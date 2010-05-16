@@ -1,0 +1,2312 @@
+<?php
+
+/* Tuning parameters to determine how similar two bibliographic records are.
+ * HASH_FUZZINESS controls how many differences there can be between the records' hashes,
+ * as a fraction of the length.
+ * HASH_PREFIX_LENGTH controls how many characters from the beginning of the records' hashes need to be identical.
+ */
+define("HASH_FUZZINESS", 0.1);		// 0.1 is 10% difference
+define("HASH_PREFIX_LENGTH", 0);	// 5 is a good value 0 ignores prefix
+
+/* import.php
+
+A process presenting a half-dozen or so pages to the user.
+Temporary objects describing the entries are stored in the session data and meddled with;
+for now, all the data is left there so that we can pick at it and debug it;
+it would be possible, though probably of low value, to provide a page wherein the user can
+look through their session data at old imports.
+import-clear.php goes through any old import data and removes it from the session.
+
+Rather than sticking all our data in the global session scope,
+each import is allocated an import_id based on the name of the file being imported,
+the user's ID, and the current time.
+All data relating to this import is stored in an array stored in $_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['heurist-import-' . <import_id>]
+including - and this is important - the current stage of the import (mode).  By moving this stuff into the
+session rather than keeping it in the request as is usual, the potential for user meddling is somewhat decreased.
+It would probably be possible (using JavaScript and appropriate HTTP redirects) to minimise the impact on the
+user's browser history to two pages -- the page wherein they specify the file, and the page telling them they're done,
+either of which should be refresh-happy (no POST data).
+
+ */
+
+
+// Make sure these are loaded before the session data is loaded, so that the class definitions are in place
+require_once("HeuristImport.php");
+require_once("HeuristReferImport.php");
+require_once("HeuristEndnoteReferImport.php");
+require_once("HeuristZoteroImport.php");
+require_once("HeuristKMLImport.php");
+
+require_once("../php/modules/NameParse.php");
+
+require_once("../php/modules/db.php");
+require_once("../php/modules/cred.php");
+require_once("lev-delta.php");
+
+require_once("../php/modules/saving.php");
+
+require_once("../php/modules/TitleMask.php");
+
+global $reftype_to_bdt_id_map;
+$reftype_to_bdt_id_map = array(
+	/* the appropriate bib_detail_type for a resource pointer constrained to type X */
+
+	5 => 227,  /* Book Reference */
+	7 => 238,  /* Conference Proceedings Reference */
+	28 => 225,  /* Journal Volume Reference */
+	29 => 226,  /* Journal Reference */
+	30 => 229,  /* Publisher Reference */
+	44 => 228,  /* Publication Series Reference */
+	49 => 217,  /* ConferenceRef */
+	53 => 244,  /* Organisation Reference */
+	54 => 250,  /* Research Group Reference */
+	55 => 251,  /* Partner Reference */
+	55 => 249,  /* Person Reference */
+	60 => 254,  /* Funding Source Reference */
+	61 => 253,  /* Grant Reference */
+	63 => 264,  /* Research Projects Reference */
+	66 => 237,  /* Newspaper Volume Reference */
+	67 => 236,  /* Magazine Volume Reference */
+	68 => 241,  /* Magazine Reference */
+	69 => 242,  /* Newspaper Reference */
+	70 => 263   /* Course Unit Reference */
+);
+
+
+
+
+
+
+mysql_connection_db_overwrite(DATABASE);
+mysql_query('set @logged_in_user_id = ' . get_user_id());
+
+// error_log("made it to import.php");
+//error_log('session ZoteroItems: ' . print_r($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['ZoteroItems'], 1));
+
+jump_sessions();
+setup_session_vars();
+if ($import_id) { $session_data = &$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']["heurist-import-" . $_REQUEST["import_id"]]; }
+choose_next_mode();
+
+print_common_header(($session_data["mode"] != "file parsing")? @$session_data["in_filename"] : NULL);	/* note that in_filename may be undefined */
+
+switch (@$session_data['mode']) {
+    case 'file selection':
+        mode_file_selection(); break;
+    case 'file parsing':
+        mode_file_parsing(); break;
+
+    case 'zotero request parsing':
+        mode_zotero_request_parsing(); break;
+
+    case 'print reftype selection':
+        mode_print_reftype_selection(); break;
+    case 'apply reftype heuristic':
+        mode_apply_reftype_heuristic(); break;
+    case 'crosswalking':
+        mode_crosswalking(); break;
+    case 'entry insertion':
+        mode_entry_insertion(); break;
+
+    default:
+        mode_file_selection();
+}
+
+print_common_footer();
+
+/***** END OF OUTPUT *****/
+
+
+
+function print_common_header($fileName) {
+	global $session_data;
+?>
+<html>
+ <head>
+  <title>Import records</title>
+
+  <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+
+  <link rel=stylesheet href=../legacy/newshsseri.css>
+  <link rel=stylesheet href=../legacy/v04/Popup.css>
+  <link rel=stylesheet href=../css/autocomplete.css>
+  <link rel=stylesheet href=import.css>
+
+  <script src=import.js></script>
+ </head>
+ <body width=720 height=480>
+  <script src=../js/heurist.js></script>
+  <script>
+if (! top.HEURIST.user) top.HEURIST.loadScript('../php/js/heurist-obj-user.php', true);
+  </script>
+  <script src=../js/autocomplete.js></script>
+
+<?php	if (defined('use_alt_db')) {	?>
+  <div style="color: red; padding: 10px; font-weight: bold;">Warning: using alternative database</div>
+<?php	}	?>
+
+  <table class="banner">
+<?php if (! (@$session_data['zoteroImport']  ||  @$_REQUEST['zoteroEntryPoint'])) { ?>
+   <tr>
+<?php 	if (@$_REQUEST['format']) {
+			$frm = $_REQUEST['format'];
+			if ($frm == "GEO") {
+				$frm = "Geographic";
+			}else if ($frm == "BIB") {
+				$frm = "Bibliographic";
+			}
+	?>
+    <td><nobr style="font-size: 14px;">Import <? print $frm ?> records</nobr></td>
+
+<?php	} else { ?>
+    <td><nobr style="font-size: 14px;">Import records</nobr></td>
+<?php	} ?>
+    <td width="100%" style="text-align: right;"><a style="color: black; font-weight: normal;" href="required_elements.php" target=_new>tag definitions</a></td>
+   </tr>
+<?php } else { ?>
+   <tr><td style="font-size: 14px;">Synchronising Zotero records with Heurist</td></tr>
+<?php } ?>
+  </table>
+
+  <div id="progress_indicator"><div id="progress_indicator_bar"></div><div id="progress"></div></div>
+  <div id="progress_indicator_title"></div>
+
+  <form action="import.php" method="post" enctype="multipart/form-data" name="import_form">
+   <input type=hidden name=current-mode value="<?= htmlspecialchars($session_data["mode"]) ?>">
+
+<?php	if ($fileName) {	?>
+<div style="margin-top: 1em; margin-bottom: 1.5em;">
+ <span style="position: absolute;">Source:</span>
+ <span style="position: relative; left: 5px; margin-left: 5em;">
+  <b><?= htmlspecialchars($fileName) ?></b>
+<?php if (@$session_data['parser']) { ?>
+  [<?= str_replace('parser', 'format', $session_data['parser']->parserDescription()) ?>]
+<?php } ?>
+ </span>
+</div>
+<?php	}	?>
+
+<?php
+}
+
+function print_common_footer() {
+	global $import_id;
+?>
+<?php	if ($import_id) {	?>
+   <input type=hidden name=import_id value="<?= htmlspecialchars($import_id) ?>">
+<?php	}	?>
+  </form>
+ </body>
+</html>
+<?php
+}
+
+
+
+function clear_session() {
+	foreach ($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'] as $name => $val) {
+		if (strpos($name, 'heurist-import-') === 0)
+			unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'][$name]);
+	}
+}
+
+
+
+
+
+
+
+
+function mode_file_selection() {
+	global $session_data;
+// error_log("mode_file_selection");
+
+?>
+   <h1>File selection</h1>
+
+   <div class="explanation">
+    Use this webpage to import your records from another program into Heurist.<br>
+<?php
+	if (@$_REQUEST['format']) {
+		$frm = $_REQUEST['format'];
+		if ($frm == "BIB") {
+?>
+    Currently, support is limited to EndNote REFER and Zotero formats.<br>
+    <a href="required_elements.php" target=_new>Show tag definitions</a> for supported REFER record formats.<br>
+<?php
+		}else if ($frm == "GEO") {
+?>
+	Currently, support is limited to <a href=../help/kml_import.html onclick="top.HEURIST.util.popupURL(window, href); return false;">KML</a> format.<br>
+<?php
+		}
+	}
+?>
+	For additional formats email <a  href="mailto:info@heuristscholar.org">info@heuristscholar.org</a>.
+   </div>
+   <br>
+<?php
+	if (@$session_data['error']) {
+		print '   <div class="error">' . $session_data['error'] . "</div><br>\n";
+	}
+?>
+   <div class="file_selection">
+    Select a file:
+    <input type="file" size="50" name="import_file">
+   </div>
+   <br clear=all>
+   <hr>
+   <br clear=all>
+    <input type=button value="Cancel" onclick="window.close();" style="margin-right: 4ex;">
+    <input type="submit" value="Continue" style="font-weight: bold;">
+<?php
+}
+
+
+function postmode_file_selection() {
+	global $session_data;
+// error_log("postmode_file_selection");
+
+	// there are two ways into the file selection mode;
+	// either the user has just arrived at the import page,
+	// or they've selected a file *and might progress to file-parsing mode*
+	$error = '';
+	if (@$_FILES['import_file']) {
+		if ($_FILES['import_file']['size'] == 0) {
+			$error = 'no file was uploaded';
+		} else {
+			switch ($_FILES['import_file']['error']) {
+			    case UPLOAD_ERR_OK:
+				break;
+			    case UPLOAD_ERR_INI_SIZE:
+			    case UPLOAD_ERR_FORM_SIZE:
+				$error = "The uploaded file was too large.  Please consider importing it in several stages.";
+				break;
+			    case UPLOAD_ERR_PARTIAL:
+				$error = "The uploaded file was only partially uploaded.";
+				break;
+			    case UPLOAD_ERR_NO_FILE:
+				$error = "No file was uploaded.";
+				break;
+			    case UPLOAD_ERR_NO_TMP_DIR:
+				$error = "Missing a temporary folder.";
+				break;
+			    case UPLOAD_ERR_CANT_WRITE:
+				$error = "Failed to write file to disk";
+				break;
+			    default:
+				$error = "Unknown file error";
+			}
+		}
+
+		if (! $error) {	// move on to the next stage!
+			initialise_import_session();
+
+			$session_data['infile'] = new HeuristInputFile();
+			$error = $session_data['infile']->open($_FILES['import_file']['tmp_name']);
+			if (! $error) {	// Fairly obscure error by this stage, but it MIGHT happen I guess.
+				$session_data['mode'] = 'file parsing';
+				return;
+			}
+		}
+	}
+
+	$session_data['error'] = $error;
+}
+
+
+function mode_file_parsing() {
+	global $session_data;
+// error_log("mode_file_parsing");
+
+?>
+<?php
+	// determine file type
+	$found_parser = FALSE;
+	$parsers = &getHeuristFiletypeParsers();
+	foreach (array_keys($parsers) as $i) {
+		if ($parsers[$i]->recogniseFile($session_data['infile'])) {
+			$session_data['parser'] = &$parsers[$i];
+			$found_parser = TRUE;
+			break;
+		}
+	}
+	if (! $found_parser) {
+		$fp = $session_data['infile']->getRawFile();
+		rewind($fp);
+		$snippet = htmlspecialchars(fread($fp, 200));
+		$snippet = str_replace("\r", "", $snippet);
+		$snippet = preg_replace('/([^\040-\176\n]+)/es',"'<span>'.str_repeat('.',strlen('\\1')).'</span>'",$snippet);
+?>
+   <div class="error">
+    <div>File read: <?= htmlspecialchars($session_data['in_filename']) ?></div>
+    <div>Sorry, this file is not in a currently supported format (REFER, EndNote REFER, KML)</div>
+    <div>Start of file looks like:
+     <div class="file_snippet"><pre><?= $snippet ?></pre></div>
+     </div>
+     <div>Your file has not been imported.</div>
+    </div>
+   </div>
+
+<?php	if (! @$session_data['zoteroImport']) { ?>
+   <input type="button" value="Cancel" onclick="window.location.replace('import.php');">
+<?php	} else { ?>
+   <input type="button" value="Close" onclick="window.close();">
+<?php	} ?>
+<?php
+		$session_data['mode'] = 'error';
+		return;
+	}
+
+
+?>
+<div style="margin-top: 1em; margin-bottom: 1.5em;">
+ <span style="position: absolute;">Source:</span>
+ <span style="position: relative; left: 5px; margin-left: 5em;">
+  <b><?= htmlspecialchars($session_data['in_filename']) ?></b>
+<?php if (@$session_data['parser']) { ?>
+  [<?= str_replace('parser', 'format', $session_data['parser']->parserDescription()) ?>]
+<?php } ?>
+ </span>
+</div>
+<?php
+
+	flush_fo_shizzle();
+
+	list($errors, $entries) = $session_data['parser']->parseFile($session_data['infile']);
+	if ($errors) {
+?>
+   <div class="error">
+    <div>
+     <div>There <?= (count($errors) > 1)? 'were errors' : 'was an unrecoverable error' ?> encountered while parsing the input file:</div>
+     <ul>
+<?php foreach ($errors as $error) { print '<li>' . $error . '</li>'; } ?>
+     </ul>
+     <div>Your file has not been imported.</div>
+    </div>
+   </div>
+
+<?php	if (! @$session_data['zoteroImport']) { ?>
+   <input type="button" value="Cancel" onclick="window.location.replace('import.php');">
+<?php	} else { ?>
+   <input type="button" value="Close" onclick="window.close();">
+<?php	} ?>
+<?php
+		$session_data['mode'] = 'error';
+		return;
+	}
+
+	if (count($entries) == 0) {
+?>
+   <div class="error">
+    <div>No entries were found in the file.</div>
+   </div>
+
+<?php	if (! @$session_data['zoteroImport']) { ?>
+   <input type="button" value="Cancel" onclick="window.location.replace('import.php');">
+<?php	} else { ?>
+   <input type="button" value="Close" onclick="window.close();">
+<?php	} ?>
+<?php
+		$session_data['mode'] = 'error';
+		return;
+	}
+
+	$session_data['in_entries'] = &$entries;
+	do_entry_parsing();
+?>
+   <br clear=all>
+   <hr>
+   <br clear=all>
+<?php	if (! @$session_data['zoteroImport']) { ?>
+   <input type="button" value="Cancel" onclick="window.location.replace('import.php');" style="margin-right: 4ex;">
+<?php	} else { ?>
+   <input type="button" value="Cancel" onclick="window.close();" style="margin-right: 4ex;">
+<?php	} ?>
+   <input type="submit" value="Continue" style="font-weight: bold;">
+<?php
+}
+
+
+function postmode_file_parsing() {
+	global $session_data;
+// error_log("postmode_file_parsing");
+
+	// Might skip over reftype selection if there are no unknown reftypes
+	$known_reftype_count = 0;
+	$unknown_reftype_count = 0;
+	foreach (array_keys($session_data['in_entries']) as $i) {
+		if ($session_data['in_entries'][$i]->getReferenceType()) ++$known_reftype_count;
+		else ++$unknown_reftype_count;
+	}
+
+	if ($unknown_reftype_count) {
+		$session_data['known-reftype-count'] = $known_reftype_count;
+		$session_data['unknown-reftype-count'] = $unknown_reftype_count;
+		$session_data['mode'] = 'print reftype selection';
+	} else {
+		$session_data['mode'] = 'crosswalking';
+	}
+}
+
+
+function mode_zotero_request_parsing() {
+	global $session_data;
+	global $import_id;
+
+	$_import_id = 'zotero-'.get_user_id().'-'.date('Y_m_d-H:i:s');
+	$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']["heurist-import-$_import_id"] = &$session_data;
+	$session_data['in_filename'] = 'Zotero items';
+	$import_id = $_import_id;
+
+
+	$session_data['parser'] = &new HeuristZoteroParser();
+	$session_data['zoteroImport'] = true;
+
+	list($errors, $entries) = $session_data['parser']->parseRequest($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['ZoteroItems']);
+	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['ZoteroItems']);
+
+	if ($errors) {
+?>
+   <div class="error">
+    <div>
+     <div>There <?= (count($errors) > 1)? 'were errors' : 'was an unrecoverable error' ?> encountered while parsing the Zotero data:</div>
+     <ul>
+<?php foreach ($errors as $error) { print '<li>' . $error . '</li>'; } ?>
+     </ul>
+     <div>Your entries have not been imported.</div>
+    </div>
+   </div>
+
+   <br clear=all>
+   <hr>
+   <br clear=all>
+   <input type="button" value="Cancel" onclick="window.close();">
+<?php
+		$session_data['mode'] = 'error';
+		return;
+	}
+
+	if (count($entries) == 0) {
+?>
+   <div class="error">
+    <div>No entries were found for import.</div>
+   </div>
+
+   <br clear=all>
+   <hr>
+   <br clear=all>
+   <input type="button" value="Cancel" onclick="window.close();" style="margin-right: 4ex;">
+<?php
+		$session_data['mode'] = 'error';
+		return;
+	}
+
+	$session_data['in_entries'] = &$entries;
+	do_entry_parsing();
+?>
+   <br clear=all>
+   <hr>
+   <br clear=all>
+   <input type="button" value="Cancel" onclick="window.close();" style="margin-right: 4ex;">
+   <input type="submit" value="Continue" style="font-weight: bold;">
+<?php
+}
+
+
+function mode_print_reftype_selection() {
+	global $session_data, $import_id;
+// error_log("mode_print_reftype_selection");
+
+?>
+   <h1>Specify record types</h1>
+
+   <div>File read: <?= htmlspecialchars($session_data['in_filename']) ?></div>
+
+   <table cellpadding="5">
+    <tr><td>Records read:</td><td><?= $session_data['known-reftype-count']+$session_data['unknown-reftype-count'] ?></td></tr>
+    <tr><td>Record type:</td>
+        <td>specified <?= $session_data['known-reftype-count'] ?>
+            &nbsp;&nbsp;&nbsp;
+            unspecified / unrecognised <?= $session_data['unknown-reftype-count'] ?></td></tr>
+   </table>
+   <br>
+   <hr>
+   <br>
+
+   <div style="width: 500px;">To help Heurist accurately identify the record types where these have not been specified, please select the types of record which may be in the file.  Be specific, as you will have further chances to include additional types if there are records which do not fit with the selected types.</div>
+
+   <p>
+   <a target="_new" href="download_input_file.php/<?= htmlspecialchars($session_data['in_filename']) ?>?import_id=<?= htmlspecialchars($import_id) ?>">View import file</a>
+   &nbsp;&nbsp;&nbsp;
+   <a target="_new" href="required_elements.php">View tag definitions</a>
+   </p>
+
+<?php	if (@$session_data['error']) {	?>
+   <div class="error">
+    <div><?= $session_data['error'] ?></div>
+   </div>
+   <br>
+<?php	}	?>
+
+   <table cellpadding="5">
+    <tr>
+     <td>
+      <span style="vertical-align: top;">All unspecified records <b>have this type</b>&nbsp;</span><img src="bent-arrow.gif">&nbsp;
+     </td>
+
+<?php	if ($session_data['parser']->supportsReferenceTypeGuessing()) { ?>
+
+<script type="text/javascript">
+<!--
+function heuristic_enabler(enabled) {
+	var elts = document.getElementsByName('use-heuristic[]');
+	for (i=0; i < elts.length; ++i)
+		elts[i].disabled = ! enabled;
+}
+//-->
+</script>
+     <td>
+      <label><input type="radio" name="set-reftype" value="use heuristic" onclick="if (this.checked) heuristic_enabler(true)">
+      <span style="vertical-align: top;">or <b>let Heurist guess</b> the additional record types</span></label>
+      <br>
+      <input type="radio" style="visibility: hidden;">
+      (mark the types which may occur in this file - see note above)
+     </td>
+<?php	} else {	/* reference type guessing is not supported by this parser */ ?>
+<script>
+function heuristic_enabler() { }
+</script>
+     <td></td>
+<?php	} ?>
+    </tr>
+<?php	foreach ($session_data['parser']->getReferenceTypes() as $reftype) { ?>
+    <tr>
+     <td style="text-align: right;"><label>&nbsp;<input type="radio" name="set-reftype" value="<?= htmlspecialchars($reftype) ?>" onclick="if (this.checked) heuristic_enabler(false);">&nbsp;</label></td>
+     <td>
+      <label>
+<?php	if ($session_data['parser']->supportsReferenceTypeGuessing()) { ?>
+       <input type="checkbox" name="use-heuristic[]" value="<?= htmlspecialchars($reftype) ?>"
+             <?= ($_REQUEST['set-reftype'] == 'use heuristic')? '' : 'disabled' ?>>
+<?php	} ?>
+       <?= htmlspecialchars($reftype) ?>
+      </label>
+     </td>
+    </tr>
+<?php	} ?>
+   </table>
+
+   <br clear=all>
+   <hr>
+   <br clear=all>
+<?php	if (! @$session_data['zoteroImport']) { ?>
+   <input type="button" value="Cancel" onclick="window.location.replace('import.php');" style="margin-right: 4ex;">
+<?php	} else { ?>
+   <input type="button" value="Cancel" onclick="window.close();" style="margin-right: 4ex;">
+<?php	} ?>
+   <input type="submit" value="Continue" style="font-weight: bold;">
+<?php
+}
+
+
+function postmode_print_reftype_selection() {
+	global $session_data;
+// error_log("postmode_print_reftype_selection");
+	if (@$_REQUEST['set-reftype']  &&  in_array($_REQUEST['set-reftype'], $session_data['parser']->getReferenceTypes())) {
+		// set the record type for all un-typed (and therefore still un-imported) entries
+		foreach (array_keys($session_data['in_entries']) as $i)
+			if (!$session_data['in_entries'][$i]->getReferenceType()){ // set only the ones that don't already have a type.
+				$session_data['in_entries'][$i]->setReferenceType($_REQUEST['set-reftype']);
+			}
+		$session_data['mode'] = 'crosswalking';
+		return;
+
+	} else if (@$_REQUEST['set-reftype'] == 'use heuristic') {
+		// user can leave all types unchecked, in which case any choices the heuristic makes are suggestions only
+		$all_okay = TRUE;
+		foreach (@$_REQUEST['use-heuristic'] as $heuristic_type) {
+			if (! in_array($heuristic_type, $session_data['parser']->getReferenceTypes())) {
+				$all_okay = FALSE;	// funny buggers
+				break;
+			}
+		}
+		if ($all_okay) {
+			$session_data['mode'] = 'apply reftype heuristic';
+			return;
+		}
+	}
+
+	// Only get here if no options were selected, or funny buggers.  Remember: never ACCUSE the user of anything.
+	$session_data['error'] = 'Please select a single record type for all remaining entries, or one or more types for Heurist to choose from.';
+	$session_data['mode'] = 'print reftype selection';	// go back to this page
+}
+
+
+function mode_apply_reftype_heuristic() {
+	global $session_data;
+
+?>
+   <table cellpadding="5">
+    <tr><td>Total records read:</td><td><?= $session_data['known-reftype-count']+$session_data['unknown-reftype-count'] ?></td></tr>
+    <tr><td>Record type specified in file:</td><td><?= $session_data['known-reftype-count'] ?></td></tr>
+    <tr><td>Record type unspecified / unrecognised:</td><td><?= $session_data['unknown-reftype-count'] ?></td></tr>
+   </table>
+
+<?php
+	$allowed_types = $_REQUEST['use-heuristic'];
+	$allowed_type_lookup = array();
+	foreach ($allowed_types as $type)
+		$allowed_type_lookup[$type] = TRUE;
+
+	$parser = &$session_data['parser'];
+
+	set_progress_bar_title('Determining record types');
+
+	$suggested_by_reftype = array();
+	$definite_by_reftype = array();
+	$unknown_count = 0;
+	foreach (array_keys($session_data['in_entries']) as $i) {
+		$entry = &$session_data['in_entries'][$i];
+
+		if (! $entry->getReferenceType()) {
+			$type = $parser->guessReferenceType($entry, $allowed_types);
+
+			// check that the returned type is one of those specified by the user; if not then make it just a suggestion
+			if ($type) {
+				if (@$allowed_type_lookup[$type]) {
+					$entry->setReferenceType($type);
+					@++$definite_by_reftype[$type];
+				} else {
+					$entry->setPotentialReferenceType($type);
+					@++$suggested_by_reftype[$type];
+				}
+			} else {
+				++$unknown_count;
+			}
+		} else {
+			@++$definite_by_reftype[$entry->getReferenceType()];
+		}
+
+		update_progress_bar(++$j / count($session_data['in_entries']));
+	}
+	update_progress_bar(-1);
+
+	if (@$definite_by_reftype  ||  $unknown_count) {
+?>
+   <h2>Fully allocated record types</h2>
+
+   <table cellpadding="5">
+<?php		if ($unknown_count > 0) { ?>
+    <tr><td>Unknown</td><td><?= $unknown_count ?> <small><i>omitted from import</i></small></td></tr>
+<?php		}
+		foreach ($already_known_by_reftype as $type => $count) {
+?>
+    <tr><td><?= htmlspecialchars($type) ?></td><td><?= $count ?></td></tr>
+<?php		} ?>
+   </table>
+
+<?php
+	}
+
+	if (@$suggested_by_reftype) {
+?>
+   <h2>Pending record types</h2>
+
+   <div>Heurist has identified the following record types.  Check the boxes for the <b>suggested</b> record types you would like to include.  Any record type <i>not checked</i> will be left out when you continue with the import.  All non-imported record will be available to you in a new file.</div>
+
+   <table cellpadding="5">
+    <tr>
+     <td></td>
+     <th>Record type</th>
+     <th>Suggested (only imported if checked)</th>
+     <th>Definite (will be imported)</th>
+    </tr>
+<?php
+		foreach (array_keys($suggested_by_reftype) as $type) {
+?>
+    <tr>
+     <td><label>&nbsp;<input type="checkbox" name="use-suggested[]" value="<?= htmlspecialchars($type) ?>">&nbsp;</label></td>
+     <td><?= htmlspecialchars($type) ?></td>
+     <td><?= intval($suggested_by_reftype[$type]) ?></td>
+     <td><?= intval($definite_by_reftype[$type]) ?></td>
+    </tr>
+<?php
+		}
+?>
+   </table>
+   <br clear=all>
+   <hr>
+   <br clear=all>
+
+<?php		if (! @$session_data['zoteroImport']) { ?>
+   <input type="button" value="Cancel" onclick="window.location.replace('import.php');" style="margin-right: 4ex;">
+<?php		} else { ?>
+   <input type="button" value="Cancel" onclick="window.close();" style="margin-right: 4ex;">
+<?php		} ?>
+   <input type="submit" name="use-suggestions" value="Add checked record types">
+   <input type="submit" name="continue" value="Continue" style="font-weight: bold;">
+<?php	} else if ($definite_by_reftype) { ?>
+
+   <br clear=all>
+   <hr>
+   <br clear=all>
+
+<?php		if (! @$session_data['zoteroImport']) { ?>
+   <input type="button" value="Cancel" onclick="window.location.replace('import.php');" style="margin-right: 4ex;">
+<?php		} else { ?>
+   <input type="button" value="Cancel" onclick="window.close();" style="margin-right: 4ex;">
+<?php		} ?>
+   <input type="submit" name="continue" value="Continue" style="font-weight: bold;">
+<?php	} else { ?>
+   <div>Heurist could not determine a type for any record in your file.<!--  We suggest having a cry. --></div>
+
+   <br clear=all>
+   <hr>
+   <br clear=all>
+
+<?php		if (! @$session_data['zoteroImport']) { ?>
+   <input type="button" value="Cancel" onclick="window.location.replace('import.php');">
+<?php		} else { ?>
+   <input type="button" value="Cancel" onclick="window.close();">
+<?php		} ?>
+<?php
+		$session_data['mode'] = 'error';
+	}
+}
+
+
+function mode_crosswalking() {
+	global $session_data;
+	global $import_id;
+	global $heurist_reftypes;
+	if (! $heurist_reftypes) load_heurist_reftypes();
+
+	set_progress_bar_title('Crosswalking entries');
+
+	$out_entries = array();
+	$out_entry_count_by_reftype = array();
+	$data_error_entries = array();
+	$no_reftype_entries = array();
+	$non_out_entries = array();	// = data_error_entries + no_reftype_entries
+	$j = 0;
+	foreach (array_keys($session_data['in_entries']) as $i) {
+		// FIXME: do fancy progress bar stuff
+		update_progress_bar(++$j / count($session_data['in_entries']));
+
+		$in_entry = &$session_data['in_entries'][$i];
+
+		if ($in_entry->getPotentialReferenceType()  &&
+		    in_array($in_entry->getPotentialReferenceType(), $_REQUEST['use-suggested'])) {
+			$in_entry->setReferenceType($in_entry->getPotentialReferenceType());
+		}
+
+		if ($in_entry->getReferenceType()) {
+			unset($out_entry);
+			$out_entry = &$in_entry->crosswalk();
+			if ($out_entry) {
+//print $out_entry->getTitle() . "<br>";
+				if ($out_entry->isValid()) {
+					$out_entries[] = &$out_entry;
+					@++$out_entry_count_by_reftype[$out_entry->getReferenceType()];
+				} else {
+					$in_entry->addValidationErrors(format_missing_field_errors($out_entry));
+					$in_entry->addValidationErrors($out_entry->getOtherErrors());
+					$data_error_entries[] = &$in_entry;
+					$non_out_entries[] = &$in_entry;
+				}
+			} else {
+				$data_error_entries[] = &$in_entry;
+				$non_out_entries[] = &$in_entry;
+			}
+		} else {
+			$no_reftype_entries[] = &$in_entry;
+			$non_out_entries[] = &$in_entry;
+		}
+	}
+	update_progress_bar(-1);
+	$session_data['out_entries'] = &$out_entries;
+
+	// make the error entries available to the session so that they can be downloaded
+	$session_data['no_reftype_entries'] = &$no_reftype_entries;
+	$session_data['data_error_entries'] = &$data_error_entries;
+	$session_data['non_out_entries'] = &$non_out_entries;
+
+	if ($out_entry_count_by_reftype) {
+?>
+    <table border=0 cellspacing=0 cellpadding=0>
+     <tr>
+      <td style="vertical-align: top; text-align: left; width: 5em; padding-top: 5px;">Types:</td>
+      <td style="vertical-align: top; text-align: left; width: 300px;">
+    <table cellpadding="5">
+    <!-- <b>Valid entries for import:</b> -->
+<?php
+		foreach ($out_entry_count_by_reftype as $type => $count) { ?>
+     <tr><td><?= htmlspecialchars($heurist_reftypes[$type]['rt_name']) ?></td><td><?= intval($count) ?></td></tr>
+<?php		}
+?>
+    </table>
+      </td>
+      <td style="vertical-align: top; text-align: left;">
+    <table cellpadding="5">
+     <tr><td>Valid records:</td><td><b><?= intval(count($out_entries)) ?></b></td><td>&nbsp;</td></tr>
+<?php
+	if ($non_out_entries) {
+		if ($no_reftype_entries) { ?>
+     <tr>
+      <td style="color: red;">Unallocated record type:<br><nobr>(will not be imported)</nobr></td>
+      <td><?= count($no_reftype_entries) ?></td>
+      <td><a target="_errors" href="download_non_reftype_entries.php/<?= htmlspecialchars($import_id) ?>-no_reftype.txt?import_id=<?= htmlspecialchars($import_id) ?>">Download errors</td>
+      <td></td>
+     </tr>
+<?php 		}
+		if ($data_error_entries) { ?>
+     <tr>
+      <td style="color: red;">Data errors:<br><nobr>(will not be imported)</nobr></td>
+      <td><?= count($data_error_entries) ?></td>
+      <td><a target="_errors" href="download_data_error_entries.php/<?= htmlspecialchars($import_id) ?>-data_error.txt?import_id=<?= htmlspecialchars($import_id) ?>">Download errors</a></td>
+     </tr>
+<?php		} ?>
+     <tr><td>Total records:</td><td><b><?= intval(count($out_entries) + count($no_reftype_entries) + count($data_error_entries)) ?></b></td><td>&nbsp;</td></tr>
+<?php
+	}
+?>
+    </table>
+      </td>
+     </tr>
+    </table>
+
+    <hr>
+
+<?php
+	}
+
+	if ($out_entries) {
+		print_keyword_stuff($out_entries);
+?>
+   <p style="margin-left: 15px;">
+    <p>Specify tags to add to all imported records:</p>
+
+     <div class="smallgr" style="padding-left: 10ex; margin-left: 10px;">
+       <nobr>Add:</nobr>
+        <nobr><a href="#" target="_ignore" onclick="add_keyword('Favourites'); return false;">Favourites</a></nobr>&nbsp;
+        <nobr><a href="#" target="_ignore" onclick="add_keyword('To Read'); return false;">To Read</a></nobr>&nbsp;
+      </div>
+       <?php
+	$top_keywords = mysql__select_array('keyword_links left join keywords on kwl_kwd_id=kwd_id',
+	                                    'kwd_name, count(kwd_id) as count',
+	                                    'kwd_usr_id='.get_user_id().' group by kwd_id order by count desc limit 5');
+	if ($top_keywords) {
+?>
+      <div class="smallgr" style="padding-left: 10ex; margin-left: 10px;">
+       <nobr>Top:</nobr>
+<?php
+		foreach ($top_keywords as $kwd) {
+			$kwd = htmlspecialchars($kwd);
+?>      <nobr><a href="#" target="_ignore" onclick="add_keyword('<?=$kwd?>'); return false;"><?=$kwd?></a></nobr>&nbsp; <?php
+		}
+?>
+      </div>
+<?php
+	}
+       ?>
+
+       <?php
+	$recent_keywords = mysql__select_array('keyword_links left join keywords on kwl_kwd_id=kwd_id',
+	                                    'distinct(kwd_name)',
+	                                    'kwd_usr_id='.get_user_id().' order by kwl_id desc limit 5');
+	if ($recent_keywords) {
+?>
+      <div class="smallgr" style="padding-left: 10ex; margin-left: 10px; padding-bottom: 5px;">
+       <nobr>Recent:</nobr>
+<?php
+		foreach ($recent_keywords as $kwd) {
+			$kwd = htmlspecialchars($kwd);
+?>      <nobr><a href="#" target="_ignore" onclick="add_keyword('<?=$kwd?>'); return false;"><?=$kwd?></a></nobr>&nbsp; <?php
+		}
+?>
+      </div>
+<?php
+	}
+       ?>
+
+
+      </div>
+
+
+
+    <div style="padding-left: 10ex;"><input type="text" name="keywords_for_all" id="keywords_for_all" style="width: 180px; border: 1px solid black;" autocomplete=off>
+<script>
+var tagsElt = document.getElementById("keywords_for_all");
+new top.HEURIST.autocomplete.AutoComplete(tagsElt, top.HEURIST.util.keywordAutofill, { nonVocabularyCallback: top.HEURIST.util.showConfirmNewTag });
+
+function add_keyword(tag) {
+	// check if the keyword is already in the list somewhere
+	var tags = tagsElt.value.split(/,/);
+	for (var i=0; i < tags.length; ++i) {
+		if (tags[i].replace(/^\s+|\s+$/g, '').replace(/\s+/, ' ').toLowerCase() == tag.toLowerCase()) return;
+	}
+
+	// otherwise, add it to the end
+	if (tagsElt.value.match(/^\s*$/)) tagsElt.value = tag;
+	else tagsElt.value += "," + tag;
+}
+
+</script>
+    <span class="smallgr">Separate tags with commas</span>
+    </div>
+
+<?php
+	/* are there any workgroup-keywords for any workgroups this user is in? If so, show the workgroup-keyword section */
+	$res = mysql_query('select kwd_id, grp_name, kwd_name from keywords, '.USERS_DATABASE.'.UserGroups, '.USERS_DATABASE.'.Groups where kwd_wg_id=ug_group_id and ug_group_id=grp_id and ug_user_id=' . get_user_id() . ' order by grp_name, kwd_name');
+	if (mysql_num_rows($res) > 0) {
+?>
+    <div style="margin-top: 1ex; margin-left: 10ex;">
+     <nobr>Workgroup keyword:</nobr>
+     <select name="workgroup_keyword">
+      <option selected></option>
+<?php		while ($row = mysql_fetch_assoc($res)) {	?>
+      <option value="<?= addslashes($row['kwd_id']) ?>">
+       <?= htmlspecialchars($row['grp_name']) ?> \ <?= htmlspecialchars($row['kwd_name']) ?>
+      </option>
+<?php		}	?>
+     </select>
+    </div>
+<?php
+	}
+?>
+   </p>
+
+   <br clear=all>
+   <hr>
+   <br clear=all>
+
+<?php	if (! @$session_data['zoteroImport']) { ?>
+   <input type="button" value="Cancel" onclick="window.location.replace('import.php');" style="margin-right: 4ex;">
+<?php	} else { ?>
+   <input type="button" value="Cancel" onclick="window.close();" style="margin-right: 4ex;">
+<?php	} ?>
+
+    <input type="submit" name="continue" value="Continue" style="font-weight: bold;">
+   <p>
+    <b>Import is non-reversible!</b> Data will be written to the Heurist database.
+   </p>
+
+<?php
+	} else {
+?>
+   <div>Heurist was unable to import any of your entries.<!-- Maybe you should try it with somebody else's data that doesn't suck --></div>
+   <br clear=all>
+   <hr>
+   <br clear=all>
+
+<?php		if (@$session_data['data_error_entries']) { ?>
+      <a target="_errors" href="download_data_error_entries.php/<?= htmlspecialchars($import_id) ?>-data_error.txt?import_id=<?= htmlspecialchars($import_id) ?>">Download errors</a>
+<?php		} ?>
+<?php		if (! @$session_data['zoteroImport']) { ?>
+   <input type="button" value="Cancel" onclick="window.location.replace('import.php');">
+<?php		} else { ?>
+   <input type="button" value="Cancel" onclick="window.close();">
+<?php		} ?>
+<?php
+		$session_data['mode'] = 'error';
+	}
+}
+
+
+function mode_entry_insertion() {
+	global $session_data;
+	global $import_id;
+
+
+	$keyword_map = array();
+	if (@$_REQUEST['orig_keywords']) {
+		$orig_keywords = $_REQUEST['orig_keywords'];
+		$keywords = $_REQUEST['keywords'];
+		if (count($orig_keywords) == count($keywords)) {
+			for ($i=0; $i < count($keywords); ++$i)
+				$keyword_map[strtolower($orig_keywords[$i])] = $keywords[$i];
+		}
+	}
+
+	$keywords_for_all = explode(',', $_REQUEST['keywords_for_all']);
+	$workgroup_keyword_id = intval($_REQUEST["workgroup_keyword"]);
+
+	$session_data['import_time'] =  date('Y-m-d H:i:s');
+	// add a keyword (tag) for this import session to all entries
+	$import_kwd = 'File Import ' . $session_data['import_time'];
+	$res = mysql__insert('keywords', array(
+		'kwd_name'		=> $import_kwd,
+		'kwd_usr_id'	=> get_user_id()));
+	// add a saved search for records with this tag
+	$now = date('Y-m-d');
+	mysql__insert('saved_searches', array(
+		'ss_name'		=> $import_kwd,
+		'ss_url'		=> '?ver=1&w=all&q=kwd%3A%22'.str_replace(' ','%20',$import_kwd).'%22',
+		'ss_usr_id'	=> get_user_id(),
+		'ss_added'		=> $now,
+		'ss_modified'	=> $now));
+?>
+
+<?php
+	set_progress_bar_title('Preparing database entries');
+
+	$j = 0;
+	foreach (array_keys($session_data['out_entries']) as $i) {
+		$entry = &$session_data['out_entries'][$i];
+		$entry->addKeyword($import_kwd); // add general import kwd
+		if ($keywords_for_all) {
+			foreach ($keywords_for_all as $kwd)
+				if (trim($kwd)) $entry->addKeyword(trim($kwd), true);
+		}
+		if ($workgroup_keyword_id)
+			$entry->setWorkgroupKeyword($workgroup_keyword_id);
+
+		$_entry = &$entry;
+		do { // for each container set up the author records
+			$fields = &$_entry->getFields();
+
+			foreach (array_keys($fields) as $i) {
+				if (! $fields[$i]->getValue()) continue;
+				if ($fields[$i]->getType() == 158) {
+					// an author: cook the value -- could be several authors
+					process_author($fields[$i]);
+					foreach ($fields[$i]->getValue() as $person_bib_id) {
+						$_entry->addAuthor($person_bib_id);
+					}
+				}
+			}
+
+			unset($fields);
+
+			$_entry = &$_entry->_container;
+		} while ($_entry);
+		unset($_entry);
+
+		unset($entry);
+
+		update_progress_bar(++$j / count($session_data['out_entries']));
+	}
+	update_progress_bar(-1);
+
+	process_disambiguations();
+	$session_data['ambiguities'] = array();
+
+	$ambig_count = 0;
+	$j = 0;
+	$out_entry_count = count($session_data['out_entries']);
+
+	global $zoteroItems;
+	$zoteroItems = array();
+
+	list($usec, $sec) = explode(' ', microtime());
+	$stime = $sec + $usec;
+	set_progress_bar_title('Checking against existing entries');
+	foreach (array_keys($session_data['out_entries']) as $i) {
+		unset($entry);
+		$entry = &$session_data['out_entries'][$i];
+		if ($entry->getBookmarkID()) {
+			++$session_data['dupe-records-count'];
+			++$session_data['dupe-bookmark-count'];
+
+			unset($session_data['out_entries'][$i]);
+						// in the future we should unset these from the session data
+
+			continue;		// already inserted;
+		}
+
+//		if (! $entry->getBiblioID())
+//			insert_biblio($entry);	// insert a (temporary) records entry
+//		$temp_bib_id = $entry->getBiblioID();
+
+		if (! find_exact_entry($entry)) {
+			find_similar_entries($entry);
+		}
+
+		if ($entry->getBiblioID()  &&  $entry->_permanent) {  //set in find_exact_entry
+			// already in the database
+	// error_log("found exact match id = ". $entry->getBiblioID());
+
+			// copy across any new data
+// FIXME			merge_biblio($entry->getBiblioID(), $temp_bib_id);
+
+			// find any data that is not already part of the entry, and merge it in
+			merge_new_biblio_data($entry->getBiblioID(), $entry);
+
+			// Make sure there's a bookmark
+			@++$session_data['dupe-records-count'];
+
+			if (! @$session_data['dupe-biblios']) $session_data['dupe-biblios'] = array();
+			array_push($session_data['dupe-biblios'], $entry->getBiblioID());
+
+			if (insert_bookmark($entry)) @++$session_data['added-bookmark-count'];
+			else @++$session_data['dupe-bookmark-count'];
+			insert_keywords($entry, $keyword_map);
+			delete_biblio($entry);
+			unset($session_data['out_entries'][$i]);
+
+		} else if ($entry->getPotentialMatches()) {
+			// present disambiguation options
+	// error_log("found potential matches id = ". $entry->getPotentialMatches());
+			if (! $entry->getBiblioID()) insert_biblio($entry);
+
+			if (! @$session_data['disambig-biblios']) $session_data['disambig-biblios'] = array();
+			array_push($session_data['disambig-biblios'], $entry->getBiblioID());
+
+			print_disambiguation_options($entry);
+			@++$ambig_count;
+		} else if ($entry->getAncestor()  &&  $entry->_ancestor->getPotentialMatches()) {
+			// present disambiguation options
+	// error_log("found ancestor with potential matches id = ". $entry->_ancestor->getPotentialMatches());
+			if (! $entry->getBiblioID()) insert_biblio($entry);
+			if (! @$session_data['disambig-ancestor-biblios']) $session_data['disambig-ancestor-biblios'] = array();
+			array_push($session_data['disambig-ancestor-biblios'], $entry->getBiblioID());
+
+			print_disambiguation_options($entry);
+			@++$ambig_count;
+		} else if (! $entry->getAncestor()  ||  $entry->_ancestor->_permanent) {
+			// The entry (and possibly several container entries) needs to be inserted into records
+	// error_log("no matches found, possibly insert all inculding the containers");
+			$_entry = $entry;
+			do {
+				if (! $_entry->getBiblioID()) insert_biblio($_entry);
+				perm_biblio($_entry);
+				$_entry = &$_entry->_container;
+			} while ($_entry  &&  ! $_entry->_permanent);
+
+			if (! @$session_data['added-biblios']) $session_data['added-biblios'] = array();
+			array_push($session_data['added-biblios'], $entry->getBiblioID());
+
+			@++$session_data['added-records-count'];
+			if (insert_bookmark($entry)) @++$session_data['added-bookmark-count'];
+			else @++$session_data['dupe-bookmark-count'];
+			insert_keywords($entry, $keyword_map);
+			unset($session_data['out_entries'][$i]);
+		} else {
+			// If we get here then the entry has an ancestor set but no definite/possible records ID for that ancestor.
+			// This goes against the definition of an ancestor, so we shouldn't be here.
+			// This means an internal error, but we may Recover Gracefully.
+			// Insert the entry and all containers.
+			// error_log("mode: entry insertion - ancestor with no potential matches");
+			$entry->setAncestor(NULL);
+			perm_biblio($entry);
+
+			if (! @$session_data['other-biblios']) $session_data['other-biblios'] = array();
+			array_push($session_data['other-biblios'], $entry->getBiblioID());
+
+			++$session_data['added-records-count'];
+			if (insert_bookmark($entry)) ++$session_data['added-bookmark-count'];
+			else ++$session_data['dupe-bookmark-count'];
+			insert_keywords($entry, $keyword_map);
+			unset($session_data['out_entries'][$i]);
+		}
+
+		// FIXME: need to check that entry is inserted properly -- if not, append it to $non_out_entries
+// print "<a target='_other' href='../edit.php?bkmk_id=".$entry->getBookmarkID()."'>".$entry->getBiblioID()."</a><br>";
+
+		// do fancy progress bar stuff
+
+		update_progress_bar(++$j / $out_entry_count);
+	}
+	update_progress_bar(-1);
+list($usec, $sec) = explode(' ', microtime());
+$etime = $sec + $usec;
+error_log("total time: " . ($etime - $stime));
+
+
+	if ($zoteroItems  &&  count($zoteroItems) > 0) {
+?>
+<div style="display: none;"><xml id="ZoteroItems">
+<?= '<?xml version="1.0"?>' ?>
+<ZoteroItems>
+<?php		foreach ($zoteroItems as $zoteroID => $heuristBibID) { ?>
+ <ZoteroItem>
+  <ZoteroID><?= $zoteroID ?></ZoteroID>
+  <HeuristID><?= $heuristBibID ?></HeuristID>
+  <HeuristStatus>OK</HeuristStatus>
+  <SyncDate><?= time() ?></SyncDate>
+ </ZoteroItem>
+<?php		} ?>
+</ZoteroItems></xml>
+</div>
+<?php
+	}
+
+	if ($ambig_count) {
+?>
+   <hr>
+   <br clear=all>
+   <input type="submit" value="Continue" style="font-weight: bold;">
+
+<?php
+	}
+
+	// print summary, print link to non-imported data, print magic "Finished" button
+?>
+   <br clear=all>
+   <br clear=all>
+   <hr>
+   <br clear=all>
+   <table cellpadding="5">
+    <tr><td><b>Records:</b></td></tr>
+    <tr><td>Read:</td><td><?= count(@$session_data['in_entries']) ?></td></tr>
+    <tr><td>Added:</td><td><?= intval(@$session_data['added-records-count']) ?></td></tr>
+    <tr><td>Dupes:</td><td><?= intval(@$session_data['dupe-records-count']) ?></td></tr>
+	<tr><td><b>Bookmarks:</b></td></tr>
+    <tr><td>Added:</td><td><?= intval(@$session_data['added-bookmark-count']) ?></td></tr>
+    <tr><td>Dupes:</td><td><?= intval(@$session_data['dupe-bookmark-count']) ?></td></tr>
+	<tr><td colspan=2>Note: duplicate bookmarks/records and records with errors were not added to the database</td></tr>
+<?php /*
+<tr><td colspan=2>
+<br>added biblios: <a target=_new href="/heurist/?q=ids:<?= join(',', $session_data['added-biblios']) ?>">here</a>
+<br>dupe biblios: <a target=_new href="/heurist/?q=ids:<?= join(',', $session_data['dupe-biblios']) ?>">here</a>
+<br>disambig biblios: <a target=_new href="/heurist/?q=ids:<?= join(',', $session_data['disambig-biblios']) ?>">here</a>
+<br>disambig-ancestor biblios: <a target=_new href="/heurist/?q=ids:<?= join(',', $session_data['disambig-ancestor-biblios']) ?>">here</a>
+<br>other biblios: <a target=_new href="/heurist/?q=ids:<?= join(',', $session_data['other-biblios']) ?>">here</a>
+</td></tr>
+*/ ?>
+<?php	if ($ambig_count) { ?>
+    <tr><td>Possible duplicates waiting for disambiguation:</td><td><?= $ambig_count ?></td></tr>
+<?php	}
+	if ($session_data['non_out_entries']) { ?>
+    <tr><td>Records with data errors:</td><td><?= count($session_data['non_out_entries']) ?></td></tr>
+<?php	} ?>
+   </table>
+
+<?php	if (! @$session_data['zoteroImport']) { ?>
+<?php		if ($ambig_count  ||  $session_data['non_out_entries']) { ?>
+   <a target="_errors" href="download_non_imported.php/<?= htmlspecialchars($import_id) ?>-unimported.txt?import_id=<?= htmlspecialchars($import_id) ?>" onclick="elt=document.getElementById('finished_button'); if (elt) elt.disabled = false;" style="color: red;">Download non-imported records</a>
+<?php		}
+		if (! $ambig_count  &&  $session_data['non_out_entries']) { ?>
+   <input type="button" value="Finished" onclick="window.location.replace('import.php');" disabled="true" id="finished_button" style="font-weight: bold;" title="You must download non-imported records before clicking this button">
+<?php		}	?>
+<?php	} else {	?>
+<?php		if ($ambig_count  ||  $session_data['non_out_entries']) { ?>
+   <a href="download_non_imported.php/<?= htmlspecialchars($import_id) ?>-unimported.txt?import_id=<?= htmlspecialchars($import_id) ?>" onclick="elt=document.getElementById('finished_button'); if (elt) elt.disabled = false;" style="color: red;">Download non-imported records</a>
+<?php		}	?>
+<?php	} ?>
+<?php	if (! $ambig_count  &&  ! $session_data['non_out_entries']) { ?>
+<?php		if (@$session_data["zoteroImport"]) {	?>
+   <input type="button" value="Finished" onclick="window.close();" style="font-weight: bold;">
+<?php		} else {	?>
+   <input type="button" value="Finished" onclick="window.location.replace('import.php');" style="font-weight: bold;">
+<?php		} ?>
+<?php	}
+
+	if ($ambig_count == 0) $session_data['mode'] = 'finished';
+}
+
+
+function do_entry_parsing() {
+	global $session_data;
+
+	$entries = &$session_data['in_entries'];
+?>
+   <p>Records:</p>
+   <table class="references_summary">
+<?php if (! (@$session_data['zoteroImport']  ||  @$_REQUEST['zoteroEntryPoint'])) { ?>
+    <tr><td style="padding-left: 10ex;">Total records read:</td><td><?= count($entries) ?></td></tr>
+<?php } else { ?>
+    <tr><td style="padding-left: 10ex;">Number of unsynchronised Zotero records:</td><td><?= count($entries) ?></td></tr>
+<?php } ?>
+<?php
+	flush_fo_shizzle();
+
+	set_progress_bar_title('Parsing file');
+
+	$good_entries = array();
+	$bad_entries = array();
+	$known_reftypes = 0;
+	$j = 0;
+	foreach (array_keys($entries) as $i) {
+		$entry = & $entries[$i];
+		$errors = $entry->parseEntry();
+		if (! $errors) {
+			$good_entries[] = &$entry;
+			if ($entry->getReferenceType()) ++$known_reftypes;
+		} else {
+			$bad_entries[] = &$entry;
+		}
+
+		// FIXME: do fancy progress bar stuff
+
+		update_progress_bar(++$j / count($entries));
+	}
+	update_progress_bar(-1);
+
+?>
+    <tr<?php if (count($bad_entries) > 0) print ' style="color: red;"'; ?>><td style="padding-left: 10ex;">Bad format:</td><td><?= count($bad_entries) ?></td></tr>
+    <tr><td style="padding-left: 10ex; padding-right: 4ex;">Record type not specified:</td><td><?= count($good_entries) - $known_reftypes ?></td></tr>
+   </table>
+<?php
+	flush_fo_shizzle();
+}
+
+
+function choose_next_mode() {
+	global $session_data;
+
+	if (@$_REQUEST['zoteroEntryPoint']) {
+		$session_data['mode'] = 'zotero request parsing';
+		return;
+	}
+
+	$session_data['prev-mode'] = @$session_data['mode']? $session_data['mode'] : '';
+
+
+	// allow the user to keep re-visiting the entry insertion page as long as there are records to disambiguate
+	if ($session_data['prev-mode'] == 'entry insertion'  &&  (count(@$session_data['disambig-biblios']) > 0  ||  count(@$session_data['disambig-ancestor-biblios']) > 0)) {
+		$session_data['mode'] = 'entry insertion';
+		return;
+	}
+
+/*
+	if (@$_REQUEST['clear-session'] == 'Yes') {
+		$session_data['mode'] = 'clear session';
+		return;
+	} else if (@$_REQUEST['clear-session'] == 'No') {
+		$session_data['mode'] = 'file selection';
+		return;
+	}
+*/
+	if ($session_data['prev-mode'] == ''  &&  @$_FILES['import_file']['name']) {
+		$session_data['prev-mode'] = 'file selection';
+	}
+
+	switch ($session_data['prev-mode']) {
+	    case 'file selection':
+		// might progress to file parsing, might stay at file selection
+		postmode_file_selection();
+		break;
+
+	    case 'file parsing':
+	    case 'zotero request parsing':
+		// might skip over reftype selection if there are no unknown reftypes
+		postmode_file_parsing();
+		break;
+
+	    case 'print reftype selection':
+		// user might have selected "set all to X", or "choose between X, Y, Z"
+		postmode_print_reftype_selection();
+		break;
+
+	    case 'apply reftype heuristic':
+		// only one way forward
+		$session_data['mode'] = 'crosswalking';
+		break;
+
+	    case 'crosswalking':
+		// only one way forward
+		$session_data['mode'] = 'entry insertion';
+		break;
+
+	    case '':
+		$heurist_import_count = 0;
+		foreach ($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'] as $name => $val) {
+			if (strpos($name, 'heurist-import-') === 0) ++$heurist_import_count;
+		}
+		if ($heurist_import_count > 0) {
+			// get rid of old import data automatically
+			clear_session();
+		}
+
+	    case 'finished':
+	    case 'entry insertion':
+	    default:
+		$session_data['mode'] = 'file selection';
+	}
+}
+
+
+function format_missing_field_errors(&$entry) {
+	// $entry is a HeuristNativeEntry with validation problems;
+	// return an array of errors describing the missing fields in the entry and its containers
+	global $heurist_reftypes, $bib_requirement_names;
+	if (! $heurist_reftypes) load_heurist_reftypes();
+	if (! $bib_requirement_names) load_bib_requirement_names();
+
+	$errors = array();
+
+	$missing_fields = $entry->getMissingFields();
+	if ($missing_fields) {
+		$err_msg = '';
+		$have_multiple = (count($missing_fields) > 1);
+		while ($field = array_shift($missing_fields)) {
+			if ($err_msg  &&  $missing_fields) $err_msg .= ', ';	// join missing fields with commas ...
+			else if ($err_msg) $err_msg .= ' and ';			// except for the final one
+			$err_msg .= strtoupper($bib_requirement_names[$entry->getReferenceType()][$field]);
+		}
+		$err_msg = strtoupper($heurist_reftypes[$entry->getReferenceType()]['rt_name'])
+		         . ' is missing ' . $err_msg . ($have_multiple? ' fields' : ' field');
+		array_push($errors, $err_msg);
+	}
+	if ($entry->getContainerEntry()) {
+		$container = & $entry->getContainerEntry();
+		$container_errors = format_missing_field_errors($container);
+		if ($container_errors  &&  ! $entry->containerIsOptional()
+/*
+		&&  (($entry->getReferenceType() == 5  ||  $entry->getReferenceType() == 4)
+			||
+		 (  ! ($container->getReferenceType() == 30  &&  count($container->_fields) == 0)
+		&&  ! ($container->getReferenceType() == 44  &&  count($container->_container->_fields) == 0)))
+*/
+)
+			// publisher is "optional" for non-book types (i.e. it's disregarded if none of its fields are specified at all)
+			foreach ($container_errors as $error) array_push($errors, $error);
+	}
+
+	return $errors;
+}
+
+
+function find_exact_entry(&$entry) {
+	// See if there's an entry in the database that exactly matches this one in all the rdr_match fields
+
+	if ($entry->getBiblioID()  &&  $entry->_permanent) {
+		// might be an exact match already, if specified in the input file
+		return true;
+	}
+
+	// error_log("select rec_id from records where ! rec_temporary and rec_type = " . $entry->getReferenceType() . " and rec_hhash = upper('" . addslashes($entry->getHHash()) . "') order by rec_id");
+	$res = mysql_query("select rec_id from records where ! rec_temporary and rec_type = " . $entry->getReferenceType() . " and rec_hhash = upper('" . addslashes($entry->getHHash()) . "') order by rec_id");
+
+	if (mysql_num_rows($res) < 1) return false;
+	// choose One Of The Matches ... tend to think that the one with the lowest bibID has precedence ...
+	$someMatch = mysql_fetch_row($res);
+	$someMatch = $someMatch[0];
+	if ($someMatch) {
+	// error_log(" matching bib_id = ". $someMatch);
+		setPermanentBiblioID($entry, $someMatch);
+		return true;
+	}
+
+	return false;
+}
+
+
+function find_similar_entries(&$entry) {
+	// Fill in the match and possible-match fields for the given entry
+	// with records IDs for entries already in the database that do or might correspond to it
+
+	if ($entry->getReferenceType() == 44  ||  $entry->getReferenceType() == 28) {	// a publication series or journal volume
+		$hash = $entry->getHHash();
+		$hashColumn = "rec_hhash";
+	}
+	else {
+		$hash = $entry->getCrapHash();
+		$hashColumn = "rec_simple_hash";
+	}
+	$hash_len = intval(strlen($hash) * HASH_FUZZINESS);
+
+	// use a strict substring to take advantage of the index on hash
+	if (HASH_PREFIX_LENGTH) {
+		$hprefix = mb_substr($hash, 0, HASH_PREFIX_LENGTH);
+		$similar_query = "select rec_id as matching_bib_id, limited_levenshtein($hashColumn, upper('" . addslashes($hash) . "'), $hash_len) as lev from records where ! rec_temporary and rec_type = " . $entry->getReferenceType() . " and $hashColumn like '" . addslashes($hprefix) . "%' having lev is not null order by lev";
+	}
+	else {
+		$similar_query = "select rec_id as matching_bib_id, limited_levenshtein($hashColumn, upper('" . addslashes($hash) . "'), $hash_len) as lev from records where ! rec_temporary and rec_type = " . $entry->getReferenceType() . " having lev is not null order by lev";
+	}
+	// error_log($similar_query);
+
+	$res = mysql_query($similar_query);
+
+	$near_misses = array();
+	while ($row = mysql_fetch_assoc($res)) {
+		array_push($near_misses, $row["matching_bib_id"]);
+	}
+	// error_log("near misses = ".join(',',$near_misses));
+
+	if (count($near_misses) > 0) {
+		foreach ($near_misses as $near_miss)
+			$entry->addPotentialMatch($near_miss);
+		if ($entry->getPotentialMatches()) return;
+	}
+
+	// No matches: go up a level, see if there's a match there
+	if ($entry->_container) {
+		if (! find_exact_entry($entry->_container))
+			find_similar_entries($entry->_container);
+
+		if ($entry->_container->_permanent  ||  $entry->_container->getPotentialMatches())	// immediate container is the ancestor that the user has to disambiguate
+			$entry->setAncestor($entry->_container);
+		else if ($entry->_container->getAncestor())		//pass ancestor down the containment hierarchy
+			$entry->setAncestor($entry->_container->getAncestor());	// container's ancestor is our ancestor too
+		else
+			$entry->_ancestor = NULL;
+	}
+	else $entry->_ancestor = NULL;
+}
+
+
+function biblio_are_equal($bib_id1, $bib_id2) {
+	// do a recursive comparison on the two records records
+	// regard the first one as "authoritative", the second as "speculative" where this makes any sense
+	$res = mysql_query("select 1 from records where rec_id = $bib_id1 and rec_hhash = hhash($bib_id2)");
+	return (mysql_num_rows($res) > 0);
+
+	$equality_query =
+'
+   select sum(rdr_match) as bdr_match_count
+     from rec_details BD1
+left join rec_details BD2 on BD1.rd_type=BD2.rd_type and (BD1.rd_val=BD2.rd_val or (length(BD1.rd_val_precis) > 20 and cast(liposuction(BD1.rd_val) as char) = cast(liposuction(BD2.rd_val) as char)))
+left join records on BD1.rd_rec_id=rec_id
+left join rec_detail_requirements on rdr_rdt_id=BD1.rd_type and rdr_rec_type=rec_type
+left join rec_detail_types on rdt_id=BD1.rd_type
+    where BD1.rd_rec_id=' . $bib_id1 . ' and BD2.rd_rec_id in (' . $bib_id1 . ',' . $bib_id2 . ')
+          and (BD1.rd_type = 158  or  rdt_type != "resource")
+ group by BD2.rd_rec_id
+ order by BD1.rd_rec_id != BD2.rd_rec_id
+';
+	$res = mysql_query($equality_query);
+	$bd1_counts = mysql_fetch_assoc($res);
+	$bd2_counts = mysql_fetch_assoc($res);
+
+	if ($bd1_counts['bdr_match_count'] != $bd2_counts['bdr_match_count']) return false;	// not at all equal
+
+	/* This one took a long time to compose, so DON'T MESS IT UP.
+	 * For each detail type which is marked rdr_match,
+	 * grab the corresponding bib_ids from the two records currently being matched.
+	 * If this returns any rows, then each row gives us two new records records that need to be tested for equality.
+	 */
+	$res = mysql_query('select BD1.rd_val as bd1_resource, BD2.rd_val as bd2_resource
+from rec_detail_types
+left join records on rec_id='.$bib_id1.'
+left join rec_detail_requirements on rdr_rdt_id=rdt_id and rdr_rec_type=rec_type
+left join rec_details BD1 on BD1.rd_type=rdt_id
+left join rec_details BD2 on BD2.rd_type=rdt_id and BD2.rd_rec_id='.$bib_id2.'
+where BD1.rd_rec_id=rec_id and (rdt_id != 158  and  rdt_type = "resource") and rdr_match and BD1.rd_id is not null');
+
+	if (mysql_num_rows($res) == 0) return true;	// there are no resource-pointer types required for a match
+	while ($row = mysql_fetch_row($res)) {
+		if (! $row[1]) return false;	// the trail went dead! BD2 doesn't have a pointer where it needs one: not a match
+
+		if (! biblio_are_equal($row[0], $row[1]))	// containers are equal
+			return false;
+	}
+
+	// all containers passed the comparison!
+	return true;
+}
+
+
+function insert_biblio(&$entry) {
+	// Insert records entries for this entry and its containers,
+	// and the associated rec_details and keyword_links entris.
+	global $session_data;
+	global $bib_type_names;
+	if (! $bib_type_names) load_bib_type_names();
+
+	// resolve the container: we may have to insert records entries for the base entry's container, container-container etc
+	if ($entry->_container  &&  ! $entry->_container->getBiblioID()) {
+		if ($entry->_container  &&  $entry->_container->isValid())	// there's the possibility that the container is invalid, but not required (so don't hook it up)
+			insert_biblio($entry->_container);
+		// check container->getBiblioID()
+	}
+
+	$bib = array('rec_type' => $entry->getReferenceType(),
+	             'rec_added' => date('Y-m-d H:i:s'),
+	             'rec_modified' => date('Y-m-d H:i:s'),
+	             'rec_auto' => 1,
+	             'rec_added_by_usr_id' => get_user_id(),
+	             'rec_temporary' => 1);	// always insert entries as temporary, we can perm them later
+
+	$bib_details = array();
+
+	$rec_scratchpad = '[' .
+		str_replace('parser', 'import', $session_data['parser']->parserDescription()) .
+		', ' . $session_data['import_time'] .
+		', from file: ' . $session_data['in_filename'] .
+		', by user: ' . get_user_name(). ']';
+
+	$fields = &$entry->getFields();
+	foreach (array_keys($fields) as $i) {
+		if (! $fields[$i]->getValue()) continue;
+
+		if (! $fields[$i]->getType()) {
+			if ($rec_scratchpad) $rec_scratchpad .= "\n";
+			$val = $fields[$i]->getRawValue();
+			$rec_scratchpad .= is_array($val)? join("\n", $val) : $val;
+		} else if ($fields[$i]->getType() === "url") {
+			// set as the rec_url
+			$bib["rec_url"] = $fields[$i]->getRawValue();
+		} else if ($fields[$i]->getType() === 256  &&  ! @$bib["rec_url"]) {
+			// use first web link as the rec_url
+			$bib["rec_url"] = $fields[$i]->getRawValue();
+		} else {
+			$bib_details[] = &$fields[$i];
+		}
+	}
+	if ($rec_scratchpad) $bib['rec_scratchpad'] = $rec_scratchpad;
+
+
+	mysql__insert('records', $bib);
+	$rec_id = mysql_insert_id();
+	$entry->setBiblioID($rec_id);
+
+	$bib_detail_insert = '';
+	foreach (array_keys($bib_details) as $i) {
+		unset($field);
+		$field = &$bib_details[$i];
+		if ($field->getType() == 158) {
+			foreach ($field->getValue() as $person_bib_id) {
+				if ($bib_detail_insert) $bib_detail_insert .= ', ';
+				$bib_detail_insert .= '('.$rec_id.','.$field->getType().', "'.addslashes($person_bib_id).'", NULL, 1)';
+			}
+		}
+		else if ($field->getGeographicValue()) {
+			if ($bib_detail_insert) $bib_detail_insert .= ', ';
+			$bib_detail_insert .= '('.$rec_id.','.$field->getType().',"'.addslashes($field->getValue()).'",geomfromtext("'.addslashes($field->getGeographicValue()).'"),1)';
+		}
+		else {
+			if ($bib_detail_insert) $bib_detail_insert .= ', ';
+			$bib_detail_insert .= '('.$rec_id.','.$field->getType().', "'.addslashes($field->getValue()).'", NULL, 1)';
+		}
+	}
+
+	if ($entry->_container  &&  $entry->_container->isValid()) {
+		global $reftype_to_bdt_id_map;
+		if ($bib_detail_insert) $bib_detail_insert .= ', ';
+
+		$resource_pointer_type = @$reftype_to_bdt_id_map[$entry->_container->getReferenceType()];
+		if (! $resource_pointer_type) $resource_pointer_type = 267;
+		$bib_detail_insert .= '('.$rec_id.','.$resource_pointer_type.','.$entry->_container->getBiblioID().', NULL, 1)';
+	}
+	if ($bib_detail_insert) {
+		$bib_detail_insert = 'insert into rec_details (rd_rec_id, rd_type, rd_val, rd_geo, rd_auto) values '
+		                                             . $bib_detail_insert;
+		mysql_query($bib_detail_insert);
+	}
+
+	mysql_query('set @suppress_update_trigger := 1');
+	mysql_query('update records set rec_title = "'.addslashes($entry->getTitle()).'", rec_hhash = hhash(rec_id), rec_simple_hash = simple_hash(rec_id) where rec_id='.$rec_id);
+	mysql_query('set @suppress_update_trigger := NULL');
+}
+
+
+function perm_biblio(&$entry) {
+	// mark the bibliographic record associated with this entry as NON-TEMPORARY
+	mysql_query('set @suppress_update_trigger := 1');
+	mysql_query('update records set rec_temporary = 0 where rec_id = ' . $entry->getBiblioID());
+
+	if ($entry->_container  &&  $entry->_container->_permanent) {
+		// container is already permanent: this means that we found a match in the database for the container, so our rec_details is out-of-date.  Update it.
+
+		global $reftype_to_bdt_id_map;
+
+		mysql_query('update rec_details set rd_val='.$entry->_container->getBiblioID().
+		            ' where rd_rec_id='.$entry->getBiblioID().' and rd_type='.$reftype_to_bdt_id_map[ $entry->_container->getReferenceType() ]);
+	}
+
+	if ($entry->_author_bib_ids) mysql_query('update records set rec_temporary=0 where rec_id in ('.join(',', $entry->_author_bib_ids).')');
+
+	mysql_query('set @suppress_update_trigger := NULL');
+	$entry->_permanent = true;
+
+	updateCachedRecord($entry->getBiblioID());
+}
+
+
+function merge_biblio($master_bib_id, $slave_bib_id) {
+	global $session_data;
+	// When confronted by two matching records,
+	// make sure that the record that will stay in the database (master)
+	// contains at least all the info in the one we're importing (slave)
+
+	// We need to insert into rec_details fields which aren't already in the old entry.
+	// Here we just determine whether such data exists,
+	// this is to prevent false deltas in the archive tables.
+
+/*
+if ($master_bib_id == 44) { error_log(str_replace("\n", " ", '
+   select '.$master_bib_id.', S.rd_type, S.rd_val, 2
+     from rec_details S
+left join rec_details M on S.rd_type=M.rd_type and S.rd_val_precis=M.rd_val_precis and M.rd_rec_id='.$master_bib_id.'
+left join rec_detail_types on rdt_id=S.rd_type
+    where S.rd_rec_id='.$slave_bib_id.' and M.rd_rec_id is null and (rdt_type != "resource" or S.rd_type=158)')); }
+*/
+
+	$new_bd_query = '
+   select '.$master_bib_id.', S.rd_type, S.rd_val, 2
+     from rec_details S
+left join rec_details M on S.rd_type=M.rd_type and S.rd_val_precis=M.rd_val_precis and M.rd_rec_id='.$master_bib_id.'
+left join rec_detail_types on rdt_id=S.rd_type
+    where S.rd_rec_id='.$slave_bib_id.' and M.rd_rec_id is null and (rdt_type != "resource" or S.rd_type=158)';	// ignore non-author references
+	$res = mysql_query($new_bd_query);
+	$num_bd_rows = mysql_num_rows($res);
+
+	// Consider, line-by-line, the values in the entries' respective rec_scratchpad fields.
+	// Any lines that are not already in the master field will be added at the end.
+
+	$rec_scratchpad = mysql__select_assoc('records', 'rec_id', 'rec_scratchpad', 'rec_id in ('.$master_bib_id.','.$slave_bib_id.')');
+	if (! $rec_scratchpad[$master_bib_id]) {
+		$new_val = $rec_scratchpad[$slave_bib_id];
+	} else {
+		$master_lines = explode("\n", $rec_scratchpad[$master_bib_id]);
+		$master_lines_map = array();
+		foreach ($master_lines as $line) $master_lines_map[strtolower($line)] = 1;
+
+		$slave_lines = explode("\n", $rec_scratchpad[$slave_bib_id]);
+		foreach ($slave_lines as $i => $slave_line)
+			if (@$master_lines_map[strtolower($slave_line)]) unset($slave_lines[$i]);
+
+		if ($slave_lines) $new_val = $rec_scratchpad[$master_bib_id] . "\n\n[" .
+			str_replace('parser', 'import', $session_data['parser']->parserDescription()) .
+			', ' . $session_data['import_time'] .
+			', from file: ' . $session_data['in_filename'] .
+			', by user: ' . get_user_name() . "]\n" .
+			join("\n", $slave_lines);
+		else $new_val = NULL;
+	}
+
+	if ($new_val) {
+		mysql_query('update records set rec_scratchpad="'.addslashes($new_val).'", rec_modified=now() where rec_id='.$master_bib_id);
+	} else if ($num_bd_rows) {
+		mysql_query('update records set rec_modified=now() where rec_id='.$master_bib_id);
+	}
+
+	// Insert the rows identified before.  We have the exact same select query so the database's internal-cache
+	// should recognise this and impose no performance hit; doing it this way (instead of retrieving the values above,
+	// making a valid request, etc etc) reduces parsing and traffic.
+	if ($num_bd_rows) {
+		$res = mysql_query('insert into rec_details (rd_rec_id, rd_type, rd_val, rd_auto) ' . $new_bd_query);
+	}
+
+	// update the memcached copy of this record
+	updateCachedRecord($master_bib_id);
+}
+
+
+function merge_new_biblio_data($master_biblio_id, &$entry) {
+// error_log("oh hey look merge_new_biblio_data");
+	global $session_data;
+
+	$master_biblio_id = intval($master_biblio_id);
+
+	$existingFields = array();
+	$bib_ids = array($master_biblio_id);
+
+	while ($rec_id = array_pop($bib_ids)) {
+		$res = mysql_query("select rd_type, rd_val, rdt_type from rec_details left join rec_detail_types on rdt_id=rd_type where rd_rec_id = " . intval($rec_id));
+
+		while ($bd = mysql_fetch_assoc($res)) {
+			if ($bd["rdt_type"] === "resource") {
+				if ($bd["rd_type"] !== 158) array_push($bib_ids, $bd["rd_val"]);	// also pull in fields from non-author related fields
+			}
+			else {
+				$existingFields[$bd["rd_type"]."-".trim(strtolower($bd["rd_val"]))] = 1;
+			}
+		}
+	}
+// error_log(print_r($existingFields, 1));
+	$res = mysql_query("select rec_scratchpad from records where rec_id = " . $master_biblio_id);
+	$notesString = mysql_fetch_row($res);  $notesString = $notesString[0];
+	$notes = array();
+	foreach (explode("\n", $notesString) as $line) { $notes[trim(strtolower($line))] = 1; }
+
+	$fields = &$entry->getFields();
+
+	$extraNotesString = "";
+	$newFields = array();
+	foreach (array_keys($fields) as $i) {
+		if (! $fields[$i]->getValue()) continue;
+
+		if (! $fields[$i]->getType()) {
+			// add type-less data to the notes field
+			foreach (explode("\n", $fields[$i]->getRawValue()) as $line) {
+				if (! @$notes[trim(strtolower($line))]) {
+					if ($extraNotesString) $extraNotesString .= "\n";
+					$extraNotesString .= $line;
+					$notes[trim(strtolower($line))] = 1;
+				}
+			}
+		}
+		else if ($fields[$i]->getGeographicValue()) {
+			$newFields[] = &$fields[$i];
+		}
+		else if ($fields[$i]->getType() != 158) {
+			// add typed data, if it doesn't exist exactly already
+			if (! @$existingFields[$fields[$i]->getType() . "-" . trim(strtolower($fields[$i]->getRawValue()))]) {
+				$newFields[] = &$fields[$i];
+				$existingFields[$fields[$i]->getType() . "-" . trim(strtolower($fields[$i]->getRawValue()))] = 1;
+			}
+		}
+	}
+
+
+	if ($extraNotesString) {
+		$newNotesString = '[' .
+			str_replace('parser', 'import', $session_data['parser']->parserDescription()) .
+			', ' . $session_data['import_time'] .
+			', from file: ' . $session_data['in_filename'] .
+			', by user: ' . get_user_name(). ']' . "\n" . $extraNotesString;
+
+		if ($notesString) $newNotesString = $notesString . "\n" . $newNotesString;
+		mysql_query("update records set rec_modified=now(), rec_scratchpad='" . addslashes($newNotesString) . "' where rec_id=" . $master_biblio_id);
+	}
+	else if (count($newFields) > 0) {
+		mysql_query("update records set rec_modified=now() where rec_id=" . $master_biblio_id);
+	}
+	else {
+		// nothing to do!
+		return;
+	}
+
+	// insert missing fields
+	$insertStmt = "";
+	foreach (array_keys($newFields) as $i) {
+		if ($newFields[$i]->getGeographicValue()) {
+			// delete existing geos
+			mysql_query("delete from rec_details where rd_rec_id = $master_biblio_id and rd_type = " . $newFields[$i]->getType());
+			if ($insertStmt) $insertStmt .= ', ';
+			$insertStmt .= "(" . $master_biblio_id . "," . $newFields[$i]->getType() . ",'" . addslashes($newFields[$i]->getValue())."',geomfromtext('".addslashes($newFields[$i]->getGeographicValue()) . "'), 1)";
+		} else {
+			if ($insertStmt) $insertStmt .= ",";
+			$insertStmt .= "(" . $master_biblio_id . "," . $newFields[$i]->getType() . ",'" . addslashes($newFields[$i]->getRawValue()) . "', NULL, 1)";
+		}
+	}
+	$insertStmt = "insert into rec_details (rd_rec_id, rd_type, rd_val, rd_geo, rd_auto) values " . $insertStmt;
+
+	mysql_query($insertStmt);
+
+	// update the memcached copy of this record
+	updateCachedRecord($master_bib_id);
+}
+
+
+function delete_biblio(&$entry) {
+	// delete a temporary bibliographic record
+	mysql_query('set @suppress_update_trigger := 1');
+	mysql_query('delete from records where rec_id = ' . $entry->getBiblioID() . ' and rec_temporary');
+	if (mysql_affected_rows() == 1) mysql_query('delete from_bib_detail where rd_rec_id = ' . $entry->getBiblioID());
+	mysql_query('set @suppress_update_trigger := NULL');
+}
+
+
+function insert_bookmark(&$entry) {
+	// Make sure that there is a bookmark for this entry (which has Biblio ID set)
+	// and insert keywords as necessary.
+	// Returns true if a bookmark was added.
+
+	global $zoteroItems;
+
+	if (! $entry->getBiblioID()) return false;
+
+	// First: check if the user already has a bookmark for this records
+	$res = mysql_query('select pers_id from personals where pers_rec_id = ' . $entry->getBiblioID()
+	                                                . ' and pers_usr_id = ' . get_user_id());
+	if (mysql_num_rows($res) > 0) {
+		$pers_id = mysql_fetch_row($res);
+		$pers_id = $pers_id[0];
+
+		if (is_a($entry->getForeignPrototype(), 'HeuristZoteroEntry')) {
+			mysql_query('update personals set pers_zotero_id = ' . $entry->getForeignPrototype()->getZoteroID().' where pers_id='.$pers_id);
+			$zoteroItems[$entry->getForeignPrototype()->getZoteroID()] = $entry->getBiblioID();
+		}
+
+		$entry->setBookmarkID($pers_id);
+		return false;
+	} else {
+		// Otherwise insert a new bookmark.
+		$bkmk = array('pers_rec_id' => $entry->getBiblioID(),
+		              'pers_added' => date('Y-m-d H:i:s'),
+		              'pers_modified' => date('Y-m-d H:i:s'),
+		              'pers_usr_id' => get_user_id(),
+		              'pers_auto' => 1);
+
+		if (is_a($entry->getForeignPrototype(), 'HeuristZoteroEntry')) {
+			$bkmk['pers_zotero_id'] = $entry->getForeignPrototype()->getZoteroID();
+			$zoteroItems[$entry->getForeignPrototype()->getZoteroID()] = $entry->getBiblioID();
+		}
+
+/* dead code
+	if ($entry->getBkmkNotes()) {
+			// pers_notes aren't visible in heurist any more
+			// stick this stuff in the scratchpad instead
+			//$bkmk['pers_notes'] = $entry->getBkmkNotes();
+		}
+*/
+		mysql__insert('personals', $bkmk);
+		$pers_id = mysql_insert_id();
+
+		$entry->setBookmarkID($pers_id);
+		return true;
+	}
+}
+
+
+function insert_keywords(&$entry, $keyword_map=array()) {
+	// automatic keyword insertion for the bookmark associated with this entry
+
+// easy one first: see if there is a workgroup keyword to be added, and that we have access to that workgroup
+$wgKwd = $entry->getWorkgroupKeyword();
+if ($wgKwd) {
+	$res = mysql_query("select * from keywords, ".USERS_DATABASE.".UserGroups where kwd_wg_id=ug_group_id and ug_user_id=" . get_user_id() . " and kwd_id=" . $wgKwd);
+	if (mysql_num_rows($res) != 1) $wgKwd = 0;
+}
+
+
+
+	if (! $entry->getKeywords()) return;
+
+	$kwd_select_clause = '';
+	foreach ($entry->getKeywords() as $kwd) {
+		$kwd = str_replace('\\', '/', $kwd);
+
+		if (array_key_exists(strtolower(trim($kwd)), $keyword_map))
+			$kwd = $keyword_map[strtolower(trim($kwd))];
+
+		if ($kwd_select_clause) $kwd_select_clause .= ',';
+		$kwd_select_clause .= '"'.addslashes($kwd).'"';
+	}
+	$res = mysql_query('select kwd_id, lower(trim(kwd_name)) from keywords where kwd_name in (' . $kwd_select_clause . ')'
+	                                                             . ' and kwd_usr_id = ' . get_user_id());
+	$keywords = array();
+	while ($row = mysql_fetch_row($res)) $keywords[$row[1]] = $row[0];
+
+	$all_keywords = mysql__select_assoc('keywords, '.USERS_DATABASE.'.UserGroups, '.USERS_DATABASE.'.Groups', 'lower(concat(grp_name, "\\\\", kwd_name))', 'kwd_id',
+	                                    'kwd_wg_id=ug_group_id and ug_group_id=grp_id and ug_user_id='.get_user_id());
+	foreach ($all_keywords as $kwd => $id) $keywords[$kwd] = $id;
+
+	$entry_kwd_ids = array();
+	foreach ($entry->getKeywords() as $kwd) {
+		if (preg_match('/^(.*?)\\s*\\\\\\s*(.*)$/', $kwd, $matches)) {
+			$kwd = $matches[1] . '\\' . $matches[2];
+			$wg_kwd = true;
+		} else $wg_kwd = false;
+
+		$kwd_id = @$keywords[strtolower(trim($kwd))];
+		if ($kwd_id) array_push($entry_kwd_ids, $kwd_id);
+/**** 	"Don't insert new keywords unannounced"
+	Well, it's very very difficult to get feedback from the user, so we just won't insert any new keywords at all, I guess.  Hope you're happy.
+*/		else if (! $wg_kwd) {	// do not insert new workgroup keywords
+			mysql_query('insert into keywords (kwd_usr_id, kwd_name) ' .
+			                         ' values ('.get_user_id().', "'.addslashes($kwd).'")');
+			$kwd_id = mysql_insert_id();
+			array_push($entry_kwd_ids, $kwd_id);
+			$keywords[strtolower(trim($kwd))] = $kwd_id;
+		}
+
+	}
+
+	$kwi_insert_stmt = '';
+	if ($wgKwd) {
+		$kwi_insert_stmt .= '(' . $entry->getBookmarkID() . ', ' . $entry->getBiblioID() . ', ' . $wgKwd . ', 1)';
+	}
+	foreach ($entry_kwd_ids as $kwd_id) {
+		if ($kwi_insert_stmt) $kwi_insert_stmt .= ',';
+		$kwi_insert_stmt .= '(' . $entry->getBookmarkID() . ', ' . $entry->getBiblioID() . ', ' . $kwd_id . ', 1)'; //FIXME getBookmarkID and getBiblioID return empty string
+	}
+	mysql_query('insert ignore into keyword_links (kwl_pers_id, kwl_rec_id, kwl_kwd_id, kwl_auto) values ' . $kwi_insert_stmt);
+}
+
+
+function process_author(&$field) {
+	// field corresponds to a person: make sure they're in the database, and set the field's value to that per_id.
+	// We will need to get fairly sophisticated about this eventually, but for now this quick hacque will do.
+
+	$person_bib_ids = array();
+
+	$persons = parseName($field->getRawValue());
+	foreach ($persons as $person) {
+		if (@$person['anonymous']) {
+			array_push($person_bib_ids, 'anonymous');
+			continue;
+		}
+		if (@$person['others']) {
+			array_push($person_bib_ids, 'et al.');
+			continue;
+		}
+		if (@$person['questionable']) {
+			// a "questionable" name -- e.g. one that could not be parsed, one that looks like an organisation etc.
+			return NULL;
+		}
+
+		$res = mysql_query('select rec_id from records
+		                             left join rec_details SURNAME on SURNAME.rd_rec_id=rec_id and SURNAME.rd_type=160
+		                             left join rec_details GIVENNAMES on GIVENNAMES.rd_rec_id=rec_id and GIVENNAMES.rd_type=291
+		                     where rec_type = 75
+		                      and SURNAME.rd_val = "'.addslashes(trim($person['surname'].' '.@$person['postfix'])).'"
+		                      and GIVENNAMES.rd_val = "'.addslashes(trim($person['first names'])).'"');
+
+
+		if (mysql_num_rows($res) > 0) {
+			// an exact match on the citation value: don't want to know if there's more than one person with this name!
+			$rec_id = mysql_fetch_row($res);  $rec_id = $rec_id[0];
+		} else {
+			// no match -- insert a new person
+			mysql_query('insert into records (rec_title, rec_type, rec_temporary, rec_modified, rec_added) values ("'.addslashes(trim($person['surname'].' '.@$person['postfix']).', '.$person['first names']).'", 75, 1, now(), now())');
+			$rec_id = mysql_insert_id();
+			mysql_query('insert into rec_details (rd_rec_id, rd_type, rd_val) values ('.$rec_id.', 160, "'.addslashes(trim($person['surname'].' '.@$person['postfix'])).'"),
+			                                                                        ('.$rec_id.', 291, "'.addslashes($person['first names']).'")');
+			mysql_query("update records set rec_hhash = hhash(rec_id) where rec_id = $rec_id");
+		}
+
+		array_push($person_bib_ids, $rec_id);
+	}
+
+	$field->_value = $person_bib_ids;
+// error_log('field value: ' . print_r($field, 1));
+}
+
+
+function print_disambiguation_options(&$entry) {
+	global $session_data;
+	global $import_id;
+	global $heurist_reftypes;
+	if (! $heurist_reftypes) load_heurist_reftypes();
+
+	if (count($session_data['ambiguities']) == 0) {
+		// This is the first ambiguous record, print out a header
+?>
+<br>
+<hr>
+<h1>Potential duplicates</h1>
+<div style="margin-left: 3ex;">
+ <p><b>The following record(s) are potential duplicates.  Please choose the appropriate action by selecting the radio buttons below.</b></p>
+ <p><a href="NEW record" onclick="return false;"><b>NEW</b></a> indicates the record being imported.  Selecting this will create a new record in Heurist.</p>
+ <p>Numbers indicate an existing record ID in Heurist.<br>
+  <span style="color: mediumvioletred;">Purple text flags any differences between the imported record and existing records.</span></p>
+</div>
+<?php
+	}
+
+
+	// generate a random number associated with this entry (it doesn't have an ID yet, remember?)
+	$nonce = rand();
+	$session_data['ambiguities'][$nonce] = &$entry;
+
+	if ($entry->getPotentialMatches())
+		$ambig_entry = &$entry;
+	else
+		$ambig_entry = &$entry->_ancestor;  //disambiguation searches the containment heirarchy for near matches and if found points to it _ancestor to it
+
+	$entry_type = $heurist_reftypes[$entry->getReferenceType()]['rt_name'];
+
+	$compare_link = "side-by-side.php?ids=" . $ambig_entry->getBiblioID() . "," . join(',', $ambig_entry->getPotentialMatches());
+?>
+  <hr>
+  <div class="ambiguous">
+<?php if ($entry == $ambig_entry) { ?>
+   <div><span style="font-weight: bold;"><?= $entry_type ?></span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=<?= $compare_link ?> onclick="var win = open(href, 'compare', 'width=600,height=300,scrollbars=1,resizable=1'); win.focus(); return false;">compare versions</a></div>
+<?php } else { ?>
+   <div><span style="font-weight: bold;"><?= $heurist_reftypes[$ambig_entry->getReferenceType()]["rt_name"] ?></span> of &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=<?= $compare_link ?> onclick="var win = open(href, 'compare', 'width=600,height=300,scrollbars=1,resizable=1'); win.focus(); return false;">compare versions</a></div>
+   <div style="margin-top: 1ex; margin-left: 3ex; background-color: #f0f0f0;"><?= htmlspecialchars($entry->getTitle()) ?> <i>(<?= $entry_type ?>)</i></div>
+<?php } ?>
+
+   <table class="new_bib" style="margin: 1em; margin-bottom: 1ex;">
+    <tr>
+     <td style="text-align: right;"><b>NEW</b>&nbsp;</td>
+     <td><input type="radio" name="ambig[<?= $nonce ?>]" value="-1" class="radio" id=<?= $nonce ?>></td>
+     <td><label for=<?= $nonce ?>><b><?= htmlspecialchars($ambig_entry->getTitle()) ?></b></label></td>
+    </tr>
+<?php
+	$res = mysql_query('select rec_id,rec_title,
+	                           levenshtein(rec_hhash,upper("'.addslashes($ambig_entry->getHHash()).'")) as diff1,
+	                           levenshtein(upper(rec_title),upper("'.addslashes($ambig_entry->getTitle()).'")) as diff2
+	                      from records where rec_id in ('.join(',',$ambig_entry->getPotentialMatches()).') order by diff1, diff2');
+	$is_first = true;
+	while ($bib = mysql_fetch_assoc($res)) {
+		$title_with_deltas = levenshtein_delta(strip_tags($bib['rec_title']), strip_tags($ambig_entry->getTitle()));
+?>
+    <tr>
+     <td style="text-align: right;"><nobr><?= $bib['rec_id'] ?></nobr>&nbsp;</td>
+     <td><input type="radio" name="ambig[<?= $nonce ?>]" value="<?= $bib['rec_id'] ?>" class="radio" <?= $is_first? "checked" : "" ?> id=<?= $bib['rec_id'] . '-' . $nonce ?>>
+     <td><label for=<?= $bib['rec_id'] . '-' . $nonce ?>><b title="<?= htmlspecialchars($bib['rec_title']) ?>"><?= $title_with_deltas ?></b></label></td>
+    </tr>
+
+<?php
+		$is_first = false;
+	}
+?>
+   </table>
+  </div>
+<?php
+}
+
+
+function process_disambiguations() {
+	global $session_data;
+
+	set_progress_bar_title('Processing ambiguous entries');
+	if (! @$session_data['ambiguities']) return;
+	$i = 0;
+	foreach (array_keys($session_data['ambiguities']) as $id) {
+		$ambig_entry = &$session_data['ambiguities'][$id];
+		if (! $ambig_entry->getPotentialMatches())
+			$ambig_entry = &$ambig_entry->_ancestor;
+
+		if (! @$_REQUEST['ambig'][$id]) {	// user hasn't chosen an option, let them sit there and fester
+			$ambig_entry->_matches = array();
+			continue;
+		}
+
+		$ambig_bib_id = $_REQUEST['ambig'][$id];
+		if ($ambig_bib_id == -1) {	// user has selected NEW -- none of the presented options were correct
+			// move the hitherto potential matches to DEFINITE NON-MATCHES
+			$ambig_entry->eliminatePotentialMatches();
+		} else {
+			if (in_array($ambig_bib_id, $ambig_entry->getPotentialMatches())) {
+				setPermanentBiblioID($ambig_entry, $ambig_bib_id);
+				$ambig_entry->eliminatePotentialMatches();
+			} else {	// funny buggers
+				$ambig->_matches = array();
+			}
+		}
+
+		update_progress_bar(++$i / count($session_data['ambiguities']));
+	}
+	update_progress_bar(-1);
+
+	flush_fo_shizzle();
+}
+
+
+function flush_fo_shizzle() {
+	// flush output for SURE
+	ob_flush();
+	flush();
+}
+
+
+function update_progress_bar($fraction) {
+	// print out javascript to update the progress bar
+	static $last_percent = NULL;
+
+	$percent = 100*$fraction;
+	if (intval($percent) == intval($last_percent)) return;
+
+	print '<script type="text/javascript">importer.setProgress('.$percent.")</script>\n";
+	flush_fo_shizzle();
+
+	$last_percent = $percent;
+}
+
+function set_progress_bar_title($title) {
+	// print out javascript to update the progress bar title
+	print '<script type="text/javascript">importer.setProgressTitle(\''.addslashes($title)."')</script>\n";
+	flush_fo_shizzle();
+}
+
+
+function setPermanentBiblioID(&$entry, $new_biblio_id) {
+	// housekeeping stuff to be done when a permanent records match is found for some entry
+
+	if ($entry->getBiblioID())
+		merge_biblio($new_biblio_id, $entry->getBiblioID());
+	$entry->setBiblioID($new_biblio_id);
+	$entry->_permanent = true;
+}
+
+
+function print_keyword_stuff(&$out_entries) {
+	$keywords = array();
+	$orig_keywords = array();
+	$j = 0;
+	foreach (array_keys($out_entries) as $i) {
+		$my_keywords = $out_entries[$i]->getKeywords();
+		foreach ($my_keywords as $kwd) {
+			$kwd = trim($kwd);
+			if (! $kwd) continue;
+			if (! array_key_exists(strtolower($kwd), $keywords)) {
+				$keywords[strtolower($kwd)] = true;
+				array_push($orig_keywords, $kwd);
+			}
+		}
+	}
+
+	$query = "";
+	foreach ($orig_keywords as $kwd) {
+		if ($query) $query .= "', '";
+		$query .= addslashes($kwd);
+	}
+	$query = "select kwd_name from keywords where kwd_name in ('" . $query . "')";
+	$res = mysql_query($query);
+	$existing_keywords = array();
+	while ($row = mysql_fetch_row($res)) {
+		$kwd = $row[0];
+		$existing_keywords[strtolower($kwd)] = $kwd;
+	}
+
+	$new_keywords = false;
+	foreach ($orig_keywords as $i => $kwd) {
+		if (! @$existing_keywords[strtolower($kwd)]) {
+			$new_keywords = true;
+			break;
+		}
+	}
+
+	if ($orig_keywords) {
+
+		if ($new_keywords) {
+?>
+<p>The following tags appear in the import file, but aren't in your list of Heurist tags.<br>
+   Un-selected tags will be ignored during the import process.</p>
+
+<p style="margin-left: 15px;">
+<?php
+		}
+		foreach ($orig_keywords as $i => $kwd) {
+			if (@$existing_keywords[strtolower($kwd)]) {
+				print '<input type=hidden name=keywords[] value="'.htmlspecialchars($kwd).'">';
+				print '<input type=hidden name=orig_keywords[] value="'.htmlspecialchars($kwd).'">';
+				continue;
+			}
+
+			print '<div style="margin-left: 2em;">';
+			print '<input type="hidden" name="keywords[]" value="' . htmlspecialchars($kwd) . '">';
+			print '<label for=kwd-' . $i . '>';
+			print   '<input type="checkbox" name="orig_keywords[]" value="' . htmlspecialchars($kwd) . '" id=kwd-' . $i . ' style="margin: 0; border: 0; padding: 0; margin-right: 5px;">';
+			print   htmlspecialchars($kwd);
+			print '</label>';
+			print "</div>\n";
+		}
+
+		if ($new_keywords) {
+?>
+
+<br clear=all>
+
+<input type=button value="Select all tags" onclick="var ok=document.getElementsByName('orig_keywords[]'); for (var i=0; i < ok.length; ++i) ok[i].checked = true;">
+<input type=button value="Unselect all tags" onclick="var ok=document.getElementsByName('orig_keywords[]'); for (var i=0; i < ok.length; ++i) ok[i].checked = false;">
+</p>
+
+<hr>
+<?php
+		}
+	}
+
+	flush_fo_shizzle();
+}
+
+
+function setup_session_vars() {
+	global $session_data;
+	global $import_id;
+
+ // print "<p><b>" . $_REQUEST['import_id'] . "</b>";
+ // print '<i>' . print_r($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['heurist-import-' . $_REQUEST['import_id']], 1) . '</i></p>';
+	if (! @$_REQUEST['import_id']  ||  ! @$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['heurist-import-' . $_REQUEST['import_id']]) {
+		$session_data = array();
+		return;
+	}
+
+	$import_id = $_REQUEST['import_id'];
+}
+
+
+function initialise_import_session() {
+	global $session_data;
+	global $import_id;
+
+	if (! @$_FILES['import_file']  ||  ! @$_FILES['import_file']['name']) return;
+
+	$_import_id = substr($_FILES['import_file']['name'],0,200);
+	// if the name has already been fiddled by heurist, get rid of our meddlings
+	$_import_id = preg_replace('/-heurist-\\d+-\\d+_\\d+\\d+-\\d+:\\d+:\\d+.*/i', '', $_import_id);
+	$_import_id = $_import_id.'-heurist-'.get_user_id().'-'.date('Y_m_d-H:i:s');
+
+	$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']["heurist-import-$_import_id"] = &$session_data;
+	$session_data['in_filename'] = $_FILES['import_file']['name'];
+	$import_id = $_import_id;
+}
+
+?>

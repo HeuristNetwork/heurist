@@ -1,0 +1,22 @@
+Heurist academic data management system (http://HeuristScholar.org)
+Copyright © 2005 - 2010 University of Sydney Digital Innovation Unit
+License: http://www.gnu.org/licenses/gpl-3.0.txt
+Concept/direction: Ian Johnson
+Developers: Tom Murtagh, Kim Jackson, Steve White, Steven Hayes, Maria Shvedova, Artem Osmakov, Maxim Nikitin.
+Graphic design/testing: Andrew Wilson, Ireneusz Golka, Martin King.
+ 
+---------------------------------------------------------------------
+
+Directory:	admin
+
+Overview:	
+
+Administrative functions for managing database definitions, users, data verification and recovery, bulk changes etc.
+
+Notes:	
+
+Administrative functions specific to individual users (eg. management of tags and creation of colleague groups) can be found in /uprofile
+
+No particular effort has been made to brand or beautify the administrative interface – it is pretty much as first conceived in 2005/2006; it does the job effectively in part though its lack of sophistication, so we have followed the “if it ain’t broke, don’t fix it” principle, preferring to concentrate on new features and end-user usability. 
+
+Updated: 	28 March 2010

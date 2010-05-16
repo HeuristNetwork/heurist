@@ -1,0 +1,24 @@
+<html>
+<head>
+<body>
+
+<iframe id=i style="width: 90%; height: 90%;"></iframe>
+
+<script src=js/heurist.js></script>
+<script src=php/js/heurist-obj-common.php></script>
+<script src=php/js/heurist-obj-user.php></script>
+<script src=php/js/display-preferences.php></script>
+<script>
+
+if (! top.HEURIST.util) top.HEURIST.loadScript(top.HEURIST.basePath+"js/heurist-util.js");
+if (! top.HEURIST.json) top.HEURIST.loadScript(top.HEURIST.basePath+"js/heurist-json.js");
+
+
+top.HEURIST.whenLoaded("obj-user", function() {
+	document.getElementById("i").src = window.location.search.substring(1);
+});
+
+</script>
+
+</body>
+</html>

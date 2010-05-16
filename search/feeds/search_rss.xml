@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<rss version="2.0">
+<channel>
+<title>USyd HEURIST Search results</title>
+<link>http://heuristscholar.org/heurist</link>
+	<description>This feed returns the results of a HEURIST search. The search URL specififes the search parameters and the search results are built live from the HEURIST database</description>
+	<language>en-gb</language>
+	<pubDate>Tue, 12 Mar 2006 12:00:00</pubDate>
+	<copyright>Copyright: (C) University of Sydney Archaeological Computing Laboratory</copyright>
+	<generator>HEURIST search</generator>
+	<managingEditor>info@heuristscholar.org</managingEditor>
+	<docs>http://heuristscholar.org/heurist/help/heurist_userguide_home.html/</docs>
+<item>
+	<id>5131</id>
+	<title>HEURIST home</title>
+	<description>HEURIST Heuristic reference manager, home page (search)</description>
+	<pubDate>2006/03/22</pubDate>
+	<modDate>2006/03/22</modDate>
+	<category></category>	
+	<keywordstring>bookmarks, social bookmarking, heuristics, bibliographic software</keywordstring>
+	<bibref>5131</bibref>
+	<link>http://heuristscholar.org/heurist</link>
+	<guid isPermaLink="false"></guid>
+</item>
+
+[search BIBLIO rss_search]
+[foreach BIBLIO searchrecordloop]
+<item>
+	<id>[rec_id]</id>
+	<title>[if : rec_url][else]no url: [end-if][rec_title]</title>
+	<description>[literal]<![CDATA[[end-literal][rec_scratchpad][literal]]]>[end-literal]</description>
+	<pubDate>[rec_modified]</pubDate>
+	<modDate>[rec_modified]</modDate>
+	<category></category>	
+	[if : rec_url]
+		<link>[rec_url]</link>
+	[else]
+		<link>http://heuristscholar.org/heurist/view.php?bib_id=[rec_id]</link>
+	[end-if]
+	<guid isPermaLink="false"></guid>
+</item>
+[end-foreach]
+[end-search]
+
+</channel>
+</rss>

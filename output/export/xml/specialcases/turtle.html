@@ -1,0 +1,231 @@
+<html>
+<head>
+
+<script src="../php/js/load-hapi.php"></script>
+
+<script>
+function getQueryFromUrl() {
+	var regexS = "[\\?&]q=([^&#]*)";
+	var regex = new RegExp( regexS );
+	var results = regex.exec( window.location.search );
+	
+	if( results == null )
+		return;
+	else
+		return results[1];
+
+}
+function init() {
+	var q = getQueryFromUrl();
+	if (q == ""){
+		q = "sortby:-m";
+	}
+	//var mysearch = new HSearch(decodeURIComponent(q));
+	var loader = new HLoader(	
+		function(s,r) {
+			displayResults(r);
+		},
+		function(s,e) {
+			alert("load failed: " + e);
+	});
+	loadAllRecords(decodeURIComponent(q), null, loader);
+	//HeuristScholarDB.loadRecords(mysearch, loader);
+}
+
+function loadAllRecords(query, options, loader) {
+		var records = [];
+		var baseSearch = new HSearch(query, options);
+		var bulkLoader = new HLoader(
+			function(s, r) {	// onload
+				records.push.apply(records, r);
+				if (r.length < 100) {
+					// we've loaded all the records: invoke the original loader's onload
+					loader.onload(baseSearch, records);
+				}
+				else { // more records to retrieve
+					//  do a search with an offset specified for retrieving the next page of records
+					var search = new HSearch(query + " offset:"+records.length, options);
+					HeuristScholarDB.loadRecords(search, bulkLoader);
+				}
+			},
+			loader.onerror
+		);
+		HeuristScholarDB.loadRecords(baseSearch, bulkLoader);
+}
+		
+function displayResults(r) {
+	var recsForRelationships = [];
+	var div = document.getElementById("results");
+	div.innerHTML = "@prefix rdfs:    &lt;http://www.w3.org/2000/01/rdf-schema#&gt; .<br>" ;
+	div.innerHTML += "@prefix default:  &lt;file:/H:/DoS/The%20Rocks%20test/DoSTestSchema5.owl#&gt; .<br>";
+div.innerHTML += "@prefix xsd:     &lt;http://www.w3.org/2001/XMLSchema#&gt; .<br>";
+div.innerHTML += "@prefix owl:     &lt;http://www.w3.org/2002/07/owl#&gt; .<br>";
+div.innerHTML += "@prefix rdf:     &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt; .<br>";
+div.innerHTML += "@prefix daml:    &lt;http://www.daml.org/2001/03/daml+oil#&gt; .<br>";
+div.innerHTML += "@prefix dos:     &lt;http://www.dos.org/dos#&gt; .<br>";
+div.innerHTML += "@prefix h:     &lt;http://dos.heuristscholar.org/resource/&gt; .<br>";
+	
+	for (var i = 0; i < r.length; i++) {
+		var p = document.createElement("p");
+		var rec = r[i];
+			p.id = rec.getID();
+			p.innerHTML += "h:"+rec.getID()+"<br>";
+			p.innerHTML += "rdf:type dos:"+rec.getRecordType().getName()+ " \  ;<br>";
+			p.innerHTML += "rdfs:label \""+rec.getTitle() + "\"\^\^xsd:string";
+				
+			switch (rec.getRecordType().getID()) {
+			
+			case "150": //FACTOID
+			recsForRelationships.push(rec);
+			var details = HDetailManager.getDetailTypesForRecordType(rec.getRecordType());
+				for (d = 0; d < details.length; d++) {
+				 	if (rec.getDetail(details[d]) != null) {
+						var detailID = details[d].getID();
+						switch (detailID) {
+					
+							case "177":
+							p.innerHTML += "\  ;<br>dos:has_Factoid_Start  \"" +rec.getDetail(details[d]) + "\"^^xsd:date";
+							break;
+							
+							case "178":
+							p.innerHTML += "\  ;<br>dos:has_Factoid_End \"" +rec.getDetail(details[d]) + "\"^^xsd:date";
+							break;
+						
+							case  "528":
+							p.innerHTML += "\  ;<br>dos:has_Factoid_SourceEntity default:d" +rec.getDetail(details[d]).getID();
+							break;
+							
+							case  "529":
+							p.innerHTML += "\  ;<br>dos:has_Factoid_TargetEntity  default:d" +rec.getDetail(details[d]).getID();
+							break;
+							
+							case  "527":
+							p.innerHTML += "\  ;<br>dos:has_Factoid_Place default:d" +rec.getDetail(details[d]).getID();
+							break;
+							
+							case  "160":
+							p.innerHTML += "\  ;<br>dos:has_Factoid_Name " +rec.getDetail(details[d]).toString()+ "\"^^xsd:string";
+							break;
+							
+							case  "230":
+							p.innerHTML += "\  ;<br>dos:has_Factoid_Location " +rec.getDetail(details[d]).toString()+ "\"^^xsd:string";
+							break;
+					
+						}
+					}
+				}
+			break;
+			
+			case "152":
+				recsForRelationships.push(rec);
+				//getRelations(rec);
+			break; 
+			
+			case "99": 
+		    	var details = HDetailManager.getDetailTypesForRecordType(rec.getRecordType());
+				for (d = 0; d < details.length; d++) {
+				 	if (rec.getDetail(details[d]) != null) {
+						var detailID = details[d].getID();
+						switch (detailID) {
+					
+							case "322":
+							p.innerHTML += "\  ;<br>dos:Annotation_annotates \"" +rec.getDetail(details[d]).getTitle() + "\"^^xsd:string";
+							break;
+						
+							case  "199":
+							p.innerHTML += "\  ;<br>dos:Annotation_related \"" +rec.getDetail(details[d]).getID() + "\"^^xsd:string";
+							break;
+					
+						}
+					}
+				}
+				p.innerHTML += ".";
+			break;
+			
+			case "74":
+			recsForRelationships.push(rec);
+		    	var details = HDetailManager.getDetailTypesForRecordType(rec.getRecordType());
+				for (d = 0; d < details.length; d++) {
+				 	if (rec.getDetail(details[d]) != null) {
+						var detailID = details[d].getID();
+						switch (detailID) {
+					
+							case "221":
+							p.innerHTML += "\  ;<br>dos:ResourcehasFile \"" +rec.getDetail(details[d]).getOriginalName(); + "\"^^xsd:string";
+							break;
+						
+							case  "289":
+							p.innerHTML += "\  ;<br>dos:ResourcehasMime \"" +rec.getDetail(details[d]); + "\"^^xsd:string";
+							break;
+					
+						}
+					}
+				}
+			break;
+			
+			case "151":
+				recsForRelationships.push(rec);
+				
+			break;
+			
+			default:
+				p.innerHTML += ".";
+			break;
+			}
+			div.appendChild(p);
+	   }
+	  
+	   
+	   for (e = 0; e < recsForRelationships.length; e ++){
+	   		getRelations(recsForRelationships[e], document.getElementById(recsForRelationships[e].getID()));
+	   }
+}
+	  
+function getRelations(record, p){
+	var strSearch = new HSearch("relationsfor:" + record.getID());
+	var loader = new HLoader(	
+		function(s,r) {
+			if (r.length != 0) {
+			    	displayRelations(r, record);
+			} else {
+				p.innerHTML += " .";
+			}
+				
+	 	 },
+	  	function(s,e) {
+	  		alert("load failed: " + e);
+	 	});
+	HeuristScholarDB.loadRecords(strSearch, loader);
+}
+	  
+function displayRelations(records, originalRecord){
+	var rec, relType;
+	var p = document.getElementById(originalRecord.getID());
+	relations = originalRecord.getRelationships();
+	if (relations.length > 0) {
+		for (i=0; i < relations.length; ++i) {
+			if (relations[i].getPrimaryRecord().getID() === originalRecord.getID()) {
+				rec = HeuristScholarDB.getRecord(relations[i].getSecondaryRecord().getID());
+				relType = relations[i].getType();
+			} else {
+				rec = relations[i].getPrimaryRecord().getRecord();
+				relType = relations[i].getInverseType();
+			}
+	  		p.innerHTML += "\  ;<br>dos:" +relType + " default:d"+rec.getID();
+		   
+		} 
+	}
+	p.innerHTML += " .";
+}
+	
+</script>
+
+</head>
+<body onLoad="init();">
+
+<div id="results">
+	
+</div>
+
+<body>
+</html>

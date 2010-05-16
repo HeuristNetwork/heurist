@@ -1,0 +1,41 @@
+<html>
+ <head>
+  <title>Workgroups</title>
+  <link rel=stylesheet href=../css/heurist.css>
+
+  <style>
+#title { font-size: 120% }
+#wg-name { font-weight: bold; }
+  </style>
+
+ </head>
+
+ <body onload="showWorkgroups()" width=600 height=400>
+
+  <script src=../js/heurist.js></script>
+  <script>
+function showWorkgroups() {
+	var wgs = top.HEURIST.workgroups;
+	if (! wgs) {
+		// We only make it here if someone's screwing around ...
+		// It does give a flash of popup window, but it's a bit hard to work around that.
+		alert("Sorry - no workgroups visible");
+		setTimeout(function() { window.close(); }, 0);
+		return;
+	}
+
+	var table_elt = document.getElementById("wg-table");
+	for (var wg_id in wgs) {
+		var wg = wgs[wg_id];
+		var row = table_elt.insertRow(table_elt.rows.length);
+		row.insertCell(0).innerHTML = wg.name;
+		row.insertCell(1).innerHTML = wg.description;
+	}
+}
+  </script>
+
+ <div id=title>Workgroups</div>
+ <table id=wg-table></table>
+ </body>
+</html>
+

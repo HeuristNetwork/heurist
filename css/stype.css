@@ -1,0 +1,31 @@
+#stype_options {
+	display: none;
+	position: absolute;
+	margin: 2px 1px 1px 1px;
+	z-index: 999999;
+	width: 200px;
+	height: 72px;
+	background-image: url(../img/stype/stype-dropshadow.png);
+}
+
+#stype_options_child {
+	/* background-color: white; */
+	/* border: 1px solid #909090; */
+	padding: 3px;
+	padding-right: 9px;
+	position: relative;
+	cursor: default;
+}
+#stype_options a { outline: 0; border: 0; padding: 0; }
+
+#stype_options div.stype_option {
+	padding: 2px 4px 2px 24px;
+	display: block; border: 0;
+	background-repeat: no-repeat;
+	background-position: 2px 2px;
+	background-color: white;
+}
+#stype_options div.stype_option:hover, #stype_options div.hover { background-color: #c0c0c0; }
+#stype_options div.stype_option img { margin-right: 1ex; }
+
+#stype_options * { text-decoration: none; color: black; cursor: default; font-size: 11px; line-height: 16px; }

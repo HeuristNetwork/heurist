@@ -1,0 +1,122 @@
+<html>
+ <head>
+  <link rel="stylesheet" href="../css/heurist.css">
+  <title>Add relationships</title>
+
+  <style type="text/css">
+	#record-count {
+		font-weight: bold;
+	}
+	#relationship-type {
+		margin-bottom: 10px;
+	}
+	#related-record {
+		width: 250px;
+		border: 1px dotted gray;
+		cursor: pointer;
+		margin-bottom: 20px;
+	}
+  </style>
+
+  <script>
+
+var relTargetID;
+var recCountSpan;
+var relTypeSelect;
+var relTargetInput;
+
+function init () {
+	//document.body.innerHTML = top.HEURIST.search.get_bib_ids().join();
+
+	relTargetID;
+	recCountSpan = document.getElementById("record-count");
+	relTypeSelect = document.getElementById("relationship-type");
+	relTargetInput = document.getElementById("related-record");
+
+	recCountSpan.innerHTML = top.HEURIST.search.get_bib_ids().length;
+
+	var relTypes = top.HEURIST.bibDetailLookups[200];
+	for (var ont in relTypes) {
+		var grp = document.createElement("optgroup");
+		grp.label = top.HEURIST.ontologyLookup[ont];
+		relTypeSelect.appendChild(grp);
+		for (var i = 0; i < relTypes[ont].length; ++i) {
+			var rdl = relTypes[ont][i];
+			relTypeSelect.options[relTypeSelect.length] = new Option(rdl[1], rdl[0]);
+			if (ont == 1 && "IsRelatedTo" === rdl[1]) {
+				relTypeSelect.value = rdl[0];
+			}
+		}
+	}
+
+	relTargetInput.onclick = function () {
+		top.HEURIST.util.popupURL(window, "popup/bib-list.html?q=", {
+			callback: function(recID, recTitle) {
+				relTargetInput.value = recTitle || "";
+				relTargetID = recID || null;
+			}
+		});
+	}
+}
+
+function save () {
+	var fakeForm = {
+		action: "php/save-relations.php",
+		elements: [
+			{ name: "bib_id", value: top.HEURIST.search.get_bib_ids().join(",") },
+			{ name: "save-mode", value: "new" },
+			{ name: "RelationType", value: relTypeSelect.value },
+			{ name: "OtherResource", value: relTargetID }
+		]
+	};
+
+	top.HEURIST.util.xhrFormSubmit(fakeForm, function(json) {
+		var i, l, rels;
+		var vals = eval(json.responseText);
+		if (! vals) {
+			alert("No response from server");
+		}
+		else if (vals.error) {
+			alert("Error while saving:\n" + vals.error);
+		}
+		else {
+			rels = 0;
+			if (vals.length) {
+				l = vals.length;
+				for (i = 0; i < l; ++i) {
+					if (vals[i].relationship) {
+						++rels;
+					}
+				}
+			} else if (vals.relationship) {
+				rels = 1;
+			}
+			document.getElementById("status").innerHTML = "<b>" + rels + "</b> relationships added."
+			setTimeout(function () {
+				top.location.href = top.location.href.replace(/[^\/]*$/, "?q=relationsfor:" + relTargetID);
+			}, 2000);
+		}
+	});
+}
+
+
+  </script>
+ </head>
+
+ <body onload="init();">
+
+   <p><span id="record-count"></span> selected records</p>
+
+   <select id="relationship-type">
+    <option selected disabled>(select relationship type)</option>
+   </select>
+
+   <input type="text" id="related-record">
+
+   <input type="button" value="add relationships" onclick="this.disabled = true; save();">
+   <input type="button" value="cancel" onclick="window.close();">
+
+   <p id="status"></p>
+
+ </body>
+</html>

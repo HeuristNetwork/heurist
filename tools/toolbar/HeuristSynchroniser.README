@@ -1,0 +1,42 @@
+HeuristSynchroniser interacts with script "heurist_processing.php".
+Currently there are two types of requests:
+1. to make sure that server is available, it sends the following request:
+   "http://URL.to/heurist_processing.php?mode=1"
+   In this case server should return XML:
+
+   <?xml version="1.0"?>
+   <online>
+       online
+   </online>
+
+2. to synchronise Zotero item(s) with Heurist, it sends data to
+   "http://URL.to/heurist_processing.php?mode=2"
+   When server receives data, it returns following XML:
+
+   <?xml version="1.0"?>
+   <ok>
+       ok
+   </ok>
+
+   Then plugin just opens a new window with URL of "import.php".
+
+Synchroniser gets items from Zotero by calling Zotero methods:
+   Zotero.Items.getAll()
+   Zotero.Items.get(itemID)
+Then synchroniser generates a request string from items. This string
+has the following format:
+1. for string and numeric fields:
+       &ZoteroItems[field1_name][item1_index]=field1_value&ZoteroItems[field2_name][item2_index]=field2_value...
+   Where "item_index" is just a number of item, "field_name" is a name of field in Zotero database,
+   "field2_value" is value of field.
+
+   Example:
+       "&ZoteroItems[itemID][0]=9173&ZoteroItems[itemType][0]=book&ZoteroItems[dateAdded][0]=2008-07-31 09:04:14&ZoteroItems[dateModified][0]=2008-07-31 09:04:14&ZoteroItems[title][0]=Baby Einstein Baby's Photo Book&ZoteroItems[abstractNote][0]=&ZoteroItems[series][0]=&ZoteroItems[seriesNumber][0]=&ZoteroItems[volume][0]=&ZoteroItems[numberOfVolumes][0]=&ZoteroItems[edition][0]=&ZoteroItems[place][0]=&ZoteroItems[publisher][0]=Baby Einstein&ZoteroItems[date][0]=2007-10-19 2007-10-19&ZoteroItems[pages][0]=&ZoteroItems[language][0]=&ZoteroItems[ISBN][0]=&ZoteroItems[shortTitle][0]=&ZoteroItems[url][0]=&ZoteroItems[accessDate][0]=&ZoteroItems[callNumber][0]=&ZoteroItems[archiveLocation][0]=&ZoteroItems[repository][0]=Amazon.com&ZoteroItems[rights][0]=&ZoteroItems[extra][0]="
+
+2. if item has creators (authors etc.), string will look as follows:
+       &ZoteroItems[creator1_type][item_index][creator1_index]=creator1_name&ZoteroItems[creator2_type][item_index][creator2_index]=creator2_name...
+   Where "creator_type" is a type of creator (author, for example), "creator_index" is a number of creator,
+   "creator_name" consists of creator's first name and last name.
+
+   Example:
+       "&ZoteroItems[author][0][0]=Albert Einstein"

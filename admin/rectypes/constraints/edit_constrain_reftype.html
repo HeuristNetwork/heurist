@@ -1,0 +1,62 @@
+<html>
+ <body onload="[if : close_on_load]window.parent.finish_edit_constrain_reftype();[end-if]">
+
+<style type="text/css">
+<!--
+body {
+	margin: 0px;
+	padding: 0px;
+	border: 0px;
+	overflow: hidden;
+}
+
+* {
+	font-size: 10px;
+	font-family: sans-serif;
+}
+
+#maindiv {
+	position: absolute;
+	width: 240px; height: 100px;
+	z-index: 101;
+	background-color: white;
+	-moz-border-radius: 12px;
+	border: 2px solid black;
+	padding: 5px;
+}
+#maindiv_shadow {
+	position: absolute;
+	left: 5px;
+	top: 5px;
+	width: 240px;
+	height: 100px;
+	z-index: 100;
+	background-color: black;
+	-moz-border-radius: 12px;
+	border: 2px solid black;
+	-moz-opacity: 0.5;
+	padding: 5px;
+}
+
+-->
+</style>
+
+<div id="maindiv">
+ <form method="post">
+ [update BIB_DETAIL_TYPE bdt]
+  <span style="float: right; cursor: pointer;" onclick="window.parent.finish_edit_constrain_reftype();">&nbsp;&#91;close&#93;</span>
+  <div style="font-weight: bold;">Constrain resource references to resource type:</div>
+
+   <br>
+   [dropdown : rdt_constrain_rec_type : a resource type : select rt_id, rt_name from rec_types order by rt_name : style="width: 190px;" : (unconstrained)]
+   <input type="submit" value="save">
+ [end-update]
+ </form>
+</div>
+<div id="maindiv_shadow"></div>
+
+<img src="speech_balloon-white.gif" style="top: 112px; left: 180px; position: absolute; z-index: 102;">
+<img src="speech_balloon-black-small.gif" style="top: 119px; left: 185px; position: absolute; z-index: 99; -moz-opacity: 0.5;">
+
+ </body>
+</html>

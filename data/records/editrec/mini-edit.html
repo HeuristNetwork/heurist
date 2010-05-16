@@ -1,0 +1,134 @@
+<html>
+	<!-- mini-edit.html
+
+	Copyright 2005 - 2010 University of Sydney Digital Innovation Unit
+	This file is part of the Heurist academic knowledge management system (http://HeuristScholar.org)
+	mailto:info@heuristscholar.org
+
+	Concept and direction: Ian Johnson.
+	Developers: Tom Murtagh, Kim Jackson, Steve White, Steven Hayes,
+				Maria Shvedova, Artem Osmakov, Maxim Nikitin.
+	Design and advice: Andrew Wilson, Ireneusz Golka, Martin King.
+
+	Heurist is free software; you can redistribute it and/or modify it under the terms of the
+	GNU General Public License as published by the Free Software Foundation; either version 3
+	of the License, or (at your option) any later version.
+
+	Heurist is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+	even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License along with this program.
+	If not, see <http://www.gnu.org/licenses/>
+	or write to the Free Software Foundation,Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+	-->
+ <head>
+  <title>Edit record</title>
+
+  <link rel=stylesheet href="../css/heurist.css">
+  <link rel=stylesheet href="../css/mini.css">
+ </head>
+
+ <body width=600 height=400>
+
+  <script src="../js/heurist.js"></script>
+  <script src="../php/js/display-preferences.php"></script>
+  <script>
+window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+window.HEURIST.loadScript('../php/js/bib.php?bib_id='+window.HEURIST.parameters['bib_id']+'&bkmk_id='+window.HEURIST.parameters['bkmk_id'], true);
+
+function showRecordProperties() {
+	if (! window.HEURIST.record) {
+		// We only make it here if someone's screwing around ...
+		// It does give a flash of popup window, but it's a bit hard to work around that.
+		alert("Sorry - record not found");
+		setTimeout(function() { window.close(); }, 0);
+		return;
+	}
+
+	// fill in the toolbar fields with the details for this record
+	document.getElementById('reftype-val').innerHTML = '';
+	document.getElementById('reftype-val').appendChild(document.createTextNode(window.HEURIST.record.reftype));
+
+	document.getElementById('title-val').innerHTML = '';
+	document.getElementById('title-val').appendChild(document.createTextNode(window.HEURIST.record.title));
+}
+
+function loadPublicEditFrame() {
+	var editFrame = document.getElementById("edit-frame");
+
+	var parameters = window.HEURIST.record;
+	if (parameters  &&  parameters.bibID) {
+		editFrame.src = "../edit/public-tab.html?bib_id=" + parameters.bibID;
+		editFrame.style.display = "block";
+	}
+
+	var defaultClose = window.frameElement.close;
+	window.frameElement.close = function() {
+		defaultClose(window.HEURIST.record.title, window.HEURIST.record.bdValuesByType);
+	};
+}
+
+
+window.HEURIST.edit = {
+	publicHasChanged: false,
+
+	unchanged: function() {
+		window.HEURIST.edit.publicHasChanged = false;
+	},
+
+	changed: function() {
+		window.HEURIST.edit.publicHasChanged = true;
+	},
+
+	save: function() {
+		// Attempt to save the public tab
+
+		var editFrame = document.getElementById("edit-frame");
+		var contentWindow = editFrame.contentWindow;
+		if (contentWindow  &&  window.HEURIST.edit.publicHasChanged) {
+			var form = contentWindow.document.forms[0];
+			if (form.onsubmit  &&  ! form.onsubmit()) {
+				return;	// submit failed ... up to the individual form handlers to display messages
+			}
+
+			top.HEURIST.registerEvent(editFrame, "load", function() {
+				window.HEURIST.edit.unchanged("public");
+				window.HEURIST.edit.save();	// will continue where we left off
+			});
+
+			(form.heuristSubmit || form.submit)();
+			return;
+		}
+
+		// If we get here, there were no unsaved changes.
+		// Grab the biblio title from the saved document, and close the window.
+		window.close();
+	}
+};
+
+top.HEURIST.registerEvent(window, "load", showRecordProperties);
+
+  </script>
+
+  <table border=0 cellspacing=0 cellpadding=0 class=expander>
+   <tr>
+    <td style="height: 60px; padding: 5px;">
+     <div><b><span id=reftype-val></span></b></div>
+     <div><span id=title-val></span></div>
+    </td>
+    <td style="width: 120px;">
+     <input type=button onclick="window.HEURIST.edit.save();" value="Save changes" style="font-weight: bold;">
+    </td>
+   </tr>
+   <tr><td colspan=2>
+    <iframe frameborder=0 class=tab id=edit-frame></iframe>
+<script>
+loadPublicEditFrame();
+</script>
+   </td></tr>
+  </table>
+
+ </body>
+</html>

@@ -1,0 +1,405 @@
+<html>
+ <head>
+  <link rel=stylesheet href="../css/heurist.css">
+  <link rel=stylesheet href="../css/heurist-relation.css">
+  <link rel=stylesheet href="../css/heurist-edit-tab.css">
+ </head>
+ <body onload="onshow();">
+  <script src="../js/heurist.js"></script>
+  <script src="../php/js/display-preferences.php"></script>
+
+		<form method=post enctype="multipart/form-data"
+			onsubmit="return top.HEURIST.edit.requiredInputsOK(window.HEURIST.inputs, window);"
+			jsonAction="php/save-biblio-data.php"
+			action="../php/save-biblio-data.php" target=save-frame>
+			<input type=hidden name=save-mode id=save-mode>
+			<input type=hidden name=notes id=notes>
+			<table><tbody id=all-inputs></tbody></table>
+		</form>
+
+  <script>
+function onshow() {
+	// Invoked when this frame is made visible.
+	// Find the first required input and focus it.
+
+	var inputs = window.HEURIST.inputs || [];
+
+	var firstInput = null, firstRequiredInput = null, firstEmptyRequiredInput = null;
+	for (var i=0; i < inputs.length; ++i) {
+		if (inputs[i].inputs && inputs[i].inputs[0].style.display == "none") continue;
+
+		if (firstInput == null)
+			firstInput = inputs[i];
+		if (firstRequiredInput == null && inputs[i].required == "required")
+			firstRequiredInput = inputs[i];
+		if (firstEmptyRequiredInput == null && inputs[i].required == "required" && ! inputs[i].verify())
+			firstEmptyRequiredInput = inputs[i];
+	}
+
+	var elt;
+	if (firstEmptyRequiredInput) elt = firstEmptyRequiredInput.inputs[0];
+	else if (firstRequiredInput) elt = firstRequiredInput.inputs[0];
+	else if (firstInput) elt = firstInput.inputs[0];
+
+	if (elt) setTimeout(function() { try { elt.focus(); } catch (e) { } }, 0);
+}
+
+
+function setReftype(rftID) {
+	parent.HEURIST.record.reftype = parent.HEURIST.reftypes.names[rftID];
+	renderInputs(parent.HEURIST.record.bibID, rftID);
+
+	changed();
+}
+function setWorkgroupProperties(wg, wgVis) {
+	var wgElement = document.getElementById("bib_workgroup");
+	if (! wgElement) {
+		wgElement = document.createElement("input");
+		wgElement.type = "hidden";
+		wgElement.name = "bib_workgroup";
+		wgElement.id = "bib_workgroup";
+		document.forms[0].appendChild(wgElement);
+	}
+	wgElement.value = wg? wg : "";
+
+	var wgVisElement = document.getElementById("bib_visibility");
+	if (! wgVisElement) {
+		wgVisElement = document.createElement("input");
+		wgVisElement.type = "hidden";
+		wgVisElement.name = "bib_visibility";
+		wgVisElement.id = "bib_visibility";
+		document.forms[0].appendChild(wgVisElement);
+	}
+	wgVisElement.value = wgVis? wgVis : "";
+
+	changed();
+}
+
+
+
+function changed() {
+	if (parent == top) top.HEURIST.edit.changed("public");
+	else if (parent.HEURIST.edit.changed)
+		parent.HEURIST.edit.changed("public");
+}
+function unchanged() {
+	if (parent == top) top.HEURIST.edit.unchanged("public");
+	else if (parent.HEURIST.edit.unchanged)
+		parent.HEURIST.edit.unchanged("public");
+}
+function handleSaved(json) {
+	var vals = eval(json.responseText);
+	if (! vals) {
+		window.location.reload();	// no changes to save ... make with the flishy-flashy
+		return;
+	}
+
+	if (vals.error) {
+		alert(vals.error);
+		return;
+	}
+
+	if (! vals.matches) {
+		// regular case -- we get back an object containing updates to the record details
+		for (var i in vals)
+			parent.HEURIST.record[i] = vals[i];
+		window.location.reload();
+	}
+	else {
+		// we have been supplied with a list of biblio records that look like this one
+		if (parent.popupDisambiguation) parent.popupDisambiguation(vals.matches);
+	}
+}
+
+
+function renderInputs(bibID, reftype) {
+	// Clear out any existing inputs
+
+	var allInputs = document.getElementById("all-inputs");
+	while (allInputs.childNodes.length > 0)
+		allInputs.removeChild(allInputs.childNodes[0]);
+
+	var showAllDiv = document.getElementById("show-all-div");
+	if (showAllDiv)
+		showAllDiv.parentNode.removeChild(showAllDiv);
+
+	var innerDims = top.HEURIST.util.innerDimensions(window);
+
+	if (bibID) {
+		if (! parent.HEURIST.record  ||  ! parent.HEURIST.record.bibID) {	// shouldn't get here -- catch it at the parent frame
+			return;
+		}
+
+		var record = parent.HEURIST.record;
+
+		var inputs = top.HEURIST.edit.createInputsForReftype(record.reftypeID, record.bdValuesByType, allInputs);
+
+		renderShowAll();
+
+		renderAdditionalDataSection(allInputs, record.reftypeID, record.bdValuesByType);
+
+		var extraInputs = top.HEURIST.edit.createInputsNotForReftype(record.reftypeID, record.bdValuesByType, allInputs);
+		if (extraInputs.length > 0) {
+			for (var i=0; i < extraInputs.length; ++i) {
+				inputs.push(extraInputs[i]);
+			}
+		}
+
+		if (! top.document.getElementById("notes")) {
+			var width = 400;
+			var height = 160;
+			var bottom = 32;
+			var right = 32;
+
+			// Find some notes to drop in the scratchpad ... traipse up the window hierarchy
+			var noteText = record.notes;
+			var win = parent;
+			while (noteText == ""  &&  win) {
+				if (win.HEURIST  &&  win.HEURIST.record  &&  win.HEURIST.record.quickNotes)
+					noteText = win.HEURIST.record.quickNotes;
+				if (win === top) break;
+				win = win.parent;
+			}
+
+			if (parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-width")))
+				width = parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-width"));
+			if (parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-height")))
+				height = parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-height"));
+			if (parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-bottom")))
+				bottom = parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-bottom")) || bottom;
+			if (parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-right")))
+				right = parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-right")) || right;
+
+			if (! top.HEURIST.util.parentWindow(window)) {
+				var notes = top.HEURIST.edit.createDraggableTextarea("notes", noteText, top.document.getElementById("notes-container"),
+				                                                     { description: "<b>Scratchpad</b> &nbsp;&nbsp; Highlight text, drag and drop to fields",
+				                                                       minimisedDescription: "<b>Scratchpad</b>",
+			                                                               style: { bottom: bottom+"px", right: right+"px", width: width+"px", height: height+"px", minWidth: "300px" },
+				                                                       scratchpad: true });
+				notes.onchange = function() { document.getElementById("notes").value = notes.value; window.changed(); };
+			}
+		} else {
+			notes = top.document.getElementById("notes");
+		}
+
+		var bibIDfield = document.createElement("input");
+			bibIDfield.name = "bib_id";
+			bibIDfield.type = "hidden";
+			bibIDfield.value = record.bibID;
+			document.forms[0].appendChild(bibIDfield);
+
+		document.getElementById("save-mode").value = "edit";
+
+		window.HEURIST.inputs = inputs;
+
+	}
+	else if (reftype) {
+
+		var defaultInputValues = {};
+		if (window.HEURIST.parameters["title"]) {
+			if (reftype == 28) {
+				// journal volume - put the title into the journal pointer field, not the journal volume title field
+				defaultInputValues["226"] = [ { "title" : window.HEURIST.parameters["title"] } ];
+			} else {
+				defaultInputValues["160"] = [ { "value" : window.HEURIST.parameters["title"] } ];
+			}
+		}
+
+		var inputs = top.HEURIST.edit.createInputsForReftype(reftype, defaultInputValues, allInputs);
+
+		renderShowAll();
+
+		renderAdditionalDataSection(allInputs, reftype);
+
+		if (! top.document.getElementById("notes")) {
+			var width = 400;
+			var height = 160;
+			var bottom = 32;
+			var right = 32;
+
+			// Find some notes to drop in the scratchpad ... traipse up the window hierarchy
+			var noteText = "";
+			var win = parent;
+			while (noteText == ""  &&  win) {
+				if (win.HEURIST  &&  win.HEURIST.record  &&  win.HEURIST.record.quickNotes)
+					noteText = win.HEURIST.record.quickNotes;
+				if (win == top) break;
+				win = win.parent;
+			}
+
+			if (parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-width")))
+				width = parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-width"));
+			if (parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-height")))
+				height = parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-height"));
+			if (parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-bottom")))
+				bottom = parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-bottom")) || bottom;
+			if (parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-right")))
+				right = parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-right")) || right;
+
+			if (! top.HEURIST.util.parentWindow(window)) {
+				var notes = top.HEURIST.edit.createDraggableTextarea("notes", noteText, top.document.getElementById("notes-container"),
+				                                                     { description: "<b>Scratchpad</b> &nbsp;&nbsp; Highlight text, drag and drop to fields",
+				                                                       minimisedDescription: "<b>Scratchpad</b>",
+				                                                       style: { bottom: bottom+"px", right: right+"px", width: width+"px", height: height+"px", minWidth: "300px" },
+					                                               scratchpad: true });
+				notes.onchange = function() { console.log(document.getElementById("notes").value = notes.value); window.changed(); };
+			}
+		}
+
+		document.getElementById("save-mode").value = "new";
+
+		window.HEURIST.inputs = inputs;
+	}
+
+
+	var rftElement = document.getElementById("reftype");
+	if (! rftElement) {
+		rftElement = document.createElement("input");
+		rftElement.type = "hidden";
+		rftElement.name = "reftype";
+		rftElement.id = "reftype";
+		document.forms[0].appendChild(rftElement);
+	}
+	rftElement.value = reftype || record.reftypeID;
+}
+
+function renderAdditionalDataSection(container, reftypeID, bdValues) {
+	var hrRow = container.appendChild(document.createElement("tr"));
+		hrRow.appendChild(document.createElement("td"));
+	var hrCell = hrRow.appendChild(document.createElement("td"));
+		hrCell.style.height = "1px";
+		hrCell.style.backgroundColor = "#660000";
+
+	var explainRow = container.appendChild(document.createElement("tr"));
+		explainRow.appendChild(document.createElement("td"));
+	var explainCell = explainRow.appendChild(document.createElement("td"));
+		explainCell.innerHTML = "<b style='padding-right: 3em;'>Additional data</b> Non-standard fields for this record type";
+		explainCell.style.padding = "25px 0 0 0";
+
+	var addRow = container.appendChild(document.createElement("tr"));
+		addRow.appendChild(document.createElement("td"));
+	var addCell = addRow.appendChild(document.createElement("td"));
+		addCell.colSpan = 2;
+		addCell.style.padding = "0 0 5px 0";
+		addCell.appendChild(document.createTextNode("Add field:"));
+
+	var bdts = top.HEURIST.edit.getBibDetailNonRequirements(reftypeID);
+	if (bdValues) {
+		for (var bdt_id in bdValues) {
+			delete bdts[bdt_id];
+		}
+	}
+
+	var bdtsByName = {};
+	for (var bdt_id in bdts) {
+		bdtsByName[bdts[bdt_id][1]] = bdts[bdt_id];
+	}
+	var bdtNames = [];
+	for (var name in bdtsByName) {
+		bdtNames.push(name);
+	}
+	bdtNames = bdtNames.sort();
+
+	var bdtSelect = addCell.appendChild(document.createElement("select"));
+		bdtSelect.style.marginLeft = "5px";
+		bdtSelect.options[0] = new Option("Select a type...", "");
+		bdtSelect.options[0].disabled = true;
+	var i = 1;
+	for (var n = 0; n < bdtNames.length; ++n) {
+		var name = bdtNames[n];
+		bdtSelect.options[i++] = new Option(bdtsByName[name][1], bdtsByName[name][0]);
+	}
+
+	var button = document.createElement("input");
+		button.type = "button";
+		button.value = "add";
+		button.onclick = function() {
+			if (bdtSelect.selectedIndex == 0) return;
+			window.HEURIST.inputs.push(top.HEURIST.edit.createInput(bdtSelect.value, 0, [], container));
+			bdtSelect.remove(bdtSelect.selectedIndex);
+			bdtSelect.selectedIndex = 0;
+		};
+	addCell.appendChild(button);
+}
+
+
+function renderShowAll() {
+	var hrRow = document.getElementById("all-inputs").appendChild(document.createElement("tr"));
+		hrRow.appendChild(document.createElement("td"));
+		hrRow.className = "not-optional-fields";
+	var hrCell = hrRow.appendChild(document.createElement("td"));
+		hrCell.style.height = "20px";
+	//	hrCell.style.backgroundColor = "#660000";
+
+	// this could probably stand to be static html
+	var showTr = document.getElementById("all-inputs").appendChild(document.createElement("tr"));
+		showTr.appendChild(document.createElement("td"));
+	var showTd = showTr.appendChild(document.createElement("td"));
+		showTd.style.padding = 0;
+
+	var showDiv = showTd.appendChild(document.createElement("div"));
+		showDiv.id = "show-all-div";
+		showDiv.style.padding = "0 0 35px 0";
+		showDiv.className = "not-optional-fields";
+
+	var showLink = showDiv.appendChild(document.createElement("span")).appendChild(document.createElement("a"));
+		showLink.className = "not-optional-fields";
+		showLink.style.fontWeight = "bold";
+		showLink.href = "#";
+		showLink.appendChild(document.createTextNode("Show all fields"));
+		showLink.onclick = function() {
+			top.HEURIST.util.setDisplayPreference("input-visibility", "all");
+			top.document.getElementById("input-visibility").selectedIndex = 2;
+			return false;
+		};
+
+	var showInnerDiv = showDiv.appendChild(document.createElement("span"));
+		showInnerDiv.appendChild(document.createTextNode("Only "));
+		showInnerDiv.style.paddingLeft = "3em";
+	var showInnerSpan = showInnerDiv.appendChild(document.createElement("span"));
+		showInnerSpan.className = "required-only";
+		showInnerSpan.style.fontWeight = "bold";
+		showInnerSpan.appendChild(document.createTextNode("required"));
+		showInnerSpan = showInnerDiv.appendChild(document.createElement("span"));
+		showInnerSpan.className = "recommended";
+		showInnerSpan.style.fontWeight = "bold";
+		showInnerSpan.appendChild(document.createTextNode("recommended"));
+		showInnerDiv.appendChild(document.createTextNode(" fields are currently visible"));
+}
+
+
+
+document.forms[0].heuristSubmit = function() {
+	var checkSimilarElement = document.getElementById("check-similar");
+	if ((! parent.HEURIST.record.bibID  ||  parent.HEURIST.record.isTemporary)  &&  ! parent.HEURIST.record.forceSave) {
+		if (! checkSimilarElement) {
+			checkSimilarElement = document.createElement("input");
+			checkSimilarElement.type = "hidden";
+			checkSimilarElement.name = "check-similar";
+			checkSimilarElement.id = "check-similar";
+			document.forms[0].appendChild(checkSimilarElement);
+		}
+		checkSimilarElement.value = 1;
+	}
+	else if (checkSimilarElement) {
+		checkSimilarElement.parentNode.removeChild(checkSimilarElement);
+	}
+
+	top.HEURIST.util.xhrFormSubmit(document.forms[0], handleSaved);
+};
+
+/* Necessary to do this stuff BEFORE LOAD -- other windows have dibs on our onload handler, they will get in before we get a chance */
+window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+var bibID;
+var reftype = parseInt(window.HEURIST.parameters["reftype"]);
+if (parent.HEURIST  &&  parent.HEURIST.record) {
+	bibID = parent.HEURIST.record.bibID;
+}else{
+	if (! parent.HEURIST) parent.HEURIST = {};
+	if (! parent.HEURIST.record) parent.HEURIST.record = {};
+	parent.HEURIST.record.reftype = reftype;
+}
+renderInputs(bibID, reftype);
+  </script>
+ </body>
+</html>

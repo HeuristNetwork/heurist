@@ -1,0 +1,326 @@
+<html>
+
+<head>
+<title>Configuration</title>
+
+<link rel="stylesheet" type="text/css" href= "../css/heurist.css">
+
+<style type="text/css">
+body { font-size: 11px; }
+
+#kwd_scroll_region {
+	height: 450px;
+	overflow: auto;
+	padding: 3px;
+	background-color: #EEEEEE;
+}
+
+#kwd_scroll_region .textinput, #kwd_scroll_region select {
+	width: 200px;
+	padding: 1px;
+	margin: 0px;
+	border: 1px solid black;
+}
+
+#kwd_scroll_region .replace input {
+	width: 60px;
+}
+
+#kwd_scroll_region img {
+	vertical-align: middle;
+	cursor: pointer;
+	margin: 1px;
+}
+
+.u-cell {
+	width: 100%;
+}
+.u {
+	background-color: gray;
+	width: 100%;
+	height: 10px;
+}
+.u div {
+	background-color: red;
+	height: 10px;
+}
+
+.success {
+	padding: 3px;
+	font-weight: bold;
+	color: green;
+}
+
+.failure {
+	padding: 3px;
+	font-weight: bold;
+	color: red;
+}
+
+h2 { font-size: 125%; }
+
+#ignored_hyperlinks {
+	height: 80px; overflow: auto; background-color: #EEEEEE; padding-left: 5px;
+}
+
+</style>
+
+<script type="text/javascript">
+<!--
+
+	function delete_kwd(kwd_id, kwd_name, use_count) {
+		if (use_count == 0) {
+			if (! confirm('Tag "'+kwd_name+'" is currently unused. Remove forever?')) return;
+		} else if (use_count == 1) {
+			if (! confirm('Tag "'+kwd_name+'" is used by one bookmark. Do you want to remove the tag?')) return;
+		} else {
+			if (! confirm('Tag "'+kwd_name+'" is used by '+use_count+' bookmarks. Do you want to remove the tag?')) return;
+		}
+
+		document.forms['kwd_edit_form'].elements['delete_kwd_id'].value = kwd_id;
+		document.forms['kwd_edit_form'].submit();
+	}
+
+	function delete_multiple() {
+		document.forms['kwd_edit_form'].elements['delete_multiple_kwds'].value = 1;
+		document.forms['kwd_edit_form'].submit();
+	}
+
+	function rename_kwd(kwd_id, kwd_obj) {
+		if (kwd_obj.value == '') {
+			alert('Tag cannot be empty');
+			kwd_obj.value = kwd_obj.defaultValue;
+			kwd_obj.focus();
+			return false;
+		}
+
+		if (kwd_obj.value.indexOf(',') >= 0) {
+			alert('Tag cannot contain commas');
+			kwd_obj.value = kwd_obj.defaultValue;
+			kwd_obj.focus();
+			return false;
+		}
+
+		if (kwd[kwd_obj.value.toLowerCase()]  &&  kwd[kwd_obj.value.toLowerCase()] != kwd_id) {
+			if (confirm('You already have a tag called "'+kwd_obj.value+'".\nDo you want to change all "'+kwd_obj.defaultValue+'" references to "'+kwd_obj.value+'" references, and remove "'+kwd_obj.defaultValue+'"?')) {
+				document.forms['kwd_edit_form'].elements['update_kwd_from'].value = kwd_id;
+				document.forms['kwd_edit_form'].elements['update_kwd_to'].value = kwd[kwd_obj.value.toLowerCase()];
+				document.forms['kwd_edit_form'].submit();
+			} else {
+				kwd_obj.value = kwd_obj.defaultValue;
+				kwd_obj.focus();
+				return false;
+			}
+		}
+
+		kwd[kwd_obj.defaultValue.toLowerCase()] = 0;
+		kwd[kwd_obj.value.toLowerCase()] = kwd_id;
+
+		document.forms['kwd_edit_form'].elements['change_names'].value = 1;
+		return true;
+	}
+
+	function show_replace_list(elt, kwd_id) {
+		var replace_link = elt;
+		var container = replace_link.parentNode;
+		var sel = document.getElementById("kwd_select").cloneNode(true);
+
+		container.removeChild(replace_link);
+
+		container.appendChild(document.createTextNode("replace with: "));
+
+		container.appendChild(sel);
+		sel.style.display = "";
+
+		container.appendChild(document.createTextNode(" "));
+
+		var b = document.createElement("input");
+		b.type = "button";
+		b.value = "replace";
+		b.onclick = function() {
+			if (! sel.value) { alert("Select a tag"); return; }
+			document.forms["kwd_edit_form"].elements["replace_kwd"].value = 1;
+			document.forms["kwd_edit_form"].elements["replace_kwd_id"].value = kwd_id;
+			document.forms["kwd_edit_form"].elements["replace_with_kwd_id"].value = sel.value;
+			document.forms["kwd_edit_form"].submit();
+		};
+		container.appendChild(b);
+
+		container.appendChild(document.createTextNode(" "));
+
+		var b = document.createElement("input");
+		b.type = "button";
+		b.value = "cancel";
+		b.onclick = function() {
+			while (container.firstChild) container.removeChild(container.firstChild);
+			container.appendChild(replace_link);
+		}
+		container.appendChild(b);
+	}
+//-->
+</script>
+
+<style type="text/css">
+.keyword_edit .hide_on_keyword_edit { display: none; }
+.bookmark_import .hide_on_bookmark_import { display: none; }
+.only_show_on_bookmark_import { display: none; }
+.bookmark_import .only_show_on_bookmark_import { display: inline; }
+
+.bookmark_import blockquote { padding-left: 0; margin-left: 0; }
+
+.bookmark_import #ignored_hyperlinks {
+	height: 350px;
+}
+</style>
+
+</head>
+
+<body onLoad="if ('{section}' != ''  &&  (enddoc=document.getElementById('enddoc'))  &&  (elt=document.getElementById('{section}'))) { enddoc.focus(); elt.focus(); elt.blur(); }">
+
+{PageHeader}
+
+<div class="hide_on_keyword_edit hide_on_bookmark_import">
+
+<!--<img src="page_header/spacer.gif" width="100%" height=20px>-->
+
+<span class="headline">Latest version of bookmarklet</span>
+
+<span class="normal">
+
+<!--p>Internet Explorer users:  Add the latest version of <a href="{Bookmarklet_ie}" onclick="alert('Right-click this link and choose Add to Favorites...');return false;">H-Bookmark (IE)</a> <b>(IE version)</b> to your favorites</p-->
+<p>Drag the latest version of <a href="{Bookmarklet}" onclick="alert('Drag this link to your personals toolbar, or right-click it and\nchoose Bookmark This Link... / Add to Favorites...');return false;">H-Bookmark</a> to your toolbar</p>
+<p>(<b>does not</b> automatically remove existing versions of bookmarklet)</p>
+  
+<br>
+
+
+<hr size="1px" color="#C0C0C0">
+
+</div>
+<div class="hide_on_keyword_edit">
+
+<a name="bookmark_import"><h2>Bookmark import settings</h2></a>
+
+<blockquote>
+
+<form method="post">
+<input type="hidden" name="submitted" value="1">
+{body_only}
+<input type="hidden" name="bookmark_import" value="{bookmark_import}">
+
+<p>
+Heurist can import bookmarks from any html file, notably bookmarks.htm/html
+which is either used by (IE) or can be exported by (Firefox - Bookmarks
+- Organize Bookmarks ... File &gt; Export) most internet browsers. To
+avoid many unnecessary hyperlinks when importing search engine results,
+it can ignore commonly occurring hyperlink text and very short hyperlinks.
+</p>
+
+<p>
+While importing bookmarks, show only hyperlinks with
+<select name="word_limit" onChange="form.submit();">
+{word_limit_options}
+</select>
+in the text of the link.
+</p>
+
+Ignore the following hyperlink texts when importing bookmarks:
+<table style="width: 100%;" border=0 cellpadding=0 cellspacing=20px><tr>
+<td>
+<div id="ignored_hyperlinks">
+{hyperlinks_ignored}
+</div>
+</td>
+<td>
+Hyperlink text to ignore:<br><br>
+<nobr>
+ <input type="text" name="new_hyp_text" value="" size="30">
+ <input type="submit" value="Add" class="only_show_on_bookmark_import">
+ </nobr>
+</td>
+</tr>
+<tr><td>&nbsp;</td><td><input type=button value=Done onclick="window.close();"></td></tr>
+</table>
+
+{UserHyperlinksImport}
+
+  <input type="submit" value="Update these settings" class="hide_on_bookmark_import">
+
+</form>
+
+</blockquote>
+
+</div>
+<div class="hide_on_keyword_edit hide_on_bookmark_import">
+
+<br>
+
+<hr size="1px" color="#C0C0C0">
+
+<br>
+
+</div>
+<div class="hide_on_bookmark_import">
+
+<a name="keyword_edit"><h2>Manage tags</h2></a>
+
+{KeywordMessage}
+
+<blockquote>
+
+<script type="text/javascript">
+<!--
+var kwd = new Object();
+{ForeachKeywordJs}
+//-->
+</script>
+
+<form method="post" action="configuration.php" name="kwd_edit_form">
+{body_only}
+<input type="hidden" name="keyword_edit" value="{keyword_edit}">
+{sortby_input}
+
+ {sortby_button}
+ Edit tags below and click "Update tags"
+ <br>
+ Or select multiple tags and click "Delete selected tags" to delete
+ <br>
+
+ <br clear="all">
+  <div id=tags-loading>Loading tag data ...</div>
+
+ <div id="kwd_scroll_region">
+  <table border="0" style="display: none;" id=tags-table>
+    {ForeachKeyword}
+  </table>
+ </div>
+  <script>
+/* get rid of scary flickery effect that occurs when some numbnut with 1000 tags loads this page */
+document.getElementById("tags-loading").style.display = "none";
+document.getElementById("tags-table").style.display = "block";
+  </script>
+ <br clear="all">
+ <input type="submit" value="Update tags" style="font-weight: bold;">
+ <input type="button" value="Delete selected tags" style="font-weight: bold;" onclick="delete_multiple();">
+ <input type="hidden" name="delete_kwd_id" value="0">
+ <input type="hidden" name="update_kwd_from" value="0">
+ <input type="hidden" name="update_kwd_to" value="0">
+ <input type="hidden" name="change_names" value="0">
+ <input type="hidden" name="replace_kwd" value="0">
+ <input type="hidden" name="replace_kwd_id" value="0">
+ <input type="hidden" name="replace_with_kwd_id" value="0">
+ <input type="hidden" name="delete_multiple_kwds" value="0">
+
+</form>
+
+</blockquote>
+
+</div>
+
+{kwd_select}
+
+<a href="#" style="text-decoration: none;" onClick="return false;" id="enddoc">&nbsp;</a>
+
+</body>
+
+</html>

@@ -1,0 +1,21 @@
+Heurist academic data management system (http://HeuristScholar.org)
+Copyright © 2005 - 2010 University of Sydney Digital Innovation Unit
+License: http://www.gnu.org/licenses/gpl-3.0.txt
+Concept/direction: Ian Johnson
+Developers: Tom Murtagh, Kim Jackson, Steve White, Steven Hayes, Maria Shvedova, Artem Osmakov, Maxim Nikitin.
+Graphic design/testing: Andrew Wilson, Ireneusz Golka, Martin King.
+ 
+---------------------------------------------------------------------
+
+Directory:	/saved_searches
+
+Overview:	Saved searches record a Heurist query for either a single user 
+		or a workgroup, and are displayed in a tree on the left of the 
+		main search page.
+
+Notes:		Saved searches can be used to publish subsets of the database through 
+		the Publish function, avoiding the needc to specify the query in the 
+		publication URL so that it cannot be modified externally to access 
+		unintended information
+
+Updated: 	28 March 2010

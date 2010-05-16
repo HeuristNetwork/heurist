@@ -1,0 +1,50 @@
+<html>
+ <head>
+  <script src="/jquery/jquery.js"></script>
+  <script src="../php/js/load-hapi.php"></script>
+  <script src="http://hapi.heuristscholar.org/kj/goi.js"></script>
+  <script src="../js/geo-editor.js"></script>
+
+  <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w"></script>
+
+  <script>
+	function init() {
+		editor = HEURIST.GeoEditor("map");
+		editor.init();
+	};
+  </script>
+
+  <style>
+   * { font-size: 11px; }
+   a img { border: none; }
+  </style>
+
+ </head>
+
+ <body onload="init();">
+  <div id="map" style="width: 480px; height: 320px;"></div>
+  <p id="select-type" style="display: none;">
+      Select geographic object type and double click on map:
+      <br>
+      <br>
+      <input id="button0" type="button" value="Point" onclick="editor.digitiser.digitisePoint(editor.selectButton); editor.selectButton(this);">&nbsp;
+      <input id="button1" type="button" value="Bounds" onclick="editor.digitiser.digitiseBounds(editor.selectButton); editor.selectButton(this);">&nbsp;
+      <input id="button2" type="button" value="Circle" onclick="editor.digitiser.digitiseCircle(editor.selectButton); editor.selectButton(this);">&nbsp;
+      <input id="button3" type="button" value="Polygon" onclick="editor.digitiser.digitisePolygon(editor.selectButton); editor.selectButton(this);">&nbsp;
+      <input id="button4" type="button" value="Path" onclick="editor.digitiser.digitisePath(editor.selectButton); editor.selectButton(this);">
+  </p>
+  <p id="msg"/>
+  <p id="save-geo" style="display: none;">
+   <input type="button" id="save-geo-button" value="Save">
+   <input type="button" id="cancel-geo-button" value="Cancel">
+  </p>
+  <p id="geos"/>
+  <p id="add-geo" style="display: none;">
+   <input type="button" value="Add" onclick="editor.addGeo();">
+  </p>
+  <p id="save-record">
+   <input type="button" value="Save" onclick="editor.save();">
+   <input type="button" value="Cancel" onclick="window.close();">
+  </p>
+ </body>
+</html>

@@ -1,0 +1,56 @@
+<html>
+<head>
+<title>Heurist WOOT</title>
+<link rel=stylesheet href=/woot/02/woot.css>
+<script src="php/js/load-hapi.php"></script>
+<script src="/tinymce/tiny_mce.js"></script>
+<script src="/woot/02/js/woot.js"></script>
+
+<script>
+var wootEditor;
+function init() {
+	var wootTitle;
+	var pageTitle;
+
+	// extract the woot name from the URI
+	var matches = location.href.match(/w=([^&]*)/);
+	if (matches  &&  matches[1]) {
+		wootTitle = decodeURIComponent(matches[1].replace(/\+/g, "%20"));
+	} else {
+		 alert("no woot title provided!");
+	}
+
+	// extract the page title from the URI
+	matches = location.href.match(/t=([^&]*)/);
+	if (matches  &&  matches[1]) {
+		pageTitle = decodeURIComponent(matches[1].replace(/\+/g, "%20"));
+	}
+
+	if (! pageTitle) pageTitle = wootTitle;
+
+	document.title = pageTitle + " - Heurist WOOT";
+
+	document.getElementById("title").innerHTML = pageTitle;
+
+	HAPI.WOOT.GUI.labelsForLanguage.en.emptyMessage.label = "&lt;&lt; Empty or no visible text blocks &gt;&gt;";
+
+	wootEditor = new HAPI.WOOT.GUI.WootEditor({ title: wootTitle, id: "woot" });
+}
+</script>
+
+<style>
+
+.woot-title {
+	display: none;
+}
+
+</style>
+
+</head>
+<body onload="init();">
+
+<h1 id=title></h1>
+<div id=woot></div>
+
+</body>
+</html>

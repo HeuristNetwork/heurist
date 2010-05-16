@@ -1,0 +1,283 @@
+<html>
+ <head>
+  [if : register]
+  <title>Register</title>
+  [else]
+  <title>Add user</title>
+  [end-if]
+ <link href="../css/heurist.css" rel="stylesheet" type="text/css">
+ <link href="registration.css" rel="stylesheet" type="text/css">
+ 
+  <script language="JavaScript" src="/jquery/jquery.js"></script>
+ </head>
+
+ <body>
+<table id="page" class="expander" border="0" cellpadding="0" cellspacing="0">
+<tr><td id="header">
+
+<table border="0" cellpadding="0" cellspacing="0" class="expander">
+<tbody><tr>
+<td rowspan="2" id="logo-cell"><a href=../><img src="../img/hlogo-small.jpg" alt="Heurist" title="Click the logo at top left of any Heurist page to return to your favourites"></a></td>
+<td rowspan="2">
+[if : register]
+[else]
+<a href="usergroupadmin.php">Edit user groups</a>[proj-group-link!]
+[end-if]
+</td>
+<td align="right" style="vertical-align: baseline;">
+[if : register]
+[else]
+<font color="#008000"><small>Logged in as: </small><tt>[logged-in-user-username]</tt></font><br>
+   [if-eq : logged-in-user-username : ""]
+   <a href="../php/login.php"><small>Log in</small></a>
+   [else]
+   <a href="../php/login.php?logout=1"><small>Log out</small></a>
+   [end-if-eq]
+ [end-if]
+</td>
+</tr>
+<tr><td id="menu-cell">
+</td></tr>
+</tbody></table>
+</td></tr>
+<tr>
+ <td height="109" id="search-cell" style="padding-left:40px; padding-right:40px; color:#FFF; font-weight:bold; font-size:1.6em;">
+ [if : register]
+ Registration
+ [else]
+ Add User
+ [end-if]
+ </td>
+ <td></td>
+</tr>
+
+ <tr>
+    <td colspan="3" style="padding-left:40px; padding-right:40px;">
+ 
+
+
+[if : register]
+[else]
+<form action="add.php">
+  <p>[extended-search USER USER_search]
+  </p>
+
+  <hr color="#cccccc" size="1" width="100%" align="left">
+<b>Search for user</b>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; First name&nbsp; [textbox : firstname : user ??? : size=&quot;20&quot;]&nbsp; 
+Last name&nbsp; [textbox : lastname : user ??? : size=&quot;20&quot;]&nbsp;&nbsp; 
+Email [textbox : EMail : user email: size=&quot;30&quot;]&nbsp;
+
+  <input type="submit" value="Find"><i><span class="smallfont"> Search will match partial 
+strings</span></i></p>
+
+<a name="results"></a>
+ 
+  [if:USER_search-searched] <p>
+    <b>Count: [result-count] </b>
+    <i>&nbsp;&nbsp;&nbsp;
+    [if:result-count] Showing [result-first] to [result-last]&nbsp;&nbsp;</i>Click on user name to edit<i> </i>[if:prev-url] <a href="[prev-url]">previous 
+    page</a>[end-if]
+    [if:next-url] <a href="[next-url]">next page</a>[end-if]</i>[end-if]
+  [end-if] </i>
+   &nbsp;</p>
+<p>
+  <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse">
+  [foreach USER searchrecordloop]
+    <tr>
+      <td style="padding-right: 20px;"><b>[Id]</b></td>
+      <td style="padding-right: 20px;"><b><a href="edit.php?Id=[Id]">[firstname] [lastname]</a></b></td>
+	  <td><a href=usergroupadmin.php?filterId=[Id]>edit groups</a></td>
+    </tr>
+  [end-foreach]
+  </table>
+</p>
+<p>[end-extended-search] </p>
+  <hr color="#cccccc" size="1" width="100%" align="left">
+ </form>
+[end-if]
+<!-- end non-registration code -->
+<form action="add.php" method="post">
+[insert required USER user_insert]
+  
+[if : register]
+[else]
+<p class="red">Please search for user (below) to ensure that they don't exist before adding&nbsp;&nbsp;&nbsp;&nbsp; </b></p>
+[end-if]
+
+<!-- end non-registration code -->
+<span class="red">[errors]</span>
+<div id="required" style="margin-top:20px;">
+<a>Required information </a>
+<br>
+	<label>First name</label>[textbox required : firstname : First name : size=&quot;20&quot;]
+	<label>Last name</label>[textbox required : lastname : Last name : size=&quot;40&quot;]
+	<label>Email<br>
+	<span class="hint">This will be your User Name</span></label>
+	[textbox required : EMail : email: size=&quot;50&quot; onKeyUp=document.getElementById('username').value=this.value;]
+	<label>Institution/company<br>
+	<span class="hint">Enter 'None' if not affiliated with an institution or company</span></label>
+	[textbox required : Organisation : Institution/company : size=&quot;40&quot;]
+	<label>Research Interests</label>[textbox required : Interests : Research Interests : size=&quot;60&quot;]
+	<label>Login name</label>[textbox required : Username : Login name : size=&quot;20&quot; id=username]
+	<label>Password</label>[password required : Password : two matching passwords : size=&quot;20&quot;]
+	<label>Repeat password</label><input type="password" name="password2" size="20">
+  
+<p>Warning: this is not an encrypted connection, so please don't use your institutional or banking password.</p>
+</div>
+<br>
+<div class="hide" id="optional"><a onMouseDown="$('#options').slideToggle('fast'); $('#optional').toggleClass('hide');">Optional information</a>
+	<div id="options" style="display:none;">
+	<br>
+		<label>Department</label>[textbox : Department : Department : size=&quot;50&quot;]
+		<label>URL</label>[textbox : URL : website : size=&quot;50&quot;]
+		<label>Street Address</label>[textbox : Address : Street Address : size=&quot;50&quot;]
+		<label>Suburb/City</label>[textbox : City : Suburb/City : size=&quot;30&quot;]
+		<label>State</label>[textbox : State : State : size=&quot;30&quot;]
+		<label>Post/zipcode</label>[textbox : Postcode : Post/zipcode : size=&quot;10&quot;]
+		<label style="padding-bottom:30PX; ">Phone</label>[textbox : telephone : Phone : size=&quot;20&quot;]
+	</div>
+</div>
+<br>
+ <div>
+  [if : register]
+   [model-user-dropdown!]
+  [else]
+  <table border="0" cellspacing="0" style="border-collapse: collapse" width="100%" id="AutoNumber1" class="normal">
+  <tr>
+    <td width="6%" height="19">&nbsp;</td>
+    <td width="11%" height="19" align="right">Jobtrack&nbsp;&nbsp;</td>
+    <td width="83%" height="19"><input type="checkbox" name="user_insert_Jobtrack" value="1" title="Jobtrack" style="margin-left: 0;">&nbsp;&nbsp; </td>
+  </tr>
+  
+  <tr>
+    <td width="6%" height="19">&nbsp;</td>
+    <td width="11%" height="19" align="right">Model User&nbsp;&nbsp;</td>
+    <td width="83%" height="19">
+	 [model-user-dropdown!]
+	 &nbsp;&nbsp;
+	</td>
+  </tr>
+</table>
+[end-if]
+[auto : PasswordType : "1"]
+[auto : Realm : "*"]
+
+[if : register]
+<div>
+ <p>Please read the Conditions of Use below, then click the Register button at the end of the page.</p>
+
+ <p>If you experience problems with the registration process, please let us know what went wrong (and send your registration details for manual addition).</p>
+ <p>     Email: <a href="mailto:info@acl.arts.usyd.edu.au">Ian Johnson &lt;info@acl.arts.usyd.edu.au&gt;</a></p>
+ <br>
+ <input type="checkbox" name="agree" onClick="e=getElementById('register_button'); if (e) e.disabled=!this.checked;">
+ I have read and agree to the Terms and Conditions of Use below<br>
+ </div>
+
+ <div class="hide" id="conditions" style="margin-top:20px;">
+  <a onMouseDown="$('#conditionstext').slideToggle('fast'); $('#conditions').toggleClass('hide');">Conditions</a>
+<div id="conditionstext" style="display:none; height:440px; margin: 12px; border-top:solid; border-width:1px; border-color:#CCC;">
+<p>HEURIST is an experimental system maintained by the University of Sydney,
+ Department of Archaeology and our funding is modest. By using the HEURIST
+ system and other ACL applications you acknowledge the following and
+ agree to license these systems on the following terms and conditions:</p>
+ <ul>
+
+  <li>
+   HEURIST is intended for personal and academic use only. All
+   users are specifically identified by their name, email address and
+   institution. This is required to provide a focus and accountability and to
+   avoid the problems associated with anonymous systems.
+  </li>
+  <li>
+   Other users are able to view the contact details of persons who added,
+   edited or keyworded contributions. By using these systems you agree that
+   your contact details will be made available to other users in this manner.
+  </li>
+  <li>
+   Other users can view and search across all keywords (tags) you use,
+   and may be able to search across all text you have entered, in order to
+   identify your records of interest, however other users cannot view text
+   marked as private (private title, private URL, private notes, password
+   reminders).
+  </li>
+  <li>
+
+   As a user you agree not to enter any material which members of the
+   general public would reasonably consider to be offensive. You agree only
+   to enter material in which you hold copyright and any other relevant
+   intellectual property rights, and in entering material you agree to make
+   it available for fair use by the University of Sydney and by other users
+   of the system. You further agree to indemnify the University of Sydney for
+   any claims arising from any breach by you of these terms and conditions.
+  </li>
+  <li>
+   We will use reasonable efforts to maintain the operation, reliability
+   and security of the systems, to provide means of exporting information
+   from the system in a structured form suitable for import to other systems,
+   and to give adequate warning if for any reason our support of the systems
+   is to be reduced or discontinued. However, you agree that we provide no
+   express or implied warranties in relation to the operation, reliability or
+   security of the systems or otherwise nor in relation to the content of any
+   material available on the systems. You agree that any use of the systems
+   is made entirely at your own risk. You expressly release us from any and
+   all liability arising from or in any way connected with your use of the
+   systems.
+  </li>
+  <li>
+   In the first instance we are making the system available to any
+   academics and selected others in our absolute discretion. We may later
+   need to limit new registrations and/or access if usage of the systems
+   exceeds our ability to service traffic.
+  </li>
+  <li>
+   We reserve the right to block/remove any users who we determine in our
+   absolute discretion abuse the system or enter inappropriate content,
+   without recourse and without explanation.
+  </li>
+
+ </ul>
+ </div>
+ </div>
+ 
+
+ <input type="hidden" name="register" value="1">
+[end-if /* register */]
+
+<p>[end-insert]</p>
+
+[if : register]
+<div>
+ [recaptcha!]
+</div>
+<p><input type="submit" value="Register" id="register_button" disabled></p>
+[else]
+<p><input type="submit" value="Add new user"></p>
+[end-if]
+
+[if : new-user-id]
+<p>
+ <span class="red">User added</span><br>
+ <a href="edit.php?Id=[new-user-id]">Click here to edit</a>
+</p>
+[end-if]
+
+</form>
+
+[not-found]
+
+ <body>
+  <span class="normalgr"><i>User not found</i></span>
+  <p>
+  <a href="users_search.php">Return to users list</a>
+  </p>
+ </body>
+[end-not-found]
+
+
+
+</td></tr></table>
+
+ </body>
+</html>

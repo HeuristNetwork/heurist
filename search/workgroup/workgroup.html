@@ -1,0 +1,209 @@
+<html>
+	<!-- workgroup.html
+
+	Copyright 2005 - 2010 University of Sydney Digital Innovation Unit
+	This file is part of the Heurist academic knowledge management system (http://HeuristScholar.org)
+	mailto:info@heuristscholar.org
+
+	Concept and direction: Ian Johnson.
+	Developers: Tom Murtagh, Kim Jackson, Steve White, Steven Hayes,
+				Maria Shvedova, Artem Osmakov, Maxim Nikitin.
+	Design and advice: Andrew Wilson, Ireneusz Golka, Martin King.
+
+	Heurist is free software; you can redistribute it and/or modify it under the terms of the
+	GNU General Public License as published by the Free Software Foundation; either version 3
+	of the License, or (at your option) any later version.
+
+	Heurist is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+	even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License along with this program.
+	If not, see <http://www.gnu.org/licenses/>
+	or write to the Free Software Foundation,Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+	-->
+	<head>
+		<title>Heurist Reference Database - Workgroup home - &copy; 2007 University of Sydney</title>
+		<link rel=stylesheet href='css/heurist.css'>
+		<link rel=stylesheet href='css/heurist-search.css'>
+		<link rel=stylesheet href='css/heurist-workgroup.css'>
+	</head>
+	<body>
+
+		<script src="/jquery/jquery.js"></script>
+		<script src="js/heurist.js"></script>	<!-- core HEURIST functions -->
+
+		<script>
+			top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js", "workgroup-js"], function() {
+				// register handlers and render non-static elements of page
+				top.HEURIST.workgroup.setupWorkgroupPage();
+			});
+		</script>
+
+		<script src="php/js/display-preferences.php"></script>	<!-- sets body css classes based on prefs in session -->
+
+		<table id=page class=expander border=0 cellspacing=0 cellpadding=0>
+			<tr><td id=header>
+
+					<table border=0 cellspacing=0 cellpadding=0 class=expander>
+						<tr>
+							<td id=logo-cell rowspan=2><a href="./">
+							<img src="img/hlogo-small.jpg" title="Click the logo at top left of any Heurist page to return to your Favourites" alt=Heurist></a></td>
+							<td rowspan=2>&nbsp;</td><td id=title-cell rowspan=2><div id=wg-name></div></td>
+
+							<!-- QUICK LINKS -->
+							<td id=quicklink-cell><nobr>
+									<a href='../help' target=_blank title="Overview and guides to the use of Heurist plus comprehensive detailed help"><b>User Manual</b></a> |
+									<a id=contact-link title="Send us an email with bug information or feature requests" href='mailto:info@heuristscholar.org'>Contact us</a>
+									&nbsp;&nbsp;
+							</nobr></td>
+						</tr>
+
+						<!--   <tr><td id=menu-cell>&nbsp;</td></tr>   -->
+
+					</table>
+					&nbsp;
+			</td></tr>
+
+			<tr><td id=header-bottom></td></tr>
+
+			<tr><td id=workgroup>
+					<table class=expander border=0 cellspacing=0 cellpadding=0>
+						<tr>
+							<td id=wg-heading-cell></td>
+							<td id=wg-divider-cell></td>
+							<td>
+								<table>
+									<tr><td colspan=5>
+											<div id=wg-description></div>
+									</td></tr>
+									<tr id=info-row>
+										<td>
+											<nobr><a id=wg-link target=_blank>Workgroup web site</a>&nbsp;&nbsp;&nbsp;</nobr>
+										</td>
+										<td>
+											<nobr><a id=blog-link target=_blank href='blog/?g='>Workgroup blog</a>&nbsp;&nbsp;&nbsp;</nobr>
+										</td>
+										<td>Membership: &nbsp; <a href='#' onclick="top.HEURIST.util.popupURL(window, 'popup/workgroup-members.html?wg_id='+top.HEURIST.workgroup.wg_id); return false;"><nobr><span id=wg-members></span>&nbsp;members</nobr></a></td>
+										<td>&nbsp;</td>
+										<td>Administrators: &nbsp; <span id=wg-admins></span> </td>
+									</tr>
+								</table>
+							</td>
+							<td id=wg-controls>
+								<nobr><a id=home-link href='./' title="Click here or logo at top left to return to your Favourites" >Exit workgroup mode</a></nobr>
+								<!--input type=button value="Exit workgroup mode" onclick="top.location = './';"-->
+								<div id=add-fav-link-div><br><a id=add-fav-link target=_blank href='php/add.php?addref=1&amp;k=Favourites' title="Bookmarks this workgroup mode page as a Favourite for easy access">Add this page to my favourites</a></div>
+							</td>
+						</tr>
+					</table>
+
+			</td></tr>
+			<tr><td id=toolbar>
+
+					<!-- TOOLBAR -->
+					<table class=expander border=0 cellspacing=0 cellpadding=0><tr>
+							<td id=filter-controls>
+								<p>
+									Show:
+									<select id=reftype-select onchange="top.HEURIST.workgroup.filterSearch('type', this.value);"><option value=''>all types</option></select>
+									<select id=keyword-select onchange="top.HEURIST.workgroup.filterSearch('kwd', this.value);"><option value=''>not filtered by tag</option></select>
+									Sort by:
+									<select id=sortby-select onchange="top.HEURIST.workgroup.filterSearch('sortby', this.value);">
+										<option value=t>title</option>
+										<option value=-m>recently modified</option>
+									</select>
+								</p>
+								<p>
+									Owned by this workgroup:
+									<label for=yes-radio><input type=radio name=owned id=yes-radio checked="checked" onchange="if (this.checked) top.HEURIST.workgroup.filterSearch();">yes</label>
+									<label for=no-radio><input type=radio name=owned id=no-radio onchange="if (this.checked) top.HEURIST.workgroup.filterSearch();">no</label>
+									<label for=both-radio><input type=radio name=owned id=both-radio onchange="if (this.checked) top.HEURIST.workgroup.filterSearch();">both</label>
+								</p>
+							</td>
+							<td id=img-buttons-cell>
+								<img class="img-button logged-in-only" title="Add new record" src='img/add-record.png' onclick="top.HEURIST.util.popupURL(window, 'legacy/popup_add_resource.php?wg_id='+top.HEURIST.workgroup.wg_id);">
+								<div class=button-label>Add workgroup-owned record</div>
+							</td>
+					</tr></table>
+
+			</td></tr>
+			<tr><td id=main><table id=main-table class=expander border=0 cellspacing=0 cellpadding=0>
+						<tr><td id=left-cell><table id=left-panel class="expander panel" border=0 cellspacing=0 cellpadding=0>
+									<tr><td class=panel-header>
+
+											<!-- LEFT PANEL HEADER -->
+											<table class=expander border=0 cellspacing=0 cellpadding=0><tr>
+													<td><b>Workgroup searches</b></td>
+													<td style="text-align: right;"><a id=wg-manage-saved-searches-link href='popup/manage-saved-searches.html' onclick="top.HEURIST.util.popupURL(window, this.href); return false;">manage</a></td>
+												</tr>
+											</table>
+
+									</td></tr>
+
+									<tr><td id=left-panel-main><div class="expander panel-main-div"><div id=left-panel-content class="autosize panel-main-content">
+													<!-- LEFT PANEL CONTENT -->
+													<div id=wg-saved-search-msg>Links open a new search window</div>
+													<div id=saved></div>
+
+									</div></div></td></tr>
+								</table>
+							</td><!-- end of #left-cell -->
+							<td id=divider-cell></td>
+							<td id=right-cell><table id=right-panel class="expander panel" border=0 cellspacing=0 cellpadding=0>
+									<!-- RIGHT PANEL HEADER -->
+									<tr><td class=panel-header>
+											<table class=expander border=0 cellspacing=0 cellpadding=0><tr>
+													<td style="width: 200px; overflow: hidden;"><nobr><b>Records owned/tagged by this workgroup</b> </nobr></td>
+													<td style="text-align: right;"><span id=resource-count></span></td>
+											</tr></table>
+									</td></tr>
+
+									<tr><td class=panel-main><div id=result-container class="expander panel-main-div">
+												<div id=results class="autosize panel-main-content">
+													<div id=search-status>
+														<div id=loading-search-status>Loading ...</div>
+														<div id=noresult-search-status>
+															No matching resources in this workgroup
+														</div>
+														<div id=wg-result-msg>A green number, e.g. <span style="color: green; font-size: 80%;">3</span>, indicates records owned by the workgroup and only editable by workgroup members<br>
+														A red number, e.g. <span style="color: red; font-size: 80%;">3</span>, indicates records which are hidden altogether from non-members.</div>
+													</div>
+													<div id=result-rows></div>
+												</div>
+									</div></td></tr>
+
+									<tr><td id=right-panel-footer class=panel-footer>
+
+											<!-- RIGHT PANEL FOOTER -->
+											<table class=expander border=0 cellspacing=0 cellpadding=0><tr>
+													<td id=logged-in></td>
+													<td id=page-nav></td>
+											</tr></table>
+
+									</td></tr>
+			</table></td></tr></table></td><!-- end of #main --></tr>
+
+			<!--
+			<tr><td id=footer>
+
+			PAGE FOOTER
+
+			</td></tr>
+			-->
+		</table>
+
+
+
+		<script>
+			top.HEURIST.loadScript("php/js/heurist-obj-common.php");	// core HEURIST object definitions (dynamically generated)
+			top.HEURIST.loadScript("php/js/heurist-obj-user.php");		// user-specific HEURIST data
+			top.HEURIST.loadScript("js/heurist-search.js");				// search-specific HEURIST functions
+			top.HEURIST.loadScript("js/heurist-workgroup.js");			// workgroup-page-specific HEURIST functions
+			// have to lie a bit to get php/json-search.php to work - refer to that file to see why
+			top.HEURIST.fireEvent(window, "heurist-search-html-loaded");
+			top.HEURIST.contentLoaded();
+		</script>
+	</body>
+</html>

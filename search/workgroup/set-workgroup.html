@@ -1,0 +1,58 @@
+<html>
+ <head>
+  <link rel=stylesheet href=../css/heurist.css>
+  <title>Set workgroup ownership and visbility</title>
+
+  <style>
+	body { font-size: 11px; }
+	#non-wg-view { margin-bottom: 5px; }
+  </style>
+
+  <script src=/jquery/jquery.js></script>
+  <script>
+	$(document).ready(function() {
+		for (var i = 0; i < top.HEURIST.user.workgroups.length; ++i) {
+			var wg = top.HEURIST.user.workgroups[i];
+			var name = top.HEURIST.workgroups[wg].name;
+			$("#wg-select").append("<option value=\"" + wg + "\">" + name + "</option>");
+		}
+	});
+  </script>
+
+ </head>
+
+ <body width=400 height=250>
+
+<table cellspacing=10>
+ <tr>
+  <td><nobr>Records are editable by:</nobr></td>
+  <td>
+   <select id=wg-select>
+    <option value=0>Anybody (no restriction)</option>
+   </select>
+  </td>
+ </tr>
+
+ <tr>
+  <td>Other Heurist users:</td>
+  <td>
+   <label for=non-wg-view><input type=radio name=non-wg-vis id=non-wg-view checked> cannot edit the record</label>
+   <br>
+   <label for=non-wg-hide><input type=radio name=non-wg-vis id=non-wg-hide> cannot view or edit the record</label>
+  </td>
+ </tr>
+
+ <tr><td colspan=2></td></tr>
+
+ <tr>
+  <td colspan=2 style="width: 100%; text-align: right;">
+   <input type=submit value=save onclick="window.close($('#wg-select').val(), $('#non-wg-hide')[0].checked);">
+   <input type=submit value=cancel onclick="window.close();">
+  </td>
+ </tr>
+</table>
+
+ </body>
+
+</html>
+

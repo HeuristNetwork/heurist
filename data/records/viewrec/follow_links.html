@@ -1,0 +1,80 @@
+<html>
+
+<!-- T1000 PHP templating system.  Version 1.0, 20 Aug 2005
+     Programmed by: Tom Murtagh
+     Documentation/templates: Ian Johnson, Tristan Gutshce
+     Copyright (C) 2005, Archaeological Computing Laboratory, University of Sydney
+-->
+
+<head>
+  <title>HEURIST - Follow Links (tags)</title>
+
+  <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+
+  <link rel="stylesheet" type="text/css" href= "../css/heurist.css">
+  <style>
+   .hide_on_collapse { display: inline; position: static; visibility: visible;}
+   .collapsed .hide_on_collapse { display: none; position: absolute; visibility: hidden; }
+  </style>
+</head>
+
+<body style="font-size: 11px;">
+
+
+[select LINKED_BIBLIO BIBLIO_select]
+
+<div style="padding: 10px;">
+
+
+<table border="0" cellpadding="2" cellspacing="0" style="border-collapse: collapse">
+  <tr>
+    <td><b>[rec_id] [rec_title]</b></td>
+  </tr>
+  <tr>
+    <td><a target="_new" href="[rec_url]">[rec_url]</a></td>
+  </tr>
+
+  <tr><td>&nbsp;</td></tr>
+  <tr>
+   <td><a href="view.php?bib_id=[rec_id]">View record details</a></td>
+  </tr>
+</table>
+
+
+<hr color="#C0C0C0" size="1">
+
+<table border="0" cellpadding="2" cellspacing="0" style="border-collapse: collapse">
+ <tr>
+  <td><b>Tagged as</b></td>
+  <td style="vertical-align: top;"><b>by</b></td>
+  <td rowspan=5 style="padding-left: 50px; text-align: right;">
+   <p>bold indicates tags you have used</p>
+   <p>numbers in [literal][][end-literal] indicate number<br>of records with this tag</p>
+  </td>
+</div>
+
+ </tr>
+
+[keyword-list!]
+[if: other-users]
+[other-users!]
+[end-if]
+
+</table>
+
+
+[end-select] 
+
+[not-found]
+<p style="padding: 10px; font-weight: bold;">Record not found</p>
+
+<p style="padding: 0 10px;">[if:pers_id]Bookmark #[pers_id][else]Record #[rec_id][end-if] does not exist, or you do not have permission to access it.</p>
+[end-not-found]
+
+
+
+</div>
+
+</body>
+</html>

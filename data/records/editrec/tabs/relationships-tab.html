@@ -1,0 +1,97 @@
+<html>
+	<!-- relationships-tab.html
+
+	Copyright 2005 - 2010 University of Sydney Digital Innovation Unit
+	This file is part of the Heurist academic knowledge management system (http://HeuristScholar.org)
+	mailto:info@heuristscholar.org
+
+	Concept and direction: Ian Johnson.
+	Developers: Tom Murtagh, Kim Jackson, Steve White, Steven Hayes,
+				Maria Shvedova, Artem Osmakov, Maxim Nikitin.
+	Design and advice: Andrew Wilson, Ireneusz Golka, Martin King.
+
+	Heurist is free software; you can redistribute it and/or modify it under the terms of the
+	GNU General Public License as published by the Free Software Foundation; either version 3
+	of the License, or (at your option) any later version.
+
+	Heurist is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+	even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License along with this program.
+	If not, see <http://www.gnu.org/licenses/>
+	or write to the Free Software Foundation,Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+	-->
+	<head>
+		<link rel=stylesheet href="../css/heurist.css">
+		<link rel=stylesheet href="../css/heurist-edit-tab.css">
+		<link rel=stylesheet href="../css/heurist-relation.css">
+
+	</head>
+	<body onload="onshow()">
+		<script src="../js/heurist.js"></script>
+		<script src="../js/heurist-relation.js"></script>
+		<script src="../php/js/display-preferences.php"></script>
+
+		<script>
+
+			function onshow() {
+				var elt = document.getElementById("relationship-type");
+				setTimeout(function() {
+					try {
+						if (elt) elt.focus()
+					} catch (e) {}
+				}, 0);
+			}
+
+		</script>
+
+		<div style="font-weight: bold;">Related records</div>
+
+		<div id=relations></div>
+		<table border=0 cellpadding=0 cellspacing=0 style="margin-left: 1ex; width: 90%;">
+			<tbody id=relations-tbody></tbody>
+		</table>
+
+		<form id=relations-form jsonAction="php/save-relations.php"></form>
+
+		<script>
+
+			function changeNotification(cmd, relID) {
+				if (cmd == "delete") {
+					deleteInput = document.createElement("input");
+					deleteInput.type = "hidden";
+					deleteInput.name = "delete[]";
+					deleteInput.value = relID;
+					document.getElementById("relations-form").appendChild(deleteInput); // saw TODO separate
+					top.HEURIST.edit.changed("relationships");
+				}
+			}
+
+			document.forms[0].heuristSubmit = function() {
+				top.HEURIST.util.xhrFormSubmit(document.forms[0], function(json) {
+					var vals = eval(json.responseText);
+					if (vals) parent.HEURIST.record.relatedRecords = vals;
+					window.location.reload();
+				});
+			};
+
+			document.forms[0].heuristForceSubmit = function() {
+				relManager.saveAllOpen();
+			};
+
+			var bibInput = document.createElement("input");
+			bibInput.type = "hidden";
+			bibInput.name = "bib_id";
+			bibInput.value = top.HEURIST.record.bibID;
+			document.getElementById("relations-form").appendChild(bibInput);
+
+			var relatedRecords = parent.HEURIST.record.relatedRecords;
+			var relationsBody = document.getElementById("relations-tbody");
+			var relManager = new RelationManager(relationsBody,top.HEURIST.record.reftypeID, relatedRecords,0,changeNotification);
+
+		</script>
+
+	</body>
+</html>

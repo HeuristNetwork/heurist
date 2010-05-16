@@ -1,0 +1,113 @@
+<html>
+ <head>
+  <link rel=stylesheet href=../css/heurist.css>
+  <title>Manage saved searches</title>
+
+  <style>
+	body { font-size: 11px; }
+	#t { width: 100%; }
+	td { height: 15px; }
+	.wg { color: gray; }
+	.search-name { padding-left: 15px; }
+	.delete-cell { width: 10px; }
+	tr:hover { background-color: #e0e0e0 }
+  </style>
+
+  <script>
+
+	var rows = {};
+
+	top.HEURIST.registerEvent(window, "load", function() {
+		displayOwnSearches();
+		displayWorkgroupSearches();
+	});
+
+	function displayOwnSearches() {
+		var tr, td, a, i;
+		var table = document.getElementById("t");
+
+		tr = document.createElement("tr");
+		td = tr.appendChild(document.createElement("td"));
+		td.className = "wg";
+		td.appendChild(document.createTextNode("personal saved searches"));
+		tr.appendChild(document.createElement("td"));
+		table.appendChild(tr);
+
+		for (i = 0; i < top.HEURIST.user.savedSearches.length; ++i) {
+			displaySearch(top.HEURIST.user.savedSearches[i][0], 0);
+		}
+	}
+
+	function displayWorkgroupSearches() {
+		var tr, td, a, i, j;
+		var table = document.getElementById("t");
+
+		for (var i = 0; i < top.HEURIST.user.workgroups.length; ++i) {
+			var wg = top.HEURIST.user.workgroups[i];
+			var searches = top.HEURIST.user.workgroupSavedSearches[wg];
+
+			if (searches  &&  searches.length > 0) {
+				tr = document.createElement("tr");
+				td = tr.appendChild(document.createElement("td"));
+				td.className = "wg";
+				td.appendChild(document.createTextNode(top.HEURIST.workgroups[wg].name));
+				tr.appendChild(document.createElement("td"));
+				table.appendChild(tr);
+
+				for (j = 0; j < searches.length; ++j) {
+					displaySearch(searches[j][0], wg);
+				}
+			}
+		}
+	}
+
+	function displaySearch(name, wg) {
+		var tr, td, a;
+		var table = document.getElementById("t");
+
+		if (! rows[wg]) rows[wg] = {};
+
+		tr = rows[wg][name] = document.createElement("tr");
+
+		td = tr.appendChild(document.createElement("td"));
+		td.className = "search-name";
+		td.appendChild(document.createTextNode(name));
+
+		td = tr.appendChild(document.createElement("td"));
+		td.className = "delete-cell";
+		a = td.appendChild(document.createElement("a"));
+		a.href = "#"
+		a.style.textDecoration = "none";
+		a.onclick = function() {
+			if (! wg  ||  confirm("Are you sure you wish to delete this saved search?\n"
+								+ "This will affect other workgroup members.")) {
+				delete_search(name, wg); return false;
+			}
+			return false;
+		};
+		a.appendChild(document.createTextNode(" x "));
+
+		table.appendChild(tr);
+	}
+
+	function delete_search(name, wg) {
+		top.HEURIST.util.getJsonData("php/js/delete-saved-search.php?wg="+wg+"&label="+escape(name), function(response) {
+			if (response.deleted) {
+				if (rows[wg]  &&  rows[wg][name]) {
+					document.getElementById("t").removeChild(rows[wg][name]);
+				}
+				if (top.HEURIST.search) {
+					top.HEURIST.search.removeSavedSearch(name, wg);
+				}
+			}
+		});
+	}
+
+  </script>
+ </head>
+
+ <body width=350 height=250>
+  <table id=t cellspacing=0></table>
+ </body>
+
+</html>

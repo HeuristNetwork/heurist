@@ -1,0 +1,323 @@
+<html>
+	<head>
+		<link rel=stylesheet href='../css/heurist.css'>
+		<link rel=stylesheet href='../css/heurist-edit-tab.css'>
+		<link rel=stylesheet href='../css/keyword-editor.css'>
+		<link rel=stylesheet href='../css/autocomplete.css'>
+		<title></title>
+		<script src='../../jquery/jquery.js'></script>
+		<script>
+			if (top.HEURIST.search.collectCount == 0) {
+				alert("No records have been collected. Please select records from the search results and press collect to add records, then press save.");
+				setTimeout(function() { window.close(); }, 100);
+			}
+
+			function parseTagOnlySearches(searches) {
+				var tagOnlySearches = [];
+				for (var i =0; i < searches.length; i++) {
+					var ss = searches[i];
+					if (!ss[1]) {
+						continue;
+					}
+					var q = ss[1].match(/[\?&]q=([^&]*)/);
+					if (!q || !q[1]) {
+						continue;
+					}
+					//q = q[1].replace(/\+/g,' ');
+					q = q[1].replace(/\+?sortby:('[^']+'|"[^"]+"|\S+)/g,'');	//remove any sortby predicates
+					q = q.replace(/OR(?![^:='"]+['"])/g,'');	// remove any 'OR' s not in a quoted string
+					var preds = q.match(/\S+[:=](?:'[^']+'|"[^"]+"|\S+)|[^:='"\s]+/g);	//create an array of all predicates including stand alone words
+					var tags = q.match(/((kwd)|(keyword)|(tag))[:=]('[^']+'|"[^"]+"|\S+)/g);	//create an array of just tag predicates
+					if (!tags || preds.length != tags.length) {
+						continue;
+					}
+					tags = tags.join(" | ").replace(/[^,\s]+[:=]/g,'').replace(/['"]/g,'');	// strip off the keywords predicates
+					tagOnlySearches.push([ss[0],tags]);
+				}
+				return tagOnlySearches;
+			}
+
+			function init() {
+				var iHTML = '<option value="" selected disabled>select ...</option>';
+				var ss = parseTagOnlySearches(top.HEURIST.user.savedSearches);
+				if (ss.length) {
+					iHTML += '<optgroup label="Personal saved searches" id="my-searches">';
+					for (var i = 0; i < ss.length; i++) {
+						iHTML += "<option value='" + ss[i][1].replace(/\+/g," ") + "'>" + ss[i][0] + "</option>";
+					}
+					iHTML += "</optgroup>";
+				}
+				for ( i = 0; i < top.HEURIST.user.workgroups.length; i++) {
+					var wg = top.HEURIST.user.workgroups[i];
+					if (!top.HEURIST.user.workgroupSavedSearches[wg]) {
+						continue;
+					}
+					ss = parseTagOnlySearches(top.HEURIST.user.workgroupSavedSearches[wg]);
+					if (ss.length) {
+						iHTML += '<optgroup label="' + top.HEURIST.workgroups[wg].name +
+						' saved searches" id="' + top.HEURIST.workgroups[wg].name.replace(/\s/g,'') + '-wg-searches">';
+						for (var j = 0; j < ss.length; j++) {
+							iHTML += "<option value='" + ss[j][1].replace(/\+/g," ") + "'>" + ss[j][0] + "</option>";
+						}
+						iHTML += "</optgroup>";
+					}
+				}
+				document.getElementById("search-select").innerHTML = iHTML;
+
+				iHTML = "";
+				for (var i = 0; i < top.HEURIST.user.workgroups.length; i++) {
+					var wg = top.HEURIST.user.workgroups[i];
+					iHTML += "<option value=" + wg + ">" + top.HEURIST.workgroups[wg].name + "</option>";
+				}
+				document.getElementById("wg-options").innerHTML += iHTML;
+
+				document.title += " Save collection (" + top.HEURIST.search.collectCount + " records) as Saved Search";
+				setTimeout(function() { document.getElementById('search-select').focus() }, 10);
+				var tagsElt = document.getElementById('personal-tags');
+				window.autocomplete = new top.HEURIST.autocomplete.AutoComplete(tagsElt, top.HEURIST.util.keywordAutofill, { nonVocabularyCallback: top.HEURIST.util.showConfirmNewTag });
+
+			}
+
+			function keypress(e) {
+				if (! e)
+				e = window.event;
+				var code = e.keyCode;
+				if (e.which)
+				code = e.which;
+				// " and '
+				if (code == 34  ||  code == 39)
+				return false;
+			}
+
+
+			function checkPersonalTags() {
+				var tagsElem = document.getElementById("personal-tags");
+				var tagsWarnStyle = document.getElementById('personal-tags-warning').style;
+				if (tagsElem.value && tagsWarnStyle.display) {
+					tagsWarnStyle.display = "";
+				} else if (!tagsElem.value && !tagsWarnStyle.display) {
+					tagsWarnStyle.display = "none";
+				}
+			}
+
+			function save() {
+				var action_fr = parent.document.getElementById("i_action").contentWindow;
+				var action_elt = action_fr.document.getElementById("action");
+				var ss_name_elt = action_fr.document.getElementById("ss_name");
+				var ss_query_elt = action_fr.document.getElementById("ss_query");
+				var ss_wgid_elt = action_fr.document.getElementById("ss_wg_id");
+				var ss_id_elt = action_fr.document.getElementById("ss_id");
+				var ss_kwds_elt = action_fr.document.getElementById("keywordstring");
+				action_fr.document.getElementById("bib_ids").value = top.HEURIST.search.collection.join(',');
+
+				if (! action_fr  ||  ! action_elt  ||  ! ss_name_elt  ||  ! ss_query_elt  ||  ! ss_wgid_elt ||  ! ss_id_elt ||  ! ss_kwds_elt) {
+					alert("Problem contacting server - try again in a moment");
+					return;
+				}
+				if ($('input[name="ssType"]:checked').val()== "1") { //create a saved search
+					action_elt.value = "bookmark_tag_and_ssearch";
+					ss_name_elt.value = document.getElementById("search-name").value;
+					if (!ss_name_elt.value) {
+						alert("You must enter name for the saved-search before saying.");
+						return;
+					}
+					ss_wgid_elt.value = document.getElementById("wg-select").value;
+					ss_kwds_elt.value = $('#personal-tags').val();
+					var kwdsRowTDs = $('#current-workgroup-keywords td');
+					for (var i=0; i < kwdsRowTDs.length; i++) {
+						if (ss_kwds_elt.value) {
+							ss_kwds_elt.value += ',';
+						}
+						ss_kwds_elt.value += kwdsRowTDs[i++].innerHTML + '\\' + kwdsRowTDs[i].innerHTML;
+					}
+					var query = [];
+					if (!ss_kwds_elt.value) {
+						alert("You must enter or select at least one tag to save a search.");
+						return;
+					}else{
+						var tags = ss_kwds_elt.value.split(',');
+						var q = "";
+						for (var j=0; j < tags.length; j++) {
+							q += 'tag:"' + tags[j].replace(/^\s*/,'').replace(/\s*$/,'') + '" ';
+						}
+						query.push('q=' + encodeURIComponent(q));
+					}
+					var result_style = document.getElementById("result-style-select").value;
+					if ($('#result-style-select').val()) {
+						query.push("view=" + $('#result-style-select').val());
+					}
+					query.push("w=" + $("input[name='w']:checked").val());
+					ss_query_elt.value = "?" + query.join("&");
+
+				}else{	//tag collections so they show up in an exisitng tag only saved search
+					action_elt.value = "bookmark_and_tag";
+					ss_kwds_elt.value = $('#search-tag-list').text().replace(/\s\|\s/,',');
+				}
+				action_elt.form.submit();
+				setTimeout(function() { window.close(); }, 10);
+			}
+
+			function switchMode(toID,fromID,focusID) {
+				$('#'+fromID).removeClass('bggray');
+				$('#'+toID).addClass('bggray');
+				var enableID = '#' + toID.match(/^[^_]+_/)[0] + "span";
+				var disableID = '#' + fromID.match(/^[^_]+_/)[0] + "span";
+				$( enableID + " input, " + enableID + " select").attr("disabled",false);
+				$( disableID + " input, " + disableID + " select").attr("disabled",true);
+				$(enableID + " .keyword-list tr").show()
+				$(disableID + " .keyword-list tr").hide()
+				$('#'+focusID).focus();
+			}
+
+			function displayBookmarkCheck(){
+				if (document.getElementById("wg-select").value) {
+					$('#all')[0].click();
+				} else {
+					$('bookmark')[0].click();
+				}
+			}
+		</script>
+		<style>
+			body { line-height: 1; font-size: 70%; margin: 0px; background-color: white;}
+			#message { color: red; }
+			.warning-message { color: red; font-size: 70%; }
+			.div-section { margin:7px 10px}
+			input, select{ margin-top: 5px;}
+			#bookmark-check-p { color: #660000; }
+			#save {font-weight: bold;}
+			.bggray { background-color: #DDDDDD;}
+			hr { background-color: #660000; border: 1px solid gray; height: 1px; margin-bottom: 10px; }
+		</style>
+	</head>
+	<body onload="init();">
+		<script src='../js/autocomplete.js'></script>
+		<div id="mainbody">
+			<div id="add_to_search" class="bggray">
+				<input style="margin-left: 10px;" type="radio" name="ssType" id="ssType" value="0" checked="checked" onclick="switchMode('add_to_search','create_new_search','search-select');">&nbsp;<b>Add to existing saved search</b>
+				<span id="add_span">
+				<select id="search-select" style="max-width:150px" onchange="document.getElementById('search-tag-list').innerHTML = this.options[this.selectedIndex].value; document.getElementById('ssType').click(); return false;">
+				</select>
+				<span class="help prompt" >
+					&nbsp;&nbsp;&nbsp;&nbsp;Only tag-based searchs can be used
+				</span><br/>
+				<div style="height:30px">
+					<span style="margin-left: 200px;"><i>The following tag(s) will be added:</i></span>
+					<div id="search-tag-list" style="color: blue; float:right; width:200px; margin-right: 15px;" ></div>
+				</div>
+				</span>
+			</div>
+			<hr>
+			<div id="create_new_search">
+				<input  style="margin-left: 10px;" type="radio" name="ssType" value="1" onclick="switchMode('create_new_search','add_to_search','search-name');">&nbsp;<b>Create new saved search</b><br/>
+				<span id="create_span">
+				<div style="margin-left: 20px;">
+					<div class="div-section">
+						Name for this search:
+						<input style="height: 17px; margin-left: 25px;" type=text id=search-name onkeypress="return keypress(event)">
+						<span style="float: right; margin-right: 107px;">
+							<input type="radio" name="w" value="all" id="all" checked="checked" onclick="document.getElementById('bookmark-warning').style.display = 'none';">
+							<label for="all" >&nbsp;search all records</label><br/>
+						</span>
+					</div>
+					<div class="div-section">
+						Add search to:
+						<select id=wg-select onChange="displayBookmarkCheck();" style="margin-left: 55px; height: 17px;">
+							<option value="">personal saved searches</option>
+							<optgroup label="workgroup saved searches" id=wg-options></optgroup>
+						</select>
+						<span style="float: right; margin-right: 56px;">
+							<input type="radio" name="w" id="bookmark" value="bookmark" onclick="document.getElementById('bookmark-warning').style.display = '';">
+							<label for="bookmark">&nbsp;only my bookmarked records</label><br/>
+							<span class="warning-message" id="bookmark-warning" style="margin-left: 25px; display: none;">&nbsp;records in collection will be bookmarked</span>
+						</span>
+					</div>
+					<div style="margin: 0px;">&nbsp;</div>
+					<div class="div-section">
+						Tag(s) identifying this set of records
+						<span class="help prompt">
+							&nbsp;&nbsp;Note: any records with these tags will be included in the saved search
+						</span>
+					</div>
+					<div class="div-section">
+						Personal tag(s)
+						<input style="height: 17px;" type=text id="personal-tags" onkeypress="setTimeout(function(){checkPersonalTags();},10); return true;">
+						<span>
+							<span class="help prompt">
+								&nbsp;&nbsp;Note: any records with these tags will be included in the saved search
+							</span><br clear="none"/>
+							<span>&nbsp;</span>
+							<span class="warning-message" id="personal-tags-warning" style="margin-left: 210px; display:none;">&nbsp;records in collection will be bookmarked</span>
+						</span>
+					</div>
+					<div class="div-section">
+						<span style="float: left; margin: 0;">Workgroup tag(s) &nbsp;&nbsp;</span>
+						<span class="help prompt" >
+							Use for personal or workgroup saved searches.
+						</span>
+
+						<br clear=all>
+
+						<table border=0 cellspacing=0 cellpadding=0 style="margin: 10px 0;">
+							<tr>
+								<td><b>Available</b></td>
+								<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+								<td><b>Selected</b></td>
+							</tr>
+
+							<tr>
+								<td>
+									<div class=keyword-list style="height:200px;"><table border=0 cellspacing=0 cellpadding=0><tbody id=all-workgroup-keywords></tbody></table></div>
+								</td>
+								<td>
+									<div id=button-box>
+										<div><input type=button value="&gt;" title="Add a tag" onmousedown="HEURIST.keywordEditor.addKeyword(window.selectedRow)" disabled id=add-button></div>
+										<div>&nbsp;&nbsp;</div>
+										<div><input type=button value="&lt;" title="Remove a tag" onmousedown="HEURIST.keywordEditor.removeKeyword(window.selectedRow)" disabled id=remove-button></div>
+									</div>
+								</td>
+								<td>
+									<div class=keyword-list style="height:200px;"><table border=0 cellspacing=0 cellpadding=0><tbody id=current-workgroup-keywords></tbody></table></div>
+								</td>
+							</tr>
+
+							<tr class=help>
+								<td class=prompt>Double-click to add a tag</td>
+								<td>&nbsp;&nbsp;</td>
+								<td class=prompt>Double-click to deselect a tag</td>
+							</tr>
+							<tr><td>
+									<div id="admin-wgKeywords"><br><a href="../legacy/workgroup_keyword_manager.php" target="_blank">add/delete</a> tags for workgroups (administrators only). </div>
+							</td></tr>
+						</table>
+
+						<form id=keyword-form onsubmit="return false;"></form> <!-- not used so stub teh submit -->
+
+						<script src='../js/keyword-editor.js'></script>
+						<script>
+
+							var removeButton = document.getElementById("remove-button");
+							var addButton = document.getElementById("add-button");
+
+							var currKwdsElt = document.getElementById("current-workgroup-keywords");
+							var allKwdsElt = document.getElementById("all-workgroup-keywords");
+							new HEURIST.keywordEditor.KeywordEditor(currKwdsElt, allKwdsElt, addButton, removeButton);
+
+						</script>
+
+						Default result style:
+						<select id=result-style-select>
+							<option value="" selected>Status quo</option>
+							<option value=list>One column</option>
+							<option value=two-col>Two columns</option>
+							<option value=thumbs>Thumbnails</option>
+							<option value=blog disabled>Blog</option>
+						</select>
+					</div>
+				</div>
+				</span>
+			</div>
+			<hr>
+			<p><input type=button value=Save id=save onclick="save();" style="float: right; margin-right: 50px;"></p>
+		</div>
+	</body>
+</html>

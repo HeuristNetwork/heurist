@@ -1,0 +1,157 @@
+/* CSS Document */
+
+div.all-res a, a:hover, a:visited{
+    text-decoration:none;
+	color:#444499;
+}
+div.all-res{
+    padding: 2px;
+    background-color:#F3F3F8;
+}
+.all-res-head{
+    background-color:#6791f3;/*6fa9fa;*/
+	font-weight:bold;
+	padding:3px;
+	
+}
+div.my-res  a, a:hover, a:visited{
+    text-decoration:none;
+    color:#8E1E1E;
+	
+}
+div.my-res{
+    padding: 2px;
+    background-color:#F7F0E7;
+}
+
+.my-res-head{
+    background-color:#d1a775;
+	font-weight:bold;
+	padding:3px;
+}
+
+div.wg-res a, a:hover, a:visited{
+    text-decoration:none;
+    color:#003300;
+}   
+div.wg-res {
+    padding: 2px;
+    background-color:#e4efd7;
+}
+.wg-res-head{
+    background-color:#9dc272;
+	font-weight:bold;
+	padding:3px;
+}
+.search_heading {
+    color:#666666;
+	font-weight: bold;
+	background-color:#EFEFEF;
+	padding-top: 3px; 
+	padding-bottom:3px;
+}
+.hint { font-weight: bold; font-size: 80%; color: gray; vertical-align: middle;  }
+.search-id { margin-left: 8px;font-weight: bold; font-size: 90%; color: gray;  }
+.button{
+font:13px arial,helvetica,clean,sans-serif;
+font-weight: bold; 
+font-size: 85%;
+
+}
+.spacer {margin-left: 50px; }
+.breaker {padding: 5px;}
+input {
+margin: 0pt;
+
+}
+#query-highlight {
+padding-top: 5px; 
+padding-bottom: 5px; 
+margin-top: 0px; 
+
+background-color: #efefef;
+color: #333333;
+}
+
+#linebreak {
+overflow: hidden;
+height: 1px;
+background-color: #660000;
+margin-top: 15px;
+margin-bottom: 15px;
+}    
+
+#toolbar { height: 5px; }
+/*
+#right-panel-content { padding-left: 5px; padding-right: 10px;
+
+} */
+#larger-panel-content { 
+padding-top: 5px;
+padding-left: 5px;
+font-size:13px;
+}
+
+#wizard-subheading { 
+/*padding-top: 10px;*/
+margin-bottom: 10px;
+font-weight:bold;
+font-size:13px;
+}
+#sideheader { text-align:right; }
+
+#linkdiv {margin-left: 50px; }
+.panel-main {
+ padding-top: 0px;
+ padding-right: 0px;
+ margin-top: 0px;
+}
+
+#pagetext {
+
+padding-right: 10px;
+padding-left: 10px;
+padding-top: 10px;
+padding-bottom: 10px;
+
+}
+
+#pagetext a{
+color:#333333;
+text-decoration:underline;
+}
+#pagetext a:hover {
+}
+#left-panel {
+
+width: 300px;
+}
+
+.search-select{
+
+padding: 3px;
+}
+.wizard-box{
+
+	background-color:#efefef;
+    border: 1px solid lightgrey;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+#chksearch {
+margin-left: 5px;
+margin-right: 4px;
+}
+.txt-rename{
+margin-left: 15px;
+}
+.search-select a, a:hover, a:visited{
+color:#333333;
+text-decoration: none;
+}
+div.search-select {
+border-top: 1px solid lightgrey;
+border-bottom: 1px solid lightgrey;
+border-right:1px solid lightgrey;
+
+}

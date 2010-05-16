@@ -1,0 +1,288 @@
+<html>
+ <head>
+  <link rel=stylesheet href=../css/heurist.css>
+  <link rel=stylesheet href=../css/heurist-edit-tab.css>
+  <link rel=stylesheet href=../css/autocomplete.css>
+  <link rel=stylesheet href=/woot/02/woot.css>
+  <style>
+.rating-row td { padding: 0 0.5em; vertical-align: middle; }
+.rating-row .header { text-align: right; padding: 0.5em 0; width: 40px; }
+.rating-row select { width: 20ex; }
+
+.reminder-table tr td * { vertical-align: middle; }
+.reminder-table .col-2 select, .reminder-table .col-4 select, .reminder-table .col-6 select, .reminder-table .col-8 input { width: 120px; }
+table.reminder-table tr td.col-1 { width: 50px; text-align: right; }
+.reminder-table .col-3, .reminder-table .col-5 { width: 0; padding-left: 1ex; }
+.reminder-table .col-7 { width: 0px; padding-left: 1ex; white-space: nowrap; }
+
+.reminder-table td { padding: 1ex 2px 1ex 0; }
+.reminder-table .frequency-dropdown { margin-left: 1ex; }
+
+fieldset.reminder { background-color: white; padding: 0 1ex; margin: 0; width: 600px; }
+fieldset.reminder .in { border-color: #909090; }
+
+fieldset.reminder legend { font-weight: bold; }
+
+div.reminder-div { margin-bottom: 1ex; padding: 6px 4px; border: 1px solid gray; width: 600px; }
+div.reminder-div img { vertical-align: middle; cursor: pointer; margin-left: 2px; }
+
+input#tags {
+	border: 1px solid black;
+	padding: 1px 4px;
+	font-size: 11px;
+	line-height: 1.5em;	/* only has an effect on safari ... otherwise we get a jumbo-vertical text box */
+	width: 80%;
+}
+
+.add-tag-link { font-size: 85%; padding: 0 0.5ex; }
+
+hr { background-color: #660000; border: 1px solid lightgray; height: 2px; margin-bottom: 15px; }
+
+.input-row .input-header-cell { vertical-align: top; }
+
+.woot-editor {
+	max-width: 1000000px;
+	max-height: 300px;
+	overflow-y: scroll;
+}
+.woot-editor.edit {
+	max-height: 1000000px;
+	overflow-y: auto;
+}
+.woot-title {
+	display: none;
+}
+
+  </style>
+  <script>
+
+function onshow() {
+	setTimeout(function() { try { document.getElementById("tags").focus(); } catch (e) {} }, 0);
+}
+top.HAPI.importSymbols(top, this);
+
+  </script>
+  <script src=/tinymce/tiny_mce.js></script>
+  <script src=/woot/02/js/woot.js></script>
+ </head>
+ <body onload="onshow();">
+  <script src=../js/heurist.js></script>
+  <script src=../php/js/display-preferences.php></script>
+  <script src=../js/autocomplete.js></script>
+
+   <form method=post jsonAction=php/save-personal-data.php action=../php/save-personal-data.php onsubmit="return verifyForm();">
+   <input type=hidden name=save-mode id=save-mode value=edit>
+   <input type=hidden name=bkmk_id id=bkmk_id>
+
+   <table border=0 cellspacing=0 cellpadding=0 style="width: 100%;"><tbody id=all-inputs>
+    <tr class=input-row>
+     <td class=input-header-cell>Personal tags</td>
+     <td class=input-cell>
+      <table border=0 cellspacing=0 cellpadding=0 style="width: 100%;">
+       <tr>
+        <td><input id=tags name=keywordstring type=text></td>
+        <td rowspan=3 style="width: 40%;">
+         <div class="help prompt" style="padding: 0 2em;">
+          Type as many tags as you like, separated by commas.  Tags may contain spaces.
+          New tags are added automatically and are specific to each user.<br><br>
+          <a href=../help/tags.html onclick="top.HEURIST.util.popupURL(window, this.href); return false;">How to enter tags</a>
+         </div>
+        </td>
+       </tr>
+       <tr>
+        <td>
+         <span class=prompt>Top:</span>
+         <a href=# class=add-tag-link onclick="addTag('Favourites'); return false;">Favourites</a>
+         <a href=# class=add-tag-link onclick="addTag('To Read'); return false;">To Read</a>
+		 |
+        <span id=top-tags-cell></span>
+        </td>
+       </tr>
+       <tr>
+        <td id=recent-tags-cell>
+         <span class=prompt>Recent:</span>
+        </td>
+       </tr>
+      </table>
+     </td>
+    </tr>
+
+    <tr><td colspan=2><hr></td></tr>
+
+    <tr class=input-row>
+     <td class=input-header-cell style="padding-top: 0.5em;">Ratings</td>
+     <td class=input-cell>
+      <table border=0 cellspacing=0 cellpadding=0>
+       <tr class=rating-row>
+        <td class=header>Interest</td><td><select id=interest-rating name=interest-rating></select></td>
+        <td rowspan=3>
+         <div class="help prompt">Records can be rated in several ways.<br>For a single rating, use only the Interest rating.</div>
+        </td>
+       </tr>
+       <tr class=rating-row><td class=header>Content</td><td><select id=content-rating name=content-rating></select></td></tr>
+       <tr class=rating-row><td class=header>Quality</td><td><select id=quality-rating name=quality-rating></select></td></tr>
+      </table>
+     </td>
+    </tr>
+
+    <tr><td colspan=2><hr></td></tr>
+
+    <tr class=input-row>
+     <td class=input-header-cell>Private notes</td>
+     <td class=input-cell>
+      <div>
+	   <span class="help prompt">These notes are private and visible only to you.</span>
+       <a id=woot-ext-link style="float: right; margin-right: 80px;" target=_blank href=../woot.html>open in new window</a>
+      </div>
+      <div id=woot style="border: 1px solid gray; margin: 8px 80px 0 0; min-height: 100px; padding: 4px;"></div>
+     </td>
+    </tr>
+
+    <tr><td colspan=2><hr></td></tr>
+
+    <tr class=input-row>
+     <td class=input-header-cell>Password reminder</td>
+     <td class=input-cell>
+      <input type=text class=in name=password-reminder id=password-reminder style="width: 200px;" onchange="window.changed();" onkeypress="window.changed();">
+      <div class="help prompt">NOT ENCRYPTED - do not use for secure passwords</div>
+     </td>
+    </tr>
+
+    <tr><td colspan=2><hr></td></tr>
+   </tbody></table>
+  </form>
+
+  <form method=post jsonAction=php/save-reminder.php action=../php/save-reminder.php onsubmit="return false;">
+   <table border=0 cellspacing=0 cellpadding=0 style="width: 100%;"><tbody><!-- separate table, because this is a separate form -->
+    <tr class=input-row>
+     <td class=input-header-cell><div style="margin: 7px 0;">Reminders</div></td>
+     <td><div id=reminders></div></td>
+    </tr>
+  </form>
+
+  <script>
+
+
+var tags = document.getElementById("tags");
+tags.value = tags.defaultValue = top.HEURIST.record.keywordString  ||  "";
+
+new top.HEURIST.autocomplete.AutoComplete(tags, top.HEURIST.util.keywordAutofill, { nonVocabularyCallback: top.HEURIST.util.showConfirmNewTag });
+
+
+tags.onchange = function() { top.HEURIST.edit.changed("personal"); };
+
+function addTag(tag) {
+	var tags = document.getElementById("tags");
+
+	var tagPos = tags.value.indexOf(tag);
+	if (tagPos != -1) {
+		if (tags.value.substring(0, tagPos).match(/(?:^|,)\s*$/)  &&
+		    tags.value.substring(tagPos + tag.length).match(/^\s*(?:,|$)/)) {
+			// tag is already there
+			return;
+		}
+	}
+
+	if (tags.value) tags.value += "," + tag;
+	else tags.value = tag;
+
+	tags.onchange();
+
+	tags.focus();
+}
+function addTagLink(tag, parentNode) {
+	var newLink = document.createElement("a");
+		newLink.href = "#";
+		newLink.className = "add-tag-link";
+		newLink.onclick = function() { addTag(tag); return false; };
+		newLink.appendChild(document.createTextNode(tag));
+	var nobr = document.createElement("nobr");
+		nobr.appendChild(newLink);
+	parentNode.appendChild(nobr);
+}
+
+var alphasort = function(a,b) { a = a.toLowerCase(); b = b.toLowerCase(); return (a < b)? -1 : (a > b)? 1 : 0; };
+
+var topTagsCell = document.getElementById("top-tags-cell");
+var topKeywords = top.HEURIST.user.topKeywords.slice(0);
+topKeywords.sort(alphasort);
+for (var i=0; i < topKeywords.length; ++i) {
+	addTagLink(topKeywords[i], topTagsCell);
+}
+var recentTagsCell = document.getElementById("recent-tags-cell");
+var recentKeywords = top.HEURIST.user.recentKeywords.slice(0, 8);
+recentKeywords.sort(alphasort);
+for (var i=0; i < recentKeywords.length; ++i) {
+	addTagLink(recentKeywords[i], recentTagsCell);
+}
+
+</script>
+<script>
+
+function verifyForm() {
+	if (tags.autocompleteObject.confirmImg) {	// user has a brand new tag waiting to be completed
+		setTimeout(function() { tags.autocompleteObject.currentWordOkay(); }, 0);
+		return false;
+	}
+	else return true;
+}
+
+function changed() { top.HEURIST.edit.changed("personal"); }
+function unchanged() { top.HEURIST.edit.unchanged("personal"); }
+function handleSaved(json) {
+	var vals = eval(json.responseText);
+	for (var i in vals)
+		parent.HEURIST.record[i] = vals[i];
+	window.location.reload();
+}
+document.forms[0].heuristSubmit = function() {
+	top.HEURIST.util.xhrFormSubmit(document.forms[0], handleSaved)
+};
+document.forms[0].heuristForceSubmit = function() {
+	if (wootEditor.unlockedChunk) {
+		wootEditor.save();
+	}
+	window.reminderInput.save(window.reminderInput.nowRadioButton.checked, true);
+};
+
+function fillRatings(element, values, defaultValue) {
+	var i = 0;
+	top.HEURIST.registerEvent(element, "change", changed);
+	for (var index in values) {
+		element.options[i] = new Option(values[index], index);
+		if (index == defaultValue) element.selectedIndex = i;
+		++i;
+	}
+}
+fillRatings(document.getElementById("interest-rating"), top.HEURIST.ratings.interest, parent.HEURIST.record.interestRating);
+fillRatings(document.getElementById("content-rating"), top.HEURIST.ratings.content, parent.HEURIST.record.contentRating);
+fillRatings(document.getElementById("quality-rating"), top.HEURIST.ratings.quality, parent.HEURIST.record.qualityRating);
+
+if (parent.HEURIST.record.passwordReminder) {
+	document.getElementById("password-reminder").value = parent.HEURIST.record.passwordReminder;
+}
+
+document.getElementById("bkmk_id").value = top.HEURIST.record.bkmkID  ||  0;
+
+var reminderDiv = document.getElementById("reminders");
+for (var i=0; i < parent.HEURIST.record.reminders.length; ++i) {
+	new top.HEURIST.edit.Reminder(reminderDiv, parent.HEURIST.record.reminders[i]);
+}
+window.reminderInput = new top.HEURIST.edit.inputs.ReminderInput(reminderDiv);
+
+// woot stuff
+HAPI.WOOT.DEFAULT_WOOT_PERMISSIONS  = [ HAPI.WOOT.OWNER_PROTECTION ];
+HAPI.WOOT.DEFAULT_CHUNK_PERMISSIONS = [ HAPI.WOOT.OWNER_PROTECTION ];
+
+var wootTitle = "bookmark:" + parent.HEURIST.record.bkmkID;
+var recTitle = parent.HEURIST.record.title + " - private notes";
+
+document.getElementById("woot-ext-link").href += "?w=" + wootTitle + "&t=" + recTitle;
+
+HAPI.WOOT.GUI.labelsForLanguage.en.emptyMessage.label = "&lt;&lt; Empty or no visible text blocks &gt;&gt;";
+var wootEditor = new HAPI.WOOT.GUI.WootEditor({ title: wootTitle, id: "woot" });
+
+
+  </script>
+ </body>
+</html>

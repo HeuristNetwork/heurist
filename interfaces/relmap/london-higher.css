@@ -1,0 +1,214 @@
+/* CSS Document */
+html, input, select, textarea {
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size:11px;
+margin-right: 3px;
+}
+body{
+background-color:#EFEFEF;
+}
+textarea{
+	width:400px;
+	height:100px;
+}
+input.text{
+	width:400px;
+}
+table{
+margin:0 auto;
+position: static;
+width:100%;
+
+background-color:#ffffff;
+border:1px solid lightgrey;
+font-size:11px;
+}
+td {
+
+padding-bottom: 5px;
+}
+.rep{
+padding-right: 5px;
+}
+.edit {
+background-color:#ffffff;
+border:1px solid lightgrey;
+font-size:11px;
+
+text-align:left;
+vertical-align:top; 
+}
+
+.optional .resource {
+border:1px dotted;
+}
+.required .resource {
+border:1px dotted;
+}
+.recommended .resource {
+border:1px dotted;
+}
+.resource {
+cursor:pointer;
+}
+
+
+.required{
+color:#CC0000;
+}
+.required input, textarea{
+border:1px solid #CC0000;
+
+}
+.required select{
+border:1px solid #CC0000;
+
+}
+.recommended{
+color: #000000;
+}
+.recommended input, textarea{
+border:1px solid #000000;
+}
+.recommended select{
+border:1px solid #000000;
+}
+.optional{
+color: #999999;
+}
+.optional input, textarea, select{
+border:1px solid #999999;
+}
+.optional select{
+border:1px solid #999999;
+}
+.header {
+						
+						padding-top: 3px;
+						
+						
+					}
+					
+					#results-div {
+					padding: 25px;
+					}
+					#results-div img {
+					vertical-align: middle;
+					}
+					#results-div-track {
+					padding: 25px;
+					}
+					#results-div-track img {
+					vertical-align: middle;
+					}
+#subdiv  {
+
+
+}
+
+#sub-res-type{
+font-weight: bold;
+width: 170px;
+padding-right: 10px;
+}
+
+.sub-res-type{
+font-weight: bold;
+width: 170px;
+padding-right: 10px;
+}
+.sub-res-type-ext{
+padding-bottom: 0px;
+vertical-align:top;
+font-weight: bold;
+width: 50px;
+padding-right: 0px;
+padding-left: 10px;
+padding-top: 10px;
+}
+
+
+
+.sub-res-type-ext input{
+font-weight: bold;
+padding-top: 0;
+}
+
+.pad{
+padding-top: 10px;
+
+}
+.mini-pad{
+padding-top: 5px;
+
+}
+.inp-div{
+padding-bottom: 3px;
+}
+.results {
+border:1px solid lightgrey;
+background:#A0A0A0 url(/heurist/img/shade-header.gif) repeat-x scroll left top;
+height:24px;
+/*line-height:24px;*/
+padding: 0;
+}
+.panel-header {
+border:1px solid lightgrey;
+background:#A0A0A0 url(/heurist/img/shade-header.gif) repeat-x scroll left top;
+height:24px;
+font-weight:bold;
+padding: 0;
+}
+.rec-title{
+padding:1px;
+font-size:16px;
+
+}
+.rec{
+float:right;
+padding-right: 10px;
+}
+#details{
+ padding: 10px;
+}
+.clickable{
+cursor:pointer;
+}
+.hint{
+color:green;
+line-height:1.22em;
+font-weight:bold;
+font-family:arial,helvetica,clean,sans-serif;
+font-size: 80%;
+}
+#rec-type-select-div{
+vertical-align:top;
+}
+#sresults{
+border-top: 1px solid #F3EFF5;
+width: 100%;
+height: 250px;
+overflow:auto;
+}
+.bg-light{
+
+}
+
+.checkboxtd{
+width:10px;
+
+}
+
+.relationshiptd{
+padding-left:5px;
+width:400px;
+font-family:Arial, Helvetica, sans-serif;
+font-size:12px;
+color:#0066FF
+
+
+}
+.deletetd{
+
+
+}

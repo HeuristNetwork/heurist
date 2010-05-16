@@ -1,0 +1,59 @@
+<html>
+<head>
+
+<script language="javascript">
+ 
+
+</script>
+</head>
+<body width=240 height=160 onload="getDateID()">
+<script>
+  var dateId;   //id of a date field
+  function getDateID(){
+	  var regexS = "[\\?&]id=([^&#]*)";
+	  var regex = new RegExp( regexS );
+	  var results = regex.exec( window.location.search );
+	 
+	  if( results == null )
+		return;
+	  else
+		dateId = results[1];
+		
+	
+	  }
+</script>
+
+<style type="text/css">
+<!--
+
+body { font-family: sans-serif; overflow: hidden; margin: 0px; }
+#cal { width: 100%; }
+#cal tr td { font-size: 11px; line-height: 12px; width: 20px; }
+
+#cal_header { width: 178px; height: 20px; border: 0px; padding: 0px; margin: 0px; font-family: Verdana; text-align: center; }
+#cal_header img { border: 0px; padding: 0px; vertical-align: middle; height: 10px; }
+#cal_month { width: 100%; vertical-align: top; text-align: center; font-weight: bold; }
+#monthnav { width: 20px; height: 10px; }
+#yearnav { width: 20px; height: 10px; }
+
+#monthyearnav { width: 25px; }
+
+.cal_daysofweek { text-align: center; font-weight: bold; }
+.cal_days { text-align: center; cursor: pointer; }
+
+.cal_day { background-color: white; }
+.cal_day_over { background-color: #B79481; }
+.cal_day_selected { background-color: blue; color: white; }
+.cal_day_today { background-color: cyan; }
+
+#calendar-div { width: 100%; height: 100%; }
+
+-->
+</style>
+
+<div id=calendar-div></div>
+<script src="calendar.js"></script>
+
+
+</body>
+</html>

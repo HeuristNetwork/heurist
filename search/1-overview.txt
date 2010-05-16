@@ -1,0 +1,26 @@
+Heurist academic data management system (http://HeuristScholar.org)
+Copyright © 2005 - 2010 University of Sydney Digital Innovation Unit
+License: http://www.gnu.org/licenses/gpl-3.0.txt
+Concept/direction: Ian Johnson
+Developers: Tom Murtagh, Kim Jackson, Steve White, Steven Hayes, Maria Shvedova, Artem Osmakov, Maxim Nikitin.
+Graphic design/testing: Andrew Wilson, Ireneusz Golka, Martin King.
+ 
+---------------------------------------------------------------------
+
+Directory:	/search
+
+Overview:	Search is Heurist’s output workhorse. It can retrieve any defined 
+		subset of records with quite flexible search criteria. Each user’s 
+		Heurist home page is a search for records bookamarked and tagged as 
+		Favourites. A range of actions can be applied to search results 
+		including saving the criteria as a saved search, changing ownership, 
+		tagging, un-bookmarking, merging duplicates, deleting and so forth.
+
+		Search is also used to publish subsets of the database as PDF files, 
+		as data feeds or for embedding in web pages. XML output in HML format
+		is generated and restyled through XSLT transforms and Cocoon. 
+
+Notes:	
+
+
+Updated: 	28 March 2010

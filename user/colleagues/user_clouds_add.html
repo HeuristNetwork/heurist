@@ -1,0 +1,90 @@
+<html>
+<head>
+ <title>Colleague groups</title>
+
+ <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+ <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+
+ <link rel="stylesheet" type="text/css" href="../css/heurist.css">
+ <style>
+body { font-size: 11px; }
+ </style>
+
+</head>
+
+<body width=600 height=500>
+
+<form action="user_clouds_add.php" method="post">
+[insert required USER_CLOUD USER_CLOUD_insert]
+ [auto: cgr_owner_id : logged-in-user-id]
+
+<h2>Colleague groups</h2>
+
+<p>
+Colleague groups are lists of people who share a common interest.
+They can be used to send out notifications, or to refine results of
+searches by sorting the results using the combined ratings of a group.
+</p>
+
+<p><font color="#FF0000"><b>Please search for an existing group to ensure that it doesn't exist before adding</b></font></p>
+
+<font color="#FF0000">[errors]</font>
+
+<table>
+ <tr>
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;Add new colleague group&nbsp;&nbsp;</td>
+  <td>[textbox required : cgr_name : cgr_name field : size="30"]</td>
+  <td><input type="submit" value="Add"></td>
+ </tr>
+
+[end-insert]
+</form>
+
+<form action="user_clouds_add.php" id="search-form">
+[extended-search USER_CLOUD USER_CLOUD_search]
+ [auto: cgr_owner_id : logged-in-user-id]
+ <tr>
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;Search for colleague group&nbsp;&nbsp;</td>
+  <td>[textbox : cgr_name : cgr_name field : size="30"]</td>
+  <td><input type="submit" value="Find"></td>
+ </tr>
+ <tr>
+  <td></td>
+  <td>Search will match partial strings</td>
+ </tr>
+</table>
+
+<p>To add colleagues to a colleague group, search for the group and click on its name to edit the list of people in the group.</p>
+
+<hr>
+
+[if:USER_CLOUD_search-searched]
+<p>
+ [if:result-count]
+  <b>Count: [result-count]</b>&nbsp;&nbsp;&nbsp;
+  <i>Showing [result-first] to [result-last]</i><br>
+  <i><font size="2">Click on group labels to edit</font></i><br>
+  [if:prev-url]<a href="[prev-url]">previous page</a>&nbsp;&nbsp;[end-if]
+  [if:next-url]<a href="[next-url]">next page</a>[end-if]
+ [else]
+  <b>No colleague groups found</b>
+ [end-if]
+[end-if]
+
+
+<table>
+ [foreach USER_CLOUD searchrecordloop]
+  <tr>
+   <td width="10"></td>
+   <td width="30"><b>[cgr_id]</b></td>
+   <td><a href="user_clouds_delete.php?cgr_id=[cgr_id]" onclick="top.HEURIST.util.popupURL(window, 'legacy/user_clouds_delete.php?cgr_id=[cgr_id]', { width:300, height:200, callback:function() { document.getElementById('search-form').submit(); } }); return false">delete</a></td>
+   <td><b>&nbsp;<a href="user_clouds_edit.php?cgr_id=[cgr_id]">[cgr_name]</a></b></td>
+  </tr>
+ [end-foreach]
+</table>
+
+[end-extended-search]
+</form>
+
+</body>
+</html>

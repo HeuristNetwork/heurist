@@ -1,0 +1,73 @@
+      .file_snippet pre { font-family: monospace; }
+      .file_snippet span { color: red; font-weight: bold; font-family: monospace; }
+
+      .error { color: red; font-weight: bold; }
+
+      input { margin: 0px; padding: 0px; }
+
+.banner {
+        width: 100%;
+        border-spacing: 4px;
+        font-weight: bold;
+}
+
+form {
+        margin: 6px;
+}
+
+h1 { font-size: 12px; }
+h2 { font-size: 11px; }
+
+.ambiguous { margin: 16px 3px; }
+.ambiguous .heading { background-color: #F0F0F0; }
+
+.delta { color: mediumvioletred; }
+
+#progress_indicator {
+        display: none;
+        position: absolute;
+        left: 500px;
+        top: 30px;
+
+        width: 120px;
+        height: 16px;
+
+        border: 1px solid black;
+        background-color: white;
+        text-align: center;
+        vertical-align: middle;
+}
+#progress_indicator_title {
+        display: none;
+        position: absolute;
+        left: 500px;
+        top: 48px;
+
+        width: 120px;
+        height: 16px;
+
+        text-align: center;
+        vertical-align: middle;
+        background-color: white;
+        margin: 2px;
+}
+#progress_indicator_bar {
+        position: absolute;
+        z-index: 1;
+        width: 0%;
+        height: 100%;
+        background-color: blue;
+}
+#progress {
+        position: absolute;
+        z-index: 2;
+        color: #A0A0A0;
+        font-weight: bold;
+
+        width: 120px;
+        height: 16px;
+        vertical-align: middle;
+}
+
+
+body { background-color: transparent; }

@@ -1,0 +1,27 @@
+Heurist academic data management system (http://HeuristScholar.org)
+Copyright © 2005 - 2010 University of Sydney Digital Innovation Unit
+License: http://www.gnu.org/licenses/gpl-3.0.txt
+Concept/direction: Ian Johnson
+Developers: Tom Murtagh, Kim Jackson, Steve White, Steven Hayes, Maria Shvedova, Artem Osmakov, Maxim Nikitin.
+Graphic design/testing: Andrew Wilson, Ireneusz Golka, Martin King.
+ 
+---------------------------------------------------------------------
+
+Directory:	/export
+
+Overview:	Functions for getting data out of Heurist. This is a broad category 
+		which includes human-readable publishing of PDF files or web pages 
+		and export of XML files for data exchange, transformation and archiving.  
+
+Notes:		Most of Heurist’s export functions commence with the export of XML in 
+		Heurist Markup Language (HML) fomat, which is then submitted to an XSLT
+		transformation pipeline to generate the desired format. This allows the 
+		generation of anything for simple lists to a complete website.
+
+		Some legacy code generates formatted output directly.
+
+		Visualisations are in separate directories /mapping, 
+		/timeline and /visualisation
+
+
+Updated: 	28 March 2010

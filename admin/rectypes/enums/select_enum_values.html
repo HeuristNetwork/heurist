@@ -1,0 +1,72 @@
+<html>
+ <body onload="nve = document.getElementById('new_value_elt'); if (nve) nve.focus();">
+
+<style type="text/css">
+<!--
+body {
+	margin: 0px;
+	padding: 0px;
+	border: 0px;
+	overflow: hidden;
+}
+
+* {
+	font-size: 10px;
+	font-family: sans-serif;
+}
+
+#maindiv {
+	position: absolute;
+	width: 500px; height: 250px;
+	z-index: 101;
+	background-color: white;
+	-moz-border-radius: 12px;
+	border: 2px solid black;
+	padding: 5px;
+}
+#maindiv_shadow {
+	position: absolute;
+	left: 5px;
+	top: 5px;
+	width: 500px;
+	height: 250px;
+	z-index: 100;
+	background-color: black;
+	-moz-border-radius: 12px;
+	border: 2px solid black;
+	-moz-opacity: 0.5;
+	padding: 5px;
+}
+
+-->
+</style>
+
+<div id="maindiv">
+[select BIB_DETAIL_TYPE bdt]
+  <span style="float: right; cursor: pointer;" onclick="window.parent.finish_edit_enum_types();">&#91;close&#93;</span>
+  <div style="font-weight: bold;">Values for &lt;[rdt_name]&gt;:</div>
+
+  <form method="post">
+  <div style="height: 200px; overflow: auto; margin: 5px; border: 1px dotted lightgray; background-color: #FFFFDD;">
+
+  [search BIB_DETAIL_LOOKUP bdl]
+    [auto : rdl_rdt_id : rdt_id]
+    [foreach BIB_DETAIL_LOOKUP bd : 1 order by rdl_id]
+     <div><input style="margin: 1px;" type=checkbox name=active_rdl[literal][[end-literal][rdl_id][literal]][end-literal] [select ACTIVE_BIB_DETAIL_LOOKUP abdl]checked[end-select][not-found][end-not-found]> [rdl_value]</div>
+    [end-foreach]
+    [not-found]<div style="font-style: italic;">(none)</div>[end-not-found]
+  [end-search]
+  </div>
+  <div>
+
+   <input type="hidden" name="rdt_id" value="[rdt_id]">
+   <input type="hidden" name=update-active-rdls value=1>
+   <input type=submit value=save style="font-weight: bold;">
+  </form>
+  </div>
+[end-select]
+</div>
+<div id="maindiv_shadow"></div>
+
+ </body>
+</html>

@@ -1,0 +1,380 @@
+<?php
+/*<!--  bib.php
+
+	Copyright 2005 - 2010 University of Sydney Digital Innovation Unit
+	This file is part of the Heurist academic knowledge management system (http://HeuristScholar.org)
+	mailto:info@heuristscholar.org
+
+	Concept and direction: Ian Johnson.
+	Developers: Tom Murtagh, Kim Jackson, Steve White, Steven Hayes,
+				Maria Shvedova, Artem Osmakov, Maxim Nikitin.
+	Design and advice: Andrew Wilson, Ireneusz Golka, Martin King.
+
+	Heurist is free software; you can redistribute it and/or modify it under the terms of the
+	GNU General Public License as published by the Free Software Foundation; either version 3
+	of the License, or (at your option) any later version.
+
+	Heurist is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+	even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License along with this program.
+	If not, see <http://www.gnu.org/licenses/>
+	or write to the Free Software Foundation,Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+  -->
+*/
+
+
+/* Take rec_id or pers_id, fill in window.HEURIST.record.bibID and window.HEURIST.record.bkmkID as appropriate */
+/* FIXME: leave around some useful error messages */
+
+if (! defined("SAVE_URI")) {
+	define("SAVE_URI", "disabled");
+}
+
+/* define JSON_RESPONSE to strip out the JavaScript commands;
+ * just output the .record object definition
+ */
+
+if (! defined("JSON_RESPONSE")) {
+	require_once("../modules/relationships.php");
+	require_once('../modules/cred.php');
+	require_once('../modules/db.php');
+	if (! is_logged_in()) return;
+
+	header('Content-type: text/javascript');
+}
+
+mysql_connection_db_select(DATABASE);
+
+list($rec_id, $pers_id, $replaced) = findRecordIDs();
+
+if (! $rec_id) {
+	// record does not exist
+	$record = null;
+} else if ($replaced) {
+	// the record has been deprecated
+	$record = array();
+	$record["replacedBy"] = $rec_id;
+} else {
+	$record = getBaseProperties($rec_id, $pers_id);
+	if (@$record["workgroupID"]  &&  $record["workgroupVisibility"] == "Hidden"  &&  ! $_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']["user_access"][$record["workgroupID"]]) {
+		// record is hidden and user is not a member of owning workgroup
+		$record = array();
+		$record["denied"] = true;
+	} else {
+		$record["bdValuesByType"] = getAllBibDetails($rec_id);
+		$record["reminders"] = getAllReminders($rec_id);
+		$record["wikis"] = getAllWikis($rec_id, $pers_id);
+		$record["comments"] = getAllComments($rec_id);
+		$record["workgroupKeywords"] = getAllWorkgroupKeywords($rec_id);
+		$record["relatedRecords"] = getAllRelatedRecords($rec_id);
+		$record["rtConstraintsByDType"] = getConstraintsByRdt($record['reftypeID']);
+		$record["retrieved"] = date('Y-m-d H:i:s');	// the current time according to the server
+	}
+}
+
+?>
+
+<?php if (! defined("JSON_RESPONSE")) { ?>
+if (! window.HEURIST) window.HEURIST = {};
+window.HEURIST.record = <?= json_format($record) ?>;
+top.HEURIST.fireEvent(window, "heurist-record-loaded");
+<?php } else { ?>
+<?= json_format($record) ?>
+<?php }
+/***** END OF OUTPUT *****/
+
+
+function findRecordIDs() {
+	// Look at the request parameters rec_id and pers_id,
+	// return the actual rec_id and pers_id as the user has access to them
+
+	/* chase down replaced-by-bib-id references */
+	$replaced = false;
+	if (intval(@$_REQUEST["bib_id"])) {
+		$res = mysql_query("select new_rec_id from aliases where old_rec_id=" . intval(@$_REQUEST["bib_id"]));
+		$recurseLimit = 10;
+		while (mysql_num_rows($res) > 0) {
+			$row = mysql_fetch_row($res);
+			$_REQUEST["bib_id"] = $row[0];
+			$replaced = true;
+			$res = mysql_query("select new_rec_id from aliases where old_rec_id=" . $_REQUEST["bib_id"]);
+
+			if ($recurseLimit-- === 0) { return array(); }
+		}
+	}
+
+	$rec_id = 0;
+	$pers_id = 0;
+	if (intval(@$_REQUEST['bib_id'])) {
+		$rec_id = intval($_REQUEST['bib_id']);
+		$res = mysql_query('select rec_id, pers_id from records left join personals on pers_rec_id=rec_id and pers_usr_id='.get_user_id().' where rec_id='.$rec_id);
+		$row = mysql_fetch_assoc($res);
+		$rec_id = intval($row['rec_id']);
+		$pers_id = intval($row['pers_id']);
+	}
+
+	if (! $rec_id  &&  intval(@$_REQUEST['bkmk_id'])) {
+		$pers_id = intval($_REQUEST['bkmk_id']);
+		$res = mysql_query('select pers_id, rec_id from personals left join records on pers_rec_id=rec_id where pers_id='.$pers_id.' and pers_usr_id='.get_user_id());
+		$row = mysql_fetch_assoc($res);
+		$pers_id = intval($row['pers_id']);
+		$rec_id = intval($row['rec_id']);
+	}
+
+	return array($rec_id, $pers_id, $replaced);
+}
+
+
+function getBaseProperties($rec_id, $pers_id) {
+	// Return an array of the basic scalar properties for this record / bookmark
+
+	if ($pers_id) {
+		$res = mysql_query('select rec_title as title, rt_name as reftype, rt_id as reftypeID, rec_url as url, grp_id as workgroupID, grp_name as workgroup, rec_scratchpad as notes, rec_visibility as visibility, pers_pwd_reminder as passwordReminder, pers_content_rating as contentRating, pers_interest_rating as interestRating, pers_quality_rating as qualityRating, pers_notes as quickNotes, rec_modified, rec_temporary from personals left join records on pers_rec_id=rec_id and pers_usr_id='.get_user_id().' left join rec_types on rt_id = rec_type left join '.USERS_DATABASE.'.Groups on grp_id=rec_wg_id where pers_id='.$pers_id);
+	} else if ($rec_id) {
+		$res = mysql_query('select rec_title as title, rt_name as reftype, rt_id as reftypeID, rec_url as url, grp_id as workgroupID, grp_name as workgroup, rec_scratchpad as notes, rec_visibility as visibility, rec_modified, rec_temporary from records left join personals on pers_rec_id=rec_id left join rec_types on rt_id = rec_type left join '.USERS_DATABASE.'.Groups on grp_id=rec_wg_id where rec_id='.$rec_id);
+	}
+
+	$row = mysql_fetch_assoc($res);
+	$props = array();
+	if ($rec_id) $props["bibID"] = $rec_id;
+	if ($pers_id) $props["bkmkID"] = $pers_id;
+	$props["title"] = $row["title"];
+	$props["reftype"] = $row["reftype"];
+	$props["reftypeID"] = $row["reftypeID"];
+	$props["url"] = $row["url"];
+	$props["moddate"] = $row["rec_modified"];
+	$props["isTemporary"] = $row["rec_temporary"]? true : false;
+
+	if (@$row["passwordReminder"]) {
+		$props["passwordReminder"] = $row["passwordReminder"];
+	}
+	if (@$row["contentRating"]) {
+		$props['contentRating'] = $row['contentRating'];
+		$props['interestRating'] = $row['interestRating'];
+		$props['qualityRating'] = $row['qualityRating'];
+	}
+	$props["quickNotes"] = @$row["quickNotes"]? $row["quickNotes"] : "";
+	if ($row['workgroupID']) {
+		$props['workgroupID'] = $row['workgroupID'];
+		$props['workgroup'] = $row['workgroup'];
+		if ($row['visibility']) $props['workgroupVisibility'] = $row['visibility'];
+	}
+	$props['notes'] = $row['notes'];
+
+	if ($pers_id) {
+		// grab the user tags (keywords) for this bookmark, as a single comma-delimited string
+		$kwds = mysql__select_array("keyword_links left join keywords on kwd_id=kwl_kwd_id", "kwd_name", "kwl_pers_id=$pers_id and kwd_usr_id=".get_user_id() . " order by kwl_order, kwl_id");
+		$props["keywordString"] = join(",", $kwds);
+	}
+
+	return $props;
+}
+
+function getAllBibDetails($rec_id) {
+	// Get all rec_details entries for this entry,
+	// as an array.
+	// File entries have file data associated,
+	// geo entries have geo data associated,
+	// record references have title data associated.
+
+	$res = mysql_query("select rd_id, rd_type, rd_val, rec_title, rd_file_id, rdl_value,
+	                           if(rd_geo is not null, astext(envelope(rd_geo)), null) as envelope,
+	                           if(rd_geo is not null, astext(rd_geo), null) as rd_geo
+	                      from rec_details
+	                 left join rec_detail_types on rdt_id=rd_type
+	                 left join records on rec_id=rd_val and rdt_type='resource'
+	                 left join rec_detail_lookups on rdt_type='enum' and rdl_id = rd_val
+	                     where rd_rec_id = $rec_id order by rd_id");
+	$bibDetails = array();
+	while ($row = mysql_fetch_assoc($res)) {
+		$detail = array();
+
+		$detail["id"] = $row["rd_id"];
+		$detail["value"] = $row["rd_val"];
+		if (array_key_exists('rdl_value',$row) && $row['rdl_value']) $detail["enumValue"] = $row["rdl_value"];	// saw Enum change
+		if ($row["rec_title"]) $detail["title"] = $row["rec_title"];
+
+		if ($row["rd_file_id"]) {
+			$fileRes = mysql_query("select * from files where file_id=" . intval($row["rd_file_id"]));
+			if (mysql_num_rows($fileRes) == 1) {
+				$file = mysql_fetch_assoc($fileRes);
+				$detail["file"] = array(
+					"id" => $file["file_id"],
+					"origName" => $file["file_orig_name"],
+					"date" => $file["file_id"],
+					"mimeType" => $file["file_mimetype"],
+					"nonce" => $file["file_nonce"],
+					"fileSize" => $file["file_size"],
+					"typeDescription" => $file["file_typedescription"]
+				);
+			}
+		}
+		else if ($row["envelope"]  &&  preg_match("/^POLYGON[(][(]([^ ]+) ([^ ]+),[^,]*,([^ ]+) ([^,]+)/", $row["envelope"], $poly)) {
+			list($match, $minX, $minY, $maxX, $maxY) = $poly;
+error_log($match);
+			$x = 0.5 * ($minX + $maxX);
+			$y = 0.5 * ($minY + $maxY);
+
+			// This is a bit ugly ... but it is useful.
+			// Do things differently for a path -- set minX,minY to the first point in the path, maxX,maxY to the last point
+			if ($row["rd_val"] == "l"  &&  preg_match("/^LINESTRING[(]([^ ]+) ([^ ]+),.*,([^ ]+) ([^ ]+)[)]$/", $row["rd_geo"], $matches)) {
+				list($dummy, $minX, $minY, $maxX, $maxY) = $matches;
+			}
+
+			switch ($row["rd_val"]) {
+			  case "p": $type = "point"; break;
+			  case "pl": $type = "polygon"; break;
+			  case "c": $type = "circle"; break;
+			  case "r": $type = "rectangle"; break;
+			  case "l": $type = "path"; break;
+			  default: $type = "unknown";
+			}
+			$wkt = $row["rd_val"] . " " . $row["rd_geo"];	// well-known text value
+			$detail["geo"] = array(
+				"minX" => $minX,
+				"minY" => $minY,
+				"maxX" => $maxX,
+				"maxY" => $maxY,
+				"x" => $x,
+				"y" => $y,
+				"type" => $type,
+				"value" => $wkt
+			);
+		}
+
+		if (! @$bibDetails[$row["rd_type"]]) $bibDetails[$row["rd_type"]] = array();
+		array_push($bibDetails[$row["rd_type"]], $detail);
+	}
+
+	return $bibDetails;
+}
+
+
+function getAllReminders($rec_id) {
+	// Get any reminders as an array;
+	if (! $rec_id) return array();
+
+	// ... MYSTIFYINGLY these are stored by rec_id+user_id, not pers_id
+	$res = mysql_query("select * from reminders where rem_rec_id=$rec_id and rem_owner_id=".get_user_id()." order by rem_startdate");
+
+	$reminders = array();
+	if (mysql_num_rows($res) > 0) {
+		while ($rem = mysql_fetch_assoc($res)) {
+
+			array_push($reminders, array(
+				"id" => $rem["rem_id"],
+				"user" => $rem["rem_usr_id"],
+				"group" => $rem["rem_wg_id"],
+				"colleagueGroup" => $rem["rem_cgr_id"],
+				"email" => $rem["rem_email"],
+				"message" => $rem["rem_message"],
+				"when" => $rem["rem_startdate"],
+				"frequency" => $rem["rem_freq"]
+			));
+		}
+	}
+
+	return $reminders;
+}
+
+
+function getAllWikis($rec_id, $pers_id) {
+	// Get all wikis for this record / bookmark as an array/object
+
+	$wikis = array();
+	$wikiNames = array();
+
+	if ($pers_id) {
+		array_push($wikis, array("Private", "Bookmark:$pers_id"));
+		array_push($wikiNames, "Bookmark:$pers_id");
+	}
+
+	if ($rec_id) {
+		$res = mysql_query("select rec_url from records where rec_id=".$rec_id);
+		$row = mysql_fetch_assoc($res);
+		if (preg_match("!(acl.arts.usyd.edu.au|heuristscholar.org)/tmwiki!", @$row["rec_url"])) {
+			array_push($wikis, array("Public", preg_replace("!.*/!", "", $row["rec_url"])));
+			array_push($wikiNames, preg_replace("!.*/!", "", $row["rec_url"]));
+		} else {
+			array_push($wikis, array("Public", "Biblio:$rec_id"));
+			array_push($wikiNames, "Biblio:$rec_id");
+		}
+
+		$res = mysql_query("select grp_id, grp_name from ".USERS_DATABASE.".UserGroups left join ".USERS_DATABASE.".Groups on ug_group_id=grp_id where ug_user_id=".get_user_id()." and grp_type !=' Usergroup' order by grp_name");
+		while ($grp = mysql_fetch_row($res)) {
+			array_push($wikis, array(htmlspecialchars($grp[1]), "Biblio:".$rec_id."_Workgroup:".$grp[0]));
+			array_push($wikiNames, slash("Biblio:".$rec_id."_Workgroup:".$grp[0]));
+		}
+	}
+
+	// get a precis for each of the wikis we're dealing with
+	$preces = mysql__select_assoc("tmwikidb.tmw_page left join tmwikidb.tmw_revision on rev_id=page_latest left join tmwikidb.tmw_text on old_id=rev_text_id", "page_title", "old_text", "page_title in ('" . join("','", $wikiNames) . "')");
+	foreach ($wikis as $id => $wiki) {
+		$precis = @$preces[$wiki[1]];	// look-up by wiki page name
+		if (strlen($precis) > 100) $precis = substr($precis, 0, 100) . "...";
+		array_push($wikis[$id], $precis? $precis : "");
+	}
+
+	return $wikis;
+}
+
+function getAllComments($rec_id) {
+	$res = mysql_query("select cmt_id, cmt_deleted, cmt_text, cmt_parent_cmt_id, cmt_date, cmt_modified, cmt_usr_id, Realname from comments left join ".USERS_DATABASE.".Users on cmt_usr_id=Id where cmt_rec_id = $rec_id order by cmt_date");
+
+	$comments = array();
+	while ($cmt = mysql_fetch_assoc($res)) {
+		if ($cmt["cmt_deleted"]) {
+			/* indicate that the comments exists but has been deleted */
+			$comments[$cmt["cmt_id"]] = array(
+				"id" => $cmt["cmt_id"],
+				"owner" => $cmt["cmt_parent_cmt_id"],
+				"deleted" => true
+			);
+			continue;
+		}
+
+		$comments[$cmt["cmt_id"]] = array(
+			"id" => $cmt["cmt_id"],
+			"text" => $cmt["cmt_text"],
+			"owner" => $cmt["cmt_parent_cmt_id"],	/* comments that owns this one (i.e. parent, just like in Dickensian times) */
+			"added" => $cmt["cmt_date"],
+			"modified" => $cmt["cmt_modified"],
+			"user" => $cmt["Realname"],
+			"userID" => $cmt["cmt_usr_id"],
+			"deleted" => false
+		);
+	}
+
+	return $comments;
+}
+
+function getAllWorkgroupKeywords($rec_id) {
+// FIXME: should limit this just to workgroups that the user is in
+	$res = mysql_query("select kwd_id from keyword_links, keywords where kwl_kwd_id=kwd_id and kwl_rec_id=$rec_id");
+	$kwd_ids = array();
+	while ($row = mysql_fetch_row($res)) array_push($kwd_ids, $row[0]);
+	return $kwd_ids;
+}
+
+function getConstraintsByRdt($recType) {
+	$rcons = array();
+	$res = mysql_query("select rcon_target_rt_id as rt_id, rcon_rdt_id as rdt_id,
+						rcon_rdl_ids as rdl_ids, rcon_ont_id as ont_id, rcon_order, rcon_limit
+						from rec_constraints
+						where rcon_source_rt_id=$recType
+						order by rcon_rdt_id, rcon_target_rt_id, rcon_order ");
+	while($row = mysql_fetch_assoc($res)) {
+		if (! @$rcons[$row["rdt_id"]]) {
+			$rcons[$row["rdt_id"]] = array();
+		}
+		if (! @$rcons[$row["rdt_id"]][$row["rt_id"]]) {
+			$rcons[$row["rdt_id"]][$row["rt_id"]] = array();
+		}
+		array_push($rcons[$row["rdt_id"]][$row["rt_id"]],$row);
+	}
+	return $rcons;
+}
+?>

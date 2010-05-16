@@ -1,0 +1,43 @@
+<html>
+ <head>
+  <title>Heurist display preferences</title>
+  <link rel=stylesheet href=../css/heurist.css>
+  <style>
+	.subhead { font-weight: bold; }
+	#buttons { margin-top: 40px; }
+  </style>
+ </head>
+
+ <body onload="showPreferences()" width=600 height=400>
+
+  <script src=../js/heurist.js></script>
+  <script>
+	function showPreferences() {
+		document.getElementById("results-per-page").value
+			= top.HEURIST.util.getDisplayPreference("results-per-page");
+	}
+
+	function save() {
+		var rpp = parseInt(document.getElementById("results-per-page").value);
+		if (rpp < 0 || rpp > 500) {
+			alert("Results per page must be between 1 and 500");
+			return;
+		}
+		top.HEURIST.util.setDisplayPreference("results-per-page", rpp);
+		window.close();
+	}
+  </script>
+
+  <h2>Preferences</h2>
+  <div>
+   <div class="subhead">Search results per page</div>
+   <p>Must be between 1 and 500</p>
+   <input id="results-per-page">
+  </div>
+  <div id="buttons">
+   <input type="button" value="save" onclick="save();">
+   <input type="button" value="cancel" onclick="window.close();">
+  </div>
+ </body>
+</html>
+

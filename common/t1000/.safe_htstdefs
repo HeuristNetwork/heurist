@@ -1,0 +1,95 @@
+<?php
+/* T1000 Database template system
+   (c) 2005 Archaeological Computing Laboratory, University of Sydney
+   T1000 Developed by Tom Murtagh, Template system Ian Johnson 22 Aug 2005 */
+
+/* INSTRUCTIONS: Change database, table and field names below
+                 For multi-table system please see full documentation */
+
+define('RESULTS_PER_PAGE', 50);
+define('UPLOAD_PATH','');
+
+/* Define the tables and joins/lookups needed 
+   An appropriate database and table may be created by running t1000_database_create.sql
+
+   mysql -u root -p < database_create.sql  */
+
+$MAINTABLES['BOOKMARK'] = 'bookmarks_safe';	// view of the personals table with the password column omitted
+	$PKEY['BOOKMARK'] = 'pers_id';
+	$INIDATE_FIELD['BOOKMARK'] = 'pers_added';
+      $MODDATE_FIELD['BOOKMARK'] = 'pers_modified';
+     $JOINS['BOOKMARK'] = array('BIBLIO-ID' => 'pers_rec_id');
+
+
+$MAINTABLES['BIBLIO'] = 'records';
+	$PKEY['BIBLIO'] = 'rec_id';
+	$INIDATE_FIELD['BIBLIO'] = 'rec_added';
+      $MODDATE_FIELD['BIBLIO'] = 'rec_modified';
+
+$MAINTABLES['LINKED_BIBLIO'] = 'records';
+	$PKEY['LINKED_BIBLIO'] = 'rec_id';
+	$INIDATE_FIELD['LINKED_BIBLIO'] = 'rec_added';
+      $MODDATE_FIELD['LINKED_BIBLIO'] = 'rec_modified';
+                $JOINS['LINKED_BIBLIO'] = array('REFTYPE-ID' => 'rec_type');
+
+if (function_exists('get_user_id')) {
+      $LOOKUPS['LINKED_BIBLIO'] = array( 'personals' => 'rec_id=pers_rec_id and pers_usr_id='.get_user_id() );
+}
+
+
+$MAINTABLES['RATING_CONTENT'] = 'ratings_content';
+	$PKEY['RATING_CONTENT'] = 'rc_id';
+$MAINTABLES['RATING_QUALITY'] = 'ratings_quality';
+	$PKEY['RATING_QUALITY'] = 'rq_id';
+$MAINTABLES['RATING_INTEREST'] = 'ratings_interest';
+	$PKEY['RATING_INTEREST'] = 'ri_id';
+
+$MAINTABLES['KEYWORD'] = 'keywords';
+	$PKEY['KEYWORD'] = 'kwd_id';
+
+$MAINTABLES['REFTYPE'] = 'rec_types';
+	$PKEY['REFTYPE'] = 'rt_id';
+
+$MAINTABLES['USER'] = USERS_DATABASE.'.'.USERS_TABLE;
+	$PKEY['USER'] = USERS_ID_FIELD;
+
+
+/* Define lookups for fields which should be coded values (many-to-one with main table)
+   Syntax: lookup-table-name => main-table-join-field = lookup-table-join-field', ... */
+
+	$LOOKUPS['BOOKMARK'] = 
+		array (
+			'ratings_content' => 'pers_content_rating=rc_id',
+			'ratings_quality' => 'pers_quality_rating=rq_id',
+			'ratings_interest' => 'pers_interest_rating=ri_id');
+
+$MAINTABLES["BOOKMARKS_TO_KEYWORDS"] = 'keyword_links';
+	$PKEY["BOOKMARKS_TO_KEYWORDS"] = 'kwl_id';
+        $LINK_KEYS["BOOKMARKS_TO_KEYWORDS"] = array(	"BOOKMARK-ID" => "kwl_pers_id",
+							"KEYWORD-ID"  => "kwl_kwd_id");
+
+
+$SEARCHES["BOOKMARK_search"] = "SELECT distinct pers_id FROM personals left join records on pers_rec_id=rec_id WHERE (
+		(pers_usr_id = [logged-in-user-id]) and 
+		[word-match:bkmk_title:bkmk_title] and 
+		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
+		if ([bkmk_advanced_search] and [pers_notes]!='', pers_notes like [%pers_notes%], 1) and
+		if ([bkmk_advanced_search] and [bkmk_reftype]!='', rec_type = [bkmk_reftype], 1)
+                and not rec_temporary
+		)
+		";	/* may be over-written by search.php */
+
+$SEARCHES["augmented_BOOKMARK_search"] = "SELECT distinct pers_id FROM personals left join records on pers_rec_id=rec_id left join keyword_links on kwl_pers_id=pers_id WHERE (
+		(pers_usr_id = [logged-in-user-id]) and 
+		[word-match:bkmk_title:bkmk_title] and 
+		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
+		if ([bkmk_advanced_search] and [pers_notes]!='', pers_notes like [%pers_notes%], 1) and
+		if ([bkmk_advanced_search] and [bkmk_reftype]!='', rec_type = [bkmk_reftype], 1)
+                and not rec_temporary
+		)
+		";	/* may be appended-to by search.php */
+
+
+
+
+?>

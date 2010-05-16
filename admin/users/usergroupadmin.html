@@ -1,0 +1,144 @@
+<html>
+<head>
+ <title>User Group Administration</title>
+ <link rel="stylesheet" type="text/css" href="../legacy/newshsseri.css">
+
+ <script language="JavaScript">
+ <!--
+ [literal]
+	function saveScrollPosition() {
+		// Save the current vertical scroll position
+		if (document.documentElement && document.documentElement.scrollTop) {
+			document.forms[0].elements['scrollTop'].value = document.documentElement.scrollTop;
+		} else if (document.body) {
+			document.forms[0].elements['scrollTop'].value = document.body.scrollTop;
+		}
+	}
+ [end-literal]
+	
+	function setScrollPosition() {
+		presetScrollTop = [presetScrollTop];
+		[literal]
+		if (document.documentElement  &&  document.documentElement.scrollTop) {
+			document.documentElement.scrollTop = presetScrollTop;
+		} else if (document.body) {
+			document.body.scrollTop = presetScrollTop;
+		}
+		document.forms[0].elements['scrollTop'].value = presetScrollTop;
+		[end-literal]
+	}
+ //-->
+ </script>
+
+</head>
+
+<body style="margin: 0px" link="blue" vlink="blue" onload="setScrollPosition()">
+
+<div style="background-color: #660000;"><a href=..><img style="border: 0;" src=../img/hlogo-small.jpg></a></div>
+
+<table width="95%"  border="0" style="border-collapse: collapse; margin-left: 5%;"><tr><td>
+
+<table width="100%" border="0" style="border-collapse: collapse">
+ <tr>
+  <td align="left"><h2>User Group Administration</h2></td>
+  <td align="right" valign="top">
+	<a href="add.php">Add user</a>[proj-group-link!]<br><br>
+   <font color="#008000"><small>Logged in as: </small><tt>[logged-in-user-username]</tt></font><br>
+   [if-eq : logged-in-user-username : ""]
+   <a href="../php/login.php"><small>Log in</small></a>
+   [else]
+   <a href="../php/login.php?logout=1"><small>Log out</small></a>
+   [end-if-eq]
+  </td>
+ </tr>
+</table>
+
+<p>
+Use the dropdowns on the right to add a user to a group.<br>
+Click "x" to remove a user from a group.<br>
+Click "+" / "-" to grant / revoke admin privileges for a group.<br>
+</p>
+
+[if : logged-in-is-admin]
+
+<form action="usergroupadmin.php" method="post" onsubmit="saveScrollPosition()">
+
+<input type="hidden" name="scrollTop" value="0">
+<input type="hidden" name="make_admin" id="make_admin_elt" value="0">
+<input type="hidden" name="unmake_admin" id="unmake_admin_elt" value="0">
+<input type="hidden" name="remove_group_link" id="remove_group_link_elt" value="0">
+[if : filterId]
+<input type=hidden name=filterId value=[filterId]>
+[end-if]
+
+<table border="1" rules="rows" frame="void">
+
+<tr>
+ <th align="left">Id
+ <th align="left">Username
+ <th align="left">Realname
+ <th align="left" width="200">Member of
+ <td width="60">
+ <th align="left">Add to
+
+[foreach USER users_foreach]
+[if-eq : Active : "Y"]
+
+<tr>
+ <td valign="top">[Id]&nbsp;&nbsp;
+ <td valign="top">[Username]&nbsp;&nbsp;&nbsp;&nbsp;
+ <td valign="top">[firstname] [lastname]&nbsp;&nbsp;&nbsp;&nbsp;
+ <td>
+
+  <table border="0" cellspacing="0" cellpadding="0">
+  [foreach USER_GROUPS user_groups_foreach]
+   <tr>
+    [select GROUP groups_select]
+     <td width="150">[grp_name]&nbsp;&nbsp;
+	 <td width="40">
+	  <a title="remove from group" href="#" onclick="elt=document.getElementById('remove_group_link_elt');
+                           if (elt) { elt.value=[ug_id]; elt.form.submit(); return true; } return false;"
+						   style="text-decoration: none; color: blue"><tt><b>x</b></tt></a>
+     <td>
+      <nobr>
+      <a title="grant admin privilege" href="#" onclick="elt=document.getElementById('make_admin_elt');
+                           if (elt) { elt.value=[ug_id]; elt.form.submit(); return true; } return false;"
+						   style="text-decoration: none; color: blue"><tt><b>+</b></tt></a>
+      <a title="revoke admin privilege" href="#" onclick="elt=document.getElementById('unmake_admin_elt');
+                           if (elt) { elt.value=[ug_id]; elt.form.submit(); return true; } return false;"
+						   style="text-decoration: none; color: blue"><tt><b>-</b></tt></a>&nbsp;
+      </nobr>
+     <td>[ug_role]&nbsp;&nbsp;
+    [end-select]
+  [end-foreach]
+  [not-found]
+  [end-not-found]
+  </table>
+
+ <td>
+ <td valign="top">
+  [insert USER_GROUPS user_groups_insert]
+   [auto : ug_user_id : Id]
+   [dropdown required : ug_group_id : groups dropdown : select grp_id,grp_name from Groups order by grp_name : style="width: 100;" : ]
+  [end-insert]
+ <td valign="top">
+  <input type="submit" value="add">
+[end-if-eq]
+[end-foreach]
+
+</table>
+
+</form>
+
+[else]
+
+<p><font color="#FF0000"><b>
+You do not have permission to edit user groups.<br>
+Only an administrator may edit user groups.
+</b></font></p>
+
+[end-if]
+
+</td></tr></table>
+</body>
+</html>

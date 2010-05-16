@@ -1,0 +1,312 @@
+/* CSS Document */
+html, input, select, textarea {
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size:11px;
+}
+input{
+padding-left: 5px;
+margin:0;
+}
+img{
+padding-left: 5px;
+}
+h3 {
+
+}
+body{
+background-image:url(img/desert.png);
+}
+textarea{
+	width:400px;
+	height:100px;
+}
+input-text{
+	width:400px;
+}
+table{
+margin:0 auto;
+position: static;
+width:100%;
+background-color:#ffffff;
+font-size:11px;
+border: 1px dotted #CC733B;
+
+}
+td {
+vertical-align:top;
+padding-bottom: 15px;
+}
+.rep{
+padding-right: 5px;
+}
+.edit {
+background-color:#ffffff;
+border:1px solid black;
+font-size:11px;
+text-align:left;
+vertical-align:top; 
+}
+
+.optional .resource {
+border:1px dotted;
+}
+.required .resource {
+border:1px dotted;
+}
+.recommended .resource {
+border:1px dotted;
+}
+.resource {
+cursor:pointer;
+}
+
+
+.required{
+color:#CC0000;
+}
+.required input, textarea{
+border:1px solid #CC0000;
+
+}
+.required select{
+border:1px solid #CC0000;
+
+}
+.recommended{
+color: #000000;
+}
+.recommended input, textarea{
+border:1px solid #000000;
+}
+.recommended select{
+border:1px solid #000000;
+}
+.optional{
+color: #666666;
+}
+.optional input, textarea, select{
+border:1px solid #999999;
+}
+.optional select{
+border:1px solid #999999;
+}
+.header {
+						
+						padding-top: 3px;
+						
+						
+					}
+					
+					#results-div {
+					padding: 25px;
+					}
+					#results-div img {
+					vertical-align: middle;
+					}
+					#results-div-track {
+					padding: 25px;
+					}
+					#results-div-track img {
+					vertical-align: middle;
+					}
+
+
+.subdiv table{
+border: 1px solid #ffffe0;
+background-color:#FFFFFF;
+padding-bottom: 10px;
+}
+
+
+
+#sub-res-type{
+font-weight: bold;
+width: 170px;
+padding-right: 10px;
+}
+
+.sub-res-type{
+font-weight: bold;
+width: 170px;
+padding-right: 10px;
+}
+.sub-res-type-ext{
+padding-bottom: 0px;
+vertical-align:top;
+font-weight: bold;
+width: 50px;
+padding-right: 0px;
+padding-left: 10px;
+padding-top: 10px;
+}
+
+
+
+.sub-res-type-ext input{
+font-weight: bold;
+padding-top: 0;
+}
+
+
+.mini-pad{
+padding-top: 5px;
+
+}
+.inp-div{
+padding-bottom: 3px;
+}
+.results {
+font-weight: bold;
+background-color: black;
+color:white;
+padding-top: 10px;
+padding-bottom: 0;
+padding-left: 10px;
+height: 30px;
+
+}
+.results input { 
+margin-left: 5px;
+}
+.panel-header {
+
+}
+.rec-title{
+padding:1px;
+font-size:12px;
+
+}
+.rec{
+float:right;
+padding-right: 10px;
+}
+#details{
+ padding: 10px;
+}
+.clickable{
+cursor:pointer;
+}
+.hint{
+color:green;
+line-height:1.22em;
+font-weight:bold;
+font-family:arial,helvetica,clean,sans-serif;
+font-size: 80%;
+}
+#rec-type-select-div{
+padding:20px;
+background-color:#ffffff;
+vertical-align:top;
+}
+#sresults{
+border-top: 1px solid #CC733B;
+width: 100%;
+height: 250px;
+overflow:auto;
+padding-top: 5px;
+}
+.bg-light{
+
+}
+#limit{ 
+border: 1px solid #FBEFC0;
+font-weight:normal;
+width: 30px;
+}
+#url-text{
+width: 250px;
+border:1px solid #000000;
+}
+.saved-searches{ 
+font-weight: bold;
+vertical-align: top;
+background-color:#CC733B;
+}
+
+.saved-searches a{
+padding-left: 10px;
+color:#FBEFC0;
+text-decoration:none;
+}
+
+.saved-searches div{ 
+padding-bottom: 4px;
+}
+
+.button {
+width: 60px;
+font-weight:bold;
+}
+#search-string, #q{
+border: 1px solid #FBEFC0;
+font-weight:normal;
+width: 250px;
+}
+.add-record{
+padding-top: 10px;
+padding-left: 3px;
+padding-bottom: 10px;
+background-color: #ffffff;
+}
+.record-over{
+background-color:#ffffe0;
+}
+
+.record-over-dead{
+padding-top: 3px;
+color: red;
+}
+.record-anchor{
+}
+#result-links{
+padding: 0;
+vertical-align:top;
+background-color:#F1E4AC;
+height: 10px;
+}
+#result-links a{
+text-decoration:none;
+color:#CC733B;
+}
+#prev{
+width:15%;
+}
+#next{
+width:15%;
+}
+#found{
+width:55%;
+padding-left: 3px;
+}
+#prev-search{
+width:15%;
+}
+.search-selected{
+padding:0;
+background-color:#FBEFC0;
+}
+.search-selected a{
+color:#2E6138;
+
+}
+#search-selected-text{
+color:white;
+font-weight:bold;
+}
+.reset{
+background-color:white;
+border: 1px solid black;
+}
+
+#search-image{ background-color:white;}
+
+.narrow td{
+padding-bottom:0px;
+}
+#delete-button {
+ padding-left: 50px;
+}
+#delete-button a{
+color:white;
+text-decoration:none;
+}

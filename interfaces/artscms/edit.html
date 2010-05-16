@@ -1,0 +1,207 @@
+<html>
+<head>
+<title>Edit record</title>
+
+<script src="http://hapi.heuristscholar.org/load?instance=artsdigital&v=d&key=793186f5d85de18661d0cc5a45f8be153706e632"></script>
+<script src="http://hapi.heuristscholar.org/03/goi.js"></script>
+<script src="common-functions.js"></script>
+<script src="../jquery/jquery.js"></script>
+<script>
+/* v 1.02 - IE 7 compliant */
+
+var path ="http://artsdigital.heuristscholar.org/heurist/";
+var rec_id = getIdFromUrl(); 
+
+if (!HCurrentUser.isLoggedIn()) window.location = path +"php/login.php";
+ 	
+function init() {
+	var spanTitle = document.getElementById("edit-title");
+	
+	spanTitle.innerHTML = "<h3>Edit Record</h3>";
+	doRecSearch(rec_id, 'primary'); 
+	
+}
+	
+function doRecSearch(id, option, detId, extra, constn) { //surely there must be a more elegant way of recycling the bugger
+	var mysearch = new HSearch("ids:" + id);
+ 	var loader = new HLoader(	
+ 	
+	function(s,r) {
+		switch (option){
+		case "primary":
+			displayPrimaryResults(r[0]);
+			break; 
+				
+		case "resource":
+			if (r[0]){
+				drawResourceDetails(r[0], detId, extra, constn);
+			}
+			break; 
+		}
+	},
+	
+	function(s,e) { alert("load failed: " + e); });
+	HeuristScholarDB.loadRecords(mysearch, loader);
+}
+
+function displayPrimaryResults(r) {
+	this.r = r;
+	if (document.getElementById("auto-save-span")){
+		//setAutoSaveTimeout(r);
+	}
+	document.getElementById("body-div").style.display = "";
+	var documentHeader = document.getElementById("results");
+	//var documentHeaderHelp = document.getElementById("help-td");
+	
+	var dets = document.getElementById("details");
+	var recImage = path +"img/reftype/" + r.getRecordType().getID() + ".gif";
+	var recTitle = r.getRecordType().getName();
+	var refId = r.getID();
+	var refTitle =r.getTitle();
+	var detailTypes =HDetailManager.getDetailTypesForRecordType(r.getRecordType()); 	//get all detail types for this record type 
+	
+	var img = document.createElement("img");
+	img.src = recImage;
+	img.align = "absmiddle";
+	documentHeader.appendChild(img);
+	documentHeader.appendChild(document.createTextNode(refTitle)); 
+	
+	var lightbulb = document.createElement("img");
+	lightbulb.src = path + "img/lb.gif";
+	lightbulb.align = "absmiddle";
+	lightbulb.border = 0;
+	
+	/*
+	var helpA = document.createElement("a");
+	helpA.href = "#";
+	helpA.onclick = function() { window.open('help.html', 'help','width=700, height=400'); };
+	helpA.appendChild(lightbulb); 
+	helpA.appendChild(document.createTextNode(" Help")); 
+	
+	documentHeaderHelp.appendChild(helpA);
+	*/
+
+	var url = drawUrlField(r);
+	if (url)dets.appendChild(url);
+			
+	for (var i = 0; i < detailTypes.length; i++) {  	//two loops, need to fully load "skin" before details, otherwise overwrites
+		var rows =drawInputForm(detailTypes[i], r.getRecordType());
+		
+		if (rows) dets.appendChild(rows);
+	}
+			 
+	for (var b = 0; b < detailTypes.length; b++) {
+		drawInputFormDetails(detailTypes[b].getID(), r.getID());
+	}
+	
+	drawRepeats();
+			
+	var tR = document.createElement("tr"); 
+	var tD = document.createElement("td");
+	tD.setAttribute("colspan", 4);
+			
+	var button = document.createElement("input");
+	button.type = "button";
+	button.value = "save record";
+	button.onclick = function() { saveRecord(r); };
+	
+	var cbutton = document.createElement("input");
+	cbutton.type = "button";
+	cbutton.value = "cancel";
+	cbutton.onclick = function() { window.close(); };
+	
+	tD.appendChild(button);
+	tD.appendChild(cbutton);
+	tR.appendChild(tD);
+	dets.appendChild(tR);
+
+	var detailID = getParams("d");
+	if (detailID) {
+		$("#details tr")
+			.not(":has(#sel" + detailID + ")")
+			.not(":last")
+			.hide();
+		$("#details").prepend("<tr colspan='2'><td><a href=#>Show all fields</a></td></tr>");
+		$("#details tr:first a").click(function() {
+			$("#details tr").show();
+			$(this).remove();
+			return false;
+		});
+	}
+}
+
+function drawInputFormDetails(detailId,rid){
+	var record = this.r;
+	var recType = record.getRecordType(); 							//HRecordType object
+	var detailType =  HDetailManager.getDetailTypeById(detailId); 	// HDetailType object
+	var detVariety = detailType.getVariety();
+	var detail = record.getDetails(detailType);
+
+	switch (detVariety){
+ 	case 'literal':
+  		drawInputField(detailId, detail);
+		break;
+ 
+ 	case 'blocktext':
+ 		drawTextArea (detailId, detail);
+ 		break;
+
+ 	case 'reference': 		//ATTENTION: not an efficient way of outputing resource pointers! FIXME!
+ 		var constRecType;
+ 		if (detailType.getConstrainedRecordType()) constRecType = detailType.getConstrainedRecordType().getID(); 
+  		drawResource(detailId, detail, constRecType);
+		break;
+ 
+	case 'file':
+ 		drawFile(detailId, detail);
+ 		break;
+ 
+ 	case 'enumeration':
+ 		drawEnums(detailId, detail);
+ 		break;
+ 
+ 	case 'geographic': 
+ 		drawGeo(detailId, detail);
+ 		break;
+ 
+ 	case 'boolean':
+ 		drawBool(detailId, detail);
+		break;
+ 
+	case 'date': //TODO: add calendar
+ 		drawDateField(detailId, detail);
+ 		break;
+ 
+ 	default:
+ 		drawRest(detailId, detail);
+		break;
+	}
+
+}
+
+
+
+
+
+
+function strcmp(a,b) { var x = a.getTitle(), y = b.getTitle(); return (x < y)? -1 : (x > y)? 1 : 0; }
+
+  </script>
+  <link rel="stylesheet" type="text/css" href="editform.css">
+ </head>
+
+ <body onLoad="init();">
+  <table class="transparent">
+   <tr>
+    <td><span id=edit-title></span></td><td><span id=auto-save-span></span></td><td>&nbsp;</td>
+   </tr>
+  </table>
+  <div id="body-div" style="display:none;">
+   <table id=tab-edit class="edit" cellpadding="0" cellspacing="0">
+    <tr><td class="panel-header" id=results></td></tr>
+    <tr><td><table class="detail"><tbody id="details"></tbody></table></td></tr>
+   </table>
+  </div>
+ </body>
+
+</html>
