@@ -58,7 +58,7 @@ function fillInColumn(colNum, bibID) {
 	else {
 		bibCell.innerHTML = "<b>Existing record #" + bibID + "</b>";
 		if (altBibIDs.length > 0) {
-			bibCell.innerHTML += " [<a href=# onclick='gotoNext(); return false;'>view next</a>]";
+			bibCell.innerHTML += " [<a href='#' onclick='gotoNext(); return false;'>view next</a>]";
 		}
 	}
 

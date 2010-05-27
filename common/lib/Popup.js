@@ -1,7 +1,7 @@
 /* Popup window functions */
 
 
-/* 
+/*
  * Open the given URL in a nicely blinged-out iframe popup in the top-level window (even if invoked from a nested frame)
  * which will be cancelled by the user clicking outside it.
  * The width and height of the popup are controlled by the width and height of the <body> of the loaded document.
@@ -55,7 +55,7 @@ function popup_url(url, x, y) {
 
 	var cancel_button = top.document.createElement('td');
 	cancel_button.className = 'cancel';
-	cancel_button.innerHTML = '&nbsp;<img src="/heurist/img/x2.gif">';
+	cancel_button.innerHTML = '&nbsp;<img src="../../common/images/x2.gif">';
 	addListener(cancel_button, 'click', cancel_click);
 	titlebar_table.firstChild.firstChild.appendChild(cancel_button);
 
@@ -150,7 +150,7 @@ function cover_top_document() {
 
 	top.coverall_iframe = top.document.createElement('div');
 	top.coverall_iframe.className = 'coverall';
-	top.coverall_iframe.src = 'blank.html';
+	top.coverall_iframe.src = '../../common/messages/blank.html';
 	top.coverall_iframe.frameBorder = 0;
 	top.document.body.appendChild(top.coverall_iframe);
 		top.coverall_iframe.style.width = page_size.w + 'px';

@@ -1,10 +1,10 @@
 <?php
 
-require_once('../php/modules/cred.php');
-require_once('t1000.php');
+require_once(dirname(__FILE__).'/../../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../../common/t1000/t1000.php');
 
 if (!is_logged_in()) {
-        header('Location: ' . BASE_PATH . 'login.php');
+        header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
         return;
 }
 
@@ -98,7 +98,7 @@ if ($keywords) {
 			if ($i++ == 3) {
 				$kwd_list .= '   <span class="collapsed"><span class="hide_on_collapse">'."\n";
 			}
-			$kwd_list .= '   <a href="user.php?Id='.$row['Id'].'" title="View user profile for '.$row['bkmk_user'].'"><nobr>'.$row['bkmk_user']."</nobr></a>&nbsp;\n";
+			$kwd_list .= '   <a href="'.HEURIST_SITE_PATH.'admin/users/user.php?Id='.$row['Id'].'" title="View user profile for '.$row['bkmk_user'].'"><nobr>'.$row['bkmk_user']."</nobr></a>&nbsp;\n";
 		}
 		if ($i > 3) {
 			$kwd_list .= '   </span>'."\n";
@@ -136,7 +136,7 @@ if (mysql_num_rows($res)) {
 		if ($i++ == 3) {
 			$body->global_vars['other-users'] .= ' <span class="collapsed"><span class="hide_on_collapse">'."\n";
 		}
-		$body->global_vars['other-users'] .= ' <a href="user.php?Id='.$row['Id'].'" title="View user profile for '.$row['bkmk_user'].'"><nobr>'.$row['bkmk_user']."</nobr></a>&nbsp;\n";
+		$body->global_vars['other-users'] .= ' <a href="'.HEURIST_SITE_PATH.'admin/users/user.php?Id='.$row['Id'].'" title="View user profile for '.$row['bkmk_user'].'"><nobr>'.$row['bkmk_user']."</nobr></a>&nbsp;\n";
 	}
 	if ($i > 3) {
 		$body->global_vars['other-users'] .= ' </span>'."\n";

@@ -1,0 +1,76 @@
+* {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+}
+
+body {
+	background-color: white;
+	margin: 0px;
+}
+
+#main {
+	padding: 20px;
+}
+
+.smallfont {
+	color: #000000;
+}
+.smallgr {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 9px;
+	font-style: normal;
+	color: #008000;
+}
+.smallgr * {
+	font-size: 9px;
+}
+.normal {
+	color: #000000;
+}
+.normalgr {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	color: #008000;
+}
+h2 {
+	font-weight: bold;
+}
+.headline {
+	font-size: 12px;
+	font-weight: bold;
+}
+.red {
+	color: #FF0000;	
+}
+.explain {
+	color: #006600;
+}
+.biglink {
+	font-size: 14px;
+}
+.search_bookmark {
+background-color: #F7F0E7;
+color: #8e1e1e;
+}
+
+.search_all {
+background-color: #F3F3F8;
+color: #444499;
+}
+
+hr {
+	height: 1px;
+	color: #C0C0C0;
+	background: #C0C0C0;
+	border: none;
+}
+
+/* Browser specific (not valid) styles to make preformatted text wrap */		
+pre {
+	white-space: pre-wrap;       /* css-3 */
+	white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+	white-space: -pre-wrap;      /* Opera 4-6 */
+	white-space: -o-pre-wrap;    /* Opera 7 */
+	word-wrap: break-word;       /* Internet Explorer 5.5+ */
+}
+

@@ -18,7 +18,7 @@ var HAPI = {
 
 	key: "",
 	instance: "",
-	setKey: function(key, instance) {
+	setKey: function(key, instance, url) {
 		var error;
 		var baseURL, path;
 
@@ -37,9 +37,10 @@ var HAPI = {
 
 			do {
 				// try the key against all path prefixes
-				if (HAPI.SHA1(instance + baseURL + path) === key) {
+				if (HAPI.SHA1(instance + baseURL + path) === key) {	//CHECKTHIS: noticed that the port is fixed perhaps we need to try without portnumber also
 					HAPI.key = key;
 					HAPI.instance = instance;
+					HAPI.HeuristBaseURL = url;
 					return;
 				}
 				path = path.replace(/[^\/]*\/$/, "");
@@ -2069,7 +2070,7 @@ HAPI.File = HFile;
 
 
 var HWikiManager = new function() {
-	var _wikiBase = "http://heuristscholar.org/tmwiki/index.php/";
+	var _wikiBase = "http://heuristscholar.org/tmwiki/index.php/";	// FIXME: need to remove this as tmwiki is deprecated
 
 	this.getWikis = function(record) {
 		/* PRE */ if (! HAPI.isA(record, "HRecord")) { throw new HTypeException("HRecord object required"); }
@@ -2503,7 +2504,7 @@ HAPI.XHR = {
 		if (! req) { return; }
 
 		if (url.match(/^[-a-z]+$/)) { /* only the HAPI method was supplied, not an absolute URL */
-			url = HAPI.XHR.defaultURLPrefix + url;
+			url = HAPI.XHR.defaultURLPrefix + "hapi/php/" + url + ".php";
 		}
 
 		var method = jso? "POST" : "GET";
@@ -2642,7 +2643,7 @@ HAPI.XHR = {
 		return stringify;
 	}(),
 
-	_xssWebPrefix: "http://hapi.heuristscholar.org/03/xss/",
+	_xssWebPrefix: HeuristBaseURL + "hapi/php/xss.php?",
 
 	txURLLen: 1900,
 	rxURLLen: (navigator.userAgent.match(/MSIE/))? 2000 : null,
@@ -2688,8 +2689,8 @@ HAPI.XHR = {
 		var handler = HAPI.addListener(fr, "load", frOnload);
 
 		void( frames[fr.name].name );	// something about lazy evaluation perhaps -- this yanks the frame violently into existence.
-		fr.contentWindow.location.replace((xssWebPrefix || HAPI.XHR._xssWebPrefix) + encodeURIComponent(method) +
-				"?key=" + encodeURIComponent(HAPI.key || "") +
+		fr.contentWindow.location.replace((xssWebPrefix || HAPI.XHR._xssWebPrefix) + "method=" + encodeURIComponent(method) +
+				"&key=" + encodeURIComponent(HAPI.key || "") +
 				"&data=" + encodeURIComponent(HAPI.base64.encode(jsonData)) +
 				(HAPI.XHR.rxURLLen? ("&rxlen="+HAPI.XHR.rxURLLen) : ""));
 	},
@@ -2818,7 +2819,7 @@ HAPI.XHR = {
 
 		var scr = document.createElement("script");
 		scr.type = "text/javascript";
-		scr.src = (xssWebPrefix || HAPI.XHR._xssWebPrefix) + encodeURIComponent(method) + "?key=" + encodeURIComponent(HAPI.key || "") + "&data=" + encodeURIComponent(HAPI.base64.encode(HAPI.XHR.convertToJSON(data))) + "&cb=" + name;
+		scr.src = (xssWebPrefix || HAPI.XHR._xssWebPrefix) + "method=" + encodeURIComponent(method) + "&key=" + encodeURIComponent(HAPI.key || "") + "&data=" + encodeURIComponent(HAPI.base64.encode(HAPI.XHR.convertToJSON(data))) + "&cb=" + name;
 
 		var headElt = document.getElementsByTagName("head")[0];
 
@@ -3496,7 +3497,7 @@ var HeuristScholarDB = new HStorageManager();
 				baseURL = baseURL.replace(/^http:\/\//, "http://" + Math.round(Math.random()*100) + ".");
 			}
 			// Insert XSS incantations if HAPI.key is set.
-			newForm.action = baseURL + (HAPI.key? ("xss/save-file?key=" + encodeURIComponent(HAPI.key)) : "save-file");
+			newForm.action = baseURL + (HAPI.key? ("xss.php/save-file?key=" + encodeURIComponent(HAPI.key)) : "save-file");
 
 		doc.body.appendChild(newForm);
 
@@ -3625,7 +3626,7 @@ console.log(uploadID + " => " + infos[uploadID]);
 			}
 		}
 	}
-}).call(HeuristScholarDB, "http://hapi.heuristscholar.org/03/");
+}).call(HeuristScholarDB, HeuristBaseURL);
 
 
 
@@ -3753,4 +3754,4 @@ HAPI.importSymbols = function(from, to) {
 
 };
 
-if (window["HeuristApiKey"]) { HAPI.setKey(HeuristApiKey, "" + window["HeuristInstance"]); }
+if (window["HeuristApiKey"]) { HAPI.setKey(HeuristApiKey, "" + window["HeuristInstance"], "" + window["HeuristBaseURL"]); }

@@ -10,9 +10,9 @@ define('SEARCH_VERSION', 1);
 
 if (array_key_exists('alt', $_REQUEST)) define('use_alt_db', 1);
 
-require_once('modules/cred.php');
-require_once('modules/db.php');
-require_once('modules/adv-search.php');
+require_once(dirname(__FILE__).'/../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../common/connect/db.php');
+require_once(dirname(__FILE__).'/advanced/adv-search.php');
 
 
 list($usec, $sec) = explode(' ', microtime());
@@ -130,7 +130,7 @@ window.HEURIST = {
 var results = {};
 results.sid = "<?= @$sid ?>";
 results.records = [];
-results.totalRecordCount = <?= $num_rows ?>;
+results.totalRecordCount = "<?= $num_rows ?>";
 results.notified = false;
 
 if (top.HEURIST && top.HEURIST.firedEvents["heurist-search-html-loaded"] && top.HEURIST.firedEvents["heurist-search-js-loaded"] && top.HEURIST.firedEvents["heurist-obj-common-loaded"]) top.HEURIST.search.searchNotify(results);
@@ -187,7 +187,7 @@ if (top.HEURIST && top.HEURIST.firedEvents["heurist-search-html-loaded"] && top.
 	print ' -->';
 ?>
  <body>
-<?php foreach ($reftypes as $rt_id) if ($rt_id > 0) print "<img src=../img/reftype/".$rt_id.".gif>"; ?>
+<?php foreach ($reftypes as $rt_id) if ($rt_id > 0) print "<img src=../common/images/reftype-icons/".$rt_id.".gif>"; ?>
  </body>
 </html>
 <?php
@@ -218,7 +218,7 @@ function print_result($row) {
 		                     limit 1");
 		if (mysql_num_rows($res) == 1) {
 			$file = mysql_fetch_assoc($res);
-			$thumb_url = "php/resize_image.php?file_id=".$file['file_nonce'];
+			$thumb_url = "../common/lib/resize_image.php?file_id=".$file['file_nonce'];
 		} else {
 			// 603  Full image url
 			$res = mysql_query("select rd_val
@@ -228,7 +228,7 @@ function print_result($row) {
 		                         limit 1");
 			if (mysql_num_rows($res) == 1) {
 				$row = mysql_fetch_assoc($res);
-				$thumb_url = "php/resize_image.php?file_url=".htmlspecialchars($row['rd_val']);
+				$thumb_url = "../common/lib/resize_image.php?file_url=".htmlspecialchars($row['rd_val']);
 			}
 		}
 		print ",'$thumb_url'";
@@ -240,7 +240,7 @@ function print_result($row) {
 
 
 function rss_url() {
-	return '../legacy/search_rss.php?s='.@$_REQUEST['s'].'&w='.@$_REQUEST['w'].'&q='.urlencode(@$_REQUEST['q']);
+	return 'feeds/search_rss.php?s='.@$_REQUEST['s'].'&w='.@$_REQUEST['w'].'&q='.urlencode(@$_REQUEST['q']);
 }
 
 ?>

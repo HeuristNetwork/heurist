@@ -37,8 +37,8 @@ if (@$_REQUEST["instance"]) {
 	define("HOST", $_SERVER["HTTP_HOST"]);
 }
 
-require_once("../modules/db.php");
-require_once("../modules/heurist-instances.php");
+require_once(dirname(__FILE__)."/../connect/db.php");
+require_once(dirname(__FILE__)."/../config/heurist-instances.php");
 
 mysql_connection_select("hapi");
 $query = "SELECT hl_key
@@ -53,5 +53,5 @@ if (! $row) {
 $key = $row["hl_key"];
 
 ?>
-document.write("<" + "script src=http://hapi.heuristscholar.org/load?v=d&instance=<?= HEURIST_INSTANCE ?>&key=<?= $key ?>><" + "/script>\n");
- 
+document.write("<" + "script src=\"<?=HEURIST_SITE_PATH?>hapi/load.php?instance=<?= HEURIST_INSTANCE ?>&key=<?= $key ?>\"><" + "/script>\n");
+

@@ -6,8 +6,7 @@ if (@$_REQUEST["instance"]) {
 	define("HOST", $_SERVER["HTTP_HOST"]);
 }
 
-require_once('heurist-instances.php');
-
+require_once("/var/www/htdocs/h3/common/config/heurist-instances.php");	//FIXME: need to figure out why this doesn't work with relative paths;
 
 if (! defined('COOKIE_VERSION'))
 	define('COOKIE_VERSION', 1);		// increment to force re-login when required
@@ -35,10 +34,9 @@ if (_is_logged_in()) {
 }
 session_write_close();
 
-if (! defined('BASE_PATH')  &&  defined('HOST')) {
-	define('BASE_PATH', 'http://'.HOST.'/heurist-test/');
+if (! defined('BASE_PATH')  &&  defined('HEURIST_URL_BASE')) {
+	define('BASE_PATH', HEURIST_URL_BASE);
 }
-
 
 function is_cookie_current_version() {
 	return (@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['cookie_version'] == COOKIE_VERSION);
@@ -50,7 +48,6 @@ function get_roles() {
 	else
 		return NULL;
 }
-
 
 function _is_logged_in() {
 	return (!!@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_name']  &&
@@ -102,7 +99,6 @@ function get_user_access() {
 	return 'not-logged-in';
 }
 
-
 function get_access_levels() {
 	return array(
 		'modeluser' => is_modeluser() ? 1 : 0,
@@ -120,9 +116,9 @@ function jump_sessions() {
 	 * this cripples the server whenever a page with session data is loaded, because PHP insists on parsing the session file.
 	 * So,
          *        "Any problem in computer science can be solved with another layer of indirection.
-	 *         But that usually will create another problem." 
+	 *         But that usually will create another problem."
          *                                    --David Wheeler
-	 * 
+	 *
 	 * In the main session data, we store the ID of another session, which we use as persistent scratch space for
 	 * (especially) the import functionality.  Call jump_sessions() to load this alternative session.
 	 * Note that we haven't yet found out what the "another problem" is in this case.

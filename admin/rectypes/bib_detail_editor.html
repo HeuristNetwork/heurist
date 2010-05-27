@@ -5,10 +5,10 @@
   <link rel="icon" href="../../favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
 
-  <link rel="stylesheet" type="text/css" href="v04/Popup.css">
-  <script type="text/javascript" src="v05/Popup.js"></script>
+  <link rel="stylesheet" type="text/css" href="../../css/Popup.css">
+  <script type="text/javascript" src="../../common/lib/Popup.js"></script>
 
-  <link rel="stylesheet" type="text/css" href="newshsseri.css">
+  <link rel="stylesheet" type="text/css" href="../../css/newshsseri.css">
   <style type="text/css">
 	a img { border: 0; }
 	.friendly_border { border: 1px dotted lightgray; background-color: #FFFFDD; border-collapse: collapse; }
@@ -44,7 +44,7 @@
 	}
 
 	function edit_enum_types_with_pos(rdt_id, pos) {
-		popup_frame(pos, 'select_enum_values.php?rdt_id='+rdt_id, finish_edit_enum_types);
+		popup_frame(pos, 'enums/select_enum_values.php?rdt_id='+rdt_id, finish_edit_enum_types);
 	}
 
 	function finish_edit_enum_types() {
@@ -54,7 +54,7 @@
 	function edit_constrain_reftype(rdt_id) {
 		var name_span = document.getElementById('name'+rdt_id);
 		var pos = findPos(name_span);
-		popup_frame(pos, 'edit_constrain_reftype.php?rdt_id='+rdt_id, finish_edit_constrain_reftype);
+		popup_frame(pos, 'constraints/edit_constrain_reftype.php?rdt_id='+rdt_id, finish_edit_constrain_reftype);
 	}
 
 	function finish_edit_constrain_reftype() {
@@ -195,27 +195,27 @@
 
   <div>
 
-<a href="../admin/">User admin</a>
+<a href="../users/add.php">User admin</a>
 |
-<a href="recalculate_title_masks.php">Rebuild titles</a>
+<a href="../verification/recalculate_title_masks.php">Rebuild titles</a>
 |
-<a href="find_dupes.php?fuzziness=10">Find duplicates</a>
+<a href="../verification/find_dupes.php?fuzziness=10">Find duplicates</a>
 |
-<a href="workgroup_keyword_manager.php">Workgroup keywords</a>
+<a href="../workgroups/workgroup_keyword_manager.php">Workgroup keywords</a>
 |
-<a href="../admin/usergroupadmin.php">List all users</a>
+<a href="../users/usergroupadmin.php">List all users</a>
 |
-<a href="../?q=_BROKEN_&w=all">Records with broken urls</a>
+<a href="../../search/heurist-search.html?q=_BROKEN_&amp;w=all">Records with broken urls</a>
 |
-<a href="wg_overrides.php">Record types with overrides</a>
+<a href="../workgroups/wg_overrides.php">Record types with overrides</a>
 |
-<a href="groups.php">Take your hat off (exit group)</a>
+<a href="../workgroups/groups.php">Take your hat off (exit group)</a>
 <br>
-<a href="../admin/xhtmlcheck.php">Woot XHTML check</a>
+<a href="../verification/xhtmlcheck.php">Woot XHTML check</a>
 |
-<a href="../admin/edit_workgroups.php">Add/edit workgroups</a>
+<a href="../workgroups/edit_workgroups.php">Add/edit workgroups</a>
 |
-<a href="../php/record-rollback.php">Record rollback</a>
+<a href="../rollback/record-rollback.php">Record rollback</a>
 
   </div>
 
@@ -235,7 +235,7 @@
 [end-if]
 
 <form action="bib_detail_editor.php" method="post" name="edit_form" onsubmit="return check_prompts();">
-<input type=hidden name=grp_id value=[grp_id]>
+<input type=hidden name=grp_id value='[grp_id]'>
 [update REFTYPE rt1]
 
   [errors]
@@ -276,8 +276,8 @@ window.reqMatchField = 1;
   <hr>
 
   <p class="base-only">
-   <a href="help/bib_detail_editor.html" target=_blank><img src="../img/lb.gif" style="vertical-align: bottom;"></a>
-   <a href="help/bib_detail_editor.html" target=_blank>Explanation of functions</a>
+   <a href="../../help/bib_detail_editor.html" target=_blank><img src="../../common/images/lb.gif" style="vertical-align: bottom;"></a>
+   <a href="../../help/bib_detail_editor.html" target=_blank>Explanation of functions</a>
   </p>
 
   <table border="0">
@@ -291,7 +291,7 @@ window.reqMatchField = 1;
    <tr class="base-only">
     <td style="font-weight: bold; text-align: right;">Icon</td>
 	<td>
-     <img src="../img/reftype/[rt_id].gif" style="vertical-align: middle;" class="rft_icon" onclick="upload_icon([rt_id]);">
+     <img src="../../common/images/reftype-icons/[rt_id].gif" style="vertical-align: middle;" class="rft_icon" onclick="upload_icon([rt_id]);">
      &nbsp;&nbsp;&nbsp;&nbsp;
      <span style="font-weight: bold; text-align: right;">Bibliographic record types</span>
      [checkbox : rt_primary : primary record type : style="margin: 0px;"]
@@ -327,7 +327,7 @@ window.reqMatchField = 1;
      [foreach BDR_OVERRIDES bdr : 1 order by rdr_order, rdr_id]
       <tr class="friendly_border">
        <td style="vertical-align: top; font-weight: bold;">
-        <img src="../img/cross.gif" onclick="delete_bdr([rdr_id]);" class="delete_icon">
+        <img src="../../common/images/cross.gif" onclick="delete_bdr([rdr_id]);" class="delete_icon">
         [delete BDR_OVERRIDES bdr_delete][hidden required : del_field][end-delete]
         [select BIB_DETAIL_TYPE bdt][rdt_name] <span style="font-size: 80%; font-weight: normal;">([rdt_id])</span>[end-select]&nbsp;
 </td>
@@ -336,7 +336,7 @@ window.reqMatchField = 1;
         [update BDR_OVERRIDES bdr]
          &nbsp;&nbsp;&nbsp;label [textbox : rdr_name : contextual name : style="width: 200px;"]&nbsp;
 [dropdown required : rdr_required : : select req_abbrev, req_full from requirements order by req_order : style="width: 90px;"]&nbsp;
-<img src="../img/10x10.gif">
+<img src="../../common/images/10x10.gif">
          &nbsp;size [textbox : rdr_size : field width : style="width: 30px;"]
           &nbsp;<label>repeatable [checkbox : rdr_repeatable : repeatable : style="margin: 0px;"]</label>&nbsp;
           &nbsp;<label>matching [checkbox : rdr_match : is this field used for identifying possible matches? : style="margin: 0px;"]</label>&nbsp;
@@ -405,14 +405,14 @@ window.reqMatchField = 1;
 <p/>
 <form method="post">
 <table border="0">
- <tr><td></td><td style="text-align: right;"><a href="bib_detail_dump.php">print-friendly dump</a> | <a href="bib_errors.php">records with errors</a></td></tr>
+ <tr><td></td><td style="text-align: right;"><a href="../describe/bib_detail_dump.php">print-friendly dump</a> | <a href="../verification/bib_errors.php">records with errors</a></td></tr>
 <tr><td>
  <p><b>Select a record type to edit:</b></p>
 
  <div style="width: 300px; height: 500px; overflow: auto; padding: 3px;" class="friendly_border">
   <table border="0">
    [foreach REFTYPE rtf : 1 order by (!rt_primary), rt_name]
-    <tr><td><input type=checkbox name=active_rt[literal][[end-literal][rt_id][literal]][end-literal] [select ACTIVE_REFTYPE art]checked[end-select][not-found][end-not-found]></td><td style="text-align: right;">[rt_id]</td><td><img src="../img/reftype/[rt_id].gif" id="rt[rt_id]" class="rft_icon" onclick="upload_icon([rt_id]);"><a href="?rt_id=[rt_id]">[rt_name]</a></td></tr>
+    <tr><td><input type=checkbox name='active_rt[literal][[end-literal][rt_id][literal]][end-literal]' [select ACTIVE_REFTYPE art]checked[end-select][not-found][end-not-found]></td><td style="text-align: right;">[rt_id]</td><td><img src="../../common/images/reftype-icons/[rt_id].gif" id="rt[rt_id]" class="rft_icon" onclick="upload_icon([rt_id]);"><a href="?rt_id=[rt_id]">[rt_name]</a></td></tr>
    [end-foreach]
    [not-found][end-not-found]
   </table>
@@ -420,7 +420,7 @@ window.reqMatchField = 1;
 
 </td>
 <td>
- <p><b>Metadata elements</b></p>
+ <p><b>Detail types (fields)</b></p>
 
  <div style="width: 450px; height: 500px; overflow: auto; padding: 3px;" class="friendly_border">
   <table border="0" style="width: 100%;">
@@ -447,7 +447,7 @@ window.reqMatchField = 1;
 
   </div>
 
-  <iframe name="popup_frame" id="popup_frame_obj" src="select_enum_values.php" style="z-index: 51; width: 520px; height: 300px; position: absolute; top: -500px; left: 0px;" frameborder="0"></iframe>
+  <iframe name="popup_frame" id="popup_frame_obj" src="enums/select_enum_values.php" style="z-index: 51; width: 520px; height: 300px; position: absolute; top: -500px; left: 0px;" frameborder="0"></iframe>
 
   </div>
 

@@ -1,6 +1,6 @@
 <html>
  <head>
-  <link rel=stylesheet href=../css/heurist.css>
+  <link rel=stylesheet href="../../css/heurist.css">
   <title>Find records</title>
 
   <style>
@@ -13,7 +13,7 @@
 	height: 1.2em;
 	overflow: hidden;
 }
-body { margin: 0; padding: 0; overflow: hidden; }
+body { margin: 0; padding: 0; overflow: hidden; min-width: 300; min-height : 200; }
 
 /* need overflow: auto on both of these elements:
    IE(6) spazzes out if #results doesn't have it,
@@ -40,11 +40,11 @@ input { padding: 0; margin: 0; }
 
   </style>
  </head>
- <body width="500" height="250" minwidth="300" minheight="200">
-  <script src=../js/heurist.js></script>
+ <body width="500" height="250" >
+  <script src="../../common/lib/heurist.js"></script>
   <script>
 if (window == top) {
-	top.HEURIST.loadScript("../php/js/heurist-obj-common.php");	// core HEURIST object definitions (dynamically generated)
+	top.HEURIST.loadScript(top.HEURIST.basePath +"common/lib/heurist-obj-common.php");	// core HEURIST object definitions (dynamically generated)
 }
   </script>
 
@@ -56,12 +56,12 @@ if (window == top) {
      <td style="padding: 5px;">
       <div style="width: 100%;">
        <div><input autocomplete=off type=text name=q id=q onchange="top.HEURIST.util.setDisplayPreference('record-search-string', value);" style="border: 1px solid black; padding: 1px 18px 1px 2px; margin: 0; width: 100%;"></div>
-       <div id=help-div>Enter part of word and click <img src=../img/tiny-magglass.gif onclick="document.forms[0].submit()" style="vertical-align: middle;"></div>
+       <div id=help-div>Enter part of word and click <img src="../../common/images/tiny-magglass.gif" onclick="document.forms[0].submit()" style="vertical-align: middle;"></div>
       </div>
      </td>
      <td style="width: 1px; vertical-align: middle;">
       <div style="overflow: visible; width: 1px;">
-      <img src=../img/small-magglass.gif style="position: relative; cursor: pointer; z-index: 1; left: -22px;"
+      <img src="../../common/images/small-magglass.gif" style="position: relative; cursor: pointer; z-index: 1; left: -22px;"
            onclick="document.forms[0].submit()" title="Search records">
       </div>
       <input type=submit value=Find style="display: none; font-weight: bold; padding: 0 1ex; margin-right: 1ex;">
@@ -80,7 +80,7 @@ if (window == top) {
    </td></tr>
    <tr><td style="padding: 5px; height: 20px; background-color: #f0f0f0;">
     Didn't find what you were looking for?
-    <a href=# onclick="top.HEURIST.util.popupURL(window, 'popup/mini-new.html?reftype='+document.getElementById('t').value+'&title='+document.getElementById('q').value, { callback: function(title, bd, bibID) { if (bibID) { window.close(bibID, title); } else { document.forms[0].submit(); } } }); return false;">Add a new record</a>
+    <a href="#" onclick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'data/records/editrec/mini-new.html?reftype='+document.getElementById('t').value+'&amp;title='+document.getElementById('q').value, { callback: function(title, bd, bibID) { if (bibID) { window.close(bibID, title); } else { document.forms[0].submit(); } } }); return false;">Add a new record</a>
    </td></tr>
   </table>
   </form>
@@ -136,7 +136,7 @@ function notifyResults(results) {
 		bibID.className = "id";
 
 		img = recordDiv.appendChild(document.createElement("img"));
-		img.src = "../img/reftype/" + (record[3]? record[3] : "blank") + ".gif";
+		img.src = top.HEURIST.basePath + "common/images/reftype-icons/" + (record[3]? record[3] : "blank") + ".gif";
 
 		title = recordDiv.appendChild(document.createElement("span"));
 		title.appendChild(document.createTextNode(record[1]));
@@ -173,7 +173,7 @@ document.forms[0].submit = function() {
 	var resultsDiv = document.getElementById("results");
 	resultsDiv.innerHTML = "<i style='padding: 1ex;'>Searching ...</i>";
 
-	top.HEURIST.util.sendRequest("php/json-bib-search.php", notifyResults, query);
+	top.HEURIST.util.sendRequest(top.HEURIST.basePath + "data/pointer/json-bib-search.php", notifyResults, query);
 
 	return false;
 }

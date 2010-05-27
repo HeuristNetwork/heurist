@@ -3,19 +3,19 @@
 /* Load the user's display preferences.
  * Display preferences are added as CSS classes to the document body:
  * you should include this file in the BODY, not in the head.
- * 
+ *
  * If arguments  xxx=yyy  are supplied, set those for future display,
  * and suppress normal output.
- * 
+ *
  * Setting  xxx=yyy  will add class  xxx-yyy  to the body,
  * but then setting  xxx=xyz  would add  xxx-xyz  INSTEAD.
- * 
+ *
  * Preferences are currently stored in the $_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'], maybe they would eventually be in the DB.
  */
 
 define("SAVE_URI", "disabled");
 
-require_once("../modules/cred.php");
+require_once(dirname(__FILE__)."/../connect/cred.php");
 
 header("Content-type: text/javascript");
 

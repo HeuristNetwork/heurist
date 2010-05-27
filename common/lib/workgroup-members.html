@@ -1,7 +1,7 @@
 <html>
  <head>
   <title>Workgroup members</title>
-  <link rel=stylesheet href=../css/heurist.css>
+  <link rel=stylesheet href="../../css/heurist.css">
 
   <style>
 #wg-title { font-size: 120% }
@@ -13,7 +13,7 @@ td { padding-right: 20px; }
 
  <body width=600 height=400>
 
-  <script src=../js/heurist.js></script>
+  <script src="heurist.js"></script>
   <script>
 window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 
@@ -57,7 +57,7 @@ function showMembers() {
 			td = tr.appendChild(document.createElement("td"));
 			link = td.appendChild(document.createElement("a"));
 			link.target = "_blank";
-			link.href = "../blog/?u="+wg.members[i].id;
+			link.href = "../../interfaces/blog/index.html?u="+wg.members[i].id;
 			link.appendChild(document.createTextNode("blog"));
 		}
 
@@ -65,7 +65,7 @@ function showMembers() {
 			td = tr.appendChild(document.createElement("td"));
 			var a = td.appendChild(document.createElement("a"));
 				a.target = "_blank";
-				a.href = "../blog/report.php?u=" + wg.members[i].id + "&d=" + dateString;
+				a.href = "../../interfaces/blog/report.php?u=" + wg.members[i].id + "&d=" + dateString;
 				a.appendChild(document.createTextNode("blog report"));
 		}
 	}
@@ -75,7 +75,7 @@ function showMembers() {
 			div.style.cssFloat = div.style.styleFloat = "right";
 		var a = div.appendChild(document.createElement("a"));
 			a.target = "_blank";
-			a.href = "../blog/report.php?g=" + window.HEURIST.parameters["wg_id"] + "&d=" + dateString;
+			a.href = "../../interfaces/blog/report.php?g=" + window.HEURIST.parameters["wg_id"] + "&d=" + dateString;
 			a.appendChild(document.createTextNode("group blog report"));
 		table.parentNode.insertBefore(div, table);
 	}

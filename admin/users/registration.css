@@ -2,7 +2,7 @@
 /* Registration */
 
 body {
-	background-image: url(../img/search-bg.gif);
+	background-image: url(../../common/images/search-bg.gif);
 	background-repeat: repeat-x;
 	background-position: 0px 0px;
 	margin-left: 10px;
@@ -44,7 +44,7 @@ body {
 	-moz-border-radius-bottomright: 10px;
 	-moz-border-radius-topleft: 10px;
 	-moz-border-radius-topright: 10px;
-	background-image: url(../img/heading_popup.png);
+	background-image: url(../../common/images/heading_popup.png);
 	background-repeat: repeat-x;
 	background-position: left -6px;
 	color: #6A7C99;
@@ -103,7 +103,7 @@ body {
 	font-size: 1em;
 	line-height: 1.6em;
 	padding-left: 18px;
-	background-image: url(../img/heading_saved_search.png);
+	background-image: url(../../common/images/heading_saved_search.png);
 	background-repeat: no-repeat;
 	background-position: left -2px;
 }
@@ -112,7 +112,7 @@ body {
 }
 
 #optional.hide a, #conditions.hide a {
-	background-image: url(../img/heading_saved_search-hidden.png);
+	background-image: url(../../common/images/heading_saved_search-hidden.png);
 	background-repeat: no-repeat;
 	background-position: left -2px;
 }

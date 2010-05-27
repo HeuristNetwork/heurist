@@ -1,11 +1,11 @@
 <?php
 
-/* 
+/*
 
 This file is part of the T1000 web database templating system
 
-Developed by Tom Murtagh, 
-Archaeological Computing Laboratory, 
+Developed by Tom Murtagh,
+Archaeological Computing Laboratory,
 University of Sydney
 
 Copyright (c) 2005, University of Sydney
@@ -26,11 +26,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-require_once('../php/modules/cred.php');
-require_once('t1000.php');
+define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
+require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
 if (! is_logged_in()  ||  ! is_admin()  ||  HEURIST_INSTANCE != "") {
-	header('Location: ../php/login.php');
+	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
 	return;
 }
 

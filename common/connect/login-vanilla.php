@@ -2,19 +2,17 @@
 
 define('SAVE_URI', 'disabled');
 
-require_once('modules/cred.php');
-require_once('modules/db.php');
+require_once('cred.php');
+require_once('db.php');
 session_start();
 
 $last_uri = urldecode(@$_REQUEST['last_uri']);
 $home = urldecode(@$_REQUEST['home']);
 $logo = urldecode(@$_REQUEST['logo']);
 if (!$logo) {
-	$logo = "../img/hlogo-big.gif";
+	$logo = "../../common/images/hlogo-big.gif";
 }
 $instance_name = ucwords(eregi_replace("[.]", "", HEURIST_INSTANCE_PREFIX));
-
-
 
 if (! $last_uri) {
 	if (@$_SERVER['HTTP_REFERER']  &&  strpos($_SERVER['HTTP_REFERER'], $_SERVER['SERVER_NAME'] . $_SERVER['SCRIPT_NAME']) === false) {
@@ -22,13 +20,15 @@ if (! $last_uri) {
 	}
 }
 
-
-if (! defined('BASE_PATH'))
-	define('BASE_PATH', '');
-
+if (! defined('HEURIST_URL_BASE')) {
+	if (defined('HOST_BASE')) {
+		define('HEURIST_URL_BASE', 'http://'.HOST_BASE."/heurist3/");
+	}else{
+		define('HEURIST_URL_BASE', '');
+	}
+}
 
 mysql_connection_db_select(USERS_DATABASE);
-
 
 $LOGIN_ERROR = '';
 if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
@@ -78,7 +78,7 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 
 		if ($last_uri)
 			header('Location: ' . $last_uri);
-			
+
 			//$onload = ' window.close();';
 
 
@@ -98,7 +98,7 @@ if (@$_REQUEST['logout']) {
 	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['search-results']);
 	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['sessionid']);
 	setcookie('favourites', '', time() - 3600);
-	
+
 
 	header('Location: login-vanilla.php' . ($logo ? '?logo=' . urlencode($logo) : '') . ($home ? '&home=' . urlencode($home) : ''));
 
@@ -110,10 +110,10 @@ if (@$_REQUEST['logout']) {
 <html>
 <head>
 <title>Heurist Login</title>
-<link rel=icon href=../../favicon.ico type=image/x-icon>
-<link rel="shortcut icon" href=../../favicon.ico type=image/x-icon>
+<link rel=icon href=<?= HEURIST_SITE_PATH ?>favicon.ico type=image/x-icon>
+<link rel="shortcut icon" href=<?= HEURIST_SITE_PATH ?>favicon.ico type=image/x-icon>
 
-<link rel=stylesheet type=text/css href=../css/heurist.css>
+<link rel=stylesheet type=text/css href=<?= HEURIST_SITE_PATH ?>css/heurist.css>
 
 <style>
 body {
@@ -174,9 +174,9 @@ div.indent {
    <?php } ?>
  }
 </script>
-<script src=../js/heurist.js></script>
-<script src=../js/heurist-util.js></script>
- 
+<script src=../../common/lib/heurist.js></script>
+<script src=../../common/lib/heurist-util.js></script>
+
 <div id=banner>
  <span id=logo><a href=".." title="Home"><img src="<?= $logo; ?>" align="absmiddle"></a><span class=bigheading style="margin-left: 50px; "> <?= $instance_name; ?> Login </span></span>
 </div>
@@ -185,7 +185,7 @@ div.indent {
 <div id=main style="padding: 20px;">
 
 
- 
+
 <form name=mainform method=post>
 
 <?php
@@ -228,7 +228,7 @@ div.indent {
 <div class=indent>
  <span class=heading>Forgotten your password?</span>
  &nbsp;
- <a href="../admin/reset_password.php" onclick="window.open(this.href,'','status=0,scrollbars=0,width=400,height=200'); return false;">Click here to reset your password</a>
+ <a href="<?=HEURIST_URL_BASE?>admin/users/reset_password.php" onclick="window.open(this.href,'','status=0,scrollbars=0,width=400,height=200'); return false;">Click here to reset your password</a>
 </div>
 
 
@@ -241,7 +241,7 @@ div.indent {
 <div class=indent>
 <p>You are currently logged-in as <b><?= get_user_name() ?> (<?= get_user_username() ?>)</b></p>
 
-<?php	
+<?php
 		if ($home)
 			echo "<p><b><a href=\"{$home}\">{$instance_name} home</a></b></p>\n\n";
 		if ($last_uri)

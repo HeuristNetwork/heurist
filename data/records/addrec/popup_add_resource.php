@@ -2,8 +2,8 @@
 
 define('SAVE_URI', 'disabled');
 
-require_once('../php/modules/cred.php');
-require_once('../php/modules/db.php');
+require_once(dirname(__FILE__).'/../../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../../common/connect/db.php');
 
 if (! is_logged_in()) return;
 
@@ -12,10 +12,10 @@ mysql_connection_db_select(DATABASE);
 ?>
 <html>
  <head>
-  <link rel=stylesheet href=../css/heurist.css>
+  <link rel=stylesheet href=../../../css/heurist.css>
   <title>Add new record</title>
 
-  <script src=../../jquery/jquery.js></script>
+  <script src=../../../external/jquery/jquery.js></script>
 
   <script>
 
@@ -49,7 +49,7 @@ function buildWorkgroupKeywordSelect(wgID) {
 
 
 function update_link() {
-	var base = "http://<?= @$_SERVER["HTTP_HOST"] ?>/heurist/php/add.php?addref=1";
+	var base = "<?= HEURIST_URL_BASE?>data/records/addrec/add.php?addref=1";
 	var link = base + compute_args();
 
 	var tags = $("#add-link-tags").val();
@@ -144,7 +144,7 @@ function add_note(e) {
 
     if (! rt) rt = "2";  //added ian 19/9/08 to re-enable notes as default
 
-	top.location.href = '../php/add.php?addref=1&bib_reftype='+rt + extra_parms;
+	top.location.href = '<?= HEURIST_URL_BASE?>data/records/addrec/add.php?addref=1&bib_reftype='+rt + extra_parms;
 
 	/*if (rt) {
 		top.location.href = '../php/add.php?addref=1&bib_reftype='+rt + extra_parms;

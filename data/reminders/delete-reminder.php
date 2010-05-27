@@ -1,7 +1,7 @@
 <?php
 
-require_once("../php/modules/cred.php");
-require_once("../php/modules/db.php");
+require_once(dirname(__FILE__)."/../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../../common/connect/db.php");
 
 $r = intval(@$_REQUEST["r"]);
 $u = intval(@$_REQUEST["u"]);
@@ -12,7 +12,7 @@ if (! $r) return;
 
 if ($u) {
 	if (! is_logged_in()  ||  $u != get_user_id()) {
-		header("Location: " . BASE_PATH . "php/login.php?logout=1");
+		header("Location: " . BASE_PATH . "common/connect/login.php?logout=1");
 		return;
 	}
 }

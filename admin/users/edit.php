@@ -2,21 +2,22 @@
 /* Filename: edit_users.php
 *  Template File: edit_users.html
 *  Rederer File: edit_users.php
-*  General Function Purpose: Allow administrators to edit the values in user lists. 
-*  File Function: Render page. 
+*  General Function Purpose: Allow administrators to edit the values in user lists.
+*  File Function: Render page.
 */
 
 
-require_once('../php/modules/cred.php');
-require_once('t1000.php');
+define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
+require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
 
 if ( ! (is_logged_in()  &&
          (is_admin()  ||  $_REQUEST['Id'] == get_user_id()) )) {
-        header('Location: ../php/login.php');
+        header('Location: '.HEURIST_URL_BASE.'common/connect/login.php');
         return;
 }
- 
+
 mysql_connection_overwrite(USERS_DATABASE);
 $template = file_get_contents('edit.html');
 
@@ -71,12 +72,12 @@ if (@$_REQUEST['_submit']) {
 
 Login at:
 
-http://".HOST."/heurist/
+".HEURIST_URL_BASE."
 
 with the username: " . $row['Username'] . ".
 
 We recommend visiting the 'Take the Tour' section and
-also visiting the Help function, which provides comprehensive 
+also visiting the Help function, which provides comprehensive
 overviews and step-by-step instructions for using Heurist.
 
 ";
@@ -88,6 +89,4 @@ overviews and step-by-step instructions for using Heurist.
 	}
 }
 $body->render();
-
-
 ?>

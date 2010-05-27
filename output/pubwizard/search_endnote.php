@@ -3,21 +3,21 @@
 define('SEARCH_VERSION', 1);
 
 header('Content-type: text/plain');
-require_once('../php/modules/heurist-instances.php');
+require_once(dirname(__FILE__).'/../../common/config/heurist-instances.php');
 
 if ($_REQUEST['pub_id']) {
-	require_once('../php/modules/publish_cred.php');
+	require_once(dirname(__FILE__).'/../../common/connect/publish_cred.php');
 } else {
-	require_once('../php/modules/cred.php');
+	require_once(dirname(__FILE__).'/../../common/connect/cred.php');
 	if (!is_logged_in()) {
-	        header('Location: ' . BASE_PATH . 'login.php');
+	        header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
 	        return;
 	}
 }
 
-require_once('../php/modules/db.php');
+require_once(dirname(__FILE__).'/../../common/connect/db.php');
 require_once('.ht_stdefs');
-require_once('../php/modules/adv-search.php');
+require_once(dirname(__FILE__).'/../../search/advanced/adv-search.php');
 
 
 $heurist_to_refer_map = array(
@@ -290,7 +290,7 @@ function print_bib_details ($rec_id, $base_reftype, $visited) {
 		if (@$reftype_parent_map[$base_reftype][$rt][$rd_type] === 'SUPPRESS'  ||
 			@$heurist_to_refer_map[$rd_type] === 'SUPPRESS') {
 			continue;
-		// type specific overrides e.g. B instead of T for Book Title 
+		// type specific overrides e.g. B instead of T for Book Title
 		} else if (@$reftype_parent_map[$base_reftype][$rt][$rd_type]) {
 			if (is_array($detail)) {
 				foreach ($detail as $val) {

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?><!--
+<map:sitemap xmlns:map="http://apache.org/cocoon/sitemap/1.0">
+
+ <map:pipelines>
+  <!-- main pipeline -->
+  <map:pipeline>
+
+    <map:match pattern="*/random_image-js/*">
+      <map:act type="request">
+        <map:parameter name="parameters" value="true"/>
+        <map:generate src="http://heuristscholar.org/heurist/php/hml.php?pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:transform src="/var/www/htdocs/heurist/stylesheets/heurist_legacy_xml.xsl"/>
+        <map:transform src="/var/www/htdocs/heurist/stylesheets/random_image-js.xsl">
+          <map:parameter name="width" value="{../2}"/>
+        </map:transform>
+      </map:act>
+      <map:serialize type="javascript"/>
+    </map:match>
+
+    <map:match pattern="*/*/*-javascript">
+      <map:act type="request">
+        <map:parameter name="parameters" value="true"/>
+        <map:generate src="http://heuristscholar.org/heurist/php/hml.php?pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:transform src="/var/www/htdocs/heurist/stylesheets/heurist_legacy_xml.xsl"/>
+        <map:transform src="/var/www/htdocs/heurist/stylesheets/{../2}.xsl">
+          <map:parameter name="arg" value="{../3}"/>
+        </map:transform>
+        <map:transform src="/var/www/htdocs/heurist/stylesheets/javascript.xsl"/>
+      </map:act>
+      <map:serialize type="javascript"/>
+    </map:match>
+
+    <map:match pattern="*/*/*.xsl">
+      <map:act type="request">
+        <map:parameter name="parameters" value="true"/>
+        <map:generate src="http://heuristscholar.org/heurist/php/hml.php?pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:transform src="/var/www/htdocs/heurist/stylesheets/heurist_legacy_xml.xsl"/>
+        <map:transform src="/var/www/htdocs/heurist/stylesheets/{../3}.xsl"/>
+        <map:call resource="display-{../2}"/>
+      </map:act>
+    </map:match>
+
+    <map:match pattern="*/*/*">
+      <map:act type="request">
+        <map:parameter name="parameters" value="true"/>
+        <map:generate src="http://heuristscholar.org/heurist/php/hml.php?pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:transform src="/var/www/htdocs/heurist/stylesheets/heurist_legacy_xml.xsl"/>
+        <map:transform src="/var/www/htdocs/heurist/stylesheets/{../2}.xsl">
+          <map:parameter name="arg" value="{../3}"/>
+        </map:transform>
+      </map:act>
+      <map:serialize/>
+    </map:match>
+
+    <map:match pattern="*/random_image-js">
+      <map:act type="request">
+        <map:parameter name="parameters" value="true"/>
+        <map:generate src="http://heuristscholar.org/heurist/php/hml.php?pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:transform src="/var/www/htdocs/heurist/stylesheets/heurist_legacy_xml.xsl"/>
+        <map:transform src="/var/www/htdocs/heurist/stylesheets/random_image-js.xsl"/>
+      </map:act>
+      <map:serialize type="javascript"/>
+    </map:match>
+
+    <map:match pattern="*/*.xsl-javascript">
+      <map:act type="request">
+        <map:parameter name="parameters" value="true"/>
+        <map:generate src="http://heuristscholar.org/heurist/php/hml.php?pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:transform src="/var/www/htdocs/heurist/stylesheets/heurist_legacy_xml.xsl"/>
+        <map:transform src="/var/www/htdocs/heurist/stylesheets/{../2}.xsl"/>
+        <map:transform src="/var/www/htdocs/heurist/stylesheets/javascript.xsl"/>
+      </map:act>
+      <map:serialize type="javascript"><encoding>UTF-8</encoding></map:serialize>
+    </map:match>
+
+    <map:match pattern="*/*-javascript">
+      <map:act type="request">
+        <map:parameter name="parameters" value="true"/>
+        <map:generate src="http://heuristscholar.org/heurist/php/hml.php?pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:transform src="/var/www/htdocs/heurist/stylesheets/heurist_legacy_xml.xsl"/>
+        <map:transform src="/var/www/htdocs/heurist/stylesheets/{../2}.xsl"/>
+        <map:transform src="/var/www/htdocs/heurist/stylesheets/javascript.xsl"/>
+      </map:act>
+      <map:serialize type="javascript"><encoding>UTF-8</encoding></map:serialize>
+    </map:match>
+
+    <map:match pattern="*/*.xsl">
+      <map:act type="request">
+        <map:parameter name="parameters" value="true"/>
+        <map:generate src="http://heuristscholar.org/heurist/php/hml.php?pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:transform src="/var/www/htdocs/heurist/stylesheets/heurist_legacy_xml.xsl"/>
+        <map:transform src="/var/www/htdocs/heurist/stylesheets/{../2}.xsl"/>
+      </map:act>
+      <map:serialize/>
+    </map:match>
+
+    <map:match pattern="*/*">
+      <map:act type="request">
+        <map:parameter name="parameters" value="true"/>
+        <map:generate src="http://heuristscholar.org/heurist/php/hml.php?pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:transform src="/var/www/htdocs/heurist/stylesheets/heurist_legacy_xml.xsl"/>
+        <map:transform src="/var/www/htdocs/heurist/stylesheets/{../2}.xsl"/>
+      </map:act>
+      <map:serialize/>
+    </map:match>
+
+
+    <map:match pattern="*">
+      <map:act type="request">
+        <map:parameter name="parameters" value="true"/>
+        <map:generate src="http://heuristscholar.org/heurist/php/hml.php?pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+      </map:act>
+      <map:serialize type="xml"/>
+    </map:match>
+
+
+
+
+    <!--+
+        | Mount everything else by calling the sitemap.xmap file located
+        | in the requested folder.
+        +-->
+    <map:match pattern="*/**">
+      <map:mount check-reload="yes" src="{1}/" uri-prefix="{1}"/>
+    </map:match>
+
+    <!--+
+        | At the very end of a pipeline, you can catch the errors triggered
+        | by the pipeline execution. The error handler is an internal sitemap
+        | component that, when triggered by an error, takes over the normal
+        | pipeline execution.
+        | You can here use the "notifying" generator that produces an XML
+        | representation and further manipulate this document for presentation
+        | on screen.
+        | You can also use any other generator if you don't want the
+        | error to be displayed on screen. The "exception" selector can help
+        | you to define different screens for different error types.
+        +-->
+    <map:handle-errors>
+      <map:select type="exception">
+
+        <map:when test="not-found">
+          <map:generate type="exception"/>
+          <map:transform src="stylesheets/system/exception2html.xslt">
+            <map:parameter name="contextPath" value="{request:contextPath}"/>
+            <map:parameter name="realPath" value="{realpath:}"/>
+            <map:parameter name="pageTitle" value="Resource not found"/>
+          </map:transform>
+          <map:serialize status-code="404"/>
+        </map:when>
+
+        <map:when test="invalid-continuation">
+          <map:generate type="exception"/>
+          <map:transform src="stylesheets/system/exception2html.xslt">
+            <map:parameter name="contextPath" value="{request:contextPath}"/>
+            <map:parameter name="realPath" value="{realpath:}"/>
+            <map:parameter name="pageTitle" value="Invalid Continuation"/>
+          </map:transform>
+          <map:serialize status-code="404"/>
+        </map:when>
+
+        <map:otherwise>
+          <map:generate type="exception"/>
+          <map:transform src="stylesheets/system/exception2html.xslt">
+            <map:parameter name="contextPath" value="{request:contextPath}"/>
+            <map:parameter name="realPath" value="{realpath:}"/>
+          </map:transform>
+          <map:serialize status-code="500"/>
+        </map:otherwise>
+      </map:select>
+
+    </map:handle-errors>
+  </map:pipeline>
+ </map:pipelines>
+ </map:sitemap>

@@ -1,9 +1,9 @@
 <html>
  <head>
-  <link rel=stylesheet href=../css/heurist.css>
-  <link rel=stylesheet href=../css/heurist-edit-tab.css>
-  <link rel=stylesheet href=../css/autocomplete.css>
-  <link rel=stylesheet href=/woot/02/woot.css>
+  <link rel=stylesheet href="../../../../css/heurist.css">
+  <link rel=stylesheet href="../../../../css/heurist-edit-tab.css">
+  <link rel=stylesheet href="../../../../css/autocomplete.css">
+  <link rel=stylesheet href="../../../../css/woot.css">
   <style>
 .rating-row td { padding: 0 0.5em; vertical-align: middle; }
 .rating-row .header { text-align: right; padding: 0.5em 0; width: 40px; }
@@ -62,15 +62,15 @@ function onshow() {
 top.HAPI.importSymbols(top, this);
 
   </script>
-  <script src=/tinymce/tiny_mce.js></script>
-  <script src=/woot/02/js/woot.js></script>
+  <script src="../../../../external/tinymce/jscripts/tiny_mce/tiny_mce.js"></script>
+  <script src="../../../woot/js/woot.js"></script>
  </head>
  <body onload="onshow();">
-  <script src=../js/heurist.js></script>
-  <script src=../php/js/display-preferences.php></script>
-  <script src=../js/autocomplete.js></script>
+  <script src="../../../../common/lib/heurist.js"></script>
+  <script src="../../../../common/lib/display-preferences.php"></script>
+  <script src="../../../tags/autocomplete.js"></script>
 
-   <form method=post jsonAction=php/save-personal-data.php action=../php/save-personal-data.php onsubmit="return verifyForm();">
+   <form method=post jsonAction="../../../bookmarks/save-personal-data.php" action="../../../bookmarks/save-personal-data.php" onsubmit="return verifyForm();">
    <input type=hidden name=save-mode id=save-mode value=edit>
    <input type=hidden name=bkmk_id id=bkmk_id>
 
@@ -85,15 +85,15 @@ top.HAPI.importSymbols(top, this);
          <div class="help prompt" style="padding: 0 2em;">
           Type as many tags as you like, separated by commas.  Tags may contain spaces.
           New tags are added automatically and are specific to each user.<br><br>
-          <a href=../help/tags.html onclick="top.HEURIST.util.popupURL(window, this.href); return false;">How to enter tags</a>
+          <a href="../../../../help/tags.html" onclick="top.HEURIST.util.popupURL(window, this.href); return false;">How to enter tags</a>
          </div>
         </td>
        </tr>
        <tr>
         <td>
          <span class=prompt>Top:</span>
-         <a href=# class=add-tag-link onclick="addTag('Favourites'); return false;">Favourites</a>
-         <a href=# class=add-tag-link onclick="addTag('To Read'); return false;">To Read</a>
+         <a href="#" class=add-tag-link onclick="addTag('Favourites'); return false;">Favourites</a>
+         <a href="#" class=add-tag-link onclick="addTag('To Read'); return false;">To Read</a>
 		 |
         <span id=top-tags-cell></span>
         </td>
@@ -132,7 +132,7 @@ top.HAPI.importSymbols(top, this);
      <td class=input-cell>
       <div>
 	   <span class="help prompt">These notes are private and visible only to you.</span>
-       <a id=woot-ext-link style="float: right; margin-right: 80px;" target=_blank href=../woot.html>open in new window</a>
+       <a id=woot-ext-link style="float: right; margin-right: 80px;" target=_blank href="../../../woot/woot.html">open in new window</a>
       </div>
       <div id=woot style="border: 1px solid gray; margin: 8px 80px 0 0; min-height: 100px; padding: 4px;"></div>
      </td>
@@ -152,12 +152,12 @@ top.HAPI.importSymbols(top, this);
    </tbody></table>
   </form>
 
-  <form method=post jsonAction=php/save-reminder.php action=../php/save-reminder.php onsubmit="return false;">
+  <form method=post jsonAction="../../../reminders/save-reminder.php" action="../../../reminders/save-reminder.php" onsubmit="return false;">
    <table border=0 cellspacing=0 cellpadding=0 style="width: 100%;"><tbody><!-- separate table, because this is a separate form -->
     <tr class=input-row>
      <td class=input-header-cell><div style="margin: 7px 0;">Reminders</div></td>
      <td><div id=reminders></div></td>
-    </tr>
+    </tr></tbody></table>
   </form>
 
   <script>

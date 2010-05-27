@@ -47,13 +47,13 @@ define('SEARCH_VERSION', 1);
 // give a xml header
 header('Content-type: text/xml; charset=utf-8');
 
-require_once('modules/heurist-instances.php');
+require_once(dirname(__FILE__).'/../../common/config/heurist-instances.php');
 
-require_once('modules/db.php');
-require_once('modules/adv-search.php');
-require_once('modules/relationships.php');
-require_once('modules/requirements-overrides.php');
-require_once('modules/woot.php');
+require_once(dirname(__FILE__).'/../../common/connect/db.php');
+require_once(dirname(__FILE__).'/../../search/advanced/adv-search.php');
+require_once(dirname(__FILE__).'/../../data/relationships/relationships.php');
+require_once(dirname(__FILE__).'/../../common/lib/requirements-overrides.php');
+require_once(dirname(__FILE__).'/../../data/woot/woot.php');
 
 
 
@@ -110,7 +110,7 @@ if (@$argv) {
 } else if (@$_REQUEST['pub_id']) {
 	$pub_id = intval($_REQUEST['pub_id']);
 	$rec_id = intval(@$_REQUEST['bib_id']);
-	require_once('modules/publish_cred.php');
+	require_once(dirname(__FILE__).'/../../common/connect/publish_cred.php');
 
 	if ($rec_id) $_REQUEST['q'] .= ' && ids:' . $rec_id;
 
@@ -125,11 +125,11 @@ if (@$argv) {
 
 } else {
 	$pub_id = 0;
-	require_once('modules/cred.php');
+	require_once(dirname(__FILE__).'/../../common/connect/cred.php');
 
 	if (!is_logged_in()) { // check if the record being retrieved is a singe non-protected record
 		if (!single_record_retrieval($_REQUEST['q'])) {
-			header('Location: ' . BASE_PATH . 'php/login.php');
+			header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
 			return;
 		}
 	}
@@ -199,7 +199,7 @@ $XML .= "\n";
 
 // harvard or anything but genericxml
 if ( @$_REQUEST['style'] && @$_REQUEST['style']!='genericxml' ) {
-	$XML .= '<?xml-stylesheet type="text/xsl" href="http://'.HOST.'/heurist/stylesheets/' . $_REQUEST['style'] . '"?>';
+	$XML .= '<?xml-stylesheet type="text/xsl" href="'.HEURIST_URL_BASE.'/output/pubwizard/xsl/' . $_REQUEST['style'] . '"?>';
 	$XML .= "\n";
 }
 // no style, give default generic xml
@@ -327,7 +327,7 @@ function writeReference($rec_id, $depth = 0, $rd_type = 0, $rec_types = 0, $rev 
 		} else {
 			fetchExtraDetails($rec_id, $rec_types);
 		}
-		
+
 		if ($depth == 0) {
 			writeWootContent($rec_id);
 		}
@@ -543,8 +543,8 @@ function writeTag($reftype, $detail, $value, $file_id) {
 				   . "<file_orig_name>" . htmlspecialchars($file['file_orig_name']) . "</file_orig_name>\n"
 				   . "<file_date>" . htmlspecialchars($file['file_date']) . "</file_date>\n"
 				   . "<file_size>" . htmlspecialchars($file['file_size']) . "</file_size>\n"
-				   . "<file_fetch_url>" . htmlspecialchars('http://'.HOST.'/heurist/php/fetch_file.php/'.urlencode($file['file_orig_name']).'?file_id='.$file['file_nonce']) . "</file_fetch_url>\n"
-				   . "<file_thumb_url>" . htmlspecialchars('http://'.HOST.'/heurist/php/resize_image.php?file_id='.$file['file_nonce']) . "</file_thumb_url>\n";
+				   . "<file_fetch_url>" . htmlspecialchars(HEURIST_URL_BASE.'/data/files/fetch_file.php/'.urlencode($file['file_orig_name']).'?file_id='.$file['file_nonce']) . "</file_fetch_url>\n"
+				   . "<file_thumb_url>" . htmlspecialchars(HEURIST_URL_BASE.'/common/lib/resize_image.php?file_id='.$file['file_nonce']) . "</file_thumb_url>\n";
 		}
 	}
 
@@ -716,10 +716,6 @@ function writeWootContent($rec_id) {
 	}
 	$XML .= "</woot>";
 }
-
-
-
-
 
 
 /**

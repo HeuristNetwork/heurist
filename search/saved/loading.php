@@ -28,7 +28,7 @@ if (! defined('SEARCH_VERSION')) {
 }
 define('MEMCACHED_PORT', 11211);
 
-require_once("adv-search.php");
+require_once(dirname(__FILE__).'/../advanced/adv-search.php');
 
 $memcache = null;
 

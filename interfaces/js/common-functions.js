@@ -1,4 +1,4 @@
-var path = window.opener.HAPI.instance ? "http://" + window.opener.HAPI.instance + ".heuristscholar.org/heurist/" : "http://heuristscholar.org/heurist/";
+var path = window.opener.HAPI.HeuristBaseURL ?  window.opener.HAPI.HeuristBaseURL : "../../";
 
 var record = new HRecord();
 
@@ -85,7 +85,7 @@ function drawInputForm(detailType, recType){
 
 	tD2.setAttribute("class", "rep");
 	if (isRepeatable)
-		tD2.innerHTML = "<img id= \"img"+detailId +"\" src=\""+path+"/img/duplicate.gif\" border=0>";
+		tD2.innerHTML = "<img id= \"img"+detailId +"\" src=\""+path+"common/images/duplicate.gif\" border=0>";
 
 	tD3.setAttribute("class", reqClass);
 	if(detPrompt)
@@ -115,12 +115,12 @@ function drawGeo(id, detail){
 		  var sel = window.opener.document.getElementById("sel"+id);
 		  var last  = sel.lastChild;
 		  sel.removeChild(last);
-		  html += "<div id=\"geoDiv" +[geoIndex]+"\"><div class=\"inp-div\" ><input type=hidden name=\""+id+"\" id=\""+id+"\" value=geo extra=\""+detail.getWKT()+"\"><img src=\""+path+"img/geo.gif\" align=absmiddle> "+detail.toString()+"&nbsp<a href=\"#\" id=\"editgeo"+[geoIndex]+"\" onclick=\"window.open('addGeoObject.html?id="+rec_id+"&did="+id+"&eid=editgeo"+[geoIndex]+"','form','width=600,height=400,scrollbars=yes');\")>edit</a><input type=\"hidden\" id=\"geodetail"+[geoIndex]+"\" value=\""+ detail.getWKT()+ "\"><input type=\"hidden\" id=\"geotype"+[geoIndex]+"\" value=\""+ detail.toString()+ "\">&nbsp;"+" <img src=\""+path+"img/cross.gif\" align=absmiddle onclick=\"remGeo("+id+",'"+detail.getWKT()+"');\"></div></div>";
+		  html += "<div id=\"geoDiv" +[geoIndex]+"\"><div class=\"inp-div\" ><input type=hidden name=\""+id+"\" id=\""+id+"\" value=geo extra=\""+detail.getWKT()+"\"><img src=\""+path+"img/geo.gif\" align=absmiddle> "+detail.toString()+"&nbsp<a href=\"#\" id=\"editgeo"+[geoIndex]+"\" onclick=\"window.open('../addGeoObject.html?id="+rec_id+"&did="+id+"&eid=editgeo"+[geoIndex]+"','form','width=600,height=400,scrollbars=yes');\")>edit</a><input type=\"hidden\" id=\"geodetail"+[geoIndex]+"\" value=\""+ detail.getWKT()+ "\"><input type=\"hidden\" id=\"geotype"+[geoIndex]+"\" value=\""+ detail.toString()+ "\">&nbsp;"+" <img src=\""+path+"common/images/cross.gif\" align=absmiddle onclick=\"remGeo("+id+",'"+detail.getWKT()+"');\"></div></div>";
 		  geoIndex++;
 	} else {
 	 	if (!isEmpty(detail)){
 	  		for (i in detail){
-           		html += "<div id=\"geoDiv" +[i]+"\"><div class=\"inp-div\"  ><input type=hidden name=\""+id+"\" id=\""+id+"\" value=geo extra=\""+detail[i].getWKT()+"\"><img src=\""+path+"img/geo.gif\" align=absmiddle> "+detail[i].toString()+"&nbsp<a href=\"#\" id=\"editgeo"+[i]+"\" onclick=\"window.open('addGeoObject.html?id="+rec_id+"&did="+id+"&eid=editgeo"+[i]+"','form','width=600,height=400,scrollbars=yes');\")>edit</a><input type=\"hidden\" id=\"geodetail"+[i]+"\" value=\""+ detail[i].getWKT()+ "\"><input type=\"hidden\" id=\"geotype"+[i]+"\" value=\""+ detail[i].toString()+ "\">&nbsp;"+" <img src=\""+path+"img/cross.gif\" align=absmiddle onclick=\"remGeo("+id+",'"+detail[i].getWKT()+"');\"></div></div>";
+           		html += "<div id=\"geoDiv" +[i]+"\"><div class=\"inp-div\"  ><input type=hidden name=\""+id+"\" id=\""+id+"\" value=geo extra=\""+detail[i].getWKT()+"\"><img src=\""+path+"img/geo.gif\" align=absmiddle> "+detail[i].toString()+"&nbsp<a href=\"#\" id=\"editgeo"+[i]+"\" onclick=\"window.open('../addGeoObject.html?id="+rec_id+"&did="+id+"&eid=editgeo"+[i]+"','form','width=600,height=400,scrollbars=yes');\")>edit</a><input type=\"hidden\" id=\"geodetail"+[i]+"\" value=\""+ detail[i].getWKT()+ "\"><input type=\"hidden\" id=\"geotype"+[i]+"\" value=\""+ detail[i].toString()+ "\">&nbsp;"+" <img src=\""+path+"common/images/cross.gif\" align=absmiddle onclick=\"remGeo("+id+",'"+detail[i].getWKT()+"');\"></div></div>";
 			}
 	 	} else {
 	  		html = "<div class=\"inp-div\"><input type=hidden name=\""+id+"\" id=\""+id+"\" value=geo extra=\"\"><a href=\"#\" onclick=\"window.open('addGeoObject.html?id="+rec_id+"&did="+id+"','form','width=600,height=400,scrollbars=yes');\")>add</a></div>";
@@ -164,7 +164,7 @@ function drawFile(id, detail){
 	   		var url = detail[i].getURL();
 	   		var filename = detail[i].getOriginalName();
 	   		var size = detail[i].getSize();
-	  		html += "<div class=\"inp-div\"><input type=hidden name=\""+id+"\" id=\""+id+"\" value=file extra=\""+detail[i].getID()+"\"><img src = \""+thumb+"\"><img src=\""+path+"/img/cross.gif\" onclick=\"remFile("+id+","+detail[i].getID()+");\"><br><a href=\""+url+"\">"+filename+"</a> ["+size+"]</div>";
+	  		html += "<div class=\"inp-div\"><input type=hidden name=\""+id+"\" id=\""+id+"\" value=file extra=\""+detail[i].getID()+"\"><img src = \""+thumb+"\"><img src=\""+path+"common/images/cross.gif\" onclick=\"remFile("+id+","+detail[i].getID()+");\"><br><a href=\""+url+"\">"+filename+"</a> ["+size+"]</div>";
 	  	}
 	} else { //upload box
 	  	html += "<div class=\"inp-div\"><input type=file  name=\""+id+"\" id=\""+id+"\" value=\"\" extra=\"\" onchange=\"uploadFile("+id+");\"></div>";
@@ -635,7 +635,7 @@ function saveRecord(record) {
 		      		break;
 
 			  	case "date":
-				
+
 					var cleanDate = parseDate(fields[f]);
 					if (!cleanDate) { return; }
 					console.log(cleanDate);

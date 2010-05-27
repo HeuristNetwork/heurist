@@ -3,21 +3,23 @@
    (c) 2005 Archaeological Computing Laboratory, University of Sydney
    Developed by Tom Murtagh, Version 1.0,  16 Aug 2005 */
 
-/* INSTRUCTIONS: Edit IN the user name and password (3 locations below) 
+/* INSTRUCTIONS: Edit IN the user name and password (3 locations below)
    The configure script will automatically substitute the readonly
    etc. names with the values provided to the script */
 
 /* MySQL utility functions */
 
-function mysql_connection_select($database='', $server='localhost') {
+if (!defined('ADMIN_DBUSERNAME')) define('ADMIN_DBUSERNAME','root');	//all rights user
+if (!defined('ADMIN_DBUSERPSWD'))define('ADMIN_DBUSERPSWD','smith18');
+if (!defined('READONLY_DBUSERNAME'))define('READONLY_DBUSERNAME','readonly');	//readonly user for access to user and heurist databases
+if (!defined('READONLY_DBUSERPSWD'))define('READONLY_DBUSERPSWD','mitnick');
+if (!defined('DEFAULT_MYSQLSRV'))  define('DEFAULT_MYSQLSRV','localhost');	// default servername for database connections
+
+function mysql_connection_select($database='', $server=DEFAULT_MYSQLSRV) {
 /* User name and password for Select access */
-	$username = 'readonly';
-	$password = 'mitnick';
-	if (! $username and ! $password) { print "PLEASE SET USERNAME/PASSWORD for SELECT in db.php\n"; exit(2); }
+	if (! READONLY_DBUSERNAME && ! READONLY_DBUSERPSWD) { print "PLEASE SET USERNAME/PASSWORD for SELECT in db.php\n"; exit(2); }
 
-//	if (defined('use_alt_db')  &&  $database == 'heuristdb') $database = 'heuristdb_alt';
-
-	$db = mysql_connect($server, $username, $password) or die(mysql_error());
+	$db = mysql_connect($server, READONLY_DBUSERNAME, READONLY_DBUSERPSWD) or die(mysql_error());
 	if ($database != '') mysql_query("use $database") or die(mysql_error());
 
 	mysql_query('set character set "utf8"');
@@ -25,15 +27,13 @@ function mysql_connection_select($database='', $server='localhost') {
 
 	return $db;
 }
-function mysql_connection_insert($database='', $server='localhost') {
+function mysql_connection_insert($database='', $server=DEFAULT_MYSQLSRV) {
 /* User name and password for insert access - must allow writing to database */
-	$username = 'root';
-	$password = 'smith18';
-	if (! $username and ! $password) { print "PLEASE SET USERNAME/PASSWORD for INSERT in db.php\n"; exit(2); }
+	if (! ADMIN_DBUSERNAME && ! ADMIN_DBUSERPSWD) { print "PLEASE SET USERNAME/PASSWORD for INSERT in db.php\n"; exit(2); }
 
 //	if (defined('use_alt_db')  &&  $database == 'heuristdb') $database = 'heuristdb_alt';
 
-	$db = mysql_connect($server, $username, $password) or die(mysql_error());
+	$db = mysql_connect($server, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD) or die(mysql_error());
 	if ($database != '') mysql_query("use $database") or die(mysql_error());
 
 	mysql_query('set character set "utf8"');
@@ -43,15 +43,13 @@ function mysql_connection_insert($database='', $server='localhost') {
 
 	return $db;
 }
-function mysql_connection_overwrite($database='', $server='localhost') {
+function mysql_connection_overwrite($database='', $server=DEFAULT_MYSQLSRV) {
 /* User name and password for overwrite access - must allow writing to database */
-	$username = 'root';
-	$password = 'smith18';
-	if (! $username and ! $password) { print "PLEASE SET USERNAME/PASSWORD for OVERWRITE in db.php\n"; exit(2); }
+	if (! ADMIN_DBUSERNAME && ! ADMIN_DBUSERPSWD) { print "PLEASE SET USERNAME/PASSWORD for OVERWRITE in db.php\n"; exit(2); }
 
 //	if (defined('use_alt_db')  &&  $database == 'heuristdb') $database = 'heuristdb_alt';
 
-	$db = mysql_connect($server, $username, $password) or die(mysql_error());
+	$db = mysql_connect($server, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD) or die(mysql_error());
 	if ($database != '') mysql_query("use $database") or die(mysql_error());
 
 	mysql_query('set character set "utf8"');
@@ -168,7 +166,7 @@ if (defined("T1000_DEBUG")) error_log($stmt);
 function mysql__update($table, $condition, $pairs_assoc) {
 	/* Update row/rows in the table with a fixed set of data:
 	 * each key/value pair in the associative array.
-	 * 
+	 *
 	 * If a VALUE in $pairs_assoc is an array with a single element
 	 * of the form  functionName(args)  where the args contain no quotes or backslashes,
 	 * then the value is not NOT escaped.  This allows simple SQL calls to be used in the update.
@@ -178,7 +176,7 @@ function mysql__update($table, $condition, $pairs_assoc) {
 	 *                                        "col2" => array("now()")
 	 *                                      ));
 	 * This will set col1 to the string "col1", and col2 to the current date (according to SQL)
-	 * 
+	 *
 	 * Be careful: $table and $condition are passed un-modified to the query.
 	 */
 

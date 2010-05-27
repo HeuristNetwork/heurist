@@ -24,18 +24,17 @@
 
 	-->
 	<head>
-		<link rel=stylesheet href="../css/heurist.css">
-		<link rel=stylesheet href="../css/heurist-edit-tab.css">
-		<link rel=stylesheet href="../css/heurist-relation.css">
+		<link rel=stylesheet href="../../../../css/heurist.css">
+		<link rel=stylesheet href="../../../../css/heurist-edit-tab.css">
+		<link rel=stylesheet href="../../../../css/heurist-relation.css">
 
 	</head>
 	<body onload="onshow()">
-		<script src="../js/heurist.js"></script>
-		<script src="../js/heurist-relation.js"></script>
-		<script src="../php/js/display-preferences.php"></script>
+		<script src="../../../../common/lib/heurist.js"></script>
+		<script src="../heurist-relation.js"></script>
+		<script src="../../../../common/lib/display-preferences.php"></script>
 
 		<script>
-
 			function onshow() {
 				var elt = document.getElementById("relationship-type");
 				setTimeout(function() {
@@ -44,7 +43,6 @@
 					} catch (e) {}
 				}, 0);
 			}
-
 		</script>
 
 		<div style="font-weight: bold;">Related records</div>
@@ -54,7 +52,7 @@
 			<tbody id=relations-tbody></tbody>
 		</table>
 
-		<form id=relations-form jsonAction="php/save-relations.php"></form>
+		<form id=relations-form jsonAction="../../../relationships/save-relations.php"></form>
 
 		<script>
 

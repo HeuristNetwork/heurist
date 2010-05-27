@@ -1,5 +1,5 @@
 <?php
-require_once("../php/modules/cred.php");
+require_once(dirname(__FILE__)."/../../common/connect/cred.php");
 
 //session_start();
 print_r($_SESSION);

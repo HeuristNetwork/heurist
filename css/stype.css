@@ -5,7 +5,7 @@
 	z-index: 999999;
 	width: 200px;
 	height: 72px;
-	background-image: url(../img/stype/stype-dropshadow.png);
+	background-image: url(../common/images/stype/stype-dropshadow.png);
 }
 
 #stype_options_child {

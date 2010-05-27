@@ -13,8 +13,8 @@ ini_set("zlib.output_compression_level", 5);
 //ob_start('ob_gzhandler');
 
 
-require_once("../php/modules/cred.php");
-require_once("../php/modules/db.php");
+require_once(dirname(__FILE__)."/../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../../common/connect/db.php");
 
 mysql_connection_db_select(DATABASE);
 

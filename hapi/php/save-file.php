@@ -1,13 +1,13 @@
 <?php
 
-require_once("modules/cred.php");
-require_once("modules/db.php");
+require_once(dirname(__FILE__)."/../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../../common/connect/db.php");
 
 
 if (! defined("USING-XSS")) {
 	function outputAsRedirect($text) {
 		$val = base64_encode($text);
-		header("Location: http://hapi.heuristscholar.org/#data=" . $val);
+		header("Location: ".HEURIST_URL_BASE."/#data=" . $val);
 		return "";
 	}
 	ob_start("outputAsRedirect");
@@ -34,8 +34,8 @@ $fileID = upload_file($upload["name"], $upload["type"], $upload["tmp_name"], $up
 if ($fileID) {
 	$res = mysql_query("select * from files where file_id = $fileID");
 	$file = mysql_fetch_assoc($res);
-	$thumbnailURL = "http://".HEURIST_INSTANCE_PREFIX."heuristscholar.org/heurist/php/resize_image.php?file_id=" . $file["file_nonce"];
-	$URL = "http://".HEURIST_INSTANCE_PREFIX."heuristscholar.org/heurist-test/php/fetch_file.php/" . urlencode($file["file_orig_name"]) . "?file_id=" . $file["file_nonce"];
+	$thumbnailURL = "http://".HEURIST_INSTANCE_PREFIX.HEURIST_SERVER_NAME.HEURIST_SITE_PATH."common/lib/resize_image.php?file_id=" . $file["file_nonce"];
+	$URL = "http://".HEURIST_INSTANCE_PREFIX.HEURIST_SERVER_NAME.HEURIST_SITE_PATH."data/files/fetch_file.php/" . urlencode($file["file_orig_name"]) . "?file_id=" . $file["file_nonce"];
 	print json_format(array("file" => array(
 		$file["file_id"], $file["file_orig_name"], $file["file_size"], $file["file_mimetype"], $URL, $thumbnailURL, $file["file_description"]
 	)));

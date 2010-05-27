@@ -1,7 +1,7 @@
 <?php
 
-require_once("modules/cred.php");
-require_once("modules/db.php");
+require_once(dirname(__FILE__)."/../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../../common/connect/db.php");
 
 mysql_connection_db_select("hapi");
 
@@ -15,7 +15,7 @@ if (! is_logged_in()) {
 
 $_REQUEST = json_decode(@$_POST["data"]?  $_POST["data"] : base64_decode(@$_GET["data"]), true);
 
-$location = @$_REQUEST["crossDomain"]? "*" : ($baseURL? $baseURL : "heuristscholar.org");
+$location = @$_REQUEST["crossDomain"]? "*" : ($baseURL? $baseURL : HEURIST_SERVER_NAME);	// TESTTHIS:  repalced heuristscholar.org with host name
 $varName = $_REQUEST["name"];
 
 if (preg_match("/^([a-zA-Z0-9_]+)((?:[.][a-zA-Z0-9_]+)+)$/", $varName, $matches)) {

@@ -32,23 +32,23 @@
   <!-- Skin CSS files resize.css must load before layout.css -->
   <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.5.2/build/assets/skins/sam/resize.css" />
   <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.5.2/build/assets/skins/sam/layout.css" />
-  <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.5.2/build/button/assets/skins/sam/button.css"> 
+  <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.5.2/build/button/assets/skins/sam/button.css">
 
   <!-- Utility Dependencies -->
-  <script src="http://yui.yahooapis.com/2.5.2/build/yahoo-dom-event/yahoo-dom-event.js"></script> 
-  <script src="http://yui.yahooapis.com/2.5.2/build/dragdrop/dragdrop-min.js"></script> 
-  <script src="http://yui.yahooapis.com/2.5.2/build/element/element-beta-min.js"></script> 
+  <script src="http://yui.yahooapis.com/2.5.2/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+  <script src="http://yui.yahooapis.com/2.5.2/build/dragdrop/dragdrop-min.js"></script>
+  <script src="http://yui.yahooapis.com/2.5.2/build/element/element-beta-min.js"></script>
   <!-- Optional Animation Support-->
-  <script src="http://yui.yahooapis.com/2.5.2/build/animation/animation-min.js"></script> 
+  <script src="http://yui.yahooapis.com/2.5.2/build/animation/animation-min.js"></script>
   <!-- Optional Resize Support -->
   <script src="http://yui.yahooapis.com/2.5.2/build/resize/resize-beta-min.js"></script>
   <!-- Source file for the Layout Manager -->
   <script src="http://yui.yahooapis.com/2.5.2/build/layout/layout-beta-min.js"></script>
 
-  <script src="http://yui.yahooapis.com/2.5.2/build/button/button-min.js"></script> 
+  <script src="http://yui.yahooapis.com/2.5.2/build/button/button-min.js"></script>
 
-  <script src=../heurist-test/php/js/load-hapi.php></script>
-  <script src=/jquery/jquery.js></script>
+  <script src="../../common/lib/load-hapi.php"></script>
+  <script src="../../external/jquery/jquery.js"></script>
 
   <script>
 
@@ -97,9 +97,9 @@
 	function showAlbums(albums) {
 		$("#albums").empty();
 
-		var btnGroup = new YAHOO.widget.ButtonGroup({ 
-			id: "buttongroup", 
-			name: "album", 
+		var btnGroup = new YAHOO.widget.ButtonGroup({
+			id: "buttongroup",
+			name: "album",
 			container: "albums"
 		 });
 		for (var i = 0; i < albums.length; ++i) {

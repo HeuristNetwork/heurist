@@ -8,7 +8,7 @@ HAPI.WootException = HWootException;
 
 
 HAPI.WOOT = function() {
-	var _xssWebPrefix = "http://woot.heuristscholar.org/02/xss/";
+	var _xssWebPrefix = HAPI.HeuristBaseURL + "data/woot/php/xss.php?";
 
 	function Woot(id, title, version, creatorId, permissions, chunks) {
 		this.id = id;
@@ -287,7 +287,7 @@ HAPI.WOOT = function() {
 
 HAPI.WOOT.GUI = function() {
     // WootEditor constructor   opts -   "woot" : wootObj   or "title" : "record : rec_id"   and "id" : docElementId  or "element": docElement or "container" : docElementContainer
-    // SAW adding code to pass in eventHandling 
+    // SAW adding code to pass in eventHandling
 	function WootEditor(opts) {
 		var that = this;
 
@@ -310,7 +310,7 @@ HAPI.WOOT.GUI = function() {
 		}
 
 		// Do a shimmy: insert a FORM element directly above the DIV containing this WootEditor
-        //this will hook the save and cancel from  tinyMCE  
+        //this will hook the save and cancel from  tinyMCE
 		this.form = document.createElement("form");
 		this.div.parentNode.insertBefore(this.form, this.div);
 		this.form.appendChild(this.div);
@@ -320,7 +320,7 @@ HAPI.WOOT.GUI = function() {
 			return false;
 		};
 		this.form.oncancel = function() {
-			setTimeout(function() { that.unlockedChunk.lock(); }, 0);   // map the form.oncancel to WootEditor.unlockedChunk.lock 
+			setTimeout(function() { that.unlockedChunk.lock(); }, 0);   // map the form.oncancel to WootEditor.unlockedChunk.lock
 			return false;
 		};
 
@@ -476,7 +476,7 @@ HAPI.WOOT.GUI = function() {
 		return false;
 	};
 
-    // set up for saving a chunk  - prep the chunk for saving (copy the text from tinyMCE to the chunk) and set the save handlers in WOOT.saveWoot 
+    // set up for saving a chunk  - prep the chunk for saving (copy the text from tinyMCE to the chunk) and set the save handlers in WOOT.saveWoot
 	WootEditor.prototype.save = function() {
 		var woot = this.woot;
 		var unlockedChunk = this.unlockedChunk;
@@ -656,7 +656,7 @@ HAPI.WOOT.GUI = function() {
 			tinyMCE.init({
 				mode: "none",
 
-				content_css: "http://woot.heuristscholar.org/02/woot.css",
+				content_css: HAPI.HeuristBaseURL + "css/woot.css",
 				theme: "advanced",
 				plugins: "inlinepopups,nonbreaking,permissions,save",
 				inline_styles: false,
@@ -713,7 +713,7 @@ HAPI.WOOT.GUI = function() {
 function loadTinyMCE() {
 	if (window.tinyMCE) { return; }
 
-	document.write('<' + 'script src="http://woot.heuristscholar.org/tinymce/tiny_mce.js">' + '</' + 'script>');
+	document.write('<' + 'script src="' + HAPI.HeuristBaseURL + 'external/tinymce/jscripts/tiny_mce/tiny_mce.js">' + '</' + 'script>');
 	return;
 }
 

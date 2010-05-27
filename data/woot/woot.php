@@ -1,6 +1,6 @@
 <?php
 
-require_once("db.php");
+require_once(dirname(__FILE__)."/../../common/connect/db.php");
 
 define("WOOT_TABLE", "woots");
 define("CHUNK_TABLE", "woot_chunks");
@@ -165,8 +165,8 @@ function loadWoot($args) {
 							  where wperm_woot_id=".$wootId);
 		while ($perm = mysql_fetch_assoc($pres)) {
 			array_push($wootPermissions, array("type" => $perm["wperm_type"],
-										   "userId" => $perm["wperm_user_id"]? $perm["wperm_user_id"] : NULL, 
-										   "userName" => $perm["wperm_user_id"]? $perm["Username"] : NULL, 
+										   "userId" => $perm["wperm_user_id"]? $perm["wperm_user_id"] : NULL,
+										   "userName" => $perm["wperm_user_id"]? $perm["Username"] : NULL,
 										   "groupId" => $perm["wperm_group_id"]? $perm["wperm_group_id"] : NULL,
 										   "groupName" => $perm["wperm_group_id"]? $perm["grp_name"] : NULL));
 		}
@@ -197,8 +197,8 @@ function loadWoot($args) {
 								  where perm_chunk_id=".$chunkData["chunk_id"]);
 			while ($perm = mysql_fetch_assoc($pres)) {
 				array_push($permissions, array("type" => $perm["perm_type"],
-											   "userId" => $perm["perm_user_id"]? $perm["perm_user_id"] : NULL, 
-											   "userName" => $perm["perm_user_id"]? $perm["Username"] : NULL, 
+											   "userId" => $perm["perm_user_id"]? $perm["perm_user_id"] : NULL,
+											   "userName" => $perm["perm_user_id"]? $perm["Username"] : NULL,
 											   "groupId" => $perm["perm_group_id"]? $perm["perm_group_id"] : NULL,
 											   "groupName" => $perm["perm_group_id"]? $perm["grp_name"] : NULL));
 			}
@@ -307,7 +307,7 @@ function saveWoot($args) {
 
 		$chunkIds = getReadableChunks($wootId, /* restrictToCurrent= */ true);
 
-		$res = mysql_query("select * from ".CHUNK_TABLE." 
+		$res = mysql_query("select * from ".CHUNK_TABLE."
 							 where chunk_woot_id=$wootId and chunk_is_latest and !chunk_deleted and chunk_id in (" . join(",", $chunkIds) . ")
 						  order by chunk_order");
 		$existingVisibleChunks = array();

@@ -22,7 +22,7 @@ h4 {
 	background: #f7f0f0 none repeat scroll 0%;
 	border-bottom: 1px solid #660000;
 	*/
-	background: white url(../img/search-bg.gif) repeat-x scroll left top;
+	background: white url(../../common/images/search-bg.gif) repeat-x scroll left top;
 	border-bottom: none;
 	padding-bottom: 20px;
 }
@@ -267,7 +267,7 @@ h4.archive-month-title {
 .comments-nested-label {
 	color: gray;
 	font-style: italic;
-}	
+}
 .comments-flat-label {
 	margin-left: 30px;
 }

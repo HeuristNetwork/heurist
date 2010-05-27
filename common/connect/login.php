@@ -2,8 +2,8 @@
 
 define('SAVE_URI', 'disabled');
 
-require_once('modules/cred.php');
-require_once('modules/db.php');
+require_once('cred.php');
+require_once('db.php');
 session_start();
 
 $last_uri = urldecode(@$_REQUEST['last_uri']);
@@ -17,9 +17,13 @@ if (! $last_uri) {
 }
 
 
-if (! defined('BASE_PATH'))
-	define('BASE_PATH', '');
-
+if (! defined('BASE_PATH')) {
+	if (defined('HOST')) {
+		define('BASE_PATH', 'http://'.HOST."/heurist3");
+	}else{
+		define('BASE_PATH', '');
+	}
+}
 
 mysql_connection_db_select(USERS_DATABASE);
 
@@ -104,14 +108,14 @@ if (@$_REQUEST['logout']) {
 <html>
 <head>
 <title>Heurist Login</title>
-<link rel=icon href=../../favicon.ico type=image/x-icon>
-<link rel="shortcut icon" href=../../favicon.ico type=image/x-icon>
+<link rel=icon href='<?=HEURIST_SITE_PATH?>favicon.ico' type=image/x-icon>
+<link rel="shortcut icon" href='<?=HEURIST_SITE_PATH?>favicon.ico' type=image/x-icon>
 
-<link rel=stylesheet type=text/css href=../css/heurist.css>
+<link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>css/heurist.css'>
 
 <style>
 body {
-	background-image: url(../img/edit-bg.gif);
+	background-image: url('<?=HEURIST_SITE_PATH?>common/images/edit-bg.gif');
 	background-repeat: repeat-x;
 	background-position: 0px 30px;
 }
@@ -120,7 +124,7 @@ body {
 hr {
 	margin: 5px 60px;
 	border: 0px none;
-	color: 6A7C99;
+	color: #6A7C99;
 	background-color: #CCC;
 	height: 1px;
 }
@@ -175,7 +179,7 @@ div.indent {
 	padding: 20px;
 	margin-right: 40px;
 	margin-left: 40px;
-	background-image: url(../img/left-panel-bg.png);
+	background-image: url('<?=HEURIST_SITE_PATH?>common/images/left-panel-bg.png');
 }
 </style>
 
@@ -191,18 +195,18 @@ div.indent {
    <?php } ?>
  }
 </script>
-<script src=../js/heurist.js></script>
-<script src=../js/heurist-util.js></script>
- 
+<script src='../../common/lib/heurist.js'></script>
+<script src='../../common/lib/heurist-util.js'></script>
+
 <div id=banner>
  <div id=tagline>Scholar-friendly software</div>
- <div id=logo><a href=".." title="Heurist home"><img src="../img/heurist_logo.png"></a></div>
+ <div id=logo><a href=".." title="Heurist home"><img src='<?=HEURIST_SITE_PATH?>common/images/heurist_logo.png'></a></div>
 </div>
 
 <div id=main style="padding: 20px;">
 
 <div class=bigheading style="margin-left: 40px; margin-bottom: 50px;">Heurist Login</div>
- 
+
 <form name=mainform method=post>
 
 <div class="blue_panel">
@@ -250,7 +254,7 @@ div.indent {
  <p align=center>
   Forgotten your password?
   &nbsp;
-  <a href="../admin/reset_password.php" onclick="window.open(this.href,'','status=0,scrollbars=0,width=400,height=200'); return false;">Click here to reset your password</a>
+  <a href='<?=HEURIST_URL_BASE?>admin/users/reset_password.php' onclick="window.open(this.href,'','status=0,scrollbars=0,width=400,height=200'); return false;">Click here to reset your password</a>
  </p>
 
 

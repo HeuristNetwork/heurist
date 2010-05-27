@@ -27,7 +27,7 @@ p { margin: 0.25ex 0; }
 .defaultSkin .permissions-button img.mceIcon {
 	width: 80px !important;
 	height: 20px !important;
-	background: transparent url(/tinymce/plugins/permissions/img/permissions.png) no-repeat scroll 2px 0;
+	background: transparent url(../../external/tinymce/jscripts/tiny_mce/plugins/permissions/img/permissions.png) no-repeat scroll 2px 0;
 }
 .defaultSkin .permissions-button.mceButtonpublic img.mceIcon { background-position: 2px 0 !important; }
 .defaultSkin .permissions-button.mceButtonprivate img.mceIcon { background-position: 2px -20px !important; }

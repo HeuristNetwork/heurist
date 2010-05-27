@@ -5,10 +5,10 @@
   <link rel="icon" href="../../favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
 
-  <link rel="stylesheet" type="text/css" href="v04/Popup.css">
+  <link rel="stylesheet" type="text/css" href="../../css/Popup.css">
   <script type="text/javascript" src="v05/Popup.js"></script>
 
-  <link rel="stylesheet" type="text/css" href="newshsseri.css">
+  <link rel="stylesheet" type="text/css" href="../../css/newshsseri.css">
   <style type="text/css">
 	a img { border: 0; }
 	.friendly_border { border: 1px dotted lightgray; background-color: #FFFFDD; border-collapse: collapse; }
@@ -52,7 +52,7 @@
 	}
 
 	function edit_enum_types_with_pos(rdt_id, pos) {
-		popup_frame(pos, 'edit_enum.php?rdt_id='+rdt_id, finish_edit_enum_types);
+		popup_frame(pos, 'enums/edit_enum.php?rdt_id='+rdt_id, finish_edit_enum_types);
 	}
 
 	function finish_edit_enum_types() {
@@ -60,7 +60,7 @@
 	}
 
 	function edit_reftype_constraints(rdt_id) {
-		popup_frame(pos, 'edit_reftype_constraints.php?rdt_id='+rdt_id, finish_edit_reftype_constraints);
+		popup_frame(pos, 'constraints/edit_reftype_constraints.php?rdt_id='+rdt_id, finish_edit_reftype_constraints);
 	}
 
 	function finish_edit_reftype_constraints() {
@@ -71,7 +71,7 @@
 	function edit_constrain_reftype(rdt_id) {
 		var name_span = document.getElementById('name'+rdt_id);
 		var pos = findPos(name_span);
-		popup_frame(pos, 'edit_constrain_reftype.php?rdt_id='+rdt_id, finish_edit_constrain_reftype,true);
+		popup_frame(pos, 'constraints/edit_constrain_reftype.php?rdt_id='+rdt_id, finish_edit_constrain_reftype,true);
 	}
 
 	function finish_edit_constrain_reftype() {
@@ -212,23 +212,23 @@
 
   <div>
 
-<a href="../admin">User admin</a>
+<a href="../users/add.php">User admin</a>
 |
-<a href="../admin/projectgroupadmin.php">Project groups</a>
+<a href="../users/projectgroupadmin.php">Project groups</a>
 |
-<a href="recalculate_title_masks.php">Rebuild titles</a>
+<a href="../verification/recalculate_title_masks.php">Rebuild titles</a>
 |
-<a href="find_dupes.php?fuzziness=10">Find duplicates</a>
+<a href="../verification/find_dupes.php?fuzziness=10">Find duplicates</a>
 |
-<a href="workgroup_keyword_manager.php">Workgroup keywords</a>
+<a href="../workgroups/workgroup_keyword_manager.php">Workgroup keywords</a>
 |
-<a href="../admin/usergroupadmin.php">List all users</a>
+<a href="../users/usergroupadmin.php">List all users</a>
 |
-<a href="../?q=_BROKEN_&w=all">Records with broken urls</a>
+<a href="../../search/heurist-search.html?q=_BROKEN_&amp;w=all">Records with broken urls</a>
 |
-<a href="wg_overrides.php">Record types with overrides</a>
+<a href="../workgroups/wg_overrides.php">Record types with overrides</a>
 |
-<a href="groups.php">Exit group</a>
+<a href="../workgroups/groups.php">Take your hat off (exit group)</a>
 
   </div>
 
@@ -259,8 +259,8 @@
 
 
   <p class="base-only">
-   <a href="help/bib_detail_editor.html" target=_blank><img src="../img/lb.gif" style="vertical-align: bottom;"></a>
-   <a href="help/bib_detail_editor.html" target=_blank>Explanation of functions</a>
+   <a href="../../help/bib_detail_editor.html" target=_blank><img src="../../common/images/lb.gif" style="vertical-align: bottom;"></a>
+   <a href="../../help/bib_detail_editor.html" target=_blank>Explanation of functions</a>
   </p>
 
   <table border="0">
@@ -274,7 +274,7 @@
    <tr class="base-only">
     <td style="font-weight: bold; text-align: right;">Icon</td>
 	<td>
-     <img src="../img/reftype/[rt_id].gif" style="vertical-align: middle;" class="rft_icon" onClick="upload_icon([rt_id]);">
+     <img src="../../common/images/reftype-icons/[rt_id].gif" style="vertical-align: middle;" class="rft_icon" onClick="upload_icon([rt_id]);">
      &nbsp;&nbsp;&nbsp;&nbsp;
      <span style="font-weight: bold; text-align: right;">Bibliographic record types</span>
      [checkbox : rt_primary : primary record type : style="margin: 0px;"]
@@ -320,7 +320,7 @@
      [foreach BIB_DETAIL_REQ bdr : 1 order by rdr_order, rdr_id /*itereate through each of the results*/]
       <tr class="friendly_border">
        <td style="vertical-align: top; font-weight: bold;">
-        <img src="../img/cross.gif" onClick="delete_bdr([rdr_id]);" class="delete_icon">
+        <img src="../../common/images/cross.gif" onClick="delete_bdr([rdr_id]);" class="delete_icon">
         [delete BIB_DETAIL_REQ bdr_delete][hidden required : del_field/* create hidden field to control marking this detail requirement for deletion*/][end-delete]
         [select BIB_DETAIL_TYPE bdt][rdt_name] <span style="font-size: 80%; font-weight: normal;">([rdt_id])</span>[end-select]&nbsp;
 </td>
@@ -329,7 +329,7 @@
         [update BIB_DETAIL_REQ bdr]
          &nbsp;&nbsp;&nbsp;label [textbox : rdr_name : contextual name : style="width: 200px;"]&nbsp;
 [dropdown required : rdr_required : : select req_abbrev, req_full from requirements order by req_order : style="width: 90px;"]&nbsp;
-<img src="../img/10x10.gif">
+<img src="../../common/images/10x10.gif">
          &nbsp;size [textbox : rdr_size : field width : style="width: 30px;"]
           &nbsp;<label>repeatable [checkbox : rdr_repeatable : repeatable : style="margin: 0px;"]</label>&nbsp;
           &nbsp;<label>matching [checkbox : rdr_match : is this field used for identifying possible matches? : style="margin: 0px;"]</label>&nbsp;
@@ -390,18 +390,18 @@
 </form>
 
 [not-found]
-<p>Master record type data will be copied to instances nightly.  Click <a href=../.ht_cron/sync_master_tables.php target=_blank>here</a> to sync now.</p>
+<p>Master record type data will be copied to instances nightly.  Click <a href="../.ht_cron/sync_master_tables.php" target=_blank>here</a> to sync now.</p>
 <div class="headline">Record types</div>
 <p/>
 <table border="0">
- <tr><td></td><td style="text-align: right;"><a href="bib_detail_dump.php">print-friendly dump</a> | <a href="bib_errors.php">records with errors</a></td></tr>
+ <tr><td></td><td style="text-align: right;"><a href="../describe/bib_detail_dump.php">print-friendly dump</a> | <a href="../verification/bib_errors.php">records with errors</a></td></tr>
 <tr><td>
  <p><b>Select a record type to edit:</b></p>
 
  <div style="width: 300px; height: 500px; overflow: auto; padding: 3px;" class="friendly_border">
   <table border="0">
    [foreach REFTYPE rtf : 1 order by (!rt_primary), rt_name]
-    <tr><td style="text-align: right;">[rt_id]</td><td><img src="../img/reftype/[rt_id].gif" id="rt[rt_id]" class="rft_icon" onClick="upload_icon([rt_id]);"><a href="?rt_id=[rt_id]">[rt_name]</a></td></tr>
+    <tr><td style="text-align: right;">[rt_id]</td><td><img src="../../common/images/reftype-icons/[rt_id].gif" id="rt[rt_id]" class="rft_icon" onClick="upload_icon([rt_id]);"><a href="?rt_id=[rt_id]">[rt_name]</a></td></tr>
    [end-foreach]
    [not-found][end-not-found]
   </table>
@@ -424,6 +424,7 @@
   <tr>
    <td></td>
    <td style="text-align: right;"><input type="submit" name="action" value="Add record type"></td>
+  </tr>
  </table>
    [end-insert]
 </form>
@@ -440,7 +441,7 @@
      <td style="text-align: left;">[if-eq : rdt_type : "enum"]<a href="#" onClick="edit_enum_types([rdt_id]); return false;">[rdt_type]</a>[else][rdt_type][end-if-eq][if-eq : rdt_type : "resource"] <a href="#" onClick="edit_constrain_reftype([rdt_id]); return false;">([if : rdt_constrain_rec_type][select REFTYPE rft][rt_name][end-select][else]unconstrained[end-if])</a>[end-if-eq]</td>
     </tr>
    [end-foreach]
-   <form action="master_bib_detail_editor.php" method="post"><input type="hidden" name="delete_bdt_field" value="" id="delete_bdt"></form>
+   <!--form action="master_bib_detail_editor.php" method="post"><input type="hidden" name="delete_bdt_field" value="" id="delete_bdt"></form-->
   </table>
  </div>
 
@@ -462,6 +463,7 @@
   <tr>
    <td></td>
    <td style="text-align: right;"><input type="submit" name="action" value="Add detail type (field)"></td>
+   </tr>
  </table>
    [end-insert]
 </form>
@@ -479,7 +481,7 @@
 
   </div>
 
-  <iframe name="popup_frame" id="popup_frame_obj" src="edit_enum.php" style="z-index: 51; width: 550px; height: 570px; position: absolute; top: -700px; left: 0px;" frameborder="0"></iframe>
+  <iframe name="popup_frame" id="popup_frame_obj" src="enums/edit_enum.php" style="z-index: 51; width: 550px; height: 570px; position: absolute; top: -700px; left: 0px;" frameborder="0"></iframe>
 
   </div>
 

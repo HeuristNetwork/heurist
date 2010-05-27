@@ -1,25 +1,26 @@
 <?php
 
-// Edit the Heurist user database in ACLAdmin on Sylvester 
+// Edit the Heurist user database in ACLAdmin on Sylvester
 // Add, delete and edit workgroup records
 // Ian Johnson 21 Aug 2008
 // Copyright (C) 2008 University of Sydney, Digital Innovation Unit
 // Coded with NuSphere PHP-Ed
 
-require_once("../php/modules/cred.php");  
-require_once "../php/nusphere/config.inc.php";
-require_once "../php/nusphere/db_utils.inc";
-require_once "../php/nusphere/db_". $config['db'] . ".inc";
+define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
+require_once(dirname(__FILE__)."/../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../../external/nusphere/config.inc.php");
+require_once(dirname(__FILE__)."/../../external/nusphere/db_utils.inc");
+require_once(dirname(__FILE__)."/../../external/nusphere/db_". $config['db'] . ".inc");
 
 
 
 if (! is_logged_in()) {
-    header("Location: " . BASE_PATH . "php/login.php");
-    return;
+	header("Location: " . HEURIST_URL_BASE . "common/connect/login.php");
+	return;
 }
 if (! is_admin()) {
-    print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href=../php/login.php?logout=1>Log out</a></p></body></html>";
-    return;   
+	print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href='".HEURIST_URL_BASE."common/connect/login.php?logout=1'>Log out</a></p></body></html>";
+	return;
 }
 
 define('INP_MODE', 'mode');
@@ -225,7 +226,7 @@ function Check(theForm, what, regexp, indices) {
 }
 
 function CheckEmail(theForm) {
-    var regexp = /^[0-9a-z\.\-_]+@[0-9a-z\-\_]+\..+$/i;    
+    var regexp = /^[0-9a-z\.\-_]+@[0-9a-z\-\_]+\..+$/i;
     return Check(theForm, "email", regexp, doslice(arguments, 1));
 }
 
@@ -282,9 +283,9 @@ function CheckDate(theForm) {
 }
 
 function CheckTime(theForm) {
-    var regexp = /^[0-9]+:[0-9]+:[0-9]+/i;    
+    var regexp = /^[0-9]+:[0-9]+:[0-9]+/i;
     if (!Check(theForm, "time", regexp,  doslice(arguments, 1)))
-        return false;                 
+        return false;
     for (var i = 1; i < arguments.length; i++) {
         var el = theForm.elements[arguments[i]];
         if (el.value == "") continue;
@@ -298,7 +299,7 @@ function CheckTime(theForm) {
     return true;
 }
 
-function CheckRequiredFields(theForm) {    
+function CheckRequiredFields(theForm) {
     for (var i = 1; i < arguments.length; i++) {
         var el = theForm.elements[arguments[i]];
         if (el.value=="") {
@@ -376,7 +377,7 @@ function CheckForm(theForm) {
             if (get_magic_quotes_gpc())
                 $key = stripslashes($key);
             echo "<input type='hidden' name='".RKEY."' value='".htmlentities($key, ENT_QUOTES, $config['encoding'])."' />";
-        }          
+        }
     ?>
 </form>
 <?php } else if ($show_data) { ?>
@@ -384,9 +385,9 @@ function CheckForm(theForm) {
 
 
     <table cellpadding="1" cellspacing="0" border="0" bgcolor="#ababab">
-  
+
     <tr><td><h2>&nbsp;&nbsp;Heurist Workgroup editing</h2></td></tr>
- 
+
     <tr><td>
 
             <table cellpadding="0" cellspacing="1" border="0" class="datatable">

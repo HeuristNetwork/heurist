@@ -1,11 +1,11 @@
 <?php
 
-require_once('../php/modules/cred.php');
-require_once('../php/modules/db.php');
-require_once('t1000.php');
+require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/connect/db.php');
+require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
 if (!is_logged_in()) {
-	header('Location: ../php/login.php');
+	header('Location: '.HEURIST_URL_BASE.'common/connect/login.php');
 	return;
 }
 
@@ -13,7 +13,7 @@ mysql_connection_db_overwrite(DATABASE);
 
 $user_select = "select ".USERS_ID_FIELD.",concat(".USERS_FIRSTNAME_FIELD.",' ',".USERS_LASTNAME_FIELD.") as fullname from ".USERS_DATABASE.".".USERS_TABLE." where ".USERS_FIRSTNAME_FIELD." is not null and ".USERS_LASTNAME_FIELD." is not null order by fullname asc";
 
-$template = file_get_contents('templates/user_clouds_users_link_edit.html');
+$template = file_get_contents('user_clouds_users_link_edit.html');
 $template = str_replace("{user-select}", $user_select, $template);
 $template = str_replace("{firstname-field}", USERS_FIRSTNAME_FIELD, $template);
 $template = str_replace("{lastname-field}", USERS_LASTNAME_FIELD, $template);

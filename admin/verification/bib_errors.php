@@ -14,7 +14,7 @@
 	var link = document.getElementById('selected_link');
 	if (!link)
 		return false;
-	link.href = '../?w=all&q=ids:' + ids;
+	link.href = '../../search/heurist-search.html?w=all&q=ids:' + ids;
 	return true;
   }
  </script>
@@ -23,8 +23,8 @@
 <body>
 <?php
 
-require_once('../php/modules/cred.php');
-require_once('../php/modules/db.php');
+require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/connect/db.php');
 
 mysql_connection_db_select(DATABASE);
 
@@ -44,14 +44,14 @@ while ($row = mysql_fetch_assoc($res))
 <div style="font-weight: bold;">
  Records with resource pointers to the wrong rec_type
  &nbsp;&nbsp;
- <a target=_new href=../?w=all&q=ids:<?= join(',', array_keys($bibs)) ?>>(show all in search)</a>
+ <a target=_new href='../../search/heurist-search.html?w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>(show all in search)</a>
 </div>
 <table>
 <?php
 foreach ($bibs as $row) {
 ?>
  <tr>
-  <td><a target=_new href=../edit?bib_id=<?= $row['rd_rec_id'] ?>><?= $row['rd_rec_id'] ?></a></td>
+  <td><a target=_new href='../../data/records/editrec/heurist-edit.html?bib_id=<?= $row['rd_rec_id'] ?>'><?= $row['rd_rec_id'] ?></a></td>
   <td><?= $row['rdt_name'] ?></td>
   <td>points to</td>
   <td><?= $row['rec_id'] ?> (<?= $row['rt_name'] ?>) - <?= substr($row['rec_title'], 0, 50) ?></td>
@@ -80,9 +80,9 @@ while ($row = mysql_fetch_assoc($res))
 <div style="font-weight: bold;">
  Records with resource pointers to non-existent records
  &nbsp;&nbsp;
- <a target=_new href=../?w=all&q=ids:<?= join(',', array_keys($bibs)) ?>>(show all in search)</a>
+ <a target=_new href='../../search/heurist-search.html?w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>(show all in search)</a>
  &nbsp;&nbsp;
- <a target=_new href=# id=selected_link onclick="return open_selected();">(show selected in search)</a>
+ <a target=_new href='#' id=selected_link onclick="return open_selected();">(show selected in search)</a>
 </div>
 <table>
 <?php
@@ -90,7 +90,7 @@ foreach ($bibs as $row) {
 ?>
  <tr>
   <td><input type=checkbox name=bib_cb value=<?= $row['rd_rec_id'] ?>></td>
-  <td><a target=_new href=../edit?bib_id=<?= $row['rd_rec_id'] ?>><?= $row['rd_rec_id'] ?></a></td>
+  <td><a target=_new href='../../data/records/editrec/heurist-edit.html?bib_id=<?= $row['rd_rec_id'] ?>'><?= $row['rd_rec_id'] ?></a></td>
   <td><?= $row['rec_title'] ?></td>
   <td><?= $row['rdt_name'] ?></td>
  </tr>

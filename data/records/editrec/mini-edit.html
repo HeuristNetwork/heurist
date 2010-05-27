@@ -26,17 +26,17 @@
  <head>
   <title>Edit record</title>
 
-  <link rel=stylesheet href="../css/heurist.css">
-  <link rel=stylesheet href="../css/mini.css">
+  <link rel=stylesheet href="../../../css/heurist.css">
+  <link rel=stylesheet href="../../../css/mini.css">
  </head>
 
  <body width=600 height=400>
 
-  <script src="../js/heurist.js"></script>
-  <script src="../php/js/display-preferences.php"></script>
+  <script src="../../../common/lib/heurist.js"></script>
+  <script src="../../../common/lib/display-preferences.php"></script>
   <script>
 window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-window.HEURIST.loadScript('../php/js/bib.php?bib_id='+window.HEURIST.parameters['bib_id']+'&bkmk_id='+window.HEURIST.parameters['bkmk_id'], true);
+window.HEURIST.loadScript(top.HEURIST.basePath +'common/lib/bib.php?bib_id='+window.HEURIST.parameters['bib_id']+'&bkmk_id='+window.HEURIST.parameters['bkmk_id'], true);
 
 function showRecordProperties() {
 	if (! window.HEURIST.record) {
@@ -60,7 +60,7 @@ function loadPublicEditFrame() {
 
 	var parameters = window.HEURIST.record;
 	if (parameters  &&  parameters.bibID) {
-		editFrame.src = "../edit/public-tab.html?bib_id=" + parameters.bibID;
+		editFrame.src = top.HEURIST.basePath + "data/records/editrec/tabs/public-tab.html?bib_id=" + parameters.bibID;
 		editFrame.style.display = "block";
 	}
 

@@ -2,10 +2,10 @@
 
 define('SAVE_URI', 'disabled');
 
-require_once('modules/cred.php');
-if (! is_logged_in()) return; 
+require_once(dirname(__FILE__).'/../common/connect/cred.php');
+if (! is_logged_in()) return;
 
-require_once('modules/db.php');
+require_once(dirname(__FILE__).'/../common/connect/db.php');
 
 session_start();
 $script = "";
@@ -393,7 +393,7 @@ function bookmark_tag_and_save_seach() {
 	} else {
 		$onload = 'location.replace(\'action.php\');'.
 					'top.HEURIST.search.insertSavedSearch(\''.slash($_REQUEST['ss_name']).'\', \''.slash($_REQUEST['ss_query']).'\', '.$wg.', '.$ss.');'.
-					'top.HEURIST.util.getJsonData("php/js/collection.php?clear", top.HEURIST.search.addRemoveCollectionCB);'.
+					'top.HEURIST.util.getJsonData("'. BASE_PATH.'search/collection.php?clear", top.HEURIST.search.addRemoveCollectionCB);'.
 					'top.HEURIST.search.popupNotice(\' Search \"'.$_REQUEST['ss_name'].'\" saved. '. $message.'\');';
 	}
 	return $onload;
@@ -413,7 +413,7 @@ function save_search() {
 		'ss_usr_id'   => get_user_id(),
 		'ss_added'     => $now,
 		'ss_modified'  => $now);
-		
+
 	if ($wg) {
 		$cmb['ss_wg_id'] = $wg;
 	}
@@ -425,7 +425,7 @@ function save_search() {
 
 	if ($row || $ss) {
 		if ($row && $row[1] == $wg) {
-		 	$ss = intval($row[0]); 
+		 	$ss = intval($row[0]);
 		}
 		mysql__update('saved_searches', 'ss_id='.$ss, $cmb);
 	} else {

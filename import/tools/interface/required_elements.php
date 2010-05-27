@@ -1,9 +1,9 @@
 <?php
 
-require_once('HeuristReferImport.php');
+require_once(dirname(__FILE__).'/../biblio/HeuristReferImport.php');
 
-require_once('../php/modules/cred.php');
-require_once('../php/modules/db.php');
+require_once(dirname(__FILE__).'/../../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../../common/connect/db.php');
 
 
 mysql_connection_db_select(DATABASE);
@@ -41,7 +41,7 @@ foreach ($refer_to_heurist_map as $type => $details) {
 		if (! is_array($bdts)) $bdts = array($bdts);
 		foreach ($bdts as $bdt) {
 			$label = decode_bdt($type, $bdt);
-		
+
 			if (strlen($code) == 1) {
 				print '<li>%' . htmlspecialchars($code) . ': ' . ($label) . '</li>';
 			} else {

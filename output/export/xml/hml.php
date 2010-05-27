@@ -51,13 +51,13 @@ if (@$argv) {
 	$_REQUEST['woot'] = @$ARGV['-woot'];
 }
 
-require_once('modules/friendly-servers.php');
-require_once('modules/heurist-instances.php');
-require_once('modules/db.php');
-require_once('modules/loading.php');
-require_once('modules/requirements-overrides.php');
-require_once('modules/relationships.php');
-require_once('modules/woot.php');
+require_once(dirname(__FILE__).'/../../../common/config/friendly-servers.php');
+require_once(dirname(__FILE__).'/../../../common/config/heurist-instances.php');
+require_once(dirname(__FILE__).'/../../../common/connect/db.php');
+require_once(dirname(__FILE__).'/../../../search/saved/loading.php');
+require_once(dirname(__FILE__).'/../../../common/lib/requirements-overrides.php');
+require_once(dirname(__FILE__).'/../../../data/relationships/relationships.php');
+require_once(dirname(__FILE__).'/../../../data/woot/woot.php');
 
 mysql_connection_db_select(DATABASE);
 
@@ -206,7 +206,7 @@ if (@$ARGV) {
 
 } else if (@$_REQUEST['pub_id']) {
 	$pub_id = intval($_REQUEST['pub_id']);
-	require_once('modules/publish_cred.php');
+	require_once(dirname(__FILE__).'/../../../common/connect/publish_cred.php');
 
 } else if (friendlyServer(@$_SERVER['SERVER_ADDR'])) {	// internal request ... apparently we don't want to authenticate ..?
 	function get_user_id() { return 0; }
@@ -219,11 +219,11 @@ if (@$ARGV) {
 
 } else {
 	$pub_id = 0;
-	require_once('modules/cred.php');
+	require_once(dirname(__FILE__).'/../../../common/connect/cred.php');
 
 	if (!is_logged_in()) { // check if the record being retrieved is a single non-protected record
 		if (!single_record_retrieval($_REQUEST['q'])) {
-			header('Location: ' . BASE_PATH . 'php/login.php');
+			header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
 			return;
 		}
 	}

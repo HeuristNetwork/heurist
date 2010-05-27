@@ -1,8 +1,8 @@
 <html>
  <head>
-  <link rel=stylesheet href=../css/heurist.css>
-  <link rel=stylesheet href=../css/heurist-edit-tab.css>
-  <link rel=stylesheet href=../css/keyword-editor.css>
+  <link rel=stylesheet href="../../../../css/heurist.css">
+  <link rel=stylesheet href="../../../../css/heurist-edit-tab.css">
+  <link rel=stylesheet href="../../../../css/keyword-editor.css">
 
   <style>
 	.keyword-list {
@@ -12,8 +12,8 @@
  </head>
 
  <body>
-  <script src=../js/heurist.js></script>
-  <script src=../php/js/display-preferences.php></script>
+  <script src="../../../../common/lib/heurist.js"></script>
+  <script src="../../../../common/lib/display-preferences.php"></script>
 
    <div>
     <h2 style="float: left; margin: 0;">Workgroup tags &nbsp;&nbsp;</h2>
@@ -53,13 +53,13 @@
       <td class=prompt>Double-click on a tag to remove it from this record</td>
      </tr>
      <tr><td>
-     	<div id="admin-wgKeywords"><br><a href="../legacy/workgroup_keyword_manager.php" target="_blank"> Click here </a> to add/delete tags for workgroups (administrators only). </div>
+     	<div id="admin-wgKeywords"><br><a href="../../../../admin/workgroups/workgroup_keyword_manager.php" target="_blank"> Click here </a> to add/delete tags for workgroups (administrators only). </div>
      </td></tr>
     </table>
 
-    <form id=keyword-form jsonAction=php/save-keywords.php action=../php/save-keywords.php></form>
+    <form id=keyword-form jsonAction="../../../tags/save-keywords.php" action="../../../tags/save-keywords.php"></form>
 
-<script src=../js/keyword-editor.js></script>
+<script src="../../../tags/keyword-editor.js"></script>
 <script>
 
 var removeButton = document.getElementById("remove-button");

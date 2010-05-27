@@ -5,10 +5,10 @@
   [else]
   <title>Add user</title>
   [end-if]
- <link href="../css/heurist.css" rel="stylesheet" type="text/css">
+ <link href="../../css/heurist.css" rel="stylesheet" type="text/css">
  <link href="registration.css" rel="stylesheet" type="text/css">
- 
-  <script language="JavaScript" src="/jquery/jquery.js"></script>
+
+  <script language="JavaScript" src="../../external/jquery/jquery.js"></script>
  </head>
 
  <body>
@@ -17,7 +17,7 @@
 
 <table border="0" cellpadding="0" cellspacing="0" class="expander">
 <tbody><tr>
-<td rowspan="2" id="logo-cell"><a href=../><img src="../img/hlogo-small.jpg" alt="Heurist" title="Click the logo at top left of any Heurist page to return to your favourites"></a></td>
+<td rowspan="2" id="logo-cell"><a href="../../"><img src="../../common/images/hlogo-small.jpg" alt="Heurist" title="Click the logo at top left of any Heurist page to return to your favourites"></a></td>
 <td rowspan="2">
 [if : register]
 [else]
@@ -29,9 +29,9 @@
 [else]
 <font color="#008000"><small>Logged in as: </small><tt>[logged-in-user-username]</tt></font><br>
    [if-eq : logged-in-user-username : ""]
-   <a href="../php/login.php"><small>Log in</small></a>
+   <a href="../../common/connect/login.php"><small>Log in</small></a>
    [else]
-   <a href="../php/login.php?logout=1"><small>Log out</small></a>
+   <a href="../../common/connect/login.php?logout=1"><small>Log out</small></a>
    [end-if-eq]
  [end-if]
 </td>
@@ -53,7 +53,7 @@
 
  <tr>
     <td colspan="3" style="padding-left:40px; padding-right:40px;">
- 
+
 
 
 [if : register]
@@ -65,19 +65,19 @@
   <hr color="#cccccc" size="1" width="100%" align="left">
 <b>Search for user</b>
 
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; First name&nbsp; [textbox : firstname : user ??? : size=&quot;20&quot;]&nbsp; 
-Last name&nbsp; [textbox : lastname : user ??? : size=&quot;20&quot;]&nbsp;&nbsp; 
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; First name&nbsp; [textbox : firstname : user ??? : size=&quot;20&quot;]&nbsp;
+Last name&nbsp; [textbox : lastname : user ??? : size=&quot;20&quot;]&nbsp;&nbsp;
 Email [textbox : EMail : user email: size=&quot;30&quot;]&nbsp;
 
-  <input type="submit" value="Find"><i><span class="smallfont"> Search will match partial 
+  <input type="submit" value="Find"><i><span class="smallfont"> Search will match partial
 strings</span></i></p>
 
 <a name="results"></a>
- 
+
   [if:USER_search-searched] <p>
     <b>Count: [result-count] </b>
     <i>&nbsp;&nbsp;&nbsp;
-    [if:result-count] Showing [result-first] to [result-last]&nbsp;&nbsp;</i>Click on user name to edit<i> </i>[if:prev-url] <a href="[prev-url]">previous 
+    [if:result-count] Showing [result-first] to [result-last]&nbsp;&nbsp;</i>Click on user name to edit<i> </i>[if:prev-url] <a href="[prev-url]">previous
     page</a>[end-if]
     [if:next-url] <a href="[next-url]">next page</a>[end-if]</i>[end-if]
   [end-if] </i>
@@ -88,7 +88,7 @@ strings</span></i></p>
     <tr>
       <td style="padding-right: 20px;"><b>[Id]</b></td>
       <td style="padding-right: 20px;"><b><a href="edit.php?Id=[Id]">[firstname] [lastname]</a></b></td>
-	  <td><a href=usergroupadmin.php?filterId=[Id]>edit groups</a></td>
+	  <td><a href="usergroupadmin.php?filterId=[Id]">edit groups</a></td>
     </tr>
   [end-foreach]
   </table>
@@ -100,7 +100,7 @@ strings</span></i></p>
 <!-- end non-registration code -->
 <form action="add.php" method="post">
 [insert required USER user_insert]
-  
+
 [if : register]
 [else]
 <p class="red">Please search for user (below) to ensure that they don't exist before adding&nbsp;&nbsp;&nbsp;&nbsp; </b></p>
@@ -123,7 +123,7 @@ strings</span></i></p>
 	<label>Login name</label>[textbox required : Username : Login name : size=&quot;20&quot; id=username]
 	<label>Password</label>[password required : Password : two matching passwords : size=&quot;20&quot;]
 	<label>Repeat password</label><input type="password" name="password2" size="20">
-  
+
 <p>Warning: this is not an encrypted connection, so please don't use your institutional or banking password.</p>
 </div>
 <br>
@@ -150,7 +150,7 @@ strings</span></i></p>
     <td width="11%" height="19" align="right">Jobtrack&nbsp;&nbsp;</td>
     <td width="83%" height="19"><input type="checkbox" name="user_insert_Jobtrack" value="1" title="Jobtrack" style="margin-left: 0;">&nbsp;&nbsp; </td>
   </tr>
-  
+
   <tr>
     <td width="6%" height="19">&nbsp;</td>
     <td width="11%" height="19" align="right">Model User&nbsp;&nbsp;</td>
@@ -240,7 +240,7 @@ strings</span></i></p>
  </ul>
  </div>
  </div>
- 
+
 
  <input type="hidden" name="register" value="1">
 [end-if /* register */]
@@ -270,7 +270,7 @@ strings</span></i></p>
  <body>
   <span class="normalgr"><i>User not found</i></span>
   <p>
-  <a href="users_search.php">Return to users list</a>
+  <!--a href="users_search.php">Return to users list</a-->	<!-- FIXME: need to find this or it's replacement. -->
   </p>
  </body>
 [end-not-found]

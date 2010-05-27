@@ -1,10 +1,10 @@
 <?php
 
-require_once("../php/modules/cred.php");
-require_once("../php/modules/db.php");
+require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/connect/db.php');
 
 if (! is_admin()) {
-	header("Location: ../php/login.php");
+	header("Location: ".HEURIST_URL_BASE."common/connect/login.php");
 }
 
 $groupID = intval(@$_REQUEST["g"]);

@@ -2,8 +2,8 @@
 
 session_start();
 
-require_once("../php/modules/cred.php");
-require_once("../php/modules/db.php");
+require_once(dirname(__FILE__)."/../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../../common/connect/db.php");
 
 
 $bib_id = intval($_REQUEST['bib_id']);

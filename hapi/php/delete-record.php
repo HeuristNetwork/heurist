@@ -11,9 +11,9 @@ if (mysql_error()) { print "ERROR: " . mysql_error() . "\n"; }
 	return $res;
 }
 
-require_once("modules/cred.php");
-require_once("modules/db.php");
-require_once("modules/deleting.php");
+require_once(dirname(__FILE__)."/../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../../common/connect/db.php");
+require_once("deleting.php");
 
 
 if (! is_logged_in()) {

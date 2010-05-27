@@ -7,7 +7,7 @@
 //error_log('post: ' . print_r($_POST, 1));
 //error_log("mode: " . $_REQUEST['mode']);
 
-require_once('../php/modules/cred.php');
+require_once(dirname(__FILE__).'/../../common/connect/cred.php');
 
 unset($mode);
 

@@ -1,16 +1,16 @@
 <?php
 
-require_once('../php/modules/cred.php');
-require_once('t1000.php');
-require_once('../php/modules/similar.php');
+require_once(dirname(__FILE__).'/../../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../../common/t1000/t1000.php');
+require_once(dirname(__FILE__).'/../disambig/similar.php');
 
 if (! is_logged_in()) {
-        header('Location: ' . BASE_PATH . 'php/login.php');
+        header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
         return;
 }
 
 if (! $_REQUEST['bkmk_url']) {
-	header('Location: ' . BASE_PATH . 'php/add.php');
+	header('Location: '.HEURIST_URL_BASE.'data/records/addrec/add.php');
 	return;
 }
 
@@ -23,17 +23,17 @@ $use_site_hierarchy = array_key_exists('site_hierarchy', $_REQUEST);
 <html>
  <head><title>Heurist - Add bookmark (disambiguation)</title>
 
-<link rel="stylesheet" type="text/css" href="newshsseri.css">
-<link rel="icon" href="../../favicon.ico" type="image/x-icon">
-<link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+<link rel="stylesheet" type="text/css" href="../../../css/newshsseri.css">
+<link rel="icon" href="../../../favicon.ico" type="image/x-icon">
+<link rel="shortcut icon" href="../../../favicon.ico" type="image/x-icon">
 
-	
+
 <style type="text/css">
 <!--
 .common_url { color: lightgray; }
 h1 { font-size: 18px; }
 h2 { margin-bottom: 0px; margin-top: 5px; font-size: 18px; }
-//-->
+-->
 </style>
 
  </head>
@@ -85,7 +85,7 @@ h2 { margin-bottom: 0px; margin-top: 5px; font-size: 18px; }
 <tr><td colspan="5"><b>No similar URLs have been bookmarked, but there are other URLs on <tt><?= htmlspecialchars($noproto_url) ?></tt>.</b></td></tr>
 <tr><td colspan="5">&nbsp;</td></tr>
 <tr><td colspan="5">You may look at <a href="<?= htmlspecialchars($base_url . '&site_hierarchy') ?>">all known URLs from the same site</a>,<br>
-or <a href="../php/add.php?bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST['bkmk_url']) ?>&bkmrk_bkmk_title=<?= urlencode($_REQUEST['bkmk_title']) ?>&bkmrk_bkmk_description=<?= urlencode($_REQUEST['bkmk_description']) ?>">add a bookmark</a> for <b><tt><?= htmlspecialchars($_REQUEST['bkmk_url']) ?></tt></b>.</td></tr>
+or <a href="add.php?bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST['bkmk_url']) ?>&bkmrk_bkmk_title=<?= urlencode($_REQUEST['bkmk_title']) ?>&bkmrk_bkmk_description=<?= urlencode($_REQUEST['bkmk_description']) ?>">add a bookmark</a> for <b><tt><?= htmlspecialchars($_REQUEST['bkmk_url']) ?></tt></b>.</td></tr>
 
 <?php
 		} else {
@@ -127,9 +127,9 @@ or <a href="../php/add.php?bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST['bkm
       ?></tt></b>
  </nobr></td>
 </tr>
-   <tr><td><img src="../img/200.gif"></td><td colspan="2"><img src="../img/200.gif"</td></tr>
+   <tr><td><img src="../../../common/images/200.gif"></td><td colspan="2"><img src="../../../common/images/200.gif"</td></tr>
    <tr>
-    <td colspan="3"><img src="../img/upleftarrow.gif" style="padding-left: 30px;">
+    <td colspan="3"><img src="../../../common/images/upleftarrow.gif" style="padding-left: 30px;">
      <span style="color: red;">This is the resource you asked to add to Heurist.  If selected it will be added as a new record.</span><br>
      <span style="padding-left: 64px;">If you select an existing record, that record will be opened for editing.</span>
     </td>
@@ -249,7 +249,7 @@ or <a href="../php/add.php?bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST['bkm
 <?php
 		}
 ?>
-   <tr><td><img src="../img/200.gif"></td><td colspan="2"></td></tr>
+   <tr><td><img src="../../../common/images/200.gif"></td><td colspan="2"></td></tr>
 </table>
  </td>
 </tr>
@@ -263,16 +263,16 @@ or <a href="../php/add.php?bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST['bkm
 
 </td></tr></table>
 
-<div style="position: absolute; display: none; background: url(100x100.gif);" id="popupProtector"></div>
+<div style="position: absolute; display: none; background: url('<?=HEURIST_SITE_PATH?>common/images/100x100.gif');" id="popupProtector"></div>
 
 <div style="background-color: #600000; border: 0px; margin: 0px; padding: 10px; overflow: hidden; display: none; position: absolute; text-align: center;" id="url_checker">
  <table border="0" cellpadding="0" cellspacing="0" width="100%" height="100%" style="font-size: 12px;">
   <tr>
    <td style="color: white; font-weight: bold;">Previewing bookmark</td>
-   <td style="width: 150px; text-align: right;"><a style="text-decoration: none; color: white;" onClick="endCheckURL(); return false;" href="blank.html">[close this window]</a></td>
+   <td style="width: 150px; text-align: right;"><a style="text-decoration: none; color: white;" onClick="endCheckURL(); return false;" href='<?=HEURIST_SITE_PATH?>common/messages/blank.html'>[close this window]</a></td>
   </tr>
   <tr>
-   <td colspan="2"><iframe style="border: 0px; margin: 0px; padding: 0px; background-color: white;" frameBorder="0" name="uc_frame" id="uc_frame_obj" src="blank.html"></iframe></td>
+   <td colspan="2"><iframe style="border: 0px; margin: 0px; padding: 0px; background-color: white;" frameBorder="0" name="uc_frame" id="uc_frame_obj" src='<?=HEURIST_SITE_PATH?>common/messages/blank.html'></iframe></td>
   </tr>
  </table>
 </div>

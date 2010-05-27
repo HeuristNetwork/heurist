@@ -24,9 +24,9 @@ define("SEARCH_VERSION", 1);
 ini_set("zlib.output_compression_level", 5);
 
 
-require_once("modules/cred.php");
-require_once("modules/db.php");
-require_once('modules/adv-search.php');
+require_once(dirname(__FILE__)."/../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../../common/connect/db.php");
+require_once(dirname(__FILE__).'/../../search/advanced/adv-search.php');
 
 mysql_connection_db_select(DATABASE);
 

@@ -12,8 +12,8 @@
  * Kim Jackson, April 2008
  */
 
-require_once('../php/modules/heurist-instances.php');
-require_once("../php/modules/db.php");
+require_once(dirname(__FILE__).'/../../common/config/heurist-instances.php');
+require_once(dirname(__FILE__).'/../../common/connect/db.php');
 
 foreach (get_all_instances() as $instance_name => $instance) {
 

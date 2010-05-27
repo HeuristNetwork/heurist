@@ -1,16 +1,16 @@
 <?php
 
-require_once('../php/modules/cred.php');
-require_once('t1000.php');
-
-require_once('../php/modules/TitleMask.php');
+define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
+require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
+require_once(dirname(__FILE__).'/../../data/records/TitleMask.php');
 
 if (! is_logged_in()) {
-	header('Location: ' . BASE_PATH . 'php/login.php');
+	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
 	return;
 }
 if (! is_admin()  ||  HEURIST_INSTANCE != "") {
-	print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href=..>Return to Heurist</a></p></body></html>";
+	print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href=".HEURIST_URL_BASE.">Return to Heurist</a></p></body></html>";
 	return;
 }
 
@@ -18,19 +18,19 @@ if (! is_admin()  ||  HEURIST_INSTANCE != "") {
 
 $_REQUEST['_bdr_search_search'] = 1;
 
-mysql_connection_db_overwrite("`heurist-common`");
+mysql_connection_db_overwrite(HEURIST_COMMON_DB);
 
 $delete_bdt_id = intval(@$_REQUEST['delete_bdt_field']);
 if ($delete_bdt_id) {
 	mysql_query('delete from rec_detail_types where rdt_id = ' . $delete_bdt_id);
 	mysql_query('delete from rec_detail_requirements where rdr_rdt_id = ' . $delete_bdt_id);
-	header('Location: ' . BASE_PATH . 'legacy/master_bib_detail_editor.php');
+	header('Location: master_bib_detail_editor.php');
 	return;
 }
 
 
-$template = file_get_contents('templates/master_bib_detail_editor.html');
-$template = str_replace('{PageHeader}', '[literal]'.file_get_contents('menu.html').'[end-literal]', $template);
+$template = file_get_contents('master_bib_detail_editor.html');
+$template = str_replace('{PageHeader}', '[literal]'.file_get_contents('../describe/menu.html').'[end-literal]', $template);
 $template = str_replace('[special-rt_id]', intval(@$_REQUEST['rt_id']), $template);
 $lexer = new Lexer($template);
 
@@ -57,10 +57,10 @@ if (@$_REQUEST['_submit']) {
 			if (@$_REQUEST['action'] == 'Add record type') {
 				$rt_id = mysql_insert_id();
 				if ($rt_id > 0) {
-					system('cd ../img/reftype  &&  cp questionmark.gif ' . $rt_id . '.gif');
+					system('cd ../../common/images/reftype-icons  &&  cp questionmark.gif ' . $rt_id . '.gif');
 				}
 
-				header('Location: ' . BASE_PATH . 'legacy/master_bib_detail_editor.php?rt_id=' . $rt_id . '&new=1');
+				header('Location: '.HEURIST_URL_BASE.'admin/rectypes/master_bib_detail_editor.php?rt_id=' . $rt_id . '&new=1');
 				return;
 			} else if (! $MYSQL_ERRORS  and  @$_REQUEST['action'] == 'Save') {
 				$body->global_vars['edit-success'] = true;

@@ -4,8 +4,9 @@
    and top.HEURIST.workgroups[wg_id].savedSearches with workgroup saved search details */
 
 define("SAVE_URI", "disabled");
-require_once("../modules/cred.php");
-require_once("../modules/db.php");
+define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
+require_once(dirname(__FILE__)."/../connect/cred.php");
+require_once(dirname(__FILE__)."/../connect/db.php");
 if (! is_logged_in()) return;
 
 header("Content-type: text/javascript");
@@ -57,10 +58,10 @@ while ($row = mysql_fetch_assoc($res)) {
 ?>
 
 	],
-	
+
 	"publishedSearches": [ <?php
 $res = mysql_query("select pub_id, pub_name
-					  from published_searches 
+					  from published_searches
 					 where pub_wg_id=".$wg_id."
                      order by pub_name");
 $first = true;

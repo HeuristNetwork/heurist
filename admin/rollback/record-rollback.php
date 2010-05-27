@@ -12,7 +12,7 @@
   .detail-row .insert { background-color: #88ff88 }
   .detail-row.shade .insert { background-color: #88ee88 }
  </style>
- <script type="text/javascript" src="/jquery/jquery.js"></script>
+ <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
  <script type="text/javascript">
 	$(function () {
 		$(".record .detail-row:even").addClass("shade");
@@ -21,10 +21,11 @@
  <h1>Record rollback</h1>
 <?php
 
-require_once("modules/cred.php");
-require_once("modules/loading.php");
-require_once("modules/requirements-overrides.php");
-require_once("modules/rollback.php");
+define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
+require_once(dirname(__FILE__)."/../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../../search/saved/loading.php");
+require_once(dirname(__FILE__)."/../../common/lib/requirements-overrides.php");
+require_once("rollback.php");
 
 if (! is_admin()) {
 	print "Administrator access required.";
@@ -45,7 +46,7 @@ if ($rollback) {
 	$s = $n != 1 ? "s" : "";
 	$state = $date ? "state as of $date" : "previous version";
 	print "<p>$n record$s rolled back to $state</p>";
-	print '<p><a href="../?q=ids:' . $ids . '">View updated records</a></p>';
+	print '<p><a href="'.HEURIST_URL_BASE.'search/heurist-search.html?q=ids:' . $ids . '">View updated records</a></p>';
 } else {
 	$rollbacks = getRecordRollbacks(split(",", $ids), $date);
 	showRollbacks($rollbacks);
@@ -177,7 +178,7 @@ function getCurrentValString ($val) {
 			return 'geo: ' . $val["geo"]["type"] . ': [' . substr($val["geo"]["wkt"], 0, 30) . ' ... ]';
 		}
 		else if (array_key_exists("id", $val)) {
-			return '=> [' . $val["id"] . '] <a href="../legacy/view.php?bib_id=' . $val["id"] . '">' . $val["title"] . '</a>';
+			return '=> [' . $val["id"] . '] <a href="'.HEURIST_URL_BASE.'data/records/viewrec/view.php?bib_id=' . $val["id"] . '">' . $val["title"] . '</a>';
 		}
 	} else {
 		return $val;

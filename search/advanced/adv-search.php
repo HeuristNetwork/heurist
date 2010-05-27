@@ -22,7 +22,7 @@ function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL) {
 	$text = preg_replace('/[\000-\041\043-\046\050-\053\073\077\100\133\135\136\140\173-\177]+/s', ' ', $text);
 	$text = preg_replace('/- (?=[^"]*(?:"[^"]*"[^"]*)*$)/', ' ', $text); // remove any dashes outside matched quotes.
 
-	$query = & new Query($search_type, $text);
+	$query = new Query($search_type, $text);
 	$query->addWorkgroupRestriction($wg_ids);
 	$q = $query->makeSQL();
 

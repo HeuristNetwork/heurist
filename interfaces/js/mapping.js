@@ -105,7 +105,7 @@ function initTMap(mini) {
 	tl_theme.autoWidth = true;
 
 	// modify preset timemap themes
-	var opts = { eventIconPath: "http://heuristscholar.org/timemap.js/images/" };
+	var opts = { eventIconPath: (HAPI && HAPI.HeuristBaseURL ? HAPI.HeuristBaseURL : (window.HeuristBaseURL ? window.HeuristBaseURL : (window.opener.HeuristBaseURL? window.opener.HeuristBaseURL: "../../"))) +"external/timemap.js/images/" };
 	TimeMapDataset.themes = {
 		'red': TimeMapDataset.redTheme(opts),
 		'blue': TimeMapDataset.blueTheme(opts),

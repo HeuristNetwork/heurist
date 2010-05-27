@@ -1,0 +1,109 @@
+<?php
+
+/* Generate a Heurist API key for a given site */
+
+require_once(dirname(__FILE__)."/../../common/connect/cred.php");
+
+$instances = get_all_instances();
+$user_instances = array();
+$logged_in = false;
+foreach (array_keys($instances) as $instance) {
+	if (@$_SESSION[($instance ? $instance."." : "") . "heurist"]["user_name"]) {
+		array_push($user_instances, $instance);
+	}
+}
+
+if (count($user_instances) == 0) {
+	header("Location: ".HEURIST_URL_BASE."common/connect/login.php?last_uri=http://hapi.heuristscholar.org/key");
+}
+
+if (count($user_instances) == 1  &&  $user_instances[0] == ""  &&
+	$_SESSION["heurist"]["user_access"][$instances[""]["admingroup"]] != "admin") {
+	header("Location: ".HEURIST_URL_BASE."common/connect/login.php?last_uri=http://hapi.heuristscholar.org/key");
+}
+
+?>
+
+<html>
+ <head>
+  <title>Generate a Heurist API key</title>
+ </head>
+ <body>
+
+  <a style="float: right;" href=/>HAPI home</a>
+  <h3>Generate a Heurist API key</h3>
+<?php
+
+if (! @$_REQUEST["url"]) {
+?>
+  <p>
+   A Heurist API (HAPI) key will let you host HAPI applications on your own site.
+   A single HAPI key is valid for a single directory on your site, and all directories beneath it.
+   For example, a key registered for <tt>http://my.domain/foo/</tt> is also valid for <tt>http://my.domain/foo/bar/</tt>, but not <tt>http://my.domain/moo/</tt>.
+  </p>
+  <form>
+   <p>
+    Web site URL: <input type=text name=url value=http:// style="width: 200px;"></input>
+   </p>
+<?php
+	if (count($user_instances) == 1) {
+		print "<input type=hidden name=instance value=".$user_instances[0]."></input>\n";
+		print "<p>Note: you are logged in to the ".($user_instances[0] ? "<tt>".$user_instances[0]."</tt>" : "primary")." instance.  To generate a key for a different instance, log in to that instance first.</p>";
+	} else {
+		print "<p>You are logged into more than one Heurist instance.  Select one: <select name=instance>\n";
+		foreach ($user_instances as $instance) {
+			print "<option value=$instance>".($instance ? $instance : "the \"primary\" Heurist instance") ."</option>\n";
+		}
+		print "</select></p>\n";
+	}
+?>
+   <br>
+   <input type=submit value="Generate HAPI key"></input>
+  </form>
+
+<?php
+	return;
+}
+
+require_once(dirname(__FILE__)."/../common/connect/db.php");
+mysql_connection_insert("hapi");
+
+$url = $_REQUEST["url"];
+$instance = $_REQUEST["instance"];
+$user_id = $instance ? @$_SESSION[$instance.".heurist"]["user_id"] : get_user_id();
+
+if (! $user_id) {
+	print "<p>You are not logged in to the specified instance</p>\n";
+	return;
+}
+
+if (substr($url, -1) != "/") $url .= "/";
+
+$res = mysql_query("select hl_key
+                      from hapi_locations
+                     where hl_location = '" . addslashes($url) . "'
+                       and hl_instance = '" . addslashes($instance) . "'");
+if (mysql_num_rows($res) > 0) {
+	$row = mysql_fetch_assoc($res);
+	$key = $row["hl_key"];
+} else {
+	mysql_query("insert into hapi_locations (hl_location, hl_instance, hl_user_id, hl_key, hl_created)
+					values ('" . addslashes($url) . "', '" . addslashes($instance) . "', " . $user_id . ", sha1('" . addslashes($instance) . addslashes($url) . "'), now())");
+	$res = mysql_query("select hl_key
+	                      from hapi_locations
+	                     where hl_location = '" . addslashes($url) . "'
+	                       and hl_instance = '" . addslashes($instance) . "'");
+	if (mysql_num_rows($res) > 0) {
+		$row = mysql_fetch_assoc($res);
+		$key = $row["hl_key"];
+	}
+}
+?>
+  <p>Your HAPI key is:</p>
+  <pre><?= $key ?></pre>
+  <p>This key is for the Heurist instance:</p>
+  <pre><?= $instance ? '"'.$instance.'"' : '"" (the "primary" Heurist instance)' ?></pre>
+  <p>This key is valid for all URLs in this directory:</p>
+  <pre><?= $url ?></pre>
+  <p>To load the Heurist API, you can use:</p>
+  <pre>&lt;script src=http:<?=HEURIST_URL_BASE?>/hapi/load.php?<?= $instance ? "instance=$instance&amp;" : "" ?>key=<?=$key?>&gt;&lt;/script&gt;</pre>

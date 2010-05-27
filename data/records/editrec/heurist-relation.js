@@ -24,12 +24,12 @@ var Relationship = function(parentElement, details, manager) {
 	var deleteTd = this.tr.appendChild(this.document.createElement("td"));
 	deleteTd.className = "delete";
 	deleteTd.title = "Delete this relationship";
-	deleteTd.appendChild(this.document.createElement("img")).src = top.HEURIST.basePath + "img/cross.gif";
+	deleteTd.appendChild(this.document.createElement("img")).src = top.HEURIST.basePath + "common/images/cross.gif";
 	deleteTd.onclick = function() { thisRef.remove(); };
 	var editTd = this.tr.appendChild(this.document.createElement("td"));
 	editTd.className = "edit";
 	editTd.title = "Edit this relationship";
-	editTd.appendChild(this.document.createElement("img")).src = top.HEURIST.basePath + "img/edit_pencil_16x16.gif";
+	editTd.appendChild(this.document.createElement("img")).src = top.HEURIST.basePath + "common/images/edit_pencil_16x16.gif";
 	editTd.onclick = function() { thisRef.edit(); };
 
 	this.titleSpan = this.tr.appendChild(this.document.createElement("td")).appendChild(this.document.createElement("div"));
@@ -68,7 +68,7 @@ var Relationship = function(parentElement, details, manager) {
 */
 Relationship.prototype.edit = function() {
 	var thisRef = this;
-	top.HEURIST.util.popupURL(window, "popup/mini-edit.html?bib_id="+this.details.bibID,
+	top.HEURIST.util.popupURL(window, top.HEURIST.basePath + "data/records/editrec/mini-edit.html?bib_id="+this.details.bibID,
 	{ callback: function(newRecTitle, newDetails) {
 			if (newRecTitle) {	//saw this gets a title from the record which does match the inital title format and mini-edit always returns a title.
 				thisRef.titleSpan.innerHTML ="";
@@ -286,7 +286,7 @@ EditableRelationship.prototype.save = function() {
 		return;
 	}
 
-	var fakeForm = { action: "php/save-relations.php",
+	var fakeForm = { action: top.HEURIST.basePath +"data/relationships/save-relations.php",
 		elements: [
 		{ name: "bib_id", value: parent.HEURIST.record.bibID },
 		{ name: "save-mode", value: "new" },

@@ -1,17 +1,18 @@
 <?php
 
-require_once('../php/modules/cred.php');
-require_once('t1000.php');
+define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
+require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
 
 if (!@$_REQUEST['register'] && !(is_logged_in() && is_admin())) {
-        header('Location: ../php/login.php');
-        return;
+	header('Location: '.HEURIST_URL_BASE.'common/connect/login.php');
+	return;
 }
 
 $recaptcha_public_key = "6LdOkgQAAAAAAJA5_pdkrwcKA-VFPPdihgoLiWmT";
 $recaptcha_private_key = "6LdOkgQAAAAAALRx8NbUn9HL50ykaTjf1dv5G3oq";
- 
+
 mysql_connection_overwrite(DATABASE);
 $template = file_get_contents('add.html');
 
@@ -23,7 +24,7 @@ $body->global_vars['recaptcha'] = "";
 
 if (@$_REQUEST['register']) {
 	$body->global_vars['register'] = 1;
-	require_once("../../recaptcha/recaptchalib.php");
+	require_once(dirname(__FILE__)."/../../external/recaptcha/recaptchalib.php");
 	$body->global_vars['recaptcha'] = recaptcha_get_html($recaptcha_public_key);
 } else {
 	$body->global_vars['register'] = 0;
@@ -42,7 +43,7 @@ if (@$_REQUEST['register']) {
 	$body->global_vars['model-user-dropdown'] = '<input type="hidden" name="model_usr_id" value="96">'."\n";
 }
 
-$body->global_vars['proj-group-link'] = HEURIST_INSTANCE === '' ? ' | <a href="projectgroupadmin.php">Edit project groups</a>' : '';
+$body->global_vars['proj-group-link'] = HEURIST_INSTANCE === '' ? ' | <a href="'.HEURIST_URL_BASE.'admin/users/projectgroupadmin.php">Edit project groups</a>' : '';
 
 $body->verify();
 
@@ -96,7 +97,7 @@ if ($_REQUEST['_submit']  &&  $dup_check_ok) {
 	$address =      preg_replace('/\s+/s', ' ', $_REQUEST['user_insert_Address']);
 	$city =         preg_replace('/\s+/s', ' ', $_REQUEST['user_insert_City']);
 	$state =        preg_replace('/\s+/s', ' ', $_REQUEST['user_insert_State']);
-	
+
 	$tmwikiname = preg_replace('/ /', '', $firstname . $lastname);
 
 	$body->input_check();
@@ -222,10 +223,9 @@ State:         $state
 
 Go to the address below to review further details and approve the registration:
 
-http://".HOST."/heurist/admin/edit.php?approve=1&Id=$usr_id
+".HEURIST_URL_BASE."admin/users/edit.php?approve=1&Id=$usr_id
 
 ";
-
 				$admins = mysql__select_array("UserGroups left join Users on Id = ug_user_id",
 				                              "EMail",
 				                              "ug_group_id = " . HEURIST_ADMIN_GROUP_ID . " and ug_role = 'admin'");
@@ -234,7 +234,7 @@ http://".HOST."/heurist/admin/edit.php?approve=1&Id=$usr_id
 				}
 				mail(join(", ", $admins), "Heurist User Registration: $firstname $lastname [$email]", $email_text, 'From: root');
 
-				header('Location: register_success.html');
+				header('Location: '. HEURIST_URL_BASE.'admin/users/register_success.html');
 			}
 
 			$body->global_vars['new-user-id'] = $usr_id;

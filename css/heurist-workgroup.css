@@ -1,7 +1,7 @@
 /* heurist-workgroup.css
  * Copyright 2006, 2007 Tom Murtagh and Kim Jackson
  * http://heuristscholar.org/
- * 
+ *
  * Styles for the main Heurist search page.
  */
 
@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 body {
 	/* thin header (overridden on search page) */
-	background: white url(../img/edit-bg.gif) 0px -6px repeat-x;  /* brown-bg.gif is necessary to extend outside the #page table */
+	background: white url(../common/images/edit-bg.gif) 0px -6px repeat-x;  /* brown-bg.gif is necessary to extend outside the #page table */
 	color: #515151;
 	margin: 10px;
 	overflow: hidden;

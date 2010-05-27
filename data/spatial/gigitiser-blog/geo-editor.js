@@ -1,6 +1,16 @@
 if (! window.HEURIST) {
 	HEURIST = {};
 }
+if (!HEURIST.basePath){
+	 var path = (top ? top.location.pathname : (window ? window.location.pathname : ""));
+	 if ( path && path != "undefined") {
+	 	path = path.match(/\/[^\s\/]\//);
+	 	path = path ? path.replace(/\//g,"") : "";
+	 }else{
+	 	path = "";
+	 }
+	 HEURIST.basePath = path;
+}
 
 HEURIST.GeoEditor = function (mapElemID) {
 
@@ -16,7 +26,7 @@ HEURIST.GeoEditor = function (mapElemID) {
 		var matches, id;
 		if (! HCurrentUser.isLoggedIn()) {
 				alert('You are not currently logged in to Heurist');
-				location.replace('../php/login.php');
+				location.replace( HEURIST.basePath+'common/connect/login.php');
 				return;
 		}
 

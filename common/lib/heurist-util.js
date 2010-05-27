@@ -1,7 +1,7 @@
 /* heurist-util.js
  * Copyright 2006, 2007 Tom Murtagh and Kim Jackson
  * http://heuristscholar.org/
- * 
+ *
  * Useful functions/vars for Heurist pages -- autosizing, popups, drag/drop wrappers etc
  * These are not in heurist.js because they can be loaded asynchronously -- only post-load
  * stuff should be put in here.
@@ -60,7 +60,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		elt.style.height = height + "px";
 		elt.style.minHeight = height + "px";
 	},
-   
+
 	autosizeContainer2: function(elt, cont, flag ) {
   /*      Set the size of the given container to that of its contained element with flags for height only or width only
           */
@@ -81,10 +81,10 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 cont.style.width = width + "px";
                 cont.style.minWidth = width + "px";    // firefox occasionally ignores the width/height setting!
                 cont.style.height = height + "px";
-                cont.style.minHeight = height + "px"; 
+                cont.style.minHeight = height + "px";
         }
      },
-               
+
     autosizeAllElements: function(e) {
 		// get the document from the event
 		var targ = null;
@@ -115,7 +115,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		 *  options is an object, you may supply:
 		 *   url:        "url"   ... open an iframe in the popup window
 		 *   element: ID or element ... a DOM element or element ID to be displayed in the popup
-		 * 
+		 *
 		 *   callback:   function() { }   ... a function to call when the popup is closed
 		 *   "no-close": true        ... do not present a close button to the user
 		 *   "no-resize": true       ... do not allow the user to resize the window
@@ -810,7 +810,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 // FIXME: element didn't necessarily belong at the end of the parent ... should have a placeholder or something
 			popup.originalParentNode.appendChild(element);
 		}
-		
+
 
 		// have to detach the actual deletion from this thread, otherwise the function may return to a non-existent window!
 		setTimeout(function() { popup.positionDiv.parentNode.removeChild(popup.positionDiv); }, 0);
@@ -879,11 +879,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				}
 			}
 			top.HEURIST.displayPreferences[prefName] = val;
-			top.HEURIST.loadScript(top.HEURIST.basePath+'php/js/display-preferences.php?' + encodeURIComponent(prefName) + '=' + encodeURIComponent(val));
+			top.HEURIST.loadScript(top.HEURIST.basePath+'common/lib/display-preferences.php?' + encodeURIComponent(prefName) + '=' + encodeURIComponent(val));
 
 			win = top;
 		}
-		if (! (val+"").match(/\s/)) { 
+		if (! (val+"").match(/\s/)) {
             if (win.document.body.className.search(prefName)== -1){
                 win.document.body.className = win.document.body.className + ' '+prefName+'-'+val+' ';
             }else{
@@ -925,14 +925,14 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		if (req.readyState == 4) return;
 		req.send(postData);
 	},
-	
+
 	XMLHttpFactories: [
 		function () {return new XMLHttpRequest()},
 		function () {return new ActiveXObject("Msxml2.XMLHTTP")},
 		function () {return new ActiveXObject("Msxml3.XMLHTTP")},
 		function () {return new ActiveXObject("Microsoft.XMLHTTP")}
 	],
-	
+
 	createXMLHTTPObject: function() {
 		var xmlhttp = false;
 		for (var i=0;i<top.HEURIST.util.XMLHttpFactories.length;i++) {
@@ -996,7 +996,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		 * We match the (whitespace-separated) words in the term with the words in the keyword.
 		 * If there is just one word in the term this is very easy.
 		 * Note that punctuation is treated as whitespace for the purposes of this experiment
-		 * 
+		 *
 		 * We treat the first word of the term as special, and make keywords that start with that word float to the top
 		 */
 
@@ -1023,7 +1023,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
 			regexSafeTerm = "(?=.*?\\b" + bits.join(")(?=.*?\\b") + ")(^.*?)\\b" + firstBit;
 			regex = new RegExp(regexSafeTerm);
-		} 
+		}
 		var startMatches = [];
 		var otherMatches = [];
 

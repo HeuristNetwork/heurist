@@ -1,7 +1,7 @@
 /* heurist-json.js
  * Copyright 2006, 2007 Tom Murtagh and Kim Jackson
  * http://heuristscholar.org/
- * 
+ *
  * Functions to load JSON data into various places in top.HEURIST
  * functions are installed as  top.HEURIST.json.*
  */
@@ -34,7 +34,7 @@ if (! top.HEURIST.json) top.HEURIST.json = {
 			if (callback) callback(wg_id);
 			return;
 		}
-		top.HEURIST.util.getJsonData(top.HEURIST.basePath+"php/js/workgroup.php?wg_id="+wg_id, function(obj) {
+		top.HEURIST.util.getJsonData(top.HEURIST.basePath+"common/lib/workgroup.php?wg_id="+wg_id, function(obj) {
 			if (! obj  || obj.error) return;
 			top.HEURIST.workgroups[wg_id].members = obj.members;
 			top.HEURIST.workgroups[wg_id].savedSearches = obj.savedSearches;
@@ -42,7 +42,7 @@ if (! top.HEURIST.json) top.HEURIST.json = {
 			if (callback) callback(wg_id);
 		});
 	}
- , 
+ ,
  loadPubSearches: function(wg_id) {
 		if (top.HEURIST.workgroups[wg_id].wgSearches  &&
 			top.HEURIST.workgroups[wg_id].mySearches &&
@@ -50,7 +50,7 @@ if (! top.HEURIST.json) top.HEURIST.json = {
 			if (callback) callback(wg_id);
 			return;
 		}
-		top.HEURIST.util.getJsonData(top.HEURIST.basePath+"pubwizard/pub.php?pub_id="+wg_id, function(obj) {
+		top.HEURIST.util.getJsonData(top.HEURIST.basePath+"common/lib/pub.php?pub_id="+wg_id, function(obj) {
 			if (! obj  || obj.error) return;
 			top.HEURIST.workgroups[wg_id].wgSearches = obj.wgSearches;
 			top.HEURIST.workgroups[wg_id].mySearches = obj.mySearches;
@@ -58,5 +58,5 @@ if (! top.HEURIST.json) top.HEURIST.json = {
 			if (callback) callback(wg_id);
 		});
 	}
-	
+
 };

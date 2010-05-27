@@ -83,7 +83,7 @@ function new_stype_option(title, tooltip, value, icon) {
 		new_option.onclick = select_stype_option;
 		new_option.onmouseover = function() { new_option.className = 'stype_option hover'; }
 		new_option.onmouseout = function() { new_option.className = 'stype_option'; }
-		new_option.style.backgroundImage = 'url(img/stype/16x16-' + icon + ')';
+		new_option.style.backgroundImage = 'url(../common/images/stype/16x16-' + icon + ')';
 		new_option.appendChild(document.createTextNode(title));
 	stype_anchor.appendChild(new_option);
 	stype_options[new_option.id] = { 'icon': icon, 'title': title, 'offset': offset, 'value': value };
@@ -91,7 +91,7 @@ function new_stype_option(title, tooltip, value, icon) {
 	if (location.search.indexOf('stype='+value) > 0  ||
 	    (offset == 0  &&  location.search.indexOf('stype=') == -1)) {	// first option is selected by default
 		var q_elt = document.getElementById('q');
-			q_elt.style.backgroundImage = 'url(img/stype/' + icon + ')';
+			q_elt.style.backgroundImage = 'url(../common/images/stype/' + icon + ')';
 			q_elt.title = title.replace('Search', 'Searching') + ': ' + tooltip;
 		stype_input.value = value;
 		stype_selected_number = offset;
@@ -138,7 +138,7 @@ function set_stype_option(id) {
 
 	var q_elt = document.getElementById('q');
 
-	q_elt.style.backgroundImage = 'url(/heurist/img/stype/'+selected_option.icon+')';
+	q_elt.style.backgroundImage = 'url(/common/images/stype/'+selected_option.icon+')';
 	q_elt.title = selected_option.title.replace('Search', 'Searching');
 	q_elt.focus();
 }

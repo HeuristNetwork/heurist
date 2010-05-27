@@ -2,8 +2,8 @@
 
 define("SAVE_URI", "disabled");
 
-require_once("modules/db.php");
-require_once('modules/cred.php');
+require_once(dirname(__FILE__)."/../../common/connect/db.php");
+require_once(dirname(__FILE__)."/../../common/connect/cred.php");
 if (! is_logged_in()) return;
 
 mysql_connection_overwrite(DATABASE);

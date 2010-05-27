@@ -29,12 +29,12 @@
 
 define('SAVE_URI', 'disabled');
 
-require_once("modules/cred.php");
-require_once("modules/db.php");
-require_once("modules/TitleMask.php");
-require_once("modules/relationships.php");
-require_once("modules/approx-matches.php");
-require_once("modules/loading.php");
+require_once(dirname(__FILE__)."/../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../../common/connect/db.php");
+require_once("TitleMask.php");
+require_once(dirname(__FILE__)."/../relationships/relationships.php");
+require_once("disambig/approx-matches.php");
+require_once(dirname(__FILE__)."/../../search/saved/loading.php");
 
 if (! is_logged_in()) return;
 
@@ -77,7 +77,7 @@ if ($updated) {
 	// Update rec_details, rec_scratchpad and rec_title in (parent.parent).HEURIST.record
 	print "(";
 	define("JSON_RESPONSE", 1);
-	require_once("js/bib.php");
+	require_once(dirname(__FILE__)."/../pointer/bib.php");
 	print ")";
 }
 /***** END OF OUTPUT *****/

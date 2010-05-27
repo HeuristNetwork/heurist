@@ -87,7 +87,7 @@ return {
 		$("#info-p").html(
 			"Found <b>" + FlexImport.fields.length + "</b> rows of data," +
 			" in <b>" + FlexImport.fields[0].length + "</b> columns. " +
-			"<a href=# onclick=\"window.location.reload(); return false;\">Start over</a>"
+			"<a href='#' onclick=\"window.location.reload(); return false;\">Start over</a>"
 		);
 
 		FlexImport.createRecTypeOptions();
@@ -146,7 +146,7 @@ return {
 		p.appendChild(document.createTextNode(" (NOTE: Workgroup tags must be pre-existing!  Create them "));
 		var a = p.appendChild(document.createElement("a"));
 			a.target = "_blank";
-			a.href = "../legacy/workgroup_keyword_manager.php"
+			a.href = HAPI.HeuristBaseURL + "admin/workgroups/workgroup_keyword_manager.php"
 			a.innerHTML = "here";
 		p.appendChild(document.createTextNode(" then start over.)"));
 
@@ -161,7 +161,7 @@ return {
 		p = e.appendChild(document.createElement("p"));
 		a = p.appendChild(document.createElement("a"));
 		a.target = "_blank";
-		a.href = "../legacy/bib_detail_dump.php#rt" + FlexImport.recType.getID();
+		a.href = HAPI.HeuristBaseURL +"admin/describe/bib_detail_dump.php#rt" + FlexImport.recType.getID();
 		a.innerHTML = "Detail requirements for " + FlexImport.recType.getName() + " records";
 
 

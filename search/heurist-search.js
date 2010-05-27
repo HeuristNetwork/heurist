@@ -109,7 +109,7 @@ top.HEURIST.search = {
 		iframeElt.style.height = "0";
 		iframeElt.frameBorder = 0;
 		iframeElt.style.position = "absolute";
-		iframeElt.src = "php/json-search.php?" +
+		iframeElt.src = "json-search.php?" +
 			("w=" + encodeURIComponent(window.HEURIST.parameters["w"])) + "&" +
 			("stype=" + (window.HEURIST.parameters["stype"] ? encodeURIComponent(window.HEURIST.parameters["stype"]) : "")) + "&" +
 			("ver=" + top.HEURIST.search.VERSION) + "&" +
@@ -195,14 +195,14 @@ top.HEURIST.search = {
 		}
 		else if (res[4] == 2) {
 			// special handling for notes reftype: link to view page if no URL
-			href = "legacy/view.php?bib_id="+res[2];
+			href = top.HEURIST.basePath+ "data/records/viewrec/view.php?bib_id="+res[2];
 		}
 
 		var userPwd;
 		if (res[10]) userPwd = "style='display:inline;cursor:pointer;' user_pwd='"+res[10].htmlEscape()+"'";
 		else userPwd = "style='display:none;'";
 
-		var reftypeImg = "style='background-image:url(../reftype/" + (res[4]? res[4] : "blank") + ".gif)'";
+		var reftypeImg = "style='background-image:url("+ top.HEURIST.basePath+"common/images/reftype-icons/" + (res[4]? res[4] : "blank") + ".gif)'";
 		var reftypeTitle = "Click to see details";
 		if (top.HEURIST.reftypes.names[parseInt(res[4])])
 			reftypeTitle = top.HEURIST.reftypes.names[parseInt(res[4])] + " - click to see details";
@@ -210,16 +210,16 @@ top.HEURIST.search = {
 		var html = "<div class=result_row title='Double-click to edit' bkmk_id='"+res[0]+"' bib_id="+res[2]+">"+
 "<span class=sp title='Click to see details'></span>"+
 "<input type=checkbox name=bib[] onclick=top.HEURIST.search.cb_onclick(this) class='logged-in-only' title='Check box to apply Actions to this record'>"+
-"<img src=img/13x13.gif " + pinAttribs + ">"+
+"<img src=" +top.HEURIST.basePath+ "common/images/13x13.gif " + pinAttribs + ">"+
 "<span class='wg-id-container logged-in-only'>"+
 "<span class=wg-id title='"+linkTitle+"' " + (wgColor? wgColor: "") + ">" + (wgHTML? wgHTML.htmlEscape() : "") + "</span>"+
 "</span>"+
-"<img src=img/16x16.gif title='"+reftypeTitle.htmlEscape()+"' "+reftypeImg+" class=rft>"+
+"<img src=" +top.HEURIST.basePath+ "common/images/16x16.gif title='"+reftypeTitle.htmlEscape()+"' "+reftypeImg+" class=rft>"+
 "<a expando=true" + (href? " href='"+href+"'" : "") +
     ((linkTitle || href)  ?  " title='" + (linkTitle? linkTitle.htmlEscape() : href) + "'"  :  "") +
     " origInnerHtml='"+linkText.htmlEscape()+"'>" + linkText + "</a>"+
 "<span class=daysbad title='Detection of broken URLs is carried out once a day'>"+daysBad+"</span>"+
-"<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src=img/key.gif " + userPwd + ">"+
+"<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src=" +top.HEURIST.basePath+ "common/images/key.gif " + userPwd + ">"+
 "</div>";
 
 		return html;
@@ -265,14 +265,14 @@ top.HEURIST.search = {
 		}
 		else if (res[4] == 2) {
 			// special handling for notes reftype: link to view page if no URL
-			href = "legacy/view.php?bib_id="+res[2];
+			href = top.HEURIST.basePath+ "data/records/viewrec/view.php?bib_id="+res[2];
 		}
 
 		var userPwd;
 		if (res[10]) userPwd = "style='display:inline;cursor:pointer;' user_pwd='"+res[10].htmlEscape()+"'";
 		else userPwd = "style='display:none;'";
 
-		var reftypeImg = "style='background-image:url(../reftype/" + (res[4]? res[4] : "blank") + ".gif)'";
+		var reftypeImg = "style='background-image:url("+ top.HEURIST.basePath+"common/images/reftype-icons/" + (res[4]? res[4] : "blank") + ".gif)'";
 		var reftypeTitle = "Click to see details";
 		if (top.HEURIST.reftypes.names[parseInt(res[4])])
 			reftypeTitle = top.HEURIST.reftypes.names[parseInt(res[4])] + " - click to see details";
@@ -287,14 +287,14 @@ top.HEURIST.search = {
 			   (res[3].length ? "<div class=rec_title title='"+linkText.htmlEscape()+"'><a href='"+res[3]+"'>"+ linkText + "</a></div>" : "<div class=rec_title title='"+linkText.htmlEscape()+"'>"+ linkText + "</div>") +
 		       "<div class=icons  bkmk_id='"+res[0]+"' bib_id="+res[2]+">" +
 			   "<input type=checkbox name=bib[] onclick=top.HEURIST.search.cb_onclick(this) class='logged-in-only' title='Check box to apply Actions to this record'>"+
-		       "<img src=img/16x16.gif title='"+reftypeTitle.htmlEscape()+"' "+reftypeImg+" class=rft>"+
-		       "<img src=img/13x13.gif " + pinAttribs + ">"+
+		       "<img src="+ top.HEURIST.basePath+"common/images/16x16.gif title='"+reftypeTitle.htmlEscape()+"' "+reftypeImg+" class=rft>"+
+		       "<img src="+ top.HEURIST.basePath+"common/images/13x13.gif " + pinAttribs + ">"+
 		       "<span class='wg-id-container logged-in-only'>"+
 		       "<span class=wg-id title='"+linkTitle.htmlEscape()+"' " + (wgColor? wgColor: "") + ">" + (wgHTML? wgHTML.htmlEscape() : "") + "</span>"+
 		       "</span>"+
-			   "<span id='rec_edit_link' title='Click to edit'><img src='img/edit_pencil_16x16.gif'></span>" +
-			   "<span id='rec_view_link' title='Click to see details'><img src='img/eye.gif'></span>" +
-			   "<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src=img/key.gif " + userPwd + ">"+
+			   "<span id='rec_edit_link' title='Click to edit'><img src='"+ top.HEURIST.basePath+"common/images/edit_pencil_16x16.gif'></span>" +
+			   "<span id='rec_view_link' title='Click to see details'><img src='"+ top.HEURIST.basePath+"common/images/eye.gif'></span>" +
+			   "<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/key.gif' " + userPwd + ">"+
 		       "</div>" +
 		       "</div>";
 		return html;
@@ -404,18 +404,18 @@ top.HEURIST.search = {
 		var logged_in_elt = document.getElementById("logged-in");
 		var left_panel_elt = document.getElementById("left-panel-content");
 		if (top.HEURIST.is_logged_in()) {
-			logged_in_elt.innerHTML = top.HEURIST.get_user_name() + " : <a href=php/login.php?logout=1>log&nbsp;out</a>";
+			logged_in_elt.innerHTML = top.HEURIST.get_user_name() + " : <a href=" +top.HEURIST.basePath+ "common/connect/login.php?logout=1>log&nbsp;out</a>";
 		} else {
-			logged_in_elt.innerHTML = "not logged in : <a href=php/login.php>log in</a>";
+			logged_in_elt.innerHTML = "not logged in : <a href=" +top.HEURIST.basePath+ "common/connect/login.php>log in</a>";
 			left_panel_elt.innerHTML =
 				"<div style=\"padding: 10px;\">\n" +
 				" Existing users:\n" +
-				" <div id=login-button><a href=php/login.php title=\"Log in to use Heurist - new users please register first\"><img src=img/111x30.gif></a></div>\n" +
-				" <p style=\"text-align: center;\"><a onclick=\"InstallTrigger.install({'Heurist Toolbar':this.href}); return false;\" href=toolbar/HeuristToolbar.xpi title=\"Get Firefox toolbar - rapid access to bookmark web pages, import hyperlinks, view and edit data for the current web page, and synchronise Heurist with Zotero\">Get toolbar</a><br>(Firefox)</p>\n" +
+				" <div id=login-button><a href=" +top.HEURIST.basePath+ "common/connect/login.php title=\"Log in to use Heurist - new users please register first\"><img src=/common/images/111x30.gif></a></div>\n" +
+				" <p style=\"text-align: center;\"><a onclick=\"InstallTrigger.install({'Heurist Toolbar':this.href}); return false;\" href=/tools/toolbar/HeuristToolbar.xpi title=\"Get Firefox toolbar - rapid access to bookmark web pages, import hyperlinks, view and edit data for the current web page, and synchronise Heurist with Zotero\">Get toolbar</a><br>(Firefox)</p>\n" +
 				" <p style=\"text-align: center;\"><a href=\"javascript:" + top.HEURIST.bookmarkletCode + "\" onclick=\"alert('Drag the Heurist Bookmarklet link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;\" title=\"Get Bookmarklet - bookmarks web pages and harvests web links \(we recommend Firefox and the Firefox toolbar - it has more features\)\">Heurist Bookmarklet</a><br>(other browsers)</p>" +
 				" New users:\n" +
-				" <div id=tour-button><a href=help/tour.html title=\"Take a quick tour of Heurist's major features\" target=\"_blank\"><img src=img/111x30.gif></a></div>\n" +
-				" <div id=register-button><a href=admin/add.php?register=1 target=\"_blank\" title=\"Register to use Heurist - takes only a couple of minutes\"><img src=img/111x30.gif></a></div>\n" +
+				" <div id=tour-button><a href=" +top.HEURIST.basePath+ "help/tour.html title=\"Take a quick tour of Heurist's major features\" target=\"_blank\"><img src=/common/images/111x30.gif></a></div>\n" +
+				" <div id=register-button><a href=" +top.HEURIST.basePath+ "admin/users/add.php?register=1 target=\"_blank\" title=\"Register to use Heurist - takes only a couple of minutes\"><img src=/common/images/111x30.gif></a></div>\n" +
 				"</div>";
 
 			document.getElementById("my-records-button").disabled = true;
@@ -726,7 +726,7 @@ top.HEURIST.search = {
 
 		var bib_id = result_div.getAttribute("bib_id");
 
-		window.open("edit?sid=" + top.HEURIST.search.sid + "&bib_id="+bib_id);
+		window.open(top.HEURIST.basePath+ "data/records/editrec/heurist-edit.html?sid=" + top.HEURIST.search.sid + "&bib_id="+bib_id);
 
 		return false;
 	},
@@ -757,7 +757,7 @@ top.HEURIST.search = {
 
 		var bib_id = result_div.getAttribute("bib_id");
 
-		window.open("/resource/" + bib_id);
+		window.open(top.HEURIST.basePath+ "data/records/viewrec/view.php?bib_id=" + bib_id +"&noclutter=1");
 
 		return false;
 	},
@@ -800,7 +800,7 @@ top.HEURIST.search = {
 		info_div.className = "info";
 		info_div.frameBorder = 0;
 		info_div.style.height = "0px";
-		info_div.src = "legacy/info.php?bib_id="+bib_id;
+		info_div.src = top.HEURIST.basePath+ "data/records/viewrec/info.php?bib_id="+bib_id;
 		infos["bib:" + bib_id] = info_div;
 		result_div.className += " expanded";
 
@@ -846,7 +846,7 @@ top.HEURIST.search = {
 		var action_elt = action_fr.contentWindow.document.getElementById("action");
 		if (! bib_ids_elt  ||  ! action_elt) {
 			alert("Problem contacting server - try again in a moment");
-			action_fr.src = "php/action.php";
+			action_fr.src = top.HEURIST.basePath+ "search/action.php";
 			return;
 		}
 
@@ -866,8 +866,8 @@ top.HEURIST.search = {
 			var innerHTML = "<nobr" + (active ? " id=activesaved" : "") + (cmb[4] || wg ? ">" : " class=bkmk>");
 			if (active) {
 
-				innerHTML += "<img class=\"saved-search-edit\" title=\"rename\" src=\"img/edit_pencil_9x11.gif\" align=absmiddle onclick=\"top.HEURIST.util.popupURL(window, 'popup/save-search.html?mode=rename&slabel=" + encodeURIComponent(cmb[0]) + "&sid="+sid+"&wg="+ (wg ? wg : 0)+"');\">";
-				innerHTML += "<img class=\"saved-search-edit\" title=\"delete\" src=\"img/delete6x7.gif\" align=absmiddle onclick=\"top.HEURIST.search.deleteSearch('"+ cmb[0] +"',"+ (wg ? wg : 0) +");\">";
+				innerHTML += "<img class=\"saved-search-edit\" title=\"rename\" src=\"" +top.HEURIST.basePath+ "common/images/edit_pencil_9x11.gif\" align=absmiddle onclick=\"top.HEURIST.util.popupURL(window, '" +top.HEURIST.basePath+ "search/saved/save-search.html?mode=rename&slabel=" + encodeURIComponent(cmb[0]) + "&sid="+sid+"&wg="+ (wg ? wg : 0)+"');\">";
+				innerHTML += "<img class=\"saved-search-edit\" title=\"delete\" src=\"" +top.HEURIST.basePath+ "common/images/delete6x7.gif\" align=absmiddle onclick=\"top.HEURIST.search.deleteSearch('"+ cmb[0] +"',"+ (wg ? wg : 0) +");\">";
 			}
 			innerHTML += "<div><a id='ss" + sid + "' href='" + (wg ? top.HEURIST.basePath : "")
 					  + cmb[1] + "&amp;label=" + encodeURIComponent(cmb[0]) + "&amp;sid=" + sid + "'>" + cmb[0] + "</a></div>";
@@ -914,7 +914,7 @@ top.HEURIST.search = {
 			}
 			searchDiv.innerHTML = innerHTML;
 
-			document.getElementById("my-blog-link").href = "blog/?u=" + top.HEURIST.get_user_id();
+			document.getElementById("my-blog-link").href = top.HEURIST.basePath+ "interfaces/blog/index.html?u=" + top.HEURIST.get_user_id();
 
 
 			// all records searches
@@ -948,8 +948,8 @@ top.HEURIST.search = {
 				innerHTML += "<div id=workgroup-searches-" + w + (hide ? " class=hide" : "") + ">";
 				innerHTML += "<div class=saved-search-subheading title=\"" + (top.HEURIST.workgroups[w].description || "" ) + "\" onclick=\"top.HEURIST.search.toggleSavedSearches(this.parentNode);\">" + top.HEURIST.workgroups[w].name + "</div>";
 				innerHTML += "<div class=content>";
-				innerHTML += "<div class=saved-search-subsubheading><a href=\"" + "workgroup.html?wg=" + w + "\">Workgroup page</a></div>";
-				innerHTML += "<div class=saved-search-subsubheading><a target=\"_blank\" href=\"blog/?g=" + w + "\">"+top.HEURIST.workgroups[w].name+" Blog</a></div>";
+				innerHTML += "<div class=saved-search-subsubheading><a href='" +top.HEURIST.basePath+ "search/workgroup/workgroup.html?wg=" + w + "'>Workgroup page</a></div>";
+				innerHTML += "<div class=saved-search-subsubheading><a target=\"_blank\" href='" +top.HEURIST.basePath+ "interfaces/blog/index.html?g=" + w + "'>"+top.HEURIST.workgroups[w].name+" Blog</a></div>";
 
 				var tags = [];
 				for (var j = 0; j < top.HEURIST.user.workgroupKeywordOrder.length; ++j) {
@@ -960,7 +960,7 @@ top.HEURIST.search = {
 				if (tags.length) {
 					innerHTML += "<div class=saved-search-subsubheading>Workgroup Tags</div>";
 					for (var j = 0; j < tags.length; ++j) {
-						innerHTML += "<nobr><a href='?ver=1&w=all&q=tag=\"" + top.HEURIST.workgroups[w].name + "\\" + tags[j] + "\"&label=Tag+\"" + tags[j] + "\"'>" + tags[j] + "</a></nobr>";
+						innerHTML += "<nobr><a href='"+top.HEURIST.basePath+"search/heurist-search.html?ver=1&w=all&q=tag=\"" + top.HEURIST.workgroups[w].name + "\\" + tags[j] + "\"&label=Tag+\"" + tags[j] + "\"'>" + tags[j] + "</a></nobr>";
 					}
 				}
 
@@ -1025,7 +1025,7 @@ top.HEURIST.search = {
 		var kwd;
 		for (var i = 0; i < keywords.length; ++i) {
 			kwd = encodeURIComponent(keywords[i]);
-			innerHTML += "<a href=?ver=1&w=bookmark&q=tag=\"" + kwd + "\"&label=Tag+\"" + kwd + "\">" + keywords[i] + "</a> ";
+			innerHTML += "<a href='"+top.HEURIST.basePath+"search/heurist-search.html?ver=1&w=bookmark&q=tag=\"" + kwd + "\"&label=Tag+\"" + kwd + "\"'>" + keywords[i] + "</a> ";
 		}
 		var kwd_search_elt = top.document.getElementById("keyword-search-links");
 		if (kwd_search_elt) {
@@ -1078,7 +1078,7 @@ top.HEURIST.search = {
 		 		return;
 			}
 		}
-		top.HEURIST.util.getJsonData("php/js/delete-saved-search.php?wg="+wg+"&label="+escape(name), function(response) {
+		top.HEURIST.util.getJsonData(top.HEURIST.basePath+ "search/saved/delete-saved-search.php?wg="+wg+"&label="+escape(name), function(response) {
 			if (response.deleted) {
 				if (top.HEURIST.search) {
 					top.HEURIST.search.removeSavedSearch(name, wg);
@@ -1089,7 +1089,7 @@ top.HEURIST.search = {
 
 	launchAdvancedSearch: function() {
 		var q = document.getElementById("q").value;
-		var url = "legacy/popup_advanced.php?" + encodeURIComponent(q);
+		var url = top.HEURIST.basePath+ "search/advanced/popup_advanced.php?" + encodeURIComponent(q);
 		top.HEURIST.util.popupURL(window, url, { callback: top.HEURIST.search.advancedSearchCallback });
 	},
 
@@ -1161,7 +1161,7 @@ top.HEURIST.search = {
 		top.HEURIST.util.bringCoverallToFront(true);
 
 		var search = top.location.search || "?w=" + top.HEURIST.parameters["w"] + "&q=" + top.HEURIST.parameters["q"];
-		top.HEURIST.util.sendRequest("php/js/fetch-bib-ids.php" + search, function(xhr) {
+		top.HEURIST.util.sendRequest(top.HEURIST.basePath+ "search/fetch-bib-ids.php" + search, function(xhr) {
 			if (! xhr.responseText.match(/^\[({[a-zA-Z0-9_,:"]*},?)*\]$/)) {
 				top.HEURIST.search.selectAllPagesCallback([]);
 			}
@@ -1229,7 +1229,7 @@ top.HEURIST.search = {
 			top.HEURIST.search.selectBookmarkMessage("for notification");
 			return;
 		}
-		top.HEURIST.util.popupURL(window, "legacy/popup_notification.php");
+		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "search/popup_notification.php");
 	},
 
 	addTagsPopup: function(reload) {
@@ -1259,7 +1259,7 @@ top.HEURIST.search = {
 			top.HEURIST.search.selectBookmarkMessage("to add / remove tags");
 			return;
 		}
-		top.HEURIST.util.popupURL(window, "popup/tags.html?show-remove", { callback: function(add, tags) {
+		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "data/tags/tags.html?show-remove", { callback: function(add, tags) {
 			if (! tags) {
 				if (reload) top.location.reload();
 				return;
@@ -1291,7 +1291,7 @@ top.HEURIST.search = {
 			alert("Select at least one record to add / remove workgroup tags");
 			return;
 		}
-		top.HEURIST.util.popupURL(window, "popup/keywords.html", { callback: function(add, kwd_ids) {
+		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "data/tags/keywords.html", { callback: function(add, kwd_ids) {
 			if (! kwd_ids) return;
 
 			var action_fr = top.document.getElementById("i_action");
@@ -1318,7 +1318,7 @@ top.HEURIST.search = {
 			top.HEURIST.search.selectBookmarkMessage("to set ratings");
 			return;
 		}
-		top.HEURIST.util.popupURL(window, "legacy/popup_set_ratings.php");
+		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "search/popup_set_ratings.php");
 	},
 
 	setWorkgroupPopup: function() {
@@ -1327,7 +1327,7 @@ top.HEURIST.search = {
 			alert("Select at least one record to set workgroup ownership and visibility");
 			return;
 		}
-		top.HEURIST.util.popupURL(window, "popup/set-workgroup.html", {
+		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "search/workgroup/set-workgroup.html", {
 			callback: function(wg, hidden) {
 				if (wg === undefined) return;
 
@@ -1357,7 +1357,7 @@ top.HEURIST.search = {
 			alert("Select at least one record to add relationships");
 			return;
 		}
-		top.HEURIST.util.popupURL(window, "popup/add-relationships.html");
+		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "search/add-relationships.html");
 	},
 
 	selectBookmarkMessage: function(operation) {
@@ -1379,7 +1379,7 @@ top.HEURIST.search = {
 		var action_elt = action_fr.contentWindow.document.getElementById("action");
 		if (! bib_ids_elt  ||  ! action_elt) {
 			alert("Problem contacting server - try again in a moment");
-			action_fr.src = "php/action.php";
+			action_fr.src = top.HEURIST.basePath+ "search/action.php";
 			return;
 		}
 
@@ -1404,7 +1404,7 @@ top.HEURIST.search = {
 		var action_elt = action_fr.contentWindow.document.getElementById("action");
 		if (! bkmk_ids_elt  ||  ! action_elt) {
 			alert("Problem contacting server - try again in a moment");
-			action_fr.src = "php/action.php";
+			action_fr.src = "action.php";
 			return;
 		}
 
@@ -1419,12 +1419,12 @@ top.HEURIST.search = {
 			alert("Select at least one record to delete");
 			return;
 		}
-		top.HEURIST.util.popupURL(window, "legacy/delete_bib.php?ids="+bib_ids_list.join(","));
+		top.HEURIST.util.popupURL(window, "delete_bib.php?ids="+bib_ids_list.join(","));
 	},
 
 	renderCollectionUI: function() {
 		if (typeof top.HEURIST.search.collectCount == "undefined") {
-			top.HEURIST.util.getJsonData("php/js/collection.php?fetch=1", function (results){
+			top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/collection.php?fetch=1", function (results){
 				top.HEURIST.search.collectCount = results.count;
 				top.HEURIST.search.collection = results.ids;
 				top.HEURIST.search.renderCollectionUI();
@@ -1456,7 +1456,7 @@ top.HEURIST.search = {
 		}
 		top.HEURIST.search.collChangeTimer = 0;
 	},
-	
+
 	// set a timer to highlite that the collection has changed  for 10 sec or until the count is updated on the screen
 	showCollectionChange: function(firstTime) {
 		if (firstTime) {
@@ -1479,7 +1479,7 @@ top.HEURIST.search = {
 			alert("Select at least one record to bookmark");
 			return;
 		}
-		top.HEURIST.util.getJsonData("php/js/collection.php", top.HEURIST.search.addRemoveCollectionCB, "fetch=1&add=" + bib_ids_list.join(","));
+		top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/collection.php", top.HEURIST.search.addRemoveCollectionCB, "fetch=1&add=" + bib_ids_list.join(","));
 		top.HEURIST.search.deselectAll();
 		document.getElementById("collection-label").className += "show-changed";
 		top.HEURIST.search.showCollectionChange(true);
@@ -1491,7 +1491,7 @@ top.HEURIST.search = {
 			alert("Select at least one record to remove from collection basket");
 			return;
 		}
-		top.HEURIST.util.getJsonData("php/js/collection.php", top.HEURIST.search.addRemoveCollectionCB, "fetch=1&remove=" + bib_ids_list.join(","));
+		top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/collection.php", top.HEURIST.search.addRemoveCollectionCB, "fetch=1&remove=" + bib_ids_list.join(","));
 	},
 
 	showKeywordSearchLinks: function() {
@@ -1566,9 +1566,9 @@ top.HEURIST.search = {
 		link.rel = "alternate";
 		link.type = "application/rss+xml";
 		link.title = "RSS feed";
-		link.href = "feed://"+window.location.host+top.HEURIST.basePath+"legacy/search_rss.php"+(document.location.search ? document.location.search : "?q=tag:Favourites");
+		link.href = "feed://"+window.location.host+top.HEURIST.basePath+"feeds/search_rss.php"+(document.location.search ? document.location.search : "?q=tag:Favourites");
 		document.getElementsByTagName("head")[0].appendChild(link);
-		document.getElementById("httprsslink").href += (document.location.search ? document.location.search : "?q=tag:Favourites");
+		document.getElementById("httprsslink").href += (document.location.search ? document.location.search : "heurist-search.html?q=tag:Favourites");
 	},
 
 	toggleLegend: function() {
@@ -1594,7 +1594,7 @@ top.HEURIST.search = {
 		var legend_box_elt = document.createElement("div");
 		legend_box_elt.id = "legend-box";
 
-		var iHTML = "<div id=legend-title><img onclick=\"top.HEURIST.search.toggleLegend();\" src=img/x2.gif>Legend</div><br>";
+		var iHTML = "<div id=legend-title><img onclick=\"top.HEURIST.search.toggleLegend();\" src='"+top.HEURIST.basePath+"common/images/x2.gif'>Legend</div><br>";
 		iHTML += "<ul id=legend-box-list>";
 		iHTML += "</ul>";
 		legend_box_elt.innerHTML = iHTML;
@@ -1610,17 +1610,17 @@ top.HEURIST.search = {
 		var iHTML = "";
 		for (var i in visible_reftypes) {
 			if (top.HEURIST.reftypes.names[i])
-				iHTML += "<li><img src=../reftype/"+i+".gif>"+top.HEURIST.reftypes.names[i]+"</li>";
+				iHTML += "<li><img src='src='"+ top.HEURIST.basePath+"common/images/reftype-icons/"+i+".gif'>"+top.HEURIST.reftypes.names[i]+"</li>";
 		}
 
 		document.getElementById("legend-box-list").innerHTML = iHTML;
 
 		iHTML = "<hr><ul>";
-		iHTML += "<li><img src=img/star-yellow.gif><span>Resource is in </span><span style=\"font-weight: bold;\">my records</span></li>";
-		iHTML += "<li><img src=img/star-yellow-with-green-7.gif><span>Belongs to workgroup 7<br></span><span style=\"margin-left: 25px;\">- read-only to others</span></li>";
-		iHTML += "<li><img src=img/star-yellow-with-red-3.gif><span>Belongs to workgroup 3<br></span><span style=\"margin-left: 25px;\">- hidden to others</span></li>";
+		iHTML += "<li><img src='"+ top.HEURIST.basePath+"common/images/star-yellow.gif'><span>Resource is in </span><span style=\"font-weight: bold;\">my records</span></li>";
+		iHTML += "<li><img src='"+ top.HEURIST.basePath+"common/images/star-yellow-with-green-7.gif'><span>Belongs to workgroup 7<br></span><span style=\"margin-left: 25px;\">- read-only to others</span></li>";
+		iHTML += "<li><img src='"+ top.HEURIST.basePath+"common/images/star-yellow-with-red-3.gif'><span>Belongs to workgroup 3<br></span><span style=\"margin-left: 25px;\">- hidden to others</span></li>";
 		iHTML += "</ul>";
-		iHTML += "<hr><div><a href=# onclick=\"top.HEURIST.util.popupURL(window, 'legacy/reftype_legend.php'); return false;\">show full legend</a></div>";
+		iHTML += "<hr><div><a href=# onclick=\"top.HEURIST.util.popupURL(window, '"+ top.HEURIST.basePath+"common/lib/reftype_legend.php'); return false;\">show full legend</a></div>";
 		legend_box_elt.innerHTML += iHTML;
 	},
 
@@ -1633,7 +1633,7 @@ top.HEURIST.search = {
 		if (bib_ids.length === 0) {
 			alert("Select at least one record to fix duplicates");
 		} else {
-			window.location.href = "legacy/fix_dupes.php?bib_ids=" + bib_ids.join(",");
+			window.location.href = top.HEURIST.basePath+"admin/verification/fix_dupes.php?bib_ids=" + bib_ids.join(",");
 		}
 	},
 
@@ -1670,9 +1670,9 @@ top.HEURIST.search = {
 				a.href = "#";
 			a.onclick = function() {
 				if (window.HEURIST.parameters["label"] && window.HEURIST.parameters["sid"]) {
-					window.open("pubwizard/publish.php?pub_id=" + window.HEURIST.parameters["sid"]);
+					window.open(top.HEURIST.basePath+ "output/pubwizard/publish.php?pub_id=" + window.HEURIST.parameters["sid"]);
 				} else {
-					top.HEURIST.util.popupURL(window, 'popup/save-search.html?publish=yes');
+					top.HEURIST.util.popupURL(window, top.HEURIST.basePath + 'search/saved/save-search.html?publish=yes');
 				}
 				return false;
 			}
@@ -1694,7 +1694,7 @@ top.HEURIST.search = {
 			p.innerHTML = 'Click below to continue to the publishing wizard.';
 			p = div.appendChild(document.createElement('p'));
 			a = p.appendChild(document.createElement('a'));
-			a.href = 'pubwizard/publish.php?pub_id=' + param['sid'];
+			a.href = top.HEURIST.basePath+ 'output/pubwizard/publish.php?pub_id=' + param['sid'];
 			a.target = '_blank';
 			a.onclick = function() {
 				top.HEURIST.util.closePopup(popup.id);

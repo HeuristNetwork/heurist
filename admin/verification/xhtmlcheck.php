@@ -1,8 +1,9 @@
 <?php
 
-require_once("/var/www/htdocs/heurist/php/modules/db.php");
+define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
+require_once(dirname(__FILE__)."/../../common/connect/db.php");
 
-mysql_connection_select("heuristdb");
+mysql_connection_select("heuristdb");	//FIXME:  need to use a configured value
 
 $woots = array();
 $res = mysql_query("select * from woots");// where woot_title='record:96990'");
@@ -30,9 +31,9 @@ foreach ($woots as $woot) {
 	if ($valid) {
 		//print "ok\n";
 	} else {
-        print "<tr><td><a target=_blank href='/heurist/woot.html?w=";
+        print "<tr><td><a target=_blank href='".HEURIST_URL_BASE."data/woot/woot.html?w=";
 		print $woot["woot_title"] . "'>";
-        print $woot["woot_title"];   
+        print $woot["woot_title"];
         print "</a></td>\n";
 
 		print "<td><pre>" . htmlspecialchars(join("\n", $errs)) . "</pre></td></tr>\n";

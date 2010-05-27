@@ -1,7 +1,7 @@
 <html>
 <head>
  <title>Project-Group Administration</title>
- <link rel="stylesheet" type="text/css" href="../legacy/newshsseri.css">
+ <link rel="stylesheet" type="text/css" href="../../css/newshsseri.css">
 
  <script language="JavaScript">
  <!--
@@ -14,7 +14,7 @@
 			document.forms[0].elements['scrollTop'].value = document.body.scrollTop;
 	}
  [end-literal]
-	
+
 	function setScrollPosition() {
 		presetScrollTop = [presetScrollTop];
 		[literal]
@@ -33,7 +33,7 @@
 
 <body style="margin: 0px" link="blue" vlink="blue" onload="setScrollPosition()">
 
-<div style="background-color: #660000;"><a href=..><img style="border: 0;" src=../img/hlogo-small.jpg></a></div>
+<div style="background-color: #660000;"><a href=..><img style="border: 0;" src="../../common/images/hlogo-small.jpg"></a></div>
 
 <table width="95%"  border="0" style="border-collapse: collapse; margin-left: 5%;"><tr><td>
 
@@ -41,14 +41,14 @@
  <tr>
   <td align="left"><h2>Project-Group Administration</h2></td>
   <td align="right" valign="top">
-	<a href="add.php">Add user</a> |
+	<a href="/admin/users/add.php">Add user</a> |
 	<a href="usergroupadmin.php">Edit user groups</a> |
-	<a href="/jobtrack/admin_page.php">Jobtrack admin</a><br><br>
+	<!--a href="/jobtrack/admin_page.php">Jobtrack admin</a><br><br--> <!-- Disabled until we decide on jobtrack -->
    <font color="#008000"><small>Logged in as: </small><tt>[logged-in-user-username]</tt></font><br>
    [if-eq : logged-in-user-username : ""]
-   <a href="../php/login.php"><small>Log in</small></a>
+   <a href="../../common/connect/login.php"><small>Log in</small></a>
    [else]
-   <a href="../php/login.php?logout=1"><small>Log out</small></a>
+   <a href="../../common/connect/login.php?logout=1"><small>Log out</small></a>
    [end-if-eq]
   </td>
  </tr>
@@ -69,53 +69,58 @@ Click "x" to remove a project from a group.<br>
 <table border="1" rules="rows" frame="void">
 
 <tr>
- <th align="left">Code
- <th align="left">Project name
- <td width="60">
- <th align="left" width="100">Assigned to
- <td width="30">
- <th>Hide
- <td width="60">
- <th align="left">Assign to
-
+ <th align="left">Code</th>
+ <th align="left">Project name</th>
+ <td width="60"></td>
+ <th align="left" width="100">Assigned to</th>
+ <td width="30"></td>
+ <th>Hide</th>
+ <td width="60"></td>
+ <th align="left">Assign to</th>
+</tr>
 [foreach PROJECT projects_foreach]
 
 <tr>
- <td valign="top">[code]&nbsp;&nbsp;
- <td valign="top">[title]&nbsp;&nbsp;&nbsp;&nbsp;
- <td>
+ <td valign="top">[code]&nbsp;&nbsp;</td>
+ <td valign="top">[title]&nbsp;&nbsp;&nbsp;&nbsp;</td>
+ <td></td>
  <td>
 
   <table border="0" cellspacing="0" cellpadding="0">
   [foreach PROJECT_GROUPS project_groups_foreach]
    <tr>
     [select GROUP groups_select]
-     <td width="80">[grp_name]&nbsp;&nbsp;
+     <td width="80">[grp_name]&nbsp;&nbsp;</td>
 	 <td width="40">
-	  <a title="remove from group" href="#" onclick="elt=document.getElementById('remove_group_link_elt');
-                           if (elt) { elt.value=[pg_id]; elt.form.submit(); return true; } return false;"
-						   style="text-decoration: none; color: blue"><tt><b>x</b></tt></a>
+	  <a title="remove from group" href="#" onclick="elt=document.getElementById('remove_group_link_elt'); if (elt) { elt.value=[pg_id]; elt.form.submit(); return true; } return false;" style="text-decoration: none; color: blue"><tt><b>x</b></tt></a>
+	  </td>
     [end-select]
   [end-foreach]
   [not-found]
   [end-not-found]
+  </tr>
   </table>
+ </td>
 
- <td>
+ <td></td>
  <td>
   [select PROJECT project_select]
    [update required PROJECT project_update]
     [checkbox Hide : hide : hide]
    [end-update]
   [end-select]
- <td>
+ </td>
+ <td></td>
  <td valign="top">
   [insert PROJECT_GROUPS project_groups_insert]
    [auto : pg_project_id : code]
    [dropdown required : pg_group_id : groups dropdown : select grp_id,grp_name from Groups order by grp_name : onchange="form.submit();" style="width: 100px;" : ]
   [end-insert]
+ </td>
  <td valign="top">
-  <input type="submit" value="submit">
+  <input type="submit" value="submit"/>
+ </td>
+</tr>
 [end-foreach]
 
 </table>

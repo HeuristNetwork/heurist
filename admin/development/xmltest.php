@@ -1,6 +1,6 @@
 <?php
 
-require_once("../php/modules/db.php");
+require_once(dirname(__FILE__)."/../../common/connect/db.php");
 
 
 	function _parseTags($text) {
@@ -29,7 +29,7 @@ require_once("../php/modules/db.php");
 		//  g = data inside full tag
 		//  h = closing tag
 		//  i = cdata after all tags have been harvested
-		// 
+		//
 		//                              \1         \2     \3\4                \5     \6\7              \8         \9
 		//                                          aaaaa   bbbbbbbb ccccc     ddddd   eeeeeeee fffff   ggg  hhh   iiiii
 		if (preg_match_all('@<!\[CDATA\[(.*?)\]\]>|([^<]*)(<([^>\s]+)[^>]*/>)|([^<]*)(<([^>\s]+)[^>]*>)(.*?)</\7>|([^<]+)@si', $text, $matches, PREG_SET_ORDER)) {

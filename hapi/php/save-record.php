@@ -11,10 +11,10 @@ if (mysql_error()) { print "ERROR: " . mysql_error() . "\n"; }
 	return $res;
 }
 
-require_once("modules/cred.php");
-require_once("modules/db.php");
-require_once("modules/saving.php");
-require_once("modules/TitleMask.php");
+require_once(dirname(__FILE__)."/../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../../common/connect/db.php");
+require_once(dirname(__FILE__)."/../../data/records/saving.php");
+require_once(dirname(__FILE__)."/../../data/records/TitleMask.php");
 
 
 if (! is_logged_in()) {
@@ -39,7 +39,7 @@ print json_format($out);
 function jsonError($message) {
 	mysql_query("rollback");
 	print "{\"error\":\"" . addslashes($message) . "\"}";
-	
+
 	exit(0);
 }
 

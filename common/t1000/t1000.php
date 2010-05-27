@@ -1,11 +1,11 @@
 <?php
 
-/* 
+/*
 
 T1000 web database templating system
 
-Developed by Tom Murtagh, 
-Archaeological Computing Laboratory, 
+Developed by Tom Murtagh,
+Archaeological Computing Laboratory,
 University of Sydney
 
 Copyright (c) 2005, University of Sydney
@@ -45,7 +45,7 @@ $SEARCHES = array();
 
 $MYSQL_ERRORS = array();
 
-if (! include_once('../php/modules/db.php')) {
+if (! include_once(dirname(__FILE__).'/../connect/db.php')) {
 	print("db.php not found: check PHP include path\n");
 	exit();
 }
@@ -251,7 +251,7 @@ function get_iter_statement($type, $vars) {
 		if (@$MAINTABLES[$type]) {
 			$stmt = 'select '.$TABLE_TYPE_TO_KEY[$type].' from '.$MAINTABLES[$type];
 
-			// if (! $JOINS[$type]  and  array_key_exists($type.'-ID', $vars)) 
+			// if (! $JOINS[$type]  and  array_key_exists($type.'-ID', $vars))
 			if (array_key_exists($type.'-ID', $vars)) {
 				// primary key already defined for this type of object: just select that object, but warn about it
 				error_log("warning: $type-ID already defined in foreach $type scope");
@@ -2941,7 +2941,7 @@ class Radio extends InputComponent {
 	function input_check($vars) {
 		$param_name = $this->container->name . '_' . $this->name . @$vars['-SUFFIX'];
 		if (! array_key_exists($param_name, $_REQUEST)) {
-			if ($this->required) 
+			if ($this->required)
 				return array("must choose at least one " . $this->description);
 		} else if ($_REQUEST[$param_name] == $this->selected_value) {
 			$this->satisfied = true;

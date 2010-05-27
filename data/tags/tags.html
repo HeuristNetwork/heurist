@@ -1,9 +1,9 @@
 <html>
  <head>
-  <link rel=stylesheet href=../css/heurist.css>
-  <link rel=stylesheet href=../css/autocomplete.css>
+  <link rel=stylesheet href="../../css/heurist.css">
+  <link rel=stylesheet href="../../css/autocomplete.css">
 
-  <script src=../../jquery/jquery.js></script>
+  <script src="../../external/jquery/jquery.js"></script>
 
   <title>Tags</title>
   <style>
@@ -36,9 +36,9 @@ table { margin-top: 10px; }
   </style>
  </head>
  <body width=450 height=360>
-  <script src=../js/heurist.js></script>
-  <script src=../php/js/display-preferences.php></script>
-  <script src=../js/autocomplete.js></script>
+  <script src="../../common/lib/heurist.js"></script>
+  <script src="../../common/lib/display-preferences.php"></script>
+  <script src="autocomplete.js"></script>
 
 <div id=no-tags style="display: none;">
      <div class="prompt" style="font-weight: bold; padding: 1em; border: 1px solid black; margin: 1em 1em 0 1em;">
@@ -64,10 +64,10 @@ table { margin-top: 10px; }
 <div class=outer-div>
 <table border=0 cellpadding=2 cellspacing=2>
  <tr>
-  <td align=right><span class=prompt>Top:</div></td>
+  <td align=right><span class=prompt>Top:</span></td>
   <td id=top-tags-cell>
-   <a href=# class=add-tag-link onclick="addTag('Favourites'); return false;">Favourites</a>
-   <a href=# class=add-tag-link onclick="addTag('To Read'); return false;">To Read</a>
+   <a href="#" class=add-tag-link onclick="addTag('Favourites'); return false;">Favourites</a>
+   <a href="#" class=add-tag-link onclick="addTag('To Read'); return false;">To Read</a>
    |
   </td>
  </tr>
@@ -87,7 +87,7 @@ table { margin-top: 10px; }
   </td>
  </tr>
  <tr>
-  <td colspan=2 id=more><b class=prompt><a href="../help/tags.html" onclick="top.HEURIST.util.popupURL(top, href); return false;">More about tags</a></b></td>
+  <td colspan=2 id=more><b class=prompt><a href="../../help/tags.html" onclick="top.HEURIST.util.popupURL(top, href); return false;">More about tags</a></b></td>
  </tr>
 </table>
 <script>

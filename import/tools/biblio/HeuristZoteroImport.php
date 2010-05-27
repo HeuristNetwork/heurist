@@ -1,6 +1,6 @@
 <?php
 
-require_once('HeuristImport.php');
+require_once(dirname(__FILE__)."/../HeuristImport.php");
 
 
 $zotero_to_heurist_detail_map = array(

@@ -3,13 +3,13 @@
 
 define('SAVE_URI', 'disabled');
 
-require_once('../php/modules/cred.php');
-require_once('../php/modules/db.php');
-require_once('../php/modules/similar.php');
-require_once('.ht_stdefs');
+require_once(dirname(__FILE__).'/../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../common/connect/db.php');
+require_once(dirname(__FILE__).'/../data/records/disambig/similar.php');
+require_once(dirname(__FILE__).'/../common/t1000/.ht_stdefs');
 
 if (! is_logged_in()) {
-	header('Location: ' . BASE_PATH . 'php/login.php');
+	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
 	return;
 }
 
@@ -194,7 +194,7 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_keyw
 
 	if (@$bkmk_insert_count == 1)
 		$success = 'Added one bookmark';
-	else if (@$bkmk_insert_count > 1) 
+	else if (@$bkmk_insert_count > 1)
 		$success = 'Added ' . $bkmk_insert_count . ' bookmarks';
 }
 
@@ -211,21 +211,21 @@ if (@$urls) {
 <html>
 <head><title>Import bookmarks</title>
 
-<link rel="icon" href="../../favicon.ico" type="image/x-icon">
-<link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+<link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
+<link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
 
 </head>
 
-<link rel="stylesheet" type="text/css" href="../css/heurist.css">
+<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>css/heurist.css">
 
-<script src="v03/titlegrabber.js"></script>
-<script src="v03/fileimport.js"></script>
+<script src="titlegrabber.js"></script>
+<script src="fileimport.js"></script>
 
 <body width=800 height=500>
 
-<script src="js/heurist.js"></script>
-<script src="../php/js/heurist-obj-user.php"></script>
-<script src="../php/js/display-preferences.php"></script>
+<script src="<?=HEURIST_SITE_PATH?>common/lib/heurist.js"></script>
+<script src="<?=HEURIST_SITE_PATH?>common/lib/heurist-obj-user.php"></script>
+<script src="<?=HEURIST_SITE_PATH?>common/lib/display-preferences.php"></script>
 
 <script type="text/javascript">
 <!--
@@ -270,8 +270,8 @@ function unCheckAll() {
 	overflow: hidden;
 	padding: 2px 0px;
 }
-.inline_url a {	
-	font-size: 80%; 
+.inline_url a {
+	font-size: 80%;
 	text-decoration:none;
 }
 
@@ -368,7 +368,7 @@ Note: the list only shows links which you have not already bookmarked.<br>
 <?php } else { ?>Common<?php } ?>
   hyperlink texts are ignored.
   &nbsp;&nbsp;
-  <input type="button" onclick="top.HEURIST.util.popupURL(top, 'configuration.php?body_only&bookmark_import=1&section=bookmarkimport', { callback: function() { document.forms[0].submit(); } });" value="Change settings">
+  <input type="button" onclick="top.HEURIST.util.popupURL(top, '<?=HEURIST_SITE_PATH?>user/profile/configuration.php?body_only&bookmark_import=1&section=bookmarkimport', { callback: function() { document.forms[0].submit(); } });" value="Change settings">
 </p>
 
 <p style="margin-left: 20px;" class="normal">
@@ -401,7 +401,7 @@ The list is reloaded after each addition and after change of settings.
    &nbsp;&nbsp;
    <a href="#" onClick="unCheckAll(); return false;">Uncheck all</a>
    &nbsp;&nbsp;
-   <input type="submit" name="mode" value="Bookmark checked links" style="font-weight: bold;" onclick="top.HEURIST.util.popupURL(window, '<?= BASE_PATH ?>/popup/add-tags.html', { callback: function(tags) { document.getElementById('keywords').value = tags; document.getElementById('adding_keywords_elt').value = 1; document.forms[0].submit(); } } ); return false;">
+   <input type="submit" name="mode" value="Bookmark checked links" style="font-weight: bold;" onclick="top.HEURIST.util.popupURL(window, '<?=HEURIST_SITE_PATH?>data/tags/add-tags.html', { callback: function(tags) { document.getElementById('keywords').value = tags; document.getElementById('adding_keywords_elt').value = 1; document.forms[0].submit(); } } ); return false;">
   </td>
  </tr>
 
@@ -448,7 +448,7 @@ The list is reloaded after each addition and after change of settings.
 /* ----- END OF OUTPUT ----- */
 
 function biblio_check($url, $title, $notes, $user_bib_id) {
-	/* 
+	/*
 	 * Look for a records record corresponding to the given record;
 	 * user_bib_id is the user's preference if there isn't an exact match.
 	 * Insert one if it doesn't already exist;
@@ -516,7 +516,7 @@ function biblio_check($url, $title, $notes, $user_bib_id) {
 }
 
 function bookmark_insert($url, $title, $keywords, $rec_id) {
-	/* 
+	/*
 	 * Insert a new bookmark with the relevant details;
 	 * return true on success,
 	 * return false on failure, or if the records record is already bookmarked by this user.

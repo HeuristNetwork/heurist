@@ -1,14 +1,15 @@
 <?php
 
-require_once("../php/modules/cred.php");
-require_once("../php/modules/db.php");
+define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
+require_once(dirname(__FILE__)."/../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../../common/connect/db.php");
 
 if (! is_logged_in()) {
-	header("Location: " . BASE_PATH . "php/login.php");
+	header("Location: ".HEURIST_URL_BASE."common/connect/login.php");
 	return;
 }
 if (! is_admin()) {
-	print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href=..>Return to Heurist</a></p></body></html>";
+	print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href=".HEURIST_URL_BASE."search/heurist-search.html>Return to Heurist</a></p></body></html>";
 	return;
 }
 
@@ -16,9 +17,9 @@ if (! is_admin()) {
 <html>
  <head>
   <title>Workgroup overrides</title>
-  <link rel="icon" href="../../favicon.ico" type="image/x-icon">
-  <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
-  <link rel="stylesheet" type="text/css" href="newshsseri.css">
+  <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>css/newshsseri.css">
   <style>
    div#page { padding: 10px; }
    div#page .headline { margin-bottom: 20px; font-size: 150%; }
@@ -42,7 +43,7 @@ if (mysql_num_rows($res) == 0) {
 	print("<p><a>None</a></p>");
 }
 while ($row = mysql_fetch_assoc($res)) {
-	print("<p><a href=bib_detail_editor.php?grp_id=0&rt_id=".$row["rt_id"].">".$row["rt_name"]."</a></p>");
+	print("<p><a href='../rectypes/bib_detail_editor.php?grp_id=0&rt_id=".$row["rt_id"]."'>".$row["rt_name"]."</a></p>");
 }
 
 ?>
@@ -62,7 +63,7 @@ while ($row = mysql_fetch_assoc($res)) {
 		print("<h2>".$row["grp_name"]."</h2>");
 		$grp = $row["grp_id"];
 	}
-	print("<p><a href=bib_detail_editor.php?grp_id=".$row["grp_id"]."&rt_id=".$row["rt_id"].">".$row["rt_name"]."</a></p>");
+	print("<p><a href='../rectypes/bib_detail_editor.php?grp_id=".$row["grp_id"]."&rt_id=".$row["rt_id"]."'>".$row["rt_name"]."</a></p>");
 }
 
 ?>

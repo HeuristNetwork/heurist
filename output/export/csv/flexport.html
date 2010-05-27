@@ -2,7 +2,7 @@
  <head>
   <title>Flexible Export v 1.04 </title>
 
-  <!-- 
+  <!--
    This HAPI tool is designed to export multiple details for a selected resource
    type. For REFERENCE it is designed to export a key detail for the refernced record
    type. It is written generically to allow any HRecordType and HDetailType
@@ -11,12 +11,12 @@
    HDetailTypes are REFERENCE the user is requested to select the output HDetail for
    the REFERENCE object. The user is allowed to select the delimiters for the output
    data which is output to a textarea for cut and paste. Multivalued fields are delimited
-   with a vertical bar (|).  
+   with a vertical bar (|).
   -->
-  
-  <script src="../php/js/load-hapi.php"></script>
+
+  <script src="../../../common/lib/load-hapi.php"></script>
   <script>
-      if (!(HCurrentUser.isLoggedIn()&& HCurrentUser.isAdministrator())) window.location = "../php/login.php";
+      if (!(HCurrentUser.isLoggedIn()&& HCurrentUser.isAdministrator())) window.location =  HAPI.HeuristBaseURL + "common/connect/login.php";
   </script>
 
   <script src="flexport.js"></script>

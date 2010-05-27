@@ -1,27 +1,27 @@
 <html>
 <head>
 <title>Heurist blog</title>
-<link rel=stylesheet href=woot.css>
-<link rel=stylesheet href=comments.css>
-<link rel=stylesheet href=../css/autocomplete.css>
+<link rel=stylesheet href="woot.css">
+<link rel=stylesheet href="comments.css">
+<link rel=stylesheet href="../../css/autocomplete.css">
 
-<script src=/jquery/jquery.js></script>
+<script src="../../external/jquery/jquery.js"></script>
 
 <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w"></script>
 
-<script src="../php/js/load-hapi.php"></script>
-<script src="http://hapi.heuristscholar.org/03/goi.js"></script>
+<script src="../../common/lib/load-hapi.php"></script>
+<script src="../../hapi/js/goi.js"></script>
 
 <script>
 if (! HCurrentUser.isLoggedIn()) {
-	window.location = "../php/login.php";
+	window.location = HAPI.HeuristBaseURL + "common/connect/login.php";
 }
 </script>
 
-<script src=/hapi/comments.js></script>
-<script src=/tinymce/tiny_mce.js></script>
-<script src=/woot/02/js/woot.js></script>
-<script src=blog.js></script>
+<script src="../../data/comments/comments.js"></script>
+<script src="../../external/tinymce/jscripts/tiny_mce/tiny_mce.js"></script>
+<script src="../../data/woot/js/woot.js"></script>
+<script src="blog.js"></script>
 
 <script src="http://yui.yahooapis.com/2.5.2/build/yahoo/yahoo-min.js"></script>
 <script src="http://yui.yahooapis.com/2.5.2/build/event/event-min.js"></script>
@@ -110,7 +110,7 @@ $(document).ready(function() {
 		else if (matches[4]) search["tag"] = matches[4];
 	}
 
-	$("#login").append(HCurrentUser.getRealName() + " : <a href=../php/login.php?logout=1>log out</a>");
+	$("#login").append(HCurrentUser.getRealName() + " : <a href='"+ HAPI.HeuristBaseURL +"/login.php?logout=1'>log out</a>");
 	$("#add-fav-link")[0].href += "&t=" + encodeURIComponent(document.title) + "&u=" + encodeURIComponent(window.location.href);
 
 	if ((user  &&  HCurrentUser == user) ||
@@ -159,7 +159,7 @@ function reload() {
 
 </head>
 <body>
- <iframe id=yui-history-iframe src=../img/hlogo-small-blog-only.gif></iframe>
+ <iframe id=yui-history-iframe src="../../common/images/hlogo-small-blog-only.gif"></iframe>
  <input id=yui-history-field type=hidden>
 
  <script src=autocomplete.js></script>
@@ -167,10 +167,10 @@ function reload() {
 <div id=header>
  <div class=right>
   <div id=login></div>
-  <div id=add-fav><a id=add-fav-link href=../php/add.php?addref=1&k=Favourites>Add page to favourites</a></div>
+  <div id=add-fav><a id=add-fav-link href="../../data/records/addrec/add.php?addref=1&amp;k=Favourites">Add page to favourites</a></div>
  </div>
  <div id=hlogo>
-  <a href=..><img src=../img/hlogo-small-return-to-heurist.gif></a>
+  <a href=..><img src="../../common/images/hlogo-small-return-to-heurist.gi"f></a>
   Blogs
   <select id=blog-select>
    <option selected>select...</option>
@@ -179,7 +179,7 @@ function reload() {
  <div class=clearall></div>
  <div id=banner>
   <div id=bloglogo>
-   <a><img src=../img/hlogo-small-blog-only.gif></a><br>
+   <a><img src=../../common/images/hlogo-small-blog-only.gif></a><br>
    <a>home</a>
   </div>
   <h1 id=blog-owner></h1>

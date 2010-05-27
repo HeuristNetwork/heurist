@@ -1,7 +1,8 @@
 <?php
 
-require_once('../php/modules/db.php');
-require_once('../php/modules/cred.php');
+define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
+require_once(dirname(__FILE__)."/../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../../common/connect/db.php");
 
 if (! is_logged_in()) {
 	header('Location: ' . BASE_PATH);
@@ -18,7 +19,7 @@ mysql_connection_db_select(DATABASE);
 <head>
  <title>Workgroup tags</title>
 
- <link rel="stylesheet" href="v05/lite.css">
+ <link rel="stylesheet" href="../../css/lite.css">
  <style type="text/css">
 body { overflow: auto; }
 .tbox { border: 1px solid black; margin: 1px; }
@@ -73,7 +74,7 @@ function delete_keyword(kwd_id) {
 		print '<ul>';
 		$res = mysql_query('select kwd_id, kwd_name, count(kwl_id) as kwi_count from keywords left join keyword_links on kwl_kwd_id=kwd_id where kwd_wg_id='.$grp['grp_id'].' group by kwd_id, kwl_kwd_id order by kwd_name');
 		while ($kwd = mysql_fetch_assoc($res)) {
-			$searchlink = '../?q=keyword%3A%22'.$grp['grp_name'].'%5C'.$kwd['kwd_name'].'%22&w=all&stype=';
+			$searchlink = HEURIST_URL_BASE.'search/heurist-search.html?q=keyword%3A%22'.$grp['grp_name'].'%5C'.$kwd['kwd_name'].'%22&w=all&stype=';
 			if ($kwd['kwi_count'] == 0) $used = '';
 			else $used = '<i>(<a target=_blank href="'.$searchlink.'">used '.($kwd['kwi_count'] == 1 ? 'once' : $kwd['kwi_count'].' times').'</a>)</i>';
 ?>

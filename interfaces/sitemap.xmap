@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map:sitemap xmlns:map="http://apache.org/cocoon/sitemap/1.0">
+
+<!-- Heurist 3.0 main cocoon interface sitemap -->
+
+
+ <map:pipelines>
+
+  <map:component-configurations>
+    <global-variables>
+		<installDir>h3</installDir>
+		<serverName>heuristscholar.org</serverName>
+		<heuristURL>http://heuristscholar.org/h3/</heuristURL>
+		<!--+
+			This is the base url for a site app to access the site code
+			access in sub-sitemaps as {global:heuristURL}
+			applications may want to add an appBaseUrl
+			<myAppBaseUrl>{global:heuristURL}myAppsDirName/</myAppBaseUrl>
+		+-->
+    </global-variables>
+  </map:component-configurations>
+
+  <!-- main pipeline -->
+  <map:pipeline>
+
+    <!--+
+        | Mount everything for exploring to the sitemap.xmap file located
+        | in the requested instance folder.
+        +-->
+    <map:match pattern="explore/*/**">
+      <map:mount check-reload="yes" src="explore/{1}/" uri-prefix="explore/{1}"/>
+    </map:match>
+
+    <!--+
+        | Mount everything else by calling the sitemap.xmap file located
+        | in the requested sub-folder in the 'output directory'.
+        +-->
+    <map:match pattern="*/**">
+      <map:mount check-reload="yes" src="../output/{1}/" uri-prefix="{1}"/>
+    </map:match>
+
+    <!--+
+        | Handle any calls to application directories that don't exist with
+        | error to be displayed on screen. The "exception" selector helps
+        | you to define different screens for different error types.
+        +-->
+    <map:handle-errors>
+      <map:select type="exception">
+
+        <map:when test="not-found">
+          <map:generate type="exception"/>
+          <map:transform src="stylesheets/system/exception2html.xslt">
+            <map:parameter name="contextPath" value="{request:contextPath}"/>
+            <map:parameter name="realPath" value="{realpath:}"/>
+            <map:parameter name="pageTitle" value="Resource not found"/>
+          </map:transform>
+          <map:serialize status-code="404"/>
+        </map:when>
+
+        <map:when test="invalid-continuation">
+          <map:generate type="exception"/>
+          <map:transform src="stylesheets/system/exception2html.xslt">
+            <map:parameter name="contextPath" value="{request:contextPath}"/>
+            <map:parameter name="realPath" value="{realpath:}"/>
+            <map:parameter name="pageTitle" value="Invalid Continuation"/>
+          </map:transform>
+          <map:serialize status-code="404"/>
+        </map:when>
+
+        <map:otherwise>
+          <map:generate type="exception"/>
+          <map:transform src="stylesheets/system/exception2html.xslt">
+            <map:parameter name="contextPath" value="{request:contextPath}"/>
+            <map:parameter name="realPath" value="{realpath:}"/>
+          </map:transform>
+          <map:serialize status-code="500"/>
+        </map:otherwise>
+      </map:select>
+
+    </map:handle-errors>
+  </map:pipeline>
+ </map:pipelines>
+ </map:sitemap>

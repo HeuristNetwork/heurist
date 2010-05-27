@@ -5,21 +5,21 @@
 // and stores equivalences in the crosswalks_definition table.
 // Ian Johnson 3 March 2010
 
-require_once('../php/modules/cred.php');
+require_once(dirname(__FILE__).'/../../common/connect/cred.php');
 
 if (!is_logged_in()) {
-	    header('Location: ' . BASE_PATH . 'login.php');
+	    header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
 	    return;
         }
 
 // Requires admin user, access to definitions through get_definitions is open
 if (! is_admin()) {
-    print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href=../php/login.php?logout=1>Log out</a></p></body></html>";
+    print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1>Log out</a></p></body></html>";
     return;
 }
 
-require_once('../php/modules/db.php');
-require_once('../legacy/.ht_stdefs');
+require_once(dirname(__FILE__).'/../../common/connect/db.php');
+require_once(dirname(__FILE__).'/../../common/T1000/.ht_stdefs');
 
 
 // Deals with all the database connections stuff

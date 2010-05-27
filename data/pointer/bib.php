@@ -38,9 +38,9 @@ if (! defined("SAVE_URI")) {
  */
 
 if (! defined("JSON_RESPONSE")) {
-	require_once("../modules/relationships.php");
-	require_once('../modules/cred.php');
-	require_once('../modules/db.php');
+	require_once(dirname(__FILE__)."/../relationships/relationships.php");
+	require_once(dirname(__FILE__)."/../../common/connect/cred.php");
+	require_once(dirname(__FILE__)."/../../common/connect/db.php");
 	if (! is_logged_in()) return;
 
 	header('Content-type: text/javascript');
@@ -295,7 +295,7 @@ function getAllWikis($rec_id, $pers_id) {
 	if ($rec_id) {
 		$res = mysql_query("select rec_url from records where rec_id=".$rec_id);
 		$row = mysql_fetch_assoc($res);
-		if (preg_match("!(acl.arts.usyd.edu.au|heuristscholar.org)/tmwiki!", @$row["rec_url"])) {
+		if (preg_match("!(acl.arts.usyd.edu.au|heuristscholar.org)/tmwiki!", @$row["rec_url"])) {	//FIXME: this needs to be configurable or generic for installations
 			array_push($wikis, array("Public", preg_replace("!.*/!", "", $row["rec_url"])));
 			array_push($wikiNames, preg_replace("!.*/!", "", $row["rec_url"]));
 		} else {
@@ -310,7 +310,7 @@ function getAllWikis($rec_id, $pers_id) {
 		}
 	}
 
-	// get a precis for each of the wikis we're dealing with
+	// get a precis for each of the wikis we're dealing with	//FIXME:  tmwikidb is not used??
 	$preces = mysql__select_assoc("tmwikidb.tmw_page left join tmwikidb.tmw_revision on rev_id=page_latest left join tmwikidb.tmw_text on old_id=rev_text_id", "page_title", "old_text", "page_title in ('" . join("','", $wikiNames) . "')");
 	foreach ($wikis as $id => $wiki) {
 		$precis = @$preces[$wiki[1]];	// look-up by wiki page name

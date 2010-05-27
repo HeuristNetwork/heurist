@@ -1,10 +1,10 @@
 <?php
 
-require_once("../php/modules/cred.php");
-require_once("../php/modules/db.php");
+require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/connect/db.php');
 
 if (! is_logged_in()) {
-	header("Location: " . BASE_PATH . "php/login.php");
+	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
 	return;
 }
 
@@ -19,9 +19,9 @@ $future = (! @$_REQUEST["show"]  ||  $_REQUEST["show"] === "future");
 <html>
  <head>
   <title>Heurist reminders</title>
-  <link rel="icon" href="../../favicon.ico" type="image/x-icon">
-  <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
-  <link rel="stylesheet" type="text/css" href="newshsseri.css">
+  <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>css/newshsseri.css">
   <style>
    div#page { padding: 10px; }
    div#page .headline { margin-bottom: 10px; }
@@ -92,8 +92,8 @@ while ($row = mysql_fetch_assoc($res)) {
 						($row["username"] ? $row["username"] : $row["rem_email"]));
 ?>
     <tr>
-     <td><a title=delete href=# onclick="del(<?= $row["rem_id"] ?>); return false;"><img src=../img/cross.gif></a></td>
-     <td><a href=../edit?bib_id=<?= $row["rem_rec_id"] ?>#personal><b><?= $row["rec_title"] ?></b></a></td>
+     <td><a title=delete href=# onclick="del(<?= $row["rem_id"] ?>); return false;"><img src="<?=HEURIST_SITE_PATH?>common/images/cross.gif"></a></td>
+     <td><a href="<?=HEURIST_SITE_PATH?>data/records/editrec/heurist-edit.html?bib_id=<?= $row["rem_rec_id"] ?>#personal"><b><?= $row["rec_title"] ?></b></a></td>
      <td><b><?= $recipient ?></b></td>
      <td><b><?= $row["rem_freq"] ?></b> from <b><?= $row["rem_startdate"] ?></b></td>
      <td><?= $row["rem_message"] ?></td>

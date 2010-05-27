@@ -1,11 +1,11 @@
 <?php
 
-require_once('../php/modules/db.php');
-require_once('../php/modules/cred.php');
-require_once('.ht_stdefs');
+require_once(dirname(__FILE__).'/../../common/connect/db.php');
+require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/t1000/.ht_stdefs');
 
 if (! is_logged_in()) {
-	header('Location: ' . BASE_PATH . 'php/login.php');
+	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
 	return;
 }
 
@@ -151,12 +151,12 @@ mysql_connection_db_select(DATABASE);
 
 
 /* Specify the template file containing the web page to be processed and displayed */
-$template = file_get_contents('templates/configuration.html');
+$template = file_get_contents('configuration.html');
 
 if (! array_key_exists('body_only', $_REQUEST)) {
 	/* Replaces the word {PageHeader} in the web page with the concatenation of the files specified */
 
-	$template = str_replace('{PageHeader}', file_get_contents('../page_header/menu.html'), $template);
+	$template = str_replace('{PageHeader}', file_get_contents(dirname(__FILE__).'/../../admin/describe/menu.html'), $template);
 } else {
 	$template = str_replace('{PageHeader}', '', $template);
 	$template = str_replace('<body ', '<body width=600 height=650 ', $template);
@@ -217,7 +217,7 @@ while ($row = mysql_fetch_row($res)) {
  <td class="u-cell">
   <div class="u" title="' . $row[2] . ' records"><div style="width: ' . (intval($row[2]) / $max_cnt * 100) . '%;"></div></div>
  </td>
- <td class=search>'.($row[2] ? '<a target=_blank href="../?w=bookmark&q=tag:%22'.$row[1].'%22">view...</a>': '').'</td>
+ <td class=search>'.($row[2] ? '<a target=_blank href="'.dirname(__FILE__).'/../../search/heurist-search.html?w=bookmark&q=tag:%22'.$row[1].'%22">view...</a>': '').'</td>
  <td class=replace>'.($row[2] ? '<a href=# onclick="show_replace_list(this, '.$row[0].'); return false;">replace...</a>': '').'</td>
 </tr>';
 

@@ -1,15 +1,16 @@
 <html>
  <head>
   <title>ACL/SHSSERI Password Reset</title>
-  <link rel="stylesheet" type="text/css" href="../legacy/newshsseri.css">
+  <link rel="stylesheet" type="text/css" href="../../css/newshsseri.css">
  </head>
  <body>
  <div style="padding: 10px;">
  <h3>Reset lost/forgotten password</h3>
 <?php
 
-require_once('../php/modules/cred.php');
-require_once('../php/modules/db.php');
+define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
+require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/connect/db.php');
 
 function generate_passwd ($length = 8) {
 	$passwd = '';
@@ -28,7 +29,7 @@ function hash_it ($passwd) {
 }
 
 function email_user ($user_id, $firstname, $email, $passwd) {
-	$msg = 
+	$msg =
 'Dear '.$firstname.',
 
 Your Heurist password has been reset.
@@ -36,7 +37,7 @@ Your Heurist password has been reset.
 Your new password is: '.$passwd.'
 
 To change your password, go to:
-http://'.HOST.'/heurist/admin/edit.php?Id='.$user_id.'
+'.HEURIST_URL_BASE.'admin/users/edit.php?Id='.$user_id.'
 
 (you will first be asked to log in with the new password above)
 ';

@@ -9,10 +9,10 @@
 <head>
   <title>HEURIST - User Profile</title>
 
-  <link rel="icon" href="../../favicon.ico" type="image/x-icon">
-  <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+  <link rel="icon" href="../../../favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="../../../favicon.ico" type="image/x-icon">
 
-  <link rel="stylesheet" type="text/css" href= "newshsseri.css">
+  <link rel="stylesheet" type="text/css" href= "../../../css/newshsseri.css">
 </head>
 
 <body>
@@ -101,8 +101,8 @@ function show_keywords(n) {
 -->
 </script>
 sort:
-<a href="user.php?Id=[Id]&sort=freq"[if-eq : sort : "freq"] style="font-weight: bold;"[end-if-eq]>freq</a>
-<a href="user.php?Id=[Id]&sort=alpha"[if-eq : sort : "alpha"] style="font-weight: bold;"[end-if-eq]>alpha</a>
+<a href="user.php?Id=[Id]&amp;sort=freq"[if-eq : sort : "freq"] style="font-weight: bold;"[end-if-eq]>freq</a>
+<a href="user.php?Id=[Id]&amp;sort=alpha"[if-eq : sort : "alpha"] style="font-weight: bold;"[end-if-eq]>alpha</a>
 
 &nbsp;&nbsp;
 
@@ -117,7 +117,7 @@ show:
 
 [keywords!]
 
-[end-select] 
+[end-select]
 
 [not-found]
 <p>user not found</p>

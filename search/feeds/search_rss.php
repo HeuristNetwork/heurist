@@ -6,18 +6,18 @@ define('T1000_XML', 1);
 //define('T1000_DEBUG', 1);
 define('SAVE_URI', 'disabled');
 
-require_once('../php/modules/cred.php');
+require_once(dirname(__FILE__).'/../../common/connect/cred.php');
 
 if (!is_logged_in()) {
-        header('Location: ' . BASE_PATH . 'login.php');
+        header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
         return;
 }
 
 
 //define('T1000_DEFS', '.safe_htstdefs');
 require_once('t1000.php');
-require_once('../php/modules/db.php');
-require_once('../php/modules/adv-search.php');
+require_once(dirname(__FILE__).'/../../common/connect/db.php');
+require_once(dirname(__FILE__).'/../../search/advanced/adv-search.php');
 
 $_REQUEST['_rss_search_search'] = 1;
 define('rss_search-RESULTS_PER_PAGE', 500);

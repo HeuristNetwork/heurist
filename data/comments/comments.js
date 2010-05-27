@@ -1,3 +1,12 @@
+var installDir = function(){
+	 var path = (top ? top.location.pathname : (window ? window.location.pathname : ""));
+	 if ( path && path != "undefined") {
+	 	path = path.match(/\/[^\s\/]\//);
+	 	path = path ? path.replace(/\//g,"") : "";
+	 	return path;
+	 }
+	 return "";
+}();
 var CommentManager = function(elem, record) {
 
 	this.commentsDiv = elem;
@@ -71,7 +80,7 @@ var Comment = function(parentComment, hComment) {
 	var detailText = hComment.getText() || "";
 		detailText = detailText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 		detailText = detailText.replace(/(http:\/\/[\041-\176]+)/g, "<a href=\"$1\">$1</a>");
-		detailText = detailText.replace(/\[(\d+)\]/g, "[<a href=\"/resource/$1\">$1</a>]");
+		detailText = detailText.replace(/\[(\d+)\]/g, "[<a href=\"/"+ installDir +"/data/records/viewrec/view.php?bib_id=$1\">$1</a>]");
 
 	this.textDiv = this.innerDiv.appendChild(this.document.createElement("div"));
 		this.textDiv.className = "text";

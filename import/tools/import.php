@@ -32,20 +32,20 @@ either of which should be refresh-happy (no POST data).
 
 // Make sure these are loaded before the session data is loaded, so that the class definitions are in place
 require_once("HeuristImport.php");
-require_once("HeuristReferImport.php");
-require_once("HeuristEndnoteReferImport.php");
-require_once("HeuristZoteroImport.php");
-require_once("HeuristKMLImport.php");
+require_once(dirname(__FILE__)."/biblio/HeuristReferImport.php");
+require_once(dirname(__FILE__)."/biblio/HeuristEndnoteReferImport.php");
+require_once(dirname(__FILE__)."/biblio/HeuristZoteroImport.php");
+require_once(dirname(__FILE__)."/kml/HeuristKMLImport.php");
 
-require_once("../php/modules/NameParse.php");
+require_once(dirname(__FILE__)."/../../import/algorithms/NameParse.php");
 
-require_once("../php/modules/db.php");
-require_once("../php/modules/cred.php");
-require_once("lev-delta.php");
+require_once(dirname(__FILE__)."/../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../../common/connect/db.php");
+require_once(dirname(__FILE__)."/../../algorithms/lev-delta.php");
 
-require_once("../php/modules/saving.php");
+require_once(dirname(__FILE__)."/../../data/records/saving.php");
 
-require_once("../php/modules/TitleMask.php");
+require_once(dirname(__FILE__)."/../../data/records/TitleMask.php");
 
 global $reftype_to_bdt_id_map;
 $reftype_to_bdt_id_map = array(
@@ -125,22 +125,22 @@ function print_common_header($fileName) {
  <head>
   <title>Import records</title>
 
-  <link rel="icon" href="../../favicon.ico" type="image/x-icon">
-  <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+  <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
 
-  <link rel=stylesheet href=../legacy/newshsseri.css>
-  <link rel=stylesheet href=../legacy/v04/Popup.css>
-  <link rel=stylesheet href=../css/autocomplete.css>
-  <link rel=stylesheet href=import.css>
+  <link rel=stylesheet href='<?=HEURIST_SITE_PATH?>css/newshsseri.css'>
+  <link rel=stylesheet href='<?=HEURIST_SITE_PATH?>css/Popup.css'>
+  <link rel=stylesheet href='<?=HEURIST_SITE_PATH?>css/autocomplete.css'>
+  <link rel=stylesheet href='<?=HEURIST_SITE_PATH?>css/import.css'>
 
   <script src=import.js></script>
  </head>
  <body width=720 height=480>
-  <script src=../js/heurist.js></script>
+  <script src='<?=HEURIST_SITE_PATH?>common/lib/heurist.js'></script>
   <script>
-if (! top.HEURIST.user) top.HEURIST.loadScript('../php/js/heurist-obj-user.php', true);
+if (! top.HEURIST.user) top.HEURIST.loadScript('<?=HEURIST_SITE_PATH?>common/lib/heurist-obj-user.php', true);
   </script>
-  <script src=../js/autocomplete.js></script>
+  <script src='<?=HEURIST_SITE_PATH?>data/tags/autocomplete.js'></script>
 
 <?php	if (defined('use_alt_db')) {	?>
   <div style="color: red; padding: 10px; font-weight: bold;">Warning: using alternative database</div>
@@ -162,7 +162,7 @@ if (! top.HEURIST.user) top.HEURIST.loadScript('../php/js/heurist-obj-user.php',
 <?php	} else { ?>
     <td><nobr style="font-size: 14px;">Import records</nobr></td>
 <?php	} ?>
-    <td width="100%" style="text-align: right;"><a style="color: black; font-weight: normal;" href="required_elements.php" target=_new>tag definitions</a></td>
+    <td width="100%" style="text-align: right;"><a style="color: black; font-weight: normal;" href='<?=HEURIST_SITE_PATH?>import/tools/interface/required_elements.php' target=_new>tag definitions</a></td>
    </tr>
 <?php } else { ?>
    <tr><td style="font-size: 14px;">Synchronising Zotero records with Heurist</td></tr>
@@ -233,16 +233,16 @@ function mode_file_selection() {
 		if ($frm == "BIB") {
 ?>
     Currently, support is limited to EndNote REFER and Zotero formats.<br>
-    <a href="required_elements.php" target=_new>Show tag definitions</a> for supported REFER record formats.<br>
+    <a href="interface/required_elements.php" target=_new>Show tag definitions</a> for supported REFER record formats.<br>
 <?php
 		}else if ($frm == "GEO") {
 ?>
-	Currently, support is limited to <a href=../help/kml_import.html onclick="top.HEURIST.util.popupURL(window, href); return false;">KML</a> format.<br>
+	Currently, support is limited to <a href='<?=HEURIST_SITE_PATH?>help/kml_import.html' onclick="top.HEURIST.util.popupURL(window, href); return false;">KML</a> format.<br>
 <?php
 		}
 	}
 ?>
-	For additional formats email <a  href="mailto:info@heuristscholar.org">info@heuristscholar.org</a>.
+	For additional formats email <a  href="mailto:<?=HEURIST_MAIL_TO_INFO?>"><?=HEURIST_MAIL_TO_INFO?></a>.
    </div>
    <br>
 <?php
@@ -460,7 +460,7 @@ function mode_zotero_request_parsing() {
 	$import_id = $_import_id;
 
 
-	$session_data['parser'] = &new HeuristZoteroParser();
+	$session_data['parser'] = new HeuristZoteroParser();
 	$session_data['zoteroImport'] = true;
 
 	list($errors, $entries) = $session_data['parser']->parseRequest($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['ZoteroItems']);
@@ -537,9 +537,9 @@ function mode_print_reftype_selection() {
    <div style="width: 500px;">To help Heurist accurately identify the record types where these have not been specified, please select the types of record which may be in the file.  Be specific, as you will have further chances to include additional types if there are records which do not fit with the selected types.</div>
 
    <p>
-   <a target="_new" href="download_input_file.php/<?= htmlspecialchars($session_data['in_filename']) ?>?import_id=<?= htmlspecialchars($import_id) ?>">View import file</a>
+   <a target="_new" href="interface/download_input_file.php/<?= htmlspecialchars($session_data['in_filename']) ?>?import_id=<?= htmlspecialchars($import_id) ?>">View import file</a>
    &nbsp;&nbsp;&nbsp;
-   <a target="_new" href="required_elements.php">View tag definitions</a>
+   <a target="_new" href="interface/required_elements.php">View tag definitions</a>
    </p>
 
 <?php	if (@$session_data['error']) {	?>
@@ -855,7 +855,7 @@ function mode_crosswalking() {
      <tr>
       <td style="color: red;">Unallocated record type:<br><nobr>(will not be imported)</nobr></td>
       <td><?= count($no_reftype_entries) ?></td>
-      <td><a target="_errors" href="download_non_reftype_entries.php/<?= htmlspecialchars($import_id) ?>-no_reftype.txt?import_id=<?= htmlspecialchars($import_id) ?>">Download errors</td>
+      <td><a target="_errors" href="interface/download_non_reftype_entries.php/<?= htmlspecialchars($import_id) ?>-no_reftype.txt?import_id=<?= htmlspecialchars($import_id) ?>">Download errors</td>
       <td></td>
      </tr>
 <?php 		}
@@ -863,7 +863,7 @@ function mode_crosswalking() {
      <tr>
       <td style="color: red;">Data errors:<br><nobr>(will not be imported)</nobr></td>
       <td><?= count($data_error_entries) ?></td>
-      <td><a target="_errors" href="download_data_error_entries.php/<?= htmlspecialchars($import_id) ?>-data_error.txt?import_id=<?= htmlspecialchars($import_id) ?>">Download errors</a></td>
+      <td><a target="_errors" href="interface/download_data_error_entries.php/<?= htmlspecialchars($import_id) ?>-data_error.txt?import_id=<?= htmlspecialchars($import_id) ?>">Download errors</a></td>
      </tr>
 <?php		} ?>
      <tr><td>Total records:</td><td><b><?= intval(count($out_entries) + count($no_reftype_entries) + count($data_error_entries)) ?></b></td><td>&nbsp;</td></tr>
@@ -1000,7 +1000,7 @@ function add_keyword(tag) {
    <br clear=all>
 
 <?php		if (@$session_data['data_error_entries']) { ?>
-      <a target="_errors" href="download_data_error_entries.php/<?= htmlspecialchars($import_id) ?>-data_error.txt?import_id=<?= htmlspecialchars($import_id) ?>">Download errors</a>
+      <a target="_errors" href="interface/download_data_error_entries.php/<?= htmlspecialchars($import_id) ?>-data_error.txt?import_id=<?= htmlspecialchars($import_id) ?>">Download errors</a>
 <?php		} ?>
 <?php		if (! @$session_data['zoteroImport']) { ?>
    <input type="button" value="Cancel" onclick="window.location.replace('import.php');">
@@ -1274,14 +1274,14 @@ error_log("total time: " . ($etime - $stime));
 
 <?php	if (! @$session_data['zoteroImport']) { ?>
 <?php		if ($ambig_count  ||  $session_data['non_out_entries']) { ?>
-   <a target="_errors" href="download_non_imported.php/<?= htmlspecialchars($import_id) ?>-unimported.txt?import_id=<?= htmlspecialchars($import_id) ?>" onclick="elt=document.getElementById('finished_button'); if (elt) elt.disabled = false;" style="color: red;">Download non-imported records</a>
+   <a target="_errors" href="interface/download_non_imported.php/<?= htmlspecialchars($import_id) ?>-unimported.txt?import_id=<?= htmlspecialchars($import_id) ?>" onclick="elt=document.getElementById('finished_button'); if (elt) elt.disabled = false;" style="color: red;">Download non-imported records</a>
 <?php		}
 		if (! $ambig_count  &&  $session_data['non_out_entries']) { ?>
    <input type="button" value="Finished" onclick="window.location.replace('import.php');" disabled="true" id="finished_button" style="font-weight: bold;" title="You must download non-imported records before clicking this button">
 <?php		}	?>
 <?php	} else {	?>
 <?php		if ($ambig_count  ||  $session_data['non_out_entries']) { ?>
-   <a href="download_non_imported.php/<?= htmlspecialchars($import_id) ?>-unimported.txt?import_id=<?= htmlspecialchars($import_id) ?>" onclick="elt=document.getElementById('finished_button'); if (elt) elt.disabled = false;" style="color: red;">Download non-imported records</a>
+   <a href="interface/download_non_imported.php/<?= htmlspecialchars($import_id) ?>-unimported.txt?import_id=<?= htmlspecialchars($import_id) ?>" onclick="elt=document.getElementById('finished_button'); if (elt) elt.disabled = false;" style="color: red;">Download non-imported records</a>
 <?php		}	?>
 <?php	} ?>
 <?php	if (! $ambig_count  &&  ! $session_data['non_out_entries']) { ?>
@@ -2081,7 +2081,7 @@ function print_disambiguation_options(&$entry) {
 
 	$entry_type = $heurist_reftypes[$entry->getReferenceType()]['rt_name'];
 
-	$compare_link = "side-by-side.php?ids=" . $ambig_entry->getBiblioID() . "," . join(',', $ambig_entry->getPotentialMatches());
+	$compare_link = "interface/side-by-side.php?ids=" . $ambig_entry->getBiblioID() . "," . join(',', $ambig_entry->getPotentialMatches());
 ?>
   <hr>
   <div class="ambiguous">

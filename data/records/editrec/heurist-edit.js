@@ -25,16 +25,16 @@
 
 top.HEURIST.edit = {
 	modules: {
-		'public': { url: 'edit/public-tab.html', 'link-id': 'public-link', loaded: false, loading: false, changed: false,
+		'public': { url: 'tabs/public-tab.html', 'link-id': 'public-link', loaded: false, loading: false, changed: false,
 				preload: function() { return (top.HEURIST.record.bibID  &&  top.HEURIST.record.bibID != 0); } },
-		'personal': { url: 'edit/personal-tab.html', 'link-id': 'personal-link', loaded: false, loading: false, changed: false,
+		'personal': { url: 'tabs/personal-tab.html', 'link-id': 'personal-link', loaded: false, loading: false, changed: false,
 				preload: function() { return (top.HEURIST.record.bkmkID  &&  top.HEURIST.record.bkmkID != 0); },
 				disabledFunction: function() { top.HEURIST.edit.addMissingBookmark() } },
-		'annotation': { url: 'edit/annotation-tab.html', 'link-id': 'annotation-link', loaded: false, loading: false, changed: false,
+		'annotation': { url: 'tabs/annotation-tab.html', 'link-id': 'annotation-link', loaded: false, loading: false, changed: false,
 				preload: function() { return true; } },
-		'workgroups': { url: 'edit/workgroups-tab.html', 'link-id': 'workgroups-link', loaded: false, loading: false, changed: false,
+		'workgroups': { url: 'tabs/workgroups-tab.html', 'link-id': 'workgroups-link', loaded: false, loading: false, changed: false,
 				preload: function() { return (top.HEURIST.record.bibID  &&  top.HEURIST.record.bibID != 0  &&  top.HEURIST.user.workgroups.length > 0); } },
-		'relationships': { url: 'edit/relationships-tab.html', 'link-id': 'relationships-link', loaded: false, loading: false, changed: false,
+		'relationships': { url: 'tabs/relationships-tab.html', 'link-id': 'relationships-link', loaded: false, loading: false, changed: false,
 				preload: function() { return (top.HEURIST.record.bibID  &&  top.HEURIST.record.bibID != 0); } }
 	},
 
@@ -220,7 +220,7 @@ top.HEURIST.edit = {
 //		document.getElementById('reftype-val').innerHTML = '';
 //		document.getElementById('reftype-val').appendChild(document.createTextNode(top.HEURIST.record.reftype));
 
-		document.getElementById('reftype-img').style.backgroundImage = "url(img/reftype/" + top.HEURIST.record.reftypeID + ".gif)";
+		document.getElementById('reftype-img').style.backgroundImage = "url("+ top.HEURIST.basePath+"common/images/reftype-icons/" + top.HEURIST.record.reftypeID + ".gif)";
 
 		document.getElementById('title-val').innerHTML = '';
 		document.getElementById('title-val').appendChild(document.createTextNode(top.HEURIST.record.title));
@@ -247,7 +247,7 @@ top.HEURIST.edit = {
 			top.HEURIST.edit.modules.personal.disabledFunction = null;
 
 			// add the bookmark, patch the record structure, and view the personal tab
-			top.HEURIST.util.getJsonData("php/add-bookmark.php?bib_id=" + top.HEURIST.record.bibID, function(vals) {
+			top.HEURIST.util.getJsonData(top.HEURIST.basePath + "data/bookmarks/add-bookmark.php?bib_id=" + top.HEURIST.record.bibID, function(vals) {
 				for (var i in vals) {
 					top.HEURIST.record[i] = vals[i];
 				}
@@ -304,7 +304,7 @@ top.HEURIST.edit = {
 		if (personalWindow  &&  ! personalWindow.tagCheckDone  &&  personalWindow.document.getElementById("tags").value.replace(/^\s+|\s+$/g, "") == "") {
 			// personal tags field is empty -- popup the add keywords dialogue
 			personalWindow.tagCheckDone = true;
-			top.HEURIST.util.popupURL(top, "popup/add-tags.html?no-tags", { callback: function(tags) {
+			top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "data/tags/add-tags.html?no-tags", { callback: function(tags) {
 				if (tags) {
 					personalWindow.document.getElementById("tags").value = tags;
 					top.HEURIST.edit.changed("personal");
@@ -981,7 +981,7 @@ top.HEURIST.edit = {
 			popupOptions.x = buttonPos.x + 8 - 120;
 			popupOptions.y = buttonPos.y + 8 - 80;
 
-			top.HEURIST.util.popupURL(windowRef, "popup/calendar.html#"+dateBox.value, popupOptions);
+			top.HEURIST.util.popupURL(windowRef,top.HEURIST.basePath + "common/lib/calendar.html#"+dateBox.value, popupOptions);
 		}
 
 		return buttonElt;
@@ -1035,7 +1035,7 @@ top.HEURIST.edit = {
 			popupOptions.x = buttonPos.x + 8 - 380;
 			popupOptions.y = buttonPos.y + 8 - 380;
 
-			top.HEURIST.util.popupURL(windowRef, "popup/temporal.html?" + (dateBox.strTemporal ? dateBox.strTemporal : dateBox.value), popupOptions);
+			top.HEURIST.util.popupURL(windowRef, top.HEURIST.basePath + "data/temporal/temporal.html?" + (dateBox.strTemporal ? dateBox.strTemporal : dateBox.value), popupOptions);
 		}
 
 		return buttonElt;
@@ -1116,7 +1116,7 @@ top.HEURIST.edit.inputs.BibDetailInput = function(bibDetailType, bibDetailRequir
 		this.headerCell.appendChild(this.document.createTextNode(bibDetailRequirements[0]));	// bdr_name
 	if (this.repeatable) {
 		var dupImg = this.headerCell.appendChild(this.document.createElement('img'));
-			dupImg.src = "../img/duplicate.gif";
+			dupImg.src = top.HEURIST.basePath + "common/images/duplicate.gif";
 			dupImg.className = "duplicator";
 			dupImg.alt = dupImg.title = "Add another " + bibDetailRequirements[0] + " field";
 			top.HEURIST.registerEvent(dupImg, "click", function() { thisRef.duplicateInput.call(thisRef); } );
@@ -1211,7 +1211,7 @@ top.HEURIST.edit.inputs.BibDetailInput.prototype.addInputHelper = function(bdVal
 			var span = this.document.createElement("span");
 				span.style.paddingLeft = "20px";
 				span.style.lineHeight = "16px";
-				span.style.backgroundImage = "url(../img/external_link_16x16.gif)";
+				span.style.backgroundImage = "url("+top.HEURIST.basePath+"common/images/external_link_16x16.gif)";
 				span.style.backgroundRepeat = "no-repeat";
 				span.style.backgroundPosition = "center left";
 			span.appendChild(this.document.createTextNode("look up"));
@@ -1360,7 +1360,7 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 	this.addInputHelper.call(this, bdValue, newDiv);
 
 	var editImg = newDiv.appendChild(this.document.createElement("img"));
-		editImg.src = "../img/edit-pencil.gif";
+		editImg.src = top.HEURIST.basePath +"common/images/edit-pencil.gif";
 		editImg.className = "edit-resource";
 		editImg.title = "Edit this resource";
 
@@ -1394,13 +1394,13 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 		newDiv.appendChild(hiddenElt);	// have to do this AFTER the type is set
 
 	top.HEURIST.registerEvent(editImg, "click", function() {
-		top.HEURIST.util.popupURL(window, "popup/mini-edit.html?bib_id=" + hiddenElt.value, {
+		top.HEURIST.util.popupURL(window,top.HEURIST.basePath +"data/records/editrec/mini-edit.html?bib_id=" + hiddenElt.value, {
 			callback: function(bibTitle) { if (bibTitle) textElt.defaultValue = textElt.value = bibTitle; }
 		});
 	});
 
 	var removeImg = newDiv.appendChild(this.document.createElement("img"));
-		removeImg.src = "../img/12x12.gif";
+		removeImg.src = top.HEURIST.basePath+"common/images/12x12.gif";
 		removeImg.className = "delete-resource";
 		removeImg.title = "Remove this resource reference";
 		var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
@@ -1425,7 +1425,7 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.chooseResource = functi
 	var thisRef = this;
 
 	if (! searchValue) searchValue = element.textElt.value;
-	var url = "popup/bib-list.html?q="+encodeURIComponent(searchValue)
+	var url = top.HEURIST.basePath+"data/pointer/bib-list.html?q="+encodeURIComponent(searchValue)
 	if (element.input.constrainReftype)
 		url += "&t="+element.input.constrainReftype;
 	top.HEURIST.util.popupURL(window, url, {
@@ -1577,8 +1577,8 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 
 		var link = inputDiv.appendChild(this.document.createElement("a"));
 			if (bdValue.file.nonce) {
-				link.href = "/fetch_file.php/" + encodeURIComponent(bdValue.file.origName) +
-												  "?file_id=" + encodeURIComponent(bdValue.file.nonce);
+				link.href = top.HEURIST.basePath+"data/files/fetch_file.php/" + /*encodeURIComponent(bdValue.file.origName)*/
+								"?file_id=" + encodeURIComponent(bdValue.file.nonce);
 			} else if (bdValue.file.url) {
 				link.href = bdValue.file.url;
 			}
@@ -1588,7 +1588,7 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 		link.appendChild(this.document.createTextNode(bdValue.file.origName));
 
 		var linkImg = link.appendChild(this.document.createElement("img"));
-			linkImg.src = "../img/external_link_16x16.gif";
+			linkImg.src = top.HEURIST.basePath+"common/images/external_link_16x16.gif";
 			linkImg.className = "link-image";
 
 		var fileSizeSpan = inputDiv.appendChild(this.document.createElement("span"));
@@ -1596,7 +1596,7 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 			fileSizeSpan.appendChild(this.document.createTextNode("[" + bdValue.file.fileSize + "]"));
 
 		var removeImg = inputDiv.appendChild(this.document.createElement("img"));
-			removeImg.src = "../img/12x12.gif";
+			removeImg.src = top.HEURIST.basePath+"common/images/12x12.gif";
 			removeImg.className = "delete-file";
 			removeImg.title = "Remove this file";
 			var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
@@ -1610,7 +1610,7 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 	} else {
 		if (top.HEURIST.browser.isEarlyWebkit) {
 			var newIframe = this.document.createElement("iframe");
-				newIframe.src = "../php/mini-file-upload.php?bib_id=" + windowRef.parent.HEURIST.record.bibID + "&bdt_id=" + this.bibDetailType[0];
+				newIframe.src = top.HEURIST.basePath+"data/records/editrec/mini-file-upload.php?bib_id=" + windowRef.parent.HEURIST.record.bibID + "&bdt_id=" + this.bibDetailType[0];
 				newIframe.frameBorder = 0;
 				newIframe.style.width = "90%";
 				newIframe.style.height = "2em";
@@ -1759,7 +1759,7 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 	newDiv.input = input;
 
 	var geoImg = this.document.createElement("img");
-	    geoImg.src = "../img/16x16.gif";
+	    geoImg.src = top.HEURIST.basePath+"common/images/16x16.gif";
 	    geoImg.className = "geo-image";
 	    newDiv.appendChild(geoImg);
 
@@ -1780,7 +1780,7 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 				callback: function(_, _, response) {
 					top.HEURIST.util.popupURL(
 						windowRef,
-						"gigitiser/?" + (response.success ? "edit" : encodeURIComponent(input.value)),
+						"gigitiser/?" + (response.success ? "edit" : encodeURIComponent(input.value)),	// FIXME: need to map this to new location of gigitiser
 						{ callback: function(type, value) { thisRef.setGeo(newDiv, value? (type+" "+value) : ""); } }
 					);
 				}
@@ -1791,7 +1791,7 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 	    editSpan.appendChild(editLink);
 
 	var removeImg = newDiv.appendChild(this.document.createElement("img"));
-		removeImg.src = "../img/12x12.gif";
+		removeImg.src = top.HEURIST.basePath+"common/images/12x12.gif";
 		removeImg.className = "delete-geo";
 		removeImg.title = "Remove this geographic object";
 		top.HEURIST.registerEvent(removeImg, "click", function() {
@@ -1931,7 +1931,7 @@ top.HEURIST.edit.Reminder = function(parentElement, reminderDetails) {
 		}
 
 	var removeImg = this.reminderDiv.appendChild(this.document.createElement("img"));
-		removeImg.src = "../img/cross.gif";
+		removeImg.src = top.HEURIST.basePath+"common/images/cross.gif";
 		removeImg.title = "Remove this reminder";
 		var thisRef = this;
 		removeImg.onclick = function() { if (confirm("Remove this reminder?")) thisRef.remove(); };
@@ -1940,7 +1940,7 @@ top.HEURIST.edit.Reminder = function(parentElement, reminderDetails) {
 };
 top.HEURIST.edit.Reminder.prototype.remove = function() {
 	var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
-	var fakeForm = { action: "php/save-reminder.php",
+	var fakeForm = { action: top.HEURIST.basePath+"data/reminders/save-reminder.php",
 	                 elements: [ { name: "rem_id", value: this.reminderID },
 	                             { name: "bib_id", value: windowRef.parent.HEURIST.record.bibID },
 	                             { name: "save-mode", value: "delete" } ] };
@@ -2271,7 +2271,7 @@ top.HEURIST.edit.inputs.BibURLInput = function(parentElement, defaultValue, requ
 			urlOutput.target = "_blank";
 			urlOutput.href = defaultValue;
 		var linkImg = urlOutput.appendChild(this.document.createElement("img"));
-			linkImg.src = "../img/external_link_16x16.gif";
+			linkImg.src = top.HEURIST.basePath+"common/images/external_link_16x16.gif";
 			linkImg.className = "link-image";
 		urlOutput.appendChild(this.document.createTextNode(defaultValue));
 
@@ -2280,7 +2280,7 @@ top.HEURIST.edit.inputs.BibURLInput = function(parentElement, defaultValue, requ
 			urlSpan.style.color = "blue";
 			urlSpan.style.cursor = "pointer";
 		var editImg = urlSpan.appendChild(this.document.createElement("img"));
-			editImg.src = "../img/edit_pencil_16x16.gif";
+			editImg.src = top.HEURIST.basePath+"common/images/edit_pencil_16x16.gif";
 		urlSpan.appendChild(editImg);
 		urlSpan.appendChild(this.document.createTextNode("edit"));
 

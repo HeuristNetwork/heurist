@@ -4,8 +4,8 @@
 
 define("SAVE_URI", "disabled");
 
-require_once("modules/cred.php");
-require_once("modules/db.php");
+require_once(dirname(__FILE__)."/../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../../common/connect/db.php");
 
 if (! is_logged_in()) return;
 
@@ -42,7 +42,7 @@ if ($rec_id  &&  $_POST["save-mode"] == "add") {
 
 	if ($_POST["mail-now"]) {
 		/* user clicked "notify immediately" */
-		require_once("modules/reminder.php");
+		require_once("reminder.php");
 		print sendReminderEmail($rem);
 	} else {
 		mysql__insert("reminders", $rem);

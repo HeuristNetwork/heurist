@@ -1,7 +1,7 @@
 /* heurist.js
  * Copyright 2006, 2007 Tom Murtagh and Kim Jackson
  * http://heuristscholar.org/
- * 
+ *
  * Essential functions/vars for all Heurist pages -- make sure these are loaded first.
  * Only needs to be loaded once per window / tab:
  * functions are installed as  top.HEURIST.*
@@ -33,11 +33,11 @@ if (! document.body) {
 if (! top.HEURIST) {
 
 top.HEURIST = {
-	VERSION: "2.1.23",
+	VERSION: "3.0.0",
 
 	basePath: top.location.pathname.replace(/^(\/[^\/]+\/).*/, "$1"),
-
-	bookmarkletCode: "(function(){h='http://"+top.location.host+"/heurist/';d=document;c=d.contentType;if(c=='text/html'||!c){if(d.getElementById('__heurist_bookmarklet_div'))return Heurist.init();s=d.createElement('script');s.type='text/javascript';s.src=(h+'js/bookmarklet-popup.js?'+new Date().getTime()).slice(0,-8);d.getElementsByTagName('head')[0].appendChild(s);}else{e=encodeURIComponent;w=open(h +'add.php?t='+e(d.title)+'&amp;u='+e(location.href));window.setTimeout('w.focus()',200);}})();",
+	// TODO:  needs to change to be perminent heuristscholar or relative to the installed version's INSTALL_DIR  can use basePath
+	bookmarkletCode: "(function(){h='http://"+top.location.host+ this.basePath+"';d=document;c=d.contentType;if(c=='text/html'||!c){if(d.getElementById('__heurist_bookmarklet_div'))return Heurist.init();s=d.createElement('script');s.type='text/javascript';s.src=(h+'js/bookmarklet-popup.js?'+new Date().getTime()).slice(0,-8);d.getElementsByTagName('head')[0].appendChild(s);}else{e=encodeURIComponent;w=open(h +'add.php?t='+e(d.title)+'&amp;u='+e(location.href));window.setTimeout('w.focus()',200);}})();",
 
 	createHeuristWindowID: function(url) {
 		return ((Math.random() + "").substring(2) + "-" + url).substring(0, 255);
@@ -435,8 +435,8 @@ if (! window.HEURIST_WINDOW_ID) {
 
 top.HEURIST.parseParams.apply(window);
 
-if (! top.HEURIST.util) top.HEURIST.loadScript(top.HEURIST.basePath+"js/heurist-util.js", true);
-if (! top.HEURIST.json) top.HEURIST.loadScript(top.HEURIST.basePath+"js/heurist-json.js", true);
+if (! top.HEURIST.util) top.HEURIST.loadScript(top.HEURIST.basePath+"common/lib/heurist-util.js", true);
+if (! top.HEURIST.json) top.HEURIST.loadScript(top.HEURIST.basePath+"common/lib/heurist-json.js", true);
 
 if (window != top) {
 	/* Invoke  autosizeAllElements()  when the window loads or is resized */

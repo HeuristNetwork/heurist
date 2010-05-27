@@ -1,25 +1,25 @@
 <html>
- <head>                                                   
+ <head>
   <title>HAPI Detail Updater v1.06</title>
-  
-  <!-- 
-   This HAPI tool is designed to update details in a heurist record or records of 
+
+  <!--
+   This HAPI tool is designed to update details in a heurist record or records of
    a record type. It takes one or more records of format :
    HRecordID, HDetailTypeID, newValue
    It is written generically to allow any non repeatable literal HDetailType.
 	 The tool reads the record types from Heurist and checks for existance and type
 	 against the reords in Heurist. Before updating the detail the value is checked
 	 for validity.
-   
+
   -->
-  
-  
-  <script src="../php/js/load-hapi.php"></script>         <!--FIXME  sometimes get and error that hapi be loaded before goi, need to send switch to load-hapi to also load gio. --> 
+
+
+  <script src="../../../common/lib/load-hapi.php"></script>         <!--FIXME  sometimes get and error that hapi be loaded before goi, need to send switch to load-hapi to also load gio. -->
    <script>
-      if (! (HCurrentUser.isLoggedIn()  &&  HCurrentUser.isAdministrator())) window.location = "../php/login.php";
+      if (! (HCurrentUser.isLoggedIn()  &&  HCurrentUser.isAdministrator())) window.location = HAPI.HeuristBaseURL + "common/connect/php/login.php";
   </script>
 
-  <script src="/hapi/03/goi.js"></script>
+  <script src="../../../hapi/js/goi.js"></script>
 
   <script>
   const recChunk = 50;
@@ -41,7 +41,7 @@
 	var fMapIndex=0; //default to dd/mm/yyyy
 	var fMap = [["0","1","2"],["1","0","2"],["2","1","0"],["2","zm","zd"]];
 
-	
+
 	function stripCharacter(words,character) {
 	  var spaces = words.length;
 	  for(var x = 0; x<spaces; ++x){
@@ -59,13 +59,13 @@
 		if (recStart > 0) {
 			recStart = recEnd;
  			if (recEnd + recChunk > fields.length) {
-				recEnd = fields.length; 
+				recEnd = fields.length;
 			}	else {
 				recEnd = recStart + recChunk;
 			}
 		}else {
-			if (recEnd > fields.length) { 
-			   recEnd = fields.length; 
+			if (recEnd > fields.length) {
+			   recEnd = fields.length;
 			 }
 		}
 		var recIDs = [];
@@ -73,7 +73,7 @@
 		for(i=0; i < (recEnd-recStart); i++) {
 				// flatten the recordID
 				if ( !isNaN(fields[i+recStart][0]) && !(recIDs.indexOf(fields[i+recStart][0])>=0)) { //if new value
-					recIDs.push(fields[i+recStart][0]); //store the Record ID  
+					recIDs.push(fields[i+recStart][0]); //store the Record ID
 				}
 				if (!isNaN(fields[i+recStart][1]) && HDetailManager.getDetailTypeById(fields[i+recStart][1]).getVariety()==HVariety.REFERENCE) { // updating a reference detail load referenced object
 					var vals = fields[i+recStart][2].split("|");
@@ -89,8 +89,8 @@
 				}
 		} //for i
 		console.debug("loading records " + recIDs.join());
-		
-		var loader = new HLoader(	
+
+		var loader = new HLoader(
 		function(s,r) {
 			recRecords = r;
 			document.getElementById("info-p").innerHTML =" loaded " + recRecords.length + " records processing input row " + (recStart+1) + " to " + recEnd;
@@ -100,7 +100,7 @@
 			alert("load failed: " + e);
 		});
 	  var mysearch = new HSearch("ids:" + recIDs.join());
-	  
+
 		HeuristScholarDB.loadRecords(mysearch,loader);  //asynchronous call for record data
 	}
 
@@ -112,15 +112,15 @@
 			var details;
 			var saver = new HSaver(
 				function(r) {
-					console.debug("saved records" + r);    //FIXME  write code to valid field value and update fields array with success message 
+					console.debug("saved records" + r);    //FIXME  write code to valid field value and update fields array with success message
 				},
 				function(r,e) {
 					alert("record save failed: " + e);     //FIXME write code to put error message in fields array.
 				});
-				
+
 				//clear any previous save records
 				while (savRecords.length > 0) {savRecords.pop();};
-	  
+
 		  	for (j = recStart; j <recEnd ; j++) {
 					if(!isNaN(fields[j][0])) { //record input
 						//get the HRecord to be updated
@@ -129,17 +129,17 @@
 					if (! recHR) {
 						continue;
 					}
-		  			
+
 		  			//get the HRecordType
 		 				recHRT = recHR.getRecordType();
-		 				
+
 		 				if( isNaN(fields[j][1])) {
 			 				if( fields[j][1]=="tags"){
 			 					var myTags =fields[j][2];
 			 					if (myTags.indexOf("\"")>=0){
 								   myTags = myTags.replace(/"/g,""); // strip off extra quotes
 			 					}
-		 						myTags = myTags.split("|");  // separate if multiple tags 
+		 						myTags = myTags.split("|");  // separate if multiple tags
 								for (var t in myTags) {
 									HTagManager.addTag(myTags[t]);	// ensure the tag exists
 									recHR.addTag(myTags[t]);
@@ -149,13 +149,13 @@
 			 					}
 							}
 								//FIXME: need to add code for Keywords, Notes, and URLs
-		 				}else{//get the detail type 
+		 				}else{//get the detail type
 			 				recHDT = HDetailManager.getDetailTypeById(fields[j][1]);
 			 				if (recHDT){ //valid detail type
 			 					if (fields[j][2]!=null && fields[j][2]!=""  ) {
-			 						
-				 					switch( recHDT.getVariety()){ 
-				 					
+
+				 					switch( recHDT.getVariety()){
+
 				 					// change data to a date object for validity code. FIXME need to do the same for GEOGRAPHIC, FILE details
 				 						case HVariety.GEOGRAPHIC:
 						 					var vals = fields[j][2].split("|");
@@ -174,14 +174,14 @@
 							 							alert("the value" + vals[v] + " is not valid for " + fields[j][1] + " detail type specified.  " + fields[j].join());
 							 						}
 							 					}
-			 									recHR.setDetails(recHDT, details); 
+			 									recHR.setDetails(recHDT, details);
 							 				} else { //singleton  case  update/add
 												geoFields = vals[0].split(":");
 												geo = new HGeographicValue(geoFields[0], geoFields[1]);
 			 									if (!details[0]) {
-			 										recHR.addDetail(recHDT, geo); 
+			 										recHR.addDetail(recHDT, geo);
 			 									} else {
-			 										recHR.changeDetail(recHDT, details[0], geo); 
+			 										recHR.changeDetail(recHDT, details[0], geo);
 			 									}
 							 				}
 											break;
@@ -219,12 +219,12 @@
 				  						tempDate.setHours(0,0,0,0);
 						 					details = recHR.getDetails(recHDT);
 	 										if (details.length ==1 ){ // single date change it
-	 											recHR.changeDetail(recHDT, details[0], tempDate); 
+	 											recHR.changeDetail(recHDT, details[0], tempDate);
 	 										}else{ // no date or multi-date detail just add it
-	 											recHR.addDetail(recHDT, tempDate); 
+	 											recHR.addDetail(recHDT, tempDate);
 	 										}
 				  						break;
-				  						
+
 				 						case HVariety.REFERENCE:
 				 							var recDetailIDs = [];
 											var ids = fields[j][2].split("|");
@@ -238,7 +238,7 @@
 														 	if ( !isNaN(fields[j][3])){ // if there is a replacement value  HRecordID, HDT, newRefID, oldRefID
                                                                 if (fields[j][3] in recDetailIDs){ //the old ref is a details
                                                                     if (!(ids[i] in recDetailIDs)){// the new value is not then replace
-                                                                        recHR.changeDetail(recHDT, HeuristScholarDB.getRecord(fields[j][3]), HeuristScholarDB.getRecord(ids[i])); 
+                                                                        recHR.changeDetail(recHDT, HeuristScholarDB.getRecord(fields[j][3]), HeuristScholarDB.getRecord(ids[i]));
                                                                     }else {  // the new value already exist so delete the old
                                                                         recHR.removeDetails(recHDT);
                                                                         details.splice(recDetailIDs[fields[j][3]],1);  //remove the old from details
@@ -259,7 +259,7 @@
 							 										recHR.changeDetail(recHDT, details[0], HeuristScholarDB.getRecord(fields[j][3]));
 							 									}else{
 							 										recHR.changeDetail(recHDT, details[0], HeuristScholarDB.getRecord(ids[0]));
-							 									} 
+							 									}
 														}else{//add
 														 	recHR.addDetail(recHDT,HeuristScholarDB.getRecord(ids[0]));
 														}
@@ -268,7 +268,7 @@
 													}
 											}
 											break;
-											
+
 						 				default:
 						 					var vals=fields[j][2].split("|");
 						 					details = recHR.getDetails(recHDT);
@@ -284,12 +284,12 @@
 							 							alert("the value" + vals[v] + " is not valid for " + fields[j][1] + " detail type specified.  " + fields[j].join());
 							 						}
 							 					}
-			 									recHR.setDetails(recHDT, details); 
+			 									recHR.setDetails(recHDT, details);
 							 				}else{ //singleton  case  update/add
 			 										if (!details[0]) {
-			 											recHR.addDetail(recHDT, vals[0]); 
+			 											recHR.addDetail(recHDT, vals[0]);
 			 										}else{
-			 											recHR.changeDetail(recHDT, details[0], vals[0]); 
+			 											recHR.changeDetail(recHDT, details[0], vals[0]);
 			 										}
 							 				}
 				 				}//end switch
@@ -312,20 +312,20 @@
 			 				}else if (fMapIndexLookup.indexOf(fields[j][1])>=0){
 			 					fMapIndex=fMapIndexLookup.indexOf(fields[j][1]);
 			 				}
-			 			}	
+			 			}
 			 		}
 	 			}  //for j = recStart
-	 			
+
 	 			//save the records to effect the changes
 console.debug("saving records " + savRecords);
  				HeuristScholarDB.saveRecords(savRecords, saver);
  				  recStart = recEnd;
  				  //make a timer call letting this fucntion complete in order to unroll the stack.
-   		  	setTimeout(function(){loadPointers();},100);   
+   		  	setTimeout(function(){loadPointers();},100);
  		}
-	
-	
-	
+
+
+
 	function analyseCSV() {
 		var separator = document.getElementById("csv-separator").value;
 		var terminator = document.getElementById("csv-terminator").value;
@@ -365,16 +365,16 @@ console.debug("saving records " + savRecords);
     function showProcessSummary() {
         var e = document.getElementById("process-div");
         e.style.display = "none";
-    
+
     }
-    
+
 
     function showDetails(){
         var e = document.getElementById("process-div");
         e.style.display = "block";
 
         var p = document.getElementById("records-p");
-        
+
         var table = document.createElement("table");
         table.id = "detail-input-table";
         tr = table.appendChild(document.createElement("tr"));
@@ -389,7 +389,7 @@ console.debug("saving records " + savRecords);
         td = tr.appendChild(document.createElement("td"));
         td.innerHTML = "Old Value"; // old value to replace
 
-        
+
         // create rest of table filling it with the csv analysed data
         for (var i = 0; i < fields.length; ++i) {
             tr = table.appendChild(document.createElement("tr"));
@@ -403,15 +403,15 @@ console.debug("saving records " + savRecords);
                  fields[i][j] = (stripCharacter(fields[i][j], "\""));
                 }
                 td.appendChild(document.createTextNode(fields[i][j]));
-                
+
             }
         }
 
         p.appendChild(table);
     }
-    
-   
-    
+
+
+
   </script>
 
   <style>
@@ -441,22 +441,22 @@ console.debug("saving records " + savRecords);
   <p id=records-p></p>
  </div>
  <div id=csv-entry-div>
-   <p>The purpose of this utility is to update a series of heurist records with a set of values. Put another 
+   <p>The purpose of this utility is to update a series of heurist records with a set of values. Put another
    	way, if you have a series of "tape" records that you have imported and need to update details for them
    	and you have the associated Heurist ids of the records to update and the type ids of the detail types that
    	you want to update,	you can update them by entering a triple of HRecordID, HDetailTypeID, newValue for each
    	detail you want to change (including resource pointers - valid record ids) and then pressing "analyse". </p>
-   	
+
    	<p>The csv structure is as follows:</p>
-   	
+
    	<code>5,365,"My new title"</code><br/>
 	<code>5,373,0</code>
-  
+
   	<p>
   		<dl>
   			<dt>The first number is the Heurist id of the recieving object (or tape following on from the example given).</dt>
-  		<dt>The second number is the Heurist detail type id of the "field" in the recieving object where you wish the 
-  		change the value. In this case 365 is used to denote the 'title' and 373 represents 'born digital' (0 = false). 
+  		<dt>The second number is the Heurist detail type id of the "field" in the recieving object where you wish the
+  		change the value. In this case 365 is used to denote the 'title' and 373 represents 'born digital' (0 = false).
   	(see ...... for a full list of Heurist types and details). </dt>
   		<dt>The final number is Detail type appropriate value to be placed in the record. </dt></dl>
   	</p>

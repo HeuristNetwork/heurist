@@ -1,6 +1,6 @@
 <?php
 
-require_once("modules/db.php");
+require_once(dirname(__FILE__)."/../../common/connect/db.php");
 
 function get_location($key) {
 	mysql_connection_db_select("hapi");

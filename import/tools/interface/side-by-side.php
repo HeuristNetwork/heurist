@@ -1,7 +1,7 @@
 <?php
 
-require_once("../php/modules/db.php");
-require_once("../php/modules/cred.php");
+require_once(dirname(__FILE__)."/../../../common/connect/db.php");
+require_once(dirname(__FILE__)."/../../../common/connect/cred.php");
 
 if (! is_logged_in()) return;
 
@@ -41,7 +41,7 @@ while (count($bib_ids_to_fetch) > 0) {
 <html>
  <head>
   <title>HEURIST - compare resources</title>
-  <link rel=stylesheet href=../css/heurist.css>
+  <link rel=stylesheet href="<?=HEURIST_SITE_PATH?> css/heurist.css">
 
  <script>
   var bibs = <?= json_format($bib_data) ?>;
@@ -50,9 +50,9 @@ while (count($bib_ids_to_fetch) > 0) {
  </head>
  <body>
 
-  <script src=../js/heurist.js></script>
-  <script src=../php/js/heurist-obj-common.php></script>
-  <script src=side-by-side.js></script>
+  <script src="<?=HEURIST_SITE_PATH?>common/lib/heurist.js"></script>
+  <script src="<?=HEURIST_SITE_PATH?>common/lib/heurist-obj-common.php"></script>
+  <script src="side-by-side.js"></script>
 
  <style>
 body { margin: 0; }

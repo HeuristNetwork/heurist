@@ -1,8 +1,8 @@
 <?php
 
-require_once("modules/db.php");
-require_once("modules/cred.php");
-require_once("modules/TitleMask.php");
+require_once(dirname(__FILE__).'/../../common/connect/db.php');
+require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../data/records/TitleMask.php');
 
 if (! is_admin()) return;
 

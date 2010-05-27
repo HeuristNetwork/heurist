@@ -1,14 +1,14 @@
 <html>
  <head>
-  <link rel=stylesheet href=../css/heurist.css>
-  <link rel=stylesheet href=../css/keyword-editor.css>
+  <link rel=stylesheet href="../../css/heurist.css">
+  <link rel=stylesheet href="../../css/keyword-editor.css">
 
   <title>Workgroup tags</title>
  </head>
  <body width=700 height=600>
-  <script src=../js/heurist.js></script>
-  <script src=../php/js/display-preferences.php></script>
-  <script src=../js/keyword-editor.js></script>
+  <script src="../../common/lib/heurist.js"></script>
+  <script src="../../common/lib/display-preferences.php"></script>
+  <script src=keyword-editor.js></script>
 
     <table><tr>
 	 <td style="font-size: 150%; font-weight: bold; vertical-align: top;"><nobr>Workgroup tags &nbsp;&nbsp;</nobr></td>
@@ -51,7 +51,7 @@
 
     <tr>
      <td>
-      <a href="../legacy/workgroup_keyword_manager.php" target="blank">Modify Tag Definitions (admins only) </a>
+      <a href="../../admin/workgroups/workgroup_keyword_manager.php" target="blank">Modify Tag Definitions (admins only) </a>
       <div style="font-size: 11px; ">Reload edit form to see new tags</div>
      </td>
      <td></td>
@@ -70,9 +70,8 @@
     </table>
 
     <!-- not used in this form ... just for compatibility with the edit/workgroups tab ... safe to FIXME when we refactor -->
-    <form id=keyword-form jsonAction=php/save-keywords.php action=../php/save-keywords.php></form>
+    <form id=keyword-form jsonAction=save-keywords.php action=save-keywords.php></form>
 
-<script src=../js/keyword-editor.js></script>
 <script>
 
 var removeButton = document.getElementById("remove-button");

@@ -1,12 +1,13 @@
 <?php
 
 define('SAVE_URI', 'disabled');
+define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
 
-require_once('../php/modules/cred.php');
-require_once('t1000.php');
+require_once(dirname(__FILE__).'/../../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../../common/t1000/t1000.php');
 
 if (! is_logged_in()  ||  ! is_admin()) {
-	header('Location: ' . BASE_PATH . 'php/login.php');
+	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
 	return;
 }
 
@@ -24,7 +25,7 @@ if (@$_REQUEST['update-active-rdls']) {
 $_REQUEST['_bdl_search'] = 1;
 define('bdl-RESULTS_PER_PAGE', 100000);
 
-$template = file_get_contents('templates/select_enum_values.html');
+$template = file_get_contents('select_enum_values.html');
 $lexer = new Lexer($template);
 
 $body = new BodyScope($lexer);

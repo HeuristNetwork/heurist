@@ -2,10 +2,10 @@
 
 define('SEARCH_VERSION', 1);
 
-require_once("../php/modules/db.php");
-require_once("../php/modules/cred.php");
+require_once(dirname(__FILE__)."/../../common/connect/db.php");
+require_once(dirname(__FILE__)."/../../common/connect/cred.php");
 
-require_once("../php/modules/adv-search.php");
+require_once(dirname(__FILE__)."/../../search/advanced/adv-search.php");
 
 require_once("PolylineEncoder.php");
 

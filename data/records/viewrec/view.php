@@ -2,25 +2,24 @@
 
 if (array_key_exists('alt', $_REQUEST)) define('use_alt_db', 1);
 
-require_once('../php/modules/cred.php');
-require_once('../php/modules/replaced.php');
+require_once(dirname(__FILE__).'/../../../common/connect/cred.php');
+require_once('replaced.php');
 
 if (!is_logged_in()) {
-        header('Location: ' . BASE_PATH . 'php/login.php');
+        header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
         return;
 }
 
-
 mysql_connection_db_select(DATABASE);
 
-if ($_REQUEST['bkmk_id']) {
+if (@$_REQUEST['bkmk_id']) {
 	$pers_id = $_REQUEST['bkmk_id'];
 	$res = mysql_query('select * from personals where pers_id = ' . $pers_id);
 	$bkmk = mysql_fetch_assoc($res);
 	$rec_id = $bkmk['pers_rec_id'];
 } else {
-	$rec_id = $_REQUEST['bib_id'];
-	
+	$rec_id = @$_REQUEST['bib_id'];
+
 	// check if this bib has been replaced
 	$replacement = get_replacement_bib_id($rec_id);
 	if ($replacement) $rec_id = $replacement;
@@ -37,9 +36,9 @@ if ($_REQUEST['bkmk_id']) {
 	$pers_id = $bkmk['pers_id'];
 }
 
-require_once('../php/modules/permissions.php');
+require_once('permissions.php');
 if (! have_bib_permissions($rec_id)) {
-	header('Location: ' . BASE_PATH . '/denied.html?'.$rec_id);
+	header('Location: ' . BASE_PATH . 'common/messages/denied.html?'.$rec_id);
 	return;
 }
 
@@ -52,25 +51,24 @@ $rec_title = $row['rec_title'];
 
 ?>
 
-
 <html>
 
 <head>
   <title>HEURIST - View record</title>
 
-  <link rel="icon" href="../../favicon.ico" type="image/x-icon">
-  <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+  <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
 
-  <link rel="stylesheet" type="text/css" href="../css/heurist.css">
+  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>css/heurist.css">
 </head>
 
-<body <?php if ($_REQUEST['popup']) { ?>style="width: 480px; height: 600px; background-color: transparent;" <?php } ?>>
+<body <?php if (@$_REQUEST['popup']) { ?>style="width: 480px; height: 600px; background-color: transparent;" <?php } ?>>
 
 <div style="background-color: black; color: white; font-weight: bold; padding: 7px 10px;">Record details</div>
 
 <div style="padding: 10px;">
  <p style="font-weight: bold;"><?= htmlspecialchars($rec_title) ?></p>
- <iframe name="viewer" frameborder="0" style="width: 100%;" src="info.php?<?= ($pers_id ? ('bkmk_id='.$pers_id) : ('bib_id='.$rec_id)) ?><?= $noclutter ?>"></iframe>
+ <iframe name="viewer" frameborder="0" style="width: 100%;" src="<?=HEURIST_SITE_PATH?>data/records/viewrec/info.php?<?= ($pers_id ? ('bkmk_id='.$pers_id) : ('bib_id='.$rec_id)) ?><?= $noclutter ?>"></iframe>
 </div>
 
 </body>

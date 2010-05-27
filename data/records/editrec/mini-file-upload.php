@@ -1,7 +1,7 @@
 <?php
 
-require_once("modules/db.php");
-require_once("modules/cred.php");
+require_once(dirname(__FILE__)."/../../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../../../common/connect/db.php");
 
 if (! is_logged_in()) return;
 
@@ -16,7 +16,7 @@ if (@$bibID  &&  @$bdtID) {
 ?>
 <html>
 <head>
-<link rel=stylesheet href=../css/heurist-edit-tab.css>
+<link rel=stylesheet href="<?=HEURIST_SITE_PATH?>css/heurist-edit-tab.css">
 <body style="padding: 0; margin: 0;">
 <form method=post enctype=multipart/form-data style="display: inline; padding: 0; margin: 0;">
 <input type=hidden name=bib_id value=<?= $bibID ?>>

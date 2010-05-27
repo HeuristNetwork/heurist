@@ -7,9 +7,9 @@ session_cache_limiter('no-cache');
 define('SAVE_URI', 'disabled');
 define('SEARCH_VERSION', 1);
 
-require_once("modules/db.php");
-require_once("modules/cred.php");
-require_once("modules/approx-matches.php");
+require_once(dirname(__FILE__)."/../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../../common/connect/db.php");
+require_once(dirname(__FILE__)."/../../data/records/disambig/approx-matches.php");
 
 $data = json_decode(@$_POST["data"]?  $_POST["data"] : base64_decode(@$_GET["data"]), true);
 

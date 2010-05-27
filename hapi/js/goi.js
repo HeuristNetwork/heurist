@@ -445,8 +445,8 @@ GOI.Digitiser = function(map) {
 		_map.addOverlay(_shape.centreMarker);
 
 		var radiusIcon = new GIcon();
-		radiusIcon.image = "http://hapi.heuristscholar.org/triangle.png";
-		radiusIcon.shadow = "http://hapi.heuristscholar.org/triangle-shadow.png";
+		radiusIcon.image = "../images/triangle.png";
+		radiusIcon.shadow = "../images/triangle-shadow.png";
 		radiusIcon.iconSize = new GSize(21, 19);
 		radiusIcon.shadowSize = new GSize(42, 19);
 		radiusIcon.iconAnchor = new GPoint(11, 18);
@@ -476,21 +476,21 @@ GOI.Digitiser = function(map) {
 		};
 
 		var vtxIcon = _shape.vtxIcon = new GIcon();
-		vtxIcon.image = "http://hapi.heuristscholar.org/triangle.png";
-		vtxIcon.shadow = "http://hapi.heuristscholar.org/triangle-shadow.png";
+		vtxIcon.image = "../images/triangle.png";
+		vtxIcon.shadow = "../images/triangle-shadow.png";
 		vtxIcon.iconSize = new GSize(21, 19);
 		vtxIcon.shadowSize = new GSize(42, 19);
 		vtxIcon.iconAnchor = new GPoint(11, 18);
 
 		var addIcon = _shape.addIcon = new GIcon();
-		addIcon.image = "http://hapi.heuristscholar.org/triangle-plus.png";
-		addIcon.shadow = "http://hapi.heuristscholar.org/triangle-shadow.png";
+		addIcon.image = "../images/triangle-plus.png";
+		addIcon.shadow = "../images/triangle-shadow.png";
 		addIcon.iconSize = new GSize(21, 19);
 		addIcon.shadowSize = new GSize(42, 19);
 		addIcon.iconAnchor = new GPoint(11, 18);
 
 		var dotIcon = _shape.dotIcon = new GIcon();
-		dotIcon.image = "http://hapi.heuristscholar.org/5x5-dot.png";
+		dotIcon.image = "../images/5x5-dot.png";
 		dotIcon.iconSize = new GSize(5, 5);
 		dotIcon.iconAnchor = new GPoint(2, 2);
 
@@ -532,28 +532,28 @@ GOI.Digitiser = function(map) {
 		};
 
 		var startIcon = _shape.vtxIcon = new GIcon();
-		startIcon.image = "http://hapi.heuristscholar.org/start-triangle.png";
-		startIcon.shadow = "http://hapi.heuristscholar.org/start-triangle-shadow.png";
+		startIcon.image = "../images/start-triangle.png";
+		startIcon.shadow = "../images/start-triangle-shadow.png";
 		startIcon.iconSize = new GSize(27, 29);
 		startIcon.shadowSize = new GSize(45, 29);
 		startIcon.iconAnchor = new GPoint(14, 28);
 
 		var vtxIcon = _shape.vtxIcon = new GIcon();
-		vtxIcon.image = "http://hapi.heuristscholar.org/triangle.png";
-		vtxIcon.shadow = "http://hapi.heuristscholar.org/triangle-shadow.png";
+		vtxIcon.image = "../images/triangle.png";
+		vtxIcon.shadow = "../images/triangle-shadow.png";
 		vtxIcon.iconSize = new GSize(21, 19);
 		vtxIcon.shadowSize = new GSize(42, 19);
 		vtxIcon.iconAnchor = new GPoint(11, 18);
 
 		var addIcon = _shape.addIcon = new GIcon();
-		addIcon.image = "http://hapi.heuristscholar.org/triangle-plus.png";
-		addIcon.shadow = "http://hapi.heuristscholar.org/triangle-shadow.png";
+		addIcon.image = "../images/triangle-plus.png";
+		addIcon.shadow = "../images/triangle-shadow.png";
 		addIcon.iconSize = new GSize(21, 19);
 		addIcon.shadowSize = new GSize(42, 19);
 		addIcon.iconAnchor = new GPoint(11, 18);
 
 		var dotIcon = _shape.dotIcon = new GIcon();
-		dotIcon.image = "http://hapi.heuristscholar.org/5x5-dot.png";
+		dotIcon.image = "../images/5x5-dot.png";
 		dotIcon.iconSize = new GSize(5, 5);
 		dotIcon.iconAnchor = new GPoint(2, 2);
 

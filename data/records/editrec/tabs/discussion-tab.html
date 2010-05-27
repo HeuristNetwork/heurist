@@ -2,7 +2,7 @@
 
     <!-- discussion-tab.html: record edit form threaded discussion area
     Added Ian Johnson 25/3/2010 - broken out from the text/annotation tab
-    /** 
+    /**
     * @version $Id$
     * @copyright 2005-2010 University of Sydney Digital Innovation Unit.
     * @link: http://HeuristScholar.org
@@ -13,8 +13,8 @@
     -->
 
     <head>
-        <link rel=stylesheet href=../css/heurist.css>
-        <link rel=stylesheet href=../css/heurist-edit-tab.css>
+		<link rel=stylesheet href="../../../../css/heurist.css">
+		<link rel=stylesheet href="../../../../css/heurist-edit-tab.css">
         <style>
 
             #comment-link {
@@ -92,7 +92,15 @@
 
         <script>
 
-
+			var installDir = function(){
+				 var path = (top ? top.location.pathname : (window ? window.location.pathname : ""));
+				 if ( path && path != "undefined") {
+	 				path = path.match(/\/[^\s\/]\//);
+	 				path = path ? path.replace(/\//g,"") : "";
+	 				return path;
+				 }
+				 return "";
+			}();
             function changed() { top.HEURIST.edit.changed("discussion"); }
             function unchanged() { top.HEURIST.edit.unchanged("discussion"); }
 
@@ -159,7 +167,7 @@
                 var detailText = details.text || "";
                 detailText = detailText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
                 detailText = detailText.replace(/(http:\/\/[\041-\176]+)/g, "<a href=\"$1\">$1</a>");
-                detailText = detailText.replace(/\[(\d+)\]/g, "[<a href=\"/resource/$1\">$1</a>]");
+                detailText = detailText.replace(/\[(\d+)\]/g, "[<a href=\"/"+ installDir +"/data/records/viewrec/view.php?bib_id=$1\">$1</a>]");
 
                 this.textDiv = this.innerDiv.appendChild(this.document.createElement("div"));
                 this.textDiv.className = "text";
@@ -216,7 +224,7 @@
             Comment.prototype.remove = function() {
                 if (! confirm("Delete this comment?")) return;
 
-                var fakeForm = { action: "php/save-comment.php",
+                var fakeForm = { action: installDir + "data/comments/save-comment.php",
                     elements: [
                     { name: "cmt_id", value: this.id },
                     { name: "delete", value: 1 }
@@ -352,7 +360,7 @@
                     return;
                 }
 
-                var fakeForm = { action: "php/save-comment.php",
+                var fakeForm = { action: installDir + "data/comments/save-comment.php",
                     elements: [
                     { name: "cmt_id", value: this.id },
                     { name: "bib_id", value: parent.HEURIST.record.bibID },

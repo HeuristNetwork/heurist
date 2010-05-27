@@ -1,7 +1,6 @@
 <html>
- <body onload="nve = document.getElementById('new_value_elt'); if (nve) nve.focus();">
 
-<style type="text/css">
+<head><style type="text/css">
 <!--
 body {
 	margin: 0px;
@@ -39,7 +38,8 @@ body {
 }
 
 -->
-</style>
+</style></head>
+ <body onload="nve = document.getElementById('new_value_elt'); if (nve) nve.focus();">
 
 <div id="maindiv">
 [select BIB_DETAIL_TYPE bdt]
@@ -52,7 +52,7 @@ body {
   [search BIB_DETAIL_LOOKUP bdl]
     [auto : rdl_rdt_id : rdt_id]
     [foreach BIB_DETAIL_LOOKUP bd : 1 order by rdl_id]
-     <div><input style="margin: 1px;" type=checkbox name=active_rdl[literal][[end-literal][rdl_id][literal]][end-literal] [select ACTIVE_BIB_DETAIL_LOOKUP abdl]checked[end-select][not-found][end-not-found]> [rdl_value]</div>
+     <div><input style="margin: 1px;" type=checkbox name='active_rdl[literal][[end-literal][rdl_id][literal]][end-literal]' [select ACTIVE_BIB_DETAIL_LOOKUP abdl]checked[end-select][not-found][end-not-found]> [rdl_value]</div>
     [end-foreach]
     [not-found]<div style="font-style: italic;">(none)</div>[end-not-found]
   [end-search]
@@ -62,8 +62,8 @@ body {
    <input type="hidden" name="rdt_id" value="[rdt_id]">
    <input type="hidden" name=update-active-rdls value=1>
    <input type=submit value=save style="font-weight: bold;">
-  </form>
   </div>
+  </form>
 [end-select]
 </div>
 <div id="maindiv_shadow"></div>

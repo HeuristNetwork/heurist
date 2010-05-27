@@ -5,7 +5,7 @@
   <link rel="icon" href="../../favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
 
-  <link rel="stylesheet" type="text/css" href="newshsseri.css">
+  <link rel="stylesheet" type="text/css" href="../../css/newshsseri.css">
   <style type="text/css">
 	a img {
 		border: 0;
@@ -46,7 +46,7 @@
  [foreach REFTYPE rtf : rt_id in (select art_id from active_rec_types) order by (!rt_primary), rt_order, rt_name]
  <tr class="rt_name">
   <td style="text-align: right;">[rt_id]</td>
-  <td><img src="../img/reftype/[rt_id].gif" id="rt[rt_id]" class="rft_icon"><span class="rt_name">[rt_name]</span></td>
+  <td><img src="../../common/images/reftype-icons/[rt_id].gif" id="rt[rt_id]" class="rft_icon"><span class="rt_name">[rt_name]</span></td>
  </tr>
  <tr>
   <td></td>

@@ -1,6 +1,6 @@
 <?php
 
-require_once('db.php');
+require_once(dirname(__FILE__).'/../../../common/connect/db.php');
 
 
 // checks if a records record has been 'replaced' - superceded by another records record.

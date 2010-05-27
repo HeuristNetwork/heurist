@@ -13,7 +13,7 @@ function search(query) {
 	);
 	loadAllRecords(query, null, loader);
 	showSearch(query);
-	
+
 }
 
 function loadAllRecords(query, options, loader) {
@@ -71,12 +71,12 @@ function displayResults(s,r) {
 	var l = document.getElementById("loading-msg");
 	l.parentNode.removeChild(l);
 
-	var innerHTML = "";
-	var thisInstancePath = HAPI.instance ? "http://"+ HAPI.instance +".heuristscholar.org/heurist/" : "http://heuristscholar.org/heurist/";
+	var innerHTML = "";	//FIXME:  need to change this to be generic to the install
+	var thisInstancePath = (HAPI && HAPI.HeuristBaseURL ? HAPI.HeuristBaseURL : (window.HeuristBaseURL ? window.HeuristBaseURL : (window.opener.HeuristBaseURL? window.opener.HeuristBaseURL: "../../")));
 	for (var i = 0; i < r.length; i++) {
 		if (r[i].getRecordType()){
-			innerHTML += "<img src=\""+ thisInstancePath + "img/reftype/" + r[i].getRecordType().getID() + ".gif\"/>";
-			innerHTML += " <a href=../" + r[i].getID() + "/ target=\"_blank\">" + r[i].getTitle() + "</a><br/>";
+			innerHTML += "<img src=\""+ thisInstancePath + "common/images/reftype-icons/" + r[i].getRecordType().getID() + ".gif\"/>";
+			innerHTML += " <a href='" + thisInstancePath + "data/records/viewrec/view.php?bib_id=" + r[i].getID() + "' target=\"_blank\">" + r[i].getTitle() + "</a><br/>";
 		}
 	}
 

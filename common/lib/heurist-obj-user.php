@@ -6,8 +6,8 @@ define("SAVE_URI", "disabled");
 
 // using ob_gzhandler makes this stuff up on IE6-
 
-require_once('../modules/cred.php');
-require_once('../modules/db.php');
+require_once(dirname(__FILE__).'/../connect/cred.php');
+require_once(dirname(__FILE__).'/../connect/db.php');
 
 header('Content-type: text/javascript');
 
@@ -26,7 +26,7 @@ while ($row = mysql_fetch_assoc($res)) {
     if (! $first) print ",";  print "\n"; $first = false;
 	//this is for searches from  obsolete published-searches table. they start with "q";
 	if (preg_match('/^q/', $row['ss_query'])) {
-		$row['ss_query'] = "?".$row['ss_query']; 
+		$row['ss_query'] = "?".$row['ss_query'];
     }
     print "        [ \"" . addslashes($row['ss_name']) . "\", \"" . addslashes($row['ss_query']) . "\", ". $row['ss_id'] .", 0, " . intval($row['w_all']) ." ]";
 }
@@ -95,7 +95,7 @@ if (@$workgroups) {
 			$ws[$wg] = array();
 		//this is for searches from  obsolete published-searches table. they start with "q";
 		if (preg_match('/^q/', $row['ss_query'])) {
-			$row['ss_query'] = "?".$row['ss_query']; 
+			$row['ss_query'] = "?".$row['ss_query'];
     	}
 		array_push($ws[$wg], array($row['ss_name'], $row['ss_query'], $row['ss_id']));
 	}

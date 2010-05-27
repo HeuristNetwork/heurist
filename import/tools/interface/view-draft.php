@@ -1,11 +1,11 @@
 <?php
 
-require_once('HeuristImport.php');
-require_once('HeuristReferImport.php');
-require_once('HeuristEndnoteReferImport.php');
+require_once(dirname(__FILE__)."/../../../import/tools/HeuristImport.php");
+require_once(dirname(__FILE__)."/../../../import/tools/biblio/HeuristReferImport.php");
+require_once(dirname(__FILE__)."/../../../import/tools/biblio/HeuristEndnoteReferImport.php");
 
-require_once('../php/modules/db.php');
-require_once('../php/modules/cred.php');
+require_once(dirname(__FILE__)."/../../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../../../common/connect/db.php");
 
 jump_sessions();
 
@@ -39,10 +39,10 @@ $type_names = $bib_requirement_names[$entry->getReferenceType()];
  <head>
   <title>HEURIST - View draft reference #<?= $entry->getBiblioID() ?></title>
 
-  <link rel="icon" href="../../favicon.ico" type="image/x-icon">
-  <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+  <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
 
-  <link rel="stylesheet" type="text/css" href="../legacy/newshsseri.css">
+  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>css/newshsseri.css">
  </head>
 
  <body>

@@ -1,11 +1,11 @@
 <?php
 
-/* 
+/*
 
 This file is part of the T1000 web database templating system
 
-Developed by Tom Murtagh, 
-Archaeological Computing Laboratory, 
+Developed by Tom Murtagh,
+Archaeological Computing Laboratory,
 University of Sydney
 
 Copyright (c) 2005, University of Sydney
@@ -26,17 +26,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-require_once('../php/modules/cred.php');
-require_once('../php/modules/db.php');
-require_once('t1000.php');
+require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/connect/db.php');
+require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
 if (!is_logged_in()) {
-	header('Location: ../php/login.php');
+	header('Location: '.HEURIST_URL_BASE.'common/connect/login.php');
 	return;
 }
 
 mysql_connection_db_overwrite(DATABASE);
-$template = file_get_contents('templates/user_clouds_edit.html');
+$template = file_get_contents('user_clouds_edit.html');
 $lexer = new Lexer($template);
 $body = new BodyScope($lexer);
 

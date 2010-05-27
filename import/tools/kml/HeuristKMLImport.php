@@ -1,8 +1,8 @@
 <?php
 
-require_once("../php/modules/cred.php");
-require_once("../php/modules/db.php");
-require_once("HeuristImport.php");
+require_once(dirname(__FILE__)."/../../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../../../common/connect/db.php");
+require_once(dirname(__FILE__)."/../HeuristImport.php");
 
 
 $kml_to_heurist_map = array(

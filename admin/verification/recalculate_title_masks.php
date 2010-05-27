@@ -1,10 +1,10 @@
 <?php
 
-require_once('../php/modules/db.php');
-require_once('../php/modules/cred.php');
+require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/connect/db.php');
 
 if (! is_logged_in()) {
-	header('Location: ' . BASE_PATH . 'php/login.php');
+	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
 	return;
 }
 
@@ -15,7 +15,7 @@ You must be a SHSSERI administrator to use this page.
 	return;
 }
 
-require_once('../php/modules/TitleMask.php');
+require_once(dirname(__FILE__).'/../../data/records/TitleMask.php');
 
 
 mysql_connection_db_overwrite(DATABASE);
@@ -113,7 +113,7 @@ foreach ($bibs as $rec_id => $bib) {
 	else
 		print '<li>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($bib['rec_title']) . '';
 
-	print ' <a target=_blank href="../edit?bib_id='.$rec_id.'">*</a> <br> <br>';
+	print ' <a target=_blank href="'.HEURIST_URL_BASE.'data/records/editrec/heurist-edit.html?bib_id='.$rec_id.'">*</a> <br> <br>';
 
 	if ($rec_id % 10 == 0) {
 		ob_flush();
@@ -161,9 +161,9 @@ if (count($updates) > 0) {
 
 	print '<hr>';
 
-	print '<a target=_blank href="../?w=all&q=ids:'.join(',', array_keys($updates)).'">Updated records</a><br>';
+	print '<a target=_blank href="'.HEURIST_URL_BASE.'search/heurist-search.html?w=all&q=ids:'.join(',', array_keys($updates)).'">Updated records</a><br>';
 }
-print '<a target=_blank href="../?w=all&q=ids:'.join(',', $blanks).'">Unchanged records (title would be blank)</a>';
+print '<a target=_blank href="'.HEURIST_URL_BASE.'search/heurist-search.html?w=all&q=ids:'.join(',', $blanks).'">Unchanged records (title would be blank)</a>';
 
 ob_flush();
 flush();

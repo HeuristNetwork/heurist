@@ -2,8 +2,9 @@
 
 /* Find any records which are *exactly the same* as another record */
 
-require_once("../php/modules/cred.php");
-require_once("../php/modules/db.php");
+define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
+require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/connect/db.php');
 
 if (! is_admin()) return;
 
@@ -66,7 +67,7 @@ mysql_query("commit");
 
 
 function do_fix_dupe($bibIDs) {
-	/* 
+	/*
 	 * $bibIDs is an array of IDs of records records that are all exactly the SAME.
 	 * We try to identify which of the records is the most important, keep that as the master,
 	 * and retrofit all pointers to the other records to point at that one.

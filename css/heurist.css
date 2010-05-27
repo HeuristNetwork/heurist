@@ -1,7 +1,7 @@
 /* heurist.css
  * Copyright 2006, 2007 Tom Murtagh and Kim Jackson
  * http://heuristscholar.org/
- * 
+ *
  * Common styles for Heurist,
  * including funky hover- and keyboard-accessible dropdown menus.
  */
@@ -34,7 +34,7 @@ form { padding: 0; margin: 0; /* fixes slight scrolling on safari */ }
 /* see README.style for comments */
 
 body {
-	behavior: url("/csshover2.htc");	/* behaviour sheet for IE to support :hover */
+	behavior: url("csshover2.htc");	/* behaviour sheet for IE to support :hover */
 }
 
 img { border: 0; }
@@ -102,11 +102,11 @@ a:hover { text-decoration: underline; }
 
 /* left and right content panels occupying most of the page */
 .panel {
-	border: 1px solid #BFBFBF; 
+	border: 1px solid #BFBFBF;
 	font-size: 85%;
 }
 .panel-header {
-	background-image:url(../img/heading_popup.png);
+	background-image:url(../common/images/heading_popup.png);
 	height:25px;
 	line-height: 24px;
 	padding: 0 1ex;
@@ -160,7 +160,7 @@ div.popup {
 	position: absolute;
 	visibility: hidden;
 	-webkit-box-shadow: 4px 4px 3px gray;
-	background: url(../img/resize-handle.gif) #000 scroll bottom right no-repeat;
+	background: url(../common/images/resize-handle.gif) #000 scroll bottom right no-repeat;
 }
 table.popup {
 	overflow: hidden;	/* otherwise blinkencursor disappears on Firefox */
@@ -180,7 +180,7 @@ table.popup td.header {
 	color: white;
 	cursor: move;
 	background-attachment: scroll;
-	background-image: url(../img/heading_popup.png);
+	background-image: url(../common/images/heading_popup.png);
 	background-repeat: repeat-x;
 	background-position: 0px top;
 	color:#333;
@@ -196,11 +196,11 @@ table.popup div.close-button {
 	margin-left: 9px;
 	margin-bottom:9px;
 	cursor: pointer;
-	background: transparent url(../img/white-cross.gif) no-repeat scroll center center;
+	background: transparent url(../common/images/white-cross.gif) no-repeat scroll center center;
 	margin-bottom: 9px;
 }
 table.popup div.close-button:hover {
-	background-image: url(../img/black-cross.gif);
+	background-image: url(../common/images/black-cross.gif);
 }
 
 /*
@@ -211,10 +211,10 @@ table.popup div.help-button {
 	width: 1.6em;
 	cursor: pointer;
 
-	background: transparent url(../img/white-query.gif) no-repeat scroll center center;
+	background: transparent url(../common/images/white-query.gif) no-repeat scroll center center;
 }
-body.help-hide table.popup div.help-button { background-image: url(../img/grey-query.gif); }
-body table.popup tr td div.help-button:hover { background-image: url(../img/black-query.gif); }
+body.help-hide table.popup div.help-button { background-image: url(../common/images/grey-query.gif); }
+body table.popup tr td div.help-button:hover { background-image: url(../common/images/black-query.gif); }
 */
 body table.popup div.help-button { float: right; }
 div.help-button {
@@ -252,7 +252,7 @@ table.popup div.size-div {
 /* width and height are controlled by size-div */
 /*  We do this in JS now ... too hard to get working without  >  selector
 table.popup div.size-div * {
-	width: 100%;	
+	width: 100%;
 	height: 100%;
 	border: 0;
 	padding: 0;
@@ -294,10 +294,10 @@ div.coverall-div {
 	color: black;
 	background-repeat: no-repeat;
 	background-position: center center;
-	background-image: url(../img/loading-animation.gif);	/* override when the load has finished */
+	background-image: url(../common/images/loading-animation.gif);	/* override when the load has finished */
 }
 div.coverall-div.saving {
-	background-image: url(../img/saving-animation.gif);
+	background-image: url(../common/images/saving-animation.gif);
 }
 
 #fake-console {
@@ -367,7 +367,7 @@ body.advanced tr.advanced
 	z-index: 999999;
 	width: 200px;
 	height: 72px;
-	background-image: url(../img/stype/stype-dropshadow.png);
+	background-image: url(../common/images/stype/stype-dropshadow.png);
 }
 
 #stype_options_child {

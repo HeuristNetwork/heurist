@@ -1,12 +1,12 @@
 <?php
-define('HOST_BASE', 'heuristscholar.org');
-$db = '`heurist-common`';
-$db_prefix =  'heuristdb-';
+require_once('heurist-ini.php');
+$db = HEURIST_COMMON_DB;	//the database which holds the database configuration information
+$db_prefix = HEURIST_DB_PREFIX;	//database name prefix for instance
 
-$uploads = "/var/www/htdocs/uploaded-heurist-files/";
+$uploads = HEURIST_UPLOAD_BASEPATH;
 $instances = array();
-
-require_once('db.php');
+$trace = "inst ";
+require_once('/var/www/htdocs/h3/common/connect/db.php');	//FIXME: need to figure out why this doesn't work with relative paths
 
 mysql_connection_db_select($db);
 
@@ -29,6 +29,8 @@ function get_all_instances() {
 }
 
 function define_constants($instance) {
+	global $trace;
+	$trace .= " defineconst ";
 	global $instances;
 	defined('HEURIST_INSTANCE') || define('HEURIST_INSTANCE', $instance);
 	define('HEURIST_INSTANCE_PREFIX', $instance == "" ? "" : $instance.".");
@@ -66,15 +68,15 @@ function define_constants($instance) {
 	define('USER_GROUPS_ROLE_FIELD', 'ug_role');
 }
 
-/* the constant HEURIST_INSTANCE might have been set, to indicate 
+/* the constant HEURIST_INSTANCE might have been set, to indicate
  * which instance we're using.  Otherwise, the default behaviour:
  *
  * Inspect the hostname to determine which instance of heurist we're operating on.
  * Possible patterns are:
- * 
+ *
  *         heuristscholar.org
  * (0-100).heuristscholar.org
- * 
+ *
  *         [instance-name].heuristscholar.org
  * (0-100).[instance-name].heuristscholar.org
  *
@@ -82,15 +84,18 @@ function define_constants($instance) {
 
 if (defined("HEURIST_INSTANCE")) {
 	$instance = HEURIST_INSTANCE;
-} else if (preg_match("/^([0-9]+[.])?(([-a-z]+)[.])?" . HOST_BASE . "/", @$_SERVER['HTTP_HOST'], $matches)) {
+} else if (preg_match("/^([0-9]+[\.])?(([-a-z]+)[\.])?" . HOST_BASE . "/", @$_SERVER['HTTP_HOST'], $matches)) { //TODO: param instance change
 	$instance = (@$matches[3]? $matches[3]: "");
 } else {
-	return;
+	$trace .= "fall through ";
+	return;	// CHECKME: check to see if popup frames inherit the instance or may need to pass this in client call code
 }
 
 if (array_key_exists(@$instance, $instances)) {
 	define_constants($instance);
+}else{
+	$trace .= "todo ";
+	//TODO:  need to have a default set of constants in the case of the instance not in the database table or error message.
 }
-
-//never ever ever ever again will I leave blank lines outside the closing php tag
+	//never ever ever ever again will I leave blank lines outside the closing php tag
 ?>

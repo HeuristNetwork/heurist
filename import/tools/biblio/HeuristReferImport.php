@@ -1,6 +1,6 @@
 <?php
 
-require_once('HeuristImport.php');
+require_once(dirname(__FILE__)."/../HeuristImport.php");
 
 
 $refer_to_heurist_map = array(
@@ -386,7 +386,7 @@ $refer_to_heurist_map = array(
 		'T' => '160',
 		'X' => '191',
 
-		'Yr' => '159', 
+		'Yr' => '159',
 		'YrKey' => '159'
 	),
 
@@ -414,7 +414,7 @@ $refer_to_heurist_map = array(
 		'W' => '351',    // Database Provider
 		'Z' => '201',    // Notes
 
-		'Yr' => '159', 
+		'Yr' => '159',
 		'YrKey' => '159'
 	)
 );

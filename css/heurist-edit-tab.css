@@ -57,7 +57,7 @@ div.draggable td.header div.resize-div {
 	cursor: nw-resize;
 	top: 0; left: 0;
 	position: absolute;
-	background: url(../img/nw-resize.gif) transparent scroll top left no-repeat;
+	background: url(../common/images/nw-resize.gif) transparent scroll top left no-repeat;
 	width: 16px;
 	height: 16px;
 }
@@ -65,7 +65,7 @@ div.draggable td.header div.resize-div {
 div.draggable td.header div.minimise-div {
 	top: 0; right: 0;
 	position: absolute;
-	background: url(../img/nw-resize.gif) transparent scroll top right no-repeat;
+	background: url(../common/images/nw-resize.gif) transparent scroll top right no-repeat;
 	width: 16px;
 	height: 16px;
 }
@@ -92,14 +92,14 @@ div.draggable textarea {
 	margin: 3px;
 	width: 24px;
 	height: 18px;
-	background: url(../img/cal.gif) lightgray scroll center center no-repeat;
+	background: url(../common/images/cal.gif) lightgray scroll center center no-repeat;
 }
 
 .temporal-button {
 	margin: 3px;
 	width: 24px;
 	height: 18px;
-	background: url(../img/temporal.gif) lightgray scroll center center no-repeat;
+	background: url(../common/images/temporal.gif) lightgray scroll center center no-repeat;
 }
 
 .input-row select { display: block; }
@@ -138,12 +138,12 @@ div.draggable textarea {
 }
 .input-cell .resource-div .delete-resource {
 	cursor: pointer;
-	background-image: url(../img/cross.gif);
+	background-image: url(../common/images/cross.gif);
 }
 .input-cell .resource-div.empty img.edit-resource { visibility: hidden; }
 .input-cell .resource-div.empty img.delete-resource {
 	cursor: default;
-	background-image: url(../img/cross-grey.gif);
+	background-image: url(../common/images/cross-grey.gif);
 }
 
 .input-cell .resource-title {
@@ -178,13 +178,13 @@ td.input-cell.readonly img.edit-resource {
 	vertical-align: middle;
 	border: 0;
 	cursor: pointer;
-	background-image: url(../img/cross.gif);
+	background-image: url(../common/images/cross.gif);
 }
 
 .input-cell .geo-div { padding: 2px 0; }
 
-.input-cell .geo-div.empty img.geo-image { background-image: url(../img/geo-grey.gif); }
-.input-cell .geo-div img.geo-image { background-image: url(../img/geo.gif); }
+.input-cell .geo-div.empty img.geo-image { background-image: url(../common/images/geo-grey.gif); }
+.input-cell .geo-div img.geo-image { background-image: url(../common/images/geo.gif); }
 .input-cell .geo-edit {
 	text-decoration: underline;
 	color: blue;

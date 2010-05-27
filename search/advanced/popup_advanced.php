@@ -1,7 +1,7 @@
 <?php
 	define ('SAVE_URI', 'DISABLED');
-	require_once('../php/modules/cred.php');
-	require_once('../php/modules/db.php');
+	require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+	require_once(dirname(__FILE__).'/../../common/connect/db.php');
 
 	mysql_connection_db_select(USERS_DATABASE);
 ?>
@@ -19,7 +19,7 @@ td.h { padding-left: 20px; font-weight: bold; font-size: 14px; }
 select#user option { color: black; }
 </style>
 
-<script src=../js/hquery.js></script>
+<script src='hquery.js'></script>
 
 <script type="text/javascript">
 
@@ -50,7 +50,7 @@ function update(elt) {
 	}
 
 	if (elt.name === "type") {
-		// update the list of record-type-specific bib-detail-types 
+		// update the list of record-type-specific bib-detail-types
 		var typeOptgroup = document.getElementById("rec_type-specific-fields");
 		var typeSelect = document.getElementById("fieldtype");
 		var prevValue = typeSelect.options[typeSelect.selectedIndex].value;

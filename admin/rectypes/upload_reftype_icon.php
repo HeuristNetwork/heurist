@@ -1,15 +1,16 @@
 <?php
-	define('REFTYPE_DIRECTORY', '../../img/reftype/');
 	define('SAVE_URI', 'disabled');
 
-	require_once('../php/modules/cred.php');
-	require_once('.ht_stdefs');
+	define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
+	require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+	require_once(dirname(__FILE__).'/../../common/config/.ht_stdefs');
+	define('REFTYPE_DIRECTORY', HEURIST_SITE_PATH.'common/images/reftype-icons/');
 	if (! (is_logged_in()  &&  is_admin()  &&  HEURIST_INSTANCE_PREFIX == "")) return;
 
 	$rt_id = intval($_REQUEST['rt_id']);
 	if (! $rt_id) return;
 
-	require_once('../php/modules/db.php');
+	require_once(dirname(__FILE__).'/../../common/connect/db.php');
 	mysql_connection_db_select(DATABASE);
 
 	$res = mysql_query('select * from rec_types where rt_id = ' . $rt_id);
@@ -20,7 +21,7 @@
 <html>
  <head>
   <title>Upload reference type icon</title>
-  <link rel="stylesheet" type="text/css" href="newshsseri.css">
+  <link rel="stylesheet" type="text/css" href="../../css/newshsseri.css">
 
   <style type="text/css">
 .success { font-weight: bold; color: green; margin-left: 3px; }
@@ -33,7 +34,7 @@
 
   <div style="line-height: 30px;">
    Current icon:
-   <img src="../img/reftype/<?= $rt_id ?>.gif?<?= time() ?>" style="vertical-align: middle; width: 16px; height: 16px;">
+   <img src="../../common/images/reftype-icons/<?= $rt_id ?>.gif?<?= time() ?>" style="vertical-align: middle; width: 16px; height: 16px;">
   </div>
 
 <?php	if ($success_msg) { ?>
