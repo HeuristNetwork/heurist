@@ -36,7 +36,7 @@
   <map:component-configurations>
     <global-variables>
 		<appSubDir>main</appSubDir>
-		<appBase>http://{global:serverName}/{global:installDir}/</heuristURL>
+		<appBase>http://{$appSubDir}/{global:installDir}/</appBase>
 		<!--+
 			Since this is the main explore app, we don't prepend an instance name.
 			For all other application the appsub id the same as the instance name,
@@ -72,6 +72,7 @@
 			<map:transform src="xsl/item_view.xsl" label="transformed">
 				<map:parameter name="use-request-parameters" value="true"/>
 				<map:parameter name="id" value="{1}"/>
+				<map:parameter name="appBaseURL" value="http://{global:serverName}/{global:installDir}/{global:appSubDir}"/>
 				<map:parameter name="related_reftype_filter" value="{2}"/>
 			</map:transform>
 			<map:transform type="xinclude" label="xinclude"/>

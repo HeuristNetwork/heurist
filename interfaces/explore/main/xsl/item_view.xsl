@@ -2,6 +2,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:str="http://exslt.org/strings" version="1.0" xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 	<xsl:param name="id"/>
 	<xsl:param name="related_reftype_filter"/>
+	<xsl:param name="appBaseURL"/>
 	<xsl:include href="myvariables.xsl"/>
 	<xsl:include href="author_editor.xsl"/>
 	<xsl:include href="books-etc.xsl"/>
@@ -193,10 +194,10 @@
 								<input type="text" id="query-input" value=""/>
 								<input type="button" value="search" onclick="search(document.getElementById('query-input').value);"/>
 							</form>
-							
+
 						</div>
 						<!-- h1>
-							
+
 							<span style="padding-right:5px; padding-left:5px; vertical-align:top;">
 								<a href="#" onclick="window.open('{$urlbase}/edit.html?id={export/references/reference/id}','','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false; " title="Edit main record">
 									<img src="{$hbase}/img/edit-pencil.gif" class="editPencil" style="vertical-align: top;"/>
@@ -264,7 +265,7 @@
 							<xsl:with-param name="reldirection" select="local-name()"/>
 							<xsl:with-param name="items" select="$items[@type = current()/@type and reftype/@id != 52]"/>
 						</xsl:call-template>
-					
+
 					</xsl:when>
 				</xsl:choose>
 			</xsl:for-each>
@@ -284,7 +285,7 @@
 							<xsl:choose>
 								<xsl:when test="$reftype_id = 99">Annotations</xsl:when>
 								<xsl:otherwise>
-									
+
 									<xsl:call-template name="translate_relations">
 										<xsl:with-param name="reltype" select="$reltype"/>
 										<xsl:with-param name="reldirection" select="$reldirection"/>
@@ -292,7 +293,7 @@
 									</xsl:call-template>
 									<!-- xsl:value-of select="$reltype"/ -->
 									<xsl:value-of select="../@id"/>
-								
+
 								</xsl:otherwise>
 							</xsl:choose>
 						</b>
@@ -365,7 +366,7 @@
 			<xsl:otherwise>
 				<tr>
 					<td>
-                    <div class="editIcon">						
+                    <div class="editIcon">
 						<a href="{$urlbase}/edit.html?id={id}" onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;" title="edit">
 							<img src="{$hbase}/img/edit-pencil.gif" class="editPencil"/>
 						</a>
@@ -395,7 +396,7 @@
 								</xsl:otherwise>
 							</xsl:choose>
 						</xsl:if>
-						
+
 						<!-- I think this is the bit of code that renders thumbnails on the right hand side -->
 						<!-- xsl:if test="detail[@id = 222 or @id=223 or @id=224]">
 							<xsl:if test="detail/file_thumb_url">
@@ -406,7 +407,7 @@
 								<br/>
 							</xsl:if>
 
-							
+
 							<xsl:if test="detail[@id=606]">
 								<a href="{$cocoonbase}/item/{id}">
 									<img width="180" src="{detail[@id=606]}"/>
@@ -414,14 +415,14 @@
 								<br/>
 							</xsl:if>
 						</xsl:if>
-						
+
 
 						<a href="{$urlbase}/edit.html?id={id}" onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;" title="edit">
 							<img src="{$hbase}/img/edit-pencil.gif"/>
 						</a>
 						-->
-					</div>	
-					<div class="link">	
+					</div>
+					<div class="link">
 
 						<a href="{$cocoonbase}/item/{id}" class="sb_two">
 							<xsl:choose>
@@ -446,7 +447,7 @@
 						<!-- change this to pick up the actuall system name of the reftye or to use the mapping method as in JHSB that calls human-readable-names.xml -->
 						<img style="vertical-align: middle;horizontal-align: right" src="{$hbase}/img/reftype/{reftype/@id}.gif"/>
 					</div>
-                </td>    
+                </td>
 				</tr>
 			</xsl:otherwise>
 		</xsl:choose>
@@ -550,7 +551,7 @@
 						<xsl:value-of select="notes"/>
 					</td>
 				</tr><!-- change this to pick up the actuall system name of the reftye or to use the mapping method as in JHSB that calls human-readable-names.xml -->
-					
+
 			</xsl:if>
 			<xsl:if test="detail[@id=222 or @id=223 or @id=224]">
 				<tr>

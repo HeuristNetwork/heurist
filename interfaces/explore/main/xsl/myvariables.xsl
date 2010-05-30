@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"
 	xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
-
+	<xsl:param name="appBaseURL"/>
     <xsl:variable name="hbase">http://heuristscholar.org/heurist</xsl:variable>
     <xsl:variable name="urlbase">/relbrowser_ig</xsl:variable>
     <xsl:variable name="cocoonbase">/cocoon/relbrowser_ig</xsl:variable>
     <xsl:variable name="hapi-key">147983c93cdd221dd23f9a93884034f2246b7e01</xsl:variable>
     <xsl:variable name="instance"></xsl:variable>
     <xsl:variable name="instance_prefix"></xsl:variable>
-    <xsl:variable name="site-title">relbrowser_ig</xsl:variable>
+    <xsl:variable name="site-title"><xsl:value-of select="$appBaseURL"/></xsl:variable>
 	<xsl:variable name="home-id">130843</xsl:variable>
 	<xsl:variable name="show-timelines-with-maps">yes</xsl:variable>
 
@@ -88,5 +88,5 @@
 			<icon><xsl:value-of select="$urlbase"/>/images/red-dot.png</icon>
 		</theme>
 	</xsl:variable>
-	
+
 </xsl:stylesheet>

@@ -18,23 +18,21 @@
  * @return boolean
  */
 function stylesheet_exists($style){
-  if (!eregi ('.xsl', $style)){
-  	$style = $style.".xsl";
-  }
+	if (!eregi ('.xsl', $style)){
+		$style = $style.".xsl";
+	}
 
-  if (file_exists("xsl/".$style)){
-   	return true;
-  } else {
-   	return false;
-  }
-
+	if (file_exists("xsl/".$style)){
+		return true;
+	} else {
+		return false;
+	}
 }
 
 function get_style_from_pubargs($ss_publish_args){
-   $style_arg = strstr($ss_publish_args, "&style=");
-   $arr_args = explode("=", $style_arg);
-   return $arr_args[1];
-
+	$style_arg = strstr($ss_publish_args, "&style=");
+	$arr_args = explode("=", $style_arg);
+	return $arr_args[1];
 }
 
 require_once(dirname(__FILE__).'/../../common/connect/cred.php');
@@ -46,22 +44,22 @@ if (array_key_exists('js', $_REQUEST)) $js = '-javascript'; else $js = '';
 if (array_key_exists('out', $_REQUEST)){
 	$output = $_REQUEST['out'];
 }else {
-  	$output  = '';
+	$output  = '';
 }
 
 if (array_key_exists('style', $_REQUEST)){
 	$style = $_REQUEST['style'];
 }else {
-  	$style  = '';
+	$style  = '';
 }
 
 
 if ($_REQUEST['pub_id']) {
 
 	mysql_connection_db_select(DATABASE);
- 	$res = mysql_query('select * from saved_searches where ss_id='.$_REQUEST['pub_id']);
+	$res = mysql_query('select * from saved_searches where ss_id='.$_REQUEST['pub_id']);
 
-  	if (mysql_num_rows($res) != 0) {
+	if (mysql_num_rows($res) != 0) {
 
 		if (!$style) { //that means we are dealing with "forced" searches
 			$pub = mysql_fetch_assoc($res);
@@ -79,27 +77,29 @@ if ($_REQUEST['pub_id']) {
 
 		switch ($style) {
 
-    	case 'endnoterefer': //last remaining style that is not Cocoon driven YET.
+			case 'endnoterefer': //last remaining style that is not Cocoon driven YET.
 			header('Location: search_endnote.php?pub_id=' . $_REQUEST['pub_id']);
-	  		break;
+			break;
 
 		case 'genericxml': //no javascript parameter for genericxml
-			header('Location: '.HEURIST_URL_BASE.'/cocoon'.INSTALL_DIR.'/' . $_REQUEST['pub_id']);
+			header('Location: http://'.HEURIST_HOST_NAME.'/cocoon'.INSTALL_DIR.'/output/pubwizard/' . $_REQUEST['pub_id']);
 			break;
 					// FIXME:  need to change these so that they reflect the setup file values for installs
 		default:
 
 			if (stylesheet_exists($style)){
-	  			header('Location: '.HEURIST_URL_BASE.'/cocoon'.INSTALL_DIR.'/'. $_REQUEST['pub_id'] .(!$output ? '': '/'. $output). '/' . $style . $js);
-	  		} else {
+				header('Location: http://'.HEURIST_HOST_NAME.'/cocoon'.INSTALL_DIR.'/output/pubwizard/'. $_REQUEST['pub_id'] .(!$output ? '': '/'. $output). '/' . $style . $js);
+			} else if (stylesheet_exists("top_".$style)){	//FIXME: temporary while we decide the final naming
+				header('Location: http://'.HEURIST_HOST_NAME.'/cocoon'.INSTALL_DIR.'/output/pubwizard/'. $_REQUEST['pub_id'] .(!$output ? '': '/'. $output). '/' . 'top_'.$style . $js);
+			}else{
 				die ("Stylesheet doesn't exist");
 			}
 			break;
  		}
 
- 	} else {
-  		die('No published search found with id ' . $_REQUEST['pub_id']);
- 	}
+	} else {
+		die('No published search found with id ' . $_REQUEST['pub_id']);
+	}
 
 } else {
 	die('No published search id supplied');

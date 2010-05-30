@@ -35,8 +35,8 @@
         | Mount everything else by calling the sitemap.xmap file located
         | in the requested sub-folder in the 'output directory'.
         +-->
-    <map:match pattern="*/**">
-      <map:mount check-reload="yes" src="../output/{1}/" uri-prefix="{1}"/>
+    <map:match pattern="output/*/**">
+      <map:mount check-reload="yes" src="../output/{1}/" uri-prefix="output/{1}"/>
     </map:match>
 
     <!--+
