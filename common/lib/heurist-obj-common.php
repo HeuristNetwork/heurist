@@ -34,6 +34,7 @@ if (strtotime(@$_SERVER["HTTP_IF_MODIFIED_SINCE"]) > $lastModified) {
 print "top.HEURIST.instance = {};\n";
 print "top.HEURIST.instance.name = " . json_format(HEURIST_INSTANCE) . ";\n";
 print "top.HEURIST.instance.prefix = " . json_format(HEURIST_INSTANCE_PREFIX) . ";\n";
+print "top.HEURIST.instance.exploreURL = " . json_format(EXPLORE_URL) . ";\n";
 
 
 /* Reftypes are an array of names sorted alphabetically, and lists of
