@@ -2,7 +2,6 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:str="http://exslt.org/strings" version="1.0" xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 	<xsl:param name="id"/>
 	<xsl:param name="related_reftype_filter"/>
-	<xsl:param name="appBaseURL"/>
 	<xsl:include href="myvariables.xsl"/>
 	<xsl:include href="author_editor.xsl"/>
 	<xsl:include href="books-etc.xsl"/>
@@ -25,14 +24,14 @@
 	<xsl:template match="/">
 		<html>
 			<head>
-				<link rel="stylesheet" href="{$urlbase}/css/browser.css"/>
+				<link rel="stylesheet" href="{$appBase}css/browser.css"/>
 				<title id="{$currentid}">
 					<xsl:value-of select="export/references/reference/title"/>
 				</title>
 				<script src="/jquery/jquery.js"/>
 				<script>
-					var itemPath = "http://heuristscholar.org/<xsl:value-of select="$cocoonbase"/>/item/";
-					var imgpath = "http://heuristscholar.org/<xsl:value-of select="$urlbase"/>/img/reftype/";
+					var itemPath = "<xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>item/";
+					var imgpath = "<xsl:value-of select="$hBase"/>common/images/reftype-icons/";
 
 					function showFootnote(recordID) {
 						document.getElementById("page").style.bottom = "105px";
@@ -83,41 +82,41 @@
 							elts.innerHTML += "&lt;br>&lt;a href=\""+itemPath+val.getID()+"\">&lt;img src=\"" + img+ "\"/>&lt;/a>";
 						}
 						else {
-						   elts.innerHTML += "&lt;br>&lt;br>&lt;span style=\"padding-right:5px; vertical-align:top\">&lt;a href=\""+itemPath+val.getID()+"\">"+val.getTitle()+"&lt;/a>&lt;/span>"+"&lt;img src=\"" + imgpath+val.getRecordType().getID() +".gif\"/>";
+						   elts.innerHTML += "&lt;br>&lt;br>&lt;span style=\"padding-right:5px; vertical-align:top\">&lt;a href=\""+itemPath+val.getID()+"\">"+val.getTitle()+"&lt;/a>&lt;/span>"+"&lt;img src=\"" + imgpath+val.getRecordType().getID() +".png\"/>";
 						}
 				   }
 
 				  </script>
-				<script src="http://hapi.heuristscholar.org/load?instance={$instance}&amp;key={$hapi-key}"/>
+				<script src="{$hIBase}common/lib/load-hapi.php?instance={$instance}&amp;key={$hapi-key}"/>
 				<script>
 					if (!HCurrentUser.isLoggedIn()) {
-						window.location = 'http://<xsl:value-of select="$instance_prefix"/>heuristscholar.org/heurist/php/login-vanilla.php?logo=http://heuristscholar.org<xsl:value-of select="$urlbase"/>/images/logo.png&amp;home=http://heuristscholar.org<xsl:value-of select="$urlbase"/>';
+						window.location = '<xsl:value-of select="$hIBase"/>common/connect/login-vanilla.php?logo=<xsl:value-of select="$appBase"/>images/logo.png&amp;home=<xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$appBase"/>';
 					}</script>
-				<script src="{$urlbase}/js/search.js"/>
+				<script src="{$appBase}js/search.js"/>
 				<script>
 					top.HEURIST = {};
 					top.HEURIST.fireEvent = function(e, e){};</script>
-				<script src="http://{$instance_prefix}heuristscholar.org/heurist/php/js/heurist-obj-user.php"/>
+				<script src="{$hIBase}common/lib/heurist-obj-user.php"/>
 				<!-- Time Map rendering -->
 				<xsl:if test="export/references/reference/reftype[@id=103 or @id=51 or @id=165 or @id=122 or @id=57]">
 					<script>
-						var urlbase = '<xsl:value-of select="$urlbase"/>';
+						var appBase = '<xsl:value-of select="$appBase"/>';
 						var enableMapTrack  = <xsl:value-of select="$enableMapTrack"/>;
-						Timeline_urlPrefix = "http://heuristscholar.org/simile/timeline/current/timeline_js/";
-						Timeline_ajax_url = "http://heuristscholar.org/simile/timeline/current/timeline_ajax/simile-ajax-api.js";
+						Timeline_urlPrefix = "<xsl:value-of select="$hBase"/>external/timeline/timeline_js/";
+						Timeline_ajax_url = "<xsl:value-of select="$hBase"/>external/timeline/timeline_ajax/simile-ajax-api.js";
 						Timeline_parameters = "bundle=true";</script>
 					<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w"></script>
-					<script src="{$urlbase}/timeline/timeline_js/timeline-api.js" type="text/javascript"></script>
-					<script src="{$urlbase}/timemap.js/timemap.js" type="text/javascript"></script>
-					<script src="{$urlbase}/timemap.js/kmlparser.js" type="text/javascript"></script>
-					<script src="{$urlbase}/js/mapping.js"></script>
+					<script src="{$hBase}external/timeline/timeline_js/timeline-api.js" type="text/javascript"></script>
+					<script src="{$hBase}external/timemap.js/timemap.js" type="text/javascript"></script>
+					<script src="{$hBase}external/timemap.js/kmlparser.js" type="text/javascript"></script>
+					<script src="{$appBase}js/mapping.js"></script>
 					<xsl:if test="$enableMapTrack = 'true'">
 						<script>
 							var maptrackCrumbNumber = <xsl:value-of select="$maptrackCrumbNumber"/>;
 							var crumbThemes = [];
 							var _nameTrack ='bcrumb' + '<xsl:value-of select="$bcrumbNameTrack"/>'; //global name for the PJ object<xsl:for-each select="exsl:node-set($mapCrumbThemes)/theme">
 								crumbThemes.push({colour:'<xsl:value-of select="exsl:node-set($timeMapThemes)/theme[@name=current()]/colour"/>' , icon : '<xsl:value-of select="exsl:node-set($timeMapThemes)/theme[@name=current()]/icon"/>'});</xsl:for-each></script>
-						<script src="{$urlbase}/js/track.js"></script>
+						<script src="{$appBase}js/track.js"></script>
 					</xsl:if>
 				</xsl:if>
 			</head>
@@ -138,7 +137,7 @@
 						</span>
 					</h2 -->
 					<div id="logo">
-						<a href="{$cocoonbase}/item/{$home-id}">
+						<a href="{$cocoonBase}item/{$home-id}">
 							<xsl:value-of select="$site-title"/>
 						</a>
 					</div>
@@ -148,13 +147,13 @@
 								<tr>
 									<xsl:if test="export/references/reference/reftype/@id = 98">
 										<xsl:if test=" $id != $home-id">
-											<td style="font-size: 85%;padding-right:10px; "><a href="#" onclick="window.open('{$urlbase}/edit-annotation.html?refid={export/references/reference/id}','','status=0,scrollbars=1,resizable=1,width=700,height=500'); return false;" title="add Annotation">
-													<img src="{$urlbase}/images/152.gif" align="absmiddle"/>
+											<td style="font-size: 85%;padding-right:10px; "><a href="#" onclick="window.open('{$appBase}edit-annotation.html?refid={export/references/reference/id}','','status=0,scrollbars=1,resizable=1,width=700,height=500'); return false;" title="add Annotation">
+													<img src="{$appBase}images/152.png" align="absmiddle"/>
 												</a> Add Annotation</td>
 										</xsl:if>
 									</xsl:if>
-									<td style="font-size: 85%;padding-right:10px;"><a href="#" onclick="window.open('{$urlbase}/addrelationship.html?typeId=52&amp;source={export/references/reference/id}','','status=0,scrollbars=1,resizable=1,width=700,height=500'); return false;" title="add Relationship">
-											<img src="{$urlbase}/images/52.gif" align="absmiddle"/>
+									<td style="font-size: 85%;padding-right:10px;"><a href="#" onclick="window.open('{$appBase}addrelationship.html?typeId=52&amp;source={export/references/reference/id}','','status=0,scrollbars=1,resizable=1,width=700,height=500'); return false;" title="add Relationship">
+											<img src="{$appBase}images/52.png" align="absmiddle"/>
 										</a> Relationship</td>
 								</tr>
 							</table>
@@ -167,7 +166,7 @@
 									<script type="text/javascript">
 
 							var a = document.createElement("a");
-							a.href ='http://<xsl:value-of select="$instance_prefix"/>heuristscholar.org/heurist/php/login-vanilla.php?logo=http://heuristscholar.org/{$urlbase}/img/logo.png&amp;home=http://heuristscholar.org/{$urlbase}';
+							a.href ='<xsl:value-of select="$hIBase"/>common/connect/login-vanilla.php?logo={$appBase}img/logo.png&amp;home={$serBaseUrl}{$appBase}';
 
 
 							if (HCurrentUser.isLoggedIn()) {
@@ -181,7 +180,7 @@
 							document.getElementById("login").appendChild(a);</script>
 								</td>
 								<td id="heurist-link">
-									<a href="http://{$instance_prefix}heuristscholar.org/heurist/?q=id:{export/references/reference/id}">Heurist</a>
+									<a href="{$hIBase}search/heurist-search.html?q=id:{export/references/reference/id}">Heurist</a>
 								</td>
 							</tr>
 						</table>
@@ -199,8 +198,8 @@
 						<!-- h1>
 
 							<span style="padding-right:5px; padding-left:5px; vertical-align:top;">
-								<a href="#" onclick="window.open('{$urlbase}/edit.html?id={export/references/reference/id}','','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false; " title="Edit main record">
-									<img src="{$hbase}/img/edit-pencil.gif" class="editPencil" style="vertical-align: top;"/>
+								<a href="#" onclick="window.open('{$appBase}edit.html?id={export/references/reference/id}','','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false; " title="Edit main record">
+									<img src="{$hBase}/img/edit-pencil.png" class="editPencil" style="vertical-align: top;"/>
 								</a>
 							</span>
 							<xsl:value-of select="export/references/reference[1]/title"/>
@@ -367,8 +366,8 @@
 				<tr>
 					<td>
                     <div class="editIcon">
-						<a href="{$urlbase}/edit.html?id={id}" onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;" title="edit">
-							<img src="{$hbase}/img/edit-pencil.gif" class="editPencil"/>
+						<a href="{$appBase}edit.html?id={id}" onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;" title="edit">
+							<img src="{$hBase}common/images/edit-pencil.png" class="editPencil"/>
 						</a>
 					</div>
 					<div class="thumbnailCell">
@@ -400,7 +399,7 @@
 						<!-- I think this is the bit of code that renders thumbnails on the right hand side -->
 						<!-- xsl:if test="detail[@id = 222 or @id=223 or @id=224]">
 							<xsl:if test="detail/file_thumb_url">
-								<a href="{$cocoonbase}/item/{id}">
+								<a href="{$cocoonBase}item/{id}">
 									<img src="{detail/file_thumb_url}" class="thumbnail"/>
 								</a>
 
@@ -409,7 +408,7 @@
 
 
 							<xsl:if test="detail[@id=606]">
-								<a href="{$cocoonbase}/item/{id}">
+								<a href="{$cocoonBase}item/{id}">
 									<img width="180" src="{detail[@id=606]}"/>
 								</a>
 								<br/>
@@ -417,14 +416,14 @@
 						</xsl:if>
 
 
-						<a href="{$urlbase}/edit.html?id={id}" onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;" title="edit">
-							<img src="{$hbase}/img/edit-pencil.gif"/>
+						<a href="{$appBase}edit.html?id={id}" onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;" title="edit">
+							<img src="{$hBase}common/images/edit-pencil.png"/>
 						</a>
 						-->
 					</div>
 					<div class="link">
 
-						<a href="{$cocoonbase}/item/{id}" class="sb_two">
+						<a href="{$cocoonBase}item/{id}" class="sb_two">
 							<xsl:choose>
 								<!-- related / notes -->
 								<xsl:when test="@notes">
@@ -445,7 +444,7 @@
 					</div>
 					<div class="reftypeIcon">
 						<!-- change this to pick up the actuall system name of the reftye or to use the mapping method as in JHSB that calls human-readable-names.xml -->
-						<img style="vertical-align: middle;horizontal-align: right" src="{$hbase}/img/reftype/{reftype/@id}.gif"/>
+						<img style="vertical-align: middle;horizontal-align: right" src="{$hBase}common/images/reftype-icons/{reftype/@id}.png"/>
 					</div>
                 </td>
 				</tr>
@@ -460,7 +459,7 @@
 		<table>
 			<tr>
 				<td colspan="2">
-					<img style="vertical-align: middle;" src="{$hbase}/img/reftype/{reftype/@id}.gif"/>
+					<img style="vertical-align: middle;" src="{$hBase}common/images/reftype-icons/{reftype/@id}.png"/>
 					<xsl:text> </xsl:text>
 					<xsl:value-of select="reftype"/>
 				</td>

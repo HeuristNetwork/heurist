@@ -4,8 +4,8 @@
 
 	<xsl:template name="xmldoc" match="reference[reftype/@id=98]">
 
-		<script src="{$urlbase}/js/highlight.js"/>
-		<script src="{$urlbase}/js/selection.js"/>
+		<script src="{$appBase}js/highlight.js"/>
+		<script src="{$appBase}js/selection.js"/>
 
 		<style>
 			#tei a { text-decoration: none; }
@@ -36,7 +36,7 @@
 							<nobr>TEI</nobr>
 						</td>
 						<td>
-							<a href="{$cocoonbase}/item/{//id}/tei">
+							<a href="{$cocoonBase}item/{//id}/tei">
 								[TEI document]
 							</a>
 						</td>
@@ -132,7 +132,7 @@
 					<td>
 						<xsl:if test="detail[@id = 222 or @id=223 or @id=224]">
 							<xsl:if test="detail/file_thumb_url">
-								<a href="{$cocoonbase}/item/{id}">
+								<a href="{$cocoonBase}item/{id}">
 
 									<img src="{detail/file_thumb_url}"/>
 
@@ -143,7 +143,7 @@
 							</xsl:if>
 						</xsl:if>
 
-						<a href="{$cocoonbase}/item/{id}/" class="sb_two">
+						<a href="{$cocoonBase}item/{id}/" class="sb_two">
 							<xsl:choose>
 								<!-- related / notes -->
 								<xsl:when test="@notes">
@@ -164,7 +164,7 @@
 					</td>
 					<td align="right">
 						<!-- change this to pick up the actuall system name of the reftye or to use the mapping method as in JHSB that calls human-readable-names.xml -->
-						<img style="vertical-align: middle;horizontal-align: right" src="{$hbase}/img/reftype/{reftype/@id}.gif"/>
+						<img style="vertical-align: middle;horizontal-align: right" src="{$hBase}common/images/reftype-icons/{reftype/@id}.gif"/>
 					</td>
 				</tr>
 			</xsl:otherwise>
@@ -191,16 +191,16 @@
 
 				<tr>
 					<td>
-					     <a href="{$urlbase}/edit.html?id={id}"
+					     <a href="{$appBase}edit.html?id={id}"
 							onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;"
 							title="edit">
-						<img src="{$hbase}/img/edit-pencil.gif"/>
+						<img src="{$hBase}common/images/edit-pencil.gif"/>
 						</a>
-						<a href="{$cocoonbase}/item/{id}" class="sb_two"><xsl:value-of select="detail[@id=160]"/></a>
+						<a href="{$cocoonBase}item/{id}" class="sb_two"><xsl:value-of select="detail[@id=160]"/></a>
 					</td>
 					<td align="right">
 						<!-- change this to pick up the actuall system name of the reftye or to use the mapping method as in JHSB that calls human-readable-names.xml -->
-						<img style="vertical-align: middle;horizontal-align: right" src="{$hbase}/img/reftype/{reftype/@id}.gif"/>
+						<img style="vertical-align: middle;horizontal-align: right" src="{$hBase}common/images/reftype-icons/{reftype/@id}.gif"/>
 					</td>
 				</tr>
 			</xsl:otherwise>

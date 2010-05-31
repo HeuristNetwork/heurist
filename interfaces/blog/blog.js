@@ -262,11 +262,11 @@ BlogEntry: function(record, parentElement, isNew) {
 
 
 	if (Blog.canEdit()) {
-		$("<a href='#' title='edit'/>").addClass("entry-edit-link").append("<img src='../img/edit-pencil.gif'/>")
+		$("<a href='#' title='edit'/>").addClass("entry-edit-link").append("<img src='../../common/images/edit-pencil.gif'/>")
 			.click(function() { that.edit(); return false; }).appendTo($(".entry-edit-link-cell", $tbody));
 	}
 
-	$("<a href='#' title='add comment'/>").addClass("entry-add-comment-link").append("<img src='../img/duplicate.gif'/>")
+	$("<a href='#' title='add comment'/>").addClass("entry-add-comment-link").append("<img src='../../common/images/duplicate.gif'/>")
 		.click(function() {
 			if (Blog.user  ||  (Blog.group  &&  HCurrentUser.isInWorkgroup(Blog.group))) {
 				that.commentManager.addComment();
@@ -294,7 +294,7 @@ BlogEntry: function(record, parentElement, isNew) {
 
 	$("<a href='#' title='show comments'/>")
 		.addClass("entry-show-comments-link")
-		.append("<img src='../img/tright.gif'/>")
+		.append("<img src='../../common/images/tright.gif'/>")
 		.click(showComments)
 		.appendTo($(".entry-show-comments-cell", $tbody));
 
@@ -306,7 +306,7 @@ BlogEntry: function(record, parentElement, isNew) {
 
 	$("<a href='#' title='hide comments'/>")
 		.addClass("entry-hide-comments-link")
-		.append("<img src='../img/tdown.gif'/>")
+		.append("<img src='../../common/images/tdown.gif'/>")
 		.click(hideComments)
 		.appendTo($(".entry-hide-comments-cell", $tbody));
 
@@ -341,7 +341,7 @@ BlogEntry: function(record, parentElement, isNew) {
 		var $content = null;
 		var mapURL = Blog.getStaticMapURL(this.record);
 		if (Blog.canEdit()) {
-			var $a = $("<a title='Click to edit' href='../popup/edit-geos.html?cb=reload&id=" + this.record.getID() + "'>")
+			var $a = $("<a title='Click to edit' href='../../data/spatial/gigitiser-blog/edit-geos.html?cb=reload&id=" + this.record.getID() + "'>")
 				.click(function () {
 					window.open(this.href, "", "status=0,width=600,height=500");
 					return false;
@@ -358,8 +358,8 @@ BlogEntry: function(record, parentElement, isNew) {
 		}
 
 		if ($content) {
-			$mapDiv.append("<p class='show-map'><a href='#'><img src='../img/tright.gif'></a> <a href='#'>Show map</a></p>");
-			$mapDiv.append("<p class='hide-map' style='display: none;'><a href='#'><img src='../img/tright.gif'></a> <a href='#'>Hide map</a></p>");
+			$mapDiv.append("<p class='show-map'><a href='#'><img src='../../common/images/tright.gif'></a> <a href='#'>Show map</a></p>");
+			$mapDiv.append("<p class='hide-map' style='display: none;'><a href='#'><img src='../../common/images/tright.gif'></a> <a href='#'>Hide map</a></p>");
 			$mapDiv.append("<div class='map-content' style='display: none;'>");
 			$(".map-content", $mapDiv).append($content);
 			$(".show-map a", $mapDiv).click(function () {
@@ -464,7 +464,7 @@ BlogEntry: function(record, parentElement, isNew) {
 			$("<a href='#'>add</a>")
 				.click((function(type) {
 					return function () {
-						window.open("../php/add.php?addref=1&bib_reftype=" + type +
+						window.open("../../data/records/addrec/add.php?addref=1&bib_reftype=" + type +
 							"&related=" + that.record.getID(), "_blank");
 						return false;
 					};
@@ -498,7 +498,7 @@ BlogEntry: function(record, parentElement, isNew) {
 		$p = $("<p class='related-link'/>").appendTo($div);
 			$("<a href='#'/>")
 				.click(function () {
-					window.open("../edit?bib_id=" + that.record.getID() +
+					window.open("../../data/records/editrec/heurist-edit.html?bib_id=" + that.record.getID() +
 						"#relationships", "_blank");
 					return false;
 				})
@@ -506,7 +506,7 @@ BlogEntry: function(record, parentElement, isNew) {
 					that.record.getRecordType().getName())
 				.append("edit")
 				.append("&nbsp&nbsp&nbsp&nbsp")
-				.append("<img src='../img/follow_links_16x16.gif'/>")
+				.append("<img src='../../common/images/follow_links_16x16.gif'/>")
 				.append(" relationships")
 				.appendTo($p);
 	};
@@ -571,7 +571,7 @@ BlogEntry: function(record, parentElement, isNew) {
 		}
 
 		if (Blog.canEdit()  ||  HCurrentUser.isAdministrator()) {
-			$("<a href='../edit?bib_id=" + this.record.getID() + "#annotation' target='_blank' title='edit record in Heurist'>edit full record</a>")
+			$("<a href='../../data/records/editrec/heurist-edit.html?bib_id=" + this.record.getID() + "#annotation' target='_blank' title='edit record in Heurist'>edit full record</a>")
 				.addClass("heurist-edit-link")
 				.appendTo($(".entry-date", this.$table))
 				.click(function() {
@@ -685,7 +685,7 @@ BlogEntry: function(record, parentElement, isNew) {
 			}
 			$(".entry-edit-wg-tags-input", this.table).after("&nbsp;&nbsp;add ", $select);
 			if (HCurrentUser.isAdministrator()) {
-				$select.after("<a target='_blank' href='../legacy/workgroup_keyword_manager.php'>admin</a>");
+				$select.after("<a target='_blank' href='../../admin/workgroups/workgroup_keyword_manager.php'>admin</a>");
 			}
 		}
 
@@ -727,11 +727,11 @@ BlogEntry: function(record, parentElement, isNew) {
 			desc += (desc.length > 0 ? ", " : "") + geos[i].toString();
 		}
 		if (desc.length > 0) {
-			$td = $("<td><img src='../img/geo.gif'> " + desc + " <a>edit</td>");
+			$td = $("<td><img src='../../common/images/geo.gif'> " + desc + " <a>edit</td>");
 		} else {
 			$td = $("<td><a>add location</a></td>");
 		}
-		$("a", $td).attr("href", "../popup/edit-geos.html?id=" + this.record.getID())
+		$("a", $td).attr("href", "../../data/spatial/gigitiser-blog/edit-geos.html?id=" + this.record.getID())
 			.click(function () {
 				window.open(this.href, "", "status=0,width=600,height=500");
 				return false;
@@ -751,7 +751,7 @@ BlogEntry: function(record, parentElement, isNew) {
 	};
 
 	this.saveButtonClick = function() {
-		
+
 		// title
 		if ($(".entry-title-input", this.$table).val()) {
 			this.record.setDetails(Blog.titleDetailType, [$(".entry-title-input", this.$table).val()]);
@@ -797,7 +797,7 @@ BlogEntry: function(record, parentElement, isNew) {
 					this.record.removeKeyword(keywords[i]);
 				}
 			}
-			
+
 			if (wgtags  &&  wgtags.length) {
 				keywords = HKeywordManager.getWorkgroupKeywords(Blog.group);
 				for (var i = 0; i < wgtags.length; ++i) {
@@ -864,7 +864,7 @@ BlogEntry: function(record, parentElement, isNew) {
 
 
 loadTags: function() {
-	HAPI.XHR.sendRequest("get-tags.php?u=" + Blog.user.getID(),  function(response) {
+	HAPI.XHR.sendRequest("../../interfaces/blog/get-tags.php?u=" + Blog.user.getID(),  function(response) {	//FIXME: we should bring this into the HAPI php commands
 		Blog.tags = response;
 		Blog.displayTagList();
 		Blog.displayBlogEntries();
@@ -956,7 +956,7 @@ createRemoveTagLink: function(blogEntry, tag) {
 	a.title = "remove tag";
 	a.href = "#";
 	a.onclick = function() { blogEntry.removeTag(tag); return false; };
-	a.appendChild(document.createElement("img")).src = "../img/cross.gif";
+	a.appendChild(document.createElement("img")).src = "../../common/images/cross.gif";
 	return a;
 },
 */
@@ -1129,7 +1129,7 @@ search: function(opts) {
 		} else if (opt === "year") {
 			for (var i = 0, l = matches.length; i < l; ++i) {
 				d = new Date(matches[i].getCreationDate().replace(/-/g, "/"));
-				if (d.getFullYear() === opts.year  &&  
+				if (d.getFullYear() === opts.year  &&
 					(! opts.month  ||  d.getMonth() === opts.month)  &&
 					(! opts.day  ||  d.getDate() === opts.day)) {
 					newMatches.push(matches[i]);

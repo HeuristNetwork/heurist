@@ -1,12 +1,12 @@
 /***** HEADINGS AND GENERIC FONT STYLING *****/
 
-                    H1 { 
-                    font-family: Helvetica, Arial, Verdana; 
-                    color:#666; 
-                    font-size: 16px; 
+                    H1 {
+                    font-family: Helvetica, Arial, Verdana;
+                    color:#666;
+                    font-size: 16px;
                     vertical-align: middle;
-                    /* hanging edit icon */ 
-                    text-indent: -16px; 
+                    /* hanging edit icon */
+                    text-indent: -16px;
                     padding-left: 18px;
                     line-height: 18px;
                     }
@@ -14,11 +14,11 @@
                     padding: 0 !important;
                     }
                     H1 A:Link img{padding-left:0px;}
-                    
+
                     DIV#page-inner H1{
                     text-indent: -37px;
                     }
-                    
+
                     H2 { font-family: Helvetica, Arial, Verdana; color:#333; font-size: 14px}
                     H3 { font-family: Helvetica, Arial, Verdana; color:#DC8501; font-size: 12px}
                     H4 { font-family: Helvetica, Arial, Verdana; color:#000; font-size: 10px }
@@ -31,11 +31,11 @@
                     P.footer { font-family: Helvetica, Arial, Verdana; color:#999999; font-size: 9px}
                     P.intro { font-family: Helvetica, Arial, Verdana; font-size: 12px; color:#666 }
 
-                    
+
                     table {
                     border-collapse: collapse;}
-                     
-                     /* side bar headings and icons */ 
+
+                     /* side bar headings and icons */
                      TD B{
                      	background-color:rgba(0, 0, 0, 0.1);
 						border-top:1px solid #CCCCCC;
@@ -45,12 +45,12 @@
 						margin-top:-2px;
 						padding:2px 0 2px 5px;
 						text-indent:0;
-                     }  
-                     
+                     }
+
                      TD TABLE TR TD {
 						border-bottom:1px solid #FFFFFF;
-                     }        
-                     
+                     }
+
 /***** LINK STYLING *****/
 
 
@@ -127,12 +127,12 @@
 /**** annotation styles *****/
 
 					A.annotation1{ font-family: Arial, Verdana, Helvetica; background-color: #ffff70; color:#0065CF; text-decoration:none; font-weight: bold; font-size: 16px };
-					
+
 					html {
 						overflow: hidden;
 					}
-					
-					
+
+
                     input[type=text] {
 
 	                    border: 1px solid #BBB;
@@ -141,7 +141,7 @@
 	                    width: 50%;
 	                    padding: 0 3px 0 3px;
 	                    font-size: 12px;
-	                    height: 18px; 
+	                    height: 18px;
 	                    -moz-border-radius-bottomleft:10px;
 	                    -moz-border-radius-bottomright:10px;
 	                    -moz-border-radius-topleft:10px;
@@ -156,7 +156,7 @@
 	                    border-top-right-radius:10px;
                      }
 
-					
+
 
                     input[type=button] {
 	                    float:right;
@@ -166,13 +166,13 @@
 	                    line-height: 21px;
 	                    vertical-align: middle;
 	                    margin-right: 5px;
-                    
+
                     }
 
-                    
-/***** LAYOUT STYLING *****/ 
-                    
-                    
+
+/***** LAYOUT STYLING *****/
+
+
                     body {
 	                    background-image:url(http://heuristscholar.org/heurist/img/saved-searches-bg.png);
 	                    height:95%;
@@ -226,16 +226,16 @@
 	                    border-top-right-radius:0px;
 	                    border:1px  solid #999999;
 					}
-                    
 
-					#page-inner { 
-	                    padding: 25px 25px 25px 35px;  
+
+					#page-inner {
+	                    padding: 25px 25px 25px 35px;
 	                    height:auto !important;
 	                    width:auto !important;
                     }
-                    
+
                     #page-inner td {
-                   		text-indent: 0;	
+                   		text-indent: 0;
                     }
 
 					#entity {
@@ -277,7 +277,7 @@
 						position: absolute;
 						top: 0px;
 						right: 0px;
-						width: 250px;
+						width: 350px;
 						height: 50px;
 	                    text-align: right;
 						overflow: visible;
@@ -310,7 +310,7 @@
 	                    border-top-right-radius:0px;
 	                    border:1px  solid #999999;
 					}
-					
+
                     #sidebar-inner { padding: 0px; }
 
 					#pagetopcolour {
@@ -400,7 +400,7 @@
 	                    bottom: 0px;
 	                    height: 100px;
 	                    overflow: auto;
-	                    display: none;       
+	                    display: none;
 	                    position: absolute;
 	                    left: 0px;
 	                    right: 305px;
@@ -424,11 +424,11 @@
 	                    box-shadow:inset 0 2px 5px RGBA(0,0,0,0.5);
 	                    -moz-box-shadow:inset 0 2px 5px RGBA(0,0,0,0.5);
                     }
-                    #footnotes-inner { 
-	                    padding: 0px 20px 20px 20px; 
+                    #footnotes-inner {
+	                    padding: 0px 20px 20px 20px;
                     }
-                    
-                    #footnotes-inner p{ 
+
+                    #footnotes-inner p{
 	                    font-size: 12px !important;
 	                    line-height: 16px;
 	                    padding:0;
@@ -438,11 +438,11 @@
                     #sidebar, #sidebartopcolour {
 	                    width:295px;
                     }
-                    
+
                     #page, #pagetopcolour  {
                     right:305px;
                     }
-                    
+
 					.reftype-heading a { text-decoration: none; }
 					.reftype-heading a img { margin: 0; }
 					.reftype-heading a.open img.right { display: none; }
@@ -491,7 +491,7 @@
 					}
 					#results-div img {
 						vertical-align: middle;
-						padding:2px 10px 2px 0; 
+						padding:2px 10px 2px 0;
 					}
 
 					.add-annotation-button {
@@ -509,7 +509,7 @@
 						padding-top: 3px;
 						vertical-align: middle;
                         padding-left: 25px;
-						
+
 
 					}
 
@@ -518,20 +518,20 @@
 						color: white;
 
 					}
-					
+
 					#saved-searches,
 					#track,
 					#track-header
 					{
 						padding-left: 15px;
-						
+
 
 					}
 
-					#saved-searches a, 					
+					#saved-searches a,
 					#track a
 					{
-						
+
 					}
 
 
@@ -541,11 +541,11 @@
 						padding-bottom: 5px;
 						font-weight: bold;
 					}
-					#track {	
+					#track {
 						padding-bottom: 20px;
 						border-bottom:2px solid #888888;
 					}
-                    
+
                     #relations-table{
                         padding-left: 0px;
                         padding-bottom: 5px;
@@ -554,16 +554,16 @@
                         word-wrap: break-word;
                         border-collapse: collapse;
                     }
-                      
-                    
+
+
 					#heurist-link  a{
 						text-align: right;
-						
+
 
 					}
 
 					/* TEI styles */
-					
+
 					p.DoSBlockquote {
 						font-family:"Times New Roman", Times, serif;
 						padding-right: 50px;
@@ -589,7 +589,7 @@
 					a.annotation.superscript {
 						display: none;
 					}
-					
+
 					/* timemap styles */
 					#map {
 						position: absolute; top: 0px; left: 0px;
@@ -599,7 +599,7 @@
 						z-index: 0;
 					}
 
-					#timeline { 
+					#timeline {
 						position: absolute; top: 380px; left: 0px;
 						width: 100%;
 						height: 300px;
@@ -616,20 +616,20 @@
 						font-family: Arial, Verdana, Helvetica; font-size: 10px; font-weight: bold; color:#666;
 						position: absolute; top: 350px; right: 0px;
 					}
-					
-					
+
+
 					#div-main {
 						position:relative;
 						float: none;
 					}
-					
+
 					a.timeline-zoom-a, a.timeline-zoom-a:hover, a.timeline-zoom-a:visited{
 						text-decoration:none;
 						padding-left: 5px;
 						font-size: 11px;
-					
+
 					}
-					
+
 					.selected{
 
 						background-color:rgba(255, 255, 255, 0.4);
@@ -639,9 +639,9 @@
 						font-size:11px;
 
 					}
-					
+
                     div#artwork.artwork img {width:100%;}
-                    
+
                     .group-td {
 	                    -moz-background-clip:border;
 	                    -moz-background-inline-policy:continuous;
@@ -658,30 +658,30 @@
                     td.group-td a.bodynav:link  {
                     	font-weight: normal;
                     }
-                    
+
                     td.group-td div{
-                        background-color: white; 
-                        text-align:center; 
-                        border:1px solid white; 
-                        margin:20px; 
-                        padding-top:10px;    
+                        background-color: white;
+                        text-align:center;
+                        border:1px solid white;
+                        margin:20px;
+                        padding-top:10px;
                     }
-                    
+
                     td.group-td div{
-                        background-color: white; 
-                        text-align:center; 
-                        border:1px solid white; 
-                        margin:10px 5px; 
-                        padding-top:10px;    
+                        background-color: white;
+                        text-align:center;
+                        border:1px solid white;
+                        margin:10px 5px;
+                        padding-top:10px;
                     }
-                    
+
                     div#page-inner table {
 
 	                    width:100%;
 	                    border-spacing :0;
 
                     }
-                    
+
                     #logo a {
 	                    color:#FFFFFF;
 	                    text-decoration:none;
@@ -689,33 +689,33 @@
 	                    text-transform:uppercase;
 	                    font-size: 24px;
                     }
-                    
+
                     #logo a:hover {
 	                    text-decoration:none;
 	                    text-shadow:0 0px 0px rgba(0, 0, 0, 0.5);
 
                     }
-                    
+
                     /* map-types stuff */
-                    #map-types { 
-	                    font-family: Helvetica, Arial, Verdana; 
-	                    color:#333; 
+                    #map-types {
+	                    font-family: Helvetica, Arial, Verdana;
+	                    color:#333;
 	                    font-size: 10px;
-	                    font-weight:normal;   
+	                    font-weight:normal;
 	                   /* background-color: RGBA(0,0,0,0.05);
 	                    -moz-border-radius:10px;
 	                    -webkit-border-radius:10px;
 	                    border-radius:10px;
-	                     -moz-box-shadow:0 2px 5px rgba(0, 0, 0, 0.5) inset;          
-	                    box-shadow: 0 6px 12px RGBA(0,0,0,0.7) inset;                
-	                    background-image:url(../../heurist-ig/img/map_box_shadow.png);              
+	                     -moz-box-shadow:0 2px 5px rgba(0, 0, 0, 0.5) inset;
+	                    box-shadow: 0 6px 12px RGBA(0,0,0,0.7) inset;
+	                    background-image:url(../../heurist-ig/img/map_box_shadow.png);
 	                    background-position: bottom;
-	                    background-repeat: repeat-x;    */                                                                    
+	                    background-repeat: repeat-x;    */
 	        /*          padding:1px 0 5px 0;     */
 	                    margin-bottom: 10px;
 	                    text-indent: 0;}
-                    
-                    
+
+
                     #map-types H4{
                      	background-color:rgba(0, 0, 0, 0.1);
 						border-top:1px solid #CCCCCC;
@@ -726,12 +726,12 @@
 						padding:2px 0 2px 5px;
 						text-indent:0;
                     }
-                    
+
                     #map-types input{
 	                    margin-left: 21px;
 	                    vertical-align: middle;
-                    }  
-                    
+                    }
+
 /* fixes for main content (page-inner) */
                     #page-inner td[colspan="2"]{
                     	text-indent: -18px;
@@ -739,7 +739,7 @@
                     #page-inner td.col1 {
 						width:150px;
 					}
-					
+
                     #page-inner td.col1, #page-inner td[colspan="2"]{
 						color:#999999;
 						font-size:10px;
@@ -748,18 +748,18 @@
 						vertical-align:top;
 						padding-right: 10px;
                     }
-                    
+
                     div#page-inner table td{
 		                border-bottom:1px solid #EFEFEF;
 						line-height:18px;
 						padding:5px 0;
                     }
-                    
+
                     a[title~=Coming] {display:none;}  /* Kills "Advanced Search" coming soon link */
-                    
+
 /* Thumbnails float left */
 					.thumbnail{
-						float:left;   
+						float:left;
 						padding-right: 5px;
 					}
 					#relations-table a img.thumbnail {
@@ -767,44 +767,44 @@
 						padding-right: 5px;
 						max-width: 50px;
 					}
-					
+
 					.editIcon{
 						display:table-cell;
 						vertical-align:middle;
 						width:16px;
 					}
-					
+
 					.thumbnailCell {
 					display:table-cell;
 					vertical-align:middle;					}
-					
+
 					.link {
 					display:table-cell;
 					padding:2px 0;
 					vertical-align:middle;
 					width:100%;
 					}
-					
+
 					.annotation {
 					display:table-cell;
 					width:100%;
 					}
-					
+
 					.annotation em {
 					font-size: 10px;
 					font-style: italic;
 					color: #666;
 					}
-					
+
 					.annotation span{
 					font-size: 10px;
 					font-weight: bold;
 					color: #666;
 					}
-					
+
 					.reftypeIcon {
-						display: table-cell; 
-						vertical-align: middle; 
+						display: table-cell;
+						vertical-align: middle;
 						right: 0pt;
 					}
 					.displayTable {

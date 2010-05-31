@@ -26,10 +26,10 @@
 
 						<!-- chose if base id = annotation target id - then include onclick handler and href is below -->
 						<div class="editIcon">
-						<a href="{$urlbase}/edit-annotation.html?id={id}"
+						<a href="{$appBase}edit-annotation.html?id={id}"
 							onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;"
 							title="edit">
-							<img src="{$hbase}/img/edit-pencil.gif"/>
+							<img src="{$hBase}common/images/edit-pencil.gif"/>
 						</a>
 						</div>
 						<div class="annotation">
@@ -42,14 +42,14 @@
 								</a>
 							</xsl:when>
 							<xsl:otherwise>
-								<a href="{$cocoonbase}/item/{pointer[@id=322]/id}/#ref{id}" class="sb_two">
+								<a href="{$cocoonBase}item/{pointer[@id=322]/id}/#ref{id}" class="sb_two">
 									<xsl:value-of select="title"/>
 								</a>
 								<span>(annotation in: <em>
 									<xsl:value-of select="pointer[@id=322]/title"/>
-								</em> 
+								</em>
 								<img style="vertical-align: middle;horizontal-align: right"
-									src="{$hbase}/img/reftype/{pointer[@id=322]/reftype/@id}.gif"/>) 
+									src="{$hBase}common/images/reftype-icons/{pointer[@id=322]/reftype/@id}.gif"/>)
 								</span>
 							</xsl:otherwise>
 						</xsl:choose>
@@ -89,7 +89,7 @@
 						<p>
 							<xsl:choose>
 								<xsl:when test="pointer[@id=152]/detail/file_thumb_url">
-									<a href="{$cocoonbase}/item/{pointer[@id=152]/id}">
+									<a href="{$cocoonBase}item/{pointer[@id=152]/id}">
 										<img src="{pointer[@id=152]/detail/file_thumb_url}"
 											border="0"/>
 									</a>
@@ -99,7 +99,7 @@
 										<tr>
 											<td>
 
-												<a href="{$cocoonbase}/item/{pointer[@id=152]/id}/"
+												<a href="{$cocoonBase}item/{pointer[@id=152]/id}/"
 												class="sb_two">
 												<xsl:value-of
 												select="pointer[@id=152]/detail[@id=291]"/>
@@ -113,7 +113,7 @@
 												<!-- change this to pick up the actuall system name of the reftye or to use the mapping method as in JHSB that calls human-readable-names.xml -->
 												<img
 												style="vertical-align: middle;horizontal-align: right"
-												src="{$hbase}/img/reftype/{pointer[@id=152]/reftype/@id}.gif"
+												src="{$hBase}common/images/reftype-icons/{pointer[@id=152]/reftype/@id}.gif"
 												/>
 											</td>
 										</tr>
@@ -135,7 +135,7 @@
 
 	<xsl:template match="reference[reftype/@id=99]">
 <xsl:comment>reference template</xsl:comment>
-		<script src="{$urlbase}/js/highlight.js"/>
+		<script src="{$appBase}js/highlight.js"/>
 		<style>
 			#tei a { text-decoration: none; }
 		</style>

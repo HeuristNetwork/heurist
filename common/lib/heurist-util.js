@@ -958,7 +958,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 			if ((elt.type == "checkbox"  ||  elt.type == "radio")  &&  ! elt.checked) continue;
 
 			// FIXME: deal with select-multiple at some stage   (perhaps we should use | to separate values)
-            // place form data into a stream of name = value pairs
+			// place form data into a stream of name = value pairs
+			if (elt.strTemporal && (elt.strTemporal.search(/\|VER/) != -1)) elt.value = elt.strTemporal;	// saw fix to capture simple date temporals.
 			if (postData) postData += "&";
 			postData += encodeURIComponent(elt.name) + "=" + encodeURIComponent(elt.value);
 		}

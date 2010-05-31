@@ -36,7 +36,6 @@
   <map:component-configurations>
     <global-variables>
 		<appSubDir>main</appSubDir>
-		<appBase>http://{$appSubDir}/{global:installDir}/</appBase>
 		<!--+
 			Since this is the main explore app, we don't prepend an instance name.
 			For all other application the appsub id the same as the instance name,
@@ -62,7 +61,7 @@
 		</map:match>
 
 		<map:match pattern="xml2/*">
-			<map:generate src="{global:heuristURL}/output/export/xml/hml.php?q=ids:{1}&amp;depth=2" label="hml"/>
+			<map:generate src="{global:heuristBaseURL}output/export/xml/hml.php?q=ids:{1}&amp;depth=2" label="hml"/>
 			<map:transform src="xsl/heurist_legacy_xml.xsl"/>
 			<map:serialize type="xml"/>
 		</map:match>
@@ -72,7 +71,12 @@
 			<map:transform src="xsl/item_view.xsl" label="transformed">
 				<map:parameter name="use-request-parameters" value="true"/>
 				<map:parameter name="id" value="{1}"/>
-				<map:parameter name="appBaseURL" value="http://{global:serverName}/{global:installDir}/{global:appSubDir}"/>
+				<map:parameter name="appBase" value="/{global:installDir}/{global:explorePath}/{global:appSubDir}/"/>
+				<map:parameter name="hBase" value="http://{global:serverName}/{global:installDir}/"/>
+				<map:parameter name="hIBase" value="http://{global:instancePrefix}{global:serverName}/{global:installDir}/"/>
+				<map:parameter name="instance" value="{global:instanceName}"/>
+				<map:parameter name="serverBaseUrl" value="{global:serverBaseURL}"/>
+				<map:parameter name="cocoonBase" value="{global:cocoonAppPath}{global:appSubDir}/"/>
 				<map:parameter name="related_reftype_filter" value="{2}"/>
 			</map:transform>
 			<map:transform type="xinclude" label="xinclude"/>
@@ -100,20 +104,20 @@
 
 		<map:match pattern="kmltrans/*">
 			<!-- generates heurist kml for the given query and transforms it -->
-			<map:generate src="{global:heuristURL}output/mapper/googleearth.kml.php/heurist-map.kml?w=all&amp;multilevel=false&amp;q={1}" label="rawkml"/>
+			<map:generate src="{global:heuristBaseURL}output/mapper/googleearth.kml.php/heurist-map.kml?w=all&amp;multilevel=false&amp;q={1}" label="rawkml"/>
 			<map:transform src="xsl/kmltrans.xsl" label="transformed"/>
 			<map:serialize type="xml"/>
 		</map:match>
 
 		<map:match pattern="kml/*">
 			<!-- generates heurist kml for the given query and transforms it -->
-			<map:generate src="{global:heuristURL}output/mapperper/googleearth.kml.php/heurist-map.kml?w=all&amp;multilevel=false&amp;q={1}" label="rawkml"/>
+			<map:generate src="{global:heuristBaseURL}output/mapper/googleearth.kml.php/heurist-map.kml?w=all&amp;multilevel=false&amp;q={1}" label="rawkml"/>
 			<map:serialize type="xml"/>
 		</map:match>
 
 		<map:match pattern="kmlfile/*">
 			<!-- generates heurist kml for the given query and transforms it -->
-			<map:generate src="{global:heuristURL}/output/export/xml/kml.php?id={1}"/>
+			<map:generate src="{global:heuristBaseURL}output/export/xml/kml.php?id={1}"/>
 			<map:serialize type="xml"/>
 		</map:match>
 	</map:pipeline>

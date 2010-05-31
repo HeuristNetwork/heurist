@@ -70,8 +70,8 @@ if ($callback  &&  preg_match('/^cb[0-9]+$/', $callback)) {
 	ob_start("outputAsRedirect");
 }
 
-//$method = preg_replace('!.*/([-a-z]+)$!', '$1', $_SERVER['PATH_INFO']);
 $method = @$_REQUEST['method'];
+if (!$method) $method = preg_replace('!.*/([-a-z]+)$!', '$1', $_SERVER['PATH_INFO']);
 $key = @$_REQUEST["key"];
 
 require_once(dirname(__FILE__)."/../../common/connect/db.php");

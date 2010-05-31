@@ -2,7 +2,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 
 	<xsl:template name="media" match="reference[reftype/@id=74]">
-		
+
 
 		<div id="artwork" class="artwork">
 		<xsl:choose>
@@ -11,13 +11,13 @@
 					<img src ="{detail[@id=603]}"></img>
 				</div>
 			</xsl:when>
-			
+
 			<xsl:when test="not (detail[@id=224]) and not (detail[@id=603]) and (detail[@id=604])">
 				<div  id = "img-external">
 					<a href="{url}"><img src ="{detail[@id=604]}" border="0"  vspace="10" hspace="10" align="center"/></a>
 				</div>
 			</xsl:when>
-			
+
 			<xsl:when test="not (detail[@id=224]) and not (detail[@id=603]) and not (detail[@id=604]) and url">
 				<div  id = "img-external">
 					<a href="{url}"><img src ="{url}" border="0"  vspace="10" hspace="10" align="center"/></a>
@@ -26,12 +26,12 @@
 			<xsl:when test="detail[@id=224]">
 				<a href="{url}"><img src="{detail[@id=224]/file_fetch_url}" border="0"  vspace="10" hspace="10" align="center"/></a>
 			</xsl:when>
-			
-			
+
+
 			<xsl:otherwise>[no images found]</xsl:otherwise>
 		</xsl:choose>
 			</div>
-		
+
 
 		<table>
 			<tr>
@@ -43,7 +43,7 @@
 								<img src="{file_fetch_url}" vspace="10" hspace="10" align="center"/>
 							</xsl:for-each>
 							<xsl:if test="detail/file_thumb_url">
-								<a href="{$cocoonbase}/item/{id}/{/export/references/reference/reftype/@id}?flavour={$flavour}">
+								<a href="{$cocoonBase}item/{id}/{/export/references/reference/reftype/@id}?flavour={$flavour}">
 									<img src="{detail/file_thumb_url}"/>
 								</a>
 								<br/>
@@ -56,7 +56,7 @@
 							<img src="{detail/file_thumb_url}&amp;w=560" border="1"/>
 						</a></div>
 						<br/>
-						
+
 					</xsl:if>
 					</div>
 					<xsl:if test="detail[@id=191]">
@@ -81,7 +81,7 @@
 					</xsl:if>
 
 					<xsl:if test="detail[@id=201]">
-						
+
 							Technical notes:
 							<xsl:call-template name="paragraphise">
 								<xsl:with-param name="text">
@@ -90,7 +90,7 @@
 							</xsl:call-template>
 						<br/>
 					</xsl:if>
-					<xsl:if test="not (detail[@id=223] or detail[@id=221]) and url">					
+					<xsl:if test="not (detail[@id=223] or detail[@id=221]) and url">
 						<div  id = "img-external">
 							<img src ="{url}"></img>
 						</div>
@@ -103,17 +103,17 @@
 						</xsl:call-template>
 					</xsl:variable>
 					<xsl:if test="$ftype = 'mp3' or $ftype ='flv' or $ftype='mov'">
-						<script type='text/javascript' src='{$urlbase}/mediaplayer/swfobject.js'></script>
+						<script type='text/javascript' src='{$appBase}mediaplayer/swfobject.js'></script>
 						<script type='text/javascript'>
 							var type = "<xsl:value-of select="$ftype"/>";
-							var s1 = new SWFObject('<xsl:value-of select="$urlbase"/>/mediaplayer/player.swf','ply','500','400','9','#ffffff');
+							var s1 = new SWFObject('<xsl:value-of select="$appBase"/>mediaplayer/player.swf','ply','500','400','9','#ffffff');
 							s1.addParam('allowfullscreen','true');
 							s1.addParam('allowscriptaccess','always');
 							s1.addParam('wmode','opaque');
 							if (type != "flv"){
 							s1.addVariable("logo", "<xsl:value-of select="detail[@id=221]/file_thumb_url"/>");
 							}
-							
+
 							s1.addVariable("type", type);
 							s1.addVariable("file", escape("<xsl:value-of select="detail[@id=221]/file_fetch_url"/>"));
 							s1.write('image-div');
@@ -138,12 +138,12 @@
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
-	
+
 	<!-- xsl:template match="reverse-pointer[reftype/@id=129]">
 		Additional image for
-		
-		
-	
+
+
+
 
 	</xsl:template -->
 

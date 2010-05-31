@@ -998,14 +998,17 @@ top.HEURIST.edit = {
 			dateBox.parentNode.appendChild(buttonElt);
 		function decodeValue (inputStr) {
 			var str = inputStr;
-			if (str.search(/\|/) != -1) {
+			if (str.search(/\|VER/) != -1) {	//we have a temporal
 				dateBox.disabled = true;
+				dateBox.strTemporal = str;
 				if (str.search(/SRT/) != -1 && str.match(/SRT=([^\|]+)/)) {
 					str = str.match(/SRT=([^\|]+)/)[1];
 				}else if (str.search(/TYP=s/) != -1 ) {
 					if (str.match(/DAT=([^\|]+)/)) {
+						if (str.search(/COM=[^\|]+/) == -1) {
+							dateBox.disabled = false;
+						}
 						str = str.match(/DAT=([^\|]+)/)[1];
-						dateBox.disabled = false;
 					}else if (str.search(/COM=[^\|]+/) != -1) {
 						str = str.match(/COM=([^\|]+)/)[1];
 						dateBox.disabled = false;
@@ -1014,6 +1017,7 @@ top.HEURIST.edit = {
 			}
 			return str;
 		}
+		dateBox.initVal = dateBox.value;
 		if (dateBox.value) {
 			dateBox.value = decodeValue(dateBox.value);
 		}
@@ -1023,6 +1027,9 @@ top.HEURIST.edit = {
 				dateBox.value = decodeValue(str);
 				if( dateBox.strTemporal != dateBox.value) {
 					windowRef.changed();
+				}
+				if( dateBox.strTemporal != dateBox.value) {
+					buttonElt.title = "Edit temporal " + dateBox.strTemporal;
 				}
 			},
 			width: "700",
@@ -1329,6 +1336,10 @@ top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.addInput = function(bdV
 
 };
 
+top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.getValue = function(input) {
+		return input && input.textElt ? (input.textElt.strTemporal ? input.textElt.strTemporal :
+											(input.textElt.value ? input.textElt.value : "" )) : "";
+	};
 top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.getPrimaryValue = function(input) { return input? input.textElt.value : ""; };
 top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.typeDescription = "a temporal value";
 top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.regex = new RegExp("\\S");

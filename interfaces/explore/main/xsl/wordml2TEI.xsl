@@ -27,7 +27,7 @@
   <!-- to be dropped into the <item> element of the revision description in the TEI Header. -->
 
   <!-- URL root: the root of the URL to which image links should point. Should correspond to the directory contained in $fileRoot. -->
-	<xsl:param name="urlroot"><xsl:value-of select="$hbase"/></xsl:param>
+	<xsl:param name="urlroot"><xsl:value-of select="$hBase"/></xsl:param>
   <!-- File root: absolute path to the directory into which images are to be written -->
   <xsl:param name="fileRoot">
     <xsl:value-of select="$urlroot"/>

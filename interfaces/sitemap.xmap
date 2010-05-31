@@ -9,8 +9,14 @@
   <map:component-configurations>
     <global-variables>
 		<installDir>h3</installDir>
+		<instanceName></instanceName>
+		<instancePrefix></instancePrefix>
 		<serverName>heuristscholar.org</serverName>
-		<heuristURL>http://heuristscholar.org/h3/</heuristURL>
+		<explorePath>interfaces/explore</explorePath>
+		<cocoonBasePath>/cocoon/h3/</cocoonBasePath>
+		<cocoonAppPath>/cocoon/h3/explore/</cocoonAppPath>
+		<serverBaseURL>http://heuristscholar.org</serverBaseURL>
+		<heuristBaseURL>http://heuristscholar.org/h3/</heuristBaseURL>
 		<!--+
 			This is the base url for a site app to access the site code
 			access in sub-sitemaps as {global:heuristURL}

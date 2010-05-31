@@ -2766,7 +2766,7 @@ HAPI.XHR = {
 
 		form.method = "post";
 		form.target = fr.name;
-		form.action = (xssWebPrefix || HAPI.XHR._xssWebPrefix) + encodeURIComponent(method);
+		form.action = (xssWebPrefix || HAPI.XHR._xssWebPrefix) + "method=" + encodeURIComponent(method);
 
 		var elt = document.createElement("input");
 			elt.type = "hidden";

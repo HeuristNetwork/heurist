@@ -17,7 +17,7 @@
 				margin: 3px;
 				width: 24px;
 				height: 18px;
-				background: url(../img/cal.gif) lightgray scroll center center no-repeat;
+				background: url(../../common/images/cal.gif) lightgray scroll center center no-repeat;
 			}
 		</style>
 
@@ -49,14 +49,14 @@
 grrr
 		<script type="text/javascript" src="../../yui/build/element/element-min.js"></script>
 		<script type="text/javascript" src="../../yui/build/tabview/tabview-min.js"></script>
-		<script type="text/javascript" src="../../yui/build/calendar/calendar-min.js"></script-->
+		<script type="text/javascript" src="../../yui/build/calendar/calendar-min.js"></script>
 
 		<script>
-			Timeline_ajax_url="../../simile/timeline-sw/source/timeline_2.3.0/src/ajax/api/simile-ajax-api.js?bundle=false";
-			Timeline_urlPrefix='../../simile/timeline-sw/source/timeline_2.3.0/src/webapp/api/';
+			Timeline_ajax_url="../../external/timeline/timeline_ajax/simile-ajax-api.js?bundle=false";
+			Timeline_urlPrefix='../../external/timeline/timeline_js/';
 			Timeline_parameters='bundle=false';
 		</script>
-		<script src="../../simile/timeline-sw/source/timeline_2.3.0/src/webapp/api/timeline-api.js" type="text/javascript"></script>
+		<script src="../../external/timeline/timeline_js/timeline-api.js" type="text/javascript"></script-->
 
 	</head>
 	<body class=" yui-skin-sam" style="background-color:rgb(240,240,240);" width=400 height=400 >
@@ -288,7 +288,8 @@ grrr
 					<span >This field is stored in the temporal to record the original values entered.</span>
 				</div>
 		</div>
-		<script type="text/javascript" src="../js/temporal.js"></script>
+		<script type="text/javascript" src="temporal.js"></script>
+		<script type="text/javascript" src="../../external/jquery/jquery.js"></script>
 		<script type="text/javascript">
 
 			function switchDev (toAsym) {
@@ -323,7 +324,7 @@ grrr
 				popupOptions.x = buttonPos.x + 8 - 120;
 				popupOptions.y = buttonPos.y + 8 - 80;
 
-				top.HEURIST.util.popupURL(windowRef, "popup/calendar.html#"+
+				top.HEURIST.util.popupURL(windowRef, top.HEURIST.basePath + "common/lib/calendar.html#"+
 					document.getElementById("simpleDate").value, popupOptions);
 			}
 
@@ -420,6 +421,7 @@ grrr
 								that.origTemporal = new Temporal();
 								that.origTemporal.setType("s");  // simple date
 								that.origTemporal.setTDate("DAT",tDate);
+								that.origTemporal.setField("COM",that.originalInputString);
 							}
 							catch(e) { // unknown string
 								that.origTemporal = new Temporal();
@@ -517,11 +519,11 @@ grrr
 					}
 					if (type === "c" && val) {
 						if (code === "DEV") {
-                            $("input[name=stdDEV][value=asym]").attr("checked","");
+							$("input[name=stdDEV][value=asym]").attr("checked","");
 							$("input[name=stdDEV][value=sym]").attr("checked","checked");
 						}else if (code === "DVP") {
 							$("input[name=stdDEV][value=sym]").attr("checked","");
-                            $("input[name=stdDEV][value=asym]").attr("checked","checked");
+							$("input[name=stdDEV][value=asym]").attr("checked","checked");
 						}
 					}
 				};

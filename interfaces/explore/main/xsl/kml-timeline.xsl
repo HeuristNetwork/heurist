@@ -11,14 +11,14 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 		    </xsl:when>
 			<xsl:otherwise>
 			<div id="timeline" class="timeline"/>
-			<div id="timeline-zoom" class="timeline-zoom"/> 
+			<div id="timeline-zoom" class="timeline-zoom"/>
 			</xsl:otherwise>
-		
+
 		</xsl:choose>
-		
+
 	</div>
-	
-	<script type="text/javascript">			
+
+	<script type="text/javascript">
 
 		window.mapdata = {
 			timemap: []
@@ -40,13 +40,13 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 				</xsl:for-each>
 			];
 		</xsl:if>
-	
+
 	//from here down we are constructing various timeMap objects for our map
-	
+
 		<!-- a blank timeMap object -->
 		<xsl:call-template name="generateTimeMapObjects">
 			<xsl:with-param name="title">Blank</xsl:with-param>
-			<xsl:with-param name="link">http://heuristscholar.org<xsl:value-of select="$urlbase"/>/blank.kml</xsl:with-param>
+			<xsl:with-param name="link"><xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$appBase"/>blank.kml</xsl:with-param>
 			<xsl:with-param name="theme">red</xsl:with-param>
 		</xsl:call-template>
 		<!-- related records -->
@@ -59,14 +59,14 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 		</xsl:for-each>
 		<xsl:call-template name="generateTimeMapObjects">
 			<xsl:with-param name="title">Related records</xsl:with-param>
-			<xsl:with-param name="link">http://heuristscholar.org<xsl:value-of select="$cocoonbase"/>/kml/relatedto:<xsl:value-of select="id"/></xsl:with-param>
+			<xsl:with-param name="link"><xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>kml/relatedto:<xsl:value-of select="id"/></xsl:with-param>
 			<xsl:with-param name="theme"><xsl:value-of select="$relatedTheme"/></xsl:with-param>
 		</xsl:call-template>
 		<!-- pointer to Site Record (57) for Historical Events -->
 		<xsl:for-each select="pointer[@id=276] | reverse-pointer[@id=276]">
 			<xsl:call-template name="generateTimeMapObjects">
 				<xsl:with-param name="title">Site reference</xsl:with-param>
-				<xsl:with-param name="link">http://heuristscholar.org<xsl:value-of select="$cocoonbase"/>/kml/id:<xsl:value-of select="id"/></xsl:with-param>
+				<xsl:with-param name="link"><xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>kml/id:<xsl:value-of select="id"/></xsl:with-param>
 				<xsl:with-param name="theme"><xsl:value-of select="$focusTheme"/></xsl:with-param>
 			</xsl:call-template>
 		</xsl:for-each>
@@ -74,7 +74,7 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 		<xsl:for-each select="pointer[@id=564]">
 			<xsl:call-template name="generateTimeMapObjects">
 				<xsl:with-param name="title"><xsl:value-of select="title"/></xsl:with-param>
-				<xsl:with-param name="link">http://heuristscholar.org<xsl:value-of select="$cocoonbase"/>/kmlfile/<xsl:value-of select="id"/></xsl:with-param>
+				<xsl:with-param name="link"><xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>kmlfile/<xsl:value-of select="id"/></xsl:with-param>
 				<xsl:with-param name="theme">
 					<xsl:choose>
 						<xsl:when test="detail[@id=567]">
@@ -92,8 +92,8 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 			<xsl:with-param name="title">Focus record</xsl:with-param>
 			<xsl:with-param name="link">
 				<xsl:choose>
-					<xsl:when test="reftype[@id = 165]">http://heuristscholar.org<xsl:value-of select="$cocoonbase"/>/kmlfile/<xsl:value-of select="id"/></xsl:when>
-					<xsl:otherwise>http://heuristscholar.org<xsl:value-of select="$cocoonbase"/>/kml/id:<xsl:value-of select="id"/></xsl:otherwise>
+					<xsl:when test="reftype[@id = 165]"><xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>kmlfile/<xsl:value-of select="id"/></xsl:when>
+					<xsl:otherwise><xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>kml/id:<xsl:value-of select="id"/></xsl:otherwise>
 				</xsl:choose>
 			</xsl:with-param>
 			<xsl:with-param name="theme">
@@ -107,17 +107,17 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 				</xsl:choose>
 			</xsl:with-param>
 		</xsl:call-template>
-		
-		
-	
+
+
+
 		initTMap();
-	
+
         	</script>
 </xsl:template>
-	
 
-	
-<xsl:template name="checkForGeoData">	
+
+
+<xsl:template name="checkForGeoData">
 		<!-- Historical event 51 -->
 	<xsl:if test="reftype/@id = 51 or reftype/@id = 122 or reftype/@id = 57">
 			<xsl:for-each select="detail[@id=230]">
@@ -128,29 +128,29 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 		<xsl:if test="reftype/@id = 103">
 			<xsl:for-each select="pointer[@id=564]">
 				<!-- fix me for uploaded files! -->
-				<xsl:if test="contains(detail[@id=551],'Polygon') or contains(detail[@id=551],'LineString') or contains(detail[@id=551],'MultiGeometry')">l</xsl:if>				
-				<xsl:if test="contains(detail[@id=551],'Point')">p</xsl:if>		
-				<xsl:if test="position() != last()">,</xsl:if>				
+				<xsl:if test="contains(detail[@id=551],'Polygon') or contains(detail[@id=551],'LineString') or contains(detail[@id=551],'MultiGeometry')">l</xsl:if>
+				<xsl:if test="contains(detail[@id=551],'Point')">p</xsl:if>
+				<xsl:if test="position() != last()">,</xsl:if>
 			</xsl:for-each>
 		</xsl:if>
 		<!-- KML maps 165-->
-		<xsl:if test="reftype/@id = 165">			
+		<xsl:if test="reftype/@id = 165">
 			<!-- fix me for uploaded files! -->
-			<xsl:if test="contains(detail[@id=551],'Polygon') or contains(detail[@id=551],'LineString') or contains(detail[@id=551],'MultiGeometry')">l</xsl:if>				
-			<xsl:if test="contains(detail[@id=551],'Point')">p</xsl:if>												
+			<xsl:if test="contains(detail[@id=551],'Polygon') or contains(detail[@id=551],'LineString') or contains(detail[@id=551],'MultiGeometry')">l</xsl:if>
+			<xsl:if test="contains(detail[@id=551],'Point')">p</xsl:if>
 		</xsl:if>
 </xsl:template>
 
 <xsl:template name="getRelatedKMLItems">
 	<!-- Related KML Maps (103) and KML Files (165) -->
-	
+
 	<xsl:param name="related"/>
 	<xsl:param name="currentId"/>
-	
-	<xsl:if test="reftype[@id = 103]">			
+
+	<xsl:if test="reftype[@id = 103]">
 		<!-- KML MAP (103) can contain pointers(564) to To KML file (165) or related Historical Events (51) -->
 		<xsl:if test="pointer[@id=564]">
-			<xsl:for-each select="pointer[@id=564]">				
+			<xsl:for-each select="pointer[@id=564]">
 				<xsl:call-template name="KMLFile165"/>
 			</xsl:for-each>
 		</xsl:if>
@@ -159,12 +159,12 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 				<xsl:if test="../id != $currentId">
 					<xsl:call-template name="generateTimeMapObjects">
 						<xsl:with-param name="title">Related records</xsl:with-param>
-						<xsl:with-param name="link">http://heuristscholar.org<xsl:value-of select="$cocoonbase"/>/kml/id:<xsl:value-of select="../id"/></xsl:with-param>
+						<xsl:with-param name="link"><xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>kml/id:<xsl:value-of select="../id"/></xsl:with-param>
 						<xsl:with-param name="theme"><xsl:value-of select="$relatedTheme"/></xsl:with-param>
 					</xsl:call-template>
 				</xsl:if>
 			</xsl:for-each>
-		</xsl:if>		
+		</xsl:if>
 	</xsl:if>
 	<xsl:if test="reftype[@id = 165]">
 		<!-- KML file (165) may or may not have a default symbology colour (567) detail type -->
@@ -176,14 +176,14 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 		<xsl:when test="detail[@id=567]">
 			<xsl:call-template name="generateTimeMapObjects">
 				<xsl:with-param name="title">Related records</xsl:with-param>
-				<xsl:with-param name="link">http://heuristscholar.org<xsl:value-of select="$cocoonbase"/>/kmlfile/<xsl:value-of select="id"/></xsl:with-param>
+				<xsl:with-param name="link"><xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>kmlfile/<xsl:value-of select="id"/></xsl:with-param>
 				<xsl:with-param name="theme"><xsl:value-of select="detail[@id=567]"/></xsl:with-param>
 			</xsl:call-template>
 		</xsl:when>
 		<xsl:otherwise>
 			<xsl:call-template name="generateTimeMapObjects">
 				<xsl:with-param name="title">Related records</xsl:with-param>
-				<xsl:with-param name="link">http://heuristscholar.org<xsl:value-of select="$cocoonbase"/>/kmlfile/<xsl:value-of select="id"/></xsl:with-param>
+				<xsl:with-param name="link"><xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>kmlfile/<xsl:value-of select="id"/></xsl:with-param>
 				<xsl:with-param name="theme"><xsl:value-of select="$relatedTheme"/></xsl:with-param>
 			</xsl:call-template>
 		</xsl:otherwise>
@@ -219,13 +219,13 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 	<xsl:param name="value"/>
 	var <xsl:value-of select="$varName"/> = Timeline.DateTime.<xsl:value-of select="$value"/>;
 </xsl:template>
-	
+
 <!-- below are all the templates concerned with presentation of related items for those record types  as rendered in item_view.xsl -->
-	
+
 <xsl:template name="renderAppropriateLegend">
 	<xsl:param name="themeToUse"/>
 	<xsl:param name="record"/>
-	
+
 	<xsl:if test="$record/detail[@id=230]!='p'">
 		<xsl:call-template name="colourSpan">
 			<xsl:with-param name="colour">
@@ -241,8 +241,8 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 	<!--xsl:if test="contains(document(detail[@id=221]/file_fetch_url), 'kml')">
 		<span style="background-color: {exsl:node-set($timeMapThemes)/theme[@name=$relatedTheme]/colour}; padding-right: 10px; padding-left: 5px;"/>
 	</xsl:if-->
-	
-	<!-- KML File (165) -->							
+
+	<!-- KML File (165) -->
 	<xsl:if test="contains($record/detail[@id=551],'Polygon') or contains($record/detail[@id=551],'LineString') or contains($record/detail[@id=551],'MultiGeometry')">
 		<xsl:call-template name="generateLegend165">
 			<xsl:with-param name="themeToUse" select="$themeToUse"/>
@@ -256,14 +256,14 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 			<xsl:with-param name="point">true</xsl:with-param>
 			<xsl:with-param name="record" select="$record"/>
 		</xsl:call-template>
-	</xsl:if>							
-	
+	</xsl:if>
+
 </xsl:template>
 <xsl:template name ="colourSpan">
 	<xsl:param name="colour"/>
 	<span style="background-color: {$colour}; padding-right: 10px; padding-left: 5px;"/>
 </xsl:template>
-	
+
 <xsl:template name="generateLegend165">
 	<!-- an appropriate legend for type KML File 165 -->
 	<!-- kml file may contain a specified theme (567) -->
@@ -302,5 +302,5 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 		</xsl:otherwise>
 	</xsl:choose>
 </xsl:template>
-	
+
 </xsl:stylesheet>
