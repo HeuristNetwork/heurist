@@ -215,10 +215,10 @@ function loadRecordDetails(&$record) {
 			$detailValue = array("file" => mysql_fetch_assoc($fres));
 			$origName = urlencode($detailValue["file"]["origName"]);
 			$detailValue["file"]["URL"] =
-				"http://".HEURIST_INSTANCE_PREFIX.HOST_BASE."/heurist/php/fetch_file.php/"
-				.$origName."?file_id=".$detailValue["file"]["nonce"];
+				"http://".HEURIST_INSTANCE_PREFIX.HOST_BASE.INSTALL_DIR."data/files/fetch_file.php"
+				."?file_id=".$detailValue["file"]["nonce"];
 			$detailValue["file"]["thumbURL"] =
-				"http://".HEURIST_INSTANCE_PREFIX.HOST_BASE."/heurist/php/resize_image.php"
+				"http://".HEURIST_INSTANCE_PREFIX.HOST_BASE.INSTALL_DIR."common/lib/resize_image.php"
 				."?file_id=".$detailValue["file"]["nonce"];
 			break;
 
