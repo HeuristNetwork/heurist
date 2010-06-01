@@ -9,8 +9,8 @@ require_once(dirname(__FILE__).'/../biblio/HeuristEndnoteReferImport.php');
 require_once(dirname(__FILE__).'/../biblio/HeuristZoteroImport.php');
 require_once(dirname(__FILE__).'/../kml/HeuristKMLImport.php');
 
-require_once(dirname(__FILE__).'/../php/modules/db.php');
-require_once(dirname(__FILE__).'/../php/modules/cred.php');
+require_once(dirname(__FILE__).'/../../../common/connect/db.php');
+require_once(dirname(__FILE__).'/../../../common/connect/cred.php');
 
 
 jump_sessions();

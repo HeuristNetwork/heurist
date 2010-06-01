@@ -1,8 +1,8 @@
 <?php
 
-require_once(dirname(__FILE__)."/../../../import/tools/HeuristImport.php");
-require_once(dirname(__FILE__)."/../../../import/tools/biblio/HeuristReferImport.php");
-require_once(dirname(__FILE__)."/../../../import/tools/biblio/HeuristEndnoteReferImport.php");
+require_once(dirname(__FILE__)."/../HeuristImport.php");
+require_once(dirname(__FILE__)."/../biblio/HeuristReferImport.php");
+require_once(dirname(__FILE__)."/../biblio/HeuristEndnoteReferImport.php");
 
 require_once(dirname(__FILE__)."/../../../common/connect/cred.php");
 require_once(dirname(__FILE__)."/../../../common/connect/db.php");
