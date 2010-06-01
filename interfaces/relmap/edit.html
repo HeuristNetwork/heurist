@@ -2,8 +2,8 @@
 <head>
 <title>Edit Record</title>
 
-<script src="php/ja/load-hapi.php"></script>
-<script src="/hapi/03/goi.js"></script>
+<script src="../../common/lib/load-hapi.php"></script>
+<script src="../../hapi/js/goi.js"></script>
 
 <script src="common-functionst.js"></script>
 
@@ -18,11 +18,11 @@ var source_entity = getParams("source"); //get source entity for a factoid recor
 
 function init(){
     var spanTitle = document.getElementById("edit-title");
-	
+
 	if(rec_id){
 	    instance = "Edit"
 	    spanTitle.innerHTML = "<h3>"+instance+" Record</h3>";
-		doRecSearch(rec_id, 'primary'); 
+		doRecSearch(rec_id, 'primary');
 	}
 	if(rec_type_id){
 	   var rectype = HRecordTypeManager.getRecordTypeById(rec_type_id);
@@ -30,24 +30,24 @@ function init(){
 	   spanTitle.innerHTML = "<h3>"+instance+" Record</h3>";
 	   displayDetailsForRecordtype(rectype);
 	}
-   
-   
+
+
 }
-	
+
 function doRecSearch(id, option, detId, extra, constn) { //surely there must be a more elegant way of recycling the bugger
  var mysearch = new HSearch("ids:" + id);
- var loader = new HLoader(	
+ var loader = new HLoader(
  function(s,r) {
 		switch (option){
 			case "primary":
 			displayPrimaryResults(r[0]);
-			break; 
-				
+			break;
+
 			case "resource":
 			if (r[0]){
 			drawResourceDetails(r[0], detId, extra, constn);
 			}
-			break; 
+			break;
 		 }
 		},
  function(s,e) {alert("load failed: " + e);});

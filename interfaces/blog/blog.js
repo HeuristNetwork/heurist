@@ -435,7 +435,7 @@ BlogEntry: function(record, parentElement, isNew) {
 					};
 				} else {
 					return function () {
-						window.open("../php/add.php?addref=1&bib_reftype=" + type +
+						window.open("../../data/records/addrec/add.php?addref=1&bib_reftype=" + type +
 							"&related=" + that.record.getID(), "_blank");
 						return false;
 					};

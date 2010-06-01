@@ -2,10 +2,10 @@
  <head>
   <title>Edit Record</title>
 
-<script src="../heurist/php/js/load-hapi.php"></script>
+<script src="../../common/lib/load-hapi.php"></script>
 
   <script>
-  var path ="http://heuristscholar.org/heurist/";
+  var path = HAPI.HeuristBaseURL;
   var rec_id = getHeuristId();
 
   isEmpty = function (object){
@@ -77,7 +77,7 @@ doRecSearch(rec_id, 'primary');
 
 
 
-			div.innerHTML += "<span class=rec><img src='"+ path +"img/reftype/"+recImage+".gif' align=absmiddle> "+recTitle +"</span><span class=rec-title>"+refTitle+"</span>";
+			div.innerHTML += "<span class=rec><img src='"+ path +"common/images/reftype-icons/"+recImage+".png' align=absmiddle> "+recTitle +"</span><span class=rec-title>"+refTitle+"</span>";
 
 			dets.innerHTML += "<table class=detail>";
 	        var refDets =HDetailManager.getDetailTypesForRecordType(r.getRecordType()); //get all detail types for this record type
@@ -148,7 +148,7 @@ var html = "";
 html += "<tr>";
 html += "<td id=sub-res-type class=\""+reqClass+"\">"+detName+"</td>";
 if (isRepeatable)
- html += "<td class=\"rep\"><img id= \"img"+detailId +"\" src=\""+path+"/img/duplicate.gif\" border=0></td>";
+ html += "<td class=\"rep\"><img id= \"img"+detailId +"\" src=\""+path+"common/images/duplicate.gif\" border=0></td>";
 else
  html += "<td class=\"rep\"></td>";
 html += "<td class=\""+reqClass+"\"><div class=pad id=sel"+detailId+"></div><div class=hint>"+detPrompt+"</div></td>";
@@ -221,7 +221,7 @@ function drawFile(id, detail){
    var url = detail[i].getURL();
    var filename = detail[i].getOriginalName();
    var size = detail[i].getSize();
-  html += "<div class=\"inp-div\"><input type=hidden name=\""+id+"\" id=\""+id+"\" value=file extra=\""+detail[i].getID()+"\"><img src = \""+thumb+"\"><img src=\""+path+"/img/cross.gif\" onclick=\"remFile("+id+","+detail[i].getID()+");\"><br><a href=\""+url+"\">"+filename+"</a></div>";
+  html += "<div class=\"inp-div\"><input type=hidden name=\""+id+"\" id=\""+id+"\" value=file extra=\""+detail[i].getID()+"\"><img src = \""+thumb+"\"><img src=\""+path+"common/images/cross.gif\" onclick=\"remFile("+id+","+detail[i].getID()+");\"><br><a href=\""+url+"\">"+filename+"</a></div>";
   }
  }else{ //upload box
   html += "<div class=\"inp-div\"><input type=file  name=\""+id+"\" id=\""+id+"\" value=\"\" extra=\"\" onchange=\"uploadFile("+id+");\"></div>";
@@ -252,13 +252,13 @@ if (!isEmpty(detail)){
   var count=0;
   for (z in detail){
    count ++;
-   html +=  "<div class=\"inp-div\"><input class=\"resource\" mode=resource type=text recid=\"\" extra="+count+" id=\""+id+"\" name=\""+id+"\" value=\"\" ><img src=\""+path+"/img/cross.gif\" onclick=\"remResource("+id+","+count+");\"></div>";
+   html +=  "<div class=\"inp-div\"><input class=\"resource\" mode=resource type=text recid=\"\" extra="+count+" id=\""+id+"\" name=\""+id+"\" value=\"\" ><img src=\""+path+"common/images/cross.gif\" onclick=\"remResource("+id+","+count+");\"></div>";
    doRecSearch(detail[z].getID(), "resource", id, count, constRecType);
   }
   sel.innerHTML += html;
  }else{
 
- html += "<div class=\"inp-div\"><input class=\"resource\" mode=resource type=text  extra=1 name=\""+id+"\" id=\""+id+"\" value=\"\" onclick=\"window.open('searchRes.html?id="+id+"&t="+constRecType+"&ext=1&q=', 'mywin','width=700, height=400, scrollbars=yes,resizable=yes'); \" onchange=\"onchangeResource("+id+",1);\"><img src=\""+path+"/img/cross.gif\" onclick=\"remResource("+id+",1);\"></div>";
+ html += "<div class=\"inp-div\"><input class=\"resource\" mode=resource type=text  extra=1 name=\""+id+"\" id=\""+id+"\" value=\"\" onclick=\"window.open('searchRes.html?id="+id+"&t="+constRecType+"&ext=1&q=', 'mywin','width=700, height=400, scrollbars=yes,resizable=yes'); \" onchange=\"onchangeResource("+id+",1);\"><img src=\""+path+"common/images/cross.gif\" onclick=\"remResource("+id+",1);\"></div>";
  sel.innerHTML += html;
  //drawResourceDetails(null, id, 1, constRecType); // FAILS MISERABLY> WHY??? this would have been a tidier way of doing it.
  }

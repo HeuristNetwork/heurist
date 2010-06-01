@@ -2,16 +2,16 @@
  <head>
   <title>HAPI Search sample application</title>
 
-<script src="../php/js/load-hapi.php"></script>
-<script src="/hapi/03/goi.js"></script>
+<script src="../../common/lib/load-hapi.php"></script>
+<script src="../../hapi/js/goi.js"></script>
 
 <script src="common-functionst.js"></script>
 
-	
+
 
 <script>
-var path ="/heurist/";
-var rec_det_id = getParams("id"); 
+var path =HAPI.HeuristBaseURL;
+var rec_det_id = getParams("id");
 var t = getParams("t");
 var q = urldecode(getParams("q"));
 var extra = getParams("ext");
@@ -76,12 +76,12 @@ function displayResults(r){ //empty result brings? Output a message!
 		var recTitle =r[i].getTitle();
 		var newdiv = document.createElement('div');
 		newdiv.setAttribute("class", "mini-pad");
-		newdiv.innerHTML += "<span class=\"clickable\" onClick=\"pickMe("+recId+",'"+recTitle+"',"+rec_det_id+","+extra+");\">" +" <img src=\""+ path +"img/reftype/"+recImage+".gif\" align=absmiddle> " +recTitle +"</span>";
+		newdiv.innerHTML += "<span class=\"clickable\" onClick=\"pickMe("+recId+",'"+recTitle+"',"+rec_det_id+","+extra+");\">" +" <img src=\""+ path +"common/images/reftype-icons/"+recImage+".png\" align=absmiddle> " +recTitle +"</span>";
 		div.appendChild(newdiv);//append new div right after embedding code div
 	}
-	
+
 }
-	
+
 
 
 function pickMe(rid, rtitle, r_d_id, extra){

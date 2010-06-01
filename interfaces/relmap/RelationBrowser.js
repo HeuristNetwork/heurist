@@ -91,7 +91,7 @@ function RecordMarker(record,manager) {
                 if (orgType  &&  orgType[0]) {
                     recIcon.image = app.getOrgTypeIconPath(orgType[0], true);
                 }else{
-                    recIcon.image = "http://heuristscholar.org/relmap-sw/img/reftype/png/" + _hRecord.getRecordType().getID() + ".png";
+                    recIcon.image = HAPI.HeuristBaseURL + "common/images/reftype-icons/" + _hRecord.getRecordType().getID() + ".png";
                 }
                 return new GMarker(loc,     // if the record doesn't have a location give the marker a temporary
                                    { icon: recIcon ,
@@ -597,8 +597,8 @@ function AffinityGroupMarker(affinityMarker,manager) {
 }
 
     rBrowser.baseIcon = new GIcon();
-    rBrowser.baseIcon.image = "http://heuristscholar.org/heurist/img/circle.png";
-    rBrowser.baseIcon.shadow = "http://heuristscholar.org/heurist/img/circle-shadow.png";
+    rBrowser.baseIcon.image = HAPI.HeuristBaseURL + "common/images/circle.png";
+    rBrowser.baseIcon.shadow = HAPI.HeuristBaseURL + "common/images/circle-shadow.png";
     rBrowser.baseIcon.iconAnchor = new GPoint(13, 13);
     rBrowser.baseIcon.infoWindowAnchor = new GPoint(13, 13);
     rBrowser.baseIcon.iconSize = new GSize(26, 26);
@@ -613,7 +613,7 @@ function AffinityGroupMarker(affinityMarker,manager) {
      */
     rBrowser.collapseIcon = new GIcon(rBrowser.baseIcon);
     //set the foreground image
-    rBrowser.collapseIcon.image = "http://" + window.location.host + "/hapi/samples/collapso-circle.gif";
+    rBrowser.collapseIcon.image = HAPI.HeuristBaseURL + "common/images/collapso-circle.gif";
 
     /**
      *  Icon used  for cluster in collapsed mode
@@ -624,7 +624,7 @@ function AffinityGroupMarker(affinityMarker,manager) {
      */
     rBrowser.expandIcon = new GIcon(rBrowser.baseIcon);
     //set the foreground image
-    rBrowser.expandIcon.image = "http://" + window.location.host + "/hapi/samples/expando-circle.gif";
+    rBrowser.expandIcon.image = HAPI.HeuristBaseURL + "common/images/expando-circle.gif";
 
 /******* Cluster Marker *************
  * A cluster marker is a display simplification object where multiple objects in proximity of each other

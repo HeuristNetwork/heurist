@@ -20,8 +20,8 @@ img.icon { margin-right: 4px; }
 
 </style>
 
-<script src="/heurist/php/js/load-hapi.php"></script>
-<script src="/hapi/02/goi.js"></script>
+<script src="../../common/lib/load-hapi.php"></script>
+<script src="../../hapi/js/goi.js"></script>
 
 <script src="http://maps.google.com/maps?file=api&amp;v=2.105&amp;key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w" type="text/javascript"></script>
 <!--xscript src="main-105.js"></xscript-->
@@ -894,7 +894,7 @@ app.chooseRecord = function(record, dontAlterStack) {
 	if (orgType  &&  orgType[0]) {
 		cri.src = app.getOrgTypeIconPath(orgType[0], false);
 	} else {
-		cri.src = "http://heuristscholar.org/heurist-test/img/reftype/" + (record.getRecordType().getID() || "questionmark") + ".gif";
+		cri.src = HAPI.HeuristBaseURL + "common/images/reftype-icons/" + (record.getRecordType().getID() || "questionmark") + ".png";
 	}
 	cri.style.display = "";
 	cri.style.verticalAlign = "baseline";
@@ -1111,7 +1111,7 @@ function addRelatedRecordLink(rrList, record) {
 	var newA1 = newTd1.appendChild(document.createElement("a"));
 	newA1.title = "Edit resource details";
     //set the link to call the heurist edit page with this record's id and select the relationship tab
-	newA1.href = 'http://' + window.location.host + '/heurist/edit?bib_id='+record.getID() + '#relationships';
+	newA1.href = HAPI.HeuristBaseURL + 'data/records/heurist-edit.html?bib_id='+record.getID() + '#relationships';
     // make sure that it comes up in another tab
     newA1.target = '_blank';
 	var newImg = newA1.appendChild(document.createElement("img"));
@@ -1119,7 +1119,7 @@ function addRelatedRecordLink(rrList, record) {
 	if (orgType  &&  orgType[0]) {
 		newImg.src = app.getOrgTypeIconPath(orgType[0], false);
 	} else {
-		newImg.src = "http://heuristscholar.org/heurist/img/reftype/" + (record.getRecordType().getID() || "questionmark") + ".gif";
+		newImg.src = HAPI.HeuristBaseURL + "common/images/reftype-icons/" + (record.getRecordType().getID() || "questionmark") + ".png";
 	}
 	newImg.className = "icon";
 
@@ -1140,7 +1140,7 @@ function addRelatedRecordLink(rrList, record) {
 		newA3.target = "_blank";
 		newA3.href = record.getURL();
 		var newImg = newA3.appendChild(document.createElement("img"));
-		newImg.src = "http://heuristscholar.org/heurist-test/img/external_link_16x16.gif";
+		newImg.src = HAPI.HeuristBaseURL + "common/images/external_link_16x16.gif";
 		newImg.className = "icon";
 	}
 
@@ -1169,32 +1169,32 @@ var markers = [];
 var lines = [];
 var addRemoveFlag=[]; //added by nan
 app.iconsByOrgType = {
-         "Assoc London": "http://heuristscholar.org/relmap/img/AssocLondon.png",
-         "Assoc other":  "http://heuristscholar.org/relmap/img/AssocOther.png",
-         "Business London":"http://heuristscholar.org/relmap/img/BusinessLondon.png",
-         "Business other": "http://heuristscholar.org/relmap/img/BusinessOther.png",
-         "FE London": "http://heuristscholar.org/relmap/img/FELondon.png",
-         "FE other": "http://heuristscholar.org/relmap/img/FEOther.png",
-         "HE other": "http://heuristscholar.org/relmap/img/HEother.png",
-         "London Higher": "http://heuristscholar.org/relmap/img/HELondon.png",
-         "London Higher Parent": "http://heuristscholar.org/relmap/img/HELondon.png",
-         "Res London": "http://heuristscholar.org/relmap/img/ResLondon.png",
-         "Res other": "http://heuristscholar.org/relmap/img/ResOther.png",
-         "default": "http://heuristscholar.org/relmap/img/ResOther.png"
+         "Assoc London": "img/AssocLondon.png",
+         "Assoc other":  "img/AssocOther.png",
+         "Business London":"img/BusinessLondon.png",
+         "Business other": "img/BusinessOther.png",
+         "FE London": "img/FELondon.png",
+         "FE other": "img/FEOther.png",
+         "HE other": "img/HEother.png",
+         "London Higher": "img/HELondon.png",
+         "London Higher Parent": "img/HELondon.png",
+         "Res London": "img/ResLondon.png",
+         "Res other": "img/ResOther.png",
+         "default": "img/ResOther.png"
 };
 app.gifsByOrgType = {
-         "Assoc London": "http://heuristscholar.org/relmap/img/AssocLondon.gif",
-         "Assoc other": "http://heuristscholar.org/relmap/img/AssocOther.gif",
-         "Business London": "http://heuristscholar.org/relmap/img/BusinessLondon.gif",
-         "Business other": "http://heuristscholar.org/relmap/img/BusinessOther.gif",
-         "FE London": "http://heuristscholar.org/relmap/img/FELondon.gif",
-         "FE other": "http://heuristscholar.org/relmap/img/FEOther.gif",
-         "HE other": "http://heuristscholar.org/relmap/img/HEother.gif",
-         "London Higher": "http://heuristscholar.org/relmap/img/HELondon.gif",
-         "London Higher Parent": "http://heuristscholar.org/relmap/img/HELondon.gif",
-         "Res London": "http://heuristscholar.org/relmap/img/ResLondon.gif",
-         "Res other": "http://heuristscholar.org/relmap/img/ResOther.gif",
-         "default": "http://heuristscholar.org/relmap/img/ResOther.gif"
+         "Assoc London": "img/AssocLondon.gif",
+         "Assoc other": "img/AssocOther.gif",
+         "Business London": "img/BusinessLondon.gif",
+         "Business other": "img/BusinessOther.gif",
+         "FE London": "img/FELondon.gif",
+         "FE other": "img/FEOther.gif",
+         "HE other": "img/HEother.gif",
+         "London Higher": "img/HELondon.gif",
+         "London Higher Parent": "img/HELondon.gif",
+         "Res London": "img/ResLondon.gif",
+         "Res other": "img/ResOther.gif",
+         "default": "img/ResOther.gif"
 };
 
 
@@ -1219,7 +1219,7 @@ function moveEndCallback() {
  <div id=banner></div>
  <div id=center style="height:750px;" style="padding-right:0px">
   <div id=mapcontainer >
-   <div id=loading-div style="position: absolute; width: 500px; z-index: 100000;"><img src="/relmap/loading-animation.gif" style="position: absolute; right: 10px; top: 10px;"></div>
+   <div id=loading-div style="position: absolute; width: 500px; z-index: 100000;"><img src="loading-animation.gif" style="position: absolute; right: 10px; top: 10px;"></div>
    <div id=map style="width: 500px; height: 700px;"></div>
    <div id="my-timeline" style="width: 500px; height: 20px;"></div>
    <div id=info style="height: 30px; padding-top:10px;">
