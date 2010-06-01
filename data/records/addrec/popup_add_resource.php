@@ -79,11 +79,6 @@ function update_link() {
 			          " -tag:\"" + $("#keyword").val() + "\"";
 	}
 }
-/*
-function compute_url() {
-	var args = compute_args();
-	return args ? "../php/add.php?addref=1" + args : "";
-}*/
 
 function compute_args() {
 	var extra_parms = '';
@@ -146,13 +141,6 @@ function add_note(e) {
 
 	top.location.href = '<?= HEURIST_URL_BASE?>data/records/addrec/add.php?addref=1&bib_reftype='+rt + extra_parms;
 
-	/*if (rt) {
-		top.location.href = '../php/add.php?addref=1&bib_reftype='+rt + extra_parms;
-	} else {  //this code now redundant b/c defaults to notes
-		alert('You must select a reference type');
-		document.getElementById('reftype_elt').focus();
-        top.location.href = '../php/add.php?addref=1&bib_reftype='+'Notes' + extra_parms;
-	}*/
 }
 function note_type_click() {
 	var ref_elt = document.getElementById('reference_elt');
@@ -172,12 +160,6 @@ hr { margin: 20px 0; }
  </head>
 
  <body width=500 height=400 style="font-size: 11px;">
-
-  <!--<h3><a href=# onfocus="href=compute_url();" onmouseover="href=compute_url();" onclick="return false;" target=_new style="color: black; text-decoration: none;" id=record-url>Add new record</a></h3>
-
-  <p>New records should be assigned a record type where possible.
-  <br>If no record type is specified, records default to Notes</p> -->
-<!-- removed Maria Shvedova 7/09/09 -->
 
 
   <table border="0" id=maintable<?= @$_REQUEST['wg_id'] > 0 ? "" : " class=hide_workgroup" ?>>
@@ -223,23 +205,6 @@ hr { margin: 20px 0; }
 ?>
       </optgroup>
      </select>
-<?php /*
-           <optgroup label="Bibliographic reference types">
-<?php
-	$res = mysql_query('select rt_id, rt_name, rt_notes from '.DATABASE.'.rec_types where rt_primary order by rt_name');
-	while ($row = mysql_fetch_assoc($res)) {
-?>          <option value="<?= $row['rt_id'] ?>" title="<?= htmlspecialchars($row["rt_notes"]) ?>"><?= htmlspecialchars($row['rt_name']) ?></option>
-<?php	}	?>
-           </optgroup>
-           <optgroup label="Other reference types">
-<?php
-	$res = mysql_query('select rt_id, rt_name from '.DATABASE.'.rec_types where ! rt_primary order by rt_name');
-	while ($row = mysql_fetch_assoc($res)) {
-?>          <option value="<?= $row['rt_id'] ?>"><?= htmlspecialchars($row['rt_name']) ?></option>
-<?php	}	?>
-           </optgroup>
-     </select>
-<?php */ ?>
     </td>
    </tr>
 
@@ -305,7 +270,6 @@ hr { margin: 20px 0; }
   <table style="width: 100%;">
    <tr>
     <td class=workgroup colspan =2>
-     <!--div style="font-size: 90%;">Please do not restrict access to bibliographic<br>entries and public web site entries</div-->
       <nobr>
       <input type="button" style="font-weight: bold;" value="Add" onclick="add_note(event);">
       &nbsp;&nbsp;
@@ -316,11 +280,9 @@ hr { margin: 20px 0; }
   </table>
 
   <hr>
-  <!--a href=# id=show-adv-link>show embedding code (advanced)</a-->
   <div id=advanced-section style="display: block;">
    <div>
    <h2>Advanced</h2>
-   <!-- title: <input id=add-link-title> -->
    Add these personal tags: <input id=add-link-tags></div>
    <p>Hyperlink this URL in your web page or a desktop shortcut <br>to provide one-click addition of Heurist records with these characteristics:<br>
    <textarea id=add-link-input></textarea></p>

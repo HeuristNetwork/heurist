@@ -48,7 +48,7 @@ h2 { margin-bottom: 0px; margin-top: 5px; font-size: 18px; }
 
 <table border="0" cellpadding="20" cellspacing="0" class="normal" width="90%"><tr><td>
 
-<form action="../php/add.php" method="get" onsubmit="var bid = elements['bib_id']; for (i=0; i < bid.length; ++i) { if (bid[i].checked) return true; } alert('Please select one of the options'); return false;">
+<form action="add.php" method="get" onsubmit="var bid = elements['bib_id']; for (i=0; i < bid.length; ++i) { if (bid[i].checked) return true; } alert('Please select one of the options'); return false;">
 
 <input type="hidden" name="bkmrk_bkmk_title" value="<?= htmlspecialchars($_REQUEST['bkmk_title']) ?>">
 <input type="hidden" name="bkmrk_bkmk_url" value="<?= htmlspecialchars($_REQUEST['bkmk_url']) ?>">

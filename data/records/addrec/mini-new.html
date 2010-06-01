@@ -2,13 +2,13 @@
  <head>
   <title>New record</title>
 
-  <link rel=stylesheet href=../css/heurist.css>
-  <link rel=stylesheet href=../css/mini.css>
+  <link rel=stylesheet href="../../css/heurist.css">
+  <link rel=stylesheet href="../../css/mini.css">
  </head>
 
  <body width=600 height=400>
-  <script src=../js/heurist.js></script>
-  <script src=../php/js/display-preferences.php></script>
+  <script src="../../../common/lib/heurist.js"></script>
+  <script src="../../../common/lib/display-preferences.php"></script>
   <table border=0 cellspacing=0 cellpadding=0 class=expander>
    <tr>
     <td style="height: 60px; padding: 5px;">
@@ -74,7 +74,7 @@ if (! reftype) {
 		var reftype = reftypeDropdown.options[reftypeDropdown.selectedIndex].value;
 
 		var editFrame = document.getElementById("edit-frame");
-		editFrame.src = "../edit/public-tab.html?reftype="+reftype;
+		editFrame.src = "../editrec/tab/public-tab.html?reftype="+reftype;
 		editFrame.style.display = "block";
 
 		reftypeDropdown.onchange = setReftype;
@@ -123,14 +123,14 @@ if (! reftype) {
 
 } else {
 	var editFrame = document.getElementById("edit-frame");
-	editFrame.src = "../edit/public-tab.html?reftype="+reftype+"&title="+encodeURIComponent(title);
+	editFrame.src = "../editrec/tab/public-tab.html?reftype="+reftype+"&title="+encodeURIComponent(title);
 	editFrame.style.display = "block";
 
 	document.getElementById("reftype-val").appendChild(document.createTextNode(top.HEURIST.reftypes.names[reftype]));
 }
 
 </script>
-<script src=../js/disambiguate.js></script>
+<script src="../disambig/disambiguate.js"></script>
 <script>
 function popupDisambiguation(matches) {
 	_popupDisambiguation(matches, function(choice) {
