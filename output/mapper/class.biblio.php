@@ -64,7 +64,7 @@ class Biblio {
 			}
 			if (mysql_num_rows($res) == 1) {
 				$file = mysql_fetch_assoc($res);
-				$thumb_url = "http://".HOST."/heurist/php/resize_image.php?file_id=".$file['file_nonce'];
+				$thumb_url = "../../common/lib/resize_image.php?file_id=".$file['file_nonce'];
 			}
 
 			$text = @$details['191'] ? '191' : (@$details['303'] ? '303' : null);

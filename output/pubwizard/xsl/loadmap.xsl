@@ -1,26 +1,26 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-  <!-- 
+  <!--
  this style renders geographical objects using HAPI and GOI
  author  Maria Shvedova
  last updated 2/12/2008 ms
   -->
   <xsl:param name="arg"/>
- 
+
   <xsl:template match="/">
     <html>
       <head>
-        
+
         <style type="text/css">
           body {font-family:Verdana,Helvetica,Arial,sans-serif; font-size:11px; }
           td { vertical-align: top; }
           .reftype {
           color: #999999;
-          
+
           }
         </style>
-		
-       <script src="/heurist/php/js/load-hapi.php"/>
-	<script src="http://hapi.heuristscholar.org/03/goi.js"/>
+
+       <script src="http://heuristscholar.org/h3/common/lib/load-hapi.php"/>
+	<script src="http://heuristscholar.org/h3/hapi/js/goi.js"/>
 	<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAogdH9AwvOFbvnh0YaNkLgBTSYVSXM3_pxTZfKUi_fD1c4-9PWxSMejnbLNsbQ7VMTSucGheu4pvMbA"/>
         <script src="http://www.google.com/uds/api?file=uds.js&amp;v=1.0&amp;key=ABQIAAAAogdH9AwvOFbvnh0YaNkLgBTSYVSXM3_pxTZfKUi_fD1c4-9PWxSMejnbLNsbQ7VMTSucGheu4pvMbA" type="text/javascript"></script>
       </head>

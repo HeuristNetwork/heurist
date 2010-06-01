@@ -37,7 +37,7 @@ function loadMap(options) {
 
 	/* add objects to the map */
 
-	var url = "/heurist/img/reftype/questionmark.gif";
+	var url = "../../common/images/reftype-icons/questionmark.gif";
 
 	var sz = new OpenLayers.Size(16, 16);
 	var calculateOffset = function(size) {
@@ -59,7 +59,7 @@ function loadMap(options) {
 
 		if (! iconsByReftype[record.reftype]) {
 			iconsByReftype[record.reftype] = baseIcon.clone();
-			iconsByReftype[record.reftype].setUrl("/heurist/img/reftype/" + record.reftype + ".gif");
+			iconsByReftype[record.reftype].setUrl("../../common/images/reftype-icons/" + record.reftype + ".png");
 		}
 
 		var marker = null;
@@ -205,7 +205,7 @@ function markerClick() {
 	} else {
 		var html = "<b>" + record.title + "&nbsp;&nbsp;&nbsp;</b>";
 		if (record.description) html += "<p style='height: 128px; overflow: auto;'>" + record.description + "</p>";
-		html += "<p><a target=_new href='/heurist/resource/" + record.bibID + "'>/heurist/resource/" + record.bibID + "</a></p>";
+		html += "<p><a target=_new href='../../data/records/viewrec/view.php?bib_id=" + record.bibID + "'>/heurist/resource/" + record.bibID + "</a></p>";
 		this.openInfoWindowHtml(html);
 	}
 }
@@ -217,7 +217,7 @@ function polygonClick(point) {
 	} else {
 		var html = "<b>" + record.title + "&nbsp;&nbsp;&nbsp;</b>";
 		if (record.description) html += "<p style='height: 128px; overflow: auto;'>" + record.description + "</p>";
-		html += "<p><a target=_new href='/heurist/resource/" + record.bibID + "'>/heurist/resource/" + record.bibID + "</a></p>";
+		html += "<p><a target=_new href='../../data/records/viewrec/view.php?bib_id=" + record.bibID + "'>/heurist/resource/" + record.bibID + "</a></p>";
 		map.openInfoWindowHtml(point, html);
 	}
 }
@@ -247,7 +247,7 @@ function getIcon(record) {
 
 		var baseIcon = new GIcon();
 			baseIcon.image = url;
-			baseIcon.shadow = "/heurist-test/img/maps-icons/circle-shadow.png";
+			baseIcon.shadow = "../../common/images/maps-icons/circle-shadow.png";
 			baseIcon.iconAnchor = new GPoint(10, 10);
 			baseIcon.iconWindowAnchor = new GPoint(10, 10);
 			baseIcon.iconSize = new GSize(20, 20);
@@ -255,7 +255,7 @@ function getIcon(record) {
 
 		if (mainLegendImg) {
 			var icon = new GIcon(baseIcon);
-			icon.image = "/heurist-test/img/maps-icons/circleStar.png";
+			icon.image = "../../common/images/maps-icons/circleStar.png";
 			var bibID = (mainLegendImg.id + "").replace(/icon-/, "");
 			legendIcons[bibID] = icon;
 			icon.associatedLegendImage = mainLegendImg;
@@ -271,7 +271,7 @@ function getIcon(record) {
 			else {
 				iconLetter = "Dot";
 			}
-			var url = "/heurist-test/img/maps-icons/circle" + iconLetter + ".png";
+			var url = "../../common/images/maps-icons/circle" + iconLetter + ".png";
 
 			var icon = new GIcon(baseIcon);
 			icon.image = url;
