@@ -352,7 +352,7 @@ Temporal.tDurationDict = {	"DUR"	:	"Simple Duration",
 Temporal.typeFieldMap = {	s : {
 									req : [["DAT"],
 											[]],		// empty date allows to capture ill-formed date strings
-									opt : ["COM"]
+									opt : ["COM","DET"]
 								},
 							c :	{
 									req : [["DVP","DVN","AVE","COD"],
