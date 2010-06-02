@@ -89,7 +89,7 @@
 					}
 				}
 		} //for i
-		console.debug("loading records " + recIDs.join());
+//		console.debug("loading records " + recIDs.join());
 
 		var loader = new HLoader(
 		function(s,r) {
@@ -113,7 +113,7 @@
 			var details;
 			var saver = new HSaver(
 				function(r) {
-					console.debug("saved records" + r);    //FIXME  write code to valid field value and update fields array with success message
+//					console.debug("saved records" + r);    //FIXME  write code to valid field value and update fields array with success message
 				},
 				function(r,e) {
 					alert("record save failed: " + e);     //FIXME write code to put error message in fields array.
@@ -297,7 +297,7 @@
 			}  //for j = recStart
 
 				//save the records to effect the changes
-console.debug("saving records " + savRecords);
+//console.debug("saving records " + savRecords);
 				HeuristScholarDB.saveRecords(savRecords, saver);
 				  recStart = recEnd;
 				  //make a timer call letting this fucntion complete in order to unroll the stack.
