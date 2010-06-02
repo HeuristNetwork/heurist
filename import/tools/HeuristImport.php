@@ -476,13 +476,13 @@ class HeuristNativeEntry {
 		foreach (array_keys($this->_fields) as $i) {
 			$field_lookup[$this->_fields[$i]->getType()] = true;
 
-			if ($this->_fields[$i]->getType() == 158) {	// author
+/*			if ($this->_fields[$i]->getType() == 158) {	// author
 				$name_errors = checkNames($this->_fields[$i]->getRawValue());
 				if ($name_errors) {
 					$this->addOtherErrors($name_errors);
 					$this->_has_name_problems = true;
 				}
-			}
+			}*/
 		}
 
 		if (@$rec_detail_requirements[$this->getReferenceType()]) {

@@ -416,8 +416,31 @@ $refer_to_heurist_map = array(
 
 		'Yr' => '159',
 		'YrKey' => '159'
+	),
+		'other document' => array(
+		'A' => '158',    // Author
+		'T' => '160',    // Title
+		'8' => '177',    // Date
+		'?' => '348',    // Translator
+		'!' => '173',    // Short Title
+		'R' => '198',    // DOI
+		'X' => '191',    // Abstract
+		'Z' => '201',    // Notes
+
+		'P' => '163',    // Number of Pages
+		'G' => '193',    // Language
+
+		'9' => '175',    // Document Type
+		'Q' => '174',    // Translated Title
+		'~' => '350',    // Name of Database
+		'W' => '351',    // Database Provider
+
+		'Yr' => '159',
+		'YrKey' => '159'
 	)
 );
+$refer_to_heurist_map['generic'] = $refer_to_heurist_map['other document'];
+$refer_to_heurist_map['unpublished work'] = $refer_to_heurist_map['report'];
 $refer_to_heurist_map['edited book'] = $refer_to_heurist_map['book'];
 $refer_to_heurist_map['electronic book'] = $refer_to_heurist_map['book'];
 $refer_to_heurist_map['edited book section'] = $refer_to_heurist_map['book section'];
@@ -452,8 +475,11 @@ $refer_to_heurist_type_map = array(
 	'journal article' => array(3, 28, 29, 30),
 	'electronic article' => array(3, 28, 29, 30),
 	'report' => array(12, 44, 30),
+	'unpublished work' => array(12, 44, 30),
 	'personal communication' => array(11),
-	'web page' => array(1)
+	'web page' => array(1),
+	'generic' => array(46),
+	'other document' => array(46)
 );
 
 class HeuristReferParser extends HeuristForeignParser {
@@ -607,7 +633,7 @@ class HeuristReferParser extends HeuristForeignParser {
 		// refer doesn't have any explicit types; add to these as necessary
 		static $known_types = array('Conference Paper', 'Conference Proceedings',
 		                            'Book', 'Book Section', 'Edited Book', 'Edited Book Section',
-		                //            'Generic',
+		                            'Generic','Unpublished Work', 'Audiovisual Material',
 		                            'Journal Article', 'Magazine Article', 'Newspaper Article',
 		                            'Personal Communication',
 		                            'Technical Report', 'Thesis', 'Web Page');

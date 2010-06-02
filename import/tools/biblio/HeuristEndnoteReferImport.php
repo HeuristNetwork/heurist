@@ -84,7 +84,7 @@ class HeuristEndnoteReferParser extends HeuristReferParser {
 		static $known_types = array(
 'Artwork', 'Audiovisual Material', 'Book', 'Book Section', 'Computer Program',
 'Conference Proceedings', 'Edited Book', 'Edited Book Section', 'Generic', 'Journal Article', 'Magazine Article', 'Map',
-'Newspaper Article', 'Patent', 'Personal Communication', 'Report', 'Thesis'
+'Newspaper Article', 'Patent', 'Personal Communication', 'Report', 'Thesis','Unpublished Work'
 		);
 		return $known_types;
 	}
