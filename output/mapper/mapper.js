@@ -34,8 +34,8 @@ function loadMap(options) {
 	/* add objects to the map */
 
 	var baseIcon = new GIcon();
-	baseIcon.image = "/heurist/img/reftype/questionmark.gif";
-	baseIcon.shadow = "/heurist-test/img/shadow.png";
+	baseIcon.image = "../../common/images/reftype-icons/questionmark.gif";
+	baseIcon.shadow = "../../common/images/shadow.png";
 	baseIcon.iconAnchor = new GPoint(8, 16);
 	baseIcon.infoWindowAnchor = new GPoint(8,8);
 	baseIcon.iconSize = new GSize(16, 16);
@@ -54,7 +54,7 @@ function loadMap(options) {
 
 		if (! iconsByReftype[record.reftype]) {
 			iconsByReftype[record.reftype] = new GIcon(baseIcon);
-			iconsByReftype[record.reftype].image = "/heurist/img/reftype/" + record.reftype + ".gif";
+			iconsByReftype[record.reftype].image = "../../common/images/reftype-icons/" + record.reftype + ".png";
 		}
 
 		var marker = null;
@@ -195,7 +195,7 @@ function markerClick() {
 	} else {
 		var html = "<b>" + record.title + "&nbsp;&nbsp;&nbsp;</b>";
 		if (record.description) html += "<p style='height: 128px; overflow: auto;'>" + record.description + "</p>";
-		html += "<p>edit:&nbsp;<a target=_new href='/heurist/resource/" + record.bibID + "'>/heurist/resource/" + record.bibID + "</a></p>";
+		html += "<p>edit:&nbsp;<a target=_new href='../../data/records/viewrec/view.php?bib_id=" + record.bibID + "'>heurist resource #" + record.bibID + "</a></p>";
 		if (record.URL) html += "<p>url:&nbsp;&nbsp;&nbsp;<a target=_new href='" + record.URL + "'>" + record.URL + "</a></p>";
 		this.openInfoWindowHtml(html);
 	}
@@ -208,7 +208,7 @@ function polygonClick(point) {
 	} else {
 		var html = "<b>" + record.title + "&nbsp;&nbsp;&nbsp;</b>";
 		if (record.description) html += "<p style='height: 128px; overflow: auto;'>" + record.description + "</p>";
-		html += "<p>edit:&nbsp;<a target=_new href='/heurist/resource/" + record.bibID + "'>/heurist/resource/" + record.bibID + "</a></p>";
+		html += "<p>edit:&nbsp;<a target=_new href='../../data/records/viewrec/view.php?bib_id=" + record.bibID + "'>heurist resource #" + record.bibID + "</a></p>";
 		if (record.URL) html += "<p>url:&nbsp;&nbsp;&nbsp;<a target=_new href='" + record.URL + "'>" + record.URL + "</a></p>";
 		map.openInfoWindowHtml(point, html);
 	}
@@ -239,7 +239,7 @@ function getIcon(record) {
 
 		var baseIcon = new GIcon();
 			baseIcon.image = url;
-			baseIcon.shadow = "/heurist-test/img/maps-icons/circle-shadow.png";
+			baseIcon.shadow = "../../common/iamges/maps-icons/circle-shadow.png";
 			baseIcon.iconAnchor = new GPoint(10, 10);
 			baseIcon.iconWindowAnchor = new GPoint(10, 10);
 			baseIcon.iconSize = new GSize(20, 20);
@@ -247,7 +247,7 @@ function getIcon(record) {
 
 		if (mainLegendImg) {
 			var icon = new GIcon(baseIcon);
-			icon.image = "/heurist-test/img/maps-icons/circleStar.png";
+			icon.image = "../../common/iamges/maps-icons/circleStar.png";
 			var bibID = (mainLegendImg.id + "").replace(/icon-/, "");
 			legendIcons[bibID] = icon;
 			icon.associatedLegendImage = mainLegendImg;
@@ -263,7 +263,7 @@ function getIcon(record) {
 			else {
 				iconLetter = "Dot";
 			}
-			var url = "/heurist-test/img/maps-icons/circle" + iconLetter + ".png";
+			var url = "../../common/iamges/maps-icons/circle" + iconLetter + ".png";
 
 			var icon = new GIcon(baseIcon);
 			icon.image = url;

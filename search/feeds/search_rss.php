@@ -15,7 +15,7 @@ if (!is_logged_in()) {
 
 
 //define('T1000_DEFS', '.safe_htstdefs');
-require_once('t1000.php');
+require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 require_once(dirname(__FILE__).'/../../common/connect/db.php');
 require_once(dirname(__FILE__).'/../../search/advanced/adv-search.php');
 
@@ -52,7 +52,7 @@ if (preg_match('/.* order by (.*)/', $query, $matches)) {
 $query = str_replace("select distinct pers_id from", "select distinct rec_id from", $query);
 $SEARCHES['rss_search'] = $query;
 
-$template = file_get_contents('templates/search_rss.xml');
+$template = file_get_contents('search_rss.xml');
 
 
 

@@ -1,21 +1,22 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-    
-    
+
+    <xsl:param name="hBase"/>
+
     <!-- detail output template -->
     <xsl:template match="reference[id=$arg]">
-        
+
         <tr>
             <td class="reftype">
                 <img>
-                    <xsl:attribute name="src">http://heuristscholar.org/reftype/<xsl:value-of
-                        select="reftype/@id"/>.gif</xsl:attribute>
+                    <xsl:attribute name="src"><xsl:value-of select="$hBase"/>common/images/reftype-icons/<xsl:value-of
+                        select="reftype/@id"/>.png</xsl:attribute>
                 </img>
             </td>
             <td style="font-weight: bold;">
                 <a style="float: right;" target="_new"
-                    href="http://heuristscholar.org/heurist/bibedit.php?bib_id={id}">
+                    href="{$hBase}data/records/editrec/heurist-edit.html?bib_id={id}">
                     <img style="border: none;"
-                        src="http://heuristscholar.org/heurist/edit_pencil_16x16.gif"/>
+                        src="{$hBase}common/images/edit_pencil_16x16.gif"/>
                 </a>
                 <xsl:value-of select="title"/>
             </td>
@@ -62,7 +63,7 @@
         </xsl:if>
         <!-- list reftypes and data-->
         <xsl:for-each select="detail[@id!=222 and @id!=223 and @id!=224 and @id!=203]">
-            
+
             <tr>
                 <td class="reftype">
                     <nobr>
@@ -96,7 +97,7 @@
                     </xsl:choose>
                 </td>
             </tr>
-            
+
         </xsl:for-each>
         <!-- director-->
         <tr>
@@ -105,11 +106,11 @@
                     <xsl:with-param name="name"><xsl:value-of select="pointer[@id=315]/@name"/></xsl:with-param>
                     <xsl:with-param name="type"><xsl:value-of select="pointer[@id=315]/@type"/></xsl:with-param>
                 </xsl:call-template>
-                
+
             </td>
             <td>
                 <xsl:apply-templates select="pointer[@id=315]"></xsl:apply-templates>
-                
+
             </td>
         </tr>
         <!-- staff-->
@@ -119,11 +120,11 @@
                     <xsl:with-param name="name"><xsl:value-of select="pointer[@id=316]/@name"/></xsl:with-param>
                     <xsl:with-param name="type"><xsl:value-of select="pointer[@id=316]/@type"/></xsl:with-param>
                 </xsl:call-template>
-                
+
             </td>
             <td>
                 <xsl:apply-templates select="pointer[@id=316]"></xsl:apply-templates>
-                
+
             </td>
         </tr>
         <!-- research projects-->
@@ -133,14 +134,14 @@
                     <xsl:with-param name="name"><xsl:value-of select="pointer[@id=264]/@name"/></xsl:with-param>
                     <xsl:with-param name="type"><xsl:value-of select="pointer[@id=264]/@type"/></xsl:with-param>
                 </xsl:call-template>
-                
+
             </td>
             <td>
                 <xsl:apply-templates select="pointer[@id=264]"></xsl:apply-templates>
-                
+
             </td>
         </tr>
-        
+
         <xsl:if test="notes != ''">
             <tr>
                 <td class="reftype">Notes</td>
@@ -149,7 +150,7 @@
                 </td>
             </tr>
         </xsl:if>
-        
+
         <xsl:if test="detail[@id=222 or @id=223 or @id=224]">
             <tr>
                 <td class="reftype">Images</td>
@@ -162,16 +163,16 @@
                 </td>
             </tr>
         </xsl:if>
-        
+
     </xsl:template>
     <xsl:template match="pointer">
         <xsl:call-template name="content_group"/>
     </xsl:template>
-    
-    
+
+
     <xsl:template name="content_group" >
-        
-        
+
+
         <xsl:choose>
             <xsl:when test="url !='' ">
                 <xsl:element name="a">
@@ -179,15 +180,15 @@
                     <xsl:attribute name="target">_blank</xsl:attribute>
                     <xsl:value-of select="title"/>
                 </xsl:element>
-                
+
             </xsl:when>
             <xsl:otherwise><xsl:value-of select="title"/></xsl:otherwise>
         </xsl:choose>
         <br></br>
-        
-        
+
+
     </xsl:template>
-    
+
     <xsl:template name="title_grouped">
         <xsl:param name="name"></xsl:param>
         <xsl:param name="type"></xsl:param>
@@ -196,8 +197,8 @@
                 <xsl:when test="string-length($name)"><xsl:value-of select="$name"/></xsl:when>
                 <xsl:otherwise> <xsl:value-of select="$type"/></xsl:otherwise>
             </xsl:choose>
-        </nobr>             
+        </nobr>
     </xsl:template>
-    
-    
+
+
 </xsl:stylesheet>

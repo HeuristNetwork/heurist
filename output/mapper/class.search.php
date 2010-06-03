@@ -8,7 +8,7 @@
  *
  */
 require_once('class.biblio.php');
-//require_once(dirname(__FILE__).'/../php/modules/cred.php');
+//require_once(dirname(__FILE__).'/../../common/connect/cred.php');
 require_once(dirname(__FILE__).'/../../common/connect/db.php');
 require_once(dirname(__FILE__).'/../../search/advanced/adv-search.php');
 

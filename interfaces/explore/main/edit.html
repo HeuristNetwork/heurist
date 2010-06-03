@@ -4,7 +4,7 @@
 <script>
 //initially attempted to load hapi window.opener.HAPI.importSymbols(window.opener, this);
 //this fails for date and geographical data types, possibly because of x-domain? so we actually need to reload hapi in this window
-document.write("<" + "script src=http://hapi.heuristscholar.org/load?instance=" +  window.opener.HAPI.instance + "&key=" + window.opener.HAPI.key + "><" + "/script>\n");
+document.write("<" + "script src="+ HAPI.HeuristBaseURL+"hapi/load.php?instance=" +  window.opener.HAPI.instance + "&key=" + window.opener.HAPI.key + "><" + "/script>\n");
 </script>
 <script src="js/common-functions.js"></script>
 
@@ -33,9 +33,9 @@ function init(){
 	}
 }
 
-function strcmp(a,b) { 
-	var x = a.getName(), y = b.getName(); 
-	return (x < y)? -1 : (x > y)? 1 : 0; 
+function strcmp(a,b) {
+	var x = a.getName(), y = b.getName();
+	return (x < y)? -1 : (x > y)? 1 : 0;
 }
 
 function createRecTypeOptions() {
@@ -43,18 +43,18 @@ function createRecTypeOptions() {
 	e.appendChild(document.createTextNode("Select record type: "));
 	recTypeSelect = e.appendChild(document.createElement("select"));
 	recTypeSelect.id = "rec-type-select";
-	recTypeSelect.onchange = function() {  
-		rec_type_id = document.getElementById("rec-type-select").value; 
+	recTypeSelect.onchange = function() {
+		rec_type_id = document.getElementById("rec-type-select").value;
 		init();
 		e.style.display = "none";
 	};
-	
+
 	var opt = document.createElement("option");
 	opt.innerHTML = "record type...";
 	opt.disabled = true;
 	opt.selected = true;
 	recTypeSelect.appendChild(opt);
-	
+
 	var recTypes = HRecordTypeManager.getRecordTypes();
 	recTypes.sort(strcmp);
 	for (var i = 0; i < recTypes.length; i ++) {
@@ -68,14 +68,14 @@ function createRecTypeOptions() {
 function doRecSearch(id, option, detId, extra, constn) { //surely there must be a more elegant way of recycling the bugger
 	var mysearch = new HSearch("ids:" + id);
 	var loader = new HLoader(
-	
+
 	function(s,r) {
-		
+
 		switch (option){
 			case "primary":
 			displayPrimaryResults(r[0]);
 			break;
-	
+
 			case "resource":
 			if (r[0]){
 				drawResourceDetails(r[0], detId, extra, constn);

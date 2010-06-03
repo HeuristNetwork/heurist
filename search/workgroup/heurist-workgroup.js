@@ -1,7 +1,7 @@
 /* heurist-workgroup.js
  * Copyright 2006, 2007 Tom Murtagh and Kim Jackson
  * http://heuristscholar.org/
- * 
+ *
  * JS for the Heurist workgroup home page:
  * functions are installed as  top.HEURIST.workgroup.*
  *
@@ -41,7 +41,7 @@ top.HEURIST.workgroup = {
 			admins += "<a href=mailto:"+wg.admins[i].email+"><nobr>"+wg.admins[i].name+"</nobr></a>&nbsp;&nbsp; ";
 		}
 		document.getElementById("wg-admins").innerHTML = admins;
-		
+
 		var link = document.getElementById("wg-link");
 		if (wg.url) {
 			link.href = (wg.url + "").match(/^http:\/\//)? wg.url : ("http://" + wg.url);
@@ -57,9 +57,9 @@ top.HEURIST.workgroup = {
 
 		document.getElementById("add-fav-link").href += "&t=" + encodeURIComponent(document.title) + "&u=" + encodeURIComponent(window.location.href);
 	},
-    
-	
-	
+
+
+
 	renderFilterOptions: function() {
 		var reftype_select = document.getElementById("reftype-select");
 		if (reftype_select.options.length <= 1) {
@@ -117,7 +117,7 @@ top.HEURIST.workgroup = {
 			return;
 		}
 		if (! top.HEURIST.is_logged_in()) {
-			top.location.href = "php/login.php";
+			top.location.href = top.HEURIST.basePath + "common/connect/login.php";
 		}
 		if (! top.HEURIST.user.isInWorkgroup(wg_id)) {
 			// TODO: display something?  redirect somewhere?
@@ -129,7 +129,7 @@ top.HEURIST.workgroup = {
 		top.HEURIST.registerEvent(window, "contentloaded", function() {
 			top.HEURIST.json.loadWorkgroupDetails(wg_id, function() {
 				top.HEURIST.search.fillInSavedSearches(wg_id);
-				
+
 			});
 		});
 
@@ -140,7 +140,7 @@ top.HEURIST.workgroup = {
 				top.HEURIST.search.toggleLegend();
 			}
 		});
-		
+
 		// load inital results: all workgroup records
 		window.HEURIST.parameters["q"] = "wg:" + wg_id + " sortby:t";
 		window.HEURIST.parameters["w"] = "all";

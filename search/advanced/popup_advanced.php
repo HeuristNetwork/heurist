@@ -545,7 +545,7 @@ function clear_fields() {
 	}
 ?>
      </select>
-    &nbsp;&nbsp;&nbsp;&nbsp;<img src=../img/leftarrow.gif>
+    &nbsp;&nbsp;&nbsp;&nbsp;<img src=<?=HEURIST_URL_BASE?>common/images/leftarrow.gif>
 </nobr>
     </td>
     <td>

@@ -15,6 +15,7 @@
 		<explorePath>interfaces/explore</explorePath>
 		<cocoonBasePath>/cocoon/h3/</cocoonBasePath>
 		<cocoonAppPath>/cocoon/h3/explore/</cocoonAppPath>
+		<cocoonPubPath>/cocoon/h3/output/pubwizard/</cocoonPubPath>
 		<serverBaseURL>http://heuristscholar.org</serverBaseURL>
 		<heuristBaseURL>http://heuristscholar.org/h3/</heuristBaseURL>
 		<!--+
@@ -34,7 +35,7 @@
         | in the requested instance folder.
         +-->
     <map:match pattern="explore/*/**">
-      <map:mount check-reload="yes" src="explore/{1}/" uri-prefix="explore/{1}"/>
+      <map:mount check-reload="yes" src="explore/{1}/" uri-prefix="explore/{1}/"/>
     </map:match>
 
     <!--+
@@ -42,7 +43,7 @@
         | in the requested sub-folder in the 'output directory'.
         +-->
     <map:match pattern="output/*/**">
-      <map:mount check-reload="yes" src="../output/{1}/" uri-prefix="output/{1}"/>
+      <map:mount check-reload="yes" src="../output/{1}/" uri-prefix="output/{1}/"/>
     </map:match>
 
     <!--+

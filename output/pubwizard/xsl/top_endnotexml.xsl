@@ -1,26 +1,26 @@
 
 <xsl:stylesheet  version="1.0"
-    xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    
+    <xsl:param name="hBase"/>
     <xsl:output method="xml"/>
     <!-- Go through the export XML and make a endnote xml record for every reference found in the xml.
            This document consists of 3 parts, the main loop, the reftype templates and helper fucntions.
            If a reference type is not recognized, it will use a default template with EndNote type 'Generic'.
-           
+
            The first part goes through the list, calling the right template per reference.
            > insert more reftypes here and call their template (or add their template).
-           
+
            The reftype templates describe how the translation takes place.
            > add and define translations per reftype (templates) here.
-           
+
            The helper functions are used for mutual use between reftypes.
            > add reusable functions here .
-        
+
         Author: Erik Baaij, Marco Springer.
         Version/Date: 12 Jan 2007.
     -->
-    
+
     <xsl:template match="/">
         <!-- use the following bit of code to include the stylesheet to display it in Heurist publishing wizard
             otherwise it will be ommited-->
@@ -32,7 +32,7 @@
             [output]endnotexml[/output]
         </xsl:comment>
         <!-- end including code -->
-      
+
         <xsl:element name="xml">
         <!-- start of endnote xml document -->
         <records>

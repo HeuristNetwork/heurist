@@ -1,6 +1,6 @@
 <html>
  <head>
-  <link rel=stylesheet href=../css/heurist.css>
+  <link rel=stylesheet href="../../css/heurist.css">
   <title>Save search</title>
   <script>
 
@@ -17,7 +17,7 @@
 			alert("There is no search string to save. Please enter a search and then save.");
 			setTimeout(function() { window.close(); }, 100);
 		}else{
-			setTimeout(function() { window.close(); top.HEURIST.util.popupURL(top, 'popup/save-collection.html');},100);
+			setTimeout(function() { window.close(); top.HEURIST.util.popupURL(top, 'save-collection.html');},100);
 		}
 	}
 
@@ -63,10 +63,10 @@
 			document.getElementById("save").value = "Save & publish";
 		}
 		if (mode == "rename") {
-		//this is for editing 
+		//this is for editing
 			document.getElementById("search-name").value = searchLabel;
 			document.getElementById("wg-p").style.display = "none";
-			document.getElementById("wg-select").value = getParams("wg"); 
+			document.getElementById("wg-select").value = getParams("wg");
 
 		}
 
@@ -166,7 +166,7 @@
 				top.HEURIST.parameters["w"] = "bookmark";
 				top.HEURIST.parameters["q"] = top.HEURIST.parameters["q"] + " user:" + top.HEURIST.get_user_id();
 			}
-		
+
 		}
 
 		for (var p in top.HEURIST.parameters) {

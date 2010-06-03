@@ -117,7 +117,7 @@
 					.sb_divider {margin-bottom: 6px }
 
                     #header {
-	                    background-image:url(http://heuristscholar.org/heurist-ig/img/hlogo-small.png);
+	                    background-image:url(http://heuristscholar.org/heurist-ig/img/hlogo-small.png); /* these need to change to be local */
 	                    background-position:left top;
 						background-repeat:no-repeat;
 						height:50px;

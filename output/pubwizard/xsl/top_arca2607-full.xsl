@@ -1,10 +1,10 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-
+  <xsl:param name="hBase"/>
   <!--
-    
+
     Modified: Maria Shvedova.
     Version/Date: 28/05/2007.
-    
+
     Supports the following BIBLIOGRAPHICAL reftypes:
     -> 42: Archive Record
     -> 5  : Book
@@ -25,11 +25,11 @@
     -> 46: Other Document - {run through default template}
     -> 76: Performance - {run through default template}
     -> 11: Pers. Comm. - {run through default template}
-    -> 44: Publication Series 
+    -> 44: Publication Series
     -> 30: Publisher
     -> 12: Report
     -> 13: Thesis
-    
+
   -->
 
   <xsl:template match="/">
@@ -88,14 +88,14 @@
           </xsl:if>
           <xsl:if  test="url!=''">
             &#160;<a href="{url}" target="_blank">web</a>
-          </xsl:if>   
+          </xsl:if>
           <xsl:call-template name="output_weblink"/>
           <xsl:call-template name="summary"/>
           <xsl:call-template name="woot_content"/>
         </xsl:if>
       </td>
     </tr>
- 
+
   </xsl:template>
 
   <!-- =================  5: BOOK =============================== -->
@@ -165,7 +165,7 @@
         </xsl:if>
         <xsl:if  test="url!=''">
           &#160;<a href="{url}" target="_blank">web</a>
-        </xsl:if> 
+        </xsl:if>
         <xsl:call-template name="output_weblink"/>
         <xsl:call-template name="summary"/>
         <xsl:call-template name="woot_content"/>
@@ -218,7 +218,7 @@
         </xsl:if>
         <xsl:if  test="url!=''">
           &#160;<a href="{url}" target="_blank">web</a>
-        </xsl:if>  
+        </xsl:if>
         <xsl:call-template name="output_weblink"/>
         <xsl:call-template name="summary"/>
         <xsl:call-template name="woot_content"/>
@@ -253,7 +253,7 @@
           </xsl:if>
           <xsl:if  test="url!=''">
             &#160;<a href="{url}" target="_blank">web</a>
-          </xsl:if> 
+          </xsl:if>
           <xsl:call-template name="output_weblink"/>
           <xsl:call-template name="summary"/>
           <xsl:call-template name="woot_content"/>
@@ -302,7 +302,7 @@
         </xsl:if>
         <xsl:if  test="url!=''">
           &#160;<a href="{url}" target="_blank">web</a>
-        </xsl:if> 
+        </xsl:if>
         <xsl:call-template name="output_weblink"/>
         <xsl:call-template name="summary"/>
         <xsl:call-template name="woot_content"/>
@@ -342,7 +342,7 @@
           </xsl:if>
           <xsl:if  test="url!=''">
             &#160;<a href="{url}" target="_blank">web</a>
-          </xsl:if>   
+          </xsl:if>
           <xsl:call-template name="output_weblink"/>
           <xsl:call-template name="summary"/>
           <xsl:call-template name="woot_content"/>
@@ -381,7 +381,7 @@
         </xsl:if>
         <xsl:if  test="url!=''">
           &#160;<a href="{url}" target="_blank">web</a>
-        </xsl:if>   
+        </xsl:if>
         <xsl:call-template name="output_weblink"/>
         <xsl:call-template name="summary"/>
         <xsl:call-template name="woot_content"/>
@@ -410,7 +410,7 @@
           </xsl:if>
           <xsl:if  test="url!=''">
             &#160;<a href="{url}" target="_blank">web</a>
-          </xsl:if>   
+          </xsl:if>
         </xsl:if>
         <xsl:call-template name="output_weblink"/>
         <xsl:call-template name="summary"/>
@@ -510,7 +510,7 @@
         </xsl:if>
         <xsl:if  test="url!=''">
           &#160;<a href="{url}" target="_blank">web</a>
-       </xsl:if>   
+       </xsl:if>
         <xsl:call-template name="output_weblink"/>
         <xsl:call-template name="summary"/>
         <xsl:call-template name="woot_content"/>
@@ -596,7 +596,7 @@
       </td>
     </tr>
   </xsl:template>
- 
+
 
 
 
@@ -623,7 +623,7 @@
         </xsl:if>
         <xsl:if  test="url!=''">
           &#160;<a href="{url}" target="_blank">web</a>
-        </xsl:if>   
+        </xsl:if>
         <xsl:call-template name="output_weblink"/>
         [no bibliographic data]
         <xsl:call-template name="summary"/>
@@ -645,7 +645,7 @@
       <!--
       <xsl:when test="contains(title, '(series =)')">
         <xsl:variable name="series">(series =)</xsl:variable>
-        
+
         <xsl:value-of select="substring-before(title, $series)"/>
         <xsl:value-of select="substring-after(title, $series)"/>
       </xsl:when>
@@ -815,13 +815,13 @@
       <xsl:copy-of select="woot"/>
     </xsl:if>
   </xsl:template>
-  
+
   <xsl:template name="summary">
     <xsl:if test="detail[@id=303] ">
       <br></br>
       <xsl:copy-of select="detail[@id=303]"/>
     </xsl:if>
-    
+
     <xsl:if test="detail[@id=191] ">
       <br></br>
       <xsl:copy-of select="detail[@id=191]"/>

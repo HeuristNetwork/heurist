@@ -59,11 +59,11 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 
 		$expiry = '';
 		if ($_REQUEST['session_type'] == 'public')
-			setcookie('heurist-sessionid', session_id(), ($expiry=0), '/', 'heuristscholar.org');
+			setcookie('heurist-sessionid', session_id(), ($expiry=0), '/', HEURIST_SERVER_NAME);
 		else if ($_REQUEST['session_type'] == 'shared')
-			setcookie('heurist-sessionid', session_id(), ($expiry=time()+24*60*60), '/', 'heuristscholar.org');
+			setcookie('heurist-sessionid', session_id(), ($expiry=time()+24*60*60), '/', HEURIST_SERVER_NAME);
 		else if ($_REQUEST['session_type'] == 'remember')
-			setcookie('heurist-sessionid', session_id(), ($expiry=time()+365*24*60*60), '/', 'heuristscholar.org');
+			setcookie('heurist-sessionid', session_id(), ($expiry=time()+365*24*60*60), '/', HEURIST_SERVER_NAME);
 
 		/* bookkeeping */
 		mysql_connection_db_overwrite(USERS_DATABASE);

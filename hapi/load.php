@@ -42,7 +42,7 @@ $scripts = array(
 var HeuristApiKey = "<?= addslashes(@$_REQUEST["key"]) ?>";
 var HeuristInstance = "<?= addslashes(@$_REQUEST["instance"]) ?>";
 var HeuristBaseURL = "<?= addslashes(HEURIST_URL_BASE) ?>";
-
+var HeuristSitePath = "<?= addslashes(HEURIST_SITE_PATH) ?>";
 /* Load the necessary JS files from <?= HAPI_HOME ?> */
 (function() {
 <?php

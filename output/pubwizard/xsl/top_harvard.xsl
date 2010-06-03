@@ -1,10 +1,10 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 
   <!--
-    
+
     Modified: Maria Shvedova.
     Version/Date: 28/05/2007.
-    
+
     Supports the following BIBLIOGRAPHICAL reftypes:
     -> 42: Archive Record
     -> 5  : Book
@@ -25,12 +25,13 @@
     -> 46: Other Document - {run through default template}
     -> 76: Performance - {run through default template}
     -> 11: Pers. Comm. - {run through default template}
-    -> 44: Publication Series 
+    -> 44: Publication Series
     -> 30: Publisher
     -> 12: Report
     -> 13: Thesis
-    
+
   -->
+  <xsl:param name="hBase"/>
   <xsl:include href="helpers/months.xsl"/> <!--converts numbers to their text equivalent-->
   <xsl:include href="helpers/creator.xsl"/> <!-- trims first names to produce initials -->
   <xsl:template match="/">
@@ -86,12 +87,12 @@
           </xsl:if>
           <xsl:if  test="url!=''">
             &#160;<a href="{url}" target="_blank">web</a>
-          </xsl:if>   
+          </xsl:if>
           <xsl:call-template name="output_weblink"/>
         </xsl:if>
       </td>
     </tr>
- 
+
   </xsl:template>
 
   <!-- =================  5: BOOK =============================== -->
@@ -109,13 +110,13 @@
 		  <xsl:choose>
 		  <xsl:when test="pointer[@id = 228]/pointer[@id = 229]">
 		  &#160;<xsl:apply-templates
-              select="pointer[@id = 228]/pointer[@id = 229]"/>         
+              select="pointer[@id = 228]/pointer[@id = 229]"/>
 		  </xsl:when>
 		  <xsl:otherwise>
 		  &#160;<xsl:value-of select="pointer[@id = 228]/title"/>
 		  </xsl:otherwise>
 		  </xsl:choose>
-          
+
         </xsl:if>
         <xsl:if test="detail[@id=187]">
           &#160;<xsl:value-of select="detail[@id=187]/@type"/>: <xsl:value-of select="detail[@id=187]"/>.
@@ -166,7 +167,7 @@
         </xsl:if>
         <xsl:if  test="url!=''">
           &#160;<a href="{url}" target="_blank">web</a>
-        </xsl:if> 
+        </xsl:if>
         <xsl:call-template name="output_weblink"/>
       </td>
     </tr>
@@ -215,7 +216,7 @@
         </xsl:if>
         <xsl:if  test="url!=''">
           &#160;<a href="{url}" target="_blank">web</a>
-        </xsl:if>  
+        </xsl:if>
         <xsl:call-template name="output_weblink"/>
       </td>
     </tr>
@@ -248,7 +249,7 @@
           </xsl:if>
           <xsl:if  test="url!=''">
             &#160;<a href="{url}" target="_blank">web</a>
-          </xsl:if> 
+          </xsl:if>
           <xsl:call-template name="output_weblink"/>
         </xsl:if>
       </td>
@@ -295,7 +296,7 @@
         </xsl:if>
         <xsl:if  test="url!=''">
           &#160;<a href="{url}" target="_blank">web</a>
-        </xsl:if> 
+        </xsl:if>
         <xsl:call-template name="output_weblink"/>
       </td>
     </tr>
@@ -333,7 +334,7 @@
           </xsl:if>
           <xsl:if  test="url!=''">
             &#160;<a href="{url}" target="_blank">web</a>
-          </xsl:if>   
+          </xsl:if>
           <xsl:call-template name="output_weblink"/>
         </xsl:if>
       </td>
@@ -365,7 +366,7 @@
         </xsl:if>
         <xsl:if  test="url!=''">
           &#160;<a href="{url}" target="_blank">web</a>
-        </xsl:if>   
+        </xsl:if>
         <xsl:call-template name="output_weblink"/> [no bibliographic data] </td>
     </tr>
 
@@ -399,7 +400,7 @@
         </xsl:if>
         <xsl:if  test="url!=''">
           &#160;<a href="{url}" target="_blank">web</a>
-        </xsl:if>   
+        </xsl:if>
         <xsl:call-template name="output_weblink"/>
       </td>
     </tr>
@@ -426,7 +427,7 @@
           </xsl:if>
           <xsl:if  test="url!=''">
             &#160;<a href="{url}" target="_blank">web</a>
-          </xsl:if>   
+          </xsl:if>
         </xsl:if>
         <xsl:call-template name="output_weblink"/>
       </td>
@@ -486,7 +487,7 @@
       <td>
         <!-- creator -->
         <xsl:apply-templates select="pointer[@id=158]" mode="process-creator"/>
-		
+
         <!-- year (from journal volume reference) -->
 		<!--
         <xsl:if test="pointer[@id=225]/detail[@id=159]"> &#160;<xsl:value-of
@@ -529,7 +530,7 @@
         </xsl:if>
         <xsl:if  test="url!=''">
           &#160;<a href="{url}" target="_blank">web</a>
-       </xsl:if>   
+       </xsl:if>
         <xsl:call-template name="output_weblink"/>
       </td>
     </tr>
@@ -609,7 +610,7 @@
       </td>
     </tr>
   </xsl:template>
- 
+
   <!-- =================  HELPER TEMPLATES  =============================== -->
 
   <!-- modify series that have no value with more appropriate "unknown series" -->
@@ -629,7 +630,7 @@
     </xsl:choose>
   </xsl:template>
 
- 
+
 
   <xsl:template  match="pointer" mode="process-creator">
     <!-- for more then 1 author, output authors in the following format: Author 1, Author 2 & Author 3 -->

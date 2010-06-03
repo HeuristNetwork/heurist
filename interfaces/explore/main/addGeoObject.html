@@ -6,14 +6,16 @@
   @import url("http://www.google.com/uds/solutions/localsearch/gmlocalsearch.css");
 </style>
 <script>
-document.write("<" + "script src=http://hapi.heuristscholar.org/load?instance=" +  window.opener.HAPI.instance + "&key=" + window.opener.HAPI.key + "><" + "/script>\n");
+	document.write("<" + "script src=\"" +  window.opener.HAPI.HeuristBaseURL + "hapi/load.php?instance=" +  window.opener.HAPI.instance + "&key=" + window.opener.HAPI.key + "\"><" + "/script>\n");
 </script>
- <script src=http://hapi.heuristscholar.org/03/goi.js></script>
+ <script>
+	document.write("<" + "script src=\"" +  window.opener.HAPI.HeuristBaseURL + "hapi/js/goi.js\"><" + "/script>\n" );
+</script>
 
   <script src="js/common-functions.js"></script>
 
-  <script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w"></script>
-  <script src="http://www.google.com/uds/api?file=uds.js&v=1.0&key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w" type="text/javascript"></script>
+  <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w"></script>
+  <script src="http://www.google.com/uds/api?file=uds.js&amp;v=1.0&amp;key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w" type="text/javascript"></script>
   <script src="http://www.google.com/uds/solutions/localsearch/gmlocalsearch.js" type="text/javascript"></script>
 
   <script>
@@ -35,7 +37,7 @@ document.write("<" + "script src=http://hapi.heuristscholar.org/load?instance=" 
 
 		//if (! HCurrentUser.isLoggedIn()) {
 				//alert("You are not currently logged in to Heurist");
-				//location.replace("http://heuristscholar.org/heurist/php/login.php");
+				//location.replace(HAPI.HeuristBaseURL + "common/connect/login.php");
 				//return;
 		//}
 		loadMap();
@@ -99,7 +101,13 @@ document.write("<" + "script src=http://hapi.heuristscholar.org/load?instance=" 
 	    var i=edit_id.substring(7);
 		var gid= "geoDiv"+edit_id.substring(7);
 		window.opener.document.getElementById(gid).innerHTML =  "";
-		window.opener.document.getElementById(gid).innerHTML += " <div class=\"inp-div\" ><input type=hidden name=\""+detail_id+"\" id=\""+detail_id+"\" value=geo extra=\""+geoObject.getWKT()+"\"><img src=\""+path+"img/geo.gif\" align=absmiddle> "+geoObject.toString()+"&nbsp<a href=\"#\" id=\"editgeo"+[i]+"\" onclick=\"window.open('addGeoObject.html?id="+rec_id+"&did="+detail_id+"&eid=editgeo"+[i]+"','form','width=600,height=400,scrollbars=yes');\")>edit</a><input type=\"hidden\" id=\"geodetail"+[i]+"\" value=\""+ geoObject.getWKT()+ "\"><input type=\"hidden\" id=\"geotype"+[i]+"\" value=\""+ geoObject.toString()+ "\">&nbsp;"+" <img src=\""+path+"img/cross.gif\" align=absmiddle onclick=\"remGeo("+detail_id+",'"+geoObject.getWKT()+"');\"></div>";
+		window.opener.document.getElementById(gid).innerHTML += " <div class=\"inp-div\" ><input type=hidden name=\""+detail_id+"\" id=\""+detail_id+
+																"\" value=geo extra=\""+geoObject.getWKT()+"\"><img src=\""+HAPI.HeuristBaseURL+"common/imagesg/geo.gif\" align=absmiddle> "+
+																geoObject.toString()+"&nbsp<a href=\"#\" id=\"editgeo"+[i]+
+																"\" onclick=\"window.open('addGeoObject.html?id="+rec_id+"&did="+detail_id+"&eid=editgeo"+[i]+
+																"','form','width=600,height=400,scrollbars=yes');\")>edit</a><input type=\"hidden\" id=\"geodetail"+[i]+
+																"\" value=\""+ geoObject.getWKT()+ "\"><input type=\"hidden\" id=\"geotype"+[i]+"\" value=\""+ geoObject.toString()+ "\">&nbsp;"
+																+" <img src=\""+HAPI.HeuristBaseURL+"common/images/cross.gif\" align=absmiddle onclick=\"remGeo("+detail_id+",'"+geoObject.getWKT()+"');\"></div>";
         window.close();
 		return;
 	 }
@@ -121,11 +129,11 @@ document.write("<" + "script src=http://hapi.heuristscholar.org/load?instance=" 
    <tr><td><input type=button value=confirm onclick="confirmIt();"></input></td>
     <td>
       <span class="hint">Select geographic object type: </span>
-      <input id=button0 type=button value=Point onclick="digitiser.digitisePoint(selectButton); selectButton(this);"></input>&nbsp;
-      <input id=button1 type=button value=Bounds onclick="digitiser.digitiseBounds(selectButton); selectButton(this);"></input>&nbsp;
-      <input id=button2 type=button value=Circle onclick="digitiser.digitiseCircle(selectButton); selectButton(this);"></input>&nbsp;
-      <input id=button3 type=button value=Polygon onclick="digitiser.digitisePolygon(selectButton); selectButton(this);"></input>&nbsp;
-      <input id=button4 type=button value=Path onclick="digitiser.digitisePath(selectButton); selectButton(this);"></input>
+      <input id=button0 type=button value=Point onclick="digitiser.digitisePoint(selectButton); selectButton(this);" />&nbsp;
+      <input id=button1 type=button value=Bounds onclick="digitiser.digitiseBounds(selectButton); selectButton(this);" />&nbsp;
+      <input id=button2 type=button value=Circle onclick="digitiser.digitiseCircle(selectButton); selectButton(this);" />&nbsp;
+      <input id=button3 type=button value=Polygon onclick="digitiser.digitisePolygon(selectButton); selectButton(this);" />&nbsp;
+      <input id=button4 type=button value=Path onclick="digitiser.digitisePath(selectButton); selectButton(this);" />
     </td>
    </tr>
    <tr><td></td>

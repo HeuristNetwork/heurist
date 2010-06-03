@@ -88,9 +88,9 @@ function fill_form() {
 			refdoc_title = window.opener.getSelection().toString();
 		} catch (e) { }
 
-		
+
 		document.getElementById("title").value = refdoc_title;
-		
+
 
 
 		var loader = new HLoader(
@@ -163,7 +163,7 @@ function doSearch(active) {
 
 		if (active == "image") {
 			q = q + " type:74";
-		} 
+		}
 
 		var loader = new HLoader(
 			function(s,r) {
@@ -175,15 +175,15 @@ function doSearch(active) {
 		);
 		HeuristScholarDB.loadRecords(new HSearch(q), loader);
 }
-	
+
 function displayResults(r, active) {
 		document.getElementById(active +"-results-div").style.display = "block";
 		var div = document.getElementById(active +"-results");
 		var innerHTML = "";
 		for (var i = 0; i < r.length; i++) {
 			if (r[i].getRecordType().getID() != 52) {
-				innerHTML += "<img src=/heurist/img/reftype/"+r[i].getRecordType().getID()+".gif> ";
-				innerHTML += "<a href=# onclick=\"setRecord("+r[i].getID()+", this.innerHTML, '" + active +"'); return false;\">" + r[i].getTitle() + "</a><br/>";
+				innerHTML += "<img src="+ HAPI.HeuristBaseURL+"common/images/reftype-icons/"+r[i].getRecordType().getID()+".png> ";
+				innerHTML += "<a href=\"#\" onclick=\"setRecord("+r[i].getID()+", this.innerHTML, '" + active +"'); return false;\">" + r[i].getTitle() + "</a><br/>";
 			}
 		}
 		if (innerHTML.length) {
@@ -194,7 +194,7 @@ function displayResults(r, active) {
 		var b;
 		b = document.createElement("input");
 		b.type = "button";
-		
+
 		if (active == "image") {
 			b.value = "Add multimedia record";
 			b.onclick = function () {
@@ -227,7 +227,7 @@ function change(active) {
 		document.getElementById(active +"-results-div").style.display = "none";
 		doSet (active, null);
 }
-	
+
 function doSet(active, value) {
 		if (active == "linked") {
 			linked_record = value;
@@ -264,8 +264,8 @@ function typeChanged() {
 		overflow: auto;
 	}
   </style>
- </head>
   <title>Add / edit annotation</title>
+ </head>
 
  <body onload="init();">
 
@@ -299,7 +299,7 @@ function typeChanged() {
      </span>
      <div id=linked-results-div style="display: none;">
       Search results (click to select):
-      <div id=linked-results />
+      <div id=linked-results> </div>
      </div>
 
     </td>
@@ -321,7 +321,7 @@ function typeChanged() {
      </span>
      <div id=image-results-div style="display: none;">
       Search results (click to select):
-      <div id=image-results />
+      <div id=image-results> </div>
      </div>
 
     </td>

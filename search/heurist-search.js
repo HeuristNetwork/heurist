@@ -1637,14 +1637,7 @@ top.HEURIST.search = {
 	},
 
 	writeRSSLinks: function() {
-		/*
-		var link = document.createElement("link");
-		link.rel = "alternate";
-		link.type = "application/rss+xml";
-		link.title = "HTTP RSS feed";
-		link.href = "http://"+window.location.host+"+top.HEURIST.basePath+"legacy/search_rss.php"+document.location.search;
-		document.getElementsByTagName("head")[0].appendChild(link);
-		*/
+
 		var link = document.createElement("link");
 		link.rel = "alternate";
 		link.type = "application/rss+xml";

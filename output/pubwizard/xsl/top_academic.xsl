@@ -1,9 +1,10 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-  <!-- 
+  <!--
  this style renders a variation of  standard html (with map)
  author  Maria Shvedova
  last updated 10/09/2007 ms
   -->
+  <xsl:param name="hBase"/>
   <xsl:include href="helpers/creator.xsl"/>
   <xsl:template match="/">
     <!-- use the following bit of code to include the stylesheet to display it in Heurist publishing wizard
@@ -18,9 +19,9 @@
       <head>
 
         <style type="text/css"> body {font-family:Verdana,Helvetica,Arial,sans-serif;
-          font-size:11px; }  .reftype { color: #999999; } 
+          font-size:11px; }  .reftype { color: #999999; }
           .record-table {margin-bottom: 10px;}
-       
+
         </style>
       </head>
       <body>
@@ -40,9 +41,9 @@
       <tr>
         <td colspan="2">
           <a target="_new"
-            href="http://heuristscholar.org/heurist/edit?bib_id={id}">
+            href="{$hBase}data/records/editrec/heurist-edit.html?bib_id={id}">
             <img style="border: none;"
-              src="/heurist/img/edit_pencil_16x16.gif" align="absmiddle"/>
+              src="{$hBase}common/images/edit_pencil_16x16.gif" align="absmiddle"/>
           </a> <b><xsl:value-of select="id"/>: &#160; <xsl:value-of select="title"/>
           </b>
         </td>
@@ -50,23 +51,23 @@
       <tr>
         <td colspan="2">
           <span class="reftype">
-          Reference type:  
+          Reference type:
           </span>
-       
+
           <xsl:value-of select="reftype"/>
-        
+
       <xsl:if test="modified !=''">
         &#160;
         <span class="reftype">
-            Last Updated: 
+            Last Updated:
           </span>
             <xsl:value-of select="modified"/>
-        
+
       </xsl:if>
       <xsl:if test="url != ''">
         &#160;
         <span class="reftype">URL: </span>
-          
+
             <a href="{url}">
               <xsl:choose>
                 <xsl:when test="string-length(url) &gt; 50">
@@ -80,7 +81,7 @@
           </td>
       </tr>
       <tr><td>&#160;</td></tr>
-     
+
 
       <!-- DETAIL LISTING -->
 
@@ -107,7 +108,7 @@
             <!-- we only want a single row output for geographical objects, therefore lets only produce one table cell -->
             <xsl:choose>
               <!--geographic -->
-              
+
               <xsl:when test="$details[@id=current()/@id] and @id=230">
                 <xsl:for-each select="$details[@id=current()/@id]">
                   <xsl:sort select="."/>
@@ -129,7 +130,7 @@
                   </xsl:if>
                 </xsl:for-each>
               </xsl:when>
-              
+
               <!-- the rest -->
               <xsl:otherwise>
                 <td>

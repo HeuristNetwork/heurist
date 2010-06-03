@@ -1,9 +1,10 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-  <!-- 
+  <!--
  this style renders standard html
  author  Maria Shvedova
  last updated 10/09/2007 ms
   -->
+	<xsl:param name="hBase"/>
   <xsl:include href="helpers/creator.xsl"/>
   <xsl:template match="/">
     <!-- use the following bit of code to include the stylesheet to display it in Heurist publishing wizard
@@ -16,29 +17,29 @@
       [output]html[/output]
     </xsl:comment>
     <!-- end including code -->
-    
+
     <html>
       <head>
-        
+
         <style type="text/css">
           body {font-family:Verdana,Helvetica,Arial,sans-serif; font-size:11px; }
           td { vertical-align: top; }
           .reftype {
           color: #999999;
-          
+
           }
         </style>
         <!--<script type="text/javascript">
-      
+
           function displayResults(){
-       
-         document.getElementById('div-loading').style.display = 'none';        
+
+         document.getElementById('div-loading').style.display = 'none';
           var elts = document.getElementsByName("div-results");
-   
+
           for (var i = 0; i &lt; elts.length; ++i) {
             var e = elts[i];
             e.style.display ='block';
-            }         
+            }
           }
         </script>-->
       </head>
@@ -47,14 +48,14 @@
           <xsl:value-of select="/export/@pub_id"/>
         </xsl:attribute>
         <!--<div id="div-loading" style="display:block;">Loading.. please wait </div>-->
-        
-       
-          <xsl:apply-templates select="/export/references/reference"></xsl:apply-templates>          
-       
-      
+
+
+          <xsl:apply-templates select="/export/references/reference"></xsl:apply-templates>
+
+
       </body>
     </html>
-    
+
   </xsl:template>
   <!-- main template -->
   <xsl:template match="/export/references/reference">
@@ -62,7 +63,7 @@
       <xsl:attribute name="id">div-results</xsl:attribute>
       <xsl:attribute name="name">div-results</xsl:attribute>
       <xsl:attribute name="style">display:none;</xsl:attribute>
-  
+
       <xsl:choose>
         <xsl:when test="position() = //rowcount">
           <script >
@@ -71,22 +72,22 @@
         </xsl:when>
         <xsl:otherwise>
           <script>
-            document.getElementById('div-loading').style.display = 'block';        
+            document.getElementById('div-loading').style.display = 'block';
           </script>
         </xsl:otherwise>
       </xsl:choose>-->
-  
-      <!-- HEADER  -->  
+
+      <!-- HEADER  -->
       <table>
           <tr>
             <td colspan="2" >
               <b><xsl:value-of select="id"/>: &#160;
                 <img>
                   <xsl:attribute name="align">absbottom</xsl:attribute>
-                  <xsl:attribute name="src">http://heuristscholar.org/reftype/<xsl:value-of
-                    select="reftype/@id"/>.gif</xsl:attribute>
+                  <xsl:attribute name="src"><xsl:value-of select="$hBase"/>common/images/reftype-icons/<xsl:value-of
+                    select="reftype/@id"/>.png</xsl:attribute>
                 </img>
-                
+
                 &#160;
                 <xsl:value-of select="title"/>
               </b>
@@ -126,14 +127,14 @@
               </td>
             </tr>
           </xsl:if>
-   
+
     <!-- DETAIL LISTING -->
-    
+
           <!--put what is being grouped in a variable-->
           <xsl:variable name="details" select="detail"/>
           <!--walk through the variable-->
           <xsl:for-each select="detail">
-            
+
             <!--act on the first in document order-->
             <xsl:if test="generate-id(.)=
               generate-id($details[@id=current()/@id][1])">
@@ -146,7 +147,7 @@
                     <xsl:otherwise>
                       <xsl:value-of select="@type"/>
                     </xsl:otherwise>
-                  </xsl:choose> 
+                  </xsl:choose>
                 </td>
                    <!--revisit all-->
                 <td>
@@ -192,7 +193,7 @@
           <xsl:variable name="pointer" select="pointer"/>
           <!--walk through the variable-->
           <xsl:for-each select="pointer">
-         
+
             <!--act on the first in document order-->
             <xsl:if test="generate-id(.)=
               generate-id($pointer[@id=current()/@id][1])">
@@ -205,7 +206,7 @@
                     <xsl:otherwise>
                       <xsl:value-of select="@type"/>
                     </xsl:otherwise>
-                  </xsl:choose> 
+                  </xsl:choose>
                 </td>
                 <td>
               <!--revisit all-->
@@ -228,7 +229,7 @@
     <xsl:variable name="relation" select="related"/>
     <!--walk through the variable-->
     <xsl:for-each select="related">
-      
+
       <!--act on the first in document order-->
       <xsl:if test="generate-id(.)=
         generate-id($relation[@type=current()/@type][1])">
@@ -239,7 +240,7 @@
           <td>
             <!--revisit all-->
             <xsl:for-each select="$relation[@type=current()/@type]">
-              
+
               <xsl:value-of select="title"/>
               <br/>
             </xsl:for-each>
@@ -254,14 +255,14 @@
          </td>
          <td>
            <xsl:call-template name="woot_content"></xsl:call-template>
-         </td>    
+         </td>
        </tr>
         </xsl:if>
       </table>
     <!--/xsl:element-->
-    
+
   </xsl:template>
-  
+
  <!-- helper templates -->
   <xsl:template name="logo">
     <xsl:param name="id"></xsl:param>
@@ -272,7 +273,7 @@
           <xsl:attribute name="src"><xsl:value-of select="self::node()[@id =$id]/file_thumb_url"/></xsl:attribute>
           <xsl:attribute name="border">0</xsl:attribute>
         </xsl:element>
-      </xsl:element>  
+      </xsl:element>
     </xsl:if>
   </xsl:template>
   <xsl:template name="file">
@@ -280,7 +281,7 @@
     <xsl:if test="self::node()[@id =$id]">
       <xsl:element name="a">
         <xsl:attribute name="href"><xsl:value-of select="self::node()[@id =$id]/file_fetch_url"/></xsl:attribute>
-        <xsl:value-of select="file_orig_name"/> 
+        <xsl:value-of select="file_orig_name"/>
       </xsl:element>  [<xsl:value-of select="file_size"/>]
     </xsl:if>
   </xsl:template>
@@ -302,5 +303,5 @@
       <xsl:copy-of select="woot"/>
     </xsl:if>
   </xsl:template>
- 
+
 </xsl:stylesheet>

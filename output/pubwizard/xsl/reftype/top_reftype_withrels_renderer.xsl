@@ -2,7 +2,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 
 	<xsl:param name="arg"/>
-
+	<xsl:param name="hBase"/>
 	<xsl:include href="course_unit.xsl"/>
 	<xsl:include href="event.xsl"/>
 	<xsl:include href="conference.xsl"/>
@@ -48,7 +48,7 @@
 				<table>
 					<xsl:choose>
 						<xsl:when test="number($arg) > 0">
-							
+
 							<xsl:apply-templates select="export/references/reference[id=$arg]"/>
 						</xsl:when>
 						<xsl:when test="string(number($arg)) = 'NaN'">
@@ -77,15 +77,15 @@
 		<tr>
 			<td style="padding-right: 10px;">
 				<img>
-					<xsl:attribute name="src">http://heuristscholar.org/reftype/<xsl:value-of
+					<xsl:attribute name="src"><xsl:value-of select="$hBase"/>common/images/reftype-icons/<xsl:value-of
 							select="reftype/@id"/>.gif</xsl:attribute>
 				</img>
 			</td>
 			<td style="font-weight: bold;">
 				<a style="float: right;" target="_new"
-					href="http://heuristscholar.org/heurist/edit?bib_id={id}">
+					href="{$hBase}data/records/editrec/heurist-edit.html?bib_id={id}">
 					<img style="border: none;"
-						src="http://heuristscholar.org/heurist/img/edit_pencil_16x16.gif"/>
+						src="{$hBase}common/images/edit_pencil_16x16.gif"/>
 				</a>
 				<xsl:value-of select="title"/>
 			</td>
@@ -151,15 +151,15 @@
 				</td>
 			</tr>
 		</xsl:for-each>
-		
-		
+
+
 		<tr>
 			<td style="padding-right: 10px;">
 				<xsl:value-of select="pointer[@id=264]/@name"/>
 			</td>
 			<td>
 		<xsl:apply-templates select="pointer[@id=264]"></xsl:apply-templates>
-		
+
 			</td>
 		</tr>
 		<tr>
@@ -167,11 +167,11 @@
 				<xsl:value-of select="pointer[@id=267]/@name"/>
 			</td>
 			<td>
-				
+
 				<xsl:apply-templates select="pointer[@id=267]"></xsl:apply-templates>
 			</td>
 		</tr>
-		
+
 		<xsl:if test="notes != ''">
 			<tr>
 				<td style="padding-right: 10px;">Notes</td>
@@ -203,13 +203,13 @@
 	<table>
 		<tr>
 			<td>
-				<xsl:value-of select="title"/>	
+				<xsl:value-of select="title"/>
 			</td>
 			</tr>
 	</table>
-			
-		
-	
-	
+
+
+
+
 </xsl:template>
 </xsl:stylesheet>

@@ -30,7 +30,7 @@ function loadTimeline() {
 			/* description */ record.description,
 			/* URL image */ "",
 			/* URL link */ "",
-			/* URL icon */ "../img/reftype/" + record.reftype + ".gif",
+			/* URL icon */ "../../common/images/reftypeicons/" + record.reftype + ".png",
 			/* colour */ "#aa0000",
 			/* text colour */ "#000000"
 		);

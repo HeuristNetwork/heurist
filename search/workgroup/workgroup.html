@@ -25,14 +25,14 @@
 	-->
 	<head>
 		<title>Heurist Reference Database - Workgroup home - &copy; 2007 University of Sydney</title>
-		<link rel=stylesheet href='css/heurist.css'>
-		<link rel=stylesheet href='css/heurist-search.css'>
-		<link rel=stylesheet href='css/heurist-workgroup.css'>
+		<link rel=stylesheet href='../../css/heurist.css'>
+		<link rel=stylesheet href='../../css/heurist-search.css'>
+		<link rel=stylesheet href='../../css/heurist-workgroup.css'>
 	</head>
 	<body>
 
-		<script src="/jquery/jquery.js"></script>
-		<script src="js/heurist.js"></script>	<!-- core HEURIST functions -->
+		<script src="../../external/jquery/jquery.js"></script>
+		<script src="../../common/lib/heurist.js"></script>	<!-- core HEURIST functions -->
 
 		<script>
 			top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js", "workgroup-js"], function() {
@@ -41,7 +41,7 @@
 			});
 		</script>
 
-		<script src="php/js/display-preferences.php"></script>	<!-- sets body css classes based on prefs in session -->
+		<script src="../../common/lib/display-preferences.php"></script>	<!-- sets body css classes based on prefs in session -->
 
 		<table id=page class=expander border=0 cellspacing=0 cellpadding=0>
 			<tr><td id=header>
@@ -49,12 +49,12 @@
 					<table border=0 cellspacing=0 cellpadding=0 class=expander>
 						<tr>
 							<td id=logo-cell rowspan=2><a href="./">
-							<img src="img/hlogo-small.jpg" title="Click the logo at top left of any Heurist page to return to your Favourites" alt=Heurist></a></td>
+							<img src="../../common/images/hlogo-small.jpg" title="Click the logo at top left of any Heurist page to return to your Favourites" alt=Heurist></a></td>
 							<td rowspan=2>&nbsp;</td><td id=title-cell rowspan=2><div id=wg-name></div></td>
 
 							<!-- QUICK LINKS -->
 							<td id=quicklink-cell><nobr>
-									<a href='../help' target=_blank title="Overview and guides to the use of Heurist plus comprehensive detailed help"><b>User Manual</b></a> |
+									<a href='../../help' target=_blank title="Overview and guides to the use of Heurist plus comprehensive detailed help"><b>User Manual</b></a> |
 									<a id=contact-link title="Send us an email with bug information or feature requests" href='mailto:info@heuristscholar.org'>Contact us</a>
 									&nbsp;&nbsp;
 							</nobr></td>
@@ -85,7 +85,7 @@
 										<td>
 											<nobr><a id=blog-link target=_blank href='blog/?g='>Workgroup blog</a>&nbsp;&nbsp;&nbsp;</nobr>
 										</td>
-										<td>Membership: &nbsp; <a href='#' onclick="top.HEURIST.util.popupURL(window, 'popup/workgroup-members.html?wg_id='+top.HEURIST.workgroup.wg_id); return false;"><nobr><span id=wg-members></span>&nbsp;members</nobr></a></td>
+										<td>Membership: &nbsp; <a href='#' onclick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath + 'common/lib/workgroup-members.html?wg_id='+top.HEURIST.workgroup.wg_id); return false;"><nobr><span id=wg-members></span>&nbsp;members</nobr></a></td>
 										<td>&nbsp;</td>
 										<td>Administrators: &nbsp; <span id=wg-admins></span> </td>
 									</tr>
@@ -94,7 +94,7 @@
 							<td id=wg-controls>
 								<nobr><a id=home-link href='./' title="Click here or logo at top left to return to your Favourites" >Exit workgroup mode</a></nobr>
 								<!--input type=button value="Exit workgroup mode" onclick="top.location = './';"-->
-								<div id=add-fav-link-div><br><a id=add-fav-link target=_blank href='php/add.php?addref=1&amp;k=Favourites' title="Bookmarks this workgroup mode page as a Favourite for easy access">Add this page to my favourites</a></div>
+								<div id=add-fav-link-div><br><a id=add-fav-link target=_blank href='../../data/records/addrec/add.php?addref=1&amp;k=Favourites' title="Bookmarks this workgroup mode page as a Favourite for easy access">Add this page to my favourites</a></div>
 							</td>
 						</tr>
 					</table>
@@ -123,7 +123,7 @@
 								</p>
 							</td>
 							<td id=img-buttons-cell>
-								<img class="img-button logged-in-only" title="Add new record" src='img/add-record.png' onclick="top.HEURIST.util.popupURL(window, 'legacy/popup_add_resource.php?wg_id='+top.HEURIST.workgroup.wg_id);">
+								<img class="img-button logged-in-only" title="Add new record" src='../../common/images/add-record.png' onclick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath + 'data/records/addrec/popup_add_resource.php?wg_id='+top.HEURIST.workgroup.wg_id);">
 								<div class=button-label>Add workgroup-owned record</div>
 							</td>
 					</tr></table>
@@ -136,7 +136,7 @@
 											<!-- LEFT PANEL HEADER -->
 											<table class=expander border=0 cellspacing=0 cellpadding=0><tr>
 													<td><b>Workgroup searches</b></td>
-													<td style="text-align: right;"><a id=wg-manage-saved-searches-link href='popup/manage-saved-searches.html' onclick="top.HEURIST.util.popupURL(window, this.href); return false;">manage</a></td>
+													<td style="text-align: right;"><a id=wg-manage-saved-searches-link href='../saved/manage-saved-searches.html' onclick="top.HEURIST.util.popupURL(window, this.href); return false;">manage</a></td>
 												</tr>
 											</table>
 
@@ -197,10 +197,10 @@
 
 
 		<script>
-			top.HEURIST.loadScript("php/js/heurist-obj-common.php");	// core HEURIST object definitions (dynamically generated)
-			top.HEURIST.loadScript("php/js/heurist-obj-user.php");		// user-specific HEURIST data
-			top.HEURIST.loadScript("js/heurist-search.js");				// search-specific HEURIST functions
-			top.HEURIST.loadScript("js/heurist-workgroup.js");			// workgroup-page-specific HEURIST functions
+			top.HEURIST.loadScript(top.HEURIST.basePath + "common/lib/heurist-obj-common.php");	// core HEURIST object definitions (dynamically generated)
+			top.HEURIST.loadScript(top.HEURIST.basePath + "common/lib/heurist-obj-user.php");		// user-specific HEURIST data
+			top.HEURIST.loadScript(top.HEURIST.basePath + "search/heurist-search.js");				// search-specific HEURIST functions
+			top.HEURIST.loadScript("heurist-workgroup.js");			// workgroup-page-specific HEURIST functions
 			// have to lie a bit to get php/json-search.php to work - refer to that file to see why
 			top.HEURIST.fireEvent(window, "heurist-search-html-loaded");
 			top.HEURIST.contentLoaded();

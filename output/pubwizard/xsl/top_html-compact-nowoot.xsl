@@ -1,11 +1,12 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:str="http://exslt.org/strings" version="1.0">
-  <!-- 
+  <!--
  this style renders standard html
  author  Maria Shvedova
  last updated 10/09/2007 ms
   -->
 
+  <xsl:param name="hBase"/>
   <xsl:template match="/">
 
     <!-- use the following bit of code to include the stylesheet to display it in Heurist publishing wizard
@@ -22,15 +23,15 @@
           body {font-family:Verdana,Helvetica,Arial,sans-serif; font-size:10px; }
           td { vertical-align: top; }
           .reftype {color: #999999;  }
-         
+
         </style>
         <script>
-          function displaymore(id) 
-          { 
-          document.getElementById(id).style.display = ''; 
+          function displaymore(id)
+          {
+          document.getElementById(id).style.display = '';
           document.getElementById('a'+id).style.display = 'none';
-          } 
-          
+          }
+
           function hidemore(id){
           document.getElementById(id).style.display="none";
           document.getElementById('a'+id).style.display = '';
@@ -85,8 +86,8 @@
       <td colspan="2" style="font-size: 11px; font-weight: bold;">
         <img>
           <xsl:attribute name="align">abstop</xsl:attribute>
-          <xsl:attribute name="src">http://heuristscholar.org/reftype/<xsl:value-of
-              select="reftype/@id"/>.gif</xsl:attribute>
+          <xsl:attribute name="src"><xsl:value-of select="$hBase"/>common/images/reftype-icons/<xsl:value-of
+              select="reftype/@id"/>.png</xsl:attribute>
         </img> &#160; <xsl:value-of select="title"/> &#160; <span style="font-weight:normal"
           >[id: <xsl:value-of select="id"/>]</span></td>
     </tr>
@@ -366,7 +367,7 @@
               <xsl:apply-templates select="." mode="creator"/>
             </xsl:when>
             <xsl:otherwise>
-              <xsl:value-of select="title"/> ; &#160; 
+              <xsl:value-of select="title"/> ; &#160;
             </xsl:otherwise>
           </xsl:choose>
           </xsl:for-each>
@@ -474,9 +475,9 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
+
   <xsl:template name="creator" match="pointer" mode="creator">
         <xsl:call-template name="title"/>;
   </xsl:template>
-  
+
 </xsl:stylesheet>

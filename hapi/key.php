@@ -14,12 +14,12 @@ foreach (array_keys($instances) as $instance) {
 }
 
 if (count($user_instances) == 0) {
-	header("Location: ".HEURIST_URL_BASE."common/connect/login.php?last_uri=http://hapi.heuristscholar.org/key");
+	header("Location: ".HEURIST_URL_BASE."common/connect/login.php?last_uri=".HEURIST_URL_BASE."hapi/key.php");
 }
 
 if (count($user_instances) == 1  &&  $user_instances[0] == ""  &&
 	$_SESSION["heurist"]["user_access"][$instances[""]["admingroup"]] != "admin") {
-	header("Location: ".HEURIST_URL_BASE."common/connect/login.php?last_uri=http://hapi.heuristscholar.org/key");
+	header("Location: ".HEURIST_URL_BASE."common/connect/login.php?last_uri=".HEURIST_URL_BASE."hapi/key.php");
 }
 
 ?>

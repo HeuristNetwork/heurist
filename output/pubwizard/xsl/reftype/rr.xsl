@@ -2,7 +2,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 
 <xsl:param name="bib_id"/>
-
+<xsl:param name="hBase"/>
 <xsl:include href="course_unit.xsl"/>
 <xsl:include href="event.xsl"/>
 <xsl:include href="student_project_topic.xsl"/>
@@ -41,7 +41,7 @@
 <!-- detail output template -->
 <xsl:template match="reference[id=$bib_id]">
 	<tr>
-		<td><img><xsl:attribute name="src">http://heuristscholar.org/reftype/<xsl:value-of select="reftype/@id"/>.gif</xsl:attribute></img></td>
+		<td><img><xsl:attribute name="src"><xsl:value-of select="$hBase"/>common/images/reftype-icons/<xsl:value-of select="reftype/@id"/>.png</xsl:attribute></img></td>
 		<td style="font-weight: bold;"><xsl:value-of select="title"/></td>
 	</tr>
 	<tr>

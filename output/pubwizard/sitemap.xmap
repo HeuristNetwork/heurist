@@ -47,6 +47,14 @@
         <map:transform src="/h3/output/pubwizard/xsl/heurist_legacy_xml.xsl"/>
         <map:transform src="/h3/output/pubwizard/xsl/{../2}.xsl">
           <map:parameter name="arg" value="{../3}"/>
+			<map:parameter name="id" value="{../1}"/>
+			<map:parameter name="appBase" value="/{global:installDir}/{global:cocoonPubPath}/"/>
+			<map:parameter name="hBase" value="http://{global:serverName}/{global:installDir}/"/>
+			<map:parameter name="hIBase" value="http://{global:instancePrefix}{global:serverName}/{global:installDir}/"/>
+			<map:parameter name="instance" value="{global:instanceName}"/>
+			<map:parameter name="serverBaseUrl" value="{global:serverBaseURL}"/>
+			<map:parameter name="cocoonBase" value="{global:cocoonPubPath}/"/>
+			<map:parameter name="related_reftype_filter" value="{2}"/>
         </map:transform>
         <map:transform src="/h3/output/pubwizard/xsl/javascript.xsl"/>
       </map:act>
@@ -58,7 +66,16 @@
         <map:parameter name="parameters" value="true"/>
         <map:generate src="/h3/output/export/xml/hml.php?pub_id={../1}&amp;depth=1&amp;limit=1000"/>
         <map:transform src="/h3/output/pubwizard/xsl/heurist_legacy_xml.xsl"/>
-        <map:transform src="/h3/output/pubwizard/xsl/{../3}.xsl"/>
+        <map:transform src="/h3/output/pubwizard/xsl/{../3}.xsl">
+			<map:parameter name="id" value="{../1}"/>
+			<map:parameter name="appBase" value="/{global:installDir}/{global:cocoonPubPath}/"/>
+			<map:parameter name="hBase" value="http://{global:serverName}/{global:installDir}/"/>
+			<map:parameter name="hIBase" value="http://{global:instancePrefix}{global:serverName}/{global:installDir}/"/>
+			<map:parameter name="instance" value="{global:instanceName}"/>
+			<map:parameter name="serverBaseUrl" value="{global:serverBaseURL}"/>
+			<map:parameter name="cocoonBase" value="{global:cocoonPubPath}/"/>
+			<map:parameter name="related_reftype_filter" value="{2}"/>
+        </map:transform>
         <map:call resource="display-{../2}"/>
       </map:act>
     </map:match>
@@ -70,6 +87,14 @@
         <map:transform src="/h3/output/pubwizard/xsl/heurist_legacy_xml.xsl"/>
         <map:transform src="/h3/output/pubwizard/xsl/{../2}.xsl">
           <map:parameter name="arg" value="{../3}"/>
+			<map:parameter name="id" value="{../1}"/>
+			<map:parameter name="appBase" value="/{global:installDir}/{global:cocoonPubPath}/"/>
+			<map:parameter name="hBase" value="http://{global:serverName}/{global:installDir}/"/>
+			<map:parameter name="hIBase" value="http://{global:instancePrefix}{global:serverName}/{global:installDir}/"/>
+			<map:parameter name="instance" value="{global:instanceName}"/>
+			<map:parameter name="serverBaseUrl" value="{global:serverBaseURL}"/>
+			<map:parameter name="cocoonBase" value="{global:cocoonPubPath}/"/>
+			<map:parameter name="related_reftype_filter" value="{2}"/>
         </map:transform>
       </map:act>
       <map:serialize/>
@@ -90,7 +115,16 @@
         <map:parameter name="parameters" value="true"/>
         <map:generate src="/h3/output/export/xml/hml.php?pub_id={../1}&amp;depth=1&amp;limit=1000"/>
         <map:transform src="/h3/output/pubwizard/xsl/heurist_legacy_xml.xsl"/>
-        <map:transform src="/h3/output/pubwizard/xsl/{../2}.xsl"/>
+        <map:transform src="/h3/output/pubwizard/xsl/{../2}.xsl">
+			<map:parameter name="id" value="{../1}"/>
+			<map:parameter name="appBase" value="/{global:installDir}/{global:cocoonPubPath}/"/>
+			<map:parameter name="hBase" value="http://{global:serverName}/{global:installDir}/"/>
+			<map:parameter name="hIBase" value="http://{global:instancePrefix}{global:serverName}/{global:installDir}/"/>
+			<map:parameter name="instance" value="{global:instanceName}"/>
+			<map:parameter name="serverBaseUrl" value="{global:serverBaseURL}"/>
+			<map:parameter name="cocoonBase" value="{global:cocoonPubPath}/"/>
+			<map:parameter name="related_reftype_filter" value="{2}"/>
+        </map:transform>
         <map:transform src="/h3/output/pubwizard/xsl/javascript.xsl"/>
       </map:act>
       <map:serialize type="javascript"><encoding>UTF-8</encoding></map:serialize>
@@ -101,7 +135,16 @@
         <map:parameter name="parameters" value="true"/>
         <map:generate src="/h3/output/export/xml/hml.php?pub_id={../1}&amp;depth=1&amp;limit=1000"/>
         <map:transform src="/h3/output/pubwizard/xsl/heurist_legacy_xml.xsl"/>
-        <map:transform src="/h3/output/pubwizard/xsl/{../2}.xsl"/>
+        <map:transform src="/h3/output/pubwizard/xsl/{../2}.xsl">
+			<map:parameter name="id" value="{../1}"/>
+			<map:parameter name="appBase" value="/{global:installDir}/{global:cocoonPubPath}/"/>
+			<map:parameter name="hBase" value="http://{global:serverName}/{global:installDir}/"/>
+			<map:parameter name="hIBase" value="http://{global:instancePrefix}{global:serverName}/{global:installDir}/"/>
+			<map:parameter name="instance" value="{global:instanceName}"/>
+			<map:parameter name="serverBaseUrl" value="{global:serverBaseURL}"/>
+			<map:parameter name="cocoonBase" value="{global:cocoonPubPath}/"/>
+			<map:parameter name="related_reftype_filter" value="{2}"/>
+        </map:transform>
         <map:transform src="/h3/output/pubwizard/xsl/javascript.xsl"/>
       </map:act>
       <map:serialize type="javascript"><encoding>UTF-8</encoding></map:serialize>
@@ -112,7 +155,16 @@
         <map:parameter name="parameters" value="true"/>
         <map:generate src="/h3/output/export/xml/hml.php?pub_id={../1}&amp;depth=1&amp;limit=1000"/>
         <map:transform src="/h3/output/pubwizard/xsl/heurist_legacy_xml.xsl"/>
-        <map:transform src="/h3/output/pubwizard/xsl/{../2}.xsl"/>
+        <map:transform src="/h3/output/pubwizard/xsl/{../2}.xsl">
+			<map:parameter name="id" value="{../1}"/>
+			<map:parameter name="appBase" value="/{global:installDir}/{global:cocoonPubPath}/"/>
+			<map:parameter name="hBase" value="http://{global:serverName}/{global:installDir}/"/>
+			<map:parameter name="hIBase" value="http://{global:instancePrefix}{global:serverName}/{global:installDir}/"/>
+			<map:parameter name="instance" value="{global:instanceName}"/>
+			<map:parameter name="serverBaseUrl" value="{global:serverBaseURL}"/>
+			<map:parameter name="cocoonBase" value="{global:cocoonPubPath}/"/>
+			<map:parameter name="related_reftype_filter" value="{2}"/>
+        </map:transform>
       </map:act>
       <map:serialize/>
     </map:match>
@@ -122,7 +174,16 @@
         <map:parameter name="parameters" value="true"/>
         <map:generate src="/h3/output/export/xml/hml.php?pub_id={../1}&amp;depth=1&amp;limit=1000"/>
         <map:transform src="/h3/output/pubwizard/xsl/heurist_legacy_xml.xsl"/>
-        <map:transform src="/h3/output/pubwizard/xsl/{../2}.xsl"/>
+        <map:transform src="/h3/output/pubwizard/xsl/{../2}.xsl">
+			<map:parameter name="id" value="{../1}"/>
+			<map:parameter name="appBase" value="/{global:installDir}/{global:cocoonPubPath}/"/>
+			<map:parameter name="hBase" value="http://{global:serverName}/{global:installDir}/"/>
+			<map:parameter name="hIBase" value="http://{global:instancePrefix}{global:serverName}/{global:installDir}/"/>
+			<map:parameter name="instance" value="{global:instanceName}"/>
+			<map:parameter name="serverBaseUrl" value="{global:serverBaseURL}"/>
+			<map:parameter name="cocoonBase" value="{global:cocoonPubPath}/"/>
+			<map:parameter name="related_reftype_filter" value="{2}"/>
+        </map:transform>
       </map:act>
       <map:serialize/>
     </map:match>

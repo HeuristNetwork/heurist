@@ -75,7 +75,7 @@ function displayResults(s,r) {
 	var thisInstancePath = (HAPI && HAPI.HeuristBaseURL ? HAPI.HeuristBaseURL : (window.HeuristBaseURL ? window.HeuristBaseURL : (window.opener.HeuristBaseURL? window.opener.HeuristBaseURL: "../../../")));
 	for (var i = 0; i < r.length; i++) {
 		if (r[i].getRecordType()){
-			innerHTML += "<img src=\""+ thisInstancePath + "common/images/reftype-icons/" + r[i].getRecordType().getID() + ".gif\"/>";
+			innerHTML += "<img src=\""+ thisInstancePath + "common/images/reftype-icons/" + r[i].getRecordType().getID() + ".png\"/>";
 			innerHTML += " <a href='" + thisInstancePath + "data/records/viewrec/view.php?bib_id=" + r[i].getID() + "' target=\"_blank\">" + r[i].getTitle() + "</a><br/>";
 		}
 	}

@@ -1,28 +1,5 @@
 <html>
 <head>
-
-<script language="javascript">
-
-
-</script>
-</head>
-<body width=240 height=160 onload="getDateID()">
-<script>
-  var dateId;   //id of a date field
-  function getDateID(){
-	  var regexS = "[\\?&]id=([^&#]*)";
-	  var regex = new RegExp( regexS );
-	  var results = regex.exec( window.location.search );
-
-	  if( results == null )
-		return;
-	  else
-		dateId = results[1];
-
-
-	  }
-</script>
-
 <style type="text/css">
 <!--
 
@@ -50,6 +27,24 @@ body { font-family: sans-serif; overflow: hidden; margin: 0px; }
 
 -->
 </style>
+</head>
+<body width=240 height=160 onload="getDateID()">
+<script>
+  var dateId;   //id of a date field
+  function getDateID(){
+	  var regexS = "[\\?&]id=([^&#]*)";
+	  var regex = new RegExp( regexS );
+	  var results = regex.exec( window.location.search );
+
+	  if( results == null )
+		return;
+	  else
+		dateId = results[1];
+
+
+	  }
+</script>
+
 
 <div id=calendar-div></div>
 <script src="js/calendar.js"></script>

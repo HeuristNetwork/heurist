@@ -41,6 +41,7 @@ var HAPI = {
 					HAPI.key = key;
 					HAPI.instance = instance;
 					HAPI.HeuristBaseURL = url;
+					if (HeuristSitePath) HAPI.HeuristSitePath = HeuristSitePath;
 					return;
 				}
 				path = path.replace(/[^\/]*\/$/, "");

@@ -28,7 +28,7 @@
 				<title id="{$currentid}">
 					<xsl:value-of select="export/references/reference/title"/>
 				</title>
-				<script src="/jquery/jquery.js"/>
+				<script src="{$appBase}external/jquery/jquery.js"/>
 				<script>
 					var itemPath = "<xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>item/";
 					var imgpath = "<xsl:value-of select="$hBase"/>common/images/reftype-icons/";
@@ -166,7 +166,7 @@
 									<script type="text/javascript">
 
 							var a = document.createElement("a");
-							a.href ='<xsl:value-of select="$hIBase"/>common/connect/login-vanilla.php?logo={$appBase}img/logo.png&amp;home={$serBaseUrl}{$appBase}';
+							a.href ='<xsl:value-of select="$hIBase"/>common/connect/login-vanilla.php?logo={$appBase}img/logo.png&amp;home={$serverBaseUrl}{$appBase}';
 
 
 							if (HCurrentUser.isLoggedIn()) {
@@ -397,7 +397,7 @@
 						</xsl:if>
 
 						<!-- I think this is the bit of code that renders thumbnails on the right hand side -->
-						<!-- xsl:if test="detail[@id = 222 or @id=223 or @id=224]">
+						<xsl:if test="detail[@id = 222 or @id=223 or @id=224]">
 							<xsl:if test="detail/file_thumb_url">
 								<a href="{$cocoonBase}item/{id}">
 									<img src="{detail/file_thumb_url}" class="thumbnail"/>
@@ -415,11 +415,6 @@
 							</xsl:if>
 						</xsl:if>
 
-
-						<a href="{$appBase}edit.html?id={id}" onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;" title="edit">
-							<img src="{$hBase}common/images/edit-pencil.png"/>
-						</a>
-						-->
 					</div>
 					<div class="link">
 

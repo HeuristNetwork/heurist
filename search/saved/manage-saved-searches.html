@@ -1,6 +1,6 @@
 <html>
  <head>
-  <link rel=stylesheet href=../css/heurist.css>
+  <link rel=stylesheet href="../../css/heurist.css">
   <title>Manage saved searches</title>
 
   <style>
@@ -91,7 +91,7 @@
 	}
 
 	function delete_search(name, wg) {
-		top.HEURIST.util.getJsonData("php/js/delete-saved-search.php?wg="+wg+"&label="+escape(name), function(response) {
+		top.HEURIST.util.getJsonData("delete-saved-search.php?wg="+wg+"&label="+escape(name), function(response) {
 			if (response.deleted) {
 				if (rows[wg]  &&  rows[wg][name]) {
 					document.getElementById("t").removeChild(rows[wg][name]);
