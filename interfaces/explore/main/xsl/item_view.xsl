@@ -79,23 +79,23 @@
 
 						if (val.getRecordType().getID() == 74) {
 							var img=val.getDetail(HDetailManager.getDetailTypeById(221)). getThumbnailURL();
-							elts.innerHTML += "&lt;br>&lt;a href=\""+itemPath+val.getID()+"\">&lt;img src=\"" + img+ "\"/>&lt;/a>";
+							elts.innerHTML += "&lt;br>&lt;a href=\""+itemPath+val.getID()+"/?instance=<xsl:value-of select="$instanceName"/>" + "\">&lt;img src=\"" + img+ "\"/>&lt;/a>";
 						}else{
 							elts.innerHTML += "&lt;br>&lt;br>&lt;span style=\"padding-right:5px; vertical-align:top\">&lt;a href=\""+itemPath+val.getID()+"\">"+val.getTitle()+"&lt;/a>&lt;/span>"+"&lt;img src=\"" + imgpath+val.getRecordType().getID() +".png\"/>";
 						}
 					}
 
 				</script>
-				<script src="{$hIBase}common/lib/load-hapi.php?instance={$hapi-instance}&amp;key={$hapi-key}"/>
+				<script src="{$hBase}common/lib/load-hapi.php?instance={$hapi-instance}&amp;key={$hapi-key}"/>
 				<script>
 					if (!HCurrentUser.isLoggedIn()) {
-						window.location = '<xsl:value-of select="$hIBase"/>common/connect/login-vanilla.php?logo=<xsl:value-of select="$appBase"/>images/logo.png&amp;home=<xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$appBase"/>';
+						window.location = '<xsl:value-of select="$hBase"/>common/connect/login-vanilla.php??instance=<xsl:value-of select="$instanceName"/>&amp;logo=<xsl:value-of select="$appBase"/>images/logo.png&amp;home=<xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$appBase"/>';
 					}</script>
 				<script src="{$appBase}js/search.js"/>
 				<script>
 					top.HEURIST = {};
 					top.HEURIST.fireEvent = function(e, e){};</script>
-				<script src="{$hIBase}common/lib/heurist-obj-user.php"/>
+				<script src="{$hBase}common/lib/heurist-obj-user.php?instance={$instanceName}"/>
 				<!-- Time Map rendering -->
 				<xsl:if test="export/references/reference/reftype[@id=103 or @id=51 or @id=165 or @id=122 or @id=57]">
 					<script>
@@ -136,7 +136,7 @@
 						</span>
 					</h2 -->
 					<div id="logo">
-						<a href="{$cocoonBase}item/{$home-id}">
+						<a href="{$cocoonBase}item/{$home-id}/?instance={$instanceName}">
 							<xsl:value-of select="$site-title"/>
 						</a>
 					</div>
@@ -146,12 +146,12 @@
 								<tr>
 									<xsl:if test="export/references/reference/reftype/@id = 98">
 										<xsl:if test=" $id != $home-id">
-											<td style="font-size: 85%;padding-right:10px; "><a href="#" onclick="window.open('{$appBase}edit-annotation.html?refid={export/references/reference/id}','','status=0,scrollbars=1,resizable=1,width=700,height=500'); return false;" title="add Annotation">
+											<td style="font-size: 85%;padding-right:10px; "><a href="#" onclick="window.open('{$appBase}edit-annotation.html?refid={export/references/reference/id}&amp;instance={$instanceName}','','status=0,scrollbars=1,resizable=1,width=700,height=500'); return false;" title="add Annotation">
 													<img src="{$appBase}images/152.png" align="absmiddle"/>
 												</a> Add Annotation</td>
 										</xsl:if>
 									</xsl:if>
-									<td style="font-size: 85%;padding-right:10px;"><a href="#" onclick="window.open('{$appBase}addrelationship.html?typeId=52&amp;source={export/references/reference/id}','','status=0,scrollbars=1,resizable=1,width=700,height=500'); return false;" title="add Relationship">
+									<td style="font-size: 85%;padding-right:10px;"><a href="#" onclick="window.open('{$appBase}addrelationship.html?typeId=52&amp;source={export/references/reference/id}&amp;instance={$instanceName}','','status=0,scrollbars=1,resizable=1,width=700,height=500'); return false;" title="add Relationship">
 											<img src="{$appBase}images/52.png" align="absmiddle"/>
 										</a> Relationship</td>
 								</tr>
@@ -165,7 +165,7 @@
 									<script type="text/javascript">
 
 							var a = document.createElement("a");
-							a.href ='<xsl:value-of select="$hIBase"/>common/connect/login-vanilla.php?logo={$appBase}img/logo.png&amp;home={$serverBaseUrl}{$appBase}';
+							a.href ='<xsl:value-of select="$hIBase"/>common/connect/login-vanilla.php?logo={$appBase}img/logo.png&amp;home={$serverBaseUrl}{$appBase}&amp;instance={$instanceName}';
 
 
 							if (HCurrentUser.isLoggedIn()) {
@@ -179,7 +179,7 @@
 							document.getElementById("login").appendChild(a);</script>
 								</td>
 								<td id="heurist-link">
-									<a href="{$hIBase}search/heurist-search.html?q=id:{export/references/reference/id}">Heurist</a>
+									<a href="{$hBase}search/heurist-search.html?q=id:{export/references/reference/id}&amp;instance={$instanceName}">Heurist</a>
 								</td>
 							</tr>
 						</table>
@@ -194,15 +194,15 @@
 							</form>
 
 						</div>
-						<!-- h1>
+						<h1>
 
 							<span style="padding-right:5px; padding-left:5px; vertical-align:top;">
-								<a href="#" onclick="window.open('{$appBase}edit.html?id={export/references/reference/id}','','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false; " title="Edit main record">
+								<a href="#" onclick="window.open('{$appBase}edit.html?id={export/references/reference/id}&amp;instance={$instanceName}','','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false; " title="Edit main record">
 									<img src="{$hBase}/img/edit-pencil.png" class="editPencil" style="vertical-align: top;"/>
 								</a>
 							</span>
 							<xsl:value-of select="export/references/reference[1]/title"/>
-						</h1 -->
+						</h1>
 						<xsl:call-template name="related_items_section">
 							<xsl:with-param name="items" select="export/references/reference/related | export/references/reference/pointer | export/references/reference/reverse-pointer"/>
 						</xsl:call-template>
@@ -365,7 +365,7 @@
 				<tr>
 					<td>
                     <div class="editIcon">
-						<a href="{$appBase}edit.html?id={id}" onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;" title="edit">
+						<a href="{$appBase}edit.html?id={id}&amp;instance={$instanceName}" onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;" title="edit">
 							<img src="{$hBase}common/images/edit-pencil.png" class="editPencil"/>
 						</a>
 					</div>
@@ -398,7 +398,7 @@
 						<!-- I think this is the bit of code that renders thumbnails on the right hand side -->
 						<xsl:if test="detail[@id = 222 or @id=223 or @id=224]">
 							<xsl:if test="detail/file_thumb_url">
-								<a href="{$cocoonBase}item/{id}">
+								<a href="{$cocoonBase}item/{id}/?instance={$instanceName}">
 									<img src="{detail/file_thumb_url}" class="thumbnail"/>
 								</a>
 
@@ -407,7 +407,7 @@
 
 
 							<xsl:if test="detail[@id=606]">
-								<a href="{$cocoonBase}item/{id}">
+								<a href="{$cocoonBase}item/{id}/?instance={$instanceName}">
 									<img width="180" src="{detail[@id=606]}"/>
 								</a>
 								<br/>
@@ -417,7 +417,7 @@
 					</div>
 					<div class="link">
 
-						<a href="{$cocoonBase}item/{id}" class="sb_two">
+						<a href="{$cocoonBase}item/{id}/?instance={$instanceName}" class="sb_two">
 							<xsl:choose>
 								<!-- related / notes -->
 								<xsl:when test="@notes">

@@ -72,7 +72,7 @@
 				<map:parameter name="use-request-parameters" value="true"/>
 				<map:parameter name="id" value="{1}"/>
 				<map:parameter name="appBase" value="{global:installPath}{global:explorePath}/{global:appSubDir}/"/>
-				<map:parameter name="hBase" value="http://{global:serverName}{global:installDir}/"/>
+				<map:parameter name="hBase" value="http://{global:serverName}{global:installPath}/"/>
 				<map:parameter name="hIBase" value="http://{global:serverName}/"/>
 				<map:parameter name="cocoonBase" value="{global:cocoonAppPath}/{global:appSubDir}/"/>
 				<map:parameter name="serverBaseUrl" value="{global:appSubDir}/"/>
