@@ -12,14 +12,15 @@ $last_uri = urldecode(@$_REQUEST['last_uri']);
 //	$last_uri = @$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['last_uri'];
 if (! $last_uri) {
 	if (@$_SERVER['HTTP_REFERER']  &&  strpos($_SERVER['HTTP_REFERER'], $_SERVER['SERVER_NAME'] . $_SERVER['SCRIPT_NAME']) === false) {
-		$last_uri = @$_SERVER['HTTP_REFERER'];
+		$last_uri = $_SERVER['HTTP_REFERER'];
+	}else if (defined('HEURIST_URL_BASE')) {
+		$last_uri = HEURIST_URL_BASE;
 	}
 }
 
-
 if (! defined('BASE_PATH')) {
 	if (defined('HOST')) {
-		define('BASE_PATH', 'http://'.HOST."/heurist3");
+		define('BASE_PATH', 'http://'.HOST."/");	//default assume document directory is root for heurist
 	}else{
 		define('BASE_PATH', '');
 	}
@@ -200,7 +201,7 @@ div.indent {
 
 <div id=banner>
  <div id=tagline>Scholar-friendly software</div>
- <div id=logo><a href=".." title="Heurist home"><img src='<?=HEURIST_SITE_PATH?>common/images/heurist_logo.png'></a></div>
+ <div id=logo><a href="<?=HEURIST_URL_BASE?>" title="Heurist home"><img src='<?=HEURIST_SITE_PATH?>common/images/heurist_logo.png'></a></div>
 </div>
 
 <div id=main style="padding: 20px;">
@@ -268,7 +269,7 @@ div.indent {
 <tr><td>
 <p>You are currently logged-in as <b><?= get_user_name() ?> (<?= get_user_username() ?>)</b></p>
 
-<p><b><a href="..">Heurist home</a></b></p>
+<p><b><a href="<?=HEURIST_URL_BASE?>">Heurist home</a></b></p>
 
 <?php
 		if ($last_uri)

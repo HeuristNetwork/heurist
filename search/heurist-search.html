@@ -59,8 +59,8 @@ if (location.search.match(/[&?]q=[^&]+/)) {		//there is a search string
 } else {
 	// this is a substitute for loading the user's default saved search - it's more intuitive
 	// and simplifies management of saved searches
-	top.HEURIST.whenLoaded("obj-user", function() {
-		if (top.HEURIST.is_logged_in()  &&  location.host.match(/^heuristscholar[.]org$/)) {	//FIXME: this doesn't work for installed verisons
+	top.HEURIST.whenLoaded("obj-user", function() {	//FIXME: need to get instance info and set it to heurist params
+		if (top.HEURIST.is_logged_in()  &&  location.host.match(/^h3[.]heuristscholar[.]org$/)) {	//FIXME: this doesn't work for installed verisons
 			document.body.className = "w-bookmark";
 			window.HEURIST.parameters["w"] = "bookmark";
 			window.HEURIST.parameters["q"] = "tag:Favourites OR tag:Favorites";

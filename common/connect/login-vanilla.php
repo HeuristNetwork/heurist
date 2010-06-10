@@ -19,7 +19,7 @@ if (! $last_uri) {
 		$last_uri = @$_SERVER['HTTP_REFERER'];
 	}
 }
-
+error_log(" last uri = ".$last_uri);
 if (! defined('HEURIST_URL_BASE')) {
 	if (defined('HOST_BASE')) {
 		define('HEURIST_URL_BASE', 'http://'.HOST_BASE."/heurist3/");
