@@ -71,13 +71,13 @@
 			<map:transform src="xsl/item_view.xsl" label="transformed">
 				<map:parameter name="use-request-parameters" value="true"/>
 				<map:parameter name="id" value="{1}"/>
-				<map:parameter name="appBase" value="/{global:installDir}/{global:explorePath}/{global:appSubDir}/"/>
-				<map:parameter name="hBase" value="http://{global:serverName}/{global:installDir}/"/>
-				<map:parameter name="hIBase" value="http://{global:instancePrefix}{global:serverName}/{global:installDir}/"/>
-				<map:parameter name="instance" value="{global:instanceName}"/>
-				<map:parameter name="serverBaseUrl" value="{global:serverBaseURL}"/>
-				<map:parameter name="cocoonBase" value="{global:cocoonAppPath}{global:appSubDir}/"/>
+				<map:parameter name="appBase" value="{global:installPath}{global:explorePath}/{global:appSubDir}/"/>
+				<map:parameter name="hBase" value="http://{global:serverName}{global:installDir}/"/>
+				<map:parameter name="hIBase" value="http://{global:serverName}/"/>
+				<map:parameter name="cocoonBase" value="{global:cocoonAppPath}/{global:appSubDir}/"/>
+				<map:parameter name="serverBaseUrl" value="{global:appSubDir}/"/>
 				<map:parameter name="related_reftype_filter" value="{2}"/>
+				<map:parameter name="instanceName" value="{request-param:instance}"/>
 			</map:transform>
 			<map:transform type="xinclude" label="xinclude"/>
 			<map:transform src="xsl/wordml2TEI.xsl" label="wordmltotei"/>

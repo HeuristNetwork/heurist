@@ -37,8 +37,8 @@ if (@$_REQUEST["instance"]) {
 	define("HOST", $_SERVER["HTTP_HOST"]);
 }
 
-require_once(dirname(__FILE__)."/../connect/db.php");
 require_once(dirname(__FILE__)."/../config/heurist-instances.php");
+require_once(dirname(__FILE__)."/../connect/db.php");
 
 mysql_connection_select("hapi");
 $query = "SELECT hl_key
@@ -48,6 +48,7 @@ $query = "SELECT hl_key
 $res = mysql_query($query);
 $row = mysql_fetch_assoc($res);
 if (! $row) {
+	print "Failed to load hapi. No key found for instance = '".HEURIST_INSTANCE."  and uri = http:/".HOST."/";
 	exit;
 }
 $key = $row["hl_key"];

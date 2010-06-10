@@ -1,12 +1,11 @@
 <?php
 /* Login and credential management */
+require_once(dirname(__FILE__)."/../config/heurist-instances.php");
 
-if (@$_REQUEST["instance"]) {
+if (!defined("HEURIST_INSTANCE") && @$_REQUEST["instance"]) {	//fallback if heurist-instanc
 	define("HEURIST_INSTANCE", $_REQUEST["instance"]);
-	define("HOST", $_SERVER["HTTP_HOST"]);
+	defined("HOST") || define("HOST", $_SERVER["HTTP_HOST"]);
 }
-
-require_once("/var/www/htdocs/h3/common/config/heurist-instances.php");	//FIXME: need to figure out why this doesn't work with relative paths;
 
 if (! defined('COOKIE_VERSION'))
 	define('COOKIE_VERSION', 1);		// increment to force re-login when required
@@ -31,6 +30,10 @@ if (_is_logged_in()) {
 	if (@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['keepalive']) {
 		$rv = setcookie('heurist-sessionid', session_id(), time() + 7*24*60*60, '/', HOST_BASE);
 	}
+	if (((! defined('REPLACE_INST'))  ||  strtoupper(REPLACE_INST) != 'DISABLED')&& defined("HEURIST_INSTANCE")) {
+		$_SESSION['heurist_last_used_instance'] = HEURIST_INSTANCE ;
+	}
+
 }
 session_write_close();
 
@@ -63,8 +66,7 @@ if (!_is_logged_in()  &&  defined("BYPASS_LOGIN")) {
 	function get_group_ids() { return (defined("HEURIST_USER_GROUP_ID") ? array(HEURIST_USER_GROUP_ID) : array()); }
 	function is_admin() { return false; }
 	function is_logged_in() { return true; }
-}
-else {
+}else{
 	function is_logged_in() {
 		return _is_logged_in();
 	}

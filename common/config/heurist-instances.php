@@ -1,12 +1,14 @@
 <?php
+if (defined('H_INSTANCE_RAN')) return;
+
 require_once('heurist-ini.php');
 $db = HEURIST_COMMON_DB;	//the database which holds the database configuration information
 $db_prefix = HEURIST_DB_PREFIX;	//database name prefix for instance
 
 $uploads = HEURIST_UPLOAD_BASEPATH;
 $instances = array();
-$trace = "inst ";
-require_once('/var/www/htdocs/h3/common/connect/db.php');	//FIXME: need to figure out why this doesn't work with relative paths
+
+require_once(dirname(__FILE__).'/../connect/db.php');
 
 mysql_connection_db_select($db);
 
@@ -29,12 +31,16 @@ function get_all_instances() {
 }
 
 function define_constants($instance) {
-	global $trace;
-	$trace .= " defineconst ";
 	global $instances;
+	if (defined('H_INSTANCE_RAN')) {
+	 	if ($instance != HEURIST_INSTANCE ) error_log("trying to redefine instance from '".HEURIST_INSTANCE. "' to '".$instance."'" );
+	 	error_log("Current session instance is '".$_SESSION['heurist_last_used_instance']."'");
+	 	return;
+	 }
+
 	defined('HEURIST_INSTANCE') || define('HEURIST_INSTANCE', $instance);
 	define('HEURIST_INSTANCE_PREFIX', $instance == "" ? "" : $instance.".");
-	defined('HOST') || define('HOST', HEURIST_INSTANCE_PREFIX . HOST_BASE);
+	defined('HOST') || define('HOST', HOST_BASE);
 	define('UPLOAD_PATH', $instances[$instance]["uploads"]);
 
 	if (@$instances[$instance]["explore"]) {
@@ -81,21 +87,36 @@ function define_constants($instance) {
  * (0-100).[instance-name].heuristscholar.org
  *
  */
-
-if (defined("HEURIST_INSTANCE")) {
-	$instance = HEURIST_INSTANCE;
-} else if (preg_match("/^([0-9]+[\.])?(([-a-z]+)[\.])?" . HOST_BASE . "/", @$_SERVER['HTTP_HOST'], $matches)) { //TODO: param instance change
+if (@$_REQUEST["instance"]) {
+	$instance = $_REQUEST["instance"];
+}else if (@$_SERVER["HTTP_REFERER"] && preg_match("/.*instance=([^&]*).*/",$_SERVER["HTTP_REFERER"],$refer_instance)) {
+	$instance = $refer_instance[1];
+}else if (@$_SESSION["heurist_last_used_instance"]) {
+	$instance = $_SESSION["heurist_last_used_instance"];
+}else if (defined("HEURIST_DEFAULT_INSTANCE")) {
+	$instance = HEURIST_DEFAULT_INSTANCE;
+}else if (preg_match("/^([0-9]+[\.])?(([-a-z]+)[\.])?" . HOST_BASE . "/", @$_SERVER['HTTP_HOST'], $matches)) { //TODO: param instance change
 	$instance = (@$matches[3]? $matches[3]: "");
 } else {
-	$trace .= "fall through ";
-	return;	// CHECKME: check to see if popup frames inherit the instance or may need to pass this in client call code
+	$instance = '';	// CHECKME: check to see if popup frames inherit the instance or may need to pass this in client call code
 }
 
 if (array_key_exists(@$instance, $instances)) {
 	define_constants($instance);
+}else if (defined("HEURIST_DEFAULT_INSTANCE") && array_key_exists(HEURIST_DEFAULT_INSTANCE, $instances)) {
+	define_constants(HEURIST_DEFAULT_INSTANCE);
+	error_log("Unable to find db row for instance = " . $instance . " . Using the default instance : " .HEURIST_DEFAULT_INSTANCE );
+}else if ( array_key_exists('main', $instances)) {
+	define_constants('main');
+	error_log("Unable to find db row for instance = " . $instance . " or default instance = ".HEURIST_DEFAULT_INSTANCE." . Using the 'main' instance " );
+}else if ( array_key_exists('default', $instances)) {
+	define_constants('default');
+	error_log("Unable to find db row for instance = " . $instance . " or default instance = ".HEURIST_DEFAULT_INSTANCE." . Using the 'main' instance " );
 }else{
-	$trace .= "todo ";
 	//TODO:  need to have a default set of constants in the case of the instance not in the database table or error message.
+	die('can\'t load/find configuration parameters for host :'.HOST_BASE.' and instance = '. $instance);
 }
+
+define('H_INSTANCE_RAN','1');
 	//never ever ever ever again will I leave blank lines outside the closing php tag
 ?>
