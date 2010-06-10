@@ -28,7 +28,7 @@ if (! @$_REQUEST['q']  ||  (@$_REQUEST['ver'] && intval(@$_REQUEST['ver']) < SEA
 
 if (! @$_REQUEST['q']  &&  ! @$_REQUEST['s']) return;	// wwgd
 
-if ($_REQUEST['w'] == 'B'  ||  $_REQUEST['w'] == 'bookmark')	// my bookmark entries
+if (@$_REQUEST['w'] == 'B'  ||  @$_REQUEST['w'] == 'bookmark')	// my bookmark entries
 	$search_type = BOOKMARK;
 else 				// all records entries
 	$search_type = BOTH;

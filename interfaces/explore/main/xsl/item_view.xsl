@@ -55,10 +55,10 @@
 								alert("load failed: " + e);
 							});
 						HeuristScholarDB.loadRecords(new HSearch("id:" + id), loader);
-				    }
+					}
 
 					function annotation_loaded(record) {
-				        var elts = document.getElementById("footnotes-inner");
+						var elts = document.getElementById("footnotes-inner");
 						var notes = record.getDetail(HDetailManager.getDetailTypeById(303));
 
 						elts.innerHTML = "&lt;p>" + record.getTitle() + "&lt;/p>";
@@ -69,25 +69,24 @@
 						var val = record.getDetail(HDetailManager.getDetailTypeById(199));
 						if (val){
 							HeuristScholarDB.loadRecords(new HSearch("id:"+val.getID()),
-                                  new HLoader(function(s,r){MM_loaded(r[0],record)})
+								new HLoader(function(s,r){MM_loaded(r[0],record)})
 							);
 						}
+					}
 
-				   }
-				   function MM_loaded(val,record) {
-				        var elts = document.getElementById("footnotes-inner");
+					function MM_loaded(val,record) {
+						var elts = document.getElementById("footnotes-inner");
 
 						if (val.getRecordType().getID() == 74) {
 							var img=val.getDetail(HDetailManager.getDetailTypeById(221)). getThumbnailURL();
 							elts.innerHTML += "&lt;br>&lt;a href=\""+itemPath+val.getID()+"\">&lt;img src=\"" + img+ "\"/>&lt;/a>";
+						}else{
+							elts.innerHTML += "&lt;br>&lt;br>&lt;span style=\"padding-right:5px; vertical-align:top\">&lt;a href=\""+itemPath+val.getID()+"\">"+val.getTitle()+"&lt;/a>&lt;/span>"+"&lt;img src=\"" + imgpath+val.getRecordType().getID() +".png\"/>";
 						}
-						else {
-						   elts.innerHTML += "&lt;br>&lt;br>&lt;span style=\"padding-right:5px; vertical-align:top\">&lt;a href=\""+itemPath+val.getID()+"\">"+val.getTitle()+"&lt;/a>&lt;/span>"+"&lt;img src=\"" + imgpath+val.getRecordType().getID() +".png\"/>";
-						}
-				   }
+					}
 
-				  </script>
-				<script src="{$hIBase}common/lib/load-hapi.php?instance={$instance}&amp;key={$hapi-key}"/>
+				</script>
+				<script src="{$hIBase}common/lib/load-hapi.php?instance={$hapi-instance}&amp;key={$hapi-key}"/>
 				<script>
 					if (!HCurrentUser.isLoggedIn()) {
 						window.location = '<xsl:value-of select="$hIBase"/>common/connect/login-vanilla.php?logo=<xsl:value-of select="$appBase"/>images/logo.png&amp;home=<xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$appBase"/>';
@@ -441,7 +440,7 @@
 						<!-- change this to pick up the actuall system name of the reftye or to use the mapping method as in JHSB that calls human-readable-names.xml -->
 						<img style="vertical-align: middle;horizontal-align: right" src="{$hBase}common/images/reftype-icons/{reftype/@id}.png"/>
 					</div>
-                </td>
+					</td>
 				</tr>
 			</xsl:otherwise>
 		</xsl:choose>

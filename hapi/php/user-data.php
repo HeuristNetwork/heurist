@@ -3,8 +3,8 @@
 header("Content-Type: text/javascript");
 define('SAVE_URI', 'disabled');
 
-require_once(dirname(__FILE__)."/../../common/connect/db.php");
 require_once(dirname(__FILE__)."/../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../../common/connect/db.php");
 require_once("auth.php");
 
 if (! @$_REQUEST["key"]) {

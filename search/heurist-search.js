@@ -202,7 +202,7 @@ top.HEURIST.search = {
 		if (res[10]) userPwd = "style='display:inline;cursor:pointer;' user_pwd='"+res[10].htmlEscape()+"'";
 		else userPwd = "style='display:none;'";
 
-		var reftypeImg = "style='background-image:url("+ top.HEURIST.basePath+"common/images/reftype-icons/" + (res[4]? res[4] : "blank") + ".gif)'";
+		var reftypeImg = "style='background-image:url("+ top.HEURIST.basePath+"common/images/reftype-icons/" + (res[4]? res[4] : "blank") + ".png)'";
 		var reftypeTitle = "Click to see details";
 		if (top.HEURIST.reftypes.names[parseInt(res[4])])
 			reftypeTitle = top.HEURIST.reftypes.names[parseInt(res[4])] + " - click to see details";
@@ -272,7 +272,7 @@ top.HEURIST.search = {
 		if (res[10]) userPwd = "style='display:inline;cursor:pointer;' user_pwd='"+res[10].htmlEscape()+"'";
 		else userPwd = "style='display:none;'";
 
-		var reftypeImg = "style='background-image:url("+ top.HEURIST.basePath+"common/images/reftype-icons/" + (res[4]? res[4] : "blank") + ".gif)'";
+		var reftypeImg = "style='background-image:url("+ top.HEURIST.basePath+"common/images/reftype-icons/" + (res[4]? res[4] : "blank") + ".png)'";
 		var reftypeThumb = "style='background-image:url("+ top.HEURIST.basePath+"common/images/reftype-icons/thumb/th_" + (res[4]? res[4] : "blank") + ".png)'";
 		var reftypeTitle = "Click to see details";
 		if (top.HEURIST.reftypes.names[parseInt(res[4])])
@@ -735,7 +735,9 @@ top.HEURIST.search = {
 
 		var bib_id = result_div.getAttribute("bib_id");
 
-		window.open(top.HEURIST.basePath+ "data/records/editrec/heurist-edit.html?sid=" + top.HEURIST.search.sid + "&bib_id="+bib_id);
+		window.open(top.HEURIST.basePath+ "data/records/editrec/heurist-edit.html?sid=" +
+					top.HEURIST.search.sid + "&bib_id="+bib_id+
+					(top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : ""));
 
 		return false;
 	},
@@ -767,7 +769,8 @@ top.HEURIST.search = {
 
 		var bib_id = result_div.getAttribute("bib_id");
 
-		window.open( "/cocoon/h3/explore/main/item/" + bib_id);
+		window.open( "/cocoon/h3/explore/main/item/" + bib_id +
+					(top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : ""));
 //		window.open(top.HEURIST.instance.exploreURL+ "" + bib_id);
 
 		return false;
@@ -1686,7 +1689,7 @@ top.HEURIST.search = {
 		var iHTML = "";
 		for (var i in visible_reftypes) {
 			if (top.HEURIST.reftypes.names[i])
-				iHTML += "<li><img src='src='"+ top.HEURIST.basePath+"common/images/reftype-icons/"+i+".gif'>"+top.HEURIST.reftypes.names[i]+"</li>";
+				iHTML += "<li><img src='src='"+ top.HEURIST.basePath+"common/images/reftype-icons/"+i+".png'>"+top.HEURIST.reftypes.names[i]+"</li>";
 		}
 
 		document.getElementById("legend-box-list").innerHTML = iHTML;

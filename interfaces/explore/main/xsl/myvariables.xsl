@@ -6,7 +6,9 @@
 	<xsl:param name="hIBase"/>
 	<xsl:param name="cocoonBase"/>
 	<xsl:param name="serverBaseUrl"/>
-	<xsl:param name="instance"/>
+	<xsl:param name="instancePrefix"/>
+	<xsl:param name="instanceName"/>
+    <xsl:variable name="hapi-instance"></xsl:variable>
     <xsl:variable name="hapi-key">147983c93cdd221dd23f9a93884034f2246b7e01</xsl:variable>
     <xsl:variable name="site-title">Main Data Explorer</xsl:variable>
 	<xsl:variable name="home-id">130843</xsl:variable>
