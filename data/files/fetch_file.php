@@ -21,7 +21,10 @@ else
 	header('Content-type: binary/download');
 
 $filename = UPLOAD_PATH . $file['file_path'] . '/' . $file['file_id'];
+error_log("filename = ".$filename);
 $filename = str_replace('/../', '/', $filename);
+$filename = str_replace('//', '/', $filename);
+error_log("filename = ".$filename);
 readfile($filename);
 
 ?>

@@ -19,7 +19,8 @@ while ($ins = mysql_fetch_assoc($res)) {
 		"db" => ($ins['ins_db'] ? "`" . $ins['ins_db'] . "`" : "`" . $db_prefix  . $ins['ins_name'] ."`"),
 		"userdb" => ($ins['ins_userdb'] ? "`" . $ins['ins_userdb'] . "`" : "`" . $db_prefix  . $ins['ins_name'] ."`"),
 		"admingroup" => ($ins['ins_admingroup'] ? $ins['ins_admingroup'] : 1),
-		"uploads" => ($ins['ins_uploads'] ? $uploads . $ins['ins_uploads'] ."/" : $uploads . $ins['ins_name'] ."/"),
+		"uploads" => ($ins['ins_uploads'] ? $uploads ."/". $ins['ins_uploads'] :
+						$ins['ins_name'] ? $uploads ."/". $ins['ins_name'] : ""),
 		"explore" => ($ins['ins_explore'] ? $ins['ins_explore'] : ""),
 		"usergroup" =>($ins['ins_usergroup'] ? $ins['ins_usergroup'] : "")
 		);
@@ -87,6 +88,9 @@ function define_constants($instance) {
  * (0-100).[instance-name].heuristscholar.org
  *
  */
+
+ // determine the instance name  check 1) REQUEST  2)REFER params 3) SESSION 4) defined DEFAULT 5) scrape it from the sub-domain deprecated or empty (which is the old default)
+
 if (@$_REQUEST["instance"]) {
 	$instance = $_REQUEST["instance"];
 }else if (@$_SERVER["HTTP_REFERER"] && preg_match("/.*instance=([^&]*).*/",$_SERVER["HTTP_REFERER"],$refer_instance)) {

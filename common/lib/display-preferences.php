@@ -64,7 +64,7 @@ if ($writeMode) return;	// suppress normal output
 
 ?>
 
-//document.domain = "heuristscholar.org";
+//document.domain = "h3.heuristscholar.org";
 
 if (! document.body) {
 	// Document manipulation becomes much harder if we can't access the body.

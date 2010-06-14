@@ -138,6 +138,7 @@
 		var cmb_url_elt = action_fr.document.getElementById("ss_query");
 		var cmb_workgroup_elt = action_fr.document.getElementById("ss_wg_id");
 		var cmb_id_elt = action_fr.document.getElementById("ss_id");
+		var cmb_instance = action_fr.document.getElementById("instance");
 		var publish_elt = action_fr.document.getElementById("publish");
 		var bkmk_only = document.getElementById("bookmark-check");
 
@@ -170,7 +171,7 @@
 		}
 
 		for (var p in top.HEURIST.parameters) {
-			if (p != "label" && p != "sid") {
+			if (p != "label" && p != "sid" && p != "instance") {
 				query.push(p + "=" + encodeURIComponent(top.HEURIST.parameters[p]));
 			}
 		}
@@ -179,6 +180,8 @@
 		if (result_style) {
 			query.push("view=" + result_style);
 		}
+		if (top.HEURIST.instance.name)
+			cmb_instance.value = top.HEURIST.instance.name;
 
 		cmb_url_elt.value = "?" + query.join("&");
 		action_elt.form.submit();

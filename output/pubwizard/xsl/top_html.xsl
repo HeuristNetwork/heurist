@@ -21,15 +21,14 @@
     <html>
       <head>
 
-        <style type="text/css">
-          body {font-family:Verdana,Helvetica,Arial,sans-serif; font-size:11px; }
-          td { vertical-align: top; }
-          .reftype {
-          color: #999999;
-
-          }
-        </style>
-        <!--<script type="text/javascript">
+		<style type="text/css">
+			body {font-family:Verdana,Helvetica,Arial,sans-serif; font-size:11px; }
+			td { vertical-align: top; }
+			.reftype {
+				color: #999999;
+			}
+		</style>
+	<!--<script type="text/javascript">
 
           function displayResults(){
 

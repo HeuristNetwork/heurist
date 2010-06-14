@@ -82,17 +82,17 @@ if ($_REQUEST['pub_id']) {
 			break;
 
 		case 'genericxml': //no javascript parameter for genericxml
-			header('Location: http://'.HEURIST_HOST_NAME.'/cocoon'.INSTALL_DIR.'/output/pubwizard/' . $_REQUEST['pub_id']);
+			header('Location: http://'.HEURIST_HOST_NAME.'/cocoon/h3'.INSTALL_DIR.'/output/pubwizard/' . $_REQUEST['pub_id'] . (HEURIST_INSTANCE ? '?instance='.HEURIST_INSTANCE: ''));
 			break;
 					// FIXME:  need to change these so that they reflect the setup file values for installs
 		default:
 
 			if (stylesheet_exists($style)){
-				header('Location: http://'.HEURIST_HOST_NAME.'/cocoon'.INSTALL_DIR.'/output/pubwizard/'. $_REQUEST['pub_id'] .(!$output ? '': '/'. $output). '/' . $style . $js);
+				header('Location: http://'.HEURIST_HOST_NAME.'/cocoon/h3'.INSTALL_DIR.'/output/pubwizard/'. $_REQUEST['pub_id'] .(!$output ? '': '/'. $output). '/' . $style . $js . (HEURIST_INSTANCE ? '?instance='.HEURIST_INSTANCE: ''));
 			} else if (stylesheet_exists("top_".$style)){	//FIXME: temporary while we decide the final naming
-				header('Location: http://'.HEURIST_HOST_NAME.'/cocoon'.INSTALL_DIR.'/output/pubwizard/'. $_REQUEST['pub_id'] .(!$output ? '': '/'. $output). '/' . 'top_'.$style . $js);
+				header('Location: http://'.HEURIST_HOST_NAME.'/cocoon/h3'.INSTALL_DIR.'/output/pubwizard/'. $_REQUEST['pub_id'] .(!$output ? '': '/'. $output). '/' . 'top_'.$style . $js . (HEURIST_INSTANCE ? '?instance='.HEURIST_INSTANCE: ''));
 			}else{
-				die ("Stylesheet doesn't exist");
+				die ("Stylesheet ( ".$style." ) doesn't exist");
 			}
 			break;
  		}

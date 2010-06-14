@@ -1742,7 +1742,7 @@ top.HEURIST.search = {
 		if (p['q']) args.push('q='+escape(p['q']));
         var query_string = args.join('&');
 
-		if (top.HEURIST.instance.name === "") {
+//		if (top.HEURIST.instance.name === "") {
 			var im_container = document.getElementById("publish-image-placeholder");
 			var a = document.createElement("a");
 				a.className = "toolbar-large-icon-link logged-in-only";
@@ -1750,7 +1750,7 @@ top.HEURIST.search = {
 				a.href = "#";
 			a.onclick = function() {
 				if (window.HEURIST.parameters["label"] && window.HEURIST.parameters["sid"]) {
-					window.open(top.HEURIST.basePath+ "output/pubwizard/publish.php?pub_id=" + window.HEURIST.parameters["sid"]);
+					window.open(top.HEURIST.basePath+ "output/pubwizard/publish.php?pub_id=" + window.HEURIST.parameters["sid"] + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : ""));
 				} else {
 					top.HEURIST.util.popupURL(window, top.HEURIST.basePath + 'search/saved/save-search.html?publish=yes' + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : ""));
 				}
@@ -1759,7 +1759,7 @@ top.HEURIST.search = {
 			a.appendChild(document.createTextNode("publish"));
 			im_container.appendChild(a);
 			im_container.appendChild(document.createTextNode(" | "));
-		}
+//		}
 
 	},
 

@@ -220,15 +220,25 @@ function print_result($row) {
 			$file = mysql_fetch_assoc($res);
 			$thumb_url = "../common/lib/resize_image.php?file_id=".$file['file_nonce'];
 		} else {
-			// 603  Full image url
+			// 606  Thumbimage url
 			$res = mysql_query("select rd_val
 			                      from rec_details
 			                     where rd_rec_id = " . $row[2] . "
-		                           and rd_type = 603
+		                           and rd_type = 606
 		                         limit 1");
-			if (mysql_num_rows($res) == 1) {
+			if (mysql_num_rows($res) == 1) {	//FIXME: we should see about uploading this to the file table
 				$row = mysql_fetch_assoc($res);
-				$thumb_url = "../common/lib/resize_image.php?file_url=".htmlspecialchars($row['rd_val']);
+				$thumb_url = "".htmlspecialchars(addslashes($row['rd_val']));
+			}else{	// 603  Full image url
+				$res = mysql_query("select rd_val
+				                      from rec_details
+				                     where rd_rec_id = " . $row[2] . "
+			                           and rd_type = 603
+			                         limit 1");
+				if (mysql_num_rows($res) == 1) {
+					$row = mysql_fetch_assoc($res);
+					$thumb_url = "../common/lib/resize_image.php?file_url=".htmlspecialchars($row['rd_val']);
+				}
 			}
 		}
 		print ",'$thumb_url'";

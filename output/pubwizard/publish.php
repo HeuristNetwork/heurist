@@ -7,8 +7,8 @@
  * (c) 2007 Archaeological Computing Laboratory, University of Sydney
  */
 
-require_once(dirname(__FILE__).'/../../common/connect/db.php');
 require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/connect/db.php');
 require_once('load_output_styles.php');
 
 //______________________________________________________
@@ -167,11 +167,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <body onLoad="init();">
 
 <script src="../../common/lib/heurist.js"></script>	<!-- core HEURIST functions -->
-<script src="../../common/lib/display-preferences.php"></script>	<!-- sets body css classes based on prefs in session -->
+<script src="../../common/lib/display-preferences.php<?=(HEURIST_INSTANCE ? "?instance=".HEURIST_INSTANCE : "")?>"></script>	<!-- sets body css classes based on prefs in session -->
 
  <script type="text/javascript">
  <!--'
-function init(){
+ function init(){
 	var style = '<?= $force_style ?>';
   	setContactLink ();
   	// a hack. NEED TO COME UP WITH A BETTER SOLUTION!! LOOKS fairly ugly when it flashes!
@@ -193,13 +193,13 @@ function setStyle(style, checkIfForced) {
 
 	switch (style) {
 		case 'genericxml':
-		    script = 'xmlexport.php';
+			script = 'xmlexport.php';
 			args = '&style=' + style;
 			addjavascript = false;
 			break;
 
 		case 'endnotexml':
-		script = 'xmlexport.php';
+			script = 'xmlexport.php';
 			args = '&out=xml&style=' + style+'.xsl';
 			addjavascript = false;
 			break;
@@ -223,21 +223,21 @@ function setStyle(style, checkIfForced) {
    var forpreviewframe = '';
    var publink = '';
 
-   if (document.getElementById('chk_force').checked) {
-   		publink = '<?= HEURIST_URL_BASE ?>output/pubwizard/published.php?pub_id='+ pub_id;
+	if (document.getElementById('chk_force').checked) {
+		publink = '<?= HEURIST_URL_BASE ?>output/pubwizard/published.php?pub_id='+ pub_id +'<?=(HEURIST_INSTANCE ? "&instance=".HEURIST_INSTANCE : "")?>';
 		forpreviewframe = publink + args;
-   } else {
-   		publink = '<?= HEURIST_URL_BASE ?>output/pubwizard/published.php?pub_id='+pub_id+args;
+	} else {
+		publink = '<?= HEURIST_URL_BASE ?>output/pubwizard/published.php?pub_id='+ pub_id +'<?=(HEURIST_INSTANCE ? "&instance=".HEURIST_INSTANCE : "")?>'+ args;
 		forpreviewframe = publink+'&depth=1';
-   }
+	}
 
 
-   var iframedisplay = '';
+	var iframedisplay = '';
 
-   	if (addjavascript) {
-		iframedisplay = '<script type="text/javascript" src="'+publink+'&js">\n</script>\n<noscript>\n<iframe width="80%" height="70%" frameborder="0" src="'+ publink +'">\n</iframe>\n</noscript>';
-   	} else {
-   		iframedisplay ='<iframe width="80%" height="70%" frameborder="0" src="'+ publink +'">\n</iframe>';
+	if (addjavascript) {
+		iframedisplay = '<script type="text/javascript" src="'+publink+'&js">\n'+'<'+'/script>\n<noscript>\n<iframe width="80%" height="70%" frameborder="0" src="'+ publink +'">\n</iframe>\n</noscript>';
+	} else {
+		iframedisplay ='<iframe width="80%" height="70%" frameborder="0" src="'+ publink +'">\n</iframe>';
  	}
 
 
@@ -318,7 +318,7 @@ function setContactLink (){
 
 <table border=0 cellspacing=0 cellpadding=0 class=expander>
 <tr>
-<td id=logo-cell rowspan=2><a href="../../"><img src="../../common/images/hlogo-small.jpg" alt=Heurist></a></td>
+<td id=logo-cell rowspan=2><a href="<?= HEURIST_URL_BASE ?>"><img src="<?= HEURIST_URL_BASE ?>common/images/hlogo-small.jpg" alt=Heurist></a></td>
 <td id=title-cell rowspan=2>
 
 <!-- PAGE TITLE -->
@@ -375,7 +375,7 @@ function setContactLink (){
 <input type="hidden" id="force_args" name="force_args" value="html">
 <span style="padding: 5px;"></span><input title="Forces search to be obligatorily processed through the specified style" type="checkbox" name="chk_force" id="chk_force" <?= (@$forced ? 'checked' : '') ?>  onClick="forceSearch();">
 Lock the output to be displayed in this style
-<span style="padding: 5px;"><img src="../../common/images/lb.gif" align="top"><a  href="../../help/index.html?Publish" target="_blank">adding stylesheet</a></span>
+<span style="padding: 5px;"><img src="<?= HEURIST_URL_BASE ?>common/images/lb.gif" align="top"><a  href="../../help/index.html?Publish" target="_blank">adding stylesheet</a></span>
 </form>
 </div>
 </div>
@@ -395,13 +395,13 @@ Lock the output to be displayed in this style
 <div class="breaker"></div>
 <div><span id=wizard-subheading >Embed the code below in your webpage or use:</span><span style="padding:5px;"></span><span id = "emb-span"></span>
 <span id ="link-span">
-<a id="dynalink" href="published.php?pub_id=<?= $_REQUEST['pub_id'] ?>&style=<?= $force_style; ?>" target="_blank">link to published page</a> [opens new window - copy and paste to your web page].</span></div>
+<a id="dynalink" href="published.php?pub_id=<?= $_REQUEST['pub_id'] ?><?=(HEURIST_INSTANCE ? "&instance=".HEURIST_INSTANCE : "")?>&style=<?= $force_style; ?>" target="_blank">link to published page</a> [opens new window - copy and paste to your web page].</span></div>
 <div class="breaker"></div>
 
 <span class="spacer"></span>
 <textarea id="embed" style="width: 70%; height: 90px;">&lt;iframe width=&quot;80%&quot; height=&quot;70%&quot; frameborder=&quot;0&quot; src=&quot;published.php?pub_id=<?= $_REQUEST['pub_id'] ?>&style=<?= $force_style; ?>&quot;&gt;&lt;/iframe&gt;" </textarea>
 <div class="breaker"></div><div class="breaker"></div>
-<div id=query-highlight>&nbsp;<img src="../../common/images/small-magglass.gif" align="absbottom"/> Search query:
+<div id=query-highlight>&nbsp;<img src="<?= HEURIST_URL_BASE ?>common/images/small-magglass.gif" align="absbottom"/> Search query:
 <?php echo $query;?>
 
 </div>

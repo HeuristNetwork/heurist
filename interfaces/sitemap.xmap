@@ -11,6 +11,7 @@
 		<installPath></installPath>
 		<serverName>h3.heuristscholar.org</serverName>
 		<explorePath>/interfaces/explore</explorePath>
+		<pubPath>/output/pubwizard</pubPath>
 		<cocoonBasePath>/cocoon/h3</cocoonBasePath>
 		<cocoonAppPath>/cocoon/h3/explore</cocoonAppPath>
 		<cocoonPubPath>/cocoon/h3/output/pubwizard</cocoonPubPath>
@@ -40,8 +41,8 @@
         | Mount everything else by calling the sitemap.xmap file located
         | in the requested sub-folder in the 'output directory'.
         +-->
-    <map:match pattern="output/*/**">
-      <map:mount check-reload="yes" src="../output/{1}/" uri-prefix="output/{1}/"/>
+    <map:match pattern="^(.*)output/pubwizard/.*$" type="regexp">
+      <map:mount check-reload="yes" src="../output/pubwizard/" uri-prefix="{1}output/pubwizard/"/>
     </map:match>
 
     <!--+

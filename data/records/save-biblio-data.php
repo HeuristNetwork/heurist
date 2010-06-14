@@ -369,14 +369,15 @@ function upload_file($name, $type, $tmp_name, $error, $size) {
 		}
 	}
 
-	$path = '';	/* can change this to something more complicated later on, to prevent crowding the upload directory */
+	$path = '';	/* can change this to something more complicated later on, to prevent crowding the upload directory
+				 the path MUST start and NOT END with a slash so that  "UPLOAD_PATH . $path . '/' .$file_id" is valid */
 
 	$file_size = '';
 	if ($size < 1000) $file_size = $size . ' bytes';
 	else if ($size < 1000000) $file_size = (round($size / 102.4)/10) . ' kb';
 	else $file_size = (round($size / (1024*102.4))/10) . ' Mb';
 
-	$res = mysql__insert('files', array('file_orig_name' => $name, 'file_path' => '', 'file_user_id' => get_user_id(),
+	$res = mysql__insert('files', array('file_orig_name' => $name, 'file_path' => $path, 'file_user_id' => get_user_id(),
 	                                    'file_date' => date('Y-m-d H:i:s'),
 	                                    'file_typedescription' => $file_description, 'file_mimetype' => $mimetype,
 	                                    'file_size' => $file_size));
@@ -385,7 +386,7 @@ function upload_file($name, $type, $tmp_name, $error, $size) {
 	mysql_query('update files set file_nonce = "' . addslashes(sha1($file_id.'.'.rand())) . '" where file_id = ' . $file_id);
 		/* nonce is a random value used to download the file */
 
-	if (move_uploaded_file($tmp_name, UPLOAD_PATH . $path . '/' . $file_id)) {
+	if (move_uploaded_file($tmp_name, UPLOAD_PATH . $path .'/'. $file_id)) {
 		return $file_id;
 	} else {
 		/* something messed up ... make a note of it and move on */

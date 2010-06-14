@@ -1,6 +1,6 @@
 <?php
 //TODO:  add code here to read db.ini and any other ini file tha twe come up with.
-define('HEURIST_TOP_DIRS',"admin|common|data|external|hapi|help|import|interface|ouput|search|tools|user");	// this is the path from the heurist code base root. Only change if file moves.
+define('HEURIST_TOP_DIRS',"admin|common|data|external|hapi|help|import|interface|output|search|tools|user");	// this is the path from the heurist code base root. Only change if file moves.
 define('HEURIST_SERVER_NAME', @$_SERVER["SERVER_NAME"]);	// this will read the server host name for the configured name.
 
 if (HEURIST_SERVER_NAME) {
@@ -24,7 +24,8 @@ if($installDir != @$_SERVER["SCRIPT_NAME"]) {	// this should be the path differe
 define('HEURIST_DEFAULT_INSTANCE','');	//default instance when the URI is abiguous about the instance
 define('HEURIST_REQUEST_URI',@$_SERVER["REQUEST_URI"]);
 define('HEURIST_DOCUMENT_ROOT',@$_SERVER["DOCUMENT_ROOT"]);
-define('HEURIST_UPLOAD_BASEPATH',HEURIST_DOCUMENT_ROOT.'/uploaded-heurist-files/');
+//define('HEURIST_UPLOAD_BASEPATH',HEURIST_DOCUMENT_ROOT.'/uploaded-heurist-files');
+define('HEURIST_UPLOAD_BASEPATH','/var/www/htdocs/uploaded-heurist-files');
 define('HEURIST_SITE_PATH',INSTALL_DIR.'/');
 define('HEURIST_RELATIVE_INSTALL_PATH',INSTALL_DIR.'/');
 define('HEURIST_URL_BASE','http://'.HEURIST_HOST_NAME.HEURIST_SITE_PATH);

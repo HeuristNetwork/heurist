@@ -61,7 +61,7 @@
 		</map:match>
 
 		<map:match pattern="xml2/*">
-			<map:generate src="{global:heuristBaseURL}output/export/xml/hml.php?q=ids:{1}&amp;depth=2" label="hml"/>
+			<map:generate src="{global:heuristBaseURL}output/export/xml/hml.php?instance={request-param:instance}&amp;q=ids:{1}&amp;depth=2" label="hml"/>
 			<map:transform src="xsl/heurist_legacy_xml.xsl"/>
 			<map:serialize type="xml"/>
 		</map:match>
