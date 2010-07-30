@@ -1,5 +1,9 @@
 if (! window["HAPI"]) {
-	alert("WOOT requires HAPI!  Please load HAPI first");
+	alert(
+		"It seems the Heurist API libraries have failed to load.\n\n" +
+		"This can be caused by network problems, so please try relaoding the page.\n\n" +
+		"If the problem persists, please email support@acl.arts.usyd.edu.au and tell us the URL you are accessing."
+	);
 }
 
 var HWootException = function(text) { HException.call(this, text, "HWootException"); };
@@ -63,7 +67,8 @@ HAPI.WOOT = function() {
 		this.number = number || null;
 		this.text = text || "";
 		this.ownerId = ownerId || HCurrentUser.getID();
-		this.ownerRealName = HUserManager.getUserById(this.ownerId).getRealName();
+		var user = HUserManager.getUserById(this.ownerId);
+		this.ownerRealName = user ? user.getRealName() : "Unknown user";
 		this.editorId = editorId || HCurrentUser.getID();
 		this.permissions = permissions? permissions.slice(0) : HAPI.WOOT.DEFAULT_CHUNK_PERMISSIONS;
 		this.modified = false;
@@ -355,7 +360,8 @@ HAPI.WOOT.GUI = function() {
 		if (! woot.chunks.length) {
 			this.showEmptyMessage();
 		}
-		this.div.className = "woot-editor";
+		// start in edit mode
+		this.div.className = "woot-editor edit";
 	};
 	WootEditor.prototype.showEmptyMessage = function() {
 		if (! this.emptyMessageDiv) {
@@ -424,7 +430,7 @@ HAPI.WOOT.GUI = function() {
 	WootEditor.prototype.createModeDiv = function() {
 		var that = this;
 
-		this.edit = false;
+		this.edit = true;
 
 		var editLink = document.createElement("a");
 			editLink.className = "woot-mode-edit-link";
@@ -440,7 +446,8 @@ HAPI.WOOT.GUI = function() {
 			viewLink.className = "woot-mode-view-link";
 			viewLink.href = "#";
 			viewLink.onclick = function() {
-				that.edit = false;;
+				that.save();
+				that.edit = false;
 				that.div.className = that.div.className.replace(/ edit/g, "");
 				return false;
 			};
@@ -658,10 +665,10 @@ HAPI.WOOT.GUI = function() {
 
 				content_css: HAPI.HeuristBaseURL + "css/woot.css",
 				theme: "advanced",
-				plugins: "inlinepopups,nonbreaking,permissions,save",
+				plugins: "inlinepopups,nonbreaking,permissions,save,hrecords",
 				inline_styles: false,
 
-				theme_advanced_buttons1: "save,cancel,|,bold,italic,|,bullist,numlist,|,link,unlink,|,formatselect,hr,nonbreaking,|,image,|,code,|,undo,redo,|,permissions",
+				theme_advanced_buttons1: "save,cancel,|,permissions,|,link,unlink,image,hrecords,|,formatselect,hr,bold,italic,bullist,numlist,|,code,|,undo,redo",
 				theme_advanced_buttons2: "",
 				theme_advanced_buttons3: "",
 				theme_advanced_blockformats: "p,h1,h2,h3",

@@ -23,9 +23,9 @@ $use_site_hierarchy = array_key_exists('site_hierarchy', $_REQUEST);
 <html>
  <head><title>Heurist - Add bookmark (disambiguation)</title>
 
-<link rel="stylesheet" type="text/css" href="../../../css/newshsseri.css">
-<link rel="icon" href="../../../favicon.ico" type="image/x-icon">
-<link rel="shortcut icon" href="../../../favicon.ico" type="image/x-icon">
+<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>css/newshsseri.css">
+<link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
+<link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
 
 
 <style type="text/css">

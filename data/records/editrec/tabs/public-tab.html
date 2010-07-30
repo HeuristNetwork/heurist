@@ -4,14 +4,14 @@
   <link rel=stylesheet href="../../../../css/heurist-relation.css">
   <link rel=stylesheet href="../../../../css/heurist-edit-tab.css">
  </head>
- <body onload="onshow();">
+ <body onLoad="onshow();">
   <script src="../../../../common/lib/heurist.js"></script>
   <script src="../../../../common/lib/display-preferences.php"></script>
 
 		<form method=post enctype="multipart/form-data"
 			onsubmit="return top.HEURIST.edit.requiredInputsOK(window.HEURIST.inputs, window);"
-			jsonAction="/h3/data/records/save-biblio-data.php"
-			action="/h3/data/records/save-biblio-data.php" target=save-frame>
+			jsonAction="/data/records/save-biblio-data.php"
+			action="/data/records/save-biblio-data.php" target=save-frame>
 			<input type=hidden name=save-mode id=save-mode>
 			<input type=hidden name=notes id=notes>
 			<table><tbody id=all-inputs></tbody></table>

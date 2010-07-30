@@ -707,7 +707,7 @@ top.HEURIST.edit = {
 		var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
 		var closeButton = this.document.createElement("img");
-			closeButton.src = "../img/black-cross.gif";
+			closeButton.src = top.HEURIST.basePath + "common/images/black-cross.gif";
 			closeButton.style.width = "12px";
 			closeButton.style.height = "12px";
 			closeButton.style.cursor = "pointer";

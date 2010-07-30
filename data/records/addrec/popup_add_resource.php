@@ -12,10 +12,10 @@ mysql_connection_db_select(DATABASE);
 ?>
 <html>
  <head>
-  <link rel=stylesheet href=../../../css/heurist.css>
+  <link rel=stylesheet href="<?=HEURIST_SITE_PATH?>css/heurist.css">
   <title>Add new record</title>
 
-  <script src=../../../external/jquery/jquery.js></script>
+  <script src="<?=HEURIST_SITE_PATH?>"external/jquery/jquery.js></script>
 
   <script>
 

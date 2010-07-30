@@ -1,29 +1,17 @@
 <html>
  <head>
-  <title>New record</title>
+  <title>Add new record</title>
 
-  <link rel=stylesheet href="../../css/heurist.css">
-  <link rel=stylesheet href="../../css/mini.css">
+  <link rel=stylesheet href="../../../css/import.css">
+  <!-- link rel=stylesheet href="../../css/mini.css" -->
  </head>
 
  <body width=600 height=400>
   <script src="../../../common/lib/heurist.js"></script>
   <script src="../../../common/lib/display-preferences.php"></script>
-  <table border=0 cellspacing=0 cellpadding=0 class=expander>
-   <tr>
-    <td style="height: 60px; padding: 5px;">
-     <div>Add new <b><span id=reftype-val></span></b></div>
-     <div><span id=title-val></span></div>
-    </td>
-    <td style="padding-right: 1ex; text-align: right;">
-     <input type=button onclick="window.HEURIST.edit.save();" value="Save new record" style="font-weight: bold;">
-    </td>
-   </tr>
-   <tr><td colspan=2 style="border-top: 1px solid gray;">
-    <iframe frameborder=0 class=tab id=edit-frame></iframe>
-   </td></tr>
-  </table>
-
+<div id="search"><b><span id=reftype-val></span></b><span id=title-val></span></div>    
+<div id="results"><iframe frameborder=0 class=tab id=edit-frame style="width: 100%; height: 100%;"></iframe></div>
+<div id="add_records_footer"><input type=button onClick="window.HEURIST.edit.save();" value="Save new record"></div>
   <script>
 
 window.HEURIST.edit = {
@@ -74,7 +62,7 @@ if (! reftype) {
 		var reftype = reftypeDropdown.options[reftypeDropdown.selectedIndex].value;
 
 		var editFrame = document.getElementById("edit-frame");
-		editFrame.src = "../editrec/tab/public-tab.html?reftype="+reftype;
+		editFrame.src = "../editrec/tabs/H3-public-tab.html?reftype="+reftype;
 		editFrame.style.display = "block";
 
 		reftypeDropdown.onchange = setReftype;
@@ -123,7 +111,7 @@ if (! reftype) {
 
 } else {
 	var editFrame = document.getElementById("edit-frame");
-	editFrame.src = "../editrec/tab/public-tab.html?reftype="+reftype+"&title="+encodeURIComponent(title);
+	editFrame.src = "../editrec/tabs/public-tab.html?reftype="+reftype+"&title="+encodeURIComponent(title);
 	editFrame.style.display = "block";
 
 	document.getElementById("reftype-val").appendChild(document.createTextNode(top.HEURIST.reftypes.names[reftype]));
