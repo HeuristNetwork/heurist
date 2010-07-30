@@ -6,6 +6,7 @@ var g_recTypeSelect = null;							//Record Type Selection object
 var g_recDetailSelect = null;					//Detail Type Selection object
 var g_textDetailSelect = null;
 var g_text2DetailSelect = null;
+var g_delimiterSelect = null;
 var g_queryInput = null;
 var g_dtIDsCheckbox = null;
 var g_detailTypes = [];
@@ -76,6 +77,14 @@ function getDetailTypes(){
 	g_dtIDsCheckbox.type = "checkbox";
 	g_dtIDsCheckbox.onchange = function(){ updateExportMap() };
 	e.appendChild(g_dtIDsCheckbox);
+
+	//create selection for choosing the delimiter
+	e.appendChild(document.createElement("br"));
+	e.appendChild(document.createTextNode("use "));
+	g_delimiterSelect = e.appendChild(document.createElement("select"));
+	addOpt(g_delimiterSelect,",","comma"); //default
+	addOpt(g_delimiterSelect,"\t","tab");
+	e.appendChild(document.createTextNode(" as delimiter"));
 
 	//add button for getting the records
 	e.appendChild(document.createElement("br"));
@@ -187,7 +196,7 @@ function getRecords() {
 
 
 function showRecordData(hRecords) {
-	var strDelim = ",";
+	var strDelim = g_delimiterSelect.value;
 	var strRowTerm = "\n";
 	var e = document.getElementById("records-p");
 	//remove textarea for multiple exports
@@ -252,8 +261,10 @@ function csv_escape(str) {
 	if (! str) {
 		return '';
 	}
-	if (str.match(/[,"]/)) {
-		return '"' + str.replace(/"/g, '""') + '"';
+	if (g_delimiterSelect.value == "," && str.match(/[",\n\t]/)) {
+		return '"' + str.replace(/\n/g,"\\n").replace(/\t/g,"\\t").replace(/"/g, '""') + '"';
+	}else if (str.match(/[\n\t]/)) {
+		return str.replace(/\n/g,"\\n").replace(/\t/g,"\\t");
 	}
 	return str;
 }

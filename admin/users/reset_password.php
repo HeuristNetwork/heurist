@@ -1,7 +1,7 @@
 <html>
  <head>
   <title>ACL/SHSSERI Password Reset</title>
-  <link rel="stylesheet" type="text/css" href="../../css/newshsseri.css">
+  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>css/newshsseri.css">
  </head>
  <body>
  <div style="padding: 10px;">
@@ -83,8 +83,6 @@ if (!$_REQUEST['username']  ||  $error) {
 </form>
 <?php
 }
-
-
 ?>
  </div>
  </body>

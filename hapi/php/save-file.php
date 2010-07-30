@@ -3,7 +3,7 @@
 require_once(dirname(__FILE__)."/../../common/connect/cred.php");
 require_once(dirname(__FILE__)."/../../common/connect/db.php");
 
-
+error_log("in save-file baseURL = ".HEURIST_URL_BASE );
 if (! defined("USING-XSS")) {
 	function outputAsRedirect($text) {
 		$val = base64_encode($text);
@@ -36,6 +36,7 @@ if ($fileID) {
 	$file = mysql_fetch_assoc($res);
 	$thumbnailURL = "http://".HEURIST_INSTANCE_PREFIX.HEURIST_SERVER_NAME.HEURIST_SITE_PATH."common/lib/resize_image.php?file_id=" . $file["file_nonce"];
 	$URL = "http://".HEURIST_INSTANCE_PREFIX.HEURIST_SERVER_NAME.HEURIST_SITE_PATH."data/files/fetch_file.php/" . urlencode($file["file_orig_name"]) . "?file_id=" . $file["file_nonce"];
+error_log("url = ". $URL);
 	print json_format(array("file" => array(
 		$file["file_id"], $file["file_orig_name"], $file["file_size"], $file["file_mimetype"], $URL, $thumbnailURL, $file["file_description"]
 	)));
@@ -63,6 +64,8 @@ function upload_file($name, $type, $tmp_name, $error, $size, $description) {
 	 * and return the file_id for that record.
 	 * This will be zero if anything went pear-shaped along the way.
 	 */
+error_log("in save-file upload_file  name = ". $name. " type = ". $type. " error = ". $error. " size = " . $size . " uploadPath = ". UPLOAD_PATH );
+
 	if ($size <= 0  ||  $error) { error_log("size is $size, error is $error"); return 0; }
 
 	/* clean up the provided file name -- these characters shouldn't make it through anyway */

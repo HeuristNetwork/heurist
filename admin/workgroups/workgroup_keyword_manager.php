@@ -19,7 +19,7 @@ mysql_connection_db_select(DATABASE);
 <head>
  <title>Workgroup tags</title>
 
- <link rel="stylesheet" href="../../css/lite.css">
+ <link rel="stylesheet" href="<?=HEURIST_SITE_PATH?>css/lite.css">
  <style type="text/css">
 body { overflow: auto; }
 .tbox { border: 1px solid black; margin: 1px; }

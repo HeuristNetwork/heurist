@@ -21,7 +21,7 @@
 <html>
  <head>
   <title>Upload reference type icon</title>
-  <link rel="stylesheet" type="text/css" href="../../css/newshsseri.css">
+  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>css/newshsseri.css">
 
   <style type="text/css">
 .success { font-weight: bold; color: green; margin-left: 3px; }

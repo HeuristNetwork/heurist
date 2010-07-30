@@ -1,44 +1,7 @@
 <html>
  <head>
-  <link rel=stylesheet href="../../css/heurist.css">
+  <link rel=stylesheet href="../../css/import.css">
   <title>Find records</title>
-
-  <style>
-.record {
-	font-size: 85%;
-	padding: 0;
-	margin: 0;
-	padding-left: 1ex;
-	line-height: 1.2em;
-	height: 1.2em;
-	overflow: hidden;
-}
-body { margin: 0; padding: 0; overflow: hidden; min-width: 300; min-height : 200; }
-
-/* need overflow: auto on both of these elements:
-   IE(6) spazzes out if #results doesn't have it,
-   firefox spazzes out if #results-container doesn't have it,
- */
-#results-container { overflow: auto; }
-#results { position: absolute; overflow: auto; }
-
-#results .record { cursor: pointer; line-height: 1.5em; height: 1.5em; }
-#results .record * { vertical-align: middle; }
-#results .record .id { font-weight: bold; padding-right: 1ex; float: left; text-align: right; width: 7ex; }
-#results .record .title { padding: 0; margin: 0; padding-left: 6px; line-height: 1.5em; }
-
-.radio *, #t, #t * { font-size: 11px; line-height: 15px;  vertical-align: middle; }
-
-input { padding: 0; margin: 0; }
-
-#help-div {
-	position: absolute;
-	height: 1em; width: 100%;
-	font-size: 11px;
-	padding: 1px;
-}
-
-  </style>
  </head>
  <body width="500" height="250" >
   <script src="../../common/lib/heurist.js"></script>
@@ -48,15 +11,14 @@ if (window == top) {
 }
   </script>
 
-  <form onsubmit="this.submit(); return false;">
-  <table border=0 cellspacing=0 cellpadding=0 class=expander>
-   <tr><td style="padding: 5px; height: 30px; vertical-align: middle; background-color: #f0f0f0;">
+  <form onSubmit="this.submit(); return false;">
+  <div id="search">
     <table border=0 cellspacing=0 cellpadding=0 class=expander style="margin-bottom: 1em;"><tr>
      <td style="width: 40px; text-align: right;">Find&nbsp;</td>
      <td style="padding: 5px;">
       <div style="width: 100%;">
-       <div><input autocomplete=off type=text name=q id=q onchange="top.HEURIST.util.setDisplayPreference('record-search-string', value);" style="border: 1px solid black; padding: 1px 18px 1px 2px; margin: 0; width: 100%;"></div>
-       <div id=help-div>Enter part of word and click <img src="../../common/images/tiny-magglass.gif" onclick="document.forms[0].submit()" style="vertical-align: middle;"></div>
+       <div><input autocomplete=off type=text name=q id=q onChange="top.HEURIST.util.setDisplayPreference('record-search-string', value);" style="padding: 1px 18px 1px 2px; margin: 0; width: 100%;"></div>
+       <div id=help-div>Enter part of word and click <img src="../../common/images/tiny-magglass.gif" onClick="document.forms[0].submit()" style="vertical-align: middle;"></div>
       </div>
      </td>
      <td style="width: 1px; vertical-align: middle;">
@@ -67,21 +29,21 @@ if (window == top) {
       <input type=submit value=Find style="display: none; font-weight: bold; padding: 0 1ex; margin-right: 1ex;">
      </td>
      <td style="width: 120px;" title="Restrict search to this record type">
-      <select id=t name=t style="width: 100%;" onchange="top.HEURIST.util.setDisplayPreference('record-search-type', options[selectedIndex].value);"></select>
+      <select id=t name=t style="width: 100%;" onChange="top.HEURIST.util.setDisplayPreference('record-search-type', options[selectedIndex].value);"></select>
      </td>
      <td style="width: 80px; padding: 0 5px;">
       <div class=radio><nobr><label for=r-recent><input type=radio name=r id=r-recent value=recent> recent</label></nobr></div>
       <div class=radio><nobr><label for=r-all><input type=radio name=r id=r-all value=all> all records</label></nobr></div>
      </td>
     </tr></table>
-   </td></tr>
-   <tr><td>
-    <div id=results-container class=expander style="overflow: hidden;"><div id=results style="width: 500px; height: 170px; background-color: white;" class=autosize2>&nbsp;</div></div>
-   </td></tr>
-   <tr><td style="padding: 5px; height: 20px; background-color: #f0f0f0;">
+   </div>
+<!--   <div id=results-container class=expander style="overflow: hidden;">-->
+    	<div id=results></div>
+<!--   </div>-->
+   <div id="add_records_footer">
     Didn't find what you were looking for?
-    <a href="#" onclick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'data/records/editrec/mini-new.html?reftype='+document.getElementById('t').value+'&amp;title='+document.getElementById('q').value, { callback: function(title, bd, bibID) { if (bibID) { window.close(bibID, title); } else { document.forms[0].submit(); } } }); return false;">Add a new record</a>
-   </td></tr>
+    <a href="#" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'data/records/addrec/mini-new.html?reftype='+document.getElementById('t').value+'&amp;title='+document.getElementById('q').value, { callback: function(title, bd, bibID) { if (bibID) { window.close(bibID, title); } else { document.forms[0].submit(); } } }); return false;"><img src="../../common/images/add-record-small.png" />Add a new record</a>
+   </div>
   </table>
   </form>
 
@@ -136,7 +98,7 @@ function notifyResults(results) {
 		bibID.className = "id";
 
 		img = recordDiv.appendChild(document.createElement("img"));
-		img.src = top.HEURIST.basePath + "common/images/reftype-icons/" + (record[3]? record[3] : "blank") + ".gif";
+		img.src = top.HEURIST.basePath + "common/images/reftype-icons/" + (record[3]? record[3] : "blank") + ".png";
 
 		title = recordDiv.appendChild(document.createElement("span"));
 		title.appendChild(document.createTextNode(record[1]));

@@ -3498,7 +3498,7 @@ var HeuristScholarDB = new HStorageManager();
 				baseURL = baseURL.replace(/^http:\/\//, "http://" + Math.round(Math.random()*100) + ".");
 			}
 			// Insert XSS incantations if HAPI.key is set.
-			newForm.action = baseURL + (HAPI.key? ("xss.php/save-file?key=" + encodeURIComponent(HAPI.key)) : "save-file");
+			newForm.action = baseURL + (HAPI.key? ("hapi/php/xss.php?method=save-file&key=" + encodeURIComponent(HAPI.key)) : "save-file");
 
 		doc.body.appendChild(newForm);
 
@@ -3534,7 +3534,7 @@ var HeuristScholarDB = new HStorageManager();
 			var data;
 			try {
 				data = HAPI.XHR.evalJSON(HAPI.base64.decode(decodeURIComponent(newIframe.contentWindow.document.location.hash.substring(6))));	// #data=....
-			} catch (e) { return; }
+			} catch (e) { return; } // return seems to try again
 
 			var response = (data  ||  { error: "internal Heurist error while uploading file" });
 			var newFile, d;
@@ -3555,6 +3555,7 @@ var HeuristScholarDB = new HStorageManager();
 
 				if (saver.onsave) { callback = function() { saver.onsave(fileInput, newFile); }; }
 			}
+
 			newIframe.onload = null;
 
 			// housekeeping

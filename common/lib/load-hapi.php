@@ -36,7 +36,7 @@ if (@$_REQUEST["instance"]) {
 	define("HEURIST_INSTANCE", $_REQUEST["instance"]);
 	define("HOST", $_SERVER["HTTP_HOST"]);
 }
-
+error_log("in loadhapi");
 require_once(dirname(__FILE__)."/../config/heurist-instances.php");
 require_once(dirname(__FILE__)."/../connect/db.php");
 

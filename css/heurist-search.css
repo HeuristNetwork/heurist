@@ -322,6 +322,7 @@ iframe.info {
 	border: 1px solid #bfbfbf;
 	padding: 6px;
 	background:transparent url(../common/images/left-panel-bg.png) repeat scroll 0 0;
+	position: relative;
 }
 
 .result_thumb .thumbnail {
@@ -687,20 +688,20 @@ div.icons input { /* positions input check box above toolbox to allow full funct
 	background-image:url("../common/images/toolbox.png");
 	background-position:0 bottom;
 	background-repeat:no-repeat;
-	bottom:0;
+	bottom:7px;
 	height:16px;
-	right:0;
+	right:6px;
 	overflow:hidden;
 	padding-top:24px;
 	position:absolute;
 	width:16px;
 }
 #toolbox:hover  {
-	background-position:-20px bottom;
+	background-position:-17px bottom;
 	clear:none;
     height:110px;
 	width:85px;
-    right:-69px;
+    right:-60px;
 	z-index:4;
 
 }

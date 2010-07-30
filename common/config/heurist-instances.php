@@ -1,10 +1,9 @@
 <?php
-if (defined('H_INSTANCE_RAN')) return;
 
 require_once('heurist-ini.php');
 $db = HEURIST_COMMON_DB;	//the database which holds the database configuration information
 $db_prefix = HEURIST_DB_PREFIX;	//database name prefix for instance
-
+//error_log("in h-instance");
 $uploads = HEURIST_UPLOAD_BASEPATH;
 $instances = array();
 
@@ -33,9 +32,11 @@ function get_all_instances() {
 
 function define_constants($instance) {
 	global $instances;
+//error_log("in h-instance constants");
+
 	if (defined('H_INSTANCE_RAN')) {
 	 	if ($instance != HEURIST_INSTANCE ) error_log("trying to redefine instance from '".HEURIST_INSTANCE. "' to '".$instance."'" );
-	 	error_log("Current session instance is '".$_SESSION['heurist_last_used_instance']."'");
+//	 	error_log("Current session instance is '".$_SESSION['heurist_last_used_instance']."'");
 	 	return;
 	 }
 
@@ -73,6 +74,9 @@ function define_constants($instance) {
 	define('USER_GROUPS_USER_ID_FIELD', 'ug_user_id');
 	define('USER_GROUPS_GROUP_ID_FIELD', 'ug_group_id');
 	define('USER_GROUPS_ROLE_FIELD', 'ug_role');
+
+	define('H_INSTANCE_RAN','1');
+
 }
 
 /* the constant HEURIST_INSTANCE might have been set, to indicate
@@ -104,6 +108,7 @@ if (@$_REQUEST["instance"]) {
 } else {
 	$instance = '';	// CHECKME: check to see if popup frames inherit the instance or may need to pass this in client call code
 }
+//error_log("in h-instance = ".$instance);
 
 if (array_key_exists(@$instance, $instances)) {
 	define_constants($instance);
@@ -121,6 +126,5 @@ if (array_key_exists(@$instance, $instances)) {
 	die('can\'t load/find configuration parameters for host :'.HOST_BASE.' and instance = '. $instance);
 }
 
-define('H_INSTANCE_RAN','1');
 	//never ever ever ever again will I leave blank lines outside the closing php tag
 ?>

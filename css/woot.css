@@ -19,13 +19,13 @@ p { margin: 0.25ex 0; }
 }
 .woot-title { font-weight: bold; margin-bottom: 0.5ex; }
 .woot-mode-div{
- text-align:right;
+ text-align:left; /* changed from right to left */
  font-size: 90%;
 }
 
 .woot-mode-div input{
  margin: 0;
- 
+
 }
 .woot-chunk {
 	border: 1px solid transparent;
@@ -40,7 +40,7 @@ p { margin: 0.25ex 0; }
 }
 .woot-chunk .owner-text,
 .woot-chunk .add-button {
-	font-size: 75%;
+	font-size: 85%;
 	float: right;
 	margin-left: 1ex;
 	color: lightgray;
@@ -84,9 +84,9 @@ div.woot-chunk:hover .owner-text { color: black; }
 .defaultSkin .permissions-button img.mceIcon {
 	width: 80px !important;
 	height: 16px !important;
-	background: transparent url(/tinymce/plugins/permissions/img/permissions.png) no-repeat scroll 2px 2px;
+	background: transparent url(../../external/tinymce/jscripts/tiny_mce/plugins/permissions/img/permissions.png) no-repeat scroll 2px 2px;
 }
-.defaultSkin .permissions-button.mceButtonpublic img.mceIcon { background-position: 2px 2px !important; }
-.defaultSkin .permissions-button.mceButtonprivate img.mceIcon { background-position: 2px -14px !important; }
-.defaultSkin .permissions-button.mceButtonpublic-ro img.mceIcon { background-position: 2px -30px !important; }
-.defaultSkin .permissions-button.mceButtoncustom img.mceIcon { background-position: 2px -46px !important; }
+.defaultSkin .permissions-button.mceButtonpublic img.mceIcon { background-position: 2px 0 !important; }
+.defaultSkin .permissions-button.mceButtonprivate img.mceIcon { background-position: 2px -20px !important; }
+.defaultSkin .permissions-button.mceButtonpublic-ro img.mceIcon { background-position: 2px -40px !important; }
+.defaultSkin .permissions-button.mceButtoncustom img.mceIcon { background-position: 2px -60px !important; }

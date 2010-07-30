@@ -217,11 +217,12 @@ if (@$urls) {
 </head>
 
 <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>css/heurist.css">
+<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>css/import.css">
 
 <script src="titlegrabber.js"></script>
 <script src="fileimport.js"></script>
 
-<body width=800 height=500>
+<body width=600 height=400>
 
 <script src="<?=HEURIST_SITE_PATH?>common/lib/heurist.js"></script>
 <script src="<?=HEURIST_SITE_PATH?>common/lib/heurist-obj-user.php"></script>
@@ -302,7 +303,7 @@ function unCheckAll() {
 
 <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" height="16">
   <tr>
-    <td valign="top" height="16"><b><font size="4">Import bookmarks</font></b></td>
+    <td><H3>Import bookmarks</H3></td>
   </tr>
 </table>
 

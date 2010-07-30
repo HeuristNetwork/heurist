@@ -2,9 +2,11 @@
  <head>
   <title>Heurist Flexible Import System</title>
 
-  <script src="../../../common/lib/load-hapi.php"></script>
+  <!--script src="../../../common/lib/load-hapi.php"></script-->
   <script>
-      if (! (HCurrentUser.isLoggedIn()  &&  HCurrentUser.isAdministrator())) window.location = HAPI.HeuristBaseURL + "common/connect/login.php";
+	if (! (HCurrentUser.isLoggedIn()  &&  HCurrentUser.isAdministrator())){
+	//	window.location = HAPI.HeuristBaseURL + "common/connect/login.php";
+	}
   </script>
 
   <script src="../../../hapi/js/goi.js"></script>

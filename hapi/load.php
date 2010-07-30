@@ -29,6 +29,7 @@ else if (preg_match('/^(d|devel)$/i', $_REQUEST["v"])) {
 else {
 	$version = $_REQUEST["v"];
 }
+error_log("in load");
 
 
 $scripts = array(
