@@ -44,7 +44,7 @@
 							</xsl:when>
 							<!-- 221 = AssociatedFile,  231 = Associated File -->
 							<xsl:when test="@id=221  or  @id=231">
-								<a href="{file_fetch_url}">
+								<a href="{file_fetch_url}?instance={$instanceName}">
 									<xsl:value-of select="file_orig_name"/>
 								</a>
 							</xsl:when>

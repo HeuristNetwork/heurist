@@ -28,7 +28,7 @@
 				<title id="{$currentid}">
 					<xsl:value-of select="export/references/reference/title"/>
 				</title>
-				<script src="{$appBase}external/jquery/jquery.js"/>
+				<script src="{$hBase}external/jquery/jquery.js"/>
 				<script>
 					var itemPath = "<xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>item/";
 					var imgpath = "<xsl:value-of select="$hBase"/>common/images/reftype-icons/";
@@ -121,25 +121,10 @@
 			</head>
 			<body pub_id="{/export/@pub_id}">
 				<div id="header">
-					<!-- h2 -->
-					<!-- PRESENTATION  for KML Map 103, Historical Event 51, KML file 165 -->
-					<!-- xsl:if test="export/references/reference/reftype[@id=103 or @id=51 or @id=165 or @id=122 or @id=57]">
-							<xsl:call-template name="renderAppropriateLegend">
-								<xsl:with-param name="record" select="export/references/reference"/>
-								<xsl:with-param name="themeToUse" select="$focusTheme"/>
-							</xsl:call-template>
-						</xsl:if>
-						<span style="margin-left:5px;">
-							<xsl:call-template name="minimise_text">
-								<xsl:with-param name="sstring"><xsl:value-of select="export/references/reference/title"/></xsl:with-param>
-							</xsl:call-template>
-						</span>
-					</h2 -->
-					<div id="logo">
-						<a href="{$cocoonBase}item/{$home-id}/?instance={$instanceName}">
-							<xsl:value-of select="$site-title"/>
-						</a>
-					</div>
+					<a href="{$hBase}search/h3-search.html?instance={$instanceName}">
+						<div id="logo"></div>
+					</a>
+					<div id="instance-name"><xsl:value-of select="$instanceName"/></div>
 					<div id="pagetopcolour" class="colourcelltwo" style="overflow:visible;">
 						<div style="padding-left:20px ">
 							<table>
@@ -198,7 +183,7 @@
 
 							<span style="padding-right:5px; padding-left:5px; vertical-align:top;">
 								<a href="#" onclick="window.open('{$appBase}edit.html?id={export/references/reference/id}&amp;instance={$instanceName}','','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false; " title="Edit main record">
-									<img src="{$hBase}/img/edit-pencil.png" class="editPencil" style="vertical-align: top;"/>
+									<img src="{$hBase}common/images/edit-pencil.png" class="editPencil" style="vertical-align: top;"/>
 								</a>
 							</span>
 							<xsl:value-of select="export/references/reference[1]/title"/>

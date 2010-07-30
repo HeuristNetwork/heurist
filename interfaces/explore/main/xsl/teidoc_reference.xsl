@@ -99,7 +99,7 @@
 										<tr>
 											<td>
 
-												<a href="{$cocoonBase}item/{pointer[@id=152]/id}/"
+												<a href="{$cocoonBase}item/{pointer[@id=152]/id}"
 												class="sb_two">
 												<xsl:value-of
 												select="pointer[@id=152]/detail[@id=291]"/>

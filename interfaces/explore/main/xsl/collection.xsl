@@ -90,7 +90,7 @@
 
 
 
-		<a class="sb_two" href="{$cocoonBase}item/{id}/"><xsl:value-of select="title"/></a>
+		<a class="sb_two" href="{$cocoonBase}item/{id}"><xsl:value-of select="title"/></a>
 
 
 		<br/>

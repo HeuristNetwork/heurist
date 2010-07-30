@@ -143,7 +143,7 @@
 							</xsl:if>
 						</xsl:if>
 
-						<a href="{$cocoonBase}item/{id}/" class="sb_two">
+						<a href="{$cocoonBase}item/{id}" class="sb_two">
 							<xsl:choose>
 								<!-- related / notes -->
 								<xsl:when test="@notes">
