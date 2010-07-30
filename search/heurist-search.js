@@ -109,7 +109,7 @@ top.HEURIST.search = {
 		iframeElt.style.height = "0";
 		iframeElt.frameBorder = 0;
 		iframeElt.style.position = "absolute";
-			iframeElt.src = "json-search.php?" +
+			iframeElt.src = top.HEURIST.basePath+"search/json-search.php?" +
 			("w=" + encodeURIComponent(window.HEURIST.parameters["w"])) + "&" +
 			("stype=" + (window.HEURIST.parameters["stype"] ? encodeURIComponent(window.HEURIST.parameters["stype"]) : "")) + "&" +
 			("ver=" + top.HEURIST.search.VERSION) + "&" +
@@ -294,13 +294,14 @@ top.HEURIST.search = {
 		       "<span class='wg-id-container logged-in-only'>"+
 		       "<span class=wg-id title='"+linkTitle.htmlEscape()+"' " + (wgColor? wgColor: "") + ">" + (wgHTML? wgHTML.htmlEscape() : "") + "</span>"+
 		       "</span>"+
+		       "<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/key.gif' " + userPwd + ">"+
+		       "</div>" +
                "<DIV id='toolbox'>" +
 			   "<span id='rec_edit_link' title='Click to edit'>edit</span>" +
 			   "<span id='rec_view_link' title='Click to see details'>view</span>" +
 			   "<span id='rec_explore_link' title='Click to see details'>explore</span>" +
-			   "<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/key.gif' " + userPwd + ">"+
                "</div>" +
-		       "</div>" +
+
 		       "</div>";
 		return html;
 	},

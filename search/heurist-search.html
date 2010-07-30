@@ -30,7 +30,7 @@
 <link rel=stylesheet href="../css/heurist-search.css">
 <link rel=icon href="../favicon.ico" type="image/x-icon">
 <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
-<link id=httprsslink rel=alternate type="application/rss+xml" title="HTTP RSS feed" href="../search/feeds/search_rss.php?q=tag:Favourites+OR+tag:Favorites">
+<link id=httprsslink rel=alternate type="application/rss+xml" title="HTTP RSS feed" href="../search/feeds/search_rss.php?q=tag:Favourite+OR+tag:Favorite">
 
 <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.6.0/build/menu/assets/skins/sam/menu.css">
 <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/yahoo-dom-event/yahoo-dom-event.js"></script>
@@ -54,7 +54,7 @@ a:hover{} a:active{} a:focus{}
 
 <script>
 if (location.search.match(/[&?]q=[^&]+/)) {		//there is a search string
-	document.getElementById("searchFrame").src = "json-search.php" + location.search;
+	document.getElementById("searchFrame").src = top.HEURIST.basePath+"search/json-search.php" + location.search;
 	top.suppressAutoSearch = true;
 } else {
 	// this is a substitute for loading the user's default saved search - it's more intuitive
@@ -63,7 +63,7 @@ if (location.search.match(/[&?]q=[^&]+/)) {		//there is a search string
 		if (top.HEURIST.is_logged_in()  &&  location.host.match(/^h3[.]heuristscholar[.]org$/)) {	//FIXME: this doesn't work for installed verisons
 			document.body.className = "w-bookmark";
 			window.HEURIST.parameters["w"] = "bookmark";
-			window.HEURIST.parameters["q"] = "tag:Favourites OR tag:Favorites";
+			window.HEURIST.parameters["q"] = "tag:Favourite OR tag:Favorite";
 		}
 	});
 }
@@ -274,7 +274,7 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
    <div id=my-records-saved-searches class=hide>
     <div class=search-type title="Personal Saved searches which search only the records you have bookmarked (your collection)" onclick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">My bookmarks</div>
 	<div class=content>
-     <div class=saved-search-subsubheading><a href="?ver=1&amp;w=bookmark&amp;q=tag:Favourites OR tag:Favorites&amp;label=Favourites">My Favourites</a></div>
+     <div class=saved-search-subsubheading><a href="?ver=1&amp;w=bookmark&amp;q=tag:Favourite OR tag:Favorite&amp;label=Favourites">My Favourites</a></div>
      <div class=saved-search-subsubheading><a href="?ver=1&amp;w=bookmark&amp;q=sortby:-m&amp;label=Recently+modified">Recent changes</a></div>
      <div class=saved-search-subsubheading><a id=search-by-keyword-link href="#" onclick="top.HEURIST.search.showKeywordSearchLinks(); return false;">My Tags</a></div>
      <div class=saved-search-subsubheading><a id=my-blog-link target="_blank" href="#">My Blog</a></div>

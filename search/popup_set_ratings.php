@@ -10,7 +10,7 @@ mysql_connection_db_select(DATABASE);
 ?>
 <html>
  <head>
-  <link rel="stylesheet" type="text/css" href="../css/heurist.css">
+  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>css/heurist.css">
 
   <title>Set ratings</title>
 

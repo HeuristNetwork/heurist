@@ -27,7 +27,7 @@ if ($_REQUEST['send_notification']) {
 ?>
 <html>
  <head>
-  <link rel="stylesheet" type="text/css" href="/css/heurist.css">
+  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>css/heurist.css">
 
   <title>Share records</title>
   <script type="text/javascript">

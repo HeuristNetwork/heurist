@@ -82,11 +82,15 @@ top.HEURIST.workgroup = {
 
 		var keyword_select = document.getElementById("keyword-select");
 		if (keyword_select.options.length <= 1) {
+			top.HEURIST.workgroup.kwds = [];
 			if (top.HEURIST.user  &&  top.HEURIST.user.workgroupKeywords) {
 				for (var i = 0; i < top.HEURIST.user.workgroupKeywordOrder.length; ++i) {
-					var kwd = top.HEURIST.user.workgroupKeywords[top.HEURIST.user.workgroupKeywordOrder[i]];
-					if (kwd[0] == top.HEURIST.workgroup.wg_id)
-						keyword_select[keyword_select.length] = new Option(kwd[1], kwd[1]);
+					var kwdId = top.HEURIST.user.workgroupKeywordOrder[i];
+					var kwd = top.HEURIST.user.workgroupKeywords[kwdId];
+					if (kwd[0] == top.HEURIST.workgroup.wg_id) {
+						keyword_select[keyword_select.length] = new Option(kwd[1],kwdId);
+						top.HEURIST.workgroup.kwds.push(kwdId);
+					}
 				}
 			}
 		}
@@ -96,12 +100,8 @@ top.HEURIST.workgroup = {
 		var rft = document.getElementById("reftype-select").value;
 		var kwd = document.getElementById("keyword-select").value;
 		var sortby = document.getElementById("sortby-select").value;
-		var wg = document.getElementById("both-radio").checked  ?  "" :
-				 ((document.getElementById("yes-radio").checked  ?  "wg:" : "-wg:") + top.HEURIST.workgroup.wg_id);
-
-		var q = wg
-			  + (rft ? " type:" + rft : "")
-			  + (kwd ? " tag:\"" + kwd + "\"" : "")
+		var q = (rft ? " type:" + rft + ((kwd || top.HEURIST.workgroup.kwds.length) ? " AND ": "") : "")
+			  + (kwd ? " tag=\"" + kwd + "\"" : "tag=\"" + top.HEURIST.workgroup.kwds.join(",") + "\"")
 			  + " sortby:" + sortby;
 		window.HEURIST.parameters["q"] = q;
 		top.HEURIST.search.closeInfos();
@@ -129,7 +129,6 @@ top.HEURIST.workgroup = {
 		top.HEURIST.registerEvent(window, "contentloaded", function() {
 			top.HEURIST.json.loadWorkgroupDetails(wg_id, function() {
 				top.HEURIST.search.fillInSavedSearches(wg_id);
-
 			});
 		});
 
@@ -142,10 +141,10 @@ top.HEURIST.workgroup = {
 		});
 
 		// load inital results: all workgroup records
-		window.HEURIST.parameters["q"] = "wg:" + wg_id + " sortby:t";
-		window.HEURIST.parameters["w"] = "all";
-        /* top.HEURIST.workgroup.filterSearch(); Add here to implement Not filtered as default, Ian */
-		top.HEURIST.search.loadSearchParameters();
+		//window.HEURIST.parameters["q"] = "wg:" + wg_id + " sortby:t";
+		//window.HEURIST.parameters["w"] = "all";
+		top.HEURIST.workgroup.filterSearch();
+		//top.HEURIST.search.loadSearchParameters();
 	},
 
 	renderWorkgroupPage: function() {

@@ -394,7 +394,8 @@ function bookmark_tag_and_save_seach() {
 		$onload = 'location.replace(\'action.php\');'.
 					'top.HEURIST.search.insertSavedSearch(\''.slash($_REQUEST['ss_name']).'\', \''.slash($_REQUEST['ss_query']).'\', '.$wg.', '.$ss.');'.
 					'top.HEURIST.util.getJsonData("'. BASE_PATH.'search/collection.php?clear", top.HEURIST.search.addRemoveCollectionCB);'.
-					'top.HEURIST.search.popupNotice(\' Search \"'.$_REQUEST['ss_name'].'\" saved. '. $message.'\');';
+					'top.HEURIST.search.popupNotice(\' Search \"'.$_REQUEST['ss_name'].'\" saved. '. $message.'\');' .
+					'top.location.href = top.location.href + (top.location.href.match(/\?/) ? \'&\' : \'?\') + \'sid='.$ss.'\';';
 	}
 	return $onload;
 }
@@ -439,7 +440,9 @@ function save_search() {
 	} else {
 		$onload = 'location.replace(\'action.php\'); top.HEURIST.search.insertSavedSearch(\''.slash($_REQUEST['ss_name']).'\', \''.slash($_REQUEST['ss_query']).'\', '.$wg.', '.$ss.');';
 		if ($publish) {
-			$onload .= ' top.location.href = top.location.href + (top.location.href.match(/?/) ? \'&\' : \'?\') + \'pub=1&sid='.$ss.'\';';
+			$onload .= ' top.location.href = top.location.href + (top.location.href.match(/\?/) ? \'&\' : \'?\') + \'pub=1&sid='.$ss.'\';';
+		}else{
+			$onload .= ' top.location.href = top.location.href + (top.location.href.match(/\?/) ? \'&\' : \'?\') + \'sid='.$ss.'\';';
 		}
 	}
 	return $onload;
