@@ -2,7 +2,7 @@
 
 /* Generate a Heurist API key for a given site */
 
-require_once(dirname(__FILE__)."/../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../common/connect/cred.php");
 
 $instances = get_all_instances();
 $user_instances = array();

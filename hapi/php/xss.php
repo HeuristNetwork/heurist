@@ -83,11 +83,12 @@ if (! ($auth = get_location($key))) {
 	return;
 }
 // error_log(print_r($auth, 1));
-//$baseURL = HEURIST_URL_BASE;
-$baseURL = $auth["hl_location"];
+$baseURL = HEURIST_URL_BASE;
+//$baseURL = $auth["hl_location"];
 
 define_constants($auth["hl_instance"]);
 
+error_log("baseURL = ".$baseURL." Heurist base = ".HEURIST_URL_BASE);
 
 if (! @$method  ||  ! in_array($method, $legalMethods)) {
 	print "{\"error\":\"unknown method\"}";

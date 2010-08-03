@@ -8,21 +8,7 @@
 
   <map:component-configurations>
     <global-variables>
-		<installPath></installPath>
-		<serverName>h3.heuristscholar.org</serverName>
-		<explorePath>/interfaces/explore</explorePath>
-		<pubPath>/output/pubwizard</pubPath>
-		<cocoonBasePath>/cocoon/h3</cocoonBasePath>
-		<cocoonAppPath>/cocoon/h3/explore</cocoonAppPath>
-		<cocoonPubPath>/cocoon/h3/output/pubwizard</cocoonPubPath>
-		<serverBaseURL>http://h3.heuristscholar.org/</serverBaseURL>
-		<heuristBaseURL>http://h3.heuristscholar.org/</heuristBaseURL>
-		<!--+
-			This is the base url for a site app to access the site code
-			access in sub-sitemaps as {global:heuristURL}
-			applications may want to add an appBaseUrl
-			<myAppBaseUrl>{global:heuristURL}myAppsDirName/</myAppBaseUrl>
-		+-->
+		<serverName>heuristscholar.org</serverName>
     </global-variables>
   </map:component-configurations>
 
@@ -32,9 +18,13 @@
     <!--+
         | Mount everything for exploring to the sitemap.xmap file located
         | in the requested instance folder.
+    <map:match pattern="^explore/([^/]+)/" type="regexp">
+      <map:mount check-reload="yes" src="explore/{1}/" uri-prefix="explore/{1}"/>
+    </map:match>
         +-->
-    <map:match pattern="explore/*/**">
-      <map:mount check-reload="yes" src="explore/{1}/" uri-prefix="explore/{1}/"/>
+
+    <map:match pattern="^([^/]+)/explore/([^/]+)/" type="regexp">
+      <map:mount check-reload="yes" src="explore/{2}/" uri-prefix=""/>
     </map:match>
 
     <!--+

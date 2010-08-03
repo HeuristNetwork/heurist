@@ -11,14 +11,14 @@ function EventManager() {
 		name : "em",
 
 		fire : function(name, data) {
-					console.debug("em.fire - " + name + " " + data);
+					//console.debug("em.fire - " + name + " " + data);
 					if (_events[name]) {
 						return _events[name].fire(data);
 					}
 		       },
 
 		subscribe : function(name, callback, obj) {
-					console.debug("em.subscribe - " + name + " by " + (obj && obj.name ? obj.name: ""));
+					//console.debug("em.subscribe - " + name + " by " + (obj && obj.name ? obj.name: ""));
 					if (_events[name]) {
 						_events[name].subscribe(callback, obj);
 					}

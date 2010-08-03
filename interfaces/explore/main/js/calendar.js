@@ -1,6 +1,8 @@
 var lastElt = null;
 var selectedDay = null;
-
+var baseUrl = (typeof path != "undefined"?path: (window.opener.path ? window.opener.path : ""));
+if (typeof path == "undefined")
+	var path = baseUrl;
 
 function getDaysInMonth(month, year) {
 	// Return the number of days in the given month of the given year
@@ -45,7 +47,6 @@ function getCalendarRows(month, year) {
 
 function getCalendarString(month, year) {
 	// Return a string giving an HTML calendar component
-
 	var monthsInYear = Array('January', 'February', 'March', 'April', 'May', 'June',
 	                         'July', 'August', 'September', 'October', 'November', 'December');
 
@@ -63,14 +64,14 @@ function getCalendarString(month, year) {
 	calString +=   '<tr><td colspan="7" id="cal_header"><table border=0 cellpadding=2 cellspacing=0 width=100%><tr>' +
 			'<td id="monthyearnav"><nobr>' +
 				'<span onClick="init(\''+prevYearURL+'\')" title="Previous year"><img src="'+path+'common/images/ll-arrow.gif"></span>' +
-				'<img src="'+path+'common/images/5x10.gif">' +
-				'<span onClick="init(\''+prevMonthURL+'\')" title="Previous month"><img src="'+path+'common/images/l-arrow.gif"></span>' +
+				'<img src="'+baseUrl+'common/images/5x10.gif">' +
+				'<span onClick="init(\''+prevMonthURL+'\')" title="Previous month"><img src="'+baseUrl+'common/images/l-arrow.gif"></span>' +
 			'</nobr></td>' +
 			'<td id="cal_month">&nbsp;' + monthsInYear[month] + '&nbsp;' + year + '&nbsp;</td>' +
 			'<td id="monthyearnav" style="text-align: right;"><nobr>' +
-				'<span onClick="init(\''+nextMonthURL+'\')" title="Next month"><img src="'+path+'common/images/r-arrow.gif"></span>' +
-				'<img src="'+path+'common/images/5x10.gif">' +
-				'<span onClick="init(\''+nextYearURL+'\')" title="Next year"><img src="'+path+'common/images/rr-arrow.gif"></span>' +
+				'<span onClick="init(\''+nextMonthURL+'\')" title="Next month"><img src="'+baseUrl+'common/images/r-arrow.gif"></span>' +
+				'<img src="'+baseUrl+'common/images/5x10.gif">' +
+				'<span onClick="init(\''+nextYearURL+'\')" title="Next year"><img src="'+baseUrl+'common/images/rr-arrow.gif"></span>' +
 			'</nobr></td>' +
 				'</tr></table></td></tr>';
 	calString +=   '<tr class="cal_daysofweek"><td>S</td><td>M</td><td>T</td><td>W</td><td>T</td><td>F</td><td>S</td></tr>';

@@ -150,7 +150,7 @@
 									<script type="text/javascript">
 
 							var a = document.createElement("a");
-							a.href ='<xsl:value-of select="$hIBase"/>common/connect/login-vanilla.php?logo={$appBase}img/logo.png&amp;home={$serverBaseUrl}{$appBase}&amp;instance={$instanceName}';
+							a.href ='<xsl:value-of select="$hBase"/>common/connect/login-vanilla.php?logo={$appBase}img/logo.png&amp;home={$serverBaseUrl}{$appBase}&amp;instance={$instanceName}';
 
 
 							if (HCurrentUser.isLoggedIn()) {

@@ -3,7 +3,6 @@
 	xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 	<xsl:param name="appBase"/>
 	<xsl:param name="hBase"/>
-	<xsl:param name="hIBase"/>
 	<xsl:param name="cocoonBase"/>
 	<xsl:param name="serverBaseUrl"/>
 	<xsl:param name="instancePrefix"/>

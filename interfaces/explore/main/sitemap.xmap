@@ -44,6 +44,10 @@
     </global-variables>
   </map:component-configurations>
 	<map:pipeline>
+		<map:match pattern="^([^/]+)/explore/([^/]+)/(.*)" type="regexp">
+			<map:redirect-to uri="cocoon:/{3}?installDir={1}&amp;appDir={2}" session="yes"/>
+		</map:match>
+
 		<map:match pattern="item/*/hml">
 			<map:redirect-to uri="../../xml2/{1}?cocoon-view=hml"/>
 		</map:match>
@@ -61,7 +65,7 @@
 		</map:match>
 
 		<map:match pattern="xml2/*">
-			<map:generate src="{global:heuristBaseURL}output/export/xml/hml.php?instance={request-param:instance}&amp;q=ids:{1}&amp;depth=2" label="hml"/>
+			<map:generate src="http://{global:serverName}/{request-param:installDir}/output/export/xml/hml.php?instance={request-param:instance}&amp;q=ids:{1}&amp;depth=2" label="hml"/>
 			<map:transform src="xsl/heurist_legacy_xml.xsl"/>
 			<map:serialize type="xml"/>
 		</map:match>
@@ -71,11 +75,10 @@
 			<map:transform src="xsl/item_view.xsl" label="transformed">
 				<map:parameter name="use-request-parameters" value="true"/>
 				<map:parameter name="id" value="{1}"/>
-				<map:parameter name="appBase" value="{global:installPath}{global:explorePath}/{global:appSubDir}/"/>
-				<map:parameter name="hBase" value="http://{global:serverName}{global:installPath}/"/>
-				<map:parameter name="hIBase" value="http://{global:serverName}/"/>
-				<map:parameter name="cocoonBase" value="{global:cocoonAppPath}/{global:appSubDir}/"/>
-				<map:parameter name="serverBaseUrl" value="{global:appSubDir}/"/>
+				<map:parameter name="appBase" value="/{request-param:installDir}/interfaces/explore/{request-param:appDir}/"/>
+				<map:parameter name="hBase" value="http://{global:serverName}/{request-param:installDir}/"/>
+				<map:parameter name="cocoonBase" value="/cocoon/{request-param:installDir}/explore/{request-param:appDir}/"/>
+				<map:parameter name="serverBaseUrl" value="http://{global:serverName}"/>
 				<map:parameter name="related_reftype_filter" value="{2}"/>
 				<map:parameter name="instanceName" value="{request-param:instance}"/>
 			</map:transform>
