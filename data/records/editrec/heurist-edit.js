@@ -981,7 +981,7 @@ top.HEURIST.edit = {
 			popupOptions.x = buttonPos.x + 8 - 120;
 			popupOptions.y = buttonPos.y + 8 - 80;
 
-			top.HEURIST.util.popupURL(windowRef,top.HEURIST.basePath + "common/lib/calendar.html#"+dateBox.value, popupOptions);
+			top.HEURIST.util.popupURL(windowRef,top.HEURIST.basePath + "common/html/calendar.html#"+dateBox.value, popupOptions);
 		}
 
 		return buttonElt;

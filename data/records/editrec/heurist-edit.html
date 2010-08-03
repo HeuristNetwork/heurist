@@ -20,8 +20,8 @@
 	-->
 	<head>
 		<title>Heurist Reference Database - Edit - &copy; 2007 University of Sydney</title>
-		<link rel=stylesheet href="../../../css/heurist.css">
-		<link rel=stylesheet href="../../../css/heurist-edit.css">
+		<link rel=stylesheet href="../../../common/css/heurist.css">
+		<link rel=stylesheet href="../../../common/css/heurist-edit.css">
 		<style>
 
 			select.minimal { margin: 0; padding: 0; border: 0; background: transparent; }
@@ -141,9 +141,9 @@
 	<body>
 
 
-		<script src="../../../common/lib/heurist.js"></script>
+		<script src="../../../common/js/heurist.js"></script>
 		<script src="heurist-relation.js"></script>
-		<script src="../../../common/lib/heurist-obj-user.php"></script>
+		<script src="../../../common/php/heurist-obj-user.php"></script>
 		<script>
 			top.HEURIST.whenLoaded("obj-user", function() {
 				if (! top.HEURIST.is_logged_in()) {
@@ -151,8 +151,8 @@
 				}
 			});
 		</script>
-		<script src="../../../common/lib/heurist-obj-common.php"></script>
-		<script src="../../../common/lib/display-preferences.php"></script>
+		<script src="../../../common/php/heurist-obj-common.php"></script>
+		<script src="../../../common/php/display-preferences.php"></script>
 		<script>
 
 		</script>
@@ -175,7 +175,7 @@
 			});
 		</script>
 		<script src="heurist-edit.js"></script>
-		<script src="../../../common/lib/load-hapi.php"></script> <!-- FIXME:  need to just change hapi to load without instances and keys  -->
+		<script src="../../../common/php/load-hapi.php"></script> <!-- FIXME:  need to just change hapi to load without instances and keys  -->
 
 		<script>
 

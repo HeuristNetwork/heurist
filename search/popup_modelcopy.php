@@ -28,7 +28,7 @@ if (@$_REQUEST['submit']) $updated = update_my_settings();
 <html>
 <head>
  <title>Update settings from model user</title>
- <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>css/import.css">
+ <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/import.css">
 
 </head>
 

@@ -20,7 +20,7 @@
           }
         </style>
 
-       <script src="{$hBase}common/lib/load-hapi.php"/>
+       <script src="{$hBase}common/php/load-hapi.php"/>
 	<script src="{$hBase}hapi/js/goi.js"/>
 	<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAogdH9AwvOFbvnh0YaNkLgBTSYVSXM3_pxTZfKUi_fD1c4-9PWxSMejnbLNsbQ7VMTSucGheu4pvMbA"/>
         <script src="http://www.google.com/uds/api?file=uds.js&amp;v=1.0&amp;key=ABQIAAAAogdH9AwvOFbvnh0YaNkLgBTSYVSXM3_pxTZfKUi_fD1c4-9PWxSMejnbLNsbQ7VMTSucGheu4pvMbA" type="text/javascript"></script>

@@ -19,7 +19,7 @@ if (! is_admin()) {
   <title>Workgroup overrides</title>
   <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
-  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>css/newshsseri.css">
+  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/newshsseri.css">
   <style>
    div#page { padding: 10px; }
    div#page .headline { margin-bottom: 20px; font-size: 150%; }

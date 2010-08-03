@@ -100,7 +100,7 @@ $res = mysql_query($query);
 $files = array();
 while ($file = mysql_fetch_assoc($res)) {
 //	$thumbnailURL = "http://".HEURIST_INSTANCE_PREFIX."heuristscholar.org/heurist/php/resize_image.php?file_id=" . $file["file_nonce"];
-	$thumbnailURL = "http://".HEURIST_INSTANCE_PREFIX.HEURIST_SERVER_NAME.HEURIST_SITE_PATH."common/lib/resize_image.php?file_id=" . $file["file_nonce"];
+	$thumbnailURL = "http://".HEURIST_INSTANCE_PREFIX.HEURIST_SERVER_NAME.HEURIST_SITE_PATH."common/php/resize_image.php?file_id=" . $file["file_nonce"];
 //	$URL = "http://".HEURIST_INSTANCE_PREFIX."heuristscholar.org/heurist/php/fetch_file.php/" . urlencode($file["file_orig_name"]) . "?file_id=" . $file["file_nonce"];
 	$URL = "http://".HEURIST_INSTANCE_PREFIX.HEURIST_SERVER_NAME.HEURIST_SITE_PATH."data/files/fetch_file.php/" . urlencode($file["file_orig_name"]) . "?file_id=" . $file["file_nonce"];
 	array_push($files, array(

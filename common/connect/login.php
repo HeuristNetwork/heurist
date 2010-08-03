@@ -112,7 +112,7 @@ if (@$_REQUEST['logout']) {
 <link rel=icon href='<?=HEURIST_SITE_PATH?>favicon.ico' type=image/x-icon>
 <link rel="shortcut icon" href='<?=HEURIST_SITE_PATH?>favicon.ico' type=image/x-icon>
 
-<link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>css/heurist.css'>
+<link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/heurist.css'>
 
 <style>
 body {
@@ -196,8 +196,8 @@ div.indent {
    <?php } ?>
  }
 </script>
-<script src='../../common/lib/heurist.js'></script>
-<script src='../../common/lib/heurist-util.js'></script>
+<script src='../../common/js/heurist.js'></script>
+<script src='../../common/js/heurist-util.js'></script>
 
 <div id=banner>
  <div id=tagline>Scholar-friendly software</div>

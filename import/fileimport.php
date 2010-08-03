@@ -216,17 +216,17 @@ if (@$urls) {
 
 </head>
 
-<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>css/heurist.css">
-<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>css/import.css">
+<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/heurist.css">
+<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/import.css">
 
 <script src="titlegrabber.js"></script>
 <script src="fileimport.js"></script>
 
 <body width=600 height=400>
 
-<script src="<?=HEURIST_SITE_PATH?>common/lib/heurist.js"></script>
-<script src="<?=HEURIST_SITE_PATH?>common/lib/heurist-obj-user.php"></script>
-<script src="<?=HEURIST_SITE_PATH?>common/lib/display-preferences.php"></script>
+<script src="<?=HEURIST_SITE_PATH?>common/js/heurist.js"></script>
+<script src="<?=HEURIST_SITE_PATH?>common/php/heurist-obj-user.php"></script>
+<script src="<?=HEURIST_SITE_PATH?>common/php/display-preferences.php"></script>
 
 <script type="text/javascript">
 <!--

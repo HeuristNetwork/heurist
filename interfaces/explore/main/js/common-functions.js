@@ -211,10 +211,10 @@ function drawDateField(id, detail){
 	if (!isEmpty(detail)){
 	  for (i in detail){
 
-		html += "<div class=\"inp-div\"><input type=text  name=\""+id+"\" id=\""+id+"\" value=\""+detail[i]+"\">&nbsp<img src=\""+path+"common/images/calendar.gif\" id=\"calendar"+id+"\" align = \"absbottom\" onclick=\"window.open('"+path+"common/lib/calendar.html?id="+id+"','mywin','width=300, height=150, resizable=no');\"><div class=\"hint\">Note:The date should be in yyyy-mm-dd format optionally followed by space then hh:mm:ss, where ss is also optional. Date in format yyyy, mm-yyyy or yyyy-mm will aslo be accepted but without time string.</div></div>";
+		html += "<div class=\"inp-div\"><input type=text  name=\""+id+"\" id=\""+id+"\" value=\""+detail[i]+"\">&nbsp<img src=\""+path+"common/images/calendar.gif\" id=\"calendar"+id+"\" align = \"absbottom\" onclick=\"window.open('"+path+"common/html/calendar.html?id="+id+"','mywin','width=300, height=150, resizable=no');\"><div class=\"hint\">Note:The date should be in yyyy-mm-dd format optionally followed by space then hh:mm:ss, where ss is also optional. Date in format yyyy, mm-yyyy or yyyy-mm will aslo be accepted but without time string.</div></div>";
 	  }
 	}else{
-	  html += "<div class=\"inp-div\"><input type=text  name=\""+id+"\" id=\""+id+"\" value=\"\">&nbsp<img src=\""+path+"common/images/calendar.gif\" id=\"calendar"+id+"\" align = \"absbottom\" onclick=\"window.open('"+path+"common/lib/calendar.html?id="+id+"','mywin','width=300, height=150, resizable=no');\"><div class=\"hint\">Note:The date should be in yyyy-mm-dd format optionally followed by space then hh:mm:ss, where ss is also optional. Date in format yyyy, mm-yyyy or yyyy-mm will aslo be accepted but without time string.</div></div>";
+	  html += "<div class=\"inp-div\"><input type=text  name=\""+id+"\" id=\""+id+"\" value=\"\">&nbsp<img src=\""+path+"common/images/calendar.gif\" id=\"calendar"+id+"\" align = \"absbottom\" onclick=\"window.open('"+path+"common/html/calendar.html?id="+id+"','mywin','width=300, height=150, resizable=no');\"><div class=\"hint\">Note:The date should be in yyyy-mm-dd format optionally followed by space then hh:mm:ss, where ss is also optional. Date in format yyyy, mm-yyyy or yyyy-mm will aslo be accepted but without time string.</div></div>";
 	}
 	sel.innerHTML += html;
 }

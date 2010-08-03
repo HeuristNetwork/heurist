@@ -52,7 +52,7 @@ require_once(dirname(__FILE__).'/../../common/config/heurist-instances.php');
 require_once(dirname(__FILE__).'/../../common/connect/db.php');
 require_once(dirname(__FILE__).'/../../search/advanced/adv-search.php');
 require_once(dirname(__FILE__).'/../../data/relationships/relationships.php');
-require_once(dirname(__FILE__).'/../../common/lib/requirements-overrides.php');
+require_once(dirname(__FILE__).'/../../common/php/requirements-overrides.php');
 require_once(dirname(__FILE__).'/../../data/woot/woot.php');
 
 
@@ -544,7 +544,7 @@ function writeTag($reftype, $detail, $value, $file_id) {
 				   . "<file_date>" . htmlspecialchars($file['file_date']) . "</file_date>\n"
 				   . "<file_size>" . htmlspecialchars($file['file_size']) . "</file_size>\n"
 				   . "<file_fetch_url>" . htmlspecialchars(HEURIST_URL_BASE.'/data/files/fetch_file.php/'.urlencode($file['file_orig_name']).'?file_id='.$file['file_nonce']) . "</file_fetch_url>\n"
-				   . "<file_thumb_url>" . htmlspecialchars(HEURIST_URL_BASE.'/common/lib/resize_image.php?file_id='.$file['file_nonce']) . "</file_thumb_url>\n";
+				   . "<file_thumb_url>" . htmlspecialchars(HEURIST_URL_BASE.'/common/php/resize_image.php?file_id='.$file['file_nonce']) . "</file_thumb_url>\n";
 		}
 	}
 

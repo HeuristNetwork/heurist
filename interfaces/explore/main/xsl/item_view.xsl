@@ -86,7 +86,7 @@
 					}
 
 				</script>
-				<script src="{$hBase}common/lib/load-hapi.php?instance={$hapi-instance}&amp;key={$hapi-key}"/>
+				<script src="{$hBase}common/php/load-hapi.php?instance={$hapi-instance}&amp;key={$hapi-key}"/>
 				<script>
 					if (!HCurrentUser.isLoggedIn()) {
 						window.location = '<xsl:value-of select="$hBase"/>common/connect/login-vanilla.php??instance=<xsl:value-of select="$instanceName"/>&amp;logo=<xsl:value-of select="$appBase"/>images/logo.png&amp;home=<xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$appBase"/>';
@@ -95,7 +95,7 @@
 				<script>
 					top.HEURIST = {};
 					top.HEURIST.fireEvent = function(e, e){};</script>
-				<script src="{$hBase}common/lib/heurist-obj-user.php?instance={$instanceName}"/>
+				<script src="{$hBase}common/php/heurist-obj-user.php?instance={$instanceName}"/>
 				<!-- Time Map rendering -->
 				<xsl:if test="export/references/reference/reftype[@id=103 or @id=51 or @id=165 or @id=122 or @id=57]">
 					<script>

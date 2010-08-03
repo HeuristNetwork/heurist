@@ -6,7 +6,7 @@ define('SAVE_URI', 'disabled');
 require_once(dirname(__FILE__)."/../../common/connect/cred.php");
 require_once(dirname(__FILE__)."/../../common/connect/db.php");
 require_once("auth.php");
-require_once(dirname(__FILE__)."/../../common/lib/requirements-overrides.php");
+require_once(dirname(__FILE__)."/../../common/php/requirements-overrides.php");
 
 if (! @$_REQUEST["key"]) {
 	print 'alert("No Heurist API key specified");';

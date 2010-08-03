@@ -27,7 +27,7 @@ if ($_REQUEST['send_notification']) {
 ?>
 <html>
  <head>
-  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>css/heurist.css">
+  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/heurist.css">
 
   <title>Share records</title>
   <script type="text/javascript">
@@ -133,7 +133,7 @@ function reset_group() {
     or email:
     <input type="text" name="notify_email" id="notify_email" onfocus="reset_person(); reset_group(); reset_coll_grp();">
     <br>
-	<div id="grp_members_link_div" style="text-align: center; display: none;">&nbsp;<a id="grp_members_link" href=# onclick="top.HEURIST.util.popupURL(window, '/common/lib/workgroup-members.html?wg_id='+this.wg_id); return false;">Show group members</a></div>
+	<div id="grp_members_link_div" style="text-align: center; display: none;">&nbsp;<a id="grp_members_link" href=# onclick="top.HEURIST.util.popupURL(window, '/common/html/workgroup-members.html?wg_id='+this.wg_id); return false;">Show group members</a></div>
 	<div id="coll_grp_members_link_div" style="text-align: center; display: none;">&nbsp;<a id="coll_grp_members_link" href=# onclick="top.HEURIST.util.popupURL(window, '/user/colleagues/user_clouds_edit.php?cgr_id='+this.cgr_id); return false;">Show colleague group members</a></div>
     &nbsp;
     <textarea name="notify_message" title="email message" style="width: 95%;" rows="3"

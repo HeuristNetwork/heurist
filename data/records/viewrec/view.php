@@ -59,7 +59,7 @@ $rec_title = $row['rec_title'];
   <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
 
-  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>css/heurist.css">
+  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/heurist.css">
 </head>
 
 <body <?php if (@$_REQUEST['popup']) { ?>style="width: 480px; height: 600px; background-color: transparent;" <?php } ?>>

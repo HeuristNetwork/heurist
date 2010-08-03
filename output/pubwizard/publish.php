@@ -160,14 +160,14 @@
 		along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		-->
 		<title>Heurist</title>
-		<link rel=stylesheet href="<?=HEURIST_SITE_PATH?>css/heurist.css">
-		<link rel=stylesheet href="<?=HEURIST_SITE_PATH?>css/publish.css">
+		<link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/heurist.css">
+		<link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/publish.css">
 
 	</head>
 	<body onLoad="init();">
 
-		<script src="<?=HEURIST_SITE_PATH?>common/lib/heurist.js"></script>	<!-- core HEURIST functions -->
-		<script src="<?=HEURIST_SITE_PATH?>common/lib/display-preferences.php<?=(HEURIST_INSTANCE ? "?instance=".HEURIST_INSTANCE : "")?>"></script>	<!-- sets body css classes based on prefs in session -->
+		<script src="<?=HEURIST_SITE_PATH?>common/js/heurist.js"></script>	<!-- core HEURIST functions -->
+		<script src="<?=HEURIST_SITE_PATH?>common/php/display-preferences.php<?=(HEURIST_INSTANCE ? "?instance=".HEURIST_INSTANCE : "")?>"></script>	<!-- sets body css classes based on prefs in session -->
 
 		<script type="text/javascript">
 			<!--'

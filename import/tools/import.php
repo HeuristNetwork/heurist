@@ -128,17 +128,17 @@ function print_common_header($fileName) {
   <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
 
-  <link rel=stylesheet href='<?=HEURIST_SITE_PATH?>css/newshsseri.css'>
-  <link rel=stylesheet href='<?=HEURIST_SITE_PATH?>css/Popup.css'>
-  <link rel=stylesheet href='<?=HEURIST_SITE_PATH?>css/autocomplete.css'>
-  <link rel=stylesheet href='<?=HEURIST_SITE_PATH?>css/import.css'>
+  <link rel=stylesheet href='<?=HEURIST_SITE_PATH?>common/css/newshsseri.css'>
+  <link rel=stylesheet href='<?=HEURIST_SITE_PATH?>common/css/Popup.css'>
+  <link rel=stylesheet href='<?=HEURIST_SITE_PATH?>common/css/autocomplete.css'>
+  <link rel=stylesheet href='<?=HEURIST_SITE_PATH?>common/css/import.css'>
 
   <script src=import.js></script>
  </head>
  <body width=720 height=480>
-  <script src='<?=HEURIST_SITE_PATH?>common/lib/heurist.js'></script>
+  <script src='<?=HEURIST_SITE_PATH?>common/js/heurist.js'></script>
   <script>
-if (! top.HEURIST.user) top.HEURIST.loadScript('<?=HEURIST_SITE_PATH?>common/lib/heurist-obj-user.php', true);
+if (! top.HEURIST.user) top.HEURIST.loadScript('<?=HEURIST_SITE_PATH?>common/php/heurist-obj-user.php', true);
   </script>
   <script src='<?=HEURIST_SITE_PATH?>data/tags/autocomplete.js'></script>
 

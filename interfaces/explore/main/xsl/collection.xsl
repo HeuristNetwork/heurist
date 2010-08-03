@@ -46,7 +46,7 @@
 							<img  src="{detail[@id=224]/file_thumb_url}"/>
 						</xsl:when>
 						<xsl:otherwise>
-							<img  src="{$hBase}common/lib/resize_image.php?file_url={detail[@id=603]}&amp;w=150"/>
+							<img  src="{$hBase}common/php/resize_image.php?file_url={detail[@id=603]}&amp;w=150"/>
 						</xsl:otherwise>
 						</xsl:choose -->
 
@@ -58,7 +58,7 @@
 								<img  src="{detail[@id=606]}"/>
 							</xsl:when>
 							<xsl:otherwise>
-							<img  src="{$hBase}common/lib/resize_image.php?file_url={detail[@id=603]}&amp;w=150"/>
+							<img  src="{$hBase}common/php/resize_image.php?file_url={detail[@id=603]}&amp;w=150"/>
 							</xsl:otherwise>
 						</xsl:choose>
 

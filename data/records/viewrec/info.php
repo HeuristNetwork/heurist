@@ -347,7 +347,7 @@ function print_public_details($bib) {
 		if ($bd['rdt_id'] == 603) {
 			array_push($thumbs, array(
 				'url' => $bd['val'],
-				'thumb' => HEURIST_SITE_PATH.'common/lib/resize_image.php?file_url='.$bd['val']
+				'thumb' => HEURIST_SITE_PATH.'common/php/resize_image.php?file_url='.$bd['val']
 			));
 		}
 
@@ -364,7 +364,7 @@ function print_public_details($bib) {
 				if ($file['file_mimetype'] == 'image/jpeg'  ||  $file['file_mimetype'] == 'image/gif'  ||  $file['file_mimetype'] == 'image/png') {
 					array_push($thumbs, array(
 						'url' => HEURIST_SITE_PATH.'data/files/fetch_file.php?file_id='.$file['file_nonce'],
-						'thumb' => HEURIST_SITE_PATH.'common/lib/resize_image.php?file_id='.$file['file_nonce']
+						'thumb' => HEURIST_SITE_PATH.'common/php/resize_image.php?file_id='.$file['file_nonce']
 					));
 				}
 				$bd['val'] = '<a target="_surf" href="'.htmlspecialchars($img_url).'"><img src="'.HEURIST_SITE_PATH.'common/images/external_link_16x16.gif">'.htmlspecialchars($file['file_orig_name']).'</a> [' .htmlspecialchars($file['file_size']) . ']';

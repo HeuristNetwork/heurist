@@ -26,8 +26,8 @@
 
 <head>
 <title>Heurist Reference Database - Search - &copy; 2005-2009 University of Sydney</title>
-<link rel=stylesheet href="../css/heurist.css">
-<link rel=stylesheet href="../css/heurist-search.css">
+<link rel=stylesheet href="../common/css/heurist.css">
+<link rel=stylesheet href="../common/css/heurist-search.css">
 <link rel=icon href="../favicon.ico" type="image/x-icon">
 <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
 <link id=httprsslink rel=alternate type="application/rss+xml" title="HTTP RSS feed" href="../search/feeds/search_rss.php?q=tag:Favourite+OR+tag:Favorite">
@@ -50,7 +50,7 @@ a:hover{} a:active{} a:focus{}
 <iframe id=searchFrame frameborder=0 style="width:0;height:0;position:absolute;"></iframe>
 
 
-<script src="../common/lib/heurist.js"></script>	<!-- core HEURIST functions -->
+<script src="../common/js/heurist.js"></script>	<!-- core HEURIST functions -->
 
 <script>
 if (location.search.match(/[&?]q=[^&]+/)) {		//there is a search string
@@ -73,7 +73,7 @@ if (! document.body.className) {
 }
 
 // start loading this early
-top.HEURIST.loadScript(top.HEURIST.basePath+"common/lib/heurist-obj-user.php");		// user-specific HEURIST data
+top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/heurist-obj-user.php");		// user-specific HEURIST data
 
 top.HEURIST.whenLoaded(["search-html", "obj-common"], top.HEURIST.util.setInstanceName);
 
@@ -94,7 +94,7 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 });
 
 </script>
-<script src="../common/lib/display-preferences.php"></script>	<!-- sets body css classes based on prefs in session -->
+<script src="../common/php/display-preferences.php"></script>	<!-- sets body css classes based on prefs in session -->
 
 <iframe src="../search/action.php" id=i_action></iframe>	<!-- action.php is written to return a form by default or running javascript followed by reload teh default-->
 
@@ -430,7 +430,7 @@ lpc.style.height = (lpc.parentNode.offsetHeight || (lpc.parentNode.parentNode.of
 rpc.style.width = (rpc.parentNode.offsetWidth || (rpc.parentNode.parentNode.offsetWidth - 10)) + "px";
 rpc.style.height = (rpc.parentNode.offsetHeight || (rpc.parentNode.parentNode.offsetHeight - 10)) + "px";
 
-top.HEURIST.loadScript(top.HEURIST.basePath+"common/lib/heurist-obj-common.php");	// core HEURIST object definitions (dynamically generated)
+top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/heurist-obj-common.php");	// core HEURIST object definitions (dynamically generated)
 top.HEURIST.loadScript("stype.js");
 top.HEURIST.loadScript("heurist-search.js");				// search-specific HEURIST functions
 top.HEURIST.loadScript(top.HEURIST.basePath+"data/records/editrec/heurist-edit.js");				// edit-specific HEURIST functions

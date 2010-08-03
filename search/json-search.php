@@ -218,7 +218,7 @@ function print_result($row) {
 		                     limit 1");
 		if (mysql_num_rows($res) == 1) {
 			$file = mysql_fetch_assoc($res);
-			$thumb_url = "../common/lib/resize_image.php?file_id=".$file['file_nonce'];
+			$thumb_url = "../common/php/resize_image.php?file_id=".$file['file_nonce'];
 		} else {
 			// 606  Thumbimage url
 			$res = mysql_query("select rd_val
@@ -237,7 +237,7 @@ function print_result($row) {
 			                         limit 1");
 				if (mysql_num_rows($res) == 1) {
 					$row = mysql_fetch_assoc($res);
-					$thumb_url = "../common/lib/resize_image.php?file_url=".htmlspecialchars($row['rd_val']);
+					$thumb_url = "../common/php/resize_image.php?file_url=".htmlspecialchars($row['rd_val']);
 				}
 			}
 		}

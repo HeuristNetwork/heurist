@@ -1701,7 +1701,7 @@ top.HEURIST.search = {
 		iHTML += "<li><img src='"+ top.HEURIST.basePath+"common/images/star-yellow-with-green-7.gif'><span>Belongs to workgroup 7<br></span><span style=\"margin-left: 25px;\">- read-only to others</span></li>";
 		iHTML += "<li><img src='"+ top.HEURIST.basePath+"common/images/star-yellow-with-red-3.gif'><span>Belongs to workgroup 3<br></span><span style=\"margin-left: 25px;\">- hidden to others</span></li>";
 		iHTML += "</ul>";
-		iHTML += "<hr><div><a href=# onclick=\"top.HEURIST.util.popupURL(window, '"+ top.HEURIST.basePath+"common/lib/reftype_legend.php"+(top.HEURIST.instance && top.HEURIST.instance.name ? "?instance=" + top.HEURIST.instance.name : "")+"' ); return false;\">show full legend</a></div>";
+		iHTML += "<hr><div><a href=# onclick=\"top.HEURIST.util.popupURL(window, '"+ top.HEURIST.basePath+"common/php/reftype_legend.php"+(top.HEURIST.instance && top.HEURIST.instance.name ? "?instance=" + top.HEURIST.instance.name : "")+"' ); return false;\">show full legend</a></div>";
 		legend_box_elt.innerHTML += iHTML;
 	},
 

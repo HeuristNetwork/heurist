@@ -1,7 +1,7 @@
 <html>
 <head>
 
-<script src="../../../common/lib/load-hapi.php"></script>
+<script src="../../../common/php/load-hapi.php"></script>
 
 <script>
 function getQueryFromUrl() {
@@ -21,7 +21,7 @@ function init() {
 		q = "sortby:-m";
 	}
 	//var mysearch = new HSearch(decodeURIComponent(q));
-	var loader = new HLoader(	
+	var loader = new HLoader(
 		function(s,r) {
 			displayResults(r);
 		},
@@ -52,7 +52,7 @@ function loadAllRecords(query, options, loader) {
 		);
 		HeuristScholarDB.loadRecords(baseSearch, bulkLoader);
 }
-		
+
 function displayResults(r) {
 	var recsForRelationships = [];
 	var div = document.getElementById("results");
@@ -64,7 +64,7 @@ div.innerHTML += "@prefix rdf:     &lt;http://www.w3.org/1999/02/22-rdf-syntax-n
 div.innerHTML += "@prefix daml:    &lt;http://www.daml.org/2001/03/daml+oil#&gt; .<br>";
 div.innerHTML += "@prefix dos:     &lt;http://www.dos.org/dos#&gt; .<br>";
 div.innerHTML += "@prefix h:     &lt;http://dos.heuristscholar.org/resource/&gt; .<br>";
-	
+
 	for (var i = 0; i < r.length; i++) {
 		var p = document.createElement("p");
 		var rec = r[i];
@@ -72,9 +72,9 @@ div.innerHTML += "@prefix h:     &lt;http://dos.heuristscholar.org/resource/&gt;
 			p.innerHTML += "h:"+rec.getID()+"<br>";
 			p.innerHTML += "rdf:type dos:"+rec.getRecordType().getName()+ " \  ;<br>";
 			p.innerHTML += "rdfs:label \""+rec.getTitle() + "\"\^\^xsd:string";
-				
+
 			switch (rec.getRecordType().getID()) {
-			
+
 			case "150": //FACTOID
 			recsForRelationships.push(rec);
 			var details = HDetailManager.getDetailTypesForRecordType(rec.getRecordType());
@@ -82,66 +82,66 @@ div.innerHTML += "@prefix h:     &lt;http://dos.heuristscholar.org/resource/&gt;
 				 	if (rec.getDetail(details[d]) != null) {
 						var detailID = details[d].getID();
 						switch (detailID) {
-					
+
 							case "177":
 							p.innerHTML += "\  ;<br>dos:has_Factoid_Start  \"" +rec.getDetail(details[d]) + "\"^^xsd:date";
 							break;
-							
+
 							case "178":
 							p.innerHTML += "\  ;<br>dos:has_Factoid_End \"" +rec.getDetail(details[d]) + "\"^^xsd:date";
 							break;
-						
+
 							case  "528":
 							p.innerHTML += "\  ;<br>dos:has_Factoid_SourceEntity default:d" +rec.getDetail(details[d]).getID();
 							break;
-							
+
 							case  "529":
 							p.innerHTML += "\  ;<br>dos:has_Factoid_TargetEntity  default:d" +rec.getDetail(details[d]).getID();
 							break;
-							
+
 							case  "527":
 							p.innerHTML += "\  ;<br>dos:has_Factoid_Place default:d" +rec.getDetail(details[d]).getID();
 							break;
-							
+
 							case  "160":
 							p.innerHTML += "\  ;<br>dos:has_Factoid_Name " +rec.getDetail(details[d]).toString()+ "\"^^xsd:string";
 							break;
-							
+
 							case  "230":
 							p.innerHTML += "\  ;<br>dos:has_Factoid_Location " +rec.getDetail(details[d]).toString()+ "\"^^xsd:string";
 							break;
-					
+
 						}
 					}
 				}
 			break;
-			
+
 			case "152":
 				recsForRelationships.push(rec);
 				//getRelations(rec);
-			break; 
-			
-			case "99": 
+			break;
+
+			case "99":
 		    	var details = HDetailManager.getDetailTypesForRecordType(rec.getRecordType());
 				for (d = 0; d < details.length; d++) {
 				 	if (rec.getDetail(details[d]) != null) {
 						var detailID = details[d].getID();
 						switch (detailID) {
-					
+
 							case "322":
 							p.innerHTML += "\  ;<br>dos:Annotation_annotates \"" +rec.getDetail(details[d]).getTitle() + "\"^^xsd:string";
 							break;
-						
+
 							case  "199":
 							p.innerHTML += "\  ;<br>dos:Annotation_related \"" +rec.getDetail(details[d]).getID() + "\"^^xsd:string";
 							break;
-					
+
 						}
 					}
 				}
 				p.innerHTML += ".";
 			break;
-			
+
 			case "74":
 			recsForRelationships.push(rec);
 		    	var details = HDetailManager.getDetailTypesForRecordType(rec.getRecordType());
@@ -149,55 +149,55 @@ div.innerHTML += "@prefix h:     &lt;http://dos.heuristscholar.org/resource/&gt;
 				 	if (rec.getDetail(details[d]) != null) {
 						var detailID = details[d].getID();
 						switch (detailID) {
-					
+
 							case "221":
 							p.innerHTML += "\  ;<br>dos:ResourcehasFile \"" +rec.getDetail(details[d]).getOriginalName(); + "\"^^xsd:string";
 							break;
-						
+
 							case  "289":
 							p.innerHTML += "\  ;<br>dos:ResourcehasMime \"" +rec.getDetail(details[d]); + "\"^^xsd:string";
 							break;
-					
+
 						}
 					}
 				}
 			break;
-			
+
 			case "151":
 				recsForRelationships.push(rec);
-				
+
 			break;
-			
+
 			default:
 				p.innerHTML += ".";
 			break;
 			}
 			div.appendChild(p);
 	   }
-	  
-	   
+
+
 	   for (e = 0; e < recsForRelationships.length; e ++){
 	   		getRelations(recsForRelationships[e], document.getElementById(recsForRelationships[e].getID()));
 	   }
 }
-	  
+
 function getRelations(record, p){
 	var strSearch = new HSearch("relationsfor:" + record.getID());
-	var loader = new HLoader(	
+	var loader = new HLoader(
 		function(s,r) {
 			if (r.length != 0) {
 			    	displayRelations(r, record);
 			} else {
 				p.innerHTML += " .";
 			}
-				
+
 	 	 },
 	  	function(s,e) {
 	  		alert("load failed: " + e);
 	 	});
 	HeuristScholarDB.loadRecords(strSearch, loader);
 }
-	  
+
 function displayRelations(records, originalRecord){
 	var rec, relType;
 	var p = document.getElementById(originalRecord.getID());
@@ -212,19 +212,19 @@ function displayRelations(records, originalRecord){
 				relType = relations[i].getInverseType();
 			}
 	  		p.innerHTML += "\  ;<br>dos:" +relType + " default:d"+rec.getID();
-		   
-		} 
+
+		}
 	}
 	p.innerHTML += " .";
 }
-	
+
 </script>
 
 </head>
 <body onLoad="init();">
 
 <div id="results">
-	
+
 </div>
 
 <body>

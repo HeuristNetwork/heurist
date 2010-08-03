@@ -663,7 +663,7 @@ HAPI.WOOT.GUI = function() {
 			tinyMCE.init({
 				mode: "none",
 
-				content_css: HAPI.HeuristBaseURL + "css/woot.css",
+				content_css: HAPI.HeuristBaseURL + "common/css/woot.css",
 				theme: "advanced",
 				plugins: "inlinepopups,nonbreaking,permissions,save,hrecords",
 				inline_styles: false,

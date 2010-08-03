@@ -22,7 +22,7 @@ mysql_connection_db_overwrite(DATABASE);
   <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
 
-  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>css/newshsseri.css">
+  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/newshsseri.css">
 
   <style type=text/css>
    a img { border: none; }

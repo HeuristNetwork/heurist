@@ -37,7 +37,7 @@ init: function () {
 	var link = document.createElement('link');
 	link.rel = 'stylesheet';
 	link.type = 'text/css';
-	link.href = Heurist.urlBase + Heurist.installDir +'/css/bookmarklet-popup.css';
+	link.href = Heurist.urlBase + Heurist.installDir +'/common/css/bookmarklet-popup.css';
 	document.getElementsByTagName('head')[0].appendChild(link);
 
 	// get record types

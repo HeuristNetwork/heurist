@@ -4,7 +4,7 @@ define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on n
 require_once(dirname(__FILE__).'/../../common/connect/cred.php');
 require_once(dirname(__FILE__).'/../../common/connect/db.php');
 require_once(dirname(__FILE__).'/../../data/records/TitleMask.php');
-require_once(dirname(__FILE__).'/../../common/lib/fetch_bib_details.php');
+require_once(dirname(__FILE__).'/../../common/php/fetch_bib_details.php');
 
 if (! is_logged_in()  ||  ! is_admin()) return;
 
