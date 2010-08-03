@@ -121,7 +121,7 @@
 			</head>
 			<body pub_id="{/export/@pub_id}">
 				<div id="header">
-					<a href="{$hBase}search/h3-search.html?instance={$instanceName}">
+					<a href="{$hBase}search/heurist-search.html?instance={$instanceName}">
 						<div id="logo"></div>
 					</a>
 					<div id="instance-name"><xsl:value-of select="$instanceName"/></div>

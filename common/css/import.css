@@ -63,7 +63,7 @@ input { padding: 0; margin: 0; }
 
 #help-div {position: absolute;height: 2ex; width: 100%;font-size: 1.6ex; padding: 1px;color:#7D9AAA}
 #search {	text-align: left;	padding: 0;	border-bottom: 1px solid #999;	vertical-align: middle;	background-color: RGBA(0, 0, 0, 0.1);	position:absolute;	right:0;	top:0;	left:0px;height:50px}
-#add_records_footer {position:absolute; right:0; left:0; bottom:0; height:20px;background-image: url("../common/images/backgrounds/banner_bg.png");background-position: bottom;background-repeat: repeat-x;padding: 0 1ex;}
+#add_records_footer {position:absolute; right:0; left:0; bottom:0; height:20px;background-image: url("../images/backgrounds/banner_bg.png");background-position: bottom;background-repeat: repeat-x;padding: 0 1ex;}
 #add_records_footer a img {vertical-align: text-bottom;}
 .tab {background-color: #ECF1FB !important;} /* to match tabs in edit */
 #reftype-val {left:2ex;position:relative;top:2.5ex;}

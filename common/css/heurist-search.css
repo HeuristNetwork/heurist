@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /* Fatter heading: bigger logo, menu bar visible */
 body {
-	background: white url(../common/images/search-bg.gif) scroll left top repeat-x;  /* search-bg.gif is necessary to extend outside the #page table */
+	background: white url(../images/search-bg.gif) scroll left top repeat-x;  /* search-bg.gif is necessary to extend outside the #page table */
 	color: #515151;
 	margin: 10px;
 	overflow: hidden;
@@ -96,7 +96,7 @@ a { color: #7D9AAA; }
 	background-color: lightgrey;
 }
 .operations {
-	background-image: url(../common/images/heading_popup.png);
+	background-image: url(../images/heading_popup.png);
 	height: 25px;
 	-moz-border-radius-bottomleft:0;
 	-moz-border-radius-bottomright:0;
@@ -129,10 +129,10 @@ a { color: #7D9AAA; }
 #search-description { border-bottom: 1px solid #bfbfbf; }
 #search-description { height: 38px; padding: 0 20px; }
 
-body.w-all #results { background-color: #FFF; background-image:url(../common/images/right-panel-bg.png);}
+body.w-all #results { background-color: #FFF; background-image:url(../images/right-panel-bg.png);}
 body.w-bookmark #results {
 	background-color: #FFF;
-	background-image:url(../common/images/right-panel-bg.png);
+	background-image:url(../images/right-panel-bg.png);
 	-moz-border-radius-bottomleft:10px;
 	-moz-border-radius-bottomright:10px;
 	-moz-border-radius-topleft:0;
@@ -214,7 +214,7 @@ body.w-bookmark #my-records-button {
 
 #left-panel{
 	background-color:#EFF2F6;
-	background-image:url(../common/images/left-panel-bg.png);
+	background-image:url(../images/left-panel-bg.png);
 	                    -moz-border-radius-bottomleft:10px;
 	                    -moz-border-radius-bottomright:10px;
 	                    -moz-border-radius-topleft:0;
@@ -232,14 +232,14 @@ body.w-bookmark #my-records-button {
 #ops-right-cell { text-align: right; line-height: 15px;}
 #search-result-styles { margin-left: 20px; margin-right: 20px; }
 
-#result-style-list-link { padding-bottom: 1px; background: url(../common/images/b_list.png) no-repeat scroll 0 0; vertical-align: text-bottom;}
-#result-style-two-col-link { padding-bottom: 1px; background: url(../common/images/b_2col.png) no-repeat scroll 0 0; vertical-align: text-bottom;}
-#result-style-thumbs-link { padding-bottom: 1px; background: url(../common/images/b_thumb.png) no-repeat scroll 0 0; vertical-align: text-bottom;}
-#result-style-blog-link { padding-bottom: 1px; background: url(../common/images/b_blog.png) no-repeat scroll 0 0; vertical-align: text-bottom;visibility: hidden;}
-body.search-result-style-list #result-style-list-link { background-image: url(../common/images/b_list_down.png); }
-body.search-result-style-two-col #result-style-two-col-link { background-image: url(../common/images/b_2col_down.png); }
-body.search-result-style-thumbs #result-style-thumbs-link { background-image: url(../common/images/b_thumb_down.png); }
-body.search-result-style-blog #result-style-blog-link { background-image: url(../common/images/b_blog_down.png); }
+#result-style-list-link { padding-bottom: 1px; background: url(../images/b_list.png) no-repeat scroll 0 0; vertical-align: text-bottom;}
+#result-style-two-col-link { padding-bottom: 1px; background: url(../images/b_2col.png) no-repeat scroll 0 0; vertical-align: text-bottom;}
+#result-style-thumbs-link { padding-bottom: 1px; background: url(../images/b_thumb.png) no-repeat scroll 0 0; vertical-align: text-bottom;}
+#result-style-blog-link { padding-bottom: 1px; background: url(../images/b_blog.png) no-repeat scroll 0 0; vertical-align: text-bottom;visibility: hidden;}
+body.search-result-style-list #result-style-list-link { background-image: url(../images/b_list_down.png); }
+body.search-result-style-two-col #result-style-two-col-link { background-image: url(../images/b_2col_down.png); }
+body.search-result-style-thumbs #result-style-thumbs-link { background-image: url(../images/b_thumb_down.png); }
+body.search-result-style-blog #result-style-blog-link { background-image: url(../images/b_blog_down.png); }
 
 #results-top-spacer { height: 10px; }
 
@@ -272,11 +272,11 @@ body.search-result-style-blog #result-style-blog-link { background-image: url(..
 
 .result_row.expanded a { color: #fff; }
 
-.result_row { background-repeat: no-repeat; background-position: 4px 2px; position: relative; background-image: url(../common/images/tright-grey.gif); white-space: nowrap; overflow: hidden; }
+.result_row { background-repeat: no-repeat; background-position: 4px 2px; position: relative; background-image: url(../images/tright-grey.gif); white-space: nowrap; overflow: hidden; }
 div.result_row:hover {
-	background-image: url(../common/images/trotate.gif); background-color: #e0e0e0;
+	background-image: url(../images/trotate.gif); background-color: #e0e0e0;
 }
-body div.result_row.expanded { background-image: url(../common/images/tdown.gif); background-color: #A4B4CB; }
+body div.result_row.expanded { background-image: url(../images/tdown.gif); background-color: #A4B4CB; }
 
 /* div.result_row.expanded .rft { visibility: hidden; } */
 .result_row span.sp { padding: 0 20px 0 0; }
@@ -284,9 +284,9 @@ body div.result_row.expanded { background-image: url(../common/images/tdown.gif)
 /*.result_row img.bookmarked, div.result_row img.unbookmarked { display: none; }*/
 
 .bookmarked, .unbookmarked { margin-left: 2px; }
-.bookmarked { background-image: url(../common/images/star-yellow.gif); }
-.unbookmarked { background-image: url(../common/images/star-white.gif); cursor: pointer; }
-.unbookmarked:hover { background-image: url(../common/images/star-grey.gif); }
+.bookmarked { background-image: url(../images/star-yellow.gif); }
+.unbookmarked { background-image: url(../images/star-white.gif); cursor: pointer; }
+.unbookmarked:hover { background-image: url(../images/star-grey.gif); }
 
 body.w-bookmark .bookmarked { background-image: none; }
 
@@ -300,7 +300,7 @@ iframe.info {
 	width: 100%;
 	height: 0;
 	background-color:#EFF2F6;
-	background-image:url(../common/images/left-panel-bg.png);
+	background-image:url(../images/left-panel-bg.png);
 	padding: 0;
 	margin: 0;
 	border-top-width: 0;
@@ -321,7 +321,7 @@ iframe.info {
 	margin: 6px;
 	border: 1px solid #bfbfbf;
 	padding: 6px;
-	background:transparent url(../common/images/left-panel-bg.png) repeat scroll 0 0;
+	background:transparent url(../images/left-panel-bg.png) repeat scroll 0 0;
 	position: relative;
 }
 
@@ -426,12 +426,12 @@ iframe.info {
 
 /* Buttons in left panel when no user logged in */
 #login-button, #register-button, #tour-button { margin: 11px 33px; text-align: center; }
-#login-button { background: url(../common/images/b_login.png) center top no-repeat; }
-#login-button:hover, #login-button:active { background-image: url(../common/images/b_login_down.png); }
-#register-button { background: url(../common/images/b_reg.png) center top no-repeat; }
-#register-button:hover, #register-button:active { background-image: url(../common/images/b_reg_down.png); }
-#tour-button { background: url(../common/images/b_tour.png) center top no-repeat; }
-#tour-button:hover, #tour-button:active { background-image: url(../common/images/b_tour_down.png); }
+#login-button { background: url(../images/b_login.png) center top no-repeat; }
+#login-button:hover, #login-button:active { background-image: url(../images/b_login_down.png); }
+#register-button { background: url(../images/b_reg.png) center top no-repeat; }
+#register-button:hover, #register-button:active { background-image: url(../images/b_reg_down.png); }
+#tour-button { background: url(../images/b_tour.png) center top no-repeat; }
+#tour-button:hover, #tour-button:active { background-image: url(../images/b_tour_down.png); }
 
 
 
@@ -450,14 +450,14 @@ iframe.info {
 #saved-search-heading {
 	font-weight: bold;
 	padding: 5px;
-	background-image:url(../common/images/heading_popup.png);
+	background-image:url(../images/heading_popup.png);
 	height:15px;
 	color:#7D9AAA;
 	padding-top: 6px;
 	padding-right: 5px;
 	padding-bottom: 6px;
 	padding-left: 5px;
-	background-image: url(../common/images/heading_popup.png);
+	background-image: url(../images/heading_popup.png);
 	height: 13px;
 	-moz-border-radius-bottomleft:0;
 	-moz-border-radius-bottomright:0;
@@ -511,7 +511,7 @@ nobr#activesaved div {
 nobr.bkmk#activesaved,  nobr#activesaved {
 	background: #A4B4CB;
 	padding-left: 18px;
-	background-image:url(../common/images/saved-searches-bg.png);
+	background-image:url(../images/saved-searches-bg.png);
 }
 nobr#activesaved a { padding-left:0; }
 #activesaved a, nobr.bkmk#activesaved a {padding-left:0;}
@@ -531,7 +531,7 @@ nobr#activesaved a { padding-left:0; }
 #my-records-saved-searches, #all-records-saved-searches, #workgroup-saved-searches {
 	padding: 0 0px 0px 0px;
 	background-color: none;
-	background-image:url(../common/images/heading_saved_search.png);
+	background-image:url(../images/heading_saved_search.png);
 	background-position:left top;
 	background-repeat:no-repeat;
 	border-bottom-width: 1px;
@@ -539,7 +539,7 @@ nobr#activesaved a { padding-left:0; }
 	border-bottom-color: #BEC8D6;
 }
 #my-records-saved-searches.hide, #all-records-saved-searches.hide, #workgroup-saved-searches.hide {
-	background-image:url(../common/images/heading_saved_search-hidden.png);
+	background-image:url(../images/heading_saved_search-hidden.png);
 	border-bottom-width: 1px;
 	border-bottom-style: solid;
 	border-bottom-color: #BEC8D6;
@@ -562,7 +562,7 @@ nobr#activesaved a { padding-left:0; }
 	font-weight:bold;
 }
 
-#saved .content { padding-bottom: 6px; background-image:url(../common/images/right-panel-bg.png) }
+#saved .content { padding-bottom: 6px; background-image:url(../images/right-panel-bg.png) }
 #saved div.hide .content { display: none; }
 
 
@@ -656,12 +656,12 @@ img.saved-search-edit {
 	border-top: 1px dotted #A4B4CB;
 	cursor: pointer;
 	background-color: none;
-	background-image: url(../common/images/sub_heading_saved_search.png);
+	background-image: url(../images/sub_heading_saved_search.png);
 	background-position: 7px -5px;
 	background-repeat: no-repeat;
 }
 div.hide .saved-search-subheading {
-	background-image: url(../common/images/sub_heading_saved_search-hidden.png);
+	background-image: url(../images/sub_heading_saved_search-hidden.png);
 }
 .saved-search-subsubheading {
 	padding: 1px 0px 1px 24px;
@@ -685,7 +685,7 @@ div.icons input { /* positions input check box above toolbox to allow full funct
     }
 
 #toolbox {
-	background-image:url("../common/images/toolbox.png");
+	background-image:url("../images/toolbox.png");
 	background-position:0 bottom;
 	background-repeat:no-repeat;
 	bottom:7px;

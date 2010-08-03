@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 body {
 	/* thin header (overridden on search page) */
-	background: white url(../common/images/edit-bg.gif) 0px -6px repeat-x;  /* brown-bg.gif is necessary to extend outside the #page table */
+	background: white url(../images/edit-bg.gif) 0px -6px repeat-x;  /* brown-bg.gif is necessary to extend outside the #page table */
 	color: #515151;
 	margin: 10px;
 	overflow: hidden;

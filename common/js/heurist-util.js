@@ -879,7 +879,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				}
 			}
 			top.HEURIST.displayPreferences[prefName] = val;
-			top.HEURIST.loadScript(top.HEURIST.basePath+'common/lib/display-preferences.php?' + encodeURIComponent(prefName) + '=' + encodeURIComponent(val));
+			top.HEURIST.loadScript(top.HEURIST.basePath+'common/php/display-preferences.php?' + encodeURIComponent(prefName) + '=' + encodeURIComponent(val));
 
 			win = top;
 		}

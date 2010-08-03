@@ -34,7 +34,7 @@ if (! top.HEURIST.json) top.HEURIST.json = {
 			if (callback) callback(wg_id);
 			return;
 		}
-		top.HEURIST.util.getJsonData(top.HEURIST.basePath+"common/lib/workgroup.php?wg_id="+wg_id, function(obj) {
+		top.HEURIST.util.getJsonData(top.HEURIST.basePath+"common/php/workgroup.php?wg_id="+wg_id, function(obj) {
 			if (! obj  || obj.error) return;
 			top.HEURIST.workgroups[wg_id].members = obj.members;
 			top.HEURIST.workgroups[wg_id].savedSearches = obj.savedSearches;
@@ -50,7 +50,7 @@ if (! top.HEURIST.json) top.HEURIST.json = {
 			if (callback) callback(wg_id);
 			return;
 		}
-		top.HEURIST.util.getJsonData(top.HEURIST.basePath+"common/lib/pub.php?pub_id="+wg_id, function(obj) {
+		top.HEURIST.util.getJsonData(top.HEURIST.basePath+"common/php/pub.php?pub_id="+wg_id, function(obj) {
 			if (! obj  || obj.error) return;
 			top.HEURIST.workgroups[wg_id].wgSearches = obj.wgSearches;
 			top.HEURIST.workgroups[wg_id].mySearches = obj.mySearches;

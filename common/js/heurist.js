@@ -435,8 +435,8 @@ if (! window.HEURIST_WINDOW_ID) {
 
 top.HEURIST.parseParams.apply(window);
 
-if (! top.HEURIST.util) top.HEURIST.loadScript(top.HEURIST.basePath+"common/lib/heurist-util.js", true);
-if (! top.HEURIST.json) top.HEURIST.loadScript(top.HEURIST.basePath+"common/lib/heurist-json.js", true);
+if (! top.HEURIST.util) top.HEURIST.loadScript(top.HEURIST.basePath+"common/js/heurist-util.js", true);
+if (! top.HEURIST.json) top.HEURIST.loadScript(top.HEURIST.basePath+"common/js/heurist-json.js", true);
 
 if (window != top) {
 	/* Invoke  autosizeAllElements()  when the window loads or is resized */

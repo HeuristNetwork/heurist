@@ -1,6 +1,6 @@
 body {
         /* thin header (overridden on search page) */
-	background: white url(../common/images/edit-bg.gif) scroll repeat-x;  /* brown-bg.gif is necessary to extend outside the #page table */
+	background: white url(../images/edit-bg.gif) scroll repeat-x;  /* brown-bg.gif is necessary to extend outside the #page table */
 	color: black;
 	margin: 10px 10px 0 10px;
 	overflow: hidden;
@@ -12,11 +12,11 @@ body {
 #workgroup-val-div {
 	white-space: nowrap;
 	padding-left: 20px;
-	background: transparent url(../common/images/workgroup_icon-small.gif) scroll top left no-repeat;
+	background: transparent url(../images/workgroup_icon-small.gif) scroll top left no-repeat;
 }
 #workgroup-access {
 	padding-left: 20px;
-	background: transparent url(../common/images/public_icon-small.gif) scroll top left no-repeat;
+	background: transparent url(../images/public_icon-small.gif) scroll top left no-repeat;
 }
 
 
@@ -41,7 +41,7 @@ body {
 .sidebar-link {
 	display: block;
 
-	background: transparent url(../common/images/32x32.gif) no-repeat scroll 8px center;
+	background: transparent url(../images/32x32.gif) no-repeat scroll 8px center;
 	color: #999999;
 
 	padding: 4px 4px 6px 54px;
@@ -79,7 +79,7 @@ div.sidebar-link img {
 	float: right;
 }
 div.sidebar-link.changed img {
-	background-image: url(../common/images/save-disk.gif);
+	background-image: url(../images/save-disk.gif);
 }
 
 body div.sidebar-link.disabled, body div.sidebar-link.disabled:hover {
