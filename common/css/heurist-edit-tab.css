@@ -1,0 +1,239 @@
+/* heurist-edit-tab.css
+ * Copyright 2006, 2007 Tom Murtagh and Kim Jackson
+ * http://heuristscholar.org/
+ *
+ * Common styles for the sub-pages on the Heurist record editing page.
+ */
+
+/*
+This file is part of Heurist.
+
+Heurist is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+Heurist is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+body {
+	background-color: #EFF2F6;
+	font-size: 11px;
+	margin-top: 2ex;
+}
+
+h2 { font-size: 13px; font-weight: bold; }
+
+div.draggable {
+	position: fixed;
+	-webkit-box-shadow: 4px 4px 3px gray;
+}
+* html div.draggable { position: absolute; }	/* IE6 doesn't understand position: fixed ... treats it as position: static */
+
+div.draggable table {
+	display: block;
+	background-color: white;
+
+	border: 1px solid black;
+}
+div.draggable td.header {
+	border-bottom: 1px solid black;
+	padding-left: 16px;
+	height: 1.4em;
+	line-height: 1.4em;
+	background-color: #aa7f7f;
+	color: white;
+	cursor: move;
+}
+
+div.draggable td.header div.resize-div {
+	cursor: nw-resize;
+	top: 0; left: 0;
+	position: absolute;
+	background: url(../common/images/nw-resize.gif) transparent scroll top left no-repeat;
+	width: 16px;
+	height: 16px;
+}
+
+div.draggable td.header div.minimise-div {
+	top: 0; right: 0;
+	position: absolute;
+	background: url(../common/images/nw-resize.gif) transparent scroll top right no-repeat;
+	width: 16px;
+	height: 16px;
+}
+
+div.draggable iframe {
+	border: 0;
+	padding: 0;
+	margin: 0;
+	position: absolute;
+	z-index: -1;
+	width: 100%;
+	height: 100%;
+}
+div.draggable textarea {
+	border: 0;
+	padding: 2px;
+	margin: 0;
+	width: 100%;
+	height: 100%;
+}
+
+
+.date-button {
+	margin: 3px;
+	width: 24px;
+	height: 18px;
+	background: url(../common/images/cal.gif) lightgray scroll center center no-repeat;
+}
+
+.temporal-button {
+	margin: 3px;
+	width: 24px;
+	height: 18px;
+	background: url(../common/images/temporal.gif) lightgray scroll center center no-repeat;
+}
+
+.input-row select { display: block; }
+.input-row tr select { display: inline; }
+
+.input-row td.input-header-cell {
+	width: 100px;
+	padding-right: 10px;
+	text-align: right;
+	font-weight: bold;
+}
+
+.input-row td { padding-bottom: 1ex; }
+
+.input-row.required td.input-header-cell { color: red; }
+.input-row.required td.input-header-cell:before { content: "* "; }
+
+.input-row.optional td.input-header-cell { color: gray; }
+
+.prompt { font-size: 85%; color: green; }
+
+.in { border: 1px solid black; padding: 1px; }
+.input-cell .in { margin: 2px 0;  }
+
+.input-cell .date-div * { vertical-align: middle; }
+.input-cell .date-div .in { display: inline; }
+
+.input-cell .resource-div { position: relative; left: -16px; white-space: nowrap; }
+
+.input-row .resource-div * { vertical-align: middle; }
+
+.input-cell .resource-div .edit-resource {
+	cursor: pointer;
+	position: relative;
+	left: 18px;
+}
+.input-cell .resource-div .delete-resource {
+	cursor: pointer;
+	background-image: url(../common/images/cross.gif);
+}
+.input-cell .resource-div.empty img.edit-resource { visibility: hidden; }
+.input-cell .resource-div.empty img.delete-resource {
+	cursor: default;
+	background-image: url(../common/images/cross-grey.gif);
+}
+
+.input-cell .resource-title {
+	padding: 1px;
+	padding-left: 20px;
+	margin: 2px 0;
+	border: 1px dotted gray;
+	cursor: pointer;
+	width: 92%;
+}
+
+td.readonly .resource-title {
+	border: 1px dotted lightgray;
+	color: gray;
+}
+td.input-cell.readonly img {
+	visibility: hidden;
+}
+td.input-cell.readonly img.edit-resource {
+	visibility: visible;
+}
+
+
+.input-row .duplicator { cursor: pointer; vertical-align: middle; margin-left: 1ex; }
+
+.input-cell .file-div { white-space: nowrap; }
+
+.input-cell .link-image { vertical-align: middle; border: 0; outline: none; }
+
+.input-cell .delete-file, .input-cell .delete-geo {
+	margin-left: 1ex;
+	vertical-align: middle;
+	border: 0;
+	cursor: pointer;
+	background-image: url(../common/images/cross.gif);
+}
+
+.input-cell .geo-div { padding: 2px 0; }
+
+.input-cell .geo-div.empty img.geo-image { background-image: url(../common/images/geo-grey.gif); }
+.input-cell .geo-div img.geo-image { background-image: url(../common/images/geo.gif); }
+.input-cell .geo-edit {
+	text-decoration: underline;
+	color: blue;
+	cursor: pointer;
+}
+.input-cell .empty .delete-geo { display: none; }
+.input-cell img {
+	vertical-align: middle;
+}
+
+.input-cell span.in-progress {
+	color: gray;
+}
+
+#uploads {
+	position: fixed;
+	position: expression("absolute");
+	right: 0; top: 0;
+	width: 150px;
+}
+#uploads div {
+	background-color: white;
+	border: 1px solid gray;
+	border-top: 0;
+	border-right: 0;
+	padding: 2px;
+}
+#uploads div img {
+	padding: 1px;
+}
+#uploads div img:hover {
+	background-color: lightgray;
+}
+#uploads div.error {
+	color: red;
+}
+#uploads div.upload-status div.progress-bar {
+	width: 136px;
+	line-height: 4px;
+	background-color: #f0f0f0;
+	border: 0; padding: 0; margin: 3px;
+}
+#uploads div.upload-status div.progress-bar div {
+	width: 0;
+	height: 4px;
+	line-height: 4px;
+	background-color: blue;
+	border: 0; padding: 0; margin: 0;
+}
+
+
+#bib_url { min-width: 75ex; }

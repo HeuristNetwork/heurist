@@ -1,0 +1,94 @@
+<html>
+ <head>
+  <title>Workgroup members</title>
+  <link rel=stylesheet href="../../common/css/heurist.css">
+
+  <style>
+#wg-title { font-size: 120% }
+#wg-name { font-weight: bold; }
+td { padding-right: 20px; }
+  </style>
+
+ </head>
+
+ <body width=600 height=400>
+
+  <script src="heurist.js"></script>
+  <script>
+window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+
+function showMembers() {
+	var wg = top.HEURIST.workgroups[window.HEURIST.parameters["wg_id"]];
+	if (! wg) {
+		// We only make it here if someone's screwing around ...
+		// It does give a flash of popup window, but it's a bit hard to work around that.
+		alert("Sorry - no workgroup members visible");
+		setTimeout(function() { window.close(); }, 0);
+		return;
+	}
+
+	var dateString;
+	if (top.HEURIST.is_admin()) {
+		var now = new Date();
+		var y = now.getFullYear();
+		var m = now.getMonth() + 1;
+		var d = now.getDate();
+		dateString = y + "-" +
+						(m < 10 ? "0" : "") + m + "-" +
+						(d < 10 ? "0" : "") + d;
+	}
+
+	document.getElementById("wg-name").appendChild(document.createTextNode(wg.name));
+
+	var table = document.getElementById("members-table");
+	var tbody =table.appendChild(document.createElement("tbody"));
+	for (var i=0; i < wg.members.length; ++i) {
+		var tr = tbody.appendChild(document.createElement("tr"));
+
+		var td = tr.appendChild(document.createElement("td"));
+		td.appendChild(document.createTextNode(wg.members[i].name));
+
+		td = tr.appendChild(document.createElement("td"));
+		var link = td.appendChild(document.createElement("a"));
+		link.href = "mailto:"+wg.members[i].email;
+		link.appendChild(document.createTextNode("email"));
+
+		if (top.HEURIST.instance.name == "") {
+			td = tr.appendChild(document.createElement("td"));
+			link = td.appendChild(document.createElement("a"));
+			link.target = "_blank";
+			link.href = "../../interfaces/blog/index.html?u="+wg.members[i].id;
+			link.appendChild(document.createTextNode("blog"));
+		}
+
+		if (top.HEURIST.is_admin()) {
+			td = tr.appendChild(document.createElement("td"));
+			var a = td.appendChild(document.createElement("a"));
+				a.target = "_blank";
+				a.href = "../../interfaces/blog/report.php?u=" + wg.members[i].id + "&d=" + dateString;
+				a.appendChild(document.createTextNode("blog report"));
+		}
+	}
+
+	if (top.HEURIST.is_admin()) {
+		var div = document.createElement("div");
+			div.style.cssFloat = div.style.styleFloat = "right";
+		var a = div.appendChild(document.createElement("a"));
+			a.target = "_blank";
+			a.href = "../../interfaces/blog/report.php?g=" + window.HEURIST.parameters["wg_id"] + "&d=" + dateString;
+			a.appendChild(document.createTextNode("group blog report"));
+		table.parentNode.insertBefore(div, table);
+	}
+}
+
+top.HEURIST.registerEvent(window, "load", function() {
+	top.HEURIST.json.loadWorkgroupDetails(window.HEURIST.parameters["wg_id"], showMembers);
+});
+
+  </script>
+
+  <h2 id=wg-title>Members of workgroup <span id=wg-name></span></h2>
+  <table id=members-table></table>
+ </body>
+</html>
+

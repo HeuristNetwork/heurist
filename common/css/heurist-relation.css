@@ -1,0 +1,105 @@
+#newly-added {
+	background-color: #F0E3DB;
+}
+
+.relation {
+	padding: 3px;
+}
+div.editable {
+	border: 2px solid #D0A0A0;
+	background-color: #F0E3DB;
+	margin: 5px;
+}
+.relation .input-row td { padding-bottom: 2px; }
+.relation .input-row td * { vertical-align: middle; }
+
+.relation .optional .input-header-cell { color: lightGray; }
+.relation .input-row .input-header-cell { white-space: nowrap; }
+.section-header-cell {
+	font-size: 110%;
+	font-weight: bold;
+	color: gray;
+}
+
+.just_added {
+	border: 1px solid #53740e;
+	border-left: 3px solid #53740e;
+}
+
+.type {
+	font-weight: bold;
+	padding-left: 20px;
+}
+
+.resource {
+	line-height: 16px;
+	padding-left: 16px;
+	margin-left: 3px;
+}
+.resource * { line-height: 16px; }
+img {
+	vertical-align: bottom;
+}
+
+/* background-color: #F4F6EF */
+
+.header {
+	font-weight: bold;
+	margin-right: 3px;
+}
+
+.minor {
+	color: #53740e;
+}
+
+th {
+	text-align: right;
+}
+
+.in {
+	padding: 1px;
+	margin: 0px;
+	border: 1px solid black;
+	width: 560px;
+}
+
+.details {
+	font-weight: bold;
+}
+.details .dates {
+	font-weight: normal;
+}
+
+.notes {
+	font-style: italic;
+	font-size: 10px;
+}
+
+a img { border: 0px; }
+tr.relation { width: 100%; }
+tr.relation .delete, tr.relation .edit {
+	width: 12px;
+	padding: 2px; cursor: pointer;
+}
+tr.relation .title { width: 300px; }
+tr.relation .title div, tr.relation .notes-field div { width: 100%;
+	overflow: hidden;
+	white-space: nowrap;
+}
+tr.relation .dates { white-space: nowrap;
+	padding: 0 1ex 1ex 1ex;
+}
+tr.relation .ellipses {
+	visibility: hidden;
+	width: 1em;
+}
+
+tr.relation-title td { padding-top: 1em; }
+tr.relation-title span { font-weight: bold; }
+tr.relation-title a { text-decoration: none; }
+
+div#test-div {
+	visibility: hidden;
+	white-space: nowrap;
+	position: absolute;
+}

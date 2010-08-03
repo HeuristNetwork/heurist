@@ -1,0 +1,95 @@
+@charset "ISO-8859-1";
+
+*:hover a {
+	cursor: pointer;
+}
+
+#section-container {
+	position: absolute;
+	width: 100%;
+	height: 474px;
+}
+.heuristsection {
+	-moz-border-radius-bottomleft:10px;
+	-moz-border-radius-bottomright:10px;
+	-moz-border-radius-topleft:10px;
+	-moz-border-radius-topright:10px;
+	background-color: #EAEDF1;
+	background-image:url(../common/images/left_panel_bg.png);
+	color: #515156;
+	border: 1px solid #CCC;
+	margin: 0;
+	padding: 0;
+	height: 230px;
+	position: absolute;
+}
+
+#topleft, #bottomleft {
+	left: 0px;
+	right: 50%;
+	margin-left: 40px;
+	margin-right: 5px;
+}
+#topright, #bottomright {
+	right: 0px;
+	left: 50%;
+	margin-right: 40px;
+	margin-left: 5px;
+}
+#topleft, #topright {
+	top: 0px;
+}
+#bottomleft, #bottomright {
+	bottom: 0px;
+}
+
+.heuristsection .summary, .heuristsection .content {
+	padding-left: 80px;
+	padding-top: 10px;
+}
+a {
+	text-decoration: none;
+	color: #6A7C99;
+}
+a:hover{
+	text-decoration: underline;
+}
+
+.heuristsection .summary ul {
+	padding-left: 1em;
+}
+.heuristsection .summary table {
+	width: 100%;
+}
+.heuristsection .summary td {
+	width: 50%;
+	vertical-align: top;
+}
+
+.heuristsection .content {
+	display: none;
+}
+
+.category {
+	-moz-border-radius-topleft: 10px;
+	-moz-border-radius-topright: 10px;
+	font-size: 12px;
+	font-weight: bold;
+	color: #6A7C99;
+	background-image: url(../common/images/heading_popup.png);
+	padding-top: 6px;
+	padding-right: 0px;
+	padding-bottom: 3px;
+	padding-left: 10px;
+}
+.subcategory {
+	font-weight: bold;
+}
+#search-cell {
+	height: 90px;
+	padding-left: 40px;
+}
+li {
+	list-style-position: inside;
+	list-style-type: square;
+}

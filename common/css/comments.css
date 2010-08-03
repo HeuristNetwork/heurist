@@ -1,0 +1,56 @@
+
+#comments {
+	margin: 0 10px;
+	padding: 4px;
+	min-height: 100px;
+}
+
+#comments td { vertical-align: top; }
+#comments a img { vertical-align: middle; border: none; }
+#comments a { text-decoration: none; }
+
+#comment-link {
+	font-weight: bold;
+}
+
+#comments .comment {
+	border-left: 3px solid #660000;
+	padding: 3px 0px 0px 3px;
+	margin: 10px 0px;
+}
+#comments .comment .comment {
+	margin-left: 10px;
+}
+#comments .comment .editing_block {
+	margin-left: 10px;
+}
+#comments .deleted {
+	font-style: italic;
+	color: gray;
+}
+
+#comments .footer {
+	padding: 5px 0px;
+}
+
+#comments .author { font-weight: bold; margin-right: 20px; }
+#comments .date, .moddate { color: gray; margin-right: 20px; }
+
+
+#comments .editing-block textarea {
+	display: block;
+	width: 600px;
+	height: 80px;
+	border: 1px solid black;
+	padding: 1px;
+}
+
+
+#focus_comment {
+	background-color: #FBF9DF;
+/* #FDFAEF; */
+}
+
+
+#comments .help { margin: 4px 2px; }
+
