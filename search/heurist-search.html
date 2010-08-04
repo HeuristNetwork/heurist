@@ -30,7 +30,7 @@
 <link rel=stylesheet href="../common/css/heurist-search.css">
 <link rel=icon href="../favicon.ico" type="image/x-icon">
 <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
-<link id=httprsslink rel=alternate type="application/rss+xml" title="HTTP RSS feed" href="../search/feeds/search_rss.php?q=tag:Favourite+OR+tag:Favorite">
+<link id=httprsslink rel=alternate type="application/rss+xml" title="HTTP RSS feed" href="../export/feeds/search_rss.php?q=tag:Favourite+OR+tag:Favorite">
 
 <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.6.0/build/menu/assets/skins/sam/menu.css">
 <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/yahoo-dom-event/yahoo-dom-event.js"></script>
@@ -135,7 +135,7 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
     <li class="yuimenuitem"><a class="yuimenuitemlabel" href="../import/tools/import.php?format=GEO" name="auto-popup" title="Import KML files">Import geographic</a></li>
     <li class="yuimenuitem"><a class="yuimenuitemlabel" href="../import/tools/csv/fleximport.html" title="Import a delimited text file of data for one record type" target="_blank">Import delimited</a></li>
     <li class="yuimenuitem admin-only"><a class="yuimenuitemlabel" href="../import/tools/detailupdater/detail-updater.html" target="_blank" title="Update record details using delimited text">Detail updater</a></li>
-    <li class="yuimenuitem admin-only"><a class="yuimenuitemlabel" href="../output/export/csv/flexport.html" target="_blank" title="Export records as delimited text">Export delimited</a></li>
+    <li class="yuimenuitem admin-only"><a class="yuimenuitemlabel" href="../export/csv/flexport.html" target="_blank" title="Export records as delimited text">Export delimited</a></li>
 
     <li class="yuimenuitem divider"><a class="yuimenuitemlabel" href="http://www.timemap.net/tmissues.php" target="_blank" title="Add a bug report directly into our bug tracking system">Report a bug</a></li>
     <li class="yuimenuitem admin-only"><a class="yuimenuitemlabel" href="../admin/rectypes/bib_detail_editor.php" target="_blank" title="For administrators only">Administrator tools</a></li>
@@ -181,7 +181,7 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 </table>
 </td>
 <td style="width: 100px; text-align: right;">
-<a id=add-record-link class="toolbar-large-icon-link logged-in-only" title="Add a new record to the Heurist database, setting record type and ownership" href="#" onclick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'data/records/addrec/popup_add_resource.php'); return false;"><img src="../common/images/add-record.png"></a>
+<a id=add-record-link class="toolbar-large-icon-link logged-in-only" title="Add a new record to the Heurist database, setting record type and ownership" href="#" onclick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/addrec/popup_add_resource.php'); return false;"><img src="../common/images/add-record.png"></a>
 </td>
 
 </tr></table>
@@ -222,7 +222,7 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
      <span id=active-label>Search results</span>
      <a class=toolbar-large-icon-link href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members" onclick="top.HEURIST.util.popupURL(window, 'saved/save-search.html'); return false;">save</a> |
      <span id=publish-image-placeholder></span>
-     <a class=toolbar-large-icon-link href="#" title="Map ( + timeline ) for current search results in Google Earth, Google Maps, TimeMap or OpenLayers" onclick="top.HEURIST.util.popupURL(window, '../output/map-menu.html?'); return false;">map</a>
+     <a class=toolbar-large-icon-link href="#" title="Map ( + timeline ) for current search results in Google Earth, Google Maps, TimeMap or OpenLayers" onclick="top.HEURIST.util.popupURL(window, '../map-menu.html?'); return false;">map</a>
     </td>
    </tr>
    <tr class="toolbar-column-header"><td colspan=2 class="operations logged-in-only">

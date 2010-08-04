@@ -34,7 +34,7 @@
     <map:match pattern="*/random_image-js/*">
       <map:act type="request">
         <map:parameter name="parameters" value="true"/>
-        <map:generate src="/output/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:generate src="/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
         <map:transform src="/output/pubwizard/xsl/heurist_legacy_xml.xsl"/>
         <map:transform src="/output/pubwizard/xsl/random_image-js.xsl">
           <map:parameter name="width" value="{../2}"/>
@@ -46,7 +46,7 @@
     <map:match pattern="*/*/*-javascript">
       <map:act type="request">
         <map:parameter name="parameters" value="true"/>
-        <map:generate src="/output/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:generate src="/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
         <map:transform src="/output/pubwizard/xsl/heurist_legacy_xml.xsl"/>
         <map:transform src="/output/pubwizard/xsl/{../2}.xsl">
 			<map:parameter name="arg" value="{../3}"/>
@@ -66,7 +66,7 @@
     <map:match pattern="*/*/*.xsl">
       <map:act type="request">
         <map:parameter name="parameters" value="true"/>
-        <map:generate src="/output/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:generate src="/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
         <map:transform src="/output/pubwizard/xsl/heurist_legacy_xml.xsl"/>
         <map:transform src="/output/pubwizard/xsl/{../3}.xsl">
 			<map:parameter name="id" value="{../1}"/>
@@ -84,7 +84,7 @@
     <map:match pattern="*/*/*">
       <map:act type="request">
         <map:parameter name="parameters" value="true"/>
-        <map:generate src="/output/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:generate src="/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
         <map:transform src="/output/pubwizard/xsl/heurist_legacy_xml.xsl"/>
         <map:transform src="/output/pubwizard/xsl/{../2}.xsl">
 			<map:parameter name="arg" value="{../3}"/>
@@ -103,7 +103,7 @@
     <map:match pattern="*/random_image-js">
       <map:act type="request">
         <map:parameter name="parameters" value="true"/>
-        <map:generate src="/output/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:generate src="/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
         <map:transform src="/output/pubwizard/xsl/heurist_legacy_xml.xsl"/>
         <map:transform src="/output/pubwizard/xsl/random_image-js.xsl"/>
       </map:act>
@@ -113,7 +113,7 @@
     <map:match pattern="*/*.xsl-javascript">
       <map:act type="request">
         <map:parameter name="parameters" value="true"/>
-        <map:generate src="/output/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:generate src="/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
         <map:transform src="/output/pubwizard/xsl/heurist_legacy_xml.xsl"/>
         <map:transform src="/output/pubwizard/xsl/{../2}.xsl">
 			<map:parameter name="id" value="{../1}"/>
@@ -132,7 +132,7 @@
     <map:match pattern="*/*-javascript">
       <map:act type="request">
         <map:parameter name="parameters" value="true"/>
-        <map:generate src="/output/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:generate src="/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
         <map:transform src="/output/pubwizard/xsl/heurist_legacy_xml.xsl"/>
         <map:transform src="/output/pubwizard/xsl/{../2}.xsl">
 			<map:parameter name="id" value="{../1}"/>
@@ -151,7 +151,7 @@
     <map:match pattern="*/*.xsl">
       <map:act type="request">
         <map:parameter name="parameters" value="true"/>
-        <map:generate src="/output/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000&amp;f=1"/>
+        <map:generate src="/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000&amp;f=1"/>
         <map:transform src="/output/pubwizard/xsl/heurist_legacy_xml.xsl"/>
         <map:transform src="/output/pubwizard/xsl/{../2}.xsl">
 			<map:parameter name="id" value="{../1}"/>
@@ -169,7 +169,7 @@
     <map:match pattern="*/*">
       <map:act type="request">
         <map:parameter name="parameters" value="true"/>
-        <map:generate src="/output/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:generate src="/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
         <map:transform src="/output/pubwizard/xsl/heurist_legacy_xml.xsl"/>
         <map:transform src="/output/pubwizard/xsl/{../2}.xsl">
 			<map:parameter name="id" value="{../1}"/>
@@ -188,7 +188,7 @@
     <map:match pattern="*">
       <map:act type="request">
         <map:parameter name="parameters" value="true"/>
-        <map:generate src="/output/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:generate src="/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
       </map:act>
       <map:serialize type="xml"/>
     </map:match>

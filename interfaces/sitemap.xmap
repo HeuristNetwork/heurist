@@ -31,8 +31,8 @@
         | Mount everything else by calling the sitemap.xmap file located
         | in the requested sub-folder in the 'output directory'.
         +-->
-    <map:match pattern="^(.*)output/pubwizard/.*$" type="regexp">
-      <map:mount check-reload="yes" src="../output/pubwizard/" uri-prefix="{1}output/pubwizard/"/>
+    <map:match pattern="^([^/]+)/output/pubwizard/.*$" type="regexp">
+      <map:mount check-reload="yes" src="../output/pubwizard/" uri-prefix="{1}/output/pubwizard/"/>
     </map:match>
 
     <!--+

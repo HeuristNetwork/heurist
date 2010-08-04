@@ -418,7 +418,7 @@ bookmark: function(reftype) {
 		}
 	}
 	var favicon = Heurist.findFavicon();
-	var w = open(Heurist.urlBase + Heurist.installDir +'/data/records/addrec/add.php?t=' + Heurist.urlcleaner(encodeURIComponent(titl)) +
+	var w = open(Heurist.urlBase + Heurist.installDir +'/records/addrec/add.php?t=' + Heurist.urlcleaner(encodeURIComponent(titl)) +
 				 '&u=' + Heurist.urlcleaner(encodeURIComponent(url)) +
 				 '&d=' + Heurist.urlcleaner(encodeURIComponent(sel)) +
 				 (favicon? ('&f=' + encodeURIComponent(favicon)) : '') +

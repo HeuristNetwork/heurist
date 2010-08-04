@@ -1,0 +1,138 @@
+<html>
+ <head>
+  <title>Add new record</title>
+
+  <link rel=stylesheet href="../../../common/css/import.css">
+  <!-- link rel=stylesheet href="../../common/css/mini.css" -->
+ </head>
+
+ <body width=600 height=400>
+  <script src="../../../common/js/heurist.js"></script>
+  <script src="../../../common/php/display-preferences.php"></script>
+<div id="search"><b><span id=reftype-val></span></b><span id=title-val></span></div>
+<div id="results"><iframe frameborder=0 class=tab id=edit-frame style="width: 100%; height: 100%;"></iframe></div>
+<div id="add_records_footer"><input type=button onClick="window.HEURIST.edit.save();" value="Save new record"></div>
+  <script>
+
+window.HEURIST.edit = {
+	publicHasChanged: false,
+
+	unchanged: function() {
+		window.HEURIST.edit.publicHasChanged = false;
+	},
+
+	changed: function() {
+		window.HEURIST.edit.publicHasChanged = true;
+	},
+
+	save: function() {
+		// Attempt to save the public tab
+
+		var editFrame = document.getElementById("edit-frame");
+		var contentWindow = editFrame.contentWindow;
+		if (contentWindow) {
+			var form = contentWindow.document.forms[0];
+			if (form.onsubmit  &&  ! form.onsubmit()) {
+				return;	// submit failed ... up to the individual form handlers to display messages
+			}
+			top.HEURIST.registerEvent(editFrame, "load", function() {
+				window.close(window.HEURIST.record.title, window.HEURIST.record.bdValuesByType, window.HEURIST.record.bibID);
+			});
+
+			(form.heuristSubmit || form.submit)();
+			return;
+		}
+
+		// If we get here, there were no unsaved changes.
+		// Grab the biblio title from the saved document, and close the window.
+	}
+};
+
+window.HEURIST.parameters = top.HEURIST.parseParams(window.location.search);
+var reftype = parseInt(window.HEURIST.parameters["reftype"]);
+var titleBits = (window.HEURIST.parameters["title"] || "").split(/\s+/);
+for (var i=0; i < titleBits.length; ++i) {
+	titleBits[i] = titleBits[i].charAt(0).toUpperCase() + titleBits[i].substring(1);
+}
+var title = titleBits.join(" ");
+document.getElementById("title-val").appendChild(document.createTextNode(title || ""));
+var url = window.HEURIST.parameters["url"];
+if (! reftype) {
+	var setInitialReftype = function() {
+		var reftype = reftypeDropdown.options[reftypeDropdown.selectedIndex].value;
+
+		var editFrame = document.getElementById("edit-frame");
+		editFrame.src = "../editrec/tabs/H3-public-tab.html?reftype="+reftype;
+		editFrame.style.display = "block";
+
+		reftypeDropdown.onchange = setReftype;
+	}
+	var setReftype = function() {
+		if (! confirm("Existing details will be lost - continue?")) return;
+
+		var reftype = reftypeDropdown.options[reftypeDropdown.selectedIndex].value;
+
+		var editFrame = document.getElementById("edit-frame");
+		editFrame.contentWindow.setReftype(reftype);
+	}
+
+
+	var reftypeDiv = document.getElementById("reftype-val");
+	var reftypeDropdown = document.createElement("select");
+		reftypeDropdown.id = "reftype";
+
+	var j = 0;
+	var firstOption = reftypeDropdown.options[j++] = new Option("(select a record type)", "");
+		firstOption.disabled = true;
+		firstOption.selected = true;
+
+	// bibliographic reftypes
+	var grp = document.createElement("optgroup");
+	grp.label = "Bibliographic reference types";
+	reftypeDropdown.appendChild(grp);
+	for (var i=0; i < top.HEURIST.reftypes.primary.length; ++i) {
+		var value = top.HEURIST.reftypes.primary[i];
+		var name = top.HEURIST.reftypes.names[value];
+		reftypeDropdown.options[j++] = new Option(name, value);
+	}
+	// other reftypes
+	var grp = document.createElement("optgroup");
+	grp.label = "Other reference types";
+	reftypeDropdown.appendChild(grp);
+	for (var i=0; i < top.HEURIST.reftypes.other.length; ++i) {
+		var value = top.HEURIST.reftypes.other[i];
+		var name = top.HEURIST.reftypes.names[value];
+		reftypeDropdown.options[j++] = new Option(name, value);
+	}
+
+	reftypeDropdown.onchange = setInitialReftype;
+
+	reftypeDiv.appendChild(reftypeDropdown);
+
+} else {
+	var editFrame = document.getElementById("edit-frame");
+	editFrame.src = "../editrec/tabs/public-tab.html?reftype="+reftype+"&title="+encodeURIComponent(title);
+	editFrame.style.display = "block";
+
+	document.getElementById("reftype-val").appendChild(document.createTextNode(top.HEURIST.reftypes.names[reftype]));
+}
+
+</script>
+<script src="../disambig/disambiguate.js"></script>
+<script>
+function popupDisambiguation(matches) {
+	_popupDisambiguation(matches, function(choice) {
+		if (choice.value == -1) {
+			window.HEURIST.record.forceSave = true;
+			var editFrame = document.getElementById("edit-frame");
+			editFrame.contentWindow.document.forms[0].heuristSubmit();
+		}
+		else {
+			window.close(choice.details.title, [], choice.details.bibID);
+		}
+	});
+}
+</script>
+
+ </body>
+</html>

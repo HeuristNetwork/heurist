@@ -948,6 +948,7 @@ TDate.parse = function () {
 		temp = temp.replace(/\s*(sun|mon|tues?|wed(nes)?|thur?s?|fri)(day)?\.?,?\s*/i,"");  //remove any day indicators
 		temp = temp.replace(/nd|rd|th|\sof/ig,"");
 		temp = temp.replace(/1st|1\sst/,"1");
+		temp = temp.replace(/\s+/g," ");	//compress multiple spaces into a single space
 		if (temp.match(/\d\d?\s*(?:am|pm)/i)) {  //  12 hour clock need to convert
 			var t12 = temp.match(/(?:\s+(\d\d?)([:\.,]\d\d?\d?){0,3})\s*(am|pm)/i);
 			if ( t12[3].match(/pm/i) ) {

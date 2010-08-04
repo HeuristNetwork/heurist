@@ -65,7 +65,7 @@
 		</map:match>
 
 		<map:match pattern="xml2/*">
-			<map:generate src="http://{global:serverName}/{request-param:installDir}/output/export/xml/hml.php?instance={request-param:instance}&amp;q=ids:{1}&amp;depth=2" label="hml"/>
+			<map:generate src="http://{global:serverName}/{request-param:installDir}/export/xml/hml.php?instance={request-param:instance}&amp;q=ids:{1}&amp;depth=2" label="hml"/>
 			<map:transform src="xsl/heurist_legacy_xml.xsl"/>
 			<map:serialize type="xml"/>
 		</map:match>
@@ -107,20 +107,20 @@
 
 		<map:match pattern="kmltrans/*">
 			<!-- generates heurist kml for the given query and transforms it -->
-			<map:generate src="{global:heuristBaseURL}output/mapper/googleearth.kml.php/heurist-map.kml?w=all&amp;multilevel=false&amp;q={1}" label="rawkml"/>
+			<map:generate src="{global:heuristBaseURL}mapper/googleearth.kml.php/heurist-map.kml?w=all&amp;multilevel=false&amp;q={1}" label="rawkml"/>
 			<map:transform src="xsl/kmltrans.xsl" label="transformed"/>
 			<map:serialize type="xml"/>
 		</map:match>
 
 		<map:match pattern="kml/*">
 			<!-- generates heurist kml for the given query and transforms it -->
-			<map:generate src="{global:heuristBaseURL}output/mapper/googleearth.kml.php/heurist-map.kml?w=all&amp;multilevel=false&amp;q={1}" label="rawkml"/>
+			<map:generate src="{global:heuristBaseURL}mapper/googleearth.kml.php/heurist-map.kml?w=all&amp;multilevel=false&amp;q={1}" label="rawkml"/>
 			<map:serialize type="xml"/>
 		</map:match>
 
 		<map:match pattern="kmlfile/*">
 			<!-- generates heurist kml for the given query and transforms it -->
-			<map:generate src="{global:heuristBaseURL}output/export/xml/kml.php?id={1}"/>
+			<map:generate src="{global:heuristBaseURL}export/xml/kml.php?id={1}"/>
 			<map:serialize type="xml"/>
 		</map:match>
 	</map:pipeline>

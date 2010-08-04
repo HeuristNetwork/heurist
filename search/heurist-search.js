@@ -1415,7 +1415,7 @@ top.HEURIST.search = {
 			alert("Select at least one record to set workgroup ownership and visibility");
 			return;
 		}
-		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "search/workgroup/set-workgroup.html" + (top.HEURIST.instance && top.HEURIST.instance.name ? "?instance=" + top.HEURIST.instance.name : ""), {
+		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "records/permissions/set-workgroup.html" + (top.HEURIST.instance && top.HEURIST.instance.name ? "?instance=" + top.HEURIST.instance.name : ""), {
 			callback: function(wg, hidden) {
 				if (wg === undefined) return;
 
@@ -1647,7 +1647,7 @@ top.HEURIST.search = {
 		link.rel = "alternate";
 		link.type = "application/rss+xml";
 		link.title = "RSS feed";
-		link.href = "feed://"+window.location.host+top.HEURIST.basePath+"feeds/search_rss.php"+(document.location.search ? document.location.search : "?q=tag:Favourites") + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "");
+		link.href = "feed://"+window.location.host+top.HEURIST.basePath+"export/feeds/search_rss.php"+(document.location.search ? document.location.search : "?q=tag:Favourites") + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "");
 		document.getElementsByTagName("head")[0].appendChild(link);
 		document.getElementById("httprsslink").href += (document.location.search ? document.location.search : "?q=tag:Favourites" + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : ""));
 	},
@@ -1751,7 +1751,7 @@ top.HEURIST.search = {
 				a.href = "#";
 			a.onclick = function() {
 				if (window.HEURIST.parameters["label"] && window.HEURIST.parameters["sid"]) {
-					window.open(top.HEURIST.basePath+ "output/pubwizard/publish.php?pub_id=" + window.HEURIST.parameters["sid"] + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : ""));
+					window.open(top.HEURIST.basePath+ "pubwizard/publish.php?pub_id=" + window.HEURIST.parameters["sid"] + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : ""));
 				} else {
 					top.HEURIST.util.popupURL(window, top.HEURIST.basePath + 'search/saved/save-search.html?publish=yes' + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : ""));
 				}
@@ -1775,7 +1775,7 @@ top.HEURIST.search = {
 			p.innerHTML = 'Click below to continue to the publishing wizard.';
 			p = div.appendChild(document.createElement('p'));
 			a = p.appendChild(document.createElement('a'));
-			a.href = top.HEURIST.basePath+ 'output/pubwizard/publish.php?pub_id=' + param['sid'] +(top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "");
+			a.href = top.HEURIST.basePath+ 'pubwizard/publish.php?pub_id=' + param['sid'] +(top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "");
 			a.target = '_blank';
 			a.onclick = function() {
 				top.HEURIST.util.closePopup(popup.id);
