@@ -1,0 +1,35 @@
+p { margin: 0.25ex 0; }
+
+.woot-editor .woot-mode-div {
+	display: none;
+}
+.mce-loading .mceText {
+	display: none;
+}
+
+.defaultSkin .mceButton.mce_save,
+.defaultSkin span.mceIcon.mce_save {
+	width: 60px !important;
+}
+.defaultSkin span.mce_save {
+	background-position: -80px -40px !important;
+}
+
+.defaultSkin .mceButton.mce_cancel,
+.defaultSkin span.mceIcon.mce_cancel {
+	width: 60px !important;
+}
+.defaultSkin span.mce_cancel {
+	background-position: -20px -40px !important;
+}
+
+.permissions-button { width: 84px !important; }
+.defaultSkin .permissions-button img.mceIcon {
+	width: 80px !important;
+	height: 20px !important;
+	background: transparent url(../../external/tinymce/jscripts/tiny_mce/plugins/permissions/img/permissions.png) no-repeat scroll 2px 0;
+}
+.defaultSkin .permissions-button.mceButtonpublic img.mceIcon { background-position: 2px 0 !important; }
+.defaultSkin .permissions-button.mceButtonprivate img.mceIcon { background-position: 2px -20px !important; }
+.defaultSkin .permissions-button.mceButtonpublic-ro img.mceIcon { background-position: 2px -40px !important; }
+.defaultSkin .permissions-button.mceButtoncustom img.mceIcon { background-position: 2px -60px !important; }

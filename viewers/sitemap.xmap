@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map:sitemap xmlns:map="http://apache.org/cocoon/sitemap/1.0">
+
+<!-- Heurist 3.0 main cocoon interface sitemap -->
+
+
+ <map:pipelines>
+
+  <map:component-configurations>
+    <global-variables>
+		<serverName>heuristscholar.org</serverName>
+    </global-variables>
+  </map:component-configurations>
+
+  <!-- main pipeline -->
+  <map:pipeline>
+
+    <!--+
+        | The form of the cocoon URI is expected to be heuristInstallDir/appName/implementationDir
+        | bare minimum there should be a "main" implementation.we pass the entire URI to the
+        | sitemap in the implementationDir
+        +-->
+
+    <map:match pattern="^([^/]+)/([^/]+)/([^/]+)/" type="regexp">
+      <map:mount check-reload="yes" src="{2}/{3}/" uri-prefix=""/>
+    </map:match>
+
+    <!--+
+        | Handle any calls to application directories that don't exist with
+        | error to be displayed on screen. The "exception" selector helps
+        | you to define different screens for different error types.
+        +-->
+    <map:handle-errors>
+      <map:select type="exception">
+
+        <map:when test="not-found">
+          <map:generate type="exception"/>
+          <map:transform src="stylesheets/system/exception2html.xslt">
+            <map:parameter name="contextPath" value="{request:contextPath}"/>
+            <map:parameter name="realPath" value="{realpath:}"/>
+            <map:parameter name="pageTitle" value="Resource not found"/>
+          </map:transform>
+          <map:serialize status-code="404"/>
+        </map:when>
+
+        <map:when test="invalid-continuation">
+          <map:generate type="exception"/>
+          <map:transform src="stylesheets/system/exception2html.xslt">
+            <map:parameter name="contextPath" value="{request:contextPath}"/>
+            <map:parameter name="realPath" value="{realpath:}"/>
+            <map:parameter name="pageTitle" value="Invalid Continuation"/>
+          </map:transform>
+          <map:serialize status-code="404"/>
+        </map:when>
+
+        <map:otherwise>
+          <map:generate type="exception"/>
+          <map:transform src="stylesheets/system/exception2html.xslt">
+            <map:parameter name="contextPath" value="{request:contextPath}"/>
+            <map:parameter name="realPath" value="{realpath:}"/>
+          </map:transform>
+          <map:serialize status-code="500"/>
+        </map:otherwise>
+      </map:select>
+
+    </map:handle-errors>
+  </map:pipeline>
+ </map:pipelines>
+ </map:sitemap>

@@ -1,0 +1,412 @@
+<html>
+<head>
+<title>Add New Record</title>
+	
+<script src="http://hapi.heuristscholar.org/load?instance=artsdigital&v=d&key=793186f5d85de18661d0cc5a45f8be153706e632"></script>
+<script src="http://hapi.heuristscholar.org/02/goi.js"></script>
+<script src=common-functions.js></script>	
+<script src="hquery.js"></script>
+<script>
+	  
+var path ="http://artsdigital.heuristscholar.org/heurist/";
+        // parse query to get record type and any preset detail values
+var qBits = HQuery.parseQuery(decodeURI(getParams("pub_query")));
+var recTypeIDs;
+if (qBits.type.length) recTypeIDs = qBits.type[0]; 
+// make sure that recType is an array of IDs
+if (recTypeIDs.length == 1){
+    recTypeIDs = recTypeIDs[0].split(",");
+    var len = recTypeIDs.length;
+    for (var i=0; i<len; i++){
+        if (isNaN(recTypeIDs[i])){
+             recTypeIDs[i] = HRecordTypeManager.getRecordTypeByName(recTypeIDs[i]).getID();
+        }
+    }
+}    //  FIXME  add error code for else case
+
+// process any keywords that were passed in the search                                                    
+if (qBits.keyword){
+    var recWgKwds = [];
+    for (var n in qBits.keyword[0]){ 
+        // find quotes at the beginning or end and remove them
+        var temp =  qBits.keyword[0][n].replace(/^\"|\"$/g,'');
+        
+        // split the string into WG name and Kwd name      format should be "WG \ Kwd"  
+        temp = temp.split(/\\/);            
+        
+        //store work group - keyword pairs   note that we have the possibility of having multiple keywords for the same workgroup
+        recWgKwds[temp[0]] = temp[1].split(",");  
+    } 
+    
+    
+    var hKwds = [];
+    for (var wgName in recWgKwds){   // iterate through all the record workgroup- keywords pairs
+        // get the HAPI workgroup object
+        var hWg =  HWorkgroupManager.getWorkgroupByName(wgName);
+
+        // if user not in workgroup we can't reliably add record so we're done
+        if  (!hWg || ! HCurrentUser.isInWorkgroup(hWg)) callGhostBusters("invalid workgroup");  
+
+        // get all the Heurist keyword objects for this workgroup
+        var wgKwds = HKeywordManager.getWorkgroupKeywords(hWg);
+        
+        // iterate through all the WG keywords
+        for (var i in wgKwds){           
+            
+            // check for a match within the search keywords for this workgroup
+            for(var j in recWgKwds[wgName]) {
+              
+                // if not a match skip to the next
+                if (wgKwds[i].getName().toLowerCase() != recWgKwds[wgName][j].toLowerCase() ) continue;
+                
+                //add the HKeyword to the record
+                record.addKeyword(wgKwds[i]);     // FIXME   record is a global in the common-functions.js
+                
+                // remove keyword name from the search-keyword array  
+                recWgKwds[wgName].splice(j,1);  
+                   
+                // found and processed  wg keyword  let's break this inner loop
+                 break;
+            }  // next search kwd
+             // if there are no more keywords for this WG  remove it from the array and go to next WG
+/*            if (recWgKwds[wgName].length == 0)  {
+                recWgKwds.splice(wgName,1);
+                break;
+            }
+ */       }  //next WG kwd                   
+        //if there are no more keywords to lookup exit the loop
+ //       if (recWgKwds.length == 0) break;
+       
+        // search keyword was not found in work group there is probably a problem with the search keyword
+        if (recWgKwds[wgName].length > 0)  callGhostBusters("unknown workgroup keyword");
+    }  // next WG
+} 
+
+var rec_presetDetails = []; 
+for (attrib in qBits){
+     if (attrib.search(/field:/) != -1){ 
+        //find the id or name which follows the field: 
+        var rd_Id = attrib.match( /.*field:(.*)/ )[1].replace(/^\"|\"$/g,'');    
+        if (isNaN(rd_Id)) {
+            // need to lookup detail name and get the id
+           rd_Id = HDetailManager.getDetailTypeByName(rd_Id).getID();
+           
+           // if lookup didn't work then the name given is illformed
+           if (!rd_Id || isNaN(rd_Id))  callGhostBusters("invalid detailtype name");
+        }
+        // strip the " from the beginning and end of the string
+        if (!rec_presetDetails[rd_Id]) {
+                rec_presetDetails[rd_Id] = [];
+        }
+        rec_presetDetails[rd_Id].push( qBits[attrib][0][0].replace(/^\"|\"$/g,'') );
+        
+     }
+}   // end of process keywords
+
+function callGhostBusters( errString){
+     alert(errString + " : contact Eugene Chan in Arts Digital");
+   //     window.close();
+}
+
+
+
+if (!HCurrentUser.isLoggedIn()) window.location= path +"php/login.php";
+
+function init(){
+	var spanTitle = document.getElementById("edit-title");
+	
+	spanTitle.innerHTML = "<h3>Add New Record</h3>";
+	
+	if (recTypeIDs && recTypeIDs.length == 1) {  // we have only one recType so add that type of record
+		document.getElementById("rec-type-select-div").style.display = "none";
+		printDetails(recTypeIDs[0]);
+	} else {
+	 createRecTypeOptions(recTypeIDs);   // null or list of rec types
+	}
+}
+		
+function doRecSearch(id, option, detId, extra, constn) { //surely there must be a more elegant way of recycling the bugger
+	var mysearch = new HSearch("ids:" + id);
+	var loader = new HLoader (	
+	
+	function(s,r) {
+		switch (option){
+		case "resource":
+			if (r[0]){
+				drawResourceDetails(r[0], detId, extra, constn);
+			}
+			break; 
+		}
+	},
+	
+	function(s,e) { alert("load failed: " + e); });
+		HeuristScholarDB.loadRecords(mysearch, loader);
+}
+	
+function createRecTypeOptions(recTypeIDs) {
+    if (recTypeIDs){
+        var temp = [];
+        for(j in recTypeIDs) temp[recTypeIDs[j]]=1;
+        recTypeIDs = temp;
+    } 
+	var e = document.getElementById("rec-type-select-div");
+	e.appendChild(document.createTextNode("Select record type: "));
+	recTypeSelect = e.appendChild(document.createElement("select"));
+	recTypeSelect.id = "rec-type-select";
+	recTypeSelect.onchange = function() {  if (recTypeSelect.value)printDetails(recTypeSelect.value); };
+	
+	var opt = document.createElement("option");
+	opt.innerHTML = "record type...";
+	opt.disabled = true;
+	opt.selected = true;
+	recTypeSelect.appendChild(opt);
+	
+	var recTypes = HRecordTypeManager.getRecordTypes();
+	recTypes.sort(strcmp);
+	for (var i = 0; i < recTypes.length; i ++) {
+        var t = recTypes[i].getID();
+        if (recTypeIDs && !recTypeIDs[t]) continue;       // if there is a list of rec types only show those types
+		opt = document.createElement("option");
+		opt.value = t;
+		opt.innerHTML = recTypes[i].getName();
+		recTypeSelect.appendChild(opt);
+	}
+}
+
+function strcmp(a,b) { 
+	var x = a.getName(), y = b.getName(); 
+	return (x < y)? -1 : (x > y)? 1 : 0; 
+}
+		
+function printDetails(recTypeID) {
+
+	if (!recTypeID) {
+		recTypeID = document.getElementById("rec-type-select").value;
+		document.getElementById("rec-type-select-div").style.display = "none";
+	}
+	
+	document.getElementById("body-div").style.display = "";
+	var documentHeaderHelp = document.getElementById("help-td");
+	var div = document.getElementById("results");
+	var dets = document.getElementById("details");
+	var but = document.getElementById("but");
+//	div.innerHTML = "";
+//	dets.innerHTML = "";
+//	but.innerTHML="";
+	
+	var recordType = HRecordTypeManager.getRecordTypeById(recTypeID); 
+	var recImage = recordType.getID();
+	var recTitle = recordType.getName();
+	var url = drawUrlField();
+	
+	var helpA = document.createElement("a");
+	helpA.href = "#";
+	helpA.onclick = function() { window.open('help.html', 'help','width=700, height=400'); };
+    var lightbulb = document.createElement("img");
+    lightbulb.src = path + "img/lb.gif";
+    lightbulb.align = "absmiddle";
+    lightbulb.border = 0;
+	helpA.appendChild(lightbulb); 
+	helpA.appendChild(document.createTextNode(" Help")); 
+	
+	documentHeaderHelp.appendChild(helpA);
+    
+    var sp = document.createElement("span");
+    sp.innerHTML =  "Add new <img src='"+ path +"img/reftype/"+recImage+".gif' align=absmiddle> "+recTitle;                                              			
+	div.appendChild(sp);
+     
+	var t = document.createElement("table"); 
+    t.className = "detail";
+    dets.appendChild(t);
+	
+/*    var logoImg = document.createElement("img");
+    logoImg.src = "img/wm_logo_80.png";
+    logoImg.style.cssFloat = "right";
+    logoImg.border = 0;
+    t.appendChild(logoImg);
+  */  
+    var tr = document.createElement("tr"); 
+    tr.colspan = "2";
+    tr.innerHTML += '<td><a id="showAll" href="#" onclick="showAll();">Show all fields</a></td>';
+    dets.appendChild(tr);
+	if (url) dets.appendChild(url);
+    if (recTypeID == 1) {
+        url.className += " required"; //internet bookmarks require URL
+    }else{
+       url.className += " recommended"; // normally recommended
+	}
+    var detailTypes =HDetailManager.getDetailTypesForRecordType(recordType); //get all detail types for this record type 
+		
+		for (var i = 0; i < detailTypes.length; i++) {  //two loops, need to fully load "skin" before details, otherwise overwrites
+			var elts =drawInputForm(detailTypes[i], recordType);
+			if (elts) dets.appendChild(elts);
+            if (elts.className.search(/optional/) > -1){
+                elts.style.display = "none";     // don't show optional field on startup
+            }
+		}
+				 
+		for (var b = 0; b < detailTypes.length; b++) {
+            var id =  detailTypes[b].getID();
+			var detail = rec_presetDetails[id]
+            if (detail) {
+                drawInputFormDetails(id, recordType, detail); 
+                var tr = document.getElementById(id);
+                if (tr && tr.tagName == "TR"){
+                    var inputContainerNode = findChildElementById(tr,id).parentNode;
+                    if (inputContainerNode) {
+                        for(var i = 0; i < inputContainerNode.childNodes.length; i++) {
+                            inputContainerNode.childNodes[i].disabled = true;
+                        }    
+                    }
+                    tr.style.display = "table-row";
+                }
+            }else{
+                drawInputFormDetails(id, recordType); 
+            }
+		}
+	
+	drawRepeats();
+	
+	var butTon = document.createElement("input");
+	but.appendChild(butTon);
+	butTon.type = "button";
+	butTon.value = "add record";
+	butTon.onclick = function() { addRecord(recordType); };
+	
+	var cbutton = document.createElement("input");
+	cbutton.type = "button";
+	cbutton.value = "cancel";
+	cbutton.onclick = function() { window.location = "search.html?re=yes"; };
+	but.appendChild(cbutton);
+	//and only then add autosave function
+	if (document.getElementById("auto-save-span")){
+		record.setRecordType(recordType);
+		setAutoSaveTimeout(record);
+	}
+				
+}
+
+function showAll() { 
+    var rows = document.getElementsByTagName("tr");  
+    for(var i in rows){
+        if (rows[i].className && rows[i].className.search("optional") > -1){
+            rows[i].style.display = "table-row";
+        } 
+    }
+    var showAllAnchor = document.getElementById("showAll");
+    showAllAnchor.parentNode.removeChild(showAllAnchor);
+    return false;
+}
+ 	
+function drawInputFormDetails(detailId,recType,detail){
+	var detailType =  HDetailManager.getDetailTypeById(detailId); // HDetailType object
+	var detVariety = detailType.getVariety();
+	if(!detail) detail = "";
+    	
+	switch (detVariety){
+	case 'literal':
+		drawInputField(detailId, detail);
+		break;
+	
+	case 'reference': //ATTENTION: not an efficient way of outputing resource pointers! FIXME!
+		var constRecType;
+		if (detailType.getConstrainedRecordType()) constRecType = detailType.getConstrainedRecordType().getID(); 
+	  	drawResource(detailId, detail, constRecType);
+	 	break;
+	 
+	case 'file':
+		drawFile(detailId, detail);
+		break;
+	 
+	case 'enumeration':
+		drawEnums(detailId, detail);
+		break;
+	 
+	case 'geographic': 
+     	drawGeo(detailId, detail);
+    	break;
+	 
+	case 'boolean':
+	 	drawBool(detailId, detail);
+		break;
+	 
+	case 'date': //TODO: add calendar
+		drawInputField(detailId, detail);
+		break;
+	 
+	case 'blocktext':
+	 	drawTextArea (detailId, detail);
+	 	break;
+
+	default:
+		drawRest(detailId, detail);
+		break;
+	}
+	
+}
+	
+	
+function addRecord(recordType) {
+
+	record.setRecordType(recordType);
+	saveRecord(record);
+	
+}
+	
+	
+function uploadFile(id) {	//FIXME local override funciton, not good! should be combined with a function in common_functions.js
+	var files = document.getElementsByName(id);
+	
+	for (f in files){
+		
+		if (files[f].type == "file") 
+		var file = files[f];
+	}
+	
+	var fileCallback = function(fInput, hFile) {
+	record.addDetail(HDetailManager.getDetailTypeById(id), hFile);
+	
+	var detail = record.getDetails(HDetailManager.getDetailTypeById(id));
+	document.getElementById("sel"+id).innerHTML= "";
+	drawFile(id, detail); 
+	
+	};
+	
+	var recordCallback = function(record) {
+	};
+	
+	var fileUploadErrorCallback = function(record, error) {
+	console.log(error);
+	};
+	
+	HeuristScholarDB.saveFile(file, new HSaver(fileCallback, fileUploadErrorCallback)); 
+}
+
+
+
+</script>
+<link rel="stylesheet" type="text/css" href="editform.css">
+</head>
+	
+	 <body onLoad="init();">
+	  <table class="transparent">
+ <tr>
+  <td><span id=edit-title></span></td><td><span id=auto-save-span></span></td><td>&nbsp;</td>
+  </tr>
+  </table>
+	  <div id="rec-type-select-div"></div>
+	  <div id="body-div" style="display:none;">
+	  <table id=tab-edit class="edit" cellpadding="0" cellspacing="0">
+	  <tr><td class="panel-header" id=results></td><td class="panel-header" id="help-td"></td>
+	  </tr>
+	  <tr>
+	  <td id=details></td>
+	  </tr>
+	  <tr>
+	  <td id=but></td>
+	  </tr>
+	  </table>
+	 </div>
+	 </body>
+	
+	</html>

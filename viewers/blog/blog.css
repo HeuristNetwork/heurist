@@ -1,0 +1,315 @@
+body {
+	margin: 0;
+	padding: 0;
+	text-align: left;
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+th, td {
+	border: none;
+}
+
+h4 {
+	margin: 17px 0;
+}
+
+.entry-outer-table {
+	margin: 15px 0 0 0;
+}
+
+#header {
+	/* heurist colours
+	background: #f7f0f0 none repeat scroll 0%;
+	border-bottom: 1px solid #660000;
+	*/
+	background: white url(../../common/images/search-bg.gif) repeat-x scroll left top;
+	border-bottom: none;
+	padding-bottom: 20px;
+}
+#header #hlogo {
+	padding: 16px 0 0 6px;
+}
+#header a img {
+	border: none;
+}
+#header .right {
+	float: right;
+}
+#header #login,
+#header #add-fav {
+	padding: 5px;
+}
+#header #home {
+	height: 28px;
+	padding: 0 12px;
+}
+.clearall {
+	clear: both;
+	height: 0px;
+	line-height: 0;
+}
+#banner {
+	margin: 24px 0 0 130px;
+}
+#header #bloglogo {
+	float: left;
+}
+#header #bloglogo a {
+	color: black;
+}
+#header h1 {
+	margin: 3px 0;
+}
+
+#page {
+	width: 100%;
+}
+
+#right {
+	width: 20%;
+	padding: 10px;
+	vertical-align: top;
+	/*overflow: hidden;*/
+	text-overflow: ellipsis; /* IE only */
+	background-color: #f9f9f9;
+}
+#left div, #right div {
+	width: 200px;
+}
+#main {
+	vertical-align: top;
+	padding: 0 20px 100px 0;
+}
+
+#spacer {	/* stops table collapsing while contents are changed */
+	width: 100%;
+}
+
+a {
+	text-decoration: none;
+	color: #7D9AAA;
+}
+a:hover {
+	text-decoration: underline;
+}
+
+a.highlight {
+	background-color: yellow;
+}
+
+#new-entry-button {
+	margin: 5px 20px 0;
+}
+
+#record-type {
+	width: 150px;
+}
+
+#spiel {
+	margin-left: 130px;
+	margin-right: 220px;
+}
+
+.empty-message {
+	margin-top: 40px;
+}
+
+.entry-outer-table {
+	width: 100%;
+}
+.entry-left {
+	width: 20%;
+	vertical-align: top;
+	padding-right: 10px;
+}
+.entry h2 {
+	margin-top: 0;
+	margin-bottom: 10px;
+}
+h3.entry-date {
+	font-size: 11px;
+	color: gray;
+	margin: 5px 0 5px 0;
+}
+.save-cancel-button-row input {
+	margin-bottom: 20px;
+}
+.entry, .new-entry {
+	border-bottom: 1px solid #cccccc;
+	padding-bottom: 10px;
+}
+.new-entry {
+	padding-bottom: 60px;
+}
+
+td.entry-edit-link-cell,
+td.entry-add-comment-link-cell {
+	vertical-align: top;
+}
+
+td.entry-edit-link-cell {
+	padding-top: 5px;
+}
+
+.edit-title-div {
+	margin-top: 10px;
+}
+
+.no-tags {
+	font-weight: bold;
+	color: red;
+}
+
+a.entry-edit-title-link img,
+a.entry-edit-link img,
+a.entry-add-tag-link img,
+a.entry-remove-tag-link img,
+a.entry-add-comment-link img,
+a.entry-hide-comments-link img,
+a.entry-show-comments-link img,
+.entry-left a img {
+	border: none;
+	vertical-align: top;
+}
+a.entry-remove-tag-link img {
+	margin-left: 3px;
+	vertical-align: bottom;
+}
+
+input.entry-edit-wg-tags-input {
+	width: 300;
+}
+input.entry-edit-tags-input {
+	width: 500px;
+}
+
+.entry-tags-span {
+	margin-right: 20px;
+}
+
+.tag {
+	margin-bottom: 2px;
+}
+.archive-entry {
+	margin-bottom: 3px;
+}
+.archive-month {
+	overflow: hidden;
+}
+h4.archive-month-title {
+	font-size: 120%;
+}
+
+.entry-title-input {
+	width: 80%;
+	margin-bottom: 5px;
+}
+.entry-title-save-button,
+.entry-title-cancel-button {
+	margin-right: 10px;
+}
+
+.entry.foreign .entry-title {
+	color: gray;
+}
+.entry.foreign .entry-owner {
+	margin-left: 10px;
+	color: red;
+}
+
+.heurist-edit-link {
+	margin: 0 5px 0 10px;
+	font-weight: normal;
+}
+
+.non-wg-visible-warning {
+	margin: 0 5px;
+	font-weight: normal;
+	color: red;
+}
+
+.entry-permissions {
+	color: gray;
+	font-weight: normal;
+}
+
+.entry.private .entry-right {
+	background: lightgray;
+}
+
+.entry-outer-table td {
+	vertical-align: top;
+}
+
+.entry-content.abbreviated,
+.woot-editor.abbreviated .woot-chunk {
+	height: 100px;
+	overflow: hidden;
+}
+
+.entry-expand {
+	padding-bottom: 15px;
+}
+.entry-expand .entry-expand-link {
+	display: none;
+}
+.entry-expand.abbreviated .entry-expand-link {
+	display: inline;
+}
+.entry-expand.abbreviated .entry-contract-link {
+	display: none;
+}
+
+.add-comment-link {
+	display: none;
+}
+.comments-flat-label,
+.comments-nested-label {
+	color: gray;
+	font-style: italic;
+}
+.comments-flat-label {
+	margin-left: 30px;
+}
+.comments-nested-label {
+	margin-left: 10px;
+}
+
+.map-section {
+	width: 170px;
+	margin-top: 10px;
+}
+.related-header {
+	margin-top: 10px;
+}
+
+.related-link {
+	margin-left: 10px;
+}
+.related-link input {
+	margin-right: 10px;
+	font-size: 10px;
+}
+
+.woot-editor {
+	margin-top: 20px;
+}
+
+.woot-title,
+.woot-editor .add-button,
+.woot-editor .edit-button,
+.woot-editor .save-button,
+.woot-editor .owner-text,
+.woot-editor .empty-message,
+.woot-editor .woot-chunk.empty {
+	display: none;
+}
+
+#yui-history-iframe {
+	position: absolute;
+	top:0; left:0;
+	width:1px; height:1px;
+	visibility: hidden;
+}
+
+

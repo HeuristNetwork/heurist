@@ -1,0 +1,252 @@
+<html>
+<head>
+<title>Edit Record</title>
+<script>
+//initially attempted to load hapi window.opener.HAPI.importSymbols(window.opener, this);
+//this fails for date and geographical data types, possibly because of x-domain? so we actually need to reload hapi in this window
+document.write("<" + "script src="+ window.opener.HAPI.HeuristBaseURL+"hapi/load.php?instance=" +  window.opener.HAPI.instance + "&key=" + window.opener.HAPI.key + "><" + "/script>\n");
+</script>
+<script src="js/common-functions.js"></script>
+
+<script>
+var titleText;
+var rec_id =  getParams("id");   //get record id if it exists
+var rec_type_id = getParams("typeId"); //get recordtype id if it exists
+var source_entity = getParams("source"); //get source entity for a factoid recordtype
+
+function init(){
+	var spanTitle = document.getElementById("edit-title");
+
+	if (rec_id) {
+		titleText = "Edit"
+	    spanTitle.innerHTML = "<h3>" + titleText + " Record</h3>";
+		doRecSearch(rec_id, 'primary');
+	} else {
+		if (rec_type_id) {
+			var rectype = HRecordTypeManager.getRecordTypeById(rec_type_id);
+			titleText = "Add "+rectype.getName();
+			spanTitle.innerHTML = "<h3>" + titleText + " Record</h3>";
+			displayDetailsForRecordtype(rectype);
+		} else {
+			createRecTypeOptions();
+		}
+	}
+}
+
+function strcmp(a,b) {
+	var x = a.getName(), y = b.getName();
+	return (x < y)? -1 : (x > y)? 1 : 0;
+}
+
+function createRecTypeOptions() {
+	var e = document.getElementById("rec-type-select-div");
+	e.appendChild(document.createTextNode("Select record type: "));
+	recTypeSelect = e.appendChild(document.createElement("select"));
+	recTypeSelect.id = "rec-type-select";
+	recTypeSelect.onchange = function() {
+		rec_type_id = document.getElementById("rec-type-select").value;
+		init();
+		e.style.display = "none";
+	};
+
+	var opt = document.createElement("option");
+	opt.innerHTML = "record type...";
+	opt.disabled = true;
+	opt.selected = true;
+	recTypeSelect.appendChild(opt);
+
+	var recTypes = HRecordTypeManager.getRecordTypes();
+	recTypes.sort(strcmp);
+	for (var i = 0; i < recTypes.length; i ++) {
+		opt = document.createElement("option");
+		opt.value = recTypes[i].getID();
+		opt.innerHTML = recTypes[i].getName();
+		recTypeSelect.appendChild(opt);
+	}
+}
+
+function doRecSearch(id, option, detId, extra, constn) { //surely there must be a more elegant way of recycling the bugger
+	var mysearch = new HSearch("ids:" + id);
+	var loader = new HLoader(
+
+	function(s,r) {
+
+		switch (option){
+			case "primary":
+			displayPrimaryResults(r[0]);
+			break;
+
+			case "resource":
+			if (r[0]){
+				drawResourceDetails(r[0], detId, extra, constn);
+			}
+			break;
+		}
+	},
+	function(s,e) {alert("load failed: " + e);});
+	HeuristScholarDB.loadRecords(mysearch, loader);
+}
+
+
+
+function displayPrimaryResults(r) {
+	document.getElementById("body-div").style.display = "";
+	var dets = document.getElementById("details");
+	titleText = r.getTitle();
+	var recImage = r.getRecordType().getID();
+	var recTitle = r.getRecordType().getName();
+	var refId = r.getID();
+	var refTitle =r.getTitle();
+	var detailTypes =HDetailManager.getDetailTypesForRecordType(r.getRecordType()); //get all detail types for this record type
+	var url = drawUrlField(r);
+
+	for (var i = 0; i < detailTypes.length; i++) {  //two loops, need to fully load "skin" before details, otherwise overwrites
+		var rows =drawInputForm(detailTypes[i], r.getRecordType());
+		if (rows) dets.appendChild(rows);
+	}
+
+	for (var b = 0; b < detailTypes.length; b++) {
+		drawInputFormDetails(detailTypes[b].getID(), r.getID());
+	}
+	drawRepeats();
+
+	var tR = document.createElement("tr");
+	var tD = document.createElement("td");
+
+	var button = document.createElement("input");
+	button.type = "button";
+	button.value = "save record";
+	button.onclick = function() { saveRecord(r); };
+	tD.appendChild(button);
+	tR.appendChild(tD);
+	dets.appendChild(tR);
+}
+
+function displayDetailsForRecordtype(rectype) {//This function is used for displaying detailtypes for a specific recordtype
+	document.getElementById("body-div").style.display = "";
+	var dets = document.getElementById("details");
+
+	record.setRecordType(rectype);   //set record type for this record
+	var recImage = rectype.getID();
+	var recTitle = rectype.getName();
+	var detailTypes =HDetailManager.getDetailTypesForRecordType(rectype); //get all detail types for this record type
+	var url = drawUrlField();
+	//if (url)dets.appendChild(url);
+	for (var i = 0; i < detailTypes.length; i++) {  //two loops, need to fully load "skin" before details, otherwise overwrites
+	   var rows =drawInputForm(detailTypes[i], rectype);
+	   if (rows) dets.appendChild(rows);
+	}
+
+	for (var b = 0; b < detailTypes.length; b++) {
+	   drawInputFormForAdding(detailTypes[b].getID(),rectype);
+
+	}
+	drawRepeats();
+
+	var tR = document.createElement("tr");
+	var tD = document.createElement("td");
+
+
+	var button = document.createElement("input");
+	button.type = "button";
+	button.value = "save record";
+	button.onclick = function() { saveRecord(record); };
+	tD.appendChild(button);
+	tR.appendChild(tD);
+	dets.appendChild(tR);
+
+}
+
+
+function drawInputFormDetails(detailId,rid){              //This function is used for editing
+    var record = HeuristScholarDB.getRecord(rid);
+	var recType = record.getRecordType(); //HRecordType object
+	var detailType =  HDetailManager.getDetailTypeById(detailId); // HDetailType object
+	var detVariety = detailType.getVariety();
+	if(detailId==524 || detailId==525)      //because v2 of HAPI does not distinguish boolean from literal, set detVariety "boolean" when the fields are "fictional" and "exists"
+		detVariety = "boolean";
+
+	var detail = record.getDetails(detailType);
+	switchDraw(detVariety,detailId,detail);
+}
+
+function drawInputFormForAdding(detailId,rectype){              //This function is used for adding
+    var detailType =  HDetailManager.getDetailTypeById(detailId); // HDetailType object
+	var detVariety = detailType.getVariety();
+	if(detailId==524 || detailId==525)      //because v2 of HAPI does not distinguish boolean from literal, set detVariety "boolean" when the fields are "fictional" and "exists"
+		detVariety = "boolean";
+	var detail;
+
+
+	switchDraw(detVariety,detailId,detail);
+}
+
+
+function switchDraw(detVariety,detailId,detail){
+    var detailType =  HDetailManager.getDetailTypeById(detailId)
+	switch (detVariety){
+		case 'literal':
+	  	drawInputField(detailId, detail);
+	 	break;
+
+
+		case 'blocktext':
+	 	drawTextArea (detailId, detail);
+	 	break;
+
+	 	case 'reference': //ATTENTION: not an efficient way of outputing resource pointers! FIXME!
+		var constRecType;
+		if (detailType.getConstrainedRecordType()) constRecType = detailType.getConstrainedRecordType().getID();
+			drawResource(detailId, detail, constRecType,source_entity);
+		break;
+
+	 	case 'file':
+	 	if(rec_id) drawFile(detailId, detail);                      //for editing
+	 	if(rec_type_id) drawFileForAdding(detailId, detail);       //for adding
+	 	break;
+
+	 	case 'enumeration':
+	 	drawEnums(detailId, detail);
+	 	break;
+
+	 	case 'geographic':
+	 	drawGeo(detailId, detail);
+	 	break;
+
+		case 'boolean':
+		drawBool(detailId, detail);
+		break;
+
+		case 'date': //TODO: add calendar
+		drawDateField(detailId, detail);
+	 	break;
+
+		default:
+		drawRest(detailId, detail);
+		break;
+	}
+}
+
+  </script>
+  <link rel="stylesheet" type="text/css" href="css/forms.css">
+ </head>
+
+ <body onLoad="init();">
+  <span id=edit-title></span>
+  <div id="rec-type-select-div"></div>
+  <div id="body-div" style="display:none;">
+  <table id=tab-edit class="edit" cellpadding="0" cellspacing="0">
+  <tr><td class="panel-header" id=results></td>
+  </tr>
+  <tr>
+  <td>
+  <table class="detail">
+  <tbody id="details"></tbody>
+  </table>
+  </td>
+  </tr>
+  </table>
+  </div>
+ </body>
+
+</html>

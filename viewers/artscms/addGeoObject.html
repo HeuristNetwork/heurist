@@ -1,0 +1,136 @@
+<html>
+ <head>
+ <link rel="stylesheet" type="text/css" href="nyirti_traditional.css">
+ <style type="text/css">
+  @import url("http://www.google.com/uds/css/gsearch.css");
+  @import url("http://www.google.com/uds/solutions/localsearch/gmlocalsearch.css");
+</style>
+
+  <script src=http://hapi.heuristscholar.org/load?instance=nyirti&key=76c8d2cbecfc7fbd35c0be423e9cab5da2812b40&v=d></script>
+  <script src=http://hapi.heuristscholar.org/03/goi.js></script>
+  <script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAAogdH9AwvOFbvnh0YaNkLgBQozj3QxHNLpoUdlHTozitMSGiiDhQcTlr4G2aCdenTmhnLP8rqA7VMRg"></script>
+  <script src="http://www.google.com/uds/api?file=uds.js&v=1.0&key=ABQIAAAAogdH9AwvOFbvnh0YaNkLgBQozj3QxHNLpoUdlHTozitMSGiiDhQcTlr4G2aCdenTmhnLP8rqA7VMRg" type="text/javascript"></script>
+  <script src="http://www.google.com/uds/solutions/localsearch/gmlocalsearch.js" type="text/javascript"></script>
+  <script src="common-functions.js"></script>
+  <script>
+    var path ="http://nyirti.heuristscholar.org/heurist/";
+	var map;
+	var digitiser;
+    var rec_id = getIdFromUrl(); 
+	var detail_id = getParams("did");
+	var edit_id = getParams("eid");
+	var detail_textbox_id ;
+	var detail_textbox_value;
+	var type_textbox_id ;
+	var type_textbox_value;
+	var geo=[];
+	var typevalue;
+	var detailvalue;
+	
+	function init() {
+		HAPI.XHR.rxURLLen = (navigator.userAgent.match(/MSIE/))? 2000 : 8000;
+
+		if (! HCurrentUser.isLoggedIn()) {
+				alert("You are not currently logged in to Heurist");
+				location.replace("http://heuristscholar.org/heurist/php/login.php");
+				return;
+		}
+		loadMap();
+	}
+
+	function loadMap() {
+		if (GBrowserIsCompatible()) {
+			map = new GMap2(document.getElementById("map"));
+			map.enableDoubleClickZoom();
+			map.enableContinuousZoom();
+			map.enableScrollWheelZoom();
+			map.addControl(new GLargeMapControl());
+			map.addControl(new GMapTypeControl());
+			map.addControl(new google.maps.LocalSearch());
+			map.removeMapType(G_SATELLITE_MAP);
+			map.addMapType(G_PHYSICAL_MAP);
+			map.setCenter(new GLatLng(4, 100), 2, G_PHYSICAL_MAP);
+		}
+		if(edit_id) {
+			detail_textbox_id = "geodetail" +edit_id.substring(7);
+			type_textbox_id = "geotype" +edit_id.substring(7);
+			detail_textbox_value = window.opener.document.getElementById(detail_textbox_id).value;
+			type_textbox_value = window.opener.document.getElementById(type_textbox_id).value;
+		    if(type_textbox_value){
+			    
+			    var typevalue = type_textbox_value;
+				var index=typevalue.indexOf(":");
+				typevalue=typevalue.substring(0,index).toUpperCase();
+			}
+		}
+	    
+		
+        if(detail_textbox_value){
+		detailvalue = detail_textbox_value;
+		
+		} 
+		
+		digitiser = new HAPI.GOI.Digitiser(map,detailvalue,typevalue);
+	}
+
+	function selectButton(x) {
+		for (var i = 0; i < 5; ++i) {
+			var e = document.getElementById('button'+i);
+			if (e === x)
+				e.style.fontWeight = 'bold';
+			else
+				e.style.fontWeight = '';
+		}
+		document.getElementById("msg").innerHTML =
+			x ? "Double-click the map to add a " + x.value + " object"
+			: "";
+	}
+
+	
+	
+	function confirmIt() { 
+	   
+	 var geoObject=digitiser.getShape();
+	 var detailType = HDetailManager.getDetailTypeById(detail_id);
+	 record.addDetail(detailType, geoObject);
+	 if(edit_id) {               //the if statement is added by nan
+	    var i=edit_id.substring(7);
+		var gid= "geoDiv"+edit_id.substring(7);
+		var path = "http://nyirti.heuristscholar.org/heurist/";
+		window.opener.document.getElementById(gid).innerHTML =  "";
+		window.opener.document.getElementById(gid).innerHTML += " <div class=\"inp-div\" ><input type=hidden name=\""+detail_id+"\" id=\""+detail_id+"\" value=geo extra=\""+geoObject.getWKT()+"\"><img src=\""+path+"img/geo.gif\" align=absmiddle> "+geoObject.toString()+"&nbsp<a href=\"#\" id=\"editgeo"+[i]+"\" onclick=\"window.open('addGeoObject.html?id="+rec_id+"&did="+detail_id+"&eid=editgeo"+[i]+"','form','width=600,height=400,scrollbars=yes');\")>edit</a><input type=\"hidden\" id=\"geodetail"+[i]+"\" value=\""+ geoObject.getWKT()+ "\"><input type=\"hidden\" id=\"geotype"+[i]+"\" value=\""+ geoObject.toString()+ "\">&nbsp;"+" <img src=\""+path+"img/cross.gif\" align=absmiddle onclick=\"remGeo("+detail_id+",'"+geoObject.getWKT()+"');\"></div>"; 
+        window.close();
+		return;
+	 }
+	 drawGeo(detail_id, geoObject);
+	 window.close();
+	}
+		
+	
+	
+  </script>
+ </head>
+ <body onload="init();">
+  
+  <table>
+  
+   <tr>
+    <td>Location</td><td><div id=map style="width: 480px; height: 320px;"></div></td>
+   </tr>
+   <tr><td><input type=button value=confirm onclick="confirmIt();"></input></td>
+    <td>
+      <span class="hint">Select geographic object type: </span>
+      <input id=button0 type=button value=Point onclick="digitiser.digitisePoint(selectButton); selectButton(this);"></input>&nbsp;
+      <input id=button1 type=button value=Bounds onclick="digitiser.digitiseBounds(selectButton); selectButton(this);"></input>&nbsp;
+      <input id=button2 type=button value=Circle onclick="digitiser.digitiseCircle(selectButton); selectButton(this);"></input>&nbsp;
+      <input id=button3 type=button value=Polygon onclick="digitiser.digitisePolygon(selectButton); selectButton(this);"></input>&nbsp;
+      <input id=button4 type=button value=Path onclick="digitiser.digitisePath(selectButton); selectButton(this);"></input>
+    </td>
+   </tr>
+   <tr><td></td>
+    <td><div id=msg></div></td>
+   </tr>
+   <tr><td></td></tr>
+  </table>
+ </body>
+</html>
