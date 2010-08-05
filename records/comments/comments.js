@@ -80,7 +80,7 @@ var Comment = function(parentComment, hComment) {
 	var detailText = hComment.getText() || "";
 		detailText = detailText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 		detailText = detailText.replace(/(http:\/\/[\041-\176]+)/g, "<a href=\"$1\">$1</a>");
-		detailText = detailText.replace(/\[(\d+)\]/g, "[<a href=\"/"+ installDir +"/data/records/viewrec/view.php?bib_id=$1\">$1</a>]");
+		detailText = detailText.replace(/\[(\d+)\]/g, "[<a href=\"/"+ installDir +"/records/viewrec/view.php?bib_id=$1\">$1</a>]");
 
 	this.textDiv = this.innerDiv.appendChild(this.document.createElement("div"));
 		this.textDiv.className = "text";

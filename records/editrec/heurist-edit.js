@@ -247,7 +247,7 @@ top.HEURIST.edit = {
 			top.HEURIST.edit.modules.personal.disabledFunction = null;
 
 			// add the bookmark, patch the record structure, and view the personal tab
-			top.HEURIST.util.getJsonData(top.HEURIST.basePath + "data/bookmarks/add-bookmark.php?bib_id=" + top.HEURIST.record.bibID + "&instance=" + HAPI.instance, function(vals) {
+			top.HEURIST.util.getJsonData(top.HEURIST.basePath + "records/bookmarks/add-bookmark.php?bib_id=" + top.HEURIST.record.bibID + "&instance=" + HAPI.instance, function(vals) {
 				for (var i in vals) {
 					top.HEURIST.record[i] = vals[i];
 				}
@@ -304,7 +304,7 @@ top.HEURIST.edit = {
 		if (personalWindow  &&  ! personalWindow.tagCheckDone  &&  personalWindow.document.getElementById("tags").value.replace(/^\s+|\s+$/g, "") == "") {
 			// personal tags field is empty -- popup the add keywords dialogue
 			personalWindow.tagCheckDone = true;
-			top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "data/tags/add-tags.html?no-tags", { callback: function(tags) {
+			top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "records/tags/add-tags.html?no-tags", { callback: function(tags) {
 				if (tags) {
 					personalWindow.document.getElementById("tags").value = tags;
 					top.HEURIST.edit.changed("personal");
@@ -1405,7 +1405,7 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 		newDiv.appendChild(hiddenElt);	// have to do this AFTER the type is set
 
 	top.HEURIST.registerEvent(editImg, "click", function() {
-		top.HEURIST.util.popupURL(window,top.HEURIST.basePath +"data/records/editrec/mini-edit.html?bib_id=" + hiddenElt.value, {
+		top.HEURIST.util.popupURL(window,top.HEURIST.basePath +"records/editrec/mini-edit.html?bib_id=" + hiddenElt.value, {
 			callback: function(bibTitle) { if (bibTitle) textElt.defaultValue = textElt.value = bibTitle; }
 		});
 	});
@@ -1436,7 +1436,7 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.chooseResource = functi
 	var thisRef = this;
 
 	if (! searchValue) searchValue = element.textElt.value;
-	var url = top.HEURIST.basePath+"data/pointer/bib-list.html?q="+encodeURIComponent(searchValue)
+	var url = top.HEURIST.basePath+"records/pointer/bib-list.html?q="+encodeURIComponent(searchValue)
 	if (element.input.constrainReftype)
 		url += "&t="+element.input.constrainReftype;
 	top.HEURIST.util.popupURL(window, url, {
@@ -1588,7 +1588,7 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 
 		var link = inputDiv.appendChild(this.document.createElement("a"));
 			if (bdValue.file.nonce) {
-				link.href = top.HEURIST.basePath+"data/files/fetch_file.php/" + /*encodeURIComponent(bdValue.file.origName)*/
+				link.href = top.HEURIST.basePath+"records/files/fetch_file.php/" + /*encodeURIComponent(bdValue.file.origName)*/
 								"?file_id=" + encodeURIComponent(bdValue.file.nonce);
 			} else if (bdValue.file.url) {
 				link.href = bdValue.file.url;
@@ -1621,7 +1621,7 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 	} else {
 		if (top.HEURIST.browser.isEarlyWebkit) {
 			var newIframe = this.document.createElement("iframe");
-				newIframe.src = top.HEURIST.basePath+"data/records/editrec/mini-file-upload.php?bib_id=" + windowRef.parent.HEURIST.record.bibID + "&bdt_id=" + this.bibDetailType[0];
+				newIframe.src = top.HEURIST.basePath+"records/files/mini-file-upload.php?bib_id=" + windowRef.parent.HEURIST.record.bibID + "&bdt_id=" + this.bibDetailType[0];
 				newIframe.frameBorder = 0;
 				newIframe.style.width = "90%";
 				newIframe.style.height = "2em";
@@ -1951,7 +1951,7 @@ top.HEURIST.edit.Reminder = function(parentElement, reminderDetails) {
 };
 top.HEURIST.edit.Reminder.prototype.remove = function() {
 	var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
-	var fakeForm = { action: top.HEURIST.basePath+"data/reminders/save-reminder.php",
+	var fakeForm = { action: top.HEURIST.basePath+"records/reminders/save-reminder.php",
 	                 elements: [ { name: "rem_id", value: this.reminderID },
 	                             { name: "bib_id", value: windowRef.parent.HEURIST.record.bibID },
 	                             { name: "save-mode", value: "delete" } ] };

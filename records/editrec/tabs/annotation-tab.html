@@ -1,8 +1,8 @@
 <html>
  <head>
-  <link rel=stylesheet href="../../../../common/css/heurist.css">
-  <link rel=stylesheet href="../../../../common/css/heurist-edit-tab.css">
-  <link rel=stylesheet href="../../../../common/css/woot.css">
+  <link rel=stylesheet href="../../../common/css/heurist.css">
+  <link rel=stylesheet href="../../../common/css/heurist-edit-tab.css">
+  <link rel=stylesheet href="../../../common/css/woot.css">
   <style>
 
 #comment-link {
@@ -81,8 +81,8 @@
 	function onshow() {}
 	top.HAPI.importSymbols(top, this);
   </script>
-  <script src="../../../../external/tinymce/jscripts/tiny_mce/tiny_mce.js"></script>
-  <script src="../../../woot/js/woot.js"></script>
+  <script src="../../../external/tinymce/jscripts/tiny_mce/tiny_mce.js"></script>
+  <script src="../../woot/js/woot.js"></script>
 
  </head>
  <body onload="onshow()">
@@ -95,7 +95,7 @@
      &nbsp;&nbsp;
     <span class="help prompt" style="font-weight: normal;">
      WYSIWYG formatting and embedded links and images.
-	 <a id=woot-ext-link style="margin-left: 50px;" target=_blank href="../../../woot/woot.html">open in new window</a>
+	 <a id=woot-ext-link style="margin-left: 50px;" target=_blank href="../../woot/woot.html">open in new window</a>
      <!--span style="font-size: 11px; font-weight: normal;">[<a href="#" onclick="FIXME(); return false;">refresh</a>]</span--><br>
      <div style="margin-left: 13em; margin-right: 10em;"><em>Note: Access rights can be set for individual paragraphs allowing personal notes which are visible only to you or which may be shared with your workgroups.</em></div>
     </span>
@@ -199,7 +199,7 @@ var Comment = function(parentComment, details) {
 	var detailText = details.text || "";
 		detailText = detailText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 		detailText = detailText.replace(/(http:\/\/[\041-\176]+)/g, "<a href=\"$1\">$1</a>");
-		detailText = detailText.replace(/\[(\d+)\]/g, "[<a href=\""+ installDir +"data/records/viewrec/view.php?bib_id=$1\">$1</a>]");
+		detailText = detailText.replace(/\[(\d+)\]/g, "[<a href=\""+ installDir +"records/viewrec/view.php?bib_id=$1\">$1</a>]");
 
 	this.textDiv = this.innerDiv.appendChild(this.document.createElement("div"));
 		this.textDiv.className = "text";
@@ -256,7 +256,7 @@ Comment.prototype.reply = function() {
 Comment.prototype.remove = function() {
 	if (! confirm("Delete this comment?")) return;
 
-	var fakeForm = { action: installDir + "data/comments/save-comment.php",
+	var fakeForm = { action: installDir + "records/comments/save-comment.php",
 			elements: [
 				{ name: "cmt_id", value: this.id },
 				{ name: "delete", value: 1 }
@@ -392,7 +392,7 @@ EditableComment.prototype.save = function() {
 		return;
 	}
 
-	var fakeForm = { action: installDir + "data/comments/save-comment.php",
+	var fakeForm = { action: installDir + "records/comments/save-comment.php",
 			elements: [
 				{ name: "cmt_id", value: this.id },
 				{ name: "bib_id", value: parent.HEURIST.record.bibID },

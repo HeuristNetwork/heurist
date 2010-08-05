@@ -1,7 +1,7 @@
 <?php
 
-require_once(dirname(__FILE__).'/../../../common/connect/cred.php');
-require_once(dirname(__FILE__).'/../../../common/t1000/t1000.php');
+require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 require_once(dirname(__FILE__).'/../disambig/similar.php');
 
 if (! is_logged_in()) {
@@ -127,9 +127,9 @@ or <a href="add.php?bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST['bkmk_url']
       ?></tt></b>
  </nobr></td>
 </tr>
-   <tr><td><img src="../../../common/images/200.gif"></td><td colspan="2"><img src="../../../common/images/200.gif"</td></tr>
+   <tr><td><img src="<?=HEURIST_SITE_PATH?>common/images/200.gif"></td><td colspan="2"><img src="<?=HEURIST_SITE_PATH?>common/images/200.gif"</td></tr>
    <tr>
-    <td colspan="3"><img src="../../../common/images/upleftarrow.gif" style="padding-left: 30px;">
+    <td colspan="3"><img src="<?=HEURIST_SITE_PATH?>common/images/upleftarrow.gif" style="padding-left: 30px;">
      <span style="color: red;">This is the resource you asked to add to Heurist.  If selected it will be added as a new record.</span><br>
      <span style="padding-left: 64px;">If you select an existing record, that record will be opened for editing.</span>
     </td>
@@ -150,27 +150,27 @@ or <a href="add.php?bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST['bkmk_url']
 			$row = $all_bibs[$bib_id];
 			$common_url = find_commonality($row['rec_url'], $bkmk_url);
 ?>
-    <tr valign="bottom"><td>
-       <label>
-        <input type="radio" name="bib_id" value="<?= $row['rec_id'] ?>">
-        <?= htmlspecialchars($row['rec_title']) ?>
-       </label>
-    </td>
-    <td>&nbsp;&nbsp;</td>
-    <td><nobr>
-       &#91;<a target="_testwindow" href="<?= htmlspecialchars($row['rec_url']) ?>"
-                                                          onClick="return checkURL(&quot;<?= htmlspecialchars($row['rec_url']) ?>&quot;);">visit</a>&#93;&nbsp; <tt title="<?= htmlspecialchars($row['rec_url']) ?>"><?php
-/*
+	<tr valign="bottom"><td>
+		<label>
+			<input type="radio" name="bib_id" value="<?= $row['rec_id'] ?>">
+			<?= htmlspecialchars($row['rec_title']) ?>
+		</label>
+	</td>
+	<td>&nbsp;&nbsp;</td>
+	<td><nobr>
+		&#91;<a target="_testwindow" href="<?= htmlspecialchars($row['rec_url']) ?>"
+			onClick="return checkURL(&quot;<?= htmlspecialchars($row['rec_url']) ?>&quot;);">visit</a>&#93;&nbsp; <tt title="<?= htmlspecialchars($row['rec_url']) ?>"><?php
+	/*
 			if (strlen($row['rec_url']) < 100)
 				print htmlspecialchars($row['rec_url']);
 			else
 				print htmlspecialchars(substr($row['rec_url'], 0, 90) . '...');
-*/
+	*/
 			$common_url_len = strlen($common_url);
 			print '<span class="common_url" title="'.htmlspecialchars($row['rec_url']).'">'.htmlspecialchars($common_url).'</span>'.substr($row['rec_url'], $common_url_len, $bkmk_url_len-$common_url_len + 10);
 			if (strlen($row['rec_url']) > $bkmk_url_len+10) print '...';
-        ?></tt>
-    </nobr></td></tr>
+		?></tt>
+	</nobr></td></tr>
 <?php
 		}
 ?>
@@ -224,16 +224,17 @@ or <a href="add.php?bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST['bkmk_url']
 		foreach ($all_site_urls as $url => $id_title) {
 			$common_url = find_commonality($url, $bkmk_url);
 ?>
-    <tr valign="bottom"><td>
-       <label>
-        <input type="radio" name="bib_id" value="<?= $id_title[0] ?>">
-        <?= htmlspecialchars($id_title[1]) ?>
-       </label>
-    </td>
-    <td>&nbsp;&nbsp;</td>
-    <td><nobr>
-       &#91;<a target="_testwindow" href="<?= htmlspecialchars($url) ?>"
-                                                          onClick="return checkURL(&quot;<?= htmlspecialchars($url) ?>&quot;);">visit</a>&#93;&nbsp; <tt><?php
+	<tr valign="bottom">
+	<td>
+		<label>
+			<input type="radio" name="bib_id" value="<?= $id_title[0] ?>">
+			<?= htmlspecialchars($id_title[1]) ?>
+		</label>
+	</td>
+	<td>&nbsp;&nbsp;</td>
+	<td><nobr>
+		&#91;<a target="_testwindow" href="<?= htmlspecialchars($url) ?>"
+		onClick="return checkURL(&quot;<?= htmlspecialchars($url) ?>&quot;);">visit</a>&#93;&nbsp; <tt><?php
 /*
 			if (strlen($url) < 100)
 				print htmlspecialchars($url);
@@ -243,13 +244,12 @@ or <a href="add.php?bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST['bkmk_url']
 			$common_url_len = strlen($common_url);
 			print '<span class="common_url" title="'.htmlspecialchars($url).'">'.htmlspecialchars($common_url).'</span>'.substr($url, $common_url_len, $bkmk_url_len-$common_url_len + 10);
 			if (strlen($url) > $bkmk_url_len+10) print '...';
-
-        ?></tt>
-    </nobr></td></tr>
+?></tt>
+</nobr></td></tr>
 <?php
 		}
 ?>
-   <tr><td><img src="../../../common/images/200.gif"></td><td colspan="2"></td></tr>
+   <tr><td><img src="../../common/images/200.gif"></td><td colspan="2"></td></tr>
 </table>
  </td>
 </tr>

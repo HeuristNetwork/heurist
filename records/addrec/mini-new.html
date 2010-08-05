@@ -62,7 +62,7 @@ if (! reftype) {
 		var reftype = reftypeDropdown.options[reftypeDropdown.selectedIndex].value;
 
 		var editFrame = document.getElementById("edit-frame");
-		editFrame.src = "../editrec/tabs/H3-public-tab.html?reftype="+reftype;
+		editFrame.src = "../editrec/tabs/public-tab.html?reftype="+reftype;
 		editFrame.style.display = "block";
 
 		reftypeDropdown.onchange = setReftype;

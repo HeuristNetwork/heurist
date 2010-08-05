@@ -2,7 +2,7 @@
 
 if (array_key_exists('alt', $_REQUEST)) define('use_alt_db', 1);
 
-require_once(dirname(__FILE__).'/../../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/connect/cred.php');
 require_once('replaced.php');
 
 if (!is_logged_in()) {

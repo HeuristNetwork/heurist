@@ -1,8 +1,8 @@
 <?php
 header('Content-type: text/xml; charset=utf-8');
 
-require_once(dirname(__FILE__).'/../../../common/config/heurist-instances.php');
-require_once(dirname(__FILE__).'/../../../common/connect/db.php');
+require_once(dirname(__FILE__).'/../../common/config/heurist-instances.php');
+require_once(dirname(__FILE__).'/../../common/connect/db.php');
 
 define("KML_DETAIL_TYPE", 551);
 define("FILE_DETAIL_TYPE", 221);

@@ -57,7 +57,7 @@ function showMembers() {
 			td = tr.appendChild(document.createElement("td"));
 			link = td.appendChild(document.createElement("a"));
 			link.target = "_blank";
-			link.href = "../../interfaces/blog/index.html?u="+wg.members[i].id;
+			link.href = "../../viewers/blog/index.html?u="+wg.members[i].id;
 			link.appendChild(document.createTextNode("blog"));
 		}
 
@@ -65,7 +65,7 @@ function showMembers() {
 			td = tr.appendChild(document.createElement("td"));
 			var a = td.appendChild(document.createElement("a"));
 				a.target = "_blank";
-				a.href = "../../interfaces/blog/report.php?u=" + wg.members[i].id + "&d=" + dateString;
+				a.href = "../../viewers/blog/report.php?u=" + wg.members[i].id + "&d=" + dateString;
 				a.appendChild(document.createTextNode("blog report"));
 		}
 	}
@@ -75,7 +75,7 @@ function showMembers() {
 			div.style.cssFloat = div.style.styleFloat = "right";
 		var a = div.appendChild(document.createElement("a"));
 			a.target = "_blank";
-			a.href = "../../interfaces/blog/report.php?g=" + window.HEURIST.parameters["wg_id"] + "&d=" + dateString;
+			a.href = "../../viewers/blog/report.php?g=" + window.HEURIST.parameters["wg_id"] + "&d=" + dateString;
 			a.appendChild(document.createTextNode("group blog report"));
 		table.parentNode.insertBefore(div, table);
 	}

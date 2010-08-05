@@ -43,9 +43,9 @@ require_once(dirname(__FILE__)."/../../common/connect/cred.php");
 require_once(dirname(__FILE__)."/../../common/connect/db.php");
 require_once(dirname(__FILE__)."/../algorithms/lev-delta.php");
 
-require_once(dirname(__FILE__)."/../../data/records/saving.php");
+require_once(dirname(__FILE__)."/../../records/saving.php");
 
-require_once(dirname(__FILE__)."/../../data/records/TitleMask.php");
+require_once(dirname(__FILE__)."/../../records/TitleMask.php");
 
 global $reftype_to_bdt_id_map;
 $reftype_to_bdt_id_map = array(
@@ -140,7 +140,7 @@ function print_common_header($fileName) {
   <script>
 if (! top.HEURIST.user) top.HEURIST.loadScript('<?=HEURIST_SITE_PATH?>common/php/heurist-obj-user.php', true);
   </script>
-  <script src='<?=HEURIST_SITE_PATH?>data/tags/autocomplete.js'></script>
+  <script src='<?=HEURIST_SITE_PATH?>tags/autocomplete.js'></script>
 
 <?php	if (defined('use_alt_db')) {	?>
   <div style="color: red; padding: 10px; font-weight: bold;">Warning: using alternative database</div>

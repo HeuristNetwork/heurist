@@ -64,7 +64,7 @@ function _popupDisambiguation(matches, continueAction) {
 			var a = nobr.appendChild(document.createElement("a"));
 				a.href = "#";
 				a.onclick = function(bibID) { return function() {
-					top.HEURIST.util.popupURL(window, top.HEURIST.basePath + "data/records/editrec/mini-edit.html?bib_id=" + bibID);
+					top.HEURIST.util.popupURL(window, top.HEURIST.basePath + "records/editrec/mini-edit.html?bib_id=" + bibID);
 					return false;
 				} }(match.id);
 				a.appendChild(document.createTextNode("view / edit details"));

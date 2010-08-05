@@ -32,10 +32,10 @@ if (@$_REQUEST['bkmrk_bkmk_url']  &&  ! @$_REQUEST['bib_reftype'])
 	$_REQUEST['bib_reftype'] = 1;
 
 
-require_once(dirname(__FILE__)."/../../../common/connect/cred.php");
-require_once(dirname(__FILE__)."/../../../common/connect/db.php");
+require_once(dirname(__FILE__)."/../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../../common/connect/db.php");
 require_once(dirname(__FILE__).'/../disambig/similar.php');
-require_once(dirname(__FILE__).'/../../woot/woot.php');
+require_once(dirname(__FILE__).'/../woot/woot.php');
 
 if (!is_logged_in()) {
 	if (! (@$_REQUEST['bkmrk_bkmk_url'] or @$_REQUEST['bkmrk_bkmk_title'] or @$_REQUEST['bkmrk_bkmk_description']))
@@ -105,7 +105,7 @@ if ($_REQUEST['bkmrk_bkmk_url']) {
 	if (mysql_num_rows($res) > 0) {
 		$bkmk = mysql_fetch_assoc($res);
 		$pers_id = $bkmk['pers_id'];
-		header('Location: ' . HEURIST_URL_BASE . 'data/records/editrec/heurist-edit.html?bkmk_id='.$pers_id.'&fromadd=exists' . $outdate);
+		header('Location: ' . HEURIST_URL_BASE . 'records/editrec/heurist-edit.html?bkmk_id='.$pers_id.'&fromadd=exists' . $outdate);
 		return;
 	}
 
@@ -198,7 +198,7 @@ if (! @$_REQUEST['_submit']  &&  $_REQUEST['bkmrk_bkmk_url']) {
 	if (! $rec_id  &&  ! $force_new) {
 		if (exist_similar($url)) {
 			/* there is/are at least one: redirect to a disambiguation page */
-			header('Location: ' . HEURIST_URL_BASE . 'data/records/disambig/add_disambiguate.php'
+			header('Location: ' . HEURIST_URL_BASE . 'records/disambig/add_disambiguate.php'
 			                    . '?bkmk_title=' . urlencode($_REQUEST['bkmrk_bkmk_title'])
 			                    . '&f=' . urlencode($_REQUEST["f"])
 			                    . '&bkmk_url=' . urlencode($url)
@@ -318,7 +318,7 @@ if ($rec_id  &&  ! @$_REQUEST['force_new']) {
 			insert_woot_content($rec_id, $description);
 		}
 
-		header('Location: ' . HEURIST_URL_BASE . 'data/records/editrec/heurist-edit.html?bkmk_id='.$bkmk['pers_id'].'&fromadd=exists' . $outdate . "#personal");
+		header('Location: ' . HEURIST_URL_BASE . 'records/editrec/heurist-edit.html?bkmk_id='.$bkmk['pers_id'].'&fromadd=exists' . $outdate . "#personal");
 		return;
 	}
 }
@@ -409,9 +409,9 @@ if ($rec_id) {
 
 	if ($pers_id) {
 		if ($new_rec_id) {
-			header('Location: ' . HEURIST_URL_BASE . 'data/records/editrec/heurist-edit.html?bkmk_id=' . $pers_id . '&fromadd=new_bib' . $outdate . $wg);
+			header('Location: ' . HEURIST_URL_BASE . 'records/editrec/heurist-edit.html?bkmk_id=' . $pers_id . '&fromadd=new_bib' . $outdate . $wg);
 		} else {
-			header('Location: ' . HEURIST_URL_BASE . 'data/records/editrec/heurist-edit.html?bkmk_id=' . $pers_id . '&fromadd=new_bkmk' . $outdate . $wg);
+			header('Location: ' . HEURIST_URL_BASE . 'records/editrec/heurist-edit.html?bkmk_id=' . $pers_id . '&fromadd=new_bkmk' . $outdate . $wg);
 		}
 		return;
 	}

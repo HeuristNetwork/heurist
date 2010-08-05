@@ -135,7 +135,7 @@ document.forms[0].submit = function() {
 	var resultsDiv = document.getElementById("results");
 	resultsDiv.innerHTML = "<i style='padding: 1ex;'>Searching ...</i>";
 
-	top.HEURIST.util.sendRequest(top.HEURIST.basePath + "data/pointer/json-bib-search.php", notifyResults, query);
+	top.HEURIST.util.sendRequest(top.HEURIST.basePath + "records/pointer/json-bib-search.php", notifyResults, query);
 
 	return false;
 }

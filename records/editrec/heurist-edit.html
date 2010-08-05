@@ -20,8 +20,8 @@
 	-->
 	<head>
 		<title>Heurist Reference Database - Edit - &copy; 2007 University of Sydney</title>
-		<link rel=stylesheet href="../../../common/css/heurist.css">
-		<link rel=stylesheet href="../../../common/css/heurist-edit.css">
+		<link rel=stylesheet href="../../common/css/heurist.css">
+		<link rel=stylesheet href="../../common/css/heurist-edit.css">
 		<style>
 
 			select.minimal { margin: 0; padding: 0; border: 0; background: transparent; }
@@ -73,7 +73,7 @@
 				cursor: nw-resize;
 				top: 0; left: 0;
 				position: absolute;
-				background: url(../../../common/images/nw-resize.gif) transparent scroll top left no-repeat;
+				background: url(../../common/images/nw-resize.gif) transparent scroll top left no-repeat;
 				width: 16px;
 				height: 16px;
 			}
@@ -82,7 +82,7 @@
 				cursor: pointer;
 				top: 2; right: 2;
 				position: absolute;
-				background: url(../../../common/images/nw-minimise.gif) transparent scroll top right no-repeat;
+				background: url(../../common/images/nw-minimise.gif) transparent scroll top right no-repeat;
 				width: 16px;
 				height: 16px;
 			}
@@ -141,9 +141,9 @@
 	<body>
 
 
-		<script src="../../../common/js/heurist.js"></script>
+		<script src="../../common/js/heurist.js"></script>
 		<script src="heurist-relation.js"></script>
-		<script src="../../../common/php/heurist-obj-user.php"></script>
+		<script src="../../common/php/heurist-obj-user.php"></script>
 		<script>
 			top.HEURIST.whenLoaded("obj-user", function() {
 				if (! top.HEURIST.is_logged_in()) {
@@ -151,13 +151,13 @@
 				}
 			});
 		</script>
-		<script src="../../../common/php/heurist-obj-common.php"></script>
-		<script src="../../../common/php/display-preferences.php"></script>
+		<script src="../../common/php/heurist-obj-common.php"></script>
+		<script src="../../common/php/display-preferences.php"></script>
 		<script>
 
 		</script>
 		<script>
-			top.HEURIST.loadScript(top.HEURIST.basePath +"data/pointer/bib.php?bib_id="+top.HEURIST.parameters["bib_id"]+"&bkmk_id="+top.HEURIST.parameters["bkmk_id"]);
+			top.HEURIST.loadScript(top.HEURIST.basePath +"records/pointer/bib.php?bib_id="+top.HEURIST.parameters["bib_id"]+"&bkmk_id="+top.HEURIST.parameters["bkmk_id"]);
 		</script>
 		<script>
 			top.HEURIST.whenLoaded("record", function() {
@@ -175,7 +175,7 @@
 			});
 		</script>
 		<script src="heurist-edit.js"></script>
-		<script src="../../../common/php/load-hapi.php"></script> <!-- FIXME:  need to just change hapi to load without instances and keys  -->
+		<script src="../../common/php/load-hapi.php"></script> <!-- FIXME:  need to just change hapi to load without instances and keys  -->
 
 		<script>
 
@@ -186,7 +186,7 @@
 			top.HEURIST.whenLoaded(["record", "edit-html"], function() {
 				top.HEURIST.edit.showRecordProperties();
 				if (top.HEURIST.parameters["sid"]) {
-					top.HEURIST.util.getJsonData(top.HEURIST.basePath+"data/records/editrec/result-context.php?s="+top.HEURIST.parameters["sid"]+"&id="+top.HEURIST.record.bibID, function(context) {
+					top.HEURIST.util.getJsonData(top.HEURIST.basePath+"records/editrec/result-context.php?s="+top.HEURIST.parameters["sid"]+"&id="+top.HEURIST.record.bibID, function(context) {
 						if (! context) return;
 						document.getElementById("search-nav").innerHTML =
 						"<p>Record "+context.pos+" of "+context.count+" search results</p>" +
@@ -312,13 +312,13 @@
 
 					<table border=0 cellspacing=0 cellpadding=0 class=expander>
 						<tr>
-							<td id=logo-cell rowspan=2><a id=home-link><img src="../../../common/images/hlogo-small.jpg" alt=Heurist></a></td>
+							<td id=logo-cell rowspan=2><a id=home-link><img src="../../common/images/hlogo-small.jpg" alt=Heurist></a></td>
 							<td id=instance-name rowspan=2></td>
 							<td id=title-cell rowspan=2><nobr>Edit record</nobr></td>
 							<td id=quicklink-cell><nobr>
 
 									<!-- QUICK LINKS -->
-									<a href="../../../help/about.html" onclick="top.HEURIST.util.popupURL(window, href); return false;">About</a> |
+									<a href="../../help/about.html" onclick="top.HEURIST.util.popupURL(window, href); return false;">About</a> |
 									<a href="http://www.timemap.net/tmissues.php" target=_blank>Report a bug</a> |
 									<a id=contact-link href="mailto:info@heuristscholar.org">Contact us</a> |
 									<a id=help-link href='#' onclick="top.HEURIST.util.helpToggler(this)"></a>
@@ -343,7 +343,7 @@
 					<table class=expander border=0 cellspacing=0 cellpadding=0><tr>
 							<td>
 								<div>
-									<b><img id=reftype-img src="../../../common/images/16x16.gif"><!--span id=reftype-val></span--></b>
+									<b><img id=reftype-img src="../../common/images/16x16.gif"><!--span id=reftype-val></span--></b>
 									<span id=reftype-edit class=edit ></span>
 								</div>
 								<div style="margin-left: 23px; margin-top: 1ex;">
@@ -355,7 +355,7 @@
 								<div id=workgroup-div>
 									<div id=workgroup-val-div title="Restrict access by workgroup">
 										<b><span id=workgroup-val></span></b>
-										<span id=workgroup-edit class="edit admin-only" onclick="openWorkgroupChanger();"><img src="../../../common/images/edit_pencil_16x16.gif">change</span>
+										<span id=workgroup-edit class="edit admin-only" onclick="openWorkgroupChanger();"><img src="../../common/images/edit_pencil_16x16.gif">change</span>
 									</div>
 									<div id=workgroup-access title="Access for users not in this workgroup"></div>
 								</div>
@@ -378,33 +378,33 @@
 									<tr><td class=panel-header><b>&nbsp;</b></td></tr>
 									<tr><td class=panel-main><div class="expander panel-main-div"><div id=sidebar class="autosize panel-main-content">
 
-													<div class="sidebar-link disabled" style="background-image: url(../../../common/images/public_icon.gif);" id=public-link
-														disabledDescription="No public information for private record"><img src="../../../common/images/16x16.gif">
+													<div class="sidebar-link disabled" style="background-image: url(../../common/images/public_icon.gif);" id=public-link
+														disabledDescription="No public information for private record"><img src="../../common/images/16x16.gif">
 														<b>Public information</b>
 														<span id=desc>Record description, bibliographic data</span>
 													</div>
 
-													<div class="sidebar-link disabled" style="background-image: url(../../../common/images/personal_icon.gif);" id=personal-link
+													<div class="sidebar-link disabled" style="background-image: url(../../common/images/personal_icon.gif);" id=personal-link
 														disabledTitle="Click here to add a bookmark for this record"
-														disabledDescription="Click here to bookmark this record"><img src="../../../common/images/16x16.gif">
+														disabledDescription="Click here to bookmark this record"><img src="../../common/images/16x16.gif">
 														<b>Personal information</b>
 														<span id=desc>Tags, passwords, ratings, notifications</span>
 													</div>
 
-													<div class="sidebar-link disabled" style="background-image: url(../../../common/images/workgroup_icon.gif);" id=workgroups-link
-														disabledDescription="You are not a member of any workgroup"><img src="../../../common/images/16x16.gif">
+													<div class="sidebar-link disabled" style="background-image: url(../../common/images/workgroup_icon.gif);" id=workgroups-link
+														disabledDescription="You are not a member of any workgroup"><img src="../../common/images/16x16.gif">
 														<b>Workgroup tags</b>
 														<span id=desc>For the workgroups you belong to</span>
 													</div>
 
-													<div class="sidebar-link disabled" style="background-image: url(../../../common/images/wiki-icon.gif);" id=annotation-link
-														disabledDescription="Not available"><img src="../../../common/images/16x16.gif">
+													<div class="sidebar-link disabled" style="background-image: url(../../common/images/wiki-icon.gif);" id=annotation-link
+														disabledDescription="Not available"><img src="../../common/images/16x16.gif">
 														<b>Text</b>
 														<span id=desc>WYSIWYG extended text &amp; discussion</span>
 													</div>
 
-													<div class="sidebar-link disabled" style="background-image: url(../../../common/images/relationships_icon.gif);" id=relationships-link
-														disabledDescription="Not available"><img src="../../../common/images/16x16.gif">
+													<div class="sidebar-link disabled" style="background-image: url(../../common/images/relationships_icon.gif);" id=relationships-link
+														disabledDescription="Not available"><img src="../../common/images/16x16.gif">
 														<b>Relationships</b>
 														<span id=desc>Cross-referencing, link related records</span>
 													</div>
@@ -545,7 +545,7 @@
 						top.HEURIST.whenLoaded("record", function() {
 							document.getElementById("moddate").appendChild(document.createTextNode(top.HEURIST.record.moddate));
 							var citeAs = document.getElementById("cite-as-url");
-							citeAs.href = "http://"+window.location.host+ top.HEURIST.basePath +"data/records/viewrec/view.php?bib_id=" + top.HEURIST.record.bibID;
+							citeAs.href = "http://"+window.location.host+ top.HEURIST.basePath +"records/viewrec/view.php?bib_id=" + top.HEURIST.record.bibID;
 							citeAs.appendChild(document.createTextNode(citeAs.href));
 						});
 					</script>
@@ -636,7 +636,7 @@
 							top.HEURIST.edit.unchanged(eachName);
 						}
 
-						top.location.replace(top.HEURIST.basePath+"data/records/editrec/heurist-edit.html?bib_id="+choice.details.id);
+						top.location.replace(top.HEURIST.basePath+"records/editrec/heurist-edit.html?bib_id="+choice.details.id);
 					}
 				});
 			}

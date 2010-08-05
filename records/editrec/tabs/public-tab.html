@@ -1,17 +1,17 @@
 <html>
  <head>
-  <link rel=stylesheet href="../../../../common/css/heurist.css">
-  <link rel=stylesheet href="../../../../common/css/heurist-relation.css">
-  <link rel=stylesheet href="../../../../common/css/heurist-edit-tab.css">
+  <link rel=stylesheet href="../../../common/css/heurist.css">
+  <link rel=stylesheet href="../../../common/css/heurist-relation.css">
+  <link rel=stylesheet href="../../../common/css/heurist-edit-tab.css">
  </head>
  <body onLoad="onshow();">
-  <script src="../../../../common/js/heurist.js"></script>
-  <script src="../../../../common/php/display-preferences.php"></script>
+  <script src="../../../common/js/heurist.js"></script>
+  <script src="../../../common/php/display-preferences.php"></script>
 
 		<form method=post enctype="multipart/form-data"
 			onsubmit="return top.HEURIST.edit.requiredInputsOK(window.HEURIST.inputs, window);"
-			jsonAction="/data/records/save-biblio-data.php"
-			action="/data/records/save-biblio-data.php" target=save-frame>
+			jsonAction="../../save-biblio-data.php"
+			action="../../save-biblio-data.php" target=save-frame>
 			<input type=hidden name=save-mode id=save-mode>
 			<input type=hidden name=notes id=notes>
 			<table><tbody id=all-inputs></tbody></table>

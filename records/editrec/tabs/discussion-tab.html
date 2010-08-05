@@ -13,8 +13,8 @@
     -->
 
     <head>
-		<link rel=stylesheet href="../../../../common/css/heurist.css">
-		<link rel=stylesheet href="../../../../common/css/heurist-edit-tab.css">
+		<link rel=stylesheet href="../../../common/css/heurist.css">
+		<link rel=stylesheet href="../../../common/css/heurist-edit-tab.css">
         <style>
 
             #comment-link {
@@ -167,7 +167,7 @@
                 var detailText = details.text || "";
                 detailText = detailText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
                 detailText = detailText.replace(/(http:\/\/[\041-\176]+)/g, "<a href=\"$1\">$1</a>");
-                detailText = detailText.replace(/\[(\d+)\]/g, "[<a href=\"/"+ installDir +"/data/records/viewrec/view.php?bib_id=$1\">$1</a>]");
+                detailText = detailText.replace(/\[(\d+)\]/g, "[<a href=\"/"+ installDir +"/records/viewrec/view.php?bib_id=$1\">$1</a>]");
 
                 this.textDiv = this.innerDiv.appendChild(this.document.createElement("div"));
                 this.textDiv.className = "text";
@@ -224,7 +224,7 @@
             Comment.prototype.remove = function() {
                 if (! confirm("Delete this comment?")) return;
 
-                var fakeForm = { action: installDir + "data/comments/save-comment.php",
+                var fakeForm = { action: installDir + "records/comments/save-comment.php",
                     elements: [
                     { name: "cmt_id", value: this.id },
                     { name: "delete", value: 1 }
@@ -360,7 +360,7 @@
                     return;
                 }
 
-                var fakeForm = { action: installDir + "data/comments/save-comment.php",
+                var fakeForm = { action: installDir + "records/comments/save-comment.php",
                     elements: [
                     { name: "cmt_id", value: this.id },
                     { name: "bib_id", value: parent.HEURIST.record.bibID },

@@ -1,7 +1,7 @@
 <?php
 
-require_once(dirname(__FILE__).'/../../../common/connect/cred.php');
-require_once(dirname(__FILE__).'/../../../common/t1000/t1000.php');
+require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
 if (!is_logged_in()) {
         header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');

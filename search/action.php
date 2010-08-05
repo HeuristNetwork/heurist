@@ -406,6 +406,7 @@ function save_search() {
 	$wg = intval(@$_REQUEST['ss_wg_id']);
 	$ss = $_REQUEST['ss_id'];
 	$publish = $_REQUEST['publish'];
+	$label = @$_REQUEST['ss_name'];
 
 	$now = date('Y-m-d');
 	$cmb = Array(
@@ -440,9 +441,9 @@ function save_search() {
 	} else {
 		$onload = 'location.replace(\'action.php\'); top.HEURIST.search.insertSavedSearch(\''.slash($_REQUEST['ss_name']).'\', \''.slash($_REQUEST['ss_query']).'\', '.$wg.', '.$ss.');';
 		if ($publish) {
-			$onload .= ' top.location.href = top.location.href + (top.location.href.match(/\?/) ? \'&\' : \'?\') + \'pub=1&sid='.$ss.'\';';
+			$onload .= ' top.location.href = top.location.href + (top.location.href.match(/\?/) ? \'&\' : \'?\') + \'pub=1&label='.$label.'&sid='.$ss.'\';';
 		}else{
-			$onload .= ' top.location.href = top.location.href + (top.location.href.match(/\?/) ? \'&\' : \'?\') + \'sid='.$ss.'\';';
+			$onload .= ' top.location.href = top.location.href + (top.location.href.match(/\?/) ? \'&\' : \'?\') + \'label='.$label.'&sid='.$ss.'\';';
 		}
 	}
 	return $onload;

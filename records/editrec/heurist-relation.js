@@ -68,7 +68,7 @@ var Relationship = function(parentElement, details, manager) {
 */
 Relationship.prototype.edit = function() {
 	var thisRef = this;
-	top.HEURIST.util.popupURL(window, top.HEURIST.basePath + "data/records/editrec/mini-edit.html?bib_id="+this.details.bibID,
+	top.HEURIST.util.popupURL(window, top.HEURIST.basePath + "records/editrec/mini-edit.html?bib_id="+this.details.bibID,
 	{ callback: function(newRecTitle, newDetails) {
 			if (newRecTitle) {	//saw this gets a title from the record which does match the inital title format and mini-edit always returns a title.
 				thisRef.titleSpan.innerHTML ="";
@@ -286,7 +286,7 @@ EditableRelationship.prototype.save = function() {
 		return;
 	}
 
-	var fakeForm = { action: top.HEURIST.basePath +"data/relationships/save-relations.php",
+	var fakeForm = { action: top.HEURIST.basePath +"records/relationships/save-relations.php",
 		elements: [
 		{ name: "bib_id", value: parent.HEURIST.record.bibID },
 		{ name: "save-mode", value: "new" },
