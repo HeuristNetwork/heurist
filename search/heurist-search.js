@@ -770,7 +770,7 @@ top.HEURIST.search = {
 
 		var bib_id = result_div.getAttribute("bib_id");
 		//TODO: parameterise the codebase for the relbrowser
-		window.open( "/cocoon"+top.HEURIST.basepath+"relbrowser/main/item/" + bib_id +
+		window.open( "/cocoon"+top.HEURIST.basePath+"relbrowser/main/item/" + bib_id +
 					(top.HEURIST.instance && top.HEURIST.instance.name ? "/?instance=" + top.HEURIST.instance.name : ""));
 //		window.open(top.HEURIST.instance.exploreURL+ "" + bib_id);
 

@@ -68,7 +68,7 @@ $rec_title = $row['rec_title'];
 
 <div style="padding: 10px;">
  <p style="font-weight: bold;"><?= htmlspecialchars($rec_title) ?></p>
- <iframe name="viewer" frameborder="0" style="width: 100%;" src="<?=HEURIST_SITE_PATH?>data/records/viewrec/info.php?<?= ($pers_id ? ('bkmk_id='.$pers_id) : ('bib_id='.$rec_id)) ?><?= $noclutter ?>"></iframe>
+ <iframe name="viewer" frameborder="0" style="width: 100%;" src="<?=HEURIST_SITE_PATH?>records/viewrec/info.php?<?= ($pers_id ? ('bkmk_id='.$pers_id) : ('bib_id='.$rec_id)) ?><?= $noclutter ?>"></iframe>
 </div>
 
 </body>

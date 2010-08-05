@@ -50,7 +50,7 @@ function init () {
 	}
 
 	relTargetInput.onclick = function () {
-		top.HEURIST.util.popupURL(window, "popup/bib-list.html?q=", {
+		top.HEURIST.util.popupURL(window, top.HEURIST.basePath + "records/pointer/bib-list.html?q=", {
 			callback: function(recID, recTitle) {
 				relTargetInput.value = recTitle || "";
 				relTargetID = recID || null;
@@ -61,7 +61,7 @@ function init () {
 
 function save () {
 	var fakeForm = {
-		action: "php/save-relations.php",
+		action: top.HEURIST.basePath + "records/relationships/save-relations.php",
 		elements: [
 			{ name: "bib_id", value: top.HEURIST.search.get_bib_ids().join(",") },
 			{ name: "save-mode", value: "new" },
