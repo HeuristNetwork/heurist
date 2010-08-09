@@ -40,7 +40,12 @@ function loadTimeline() {
 	}
 
 	if (eventCount == 0) {
-		document.getElementById("timeline-cell").style.display = "none";
+		var tdTimeline = document.getElementById("timeline-cell");
+		tdTimeline.style.display = "none";
+		tdTimeline.parentNode.style.display = "none";
+		var tdResizer = document.getElementById("resizer");
+		tdResizer.style.display = "none";
+		tdResizer.parentNode.style.display = "none";
 		if (bigDate)
 			document.getElementById("info").innerHTML = "<b>Time data lies outside 250000BCE .. 250000CE.</b> Timebar cannot display these dates.";
 		else

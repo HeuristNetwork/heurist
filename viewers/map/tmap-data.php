@@ -137,36 +137,58 @@ $timeObjects = array();
 //select d.rd_rec_id, min(d.rd_val), max(d.rd_val), min(y.rd_val), max(y.rd_val)
 //from rec_details b, rec_details y
 //"
-
-$res = mysql_query("select rec_id, min(d.rd_val), max(d.rd_val), min(y.rd_val), max(y.rd_val)
+$dates = array();
+$years =array();
+$res = mysql_query("select rec_id, min(d.rd_val), max(d.rd_val)
 					  from records
 				cross join rec_detail_types dt
-				cross join rec_detail_types yt
 				 left join rec_details d on d.rd_rec_id = rec_id and d.rd_type = dt.rdt_id
-				 left join rec_details y on y.rd_rec_id = rec_id and y.rd_type = yt.rdt_id
 					 where rec_id in (" . join(",", $bibIDs) . ")
 					   and dt.rdt_type = 'date'
-					   and yt.rdt_type = 'year'
 				  group by rec_id");
-While ($val = mysql_fetch_row($res)) {
-	if (preg_match("/^\\d+\\s*bc/i", $val[1])) $val[1] = -$val[1] + 1;
-	if (preg_match("/^\\d+\\s*bc/i", $val[2])) $val[2] = -$val[2] + 1;
-	if (preg_match("/^\\d+\\s*bc/i", $val[3])) $val[3] = -$val[3] + 1;
-	if (preg_match("/^\\d+\\s*bc/i", $val[4])) $val[4] = -$val[4] + 1;
+while ($val = mysql_fetch_row($res)) {
+	if (preg_match("/^\\d+\\s*bc/i", $val[1])) {
+		$val[1] = -(preg_replace("/\\s*bc/i","",$val[1])) + 1;
+	}
+	if (preg_match("/^\\d+\\s*bc/i", $val[2])) {
+		$val[2] = -(preg_replace("/\\s*bc/i","",$val[2])) + 1;
+	}
 
-	$sd = $val[1];
-	$ed = $val[2];
-	$sy = $val[3];
-	$ey = $val[4];
+	$dates[$val[0]] = array($val[1],$val[2]);
+}
 
-	if (! $sd  &&  ! $ed  &&  $sy == $ey)
+$res = mysql_query("select rec_id, min(d.rd_val), max(d.rd_val)
+					  from records
+				cross join rec_detail_types yt
+				 left join rec_details y on y.rd_rec_id = rec_id and y.rd_type = yt.rdt_id
+					 where rec_id in (" . join(",", $bibIDs) . ")
+					   and yt.rdt_type = 'yesr'
+				  group by rec_id");
+while ($val = mysql_fetch_row($res)) {
+	if (preg_match("/^\\d+\\s*bc/i", $val[1])) {
+		$val[1] = -(preg_replace("/\\s*bc/i","",$val[1])) + 1;
+	}
+	if (preg_match("/^\\d+\\s*bc/i", $val[2])) {
+		$val[2] = -(preg_replace("/\\s*bc/i","",$val[2])) + 1;
+	}
+
+	$years[$val[0]] = array($val[1],$val[2]);
+}
+
+foreach( $bibIDs as $bibID){
+	$sd = (@$dates[$bibID][0] ? $dates[$bibID][0]:null);
+	$ed = (@$dates[$bibID][1] ? $dates[$bibID][1]:null);
+	$sy = (@$years[$bibID][0] ? $years[$bibID][0]:null);
+	$ey = (@$years[$bibID][1] ? $years[$bibID][1]:null);
+
+	if (! $sd  &&  ! $ed  && $sy && $sy == $ey)
 		$ey = $sy + 1;
 
 	$s = ($sd ? $sd : $sy);
 	$e = ($ed ? $ed : $ey);
-	if ($s == $e) $e = null;
+	if ($s >= $e) $e = null;
 
-	$timeObjects[$val[0]] = array($s, $e);
+	$timeObjects[$bibID] = array($s, $e);
 }
 
 

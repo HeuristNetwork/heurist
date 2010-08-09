@@ -5,19 +5,24 @@
  <title>Map search results</title>
  <script>
 
-   function build_links() {
-     if (! top.HEURIST  ||  ! top.HEURIST.parameters) return;
-     var p = top.HEURIST.parameters;
-     var query_string = '?ver='+(p['ver'] || "") + '&w='+(p['w'] || "") + '&q='+(p['q'] || "") + '&stype='+(p['stype'] || "");
-     query_string = encodeURI(query_string);
-     var elts = document.documentElement.getElementsByTagName('A');
-     for (var i=0; i < elts.length; ++i) {
-       elts[i].href += query_string;
-     }
+	function build_links() {
+		if (! top.HEURIST  ||  ! top.HEURIST.parameters) return;
+		var p = top.HEURIST.parameters;
+		var query_string = '?ver='+(p['ver'] || "") + '&w='+(p['w'] || "") + '&q=' +
+			(!p['q'] ? "" :
+				(p['w'].search(/bookmark/) > -1 && p['q'].search(/user/) == -1 && top.HEURIST.get_user_id ?
+					p['q'] + " user:" + top.HEURIST.get_user_id() :
+					p['q'])) +
+			'&stype='+(p['stype'] || "");
+		query_string = encodeURI(query_string);
+		var elts = document.documentElement.getElementsByTagName('A');
+		for (var i=0; i < elts.length; ++i) {
+			elts[i].href += query_string;
+		}
 
-     var url = location.href.replace(/popup.*/, "mapper/") + query_string;//FIXME does this work with the new structure??
-     document.getElementById("code-textbox").value = '<iframe src="' + url + '" width="800" height="650" frameborder="0"></iframe>';
-   }
+		var url = location.href.replace(/popup.*/, "mapper/") + query_string;//FIXME does this work with the new structure??
+		document.getElementById("code-textbox").value = '<iframe src="' + url + '" width="800" height="650" frameborder="0"></iframe>';
+	}
  </script>
 </head>
 

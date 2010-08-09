@@ -12,7 +12,7 @@
 
 #timeline-cell * { font-size: 11px; }
 
-#resizer, #resizer div { font-size: 4px; line-height: 4px; overflow: hidden; height: 4px; background-color: white; cursor: n-resize; display: none; }
+#resizer, #resizer div { font-size: 4px; line-height: 4px; overflow: hidden; height: 4px; background-color: white; cursor: n-resize; }
 
 body div { line-height: 1.5em; }
 
@@ -38,11 +38,16 @@ body div { line-height: 1.5em; }
 
   <script>
 if (location.search.match(/\btimeline=0\b/)) {
-	document.getElementById("timeline-cell").style.display = "none";
+	var tdTimeline = document.getElementById("timeline-cell");
+	tdTimeline.style.display = "none";
+	tdTimeline.parentNode.style.display = "none";
+	var tdResizer = document.getElementById("resizer");
+	tdResizer.style.display = "none";
+	tdResizer.parentNode.style.display = "none";
 	document.getElementById("info-cell").style.display = "none";
 }
 var HEURIST = {};
-document.write('<scr'+'ipt src="tmap-data.php' + location.search + '"></scr'+'ipt>');
+document.write('<scr'+'ipt src="'+location.pathname+'tmap-data.php' + location.search + '"></scr'+'ipt>');
 </script>
 
 <script>
@@ -85,11 +90,24 @@ resizerCell.onmousedown = function(e) {
 		var upHeight = downHeight + (downY - upY);
 
 		timelineCell.style.height = upHeight + "px";
+		timeline.layout();
 
-		top.HEURIST.deregisterEvent(document, "mouseup", resizerCell.document_mouseup);
+		if (top.HEURIST.deregisterEvent) {
+			top.HEURIST.deregisterEvent(document, "mouseup", resizerCell.document_mouseup);
+		}else if (window.removeEventListener) {
+			document.removeEventListener("mouseup", resizerCell.document_mouseup,true);
+		} else if (window.detachEvent) {
+			document.detachEvent("onmouseup", resizerCell.document_mouseup);
+		}
 	};
 
-	top.HEURIST.registerEvent(document, "mouseup", resizerCell.document_mouseup);
+	if (top.HEURIST.registerEvent){
+		top.HEURIST.registerEvent(document, "mouseup", resizerCell.document_mouseup);
+	}else if (window.addEventListener) {
+		document.addEventListener("mouseup", resizerCell.document_mouseup,true);
+	} else if (window.attachEvent) {
+		document.attachEvent("onmouseup", resizerCell.document_mouseup);
+	}
 };
   </script>
 
