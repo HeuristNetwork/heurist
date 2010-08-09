@@ -156,7 +156,7 @@ function handle_notification() {
 	if (! count($bib_ids))
 		return '<div style="color: red; font-weight: bold; padding: 5px;">(you must select at least one bookmark)</div>';
 
-	$notification_link = BASE_PATH . 'search/heurist-search.html?w=all&q=ids:' . join(',', $bib_ids);
+	$notification_link = BASE_PATH . 'search/search.html?w=all&q=ids:' . join(',', $bib_ids);
 
 	$bib_titles = mysql__select_assoc('records', 'rec_id', 'rec_title', 'rec_id in (' . join(',', $bib_ids) . ')');
 	$title_list = "Id      Title\n" . "------  ---------\n";

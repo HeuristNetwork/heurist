@@ -52,8 +52,9 @@
 			<tbody id=relations-tbody></tbody>
 		</table>
 
-		<form id=relations-form jsonAction="../../relationships/save-relations.php"></form>
-
+		<script>
+			document.write('<form id=relations-form jsonAction="'+top.HEURIST.basePath+'records/relationships/save-relations.php"></form>');
+		</script>
 		<script>
 
 			function changeNotification(cmd, relID) {

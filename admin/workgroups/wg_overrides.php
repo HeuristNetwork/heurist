@@ -9,7 +9,7 @@ if (! is_logged_in()) {
 	return;
 }
 if (! is_admin()) {
-	print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href=".HEURIST_URL_BASE."search/heurist-search.html>Return to Heurist</a></p></body></html>";
+	print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href=".HEURIST_URL_BASE."search/search.html>Return to Heurist</a></p></body></html>";
 	return;
 }
 

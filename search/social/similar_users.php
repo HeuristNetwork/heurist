@@ -121,7 +121,7 @@ Users with similar interests to you: (show
 	$i = 0;
 	while ($row = mysql_fetch_assoc($res)) {
 		echo ' <tr'. (++$i > 10 ? ' style="display: none;"' : '') .'><td><a href="'.HEURIST_SITE_PATH.'admin/user/user.php?Id='.$row['pers_usr_id'].'" title="View user profile for '.$row['name'].'">'.$row['name']."</a>&nbsp;&nbsp;&nbsp;&nbsp;</td>\n";
-		echo '     <td><a target="_top" href="'.HEURIST_SITE_PATH.'search/heurist-search.html?w=bookmark&q=user:%22'.$row['name'].'%22" title="Search for records that you and '.$row['name'].' share"><b>'.$row['freq']."</b> records in common</a></td></tr>\n";
+		echo '     <td><a target="_top" href="'.HEURIST_SITE_PATH.'search/search.html?w=bookmark&q=user:%22'.$row['name'].'%22" title="Search for records that you and '.$row['name'].' share"><b>'.$row['freq']."</b> records in common</a></td></tr>\n";
 	}
 }
 

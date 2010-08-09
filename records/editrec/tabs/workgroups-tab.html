@@ -56,9 +56,9 @@
      	<div id="admin-wgKeywords"><br><a href="../../../admin/workgroups/workgroup_keyword_manager.php" target="_blank"> Click here </a> to add/delete tags for workgroups (administrators only). </div>
      </td></tr>
     </table>
-
-    <form id=keyword-form jsonAction="../../tags/save-keywords.php" action="../../tags/save-keywords.php"></form>
-
+<script>
+	document.write('<form id=keyword-form method=post jsonAction="'+top.HEURIST.basePath+'records/tags/save-keywords.php" action="'+top.HEURIST.basePath+'records/tags/save-keywords.php"></form>');
+</script>
 <script src="../../tags/keyword-editor.js"></script>
 <script>
 

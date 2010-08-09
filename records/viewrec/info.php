@@ -261,7 +261,7 @@ function print_private_details($bib) {
 				$grp_kwd = $grp.'\\\\'.$kwd;
 				$label = 'Tag "'.$grp_kwd.'"';
 				if (preg_match('/\\s/', $grp_kwd)) $grp_kwd = '"'.$grp_kwd.'"';
-				print htmlspecialchars($grp.' - ').'<a class=normal style="vertical-align: top;" target=_parent href="'.HEURIST_SITE_PATH.'search/heurist-search.html?ver=1&amp;q=tag:'.urlencode($grp_kwd).'&amp;w=all&amp;label='.urlencode($label).'">'.htmlspecialchars($kwd).'<img style="vertical-align: middle; margin: 1px; border: 0;" src="'.HEURIST_SITE_PATH.'common/images/tiny-magglass.gif"></a>';
+				print htmlspecialchars($grp.' - ').'<a class=normal style="vertical-align: top;" target=_parent href="'.HEURIST_SITE_PATH.'search/search.html?ver=1&amp;q=tag:'.urlencode($grp_kwd).'&amp;w=all&amp;label='.urlencode($label).'">'.htmlspecialchars($kwd).'<img style="vertical-align: middle; margin: 1px; border: 0;" src="'.HEURIST_SITE_PATH.'common/images/tiny-magglass.gif"></a>';
 			}
 ?>
 </td></tr>
@@ -290,7 +290,7 @@ function print_personal_details($bkmk) {
 			$tag = $tags[$i];
 			$label = 'Tag "'.$tag.'"';
 			if (preg_match('/\\s/', $tag)) $tag = '"'.$tag.'"';
-			print '<a class=normal style="vertical-align: top;" target=_parent href="'.HEURIST_SITE_PATH.'search/heurist-search.html?ver=1&amp;q=tag:'.urlencode($tag).'&amp;w=bookmark&amp;label='.urlencode($label).'">'.htmlspecialchars($tags[$i]).'<img style="vertical-align: middle; margin: 1px; border: 0;" src="'.HEURIST_SITE_PATH.'common/images/tiny-magglass.gif"></a>';
+			print '<a class=normal style="vertical-align: top;" target=_parent href="'.HEURIST_SITE_PATH.'search/search.html?ver=1&amp;q=tag:'.urlencode($tag).'&amp;w=bookmark&amp;label='.urlencode($label).'">'.htmlspecialchars($tags[$i]).'<img style="vertical-align: middle; margin: 1px; border: 0;" src="'.HEURIST_SITE_PATH.'common/images/tiny-magglass.gif"></a>';
 		}
 		if (count($tags)) {
 			print "<br>\n";
@@ -506,7 +506,7 @@ function print_linked_details($bib) {
 	if (mysql_num_rows($res) <= 0) return;
 ?>
 <tr> <td colspan="2" class="label separator" >Linked From</td></tr>
-<tr><td class="label" style="padding: 5px 2px;"> </td><td><a href="<?=HEURIST_SITE_PATH?>search/heurist-search.html?w=all&q=linkto:<?=$bib['rec_id']?>" onclick="top.location.href = this.href; return false;"><b>Show list below as search results</b></a> <b>(linkto:<?=$bib['rec_id']?> = records pointing TO this record)</b></td></tr>
+<tr><td class="label" style="padding: 5px 2px;"> </td><td><a href="<?=HEURIST_SITE_PATH?>search/search.html?w=all&q=linkto:<?=$bib['rec_id']?>" onclick="top.location.href = this.href; return false;"><b>Show list below as search results</b></a> <b>(linkto:<?=$bib['rec_id']?> = records pointing TO this record)</b></td></tr>
 <?php
 	while ($row = mysql_fetch_assoc($res)) {
 

@@ -1055,7 +1055,7 @@ top.HEURIST.search = {
 				if (tags.length) {
 					innerHTML += "<div class=saved-search-subsubheading>Workgroup Tags</div>";
 					for (var j = 0; j < tags.length; ++j) {
-						innerHTML += "<nobr><a href='"+top.HEURIST.basePath+"search/heurist-search.html?ver=1&w=all&q=tag=\"" + top.HEURIST.workgroups[w].name + "\\" + tags[j] + "\"&label=Tag+\"" + tags[j] + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "") + "\"'>" + tags[j] + "</a></nobr>";
+						innerHTML += "<nobr><a href='"+top.HEURIST.basePath+"search/search.html?ver=1&w=all&q=tag=\"" + top.HEURIST.workgroups[w].name + "\\" + tags[j] + "\"&label=Tag+\"" + tags[j] + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "") + "\"'>" + tags[j] + "</a></nobr>";
 					}
 				}
 
@@ -1113,7 +1113,7 @@ top.HEURIST.search = {
 		var kwd;
 		for (var i = 0; i < keywords.length; ++i) {
 			kwd = encodeURIComponent(keywords[i]);
-			innerHTML += "<a href='"+top.HEURIST.basePath+"search/heurist-search.html?ver=1&w=bookmark&q=tag=\"" + kwd + "\"&label=Tag+\"" + kwd + "\"'>" + keywords[i] + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "") + "</a> ";
+			innerHTML += "<a href='"+top.HEURIST.basePath+"search/search.html?ver=1&w=bookmark&q=tag=\"" + kwd + "\"&label=Tag+\"" + kwd + "\"'>" + keywords[i] + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "") + "</a> ";
 		}
 		var kwd_search_elt = top.document.getElementById("keyword-search-links");
 		if (kwd_search_elt) {

@@ -6,5 +6,5 @@
 	}else{
 		$q = "instance=".HEURIST_DEFAULT_INSTANCE;
 	}
-	header('Location: '.HEURIST_URL_BASE.'search/heurist-search.html?'.$q);
+	header('Location: '.HEURIST_URL_BASE.'search/search.html?'.$q);
 ?>

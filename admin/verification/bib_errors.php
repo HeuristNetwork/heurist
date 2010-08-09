@@ -14,7 +14,7 @@
 	var link = document.getElementById('selected_link');
 	if (!link)
 		return false;
-	link.href = '../../search/heurist-search.html?w=all&q=ids:' + ids;
+	link.href = '../../search/search.html?w=all&q=ids:' + ids;
 	return true;
   }
  </script>
@@ -44,7 +44,7 @@ while ($row = mysql_fetch_assoc($res))
 <div style="font-weight: bold;">
  Records with resource pointers to the wrong rec_type
  &nbsp;&nbsp;
- <a target=_new href='../../search/heurist-search.html?w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>(show all in search)</a>
+ <a target=_new href='../../search/search.html?w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>(show all in search)</a>
 </div>
 <table>
 <?php
@@ -80,7 +80,7 @@ while ($row = mysql_fetch_assoc($res))
 <div style="font-weight: bold;">
  Records with resource pointers to non-existent records
  &nbsp;&nbsp;
- <a target=_new href='../../search/heurist-search.html?w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>(show all in search)</a>
+ <a target=_new href='../../search/search.html?w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>(show all in search)</a>
  &nbsp;&nbsp;
  <a target=_new href='#' id=selected_link onclick="return open_selected();">(show selected in search)</a>
 </div>

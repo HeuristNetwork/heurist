@@ -84,7 +84,7 @@ foreach (get_all_instances() as $prefix => $instance) {
 	foreach ($bad_bibs as $rec_id => $details) {
 		$message .= '  ' . $rec_id . ': ' . $details[0] . ' (' . $details[1] . ')' . "\n";
 	}
-	$message .= "\n\nFind these at\nhttp://" . ($prefix? $prefix.".": "") . HOST_BASE .HEURIST_SITE_PATH."search/heurist-search.html?q=ids:" . join(',', array_keys($bad_bibs)) . "\n";
+	$message .= "\n\nFind these at\nhttp://" . ($prefix? $prefix.".": "") . HOST_BASE .HEURIST_SITE_PATH."search/search.html?q=ids:" . join(',', array_keys($bad_bibs)) . "\n";
 	//mail('kjackson@acl.arts.usyd.edu.au', 'HEURIST - bad URLs', $message);
 	error_log($message);
 }

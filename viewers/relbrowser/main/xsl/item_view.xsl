@@ -121,7 +121,7 @@
 			</head>
 			<body pub_id="{/export/@pub_id}">
 				<div id="header">
-					<a href="{$hBase}search/heurist-search.html?instance={$instanceName}">
+					<a href="{$hBase}search/search.html?instance={$instanceName}">
 						<div id="logo"></div>
 					</a>
 					<div id="instance-name"><xsl:value-of select="$instanceName"/></div>
@@ -164,7 +164,7 @@
 							document.getElementById("login").appendChild(a);</script>
 								</td>
 								<td id="heurist-link">
-									<a href="{$hBase}search/heurist-search.html?q=id:{export/references/reference/id}&amp;instance={$instanceName}">Heurist</a>
+									<a href="{$hBase}search/search.html?q=id:{export/references/reference/id}&amp;instance={$instanceName}">Heurist</a>
 								</td>
 							</tr>
 						</table>

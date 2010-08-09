@@ -74,7 +74,7 @@ function delete_keyword(kwd_id) {
 		print '<ul>';
 		$res = mysql_query('select kwd_id, kwd_name, count(kwl_id) as kwi_count from keywords left join keyword_links on kwl_kwd_id=kwd_id where kwd_wg_id='.$grp['grp_id'].' group by kwd_id, kwl_kwd_id order by kwd_name');
 		while ($kwd = mysql_fetch_assoc($res)) {
-			$searchlink = HEURIST_URL_BASE.'search/heurist-search.html?q=keyword%3A%22'.$grp['grp_name'].'%5C'.$kwd['kwd_name'].'%22&w=all&stype=';
+			$searchlink = HEURIST_URL_BASE.'search/search.html?q=keyword%3A%22'.$grp['grp_name'].'%5C'.$kwd['kwd_name'].'%22&w=all&stype=';
 			if ($kwd['kwi_count'] == 0) $used = '';
 			else $used = '<i>(<a target=_blank href="'.$searchlink.'">used '.($kwd['kwi_count'] == 1 ? 'once' : $kwd['kwi_count'].' times').'</a>)</i>';
 ?>

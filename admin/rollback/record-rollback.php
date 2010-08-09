@@ -46,7 +46,7 @@ if ($rollback) {
 	$s = $n != 1 ? "s" : "";
 	$state = $date ? "state as of $date" : "previous version";
 	print "<p>$n record$s rolled back to $state</p>";
-	print '<p><a href="'.HEURIST_URL_BASE.'search/heurist-search.html?q=ids:' . $ids . '">View updated records</a></p>';
+	print '<p><a href="'.HEURIST_URL_BASE.'search/search.html?q=ids:' . $ids . '">View updated records</a></p>';
 } else {
 	$rollbacks = getRecordRollbacks(split(",", $ids), $date);
 	showRollbacks($rollbacks);

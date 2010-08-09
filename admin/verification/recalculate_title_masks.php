@@ -161,9 +161,9 @@ if (count($updates) > 0) {
 
 	print '<hr>';
 
-	print '<a target=_blank href="'.HEURIST_URL_BASE.'search/heurist-search.html?w=all&q=ids:'.join(',', array_keys($updates)).'">Updated records</a><br>';
+	print '<a target=_blank href="'.HEURIST_URL_BASE.'search/search.html?w=all&q=ids:'.join(',', array_keys($updates)).'">Updated records</a><br>';
 }
-print '<a target=_blank href="'.HEURIST_URL_BASE.'search/heurist-search.html?w=all&q=ids:'.join(',', $blanks).'">Unchanged records (title would be blank)</a>';
+print '<a target=_blank href="'.HEURIST_URL_BASE.'search/search.html?w=all&q=ids:'.join(',', $blanks).'">Unchanged records (title would be blank)</a>';
 
 ob_flush();
 flush();

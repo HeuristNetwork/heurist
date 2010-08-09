@@ -39,7 +39,7 @@ while ($row = mysql_fetch_assoc($res)) {
 	if ($i == 50)
 		$body->global_vars['keywords'] .= "</span>\n".'<span id="top100" style="display: none;">'."\n";
 	$i++;
-	$body->global_vars['keywords'] .= '<a target="_top" href="'.HEURIST_URL_BASE.'search/heurist-search.html?w=all&q=tag:%22'.urlencode($row['kwd_name']).'%22+user:'.$_REQUEST['Id'].'" title="Search for '.$name.'\'s references with the keyword \''.$row['kwd_name'].'\'"><nobr>'.$row['kwd_name'].' ('.$row['bkmks'].")</nobr></a>&nbsp&nbsp\n";
+	$body->global_vars['keywords'] .= '<a target="_top" href="'.HEURIST_URL_BASE.'search/search.html?w=all&q=tag:%22'.urlencode($row['kwd_name']).'%22+user:'.$_REQUEST['Id'].'" title="Search for '.$name.'\'s references with the keyword \''.$row['kwd_name'].'\'"><nobr>'.$row['kwd_name'].' ('.$row['bkmks'].")</nobr></a>&nbsp&nbsp\n";
 }
 $body->global_vars['keywords'] .= "</span>\n";
 

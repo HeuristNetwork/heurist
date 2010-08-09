@@ -132,7 +132,7 @@ foreach ($dupes as $rectype => $subarr) {
     	$diffHash = join(',',$diffHash );
     	if (in_array($diffHash,$dupeDifferences)) continue;
 	    print '<div style="font-weight: bold;">' . $rectype . '&nbsp;&nbsp;&nbsp;&nbsp;';
-	    print '<a target="_new" href="'.HEURIST_URL_BASE.'search/heurist-search.html?w=all&q=ids:' . join(',', array_keys($bibs[$key])) . '">search</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+	    print '<a target="_new" href="'.HEURIST_URL_BASE.'search/search.html?w=all&q=ids:' . join(',', array_keys($bibs[$key])) . '">search</a>&nbsp;&nbsp;&nbsp;&nbsp;';
 	    print '<a target="fix" href="fix_dupes.php?bib_ids=' . join(',', array_keys($bibs[$key])) . '">fix</a>&nbsp;&nbsp;&nbsp;&nbsp;';
 	    print '<input type="checkbox" name="dupeDiffHash[] title="Check to idicate that all records in this set are unique." id="'.$key.
 	    		'" value="' . $diffHash . '">&nbsp;&nbsp;';
