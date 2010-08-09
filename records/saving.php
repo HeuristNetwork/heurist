@@ -23,7 +23,7 @@
 	or write to the Free Software Foundation,Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 	-->*/
-require_once(dirname(__FILE__)."/../../search/saved/loading.php");
+require_once(dirname(__FILE__)."/../search/saved/loading.php");
 
 function saveRecord($id, $type, $url, $notes, $group, $vis, $personalised, $pnotes, $crate, $irate, $qrate, $tags, $keywords, $details, $notifyREMOVE, $notifyADD, $commentREMOVE, $commentMOD, $commentADD, &$nonces=null, &$retitleRecs=null) {
 	$id = intval($id);

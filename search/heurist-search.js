@@ -1691,7 +1691,7 @@ top.HEURIST.search = {
 		var iHTML = "";
 		for (var i in visible_reftypes) {
 			if (top.HEURIST.reftypes.names[i])
-				iHTML += "<li><img src='src='"+ top.HEURIST.basePath+"common/images/reftype-icons/"+i+".png'>"+top.HEURIST.reftypes.names[i]+"</li>";
+				iHTML += "<li><img src='"+ top.HEURIST.basePath+"common/images/reftype-icons/"+i+".png'>"+top.HEURIST.reftypes.names[i]+"</li>";
 		}
 
 		document.getElementById("legend-box-list").innerHTML = iHTML;
@@ -1751,7 +1751,7 @@ top.HEURIST.search = {
 				a.href = "#";
 			a.onclick = function() {
 				if (window.HEURIST.parameters["label"] && window.HEURIST.parameters["sid"]) {
-					window.open(top.HEURIST.basePath+ "publish/publish.php?pub_id=" + window.HEURIST.parameters["sid"] + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : ""));
+					window.open(top.HEURIST.basePath+ "viewers/publish/publish.php?pub_id=" + window.HEURIST.parameters["sid"] + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : ""));
 				} else {
 					top.HEURIST.util.popupURL(window, top.HEURIST.basePath + 'search/saved/save-search.html?publish=yes' + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : ""));
 				}
@@ -1777,7 +1777,7 @@ top.HEURIST.search = {
 			p.innerHTML = 'Click below to continue to the publishing wizard.';
 			p = div.appendChild(document.createElement('p'));
 			a = p.appendChild(document.createElement('a'));
-			a.href = top.HEURIST.basePath+ 'publish/publish.php?pub_id=' + param['sid'] +(top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "");
+			a.href = top.HEURIST.basePath+ 'viewers/publish/publish.php?pub_id=' + param['sid'] +(top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "");
 			a.target = '_blank';
 			a.onclick = function() {
 				top.HEURIST.util.closePopup(popup.id);

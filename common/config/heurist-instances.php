@@ -14,16 +14,17 @@ mysql_connection_db_select($db);
 $res = mysql_query('select * from instances');
 
 while ($ins = mysql_fetch_assoc($res)) {
+// if ($ins['ins_uploads']) error_log(" instance = ". ($ins['ins_name'] ?$ins['ins_name']:"name blank") ." has upload of ".$ins['ins_uploads']);
 	$instances[$ins['ins_name'] ? $ins['ins_name'] : ""] = array(
 		"db" => ($ins['ins_db'] ? "`" . $ins['ins_db'] . "`" : "`" . $db_prefix  . $ins['ins_name'] ."`"),
 		"userdb" => ($ins['ins_userdb'] ? "`" . $ins['ins_userdb'] . "`" : "`" . $db_prefix  . $ins['ins_name'] ."`"),
 		"admingroup" => ($ins['ins_admingroup'] ? $ins['ins_admingroup'] : 1),
-		"uploads" => ($ins['ins_uploads'] ? $uploads ."/". $ins['ins_uploads'] :
-						$ins['ins_name'] ? $uploads ."/". $ins['ins_name'] : ""),
+		"uploads" => "". $uploads .($ins['ins_uploads'] ? "/". $ins['ins_uploads'] : ($ins['ins_name'] ? "/". $ins['ins_name'] : "")),
 		"explore" => ($ins['ins_explore'] ? $ins['ins_explore'] : ""),
 		"usergroup" =>($ins['ins_usergroup'] ? $ins['ins_usergroup'] : "")
 		);
 }
+//error_log("in h-instance = ". print_r($instances[""]['uploads'],true));
 
 function get_all_instances() {
 	global $instances;

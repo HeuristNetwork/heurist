@@ -7,7 +7,7 @@ require_once(dirname(__FILE__).'/../connect/cred.php');
 <head>
  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
  <title>Legend & Reference Types</title>
- <link rel="stylesheet" type="text/css" href= "<?=HEURIST_SITE_PATH?>css/import.css">
+ <link rel="stylesheet" type="text/css" href= "<?=HEURIST_SITE_PATH?>common/css/import.css">
  <style type=text/css>
 
 

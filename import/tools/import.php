@@ -140,7 +140,7 @@ function print_common_header($fileName) {
   <script>
 if (! top.HEURIST.user) top.HEURIST.loadScript('<?=HEURIST_SITE_PATH?>common/php/heurist-obj-user.php', true);
   </script>
-  <script src='<?=HEURIST_SITE_PATH?>tags/autocomplete.js'></script>
+  <script src='<?=HEURIST_SITE_PATH?>records/tags/autocomplete.js'></script>
 
 <?php	if (defined('use_alt_db')) {	?>
   <div style="color: red; padding: 10px; font-weight: bold;">Warning: using alternative database</div>
@@ -233,7 +233,7 @@ function mode_file_selection() {
 		if ($frm == "BIB") {
 ?>
     Currently, support is limited to EndNote REFER and Zotero formats.<br>
-    <a href="interface/required_elements.php" target=_new>Show tag definitions</a> for supported REFER record formats.<br>
+    <a href="<?=HEURIST_SITE_PATH?>impot/tools/interface/required_elements.php" target=_new>Show tag definitions</a> for supported REFER record formats.<br>
 <?php
 		}else if ($frm == "GEO") {
 ?>

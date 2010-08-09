@@ -31,12 +31,17 @@
   <!-- main pipeline -->
   <map:pipeline>
 
+	<map:match pattern="^([^/]+)/publish/([^/]+)/(.*)" type="regexp">
+		<map:redirect-to uri="cocoon:/{3}?installDir={1}&amp;appDir={2}" />
+	</map:match>
+
+
     <map:match pattern="*/random_image-js/*">
       <map:act type="request">
         <map:parameter name="parameters" value="true"/>
-        <map:generate src="/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
-        <map:transform src="/viewers/publish/xsl/heurist_legacy_xml.xsl"/>
-        <map:transform src="/viewers/publish/xsl/random_image-js.xsl">
+        <map:generate src="/{request-param:installDir}/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:transform src="/{request-param:installDir}/viewers/publish/xsl/heurist_legacy_xml.xsl"/>
+        <map:transform src="/{request-param:installDir}/viewers/publish/xsl/random_image-js.xsl">
           <map:parameter name="width" value="{../2}"/>
         </map:transform>
       </map:act>
@@ -46,19 +51,19 @@
     <map:match pattern="*/*/*-javascript">
       <map:act type="request">
         <map:parameter name="parameters" value="true"/>
-        <map:generate src="/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
-        <map:transform src="/viewers/publish/xsl/heurist_legacy_xml.xsl"/>
-        <map:transform src="/viewers/publish/xsl/{../2}.xsl">
+        <map:generate src="/{request-param:installDir}/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:transform src="/{request-param:installDir}/viewers/publish/xsl/heurist_legacy_xml.xsl"/>
+        <map:transform src="/{request-param:installDir}/viewers/publish/xsl/{../2}.xsl">
 			<map:parameter name="arg" value="{../3}"/>
 			<map:parameter name="id" value="{../1}"/>
-			<map:parameter name="appBase" value="{global:installPath}{global:pubPath}/"/>
-			<map:parameter name="hBase" value="http://{global:serverName}{global:installPath}/"/>
+			<map:parameter name="appBase" value="/{request-param:installDir}/viewers/publish/{request-param:appDir}/"/>
+			<map:parameter name="hBase" value="http://{global:serverName}/{request-param:installDir}/"/>
 			<map:parameter name="instanceName" value="{request-param:instance}"/>
-			<map:parameter name="serverBaseUrl" value="{global:serverBaseURL}"/>
-			<map:parameter name="cocoonBase" value="{global:cocoonPubPath}/"/>
+			<map:parameter name="serverBaseUrl" value="http://{global:serverName}"/>
+			<map:parameter name="cocoonBase" value="/cocoon/{request-param:installDir}/publish/{request-param:appDir}/"/>
 			<map:parameter name="related_reftype_filter" value="{../2}"/>
         </map:transform>
-        <map:transform src="/viewers/publish/xsl/javascript.xsl"/>
+        <map:transform src="/{request-param:installDir}/viewers/publish/xsl/javascript.xsl"/>
       </map:act>
       <map:serialize type="javascript"/>
     </map:match>
@@ -66,15 +71,15 @@
     <map:match pattern="*/*/*.xsl">
       <map:act type="request">
         <map:parameter name="parameters" value="true"/>
-        <map:generate src="/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
-        <map:transform src="/viewers/publish/xsl/heurist_legacy_xml.xsl"/>
-        <map:transform src="/viewers/publish/xsl/{../3}.xsl">
+        <map:generate src="/{request-param:installDir}/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:transform src="/{request-param:installDir}/viewers/publish/xsl/heurist_legacy_xml.xsl"/>
+        <map:transform src="/{request-param:installDir}/viewers/publish/xsl/{../3}.xsl">
 			<map:parameter name="id" value="{../1}"/>
-			<map:parameter name="appBase" value="{global:installPath}{global:pubPath}/"/>
-			<map:parameter name="hBase" value="http://{global:serverName}{global:installPath}/"/>
+			<map:parameter name="appBase" value="/{request-param:installDir}/viewers/publish/{request-param:appDir}/"/>
+			<map:parameter name="hBase" value="http://{global:serverName}/{request-param:installDir}/"/>
 			<map:parameter name="instanceName" value="{request-param:instance}"/>
-			<map:parameter name="serverBaseUrl" value="{global:serverBaseURL}"/>
-			<map:parameter name="cocoonBase" value="{global:cocoonPubPath}/"/>
+			<map:parameter name="serverBaseUrl" value="http://{global:serverName}"/>
+			<map:parameter name="cocoonBase" value="/cocoon/{request-param:installDir}/publish/{request-param:appDir}/"/>
 			<map:parameter name="related_reftype_filter" value="{../3}"/>
         </map:transform>
         <map:call resource="display-{../2}"/>
@@ -84,16 +89,16 @@
     <map:match pattern="*/*/*">
       <map:act type="request">
         <map:parameter name="parameters" value="true"/>
-        <map:generate src="/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
-        <map:transform src="/viewers/publish/xsl/heurist_legacy_xml.xsl"/>
-        <map:transform src="/viewers/publish/xsl/{../2}.xsl">
+        <map:generate src="/{request-param:installDir}/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:transform src="/{request-param:installDir}/viewers/publish/xsl/heurist_legacy_xml.xsl"/>
+        <map:transform src="/{request-param:installDir}/viewers/publish/xsl/{../2}.xsl">
 			<map:parameter name="arg" value="{../3}"/>
 			<map:parameter name="id" value="{../1}"/>
-			<map:parameter name="appBase" value="{global:installPath}{global:pubPath}/"/>
-			<map:parameter name="hBase" value="http://{global:serverName}{global:installPath}/"/>
+			<map:parameter name="appBase" value="/{request-param:installDir}/viewers/publish/{request-param:appDir}/"/>
+			<map:parameter name="hBase" value="http://{global:serverName}/{request-param:installDir}/"/>
 			<map:parameter name="instanceName" value="{request-param:instance}"/>
-			<map:parameter name="serverBaseUrl" value="{global:serverBaseURL}"/>
-			<map:parameter name="cocoonBase" value="{global:cocoonPubPath}/"/>
+			<map:parameter name="serverBaseUrl" value="http://{global:serverName}"/>
+			<map:parameter name="cocoonBase" value="/cocoon/{request-param:installDir}/publish/{request-param:appDir}/"/>
 			<map:parameter name="related_reftype_filter" value="{../2}"/>
         </map:transform>
       </map:act>
@@ -103,9 +108,9 @@
     <map:match pattern="*/random_image-js">
       <map:act type="request">
         <map:parameter name="parameters" value="true"/>
-        <map:generate src="/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
-        <map:transform src="/viewers/publish/xsl/heurist_legacy_xml.xsl"/>
-        <map:transform src="/viewers/publish/xsl/random_image-js.xsl"/>
+        <map:generate src="/{request-param:installDir}/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:transform src="/{request-param:installDir}/viewers/publish/xsl/heurist_legacy_xml.xsl"/>
+        <map:transform src="/{request-param:installDir}/viewers/publish/xsl/random_image-js.xsl"/>
       </map:act>
       <map:serialize type="javascript"/>
     </map:match>
@@ -113,18 +118,18 @@
     <map:match pattern="*/*.xsl-javascript">
       <map:act type="request">
         <map:parameter name="parameters" value="true"/>
-        <map:generate src="/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
-        <map:transform src="/viewers/publish/xsl/heurist_legacy_xml.xsl"/>
-        <map:transform src="/viewers/publish/xsl/{../2}.xsl">
+        <map:generate src="/{request-param:installDir}/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:transform src="/{request-param:installDir}/viewers/publish/xsl/heurist_legacy_xml.xsl"/>
+        <map:transform src="/{request-param:installDir}/viewers/publish/xsl/{../2}.xsl">
 			<map:parameter name="id" value="{../1}"/>
-			<map:parameter name="appBase" value="{global:installPath}{global:pubPath}/"/>
-			<map:parameter name="hBase" value="http://{global:serverName}{global:installPath}/"/>
+			<map:parameter name="appBase" value="/{request-param:installDir}/viewers/publish/{request-param:appDir}/"/>
+			<map:parameter name="hBase" value="http://{global:serverName}/{request-param:installDir}/"/>
 			<map:parameter name="instanceName" value="{request-param:instance}"/>
-			<map:parameter name="serverBaseUrl" value="{global:serverBaseURL}"/>
-			<map:parameter name="cocoonBase" value="{global:cocoonPubPath}/"/>
+			<map:parameter name="serverBaseUrl" value="http://{global:serverName}"/>
+			<map:parameter name="cocoonBase" value="/cocoon/{request-param:installDir}/publish/{request-param:appDir}/"/>
 			<map:parameter name="related_reftype_filter" value="{../2}"/>
         </map:transform>
-        <map:transform src="/viewers/publish/xsl/javascript.xsl"/>
+        <map:transform src="/{request-param:installDir}/viewers/publish/xsl/javascript.xsl"/>
       </map:act>
       <map:serialize type="javascript"><encoding>UTF-8</encoding></map:serialize>
     </map:match>
@@ -132,18 +137,18 @@
     <map:match pattern="*/*-javascript">
       <map:act type="request">
         <map:parameter name="parameters" value="true"/>
-        <map:generate src="/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
-        <map:transform src="/viewers/publish/xsl/heurist_legacy_xml.xsl"/>
-        <map:transform src="/viewers/publish/xsl/{../2}.xsl">
+        <map:generate src="/{request-param:installDir}/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:transform src="/{request-param:installDir}/viewers/publish/xsl/heurist_legacy_xml.xsl"/>
+        <map:transform src="/{request-param:installDir}/viewers/publish/xsl/{../2}.xsl">
 			<map:parameter name="id" value="{../1}"/>
-			<map:parameter name="appBase" value="{global:installPath}{global:pubPath}/"/>
-			<map:parameter name="hBase" value="http://{global:serverName}{global:installPath}/"/>
+			<map:parameter name="appBase" value="/{request-param:installDir}/viewers/publish/{request-param:appDir}/"/>
+			<map:parameter name="hBase" value="http://{global:serverName}/{request-param:installDir}/"/>
 			<map:parameter name="instanceName" value="{request-param:instance}"/>
-			<map:parameter name="serverBaseUrl" value="{global:serverBaseURL}"/>
-			<map:parameter name="cocoonBase" value="{global:cocoonPubPath}/"/>
+			<map:parameter name="serverBaseUrl" value="http://{global:serverName}"/>
+			<map:parameter name="cocoonBase" value="/cocoon/{request-param:installDir}/publish/{request-param:appDir}/"/>
 			<map:parameter name="related_reftype_filter" value="{../2}"/>
         </map:transform>
-        <map:transform src="/viewers/publish/xsl/javascript.xsl"/>
+        <map:transform src="/{request-param:installDir}/viewers/publish/xsl/javascript.xsl"/>
       </map:act>
       <map:serialize type="javascript"><encoding>UTF-8</encoding></map:serialize>
     </map:match>
@@ -151,15 +156,15 @@
     <map:match pattern="*/*.xsl">
       <map:act type="request">
         <map:parameter name="parameters" value="true"/>
-        <map:generate src="/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000&amp;f=1"/>
-        <map:transform src="/viewers/publish/xsl/heurist_legacy_xml.xsl"/>
-        <map:transform src="/viewers/publish/xsl/{../2}.xsl">
+        <map:generate src="/{request-param:installDir}/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000&amp;f=1"/>
+        <map:transform src="/{request-param:installDir}/viewers/publish/xsl/heurist_legacy_xml.xsl"/>
+        <map:transform src="/{request-param:installDir}/viewers/publish/xsl/{../2}.xsl">
 			<map:parameter name="id" value="{../1}"/>
-			<map:parameter name="appBase" value="{global:installPath}{global:pubPath}/"/>
-			<map:parameter name="hBase" value="http://{global:serverName}{global:installPath}/"/>
+			<map:parameter name="appBase" value="/{request-param:installDir}/viewers/publish/{request-param:appDir}/"/>
+			<map:parameter name="hBase" value="http://{global:serverName}/{request-param:installDir}/"/>
 			<map:parameter name="instanceName" value="{request-param:instance}"/>
-			<map:parameter name="serverBaseUrl" value="{global:serverBaseURL}"/>
-			<map:parameter name="cocoonBase" value="{global:cocoonPubPath}/"/>
+			<map:parameter name="serverBaseUrl" value="http://{global:serverName}"/>
+			<map:parameter name="cocoonBase" value="/cocoon/{request-param:installDir}/publish/{request-param:appDir}/"/>
 			<map:parameter name="related_reftype_filter" value="{../2}"/>
         </map:transform>
       </map:act>
@@ -169,15 +174,15 @@
     <map:match pattern="*/*">
       <map:act type="request">
         <map:parameter name="parameters" value="true"/>
-        <map:generate src="/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
-        <map:transform src="/viewers/publish/xsl/heurist_legacy_xml.xsl"/>
-        <map:transform src="/viewers/publish/xsl/{../2}.xsl">
+        <map:generate src="/{request-param:installDir}/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:transform src="/{request-param:installDir}/viewers/publish/xsl/heurist_legacy_xml.xsl"/>
+        <map:transform src="/{request-param:installDir}/viewers/publish/xsl/{../2}.xsl">
 			<map:parameter name="id" value="{../1}"/>
-			<map:parameter name="appBase" value="{global:installPath}{global:pubPath}/"/>
-			<map:parameter name="hBase" value="http://{global:serverName}{global:installPath}/"/>
+			<map:parameter name="appBase" value="/{request-param:installDir}/viewers/publish/{request-param:appDir}/"/>
+			<map:parameter name="hBase" value="http://{global:serverName}/{request-param:installDir}/"/>
 			<map:parameter name="instanceName" value="{request-param:instance}"/>
-			<map:parameter name="serverBaseUrl" value="{global:serverBaseURL}"/>
-			<map:parameter name="cocoonBase" value="{global:cocoonPubPath}/"/>
+			<map:parameter name="serverBaseUrl" value="http://{global:serverName}"/>
+			<map:parameter name="cocoonBase" value="/cocoon/{request-param:installDir}/publish/{request-param:appDir}/"/>
 			<map:parameter name="related_reftype_filter" value="{../2}"/>
         </map:transform>
       </map:act>
@@ -188,7 +193,7 @@
     <map:match pattern="*">
       <map:act type="request">
         <map:parameter name="parameters" value="true"/>
-        <map:generate src="/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
+        <map:generate src="/{request-param:installDir}/export/xml/hml.php?instance={request-param:instance}&amp;pub_id={../1}&amp;depth=1&amp;limit=1000"/>
       </map:act>
       <map:serialize type="xml"/>
     </map:match>

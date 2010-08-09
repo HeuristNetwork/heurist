@@ -60,7 +60,7 @@ if (location.search.match(/[&?]q=[^&]+/)) {		//there is a search string
 	// this is a substitute for loading the user's default saved search - it's more intuitive
 	// and simplifies management of saved searches
 	top.HEURIST.whenLoaded("obj-user", function() {	//FIXME: need to get instance info and set it to heurist params
-		if (top.HEURIST.is_logged_in()  &&  location.host.match(/^h3[.]heuristscholar[.]org$/)) {	//FIXME: this doesn't work for installed verisons
+		if (top.HEURIST.is_logged_in()  ) {	//FIXME: this doesn't work for installed verisons
 			document.body.className = "w-bookmark";
 			window.HEURIST.parameters["w"] = "bookmark";
 			window.HEURIST.parameters["q"] = "tag:Favourite OR tag:Favorite";
@@ -222,7 +222,7 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
      <span id=active-label>Search results</span>
      <a class=toolbar-large-icon-link href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members" onclick="top.HEURIST.util.popupURL(window, 'saved/save-search.html'); return false;">save</a> |
      <span id=publish-image-placeholder></span>
-     <a class=toolbar-large-icon-link href="#" title="Map ( + timeline ) for current search results in Google Earth, Google Maps, TimeMap or OpenLayers" onclick="top.HEURIST.util.popupURL(window, '../map-menu.html?'); return false;">map</a>
+     <a class=toolbar-large-icon-link href="#" title="Map ( + timeline ) for current search results in Google Earth, Google Maps, TimeMap or OpenLayers" onclick="top.HEURIST.util.popupURL(window, 'map-menu.html?'); return false;">map</a>
     </td>
    </tr>
    <tr class="toolbar-column-header"><td colspan=2 class="operations logged-in-only">

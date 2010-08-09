@@ -1,8 +1,8 @@
-/* 
+/*
  * Very rudimentary autocomplete box -- attach it to a textbox input;
  * instantiate it with
  *   new top.HEURIST.autocomplete.AutoComplete( textbox , dataFunction , options )
- * 
+ *
  * July 2008 - made Heurist-independent (KJ)
  */
 
@@ -57,7 +57,7 @@ var sE = top.HEURIST.autocomplete.soundEmbed = document.createElement("embed");
 	sE.style.height = "1px";
 	sE.style.left = "-1000px";
 	sE.style.top = "-1000px";
-	sE.src = "../audio/beep.swf";
+	sE.src = "../../common/other_media/sounds/beep.swf";
 	document.body.appendChild(sE);
 top.HEURIST.autocomplete.beep = function() {
 	try {
@@ -364,7 +364,7 @@ top.HEURIST.autocomplete.AutoComplete.prototype.checkTextboxWord = function(move
 		return;
 	}
 
-	if (this.textbox.selectionStart !== this.textbox.selectionEnd) { 
+	if (this.textbox.selectionStart !== this.textbox.selectionEnd) {
 		// we have a block of text selected -- do system default
 		return false;
 	}
