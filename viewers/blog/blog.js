@@ -341,7 +341,7 @@ BlogEntry: function(record, parentElement, isNew) {
 		var $content = null;
 		var mapURL = Blog.getStaticMapURL(this.record);
 		if (Blog.canEdit()) {
-			var $a = $("<a title='Click to edit' href='../../data/spatial/gigitiser-blog/edit-geos.html?cb=reload&id=" + this.record.getID() + "'>")
+			var $a = $("<a title='Click to edit' href='../../records/spatial/gigitiser-blog/edit-geos.html?cb=reload&id=" + this.record.getID() + "'>")
 				.click(function () {
 					window.open(this.href, "", "status=0,width=600,height=500");
 					return false;
@@ -498,7 +498,7 @@ BlogEntry: function(record, parentElement, isNew) {
 		$p = $("<p class='related-link'/>").appendTo($div);
 			$("<a href='#'/>")
 				.click(function () {
-					window.open("../../data/records/editrec/heurist-edit.html?bib_id=" + that.record.getID() +
+					window.open("../../records/editrec/heurist-edit.html?bib_id=" + that.record.getID() +
 						"#relationships", "_blank");
 					return false;
 				})
@@ -571,7 +571,7 @@ BlogEntry: function(record, parentElement, isNew) {
 		}
 
 		if (Blog.canEdit()  ||  HCurrentUser.isAdministrator()) {
-			$("<a href='../../data/records/editrec/heurist-edit.html?bib_id=" + this.record.getID() + "#annotation' target='_blank' title='edit record in Heurist'>edit full record</a>")
+			$("<a href='../../records/editrec/heurist-edit.html?bib_id=" + this.record.getID() + "#annotation' target='_blank' title='edit record in Heurist'>edit full record</a>")
 				.addClass("heurist-edit-link")
 				.appendTo($(".entry-date", this.$table))
 				.click(function() {
@@ -731,7 +731,7 @@ BlogEntry: function(record, parentElement, isNew) {
 		} else {
 			$td = $("<td><a>add location</a></td>");
 		}
-		$("a", $td).attr("href", "../../data/spatial/gigitiser-blog/edit-geos.html?id=" + this.record.getID())
+		$("a", $td).attr("href", "../../spatial/gigitiser-blog/edit-geos.html?id=" + this.record.getID())
 			.click(function () {
 				window.open(this.href, "", "status=0,width=600,height=500");
 				return false;

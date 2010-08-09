@@ -56,8 +56,8 @@ require_once(dirname(__FILE__).'/../../common/config/heurist-instances.php');
 require_once(dirname(__FILE__).'/../../common/connect/db.php');
 require_once(dirname(__FILE__).'/../../search/saved/loading.php');
 require_once(dirname(__FILE__).'/../../common/php/requirements-overrides.php');
-require_once(dirname(__FILE__).'/../../data/relationships/relationships.php');
-require_once(dirname(__FILE__).'/../../data/woot/woot.php');
+require_once(dirname(__FILE__).'/../../records/relationships/relationships.php');
+require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 
 mysql_connection_db_select(DATABASE);
 

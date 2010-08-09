@@ -142,7 +142,7 @@ render: function() {
 
 		a = td.appendChild(document.createElement("a"));
 		a.target = "_blank";
-		a.href= Heurist.urlBase + Heurist.installDir +'/data/records/editrec/heurist-edit.html?bkmk_id=' + HEURIST_url_bkmk_id;
+		a.href= Heurist.urlBase + Heurist.installDir +'/records/editrec/heurist-edit.html?bkmk_id=' + HEURIST_url_bkmk_id;
 		a.onclick = function() { Heurist.close() };
 		a.innerHTML = "edit";
 

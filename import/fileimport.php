@@ -5,7 +5,7 @@ define('SAVE_URI', 'disabled');
 
 require_once(dirname(__FILE__).'/../common/connect/cred.php');
 require_once(dirname(__FILE__).'/../common/connect/db.php');
-require_once(dirname(__FILE__).'/../data/records/disambig/similar.php');
+require_once(dirname(__FILE__).'/../records/disambig/similar.php');
 require_once(dirname(__FILE__).'/../common/t1000/.ht_stdefs');
 
 if (! is_logged_in()) {
@@ -402,7 +402,7 @@ The list is reloaded after each addition and after change of settings.
    &nbsp;&nbsp;
    <a href="#" onClick="unCheckAll(); return false;">Uncheck all</a>
    &nbsp;&nbsp;
-   <input type="submit" name="mode" value="Bookmark checked links" style="font-weight: bold;" onclick="top.HEURIST.util.popupURL(window, '<?=HEURIST_SITE_PATH?>data/tags/add-tags.html', { callback: function(tags) { document.getElementById('keywords').value = tags; document.getElementById('adding_keywords_elt').value = 1; document.forms[0].submit(); } } ); return false;">
+   <input type="submit" name="mode" value="Bookmark checked links" style="font-weight: bold;" onclick="top.HEURIST.util.popupURL(window, '<?=HEURIST_SITE_PATH?>records/tags/add-tags.html', { callback: function(tags) { document.getElementById('keywords').value = tags; document.getElementById('adding_keywords_elt').value = 1; document.forms[0].submit(); } } ); return false;">
   </td>
  </tr>
 

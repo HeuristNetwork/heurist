@@ -11,7 +11,7 @@ if (!is_logged_in()) {
 error_log(print_r($LOOKUPS, 1));
 
 mysql_connection_db_overwrite(DATABASE);
-$template = file_get_contents('templates/follow_links.html');
+$template = file_get_contents('follow_links.html');
 $template = str_replace('[logged-in-user-id]', intval(get_user_id()), $template);
 
 $wg_ids = mysql__select_array(USERS_DATABASE.'.UserGroups', 'ug_group_id', 'ug_user_id='.get_user_id());

@@ -178,7 +178,7 @@ function getCurrentValString ($val) {
 			return 'geo: ' . $val["geo"]["type"] . ': [' . substr($val["geo"]["wkt"], 0, 30) . ' ... ]';
 		}
 		else if (array_key_exists("id", $val)) {
-			return '=> [' . $val["id"] . '] <a href="'.HEURIST_URL_BASE.'data/records/viewrec/view.php?bib_id=' . $val["id"] . '">' . $val["title"] . '</a>';
+			return '=> [' . $val["id"] . '] <a href="'.HEURIST_URL_BASE.'records/viewrec/view.php?bib_id=' . $val["id"] . '">' . $val["title"] . '</a>';
 		}
 	} else {
 		return $val;

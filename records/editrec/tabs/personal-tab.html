@@ -70,7 +70,9 @@ top.HAPI.importSymbols(top, this);
   <script src="../../../common/php/display-preferences.php"></script>
   <script src="../../tags/autocomplete.js"></script>
 
-   <form method=post jsonAction="../../bookmarks/save-personal-data.php" action="../../bookmarks/save-personal-data.php" onsubmit="return verifyForm();">
+  <script>
+   document.write('<form method=post jsonAction="'+top.HEURIST.basePath+'records/bookmarks/save-personal-data.php" action="'+top.HEURIST.basePath+'records/bookmarks/save-personal-data.php" onsubmit="return verifyForm();">');
+  </script>
    <input type=hidden name=save-mode id=save-mode value=edit>
    <input type=hidden name=bkmk_id id=bkmk_id>
 
@@ -132,7 +134,7 @@ top.HAPI.importSymbols(top, this);
      <td class=input-cell>
       <div>
 	   <span class="help prompt">These notes are private and visible only to you.</span>
-       <a id=woot-ext-link style="float: right; margin-right: 80px;" target=_blank href="../../woot/woot.html">open in new window</a>
+       <a id=woot-ext-link style="float: right; margin-right: 80px;" target=_blank href="../../records/woot/woot.html">open in new window</a>
       </div>
       <div id=woot style="border: 1px solid gray; margin: 8px 80px 0 0; min-height: 100px; padding: 4px;"></div>
      </td>
@@ -152,7 +154,7 @@ top.HAPI.importSymbols(top, this);
    </tbody></table>
   </form>
 
-  <form method=post jsonAction="../../reminders/save-reminder.php" action="../../reminders/save-reminder.php" onsubmit="return false;">
+  <form method=post jsonAction="../../records/reminders/save-reminder.php" action="../../records/reminders/save-reminder.php" onsubmit="return false;">
    <table border=0 cellspacing=0 cellpadding=0 style="width: 100%;"><tbody><!-- separate table, because this is a separate form -->
     <tr class=input-row>
      <td class=input-header-cell><div style="margin: 7px 0;">Reminders</div></td>

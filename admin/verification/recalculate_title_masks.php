@@ -15,7 +15,7 @@ You must be a SHSSERI administrator to use this page.
 	return;
 }
 
-require_once(dirname(__FILE__).'/../../data/records/TitleMask.php');
+require_once(dirname(__FILE__).'/../../records/TitleMask.php');
 
 
 mysql_connection_db_overwrite(DATABASE);
@@ -113,7 +113,7 @@ foreach ($bibs as $rec_id => $bib) {
 	else
 		print '<li>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($bib['rec_title']) . '';
 
-	print ' <a target=_blank href="'.HEURIST_URL_BASE.'data/records/editrec/heurist-edit.html?bib_id='.$rec_id.'">*</a> <br> <br>';
+	print ' <a target=_blank href="'.HEURIST_URL_BASE.'records/editrec/heurist-edit.html?bib_id='.$rec_id.'">*</a> <br> <br>';
 
 	if ($rec_id % 10 == 0) {
 		ob_flush();

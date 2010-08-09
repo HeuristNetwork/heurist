@@ -93,7 +93,7 @@ while ($row = mysql_fetch_assoc($res)) {
 ?>
     <tr>
      <td><a title=delete href=# onclick="del(<?= $row["rem_id"] ?>); return false;"><img src="<?=HEURIST_SITE_PATH?>common/images/cross.gif"></a></td>
-     <td><a href="<?=HEURIST_SITE_PATH?>data/records/editrec/heurist-edit.html?bib_id=<?= $row["rem_rec_id"] ?>#personal"><b><?= $row["rec_title"] ?></b></a></td>
+     <td><a href="<?=HEURIST_SITE_PATH?>records/editrec/heurist-edit.html?bib_id=<?= $row["rem_rec_id"] ?>#personal"><b><?= $row["rec_title"] ?></b></a></td>
      <td><b><?= $recipient ?></b></td>
      <td><b><?= $row["rem_freq"] ?></b> from <b><?= $row["rem_startdate"] ?></b></td>
      <td><?= $row["rem_message"] ?></td>

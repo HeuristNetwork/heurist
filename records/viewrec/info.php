@@ -33,8 +33,8 @@ require_once(dirname(__FILE__).'/../../common/connect/cred.php');
 require_once(dirname(__FILE__).'/../../common/connect/db.php');
 mysql_connection_db_select(DATABASE);
 
-require_once(dirname(__FILE__).'/../../relationships/relationships.php');
-require_once(dirname(__FILE__).'/../../woot/woot.php');
+require_once(dirname(__FILE__).'/../../records/relationships/relationships.php');
+require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 
 $noclutter = array_key_exists('noclutter', $_REQUEST);
 

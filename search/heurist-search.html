@@ -330,7 +330,7 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
     <div id=search-status class=loading>
      <div id=loading-search-status>
       <div><a href="#" onclick="document.getElementById('search-not-loading-message').style.display = ''; this.style.display = 'none'; return false;">Search not loading?</a></div>
-      <div id=search-not-loading-message style="display: none; color: green;">Clear the cache by shift-reloading the page. If this fails, try Tools &gt; Clear browsing data/recent history &gt; clear cache</div>
+      <div id=search-not-loading-message style="display: none; color: green;">Clear the cache by shift-reloading the page. If this fails, try Tools &gt; Clear browsing recent history &gt; clear cache</div>
       <p>Loading ...</p>
      </div>
 	 <div id=noquery-search-status>
@@ -433,7 +433,7 @@ rpc.style.height = (rpc.parentNode.offsetHeight || (rpc.parentNode.parentNode.of
 top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/heurist-obj-common.php");	// core HEURIST object definitions (dynamically generated)
 top.HEURIST.loadScript("stype.js");
 top.HEURIST.loadScript("heurist-search.js");				// search-specific HEURIST functions
-top.HEURIST.loadScript(top.HEURIST.basePath+"data/records/editrec/heurist-edit.js");				// edit-specific HEURIST functions
+top.HEURIST.loadScript(top.HEURIST.basePath+"records/editrec/heurist-edit.js");				// edit-specific HEURIST functions
 top.HEURIST.fireEvent(window, "heurist-search-html-loaded");
 top.HEURIST.contentLoaded();
 </script>

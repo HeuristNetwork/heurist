@@ -1,6 +1,6 @@
 <?php
 //TODO:  add code here to read db.ini and any other ini file tha twe come up with.
-define('HEURIST_TOP_DIRS',"admin|common|data|external|hapi|help|import|interface|output|search|tools|user");	// this is the path from the heurist code base root. Only change if file moves.
+define('HEURIST_TOP_DIRS',"admin|common|export|external|hapi|help|import|records|search|tools|user|viewers");	// this is the path from the heurist code base root. Only change if file moves.
 define('HEURIST_SERVER_NAME', @$_SERVER["SERVER_NAME"]);	// this will read the server host name for the configured name.
 
 if (HEURIST_SERVER_NAME) {

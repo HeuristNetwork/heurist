@@ -907,7 +907,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 	sendRequest: function(url,callback,postData) {
 		if (! url.match(/^http:/)  &&  ! url.match(/^\//))
 			url = top.HEURIST.basePath + url;
-
+		var file = url;
 		var req = top.HEURIST.util.createXMLHTTPObject();
 		if (!req) return;
 		var method = (postData) ? "POST" : "GET";
@@ -917,7 +917,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		req.onreadystatechange = function () {
 			if (req.readyState != 4) return;
 			if (req.status != 200 && req.status != 304) {
-				alert('HTTP error ' + req.status);
+				if (req.status == 404) {
+					alert('H-Util HTTP error ' + req.status + " " +file);
+				}else{
+					alert('H-Util HTTP error ' + req.status);
+				}
 				return;
 			}
 			callback(req);

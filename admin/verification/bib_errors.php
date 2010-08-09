@@ -51,7 +51,7 @@ while ($row = mysql_fetch_assoc($res))
 foreach ($bibs as $row) {
 ?>
  <tr>
-  <td><a target=_new href='../../data/records/editrec/heurist-edit.html?bib_id=<?= $row['rd_rec_id'] ?>'><?= $row['rd_rec_id'] ?></a></td>
+  <td><a target=_new href='../../records/editrec/heurist-edit.html?bib_id=<?= $row['rd_rec_id'] ?>'><?= $row['rd_rec_id'] ?></a></td>
   <td><?= $row['rdt_name'] ?></td>
   <td>points to</td>
   <td><?= $row['rec_id'] ?> (<?= $row['rt_name'] ?>) - <?= substr($row['rec_title'], 0, 50) ?></td>
@@ -90,7 +90,7 @@ foreach ($bibs as $row) {
 ?>
  <tr>
   <td><input type=checkbox name=bib_cb value=<?= $row['rd_rec_id'] ?>></td>
-  <td><a target=_new href='../../data/records/editrec/heurist-edit.html?bib_id=<?= $row['rd_rec_id'] ?>'><?= $row['rd_rec_id'] ?></a></td>
+  <td><a target=_new href='../../records/editrec/heurist-edit.html?bib_id=<?= $row['rd_rec_id'] ?>'><?= $row['rd_rec_id'] ?></a></td>
   <td><?= $row['rec_title'] ?></td>
   <td><?= $row['rdt_name'] ?></td>
  </tr>

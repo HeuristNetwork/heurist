@@ -2,7 +2,7 @@
 
 require_once(dirname(__FILE__).'/../../common/config/heurist-instances.php');
 require_once(dirname(__FILE__).'/../../common/connect/db.php');
-require_once(dirname(__FILE__)."/../../data/reminders/reminder.php");
+require_once(dirname(__FILE__)."/../../records/reminders/reminder.php");
 
 foreach (get_all_instances() as $prefix => $instance) {
 

@@ -88,7 +88,7 @@ $baseURL = HEURIST_URL_BASE;
 
 define_constants($auth["hl_instance"]);
 
-error_log("baseURL = ".$baseURL." Heurist base = ".HEURIST_URL_BASE);
+error_log("hapi xss baseURL = ".$baseURL." Heurist base = ".HEURIST_URL_BASE);
 
 if (! @$method  ||  ! in_array($method, $legalMethods)) {
 	print "{\"error\":\"unknown method\"}";

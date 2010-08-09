@@ -35,7 +35,7 @@ if ($fileID) {
 	$res = mysql_query("select * from files where file_id = $fileID");
 	$file = mysql_fetch_assoc($res);
 	$thumbnailURL = "http://".HEURIST_INSTANCE_PREFIX.HEURIST_SERVER_NAME.HEURIST_SITE_PATH."common/php/resize_image.php?file_id=" . $file["file_nonce"];
-	$URL = "http://".HEURIST_INSTANCE_PREFIX.HEURIST_SERVER_NAME.HEURIST_SITE_PATH."data/files/fetch_file.php/" . urlencode($file["file_orig_name"]) . "?file_id=" . $file["file_nonce"];
+	$URL = "http://".HEURIST_INSTANCE_PREFIX.HEURIST_SERVER_NAME.HEURIST_SITE_PATH."records/files/fetch_file.php/" . urlencode($file["file_orig_name"]) . "?file_id=" . $file["file_nonce"];
 error_log("url = ". $URL);
 	print json_format(array("file" => array(
 		$file["file_id"], $file["file_orig_name"], $file["file_size"], $file["file_mimetype"], $URL, $thumbnailURL, $file["file_description"]

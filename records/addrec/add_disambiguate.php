@@ -269,10 +269,10 @@ or <a href="add.php?bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST['bkmk_url']
  <table border="0" cellpadding="0" cellspacing="0" width="100%" height="100%" style="font-size: 12px;">
   <tr>
    <td style="color: white; font-weight: bold;">Previewing bookmark</td>
-   <td style="width: 150px; text-align: right;"><a style="text-decoration: none; color: white;" onClick="endCheckURL(); return false;" href='<?=HEURIST_SITE_PATH?>common/messages/blank.html'>[close this window]</a></td>
+   <td style="width: 150px; text-align: right;"><a style="text-decoration: none; color: white;" onClick="endCheckURL(); return false;" href='<?=HEURIST_URL_BASE?>common/messages/blank.html'>[close this window]</a></td>
   </tr>
   <tr>
-   <td colspan="2"><iframe style="border: 0px; margin: 0px; padding: 0px; background-color: white;" frameBorder="0" name="uc_frame" id="uc_frame_obj" src='<?=HEURIST_SITE_PATH?>common/messages/blank.html'></iframe></td>
+   <td colspan="2"><iframe style="border: 0px; margin: 0px; padding: 0px; background-color: white;" frameBorder="0" name="uc_frame" id="uc_frame_obj" src='<?=HEURIST_URL_BASE?>common/messages/blank.html'></iframe></td>
   </tr>
  </table>
 </div>

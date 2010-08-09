@@ -31,7 +31,7 @@ foreach ($woots as $woot) {
 	if ($valid) {
 		//print "ok\n";
 	} else {
-        print "<tr><td><a target=_blank href='".HEURIST_URL_BASE."data/woot/woot.html?w=";
+        print "<tr><td><a target=_blank href='".HEURIST_URL_BASE."records/woot/woot.html?w=";
 		print $woot["woot_title"] . "'>";
         print $woot["woot_title"];
         print "</a></td>\n";

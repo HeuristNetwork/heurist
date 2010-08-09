@@ -12,7 +12,7 @@ HAPI.WootException = HWootException;
 
 
 HAPI.WOOT = function() {
-	var _xssWebPrefix = HAPI.HeuristBaseURL + "data/woot/php/xss.php?";
+	var _xssWebPrefix = HAPI.HeuristBaseURL + "records/woot/php/xss.php?";
 
 	function Woot(id, title, version, creatorId, permissions, chunks) {
 		this.id = id;

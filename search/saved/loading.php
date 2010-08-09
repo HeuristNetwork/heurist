@@ -215,7 +215,7 @@ function loadRecordDetails(&$record) {
 			$detailValue = array("file" => mysql_fetch_assoc($fres));
 			$origName = urlencode($detailValue["file"]["origName"]);
 			$detailValue["file"]["URL"] =
-				"http://".HOST_BASE.INSTALL_DIR."/data/files/fetch_file.php?". (defined('HEURIST_INSTANCE') ? "instance=".HEURIST_INSTANCE."&" : "" )
+				"http://".HOST_BASE.INSTALL_DIR."/records/files/fetch_file.php?". (defined('HEURIST_INSTANCE') ? "instance=".HEURIST_INSTANCE."&" : "" )
 				."file_id=".$detailValue["file"]["nonce"];
 			$detailValue["file"]["thumbURL"] =
 				"http://".HOST_BASE.INSTALL_DIR."/common/php/resize_image.php?" . (defined('HEURIST_INSTANCE') ? "instance=".HEURIST_INSTANCE."&" : "" )

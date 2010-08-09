@@ -2,8 +2,8 @@
 
 require_once(dirname(__FILE__)."/../../common/connect/cred.php");
 require_once(dirname(__FILE__)."/../../common/connect/db.php");
-require_once(dirname(__FILE__)."/../../data/records/saving.php");
-require_once(dirname(__FILE__)."/../../data/records/TitleMask.php");
+require_once(dirname(__FILE__)."/../../records/saving.php");
+require_once(dirname(__FILE__)."/../../records/TitleMask.php");
 
 
 if (! is_logged_in()) {
