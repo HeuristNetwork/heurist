@@ -191,7 +191,7 @@
 
 				<tr>
 					<td>
-					     <a href="{$appBase}edit.html?id={id}"
+					     <a href="{$appBase}rb-edit.html?id={id}"
 							onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;"
 							title="edit">
 						<img src="{$hBase}common/images/edit-pencil.gif"/>

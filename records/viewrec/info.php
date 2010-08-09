@@ -201,7 +201,7 @@ function print_header_line($bib) {
 ?>
 <tr>
  <td class=label>
-  <nobr><span class="link"><a id=edit-link class=normal target=_new href="../editrec/heurist-edit.html?bib_id=<?= $rec_id ?>" onclick="return sane_link_opener(this);"><img src="../../common/images/edit_pencil_16x16.gif"><b>edit</b></a></span></nobr>
+  <nobr><span class="link"><a id=edit-link class=normal target=_new href="../editrec/edit.html?bib_id=<?= $rec_id ?>" onclick="return sane_link_opener(this);"><img src="../../common/images/edit_pencil_16x16.gif"><b>edit</b></a></span></nobr>
  </td>
  <td>
  <span class=link><?= htmlspecialchars($bib['rt_name']) ?></span>

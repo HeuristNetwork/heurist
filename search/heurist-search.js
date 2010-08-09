@@ -736,7 +736,7 @@ top.HEURIST.search = {
 
 		var bib_id = result_div.getAttribute("bib_id");
 
-		window.open(top.HEURIST.basePath+ "records/editrec/heurist-edit.html?sid=" +
+		window.open(top.HEURIST.basePath+ "records/editrec/edit.html?sid=" +
 					top.HEURIST.search.sid + "&bib_id="+bib_id+
 					(top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : ""));
 

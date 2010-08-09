@@ -1111,7 +1111,7 @@ function addRelatedRecordLink(rrList, record) {
 	var newA1 = newTd1.appendChild(document.createElement("a"));
 	newA1.title = "Edit resource details";
     //set the link to call the heurist edit page with this record's id and select the relationship tab
-	newA1.href = HAPI.HeuristBaseURL + 'records/heurist-edit.html?bib_id='+record.getID() + '#relationships';
+	newA1.href = HAPI.HeuristBaseURL + 'records/edit.html?bib_id='+record.getID() + '#relationships';
     // make sure that it comes up in another tab
     newA1.target = '_blank';
 	var newImg = newA1.appendChild(document.createElement("img"));

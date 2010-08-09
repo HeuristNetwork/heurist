@@ -23,7 +23,7 @@ $prevInvalidRecId = 0;
 foreach ($textDetails as $textDetail) {
 	if (! check($textDetail['rd_val'])){
 		if ($prevInvalidRecId < $textDetail['rd_rec_id']) {
-			print "<tr><td><a target=_blank href='".HEURIST_URL_BASE."records/editrec/heurist-edit.html?bib_id=".
+			print "<tr><td><a target=_blank href='".HEURIST_URL_BASE."records/editrec/edit.html?bib_id=".
 					$textDetail['rd_rec_id'] . "&instance=".HEURIST_INSTANCE. "'> " . $textDetail['rd_rec_id']. "</a></td></tr>\n";
 			$prevInvalidRecId = $textDetail['rd_rec_id'];
 			mysql__update("records", "rec_id=".$textDetail['rd_rec_id'],array("rec_modified" => $now));

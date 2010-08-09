@@ -498,7 +498,7 @@ BlogEntry: function(record, parentElement, isNew) {
 		$p = $("<p class='related-link'/>").appendTo($div);
 			$("<a href='#'/>")
 				.click(function () {
-					window.open("../../records/editrec/heurist-edit.html?bib_id=" + that.record.getID() +
+					window.open("../../records/editrec/edit.html?bib_id=" + that.record.getID() +
 						"#relationships", "_blank");
 					return false;
 				})
@@ -571,7 +571,7 @@ BlogEntry: function(record, parentElement, isNew) {
 		}
 
 		if (Blog.canEdit()  ||  HCurrentUser.isAdministrator()) {
-			$("<a href='../../records/editrec/heurist-edit.html?bib_id=" + this.record.getID() + "#annotation' target='_blank' title='edit record in Heurist'>edit full record</a>")
+			$("<a href='../../records/editrec/edit.html?bib_id=" + this.record.getID() + "#annotation' target='_blank' title='edit record in Heurist'>edit full record</a>")
 				.addClass("heurist-edit-link")
 				.appendTo($(".entry-date", this.$table))
 				.click(function() {

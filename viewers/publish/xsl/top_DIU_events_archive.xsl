@@ -54,7 +54,7 @@
       <!-- HEADER  -->
 			<!-- we don't need the edit pencil for a lsit liek this
               <a target="_new"
-                href="{$hBase}records/editrec/heurist-edit.html?bib_id={id}">
+                href="{$hBase}records/editrec/edit.html?bib_id={id}">
                 <img style="border: none;"
                   src="{$hBase}common/images/edit_pencil_16x16.gif"/>
               </a>

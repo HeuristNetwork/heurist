@@ -63,7 +63,7 @@
                     <br></br>
 
                     <a style=" font-family:Verdana,Helvetica,Arial,sans-serif; font-size:10px;"  target="_new" href="wiki/{id}">[view details]</a>&#160;<a style=" font-family:Verdana,Helvetica,Arial,sans-serif; font-size:10px;"  target="_new"
-                        href="{$hBase}records/editrec/heurist-edit.html?bib_id={id}">[edit]</a>
+                        href="{$hBase}records/editrec/edit.html?bib_id={id}">[edit]</a>
 
                 </xsl:if>
                 </td></tr>

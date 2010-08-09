@@ -199,14 +199,14 @@ function displayResults(r, active) {
 			b.value = "Add multimedia record";
 			b.onclick = function () {
 				document.getElementById("active-search").value = "image";
-				window.open("edit.html?typeId=74","","status=0,scrollbars=1,resizable=1,width=800,height=600");
+				window.open("rb-edit.html?typeId=74","","status=0,scrollbars=1,resizable=1,width=800,height=600");
 			}
 		} else {
 			b.value = "Add a record";
 			b.onclick = function () {
 				document.getElementById("active-search").value = "";
 				//HERE IT WILL BREAK
-				window.open("edit.html?typeId=","","status=0,scrollbars=1,resizable=1,width=800,height=600");
+				window.open("rb-edit.html?typeId=","","status=0,scrollbars=1,resizable=1,width=800,height=600");
 			}
 		}
 		div.appendChild(b);

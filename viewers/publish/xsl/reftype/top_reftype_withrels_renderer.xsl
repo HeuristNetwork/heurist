@@ -83,7 +83,7 @@
 			</td>
 			<td style="font-weight: bold;">
 				<a style="float: right;" target="_new"
-					href="{$hBase}records/editrec/heurist-edit.html?bib_id={id}">
+					href="{$hBase}records/editrec/edit.html?bib_id={id}">
 					<img style="border: none;"
 						src="{$hBase}common/images/edit_pencil_16x16.gif"/>
 				</a>

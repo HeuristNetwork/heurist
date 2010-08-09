@@ -182,7 +182,7 @@
 						<h1>
 
 							<span style="padding-right:5px; padding-left:5px; vertical-align:top;">
-								<a href="#" onclick="window.open('{$appBase}edit.html?id={export/references/reference/id}&amp;instance={$instanceName}','','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false; " title="Edit main record">
+								<a href="#" onclick="window.open('{$appBase}rb-edit.html?id={export/references/reference/id}&amp;instance={$instanceName}','','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false; " title="Edit main record">
 									<img src="{$hBase}common/images/edit-pencil.png" class="editPencil" style="vertical-align: top;"/>
 								</a>
 							</span>
@@ -350,7 +350,7 @@
 				<tr>
 					<td>
                     <div class="editIcon">
-						<a href="{$appBase}edit.html?id={id}&amp;instance={$instanceName}" onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;" title="edit">
+						<a href="{$appBase}rb-edit.html?id={id}&amp;instance={$instanceName}" onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;" title="edit">
 							<img src="{$hBase}common/images/edit-pencil.png" class="editPencil"/>
 						</a>
 					</div>
