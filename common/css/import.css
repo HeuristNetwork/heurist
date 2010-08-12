@@ -41,7 +41,7 @@ form {line-height:18px;margin: 3px;} */
 /***** import global styles ********************/
 
 @import url(global.css);
-body{background-image:none !important; background-color:transparent;margin:0;padding:0;overflow: auto; min-width: 300; min-height : 200; }
+body{background-image:none !important; background-color:transparent;margin:0;padding:20px;overflow: auto; min-width: 300; min-height : 200; }
 #q {-moz-border-radius:10px; -webkit-border-radius:10px; border-radius:10px}
 /* bib-import specific*/
 .record {font-size:1.8ex;height:3.5ex;margin:0;overflow:hidden;padding:0 0 0 1ex;}
@@ -67,3 +67,7 @@ input { padding: 0; margin: 0; }
 #add_records_footer a img {vertical-align: text-bottom;}
 .tab {background-color: #ECF1FB !important;} /* to match tabs in edit */
 #reftype-val {left:2ex;position:relative;top:2.5ex;}
+#mainbody {margin-top:2ex}
+input[type="radio"] {vertical-align: text-top;}
+.div-section {padding: 5px 0;}
+.prompt {color:#999999;font-size:10px;font-weight:normal;}

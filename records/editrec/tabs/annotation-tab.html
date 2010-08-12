@@ -1,82 +1,10 @@
 <html>
  <head>
-  <link rel=stylesheet href="../../../common/css/heurist.css">
-  <link rel=stylesheet href="../../../common/css/heurist-edit-tab.css">
+  <link rel=stylesheet href="../../../common/css/global.css">
+  <link rel=stylesheet href="../../../common/css/edit.css">
+  <link rel=stylesheet href="../../../common/css/edit-tab.css">
   <link rel=stylesheet href="../../../common/css/woot.css">
-  <style>
-
-#comment-link {
-	font-weight: bold;
-}
-
-#comments .comment {
-	border-left: 3px solid #660000;
-	padding: 3px 0px 0px 3px;
-	margin: 10px 0px;
-}
-#comments .comment .comment {
-	margin-left: 10px;
-}
-#comments .comment .editing_block {
-	margin-left: 10px;
-}
-#comments .deleted {
-	font-style: italic;
-	color: gray;
-}
-
-#comments .header {
-	font-weight: bold;
-}
-#comments .footer {
-	padding: 5px 0px;
-}
-
-#comments .author { margin-right: 20px; }
-#comments .date, .moddate { font-weight: normal; color: gray; }
-
-
-#comments .editing-block textarea {
-	display: block;
-	width: 400px;
-	height: 60px;
-	border: 1px solid black;
-	padding: 1px;
-}
-
-
-#focus_comment {
-	background-color: #FBF9DF;
-/* #FDFAEF; */
-}
-
-
-#comments .help { margin: 4px 2px; }
-
-
-#comments {
-	margin: 0 80px;
-	border: 1px solid gray;
-	padding: 4px;
-	min-height: 100px;
-	background-color: white;
-}
-
-.woot-editor {
-	max-width: 1000000px;
-	max-height: 300px;
-	overflow-y: scroll;
-}
-.woot-editor.edit {
-	max-height: 1000000px;
-	overflow-y: auto;
-}
-.woot-title {
-	display: none;
-}
-
-  </style>
-
+  
   <script>
 	function onshow() {}
 	top.HAPI.importSymbols(top, this);
@@ -90,25 +18,18 @@
   <form></form>
 
   <div>
-   <h2>
-    Extended text
-     &nbsp;&nbsp;
-    <span class="help prompt" style="font-weight: normal;">
-     WYSIWYG formatting and embedded links and images.
-	 <a id=woot-ext-link style="margin-left: 50px;" target=_blank href="../../woot/woot.html">open in new window</a>
-     <!--span style="font-size: 11px; font-weight: normal;">[<a href="#" onclick="FIXME(); return false;">refresh</a>]</span--><br>
-     <div style="margin-left: 13em; margin-right: 10em;"><em>Note: Access rights can be set for individual paragraphs allowing personal notes which are visible only to you or which may be shared with your workgroups.</em></div>
+   <h2>Extended text</h2>
+   <span class="help prompt">WYSIWYG formatting and embedded links and images.<br>Note: Access rights can be set for individual paragraphs allowing personal notes which are visible only to you or which may be shared with your workgroups.
     </span>
-   </h2>
-   <div id=woot style="border: 1px solid gray; margin: 0pt 80px; min-height: 100px; padding: 4px;"></div>
+   
+   <div id=woot></div>
+   <a id=woot-ext-link target=_blank href="../../../woot/woot.html">open in new window</a>  
   </div>
 
-  <div>
-   <h2>
-    Discussion
-    &nbsp;&nbsp;
-    <span class="help prompt" style="font-weight: normal;">Threaded discussion of this record</span>
-   </h2>
+  <div style="padding-top:10px; margin-top:20px; border-top: 1px solid #A4B4CB; ">
+   <h2>Discussion</h2>
+    <span class="help prompt">Threaded discussion of this record</span>
+   
    <div id=comments></div>
   </div>
 

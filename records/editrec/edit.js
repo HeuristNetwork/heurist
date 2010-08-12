@@ -220,7 +220,7 @@ top.HEURIST.edit = {
 //		document.getElementById('reftype-val').innerHTML = '';
 //		document.getElementById('reftype-val').appendChild(document.createTextNode(top.HEURIST.record.reftype));
 
-		document.getElementById('reftype-img').style.backgroundImage = "url("+ top.HEURIST.basePath+"common/images/reftype-icons/" + top.HEURIST.record.reftypeID + ".gif)";
+		document.getElementById('reftype-img').style.backgroundImage = "url("+ top.HEURIST.basePath+"common/images/reftype-icons/" + top.HEURIST.record.reftypeID + ".png)";
 
 		document.getElementById('title-val').innerHTML = '';
 		document.getElementById('title-val').appendChild(document.createTextNode(top.HEURIST.record.title));
@@ -228,13 +228,13 @@ top.HEURIST.edit = {
 		if (top.HEURIST.record.workgroup) {
 			document.getElementById('workgroup-val').innerHTML = '';
 			document.getElementById('workgroup-val').appendChild(document.createTextNode(top.HEURIST.record.workgroup));
-			document.getElementById('workgroup-div').style.display = "block";
+			document.getElementById('workgroup-div').style.display = "inline-block";
 
 			var othersAccess = (top.HEURIST.record.workgroupVisibility == "Hidden")? "not visible" : "visible";
 			document.getElementById('workgroup-access').innerHTML = othersAccess;
 		} else {
 			document.getElementById('workgroup-val').innerHTML = 'everyone';
-			document.getElementById('workgroup-div').style.display = "block";
+			document.getElementById('workgroup-div').style.display = "inline-block";
 
 			document.getElementById('workgroup-access').innerHTML = 'visible';
 		}
@@ -1371,7 +1371,7 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 	this.addInputHelper.call(this, bdValue, newDiv);
 
 	var editImg = newDiv.appendChild(this.document.createElement("img"));
-		editImg.src = top.HEURIST.basePath +"common/images/edit-pencil.gif";
+		editImg.src = top.HEURIST.basePath +"common/images/edit-pencil.png";
 		editImg.className = "edit-resource";
 		editImg.title = "Edit this resource";
 
@@ -1877,8 +1877,8 @@ top.HEURIST.edit.inputs.BibDetailSeparator.prototype.typeDescription = "record d
 top.HEURIST.edit.inputs.BibDetailSeparator.prototype.addInput = function(bdValue) {
 
 	var newInput = this.document.createElement("div");
-		newInput.style.border = '1px solid grey';
-		newInput.style.width = '105ex';	// this will effectively override the sizing control in the record definition, may have to remove
+		//newInput.style.border = '1px solid grey';
+		//newInput.style.width = '105ex';	// this will effectively override the sizing control in the record definition, may have to remove
 	this.addInputHelper.call(this, bdValue, newInput);
 	if (this.promptDiv){
 		this.promptDiv.className = "";
@@ -1900,8 +1900,8 @@ top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.addInput = function(bd
 	newInput.border = 0;
 	newInput.cellpadding = 0;
 	newInput.cellspacing = 0;
-	newInput.style.marginLeft = "1ex";
-	newInput.style.width = "100%";
+	//newInput.style.marginLeft = "1ex";
+	//newInput.style.width = "100%";
 	this.addInputHelper.call(this, bdValue, newInput);
 	var tb = this.document.createElement("tbody");
 	tb.id = "relations-tbody";
@@ -1998,6 +1998,7 @@ top.HEURIST.edit.inputs.ReminderInput = function(parentElement) {
 	};
 	this.details = reminderDetails;
 
+	
 	var thisRef = this;
 
 	this.fieldset = parentElement.appendChild(this.document.createElement("fieldset"));
@@ -2007,14 +2008,16 @@ top.HEURIST.edit.inputs.ReminderInput = function(parentElement) {
 	var p = this.fieldset.appendChild(this.document.createElement("p"));
 	p.appendChild(this.document.createTextNode("Set up email reminders about this record"));
 
-	this.detailTable = this.fieldset.appendChild(this.document.createElement("table"));
-		this.detailTable.frameBorder = 0;
-		this.detailTable.className = "reminder-table";
-	var tbody = this.detailTable.appendChild(this.document.createElement("tbody"));
-	var tr1 = tbody.appendChild(this.document.createElement("tr"));
+	 var tbody = this.fieldset.appendChild(this.document.createElement("div"));
+		//tbody.frameBorder = 0;
+		tbody.className = "reminder-table";
+	//var tbody = this.detailTable.appendChild(this.document.createElement("div"));
+	//var tbody = detailTable;
+		
+	var tr1 = tbody.appendChild(this.document.createElement("div"));
 		var tds = [];
 		for (var i=0; i < 8; ++i) {
-			var td = tr1.appendChild(this.document.createElement("td"));
+			var td = tr1.appendChild(this.document.createElement("span"));
 			td.className = "col-"+(i+1);
 			tds.push(td);
 		}
@@ -2078,13 +2081,13 @@ top.HEURIST.edit.inputs.ReminderInput = function(parentElement) {
 		cd.onchange = function() { gd.selectedIndex = 0; ut.value = et.value = ""; }
 		et.onchange = function() { gd.selectedIndex = cd.selectedIndex = 0; ut.value = ""; }
 
-	var tr2 = tbody.appendChild(this.document.createElement("tr"));
-		var td = tr2.appendChild(this.document.createElement("td"));
-		td.className = "col-1";
+	var tr2 = tbody.appendChild(this.document.createElement("div"));
+		var td = tr2.appendChild(this.document.createElement("span"));
+		//td.className = "col-1";
 		td.appendChild(this.document.createTextNode("When"));
-
-		td = tr2.appendChild(this.document.createElement("td"));
-		td.colSpan = 7;
+		td.className = "col-1";
+		td = tr2.appendChild(this.document.createElement("span"));
+		//td.colSpan = 7;
 
 		this.nowRadioButton = this.document.createElement("input");
 		this.nowRadioButton.type = "radio";
@@ -2097,7 +2100,7 @@ top.HEURIST.edit.inputs.ReminderInput = function(parentElement) {
 		this.laterRadioButton = this.document.createElement("input");
 		this.laterRadioButton.type = "radio";
 		this.laterRadioButton.name = "when";
-		this.laterRadioButton.style.marginLeft = "20px";
+		//this.laterRadioButton.style.marginLeft = "20px";
 		this.laterRadioButton.onclick = function() { thisRef.whenSpan.style.display = ""; thisRef.saveButton.value = "Store" };
 		td.appendChild(this.laterRadioButton);
 		td.appendChild(this.document.createTextNode("Later / periodic"));
@@ -2109,8 +2112,8 @@ top.HEURIST.edit.inputs.ReminderInput = function(parentElement) {
 			this.whenTextbox.type = "text";
 			this.whenTextbox.className = "in";
 			this.whenTextbox.name = "reminder-when";
-			this.whenTextbox.style.width = "90px";
-			this.whenTextbox.style.marginLeft = "10px";
+			//this.whenTextbox.style.width = "90px";
+			//this.whenTextbox.style.marginLeft = "10px";
 			this.whenTextbox.value = reminderDetails.when;
 		this.whenSpan.appendChild(this.whenTextbox);
 		this.whenButton = top.HEURIST.edit.makeDateButton(this.whenTextbox, this.document);
@@ -2128,41 +2131,41 @@ top.HEURIST.edit.inputs.ReminderInput = function(parentElement) {
 				this.frequencyDropdown.selectedIndex = i;
 		}
 
-	var tr3 = tbody.appendChild(this.document.createElement("tr"));
-		td = tr3.appendChild(this.document.createElement("td"));
+	var tr3 = tbody.appendChild(this.document.createElement("div"));
+		td = tr3.appendChild(this.document.createElement("span"));
 		td.className = "col-1";
 		td.appendChild(this.document.createTextNode("Message"));
 
-		td = tr3.appendChild(this.document.createElement("td"));
-		td.colSpan = 8;
+		td = tr3.appendChild(this.document.createElement("span"));
+		//td.colSpan = 8;
 
 		this.messageBox = td.appendChild(this.document.createElement("textarea"));
 			this.messageBox.className = "in";
 			this.messageBox.name = "reminder-message";
 			this.messageBox.value = reminderDetails.message;
-			this.messageBox.style.width = "600px";
+			this.messageBox.style.width = "100%";
 			this.messageBox.style.height = "70px";
 
-	var tr4 = tbody.appendChild(this.document.createElement("tr"));
-		td = tr4.appendChild(this.document.createElement("td"));
-		td = tr4.appendChild(this.document.createElement("td"));
-		td.colSpan = 1;
-		td.style.verticalAlign = "bottom";
-		td.style.textAlign = "right";
+	var tr4 = tbody.appendChild(this.document.createElement("div"));
+		td = tr4.appendChild(this.document.createElement("span"));
+		//td = tr4.appendChild(this.document.createElement("span"));
+		//td.colSpan = 1;
+		//td.style.verticalAlign = "bottom";
+		//td.style.textAlign = "right";
 		this.saveButton = this.document.createElement("input");
 			this.saveButton.type = "button";
 			this.saveButton.value = "Send";
-			this.saveButton.style.fontWeight = "bold";
-			this.saveButton.style.marginBottom = "1em";
-			this.saveButton.style.display = "block";
+			//this.saveButton.style.fontWeight = "bold";
+			//this.saveButton.style.marginBottom = "1em";
+			//this.saveButton.style.display = "inline";
 			var thisRef = this;
 			this.saveButton.onclick = function() { thisRef.save(thisRef.nowRadioButton.checked); };
 			td.appendChild(this.saveButton);
-		td = tr4.appendChild(this.document.createElement("td"));
-		td.colSpan = 6;
+		td = tr4.appendChild(this.document.createElement("span"));
+		//td.colSpan = 6;
 		td.style.textAlign = "left";
-		td.style.verticalAlign = "baseline";
-		td.style.paddingTop = "10px";
+		//td.style.verticalAlign = "baseline";
+		//td.style.paddingTop = "10px";
 		td.appendChild(this.document.createTextNode("You must Send (now) or Set (periodic) your reminder before saving record. " +
 			"Reminders are sent shortly after midnight (server time) on the reminder day."));
 
@@ -2269,8 +2272,8 @@ top.HEURIST.edit.inputs.BibURLInput = function(parentElement, defaultValue, requ
 	var inputField = inputCell.appendChild(this.document.createElement("input"));
 	this.inputs = [ inputField ];
 		this.inputs[0].className = "in";
-		this.inputs[0].style.width = "75ex";
-		this.inputs[0].style.maxWidth = "90%";
+		//this.inputs[0].style.width = "75ex";
+		//this.inputs[0].style.maxWidth = "90%";
 		this.inputs[0].name = "bib_url";
 		this.inputs[0].id = "bib_url";
 		this.inputs[0].value = defaultValue  ||  "";
@@ -2291,7 +2294,7 @@ top.HEURIST.edit.inputs.BibURLInput = function(parentElement, defaultValue, requ
 			urlSpan.style.color = "blue";
 			urlSpan.style.cursor = "pointer";
 		var editImg = urlSpan.appendChild(this.document.createElement("img"));
-			editImg.src = top.HEURIST.basePath+"common/images/edit_pencil_16x16.gif";
+			editImg.src = top.HEURIST.basePath+"common/images/edit-pencil.png";
 		urlSpan.appendChild(editImg);
 		urlSpan.appendChild(this.document.createTextNode("edit"));
 

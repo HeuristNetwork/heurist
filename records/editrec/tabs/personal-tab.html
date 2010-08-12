@@ -1,60 +1,11 @@
 <html>
  <head>
-  <link rel=stylesheet href="../../../common/css/heurist.css">
-  <link rel=stylesheet href="../../../common/css/heurist-edit-tab.css">
+  <link rel=stylesheet href="../../../common/css/global.css">
+  <link rel=stylesheet href="../../../common/css/edit.css">
+  <link rel=stylesheet href="../../../common/css/edit-tab.css">
   <link rel=stylesheet href="../../../common/css/autocomplete.css">
   <link rel=stylesheet href="../../../common/css/woot.css">
-  <style>
-.rating-row td { padding: 0 0.5em; vertical-align: middle; }
-.rating-row .header { text-align: right; padding: 0.5em 0; width: 40px; }
-.rating-row select { width: 20ex; }
-
-.reminder-table tr td * { vertical-align: middle; }
-.reminder-table .col-2 select, .reminder-table .col-4 select, .reminder-table .col-6 select, .reminder-table .col-8 input { width: 120px; }
-table.reminder-table tr td.col-1 { width: 50px; text-align: right; }
-.reminder-table .col-3, .reminder-table .col-5 { width: 0; padding-left: 1ex; }
-.reminder-table .col-7 { width: 0px; padding-left: 1ex; white-space: nowrap; }
-
-.reminder-table td { padding: 1ex 2px 1ex 0; }
-.reminder-table .frequency-dropdown { margin-left: 1ex; }
-
-fieldset.reminder { background-color: white; padding: 0 1ex; margin: 0; width: 600px; }
-fieldset.reminder .in { border-color: #909090; }
-
-fieldset.reminder legend { font-weight: bold; }
-
-div.reminder-div { margin-bottom: 1ex; padding: 6px 4px; border: 1px solid gray; width: 600px; }
-div.reminder-div img { vertical-align: middle; cursor: pointer; margin-left: 2px; }
-
-input#tags {
-	border: 1px solid black;
-	padding: 1px 4px;
-	font-size: 11px;
-	line-height: 1.5em;	/* only has an effect on safari ... otherwise we get a jumbo-vertical text box */
-	width: 80%;
-}
-
-.add-tag-link { font-size: 85%; padding: 0 0.5ex; }
-
-hr { background-color: #660000; border: 1px solid lightgray; height: 2px; margin-bottom: 15px; }
-
-.input-row .input-header-cell { vertical-align: top; }
-
-.woot-editor {
-	max-width: 1000000px;
-	max-height: 300px;
-	overflow-y: scroll;
-}
-.woot-editor.edit {
-	max-height: 1000000px;
-	overflow-y: auto;
-}
-.woot-title {
-	display: none;
-}
-
-  </style>
-  <script>
+<script>
 
 function onshow() {
 	setTimeout(function() { try { document.getElementById("tags").focus(); } catch (e) {} }, 0);
@@ -78,79 +29,59 @@ top.HAPI.importSymbols(top, this);
 
    <table border=0 cellspacing=0 cellpadding=0 style="width: 100%;"><tbody id=all-inputs>
     <tr class=input-row>
-     <td class=input-header-cell>Personal tags</td>
-     <td class=input-cell>
-      <table border=0 cellspacing=0 cellpadding=0 style="width: 100%;">
-       <tr>
-        <td><input id=tags name=keywordstring type=text></td>
-        <td rowspan=3 style="width: 40%;">
-         <div class="help prompt" style="padding: 0 2em;">
+     <td class=input-header-cell>Personal tags
+     	<div class="help prompt">
           Type as many tags as you like, separated by commas.  Tags may contain spaces.
           New tags are added automatically and are specific to each user.<br><br>
-          <a href="../../../help/tags.html" onclick="top.HEURIST.util.popupURL(window, this.href); return false;">How to enter tags</a>
+          <a href="../../../../help/tags.html" onClick="top.HEURIST.util.popupURL(window, this.href); return false;">How to enter tags</a>
          </div>
-        </td>
-       </tr>
-       <tr>
-        <td>
-         <span class=prompt>Top:</span>
-         <a href="#" class=add-tag-link onclick="addTag('Favourites'); return false;">Favourites</a>
-         <a href="#" class=add-tag-link onclick="addTag('To Read'); return false;">To Read</a>
-		 |
-        <span id=top-tags-cell></span>
-        </td>
-       </tr>
-       <tr>
-        <td id=recent-tags-cell>
+     </td>
+     <td class=input-cell>
+     	<input id=tags name=keywordstring type=text>
+         <div id=top-tags-cell><span class=prompt>Top:</span>
+         <a href="#" class=add-tag-link onClick="addTag('Favourites'); return false;">Favourites </a>|<a href="#" class=add-tag-link onClick="addTag('To Read'); return false;"> To Read </a>| </div>
+        <div id=recent-tags-cell>
          <span class=prompt>Recent:</span>
-        </td>
-       </tr>
-      </table>
+        </div>
      </td>
     </tr>
 
-    <tr><td colspan=2><hr></td></tr>
+    <tr><td class="separator_row" colspan="2">&nbsp;</td></tr>
 
     <tr class=input-row>
-     <td class=input-header-cell style="padding-top: 0.5em;">Ratings</td>
+     <td class=input-header-cell>Ratings<div class="help prompt">Records can be rated in several ways. For a single rating, use only the Interest rating.</div></td>
      <td class=input-cell>
-      <table border=0 cellspacing=0 cellpadding=0>
-       <tr class=rating-row>
-        <td class=header>Interest</td><td><select id=interest-rating name=interest-rating></select></td>
-        <td rowspan=3>
-         <div class="help prompt">Records can be rated in several ways.<br>For a single rating, use only the Interest rating.</div>
-        </td>
-       </tr>
-       <tr class=rating-row><td class=header>Content</td><td><select id=content-rating name=content-rating></select></td></tr>
-       <tr class=rating-row><td class=header>Quality</td><td><select id=quality-rating name=quality-rating></select></td></tr>
-      </table>
+       <div class=rating-row><span class=header>Interest</span><span><select id=interest-rating name=interest-rating></select></span></div>
+       <div class=rating-row><span class=header>Content</span><span><select id=content-rating name=content-rating></select></span></div>
+       <div class=rating-row><span class=header>Quality</span><span><select id=quality-rating name=quality-rating></select></span></div>
      </td>
     </tr>
 
-    <tr><td colspan=2><hr></td></tr>
+    <tr><td class="separator_row" colspan="2">&nbsp;</td></tr>
 
     <tr class=input-row>
-     <td class=input-header-cell>Private notes</td>
+     <td class=input-header-cell>Private notes<div class="help prompt">These notes are private and visible only to you.</div> </td>
      <td class=input-cell>
+     	<div id=woot></div> 
       <div>
-	   <span class="help prompt">These notes are private and visible only to you.</span>
-       <a id=woot-ext-link style="float: right; margin-right: 80px;" target=_blank href="../../records/woot/woot.html">open in new window</a>
+	   
+       <a id=woot-ext-link target=_blank href="../../../woot/woot.html">open in new window</a>
       </div>
-      <div id=woot style="border: 1px solid gray; margin: 8px 80px 0 0; min-height: 100px; padding: 4px;"></div>
+      
      </td>
     </tr>
 
-    <tr><td colspan=2><hr></td></tr>
+    <tr><td class="separator_row" colspan="2">&nbsp;</td></tr>
 
     <tr class=input-row>
-     <td class=input-header-cell>Password reminder</td>
+     <td class=input-header-cell>Password reminder<div class="help prompt">NOT ENCRYPTED - do not use for secure passwords</div></td>
      <td class=input-cell>
-      <input type=text class=in name=password-reminder id=password-reminder style="width: 200px;" onchange="window.changed();" onkeypress="window.changed();">
-      <div class="help prompt">NOT ENCRYPTED - do not use for secure passwords</div>
+      <input type=text class=in name=password-reminder id=password-reminder style="width: 200px;" onChange="window.changed();" onKeyPress="window.changed();">
+      
      </td>
     </tr>
 
-    <tr><td colspan=2><hr></td></tr>
+    <tr><td class="separator_row" colspan="2">&nbsp;</td></tr>
    </tbody></table>
   </form>
 

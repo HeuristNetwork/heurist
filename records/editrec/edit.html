@@ -20,123 +20,8 @@
 	-->
 	<head>
 		<title>Heurist Reference Database - Edit - &copy; 2007 University of Sydney</title>
-		<link rel=stylesheet href="../../common/css/heurist.css">
-		<link rel=stylesheet href="../../common/css/heurist-edit.css">
-		<style>
-
-			select.minimal { margin: 0; padding: 0; border: 0; background: transparent; }
-			select.minimal option { background-color: white; }
-
-		</style>
-
-		<style type="text/css">
-			.inconsistent-design-help-button {
-				padding: 2px;
-				margin-left: 1em;
-				cursor: pointer;
-			}
-			.inconsistent-design-help-button input {
-				vertical-align: middle;
-			}
-			.inconsistent-design-help-button:hover {
-				padding: 1px;
-				border: 1px solid #909090;
-				border-color: #909090 #c0c0c0 #c0c0c0 #909090;
-			}
-		</style>
-		<style type="text/css">
-
-			div.draggable {
-				position: fixed;
-				-webkit-box-shadow: 4px 4px 3px gray;
-			}
-			* html div.draggable { position: absolute; }    /* IE6 doesn't understand position: fixed ... treats it as position: static */
-
-			div.draggable table {
-				display: block;
-				background-color: white;
-
-				border: 1px solid black;
-			}
-			div.draggable td.header {
-				border-bottom: 1px solid black;
-				padding-left: 16px;
-				padding-right: 16px;
-				height: 1.4em;
-				line-height: 1.4em;
-				background-color: #aa7f7f;
-				color: white;
-				cursor: move;
-			}
-
-			div.draggable td.header div.resize-div {
-				cursor: nw-resize;
-				top: 0; left: 0;
-				position: absolute;
-				background: url(../../common/images/nw-resize.gif) transparent scroll top left no-repeat;
-				width: 16px;
-				height: 16px;
-			}
-
-			div.draggable td.header div.minimise-div {
-				cursor: pointer;
-				top: 2; right: 2;
-				position: absolute;
-				background: url(../../common/images/nw-minimise.gif) transparent scroll top right no-repeat;
-				width: 16px;
-				height: 16px;
-			}
-
-			div.draggable div.min-description {
-				display: none;
-			}
-			div.draggable.minimised div.min-description {
-				cursor: pointer;
-				display: block;
-				width: 100%;
-			}
-
-			div.draggable.minimised td.header {
-				cursor: pointer;
-			}
-
-			div.draggable.minimised iframe,
-			div.draggable.minimised textarea,
-			div.draggable.minimised div.description,
-			div.draggable.minimised div.resize-div,
-			div.draggable.minimised div.minimise-div {
-				display: none;
-			}
-
-			div.draggable.minimised {
-				bottom: 30px;
-				right: 30px;
-			}
-
-			div.draggable iframe {
-				border: 0;
-				padding: 0;
-				margin: 0;
-				position: absolute;
-				z-index: -1;
-				width: 100%;
-				height: 100%;
-			}
-			div.draggable textarea {
-				border: 0;
-				padding: 2px;
-				margin: 0;
-				width: 100%;
-				height: 100%;
-			}
-
-			div#notes {
-				font-size: 11px;
-			}
-
-
-		</style>
-
+		<link rel=stylesheet href="../../common/css/global.css">
+		<link rel=stylesheet href="../../common/css/edit.css">
 	</head>
 	<body>
 
@@ -306,346 +191,313 @@
 
 		</script>
 
+<a id=home-link>
+<div id=logo title="Click the logo to return to your Favourites"></div>
+</a>
+<div id=version></div>
+<!-- instance name -->
+<div id=instance-name ></div>
+<!-- message of the day -->
+<div id="message"> Heurist 3 : Open Source <a href="../help/webhelp/index.html?ACL" target="_blank" title="Click for full information. Design: Ireneusz Golka, Ian Johnson &amp; Ingrid Mason. Programming: Kim Jackson, Tom Murtagh &amp; Maria Shvedova. University of Sydney Digital Innovation Unit."><br><font size="11px">Credits</font></a> </div>
+<!-- quicklinks -->
+<div id="quicklinks" >
+  <div id=quicklink-cell class=yui-skin-sam>
+  	<nobr><b>
+		<a href="../../help/about.html" onClick="top.HEURIST.util.popupURL(window, href); return false;">About</a> |
+		<a href="http://www.timemap.net/tmissues.php" target=_blank>Report a bug</a> |
+		<a id=contact-link href="mailto:info@heuristscholar.org">Contact us</a> |
+		<a id=help-link href='#' onClick="top.HEURIST.util.helpToggler(this)"></a>
 
-		<table id=page class=expander border=0 cellspacing=0 cellpadding=0>
-			<tr><td id=header>
+		<script>
+			top.HEURIST.whenLoaded(["edit-html", "obj-common"], top.HEURIST.util.setInstanceName);
+			top.HEURIST.whenLoaded("record", function() {
+				var contactLinkSubject = "HEURIST v" + top.HEURIST.VERSION + " user:"+top.HEURIST.get_user_username() + " edit";
+				if (top.HEURIST.record.bibID) contactLinkSubject += " bibID:"+top.HEURIST.record.bibID;
+				if (top.HEURIST.record.bkmkID) contactLinkSubject += " bkmkID:"+top.HEURIST.record.bkmkID;
+				top.document.getElementById("contact-link").href += "?subject=" + encodeURIComponent(contactLinkSubject);
+			});
+		</script>
+	</b></nobr>
+	</div>
+</div>
+<!-- search -->
+<div id=search  class="roundedBoth outline bannerBG">
+	<div class="tablecell" id="edit_record_title">EDIT RECORD</div>
+	<div class="tablecell">
+		<img id=reftype-img src="../../common/images/16x16.gif">
+		<span id=title-val></span>
+		<span id=reftype-edit class=edit ></span>
+	</div>
+	<div class="tablecell" id=workgroup-div>
+		<div id=workgroup-val-div title="Restrict access by workgroup">
+			<nobr>
+			<b><span id=workgroup-val></span></b>
+			<span id=workgroup-edit class="edit admin-only" onClick="openWorkgroupChanger();"><img src="../../common/images/edit-pencil.png">change</span>
+		</nobr>	
+		</div>
+		<div id=workgroup-access title="Access for users not in this workgroup"></div>
+	</div>
+	<div class="tablecell" style="float:right; border:none;">
+		<input type=button name=save-button value=Cancel onClick="top.HEURIST.edit.cancelSave();">
+		&nbsp;&nbsp;
+		<input type=button name=save-button style="font-weight: bold;" value=Save onClick="top.HEURIST.edit.save();">
+	</div>
+</div>
 
-					<table border=0 cellspacing=0 cellpadding=0 class=expander>
-						<tr>
-							<td id=logo-cell rowspan=2><a id=home-link><img src="../../common/images/hlogo-small.jpg" alt=Heurist></a></td>
-							<td id=instance-name rowspan=2></td>
-							<td id=title-cell rowspan=2><nobr>Edit record</nobr></td>
-							<td id=quicklink-cell><nobr>
+<!-- sidebar -->   
+<div id="sidebar"> 
+	<div class="sidebar-link disabled" style="background-image: url(../../common/images/public_icon.gif);" id=public-link
+		disabledDescription="No public information for private record"><img src="../../common/images/16x16.gif">
+		<b>Public information</b>
+		<span id=desc>Record description, bibliographic data</span>
+	</div>
 
-									<!-- QUICK LINKS -->
-									<a href="../../help/about.html" onclick="top.HEURIST.util.popupURL(window, href); return false;">About</a> |
-									<a href="http://www.timemap.net/tmissues.php" target=_blank>Report a bug</a> |
-									<a id=contact-link href="mailto:info@heuristscholar.org">Contact us</a> |
-									<a id=help-link href='#' onclick="top.HEURIST.util.helpToggler(this)"></a>
+	<div class="sidebar-link disabled" style="background-image: url(../../common/images/personal_icon.gif);" id=personal-link
+		disabledTitle="Click here to add a bookmark for this record"
+		disabledDescription="Click here to bookmark this record"><img src="../../common/images/16x16.gif">
+		<b>Personal information</b>
+		<span id=desc>Tags, passwords, ratings, notifications</span>
+	</div>
 
-									<script>
-										top.HEURIST.whenLoaded(["edit-html", "obj-common"], top.HEURIST.util.setInstanceName);
-										top.HEURIST.whenLoaded("record", function() {
-											var contactLinkSubject = "HEURIST v" + top.HEURIST.VERSION + " user:"+top.HEURIST.get_user_username() + " edit";
-											if (top.HEURIST.record.bibID) contactLinkSubject += " bibID:"+top.HEURIST.record.bibID;
-											if (top.HEURIST.record.bkmkID) contactLinkSubject += " bkmkID:"+top.HEURIST.record.bkmkID;
-											top.document.getElementById("contact-link").href += "?subject=" + encodeURIComponent(contactLinkSubject);
-										});
-									</script>
+	<div class="sidebar-link disabled" style="background-image: url(../../common/images/workgroup_icon.gif);" id=workgroups-link
+		disabledDescription="You are not a member of any workgroup"><img src="../../common/images/16x16.gif">
+		<b>Workgroup tags</b>
+		<span id=desc>For the workgroups you belong to</span>
+	</div>
 
-							</nobr></td>
-						</tr>
-						<tr><td id=menu-cell>&nbsp;</td></tr>
-					</table>
-			</td></tr>
-			<tr><td id=toolbar>
+	<div class="sidebar-link disabled" style="background-image: url(../../common/images/wiki-icon.gif);" id=annotation-link
+		disabledDescription="Not available"><img src="../../common/images/16x16.gif">
+		<b>Text</b>
+		<span id=desc>WYSIWYG extended text &amp; discussion</span>
+	</div>
 
-					<table class=expander border=0 cellspacing=0 cellpadding=0><tr>
-							<td>
-								<div>
-									<b><img id=reftype-img src="../../common/images/16x16.gif"><!--span id=reftype-val></span--></b>
-									<span id=reftype-edit class=edit ></span>
-								</div>
-								<div style="margin-left: 23px; margin-top: 1ex;">
-									<div><span id=title-val></span></div>
-								</div>
-							</td>
+	<div class="sidebar-link disabled" style="background-image: url(../../common/images/relationships_icon.gif);" id=relationships-link
+		disabledDescription="Not available"><img src="../../common/images/16x16.gif">
+		<b>Relationships</b>
+		<span id=desc>Cross-referencing, link related records</span>
+	</div>
 
-							<td style="width: 150px; text-align: left;">
-								<div id=workgroup-div>
-									<div id=workgroup-val-div title="Restrict access by workgroup">
-										<b><span id=workgroup-val></span></b>
-										<span id=workgroup-edit class="edit admin-only" onclick="openWorkgroupChanger();"><img src="../../common/images/edit_pencil_16x16.gif">change</span>
-									</div>
-									<div id=workgroup-access title="Access for users not in this workgroup"></div>
-								</div>
-							</td>
+	<div style="width: 180px; text-align: center; padding: 20px 0;" id=public-link>
+		<input type=button name=save-button value=Cancel onClick="top.HEURIST.edit.cancelSave();">
+		&nbsp;&nbsp;
+		<input type=button name=save-button value=Save style="font-weight: bold;" onClick="top.HEURIST.edit.save();">
+	</div>
+	<div style="padding: 0 30px;">
+		<div style="padding: 3px 0;"><label for=act-recent><input type=radio name=act id=act-recent value=search
+			onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)"> show recent edits</label></div>
+		<div style="padding: 3px 0;"><label for=act-stay><input type=radio name=act id=act-stay value=stay
+			onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)"> stay on page</label></div>
+		<div style="padding: 3px 0;" id=close-window-option><label for=act-close><input type=radio name=act id=act-close value=close
+			onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)"> close window</label></div>
+		<div id=search-nav></div>
+	</div>
+	<script>
+		top.HEURIST.whenLoaded("display-preferences", function() {
+			var canCloseWindow = false;
+			try {
+				// see if we would be able to close this window with JS
+				if (top.opener != top && top.HEURIST_WINDOW_ID) {
+					canCloseWindow = true;
+				}
+				// otherwise, fall through to a different detail action, and hide the close-window option
+			} catch (e) {
+				document.getElementById("close-window-option").style.display = "none";
+			}
 
-							<td style="width: 20px;">&nbsp;</td>
+			switch (top.HEURIST.displayPreferences["action-on-save"]) {
+				case "search":
+				document.getElementById("act-recent").checked = true;
+				break;
+				case "close":
+				if (canCloseWindow) {
+					document.getElementById("act-close").checked = true;
+					break;
+				}
+				default:
+				document.getElementById("act-stay").checked = true;
+			}
 
-							<td id=action-cell style="width: 150px; text-align: left;">
-								<div>
-									<input type=button name=save-button value=Cancel onclick="top.HEURIST.edit.cancelSave();">
-									&nbsp;&nbsp;
-									<input type=button name=save-button style="font-weight: bold;" value=Save onclick="top.HEURIST.edit.save();">
-								</div>
-							</td>
-					</tr></table>
+			var helpOn = (top.HEURIST.util.getDisplayPreference("help") !== "hide");
+			var helpLink = top.document.getElementById("help-link");
+			helpLink.innerHTML = "<span>Help is " + (helpOn? "on" : "off") + "</span>";
+			helpLink.title = helpOn? "Click here to hide help text" : "Click here to show help text";
+		});
+	</script>
 
-			</td></tr>
-			<tr><td id=main><table id=main-table class=expander border=0 cellspacing=0 cellpadding=0>
-						<tr><td id=left-cell><table id=left-panel class="expander panel" border=0 cellspacing=0 cellpadding=0>
-									<tr><td class=panel-header><b>&nbsp;</b></td></tr>
-									<tr><td class=panel-main><div class="expander panel-main-div"><div id=sidebar class="autosize panel-main-content">
+</div>
+<!-- end sidebar -->  
+<!-- page --> 
+<div id=page> 
+	<!-- banner -->
+	<div class="banner">
+		<nobr>
+					<div class=public-visible>
+						<!--
+						<select id=input-visibility onchange="top.HEURIST.util.setDisplayPreference('input-visibility', this.value)" class=minimal>
+						<option value=required>Show only required fields</option>
+						<option value=recommended>Show only recommended fields</option>
+						<option value=all>Show all fields</option>
+						</select>
+						<script>
+						top.HEURIST.whenLoaded("display-preferences", function() {
+						switch (top.HEURIST.displayPreferences["input-visibility"]) {
+						case "required": document.getElementById("input-visibility").selectedIndex = 0; break;
+						case "recommended": document.getElementById("input-visibility").selectedIndex = 1; break;
+						case "all": document.getElementById("input-visibility").selectedIndex = 2; break;
+						}
+						});
+						</script>
+						-->
 
-													<div class="sidebar-link disabled" style="background-image: url(../../common/images/public_icon.gif);" id=public-link
-														disabledDescription="No public information for private record"><img src="../../common/images/16x16.gif">
-														<b>Public information</b>
-														<span id=desc>Record description, bibliographic data</span>
-													</div>
-
-													<div class="sidebar-link disabled" style="background-image: url(../../common/images/personal_icon.gif);" id=personal-link
-														disabledTitle="Click here to add a bookmark for this record"
-														disabledDescription="Click here to bookmark this record"><img src="../../common/images/16x16.gif">
-														<b>Personal information</b>
-														<span id=desc>Tags, passwords, ratings, notifications</span>
-													</div>
-
-													<div class="sidebar-link disabled" style="background-image: url(../../common/images/workgroup_icon.gif);" id=workgroups-link
-														disabledDescription="You are not a member of any workgroup"><img src="../../common/images/16x16.gif">
-														<b>Workgroup tags</b>
-														<span id=desc>For the workgroups you belong to</span>
-													</div>
-
-													<div class="sidebar-link disabled" style="background-image: url(../../common/images/wiki-icon.gif);" id=annotation-link
-														disabledDescription="Not available"><img src="../../common/images/16x16.gif">
-														<b>Text</b>
-														<span id=desc>WYSIWYG extended text &amp; discussion</span>
-													</div>
-
-													<div class="sidebar-link disabled" style="background-image: url(../../common/images/relationships_icon.gif);" id=relationships-link
-														disabledDescription="Not available"><img src="../../common/images/16x16.gif">
-														<b>Relationships</b>
-														<span id=desc>Cross-referencing, link related records</span>
-													</div>
-
-													<div style="width: 180px; text-align: center; padding: 20px 0;" id=public-link>
-														<input type=button name=save-button value=Cancel onclick="top.HEURIST.edit.cancelSave();">
-														&nbsp;&nbsp;
-														<input type=button name=save-button value=Save style="font-weight: bold;" onclick="top.HEURIST.edit.save();">
-													</div>
-													<div style="padding: 0 30px;">
-														<div style="padding: 3px 0;"><label for=act-recent><input type=radio name=act id=act-recent value=search
-															onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)"> show recent edits</label></div>
-														<div style="padding: 3px 0;"><label for=act-stay><input type=radio name=act id=act-stay value=stay
-															onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)"> stay on page</label></div>
-														<div style="padding: 3px 0;" id=close-window-option><label for=act-close><input type=radio name=act id=act-close value=close
-															onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)"> close window</label></div>
-														<div id=search-nav></div>
-													</div>
-													<script>
-														top.HEURIST.whenLoaded("display-preferences", function() {
-															var canCloseWindow = false;
-															try {
-																// see if we would be able to close this window with JS
-																if (top.opener != top && top.HEURIST_WINDOW_ID) {
-																	canCloseWindow = true;
-																}
-																// otherwise, fall through to a different detail action, and hide the close-window option
-															} catch (e) {
-																document.getElementById("close-window-option").style.display = "none";
-															}
-
-															switch (top.HEURIST.displayPreferences["action-on-save"]) {
-																case "search":
-																document.getElementById("act-recent").checked = true;
-																break;
-																case "close":
-																if (canCloseWindow) {
-																	document.getElementById("act-close").checked = true;
-																	break;
-																}
-																default:
-																document.getElementById("act-stay").checked = true;
-															}
-
-															var helpOn = (top.HEURIST.util.getDisplayPreference("help") !== "hide");
-															var helpLink = top.document.getElementById("help-link");
-															helpLink.innerHTML = "<span>Help is " + (helpOn? "on" : "off") + "</span>";
-															helpLink.title = helpOn? "Click here to hide help text" : "Click here to show help text";
-														});
-													</script>
-
-									</div></div></td></tr>
-							</table></td><!-- end of #left-cell -->
-							<td id=divider-cell></td>
-							<td id=right-cell><table id=right-panel class="expander panel" border=0 cellspacing=0 cellpadding=0>
-									<tr><td class=panel-header>
-											<table border=0 cellspacing=0 cellpadding=0><tr>
-													<td style="width: 120px; text-align: right;"><nobr>
-															<div class=public-visible>
-																<!--
-																<select id=input-visibility onchange="top.HEURIST.util.setDisplayPreference('input-visibility', this.value)" class=minimal>
-																<option value=required>Show only required fields</option>
-																<option value=recommended>Show only recommended fields</option>
-																<option value=all>Show all fields</option>
-																</select>
-																<script>
-																top.HEURIST.whenLoaded("display-preferences", function() {
-																switch (top.HEURIST.displayPreferences["input-visibility"]) {
-																case "required": document.getElementById("input-visibility").selectedIndex = 0; break;
-																case "recommended": document.getElementById("input-visibility").selectedIndex = 1; break;
-																case "all": document.getElementById("input-visibility").selectedIndex = 2; break;
-																}
-																});
-																</script>
-																-->
-
-																<label for=input-visibility style="margin-left: 116px;">
-																	<input style="vertical-align: middle;" type=checkbox id=input-visibility onclick="top.HEURIST.util.setDisplayPreference('input-visibility', this.checked? 'all' : 'recommended')" class=minimal>
-																	show optional fields
-																</label>
-																<script>
-																	top.HEURIST.whenLoaded("display-preferences", function() {
-																		document.getElementById("input-visibility").checked = (top.HEURIST.displayPreferences["input-visibility"] === "all");
-																	});
-																</script>
+						<label for=input-visibility style="margin-left: 116px;">
+							<input style="vertical-align: middle;" type=checkbox id=input-visibility onClick="top.HEURIST.util.setDisplayPreference('input-visibility', this.checked? 'all' : 'recommended')" class=minimal>
+							show optional fields
+						</label>
+						<script>
+							top.HEURIST.whenLoaded("display-preferences", function() {
+								document.getElementById("input-visibility").checked = (top.HEURIST.displayPreferences["input-visibility"] === "all");
+							});
+						</script>
 
 
-															</div>
-													</nobr></td>
-
-													<td style="width: 100px; text-align: right;"><nobr>
-
-
-															<span class=inconsistent-design-help-button>
-																<span class="help"
-																	title="Help tips may be read using your eyes to view helpful tips about the visual elements and/or functions to which they refer"
-																	onclick="top.HEURIST.util.setDisplayPreference('help', 'hide')"><input onclick="return false;" type=checkbox checked=checked> show help <span style="font-size: 10px; font-weight: bold;">&nbsp;You can also turn help on and off using the button at the top-right of every screen</span></span>
-																<span class="not-help" onclick="top.HEURIST.util.setDisplayPreference('help', 'show')"><input onclick="return false;" type=checkbox> show help</span>
-															</span>
+					</div>
+					<span class=inconsistent-design-help-button>
+						<span class="help"
+							title="Help tips may be read using your eyes to view helpful tips about the visual elements and/or functions to which they refer"
+							onclick="top.HEURIST.util.setDisplayPreference('help', 'hide')"><input onClick="return false;" type=checkbox checked=checked> show help <span style="font-size: 10px; font-weight: bold;">&nbsp;You can also turn help on and off using the button at the top-right of every screen</span></span>
+						<span class="not-help" onClick="top.HEURIST.util.setDisplayPreference('help', 'show')"><input onClick="return false;" type=checkbox> show help</span>
+					</span>
 
 
 
-															&nbsp;
-															<!--
-															<select id=help-visibility onchange="top.HEURIST.util.setDisplayPreference('help', this.value)" class=minimal>
-															<option value=show>Show help text</option>
-															<option value=hide>Hide help text</option>
-															</select>
-															<script>
-															top.HEURIST.whenLoaded("display-preferences", function() {
-															switch (top.HEURIST.displayPreferences["help"]) {
-															case "show": document.getElementById("help-visibility").selectedIndex = 0; break;
-															case "hide": document.getElementById("help-visibility").selectedIndex = 1; break;
-															}
-															});
-															</script>
-															-->
-													</nobr></td>
-											</tr></table>
-									</td></tr>
-									<tr><td class=panel-main><div class="expander panel-main-div"><div id=tab-holder class="autosize panel-main-content">
-									</div></div></td></tr>
-									<!--
-									<tr><td id=right-panel-footer class=panel-footer>
 
-									RIGHT PANEL FOOTER
+					&nbsp;
+					<!--
+					<select id=help-visibility onchange="top.HEURIST.util.setDisplayPreference('help', this.value)" class=minimal>
+					<option value=show>Show help text</option>
+					<option value=hide>Hide help text</option>
+					</select>
+					<script>
+					top.HEURIST.whenLoaded("display-preferences", function() {
+					switch (top.HEURIST.displayPreferences["help"]) {
+					case "show": document.getElementById("help-visibility").selectedIndex = 0; break;
+					case "hide": document.getElementById("help-visibility").selectedIndex = 1; break;
+					}
+					});
+					</script>
+					-->
+			</nobr>
+	</div>
+	<!-- end banner -->
+	<!-- main panel -->
+	<div id="page-inner" class="panel-main-div">
+		<div id=tab-holder class="autosize panel-main-content">
+		</div>
+		</div>
 
-									</td></tr>
-									-->
-			</table></td></tr></table></td><!-- end of #main --></tr>
 
-			<tr><td id=footer style="height: 2em; padding-left: 205px;">
-					<table class=expander border=0 cellspacing=0 cellpadding=0 style="font-size: 11px;"><tr>
-							<td style="text-align: left; padding-left: 4px;">last accessed <span id=moddate></span></td>
-							<td style="text-align: right; padding-right: 4px;">cite as: <a href='#' id=cite-as-url contextmenu=enable onclick="return false;"></a></td>
-					</tr></table>
+</div>
+<!-- end page --> 
+<!-- footer -->
+			<div id=footer>
+					<span>last accessed: <span id=moddate></span>
+							<span>cite as: <a href='#' id=cite-as-url contextmenu=enable onClick="return false;"></a></span>
 					<script>
 						top.HEURIST.whenLoaded("record", function() {
 							document.getElementById("moddate").appendChild(document.createTextNode(top.HEURIST.record.moddate));
 							var citeAs = document.getElementById("cite-as-url");
-							citeAs.href = "http://"+window.location.host+ top.HEURIST.basePath +"records/viewrec/view.php?bib_id=" + top.HEURIST.record.bibID;
+							citeAs.href = "http://"+window.location.host+ top.HEURIST.basePath +"data/records/viewrec/view.php?bib_id=" + top.HEURIST.record.bibID;
 							citeAs.appendChild(document.createTextNode(citeAs.href));
 						});
 					</script>
-			</td></tr>
-		</table>
-
-
-
-		<div style="position: absolute;"><div id=workgroup-editor style="display: none;">
-				<table id=workgroupTable border=0 cellspacing=4><tbody>
-						<tr><td colspan=2><b>Change workgroup access:</b></td></tr>
-						<tr>
-							<td>Record is editable by</td>
-							<td><select id=new-workgroup-value class=in></select></td>
-						</tr>
-						<tr>
-							<td><span style="position: relative; top: 1.2ex;">Other Heurist users</span></td>
-							<td><label for=non-wg-view><input type=radio name=new-non-workgroup value=Viewable id=non-wg-view> cannot edit the record</label></td>
-						</tr>
-						<tr>
-							<td>&nbsp;</td>
-							<td><label for=non-wg-hide><input type=radio name=new-non-workgroup value=Hidden id=non-wg-hide> cannot view or edit the record</label></td>
-						</tr>
-						<tr><td style="text-align: right; padding: 2px;" colspan=2>
-								<input type=button value="Change" style="font-weight: bold;" onclick="closeWorkgroupChanger();">
-								<input type=button value="Cancel" onclick="closeWorkgroupChanger(true);">
-						</td></tr>
-				</tbody></table>
-		</div></div>
-
-		<div id=workgroup-message style="display: none;">
-			<div style="padding: 5px;">
-				<h2>Workgroup warning</h2>
-				<p>The link you followed attempts to add workgroup ownership and/or workgroup tags to the record you are creating.
-					As you are not a member of the workgroup <span id=workgroup-message-wgname style="font-weight: bold;"></span>, the record will be
-				created as an open record without the workgroup information.</p>
-				<p>In this context, workgroup tags are generally used to publish records to specific lists.
-					The absence of the workgroup tag probably means that your new record will not appear in the corresponding list(s).
-				If it needs to appear there, you will need to ask a member of the workgroup to add the tag(s) later.</p>
-
-				<input type="button" value="OK" onclick="top.HEURIST.util.closePopup(workgroupPopupID);">
 			</div>
-		</div>
+<!-- end footer -->
+<div style="position: absolute;"><div id=workgroup-editor style="display: none;">
+		<table id=workgroupTable border=0 cellspacing=4><tbody>
+				<tr><td colspan=2><b>Change workgroup access:</b></td></tr>
+				<tr>
+					<td>Record is editable by</td>
+					<td><select id=new-workgroup-value class=in></select></td>
+				</tr>
+				<tr>
+					<td><span style="position: relative; top: 1.2ex;">Other Heurist users</span></td>
+					<td><label for=non-wg-view><input type=radio name=new-non-workgroup value=Viewable id=non-wg-view> cannot edit the record</label></td>
+				</tr>
+				<tr>
+					<td>&nbsp;</td>
+					<td><label for=non-wg-hide><input type=radio name=new-non-workgroup value=Hidden id=non-wg-hide> cannot view or edit the record</label></td>
+				</tr>
+				<tr><td style="text-align: right; padding: 2px;" colspan=2>
+						<input type=button value="Change" style="font-weight: bold;" onClick="closeWorkgroupChanger();">
+						<input type=button value="Cancel" onClick="closeWorkgroupChanger(true);">
+				</td></tr>
+		</tbody></table>
+</div></div>
 
-		<script>
-			var workgroupPopupID;
-			function testWorkgroupMessage() {
-				top.HEURIST.deregisterEvent(window, "load", testWorkgroupMessage);
+<div id=workgroup-message style="display: none;">
+	<div style="padding: 5px;">
+		<h2>Workgroup warning</h2>
+		<p>The link you followed attempts to add workgroup ownership and/or workgroup tags to the record you are creating.
+			As you are not a member of the workgroup <span id=workgroup-message-wgname style="font-weight: bold;"></span>, the record will be
+		created as an open record without the workgroup information.</p>
+		<p>In this context, workgroup tags are generally used to publish records to specific lists.
+			The absence of the workgroup tag probably means that your new record will not appear in the corresponding list(s).
+		If it needs to appear there, you will need to ask a member of the workgroup to add the tag(s) later.</p>
 
-				if (! (top.HEURIST.parameters["wg"]  ||  top.HEURIST.parameters["wgkwd"])) return;
-				var wg = top.HEURIST.workgroups[parseInt(top.HEURIST.parameters["wg"])];
+		<input type="button" value="OK" onClick="top.HEURIST.util.closePopup(workgroupPopupID);">
+	</div>
+</div>
 
-				document.getElementById("workgroup-message-wgname").appendChild(document.createTextNode(wg? wg.name : ""));
+<script>
+	var workgroupPopupID;
+	function testWorkgroupMessage() {
+		top.HEURIST.deregisterEvent(window, "load", testWorkgroupMessage);
 
-				var w = top.HEURIST.util.popupElement(top, document.getElementById("workgroup-message"), { "no-titlebar": true, width: 400, height: 300 });
-				workgroupPopupID = w.id;
+		if (! (top.HEURIST.parameters["wg"]  ||  top.HEURIST.parameters["wgkwd"])) return;
+		var wg = top.HEURIST.workgroups[parseInt(top.HEURIST.parameters["wg"])];
+
+		document.getElementById("workgroup-message-wgname").appendChild(document.createTextNode(wg? wg.name : ""));
+
+		var w = top.HEURIST.util.popupElement(top, document.getElementById("workgroup-message"), { "no-titlebar": true, width: 400, height: 300 });
+		workgroupPopupID = w.id;
+	}
+	top.HEURIST.registerEvent(window, "load", testWorkgroupMessage);
+</script>
+
+
+<div id=notes-container></div>
+
+<div>
+	<div id=popup-saved style="display: none">
+		<b>Record saved</b>
+	</div>
+</div>
+
+<script src="../disambig/disambiguate.js"></script>
+<script>
+	function popupDisambiguation(matches) {
+		_popupDisambiguation(matches, function(choice) {
+			if (choice.value == -1) {
+				top.HEURIST.record.forceSave = true;
+				var editFrame = top.HEURIST.edit.modules.public.frame;
+				editFrame.contentWindow.document.forms[0].heuristSubmit();
 			}
-			top.HEURIST.registerEvent(window, "load", testWorkgroupMessage);
-		</script>
+			else {
+				var modules = top.HEURIST.edit.modules;
+				for (var eachName in modules) {
+					top.HEURIST.edit.unchanged(eachName);
+				}
 
-
-		<div id=notes-container></div>
-
-		<div style="position: absolute; left: 70%; top: 200px;">
-			<div id=popup-saved style="display: none; position: relative; left: -100px; width: 300px; height: 60px; border: 1px solid gray;">
-				<table border=0 cellspacing=0 cellpadding=0 style="background-color: blue; width: 100%; height: 100%; color:white;"><tr><td style="vertical-align: middle; text-align: center;">
-							<b>Record saved ... </b>
-							<!--
-							<br/><br/>
-							<div style="font-size: 80%">Window can safely be closed as soon as this message appears</div>
-							-->
-
-				</td></tr></table>
-		</div></div>
-
-		<script src="../disambig/disambiguate.js"></script>
-		<script>
-			function popupDisambiguation(matches) {
-				_popupDisambiguation(matches, function(choice) {
-					if (choice.value == -1) {
-						top.HEURIST.record.forceSave = true;
-						var editFrame = top.HEURIST.edit.modules.public.frame;
-						editFrame.contentWindow.document.forms[0].heuristSubmit();
-					}
-					else {
-						var modules = top.HEURIST.edit.modules;
-						for (var eachName in modules) {
-							top.HEURIST.edit.unchanged(eachName);
-						}
-
-						top.location.replace(top.HEURIST.basePath+"records/editrec/edit.html?bib_id="+choice.details.id);
-					}
-				});
+				top.location.replace(top.HEURIST.basePath+"data/records/editrec/heurist-edit.html?bib_id="+choice.details.id);
 			}
-		</script>
+		});
+	}
+</script>
 
-		<script>
-			top.HEURIST.contentLoaded();
-			top.HEURIST.fireEvent(top, "heurist-edit-html-loaded");
-		</script>
+<script>
+	top.HEURIST.contentLoaded();
+	top.HEURIST.fireEvent(top, "heurist-edit-html-loaded");
+</script>
 
 	</body>
 </html>

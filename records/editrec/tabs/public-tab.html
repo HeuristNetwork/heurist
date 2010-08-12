@@ -1,8 +1,8 @@
 <html>
  <head>
-  <link rel=stylesheet href="../../../common/css/heurist.css">
-  <link rel=stylesheet href="../../../common/css/heurist-relation.css">
-  <link rel=stylesheet href="../../../common/css/heurist-edit-tab.css">
+  <link rel=stylesheet href="../../../common/css/global.css">
+  <link rel=stylesheet href="../../../common/css/edit.css">
+  <link rel=stylesheet href="../../../common/css/edit-tab.css">
  </head>
  <body onLoad="onshow();">
   <script src="../../../common/js/heurist.js"></script>
@@ -267,19 +267,25 @@ function renderInputs(bibID, reftype) {
 
 function renderAdditionalDataSection(container, reftypeID, bdValues) {
 	var hrRow = container.appendChild(document.createElement("tr"));
-		hrRow.appendChild(document.createElement("td"));
+	
 	var hrCell = hrRow.appendChild(document.createElement("td"));
-		hrCell.style.height = "1px";
-		hrCell.style.backgroundColor = "#660000";
+		hrCell.className = "separator_row";
+		hrCell.colSpan = 2;
+		hrCell.innerHTML = "&nbsp";
 
 	var explainRow = container.appendChild(document.createElement("tr"));
-		explainRow.appendChild(document.createElement("td"));
+	
+	var hrCell = explainRow.appendChild(document.createElement("td"));
+		hrCell.style.height = "20px";
+		hrCell.innerHTML = "<b>Additional data</b>";
+		hrCell.className = "additional-header-cell";
+		
 	var explainCell = explainRow.appendChild(document.createElement("td"));
-		explainCell.innerHTML = "<b style='padding-right: 3em;'>Additional data</b> Non-standard fields for this record type";
-		explainCell.style.padding = "25px 0 0 0";
+		explainCell.innerHTML = "Non-standard fields for this record type";
 
 	var addRow = container.appendChild(document.createElement("tr"));
 		addRow.appendChild(document.createElement("td"));
+		
 	var addCell = addRow.appendChild(document.createElement("td"));
 		addCell.colSpan = 2;
 		addCell.style.padding = "0 0 5px 0";
@@ -331,7 +337,6 @@ function renderShowAll() {
 		hrRow.className = "not-optional-fields";
 	var hrCell = hrRow.appendChild(document.createElement("td"));
 		hrCell.style.height = "20px";
-	//	hrCell.style.backgroundColor = "#660000";
 
 	// this could probably stand to be static html
 	var showTr = document.getElementById("all-inputs").appendChild(document.createElement("tr"));
@@ -341,7 +346,7 @@ function renderShowAll() {
 
 	var showDiv = showTd.appendChild(document.createElement("div"));
 		showDiv.id = "show-all-div";
-		showDiv.style.padding = "0 0 35px 0";
+		showDiv.style.padding = "0 0 8px 0";
 		showDiv.className = "not-optional-fields";
 
 	var showLink = showDiv.appendChild(document.createElement("span")).appendChild(document.createElement("a"));

@@ -29,33 +29,34 @@ var Relationship = function(parentElement, details, manager) {
 	var editTd = this.tr.appendChild(this.document.createElement("td"));
 	editTd.className = "edit";
 	editTd.title = "Edit this relationship";
-	editTd.appendChild(this.document.createElement("img")).src = top.HEURIST.basePath + "common/images/edit_pencil_16x16.gif";
+	editTd.appendChild(this.document.createElement("img")).src = top.HEURIST.basePath + "common/images/edit-pencil.png";
 	editTd.onclick = function() { thisRef.edit(); };
+
+	this.relSpan = this.tr.appendChild(this.document.createElement("td")).appendChild(this.document.createElement("div"));
+	this.relSpan.parentNode.className = "rel";
+	this.relSpan.appendChild(this.document.createTextNode(details.RelationValue));
 
 	this.titleSpan = this.tr.appendChild(this.document.createElement("td")).appendChild(this.document.createElement("div"));
 	this.titleSpan.parentNode.className = "title";
-	this.titleSpan.appendChild(this.document.createTextNode(details.RelationValue + ": " + (details.OtherResource? details.OtherResource.Title : details.Title)));
+	this.titleSpan.appendChild(this.document.createTextNode((details.OtherResource? details.OtherResource.Title : details.Title)));
 
-	this.ellipsesTd1 = this.tr.appendChild(this.document.createElement("td"));
-	this.ellipsesTd1.className = "ellipses";
-	this.ellipsesTd1.innerHTML = "&nbsp;...";
+//	this.ellipsesTd1 = this.tr.appendChild(this.document.createElement("td"));
+//	this.ellipsesTd1.className = "ellipses";
+//	this.ellipsesTd1.innerHTML = "&nbsp;...";
 
-	this.datesTd = this.tr.appendChild(this.document.createElement("td"));
-	this.datesTd.className = "dates";
+	this.datesTd = this.tr.appendChild(this.document.createElement("td")).appendChild(this.document.createElement("div"));
+	this.datesTd.parentNode.className = "dates";
 	if (details.StartDate) {
 		this.datesTd.appendChild(this.document.createTextNode(details.StartDate));
-	}
-	if (details.EndDate) {
-		this.datesTd.appendChild(this.document.createTextNode(" until " + details.EndDate));
 	}
 
 	this.notesField = this.tr.appendChild(this.document.createElement("td")).appendChild(this.document.createElement("div"));
 	this.notesField.parentNode.className = "notes-field";
 	this.notesField.appendChild(this.document.createTextNode(details.Notes || ""));
 
-	this.ellipsesTd2 = this.tr.appendChild(this.document.createElement("td"));
-	this.ellipsesTd2.className = "ellipses";
-	this.ellipsesTd2.innerHTML = "&nbsp;...";
+//	this.ellipsesTd2 = this.tr.appendChild(this.document.createElement("td"));
+//	this.ellipsesTd2.className = "ellipses";
+//	this.ellipsesTd2.innerHTML = "&nbsp;...";
 
 	parentElement.appendChild(this.tr);
 };
@@ -454,14 +455,22 @@ var RelationManager = function(parentElement, reftypeID, relatedRecords, bibDeta
 	}
 	var addOtherTr = document.createElement("tr");
 	var addOtherTd = addOtherTr.appendChild(document.createElement("td"));
-	addOtherTd.style.paddingTop = "0.5em";
+	addOtherTd.style.paddingTop = "20px";
 	addOtherTd.colSpan = 7;
 	var a = addOtherTd.appendChild(document.createElement("a"));
 	a.href = "#";
 	if (this.relationships.length > 0) {
+		var addImg = a.appendChild(document.createElement("img"));
+		addImg.src = top.HEURIST.basePath +"common/images/add-record-small.png";
+		addImg.className = "add_records_img";
+		addImg.title = "Add another relationship";
 		a.appendChild(document.createTextNode("add more ..."));
 	}
 	else {
+		var addImg = a.appendChild(document.createElement("img"));
+		addImg.src = top.HEURIST.basePath +"common/images/add-record-small.png";
+		addImg.className = "add_records_img";
+		addImg.title = "Add a relationship";
 		a.appendChild(document.createTextNode("Add a relationship"));
 	}
 	a.style.textDecoration = "none";

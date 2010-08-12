@@ -22,13 +22,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-body {
-	/* thin header (overridden on search page) */
-	background: white url(../images/edit-bg.gif) 0px -6px repeat-x;  /* brown-bg.gif is necessary to extend outside the #page table */
-	color: #515151;
-	margin: 10px;
-	overflow: hidden;
-}
+
 #header { height: 44px; }
 #home { left: 22px; top: 40px; font-size: 69%; }
 #logo-cell { width: 160px; }

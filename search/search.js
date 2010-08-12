@@ -279,29 +279,61 @@ top.HEURIST.search = {
 		if (top.HEURIST.reftypes.names[parseInt(res[4])])
 			reftypeTitle = top.HEURIST.reftypes.names[parseInt(res[4])] + " - click to see details";
 
-		var html = "<div title='Double-click to edit'  class=result_thumb  bkmk_id='"+res[0]+"' bib_id="+res[2]+">" +
-				"<div class=thumbnail>" +
-				(res[11] && res[11].length && res[3].length ? "<a href='"+res[3]+"'>" : "") +
-				(res[11] && res[11].length ? "<img bkmk_id='"+res[0]+"' bib_id="+res[2]+" src='"+res[11]+"'>"
-					: "<div class='no-thumbnail' "+reftypeThumb+" ></div>") +
-						(res[11] && res[11].length && res[3].length ? "</a>" : "") +
-				"</div>" +
-				(res[3].length ? "<div class=rec_title title='"+linkText.htmlEscape()+"'><a href='"+res[3]+"'>"+ linkText + "</a></div>" : "<div class=rec_title title='"+linkText.htmlEscape()+"'>"+ linkText + "</div>") +
-				"<div class=icons  bkmk_id='"+res[0]+"' bib_id="+res[2]+">" +
-				"<input type=checkbox name=bib[] onclick=top.HEURIST.search.cb_onclick(this) class='logged-in-only' title='Check box to apply Actions to this record'>"+
-				"<img src='"+ top.HEURIST.basePath+"common/images/16x16.gif' title='"+reftypeTitle.htmlEscape()+"' "+reftypeImg+" class=rft>"+
-				"<img src='"+ top.HEURIST.basePath+"common/images/13x13.gif' " + pinAttribs + ">"+
-				"<span class='wg-id-container logged-in-only'>"+
-				"<span class=wg-id title='"+linkTitle.htmlEscape()+"' " + (wgColor? wgColor: "") + ">" + (wgHTML? wgHTML.htmlEscape() : "") + "</span>"+
-				"</span>"+
-				"<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/key.gif' " + userPwd + ">"+
-				"</div>" +
-				"<DIV id='toolbox'>" +
-				"<span id='rec_edit_link' title='Click to edit'>edit</span>" +
-				"<span id='rec_view_link' title='Click to see details'>view</span>" +
-				"<span id='rec_explore_link' title='Click to see details'>explore</span>" +
-				"</div>" +
-				"</div>";
+		var html =
+		"<div title=''  class=result_thumb  bkmk_id='"+res[0]+"' bib_id="+res[2]+">" +
+
+
+		    "<div id='front' class='result_thumb_inner'>" +
+			"<div class='info_button'></div>" +
+
+		       //"<div class=thumbnail>" +
+			   (res[3].length ? "<a href='"+res[3]+"'>" : "") +
+		       (res[11] && res[11].length ? "<div class='thumbnail' style='background-image:url("+res[11]+")' ></div>"
+			                   : "<div class='no-thumbnail' "+reftypeThumb+" ></div>") +
+			   (res[3].length ? "</a>" : "") +
+		       //"</div>" +
+
+
+			   (res[3].length ? "<div class=rec_title title='"+linkText.htmlEscape()+"'><a href='"+res[3]+"'>"+ linkText + "</a></div>" : "<div class=rec_title title='"+linkText.htmlEscape()+"'>"+ linkText + "</div>") +
+		       "<div class=icons  bkmk_id='"+res[0]+"' bib_id="+res[2]+">" +
+			   "<input type=checkbox name=bib[] onclick=top.HEURIST.search.cb_onclick(this) class='logged-in-only' title='Check box to apply Actions to this record'>"+
+		       "<img src='"+ top.HEURIST.basePath+"common/images/16x16.gif' title='"+reftypeTitle.htmlEscape()+"' "+reftypeImg+" class='rft'>"+
+		       "<img src='"+ top.HEURIST.basePath+"common/images/13x13.gif' " + pinAttribs + ">"+
+		       "<span class='wg-id-container logged-in-only'>"+
+		       "<span class=wg-id title='"+linkTitle.htmlEscape()+"' " + (wgColor? wgColor: "") + ">" + (wgHTML? wgHTML.htmlEscape() : "") + "</span>"+
+		       "</span>"+
+		       "<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/key.gif' " + userPwd + ">"+
+		       "<span id='rec_edit_link' title='Click to edit'><a href='"+
+				   	top.HEURIST.basePath+ "records/editrec/edit.html?sid=" +
+					top.HEURIST.search.sid + "&bib_id="+ res[2] +
+					(top.HEURIST.instance && top.HEURIST.instance.name ? '&instance=' + top.HEURIST.instance.name : '') +
+				   	"' target='_blank'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png'/></a></span>" +
+		    "</div>" +
+
+			 "</div>" +
+
+			// Back flip of resodr chips -- needs populating with required records
+			"<div id='back'   style='display:none'>" +
+				"<div class='done_button'></div>" +
+				"<div class='rec_links'>" +
+					"<span id='rec_edit_link' title='Click to edit'><a href='"+
+					top.HEURIST.basePath+ "records/editrec/edit.html?sid=" +
+					top.HEURIST.search.sid + "&bib_id="+ res[2] +
+					(top.HEURIST.instance && top.HEURIST.instance.name ? '&instance=' + top.HEURIST.instance.name : '') +
+					"' target='_blank'>edit</a></span> | " +
+					//"<span id='rec_view_link' title='Click to see details'>view | </span>" + not needed as the chip does most of the work...
+					"<span id='rec_explore_link' title='Click to explore'><a href='/cocoon/h3/relbrowser/main/item/" + res[2] +
+					(top.HEURIST.instance && top.HEURIST.instance.name ? '/?instance=' + top.HEURIST.instance.name : '') +
+					"' target='_blank'>explore</a></span></div>" +
+	            "<div id='infobox'>" +
+					"<span>Record ID: <b>" + res[2] + "</b><hr></span>" +
+					"<span class='back_rec_type'>" + top.HEURIST.reftypes.names[parseInt(res[4])] + "</span>" +
+					"<span class='back_rec_title' title='"+res[5]+"'>" + res[5] + "</span>" +
+
+
+	             "</div>" +
+	          "</div>" +
+		"</div>";
 		return html;
 	},
 

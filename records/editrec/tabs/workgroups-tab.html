@@ -1,14 +1,9 @@
 <html>
  <head>
-  <link rel=stylesheet href="../../../common/css/heurist.css">
-  <link rel=stylesheet href="../../../common/css/heurist-edit-tab.css">
-  <link rel=stylesheet href="../../../common/css/keyword-editor.css">
+  <link rel=stylesheet href="../../../common/css/global.css">
+  <link rel=stylesheet href="../../../common/css/edit.css">
+  <link rel=stylesheet href="../../../common/css/edit-tab.css">
 
-  <style>
-	.keyword-list {
-		height: 320px;
-	}
-  </style>
  </head>
 
  <body>
@@ -24,26 +19,26 @@
 
     <br clear=all>
 
-    <table border=0 cellspacing=0 cellpadding=0 style="margin: 10px 0;">
+    <table border=0 cellspacing=0 cellpadding=0 style="margin: 10px 0; border-collapse: collapse;">
      <tr>
-      <td><b>Available</b></td>
+      <td width="270px"><b>Available</b></td>
       <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-      <td><b>Selected</b></td>
+      <td width="270px"><b>Selected</b></td>
      </tr>
 
      <tr>
       <td>
-       <div class=keyword-list><table border=0 cellspacing=0 cellpadding=0><tbody id=all-workgroup-keywords></tbody></table></div>
+       <div class=keyword-list><table border=0 cellspacing=0 cellpadding=0 width="260px"><tbody id=all-workgroup-keywords></tbody></table></div>
       </td>
       <td>
        <div id=button-box>
-        <div><input type=button value="&gt;" title="Add a tag" onmousedown="HEURIST.keywordEditor.addKeyword(window.selectedRow)" disabled id=add-button></div>
+        <div><input type=button value="&gt;" title="Add a tag" onMouseDown="HEURIST.keywordEditor.addKeyword(window.selectedRow)" disabled id=add-button></div>
         <div>&nbsp;&nbsp;</div>
-        <div><input type=button value="&lt;" title="Remove a tag" onmousedown="HEURIST.keywordEditor.removeKeyword(window.selectedRow)" disabled id=remove-button></div>
+        <div><input type=button value="&lt;" title="Remove a tag" onMouseDown="HEURIST.keywordEditor.removeKeyword(window.selectedRow)" disabled id=remove-button></div>
        </div>
       </td>
       <td>
-       <div class=keyword-list><table border=0 cellspacing=0 cellpadding=0><tbody id=current-workgroup-keywords></tbody></table></div>
+       <div class=keyword-list><table border=0 cellspacing=0 cellpadding=0 width="260px"><tbody id=current-workgroup-keywords></tbody></table></div>
       </td>
      </tr>
 

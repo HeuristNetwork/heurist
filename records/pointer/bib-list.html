@@ -42,7 +42,7 @@ if (window == top) {
 <!--   </div>-->
    <div id="add_records_footer">
     Didn't find what you were looking for?
-    <a href="#" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/addrec/mini-new.html?reftype='+document.getElementById('t').value+'&amp;title='+document.getElementById('q').value, { callback: function(title, bd, bibID) { if (bibID) { window.close(bibID, title); } else { document.forms[0].submit(); } } }); return false;"><img src="../../common/images/add-record-small.png" />Add a new record</a>
+    <a href="#" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/addrec/mini-add.html?reftype='+document.getElementById('t').value+'&amp;title='+document.getElementById('q').value, { callback: function(title, bd, bibID) { if (bibID) { window.close(bibID, title); } else { document.forms[0].submit(); } } }); return false;"><img src="../../common/images/add-record-small.png" />Add a new record</a>
    </div>
   </table>
   </form>

@@ -10,7 +10,7 @@ mysql_connection_db_select(DATABASE);
 ?>
 <html>
  <head>
-  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/heurist.css">
+  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/import.css">
 
   <title>Set ratings</title>
 
@@ -55,7 +55,7 @@ function set_ratings() {
   </script>
  </head>
 
- <body width=260 height=160 style="width: 250px; height: 140px; margin: 3px; background-color: transparent;">
+ <body width=350 height=250>
 
    <table>
     <tr>
