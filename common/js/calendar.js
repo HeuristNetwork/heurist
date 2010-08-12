@@ -183,7 +183,7 @@ document.onclick = function(e) {
 		selectedDay = target;
 		target.className += ' cal_day_selected';
 
-	   if(window.opener.document.getElementById(dateId))
+		if(window.opener && window.opener.document && window.opener.document.getElementById(dateId))
 		  window.opener.document.getElementById(dateId).value=selectedDay.id;
 
 		window.close(selectedDay.id);

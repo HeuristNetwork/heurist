@@ -336,7 +336,7 @@ Temporal.profiles = {	0	:	"Flat",
 						3	:	"Slow Finish"
 };
 
-Temporal.tDateDict = {	"DAT" 	:	"ISO Date",
+Temporal.tDateDict = {	"DAT" 	:	"ISO DateTime",
 						"AVE" 	:	"Mean Date",
 						"TPQ"	:	"Terminus Post Quem",
 						"TAQ"	:	"Terminus Ante Quem",
@@ -350,8 +350,8 @@ Temporal.tDurationDict = {	"DUR"	:	"Simple Duration",
 };
 
 Temporal.typeFieldMap = {	s : {
-									req : [["DAT"],
-											[]],		// empty date allows to capture ill-formed date strings
+									req : [["DAT"]],
+//											[]],		// empty date allows to capture ill-formed date strings
 									opt : ["COM"]
 								},
 							c :	{

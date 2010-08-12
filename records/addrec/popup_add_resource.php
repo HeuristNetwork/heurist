@@ -15,7 +15,7 @@ mysql_connection_db_select(DATABASE);
   <link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/heurist.css">
   <title>Add new record</title>
 
-  <script src="<?=HEURIST_SITE_PATH?>"external/jquery/jquery.js></script>
+  <script src="<?=HEURIST_SITE_PATH?>external/jquery/jquery.js"></script>
 
   <script>
 
@@ -49,7 +49,7 @@ function buildWorkgroupKeywordSelect(wgID) {
 
 
 function update_link() {
-	var base = "<?= HEURIST_URL_BASE?>records/addrec/add.php?addref=1";
+	var base = "<?= HEURIST_URL_BASE?>records/addrec/add.php?addref=1&instance=<?=HEURIST_INSTANCE?>";
 	var link = base + compute_args();
 
 	var tags = $("#add-link-tags").val();
@@ -139,7 +139,7 @@ function add_note(e) {
 
     if (! rt) rt = "2";  //added ian 19/9/08 to re-enable notes as default
 
-	top.location.href = '<?= HEURIST_URL_BASE?>records/addrec/add.php?addref=1&bib_reftype='+rt + extra_parms;
+	top.location.href = '<?= HEURIST_URL_BASE?>records/addrec/add.php?addref=1&instance=<?=HEURIST_INSTANCE?>&bib_reftype='+rt + extra_parms;
 
 }
 function note_type_click() {

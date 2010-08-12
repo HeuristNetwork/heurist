@@ -570,8 +570,12 @@
 								strDate += " " + zone;
 							}
 						}
-						strDate = 	$("#simpleDate").val() + " " + strDate;
-						temporal.addObjForString("DAT", strDate);
+						if (strDate && $("#simpleDate").val()) {
+							strDate = $("#simpleDate").val() + " " + strDate;
+						}else{
+							strDate = $("#simpleDate").val();
+						}
+						if (strDate) temporal.addObjForString("DAT", strDate);
 					}
 				};
 
@@ -595,14 +599,21 @@
 								}
 								window.close( that.curTemporal.toString());
 							}else{
-								var msg = validity[1].join(',');
-								msg = msg ? "The current temporal is missing the" + msg + " value(s)." : "";
+								var msg = "";
+								for (var i = 0; i < validity[1].length; i++) {
+								 if (!msg){
+								 	msg = Temporal.getStringForCode(validity[1][i]);
+								 }else{
+								 	msg += ", " + Temporal.getStringForCode(validity[1][i]);
+								 }
+								}
+								msg = msg ? "The current temporal is missing the " + msg + " value(s)." : "";
 								msg +=  validity[3] ? " " + validity[3] : "";
 								if (!confirm( msg +
 										"Would you like to continue working? Press cancel to reset to the original string.")) {
 									window.close(that.originalInputString);
 								}else{
-									window.close();
+									window.close("");
 								}
 							}
 						},
