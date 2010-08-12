@@ -80,7 +80,7 @@ body.search-result-style-list #result-style-list-link { background-image: url(..
 body.search-result-style-two-col #result-style-two-col-link { background-image: url(../images/b_2col_down.png); }
 body.search-result-style-thumbs #result-style-thumbs-link { background-image: url(../images/b_thumb_down.png); }
 body.search-result-style-blog #result-style-blog-link { background-image: url(../images/b_blog_down.png); }
-
+#results {width:100% !important}
 #results-top-spacer { height: 10px; }
 #results-message {color: green;padding: 0 20px;display: none;}
 #result-rows {padding: 10px 14px 0 14px;text-align:center;}

@@ -34,7 +34,8 @@ top.HEURIST.workgroup = {
 		var wg = top.HEURIST.workgroups[top.HEURIST.workgroup.wg_id];
 		document.title = "Heurist Workgroup home page - " + wg.name;
 		document.getElementById("wg-name").innerHTML = wg.name;
-		document.getElementById("wg-description").innerHTML = wg.description ? wg.description : "This workgroup does not currently have a description";
+		document.getElementById("wg-description").innerHTML = wg.description ? "<table style='height:100%'><tbody><tr><td>"+wg.description+"</td></tr></tbody></table>" : "";
+		document.getElementById("wg-description").title = wg.description ? wg.description : "This workgroup does not currently have a description";
 		document.getElementById("wg-members").innerHTML = wg.memberCount;
 		var admins = "";
 		for (var i=0; wg.admins && i < wg.admins.length; ++i) {
