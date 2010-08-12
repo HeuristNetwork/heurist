@@ -39,10 +39,10 @@ require_once(dirname(__FILE__).'/../woot/woot.php');
 
 if (!is_logged_in()) {
 	if (! (@$_REQUEST['bkmrk_bkmk_url'] or @$_REQUEST['bkmrk_bkmk_title'] or @$_REQUEST['bkmrk_bkmk_description']))
-        	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
+		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE);
 	else
-        	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?bkmrk_bkmk_title='.urlencode($_REQUEST['bkmrk_bkmk_title']).'&bkmrk_bkmk_url='.urlencode($_REQUEST['bkmrk_bkmk_url']).'&bkmrk_bkmk_description='.urlencode($_REQUEST['bkmrk_bkmk_description']));
-        return;
+		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE.'&bkmrk_bkmk_title='.urlencode($_REQUEST['bkmrk_bkmk_title']).'&bkmrk_bkmk_url='.urlencode($_REQUEST['bkmrk_bkmk_url']).'&bkmrk_bkmk_description='.urlencode($_REQUEST['bkmrk_bkmk_description']));
+	return;
 }
 
 mysql_connection_db_overwrite(DATABASE);
@@ -105,7 +105,7 @@ if ($_REQUEST['bkmrk_bkmk_url']) {
 	if (mysql_num_rows($res) > 0) {
 		$bkmk = mysql_fetch_assoc($res);
 		$pers_id = $bkmk['pers_id'];
-		header('Location: ' . HEURIST_URL_BASE . 'records/editrec/edit.html?bkmk_id='.$pers_id.'&fromadd=exists' . $outdate);
+		header('Location: ' . HEURIST_URL_BASE . 'records/editrec/edit.html?instance='.HEURIST_INSTANCE.'&bkmk_id='.$pers_id.'&fromadd=exists' . $outdate);
 		return;
 	}
 
@@ -199,10 +199,11 @@ if (! @$_REQUEST['_submit']  &&  $_REQUEST['bkmrk_bkmk_url']) {
 		if (exist_similar($url)) {
 			/* there is/are at least one: redirect to a disambiguation page */
 			header('Location: ' . HEURIST_URL_BASE . 'records/disambig/add_disambiguate.php'
-			                    . '?bkmk_title=' . urlencode($_REQUEST['bkmrk_bkmk_title'])
-			                    . '&f=' . urlencode($_REQUEST["f"])
-			                    . '&bkmk_url=' . urlencode($url)
-			                    . '&bkmk_description=' . urlencode($description)
+								. '?instance='.HEURIST_INSTANCE
+								. '&bkmk_title=' . urlencode($_REQUEST['bkmrk_bkmk_title'])
+								. '&f=' . urlencode($_REQUEST["f"])
+								. '&bkmk_url=' . urlencode($url)
+								. '&bkmk_description=' . urlencode($description)
 								. '&keyword=' . urlencode($_REQUEST['keyword'])
 								. (@$_REQUEST['bib_reftype'] ? '&bib_reftype=' . urlencode($_REQUEST['bib_reftype']) : ''));
 			return;
@@ -218,10 +219,11 @@ if (! @$_REQUEST['_submit']  &&  $_REQUEST['bkmrk_bkmk_url']) {
 		} else if (!check_reftype_exist($rt)) {
 			// the reftype passed in is not available on this instance  send them to the  add resource popup
 			header('Location: ' . BASE_PATH . 'records/addrec/popup_add_resource.php'
-			                    . '?t=' . urlencode($_REQUEST['t'])
-			                    . '&error_msg=' . urlencode('Record Type #'. $rt . ' does not exist in this instance of Heurist'
-			                    . ' (it may not have been enabled). Please choose the record type from the pulldown ')
-			                    . '&wg_id=' . urlencode(intval($_REQUEST['bib_workgroup'])));
+								. '?instance='.HEURIST_INSTANCE
+								. '&t=' . urlencode($_REQUEST['t'])
+								. '&error_msg=' . urlencode('Record Type #'. $rt . ' does not exist in this instance of Heurist'
+								. ' (it may not have been enabled). Please choose the record type from the pulldown ')
+								. '&wg_id=' . urlencode(intval($_REQUEST['bib_workgroup'])));
 			return;
 		}
 
@@ -261,10 +263,11 @@ if (! $rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 	if (!check_reftype_exist($rt)) {
 		// the reftype passed in is not available on this instance  send them to the  add resource popup
 		header('Location: ' . BASE_PATH . 'records/addrec/popup_add_resource.php'
-				            . '?t=' . urlencode($_REQUEST['t'])
-				            . '&error_msg=' . urlencode('Record Type #'. $rt . ' does not exist in this instance of Heurist'
-				            . ' (it may not have been enabled). Please choose the record type from the pulldown ')
-				            . '&wg_id=' . urlencode(intval($_REQUEST['bib_workgroup'])));
+							. '?instance='.HEURIST_INSTANCE
+							. '&t=' . urlencode($_REQUEST['t'])
+							. '&error_msg=' . urlencode('Record Type #'. $rt . ' does not exist in this instance of Heurist'
+							. ' (it may not have been enabled). Please choose the record type from the pulldown ')
+							. '&wg_id=' . urlencode(intval($_REQUEST['bib_workgroup'])));
 		return;
 	}
 	mysql__insert('records', array('rec_title' => $_REQUEST['bkmrk_bkmk_title'],
@@ -318,7 +321,7 @@ if ($rec_id  &&  ! @$_REQUEST['force_new']) {
 			insert_woot_content($rec_id, $description);
 		}
 
-		header('Location: ' . HEURIST_URL_BASE . 'records/editrec/edit.html?bkmk_id='.$bkmk['pers_id'].'&fromadd=exists' . $outdate . "#personal");
+		header('Location: ' . HEURIST_URL_BASE . 'records/editrec/edit.html?instance='.HEURIST_INSTANCE.'&bkmk_id='.$bkmk['pers_id'].'&fromadd=exists' . $outdate . "#personal");
 		return;
 	}
 }
@@ -409,9 +412,9 @@ if ($rec_id) {
 
 	if ($pers_id) {
 		if ($new_rec_id) {
-			header('Location: ' . HEURIST_URL_BASE . 'records/editrec/edit.html?bkmk_id=' . $pers_id . '&fromadd=new_bib' . $outdate . $wg);
+			header('Location: ' . HEURIST_URL_BASE . 'records/editrec/edit.html?instance='.HEURIST_INSTANCE.'&bkmk_id=' . $pers_id . '&fromadd=new_bib' . $outdate . $wg);
 		} else {
-			header('Location: ' . HEURIST_URL_BASE . 'records/editrec/edit.html?bkmk_id=' . $pers_id . '&fromadd=new_bkmk' . $outdate . $wg);
+			header('Location: ' . HEURIST_URL_BASE . 'records/editrec/edit.html?instance='.HEURIST_INSTANCE.'&bkmk_id=' . $pers_id . '&fromadd=new_bkmk' . $outdate . $wg);
 		}
 		return;
 	}

@@ -121,7 +121,7 @@ if (array_key_exists(@$instance, $instances)) {
 	error_log("Unable to find db row for instance = " . $instance . " or default instance = ".HEURIST_DEFAULT_INSTANCE." . Using the 'main' instance " );
 }else if ( array_key_exists('default', $instances)) {
 	define_constants('default');
-	error_log("Unable to find db row for instance = " . $instance . " or default instance = ".HEURIST_DEFAULT_INSTANCE." . Using the 'main' instance " );
+	error_log("Unable to find db row for instance = " . $instance . " or default instance = ".HEURIST_DEFAULT_INSTANCE." . Using the 'default' instance " );
 }else{
 	//TODO:  need to have a default set of constants in the case of the instance not in the database table or error message.
 	die('can\'t load/find configuration parameters for host :'.HOST_BASE.' and instance = '. $instance);

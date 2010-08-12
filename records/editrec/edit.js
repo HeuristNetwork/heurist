@@ -998,9 +998,10 @@ top.HEURIST.edit = {
 			dateBox.parentNode.appendChild(buttonElt);
 		function decodeValue (inputStr) {
 			var str = inputStr;
-			if (str.search(/\|VER/) != -1) {	//we have a temporal
-				dateBox.disabled = true;
+			dateBox.disabled = false;
+			if (str && str.search(/\|VER/) != -1) {	//we have a temporal
 				dateBox.strTemporal = str;
+				dateBox.disabled = true;
 				if (str.search(/SRT/) != -1 && str.match(/SRT=([^\|]+)/)) {
 					str = str.match(/SRT=([^\|]+)/)[1];
 				}else if (str.search(/TYP=s/) != -1 ) {
@@ -1024,10 +1025,10 @@ top.HEURIST.edit = {
 		var popupOptions = {
 			callback: function(str) {
 				dateBox.strTemporal = str;
-				dateBox.value = decodeValue(str);
 				if( dateBox.strTemporal != dateBox.value) {
 					windowRef.changed();
 				}
+				dateBox.value = decodeValue(str);
 				if( dateBox.strTemporal != dateBox.value) {
 					buttonElt.title = "Edit temporal " + dateBox.strTemporal;
 				}
@@ -1998,7 +1999,7 @@ top.HEURIST.edit.inputs.ReminderInput = function(parentElement) {
 	};
 	this.details = reminderDetails;
 
-	
+
 	var thisRef = this;
 
 	this.fieldset = parentElement.appendChild(this.document.createElement("fieldset"));
@@ -2013,7 +2014,7 @@ top.HEURIST.edit.inputs.ReminderInput = function(parentElement) {
 		tbody.className = "reminder-table";
 	//var tbody = this.detailTable.appendChild(this.document.createElement("div"));
 	//var tbody = detailTable;
-		
+
 	var tr1 = tbody.appendChild(this.document.createElement("div"));
 		var tds = [];
 		for (var i=0; i < 8; ++i) {

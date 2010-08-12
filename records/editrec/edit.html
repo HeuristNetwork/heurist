@@ -198,7 +198,7 @@
 <!-- instance name -->
 <div id=instance-name ></div>
 <!-- message of the day -->
-<div id="message"> Heurist 3 : Open Source <a href="../help/webhelp/index.html?ACL" target="_blank" title="Click for full information. Design: Ireneusz Golka, Ian Johnson &amp; Ingrid Mason. Programming: Kim Jackson, Tom Murtagh &amp; Maria Shvedova. University of Sydney Digital Innovation Unit."><br><font size="11px">Credits</font></a> </div>
+<div id="message"> Heurist 3 : Open Source <a href="../help/webhelp/index.html?ACL" target="_blank" title="Click for full information. Design: Ireneusz Golka, Ian Johnson &amp; Ingrid Mason. Programming: Steve Whtie, Kim Jackson, Tom Murtagh &amp; Maria Shvedova. University of Sydney Digital Innovation Unit."><br><font size="11px">Credits</font></a> </div>
 <!-- quicklinks -->
 <div id="quicklinks" >
   <div id=quicklink-cell class=yui-skin-sam>
@@ -233,7 +233,7 @@
 			<nobr>
 			<b><span id=workgroup-val></span></b>
 			<span id=workgroup-edit class="edit admin-only" onClick="openWorkgroupChanger();"><img src="../../common/images/edit-pencil.png">change</span>
-		</nobr>	
+		</nobr>
 		</div>
 		<div id=workgroup-access title="Access for users not in this workgroup"></div>
 	</div>
@@ -244,8 +244,8 @@
 	</div>
 </div>
 
-<!-- sidebar -->   
-<div id="sidebar"> 
+<!-- sidebar -->
+<div id="sidebar">
 	<div class="sidebar-link disabled" style="background-image: url(../../common/images/public_icon.gif);" id=public-link
 		disabledDescription="No public information for private record"><img src="../../common/images/16x16.gif">
 		<b>Public information</b>
@@ -325,9 +325,9 @@
 	</script>
 
 </div>
-<!-- end sidebar -->  
-<!-- page --> 
-<div id=page> 
+<!-- end sidebar -->
+<!-- page -->
+<div id=page>
 	<!-- banner -->
 	<div class="banner">
 		<nobr>
@@ -397,7 +397,7 @@
 
 
 </div>
-<!-- end page --> 
+<!-- end page -->
 <!-- footer -->
 			<div id=footer>
 					<span>last accessed: <span id=moddate></span>
@@ -406,7 +406,7 @@
 						top.HEURIST.whenLoaded("record", function() {
 							document.getElementById("moddate").appendChild(document.createTextNode(top.HEURIST.record.moddate));
 							var citeAs = document.getElementById("cite-as-url");
-							citeAs.href = "http://"+window.location.host+ top.HEURIST.basePath +"data/records/viewrec/view.php?bib_id=" + top.HEURIST.record.bibID;
+							citeAs.href = "http://"+window.location.host+ top.HEURIST.basePath +"data/records/viewrec/view.php?instance="+ top.HEURIST.instance.name +"&bib_id=" + top.HEURIST.record.bibID;
 							citeAs.appendChild(document.createTextNode(citeAs.href));
 						});
 					</script>
