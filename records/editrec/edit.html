@@ -65,7 +65,7 @@
 		<script>
 
 			top.HEURIST.registerEvent(window, "contentloaded", function() {
-				document.getElementById("home-link").href = top.HEURIST.basePath;
+				document.getElementById("home-link").href = top.HEURIST.basePath + "?instance=" +top.HEURIST.instance.name;
 			});
 
 			top.HEURIST.whenLoaded(["record", "edit-html"], function() {
@@ -198,7 +198,7 @@
 <!-- instance name -->
 <div id=instance-name ></div>
 <!-- message of the day -->
-<div id="message"> Heurist 3 : Open Source <a href="../help/webhelp/index.html?ACL" target="_blank" title="Click for full information. Design: Ireneusz Golka, Ian Johnson &amp; Ingrid Mason. Programming: Steve Whtie, Kim Jackson, Tom Murtagh &amp; Maria Shvedova. University of Sydney Digital Innovation Unit."><br><font size="11px">Credits</font></a> </div>
+<div id="message"> Heurist 3 : Open Source <a href="../help/webhelp/index.html?ACL" target="_blank" title="Click for full information. Design: Ireneusz Golka, Ian Johnson &amp; Ingrid Mason. Programming: Steve Whtie, Kim Jackson, Tom Murtagh &amp; Maria Shvedova. University of Sydney Digital Innovation Unit."><br><font style="font-size:11px">Credits</font></a> </div>
 <!-- quicklinks -->
 <div id="quicklinks" >
   <div id=quicklink-cell class=yui-skin-sam>
@@ -410,6 +410,7 @@
 							citeAs.appendChild(document.createTextNode(citeAs.href));
 						});
 					</script>
+					</span>
 			</div>
 <!-- end footer -->
 <div style="position: absolute;"><div id=workgroup-editor style="display: none;">

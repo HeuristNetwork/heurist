@@ -97,6 +97,12 @@ top.HEURIST.search = {
 		}
 	},
 
+
+	loadSearchLocation: function(strLocation) {
+		var temp = strLocation + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "");
+		window.location.href = temp;
+	},
+
 	loadSearch: function() {
 		if (! window.HEURIST.parameters["q"]) {
 			top.HEURIST.registerEvent(window, "contentloaded",

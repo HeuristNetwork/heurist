@@ -150,8 +150,8 @@ top.HEURIST.search.setupSearchPage();
 <div id=my-records-saved-searches class=hide>
 <div class=search-type title="Personal Saved searches which search only the records you have bookmarked (your collection)" onClick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">My bookmarks</div>
 <div class=content>
-<div class=saved-search-subsubheading><a href="?ver=1&amp;w=bookmark&amp;q=tag:Favourites OR tag:Favorites&amp;label=Favourites">My Favourites</a></div>
-<div class=saved-search-subsubheading><a href="?ver=1&amp;w=bookmark&amp;q=sortby:-m&amp;label=Recently+modified">Recent changes</a></div>
+<div class=saved-search-subsubheading><a href='?ver=1&amp;w=bookmark&amp;q=tag:Favourites+OR+tag:Favorites&amp;label=Favourites' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">My Favourites</a></div>
+<div class=saved-search-subsubheading><a href='?ver=1&amp;w=bookmark&amp;q=sortby:-m&amp;label=Recently+modified' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">Recent changes</a></div>
 <div class=saved-search-subsubheading><a id=search-by-keyword-link href="#" onClick="top.HEURIST.search.showKeywordSearchLinks(); return false;">My Tags</a></div>
 <div class=saved-search-subsubheading><a id=my-blog-link target="_blank" href="#">My Blog</a></div>
 <div class=saved-search-subsubheading>Saved searches</div>
@@ -161,7 +161,7 @@ top.HEURIST.search.setupSearchPage();
 <div id=all-records-saved-searches class=hide>
 <div class=search-type title="Personal Saved searches which search across all records in Heurist" onClick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">All records</div>
 <div class=content>
-<div class=saved-search-subsubheading><a href="search.html?ver=1&amp;w=all&amp;q=sortby:-m&amp;label=Recently+modified">Recent changes</a></div>
+<div class=saved-search-subsubheading><a href="#" onClick="top.HEURIST.search.loadSearchLocation('?ver=1&amp;w=all&amp;q=sortby:-m&amp;label=Recently+modified');">Recent changes</a></div>
 <div class=saved-search-subsubheading>Saved searches</div>
 <div id=all-records-saved-searches-searches></div>
 </div>
@@ -173,7 +173,7 @@ top.HEURIST.search.setupSearchPage();
 </div>
 </div>
 <div id=curated-collections>
-<div><a href='search.html?ver=1&amp;w=all&amp;q=tag:"Heurist+System\Featured+Subsets"&amp;label=Featured+subsets&amp;description=The+links+below+retrieve+curated+subsets+of+Heurist+records+of+general+interest+assembled+by+special+bibliographic+and+data+collection+projects.+If+you+would+like+to+add+a+collecion+here,+email+admin@heuristscholar.org+for+instructions.'>Example collections</a></div>
+<div><a href='?ver=1&amp;w=all&amp;q=tag:"Heurist+System\Featured+Subsets"&amp;label=Featured+subsets&amp;description=The+links+below+retrieve+curated+subsets+of+Heurist+records+of+general+interest+assembled+by+special+bibliographic+and+data+collection+projects.+If+you+would+like+to+add+a+collecion+here,+email+admin@heuristscholar.org+for+instructions.' onClick="top.HEURIST.search.loadSearchLocation(this.href); return false;">Example collections</a></div>
 </div>
 </div>
 <div id=keyword-search-links></div>
