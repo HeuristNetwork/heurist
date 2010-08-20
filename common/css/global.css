@@ -22,60 +22,220 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
 /****** old CSS *******/
-table {font-size:inherit;font:100%;}
-pre, code {font:100% monospace;}
-h3 {font-size: 120%}
-form {padding: 0;margin: 0; /* fixes slight scrolling on safari */}
+
+
+table {
+	font-size:inherit;
+	font:100%;
+}
+
+pre, code {
+	font:100% monospace;
+}
+form {
+	padding: 0;
+	margin: 0; /* fixes slight scrolling on safari */
+}
 /* see README.style for comments */
 
-body {behavior: url("csshover2.htc");/* behaviour sheet for IE to support :hover */}
-img {border: 0;}
-a:hover {text-decoration: underline;}
-#header { /* background-color: #660000; */height: 44px;}
-#logo-cell {width: 170px;}
-#logo-cell a {text-decoration: none;}
-#title-cell {font-size: 3ex;color: #666;}
-#title-cell a {color: #7D9AAA;text-decoration: none;}
-#title-cell a:hover {color: #7D9AAA;text-decoration: underline;}
+body {
+	behavior: url("csshover2.htc");	/* behaviour sheet for IE to support :hover */
+}
+img {
+	border: 0;
+}
+a:hover {
+	text-decoration: underline;
+}
+#header { /* background-color: #660000; */
+	height: 44px;
+}
+#logo-cell {
+	width: 170px;
+}
+#logo-cell a {
+	text-decoration: none;
+}
+#title-cell {
+	font-size: 3ex;
+	color: #666;
+}
+#title-cell a {
+	color: #7D9AAA;
+	text-decoration: none;
+}
+#title-cell a:hover {
+	color: #7D9AAA;
+	text-decoration: underline;
+}
 /* links in the top-right corner of every page (about, report a bug, contact us) */
-#quicklink-cell {vertical-align: top;text-align: right;width: 250px;color: #666;font-size:3ex;}
-#quicklink-cell a {color: #7D9AAA;text-decoration: none;margin: 0 1ex;}
-#quicklink-cell a:hover {text-decoration: underline;}
+#quicklink-cell {
+	vertical-align: top;
+	text-align: right;
+	width: 250px;
+	color: #666;
+	font-size:3ex;
+}
+#quicklink-cell a {
+	color: #7D9AAA;
+	text-decoration: none;
+	margin: 0 1ex;
+}
+#quicklink-cell a:hover {
+	text-decoration: underline;
+}
 /* a cell for adding a drop-down menu (only the search page?) */
-#menu-cell {vertical-align: bottom;text-align: right;width: 10px;}
-#toolbar {height: 80px;color: #333;}
+#menu-cell {
+	vertical-align: bottom;
+	text-align: right;
+	width: 10px;
+}
+#toolbar {
+	height: 80px;
+	color: #333;
+}
 /* #main { height: auto; } -- expands to rest of #page height */
-#main-table {width: 100%;height: 100%;}
-#left-cell {width: 200px;}
-#divider-cell {width: 4px;}
+#main-table {
+	width: 100%;
+	height: 100%;
+}
+#left-cell {
+	width: 200px;
+}
+#divider-cell {
+	width: 4px;
+}
 /* left and right content panels occupying most of the page */
-.panel {border: 1px solid #BFBFBF;font-size: 85%;}
-.panel-header {	background-image:url(../images/heading_popup.png);height:25px;line-height: 24px;padding: 0 1ex;}
-.panel-header b {font-size: 107%;}
-.panel-header a {color: #515151;}
-.panel-header * {line-height: 24px;}
-.result-container {vertical-align: top;}
-.panel-main-content {position: absolute;overflow: auto;/* setting w/h to 100% doesn't work as well as one would hope, * IE6 in particular doesn't get the hint. */width: 100%;height: 100%;}
-.panel-footer {height: 24px;}
-.expander {width: 100%;height: 100%;}
+.panel {
+	border: 1px solid #BFBFBF;
+	font-size: 85%;
+}
+.panel-header {
+	background-image:url(../images/heading_popup.png);
+	height:25px;
+	line-height: 24px;
+	padding: 0 1ex;
+}
+.panel-header b {
+	font-size: 107%;
+}
+.panel-header a {
+	color: #515151;
+}
+.panel-header * {
+	line-height: 24px;
+}
+.result-container {
+	vertical-align: top;
+}
+.panel-main-content {
+	position: absolute;
+	overflow: auto;
+	/* setting w/h to 100% doesn't work as well as one would hope,
+	 * IE6 in particular doesn't get the hint.
+	 */
+	width: 100%;
+	height: 100%;
+}
+.panel-footer {
+	height: 24px;
+}
+.expander {
+	width: 100%;
+	height: 100%;
+}
 /* make focus outlines consistent (Safari doesn't draw the right focus on links with image in it) */
-*:focus {outline: none;color: #000;}
-.img-button:focus, #logo-cell a:focus {outline: none;}
-*:focus img {outline: none;text-align: center;}
+*:focus {
+	outline: none;
+	color: #000;
+}
+.img-button:focus, #logo-cell a:focus {
+	outline: none;
+}
+*:focus img {
+	outline: none;
+	text-align: center;
+}
+
 /* Buttons on firefox get a double outline unless we specify this;
  * IE treats the ::-moz-focus-inner as :unknown, which is treated as :focus by the csshover code.
  */
-input[type=submit]::-moz-focus-inner, input[type=button]::-moz-focus-inner {border: none;}
-select:focus {outline: none;}
+input[type=submit]::-moz-focus-inner, input[type=button]::-moz-focus-inner {
+border: none;
+}
+select:focus {
+	outline: none;
+}
 /* generic awful workarounds to make radiobuttons and checkboxes cross-browser sane */
-label input {vertical-align: text-top;padding: 0;margin: 0;width: 13px;height: 13px;}
-label {line-height: 100%;}
-.dialogBox {-webkit-border-radius: 6px;-moz-border-radius: 6px;border-radius: 6px;-webkit-box-shadow: 0 3px 6px rgba(100, 100, 100, 0.6);-moz-box-shadow: 0 3px 6px rgba(100, 100, 100, 0.6);box-shadow: 0 3px 6px rgba(100, 100, 100, 0.6);display: inline-block;border: 3px solid #FFF !important;background:url("../images/backgrounds/thumbnail_bg.png") repeat-x scroll 0 bottom #F6F6F6 !important;}
-div.popup {position: absolute;visibility: hidden;-webkit-box-shadow: 4px 4px 3px gray;background: url(../images/resize-handle.gif) #000 scroll bottom right no-repeat;-webkit-border-radius: 6px;-moz-border-radius: 6px;border-radius: 6px;-webkit-box-shadow: 0 4px 8px #000;-moz-box-shadow: 0 4px 8px #000;box-shadow: 0 4px 8px #000;display: inline-block;border: 3px solid #FFF !important;background:url("../images/backgrounds/thumbnail_bg.png") repeat-x scroll 0 bottom #F6F6F6 !important;}
-table.popup {overflow: hidden;display: block;margin: 1px;padding: 0;border-spacing: 0;-webkit-border-radius: 6px;-moz-border-radius: 6px;border-radius: 6px;}
-table.popup tr, table.popup td {padding: 0;border-spacing: 0;border: 0;overflow: hidden;}
-table.popup td.header {	background-attachment:scroll;background-image:url("../images/backgrounds/banner_bg.png");background-position:0 bottom;background-repeat:repeat-x;color:#999999;cursor:move;font-size:14px;font-weight:bold;height:25px;line-height:24px;padding-left:10px;text-shadow:0 1px 1px #FFFFFF;text-transform:uppercase;}
+label input {
+	vertical-align: text-top;
+	padding: 0;
+	margin: 0;
+	width: 13px;
+	height: 13px;
+}
+label {
+	line-height: 100%;
+}
+.dialogBox {
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
+	-webkit-box-shadow: 0 3px 6px rgba(100, 100, 100, 0.6);
+	-moz-box-shadow: 0 3px 6px rgba(100, 100, 100, 0.6);
+	box-shadow: 0 3px 6px rgba(100, 100, 100, 0.6);
+	display: inline-block;
+	border: 3px solid #FFF !important;
+	background:url("../images/backgrounds/thumbnail_bg.png") repeat-x scroll 0 bottom #F6F6F6 !important;
+}
+div.popup {
+	position: absolute;
+	visibility: hidden;
+	-webkit-box-shadow: 4px 4px 3px gray;
+	background: url(../images/resize-handle.gif) #000 scroll bottom right no-repeat;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
+	-webkit-box-shadow: 0 4px 8px #000;
+	-moz-box-shadow: 0 4px 8px #000;
+	box-shadow: 0 4px 8px #000;
+	display: inline-block;
+	border: 3px solid #FFF !important;
+	background:url("../images/backgrounds/thumbnail_bg.png") repeat-x scroll 0 bottom #F6F6F6 !important;
+}
+table.popup {
+	overflow: hidden;
+	display: block;
+	margin: 1px;
+	padding: 0;
+	border-spacing: 0;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
+}
+table.popup tr, table.popup td {
+	padding: 0;
+	border-spacing: 0;
+	border: 0;
+	overflow: hidden;
+}
+table.popup td.header {
+	background-attachment:scroll;
+	background-image:url("../images/backgrounds/banner_bg.png");
+	background-position:0 bottom;
+	background-repeat:repeat-x;
+	color:#999999;
+	cursor:move;
+	font-size:14px;
+	font-weight:bold;
+	height:25px;
+	line-height:24px;
+	padding-left:10px;
+	text-shadow:0 1px 1px #FFFFFF;
+	text-transform:uppercase;
+}
 /* don't want it to look like you can select the header! */
 table.popup td.header::selection, div.draggable td.header::selection, div.draggable td.header b::selection {
 background-color: inherit;
@@ -490,7 +650,7 @@ img {border: 0;}
 /******* basic paragraph styles ********/
 H1 {color:#666;font-size: 16px;vertical-align: middle;line-height: 18px;}
 H2 {color:#6A7C99;font-size: 14px;text-transform: uppercase;}
-H3 {color:#DC8501;font-size: 12px}
+H3 {color:#DC8501;font-size: 12px; white-space: nowrap;}
 H4 {color:#000;font-size: 11px}
 H5 {color:#999;font-size: 10px}
 P {color:#333333;font-size:11px;line-height:21px;}
@@ -514,8 +674,8 @@ img a:link {border: none;}
 /****** search and button styling from search page *****/
 #q, #toolbar select, #query-input {
 	-moz-border-radius:10px 0 0 10px;
-	-webkit-botrder-raduis: 10px 0 0 10px;
-	border-radius: 10px 0 0 10px;
+	-webkit-botrder-raduis:10px 0 0 10px;
+	border-radius:10px 0 0 10px;
 	border:0 solid #666666;
 	height:22px;
 	margin-right:-3px;
@@ -529,6 +689,7 @@ body.w-all #my-records-button, body.w-bookmark #all-records-button {
 	font-size:10px;
 	height:22px;
 	margin:0 -3px 0 0;
+	padding:0 5px;
 }
 body.w-all #all-records-button, body.w-bookmark #my-records-button {
 	-moz-border-radius:0 0 0 0;
@@ -540,6 +701,7 @@ body.w-all #all-records-button, body.w-bookmark #my-records-button {
 	height:22px;
 	margin:0 -3px 0 0;
 	background-color: RGBA(0,0,0,0.1);
+	padding:0 5px;
 }
 
 #web-search-link, .button {
@@ -552,6 +714,8 @@ body.w-all #all-records-button, body.w-bookmark #my-records-button {
 	font-size:10px;
 	height:22px;
 	margin:0 -3px 0 0;
+	padding:0 5px;
+	padding:0 5px;
 }
 #my-records-button, #all-records-button, #web-search-link, .button {
 	text-transform: uppercase;
@@ -563,7 +727,7 @@ body.w-all #all-records-button, body.w-bookmark #my-records-button {
 }
 .outline {
 	border:1px solid #999;
-	padding:0 10px 0 0;
+	padding:0 10px 0 5px;
 	background-image:url("../images/backgrounds/banner_bg_dark.png");
 	background-position:bottom;
 	display:inline-block;
@@ -571,11 +735,6 @@ body.w-all #all-records-button, body.w-bookmark #my-records-button {
 	overflow: hidden;
 	vertical-align:middle;
 }
-#collection-commands, #tools-right-cell {
-	position:absolute;
-	top: -20px;
-}
-
 #my-records-saved-searches, #all-records-saved-searches, #workgroup-saved-searches, .relType {
 	padding: 0 0px 0px 0px;
 	background-color: none;
@@ -618,9 +777,9 @@ body.w-all #all-records-button, body.w-bookmark #my-records-button {
 /*  keyword editoi css */
 
 .keyword-list {
-	width: 200px;
+	width: 270px;
 	height: 350px;
-	padding: 5px;
+    padding: 5px;
 	background-color: white;
 	border: 1px solid #A4B4CB;
 	overflow-x:hidden ;
@@ -694,3 +853,13 @@ body.w-all #all-records-button, body.w-bookmark #my-records-button {
 .resource {
 	background-color: RGBA(0,0,0,0.1);}
 .add_records_img {vertical-align: text-bottom;padding: 0 1ex 0 0;}
+
+*.openTools {position:absolute;right:5px;bottom:5px;z-index:11;cursor:pointer;height: 15px;width:28px;background-image: url("../images/cog.png");background-position: 0 0;}
+.openTools {position:absolute;left:40px;}
+#toolbox {background-color: RGBA(0,0,0,0.8);padding:0 10px;margin: 0;position: absolute;top: 22px;left: 5px;width: auto;overflow: visible;	/* IE only */width: expression(document.documentElement.clientWidth-151);-moz-border-radius-bottomleft:10px;-moz-border-radius-bottomright:10px;-moz-border-radius-topleft:10px;-moz-border-radius-topright:10px;-webkit-border-bottom-left-radius:10px;-webkit-border-bottom-right-radius:10px;-webkit-border-top-left-radius:10px;-webkit-border-top-right-radius:10px;border-bottom-left-radius:10px;border-bottom-right-radius:10px;border-top-left-radius:10px;border-top-right-radius:10px;border :2px solid #FFF;-webkit-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);-moz-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);z-index: 100;}
+
+#toolbox span{text-indent: 0;white-space: nowrap;font-size: 12px;display:block;z-index:12;}
+#toolbox span:hover{color: #FFF;}
+#toolbox a {color:#CCCCCC;display:block;font-size:10px;font-weight:bold;height:19px;padding:3px 10px 0;text-decoration:none;}
+#toolbox a:hover {background-color: RGBA(255,255,255,0.2);color:#FFF}
+
