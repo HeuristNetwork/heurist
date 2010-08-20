@@ -128,11 +128,11 @@ function renderInputs(bibID, reftype) {
 	var innerDims = top.HEURIST.util.innerDimensions(window);
 
 	if (bibID) {
-		if (! parent.HEURIST.record  ||  ! parent.HEURIST.record.bibID) {	// shouldn't get here -- catch it at the parent frame
+		if (! top.HEURIST.edit.record  ||  ! top.HEURIST.edit.record.bibID) {	// shouldn't get here -- catch it at the parent frame
 			return;
 		}
 
-		var record = parent.HEURIST.record;
+		var record = top.HEURIST.edit.record;
 
 		var inputs = top.HEURIST.edit.createInputsForReftype(record.reftypeID, record.bdValuesByType, allInputs);
 
@@ -173,7 +173,7 @@ function renderInputs(bibID, reftype) {
 				right = parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-right")) || right;
 
 			if (! top.HEURIST.util.parentWindow(window)) {
-				var notes = top.HEURIST.edit.createDraggableTextarea("notes", noteText, top.document.getElementById("notes-container"),
+				var notes = top.HEURIST.edit.createDraggableTextarea("notes", noteText, parent.document.getElementById("notes-container"),
 				                                                     { description: "<b>Scratchpad</b> &nbsp;&nbsp; Highlight text, drag and drop to fields",
 				                                                       minimisedDescription: "<b>Scratchpad</b>",
 			                                                               style: { bottom: bottom+"px", right: right+"px", width: width+"px", height: height+"px", minWidth: "300px" },
@@ -399,12 +399,15 @@ document.forms[0].heuristSubmit = function() {
 window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 var bibID;
 var reftype = parseInt(window.HEURIST.parameters["reftype"]);
-if (parent.HEURIST  &&  parent.HEURIST.record) {
-	bibID = parent.HEURIST.record.bibID;
+if (parent.HEURIST  &&  parent.HEURIST.edit && parent.HEURIST.edit.record) {
+	bibID = parent.HEURIST.edit.record;
+}else if (top.HEURIST && top.HEURIST.edit && top.HEURIST.edit.record) {
+	bibID = top.HEURIST.edit.record.bibID;
 }else{
 	if (! parent.HEURIST) parent.HEURIST = {};
-	if (! parent.HEURIST.record) parent.HEURIST.record = {};
-	parent.HEURIST.record.reftype = reftype;
+	if (! parent.HEURIST.edit) parent.HEURIST.edit = {};
+	if (! parent.HEURIST.edit.record) parent.HEURIST.edit.record = {};
+	parent.HEURIST.edit.record.reftype = reftype;
 }
 renderInputs(bibID, reftype);
   </script>

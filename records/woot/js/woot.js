@@ -675,7 +675,7 @@ HAPI.WOOT.GUI = function() {
 				theme_advanced_toolbar_location: "top",
 				theme_advanced_toolbar_align: "left",
 
-				height: "400",
+				height: "800",
 
 				hidden_input: 0,
 				valid_elements: "+a[href|target=_blank],-b,-i,br,-p,img[src|align|width|height|border|vspace|hspace|alt],-h1,-h2,-h3,hr,-ul,-ol"

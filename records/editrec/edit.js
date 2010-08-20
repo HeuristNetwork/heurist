@@ -22,20 +22,21 @@
 	or write to the Free Software Foundation,Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 	*/
+if (! top.HEURIST.edit) {
 
 top.HEURIST.edit = {
 	modules: {
 		'public': { url: 'tabs/public-tab.html', 'link-id': 'public-link', loaded: false, loading: false, changed: false,
-				preload: function() { return (top.HEURIST.record.bibID  &&  top.HEURIST.record.bibID != 0); } },
+				preload: function() { return (top.HEURIST.edit.record.bibID  &&  top.HEURIST.edit.record.bibID != 0); } },
 		'personal': { url: 'tabs/personal-tab.html', 'link-id': 'personal-link', loaded: false, loading: false, changed: false,
-				preload: function() { return (top.HEURIST.record.bkmkID  &&  top.HEURIST.record.bkmkID != 0); },
+				preload: function() { return (top.HEURIST.edit.record.bkmkID  &&  top.HEURIST.edit.record.bkmkID != 0); },
 				disabledFunction: function() { top.HEURIST.edit.addMissingBookmark() } },
 		'annotation': { url: 'tabs/annotation-tab.html', 'link-id': 'annotation-link', loaded: false, loading: false, changed: false,
 				preload: function() { return true; } },
 		'workgroups': { url: 'tabs/workgroups-tab.html', 'link-id': 'workgroups-link', loaded: false, loading: false, changed: false,
-				preload: function() { return (top.HEURIST.record.bibID  &&  top.HEURIST.record.bibID != 0  &&  top.HEURIST.user.workgroups.length > 0); } },
+				preload: function() { return (top.HEURIST.edit.record.bibID  &&  top.HEURIST.edit.record.bibID != 0  &&  top.HEURIST.user.workgroups.length > 0); } },
 		'relationships': { url: 'tabs/relationships-tab.html', 'link-id': 'relationships-link', loaded: false, loading: false, changed: false,
-				preload: function() { return (top.HEURIST.record.bibID  &&  top.HEURIST.record.bibID != 0); } }
+				preload: function() { return (top.HEURIST.edit.record.bibID  &&  top.HEURIST.edit.record.bibID != 0); } }
 	},
 
 	loadModule: function(name) {
@@ -63,7 +64,7 @@ top.HEURIST.edit = {
 
 			return false;
 		}
-		else if (sidebarLink.getAttribute("enabledDescription")) {
+		else if (sidebarLink && sidebarLink.getAttribute("enabledDescription")) {
 			// we are patching a module that was previously disabled but is now enabled
 			var enabledDescription = sidebarLink.getAttribute("enabledDescription");
 			for (var i=0; i < sidebarLink.childNodes.length; ++i) {
@@ -105,7 +106,7 @@ top.HEURIST.edit = {
 			});
 
 		var urlBits = [];
-		var parameters = top.HEURIST.record;
+		var parameters = top.HEURIST.edit.record;
 		if (parameters.bibID) urlBits.push("bib_id=" + parameters.bibID);
 		if (parameters.bkmkID) urlBits.push("bkmk_id=" + parameters.bkmkID);
 		if (HAPI.instance) urlBits.push("instance=" + HAPI.instance);
@@ -219,37 +220,42 @@ top.HEURIST.edit = {
 		// fill in the toolbar fields with the details for this record
 //		document.getElementById('reftype-val').innerHTML = '';
 //		document.getElementById('reftype-val').appendChild(document.createTextNode(top.HEURIST.record.reftype));
+		if (document) {
+			if (document.getElementById('reftype-img')) {
+				document.getElementById('reftype-img').style.backgroundImage = "url("+ top.HEURIST.basePath+"common/images/reftype-icons/" + top.HEURIST.edit.record.reftypeID + ".png)";
+			}
+			if (document.getElementById('title-val')) {
+				document.getElementById('title-val').innerHTML = '';
+				document.getElementById('title-val').appendChild(document.createTextNode(top.HEURIST.edit.record.title));
+			}
+			if (document.getElementById('workgroup-val')) {
+				if (top.HEURIST.edit.record.workgroup) {
+					document.getElementById('workgroup-val').innerHTML = '';
+					document.getElementById('workgroup-val').appendChild(document.createTextNode(top.HEURIST.edit.record.workgroup));
+					document.getElementById('workgroup-div').style.display = "inline-block";
 
-		document.getElementById('reftype-img').style.backgroundImage = "url("+ top.HEURIST.basePath+"common/images/reftype-icons/" + top.HEURIST.record.reftypeID + ".png)";
+					var othersAccess = (top.HEURIST.edit.record.workgroupVisibility == "Hidden")? "not visible" : "visible";
+					document.getElementById('workgroup-access').innerHTML = othersAccess;
+				} else {
+					document.getElementById('workgroup-val').innerHTML = 'everyone';
+					document.getElementById('workgroup-div').style.display = "inline-block";
 
-		document.getElementById('title-val').innerHTML = '';
-		document.getElementById('title-val').appendChild(document.createTextNode(top.HEURIST.record.title));
-
-		if (top.HEURIST.record.workgroup) {
-			document.getElementById('workgroup-val').innerHTML = '';
-			document.getElementById('workgroup-val').appendChild(document.createTextNode(top.HEURIST.record.workgroup));
-			document.getElementById('workgroup-div').style.display = "inline-block";
-
-			var othersAccess = (top.HEURIST.record.workgroupVisibility == "Hidden")? "not visible" : "visible";
-			document.getElementById('workgroup-access').innerHTML = othersAccess;
-		} else {
-			document.getElementById('workgroup-val').innerHTML = 'everyone';
-			document.getElementById('workgroup-div').style.display = "inline-block";
-
-			document.getElementById('workgroup-access').innerHTML = 'visible';
+					document.getElementById('workgroup-access').innerHTML = 'visible';
+				}
+			}
 		}
 	},
 
 	addMissingBookmark: function() {
-		if (! top.HEURIST.record.bibID) return;
+		if (! top.HEURIST.edit.record.bibID) return;
 		if (confirm("You haven't bookmarked this record.\nWould you like to add a bookmark now?")) {
 			// only call the disabledFunction callback once -- a safeguard against infinite loops
 			top.HEURIST.edit.modules.personal.disabledFunction = null;
 
 			// add the bookmark, patch the record structure, and view the personal tab
-			top.HEURIST.util.getJsonData(top.HEURIST.basePath + "records/bookmarks/add-bookmark.php?bib_id=" + top.HEURIST.record.bibID + "&instance=" + HAPI.instance, function(vals) {
+			top.HEURIST.util.getJsonData(top.HEURIST.basePath + "records/bookmarks/add-bookmark.php?bib_id=" + top.HEURIST.edit.record.bibID + "&instance=" + HAPI.instance, function(vals) {
 				for (var i in vals) {
-					top.HEURIST.record[i] = vals[i];
+					top.HEURIST.edit.record[i] = vals[i];
 				}
 				top.HEURIST.edit.showModule("personal");
 			});
@@ -601,8 +607,8 @@ top.HEURIST.edit = {
 	getRecTypeConstraintsList: function(dTypeID) {
 		var listRecTypeConst = "";
 		var first = true;
-		var rdtID = top.HEURIST.record.rtConstraintsByDType[dTypeID] ? dTypeID : 200;
-		for (var rType in top.HEURIST.record.rtConstraintsByDType[rdtID]) {	// saw TODO  need to change this to dTypeID for relmarkers
+		var rdtID = top.HEURIST.edit.record.rtConstraintsByDType[dTypeID] ? dTypeID : 200;
+		for (var rType in top.HEURIST.edit.record.rtConstraintsByDType[rdtID]) {	// saw TODO  need to change this to dTypeID for relmarkers
 			if (first) {
 				listRecTypeConst += "" + rType;
 				first = false;
@@ -618,9 +624,9 @@ top.HEURIST.edit = {
 
 	getLookupConstraintsList: function(dTypeID) {
 		var rdtConstrainedLookups = {};
-		var rdtID = top.HEURIST.record.rtConstraintsByDType[dTypeID] ? dTypeID : 200;
-		for (var rType in top.HEURIST.record.rtConstraintsByDType[rdtID]) {
-			var dtRelConstForRecType = top.HEURIST.record.rtConstraintsByDType[rdtID][rType];
+		var rdtID = top.HEURIST.edit.record.rtConstraintsByDType[dTypeID] ? dTypeID : 200;
+		for (var rType in top.HEURIST.edit.record.rtConstraintsByDType[rdtID]) {
+			var dtRelConstForRecType = top.HEURIST.edit.record.rtConstraintsByDType[rdtID][rType];
 			if (!dtRelConstForRecType) continue;
 			for (var i = 0; i<dtRelConstForRecType.length; i++) {
 				var list = dtRelConstForRecType[i]['rdl_ids'];
@@ -1423,7 +1429,7 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 			}
 		});
 
-	if (window.HEURIST.parameters["title"]  &&  bdValue  &&  bdValue.title  &&  windowRef.parent.frameElement) {
+	if (window.HEURIST && window.HEURIST.parameters && window.HEURIST.parameters["title"]  &&  bdValue  &&  bdValue.title  &&  windowRef.parent.frameElement) {
 		// we've been given a search string for a record pointer field - pop up the search box
 		top.HEURIST.registerEvent(windowRef.parent.frameElement, "heurist-finished-loading-popup", function() {
 			thisRef.chooseResource(newDiv, bdValue.title);
@@ -1908,7 +1914,7 @@ top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.addInput = function(bd
 	tb.id = "relations-tbody";
 	newInput.appendChild(tb);
 	var relatedRecords = parent.HEURIST.record.relatedRecords;
-	this.relManager = new RelationManager(tb,top.HEURIST.record.reftypeID, relatedRecords,this.bibDetailType[0],this.changeNotification,true);
+	this.relManager = new RelationManager(tb,top.HEURIST.edit.record.reftypeID, relatedRecords,this.bibDetailType[0],this.changeNotification,true);
 
 };
 
@@ -2319,3 +2325,10 @@ top.HEURIST.edit.inputs.BibURLInput.prototype.verify = function() {
 };
 
 top.HEURIST.fireEvent(window, "heurist-edit-js-loaded");
+}
+if (typeof HAPI == "undefined"){
+	var windowRef = document.parentWindow  ||  document.defaultView  ||  document._parentWindow;
+	if (windowRef.HAPI) {
+		windowRef.HAPI.importSymbols(windowRef, this);
+	}
+}

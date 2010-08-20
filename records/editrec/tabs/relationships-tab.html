@@ -71,7 +71,7 @@
 			document.forms[0].heuristSubmit = function() {
 				top.HEURIST.util.xhrFormSubmit(document.forms[0], function(json) {
 					var vals = eval(json.responseText);
-					if (vals) parent.HEURIST.record.relatedRecords = vals;
+					if (vals) top.HEURIST.edit.record.relatedRecords = vals;
 					window.location.reload();
 				});
 			};
@@ -83,12 +83,12 @@
 			var bibInput = document.createElement("input");
 			bibInput.type = "hidden";
 			bibInput.name = "bib_id";
-			bibInput.value = top.HEURIST.record.bibID;
+			bibInput.value = top.HEURIST.edit.record.bibID;
 			document.getElementById("relations-form").appendChild(bibInput);
 
-			var relatedRecords = parent.HEURIST.record.relatedRecords;
+			var relatedRecords = top.HEURIST.edit.record.relatedRecords;
 			var relationsBody = document.getElementById("relations-tbody");
-			var relManager = new RelationManager(relationsBody,top.HEURIST.record.reftypeID, relatedRecords,0,changeNotification);
+			var relManager = new RelationManager(relationsBody,top.HEURIST.edit.record.reftypeID, relatedRecords,0,changeNotification);
 
 		</script>
 

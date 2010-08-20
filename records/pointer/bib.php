@@ -78,8 +78,9 @@ if (! $rec_id) {
 ?>
 
 <?php if (! defined("JSON_RESPONSE")) { ?>
-if (! window.HEURIST) window.HEURIST = {};
-window.HEURIST.record = <?= json_format($record) ?>;
+if (! top.HEURIST) top.HEURIST = {};
+if (! top.HEURIST.edit) top.HEURIST.edit = {};
+top.HEURIST.edit.record = <?= json_format($record) ?>;
 top.HEURIST.fireEvent(window, "heurist-record-loaded");
 <?php } else { ?>
 <?= json_format($record) ?>

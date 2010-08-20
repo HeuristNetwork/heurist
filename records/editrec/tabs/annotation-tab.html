@@ -4,7 +4,7 @@
   <link rel=stylesheet href="../../../common/css/edit.css">
   <link rel=stylesheet href="../../../common/css/edit-tab.css">
   <link rel=stylesheet href="../../../common/css/woot.css">
-  
+
   <script>
 	function onshow() {}
 	top.HAPI.importSymbols(top, this);
@@ -21,15 +21,15 @@
    <h2>Extended text</h2>
    <span class="help prompt">WYSIWYG formatting and embedded links and images.<br>Note: Access rights can be set for individual paragraphs allowing personal notes which are visible only to you or which may be shared with your workgroups.
     </span>
-   
+
    <div id=woot></div>
-   <a id=woot-ext-link target=_blank href="../../../woot/woot.html">open in new window</a>  
+   <a id=woot-ext-link target=_blank href="../../../woot/woot.html">open in new window</a>
   </div>
 
   <div style="padding-top:10px; margin-top:20px; border-top: 1px solid #A4B4CB; ">
    <h2>Discussion</h2>
     <span class="help prompt">Threaded discussion of this record</span>
-   
+
    <div id=comments></div>
   </div>
 
@@ -61,8 +61,8 @@ document.forms[0].heuristForceSubmit = function() {
 
 
 // woot stuff
-var wootTitle = "record:" + parent.HEURIST.record.bibID;
-var recTitle = parent.HEURIST.record.title;
+var wootTitle = "record:" + top.HEURIST.edit.record.bibID;
+var recTitle = top.HEURIST.edit.record.title;
 
 document.getElementById("woot-ext-link").href += "?w=" + wootTitle + "&t=" + recTitle;
 
@@ -207,7 +207,7 @@ Comment.prototype.remove = function() {
 };
 Comment.prototype.formatDate = function(date) {
 	var date = new Date(Date.parse(date.replace(/-/g, "/")));
-	var now = new Date(Date.parse(top.HEURIST.record.retrieved.replace(/-/g, "/")));
+	var now = new Date(Date.parse(top.HEURIST.edit.record.retrieved.replace(/-/g, "/")));
 
 	var dateTime = Math.round(date.getTime() / 1000);
 	var nowTime = Math.round(now.getTime() / 1000);
@@ -357,7 +357,7 @@ EditableComment.prototype.cancel = function() {
 
 
 function printAllComments() {
-	var commentDetails = parent.HEURIST.record.comments;
+	var commentDetails = top.HEURIST.edit.record.comments;
 	var comments = {};
 
 	var commentsDiv = document.getElementById("comments");

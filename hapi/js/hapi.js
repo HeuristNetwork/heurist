@@ -3757,3 +3757,5 @@ HAPI.importSymbols = function(from, to) {
 };
 
 if (window["HeuristApiKey"]) { HAPI.setKey(HeuristApiKey, "" + window["HeuristInstance"], "" + window["HeuristBaseURL"]); }
+if (top.HEURIST && top.HEURIST.fireEvent) top.HEURIST.fireEvent(top, "heurist-HAPI-loaded");
+
