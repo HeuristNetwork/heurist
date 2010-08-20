@@ -25,7 +25,6 @@
 	</head>
 	<body>
 
-
 		<script src="../../common/js/heurist.js"></script>
 		<script src="heurist-relation.js"></script>
 		<script src="../../common/php/heurist-obj-user.php"></script>
@@ -41,50 +40,66 @@
 		<script>
 
 		</script>
+		<script src="edit.js"></script>
 		<script>
-			top.HEURIST.loadScript(top.HEURIST.basePath +"records/pointer/bib.php?bib_id="+top.HEURIST.parameters["bib_id"]+"&bkmk_id="+top.HEURIST.parameters["bkmk_id"]);
+			{
+				var URL = top.HEURIST.basePath +"records/pointer/bib.php?bib_id="+
+					(top.HEURIST.parameters["bib_id"]? top.HEURIST.parameters["bib_id"] : window.location.search.match(/bib_id=(\d+).*$/)[1])+
+					(top.HEURIST.parameters["bkmk_id"]?"&bkmk_id="+top.HEURIST.parameters["bkmk_id"] : "");
+				window.document.write('<script src="' + URL + '"></' + 'script>');
+			}
+		//			top.HEURIST.loadScript(top.HEURIST.basePath +"records/pointer/bib.php?bib_id="+
+//			(top.HEURIST.parameters["bib_id"]? top.HEURIST.parameters["bib_id"] : window.location.search.match(/bib_id=(\d+).*$/)[1])+
+//			"&bkmk_id="+top.HEURIST.parameters["bkmk_id"]);
 		</script>
 		<script>
-			top.HEURIST.whenLoaded("record", function() {
-				if (! top.HEURIST.record) {
-					top.location.replace(top.HEURIST.basePath +"common/messages/invalid.html?"+top.HEURIST.parameters["bib_id"]);
+			top.HEURIST.whenLoaded(["record","short-edit-html"], function() {
+				var rec = (top && top.HEURIST && top.HEURIST.edit && top.HEURIST.edit.record ? top.HEURIST.edit.record:null);
+				var bib_id =  ((rec?rec.bibID : 0) || (window.HEURIST ? window.HEURIST.parameters["bib_id"]:0) || (top.HEURIST ? top.HEURIST.parameters["bib_id"]:0));
+				if (! rec) {
+					window.location.replace(top.HEURIST.basePath +"common/messages/invalid.html"+ (bib_id ? "?" + bib_id : ""));
 				}
-				if (top.HEURIST.record.denied) {
-					top.location.replace(top.HEURIST.basePath +"common/messages/denied.html?"+top.HEURIST.parameters["bib_id"]);
+				if (rec.denied) {
+					window.location.replace(window.HEURIST.basePath +"common/messages/denied.html"+ (bib_id ? "?" + bib_id : ""));
 				}
-				if (top.HEURIST.record.replacedBy) {
+				if (rec.replacedBy) {
 					// This record has been deprecated in favour of another ...
 					// Load that page (and make a best effort to stop this one from continuing)
-					top.location.replace("?bib_id=" + top.HEURIST.record.replacedBy);
+					window.location.replace("?bib_id=" + rec.replacedBy);
 				}
 			});
 		</script>
-		<script src="edit.js"></script>
 		<script src="../../common/php/load-hapi.php"></script> <!-- FIXME:  need to just change hapi to load without instances and keys  -->
 
 		<script>
-
-			top.HEURIST.registerEvent(window, "contentloaded", function() {
-				document.getElementById("home-link").href = top.HEURIST.basePath + "?instance=" +top.HEURIST.instance.name;
-			});
-
-			top.HEURIST.whenLoaded(["record", "edit-html"], function() {
+			function showProperties() {
 				top.HEURIST.edit.showRecordProperties();
-				if (top.HEURIST.parameters["sid"]) {
-					top.HEURIST.util.getJsonData(top.HEURIST.basePath+"records/editrec/result-context.php?s="+top.HEURIST.parameters["sid"]+"&id="+top.HEURIST.record.bibID, function(context) {
-						if (! context) return;
-						document.getElementById("search-nav").innerHTML =
-						"<p>Record "+context.pos+" of "+context.count+" search results</p>" +
-						"<p>" +
-						(context.prev ? "<a style=\"padding-right: 10px;\" href=?sid="+top.HEURIST.parameters["sid"]+"&bib_id="+context.prev+">previous</a>" : "") +
-						(context.next ? "<a href=?sid="+top.HEURIST.parameters["sid"]+"&bib_id="+context.next+">next</a>" : "") +
-						"</p>";
-					});
-				}
-			});
-			top.HEURIST.whenLoaded(["record", "edit-js", "edit-html"], top.HEURIST.edit.loadAllModules);
-			top.HEURIST.whenLoaded(["record", "edit-js", "edit-html"],createReftypeChanger );
-			window.onbeforeunload = top.HEURIST.edit.onbeforeunload;
+//				if (top.HEURIST.parameters["sid"]) {
+//					top.HEURIST.util.getJsonData(top.HEURIST.basePath+"records/editrec/result-context.php?s="+top.HEURIST.parameters["sid"]+"&id="+top.HEURIST.record.bibID, function(context) {
+//						if (! context) return;
+//						document.getElementById("search-nav").innerHTML =
+//						"<p>Record "+context.pos+" of "+context.count+" search results</p>" +
+//						"<p>" +
+//						(context.prev ? "<a style=\"padding-right: 10px;\" href=?sid="+top.HEURIST.parameters["sid"]+"&bib_id="+context.prev+">previous</a>" : "") +
+//						(context.next ? "<a href=?sid="+top.HEURIST.parameters["sid"]+"&bib_id="+context.next+">next</a>" : "") +
+//						"</p>";
+//					});
+//				}
+			}
+
+
+			top.HEURIST.whenLoaded(["record", "edit-js", "HAPI", "short-edit-html"], showProperties );
+			top.HEURIST.whenLoaded(["record", "edit-js", "HAPI", "short-edit-html"],createReftypeChanger );
+
+			function loadModules() {
+				top.HEURIST.edit.loadAllModules();
+			}
+			top.HEURIST.whenLoaded(["record", "edit-js", "HAPI", "short-edit-html"], loadModules);
+
+			function setUnloadHandler() {
+				window.onbeforeunload = top.HEURIST.edit.onbeforeunload;
+			}
+			top.HEURIST.whenLoaded(["edit-js", "short-edit-html"],setUnloadHandler );
 
 
 			function createReftypeChanger() {
@@ -104,7 +119,7 @@
 						var value = top.HEURIST.reftypes.primary[i];
 						var name = top.HEURIST.reftypes.names[value];
 						reftypeValSelect.options[reftypeValSelect.length] = new Option(name, value);
-						if (name == top.HEURIST.record.reftype) {
+						if (name == top.HEURIST.edit.record.reftype) {
 							reftypeValSelect.selectedIndex = reftypeValSelect.options.length-1;
 						}
 					}
@@ -116,7 +131,7 @@
 						var value = top.HEURIST.reftypes.other[i];
 						var name = top.HEURIST.reftypes.names[value];
 						reftypeValSelect.options[reftypeValSelect.length] = new Option(name, value);
-						if (name == top.HEURIST.record.reftype) {
+						if (name == top.HEURIST.edit.record.reftype) {
 							reftypeValSelect.selectedIndex = reftypeValSelect.options.length-1;
 						}
 					}
@@ -125,9 +140,9 @@
 
 			function changeReftype() {
 				var reftypeValue = document.getElementById("reftype-select").value;
-				if (top.HEURIST.record.reftype != reftypeValue) {
-					top.HEURIST.record.reftypeID = reftypeValue;
-					top.HEURIST.record.reftype = top.HEURIST.reftypes.names[reftypeValue];
+				if (top.HEURIST.edit.record.reftype != reftypeValue) {
+					top.HEURIST.edit.record.reftypeID = reftypeValue;
+					top.HEURIST.edit.record.reftype = top.HEURIST.reftypes.names[reftypeValue];
 
 					// update the public info frame to reflect the change of reftype
 					top.HEURIST.edit.showModule("public");
@@ -138,7 +153,7 @@
 
 
 			function openWorkgroupChanger() {
-				if (top.HEURIST.record.workgroupVisibility == "Hidden") {
+				if (top.HEURIST.edit.record.workgroupVisibility == "Hidden") {
 					document.getElementById("non-wg-hide").checked = true;
 				} else {
 					document.getElementById("non-wg-view").checked = true;
@@ -155,7 +170,7 @@
 					var wgName = top.HEURIST.workgroups[wgID].name;
 					wgVal.options[i+1] = new Option(wgName, wgID);
 
-					if (wgName == top.HEURIST.record.workgroup)
+					if (wgName == top.HEURIST.edit.record.workgroup)
 					wgVal.selectedIndex = i+1;
 				}
 
@@ -173,9 +188,9 @@
 				if (! cancel) {
 					var wgValue = document.getElementById("new-workgroup-value").value;
 					var wgVisValue = document.getElementById("non-wg-hide").checked? "Hidden" : "Viewable";
-					if (top.HEURIST.record.workgroup != wgValue  ||  top.HEURIST.record.workgroupVisibility != wgVisValue) {
-						top.HEURIST.record.workgroup = wgValue? top.HEURIST.workgroups[wgValue].name : null;
-						top.HEURIST.record.workgroupVisibility = wgVisValue;
+					if (top.HEURIST.edit.record.workgroup != wgValue  ||  top.HEURIST.edit.record.workgroupVisibility != wgVisValue) {
+						top.HEURIST.edit.record.workgroup = wgValue? top.HEURIST.workgroups[wgValue].name : null;
+						top.HEURIST.edit.record.workgroupVisibility = wgVisValue;
 
 						top.HEURIST.edit.modules["public"].frame.contentWindow.setWorkgroupProperties(wgValue, wgVisValue);
 
@@ -191,58 +206,6 @@
 
 		</script>
 
-<a id=home-link>
-<div id=logo title="Click the logo to return to your Favourites"></div>
-</a>
-<div id=version></div>
-<!-- instance name -->
-<div id=instance-name ></div>
-<!-- message of the day -->
-<div id="message"> Heurist 3 : Open Source <a href="../help/webhelp/index.html?ACL" target="_blank" title="Click for full information. Design: Ireneusz Golka, Ian Johnson &amp; Ingrid Mason. Programming: Steve Whtie, Kim Jackson, Tom Murtagh &amp; Maria Shvedova. University of Sydney Digital Innovation Unit."><br><font style="font-size:11px">Credits</font></a> </div>
-<!-- quicklinks -->
-<div id="quicklinks" >
-  <div id=quicklink-cell class=yui-skin-sam>
-  	<nobr><b>
-		<a href="../../help/about.html" onClick="top.HEURIST.util.popupURL(window, href); return false;">About</a> |
-		<a href="http://www.timemap.net/tmissues.php" target=_blank>Report a bug</a> |
-		<a id=contact-link href="mailto:info@heuristscholar.org">Contact us</a> |
-		<a id=help-link href='#' onClick="top.HEURIST.util.helpToggler(this)"></a>
-
-		<script>
-			top.HEURIST.whenLoaded(["edit-html", "obj-common"], top.HEURIST.util.setInstanceName);
-			top.HEURIST.whenLoaded("record", function() {
-				var contactLinkSubject = "HEURIST v" + top.HEURIST.VERSION + " user:"+top.HEURIST.get_user_username() + " edit";
-				if (top.HEURIST.record.bibID) contactLinkSubject += " bibID:"+top.HEURIST.record.bibID;
-				if (top.HEURIST.record.bkmkID) contactLinkSubject += " bkmkID:"+top.HEURIST.record.bkmkID;
-				top.document.getElementById("contact-link").href += "?subject=" + encodeURIComponent(contactLinkSubject);
-			});
-		</script>
-	</b></nobr>
-	</div>
-</div>
-<!-- search -->
-<div id=search  class="roundedBoth outline bannerBG">
-	<div class="tablecell" id="edit_record_title">EDIT RECORD</div>
-	<div class="tablecell">
-		<img id=reftype-img src="../../common/images/16x16.gif">
-		<span id=title-val></span>
-		<span id=reftype-edit class=edit ></span>
-	</div>
-	<div class="tablecell" id=workgroup-div>
-		<div id=workgroup-val-div title="Restrict access by workgroup">
-			<nobr>
-			<b><span id=workgroup-val></span></b>
-			<span id=workgroup-edit class="edit admin-only" onClick="openWorkgroupChanger();"><img src="../../common/images/edit-pencil.png">change</span>
-		</nobr>
-		</div>
-		<div id=workgroup-access title="Access for users not in this workgroup"></div>
-	</div>
-	<div class="tablecell" style="float:right; border:none;">
-		<input type=button name=save-button value=Cancel onClick="top.HEURIST.edit.cancelSave();">
-		&nbsp;&nbsp;
-		<input type=button name=save-button style="font-weight: bold;" value=Save onClick="top.HEURIST.edit.save();">
-	</div>
-</div>
 
 <!-- sidebar -->
 <div id="sidebar">
@@ -281,46 +244,17 @@
 		<input type=button name=save-button value=Cancel onClick="top.HEURIST.edit.cancelSave();">
 		&nbsp;&nbsp;
 		<input type=button name=save-button value=Save style="font-weight: bold;" onClick="top.HEURIST.edit.save();">
-	</div>
-	<div style="padding: 0 30px;">
-		<div style="padding: 3px 0;"><label for=act-recent><input type=radio name=act id=act-recent value=search
-			onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)"> show recent edits</label></div>
-		<div style="padding: 3px 0;"><label for=act-stay><input type=radio name=act id=act-stay value=stay
-			onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)"> stay on page</label></div>
-		<div style="padding: 3px 0;" id=close-window-option><label for=act-close><input type=radio name=act id=act-close value=close
-			onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)"> close window</label></div>
-		<div id=search-nav></div>
+		&nbsp;&nbsp;
+		<a id=help-link href='#' onClick="top.HEURIST.util.helpToggler(this)"></a>
 	</div>
 	<script>
-		top.HEURIST.whenLoaded("display-preferences", function() {
-			var canCloseWindow = false;
-			try {
-				// see if we would be able to close this window with JS
-				if (top.opener != top && top.HEURIST_WINDOW_ID) {
-					canCloseWindow = true;
-				}
-				// otherwise, fall through to a different detail action, and hide the close-window option
-			} catch (e) {
-				document.getElementById("close-window-option").style.display = "none";
-			}
-
-			switch (top.HEURIST.displayPreferences["action-on-save"]) {
-				case "search":
-				document.getElementById("act-recent").checked = true;
-				break;
-				case "close":
-				if (canCloseWindow) {
-					document.getElementById("act-close").checked = true;
-					break;
-				}
-				default:
-				document.getElementById("act-stay").checked = true;
-			}
-
+		top.HEURIST.whenLoaded(["display-preferences","short-edit-html"], function() {
 			var helpOn = (top.HEURIST.util.getDisplayPreference("help") !== "hide");
-			var helpLink = top.document.getElementById("help-link");
-			helpLink.innerHTML = "<span>Help is " + (helpOn? "on" : "off") + "</span>";
-			helpLink.title = helpOn? "Click here to hide help text" : "Click here to show help text";
+			var helpLink = window.document.getElementById("help-link");
+			if (helpLink) {
+				helpLink.innerHTML = "<span>Help is " + (helpOn? "on" : "off") + "</span>";
+				helpLink.title = helpOn? "Click here to hide help text" : "Click here to show help text";
+			}
 		});
 	</script>
 
@@ -332,23 +266,10 @@
 	<div class="banner">
 		<nobr>
 					<div class=public-visible>
-						<!--
-						<select id=input-visibility onchange="top.HEURIST.util.setDisplayPreference('input-visibility', this.value)" class=minimal>
-						<option value=required>Show only required fields</option>
-						<option value=recommended>Show only recommended fields</option>
-						<option value=all>Show all fields</option>
-						</select>
-						<script>
-						top.HEURIST.whenLoaded("display-preferences", function() {
-						switch (top.HEURIST.displayPreferences["input-visibility"]) {
-						case "required": document.getElementById("input-visibility").selectedIndex = 0; break;
-						case "recommended": document.getElementById("input-visibility").selectedIndex = 1; break;
-						case "all": document.getElementById("input-visibility").selectedIndex = 2; break;
-						}
-						});
-						</script>
-						-->
 
+		<img id=reftype-img src="../../common/images/16x16.gif">
+		<span id=title-val></span>
+		<span id=reftype-edit class=edit ></span>
 						<label for=input-visibility style="margin-left: 116px;">
 							<input style="vertical-align: middle;" type=checkbox id=input-visibility onClick="top.HEURIST.util.setDisplayPreference('input-visibility', this.checked? 'all' : 'recommended')" class=minimal>
 							show optional fields
@@ -372,20 +293,6 @@
 
 
 					&nbsp;
-					<!--
-					<select id=help-visibility onchange="top.HEURIST.util.setDisplayPreference('help', this.value)" class=minimal>
-					<option value=show>Show help text</option>
-					<option value=hide>Hide help text</option>
-					</select>
-					<script>
-					top.HEURIST.whenLoaded("display-preferences", function() {
-					switch (top.HEURIST.displayPreferences["help"]) {
-					case "show": document.getElementById("help-visibility").selectedIndex = 0; break;
-					case "hide": document.getElementById("help-visibility").selectedIndex = 1; break;
-					}
-					});
-					</script>
-					-->
 			</nobr>
 	</div>
 	<!-- end banner -->
@@ -393,7 +300,7 @@
 	<div id="page-inner" class="panel-main-div">
 		<div id=tab-holder class="autosize panel-main-content">
 		</div>
-		</div>
+	</div>
 
 
 </div>
@@ -401,12 +308,12 @@
 <!-- footer -->
 			<div id=footer>
 					<span>last accessed: <span id=moddate></span>
-							<span>cite as: <a href='#' id=cite-as-url contextmenu=enable onClick="return false;"></a></span>
+					<span>cite as: <a href='#' id=cite-as-url contextmenu=enable onClick="return false;"></a></span>
 					<script>
 						top.HEURIST.whenLoaded("record", function() {
-							document.getElementById("moddate").appendChild(document.createTextNode(top.HEURIST.record.moddate));
+							document.getElementById("moddate").appendChild(document.createTextNode(top.HEURIST.edit.record.moddate));
 							var citeAs = document.getElementById("cite-as-url");
-							citeAs.href = "http://"+window.location.host+ top.HEURIST.basePath +"data/records/viewrec/view.php?instance="+ top.HEURIST.instance.name +"&bib_id=" + top.HEURIST.record.bibID;
+							citeAs.href = "http://"+window.location.host+ top.HEURIST.basePath +"data/records/viewrec/view.php?instance="+ top.HEURIST.instance.name +"&bib_id=" + top.HEURIST.edit.record.bibID;
 							citeAs.appendChild(document.createTextNode(citeAs.href));
 						});
 					</script>
@@ -474,7 +381,7 @@
 	</div>
 </div>
 
-<script src="../disambig/disambiguate.js"></script>
+<!--script src="../disambig/disambiguate.js"></script>
 <script>
 	function popupDisambiguation(matches) {
 		_popupDisambiguation(matches, function(choice) {
@@ -493,11 +400,14 @@
 			}
 		});
 	}
-</script>
+</script-->
 
 <script>
+	if (!top.HAPI && typeof HAPI == "object"){
+		HAPI.importSymbols(this,top);
+	}
 	top.HEURIST.contentLoaded();
-	top.HEURIST.fireEvent(top, "heurist-edit-html-loaded");
+	top.HEURIST.fireEvent(top, "heurist-short-edit-html-loaded");
 </script>
 
 	</body>
