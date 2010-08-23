@@ -86,5 +86,5 @@ input[type="radio"] {vertical-align: text-top;}
 div.thumbnail img{width:80px;border: 2px solid #FFF;-moz-box-shadow:0 2px 4px #BBB;-webkit-box-shadow:0 2px 4px #BBB;box-shadow:0 2px 4px #BBB;}
 img {border:0 none;vertical-align:middle;}
 #recID {float:right}
-.HeaderRow {width:100%; height:95px; overflow:hidden; position: relative;}
-#footer {position: absolute;bottom:0; right:0;left:0;}
+.HeaderRow {width:100%; height:95px; overflow:hidden; position: relative;padding-top: 10px;}
+#footer {position: absolute;top:0; right:0;left:0;}

@@ -356,7 +356,7 @@
 											<b>Publishing wizard</b>
 
 										</td>
-										<td class=panel-header id=sideheader><a  href="<?=HEURIST_SITE_PATH?>help/index.html?Publish" target="_blank">case study</a></td>
+										<td class=panel-header id=sideheader><a  href="<?=HEURIST_SITE_PATH?>help/webhelp/index.html?Publish" target="_blank">case study</a></td>
 									</tr>
 									<tr><td class=panel-main colspan="2"><div class="expander panel-main-div" id=right-panel-content>
 											<!-- <div id=right-panel-content class="autosize panel-main-content">  -->
@@ -376,7 +376,7 @@
 															<input type="hidden" id="force_args" name="force_args" value="html">
 															<span style="padding: 5px;"></span><input title="Forces search to be obligatorily processed through the specified style" type="checkbox" name="chk_force" id="chk_force" <?= (@$forced ? 'checked' : '') ?>  onClick="forceSearch();">
 															Lock the output to be displayed in this style
-															<span style="padding: 5px;"><img src="<?= HEURIST_URL_BASE ?>common/images/lb.gif" align="top"><a  href="<?=HEURIST_SITE_PATH?>help/index.html?Publish" target="_blank">adding stylesheet</a></span>
+															<span style="padding: 5px;"><img src="<?= HEURIST_URL_BASE ?>common/images/lb.gif" align="top"><a  href="<?=HEURIST_SITE_PATH?>help/webhelp/index.html?Publish" target="_blank">adding stylesheet</a></span>
 														</form>
 													</div>
 												</div>

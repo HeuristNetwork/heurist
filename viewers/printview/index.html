@@ -1,0 +1,116 @@
+<html>
+	<head>
+		<script src="load_print_formats.php"></script>
+		<script>
+			function loadXMLDocFromFile(filename)
+			{
+				var xmlDoc;
+				// code for IE
+				try{
+					if (window.ActiveXObject){
+						var errorMsg = "Error loading " + filename + " using ActiveXObject";
+						xmlDoc=new ActiveXObject("Microsoft.XMLDOM");
+						xmlDoc.async=false;
+						xmlDoc.load(filename);
+						xmlDoc=xmlDoc.documentElement;
+					}
+					//code for google chrome
+					else if(window.XMLHttpRequest){
+						var errorMsg = "Error loading " + filename + " using XMLHttpRequest";
+						var d = new XMLHttpRequest();
+						d.open("GET", filename, false);
+						d.send("");
+						xmlDoc=d.responseXML;
+					}
+					// code for Mozilla, Firefox, Opera, etc.
+					else if (document.implementation && document.implementation.createDocument){
+						var errorHappendHere = "Error with document implementation.";
+						var errorMsg = "Error loading " + filename + " using createDocument";
+						xmlDoc = document.implementation.createDocument("","",null);
+						xmlDoc.async=false;
+						xmlDoc.load(filename);
+					}
+					else{
+						alert("Your browser doesn't process XSL. Unable to view content.");
+					}
+				}
+				catch(e){
+					alert(errorHappendHere);
+				}
+				return xmlDoc;
+			}
+
+			function fillStyles(s) {
+				var styleSelectElt = document.getElementById("style_select");
+				styleSelectElt.options[0] = new Option("Select a style...", "");
+				styleSelectElt.options[0].disabled = true;
+				var i = 1;
+				for (var n = 0; n < styles.length; ++n) {
+					var style = styles[n];
+					styleSelectElt.options[i++] = new Option(style[1], style[0]);
+					if (style[0] == s) styleSelectElt.selectedIndex = i-1;
+				}
+				styleSelectElt.options[i] = new Option("Generic XML", "genericXML");
+			}
+
+			var xml;
+			function init() {
+			//parse query
+				var style = location.search.match(/style=([^&=#]*)/);
+				var query = location.search.replace(/&style=[^&=#]*/,"");
+			//load xml
+				if (query){
+					xml = loadXMLDocFromFile("http://heuristscholar.org/h3/export/xml/hml.php"+query);
+				}else{
+					alert("invalid use -must supply a query string q=.... ");
+					document.getElementById("displayResult").innerHTML = "Unable to display any results";
+					return;
+				}
+				if (style && style[1]) {
+					style = style[1];
+				}else{
+					style = "default";
+				}
+				fillStyles(style);
+				displayResult(style);
+			}
+
+			function displayResult(style){
+				var tempXML = xml;
+				var resultDiv =document.getElementById("displayResult");
+
+				while (resultDiv.childNodes[0]) resultDiv.removeChild(resultDiv.childNodes[0]);
+
+				if (style == "genericXML") {
+					document.getElementById("displayResult").appendChild(tempXML.documentElement);
+					return;
+				}
+				var xsl=loadXMLDocFromFile("xsl/" +style +".xsl");
+				if (!xsl) {
+					alert("Unable to read .xsl file, check to see if this style sheet is readable in your browser or another browser.");
+					return;
+				}
+				// code for IE
+				if (window.ActiveXObject)
+				{
+					var ex=xml.transformNode(xsl);
+					document.getElementById("displayResult").innerHTML=ex;
+				}
+				// code for Mozilla, Firefox, Opera, etc.
+				else if (document.implementation && document.implementation.createDocument)
+				{
+					var xsltProcessor=new XSLTProcessor();
+					xsltProcessor.importStylesheet(xsl);
+					var resultDocument = xsltProcessor.transformToFragment(xml,document);
+					document.getElementById("displayResult").appendChild(resultDocument);
+				}
+			}
+		</script>
+	</head>
+	<body onload="init()">
+		<select id="style_select" style="width: 180px;" onChange="displayResult(this.options[this.selectedIndex].value, true);">
+		</select>
+
+		<div id="displayResult" >Loading .....</div>
+	</body>
+</html>

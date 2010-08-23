@@ -917,7 +917,8 @@ top.HEURIST.search = {
 	},
 
 	edit_short: function(bib_id,result_div) {
-
+		top.HEURIST.search.closeInfos;
+		top.HEURIST.search.setRecordView("full");
 		var infos = top.HEURIST.search.infos;
 		if (infos["bib:" + bib_id]) {
 			// bib info is already displaying -- hide it
@@ -932,13 +933,28 @@ top.HEURIST.search = {
 		info_div.className = "info";
 		info_div.frameBorder = 0;
 		info_div.style.height = "100%";
-		info_div.src = top.HEURIST.basePath+ "records/editrec/short-edit.html?bib_id="+bib_id + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "");
+		info_div.src = top.HEURIST.basePath+ "records/editrec/edit.html?bib_id="+bib_id + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "");
 		infos["bib:" + bib_id] = info_div;
 		result_div.className += " expanded";
 		pageRight.appendChild(info_div);
 		return false;
 	},
 
+	publisherTest: function() {
+		top.HEURIST.search.closeInfos(); // closes infos
+		top.HEURIST.search.setRecordView("full"); // sets full view
+		var info_div = document.createElement("iframe");
+		var infos = top.HEURIST.search.infos;   
+		var pageRight = document.getElementById('page-right');
+		info_div.className = "info";
+		info_div.frameBorder = 0;
+        infos["publish"] = info_div; 
+		info_div.src = "http://heuristscholar.org/h3/temp/publisherxslt.html";
+		document.getElementById("helper").style.display = "none";
+		pageRight.appendChild(info_div);
+		return false;
+	},
+	
 	full_record_view: function(e, targ) {
 		if (! e) e = window.event;
 
@@ -1017,16 +1033,19 @@ top.HEURIST.search = {
 		if (e.target) targ = e.target;
 		else if (e.srcElement) targ = e.srcElement;
 		if (targ.nodeType == 3) targ = targ.parentNode;
-
 		if (targ  &&  targ.className.match("result_row")) top.HEURIST.search.open_out(null, targ.childNodes[3]);
 	},
 
 	closeInfos: function() {
 		for (var i in top.HEURIST.search.infos) {
 			var info = top.HEURIST.search.infos[i];
-			info.parentNode.className = info.parentNode.className.replace(" expanded", "");
+			//info.parentNode.className = info.parentNode.className.replace(" expanded", ""); 
 			info.parentNode.removeChild(info);
-			delete top.HEURIST.search.infos[i];
+			delete top.HEURIST.search.infos[i];}
+		var resultsDiv = document.getElementById("result-rows");
+		for (var i=0; i < resultsDiv.childNodes.length; ++i) {
+        	var result = resultsDiv.childNodes[i];
+			result.className = result.className.replace(" expanded", ""); 
 		}
 	},
 

@@ -163,7 +163,7 @@ function print_header_line($bib) {
 <div class=HeaderRow><h2><?= htmlspecialchars($bib['rec_title']) ?></h2>
 <div id=footer>
 <h3><?= htmlspecialchars($bib['rt_name']) ?></h3>
-<div id=recID>Record ID:<?= htmlspecialchars($rec_id) ?><nobr><span class="link"><a id=edit-link class=normal target=_new href="../editrec/edit.html?bib_id=<?= $rec_id ?>" onclick="return sane_link_opener(this);"><img src="../../common/images/edit-pencil.png" title="Edit Record"></a></span></nobr></div>
+<div id=recID>Record ID:<?= htmlspecialchars($rec_id) ?><nobr><span class="link"><a id=edit-link class=normal target=_self href="../editrec/edit.html?bib_id=<?= $rec_id ?>" onclick="return sane_link_opener(this);"><img src="../../common/images/edit-pencil.png" title="Edit Record"></a></span></nobr></div>
 </div>
 </div>
 <div class=detailRowHeader>
