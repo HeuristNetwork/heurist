@@ -107,6 +107,12 @@
 			<map:serialize type="html"/>
 		</map:match>
 
+		<map:match pattern="rssFeed/*">
+			<!-- generates heurist kml for the given rss feed url -->
+			<map:generate src="http://{global:serverName}/{request-param:installDir}/viewers/map/geoRssReader.php?id={1}"/>
+			<map:serialize type="xml"/>
+		</map:match>
+
 		<map:match pattern="kmltrans/*">
 			<!-- generates heurist kml for the given query and transforms it -->
 			<map:generate src="http://{global:serverName}/{request-param:installDir}/viewers/map/googleearth.kml.php/heurist-map.kml?w=all&amp;multilevel=false&amp;q={1}" label="rawkml"/>

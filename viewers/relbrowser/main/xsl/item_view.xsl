@@ -108,6 +108,7 @@
 					<script src="{$hBase}external/timeline/timeline_js/timeline-api.js" type="text/javascript"></script>
 					<script src="{$hBase}external/timemap.js/timemap.js" type="text/javascript"></script>
 					<script src="{$hBase}external/timemap.js/kmlparser.js" type="text/javascript"></script>
+					<script src="{$hBase}external/timemap.js/georssparser.js" type="text/javascript"></script>
 					<script src="{$appBase}js/mapping.js"></script>
 					<xsl:if test="$enableMapTrack = 'true'">
 						<script>

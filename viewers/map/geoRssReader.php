@@ -1,0 +1,51 @@
+<?php
+header('Content-type: text/xml; charset=utf-8');
+
+require_once(dirname(__FILE__).'/../../common/config/heurist-instances.php');
+require_once(dirname(__FILE__).'/../../common/connect/db.php');
+
+define("KML_DETAIL_TYPE", 551);
+define("RSSFEED_DETAIL_TYPE", 610);
+define("FILE_DETAIL_TYPE", 221);
+
+mysql_connection_select(DATABASE);
+$res = mysql_query("select rd_val from rec_details where rd_rec_id = " . intval($_REQUEST["id"]) . " and rd_type = " . RSSFEED_DETAIL_TYPE);
+if (mysql_num_rows($res)) {
+	//read in the feed data
+	$rssURL = mysql_fetch_array($res);
+	$ch = curl_init($rssURL[0]);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_HEADER, 0);
+	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);	// follow server header redirects
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);	// don't verify peer cert
+	curl_setopt($ch, CURLOPT_TIMEOUT, 100);	// timeout after ten seconds
+	curl_setopt($ch, CURLOPT_MAXREDIRS, 5);	// no more than 5 redirections
+	curl_setopt($ch, CURLOPT_PROXY, 'www-cache.usyd.edu.au:8080');
+	$rawXML = curl_exec($ch);
+	curl_close($ch);
+	// clean up encodings that make the default parsers barf.
+	$pat = array(
+				'@&\s@i',
+				'@&rsquo;@i',
+				'@&lsquo;@i',
+				'@&rdquo;@i',
+				'@&ldquo;@i',
+				'@&ndash;@i'
+				);
+	$repPat = array(
+				'&amp;',
+				'%92',
+				'%91',
+				'%94',
+				'%93',
+				'%97'
+				);
+	$text = preg_replace($pat,$repPat,$rawXML);
+	print $text;
+} else {	//leaving the this after the rssfeed check allows use to cache a file in case the feed doesn't work. More coding (try catch ) is needed for this
+	$res = mysql_query("select file_id from rec_details left join files on file_id = rd_file_id where rd_rec_id = " . intval($_REQUEST["id"]) . " and rd_type = " . FILE_DETAIL_TYPE);
+	$file_id = mysql_fetch_array($res);
+	$file_id = $file_id[0];
+	print file_get_contents(UPLOAD_PATH . "/" . $file_id);
+}
+?>
