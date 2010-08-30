@@ -66,6 +66,7 @@ top.HEURIST.search = {
 	searchNotify: function(results) {
 		top.HEURIST.search.results = {
 			records: [],
+			bibIdToResultIndex: {},
 			totalRecordCount: results.totalRecordCount
 		};
 
@@ -84,6 +85,7 @@ top.HEURIST.search = {
 	searchResultsNotify: function(newResults, startIndex) {
 		for (var i=0; i < newResults.records.length; ++i) {
 			top.HEURIST.search.results.records[i + startIndex] = newResults.records[i];
+			top.HEURIST.search.results.bibIdToResultIndex[newResults.records[i][2]] = i + startIndex;
 		}
 		newResults.records = [];
 
@@ -221,10 +223,13 @@ top.HEURIST.search = {
 		"<span class=wg-id title='"+linkTitle+"' " + (wgColor? wgColor: "") + ">" + (wgHTML? wgHTML.htmlEscape() : "") + "</span>"+
 		"</span>"+
 		"<img src=" +top.HEURIST.basePath+ "common/images/16x16.gif title='"+reftypeTitle.htmlEscape()+"' "+reftypeImg+" class=rft>"+
+		"<span class='rec_title'>" + linkText + "</span>" +
+		"<div class=right_margin_info>"+
 		"<a expando=true" + (href ? " href='"+href+"'><img class='ext_link'src='"+ top.HEURIST.basePath+"common/images/external_link_16x16.gif' title='go to link'" : "") + ((linkTitle || href)  ?  " title='" + (linkTitle? linkTitle.htmlEscape() : href) + "'"  :  "") +
-		" origInnerHtml='"+linkText.htmlEscape()+"'>" + "</a><span class='rec_title'>" + linkText + "</span>" +
-		"<span class=daysbad title='Detection of broken URLs is carried out once a day'>"+daysBad+"</span>"+
-		"<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src=" +top.HEURIST.basePath+ "common/images/key.gif " + userPwd + ">"+
+		" origInnerHtml='"+linkText.htmlEscape()+"'></a>" +
+		"<span style='display:none' class=daysbad title='Detection of broken URLs is carried out once a day'>"+daysBad+"</span>"+
+		"<br><img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src=" +top.HEURIST.basePath+ "common/images/key.gif " + userPwd + ">"+
+		"</div>" +
 		"<input type=checkbox name=bib[] onclick=top.HEURIST.search.cb_onclick(this) class='logged-in-only' title='Check box to apply Actions to this record'>"+
 		"</div>";
 
@@ -336,7 +341,7 @@ top.HEURIST.search = {
 		if (params["label"]) {
 			document.getElementById("active-label").innerHTML = params["label"];
 			if (params["label"] == "Favourites") {
-				document.getElementById("results-message").innerHTML = "Click on the Heurist logo at the top left of any screen for quick return to your Favourites";
+				document.getElementById("results-message").innerHTML = "Click on a record to view details. CTRL click to select multiple records";
 				document.getElementById("results-message").style.display = "block";
 			}
 		} else {
@@ -490,12 +495,12 @@ top.HEURIST.search = {
 			var reftype_img = result.childNodes[4];
 			var pin_img = result.childNodes[2];
 
-			top.HEURIST.registerEvent(result, "click", top.HEURIST.search.full_record_view);
-			top.HEURIST.registerEvent(t_span, "click", top.HEURIST.search.full_record_view);
-			top.HEURIST.registerEvent(reftype_img, "click", top.HEURIST.search.full_record_view);
-			top.HEURIST.registerEvent(rec_title, "click", top.HEURIST.search.full_record_view);
-			top.HEURIST.registerEvent(pin_img, "click", result.getAttribute("bkmk_id") ? top.HEURIST.search.open_out : top.HEURIST.search.addBookmark);
-			top.HEURIST.registerEvent(result, "dblclick", (top.HEURIST.util.getDisplayPreference("double-click-action") == "edit") ? top.HEURIST.search.edit_short : top.HEURIST.search.open_out);
+			top.HEURIST.registerEvent(result, "click", top.HEURIST.search.resultItemOnClick);
+			top.HEURIST.registerEvent(t_span, "click", top.HEURIST.search.resultItemOnClick);
+			top.HEURIST.registerEvent(reftype_img, "click", top.HEURIST.search.resultItemOnClick);
+			top.HEURIST.registerEvent(rec_title, "click", top.HEURIST.search.resultItemOnClick);
+			top.HEURIST.registerEvent(pin_img, "click", result.getAttribute("bkmk_id") ? top.HEURIST.search.resultItemOnClick : top.HEURIST.search.addBookmark);
+			top.HEURIST.registerEvent(result, "dblclick", (top.HEURIST.util.getDisplayPreference("double-click-action") == "edit") ? top.HEURIST.search.edit_short : top.HEURIST.search.resultItemOnClick);
 		}
 
 		var thumbs = $(".result_thumb", resultsDiv).get();
@@ -506,31 +511,24 @@ top.HEURIST.search = {
 			var pin_img = $(".unbookmarked", result)[0];
 			var thumb_img = $(".thumbnail, .no-thumbnail, .rec_title", result)[0];
 			var rec_title = $(".rec_title", result)[0];
-//			var rec_view_link = $("#rec_view_link", result)[0];
-//			var rec_quickview_link = $("#rec_quickview_link", result)[0];
-//			var rec_explore_link = $("#rec_explore_link", result)[0];
-//
-			top.HEURIST.registerEvent(result, "click", top.HEURIST.search.full_record_view);
+
+			top.HEURIST.registerEvent(result, "click", top.HEURIST.search.resultItemOnClick);
 
 			if (pin_img) {
 				top.HEURIST.registerEvent(pin_img, "click", result.getAttribute("bkmk_id") ? function(){} : top.HEURIST.search.addBookmark);
 			}
 //			top.HEURIST.registerEvent(result, "dblclick", (top.HEURIST.util.getDisplayPreference("double-click-action") == "edit") ? top.HEURIST.search.edit : top.HEURIST.search.open_out);
-			//top.HEURIST.registerEvent(result, "click", top.HEURIST.search.openRecordDetails);
 //			if (rec_edit_link) {
 //					top.HEURIST.registerEvent(rec_edit_link, "click", top.HEURIST.search.edit);
-//			}
-//			if (rec_view_link) {
-//					top.HEURIST.registerEvent(rec_view_link, "click", top.HEURIST.search.openRecordDetails);
 //			}
 //			if (rec_quickview_link) {
 //				top.HEURIST.registerEvent(rec_quickview_link, "click", top.HEURIST.search.quickview);
 //			}
 			if (rec_title) {
-					top.HEURIST.registerEvent(rec_title, "click", top.HEURIST.search.full_record_view);
+					top.HEURIST.registerEvent(rec_title, "click", top.HEURIST.search.resultItemOnClick);
 			}
 			if (thumb_img) {
-					top.HEURIST.registerEvent(thumb_img, "click", top.HEURIST.search.full_record_view);
+					top.HEURIST.registerEvent(thumb_img, "click", top.HEURIST.search.resultItemOnClick);
 			}
 
 		}
@@ -589,7 +587,7 @@ top.HEURIST.search = {
 			var offset_width = Math.floor(0.9 * results[i].parentNode.offsetWidth) - 20;
 			var days_bad = results[i].childNodes[6];
 			var self_link = results[i].childNodes[5];
-			top.HEURIST.search.trimLinkText(self_link, offset_width - (days_bad.offsetWidth ? days_bad.offsetWidth : 0));
+			top.HEURIST.search.trimLinkText(self_link, offset_width - (days_bad && days_bad.offsetWidth ? days_bad.offsetWidth : 0));
 		}
 	},
 
@@ -797,125 +795,6 @@ top.HEURIST.search = {
 		return false;
 	},
 
-	quickview: function(e, targ) {
-		if (! e) e = window.event;
-
-		if (e) {
-			e.cancelBubble = true;
-			if (e.stopPropagation) e.stopPropagation();
-		}
-
-		if (! targ) {
-			if (e.target) targ = e.target;
-			else if (e.srcElement) targ = e.srcElement;
-			if (targ.nodeType == 3) targ = targ.parentNode;
-		}
-
-		if (targ.getAttribute("bib_id")) {
-			var result_div = targ;
-		}
-		else if (targ.parentNode  &&  targ.parentNode.getAttribute("bib_id")) {
-			var result_div = targ.parentNode;
-		}
-		else if (targ.parentNode.parentNode  &&  targ.parentNode.parentNode.getAttribute("bib_id")) {
-			var result_div = targ.parentNode.parentNode;
-		}
-		else return;
-
-		var bib_id = result_div.getAttribute("bib_id");
-
-		var options = {};
-		options["title"] = "Preview of record id:" + bib_id;
-		options["close-on-blur"] = true;
-		options["no-resize"] = true;
-		options["width"] = 480;
-		options["height"] = 300;
-		options["no-close"] = true;
-		options["no-titlebar"] = true;
-
-		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "records/viewrec/quickview.php?bib_id=" + bib_id + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : ""), options);
-
-		return false;
-	},
-
-	openRecordDetails: function(e, targ) {
-
-		if (! e) e = window.event;
-
-		if (e) {
-			e.cancelBubble = true;
-			if (e.stopPropagation) e.stopPropagation();
-		}
-
-		if (! targ) {
-			if (e.target) targ = e.target;
-			else if (e.srcElement) targ = e.srcElement;
-			if (targ.nodeType == 3) targ = targ.parentNode;
-
-		}
-
-		if (targ.getAttribute("bib_id")) {
-			var result_div = targ;
-		}
-		else if (targ.parentNode.parentNode  &&  targ.parentNode.parentNode.getAttribute("bib_id")) {
-			var result_div = targ.parentNode.parentNode;
-		}
-		else return;
-
-		var bib_id = result_div.getAttribute("bib_id");
-
-		window.open(top.HEURIST.basePath+ "records/viewrec/view.php?bib_id=" + bib_id +"&noclutter=1" + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : ""));
-
-		return false;
-	},
-
-	open_out: function(e, targ) {
-		if (! e) e = window.event;
-
-		if (e) {
-			e.cancelBubble = true;
-			if (e.stopPropagation) e.stopPropagation();
-		}
-
-		if (! targ) {
-			if (e.target) targ = e.target;
-			else if (e.srcElement) targ = e.srcElement;
-			if (targ.nodeType == 3) targ = targ.parentNode;
-		}
-
-		if (targ.getAttribute("bib_id")) {
-			var result_div = targ;
-		}
-		else if (targ.parentNode  &&  targ.parentNode.getAttribute("bib_id")) {
-			var result_div = targ.parentNode;
-		}
-		else return;
-
-		var bib_id = result_div.getAttribute("bib_id");
-
-		var infos = top.HEURIST.search.infos;
-		if (infos["bib:" + bib_id]) {
-			// bib info is already displaying -- hide it
-			var info = infos["bib:" + bib_id];
-			result_div.className = result_div.className.replace(" expanded", "");
-			info.parentNode.removeChild(info);
-			delete infos["bib:" + bib_id];
-			return;
-		}
-
-		var info_div = document.createElement("iframe");
-		info_div.className = "info";
-		info_div.frameBorder = 0;
-		info_div.style.height = "0px";
-		info_div.src = top.HEURIST.basePath+ "records/viewrec/info.php?bib_id="+bib_id + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "");
-		infos["bib:" + bib_id] = info_div;
-		result_div.className += " expanded";
-
-		result_div.appendChild(info_div);
-
-		return false;
-	},
-
 	edit_short: function(bib_id,result_div) {
 		top.HEURIST.search.closeInfos;
 		top.HEURIST.search.setRecordView("full");
@@ -927,7 +806,6 @@ top.HEURIST.search = {
 			info.parentNode.removeChild(info);
 			delete infos["bib:" + bib_id];
 		}
-
 		var info_div = document.createElement("iframe");
 		var pageRight = document.getElementById('page-right');
 		info_div.className = "info";
@@ -944,17 +822,151 @@ top.HEURIST.search = {
 		top.HEURIST.search.closeInfos(); // closes infos
 		top.HEURIST.search.setRecordView("full"); // sets full view
 		var info_div = document.createElement("iframe");
-		var infos = top.HEURIST.search.infos;   
+		var infos = top.HEURIST.search.infos;
 		var pageRight = document.getElementById('page-right');
 		info_div.className = "info";
 		info_div.frameBorder = 0;
-        infos["publish"] = info_div; 
-		info_div.src = "http://heuristscholar.org/h3/temp/publisherxslt.html";
+		infos["publish"] = info_div;
+		info_div.src =  top.HEURIST.basePath+"viewers/printview/";
 		document.getElementById("helper").style.display = "none";
 		pageRight.appendChild(info_div);
 		return false;
 	},
-	
+
+	selectedRecordIds: [],
+	selectedRecordDivs: {},
+
+	toggleResultItemSelect: function(bib_id,resultDiv) {
+		if (top.HEURIST.search.selectedRecordDivs[bib_id]) { // was selected so deselect
+			top.HEURIST.search.deselectResultItem(bib_id);
+		}else if (bib_id) {
+			if (!resultDiv) {
+				resultDiv = $('div[class~=result_thumb] , div[class~=result_row]').filter('div[bib_id='+ bib_id +']').get(0);
+			}
+			var cb = resultDiv.getElementsByTagName("INPUT");
+			if (cb[0] && cb[0].name == "bib[]") {
+				cb = cb[0];
+			}else{
+				cb = null;
+			}
+			top.HEURIST.search.bib_ids[bib_id] = true;	//deprecated
+			if (cb) cb.checked = true;					//deprecated
+			resultDiv.className += " selected";
+			top.HEURIST.search.selectedRecordDivs[bib_id] = resultDiv;
+			top.HEURIST.search.selectedRecordIds.push(bib_id);
+		}
+	},
+
+	deselectResultItem: function(bib_id) {
+		var resultDiv = top.HEURIST.search.selectedRecordDivs[bib_id];
+		if (resultDiv) {
+			delete top.HEURIST.search.selectedRecordDivs[bib_id];
+			var cb = resultDiv.getElementsByTagName("INPUT");
+			if (cb[0] && cb[0].name == "bib[]") {
+				cb = cb[0];
+			}else{
+				cb = null;
+			}
+			top.HEURIST.search.bib_ids[bib_id] = null;
+			if (cb) cb.checked = false;
+			resultDiv.className = resultDiv.className.replace(" selected", "");
+			for(var i = 0; i < top.HEURIST.search.selectedRecordIds.length; i++){
+				if (top.HEURIST.search.selectedRecordIds[i] == bib_id) {
+					top.HEURIST.search.selectedRecordIds.splice(i,1);
+					break;
+				}
+			}
+		}
+	},
+
+	resultItemOnClick: function(e, targ) {
+		//find the event and target element
+		if (! e) e = window.event;
+
+		if (e) {
+			e.cancelBubble = true;
+			if (e.stopPropagation) e.stopPropagation();
+		}
+
+		if (! targ) {
+			if (e.target) targ = e.target;
+			else if (e.srcElement) targ = e.srcElement;
+			if (targ.nodeType == 3) targ = targ.parentNode;
+		}
+
+		if (targ.getAttribute("bib_id")) {
+			var result_div = targ;
+		}
+		else if (targ.parentNode  &&  targ.parentNode.getAttribute("bib_id")) {
+			var result_div = targ.parentNode;
+		}
+		else return;  // no target so we can't do anything
+
+		var bib_id = result_div.getAttribute("bib_id");
+
+		if ( e.ctrlKey) { // CTRL + Click -  do multiselect functionality single item select and unselect from list
+			top.HEURIST.search.toggleResultItemSelect(bib_id,result_div);
+		}else if (e.shiftKey){//SHIFT + Click
+		// find all items from current click item to last selected
+			var bibIdToIndexMap = top.HEURIST.search.results.bibIdToResultIndex;
+			var selectedBibIds = top.HEURIST.search.selectedRecordIds;
+			var lastSelectedIndex = bibIdToIndexMap[selectedBibIds[selectedBibIds.length - 1]];
+			var clickedIndex = bibIdToIndexMap[bib_id];
+			var newSelectedBibIdMap = {};
+			var newSelectedBibIds = [];
+			// order this object so lasted selected remains last.
+			if (clickedIndex < lastSelectedIndex){
+				for(var i = clickedIndex; i <= lastSelectedIndex; i++) {
+					newSelectedBibIdMap[top.HEURIST.search.results.records[i][2]] = true;
+					newSelectedBibIds.push(top.HEURIST.search.results.records[i][2]);
+				}
+			}else{
+				for(var i = clickedIndex; i >= lastSelectedIndex; i--) {
+					newSelectedBibIdMap[top.HEURIST.search.results.records[i][2]] = true;
+					newSelectedBibIds.push(top.HEURIST.search.results.records[i][2]);
+				}
+			}
+		// for all selectedBibIds items not in new selection set, deselect item (which also removes it from selectedBibIds)
+			for(var j =0;  j< selectedBibIds.length; j++) {
+				if (!newSelectedBibIdMap[selectedBibIds[j]]){
+					top.HEURIST.search.deselectResultItem(selectedBibIds[j]);
+					j--; //adjust for changed selectedBibIds
+				}
+			}
+		//select all unselected new items and replace the selectedBidIds
+			for(var newSelectedBibId in newSelectedBibIdMap){
+				if (!top.HEURIST.search.selectedRecordDivs[newSelectedBibId]){
+					top.HEURIST.search.toggleResultItemSelect(newSelectedBibId);
+				}
+			}
+			 top.HEURIST.search.selectedRecordIds = newSelectedBibIds;
+		}else{ //Normal Click -- assume this is just a normal click and single select;
+			var clickedResultFound = false;
+			var j=0;
+			while (top.HEURIST.search.selectedRecordIds.length && !clickedResultFound ||  clickedResultFound && top.HEURIST.search.selectedRecordIds.length > 1) {
+				if (!clickedResultFound && top.HEURIST.search.selectedRecordIds[0] == bib_id) {
+					clickedResultFound=true;
+					j=1;
+					continue;
+				}
+				top.HEURIST.search.deselectResultItem(top.HEURIST.search.selectedRecordIds[j]);
+			}
+			if (!clickedResultFound) { // clicked result was not previously selected so toggle to select
+				top.HEURIST.search.toggleResultItemSelect(bib_id,result_div);
+			}
+		}
+
+		// for now just set the src to the new url.
+		var viewerFrame = document.getElementById("viewer-frame");
+		//send selectionChange event
+//		top.HEURIST.fireEvent(viewerFrame,"heurist-selectionChange", "selectedIds=" + top.HEURIST.search.selectedRecordIds.join(","));
+
+		viewerFrame.src = top.HEURIST.basePath+ "viewers/printview/?q=ids:"+top.HEURIST.search.selectedRecordIds.join(",") +
+							" sortby:t" +
+							(top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "");
+		return false;
+	},
+
 	full_record_view: function(e, targ) {
 		if (! e) e = window.event;
 
@@ -979,29 +991,53 @@ top.HEURIST.search = {
 
 		var bib_id = result_div.getAttribute("bib_id");
 
+		if (!e.ctrlKey) {
+			top.HEURIST.search.closeInfos();
+		};
+
+		top.HEURIST.search.toggleResultItemSelect(bib_id,result_div);
+
 		var infos = top.HEURIST.search.infos;
 		if (infos["bib:" + bib_id]) {
 			// bib info is already displaying -- hide it
 			var info = infos["bib:" + bib_id];
-			result_div.className = result_div.className.replace(" expanded", "");
+//			result_div.className = result_div.className.replace(" expanded", "");
 			info.parentNode.removeChild(info);
 			delete infos["bib:" + bib_id];
-			return;
+			return false;
 		}
+
+
 		var page_right = document.getElementById("page-right");
 		var info_div = document.createElement("iframe");
+		info_div.id = bib_id;
+		var loadingDiv = document.createElement("div");
+		loadingDiv.id = "loadingDiv";
 		if (top.HEURIST.search.record_view_style == "full") {
 			info_div.className = "info";
+			loadingDiv.className = "full";
 			} else {
-			info_div.className = "info summary";}
+			info_div.className = "info summary";
+			loadingDiv.className = "summary";
+			};
 		info_div.frameBorder = 0;
+		page_right.appendChild(loadingDiv);
 		info_div.src = top.HEURIST.basePath+ "records/viewrec/info.php?bib_id="+bib_id + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "");
 		infos["bib:" + bib_id] = info_div;
-		result_div.className += " expanded";
+//		result_div.className += " expanded";
 		document.getElementById("helper").style.display = "none";
 		page_right.appendChild(info_div);
-
 		return false;
+	},
+
+	hideLoading: function (){
+		var page_right = document.getElementById("page-right");
+	},
+
+	infoHeight: function (bib_id){
+		var the_height=document.getElementById(bib_id).contentWindow.document.body.scrollHeight;
+		//change the height of the iframe
+		document.getElementById(bib_id).height=the_height;
 	},
 
 	setRecordView: function(recordViewStyle) {
@@ -1037,15 +1073,16 @@ top.HEURIST.search = {
 	},
 
 	closeInfos: function() {
+		top.HEURIST.search.hideLoading();
 		for (var i in top.HEURIST.search.infos) {
 			var info = top.HEURIST.search.infos[i];
-			//info.parentNode.className = info.parentNode.className.replace(" expanded", ""); 
+			//info.parentNode.className = info.parentNode.className.replace(" expanded", "");
 			info.parentNode.removeChild(info);
 			delete top.HEURIST.search.infos[i];}
 		var resultsDiv = document.getElementById("result-rows");
 		for (var i=0; i < resultsDiv.childNodes.length; ++i) {
-        	var result = resultsDiv.childNodes[i];
-			result.className = result.className.replace(" expanded", ""); 
+			var result = resultsDiv.childNodes[i];
+			result.className = result.className.replace(" expanded", "");
 		}
 	},
 

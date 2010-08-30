@@ -2,7 +2,7 @@
   <!--
  this style renders standard html
  author  Maria Shvedova
- last updated 10/09/2007 ms
+ last updated 24/08/2010 I.Golka
   -->
     <xsl:template name="creator" match="detail/record" mode="creator">
         <xsl:choose>
@@ -45,17 +45,10 @@
     </xsl:comment>
     <!-- end including code -->
 
-    <html>
-      <head>
+<html>
+	<head>
 
-        <style type="text/css">
-          body {font-family:Verdana,Helvetica,Arial,sans-serif; font-size:11px; }
-          td { vertical-align: top; }
-          .reftype {
-          color: #999999;
-
-          }
-        </style>
+	<!-- link rel="stylesheet" href="../../common/css/printview.css"/ -->
         <!--<script type="text/javascript">
 
           function displayResults(){
@@ -105,68 +98,42 @@
       </xsl:choose>-->
 
       <!-- HEADER  -->
-      <table>
-          <tr>
-            <td colspan="2" >
-              <b><xsl:value-of select="id"/>: &#160;
-                <img>
+<div id="{id}" class="record">
+          <div class="headerRow">
+              <div id="recID">Record ID: <xsl:value-of select="id"/></div>
+                <!--img>
                   <xsl:attribute name="align">absbottom</xsl:attribute>
-                  <xsl:attribute name="src">http://heuristscholar.org/reftype/<xsl:value-of
-                    select="type/@id"/>.gif</xsl:attribute>
-                </img>
+                  < xsl:attribute name="src">../../common/images/reftype-icons/<xsl:value-of
+                    select="type/@id"/>.png</xsl:attribute >
+                </img-->
+                <h2><xsl:value-of select="title"/></h2><br/>
+                <h3><xsl:value-of select="type"/></h3>
+          </div>
 
-                &#160;
-                <xsl:value-of select="title"/>
-              </b>
-            </td>
-          </tr>
-          <tr>
-            <td class="reftype">
-              <nobr>Reference type</nobr>
-            </td>
-            <td>
-              <xsl:value-of select="type"/>
-            </td>
-          </tr>
-    <xsl:if test="modified !=''">
-          <tr>
-            <td class="reftype">
-              <nobr>Last Updated</nobr>
-            </td>
-            <td>
-              <xsl:value-of select="modified"/>
-            </td>
-          </tr>
-    </xsl:if>
-          <xsl:if test="url != ''">
-            <tr>
-              <td class="reftype">URL</td>
-              <td>
-                <a href="{url}">
-                  <xsl:choose>
-                    <xsl:when test="string-length(url) &gt; 50">
-                      <xsl:value-of select="substring(url, 0, 50)"/> ... </xsl:when>
-                    <xsl:otherwise>
-                      <xsl:value-of select="url"/>
-                    </xsl:otherwise>
-                  </xsl:choose>
-                </a>
-              </td>
-            </tr>
-          </xsl:if>
+
+			<xsl:if test="detail[@id= 222 or @id= 223 or  @id= 224]">
+				<div class="thumbnail">
+						<!-- only display 223 = Thumbnail in top-right corner -->
+						<xsl:element name="img">
+						<xsl:attribute name="src"><xsl:value-of select="detail[@id= 222 or @id= 223 or  @id= 224]/file/thumbURL"/></xsl:attribute> 
+						</xsl:element>
+				</div>
+			</xsl:if>
 
     <!-- DETAIL LISTING -->
-
           <!--put what is being grouped in a variable-->
-          <xsl:variable name="details" select="detail"/>
+          <xsl:variable name="details" select="detail"/>  
           <!--walk through the variable-->
           <xsl:for-each select="detail">
 
             <!--act on the first in document order-->
             <xsl:if test="generate-id(.)=
               generate-id($details[@id=current()/@id][1]) and self::node()[@id!= 249]">
-              <tr>
-                <td class="reftype" width="150">
+
+              
+	<div class="detailRow">
+	<xsl:if test="self::node()[@id!= 223]">
+		<div class="detailType">
                   <xsl:choose>
                     <xsl:when test="@name !=''">
                       <xsl:value-of select="@name"/>
@@ -175,9 +142,10 @@
                       <xsl:value-of select="@type"/>
                     </xsl:otherwise>
                   </xsl:choose>
-                </td>
+                </div>
+        </xsl:if>
                    <!--revisit all-->
-                <td>
+        <div class="detail">
               <xsl:for-each select="$details[@id=current()/@id]">
                 <xsl:sort select="."/>
               <xsl:choose>
@@ -188,11 +156,7 @@
                   <xsl:if test="self::node()[@id= 177]">
                     <xsl:call-template name="start-date"></xsl:call-template>
                   </xsl:if>
-                  <xsl:if test="self::node()[@id= 222 or @id= 223 or  @id= 224]">
-                    <xsl:call-template name="logo">
-                      <xsl:with-param name="id"><xsl:value-of select="@id"/></xsl:with-param>
-                    </xsl:call-template>
-                  </xsl:if>
+                  
                   <xsl:if test="self::node()[@id= 231 or @id=221]">
                     <xsl:call-template name="file">
                       <xsl:with-param name="id"><xsl:value-of select="@id"/></xsl:with-param>
@@ -213,19 +177,18 @@
                 </xsl:otherwise>
               </xsl:choose><br/>
               </xsl:for-each>
-                </td>
-              </tr></xsl:if>
-          </xsl:for-each>
+                </div>
+              </div></xsl:if>
+          </xsl:for-each>   
     <!-- POINTER LISTING -->
           <xsl:variable name="pointer" select="detail"/>
           <!--walk through the variable-->
           <xsl:for-each select="detail">
 
             <!--act on the first in document order-->
-            <xsl:if test="generate-id(.)=
-              generate-id($pointer[@id=current()/@id][1]) and self::node()[@id= 249]">
-              <tr>
-                <td class="reftype" width="150">
+            <xsl:if test="generate-id(.)=generate-id($pointer[@id=current()/@id][1]) and self::node()[@id= 249]">
+	<div class="detailRow">
+		<div class="detailType">
                   <xsl:choose>
                     <xsl:when test="@name !=''">
                       <xsl:value-of select="@name"/>
@@ -234,8 +197,8 @@
                       <xsl:value-of select="@type"/>
                     </xsl:otherwise>
                   </xsl:choose>
-                </td>
-                <td>
+                </div>
+                <div class="detail">
               <!--revisit all-->
               <xsl:for-each select="$pointer[@id=current()/@id]">
               <xsl:choose>
@@ -248,8 +211,8 @@
               </xsl:choose>
                 <br/>
               </xsl:for-each>
-                </td>
-              </tr>
+                </div>
+              </div>
             </xsl:if>
           </xsl:for-each>
     <!-- RELATED LISTING -->
@@ -260,33 +223,53 @@
       <!--act on the first in document order-->
       <xsl:if test="generate-id(.)=
         generate-id($relation[@type=current()/@type][1])">
-        <tr>
-          <td class="reftype" width="150">
+	<div class="detailRow">
+		<div class="detailType">
             <xsl:value-of select="@type"/>
-          </td>
-          <td>
+          </div>
+          <div class="detail">
             <!--revisit all-->
             <xsl:for-each select="$relation[@type=current()/@type]">
-
               <xsl:value-of select="record/title"/>
               <br/>
             </xsl:for-each>
-          </td>
-        </tr>
+          </div>
+        </div>
       </xsl:if>
     </xsl:for-each>
         <xsl:if test="woot !=''">
-       <tr>
-         <td  class="reftype">
-           WYSIWIG Text
-         </td>
-         <td>
-           <xsl:call-template name="woot_content"></xsl:call-template>
-         </td>
-       </tr>
+	<div class="detailRow">
+		<div class="detailType">WYSIWIG Text</div>
+			<div class="detail"><xsl:call-template name="woot_content"></xsl:call-template></div>
+		</div>
         </xsl:if>
-      </table>
+
+		<div class="detailRow">  
+	<xsl:if test="url != ''">
+	<div class="detailRow">
+		<div class="detailType">URL</div>
+		<div class="detail">
+		<a href="{url}">
+			<xsl:choose>
+			<xsl:when test="string-length(url) &gt; 50">
+					<xsl:value-of select="substring(url, 0, 50)"/> ... </xsl:when>
+			<xsl:otherwise>
+			<xsl:value-of select="url"/>
+					</xsl:otherwise>
+			</xsl:choose>
+		</a>
+		</div>
+	</div>
+	</xsl:if>
+	</div>
+	<div class="detailRow">  
+	<xsl:if test="modified !=''">
+		<div class="detailType">Last Updated</div><div class="detail"><xsl:value-of select="modified"/></div>
+	</xsl:if>
+	</div>
+</div>
     <!--/xsl:element-->
+
 
   </xsl:template>
 
@@ -303,6 +286,7 @@
       </xsl:element>
     </xsl:if>
   </xsl:template>
+
   <xsl:template name="file">
     <xsl:param name="id"></xsl:param>
     <xsl:if test="self::node()[@id =$id]">
@@ -312,11 +296,13 @@
       </xsl:element>  [<xsl:value-of select="file/size"/>]
     </xsl:if>
   </xsl:template>
+
   <xsl:template name="start-date" match="detail[@id=177]">
     <xsl:if test="self::node()[@id =177]">
       <xsl:value-of select="self::node()[@id =177]/year"/>
     </xsl:if>
   </xsl:template>
+
   <xsl:template name="url">
     <xsl:param name="key"></xsl:param>
     <xsl:param name="value"></xsl:param>
@@ -325,6 +311,7 @@
       <xsl:value-of select="$value"/>
     </xsl:element>
   </xsl:template>
+
   <xsl:template name="woot_content">
     <xsl:if test="woot">
       <xsl:copy-of select="woot"/>

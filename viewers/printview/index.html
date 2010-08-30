@@ -1,5 +1,6 @@
 <html>
 	<head>
+		<link rel="stylesheet" href="../../common/css/printview.css"/>
 		<script src="load_print_formats.php"></script>
 		<script>
 			function loadXMLDocFromFile(filename)
@@ -57,7 +58,8 @@
 			function init() {
 			//parse query
 				var style = location.search.match(/style=([^&=#]*)/);
-				var query = location.search.replace(/&style=[^&=#]*/,"");
+				var query = location.search.replace(/&?style=[^&=#]*/,"");
+
 			//load xml
 				if (query){
 					xml = loadXMLDocFromFile("http://heuristscholar.org/h3/export/xml/hml.php"+query);
@@ -106,11 +108,13 @@
 				}
 			}
 		</script>
+
 	</head>
 	<body onload="init()">
+		<div class="banner">
 		<select id="style_select" style="width: 180px;" onChange="displayResult(this.options[this.selectedIndex].value, true);">
 		</select>
-
+		</div>
 		<div id="displayResult" >Loading .....</div>
 	</body>
 </html>
