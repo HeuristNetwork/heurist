@@ -1,0 +1,11 @@
+/* login specific overrides */
+
+#page {bottom:auto;height:auto;left:15%;overflow:auto;position:absolute;right:15%;text-align:center;}
+#logo, #home-link {display:block;height:50px;margin-left:auto;margin-right:auto;position:relative;top:0;width:226px;z-index:10;}
+
+.input-row td, .input-header-cell {padding-bottom:0;padding-top:10px;vertical-align:top;}
+.input-row td.input-header-cell {font-weight:bold;padding-right:10px;text-align:right;width:150px;}
+input#tags, .input-cell .in, .input-cell .resource-title {background:none repeat scroll 0 0 #FFFFFF;border:medium none;font-size:2ex;margin:2px 0;padding:0.5ex;}
+input#tags:focus, .input-cell .in:focus, .input-cell .resource-title:focus {-moz-box-shadow:0 0 4px #6A7C99; -webkit-box-shadow:0 0 4px #6A7C99; box-shadow:0 0 4px #6A7C99; } 
+#loginDiv {background-color:#ECF1FB !important;padding: 10px;overflow: hidden;}
+#login-table {width:500px; margin:10px auto; border-bottom: 1px solid #A4B4CB;padding-bottom: 20px;}
