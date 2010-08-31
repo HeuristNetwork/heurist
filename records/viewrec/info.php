@@ -97,7 +97,7 @@ function add_sid() {
 
   </script>
  </head>
- <body onload="add_sid()" <?php if (! is_logged_in()) { print 'class=not-logged-in'; } else if ($noclutter) { print 'class=noclutter'; } ?>>
+ <body onload="top.HEURIST.search.hideLoading(); top.HEURIST.search.infoHeight()" <?php if (! is_logged_in()) { print 'class=not-logged-in'; } else if ($noclutter) { print 'class=noclutter'; } ?> >
 
 <?php
 // get a list of workgroups the user belongs to.
@@ -133,6 +133,7 @@ if ($pers_id) {
 </div>
 
 <div id=bottom><div></div></div>
+
 </body>
 </html>
 <?php	/***** END OF OUTPUT *****/

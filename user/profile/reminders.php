@@ -35,8 +35,8 @@ $future = (! @$_REQUEST["show"]  ||  $_REQUEST["show"] === "future");
 	}
   </script>
  </head>
- <body width=500 height=300>
-  <div id=page>
+ <body width=600 height=300>
+  <div>
    <div class=headline>Reminders</div>
 
    <form>
@@ -56,12 +56,12 @@ $future = (! @$_REQUEST["show"]  ||  $_REQUEST["show"] === "future");
     <input type=hidden name=action id=action_input>
    </form>
 
-   <table cellspacing=20>
+   <table class=reminder width="100%">
     <tr>
-     <th></th>
-     <th>Record</th>
-     <th>Recipient</th>
-     <th>Notification frequency</th>
+     <th width="20"></th>
+     <th width="200">Record</th>
+     <th width="100">Recipient</th>
+     <th width="100">Notification frequency</th>
      <th>Message</th>
     </tr>
 <?php

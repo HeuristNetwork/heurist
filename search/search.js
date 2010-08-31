@@ -225,8 +225,9 @@ top.HEURIST.search = {
 		"<img src=" +top.HEURIST.basePath+ "common/images/16x16.gif title='"+reftypeTitle.htmlEscape()+"' "+reftypeImg+" class=rft>"+
 		"<span class='rec_title'>" + linkText + "</span>" +
 		"<div class=right_margin_info>"+
-		"<a expando=true" + (href ? " href='"+href+"'><img class='ext_link'src='"+ top.HEURIST.basePath+"common/images/external_link_16x16.gif' title='go to link'" : "") + ((linkTitle || href)  ?  " title='" + (linkTitle? linkTitle.htmlEscape() : href) + "'"  :  "") +
+		"<a expando=true" + (href ? " href='"+href+"' target='_blank'><img class='ext_link'src='"+ top.HEURIST.basePath+"common/images/external_link_16x16.gif' title='go to link'" : "") + ((linkTitle || href)  ?  " title='" + (linkTitle? linkTitle.htmlEscape() : href) + "'"  :  "") +
 		" origInnerHtml='"+linkText.htmlEscape()+"'></a>" +
+		"<span id='rec_edit_link' title='Click to edit'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png' onclick='top.HEURIST.search.edit("+ res[2] +",this.parentNode.parentNode.parentNode); return false;'/></a></span>" +
 		"<span style='display:none' class=daysbad title='Detection of broken URLs is carried out once a day'>"+daysBad+"</span>"+
 		"<br><img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src=" +top.HEURIST.basePath+ "common/images/key.gif " + userPwd + ">"+
 		"</div>" +
@@ -296,14 +297,14 @@ top.HEURIST.search = {
 		   "<div class=rec_title title='"+linkText.htmlEscape()+"'>"+ linkText + "</div>"+
 		   "<div class=icons  bkmk_id='"+res[0]+"' bib_id="+res[2]+">" +
 
-		   (res[3].length ? "<a href='"+res[3]+"'><img src='"+ top.HEURIST.basePath+"common/images/external_link_16x16.gif' title='go to link'></a>" : "") +
+		   (res[3].length ? "<a href='"+res[3]+"' target='_blank'><img src='"+ top.HEURIST.basePath+"common/images/external_link_16x16.gif' title='go to link'></a>" : "") +
 		   "<img src='"+ top.HEURIST.basePath+"common/images/16x16.gif' title='"+reftypeTitle.htmlEscape()+"' "+reftypeImg+" class='rft'>"+
 		   "<img src='"+ top.HEURIST.basePath+"common/images/13x13.gif' " + pinAttribs + ">"+
 		   "<span class='wg-id-container logged-in-only'>"+
 		   "<span class=wg-id title='"+linkTitle.htmlEscape()+"' " + (wgColor? wgColor: "") + ">" + (wgHTML? wgHTML.htmlEscape() : "") + "</span>"+
 		   "</span>"+
 		   "<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/key.gif' " + userPwd + ">"+
-		   "<span id='rec_edit_link' title='Click to edit'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png' onclick='top.HEURIST.search.edit_short("+ res[2] +",this.parentNode.parentNode.parentNode); return false;'/></a></span>" +
+		   "<span id='rec_edit_link' title='Click to edit'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png' onclick='top.HEURIST.search.edit("+ res[2] +",this.parentNode.parentNode.parentNode); return false;'/></a></span>" +
 //		   "<span id='rec_edit_link' title='Click to edit'><a href='"+
 //			top.HEURIST.basePath+ "records/editrec/edit.html?sid=" +
 //			top.HEURIST.search.sid + "&bib_id="+ res[2] +
@@ -424,12 +425,12 @@ top.HEURIST.search = {
 			left_panel_elt.innerHTML =
 				"<div style=\"padding: 10px;\">\n" +
 				" Existing users:\n" +
-				" <div id=login-button><a href=" +top.HEURIST.basePath+ "common/connect/login.php"+(top.HEURIST.instance && top.HEURIST.instance.name ? "?instance=" + top.HEURIST.instance.name : "")+" title=\"Log in to use Heurist - new users please register first\"><img src=/common/images/111x30.gif></a></div>\n" +
+				" <div id=login-button><a href=" +top.HEURIST.basePath+ "common/connect/login.php"+(top.HEURIST.instance && top.HEURIST.instance.name ? "?instance=" + top.HEURIST.instance.name : "")+" title=\"Log in to use Heurist - new users please register first\"><img src=../common/images/111x30.gif></a></div>\n" +
 				" <p style=\"text-align: center;\"><a onclick=\"InstallTrigger.install({'Heurist Toolbar':this.href}); return false;\" href=" +top.HEURIST.basePath+ "tools/toolbar/HeuristToolbar.xpi title=\"Get Firefox toolbar - rapid access to bookmark web pages, import hyperlinks, view and edit data for the current web page, and synchronise Heurist with Zotero\">Get toolbar</a><br>(Firefox)</p>\n" +
 				" <p style=\"text-align: center;\"><a href=\"javascript:" + top.HEURIST.bookmarkletCode + "\" onclick=\"alert('Drag the Heurist Bookmarklet link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;\" title=\"Get Bookmarklet - bookmarks web pages and harvests web links \(we recommend Firefox and the Firefox toolbar - it has more features\)\">Heurist Bookmarklet</a><br>(other browsers)</p>" +
 				" New users:\n" +
-				" <div id=tour-button><a href=" +top.HEURIST.basePath+ "help/tour.html title=\"Take a quick tour of Heurist's major features\" target=\"_blank\"><img src=/common/images/111x30.gif></a></div>\n" +
-				" <div id=register-button><a href=" +top.HEURIST.basePath+ "admin/users/add.php?register=1"+(top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "")+" target=\"_blank\" title=\"Register to use Heurist - takes only a couple of minutes\"><img src=/common/images/111x30.gif></a></div>\n" +
+				" <div id=tour-button><a href=" +top.HEURIST.basePath+ "help/tour.html title=\"Take a quick tour of Heurist's major features\" target=\"_blank\"><img src=../common/images/111x30.gif></a></div>\n" +
+				" <div id=register-button><a href=" +top.HEURIST.basePath+ "admin/users/add.php?register=1"+(top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "")+" target=\"_blank\" title=\"Register to use Heurist - takes only a couple of minutes\"><img src=../common/images/111x30.gif></a></div>\n" +
 				"</div>";
 
 			document.getElementById("my-records-button").disabled = true;
@@ -794,10 +795,10 @@ top.HEURIST.search = {
 
 		return false;
 	},
-
+	
 	edit_short: function(bib_id,result_div) {
 		top.HEURIST.search.closeInfos;
-		top.HEURIST.search.setRecordView("full");
+		//top.HEURIST.search.setRecordView("full");
 		var infos = top.HEURIST.search.infos;
 		if (infos["bib:" + bib_id]) {
 			// bib info is already displaying -- hide it
@@ -958,12 +959,14 @@ top.HEURIST.search = {
 
 		// for now just set the src to the new url.
 		var viewerFrame = document.getElementById("viewer-frame");
-		//send selectionChange event
-//		top.HEURIST.fireEvent(viewerFrame,"heurist-selectionChange", "selectedIds=" + top.HEURIST.search.selectedRecordIds.join(","));
 
 		viewerFrame.src = top.HEURIST.basePath+ "viewers/printview/?q=ids:"+top.HEURIST.search.selectedRecordIds.join(",") +
 							" sortby:t" +
 							(top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "");
+		//send selectionChange event
+		window.setTimeout(function(){top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", "selectedIds=" + top.HEURIST.search.selectedRecordIds.join(","));
+						},
+						1000);
 		return false;
 	},
 

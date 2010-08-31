@@ -6,7 +6,7 @@
   <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
 
-  <link rel="stylesheet" type="text/css" href= "/../../common/css/import.css">
+  <link rel="stylesheet" type="text/css" href= "../../common/css/import.css">
 </head>
 
 <body width=600 height=500 style="font-size: 11px;">
@@ -114,7 +114,7 @@ Users with similar interests to you: (show
 <span id="show100" style="cursor: pointer; text-decoration: underline;" onclick="show_rows(100);">100</span>
 )
 
-<table>
+<table class="reminder">
 <tbody id="user_table">
 <?php
 

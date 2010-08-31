@@ -146,9 +146,9 @@ if (! top.HEURIST.user) top.HEURIST.loadScript('<?=HEURIST_SITE_PATH?>common/php
   <div style="color: red; padding: 10px; font-weight: bold;">Warning: using alternative database</div>
 <?php	}	?>
 
-  <table class="banner">
+  <div style="margin-bottom:30px">
 <?php if (! (@$session_data['zoteroImport']  ||  @$_REQUEST['zoteroEntryPoint'])) { ?>
-   <tr>
+
 <?php 	if (@$_REQUEST['format']) {
 			$frm = $_REQUEST['format'];
 			if ($frm == "GEO") {
@@ -157,17 +157,17 @@ if (! top.HEURIST.user) top.HEURIST.loadScript('<?=HEURIST_SITE_PATH?>common/php
 				$frm = "Bibliographic";
 			}
 	?>
-    <td><nobr style="font-size: 14px;">Import <? print $frm ?> records</nobr></td>
+<h2 style="display:inline">Import <? print $frm ?> records</h2>
 
 <?php	} else { ?>
-    <td><nobr style="font-size: 14px;">Import records</nobr></td>
+<h2 style="display:inline">Import records</h2>
 <?php	} ?>
-    <td width="100%" style="text-align: right;"><a style="color: black; font-weight: normal;" href='<?=HEURIST_SITE_PATH?>import/tools/interface/required_elements.php' target=_new>tag definitions</a></td>
-   </tr>
+    <div style="float:right"><a style="color: black; font-weight: normal;" href='<?=HEURIST_SITE_PATH?>import/tools/interface/required_elements.php' target=_new>tag definitions</a></div>
+
 <?php } else { ?>
-   <tr><td style="font-size: 14px;">Synchronising Zotero records with Heurist</td></tr>
+   <div><h3>Synchronising Zotero records with Heurist</h3></div>
 <?php } ?>
-  </table>
+  </div>
 
   <div id="progress_indicator"><div id="progress_indicator_bar"></div><div id="progress"></div></div>
   <div id="progress_indicator_title"></div>

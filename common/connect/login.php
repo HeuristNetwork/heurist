@@ -112,77 +112,10 @@ if (@$_REQUEST['logout']) {
 <link rel=icon href='<?=HEURIST_SITE_PATH?>favicon.ico' type=image/x-icon>
 <link rel="shortcut icon" href='<?=HEURIST_SITE_PATH?>favicon.ico' type=image/x-icon>
 
-<link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/heurist.css'>
-
-<style>
-body {
-	background-image: url('<?=HEURIST_SITE_PATH?>common/images/edit-bg.gif');
-	background-repeat: repeat-x;
-	background-position: 0px 30px;
-}
+<link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/global.css'>
+<link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/login.css'>
 
 
-hr {
-	margin: 5px 60px;
-	border: 0px none;
-	color: #6A7C99;
-	background-color: #CCC;
-	height: 1px;
-}
-#banner {
-}
-#banner_bottom {
-	background-color: #AA7F7F;
-	height: 10px;
-}
-#logo {
-	padding-top: 0px;
-	padding-right: 40px;
-	padding-bottom: 0px;
-	padding-left: 40px;
-}
-#tagline {
-	float: right;
-	font-size: 16pt;
-	font-weight: bold;
-	padding-top: 40px;
-	padding-right: 60px;
-	color: #999;
-}
-#login_table {
-	margin-top: 0;
-	margin-right: auto;
-	margin-bottom: 30px;
-	margin-left: auto;
-}
-div.indent {
-	margin: 30px 0 0 100px;
-}
-.heading {
-	font-size: 10pt;
-	font-weight: bold;
-	style="text-decoration none";
-}
-.bigheading {
-	font-size: 12pt;
-	font-weight: bold;
-}
-#link_table {
-	margin-left: 80px;
-}
-#link_table td {
-	vertical-align: top;
-	text-align: center;
-}
-.blue_panel {
-	background-color: #EFF2F6;
-	border: 1px solid #CCC;
-	padding: 20px;
-	margin-right: 40px;
-	margin-left: 40px;
-	background-image: url('<?=HEURIST_SITE_PATH?>common/images/left-panel-bg.png');
-}
-</style>
 
 </head>
 
@@ -199,18 +132,16 @@ div.indent {
 <script src='../../common/js/heurist.js'></script>
 <script src='../../common/js/heurist-util.js'></script>
 
-<div id=banner>
- <div id=tagline>Scholar-friendly software</div>
- <div id=logo><a href="<?=HEURIST_URL_BASE?>" title="Heurist home"><img src='<?=HEURIST_SITE_PATH?>common/images/heurist_logo.png'></a></div>
-</div>
 
-<div id=main style="padding: 20px;">
-
-<div class=bigheading style="margin-left: 40px; margin-bottom: 50px;">Heurist Login</div>
+<div id=page style="padding: 20px;">
+<a id=home-link>
+<div id=logo title="Click the logo at top left of any Heurist page to return to your Favourites"></div>
+</a>
+<div><h1>PLEASE LOGIN</h1></div>
 
 <form name=mainform method=post>
 
-<div class="blue_panel">
+<div id="loginDiv">
 
 <?php
 	echo "<input type=hidden name=last_uri value={$last_uri}>\n";
@@ -222,21 +153,20 @@ div.indent {
 		if ($LOGIN_ERROR)
 			echo "<p style=\"margin-left: 100px; color: red;\">".$LOGIN_ERROR."</p>";
 ?>
-
-  <table cellpadding=3 id=login_table>
-   <tr>
-    <td>Username</td>
-    <td><input type="text" name="username" id="username" size="20"></td>
+<table cellpadding=3 id="login-table">
+   <tr class="input-row">
+    <td class="input-header-cell">Username</td>
+    <td class="input-cell"><input type="text" name="username" id="username" size="20" class="in"></td>
    </tr>
 
-   <tr>
-    <td>Password</td>
-    <td><input type="password" name="password" size="20"></td>
+   <tr class="input-row">
+    <td class="input-header-cell">Password</td>
+    <td class="input-cell"><input type="password" name="password" size="20" class="in"></td>
    </tr>
 
-   <tr>
-    <td></td>
-    <td><input type="radio" name="session_type" value="public">Expire on browser close (public computer)<br>
+   <tr class="input-row">
+    <td class="input-header-cell"></td>
+    <td class="input-cell"><input type="radio" name="session_type" value="public">Expire on browser close (public computer)<br>
         <input type="radio" name="session_type" value="shared">Expire on user logout (shared computer)<br>
         <input type="radio" name="session_type" value="remember" checked>Remember me on this computer (your computer)</td>
    </tr>
@@ -248,13 +178,11 @@ div.indent {
     <td><input type="submit" value="  Login  " >&nbsp;&nbsp;&nbsp;</td>
    </tr>
 
-  </table>
-
-<hr noshade>
+</table>
 
  <p align=center>
   Forgotten your password?
-  &nbsp;
+  &nbsp; 
   <a href='<?=HEURIST_URL_BASE?>admin/users/reset_password.php' onclick="window.open(this.href,'','status=0,scrollbars=0,width=400,height=200'); return false;">Click here to reset your password</a>
  </p>
 
