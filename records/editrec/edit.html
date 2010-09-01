@@ -53,7 +53,7 @@
 //			"&bkmk_id="+top.HEURIST.parameters["bkmk_id"]);
 		</script>
 		<script>
-			top.HEURIST.whenLoaded(["record","short-edit-html"], function() {
+			top.HEURIST.whenLoaded(["record","edit-html"], function() {
 				var rec = (top && top.HEURIST && top.HEURIST.edit && top.HEURIST.edit.record ? top.HEURIST.edit.record:null);
 				var bib_id =  ((rec?rec.bibID : 0) || (window.HEURIST ? window.HEURIST.parameters["bib_id"]:0) || (top.HEURIST ? top.HEURIST.parameters["bib_id"]:0));
 				if (! rec) {
@@ -88,18 +88,18 @@
 			}
 
 
-			top.HEURIST.whenLoaded(["record", "edit-js", "HAPI", "short-edit-html"], showProperties );
-			top.HEURIST.whenLoaded(["record", "edit-js", "HAPI", "short-edit-html"],createReftypeChanger );
+			top.HEURIST.whenLoaded(["record", "edit-js", "HAPI", "edit-html"], showProperties );
+			top.HEURIST.whenLoaded(["record", "edit-js", "HAPI", "edit-html"],createReftypeChanger );
 
 			function loadModules() {
 				top.HEURIST.edit.loadAllModules();
 			}
-			top.HEURIST.whenLoaded(["record", "edit-js", "HAPI", "short-edit-html"], loadModules);
+			top.HEURIST.whenLoaded(["record", "edit-js", "HAPI", "edit-html"], loadModules);
 
 			function setUnloadHandler() {
 				window.onbeforeunload = top.HEURIST.edit.onbeforeunload;
 			}
-			top.HEURIST.whenLoaded(["edit-js", "short-edit-html"],setUnloadHandler );
+			top.HEURIST.whenLoaded(["edit-js", "edit-html"],setUnloadHandler );
 
 
 			function createReftypeChanger() {
@@ -248,7 +248,7 @@
 		<a id=help-link href='#' onClick="top.HEURIST.util.helpToggler(this)"></a>
 	</div>
 	<script>
-		top.HEURIST.whenLoaded(["display-preferences","short-edit-html"], function() {
+		top.HEURIST.whenLoaded(["display-preferences","edit-html"], function() {
 			var helpOn = (top.HEURIST.util.getDisplayPreference("help") !== "hide");
 			var helpLink = window.document.getElementById("help-link");
 			if (helpLink) {
@@ -407,7 +407,7 @@
 		HAPI.importSymbols(this,top);
 	}
 	top.HEURIST.contentLoaded();
-	top.HEURIST.fireEvent(top, "heurist-short-edit-html-loaded");
+	top.HEURIST.fireEvent(top, "heurist-edit-html-loaded");
 </script>
 
 	</body>

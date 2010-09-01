@@ -250,7 +250,7 @@ function print_result($row) {
 
 
 function rss_url() {
-	return 'feeds/search_rss.php?s='.@$_REQUEST['s'].'&w='.@$_REQUEST['w'].'&q='.urlencode(@$_REQUEST['q']);
+	return HEURIST_URL_BASE.'export/feeds/search_rss.php?s='.@$_REQUEST['s'].'&w='.@$_REQUEST['w'].'&q='.urlencode(@$_REQUEST['q']);
 }
 
 ?>

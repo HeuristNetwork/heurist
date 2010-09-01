@@ -208,7 +208,7 @@ if (@$ARGV) {
 	$pub_id = intval($_REQUEST['pub_id']);
 	require_once(dirname(__FILE__).'/../../common/connect/publish_cred.php');
 
-} else if (friendlyServer(@$_SERVER['SERVER_ADDR'])) {	// internal request ... apparently we don't want to authenticate ..?
+} else if (friendlyServer(@$_SERVER['SERVER_ADDR']) && !(@$_REQUEST['w'] && $_REQUEST['w']=='bookmark')) {	// internal request ... apparently we don't want to authenticate ..?
 	function get_user_id() { return 0; }
 	function get_user_name() { return ''; }
 	function get_user_username() { return ''; }

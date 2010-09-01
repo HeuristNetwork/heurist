@@ -304,7 +304,7 @@ top.HEURIST.search = {
 		   "<span class=wg-id title='"+linkTitle.htmlEscape()+"' " + (wgColor? wgColor: "") + ">" + (wgHTML? wgHTML.htmlEscape() : "") + "</span>"+
 		   "</span>"+
 		   "<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/key.gif' " + userPwd + ">"+
-		   "<span id='rec_edit_link' title='Click to edit'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png' onclick='top.HEURIST.search.edit("+ res[2] +",this.parentNode.parentNode.parentNode); return false;'/></a></span>" +
+		   "<span id='rec_edit_link' title='Click to edit'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png' onclick='top.HEURIST.search.edit(null,this.parentNode.parentNode.parentNode); return false;'/></a></span>" +
 //		   "<span id='rec_edit_link' title='Click to edit'><a href='"+
 //			top.HEURIST.basePath+ "records/editrec/edit.html?sid=" +
 //			top.HEURIST.search.sid + "&bib_id="+ res[2] +
@@ -447,6 +447,8 @@ top.HEURIST.search = {
 	clearResultRows: function() {
 		var resultsPerPage = top.HEURIST.search.resultsPerPage;
 		document.getElementById("result-rows").innerHTML = "";
+		top.HEURIST.search.selectedRecordIds = [];
+		top.HEURIST.search.selectedRecordDivs = {};
 	},
 
 	renderSearchResults: function(firstIndex, lastIndex) {
@@ -501,7 +503,7 @@ top.HEURIST.search = {
 			top.HEURIST.registerEvent(reftype_img, "click", top.HEURIST.search.resultItemOnClick);
 			top.HEURIST.registerEvent(rec_title, "click", top.HEURIST.search.resultItemOnClick);
 			top.HEURIST.registerEvent(pin_img, "click", result.getAttribute("bkmk_id") ? top.HEURIST.search.resultItemOnClick : top.HEURIST.search.addBookmark);
-			top.HEURIST.registerEvent(result, "dblclick", (top.HEURIST.util.getDisplayPreference("double-click-action") == "edit") ? top.HEURIST.search.edit_short : top.HEURIST.search.resultItemOnClick);
+			top.HEURIST.registerEvent(result, "dblclick", (top.HEURIST.util.getDisplayPreference("double-click-action") == "edit") ? top.HEURIST.search.edit : top.HEURIST.search.resultItemOnClick);
 		}
 
 		var thumbs = $(".result_thumb", resultsDiv).get();
@@ -540,6 +542,8 @@ top.HEURIST.search = {
 				top.HEURIST.search.toggleLegend();
 				top.HEURIST.search.toggleLegend();
 			}
+			document.getElementById("viewer-frame").src = top.HEURIST.basePath+ "viewers/printview/";
+			top.HEURIST.search.toggleResultItemSelect(top.HEURIST.search.results.records[firstIndex][2]);
 		});
 	},
 
@@ -795,7 +799,7 @@ top.HEURIST.search = {
 
 		return false;
 	},
-	
+
 	edit_short: function(bib_id,result_div) {
 		top.HEURIST.search.closeInfos;
 		//top.HEURIST.search.setRecordView("full");
@@ -957,16 +961,9 @@ top.HEURIST.search = {
 			}
 		}
 
-		// for now just set the src to the new url.
-		var viewerFrame = document.getElementById("viewer-frame");
-
-		viewerFrame.src = top.HEURIST.basePath+ "viewers/printview/?q=ids:"+top.HEURIST.search.selectedRecordIds.join(",") +
-							" sortby:t" +
-							(top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "");
 		//send selectionChange event
-		window.setTimeout(function(){top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", "selectedIds=" + top.HEURIST.search.selectedRecordIds.join(","));
-						},
-						1000);
+		var viewerFrame = document.getElementById("viewer-frame");
+		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", "selectedIds=" + top.HEURIST.search.selectedRecordIds.join(","));
 		return false;
 	},
 
@@ -1469,6 +1466,9 @@ top.HEURIST.search = {
 		}
 		top.HEURIST.search.bib_ids = {};
 		top.HEURIST.search.bkmk_ids = {};
+		top.HEURIST.selectedRecordIds = [];
+
+		top.HEURIST.selectedRecordDivs = {};
 	},
 
 	get_bib_ids: function() {

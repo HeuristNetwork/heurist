@@ -45,36 +45,8 @@
     </xsl:comment>
     <!-- end including code -->
 
-<html>
-	<head>
-
-	<!-- link rel="stylesheet" href="../../common/css/printview.css"/ -->
-        <!--<script type="text/javascript">
-
-          function displayResults(){
-
-         document.getElementById('div-loading').style.display = 'none';
-          var elts = document.getElementsByName("div-results");
-
-          for (var i = 0; i &lt; elts.length; ++i) {
-            var e = elts[i];
-            e.style.display ='block';
-            }
-          }
-        </script>-->
-      </head>
-      <body>
-        <xsl:attribute name="pub_id">
-          <xsl:value-of select="/hml/query[@pub_id]"/>
-        </xsl:attribute>
-        <!--<div id="div-loading" style="display:block;">Loading.. please wait </div>-->
-
-
           <xsl:apply-templates select="/hml/records/record"></xsl:apply-templates>
 
-
-      </body>
-    </html>
 
   </xsl:template>
   <!-- main template -->
