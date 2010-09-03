@@ -768,7 +768,7 @@ top.HEURIST.edit = {
 
 		var inputs = [];
 
-		var defaultURL = (windowRef.parent.HEURIST.record  &&  windowRef.parent.HEURIST.record.url)? windowRef.parent.HEURIST.record.url : "";
+		var defaultURL = (windowRef.parent.HEURIST.edit.record  &&  windowRef.parent.HEURIST.edit.record.url)? windowRef.parent.HEURIST.edit.record.url : "";
 		var required = (reftypeID == 1);	// URL input is only REQUIRED for internet bookmark
 		var URLInput = new top.HEURIST.edit.inputs.BibURLInput(container, defaultURL, required);
 		top.HEURIST.edit.allInputs.push(URLInput);
@@ -1628,7 +1628,7 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 	} else {
 		if (top.HEURIST.browser.isEarlyWebkit) {
 			var newIframe = this.document.createElement("iframe");
-				newIframe.src = top.HEURIST.basePath+"records/files/mini-file-upload.php?bib_id=" + windowRef.parent.HEURIST.record.bibID + "&bdt_id=" + this.bibDetailType[0];
+				newIframe.src = top.HEURIST.basePath+"records/files/mini-file-upload.php?bib_id=" + windowRef.parent.HEURIST.edit.record.bibID + "&bdt_id=" + this.bibDetailType[0];
 				newIframe.frameBorder = 0;
 				newIframe.style.width = "90%";
 				newIframe.style.height = "2em";
@@ -1913,7 +1913,7 @@ top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.addInput = function(bd
 	var tb = this.document.createElement("tbody");
 	tb.id = "relations-tbody";
 	newInput.appendChild(tb);
-	var relatedRecords = parent.HEURIST.record.relatedRecords;
+	var relatedRecords = parent.HEURIST.edit.record.relatedRecords;
 	this.relManager = new RelationManager(tb,top.HEURIST.edit.record.reftypeID, relatedRecords,this.bibDetailType[0],this.changeNotification,true);
 
 };
@@ -1960,7 +1960,7 @@ top.HEURIST.edit.Reminder.prototype.remove = function() {
 	var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 	var fakeForm = { action: top.HEURIST.basePath+"records/reminders/save-reminder.php",
 	                 elements: [ { name: "rem_id", value: this.reminderID },
-	                             { name: "bib_id", value: windowRef.parent.HEURIST.record.bibID },
+	                             { name: "bib_id", value: windowRef.parent.HEURIST.edit.record.bibID },
 	                             { name: "save-mode", value: "delete" } ] };
 	var thisRef = this;
 	top.HEURIST.util.xhrFormSubmit(fakeForm, function(json) {
@@ -1969,8 +1969,8 @@ top.HEURIST.edit.Reminder.prototype.remove = function() {
 			/* deletion was successful */
 			thisRef.reminderDiv.parentNode.removeChild(thisRef.reminderDiv);
 
-			/* find the reminder in HEURIST.record ... */
-			var reminders = windowRef.parent.HEURIST.record.reminders;
+			/* find the reminder in HEURIST.edit.record ... */
+			var reminders = windowRef.parent.HEURIST.edit.record.reminders;
 			for (var i=0; i < reminders.length; ++i) {
 				if (reminders[i].id == thisRef.reminderID) {
 					reminders.splice(i, 1);
@@ -2179,7 +2179,7 @@ top.HEURIST.edit.inputs.ReminderInput = function(parentElement) {
 		var bibIDelt = this.document.createElement("input");
 			bibIDelt.type = "hidden";
 			bibIDelt.name = "bib_id";
-			bibIDelt.value = parent.HEURIST.record.bibID;
+			bibIDelt.value = parent.HEURIST.edit.record.bibID;
 			td.appendChild(bibIDelt);
 		var addElt = this.document.createElement("input");
 			addElt.type = "hidden";
@@ -2238,7 +2238,7 @@ top.HEURIST.edit.inputs.ReminderInput.prototype.save = function(immediate, auto)
 		} else {
 			// Add the reminder to the record ...
 			var newReminder = vals.reminder;
-			windowRef.parent.HEURIST.record.reminders.push(newReminder);
+			windowRef.parent.HEURIST.edit.record.reminders.push(newReminder);
 
 			// ... remove the previous inputs ...
 			thisRef.fieldset.parentNode.removeChild(thisRef.fieldset);

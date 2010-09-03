@@ -316,7 +316,7 @@ EditableComment.prototype.save = function() {
 	var fakeForm = { action: installDir + "records/comments/save-comment.php",
 			elements: [
 				{ name: "cmt_id", value: this.id },
-				{ name: "bib_id", value: parent.HEURIST.record.bibID },
+				{ name: "bib_id", value: parent.HEURIST.edit.record.bibID },
 				{ name: "owner",  value: this.parentComment.id },
 				{ name: "text",   value: this.textarea.value }
 			] };

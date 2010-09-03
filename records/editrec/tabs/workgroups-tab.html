@@ -63,7 +63,7 @@ var addButton = document.getElementById("add-button");
 document.forms[0].heuristSubmit = function() {
 	top.HEURIST.util.xhrFormSubmit(document.forms[0], function(json) {
 		var vals = eval(json.responseText);
-		if (vals) parent.HEURIST.record.workgroupKeywords = vals;
+		if (vals) parent.HEURIST.edit.record.workgroupKeywords = vals;
 		window.location.reload();
 	});
 };

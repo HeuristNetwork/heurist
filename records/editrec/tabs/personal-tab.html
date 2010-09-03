@@ -62,12 +62,12 @@ top.HAPI.importSymbols(top, this);
     <tr class=input-row>
      <td class=input-header-cell>Private notes<div class="help prompt">These notes are private and visible only to you.</div> </td>
      <td class=input-cell>
-     	<div id=woot></div> 
+     	<div id=woot></div>
       <div>
-	   
+
        <a id=woot-ext-link target=_blank href="../../../woot/woot.html">open in new window</a>
       </div>
-      
+
      </td>
     </tr>
 
@@ -77,7 +77,7 @@ top.HAPI.importSymbols(top, this);
      <td class=input-header-cell>Password reminder<div class="help prompt">NOT ENCRYPTED - do not use for secure passwords</div></td>
      <td class=input-cell>
       <input type=text class=in name=password-reminder id=password-reminder style="width: 200px;" onChange="window.changed();" onKeyPress="window.changed();">
-      
+
      </td>
     </tr>
 
@@ -97,7 +97,7 @@ top.HAPI.importSymbols(top, this);
 
 
 var tags = document.getElementById("tags");
-tags.value = tags.defaultValue = top.HEURIST.record.keywordString  ||  "";
+tags.value = tags.defaultValue = top.HEURIST.edit.record.keywordString  ||  "";
 
 new top.HEURIST.autocomplete.AutoComplete(tags, top.HEURIST.util.keywordAutofill, { nonVocabularyCallback: top.HEURIST.util.showConfirmNewTag });
 
@@ -165,7 +165,7 @@ function unchanged() { top.HEURIST.edit.unchanged("personal"); }
 function handleSaved(json) {
 	var vals = eval(json.responseText);
 	for (var i in vals)
-		parent.HEURIST.record[i] = vals[i];
+		parent.HEURIST.edit.record[i] = vals[i];
 	window.location.reload();
 }
 document.forms[0].heuristSubmit = function() {
@@ -187,19 +187,19 @@ function fillRatings(element, values, defaultValue) {
 		++i;
 	}
 }
-fillRatings(document.getElementById("interest-rating"), top.HEURIST.ratings.interest, parent.HEURIST.record.interestRating);
-fillRatings(document.getElementById("content-rating"), top.HEURIST.ratings.content, parent.HEURIST.record.contentRating);
-fillRatings(document.getElementById("quality-rating"), top.HEURIST.ratings.quality, parent.HEURIST.record.qualityRating);
+fillRatings(document.getElementById("interest-rating"), top.HEURIST.ratings.interest, parent.HEURIST.edit.record.interestRating);
+fillRatings(document.getElementById("content-rating"), top.HEURIST.ratings.content, parent.HEURIST.edit.record.contentRating);
+fillRatings(document.getElementById("quality-rating"), top.HEURIST.ratings.quality, parent.HEURIST.edit.record.qualityRating);
 
-if (parent.HEURIST.record.passwordReminder) {
-	document.getElementById("password-reminder").value = parent.HEURIST.record.passwordReminder;
+if (parent.HEURIST.edit.record.passwordReminder) {
+	document.getElementById("password-reminder").value = parent.HEURIST.edit.record.passwordReminder;
 }
 
-document.getElementById("bkmk_id").value = top.HEURIST.record.bkmkID  ||  0;
+document.getElementById("bkmk_id").value = top.HEURIST.edit.record.bkmkID  ||  0;
 
 var reminderDiv = document.getElementById("reminders");
-for (var i=0; i < parent.HEURIST.record.reminders.length; ++i) {
-	new top.HEURIST.edit.Reminder(reminderDiv, parent.HEURIST.record.reminders[i]);
+for (var i=0; i < parent.HEURIST.edit.record.reminders.length; ++i) {
+	new top.HEURIST.edit.Reminder(reminderDiv, parent.HEURIST.edit.record.reminders[i]);
 }
 window.reminderInput = new top.HEURIST.edit.inputs.ReminderInput(reminderDiv);
 
@@ -207,8 +207,8 @@ window.reminderInput = new top.HEURIST.edit.inputs.ReminderInput(reminderDiv);
 HAPI.WOOT.DEFAULT_WOOT_PERMISSIONS  = [ HAPI.WOOT.OWNER_PROTECTION ];
 HAPI.WOOT.DEFAULT_CHUNK_PERMISSIONS = [ HAPI.WOOT.OWNER_PROTECTION ];
 
-var wootTitle = "bookmark:" + parent.HEURIST.record.bkmkID;
-var recTitle = parent.HEURIST.record.title + " - private notes";
+var wootTitle = "bookmark:" + parent.HEURIST.edit.record.bkmkID;
+var recTitle = parent.HEURIST.edit.record.title + " - private notes";
 
 document.getElementById("woot-ext-link").href += "?w=" + wootTitle + "&t=" + recTitle;
 

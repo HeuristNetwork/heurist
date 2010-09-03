@@ -255,7 +255,7 @@
             };
             Comment.prototype.formatDate = function(date) {
                 var date = new Date(Date.parse(date.replace(/-/g, "/")));
-                var now = new Date(Date.parse(top.HEURIST.record.retrieved.replace(/-/g, "/")));
+                var now = new Date(Date.parse(top.HEURIST.edit.record.retrieved.replace(/-/g, "/")));
 
                 var dateTime = Math.round(date.getTime() / 1000);
                 var nowTime = Math.round(now.getTime() / 1000);
@@ -364,7 +364,7 @@
                 var fakeForm = { action: installDir + "records/comments/save-comment.php",
                     elements: [
                     { name: "cmt_id", value: this.id },
-                    { name: "bib_id", value: parent.HEURIST.record.bibID },
+                    { name: "bib_id", value: parent.HEURIST.edit.record.bibID },
                     { name: "owner",  value: this.parentComment.id },
                     { name: "text",   value: this.textarea.value }
                     ] };
@@ -405,7 +405,7 @@
 
 
             function printAllComments() {
-                var commentDetails = parent.HEURIST.record.comments;
+                var commentDetails = parent.HEURIST.edit.record.comments;
                 var comments = {};
 
                 var commentsDiv = document.getElementById("comments");

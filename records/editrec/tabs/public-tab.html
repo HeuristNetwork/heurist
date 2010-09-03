@@ -48,8 +48,8 @@ function onshow() {
 
 
 function setReftype(rftID) {
-	parent.HEURIST.record.reftype = parent.HEURIST.reftypes.names[rftID];
-	renderInputs(parent.HEURIST.record.bibID, rftID);
+	parent.HEURIST.edit.record.reftype = parent.HEURIST.reftypes.names[rftID];
+	renderInputs(parent.HEURIST.edit.record.bibID, rftID);
 
 	changed();
 }
@@ -104,7 +104,7 @@ function handleSaved(json) {
 	if (! vals.matches) {
 		// regular case -- we get back an object containing updates to the record details
 		for (var i in vals)
-			parent.HEURIST.record[i] = vals[i];
+			parent.HEURIST.edit.record[i] = vals[i];
 		window.location.reload();
 	}
 	else {
@@ -157,8 +157,8 @@ function renderInputs(bibID, reftype) {
 			var noteText = record.notes;
 			var win = parent;
 			while (noteText == ""  &&  win) {
-				if (win.HEURIST  &&  win.HEURIST.record  &&  win.HEURIST.record.quickNotes)
-					noteText = win.HEURIST.record.quickNotes;
+				if (win.HEURIST  &&  win.HEURIST.edit.record  &&  win.HEURIST.edit.record.quickNotes)
+					noteText = win.HEURIST.edit.record.quickNotes;
 				if (win === top) break;
 				win = win.parent;
 			}
@@ -223,8 +223,8 @@ function renderInputs(bibID, reftype) {
 			var noteText = "";
 			var win = parent;
 			while (noteText == ""  &&  win) {
-				if (win.HEURIST  &&  win.HEURIST.record  &&  win.HEURIST.record.quickNotes)
-					noteText = win.HEURIST.record.quickNotes;
+				if (win.HEURIST  &&  win.HEURIST.edit.record  &&  win.HEURIST.edit.record.quickNotes)
+					noteText = win.HEURIST.edit.record.quickNotes;
 				if (win == top) break;
 				win = win.parent;
 			}
@@ -267,25 +267,25 @@ function renderInputs(bibID, reftype) {
 
 function renderAdditionalDataSection(container, reftypeID, bdValues) {
 	var hrRow = container.appendChild(document.createElement("tr"));
-	
+
 	var hrCell = hrRow.appendChild(document.createElement("td"));
 		hrCell.className = "separator_row";
 		hrCell.colSpan = 2;
 		hrCell.innerHTML = "&nbsp";
 
 	var explainRow = container.appendChild(document.createElement("tr"));
-	
+
 	var hrCell = explainRow.appendChild(document.createElement("td"));
 		hrCell.style.height = "20px";
 		hrCell.innerHTML = "<b>Additional data</b>";
 		hrCell.className = "additional-header-cell";
-		
+
 	var explainCell = explainRow.appendChild(document.createElement("td"));
 		explainCell.innerHTML = "Non-standard fields for this record type";
 
 	var addRow = container.appendChild(document.createElement("tr"));
 		addRow.appendChild(document.createElement("td"));
-		
+
 	var addCell = addRow.appendChild(document.createElement("td"));
 		addCell.colSpan = 2;
 		addCell.style.padding = "0 0 5px 0";
@@ -378,7 +378,7 @@ function renderShowAll() {
 
 document.forms[0].heuristSubmit = function() {
 	var checkSimilarElement = document.getElementById("check-similar");
-	if ((! parent.HEURIST.record.bibID  ||  parent.HEURIST.record.isTemporary)  &&  ! parent.HEURIST.record.forceSave) {
+	if ((! parent.HEURIST.edit.record.bibID  ||  parent.HEURIST.edit.record.isTemporary)  &&  ! parent.HEURIST.edit.record.forceSave) {
 		if (! checkSimilarElement) {
 			checkSimilarElement = document.createElement("input");
 			checkSimilarElement.type = "hidden";
