@@ -20,7 +20,7 @@
 
 
 
-	<xsl:template match="/">
+<xsl:template match="/">
 		<!-- use the following bit of code to include the stylesheet to display it in Heurist publishing wizard
 			otherwise it will be ommited-->
 		<!-- begin including code -->
@@ -33,25 +33,12 @@
 		<!-- end including code -->
 		<html>
 			<head>
-				<title/>
-				<link rel="stylesheet" type="text/css"
-					href="http://www.arts.usyd.edu.au/departs/archaeology/styles/base_internal.css"/>
-				<style type="text/css">
-				body { font-size: 80%; }
-				td { vertical-align: top; }
-			</style>
+			<title/>
 			</head>
 			<body>
-                <xsl:attribute name="pub_id">
-                    <xsl:value-of select="/hml/query[@pub_id]"/>
-                </xsl:attribute>
-                <xsl:attribute name="pub_query">
-                    <xsl:value-of select="/hml/query[@q]"/>
-                </xsl:attribute>
-				<table>
+			
 					<xsl:choose>
 						<xsl:when test="number($arg) > 0">
-
 							<xsl:apply-templates select="hml/records/record[id=$arg]"/>
 						</xsl:when>
 						<xsl:when test="string(number($arg)) = 'NaN'">
@@ -69,17 +56,13 @@
 							<xsl:apply-templates select="hml/records/record"/>
 						</xsl:otherwise>
 					</xsl:choose>
-				</table>
+			
 			</body>
 		</html>
-	</xsl:template>
-
+</xsl:template>
 
 	<!-- detail output template -->
 	<xsl:template match="record[id=$arg]">
-		<!--tr>
-		<a href="javascript:history.go(-1);">Back to list</a>
-	</tr-->
 		<tr>
 			<td style="padding-right: 10px;">
 				<img>
@@ -199,23 +182,20 @@
 				</td>
 			</tr>
 		</xsl:if>
-
 	</xsl:template>
+	
 <xsl:template match="detail/record">
 	<xsl:call-template name="title_group"/>
 </xsl:template>
+
 <xsl:template name="title_group" mode="blah">
 	<!-- only output reftype title once -->
 	<table>
-		<tr>
-			<td>
+		<tr name="test">
+			<td id="title">
 				<xsl:value-of select="title"/>
 			</td>
 			</tr>
 	</table>
-
-
-
-
 </xsl:template>
 </xsl:stylesheet>

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-    <xsl:template name="fieldwork_opportunity" match="record[type/@id=77]">
-        <tr>
-            <td>
+<xsl:template name="fieldwork_opportunity" match="record[type/@id=77]">
+<div id="{id}" class="record">
                 <a target="_new">
                     <xsl:attribute name="href">reftype_renderer/<xsl:value-of select="id"/></xsl:attribute>
                     <xsl:value-of select="detail[@id=160]"/><!-- Title -->
@@ -21,15 +20,12 @@
                 </xsl:for-each>
                 <br/>
                 <xsl:value-of select="detail[@id=303]"/><!-- Summary for web -->
-                <br/><br/>
-            </td>
-			<td>
+                <br/>
 				<xsl:if test="detail[@id=223]"><!-- thumbnail -->
 					<img>
 						<xsl:attribute name="src"><xsl:value-of select="detail[@id=223]/file/thumbURL"/></xsl:attribute>
 					</img>
 				</xsl:if>
-			</td>
-        </tr>
-    </xsl:template>
+</div>
+</xsl:template>
 </xsl:stylesheet>

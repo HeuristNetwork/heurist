@@ -2,8 +2,11 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 	<xsl:template name="course_unit" match="record[type/@id=70]">
 		<xsl:param name="style"/>
-		<tr>
-			<td>
+		<div id="{id}" class="record">
+			<xsl:if test="detail[@id=223]"><!-- thumbnail -->
+				<img src="{detail[@id=223]/file/thumbURL}" class="thumbnail"/>
+			</xsl:if>
+
 				<b>
 					<xsl:value-of select="detail[@id=269]"/>
 				</b>
@@ -47,15 +50,6 @@
 						</xsl:if>
 					</xsl:otherwise>
 				</xsl:choose>
-
-				<br/>
-				<br/>
-			</td>
-			<td>
-				<xsl:if test="detail[@id=223]"><!-- thumbnail -->
-					<img src="{detail[@id=223]/file/thumbURL}"/>
-				</xsl:if>
-			</td>
-		</tr>
+		</div>
 	</xsl:template>
 </xsl:stylesheet>

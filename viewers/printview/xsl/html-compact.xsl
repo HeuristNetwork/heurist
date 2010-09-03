@@ -52,7 +52,8 @@
             <xsl:when test="$mnth = '12'">December</xsl:when>
         </xsl:choose>
     </xsl:template>
-  <xsl:template match="/">
+
+<xsl:template match="/">
 
     <!-- use the following bit of code to include the stylesheet to display it in Heurist publishing wizard
       otherwise it will be ommited-->
@@ -62,37 +63,9 @@
       <!-- match the name of the stylesheet--> [output]html-compact[/output] </xsl:comment>
     <!-- end including code -->
 
-    <html>
-      <head>
-        <style type="text/css">
-          body {font-family:Verdana,Helvetica,Arial,sans-serif; font-size:10px; }
-          td { vertical-align: top; }
-          .reftype {color: #999999;  }
+	<xsl:apply-templates select="/hml/records/record"/>
 
-        </style>
-        <script>
-          function displaymore(id)
-          {
-          document.getElementById(id).style.display = '';
-          document.getElementById('a'+id).style.display = 'none';
-          }
-
-          function hidemore(id){
-          document.getElementById(id).style.display="none";
-          document.getElementById('a'+id).style.display = '';
-          }
-        </script>
-      </head>
-      <body>
-        <xsl:attribute name="pub_id">
-          <xsl:value-of select="/hml/query[@pub_id]"/>
-        </xsl:attribute>
-        <table>
-          <xsl:apply-templates select="/hml/records/record"/>
-        </table>
-      </body>
-    </html>
-  </xsl:template>
+</xsl:template>
 
 
 
@@ -109,18 +82,15 @@
     </xsl:call-template>-<xsl:value-of select="str:split($datepart, '-')[1]"/> ; </xsl:template>
 
   <!-- HEADER  -->
-  <xsl:template name="header">
-    <tr>
-      <td colspan="2" style="font-size: 11px; font-weight: bold;">
+<xsl:template name="header">
+<div style="font-size: 11px; font-weight: bold;">
         <img>
           <xsl:attribute name="align">abstop</xsl:attribute>
-          <xsl:attribute name="src">http://heuristscholar.org/reftype/<xsl:value-of
-              select="type/@id"/>.gif</xsl:attribute>
-        </img> &#160; <xsl:value-of select="title"/> &#160; <span style="font-weight:normal"
-          >[id: <xsl:value-of select="id"/>]</span></td>
-    </tr>
-    <tr>
-      <td style="font-size: 11px;">
+          <xsl:attribute name="src">../../common/images/reftype-icons/<xsl:value-of select="type/@id"/>.png</xsl:attribute>
+        </img> &#160; 
+        <xsl:value-of select="title"/> &#160; <span style="font-weight:normal">[id: <xsl:value-of select="id"/>]</span>
+</div>
+<div style="font-size: 11px;">
         <xsl:value-of select="type"/> ; <xsl:if test="modified !=''"> &#160; <span
             class="reftype">updated:</span>&#160; <xsl:apply-templates select="modified"/>
         </xsl:if>
@@ -133,35 +103,34 @@
             </xsl:choose>
           </a> ;
         </xsl:if>
-      </td>
-    </tr>
-  </xsl:template>
+</div>
+</xsl:template>
 
-  <!-- url  reftype only -->
-  <xsl:template match="record[type/@id=1]">
-    <xsl:call-template name="header"/>
-    <tr>
-      <td colspan="2" style="padding-bottom: 7px;">
-        <xsl:call-template name="body-detail-1"/>
-        <xsl:call-template name="body-pointer"/>
-        <xsl:call-template name="body-related"/>
-      </td>
-    </tr>
-  </xsl:template>
+<!-- url  reftype only -->
+<xsl:template match="record[type/@id=1]">
+<div id="{id}" class="record">
+	<xsl:call-template name="header"/>
+	<div style="padding-bottom: 7px;">
+		<xsl:call-template name="body-detail-1"/>
+		<xsl:call-template name="body-pointer"/>
+		<xsl:call-template name="body-related"/>
+	</div>
+</div>
+</xsl:template>
 
-  <!-- all reftypes template -->
-  <xsl:template match="record">
-    <xsl:call-template name="header"/>
-    <tr>
-      <td colspan="2" style="padding-bottom: 7px;">
-        <xsl:call-template name="body-detail"/>
-        <xsl:call-template name="body-pointer"/>
-        <xsl:call-template name="body-related"/>
-      </td>
-    </tr>
-  </xsl:template>
+<!-- all reftypes template -->
+<xsl:template match="record">
+<div id="{id}" class="record">
+	<xsl:call-template name="header"/>
+	<div style="padding-bottom: 7px;">
+		<xsl:call-template name="body-detail"/>
+		<xsl:call-template name="body-pointer"/>
+		<xsl:call-template name="body-related"/>
+	</div>
+</div>
+</xsl:template>
 
-  <xsl:template name="body-detail">
+<xsl:template name="body-detail">
     <!-- DETAIL LISTING -->
     <!--put what is being grouped in a variable-->
     <xsl:variable name="details" select="detail"/>

@@ -20,7 +20,7 @@
 
 
 
-	<xsl:template match="/">
+<xsl:template match="/">
 		<!-- use the following bit of code to include the stylesheet to display it in Heurist publishing wizard
 			otherwise it will be ommited-->
 		<!-- begin including code -->
@@ -36,10 +36,6 @@
 				<title/>
 				<link rel="stylesheet" type="text/css"
 					href="http://www.arts.usyd.edu.au/departs/archaeology/styles/base_internal.css"/>
-				<style type="text/css">
-				body { font-size: 80%; }
-				td { vertical-align: top; }
-			</style>
 			</head>
 			<body>
 				<xsl:attribute name="pub_id">
@@ -48,7 +44,8 @@
                 <xsl:attribute name="pub_query">
                     <xsl:value-of select="/hml/query[@q]"/>
                 </xsl:attribute>
-				<table>
+				<div id="{id}" class="record">
+					<table>
 					<xsl:choose>
 						<xsl:when test="number($arg) > 0">
 							
@@ -63,21 +60,21 @@
 								<xsl:with-param name="year" select="/hml/dateStamp/number(substring(., 1, 4)"/>
 								<xsl:with-param name="month" select="/hml/dateStamp/number(substring(., 6, 2))"/>
 								<xsl:with-param name="day" select="/hml/dateStamp/number(substring(., 9, 2))"/>
-
 							</xsl:apply-templates>
 						</xsl:when>
 						<xsl:otherwise>
 							<xsl:apply-templates select="hml/records/record"/>
 						</xsl:otherwise>
 					</xsl:choose>
-				</table>
+					</table>
+					</div>
 			</body>
 		</html>
-	</xsl:template>
+</xsl:template>
 
 
-	<!-- detail output template -->
-	<xsl:template match="record[id=$arg]">
+<!-- detail output template -->
+<xsl:template match="record[id=$arg]">
 		<!--tr>
 		<a href="javascript:history.go(-1);">Back to list</a>
 	</tr-->

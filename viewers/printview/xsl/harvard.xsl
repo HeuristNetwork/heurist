@@ -84,32 +84,19 @@
       otherwise it will be ommited-->
     <!-- begin including code -->
     <xsl:comment>
-      <!-- name (desc.) that will appear in dropdown list --> [name]Harvard style
-      bibliography[/name] <!-- match the filename of the stylesheet--> [output]harvard[/output] </xsl:comment>
+      <!-- name (desc.) that will appear in dropdown list --> [name]Harvard style bibliography[/name] <!-- match the filename of the stylesheet--> [output]harvard[/output] </xsl:comment>
     <!-- end including code -->
-    <html>
-      <head>
-
-        <style type="text/css">
-        body {font-family:Verdana,Helvetica,Arial,sans-serif; font-size:11px; }
-        td { vertical-align: top; padding-bottom: 7px; }
-      </style>
-      </head>
-      <body>
         <xsl:attribute name="pub_id">
           <xsl:value-of select="/hml/query[@pub_id]"/>
         </xsl:attribute>
-        <table>
 
           <xsl:apply-templates select="hml/records/record"/>
 
-        </table>
-      </body>
-    </html>
   </xsl:template>
   <!-- =================  42: ARCHIVE RECORD =============================== -->
   <xsl:template name="archive" match="record[type/@id=42]">
-
+   <div id="{id}" class="record">
+   <table>
     <tr>
       <td>
         <!-- if Title are missing, don't print -->
@@ -136,11 +123,14 @@
         </xsl:if>
       </td>
     </tr>
-
+    </table>
+	</div>
   </xsl:template>
 
   <!-- =================  5: BOOK =============================== -->
   <xsl:template name="publications" match="record[type/@id=5]">
+  <div id="{id}" class="record">
+  <table>
     <tr>
       <td>
         <!-- if Title are missing, don't print -->
@@ -174,11 +164,15 @@
         <xsl:call-template name="output_weblink"/>
       </td>
     </tr>
+    </table>
+    </div>
 
   </xsl:template>
 
   <!-- =================  4: BOOK CHAPTER  =============================== -->
   <xsl:template name="book_chap" match="record[type/@id=4]">
+    <div id="{id}" class="record">
+    <table>
     <tr>
       <td>
         <!-- if one of the details Author or Title are missing, don't print -->
@@ -215,11 +209,15 @@
         <xsl:call-template name="output_weblink"/>
       </td>
     </tr>
+    </table>
+    </div>
 
   </xsl:template>
 
   <!-- =================  1: HYPERLINK  =============================== -->
   <xsl:template name="hyperlink" match="record[type/@id=1]">
+   <div id="{id}" class="record">
+   <table>
     <tr>
       <td>
 
@@ -241,10 +239,14 @@
         </xsl:if>
       </td>
     </tr>
+    </table>
+    </div>
 
   </xsl:template>
   <!-- =================  29: JOURNAL | 68: MAGAZINE | 69: NEWSPAPER =============================== -->
   <xsl:template name="journal" match="record[type/@id=29 or type/@id=68 or type/@id=69]">
+  <div id="{id}" class="record">
+  <table>
     <tr>
       <td>
 
@@ -264,10 +266,13 @@
         <xsl:call-template name="output_weblink"/>
       </td>
     </tr>
-
+	</table>
+	</div>
   </xsl:template>
   <!-- =================  31: CONFERENCE PAPER =============================== -->
   <xsl:template name="conf-paper" match="record[type/@id=31]">
+  <div id="{id}" class="record">
+    <table>
     <tr>
       <td>
         <xsl:if test="detail[@id='160']">
@@ -298,12 +303,15 @@
         </xsl:if>
       </td>
     </tr>
-
+	</table>
+	</div>
   </xsl:template>
 
   <!-- =================  7: CONFERENCE PROCEEDINGS =============================== -->
 
   <xsl:template name="conference_proceedings" match="record[type/@id=7 ]">
+  <div id="{id}" class="record">
+  <table>
     <tr>
       <td>
         <!-- creator -->
@@ -344,13 +352,16 @@
         <xsl:call-template name="output_weblink"/>
       </td>
     </tr>
+    </table>
+    </div>
 
   </xsl:template>
 
   <!-- =================  9: NEWSPAPER ARTICLE && 10: MAGAZINE  ARTICLE =============================== -->
 
   <xsl:template name="article" match="record[type/@id=9 or type/@id=10]">
-
+    <div id="{id}" class="record">
+    <table>
     <tr>
       <td>
         <xsl:if test="detail[@id='160']">
@@ -383,6 +394,8 @@
         </xsl:if>
       </td>
     </tr>
+    </table>
+    </div>
 
   </xsl:template>
 
@@ -390,6 +403,8 @@
   <!-- =================  DEFAULT =============================== -->
 
   <xsl:template name="default" match="record">
+  <div id="{id}" class="record">
+  <table>
     <tr>
       <td>
         <xsl:if test="detail[@id=158]/record != ''">
@@ -413,11 +428,15 @@
         </xsl:if>
         <xsl:call-template name="output_weblink"/> [no bibliographic data] </td>
     </tr>
+    </table>
+    </div>
 
   </xsl:template>
 
   <!-- =================  28: JOURNAL VOLUME  =============================== -->
   <xsl:template name="journal_volume" match="record[type/@id=28 ] ">
+  <div id="{id}" class="record">
+  <table>
     <tr>
       <td>
         <xsl:choose>
@@ -448,11 +467,14 @@
         <xsl:call-template name="output_weblink"/>
       </td>
     </tr>
+    </table>
+    </div>
 
   </xsl:template>
   <!-- =================  30: PUBLISHER  =============================== -->
   <xsl:template name="publisher" match="record[type/@id=30 ] ">
-
+  <div id="{id}" class="record">
+  <table>
     <tr>
       <td>
         <xsl:if test="detail[@id=160]">
@@ -476,6 +498,8 @@
         <xsl:call-template name="output_weblink"/>
       </td>
     </tr>
+    </table>
+    </div>
 
   </xsl:template>
   <!-- =================  44: PUBLICATION SERIES  =============================== -->
@@ -484,6 +508,8 @@
       <!-- only display series if series title exists -->
       <xsl:when
         test="detail[@id=160] and detail[@id=160] != 'Unknown Series' and detail[@id =160] != 000">
+      <div id="{id}" class="record">
+  	  <table>
         <tr>
           <td>
 
@@ -520,6 +546,8 @@
             <xsl:call-template name="output_weblink"/>
           </td>
         </tr>
+        </table>
+        </div>
 
       </xsl:when>
     </xsl:choose>
@@ -527,6 +555,8 @@
 
   <!-- =================  3: JOURNAL ARTICLE  && 10: MAGAZINE ARTICLE =============================== -->
   <xsl:template name="jour_article" match="record[type/@id=3 or type/@id=10 ]">
+  <div id="{id}" class="record">
+  <table>
     <tr>
       <td>
         <!-- creator -->
@@ -578,10 +608,14 @@
         <xsl:call-template name="output_weblink"/>
       </td>
     </tr>
+    </table>
+    </div>
 
   </xsl:template>
   <!-- =================  12: REPORT =============================== -->
   <xsl:template name="report" match="record[type/@id=12 ]">
+  <div id="{id}" class="record">
+  <table>
     <tr>
       <td>
         <!-- creator -->
@@ -609,11 +643,15 @@
         <xsl:call-template name="output_weblink"/>
       </td>
     </tr>
+    </table>
+    </div>
 
   </xsl:template>
 
   <!-- =================  13: THESIS =============================== -->
   <xsl:template name="thesis" match="record[type/@id=13 ]">
+  <div id="{id}" class="record">
+  <table>
     <tr>
       <td>
         <!-- creator -->
@@ -653,6 +691,8 @@
         <xsl:call-template name="output_weblink"/>
       </td>
     </tr>
+    </table>
+    </div>
   </xsl:template>
 
   <!-- =================  HELPER TEMPLATES  =============================== -->

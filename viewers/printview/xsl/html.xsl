@@ -45,74 +45,22 @@
     </xsl:comment>
     <!-- end including code -->
 
-    <html>
-      <head>
-
-        <style type="text/css">
-          body {font-family:Verdana,Helvetica,Arial,sans-serif; font-size:11px; }
-          td { vertical-align: top; }
-          .reftype {
-          color: #999999;
-
-          }
-        </style>
-        <!--<script type="text/javascript">
-
-          function displayResults(){
-
-         document.getElementById('div-loading').style.display = 'none';
-          var elts = document.getElementsByName("div-results");
-
-          for (var i = 0; i &lt; elts.length; ++i) {
-            var e = elts[i];
-            e.style.display ='block';
-            }
-          }
-        </script>-->
-      </head>
-      <body>
-        <xsl:attribute name="pub_id">
-          <xsl:value-of select="/hml/query[@pub_id]"/>
-        </xsl:attribute>
-        <!--<div id="div-loading" style="display:block;">Loading.. please wait </div>-->
-
-
-          <xsl:apply-templates select="/hml/records/record"></xsl:apply-templates>
-
-
-      </body>
-    </html>
+	<xsl:apply-templates select="/hml/records/record"></xsl:apply-templates>
 
   </xsl:template>
+
   <!-- main template -->
   <xsl:template match="/hml/records/record">
-   <!-- <xsl:element name="div">
-      <xsl:attribute name="id">div-results</xsl:attribute>
-      <xsl:attribute name="name">div-results</xsl:attribute>
-      <xsl:attribute name="style">display:none;</xsl:attribute>
-
-      <xsl:choose>
-        <xsl:when test="position() = //rowcount">
-          <script >
-            displayResults();
-          </script>
-        </xsl:when>
-        <xsl:otherwise>
-          <script>
-            document.getElementById('div-loading').style.display = 'block';
-          </script>
-        </xsl:otherwise>
-      </xsl:choose>-->
-
       <!-- HEADER  -->
+      <div id="{id}" class="record">
       <table>
           <tr>
             <td colspan="2" >
               <b><xsl:value-of select="id"/>: &#160;
                 <img>
                   <xsl:attribute name="align">absbottom</xsl:attribute>
-                  <xsl:attribute name="src">http://heuristscholar.org/reftype/<xsl:value-of
-                    select="type/@id"/>.gif</xsl:attribute>
+                  <xsl:attribute name="src">../../common/images/reftype-icons/<xsl:value-of
+                    select="type/@id"/>.png</xsl:attribute>
                 </img>
 
                 &#160;
@@ -286,6 +234,7 @@
        </tr>
         </xsl:if>
       </table>
+      </div>
     <!--/xsl:element-->
 
   </xsl:template>

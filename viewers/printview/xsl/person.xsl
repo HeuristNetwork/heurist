@@ -10,9 +10,7 @@
 						</xsl:for-each>
 					</div>
 				</xsl:if>
-                <a target="_new" href="reftype_renderer/{id}">
                     <xsl:value-of select="title"/>
-                </a>
 				<br/>
 				<xsl:if test="detail[@id=255]">
 					<xsl:for-each select="detail[@id=255]"><!-- role -->
