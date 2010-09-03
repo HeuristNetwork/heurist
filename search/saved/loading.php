@@ -65,7 +65,7 @@ function loadSearch($args, $bare = false)  {
 	if (array_key_exists("l", $args)) {
 		$limit = intval(@$args["l"]);
 		unset($args["l"]);
-	} else if(array_key_exists("limit", $args)) {
+	}else if(array_key_exists("limit", $args)) {
 		$limit = intval(@$args["limit"]);  // this is back in since hml.php passes through stuff from sitemap.xmap
 	}else{
 		$limit = 100;
@@ -75,6 +75,8 @@ function loadSearch($args, $bare = false)  {
 	if (array_key_exists("o", $args)) {
 		$offset = intval(@$args["o"]);
 		unset($args["o"]);
+	}else if(array_key_exists("offset", $args)) {
+		$offset = intval(@$args["offset"]);  // this is back in since hml.php passes through stuff from sitemap.xmap
 	}
 
 	$query = REQUEST_to_query("select SQL_CALC_FOUND_ROWS rec_id ", $searchType, $args)
@@ -93,7 +95,7 @@ function loadSearch($args, $bare = false)  {
 		array_push($recs, $record);
 	}
 
-	return array("resultCount" => $resultCount, "records" => $recs);
+	return array("resultCount" => $resultCount, "recordCount" => count($recs), "records" => $recs);
 }
 
 

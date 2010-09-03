@@ -12,19 +12,15 @@
 
 	header('Content-type: text/javascript');
 
-	if (is_logged_in()) {
-		$arr_styles = load_output_styles();
+	$arr_styles = load_output_styles();
 
-		print "styles = [\n";
-		$first = true;
-		foreach ($arr_styles as $key => $value) { //load xsl-stylesheet based styles
-			if (! $first) print ",";  print "\n"; $first = false;
-			print "\t[ \"".$key."\", \"".$value."\" ]";
-		}
-		print "    ];\n";
-	}else{
-		print "styles = [];";
+	print "styles = [\n";
+	$first = true;
+	foreach ($arr_styles as $key => $value) { //load xsl-stylesheet based styles
+		if (! $first) print ",";  print "\n"; $first = false;
+		print "\t[ \"".$key."\", \"".$value."\" ]";
 	}
+	print "    ];\n";
 /**
 		* This function loads stylesheet names into the dropdown list for heurist publishing wizard
 		* @return  array  - array of stylesheet [stylesheetname]=>Name of Style

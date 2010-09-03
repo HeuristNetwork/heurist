@@ -6,38 +6,32 @@
 		<script>
 			function loadXMLDocFromFile(filename)
 			{
-				var xmlDoc;
-				// code for IE
-				try{
-					if (window.ActiveXObject){
-						var errorMsg = "Error loading " + filename + " using ActiveXObject";
-						xmlDoc=new ActiveXObject("Microsoft.XMLDOM");
-						xmlDoc.async=false;
-						xmlDoc.load(filename);
-						xmlDoc=xmlDoc.documentElement;
+				var xmlDoc=null;
+				var errorMsg = "Error loading " + filename + " using XMLHttpRequest";
+				var d;
+				try {
+					d = new XMLHttpRequest();
+				} catch (trymicrosoft) {
+					try {
+						d = new ActiveXObject("Msxml2.XMLHTTP");
+					} catch (othermicrosoft) {
+						try {
+							d = new ActiveXObject("Microsoft.XMLHTTP");
+						} catch (failed) {
+							d = false;
+						}
 					}
-					//code for google chrome
-					else if(window.XMLHttpRequest){
-						var errorMsg = "Error loading " + filename + " using XMLHttpRequest";
-						var d = new XMLHttpRequest();
+				}
+				if (d) {
+					try{
 						d.open("GET", filename, false);
 						d.send("");
 						xmlDoc=d.responseXML;
+					}catch(e){
+						alert(errorMsg + " Hint : " + e);
 					}
-					// code for Mozilla, Firefox, Opera, etc.
-					else if (document.implementation && document.implementation.createDocument){
-						var errorHappendHere = "Error with document implementation.";
-						var errorMsg = "Error loading " + filename + " using createDocument";
-						xmlDoc = document.implementation.createDocument("","",null);
-						xmlDoc.async=false;
-						xmlDoc.load(filename);
-					}
-					else{
-						alert("Your browser doesn't process XSL. Unable to view content.");
-					}
-				}
-				catch(e){
-					alert(errorHappendHere);
+				}else{
+					alert("Your browser doesn't process XSL. Unable to view content.");
 				}
 				return xmlDoc;
 			}
@@ -56,14 +50,19 @@
 			}
 
 			var xml;
+			var pageXMLs = {};
+			var aReq;
 			var selectedIds;
 			var xsls = {};
 			var query;
+			var aquery;
+			var loadingPage;
 			var curStyle = "default";
-			var currentPage = 0;
+			var currentPage = 1;
 			var totalRecordCount = 0;
 			var resultsPerPage = 50;
 			var pageCount = 0;
+
 			function init() {
 			//initialize parameters
 				if (top.HEURIST && top.HEURIST.search) {
@@ -102,7 +101,7 @@
 						if (top.HEURIST.search.resultsPerPage) resultsPerPage = top.HEURIST.search.resultsPerPage;
 						pageCount = Math.ceil(totalRecordCount / resultsPerPage);
 						if (top.HEURIST.search.currentPage) currentPage = top.HEURIST.search.currentPage;
-						offset = currentPage*resultsPerPage;
+						offset = (currentPage -1)*resultsPerPage;
 						if (query.search("limit")> -1) {
 							query = query.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage);
 						}else{
@@ -114,10 +113,9 @@
 							query += "&offset=" + offset;
 						}
 					}
-					if (query && query.search("sortby")> -1){
+					if (query && query.search("sortby")== -1){
 						query = query.replace(/q=([^#&=]*)/,"q=$1 sotrby:t");
 					}
-
 				}
 			//load xml
 				if (query){
@@ -126,10 +124,74 @@
 					document.getElementById("displayResult").innerHTML = "No query found, unable to display any results";
 					return;
 				}
+				pageXMLs[1] = xml;
 				xsls[curStyle] = loadXMLDocFromFile("xsl/" +curStyle +".xsl");
 				fillStyles(curStyle);
-				displayResult(curStyle);
-				if (top.HEURIST) top.HEURIST.registerEvent(this,"heurist-selectionChange",onSelectionChange);
+				displayResultPage(curStyle,1);
+				if (top.HEURIST) {
+					top.HEURIST.registerEvent(this,"heurist-selectionChange",onSelectionChange);
+					top.HEURIST.registerEvent(this,"heurist-pageChange",onPageChange);
+				}
+				asyncLoadSearchPages();
+			}
+
+			// this function takes the same search but attemps an asynchronous load of the entire result set
+			function asyncLoadSearchPages(){
+				//find next page to load
+				loadingPage = null;
+				for (var i=1; i <= pageCount; i++){
+					if (!pageXMLs[i]) {
+						loadingPage = i;
+						break;
+					}
+				}
+				if (!loadingPage) { // we are done loading
+					return;
+				}
+				//set query limits
+				aquery = query.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"&offset=" + (loadingPage-1)*resultsPerPage);
+				var url = "http://heuristscholar.org"+ top.HEURIST.basePath+ "export/xml/hml.php"+aquery;
+				var errorMsg = "Error loading " + url + " using XMLHttpRequest";
+				try {
+					aReq = new XMLHttpRequest();
+				} catch (trymicrosoft) {
+					try {
+						aReq = new ActiveXObject("Msxml2.XMLHTTP");
+					} catch (othermicrosoft) {
+						try {
+							aReq = new ActiveXObject("Microsoft.XMLHTTP");
+						} catch (failed) {
+							aReq = false;
+						}
+					}
+				}
+				if (aReq) {
+					try{
+						aReq.open("GET", url, true);
+						aReq.onreadystatechange = updateXMLPages;
+						aReq.send("");
+					}catch(e){
+						alert(errorMsg + " Hint : " + e);
+					}
+				}else{
+					alert("Your browser doesn'tsupport asynch loading. Unable to view complete content.");
+				}
+			}
+
+			function updateXMLPages(){
+				if (aReq.readyState == 4) {
+					if (aReq.status == 404) {
+						alert("Request for full record results failed - URL not found - likely the server is temporarily out of service");
+					} else if (aReq.status != 200) {
+						alert("Error: status code is " + aReq.status + " please contact the system administrator.");
+					}else{
+						pageXMLs[loadingPage] = aReq.responseXML;
+						if (currentPage == loadingPage){
+							displayResultPage(curStyle,curPage);
+						}
+						asyncLoadSearchPages(); // try and load the next page
+					}
+				}
 			}
 
 			function objFromArr(arr)
@@ -144,6 +206,32 @@
 
 			var newSelectionIds, newSelectionMap, alreadySelectedMap;
 
+			function onPageChange(eventType, argList) {
+				//if page xml not loaded then load sync
+				if (eventType == "heurist-pagechange"){
+					var page = 0;
+					if (argList && argList.match("pageNum")) {
+						var page = argList.match("pageNum=(\\d+)")
+						page = page[1];
+					}else if (top.HEURIST.search.currentPage > 0) {
+						page = top.HEURIST.search.currentPage;
+					}
+					if (page > 0  && page != currentPage && page <= pageCount){
+						currentPage = page;
+						if (!pageXMLs[page]){ //load pageXML now
+							var pageQuery = query;
+							pageQuery = pageQuery.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"&offset=" + (page-1)*resultsPerPage);
+							var url = "http://heuristscholar.org" + top.HEURIST.basePath+ "export/xml/hml.php" + pageQuery;
+							var errorMsg = "Error loading " + url + " using XMLHttpRequest";
+							pageXMLs[page] = loadXMLDocFromFile(url);
+						}
+						xml = pageXMLs[page];
+						selectedIds = [];
+						displayResultPage(curStyle,page);
+					}
+				}
+			}
+
 			function onSelectionChange(eventType, argList) {
 				if (eventType == "heurist-selectionchange"){
 					newSelectionIds = [];
@@ -155,21 +243,26 @@
 					}
 					newSelectionMap = objFromArr(newSelectionIds);
 					alreadySelectedMap = {};
-					$('div[class~=selected]').map(function(a){ return this.id;}).map(function(i){
+					var selDivs = $('div[class~=selected]');
+					if (selDivs) selDivs.map(function(a){ return this.id;}).map(function(i){
 																						if (newSelectionMap[this]) {
 																							alreadySelectedMap[this] = "";
 																						}else{
 																							$('div#'+ this).removeClass("selected");
 																						}
 																					});
-					$(newSelectionIds).map(function(i){ if (!alreadySelectedMap[this])$('div#'+ this).addClass("selected");});
+					$(newSelectionIds).map(function(i){
+													if (!alreadySelectedMap[this]){
+														$('div#'+ this).addClass("selected");
+													}
+												});
 					selectedIds = newSelectionIds;
 					$('div#'+selectedIds[selectedIds.length-1],$('iframe[id=viewer-frame]',top.document).get(0).contentDocument).get(0).scrollIntoView()
 				}
 			}
 
 			function updateSelection(){
-				if (!selectedIds) {
+				if (!selectedIds || selectedIds.length == 0) {
 					selectedIds = [$('div[class~=record]').attr("id")]; //get the id of the first record div
 				}
 				for (var i = 0; i < selectedIds.length; i++) {
@@ -178,34 +271,41 @@
 			}
 
 			function displayResult(style){
-				var resultDiv =document.getElementById("displayResult");
+				displayResultPage(style,currentPage);
+			}
 
-				while (resultDiv.childNodes[0]) resultDiv.removeChild(resultDiv.childNodes[0]);
+			function displayResultPage(style,page){
+				var resultDiv =document.getElementById("displayResult");
+				var xhtmlResultDoc = "";
+				function clearResult(resultDiv) {
+					while (resultDiv.childNodes[0]) resultDiv.removeChild(resultDiv.childNodes[0]);
+				}
 
 				if (style == "genericXML") {
-					document.getElementById("displayResult").appendChild(tempXML.documentElement);
-					return;
-				}else if (!xsls[style]){
-					xsls[style]=loadXMLDocFromFile("xsl/" +style +".xsl");
+					xhtmlResultDoc = pageXMLs[page].documentElement;
+				}else{
+					if (!xsls[style]){
+						xsls[style]=loadXMLDocFromFile("xsl/" +style +".xsl");
+					}
 					if (!xsls[style]) {
 						alert("Unable to read .xsl file, check to see if this style sheet is readable in your browser or another browser.");
 						return;
 					}
+					// code for IE
+					if (window.ActiveXObject){
+						var xmlResultStr = pageXMLs[page].transformNode(xsls[style]);
+						xhtmlResultDoc=new ActiveXObject("Microsoft.XMLDOM");
+						xhtmlResultDoc.async="false";
+						xhtmlResultDoc.loadXML(xmlResultStr);
+					// code for Mozilla, Firefox, Opera, etc.
+					}else {
+						var xsltProcessor=new XSLTProcessor();
+						xsltProcessor.importStylesheet(xsls[style]);
+						xhtmlResultDoc = xsltProcessor.transformToFragment(pageXMLs[page],document);
+					}
 				}
-				// code for IE
-				if (window.ActiveXObject)
-				{
-					var ex=xml.transformNode(xsls[style]);
-					document.getElementById("displayResult").innerHTML=ex;
-				}
-				// code for Mozilla, Firefox, Opera, etc.
-				else if (document.implementation && document.implementation.createDocument)
-				{
-					var xsltProcessor=new XSLTProcessor();
-					xsltProcessor.importStylesheet(xsls[style]);
-					var resultDocument = xsltProcessor.transformToFragment(xml,document);
-					document.getElementById("displayResult").appendChild(resultDocument);
-				}
+				clearResult(resultDiv);
+				resultDiv.appendChild(xhtmlResultDoc);
 				updateSelection();
 			}
 		</script>
@@ -213,7 +313,7 @@
 	</head>
 	<body onload="init()">
 		<div class="banner">
-		<select id="style_select" style="width: 180px;" onChange="displayResult(this.options[this.selectedIndex].value, true);">
+		<select id="style_select" style="width: 180px;" onChange="displayResult(this.options[this.selectedIndex].value);">
 		</select>
 		</div>
 		<div id="displayResult" >Loading .....</div>

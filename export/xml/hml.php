@@ -189,6 +189,16 @@ $MAX_DEPTH = @$_REQUEST['depth'] ? intval($_REQUEST['depth']) : 0;
 $REVERSE = @$_REQUEST['rev'] === 'no' ? false : true;
 $WOOT = @$_REQUEST['woot'] === '1' ? true : false;
 
+if (preg_match('/_COLLECTED_/', $_REQUEST['q'])) {
+if (!session_id()) session_start();
+	$collection = &$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['record-collection'];
+	error_log(print_r($collection,true));
+	if (count($collection) > 0) {
+		$_REQUEST['q'] = 'ids:' . join(',', array_keys($collection));
+	} else {
+		$_REQUEST['q'] = '';
+	}
+}
 
 
 //----------------------------------------------------------------------------//
@@ -554,6 +564,7 @@ if (array_key_exists('error', $result)) {
 	}
 	closeTag('ontologies');
 	makeTag('resultCount', null, $result['resultCount']);
+	makeTag('recordCount', null, $result['recordCount']);
 	openTag('records');
 	outputRecords($result);
 	closeTag('records');

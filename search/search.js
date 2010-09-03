@@ -97,6 +97,11 @@ top.HEURIST.search = {
 				top.HEURIST.search.renderSearchResults(startIndex, lastIndex-1);
 				top.HEURIST.search.renderNavigation();
 			});
+			top.HEURIST.registerEvent(window, "load", function() {
+				document.getElementById("viewer-frame").src = top.HEURIST.basePath+ "viewers/printview/";
+//				top.HEURIST.search.toggleResultItemSelect(top.HEURIST.search.results.records[startIndex][2]);
+				top.HEURIST.search.toggleResultItemSelect(top.HEURIST.search.results.records[0][2]);
+			});
 		}
 	},
 
@@ -542,8 +547,6 @@ top.HEURIST.search = {
 				top.HEURIST.search.toggleLegend();
 				top.HEURIST.search.toggleLegend();
 			}
-			document.getElementById("viewer-frame").src = top.HEURIST.basePath+ "viewers/printview/";
-			top.HEURIST.search.toggleResultItemSelect(top.HEURIST.search.results.records[firstIndex][2]);
 		});
 	},
 
@@ -717,6 +720,7 @@ top.HEURIST.search = {
 		top.HEURIST.search.closeInfos();
 
 		top.HEURIST.search.currentPage = pageNumber;
+		top.HEURIST.search.deselectAll();
 
 		// Check if we've already loaded the given page ...
 		var firstOnPage = pageNumber*resultsPerPage;
@@ -725,6 +729,10 @@ top.HEURIST.search = {
 			// Hoorah ... all the data is loaded (well, the first and last entries on the page ...), so render it
 			document.getElementById("results").scrollTop = 0;
 			top.HEURIST.search.renderSearchResults(firstOnPage, lastOnPage);
+			top.HEURIST.search.toggleResultItemSelect(results.records[firstOnPage][2]);
+			var viewerFrame = document.getElementById("viewer-frame");
+			top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-pagechange", "pageNum=" + (pageNumber +1));
+			top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", "selectedIds=" + results.records[firstOnPage][2]);
 		} else {
 			// Have to wait for the data to load
 			document.getElementById("result-rows").innerHTML = "";
@@ -732,7 +740,6 @@ top.HEURIST.search = {
 		}
 
 		top.HEURIST.search.renderNavigation();
-		top.HEURIST.search.deselectAll();
 	},
 
 	edit: function(e, targ) {
