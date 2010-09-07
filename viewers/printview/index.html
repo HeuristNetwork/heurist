@@ -114,7 +114,13 @@
 						}
 					}
 					if (query && query.search("sortby")== -1){
-						query = query.replace(/q=([^#&=]*)/,"q=$1 sotrby:t");
+						query = query.replace(/q=([^#&=]*)/,"q=$1 sortby:t");
+					}
+					if (query && query.search("a=")== -1){
+						query += "&a=1";
+					}
+					if (query && query.search("f=")== -1){
+						query += "&f=1";
 					}
 				}
 			//load xml
@@ -129,8 +135,9 @@
 				fillStyles(curStyle);
 				displayResultPage(curStyle,1);
 				if (top.HEURIST) {
-					top.HEURIST.registerEvent(this,"heurist-selectionChange",onSelectionChange);
-					top.HEURIST.registerEvent(this,"heurist-pageChange",onPageChange);
+					top.HEURIST.registerEvent(this,"heurist-selectionchange",onSelectionChange);
+					top.HEURIST.registerEvent(this,"heurist-selectall",onSelectAll);
+					top.HEURIST.registerEvent(this,"heurist-pagechange",onPageChange);
 				}
 				asyncLoadSearchPages();
 			}
@@ -232,6 +239,30 @@
 				}
 			}
 
+			function onSelectAll(eventType, argList) {
+				//if page xml not loaded then load sync
+				if (eventType == "heurist-selectall"){
+					var tempXML = pageXMLs[1];
+					var recordsNode = tempXML.getElementsByTagName("records")[0];
+					for (var page = 2; page <= pageCount; page++){
+						if (!pageXMLs[page]){ //load pageXML now
+							var pageQuery = query;
+							pageQuery = pageQuery.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"&offset=" + (page-1)*resultsPerPage);
+							var url = "http://heuristscholar.org" + top.HEURIST.basePath+ "export/xml/hml.php" + pageQuery;
+							var errorMsg = "Error loading " + url + " using XMLHttpRequest";
+							pageXMLs[page] = loadXMLDocFromFile(url);
+						}
+						var recordNodes = pageXMLs[page].getElementsByTagName("records")[0].childNodes;
+						for (var i =0; i<recordNodes.length; i++) {
+							recordsNode.appendChild(recordNodes[i].cloneNode(true));
+						}
+					}
+					pageXMLs[0] = tempXML;
+					selectedIds = [];
+					displayResultPage(curStyle,0);
+				}
+			}
+
 			function onSelectionChange(eventType, argList) {
 				if (eventType == "heurist-selectionchange"){
 					newSelectionIds = [];
@@ -271,6 +302,7 @@
 			}
 
 			function displayResult(style){
+				curStyle = style;
 				displayResultPage(style,currentPage);
 			}
 

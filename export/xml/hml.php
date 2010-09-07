@@ -61,7 +61,6 @@ require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 
 mysql_connection_db_select(DATABASE);
 
-
 //----------------------------------------------------------------------------//
 //  Tag construction helpers
 //----------------------------------------------------------------------------//
@@ -192,7 +191,6 @@ $WOOT = @$_REQUEST['woot'] === '1' ? true : false;
 if (preg_match('/_COLLECTED_/', $_REQUEST['q'])) {
 if (!session_id()) session_start();
 	$collection = &$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['record-collection'];
-	error_log(print_r($collection,true));
 	if (count($collection) > 0) {
 		$_REQUEST['q'] = 'ids:' . join(',', array_keys($collection));
 	} else {
@@ -218,7 +216,7 @@ if (@$ARGV) {
 	$pub_id = intval($_REQUEST['pub_id']);
 	require_once(dirname(__FILE__).'/../../common/connect/publish_cred.php');
 
-} else if (friendlyServer(@$_SERVER['SERVER_ADDR']) && !(@$_REQUEST['w'] && $_REQUEST['w']=='bookmark')) {	// internal request ... apparently we don't want to authenticate ..?
+} else if (friendlyServer(@$_SERVER['SERVER_ADDR']) && !(@$_REQUEST['a'])) {	// internal request ... apparently we don't want to authenticate ..?
 	function get_user_id() { return 0; }
 	function get_user_name() { return ''; }
 	function get_user_username() { return ''; }
@@ -230,7 +228,6 @@ if (@$ARGV) {
 } else {
 	$pub_id = 0;
 	require_once(dirname(__FILE__).'/../../common/connect/cred.php');
-
 	if (!is_logged_in()) { // check if the record being retrieved is a single non-protected record
 		if (!single_record_retrieval($_REQUEST['q'])) {
 			header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
@@ -543,7 +540,7 @@ openTag('hml', array(
 	'xsi:schemaLocation' => 'http://heuristscholar.org/heurist/hml http://heuristscholar.org/heurist/schemas/hml.xsd')
 );
 */
-$query_attrs = array_intersect_key($_REQUEST, array('q'=>1,'w'=>1,'depth'=>1));
+$query_attrs = array_intersect_key($_REQUEST, array('q'=>1,'w'=>1,'depth'=>1,'f'=>1,'limit'=>1,'offset'=>1,'instance'=>1));
 if ($pub_id) {
 	$query_attrs['pubID'] = $pub_id;
 }
