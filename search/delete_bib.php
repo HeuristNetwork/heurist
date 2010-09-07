@@ -70,7 +70,7 @@ mysql_connection_db_overwrite(DATABASE);
 				list($a, $b) = delete_bib($rec_id);
 				$bibs += $a;
 				$bkmks += $b;
-				$refs_res = mysql_query('select rec_id from rec_details left join rec_detail_types on rdt_id=rd_type left join records on rec_id=rd_rec_id where rd_val='.$rec_id.' and rdt_type="resource" and rec_type=52');
+				$refs_res = mysql_query('select rec_id from rec_details left join rec_detail_types on rdt_id=rd_type left join records on rec_id=rd_rec_id where rdt_type="resource" and rd_val='.$rec_id.' and rec_type=52');
 				while ($row = mysql_fetch_assoc($refs_res)) {
 					list($a, $b) = delete_bib($row['rec_id']);
 					$rels += $a;
@@ -105,7 +105,7 @@ mysql_connection_db_overwrite(DATABASE);
 		$bkmk_count = mysql_num_rows($res);
 		$bkmk_users = array();
 		while ($row = mysql_fetch_assoc($res)) array_push($bkmk_users, $row[USERS_USERNAME_FIELD]);
-		$refs_res = mysql_query('select rd_rec_id from rec_details left join rec_detail_types on rdt_id=rd_type where rd_val='.$rec_id.' and rdt_type="resource"');
+		$refs_res = mysql_query('select rd_rec_id from rec_details left join rec_detail_types on rdt_id=rd_type where  rdt_type="resource and rd_val='.$rec_id.' "');
 		$refs = mysql_num_rows($refs_res);
 
 		$allowed = is_admin()  ||
