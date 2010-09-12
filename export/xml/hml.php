@@ -49,6 +49,7 @@ if (@$argv) {
 	$_REQUEST['depth'] = @$ARGV['-depth'];
 	$_REQUEST['rev'] = @$ARGV['-rev'];
 	$_REQUEST['woot'] = @$ARGV['-woot'];
+	if (@$ARGV['-stub']) $_REQUEST['stub'] = '1';
 }
 
 require_once(dirname(__FILE__).'/../../common/config/friendly-servers.php');
@@ -187,6 +188,7 @@ $GEO_TYPES = array(
 $MAX_DEPTH = @$_REQUEST['depth'] ? intval($_REQUEST['depth']) : 0;
 $REVERSE = @$_REQUEST['rev'] === 'no' ? false : true;
 $WOOT = @$_REQUEST['woot'] === '1' ? true : false;
+$OUTPUT_STUBS = @$_REQUEST['stub'] === '1'? true : false;
 
 if (preg_match('/_COLLECTED_/', $_REQUEST['q'])) {
 if (!session_id()) session_start();
@@ -322,7 +324,7 @@ function buildTree($rec_ids, &$reverse_pointers, &$relationships) {
 //  Output functions
 //----------------------------------------------------------------------------//
 
-function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0) {
+function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $outputStub=false) {
 	global $RTN, $DTN, $RQS, $WGN, $MAX_DEPTH, $WOOT;
 
 	openTag('record');
@@ -338,10 +340,11 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0) {
 	makeTag('added', null, $record['rec_added']);
 	makeTag('modified', null, $record['rec_modified']);
 	makeTag('workgroup', array('id' => $record['rec_wg_id']), $record['rec_wg_id'] > 0 ? $WGN[$record['rec_wg_id']] : 'public');
-
+//error_log(print_r($record,true));
+//error_log("output record  stub = " .$outputStub. " depth = " . $depth. " MAX depth = ". $MAX_DEPTH);
 	foreach ($record['details'] as $dt => $details) {
 		foreach ($details as $value) {
-			outputDetail($dt, $value, $record['rec_type'], $reverse_pointers, $relationships, $depth);
+			outputDetail($dt, $value, $record['rec_type'], $reverse_pointers, $relationships, $depth, $outputStub);
 		}
 	}
 
@@ -379,9 +382,19 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0) {
 	closeTag('record');
 }
 
-function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $depth=0) {
-	global $DTN, $DTT, $RDL, $ONT, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH;
+function outputRecordStub($recordStub) {
+	global $RTN;
+//error_log( "ouput recordStub ".print_r($recordStub,true));
 
+	openTag('record',array('isStub'=> 1));
+	makeTag('id', null, $recordStub['id']);
+	makeTag('type', array('id' => $recordStub['type']), $RTN[$recordStub['type']]);
+	makeTag('title', null, $recordStub['title']);
+	closeTag('record');
+}
+
+function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $depth=0, $outputStub) {
+	global $DTN, $DTT, $RDL, $ONT, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH;
 	$attrs = array('id' => $dt);
 	if (array_key_exists($dt, $DTN)) {
 		$attrs['type'] = $DTN[$dt];
@@ -394,10 +407,15 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 	}
 	if (is_array($value)) {
 		if (array_key_exists('id', $value)) {
+//error_log("output detail  stub = " .$outputStub. " depth = " . $depth. " MAX depth = ". $MAX_DEPTH);
 			// record pointer
 			if ($depth < $MAX_DEPTH) {
 				openTag('detail', $attrs);
-				outputRecord(loadRecord($value['id']), $reverse_pointers, $relationships, $depth + 1);
+				outputRecord(loadRecord($value['id']), $reverse_pointers, $relationships, $depth + 1, $outputStub);
+				closeTag('detail');
+			} else if ($outputStub) {
+				openTag('detail', $attrs);
+				outputRecordStub($value);
 				closeTag('detail');
 			} else {
 				makeTag('detail', $attrs, $value['id']);
@@ -431,7 +449,7 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 		closeTag('detail');
 	} else if ($DTT[$dt] === 'resource') {
 		openTag('detail', $attrs);
-		outputRecord(loadRecord($value), $reverse_pointers, $relationships, $depth + 1);
+		outputRecord(loadRecord($value), $reverse_pointers, $relationships, $depth + 1, $outputStub);
 		closeTag('detail');
 	} else if ($DTT[$dt] === 'enum' && array_key_exists($value,$RDL)) {
 		if (array_key_exists($RDL[$value]['rdl_ont_id'],$ONT)) {
@@ -496,6 +514,7 @@ function outputDateDetail($attrs, $value) {
 }
 
 function outputRecords($result) {
+	global $OUTPUT_STUBS;
 	$reverse_pointers = array();
 	$relationships = array();
 
@@ -503,11 +522,11 @@ function outputRecords($result) {
 	foreach ($result['records'] as $record) {
 		array_push($rec_ids, $record['rec_id']);
 	}
-
+error_log("in hml and stub = ". $OUTPUT_STUBS);
 	buildTree($rec_ids, $reverse_pointers, $relationships);
 
 	foreach ($result['records'] as $record) {
-		outputRecord($record, $reverse_pointers, $relationships);
+		outputRecord($record, $reverse_pointers, $relationships, 0,$OUTPUT_STUBS);
 	}
 }
 
@@ -540,7 +559,7 @@ openTag('hml', array(
 	'xsi:schemaLocation' => 'http://heuristscholar.org/heurist/hml http://heuristscholar.org/heurist/schemas/hml.xsd')
 );
 */
-$query_attrs = array_intersect_key($_REQUEST, array('q'=>1,'w'=>1,'depth'=>1,'f'=>1,'limit'=>1,'offset'=>1,'instance'=>1));
+$query_attrs = array_intersect_key($_REQUEST, array('q'=>1,'w'=>1,'depth'=>1,'f'=>1,'limit'=>1,'offset'=>1,'instance'=>1,'stub'=>1));
 if ($pub_id) {
 	$query_attrs['pubID'] = $pub_id;
 }

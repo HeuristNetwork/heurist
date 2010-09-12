@@ -144,6 +144,26 @@ function updateCachedRecord($id) {
 	}
 }
 
+function loadRecordStub($id) {
+	$res = mysql_query(
+	    "select rec_id,
+	            rec_type,
+	            rec_title,
+	            rec_url,
+	            rec_scratchpad,
+	            rec_wg_id,
+	            if (rec_visibility = 'Hidden', 0, 1) as rec_visibility,
+	            rec_url_last_verified,
+	            rec_url_error,
+	            rec_added,
+	            rec_modified,
+	            rec_added_by_usr_id,
+	            rec_hhash
+	       from records
+	      where rec_id = $id");
+	$record = mysql_fetch_assoc($res);
+	return $record;
+}
 
 function loadBareRecordFromDB($id) {
 	$res = mysql_query(
@@ -181,6 +201,7 @@ function loadRecordDetails(&$record) {
 	            rdt_type,
 	            rec_id,
 	            rec_title,
+	            rec_type,
 	            rec_hhash
 	       from rec_details
 	  left join rec_detail_types on rdt_id = rd_type
@@ -227,6 +248,7 @@ function loadRecordDetails(&$record) {
 			case "resource":
 			$detailValue = array(
 				"id" => $rd["rec_id"],
+				"type"=>$rd["rec_type"],
 				"title" => $rd["rec_title"],
 				"hhash" => $rd["rec_hhash"]
 			);
