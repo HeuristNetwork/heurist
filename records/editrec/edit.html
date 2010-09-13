@@ -223,13 +223,13 @@
 </div>
 <!-- search -->
 <div id=search  class="roundedBoth outline bannerBG">
-	<div class="tablecell" id="edit_record_title">EDIT RECORD</div>
-	<div class="tablecell">
+	<!-- div class="tablecell" id="edit_record_title">EDIT RECORD</div -->
+	<div id=record-title>
 		<img id=reftype-img src="../../common/images/16x16.gif">
-		<span id=title-val></span>
-		<span id=reftype-edit class=edit ></span>
+		<div id=title-val></div>
 	</div>
-	<div class="tablecell" id=workgroup-div>
+	<div id=reftype-edit class=edit ></div>
+	<div id=workgroup-div>
 		<div id=workgroup-val-div title="Restrict access by workgroup">
 			<nobr>
 			<b><span id=workgroup-val></span></b>
@@ -238,7 +238,7 @@
 		</div>
 		<div id=workgroup-access title="Access for users not in this workgroup"></div>
 	</div>
-	<div class="tablecell" style="float:right; border:none;">
+	<div id=save-record-buttons>
 		<input type=button name=save-button value=Cancel onClick="top.HEURIST.edit.cancelSave();">
 		&nbsp;&nbsp;
 		<input type=button name=save-button style="font-weight: bold;" value=Save onClick="top.HEURIST.edit.save();">
@@ -334,9 +334,6 @@
 		<nobr>
 					<div class=public-visible>
 
-						<img id=reftype-img src="../../common/images/16x16.gif">
-						<span id=title-val></span>
-						<span id=reftype-edit class=edit ></span>
 						<label for=input-visibility style="margin-left: 116px;">
 							<input style="vertical-align: middle;" type=checkbox id=input-visibility onClick="top.HEURIST.util.setDisplayPreference('input-visibility', this.checked? 'all' : 'recommended')" class=minimal>
 							show optional fields

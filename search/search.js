@@ -296,7 +296,7 @@ top.HEURIST.search = {
 			reftypeTitle = top.HEURIST.reftypes.names[parseInt(res[4])] + " - click to see details";
 
 		var html =
-		"<div title=''  class=result_thumb  bkmk_id='"+res[0]+"' bib_id="+res[2]+">" +
+		"<div class=result_thumb  title='Double-click to edit' bkmk_id='"+res[0]+"' bib_id="+res[2]+">" +
 		"<input style='display:none' type=checkbox name=bib[] onclick=top.HEURIST.search.cb_onclick(this) class='logged-in-only' title='Check box to apply Actions to this record'>"+
 		   (res[11] && res[11].length ? "<div class='thumbnail' style='background-image:url("+res[11]+")' ></div>":"<div class='no-thumbnail' "+reftypeThumb+" ></div>") +
 		   "<div class=rec_title title='"+linkText.htmlEscape()+"'>"+ linkText + "</div>"+
@@ -525,7 +525,7 @@ top.HEURIST.search = {
 			if (pin_img) {
 				top.HEURIST.registerEvent(pin_img, "click", result.getAttribute("bkmk_id") ? function(){} : top.HEURIST.search.addBookmark);
 			}
-//			top.HEURIST.registerEvent(result, "dblclick", (top.HEURIST.util.getDisplayPreference("double-click-action") == "edit") ? top.HEURIST.search.edit : top.HEURIST.search.open_out);
+			top.HEURIST.registerEvent(result, "dblclick", (top.HEURIST.util.getDisplayPreference("double-click-action") == "edit") ? top.HEURIST.search.edit : top.HEURIST.search.open_out);
 //			if (rec_edit_link) {
 //					top.HEURIST.registerEvent(rec_edit_link, "click", top.HEURIST.search.edit);
 //			}
@@ -1233,7 +1233,7 @@ top.HEURIST.search = {
 				if (tags.length) {
 					innerHTML += "<div class=saved-search-subsubheading>Workgroup Tags</div>";
 					for (var j = 0; j < tags.length; ++j) {
-						innerHTML += "<nobr><a href='"+top.HEURIST.basePath+"search/search.html?ver=1&w=all&q=tag=\"" + top.HEURIST.workgroups[w].name + "\\" + tags[j] + "\"&label=Tag+\"" + tags[j] + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "") + "\"'>" + tags[j] + "</a></nobr>";
+						innerHTML += "<nobr><a href='"+top.HEURIST.basePath+"search/search.html?ver=1&w=all&q=tag:\"" + top.HEURIST.workgroups[w].name + "\\" + tags[j] + "\"&label=Tag+\"" + tags[j] + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "") + "\"'>" + tags[j] + "</a></nobr>";
 					}
 				}
 
@@ -1291,7 +1291,7 @@ top.HEURIST.search = {
 		var kwd;
 		for (var i = 0; i < keywords.length; ++i) {
 			kwd = encodeURIComponent(keywords[i]);
-			innerHTML += "<a href='"+top.HEURIST.basePath+"search/search.html?ver=1&w=bookmark&q=tag=\"" + kwd + "\"&label=Tag+\"" + kwd + "\"'>" + keywords[i] + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "") + "</a> ";
+			innerHTML += "<a href='"+top.HEURIST.basePath+"search/search.html?ver=1&w=bookmark&q=tag:\"" + kwd + "\"&label=Tag+\"" + kwd + "\"'>" + keywords[i] + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "") + "</a> ";
 		}
 		var kwd_search_elt = top.document.getElementById("keyword-search-links");
 		if (kwd_search_elt) {
