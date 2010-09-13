@@ -134,10 +134,10 @@ if (@$_REQUEST['logout']) {
 
 
 <div id=page style="padding: 20px;">
-<a id=home-link>
+<a id=home-link href='../../'>
 <div id=logo title="Click the logo at top left of any Heurist page to return to your Favourites"></div>
 </a>
-<div><h1>PLEASE LOGIN</h1></div>
+<div><h1>PLEASE LOGIN or <a href='../../' style='font-size:16px'>SEARCH</a></h1></div>
 
 <form name=mainform method=post>
 
