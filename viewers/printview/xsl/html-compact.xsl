@@ -94,7 +94,7 @@
         <xsl:value-of select="type"/> ; <xsl:if test="modified !=''"> &#160; <span
             class="reftype">updated:</span>&#160; <xsl:apply-templates select="modified"/>
         </xsl:if>
-        <xsl:if test="url != ''"> &#160; <a href="{url}">
+        <xsl:if test="url != ''"> &#160; <a href="{url}" TARGET="_blank">
             <xsl:choose>
               <xsl:when test="string-length(url) &gt; 50">
                 <xsl:value-of select="substring(url, 0, 50)"/>...</xsl:when>
@@ -394,7 +394,7 @@
     <xsl:param name="id"/>
     <xsl:if test="self::node()[@id =$id]">
       <xsl:element name="a">
-        <xsl:attribute name="target">_blank</xsl:attribute>
+        <xsl:attribute name="TARGET">_blank</xsl:attribute>
         <xsl:attribute name="href">
           <xsl:value-of select="self::node()[@id =$id]/url"/>
         </xsl:attribute> view image</xsl:element>
@@ -405,6 +405,7 @@
     <xsl:param name="id"/>
     <xsl:if test="self::node()[@id =$id]">
       <xsl:element name="a">
+      <xsl:attribute name="TARGET">_blank</xsl:attribute>
         <xsl:attribute name="href">
           <xsl:value-of select="self::node()[@id =$id]/file/url"/>
         </xsl:attribute>
@@ -422,6 +423,7 @@
     <xsl:param name="key"/>
     <xsl:param name="value"/>
     <xsl:element name="a">
+    <xsl:attribute name="TARGET">_blank</xsl:attribute>  
       <xsl:attribute name="href">
         <xsl:value-of select="$key"/>
       </xsl:attribute>

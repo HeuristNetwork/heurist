@@ -221,7 +221,7 @@
 	<div class="detailRow">
 		<div class="detailType">URL</div>
 		<div class="detail">
-		<a href="{url}">
+		<a href="{url}" TARGET="_blank">
 			<xsl:choose>
 			<xsl:when test="string-length(url) &gt; 50">
 					<xsl:value-of select="substring(url, 0, 50)"/> ... </xsl:when>
@@ -239,6 +239,7 @@
 		<div class="detailType">Last Updated</div><div class="detail"><xsl:value-of select="modified"/></div>
 	</xsl:if>
 	</div>
+	<div class="separator_row"></div>
 </div>
     <!--/xsl:element-->
 
@@ -250,7 +251,8 @@
     <xsl:param name="id"></xsl:param>
     <xsl:if test="self::node()[@id =$id]">
       <xsl:element name="a">
-        <xsl:attribute name="href"><xsl:value-of select="self::node()[@id =$id]/file/url"/></xsl:attribute>
+      <xsl:attribute name="TARGET">_blank</xsl:attribute>    
+        <xsl:attribute name="href" ><xsl:value-of select="self::node()[@id =$id]/file/url"/></xsl:attribute>
         <xsl:element name="img">
           <xsl:attribute name="src"><xsl:value-of select="self::node()[@id =$id]/file/thumbURL"/></xsl:attribute>
           <xsl:attribute name="border">0</xsl:attribute>
@@ -263,6 +265,7 @@
     <xsl:param name="id"></xsl:param>
     <xsl:if test="self::node()[@id =$id]">
       <xsl:element name="a">
+      <xsl:attribute name="TARGET">_blank</xsl:attribute>    
         <xsl:attribute name="href"><xsl:value-of select="self::node()[@id =$id]/file/url"/></xsl:attribute>
         <xsl:value-of select="file/origName"/>
       </xsl:element>  [<xsl:value-of select="file/size"/>]
@@ -280,6 +283,7 @@
     <xsl:param name="value"></xsl:param>
     <xsl:element name="a">
       <xsl:attribute name="href"><xsl:value-of select="$key"/></xsl:attribute>
+      <xsl:attribute name="TARGET">_blank</xsl:attribute>
       <xsl:value-of select="$value"/>
     </xsl:element>
   </xsl:template>
