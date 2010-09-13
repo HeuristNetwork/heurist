@@ -335,6 +335,11 @@ top.HEURIST.search = {
 			w_input.value = params["w"];
 		}
 
+		var inst_input = document.getElementById("instance");
+		if (inst_input  &&  params["instance"]) {
+			inst_input.value = params["instance"];
+		}
+
 		// set body class for elements whose display depends on search mode
 		document.body.className += (document.body.className ? " " : "") + "w-" + params["w"];
 
@@ -731,7 +736,11 @@ top.HEURIST.search = {
 			top.HEURIST.search.renderSearchResults(firstOnPage, lastOnPage);
 			top.HEURIST.search.toggleResultItemSelect(results.records[firstOnPage][2]);
 			var viewerFrame = document.getElementById("viewer-frame");
-			top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-pagechange", "pageNum=" + (pageNumber +1));
+			if (all) {
+				top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectall");
+			}else{
+				top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-pagechange", "pageNum=" + (pageNumber +1));
+			}
 			top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", "selectedIds=" + results.records[firstOnPage][2]);
 		} else {
 			// Have to wait for the data to load
@@ -2013,6 +2022,13 @@ top.HEURIST.search = {
 		for (var i=0; i < autoPopups.length; ++i) {
 			autoPopups[i].onclick = top.HEURIST.search.autoPopupLink;
 		}
+		var searchForm = document.forms[0];
+		var inputInstance = document.createElement("input");
+		inputInstance.type = "hidden";
+		inputInstance.id = "instance";
+		inputInstance.name = "instance";
+		inputInstance.value = top.HEURIST.instance.name;
+		searchForm.appendChild(inputInstance);
 
 		document.getElementById("select-all-checkbox").checked = false;
 	}

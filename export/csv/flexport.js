@@ -246,7 +246,8 @@ function showRecordData(hRecords) {
 						line += strDelim;
 					}
 				}else if (g_detailTypes[g_exportMap[j]].getVariety() == HVariety.GEOGRAPHIC) { //geographic object
-					line += csv_escape(hRecords[i].getDetail(g_detailTypes[g_exportMap[j]]).getWKT())+strDelim;
+					var geoDetail = hRecords[i].getDetail(g_detailTypes[g_exportMap[j]]);
+					line += (geoDetail ? csv_escape(geoDetail.getWKT()) : '') +strDelim;
 				}else{//non-reference case
 					line += csv_escape(hRecords[i].getDetail(g_detailTypes[g_exportMap[j]]))+strDelim;
 				}

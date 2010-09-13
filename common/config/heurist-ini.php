@@ -12,13 +12,14 @@ if (HEURIST_SERVER_NAME) {
 define('HEURIST_HOST_NAME', @$_SERVER["HTTP_HOST"]);	// this will read the server host name for the configured name.
 
 $installDir = preg_replace("/\/(".HEURIST_TOP_DIRS.")\/.*/","",@$_SERVER["SCRIPT_NAME"]);
+
 if($installDir == @$_SERVER["SCRIPT_NAME"]) {	// no top directories in this URI must be a root level script file or blank
 	$installDir = preg_replace("/\/index.php/","",@$_SERVER["SCRIPT_NAME"]);
 }
 if($installDir != @$_SERVER["SCRIPT_NAME"]) {	// this should be the path difference between document root and heurist code root
 	define('INSTALL_DIR', $installDir);	//the subdir of the servers document directory where heurist is installed
 }else{
-	define('INSTALL_DIR', '');	//the default is the document directory
+	define('INSTALL_DIR', '');	//the default is the document root directory
 }
 
 define('HEURIST_DEFAULT_INSTANCE','');	//default instance when the URI is abiguous about the instance

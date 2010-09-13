@@ -144,6 +144,26 @@ function updateCachedRecord($id) {
 	}
 }
 
+function loadRecordStub($id) {
+	$res = mysql_query(
+	    "select rec_id,
+	            rec_type,
+	            rec_title,
+	            rec_url,
+	            rec_scratchpad,
+	            rec_wg_id,
+	            if (rec_visibility = 'Hidden', 0, 1) as rec_visibility,
+	            rec_url_last_verified,
+	            rec_url_error,
+	            rec_added,
+	            rec_modified,
+	            rec_added_by_usr_id,
+	            rec_hhash
+	       from records
+	      where rec_id = $id");
+	$record = mysql_fetch_assoc($res);
+	return $record;
+}
 
 function loadBareRecordFromDB($id) {
 	$res = mysql_query(
@@ -181,6 +201,7 @@ function loadRecordDetails(&$record) {
 	            rdt_type,
 	            rec_id,
 	            rec_title,
+	            rec_type,
 	            rec_hhash
 	       from rec_details
 	  left join rec_detail_types on rdt_id = rd_type
@@ -217,16 +238,17 @@ function loadRecordDetails(&$record) {
 			$detailValue = array("file" => mysql_fetch_assoc($fres));
 			$origName = urlencode($detailValue["file"]["origName"]);
 			$detailValue["file"]["URL"] =
-				"http://".HOST_BASE.INSTALL_DIR."/records/files/fetch_file.php?". (defined('HEURIST_INSTANCE') ? "instance=".HEURIST_INSTANCE."&" : "" )
+				HEURIST_URL_BASE."records/files/fetch_file.php?". (defined('HEURIST_INSTANCE') ? "instance=".HEURIST_INSTANCE."&" : "" )
 				."file_id=".$detailValue["file"]["nonce"];
 			$detailValue["file"]["thumbURL"] =
-				"http://".HOST_BASE.INSTALL_DIR."/common/php/resize_image.php?" . (defined('HEURIST_INSTANCE') ? "instance=".HEURIST_INSTANCE."&" : "" )
+				HEURIST_URL_BASE."common/php/resize_image.php?" . (defined('HEURIST_INSTANCE') ? "instance=".HEURIST_INSTANCE."&" : "" )
 				."file_id=".$detailValue["file"]["nonce"];
 			break;
 
 			case "resource":
 			$detailValue = array(
 				"id" => $rd["rec_id"],
+				"type"=>$rd["rec_type"],
 				"title" => $rd["rec_title"],
 				"hhash" => $rd["rec_hhash"]
 			);
