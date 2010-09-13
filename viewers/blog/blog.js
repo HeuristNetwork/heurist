@@ -262,7 +262,7 @@ BlogEntry: function(record, parentElement, isNew) {
 
 
 	if (Blog.canEdit()) {
-		$("<a href='#' title='edit'/>").addClass("entry-edit-link").append("<img src='../../common/images/edit-pencil.gif'/>")
+		$("<a href='#' title='edit'/>").addClass("entry-edit-link").append("<img src='../../common/images/edit-pencil.png'/>")
 			.click(function() { that.edit(); return false; }).appendTo($(".entry-edit-link-cell", $tbody));
 	}
 
@@ -975,7 +975,7 @@ displayArchives: function() {
 },
 
 addArchivedBlogEntry: function(record) {
-	var archiveElem = document.getElementById("right");
+	var archiveElem = document.getElementById("archives");
 	var d = new Date(record.getCreationDate().replace(/-/g, "/"));
 	var y = d.getFullYear();
 	var m = d.getMonth();

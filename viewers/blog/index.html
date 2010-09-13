@@ -110,14 +110,14 @@ $(document).ready(function() {
 		else if (matches[4]) search["tag"] = matches[4];
 	}
 
-	$("#login").append(HCurrentUser.getRealName() + " : <a href='"+ HAPI.HeuristBaseURL +"/login.php?logout=1'>log out</a>");
+	$("#add-fav").append("<br>" + HCurrentUser.getRealName() + " : <a href='"+ HAPI.HeuristBaseURL +"/login.php?logout=1'>log out</a>");
 	$("#add-fav-link")[0].href += "&t=" + encodeURIComponent(document.title) + "&u=" + encodeURIComponent(window.location.href);
 
 	if ((user  &&  HCurrentUser == user) ||
 		(group  &&  HCurrentUser.isInWorkgroup(group))) {
 		$("<input type='button' id='new-entry-button' value='New " + record_type.getName() + "'/>")
 			.click(function() { Blog.newEntry(); })
-			.insertAfter("#header");
+			.insertBefore("#blog-owner");
 	}
 
 	$("#spiel,#hide-spiel-link").hide();
@@ -154,117 +154,109 @@ function reload() {
 </script>
 
 <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.5.2/build/fonts/fonts-min.css">
-
-<link rel="stylesheet" type="text/css" href="blog.css">
+<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+<link rel="stylesheet" type="text/css" href="../../common/css/search.css">
+<link rel="stylesheet" type="text/css" href="../../common/css/blog.css">
 
 </head>
 <body>
- <iframe id=yui-history-iframe src="../../common/images/hlogo-small-blog-only.gif"></iframe>
+ <!-- iframe id=yui-history-iframe src="../../common/images/hlogo-small-blog-only.gif"></iframe -->
  <input id=yui-history-field type=hidden>
 
  <script src=autocomplete.js></script>
 
-<div id=header>
- <div class=right>
-  <div id=login></div>
-  <div id=add-fav><a id=add-fav-link href="../../records/addrec/add.php?addref=1&amp;k=Favourites">Add page to favourites</a></div>
+<a id=home-link href="/h3-ig/">
+<div title="Click the logo at top left of any Heurist page to return to your Favourites" id="logo"></div>
+</a>
+<div id=version></div>
+<!-- instance name -->
+<div id=instance-name ></div>
+  
  </div>
- <div id=hlogo>
-  <a href=..><img src="../../common/images/hlogo-small-return-to-heurist.gif"></a>
-  Blogs
-  <select id=blog-select>
-   <option selected>select...</option>
-  </select>
  </div>
- <div class=clearall></div>
- <div id=banner>
-  <div id=bloglogo>
-   <a><img src="../../common/images/hlogo-small-blog-only.gif"></a><br>
-   <a>home</a>
-  </div>
-  <h1 id=blog-owner></h1>
-  <p id=spiel-leader><strong>Heurist Blog: the blog with more ...</strong> <a id=show-spiel-link href="#">tell me</a><a id=hide-spiel-link href="#">hide</a></p>
- </div>
- <div id=spiel title="click to hide">
-  <br>
-  In most blogs a blog entry is just that - a blog entry, nothing more. In
-  Heurist, a blog entry is a fully-fledged record in a Heurist database.
-  That means you can re-use the data in many other ways:
-  <ul>
-   <li>
-    Create relationships between a blog entry and people, events,
-    bibliographic references or any of the other 70+ record types in Heurist;
-   </li>
-   <li>
-    See all the entries related to each entry in your blog, view them
-    as a blog, add a new related entry
-   </li>
-   <li>
-    View any type of record in blog format, edit, add related records etc.
-   </li>
-   <li>
-    Attach geographic and time locations to your blog entries (and
-    create maps and timelines from them);
-   </li>
-   <li>
-    Attach thumbnail images to your blog entries;
-   </li>
-   <li>
-    Use Heurist's search and publishing engine to find, reformat and
-    publish blog entries live to other web pages, or provide RSS feeds;
-   </li>
-   <li>
-    Insert other Heurist records in the blog entry as dynamic content
-    (including images and other media objects, bibliographic references,
-    people, places, events etc.);
-   </li>
-   <li>
-    Create extended blog entries with granular permissions (read and/or
-    write) on individual paragraphs down to individual users or workgroups;
-   </li>
-   <li>
-    Use a personal blog or a workgroup blog, show or hide records from a
-    broader public
-   </li>
-   <li>
-    Include records seamlessly in your personal blog simply by bookmarking
-   </li>
-  </ul>
-  <p>
-   For maximum control of a blog entry, click on 'Edit full record' link
-  </p>
- </div>
+<div id=sidebar>
+	<div class=banner>
+		<div id=add-fav><a id=add-fav-link href="../../records/addrec/add.php?addref=1&amp;k=Favourites">Add page to favourites</a></div>
+	</div>
+	
+	<div id="sidebar-inner">
+	<div id=right>
+		<div class=detailRow>
+		Show<select id=record-type><option value=0 disabled>(search results)</option></select>
+		<input type="button" value="&lt;&lt; Back" onclick="history.go(-1);">
+		</div>
+		<div class=detailRow>
+			<div id=tags></div>
+		</div>
+		<div class=detailRow>
+			<div id=archives><h4>Archives</h4></div>
+		</div>
+	</div></div>
+</div>
 </div>
 
-<table id=page>
- <tr>
-  <td id=main></td>
-  <td id=right>
-   <div>
-    <table>
-     <tr>
-      <td>Show</td>
-      <td>
-       <select id=record-type>
-        <option value=0 disabled>(search results)</option>
-       </select>
-      </td>
-     </tr>
-     <tr>
-      <td></td>
-      <td>
-       <input type="button" value="&lt;&lt; Back" onclick="history.go(-1);">
-      </td>
-     </tr>
-    </table>
-   </div>
-   <div id=tags></div>
-   <div id=archives>
-    <h4>Archives</h4>
-   </div>
-  </td>
- </tr>
-</table>
+
+<div id=page>
+<div id=header></div>
+<div class=banner>
+	<h1 id=blog-owner></h1><div id=blog-selector>Other blogs <select id=blog-select><option selected>select...</option></select></div>
+	<div id=spiel-leader><strong>Heurist Blog: the blog with more ...</strong> <a id=show-spiel-link href="#">tell me</a><a id=hide-spiel-link href="#">hide</a></div>
+		 <div id=spiel title="click to hide">
+		  <br>
+		  In most blogs a blog entry is just that - a blog entry, nothing more. In
+		  Heurist, a blog entry is a fully-fledged record in a Heurist database.
+		  That means you can re-use the data in many other ways:
+		  <ul>
+		   <li>
+		    Create relationships between a blog entry and people, events,
+		    bibliographic references or any of the other 70+ record types in Heurist;
+		   </li>
+		   <li>
+		    See all the entries related to each entry in your blog, view them
+		    as a blog, add a new related entry
+		   </li>
+		   <li>
+		    View any type of record in blog format, edit, add related records etc.
+		   </li>
+		   <li>
+		    Attach geographic and time locations to your blog entries (and
+		    create maps and timelines from them);
+		   </li>
+		   <li>
+		    Attach thumbnail images to your blog entries;
+		   </li>
+		   <li>
+		    Use Heurist's search and publishing engine to find, reformat and
+		    publish blog entries live to other web pages, or provide RSS feeds;
+		   </li>
+		   <li>
+		    Insert other Heurist records in the blog entry as dynamic content
+		    (including images and other media objects, bibliographic references,
+		    people, places, events etc.);
+		   </li>
+		   <li>
+		    Create extended blog entries with granular permissions (read and/or
+		    write) on individual paragraphs down to individual users or workgroups;
+		   </li>
+		   <li>
+		    Use a personal blog or a workgroup blog, show or hide records from a
+		    broader public
+		   </li>
+		   <li>
+		    Include records seamlessly in your personal blog simply by bookmarking
+		   </li>
+		  </ul>
+		  <p>
+		   For maximum control of a blog entry, click on 'Edit full record' link
+		  </p>
+		 </div>
+		 
+	</div>
+	<div id=page-inner>
+  <div id=main></div>
+  </div>
+
+</div>
 
 </body>
 </html>
