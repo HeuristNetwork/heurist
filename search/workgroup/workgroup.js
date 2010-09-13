@@ -102,7 +102,7 @@ top.HEURIST.workgroup = {
 		var kwd = document.getElementById("keyword-select").value;
 		var sortby = document.getElementById("sortby-select").value;
 		var q = (rft ? " type:" + rft + ((kwd || top.HEURIST.workgroup.kwds.length) ? " AND ": "") : "")
-			  + (kwd ? " tag=\"" + kwd + "\"" : "tag=\"" + top.HEURIST.workgroup.kwds.join(",") + "\"")
+			  + (kwd ? " tag:\"" + kwd + "\"" : "tag:\"" + top.HEURIST.workgroup.kwds.join(",") + "\"")
 			  + " sortby:" + sortby;
 		window.HEURIST.parameters["q"] = q;
 		top.HEURIST.search.closeInfos();
