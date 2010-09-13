@@ -229,12 +229,26 @@ top.HEURIST.search = {
 		"</span>"+
 		"<img src=" +top.HEURIST.basePath+ "common/images/16x16.gif title='"+reftypeTitle.htmlEscape()+"' "+reftypeImg+" class=rft>"+
 		"<span class='rec_title'>" + linkText + "</span>" +
+		
+		
 		"<div class=right_margin_info>"+
-		"<a expando=true" + (href ? " href='"+href+"' target='_blank'><img class='ext_link'src='"+ top.HEURIST.basePath+"common/images/external_link_16x16.gif' title='go to link'" : "") + ((linkTitle || href)  ?  " title='" + (linkTitle? linkTitle.htmlEscape() : href) + "'"  :  "") +
-		" origInnerHtml='"+linkText.htmlEscape()+"'></a>" +
-		"<span id='rec_edit_link' title='Click to edit'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png' onclick='top.HEURIST.search.edit("+ res[2] +",this.parentNode.parentNode.parentNode); return false;'/></a></span>" +
+
+		"<div class=mini-tools bkmk_id='"+res[0]+"' bib_id="+res[2]+">" +
+			"<span id='rec_edit_link' title='Click to edit'><a href='"+
+			top.HEURIST.basePath+ "records/editrec/edit.html?sid=" +
+			top.HEURIST.search.sid + "&bib_id="+ res[2] +
+			(top.HEURIST.instance && top.HEURIST.instance.name ? '&instance=' + top.HEURIST.instance.name : '') +
+			"' target='_blank'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png'/>edit</a> | </span>" +
+			(res[3].length ? "<span><a href='"+res[3]+"' target='_blank'><img src='"+ top.HEURIST.basePath+"common/images/external_link_16x16.gif' title='go to link'>visit</a> | </span>" : "") +
+			"<span id='rec_explore_link' title='Click to explore'><a href='/cocoon/h3/relbrowser/irek/item/" + res[2] +
+					(top.HEURIST.instance && top.HEURIST.instance.name ? '/?instance=' + top.HEURIST.instance.name : '') +
+					"' target='_blank'><img src='"+	top.HEURIST.basePath + "common/images/explore.png'/>explore</a></span>" +
+					"<span><img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src=" +top.HEURIST.basePath+ "common/images/lock.png " + userPwd + "></span>"+
+			"<span id='spacer'><img src='"+	top.HEURIST.basePath + "common/images/16x16.gif'/></span>" +
+		"</div>" +
+
 		"<span style='display:none' class=daysbad title='Detection of broken URLs is carried out once a day'>"+daysBad+"</span>"+
-		"<br><img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src=" +top.HEURIST.basePath+ "common/images/key.gif " + userPwd + ">"+
+
 		"</div>" +
 		"<input type=checkbox name=bib[] onclick=top.HEURIST.search.cb_onclick(this) class='logged-in-only' title='Check box to apply Actions to this record'>"+
 		"</div>";
@@ -302,20 +316,29 @@ top.HEURIST.search = {
 		   "<div class=rec_title title='"+linkText.htmlEscape()+"'>"+ linkText + "</div>"+
 		   "<div class=icons  bkmk_id='"+res[0]+"' bib_id="+res[2]+">" +
 
-		   (res[3].length ? "<a href='"+res[3]+"' target='_blank'><img src='"+ top.HEURIST.basePath+"common/images/external_link_16x16.gif' title='go to link'></a>" : "") +
+		
 		   "<img src='"+ top.HEURIST.basePath+"common/images/16x16.gif' title='"+reftypeTitle.htmlEscape()+"' "+reftypeImg+" class='rft'>"+
 		   "<img src='"+ top.HEURIST.basePath+"common/images/13x13.gif' " + pinAttribs + ">"+
 		   "<span class='wg-id-container logged-in-only'>"+
 		   "<span class=wg-id title='"+linkTitle.htmlEscape()+"' " + (wgColor? wgColor: "") + ">" + (wgHTML? wgHTML.htmlEscape() : "") + "</span>"+
 		   "</span>"+
-		   "<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/key.gif' " + userPwd + ">"+
-		   "<span id='rec_edit_link' title='Click to edit'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png' onclick='top.HEURIST.search.edit(null,this.parentNode.parentNode.parentNode); return false;'/></a></span>" +
-//		   "<span id='rec_edit_link' title='Click to edit'><a href='"+
-//			top.HEURIST.basePath+ "records/editrec/edit.html?sid=" +
-//			top.HEURIST.search.sid + "&bib_id="+ res[2] +
-//			(top.HEURIST.instance && top.HEURIST.instance.name ? '&instance=' + top.HEURIST.instance.name : '') +
-//			"' target='_blank'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png'/></a></span>" +
+		   "<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/lock.png' " + userPwd + ">"+
 		    "</div>" +
+		    "<div class=mini-tools bkmk_id='"+res[0]+"' bib_id="+res[2]+">" +
+		    	"<div id='links'>" +
+				"<span id='rec_edit_link' title='Click to edit'><a href='"+
+			top.HEURIST.basePath+ "records/editrec/edit.html?sid=" +
+			top.HEURIST.search.sid + "&bib_id="+ res[2] +
+			(top.HEURIST.instance && top.HEURIST.instance.name ? '&instance=' + top.HEURIST.instance.name : '') +
+			"' target='_blank'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png'/>edit</a> | </span>" +
+				(res[3].length ? "<span><a href='"+res[3]+"' target='_blank'><img src='"+ top.HEURIST.basePath+"common/images/external_link_16x16.gif' title='go to link'>visit</a> | </span>" : "") +
+				"<span id='rec_explore_link' title='Click to explore'><a href='/cocoon/h3/relbrowser/irek/item/" + res[2] +
+					(top.HEURIST.instance && top.HEURIST.instance.name ? '/?instance=' + top.HEURIST.instance.name : '') +
+					"' target='_blank'><img src='"+	top.HEURIST.basePath + "common/images/explore.png'/>explore</a></span>" +
+				"<span id='spacer'><img src='"+	top.HEURIST.basePath + "common/images/16x16.gif'/></span>" +
+				"</div>" +
+		   "</div>" +
+		    
 		"</div>";
 		return html;
 	},
