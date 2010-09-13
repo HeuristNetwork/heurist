@@ -29,6 +29,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #logo-cell { width: 160px; }
 #exit-link {color:#DC8501;font-size:14px;}
 #wg-title { position: absolute; left: 40px; top: 15px; font-weight: bold; color: white; }
+#search {height:40px;left:10px;position:absolute;right:10px;top:65px;width:auto;}
+#saved-search-heading {height:13px}
+#page-inner {top:1px; right:0}
 #banner-heading{-moz-border-radius:10px 10px 0 0;-webkit-border-radius:10px 10px 0 0; border-radius:10px 10px 0 0; color:#7D9AAA;font-weight:bold;height:13px;padding:6px 5px;}
 #workgroup {height:100px;left:10px;position:absolute;right:10px;top:105px;}
 #workgroup #wg-heading-cell { width: 25px; font-size: 110%; vertical-align: top; padding-top: 20px; }

@@ -365,7 +365,7 @@ div.hide .saved-search-subheading {background-image:url("../images/sub_heading_s
 
 iframe.info.summary {position:relative; display:inline-block; height:100px; overflow:hidden; background:url("../images/backgrounds/thumbnail_bg.png") repeat-x scroll 0 bottom #F6F6F6 !important;}
 iframe.info html body {font-size: 12px;}
-.right_margin_info {background-image:url("../images/white_fade.png");background-position:2px 50%;background-repeat:repeat-y;color:#4C5F76;height:31px;line-height:19px;padding:0;position:absolute;right:0;text-decoration:none;top:0;width:48px;z-index:1;text-align: right;}
+.right_margin_info {background-image:url("../images/white_fade.png");background-position:0px 50%;background-repeat:repeat-y;color:#4C5F76;height:32px;line-height:19px;padding:0;position:absolute;right:0;text-decoration:none;top:0;width:48px;z-index:1;text-align: right;}
 #loadingDiv {background-image: url("../images/loading-animation.gif"); background-position: 50%;background-repeat: no-repeat;}
 #loadingDiv.summary {position:absolute; display:block; height:100px; width:100%;overflow:hidden;z-index: 100;}
 #loadingDiv.full {position:absolute; display:inline-block; height:100%; width:100%;z-index: 100;}
