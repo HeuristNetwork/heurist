@@ -57,6 +57,8 @@
 			var query;
 			var aquery;
 			var loadingPage;
+			var loadCount;	// to restict the number of pages that are loaded. Some queries gives all records.
+			var maxLoadPages = 10;
 			var curStyle = "default";
 			var currentPage = 1;
 			var totalRecordCount = 0;
@@ -113,9 +115,11 @@
 							query += "&offset=" + offset;
 						}
 					}
-					if (query && query.search("sortby")== -1){
+
+/*					if (query && query.search("sortby")== -1){
 						query = query.replace(/q=([^#&=]*)/,"q=$1 sortby:t");
 					}
+*/
 					if (query && query.search("a=")== -1){
 						query += "&a=1";
 					}
@@ -142,11 +146,13 @@
 					top.HEURIST.registerEvent(this,"heurist-selectall",onSelectAll);
 					top.HEURIST.registerEvent(this,"heurist-pagechange",onPageChange);
 				}
+				loadCount = maxLoadPages;
 				asyncLoadSearchPages();
 			}
 
 			// this function takes the same search but attemps an asynchronous load of the entire result set
 			function asyncLoadSearchPages(){
+				if (!loadCount || loadCount <=0) return; //nothing to load
 				//find next page to load
 				loadingPage = null;
 				for (var i=1; i <= pageCount; i++){
@@ -156,6 +162,7 @@
 					}
 				}
 				if (!loadingPage) { // we are done loading
+					loadCount = 0;
 					return;
 				}
 				//set query limits
@@ -193,12 +200,13 @@
 					if (aReq.status == 404) {
 						alert("Request for full record results failed - URL not found - likely the server is temporarily out of service");
 					} else if (aReq.status != 200) {
-						alert("Error: status code is " + aReq.status + " please contact the system administrator.");
+						//alert("Error: loading page "+ loadingPage +" status code is " + aReq.status + " please contact the system administrator.");
 					}else{
 						pageXMLs[loadingPage] = aReq.responseXML;
 						if (currentPage == loadingPage){
 							displayResultPage(curStyle,curPage);
 						}
+						loadCount -= 1;
 						asyncLoadSearchPages(); // try and load the next page
 					}
 				}

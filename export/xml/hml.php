@@ -265,8 +265,8 @@ function findReversePointers($rec_ids, &$pointers) {
 	            FROM rec_details
 	       LEFT JOIN rec_detail_types ON rd_type = rdt_id
 	       LEFT JOIN records ON rec_id = rd_rec_id
-	           WHERE rd_val IN (' . join(',', $rec_ids) .')
-	             AND rdt_type = "resource"
+	           WHERE rdt_type = "resource"
+	             AND rd_val IN (' . join(',', $rec_ids) .')
 	             AND rec_type != 52';
 	$res = mysql_query($query);
 	while ($row = mysql_fetch_assoc($res)) {
@@ -287,9 +287,9 @@ function findRelatedRecords($rec_ids, &$relationships) {
 	            FROM rec_details a
 	       LEFT JOIN records ON rec_id = a.rd_rec_id
 	       LEFT JOIN rec_details b ON b.rd_rec_id = rec_id
-	           WHERE a.rd_val IN (' . join(',', $rec_ids) . ')
-	             AND a.rd_type IN (202,199)
+	           WHERE a.rd_type IN (202,199)
 	             AND rec_type = 52
+	             AND a.rd_val IN (' . join(',', $rec_ids) . ')
 	             AND b.rd_type = IF (a.rd_type = 202, 199, 202)';
 	$res = mysql_query($query);
 	while ($row = mysql_fetch_row($res)) {

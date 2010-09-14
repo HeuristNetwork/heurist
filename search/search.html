@@ -132,7 +132,7 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="../import/tools/import.php?format=GEO" name="auto-popup" title="Import KML files">Import geographic</a></li>
 					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="../import/tools/csv/fleximport.html" title="Import a delimited text file of data for one record type" target="_blank">Import delimited</a></li>
 					<li class="yuimenuitem admin-only"><a class="yuimenuitemlabel" href="../import/tools/detailupdater/detail-updater.html" target="_blank" title="Update record details using delimited text">Detail updater</a></li>
-					<li class="yuimenuitem admin-only"><a class="yuimenuitemlabel" href="../output/export/csv/flexport.html" target="_blank" title="Export records as delimited text">Export delimited</a></li>
+					<li class="yuimenuitem admin-only"><a class="yuimenuitemlabel" href="../export/csv/flexport.html" target="_blank" title="Export records as delimited text">Export delimited</a></li>
 
 					<li class="yuimenuitem divider"><a class="yuimenuitemlabel" href="http://www.timemap.net/tmissues.php" target="_blank" title="Add a bug report directly into our bug tracking system">Report a bug</a></li>
 					<li class="yuimenuitem admin-only"><a class="yuimenuitemlabel" href="../admin/rectypes/bib_detail_editor.php" target="_blank" title="For administrators only">Administrator tools</a></li>
@@ -211,18 +211,18 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 	<div id="search-result-commands" class="not-query-collected" >
 	<div class="openTools"></div>
 	<div id=ops-right-cell>
-		<span id=search-result-styles> 
-			<a href="#" id=result-style-list-link title="View results as a list" onClick="top.HEURIST.search.setResultStyle('list'); return false;"><img src="../common/images/19x15.gif"></a> 
-			<a href="#" id=result-style-two-col-link title="View results in two columns" onClick="top.HEURIST.search.setResultStyle('two-col'); return false;"><img src="../common/images/19x15.gif"></a> 
-			<a href="#" id=result-style-thumbs-link title="View results as thumbnails" onClick="top.HEURIST.search.setResultStyle('thumbs'); return false;"><img src="../common/images/19x15.gif"></a> 
-			<a href="#" id=result-style-blog-link title="View results as a blog!" onClick="alert('not yet implemented'); return false;"><img src="../common/images/19x15.gif"></a> 
+		<span id=search-result-styles>
+			<a href="#" id=result-style-list-link title="View results as a list" onClick="top.HEURIST.search.setResultStyle('list'); return false;"><img src="../common/images/19x15.gif"></a>
+			<a href="#" id=result-style-two-col-link title="View results in two columns" onClick="top.HEURIST.search.setResultStyle('two-col'); return false;"><img src="../common/images/19x15.gif"></a>
+			<a href="#" id=result-style-thumbs-link title="View results as thumbnails" onClick="top.HEURIST.search.setResultStyle('thumbs'); return false;"><img src="../common/images/19x15.gif"></a>
+			<a href="#" id=result-style-blog-link title="View results as a blog!" onClick="alert('not yet implemented'); return false;"><img src="../common/images/19x15.gif"></a>
 		</span>
 	</div>
 	<div class=selectAll style="display:none"><input id=select-all-checkbox type=checkbox title="Check/uncheck this box to select/deselect all records in the current set of results" onClick="if (this.checked) top.HEURIST.search.selectAll(); else top.HEURIST.search.deselectAll();"></div>
 	<div><a href="#" title="Click to hide/show the legend" onClick="top.HEURIST.search.toggleLegend(); blur(); return false;" id=legend-link>legend</a></div>
 	<div id="toolbox" style="display:none">
 	<div id=tools-right-cell class="toolboxcolumn left">
-	
+
 	<span id=active-label>Search results</span>
 	<a class=toolbar-large-icon-link href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members" onClick="top.HEURIST.util.popupURL(window, 'saved/save-search.html'); return false;">save</a>
 	<span id=publish-image-placeholder></span>
@@ -233,7 +233,7 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 	<a class=collected-hidden href="#" onClick="top.HEURIST.search.addToCollection();return false;" title="Select one or more records, then click to add to the collection">collect</a><span class="collected-hidden"></span><a class=collected-shown href="#" onClick="top.HEURIST.search.removeFromCollection(); return false;" title="Select one or more records, then click to remove records from the collection">drop</a><span class="collected-shown"></span><a href="#" onClick="top.HEURIST.search.addRemoveTagsPopup(false); return false;" title="Select one or more records, then click to add or remove tags">tag</a><a href="#" onClick="top.HEURIST.search.addRemoveKeywordsPopup(); return false;" title="Select one or more records, then click to add or remove workgroup tags">wg-tag</a><a href="#" onClick="top.HEURIST.search.setRatingsPopup(); return false;" title="Select one or more records, then click to set ratings">rate</a><a href="#" onClick="top.HEURIST.search.notificationPopup(); return false;" title="Select one or more records, then click to send notification">share</a><a href="#" onClick="top.HEURIST.search.addRelationshipsPopup(); return false;" title="Select one or more records, then click to add relationships">relate</a><a class=w-all-only href="#" onClick="top.HEURIST.search.addBookmarks(); return false;" title="Select one or more records, then click to bookmark">bookmark</a><a class=w-bookmark-only href="#" onClick="top.HEURIST.search.deleteBookmarks(); return false;" title="Select one or more records, then click to remove bookmarks">unbookmark</a><a href="#" onClick="top.HEURIST.search.deleteBiblios(); return false;" title="Select one or more records, then click to delete">delete</a> <span class=admin-only><a href="#" onClick="top.HEURIST.search.fixDuplicates(); return false;" title="Select one or more records, then click to fix duplicates">dupes</a><a href="#" onClick="top.HEURIST.search.setWorkgroupPopup(); return false;" title="Select one or more records, then click to set workgroup ownership and visibility">workgroup / visibility</a> </span>
 	</div>
 	</div>
-</div>   
+</div>
     <div id=result-container>
       <div id=results>
         <div id=results-message></div>
@@ -270,7 +270,7 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
       </div>
     </div>
   </div>
-  
+
 
 
   <div id="page-right">

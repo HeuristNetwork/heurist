@@ -229,11 +229,11 @@ top.HEURIST.search = {
 		"</span>"+
 		"<img src=" +top.HEURIST.basePath+ "common/images/16x16.gif title='"+reftypeTitle.htmlEscape()+"' "+reftypeImg+" class=rft>"+
 		"<span class='rec_title'>" + linkText + "</span>" +
-		
-		
+
+
 		"<div class=right_margin_info>"+
 
-		"<div class=mini-tools bkmk_id='"+res[0]+"' bib_id="+res[2]+">" +
+		"<div class=mini-tools >" +
 			"<span id='rec_edit_link' title='Click to edit'><a href='"+
 			top.HEURIST.basePath+ "records/editrec/edit.html?sid=" +
 			top.HEURIST.search.sid + "&bib_id="+ res[2] +
@@ -311,12 +311,12 @@ top.HEURIST.search = {
 
 		var html =
 		"<div class=result_thumb  title='Double-click to edit' bkmk_id='"+res[0]+"' bib_id="+res[2]+">" +
-		"<input style='display:none' type=checkbox name=bib[] onclick=top.HEURIST.search.cb_onclick(this) class='logged-in-only' title='Check box to apply Actions to this record'>"+
+		"<input style='display:none' type=checkbox name=bib[] onclick=top.HEURIST.search.resultItemOnClick(this) class='logged-in-only' title='Check box to apply Actions to this record'>"+
 		   (res[11] && res[11].length ? "<div class='thumbnail' style='background-image:url("+res[11]+")' ></div>":"<div class='no-thumbnail' "+reftypeThumb+" ></div>") +
 		   "<div class=rec_title title='"+linkText.htmlEscape()+"'>"+ linkText + "</div>"+
 		   "<div class=icons  bkmk_id='"+res[0]+"' bib_id="+res[2]+">" +
 
-		
+
 		   "<img src='"+ top.HEURIST.basePath+"common/images/16x16.gif' title='"+reftypeTitle.htmlEscape()+"' "+reftypeImg+" class='rft'>"+
 		   "<img src='"+ top.HEURIST.basePath+"common/images/13x13.gif' " + pinAttribs + ">"+
 		   "<span class='wg-id-container logged-in-only'>"+
@@ -324,7 +324,7 @@ top.HEURIST.search = {
 		   "</span>"+
 		   "<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/lock.png' " + userPwd + ">"+
 		    "</div>" +
-		    "<div class=mini-tools bkmk_id='"+res[0]+"' bib_id="+res[2]+">" +
+		    "<div class=mini-tools >" +
 		    	"<div id='links'>" +
 				"<span id='rec_edit_link' title='Click to edit'><a href='"+
 			top.HEURIST.basePath+ "records/editrec/edit.html?sid=" +
@@ -338,7 +338,7 @@ top.HEURIST.search = {
 				"<span id='spacer'><img src='"+	top.HEURIST.basePath + "common/images/16x16.gif'/></span>" +
 				"</div>" +
 		   "</div>" +
-		    
+
 		"</div>";
 		return html;
 	},
@@ -1006,68 +1006,6 @@ top.HEURIST.search = {
 		return false;
 	},
 
-	full_record_view: function(e, targ) {
-		if (! e) e = window.event;
-
-		if (e) {
-			e.cancelBubble = true;
-			if (e.stopPropagation) e.stopPropagation();
-		}
-
-		if (! targ) {
-			if (e.target) targ = e.target;
-			else if (e.srcElement) targ = e.srcElement;
-			if (targ.nodeType == 3) targ = targ.parentNode;
-		}
-
-		if (targ.getAttribute("bib_id")) {
-			var result_div = targ;
-		}
-		else if (targ.parentNode  &&  targ.parentNode.getAttribute("bib_id")) {
-			var result_div = targ.parentNode;
-		}
-		else return;
-
-		var bib_id = result_div.getAttribute("bib_id");
-
-		if (!e.ctrlKey) {
-			top.HEURIST.search.closeInfos();
-		};
-
-		top.HEURIST.search.toggleResultItemSelect(bib_id,result_div);
-
-		var infos = top.HEURIST.search.infos;
-		if (infos["bib:" + bib_id]) {
-			// bib info is already displaying -- hide it
-			var info = infos["bib:" + bib_id];
-//			result_div.className = result_div.className.replace(" expanded", "");
-			info.parentNode.removeChild(info);
-			delete infos["bib:" + bib_id];
-			return false;
-		}
-
-
-		var page_right = document.getElementById("page-right");
-		var info_div = document.createElement("iframe");
-		info_div.id = bib_id;
-		var loadingDiv = document.createElement("div");
-		loadingDiv.id = "loadingDiv";
-		if (top.HEURIST.search.record_view_style == "full") {
-			info_div.className = "info";
-			loadingDiv.className = "full";
-			} else {
-			info_div.className = "info summary";
-			loadingDiv.className = "summary";
-			};
-		info_div.frameBorder = 0;
-		page_right.appendChild(loadingDiv);
-		info_div.src = top.HEURIST.basePath+ "records/viewrec/info.php?bib_id="+bib_id + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "");
-		infos["bib:" + bib_id] = info_div;
-//		result_div.className += " expanded";
-		document.getElementById("helper").style.display = "none";
-		page_right.appendChild(info_div);
-		return false;
-	},
 
 	hideLoading: function (){
 		var page_right = document.getElementById("page-right");
