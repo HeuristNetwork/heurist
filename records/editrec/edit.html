@@ -42,9 +42,13 @@
 		</script>
 		<script src="edit.js"></script>
 		<script>
-			top.HEURIST.loadScript(top.HEURIST.basePath +"records/pointer/bib.php?bib_id="+
-				(top.HEURIST.parameters["bib_id"]? top.HEURIST.parameters["bib_id"] : window.location.search.match(/bib_id=(\d+).*$/)[1])+
-				"&bkmk_id="+top.HEURIST.parameters["bkmk_id"]);
+			var queryStr = (top.HEURIST.parameters["bib_id"]? "bib_id="+top.HEURIST.parameters["bib_id"] :
+							(window.location.search.match(/bib_id=(\d+).*$/)? window.location.search.match(/bib_id=(\d+).*$/)[1] : ""));
+			if  (top.HEURIST.parameters["bkmk_id"]){
+				if (queryStr) queryStr += "&";
+				queryStr += "bkmk_id="+top.HEURIST.parameters["bkmk_id"];
+			}
+			top.HEURIST.loadScript(top.HEURIST.basePath +"records/pointer/bib.php?"+queryStr);
 		</script>
 		<script>
 			top.HEURIST.whenLoaded(["record","edit-html"], function() {

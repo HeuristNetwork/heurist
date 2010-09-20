@@ -2,8 +2,7 @@ var Heurist = {
 
 w: 370,
 h: 240,
-installDir: "",
-urlBase: "http://",
+uriBase: "http://heuristscholar.org/h3-sw/",
 
 init: function () {
 	// toggle display if our div is already present in the DOM
@@ -24,32 +23,23 @@ init: function () {
 		return;
 	}
 
-	var loc = (top ? top.location : (window ? window.location : ""));
-	if ( loc && loc.pathname != "undefined") {
-		Heurist.installDir = loc.pathname.match(/\/[^\s\/]\//);	// find the first '/dirname/' pattern
-		Heurist.installDir = Heurist.installDir ? '/' + Heurist.installDir.replace(/\//g,"") : "";
-	}else{
-		Heurist.installDir = ""
-	}
-
-	Heurist.urlBase += loc.hostname;
 	// add our style sheet
 	var link = document.createElement('link');
 	link.rel = 'stylesheet';
 	link.type = 'text/css';
-	link.href = Heurist.urlBase + Heurist.installDir +'/common/css/bookmarklet-popup.css';
+	link.href = Heurist.uriBase +'common/css/bookmarklet-popup.css';
 	document.getElementsByTagName('head')[0].appendChild(link);
 
 	// get record types
 	var scr = document.createElement('script');
 	scr.type = 'text/javascript';
-	scr.src = Heurist.urlBase + Heurist.installDir +'/import/bookmarklet/reftypes.php';
+	scr.src = Heurist.uriBase +'import/bookmarklet/reftypes.php';
 	document.getElementsByTagName('head')[0].appendChild(scr);
 
 	// get bkmk id if already bookmarked
 	scr = document.createElement('script');
 	scr.type = 'text/javascript';
-	scr.src = Heurist.urlBase + Heurist.installDir +'/import/bookmarklet/url-bookmarked.php?url=' + Heurist.urlcleaner(encodeURIComponent(location.href));
+	scr.src = Heurist.uriBase +'import/bookmarklet/url-bookmarked.php?url=' + Heurist.urlcleaner(encodeURIComponent(location.href));
 	document.getElementsByTagName('head')[0].appendChild(scr);
 },
 
@@ -89,7 +79,7 @@ render: function() {
 	// 'close' button
 	var s = document.createElement('span');
 	s.className = 'close';
-	s.innerHTML = '<img src="'+ Heurist.urlBase + Heurist.installDir +'/common/images/white-cross.gif">';
+	s.innerHTML = '<img src="'+ Heurist.uriBase +'common/images/white-cross.gif">';
 	s.onclick = Heurist.close;
 	hdr.appendChild(s);
 
@@ -98,11 +88,11 @@ render: function() {
 	a.href = Heurist.urlBase + Heurist.installDir +'/';
 	if (document.all) {
 		i = document.createElement('img');
-		i.src = Heurist.urlBase + Heurist.installDir +'/common/images/heurist-micro.gif';
+		i.src = Heurist.uriBase +'common/images/heurist-micro.gif';
 		a.appendChild(i);
 	}
 	else
-		a.innerHTML = '<img src="/'+ Heurist.urlBase + Heurist.installDir +'/common/images/heurist-micro.gif">';
+		a.innerHTML = '<img src="/'+ Heurist.uriBase +'common/images/heurist-micro.gif">';
 	a.className='imglnk';
 	hdr.appendChild(a);
 
@@ -142,7 +132,7 @@ render: function() {
 
 		a = td.appendChild(document.createElement("a"));
 		a.target = "_blank";
-		a.href= Heurist.urlBase + Heurist.installDir +'/records/editrec/edit.html?bkmk_id=' + HEURIST_url_bkmk_id;
+		a.href= Heurist.uriBase +'records/editrec/edit.html?bkmk_id=' + HEURIST_url_bkmk_id;
 		a.onclick = function() { Heurist.close() };
 		a.innerHTML = "edit";
 
@@ -229,7 +219,7 @@ render: function() {
 	button.value = "Get";
 	button.onclick = function() {
 		Heurist.close();
-		var w = open(Heurist.urlBase + Heurist.installDir +'/import/fileimport.php?shortcut=' + encodeURIComponent(location.href));
+		var w = open(Heurist.uriBase +'import/fileimport.php?shortcut=' + encodeURIComponent(location.href));
 		void(window.setTimeout("w.focus()",200));
 		return false;
 	}
@@ -418,7 +408,7 @@ bookmark: function(reftype) {
 		}
 	}
 	var favicon = Heurist.findFavicon();
-	var w = open(Heurist.urlBase + Heurist.installDir +'/records/addrec/add.php?t=' + Heurist.urlcleaner(encodeURIComponent(titl)) +
+	var w = open(Heurist.uriBase +'records/addrec/add.php?t=' + Heurist.urlcleaner(encodeURIComponent(titl)) +
 				 '&u=' + Heurist.urlcleaner(encodeURIComponent(url)) +
 				 '&d=' + Heurist.urlcleaner(encodeURIComponent(sel)) +
 				 (favicon? ('&f=' + encodeURIComponent(favicon)) : '') +
