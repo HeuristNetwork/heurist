@@ -2,7 +2,8 @@ var Heurist = {
 
 w: 370,
 h: 240,
-uriBase: "http://heuristscholar.org/h3-sw/",
+
+uriBase: "http://heuristscholar.org/h3-ig/",
 
 init: function () {
 	// toggle display if our div is already present in the DOM
@@ -55,49 +56,32 @@ render: function() {
 		d.style.top = (document.body.scrollTop + 30) + 'px';
 	}
 
-	// create a drop shadow
-	if (! document.all) {
-		var ss = document.createElement('div');
-		ss.id = 'DropShadowContainer';
-		var s = document.createElement('div');
-		s.id = 'DropShadow';
-		ss.appendChild(s);
-		d.appendChild(ss);
-	}
-
-	// create a container for all d's contents (it's complicated ... stupid drop shadow!)
-	var c = document.createElement('div');
-	c.id = 'Content';
-	d.appendChild(c);
 
 	// create a header bar
 	var hdr = document.createElement('div');
-	hdr.className = 'header';
+	hdr.className = 'bookmarklet_header';
 	hdr.onmousedown = Heurist.dragStart;
-	c.appendChild(hdr);
+	d.appendChild(hdr);
 
 	// 'close' button
-	var s = document.createElement('span');
-	s.className = 'close';
-	s.innerHTML = '<img src="'+ Heurist.uriBase +'common/images/white-cross.gif">';
+	var s = document.createElement('div');
+	s.className = 'bookmarklet_close';
 	s.onclick = Heurist.close;
 	hdr.appendChild(s);
 
 	// heurist home page link
 	var a = document.createElement('a');
-	a.href = Heurist.urlBase + Heurist.installDir +'/';
+	a.href = Heurist.uriBase;
 	if (document.all) {
 		i = document.createElement('img');
-		i.src = Heurist.uriBase +'common/images/heurist-micro.gif';
+		i.src = Heurist.uriBase +'common/images/H3-favicon.png';
 		a.appendChild(i);
 	}
 	else
-		a.innerHTML = '<img src="/'+ Heurist.uriBase +'common/images/heurist-micro.gif">';
+	a.innerHTML = '<img src="'+ Heurist.uriBase +'common/images/H3-favicon.png">';
 	a.className='imglnk';
 	hdr.appendChild(a);
-
-	s = document.createElement('span');
-	s.innerHTML = '&nbsp;Heurist bookmarklet';
+	s = document.createTextNode('Heurist bookmarklet');
 	hdr.appendChild(s);
 
 
@@ -105,10 +89,11 @@ render: function() {
 	var dd = document.createElement("div");
 	dd.id = "topline";
 	dd.innerHTML = (! HEURIST_url_bib_id ? "Add this page as:" : "");
-	c.appendChild(dd);
+	d.appendChild(dd);
 
-	var t = c.appendChild(document.createElement("table"));
-	t.style.margin = "0 20px 20px 20px";
+	var t = d.appendChild(document.createElement("table"));
+	t.style.margin = "0";
+	t.style.width = "100%";
 
 	var tr = t.appendChild(document.createElement("tr"));
 	var td = tr.appendChild(document.createElement("td"));
@@ -134,7 +119,7 @@ render: function() {
 		a.target = "_blank";
 		a.href= Heurist.uriBase +'records/editrec/edit.html?bkmk_id=' + HEURIST_url_bkmk_id;
 		a.onclick = function() { Heurist.close() };
-		a.innerHTML = "edit";
+		a.innerHTML = "edit record";
 
 		tr = t.appendChild(document.createElement("tr"));
 		td = tr.appendChild(document.createElement("td"));
@@ -156,7 +141,7 @@ render: function() {
 		td = tr.appendChild(document.createElement("td"));
 		var button = document.createElement("input");
 			button.type = "button";
-			button.value = "Add";
+			button.value = "Bookmark Record";
 			button.onclick = function() {
 				Heurist.bookmark();
 			};
@@ -200,59 +185,21 @@ render: function() {
 		td.appendChild(button);
 	}
 
-	tr = t.appendChild(document.createElement("tr"));
-	td = tr.appendChild(document.createElement("td"));
-	td.colSpan = "2";
-	var hr = td.appendChild(document.createElement("div"));
-	hr.id = "hr-div";
-
 	// link importer
-	tr = t.appendChild(document.createElement("tr"));
-	td = tr.appendChild(document.createElement("td"));
-	var nobr = td.appendChild(document.createElement("nobr"));
+	var nobr = d.appendChild(document.createElement("div"));
 	nobr.innerHTML = "Import links from this page";
-	nobr.style.marginLeft = "40px";
-	nobr.style.marginRight = "15px";
-	td = tr.appendChild(document.createElement("td"));
+	nobr.className = "bookmarklet_link_importer";
 	var button = document.createElement("input");
 	button.type = "button";
 	button.value = "Get";
+	button.style.marginLeft = "5px";
 	button.onclick = function() {
 		Heurist.close();
 		var w = open(Heurist.uriBase +'import/fileimport.php?shortcut=' + encodeURIComponent(location.href));
 		void(window.setTimeout("w.focus()",200));
 		return false;
 	}
-	td.appendChild(button);
-
-/*
-	// view info
-	a = document.createElement('a');
-	a.href = "#";
-	a.onclick = function() { return false; };
-	a.innerHTML = 'View info/notes (nyi)';
-	a.className = 'lnk';
-	a.style.color = '#909090';
-	c.appendChild(a);
-
-	// notifications
-	a = document.createElement('a');
-	a.href = "#";
-	a.onclick = function() { return false; };
-	a.innerHTML = 'Notifications (nyi)';
-	a.className = 'lnk';
-	a.style.color = '#909090';
-	c.appendChild(a);
-
-	// password reminder
-	a = document.createElement('a');
-	a.href = "#";
-	a.onclick = function() { return false; };
-	a.innerHTML = 'Password reminder (nyi)';
-	a.className = 'lnk';
-	a.style.color = '#909090';
-	c.appendChild(a);
-*/
+	nobr.appendChild(button);
 
 	// add our div to the document tree
 	if (document.all)
@@ -263,12 +210,12 @@ render: function() {
 	d.style.display = 'block';
 
 	// IE doesn't understand position: fixed
-    if (document.all) {
+	if (document.all) {
 		d.style.position = 'absolute';
 		// window.scrollTo(0,0);
 		if (document.body.scrollLeft == 0  &&  document.body.scrollTop == 0) window.scrollTo(0, 0);
 			// some sites have weird stuff going on that breaks scroll{Left,Top}
-    }
+	}
 	else {
 		d.style.position = 'fixed';
 	}
@@ -299,61 +246,39 @@ fade: function() {
 
 dragStart: function(e) {
 	var d = document.getElementById('__heurist_bookmarklet_div');
-/*
-	if (d.style.position == 'fixed') {
-		d.style.position = 'absolute';
-		d.style.left = (parseInt(d.style.left) + document.body.scrollLeft) + 'px';
-		d.style.top = (parseInt(d.style.top) + document.body.scrollTop) + 'px';
-	}
-*/
 	if (d.filters) d.filters.alpha.opacity = 75;
 	else d.style.opacity = 0.75;
-
 	window.startDragCoords = Heurist.getCoords(e);
 	window.startDragPos = { left: parseInt(d.style.left), top: parseInt(d.style.top) };
-// document.firstChild.innerHTML += '<div>' + window.startDragPos.left + ',' + window.startDragPos.top + '</div>';
 	document.onmousemove = Heurist.dragMid;
 	document.onmouseup = Heurist.dragEnd;
 	document.onmousedown = null;
-
 	return false;
 },
 
 dragMid: function(e) {
 	var d = document.getElementById('__heurist_bookmarklet_div');
 	var coords = Heurist.getCoords(e);
-
 	d.style.left = (window.startDragPos.left + (coords.x - window.startDragCoords.x)) + 'px';
 	d.style.top = (window.startDragPos.top + (coords.y - window.startDragCoords.y)) + 'px';
-
 	return false;
 },
 
 dragEnd: function(e) {
 	var d = document.getElementById('__heurist_bookmarklet_div');
 	Heurist.dragMid(e);
-/*
-	if (! document.all) {
-		d.style.left = (parseInt(d.style.left) - document.body.scrollLeft) + 'px';
-		d.style.top = (parseInt(d.style.top) - document.body.scrollTop) + 'px';
-		d.style.position = 'fixed';
-	}
-*/
 	if (d.filters) d.filters.alpha.opacity = '100';
 	else d.style.opacity = '1.0';
 	document.onmouseup = null;
 	document.onmousemove = null;
-	//document.onmousedown = Heurist.dragStart;
 	return true;
 },
 
 getCoords: function(e) {
 	if (! e) e = event;
-
 	var pos = new Object();
 	pos.x = 0;
 	pos.y = 0;
-
 	if (e.pageX  ||  e.pageY) {
 		pos.x = e.pageX;
 		pos.y = e.pageY;
@@ -408,6 +333,7 @@ bookmark: function(reftype) {
 		}
 	}
 	var favicon = Heurist.findFavicon();
+
 	var w = open(Heurist.uriBase +'records/addrec/add.php?t=' + Heurist.urlcleaner(encodeURIComponent(titl)) +
 				 '&u=' + Heurist.urlcleaner(encodeURIComponent(url)) +
 				 '&d=' + Heurist.urlcleaner(encodeURIComponent(sel)) +
@@ -427,12 +353,7 @@ renderReftypeSelect: function(sel) {
 	sel.options[0] = new Option('Select type...', '');
 	sel.options[0].selected = true;
 	sel.options[0].disabled = true;
-/*
-	var opt = document.createElement("option");
-	opt.value = 1;
-	opt.innerHTML = HEURIST_reftypes.names[1];	// internet bookmark
-	sel.appendChild(opt);
-*/
+
 	for (var g in HEURIST_reftypes.groups) {
 		var grp = document.createElement("optgroup");
 		grp.label = g + " record types";
@@ -469,8 +390,6 @@ renderReftypeSelect: function(sel) {
 }
 
 };
-
-
 
 var HEURIST_reftypesOnload = function() {
 	Heurist.reftypesLoaded = true;

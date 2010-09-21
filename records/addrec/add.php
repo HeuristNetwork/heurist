@@ -198,7 +198,7 @@ if (! @$_REQUEST['_submit']  &&  $_REQUEST['bkmrk_bkmk_url']) {
 	if (! $rec_id  &&  ! $force_new) {
 		if (exist_similar($url)) {
 			/* there is/are at least one: redirect to a disambiguation page */
-			header('Location: ' . HEURIST_URL_BASE . 'records/disambig/add_disambiguate.php'
+			header('Location: ' . HEURIST_URL_BASE . 'records/addrec/add_disambiguate.php'
 								. '?instance='.HEURIST_INSTANCE
 								. '&bkmk_title=' . urlencode($_REQUEST['bkmrk_bkmk_title'])
 								. '&f=' . urlencode($_REQUEST["f"])
