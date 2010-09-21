@@ -135,7 +135,7 @@ input#tags:focus, .input-cell .in:focus, .input-cell .resource-title:focus {-moz
 
 .input-row .resource-div * { vertical-align: middle; }
 
-.input-cell .resource-div .edit-resource {cursor: pointer;position: relative;left: 383px;}
+.input-cell .resource-div .edit-resource {cursor: pointer;position: relative;/* left: 383px; */}
 .input-cell .resource-div .delete-resource {cursor: pointer; margin-left: 5px;background-image: url(../images/cross.png);}
 .input-cell .resource-div.empty img.edit-resource { visibility: hidden; }
 .input-cell .resource-div.empty img.delete-resource {cursor: default; margin-left: 5px;background-image: url(../images/cross-grey.png);}
@@ -317,7 +317,7 @@ fieldset.reminder legend { font-weight: bold; color: #A4B4CB; ; }
 div.reminder-div { margin-bottom: 1ex; padding: 6px 4px; border: 1px solid gray; width: 600px; }
 div.reminder-div img { vertical-align: middle; cursor: pointer; margin-left: 2px; }
 
-.add-tag-link { font-size: 10px;}
+.add-tag-link { font-size: 10px; border-right: 1px solid #BBB; padding: 0 5px}
 
 hr { background-color: #660000; border: 1px solid lightgray; height: 2px; margin-bottom: 15px; }
 
