@@ -150,6 +150,58 @@
 				asyncLoadSearchPages();
 			}
 
+			var relatedRecListXSL;
+
+			function displayRelatedRecords(recID,parentDiv){
+				var showRelatedLink = parentDiv.firstChild;
+				if (parentDiv.className.match(new RegExp('(\\s|^)loaded(\\s|$)'))) {
+					if (parentDiv.className.match(new RegExp('(\\s|^)show(\\s|$)'))) {
+						parentDiv.className = parentDiv.className.replace(" show", "");
+						showRelatedLink.innerHTML = "Show related records";
+						return;
+					} else {
+						parentDiv.className += " show";
+						showRelatedLink.innerHTML = "Hide related records";
+						return;
+					};
+				};
+				
+				if (parentDiv.className == "related-records show" ) {
+					parentDiv.className = parentDiv.className.replace(" show", "");
+					showRelatedLink.innerHTML = "Show related records";    
+					return;
+				} else {
+					showRelatedLink.className += " wait";
+					showRelatedLink.innerHTML = "Loading related records";
+					parentDiv.className += " show";
+
+					var xmlRecDepth1 = loadXMLDocFromFile("http://heuristscholar.org"+ top.HEURIST.basePath+
+										"export/xml/hml.php?q=ids:"+recID+"&depth=1"+
+										(top.HEURIST.instance.name? "&instance=" + top.HEURIST.instance.name:""));
+					if (!xmlRecDepth1) return;
+					if (!relatedRecListXSL) {
+						relatedRecListXSL = loadXMLDocFromFile("xsl/relatedRecList.xsl");
+					}
+					var xhtmlResultDoc;
+					if (window.ActiveXObject){
+						var xmlResultStr = xmlRecDepth1.transformNode(relatedRecListXSL);
+						xhtmlResultDoc=new ActiveXObject("Microsoft.XMLDOM");
+						xhtmlResultDoc.async="false";
+						xhtmlResultDoc.loadXML(xmlResultStr);
+					// code for Mozilla, Firefox, Opera, etc.
+					}else {
+						var xsltProcessor=new XSLTProcessor();
+						xsltProcessor.importStylesheet(relatedRecListXSL);
+						xhtmlResultDoc = xsltProcessor.transformToFragment(xmlRecDepth1,document);
+					}
+					parentDiv.appendChild(xhtmlResultDoc);
+					parentDiv.className += " loaded";
+					
+					showRelatedLink.className = parentDiv.firstChild.className.replace(" wait", "");   
+					showRelatedLink.innerHTML = "Hide related records";
+					}
+				}
+
 			// this function takes the same search but attemps an asynchronous load of the entire result set
 			function asyncLoadSearchPages(){
 				if (!loadCount || loadCount <=0) return; //nothing to load
@@ -354,7 +406,7 @@
 		</script>
 
 	</head>
-	<body onload="init()">
+	<body onLoad="init()">
 		<div class="banner">
 		<select id="style_select" style="width: 180px;" onChange="displayResult(this.options[this.selectedIndex].value);">
 		</select>
