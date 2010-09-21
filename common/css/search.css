@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #logo {top:0; left:0;}
 #wg-title { position: absolute; left: 40px; top: 15px; font-weight: bold; color: white; }
 #title-cell {padding-left: 20px;}
-#add-record {height:23px;margin:0;padding:0;position:absolute;right:20px;top:38px;width:76px;}
+#add-record {height:23px;margin:0;padding:0;position:absolute;left:20px;top:78px;width:76px;z-index: 1;}
 
 input { margin: 0; }
 a { color: #7D9AAA; }
@@ -48,8 +48,8 @@ a { color: #7D9AAA; }
 
 .panel-header img { vertical-align: middle; }
 
-#active-label, .toolboxheading {	font-size: 140%;font-weight: bold;margin-left: 0;margin-right: 0;color:#7D9AAA;text-transform: uppercase;}
-#collection-label {font-weight: bold;margin-left: 0;margin-right: 5px;color:#7D9AAA;}
+#active-label, .toolboxheading {font-size: 140%;font-weight: bold;margin-left: 0;margin-right: 0;color:#7D9AAA;text-transform: uppercase;}
+#collection-label {font-weight: bold;margin-left: 0;margin-right: 5px;color:#7D9AAA;text-transform:uppercase;}
 #collection-label.show-changed {background-color: lightgrey;}
 
 .operations a, .operations input, .operations img {vertical-align: middle;}
@@ -71,7 +71,7 @@ body.w-bookmark #results {background-color: none;-moz-border-radius-bottomleft:1
 
 #left-panel{background-color:#EFF2F6;background-image:url(../images/left-panel-bg.png);-moz-border-radius-bottomleft:10px;-moz-border-radius-bottomright:10px;-moz-border-radius-topleft:0;-moz-border-radius-topright:0;-webkit-border-bottom-left-radius:10px;-webkit-border-bottom-right-radius:10px;-webkit-border-top-left-radius:0;-webkit-border-top-right-radius:0;border-bottom-left-radius:10px;border-bottom-right-radius:10px;border-top-left-radius:0;border-top-right-radius:0;}
 
-#ops-right-cell { border-left: 1px solid rgba(0, 0, 0, 0.1);border-right: 1px solid rgba(0, 0, 0, 0.1);vertical-align: middle;width:100%}
+#search-result-commands div#ops-right-cell { border-left: 1px solid rgba(0, 0, 0, 0.1);border-right: 1px solid rgba(0, 0, 0, 0.1);vertical-align: middle;width:100%; text-align: center;}
 #ops-right-cell a {display:table-cell; vertical-align:middle;padding:0 1px; white-space: nowrap;text-align: center;}
 
 #search-result-styles { margin:0;text-align: center;display: inline-block;}
@@ -133,7 +133,7 @@ body.w-bookmark .bookmarked { background-image: none; }
 .info a { padding: 0 10px; }
 .info img { height: 16px; width: 16px; }
 
-#viewer-frame {border:0;position:relative; top:0; bottom:0;left:0;right:0; width:100%;height:100%; display:block; border-bottom:1px solid #CDDCF3;}
+#viewer-frame {border:0;position:relative; top:0; bottom:0;left:0;right:0; width:100%;height:100%; display:block; border:none;}
 
 .result_thumb {
 -moz-border-radius:10px 10px 10px 10px;
@@ -336,7 +336,7 @@ div.hide .saved-search-subheading {background-image:url("../images/sub_heading_s
 #add-record-link img{margin:-6px -4px;padding:0;}
 .shadow {-webkit-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);-moz-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);}
 #search-result-commands{background-image:url("../images/backgrounds/banner_bg.png");background-repeat:repeat-x;background-position:0 -4px;border-collapse:collapse;height:25px;position:relative;background-color: RGBA(0,0,0,0.1);display: table;width:100%}
-#search-result-commands div {display:table-cell; padding: 0 5px; text-align: center;vertical-align: middle}
+#search-result-commands div {display:table-cell; padding: 0 5px; text-align: left;vertical-align: middle}
 #search-result-commands div.openTools {display:block; height:14px; top:5px;background-position: 0 0;}
 #search-result-commands div.openTools:hover {background-position: 0 -15px;display: block;}
 

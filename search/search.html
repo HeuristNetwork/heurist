@@ -147,7 +147,7 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 <div id="sidebar">
 	<div id="saved-search-heading" class="banner">
 		<!-- collection-commands -->
-		<div id="collection-commands" class="not-query-collected"> <span id=collection-label title="Select records and click collect to add to a temporary collection which can later be saved as a search." >Collected:&nbsp;&nbsp;</span><br><a class='toolbar-large-icon-link-normal collected-hidden' href="#" onClick="top.HEURIST.search.addToCollection();return false;" title="Select one or more records, then click to add to the collection">add</a><span class="collected-hidden"> |</span> <a class='toolbar-large-icon-link-normal collected-shown' href="#" onClick="top.HEURIST.search.removeFromCollection(); return false;" title="Select one or more records, then click to remove records from the collection">drop</a><span class="collected-shown"> |</span> <a class=toolbar-large-icon-link-normal href="?q=_COLLECTED_&amp;label=Collected" title="Show current set of records in collection" >show</a> | <a class=toolbar-large-icon-link-normal href=" " title="Save current set of records in collection" onClick="top.HEURIST.util.popupURL(window, 'saved/save-collection.html',{width:590, height:600}); return false;">save</a> | <a class=toolbar-large-icon-link-normal href=" " title="Empty records from the collection" onclick='top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/collection.php?clear", top.HEURIST.search.addRemoveCollectionCB); document.getElementById("q").focus(); return false;'>clear</a> </div>
+		
 	</div>
 	<div id="sidebar-inner">
 		<div id=left-panel-content class="panel-main-content">
@@ -220,18 +220,42 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 	</div>
 	<div class=selectAll style="display:none"><input id=select-all-checkbox type=checkbox title="Check/uncheck this box to select/deselect all records in the current set of results" onClick="if (this.checked) top.HEURIST.search.selectAll(); else top.HEURIST.search.deselectAll();"></div>
 	<div><a href="#" title="Click to hide/show the legend" onClick="top.HEURIST.search.toggleLegend(); blur(); return false;" id=legend-link>legend</a></div>
+
 	<div id="toolbox" style="display:none">
-	<div id=tools-right-cell class="toolboxcolumn left">
+		<div id=tools-right-cell class="toolboxcolumn left">
+			<span id=active-label>Search results</span>
+			<a class=toolbar-large-icon-link href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members" onClick="top.HEURIST.util.popupURL(window, 'saved/save-search.html'); return false;">save</a>
+			<span id=publish-image-placeholder></span>
+			<span id="collection-commands" class="not-query-collected"></span>
+			<span id=collection-label title="Select records and click collect to add to a temporary collection which can later be saved as a search." >Collected:&nbsp;&nbsp;</span>
+			<a class='toolbar-large-icon-link-normal collected-hidden' href="#" onClick="top.HEURIST.search.addToCollection();return false;" title="Select one or more records, then click to add to the collection">add</a><span class="collected-hidden"></span>
+			<a class='toolbar-large-icon-link-normal collected-shown' href="#" onClick="top.HEURIST.search.removeFromCollection(); return false;" title="Select one or more records, then click to remove records from the collection">drop</a><span class="collected-shown"></span>
+			<a class=toolbar-large-icon-link-normal href="?q=_COLLECTED_&amp;label=Collected" title="Show current set of records in collection" >show</a>
+			<a class=toolbar-large-icon-link-normal href=" " title="Save current set of records in collection" onClick="top.HEURIST.util.popupURL(window, 'saved/save-collection.html',{width:590, height:600}); return false;">save</a>
+			<a class=toolbar-large-icon-link-normal href=" " title="Empty records from the collection" onclick='top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/collection.php?clear", top.HEURIST.search.addRemoveCollectionCB); document.getElementById("q").focus(); return false;'>clear</a>
+			<span class="toolboxheading">ADMIN</span>
+				<span class=admin-only>
+				<a href="#" onClick="top.HEURIST.search.fixDuplicates(); return false;" title="Select one or more records, then click to fix duplicates">dupes</a>
+				<a href="#" onClick="top.HEURIST.search.setWorkgroupPopup(); return false;" title="Select one or more records, then click to set workgroup ownership and visibility">workgroup / visibility</a>
+			</span>
+		</div>
 
-	<span id=active-label>Search results</span>
-	<a class=toolbar-large-icon-link href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members" onClick="top.HEURIST.util.popupURL(window, 'saved/save-search.html'); return false;">save</a>
-	<span id=publish-image-placeholder></span>
-	</div>
+		<div class="toolboxcolumn right">
+			<span class="toolboxheading">SELECTED RECORDS</span>
+			<a class=collected-hidden href="#" onClick="top.HEURIST.search.addToCollection();return false;" title="Select one or more records, then click to add to the collection">collect</a>
+			<span class="collected-hidden"></span>
+			<a class=collected-shown href="#" onClick="top.HEURIST.search.removeFromCollection(); return false;" title="Select one or more records, then click to remove records from the collection">drop</a>
+			<span class="collected-shown"></span>
+			<a href="#" onClick="top.HEURIST.search.addRemoveTagsPopup(false); return false;" title="Select one or more records, then click to add or remove tags">tag</a>
+			<a href="#" onClick="top.HEURIST.search.addRemoveKeywordsPopup(); return false;" title="Select one or more records, then click to add or remove workgroup tags">wg-tag</a>
+			<a href="#" onClick="top.HEURIST.search.setRatingsPopup(); return false;" title="Select one or more records, then click to set ratings">rate</a>
+			<a href="#" onClick="top.HEURIST.search.notificationPopup(); return false;" title="Select one or more records, then click to send notification">share</a>
+			<a href="#" onClick="top.HEURIST.search.addRelationshipsPopup(); return false;" title="Select one or more records, then click to add relationships">relate</a>
+			<a class=w-all-only href="#" onClick="top.HEURIST.search.addBookmarks(); return false;" title="Select one or more records, then click to bookmark">bookmark</a>
+			<a class=w-bookmark-only href="#" onClick="top.HEURIST.search.deleteBookmarks(); return false;" title="Select one or more records, then click to remove bookmarks">unbookmark</a>
+			<a href="#" onClick="top.HEURIST.search.deleteBiblios(); return false;" title="Select one or more records, then click to delete">delete</a>
 
-	<div class="toolboxcolumn right">
-	<span class="toolboxheading">SELECTED RECORDS</span>
-	<a class=collected-hidden href="#" onClick="top.HEURIST.search.addToCollection();return false;" title="Select one or more records, then click to add to the collection">collect</a><span class="collected-hidden"></span><a class=collected-shown href="#" onClick="top.HEURIST.search.removeFromCollection(); return false;" title="Select one or more records, then click to remove records from the collection">drop</a><span class="collected-shown"></span><a href="#" onClick="top.HEURIST.search.addRemoveTagsPopup(false); return false;" title="Select one or more records, then click to add or remove tags">tag</a><a href="#" onClick="top.HEURIST.search.addRemoveKeywordsPopup(); return false;" title="Select one or more records, then click to add or remove workgroup tags">wg-tag</a><a href="#" onClick="top.HEURIST.search.setRatingsPopup(); return false;" title="Select one or more records, then click to set ratings">rate</a><a href="#" onClick="top.HEURIST.search.notificationPopup(); return false;" title="Select one or more records, then click to send notification">share</a><a href="#" onClick="top.HEURIST.search.addRelationshipsPopup(); return false;" title="Select one or more records, then click to add relationships">relate</a><a class=w-all-only href="#" onClick="top.HEURIST.search.addBookmarks(); return false;" title="Select one or more records, then click to bookmark">bookmark</a><a class=w-bookmark-only href="#" onClick="top.HEURIST.search.deleteBookmarks(); return false;" title="Select one or more records, then click to remove bookmarks">unbookmark</a><a href="#" onClick="top.HEURIST.search.deleteBiblios(); return false;" title="Select one or more records, then click to delete">delete</a> <span class=admin-only><a href="#" onClick="top.HEURIST.search.fixDuplicates(); return false;" title="Select one or more records, then click to fix duplicates">dupes</a><a href="#" onClick="top.HEURIST.search.setWorkgroupPopup(); return false;" title="Select one or more records, then click to set workgroup ownership and visibility">workgroup / visibility</a> </span>
-	</div>
+		</div>
 	</div>
 </div>
     <div id=result-container>
