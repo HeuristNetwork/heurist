@@ -303,7 +303,6 @@ return {
 
 		e.appendChild(table);
 	},
-
 	// This function preloads all records necessary for REFERENCE detail types
 	loadReferencedRecords: function () {
 		var detailType;
@@ -376,6 +375,15 @@ return {
 					dateTransform = null;
 					for (i = 0; i < FlexImport.fields.length; ++i) {
 						val = FlexImport.fields[i][j];
+						if (val.match(/\|VER\=/i)) {	// temporal string so don't transform
+							try{
+								Temporal.parse(val);
+							}catch(e){
+								alert("Warning: temporal format in column " + j + ", row " + i + ": " + val +
+										" will not create temporal object - " + e );
+							}
+							continue;
+						}
 						reString = "(\\d\\d?)\\/(\\d\\d?)\\/(\\d{4})";
 						re = new RegExp(reString);
 						matches = val.match(re);
