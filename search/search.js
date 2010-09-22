@@ -895,6 +895,9 @@ top.HEURIST.search = {
 			}
 			top.HEURIST.search.bib_ids[bib_id] = true;	//deprecated
 			if (cb) cb.checked = true;					//deprecated
+			var bkmk_id = cb.parentNode.getAttribute("bkmk_id");
+			if (bkmk_id)
+				top.HEURIST.search.bkmk_ids[bkmk_id] =  true;
 			resultDiv.className += " selected";
 			top.HEURIST.search.selectedRecordDivs[bib_id] = resultDiv;
 			top.HEURIST.search.selectedRecordIds.push(bib_id);
@@ -913,6 +916,9 @@ top.HEURIST.search = {
 			}
 			top.HEURIST.search.bib_ids[bib_id] = null;
 			if (cb) cb.checked = false;
+			var bkmk_id = cb.parentNode.getAttribute("bkmk_id");
+			if (bkmk_id)
+				top.HEURIST.search.bkmk_ids[bkmk_id] =  false;
 			resultDiv.className = resultDiv.className.replace(" selected", "");
 			for(var i = 0; i < top.HEURIST.search.selectedRecordIds.length; i++){
 				if (top.HEURIST.search.selectedRecordIds[i] == bib_id) {
