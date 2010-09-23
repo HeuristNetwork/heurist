@@ -51,6 +51,7 @@ while ($row = mysql_fetch_assoc($res)) {
 }
 $body->global_vars['workgroup-dropdown'] .= '</select>';
 $body->global_vars['grp_id'] = $grp_id;
+$body->global_vars['instance-name'] = HEURIST_INSTANCE;
 //$body->global_vars['new_bdr_bdr_wg_id'] = $grp_id;
 
 $body->global_vars['edit-master-types-link'] = HEURIST_INSTANCE === "" ? "<a href=master_bib_detail_editor.php>Edit MASTER record type definitions</a>" : "Go to <a href=http://".HOST_BASE.$_SERVER["REQUEST_URI"].">primary instance</a> to edit MASTER record type definitions";
