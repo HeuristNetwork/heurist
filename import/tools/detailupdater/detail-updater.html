@@ -148,6 +148,16 @@
 								if (!(savRecords.indexOf(recHR)>=0) ) {// add this record to list for saving
 									savRecords.push(recHR);
 								}
+							}else if (fields[j][1] == "url") {
+								recHR.setURL(fields[j][2]);
+								if (!(savRecords.indexOf(recHR)>=0) ) {// add this record to list for saving
+									savRecords.push(recHR);
+								}
+							} else if (fields[j][1] == "notes") {
+								recHR.setNotes(fields[j][2]);
+								if (!(savRecords.indexOf(recHR)>=0) ) {// add this record to list for saving
+									savRecords.push(recHR);
+								}
 							}
 							//FIXME: need to add code for Keywords, Notes, and URLs
 						}else{//get the detail type
