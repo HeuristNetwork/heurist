@@ -21,7 +21,7 @@ while ($ins = mysql_fetch_assoc($res)) {
 		"admingroup" => ($ins['ins_admingroup'] ? $ins['ins_admingroup'] : 1),
 		"uploads" => "". $uploads .($ins['ins_uploads'] ? "/". $ins['ins_uploads'] : ($ins['ins_name'] ? "/". $ins['ins_name'] : "")),
 		"explore" => ($ins['ins_explore'] ? $ins['ins_explore'] : ""),
-		"usergroup" =>($ins['ins_usergroup'] ? $ins['ins_usergroup'] : "",)
+		"usergroup" =>($ins['ins_usergroup'] ? $ins['ins_usergroup'] : ""),
 		"verifyURLs" =>($ins['ins_verifyURLs'] ? true : false)
 		);
 }
