@@ -24,7 +24,6 @@
 
 	-->*/
 
-
 header('Content-type: text/xml; charset=utf-8');
 
 if (@$argv) {
@@ -132,6 +131,7 @@ $DTT = array();	//detail type base type
 $INV = array();	//detail type inverse
 $WGN = array();	//work group name
 $RDL = array();	//record detail lookup
+$RDLV = array();	//record detail lookup by value
 $ONT = array();	//ontology lookup
 // record type labels
 $query = 'SELECT rt_id, rt_name FROM rec_types';
@@ -162,6 +162,7 @@ $query = 'SELECT rdl_id, rdl_value, rdl_ont_id FROM rec_detail_lookups';
 $res = mysql_query($query);
 while ($row = mysql_fetch_assoc($res)) {
 	$RDL[$row['rdl_id']] = $row;
+	$RDLV[$row['rdl_value']] = $row;
 }
 
 // lookup for ontologies
@@ -187,7 +188,7 @@ $GEO_TYPES = array(
 
 $MAX_DEPTH = @$_REQUEST['depth'] ? intval($_REQUEST['depth']) : 0;
 $REVERSE = @$_REQUEST['rev'] === 'no' ? false : true;
-$WOOT = @$_REQUEST['woot'] === '1' ? true : false;
+$WOOT = @$_REQUEST['woot'] ? intval($_REQUEST['woot']) : 0;
 $OUTPUT_STUBS = @$_REQUEST['stub'] === '1'? true : false;
 
 if (preg_match('/_COLLECTED_/', $_REQUEST['q'])) {
@@ -314,7 +315,7 @@ function buildTree($rec_ids, &$reverse_pointers, &$relationships) {
 		$p_rec_ids = findPointers($rec_ids);
 		$rp_rec_ids = $REVERSE ? findReversePointers($rec_ids, $reverse_pointers) : array();
 		$rel_rec_ids = findRelatedRecords($rec_ids, $relationships);
-		$rec_ids = array_merge($p_rec_ids, $rp_rec_ids, $rel_rec_ids);
+		$rec_ids = array_merge($p_rec_ids, $rp_rec_ids, $rel_rec_ids); // record set for a given level
 	}
 }
 
@@ -326,7 +327,7 @@ function buildTree($rec_ids, &$reverse_pointers, &$relationships) {
 
 function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $outputStub=false) {
 	global $RTN, $DTN, $RQS, $WGN, $MAX_DEPTH, $WOOT;
-
+//error_log("rec = ".$record['rec_id']);
 	openTag('record');
 	makeTag('id', null, $record['rec_id']);
 	makeTag('type', array('id' => $record['rec_type']), $RTN[$record['rec_type']]);
@@ -335,26 +336,25 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $o
 		makeTag('url', null, $record['rec_url']);
 	}
 	if ($record['rec_scratchpad']) {
-		makeTag('notes', null, $record['rec_scratchpad']);
+		makeTag('notes', null, replaceIllegalChars($record['rec_scratchpad']));
 	}
 	makeTag('added', null, $record['rec_added']);
 	makeTag('modified', null, $record['rec_modified']);
 	makeTag('workgroup', array('id' => $record['rec_wg_id']), $record['rec_wg_id'] > 0 ? $WGN[$record['rec_wg_id']] : 'public');
-//error_log(print_r($record,true));
-//error_log("output record  stub = " .$outputStub. " depth = " . $depth. " MAX depth = ". $MAX_DEPTH);
+
 	foreach ($record['details'] as $dt => $details) {
 		foreach ($details as $value) {
 			outputDetail($dt, $value, $record['rec_type'], $reverse_pointers, $relationships, $depth, $outputStub);
 		}
 	}
 
-	if ($WOOT  &&  $depth === 0) {
+	if ($WOOT > $depth) {
 		$result = loadWoot(array('title' => 'record:'.$record['rec_id']));
 		if ($result['success']) {
 			openTag('woot', array('title' => 'record:'.$record['rec_id']));
 			openCDATA();
 			foreach ($result['woot']['chunks'] as $chunk) {
-				echo $chunk['text'] . "\n";
+				echo replaceIllegalChars($chunk['text']) . "\n";
 			}
 			closeCDATA();
 			closeTag('woot');
@@ -395,6 +395,7 @@ function outputRecordStub($recordStub) {
 
 function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $depth=0, $outputStub) {
 	global $DTN, $DTT, $RDL, $ONT, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH;
+
 	$attrs = array('id' => $dt);
 	if (array_key_exists($dt, $DTN)) {
 		$attrs['type'] = $DTN[$dt];
@@ -405,9 +406,9 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 	if ($dt === 200  &&  array_key_exists($value, $INV) && array_key_exists($INV[$value], $RDL)) {	//saw Enum change
 		$attrs['inverse'] = $RDL[$INV[$value]]['rdl_value'];
 	}
+
 	if (is_array($value)) {
 		if (array_key_exists('id', $value)) {
-//error_log("output detail  stub = " .$outputStub. " depth = " . $depth. " MAX depth = ". $MAX_DEPTH);
 			// record pointer
 			if ($depth < $MAX_DEPTH) {
 				openTag('detail', $attrs);
@@ -445,7 +446,11 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 		}
 	} else if ($DTT[$dt] === 'date') {
 		openTag('detail', $attrs);
-		outputDateDetail($attrs, $value);
+		if (strpos($value,"|")===false) {
+			outputDateDetail($attrs, $value);
+		}else{
+			outputTemporalDetail($attrs, $value);
+		}
 		closeTag('detail');
 	} else if ($DTT[$dt] === 'resource') {
 		openTag('detail', $attrs);
@@ -457,8 +462,95 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 		}
 		makeTag('detail', $attrs, $RDL[$value]['rdl_value']);	//saw Enum  possible change
 	} else {
-		makeTag('detail', $attrs, $value);
+		makeTag('detail', $attrs, replaceIllegalChars($value));
 	}
+}
+$typeDict = array(	"s" =>	"Simple Date",
+					"c" =>	"C14 Date",
+					"f" =>	"Aproximate Date",
+					"p" =>	"Date Range",
+					"d" =>	"Duration"
+					);
+
+$fieldsDict = array(	"VER" =>	"Version Number",
+						"TYP" =>	"Temporal Type Code",
+						"PRF" =>	"Probability Profile",
+						"SPF" =>	"Start Profile",
+						"EPF" =>	"End Profile",
+						"COR" =>	"Corrected",
+						"COD" =>	"Laboratory Code",
+						"DET" =>	"Determination Type",
+						"COM" =>	"Comment",
+						"DEV" =>	"Standard Deviation",
+						"DVP" =>	"Deviation Positive",
+						"DVN" =>	"Deviation Negative",
+						"RNG" =>	"Range",
+						"EGP" =>	"Egyptian Date"
+						);
+
+$determinationCodes = array(	0 =>	"Unknown",
+								1 =>	"Attested",
+								2 =>	"Conjecture",
+								3 =>	"Measurement"
+							);
+
+$profileCodes = array(	0 =>	"Flat",
+						1 =>	"Bezier",
+						2 =>	"Slow Start",
+						3 =>	"Slow Finish"
+						);
+
+$tDateDict = Array(	"DAT"  =>	"ISO DateTime",
+					"AVE"  =>	"Mean Date",
+					"TPQ" =>	"Terminus Post Quem",
+					"TAQ" =>	"Terminus Ante Quem",
+					"PDB" =>	"Probable begin",
+					"PDE" =>	"Probable end",
+					"SRT" =>	"Sortby Date"
+					);
+
+$tDurationDict = array(	"DUR" =>	"Simple Duration",
+						"ERR" =>	"Error Margin"
+						);
+function outputTemporalDetail($attrs, $value) {
+	global $typeDict,$fieldsDict,$determinationCodes,$profileCodes,$tDateDict,$tDurationDict;
+	$temporalStr = substr_replace($value,"",0,1);
+	$props = explode("|", $temporalStr);
+	$properties = array();
+	foreach ($props as $prop) {
+		list($tag, $val) = explode("=",$prop);
+		$properties[$tag] = $val;
+	}
+	openTag('temporal',array("version" => $properties['VER'], "type" => $typeDict[$properties['TYP']] ));
+		unset($properties['VER']);
+		unset($properties['TYP']);
+		foreach( $properties as $tag => $val) {
+			if (array_key_exists($tag,$fieldsDict)) { //simple property
+				openTag('property',array('type'=>$tag));
+				switch ($tag) {
+					case "DET":
+						echo $determinationCodes[$val];
+						break;
+					case "PRF":
+					case "SPF":
+					case "EPF":
+						echo $profileCodes[$val];
+						break;
+					default:
+						echo $val;
+				}
+				closeTag('property');
+			}else if (array_key_exists($tag,$tDateDict)) {
+				openTag('date',array('type'=>$tag));
+				outputTDateDetail(null,$val);
+				closeTag('date');
+			}else if (array_key_exists($tag,$tDurationDict)) {
+				openTag('duration',array('type'=>$tag));
+				outputDurationDetail(null,$val);
+				closeTag('duration');
+			}
+		}
+	closeTag('temporal');
 }
 
 function outputDateDetail($attrs, $value) {
@@ -509,7 +601,58 @@ function outputDateDetail($attrs, $value) {
 				}
 			}
 		}
+	}
+}
 
+function outputTDateDetail($attrs, $value) {
+	makeTag('raw', null, $value);
+	if (preg_match('/^([^T\s]*)(?:[T\s+](\S*))?$/', $value, $matches)) { // valid ISO Duration split into date and time
+		$date = @$matches[1];
+		$time = @$matches[2];
+		if (!$time && preg_match('/:\./',$date)) {
+			$time = $date;
+			$date = null;
+		}
+		if ($date) {
+			preg_match('/^(?:(\d\d\d\d)[-\/]?)?(?:(1[012]|0[23]|[23](?!\d)|0?1(?!\d)|0?[4-9](?!\d))[-\/]?)?(?:([12]\d(?!-)|3[01]|0?[1-9][\s$]))?/',$date,$matches);
+			if (@$matches[1]) makeTag('year', null, $matches[1]);
+			if (@$matches[2]) makeTag('month', null, $matches[2]);
+			if (@$matches[3]) makeTag('day', null, $matches[3]);
+		}
+		if ($time) {
+			preg_match('/(?:(0?[1-9]|1\d|2[0-3])[:\.])?(?:(0?[1-9]|[0-5]\d)[:\.])?(?:(0?[1-9]|[0-5]\d))?/',$time,$matches);
+			if (@$matches[1]) makeTag('hour', null, $matches[1]);
+			if (@$matches[2]) makeTag('minutes', null, $matches[2]);
+			if (@$matches[3]) makeTag('seconds', null, $matches[3]);
+		}
+	}
+}
+
+function outputDurationDetail($attrs, $value) {
+	makeTag('raw', null, $value);
+	if (preg_match('/^P([^T]*)T?(.*)$/', $value, $matches)) { // valid ISO Duration split into date and time
+		$date = @$matches[1];
+		$time = @$matches[2];
+		if ($date) {
+			if (preg_match('/[YMD]/',$date)){ //char separated version 6Y5M8D
+				preg_match('/(?:(\d+)Y)?(?:(\d|0\d|1[012])M)?(?:(0?[1-9]|[12]\d|3[01])D)?/',$date,$matches);
+			}else{ //delimited version  0004-12-06
+				preg_match('/^(?:(\d\d\d\d)[-\/]?)?(?:(1[012]|0[23]|[23](?!\d)|0?1(?!\d)|0?[4-9](?!\d))[-\/]?)?(?:([12]\d(?!-)|3[01]|0?[1-9][\s$]))?/',$date,$matches);
+			}
+			if (@$matches[1]) makeTag('year', null, intval($matches[1]));
+			if (@$matches[2]) makeTag('month', null, intval($matches[2]));
+			if (@$matches[3]) makeTag('day', null, intval($matches[3]));
+		}
+		if ($time) {
+			if (preg_match('/[HMS]/',$time)){ //char separated version 6H5M8S
+				preg_match('/(?:(0?[1-9]|1\d|2[0-3])H)?(?:(0?[1-9]|[0-5]\d)M)?(?:(0?[1-9]|[0-5]\d)S)?/',$time,$matches);
+			}else{ //delimited version  23:59:59
+				preg_match('/(?:(0?[1-9]|1\d|2[0-3])[:\.])?(?:(0?[1-9]|[0-5]\d)[:\.])?(?:(0?[1-9]|[0-5]\d))?/',$time,$matches);
+			}
+			if (@$matches[1]) makeTag('hour', null, intval($matches[1]));
+			if (@$matches[2]) makeTag('minutes', null, intval($matches[2]));
+			if (@$matches[3]) makeTag('seconds', null, intval($matches[3]));
+		}
 	}
 }
 
@@ -522,7 +665,7 @@ function outputRecords($result) {
 	foreach ($result['records'] as $record) {
 		array_push($rec_ids, $record['rec_id']);
 	}
-error_log("in hml and stub = ". $OUTPUT_STUBS);
+
 	buildTree($rec_ids, $reverse_pointers, $relationships);
 
 	foreach ($result['records'] as $record) {
@@ -530,6 +673,24 @@ error_log("in hml and stub = ". $OUTPUT_STUBS);
 	}
 }
 
+$invalidChars = array(chr(0),chr(1),chr(2),chr(3),chr(4),chr(5),chr(6),chr(7),chr(8),chr(11),chr(12),chr(14),chr(15),chr(16),chr(17),chr(18),chr(19),chr(20),chr(21),chr(22),chr(23),chr(24),chr(25),chr(26),chr(27),chr(28),chr(29),chr(30),chr(31)); // invalid chars that need to be stripped from the data.
+$replacements = array("[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]"," ","[?]","[?]","[?]","[?]","[?]");
+function replaceIllegalChars($text) {
+	global $invalidChars, $replacements;
+	return str_replace($invalidChars ,$replacements,$text);
+}
+
+function check($text) {
+	global $invalidChars;
+	foreach ($invalidChars as $charCode){
+		//$pattern = "". chr($charCode);
+		if (strpos($text,$charCode)) {
+			error_log("found invalid char " );
+			return false;
+		}
+	}
+	return true;
+}
 
 //----------------------------------------------------------------------------//
 //  Turn off output buffering
