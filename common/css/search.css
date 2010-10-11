@@ -157,7 +157,7 @@ user-select: none; /* CSS3 */
 -khtml-user-select:none; /* Webkit (Safari, Chrome) */
 user-select: none;
 }
-.result_thumb.selected{border:3px solid #A4B4CB}
+.result_thumb.selected{background:url("../images/backgrounds/thumbnail_bg_selected.png") repeat-x scroll 0 bottom #E6EDF7 !important}
 .result_thumb_inner {position: absolute;top:0;bottom: 0;right:0;left: 0;overflow: hidden;padding: 6px;}
 /*.selected {border: 1px solid #AAA; background-color:RGBA(200,200,0,0.5);}*/
 
