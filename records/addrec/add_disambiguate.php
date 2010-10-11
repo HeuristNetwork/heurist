@@ -23,33 +23,23 @@ $use_site_hierarchy = array_key_exists('site_hierarchy', $_REQUEST);
 <html>
  <head><title>Heurist - Add bookmark (disambiguation)</title>
 
-<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/newshsseri.css">
+<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+<link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/disambiguate.css'>
 <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
 <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
-
-
-<style type="text/css">
-<!--
-.common_url { color: lightgray; }
-h1 { font-size: 18px; }
-h2 { margin-bottom: 0px; margin-top: 5px; font-size: 18px; }
--->
-</style>
-
- </head>
+</head>
 
  <body>
-
+<div id=page style="padding: 20px;">
+<a id=home-link href='../../'>
+<div id=logo title="Click the logo at top left of any Heurist page to return to your Favourites"></div>
+</a>
+<div><h1>Possible duplicate URL </h1></div>
 <?= $page_header ?>
-
-<span class="small">
 
 <div id="main">
 
-<table border="0" cellpadding="20" cellspacing="0" class="normal" width="90%"><tr><td>
-
 <form action="add.php" method="get" onsubmit="var bid = elements['bib_id']; for (i=0; i < bid.length; ++i) { if (bid[i].checked) return true; } alert('Please select one of the options'); return false;">
-
 <input type="hidden" name="bkmrk_bkmk_title" value="<?= htmlspecialchars($_REQUEST['bkmk_title']) ?>">
 <input type="hidden" name="bkmrk_bkmk_url" value="<?= htmlspecialchars($_REQUEST['bkmk_url']) ?>">
 <input type="hidden" name="bkmrk_bkmk_description" value="<?= htmlspecialchars($_REQUEST['bkmk_description']) ?>">
@@ -60,7 +50,7 @@ h2 { margin-bottom: 0px; margin-top: 5px; font-size: 18px; }
 <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse;" width="100%" class="normal">
 
 <tr>
- <td style="width: 250px;"><h1>Possible duplicate URL</h1></td>
+ <td style="width: 250px;"></td>
  <td>&nbsp;</td>
  <td style="width: 70px;"><b>Showing:</b></td>
   <?php if ($use_site_hierarchy) { ?>
@@ -82,10 +72,14 @@ h2 { margin-bottom: 0px; margin-top: 5px; font-size: 18px; }
 
 			$noproto_url = preg_replace('!^http://(?:www[.])?([^/]*).*!', '\1', $_REQUEST['bkmk_url']);	// URL minus the protocol + possibly www.
 ?>
+
+
 <tr><td colspan="5"><b>No similar URLs have been bookmarked, but there are other URLs on <tt><?= htmlspecialchars($noproto_url) ?></tt>.</b></td></tr>
 <tr><td colspan="5">&nbsp;</td></tr>
 <tr><td colspan="5">You may look at <a href="<?= htmlspecialchars($base_url . '&site_hierarchy') ?>">all known URLs from the same site</a>,<br>
 or <a href="add.php?bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST['bkmk_url']) ?>&bkmrk_bkmk_title=<?= urlencode($_REQUEST['bkmk_title']) ?>&bkmrk_bkmk_description=<?= urlencode($_REQUEST['bkmk_description']) ?>">add a bookmark</a> for <b><tt><?= htmlspecialchars($_REQUEST['bkmk_url']) ?></tt></b>.</td></tr>
+
+
 
 <?php
 		} else {
@@ -96,27 +90,37 @@ or <a href="add.php?bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST['bkmk_url']
   <b>Please choose URL to bookmark, then:&nbsp;&nbsp;</b>
   <input type="submit" value="Save bookmark">
  </td>
- <td colspan="4" style="text-align: right;">
+<!-- <td colspan="4" style="text-align: right;">
   If choosing an existing URL, you can <label><b>check this box <input type="checkbox" name="force_new" value="1" style="margin: 0px; padding: 0px; border: 0px;"></b></label> to attach an additional bookmark<br>
  (this creates multiple bookmarks attached to one URL - use sparingly)
- </td>
+ </td>  -->
 </tr>
 
 <tr><td colspan="5">&nbsp;</td></tr>
 
 <tr>
  <td colspan="5">
-<table border="0" class="normal" width="100%">
+ 
 
-    <tr><td><h2>New URL:</h2></td></tr>
-    <tr valign="bottom" style="background-color: lightgray;"><td>
-       <label>
-        <input type="radio" name="bib_id" value="-1">
-        <b><?= htmlspecialchars($_REQUEST['bkmk_title']) ?></b>
-       </label>
-    </td>
-    <td>&nbsp;&nbsp;</td>
-    <td><nobr>
+  </td>
+</tr>
+</table>
+
+<!-- duplicates table FIXME: convert to DIV with 2-column view-->
+
+<div id="comparoTable">
+<div class="roundedBoth newRecord">
+<h2>New URL:</h2>
+<div class=warning>This is the resource you asked to add to Heurist.  If selected it will be added as a new record.</div>
+<div class=info>If you select an existing record, that record will be opened for editing.</div>
+	<div class=newRecordItem>
+		<div class=label>
+			<label>
+			<input type="radio" name="bib_id" value="-1">
+				<b><?= htmlspecialchars($_REQUEST['bkmk_title']) ?></b>
+			</label>
+		</div>
+		<div class=url>
      &#91;<a target="_testwindow" href="<?= htmlspecialchars($_REQUEST['bkmk_url']) ?>"
                                 onClick="return checkURL(&quot;<?= htmlspecialchars($_REQUEST['bkmk_url']) ?>&quot;);">visit</a>&#93;&nbsp;
 <b><tt title="<?= htmlspecialchars($_REQUEST['bkmk_url']) ?>"><?php
@@ -125,17 +129,13 @@ or <a href="add.php?bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST['bkmk_url']
 		else
 			print htmlspecialchars(substr($_REQUEST['bkmk_url'], 0, 90) . '...')
       ?></tt></b>
- </nobr></td>
-</tr>
-   <tr><td><img src="<?=HEURIST_SITE_PATH?>common/images/200.gif"></td><td colspan="2"><img src="<?=HEURIST_SITE_PATH?>common/images/200.gif"</td></tr>
-   <tr>
-    <td colspan="3"><img src="<?=HEURIST_SITE_PATH?>common/images/upleftarrow.gif" style="padding-left: 30px;">
-     <span style="color: red;">This is the resource you asked to add to Heurist.  If selected it will be added as a new record.</span><br>
-     <span style="padding-left: 64px;">If you select an existing record, that record will be opened for editing.</span>
-    </td>
-   </tr>
+ </div>
+</div>
+</div>
 
-   <tr valign="bottom"><td><h2>URLs already in Heurist:</h2></td></tr>
+
+<div class="roundedBoth existingRecords">
+<h2>URLs already in Heurist:</h2>
 
 <?php
 		$bkmk_url = $_REQUEST['bkmk_url'];
@@ -150,14 +150,14 @@ or <a href="add.php?bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST['bkmk_url']
 			$row = $all_bibs[$bib_id];
 			$common_url = find_commonality($row['rec_url'], $bkmk_url);
 ?>
-	<tr valign="bottom"><td>
+	<div class=existingRecordItem>
+	<div class=label>
 		<label>
 			<input type="radio" name="bib_id" value="<?= $row['rec_id'] ?>">
 			<?= htmlspecialchars($row['rec_title']) ?>
 		</label>
-	</td>
-	<td>&nbsp;&nbsp;</td>
-	<td><nobr>
+	</div>
+	<div class=url>
 		&#91;<a target="_testwindow" href="<?= htmlspecialchars($row['rec_url']) ?>"
 			onClick="return checkURL(&quot;<?= htmlspecialchars($row['rec_url']) ?>&quot;);">visit</a>&#93;&nbsp; <tt title="<?= htmlspecialchars($row['rec_url']) ?>"><?php
 	/*
@@ -170,15 +170,13 @@ or <a href="add.php?bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST['bkmk_url']
 			print '<span class="common_url" title="'.htmlspecialchars($row['rec_url']).'">'.htmlspecialchars($common_url).'</span>'.substr($row['rec_url'], $common_url_len, $bkmk_url_len-$common_url_len + 10);
 			if (strlen($row['rec_url']) > $bkmk_url_len+10) print '...';
 		?></tt>
-	</nobr></td></tr>
+	</div>
+	</div>
 <?php
 		}
 ?>
-</table>
- </td>
-</tr>
-
-</table>
+</div>
+</div>
 <?php
 		}
 	} else {
@@ -193,46 +191,45 @@ or <a href="add.php?bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST['bkmk_url']
   <b>Please choose URL to bookmark, then:&nbsp;&nbsp;</b>
   <input type="submit" value="Save bookmark">
  </td>
- <td colspan="4" style="text-align: right;">
+<!-- <td colspan="4" style="text-align: right;">
   If choosing an existing URL, you can <label><b>check this box <input type="checkbox" name="force_new" value="1" style="margin: 0px; padding: 0px; border: 0px;"></b></label> to attach an additional bookmark<br>
  (this creates multiple bookmarks attached to one URL - use sparingly)
- </td>
+ </td>   -->
 </tr>
-
 <tr><td colspan="5">&nbsp;</td></tr>
+</table>
 
-<tr>
- <td colspan="5">
-<table border="0" class="normal" width="100%">
-
-   <tr><td><h2>New URL:</h2></td></tr>
-
-   <tr valign="bottom" style="background-color: lightgray;">
-   <td><input type="radio" name="bib_id" value="-1">
-       <b><?= htmlspecialchars($_REQUEST['bkmk_title']) ?></b></td>
-   <td>&nbsp;&nbsp;</td>
-   <td><nobr>
-       &#91;<a target="_testwindow" href="<?= htmlspecialchars($bkmk_url) ?>"
-               onClick="return checkURL(&quot;<?= htmlspecialchars($bkmk_url) ?>&quot;);">visit</a>&#93;&nbsp;
-            <tt title="<?= htmlspecialchars($bkmk_url) ?>"><b><?= htmlspecialchars($bkmk_url) ?></b></tt>
-   </nobr></td>
-   </tr>
-
-   <tr valign="bottom"><td><h2>URLs already in Heurist:</h2></td></tr>
+<div id="comparoTable">
+<div class="roundedBoth newRecord">
+	<h2>New URL:</h2>
+		<div class=newRecordItem>
+		<div class=label>
+			<label>
+			<input type="radio" name="bib_id" value="-1">
+				<b><?= htmlspecialchars($_REQUEST['bkmk_title']) ?></b></td>
+			</label>
+		</div>
+		<div class=url>
+				&#91;<a target="_testwindow" href="<?= htmlspecialchars($bkmk_url) ?>" onClick="return checkURL(&quot;<?= htmlspecialchars($bkmk_url) ?>&quot;);">visit</a>&#93;&nbsp;
+				<tt title="<?= htmlspecialchars($bkmk_url) ?>"><b><?= htmlspecialchars($bkmk_url) ?></b></tt>
+		</div>
+		</div>
+	</div>
+<div class="roundedBoth existingRecords">
+<h2>URLs already in Heurist:</h2>
 <?php
 		$all_site_urls = site_urls($bkmk_url);
 		foreach ($all_site_urls as $url => $id_title) {
 			$common_url = find_commonality($url, $bkmk_url);
 ?>
-	<tr valign="bottom">
-	<td>
+	<div class=existingRecordItem>
+	<div class=label>
 		<label>
 			<input type="radio" name="bib_id" value="<?= $id_title[0] ?>">
 			<?= htmlspecialchars($id_title[1]) ?>
 		</label>
-	</td>
-	<td>&nbsp;&nbsp;</td>
-	<td><nobr>
+	</div>
+	<div class="url">
 		&#91;<a target="_testwindow" href="<?= htmlspecialchars($url) ?>"
 		onClick="return checkURL(&quot;<?= htmlspecialchars($url) ?>&quot;);">visit</a>&#93;&nbsp; <tt><?php
 /*
@@ -244,25 +241,27 @@ or <a href="add.php?bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST['bkmk_url']
 			$common_url_len = strlen($common_url);
 			print '<span class="common_url" title="'.htmlspecialchars($url).'">'.htmlspecialchars($common_url).'</span>'.substr($url, $common_url_len, $bkmk_url_len-$common_url_len + 10);
 			if (strlen($url) > $bkmk_url_len+10) print '...';
-?></tt>
-</nobr></td></tr>
+?></div>
+</div>
 <?php
 		}
 ?>
+</div>
+</div>
    <tr><td><img src="../../common/images/200.gif"></td><td colspan="2"></td></tr>
 </table>
  </td>
 </tr>
 
-</table>
+
 
 <?php
 	}
 ?>
 </form>
 
-</td></tr></table>
-
+</div>
+ 
 <div style="position: absolute; display: none; background: url('<?=HEURIST_SITE_PATH?>common/images/100x100.gif');" id="popupProtector"></div>
 
 <div style="background-color: #600000; border: 0px; margin: 0px; padding: 10px; overflow: hidden; display: none; position: absolute; text-align: center;" id="url_checker">
@@ -278,7 +277,6 @@ or <a href="add.php?bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST['bkmk_url']
 </div>
 
 </body>
-
 </html>
 <?php
 
