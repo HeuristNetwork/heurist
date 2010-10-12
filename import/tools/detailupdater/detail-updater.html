@@ -77,7 +77,7 @@
 					if ( !isNaN(fields[i+recStart][0]) && !(recIDs.indexOf(fields[i+recStart][0])>=0)) { //if new value
 						recIDs.push(fields[i+recStart][0]); //store the Record ID
 					}
-					if (!isNaN(fields[i+recStart][1]) && HDetailManager.getDetailTypeById(fields[i+recStart][1]).getVariety()==HVariety.REFERENCE) { // updating a reference detail load referenced object
+					if (!isNaN(fields[i+recStart][1]) && HDetailManager.getDetailTypeById(parseInt(fields[i+recStart][1])).getVariety()==HVariety.REFERENCE) { // updating a reference detail load referenced object
 						var vals = fields[i+recStart][2].split("|");
 						for(v in vals){
 							if (!isNaN(vals[v]) && !(recIDs.indexOf(vals[v])>=0)){
@@ -175,7 +175,7 @@
 							}
 							//FIXME: need to add code for Keywords, Notes, and URLs
 						}else{//get the detail type
-							recHDT = HDetailManager.getDetailTypeById(fields[j][1]);
+							recHDT = HDetailManager.getDetailTypeById(parseInt(fields[j][1]));
 							if (recHDT){ //valid detail type
 								if (fields[j][2]!=null && fields[j][2]!=""  ) {
 
@@ -191,6 +191,7 @@
 											// update/add the detail if the value exist and is valid
 											for (var v in vals) {
 												geoFields = vals[v].split(":");
+												geoFields[0] = geoFields[0].match(/^(\s*)(\S)(\s*)/)[2]; //strip any spaces
 												geo = new HGeographicValue(geoFields[0], geoFields[1]);
 												if (recHDT.checkValue(geo)) {
 													details.push(geo);
@@ -202,6 +203,7 @@
 											recHR.setDetails(recHDT, details);
 										} else { //singleton  case  update/add
 											geoFields = vals[0].split(":");
+											geoFields[0] = geoFields[0].match(/^(\s*)(\S)(\s*)/)[2]; //strip any spaces
 											geo = new HGeographicValue(geoFields[0], geoFields[1]);
 											if (!details[0]) {
 												recHR.addDetail(recHDT, geo);
