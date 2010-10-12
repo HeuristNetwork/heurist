@@ -139,7 +139,9 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 				</ul>
 			</div>
 		</div>
-	<a href="../help/webhelp" target=_blank title="Overview and guides to the use of Heurist plus comprehensive detailed help"><b>Help</b></a> | <a id=contact-link title="Send us an email with bug information or feature requests" href="mailto:info@heuristscholar.org"><b>Contact us</b></a> </nobr></div>
+	<a href="../help/webhelp" target=_blank title="Overview and guides to the use of Heurist plus comprehensive detailed help"><b>Help</b></a> | 
+	<a id=contact-link style="display:none" title="Send us an email with bug information or feature requests" href="mailto:info@heuristscholar.org"><b>Contact us</b></a>
+	<a href="javascript:(function(){h='http://heuristscholar.org/h3-ig/';d=document;c=d.contentType;if(c=='text/html'||!c){if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();s=d.createElement('script');s.type='text/javascript';s.src=(h+'import/bookmarklet/bookmarklet-popup.js?'+new%20Date().getTime()).slice(0,-8);d.getElementsByTagName('head')[0].appendChild(s);}else{e=encodeURIComponent;w=open(h%20+'records/addrec/add.php?t='+e(d.title)+'&u='+e(location.href));window.setTimeout('w.focus()',200);}})();"><b>Bookmarklet</b></a></nobr></div>
 </div>
 
 <div id="add-record" class="bannerBG"><a id=add-record-link class="toolbar-large-icon-link logged-in-only" title="Add a new record to the Heurist database, setting record type and ownership" href="#" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/addrec/popup_add_resource.php'); return false;"><img src="../common/images/add-record.png"></a> </div>

@@ -228,27 +228,22 @@ top.HEURIST.search = {
 		"<span class=wg-id title='"+linkTitle+"' " + (wgColor? wgColor: "") + ">" + (wgHTML? wgHTML.htmlEscape() : "") + "</span>"+
 		"</span>"+
 		"<img src=" +top.HEURIST.basePath+ "common/images/16x16.gif title='"+reftypeTitle.htmlEscape()+"' "+reftypeImg+" class=rft>"+
-		"<span class='rec_title'>" + linkText + "</span>" +
-
-
+		"<span class='rec_title'>" + (res[3].length ? "<a href='"+res[3]+"' target='_blank'>"+linkText + "</a>" : linkText ) + "</span>" +
 		"<div class=right_margin_info>"+
-
+		"<span><img class='passwordIcon' onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src=" +top.HEURIST.basePath+ "common/images/lock.png " + userPwd + "></span>"+
 		"<div class=mini-tools >" +
 			"<span id='rec_edit_link' title='Click to edit'><a href='"+
 			top.HEURIST.basePath+ "records/editrec/edit.html?sid=" +
 			top.HEURIST.search.sid + "&bib_id="+ res[2] +
 			(top.HEURIST.instance && top.HEURIST.instance.name ? '&instance=' + top.HEURIST.instance.name : '') +
 			"' target='_blank'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png'/>edit</a> | </span>" +
-			(res[3].length ? "<span><a href='"+res[3]+"' target='_blank'><img src='"+ top.HEURIST.basePath+"common/images/external_link_16x16.gif' title='go to link'>visit</a> | </span>" : "") +
 			"<span id='rec_explore_link' title='Click to explore'><a href='/cocoon/h3/relbrowser/irek/item/" + res[2] +
 					(top.HEURIST.instance && top.HEURIST.instance.name ? '/?instance=' + top.HEURIST.instance.name : '') +
 					"' target='_blank'><img src='"+	top.HEURIST.basePath + "common/images/explore.png'/>explore</a></span>" +
-					"<span><img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src=" +top.HEURIST.basePath+ "common/images/lock.png " + userPwd + "></span>"+
+					
 			"<span id='spacer'><img src='"+	top.HEURIST.basePath + "common/images/16x16.gif'/></span>" +
 		"</div>" +
-
 		"<span style='display:none' class=daysbad title='Detection of broken URLs is carried out once a day'>"+daysBad+"</span>"+
-
 		"</div>" +
 		"<input type=checkbox name=bib[] onclick=top.HEURIST.search.cb_onclick(this) class='logged-in-only' title='Check box to apply Actions to this record'>"+
 		"</div>";
@@ -313,7 +308,7 @@ top.HEURIST.search = {
 		"<div class=result_thumb  title='Double-click to edit' bkmk_id='"+res[0]+"' bib_id="+res[2]+">" +
 		"<input style='display:none' type=checkbox name=bib[] onclick=top.HEURIST.search.resultItemOnClick(this) class='logged-in-only' title='Check box to apply Actions to this record'>"+
 		   (res[11] && res[11].length ? "<div class='thumbnail' style='background-image:url("+res[11]+")' ></div>":"<div class='no-thumbnail' "+reftypeThumb+" ></div>") +
-		   "<div class=rec_title title='"+linkText.htmlEscape()+"'>"+ linkText + "</div>"+
+		"<div class='rec_title'>" + (res[3].length ? "<a href='"+res[3]+"' target='_blank'>"+linkText + "</a>" : linkText ) + "</div>" +
 		   "<div class=icons  bkmk_id='"+res[0]+"' bib_id="+res[2]+">" +
 
 
