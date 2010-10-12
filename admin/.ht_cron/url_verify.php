@@ -4,7 +4,7 @@ require_once(dirname(__FILE__).'/../../common/config/heurist-instances.php');
 require_once(dirname(__FILE__).'/../../common/connect/db.php');
 
 foreach (get_all_instances() as $prefix => $instance) {
-
+	if (!$instance['verifyURLs']) continue;
 	mysql_connection_db_overwrite($instance["db"]);
 
 	$ch = curl_init();

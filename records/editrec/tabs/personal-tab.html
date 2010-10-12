@@ -1,221 +1,221 @@
 <html>
- <head>
-  <link rel=stylesheet href="../../../common/css/global.css">
-  <link rel=stylesheet href="../../../common/css/edit.css">
-  <link rel=stylesheet href="../../../common/css/edit-tab.css">
-  <link rel=stylesheet href="../../../common/css/autocomplete.css">
-  <link rel=stylesheet href="../../../common/css/woot.css">
-<script>
+	<head>
+		<link rel=stylesheet href="../../../common/css/global.css">
+		<link rel=stylesheet href="../../../common/css/edit.css">
+		<link rel=stylesheet href="../../../common/css/edit-tab.css">
+		<link rel=stylesheet href="../../../common/css/autocomplete.css">
+		<link rel=stylesheet href="../../../common/css/woot.css">
+		<script>
 
-function onshow() {
-	setTimeout(function() { try { document.getElementById("tags").focus(); } catch (e) {} }, 0);
-}
-top.HAPI.importSymbols(top, this);
+			function onshow() {
+				setTimeout(function() { try { document.getElementById("tags").focus(); } catch (e) {} }, 0);
+			}
+			top.HAPI.importSymbols(top, this);
 
-  </script>
-  <script src="../../../external/tinymce/jscripts/tiny_mce/tiny_mce.js"></script>
-  <script src="../../woot/js/woot.js"></script>
- </head>
- <body onload="onshow();">
-  <script src="../../../common/js/heurist.js"></script>
-  <script src="../../../common/php/display-preferences.php"></script>
-  <script src="../../tags/autocomplete.js"></script>
+		</script>
+		<script src="../../../external/tinymce/jscripts/tiny_mce/tiny_mce.js"></script>
+		<script src="../../woot/js/woot.js"></script>
+	</head>
+	<body onload="onshow();">
+		<script src="../../../common/js/heurist.js"></script>
+		<script src="../../../common/php/display-preferences.php"></script>
+		<script src="../../tags/autocomplete.js"></script>
 
-  <script>
-   document.write('<form method=post jsonAction="'+top.HEURIST.basePath+'records/bookmarks/save-personal-data.php" action="'+top.HEURIST.basePath+'records/bookmarks/save-personal-data.php" onsubmit="return verifyForm();">');
-  </script>
-   <input type=hidden name=save-mode id=save-mode value=edit>
-   <input type=hidden name=bkmk_id id=bkmk_id>
+		<script>
+			document.write('<form method=post jsonAction="'+top.HEURIST.basePath+'records/bookmarks/save-personal-data.php" action="'+top.HEURIST.basePath+'records/bookmarks/save-personal-data.php" onsubmit="return verifyForm();">');
+		</script>
+		<input type=hidden name=save-mode id=save-mode value=edit>
+		<input type=hidden name=bkmk_id id=bkmk_id>
 
-   <table border=0 cellspacing=0 cellpadding=0 style="width: 100%;"><tbody id=all-inputs>
-    <tr class=input-row>
-     <td class=input-header-cell>Personal tags
-     	<div class="help prompt">
-          Type as many tags as you like, separated by commas.  Tags may contain spaces.
-          New tags are added automatically and are specific to each user.<br><br>
-          <a href="../../../../help/tags.html" onClick="top.HEURIST.util.popupURL(window, this.href); return false;">How to enter tags</a>
-         </div>
-     </td>
-     <td class=input-cell>
-     	<input id=tags name=keywordstring type=text>
-         <div id=top-tags-cell><span class=prompt>Top:</span>
-         <a href="#" class=add-tag-link onClick="addTag('Favourites'); return false;">Favourites </a><a href="#" class=add-tag-link onClick="addTag('To Read'); return false;"> To Read </a></div>
-        <div id=recent-tags-cell>
-         <span class=prompt>Recent:</span>
-        </div>
-     </td>
-    </tr>
+		<table border=0 cellspacing=0 cellpadding=0 style="width: 100%;"><tbody id=all-inputs>
+				<tr class=input-row>
+					<td class=input-header-cell>Personal tags
+						<div class="help prompt">
+							Type as many tags as you like, separated by commas.  Tags may contain spaces.
+							New tags are added automatically and are specific to each user.<br><br>
+							<a href="../../../help/tags.html" onClick="top.HEURIST.util.popupURL(window, this.href); return false;">How to enter tags</a>
+						</div>
+					</td>
+					<td class=input-cell>
+						<input id=tags name=keywordstring type=text>
+						<div id=top-tags-cell><span class=prompt>Top:</span>
+						<a href="#" class=add-tag-link onClick="addTag('Favourites'); return false;">Favourites </a><a href="#" class=add-tag-link onClick="addTag('To Read'); return false;"> To Read </a></div>
+						<div id=recent-tags-cell>
+							<span class=prompt>Recent:</span>
+						</div>
+					</td>
+				</tr>
 
-    <tr><td class="separator_row" colspan="2">&nbsp;</td></tr>
+				<tr><td class="separator_row" colspan="2">&nbsp;</td></tr>
 
-    <tr class=input-row>
-     <td class=input-header-cell>Ratings<div class="help prompt">Records can be rated in several ways. For a single rating, use only the Interest rating.</div></td>
-     <td class=input-cell>
-       <div class=rating-row><span class=header>Interest</span><span><select id=interest-rating name=interest-rating></select></span></div>
-       <div class=rating-row><span class=header>Content</span><span><select id=content-rating name=content-rating></select></span></div>
-       <div class=rating-row><span class=header>Quality</span><span><select id=quality-rating name=quality-rating></select></span></div>
-     </td>
-    </tr>
+				<tr class=input-row>
+					<td class=input-header-cell>Ratings<div class="help prompt">Records can be rated in several ways. For a single rating, use only the Interest rating.</div></td>
+					<td class=input-cell>
+						<div class=rating-row><span class=header>Interest</span><span><select id=interest-rating name=interest-rating></select></span></div>
+						<div class=rating-row><span class=header>Content</span><span><select id=content-rating name=content-rating></select></span></div>
+						<div class=rating-row><span class=header>Quality</span><span><select id=quality-rating name=quality-rating></select></span></div>
+					</td>
+				</tr>
 
-    <tr><td class="separator_row" colspan="2">&nbsp;</td></tr>
+				<tr><td class="separator_row" colspan="2">&nbsp;</td></tr>
 
-    <tr class=input-row>
-     <td class=input-header-cell>Private notes<div class="help prompt">These notes are private and visible only to you.</div> </td>
-     <td class=input-cell>
-     	<div id=woot></div>
-      <div>
+				<tr class=input-row>
+					<td class=input-header-cell>Private notes<div class="help prompt">These notes are private and visible only to you.</div> </td>
+					<td class=input-cell>
+						<div id=woot></div>
+						<div>
 
-       <a id=woot-ext-link target=_blank href="../../../woot/woot.html">open in new window</a>
-      </div>
+							<a id=woot-ext-link target=_blank href="../../woot/woot.html">open in new window</a>
+						</div>
 
-     </td>
-    </tr>
+					</td>
+				</tr>
 
-    <tr><td class="separator_row" colspan="2">&nbsp;</td></tr>
+				<tr><td class="separator_row" colspan="2">&nbsp;</td></tr>
 
-    <tr class=input-row>
-     <td class=input-header-cell>Password reminder<div class="help prompt">NOT ENCRYPTED - do not use for secure passwords</div></td>
-     <td class=input-cell>
-      <input type=text class=in name=password-reminder id=password-reminder style="width: 200px;" onChange="window.changed();" onKeyPress="window.changed();">
+				<tr class=input-row>
+					<td class=input-header-cell>Password reminder<div class="help prompt">NOT ENCRYPTED - do not use for secure passwords</div></td>
+					<td class=input-cell>
+						<input type=text class=in name=password-reminder id=password-reminder style="width: 200px;" onChange="window.changed();" onKeyPress="window.changed();">
 
-     </td>
-    </tr>
+					</td>
+				</tr>
 
-    <tr><td class="separator_row" colspan="2">&nbsp;</td></tr>
-   </tbody></table>
-  </form>
+				<tr><td class="separator_row" colspan="2">&nbsp;</td></tr>
+		</tbody></table>
+		</form>
 
-  <form method=post jsonAction="../../records/reminders/save-reminder.php" action="../../records/reminders/save-reminder.php" onsubmit="return false;">
-   <table border=0 cellspacing=0 cellpadding=0 style="width: 100%;"><tbody><!-- separate table, because this is a separate form -->
-    <tr class=input-row>
-     <td class=input-header-cell><div style="margin: 7px 0;">Reminders</div></td>
-     <td><div id=reminders></div></td>
-    </tr></tbody></table>
-  </form>
+		<form method=post jsonAction="records/reminders/save-reminder.php" action="records/reminders/save-reminder.php" onsubmit="return false;">
+			<table border=0 cellspacing=0 cellpadding=0 style="width: 100%;"><tbody><!-- separate table, because this is a separate form -->
+					<tr class=input-row>
+						<td class=input-header-cell><div style="margin: 7px 0;">Reminders</div></td>
+						<td><div id=reminders></div></td>
+			</tr></tbody></table>
+		</form>
 
-  <script>
-
-
-var tags = document.getElementById("tags");
-tags.value = tags.defaultValue = top.HEURIST.edit.record.keywordString  ||  "";
-
-new top.HEURIST.autocomplete.AutoComplete(tags, top.HEURIST.util.keywordAutofill, { nonVocabularyCallback: top.HEURIST.util.showConfirmNewTag });
+		<script>
 
 
-tags.onchange = function() { top.HEURIST.edit.changed("personal"); };
+			var tags = document.getElementById("tags");
+			tags.value = tags.defaultValue = top.HEURIST.edit.record.keywordString  ||  "";
 
-function addTag(tag) {
-	var tags = document.getElementById("tags");
-
-	var tagPos = tags.value.indexOf(tag);
-	if (tagPos != -1) {
-		if (tags.value.substring(0, tagPos).match(/(?:^|,)\s*$/)  &&
-		    tags.value.substring(tagPos + tag.length).match(/^\s*(?:,|$)/)) {
-			// tag is already there
-			return;
-		}
-	}
-
-	if (tags.value) tags.value += "," + tag;
-	else tags.value = tag;
-
-	tags.onchange();
-
-	tags.focus();
-}
-function addTagLink(tag, parentNode) {
-	var newLink = document.createElement("a");
-		newLink.href = "#";
-		newLink.className = "add-tag-link";
-		newLink.onclick = function() { addTag(tag); return false; };
-		newLink.appendChild(document.createTextNode(tag));
-	var nobr = document.createElement("nobr");
-		nobr.appendChild(newLink);
-	parentNode.appendChild(nobr);
-}
-
-var alphasort = function(a,b) { a = a.toLowerCase(); b = b.toLowerCase(); return (a < b)? -1 : (a > b)? 1 : 0; };
-
-var topTagsCell = document.getElementById("top-tags-cell");
-var topKeywords = top.HEURIST.user.topKeywords.slice(0);
-topKeywords.sort(alphasort);
-for (var i=0; i < topKeywords.length; ++i) {
-	addTagLink(topKeywords[i], topTagsCell);
-}
-var recentTagsCell = document.getElementById("recent-tags-cell");
-var recentKeywords = top.HEURIST.user.recentKeywords.slice(0, 8);
-recentKeywords.sort(alphasort);
-for (var i=0; i < recentKeywords.length; ++i) {
-	addTagLink(recentKeywords[i], recentTagsCell);
-}
-
-</script>
-<script>
-
-function verifyForm() {
-	if (tags.autocompleteObject.confirmImg) {	// user has a brand new tag waiting to be completed
-		setTimeout(function() { tags.autocompleteObject.currentWordOkay(); }, 0);
-		return false;
-	}
-	else return true;
-}
-
-function changed() { top.HEURIST.edit.changed("personal"); }
-function unchanged() { top.HEURIST.edit.unchanged("personal"); }
-function handleSaved(json) {
-	var vals = eval(json.responseText);
-	for (var i in vals)
-		parent.HEURIST.edit.record[i] = vals[i];
-	window.location.reload();
-}
-document.forms[0].heuristSubmit = function() {
-	top.HEURIST.util.xhrFormSubmit(document.forms[0], handleSaved)
-};
-document.forms[0].heuristForceSubmit = function() {
-	if (wootEditor.unlockedChunk) {
-		wootEditor.save();
-	}
-	window.reminderInput.save(window.reminderInput.nowRadioButton.checked, true);
-};
-
-function fillRatings(element, values, defaultValue) {
-	var i = 0;
-	top.HEURIST.registerEvent(element, "change", changed);
-	for (var index in values) {
-		element.options[i] = new Option(values[index], index);
-		if (index == defaultValue) element.selectedIndex = i;
-		++i;
-	}
-}
-fillRatings(document.getElementById("interest-rating"), top.HEURIST.ratings.interest, parent.HEURIST.edit.record.interestRating);
-fillRatings(document.getElementById("content-rating"), top.HEURIST.ratings.content, parent.HEURIST.edit.record.contentRating);
-fillRatings(document.getElementById("quality-rating"), top.HEURIST.ratings.quality, parent.HEURIST.edit.record.qualityRating);
-
-if (parent.HEURIST.edit.record.passwordReminder) {
-	document.getElementById("password-reminder").value = parent.HEURIST.edit.record.passwordReminder;
-}
-
-document.getElementById("bkmk_id").value = top.HEURIST.edit.record.bkmkID  ||  0;
-
-var reminderDiv = document.getElementById("reminders");
-for (var i=0; i < parent.HEURIST.edit.record.reminders.length; ++i) {
-	new top.HEURIST.edit.Reminder(reminderDiv, parent.HEURIST.edit.record.reminders[i]);
-}
-window.reminderInput = new top.HEURIST.edit.inputs.ReminderInput(reminderDiv);
-
-// woot stuff
-HAPI.WOOT.DEFAULT_WOOT_PERMISSIONS  = [ HAPI.WOOT.OWNER_PROTECTION ];
-HAPI.WOOT.DEFAULT_CHUNK_PERMISSIONS = [ HAPI.WOOT.OWNER_PROTECTION ];
-
-var wootTitle = "bookmark:" + parent.HEURIST.edit.record.bkmkID;
-var recTitle = parent.HEURIST.edit.record.title + " - private notes";
-
-document.getElementById("woot-ext-link").href += "?w=" + wootTitle + "&t=" + recTitle;
-
-HAPI.WOOT.GUI.labelsForLanguage.en.emptyMessage.label = "&lt;&lt; Empty or no visible text blocks &gt;&gt;";
-var wootEditor = new HAPI.WOOT.GUI.WootEditor({ title: wootTitle, id: "woot" });
+			new top.HEURIST.autocomplete.AutoComplete(tags, top.HEURIST.util.keywordAutofill, { nonVocabularyCallback: top.HEURIST.util.showConfirmNewTag });
 
 
-  </script>
- </body>
+			tags.onchange = function() { top.HEURIST.edit.changed("personal"); };
+
+			function addTag(tag) {
+				var tags = document.getElementById("tags");
+
+				var tagPos = tags.value.indexOf(tag);
+				if (tagPos != -1) {
+					if (tags.value.substring(0, tagPos).match(/(?:^|,)\s*$/)  &&
+					tags.value.substring(tagPos + tag.length).match(/^\s*(?:,|$)/)) {
+						// tag is already there
+						return;
+					}
+				}
+
+				if (tags.value) tags.value += "," + tag;
+				else tags.value = tag;
+
+				tags.onchange();
+
+				tags.focus();
+			}
+			function addTagLink(tag, parentNode) {
+				var newLink = document.createElement("a");
+				newLink.href = "#";
+				newLink.className = "add-tag-link";
+				newLink.onclick = function() { addTag(tag); return false; };
+				newLink.appendChild(document.createTextNode(tag));
+				var nobr = document.createElement("nobr");
+				nobr.appendChild(newLink);
+				parentNode.appendChild(nobr);
+			}
+
+			var alphasort = function(a,b) { a = a.toLowerCase(); b = b.toLowerCase(); return (a < b)? -1 : (a > b)? 1 : 0; };
+
+			var topTagsCell = document.getElementById("top-tags-cell");
+			var topKeywords = top.HEURIST.user.topKeywords.slice(0);
+			topKeywords.sort(alphasort);
+			for (var i=0; i < topKeywords.length; ++i) {
+				addTagLink(topKeywords[i], topTagsCell);
+			}
+			var recentTagsCell = document.getElementById("recent-tags-cell");
+			var recentKeywords = top.HEURIST.user.recentKeywords.slice(0, 8);
+			recentKeywords.sort(alphasort);
+			for (var i=0; i < recentKeywords.length; ++i) {
+				addTagLink(recentKeywords[i], recentTagsCell);
+			}
+
+		</script>
+		<script>
+
+			function verifyForm() {
+				if (tags.autocompleteObject.confirmImg) {	// user has a brand new tag waiting to be completed
+					setTimeout(function() { tags.autocompleteObject.currentWordOkay(); }, 0);
+					return false;
+				}
+				else return true;
+			}
+
+			function changed() { top.HEURIST.edit.changed("personal"); }
+			function unchanged() { top.HEURIST.edit.unchanged("personal"); }
+			function handleSaved(json) {
+				var vals = eval(json.responseText);
+				for (var i in vals)
+				parent.HEURIST.edit.record[i] = vals[i];
+				window.location.reload();
+			}
+			document.forms[0].heuristSubmit = function() {
+				top.HEURIST.util.xhrFormSubmit(document.forms[0], handleSaved)
+			};
+			document.forms[0].heuristForceSubmit = function() {
+				if (wootEditor.unlockedChunk) {
+					wootEditor.save();
+				}
+				window.reminderInput.save(window.reminderInput.nowRadioButton.checked, true);
+			};
+
+			function fillRatings(element, values, defaultValue) {
+				var i = 0;
+				top.HEURIST.registerEvent(element, "change", changed);
+				for (var index in values) {
+					element.options[i] = new Option(values[index], index);
+					if (index == defaultValue) element.selectedIndex = i;
+					++i;
+				}
+			}
+			fillRatings(document.getElementById("interest-rating"), top.HEURIST.ratings.interest, parent.HEURIST.edit.record.interestRating);
+			fillRatings(document.getElementById("content-rating"), top.HEURIST.ratings.content, parent.HEURIST.edit.record.contentRating);
+			fillRatings(document.getElementById("quality-rating"), top.HEURIST.ratings.quality, parent.HEURIST.edit.record.qualityRating);
+
+			if (parent.HEURIST.edit.record.passwordReminder) {
+				document.getElementById("password-reminder").value = parent.HEURIST.edit.record.passwordReminder;
+			}
+
+			document.getElementById("bkmk_id").value = top.HEURIST.edit.record.bkmkID  ||  0;
+
+			var reminderDiv = document.getElementById("reminders");
+			for (var i=0; i < parent.HEURIST.edit.record.reminders.length; ++i) {
+				new top.HEURIST.edit.Reminder(reminderDiv, parent.HEURIST.edit.record.reminders[i]);
+			}
+			window.reminderInput = new top.HEURIST.edit.inputs.ReminderInput(reminderDiv);
+
+			// woot stuff
+			HAPI.WOOT.DEFAULT_WOOT_PERMISSIONS  = [ HAPI.WOOT.OWNER_PROTECTION ];
+			HAPI.WOOT.DEFAULT_CHUNK_PERMISSIONS = [ HAPI.WOOT.OWNER_PROTECTION ];
+
+			var wootTitle = "bookmark:" + parent.HEURIST.edit.record.bkmkID;
+			var recTitle = parent.HEURIST.edit.record.title + " - private notes";
+
+			document.getElementById("woot-ext-link").href += "?w=" + wootTitle + "&t=" + recTitle;
+
+			HAPI.WOOT.GUI.labelsForLanguage.en.emptyMessage.label = "&lt;&lt; Empty or no visible text blocks &gt;&gt;";
+			var wootEditor = new HAPI.WOOT.GUI.WootEditor({ title: wootTitle, id: "woot" });
+
+
+		</script>
+	</body>
 </html>

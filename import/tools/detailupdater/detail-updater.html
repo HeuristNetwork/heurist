@@ -23,7 +23,7 @@
 		<script src="../../../common/js/temporal.js"></script>
 
 		<script>
-			const recChunk = 50;
+			const recChunk = 1000;
 			var fields = [];
 			var recTypeSelect;
 			var workgroupSelect;
@@ -72,11 +72,12 @@
 				var recIDs = [];
 				//get recChunk records
 				for(i=0; i < (recEnd-recStart); i++) {
+					var newIDs = [];
 					// flatten the recordID
 					if ( !isNaN(fields[i+recStart][0]) && !(recIDs.indexOf(fields[i+recStart][0])>=0)) { //if new value
 						recIDs.push(fields[i+recStart][0]); //store the Record ID
 					}
-					if (!isNaN(fields[i+recStart][1]) && HDetailManager.getDetailTypeById(fields[i+recStart][1]).getVariety()==HVariety.REFERENCE) { // updating a reference detail load referenced object
+					if (!isNaN(fields[i+recStart][1]) && HDetailManager.getDetailTypeById(parseInt(fields[i+recStart][1])).getVariety()==HVariety.REFERENCE) { // updating a reference detail load referenced object
 						var vals = fields[i+recStart][2].split("|");
 						for(v in vals){
 							if (!isNaN(vals[v]) && !(recIDs.indexOf(vals[v])>=0)){
@@ -88,8 +89,20 @@
 							recIDs.push(fields[i+recStart][3]);
 						}
 					}
+					if ((newIDs.length + recIDs.length)>1000){
+						//adjust recEnd and break out
+						recEnd = i + recStart;
+						break;
+					}else{
+						recIDs = recIDs.concat(newIDs);
+					}
 				} //for i
-				//		console.debug("loading records " + recIDs.join());
+//				console.debug("loading records " + recIDs.join());
+				if (recIDs.length > 1000) {
+					alert("This is embarrassing, but somehow you have exceeded ("+ recIDs.length +
+							") the capacity (1000) of the updater to handle. We need to start again. The last row handled was " + recStart);
+					location.reload();
+				}
 
 				var loader = new HLoader(
 				function(s,r) {
@@ -102,6 +115,7 @@
 				});
 				var mysearch = new HSearch("ids:" + recIDs.join());
 
+				HeuristScholarDB.setDefaultLoadRecordLimit(1000); //set the limit to the max
 				HeuristScholarDB.loadRecords(mysearch,loader);  //asynchronous call for record data
 			}
 
@@ -113,7 +127,7 @@
 				var details;
 				var saver = new HSaver(
 				function(r) {
-					//					console.debug("saved records" + r);    //FIXME  write code to valid field value and update fields array with success message
+//					console.debug("saved records" + r);    //FIXME  write code to valid field value and update fields array with success message
 				},
 				function(r,e) {
 					alert("record save failed: " + e);     //FIXME write code to put error message in fields array.
@@ -135,7 +149,7 @@
 						recHRT = recHR.getRecordType();
 
 						if( isNaN(fields[j][1])) {
-							if( fields[j][1]=="tags"){
+							if( (fields[j][1]).toLowerCase()=="tags"){
 								var myTags =fields[j][2];
 								if (myTags.indexOf("\"")>=0){
 									myTags = myTags.replace(/"/g,""); // strip off extra quotes
@@ -148,10 +162,20 @@
 								if (!(savRecords.indexOf(recHR)>=0) ) {// add this record to list for saving
 									savRecords.push(recHR);
 								}
+							}else if ((fields[j][1]).toLowerCase() == "url") {
+								recHR.setURL(fields[j][2]);
+								if (!(savRecords.indexOf(recHR)>=0) ) {// add this record to list for saving
+									savRecords.push(recHR);
+								}
+							} else if ((fields[j][1]).toLowerCase() == "notes") {
+								recHR.setNotes(fields[j][2]);
+								if (!(savRecords.indexOf(recHR)>=0) ) {// add this record to list for saving
+									savRecords.push(recHR);
+								}
 							}
 							//FIXME: need to add code for Keywords, Notes, and URLs
 						}else{//get the detail type
-							recHDT = HDetailManager.getDetailTypeById(fields[j][1]);
+							recHDT = HDetailManager.getDetailTypeById(parseInt(fields[j][1]));
 							if (recHDT){ //valid detail type
 								if (fields[j][2]!=null && fields[j][2]!=""  ) {
 
@@ -167,6 +191,7 @@
 											// update/add the detail if the value exist and is valid
 											for (var v in vals) {
 												geoFields = vals[v].split(":");
+												geoFields[0] = geoFields[0].match(/^(\s*)(\S)(\s*)/)[2]; //strip any spaces
 												geo = new HGeographicValue(geoFields[0], geoFields[1]);
 												if (recHDT.checkValue(geo)) {
 													details.push(geo);
@@ -178,6 +203,7 @@
 											recHR.setDetails(recHDT, details);
 										} else { //singleton  case  update/add
 											geoFields = vals[0].split(":");
+											geoFields[0] = geoFields[0].match(/^(\s*)(\S)(\s*)/)[2]; //strip any spaces
 											geo = new HGeographicValue(geoFields[0], geoFields[1]);
 											if (!details[0]) {
 												recHR.addDetail(recHDT, geo);
@@ -345,6 +371,7 @@
 			function showProcessSummary() {
 				var e = document.getElementById("process-div");
 				e.style.display = "none";
+				if (confirm("Would you like to use DetailUpdater for more updating?"))location.reload();
 			}
 
 
