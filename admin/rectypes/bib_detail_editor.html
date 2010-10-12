@@ -416,7 +416,7 @@ window.reqMatchField = 1;
  <div style="width: 300px; height: 500px; overflow: auto; padding: 3px;" class="friendly_border">
   <table border="0">
    [foreach REFTYPE rtf : 1 order by (!rt_primary), rt_name]
-    <tr><td><input type=checkbox name='active_rt[literal][[end-literal][rt_id][literal]][end-literal]' [select ACTIVE_REFTYPE art]checked[end-select][not-found][end-not-found]></td><td style="text-align: right;">[rt_id]</td><td><img src="../../common/images/reftype-icons/[rt_id].gif" id="rt[rt_id]" class="rft_icon" onclick="upload_icon([rt_id]);"><a href="?rt_id=[rt_id]">[rt_name]</a></td></tr>
+    <tr><td><input type=checkbox name='active_rt[literal][[end-literal][rt_id][literal]][end-literal]' [select ACTIVE_REFTYPE art]checked[end-select][not-found][end-not-found]></td><td style="text-align: right;">[rt_id]</td><td><img src="../../common/images/reftype-icons/[rt_id].gif" id="rt[rt_id]" class="rft_icon" onclick="upload_icon([rt_id]);"><a href="?rt_id=[rt_id]&amp;instance=[instance-name!]">[rt_name]</a></td></tr>
    [end-foreach]
    [not-found][end-not-found]
   </table>
