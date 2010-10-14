@@ -237,7 +237,8 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 			<a class=toolbar-large-icon-link-normal href=" " title="Empty records from the collection" onclick='top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/collection.php?clear", top.HEURIST.search.addRemoveCollectionCB); document.getElementById("q").focus(); return false;'>clear</a>
 			<span class="toolboxheading">ADMIN</span>
 				<span class=admin-only>
-				<a href="#" onClick="top.HEURIST.search.fixDuplicates(); return false;" title="Select one or more records, then click to fix duplicates">dupes</a>
+				<a href="#" onClick="top.HEURIST.search.fixDuplicates(); return false;" title="Select one or more records, then click to fix duplicates">merge dupes</a>
+				<a href="#" onClick="top.HEURIST.search.collectDuplicates(); return false;" title="Click to identify possible duplicates in the current query and create collections for each set">collect dupes</a>
 				<a href="#" onClick="top.HEURIST.search.setWorkgroupPopup(); return false;" title="Select one or more records, then click to set workgroup ownership and visibility">workgroup / visibility</a>
 			</span>
 		</div>

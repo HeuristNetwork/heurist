@@ -1870,6 +1870,17 @@ top.HEURIST.search = {
 		}
 	},
 
+	collectDuplicates: function() {
+		var p = window.HEURIST.parameters;
+		var args = [];
+		if (p['ver']) args.push('ver='+p['ver']);
+		if (p['w']) args.push('w='+p['w']);
+		if (p['stype']) args.push('stype='+p['stype']);
+		if (p['q']) args.push('q='+escape(p['q']));
+		var query_string = args.join('&');
+		window.location.href = top.HEURIST.basePath+"admin/verification/collect_dupes.php?"+ query_string + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "");
+	},
+
 	setupSearchPage: function() {
 		top.HEURIST.registerEvent(window, "contentloaded", top.HEURIST.search.renderSearchPage);
 		top.HEURIST.registerEvent(window, "resize", top.HEURIST.search.trimAllLinkTexts);
@@ -1887,13 +1898,13 @@ top.HEURIST.search = {
 	},
 
 	buildPublishLinks: function() {
-        var p = window.HEURIST.parameters;
+		var p = window.HEURIST.parameters;
 		var args = [];
 		if (p['ver']) args.push('ver='+p['ver']);
 		if (p['w']) args.push('w='+p['w']);
 		if (p['stype']) args.push('stype='+p['stype']);
 		if (p['q']) args.push('q='+escape(p['q']));
-        var query_string = args.join('&');
+		var query_string = args.join('&');
 
 //		if (top.HEURIST.instance.name === "") {
 			var im_container = document.getElementById("publish-image-placeholder");

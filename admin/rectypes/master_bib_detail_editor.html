@@ -65,7 +65,7 @@
 
 	function finish_edit_reftype_constraints() {
 		close_popup_frame();
-		document.location.replace('master_bib_detail_editor.php');
+		document.location.replace('../master_bib_detail_editor.php');//note: called in the context of the popup
 	}
 
 	function edit_constrain_reftype(rdt_id) {
@@ -76,7 +76,7 @@
 
 	function finish_edit_constrain_reftype() {
 		close_popup_frame();
-		document.location.replace('master_bib_detail_editor.php');
+		document.location.replace('../master_bib_detail_editor.php'); //note: called in the context of the popup
 	}
 
 	function popup_frame(position, location, finish_fn, keepRelPos) {

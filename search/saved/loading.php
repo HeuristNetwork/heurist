@@ -34,7 +34,7 @@ $memcache = null;
 
 mysql_connection_select(DATABASE);
 
-function loadSearch($args, $bare = false)  {
+function loadSearch($args, $bare = false, $onlyIDs = false)  {
 	/*
 	 * Three basic steps are involved here:
 	 *
@@ -70,7 +70,8 @@ function loadSearch($args, $bare = false)  {
 	}else{
 		$limit = 100;
 	}
-	$limit = min($limit, 1000);
+	if ($limit < 0 ) unset($limit);
+	if (@$limit) $limit = min($limit, 1000);
 
 	if (array_key_exists("o", $args)) {
 		$offset = intval(@$args["o"]);
@@ -80,22 +81,31 @@ function loadSearch($args, $bare = false)  {
 	}
 
 	$query = REQUEST_to_query("select SQL_CALC_FOUND_ROWS rec_id ", $searchType, $args)
-								. " limit $limit" . (@$offset? " offset $offset " : "");
+								. (@$limit? " limit $limit" : "") . (@$offset? " offset $offset " : "");
 	$res = mysql_query($query);
 
 	$fres = mysql_query('select found_rows()');
 	$resultCount = mysql_fetch_row($fres); $resultCount = $resultCount[0];
 
-	$recs = array();
-	while ($row = mysql_fetch_assoc($res)) {
-		$record = loadRecord($row["rec_id"], $fresh, $bare);
-		if (array_key_exists("error", $record)) {
-			return array("error" => $record["error"]);
+	if ($onlyIDs) {
+		$row = mysql_fetch_assoc($res);
+		$ids = "" . ($row["rec_id"] ? $row["rec_id"]:"");
+		while ($row = mysql_fetch_assoc($res)) {
+			$ids .= ($row["rec_id"] ? ",".$row["rec_id"]:"");
 		}
-		array_push($recs, $record);
-	}
+		return array("resultCount" => $resultCount, "recordCount" => count(explode(",",$ids)), "recIDs" => $ids);
+	}else{
+		$recs = array();
+		while ($row = mysql_fetch_assoc($res)) {
+			$record = loadRecord($row["rec_id"], $fresh, $bare);
+			if (array_key_exists("error", $record)) {
+				return array("error" => $record["error"]);
+			}
+			array_push($recs, $record);
+		}
 
-	return array("resultCount" => $resultCount, "recordCount" => count($recs), "records" => $recs);
+		return array("resultCount" => $resultCount, "recordCount" => count($recs), "records" => $recs);
+	}
 }
 
 
