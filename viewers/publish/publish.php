@@ -349,7 +349,7 @@
 					</td>
 					<td width="50px"><span style="padding-left:10px; color:#990000; " id="loading-msg">loading...</span><div class="breaker"></div>
 					</td>
-					<td valign="top"><iframe id="frame-rowcount" name="frame-rowcount" scrolling="no" width="120px;" height="16px;" frameborder="0" style="margin-left: 10px; overflow:hidden;" src="<?='/cocoon'.INSTALL_DIR.'/'. $_REQUEST['pub_id'] ?>/rowcount.xsl"></iframe>
+					<td valign="top"><iframe id="frame-rowcount" name="frame-rowcount" scrolling="no" width="120px;" height="16px;" frameborder="0" style="margin-left: 10px; overflow:hidden;" src="<?='/cocoon'.INSTALL_DIR.'/publish/main/'. $_REQUEST['pub_id'] ?>/rowcount.xsl"></iframe>
 					</td>
 				</tr>
 			</table>
