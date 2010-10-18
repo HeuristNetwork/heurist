@@ -1679,6 +1679,7 @@ top.HEURIST.search = {
 			}
 		}
 		document.getElementById("collection-label").innerHTML = "Collected: " + top.HEURIST.search.collectCount;
+		document.getElementById("collection-info").innerHTML = "<a href='?q=_COLLECTED_&amp;label=Collected'>Collected: " + top.HEURIST.search.collectCount + "</a>";
 	},
 
 	addRemoveCollectionCB: function(results) {
@@ -1920,9 +1921,13 @@ top.HEURIST.search = {
 				}
 				return false;
 			}
-			a.appendChild(document.createTextNode("publish"));
+			icon = document.createElement("img");
+			icon.src = top.HEURIST.basePath + "common/images/publish.png"
+			a.appendChild(icon);
+			
+			//a.appendChild(document.createTextNode("publish"));
 			im_container.appendChild(a);
-			im_container.appendChild(document.createTextNode(" | "));
+			//im_container.appendChild(document.createTextNode(" | "));
 //		}
 
 	},
@@ -1978,6 +1983,35 @@ top.HEURIST.search = {
 		}, 2000);
 	},
 
+	printResultRow: function() {
+		var content = document.getElementById("result-rows");
+		var pri = document.getElementById("printingFrame").contentWindow;
+		var GlobalcssLink = document.createElement("link") 
+		GlobalcssLink.href = top.HEURIST.basePath+"common/css/global.css"; 
+		GlobalcssLink .rel = "stylesheet"; 
+		GlobalcssLink .type = "text/css";
+		var SearchcssLink = document.createElement("link") 
+		SearchcssLink.href = top.HEURIST.basePath+"common/css/search.css"; 
+		SearchcssLink .rel = "stylesheet"; 
+		SearchcssLink .type = "text/css";
+		var PrintcssLink = document.createElement("link") 
+		PrintcssLink.href = top.HEURIST.basePath+"common/css/print.css"; 
+		PrintcssLink .rel = "stylesheet"; 
+		PrintcssLink .type = "text/css"; 
+		PrintcssLink.media = "print";
+
+
+		
+		pri.document.open();
+		pri.document.write(content.innerHTML);
+		pri.document.body.appendChild(GlobalcssLink);
+		pri.document.body.appendChild(SearchcssLink);
+		pri.document.body.appendChild(PrintcssLink);
+		pri.document.close();
+		pri.focus();
+		pri.print();		
+	},
+	
 	renderSearchPage: function() {
 		top.HEURIST.search.fillInSavedSearches();
 		top.HEURIST.search.fillInKeywordSearches();

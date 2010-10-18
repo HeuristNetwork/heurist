@@ -1,4 +1,4 @@
-#logo {top:0; left:0;}    
+
 #quicklinks {right:50px;}
 #sidebar, #page {top:140px;bottom:20px;}
 #page {background-color:#ECF1FB  !important; left:200px; bottom: 80px; min-height: 310px;}
@@ -29,6 +29,7 @@
 	padding: 2px 0;
 }
 #sidebar{
+	background:none repeat scroll 0 0 transparent;
 	border:medium none;
 	left:10px;
 	padding-top:26px;
