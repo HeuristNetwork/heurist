@@ -77,6 +77,10 @@ a:hover {
 	width: 250px;
 	color: #666;
 	font-size:3ex;
+	clear:both;
+	position:absolute;
+	right:0;
+	top:20px;
 }
 #quicklink-cell a {
 	color: #7D9AAA;
@@ -460,8 +464,9 @@ body, .darkBG {
 	background-repeat:repeat;
 }
 #sidebar, #footnotes, .mediumBG {
-	background-image:url("../images/backgrounds/medium_bg.png") !important;
-	background-repeat:repeat;
+	/*background-image:url("../images/backgrounds/medium_bg.png") !important;
+	background-repeat:repeat;*/
+	background-color:#DBDFE6;
 }
 #page, .lightBG {
 	background-image:none !important;
@@ -590,12 +595,23 @@ body {
 }
 #logo, #home-link {
 	position: absolute;
-	max-width:300px;
 	height:50px;
 	top:5px;
 	left:10px;
 }
-#logo {width:180px;}
+#home-link {
+	background-color:#F2F2F2;
+	background-image:url("../images/backgrounds/banner_bg.png");
+	background-position:center bottom;
+	background-repeat:repeat-x;
+	height:56px;
+	left:0;
+	position:absolute;
+	top:0;
+	width:100%;
+	border-bottom: 1px solid #999999;
+	}
+#logo {width:180px;left:15px;top:5px;}
 #version { position: absolute; left: 150px; top: 36px; color: white; font-size: 10px; }
 #quicklinks-cell {
 	color:#666666;
@@ -607,7 +623,7 @@ body {
 	top:0;
 	right:5px;
 }
-#message {color:#FFF;width:auto;position:absolute;top:15px;left:295px;height: 30px;padding: 10px;display: table-cell;}
+#message {color:#FFF;width:auto;position:absolute;top:15px;left:295px;height: 30px;padding: 10px;display: table-cell;display: none;}
 
 img {border: 0;}
 .banner {
@@ -666,10 +682,10 @@ img a:link {border: none;}
 #home-link a:hover {text-decoration:none;text-shadow:0 0px 0px rgba(0, 0, 0, 0.5);}
 #message, #message a {font-size:21px;font-weight: bold;color: #FFFF98;text-shadow: 1px 1px 3px RGBA(0, 0, 0, 0.5);}
 #message a {color: #DDFFFF;}
-#instance-name {font-size:14px;font-weight:bold;color: #FFF;text-shadow: 1px 1px 3px RGBA(0, 0, 0, 0.5);text-transform: uppercase;font-style: italic;left:125px;position:absolute;top:45px;}
+#instance-name {font-size:14px;font-weight:bold;color: #FFF;text-shadow: 1px 1px 3px RGBA(0, 0, 0, 0.5);text-transform: uppercase;font-style: italic;left:50px;position:absolute;top:39px;}
 .banner A, .banner A:hover, .banner input {background-position:2px 5px;background-repeat:no-repeat;border-right:1px solid #D6D6D6;display:inline-block;font-size:10px;font-weight:bold;height:19px;padding:6px 13px 0 0;text-decoration:none;}
 .banner A:hover {background-color: RGBA(150, 150, 150, 0.1);}
-#version { color:#909090;font-size:10px;font-style:normal;font-weight:bold;height:11px;left:200px;line-height:10px;padding:0 3px;position:absolute;top:23px; }
+#version { color:#909090;font-size:10px;font-style:normal;font-weight:bold;height:11px;left:155px;line-height:10px;padding:0 3px;position:absolute;top:23px; }
 #quicklinks {z-index:20;position:absolute;right:0;}
 /****** search and button styling from search page *****/
 #q, #toolbar select, #query-input {
@@ -741,10 +757,10 @@ body.w-all #all-records-button, body.w-bookmark #my-records-button {
 	background-image:url(../images/heading_saved_search.png);
 	background-position:left top;
 	background-repeat:no-repeat;
-	border-bottom-width: 1px;
+/*	border-bottom-width: 1px;
 	border-bottom-style: solid;
 	border-bottom-color: #BEC8D6;
-	border-top:1px solid #FFF;
+	border-top:1px solid #FFF;*/
 }
 #my-records-saved-searches.hide, #all-records-saved-searches.hide, #workgroup-saved-searches.hide, .relType.hide {
 	background-image:url(../images/heading_saved_search-hidden.png);
