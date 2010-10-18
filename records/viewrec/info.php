@@ -97,7 +97,7 @@ function add_sid() {
 
   </script>
  </head>
- <body onload="top.HEURIST.search.hideLoading(); top.HEURIST.search.infoHeight()" <?php if (! is_logged_in()) { print 'class=not-logged-in'; } else if ($noclutter) { print 'class=noclutter'; } ?> >
+ <body onload="if (top.HEURIST  &&  top.HEURIST.search) {top.HEURIST.search.hideLoading(); top.HEURIST.search.infoHeight();}" <?php if (! is_logged_in()) { print 'class=not-logged-in'; } else if ($noclutter) { print 'class=noclutter'; } ?> >
 
 <?php
 // get a list of workgroups the user belongs to.
