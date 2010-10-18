@@ -9,7 +9,6 @@
  Mofified further for events archive 12/12/2008 by Ian
 
   -->
-  <xsl:param name="hBase"/>
 
  <xsl:include href="helpers/creator.xsl"/>
 
@@ -18,10 +17,8 @@
       otherwise it will be ommited-->
     <!-- begin including code -->
     <xsl:comment>
-      <!-- name (desc.) that will appear in dropdown list -->
-      [name]DIU Events Archive 4[/name]
-      <!-- match the name of the stylesheet-->
-      [output]events_archive[/output]
+      <!-- name (desc.) that will appear in dropdown list -->[name]DIU Events Archive[/name]
+      <!-- match the name of the stylesheet-->[output]pub_diu-events-archive[/output]
     </xsl:comment>
     <!-- end including code -->
 
@@ -40,41 +37,45 @@
 
       <body>
         <xsl:attribute name="pub_id">
-          <xsl:value-of select="/export/@pub_id"/>
+          <xsl:value-of select="/hml/query[@pub_id]"/>
         </xsl:attribute>
-          <xsl:apply-templates select="/export/references/reference"></xsl:apply-templates>
+          <xsl:apply-templates select="/hml/records/record"></xsl:apply-templates>
       </body>
 
     </html>
 
   </xsl:template>
   <!-- main template -->
-  <xsl:template match="/export/references/reference">
+  <xsl:template match="/hml/records/record">
 
       <!-- HEADER  -->
-      <table style="margin-bottom: 20px; ">
-          <tr>
-            <td>
+			<!-- we don't need the edit pencil for a lsit liek this
               <a target="_new"
-                href="{$hBase}records/editrec/edit.html?bib_id={id}">
+                href="http://heuristscholar.org/heurist/edit?bib_id={id}">
                 <img style="border: none;"
-                  src="{$hBase}common/images/edit_pencil_16x16.gif"/>
+                  src="/heurist/img/edit_pencil_16x16.gif"/>
               </a>
-              </td>
-            <td >
-              <b>
-                <xsl:value-of select="title"/>
-              </b>
-            </td>
-          </tr>
+            -->
 
+        <p style="margin-bottom: 5px; ">
+            <!--output the author(s)-->
+		    <xsl:for-each select="detail">
+		        <xsl:if test="self::node()[@id= 249]"> <!--  249 = person reference -->
+		              <!--revisit all-->
+		                <xsl:value-of select="record/title"/>
+		                <xsl:text> </xsl:text>
+		        </xsl:if>
+		        </xsl:for-each>
+             <!--output the seminar title-->
+	            <i><b>
+	              <xsl:value-of select="title"/>
+	            </b></i>
+		</p>
 
-          <xsl:if test="url != ''">
-            <tr>
-              <td>
-              </td>
-              <td>
-                <xsl:text> Files for this presentation (SydneyeScholarship repository): </xsl:text>
+        <p style="margin-bottom: 5px; ">
+
+  		  <xsl:if test="url != ''">
+               <xsl:text> Files in Sydney eScholarship repository: </xsl:text>
                 <a href="{url}">
                   <xsl:choose>
                     <xsl:when test="string-length(url) &gt; 50">
@@ -84,28 +85,21 @@
                     </xsl:otherwise>
                   </xsl:choose>
                 </a>
-              </td>
-            </tr>
           </xsl:if>
+		</p>
 
+       <p style="margin-bottom: 5px; ">
         <!-- DETAIL LISTING -->
-
         <!--put what is being grouped in a variable-->
         <xsl:variable name="details" select="detail"/>
         <!--walk through the variable-->
-
-      <xsl:for-each select="detail">
-        <xsl:if test="self::node()[@id= 303 or @id=191]">
-            <tr>
-              <td>
-              </td>
+        <xsl:for-each select="detail">
+          <xsl:if test="self::node()[@id= 303 or @id=191]">
               <!--revisit all-->
-              <td>
                       <xsl:value-of select="."/>
-              </td>
-            </tr>
-        </xsl:if>
+          </xsl:if>
         </xsl:for-each>
+	    </p>
 
 <!-- Remove Woot text which breaks up the list with ltos of inconsistently formatted text
 
@@ -120,9 +114,11 @@
        </tr>
         </xsl:if>
 -->
-      </table>
     <!--/xsl:element-->
 
+  <p style="margin-bottom: 5px; ">
+  ----
+  </p>
 
   </xsl:template>
 
@@ -131,9 +127,9 @@
     <xsl:param name="id"></xsl:param>
     <xsl:if test="self::node()[@id =$id]">
       <xsl:element name="a">
-        <xsl:attribute name="href"><xsl:value-of select="self::node()[@id =$id]/file_fetch_url"/></xsl:attribute>
+        <xsl:attribute name="href"><xsl:value-of select="self::node()[@id =$id]/url"/></xsl:attribute>
         <xsl:element name="img">
-          <xsl:attribute name="src"><xsl:value-of select="self::node()[@id =$id]/file_thumb_url"/></xsl:attribute>
+          <xsl:attribute name="src"><xsl:value-of select="self::node()[@id =$id]/thumbUrl"/></xsl:attribute>
           <xsl:attribute name="border">0</xsl:attribute>
         </xsl:element>
       </xsl:element>
@@ -143,9 +139,9 @@
     <xsl:param name="id"></xsl:param>
     <xsl:if test="self::node()[@id =$id]">
       <xsl:element name="a">
-        <xsl:attribute name="href"><xsl:value-of select="self::node()[@id =$id]/file_fetch_url"/></xsl:attribute>
-        <xsl:value-of select="file_orig_name"/>
-      </xsl:element>  [<xsl:value-of select="file_size"/>]
+        <xsl:attribute name="href"><xsl:value-of select="self::node()[@id =$id]/url"/></xsl:attribute>
+        <xsl:value-of select="origName"/>
+      </xsl:element>  [<xsl:value-of select="size"/>]
     </xsl:if>
   </xsl:template>
   <xsl:template name="start-date" match="detail[@id=177]">
@@ -162,7 +158,7 @@
     </xsl:element>
   </xsl:template>
 
-  <!--
+  <!-- Woot not being used in this template as it carries ugly formatting
   <xsl:template name="woot_content">
     <xsl:if test="woot">
       <xsl:copy-of select="woot"/>

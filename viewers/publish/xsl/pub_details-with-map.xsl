@@ -1,18 +1,26 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+  <xsl:param name="hBase"/>
   <!--
  this style renders a variation of  standard html (with map)
  author  Maria Shvedova
  last updated 10/09/2007 ms
   -->
-  <xsl:param name="hBase"/>
   <xsl:include href="helpers/creator.xsl"/>
   <xsl:template match="/">
+<!--
+
+     THIS STYLESHEET HAS DISPLAY OF MAP (WHICH DOESN'T SEEM TO WORK)
+     BUT IS OTEHRWISE MORE OR LESS THE SDAME AS THE STANDARD FULL DETAILS FORMAT
+-->
+
+
+
     <!-- use the following bit of code to include the stylesheet to display it in Heurist publishing wizard
       otherwise it will be ommited-->
     <!-- begin including code -->
     <xsl:comment>
-      <!-- name (desc.) that will appear in dropdown list --> [name]Academic (compact)[/name]
-      <!-- match the name of the stylesheet--> [output]academic[/output] </xsl:comment>
+      <!-- name (desc.) that will appear in dropdown list --> [name]Revised Full Details with map[/name]
+      <!-- match the name of the stylesheet--> [output]pub_details-with-map[/output] </xsl:comment>
     <!-- end including code -->
 
     <html>
@@ -26,15 +34,15 @@
       </head>
       <body>
         <xsl:attribute name="pub_id">
-          <xsl:value-of select="/export/@pub_id"/>
+          <xsl:value-of select="/hml/query[@pub_id]"/>
         </xsl:attribute>
-        <xsl:apply-templates select="/export/references/reference"/>
+        <xsl:apply-templates select="/hml/records/record"/>
       </body>
     </html>
 
   </xsl:template>
   <!-- main template -->
-  <xsl:template match="/export/references/reference">
+  <xsl:template match="/hml/records/record">
 
     <!-- HEADER  -->
     <table class="record-table">
@@ -43,7 +51,7 @@
           <a target="_new"
             href="{$hBase}records/editrec/edit.html?bib_id={id}">
             <img style="border: none;"
-              src="{$hBase}common/images/edit_pencil_16x16.gif" align="absmiddle"/>
+               src="{$hBase}common/images/edit_pencil_16x16.gif" align="absmiddle"/>
           </a> <b><xsl:value-of select="id"/>: &#160; <xsl:value-of select="title"/>
           </b>
         </td>
@@ -54,7 +62,7 @@
           Reference type:
           </span>
 
-          <xsl:value-of select="reftype"/>
+          <xsl:value-of select="type"/>
 
       <xsl:if test="modified !=''">
         &#160;
@@ -92,7 +100,7 @@
       <xsl:for-each select="detail">
         <!--act on the first in document order-->
         <xsl:if test="generate-id(.)=
-              generate-id($details[@id=current()/@id][1])">
+              generate-id($details[@id=current()/@id][1]) and self::node()[@id!= 249]">
           <tr>
             <td class="reftype" width="150">
               <xsl:choose>
@@ -191,13 +199,13 @@
         </xsl:if>
       </xsl:for-each>
       <!-- POINTER LISTING -->
-      <xsl:variable name="pointer" select="pointer"/>
+      <xsl:variable name="pointer" select="detail"/>
       <!--walk through the variable-->
-      <xsl:for-each select="pointer">
+      <xsl:for-each select="detail">
 
         <!--act on the first in document order-->
         <xsl:if test="generate-id(.)=
-              generate-id($pointer[@id=current()/@id][1])">
+              generate-id($pointer[@id=current()/@id][1]) and self::node()[@id= 249]">
           <tr>
             <td class="reftype" width="150">
               <xsl:choose>
@@ -217,7 +225,7 @@
                     <xsl:apply-templates select="." mode="creator"/>
                   </xsl:when>
                   <xsl:otherwise>
-                    <xsl:value-of select="title"/>
+                    <xsl:value-of select="record/title"/>
                   </xsl:otherwise>
                 </xsl:choose>
                 <br/>
@@ -227,9 +235,9 @@
         </xsl:if>
       </xsl:for-each>
       <!-- RELATED LISTING -->
-      <xsl:variable name="relation" select="related"/>
+      <xsl:variable name="relation" select="relationships"/>
       <!--walk through the variable-->
-      <xsl:for-each select="related">
+      <xsl:for-each select="relationships">
 
         <!--act on the first in document order-->
         <xsl:if test="generate-id(.)=
@@ -242,7 +250,7 @@
               <!--revisit all-->
               <xsl:for-each select="$relation[@type=current()/@type]">
 
-                <xsl:value-of select="title"/>
+                <xsl:value-of select="record/title"/>
                 <br/>
               </xsl:for-each>
             </td>
@@ -268,11 +276,11 @@
     <xsl:if test="self::node()[@id =$id]">
       <xsl:element name="a">
         <xsl:attribute name="href">
-          <xsl:value-of select="self::node()[@id =$id]/file_fetch_url"/>
+          <xsl:value-of select="self::node()[@id =$id]/file/url"/>
         </xsl:attribute>
         <xsl:element name="img">
           <xsl:attribute name="src">
-            <xsl:value-of select="self::node()[@id =$id]/file_thumb_url"/>
+            <xsl:value-of select="self::node()[@id =$id]/file/thumbURL"/>
           </xsl:attribute>
           <xsl:attribute name="border">0</xsl:attribute>
         </xsl:element>
@@ -284,10 +292,10 @@
     <xsl:if test="self::node()[@id =$id]">
       <xsl:element name="a">
         <xsl:attribute name="href">
-          <xsl:value-of select="self::node()[@id =$id]/file_fetch_url"/>
+          <xsl:value-of select="self::node()[@id =$id]/file/url"/>
         </xsl:attribute>
-        <xsl:value-of select="file_orig_name"/>
-      </xsl:element> [<xsl:value-of select="file_size"/>] </xsl:if>
+        <xsl:value-of select="file/origName"/>
+      </xsl:element> [<xsl:value-of select="file/size"/>] </xsl:if>
   </xsl:template>
   <xsl:template name="start-date" match="detail[@id=177]">
     <xsl:if test="self::node()[@id =177]">
@@ -306,7 +314,7 @@
   </xsl:template>
   <xsl:template name="woot_content">
     <xsl:if test="woot">
-      <xsl:copy-of select="woot"/>
+		<xsl:value-of select="woot" disable-output-escaping="yes"/>
     </xsl:if>
   </xsl:template>
 

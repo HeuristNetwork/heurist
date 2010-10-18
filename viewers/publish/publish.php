@@ -129,7 +129,7 @@
 	//style based on wether it's forced or not : default to html
 
 	if (!@$force_style) {
-		$force_style = 'html';
+		$force_style = 'details-full';
 	}
 
 ?>
@@ -333,12 +333,12 @@
 					</select>
 					<input type="hidden" name="op" value="force">
 					<!-- default style -->
-					<input type="hidden" id="force_args" name="force_args" value="html">
+					<input type="hidden" id="force_args" name="force_args" value="details-full">
 					<span style="padding: 5px;"></span><input title="Forces search to be obligatorily processed through the specified style" type="checkbox" name="chk_force" id="chk_force" <?= (@$forced ? 'checked' : '') ?>  onClick="forceSearch();">
 					Lock the output to be displayed in this style
 					<span style="padding: 5px;"><img src="<?= HEURIST_URL_BASE ?>common/images/lb.gif" align="top"><a  href="<?=HEURIST_SITE_PATH?>help/webhelp/index.html?Publish" target="_blank">adding stylesheet</a></span>
 				</form>
-		
+
 							</div>
 		<div class="breaker"></div>
 		<div class="breaker"></div>

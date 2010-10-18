@@ -71,7 +71,7 @@ if ($_REQUEST['pub_id']) {
 			//if no style in args, could be one of the ex-published_searches table searches. or someone deleted style parameter from url. whatever.
 			//in any case lets asign a default html style output to those.
 			if ($style == "") {
-				$style  = "html.xsl";
+				$style  = "pub_details-full.xsl";
 			}
 		}
 
@@ -89,8 +89,8 @@ if ($_REQUEST['pub_id']) {
 
 			if (stylesheet_exists($style)){
 				header('Location: http://'.HEURIST_HOST_NAME.'/cocoon/'.INSTALL_DIR.'/publish/main/'. $_REQUEST['pub_id'] .(!$output ? '': '/'. $output). '/' . $style . $js . (HEURIST_INSTANCE ? '?instance='.HEURIST_INSTANCE: ''));
-			} else if (stylesheet_exists("top_".$style)){	//FIXME: temporary while we decide the final naming
-				header('Location: http://'.HEURIST_HOST_NAME.'/cocoon/'.INSTALL_DIR.'/publish/main/'. $_REQUEST['pub_id'] .(!$output ? '': '/'. $output). '/' . 'top_'.$style . $js . (HEURIST_INSTANCE ? '?instance='.HEURIST_INSTANCE: ''));
+			} else if (stylesheet_exists("pub_".$style)){	//FIXME: temporary while we decide the final naming
+				header('Location: http://'.HEURIST_HOST_NAME.'/cocoon/'.INSTALL_DIR.'/publish/main/'. $_REQUEST['pub_id'] .(!$output ? '': '/'. $output). '/' . 'pub_'.$style . $js . (HEURIST_INSTANCE ? '?instance='.HEURIST_INSTANCE: ''));
 			}else{
 				die ("Stylesheet ( ".$style." ) doesn't exist");
 			}

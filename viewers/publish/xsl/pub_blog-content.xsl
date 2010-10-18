@@ -1,15 +1,15 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+  <xsl:param name="hBase"/>
 
-    <xsl:param name="hBase"/>
     <xsl:template match="/">
         <!-- use the following bit of code to include the stylesheet to display it in Heurist publishing wizard
             otherwise it will be ommited-->
         <!-- begin including code -->
         <xsl:comment>
             <!-- name (desc.) that will appear in dropdown list -->
-            [name]PBwiki[/name]
+            [name]Blog posts as list with content[/name]
             <!-- match the name of the stylesheet-->
-            [output]wiki-simple[/output]
+            [output]pub_blog-content[/output]
         </xsl:comment>
         <!-- end including code -->
 
@@ -26,11 +26,11 @@
             </head>
             <body>
                 <xsl:attribute name="pub_id">
-                <xsl:value-of select="/export/@pub_id"/>
+                <xsl:value-of select="/hml/@pub_id"/>
                 </xsl:attribute>
                 <table border="0" >
 
-                    <xsl:apply-templates select="export/references/reference"/>
+                    <xsl:apply-templates select="hml/records/record"/>
 
                 </table>
             </body>
@@ -41,7 +41,11 @@
      <xsl:value-of select="title"/>
     </xsl:template>
 
-    <xsl:template match="reference">
+	<xsl:template name="print_woot">
+		<xsl:value-of select="woot" disable-output-escaping="yes"/>
+	</xsl:template>
+
+    <xsl:template match="record">
 
         <tr><td style="padding-bottom: 8px;">
                 <xsl:if test="detail[@id='160']">
@@ -53,7 +57,7 @@
                                     <xsl:attribute name="href"><xsl:value-of select="url"/></xsl:attribute>
                                     <xsl:attribute name="target">_blank</xsl:attribute>
                                     <xsl:call-template name="print_consolidated_title"></xsl:call-template>
-                                </xsl:element>
+                                     </xsl:element>
                             </xsl:when>
                             <xsl:otherwise>
                                 <xsl:call-template name="print_consolidated_title"></xsl:call-template>
@@ -63,7 +67,10 @@
                     <br></br>
 
                     <a style=" font-family:Verdana,Helvetica,Arial,sans-serif; font-size:10px;"  target="_new" href="wiki/{id}">[view details]</a>&#160;<a style=" font-family:Verdana,Helvetica,Arial,sans-serif; font-size:10px;"  target="_new"
-                        href="{$hBase}records/editrec/edit.html?bib_id={id}">[edit]</a>
+                      href="{$hBase}records/editrec/edit.html?bib_id={id}">[edit]</a>
+                    <p>
+                    <xsl:call-template name="print_woot"></xsl:call-template>
+                    </p>
 
                 </xsl:if>
                 </td></tr>

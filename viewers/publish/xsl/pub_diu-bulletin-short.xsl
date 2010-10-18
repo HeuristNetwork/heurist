@@ -1,10 +1,10 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+  <xsl:param name="hBase"/>
   <!--
  this style renders standard html
  author  Maria Shvedova
  last updated 10/09/2007 ms
   -->
-  <xsl:param name="hBase"/>
   <xsl:include href="helpers/creator.xsl"/>
   <xsl:template match="/">
     <!-- use the following bit of code to include the stylesheet to display it in Heurist publishing wizard
@@ -12,9 +12,9 @@
     <!-- begin including code -->
     <xsl:comment>
       <!-- name (desc.) that will appear in dropdown list -->
-      [name]Bulletin - short[/name]
+      [name]DIU Bulletin - short[/name]
       <!-- match the name of the stylesheet-->
-      [output]bulletin-short[/output]
+      [output]pub_diu-bulletin-short[/output]
     </xsl:comment>
     <!-- end including code -->
 
@@ -32,15 +32,15 @@
       </head>
       <body>
         <xsl:attribute name="pub_id">
-          <xsl:value-of select="/export/@pub_id"/>
+          <xsl:value-of select="/hml/query[@pub_id]"/>
         </xsl:attribute>
-          <xsl:apply-templates select="/export/references/reference"></xsl:apply-templates>
+          <xsl:apply-templates select="/hml/records/record"></xsl:apply-templates>
       </body>
     </html>
 
   </xsl:template>
   <!-- main template -->
-  <xsl:template match="/export/references/reference">
+  <xsl:template match="/hml/records/record">
 
       <!-- HEADER  -->
       <table style="margin-bottom: 20px; ">
@@ -106,9 +106,9 @@
     <xsl:param name="id"></xsl:param>
     <xsl:if test="self::node()[@id =$id]">
       <xsl:element name="a">
-        <xsl:attribute name="href"><xsl:value-of select="self::node()[@id =$id]/file_fetch_url"/></xsl:attribute>
+        <xsl:attribute name="href"><xsl:value-of select="self::node()[@id =$id]/url"/></xsl:attribute>
         <xsl:element name="img">
-          <xsl:attribute name="src"><xsl:value-of select="self::node()[@id =$id]/file_thumb_url"/></xsl:attribute>
+          <xsl:attribute name="src"><xsl:value-of select="self::node()[@id =$id]/thumbURL"/></xsl:attribute>
           <xsl:attribute name="border">0</xsl:attribute>
         </xsl:element>
       </xsl:element>
@@ -118,9 +118,9 @@
     <xsl:param name="id"></xsl:param>
     <xsl:if test="self::node()[@id =$id]">
       <xsl:element name="a">
-        <xsl:attribute name="href"><xsl:value-of select="self::node()[@id =$id]/file_fetch_url"/></xsl:attribute>
-        <xsl:value-of select="file_orig_name"/>
-      </xsl:element>  [<xsl:value-of select="file_size"/>]
+        <xsl:attribute name="href"><xsl:value-of select="self::node()[@id =$id]/url"/></xsl:attribute>
+        <xsl:value-of select="origName"/>
+      </xsl:element>  [<xsl:value-of select="size"/>]
     </xsl:if>
   </xsl:template>
   <xsl:template name="start-date" match="detail[@id=177]">
