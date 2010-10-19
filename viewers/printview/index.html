@@ -130,6 +130,9 @@
 					if (query && query.search("stub=")== -1){
 						query += "&stub=1";
 					}
+					if (query && query.search("woot=")== -1){
+						query += "&woot=1";
+					}
 				}
 			//load xml
 				if (query){
@@ -177,7 +180,7 @@
 					parentDiv.className += " show";
 
 					var xmlRecDepth1 = loadXMLDocFromFile("http://heuristscholar.org"+ top.HEURIST.basePath+
-										"export/xml/hml.php?q=ids:"+recID+"&depth=1"+
+										"export/xml/hml.php?q=ids:"+recID+"&depth=1&woot=1"+
 										(top.HEURIST.instance.name? "&instance=" + top.HEURIST.instance.name:""));
 					if (!xmlRecDepth1) return;
 					if (!relatedRecListXSL) {

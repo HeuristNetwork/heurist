@@ -812,7 +812,7 @@
 
   <xsl:template name="woot_content">
     <xsl:if test="woot">
-		<xsl:value-of select="woot" disable-output-escaping="yes"/>
+		<xsl:copy-of select="woot"/>
     </xsl:if>
   </xsl:template>
 

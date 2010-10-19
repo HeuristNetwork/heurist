@@ -42,7 +42,7 @@
     </xsl:template>
 
 	<xsl:template name="print_woot">
-		<xsl:value-of select="woot" disable-output-escaping="yes"/>
+		<xsl:copy-of select="woot"/>
 	</xsl:template>
 
     <xsl:template match="record">
@@ -66,7 +66,7 @@
                     </b>
                     <br></br>
 
-                    <a style=" font-family:Verdana,Helvetica,Arial,sans-serif; font-size:10px;"  target="_new" href="wiki/{id}">[view details]</a>&#160;<a style=" font-family:Verdana,Helvetica,Arial,sans-serif; font-size:10px;"  target="_new"
+                    <a style=" font-family:Verdana,Helvetica,Arial,sans-serif; font-size:10px;"  target="_new" href="{$hBase}records/viewrec/view.php?bib_id={id}">[view details]</a>&#160;<a style=" font-family:Verdana,Helvetica,Arial,sans-serif; font-size:10px;"  target="_new"
                       href="{$hBase}records/editrec/edit.html?bib_id={id}">[edit]</a>
                     <p>
                     <xsl:call-template name="print_woot"></xsl:call-template>

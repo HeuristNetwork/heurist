@@ -352,11 +352,11 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $o
 		$result = loadWoot(array('title' => 'record:'.$record['rec_id']));
 		if ($result['success']) {
 			openTag('woot', array('title' => 'record:'.$record['rec_id']));
-			openCDATA();
+//			openCDATA();
 			foreach ($result['woot']['chunks'] as $chunk) {
 				echo replaceIllegalChars($chunk['text']) . "\n";
 			}
-			closeCDATA();
+//			closeCDATA();
 			closeTag('woot');
 		}
 	}
