@@ -1,5 +1,5 @@
 /* heurist.css
-* Copyright 2010 Ireneusz GOLKA
+* Copyright 2010 Ireneusz Golka
 * http://heuristscholar.org/
 *
 * Styles for the main Heurist search page.
@@ -22,13 +22,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-body {margin:0}
-#message {display:none}
 #header { height: 57px; }
 #home { left: 20px; top: 49px; font-size: 69%; }
+#logo {top:0; left:0;}
 #wg-title { position: absolute; left: 40px; top: 15px; font-weight: bold; color: white; }
 #title-cell {padding-left: 20px;}
-#add-record {height:23px;margin:0;padding:0;position:absolute;left:15px;top:60px;width:76px;z-index: 1;}
+
 
 input { margin: 0; }
 a { color: #7D9AAA; }
@@ -49,9 +48,9 @@ a { color: #7D9AAA; }
 
 .panel-header img { vertical-align: middle; }
 
-#active-label, .toolboxheading {font-size: 140%;font-weight: bold;margin-left: 0;margin-right: 0;color:#7D9AAA;padding:3px 0 3px 3px;}
-#collection-label {font-weight: bold;margin-left: 0;margin-right: 5px;color:#7D9AAA;padding:3px 0 3px 3px}
-/*#collection-label.show-changed {background-color: lightgrey;}  */
+#active-label, .toolboxheading {font-size: 140%;font-weight: bold;margin-left: 0;margin-right: 0;color:#7D9AAA;text-transform: uppercase;}
+#collection-label {font-weight: bold;margin-left: 0;margin-right: 5px;color:#7D9AAA;text-transform:uppercase;}
+#collection-label.show-changed {background-color: lightgrey;}
 
 .operations a, .operations input, .operations img {vertical-align: middle;}
 .operations, .operations a {text-decoration: none;color: #7D9AAA;}
@@ -243,7 +242,7 @@ div.right_margin_info div.mini-tools:hover{-moz-border-radius:7px 7px 7px 7px;-w
 
 #curated-collections-link {padding-bottom: 5px;margin-bottom: 5px;}
 
-#saved-search-heading {font-weight: bold;color:#7D9AAA; height:13px;}
+#saved-search-heading {font-weight: bold;padding: 5px;height:15px;color:#7D9AAA;padding-top: 6px;padding-right: 5px;padding-bottom: 6px;padding-left: 5px;height: 27px;-moz-border-radius-bottomleft:0;-moz-border-radius-bottomright:0;-moz-border-radius-topleft:10px;-moz-border-radius-topright:10px;-webkit-border-bottom-left-radius:0;-webkit-border-bottom-right-radius:0;-webkit-border-top-left-radius:10px;-webkit-border-top-right-radius:10px;	border-bottom-left-radius:0;border-bottom-right-radius:0;border-top-left-radius:10px;border-top-right-radius:10px;}
 
 #right-panel{-moz-border-radius-bottomleft:10px;-moz-border-radius-bottomright:10px;-moz-border-radius-topleft:0;-moz-border-radius-topright:0;-webkit-border-bottom-left-radius:10px;-webkit-border-bottom-right-radius:10px;-webkit-border-top-left-radius:0;-webkit-border-top-right-radius:0;border-bottom-left-radius:10px;border-bottom-right-radius:10px;border-top-left-radius:0;border-top-right-radius:0;}
 
@@ -258,19 +257,18 @@ nobr#activesaved a { padding-left:0; }
 #activesaved a, nobr.bkmk#activesaved a {padding-left:0;}
 #activesaved .wg-id { display: none; }
 #saved .search-type {color: #6A7C99;font-weight:bold;cursor: pointer;padding-top: 5px;padding-right: 6px;padding-bottom: 4px;padding-left: 18px;background-position: bottom;border: 1px none #999;}
-#my-records-saved-searches, #all-records-saved-searches, #workgroup-saved-searches {padding: 0 0px 10px 0px;background-color: none;background-image:url(../images/heading_saved_search.png);background-position:left top;background-repeat:no-repeat;border/*-bottom-width: 1px;border-bottom-style: solid;border-bottom-color: #BEC8D6;border-top:1px solid #FFFFFF;*/}
+#my-records-saved-searches, #all-records-saved-searches, #workgroup-saved-searches {padding: 0px 0px 10px 0px;background-color: none;background-image:url(../images/heading_saved_search.png);background-position:left top;background-repeat:no-repeat;/*border-bottom-width: 1px;border-bottom-style: solid;border-bottom-color: #BEC8D6;border-top:1px solid #FFFFFF;*/}
 #my-records-saved-searches.hide, #all-records-saved-searches.hide, #workgroup-saved-searches.hide {	background-image:url(../images/heading_saved_search-hidden.png);}
 #curated-collections {/*border-bottom-width: 1px;border-bottom-style: solid;border-bottom-color: #BEC8D6;border-top:1px solid #FFFFFF;*/}
 #curated-collections div {padding-top: 5px;padding-right: 6px;padding-bottom: 14px;padding-left: 18px;}
 #curated-collections div a {text-decoration: none;color: #6A7C99;font-weight:bold;}
-#curated-collections div a:hover {text-decoration: none;color: #6A7C99;font-weight:bold;}
-#saved .content { padding-bottom: 6px; 	/*background-image:url(../images/backgrounds/light_bg.png);*/}
+#saved .content { padding-bottom: 6px; 	/*background-image:url(../images/backgrounds/light_bg.png)*/;}
 #saved div.hide .content { display: none; }
 #i_action { width: 1px; height: 1px; left: 0; top: 0; position: absolute; visibility: hidden; }
 #password { display: none; font-size: 85%; }
 #password div { padding: 2px; }
 #footer {height: 20px;}
-#logged-in{color: #444;font-size:11px; float:right; padding: 6px;height:10px; display:block}
+#logged-in{color: #444;font-size:11px; float:right; padding: 6px;height:10px; display:block; position:relative;right:10px;}
 
 /* legend box */
 #legend-link {}
@@ -308,8 +306,8 @@ td.not-query-collected .collected-hidden {display: "";}
 
 img.saved-search-edit {cursor: pointer;padding-left: 3px;float:right;}
 .saved-search-subheading {font-weight: bold;margin-top: 0px;padding: 3px 0 0 30px;color: #6A7C99;/*border-top: 1px dotted #A4B4CB*/;cursor: pointer;background-color: none;background-image: url(../images/sub_heading_saved_search.png);background-position: 13px -5px;background-repeat: no-repeat;}
-div.hide .saved-search-subheading {background-image:url("../images/sub_heading_saved_search-hidden.png");/*border-top:1px dotted #BEC8D6*/;margin-top:0;padding-top:2px;}
-.saved-search-subsubheading {padding: 1px 0px 1px 24px;color: #6A7C99;/*border-top:1px solid #FFFFFF;*/}
+div.hide .saved-search-subheading {background-image:url("../images/sub_heading_saved_search-hidden.png");/*border-top:1px dotted #BEC8D6;*/margin-top:0;padding-top:2px;}
+.saved-search-subsubheading {padding: 1px 0px 1px 24px;color: #6A7C99;/*border-top:1px solid #FFFFFF*/;}
 .saved-search-subsubheading a { text-decoration: none; color: #515151;}
 .saved-search-subsubheading a:hover { text-decoration: underline;}
 
@@ -323,20 +321,22 @@ div.hide .saved-search-subheading {background-image:url("../images/sub_heading_s
 
 /**** global overrides ****/
 
-#sidebar, #page {bottom:20px;}
-#sidebar, #page, .banner {-moz-border-radius:0px;-webkit-border-radius:0px;border-radius:0px;}
-#sidebar {width:200px; top:56px; left:0; border-left:none}
-#page {left:201px;top:0; right: 0;border-top:none; border-right:none; border-left:none}
+#sidebar, #page {bottom:20px;top:55px}
 
-#page-inner, #page-right {top:57px}
-#page-right {right:0; border-left: 1px solid #A4B4CB;left:50%;position:absolute;overflow: hidden;background}
-#page-inner {right:50%;overflow: hidden;}
-#sidebar-inner {top:30px;}
-#footer {position:absolute;left:200px;right:0;bottom:0px;height:20px;background}
-#search {display:block;height:29px;padding:0;position:relative;top:6px;left:-5px;width:100%}
+#sidebar {width:200px;}
+#page {left:220px;}
+
+#page-right {right:0; border-left: 1px solid #A4B4CB;bottom:10px;left:50%;position:absolute;top:40px;overflow: hidden;background}
+
+#page-inner {right:50%;top:40px;overflow: hidden;}
+#sidebar-inner {top:40px;}
+#footer {position:absolute;left:200px;right:0;bottom:0px;height:20px;}
+#search {display:block;height:29px;padding:0;position:relative;top:0;left:2px;width:100%}
 /* #collection-commands {position:absolute;top:-20px;}  */
 .banner a, .banner a:hover, .banner input {border:medium none;height:auto;padding:0;}
 #add-record-link img{margin:-6px -4px;padding:0;}
+#add-record-link{margin:-6px -4px;padding:0;}
+#add-record {height:23px;margin:0;padding:0;position:absolute;left:25px;top:64px;width:76px;z-index: 1;}
 .shadow {-webkit-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);-moz-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);}
 #search-result-commands{position:relative;background-color: RGBA(0,0,0,0.1);display: table;width:100%}
 #search-result-commands div {display:table-cell; padding: 0 5px; text-align: left;vertical-align: middle}
@@ -353,12 +353,12 @@ div.hide .saved-search-subheading {background-image:url("../images/sub_heading_s
 #applications_window {bottom:0;display:block;left:0;position:absolute;right:0;top:0px;}
 
 .tableCell {border-right:none;display:table-cell;vertical-align:middle;padding:0 5px; white-space: nowrap;}
-.banner {height:40px;padding:8px 0;overflow:hidden}
-#result-container {bottom:0;left:0;overflow:auto;position:absolute;right:0;top:30px;}
+.banner {height:23px;padding:8px 0;overflow:hidden}
+#result-container {bottom:0;left:0;overflow:auto;position:absolute;right:0;top:31px;}
 
 .openTools {left:8px;display: table-cell;position: relative;padding: 0 5px;background-repeat: no-repeat; width:32px}
 #search-result-commands div.toolboxcolumn {display: inline-block; padding:5px; width:150px;}
-#search-result-commands div.toolboxcolumn.right {border-left:1px solid #888; margin-left: -1px;}
+#search-result-commands div.toolboxcolumn.right {border-left:1px solid #888; margin-left:-1px;}
 #search-result-commands div.toolboxcolumn.left {float:left; border-right:1px solid #888888;}
 #search-result-commands div#toolbox {padding:0}
 
@@ -374,7 +374,6 @@ input[type=checkbox] {display: none;}
 #select-all-checkbox {margin: 3px 10px 0px 21px;vertical-align:middle;display: inline;}
 .banner a:hover {background: none;text-decoration: underline;}
 .passwordIcon {cursor:pointer;display:block;left:-38px;position:absolute;top:9px;}
-#page-inner, #sidebar-inner, #results-div, #page-right {bottom:0}
 #pageNavCount {right:50%; text-align: right;}
 #quicklink-cell {clear:both}
 

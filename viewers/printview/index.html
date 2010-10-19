@@ -1,6 +1,7 @@
 <html>
 	<head>
 		<link rel="stylesheet" href="../../common/css/printview.css"/>
+		<link rel="stylesheet" href="../../common/css/printview_print.css" media="print"/>
 		<script src="../../external/jquery/jquery.js"></script>
 		<script src="load_print_formats.php"></script>
 		<script>
@@ -410,6 +411,7 @@
 		<div class="banner">
 		<select id="style_select" style="width: 180px;" onChange="displayResult(this.options[this.selectedIndex].value);">
 		</select>
+		<A HREF="javascript:window.print()"><div id="printingLink"></div></a>
 		</div>
 		<div id="displayResult" ><div id=loading></div></div>
 	</body>

@@ -21,7 +21,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-body {padding:0;margin:20px 0 0 0;}
+body {padding:0;overflow: hidden;}
 
 *|* {font-family: Helvetica, Arial, Verdana !important;font-size: 11px;}
 
@@ -35,7 +35,7 @@ A:visited {color:#6A7C99;text-decoration: none;}
 A:active {color:#6A7C99;text-decoration: none;}
 A:hover {text-decoration: underline;}
 img a:link {border: none;}
-.banner {background-color:#FFF;border-collapse:collapse;color:#999999;height:12px;left:-3px;overflow:visible;padding:10px;position:fixed;right:0;top:-7px;z-index:1;}
+.banner {background-color:#FFF;border-collapse:collapse;color:#999999;height:12px;left:-3px;overflow:visible;padding:10px;position:fixed;right:0;top:-3px;z-index:1;}
 .banner A, .banner A:hover, .banner input {text-decoration:none;color:#6A7C99 !important;}
 .banner A:hover{text-decoration:underline;color:#6A7C99 !important;}
 form {line-height:18px;margin: 3px;} */
@@ -91,11 +91,13 @@ width:16px;}
 .thumbnail {float:right;margin-right: 10px;margin: 0 0 0 10px;}
 div.thumbnail img{width:80px;border: 2px solid #FFF;-moz-box-shadow:0 2px 4px #BBB;-webkit-box-shadow:0 2px 4px #BBB;box-shadow:0 2px 4px #BBB;}
 img {border:0 none;vertical-align:middle;}
-#recID {float:right}
-.HeaderRow {overflow:hidden; position: relative;padding:10px 0;display: block;}
+#recID {float:left}
+.headerRow #recID {float:right}
+.HeaderRow {overflow:hidden; position: relative;padding:10px 0;display: block;text-align: left;}
 #footer {position: absolute;top:0; right:0;left:0;}
 .record.selected {display:block; padding: 10px;}
-.record {display:none}
+.record.result_thumb.selected {display:inline-block;}
+.record, .record.result_thumb {display:none; padding:0; text-align: left;}
 #style_select {background-color:rgba(255, 255, 255, 0.5);border:1px solid #AAAAAA;width:180px;}
 #loading{position: absolute;top:0;bottom:0;left:0;right:0; background-image: url("../images/loading-animation-white.gif");background-position: 50% 50%;background-repeat: no-repeat;}
 .loading{background-image: url("../images/loading-animation-white.gif");background-position: 50% 50%;background-repeat: no-repeat;height:100px}
@@ -106,16 +108,84 @@ img {border:0 none;vertical-align:middle;}
 record {display: block;margin:10px}
 records {margin:20px}
 hml {margin:10px}
-#displayResult {padding-top: 10px;}
+#displayResult {bottom:0;left:0;overflow-y:auto;position:absolute;right:0;top:30px;text-align: center;}
 
 /* related recodrs styles */
 .show-related {background-image: url(../images/b_plus.png); background-position:0px 3px; height:16px; display:inline-block; clear: both;background-repeat: no-repeat;padding: 3px 20px;); cursor: pointer;color:#6A7C99 ;}
 .show-related a {font-size: 10px;line-height: 10px;}
 div.show-related:hover {text-decoration: underline;}
-.related-records {margin:20px 0 0 0; height: 18px; overflow: hidden;padding: 5px;}
+.related-records {margin:20px 0 0 0; height: 18px; overflow: hidden;padding: 5px;text-align: left;}
 .related-records.show{height: auto; background: url("../images/backgrounds/thumbnail_bg_small.png") repeat-x scroll 0 bottom #F6F6F6 !important;}
 .related-records div.related-records-list {display: none;}
 .related-records.show div.related-records-list {background-color:#EEEEEE;display: block;}
 .related-records.show div.show-related{background-image: url(../images/b_minus.png)}
 .wait {background-image: url("../images/mini-loading.gif") !important;}
 .relatedHeader {border-top:1px solid #FFF; font-weight:bold; color:#6A7C99; text-transform:uppercase; margin: 5px 0 5px 0; font-size:10px; padding:5px 0 0 0;}
+#printingLink {display: inline;padding:0 3px;width:16px; height:16px; background-image:url("../images/print.png"); background-repeat: no-repeat ;display: inline-block; vertical-align: top;margin-left: 10px;}
+
+/*  thumbnail view */
+.result_thumb {
+	-moz-border-radius:10px 10px 10px 10px;
+	-moz-box-shadow:0 2px 4px #AAAAAA;
+	border-radius:10px 10px 10px 10px;
+	box-shadow:0 2px 4px #AAAAAA;
+	-webkit-border-radius:10px 10px 10px 10px;
+	-webkit-box-shadow:0 2px 4px #AAAAAA;
+	background:url("../images/backgrounds/thumbnail_bg.png") repeat-x scroll 0 bottom #F6F6F6 !important;
+	border:3px solid #FFFFFF;
+	border-collapse:collapse;
+	display:inline-block;
+	height:140px;
+	margin:7px;
+	overflow:visible;
+	padding:0;
+	position:relative;
+	width:140px;
+	overflow:hidden;
+}
+.result_thumb .recID {
+	position: absolute;
+	right:0;
+	top:3px;
+	font-size: 8px;
+}
+.result_thumb .thumbnail, .result_thumb .rec_title, .result_thumb .icons, .links {left:2px;overflow:hidden;position:absolute;z-index:1;text-align: left;padding-left:0px;}
+.result_thumb .icons {overflow: visible;}
+.result_thumb .thumbnail, .result_thumb .thumbnail .no-thumbnail {-moz-background-size:100% auto;
+	background-position:center center;
+	background-repeat:no-repeat;
+	height:75px;
+	left:0;
+	line-height:42px;
+	margin:0;
+	min-height:75px;
+	position:absolute;
+	right:0;
+	text-align:center;
+	top:13px;
+	vertical-align:middle;}
+.result_thumb .thumbnail img, .result_thumb div.thumbnail img {
+	-moz-box-shadow:none;
+	border:medium none;
+	bottom:0;
+	left:0;
+	margin:0;
+	padding:0;
+	position:absolute;
+	top:-25%;
+	width:100%;}
+.result_thumb .thumbnail .no-thumbnail, .no-thumbnail {opacity:0.3;}
+
+.result_thumb .rec_title {height:25px;line-height:12px;text-align:left;top:90px;color:#666;}
+.result_thumb .rec_title a{line-height: 12px;text-decoration: none;}
+.result_thumb .rec_title a:hover{text-decoration: underline;}
+.result_thumb .unbookmarked {margin-bottom: 2px;}
+.result_thumb .bookmarked {margin-bottom: 2px;}
+
+.result_thumb .icons, .info_button, .done_button, .rec_links {bottom:0px;}
+.result_thumb .icons img {vertical-align: text-bottom; margin-left: 0px;}
+/*.result_thumb .icons img.rft {margin-left: 10px;}*/
+.result_thumb .icons input {vertical-align: text-bottom;}
+
+.rec_type {left:3px;position:absolute;top:124px;color:#7D9AAA}
+.greyType {color: #999999}

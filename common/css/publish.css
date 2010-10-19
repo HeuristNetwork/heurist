@@ -10,3 +10,6 @@ input {margin: 0pt;vertical-align: text-top;}
 h2 {color:#6A7C99;font-size:14px;line-height:6px;padding:0 10px;text-transform:uppercase;}
 form {display:inline}
 #forceform img {border:0 none;padding:0 5px 0 10px;vertical-align:text-top;}
+#home-link {position:absolute; top:0; left:0; right:0; height:56px; background-color: #F2F2F2; background-repeat: repeat-x; background-position: bottom;background-image:url("../images/backgrounds/banner_bg.png");border-bottom:1px solid #999999;max-width:100%}
+#logo {left:15px;top:5px;}
+#quicklinks {top:23px; font-weight: bold;}

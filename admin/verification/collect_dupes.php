@@ -5,7 +5,8 @@ require_once(dirname(__FILE__).'/../../common/connect/cred.php');
 require_once(dirname(__FILE__).'/../../common/connect/db.php');
 require_once(dirname(__FILE__).'/../../search/saved/loading.php');
 
-if (! is_logged_in()  ||  ! is_admin()) return;
+//if (! is_logged_in()  ||  ! is_admin()) return;
+if (! is_logged_in()) return;
 
 
 $fuzziness = intval($_REQUEST['fuzziness']);
