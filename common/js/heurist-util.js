@@ -919,7 +919,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 			if (req.status != 200 && req.status != 304) {
 				if (req.status == 404) {
 					alert('H-Util HTTP error ' + req.status + " " +file);
-				}else{
+				}else if (req.status){
 					alert('H-Util HTTP error ' + req.status);
 				}
 				return;

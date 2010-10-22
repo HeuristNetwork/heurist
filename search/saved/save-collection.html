@@ -6,6 +6,7 @@
 		<link rel=stylesheet href='../../common/css/autocomplete.css'>
 		<title></title>
 		<script src='../../external/jquery/jquery.js'></script>
+		<script src='../../records/tags/keyword-editor.js'></script>
 		<script>
 			if (top.HEURIST.search.collectCount == 0) {
 				alert("No records have been collected. Please select records from the search results and press collect to add records, then press save.");
@@ -75,6 +76,13 @@
 				setTimeout(function() { document.getElementById('search-select').focus() }, 10);
 				var tagsElt = document.getElementById('personal-tags');
 				window.autocomplete = new top.HEURIST.autocomplete.AutoComplete(tagsElt, top.HEURIST.util.keywordAutofill, { nonVocabularyCallback: top.HEURIST.util.showConfirmNewTag });
+
+				var removeButton = document.getElementById("remove-button");
+				var addButton = document.getElementById("add-button");
+
+				var currKwdsElt = document.getElementById("current-workgroup-keywords");
+				var allKwdsElt = document.getElementById("all-workgroup-keywords");
+				top.HEURIST.keywordEditor.KeywordEditor(currKwdsElt, allKwdsElt, addButton, removeButton);
 
 			}
 
@@ -177,10 +185,10 @@
 				}
 			}
 		</script>
-		
+
 	</head>
 	<body onload="init();">
-		<script src='../js/autocomplete.js'></script>
+		<script src='../../records/tags/autocomplete.js'></script>
 		<div id="mainbody">
 			<div id="add_to_search" class="bggray">
 				<input style="margin-left: 10px;" type="radio" name="ssType" id="ssType" value="0" checked="checked" onclick="switchMode('add_to_search','create_new_search','search-select');">&nbsp;<b>Add to existing saved search</b>
@@ -260,9 +268,9 @@
 								</td>
 								<td>
 									<div id=button-box>
-										<div><input type=button value="&gt;" title="Add a tag" onmousedown="HEURIST.keywordEditor.addKeyword(window.selectedRow)" disabled id=add-button></div>
+										<div><input type=button value="&gt;" title="Add a tag" onmousedown="top.HEURIST.keywordEditor.addKeyword(window.selectedRow)" disabled id=add-button></div>
 										<div>&nbsp;&nbsp;</div>
-										<div><input type=button value="&lt;" title="Remove a tag" onmousedown="HEURIST.keywordEditor.removeKeyword(window.selectedRow)" disabled id=remove-button></div>
+										<div><input type=button value="&lt;" title="Remove a tag" onmousedown="top.HEURIST.keywordEditor.removeKeyword(window.selectedRow)" disabled id=remove-button></div>
 									</div>
 								</td>
 								<td>
@@ -281,18 +289,6 @@
 						</table>
 
 						<form id=keyword-form onsubmit="return false;"></form> <!-- not used so stub teh submit -->
-
-						<script src='../js/keyword-editor.js'></script>
-						<script>
-
-							var removeButton = document.getElementById("remove-button");
-							var addButton = document.getElementById("add-button");
-
-							var currKwdsElt = document.getElementById("current-workgroup-keywords");
-							var allKwdsElt = document.getElementById("all-workgroup-keywords");
-							new HEURIST.keywordEditor.KeywordEditor(currKwdsElt, allKwdsElt, addButton, removeButton);
-
-						</script>
 
 						Default result style:
 						<select id=result-style-select>
