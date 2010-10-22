@@ -46,18 +46,6 @@
 	  [output]default[/output]
 	</xsl:comment>
 	<!-- end including code -->
-	<script>
-		<![CDATA[
-		function makeHref(element,hrefRelative) {
-			var host = window.location.host;
-			var installDir = (top && top.HEURIST && top.HEURIST.basepath? top.HEURIST.basepath : window.location.pathname.match(/^\/[^\/]+\//));
-			var instance = (top && top.HEURIST && top.HEURIST.instance? top.HEURIST.instance.name : location.search.match(/instance=([^&]+)/)[1]);
-			element.href = "http://" + host + installDir + hrefRelative + "&instance=" + instance;
-			return true;
-		}
-		]]>
-	</script>
-
 	<xsl:apply-templates select="/hml/records/record"></xsl:apply-templates>
 </xsl:template>
 
@@ -66,7 +54,7 @@
 	<!-- HEADER  -->
 	<div id="{id}" class="record">
 		<div class="headerRow">
-			<div id="recID">xxxRecord ID: <xsl:value-of select="id"/></div>
+			<div id="recID">Record ID: <xsl:value-of select="id"/></div>
 			<h2><xsl:value-of select="title"/></h2><br/>
 			<h3><xsl:value-of select="type"/></h3>
 		</div>
@@ -106,7 +94,7 @@
 								<xsl:sort select="."/>
 							<xsl:choose>
 								<xsl:when test="self::node()/record">
-									<xsl:value-of select="./record/type"/>: <a target="_new" href="#" onclick="return makeHref(this,'search/search.html?q=ids:{self::node()/record/id}');"> <xsl:value-of select="./record/title"/> </a>
+									<xsl:value-of select="./record/type"/>: <a target="_new" href="#" onclick="this.href = hBase +'search/search.html?q=ids:{self::node()/record/id}&amp;instance=' + instance;"> <xsl:value-of select="./record/title"/> </a>
 								</xsl:when>
 								<xsl:when test="self::node()[@id!= 222 and @id!= 221 and @id!=177 and @id != 223 and @id != 231 and @id != 268 and @id !=256 and @id!=304 and @id != 224]">
 									<xsl:value-of select="."/>
@@ -166,7 +154,7 @@
 				  <xsl:apply-templates select="." mode="creator"/>
 				</xsl:when>
 				<xsl:otherwise>
-				 test <xsl:value-of select="record/title"/> test
+				<xsl:value-of select="record/title"/>
 				</xsl:otherwise>
 			  </xsl:choose>
 				<br/>

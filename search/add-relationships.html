@@ -24,6 +24,9 @@ var relTargetID;
 var recCountSpan;
 var relTypeSelect;
 var relTargetInput;
+var hBase = "http://" + window.location.host +
+			(top && top.HEURIST && top.HEURIST.basePath? top.HEURIST.basePath : window.location.pathname.match(/^\/[^\/]+\//));
+var instance = (top && top.HEURIST && top.HEURIST.instance? top.HEURIST.instance.name : location.search.match(/instance=([^&]+)/)[1]);
 
 function init () {
 	//document.body.innerHTML = top.HEURIST.search.get_bib_ids().join();
@@ -50,7 +53,7 @@ function init () {
 	}
 
 	relTargetInput.onclick = function () {
-		top.HEURIST.util.popupURL(window, top.HEURIST.basePath + "records/pointer/bib-list.html?q=", {
+		top.HEURIST.util.popupURL(window, hBase + "records/pointer/bib-list.html?q=", {
 			callback: function(recID, recTitle) {
 				relTargetInput.value = recTitle || "";
 				relTargetID = recID || null;
@@ -93,7 +96,7 @@ function save () {
 			}
 			document.getElementById("status").innerHTML = "<b>" + rels + "</b> relationships added."
 			setTimeout(function () {
-				top.location.href = top.location.href.replace(/[^\/]*$/, "?q=relationsfor:" + relTargetID);
+				top.location.href = hBase + "?q=relationsfor:" + relTargetID + "&instance=" + instance;
 			}, 2000);
 		}
 	});

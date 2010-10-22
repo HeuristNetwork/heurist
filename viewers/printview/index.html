@@ -65,6 +65,9 @@
 			var totalRecordCount = 0;
 			var resultsPerPage = 50;
 			var pageCount = 0;
+			var hBase = "http://" + window.location.host +
+						(top && top.HEURIST && top.HEURIST.basePath? top.HEURIST.basePath : window.location.pathname.match(/^\/[^\/]+\//));
+			var instance = (top && top.HEURIST && top.HEURIST.instance? top.HEURIST.instance.name : location.search.match(/instance=([^&]+)/)[1]);
 
 			function init() {
 			//initialize parameters
@@ -117,10 +120,9 @@
 						}
 					}
 
-/*					if (query && query.search("sortby")== -1){
-						query = query.replace(/q=([^#&=]*)/,"q=$1 sortby:t");
+					if (query && query.search("instance")== -1){
+						query += "&instance=" + instance;
 					}
-*/
 					if (query && query.search("a=")== -1){
 						query += "&a=1";
 					}
@@ -169,10 +171,10 @@
 						return;
 					};
 				};
-				
+
 				if (parentDiv.className == "related-records show" ) {
 					parentDiv.className = parentDiv.className.replace(" show", "");
-					showRelatedLink.innerHTML = "Show related records";    
+					showRelatedLink.innerHTML = "Show related records";
 					return;
 				} else {
 					showRelatedLink.className += " wait";
@@ -223,7 +225,7 @@
 				}
 				//set query limits
 				aquery = query.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"&offset=" + (loadingPage-1)*resultsPerPage);
-				var url = "http://heuristscholar.org"+ top.HEURIST.basePath+ "export/xml/hml.php"+aquery;
+				var url = hBase + "export/xml/hml.php"+aquery;
 				var errorMsg = "Error loading " + url + " using XMLHttpRequest";
 				try {
 					aReq = new XMLHttpRequest();
