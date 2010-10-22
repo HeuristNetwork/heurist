@@ -2,7 +2,8 @@
 <!--
  this style renders standard html
  author  Maria Shvedova
- last updated 24/08/2010 I.Golka
+      updated 24/08/2010 I.Golka
+ last updated 22/10/2010 Stevewh
   -->
 <xsl:template name="creator" match="detail/record" mode="creator">
 	<xsl:choose>
@@ -45,6 +46,17 @@
 	  [output]default[/output]
 	</xsl:comment>
 	<!-- end including code -->
+	<script>
+		<![CDATA[
+		function makeHref(element,hrefRelative) {
+			var host = window.location.host;
+			var installDir = (top && top.HEURIST && top.HEURIST.basepath? top.HEURIST.basepath : window.location.pathname.match(/^\/[^\/]+\//));
+			var instance = (top && top.HEURIST && top.HEURIST.instance? top.HEURIST.instance.name : location.search.match(/instance=([^&]+)/)[1]);
+			element.href = "http://" + host + installDir + hrefRelative + "&instance=" + instance;
+			return true;
+		}
+		]]>
+	</script>
 
 	<xsl:apply-templates select="/hml/records/record"></xsl:apply-templates>
 </xsl:template>
@@ -54,7 +66,7 @@
 	<!-- HEADER  -->
 	<div id="{id}" class="record">
 		<div class="headerRow">
-			<div id="recID">Record ID: <xsl:value-of select="id"/></div>
+			<div id="recID">xxxRecord ID: <xsl:value-of select="id"/></div>
 			<h2><xsl:value-of select="title"/></h2><br/>
 			<h3><xsl:value-of select="type"/></h3>
 		</div>
@@ -93,6 +105,9 @@
 							<xsl:for-each select="$details[@id=current()/@id]">
 								<xsl:sort select="."/>
 							<xsl:choose>
+								<xsl:when test="self::node()/record">
+									<xsl:value-of select="./record/type"/>: <a target="_new" href="#" onclick="return makeHref(this,'search/search.html?q=ids:{self::node()/record/id}');"> <xsl:value-of select="./record/title"/> </a>
+								</xsl:when>
 								<xsl:when test="self::node()[@id!= 222 and @id!= 221 and @id!=177 and @id != 223 and @id != 231 and @id != 268 and @id !=256 and @id!=304 and @id != 224]">
 									<xsl:value-of select="."/>
 								</xsl:when>
@@ -124,6 +139,7 @@
 				</div>
 			</xsl:if>
 		</xsl:for-each>
+
 	<!-- POINTER LISTING -->
 		  <xsl:variable name="pointer" select="detail"/>
 		  <!--walk through the variable-->
@@ -135,10 +151,10 @@
 		<div class="detailType">
 				  <xsl:choose>
 					<xsl:when test="@name !=''">
-					  <xsl:value-of select="@name"/>
+					<xsl:value-of select="@name"/>
 					</xsl:when>
 					<xsl:otherwise>
-					  <xsl:value-of select="@type"/>
+					<div>type:  <xsl:value-of select="@type"/></div>
 					</xsl:otherwise>
 				  </xsl:choose>
 				</div>
@@ -150,7 +166,7 @@
 				  <xsl:apply-templates select="." mode="creator"/>
 				</xsl:when>
 				<xsl:otherwise>
-				  <xsl:value-of select="record/title"/>
+				 test <xsl:value-of select="record/title"/> test
 				</xsl:otherwise>
 			  </xsl:choose>
 				<br/>
@@ -159,6 +175,7 @@
 			  </div>
 			</xsl:if>
 		  </xsl:for-each>
+
 	<!-- RELATED LISTING -->
 	<xsl:variable name="relation" select="relationships"/>
 	<!--walk through the variable-->
@@ -188,7 +205,7 @@
 		</div>
 	</xsl:if>
 
-		<div class="detailRow">
+	<div class="detailRow">
 	<xsl:if test="url != ''">
 	<div class="detailRow">
 		<div class="detailType">URL</div>
