@@ -6,13 +6,18 @@
   @import url("http://www.google.com/uds/solutions/localsearch/gmlocalsearch.css");
 </style>
 <script>
-	document.write("<" + "script src=\"" +  window.opener.HAPI.HeuristBaseURL + "hapi/load.php?instance=" +  window.opener.HAPI.instance + "&key=" + window.opener.HAPI.key + "\"><" + "/script>\n");
+	var basePath = (top && top.HEURIST && top.HEURIST.basePath? top.HEURIST.basePath : window.location.pathname.match(/^\/[^\/]+\//));
+	var hBase = "http://" + window.location.host + basePath;
+	var instance = (top && top.HEURIST && top.HEURIST.instance? top.HEURIST.instance.name : location.search.match(/instance=([^&]+)/)[1]);
 </script>
  <script>
-	document.write("<" + "script src=\"" +  window.opener.HAPI.HeuristBaseURL + "hapi/js/goi.js\"><" + "/script>\n" );
+	document.write("<" + "script src=\"" +  basePath + "hapi/load.php?instance=" +  window.opener.HAPI.instance + "&key=" + window.opener.HAPI.key + "\"><" + "/script>\n");
+</script>
+ <script>
+	document.write("<" + "script src=\"" +  basePath + "hapi/js/goi.js\"><" + "/script>\n" );
 </script>
 
-  <script src="js/common-functions.js"></script>
+<script src="js/common-functions.js"></script>
 
   <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w"></script>
   <script src="http://www.google.com/uds/api?file=uds.js&amp;v=1.0&amp;key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w" type="text/javascript"></script>
@@ -37,7 +42,7 @@
 
 		//if (! HCurrentUser.isLoggedIn()) {
 				//alert("You are not currently logged in to Heurist");
-				//location.replace(HAPI.HeuristBaseURL + "common/connect/login.php");
+				//location.replace("http://heuristscholar.org/heurist/php/login.php");
 				//return;
 		//}
 		loadMap();
@@ -126,7 +131,7 @@
    <tr>
     <td>Location</td><td><div id=map style="width: 480px; height: 320px;"></div></td>
    </tr>
-   <tr><td><input type=button value=confirm onclick="confirmIt();"></input></td>
+   <tr><td><input type=button value=confirm onclick="confirmIt();" /></td>
     <td>
       <span class="hint">Select geographic object type: </span>
       <input id=button0 type=button value=Point onclick="digitiser.digitisePoint(selectButton); selectButton(this);" />&nbsp;

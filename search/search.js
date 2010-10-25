@@ -237,10 +237,10 @@ top.HEURIST.search = {
 			top.HEURIST.search.sid + "&bib_id="+ res[2] +
 			(top.HEURIST.instance && top.HEURIST.instance.name ? '&instance=' + top.HEURIST.instance.name : '') +
 			"' target='_blank'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png'/>edit</a> | </span>" +
-			"<span id='rec_explore_link' title='Click to explore'><a href='/cocoon/h3/relbrowser/irek/item/" + res[2] +
+			"<span id='rec_explore_link' title='Click to explore'><a href='/cocoon" +top.HEURIST.basePath +'relbrowser/main/item/' + res[2] +
 					(top.HEURIST.instance && top.HEURIST.instance.name ? '/?instance=' + top.HEURIST.instance.name : '') +
 					"' target='_blank'><img src='"+	top.HEURIST.basePath + "common/images/explore.png'/>explore</a></span>" +
-					
+
 			"<span id='spacer'><img src='"+	top.HEURIST.basePath + "common/images/16x16.gif'/></span>" +
 		"</div>" +
 		"<span style='display:none' class=daysbad title='Detection of broken URLs is carried out once a day'>"+daysBad+"</span>"+
@@ -327,7 +327,7 @@ top.HEURIST.search = {
 			(top.HEURIST.instance && top.HEURIST.instance.name ? '&instance=' + top.HEURIST.instance.name : '') +
 			"' target='_blank'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png'/>edit</a> | </span>" +
 				(res[3].length ? "<span><a href='"+res[3]+"' target='_blank'><img src='"+ top.HEURIST.basePath+"common/images/external_link_16x16.gif' title='go to link'>visit</a> | </span>" : "") +
-				"<span id='rec_explore_link' title='Click to explore'><a href='/cocoon/h3/relbrowser/irek/item/" + res[2] +
+						"<span id='rec_explore_link' title='Click to explore'><a href='/cocoon" +top.HEURIST.basePath +'relbrowser/main/item/' + res[2] +
 					(top.HEURIST.instance && top.HEURIST.instance.name ? '/?instance=' + top.HEURIST.instance.name : '') +
 					"' target='_blank'><img src='"+	top.HEURIST.basePath + "common/images/explore.png'/>explore</a></span>" +
 				"<span id='spacer'><img src='"+	top.HEURIST.basePath + "common/images/16x16.gif'/></span>" +
@@ -1924,7 +1924,7 @@ top.HEURIST.search = {
 			icon = document.createElement("img");
 			icon.src = top.HEURIST.basePath + "common/images/publish.png"
 			a.appendChild(icon);
-			
+
 			//a.appendChild(document.createTextNode("publish"));
 			im_container.appendChild(a);
 			//im_container.appendChild(document.createTextNode(" | "));
@@ -1986,22 +1986,22 @@ top.HEURIST.search = {
 	printResultRow: function() {
 		var content = document.getElementById("result-rows");
 		var pri = document.getElementById("printingFrame").contentWindow;
-		var GlobalcssLink = document.createElement("link") 
-		GlobalcssLink.href = top.HEURIST.basePath+"common/css/global.css"; 
-		GlobalcssLink .rel = "stylesheet"; 
+		var GlobalcssLink = document.createElement("link")
+		GlobalcssLink.href = top.HEURIST.basePath+"common/css/global.css";
+		GlobalcssLink .rel = "stylesheet";
 		GlobalcssLink .type = "text/css";
-		var SearchcssLink = document.createElement("link") 
-		SearchcssLink.href = top.HEURIST.basePath+"common/css/search.css"; 
-		SearchcssLink .rel = "stylesheet"; 
+		var SearchcssLink = document.createElement("link")
+		SearchcssLink.href = top.HEURIST.basePath+"common/css/search.css";
+		SearchcssLink .rel = "stylesheet";
 		SearchcssLink .type = "text/css";
-		var PrintcssLink = document.createElement("link") 
-		PrintcssLink.href = top.HEURIST.basePath+"common/css/print.css"; 
-		PrintcssLink .rel = "stylesheet"; 
-		PrintcssLink .type = "text/css"; 
+		var PrintcssLink = document.createElement("link")
+		PrintcssLink.href = top.HEURIST.basePath+"common/css/print.css";
+		PrintcssLink .rel = "stylesheet";
+		PrintcssLink .type = "text/css";
 		PrintcssLink.media = "print";
 
 
-		
+
 		pri.document.open();
 		pri.document.write(content.innerHTML);
 		pri.document.body.appendChild(GlobalcssLink);
@@ -2009,9 +2009,9 @@ top.HEURIST.search = {
 		pri.document.body.appendChild(PrintcssLink);
 		pri.document.close();
 		pri.focus();
-		pri.print();		
+		pri.print();
 	},
-	
+
 	renderSearchPage: function() {
 		top.HEURIST.search.fillInSavedSearches();
 		top.HEURIST.search.fillInKeywordSearches();

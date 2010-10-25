@@ -15,13 +15,13 @@
 			<!-- detail 231 is associated WordML file -->
 			<xsl:when test="detail[@id=231]">
 				<div id="tei" style="padding-right: 80px">
-					<xi:include href="{detail[@id=231]/file_fetch_url}"/>
+					<xi:include href="{detail[@id=231]/file_fetch_url}?instance={$instanceName}"/>
 				</div>
 			</xsl:when>
 			<!-- detail 221 is associated TEI file -->
 			<xsl:when test="detail[@id=221]">
 				<div id="tei" style="padding-right: 10px">
-					<xi:include href="{detail[@id=221]/file_fetch_url}"/>
+					<xi:include href="{detail[@id=221]/file_fetch_url}?instance={$instanceName}"/>
 				</div>
 			</xsl:when>
 		</xsl:choose>
@@ -36,7 +36,7 @@
 							<nobr>TEI</nobr>
 						</td>
 						<td>
-							<a href="{$cocoonBase}item/{//id}/tei">
+							<a href="{$cocoonBase}item/{//id}/tei?instance={$instanceName}">
 								[TEI document]
 							</a>
 						</td>
@@ -76,7 +76,7 @@
 							</xsl:when>
 							<!-- 231 = WordML File! -->
 							<xsl:when test="@id=231 or @id=221">
-								<a href="{file_fetch_url}">
+								<a href="{file_fetch_url}?instance={$instanceName}">
 									[<xsl:value-of select="file_orig_name"/>]
 								</a>
 
@@ -132,7 +132,7 @@
 					<td>
 						<xsl:if test="detail[@id = 222 or @id=223 or @id=224]">
 							<xsl:if test="detail/file_thumb_url">
-								<a href="{$cocoonBase}item/{id}">
+								<a href="{$cocoonBase}item/{id}?instance={$instanceName}">
 
 									<img src="{detail/file_thumb_url}"/>
 
@@ -143,7 +143,7 @@
 							</xsl:if>
 						</xsl:if>
 
-						<a href="{$cocoonBase}item/{id}" class="sb_two">
+						<a href="{$cocoonBase}item/{id}?instance={$instanceName}" class="sb_two">
 							<xsl:choose>
 								<!-- related / notes -->
 								<xsl:when test="@notes">
@@ -164,7 +164,7 @@
 					</td>
 					<td align="right">
 						<!-- change this to pick up the actuall system name of the reftye or to use the mapping method as in JHSB that calls human-readable-names.xml -->
-						<img style="vertical-align: middle;horizontal-align: right" src="{$hBase}common/images/reftype-icons/{reftype/@id}.gif"/>
+						<img style="vertical-align: middle;horizontal-align: right" src="{$hBase}common/images/reftype-icons/{reftype/@id}.png"/>
 					</td>
 				</tr>
 			</xsl:otherwise>
@@ -191,16 +191,16 @@
 
 				<tr>
 					<td>
-					     <a href="{$appBase}rb-edit.html?id={id}"
+					     <a href="{$appBase}edit.html?id={id}?instance={$instanceName}"
 							onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;"
 							title="edit">
-						<img src="{$hBase}common/images/edit-pencil.gif"/>
+						<img src="{$hBase}common/images/edit-pencil.png"/>
 						</a>
-						<a href="{$cocoonBase}item/{id}" class="sb_two"><xsl:value-of select="detail[@id=160]"/></a>
+						<a href="{$cocoonBase}item/{id}?instance={$instanceName}" class="sb_two"><xsl:value-of select="detail[@id=160]"/></a>
 					</td>
 					<td align="right">
 						<!-- change this to pick up the actuall system name of the reftye or to use the mapping method as in JHSB that calls human-readable-names.xml -->
-						<img style="vertical-align: middle;horizontal-align: right" src="{$hBase}common/images/reftype-icons/{reftype/@id}.gif"/>
+						<img style="vertical-align: middle;horizontal-align: right" src="{$hBase}common/images/reftype-icons/{reftype/@id}.png"/>
 					</td>
 				</tr>
 			</xsl:otherwise>

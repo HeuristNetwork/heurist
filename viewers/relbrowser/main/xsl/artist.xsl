@@ -3,44 +3,36 @@
 
 	<xsl:template name="artist" match="reference[reftype/@id=128]">
 
-		<table width="100%">
-			<tr>
-				<td>
-		<xsl:call-template name="personDetailsForArtist">
+		<div class="recordTypeHeading">
+					<img src="{$hBase}common/images/reftype-icons/{reftype/@id}.png"/>
+					<xsl:text> </xsl:text>
+					<xsl:value-of select="reftype"/>
+        </div>
+ 
+		<xsl:call-template name="personDetailsForArtist"> 
 			<xsl:with-param name="personDetails" select="pointer[@id=249]"/>
-		</xsl:call-template>
-		</td>
-			</tr>
-			<tr>
-				<td>
-			<h2>Paintings by this artist</h2>
-
-			<xsl:call-template name="tableOfArtworkThumbnails">
-				<xsl:with-param name="artworks" select="reverse-pointer[@id=580]"/>
-			</xsl:call-template></td>
-		</tr>
-
-		</table>
-
+		</xsl:call-template>    
+				
+		<xsl:if test="reverse-pointer[@id=580] != ''">		
+		<div class="detailRow">
+			<div class="detailType">Paintings by this artist
+                   <xsl:call-template name="tableOfArtworkThumbnails">
+				   <xsl:with-param name="artworks" select="reverse-pointer[@id=580]"/>
+				</xsl:call-template>
+			</div>
+		</div>
+		</xsl:if>		
 	</xsl:template>
 
 	<xsl:template name="personDetailsForArtist">
 		<xsl:param name="personDetails"/>
-		<h1><xsl:value-of select="$personDetails/title"/></h1>
-
-		<xsl:choose><xsl:when test="$personDetails/detail[@id=223]">
-			...
-			<img src="{$personDetails/detail[@id=223]/file_fetch_url}" width="300" border="0" vspace="10"
-						hspace="10" align="left"/>
-		</xsl:when></xsl:choose>
-
-		<xsl:choose>
-			<xsl:when test="$personDetails/detail[@id=293]">
-				<p>Born: <xsl:value-of select="$personDetails/detail[@id=293]/year"/> in <xsl:value-of select="$personDetails/detail[@id=216]"/></p>
-			</xsl:when>
-
-		</xsl:choose>
-
+			<div class="detailRow">
+				<div class="detailType">
+					<img src="{$personDetails/detail[@id=223]/file_fetch_url}" align="left" class="personPhoto"/>  
+		         	<h1><xsl:value-of select="$personDetails/title"/></h1>
+		         	 Born:<xsl:value-of select="$personDetails/detail[@id=293]/year"/> in <xsl:value-of select="$personDetails/detail[@id=216]"/>             
+	      		</div>	
+		     </div>				
 	</xsl:template>
 
 </xsl:stylesheet>

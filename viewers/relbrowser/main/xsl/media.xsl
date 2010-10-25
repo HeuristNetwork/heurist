@@ -52,7 +52,7 @@
 					</xsl:if>
 					<div id = "image-div">
 					<xsl:if test="detail[@id=221]">
-						<div align="center"><a href="{detail/file_fetch_url}" target="_top">
+						<div align="center"><a href="{detail/file_fetch_url}&amp;instance={$instanceName}" target="_top">
 							<img src="{detail/file_thumb_url}&amp;w=560" border="1"/>
 						</a></div>
 						<br/>

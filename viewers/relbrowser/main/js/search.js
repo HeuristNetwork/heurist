@@ -43,7 +43,7 @@ function loadAllRecords(query, options, loader) {
 function showSearch(query) {
 	// hide footnotes
 	document.getElementById("footnotes").style.display = "none";
-	document.getElementById("page").style.bottom = "0px";
+	document.getElementById("page").style.bottom = "10px";
 
 	// turn off any highlighting
 	if (window.highlightElem) {
@@ -73,10 +73,11 @@ function displayResults(s,r) {
 
 	var innerHTML = "";	//FIXME:  need to change this to be generic to the install
 	var thisInstancePath = (HAPI && HAPI.HeuristBaseURL ? HAPI.HeuristBaseURL : (window.HeuristBaseURL ? window.HeuristBaseURL : (window.opener.HeuristBaseURL? window.opener.HeuristBaseURL: "../../../")));
+
 	for (var i = 0; i < r.length; i++) {
 		if (r[i].getRecordType()){
-			innerHTML += "<img src=\""+ thisInstancePath + "common/images/reftype-icons/" + r[i].getRecordType().getID() + ".png\"/>";
-			innerHTML += " <a href='" + thisInstancePath + "records/viewrec/view.php?bib_id=" + r[i].getID() + "' target=\"_blank\">" + r[i].getTitle() + "</a><br/>";
+			innerHTML += "<div class='displayTable'><div class='editIcon'><img src=\""+ thisInstancePath + "common/images/reftype-icons/" + r[i].getRecordType().getID() + ".png\"/></div>";
+			innerHTML += "<div class='link'><a href='../" + r[i].getID() + "' target=\"_blank\">" + r[i].getTitle() + "</a></div></div>"; 
 		}
 	}
 

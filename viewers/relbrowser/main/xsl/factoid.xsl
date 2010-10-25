@@ -74,7 +74,7 @@
 		</script>
 		<!-- yes you do need this -->
 		<xsl:element name="script">
-			<xsl:attribute name="src"><xsl:value-of select="$hBase"/>viewers/map/tmap-data.php?w=all&amp;q=id:<xsl:value-of select="id"/>
+			<xsl:attribute name="src"><xsl:value-of select="$hBase"/>output/mapper/tmap-data.php?w=all&amp;q=id:<xsl:value-of select="id"/>
 				<xsl:for-each select="related|pointer|reverse-pointer">
 					<xsl:text>,</xsl:text>
 					<xsl:value-of select="id"/>
@@ -82,8 +82,8 @@
 			</xsl:attribute>
 		</xsl:element>
 		<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w"></script>
-		<script src="{$hBase}viewers/map/epoly.js"></script>
-		<script src="{$hBase}viewers/map/mapper.js"></script>
+		<script src="{$hBase}output/mapper/epoly.js"></script>
+		<script src="{$hBase}output/mapper/mapper.js"></script>
 
 		<script>
 			loadMap( { compact: true, highlight: [<xsl:value-of select="id"/>], onclick: function(record) { window.location = "<xsl:value-of select="$cocoonBase"/>item/"+record.bibID+"/"; } } );

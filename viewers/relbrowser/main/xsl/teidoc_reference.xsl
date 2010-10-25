@@ -20,16 +20,15 @@
 
 			</xsl:when>
 			<xsl:otherwise>
-				<tr>
-					<td>
+				<div class="relatedItem">
 						<!--a href="{$base}/item/{id}/{/export/references/reference/reftype/@id}?flavour={$flavour}#ref1"-->
 
 						<!-- chose if base id = annotation target id - then include onclick handler and href is below -->
 						<div class="editIcon">
-						<a href="{$appBase}edit-annotation.html?id={id}"
+						<a href="{$appBase}edit-annotation.html?id={id}?instance={$instanceName}"
 							onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;"
 							title="edit">
-							<img src="{$hBase}common/images/edit-pencil.gif"/>
+							<img src="{$hBase}common/images/edit-pencil.png"/>
 						</a>
 						</div>
 						<div class="annotation">
@@ -42,25 +41,20 @@
 								</a>
 							</xsl:when>
 							<xsl:otherwise>
-								<a href="{$cocoonBase}item/{pointer[@id=322]/id}/#ref{id}" class="sb_two">
+								<a href="{$cocoonBase}item/{pointer[@id=322]/id}/#ref{id}?instance={$instanceName}" class="sb_two">
 									<xsl:value-of select="title"/>
 								</a>
 								<span>(annotation in: <em>
 									<xsl:value-of select="pointer[@id=322]/title"/>
 								</em>
 								<img style="vertical-align: middle;horizontal-align: right"
-									src="{$hBase}common/images/reftype-icons/{pointer[@id=322]/reftype/@id}.gif"/>)
+									src="{$hBase}common/images/reftype-icons/{pointer[@id=322]/reftype/@id}.png"/>)
 								</span>
 							</xsl:otherwise>
 						</xsl:choose>
                         </div>
-
 						<!-- iotherwise get the id if the target and -->
-
-
-
-					</td>
-				</tr>
+				</div>
 
 				<xsl:call-template name="add_ref">
 					<xsl:with-param name="ref" select="."/>
@@ -74,22 +68,20 @@
 		<div name="footnote" recordID="{id}">
 
 			<div name="footnotesleft">
-							<p>
-								<b><xsl:value-of select="detail[@id=160]/text()"/></b>
-							<br></br>
-
+						<p><b><xsl:value-of select="detail[@id=160]/text()"/></b>
+							
 						<xsl:call-template name="paragraphise">
 							<xsl:with-param name="text">
 								<xsl:value-of select="detail[@id=191]/text()"/>
 							</xsl:with-param>
 						</xsl:call-template>
-							</p>
+						</p>	
 			</div>
 			<div name="footnotesright">
 						<p>
 							<xsl:choose>
 								<xsl:when test="pointer[@id=152]/detail/file_thumb_url">
-									<a href="{$cocoonBase}item/{pointer[@id=152]/id}">
+									<a href="{$cocoonBase}item/{pointer[@id=152]/id}/?instance={$instanceName}">
 										<img src="{pointer[@id=152]/detail/file_thumb_url}"
 											border="0"/>
 									</a>
@@ -99,7 +91,7 @@
 										<tr>
 											<td>
 
-												<a href="{$cocoonBase}item/{pointer[@id=152]/id}"
+												<a href="{$cocoonBase}item/{pointer[@id=152]/id}/?instance={$instanceName}"
 												class="sb_two">
 												<xsl:value-of
 												select="pointer[@id=152]/detail[@id=291]"/>
@@ -113,7 +105,7 @@
 												<!-- change this to pick up the actuall system name of the reftye or to use the mapping method as in JHSB that calls human-readable-names.xml -->
 												<img
 												style="vertical-align: middle;horizontal-align: right"
-												src="{$hBase}common/images/reftype-icons/{pointer[@id=152]/reftype/@id}.gif"
+												src="{$hBase}common/images/reftype-icons/{pointer[@id=152]/reftype/@id}.png"
 												/>
 											</td>
 										</tr>
@@ -127,8 +119,7 @@
 
 			<div name="xpath">
 				<small> (xpath: /TEI/text/body/div[]/p[] <xsl:value-of select="detail[@id=539]"/>)</small>
-
-				</div>
+			</div>
 		</div>
 	</xsl:template>
 

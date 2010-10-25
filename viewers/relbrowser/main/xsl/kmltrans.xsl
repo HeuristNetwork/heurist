@@ -70,7 +70,7 @@
 	</xsl:template>
 
 	<xsl:template match="kml:a">
-		<xsl:param name="itemname"/>&lt;a href=<xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>item/<xsl:value-of select="substring-after(@href,'resource/')"/>&gt;<xsl:value-of select="$itemname"/>&lt;/a&gt;
+		<xsl:param name="itemname"/>&lt;a href=http://heuristscholar.org/cocoon/<xsl:value-of select="$appBase"/>item/<xsl:value-of select="substring-after(@href,'resource/')"/>&gt;<xsl:value-of select="$itemname"/>&lt;/a&gt;
 	</xsl:template>
 
 </xsl:stylesheet>

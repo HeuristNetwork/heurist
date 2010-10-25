@@ -24,13 +24,13 @@
 	<xsl:template match="/">
 		<html>
 			<head>
-				<link rel="stylesheet" href="{$appBase}css/browser.css"/>
+				<link rel="stylesheet" href="{$serverBaseUrl}{$appBase}css/browser.css"/>
 				<title id="{$currentid}">
 					<xsl:value-of select="export/references/reference/title"/>
 				</title>
 				<script src="{$hBase}external/jquery/jquery.js"/>
 				<script>
-					var itemPath = "<xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>item/";
+					var itemPath = "<xsl:value-of select="$cocoonBase"/>item/";
 					var imgpath = "<xsl:value-of select="$hBase"/>common/images/reftype-icons/";
 
 					function showFootnote(recordID) {
@@ -89,7 +89,7 @@
 				<script src="{$hBase}common/php/load-hapi.php?instance={$hapi-instance}&amp;key={$hapi-key}"/>
 				<script>
 					if (!HCurrentUser.isLoggedIn()) {
-						window.location = '<xsl:value-of select="$hBase"/>common/connect/login-vanilla.php??instance=<xsl:value-of select="$instanceName"/>&amp;logo=<xsl:value-of select="$appBase"/>images/logo.png&amp;home=<xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$appBase"/>';
+						window.location = '<xsl:value-of select="$hBase"/>common/connect/login-vanilla.php?instance=<xsl:value-of select="$instanceName"/>&amp;logo=<xsl:value-of select="$appBase"/>images/logo.png&amp;home=<xsl:value-of select="$appBase"/>';
 					}</script>
 				<script src="{$appBase}js/search.js"/>
 				<script>
@@ -108,7 +108,6 @@
 					<script src="{$hBase}external/timeline/timeline_js/timeline-api.js" type="text/javascript"></script>
 					<script src="{$hBase}external/timemap.js/timemap.js" type="text/javascript"></script>
 					<script src="{$hBase}external/timemap.js/kmlparser.js" type="text/javascript"></script>
-					<script src="{$hBase}external/timemap.js/georssparser.js" type="text/javascript"></script>
 					<script src="{$appBase}js/mapping.js"></script>
 					<xsl:if test="$enableMapTrack = 'true'">
 						<script>
@@ -126,92 +125,102 @@
 						<div id="logo"></div>
 					</a>
 					<div id="instance-name"><xsl:value-of select="$instanceName"/></div>
-					<div id="pagetopcolour" class="colourcelltwo" style="overflow:visible;">
-						<div style="padding-left:20px ">
-							<table>
-								<tr>
-									<xsl:if test="export/references/reference/reftype/@id = 98">
-										<xsl:if test=" $id != $home-id">
-											<td style="font-size: 85%;padding-right:10px; "><a href="#" onclick="window.open('{$appBase}edit-annotation.html?refid={export/references/reference/id}&amp;instance={$instanceName}','','status=0,scrollbars=1,resizable=1,width=700,height=500'); return false;" title="add Annotation">
-													<img src="{$appBase}images/152.png" align="absmiddle"/>
-												</a> Add Annotation</td>
-										</xsl:if>
-									</xsl:if>
-									<td style="font-size: 85%;padding-right:10px;"><a href="#" onclick="window.open('{$appBase}addrelationship.html?typeId=52&amp;source={export/references/reference/id}&amp;instance={$instanceName}','','status=0,scrollbars=1,resizable=1,width=700,height=500'); return false;" title="add Relationship">
-											<img src="{$appBase}images/52.png" align="absmiddle"/>
-										</a> Relationship</td>
-								</tr>
-							</table>
-						</div>
-					</div>
-					<div id="sidebartopcolour" class="colourcelltwo">
-						<table width="100%">
-							<tr>
-								<td id="login">
-									<script type="text/javascript">
-
-							var a = document.createElement("a");
-							a.href ='<xsl:value-of select="$hBase"/>common/connect/login-vanilla.php?logo={$appBase}img/logo.png&amp;home={$serverBaseUrl}{$appBase}&amp;instance={$instanceName}';
-
-
-							if (HCurrentUser.isLoggedIn()) {
-								document.getElementById("login").appendChild(document.createTextNode(HCurrentUser.getRealName() + " : "));
-								a.appendChild( document.createTextNode("Log out"));
-							} else {
-
-								a.appendChild(document.createTextNode("Log in"));
-							}
-
-							document.getElementById("login").appendChild(a);</script>
-								</td>
-								<td id="heurist-link">
-									<a href="{$hBase}search/search.html?q=id:{export/references/reference/id}&amp;instance={$instanceName}">Heurist</a>
-								</td>
-							</tr>
-						</table>
+					<div id="home-link">
+						<a href="{$hBase}search/search.html?q=id:{export/references/reference/id}&amp;instance={$instanceName}">Record id:
+							<xsl:value-of select="export/references/reference/id"/>
+						</a>
 					</div>
 				</div>
-				<div id="sidebar" class="colourcellthree">
-					<div id="sidebar-inner">
-						<div id="search">
+		<div id="sidebar">
+				<div class="banner">
+						<div id="login">
+								<script type="text/javascript">
+
+						var a = document.createElement("a");
+						a.href ='<xsl:value-of select="$hBase"/>common/connect/login-vanilla.php?logo={$appBase}images/logo.png&amp;home={$serBaseUrl}{$appBase}';
+
+
+						if (HCurrentUser.isLoggedIn()) {
+							document.getElementById("login").appendChild(document.createTextNode(HCurrentUser.getRealName() + " : "));
+							a.appendChild( document.createTextNode("Log out"));
+						} else {
+
+							a.appendChild(document.createTextNode("Log in"));
+						}
+
+						document.getElementById("login").appendChild(a);</script>
+						</div>
+
+				</div>
+				<div id="search">
+					<div class="outline roundedBoth">
 							<form method="post" onsubmit="search(document.getElementById('query-input').value); return false;">
 								<input type="text" id="query-input" value=""/>
-								<input type="button" value="search" onclick="search(document.getElementById('query-input').value);"/>
+								<input type="button" class="button" value="search" onclick="search(document.getElementById('query-input').value);"/>
 							</form>
+					</div>
 
-						</div>
-						<h1>
+				</div>
+
+				<div id="sidebar-inner">
+						<!-- h1>
 
 							<span style="padding-right:5px; padding-left:5px; vertical-align:top;">
-								<a href="#" onclick="window.open('{$appBase}rb-edit.html?id={export/references/reference/id}&amp;instance={$instanceName}','','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false; " title="Edit main record">
-									<img src="{$hBase}common/images/edit-pencil.png" class="editPencil" style="vertical-align: top;"/>
+								<a href="#" onclick="window.open('{$appBase}edit.html?id={export/references/reference/id}','','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false; " title="Edit main record">
+									<img src="{$hBase}/img/edit-pencil.png" class="editPencil" style="vertical-align: top;"/>
 								</a>
 							</span>
 							<xsl:value-of select="export/references/reference[1]/title"/>
-						</h1>
+						</h1 -->
 						<xsl:call-template name="related_items_section">
 							<xsl:with-param name="items" select="export/references/reference/related | export/references/reference/pointer | export/references/reference/reverse-pointer"/>
 						</xsl:call-template>
+
+
 					</div>
+			</div>
+
+		 <div id="popup" class="popup" style="z-index:100001; visibility: visible; display:none;">
+		 	<div class="close-button"></div>
+
+         <!--iframe frameborder="0" style="width: 100%; height: 100%;" src='{$appBase}addrelationship.html?typeId=52&amp;source={export/references/reference/id}'></iframe-->
+
+     	 </div>
+	 <iframe frameborder="0" id="coverall" style="visibility: visible; z-index: 100000;" class=""></iframe>
+
+
+
+
+			<div id="page">
+				<div class="banner">
+						<a href="{$appBase}edit.html?id={$currentid}&amp;instance={$instanceName}" onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;" title="edit" style="background-image:url({$hBase}common/images/edit-pencil.png)">
+						Edit Record</a><nobr></nobr>
+					<xsl:if test="export/references/reference/reftype/@id = 98">
+					<xsl:if test=" $id != $home-id">
+						<a href="#" onclick="window.open('{$appBase}edit-annotation.html?refid={export/references/reference/id}','','status=0,scrollbars=1,resizable=1,width=700,height=500'); return false;" title="add Annotation" style="background-image:url({$appBase}images/annotation_tool.png)">Add Annotation</a>
+						</xsl:if>
+					</xsl:if>
+					<!-- a href="#" id="addRelationship" title="add Relationship" style="background-image:url({$appBase}images/rel_icon.png)">Add Relationship Popup Test</a -->
+					<a href="#" onclick="window.open('{$appBase}addrelationship.html?typeId=52&amp;source={export/references/reference/id}&amp;instance={$instanceName}','','status=0,scrollbars=1,resizable=1,width=700,height=500'); return false;" title="add Relationship" style="background-image:url({$appBase}images/rel_icon.png)">Add Relationship</a>
 				</div>
-				<div id="page">
-					<xsl:choose>
-						<xsl:when test="export/references/reference/reftype[@id = 51 or @id = 55]">
+
+<!--					<xsl:choose>
+						<xsl:when test="export/references/reference/reftype[@id = 51 or @id = 55]" -->
 							<div id="page-inner">
 								<!-- full version of record -->
 								<xsl:apply-templates select="export/references/reference"/>
 							</div>
-						</xsl:when>
+						<!-- /xsl:when>
 						<xsl:otherwise>
 
-							<div id="page-inner" style="width: 100%; height: 370px; margin-right: auto; margin-left: auto">
+							<div id="page-inner">
 
 
-								<!-- full version of record -->
+
 								<xsl:apply-templates select="export/references/reference"/>
 							</div>
 						</xsl:otherwise>
-					</xsl:choose>
+					</xsl:choose -->
 				</div>
 				<div id="footnotes">
 					<div id="footnotes-inner">
@@ -220,6 +229,19 @@
 				</div>
 			</body>
 		</html>
+
+<script type="text/javascript">
+	 $(document).ready(function(){
+
+	 		$('.relTypeHeading').live("click",function(){
+				$(this).siblings('div.relItemList').slideToggle('fast');
+				$(this).parent('.relType').toggleClass('hide');
+		});
+
+	 });
+</script>
+
+<!-- end of HTML output -->
 	</xsl:template>
 	<xsl:template match="breadcrumbs">
 		<xsl:for-each select="breadcrumb">
@@ -231,14 +253,11 @@
 	</xsl:template>
 	<xsl:template name="related_items_section">
 		<xsl:param name="items"/>
-		<!-- top of sidebar before you start listing the type of relationships -->
-		<table id="relations-table" cellpadding="2" border="0" width="100%">
-			<tr class="colourcellfour">
-				<td>
-					<div id="map-types" class="map-timeline-key"/>
-				</td>
-			</tr>
-			<!-- this step of the code aggregates related items into groupings based on the type of related item -->
+
+<!-- top of sidebar before you start listing the type of relationships -->
+		<div id="relations-table">
+			<div id="map-types" class="map-timeline-key"/>
+ 			<!-- this step of the code aggregates related items into groupings based on the type of related item -->
 			<xsl:for-each select="$items[not(@type = preceding-sibling::*/@type)] ">
 				<xsl:choose>
 					<xsl:when test="@type != 'Map image layer reference' and @type != 'Source entity reference' and @type != 'Entity reference' and @type != 'Target entity reference'">
@@ -249,11 +268,11 @@
 							<xsl:with-param name="reldirection" select="local-name()"/>
 							<xsl:with-param name="items" select="$items[@type = current()/@type and reftype/@id != 52]"/>
 						</xsl:call-template>
-
 					</xsl:when>
 				</xsl:choose>
 			</xsl:for-each>
-		</table>
+       		</div>
+
 
 	</xsl:template>
 	<xsl:template name="related_items_by_reltype">
@@ -263,9 +282,9 @@
 		<xsl:param name="items"/>
 		<xsl:if test="count($items) &gt; 0">
 			<xsl:if test="$reftype_id != 150  or  ../reftype/@id = 103">
-				<tr>
-					<td>
-						<b>
+
+				<div class="relType">
+						<div class="relTypeHeading">
 							<xsl:choose>
 								<xsl:when test="$reftype_id = 99">Annotations</xsl:when>
 								<xsl:otherwise>
@@ -280,23 +299,20 @@
 
 								</xsl:otherwise>
 							</xsl:choose>
-						</b>
-					</td>
-				</tr>
-				<tr>
-					<td>
+						</div>
 						<!-- (<xsl:value-of select="$items[1]"/>) -->
-						<table width="100%">
+						<div class="relItemList">
 							<!-- p>id: <xsl:value-of select="$currentid"/> - [<xsl:value-of select="id"/>] - </p -->
 							<xsl:apply-templates select="$items[1]">
 								<xsl:with-param name="matches" select="$items"/>
 							</xsl:apply-templates>
-						</table>
-					</td>
-				</tr>
+						</div>
+				</div>
+
 			</xsl:if>
 		</xsl:if>
 	</xsl:template>
+
 	<xsl:template name="related_items">
 		<xsl:param name="reftype_id"/>
 		<xsl:param name="reftype_label"/>
@@ -348,10 +364,9 @@
 				</xsl:apply-templates>
 			</xsl:when>
 			<xsl:otherwise>
-				<tr>
-					<td>
+				<div class="relatedItem">
                     <div class="editIcon">
-						<a href="{$appBase}rb-edit.html?id={id}&amp;instance={$instanceName}" onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;" title="edit">
+						<a href="{$appBase}edit.html?id={id}&amp;instance={$instanceName}" onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;" title="edit">
 							<img src="{$hBase}common/images/edit-pencil.png" class="editPencil"/>
 						</a>
 					</div>
@@ -381,29 +396,25 @@
 							</xsl:choose>
 						</xsl:if>
 
-						<!-- I think this is the bit of code that renders thumbnails on the right hand side -->
-						<xsl:if test="detail[@id = 222 or @id=223 or @id=224]">
+						<!--  renders thumbnails  -->
+						 <xsl:if test="detail[@id=606]">
+								<a href="{$cocoonBase}item/{id}/?instance={$instanceName}">
+									<img src="{detail[@id=606]}" title="{detail[@id=606]}" class="thumbnail"/>
+								</a>
+						 </xsl:if>
+
+						 <xsl:if test="detail[@id = 222 or @id=223 or @id=224]">
 							<xsl:if test="detail/file_thumb_url">
 								<a href="{$cocoonBase}item/{id}/?instance={$instanceName}">
 									<img src="{detail/file_thumb_url}" class="thumbnail"/>
 								</a>
-
-								<br/>
-							</xsl:if>
-
-
-							<xsl:if test="detail[@id=606]">
-								<a href="{$cocoonBase}item/{id}/?instance={$instanceName}">
-									<img width="180" src="{detail[@id=606]}"/>
-								</a>
-								<br/>
 							</xsl:if>
 						</xsl:if>
-
 					</div>
+
 					<div class="link">
 
-						<a href="{$cocoonBase}item/{id}/?instance={$instanceName}" class="sb_two">
+						<a href="{$cocoonBase}item/{id}/?instance={$instanceName}">
 							<xsl:choose>
 								<!-- related / notes -->
 								<xsl:when test="@notes">
@@ -424,30 +435,28 @@
 					</div>
 					<div class="reftypeIcon">
 						<!-- change this to pick up the actuall system name of the reftye or to use the mapping method as in JHSB that calls human-readable-names.xml -->
-						<img style="vertical-align: middle;horizontal-align: right" src="{$hBase}common/images/reftype-icons/{reftype/@id}.png"/>
+						<img style="vertical-align: middle;horizontal-align: right" src="{$hBase}common/images/reftype-icons/{reftype/@id}.png" title="{reftype}"/>
 					</div>
-					</td>
-				</tr>
+                </div>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
+
+
 	<!-- fall-back template for any reference types that aren't already handled -->
 	<xsl:template match="reference">
-		<!-- xsl:if test="detail[@id=221]">
-			<img src="{detail[@id=221]/file_thumb_url}&amp;w=400"/>
-		</xsl:if -->
-		<table>
-			<tr>
-				<td colspan="2">
-					<img style="vertical-align: middle;" src="{$hBase}common/images/reftype-icons/{reftype/@id}.png"/>
+
+
+            <div class="recordTypeHeading">
+					<img src="{$hBase}common/images/reftype-icons/{reftype/@id}.png"/>
 					<xsl:text> </xsl:text>
 					<xsl:value-of select="reftype"/>
-				</td>
-			</tr>
-			<xsl:if test="url != ''">
-				<tr>
-					<td class="col1">URL</td>
-					<td>
+            </div>
+
+			<div class="detailRow">
+				<xsl:if test="url != ''">
+					<div class="detailType">URL</div>
+					<div class="detail">
 						<a href="{url}">
 							<xsl:choose>
 								<xsl:when test="string-length(url) &gt; 50">
@@ -458,14 +467,13 @@
 								</xsl:otherwise>
 							</xsl:choose>
 						</a>
-					</td>
-				</tr>
-			</xsl:if>
-			<!-- this calls  ? -->
+					</div>
+				</xsl:if>
+			</div>
+
 			<xsl:for-each select="detail[@id!=222 and @id!=223 and @id!=224]">
-				<tr>
-					<td class="col1">
-						<nobr>
+				<div class="detailRow">
+					<div class="detailType">
 							<xsl:choose>
 								<xsl:when test="string-length(@name)">
 									<xsl:value-of select="@name"/>
@@ -474,10 +482,13 @@
 									<xsl:value-of select="@type"/>
 								</xsl:otherwise>
 							</xsl:choose>
-						</nobr>
-					</td>
-					<td>
+					</div>
+					<div class="detail">
 						<xsl:choose>
+							<xsl:when test="@id=606">
+								<a href="{text()}"><img src="{text()}" title="{text()}"></img>
+								</a>
+							</xsl:when>
 							<!-- 268 = Contact details URL,  256 = Web links -->
 							<xsl:when test="@id=268  or  @id=256  or  starts-with(text(), 'http')">
 								<a href="{text()}">
@@ -501,51 +512,59 @@
 								<xsl:value-of select="text()"/>
 							</xsl:otherwise>
 						</xsl:choose>
-					</td>
-				</tr>
+					</div>
+				</div>
 			</xsl:for-each>
-			<tr>
 
-				<td style="padding-right: 10px;">
-					<xsl:value-of select="pointer[@id=264]/@name"/>
-				</td>
-				<td>
-					<table>
-						<xsl:apply-templates select="pointer[@id=264]"/>
-					</table>
-				</td>
-			</tr>
-			<tr>
-				<td class="col1">
-					<xsl:value-of select="pointer[@id=267]/@name"/>
-				</td>
-				<td>
-					<xsl:apply-templates select="pointer[@id=267]"/>
-				</td>
-			</tr>
-			<xsl:if test="notes != ''">
-				<tr>
-					<td class="col1">Notes</td>
-					<td>
-						<xsl:value-of select="notes"/>
-					</td>
-				</tr><!-- change this to pick up the actuall system name of the reftye or to use the mapping method as in JHSB that calls human-readable-names.xml -->
-
+			<!-- 264 = Research Project -->
+			<xsl:if test="pointer[@id=264]/@name != ''">
+				<div class="detailRow">
+					<div class="detailType">
+						<xsl:value-of select="pointer[@id=264]/@name"/>
+					</div>
+					<div class="detail">
+						<table>
+							<xsl:apply-templates select="pointer[@id=264]"/>
+						</table>
+					</div>
+				</div>
 			</xsl:if>
-			<xsl:if test="detail[@id=222 or @id=223 or @id=224]">
-				<tr>
 
-					<td class="col1">Images</td>
-					<td>
+			<xsl:if test="pointer[@id=267]/@name != ''">
+				<div class="detailRow">
+					<div class="detailType">
+						<xsl:value-of select="pointer[@id=267]/@name"/>
+					</div>
+					<div class="detail">
+						<xsl:apply-templates select="pointer[@id=267]"/>
+					</div>
+				</div>
+			</xsl:if>
+
+			<xsl:if test="notes != ''">
+				<div class="detailRow">
+					<div class="detailType">Notes</div>
+					<div class="detail">
+						<xsl:value-of select="notes"/>
+					</div>
+				</div>
+			</xsl:if>
+
+			<xsl:if test="detail[@id=222 or @id=223 or @id=224]">
+				<div class="detailRow">
+					<div class="detailType">Images</div>
+					<div class="detail">
 						<!-- 222 = Logo image,  223 = Thumbnail,  224 = Images -->
 						<xsl:for-each select="detail[@id=222 or @id=223 or @id=224]"><a href="{file_fetch_url}">
 								<img src="{file_thumb_url}" border="0" class="thumbnail"/>
-							</a> &#160;&#160; </xsl:for-each>
-					</td>
-				</tr>
+							</a> &#160;&#160;
+						</xsl:for-each>
+					</div>
+				</div>
 			</xsl:if>
-		</table>
 	</xsl:template>
+
+
 	<xsl:template name="paragraphise">
 		<xsl:param name="text"/>
 		<xsl:for-each select="str:split($text, '&#xa;&#xa;')">

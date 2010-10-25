@@ -1,0 +1,956 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">
+ <head>
+  <title>Google Maps digitiser</title>
+
+  <style>
+
+#button-point, #button-circle, #button-rectangle, #button-polygon, #button-path, #button-save-zoom, #button-enter-values, #button-use { padding-left: 0; padding-right: 0; width: 90px; }
+#buttons td { height: 10px; }
+#buttons .selected input { font-weight: bold; }
+#buttons div { border: 2px solid white; }
+#buttons .selected div { border-color: black; }
+
+.gmls-more-results { display: none; }
+div.gs-directions-to-from { display: none !important; }
+a.gs-title { display: none; }
+
+#coord-window {
+	position: absolute;
+	display: none;
+}
+
+  </style>
+
+  <script src="/jquery/jquery.js"></script>
+
+  <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w"></script>
+
+<script src="http://www.google.com/uds/api?file=uds.js&amp;v=1.0&amp;key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w" type="text/javascript"></script>
+<script src="http://www.google.com/uds/solutions/localsearch/gmlocalsearch.js" type="text/javascript"></script>
+
+<style type="text/css">
+  @import url("http://www.google.com/uds/css/gsearch.css");
+  @import url("http://www.google.com/uds/solutions/localsearch/gmlocalsearch.css");
+</style>
+
+  <script>
+
+top.HAPI.importSymbols(top, this);
+
+var map;
+var mapDiv;
+var shape = {};
+var searchcontrol;
+var coordBoxWindow, coordBox;
+
+function openCoordBox() {
+	if (! shape.type) {
+		alert("Please select a shape type first");
+		return;
+	}
+	var text = "";
+	var caption = "";
+	var r = function(x) { return Math.round(x*1000000)/1000000; };
+
+	switch (shape.type) {
+	    case /* in */ "point":
+		caption = "Enter longitude/latitude coordinate pair (e.g. <tt>151.2,-33.9</tt>)";
+		if (shape.position) {
+			text = r(shape.position.lng()) + "," + r(shape.position.lat());
+		}
+		break;
+
+	    case "rectangle":
+		caption = "Enter longitude/latitude coordinate pairs (e.g. <tt>151.2,-33.9</tt>) for north-west and south-east corners, on separate lines";
+		if (shape.corner1  &&  shape.corner2) {
+			text = r(shape.corner1.lng()) + "," + r(shape.corner1.lat()) + "\n" +
+			       r(shape.corner2.lng()) + "," + r(shape.corner2.lat());
+		}
+		break;
+
+	    case "circle":
+		caption = "Enter longitude/latitude coordinate pair for centrepoint, and radius (e.g. <tt>151.2,-33.9,1</tt>)";
+		if (shape.centre  &&  shape.radius) {
+			text = r(shape.centre.lng()) + "," + r(shape.centre.lat()) + "," + r(shape.radius);
+		}
+		break;
+
+	    case "polygon":
+	    case "path":
+		caption = "Enter longitude/latitude coordinate pairs (e.g. <tt>151.2,-33.9</tt>), one per line";
+		if (shape.vertices) {
+			for (var i=0; i < shape.vertices.length; ++i) {
+				if (text) text += "\n";
+				text += r(shape.vertices[i].lng()) + "," + r(shape.vertices[i].lat());
+			}
+		}
+		break;
+	}
+
+	document.getElementById("coord-caption").innerHTML = caption;
+	document.getElementById("coord-box").value = text;
+	document.getElementById("coord-button").onclick = closeCoordBox;
+
+	coordBox = document.getElementById("coord-box");
+	coordBoxWindow = top.HEURIST.util.popupElement(window, document.getElementById("coord-window"),
+	                                               { "title": "Manual coordinate data entry", "no-resize": true });
+	setTimeout(function() { top.document.getElementById("coord-box").focus(); }, 20);
+}
+
+
+function closeCoordBox() {
+	var value = coordBox.value;
+
+	var text = "";
+	var caption = "";
+	var matches, bits;
+	var lat, lng, rad, points;
+	switch (shape.type) {
+	    case "point":
+		if ( (matches = value.match(/^\s*([^,\s]+)[,\s]+([^,\s]+)\s*$/)) ) {
+			lng = parseFloat(matches[1]);
+			lat = parseFloat(matches[2]);
+			if (lat !== NaN  &&  lng !== NaN) {
+				map.clearOverlays();
+				if (window.shape.dblclickHandle)
+					GEvent.removeListener(window.shape.dblclickHandle);
+				map.enableDoubleClickZoom();
+				mapDiv.title = mapDiv.getAttribute("defaultTitle");
+				document.getElementById("button-use").disabled = false;
+				initPoint(new GLatLng(lat, lng));
+				break;
+			}
+		}
+		alert("Invalid point data");
+		return;
+
+	    case "rectangle":
+		if ( (matches = value.match(/^\s*([^,\s]+)[,\s]+([^,\s]+)\s*\n\s*([^,\s]+)[,\s]+([^,\s]+)\s*$/)) ) {
+			points = [
+					{ lng: parseFloat(matches[1]), lat: parseFloat(matches[2]) },
+					{ lng: parseFloat(matches[1]), lat: parseFloat(matches[2]) }
+			];
+			if ((points[0].lat + points[0].lng + points[1].lat + points[0].lng) !== NaN) {
+				map.clearOverlays();
+				if (window.shape.dblclickHandle)
+					GEvent.removeListener(window.shape.dblclickHandle);
+				map.enableDoubleClickZoom();
+				mapDiv.title = mapDiv.getAttribute("defaultTitle");
+				document.getElementById("button-use").disabled = false;
+				initRectangle(new GLatLng(points[0].lat, points[0].lng), new GLatLng(points[1].lat, points[1].lng));
+				break;
+			}
+		}
+		alert("Invalid bounds data");
+		return;
+
+	    case "circle":
+		if ( (matches = value.match(/^\s*([^,\s]+)[,\s]+([^,\s]+)[,\s]*([^,\s]*)\s*$/)) ) {
+			lng = parseFloat(matches[1]);
+			lat = parseFloat(matches[2]);
+			rad = parseFloat(matches[3]);
+			if (lat !== NaN  &&  lng !== NaN) {
+				map.clearOverlays();
+				if (window.shape.dblclickHandle)
+					GEvent.removeListener(window.shape.dblclickHandle);
+				map.enableDoubleClickZoom();
+				mapDiv.title = mapDiv.getAttribute("defaultTitle");
+				document.getElementById("button-use").disabled = false;
+				initCircle(new GLatLng(lat, lng), rad || window.shape.radius || 1);
+				break;
+			}
+		}
+		alert("Invalid centre point data");
+		return;
+
+	    case "polygon":
+	    case "path":
+		if ( (matches = value.match(/^(?:\s*[^,\s]+[,\s]+[^,\s]+\s*\n)*\s*[^,\s]+[,\s]+[^,\s]+\s*$/)) ) {
+			matches = value.split(/\n/);
+			points = [];
+			for (i=0; i < matches.length; ++i) {
+				bits = matches[i].match(/([^,\s]+)[,\s]+([^,\s]+)/);
+				lng = parseFloat(bits[1]);
+				lat = parseFloat(bits[2]);
+				if (lat !== NaN  &&  lng !== NaN) {
+					points.push(new GLatLng(lat, lng));
+				}
+				else {
+					alert("Invalid point data \"" + matches[i] + "\"");
+					return;
+				}
+			}
+
+			if (shape.type === "polygon") {
+				if (! points[0].equals(points[points.length-1])) {
+					points.push(new GLatLng(points[0].lat(), points[0].lng()));
+				}
+				if (points.length > 3) {
+					map.clearOverlays();
+					if (window.shape.dblclickHandle)
+						GEvent.removeListener(window.shape.dblclickHandle);
+					map.enableDoubleClickZoom();
+					mapDiv.title = mapDiv.getAttribute("defaultTitle");
+					document.getElementById("button-use").disabled = false;
+					initPolygon(points);
+					break;
+				}
+				else {
+					alert("Polygon requires at least three different points");
+					return;
+				}
+			}
+			else {
+				if (points.length >= 2) {
+					map.clearOverlays();
+					if (window.shape.dblclickHandle)
+						GEvent.removeListener(window.shape.dblclickHandle);
+					map.enableDoubleClickZoom();
+					mapDiv.title = mapDiv.getAttribute("defaultTitle");
+					document.getElementById("button-use").disabled = false;
+					initPath(points);
+					break;
+				}
+				else {
+					alert("Path requires at least two points");
+					return;
+				}
+			}
+		}
+		alert("Invalid point data");
+		return;
+	}
+
+	top.HEURIST.util.closePopup(coordBoxWindow.id);
+}
+
+
+
+function load() {
+	var options;
+
+	if (GBrowserIsCompatible()) {
+		mapDiv = document.getElementById("map");
+		var winHeight = window.innerHeight || window.document.documentElement.clientHeight || window.document.body.clientHeight;
+		mapDiv.parentNode.style.height = (winHeight-10) + "px";
+
+		map = new GMap2(mapDiv);
+		map.enableDoubleClickZoom();
+		map.enableContinuousZoom();
+		map.enableScrollWheelZoom();
+		map.addControl(new GSmallMapControl());
+		map.addControl(new GMapTypeControl());
+
+		options = {
+			linkTarget: GSearch.LINK_TARGET_SELF,
+			/* onSearchCompleteCallback: localsearchCallback, */
+			onMarkersSetCallback: localsearchCallback,
+			suppressInitialResultSelection: true,
+			onGenerateMarkerHtmlCallback: markerCallback
+		};
+
+		searchcontrol = new google.maps.LocalSearch(options);
+		map.addControl(searchcontrol);
+		searchcontrol.appContainer.title = "Type a placename or latitude/longitude (e.g. -33.9 151.2)";
+
+		var defaultViewString = top.HEURIST.util.getDisplayPreference("gigitiser-view");
+		var viewBits;
+		if (defaultViewString  &&  (viewBits = defaultViewString.match(/(.*),(.*)@(\d+)(:[mkh])?/))) {
+			map.setCenter(new GLatLng(parseFloat(viewBits[1]) || 0, parseFloat(viewBits[2]) || 0), parseInt(viewBits[3]));
+			switch (viewBits[4]) {
+			    case ':m': map.setMapType(G_MAP_TYPE); break;
+			    case ':k': map.setMapType(G_SATELLITE_TYPE); break;
+			    case ':h': map.setMapType(G_HYBRID_TYPE); break;
+			}
+		}
+		else {
+			map.setCenter(new GLatLng(0, 0), 1);
+		}
+
+		if (document.location.search.match(/\?edit/)) {
+			HAPI.PJ.retrieve("gigitiser_geo_object",
+				function(_, val) {
+					loadParameters(val);
+				}
+			);
+		} else {
+			loadParameters();
+		}
+	}
+	else {
+		mapDiv.innerHTML = "<h3>Google Maps browser not available</h3><p>Sorry, but the Heurist digitiser uses the Google Maps API, which is not available on your browser.</p><a href=# onclick='window.close()'>Close this window</a>";
+	}
+}
+
+function saveZoom() {
+	if (! map) return;
+
+	var currentLatLng = map.getCenter();
+	var currentZoom = map.getZoom();
+	var currentMap = map.getCurrentMapType().getUrlArg();
+	var viewString = currentLatLng.lat() + "," + currentLatLng.lng() + "@" + currentZoom + ":" + currentMap;
+
+	top.HEURIST.util.setDisplayPreference("gigitiser-view", viewString);
+
+	var button = document.getElementById("button-save-zoom");
+	button.value = "View\nsaved";
+	button.style.color = "red";
+	setTimeout(function() { button.value = "Remember\nthis view"; button.style.color = ""; }, 2000);
+}
+
+
+function loadParameters(val) {
+
+	if (! val) {
+		val = decodeURIComponent(document.location.search);
+	}
+
+	var matches = val.match(/\??(\S+)\s+(.*)/);
+	if (! matches) return;
+	var type = matches[1];
+	var value = matches[2];
+
+	var sePoint, nwPoint;
+	switch (type) {
+	    case "p":
+		var matches = value.match(/POINT\((\S+)\s+(\S+)\)/i);
+		if (! matches) break;
+		var point = new GLatLng(parseFloat(matches[2]), parseFloat(matches[1]));
+		initPoint(point);
+		sePoint = new GLatLng(point.lat() - 0.5, point.lng() + 0.5);
+		nwPoint = new GLatLng(point.lat() + 0.5, point.lng() - 0.5);
+		var typeDescription = "point";
+		break;
+
+	    case "r":
+		var matches = value.match(/POLYGON\(\((\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*\S+\s+\S+\)\)/i);
+		if (! matches) break;
+		var point1 = new GLatLng(parseFloat(matches[2]), parseFloat(matches[1]));
+		var point2 = new GLatLng(parseFloat(matches[6]), parseFloat(matches[5]));
+		initRectangle(point1, point2);
+		sePoint = point1;
+		nwPoint = point2;
+		var typeDescription = "rectangle";
+		break;
+
+	    case "c":
+		var matches = value.match(/LINESTRING\((\S+)\s+(\S+),\s*(\S+)\s+\S+,\s*\S+\s+\S+,\s*\S+\s+\S+\)/i);
+		if (! matches) break;
+		var centre = new GLatLng(parseFloat(matches[2]), parseFloat(matches[1]));
+		var radius = parseFloat(matches[3])-parseFloat(matches[1]);
+		initCircle(centre, radius);
+		sePoint = new GLatLng(centre.lat() - radius, centre.lng() + radius);
+		nwPoint = new GLatLng(centre.lat() + radius, centre.lng() - radius);
+		var typeDescription = "circle";
+		break;
+
+	    case "l":
+		var matches = value.match(/LINESTRING\((.+)\)/i);
+		if (! matches) break;
+
+		matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
+		var points = [];
+		var minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
+		for (var j=0; j < matches.length-1; ++j) {
+			var match_matches = matches[j].match(/(\S+)\s+(\S+)(?:,|$)/);
+			var point = new GLatLng(parseFloat(match_matches[2]), parseFloat(match_matches[1]));
+			points.push(point);
+
+			if (point.lat() < minLat) minLat = point.lat();
+			if (point.lat() > maxLat) maxLat = point.lat();
+			if (point.lng() < minLng) minLng = point.lng();
+			if (point.lng() > maxLng) maxLng = point.lng();
+		}
+		sePoint = new GLatLng(minLat, minLng);
+		nwPoint = new GLatLng(maxLat, maxLng);
+		initPath(points);
+		var typeDescription = "path";
+		break;
+
+	    case "pl":
+		var matches = value.match(/POLYGON\(\((.+)\)\)/i);
+		if (! matches) break;
+
+		matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
+		var points = [];
+		var minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
+		for (var j=0; j < matches.length-1; ++j) {
+			var match_matches = matches[j].match(/(\S+)\s+(\S+)(?:,|$)/);
+			var point = new GLatLng(parseFloat(match_matches[2]), parseFloat(match_matches[1]));
+			points.push(point);
+
+			if (point.lat() < minLat) minLat = point.lat();
+			if (point.lat() > maxLat) maxLat = point.lat();
+			if (point.lng() < minLng) minLng = point.lng();
+			if (point.lng() > maxLng) maxLng = point.lng();
+		}
+		sePoint = new GLatLng(minLat, maxLng);
+		nwPoint = new GLatLng(maxLat, minLng);
+		initPolygon(points);
+		var typeDescription = "polygon";
+		break;
+	}
+
+
+	if (typeDescription) {
+		document.getElementById("button-use").disabled = false;
+		var button = document.getElementById("button-" + typeDescription);
+			button.parentNode.parentNode.parentNode.className = "selected";
+	}
+
+	zoomToBounds(nwPoint, sePoint);
+}
+
+
+function zoomToBounds(nwPoint, sePoint) {
+	var middle = new GLatLng(0.5*(sePoint.lat()+nwPoint.lat()), 0.5*(sePoint.lng()+nwPoint.lng()));
+	var dLat = Math.abs(nwPoint.lat() - sePoint.lat()) * 1.05;
+	var dLng = Math.abs(nwPoint.lng() - sePoint.lng()) * 1.05;
+
+	map.panTo(middle);
+
+	var zoom = map.getBoundsZoomLevel(new GLatLngBounds(new GLatLng(sePoint.lat(), nwPoint.lng()), new GLatLng(nwPoint.lat(), sePoint.lng())));
+
+	if (zoom < 1) zoom = 1;
+	else if (zoom > 14) zoom = 14;
+	map.setZoom(zoom);
+	map.panTo(middle);
+}
+
+function setShapeType(type) {
+	if (window.shape.dblclickHandle) GEvent.removeListener(window.shape.dblclickHandle);
+
+	window.shape = { };
+	map.clearOverlays();
+	map.disableDoubleClickZoom();
+
+	var dblclickFunction = null;
+	switch (type) {
+	    case "point":
+		dblclickFunction = initPoint;
+		mapDiv.title = "Double-click to place point";
+		break;
+
+	    case "circle":
+		dblclickFunction = initCircle;
+		mapDiv.title = "Double-click to place centre of circle";
+		break;
+
+	    case "rectangle":
+		dblclickFunction = initRectangle;
+		mapDiv.title = "Double-click to place corner of bounding-box";
+		break;
+
+	    case "polygon":
+		dblclickFunction = initPolygon;
+		mapDiv.title = "Double-click to place first point";
+		break;
+
+	    case "path":
+		dblclickFunction = initPath;
+		mapDiv.title = "Double-click to place first point";
+		break;
+
+	    default:
+		mapDiv.title = mapDiv.getAttribute("defaultTitle");
+	}
+
+	var buttons = document.getElementById("buttons");
+	for (var i=0; i < buttons.childNodes.length; ++i)
+		buttons.childNodes[i].className = "";
+	var button = document.getElementById("button-" + type);
+		button.parentNode.parentNode.parentNode.className = "selected";
+
+	document.getElementById("button-use").disabled = true;
+
+	if (dblclickFunction) {
+		var handle = GEvent.addListener(map, "dblclick", function(overlay, point) {
+			dblclickFunction(point);
+			mapDiv.title = mapDiv.getAttribute("defaultTitle");
+			document.getElementById("button-use").disabled = false;
+			GEvent.removeListener(handle);
+			map.enableDoubleClickZoom();
+		});
+
+		window.shape.dblclickHandle = handle;
+		window.shape.type = type;
+	}
+}
+
+function initCircle(centre, radius) {
+	window.shape = {
+		type: "circle",
+		centre: centre,
+		radius: radius || 1
+	};
+
+	if (! radius) {
+		var bounds = map.getBounds();
+		window.shape.radius = (bounds.getNorthEast().lat() - bounds.getSouthWest().lat()) / 10;
+	}
+
+	var centrePos = window.shape.centre;
+	window.shape.centreMarker = new GMarker(centrePos, { bouncy: true, draggable: true, title: "Drag this marker to move the centre of the circle" });
+	GEvent.addListener(window.shape.centreMarker, "dragend", function() {
+		var rpoint = window.shape.radiusMarker.getPoint();
+		var cpoint = window.shape.centreMarker.getPoint();
+		var dy = cpoint.lat() - window.shape.centre.lat();
+		var dx = cpoint.lng() - window.shape.centre.lng();
+
+		window.shape.centre = cpoint;
+		window.shape.radiusMarker.setPoint(new GLatLng(rpoint.lat()+dy, rpoint.lng()+dx));
+		drawCircle();
+	});
+
+	var radiusIcon = new GIcon();
+	radiusIcon.image = "triangle.png";
+	radiusIcon.shadow = "triangle-shadow.png";
+	radiusIcon.iconSize = new GSize(21, 19);
+	radiusIcon.shadowSize = new GSize(42, 19);
+	radiusIcon.iconAnchor = new GPoint(11, 18);
+
+	var radiusPos = new GLatLng(centrePos.lat() - window.shape.radius/Math.sqrt(2), centrePos.lng() + window.shape.radius/Math.sqrt(2));
+	window.shape.radiusMarker = new GMarker(radiusPos, { icon: radiusIcon, bouncy: false, draggable: true, title: "Drag this marker to set circle radius" });
+	GEvent.addListener(window.shape.radiusMarker, "drag", function() {
+		var rpoint = window.shape.radiusMarker.getPoint();
+		var dy = rpoint.lat() - window.shape.centre.lat();
+		var dx = rpoint.lng() - window.shape.centre.lng();
+		window.shape.radius = Math.sqrt(dx*dx + dy*dy);
+		drawCircle();
+	});
+	map.addOverlay(window.shape.radiusMarker);
+
+	drawCircle();
+}
+
+function initRectangle(point, point2) {
+	window.shape = {
+		type: "rectangle",
+		corner1: new GLatLng(point.lat(), point.lng()),
+		corner2: new GLatLng(point.lat() - 1, point.lng() + 1)
+	};
+
+	if (! point2) {
+		var bounds = map.getBounds();
+		var lat2 = point.lat() - (point.lat() - bounds.getSouthWest().lat()) / 10;
+		var lng2 = point.lng() - (point.lng() - bounds.getSouthWest().lng()) / 10;
+		window.shape.corner2 = new GLatLng(lat2, lng2);
+	}
+	else {
+		window.shape.corner2 = new GLatLng(point2.lat(), point2.lng());
+	}
+
+	window.shape.corner1marker = new GMarker(window.shape.corner1, { bouncy: true, draggable: true, title: "Drag this marker to a corner of the bounding-box" });
+	window.shape.corner2marker = new GMarker(window.shape.corner2, { bouncy: true, draggable: true, title: "Drag this marker to a corner of the bounding-box" })
+
+	GEvent.addListener(window.shape.corner1marker, "drag", function() {
+		window.shape.corner1 = window.shape.corner1marker.getPoint();
+		drawRectangle();
+	});
+	GEvent.addListener(window.shape.corner2marker, "drag", function() {
+		window.shape.corner2 = window.shape.corner2marker.getPoint();
+		drawRectangle();
+	});
+
+	map.addOverlay(window.shape.corner1marker);
+	map.addOverlay(window.shape.corner2marker);
+
+	drawRectangle();
+}
+
+
+function initPath(points) {
+	if (points && ! points.length)	// points is a single point
+		points = [ points ];
+
+	window.shape = {
+		type: "path",
+		vertices: [],
+		movingVertex: null
+	};
+
+	var startIcon = window.shape.vtxIcon = new GIcon();
+	startIcon.image = "start-triangle.png";
+	startIcon.shadow = "start-triangle-shadow.png";
+	startIcon.iconSize = new GSize(27, 29);
+	startIcon.shadowSize = new GSize(45, 29);
+	startIcon.iconAnchor = new GPoint(14, 28);
+
+	var vtxIcon = window.shape.vtxIcon = new GIcon();
+	vtxIcon.image = "triangle.png";
+	vtxIcon.shadow = "triangle-shadow.png";
+	vtxIcon.iconSize = new GSize(21, 19);
+	vtxIcon.shadowSize = new GSize(42, 19);
+	vtxIcon.iconAnchor = new GPoint(11, 18);
+
+	var addIcon = window.shape.addIcon = new GIcon();
+	addIcon.image = "triangle-plus.png";
+	addIcon.shadow = "triangle-shadow.png";
+	addIcon.iconSize = new GSize(21, 19);
+	addIcon.shadowSize = new GSize(42, 19);
+	addIcon.iconAnchor = new GPoint(11, 18);
+
+	var dotIcon = window.shape.dotIcon = new GIcon();
+	dotIcon.image = "5x5-dot.png";
+	dotIcon.iconSize = new GSize(5, 5);
+	dotIcon.iconAnchor = new GPoint(2, 2);
+
+	for (var i=0; i < points.length; ++i) {
+		addVertex(points[i], true, (i==1)? startIcon : null);
+	}
+	window.shape.vertexMarker = new GMarker(points[points.length-1], { bouncy: false, draggable: true, icon: addIcon, title: "Drag this marker to add a new point to the path" });
+
+	GEvent.addListener(window.shape.vertexMarker, "drag", function() {
+		window.shape.movingVertex = window.shape.vertexMarker.getPoint();
+		drawPolygon(false, true);
+	});
+	GEvent.addListener(window.shape.vertexMarker, "dragend", function() {
+		addVertex(window.shape.vertexMarker.getPoint(), true);
+		window.shape.movingVertex = null;
+		drawPolygon(true, true);
+	});
+
+	window.shape.dots = [];
+	for (var i=0; i < 4; ++i) {
+		var newDot = new GMarker(points[0], { inert: true, icon: dotIcon });
+		window.shape.dots.push(newDot);
+		map.addOverlay(newDot);
+	}
+	map.addOverlay(window.shape.vertexMarker);
+
+	drawPolygon(true, true);
+}
+
+function initPolygon(points, suppressClosingLine) {
+	if (points && ! points.length)	// points is a single point
+		points = [ points ];
+
+	window.shape = {
+		type: "polygon",
+		vertices: [],
+		movingVertex: null
+	};
+
+	var vtxIcon = window.shape.vtxIcon = new GIcon();
+	vtxIcon.image = "triangle.png";
+	vtxIcon.shadow = "triangle-shadow.png";
+	vtxIcon.iconSize = new GSize(21, 19);
+	vtxIcon.shadowSize = new GSize(42, 19);
+	vtxIcon.iconAnchor = new GPoint(11, 18);
+
+	var addIcon = window.shape.addIcon = new GIcon();
+	addIcon.image = "triangle-plus.png";
+	addIcon.shadow = "triangle-shadow.png";
+	addIcon.iconSize = new GSize(21, 19);
+	addIcon.shadowSize = new GSize(42, 19);
+	addIcon.iconAnchor = new GPoint(11, 18);
+
+	var dotIcon = window.shape.dotIcon = new GIcon();
+	dotIcon.image = "5x5-dot.png";
+	dotIcon.iconSize = new GSize(5, 5);
+	dotIcon.iconAnchor = new GPoint(2, 2);
+
+	for (var i=0; i < points.length; ++i) {
+		addVertex(points[i]);
+	}
+	var dragPoint = suppressClosingLine? points[0] : points[points.length-1];
+	window.shape.vertexMarker = new GMarker(dragPoint, { bouncy: false, draggable: true, icon: addIcon, title: "Drag this marker to add a new corner to the polygon" });
+
+	GEvent.addListener(window.shape.vertexMarker, "drag", function() {
+		window.shape.movingVertex = window.shape.vertexMarker.getPoint();
+		drawPolygon();
+	});
+	GEvent.addListener(window.shape.vertexMarker, "dragend", function() {
+		addVertex(window.shape.vertexMarker.getPoint());
+		window.shape.movingVertex = null;
+		drawPolygon(true);
+	});
+
+	window.shape.dots = [];
+	for (var i=0; i < 4; ++i) {
+		var newDot = new GMarker(points[0], { inert: true, icon: dotIcon });
+		window.shape.dots.push(newDot);
+		map.addOverlay(newDot);
+	}
+	map.addOverlay(window.shape.vertexMarker);
+
+	drawPolygon(true);
+}
+function addVertex(point, polylinePoint, icon) {
+	var index = window.shape.vertices.length - 1;
+	var prevPoint = window.shape.vertices[index];
+
+	window.shape.vertices.push(point);
+
+	if (prevPoint) {
+		if (! icon) icon = window.shape.vtxIcon;
+		var newMarker = new GMarker(prevPoint, { bouncy: false, draggable: true, icon: icon, title: "Drag this marker to move a corner of the polygon" });
+		GEvent.addListener(newMarker, "dragend", function() {
+			window.shape.vertices[index] = newMarker.getPoint();
+			drawPolygon(true, polylinePoint);
+		});
+		map.addOverlay(newMarker);
+	}
+}
+
+function initPoint(point) {
+	window.shape = {
+		type: "point",
+		position: point
+	};
+
+	var pointPos = window.shape.position;
+	window.shape.pointMarker = new GMarker(pointPos, { bouncy: true, draggable: true, title: "Drag this marker to move the point" });
+	GEvent.addListener(window.shape.pointMarker, "dragend", function() {
+		window.shape.position = window.shape.pointMarker.getPoint();
+	});
+
+	map.addOverlay(window.shape.pointMarker);
+}
+
+
+function drawCircle() {
+	if (window.shape.polylines) {
+		for (var i=0; i < window.shape.polylines.length; ++i)
+			map.removeOverlay(window.shape.polylines[i]);
+	}
+	window.shape.polylines = [];
+
+	var centre = window.shape.centre;
+	var radius = window.shape.radius;
+	var points = [];
+	for (var i=0; i < 30; ++i) {
+		var P = new GLatLng(centre.lat() + (radius * Math.sin(2 * Math.PI * i / 30)),
+		                    centre.lng() + (radius * Math.cos(2 * Math.PI * i / 30)));
+		points.push(P);
+	}
+	points.push(points[0]);	// close the circle
+
+	window.shape.polylines.push(new GPolyline(points, "#0000FF", 4, 0.8));
+	map.addOverlay(window.shape.polylines[0]);
+}
+
+function drawRectangle() {
+	if (window.shape.polylines) {
+		for (var i=0; i < window.shape.polylines.length; ++i)
+			map.removeOverlay(window.shape.polylines[i]);
+	}
+	window.shape.polylines = [];
+
+	var corner1 = window.shape.corner1;
+	var corner2 = window.shape.corner2;
+	var points = [];
+		points.push(new GLatLng(corner1.lat(), corner1.lng()));
+		points.push(new GLatLng(corner2.lat(), corner1.lng()));
+		points.push(new GLatLng(corner2.lat(), corner2.lng()));
+		points.push(new GLatLng(corner1.lat(), corner2.lng()));
+		points.push(new GLatLng(corner1.lat(), corner1.lng()));
+
+	window.shape.polylines.push(new GPolyline(points, "#0000FF", 4, 0.8));
+	map.addOverlay(window.shape.polylines[0]);
+}
+
+function drawPolygon(fullRedraw, suppressClosingLine) {
+	if (window.shape.movingVertex) {
+		var p0, p1;
+		p0 = window.shape.vertices[window.shape.vertices.length-1];
+		p1 = window.shape.movingVertex;
+
+		var n = window.shape.dots.length;
+		for (var i=0; i < n; ++i) {
+			var plat = p1.lat()*(i/n) + p0.lat()*((n-i)/n);
+			var plng = p1.lng()*(i/n) + p0.lng()*((n-i)/n);
+			window.shape.dots[i].setPoint(new GLatLng(plat, plng));
+		}
+
+		if (! fullRedraw) return;
+	}
+
+	if (window.shape.polylines) {
+		for (var i=0; i < window.shape.polylines.length; ++i)
+			map.removeOverlay(window.shape.polylines[i]);
+	}
+	window.shape.polylines = [];
+
+	if (! window.shape.movingVertex) {
+		if (! suppressClosingLine) {
+			var points = [];
+			points.push(window.shape.vertices[window.shape.vertices.length-1]);
+			points.push(window.shape.vertices[0]);
+			window.shape.polylines.push(new GPolyline(points, "#000040", 4, 0.3));
+		}
+
+		for (var i=0; i < window.shape.dots.length; ++i)
+			window.shape.dots[i].setPoint(window.shape.vertices[window.shape.vertices.length-1]);
+	}
+
+	if (window.shape.vertices.length > 1) {
+		var points = [];
+		for (var i=0; i < window.shape.vertices.length; ++i)
+			points.push(window.shape.vertices[i]);
+		window.shape.polylines.push(new GPolyline(points, "#0000FF", 4, 0.8));
+	}
+
+	for (var i=0; i < window.shape.polylines.length; ++i)
+		map.addOverlay(window.shape.polylines[i]);
+}
+
+
+function closeWithValue() {
+	var type, value;
+	var r = function(x) { return Math.round(x*10000000)/10000000; };
+	switch (window.shape.type) {
+	    case "point":
+		type = "p";
+		var point = window.shape.position;
+		value = "POINT("+r(point.lng())+" "+r(point.lat())+")";
+		break;
+
+	    case "rectangle":
+		type = "r";
+		var corner1 = window.shape.corner1, corner2 = window.shape.corner2;
+		var west = r(Math.min(corner1.lng(), corner2.lng()));
+		var east = r(Math.max(corner1.lng(), corner2.lng()));
+		var north = r(Math.max(corner1.lat(), corner2.lat()));
+		var south = r(Math.min(corner1.lat(), corner2.lat()));
+		value = "POLYGON(("+west+" "+north+","+east+" "+north+","+east+" "+south+","+west+" "+south+","+west+" "+north+"))";
+		break;
+
+	    case "circle":
+		type = "c";
+		var lat = r(window.shape.centre.lat());
+		var lng = r(window.shape.centre.lng());
+		var rad = r(window.shape.radius);
+		value = "LINESTRING("+lng+" "+lat+","+(lng+rad)+" "+lat+","+(lng-rad)+" "+(lat-rad)+","+(lng-rad)+" "+(lat+rad)+")";
+		break;
+
+	    case "polygon":
+		type = "pl";
+		var points = [];
+		for (var i=0; i < window.shape.vertices.length; ++i)
+			points.push(r(window.shape.vertices[i].lng())+" "+r(window.shape.vertices[i].lat()));
+		points.push(r(window.shape.vertices[0].lng())+" "+r(window.shape.vertices[0].lat()));	// close the polygon
+		value = "POLYGON((" + points.join(",") + "))";
+		break;
+
+	    case "path":
+		type = "l";
+		var points = [];
+		for (var i=0; i < window.shape.vertices.length; ++i)
+			points.push(r(window.shape.vertices[i].lng())+" "+r(window.shape.vertices[i].lat()));
+		value = "LINESTRING(" + points.join(",") + ")";
+	}
+
+	window.close(type, value);
+}
+
+
+window.onresize = function() {
+	var winHeight = window.innerHeight || window.document.documentElement.clientHeight || window.document.body.clientHeight;
+	mapDiv.parentNode.style.height = (winHeight-10) + "px";
+	map.checkResize();
+}
+
+
+function localsearchCallback(markers) {
+/*
+function localsearchCallback(searcher) {
+	var W=null, E=null, N=null, S=null;
+
+	for (var i=0; i < searcher.results.length; ++i) {
+		var point = searcher.results[i];
+		var lat = parseFloat(point.lat);
+		var lng = parseFloat(point.lng);
+		if (N === null  ||  lat > N) N = lat;
+		if (S === null  ||  lat < S) S = lat;
+		if (E === null  ||  lng > E) E = lng;
+		if (W === null  ||  lng < W) W = lng;
+	}
+
+	if (searcher.results.length === 1) {
+		console.log(searcher.results[0].marker);
+	}
+
+	if (N  ||  S) zoomToBounds(new GLatLng(N, W), new GLatLng(S, E));
+*/
+	var W=null, E=null, N=null, S=null;
+
+	for (var i=0; i < markers.length; ++i) {
+		var point = markers[i].result;
+		var lat = parseFloat(point.lat);
+		var lng = parseFloat(point.lng);
+		if (N === null  ||  lat > N) N = lat;
+		if (S === null  ||  lat < S) S = lat;
+		if (E === null  ||  lng > E) E = lng;
+		if (W === null  ||  lng < W) W = lng;
+	}
+
+	if (markers.length === 1) {
+		/* We have the "suppressInitialResultSelection" option set to true,
+		 * but we still want to select the initial result if there is only a SINGLE RESULT.
+		 * So, we fake a click event on the one and only marker.
+		 */
+		setTimeout(function() { GEvent.trigger(markers[0].marker, "click"); }, 0);
+	}
+
+	if (N  ||  S) zoomToBounds(new GLatLng(N, W), new GLatLng(S, E));
+}
+
+function markerCallback(marker, html, result) {
+	var div = document.createElement("div");
+	div.style.padding = "1em 0";
+
+	var input = document.createElement("input");
+	input.type = "button";
+	input.value = "Add a point here";
+
+	input.onclick = function() {
+		input.onclick = null;
+
+		window.shape.type = "point";
+		window.shape.position = new GLatLng(result.lat, result.lng);
+		setTimeout(closeWithValue, 0);
+	};
+	div.appendChild(input);
+	html.appendChild(div);
+
+	return html;
+}
+
+   </script>
+  </head>
+  <body width=750 height=450 style="margin: 5px; margin-right: 110px; padding: 0;" onload="setTimeout(load, 0)" onunload="GUnload()">
+
+   <script src=../js/heurist.js></script>
+
+     <div style="width: 100%; height: 100%;"><div id="map" style="width: 100%; height: 100%;"
+      defaulttitle="Double-click one or more times to zoom to a location" title="Double-click one or more times to zoom to a location"></div></div>
+
+      <table border=0 cellspacing=5 cellpadding=0 style="width: 100px; height: 100%; position: absolute; right: 0; top: 0;">
+       <tbody id=buttons>
+        <tr><td><div><input type=button id=button-point value=Point onclick="setShapeType('point')"></div></td></tr>
+        <tr><td><div><input type=button id=button-rectangle value="Box" onclick="setShapeType('rectangle')"></div></td></tr>
+        <tr><td><div><input type=button id=button-circle value=Circle onclick="setShapeType('circle')"></div></td></tr>
+        <tr><td><div><input type=button id=button-polygon value=Polygon onclick="setShapeType('polygon')"></div></td></tr>
+        <tr><td><div><input type=button id=button-path value=Path onclick="setShapeType('path')"></div></td></tr>
+        <tr><td>&nbsp;</td></tr>
+        <tr><td><div><input type=button id=button-enter-values value="Enter
+values" title="Open manual coordinate data entry form" onclick="openCoordBox();"></div></td></tr>
+        <tr><td>&nbsp;</td></tr>
+        <tr><td>&nbsp;</td></tr>
+        <tr><td><div><input type=button id=button-save-zoom value="Remember
+this view" title="Map will re-open to this area for new digitising" onclick="saveZoom();"></div></td></tr>
+        <tr><td>&nbsp;</td></tr>
+        <tr><td><div><input type=button id=button-use disabled style="font-weight: bold;" value="Save" onclick="closeWithValue();"></div></td></tr>
+       </tbody>
+      </table>
+
+     <div id=coord-window style="width: 340px; height: 280px; overflow: hidden;"><div style="padding: 5px;">
+      <div id=coord-caption></div>
+      <textarea id=coord-box style="width: 280px; height: 200px; border: 1px solid black; margin: 5px;"></textarea>
+      <input id=coord-button type=button value="Use value(s)">
+     </div></div>
+  </body>
+</html>

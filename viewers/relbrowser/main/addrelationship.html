@@ -144,7 +144,7 @@
 	function addRecord(){
 		var recTypeDrop=document.getElementById("recordTypeDrop");
 		var recTypeId=recTypeDrop.options[recTypeDrop.selectedIndex].value;
-		window.open("rb-edit.html?typeId="+recTypeId,"","status=0,scrollbars=1,resizable=1,width=800,height=600");
+		window.open("edit.html?typeId="+recTypeId,"","status=0,scrollbars=1,resizable=1,width=800,height=600");
 	}
 	function setLinkedRecord(id, title) {
 		linked_record = HeuristScholarDB.getRecord(id);

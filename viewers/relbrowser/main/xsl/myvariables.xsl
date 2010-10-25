@@ -9,7 +9,7 @@
 	<xsl:param name="instanceName"/>
 	<xsl:variable name="hapi-instance"><xsl:value-of select="$instanceName"/></xsl:variable>
 	<xsl:variable name="hapi-key">147983c93cdd221dd23f9a93884034f2246b7e01</xsl:variable>
-	<xsl:variable name="site-title">Main Data Explorer</xsl:variable>
+	<xsl:variable name="site-title">irek</xsl:variable>
 	<xsl:variable name="home-id">130843</xsl:variable>
 	<xsl:variable name="show-timelines-with-maps">yes</xsl:variable>
 

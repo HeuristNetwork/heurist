@@ -1798,7 +1798,7 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 				callback: function(_, _, response) {
 					top.HEURIST.util.popupURL(
 						windowRef,
-						"gigitiser/?" + (response.success ? "edit" : encodeURIComponent(input.value)),	// FIXME: need to map this to new location of gigitiser
+						"gigitiser/index.html?" + (response.success ? "edit" : encodeURIComponent(input.value)),	// FIXME: need to map this to new location of gigitiser
 						{ callback: function(type, value) { thisRef.setGeo(newDiv, value? (type+" "+value) : ""); } }
 					);
 				}

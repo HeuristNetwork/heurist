@@ -46,9 +46,8 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 		<!-- a blank timeMap object -->
 		<xsl:call-template name="generateTimeMapObjects">
 			<xsl:with-param name="title">Blank</xsl:with-param>
-			<xsl:with-param name="link"><xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$appBase"/>blank.kml</xsl:with-param>
+			<xsl:with-param name="link">http://heuristscholar.org<xsl:value-of select="$appBase"/>blank.kml</xsl:with-param>
 			<xsl:with-param name="theme">red</xsl:with-param>
-			<xsl:with-param name="type">kml</xsl:with-param>
 		</xsl:call-template>
 		<!-- related records -->
 		<xsl:for-each select="related">
@@ -60,78 +59,41 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 		</xsl:for-each>
 		<xsl:call-template name="generateTimeMapObjects">
 			<xsl:with-param name="title">Related records</xsl:with-param>
-			<xsl:with-param name="link"><xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>kml/relatedto:<xsl:value-of select="id"/></xsl:with-param>
+			<xsl:with-param name="link">http://heuristscholar.org<xsl:value-of select="$cocoonBase"/>kml/relatedto:<xsl:value-of select="id"/></xsl:with-param>
 			<xsl:with-param name="theme"><xsl:value-of select="$relatedTheme"/></xsl:with-param>
-			<xsl:with-param name="type">kml</xsl:with-param>
 		</xsl:call-template>
 		<!-- pointer to Site Record (57) for Historical Events -->
 		<xsl:for-each select="pointer[@id=276] | reverse-pointer[@id=276]">
 			<xsl:call-template name="generateTimeMapObjects">
 				<xsl:with-param name="title">Site reference</xsl:with-param>
-				<xsl:with-param name="link"><xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>kml/id:<xsl:value-of select="id"/></xsl:with-param>
+				<xsl:with-param name="link">http://heuristscholar.org<xsl:value-of select="$cocoonBase"/>kml/id:<xsl:value-of select="id"/></xsl:with-param>
 				<xsl:with-param name="theme"><xsl:value-of select="$focusTheme"/></xsl:with-param>
-				<xsl:with-param name="type">kml</xsl:with-param>
 			</xsl:call-template>
 		</xsl:for-each>
 		<!-- pointer to KML File (165) in case with KML map -->
 		<xsl:for-each select="pointer[@id=564]">
-			<xsl:choose>
-				<xsl:when test="detail[@id=610]">
-					<xsl:call-template name="generateTimeMapObjects">
-						<xsl:with-param name="title"><xsl:value-of select="title"/></xsl:with-param>
-						<xsl:with-param name="link"><xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>rssFeed/<xsl:value-of select="id"/></xsl:with-param>
-						<xsl:with-param name="type">georss</xsl:with-param>
-						<xsl:with-param name="theme">
-							<xsl:choose>
-								<xsl:when test="detail[@id=567]">
-									<xsl:value-of select="detail[@id=567]"/>
-								</xsl:when>
-								<xsl:otherwise>
-									<xsl:value-of select="$relatedTheme"/>
-								</xsl:otherwise>
-							</xsl:choose>
-						</xsl:with-param>
-					</xsl:call-template>
-				</xsl:when>
-				<xsl:otherwise>
-					<xsl:call-template name="generateTimeMapObjects">
-						<xsl:with-param name="title"><xsl:value-of select="title"/></xsl:with-param>
-						<xsl:with-param name="link"><xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>kmlfile/<xsl:value-of select="id"/></xsl:with-param>
-						<xsl:with-param name="type">kml</xsl:with-param>
-						<xsl:with-param name="theme">
-							<xsl:choose>
-								<xsl:when test="detail[@id=567]">
-									<xsl:value-of select="detail[@id=567]"/>
-								</xsl:when>
-								<xsl:otherwise>
-									<xsl:value-of select="$relatedTheme"/>
-								</xsl:otherwise>
-							</xsl:choose>
-						</xsl:with-param>
-					</xsl:call-template>
-				</xsl:otherwise>
-			</xsl:choose>
+			<xsl:call-template name="generateTimeMapObjects">
+				<xsl:with-param name="title"><xsl:value-of select="title"/></xsl:with-param>
+				<xsl:with-param name="link">http://heuristscholar.org<xsl:value-of select="$cocoonBase"/>kmlfile/<xsl:value-of select="id"/></xsl:with-param>
+				<xsl:with-param name="theme">
+					<xsl:choose>
+						<xsl:when test="detail[@id=567]">
+							<xsl:value-of select="detail[@id=567]"/>
+						</xsl:when>
+						<xsl:otherwise>
+							<xsl:value-of select="$relatedTheme"/>
+						</xsl:otherwise>
+					</xsl:choose>
+				</xsl:with-param>
+			</xsl:call-template>
 		</xsl:for-each>
 		<!-- record in focus -->
 		<xsl:call-template name="generateTimeMapObjects">
 			<xsl:with-param name="title">Focus record</xsl:with-param>
 			<xsl:with-param name="link">
 				<xsl:choose>
-					<xsl:when test="detail[@id = 610]">
-						<xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>rssFeed/<xsl:value-of select="id"/>
-					</xsl:when>
-					<xsl:when test="reftype[@id = 165]">
-						<xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>kmlfile/<xsl:value-of select="id"/>
-					</xsl:when>
-					<xsl:otherwise>
-						<xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>kml/id:<xsl:value-of select="id"/>
-					</xsl:otherwise>
-				</xsl:choose>
-			</xsl:with-param>
-			<xsl:with-param name="type">
-				<xsl:choose>
-					<xsl:when test="detail[@id=610]">georss</xsl:when>
-					<xsl:otherwise>kml</xsl:otherwise>
+					<xsl:when test="reftype[@id = 165]">http://heuristscholar.org<xsl:value-of select="$cocoonBase"/>kmlfile/<xsl:value-of select="id"/></xsl:when>
+					<xsl:otherwise>http://heuristscholar.org<xsl:value-of select="$cocoonBase"/>kml/id:<xsl:value-of select="id"/></xsl:otherwise>
 				</xsl:choose>
 			</xsl:with-param>
 			<xsl:with-param name="theme">
@@ -197,9 +159,8 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 				<xsl:if test="../id != $currentId">
 					<xsl:call-template name="generateTimeMapObjects">
 						<xsl:with-param name="title">Related records</xsl:with-param>
-						<xsl:with-param name="link"><xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>kml/id:<xsl:value-of select="../id"/></xsl:with-param>
+						<xsl:with-param name="link">http://heuristscholar.org<xsl:value-of select="$cocoonBase"/>kml/id:<xsl:value-of select="../id"/></xsl:with-param>
 						<xsl:with-param name="theme"><xsl:value-of select="$relatedTheme"/></xsl:with-param>
-						<xsl:with-param name="type">kml</xsl:with-param>
 					</xsl:call-template>
 				</xsl:if>
 			</xsl:for-each>
@@ -207,51 +168,24 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 	</xsl:if>
 	<xsl:if test="reftype[@id = 165]">
 		<!-- KML file (165) may or may not have a default symbology colour (567) detail type -->
-		<!-- KML file (165) may or may not have a geoRSS feed URL  (610) detail type -->
 		<xsl:call-template name="KMLFile165"/>
 	</xsl:if>
 </xsl:template>
 <xsl:template name="KMLFile165">
 	<xsl:choose>
-		<xsl:when test="detail[@id=610]">
-			<xsl:choose>
-				<xsl:when test="detail[@id=567]">
-					<xsl:call-template name="generateTimeMapObjects">
-						<xsl:with-param name="title">Related records</xsl:with-param>
-						<xsl:with-param name="link"><xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>rssFeed/<xsl:value-of select="id"/></xsl:with-param>
-						<xsl:with-param name="theme"><xsl:value-of select="detail[@id=567]"/></xsl:with-param>
-						<xsl:with-param name="type">georss</xsl:with-param>
-					</xsl:call-template>
-				</xsl:when>
-				<xsl:otherwise>
-					<xsl:call-template name="generateTimeMapObjects">
-						<xsl:with-param name="title">Related records</xsl:with-param>
-						<xsl:with-param name="link"><xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>rssFeed/<xsl:value-of select="id"/></xsl:with-param>
-						<xsl:with-param name="theme"><xsl:value-of select="$relatedTheme"/></xsl:with-param>
-						<xsl:with-param name="type">georss</xsl:with-param>
-					</xsl:call-template>
-				</xsl:otherwise>
-			</xsl:choose>
+		<xsl:when test="detail[@id=567]">
+			<xsl:call-template name="generateTimeMapObjects">
+				<xsl:with-param name="title">Related records</xsl:with-param>
+				<xsl:with-param name="link">http://heuristscholar.org<xsl:value-of select="$cocoonBase"/>kmlfile/<xsl:value-of select="id"/></xsl:with-param>
+				<xsl:with-param name="theme"><xsl:value-of select="detail[@id=567]"/></xsl:with-param>
+			</xsl:call-template>
 		</xsl:when>
 		<xsl:otherwise>
-			<xsl:choose>
-				<xsl:when test="detail[@id=567]">
-					<xsl:call-template name="generateTimeMapObjects">
-						<xsl:with-param name="title">Related records</xsl:with-param>
-						<xsl:with-param name="link"><xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>kmlfile/<xsl:value-of select="id"/></xsl:with-param>
-						<xsl:with-param name="theme"><xsl:value-of select="detail[@id=567]"/></xsl:with-param>
-						<xsl:with-param name="type">kml</xsl:with-param>
-					</xsl:call-template>
-				</xsl:when>
-				<xsl:otherwise>
-					<xsl:call-template name="generateTimeMapObjects">
-						<xsl:with-param name="title">Related records</xsl:with-param>
-						<xsl:with-param name="link"><xsl:value-of select="$serverBaseUrl"/><xsl:value-of select="$cocoonBase"/>kmlfile/<xsl:value-of select="id"/></xsl:with-param>
-						<xsl:with-param name="theme"><xsl:value-of select="$relatedTheme"/></xsl:with-param>
-						<xsl:with-param name="type">kml</xsl:with-param>
-					</xsl:call-template>
-				</xsl:otherwise>
-			</xsl:choose>
+			<xsl:call-template name="generateTimeMapObjects">
+				<xsl:with-param name="title">Related records</xsl:with-param>
+				<xsl:with-param name="link">http://heuristscholar.org<xsl:value-of select="$cocoonBase"/>kmlfile/<xsl:value-of select="id"/></xsl:with-param>
+				<xsl:with-param name="theme"><xsl:value-of select="$relatedTheme"/></xsl:with-param>
+			</xsl:call-template>
 		</xsl:otherwise>
 	</xsl:choose>
 </xsl:template>
@@ -260,7 +194,6 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 	<xsl:param name="title"/>
 	<xsl:param name="link"/>
 	<xsl:param name="theme"/>
-	<xsl:param name="type"/>
 
 	window.mapdata.timemap.push({
 		title: "<xsl:value-of select="$title"/>",
@@ -276,8 +209,8 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 			</xsl:otherwise>
 		</xsl:choose>
 		data: {
-			type: "<xsl:value-of select="$type"/>", // Data to be loaded in KML or from GEORSS feed- must be a local URL
-			url: "<xsl:value-of select="$link"/>" // KML file or GEORSS feed to load
+			type: "kml", // Data to be loaded in KML - must be a local URL
+			url: "<xsl:value-of select="$link"/>" // KML file to load
 		}
 	});
 </xsl:template>
