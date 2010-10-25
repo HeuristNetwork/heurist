@@ -5,7 +5,10 @@ define('T1000_SUPPRESS_HIDDEN_FIELDS',1);
 define('T1000_XML', 1);
 //define('T1000_DEBUG', 1);
 define('SAVE_URI', 'disabled');
-
+if (!@$_REQUEST['a'] == 1) {
+	define("BYPASS_LOGIN",true);
+	$where = "where rec_visibility ='viewable' or rec_visibility is null";
+}
 require_once(dirname(__FILE__).'/../../common/connect/cred.php');
 
 if (!is_logged_in()) {
@@ -28,17 +31,20 @@ mysql_connection_db_select(DATABASE);
 if (! @$_REQUEST['q']  ||  (@$_REQUEST['ver'] && intval(@$_REQUEST['ver']) < SEARCH_VERSION))
 	construct_legacy_search();	// migration path
 
-if (! @$_REQUEST['w']  ||  $_REQUEST['w'] == 'B'  ||  $_REQUEST['w'] == 'bookmark') {		// my bookmark entries
+if ( $_REQUEST['w'] == 'B'  ||  $_REQUEST['w'] == 'bookmark') {		// my bookmark entries
 	$search_type = BOOKMARK;
 	$query = 'select distinct pers_id ';
-} else if ($_REQUEST['w'] == 'a'  ||  $_REQUEST['w'] == 'all') {			// all records entries
+} else if (! @$_REQUEST['w']  ||$_REQUEST['w'] == 'a'  ||  $_REQUEST['w'] == 'all') {			// all records entries
 	$search_type = BOTH;
 	$query = 'select distinct rec_id ';
 } else {
 	return;	// wwgd
 }
-
-$query = REQUEST_to_query($query, $search_type);
+if (@$where){
+	$query = REQUEST_to_query($query, $search_type,NULL,"0");
+} else {
+	$query = REQUEST_to_query($query, $search_type);
+}
 if (preg_match('/.* order by (.*)/', $query, $matches)) {
 	$order_col = $matches[1];
 	if ($search_type == BOTH  ||  ! preg_match('/bib_/', $order_col)) {
@@ -51,6 +57,7 @@ if (preg_match('/.* order by (.*)/', $query, $matches)) {
 // hack!  Instead of stupidly searching the useless personals (bookmarks) table, give us rec_ids instead
 $query = str_replace("select distinct pers_id from", "select distinct rec_id from", $query);
 $SEARCHES['rss_search'] = $query;
+error_log("query = ".$query);
 
 $template = file_get_contents('search_rss.xml');
 
@@ -59,6 +66,8 @@ $template = file_get_contents('search_rss.xml');
 $lexer = new Lexer($template);
 
 $body = new BodyScope($lexer);
+
+$body->global_vars['hBase'] = HEURIST_URL_BASE;
 
 if ($search_type == BOOKMARK) $body->global_vars['search-type'] = 'bookmark';
 else $body->global_vars['search-type'] = 'biblio';
