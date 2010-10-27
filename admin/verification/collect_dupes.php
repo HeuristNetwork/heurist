@@ -32,7 +32,20 @@ if (!@$_REQUEST['q'] || array_key_exists("error", @$result) || @$result['resultC
 	//error has occured tell the user and stop
 ?>
 <html>
+<head>
+<title>Heurist Collect Duplicate Records</title>
+<link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/global.css'>
+<link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/publish.css'>
+</head>
 <body>
+
+<a id=home-link href='../../'>
+<div id=logo title="Click the logo at top left of any Heurist page to return to your Favourites"></div>
+</a>
+<div id=page>
+	<div class="banner">
+		<h2>Collect Duplicate Records</h2>
+	</div>
 	An error occured while retrieving the set of records to compare:
 
 <?php
@@ -44,6 +57,7 @@ if (!@$_REQUEST['q'] || array_key_exists("error", @$result) || @$result['resultC
 		print " The number of recIDs returned is not equal to the total number in the query result set.";
 	}
 ?>
+</div>
 </body>
 </html>
 
@@ -126,8 +140,22 @@ foreach ($dupes as $typekey => $subarr) {
 }
 
 ?><html>
+<head>
+<title>Heurist Collect Duplicate Records</title>
+<link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/global.css'>
+<link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/publish.css'>
+</head>
 <body>
+
+<a id=home-link href='../../'>
+<div id=logo title="Click the logo at top left of any Heurist page to return to your Favourites"></div>
+</a>
+<div id=page>
+	<div class="banner">
+		<h2>Collect Duplicate Records</h2>
+	</div>
 <form>
+<div class="wizard-box roundedBoth">
 Select fuzziness: <select name="fuzziness" id="fuzziness" onchange="form.submit();">
 <option value=3>3</option>
 <option value=4 <?= $fuzziness == 4  ? "selected" : "" ?>>4</option>
@@ -144,16 +172,14 @@ Select fuzziness: <select name="fuzziness" id="fuzziness" onchange="form.submit(
 <option value=30 <?= $fuzziness >= 30 ? "selected" : "" ?>>30</option>
 </select>
 characters of metaphone must match
+<div id=searchString>Search string: <input type="text" name="q" id="q" value="<?= @$_REQUEST['q'] ?>" /></div>
+</div>
+<br />Cross type matching will attemp to match titles of different record types. This is potentially a long search with many matching results. Increasing fuzziness will reduce the number of matches.
 <br />
-<br />Cross type matching will attemp to match titles of different record types. This is potentially a long search
-<br />with many matching results. Increasing fuzziness will reduce the number of matches.
 <br />
+<input type="checkbox" class="options" name="crosstype" id="crosstype" value=1 <?= $crosstype ? "checked" : "" ?>  onclick="form.submit();"> Do Cross Type Matching
 <br />
-search string: <input type="text" name="q" id="q" value="<?= @$_REQUEST['q'] ?>" />
-<br />
-<input type="checkbox" name="crosstype" id="crosstype" value=1 <?= $crosstype ? "checked" : "" ?>  onclick="form.submit();"> Do Cross Type Matching
-<br />
-<input type="checkbox" name="personmatch" id="personmatch" value=1   onclick="form.submit();"> Do Person Matching by SurName first
+<input type="checkbox" class="options" name="personmatch" id="personmatch" value=1   onclick="form.submit();"> Do Person Matching by SurName first
 <?php
 if (@$_REQUEST['w']) {
 ?>
@@ -184,7 +210,7 @@ if (@$_REQUEST['instance']) {
 
   unset($_REQUEST['personmatch']);
 
-print '<div>' . count($dupes) . ' potential groups of duplicates</div><hr>';
+print '<div id=dupeCount>' . count($dupes) . ' potential groups of duplicates</div><div class=duplicateList>';
 
 foreach ($dupes as $rectype => $subarr) {
     foreach ($subarr as $index => $key) {
@@ -192,7 +218,7 @@ foreach ($dupes as $rectype => $subarr) {
     	sort($diffHash,SORT_ASC);
     	$diffHash = join(',',$diffHash );
     	if (in_array($diffHash,$dupeDifferences)) continue;
-	    print '<div style="font-weight: bold;">' . $rectype . '&nbsp;&nbsp;&nbsp;&nbsp;';
+	    print '<div class=duplicateGroup><div style="font-weight: bold;">' . $rectype . '&nbsp;&nbsp;&nbsp;&nbsp;';
 //	    print '<a target="_new" href="'.HEURIST_URL_BASE.'search/search.html?w=all&q=ids:' . join(',', array_keys($bibs[$key])) . '">search</a>&nbsp;&nbsp;&nbsp;&nbsp;';
 //	    print '<a target="fix" href="fix_dupes.php?bib_ids=' . join(',', array_keys($bibs[$key])) . '">fix</a>&nbsp;&nbsp;&nbsp;&nbsp;';
 	    print '<input type="checkbox" name="dupeDiffHash[] title="Check to idicate that all records in this set are unique." id="'.$key.
@@ -210,10 +236,12 @@ foreach ($dupes as $rectype => $subarr) {
 		    print '</li>';
 	    }
 	    print '</ul>';
-		print '<a target="_new" href="'.HEURIST_URL_BASE.'search/search.html?q=ids:'.join(",",array_keys($bibs[$key])).'&instance='.HEURIST_INSTANCE.'">view duplicate set</a>';
+		print '<a target="_new" href="'.HEURIST_URL_BASE.'search/search.html?q=ids:'.join(",",array_keys($bibs[$key])).'&instance='.HEURIST_INSTANCE.'">view duplicate set</a></div>';
     }
 }
 ?>
+</div>
 </form>
+</div>
 </body>
 </html>

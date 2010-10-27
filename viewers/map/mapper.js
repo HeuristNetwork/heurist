@@ -147,6 +147,10 @@ function loadMap(options) {
 			map.addOverlay(polygon);
 			GEvent.addListener(polygon, "click", polygonClick);
 		}
+		var offset = GSize(200,20);
+		var label = new ELabel(new GLatLng(geo.geo.y, geo.geo.x), "<div class='testLabel' style='background-image:url(../../common/images/reftype-icons/"+record.reftype+".png)'>"+record.title+"</div>","",offset,100,true);
+		map.addOverlay(label);
+
 	}
 }
 
@@ -185,7 +189,6 @@ function calculateGoodMapView(geoObjects) {
 
 	return { latlng: centre, zoom: zoom };
 }
-
 
 function markerClick() {
 	var record = this.record;

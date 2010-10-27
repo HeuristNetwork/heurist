@@ -24,17 +24,20 @@ $use_site_hierarchy = array_key_exists('site_hierarchy', $_REQUEST);
  <head><title>Heurist - Add bookmark (disambiguation)</title>
 
 <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+<link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/publish.css'>
 <link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/disambiguate.css'>
 <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
 <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
 </head>
-
- <body>
-<div id=page style="padding: 20px;">
+<body>
 <a id=home-link href='../../'>
 <div id=logo title="Click the logo at top left of any Heurist page to return to your Favourites"></div>
 </a>
-<div><h1>Possible duplicate URL </h1></div>
+<div id=page>
+	<div class="banner">
+		<h2>Possible duplicate URL</h2>
+	</div>
+
 <?= $page_header ?>
 
 <div id="main">

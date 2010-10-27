@@ -1365,6 +1365,41 @@ top.HEURIST.search = {
 		}
 	},
 
+	mapSelected: function() {
+		var p = top.HEURIST.parameters;
+		var recIds = top.HEURIST.search.selectedRecordIds.slice(0,500); // maximum number of records ids 500
+		if (top.HEURIST.search.selectedRecordIds.length >= 500) {
+			alert("Selected record count is great than 500, mapping the first 500 records!");
+		}
+		var query_string = '?ver='+(p['ver'] || "") + '&w=all&q=ids:' +
+			recIds.join(",") +
+			'&stype='+(p['stype'] || "") +
+			'&instance='+(p['instance'] || "");
+		query_string = encodeURI(query_string);
+		url = top.HEURIST.basePath+ "viewers/map/index.html" + query_string;
+		// set frame source to url
+		// make frame visible
+		var mapDiv = document.createElement("div");
+		mapDiv.id = "mapDiv";
+		mapDiv.style.display = "block";
+		var closeMapButton = document.createElement("div");
+		closeMapButton.className = "close-button";
+		closeMapButton.onclick = top.HEURIST.search.closeMap;
+		closeMapButton.title = "Close Map";
+		mapDiv.appendChild(closeMapButton);
+		var mapiFrame = document.createElement("iFrame");
+		mapiFrame.style.border = "0";
+		mapiFrame.style.width = "100%";
+		mapiFrame.style.height = "100%";
+		mapiFrame.src = url
+		mapDiv.appendChild(mapiFrame);
+		document.getElementById("page").appendChild(mapDiv);
+	},
+	closeMap: function() {
+		var mapDiv = document.getElementById("mapDiv");
+		mapDiv.parentNode.removeChild(mapDiv);
+	},
+
 	selectAll: function() {
 		if (top.HEURIST.search.results.totalRecordCount > top.HEURIST.search.resultsPerPage) {
 			top.HEURIST.search.selectAllPages();

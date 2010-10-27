@@ -1,15 +1,16 @@
 /* CSS Document */
 .breaker {padding: 5px;}
-input {margin: 0pt;vertical-align: text-top;}
+input {vertical-align: sub;}
 #query-highlight {background-color:#EFEFEF;bottom:10px;color:#333333;left:10px;margin-top:0;padding-bottom:5px;padding-top:5px;position:absolute;right:10px;}
 #wizard-subheading {margin-bottom: 10px;font-weight:bold;font-size:13px;}
 .wizard-box{background-color:#efefef; border: 1px solid lightgrey;padding:10px;}
-/**** global overrides ****/
-#page {top:75px; bottom:10px; right: 10px; left: 10px;display: block;padding: 40px 10px 10px 10px;}
-#header {display: none;}
-h2 {color:#6A7C99;font-size:14px;line-height:6px;padding:0 10px;text-transform:uppercase;}
-form {display:inline}
-#forceform img {border:0 none;padding:0 5px 0 10px;vertical-align:text-top;}
-#home-link {position:absolute; top:0; left:0; right:0; height:56px; background-color: #F2F2F2; background-repeat: repeat-x; background-position: bottom;background-image:url("../images/backgrounds/banner_bg.png");border-bottom:1px solid #999999;max-width:100%}
-#logo {left:15px;top:5px;}
-#quicklinks {top:23px; font-weight: bold;}
+.lightGreyBorder {border:1px solid lightgrey;}
+.duplicateList{background-color:#efefef; border:1px solid #AAAAAA;float:right;min-height:200px;overflow:auto;position:absolute;right:10px;top:220px;left:10px;bottom:10px;padding: 10px;	-moz-border-radius-bottomleft:5px;-moz-border-radius-bottomright:5px;-moz-border-radius-topleft:5px;-moz-border-radius-topright:5px;-webkit-border-bottom-left-radius:5px;-webkit-border-bottom-right-radius:5px;-webkit-border-top-left-radius:5px;-webkit-border-top-right-radius:5px;border-bottom-left-radius:5px;border-bottom-right-radius:5px;border-top-left-radius:5px;border-top-right-radius:5px;}
+.duplicateGroup {background-color:#FFFFFF; border:1px solid #A4B4CB;display:inline-block;height:90px;margin:10px;min-width:80px;overflow:auto;padding:10px;width:29%;}
+.duplicateGroup ul{color:#6A7C99;list-style-position:outside;list-style-type:square;padding-left:14px;}
+.duplicateGroup ul li{line-height: 14px;padding-bottom: 3px;}
+#dupeCount {color:#6A7C99;font-size:12px;font-weight:bold;padding:10px 3px;}
+#q {border:1px solid #ECE9D8;color:#6A7C99;display:inline-block;padding:0 3px;vertical-align:middle;}
+#searchString {display: block;padding: 6px 0;}
+
+.options{display:table-cell; vertical-align: middle;}

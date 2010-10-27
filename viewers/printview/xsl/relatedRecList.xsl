@@ -6,7 +6,7 @@
 	<xsl:template match="/">
 
 		<!-- Relationship Header goes here -->
-			<div id="relationshipHeader{hml/records/record/id}" class="relatedHeader" >Related Records</div>
+			<div id="relationshipHeader{hml/records/record/id}" class="relatedHeader" >Related Records:</div>
 
 		<xsl:call-template name="relationShip_record_section">
 			<xsl:with-param name="items" select="hml/records/record/relationships/record"/>

@@ -511,16 +511,11 @@ body, .darkBG {
 	border-top-left-radius:10px;
 	border-top-right-radius:10px;
 	border:1px solid #999999;
+	top:55px;
+	bottom:20px;
 }
-#page {
-	top: 75px;
-	left: 305px;
-	right: 10px;
-	height:auto;
-	width:auto;
-}
+#page {left: 10px; right: 10px;height:auto;width:auto;padding:40px 10px 10px 10px;}
 #sidebar {
-	top: 75px;
 	left: 10px;
 	width: 285px;
 }
@@ -600,7 +595,7 @@ body {
 	left:10px;
 }
 
-#logo {width:180px;left:15px;top:5px;}
+#logo {width:180px;left:0px;top:0px;}
 #version { position: absolute; left: 150px; top: 36px; color: white; font-size: 10px; }
 #quicklinks-cell {
 	color:#666666;
@@ -868,3 +863,9 @@ body.w-all #all-records-button, body.w-bookmark #my-records-button {
 #toolbox a {color:#CCCCCC;display:block;font-size:10px;font-weight:bold;height:19px;padding:3px 10px 0;text-decoration:none;}
 #toolbox a:hover {background-color: RGBA(255,255,255,0.2);color:#FFF}
 
+
+#header {display: none;}
+h2 {color:#6A7C99;font-size:14px;line-height:6px;padding:0 10px;text-transform:uppercase;}
+form {display:inline}
+#forceform img {border:0 none;padding:0 5px 0 10px;vertical-align:text-top;}
+div#mapDiv .close-button {top:2px; right:2px}

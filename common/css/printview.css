@@ -1,4 +1,4 @@
-/* import.css
+/* printview.css
  * Copyright 2010 Ireneusz "Irek" Golka
  * http://heuristscholar.org/
  *
@@ -39,12 +39,10 @@ img a:link {border: none;}
 .banner A, .banner A:hover, .banner input {text-decoration:none;color:#6A7C99 !important;}
 .banner A:hover{text-decoration:underline;color:#6A7C99 !important;}
 form {line-height:18px;margin: 3px;} */
-
 h2 {text-transform:none;font-size: 12px;}
 h3 {display: inline;}
 #q {-moz-border-radius:10px; -webkit-border-radius:10px; border-radius:10px}
 
-/* bib-import specific*/
 -container { overflow: auto; }
 #results { bottom:25px;left:0;overflow:auto;position:absolute;right:0;top:50px;background-color:#FFF;padding: 0;}
 #results .record * { vertical-align: middle; }
@@ -69,24 +67,11 @@ input[type="radio"] {vertical-align: text-top;}
 /**** record view styles ****/
 
 .detailType {width:90px;display: table-cell;color: #999999;vertical-align: top;padding: 0 10px 0 0;text-align: right;text-transform: none;}
-.related-records .detailType {background-position:right center;
-background-repeat:no-repeat;
-color:#AAAAAA;
-display:table-cell;
-margin:10px;
-padding-bottom:0;
-padding-left:0;
-padding-top:0;
-text-align:right;
-text-transform:none;
-vertical-align:top;
-width:16px;}
-
+.related-records .detailType {background-position:right center;background-repeat:no-repeat;color:#AAAAAA;display:table-cell;margin:10px;padding-bottom:0;padding-left:0;padding-top:0;text-align:right;text-transform:none;vertical-align:top;width:16px;}
 .detail {display: table-cell;padding-left: 15px;text-transform: none;color: #000;}
 .related-records .detail {color: #666;}
 .detailRow {display: table;padding: 5px 0 5px 0;font-size: 11px;overflow: visible;}
 .detailRowHeader {display: table;padding: 5px 0 5px 0;width:100%;border-top: 1px solid #7D9AAA;font-size: 11px;overflow: visible;text-align: left;color:#7D9AAA; text-transform: uppercase;}
-
 .personPhoto {max-width: 150px;padding:0 16px 0 0;}
 .thumbnail {float:right;margin-right: 10px;margin: 0 0 0 10px;}
 div.thumbnail img{width:80px;border: 2px solid #FFF;-moz-box-shadow:0 2px 4px #BBB;-webkit-box-shadow:0 2px 4px #BBB;box-shadow:0 2px 4px #BBB;}
@@ -97,14 +82,15 @@ img {border:0 none;vertical-align:middle;}
 #footer {position: absolute;top:0; right:0;left:0;}
 .record.selected {display:block; padding: 10px;}
 .record.result_thumb.selected {display:inline-block;}
+.record.full_result_thumb.selected {display:inline-block;}
 .record, .record.result_thumb {display:none; padding:0; text-align: left;}
+.record, .record.full_result_thumb {display:none; padding:0; text-align: left;}
 #style_select {background-color:rgba(255, 255, 255, 0.5);border:1px solid #AAAAAA;width:180px;}
 #loading{position: absolute;top:0;bottom:0;left:0;right:0; background-image: url("../images/loading-animation-white.gif");background-position: 50% 50%;background-repeat: no-repeat;}
 .loading{background-image: url("../images/loading-animation-white.gif");background-position: 50% 50%;background-repeat: no-repeat;height:100px}
 .separator_row {height: 1px; border-bottom: 1px solid #A4B4CB;clear:both}
 .reftype { color: #999999;vertical-align: top; }
 .record-table {margin-bottom: 10px;}
-
 record {display: block;margin:10px}
 records {margin:20px}
 hml {margin:10px}
@@ -124,68 +110,23 @@ div.show-related:hover {text-decoration: underline;}
 #printingLink {display: inline;padding:0 3px;width:16px; height:16px; background-image:url("../images/print.png"); background-repeat: no-repeat ;display: inline-block; vertical-align: top;margin-left: 10px;}
 
 /*  thumbnail view */
-.result_thumb {
-	-moz-border-radius:10px 10px 10px 10px;
-	-moz-box-shadow:0 2px 4px #AAAAAA;
-	border-radius:10px 10px 10px 10px;
-	box-shadow:0 2px 4px #AAAAAA;
-	-webkit-border-radius:10px 10px 10px 10px;
-	-webkit-box-shadow:0 2px 4px #AAAAAA;
-	background:url("../images/backgrounds/thumbnail_bg.png") repeat-x scroll 0 bottom #F6F6F6 !important;
-	border:3px solid #FFFFFF;
-	border-collapse:collapse;
-	display:inline-block;
-	height:140px;
-	margin:7px;
-	overflow:visible;
-	padding:0;
-	position:relative;
-	width:140px;
-	overflow:hidden;
-}
-.result_thumb .recID {
-	position: absolute;
-	right:0;
-	top:3px;
-	font-size: 8px;
-}
+.result_thumb {-moz-border-radius:10px 10px 10px 10px;-moz-box-shadow:0 2px 4px #AAAAAA;border-radius:10px 10px 10px 10px;box-shadow:0 2px 4px #AAAAAA;-webkit-border-radius:10px 10px 10px 10px;-webkit-box-shadow:0 2px 4px #AAAAAA;background:url("../images/backgrounds/thumbnail_bg.png") repeat-x scroll 0 bottom #F6F6F6 !important;border:3px solid #FFFFFF;border-collapse:collapse;display:inline-block;height:140px;margin:7px;overflow:visible;padding:0;position:relative;width:140px;overflow:hidden;}
+.result_thumb .recID {position: absolute;right:0;top:3px;font-size: 8px;}
 .result_thumb .thumbnail, .result_thumb .rec_title, .result_thumb .icons, .links {left:2px;overflow:hidden;position:absolute;z-index:1;text-align: left;padding-left:0px;}
 .result_thumb .icons {overflow: visible;}
-.result_thumb .thumbnail, .result_thumb .thumbnail .no-thumbnail {-moz-background-size:100% auto;
-	background-position:center center;
-	background-repeat:no-repeat;
-	height:75px;
-	left:0;
-	line-height:42px;
-	margin:0;
-	min-height:75px;
-	position:absolute;
-	right:0;
-	text-align:center;
-	top:13px;
-	vertical-align:middle;}
-.result_thumb .thumbnail img, .result_thumb div.thumbnail img {
-	-moz-box-shadow:none;
-	border:medium none;
-	bottom:0;
-	left:0;
-	margin:0;
-	padding:0;
-	position:absolute;
-	top:-25%;
-	width:100%;}
+.result_thumb .thumbnail, .result_thumb .thumbnail .no-thumbnail {-moz-background-size:100% auto;background-position:center center;background-repeat:no-repeat;height:75px;left:0;line-height:42px;margin:0;min-height:75px;position:absolute;right:0;text-align:center;top:13px;vertical-align:middle;}
+.full_result_thumb{-moz-background-size:100% auto;-moz-border-radius:10px 10px 10px 10px;-moz-box-shadow:0 2px 4px #AAAAAA;-webkit-background-size:100% auto;-webkit-border-radius:10px 10px 10px 10px;-webkit-box-shadow:0 2px 4px #AAAAAA;background-size:100% auto;border-radius:10px 10px 10px 10px;box-shadow:0 2px 4px #AAAAAA;background-color:#999999;background-position:center center;background-repeat:no-repeat;border:3px solid #FFFFFF;border-collapse:collapse;height:140px;margin:7px 7px 70px 7px;overflow:visible;position:relative;width:140px;}
+.full_result_thumb .rec_title {bottom:-70px;font-weight:bold;height:65px;overflow:hidden;position:absolute;text-align:center;width:100%;}
+.full_result_thumb #recId {background:none repeat scroll 0 0 #FFFFFF;border-bottom:1px solid #DDDDDD;bottom:0;float:none;font-weight:normal;height:17px;padding-top:3px;position:absolute;width:100%;}
+.result_thumb .thumbnail img, .result_thumb div.thumbnail img {-moz-box-shadow:none;-webkit-box-shadow:none;box-shadow:none;border:medium none;bottom:0;left:0;margin:0;padding:0;position:absolute;top:-25%;width:100%;}
 .result_thumb .thumbnail .no-thumbnail, .no-thumbnail {opacity:0.3;}
-
 .result_thumb .rec_title {height:25px;line-height:12px;text-align:left;top:90px;color:#666;}
 .result_thumb .rec_title a{line-height: 12px;text-decoration: none;}
 .result_thumb .rec_title a:hover{text-decoration: underline;}
 .result_thumb .unbookmarked {margin-bottom: 2px;}
 .result_thumb .bookmarked {margin-bottom: 2px;}
-
 .result_thumb .icons, .info_button, .done_button, .rec_links {bottom:0px;}
 .result_thumb .icons img {vertical-align: text-bottom; margin-left: 0px;}
-/*.result_thumb .icons img.rft {margin-left: 10px;}*/
 .result_thumb .icons input {vertical-align: text-bottom;}
-
-.rec_type {left:3px;position:absolute;top:124px;color:#7D9AAA}
+.rec_type {-moz-border-radius:6px 6px 6px 6px;-webkit-border-radius:6px 6px 6px 6px;border-radius:6px 6px 6px 6px; background-color:RGBA(0,0,0,0.3);color:#7D9AAA;left:0;padding:0 3px;position:absolute;text-align:center;top:126px;width:134px;}
 .greyType {color: #999999}

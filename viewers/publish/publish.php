@@ -159,7 +159,7 @@
 		You should have received a copy of the GNU General Public License
 		along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		-->
-		<title>Heurist</title>
+		<title>Heurist Publishing Wizard</title>
 		<link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/global.css">
 		<link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/publish.css">
 

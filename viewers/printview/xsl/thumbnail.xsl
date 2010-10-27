@@ -83,7 +83,7 @@
 				</div>
 			</xsl:when>
 
-			<xsl:when test="(type[@id = 74]) and not (detail[@id=224]) and not (detail[@id=603]) and not (detail[@id=604]) and url">
+			<xsl:when test="(type[@id=74 or @id=129]) and not (detail[@id=224]) and not (detail[@id=603]) and not (detail[@id=604]) and url">
 				<div class="thumbnail url">
 					<img  src="{url}" title="{url}"/>
 				</div>

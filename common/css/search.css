@@ -321,10 +321,10 @@ div.hide .saved-search-subheading {background-image:url("../images/sub_heading_s
 
 /**** global overrides ****/
 
-#sidebar, #page {bottom:20px;top:55px}
+#sidebar, #page, .mapDiv {bottom:20px;top:55px}
 
 #sidebar {width:200px;}
-#page {left:220px;}
+#page, .mapDiv {left:220px;}
 
 #page-right {right:0; border-left: 1px solid #A4B4CB;bottom:10px;left:50%;position:absolute;top:40px;overflow: hidden;background}
 
@@ -379,3 +379,6 @@ input[type=checkbox] {display: none;}
 
 #printingLink {background-image:url("../images/print.png");background-position:left center;background-repeat:no-repeat;border-right:1px solid rgba(0, 0, 0, 0.1);display:block !important;height:29px;margin-left:10px;width:16px;cursor:pointer}
 #publish-image-placeholder {border-right:1px solid rgba(0, 0, 0, 0.1)}
+
+/* map window */
+#mapDiv {-moz-border-radius:0 0 10px 10px;position:absolute; background-color: RGBA(255,255,255,0.8); z-index: 100000;top:40px;bottom: 0;right:0; left:0; }

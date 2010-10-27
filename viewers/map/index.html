@@ -16,13 +16,28 @@
 
 body div { line-height: 1.5em; }
 
+.testLabel {
+background-color:RGBA(0,0,0,0.6);
+border: 1px solid #FFF;
+-moz-border-radius: 6px;
+-moz-box-shadow: 0 2px 4px #666;
+background-repeat:no-repeat;
+font-size:10px;
+line-height:10px;
+padding:3px 3px 3px 18px;
+width:auto;
+color:#FFF;
+margin-bottom: 20px;
+margin-left: -100%;}
+
+
   </style>
   <!--<script src="http://simile.mit.edu/timeline/api/timeline-api.js"></script> -->
   <script src="../../external/simile/timeline-api.js" type="text/javascript"></script>
 
  </head>
 
- <body style="margin: 0; padding: 0;">
+ <body onload="load();" style="margin: 0; padding: 0;">
 
   <table border=0 cellspacing=0 cellpadding=0 id=all-table><tbody>
    <tr><td id=map-cell><div id=map></div></td></tr>
@@ -37,6 +52,12 @@ body div { line-height: 1.5em; }
   </tbody></table>
 
   <script>
+  var HEURIST = {};
+document.write('<scr'+'ipt src="'+location.pathname.replace(/\/[^\/]*$/,"/")+'tmap-data.php' + location.search + '"></scr'+'ipt>');
+</script>
+
+
+  <script>
 if (location.search.match(/\btimeline=0\b/)) {
 	var tdTimeline = document.getElementById("timeline-cell");
 	tdTimeline.style.display = "none";
@@ -46,69 +67,68 @@ if (location.search.match(/\btimeline=0\b/)) {
 	tdResizer.parentNode.style.display = "none";
 	document.getElementById("info-cell").style.display = "none";
 }
-var HEURIST = {};
-document.write('<scr'+'ipt src="'+location.pathname+'tmap-data.php' + location.search + '"></scr'+'ipt>');
 </script>
 
-<script>
-if (HEURIST.tmap.totalRecordCount == 0) {
-	document.body.style.margin = "10px";
-	document.body.innerHTML = "<h3>The search results you are trying to plot do not contain any geographic objects</h3>";
-	if (window.stop) window.stop();
-	else if (document.execCommand) document.execCommand("Stop");
-}
-else {
-	document.getElementById("record-count").innerHTML = "" + HEURIST.tmap.totalRecordCount;
-	document.getElementById("total-record-count").innerHTML = "" + HEURIST.tmap.totalRecordCount;
-}
-  </script>
 
   <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w"></script>
   <script src="epoly.js"></script>
+  <script src="elabel.js"></script>
 
   <script src="mapper.js"></script>
   <script src="timeline.js"></script>
 
   <script>
-if (HEURIST.tmap.totalRecordCount > 0) {
-	loadMap({ compact: location.search.match(/\bcompact=1\b/) });
-	if (! location.search.match(/\btimeline=0\b/)) loadTimeline();
-}
+  function load(){
+	if (HEURIST.tmap.totalRecordCount == 0) {
+		document.body.style.margin = "10px";
+		document.body.innerHTML = "<h3>The search results you are trying to plot do not contain any geographic objects</h3>";
+		if (window.stop) window.stop();
+		else if (document.execCommand) document.execCommand("Stop");
+	}
+	else {
+		document.getElementById("record-count").innerHTML = "" + HEURIST.tmap.totalRecordCount;
+		document.getElementById("total-record-count").innerHTML = "" + HEURIST.tmap.totalRecordCount;
+	}
+	if (HEURIST.tmap.totalRecordCount > 0) {
+		loadMap({ compact: location.search.match(/\bcompact=1\b/) });
+		if (! location.search.match(/\btimeline=0\b/)) loadTimeline();
+	}
 
-var resizerCell = document.getElementById("resizer");
-var timelineCell = document.getElementById("timeline-cell");
-resizerCell.onmousedown = function(e) {
-	if (! e) e = window.event;
-
-	var downY = e.pageY || e.clientY;
-	var downHeight = timelineCell.offsetHeight;
-
-	resizerCell.document_mouseup = function(e) {
+	var resizerCell = document.getElementById("resizer");
+	var timelineCell = document.getElementById("timeline-cell");
+	resizerCell.onmousedown = function(e) {
 		if (! e) e = window.event;
 
-		var upY = e.pageY || e.clientY;
-		var upHeight = downHeight + (downY - upY);
+		var downY = e.pageY || e.clientY;
+		var downHeight = timelineCell.offsetHeight;
 
-		timelineCell.style.height = upHeight + "px";
-		timeline.layout();
+		resizerCell.document_mouseup = function(e) {
+			if (! e) e = window.event;
 
-		if (top.HEURIST.deregisterEvent) {
-			top.HEURIST.deregisterEvent(document, "mouseup", resizerCell.document_mouseup);
-		}else if (window.removeEventListener) {
-			document.removeEventListener("mouseup", resizerCell.document_mouseup,true);
-		} else if (window.detachEvent) {
-			document.detachEvent("onmouseup", resizerCell.document_mouseup);
+			var upY = e.pageY || e.clientY;
+			var upHeight = downHeight + (downY - upY);
+
+			timelineCell.style.height = upHeight + "px";
+			timeline.layout();
+
+			if (top.HEURIST.deregisterEvent) {
+				top.HEURIST.deregisterEvent(document, "mouseup", resizerCell.document_mouseup);
+			}else if (window.removeEventListener) {
+				document.removeEventListener("mouseup", resizerCell.document_mouseup,true);
+			} else if (window.detachEvent) {
+				document.detachEvent("onmouseup", resizerCell.document_mouseup);
+			}
+		};
+
+		if (top.HEURIST.registerEvent){
+			top.HEURIST.registerEvent(document, "mouseup", resizerCell.document_mouseup);
+		}else if (window.addEventListener) {
+			document.addEventListener("mouseup", resizerCell.document_mouseup,true);
+		} else if (window.attachEvent) {
+			document.attachEvent("onmouseup", resizerCell.document_mouseup);
 		}
 	};
-
-	if (top.HEURIST.registerEvent){
-		top.HEURIST.registerEvent(document, "mouseup", resizerCell.document_mouseup);
-	}else if (window.addEventListener) {
-		document.addEventListener("mouseup", resizerCell.document_mouseup,true);
-	} else if (window.attachEvent) {
-		document.attachEvent("onmouseup", resizerCell.document_mouseup);
-	}
-};
+}
   </script>
 
  </body>
