@@ -23,7 +23,7 @@ a.gs-title { display: none; }
 
   </style>
 
-  <script src="/jquery/jquery.js"></script>
+  <script src="../../../external/jquery/jquery.js"></script>
 
   <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w"></script>
 
@@ -921,36 +921,33 @@ function markerCallback(marker, html, result) {
 
    </script>
   </head>
-  <body width=750 height=450 style="margin: 5px; margin-right: 110px; padding: 0;" onload="setTimeout(load, 0)" onunload="GUnload()">
+  <body width="750" height="450" style="margin: 5px; margin-right: 110px; padding: 0;" onload="setTimeout(load, 0)" onunload="GUnload()">
 
-   <script src=../js/heurist.js></script>
+   <script src="../js/heurist.js"></script>
 
-     <div style="width: 100%; height: 100%;"><div id="map" style="width: 100%; height: 100%;"
-      defaulttitle="Double-click one or more times to zoom to a location" title="Double-click one or more times to zoom to a location"></div></div>
+     <div style="width: 100%; height: 100%;"><div id="map" style="width: 100%; height: 100%;" defaulttitle="Double-click one or more times to zoom to a location" title="Double-click one or more times to zoom to a location"></div></div>
 
-      <table border=0 cellspacing=5 cellpadding=0 style="width: 100px; height: 100%; position: absolute; right: 0; top: 0;">
-       <tbody id=buttons>
-        <tr><td><div><input type=button id=button-point value=Point onclick="setShapeType('point')"></div></td></tr>
-        <tr><td><div><input type=button id=button-rectangle value="Box" onclick="setShapeType('rectangle')"></div></td></tr>
-        <tr><td><div><input type=button id=button-circle value=Circle onclick="setShapeType('circle')"></div></td></tr>
-        <tr><td><div><input type=button id=button-polygon value=Polygon onclick="setShapeType('polygon')"></div></td></tr>
-        <tr><td><div><input type=button id=button-path value=Path onclick="setShapeType('path')"></div></td></tr>
+      <table border="0" cellspacing="5" cellpadding="0" style="width: 100px; height: 100%; position: absolute; right: 0; top: 0;">
+       <tbody id="buttons">
+        <tr><td><div><input type="button" id="button-point" value="Point" onclick="setShapeType('point')" /></div></td></tr>
+        <tr><td><div><input type="button" id="button-rectangle" value="Box" onclick="setShapeType('rectangle')" /></div></td></tr>
+        <tr><td><div><input type="button" id="button-circle" value="Circle" onclick="setShapeType('circle')" /></div></td></tr>
+        <tr><td><div><input type="button" id="button-polygon" value="Polygon" onclick="setShapeType('polygon')" /></div></td></tr>
+        <tr><td><div><input type="button" id="button-path" value="Path" onclick="setShapeType('path')" /></div></td></tr>
         <tr><td>&nbsp;</td></tr>
-        <tr><td><div><input type=button id=button-enter-values value="Enter
-values" title="Open manual coordinate data entry form" onclick="openCoordBox();"></div></td></tr>
+        <tr><td><div><input type="button" id="button-enter-values" value="Enter values" title="Open manual coordinate data entry form" onclick="openCoordBox();" /></div></td></tr>
         <tr><td>&nbsp;</td></tr>
         <tr><td>&nbsp;</td></tr>
-        <tr><td><div><input type=button id=button-save-zoom value="Remember
-this view" title="Map will re-open to this area for new digitising" onclick="saveZoom();"></div></td></tr>
+        <tr><td><div><input type="button" id="button-save-zoom" value="Remember this view" title="Map will re-open to this area for new digitising" onclick="saveZoom();" /></div></td></tr>
         <tr><td>&nbsp;</td></tr>
-        <tr><td><div><input type=button id=button-use disabled style="font-weight: bold;" value="Save" onclick="closeWithValue();"></div></td></tr>
+        <tr><td><div><input type="button" id="button-use" disabled="disabled" style="font-weight: bold;" value="Save" onclick="closeWithValue();" /></div></td></tr>
        </tbody>
       </table>
 
-     <div id=coord-window style="width: 340px; height: 280px; overflow: hidden;"><div style="padding: 5px;">
-      <div id=coord-caption></div>
-      <textarea id=coord-box style="width: 280px; height: 200px; border: 1px solid black; margin: 5px;"></textarea>
-      <input id=coord-button type=button value="Use value(s)">
+     <div id="coord-window" style="width: 340px; height: 280px; overflow: hidden;"><div style="padding: 5px;">
+      <div id="coord-caption"></div>
+      <textarea id="coord-box" style="width: 280px; height: 200px; border: 1px solid black; margin: 5px;"></textarea>
+      <input id="coord-button" type="button" value="Use value(s)" />
      </div></div>
   </body>
 </html>

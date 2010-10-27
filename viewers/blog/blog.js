@@ -3,6 +3,14 @@
  *  Kim Jackson, July 2008
  */
 
+var basePath = (top && top.HEURIST && top.HEURIST.basePath? top.HEURIST.basePath :
+				(opener && opener.HEURIST && opener.HEURIST.basePath? opener.HEURIST.basePath :
+				(window.location.pathname.match(/^\/[^\/]+\//) ? window.location.pathname.match(/^\/[^\/]+\//) : "/")));
+var hBase = "http://" + window.location.host + basePath;
+var instance = (top && top.HEURIST && top.HEURIST.instance? top.HEURIST.instance.name :
+				(opener && opener.HEURIST && opener.HEURIST.instance? opener.HEURIST.instance.name :
+				(location.search.match(/instance=([^&]+)/) ? location.search.match(/instance=([^&]+)/)[1]:"")));
+
 var Blog = {
 
 blogEntryRecordType: HRecordTypeManager.getRecordTypeById(137),
@@ -341,7 +349,7 @@ BlogEntry: function(record, parentElement, isNew) {
 		var $content = null;
 		var mapURL = Blog.getStaticMapURL(this.record);
 		if (Blog.canEdit()) {
-			var $a = $("<a title='Click to edit' href='../../records/spatial/gigitiser-blog/edit-geos.html?cb=reload&id=" + this.record.getID() + "'>")
+			var $a = $("<a title='Click to edit' href='../../viewers/blog/gigitiser-blog/edit-geos.html?cb=reload&id=" + this.record.getID() + (instance ? "&instance="+instance : "") + "'>")
 				.click(function () {
 					window.open(this.href, "", "status=0,width=600,height=500");
 					return false;
@@ -419,7 +427,7 @@ BlogEntry: function(record, parentElement, isNew) {
 
 			link = (Blog.user ? "?u=" + Blog.user.getID() : "?g=" + Blog.group.getID()) +
 				"&t=" + type.getID() +
-				"&q=relatedto:" + that.record.getID();
+				"&q=relatedto:" + that.record.getID() + (instance ? "&instance="+instance : "");
 			title = "Click to see these related " + type.getName() + " records in blog layout";
 			return $("<a href='" + link + "' title='" + title + "'>" + label + "</a>");
 		};
@@ -436,7 +444,7 @@ BlogEntry: function(record, parentElement, isNew) {
 				} else {
 					return function () {
 						window.open("../../records/addrec/add.php?addref=1&bib_reftype=" + type +
-							"&related=" + that.record.getID(), "_blank");
+							"&related=" + that.record.getID() + (instance ? "&instance="+instance : ""), "_blank");
 						return false;
 					};
 				}
@@ -465,7 +473,7 @@ BlogEntry: function(record, parentElement, isNew) {
 				.click((function(type) {
 					return function () {
 						window.open("../../records/addrec/add.php?addref=1&bib_reftype=" + type +
-							"&related=" + that.record.getID(), "_blank");
+							"&related=" + that.record.getID() + (instance ? "&instance="+instance : ""), "_blank");
 						return false;
 					};
 				})(type))
@@ -486,7 +494,8 @@ BlogEntry: function(record, parentElement, isNew) {
 			$("<a href='#'>add</a>")
 				.click(function () {
 					window.open("add-record.html?id=" + that.record.getID() +
-						(Blog.group ? "&g=" + Blog.group.getID() : ""), "_blank");
+						(Blog.group ? "&g=" + Blog.group.getID() : "") +
+						(instance ? "&instance="+instance : ""), "_blank");
 					return false;
 				})
 				.attr("title", "Click to add a new record of any type related to this " +
@@ -499,7 +508,7 @@ BlogEntry: function(record, parentElement, isNew) {
 			$("<a href='#'/>")
 				.click(function () {
 					window.open("../../records/editrec/edit.html?bib_id=" + that.record.getID() +
-						"#relationships", "_blank");
+						(instance ? "&instance="+instance : "") + "#relationships", "_blank");
 					return false;
 				})
 				.attr("title", "Click to add new or edit existing relationships for this " +
@@ -571,7 +580,9 @@ BlogEntry: function(record, parentElement, isNew) {
 		}
 
 		if (Blog.canEdit()  ||  HCurrentUser.isAdministrator()) {
-			$("<a href='../../records/editrec/edit.html?bib_id=" + this.record.getID() + "#annotation' target='_blank' title='edit record in Heurist'>edit full record</a>")
+			$("<a href='../../records/editrec/edit.html?bib_id=" + this.record.getID() +
+						(instance ? "&instance="+instance : "") +
+						"#annotation' target='_blank' title='edit record in Heurist'>edit full record</a>")
 				.addClass("heurist-edit-link")
 				.appendTo($(".entry-date", this.$table))
 				.click(function() {
@@ -685,7 +696,7 @@ BlogEntry: function(record, parentElement, isNew) {
 			}
 			$(".entry-edit-wg-tags-input", this.table).after("&nbsp;&nbsp;add ", $select);
 			if (HCurrentUser.isAdministrator()) {
-				$select.after("<a target='_blank' href='../../admin/workgroups/workgroup_keyword_manager.php'>admin</a>");
+				$select.after("<a target='_blank' href='../../admin/workgroups/workgroup_keyword_manager.php"+(instance ? "&instance="+instance : "")+"'>admin</a>");
 			}
 		}
 
@@ -731,7 +742,7 @@ BlogEntry: function(record, parentElement, isNew) {
 		} else {
 			$td = $("<td><a>add location</a></td>");
 		}
-		$("a", $td).attr("href", "../../spatial/gigitiser-blog/edit-geos.html?id=" + this.record.getID())
+		$("a", $td).attr("href", "../../viewers/blog/gigitiser-blog/edit-geos.html?id=" + this.record.getID() + (instance ? "&instance="+instance : ""))
 			.click(function () {
 				window.open(this.href, "", "status=0,width=600,height=500");
 				return false;
@@ -834,8 +845,8 @@ BlogEntry: function(record, parentElement, isNew) {
 					saveFn();
 				},
 				function(r,e) {
-	                alert("file save failed: " + e);
-	            }
+					alert("file save failed: " + e);
+				}
 			));
 		} else {
 			saveFn();
@@ -864,7 +875,7 @@ BlogEntry: function(record, parentElement, isNew) {
 
 
 loadTags: function() {
-	HAPI.XHR.sendRequest("../../viewers/blog/get-tags.php?u=" + Blog.user.getID(),  function(response) {	//FIXME: we should bring this into the HAPI php commands
+	HAPI.XHR.sendRequest("../../viewers/blog/get-tags.php?u=" + Blog.user.getID() + (instance ? "&instance="+instance : ""),  function(response) {	//FIXME: we should bring this into the HAPI php commands
 		Blog.tags = response;
 		Blog.displayTagList();
 		Blog.displayBlogEntries();

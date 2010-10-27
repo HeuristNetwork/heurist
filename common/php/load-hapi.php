@@ -36,7 +36,6 @@ if (@$_REQUEST["instance"]) {
 	define("HEURIST_INSTANCE", $_REQUEST["instance"]);
 	define("HOST", $_SERVER["HTTP_HOST"]);
 }
-error_log("in loadhapi");
 require_once(dirname(__FILE__)."/../config/heurist-instances.php");
 require_once(dirname(__FILE__)."/../connect/db.php");
 
@@ -52,7 +51,7 @@ if (! $row) {
 	exit;
 }
 $key = $row["hl_key"];
-
 ?>
-document.write("<" + "script src=\"<?=HEURIST_SITE_PATH?>hapi/load.php?instance=<?= HEURIST_INSTANCE ?>&key=<?= $key ?>\"><" + "/script>\n");
+
+document.write("<" + "script src=\"<?=HEURIST_SITE_PATH?>hapi/load.php?instance=<?= HEURIST_INSTANCE ?>&key=<?= $key?> <?=(@$_REQUEST["inclGeo"]? "&inclGeo=1":"")?>\"><" + "/script>\n");
 

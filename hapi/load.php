@@ -14,34 +14,22 @@ define("HAPI_HOME" /* makes ME laugh */, HEURIST_URL_BASE."hapi/");
 
 
 header("Content-type: text/javascript");
-
-if (! @$_REQUEST["key"]) {
-	print 'alert("There is no Heurist API key specified for this web site");';
-	return;
-}
-
-if (! @$_REQUEST["v"]) {
-	$version = STABLE_VERSION;
-}
-else if (preg_match('/^(d|devel)$/i', $_REQUEST["v"])) {
-	$version = DEVEL_VERSION;
-}
-else {
-	$version = $_REQUEST["v"];
-}
-error_log("in load");
-
+$instance = (@$_REQUEST["instance"] ? $_REQUEST['instance']:"");
 
 $scripts = array(
-	HAPI_HOME . "php/common-data.php?key=" . addslashes($_REQUEST["key"]),
-	HAPI_HOME . "php/user-data.php?key=" . addslashes($_REQUEST["key"]),
-	HAPI_HOME . "js/hapi.js"
+	HAPI_HOME . "php/common-data.php?key=" . addslashes($_REQUEST["key"])."&instance=".$instance,
+	HAPI_HOME . "php/user-data.php?key=" . addslashes($_REQUEST["key"])."&instance=".$instance,
+	HAPI_HOME . "js/hapi.js?instance=".$instance
 );
+
+if (@$_REQUEST["inclGeo"]) {
+	array_push($scripts,HAPI_HOME."js/geo.js?instance=".$instance);
+}
 
 ?>
 /* The key will be set once the javascript files are loaded */
 var HeuristApiKey = "<?= addslashes(@$_REQUEST["key"]) ?>";
-var HeuristInstance = "<?= addslashes(@$_REQUEST["instance"]) ?>";
+var HeuristInstance = "<?= addslashes($instance) ?>";
 var HeuristBaseURL = "<?= addslashes(HEURIST_URL_BASE) ?>";
 var HeuristSitePath = "<?= addslashes(HEURIST_SITE_PATH) ?>";
 /* Load the necessary JS files from <?= HAPI_HOME ?> */

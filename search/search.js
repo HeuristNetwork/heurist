@@ -1150,7 +1150,8 @@ top.HEURIST.search = {
 			}
 			searchDiv.innerHTML = innerHTML;
 
-			document.getElementById("my-blog-link").href = top.HEURIST.basePath+ "viewers/blog/index.html?u=" + top.HEURIST.get_user_id();
+			document.getElementById("my-blog-link").href = top.HEURIST.basePath+ "viewers/blog/index.html?u=" + top.HEURIST.get_user_id() +
+				(top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "");
 
 
 			// all records searches

@@ -13,9 +13,9 @@
 <script src="../../hapi/js/goi.js"></script>
 
 <script>
-if (! HCurrentUser.isLoggedIn()) {
-	window.location = HAPI.HeuristBaseURL + "common/connect/login.php";
-}
+	if (! HCurrentUser.isLoggedIn()) {
+		window.location = HAPI.HeuristBaseURL + "common/connect/login.php" + (instance ? "?instance="+instance : "");
+	}
 </script>
 
 <script src="../../records/comments/comments.js"></script>
@@ -35,13 +35,13 @@ $(document).ready(function() {
 	matches = location.href.match(/[?&]u=(\d+)/);	// extract the userID from the URI
 	if (matches) {
 		user = HUserManager.getUserById(matches[1]);
-		$("#bloglogo a").attr("href", "?u=" + matches[1]);
+		$("#bloglogo a").attr("href", "?u=" + matches[1] + (instance ? "&instance="+instance : ""));
 	}
 	if (! user) {
 		matches = location.href.match(/[?&]g=(\d+)/);	// extract the groupID from the URI
 		if (matches) {
 			group = HWorkgroupManager.getWorkgroupById(matches[1]);
-			$("#bloglogo a").attr("href", "?g=" + matches[1]);
+			$("#bloglogo a").attr("href", "?g=" + matches[1] + (instance ? "&instance="+instance : ""));
 		}
 	}
 	if (! (user || group)) { alert("user / group ID invalid or not provided"); return; }
@@ -77,7 +77,7 @@ $(document).ready(function() {
 	// blog select
 	$("<option value='u=" + HCurrentUser.getID() + "'>" + HCurrentUser.getRealName() + "</option>")
 		.click(function () {
-			location.href = "?" + this.value;
+			location.href = "?" + this.value  + (instance ? "&instance="+instance : "");
 		})
 		.appendTo("#blog-select");
 	var wgs = HCurrentUser.getWorkgroups();
@@ -85,7 +85,7 @@ $(document).ready(function() {
 	for (var i = 0; i < wgs.length; ++i) {
 		$("<option value='g=" + wgs[i].getID() + "'>" + wgs[i].getName() + "</option>")
 			.click(function () {
-				location.href = "?" + this.value;
+				location.href = "?" + this.value + (instance ? "&instance="+instance : "");
 			})
 			.appendTo("#blog-select");
 	}
@@ -96,8 +96,8 @@ $(document).ready(function() {
 		$("<option value='" + rectypes[i].getID() + "'>" + rectypes[i].getName() + "</option>").appendTo("#record-type");
 	}
 //	$("#record-type").val(record_type ? record_type.getID() : 0);
-	$("#record-type").val(query ?  0 : record_type.getID());
-	$("#record-type").change(function() {
+	$("#record-type").val(query ?  0 : ( record_type?record_type.getID() :HRecordTypeManager.getRecordTypeById(137)));
+	$("#record-type").change(function() { //fixme what if user and group are null???
 		window.location.href = "?" + (user ? "u="+user.getID() : "g="+group.getID()) + "&t="+this.value;
 	});
 
@@ -110,8 +110,8 @@ $(document).ready(function() {
 		else if (matches[4]) search["tag"] = matches[4];
 	}
 
-	$("#add-fav").append("<br>" + HCurrentUser.getRealName() + " : <a href='"+ HAPI.HeuristBaseURL +"/login.php?logout=1'>log out</a>");
-	$("#add-fav-link")[0].href += "&t=" + encodeURIComponent(document.title) + "&u=" + encodeURIComponent(window.location.href);
+	$("#add-fav").append("<br>" + HCurrentUser.getRealName() + " : <a href='"+ (hBase ? hBase : HAPI.HeuristBaseURL) +"/login.php?logout=1"+ + (instance ? "&instance="+instance : "")+"'>log out</a>");
+	$("#add-fav-link")[0].href += "&t=" + encodeURIComponent(document.title) + "&u=" + encodeURIComponent(window.location.href) + (instance ? "&instance="+instance : "");
 
 	if ((user  &&  HCurrentUser == user) ||
 		(group  &&  HCurrentUser.isInWorkgroup(group))) {
