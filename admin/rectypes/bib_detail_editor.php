@@ -21,12 +21,12 @@ $_REQUEST['_bdr_search_search'] = 1;
 
 mysql_connection_db_overwrite(DATABASE);
 
-
+error_log("db = ". DATABASE. " instance = ". HEURIST_INSTANCE);
 if (@$_REQUEST['update-active-rec-types']) {
 	$arts = array_keys($_REQUEST['active_rt']);
 	mysql_query('delete from active_rec_types where art_id not in (' . join(',', $arts) . ')');
 	mysql_query('insert ignore into active_rec_types values (' . join('),(', $arts) . ')');
-	header('Location: bib_detail_editor.php');
+	header('Location: bib_detail_editor.php?instance='.HEURIST_INSTANCE);
 	return;
 }
 

@@ -5,7 +5,7 @@
 
 var basePath = (top && top.HEURIST && top.HEURIST.basePath? top.HEURIST.basePath :
 				(opener && opener.HEURIST && opener.HEURIST.basePath? opener.HEURIST.basePath :
-				(window.location.pathname.match(/^\/[^\/]+\//) ? window.location.pathname.match(/^\/[^\/]+\//) : "/")));
+				(window.location.pathname.match(/^\/[^\/]+\//) ? window.location.pathname.match(/^\/[^\/]+\//)[0] : "/")));
 var hBase = "http://" + window.location.host + basePath;
 var instance = (top && top.HEURIST && top.HEURIST.instance? top.HEURIST.instance.name :
 				(opener && opener.HEURIST && opener.HEURIST.instance? opener.HEURIST.instance.name :

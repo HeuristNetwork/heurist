@@ -238,7 +238,7 @@
 </form>
 [end-if]
 
-<form action="bib_detail_editor.php" method="post" name="edit_form" onsubmit="return check_prompts();">
+<form action="bib_detail_editor.php?instance=[instance-name!]" method="post" name="edit_form" onsubmit="return check_prompts();">
 <input type=hidden name=grp_id value='[grp_id]'>
 [update REFTYPE rt1]
 
