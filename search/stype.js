@@ -66,7 +66,7 @@ function init_stype() {
 
 	var pos = top.HEURIST.getPosition(q_elt);
 	stype_div.style.top = (pos.y + q_elt.offsetHeight) + 'px';
-	stype_div.style.left = (pos.x - 1) + 'px';
+	//stype_div.style.left = (pos.x - 1) + 'px';
 
 	stype_selected_number = 0;
 	stype_options = { length: 0 };

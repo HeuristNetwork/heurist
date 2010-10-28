@@ -412,10 +412,20 @@ body.advanced tr.advanced {
 	position: absolute;
 	margin: 2px 1px 1px 1px;
 	z-index: 999999;
-	width: 200px;
+	width: auto;
 	height: 72px;
 	background-image: url(../images/stype/stype-dropshadow.png);
-	top:32px !important;
+	top:22px !important;
+	padding: 3px 5px 3px 3px;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
+	-webkit-box-shadow: 0 3px 6px rgba(100, 100, 100, 0.6);
+	-moz-box-shadow: 0 3px 6px rgba(100, 100, 100, 0.6);
+	box-shadow: 0 3px 6px rgba(100, 100, 100, 0.6);
+	border: 3px solid #FFF !important;
+	background:url("../images/backgrounds/thumbnail_bg.png") repeat-x scroll 0 bottom #F6F6F6 !important;}
+	
 }
 #stype_options_child {
 	padding: 3px;
@@ -427,6 +437,7 @@ body.advanced tr.advanced {
 	outline: 0;
 	border: 0;
 	padding: 0;
+	font-weight: normal;
 }
 #stype_options div.stype_option {
 	padding: 2px 4px 2px 24px;
@@ -434,10 +445,9 @@ body.advanced tr.advanced {
 	border: 0;
 	background-repeat: no-repeat;
 	background-position: 2px 2px;
-	background-color: white;
 }
 #stype_options div.stype_option:hover, #stype_options div.hover {
-	background-color: #c0c0c0;
+	background-color: #CDDCF3;
 }
 #stype_options div.stype_option img {
 	margin-right: 1ex;
@@ -481,7 +491,8 @@ body, .darkBG {
 	background-repeat:repeat-x;
 }
 #logo {
-	background-image:url(../images/branding/h3logo_small.png) !important;
+/*	background-image:url(../images/branding/h3logo_small.png) !important;*/	
+	background-image:url(../images/branding/h3logo_haloween.png) !important;
 	background-repeat: no-repeat;
 }
 #search {height:40px;left:10px;padding:0;position:absolute;right:10px;top:65px;}
@@ -732,7 +743,7 @@ body.w-all #all-records-button, body.w-bookmark #my-records-button {
 	background-position:bottom;
 	display:inline-block;
 	height: 22px;
-	overflow: hidden;
+	/* overflow: hidden; */
 	vertical-align:middle;
 }
 #my-records-saved-searches, #all-records-saved-searches, #workgroup-saved-searches, .relType {

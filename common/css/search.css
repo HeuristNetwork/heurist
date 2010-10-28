@@ -353,7 +353,7 @@ div.hide .saved-search-subheading {background-image:url("../images/sub_heading_s
 #applications_window {bottom:0;display:block;left:0;position:absolute;right:0;top:0px;}
 
 .tableCell {border-right:none;display:table-cell;vertical-align:middle;padding:0 5px; white-space: nowrap;}
-.banner {height:23px;padding:8px 0;overflow:hidden}
+.banner {height:23px;padding:8px 0;overflow:visible}
 #result-container {bottom:0;left:0;overflow:auto;position:absolute;right:0;top:31px;}
 
 .openTools {left:8px;display: table-cell;position: relative;padding: 0 5px;background-repeat: no-repeat; width:32px}
@@ -381,4 +381,4 @@ input[type=checkbox] {display: none;}
 #publish-image-placeholder {border-right:1px solid rgba(0, 0, 0, 0.1)}
 
 /* map window */
-#mapDiv {-moz-border-radius:0 0 10px 10px;position:absolute; background-color: RGBA(255,255,255,0.8); z-index: 100000;top:40px;bottom: 0;right:0; left:0; }
+#mapDiv {-moz-border-radius:0 0 10px 10px;position:absolute; background-color: #FFF; z-index: 100000;top:40px;bottom: 0;right:0; left:0; }
