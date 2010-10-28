@@ -380,7 +380,7 @@ top.HEURIST.edit = {
 		}
 		else if (document.getElementById("act-recent").checked) {
 			setTimeout(function() {
-				top.location.href = ".?q=sortby:-m";
+				top.location.href = top.HEURIST.basePath + "search/search.html?q=sortby:-m&instance=" + HAPI.instance;
 			}, 0);
 		}
 	},
