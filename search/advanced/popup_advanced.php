@@ -630,7 +630,7 @@ function setAscDescLabels(sortbyValue) {
       Use e.g. <b>title=</b><i>xxx</i> to match exactly, similarly <b>&lt;</b> or <b>&gt;</b>.<br>
       To find records that include either of two search terms, use an uppercase OR. e.g. <b>timemap OR &quot;time map&quot;</b><br>
       To omit records that include a search term, precede the term with a single dash. e.g. <b>-maps -tag:timelines</b><br>
-      See also <a href="#" onclick="top.HEURIST.util.popupURL(window, 'help/advanced_search.html'); return false;">help for advanced search</a>.
+      See also <a href="#" onclick="top.HEURIST.util.popupURL(window, '<?=HEURIST_URL_BASE?>help/advanced_search.html'); return false;">help for advanced search</a>.
     </td>
    </tr>
 

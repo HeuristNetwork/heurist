@@ -48,7 +48,7 @@ function define_constants($instance) {
 	define('UPLOAD_PATH', $instances[$instance]["uploads"]);
 
 	if (@$instances[$instance]["explore"]) {
-		define('EXPLORE_URL', $instances[$instance]["explore"]);
+		define('EXPLORE_URL', $instances[$instance]["explore"]); // FIXME saw read from db.ini
 	}
 	if (@$instances[$instance]["usergroup"]) {
 		define ('HEURIST_USER_GROUP_ID', $instances[$instance]["usergroup"]);

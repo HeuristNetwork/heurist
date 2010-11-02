@@ -30,7 +30,7 @@ require_once(dirname(__FILE__).'/../../common/connect/cred.php');
 require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
 if (!is_logged_in()) {
-	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
+	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE);
 	return;
 }
 
@@ -44,8 +44,9 @@ $body = new BodyScope($lexer);
 
 $body->global_vars['presetScrollTop'] = intval(@$_REQUEST['scrollTop']);
 $body->global_vars['filterId'] = @$_REQUEST['filterId'];
+$body->global_vars['instance-name'] = HEURIST_INSTANCE;
 
-$body->global_vars['proj-group-link'] = HEURIST_INSTANCE === '' ? ' | <a href="projectgroupadmin.php">Edit project groups</a>' : '';
+$body->global_vars['proj-group-link'] = HEURIST_INSTANCE === '' ? ' | <a href="projectgroupadmin.php?instance='.HEURIST_INSTANCE.'">Edit project groups</a>' : '';
 
 mysql_connection_overwrite(USERS_DATABASE);
 $body->verify();
@@ -70,7 +71,7 @@ if (@$_REQUEST['_submit']) {
 		if ($body->execute()) {
 			$ug_id = mysql_insert_id();
 
-			header('Location: usergroupadmin.php'. (@$_REQUEST['filterId'] ? '?filterId='.$_REQUEST['filterId'] : '') );
+			header('Location: usergroupadmin.php?instance='.HEURIST_INSTANCE.(@$_REQUEST['filterId'] ? '&amp;filterId='.$_REQUEST['filterId'] : '') );
 		}
 	}
 }

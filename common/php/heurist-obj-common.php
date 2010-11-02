@@ -24,6 +24,7 @@ $res = mysql_query("select max(datestamp) from last_update where common = 1");
 $lastModified = mysql_fetch_row($res);
 $lastModified = strtotime($lastModified[0]);
 
+// not changed since last requested so return
 if (strtotime(@$_SERVER["HTTP_IF_MODIFIED_SINCE"]) > $lastModified) {
   header('HTTP/1.1 304 Not Modified');
   exit();
@@ -35,7 +36,8 @@ print "top.HEURIST.instance = {};\n";
 print "top.HEURIST.instance.name = " . json_format(HEURIST_INSTANCE) . ";\n";
 print "top.HEURIST.instance.prefix = " . json_format(HEURIST_INSTANCE_PREFIX) . ";\n";
 print "top.HEURIST.instance.exploreURL = " . json_format(EXPLORE_URL) . ";\n";
-
+print "if (!top.HEURIST.basePath) top.HEURIST.basePath = ".json_format(HEURIST_SITE_PATH) . ";\n";
+print "if (!top.HEURIST.baseURL) top.HEURIST.baseURL = ".json_format(HEURIST_URL_BASE) . ";\n";
 
 /* Reftypes are an array of names sorted alphabetically, and lists of
    primary (bibliographic) and other reftypes, also sorted alphbetically */
