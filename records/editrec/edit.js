@@ -1020,6 +1020,25 @@ top.HEURIST.edit = {
 						str = str.match(/COM=([^\|]+)/)[1];
 						dateBox.disabled = false;
 					}
+				}else if (str.search(/TYP=c/) != -1 ) { //c14 date
+
+				}else if (str.search(/TYP=p/) != -1 ) {// probable date
+					var tpq = str.match(/TPQ=([^\|]+)/);
+						tpq = tpq ? tpq[1]: null;
+					var taq = str.match(/TAQ=([^\|]+)/);
+						taq = taq ? taq[1]: null;
+					var pdb = str.match(/PDB=([^\|]+)/);
+						pdb = pdb ? pdb[1]: (tpq ? tpq:"");
+					var pde = str.match(/PDE=([^\|]+)/);
+						pde = pde ? pde[1]: (taq ? taq:"");
+						str = pdb + " – " + pde;
+				}else if (str.search(/TYP=f/) != -1 ) {//fuzzy date
+					var dat = str.match(/DAT=([^\|]+)/);
+						dat = dat ? dat[1]: "";
+					var rng = str.match(/RNG=P(\d*)(Y|M|D)/);
+					var units = rng[2] ? (rng[2]=="Y" ? "year" : rng[2]=="M" ? "month" :rng[2]=="D" ? "day" :""): "";
+						rng = rng && rng[1] ? " ± " + rng[1] + " " + units + (rng[1]>1 ? "s":""): "";
+						str = dat + rng;
 				}
 			}
 			return str;

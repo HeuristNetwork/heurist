@@ -265,6 +265,7 @@ Temporal.parse = function () {
 				fieldType = "DAT";	// save string as a TDate object
 			}
 			catch(e) {	// save string in COM field and keep an empty simple date temporal
+				if(str.replace(/\|VER=(\d)*\|TYP=./,'')=="") return; //empty temporal string
 				fieldType = "COM";
 			}
 			temporal.clear(str);  // clear out all the oold stuff
@@ -352,25 +353,30 @@ Temporal.tDurationDict = {	"DUR"	:	"Simple Duration",
 Temporal.typeFieldMap = {	s : {
 									req : [["DAT"]],
 //											[]],		// empty date allows to capture ill-formed date strings
-									opt : ["COM"]
+									opt : ["COM"],
+									hdr : ["DAT"]
 								},
 							c :	{
 									req : [["DVP","DVN","AVE","COD"],
 											["DEV","AVE","COD"]],
-									opt : ["COR","DET","COM","SRT"]
+									opt : ["COR","DET","COM","SRT"],
+									hdr : ["DVP","DVN","AVE","COD","DEV"]
 								},
 							p :	{
 									req : [["PDB","PDE","TPQ","TAQ"],
 											["TPQ","TAQ"]],
-									opt : ["DET","SPF","EPF","COM","SRT"]
+									opt : ["DET","SPF","EPF","COM","SRT"],
+									hdr : ["PDB","PDE","TPQ","TAQ"]
 								},
 							f :	{
 									req : [["DAT","RNG"]],
-									opt : ["DET","PRF","COM","SRT"]
+									opt : ["DET","PRF","COM","SRT"],
+									hdr : ["DAT","RNG"]
 								},
 							d :	{
 									req : [["DUR"]],
-									opt : ["DET","ERR","COM"]
+									opt : ["DET","ERR","COM"],
+									hdr : ["DUR"]
 								}
 };
 
@@ -499,7 +505,7 @@ Temporal.getTypeOpt = function (type) {
 
 Temporal.getFieldsForType = function (type) {
 	if ( type && typeof type === "string" && typeof Temporal.typeFieldMap[type] === "object") {
-		return 	Temporal.typeFieldMap[type].req[0].concat(Temporal.typeFieldMap[type].opt);
+		return 	Temporal.typeFieldMap[type].hdr.concat(Temporal.typeFieldMap[type].opt);
 	} else {
 		throw "Temporal Exception - invalid temporal type passed to getFieldsForType - " + type;
 	}
