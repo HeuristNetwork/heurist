@@ -137,23 +137,12 @@
 					}
 				}
 			//load xml
-				if (query){
-					xml = loadXMLDocFromFile("http://heuristscholar.org"+ top.HEURIST.basePath+ "export/xml/hml.php"+query);
-				}else{
-					document.getElementById("displayResult").innerHTML = "No query found, unable to display any results";
-					return;
-				}
-				pageXMLs[1] = xml;
-				xsls[curStyle] = loadXMLDocFromFile("xsl/" +curStyle +".xsl");
 				fillStyles(curStyle);
-				displayResultPage(curStyle,1);
 				if (top.HEURIST) {
 					top.HEURIST.registerEvent(this,"heurist-selectionchange",onSelectionChange);
 					top.HEURIST.registerEvent(this,"heurist-selectall",onSelectAll);
 					top.HEURIST.registerEvent(this,"heurist-pagechange",onPageChange);
 				}
-				loadCount = maxLoadPages;
-				asyncLoadSearchPages();
 			}
 
 			var relatedRecListXSL;
@@ -283,6 +272,7 @@
 			var newSelectionIds, newSelectionMap, alreadySelectedMap;
 
 			function onPageChange(eventType, argList) {
+				clearAndDisplayLoading();
 				//if page xml not loaded then load sync
 				if (eventType == "heurist-pagechange"){
 					var page = 0;
@@ -313,7 +303,7 @@
 				if (eventType == "heurist-selectall"){
 					var tempXML = pageXMLs[1];
 					var recordsNode = tempXML.getElementsByTagName("records")[0];
-					for (var page = 2; page <= pageCount; page++){
+					for (var page = 1; page <= pageCount; page++){
 						if (!pageXMLs[page]){ //load pageXML now
 							var pageQuery = query;
 							pageQuery = pageQuery.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"&offset=" + (page-1)*resultsPerPage);
@@ -343,6 +333,17 @@
 					}
 					newSelectionMap = objFromArr(newSelectionIds);
 					alreadySelectedMap = {};
+					if (!pageXMLs[currentPage]){ //load pageXML now
+						clearAndDisplayLoading();
+						var pageQuery = query;
+						pageQuery = pageQuery.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"&offset=" + (currentPage-1)*resultsPerPage);
+						var url = "http://heuristscholar.org" + top.HEURIST.basePath+ "export/xml/hml.php" + pageQuery;
+						var errorMsg = "Error loading " + url + " using XMLHttpRequest";
+						pageXMLs[currentPage] = loadXMLDocFromFile(url);
+						xml = pageXMLs[currentPage];
+						displayResultPage(curStyle,currentPage);
+					}
+
 					var selDivs = $('div[class~=selected]');
 					if (selDivs) selDivs.map(function(a){ return this.id;}).map(function(i){
 																						if (newSelectionMap[this]) {
@@ -357,17 +358,24 @@
 													}
 												});
 					selectedIds = newSelectionIds;
-					$('div#'+selectedIds[selectedIds.length-1],$('iframe[id=viewer-frame]',top.document).get(0).contentDocument).get(0).scrollIntoView()
+					if (selectedIds && selectedIds.length > 0) {
+						$('div#'+selectedIds[selectedIds.length-1],$('iframe[id=viewer-frame]',top.document).get(0).contentDocument).get(0).scrollIntoView();
+					}
 				}
 			}
 
 			function updateSelection(){
-				if (!selectedIds || selectedIds.length == 0) {
-					selectedIds = [$('div[class~=record]').attr("id")]; //get the id of the first record div
-				}
 				for (var i = 0; i < selectedIds.length; i++) {
 					$('div[class~=record]').filter('div[id='+ selectedIds[i] +']').addClass("selected");
 				}
+			}
+
+			function clearAndDisplayLoading(){
+				var resultDiv =document.getElementById("displayResult");
+				while (resultDiv.childNodes[0]) resultDiv.removeChild(resultDiv.childNodes[0]);
+				var loadingDiv = document.createElement("div");
+					loadingDiv.id = "loading";
+				resultDiv.appendChild(loadingDiv);
 			}
 
 			function displayResult(style){
@@ -418,6 +426,6 @@
 		</select>
 		<A HREF="javascript:window.print()"><div id="printingLink"></div></a>
 		</div>
-		<div id="displayResult" ><div id=loading></div></div>
+		<div id="displayResult" ></div>
 	</body>
 </html>
