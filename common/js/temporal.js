@@ -314,7 +314,7 @@ Temporal.fieldsDict = {	"VER"	:	"Version Number",
 						"PRF"	:	"Probability Profile",					// FIXME: add definitions
 						"SPF"	:	"Start Profile",					// FIXME: add definitions
 						"EPF"	:	"End Profile",					// FIXME: add definitions
-						"COR"	:	"Corrected",
+						"CAL"	:	"Calibrated",
 						"COD"	:	"Laboratory Code",
 						"DET"	:	"Determination Type",
 						"COM"	:	"Comment",
@@ -338,7 +338,8 @@ Temporal.profiles = {	0	:	"Flat",
 };
 
 Temporal.tDateDict = {	"DAT" 	:	"ISO DateTime",
-						"AVE" 	:	"Mean Date",
+						"BPD" 	:	"Before Present (1950) Date",
+						"BCE" 	:	"Before Current Era",
 						"TPQ"	:	"Terminus Post Quem",
 						"TAQ"	:	"Terminus Ante Quem",
 						"PDB"	:	"Probable begin",
@@ -357,10 +358,12 @@ Temporal.typeFieldMap = {	s : {
 									hdr : ["DAT"]
 								},
 							c :	{
-									req : [["DVP","DVN","AVE","COD"],
-											["DEV","AVE","COD"]],
-									opt : ["COR","DET","COM","SRT"],
-									hdr : ["DVP","DVN","AVE","COD","DEV"]
+									req : [["DVP","DVN","BPD","COD"],
+											["DEV","BPD","COD"],
+											["DVP","DVN","BCE","COD"],
+											["DEV","BCE","COD"]],
+									opt : ["CAL","DET","COM","SRT"],
+									hdr : ["DVP","DVN","BCE","BPD","COD","DEV","DAT"]
 								},
 							p :	{
 									req : [["PDB","PDE","TPQ","TAQ"],
@@ -1269,7 +1272,12 @@ TDate.getDayName = function (y,m,d,shortName) {
 
 TDate.validate = function (value, min, max, name) {
 	if (value < min || value > max) {
-		throw  value.toString() + " is not a valid value for " + name ;
+		if (name == "year") {
+			if (value < min) throw  "Hmmmm do you know something I don't, that's BBB (before big bang)";
+			else throw  "Don't worry about it mate, neither of us will be around";
+		}else {
+		 throw  value.toString() + " is not a valid value for " + name ;
+		}
 	}
 	return true;
 }
@@ -1300,7 +1308,7 @@ TDate.validateMonth = function (n) {
 }
 
 TDate.validateYear = function (n) {
-	return TDate.validate(n, -5000000000, 5000000000, "year");
+	return TDate.validate(n, -14000000000, 14000000000, "year");
 }
 
 TDate.getDaysInMonth = function (year, month) {

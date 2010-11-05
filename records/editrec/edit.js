@@ -1021,7 +1021,19 @@ top.HEURIST.edit = {
 						dateBox.disabled = false;
 					}
 				}else if (str.search(/TYP=c/) != -1 ) { //c14 date
-
+					var bce = str.match(/BCE=([^\|]+)/);
+						bce = bce ? bce[1]: null;
+					var c14 = str.match(/BPD=([^\|]+)/);
+						c14 = c14 ? c14[1]: (bce ? bce:" c14 temporal");
+					var suff = str.match(/CAL=([^\|]+)/) ? " Cal" : "";
+					suff += bce ? " BCE" : " BP";
+					var dvp = str.match(/DVP=([^\|]+)/);
+						dvp = dvp ? dvp[1]: null;
+					var dev = str.match(/DEV=([^\|]+)/);
+						dev = dev ? " ±" + dev[1]:(dvp ? " +" + dvp:" + ??");
+					var dvn = str.match(/DVN=([^\|]+)/);
+						dev += dvp ? (dvn[1] ? " -" + dvn[1]: " - ??") : "";
+						str = c14 + dev + suff;
 				}else if (str.search(/TYP=p/) != -1 ) {// probable date
 					var tpq = str.match(/TPQ=([^\|]+)/);
 						tpq = tpq ? tpq[1]: null;

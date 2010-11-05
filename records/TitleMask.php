@@ -278,23 +278,78 @@ function _title_mask__get_rec_detail($rec_id, $rdt_id) {
 		$rdt_type = $rdt[$rd['rd_type']]['rdt_type'];
 
 		if ($rdt_type == 'file') {	/* handle files specially */
-			if (@$rec_details[$rec_id][$rd['rd_type']])
+			if (@$rec_details[$rec_id][$rd['rd_type']])// repeated values
 				$rec_details[$rec_id][$rd['rd_type']] = (intval($rec_details[$rec_id][$rd['rd_type']])+1).' files';
 			else
 				$rec_details[$rec_id][$rd['rd_type']] = '1 file';
 
 		} else if ($rdt_type == 'geo') {	/* handle geographic objects specially */
-			if (@$rec_details[$rec_id][$rd['rd_type']])
+			if (@$rec_details[$rec_id][$rd['rd_type']])// repeated values
 				$rec_details[$rec_id][$rd['rd_type']] =
 				  (intval($rec_details[$rec_id][$rd['rd_type']])+1).' geographic objects';
 			else
 				$rec_details[$rec_id][$rd['rd_type']] = '1 geographic object';
+		} else if ($rdt_type == 'date') {	/* handle date objects specially */
+			$str = trim($rd['rd_val']);
+			if (strlen($str) > 0 && preg_match("/\|VER/",$str)) { // we have a temporal
+				preg_match("/TYP=([s|p|c|f|d])/",$str,$typ);
+				switch  ($typ[1]) {
+					case 's': // simple date
+						preg_match("/DAT=([^\|]+)/",$str,$dat);
+						$dat = $dat[1] ? $dat[1] : null;
+						preg_match("/COM=([^\|]+)/",$str,$com);
+						$com = $com[1] ? $com[1] : null;
+						$str = $dat ? $dat :($com ? $com:"temporal simple date");
+						break;
+					case 'p': // probable date
+						preg_match("/TPQ=([^\|]+)/",$str,$tpq);
+						$tpq = $tpq[1] ? $tpq[1] : null;
+						preg_match("/TAQ=([^\|]+)/",$str,$taq);
+						$taq = $taq[1] ? $taq[1] : null;
+						preg_match("/PDB=([^\|]+)/",$str,$pdb);
+						$pdb = $pdb[1] ? $pdb[1] :($tpq ? $tpq:"");
+						preg_match("/PDE=([^\|]+)/",$str,$pde);
+						$pde = $pde[1] ? $pde[1] :($taq ? $taq:"");
+						$str = "(" . $pdb . " – " . $pde . ")";
+						break;
+					case 'c': //c14 date
+						preg_match("/BCE=([^\|]+)/",$str,$bce);
+						$bce = $bce[1] ? $bce[1] : null;
+						preg_match("/BPD=([^\|]+)/",$str,$c14);
+						$c14 = $c14[1] ? $c14[1] :($bce ? $bce:" c14 temporal");
+						$suff = preg_match("/CAL=/",$str) ? " Cal" : "";
+						$suff .= $bce ? " BCE" : " BP";
+						preg_match("/DVP=([^\|]+)/",$str,$dvp);
+						$dvp = $dvp[1] ? $dvp[1] : null;
+						preg_match("/DEV=([^\|]+)/",$str,$dev);
+						$dev = $dev ? " ±" . $dev[1]:($dvp ? " +" . $dvp:" + ??");
+						preg_match("/DVN=([^\|]+)/",$str,$dvn);
+						$dev .= $dvp ? ($dvn[1] ? " -" + $dvn[1]: " - ??") : "";
+						$str = "(" . $c14 . $dev . $suff . ")";
+						break;
+					case 'f': //fuzzy date
+						preg_match("/DAT=([^\|]+)/",$str,$dat);
+						$dat = $dat[1] ? $dat[1] : null;
+						preg_match("/RNG=P(\d*)(Y|M|D)/",$str,$rng);
+						$units = $rng[2] ? ($rng[2]=="Y" ? "year" : $rng[2]=="M" ? "month" :$rng[2]=="D" ? "day" :""): "";
+						$rng = $rng && $rng[1] ? " ± " . $rng[1] . " " . $units . ($rng[1]>1 ? "s":""): "";
+						$str = "(" . $dat . $rng . ")";
+						break;
+					default:
+						$str = "temporal encoded time";
+				}
+			}
+
+			if (@$rec_details[$rec_id][$rd['rd_type']])// repeated values
+				$rec_details[$rec_id][$rd['rd_type']] .=', ' . $str;
+			else
+				$rec_details[$rec_id][$rd['rd_type']] = $str;
 		} else {
 			if ($rdt_type == 'enum'){ //saw Enum change
 				$relval = mysql_fetch_assoc(mysql_query("select rdl_value from rec_detail_lookups where rdl_id = ".$rd['rd_val']));
 				$rd['rd_val'] = $relval['rdl_value'];
 			}
-			if (@$rec_details[$rec_id][$rd['rd_type']])
+			if (@$rec_details[$rec_id][$rd['rd_type']])// repeated values
 				$rec_details[$rec_id][$rd['rd_type']] .= ', ' . $rd['rd_val'];
 			else
 				$rec_details[$rec_id][$rd['rd_type']] = $rd['rd_val'];

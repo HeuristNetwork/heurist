@@ -87,6 +87,9 @@ top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/heurist-obj-user.php");	
 top.HEURIST.whenLoaded(["search-html", "obj-common"], top.HEURIST.util.setInstanceName);
 
 top.HEURIST.whenLoaded(["search-html", "obj-common", "search-js"], function() {
+	var action_fr = document.getElementById("i_action");
+	action_fr.src = top.HEURIST.basePath+ "search/action.php" +
+					(top.HEURIST.instance && top.HEURIST.instance.name ? "?instance=" + top.HEURIST.instance.name : "");
 	// if there are results waiting, render them
 	var searchFrame = document.getElementById("searchFrame");
 	if (searchFrame && searchFrame.contentWindow && searchFrame.contentWindow.results) {
