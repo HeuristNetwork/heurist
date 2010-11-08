@@ -45,7 +45,7 @@ $query = 'select SQL_CALC_FOUND_ROWS
           if(rec_visibility="Hidden",1,0),
           rec_url_last_verified,
           rec_url_error,
-          pers_pwd_reminder ';
+          bkm_PwdReminder ';
 
 
 mysql_connection_db_select(DATABASE);

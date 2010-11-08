@@ -635,7 +635,7 @@ function do_fix_dupe() {
         $master_pers_record = mysql_fetch_assoc(mysql_query('select * from usrBookmarks where bkm_ID='.$master_bkm_ID));
         $delete_dup_pers_record = mysql_fetch_assoc(mysql_query('select * from usrBookmarks where bkm_ID='.$delete_dup_bkm_ID));
         $master_pers_record['pers_notes'] .= $delete_dup_pers_record['pers_notes'];
-        $master_pers_record['pers_pwd_reminder'] .= $delete_dup_pers_record['pers_pwd_reminder'];
+        $master_pers_record['bkm_PwdReminder'] .= $delete_dup_pers_record['bkm_PwdReminder'];
         $master_pers_record['pers_content_rating'] = max($master_pers_record['pers_content_rating'],$delete_dup_pers_record['pers_content_rating']);
         $master_pers_record['pers_quality_rating'] = max($master_pers_record['pers_quality_rating'],$delete_dup_pers_record['pers_quality_rating']);
         $master_pers_record['pers_interest_rating'] = max($master_pers_record['pers_interest_rating'],$delete_dup_pers_record['pers_interest_rating']);
