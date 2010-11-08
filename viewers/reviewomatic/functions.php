@@ -64,9 +64,9 @@ function get_reviews($user_id, $class_grp_id, $ass_kwd_id, $get_text=false, $ind
 						  FROM keyword_links
 					 LEFT JOIN usrBookmarks ON bkm_ID=kwl_pers_id
 					 LEFT JOIN records ON rec_id=kwl_rec_id
-					 LEFT JOIN ACLAdmin.Users on Id=pers_usr_id
+					 LEFT JOIN ACLAdmin.Users on Id=bkm_UGrpID
 						 WHERE kwl_kwd_id=' . $ass_kwd_id .
-		 ($user_id > 0 ? ' AND pers_usr_id=' . $user_id : '').'
+		 ($user_id > 0 ? ' AND bkm_UGrpID=' . $user_id : '').'
 						 ORDER BY bkm_Added desc
 	   '.($count > 0 ? ' LIMIT ' . $index . ', ' . $count : ''));
 
@@ -117,7 +117,7 @@ function have_bkmk_permissions($bkmk_id, $user_id) {
 						  FROM usrBookmarks
 					 LEFT JOIN records ON pers_rec_id=rec_id
 						 WHERE bkm_ID=' . $bkmk_id . '
-						   AND pers_usr_id=' . $user_id);
+						   AND bkm_UGrpID=' . $user_id);
 	return (mysql_num_rows($res) > 0);
 }
 
@@ -238,7 +238,7 @@ function add_review($bib_id, $title, $ass_kwd_id, $genre_id, $user_id) {
 		'pers_rec_id' => $bib_id,
 		'bkm_Added' => date('Y-m-d H:i:s'),
 		'bkm_Modified' => date('Y-m-d H:i:s'),
-		'pers_usr_id' => $user_id));
+		'bkm_UGrpID' => $user_id));
 	$bkmk_id = mysql_insert_id();
 	mysql__insert('keyword_links', array(
 		'kwl_pers_id' => $bkmk_id,

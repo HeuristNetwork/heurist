@@ -31,37 +31,37 @@ mysql_connection_db_select(DATABASE);
 if ($_REQUEST['user']) {
 	if ($_REQUEST['kwd']) {
 		$res = mysql_query('
-   select B.pers_usr_id,
+   select B.bkm_UGrpID,
           concat('.USERS_FIRSTNAME_FIELD.'," ",'.USERS_LASTNAME_FIELD.') as name,
-		  count(B.pers_usr_id) as freq
+		  count(B.bkm_UGrpID) as freq
      from keyword_links
 left join usrBookmarks A on A.bkm_ID=kwl_pers_id
 left join records on rec_id=A.pers_rec_id
 left join usrBookmarks B on B.pers_rec_id=rec_id
-left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=B.pers_usr_id
+left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=B.bkm_UGrpID
     where kwl_kwd_id='.$_REQUEST['kwd'].'
-      and A.pers_usr_id='.$_REQUEST['user'].'
-	  and B.pers_usr_id!='.$_REQUEST['user'].'
+      and A.bkm_UGrpID='.$_REQUEST['user'].'
+	  and B.bkm_UGrpID!='.$_REQUEST['user'].'
 	  and '.USERS_ID_FIELD.' is not null
 	  and '.USERS_ACTIVE_FIELD.'="Y"
- group by B.pers_usr_id
+ group by B.bkm_UGrpID
  order by freq desc, name;');
 
 	}
 	else {
 		$res = mysql_query('
-   select B.pers_usr_id,
+   select B.bkm_UGrpID,
           concat('.USERS_FIRSTNAME_FIELD.'," ",'.USERS_LASTNAME_FIELD.') as name,
-		  count(B.pers_usr_id) as freq
+		  count(B.bkm_UGrpID) as freq
      from usrBookmarks A
 left join records on rec_id=A.pers_rec_id
 left join usrBookmarks B on B.pers_rec_id=rec_id
-left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=B.pers_usr_id
-    where A.pers_usr_id='.$_REQUEST['user'].'
-	  and B.pers_usr_id!='.$_REQUEST['user'].'
+left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=B.bkm_UGrpID
+    where A.bkm_UGrpID='.$_REQUEST['user'].'
+	  and B.bkm_UGrpID!='.$_REQUEST['user'].'
 	  and '.USERS_ID_FIELD.' is not null
 	  and '.USERS_ACTIVE_FIELD.'="Y"
- group by B.pers_usr_id
+ group by B.bkm_UGrpID
  order by freq desc, name;');
 	}
 ?>
@@ -120,7 +120,7 @@ Users with similar interests to you: (show
 
 	$i = 0;
 	while ($row = mysql_fetch_assoc($res)) {
-		echo ' <tr'. (++$i > 10 ? ' style="display: none;"' : '') .'><td><a href="'.HEURIST_SITE_PATH.'admin/user/user.php?Id='.$row['pers_usr_id'].'" title="View user profile for '.$row['name'].'">'.$row['name']."</a>&nbsp;&nbsp;&nbsp;&nbsp;</td>\n";
+		echo ' <tr'. (++$i > 10 ? ' style="display: none;"' : '') .'><td><a href="'.HEURIST_SITE_PATH.'admin/user/user.php?Id='.$row['bkm_UGrpID'].'" title="View user profile for '.$row['name'].'">'.$row['name']."</a>&nbsp;&nbsp;&nbsp;&nbsp;</td>\n";
 		echo '     <td><a target="_top" href="'.HEURIST_SITE_PATH.'search/search.html?w=bookmark&q=user:%22'.$row['name'].'%22" title="Search for records that you and '.$row['name'].' share"><b>'.$row['freq']."</b> records in common</a></td></tr>\n";
 	}
 }

@@ -36,7 +36,7 @@ else 				// all records entries
 
 $query = 'select SQL_CALC_FOUND_ROWS
           bkm_ID,
-          pers_usr_id,
+          bkm_UGrpID,
           rec_id,
           rec_url,
           rec_type,

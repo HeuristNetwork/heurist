@@ -33,7 +33,7 @@ $MAINTABLES['LINKED_BIBLIO'] = 'records';
                 $JOINS['LINKED_BIBLIO'] = array('REFTYPE-ID' => 'rec_type');
 
 if (function_exists('get_user_id')) {
-      $LOOKUPS['LINKED_BIBLIO'] = array( 'usrBookmarks' => 'rec_id=pers_rec_id and pers_usr_id='.get_user_id() );
+      $LOOKUPS['LINKED_BIBLIO'] = array( 'usrBookmarks' => 'rec_id=pers_rec_id and bkm_UGrpID='.get_user_id() );
 }
 
 
@@ -70,7 +70,7 @@ $MAINTABLES["BOOKMARKS_TO_KEYWORDS"] = 'keyword_links';
 
 
 $SEARCHES["BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left join records on pers_rec_id=rec_id WHERE (
-		(pers_usr_id = [logged-in-user-id]) and 
+		(bkm_UGrpID = [logged-in-user-id]) and
 		[word-match:bkmk_title:bkmk_title] and 
 		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
 		if ([bkmk_advanced_search] and [pers_notes]!='', pers_notes like [%pers_notes%], 1) and
@@ -80,7 +80,7 @@ $SEARCHES["BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left jo
 		";	/* may be over-written by search.php */
 
 $SEARCHES["augmented_BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left join records on pers_rec_id=rec_id left join keyword_links on kwl_pers_id=bkm_ID WHERE (
-		(pers_usr_id = [logged-in-user-id]) and 
+		(bkm_UGrpID = [logged-in-user-id]) and
 		[word-match:bkmk_title:bkmk_title] and 
 		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
 		if ([bkmk_advanced_search] and [pers_notes]!='', pers_notes like [%pers_notes%], 1) and

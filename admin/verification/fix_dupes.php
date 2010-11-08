@@ -600,12 +600,12 @@ function do_fix_dupe() {
 
 // move dup bookmarks and tags to master unless they are already there
 //get bookmarkid =>userid for bookmarks of master record
-    $master_pers_usr_ids = mysql__select_assoc('usrBookmarks', 'bkm_ID','pers_usr_id', 'pers_rec_id = '.$master_rec_id);
+    $master_pers_usr_ids = mysql__select_assoc('usrBookmarks', 'bkm_ID','bkm_UGrpID', 'pers_rec_id = '.$master_rec_id);
 //get kwids for  all bookmarks of master record
     $master_kwd_ids = mysql__select_array('keyword_links', 'kwl_kwd_id', 'kwl_rec_id = '.$master_rec_id);
     if ($master_kwd_ids) $master_kwd_cnt = count($master_kwd_ids);
 //get bookmarkid => userid for bookmarks in dup records
-    $dup_pers_usr_ids = mysql__select_assoc('usrBookmarks','bkm_ID', 'pers_usr_id', 'pers_rec_id in'. $dup_rec_list);
+    $dup_pers_usr_ids = mysql__select_assoc('usrBookmarks','bkm_ID', 'bkm_UGrpID', 'pers_rec_id in'. $dup_rec_list);
 
 
 // if dup userid already has a bookmark on master record then add bkm_ID to delete_bkm_IDs_list else add to  update_bkm_IDs

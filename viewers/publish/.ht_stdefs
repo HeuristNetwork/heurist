@@ -34,7 +34,7 @@ $MAINTABLES['LINKED_BIBLIO'] = 'records';
                 $JOINS['LINKED_BIBLIO'] = array('REFTYPE-ID' => 'rec_type');
 
 if (function_exists('get_user_id')) {
-      $LOOKUPS['LINKED_BIBLIO'] = array( 'usrBookmarks' => 'rec_id=pers_rec_id and pers_usr_id='.get_user_id() );
+      $LOOKUPS['LINKED_BIBLIO'] = array( 'usrBookmarks' => 'rec_id=pers_rec_id and bkm_UGrpID='.get_user_id() );
 }
 
 
@@ -130,8 +130,8 @@ if (@$_REQUEST['showall']) {
  * for the search page: if showall is set,
  * then we select every URL that hasn't been bookmarked by this user already,
  * but only one bookmark per URL (we arbitrarily select the one with the minimum user id)
-	$SEARCHES["BOOKMARK_search"] = "SELECT bkm_ID, pers_usr_id, min(pers_usr_id) as min_user_id FROM usrBookmarks WHERE (
-		pers_usr_id != [logged-in-user-id] and
+	$SEARCHES["BOOKMARK_search"] = "SELECT bkm_ID, bkm_UGrpID, min(bkm_UGrpID) as min_user_id FROM usrBookmarks WHERE (
+		bkm_UGrpID != [logged-in-user-id] and
 		if ([bkmk_title]!='', if([bkmk_title]!='=', bkmk_title like [%bkmk_title%], bkmk_title = ''), 1) and
 		if ([bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
 		if ([pers_notes]!='', pers_notes like [%pers_notes%], 1) and
@@ -139,7 +139,7 @@ if (@$_REQUEST['showall']) {
 		if ([bkmk_keywordstring]!='', bkmk_keywordstring like [%bkmk_keywordstring%], 1)
 		)
 		group by bkmk_url
-		having pers_usr_id=min_user_id
+		having bkm_UGrpID=min_user_id
 		";
 } else {
 */
@@ -187,7 +187,7 @@ if (@$_REQUEST['sort_order_dropdown']  &&  in_array($_REQUEST['sort_order_dropdo
 
 /*
 $SEARCHES["BOOKMARK_search"] = "SELECT bkm_ID FROM usrBookmarks WHERE (
-		(pers_usr_id = [logged-in-user-id]) and 
+		(bkm_UGrpID = [logged-in-user-id]) and
 		if ([bkmk_title]!='', if([bkmk_title]!='=', bkmk_title like [%bkmk_title%], bkmk_title = ''), 1) and
 		if ([bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
 		if ([pers_notes]!='', pers_notes like [%pers_notes%], 1) and
@@ -198,7 +198,7 @@ $SEARCHES["BOOKMARK_search"] = "SELECT bkm_ID FROM usrBookmarks WHERE (
 		";
 */
 $SEARCHES["BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left join records on pers_rec_id=rec_id WHERE (
-		(pers_usr_id = [logged-in-user-id]) and 
+		(bkm_UGrpID = [logged-in-user-id]) and
 		[word-match:bkmk_title:bkmk_title] and 
 		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
 		if ([bkmk_advanced_search] and [pers_notes]!='', pers_notes like [%pers_notes%], 1) and
@@ -208,7 +208,7 @@ $SEARCHES["BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left jo
 		";	/* may be over-written by search.php */
 
 $SEARCHES["augmented_BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left join records on pers_rec_id=rec_id left join keyword_links on kwl_pers_id=bkm_ID WHERE (
-		(pers_usr_id = [logged-in-user-id]) and 
+		(bkm_UGrpID = [logged-in-user-id]) and
 		[word-match:bkmk_title:bkmk_title] and 
 		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
 		if ([bkmk_advanced_search] and [pers_notes]!='', pers_notes like [%pers_notes%], 1) and
@@ -224,8 +224,8 @@ define('BOOKMARK_search_all-order', 'bkmk_title');
 /* All Bookmarks search */
 
 /*
-$SEARCHES["BOOKMARK_search_all"] = "SELECT bkm_ID, pers_usr_id FROM usrBookmarks WHERE (
-		pers_usr_id != [logged-in-user-id] and
+$SEARCHES["BOOKMARK_search_all"] = "SELECT bkm_ID, bkm_UGrpID FROM usrBookmarks WHERE (
+		bkm_UGrpID != [logged-in-user-id] and
 		if ([bkmk_title]!='', bkmk_title like [%bkmk_title%], 1) and
 		if ([bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
 		if ([pers_notes]!='', pers_notes like [%pers_notes%], 1) and
@@ -248,7 +248,7 @@ $SEARCHES["ALLBOOKMARK_search"] = "SELECT bkm_ID FROM usrBookmarks WHERE (
 /* search the records records for which the user doesn't have a bookmark already */
 
 $SEARCHES["BIBLIO_search"] = "select rec_id from records
-	                               left join usrBookmarks on pers_rec_id=rec_id and pers_usr_id = [logged-in-user-id] where (
+	                               left join usrBookmarks on pers_rec_id=rec_id and bkm_UGrpID = [logged-in-user-id] where (
 	bkm_ID is null and
 	[word-match:rec_title:rec_title] and 
 	if ([rec_url]!='', rec_url like [%rec_url%], 1) and
@@ -272,7 +272,7 @@ $SEARCHES["augmented_simple_BIBLIO_search"] = "select distinct rec_id from recor
 	";
 
 $SEARCHES["others_BIBLIO_search"] = "select distinct rec_id from records
-	                               left join usrBookmarks on pers_rec_id=rec_id and pers_usr_id = [logged-in-user-id] where (
+	                               left join usrBookmarks on pers_rec_id=rec_id and bkm_UGrpID = [logged-in-user-id] where (
 	bkm_ID is null and
 	[word-match:rec_title:rec_title] and 
 	if ([bib_advanced_search] and [rec_url]!='', rec_url like [%rec_url%], 1) and
@@ -283,7 +283,7 @@ $SEARCHES["others_BIBLIO_search"] = "select distinct rec_id from records
 
 $SEARCHES['augmented_others_BIBLIO_search'] = "select distinct rec_id from records
 	                               left join usrBookmarks A on A.pers_rec_id=rec_id
-                                       left join usrBookmarks B on B.pers_rec_id=A.pers_rec_id and B.pers_usr_id = [logged-in-user-id]
+                                       left join usrBookmarks B on B.pers_rec_id=A.pers_rec_id and B.bkm_UGrpID = [logged-in-user-id]
                                        left join keyword_links on kwl_pers_id=A.bkm_ID where (
 	B.bkm_ID is null and
 	[word-match:rec_title:rec_title] and 
@@ -301,7 +301,7 @@ $SEARCHES['augmented_others_BIBLIO_search'] = "select distinct rec_id from recor
    simplify the front screen search
 define('BOOKMARK_simple_search-order', 'bkmk_title');
 $SEARCHES["BOOKMARK_simple_search"] = "SELECT bkm_ID FROM usrBookmarks WHERE (
-		if ([pers_usr_id]!='',pers_usr_id = [pers_usr_id], pers_usr_id = [logged-in-user-id]) and 
+		if ([bkm_UGrpID]!='',bkm_UGrpID = [bkm_UGrpID], bkm_UGrpID = [logged-in-user-id]) and
 		if ([bkmk_title]!='', bkmk_title like [%bkmk_title%], 1) and
 		if ([bkmk_category_id]!='', bkmk_category_id = [bkmk_category_id], 1)
 		)

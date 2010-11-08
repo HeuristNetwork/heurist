@@ -57,7 +57,7 @@ mysql_connection_db_overwrite(DATABASE);
 			$row = mysql_fetch_assoc($res);
 			$owner = $row['rec_added_by_usr_id'];
 
-			$res = mysql_query('select '.USERS_USERNAME_FIELD.' from records left join usrBookmarks on pers_rec_id=rec_id left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=pers_usr_id where rec_id = ' . $rec_id);
+			$res = mysql_query('select '.USERS_USERNAME_FIELD.' from records left join usrBookmarks on pers_rec_id=rec_id left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=bkm_UGrpID where rec_id = ' . $rec_id);
 			$bkmk_count = mysql_num_rows($res);
 			$bkmk_users = array();
 			while ($row = mysql_fetch_assoc($res)) array_push($bkmk_users, $row[USERS_USERNAME_FIELD]);
@@ -101,7 +101,7 @@ mysql_connection_db_overwrite(DATABASE);
 		$row = mysql_fetch_assoc($res);
 		$rec_title = $row['rec_title'];
 		$owner = $row['rec_added_by_usr_id'];
-		$res = mysql_query('select '.USERS_USERNAME_FIELD.' from records left join usrBookmarks on pers_rec_id=rec_id left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=pers_usr_id where rec_id = ' . $rec_id);
+		$res = mysql_query('select '.USERS_USERNAME_FIELD.' from records left join usrBookmarks on pers_rec_id=rec_id left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=bkm_UGrpID where rec_id = ' . $rec_id);
 		$bkmk_count = mysql_num_rows($res);
 		$bkmk_users = array();
 		while ($row = mysql_fetch_assoc($res)) array_push($bkmk_users, $row[USERS_USERNAME_FIELD]);

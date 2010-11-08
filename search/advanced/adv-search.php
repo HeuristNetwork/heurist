@@ -139,17 +139,17 @@ class Query {
 		if ($this->search_type == BOOKMARK)
 			$from_clause = 'from usrBookmarks TOPBKMK left join records TOPBIBLIO on pers_rec_id=rec_id ';
 		else
-			$from_clause = 'from records TOPBIBLIO left join usrBookmarks TOPBKMK on pers_rec_id=rec_id and pers_usr_id='.get_user_id().' ';
+			$from_clause = 'from records TOPBIBLIO left join usrBookmarks TOPBKMK on pers_rec_id=rec_id and bkm_UGrpID='.get_user_id().' ';
 
 		$from_clause .= join(' ', $this->sort_tables);	// sorting may require the introduction of more tables
 
 
 		if ($this->search_type == BOOKMARK) {
 			if ($where_clause) $where_clause = '(' . $where_clause . ') and ';
-			$where_clause .= 'pers_usr_id = ' . get_user_id() . ' and (rec_temporary is null or not rec_temporary) ';
+			$where_clause .= 'bkm_UGrpID = ' . get_user_id() . ' and (rec_temporary is null or not rec_temporary) ';
 		} else if ($this->search_type == BIBLIO) {
 			if ($where_clause) $where_clause = '(' . $where_clause . ') and ';
-			$where_clause .= 'pers_usr_id is null and not rec_temporary ';
+			$where_clause .= 'bkm_UGrpID is null and not rec_temporary ';
 		} else {
 			if ($where_clause) $where_clause = '(' . $where_clause . ') and ';
 			$where_clause .= 'not rec_temporary ';
@@ -624,15 +624,15 @@ class UserPredicate extends Predicate {
 		$not = ($this->parent->negate)? 'not ' : '';
 		if (is_numeric($this->value)) {
 			return $not . 'exists (select * from usrBookmarks bkmk where bkmk.pers_rec_id=rec_id '
-			                                                  . ' and bkmk.pers_usr_id = ' . intval($this->value) . ')';
+			                                                  . ' and bkmk.bkm_UGrpID = ' . intval($this->value) . ')';
 		}
 		else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
 			return $not . 'exists (select * from usrBookmarks bkmk where bkmk.pers_rec_id=rec_id '
-			                                                  . ' and bkmk.pers_usr_id in (' . $this->value . '))';
+			                                                  . ' and bkmk.bkm_UGrpID in (' . $this->value . '))';
 		}
 		else {
 			return $not . 'exists (select * from usrBookmarks bkmk, '.USERS_DATABASE.'.Users usr '
-			                    . ' where bkmk.pers_rec_id=rec_id and bkmk.pers_usr_id = usr.Id '
+			                    . ' where bkmk.pers_rec_id=rec_id and bkmk.bkm_UGrpID = usr.Id '
 			                      . ' and (usr.Realname = "' . addslashes($this->value) . '" or usr.Username = "' . addslashes($this->value) . '"))';
 		}
 	}

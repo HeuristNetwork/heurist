@@ -161,14 +161,14 @@ if ($_REQUEST['_submit']  &&  $dup_check_ok) {
 			                      left join keywords B on B.kwd_name=A.kwd_name and B.kwd_usr_id=$usr_id",
 			                                'A.kwd_id', 'B.kwd_id', "A.kwd_usr_id=$model_usr_id");
 
-			$res = mysql_query("select * from usrBookmarks where pers_usr_id = $model_usr_id");	// model user
+			$res = mysql_query("select * from usrBookmarks where bkm_UGrpID = $model_usr_id");	// model user
 			while ($row = mysql_fetch_assoc($res)) {
 				// add a new bookmark for each of the model user's bookmarks
 				// (all fields the same except for user id and keyword id)
 
 				unset($row['bkm_ID']);
 
-				$row['pers_usr_id'] = $usr_id;
+				$row['bkm_UGrpID'] = $usr_id;
 				$row['bkm_Added'] = date('Y-m-d H:i:s');
 				$row['bkm_Modified'] = date('Y-m-d H:i:s');
 
@@ -181,12 +181,12 @@ if ($_REQUEST['_submit']  &&  $dup_check_ok) {
 			$res = mysql_query(
 'select NEWUSER_BKMK.bkm_ID, NEWUSER_KWD.kwd_id, MODUSER_KWDL.kwl_order, MODUSER_KWDL.kwl_rec_id
    from usrBookmarks NEWUSER_BKMK left join usrBookmarks MODUSER_BKMK on NEWUSER_BKMK.pers_rec_id=MODUSER_BKMK.pers_rec_id
-                                                               and MODUSER_BKMK.pers_usr_id='.$model_usr_id.'
+                                                               and MODUSER_BKMK.bkm_UGrpID='.$model_usr_id.'
                                left join keyword_links MODUSER_KWDL on MODUSER_KWDL.kwl_pers_id=MODUSER_BKMK.bkm_ID
                                left join keywords MODUSER_KWD on MODUSER_KWD.kwd_id=MODUSER_KWDL.kwl_kwd_id
                                left join keywords NEWUSER_KWD on NEWUSER_KWD.kwd_name=MODUSER_KWD.kwd_name
                                                              and NEWUSER_KWD.kwd_usr_id='.$usr_id.'
-  where NEWUSER_BKMK.pers_usr_id='.$usr_id.' and NEWUSER_KWD.kwd_id is not null'
+  where NEWUSER_BKMK.bkm_UGrpID='.$usr_id.' and NEWUSER_KWD.kwd_id is not null'
 			);
 			$insert_pairs = array();
 			while ($row = mysql_fetch_row($res))

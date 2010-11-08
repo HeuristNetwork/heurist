@@ -1892,7 +1892,7 @@ function insert_bookmark(&$entry) {
 
 	// First: check if the user already has a bookmark for this records
 	$res = mysql_query('select bkm_ID from usrBookmarks where pers_rec_id = ' . $entry->getBiblioID()
-	                                                . ' and pers_usr_id = ' . get_user_id());
+	                                                . ' and bkm_UGrpID = ' . get_user_id());
 	if (mysql_num_rows($res) > 0) {
 		$bkm_ID = mysql_fetch_row($res);
 		$bkm_ID = $bkm_ID[0];
@@ -1909,7 +1909,7 @@ function insert_bookmark(&$entry) {
 		$bkmk = array('pers_rec_id' => $entry->getBiblioID(),
 		              'bkm_Added' => date('Y-m-d H:i:s'),
 		              'bkm_Modified' => date('Y-m-d H:i:s'),
-		              'pers_usr_id' => get_user_id(),
+		              'bkm_UGrpID' => get_user_id(),
 		              'pers_auto' => 1);
 
 		if (is_a($entry->getForeignPrototype(), 'HeuristZoteroEntry')) {

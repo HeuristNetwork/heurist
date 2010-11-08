@@ -30,10 +30,10 @@ if ($bkm_ID  &&  $_POST["save-mode"] == "edit") {
 		if (array_key_exists($varNames[0], $_POST))
 			$updates[$colName] = $_POST[$varNames[0]];
 	}
-	mysql__update("usrBookmarks", "bkm_ID=$bkm_ID and pers_usr_id=".get_user_id(), $updates);
+	mysql__update("usrBookmarks", "bkm_ID=$bkm_ID and bkm_UGrpID=".get_user_id(), $updates);
 
 	$res = mysql_query("select " . join(", ", array_keys($updates)) .
-				" from usrBookmarks where bkm_ID=$bkm_ID and pers_usr_id=".get_user_id());
+				" from usrBookmarks where bkm_ID=$bkm_ID and bkm_UGrpID=".get_user_id());
 	if (mysql_num_rows($res) == 1) {
 		$dbVals = mysql_fetch_assoc($res);
 		$hVals = array();

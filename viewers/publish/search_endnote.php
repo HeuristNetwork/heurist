@@ -229,7 +229,7 @@ function print_biblio($bib) {
 	$kwds = mysql__select_array('usrBookmarks left join keyword_links on kwl_pers_id = bkm_ID
 	                                       left join keywords on kwd_id = kwl_kwd_id',
 	                            'kwd_name',
-	                            'pers_rec_id = ' . $bib['rec_id'] . ' and pers_usr_id = ' . get_user_id() . ' and kwd_name != "" and kwd_name is not null');
+	                            'pers_rec_id = ' . $bib['rec_id'] . ' and bkm_UGrpID = ' . get_user_id() . ' and kwd_name != "" and kwd_name is not null');
 	if (count($kwds)) $output .= '%K ' . join(', ', $kwds) . "\n";
 
 /*

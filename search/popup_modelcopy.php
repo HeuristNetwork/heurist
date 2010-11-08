@@ -217,7 +217,7 @@ function update_my_settings() {
 	$ssearches = array_map('intval', array_keys($_REQUEST['ssearch']));
 
 	$keys = mysql__select_array('keywords', 'kwd_id', 'kwd_usr_id = '.MODEL_USER_ID.' and kwd_id in (0, ' . join(', ', $keys) . ')');
-	$bkmks = mysql__select_array('usrBookmarks', 'bkm_ID', 'pers_usr_id = '.MODEL_USER_ID.' and bkm_ID in (0, ' . join(', ', $bkmks) . ')');
+	$bkmks = mysql__select_array('usrBookmarks', 'bkm_ID', 'bkm_UGrpID = '.MODEL_USER_ID.' and bkm_ID in (0, ' . join(', ', $bkmks) . ')');
 	$ssearches = mysql__select_array('saved_searches', 'ss_id', 'ss_usr_id = '.MODEL_USER_ID.' and ss_id in (0, ' . join(', ', $ssearches) . ')');
 
 	if ($keys) {
@@ -242,7 +242,7 @@ function update_my_settings() {
 
 			unset($row['bkm_ID']);
 
-			$row['pers_usr_id'] = get_user_id();
+			$row['bkm_UGrpID'] = get_user_id();
 			$row['bkm_Added'] = date('Y-m-d H:i:s');
 			$row['bkm_Modified'] = date('Y-m-d H:i:s');
 
@@ -260,7 +260,7 @@ function update_my_settings() {
                                left join keywords MODUSER_KWD on MODUSER_KWD.kwd_id=MODUSER_KWDL.kwl_kwd_id
                                left join keywords NEWUSER_KWD on NEWUSER_KWD.kwd_name=MODUSER_KWD.kwd_name
                                                              and NEWUSER_KWD.kwd_usr_id='.get_user_id().'
-  where NEWUSER_BKMK.pers_usr_id='.get_user_id().' and NEWUSER_KWD.kwd_id is not null'
+  where NEWUSER_BKMK.bkm_UGrpID='.get_user_id().' and NEWUSER_KWD.kwd_id is not null'
 		);
 		$insert_pairs = array();
 		while ($row = mysql_fetch_row($res))
@@ -300,8 +300,8 @@ function kwd_query() {
 function bkmk_query() {
 	return mysql_query("select A.bkm_ID, rec_url, rec_title from usrBookmarks A
 	                           left join records on rec_id = A.pers_rec_id
-	                           left join usrBookmarks B on A.pers_rec_id = B.pers_rec_id and B.pers_usr_id=".get_user_id()."
-	                     where A.pers_usr_id=".MODEL_USER_ID." and B.bkm_ID is null
+	                           left join usrBookmarks B on A.pers_rec_id = B.pers_rec_id and B.bkm_UGrpID=".get_user_id()."
+	                     where A.bkm_UGrpID=".MODEL_USER_ID." and B.bkm_ID is null
 	                     order by A.bkm_ID");
 }
 
