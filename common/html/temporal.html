@@ -533,6 +533,15 @@
 						if (elem.length == 0) {
 							elem = $("input[name=" + type + code + "]:checked");
 						}
+						if (type === "c" && val && (code == "DEV" || code == "DVP" ||code == "DVN" )) {
+							var v = val.match(/P(\d+)Y/);
+							val = v[1] ? v[1] : val;
+						}
+						if (type === "f" && val && code == "RNG" ) {
+							var v = val.match(/P(\d+)(Y|M|D)/);
+							val = v[1] ? v[1] : val;
+							if (v[2]) $("#level").val(v[2]);
+						}
 						if (elem.length != 0) {
 							switch (elem[0].type) {
 								case "checkbox" :
@@ -555,15 +564,6 @@
 								default :
 									elem.val(val);
 							}
-						}
-					}
-					if (type === "c" && val) {
-						if (code === "DEV") {
-							$("input[name=stdDEV][value=asym]").attr("checked","");
-							$("input[name=stdDEV][value=sym]").attr("checked","checked");
-						}else if (code === "DVP") {
-							$("input[name=stdDEV][value=sym]").attr("checked","");
-							$("input[name=stdDEV][value=asym]").attr("checked","checked");
 						}
 					}
 				};
@@ -594,6 +594,9 @@
 										var val = elem.val();
 										if (code == "RNG") {
 											val = "P" + val + $("#level").val();
+										}
+										if (code == "DEV" || code == "DVP" ||code == "DVN" ) {
+											val = "P" + val + "Y";
 										}
 										temporal.addObjForString(code, val);  // FIXME  this should validate input from the user.
 									}else if (elem.length != 0) {

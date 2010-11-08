@@ -1027,12 +1027,12 @@ top.HEURIST.edit = {
 						c14 = c14 ? c14[1]: (bce ? bce:" c14 temporal");
 					var suff = str.match(/CAL=([^\|]+)/) ? " Cal" : "";
 					suff += bce ? " BCE" : " BP";
-					var dvp = str.match(/DVP=([^\|]+)/);
+					var dvp = str.match(/DVP=P(\d+)Y/);
 						dvp = dvp ? dvp[1]: null;
-					var dev = str.match(/DEV=([^\|]+)/);
-						dev = dev ? " ±" + dev[1]:(dvp ? " +" + dvp:" + ??");
-					var dvn = str.match(/DVN=([^\|]+)/);
-						dev += dvp ? (dvn[1] ? " -" + dvn[1]: " - ??") : "";
+					var dev = str.match(/DEV=P(\d+)Y/);
+						dev = dev ? " ±" + dev[1] + " yr" + (dev[1]>1?"s":""):(dvp ? " +" + dvp + " yr" + (dvp>1?"s":""):" + ??");
+					var dvn = str.match(/DVN=P(\d+)Y/);
+						dev += dvp ? (dvn[1] ? " -" + dvn[1] + " yr" + (dvn[1]>1?"s":""): " - ??") : "";
 						str = c14 + dev + suff;
 				}else if (str.search(/TYP=p/) != -1 ) {// probable date
 					var tpq = str.match(/TPQ=([^\|]+)/);

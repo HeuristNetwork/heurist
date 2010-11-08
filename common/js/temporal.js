@@ -318,10 +318,6 @@ Temporal.fieldsDict = {	"VER"	:	"Version Number",
 						"COD"	:	"Laboratory Code",
 						"DET"	:	"Determination Type",
 						"COM"	:	"Comment",
-						"DEV"	:	"Standard Deviation",
-						"DVP"	:	"Deviation Positive",
-						"DVN"	:	"Deviation Negative",
-						"RNG"	:	"Range",
 						"EGP"	:	"Egyptian Date"
 };
 
@@ -348,6 +344,10 @@ Temporal.tDateDict = {	"DAT" 	:	"ISO DateTime",
 };
 
 Temporal.tDurationDict = {	"DUR"	:	"Simple Duration",
+							"DEV"	:	"Standard Deviation",
+							"DVP"	:	"Deviation Positive",
+							"DVN"	:	"Deviation Negative",
+							"RNG"	:	"Range",
 							"ERR"	:	"Error Margin"
 };
 

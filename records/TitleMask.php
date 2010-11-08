@@ -319,12 +319,12 @@ function _title_mask__get_rec_detail($rec_id, $rdt_id) {
 						$c14 = $c14[1] ? $c14[1] :($bce ? $bce:" c14 temporal");
 						$suff = preg_match("/CAL=/",$str) ? " Cal" : "";
 						$suff .= $bce ? " BCE" : " BP";
-						preg_match("/DVP=([^\|]+)/",$str,$dvp);
+						preg_match("/DVP=P(\d+)Y/",$str,$dvp);
 						$dvp = $dvp[1] ? $dvp[1] : null;
-						preg_match("/DEV=([^\|]+)/",$str,$dev);
-						$dev = $dev ? " ±" . $dev[1]:($dvp ? " +" . $dvp:" + ??");
-						preg_match("/DVN=([^\|]+)/",$str,$dvn);
-						$dev .= $dvp ? ($dvn[1] ? " -" + $dvn[1]: " - ??") : "";
+						preg_match("/DEV=P(\d+)Y/",$str,$dev);
+						$dev = $dev ? " ±" . $dev[1]. " yr". ($dev[1]>1?"s":""):($dvp ? " +" . $dvp . " yr" . ($dvp>1?"s":""):" + ??");
+						preg_match("/DVN=P(\d+)Y/",$str,$dvn);
+						$dev .= $dvp ? ($dvn[1] ? " -" . $dvn[1] . " yr" . ($dvn[1]>1?"s":""): " - ??") : "";
 						$str = "(" . $c14 . $dev . $suff . ")";
 						break;
 					case 'f': //fuzzy date

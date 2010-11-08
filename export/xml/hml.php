@@ -477,14 +477,10 @@ $fieldsDict = array(	"VER" =>	"Version Number",
 						"PRF" =>	"Probability Profile",
 						"SPF" =>	"Start Profile",
 						"EPF" =>	"End Profile",
-						"COR" =>	"Corrected",
+						"CAL" =>	"Calibrated",
 						"COD" =>	"Laboratory Code",
 						"DET" =>	"Determination Type",
 						"COM" =>	"Comment",
-						"DEV" =>	"Standard Deviation",
-						"DVP" =>	"Deviation Positive",
-						"DVN" =>	"Deviation Negative",
-						"RNG" =>	"Range",
 						"EGP" =>	"Egyptian Date"
 						);
 
@@ -500,8 +496,9 @@ $profileCodes = array(	0 =>	"Flat",
 						3 =>	"Slow Finish"
 						);
 
-$tDateDict = Array(	"DAT"  =>	"ISO DateTime",
-					"AVE"  =>	"Mean Date",
+$tDateDict = Array(	"DAT" =>	"ISO DateTime",
+					"BPD" =>	"Before Present (1950) Date",
+					"BCE" =>	"Before Current Era",
 					"TPQ" =>	"Terminus Post Quem",
 					"TAQ" =>	"Terminus Ante Quem",
 					"PDB" =>	"Probable begin",
@@ -510,6 +507,10 @@ $tDateDict = Array(	"DAT"  =>	"ISO DateTime",
 					);
 
 $tDurationDict = array(	"DUR" =>	"Simple Duration",
+						"RNG" =>	"Range",
+						"DEV" =>	"Standard Deviation",
+						"DVP" =>	"Deviation Positive",
+						"DVN" =>	"Deviation Negative",
 						"ERR" =>	"Error Margin"
 						);
 function outputTemporalDetail($attrs, $value) {
@@ -526,7 +527,7 @@ function outputTemporalDetail($attrs, $value) {
 		unset($properties['TYP']);
 		foreach( $properties as $tag => $val) {
 			if (array_key_exists($tag,$fieldsDict)) { //simple property
-				openTag('property',array('type'=>$tag));
+				openTag('property',array('type'=>$tag, 'name'=>$fieldsDict[$tag]));
 				switch ($tag) {
 					case "DET":
 						echo $determinationCodes[$val];
@@ -541,11 +542,11 @@ function outputTemporalDetail($attrs, $value) {
 				}
 				closeTag('property');
 			}else if (array_key_exists($tag,$tDateDict)) {
-				openTag('date',array('type'=>$tag));
+				openTag('date',array('type'=>$tag, 'name'=>$tDateDict[$tag]));
 				outputTDateDetail(null,$val);
 				closeTag('date');
 			}else if (array_key_exists($tag,$tDurationDict)) {
-				openTag('duration',array('type'=>$tag));
+				openTag('duration',array('type'=>$tag, 'name'=>$tDurationDict[$tag]));
 				outputDurationDetail(null,$val);
 				closeTag('duration');
 			}
@@ -614,7 +615,7 @@ function outputTDateDetail($attrs, $value) {
 			$date = null;
 		}
 		if ($date) {
-			preg_match('/^(?:(\d\d\d\d)[-\/]?)?(?:(1[012]|0[23]|[23](?!\d)|0?1(?!\d)|0?[4-9](?!\d))[-\/]?)?(?:([12]\d(?!-)|3[01]|0?[1-9][\s$]))?/',$date,$matches);
+			preg_match('/^(?:(\d\d\d\d)[-\/]?)?(?:(1[012]|0[23]|[23](?!\d)|0?1(?!\d)|0?[4-9](?!\d))[-\/]?)?(?:([12]\d|3[01]|0?[1-9]))?\s*$/',$date,$matches);
 			if (@$matches[1]) makeTag('year', null, $matches[1]);
 			if (@$matches[2]) makeTag('month', null, $matches[2]);
 			if (@$matches[3]) makeTag('day', null, $matches[3]);
@@ -637,7 +638,7 @@ function outputDurationDetail($attrs, $value) {
 			if (preg_match('/[YMD]/',$date)){ //char separated version 6Y5M8D
 				preg_match('/(?:(\d+)Y)?(?:(\d|0\d|1[012])M)?(?:(0?[1-9]|[12]\d|3[01])D)?/',$date,$matches);
 			}else{ //delimited version  0004-12-06
-				preg_match('/^(?:(\d\d\d\d)[-\/]?)?(?:(1[012]|0[23]|[23](?!\d)|0?1(?!\d)|0?[4-9](?!\d))[-\/]?)?(?:([12]\d(?!-)|3[01]|0?[1-9][\s$]))?/',$date,$matches);
+				preg_match('/^(?:(\d\d\d\d)[-\/]?)?(?:(1[012]|0[23]|[23](?!\d)|0?1(?!\d)|0?[4-9](?!\d))[-\/]?)?(?:([12]\d|3[01]|0?[1-9]))?\s*$/',$date,$matches);
 			}
 			if (@$matches[1]) makeTag('year', null, intval($matches[1]));
 			if (@$matches[2]) makeTag('month', null, intval($matches[2]));
