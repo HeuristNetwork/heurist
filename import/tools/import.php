@@ -1891,7 +1891,7 @@ function insert_bookmark(&$entry) {
 	if (! $entry->getBiblioID()) return false;
 
 	// First: check if the user already has a bookmark for this records
-	$res = mysql_query('select bkm_ID from usrBookmarks where pers_rec_id = ' . $entry->getBiblioID()
+	$res = mysql_query('select bkm_ID from usrBookmarks where bkm_recID = ' . $entry->getBiblioID()
 	                                                . ' and bkm_UGrpID = ' . get_user_id());
 	if (mysql_num_rows($res) > 0) {
 		$bkm_ID = mysql_fetch_row($res);
@@ -1906,7 +1906,7 @@ function insert_bookmark(&$entry) {
 		return false;
 	} else {
 		// Otherwise insert a new bookmark.
-		$bkmk = array('pers_rec_id' => $entry->getBiblioID(),
+		$bkmk = array('bkm_recID' => $entry->getBiblioID(),
 		              'bkm_Added' => date('Y-m-d H:i:s'),
 		              'bkm_Modified' => date('Y-m-d H:i:s'),
 		              'bkm_UGrpID' => get_user_id(),

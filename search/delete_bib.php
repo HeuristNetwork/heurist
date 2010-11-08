@@ -39,10 +39,10 @@ mysql_connection_db_overwrite(DATABASE);
 		mysql_query('delete from rec_details where rd_rec_id = ' . $rec_id);
 		mysql_query('delete from reminders where rem_rec_id = ' . $rec_id);
 		mysql_query('delete from keyword_links where kwl_rec_id = ' . $rec_id);
-		$res = mysql_query('select bkm_ID from usrBookmarks where pers_rec_id = ' . $rec_id);
+		$res = mysql_query('select bkm_ID from usrBookmarks where bkm_recID = ' . $rec_id);
 		while ($row = mysql_fetch_assoc($res))
 			mysql_query('delete from keyword_links where kwl_pers_id = ' . $row['bkm_ID']);
-		mysql_query('delete from usrBookmarks where pers_rec_id = ' . $rec_id);
+		mysql_query('delete from usrBookmarks where bkm_recID = ' . $rec_id);
 		$bkmks = mysql_affected_rows();
 		return array($bibs, $bkmks);
 	}
@@ -57,7 +57,7 @@ mysql_connection_db_overwrite(DATABASE);
 			$row = mysql_fetch_assoc($res);
 			$owner = $row['rec_added_by_usr_id'];
 
-			$res = mysql_query('select '.USERS_USERNAME_FIELD.' from records left join usrBookmarks on pers_rec_id=rec_id left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=bkm_UGrpID where rec_id = ' . $rec_id);
+			$res = mysql_query('select '.USERS_USERNAME_FIELD.' from records left join usrBookmarks on bkm_recID=rec_id left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=bkm_UGrpID where rec_id = ' . $rec_id);
 			$bkmk_count = mysql_num_rows($res);
 			$bkmk_users = array();
 			while ($row = mysql_fetch_assoc($res)) array_push($bkmk_users, $row[USERS_USERNAME_FIELD]);
@@ -101,7 +101,7 @@ mysql_connection_db_overwrite(DATABASE);
 		$row = mysql_fetch_assoc($res);
 		$rec_title = $row['rec_title'];
 		$owner = $row['rec_added_by_usr_id'];
-		$res = mysql_query('select '.USERS_USERNAME_FIELD.' from records left join usrBookmarks on pers_rec_id=rec_id left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=bkm_UGrpID where rec_id = ' . $rec_id);
+		$res = mysql_query('select '.USERS_USERNAME_FIELD.' from records left join usrBookmarks on bkm_recID=rec_id left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=bkm_UGrpID where rec_id = ' . $rec_id);
 		$bkmk_count = mysql_num_rows($res);
 		$bkmk_users = array();
 		while ($row = mysql_fetch_assoc($res)) array_push($bkmk_users, $row[USERS_USERNAME_FIELD]);

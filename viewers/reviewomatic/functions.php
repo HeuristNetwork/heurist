@@ -115,7 +115,7 @@ function have_bkmk_permissions($bkmk_id, $user_id) {
 	$user_id = intval($user_id);
 	$res = mysql_query('SELECT *
 						  FROM usrBookmarks
-					 LEFT JOIN records ON pers_rec_id=rec_id
+					 LEFT JOIN records ON bkm_recID=rec_id
 						 WHERE bkm_ID=' . $bkmk_id . '
 						   AND bkm_UGrpID=' . $user_id);
 	return (mysql_num_rows($res) > 0);
@@ -125,7 +125,7 @@ function get_review($bkmk_id, $class_grp_id) {
 	$bkmk_id = intval($bkmk_id);
 	$res = mysql_query('SELECT bkm_ID, pers_notes, rec_id, rec_title, rec_url
 						  FROM usrBookmarks
-					 LEFT JOIN records ON rec_id=pers_rec_id
+					 LEFT JOIN records ON rec_id=bkm_recID
 						 WHERE bkm_ID=' . $bkmk_id);
 	if ($row = mysql_fetch_assoc($res)) {
 		$review['bib_id'] = $row['rec_id'];
@@ -235,7 +235,7 @@ function add_review($bib_id, $title, $ass_kwd_id, $genre_id, $user_id) {
 	mysql__insert('usrBookmarks', array(
 		'pers_title' => addslashes($title),
 		'pers_rec_title' => addslashes($title),
-		'pers_rec_id' => $bib_id,
+		'bkm_recID' => $bib_id,
 		'bkm_Added' => date('Y-m-d H:i:s'),
 		'bkm_Modified' => date('Y-m-d H:i:s'),
 		'bkm_UGrpID' => $user_id));

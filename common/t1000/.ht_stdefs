@@ -19,7 +19,7 @@ $MAINTABLES['BOOKMARK'] = 'usrBookmarks';
 	$PKEY['BOOKMARK'] = 'bkm_ID';
 	$INIDATE_FIELD['BOOKMARK'] = 'bkm_Added';
       $MODDATE_FIELD['BOOKMARK'] = 'bkm_Modified';
-     $JOINS['BOOKMARK'] = array('BIBLIO-ID' => 'pers_rec_id');
+     $JOINS['BOOKMARK'] = array('BIBLIO-ID' => 'bkm_recID');
 
 
 $MAINTABLES['BIBLIO'] = 'records';
@@ -34,7 +34,7 @@ $MAINTABLES['LINKED_BIBLIO'] = 'records';
                 $JOINS['LINKED_BIBLIO'] = array('REFTYPE-ID' => 'rec_type');
 
 if (function_exists('get_user_id')) {
-      $LOOKUPS['LINKED_BIBLIO'] = array( 'usrBookmarks' => 'rec_id=pers_rec_id and bkm_UGrpID='.get_user_id() );
+      $LOOKUPS['LINKED_BIBLIO'] = array( 'usrBookmarks' => 'rec_id=bkm_recID and bkm_UGrpID='.get_user_id() );
 }
 
 
@@ -203,7 +203,7 @@ $SEARCHES["BOOKMARK_search"] = "SELECT bkm_ID FROM usrBookmarks WHERE (
 		)
 		";
 */
-$SEARCHES["BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left join records on pers_rec_id=rec_id WHERE (
+$SEARCHES["BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left join records on bkm_recID=rec_id WHERE (
 		(bkm_UGrpID = [logged-in-user-id]) and
 		[word-match:bkmk_title:bkmk_title] and
 		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
@@ -213,7 +213,7 @@ $SEARCHES["BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left jo
 		)
 		";	/* may be over-written by search.php */
 
-$SEARCHES["augmented_BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left join records on pers_rec_id=rec_id left join keyword_links on kwl_pers_id=bkm_ID WHERE (
+$SEARCHES["augmented_BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left join records on bkm_recID=rec_id left join keyword_links on kwl_pers_id=bkm_ID WHERE (
 		(bkm_UGrpID = [logged-in-user-id]) and
 		[word-match:bkmk_title:bkmk_title] and
 		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
@@ -254,7 +254,7 @@ $SEARCHES["ALLBOOKMARK_search"] = "SELECT bkm_ID FROM usrBookmarks WHERE (
 /* search the records records for which the user doesn't have a bookmark already */
 
 $SEARCHES["BIBLIO_search"] = "select rec_id from records
-	                               left join usrBookmarks on pers_rec_id=rec_id and bkm_UGrpID = [logged-in-user-id] where (
+	                               left join usrBookmarks on bkm_recID=rec_id and bkm_UGrpID = [logged-in-user-id] where (
 	bkm_ID is null and
 	[word-match:rec_title:rec_title] and
 	if ([rec_url]!='', rec_url like [%rec_url%], 1) and
@@ -269,7 +269,7 @@ $SEARCHES["simple_BIBLIO_search"] = "select distinct rec_id from records  where 
          and not rec_temporary
 	)
 	";
-$SEARCHES["augmented_simple_BIBLIO_search"] = "select distinct rec_id from records left join usrBookmarks on pers_rec_id=rec_id left join keyword_links on kwl_pers_id=bkm_ID where (
+$SEARCHES["augmented_simple_BIBLIO_search"] = "select distinct rec_id from records left join usrBookmarks on bkm_recID=rec_id left join keyword_links on kwl_pers_id=bkm_ID where (
 	[word-match:rec_title:rec_title] and
 	if ([bib_advanced_search] and [rec_url]!='', rec_url like [%rec_url%], 1) and
 	if ([bib_advanced_search] and [rec_type]!='', rec_type = [rec_type], 1)
@@ -278,7 +278,7 @@ $SEARCHES["augmented_simple_BIBLIO_search"] = "select distinct rec_id from recor
 	";
 
 $SEARCHES["others_BIBLIO_search"] = "select distinct rec_id from records
-	                               left join usrBookmarks on pers_rec_id=rec_id and bkm_UGrpID = [logged-in-user-id] where (
+	                               left join usrBookmarks on bkm_recID=rec_id and bkm_UGrpID = [logged-in-user-id] where (
 	bkm_ID is null and
 	[word-match:rec_title:rec_title] and
 	if ([bib_advanced_search] and [rec_url]!='', rec_url like [%rec_url%], 1) and
@@ -288,8 +288,8 @@ $SEARCHES["others_BIBLIO_search"] = "select distinct rec_id from records
 	";
 
 $SEARCHES['augmented_others_BIBLIO_search'] = "select distinct rec_id from records
-	                               left join usrBookmarks A on A.pers_rec_id=rec_id
-                                       left join usrBookmarks B on B.pers_rec_id=A.pers_rec_id and B.bkm_UGrpID = [logged-in-user-id]
+	                               left join usrBookmarks A on A.bkm_recID=rec_id
+                                       left join usrBookmarks B on B.bkm_recID=A.bkm_recID and B.bkm_UGrpID = [logged-in-user-id]
                                        left join keyword_links on kwl_pers_id=A.bkm_ID where (
 	B.bkm_ID is null and
 	[word-match:rec_title:rec_title] and

@@ -254,7 +254,7 @@ function update_my_settings() {
 		/* hold onto your hats, folks: this is a five-table join across three tables! */
 		$res = mysql_query(
 'select NEWUSER_BKMK.bkm_ID, NEWUSER_KWD.kwd_id, MODUSER_KWDL.kwl_order, MODUSER_KWDL.kwl_rec_id
-   from usrBookmarks NEWUSER_BKMK left join usrBookmarks MODUSER_BKMK on NEWUSER_BKMK.pers_rec_id=MODUSER_BKMK.pers_rec_id
+   from usrBookmarks NEWUSER_BKMK left join usrBookmarks MODUSER_BKMK on NEWUSER_BKMK.bkm_recID=MODUSER_BKMK.bkm_recID
                                                                and MODUSER_BKMK.bkm_ID in ('.join(',',$bkmks).')
                                left join keyword_links MODUSER_KWDL on MODUSER_KWDL.kwl_pers_id=MODUSER_BKMK.bkm_ID
                                left join keywords MODUSER_KWD on MODUSER_KWD.kwd_id=MODUSER_KWDL.kwl_kwd_id
@@ -299,8 +299,8 @@ function kwd_query() {
 
 function bkmk_query() {
 	return mysql_query("select A.bkm_ID, rec_url, rec_title from usrBookmarks A
-	                           left join records on rec_id = A.pers_rec_id
-	                           left join usrBookmarks B on A.pers_rec_id = B.pers_rec_id and B.bkm_UGrpID=".get_user_id()."
+	                           left join records on rec_id = A.bkm_recID
+	                           left join usrBookmarks B on A.bkm_recID = B.bkm_recID and B.bkm_UGrpID=".get_user_id()."
 	                     where A.bkm_UGrpID=".MODEL_USER_ID." and B.bkm_ID is null
 	                     order by A.bkm_ID");
 }

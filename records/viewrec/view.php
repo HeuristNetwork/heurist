@@ -16,7 +16,7 @@ if (@$_REQUEST['bkmk_id']) {
 	$bkm_ID = $_REQUEST['bkmk_id'];
 	$res = mysql_query('select * from usrBookmarks where bkm_ID = ' . $bkm_ID);
 	$bkmk = mysql_fetch_assoc($res);
-	$rec_id = $bkmk['pers_rec_id'];
+	$rec_id = $bkmk['bkm_recID'];
 } else {
 	$rec_id = @$_REQUEST['bib_id'];
 
@@ -31,7 +31,7 @@ if (@$_REQUEST['bkmk_id']) {
 	}
 	*/
 
-	$res = mysql_query('select * from usrBookmarks where pers_rec_id = ' . $rec_id . ' and bkm_UGrpID = ' . get_user_id());
+	$res = mysql_query('select * from usrBookmarks where bkm_recID = ' . $rec_id . ' and bkm_UGrpID = ' . get_user_id());
 	$bkmk = mysql_fetch_assoc($res);
 	$bkm_ID = $bkmk['bkm_ID'];
 }

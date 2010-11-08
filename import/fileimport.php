@@ -201,7 +201,7 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_keyw
 
 // filter the URLs (get rid of the ones already bookmarked)
 if (@$urls) {
-	$bkmk_urls = mysql__select_assoc('usrBookmarks left join records on rec_id = pers_rec_id', 'rec_url', '1', 'bkm_UGrpID='.get_user_id());
+	$bkmk_urls = mysql__select_assoc('usrBookmarks left join records on rec_id = bkm_recID', 'rec_url', '1', 'bkm_UGrpID='.get_user_id());
 	$ignore = array();
 	foreach ($urls as $url => $title)
 		if (@$bkmk_urls[$url]) $ignore[$url] = 1;
@@ -523,12 +523,12 @@ function bookmark_insert($url, $title, $keywords, $rec_id) {
 	 * return false on failure, or if the records record is already bookmarked by this user.
 	 */
 
-	$res = mysql_query('select * from usrBookmarks where pers_rec_id="'.addslashes($rec_id).'"
+	$res = mysql_query('select * from usrBookmarks where bkm_recID="'.addslashes($rec_id).'"
 	                                              and bkm_UGrpID="'.get_user_id().'"');
 	if (mysql_num_rows($res) > 0) return 0;
 
 	if (mysql__insert('usrBookmarks', array(
-		'pers_rec_id' => $rec_id,
+		'bkm_recID' => $rec_id,
 		'bkm_Added' => date('Y-m-d H:i:s'),
 		'bkm_Modified' => date('Y-m-d H:i:s'),
 		'bkm_UGrpID' => get_user_id()

@@ -73,7 +73,7 @@ function doKeywordInsertion($bkm_ID) {
 		array_push($kwd_ids, $kwd_id);
 	}
 
-	$res = mysql_query("select pers_rec_id from usrBookmarks where bkm_ID=$bkm_ID");
+	$res = mysql_query("select bkm_recID from usrBookmarks where bkm_ID=$bkm_ID");
 	$rec_id = mysql_fetch_row($res);  $rec_id = $rec_id[0];
 	if (! $rec_id) $rec_id = "NULL";
 

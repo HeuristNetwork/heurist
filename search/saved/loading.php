@@ -299,7 +299,7 @@ function loadUserDependentData(&$record) {
 	            pers_interest_rating,
 	            pers_quality_rating
 	       from usrBookmarks
-	      where pers_rec_id = $recID
+	      where bkm_recID = $recID
 	        and bkm_UGrpID = ".get_user_id());
 	if (mysql_num_rows($res) > 0) {
 		$row = mysql_fetch_assoc($res);

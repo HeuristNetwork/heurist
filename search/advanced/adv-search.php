@@ -137,9 +137,9 @@ class Query {
 		if ($sort_clause) $sort_clause = ' order by ' . $sort_clause;
 
 		if ($this->search_type == BOOKMARK)
-			$from_clause = 'from usrBookmarks TOPBKMK left join records TOPBIBLIO on pers_rec_id=rec_id ';
+			$from_clause = 'from usrBookmarks TOPBKMK left join records TOPBIBLIO on bkm_recID=rec_id ';
 		else
-			$from_clause = 'from records TOPBIBLIO left join usrBookmarks TOPBKMK on pers_rec_id=rec_id and bkm_UGrpID='.get_user_id().' ';
+			$from_clause = 'from records TOPBIBLIO left join usrBookmarks TOPBKMK on bkm_recID=rec_id and bkm_UGrpID='.get_user_id().' ';
 
 		$from_clause .= join(' ', $this->sort_tables);	// sorting may require the introduction of more tables
 
@@ -623,16 +623,16 @@ class UserPredicate extends Predicate {
 	function makeSQL() {
 		$not = ($this->parent->negate)? 'not ' : '';
 		if (is_numeric($this->value)) {
-			return $not . 'exists (select * from usrBookmarks bkmk where bkmk.pers_rec_id=rec_id '
+			return $not . 'exists (select * from usrBookmarks bkmk where bkmk.bkm_recID=rec_id '
 			                                                  . ' and bkmk.bkm_UGrpID = ' . intval($this->value) . ')';
 		}
 		else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
-			return $not . 'exists (select * from usrBookmarks bkmk where bkmk.pers_rec_id=rec_id '
+			return $not . 'exists (select * from usrBookmarks bkmk where bkmk.bkm_recID=rec_id '
 			                                                  . ' and bkmk.bkm_UGrpID in (' . $this->value . '))';
 		}
 		else {
 			return $not . 'exists (select * from usrBookmarks bkmk, '.USERS_DATABASE.'.Users usr '
-			                    . ' where bkmk.pers_rec_id=rec_id and bkmk.bkm_UGrpID = usr.Id '
+			                    . ' where bkmk.bkm_recID=rec_id and bkmk.bkm_UGrpID = usr.Id '
 			                      . ' and (usr.Realname = "' . addslashes($this->value) . '" or usr.Username = "' . addslashes($this->value) . '"))';
 		}
 	}

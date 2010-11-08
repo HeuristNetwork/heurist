@@ -34,7 +34,7 @@ if (substr($url, -1) == "/") $url = substr($url, 0, strlen($url)-1);
 
 $res = mysql_query("select rec_id
 					  from records
-				 left join usrBookmarks on pers_rec_id = rec_id
+				 left join usrBookmarks on bkm_recID = rec_id
 					 where (rec_url='".addslashes($url)."' or rec_url='".addslashes($url)."/')
 				  group by bkm_ID
 				  order by count(bkm_ID), rec_id
@@ -47,7 +47,7 @@ if ($row = mysql_fetch_assoc($res)) {
 
 $res = mysql_query("select bkm_ID
 					  from usrBookmarks
-				 left join records on rec_id = pers_rec_id
+				 left join records on rec_id = bkm_recID
 					 where bkm_UGrpID=".get_user_id()."
 					   and (rec_url='".addslashes($url)."' or rec_url='".addslashes($url)."/')
 					 limit 1");

@@ -109,12 +109,12 @@ function saveRecord($id, $type, $url, $notes, $group, $vis, $personalised, $pnot
 	updateCachedRecord($id);
 
 	// private data
-	$bkmk = @mysql_fetch_row(mysql_query("select bkm_ID from usrBookmarks where bkm_UGrpID=" . get_user_id() . " and pers_rec_id=" . $id));
+	$bkmk = @mysql_fetch_row(mysql_query("select bkm_ID from usrBookmarks where bkm_UGrpID=" . get_user_id() . " and bkm_recID=" . $id));
 	$bkm_ID = @$bkmk[0];
 	if ($personalised) {
 		if (! $bkm_ID) {
 			// Record is not yet bookmarked, but we want it to be
-			mysql_query("insert into usrBookmarks (bkm_Added,bkm_Modified,bkm_UGrpID,pers_rec_id) values (now(),now(),".get_user_id().",$id)");
+			mysql_query("insert into usrBookmarks (bkm_Added,bkm_Modified,bkm_UGrpID,bkm_recID) values (now(),now(),".get_user_id().",$id)");
 			if (mysql_error()) jsonError("database error - " . mysql_error());
 			$bkm_ID = mysql_insert_id();
 		}
@@ -131,7 +131,7 @@ function saveRecord($id, $type, $url, $notes, $group, $vis, $personalised, $pnot
 	}
 	else if ($bkm_ID) {
 		// Record is bookmarked, but the user doesn't want it to be
-		mysql_query("delete usrBookmarks, keyword_links from usrBookmarks left join keyword_links on kwl_pers_id = bkm_ID where bkm_ID=$bkm_ID and pers_rec_id=$id and bkm_UGrpID=" . get_user_id());
+		mysql_query("delete usrBookmarks, keyword_links from usrBookmarks left join keyword_links on kwl_pers_id = bkm_ID where bkm_ID=$bkm_ID and bkm_recID=$id and bkm_UGrpID=" . get_user_id());
 		if (mysql_error()) jsonError("database error - " . mysql_error());
 	}
 
