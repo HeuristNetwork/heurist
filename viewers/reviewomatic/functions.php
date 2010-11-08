@@ -237,7 +237,7 @@ function add_review($bib_id, $title, $ass_kwd_id, $genre_id, $user_id) {
 		'pers_rec_title' => addslashes($title),
 		'pers_rec_id' => $bib_id,
 		'bkm_Added' => date('Y-m-d H:i:s'),
-		'pers_modified' => date('Y-m-d H:i:s'),
+		'bkm_Modified' => date('Y-m-d H:i:s'),
 		'pers_usr_id' => $user_id));
 	$bkmk_id = mysql_insert_id();
 	mysql__insert('keyword_links', array(

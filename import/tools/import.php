@@ -1908,7 +1908,7 @@ function insert_bookmark(&$entry) {
 		// Otherwise insert a new bookmark.
 		$bkmk = array('pers_rec_id' => $entry->getBiblioID(),
 		              'bkm_Added' => date('Y-m-d H:i:s'),
-		              'pers_modified' => date('Y-m-d H:i:s'),
+		              'bkm_Modified' => date('Y-m-d H:i:s'),
 		              'pers_usr_id' => get_user_id(),
 		              'pers_auto' => 1);
 

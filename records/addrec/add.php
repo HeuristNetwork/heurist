@@ -337,7 +337,7 @@ if ($rec_id) {
 	mysql__insert('usrBookmarks', array(
 		'pers_rec_id' => $rec_id,
 		'bkm_Added' => date('Y-m-d H:i:s'),
-		'pers_modified' => date('Y-m-d H:i:s'),
+		'bkm_Modified' => date('Y-m-d H:i:s'),
 		'pers_usr_id' => get_user_id()
 	));
 

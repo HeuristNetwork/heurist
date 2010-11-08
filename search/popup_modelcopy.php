@@ -244,7 +244,7 @@ function update_my_settings() {
 
 			$row['pers_usr_id'] = get_user_id();
 			$row['bkm_Added'] = date('Y-m-d H:i:s');
-			$row['pers_modified'] = date('Y-m-d H:i:s');
+			$row['bkm_Modified'] = date('Y-m-d H:i:s');
 
 			mysql__insert('usrBookmarks', $row);
 			$updated = 1;

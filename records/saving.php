@@ -114,7 +114,7 @@ function saveRecord($id, $type, $url, $notes, $group, $vis, $personalised, $pnot
 	if ($personalised) {
 		if (! $bkm_ID) {
 			// Record is not yet bookmarked, but we want it to be
-			mysql_query("insert into usrBookmarks (bkm_Added,pers_modified,pers_usr_id,pers_rec_id) values (now(),now(),".get_user_id().",$id)");
+			mysql_query("insert into usrBookmarks (bkm_Added,bkm_Modified,pers_usr_id,pers_rec_id) values (now(),now(),".get_user_id().",$id)");
 			if (mysql_error()) jsonError("database error - " . mysql_error());
 			$bkm_ID = mysql_insert_id();
 		}
@@ -124,7 +124,7 @@ function saveRecord($id, $type, $url, $notes, $group, $vis, $personalised, $pnot
 		"pers_content_rating" => $crate,
 		"pers_interest_rating" => $irate,
 		"pers_quality_rating" => $qrate,
-		"pers_modified" => date('Y-m-d H:i:s')
+		"bkm_Modified" => date('Y-m-d H:i:s')
 		));
 
 		doTagInsertion($id, $bkm_ID, $tags);
