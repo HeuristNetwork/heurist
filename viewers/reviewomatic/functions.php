@@ -59,10 +59,10 @@ function get_reviews($user_id, $class_grp_id, $ass_kwd_id, $get_text=false, $ind
 	$ass_kwd_id = intval($ass_kwd_id);
 	$reviews = array();
 	$res = mysql_query('SELECT SQL_CALC_FOUND_ROWS
-							   rec_id, rec_title, rec_url, pers_id, pers_added,
+							   rec_id, rec_title, rec_url, bkm_ID, pers_added,
 							   concat(firstname," ",lastname) as author'.($get_text?', pers_notes':'').'
 						  FROM keyword_links
-					 LEFT JOIN usrBookmarks ON pers_id=kwl_pers_id
+					 LEFT JOIN usrBookmarks ON bkm_ID=kwl_pers_id
 					 LEFT JOIN records ON rec_id=kwl_rec_id
 					 LEFT JOIN ACLAdmin.Users on Id=pers_usr_id
 						 WHERE kwl_kwd_id=' . $ass_kwd_id .
@@ -76,7 +76,7 @@ function get_reviews($user_id, $class_grp_id, $ass_kwd_id, $get_text=false, $ind
 
 	while ($row = mysql_fetch_assoc($res)) {
 		$review['bib_id'] = $row['rec_id'];
-		$review['bkmk_id'] = $row['pers_id'];
+		$review['bkmk_id'] = $row['bkm_ID'];
 		$review['title'] = $row['pers_title'] ? $row['pers_title'] : $row['rec_title'];
 		$review['url'] = $row['rec_url'];
 		$review['added'] = $row['pers_added'];
@@ -84,7 +84,7 @@ function get_reviews($user_id, $class_grp_id, $ass_kwd_id, $get_text=false, $ind
 		if ($get_text) {
 			$review['text'] = $row['pers_notes'];
 		}
-		@list($review['genre_id'], $review['genre_label']) = get_genre($row['pers_id'], $class_grp_id);
+		@list($review['genre_id'], $review['genre_label']) = get_genre($row['bkm_ID'], $class_grp_id);
 		$reviews[] = $review;
 	}
 
@@ -116,23 +116,23 @@ function have_bkmk_permissions($bkmk_id, $user_id) {
 	$res = mysql_query('SELECT *
 						  FROM usrBookmarks
 					 LEFT JOIN records ON pers_rec_id=rec_id
-						 WHERE pers_id=' . $bkmk_id . '
+						 WHERE bkm_ID=' . $bkmk_id . '
 						   AND pers_usr_id=' . $user_id);
 	return (mysql_num_rows($res) > 0);
 }
 
 function get_review($bkmk_id, $class_grp_id) {
 	$bkmk_id = intval($bkmk_id);
-	$res = mysql_query('SELECT pers_id, pers_notes, rec_id, rec_title, rec_url
+	$res = mysql_query('SELECT bkm_ID, pers_notes, rec_id, rec_title, rec_url
 						  FROM usrBookmarks
 					 LEFT JOIN records ON rec_id=pers_rec_id
-						 WHERE pers_id=' . $bkmk_id);
+						 WHERE bkm_ID=' . $bkmk_id);
 	if ($row = mysql_fetch_assoc($res)) {
 		$review['bib_id'] = $row['rec_id'];
-		$review['bkmk_id'] = $row['pers_id'];
+		$review['bkmk_id'] = $row['bkm_ID'];
 		$review['title'] = $row['pers_title'] ? $row['pers_title'] : $row['rec_title'];
 		$review['url'] = $row['rec_url'];
-		@list($review['genre_id'], $review['genre_label']) = get_genre($row['pers_id'], $class_grp_id);
+		@list($review['genre_id'], $review['genre_label']) = get_genre($row['bkm_ID'], $class_grp_id);
 
 		$matches = '';
 		preg_match_all("/^(?:{rating:([0-9]*)})?(?:{headline:([^}]*)})?(.*)/ms", $row['pers_notes'], $matches);
@@ -253,7 +253,7 @@ function add_review($bib_id, $title, $ass_kwd_id, $genre_id, $user_id) {
 
 function delete_review($bkmk_id) {
 	mysql_connection_overwrite('heuristdb');
-	mysql_query('DELETE FROM usrBookmarks WHERE pers_id=' . intval($bkmk_id));
+	mysql_query('DELETE FROM usrBookmarks WHERE bkm_ID=' . intval($bkmk_id));
 	mysql_query('DELETE FROM keyword_links WHERE kwl_pers_id=' . intval($bkmk_id));
 }
 

@@ -41,7 +41,7 @@ if (mysql_num_rows($res) == 0) {
 	/* full steam ahead */
 	mysql_query("insert into usrBookmarks (pers_rec_id, pers_usr_id, pers_added, pers_modified) values (" . $rec_id . ", " . get_user_id() . ", now(), now())");
 
-	$res = mysql_query("select * from usrBookmarks where pers_id=last_insert_id()");
+	$res = mysql_query("select * from usrBookmarks where bkm_ID=last_insert_id()");
 	if (mysql_num_rows($res) == 0) {
 		print "{ error: \"internal database error while adding bookmark\" }";
 		return;
@@ -51,12 +51,12 @@ if (mysql_num_rows($res) == 0) {
 }
 else {
 	$bkmk = mysql_fetch_assoc($res);
-	$kwds = mysql__select_array("keyword_links left join keywords on kwd_id=kwl_kwd_id", "kwd_name", "kwl_pers_id=".$bkmk["pers_id"]." and kwd_usr_id=".get_user_id() . " order by kwl_order, kwl_id");
+	$kwds = mysql__select_array("keyword_links left join keywords on kwd_id=kwl_kwd_id", "kwd_name", "kwl_pers_id=".$bkmk["bkm_ID"]." and kwd_usr_id=".get_user_id() . " order by kwl_order, kwl_id");
 	$bkmk["keywordString"] = join(",", $kwds);
 }
 
 $record = array(
-	"bkmkID" => $bkmk["pers_id"],
+	"bkmkID" => $bkmk["bkm_ID"],
 	"keywordString" => $bkmk["keywordString"],
 	"interestRating" => $bkmk["pers_interest_rating"],
 	"contentRating" => $bkmk["pers_content_rating"],

@@ -18,9 +18,9 @@ $wg_ids = mysql__select_array(USERS_DATABASE.'.UserGroups', 'ug_group_id', 'ug_u
 array_push($wg_ids, 0);
 
 if (@$_REQUEST['bkmk_id']) {
-	$res = mysql_query('select * from usrBookmarks where pers_id = '.intval($_REQUEST['bkmk_id']));
+	$res = mysql_query('select * from usrBookmarks where bkm_ID = '.intval($_REQUEST['bkmk_id']));
 	$bkmk = mysql_fetch_assoc($res);
-	$res = mysql_query('select records.* from usrBookmarks left join records on pers_rec_id=rec_id where pers_id = '.$bkmk['pers_id'].' and (rec_wg_id in ('.join(',', $wg_ids).') or rec_visibility="viewable")');
+	$res = mysql_query('select records.* from usrBookmarks left join records on pers_rec_id=rec_id where bkm_ID = '.$bkmk['bkm_ID'].' and (rec_wg_id in ('.join(',', $wg_ids).') or rec_visibility="viewable")');
 	$bib = mysql_fetch_assoc($res);
 	$_REQUEST['bib_id'] = $bib['rec_id'];
 }
@@ -29,22 +29,22 @@ else if (@$_REQUEST['bib_id']) {
 	$bkmk = mysql_fetch_assoc($res);
 	$res = mysql_query('select * from records where rec_id = '.intval($_REQUEST['bib_id']).' and (rec_wg_id in ('.join(',', $wg_ids).') or rec_visibility="viewable")');
 	$bib = mysql_fetch_assoc($res);
-	$_REQUEST['bkmk_id'] = $bkmk['pers_id'];
+	$_REQUEST['bkmk_id'] = $bkmk['bkm_ID'];
 }
 
 $_REQUEST['rec_id'] = $_REQUEST['bib_id'];
-$_REQUEST['pers_id'] = $_REQUEST['bkmk_id'];
+$_REQUEST['bkm_ID'] = $_REQUEST['bkmk_id'];
 
 $lexer = new Lexer($template);
 $body = new BodyScope($lexer);
 
 $body->global_vars['rec_id'] = $_REQUEST['rec_id'];
-$body->global_vars['pers_id'] = $_REQUEST['pers_id'];
+$body->global_vars['bkm_ID'] = $_REQUEST['bkm_ID'];
 
-$my_kwds = mysql__select_array('keyword_links left join keywords on kwl_kwd_id=kwd_id', 'kwd_name', 'kwl_pers_id='.$bkmk['pers_id']);
+$my_kwds = mysql__select_array('keyword_links left join keywords on kwl_kwd_id=kwd_id', 'kwd_name', 'kwl_pers_id='.$bkmk['bkm_ID']);
 
 $keywords = mysql__select_assoc('usrBookmarks
-								 left join keyword_links on pers_id=kwl_pers_id
+								 left join keyword_links on bkm_ID=kwl_pers_id
 								 left join keywords on kwl_kwd_id=kwd_id
 								 left join '.USERS_DATABASE.'.Users on Id=kwd_usr_id',
 								'kwd_name', 'count(kwd_id) as kcount',
@@ -57,7 +57,7 @@ $keywords = mysql__select_assoc('usrBookmarks
 /*
 $res = mysql_query('select concat(firstname," ",lastname) as bkmk_user, kwd_name
 					from usrBookmarks
-					left join keyword_links on pers_id=kwl_pers_id
+					left join keyword_links on bkm_ID=kwl_pers_id
 					left join keywords on kwl_kwd_id=kwd_id
 					left join '.USERS_DATABASE.'.Users on pers_usr_id=Id
 					where pers_rec_id='.$bib['rec_id'].' and kwl_id is not null order by bkmk_user, kwd_name');
@@ -85,7 +85,7 @@ if ($keywords) {
 		$kwd_list .= "  <td>\n";
 		$res = mysql_query('select Id, concat(firstname," ",lastname) as bkmk_user
 							from usrBookmarks
-							left join keyword_links on pers_id=kwl_pers_id
+							left join keyword_links on bkm_ID=kwl_pers_id
 							left join keywords on kwl_kwd_id=kwd_id
 							left join '.USERS_DATABASE.'.Users on pers_usr_id=Id
 							where pers_rec_id='.$bib['rec_id'].'
@@ -119,7 +119,7 @@ $res = mysql_query('
    select Id, concat(firstname," ",lastname) as bkmk_user
      from records
 left join usrBookmarks on pers_rec_id=rec_id
-left join keyword_links on kwl_pers_id=pers_id
+left join keyword_links on kwl_pers_id=bkm_ID
 left join keywords on kwd_id=kwl_kwd_id and kwd_usr_id=pers_usr_id
 left join '.USERS_DATABASE.'.Users on Id=pers_usr_id
     where rec_id='.$bib['rec_id'].'

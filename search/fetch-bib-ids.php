@@ -35,7 +35,7 @@ if (preg_match('/\\b_BROKEN_\\b/', $_REQUEST['q'])) {
 	$_REQUEST['q'] = preg_replace('/\\b_BROKEN_\\b/', '', $_REQUEST['q']);
 }
 
-$query = REQUEST_to_query("select rec_id, pers_id ", $search_type);
+$query = REQUEST_to_query("select rec_id, bkm_ID ", $search_type);
 
 if (@$broken) {
 	$query = str_replace(' where ', ' where (to_days(now()) - to_days(rec_url_last_verified) >= 8) and ', $query);
@@ -44,7 +44,7 @@ if (@$broken) {
 $res = mysql_query($query);
 $ids = array();
 while ($row = mysql_fetch_assoc($res)) {
-	array_push($ids, array("bib_id" => $row["rec_id"], "bkmk_id" => $row["pers_id"]));
+	array_push($ids, array("bib_id" => $row["rec_id"], "bkmk_id" => $row["bkm_ID"]));
 }
 
 print json_format($ids);

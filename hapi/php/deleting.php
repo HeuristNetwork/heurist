@@ -18,10 +18,10 @@ function deleteRecord($id) {
 	while ($row = mysql_fetch_assoc($res)) array_push($reference_ids, $row["rd_rec_id"]);
 
 	// find any bookmarks of the record
-	$res = mysql_query("select pers_id from records left join usrBookmarks on pers_rec_id=rec_id where rec_id = " . $id . " and pers_id is not null");
+	$res = mysql_query("select bkm_ID from records left join usrBookmarks on pers_rec_id=rec_id where rec_id = " . $id . " and bkm_ID is not null");
 	$bkmk_count = mysql_num_rows($res);
 	$bkmk_ids = array();
-	while ($row = mysql_fetch_assoc($res)) array_push($bkmk_ids, $row["pers_id"]);
+	while ($row = mysql_fetch_assoc($res)) array_push($bkmk_ids, $row["bkm_ID"]);
 
 
 	if (is_admin()  ||  $owner === get_user_id()) {

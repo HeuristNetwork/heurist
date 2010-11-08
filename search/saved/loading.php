@@ -293,7 +293,7 @@ function loadRecordDetails(&$record) {
 function loadUserDependentData(&$record) {
 	$recID = $record["rec_id"];
 	$res = mysql_query(
-	    "select pers_id,
+	    "select bkm_ID,
 	            pers_notes,
 	            pers_content_rating,
 	            pers_interest_rating,

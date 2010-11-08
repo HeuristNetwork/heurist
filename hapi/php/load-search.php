@@ -32,7 +32,7 @@ if (array_key_exists("records", $result)) {
 			@$record["rec_modified"],             // 12
 			@$record["rec_added_by_usr_id"],      // 13
 			@$record["rec_hhash"],                // 14
-			@$record["pers_id"],                  // 15
+			@$record["bkm_ID"],                  // 15
 			@$record["pers_notes"],               // 16
 			@$record["pers_content_rating"],      // 17
 			@$record["pers_interest_rating"],     // 18

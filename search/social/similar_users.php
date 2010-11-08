@@ -35,7 +35,7 @@ if ($_REQUEST['user']) {
           concat('.USERS_FIRSTNAME_FIELD.'," ",'.USERS_LASTNAME_FIELD.') as name,
 		  count(B.pers_usr_id) as freq
      from keyword_links
-left join usrBookmarks A on A.pers_id=kwl_pers_id
+left join usrBookmarks A on A.bkm_ID=kwl_pers_id
 left join records on rec_id=A.pers_rec_id
 left join usrBookmarks B on B.pers_rec_id=rec_id
 left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=B.pers_usr_id

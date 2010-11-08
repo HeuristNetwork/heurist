@@ -39,9 +39,9 @@ mysql_connection_db_overwrite(DATABASE);
 		mysql_query('delete from rec_details where rd_rec_id = ' . $rec_id);
 		mysql_query('delete from reminders where rem_rec_id = ' . $rec_id);
 		mysql_query('delete from keyword_links where kwl_rec_id = ' . $rec_id);
-		$res = mysql_query('select pers_id from usrBookmarks where pers_rec_id = ' . $rec_id);
+		$res = mysql_query('select bkm_ID from usrBookmarks where pers_rec_id = ' . $rec_id);
 		while ($row = mysql_fetch_assoc($res))
-			mysql_query('delete from keyword_links where kwl_pers_id = ' . $row['pers_id']);
+			mysql_query('delete from keyword_links where kwl_pers_id = ' . $row['bkm_ID']);
 		mysql_query('delete from usrBookmarks where pers_rec_id = ' . $rec_id);
 		$bkmks = mysql_affected_rows();
 		return array($bibs, $bkmks);

@@ -1891,14 +1891,14 @@ function insert_bookmark(&$entry) {
 	if (! $entry->getBiblioID()) return false;
 
 	// First: check if the user already has a bookmark for this records
-	$res = mysql_query('select pers_id from usrBookmarks where pers_rec_id = ' . $entry->getBiblioID()
+	$res = mysql_query('select bkm_ID from usrBookmarks where pers_rec_id = ' . $entry->getBiblioID()
 	                                                . ' and pers_usr_id = ' . get_user_id());
 	if (mysql_num_rows($res) > 0) {
 		$pers_id = mysql_fetch_row($res);
 		$pers_id = $pers_id[0];
 
 		if (is_a($entry->getForeignPrototype(), 'HeuristZoteroEntry')) {
-			mysql_query('update usrBookmarks set pers_zotero_id = ' . $entry->getForeignPrototype()->getZoteroID().' where pers_id='.$pers_id);
+			mysql_query('update usrBookmarks set pers_zotero_id = ' . $entry->getForeignPrototype()->getZoteroID().' where bkm_ID='.$pers_id);
 			$zoteroItems[$entry->getForeignPrototype()->getZoteroID()] = $entry->getBiblioID();
 		}
 

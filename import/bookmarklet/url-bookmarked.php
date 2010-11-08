@@ -24,8 +24,8 @@ $res = mysql_query("select rec_id
 					  from records
 				 left join usrBookmarks on pers_rec_id = rec_id
 					 where (rec_url='".addslashes($url)."' or rec_url='".addslashes($url)."/')
-				  group by pers_id
-				  order by count(pers_id), rec_id
+				  group by bkm_ID
+				  order by count(bkm_ID), rec_id
 					 limit 1");
 if ($row = mysql_fetch_assoc($res)) {
 	print "HEURIST_url_bib_id = ".$row["rec_id"].";\n\n";
@@ -33,14 +33,14 @@ if ($row = mysql_fetch_assoc($res)) {
 	print "HEURIST_url_bib_id = null;\n\n";
 }
 
-$res = mysql_query("select pers_id
+$res = mysql_query("select bkm_ID
 					  from usrBookmarks
 				 left join records on rec_id = pers_rec_id
 					 where pers_usr_id=".get_user_id()."
 					   and (rec_url='".addslashes($url)."' or rec_url='".addslashes($url)."/')
 					 limit 1");
 if ($row = mysql_fetch_assoc($res)) {
-	print "HEURIST_url_bkmk_id = ".$row["pers_id"].";\n\n";
+	print "HEURIST_url_bkmk_id = ".$row["bkm_ID"].";\n\n";
 } else {
 	print "HEURIST_url_bkmk_id = null;\n\n";
 }

@@ -133,7 +133,7 @@ if (@$_REQUEST['submit']) $updated = update_my_settings();
 ?>
   <tr>
    <td style="width: 16px;">&nbsp;</td>
-   <td style="width: 16px;"><input type="checkbox" name="bkmk[<?= $row['pers_id'] ?>]" value="1" checked class="bkmk"></td>
+   <td style="width: 16px;"><input type="checkbox" name="bkmk[<?= $row['bkm_ID'] ?>]" value="1" checked class="bkmk"></td>
    <td><a href="<?= $row['rec_url'] ?>" target="_testwindow"><?= htmlspecialchars($row['rec_title']) ?></a></td>
   </tr>
 <?php
@@ -217,7 +217,7 @@ function update_my_settings() {
 	$ssearches = array_map('intval', array_keys($_REQUEST['ssearch']));
 
 	$keys = mysql__select_array('keywords', 'kwd_id', 'kwd_usr_id = '.MODEL_USER_ID.' and kwd_id in (0, ' . join(', ', $keys) . ')');
-	$bkmks = mysql__select_array('usrBookmarks', 'pers_id', 'pers_usr_id = '.MODEL_USER_ID.' and pers_id in (0, ' . join(', ', $bkmks) . ')');
+	$bkmks = mysql__select_array('usrBookmarks', 'bkm_ID', 'pers_usr_id = '.MODEL_USER_ID.' and bkm_ID in (0, ' . join(', ', $bkmks) . ')');
 	$ssearches = mysql__select_array('saved_searches', 'ss_id', 'ss_usr_id = '.MODEL_USER_ID.' and ss_id in (0, ' . join(', ', $ssearches) . ')');
 
 	if ($keys) {
@@ -235,12 +235,12 @@ function update_my_settings() {
 	}
 
 	if ($bkmks) {
-		$res = mysql_query('select * from usrBookmarks where pers_id in ('.join(',',$bkmks).')');
+		$res = mysql_query('select * from usrBookmarks where bkm_ID in ('.join(',',$bkmks).')');
 		while ($row = mysql_fetch_assoc($res)) {
 			// add a new bookmark for each of the selected usrBookmarks
 			// (all fields the same except for user id)
 
-			unset($row['pers_id']);
+			unset($row['bkm_ID']);
 
 			$row['pers_usr_id'] = get_user_id();
 			$row['pers_added'] = date('Y-m-d H:i:s');
@@ -253,10 +253,10 @@ function update_my_settings() {
 		/* for each of the model user's keyword_links entries, make a corresponding entry for the new user */
 		/* hold onto your hats, folks: this is a five-table join across three tables! */
 		$res = mysql_query(
-'select NEWUSER_BKMK.pers_id, NEWUSER_KWD.kwd_id, MODUSER_KWDL.kwl_order, MODUSER_KWDL.kwl_rec_id
+'select NEWUSER_BKMK.bkm_ID, NEWUSER_KWD.kwd_id, MODUSER_KWDL.kwl_order, MODUSER_KWDL.kwl_rec_id
    from usrBookmarks NEWUSER_BKMK left join usrBookmarks MODUSER_BKMK on NEWUSER_BKMK.pers_rec_id=MODUSER_BKMK.pers_rec_id
-                                                               and MODUSER_BKMK.pers_id in ('.join(',',$bkmks).')
-                               left join keyword_links MODUSER_KWDL on MODUSER_KWDL.kwl_pers_id=MODUSER_BKMK.pers_id
+                                                               and MODUSER_BKMK.bkm_ID in ('.join(',',$bkmks).')
+                               left join keyword_links MODUSER_KWDL on MODUSER_KWDL.kwl_pers_id=MODUSER_BKMK.bkm_ID
                                left join keywords MODUSER_KWD on MODUSER_KWD.kwd_id=MODUSER_KWDL.kwl_kwd_id
                                left join keywords NEWUSER_KWD on NEWUSER_KWD.kwd_name=MODUSER_KWD.kwd_name
                                                              and NEWUSER_KWD.kwd_usr_id='.get_user_id().'
@@ -298,11 +298,11 @@ function kwd_query() {
 }
 
 function bkmk_query() {
-	return mysql_query("select A.pers_id, rec_url, rec_title from usrBookmarks A
+	return mysql_query("select A.bkm_ID, rec_url, rec_title from usrBookmarks A
 	                           left join records on rec_id = A.pers_rec_id
 	                           left join usrBookmarks B on A.pers_rec_id = B.pers_rec_id and B.pers_usr_id=".get_user_id()."
-	                     where A.pers_usr_id=".MODEL_USER_ID." and B.pers_id is null
-	                     order by A.pers_id");
+	                     where A.pers_usr_id=".MODEL_USER_ID." and B.bkm_ID is null
+	                     order by A.bkm_ID");
 }
 
 function saved_search_query() {

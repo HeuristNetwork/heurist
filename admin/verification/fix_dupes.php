@@ -275,9 +275,9 @@ if (! @$do_merge_details){  // display a page to user for selecting which record
 		    print '</td></tr>';
 	    }
 
-	    $bkmk_count = mysql_fetch_array(mysql_query('select count(distinct pers_id) from usrBookmarks where pers_rec_id='.$record['rec_id']));
+	    $bkmk_count = mysql_fetch_array(mysql_query('select count(distinct bkm_ID) from usrBookmarks where pers_rec_id='.$record['rec_id']));
 	    if ($bkmk_count[0]) print '<tr><td>Bookmarks</td><td>'.$bkmk_count[0].'</td></tr>';
-	    $kwd_count = mysql_fetch_array(mysql_query('select count(distinct kwl_id) from usrBookmarks left join keyword_links on kwl_pers_id=pers_id where pers_rec_id='.$record['rec_id'].' and kwl_id is not null'));
+	    $kwd_count = mysql_fetch_array(mysql_query('select count(distinct kwl_id) from usrBookmarks left join keyword_links on kwl_pers_id=bkm_ID where pers_rec_id='.$record['rec_id'].' and kwl_id is not null'));
 	    if ($kwd_count[0]) print '<tr><td>Tags</td><td>'.$kwd_count[0].'</td></tr>';
 
 	    $res2 = mysql_query('select concat('.USERS_FIRSTNAME_FIELD.'," ",'.USERS_LASTNAME_FIELD.') as name, rem_freq, rem_startdate from reminders left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=rem_owner_id where rem_rec_id='.$record['rec_id']);
@@ -380,9 +380,9 @@ if (! @$do_merge_details){  // display a page to user for selecting which record
             print '</td></tr>';
         }
 
-        $bkmk_count = mysql_fetch_array(mysql_query('select count(distinct pers_id) from usrBookmarks where pers_rec_id='.$record['rec_id']));
+        $bkmk_count = mysql_fetch_array(mysql_query('select count(distinct bkm_ID) from usrBookmarks where pers_rec_id='.$record['rec_id']));
         if ($bkmk_count[0]) print '<tr><td>Bookmarks</td><td>'.$bkmk_count[0].'</td></tr>';
-        $kwd_count = mysql_fetch_array(mysql_query('select count(distinct kwl_id) from usrBookmarks left join keyword_links on kwl_pers_id=pers_id where pers_rec_id='.$record['rec_id'].' and kwl_id is not null'));
+        $kwd_count = mysql_fetch_array(mysql_query('select count(distinct kwl_id) from usrBookmarks left join keyword_links on kwl_pers_id=bkm_ID where pers_rec_id='.$record['rec_id'].' and kwl_id is not null'));
         if ($kwd_count[0]) print '<tr><td>Tags</td><td>'.$kwd_count[0].'</td></tr>';
 
         $res2 = mysql_query('select concat('.USERS_FIRSTNAME_FIELD.'," ",'.USERS_LASTNAME_FIELD.') as name, rem_freq, rem_startdate from reminders left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=rem_owner_id where rem_rec_id='.$record['rec_id']);
@@ -600,15 +600,15 @@ function do_fix_dupe() {
 
 // move dup bookmarks and tags to master unless they are already there
 //get bookmarkid =>userid for bookmarks of master record
-    $master_pers_usr_ids = mysql__select_assoc('usrBookmarks', 'pers_id','pers_usr_id', 'pers_rec_id = '.$master_rec_id);
+    $master_pers_usr_ids = mysql__select_assoc('usrBookmarks', 'bkm_ID','pers_usr_id', 'pers_rec_id = '.$master_rec_id);
 //get kwids for  all bookmarks of master record
     $master_kwd_ids = mysql__select_array('keyword_links', 'kwl_kwd_id', 'kwl_rec_id = '.$master_rec_id);
     if ($master_kwd_ids) $master_kwd_cnt = count($master_kwd_ids);
 //get bookmarkid => userid for bookmarks in dup records
-    $dup_pers_usr_ids = mysql__select_assoc('usrBookmarks','pers_id', 'pers_usr_id', 'pers_rec_id in'. $dup_rec_list);
+    $dup_pers_usr_ids = mysql__select_assoc('usrBookmarks','bkm_ID', 'pers_usr_id', 'pers_rec_id in'. $dup_rec_list);
 
 
-// if dup userid already has a bookmark on master record then add pers_id to delete_pers_ids_list else add to  update_pers_ids
+// if dup userid already has a bookmark on master record then add bkm_ID to delete_pers_ids_list else add to  update_pers_ids
     $update_pers_ids  = array();
     $delete_pers_ids = array();
     $dup_delete_pers_id_to_master_per_id = array();
@@ -625,24 +625,24 @@ function do_fix_dupe() {
     $delete_pers_ids_list  = '('.join(',',$delete_pers_ids). ")";
 
     if (strlen($update_pers_ids_list)>2) { // update the bookmarks and tags that are not in the master
-        mysql_query('update usrBookmarks set pers_rec_id='.$master_rec_id.' where pers_id in '.$update_pers_ids_list);
+        mysql_query('update usrBookmarks set pers_rec_id='.$master_rec_id.' where bkm_ID in '.$update_pers_ids_list);
         mysql_query('update keyword_links set kwl_rec_id='.$master_rec_id.' where kwl_pers_id in '.$update_pers_ids_list);
     }
 // process to be deleted dup bookmarks and their kwd links
     foreach ($delete_pers_ids as $delete_dup_pers_id) {
         //copy soon to be deleted dup bookmark data to master record bookmark  by concat notes and pwd_reminder, max of ratings and copy zotero if non existant
         $master_pers_id = $dup_delete_pers_id_to_master_per_id[$delete_dup_pers_id];
-        $master_pers_record = mysql_fetch_assoc(mysql_query('select * from usrBookmarks where pers_id='.$master_pers_id));
-        $delete_dup_pers_record = mysql_fetch_assoc(mysql_query('select * from usrBookmarks where pers_id='.$delete_dup_pers_id));
+        $master_pers_record = mysql_fetch_assoc(mysql_query('select * from usrBookmarks where bkm_ID='.$master_pers_id));
+        $delete_dup_pers_record = mysql_fetch_assoc(mysql_query('select * from usrBookmarks where bkm_ID='.$delete_dup_pers_id));
         $master_pers_record['pers_notes'] .= $delete_dup_pers_record['pers_notes'];
         $master_pers_record['pers_pwd_reminder'] .= $delete_dup_pers_record['pers_pwd_reminder'];
         $master_pers_record['pers_content_rating'] = max($master_pers_record['pers_content_rating'],$delete_dup_pers_record['pers_content_rating']);
         $master_pers_record['pers_quality_rating'] = max($master_pers_record['pers_quality_rating'],$delete_dup_pers_record['pers_quality_rating']);
         $master_pers_record['pers_interest_rating'] = max($master_pers_record['pers_interest_rating'],$delete_dup_pers_record['pers_interest_rating']);
         if (!$master_pers_record['pers_zotero_id']) $master_pers_record['pers_zotero_id']= $delete_dup_pers_record['pers_zotero_id'];
-        unset($master_pers_record['pers_id']);
-        mysql__update('usrBookmarks','pers_id='.$master_pers_id,$master_pers_record);
-        //for every delete dup kwd link whoses kwd id is not already linked to the master record change the record id to master and the pers_id to the mapped master_pers_id
+        unset($master_pers_record['bkm_ID']);
+        mysql__update('usrBookmarks','bkm_ID='.$master_pers_id,$master_pers_record);
+        //for every delete dup kwd link whoses kwd id is not already linked to the master record change the record id to master and the bkm_ID to the mapped master_pers_id
         //get kwd links for the soon to be deleted bookmark
         $delete_dup_kwl_kwd_ids = mysql__select_assoc('keyword_links','kwl_id', 'kwl_kwd_id', 'kwl_pers_id ='. $delete_dup_pers_id);
         foreach ($delete_dup_kwl_kwd_ids as $kwl_id => $kwd_id) {
@@ -664,7 +664,7 @@ function do_fix_dupe() {
     mysql_query('delete from rec_details where rd_rec_id in '.$dup_rec_list);
 //delete dup usrBookmarks
     if (strlen($delete_pers_ids_list)>2) {
-        mysql_query('delete from usrBookmarks where pers_id in '.$delete_pers_ids_list);
+        mysql_query('delete from usrBookmarks where bkm_ID in '.$delete_pers_ids_list);
     }
 
  // move dup record pointers to master record

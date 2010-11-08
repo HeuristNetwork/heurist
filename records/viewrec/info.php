@@ -109,13 +109,13 @@ array_push($wg_ids, 0);
 	$res = mysql_query('select * from usrBookmarks where pers_rec_id = '.intval($_REQUEST['bib_id']).' and pers_usr_id = '.get_user_id());
 	if (mysql_num_rows($res)>0) {
 		$row = mysql_fetch_assoc($res);
-		$_REQUEST['bkmk_id'] = $row['pers_id'];
+		$_REQUEST['bkmk_id'] = $row['bkm_ID'];
 	}
 }
 $pers_id = intval(@$_REQUEST['bkmk_id']);
 $rec_id = intval(@$_REQUEST['bib_id']);
 if ($pers_id) {
-	$res = mysql_query('select * from usrBookmarks left join records on pers_rec_id=rec_id left join rec_types on rec_type=rt_id where pers_id='.$pers_id.' and pers_usr_id='.get_user_id().' and (not rec_temporary or rec_temporary is null)');
+	$res = mysql_query('select * from usrBookmarks left join records on pers_rec_id=rec_id left join rec_types on rec_type=rt_id where bkm_ID='.$pers_id.' and pers_usr_id='.get_user_id().' and (not rec_temporary or rec_temporary is null)');
 	$bibInfo = mysql_fetch_assoc($res);
 	print_details($bibInfo);
 } else if ($rec_id) {
@@ -198,7 +198,7 @@ function print_private_details($bib) {
 	$res = mysql_query('select grp_name, kwd_name from keyword_links left join keywords on kwl_kwd_id=kwd_id left join '.USERS_DATABASE.'.Groups on kwd_wg_id=grp_id left join '.USERS_DATABASE.'.UserGroups on ug_group_id=grp_id and ug_user_id='.get_user_id().' where kwl_rec_id='.$bib['rec_id'].' and kwd_wg_id and ug_id is not null order by kwl_order');
 	$kwds = array();
 	while ($row = mysql_fetch_row($res)) array_push($kwds, $row);
-	if ( $workgroup_name || count($kwds) || $bib['pers_id']) {
+	if ( $workgroup_name || count($kwds) || $bib['bkm_ID']) {
 ?>
 <div class=detailRowHeader>Private info
 	<?php
@@ -237,7 +237,7 @@ function print_private_details($bib) {
 	<?php
 			}
 		}
-		if (array_key_exists('pers_id',$bib)) {
+		if (array_key_exists('bkm_ID',$bib)) {
 			print_personal_details($bib);
 		}
 	}
@@ -245,7 +245,7 @@ function print_private_details($bib) {
 
 	//this function outputs the personal information from the bookmark
 	function print_personal_details($bkmk) {
-		$pers_id = $bkmk['pers_id'];
+		$pers_id = $bkmk['bkm_ID'];
 
 		$tags = mysql__select_array('keyword_links, keywords',
 		                            'kwd_name',

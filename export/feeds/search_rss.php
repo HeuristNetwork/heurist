@@ -33,7 +33,7 @@ if (! @$_REQUEST['q']  ||  (@$_REQUEST['ver'] && intval(@$_REQUEST['ver']) < SEA
 
 if ( $_REQUEST['w'] == 'B'  ||  $_REQUEST['w'] == 'bookmark') {		// my bookmark entries
 	$search_type = BOOKMARK;
-	$query = 'select distinct pers_id ';
+	$query = 'select distinct bkm_ID ';
 } else if (! @$_REQUEST['w']  ||$_REQUEST['w'] == 'a'  ||  $_REQUEST['w'] == 'all') {			// all records entries
 	$search_type = BOTH;
 	$query = 'select distinct rec_id ';
@@ -55,7 +55,7 @@ if (preg_match('/.* order by (.*)/', $query, $matches)) {
 
 
 // hack!  Instead of stupidly searching the useless usrBookmarks (bookmarks) table, give us rec_ids instead
-$query = str_replace("select distinct pers_id from", "select distinct rec_id from", $query);
+$query = str_replace("select distinct bkm_ID from", "select distinct rec_id from", $query);
 $SEARCHES['rss_search'] = $query;
 error_log("query = ".$query);
 

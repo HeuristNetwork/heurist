@@ -765,7 +765,7 @@ class KeywordPredicate extends Predicate {
 		$not = ($this->parent->negate)? 'not ' : '';
 		if ($query->search_type == BOOKMARK) {
 			if (is_numeric(join('', $this->value))) {	// if all keyword specs are numeric then don't need a join
-				return $not . 'exists (select * from keyword_links where kwl_pers_id=pers_id and kwl_kwd_id in ('.join(',', $this->value).'))';
+				return $not . 'exists (select * from keyword_links where kwl_pers_id=bkm_ID and kwl_kwd_id in ('.join(',', $this->value).'))';
 			} else if (! $this->wg_value) {
 				// this runs faster (like TEN TIMES FASTER) - think it's to do with the join
 				$query=$not . 'exists (select * from keyword_links kwi left join keywords kwd on kwi.kwl_kwd_id=kwd.kwd_id '

@@ -100,11 +100,11 @@ if ($_REQUEST['bkmrk_bkmk_url']) {
 	if (substr($burl, -1) == '/') $burl = substr($burl, 0, strlen($burl)-1);
 
 	/* look up the user's bookmark (usrBookmarks) table, see if they've already got this URL bookmarked -- if so, just edit it */
-	$res = mysql_query('select pers_id from usrBookmarks left join records on rec_id=pers_rec_id where pers_usr_id="'.addslashes(get_user_id()).'"
+	$res = mysql_query('select bkm_ID from usrBookmarks left join records on rec_id=pers_rec_id where pers_usr_id="'.addslashes(get_user_id()).'"
 							and (rec_url="'.addslashes($burl).'" or rec_url="'.addslashes($burl).'/")');
 	if (mysql_num_rows($res) > 0) {
 		$bkmk = mysql_fetch_assoc($res);
-		$pers_id = $bkmk['pers_id'];
+		$pers_id = $bkmk['bkm_ID'];
 		header('Location: ' . HEURIST_URL_BASE . 'records/editrec/edit.html?instance='.HEURIST_INSTANCE.'&bkmk_id='.$pers_id.'&fromadd=exists' . $outdate);
 		return;
 	}
@@ -299,7 +299,7 @@ if ($rec_id  &&  ! @$_REQUEST['force_new']) {
 	 */
 	$res = mysql_query('select * from usrBookmarks where pers_usr_id='.get_user_id().' and pers_rec_id = '.$rec_id);
 	$bkmk = mysql_fetch_assoc($res);
-	if ($bkmk  &&  $bkmk['pers_id']) {
+	if ($bkmk  &&  $bkmk['bkm_ID']) {
 		if ($description) {
 			$dres = mysql_query("select rec_scratchpad from records where rec_id = " . $rec_id);
 			$existingDescription = mysql_fetch_row($dres);
@@ -321,7 +321,7 @@ if ($rec_id  &&  ! @$_REQUEST['force_new']) {
 			insert_woot_content($rec_id, $description);
 		}
 
-		header('Location: ' . HEURIST_URL_BASE . 'records/editrec/edit.html?instance='.HEURIST_INSTANCE.'&bkmk_id='.$bkmk['pers_id'].'&fromadd=exists' . $outdate . "#personal");
+		header('Location: ' . HEURIST_URL_BASE . 'records/editrec/edit.html?instance='.HEURIST_INSTANCE.'&bkmk_id='.$bkmk['bkm_ID'].'&fromadd=exists' . $outdate . "#personal");
 		return;
 	}
 }
