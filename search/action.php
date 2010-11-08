@@ -75,8 +75,8 @@ function delete_bookmarks() {
 	$bkmk_ids = array_map('intval', explode(',', $_REQUEST['bkmk_ids']));
 
 	mysql_connection_db_overwrite(DATABASE);
-	mysql_query('delete keyword_links from personals left join keyword_links on kwl_pers_id=pers_id where pers_id in ('.join(',', $bkmk_ids).') and pers_usr_id=' . get_user_id());
-	mysql_query('delete from personals where pers_id in ('.join(',', $bkmk_ids).') and pers_usr_id=' . get_user_id());
+	mysql_query('delete keyword_links from usrBookmarks left join keyword_links on kwl_pers_id=pers_id where pers_id in ('.join(',', $bkmk_ids).') and pers_usr_id=' . get_user_id());
+	mysql_query('delete from usrBookmarks where pers_id in ('.join(',', $bkmk_ids).') and pers_usr_id=' . get_user_id());
 	$deleted_count = mysql_affected_rows();
 
 	if (mysql_error()) {
@@ -105,7 +105,7 @@ function add_keywords() {
 
 		$keywords = get_ids_for_keywords(array_filter(explode(',', $_REQUEST['keywordstring'])), true);
 		mysql_query('insert ignore into keyword_links (kwl_pers_id, kwl_rec_id, kwl_kwd_id) '
-				  . 'select pers_id, pers_rec_id, kwd_id from personals, keywords '
+				  . 'select pers_id, pers_rec_id, kwd_id from usrBookmarks, keywords '
 				  . ' where pers_id in (' . join(',', $bkmk_ids) . ') and pers_usr_id = ' . get_user_id()
 				  . ' and kwd_id in (' . join(',', $keywords) . ')');
 		$keyword_count = mysql_affected_rows();
@@ -138,7 +138,7 @@ function add_keywords_by_id() {
 
 		$keywords = array_map('intval', explode(',', $_REQUEST["kwd_ids"]));
 		mysql_query('insert ignore into keyword_links (kwl_rec_id, kwl_pers_id, kwl_kwd_id) '
-				  . 'select rec_id, pers_id, kwd_id from keywords, '.USERS_DATABASE.'.UserGroups, records left join personals on rec_id=pers_rec_id and pers_usr_id= '.get_user_id()
+				  . 'select rec_id, pers_id, kwd_id from keywords, '.USERS_DATABASE.'.UserGroups, records left join usrBookmarks on rec_id=pers_rec_id and pers_usr_id= '.get_user_id()
 				  . ' where rec_id in (' . join(',', $bib_ids) . ') '
 				  . ' and ug_group_id=kwd_wg_id and ug_user_id='.get_user_id()
 				  . ' and kwd_id in (' . join(',', $keywords) . ')');
@@ -173,7 +173,7 @@ function remove_keywords_by_id() {
 		mysql_connection_db_overwrite(DATABASE);
 
 		$keywords = array_map('intval', explode(',', $_REQUEST["kwd_ids"]));
-		mysql_query('delete keyword_links from personals'
+		mysql_query('delete keyword_links from usrBookmarks'
 				 . ' left join keyword_links on kwl_pers_id = pers_id'
 				 . ' left join keywords on kwd_id = kwl_kwd_id'
 		         . ' where pers_rec_id in (' . join(',', $bib_ids) . ') and pers_usr_id = ' . get_user_id()
@@ -216,7 +216,7 @@ function remove_keywords() {
 		$keyword_count = 0;
 		$keywords = get_ids_for_keywords(array_filter(explode(',', $_REQUEST['keywordstring'])), false);
 		if (count($bkmk_ids)  &&  $keywords  &&  count($keywords)) {
-			mysql_query('delete keyword_links from personals'
+			mysql_query('delete keyword_links from usrBookmarks'
 					 . ' left join keyword_links on kwl_pers_id = pers_id'
 					 . ' left join keywords on kwd_id = kwl_kwd_id'
 					 . ' where pers_id in (' . join(',', $bkmk_ids) . ') and pers_usr_id = ' . get_user_id()
@@ -251,7 +251,7 @@ function set_ratings() {
 	$interest_rating = intval($_REQUEST['i_rating']);
 
 	mysql_connection_db_overwrite(DATABASE);
-	mysql_query('update personals set pers_content_rating = ' . $content_rating
+	mysql_query('update usrBookmarks set pers_content_rating = ' . $content_rating
 								 . ', pers_quality_rating = ' . $quality_rating
 								 . ', pers_interest_rating = ' . $interest_rating
 			  . ' where pers_id in (' . join(',', $bkmk_ids) . ') and pers_usr_id = ' . get_user_id());
@@ -270,18 +270,18 @@ function bookmark_references() {
 	mysql_connection_db_overwrite(DATABASE);
 
 	$bib_ids = bib_filter(explode(',', $_REQUEST['bib_ids']));
-	$new_bib_ids = mysql__select_array('records left join personals on pers_rec_id=rec_id and pers_usr_id='.get_user_id(),
+	$new_bib_ids = mysql__select_array('records left join usrBookmarks on pers_rec_id=rec_id and pers_usr_id='.get_user_id(),
 	                                   'rec_id', 'pers_id is null and rec_id in (' . join(',', $bib_ids) . ')');
-	$existing_bkmk_ids = mysql__select_array('records left join personals on pers_rec_id=rec_id and pers_usr_id='.get_user_id(),
+	$existing_bkmk_ids = mysql__select_array('records left join usrBookmarks on pers_rec_id=rec_id and pers_usr_id='.get_user_id(),
 	                                   'concat(pers_id,":true")', 'pers_id is not null and rec_id in (' . join(',', $bib_ids) . ')');
 
 	if ($new_bib_ids) {
-		mysql_query('insert into personals
+		mysql_query('insert into usrBookmarks
 		                  (pers_usr_id, pers_added, pers_modified, pers_rec_id)
 		                  select ' . get_user_id() . ', now(), now(), rec_id
 		                    from records where rec_id in (' . join(',', $new_bib_ids) . ')');
 		$inserted_count = mysql_affected_rows();
-		$bkmk_ids = mysql__select_array('personals', 'concat(pers_id,":true")', 'pers_rec_id in ('.join(',',$new_bib_ids).') and pers_usr_id = ' . get_user_id());
+		$bkmk_ids = mysql__select_array('usrBookmarks', 'concat(pers_id,":true")', 'pers_rec_id in ('.join(',',$new_bib_ids).') and pers_usr_id = ' . get_user_id());
 	} else {
 		$inserted_count = -1;
 	}
@@ -303,18 +303,18 @@ function bookmark_and_tag_bibids ( $phpReturn ) {
 	mysql_connection_db_overwrite(DATABASE);
 
 	$bib_ids = bib_filter(explode(',', $_REQUEST['bib_ids']));
-	$new_bib_ids = mysql__select_array('records left join personals on pers_rec_id=rec_id and pers_usr_id='.get_user_id(),
+	$new_bib_ids = mysql__select_array('records left join usrBookmarks on pers_rec_id=rec_id and pers_usr_id='.get_user_id(),
 										'rec_id', 'pers_id is null and rec_id in (' . join(',', $bib_ids) . ')');
 
 	if ($new_bib_ids) {
-		mysql_query('insert into personals
+		mysql_query('insert into usrBookmarks
 					  (pers_usr_id, pers_added, pers_modified, pers_rec_id)
 					  select ' . get_user_id() . ', now(), now(), rec_id
 						from records where rec_id in (' . join(',', $new_bib_ids) . ')');
 		$inserted_count = mysql_affected_rows();
 	}
 
-	$bkmk_ids = mysql__select_array('personals', 'pers_id', 'pers_rec_id in ('.join(',',$bib_ids).') and pers_usr_id = ' . get_user_id());
+	$bkmk_ids = mysql__select_array('usrBookmarks', 'pers_id', 'pers_rec_id in ('.join(',',$bib_ids).') and pers_usr_id = ' . get_user_id());
 
 	if (mysql_error()) {
 		$message = 'Database problem (' . addslashes(mysql_error()) . ') - no bookmarks added';
@@ -325,7 +325,7 @@ function bookmark_and_tag_bibids ( $phpReturn ) {
 	} else {	//we have bookmarks lets add teh tags
 		$keywords = get_ids_for_keywords(array_filter(explode(',', $_REQUEST['keywordstring'])), true);
 		mysql_query('insert ignore into keyword_links (kwl_pers_id, kwl_rec_id, kwl_kwd_id) '
-				  . 'select pers_id, pers_rec_id, kwd_id from personals, keywords '
+				  . 'select pers_id, pers_rec_id, kwd_id from usrBookmarks, keywords '
 				  . ' where pers_id in (' . join(',', $bkmk_ids) . ') and pers_usr_id = ' . get_user_id()
 				  . ' and kwd_id in (' . join(',', $keywords) . ')');
 		$keyword_count = mysql_affected_rows();

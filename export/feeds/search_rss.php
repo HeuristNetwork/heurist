@@ -54,7 +54,7 @@ if (preg_match('/.* order by (.*)/', $query, $matches)) {
 }
 
 
-// hack!  Instead of stupidly searching the useless personals (bookmarks) table, give us rec_ids instead
+// hack!  Instead of stupidly searching the useless usrBookmarks (bookmarks) table, give us rec_ids instead
 $query = str_replace("select distinct pers_id from", "select distinct rec_id from", $query);
 $SEARCHES['rss_search'] = $query;
 error_log("query = ".$query);

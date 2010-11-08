@@ -106,7 +106,7 @@ array_push($wg_ids, 0);
 
 // if we get a record id tehn see if there is a personal bookmark for it.
  if (@$_REQUEST['bib_id'] && !@$_REQUEST['bkmk_id']) {
-	$res = mysql_query('select * from personals where pers_rec_id = '.intval($_REQUEST['bib_id']).' and pers_usr_id = '.get_user_id());
+	$res = mysql_query('select * from usrBookmarks where pers_rec_id = '.intval($_REQUEST['bib_id']).' and pers_usr_id = '.get_user_id());
 	if (mysql_num_rows($res)>0) {
 		$row = mysql_fetch_assoc($res);
 		$_REQUEST['bkmk_id'] = $row['pers_id'];
@@ -115,7 +115,7 @@ array_push($wg_ids, 0);
 $pers_id = intval(@$_REQUEST['bkmk_id']);
 $rec_id = intval(@$_REQUEST['bib_id']);
 if ($pers_id) {
-	$res = mysql_query('select * from personals left join records on pers_rec_id=rec_id left join rec_types on rec_type=rt_id where pers_id='.$pers_id.' and pers_usr_id='.get_user_id().' and (not rec_temporary or rec_temporary is null)');
+	$res = mysql_query('select * from usrBookmarks left join records on pers_rec_id=rec_id left join rec_types on rec_type=rt_id where pers_id='.$pers_id.' and pers_usr_id='.get_user_id().' and (not rec_temporary or rec_temporary is null)');
 	$bibInfo = mysql_fetch_assoc($res);
 	print_details($bibInfo);
 } else if ($rec_id) {

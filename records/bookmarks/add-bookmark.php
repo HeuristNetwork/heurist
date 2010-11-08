@@ -35,13 +35,13 @@ if ($bib["rec_wg_id"]  &&  $bib["rec_visibility"] == "Hidden") {
 
 
 /* check -- maybe the user has this bookmarked already ..? */
-$res = mysql_query("select * from personals where pers_rec_id=$rec_id and pers_usr_id=" . get_user_id());
+$res = mysql_query("select * from usrBookmarks where pers_rec_id=$rec_id and pers_usr_id=" . get_user_id());
 
 if (mysql_num_rows($res) == 0) {
 	/* full steam ahead */
-	mysql_query("insert into personals (pers_rec_id, pers_usr_id, pers_added, pers_modified) values (" . $rec_id . ", " . get_user_id() . ", now(), now())");
+	mysql_query("insert into usrBookmarks (pers_rec_id, pers_usr_id, pers_added, pers_modified) values (" . $rec_id . ", " . get_user_id() . ", now(), now())");
 
-	$res = mysql_query("select * from personals where pers_id=last_insert_id()");
+	$res = mysql_query("select * from usrBookmarks where pers_id=last_insert_id()");
 	if (mysql_num_rows($res) == 0) {
 		print "{ error: \"internal database error while adding bookmark\" }";
 		return;

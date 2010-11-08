@@ -91,7 +91,7 @@ function do_fix_dupe($bibIDs) {
 	$bdCount = mysql_affected_rows();
 		$errors .= mysql_error() . ' ';
 
-        mysql_query("update ignore personals set pers_rec_id=$masterBibID where pers_rec_id in ($bibIDlist)");
+        mysql_query("update ignore usrBookmarks set pers_rec_id=$masterBibID where pers_rec_id in ($bibIDlist)");
 	$bkmkCount = mysql_affected_rows();
 		$errors .= mysql_error() . ' ';
         mysql_query("update ignore keyword_links set kwl_rec_id=$masterBibID where kwl_rec_id in ($bibIDlist)");

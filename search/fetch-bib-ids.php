@@ -12,7 +12,7 @@ require_once(dirname(__FILE__).'/../common/connect/cred.php');
 require_once(dirname(__FILE__).'/../common/connect/db.php');
 require_once(dirname(__FILE__).'/../search/advanced/adv-search.php');
 
-// if the user isn't logged in, never do a personals search
+// if the user isn't logged in, never do a usrBookmarks search
 if (! is_logged_in())
 	$_REQUEST['w'] = 'all';
 

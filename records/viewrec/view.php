@@ -14,7 +14,7 @@ mysql_connection_db_select(DATABASE);
 
 if (@$_REQUEST['bkmk_id']) {
 	$pers_id = $_REQUEST['bkmk_id'];
-	$res = mysql_query('select * from personals where pers_id = ' . $pers_id);
+	$res = mysql_query('select * from usrBookmarks where pers_id = ' . $pers_id);
 	$bkmk = mysql_fetch_assoc($res);
 	$rec_id = $bkmk['pers_rec_id'];
 } else {
@@ -31,7 +31,7 @@ if (@$_REQUEST['bkmk_id']) {
 	}
 	*/
 
-	$res = mysql_query('select * from personals where pers_rec_id = ' . $rec_id . ' and pers_usr_id = ' . get_user_id());
+	$res = mysql_query('select * from usrBookmarks where pers_rec_id = ' . $rec_id . ' and pers_usr_id = ' . get_user_id());
 	$bkmk = mysql_fetch_assoc($res);
 	$pers_id = $bkmk['pers_id'];
 }

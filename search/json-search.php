@@ -18,7 +18,7 @@ require_once(dirname(__FILE__).'/advanced/adv-search.php');
 list($usec, $sec) = explode(' ', microtime());
 $stime = $sec + $usec;
 
-// if the user isn't logged in, never do a personals search
+// if the user isn't logged in, never do a usrBookmarks search
 if (! is_logged_in())
 	$_REQUEST['w'] = 'all';
 

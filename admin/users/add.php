@@ -161,7 +161,7 @@ if ($_REQUEST['_submit']  &&  $dup_check_ok) {
 			                      left join keywords B on B.kwd_name=A.kwd_name and B.kwd_usr_id=$usr_id",
 			                                'A.kwd_id', 'B.kwd_id', "A.kwd_usr_id=$model_usr_id");
 
-			$res = mysql_query("select * from personals where pers_usr_id = $model_usr_id");	// model user
+			$res = mysql_query("select * from usrBookmarks where pers_usr_id = $model_usr_id");	// model user
 			while ($row = mysql_fetch_assoc($res)) {
 				// add a new bookmark for each of the model user's bookmarks
 				// (all fields the same except for user id and keyword id)
@@ -172,7 +172,7 @@ if ($_REQUEST['_submit']  &&  $dup_check_ok) {
 				$row['pers_added'] = date('Y-m-d H:i:s');
 				$row['pers_modified'] = date('Y-m-d H:i:s');
 
-				mysql__insert('personals', $row);
+				mysql__insert('usrBookmarks', $row);
 			}
 
 
@@ -180,7 +180,7 @@ if ($_REQUEST['_submit']  &&  $dup_check_ok) {
 			/* hold onto your hats, folks: this is a five-table join across three tables! */
 			$res = mysql_query(
 'select NEWUSER_BKMK.pers_id, NEWUSER_KWD.kwd_id, MODUSER_KWDL.kwl_order, MODUSER_KWDL.kwl_rec_id
-   from personals NEWUSER_BKMK left join personals MODUSER_BKMK on NEWUSER_BKMK.pers_rec_id=MODUSER_BKMK.pers_rec_id
+   from usrBookmarks NEWUSER_BKMK left join usrBookmarks MODUSER_BKMK on NEWUSER_BKMK.pers_rec_id=MODUSER_BKMK.pers_rec_id
                                                                and MODUSER_BKMK.pers_usr_id='.$model_usr_id.'
                                left join keyword_links MODUSER_KWDL on MODUSER_KWDL.kwl_pers_id=MODUSER_BKMK.pers_id
                                left join keywords MODUSER_KWD on MODUSER_KWD.kwd_id=MODUSER_KWDL.kwl_kwd_id

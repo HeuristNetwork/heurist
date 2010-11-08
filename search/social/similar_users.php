@@ -35,9 +35,9 @@ if ($_REQUEST['user']) {
           concat('.USERS_FIRSTNAME_FIELD.'," ",'.USERS_LASTNAME_FIELD.') as name,
 		  count(B.pers_usr_id) as freq
      from keyword_links
-left join personals A on A.pers_id=kwl_pers_id
+left join usrBookmarks A on A.pers_id=kwl_pers_id
 left join records on rec_id=A.pers_rec_id
-left join personals B on B.pers_rec_id=rec_id
+left join usrBookmarks B on B.pers_rec_id=rec_id
 left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=B.pers_usr_id
     where kwl_kwd_id='.$_REQUEST['kwd'].'
       and A.pers_usr_id='.$_REQUEST['user'].'
@@ -53,9 +53,9 @@ left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=B.pers_usr_id
    select B.pers_usr_id,
           concat('.USERS_FIRSTNAME_FIELD.'," ",'.USERS_LASTNAME_FIELD.') as name,
 		  count(B.pers_usr_id) as freq
-     from personals A
+     from usrBookmarks A
 left join records on rec_id=A.pers_rec_id
-left join personals B on B.pers_rec_id=rec_id
+left join usrBookmarks B on B.pers_rec_id=rec_id
 left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=B.pers_usr_id
     where A.pers_usr_id='.$_REQUEST['user'].'
 	  and B.pers_usr_id!='.$_REQUEST['user'].'

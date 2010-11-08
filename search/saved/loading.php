@@ -298,7 +298,7 @@ function loadUserDependentData(&$record) {
 	            pers_content_rating,
 	            pers_interest_rating,
 	            pers_quality_rating
-	       from personals
+	       from usrBookmarks
 	      where pers_rec_id = $recID
 	        and pers_usr_id = ".get_user_id());
 	if (mysql_num_rows($res) > 0) {

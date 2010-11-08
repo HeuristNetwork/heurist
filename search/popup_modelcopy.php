@@ -217,7 +217,7 @@ function update_my_settings() {
 	$ssearches = array_map('intval', array_keys($_REQUEST['ssearch']));
 
 	$keys = mysql__select_array('keywords', 'kwd_id', 'kwd_usr_id = '.MODEL_USER_ID.' and kwd_id in (0, ' . join(', ', $keys) . ')');
-	$bkmks = mysql__select_array('personals', 'pers_id', 'pers_usr_id = '.MODEL_USER_ID.' and pers_id in (0, ' . join(', ', $bkmks) . ')');
+	$bkmks = mysql__select_array('usrBookmarks', 'pers_id', 'pers_usr_id = '.MODEL_USER_ID.' and pers_id in (0, ' . join(', ', $bkmks) . ')');
 	$ssearches = mysql__select_array('saved_searches', 'ss_id', 'ss_usr_id = '.MODEL_USER_ID.' and ss_id in (0, ' . join(', ', $ssearches) . ')');
 
 	if ($keys) {
@@ -235,9 +235,9 @@ function update_my_settings() {
 	}
 
 	if ($bkmks) {
-		$res = mysql_query('select * from personals where pers_id in ('.join(',',$bkmks).')');
+		$res = mysql_query('select * from usrBookmarks where pers_id in ('.join(',',$bkmks).')');
 		while ($row = mysql_fetch_assoc($res)) {
-			// add a new bookmark for each of the selected personals
+			// add a new bookmark for each of the selected usrBookmarks
 			// (all fields the same except for user id)
 
 			unset($row['pers_id']);
@@ -246,7 +246,7 @@ function update_my_settings() {
 			$row['pers_added'] = date('Y-m-d H:i:s');
 			$row['pers_modified'] = date('Y-m-d H:i:s');
 
-			mysql__insert('personals', $row);
+			mysql__insert('usrBookmarks', $row);
 			$updated = 1;
 		}
 
@@ -254,7 +254,7 @@ function update_my_settings() {
 		/* hold onto your hats, folks: this is a five-table join across three tables! */
 		$res = mysql_query(
 'select NEWUSER_BKMK.pers_id, NEWUSER_KWD.kwd_id, MODUSER_KWDL.kwl_order, MODUSER_KWDL.kwl_rec_id
-   from personals NEWUSER_BKMK left join personals MODUSER_BKMK on NEWUSER_BKMK.pers_rec_id=MODUSER_BKMK.pers_rec_id
+   from usrBookmarks NEWUSER_BKMK left join usrBookmarks MODUSER_BKMK on NEWUSER_BKMK.pers_rec_id=MODUSER_BKMK.pers_rec_id
                                                                and MODUSER_BKMK.pers_id in ('.join(',',$bkmks).')
                                left join keyword_links MODUSER_KWDL on MODUSER_KWDL.kwl_pers_id=MODUSER_BKMK.pers_id
                                left join keywords MODUSER_KWD on MODUSER_KWD.kwd_id=MODUSER_KWDL.kwl_kwd_id
@@ -298,9 +298,9 @@ function kwd_query() {
 }
 
 function bkmk_query() {
-	return mysql_query("select A.pers_id, rec_url, rec_title from personals A
+	return mysql_query("select A.pers_id, rec_url, rec_title from usrBookmarks A
 	                           left join records on rec_id = A.pers_rec_id
-	                           left join personals B on A.pers_rec_id = B.pers_rec_id and B.pers_usr_id=".get_user_id()."
+	                           left join usrBookmarks B on A.pers_rec_id = B.pers_rec_id and B.pers_usr_id=".get_user_id()."
 	                     where A.pers_usr_id=".MODEL_USER_ID." and B.pers_id is null
 	                     order by A.pers_id");
 }

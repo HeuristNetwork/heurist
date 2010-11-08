@@ -15,7 +15,7 @@ if (! defined('UPLOAD_PATH'))
 
    mysql -u root -p < database_create.sql  */
 
-$MAINTABLES['BOOKMARK'] = 'personals';
+$MAINTABLES['BOOKMARK'] = 'usrBookmarks';
 	$PKEY['BOOKMARK'] = 'pers_id';
 	$INIDATE_FIELD['BOOKMARK'] = 'pers_added';
       $MODDATE_FIELD['BOOKMARK'] = 'pers_modified';
@@ -34,7 +34,7 @@ $MAINTABLES['LINKED_BIBLIO'] = 'records';
                 $JOINS['LINKED_BIBLIO'] = array('REFTYPE-ID' => 'rec_type');
 
 if (function_exists('get_user_id')) {
-      $LOOKUPS['LINKED_BIBLIO'] = array( 'personals' => 'rec_id=pers_rec_id and pers_usr_id='.get_user_id() );
+      $LOOKUPS['LINKED_BIBLIO'] = array( 'usrBookmarks' => 'rec_id=pers_rec_id and pers_usr_id='.get_user_id() );
 }
 
 
@@ -130,7 +130,7 @@ if (@$_REQUEST['showall']) {
  * for the search page: if showall is set,
  * then we select every URL that hasn't been bookmarked by this user already,
  * but only one bookmark per URL (we arbitrarily select the one with the minimum user id)
-	$SEARCHES["BOOKMARK_search"] = "SELECT pers_id, pers_usr_id, min(pers_usr_id) as min_user_id FROM personals WHERE (
+	$SEARCHES["BOOKMARK_search"] = "SELECT pers_id, pers_usr_id, min(pers_usr_id) as min_user_id FROM usrBookmarks WHERE (
 		pers_usr_id != [logged-in-user-id] and
 		if ([bkmk_title]!='', if([bkmk_title]!='=', bkmk_title like [%bkmk_title%], bkmk_title = ''), 1) and
 		if ([bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
@@ -154,12 +154,12 @@ if (@$_REQUEST['sort_order_dropdown']  &&  in_array($_REQUEST['sort_order_dropdo
 		$_REQUEST['sort_order_dropdown'] == 'popularity')
 		$_REQUEST['sort_order_dropdown'] = $_REQUEST['sort_order_dropdown'] . ' desc';
 	if ($_REQUEST['sort_order_dropdown'] == 'title') {
-		define('BOOKMARK_search-order', 'personals.bkmk_title = "", personals.bkmk_title');
+		define('BOOKMARK_search-order', 'usrBookmarks.bkmk_title = "", usrBookmarks.bkmk_title');
 		define('BIBLIO_search_all-order', 'rec_title = "", rec_title');
 		define('simple_BIBLIO_search-order', 'rec_title = "", rec_title');
 		define('others_BIBLIO_search-order', 'rec_title = "", rec_title');
 	} else {
-		define('BOOKMARK_search-order', 'personals.bkmk_' . $_REQUEST['sort_order_dropdown']);
+		define('BOOKMARK_search-order', 'usrBookmarks.bkmk_' . $_REQUEST['sort_order_dropdown']);
 		define('BIBLIO_search_all-order', 'bib_' . $_REQUEST['sort_order_dropdown']);
 		define('simple_BIBLIO_search-order', 'bib_' . $_REQUEST['sort_order_dropdown']);
 		define('others_BIBLIO_search-order', 'bib_' . $_REQUEST['sort_order_dropdown']);
@@ -167,18 +167,18 @@ if (@$_REQUEST['sort_order_dropdown']  &&  in_array($_REQUEST['sort_order_dropdo
 	$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'][HEURIST_INSTANCE_PREFIX.'heurist']['sort_order'] = $_REQUEST['sort_order_dropdown'];
 } else if (@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'][HEURIST_INSTANCE_PREFIX.'heurist']['sort_order']) {
 	if ($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'][HEURIST_INSTANCE_PREFIX.'heurist']['sort_order'] == 'title') {
-		define('BOOKMARK_search-order', 'personals.bkmk_title = "", personals.bkmk_title');
+		define('BOOKMARK_search-order', 'usrBookmarks.bkmk_title = "", usrBookmarks.bkmk_title');
 		define('BIBLIO_search_all-order', 'rec_title = "", rec_title');
 		define('simple_BIBLIO_search-order', 'rec_title = "", rec_title');
 		define('others_BIBLIO_search-order', 'rec_title = "", rec_title');
 	} else {
-		define('BOOKMARK_search-order', 'personals.bkmk_' . $_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'][HEURIST_INSTANCE_PREFIX.'heurist']['sort_order']);
+		define('BOOKMARK_search-order', 'usrBookmarks.bkmk_' . $_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'][HEURIST_INSTANCE_PREFIX.'heurist']['sort_order']);
 		define('BIBLIO_search_all-order', 'bib_' . $_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'][HEURIST_INSTANCE_PREFIX.'heurist']['sort_order']);
 		define('simple_BIBLIO_search-order', 'bib_' . $_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'][HEURIST_INSTANCE_PREFIX.'heurist']['sort_order']);
 		define('others_BIBLIO_search-order', 'bib_' . $_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'][HEURIST_INSTANCE_PREFIX.'heurist']['sort_order']);
 	}
 } else {
-	define('BOOKMARK_search-order', 'personals.bkmk_title = "", personals.bkmk_title');
+	define('BOOKMARK_search-order', 'usrBookmarks.bkmk_title = "", usrBookmarks.bkmk_title');
 	define('BIBLIO_search_all-order', 'rec_title = "", rec_title');
 	define('simple_BIBLIO_search-order', 'rec_title = "", rec_title');
 	define('others_BIBLIO_search-order', 'rec_title = "", rec_title');
@@ -186,7 +186,7 @@ if (@$_REQUEST['sort_order_dropdown']  &&  in_array($_REQUEST['sort_order_dropdo
 
 
 /*
-$SEARCHES["BOOKMARK_search"] = "SELECT pers_id FROM personals WHERE (
+$SEARCHES["BOOKMARK_search"] = "SELECT pers_id FROM usrBookmarks WHERE (
 		(pers_usr_id = [logged-in-user-id]) and 
 		if ([bkmk_title]!='', if([bkmk_title]!='=', bkmk_title like [%bkmk_title%], bkmk_title = ''), 1) and
 		if ([bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
@@ -197,7 +197,7 @@ $SEARCHES["BOOKMARK_search"] = "SELECT pers_id FROM personals WHERE (
 		)
 		";
 */
-$SEARCHES["BOOKMARK_search"] = "SELECT distinct pers_id FROM personals left join records on pers_rec_id=rec_id WHERE (
+$SEARCHES["BOOKMARK_search"] = "SELECT distinct pers_id FROM usrBookmarks left join records on pers_rec_id=rec_id WHERE (
 		(pers_usr_id = [logged-in-user-id]) and 
 		[word-match:bkmk_title:bkmk_title] and 
 		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
@@ -207,7 +207,7 @@ $SEARCHES["BOOKMARK_search"] = "SELECT distinct pers_id FROM personals left join
 		)
 		";	/* may be over-written by search.php */
 
-$SEARCHES["augmented_BOOKMARK_search"] = "SELECT distinct pers_id FROM personals left join records on pers_rec_id=rec_id left join keyword_links on kwl_pers_id=pers_id WHERE (
+$SEARCHES["augmented_BOOKMARK_search"] = "SELECT distinct pers_id FROM usrBookmarks left join records on pers_rec_id=rec_id left join keyword_links on kwl_pers_id=pers_id WHERE (
 		(pers_usr_id = [logged-in-user-id]) and 
 		[word-match:bkmk_title:bkmk_title] and 
 		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
@@ -224,7 +224,7 @@ define('BOOKMARK_search_all-order', 'bkmk_title');
 /* All Bookmarks search */
 
 /*
-$SEARCHES["BOOKMARK_search_all"] = "SELECT pers_id, pers_usr_id FROM personals WHERE (
+$SEARCHES["BOOKMARK_search_all"] = "SELECT pers_id, pers_usr_id FROM usrBookmarks WHERE (
 		pers_usr_id != [logged-in-user-id] and
 		if ([bkmk_title]!='', bkmk_title like [%bkmk_title%], 1) and
 		if ([bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
@@ -237,7 +237,7 @@ $SEARCHES["BOOKMARK_search_all"] = "SELECT pers_id, pers_usr_id FROM personals W
 
 define('ALLBOOKMARK_search-order', 'bkmk_title');
 
-$SEARCHES["ALLBOOKMARK_search"] = "SELECT pers_id FROM personals WHERE (
+$SEARCHES["ALLBOOKMARK_search"] = "SELECT pers_id FROM usrBookmarks WHERE (
 	if ([bkmk_title]!='', bkmk_title like [%bkmk_title%], 1) and
 	if ([bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
 	if ([pers_notes]!='', pers_notes like [%pers_notes%], 1)
@@ -248,7 +248,7 @@ $SEARCHES["ALLBOOKMARK_search"] = "SELECT pers_id FROM personals WHERE (
 /* search the records records for which the user doesn't have a bookmark already */
 
 $SEARCHES["BIBLIO_search"] = "select rec_id from records
-	                               left join personals on pers_rec_id=rec_id and pers_usr_id = [logged-in-user-id] where (
+	                               left join usrBookmarks on pers_rec_id=rec_id and pers_usr_id = [logged-in-user-id] where (
 	pers_id is null and
 	[word-match:rec_title:rec_title] and 
 	if ([rec_url]!='', rec_url like [%rec_url%], 1) and
@@ -263,7 +263,7 @@ $SEARCHES["simple_BIBLIO_search"] = "select distinct rec_id from records  where 
          and not rec_temporary
 	)
 	";
-$SEARCHES["augmented_simple_BIBLIO_search"] = "select distinct rec_id from records left join personals on pers_rec_id=rec_id left join keyword_links on kwl_pers_id=pers_id where (
+$SEARCHES["augmented_simple_BIBLIO_search"] = "select distinct rec_id from records left join usrBookmarks on pers_rec_id=rec_id left join keyword_links on kwl_pers_id=pers_id where (
 	[word-match:rec_title:rec_title] and 
 	if ([bib_advanced_search] and [rec_url]!='', rec_url like [%rec_url%], 1) and
 	if ([bib_advanced_search] and [rec_type]!='', rec_type = [rec_type], 1)
@@ -272,7 +272,7 @@ $SEARCHES["augmented_simple_BIBLIO_search"] = "select distinct rec_id from recor
 	";
 
 $SEARCHES["others_BIBLIO_search"] = "select distinct rec_id from records
-	                               left join personals on pers_rec_id=rec_id and pers_usr_id = [logged-in-user-id] where (
+	                               left join usrBookmarks on pers_rec_id=rec_id and pers_usr_id = [logged-in-user-id] where (
 	pers_id is null and
 	[word-match:rec_title:rec_title] and 
 	if ([bib_advanced_search] and [rec_url]!='', rec_url like [%rec_url%], 1) and
@@ -282,8 +282,8 @@ $SEARCHES["others_BIBLIO_search"] = "select distinct rec_id from records
 	";
 
 $SEARCHES['augmented_others_BIBLIO_search'] = "select distinct rec_id from records
-	                               left join personals A on A.pers_rec_id=rec_id
-                                       left join personals B on B.pers_rec_id=A.pers_rec_id and B.pers_usr_id = [logged-in-user-id]
+	                               left join usrBookmarks A on A.pers_rec_id=rec_id
+                                       left join usrBookmarks B on B.pers_rec_id=A.pers_rec_id and B.pers_usr_id = [logged-in-user-id]
                                        left join keyword_links on kwl_pers_id=A.pers_id where (
 	B.pers_id is null and
 	[word-match:rec_title:rec_title] and 
@@ -300,7 +300,7 @@ $SEARCHES['augmented_others_BIBLIO_search'] = "select distinct rec_id from recor
 /* THIS IS N0T USED TO THE BEST OF MY KNOWLEDGE, but might be if we want to
    simplify the front screen search
 define('BOOKMARK_simple_search-order', 'bkmk_title');
-$SEARCHES["BOOKMARK_simple_search"] = "SELECT pers_id FROM personals WHERE (
+$SEARCHES["BOOKMARK_simple_search"] = "SELECT pers_id FROM usrBookmarks WHERE (
 		if ([pers_usr_id]!='',pers_usr_id = [pers_usr_id], pers_usr_id = [logged-in-user-id]) and 
 		if ([bkmk_title]!='', bkmk_title like [%bkmk_title%], 1) and
 		if ([bkmk_category_id]!='', bkmk_category_id = [bkmk_category_id], 1)

@@ -14,7 +14,7 @@ define('UPLOAD_PATH','');
 
    mysql -u root -p < database_create.sql  */
 
-$MAINTABLES['BOOKMARK'] = 'bookmarks_safe';	// view of the personals table with the password column omitted
+$MAINTABLES['BOOKMARK'] = 'bookmarks_safe';	// view of the usrBookmarks table with the password column omitted
 	$PKEY['BOOKMARK'] = 'pers_id';
 	$INIDATE_FIELD['BOOKMARK'] = 'pers_added';
       $MODDATE_FIELD['BOOKMARK'] = 'pers_modified';
@@ -33,7 +33,7 @@ $MAINTABLES['LINKED_BIBLIO'] = 'records';
                 $JOINS['LINKED_BIBLIO'] = array('REFTYPE-ID' => 'rec_type');
 
 if (function_exists('get_user_id')) {
-      $LOOKUPS['LINKED_BIBLIO'] = array( 'personals' => 'rec_id=pers_rec_id and pers_usr_id='.get_user_id() );
+      $LOOKUPS['LINKED_BIBLIO'] = array( 'usrBookmarks' => 'rec_id=pers_rec_id and pers_usr_id='.get_user_id() );
 }
 
 
@@ -69,7 +69,7 @@ $MAINTABLES["BOOKMARKS_TO_KEYWORDS"] = 'keyword_links';
 							"KEYWORD-ID"  => "kwl_kwd_id");
 
 
-$SEARCHES["BOOKMARK_search"] = "SELECT distinct pers_id FROM personals left join records on pers_rec_id=rec_id WHERE (
+$SEARCHES["BOOKMARK_search"] = "SELECT distinct pers_id FROM usrBookmarks left join records on pers_rec_id=rec_id WHERE (
 		(pers_usr_id = [logged-in-user-id]) and 
 		[word-match:bkmk_title:bkmk_title] and 
 		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
@@ -79,7 +79,7 @@ $SEARCHES["BOOKMARK_search"] = "SELECT distinct pers_id FROM personals left join
 		)
 		";	/* may be over-written by search.php */
 
-$SEARCHES["augmented_BOOKMARK_search"] = "SELECT distinct pers_id FROM personals left join records on pers_rec_id=rec_id left join keyword_links on kwl_pers_id=pers_id WHERE (
+$SEARCHES["augmented_BOOKMARK_search"] = "SELECT distinct pers_id FROM usrBookmarks left join records on pers_rec_id=rec_id left join keyword_links on kwl_pers_id=pers_id WHERE (
 		(pers_usr_id = [logged-in-user-id]) and 
 		[word-match:bkmk_title:bkmk_title] and 
 		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and

@@ -3,7 +3,7 @@
 function have_bkmk_permissions($pers_id) {
 
 	$pers_id = intval($pers_id);
-	$res = mysql_query('select * from personals left join records on pers_rec_id=rec_id where pers_id='.$pers_id.' and pers_usr_id='.get_user_id());
+	$res = mysql_query('select * from usrBookmarks left join records on pers_rec_id=rec_id where pers_id='.$pers_id.' and pers_usr_id='.get_user_id());
 
 	// they're not the owner
 	if (mysql_num_rows($res) <= 0) return false;

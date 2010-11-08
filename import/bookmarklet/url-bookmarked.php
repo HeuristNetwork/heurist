@@ -22,7 +22,7 @@ if (substr($url, -1) == "/") $url = substr($url, 0, strlen($url)-1);
 
 $res = mysql_query("select rec_id
 					  from records
-				 left join personals on pers_rec_id = rec_id
+				 left join usrBookmarks on pers_rec_id = rec_id
 					 where (rec_url='".addslashes($url)."' or rec_url='".addslashes($url)."/')
 				  group by pers_id
 				  order by count(pers_id), rec_id
@@ -34,7 +34,7 @@ if ($row = mysql_fetch_assoc($res)) {
 }
 
 $res = mysql_query("select pers_id
-					  from personals
+					  from usrBookmarks
 				 left join records on rec_id = pers_rec_id
 					 where pers_usr_id=".get_user_id()."
 					   and (rec_url='".addslashes($url)."' or rec_url='".addslashes($url)."/')

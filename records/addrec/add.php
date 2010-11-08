@@ -99,8 +99,8 @@ if ($_REQUEST['bkmrk_bkmk_url']) {
 	$burl = $_REQUEST['bkmrk_bkmk_url'];
 	if (substr($burl, -1) == '/') $burl = substr($burl, 0, strlen($burl)-1);
 
-	/* look up the user's bookmark (personals) table, see if they've already got this URL bookmarked -- if so, just edit it */
-	$res = mysql_query('select pers_id from personals left join records on rec_id=pers_rec_id where pers_usr_id="'.addslashes(get_user_id()).'"
+	/* look up the user's bookmark (usrBookmarks) table, see if they've already got this URL bookmarked -- if so, just edit it */
+	$res = mysql_query('select pers_id from usrBookmarks left join records on rec_id=pers_rec_id where pers_usr_id="'.addslashes(get_user_id()).'"
 							and (rec_url="'.addslashes($burl).'" or rec_url="'.addslashes($burl).'/")');
 	if (mysql_num_rows($res) > 0) {
 		$bkmk = mysql_fetch_assoc($res);
@@ -297,7 +297,7 @@ if ($rec_id  &&  ! @$_REQUEST['force_new']) {
 	 * If they do in fact have it bookmarked, redirect to the edit bookmark page
 	 * and add the new notes to the end of their existing notes.  FMS
 	 */
-	$res = mysql_query('select * from personals where pers_usr_id='.get_user_id().' and pers_rec_id = '.$rec_id);
+	$res = mysql_query('select * from usrBookmarks where pers_usr_id='.get_user_id().' and pers_rec_id = '.$rec_id);
 	$bkmk = mysql_fetch_assoc($res);
 	if ($bkmk  &&  $bkmk['pers_id']) {
 		if ($description) {
@@ -334,7 +334,7 @@ if ($rec_id) {
 		$url = $row['rec_url'];
 	}
 
-	mysql__insert('personals', array(
+	mysql__insert('usrBookmarks', array(
 		'pers_rec_id' => $rec_id,
 		'pers_added' => date('Y-m-d H:i:s'),
 		'pers_modified' => date('Y-m-d H:i:s'),

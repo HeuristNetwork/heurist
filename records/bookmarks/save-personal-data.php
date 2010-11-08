@@ -30,10 +30,10 @@ if ($pers_id  &&  $_POST["save-mode"] == "edit") {
 		if (array_key_exists($varNames[0], $_POST))
 			$updates[$colName] = $_POST[$varNames[0]];
 	}
-	mysql__update("personals", "pers_id=$pers_id and pers_usr_id=".get_user_id(), $updates);
+	mysql__update("usrBookmarks", "pers_id=$pers_id and pers_usr_id=".get_user_id(), $updates);
 
 	$res = mysql_query("select " . join(", ", array_keys($updates)) .
-				" from personals where pers_id=$pers_id and pers_usr_id=".get_user_id());
+				" from usrBookmarks where pers_id=$pers_id and pers_usr_id=".get_user_id());
 	if (mysql_num_rows($res) == 1) {
 		$dbVals = mysql_fetch_assoc($res);
 		$hVals = array();
@@ -73,7 +73,7 @@ function doKeywordInsertion($pers_id) {
 		array_push($kwd_ids, $kwd_id);
 	}
 
-	$res = mysql_query("select pers_rec_id from personals where pers_id=$pers_id");
+	$res = mysql_query("select pers_rec_id from usrBookmarks where pers_id=$pers_id");
 	$rec_id = mysql_fetch_row($res);  $rec_id = $rec_id[0];
 	if (! $rec_id) $rec_id = "NULL";
 
