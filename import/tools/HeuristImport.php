@@ -547,7 +547,7 @@ class HeuristNativeEntry {
 	function getBiblioID() { return $this->_bib_id; }
 		// Get the ID for the records table row corresponding to this entry
 
-	function setBookmarkID($pers_id) { $this->_bkmk_id = $pers_id; }
+	function setBookmarkID($bkm_ID) { $this->_bkmk_id = $bkm_ID; }
 	function getBookmarkID() { return $this->_bkmk_id; }
 		// Store/get the ID for the bookmark table row corresponding to this entry
 

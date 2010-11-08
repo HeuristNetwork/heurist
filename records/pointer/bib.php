@@ -48,7 +48,7 @@ if (! defined("JSON_RESPONSE")) {
 
 mysql_connection_db_select(DATABASE);
 
-list($rec_id, $pers_id, $replaced) = findRecordIDs();
+list($rec_id, $bkm_ID, $replaced) = findRecordIDs();
 
 if (! $rec_id) {
 	// record does not exist
@@ -58,7 +58,7 @@ if (! $rec_id) {
 	$record = array();
 	$record["replacedBy"] = $rec_id;
 } else {
-	$record = getBaseProperties($rec_id, $pers_id);
+	$record = getBaseProperties($rec_id, $bkm_ID);
 	if (@$record["workgroupID"]  &&  $record["workgroupVisibility"] == "Hidden"  &&  ! $_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']["user_access"][$record["workgroupID"]]) {
 		// record is hidden and user is not a member of owning workgroup
 		$record = array();
@@ -66,7 +66,7 @@ if (! $rec_id) {
 	} else {
 		$record["bdValuesByType"] = getAllBibDetails($rec_id);
 		$record["reminders"] = getAllReminders($rec_id);
-		$record["wikis"] = getAllWikis($rec_id, $pers_id);
+		$record["wikis"] = getAllWikis($rec_id, $bkm_ID);
 		$record["comments"] = getAllComments($rec_id);
 		$record["workgroupKeywords"] = getAllWorkgroupKeywords($rec_id);
 		$record["relatedRecords"] = getAllRelatedRecords($rec_id);
@@ -108,32 +108,32 @@ function findRecordIDs() {
 	}
 
 	$rec_id = 0;
-	$pers_id = 0;
+	$bkm_ID = 0;
 	if (intval(@$_REQUEST['bib_id'])) {
 		$rec_id = intval($_REQUEST['bib_id']);
 		$res = mysql_query('select rec_id, bkm_ID from records left join usrBookmarks on pers_rec_id=rec_id and pers_usr_id='.get_user_id().' where rec_id='.$rec_id);
 		$row = mysql_fetch_assoc($res);
 		$rec_id = intval($row['rec_id']);
-		$pers_id = intval($row['bkm_ID']);
+		$bkm_ID = intval($row['bkm_ID']);
 	}
 
 	if (! $rec_id  &&  intval(@$_REQUEST['bkmk_id'])) {
-		$pers_id = intval($_REQUEST['bkmk_id']);
-		$res = mysql_query('select bkm_ID, rec_id from usrBookmarks left join records on pers_rec_id=rec_id where bkm_ID='.$pers_id.' and pers_usr_id='.get_user_id());
+		$bkm_ID = intval($_REQUEST['bkmk_id']);
+		$res = mysql_query('select bkm_ID, rec_id from usrBookmarks left join records on pers_rec_id=rec_id where bkm_ID='.$bkm_ID.' and pers_usr_id='.get_user_id());
 		$row = mysql_fetch_assoc($res);
-		$pers_id = intval($row['bkm_ID']);
+		$bkm_ID = intval($row['bkm_ID']);
 		$rec_id = intval($row['rec_id']);
 	}
 
-	return array($rec_id, $pers_id, $replaced);
+	return array($rec_id, $bkm_ID, $replaced);
 }
 
 
-function getBaseProperties($rec_id, $pers_id) {
+function getBaseProperties($rec_id, $bkm_ID) {
 	// Return an array of the basic scalar properties for this record / bookmark
 
-	if ($pers_id) {
-		$res = mysql_query('select rec_title as title, rt_name as reftype, rt_id as reftypeID, rec_url as url, grp_id as workgroupID, grp_name as workgroup, rec_scratchpad as notes, rec_visibility as visibility, pers_pwd_reminder as passwordReminder, pers_content_rating as contentRating, pers_interest_rating as interestRating, pers_quality_rating as qualityRating, pers_notes as quickNotes, rec_modified, rec_temporary from usrBookmarks left join records on pers_rec_id=rec_id and pers_usr_id='.get_user_id().' left join rec_types on rt_id = rec_type left join '.USERS_DATABASE.'.Groups on grp_id=rec_wg_id where bkm_ID='.$pers_id);
+	if ($bkm_ID) {
+		$res = mysql_query('select rec_title as title, rt_name as reftype, rt_id as reftypeID, rec_url as url, grp_id as workgroupID, grp_name as workgroup, rec_scratchpad as notes, rec_visibility as visibility, pers_pwd_reminder as passwordReminder, pers_content_rating as contentRating, pers_interest_rating as interestRating, pers_quality_rating as qualityRating, pers_notes as quickNotes, rec_modified, rec_temporary from usrBookmarks left join records on pers_rec_id=rec_id and pers_usr_id='.get_user_id().' left join rec_types on rt_id = rec_type left join '.USERS_DATABASE.'.Groups on grp_id=rec_wg_id where bkm_ID='.$bkm_ID);
 	} else if ($rec_id) {
 		$res = mysql_query('select rec_title as title, rt_name as reftype, rt_id as reftypeID, rec_url as url, grp_id as workgroupID, grp_name as workgroup, rec_scratchpad as notes, rec_visibility as visibility, rec_modified, rec_temporary from records left join usrBookmarks on pers_rec_id=rec_id left join rec_types on rt_id = rec_type left join '.USERS_DATABASE.'.Groups on grp_id=rec_wg_id where rec_id='.$rec_id);
 	}
@@ -141,7 +141,7 @@ function getBaseProperties($rec_id, $pers_id) {
 	$row = mysql_fetch_assoc($res);
 	$props = array();
 	if ($rec_id) $props["bibID"] = $rec_id;
-	if ($pers_id) $props["bkmkID"] = $pers_id;
+	if ($bkm_ID) $props["bkmkID"] = $bkm_ID;
 	$props["title"] = $row["title"];
 	$props["reftype"] = $row["reftype"];
 	$props["reftypeID"] = $row["reftypeID"];
@@ -165,9 +165,9 @@ function getBaseProperties($rec_id, $pers_id) {
 	}
 	$props['notes'] = $row['notes'];
 
-	if ($pers_id) {
+	if ($bkm_ID) {
 		// grab the user tags (keywords) for this bookmark, as a single comma-delimited string
-		$kwds = mysql__select_array("keyword_links left join keywords on kwd_id=kwl_kwd_id", "kwd_name", "kwl_pers_id=$pers_id and kwd_usr_id=".get_user_id() . " order by kwl_order, kwl_id");
+		$kwds = mysql__select_array("keyword_links left join keywords on kwd_id=kwl_kwd_id", "kwd_name", "kwl_pers_id=$bkm_ID and kwd_usr_id=".get_user_id() . " order by kwl_order, kwl_id");
 		$props["keywordString"] = join(",", $kwds);
 	}
 
@@ -282,15 +282,15 @@ function getAllReminders($rec_id) {
 }
 
 
-function getAllWikis($rec_id, $pers_id) {
+function getAllWikis($rec_id, $bkm_ID) {
 	// Get all wikis for this record / bookmark as an array/object
 
 	$wikis = array();
 	$wikiNames = array();
 
-	if ($pers_id) {
-		array_push($wikis, array("Private", "Bookmark:$pers_id"));
-		array_push($wikiNames, "Bookmark:$pers_id");
+	if ($bkm_ID) {
+		array_push($wikis, array("Private", "Bookmark:$bkm_ID"));
+		array_push($wikiNames, "Bookmark:$bkm_ID");
 	}
 
 	if ($rec_id) {

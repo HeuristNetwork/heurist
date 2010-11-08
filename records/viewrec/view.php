@@ -13,8 +13,8 @@ if (!is_logged_in()) {
 mysql_connection_db_select(DATABASE);
 
 if (@$_REQUEST['bkmk_id']) {
-	$pers_id = $_REQUEST['bkmk_id'];
-	$res = mysql_query('select * from usrBookmarks where bkm_ID = ' . $pers_id);
+	$bkm_ID = $_REQUEST['bkmk_id'];
+	$res = mysql_query('select * from usrBookmarks where bkm_ID = ' . $bkm_ID);
 	$bkmk = mysql_fetch_assoc($res);
 	$rec_id = $bkmk['pers_rec_id'];
 } else {
@@ -33,7 +33,7 @@ if (@$_REQUEST['bkmk_id']) {
 
 	$res = mysql_query('select * from usrBookmarks where pers_rec_id = ' . $rec_id . ' and pers_usr_id = ' . get_user_id());
 	$bkmk = mysql_fetch_assoc($res);
-	$pers_id = $bkmk['bkm_ID'];
+	$bkm_ID = $bkmk['bkm_ID'];
 }
 
 require_once(dirname(__FILE__).'/../permissions/permissions.php');
@@ -68,7 +68,7 @@ $rec_title = $row['rec_title'];
 
 <div style="padding: 10px;">
  <p style="font-weight: bold;"><?= htmlspecialchars($rec_title) ?></p>
- <iframe name="viewer" frameborder="0" style="width: 100%;height: 100%;" src="<?=HEURIST_SITE_PATH?>records/viewrec/info.php?<?= ($pers_id ? ('bkmk_id='.$pers_id) : ('bib_id='.$rec_id)) ?><?= $noclutter ?>"></iframe>
+ <iframe name="viewer" frameborder="0" style="width: 100%;height: 100%;" src="<?=HEURIST_SITE_PATH?>records/viewrec/info.php?<?= ($bkm_ID ? ('bkmk_id='.$bkm_ID) : ('bib_id='.$rec_id)) ?><?= $noclutter ?>"></iframe>
 </div>
 
 </body>

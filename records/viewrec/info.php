@@ -112,10 +112,10 @@ array_push($wg_ids, 0);
 		$_REQUEST['bkmk_id'] = $row['bkm_ID'];
 	}
 }
-$pers_id = intval(@$_REQUEST['bkmk_id']);
+$bkm_ID = intval(@$_REQUEST['bkmk_id']);
 $rec_id = intval(@$_REQUEST['bib_id']);
-if ($pers_id) {
-	$res = mysql_query('select * from usrBookmarks left join records on pers_rec_id=rec_id left join rec_types on rec_type=rt_id where bkm_ID='.$pers_id.' and pers_usr_id='.get_user_id().' and (not rec_temporary or rec_temporary is null)');
+if ($bkm_ID) {
+	$res = mysql_query('select * from usrBookmarks left join records on pers_rec_id=rec_id left join rec_types on rec_type=rt_id where bkm_ID='.$bkm_ID.' and pers_usr_id='.get_user_id().' and (not rec_temporary or rec_temporary is null)');
 	$bibInfo = mysql_fetch_assoc($res);
 	print_details($bibInfo);
 } else if ($rec_id) {
@@ -245,11 +245,11 @@ function print_private_details($bib) {
 
 	//this function outputs the personal information from the bookmark
 	function print_personal_details($bkmk) {
-		$pers_id = $bkmk['bkm_ID'];
+		$bkm_ID = $bkmk['bkm_ID'];
 
 		$tags = mysql__select_array('keyword_links, keywords',
 		                            'kwd_name',
-		                            'kwl_kwd_id=kwd_id and kwl_pers_id='.$pers_id.' and kwd_wg_id is null order by kwl_order');
+		                            'kwl_kwd_id=kwd_id and kwl_pers_id='.$bkm_ID.' and kwd_wg_id is null order by kwl_order');
 	?>
 	<div class=detailRow>
 	<div class=detailType>Personal Tags</div>

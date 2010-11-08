@@ -533,7 +533,7 @@ function bookmark_insert($url, $title, $keywords, $rec_id) {
 		'pers_modified' => date('Y-m-d H:i:s'),
 		'pers_usr_id' => get_user_id()
 	))) {
-		$pers_id = mysql_insert_id();
+		$bkm_ID = mysql_insert_id();
 
 		$all_keywords = mysql__select_assoc('keywords', 'lower(kwd_name)', 'kwd_id', 'kwd_usr_id='.get_user_id());
 		$input_keywords = explode(',', $keywords);
@@ -548,13 +548,13 @@ function bookmark_insert($url, $title, $keywords, $rec_id) {
 			}
 		}
 
-		mysql_query('delete from keyword_links where kwl_pers_id='.$pers_id);
+		mysql_query('delete from keyword_links where kwl_pers_id='.$bkm_ID);
 		if ($kwd_ids) {
 			$insert_stmt = '';
 			$kwi_count = 0;
 			foreach ($kwd_ids as $kwd_id) {
 				if ($insert_stmt) $insert_stmt .= ',';
-				$insert_stmt .= '(' . $pers_id . ',' . $rec_id . ',' . $kwd_id . ',' . ++$kwi_count . ')';
+				$insert_stmt .= '(' . $bkm_ID . ',' . $rec_id . ',' . $kwd_id . ',' . ++$kwi_count . ')';
 			}
 
 			$insert_stmt = 'insert into keyword_links (kwl_pers_id, kwl_rec_id, kwl_kwd_id, kwl_order) values ' . $insert_stmt;

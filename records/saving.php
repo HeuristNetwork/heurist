@@ -110,16 +110,16 @@ function saveRecord($id, $type, $url, $notes, $group, $vis, $personalised, $pnot
 
 	// private data
 	$bkmk = @mysql_fetch_row(mysql_query("select bkm_ID from usrBookmarks where pers_usr_id=" . get_user_id() . " and pers_rec_id=" . $id));
-	$pers_id = @$bkmk[0];
+	$bkm_ID = @$bkmk[0];
 	if ($personalised) {
-		if (! $pers_id) {
+		if (! $bkm_ID) {
 			// Record is not yet bookmarked, but we want it to be
 			mysql_query("insert into usrBookmarks (pers_added,pers_modified,pers_usr_id,pers_rec_id) values (now(),now(),".get_user_id().",$id)");
 			if (mysql_error()) jsonError("database error - " . mysql_error());
-			$pers_id = mysql_insert_id();
+			$bkm_ID = mysql_insert_id();
 		}
 
-		mysql__update("usrBookmarks", "bkm_ID=$pers_id", array(
+		mysql__update("usrBookmarks", "bkm_ID=$bkm_ID", array(
 		"pers_notes" => $pnotes,
 		"pers_content_rating" => $crate,
 		"pers_interest_rating" => $irate,
@@ -127,11 +127,11 @@ function saveRecord($id, $type, $url, $notes, $group, $vis, $personalised, $pnot
 		"pers_modified" => date('Y-m-d H:i:s')
 		));
 
-		doTagInsertion($id, $pers_id, $tags);
+		doTagInsertion($id, $bkm_ID, $tags);
 	}
-	else if ($pers_id) {
+	else if ($bkm_ID) {
 		// Record is bookmarked, but the user doesn't want it to be
-		mysql_query("delete usrBookmarks, keyword_links from usrBookmarks left join keyword_links on kwl_pers_id = bkm_ID where bkm_ID=$pers_id and pers_rec_id=$id and pers_usr_id=" . get_user_id());
+		mysql_query("delete usrBookmarks, keyword_links from usrBookmarks left join keyword_links on kwl_pers_id = bkm_ID where bkm_ID=$bkm_ID and pers_rec_id=$id and pers_usr_id=" . get_user_id());
 		if (mysql_error()) jsonError("database error - " . mysql_error());
 	}
 
@@ -146,7 +146,7 @@ function saveRecord($id, $type, $url, $notes, $group, $vis, $personalised, $pnot
 	}
 
 
-	$rval = array("bibID" => $id, "bkmkID" => $pers_id, "modified" => $now);
+	$rval = array("bibID" => $id, "bkmkID" => $bkm_ID, "modified" => $now);
 	if ($title) {
 		$rval["title"] = $title;
 	}

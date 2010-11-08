@@ -104,8 +104,8 @@ if ($_REQUEST['bkmrk_bkmk_url']) {
 							and (rec_url="'.addslashes($burl).'" or rec_url="'.addslashes($burl).'/")');
 	if (mysql_num_rows($res) > 0) {
 		$bkmk = mysql_fetch_assoc($res);
-		$pers_id = $bkmk['bkm_ID'];
-		header('Location: ' . HEURIST_URL_BASE . 'records/editrec/edit.html?instance='.HEURIST_INSTANCE.'&bkmk_id='.$pers_id.'&fromadd=exists' . $outdate);
+		$bkm_ID = $bkmk['bkm_ID'];
+		header('Location: ' . HEURIST_URL_BASE . 'records/editrec/edit.html?instance='.HEURIST_INSTANCE.'&bkmk_id='.$bkm_ID.'&fromadd=exists' . $outdate);
 		return;
 	}
 
@@ -341,7 +341,7 @@ if ($rec_id) {
 		'pers_usr_id' => get_user_id()
 	));
 
-	$pers_id = mysql_insert_id();
+	$bkm_ID = mysql_insert_id();
 
 	// add keyword
 	if (@$_REQUEST['keyword']) {
@@ -372,7 +372,7 @@ if ($rec_id) {
 
 			if ($kwd_id) {
 				mysql__insert('keyword_links', array(
-					'kwl_pers_id' => $pers_id,
+					'kwl_pers_id' => $bkm_ID,
 					'kwl_rec_id' => $rec_id,
 					'kwl_kwd_id' => $kwd_id
 				));
@@ -410,11 +410,11 @@ if ($rec_id) {
 	}
 
 
-	if ($pers_id) {
+	if ($bkm_ID) {
 		if ($new_rec_id) {
-			header('Location: ' . HEURIST_URL_BASE . 'records/editrec/edit.html?instance='.HEURIST_INSTANCE.'&bkmk_id=' . $pers_id . '&fromadd=new_bib' . $outdate . $wg);
+			header('Location: ' . HEURIST_URL_BASE . 'records/editrec/edit.html?instance='.HEURIST_INSTANCE.'&bkmk_id=' . $bkm_ID . '&fromadd=new_bib' . $outdate . $wg);
 		} else {
-			header('Location: ' . HEURIST_URL_BASE . 'records/editrec/edit.html?instance='.HEURIST_INSTANCE.'&bkmk_id=' . $pers_id . '&fromadd=new_bkmk' . $outdate . $wg);
+			header('Location: ' . HEURIST_URL_BASE . 'records/editrec/edit.html?instance='.HEURIST_INSTANCE.'&bkmk_id=' . $bkm_ID . '&fromadd=new_bkmk' . $outdate . $wg);
 		}
 		return;
 	}

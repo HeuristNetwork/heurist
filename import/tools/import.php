@@ -1894,15 +1894,15 @@ function insert_bookmark(&$entry) {
 	$res = mysql_query('select bkm_ID from usrBookmarks where pers_rec_id = ' . $entry->getBiblioID()
 	                                                . ' and pers_usr_id = ' . get_user_id());
 	if (mysql_num_rows($res) > 0) {
-		$pers_id = mysql_fetch_row($res);
-		$pers_id = $pers_id[0];
+		$bkm_ID = mysql_fetch_row($res);
+		$bkm_ID = $bkm_ID[0];
 
 		if (is_a($entry->getForeignPrototype(), 'HeuristZoteroEntry')) {
-			mysql_query('update usrBookmarks set pers_zotero_id = ' . $entry->getForeignPrototype()->getZoteroID().' where bkm_ID='.$pers_id);
+			mysql_query('update usrBookmarks set pers_zotero_id = ' . $entry->getForeignPrototype()->getZoteroID().' where bkm_ID='.$bkm_ID);
 			$zoteroItems[$entry->getForeignPrototype()->getZoteroID()] = $entry->getBiblioID();
 		}
 
-		$entry->setBookmarkID($pers_id);
+		$entry->setBookmarkID($bkm_ID);
 		return false;
 	} else {
 		// Otherwise insert a new bookmark.
@@ -1925,9 +1925,9 @@ function insert_bookmark(&$entry) {
 		}
 */
 		mysql__insert('usrBookmarks', $bkmk);
-		$pers_id = mysql_insert_id();
+		$bkm_ID = mysql_insert_id();
 
-		$entry->setBookmarkID($pers_id);
+		$entry->setBookmarkID($bkm_ID);
 		return true;
 	}
 }

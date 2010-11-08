@@ -11,10 +11,10 @@ if (! is_logged_in()) return;
 
 mysql_connection_db_overwrite(DATABASE);
 
-$pers_id = intval($_POST["bkmk_id"]);
-if ($pers_id  &&  $_POST["save-mode"] == "edit") {
+$bkm_ID = intval($_POST["bkmk_id"]);
+if ($bkm_ID  &&  $_POST["save-mode"] == "edit") {
 	if (array_key_exists("keywordstring", $_POST)) {
-		$keywordstring = doKeywordInsertion($pers_id);
+		$keywordstring = doKeywordInsertion($bkm_ID);
 	} else  $keywordstring = NULL;
 
 	$updatable = array(
@@ -30,10 +30,10 @@ if ($pers_id  &&  $_POST["save-mode"] == "edit") {
 		if (array_key_exists($varNames[0], $_POST))
 			$updates[$colName] = $_POST[$varNames[0]];
 	}
-	mysql__update("usrBookmarks", "bkm_ID=$pers_id and pers_usr_id=".get_user_id(), $updates);
+	mysql__update("usrBookmarks", "bkm_ID=$bkm_ID and pers_usr_id=".get_user_id(), $updates);
 
 	$res = mysql_query("select " . join(", ", array_keys($updates)) .
-				" from usrBookmarks where bkm_ID=$pers_id and pers_usr_id=".get_user_id());
+				" from usrBookmarks where bkm_ID=$bkm_ID and pers_usr_id=".get_user_id());
 	if (mysql_num_rows($res) == 1) {
 		$dbVals = mysql_fetch_assoc($res);
 		$hVals = array();
@@ -48,9 +48,9 @@ if ($pers_id  &&  $_POST["save-mode"] == "edit") {
 }
 
 
-function doKeywordInsertion($pers_id) {
+function doKeywordInsertion($bkm_ID) {
 	$kwds = mysql__select_array("keyword_links, keywords",
-	                            "kwd_name", "kwl_pers_id=$pers_id and kwd_id=kwl_kwd_id and kwd_usr_id=".get_user_id()." order by kwl_order, kwl_id");
+	                            "kwd_name", "kwl_pers_id=$bkm_ID and kwd_id=kwl_kwd_id and kwd_usr_id=".get_user_id()." order by kwl_order, kwl_id");
 	$keywordString = join(",", $kwds);
 
 	// Nothing to do here
@@ -73,18 +73,18 @@ function doKeywordInsertion($pers_id) {
 		array_push($kwd_ids, $kwd_id);
 	}
 
-	$res = mysql_query("select pers_rec_id from usrBookmarks where bkm_ID=$pers_id");
+	$res = mysql_query("select pers_rec_id from usrBookmarks where bkm_ID=$bkm_ID");
 	$rec_id = mysql_fetch_row($res);  $rec_id = $rec_id[0];
 	if (! $rec_id) $rec_id = "NULL";
 
 	// Delete all non-workgroup keywords for this bookmark
-	mysql_query("delete keyword_links from keyword_links, keywords where kwl_pers_id = $pers_id and kwd_id=kwl_kwd_id and kwd_wg_id is null");
+	mysql_query("delete keyword_links from keyword_links, keywords where kwl_pers_id = $bkm_ID and kwd_id=kwl_kwd_id and kwd_wg_id is null");
 
 	if (count($kwd_ids) > 0) {
 		$query = "";
 		for ($i=0; $i < count($kwd_ids); ++$i) {
 			if ($query) $query .= ", ";
-			$query .= "($pers_id, $rec_id, ".($i+1).", ".$kwd_ids[$i].")";
+			$query .= "($bkm_ID, $rec_id, ".($i+1).", ".$kwd_ids[$i].")";
 		}
 		$query = "insert into keyword_links (kwl_pers_id, kwl_rec_id, kwl_order, kwl_kwd_id) values " . $query;
 		mysql_query($query);
@@ -92,7 +92,7 @@ function doKeywordInsertion($pers_id) {
 
 	// return new keyword string
 	$kwds = mysql__select_array("keyword_links, keywords",
-	                            "kwd_name", "kwl_pers_id=$pers_id and kwd_id=kwl_kwd_id and kwd_usr_id=".get_user_id()." order by kwl_order, kwl_id");
+	                            "kwd_name", "kwl_bkm_ID=$bkm_ID and kwd_id=kwl_kwd_id and kwd_usr_id=".get_user_id()." order by kwl_order, kwl_id");
 	return join(",", $kwds);
 }
 
