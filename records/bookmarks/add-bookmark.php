@@ -39,7 +39,7 @@ $res = mysql_query("select * from usrBookmarks where pers_rec_id=$rec_id and per
 
 if (mysql_num_rows($res) == 0) {
 	/* full steam ahead */
-	mysql_query("insert into usrBookmarks (pers_rec_id, pers_usr_id, pers_added, pers_modified) values (" . $rec_id . ", " . get_user_id() . ", now(), now())");
+	mysql_query("insert into usrBookmarks (pers_rec_id, pers_usr_id, bkm_Added, pers_modified) values (" . $rec_id . ", " . get_user_id() . ", now(), now())");
 
 	$res = mysql_query("select * from usrBookmarks where bkm_ID=last_insert_id()");
 	if (mysql_num_rows($res) == 0) {

@@ -529,7 +529,7 @@ function bookmark_insert($url, $title, $keywords, $rec_id) {
 
 	if (mysql__insert('usrBookmarks', array(
 		'pers_rec_id' => $rec_id,
-		'pers_added' => date('Y-m-d H:i:s'),
+		'bkm_Added' => date('Y-m-d H:i:s'),
 		'pers_modified' => date('Y-m-d H:i:s'),
 		'pers_usr_id' => get_user_id()
 	))) {

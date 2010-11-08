@@ -42,7 +42,7 @@ function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL) {
 			    case SORT_MODIFIED:
 				$q .= ' order by pers_modified desc'; break;
 			    case SORT_ADDED:
-				$q .= ' order by pers_added desc'; break;
+				$q .= ' order by bkm_Added desc'; break;
 			    case SORT_TITLE: default:
 				$q .= ' order by rec_title = "", rec_title';
 			}
@@ -459,7 +459,7 @@ class SortPhrase {
 			else return array('rec_modified'.$scending, 'rec_modified', NULL);
 
 		    case 'a': case 'added':
-			if ($this->parent->search_type == BOOKMARK) return array('pers_added'.$scending, NULL);
+			if ($this->parent->search_type == BOOKMARK) return array('bkm_Added'.$scending, NULL);
 			else return array('rec_added'.$scending, 'rec_added', NULL);
 
 		    case 'f': case 'field':

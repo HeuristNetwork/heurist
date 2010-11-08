@@ -17,7 +17,7 @@ if (! defined('UPLOAD_PATH'))
 
 $MAINTABLES['BOOKMARK'] = 'usrBookmarks';
 	$PKEY['BOOKMARK'] = 'bkm_ID';
-	$INIDATE_FIELD['BOOKMARK'] = 'pers_added';
+	$INIDATE_FIELD['BOOKMARK'] = 'bkm_Added';
       $MODDATE_FIELD['BOOKMARK'] = 'pers_modified';
      $JOINS['BOOKMARK'] = array('BIBLIO-ID' => 'pers_rec_id');
 

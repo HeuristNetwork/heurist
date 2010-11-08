@@ -277,7 +277,7 @@ function bookmark_references() {
 
 	if ($new_bib_ids) {
 		mysql_query('insert into usrBookmarks
-		                  (pers_usr_id, pers_added, pers_modified, pers_rec_id)
+		                  (pers_usr_id, bkm_Added, pers_modified, pers_rec_id)
 		                  select ' . get_user_id() . ', now(), now(), rec_id
 		                    from records where rec_id in (' . join(',', $new_bib_ids) . ')');
 		$inserted_count = mysql_affected_rows();
@@ -308,7 +308,7 @@ function bookmark_and_tag_bibids ( $phpReturn ) {
 
 	if ($new_bib_ids) {
 		mysql_query('insert into usrBookmarks
-					  (pers_usr_id, pers_added, pers_modified, pers_rec_id)
+					  (pers_usr_id, bkm_Added, pers_modified, pers_rec_id)
 					  select ' . get_user_id() . ', now(), now(), rec_id
 						from records where rec_id in (' . join(',', $new_bib_ids) . ')');
 		$inserted_count = mysql_affected_rows();

@@ -16,7 +16,7 @@ define('UPLOAD_PATH','');
 
 $MAINTABLES['BOOKMARK'] = 'bookmarks_safe';	// view of the usrBookmarks table with the password column omitted
 	$PKEY['BOOKMARK'] = 'bkm_ID';
-	$INIDATE_FIELD['BOOKMARK'] = 'pers_added';
+	$INIDATE_FIELD['BOOKMARK'] = 'bkm_Added';
       $MODDATE_FIELD['BOOKMARK'] = 'pers_modified';
      $JOINS['BOOKMARK'] = array('BIBLIO-ID' => 'pers_rec_id');
 

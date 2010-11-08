@@ -169,7 +169,7 @@ if ($_REQUEST['_submit']  &&  $dup_check_ok) {
 				unset($row['bkm_ID']);
 
 				$row['pers_usr_id'] = $usr_id;
-				$row['pers_added'] = date('Y-m-d H:i:s');
+				$row['bkm_Added'] = date('Y-m-d H:i:s');
 				$row['pers_modified'] = date('Y-m-d H:i:s');
 
 				mysql__insert('usrBookmarks', $row);

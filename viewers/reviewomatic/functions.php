@@ -59,7 +59,7 @@ function get_reviews($user_id, $class_grp_id, $ass_kwd_id, $get_text=false, $ind
 	$ass_kwd_id = intval($ass_kwd_id);
 	$reviews = array();
 	$res = mysql_query('SELECT SQL_CALC_FOUND_ROWS
-							   rec_id, rec_title, rec_url, bkm_ID, pers_added,
+							   rec_id, rec_title, rec_url, bkm_ID, bkm_Added,
 							   concat(firstname," ",lastname) as author'.($get_text?', pers_notes':'').'
 						  FROM keyword_links
 					 LEFT JOIN usrBookmarks ON bkm_ID=kwl_pers_id
@@ -67,7 +67,7 @@ function get_reviews($user_id, $class_grp_id, $ass_kwd_id, $get_text=false, $ind
 					 LEFT JOIN ACLAdmin.Users on Id=pers_usr_id
 						 WHERE kwl_kwd_id=' . $ass_kwd_id .
 		 ($user_id > 0 ? ' AND pers_usr_id=' . $user_id : '').'
-		 			  ORDER BY pers_added desc
+						 ORDER BY bkm_Added desc
 	   '.($count > 0 ? ' LIMIT ' . $index . ', ' . $count : ''));
 
 	$res2 = mysql_query('SELECT FOUND_ROWS()');
@@ -79,7 +79,7 @@ function get_reviews($user_id, $class_grp_id, $ass_kwd_id, $get_text=false, $ind
 		$review['bkmk_id'] = $row['bkm_ID'];
 		$review['title'] = $row['pers_title'] ? $row['pers_title'] : $row['rec_title'];
 		$review['url'] = $row['rec_url'];
-		$review['added'] = $row['pers_added'];
+		$review['added'] = $row['bkm_Added'];
 		$review['author'] = $row['author'];
 		if ($get_text) {
 			$review['text'] = $row['pers_notes'];
@@ -236,7 +236,7 @@ function add_review($bib_id, $title, $ass_kwd_id, $genre_id, $user_id) {
 		'pers_title' => addslashes($title),
 		'pers_rec_title' => addslashes($title),
 		'pers_rec_id' => $bib_id,
-		'pers_added' => date('Y-m-d H:i:s'),
+		'bkm_Added' => date('Y-m-d H:i:s'),
 		'pers_modified' => date('Y-m-d H:i:s'),
 		'pers_usr_id' => $user_id));
 	$bkmk_id = mysql_insert_id();
