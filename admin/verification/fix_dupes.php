@@ -600,20 +600,20 @@ function do_fix_dupe() {
 
 // move dup bookmarks and tags to master unless they are already there
 //get bookmarkid =>userid for bookmarks of master record
-    $master_pers_usr_ids = mysql__select_assoc('usrBookmarks', 'bkm_ID','bkm_UGrpID', 'pers_rec_id = '.$master_rec_id);
+    $master_bkm_UGrpIDs = mysql__select_assoc('usrBookmarks', 'bkm_ID','bkm_UGrpID', 'pers_rec_id = '.$master_rec_id);
 //get kwids for  all bookmarks of master record
     $master_kwd_ids = mysql__select_array('keyword_links', 'kwl_kwd_id', 'kwl_rec_id = '.$master_rec_id);
     if ($master_kwd_ids) $master_kwd_cnt = count($master_kwd_ids);
 //get bookmarkid => userid for bookmarks in dup records
-    $dup_pers_usr_ids = mysql__select_assoc('usrBookmarks','bkm_ID', 'bkm_UGrpID', 'pers_rec_id in'. $dup_rec_list);
+    $dup_bkm_UGrpIDs = mysql__select_assoc('usrBookmarks','bkm_ID', 'bkm_UGrpID', 'pers_rec_id in'. $dup_rec_list);
 
 
 // if dup userid already has a bookmark on master record then add bkm_ID to delete_bkm_IDs_list else add to  update_bkm_IDs
     $update_bkm_IDs  = array();
     $delete_bkm_IDs = array();
     $dup_delete_bkm_ID_to_master_per_id = array();
-    foreach ($dup_pers_usr_ids as $dup_bkm_ID => $dup_pers_usr_id){
-        if ($master_pers_usr_ids && $matching_master_bkm_ID = array_search($dup_pers_usr_id,$master_pers_usr_ids)){
+    foreach ($dup_bkm_UGrpIDs as $dup_bkm_ID => $dup_bkm_UGrpID){
+        if ($master_bkm_UGrpIDs && $matching_master_bkm_ID = array_search($dup_bkm_UGrpID,$master_bkm_UGrpIDs)){
             array_push($delete_bkm_IDs, $dup_bkm_ID);
             $dup_delete_bkm_ID_to_master_per_id[$dup_bkm_ID] = $matching_master_bkm_ID;
         }else{
