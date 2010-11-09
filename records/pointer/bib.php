@@ -133,7 +133,7 @@ function getBaseProperties($rec_id, $bkm_ID) {
 	// Return an array of the basic scalar properties for this record / bookmark
 
 	if ($bkm_ID) {
-		$res = mysql_query('select rec_title as title, rt_name as reftype, rt_id as reftypeID, rec_url as url, grp_id as workgroupID, grp_name as workgroup, rec_scratchpad as notes, rec_visibility as visibility, bkm_PwdReminder as passwordReminder, pers_content_rating as contentRating, pers_interest_rating as interestRating, pers_quality_rating as qualityRating, pers_notes as quickNotes, rec_modified, rec_temporary from usrBookmarks left join records on bkm_recID=rec_id and bkm_UGrpID='.get_user_id().' left join rec_types on rt_id = rec_type left join '.USERS_DATABASE.'.Groups on grp_id=rec_wg_id where bkm_ID='.$bkm_ID);
+		$res = mysql_query('select rec_title as title, rt_name as reftype, rt_id as reftypeID, rec_url as url, grp_id as workgroupID, grp_name as workgroup, rec_scratchpad as notes, rec_visibility as visibility, bkm_PwdReminder as passwordReminder, bkm_Rating as rating, pers_notes as quickNotes, rec_modified, rec_temporary from usrBookmarks left join records on bkm_recID=rec_id and bkm_UGrpID='.get_user_id().' left join rec_types on rt_id = rec_type left join '.USERS_DATABASE.'.Groups on grp_id=rec_wg_id where bkm_ID='.$bkm_ID);
 	} else if ($rec_id) {
 		$res = mysql_query('select rec_title as title, rt_name as reftype, rt_id as reftypeID, rec_url as url, grp_id as workgroupID, grp_name as workgroup, rec_scratchpad as notes, rec_visibility as visibility, rec_modified, rec_temporary from records left join usrBookmarks on bkm_recID=rec_id left join rec_types on rt_id = rec_type left join '.USERS_DATABASE.'.Groups on grp_id=rec_wg_id where rec_id='.$rec_id);
 	}
@@ -152,10 +152,8 @@ function getBaseProperties($rec_id, $bkm_ID) {
 	if (@$row["passwordReminder"]) {
 		$props["passwordReminder"] = $row["passwordReminder"];
 	}
-	if (@$row["contentRating"]) {
-		$props['contentRating'] = $row['contentRating'];
-		$props['interestRating'] = $row['interestRating'];
-		$props['qualityRating'] = $row['qualityRating'];
+	if (@$row["rating"]) {
+		$props['rating'] = $row['rating'];
 	}
 	$props["quickNotes"] = @$row["quickNotes"]? $row["quickNotes"] : "";
 	if ($row['workgroupID']) {

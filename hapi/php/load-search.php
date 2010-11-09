@@ -34,7 +34,7 @@ if (array_key_exists("records", $result)) {
 			@$record["rec_hhash"],                // 14
 			@$record["bkm_ID"],                  // 15
 			@$record["pers_notes"],               // 16
-			@$record["pers_content_rating"],      // 17
+			@$record["bkm_Rating"],      // 17
 			@$record["pers_interest_rating"],     // 18
 			@$record["pers_quality_rating"],      // 19
 			@$record["tags"],                     // 20

@@ -102,12 +102,13 @@ $MAINTABLES['ACTIVE_BIB_DETAIL_LOOKUP'] = 'active_rec_detail_lookups';
 /* Define lookups for fields which should be coded values (many-to-one with main table)
    Syntax: lookup-table-name => main-table-join-field = lookup-table-join-field', ... */
 
+/* SAW Removed 8/11/2010 no longer used
 	$LOOKUPS['BOOKMARK'] =
 		array (
 			'ratings_content' => 'pers_content_rating=rc_id',
 			'ratings_quality' => 'pers_quality_rating=rq_id',
 			'ratings_interest' => 'pers_interest_rating=ri_id');
-
+*/
 $MAINTABLES['ONTOLOGIES_LOOKUP'] = 'ontologies';
       $PKEY['ONTOLOGIES_LOOKUP'] = 'ont_id';
 

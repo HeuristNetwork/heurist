@@ -25,7 +25,7 @@
 	-->*/
 require_once(dirname(__FILE__)."/../search/saved/loading.php");
 
-function saveRecord($id, $type, $url, $notes, $group, $vis, $personalised, $pnotes, $crate, $irate, $qrate, $tags, $keywords, $details, $notifyREMOVE, $notifyADD, $commentREMOVE, $commentMOD, $commentADD, &$nonces=null, &$retitleRecs=null) {
+function saveRecord($id, $type, $url, $notes, $group, $vis, $personalised, $pnotes, $rating, $irate, $qrate, $tags, $keywords, $details, $notifyREMOVE, $notifyADD, $commentREMOVE, $commentMOD, $commentADD, &$nonces=null, &$retitleRecs=null) {
 	$id = intval($id);
 	$group = intval($group);
 	if ($group) {
@@ -121,9 +121,7 @@ function saveRecord($id, $type, $url, $notes, $group, $vis, $personalised, $pnot
 
 		mysql__update("usrBookmarks", "bkm_ID=$bkm_ID", array(
 		"pers_notes" => $pnotes,
-		"pers_content_rating" => $crate,
-		"pers_interest_rating" => $irate,
-		"pers_quality_rating" => $qrate,
+		"bkm_Rating" => $rating,
 		"bkm_Modified" => date('Y-m-d H:i:s')
 		));
 

@@ -428,27 +428,15 @@ class SortPhrase {
 
 		    case 'r': case 'rating':
 			if ($this->parent->search_type == BOOKMARK) {
-				return array('-if(pers_content_rating > pers_quality_rating, if(pers_content_rating > pers_interest_rating, pers_content_rating, pers_interest_rating), if(pers_quality_rating > pers_interest_rating, pers_quality_rating, pers_interest_rating))'.$scending.', -(pers_content_rating+pers_quality_rating+pers_interest_rating)'.$scending, 'bkmk_rating', NULL);
+				return array('-(bkm_Rating)'.$scending, 'bkmk_rating', NULL); //SAW Ratings Change todo: test queries with rating
 			} else {	// default to popularity sort
 				return array('-rec_popularity'.$scending.', -rec_id'.$scending, 'rec_popularity', NULL);
 			}
 
-		    case 'interest':
-			if ($this->parent->search_type == BOOKMARK) {
-				return array('-pers_interest_rating'.$scending, 'pers_interest_rating', NULL);
-			} else return array('rec_title'.$scending, NULL);	// default to title sort
-			break;
-
+		    case 'interest':	//todo: change help file to reflect depricated predicates
 		    case 'content':
-			if ($this->parent->search_type == BOOKMARK) {
-				return array('-pers_content_rating'.$scending, 'pers_content_rating', NULL);
-			} else return array('rec_title'.$scending, NULL);	// default to title sort
-			break;
-
 		    case 'quality':
-			if ($this->parent->search_type == BOOKMARK) {
-				return array('-pers_quality_rating'.$scending, 'pers_quality_rating', NULL);
-			} else return array('rec_title'.$scending, NULL);	// default to title sort
+				return array('rec_title'.$scending, NULL);	// default to title sort
 			break;
 
 		    case 'u': case 'url':

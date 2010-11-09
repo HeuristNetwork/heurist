@@ -636,10 +636,8 @@ function do_fix_dupe() {
         $delete_dup_pers_record = mysql_fetch_assoc(mysql_query('select * from usrBookmarks where bkm_ID='.$delete_dup_bkm_ID));
         $master_pers_record['pers_notes'] .= $delete_dup_pers_record['pers_notes'];
         $master_pers_record['bkm_PwdReminder'] .= $delete_dup_pers_record['bkm_PwdReminder'];
-        $master_pers_record['pers_content_rating'] = max($master_pers_record['pers_content_rating'],$delete_dup_pers_record['pers_content_rating']);
-        $master_pers_record['pers_quality_rating'] = max($master_pers_record['pers_quality_rating'],$delete_dup_pers_record['pers_quality_rating']);
-        $master_pers_record['pers_interest_rating'] = max($master_pers_record['pers_interest_rating'],$delete_dup_pers_record['pers_interest_rating']);
-        if (!$master_pers_record['pers_zotero_id']) $master_pers_record['pers_zotero_id']= $delete_dup_pers_record['pers_zotero_id'];
+        $master_pers_record['bkm_Rating'] = max($master_pers_record['bkm_Rating'],$delete_dup_pers_record['bkm_Rating']);
+        if (!$master_pers_record['bkm_ZoteroID']) $master_pers_record['bkm_ZoteroID']= $delete_dup_pers_record['bkm_ZoteroID'];
         unset($master_pers_record['bkm_ID']);
         mysql__update('usrBookmarks','bkm_ID='.$master_bkm_ID,$master_pers_record);
         //for every delete dup kwd link whoses kwd id is not already linked to the master record change the record id to master and the bkm_ID to the mapped master_bkm_ID

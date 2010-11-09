@@ -17,9 +17,7 @@ mysql_connection_db_select(DATABASE);
   <script type="text/javascript">
 
 function set_ratings() {
-	var i_rating = document.getElementById('ratings_interest');
-	var q_rating = document.getElementById('ratings_quality');
-	var c_rating = document.getElementById('ratings_content');
+	var ratingSelect = document.getElementById('overall-rating');
 
 
 	var action_fr = parent.document.getElementById('i_action').contentWindow;
@@ -30,18 +28,14 @@ function set_ratings() {
 	}
 
 	var action_elt = action_fr.document.getElementById('action');
-	var i_r = action_fr.document.getElementById('i_rating');
-	var q_r = action_fr.document.getElementById('q_rating');
-	var c_r = action_fr.document.getElementById('c_rating');
+	var updateRatingElt = action_fr.document.getElementById('rating');
 
-	if (! action_elt  ||  ! i_r  ||  ! q_r  ||  ! c_r) {
+	if (! action_elt  ||  ! updateRatingElt  ) {
 		alert('Problem contacting server - try again in a moment');
 		return;
 	}
 
-	i_r.value = i_rating.value;
-	q_r.value = q_rating.value;
-	c_r.value = c_rating.value;
+	updateRatingElt.value = ratingSelect.value;
 
 	var bkmk_ids_list = top.HEURIST.search.get_bkmk_ids();
 	bkmk_ids_elt.value = bkmk_ids_list.join(',');
@@ -64,20 +58,16 @@ function set_ratings() {
 
     <tr>
      <td>&nbsp;&nbsp;</td>
-     <td style="text-align: right;">Interest</td>
-     <td><?php print_ratings_pulldown('ratings_interest', 'ri_id', 'ri_label'); ?></td>
-    </tr>
-
-    <tr>
-     <td>&nbsp;&nbsp;</td>
-     <td style="text-align: right;">Content</td>
-     <td><?php print_ratings_pulldown('ratings_content', 'rc_id', 'rc_label'); ?></td>
-    </tr>
-
-    <tr>
-     <td>&nbsp;&nbsp;</td>
-     <td style="text-align: right;">Quality</td>
-     <td><?php print_ratings_pulldown('ratings_quality', 'rq_id', 'rq_label'); ?></td>
+     <td style="text-align: right;">Rating</td>
+     <td><select name="overall-rating" id="overall-rating" style="width: 150px;">
+			<option value="0">Not Rated</option>
+			<option value="1">*</option>
+			<option value="2">**</option>
+			<option value="3">***</option>
+			<option value="4">****</option>
+			<option value="5">*****</option>
+         </select>
+     </td>
     </tr>
 
     <tr>
@@ -91,18 +81,3 @@ function set_ratings() {
   </form>
  </body>
 </html>
-<?php
-
-function print_ratings_pulldown($table, $id_col, $label_col) {
-	$res = mysql_query("select $id_col, $label_col from $table order by $id_col desc");
-	print '<select name="'.$table.'" id="'.$table.'" style="width: 150px;">';
-	while ($row=mysql_fetch_row($res)) {
-		if ($row[0] == 2)
-			print '<option value="'.$row[0].'" selected>'.htmlspecialchars($row[1]).'</option>';
-		else
-			print '<option value="'.$row[0].'">'.htmlspecialchars($row[1]).'</option>';
-	}
-	print '</select>';
-}
-
-?>

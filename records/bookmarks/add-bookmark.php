@@ -58,9 +58,7 @@ else {
 $record = array(
 	"bkmkID" => $bkmk["bkm_ID"],
 	"keywordString" => $bkmk["keywordString"],
-	"interestRating" => $bkmk["pers_interest_rating"],
-	"contentRating" => $bkmk["pers_content_rating"],
-	"qualityRating" => $bkmk["pers_quality_rating"],
+	"rating" => $bkmk["bkm_Rating"],
 	"reminders" => array(),	// FIXME: should really import these freshly in case the bkmk already exists
 	"passwordReminder" => $bkmk["bkm_PwdReminder"],
 	"quickNotes" => $bkmk["pers_notes"]? $bkmk["pers_notes"] : ""

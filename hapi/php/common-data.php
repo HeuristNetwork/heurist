@@ -36,17 +36,6 @@ while ($row = mysql_fetch_row($res)) { array_push($users, $row); }
 $res = mysql_query("select distinct grp_id, grp_name, grp_longname, grp_description, grp_url from ".USERS_DATABASE.".Groups, ".USERS_DATABASE.".UserGroups where ug_group_id=grp_id");
 $workgroups = array();
 while ($row = mysql_fetch_row($res)) { array_push($workgroups, $row); }
-
-$res = mysql_query("select rc_id as id, rc_label as CONTENT, ri_label as INTEREST, rq_label as QUALITY
-                      from ratings_content, ratings_interest, ratings_quality where rc_id = ri_id and ri_id = rq_id");
-$ratings = array("CONTENT" => array(), "INTEREST" => array(), "QUALITY" => array());
-while ($row = mysql_fetch_assoc($res)) {
-	$id = $row["id"];
-	$ratings["CONTENT"][$id] = $row["CONTENT"];
-	$ratings["INTEREST"][$id] = $row["INTEREST"];
-	$ratings["QUALITY"][$id] = $row["QUALITY"];
-}
-
 $res = mysql_query("select rt_id, rt_name, rt_canonical_title_mask from active_rec_types inner join rec_types on rt_id=art_id");
 $recordTypes = array();
 while ($row = mysql_fetch_row($res)) array_push($recordTypes, $row);
@@ -124,7 +113,12 @@ foreach ($rec_types as $rec_type) {
 $commonData = array(
 	"users" => $users,
 	"workgroups" => $workgroups,
-	"ratings" => $ratings,
+	"ratings" => array("0"=>"not rated",
+						"1"=> "*",
+						"2"=>"**",
+						"3"=>"***",
+						"4"=>"****",
+						"5"=>"*****"),
 	"recordTypes" => $recordTypes,
 	"detailTypes" => $detailTypes,
 	"detailRequirements" =>$detailRequirements

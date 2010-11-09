@@ -477,17 +477,11 @@ HAPI.RecordType = HRecordType;
 var HRatings = function(ratingValues) {
 	// ratingValues is of the form { CONTENT: {1: "poor", 2: "good-ish", ...}, QUALITY: .. }
 	var vals = {
-		CONTENT: "content",
-		INTEREST: "interest",
-		QUALITY: "quality",
+		ratings: ratingValues,
+		isValidRating: function(ratingVal) { return typeof this.ratings[ratingVal] != "undefined"},
+		defaultRating: "0",
 		getClass: function() { return "HRatings"; }
 	};
-
-	var i;
-	for (i in ratingValues.CONTENT) { vals["CONTENT_"+i] = ratingValues.CONTENT[i]; }
-	for (i in ratingValues.INTEREST) { vals["INTEREST_"+i] = ratingValues.INTEREST[i]; }
-	for (i in ratingValues.QUALITY) { vals["QUALITY_"+i] = ratingValues.QUALITY[i]; }
-
 	return vals;
 }(HAPI_commonData.ratings);
 HAPI.Ratings = HRatings;
@@ -609,7 +603,7 @@ var HRecord = function() {
 
 	var _isPersonalised = false;
 	var _bookmarkID = null;
-	var _personalNotes = null, _ratings = {}, _tags = [], _tagsMap = {}, _keywords = [], _keywordsMap = {};
+	var _personalNotes = null, _rating = "", _tags = [], _tagsMap = {}, _keywords = [], _keywordsMap = {};
 	var _notifications = [], _addedNotifications = [], _removedNotifications = [];
 	var _comments = [], _addedComments = [], _removedComments = [], _modifiedComments = [];
 
@@ -1046,7 +1040,7 @@ var HRecord = function() {
 		_isPersonalised = false;
 		_bookmarkID = null;
 		_personalNotes = null;
-		_ratings = {};
+		_rating = "";
 		_tags = [];
 		// _keywords = [];	keywords can stay
 		_modified = true;
@@ -1064,20 +1058,20 @@ var HRecord = function() {
 		_modified = true;
 	};
 
-	this.getRating = function(ratingType) {
+	this.getRating = function() {
 		if (! HCurrentUser.isLoggedIn()) { throw new HNotLoggedInException(); }
 		if (! _isPersonalised) { throw new HNotPersonalisedException(); }
-		if (_ratings[ratingType]) {
-			return _ratings[ratingType];
+		if (_rating) {
+			return _rating;
 		}
-		return HRatings.defaultRating[ratingType];
+		return HRatings.defaultRating;
 	};
-	this.setRating = function(ratingType, ratingValue) {
+	this.setRating = function(ratingValue) {
 		if (! HCurrentUser.isLoggedIn()) { throw new HNotLoggedInException(); }
 		if (! _isPersonalised) { throw new HNotPersonalisedException(); }
-		if (HRatings.isValidRating(ratingType, ratingValue)) {
+		if (HRatings.isValidRating(ratingValue)) {
 			// Check that the rating is okay
-			_ratings[ratingType] = ratingValue;
+			_rating = ratingValue;
 			_modified = true;
 		}	// ... otherwise the existing rating is kept (silently!)
 	};
@@ -1337,9 +1331,7 @@ var HRecord = function() {
 
 			bookmark: (_isPersonalised? 1 : 0),
 			pnotes: (_personalNotes || ""),
-			crate: (_ratings.content || ""),
-			irate: (_ratings.interest || ""),
-			qrate: (_ratings.quality || ""),
+			rating: _rating,
 			tags: (_tags.join(",") || "")
 		};
 		var keywords = [];
@@ -1399,7 +1391,7 @@ var HRecord = function() {
 		return jso;
 	};
 
-	this.setAll = function(sm, id, version, type, title, details, url, notes, wg, nonwgVis, urlDate, urlError, cDate, mDate, creator, hhash, bkmkID, pNotes, crate, irate, qrate, tags, kwds, readonly) {
+	this.setAll = function(sm, id, version, type, title, details, url, notes, wg, nonwgVis, urlDate, urlError, cDate, mDate, creator, hhash, bkmkID, pNotes, rating, irate, qrate, tags, kwds, readonly) {
 		// Set all the details (even the secret ones!) for a record in one place ... only available to the storage manager
 		if (! HAPI.isA(sm, "HStorageManager")) { throw "Do not call HRecord::setAll"; }
 
@@ -1424,9 +1416,7 @@ var HRecord = function() {
 			_isPersonalised = true;
 			_bookmarkID = bkmkID;
 			_personalNotes = pNotes;
-			_ratings.content = crate;
-			_ratings.interest = irate;
-			_ratings.quality = qrate;
+			_rating = rating;
 			_tags = tags || [];
 			_tagsMap = {};
 			for (i=0; i < _tags.length; ++i) { _tagsMap[_tags[i]] = true; }

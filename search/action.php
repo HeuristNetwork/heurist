@@ -246,20 +246,16 @@ function remove_keywords() {
 
 function set_ratings() {
 	$bkmk_ids = array_map('intval', explode(',', $_REQUEST['bkmk_ids']));
-	$content_rating = intval($_REQUEST['c_rating']);
-	$quality_rating = intval($_REQUEST['q_rating']);
-	$interest_rating = intval($_REQUEST['i_rating']);
+	$rating = intval($_REQUEST['rating']);
 
 	mysql_connection_db_overwrite(DATABASE);
-	mysql_query('update usrBookmarks set pers_content_rating = ' . $content_rating
-								 . ', pers_quality_rating = ' . $quality_rating
-								 . ', pers_interest_rating = ' . $interest_rating
+	mysql_query('update usrBookmarks set bkm_Rating = ' . $rating
 			  . ' where bkm_ID in (' . join(',', $bkmk_ids) . ') and bkm_UGrpID = ' . get_user_id());
 	$update_count = mysql_affected_rows();
 	if (mysql_error()) {
-		$onload = 'alert(\'Database problem - ' . addslashes(mysql_error()) . ' - no ratings set\'); location.replace(\'action.php\');';
+		$onload = 'alert(\'Database problem - ' . addslashes(mysql_error()) . ' - ratings not set\'); location.replace(\'action.php\');';
 	} else if ($update_count == 0) {
-		$onload = 'top.HEURIST.search.popupNotice(\'No changes made - all ratings are up-to-date\'); location.replace(\'action.php\');';
+		$onload = 'top.HEURIST.search.popupNotice(\'No changes made - ratings are up-to-date\'); location.replace(\'action.php\');';
 	} else {
 		$onload = 'top.HEURIST.search.popupNotice(\'Ratings have been set\'); location.replace(\'action.php\');';
 	}
@@ -485,9 +481,7 @@ function print_input_form() {
 <input type="hidden" name="bib_ids" id="bib_ids" value="">
 <input type="hidden" name="keywordstring" id="keywordstring" value="">
 <input type="hidden" name="kwd_ids" id="kwd_ids" value="">
-<input type="hidden" name="c_rating" id="c_rating" value="">
-<input type="hidden" name="q_rating" id="q_rating" value="">
-<input type="hidden" name="i_rating" id="i_rating" value="">
+<input type="hidden" name="rating" id="rating" value="">
 <input type="hidden" name="ss_id" id="ss_id" value="">
 <input type="hidden" name="ss_name" id="ss_name" value="">
 <input type="hidden" name="ss_query" id="ss_query" value="">

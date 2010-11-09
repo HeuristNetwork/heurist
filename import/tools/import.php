@@ -1898,7 +1898,7 @@ function insert_bookmark(&$entry) {
 		$bkm_ID = $bkm_ID[0];
 
 		if (is_a($entry->getForeignPrototype(), 'HeuristZoteroEntry')) {
-			mysql_query('update usrBookmarks set pers_zotero_id = ' . $entry->getForeignPrototype()->getZoteroID().' where bkm_ID='.$bkm_ID);
+			mysql_query('update usrBookmarks set bkm_ZoteroID = ' . $entry->getForeignPrototype()->getZoteroID().' where bkm_ID='.$bkm_ID);
 			$zoteroItems[$entry->getForeignPrototype()->getZoteroID()] = $entry->getBiblioID();
 		}
 
@@ -1910,10 +1910,10 @@ function insert_bookmark(&$entry) {
 		              'bkm_Added' => date('Y-m-d H:i:s'),
 		              'bkm_Modified' => date('Y-m-d H:i:s'),
 		              'bkm_UGrpID' => get_user_id(),
-		              'pers_auto' => 1);
+		              'bkm_AddedByImport' => 1);
 
 		if (is_a($entry->getForeignPrototype(), 'HeuristZoteroEntry')) {
-			$bkmk['pers_zotero_id'] = $entry->getForeignPrototype()->getZoteroID();
+			$bkmk['bkm_ZoteroID'] = $entry->getForeignPrototype()->getZoteroID();
 			$zoteroItems[$entry->getForeignPrototype()->getZoteroID()] = $entry->getBiblioID();
 		}
 

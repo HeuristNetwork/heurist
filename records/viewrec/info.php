@@ -271,14 +271,18 @@ function print_private_details($bib) {
 	</div>
 	</div>
 	<?php
-
-		$res = mysql_query('select ri_label, rc_label, rq_label from ratings_interest, ratings_content, ratings_quality where ri_id='.intval($bkmk['pers_interest_rating']).' and rc_id='.intval($bkmk['pers_content_rating']).' and rq_id='.intval($bkmk['pers_quality_rating']));
-		list($ri_label, $rc_label, $rq_label) = mysql_fetch_row($res);
+		$ratings = array("0"=>"not rated",
+						"1"=> "*",
+						"2"=>"**",
+						"3"=>"***",
+						"4"=>"****",
+						"5"=>"*****");
+		$rating_label = $ratings[$bkmk['bkm_Rating']];
 	?>
 	<div class=detailRow>
 	<div class=detailType>Ratings</div>
 	<div class=detail>
-	 <span class=label>Interest:</span> <?= $ri_label? $ri_label : '(not set)' ?> &nbsp;&nbsp; <span class=label>Content:</span> <?= $rc_label? $rc_label : '(not set)' ?> &nbsp;&nbsp; <span class=label>Quality:</span> <?= $rq_label? $rq_label : '(not set)' ?>
+	 <span class=label>Rating:</span> <?= $rating_label? $rating_label : '(not set)' ?>
 
 	</div>
 	</div>

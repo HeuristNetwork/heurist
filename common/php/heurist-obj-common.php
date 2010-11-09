@@ -193,33 +193,12 @@ while ($row = mysql_fetch_assoc($res)) {
 }
 print "\n};\n";?>
 
-top.HEURIST.ratings = {
-	"content": { <?php
-		$first = true;
-		$res = mysql_query("select * from ratings_content order by rc_id desc");
-		while ($rat = mysql_fetch_assoc($res)) {
-			if (! $first) print ", "; $first = false;
-			print "\t\t\"".$rat["rc_id"]."\": \"" . slash($rat["rc_label"]) . "\"";
-		}
-?>	},
-
-	"quality": { <?php
-		$first = true;
-		$res = mysql_query("select * from ratings_quality order by rq_id desc");
-		while ($rat = mysql_fetch_assoc($res)) {
-			if (! $first) print ", "; $first = false;
-			print "\t\t\"".$rat["rq_id"]."\": \"" . slash($rat["rq_label"]) . "\"";
-		}
-?>	},
-
-	"interest": { <?php
-		$first = true;
-		$res = mysql_query("select * from ratings_interest order by ri_id desc");
-		while ($rat = mysql_fetch_assoc($res)) {
-			if (! $first) print ", "; $first = false;
-			print "\t\t\"".$rat["ri_id"]."\": \"" . slash($rat["ri_label"]) . "\"";
-		}
-?>	}
+top.HEURIST.ratings = {"0": "not rated",
+						"1": "*",
+						"2": "**",
+						"3": "***",
+						"4": "****",
+						"5": "*****"
 };
 
 <?php

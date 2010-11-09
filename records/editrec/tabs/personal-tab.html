@@ -49,11 +49,9 @@
 				<tr><td class="separator_row" colspan="2">&nbsp;</td></tr>
 
 				<tr class=input-row>
-					<td class=input-header-cell>Ratings<div class="help prompt">Records can be rated in several ways. For a single rating, use only the Interest rating.</div></td>
+					<td class=input-header-cell>Rating<div class="help prompt">Please enter your rating for this Record.</div></td>
 					<td class=input-cell>
-						<div class=rating-row><span class=header>Interest</span><span><select id=interest-rating name=interest-rating></select></span></div>
-						<div class=rating-row><span class=header>Content</span><span><select id=content-rating name=content-rating></select></span></div>
-						<div class=rating-row><span class=header>Quality</span><span><select id=quality-rating name=quality-rating></select></span></div>
+						<div class=rating-row><span class=header>Interest</span><span><select id=overall-rating name=overall-rating></select></span></div>
 					</td>
 				</tr>
 
@@ -187,9 +185,7 @@
 					++i;
 				}
 			}
-			fillRatings(document.getElementById("interest-rating"), top.HEURIST.ratings.interest, parent.HEURIST.edit.record.interestRating);
-			fillRatings(document.getElementById("content-rating"), top.HEURIST.ratings.content, parent.HEURIST.edit.record.contentRating);
-			fillRatings(document.getElementById("quality-rating"), top.HEURIST.ratings.quality, parent.HEURIST.edit.record.qualityRating);
+			fillRatings(document.getElementById("overall-rating"), top.HEURIST.ratings, parent.HEURIST.edit.record.rating);
 
 			if (parent.HEURIST.edit.record.passwordReminder) {
 				document.getElementById("password-reminder").value = parent.HEURIST.edit.record.passwordReminder;
