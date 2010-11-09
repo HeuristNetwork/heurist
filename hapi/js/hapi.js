@@ -603,7 +603,7 @@ var HRecord = function() {
 
 	var _isPersonalised = false;
 	var _bookmarkID = null;
-	var _personalNotes = null, _rating = "", _tags = [], _tagsMap = {}, _keywords = [], _keywordsMap = {};
+	var _personalNotes = null, _rating = "", _tags = [], _tagsMap = {}, _wgTags = [], _wgTagsMap = {};
 	var _notifications = [], _addedNotifications = [], _removedNotifications = [];
 	var _comments = [], _addedComments = [], _removedComments = [], _modifiedComments = [];
 
@@ -1042,7 +1042,6 @@ var HRecord = function() {
 		_personalNotes = null;
 		_rating = "";
 		_tags = [];
-		// _keywords = [];	keywords can stay
 		_modified = true;
 	};
 
@@ -1116,34 +1115,34 @@ var HRecord = function() {
 		}
 	};
 
-	this.getKeywords = function() { return _keywords.slice(0); };
-	this.addKeyword = function(kwd) {
+	this.getWgTags = this.getKeywords = function() { return _wgTags.slice(0); };
+	this.addWgTag = this.addKeyword = function(kwd) {
 		/* PRE */ if (! HAPI.isA(kwd, "HKeyword")) { throw new HTypeException("HKeyword object required"); }
 		if (! HCurrentUser.isInWorkgroup(kwd.getWorkgroup())) {
-			// This shouldn't happen ... you shouldn't be able to get keywords for workgroups you're not a member of
+			// This shouldn't happen ... you shouldn't be able to get tags for workgroups you're not a member of
 			throw new HInvalidWorkgroupException("User is not a member of keyword's workgroup");
 		}
 
-		if (! _keywordsMap[kwd.getID()]) {
-			_keywords.push(kwd);
-			_keywordsMap[kwd.getID()] = true;
+		if (! _wgTagsMap[kwd.getID()]) {
+			_wgTags.push(kwd);
+			_wgTagsMap[kwd.getID()] = true;
 			_modified = true;
 		}
 	};
-	this.removeKeyword = function(kwd) {
+	this.removeWgTag = this.removeKeyword = function(kwd) {
 		/* PRE */ if (! HAPI.isA(kwd, "HKeyword")) { throw new HTypeException("HKeyword object required"); }
 		if (! HCurrentUser.isInWorkgroup(kwd.getWorkgroup())) {
-			// This shouldn't happen ... you shouldn't be able to get keywords for workgroups you're not a member of
+			// This shouldn't happen ... you shouldn't be able to get tags for workgroups you're not a member of
 			throw new HInvalidWorkgroupException("User is not a member of keyword's workgroup");
 		}
 
 		var i;
-		if (_keywordsMap[kwd.getID()]) {
-			for (i=0; i < _keywords.length; ++i) {
-				if (_keywords[i] === kwd) {
+		if (_wgTagsMap[kwd.getID()]) {
+			for (i=0; i < _wgTags.length; ++i) {
+				if (_wgTags[i] === kwd) {
 					// Found the keyword in the list; remove it
-					_keywords.splice(i, 1);
-					delete _keywordsMap[kwd.getID()];
+					_wgTags.splice(i, 1);
+					delete _wgTagsMap[kwd.getID()];
 					_modified = true;
 					break;
 				}
@@ -1334,11 +1333,11 @@ var HRecord = function() {
 			rating: _rating,
 			tags: (_tags.join(",") || "")
 		};
-		var keywords = [];
-		for (i=0; i < _keywords.length; ++i) {
-			keywords.push(_keywords[i].getID());
+		var wgTags = [];
+		for (i=0; i < _wgTags.length; ++i) {
+			wgTags.push(_wgTags[i].getID());
 		}
-		jso.keywords = keywords.join(",");
+		jso.wgTags = wgTags.join(",");
 
 		jso.detail = {};
 		for (type in _namedDetails) {
@@ -1425,11 +1424,11 @@ var HRecord = function() {
 			_removedNotifications = [];
 		}
 
-		_keywords = kwds || [];
-		_keywordsMap = {};
-		for (i=0; i < _keywords.length; ++i) {
-			_keywordsMap[_keywords[i]] = true;
-			_keywords[i] = HKeywordManager.getKeywordById(_keywords[i]);
+		_wgTags = kwds || [];
+		_wgTagsMap = {};
+		for (i=0; i < _wgTags.length; ++i) {
+			_wgTagsMap[_wgTags[i]] = true;
+			_wgTags[i] = HKeywordManager.getKeywordById(_wgTags[i]);
 		}
 
 		_addedComments = [];
@@ -1640,6 +1639,9 @@ var HNotes = function() {
 	this.getKeywords = throwException;
 	this.addKeyword = throwException;
 	this.removeKeyword = throwException;
+	this.getWgTags = throwException;
+	this.addWgTag = throwException;
+	this.removeWgTag = throwException;
 
 	this.getNotifications = throwException;
 	this.addNotification = throwException;
@@ -2212,50 +2214,50 @@ HWorkgroupManager.prototype = new HObject();
 HAPI.WorkgroupManager = HWorkgroupManager;
 
 
-var HKeywordManager = new function(keywords) {
-	/* keywords is an array, each entry is a triplet of [id, name, workgroupID] */
-	var _keywords = [];
-    var _keywordsById = {};
-    var _keywordsByName = {};
-	var _keywordsByGroup = {};
+var HKeywordManager = new function(wgTags) {
+	/* wgTags is an array, each entry is a triplet of [id, name, workgroupID] */
+	var _wgTags = [];
+    var _wgTagsById = {};
+    var _wgTagsByName = {};
+	var _wgTagsByGroup = {};
 
-	/* Keywords are constructed by the keyword manager */
-	var i, workgroup, newKeyword;
-	for (i=0; i < keywords.length; ++i) {
-		workgroup = HWorkgroupManager.getWorkgroupById(keywords[i][2]);
+	/* wgTags are constructed by the keyword manager */
+	var i, workgroup, newWgTag;
+	for (i=0; i < wgTags.length; ++i) {
+		workgroup = HWorkgroupManager.getWorkgroupById(wgTags[i][2]);
 		if (! workgroup) { continue; }
 
-		newKeyword = new HKeyword(parseInt(keywords[i][0]), keywords[i][1], workgroup);
+		newWgTag = new HKeyword(parseInt(wgTags[i][0]), wgTags[i][1], workgroup);
 
-		_keywords.push(newKeyword);
-        _keywordsById[keywords[i][0]] = newKeyword;
-        _keywordsByName[keywords[i][1].toLowerCase()] = newKeyword;
-		if (_keywordsByGroup[keywords[i][2]]) {
-			_keywordsByGroup[keywords[i][2]].push(newKeyword);
+		_wgTags.push(newWgTag);
+        _wgTagsById[wgTags[i][0]] = newWgTag;
+        _wgTagsByName[wgTags[i][1].toLowerCase()] = newWgTag;
+		if (_wgTagsByGroup[wgTags[i][2]]) {
+			_wgTagsByGroup[wgTags[i][2]].push(newWgTag);
 		}
 		else {
-			_keywordsByGroup[keywords[i][2]] = [ newKeyword ];
+			_wgTagsByGroup[wgTags[i][2]] = [ newWgTag ];
 		}
 	}
 
     this.getKeywordById = function(id) {
         if (! HCurrentUser.isLoggedIn()) { throw new HNotLoggedInException(); }
-        return (_keywordsById[id] || null);
+        return (_wgTagsById[id] || null);
     };
     this.getKeywordByName = function(name) {
         if (! HCurrentUser.isLoggedIn()) { throw new HNotLoggedInException(); }
-        return (_keywordsByName[name.toLowerCase()] || null);
+        return (_wgTagsByName[name.toLowerCase()] || null);
     };
 	this.getAllKeywords = function() {
 		if (! HCurrentUser.isLoggedIn()) { throw new HNotLoggedInException(); }
-		return _keywords.slice(0);
+		return _wgTags.slice(0);
 	};
 	this.getWorkgroupKeywords = function(workgroup) {
 		if (! HCurrentUser.isLoggedIn()) { throw new HNotLoggedInException(); }
 		if (! HCurrentUser.isInWorkgroup(workgroup)) {
 			throw new HInvalidWorkgroupException("User is not a member of this workgroup");
 		}
-		return (_keywordsByGroup[workgroup.getID()] || []).slice(0);
+		return (_wgTagsByGroup[workgroup.getID()] || []).slice(0);
 	};
 }(HAPI_userData.workgroupKeywords || []);
 HKeywordManager.prototype = new HObject();

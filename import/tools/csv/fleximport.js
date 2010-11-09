@@ -16,7 +16,7 @@ return {
 	recType: null,
 	workgroupSelect: null,
 	workgroups: {},
-	workgroupKeywords: {},
+	workgroupTags: {},
 	colSelectors: [],
 	cols: [],
 	subTypes: [],
@@ -126,12 +126,12 @@ return {
 		p.appendChild(document.createTextNode("Workgroup for tags: "));
 		FlexImport.workgroupSelect = p.appendChild(document.createElement("select"));
 		FlexImport.workgroupSelect.onchange = function() {
-			FlexImport.workgroupKeywords = {};
+			FlexImport.workgroupTags = {};
 			if (this.value) {
 				var wgkwds = HKeywordManager.getWorkgroupKeywords(FlexImport.workgroups[this.value]);
 				var i, l = wgkwds.length;
 				for (i = 0; i < l; ++i) {
-					FlexImport.workgroupKeywords[wgkwds[i].getName()] = wgkwds[i];
+					FlexImport.workgroupTags[wgkwds[i].getName()] = wgkwds[i];
 				}
 			}
 		}
@@ -178,7 +178,7 @@ return {
 			td = tr.appendChild(document.createElement("td"));
 			sel = td.appendChild(document.createElement("select"));
 			sel.onchange = function() {
-				if (this.value != "tags"  &&  this.value != "keywords") {
+				if (this.value != "tags"  &&  this.value != "wgTags") {
 					//search if this detail is in another column and remove it from the other column if it is
 					var j, m = FlexImport.colSelectors.length;
 					for (j = 0; j < m; ++j) {
@@ -193,7 +193,7 @@ return {
 				}
 				// for types that have subtypes show select for subtypes
 				if (this.value != "url"  &&  this.value != "notes"  &&
-					this.value != "tags"  &&  this.value != "keywords"  &&
+					this.value != "tags"  &&  this.value != "wgTags"  &&
 					HDetailManager.getDetailTypeById(this.value).getVariety() == HVariety.GEOGRAPHIC) {
 					this.subTypeSelect = this.parentNode.appendChild(document.createElement("select"));
 					var vals = [
@@ -222,7 +222,7 @@ return {
 			_addOpt(sel, "url", "URL");
 			_addOpt(sel, "notes", "Notes");
 			_addOpt(sel, "tags", "Tag(s)");
-			_addOpt(sel, "keywords", "Workgroup Tag(s)");
+			_addOpt(sel, "wgTags", "Workgroup Tag(s)");
 
 			var reqDetailTypes = HDetailManager.getRequiredDetailTypesForRecordType(FlexImport.recType);
 			var detailTypes = HDetailManager.getDetailTypesForRecordType(FlexImport.recType);
@@ -317,7 +317,7 @@ return {
 				FlexImport.cols[i] = FlexImport.colSelectors[i].value;
 			}
 			FlexImport.subTypes[i] = FlexImport.colSelectors[i].subTypeSelect ? FlexImport.colSelectors[i].subTypeSelect.value : null;
-			if ( FlexImport.cols[i]  &&  FlexImport.cols[i]!=="tags"   &&  FlexImport.cols[i]!== "keywords" && FlexImport.cols[i] !== "url" && FlexImport.cols[i] !== "notes") {
+			if ( FlexImport.cols[i]  &&  FlexImport.cols[i]!=="tags"   &&  FlexImport.cols[i]!== "wgTags" && FlexImport.cols[i] !== "url" && FlexImport.cols[i] !== "notes") {
 				detailType = HDetailManager.getDetailTypeById(FlexImport.cols[i]);
 				//mark which columns have the REFERENCE identifying data
 				if (detailType.getVariety() == HVariety.REFERENCE) {
@@ -438,7 +438,7 @@ return {
 		for (var j = 0; j < fields.length; ++j) {
 			if (FlexImport.cols[j]  &&
 				FlexImport.cols[j] != "tags"  &&
-				FlexImport.cols[j] != "keywords") {
+				FlexImport.cols[j] != "wgTags") {
 				hash += fields[j];
 			}
 		}
@@ -472,7 +472,7 @@ return {
 		var kwds = false;
 		var j, l = FlexImport.cols.length;
 		for (j = 0; j < l; ++j) {
-			if (! FlexImport.cols[j]  ||  (FlexImport.cols[j]=="tags" && tags)  ||  (FlexImport.cols[j]=="keywords" && kwds)) continue;
+			if (! FlexImport.cols[j]  ||  (FlexImport.cols[j]=="tags" && tags)  ||  (FlexImport.cols[j]=="wgTags" && kwds)) continue;
 			td = tr.appendChild(document.createElement("td"));
 			if (FlexImport.cols[j] == "url") {
 				td.innerHTML = "URL";
@@ -483,7 +483,7 @@ return {
 					tags = true;
 					td.innerHTML = "Tag(s)";
 				}
-			} else if (FlexImport.cols[j] == "keywords") {
+			} else if (FlexImport.cols[j] == "wgTags") {
 				if (! kwds) {
 					kwds = true;
 					td.innerHTML = "Workgroup Tag(s)";
@@ -550,7 +550,7 @@ return {
 
 			tags = false; kwds = false;
 			for (var j = 0; j < FlexImport.fields[i].length; ++j) {
-				if (! FlexImport.cols[j]  ||  (FlexImport.cols[j]=="tags" && tags)  ||  (FlexImport.cols[j]=="keywords" && kwds)) continue;
+				if (! FlexImport.cols[j]  ||  (FlexImport.cols[j]=="tags" && tags)  ||  (FlexImport.cols[j]=="wgTags" && kwds)) continue;
 				td = tr.appendChild(document.createElement("td"));
 				if (FlexImport.cols[j] == "url") {
 					td.innerHTML = "<p>" + record.getURL() + "</p>";
@@ -561,11 +561,11 @@ return {
 						tags = true;
 						td.innerHTML = "<p>" + record.getTags().join(", ") + "</p>";
 					}
-				} else if (FlexImport.cols[j] == "keywords") {
+				} else if (FlexImport.cols[j] == "wgTags") {
 					if (! kwds) {
 						kwds = true;
 						var temp = "<p>";
-						var ks = record.getKeywords();
+						var ks = record.getWgTags();
 						for (var k = 0; k < ks.length; ++k) {
 							temp += (k > 0 ? ", " : "") + ks[k].getName();
 						}
@@ -637,11 +637,11 @@ return {
 						HTagManager.addTag(vals[v]);	// ensure the tag exists
 						hRec.addTag(vals[v]);
 					}
-				} else if (FlexImport.cols[j] == "keywords") {
+				} else if (FlexImport.cols[j] == "wgTags") {
 					var vals = val.split(",");
 					for (var v = 0; v < vals.length; ++v) {
-						if (FlexImport.workgroupKeywords[vals[v]]) {
-							hRec.addKeyword(FlexImport.workgroupKeywords[vals[v]])
+						if (FlexImport.workgroupTags[vals[v]]) {
+							hRec.addWgTag(FlexImport.workgroupTags[vals[v]])
 						}
 					}
 				} else if (FlexImport.cols[j]) { // detail is generic so prepare to addDetail

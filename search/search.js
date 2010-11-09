@@ -11,6 +11,7 @@
  * NOTE: personal keywords are now referred to as "tags", to distinguish
  * them from workgroup keywords.  The code still refers to both as keywords.
  * -kj, 2007-08-13
+ * Note: now there are tags (user) and wgTags (workgroup)
  */
 
 /*
@@ -1258,12 +1259,12 @@ top.HEURIST.search = {
 	fillInKeywordSearches: function() {
 		if (! top.HEURIST.user) return;
 
-		var keywords = top.HEURIST.user.keywords;
+		var tags = top.HEURIST.user.tags;
 		var innerHTML = "";
 		var kwd;
-		for (var i = 0; i < keywords.length; ++i) {
-			kwd = encodeURIComponent(keywords[i]);
-			innerHTML += "<a href='"+top.HEURIST.basePath+"search/search.html?ver=1&w=bookmark&q=tag:\"" + kwd + "\"&label=Tag+\"" + kwd + "\"'>" + keywords[i] + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "") + "</a> ";
+		for (var i = 0; i < tags.length; ++i) {
+			kwd = encodeURIComponent(tags[i]);
+			innerHTML += "<a href='"+top.HEURIST.basePath+"search/search.html?ver=1&w=bookmark&q=tag:\"" + kwd + "\"&label=Tag+\"" + kwd + "\"'>" + tags[i] + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "") + "</a> ";
 		}
 		var kwd_search_elt = top.document.getElementById("keyword-search-links");
 		if (kwd_search_elt) {
@@ -1544,16 +1545,16 @@ top.HEURIST.search = {
 			var action_fr = top.document.getElementById("i_action");
 			var action_elt = action_fr.contentWindow.document.getElementById('action');
 			var bkmk_ids_elt = action_fr.contentWindow.document.getElementById('bkmk_ids');
-			var keywordstring_elt = action_fr.contentWindow.document.getElementById('keywordstring');
+			var tagString_elt = action_fr.contentWindow.document.getElementById('tagString');
 			var reload_elt = action_fr.contentWindow.document.getElementById('reload');
 
-			if (! action_fr  ||  ! action_elt  ||  ! bkmk_ids_elt  ||  ! keywordstring_elt  ||  ! reload_elt) {
+			if (! action_fr  ||  ! action_elt  ||  ! bkmk_ids_elt  ||  ! tagString_elt  ||  ! reload_elt) {
 				alert("Problem contacting server - try again in a moment");
 				return;
 			}
 
 			action_elt.value = (add ? "add" : "remove") + "_keywords";
-			keywordstring_elt.value = tags;
+			tagString_elt.value = tags;
 			var bkmk_ids_list = top.HEURIST.search.get_bkmk_ids();
 			bkmk_ids_elt.value = bkmk_ids_list.join(',');
 			reload_elt.value = reload ? "1" : "";
@@ -1567,7 +1568,7 @@ top.HEURIST.search = {
 			alert("Select at least one record to add / remove workgroup tags");
 			return;
 		}
-		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "records/tags/keywords.html" + (top.HEURIST.instance && top.HEURIST.instance.name ? "?instance=" + top.HEURIST.instance.name : ""), { callback: function(add, kwd_ids) {
+		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "records/tags/wgTags.html" + (top.HEURIST.instance && top.HEURIST.instance.name ? "?instance=" + top.HEURIST.instance.name : ""), { callback: function(add, kwd_ids) {
 			if (! kwd_ids) return;
 
 			var action_fr = top.document.getElementById("i_action");
@@ -1580,7 +1581,7 @@ top.HEURIST.search = {
 				return;
 			}
 
-			action_elt.value = (add ? "add" : "remove") + "_keywords_by_id";
+			action_elt.value = (add ? "add" : "remove") + "_wgTags_by_id";
 			kwd_ids_elt.value = kwd_ids.join(",");
 			bib_ids_elt.value = bib_ids_list.join(',');
 
@@ -1803,7 +1804,7 @@ top.HEURIST.search = {
 		}
 		// remove sortbys, and all other predicate names
 		q = q.replace(new RegExp("sortby:[^\\s]*|[^\\s\"]*:", "g"), "");
-		// split workgroup keywords
+		// split workgroup tags
 		q = q.replace(new RegExp("(\"[^\"]*)\\\\([^\"]*\")", "g"), "$1\" \"$2");
 		q = q.replace(new RegExp("\\\\", "g"), " ");
 		// OR and AND have to be uppercase for google

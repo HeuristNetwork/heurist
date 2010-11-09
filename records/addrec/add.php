@@ -4,7 +4,7 @@ if (@$_REQUEST['t']) $_REQUEST['bkmrk_bkmk_title'] = $_REQUEST['t'];
 if (@$_REQUEST['u']) $_REQUEST['bkmrk_bkmk_url'] = $_REQUEST['u'];
 if (@$_REQUEST['d']) $_REQUEST['bkmrk_bkmk_description'] = $_REQUEST['d'];
 if (@$_REQUEST['v']) $_REQUEST['version'] = $_REQUEST['v'];
-if (@$_REQUEST['k']) $_REQUEST['keyword'] = $_REQUEST['k'];
+if (@$_REQUEST['k']) $_REQUEST['keyword'] = $_REQUEST['k'];	//TODO: mod this file for tags instead of keywords ?? t is in use so use tag?
 
 // $_REQUEST['bkmrk_bkmk_description'] = mb_convert_encoding($_REQUEST['bkmrk_bkmk_description'], 'utf-8');
 
@@ -130,7 +130,7 @@ if (@$_REQUEST['bib_workgroup']) {
 		// return;
 	}
 }
-//  Process keywords for workgroups ensuring that the user is a memeber of the workgroup
+//  Process tags for workgroups ensuring that the user is a memeber of the workgroup
 if (@$_REQUEST['keyword']  &&  strpos($_REQUEST['keyword'], "\\")) {
 	// workgroup keyword
 	// workgroup is ...
@@ -144,7 +144,7 @@ if (@$_REQUEST['keyword']  &&  strpos($_REQUEST['keyword'], "\\")) {
 			if (mysql_num_rows($res) == 0) {
 				$wg .= '&wgkwd=' . urlencode($keyword);
 				array_push($outKeywords, str_replace("\\", "", $keyword));
-				// print "You are not a member of workgroup ".$grpName.".  You may not use keywords belonging to that workgroup.";
+				// print "You are not a member of workgroup ".$grpName.".  You may not use tags belonging to that workgroup.";
 				// return;
 			}
 			else {

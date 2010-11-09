@@ -37,7 +37,7 @@
 						</div>
 					</td>
 					<td class=input-cell>
-						<input id=tags name=keywordstring type=text>
+						<input id=tags name=tagString type=text>
 						<div id=top-tags-cell><span class=prompt>Top:</span>
 						<a href="#" class=add-tag-link onClick="addTag('Favourites'); return false;">Favourites </a><a href="#" class=add-tag-link onClick="addTag('To Read'); return false;"> To Read </a></div>
 						<div id=recent-tags-cell>
@@ -95,7 +95,7 @@
 
 
 			var tags = document.getElementById("tags");
-			tags.value = tags.defaultValue = top.HEURIST.edit.record.keywordString  ||  "";
+			tags.value = tags.defaultValue = top.HEURIST.edit.record.tagString  ||  "";
 
 			new top.HEURIST.autocomplete.AutoComplete(tags, top.HEURIST.util.keywordAutofill, { nonVocabularyCallback: top.HEURIST.util.showConfirmNewTag });
 
@@ -141,10 +141,10 @@
 				addTagLink(topKeywords[i], topTagsCell);
 			}
 			var recentTagsCell = document.getElementById("recent-tags-cell");
-			var recentKeywords = top.HEURIST.user.recentKeywords.slice(0, 8);
-			recentKeywords.sort(alphasort);
-			for (var i=0; i < recentKeywords.length; ++i) {
-				addTagLink(recentKeywords[i], recentTagsCell);
+			var recentTags = top.HEURIST.user.recentTags.slice(0, 8);
+			recentTags.sort(alphasort);
+			for (var i=0; i < recentTags.length; ++i) {
+				addTagLink(recentTags[i], recentTagsCell);
 			}
 
 		</script>

@@ -37,13 +37,14 @@ if (function_exists('get_user_id')) {
       $LOOKUPS['LINKED_BIBLIO'] = array( 'usrBookmarks' => 'rec_id=bkm_recID and bkm_UGrpID='.get_user_id() );
 }
 
-
+/*
 $MAINTABLES['RATING_CONTENT'] = 'ratings_content';
 	$PKEY['RATING_CONTENT'] = 'rc_id';
 $MAINTABLES['RATING_QUALITY'] = 'ratings_quality';
 	$PKEY['RATING_QUALITY'] = 'rq_id';
 $MAINTABLES['RATING_INTEREST'] = 'ratings_interest';
 	$PKEY['RATING_INTEREST'] = 'ri_id';
+*/
 
 $MAINTABLES['KEYWORD'] = 'usrTags';
 	$PKEY['KEYWORD'] = 'kwd_id';

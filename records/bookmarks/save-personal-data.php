@@ -13,9 +13,9 @@ mysql_connection_db_overwrite(DATABASE);
 
 $bkm_ID = intval($_POST["bkmk_id"]);
 if ($bkm_ID  &&  $_POST["save-mode"] == "edit") {
-	if (array_key_exists("keywordstring", $_POST)) {
-		$keywordstring = doKeywordInsertion($bkm_ID);
-	} else  $keywordstring = NULL;
+	if (array_key_exists("tagString", $_POST)) {
+		$tagString = doKeywordInsertion($bkm_ID);
+	} else  $tagString = NULL;
 
 	$updatable = array(
 	/* map database column to array($_POST variable name, JSON response name) */
@@ -37,11 +37,11 @@ if ($bkm_ID  &&  $_POST["save-mode"] == "edit") {
 		$hVals = array();
 		foreach ($dbVals as $colName => $val) $hVals[$updatable[$colName][1]] = $val;
 
-		if ($keywordstring !== NULL) $hVals["keywordString"] = $keywordstring;
+		if ($tagString !== NULL) $hVals["tagString"] = $tagString;
 		print "(" . json_format($hVals) . ")";
 	}
-	else if ($keywordstring !== NULL) {
-		print "({keywordString: \"" . slash($keywordstring) . "\"})";
+	else if ($tagString !== NULL) {
+		print "({tagString: \"" . slash($tagString) . "\"})";
 	}
 }
 
@@ -49,13 +49,13 @@ if ($bkm_ID  &&  $_POST["save-mode"] == "edit") {
 function doKeywordInsertion($bkm_ID) {
 	$kwds = mysql__select_array("keyword_links, usrTags",
 	                            "kwd_name", "kwl_pers_id=$bkm_ID and kwd_id=kwl_kwd_id and kwd_usr_id=".get_user_id()." order by kwl_order, kwl_id");
-	$keywordString = join(",", $kwds);
+	$tagString = join(",", $kwds);
 
 	// Nothing to do here
-	if (strtolower(trim($_POST["keywordstring"])) == strtolower(trim($keywordString))) return;
+	if (strtolower(trim($_POST["tagString"])) == strtolower(trim($tagString))) return;
 
 
-	$keywords = array_filter(array_map("trim", explode(",", str_replace("\\", "/", $_POST["keywordstring"]))));	// replace backslashes with forwardslashes
+	$keywords = array_filter(array_map("trim", explode(",", str_replace("\\", "/", $_POST["tagString"]))));	// replace backslashes with forwardslashes
 	$kwd_map = mysql__select_assoc("usrTags", "trim(lower(kwd_name))", "kwd_id",
 	                               "kwd_usr_id=".get_user_id()." and kwd_name in (\"".join("\",\"", array_map("addslashes", $keywords))."\")");
 
@@ -75,7 +75,7 @@ function doKeywordInsertion($bkm_ID) {
 	$rec_id = mysql_fetch_row($res);  $rec_id = $rec_id[0];
 	if (! $rec_id) $rec_id = "NULL";
 
-	// Delete all non-workgroup keywords for this bookmark
+	// Delete all non-workgroup tags for this bookmark
 	mysql_query("delete keyword_links from keyword_links, usrTags where kwl_pers_id = $bkm_ID and kwd_id=kwl_kwd_id and kwd_wg_id is null");
 
 	if (count($kwd_ids) > 0) {

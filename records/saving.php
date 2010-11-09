@@ -169,11 +169,11 @@ notes
 group
 vis
 pnotes
-crate
-irate
-qrate
+rating
+irate //deprecated
+qrate //deprecated
 tags
-keywords
+wgTags
 details : [t:xxx] => [ [bd:yyy] => val ]*
 
 */
@@ -343,7 +343,7 @@ function doTagInsertion($bibID, $bkmkID, $tagString) {
 		array_push($kwd_ids, $kwd_id);
 	}
 
-	// Delete all non-workgroup keywords for this bookmark
+	// Delete all non-workgroup tags for this bookmark
 	mysql_query("delete keyword_links from keyword_links, usrTags where kwl_pers_id=$bkmkID and kwd_id=kwl_kwd_id and kwd_wg_id is null");
 
 	if (count($kwd_ids) > 0) {

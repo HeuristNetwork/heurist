@@ -164,9 +164,9 @@ function getBaseProperties($rec_id, $bkm_ID) {
 	$props['notes'] = $row['notes'];
 
 	if ($bkm_ID) {
-		// grab the user tags (keywords) for this bookmark, as a single comma-delimited string
+		// grab the user tags for this bookmark, as a single comma-delimited string
 		$kwds = mysql__select_array("keyword_links left join usrTags on kwd_id=kwl_kwd_id", "kwd_name", "kwl_pers_id=$bkm_ID and kwd_usr_id=".get_user_id() . " order by kwl_order, kwl_id");
-		$props["keywordString"] = join(",", $kwds);
+		$props["tagString"] = join(",", $kwds);
 	}
 
 	return $props;

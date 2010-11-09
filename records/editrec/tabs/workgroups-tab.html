@@ -28,17 +28,17 @@
 
      <tr>
       <td>
-       <div class=keyword-list><table border=0 cellspacing=0 cellpadding=0 width="260px"><tbody id=all-workgroup-keywords></tbody></table></div>
+       <div class=keyword-list><table border=0 cellspacing=0 cellpadding=0 width="260px"><tbody id=all-workgroup-tags></tbody></table></div>
       </td>
       <td>
        <div id=button-box>
-        <div><input type=button value="&gt;" title="Add a tag" onMouseDown="HEURIST.keywordEditor.addKeyword(window.selectedRow)" disabled id=add-button></div>
+        <div><input type=button value="&gt;" title="Add a tag" onMouseDown="HEURIST.keywordEditor.addWgTag(window.selectedRow)" disabled id=add-button></div>
         <div>&nbsp;&nbsp;</div>
-        <div><input type=button value="&lt;" title="Remove a tag" onMouseDown="HEURIST.keywordEditor.removeKeyword(window.selectedRow)" disabled id=remove-button></div>
+        <div><input type=button value="&lt;" title="Remove a tag" onMouseDown="HEURIST.keywordEditor.removeWgTag(window.selectedRow)" disabled id=remove-button></div>
        </div>
       </td>
       <td>
-       <div class=keyword-list><table border=0 cellspacing=0 cellpadding=0 width="260px"><tbody id=current-workgroup-keywords></tbody></table></div>
+       <div class=keyword-list><table border=0 cellspacing=0 cellpadding=0 width="260px"><tbody id=current-workgroup-tags></tbody></table></div>
       </td>
      </tr>
 
@@ -52,7 +52,7 @@
      </td></tr>
     </table>
 <script>
-	document.write('<form id=keyword-form method=post jsonAction="'+top.HEURIST.basePath+'records/tags/save-keywords.php" action="'+top.HEURIST.basePath+'records/tags/save-keywords.php"></form>');
+	document.write('<form id=keyword-form method=post jsonAction="'+top.HEURIST.basePath+'records/tags/update-taglinks.php" action="'+top.HEURIST.basePath+'records/tags/update-taglinks.php"></form>');
 </script>
 <script src="../../tags/keyword-editor.js"></script>
 <script>
@@ -74,9 +74,9 @@ var bibInput = document.createElement("input");
 document.getElementById("keyword-form").appendChild(bibInput);
 
 
-var currKwdsElt = document.getElementById("current-workgroup-keywords");
-var allKwdsElt = document.getElementById("all-workgroup-keywords");
-new HEURIST.keywordEditor.KeywordEditor(currKwdsElt, allKwdsElt, addButton, removeButton);
+var currWgTagsElt = document.getElementById("current-workgroup-tags");
+var allWgTagsElt = document.getElementById("all-workgroup-tags");
+new HEURIST.keywordEditor.KeywordEditor(currWgTagsElt, allWgTagsElt, addButton, removeButton);
 
 </script>
    </div>

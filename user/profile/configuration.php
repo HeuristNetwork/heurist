@@ -46,7 +46,7 @@ if (@$_REQUEST['update_kwd_from']  and  @$_REQUEST['update_kwd_to']) {
 	$kwd_from = intval(@$_REQUEST['update_kwd_from']);
 	$kwd_to = intval(@$_REQUEST['update_kwd_to']);
 
-	/* check that both keywords belong to this user */
+	/* check that both tags belong to this user */
 	$res = mysql_query('select * from usrTags where kwd_id in ('.$kwd_from.','.$kwd_to.') and kwd_usr_id='.get_user_id());
 	if (mysql_num_rows($res) == 2) {
 		mysql_query('update ignore keyword_links set kwl_kwd_id = '.$kwd_to.' where kwl_kwd_id = '.$kwd_from);

@@ -18,16 +18,16 @@ switch (@$_REQUEST['action']) {
 		$script = add_keywords();
 		break;
 
-	case 'add_keywords_by_id':
-		$script = add_keywords_by_id();
+	case 'add_wgTags_by_id':
+		$script = add_wgTags_by_id();
 		break;
 
 	case 'remove_keywords':
 		$script = remove_keywords();
 		break;
 
-	case 'remove_keywords_by_id':
-		$script = remove_keywords_by_id();
+	case 'remove_wgTags_by_id':
+		$script = remove_wgTags_by_id();
 		break;
 
 	case 'set_ratings':
@@ -100,10 +100,10 @@ function delete_bookmarks() {
 function add_keywords() {
 	$bkmk_ids = array_map('intval', explode(',', $_REQUEST['bkmk_ids']));
 
-	if (trim($_REQUEST["keywordstring"])) {
+	if (trim($_REQUEST["tagString"])) {
 		mysql_connection_db_overwrite(DATABASE);
 
-		$keywords = get_ids_for_keywords(array_filter(explode(',', $_REQUEST['keywordstring'])), true);
+		$keywords = get_ids_for_keywords(array_filter(explode(',', $_REQUEST['tagString'])), true);
 		mysql_query('insert ignore into keyword_links (kwl_pers_id, kwl_rec_id, kwl_kwd_id) '
 				  . 'select bkm_ID, bkm_recID, kwd_id from usrBookmarks, usrTags '
 				  . ' where bkm_ID in (' . join(',', $bkmk_ids) . ') and bkm_UGrpID = ' . get_user_id()
@@ -111,7 +111,7 @@ function add_keywords() {
 		$keyword_count = mysql_affected_rows();
 	}
 
-	if (! trim($_REQUEST['keywordstring'])) {
+	if (! trim($_REQUEST['tagString'])) {
 		$onload = 'top.HEURIST.search.popupNotice(\'No tags have been added\'); location.replace(\'action.php\');';
 	} else if (mysql_error()) {
 		$onload = 'alert(\'Database problem - ' . addslashes(mysql_error()) . ' - no tags added\'); location.replace(\'action.php\');';
@@ -121,16 +121,16 @@ function add_keywords() {
 		if ($_REQUEST['reload']) {
 			$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['action-message'] = 'Tags added';
 			session_write_close();
-			header('Location: action.php');
+			header('Location: action.php'); //TODO: add instance code here
 			exit();
 		} else {
-			$onload = 'top.HEURIST.search.popupNotice(\''.$keyword_count.' Tags added\'); location.replace(\'action.php\');';
+			$onload = 'top.HEURIST.search.popupNotice(\''.$keyword_count.' Tags added\'); location.replace(\'action.php\');'; //TODO: add instance code here
 		}
 	}
 	return $onload;
 }
 
-function add_keywords_by_id() {
+function add_wgTags_by_id() {
 	$bib_ids = array_map('intval', explode(',', $_REQUEST['bib_ids']));
 
 	if ($_REQUEST["kwd_ids"]) {
@@ -164,7 +164,7 @@ function add_keywords_by_id() {
 	return $onload;
 }
 
-function remove_keywords_by_id() {
+function remove_wgTags_by_id() {
 	$bib_ids = array_map('intval', explode(',', $_REQUEST['bib_ids']));
 
 	$keyword_count = 0;
@@ -210,11 +210,11 @@ function remove_keywords_by_id() {
 function remove_keywords() {
 	$bkmk_ids = array_map('intval', explode(',', $_REQUEST['bkmk_ids']));
 
-	if ($_REQUEST["keywordstring"]) {
+	if ($_REQUEST["tagString"]) {
 		mysql_connection_db_overwrite(DATABASE);
 
 		$keyword_count = 0;
-		$keywords = get_ids_for_keywords(array_filter(explode(',', $_REQUEST['keywordstring'])), false);
+		$keywords = get_ids_for_keywords(array_filter(explode(',', $_REQUEST['tagString'])), false);
 		if (count($bkmk_ids)  &&  $keywords  &&  count($keywords)) {
 			mysql_query('delete keyword_links from usrBookmarks'
 					 . ' left join keyword_links on kwl_pers_id = bkm_ID'
@@ -225,7 +225,7 @@ function remove_keywords() {
 		}
 	}
 
-	if (! trim($_REQUEST['keywordstring'])) {
+	if (! trim($_REQUEST['tagString'])) {
 		$onload = 'top.HEURIST.search.popupNotice(\'No tags removed\'); location.replace(\'action.php\');';
 	} else if (mysql_error()) {
 		$onload = 'alert(\'Database problem - ' . addslashes(mysql_error()) . ' - no tags removed\'); location.replace(\'action.php\');';
@@ -316,10 +316,10 @@ function bookmark_and_tag_bibids ( $phpReturn ) {
 		$message = 'Database problem (' . addslashes(mysql_error()) . ') - no bookmarks added';
 	} else if (count($bkmk_ids) < 1) {
 		$message = 'No bookmark found or created for selected records.';
-	} else if (! trim($_REQUEST['keywordstring'])) {
+	} else if (! trim($_REQUEST['tagString'])) {
 
 	} else {	//we have bookmarks lets add teh tags
-		$keywords = get_ids_for_keywords(array_filter(explode(',', $_REQUEST['keywordstring'])), true);
+		$keywords = get_ids_for_keywords(array_filter(explode(',', $_REQUEST['tagString'])), true);
 		mysql_query('insert ignore into keyword_links (kwl_pers_id, kwl_rec_id, kwl_kwd_id) '
 				  . 'select bkm_ID, bkm_recID, kwd_id from usrBookmarks, usrTags '
 				  . ' where bkm_ID in (' . join(',', $bkmk_ids) . ') and bkm_UGrpID = ' . get_user_id()
@@ -479,7 +479,7 @@ function print_input_form() {
 <form action="action.php" method="get" id="action_form">
 <input type="hidden" name="bkmk_ids" id="bkmk_ids" value="">
 <input type="hidden" name="bib_ids" id="bib_ids" value="">
-<input type="hidden" name="keywordstring" id="keywordstring" value="">
+<input type="hidden" name="tagString" id="tagString" value="">
 <input type="hidden" name="kwd_ids" id="kwd_ids" value="">
 <input type="hidden" name="rating" id="rating" value="">
 <input type="hidden" name="ss_id" id="ss_id" value="">

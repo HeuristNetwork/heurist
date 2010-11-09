@@ -654,7 +654,7 @@ top.HEURIST.tagAutofill = function(term) {
 };
 
 top.HEURIST.getKeywordAutofillFn = function(group) {
-	var keywords = HKeywordManager.getWorkgroupKeywords(group);
+	var wgTags = HKeywordManager.getWorkgroupKeywords(group);
 	var count = 20;
 	return function(term) {
 		var regex, regexSafeTerm;
@@ -694,14 +694,14 @@ top.HEURIST.getKeywordAutofillFn = function(group) {
 		startMatches = [];
 		otherMatches = [];
 
-		for (i=0; i < keywords.length; ++i) {
-			match = keywords[i].getName().toLowerCase().match(regex);
+		for (i=0; i < wgTags.length; ++i) {
+			match = wgTags[i].getName().toLowerCase().match(regex);
 
 			if (match  &&  match[1] === "") {
-				startMatches.push(keywords[i].getName());
+				startMatches.push(wgTags[i].getName());
 			}
 			else if (match) {
-				otherMatches.push(keywords[i].getName());
+				otherMatches.push(wgTags[i].getName());
 			}
 		}
 
@@ -781,7 +781,7 @@ top.HEURIST.showConfirmNewTag = function(tag) {
 top.HEURIST.autocompleteConfirm = function() {
 	// (this) is the AutoComplete
 	var newTag = this.currentWordValue.replace(/^\s+|\s+$/g, "").replace(/\s+/g, " ");
-	//top.HEURIST.user.keywords.push(newTag);
+	//top.HEURIST.user.tags.push(newTag);
 
 	this.confirmImg.parentNode.removeChild(this.confirmImg);
 	this.confirmImg = null;

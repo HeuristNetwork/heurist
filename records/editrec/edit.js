@@ -308,7 +308,7 @@ top.HEURIST.edit = {
 */
 		var personalWindow = top.HEURIST.edit.modules.personal  &&  top.HEURIST.edit.modules.personal.frame  &&  top.HEURIST.edit.modules.personal.frame.contentWindow;
 		if (personalWindow  &&  ! personalWindow.tagCheckDone  &&  personalWindow.document.getElementById("tags").value.replace(/^\s+|\s+$/g, "") == "") {
-			// personal tags field is empty -- popup the add keywords dialogue
+			// personal tags field is empty -- popup the add tags dialogue
 			personalWindow.tagCheckDone = true;
 			top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "records/tags/add-tags.html?no-tags", { callback: function(tags) {
 				if (tags) {

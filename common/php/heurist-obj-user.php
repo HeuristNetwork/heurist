@@ -33,7 +33,7 @@ while ($row = mysql_fetch_assoc($res)) {
 ?>
     ];
 
-    top.HEURIST.user.keywords = [<?php
+    top.HEURIST.user.tags = [<?php
 $res = mysql_query('select distinct kwd_name from usrTags where kwd_usr_id='.get_user_id().' order by kwd_name');
 $first = true;
 while ($row = mysql_fetch_row($res)) {
@@ -57,7 +57,7 @@ while ($row = mysql_fetch_row($res)) {
     top.HEURIST.user.workgroupKeywordOrder = <?= json_format($ids); ?>;
 
     top.HEURIST.user.topKeywords = [<?php
-/* find the top five keywords for this user */
+/* find the top five tags for this user */
 $res = mysql_query("select kwd_name, count(kwl_id) as c from usrTags left join keyword_links on kwl_kwd_id=kwd_id
                      where kwd_usr_id=".get_user_id()." group by kwd_name order by c desc limit 5");
 $first = true;
@@ -67,8 +67,8 @@ while ($row = mysql_fetch_row($res)) {
 }
 ?> ];
 
-   top.HEURIST.user.recentKeywords = [<?php
-/* find the ten most recently used keywords for this user */
+   top.HEURIST.user.recentTags = [<?php
+/* find the ten most recently used tags for this user */
 $res = mysql_query("select distinct(kwd_name) from usrTags left join keyword_links on kwl_kwd_id=kwd_id
                      where kwd_usr_id=".get_user_id()." group by kwl_kwd_id order by max(kwl_id) desc limit 10");
 $first = true;

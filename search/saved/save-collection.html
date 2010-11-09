@@ -32,7 +32,7 @@
 					if (!tags || preds.length != tags.length) {
 						continue;
 					}
-					tags = tags.join(" | ").replace(/[^,\s]+[:=]/g,'').replace(/['"]/g,'');	// strip off the keywords predicates
+					tags = tags.join(" | ").replace(/[^,\s]+[:=]/g,'').replace(/['"]/g,'');	// strip off the tags predicates
 					tagOnlySearches.push([ss[0],tags]);
 				}
 				return tagOnlySearches;
@@ -80,9 +80,9 @@
 				var removeButton = document.getElementById("remove-button");
 				var addButton = document.getElementById("add-button");
 
-				var currKwdsElt = document.getElementById("current-workgroup-keywords");
-				var allKwdsElt = document.getElementById("all-workgroup-keywords");
-				top.HEURIST.keywordEditor.KeywordEditor(currKwdsElt, allKwdsElt, addButton, removeButton);
+				var currWgTagsElt = document.getElementById("current-workgroup-tags");
+				var allWgTagsElt = document.getElementById("all-workgroup-tags");
+				top.HEURIST.keywordEditor.KeywordEditor(currWgTagsElt, allWgTagsElt, addButton, removeButton);
 
 			}
 
@@ -115,7 +115,7 @@
 				var ss_query_elt = action_fr.document.getElementById("ss_query");
 				var ss_wgid_elt = action_fr.document.getElementById("ss_wg_id");
 				var ss_id_elt = action_fr.document.getElementById("ss_id");
-				var ss_kwds_elt = action_fr.document.getElementById("keywordstring");
+				var ss_kwds_elt = action_fr.document.getElementById("tagString");
 				action_fr.document.getElementById("bib_ids").value = top.HEURIST.search.collection.join(',');
 
 				if (! action_fr  ||  ! action_elt  ||  ! ss_name_elt  ||  ! ss_query_elt  ||  ! ss_wgid_elt ||  ! ss_id_elt ||  ! ss_kwds_elt) {
@@ -131,7 +131,7 @@
 					}
 					ss_wgid_elt.value = document.getElementById("wg-select").value;
 					ss_kwds_elt.value = $('#personal-tags').val();
-					var kwdsRowTDs = $('#current-workgroup-keywords td');
+					var kwdsRowTDs = $('#current-workgroup-tags td');
 					for (var i=0; i < kwdsRowTDs.length; i++) {
 						if (ss_kwds_elt.value) {
 							ss_kwds_elt.value += ',';
@@ -264,17 +264,17 @@
 
 							<tr>
 								<td>
-									<div class=keyword-list style="height:200px;"><table border=0 cellspacing=0 cellpadding=0><tbody id=all-workgroup-keywords></tbody></table></div>
+									<div class=keyword-list style="height:200px;"><table border=0 cellspacing=0 cellpadding=0><tbody id=all-workgroup-tags></tbody></table></div>
 								</td>
 								<td>
 									<div id=button-box>
-										<div><input type=button value="&gt;" title="Add a tag" onmousedown="top.HEURIST.keywordEditor.addKeyword(window.selectedRow)" disabled id=add-button></div>
+										<div><input type=button value="&gt;" title="Add a tag" onmousedown="top.HEURIST.keywordEditor.addWgTag(window.selectedRow)" disabled id=add-button></div>
 										<div>&nbsp;&nbsp;</div>
-										<div><input type=button value="&lt;" title="Remove a tag" onmousedown="top.HEURIST.keywordEditor.removeKeyword(window.selectedRow)" disabled id=remove-button></div>
+										<div><input type=button value="&lt;" title="Remove a tag" onmousedown="top.HEURIST.keywordEditor.removeWgTag(window.selectedRow)" disabled id=remove-button></div>
 									</div>
 								</td>
 								<td>
-									<div class=keyword-list style="height:200px;"><table border=0 cellspacing=0 cellpadding=0><tbody id=current-workgroup-keywords></tbody></table></div>
+									<div class=keyword-list style="height:200px;"><table border=0 cellspacing=0 cellpadding=0><tbody id=current-workgroup-tags></tbody></table></div>
 								</td>
 							</tr>
 

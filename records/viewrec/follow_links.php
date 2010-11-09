@@ -157,7 +157,7 @@ if ($user_keywords) {
 	foreach ($user_keywords as $usr => $kwds) {
 		$body->global_vars['user-keywords'] .= "  <tr>\n    <td>" . $usr . ": &nbsp;&nbsp;</td>\n    <td>\n";
 		foreach ($kwds as $kwd) {
-			$body->global_vars['user-keywords'] .= '      <a href="search.php?search_type=records&_simple_BIBLIO_search_search=1&biblio_search_all=true&search_advanced_search=1&adv_search=show&sort_order_dropdown=title&search_keywordstring=%22'.urlencode($kwd).'%22" onclick="opener.location.href = this.href; window.close();">'.htmlspecialchars($kwd)."</a>\n";
+			$body->global_vars['user-keywords'] .= '      <a href="search.php?search_type=records&_simple_BIBLIO_search_search=1&biblio_search_all=true&search_advanced_search=1&adv_search=show&sort_order_dropdown=title&search_tagString=%22'.urlencode($kwd).'%22" onclick="opener.location.href = this.href; window.close();">'.htmlspecialchars($kwd)."</a>\n";
 		}
 		$body->global_vars['user-keywords'] .= "    </td>\n  </tr>\n";
 	}

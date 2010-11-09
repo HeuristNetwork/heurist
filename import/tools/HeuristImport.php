@@ -371,7 +371,7 @@ class HeuristNativeEntry {
 		$this->_title_field = NULL;  $this->_author_fields = array();
 		$this->_title_metaphone = NULL;
 
-		$this->_keywords = array();
+		$this->_tags = array();
 		$this->_workgroupKeyword = 0;
 
 		$this->_missing_fields = array();
@@ -409,21 +409,21 @@ class HeuristNativeEntry {
 	function getFields() { return $this->_fields; }
 		// Return an array of HeuristNativeField objects
 
-	function addKeyword($keyword, $userSupplied=false) {
+	function addKeyword($tag, $userSupplied=false) {
 		global $allKeywords;
 
-		// Do a bit of cooking here: keywords are typically comma or newline separated
-		if (preg_match('/\\n/s', $keyword))
-			$keywords = preg_split('/\\s*\\n\\s*/s', $keyword);
+		// Do a bit of cooking here: tags are typically comma or newline separated
+		if (preg_match('/\\n/s', $tag))
+			$tags = preg_split('/\\s*\\n\\s*/s', $tag);
 		else
-			$keywords = preg_split('/\\s*,\\s*/', $keyword);
-		foreach ($keywords as $kwd) {
+			$tags = preg_split('/\\s*,\\s*/', $tag);
+		foreach ($tags as $kwd) {
 			if (substr($kwd, -1) == '.') $kwd = substr($kwd, 0, -1);
-			array_push($this->_keywords, $kwd);
+			array_push($this->_tags, $kwd);
 			if (! $userSupplied) $allKeywords[$kwd] = $kwd;
 		}
 	}
-	function getKeywords() { return $this->_keywords; }
+	function getKeywords() { return $this->_tags; }
 
 	function setWorkgroupKeyword($kwd_id) {
 		$this->_workgroupKeyword = $kwd_id;

@@ -56,7 +56,7 @@ table { margin-top: 10px; }
   <table border=0 cellspacing=3 cellpadding=0 style="width: 100%;">
    <tr>
     <td style="width: 8ex; text-align: right;"><nobr><b>Tags</b></nobr></td>
-    <td style="width: auto;"><input id=tags name=keywordstring type=text style="width: 100%;"></td>
+    <td style="width: auto;"><input id=tags name=tagString type=text style="width: 100%;"></td>
     <td style="width: 4em;"><input type=submit value=Save></td>
    </tr>
   </table>
@@ -140,10 +140,10 @@ for (var i=0; i < topKeywords.length; ++i) {
 	addTagLink(topKeywords[i], topTagsCell);
 }
 var recentTagsCell = document.getElementById("recent-tags-cell");
-var recentKeywords = top.HEURIST.user.recentKeywords.slice(0, 5);
-recentKeywords.sort(alphasort);
-for (var i=0; i < recentKeywords.length; ++i) {	// only use the last 5 keywords here, we are starved for space
-	addTagLink(recentKeywords[i], recentTagsCell);
+var recentTags = top.HEURIST.user.recentTags.slice(0, 5);
+recentTags.sort(alphasort);
+for (var i=0; i < recentTags.length; ++i) {	// only use the last 5 keywords here, we are starved for space
+	addTagLink(recentTags[i], recentTagsCell);
 }
 
 

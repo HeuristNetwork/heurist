@@ -195,7 +195,7 @@ BlogEntry: function(record, parentElement, isNew) {
 		}
 
 		$span = $(".entry-wg-tags-span", this.$table);
-		tags = this.record.getKeywords();
+		tags = this.record.getWgTags();
 		if (tags  &&  tags.length) {
 			for (var i = 0; i < tags.length; ++i) {
 				if (tags[i].getWorkgroup() === Blog.group) {
@@ -676,8 +676,8 @@ BlogEntry: function(record, parentElement, isNew) {
 		if (Blog.group) {
 			var $taginput = $(".entry-edit-wg-tags-input", this.table);
 			var $select = $("<select><option value=''>Select a tag...</option></select>");
-		    var keywords = HKeywordManager.getWorkgroupKeywords(Blog.group);
-			var l = keywords.length;
+			var wgTags = HKeywordManager.getWorkgroupKeywords(Blog.group);
+			var l = wgTags.length;
 			for (var i = 0; i < l; ++i) {
 				(function (kwd) {
 					$("<option>" + kwd + "</option>")
@@ -692,7 +692,7 @@ BlogEntry: function(record, parentElement, isNew) {
 						$select.val("");
 					})
 					.appendTo($select);
-				})(keywords[i].getName());
+				})(wgTags[i].getName());
 			}
 			$(".entry-edit-wg-tags-input", this.table).after("&nbsp;&nbsp;add ", $select);
 			if (HCurrentUser.isAdministrator()) {
@@ -703,9 +703,9 @@ BlogEntry: function(record, parentElement, isNew) {
 		var tags = [];
 		var $input = null;
 		if (Blog.group) {
-			var keywords = this.record.getKeywords();
-			for (var i = 0; i < keywords.length; ++i) {
-				tags.push(keywords[i].getName());
+			var wgTags = this.record.getWgTags();
+			for (var i = 0; i < wgTags.length; ++i) {
+				tags.push(wgTags[i].getName());
 			}
 			$input = $(".entry-edit-wg-tags-input", this.$table);
 			$input.val(tags);
@@ -802,20 +802,20 @@ BlogEntry: function(record, parentElement, isNew) {
 				wgtags = wgtags.split(",");
 			}
 
-			var keywords = this.record.getKeywords();
-			for (var i = 0; i < keywords.length; ++i) {
-				if (keywords[i].getWorkgroup() === Blog.group) {
-					this.record.removeKeyword(keywords[i]);
+			var wgTags = this.record.getWgTags();
+			for (var i = 0; i < wgTags.length; ++i) {
+				if (wgTags[i].getWorkgroup() === Blog.group) {
+					this.record.removeWgTag(wgTags[i]);
 				}
 			}
 
 			if (wgtags  &&  wgtags.length) {
-				keywords = HKeywordManager.getWorkgroupKeywords(Blog.group);
+				wgTags = HKeywordManager.getWorkgroupKeywords(Blog.group);
 				for (var i = 0; i < wgtags.length; ++i) {
-					for (var j = 0; j < keywords.length; ++j) {
+					for (var j = 0; j < wgTags.length; ++j) {
 						if (wgtags[i]){
-							if (keywords[j].getName() === wgtags[i]) {
-								this.record.addKeyword(keywords[j]);
+							if (wgTags[j].getName() === wgtags[i]) {
+								this.record.addWgTag(wgTags[j]);
 							}
 						}
 					}
@@ -910,9 +910,9 @@ displayTagList: function() {
 		}
 	} else {
 		for (var i = 0; i < Blog.records.length; ++i) {
-			tags = Blog.records[i].getKeywords();
+			tags = Blog.records[i].getWgTags();
 			for (var j = 0; j < tags.length; ++j) {
-				if (tags[j].getWorkgroup() === Blog.group) {	// only show keywords relevant to this workgroup
+				if (tags[j].getWorkgroup() === Blog.group) {	// only show wgTags relevant to this workgroup
 					tagCounts[tags[j].getName()] = 1 + (tagCounts[tags[j].getName()] || 0);
 				}
 			}
@@ -1100,7 +1100,7 @@ search: function(opts) {
 		if (opt === "wgtag") {
 			var tags;
 			for (var i = 0, l = matches.length; i < l; ++i) {
-				tags = matches[i].getKeywords();
+				tags = matches[i].getWgTags();
 				for (var j = 0; tags && j < tags.length; ++j) {
 					if (Blog.group  &&  tags[j].getWorkgroup() === Blog.group  &&  tags[j].getName() === opts.wgtag) {
 						newMatches.push(matches[i]);

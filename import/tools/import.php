@@ -956,13 +956,13 @@ function add_keyword(tag) {
     </div>
 
 <?php
-	/* are there any workgroup-keywords for any workgroups this user is in? If so, show the workgroup-keyword section */
+	/* are there any workgroup-tags for any workgroups this user is in? If so, show the workgroup-keyword section */
 	$res = mysql_query('select kwd_id, grp_name, kwd_name from usrTags, '.USERS_DATABASE.'.UserGroups, '.USERS_DATABASE.'.Groups where kwd_wg_id=ug_group_id and ug_group_id=grp_id and ug_user_id=' . get_user_id() . ' order by grp_name, kwd_name');
 	if (mysql_num_rows($res) > 0) {
 ?>
     <div style="margin-top: 1ex; margin-left: 10ex;">
-     <nobr>Workgroup keyword:</nobr>
-     <select name="workgroup_keyword">
+     <nobr>Workgroup tag:</nobr>
+     <select name="workgroup_tag">
       <option selected></option>
 <?php		while ($row = mysql_fetch_assoc($res)) {	?>
       <option value="<?= addslashes($row['kwd_id']) ?>">
@@ -1019,17 +1019,17 @@ function mode_entry_insertion() {
 
 
 	$keyword_map = array();
-	if (@$_REQUEST['orig_keywords']) {
-		$orig_keywords = $_REQUEST['orig_keywords'];
-		$keywords = $_REQUEST['keywords'];
-		if (count($orig_keywords) == count($keywords)) {
-			for ($i=0; $i < count($keywords); ++$i)
-				$keyword_map[strtolower($orig_keywords[$i])] = $keywords[$i];
+	if (@$_REQUEST['orig_tags']) {
+		$orig_tags = $_REQUEST['orig_tags'];
+		$tags = $_REQUEST['tags'];
+		if (count($orig_tags) == count($tags)) {
+			for ($i=0; $i < count($tags); ++$i)
+				$keyword_map[strtolower($orig_tags[$i])] = $tags[$i];
 		}
 	}
 
 	$keywords_for_all = explode(',', $_REQUEST['keywords_for_all']);
-	$workgroup_keyword_id = intval($_REQUEST["workgroup_keyword"]);
+	$workgroup_tag_id = intval($_REQUEST["workgroup_tag"]);
 
 	$session_data['import_time'] =  date('Y-m-d H:i:s');
 	// add a keyword (tag) for this import session to all entries
@@ -1058,8 +1058,8 @@ function mode_entry_insertion() {
 			foreach ($keywords_for_all as $kwd)
 				if (trim($kwd)) $entry->addKeyword(trim($kwd), true);
 		}
-		if ($workgroup_keyword_id)
-			$entry->setWorkgroupKeyword($workgroup_keyword_id);
+		if ($workgroup_tag_id)
+			$entry->setWorkgroupKeyword($workgroup_tag_id);
 
 		$_entry = &$entry;
 		do { // for each container set up the author records
@@ -1883,7 +1883,7 @@ function delete_biblio(&$entry) {
 
 function insert_bookmark(&$entry) {
 	// Make sure that there is a bookmark for this entry (which has Biblio ID set)
-	// and insert keywords as necessary.
+	// and insert tags as necessary.
 	// Returns true if a bookmark was added.
 
 	global $zoteroItems;
@@ -1959,12 +1959,12 @@ if ($wgKwd) {
 	}
 	$res = mysql_query('select kwd_id, lower(trim(kwd_name)) from usrTags where kwd_name in (' . $kwd_select_clause . ')'
 	                                                             . ' and kwd_usr_id = ' . get_user_id());
-	$keywords = array();
-	while ($row = mysql_fetch_row($res)) $keywords[$row[1]] = $row[0];
+	$tags = array();
+	while ($row = mysql_fetch_row($res)) $tags[$row[1]] = $row[0];
 
 	$all_keywords = mysql__select_assoc('usrTags, '.USERS_DATABASE.'.UserGroups, '.USERS_DATABASE.'.Groups', 'lower(concat(grp_name, "\\\\", kwd_name))', 'kwd_id',
 	                                    'kwd_wg_id=ug_group_id and ug_group_id=grp_id and ug_user_id='.get_user_id());
-	foreach ($all_keywords as $kwd => $id) $keywords[$kwd] = $id;
+	foreach ($all_keywords as $kwd => $id) $tags[$kwd] = $id;
 
 	$entry_kwd_ids = array();
 	foreach ($entry->getKeywords() as $kwd) {
@@ -1973,16 +1973,16 @@ if ($wgKwd) {
 			$wg_kwd = true;
 		} else $wg_kwd = false;
 
-		$kwd_id = @$keywords[strtolower(trim($kwd))];
+		$kwd_id = @$tags[strtolower(trim($kwd))];
 		if ($kwd_id) array_push($entry_kwd_ids, $kwd_id);
-/**** 	"Don't insert new keywords unannounced"
-	Well, it's very very difficult to get feedback from the user, so we just won't insert any new keywords at all, I guess.  Hope you're happy.
-*/		else if (! $wg_kwd) {	// do not insert new workgroup keywords
+/**** 	"Don't insert new tags unannounced"
+	Well, it's very very difficult to get feedback from the user, so we just won't insert any new tags at all, I guess.  Hope you're happy.
+*/		else if (! $wg_kwd) {	// do not insert new workgroup tags
 			mysql_query('insert into usrTags (kwd_usr_id, kwd_name) ' .
 			                         ' values ('.get_user_id().', "'.addslashes($kwd).'")');
 			$kwd_id = mysql_insert_id();
 			array_push($entry_kwd_ids, $kwd_id);
-			$keywords[strtolower(trim($kwd))] = $kwd_id;
+			$tags[strtolower(trim($kwd))] = $kwd_id;
 		}
 
 	}
@@ -2198,43 +2198,43 @@ function setPermanentBiblioID(&$entry, $new_biblio_id) {
 
 
 function print_keyword_stuff(&$out_entries) {
-	$keywords = array();
-	$orig_keywords = array();
+	$tags = array();
+	$orig_tags = array();
 	$j = 0;
 	foreach (array_keys($out_entries) as $i) {
 		$my_keywords = $out_entries[$i]->getKeywords();
 		foreach ($my_keywords as $kwd) {
 			$kwd = trim($kwd);
 			if (! $kwd) continue;
-			if (! array_key_exists(strtolower($kwd), $keywords)) {
-				$keywords[strtolower($kwd)] = true;
-				array_push($orig_keywords, $kwd);
+			if (! array_key_exists(strtolower($kwd), $tags)) {
+				$tags[strtolower($kwd)] = true;
+				array_push($orig_tags, $kwd);
 			}
 		}
 	}
 
 	$query = "";
-	foreach ($orig_keywords as $kwd) {
+	foreach ($orig_tags as $kwd) {
 		if ($query) $query .= "', '";
 		$query .= addslashes($kwd);
 	}
 	$query = "select kwd_name from usrTags where kwd_name in ('" . $query . "')";
 	$res = mysql_query($query);
-	$existing_keywords = array();
+	$existing_tags = array();
 	while ($row = mysql_fetch_row($res)) {
 		$kwd = $row[0];
-		$existing_keywords[strtolower($kwd)] = $kwd;
+		$existing_tags[strtolower($kwd)] = $kwd;
 	}
 
 	$new_keywords = false;
-	foreach ($orig_keywords as $i => $kwd) {
-		if (! @$existing_keywords[strtolower($kwd)]) {
+	foreach ($orig_tags as $i => $kwd) {
+		if (! @$existing_tags[strtolower($kwd)]) {
 			$new_keywords = true;
 			break;
 		}
 	}
 
-	if ($orig_keywords) {
+	if ($orig_tags) {
 
 		if ($new_keywords) {
 ?>
@@ -2244,17 +2244,17 @@ function print_keyword_stuff(&$out_entries) {
 <p style="margin-left: 15px;">
 <?php
 		}
-		foreach ($orig_keywords as $i => $kwd) {
-			if (@$existing_keywords[strtolower($kwd)]) {
-				print '<input type=hidden name=keywords[] value="'.htmlspecialchars($kwd).'">';
-				print '<input type=hidden name=orig_keywords[] value="'.htmlspecialchars($kwd).'">';
+		foreach ($orig_tags as $i => $kwd) {
+			if (@$existing_tags[strtolower($kwd)]) {
+				print '<input type=hidden name=tags[] value="'.htmlspecialchars($kwd).'">';
+				print '<input type=hidden name=orig_tags[] value="'.htmlspecialchars($kwd).'">';
 				continue;
 			}
 
 			print '<div style="margin-left: 2em;">';
-			print '<input type="hidden" name="keywords[]" value="' . htmlspecialchars($kwd) . '">';
+			print '<input type="hidden" name="tags[]" value="' . htmlspecialchars($kwd) . '">';
 			print '<label for=kwd-' . $i . '>';
-			print   '<input type="checkbox" name="orig_keywords[]" value="' . htmlspecialchars($kwd) . '" id=kwd-' . $i . ' style="margin: 0; border: 0; padding: 0; margin-right: 5px;">';
+			print   '<input type="checkbox" name="orig_tags[]" value="' . htmlspecialchars($kwd) . '" id=kwd-' . $i . ' style="margin: 0; border: 0; padding: 0; margin-right: 5px;">';
 			print   htmlspecialchars($kwd);
 			print '</label>';
 			print "</div>\n";
@@ -2265,8 +2265,8 @@ function print_keyword_stuff(&$out_entries) {
 
 <br clear=all>
 
-<input type=button value="Select all tags" onclick="var ok=document.getElementsByName('orig_keywords[]'); for (var i=0; i < ok.length; ++i) ok[i].checked = true;">
-<input type=button value="Unselect all tags" onclick="var ok=document.getElementsByName('orig_keywords[]'); for (var i=0; i < ok.length; ++i) ok[i].checked = false;">
+<input type=button value="Select all tags" onclick="var ok=document.getElementsByName('orig_tags[]'); for (var i=0; i < ok.length; ++i) ok[i].checked = true;">
+<input type=button value="Unselect all tags" onclick="var ok=document.getElementsByName('orig_tags[]'); for (var i=0; i < ok.length; ++i) ok[i].checked = false;">
 </p>
 
 <hr>

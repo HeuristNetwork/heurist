@@ -29,17 +29,17 @@
 
      <tr>
       <td>
-       <div class=keyword-list><table border=0 cellspacing=0 cellpadding=0><tbody id=all-workgroup-keywords></tbody></table></div>
+       <div class=keyword-list><table border=0 cellspacing=0 cellpadding=0><tbody id=all-workgroup-tags></tbody></table></div>
       </td>
       <td>
        <div id=button-box>
-        <div><input type=button value="&gt;" title="Add a tag" onmousedown="HEURIST.keywordEditor.addKeyword(window.selectedRow)" disabled id=add-button></div>
+        <div><input type=button value="&gt;" title="Add a tag" onmousedown="HEURIST.keywordEditor.addWgTag(window.selectedRow)" disabled id=add-button></div>
         <div>&nbsp;&nbsp;</div>
-        <div><input type=button value="&lt;" title="Remove a tag" onmousedown="HEURIST.keywordEditor.removeKeyword(window.selectedRow)" disabled id=remove-button></div>
+        <div><input type=button value="&lt;" title="Remove a tag" onmousedown="HEURIST.keywordEditor.removeWgTag(window.selectedRow)" disabled id=remove-button></div>
        </div>
       </td>
       <td>
-       <div class=keyword-list><table border=0 cellspacing=0 cellpadding=0><tbody id=current-workgroup-keywords></tbody></table></div>
+       <div class=keyword-list><table border=0 cellspacing=0 cellpadding=0><tbody id=current-workgroup-tags></tbody></table></div>
       </td>
      </tr>
 
@@ -70,23 +70,23 @@
     </table>
 
     <!-- not used in this form ... just for compatibility with the edit/workgroups tab ... safe to FIXME when we refactor -->
-    <form id=keyword-form jsonAction=save-keywords.php action=save-keywords.php></form>
+    <form id=keyword-form jsonAction="update-taglinks.php" action="update-taglinks.php"></form>
 
 <script>
 
 var removeButton = document.getElementById("remove-button");
 var addButton = document.getElementById("add-button");
 
-var currKwdsElt = document.getElementById("current-workgroup-keywords");
-var allKwdsElt = document.getElementById("all-workgroup-keywords");
-new HEURIST.keywordEditor.KeywordEditor(currKwdsElt, allKwdsElt, addButton, removeButton);
+var currWgTagsElt = document.getElementById("current-workgroup-tags");
+var allWgTagsElt = document.getElementById("all-workgroup-tags");
+new HEURIST.keywordEditor.KeywordEditor(currWgTagsElt, allWgTagsElt, addButton, removeButton);
 
 
 function saveKeywords(add) {
-	// grab the IDs of the workgroup keywords that we are adding, pass them back to the close function.
+	// grab the IDs of the workgroup tags that we are adding, pass them back to the close function.
 	var ids = [];
-	for (var i=0; i < currKwdsElt.childNodes.length; ++i) {
-		var id = parseInt(currKwdsElt.childNodes[i].id);
+	for (var i=0; i < currWgTagsElt.childNodes.length; ++i) {
+		var id = parseInt(currWgTagsElt.childNodes[i].id);
 		ids.push(id);
 	}
 

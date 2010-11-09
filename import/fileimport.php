@@ -183,7 +183,7 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_keyw
 		if (! @$rec_id) continue;	/* malformed URL */
 
 		if (@$_REQUEST['adding_keywords']) {
-			$kwd = @$_REQUEST['keywords'];
+			$kwd = @$_REQUEST['wgTags'];
 		} else {
 			$kwd = @$_REQUEST['kwd'][$linkno];
 		}
@@ -309,7 +309,7 @@ function unCheckAll() {
 
 <form action="fileimport.php" method="post" enctype="multipart/form-data" name="mainform" style="margin: 0px 3px;">
 
-<input type="hidden" name="keywords" id="keywords">
+<input type="hidden" name="wgTags" id="wgTags">
 <input type="hidden" name="adding_keywords" value="0" id="adding_keywords_elt">
 <input type="hidden" name="titlegrabber_lock">
 
@@ -402,7 +402,7 @@ The list is reloaded after each addition and after change of settings.
    &nbsp;&nbsp;
    <a href="#" onClick="unCheckAll(); return false;">Uncheck all</a>
    &nbsp;&nbsp;
-   <input type="submit" name="mode" value="Bookmark checked links" style="font-weight: bold;" onclick="top.HEURIST.util.popupURL(window, '<?=HEURIST_SITE_PATH?>records/tags/add-tags.html', { callback: function(tags) { document.getElementById('keywords').value = tags; document.getElementById('adding_keywords_elt').value = 1; document.forms[0].submit(); } } ); return false;">
+   <input type="submit" name="mode" value="Bookmark checked links" style="font-weight: bold;" onclick="top.HEURIST.util.popupURL(window, '<?=HEURIST_SITE_PATH?>records/tags/add-tags.html', { callback: function(tags) { document.getElementById('wgTags').value = tags; document.getElementById('adding_keywords_elt').value = 1; document.forms[0].submit(); } } ); return false;">
   </td>
  </tr>
 

@@ -120,7 +120,7 @@ if ($_REQUEST['_submit']  &&  $dup_check_ok) {
 			mysql_query("update ".USERS_DATABASE.".Users set WordLimit='".addslashes($word_limit)."' where Id=$usr_id");
 
 
-			/* copy keywords from the model_user */
+			/* copy tags from the model_user */
 			$res = mysql_query("select kwd_name from usrTags where kwd_usr_id=$model_usr_id");
 			$values = '';
 			while ($row = mysql_fetch_row($res)) {

@@ -732,7 +732,7 @@ class KeywordPredicate extends Predicate {
 		$any_wg_values = false;
 
 		// Heavy, heavy DWIM here: if the keyword for which we're searching contains comma(s),
-		// then split it into several keywords, and do an OR search on those.
+		// then split it into several tags, and do an OR search on those.
 		for ($i=0; $i < count($values); ++$i) {
 			if (strpos($values[$i], '\\') === FALSE) {
 				array_push($this->value, trim($values[$i]));
@@ -1100,7 +1100,7 @@ function construct_legacy_search() {
 	$q = '';
 
 	if (@$_REQUEST['search_title']) $_REQUEST['t'] = $_REQUEST['search_title'];
-	if (@$_REQUEST['search_keywordstring']) $_REQUEST['k'] = $_REQUEST['search_keywordstring'];
+	if (@$_REQUEST['search_tagString']) $_REQUEST['k'] = $_REQUEST['search_tagString'];
 	if (@$_REQUEST['search_url']) $_REQUEST['u'] = $_REQUEST['search_url'];
 	if (@$_REQUEST['search_description']) $_REQUEST['n'] = $_REQUEST['search_description'];
 	if (@$_REQUEST['search_reftype']) $_REQUEST['r'] = $_REQUEST['search_reftype'];

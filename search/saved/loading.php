@@ -353,7 +353,7 @@ function loadUserDependentData(&$record) {
 		 kwl_rec_id = $recID
 		 order by kwl_order");
 
-	$record["keywords"] = mysql__select_array(
+	$record["wgTags"] = mysql__select_array(
 		"keyword_links, usrTags, ".USERS_DATABASE.".UserGroups",
 		"kwl_kwd_id",
 		"kwd_id = kwl_kwd_id and

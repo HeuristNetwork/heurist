@@ -6,7 +6,7 @@
 
 if (! window.HEURIST) window.HEURIST = {};
 window.HEURIST.keywordEditor = {
-	addKeyword: function(row) {
+	addWgTag: function(row) {
 		var newInput = document.createElement("input");
 			newInput.type = "hidden";
 			newInput.name = "action[]";
@@ -15,11 +15,11 @@ window.HEURIST.keywordEditor = {
 
 		var kwdDetails = top.HEURIST.user.workgroupKeywords[row.id];
 		row.className = "";	// address bug with csshover2
-		document.getElementById("current-workgroup-keywords").appendChild(row);
-		row.ondblclick = function() { HEURIST.keywordEditor.removeKeyword(row); };
+		document.getElementById("current-workgroup-tags").appendChild(row);
+		row.ondblclick = function() { HEURIST.keywordEditor.removeWgTag(row); };
 		row.onkeypress = function(e) {
 			if (! e) e = window.event;
-			if (e.keyCode == 10 || e.keyCode == 13) HEURIST.keywordEditor.removeKeyword(row);
+			if (e.keyCode == 10 || e.keyCode == 13) HEURIST.keywordEditor.removeWgTag(row);
 		};
 		row.onfocus = function() { window.selectedRow = this; removeButton.disabled = false; }
 		row.onblur = function() { window.selectedRow = null; removeButton.disabled = true; };
@@ -28,7 +28,7 @@ window.HEURIST.keywordEditor = {
 		if (top.HEURIST.edit) top.HEURIST.edit.changed("workgroups");
 	},
 
-	removeKeyword: function(row) {
+	removeWgTag: function(row) {
 		var newInput = document.createElement("input");
 			newInput.type = "hidden";
 			newInput.name = "action[]";
@@ -37,11 +37,11 @@ window.HEURIST.keywordEditor = {
 
 		var kwdDetails = top.HEURIST.user.workgroupKeywords[row.id];
 		row.className = "";
-		document.getElementById("all-workgroup-keywords").appendChild(row);
-		row.ondblclick = function() { HEURIST.keywordEditor.addKeyword(row); };
+		document.getElementById("all-workgroup-tags").appendChild(row);
+		row.ondblclick = function() { HEURIST.keywordEditor.addWgTag(row); };
 		row.onkeypress = function(e) {
 			if (! e) e = window.event;
-			if (e.keyCode == 10 || e.keyCode == 13) HEURIST.keywordEditor.addKeyword(row);
+			if (e.keyCode == 10 || e.keyCode == 13) HEURIST.keywordEditor.addWgTag(row);
 		};
 		row.onfocus = function() { window.selectedRow = this; HEURIST.keywordEditor.addButton.disabled = false; }
 		row.onblur = function() { window.selectedRow = null; HEURIST.keywordEditor.addButton.disabled = true; };
@@ -73,7 +73,7 @@ window.HEURIST.keywordEditor = {
 		return list.appendChild(kwdRow);
 	},
 
-	KeywordEditor: function(currKwdsElt, allKwdsElt, addButton, removeButton) {
+	KeywordEditor: function(currWgTagsElt, allWgTagsElt, addButton, removeButton) {
 		var kwdDetailsById = top.HEURIST.user.workgroupKeywords;
 		var kwdOrder = top.HEURIST.user.workgroupKeywordOrder;
 		var wKwdIds = parent.HEURIST.record? parent.HEURIST.record.workgroupKeywords : [];
@@ -87,11 +87,11 @@ window.HEURIST.keywordEditor = {
 			var kwdDetails = kwdDetailsById[ wKwdIds[i] ];
 			if (! kwdDetails) continue;	// workgroup-keyword for a workgroup this user isn't in
 
-			var newRow = HEURIST.keywordEditor.addKeywordToList(currKwdsElt, wKwdIds[i], kwdDetails[0], kwdDetails[1]);
-				newRow.ondblclick = function(row) { return function() { HEURIST.keywordEditor.removeKeyword(row); }; }(newRow);
+			var newRow = HEURIST.keywordEditor.addKeywordToList(currWgTagsElt, wKwdIds[i], kwdDetails[0], kwdDetails[1]);
+				newRow.ondblclick = function(row) { return function() { HEURIST.keywordEditor.removeWgTag(row); }; }(newRow);
 				newRow.onkeypress = function(row) { return function(e) {
 					if (! e) e = window.event;
-					if (e.keyCode == 10 || e.keyCode == 13) HEURIST.keywordEditor.removeKeyword(row);
+					if (e.keyCode == 10 || e.keyCode == 13) HEURIST.keywordEditor.removeWgTag(row);
 				} }(newRow);
 				newRow.onfocus = function() { window.selectedRow = this; HEURIST.keywordEditor.removeButton.disabled = false; }
 				newRow.onblur = function() { window.selectedRow = null; HEURIST.keywordEditor.removeButton.disabled = true; };
@@ -103,11 +103,11 @@ window.HEURIST.keywordEditor = {
 			if (usedKwdIds[wKwdId]) continue;
 
 			var kwdDetails = kwdDetailsById[ wKwdId ];
-			var newRow = HEURIST.keywordEditor.addKeywordToList(allKwdsElt, wKwdId, kwdDetails[0], kwdDetails[1]);
-				newRow.ondblclick = function(row) { return function() { HEURIST.keywordEditor.addKeyword(row); }; }(newRow);
+			var newRow = HEURIST.keywordEditor.addKeywordToList(allWgTagsElt, wKwdId, kwdDetails[0], kwdDetails[1]);
+				newRow.ondblclick = function(row) { return function() { HEURIST.keywordEditor.addWgTag(row); }; }(newRow);
 				newRow.onkeypress = function(row) { return function(e) {
 					if (! e) e = window.event;
-					if (e.keyCode == 10 || e.keyCode == 13) HEURIST.keywordEditor.addKeyword(row);
+					if (e.keyCode == 10 || e.keyCode == 13) HEURIST.keywordEditor.addWgTag(row);
 				} }(newRow);
 				newRow.onfocus = function() { window.selectedRow = this; addButton.disabled = false; };
 				newRow.onblur = function() { window.selectedRow = null; addButton.disabled = true; };

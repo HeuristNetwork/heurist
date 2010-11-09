@@ -995,14 +995,14 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
 		if (term === "") return [];
 
-		var keywords = top.HEURIST.user.keywords;
+		var tags = top.HEURIST.user.tags;
 
 		/* Do complicated matching:
 		 * We match the (whitespace-separated) words in the term with the words in the keyword.
 		 * If there is just one word in the term this is very easy.
 		 * Note that punctuation is treated as whitespace for the purposes of this experiment
 		 *
-		 * We treat the first word of the term as special, and make keywords that start with that word float to the top
+		 * We treat the first word of the term as special, and make tags that start with that word float to the top
 		 */
 
 		term = term.replace(/[^a-zA-Z0-9]/g, " ");	// remove punctuation and other non-alphanums
@@ -1032,13 +1032,13 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		var startMatches = [];
 		var otherMatches = [];
 
-		for (var i=0; i < keywords.length; ++i) {
-			var match = keywords[i].toLowerCase().match(regex);
+		for (var i=0; i < tags.length; ++i) {
+			var match = tags[i].toLowerCase().match(regex);
 
 			if (match  &&  match[1] == "")
-				startMatches.push(keywords[i]);
+				startMatches.push(tags[i]);
 			else if (match)
-				otherMatches.push(keywords[i]);
+				otherMatches.push(tags[i]);
 		}
 
 		// splice start matches at the beginning of the other matches
@@ -1110,7 +1110,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 	autocompleteConfirm: function() {
 		// (this) is the AutoComplete
 		var newTag = this.currentWordValue.replace(/^\s+|\s+$/g, "").replace(/\s+/g, " ");
-		top.HEURIST.user.keywords.push(newTag);
+		top.HEURIST.user.tags.push(newTag);
 
 		this.confirmImg.parentNode.removeChild(this.confirmImg);
 		this.confirmImg = null;

@@ -47,17 +47,17 @@ if (mysql_num_rows($res) == 0) {
 		return;
 	}
 	$bkmk = mysql_fetch_assoc($res);
-	$bkmk["keywordString"] = "";
+	$bkmk["tagString"] = "";
 }
 else {
 	$bkmk = mysql_fetch_assoc($res);
 	$kwds = mysql__select_array("keyword_links left join usrTags on kwd_id=kwl_kwd_id", "kwd_name", "kwl_pers_id=".$bkmk["bkm_ID"]." and kwd_usr_id=".get_user_id() . " order by kwl_order, kwl_id");
-	$bkmk["keywordString"] = join(",", $kwds);
+	$bkmk["tagString"] = join(",", $kwds);
 }
 
 $record = array(
 	"bkmkID" => $bkmk["bkm_ID"],
-	"keywordString" => $bkmk["keywordString"],
+	"tagString" => $bkmk["tagString"],
 	"rating" => $bkmk["bkm_Rating"],
 	"reminders" => array(),	// FIXME: should really import these freshly in case the bkmk already exists
 	"passwordReminder" => $bkmk["bkm_PwdReminder"],

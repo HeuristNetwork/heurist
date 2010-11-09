@@ -24,7 +24,7 @@ if (recTypeIDs.length == 1){
     }
 }    //  FIXME  add error code for else case
 
-// process any keywords that were passed in the search                                                    
+// process any tags that were passed in the search
 if (qBits.keyword){
     var recWgKwds = [];
     for (var n in qBits.keyword[0]){ 
@@ -34,13 +34,13 @@ if (qBits.keyword){
         // split the string into WG name and Kwd name      format should be "WG \ Kwd"  
         temp = temp.split(/\\/);            
         
-        //store work group - keyword pairs   note that we have the possibility of having multiple keywords for the same workgroup
+        //store work group - keyword pairs   note that we have the possibility of having multiple tags for the same workgroup
         recWgKwds[temp[0]] = temp[1].split(",");  
     } 
     
     
     var hKwds = [];
-    for (var wgName in recWgKwds){   // iterate through all the record workgroup- keywords pairs
+    for (var wgName in recWgKwds){   // iterate through all the record workgroup- tags pairs
         // get the HAPI workgroup object
         var hWg =  HWorkgroupManager.getWorkgroupByName(wgName);
 
@@ -50,17 +50,17 @@ if (qBits.keyword){
         // get all the Heurist keyword objects for this workgroup
         var wgKwds = HKeywordManager.getWorkgroupKeywords(hWg);
         
-        // iterate through all the WG keywords
+        // iterate through all the WG tags
         for (var i in wgKwds){           
             
-            // check for a match within the search keywords for this workgroup
+            // check for a match within the search tags for this workgroup
             for(var j in recWgKwds[wgName]) {
               
                 // if not a match skip to the next
                 if (wgKwds[i].getName().toLowerCase() != recWgKwds[wgName][j].toLowerCase() ) continue;
                 
                 //add the HKeyword to the record
-                record.addKeyword(wgKwds[i]);     // FIXME   record is a global in the common-functions.js
+                record.addWgTag(wgKwds[i]);     // FIXME   record is a global in the common-functions.js
                 
                 // remove keyword name from the search-keyword array  
                 recWgKwds[wgName].splice(j,1);  
@@ -68,13 +68,13 @@ if (qBits.keyword){
                 // found and processed  wg keyword  let's break this inner loop
                  break;
             }  // next search kwd
-             // if there are no more keywords for this WG  remove it from the array and go to next WG
+             // if there are no more tags for this WG  remove it from the array and go to next WG
 /*            if (recWgKwds[wgName].length == 0)  {
                 recWgKwds.splice(wgName,1);
                 break;
             }
  */       }  //next WG kwd                   
-        //if there are no more keywords to lookup exit the loop
+        //if there are no more tags to lookup exit the loop
  //       if (recWgKwds.length == 0) break;
        
         // search keyword was not found in work group there is probably a problem with the search keyword
@@ -101,7 +101,7 @@ for (attrib in qBits){
         rec_presetDetails[rd_Id].push( qBits[attrib][0][0].replace(/^\"|\"$/g,'') );
         
      }
-}   // end of process keywords
+}   // end of process tags
 
 function callGhostBusters( errString){
      alert(errString + " : contact Eugene Chan in Arts Digital");

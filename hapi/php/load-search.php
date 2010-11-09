@@ -38,7 +38,7 @@ if (array_key_exists("records", $result)) {
 			@$record["pers_interest_rating"],     // 18
 			@$record["pers_quality_rating"],      // 19
 			@$record["tags"],                     // 20
-			@$record["keywords"],                 // 21
+			@$record["wgTags"],                   // 21
 			@$record["notifies"],                 // 22
 			@$record["comments"]                  // 23
 		);
