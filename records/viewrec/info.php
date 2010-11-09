@@ -195,7 +195,7 @@ function print_private_details($bib) {
 		$workgroup_name = $row[0];
 	}
 	// check for workgroup tags
-	$res = mysql_query('select grp_name, kwd_name from keyword_links left join usrTags on kwl_kwd_id=kwd_id left join '.USERS_DATABASE.'.Groups on kwd_wg_id=grp_id left join '.USERS_DATABASE.'.UserGroups on ug_group_id=grp_id and ug_user_id='.get_user_id().' where kwl_rec_id='.$bib['rec_id'].' and kwd_wg_id and ug_id is not null order by kwl_order');
+	$res = mysql_query('select grp_name, tag_Text from keyword_links left join usrTags on kwl_kwd_id=tag_ID left join '.USERS_DATABASE.'.Groups on tag_UGrpID=grp_id left join '.USERS_DATABASE.'.UserGroups on ug_group_id=grp_id and ug_user_id='.get_user_id().' where kwl_rec_id='.$bib['rec_id'].' and ???kwd_wg_id and ug_id is not null order by kwl_order');
 	$kwds = array();
 	while ($row = mysql_fetch_row($res)) array_push($kwds, $row);
 	if ( $workgroup_name || count($kwds) || $bib['bkm_ID']) {
@@ -248,8 +248,8 @@ function print_private_details($bib) {
 		$bkm_ID = $bkmk['bkm_ID'];
 
 		$tags = mysql__select_array('keyword_links, usrTags',
-		                            'kwd_name',
-		                            'kwl_kwd_id=kwd_id and kwl_pers_id='.$bkm_ID.' and kwd_wg_id is null order by kwl_order');
+		                            'tag_Text',
+		                            'kwl_kwd_id=tag_ID and kwl_pers_id='.$bkm_ID.' and ???kwd_wg_id is null order by kwl_order');
 	?>
 	<div class=detailRow>
 	<div class=detailType>Personal Tags</div>

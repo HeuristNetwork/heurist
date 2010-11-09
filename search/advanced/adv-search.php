@@ -756,7 +756,7 @@ class KeywordPredicate extends Predicate {
 				return $not . 'exists (select * from keyword_links where kwl_pers_id=bkm_ID and kwl_kwd_id in ('.join(',', $this->value).'))';
 			} else if (! $this->wg_value) {
 				// this runs faster (like TEN TIMES FASTER) - think it's to do with the join
-				$query=$not . 'exists (select * from keyword_links kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.kwd_id '
+				$query=$not . 'exists (select * from keyword_links kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.tag_ID '
 				                    . 'where kwi.kwl_rec_id=rec_id and (';
 				$first_value = true;
 				foreach ($this->value as $value) {
@@ -764,15 +764,15 @@ class KeywordPredicate extends Predicate {
 					if (is_numeric($value)) {
 						$query .= 'kwl_kwd_id='.intval($value).' ';
 					} else {
-						$query .=     ($this->parent->exact? 'kwd.kwd_name = "'.addslashes($value).'" '
-					                                           : 'kwd.kwd_name like "'.addslashes($value).'%" ');
+						$query .=     ($this->parent->exact? 'kwd.tag_Text = "'.addslashes($value).'" '
+					                                           : 'kwd.tag_Text like "'.addslashes($value).'%" ');
 					}
 					$first_value = false;
 				}
-				$query .=              ') and kwd.kwd_usr_id='.get_user_id().') ';
+				$query .=              ') and kwd.tag_UGrpID='.get_user_id().') ';
 			} else {
-				$query=$not . 'exists (select * from '.USERS_DATABASE.'.Groups, keyword_links kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.kwd_id '
-				                    . 'where grp_id=kwd_wg_id and kwi.kwl_rec_id=rec_id and (';
+				$query=$not . 'exists (select * from '.USERS_DATABASE.'.Groups, keyword_links kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.tag_ID '
+				                    . 'where grp_id=tag_UGrpID and kwi.kwl_rec_id=rec_id and (';
 				for ($i=0; $i < count($this->value); ++$i) {
 					if ($i > 0) $query .= 'or ';
 
@@ -781,34 +781,34 @@ class KeywordPredicate extends Predicate {
 
 					if ($wg_value) {
 						$query .= '(';
-				        	$query .=      ($this->parent->exact? 'kwd.kwd_name = "'.addslashes($value).'" '
-					                                            : 'kwd.kwd_name like "'.addslashes($value).'%" ');
+						$query .=      ($this->parent->exact? 'kwd.tag_Text = "'.addslashes($value).'" '
+					                                            : 'kwd.tag_Text like "'.addslashes($value).'%" ');
 						$query .=      ' and grp_name = "'.addslashes($wg_value).'") ';
 					} else {
-				        	$query .=      ($this->parent->exact? 'kwd.kwd_name = "'.addslashes($value).'" '
-					                                            : 'kwd.kwd_name like "'.addslashes($value).'%" ');
+						$query .=      ($this->parent->exact? 'kwd.tag_Text = "'.addslashes($value).'" '
+					                                            : 'kwd.tag_Text like "'.addslashes($value).'%" ');
 					}
 				}
 				$query .= ')) ';
 			}
 		} else {
 			if (! $this->wg_value) {
-				$query = $not . 'exists (select * from keyword_links kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.kwd_id '
+				$query = $not . 'exists (select * from keyword_links kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.tag_ID '
 				                    . 'where kwi.kwl_rec_id=rec_id and (';
 				$first_value = true;
 				foreach ($this->value as $value) {
 					if (! $first_value) $query .= 'or ';
 					if (is_numeric($value)) {
-						$query .= "kwd.kwd_id=$value ";
+						$query .= "kwd.tag_ID=$value ";
 					} else {
-						$query .=      ($this->parent->exact? 'kwd.kwd_name = "'.addslashes($value).'" '
-					                                            : 'kwd.kwd_name like "'.addslashes($value).'%" ');
+						$query .=      ($this->parent->exact? 'kwd.tag_Text = "'.addslashes($value).'" '
+					                                            : 'kwd.tag_Text like "'.addslashes($value).'%" ');
 					}
 					$first_value = false;
 				}
 				$query .= ')) ';
 			} else {
-				$query = $not . 'exists (select * from keyword_links kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.kwd_id left join '.USERS_DATABASE.'.Groups on grp_id=kwd_wg_id '
+				$query = $not . 'exists (select * from keyword_links kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.tag_ID left join '.USERS_DATABASE.'.Groups on grp_id=tag_UGrpID '
 				                    . 'where kwi.kwl_rec_id=rec_id and (';
 				for ($i=0; $i < count($this->value); ++$i) {
 					if ($i > 0) $query .= 'or ';
@@ -818,16 +818,16 @@ class KeywordPredicate extends Predicate {
 
 					if ($wg_value) {
 						$query .= '(';
-						$query .=      ($this->parent->exact? 'kwd.kwd_name = "'.addslashes($value).'" '
-					                                            : 'kwd.kwd_name like "'.addslashes($value).'%" ');
+						$query .=      ($this->parent->exact? 'kwd.tag_Text = "'.addslashes($value).'" '
+					                                            : 'kwd.tag_Text like "'.addslashes($value).'%" ');
 					        $query .=      ' and grp_name = "'.addslashes($wg_value).'") ';
 					} else {
 						if (is_numeric($value)) {
-							$query .= "kwd.kwd_id=$value ";
+							$query .= "kwd.tag_ID=$value ";
 						} else {
 							$query .= '(';
-							$query .=      ($this->parent->exact? 'kwd.kwd_name = "'.addslashes($value).'" '
-						                                            : 'kwd.kwd_name like "'.addslashes($value).'%" ');
+							$query .=      ($this->parent->exact? 'kwd.tag_Text = "'.addslashes($value).'" '
+						                                            : 'kwd.tag_Text like "'.addslashes($value).'%" ');
 							$query .= ' and grp_id is null) ';
 						}
 					}

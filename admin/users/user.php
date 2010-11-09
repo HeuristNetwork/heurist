@@ -22,12 +22,12 @@ $name = $name[0];
 
 $body->global_vars['tags'] = '';
 
-$res = mysql_query('select kwd_name,count(kwl_id) as bkmks
+$res = mysql_query('select tag_Text,count(kwl_id) as bkmks
                       from keyword_links
-                 left join usrTags on kwl_kwd_id=kwd_id
-                     where kwd_usr_id='.$_REQUEST['Id'].'
-                  group by kwd_name
-                  order by '. ($_REQUEST['sort'] == 'alpha' ? 'kwd_name, bkmks desc' : 'bkmks desc, kwd_name'));
+                 left join usrTags on kwl_kwd_id=tag_ID
+                     where tag_UGrpID='.$_REQUEST['Id'].'
+                  group by tag_Text
+                  order by '. ($_REQUEST['sort'] == 'alpha' ? 'tag_Text, bkmks desc' : 'bkmks desc, tag_Text'));
 
 $body->global_vars['tags'] .= '<span id="top10">'."\n";
 $i = 0;
@@ -39,7 +39,7 @@ while ($row = mysql_fetch_assoc($res)) {
 	if ($i == 50)
 		$body->global_vars['tags'] .= "</span>\n".'<span id="top100" style="display: none;">'."\n";
 	$i++;
-	$body->global_vars['tags'] .= '<a target="_top" href="'.HEURIST_URL_BASE.'search/search.html?w=all&q=tag:%22'.urlencode($row['kwd_name']).'%22+user:'.$_REQUEST['Id'].'" title="Search for '.$name.'\'s references with the keyword \''.$row['kwd_name'].'\'"><nobr>'.$row['kwd_name'].' ('.$row['bkmks'].")</nobr></a>&nbsp&nbsp\n";
+	$body->global_vars['tags'] .= '<a target="_top" href="'.HEURIST_URL_BASE.'search/search.html?w=all&q=tag:%22'.urlencode($row['tag_Text']).'%22+user:'.$_REQUEST['Id'].'" title="Search for '.$name.'\'s references with the keyword \''.$row['tag_Text'].'\'"><nobr>'.$row['tag_Text'].' ('.$row['bkmks'].")</nobr></a>&nbsp&nbsp\n";
 }
 $body->global_vars['tags'] .= "</span>\n";
 

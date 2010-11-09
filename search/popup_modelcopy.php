@@ -93,8 +93,8 @@ if (@$_REQUEST['submit']) $updated = update_my_settings();
 ?>
   <tr>
    <td style="width: 16px;">&nbsp;</td>
-   <td style="width: 16px;"><input type="checkbox" name="kwd[<?= $row['kwd_id'] ?>]" value="1" checked class="kwd"></td>
-   <td><?= htmlspecialchars($row['kwd_name']) ?></td>
+   <td style="width: 16px;"><input type="checkbox" name="kwd[<?= $row['tag_ID'] ?>]" value="1" checked class="kwd"></td>
+   <td><?= htmlspecialchars($row['tag_Text']) ?></td>
   </tr>
 <?php
 	}
@@ -216,12 +216,12 @@ function update_my_settings() {
 	$bkmks = array_map('intval', array_keys($_REQUEST['bkmk']));
 	$ssearches = array_map('intval', array_keys($_REQUEST['ssearch']));
 
-	$keys = mysql__select_array('usrTags', 'kwd_id', 'kwd_usr_id = '.MODEL_USER_ID.' and kwd_id in (0, ' . join(', ', $keys) . ')');
+	$keys = mysql__select_array('usrTags', 'tag_ID', 'tag_UGrpID= '.MODEL_USER_ID.' and tag_ID in (0, ' . join(', ', $keys) . ')');
 	$bkmks = mysql__select_array('usrBookmarks', 'bkm_ID', 'bkm_UGrpID = '.MODEL_USER_ID.' and bkm_ID in (0, ' . join(', ', $bkmks) . ')');
 	$ssearches = mysql__select_array('saved_searches', 'ss_id', 'ss_usr_id = '.MODEL_USER_ID.' and ss_id in (0, ' . join(', ', $ssearches) . ')');
 
 	if ($keys) {
-		$res = mysql_query('select kwd_name from usrTags where kwd_id in ('.join(',',$keys).')');
+		$res = mysql_query('select tag_Text from usrTags where tag_ID in ('.join(',',$keys).')');
 		$values = '';
 		while ($row = mysql_fetch_row($res)) {
 			if ($values) $values .= ', ';
@@ -229,7 +229,7 @@ function update_my_settings() {
 		}
 
 		if ($values) {
-			mysql_query("insert into usrTags (kwd_name, kwd_usr_id) values $values");
+			mysql_query("insert into usrTags (tag_Text, tag_UGrpID) values $values");
 			$updated = 1;
 		}
 	}
@@ -253,14 +253,14 @@ function update_my_settings() {
 		/* for each of the model user's keyword_links entries, make a corresponding entry for the new user */
 		/* hold onto your hats, folks: this is a five-table join across three tables! */
 		$res = mysql_query(
-'select NEWUSER_BKMK.bkm_ID, NEWUSER_KWD.kwd_id, MODUSER_KWDL.kwl_order, MODUSER_KWDL.kwl_rec_id
+'select NEWUSER_BKMK.bkm_ID, NEWUSER_KWD.tag_ID, MODUSER_KWDL.kwl_order, MODUSER_KWDL.kwl_rec_id
    from usrBookmarks NEWUSER_BKMK left join usrBookmarks MODUSER_BKMK on NEWUSER_BKMK.bkm_recID=MODUSER_BKMK.bkm_recID
                                                                and MODUSER_BKMK.bkm_ID in ('.join(',',$bkmks).')
                                left join keyword_links MODUSER_KWDL on MODUSER_KWDL.kwl_pers_id=MODUSER_BKMK.bkm_ID
-                               left join usrTags MODUSER_KWD on MODUSER_KWD.kwd_id=MODUSER_KWDL.kwl_kwd_id
-                               left join usrTags NEWUSER_KWD on NEWUSER_KWD.kwd_name=MODUSER_KWD.kwd_name
-                                                             and NEWUSER_KWD.kwd_usr_id='.get_user_id().'
-  where NEWUSER_BKMK.bkm_UGrpID='.get_user_id().' and NEWUSER_KWD.kwd_id is not null'
+                               left join usrTags MODUSER_KWD on MODUSER_KWD.tag_ID=MODUSER_KWDL.kwl_kwd_id
+                               left join usrTags NEWUSER_KWD on NEWUSER_KWD.tag_Text=MODUSER_KWD.tag_Text
+                                                             and NEWUSER_KWD.tag_UGrpID='.get_user_id().'
+  where NEWUSER_BKMK.bkm_UGrpID='.get_user_id().' and NEWUSER_KWD.tag_ID is not null'
 		);
 		$insert_pairs = array();
 		while ($row = mysql_fetch_row($res))
@@ -292,9 +292,9 @@ function update_my_settings() {
 
 
 function kwd_query() {
-	return mysql_query("select A.kwd_id as kwd_id, A.kwd_name as kwd_name from usrTags A
-	                           left join usrTags B on A.kwd_name=B.kwd_name and B.kwd_usr_id=".get_user_id()."
-	                     where A.kwd_usr_id = ".MODEL_USER_ID." and B.kwd_id is null");
+	return mysql_query("select A.tag_ID as tag_ID, A.tag_Text as tag_Text from usrTags A
+	                           left join usrTags B on A.tag_Text=B.tag_Text and B.tag_UGrpID=".get_user_id()."
+	                     where A.tag_UGrpID= ".MODEL_USER_ID." and B.tag_ID is null");
 }
 
 function bkmk_query() {

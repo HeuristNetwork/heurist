@@ -324,6 +324,6 @@ define('CUSTOMBOOKMARK_search-order', '!(ss_url like "%w=bookmark%" OR ss_url li
 
 define('user_kwds-order', 'kwd_name');
 define('user_kwds-RESULTS_PER_PAGE', 10000);
-$SEARCHES['user_kwds'] = 'select distinct kwd_id from usrTags left join keyword_links on kwd_id=kwl_kwd_id where kwl_id is not null and kwd_usr_id = [logged-in-user-id]';
+$SEARCHES['user_kwds'] = 'select distinct tag_ID from usrTags left join keyword_links on tag_ID=kwl_kwd_id where kwl_id is not null and tag_UGrpID = [logged-in-user-id]';
 
 ?>

@@ -892,9 +892,9 @@ function mode_crosswalking() {
         <nobr><a href="#" target="_ignore" onclick="add_keyword('To Read'); return false;">To Read</a></nobr>&nbsp;
       </div>
        <?php
-	$top_keywords = mysql__select_array('keyword_links left join usrTags on kwl_kwd_id=kwd_id',
-	                                    'kwd_name, count(kwd_id) as count',
-	                                    'kwd_usr_id='.get_user_id().' group by kwd_id order by count desc limit 5');
+	$top_keywords = mysql__select_array('keyword_links left join usrTags on kwl_kwd_id=tag_ID',
+	                                    'tag_Text, count(tag_ID) as count',
+	                                    'tag_UGrpID='.get_user_id().' group by tag_ID order by count desc limit 5');
 	if ($top_keywords) {
 ?>
       <div class="smallgr" style="padding-left: 10ex; margin-left: 10px;">
@@ -911,9 +911,9 @@ function mode_crosswalking() {
        ?>
 
        <?php
-	$recent_keywords = mysql__select_array('keyword_links left join usrTags on kwl_kwd_id=kwd_id',
-	                                    'distinct(kwd_name)',
-	                                    'kwd_usr_id='.get_user_id().' order by kwl_id desc limit 5');
+	$recent_keywords = mysql__select_array('keyword_links left join usrTags on kwl_kwd_id=tag_ID',
+	                                    'distinct(tag_Text)',
+	                                    'tag_UGrpID='.get_user_id().' order by kwl_id desc limit 5');
 	if ($recent_keywords) {
 ?>
       <div class="smallgr" style="padding-left: 10ex; margin-left: 10px; padding-bottom: 5px;">
@@ -957,7 +957,7 @@ function add_keyword(tag) {
 
 <?php
 	/* are there any workgroup-tags for any workgroups this user is in? If so, show the workgroup-keyword section */
-	$res = mysql_query('select kwd_id, grp_name, kwd_name from usrTags, '.USERS_DATABASE.'.UserGroups, '.USERS_DATABASE.'.Groups where kwd_wg_id=ug_group_id and ug_group_id=grp_id and ug_user_id=' . get_user_id() . ' order by grp_name, kwd_name');
+	$res = mysql_query('select tag_ID, grp_name, tag_Text from usrTags, '.USERS_DATABASE.'.UserGroups, '.USERS_DATABASE.'.Groups where tag_UGrpID=ug_group_id and ug_group_id=grp_id and ug_user_id=' . get_user_id() . ' order by grp_name, tag_Text');
 	if (mysql_num_rows($res) > 0) {
 ?>
     <div style="margin-top: 1ex; margin-left: 10ex;">
@@ -965,8 +965,8 @@ function add_keyword(tag) {
      <select name="workgroup_tag">
       <option selected></option>
 <?php		while ($row = mysql_fetch_assoc($res)) {	?>
-      <option value="<?= addslashes($row['kwd_id']) ?>">
-       <?= htmlspecialchars($row['grp_name']) ?> \ <?= htmlspecialchars($row['kwd_name']) ?>
+      <option value="<?= addslashes($row['tag_ID']) ?>">
+       <?= htmlspecialchars($row['grp_name']) ?> \ <?= htmlspecialchars($row['tag_Text']) ?>
       </option>
 <?php		}	?>
      </select>
@@ -1035,8 +1035,8 @@ function mode_entry_insertion() {
 	// add a keyword (tag) for this import session to all entries
 	$import_kwd = 'File Import ' . $session_data['import_time'];
 	$res = mysql__insert('usrTags', array(
-		'kwd_name'		=> $import_kwd,
-		'kwd_usr_id'	=> get_user_id()));
+		'tag_Text'		=> $import_kwd,
+		'tag_UGrpID'	=> get_user_id()));
 	// add a saved search for records with this tag
 	$now = date('Y-m-d');
 	mysql__insert('saved_searches', array(
@@ -1939,7 +1939,7 @@ function insert_keywords(&$entry, $keyword_map=array()) {
 // easy one first: see if there is a workgroup keyword to be added, and that we have access to that workgroup
 $wgKwd = $entry->getWorkgroupKeyword();
 if ($wgKwd) {
-	$res = mysql_query("select * from usrTags, ".USERS_DATABASE.".UserGroups where kwd_wg_id=ug_group_id and ug_user_id=" . get_user_id() . " and kwd_id=" . $wgKwd);
+	$res = mysql_query("select * from usrTags, ".USERS_DATABASE.".UserGroups where tag_UGrpID=ug_group_id and ug_user_id=" . get_user_id() . " and tag_ID=" . $wgKwd);
 	if (mysql_num_rows($res) != 1) $wgKwd = 0;
 }
 
@@ -1957,13 +1957,13 @@ if ($wgKwd) {
 		if ($kwd_select_clause) $kwd_select_clause .= ',';
 		$kwd_select_clause .= '"'.addslashes($kwd).'"';
 	}
-	$res = mysql_query('select kwd_id, lower(trim(kwd_name)) from usrTags where kwd_name in (' . $kwd_select_clause . ')'
-	                                                             . ' and kwd_usr_id = ' . get_user_id());
+	$res = mysql_query('select tag_ID, lower(trim(tag_Text)) from usrTags where tag_Text in (' . $kwd_select_clause . ')'
+	                                                             . ' and tag_UGrpID= ' . get_user_id());
 	$tags = array();
 	while ($row = mysql_fetch_row($res)) $tags[$row[1]] = $row[0];
 
-	$all_keywords = mysql__select_assoc('usrTags, '.USERS_DATABASE.'.UserGroups, '.USERS_DATABASE.'.Groups', 'lower(concat(grp_name, "\\\\", kwd_name))', 'kwd_id',
-	                                    'kwd_wg_id=ug_group_id and ug_group_id=grp_id and ug_user_id='.get_user_id());
+	$all_keywords = mysql__select_assoc('usrTags, '.USERS_DATABASE.'.UserGroups, '.USERS_DATABASE.'.Groups', 'lower(concat(grp_name, "\\\\", tag_Text))', 'tag_ID',
+	                                    'tag_UGrpID=ug_group_id and ug_group_id=grp_id and ug_user_id='.get_user_id()); //FIXME: check this is correct to import wgTags with a slash
 	foreach ($all_keywords as $kwd => $id) $tags[$kwd] = $id;
 
 	$entry_kwd_ids = array();
@@ -1978,7 +1978,7 @@ if ($wgKwd) {
 /**** 	"Don't insert new tags unannounced"
 	Well, it's very very difficult to get feedback from the user, so we just won't insert any new tags at all, I guess.  Hope you're happy.
 */		else if (! $wg_kwd) {	// do not insert new workgroup tags
-			mysql_query('insert into usrTags (kwd_usr_id, kwd_name) ' .
+			mysql_query('insert into usrTags (tag_UGrpID, tag_Text) ' .
 			                         ' values ('.get_user_id().', "'.addslashes($kwd).'")');
 			$kwd_id = mysql_insert_id();
 			array_push($entry_kwd_ids, $kwd_id);
@@ -2218,7 +2218,7 @@ function print_keyword_stuff(&$out_entries) {
 		if ($query) $query .= "', '";
 		$query .= addslashes($kwd);
 	}
-	$query = "select kwd_name from usrTags where kwd_name in ('" . $query . "')";
+	$query = "select tag_Text from usrTags where tag_Text in ('" . $query . "')";
 	$res = mysql_query($query);
 	$existing_tags = array();
 	while ($row = mysql_fetch_row($res)) {

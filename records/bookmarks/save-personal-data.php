@@ -48,7 +48,7 @@ if ($bkm_ID  &&  $_POST["save-mode"] == "edit") {
 
 function doKeywordInsertion($bkm_ID) {
 	$kwds = mysql__select_array("keyword_links, usrTags",
-	                            "kwd_name", "kwl_pers_id=$bkm_ID and kwd_id=kwl_kwd_id and kwd_usr_id=".get_user_id()." order by kwl_order, kwl_id");
+	                            "tag_Text", "kwl_pers_id=$bkm_ID and tag_ID=kwl_kwd_id and tag_UGrpID=".get_user_id()." order by kwl_order, kwl_id");
 	$tagString = join(",", $kwds);
 
 	// Nothing to do here
@@ -56,8 +56,8 @@ function doKeywordInsertion($bkm_ID) {
 
 
 	$keywords = array_filter(array_map("trim", explode(",", str_replace("\\", "/", $_POST["tagString"]))));	// replace backslashes with forwardslashes
-	$kwd_map = mysql__select_assoc("usrTags", "trim(lower(kwd_name))", "kwd_id",
-	                               "kwd_usr_id=".get_user_id()." and kwd_name in (\"".join("\",\"", array_map("addslashes", $keywords))."\")");
+	$kwd_map = mysql__select_assoc("usrTags", "trim(lower(tag_Text))", "tag_ID",
+	                               "tag_UGrpID=".get_user_id()." and tag_Text in (\"".join("\",\"", array_map("addslashes", $keywords))."\")");
 
 	$kwd_ids = array();
 	foreach ($keywords as $keyword) {
@@ -65,7 +65,7 @@ function doKeywordInsertion($bkm_ID) {
 		if (@$kwd_map[strtolower($keyword)]) {
 			$kwd_id = $kwd_map[strtolower($keyword)];
 		} else {
-			mysql_query("insert into usrTags (kwd_name, kwd_usr_id) values (\"" . addslashes($keyword) . "\", " . get_user_id() . ")");
+			mysql_query("insert into usrTags (tag_Text, tag_UGrpID) values (\"" . addslashes($keyword) . "\", " . get_user_id() . ")");
 			$kwd_id = mysql_insert_id();
 		}
 		array_push($kwd_ids, $kwd_id);
@@ -76,7 +76,7 @@ function doKeywordInsertion($bkm_ID) {
 	if (! $rec_id) $rec_id = "NULL";
 
 	// Delete all non-workgroup tags for this bookmark
-	mysql_query("delete keyword_links from keyword_links, usrTags where kwl_pers_id = $bkm_ID and kwd_id=kwl_kwd_id and kwd_wg_id is null");
+	mysql_query("delete keyword_links from keyword_links, usrTags where kwl_pers_id = $bkm_ID and tag_ID=kwl_kwd_id and ???kwd_wg_id is null");
 
 	if (count($kwd_ids) > 0) {
 		$query = "";
@@ -90,7 +90,7 @@ function doKeywordInsertion($bkm_ID) {
 
 	// return new keyword string
 	$kwds = mysql__select_array("keyword_links, usrTags",
-	                            "kwd_name", "kwl_bkm_ID=$bkm_ID and kwd_id=kwl_kwd_id and kwd_usr_id=".get_user_id()." order by kwl_order, kwl_id");
+	                            "tag_Text", "kwl_bkm_ID=$bkm_ID and tag_ID=kwl_kwd_id and tag_UGrpID=".get_user_id()." order by kwl_order, kwl_id");
 	return join(",", $kwds);
 }
 

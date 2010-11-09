@@ -39,13 +39,13 @@ function get_classes($user_id) {
 
 function get_assignments($grp_id) {
 	$grp_id = intval($grp_id);
-	$res = mysql_query('SELECT kwd_id, kwd_name
+	$res = mysql_query('SELECT tag_ID, tag_Text
 						  FROM usrTags
-						 WHERE kwd_wg_id=' . $grp_id . '
-						   AND kwd_name LIKE "Assignment: %"
-					  ORDER BY kwd_name');
+						 WHERE tag_UGrpID=' . $grp_id . '
+						   AND tag_Text LIKE "Assignment: %"
+					  ORDER BY tag_Text');
 	while ($row = mysql_fetch_assoc($res)) {
-		$assignments[$row['kwd_id']] = $row['kwd_name'];
+		$assignments[$row['tag_ID']] = $row['tag_Text'];
 	}
 	return $assignments;
 }
@@ -97,14 +97,14 @@ function get_reviews($user_id, $class_grp_id, $ass_kwd_id, $get_text=false, $ind
 function get_genre($bkmk_id, $class_grp_id) {
 	$bkmk_id = intval($bkmk_id);
 	$class_grp_id = intval($class_grp_id);
-	$res = mysql_query('SELECT kwd_id, kwd_name
+	$res = mysql_query('SELECT tag_ID, tag_Text
 						  FROM keyword_links
-					 LEFT JOIN usrTags ON kwd_id=kwl_kwd_id
+					 LEFT JOIN usrTags ON tag_ID=kwl_kwd_id
 						 WHERE kwl_pers_id=' . $bkmk_id . '
-						   AND kwd_wg_id=' . $class_grp_id . '
-						   AND kwd_name like "Genre: %"');
+						   AND tag_UGrpID=' . $class_grp_id . '
+						   AND tag_Text like "Genre: %"');
 	if ($row = mysql_fetch_assoc($res)) {
-		return array($row['kwd_id'], str_replace('Genre: ', '', $row['kwd_name']));
+		return array($row['tag_ID'], str_replace('Genre: ', '', $row['tag_Text']));
 	} else {
 		return '';
 	}
@@ -141,15 +141,15 @@ function get_review($bkmk_id, $class_grp_id) {
 		$review['text'] = $matches[3][0];
 	}
 	$review['tags'] = array();
-	$res = mysql_query('SELECT kwd_name
+	$res = mysql_query('SELECT tag_Text
 						  FROM keyword_links
-					 LEFT JOIN usrTags ON kwd_id = kwl_kwd_id
+					 LEFT JOIN usrTags ON tag_ID = kwl_kwd_id
 						 WHERE kwl_pers_id = '.$bkmk_id.'
-						   AND kwd_usr_id = '.get_user_id().'
-						   AND kwd_wg_id is null
+						   AND tag_UGrpID= '.get_user_id().'
+						   AND ???kwd_wg_id is null
 					  ORDER BY kwl_order');
 	while ($row = mysql_fetch_assoc($res)) {
-		array_push($review['tags'], $row['kwd_name']);
+		array_push($review['tags'], $row['tag_Text']);
 	}
 	return $review;
 }
@@ -157,13 +157,13 @@ function get_review($bkmk_id, $class_grp_id) {
 function get_genres($class_grp_id) {
 	$class_grp_id = intval($class_grp_id);
 	$genres = array();
-	$res = mysql_query('SELECT kwd_id, kwd_name
+	$res = mysql_query('SELECT tag_ID, tag_Text
 						  FROM usrTags
-						 WHERE kwd_wg_id=' . $class_grp_id . '
-						   AND kwd_name like "Genre: %"
-					  ORDER BY kwd_name');
+						 WHERE tag_UGrpID=' . $class_grp_id . '
+						   AND tag_Text like "Genre: %"
+					  ORDER BY tag_Text');
 	while ($row = mysql_fetch_assoc($res)) {
-		$genres[$row['kwd_id']] = str_replace('Genre: ', '', $row['kwd_name']);
+		$genres[$row['tag_ID']] = str_replace('Genre: ', '', $row['tag_Text']);
 	}
 	return $genres;
 }

@@ -28,10 +28,10 @@ ul { margin: 2px; }
  </style>
 
  <script type="text/javascript">
-function delete_keyword(kwd_id) {
+function delete_keyword(tag_ID) {
 	if (! confirm('Really delete this tag?')) return;
 	var kd = document.getElementById('kwd_delete');
-	kd.value = kwd_id + '';
+	kd.value = tag_ID + '';
 	kd.form.submit();
 }
  </script>
@@ -72,13 +72,13 @@ function delete_keyword(kwd_id) {
 		print '<b>' . htmlspecialchars($grp['grp_name']) . '</b>';
 
 		print '<ul>';
-		$res = mysql_query('select kwd_id, kwd_name, count(kwl_id) as kwi_count from usrTags left join keyword_links on kwl_kwd_id=kwd_id where kwd_wg_id='.$grp['grp_id'].' group by kwd_id, kwl_kwd_id order by kwd_name');
+		$res = mysql_query('select tag_ID, tag_Text, count(kwl_id) as kwi_count from usrTags left join keyword_links on kwl_kwd_id=tag_ID where tag_UGrpID='.$grp['grp_id'].' group by tag_ID, kwl_kwd_id order by tag_Text');
 		while ($kwd = mysql_fetch_assoc($res)) {
-			$searchlink = HEURIST_URL_BASE.'search/search.html?q=keyword%3A%22'.$grp['grp_name'].'%5C'.$kwd['kwd_name'].'%22&w=all&stype=';
+			$searchlink = HEURIST_URL_BASE.'search/search.html?q=keyword%3A%22'.$grp['grp_name'].'%5C'.$kwd['tag_Text'].'%22&w=all&stype=';
 			if ($kwd['kwi_count'] == 0) $used = '';
 			else $used = '<i>(<a target=_blank href="'.$searchlink.'">used '.($kwd['kwi_count'] == 1 ? 'once' : $kwd['kwi_count'].' times').'</a>)</i>';
 ?>
- <li><b><?= htmlspecialchars($kwd['kwd_name']) ?></b> <?= $used ?> [<a href="#" onclick="delete_keyword(<?= $kwd['kwd_id'] ?>); return false;">delete</a>]</li>
+ <li><b><?= htmlspecialchars($kwd['tag_Text']) ?></b> <?= $used ?> [<a href="#" onclick="delete_keyword(<?= $kwd['tag_ID'] ?>); return false;">delete</a>]</li>
 <?php
 		}
 		print ' <li><input type="text" class="tbox" name="new[' . htmlspecialchars($grp['grp_id']) . ']" onkeypress="return (event.which != 92  &&  event.keyCode != 92);" value="' . htmlspecialchars($_REQUEST['new'][$grp['grp_id']]) . '"></li>';
@@ -113,7 +113,7 @@ function add_keywords() {
 	}
 	if (! $insert_stmt) return;
 
-	$insert_stmt = 'insert into usrTags (kwd_name, kwd_wg_id) values ' . $insert_stmt;
+	$insert_stmt = 'insert into usrTags (tag_Text, tag_UGrpID) values ' . $insert_stmt;
 	mysql_connection_db_overwrite(DATABASE);
 	mysql_query($insert_stmt);
 	if (mysql_affected_rows() == 1) {
@@ -129,7 +129,7 @@ function add_keywords() {
 function delete_keyword() {
 	$kwd_id = intval($_REQUEST['deleting']);
 	mysql_connection_db_overwrite(DATABASE);
-	mysql_query('delete from usrTags where kwd_id = ' . $kwd_id . ' and kwd_wg_id is not null');
+	mysql_query('delete from usrTags where tag_ID = ' . $kwd_id . ' and ???kwd_wg_id is not null');
 	if (mysql_affected_rows() >= 1) {	// overkill
 		print '<div style="color: red;">1 tag deleted</div>';
 	} else {

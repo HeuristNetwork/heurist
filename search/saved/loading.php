@@ -347,17 +347,17 @@ function loadUserDependentData(&$record) {
 
 	$record["tags"] = mysql__select_array(
 		"keyword_links, usrTags",
-		"kwd_name",
-		"kwd_id = kwl_kwd_id and
-		 kwd_usr_id = ".get_user_id()." and
+		"tag_Text",
+		"tag_ID = kwl_kwd_id and
+		 tag_UGrpID= ".get_user_id()." and
 		 kwl_rec_id = $recID
 		 order by kwl_order");
 
 	$record["wgTags"] = mysql__select_array(
 		"keyword_links, usrTags, ".USERS_DATABASE.".UserGroups",
 		"kwl_kwd_id",
-		"kwd_id = kwl_kwd_id and
-		 kwd_wg_id = ug_group_id and
+		"tag_ID = kwl_kwd_id and
+		 tag_UGrpID = ug_group_id and
 		 ug_user_id = ".get_user_id()." and
 		 kwl_rec_id = $recID
 		 order by kwl_order");

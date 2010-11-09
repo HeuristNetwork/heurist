@@ -105,9 +105,9 @@ function add_keywords() {
 
 		$keywords = get_ids_for_keywords(array_filter(explode(',', $_REQUEST['tagString'])), true);
 		mysql_query('insert ignore into keyword_links (kwl_pers_id, kwl_rec_id, kwl_kwd_id) '
-				  . 'select bkm_ID, bkm_recID, kwd_id from usrBookmarks, usrTags '
+				  . 'select bkm_ID, bkm_recID, tag_ID from usrBookmarks, usrTags '
 				  . ' where bkm_ID in (' . join(',', $bkmk_ids) . ') and bkm_UGrpID = ' . get_user_id()
-				  . ' and kwd_id in (' . join(',', $keywords) . ')');
+				  . ' and tag_ID in (' . join(',', $keywords) . ')');
 		$keyword_count = mysql_affected_rows();
 	}
 
@@ -138,10 +138,10 @@ function add_wgTags_by_id() {
 
 		$keywords = array_map('intval', explode(',', $_REQUEST["kwd_ids"]));
 		mysql_query('insert ignore into keyword_links (kwl_rec_id, kwl_pers_id, kwl_kwd_id) '
-				  . 'select rec_id, bkm_ID, kwd_id from usrTags, '.USERS_DATABASE.'.UserGroups, records left join usrBookmarks on rec_id=bkm_recID and bkm_UGrpID= '.get_user_id()
+				  . 'select rec_id, bkm_ID, tag_ID from usrTags, '.USERS_DATABASE.'.UserGroups, records left join usrBookmarks on rec_id=bkm_recID and bkm_UGrpID= '.get_user_id()
 				  . ' where rec_id in (' . join(',', $bib_ids) . ') '
-				  . ' and ug_group_id=kwd_wg_id and ug_user_id='.get_user_id()
-				  . ' and kwd_id in (' . join(',', $keywords) . ')');
+				  . ' and ug_group_id=tag_UGrpID and ug_user_id='.get_user_id()
+				  . ' and tag_ID in (' . join(',', $keywords) . ')');
 		$keyword_count = mysql_affected_rows();
 	}
 
@@ -175,16 +175,16 @@ function remove_wgTags_by_id() {
 		$keywords = array_map('intval', explode(',', $_REQUEST["kwd_ids"]));
 		mysql_query('delete keyword_links from usrBookmarks'
 				 . ' left join keyword_links on kwl_pers_id = bkm_ID'
-				 . ' left join usrTags on kwd_id = kwl_kwd_id'
+				 . ' left join usrTags on tag_ID = kwl_kwd_id'
 		         . ' where bkm_recID in (' . join(',', $bib_ids) . ') and bkm_UGrpID = ' . get_user_id()
-		         . ' and kwd_id in (' . join(',', $keywords) . ')');
+		         . ' and tag_ID in (' . join(',', $keywords) . ')');
 		$keyword_count += mysql_affected_rows();
 		mysql_query('delete keyword_links from keyword_links'
-				 . ' left join usrTags on kwd_id = kwl_kwd_id'
-				 . ' left join '.USERS_DATABASE.'.UserGroups on ug_group_id = kwd_wg_id'
+				 . ' left join usrTags on tag_ID = kwl_kwd_id'
+				 . ' left join '.USERS_DATABASE.'.UserGroups on ug_group_id = tag_UGrpID'
 		         . ' where kwl_pers_id = 0 and kwl_rec_id in (' . join(',', $bib_ids) . ')'
 				 . ' and ug_user_id = ' . get_user_id()
-		         . ' and kwd_id in (' . join(',', $keywords) . ')');
+		         . ' and tag_ID in (' . join(',', $keywords) . ')');
 		$keyword_count += mysql_affected_rows();
 	}
 
@@ -218,9 +218,9 @@ function remove_keywords() {
 		if (count($bkmk_ids)  &&  $keywords  &&  count($keywords)) {
 			mysql_query('delete keyword_links from usrBookmarks'
 					 . ' left join keyword_links on kwl_pers_id = bkm_ID'
-					 . ' left join usrTags on kwd_id = kwl_kwd_id'
+					 . ' left join usrTags on tag_ID = kwl_kwd_id'
 					 . ' where bkm_ID in (' . join(',', $bkmk_ids) . ') and bkm_UGrpID = ' . get_user_id()
-					 . ' and kwd_id in (' . join(',', $keywords) . ')');
+					 . ' and tag_ID in (' . join(',', $keywords) . ')');
 			$keyword_count = mysql_affected_rows();
 		}
 	}
@@ -321,9 +321,9 @@ function bookmark_and_tag_bibids ( $phpReturn ) {
 	} else {	//we have bookmarks lets add teh tags
 		$keywords = get_ids_for_keywords(array_filter(explode(',', $_REQUEST['tagString'])), true);
 		mysql_query('insert ignore into keyword_links (kwl_pers_id, kwl_rec_id, kwl_kwd_id) '
-				  . 'select bkm_ID, bkm_recID, kwd_id from usrBookmarks, usrTags '
+				  . 'select bkm_ID, bkm_recID, tag_ID from usrBookmarks, usrTags '
 				  . ' where bkm_ID in (' . join(',', $bkmk_ids) . ') and bkm_UGrpID = ' . get_user_id()
-				  . ' and kwd_id in (' . join(',', $keywords) . ')');
+				  . ' and tag_ID in (' . join(',', $keywords) . ')');
 		$keyword_count = mysql_affected_rows();
 		if (mysql_error()) {
 			$message = 'Database problem - ' . addslashes(mysql_error()) . ' - no tags added.';
@@ -514,10 +514,10 @@ function get_ids_for_keywords($kwds, $add) {
 		if ( ($slashpos = strpos($kwd_name, '\\')) ) {	// it's a workgroup keyword
 			$grp_name = substr($kwd_name, 0, $slashpos);
 			$kwd_name = substr($kwd_name, $slashpos+1);
-			$res = mysql_query('select kwd_id from usrTags, '.USERS_DATABASE.'.UserGroups, '.USERS_DATABASE.'.Groups where kwd_wg_id=ug_group_id and ug_group_id=grp_id and ug_user_id='.get_user_id().' and grp_name="'.addslashes($grp_name).'" and lower(kwd_name)=lower("'.addslashes($kwd_name).'")');
+			$res = mysql_query('select tag_ID from usrTags, '.USERS_DATABASE.'.UserGroups, '.USERS_DATABASE.'.Groups where tag_UGrpID=ug_group_id and ug_group_id=grp_id and ug_user_id='.get_user_id().' and grp_name="'.addslashes($grp_name).'" and lower(tag_Text)=lower("'.addslashes($kwd_name).'")');
 		}
 		else {
-			$res = mysql_query('select kwd_id from usrTags where lower(kwd_name)=lower("'.addslashes($kwd_name).'") and kwd_usr_id='.get_user_id());
+			$res = mysql_query('select tag_ID from usrTags where lower(tag_Text)=lower("'.addslashes($kwd_name).'") and tag_UGrpID='.get_user_id());
 		}
 
 		if (mysql_num_rows($res) > 0) {
@@ -527,7 +527,7 @@ function get_ids_for_keywords($kwds, $add) {
 		else if ($add) {
 			// non-existent keyword ... add it
 			$kwd_name = str_replace("\\", "/", $kwd_name);	// replace backslashes with forwardslashes
-			mysql_query("insert into usrTags (kwd_name, kwd_usr_id) values (\"" . addslashes($kwd_name) . "\", " . get_user_id() . ")");
+			mysql_query("insert into usrTags (tag_Text, tag_UGrpID) values (\"" . addslashes($kwd_name) . "\", " . get_user_id() . ")");
 			array_push($kwd_ids, mysql_insert_id());
 		}
 	}

@@ -41,31 +41,31 @@ $body = new BodyScope($lexer);
 $body->global_vars['rec_id'] = $_REQUEST['rec_id'];
 $body->global_vars['bkm_ID'] = $_REQUEST['bkm_ID'];
 
-$my_kwds = mysql__select_array('keyword_links left join usrTags on kwl_kwd_id=kwd_id', 'kwd_name', 'kwl_pers_id='.$bkmk['bkm_ID']);
+$my_kwds = mysql__select_array('keyword_links left join usrTags on kwl_kwd_id=tag_ID', 'tag_Text', 'kwl_pers_id='.$bkmk['bkm_ID']);
 
 $keywords = mysql__select_assoc('usrBookmarks
 								 left join keyword_links on bkm_ID=kwl_pers_id
-								 left join usrTags on kwl_kwd_id=kwd_id
-								 left join '.USERS_DATABASE.'.Users on Id=kwd_usr_id',
-								'kwd_name', 'count(kwd_id) as kcount',
+								 left join usrTags on kwl_kwd_id=tag_ID
+								 left join '.USERS_DATABASE.'.Users on Id=tag_UGrpID',
+								'tag_Text', 'count(tag_ID) as kcount',
 								'bkm_recID='.$bib['rec_id'].'
 								 and kwl_id is not null
 								 and Active="Y"
-								 group by kwd_name
-								 order by kcount desc, kwd_name');
+								 group by tag_Text
+								 order by kcount desc, tag_Text');
 
 /*
-$res = mysql_query('select concat(firstname," ",lastname) as bkmk_user, kwd_name
+$res = mysql_query('select concat(firstname," ",lastname) as bkmk_user, tag_Text
 					from usrBookmarks
 					left join keyword_links on bkm_ID=kwl_pers_id
-					left join usrTags on kwl_kwd_id=kwd_id
+					left join usrTags on kwl_kwd_id=tag_ID
 					left join '.USERS_DATABASE.'.Users on bkm_UGrpID=Id
-					where bkm_recID='.$bib['rec_id'].' and kwl_id is not null order by bkmk_user, kwd_name');
+					where bkm_recID='.$bib['rec_id'].' and kwl_id is not null order by bkmk_user, tag_Text');
 
 $user_keywords = array();
 while ($row = mysql_fetch_assoc($res)) {
 	$bkmk_user = $row['bkmk_user'];
-	$kwd_name = $row['kwd_name'];
+	$kwd_name = $row['tag_Text'];
 
 	if ($user_keywords[$bkmk_user])
 		array_push($user_keywords[$bkmk_user], $kwd_name);
@@ -86,11 +86,11 @@ if ($keywords) {
 		$res = mysql_query('select Id, concat(firstname," ",lastname) as bkmk_user
 							from usrBookmarks
 							left join keyword_links on bkm_ID=kwl_pers_id
-							left join usrTags on kwl_kwd_id=kwd_id
+							left join usrTags on kwl_kwd_id=tag_ID
 							left join '.USERS_DATABASE.'.Users on bkm_UGrpID=Id
 							where bkm_recID='.$bib['rec_id'].'
 							and kwl_id is not null
-							and kwd_name="'.$keyword.'"
+							and tag_Text="'.$keyword.'"
 							and Active="Y"
 							order by bkmk_user');
 		$i = 0;
@@ -120,10 +120,10 @@ $res = mysql_query('
      from records
 left join usrBookmarks on bkm_recID=rec_id
 left join keyword_links on kwl_pers_id=bkm_ID
-left join usrTags on kwd_id=kwl_kwd_id and kwd_usr_id=bkm_UGrpID
+left join usrTags on tag_ID=kwl_kwd_id and tag_UGrpID=bkm_UGrpID
 left join '.USERS_DATABASE.'.Users on Id=bkm_UGrpID
     where rec_id='.$bib['rec_id'].'
-      and kwd_id is null
+      and tag_ID is null
       and Id is not null
       and Id!='.get_user_id().'
 	  and Active="Y"

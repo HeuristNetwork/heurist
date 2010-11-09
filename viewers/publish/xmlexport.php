@@ -499,16 +499,16 @@ function writeReversePointers($bib, $depth) {
 function writeKeywords($bib) {
 	global $XML;
 
-	$query = 'SELECT distinct grp_name, kwd_name
+	$query = 'SELECT distinct grp_name, tag_Text
 				FROM keyword_links
-		   LEFT JOIN usrTags ON kwd_id = kwl_kwd_id
-		   LEFT JOIN '.USERS_DATABASE.'.Groups ON grp_id = kwd_wg_id
+		   LEFT JOIN usrTags ON tag_ID = kwl_kwd_id
+		   LEFT JOIN '.USERS_DATABASE.'.Groups ON grp_id = tag_UGrpID
 			   WHERE kwl_rec_id = '.$bib.'
-				 AND kwd_wg_id > 0
-			ORDER BY grp_name, kwd_name';
+				 AND ???kwd_wg_id > 0
+			ORDER BY grp_name, tag_Text';
 	$res = mysql_query($query);
 	while ($row = mysql_fetch_assoc($res)) {
-		$XML .= "<keyword workgroup=\"".$row['grp_name']."\">".$row['kwd_name']."</keyword>\n";
+		$XML .= "<keyword workgroup=\"".$row['grp_name']."\">".$row['tag_Text']."</keyword>\n";
 	}
 }
 

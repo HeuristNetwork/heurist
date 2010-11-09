@@ -23,16 +23,16 @@
 <script type="text/javascript">
 <!--
 
-	function delete_kwd(kwd_id, kwd_name, use_count) {
+	function delete_kwd(tag_ID, tag_Text, use_count) {
 		if (use_count == 0) {
-			if (! confirm('Tag "'+kwd_name+'" is currently unused. Remove forever?')) return;
+			if (! confirm('Tag "'+tag_Text+'" is currently unused. Remove forever?')) return;
 		} else if (use_count == 1) {
-			if (! confirm('Tag "'+kwd_name+'" is used by one bookmark. Do you want to remove the tag?')) return;
+			if (! confirm('Tag "'+tag_Text+'" is used by one bookmark. Do you want to remove the tag?')) return;
 		} else {
-			if (! confirm('Tag "'+kwd_name+'" is used by '+use_count+' bookmarks. Do you want to remove the tag?')) return;
+			if (! confirm('Tag "'+tag_Text+'" is used by '+use_count+' bookmarks. Do you want to remove the tag?')) return;
 		}
 
-		document.forms['kwd_edit_form'].elements['delete_kwd_id'].value = kwd_id;
+		document.forms['kwd_edit_form'].elements['delete_kwd_id'].value = tag_ID;
 		document.forms['kwd_edit_form'].submit();
 	}
 
@@ -41,7 +41,7 @@
 		document.forms['kwd_edit_form'].submit();
 	}
 
-	function rename_kwd(kwd_id, kwd_obj) {
+	function rename_kwd(tag_ID, kwd_obj) {
 		if (kwd_obj.value == '') {
 			alert('Tag cannot be empty');
 			kwd_obj.value = kwd_obj.defaultValue;
@@ -56,9 +56,9 @@
 			return false;
 		}
 
-		if (kwd[kwd_obj.value.toLowerCase()]  &&  kwd[kwd_obj.value.toLowerCase()] != kwd_id) {
+		if (kwd[kwd_obj.value.toLowerCase()]  &&  kwd[kwd_obj.value.toLowerCase()] != tag_ID) {
 			if (confirm('You already have a tag called "'+kwd_obj.value+'".\nDo you want to change all "'+kwd_obj.defaultValue+'" references to "'+kwd_obj.value+'" references, and remove "'+kwd_obj.defaultValue+'"?')) {
-				document.forms['kwd_edit_form'].elements['update_kwd_from'].value = kwd_id;
+				document.forms['kwd_edit_form'].elements['update_kwd_from'].value = tag_ID;
 				document.forms['kwd_edit_form'].elements['update_kwd_to'].value = kwd[kwd_obj.value.toLowerCase()];
 				document.forms['kwd_edit_form'].submit();
 			} else {
@@ -69,13 +69,13 @@
 		}
 
 		kwd[kwd_obj.defaultValue.toLowerCase()] = 0;
-		kwd[kwd_obj.value.toLowerCase()] = kwd_id;
+		kwd[kwd_obj.value.toLowerCase()] = tag_ID;
 
 		document.forms['kwd_edit_form'].elements['change_names'].value = 1;
 		return true;
 	}
 
-	function show_replace_list(elt, kwd_id) {
+	function show_replace_list(elt, tag_ID) {
 		var replace_link = elt;
 		var container = replace_link.parentNode;
 		var sel = document.getElementById("kwd_select").cloneNode(true);
@@ -95,7 +95,7 @@
 		b.onclick = function() {
 			if (! sel.value) { alert("Select a tag"); return; }
 			document.forms["kwd_edit_form"].elements["replace_kwd"].value = 1;
-			document.forms["kwd_edit_form"].elements["replace_kwd_id"].value = kwd_id;
+			document.forms["kwd_edit_form"].elements["replace_kwd_id"].value = tag_ID;
 			document.forms["kwd_edit_form"].elements["replace_with_kwd_id"].value = sel.value;
 			document.forms["kwd_edit_form"].submit();
 		};

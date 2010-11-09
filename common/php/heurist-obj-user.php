@@ -34,7 +34,7 @@ while ($row = mysql_fetch_assoc($res)) {
     ];
 
     top.HEURIST.user.tags = [<?php
-$res = mysql_query('select distinct kwd_name from usrTags where kwd_usr_id='.get_user_id().' order by kwd_name');
+$res = mysql_query('select distinct tag_Text from usrTags where tag_UGrpID='.get_user_id().' order by tag_Text');
 $first = true;
 while ($row = mysql_fetch_row($res)) {
     if (! $first) print ",";  print "\n"; $first = false;
@@ -44,7 +44,7 @@ while ($row = mysql_fetch_row($res)) {
     ];
 <?php
 
-$res = mysql_query("select kwd_id, kwd_wg_id, kwd_name from usrTags, ".USERS_DATABASE.".UserGroups, ".USERS_DATABASE.".Groups where ug_group_id=kwd_wg_id and ug_group_id=grp_id and ug_user_id=".get_user_id()." and grp_type!='Usergroup' order by grp_name, kwd_name");
+$res = mysql_query("select tag_ID, tag_UGrpID, tag_Text from usrTags, ".USERS_DATABASE.".UserGroups, ".USERS_DATABASE.".Groups where ug_group_id=tag_UGrpID and ug_group_id=grp_id and ug_user_id=".get_user_id()." and grp_type!='Usergroup' order by grp_name, tag_Text");
 $rows = array();
 $ids = array();
 while ($row = mysql_fetch_row($res)) {
@@ -58,8 +58,8 @@ while ($row = mysql_fetch_row($res)) {
 
     top.HEURIST.user.topKeywords = [<?php
 /* find the top five tags for this user */
-$res = mysql_query("select kwd_name, count(kwl_id) as c from usrTags left join keyword_links on kwl_kwd_id=kwd_id
-                     where kwd_usr_id=".get_user_id()." group by kwd_name order by c desc limit 5");
+$res = mysql_query("select tag_Text, count(kwl_id) as c from usrTags left join keyword_links on kwl_kwd_id=tag_ID
+                     where tag_UGrpID=".get_user_id()." group by tag_Text order by c desc limit 5");
 $first = true;
 while ($row = mysql_fetch_row($res)) {
     if (! $first) print ",";  print " "; $first = false;
@@ -69,8 +69,8 @@ while ($row = mysql_fetch_row($res)) {
 
    top.HEURIST.user.recentTags = [<?php
 /* find the ten most recently used tags for this user */
-$res = mysql_query("select distinct(kwd_name) from usrTags left join keyword_links on kwl_kwd_id=kwd_id
-                     where kwd_usr_id=".get_user_id()." group by kwl_kwd_id order by max(kwl_id) desc limit 10");
+$res = mysql_query("select distinct(tag_Text) from usrTags left join keyword_links on kwl_kwd_id=tag_ID
+                     where tag_UGrpID=".get_user_id()." group by kwl_kwd_id order by max(kwl_id) desc limit 10");
 $first = true;
 while ($row = mysql_fetch_row($res)) {
     if (! $first) print ",";  print " "; $first = false;

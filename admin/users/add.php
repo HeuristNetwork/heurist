@@ -121,14 +121,14 @@ if ($_REQUEST['_submit']  &&  $dup_check_ok) {
 
 
 			/* copy tags from the model_user */
-			$res = mysql_query("select kwd_name from usrTags where kwd_usr_id=$model_usr_id");
+			$res = mysql_query("select tag_Text from usrTags where tag_UGrpID=$model_usr_id");
 			$values = '';
 			while ($row = mysql_fetch_row($res)) {
 				if ($values) $values .= ', ';
 				$values .= '("'.addslashes($row[0]).'", ' . $usr_id . ')';
 			}
 			if ($values)
-				mysql_query("insert into usrTags (kwd_name, kwd_usr_id) values $values");
+				mysql_query("insert into usrTags (tag_Text, tag_UGrpID) values $values");
 
 
 			/* copy ignored_hyperlink_texts from the model_user */
@@ -156,10 +156,10 @@ if ($_REQUEST['_submit']  &&  $dup_check_ok) {
 				mysql_query("insert into saved_searches (ss_name, ss_query, ss_usr_id, ss_added, ss_modified) values $values");
 
 
-			/* mapping of model user's kwd_id to new user's kwd_id */
+			/* mapping of model user's tag_ID to new user's tag_ID */
 			$kwd_map = mysql__select_assoc("usrTags A
-			                      left join usrTags B on B.kwd_name=A.kwd_name and B.kwd_usr_id=$usr_id",
-			                                'A.kwd_id', 'B.kwd_id', "A.kwd_usr_id=$model_usr_id");
+			                      left join usrTags B on B.tag_Text=A.tag_Text and B.tag_UGrpID=$usr_id",
+			                                'A.tag_ID', 'B.tag_ID', "A.tag_UGrpID=$model_usr_id");
 
 			$res = mysql_query("select * from usrBookmarks where bkm_UGrpID = $model_usr_id");	// model user
 			while ($row = mysql_fetch_assoc($res)) {
@@ -179,14 +179,14 @@ if ($_REQUEST['_submit']  &&  $dup_check_ok) {
 			/* for each of the model user's kwd_link entries, make a corresponding entry for the new user */
 			/* hold onto your hats, folks: this is a five-table join across three tables! */
 			$res = mysql_query(
-'select NEWUSER_BKMK.bkm_ID, NEWUSER_KWD.kwd_id, MODUSER_KWDL.kwl_order, MODUSER_KWDL.kwl_rec_id
+'select NEWUSER_BKMK.bkm_ID, NEWUSER_KWD.tag_ID, MODUSER_KWDL.kwl_order, MODUSER_KWDL.kwl_rec_id
    from usrBookmarks NEWUSER_BKMK left join usrBookmarks MODUSER_BKMK on NEWUSER_BKMK.bkm_recID=MODUSER_BKMK.bkm_recID
                                                                and MODUSER_BKMK.bkm_UGrpID='.$model_usr_id.'
                                left join keyword_links MODUSER_KWDL on MODUSER_KWDL.kwl_pers_id=MODUSER_BKMK.bkm_ID
-                               left join usrTags MODUSER_KWD on MODUSER_KWD.kwd_id=MODUSER_KWDL.kwl_kwd_id
-                               left join usrTags NEWUSER_KWD on NEWUSER_KWD.kwd_name=MODUSER_KWD.kwd_name
-                                                             and NEWUSER_KWD.kwd_usr_id='.$usr_id.'
-  where NEWUSER_BKMK.bkm_UGrpID='.$usr_id.' and NEWUSER_KWD.kwd_id is not null'
+                               left join usrTags MODUSER_KWD on MODUSER_KWD.tag_ID=MODUSER_KWDL.kwl_kwd_id
+                               left join usrTags NEWUSER_KWD on NEWUSER_KWD.tag_Text=MODUSER_KWD.tag_Text
+                                                             and NEWUSER_KWD.tag_UGrpID='.$usr_id.'
+  where NEWUSER_BKMK.bkm_UGrpID='.$usr_id.' and NEWUSER_KWD.tag_ID is not null'
 			);
 			$insert_pairs = array();
 			while ($row = mysql_fetch_row($res))
