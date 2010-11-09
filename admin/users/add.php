@@ -121,14 +121,14 @@ if ($_REQUEST['_submit']  &&  $dup_check_ok) {
 
 
 			/* copy keywords from the model_user */
-			$res = mysql_query("select kwd_name from keywords where kwd_usr_id=$model_usr_id");
+			$res = mysql_query("select kwd_name from usrTags where kwd_usr_id=$model_usr_id");
 			$values = '';
 			while ($row = mysql_fetch_row($res)) {
 				if ($values) $values .= ', ';
 				$values .= '("'.addslashes($row[0]).'", ' . $usr_id . ')';
 			}
 			if ($values)
-				mysql_query("insert into keywords (kwd_name, kwd_usr_id) values $values");
+				mysql_query("insert into usrTags (kwd_name, kwd_usr_id) values $values");
 
 
 			/* copy ignored_hyperlink_texts from the model_user */
@@ -157,8 +157,8 @@ if ($_REQUEST['_submit']  &&  $dup_check_ok) {
 
 
 			/* mapping of model user's kwd_id to new user's kwd_id */
-			$kwd_map = mysql__select_assoc("keywords A
-			                      left join keywords B on B.kwd_name=A.kwd_name and B.kwd_usr_id=$usr_id",
+			$kwd_map = mysql__select_assoc("usrTags A
+			                      left join usrTags B on B.kwd_name=A.kwd_name and B.kwd_usr_id=$usr_id",
 			                                'A.kwd_id', 'B.kwd_id', "A.kwd_usr_id=$model_usr_id");
 
 			$res = mysql_query("select * from usrBookmarks where bkm_UGrpID = $model_usr_id");	// model user
@@ -183,8 +183,8 @@ if ($_REQUEST['_submit']  &&  $dup_check_ok) {
    from usrBookmarks NEWUSER_BKMK left join usrBookmarks MODUSER_BKMK on NEWUSER_BKMK.bkm_recID=MODUSER_BKMK.bkm_recID
                                                                and MODUSER_BKMK.bkm_UGrpID='.$model_usr_id.'
                                left join keyword_links MODUSER_KWDL on MODUSER_KWDL.kwl_pers_id=MODUSER_BKMK.bkm_ID
-                               left join keywords MODUSER_KWD on MODUSER_KWD.kwd_id=MODUSER_KWDL.kwl_kwd_id
-                               left join keywords NEWUSER_KWD on NEWUSER_KWD.kwd_name=MODUSER_KWD.kwd_name
+                               left join usrTags MODUSER_KWD on MODUSER_KWD.kwd_id=MODUSER_KWDL.kwl_kwd_id
+                               left join usrTags NEWUSER_KWD on NEWUSER_KWD.kwd_name=MODUSER_KWD.kwd_name
                                                              and NEWUSER_KWD.kwd_usr_id='.$usr_id.'
   where NEWUSER_BKMK.bkm_UGrpID='.$usr_id.' and NEWUSER_KWD.kwd_id is not null'
 			);

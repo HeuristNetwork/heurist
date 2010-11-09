@@ -33,7 +33,7 @@ $keyword_message = '';
 if (@$_REQUEST['delete_kwd_id']) {
 	mysql_connection_db_overwrite(DATABASE);
 	$kwd_id = intval(@$_REQUEST['delete_kwd_id']);
-	mysql_query('delete from keywords where kwd_id = ' . $kwd_id . ' and kwd_usr_id = ' . get_user_id());
+	mysql_query('delete from usrTags where kwd_id = ' . $kwd_id . ' and kwd_usr_id = ' . get_user_id());
 	if (mysql_affected_rows()) {
 		mysql_query('delete from keyword_links where kwl_kwd_id = ' . $kwd_id);
 		$keyword_message .= '<div class="success">Tag was deleted</div>';
@@ -47,11 +47,11 @@ if (@$_REQUEST['update_kwd_from']  and  @$_REQUEST['update_kwd_to']) {
 	$kwd_to = intval(@$_REQUEST['update_kwd_to']);
 
 	/* check that both keywords belong to this user */
-	$res = mysql_query('select * from keywords where kwd_id in ('.$kwd_from.','.$kwd_to.') and kwd_usr_id='.get_user_id());
+	$res = mysql_query('select * from usrTags where kwd_id in ('.$kwd_from.','.$kwd_to.') and kwd_usr_id='.get_user_id());
 	if (mysql_num_rows($res) == 2) {
 		mysql_query('update ignore keyword_links set kwl_kwd_id = '.$kwd_to.' where kwl_kwd_id = '.$kwd_from);
 		$count = mysql_affected_rows();
-		mysql_query('delete from keywords where kwd_id = '.$kwd_from);
+		mysql_query('delete from usrTags where kwd_id = '.$kwd_from);
 
 		if ($count == -1)
 			$keyword_message .= '<div class="success">Tag changed: duplicate tag links removed</div>';
@@ -65,12 +65,12 @@ if (@$_REQUEST['update_kwd_from']  and  @$_REQUEST['update_kwd_to']) {
 }
 if (@$_REQUEST['change_names']) {
 	mysql_connection_db_overwrite(DATABASE);
-	$orig_kwd_label = mysql__select_assoc('keywords', 'kwd_id', 'kwd_name', 'kwd_usr_id='.get_user_id());
+	$orig_kwd_label = mysql__select_assoc('usrTags', 'kwd_id', 'kwd_name', 'kwd_usr_id='.get_user_id());
 
 	$count = 0;
 	foreach (@$_REQUEST['kwdl'] as $kwd_id => $new_kwd_label) {
 		if ($orig_kwd_label[$kwd_id]  and  $orig_kwd_label[$kwd_id] != $new_kwd_label) {
-			mysql_query('update keywords set kwd_name="'.addslashes($new_kwd_label).'"
+			mysql_query('update usrTags set kwd_name="'.addslashes($new_kwd_label).'"
 			                           where kwd_id='.intval($kwd_id));
 			$count += mysql_affected_rows();
 		}
@@ -91,7 +91,7 @@ if (@$_REQUEST['delete_multiple_kwds']) {
 	$kwd_ids = array_map('intval', array_keys($_REQUEST['delete_kwds']));
 	if (count($kwd_ids)) {
 		mysql_connection_db_overwrite(DATABASE);
-		$res = mysql_query('delete keywords, keyword_links from keywords left join keyword_links on kwl_kwd_id = kwd_id where kwd_id in ('. join(', ', $kwd_ids) .') and kwd_usr_id='.get_user_id());
+		$res = mysql_query('delete usrTags, keyword_links from usrTags left join keyword_links on kwl_kwd_id = kwd_id where kwd_id in ('. join(', ', $kwd_ids) .') and kwd_usr_id='.get_user_id());
 		$keyword_message .= mysql_error() . '<div class="success">Tags deleted</div>';
 	} else {
 		$keyword_message .= mysql_error() . '<div class="success">No tags deleted</div>';
@@ -194,14 +194,14 @@ $hyperlinks_ignored = '<div>' .
 $template = str_replace('{hyperlinks_ignored}', $hyperlinks_ignored, $template);
 $template = str_replace('{Bookmarklet}', file_get_contents('bookmarklet.js'), $template);
 
-$res = mysql_query('select count(kwl_id) as cnt from keywords left join keyword_links on kwl_kwd_id=kwd_id where kwd_usr_id = ' . get_user_id() . ' group by kwd_id order by cnt desc, kwd_name limit 1');
+$res = mysql_query('select count(kwl_id) as cnt from usrTags left join keyword_links on kwl_kwd_id=kwd_id where kwd_usr_id = ' . get_user_id() . ' group by kwd_id order by cnt desc, kwd_name limit 1');
 $row = mysql_fetch_row($res);
 $max_cnt = intval($row[0]);
 
 if (@$_REQUEST['order_by_popularity']) {
-	$res = mysql_query('select kwd_id, kwd_name, count(kwl_id) as cnt from keywords left join keyword_links on kwl_kwd_id=kwd_id where kwd_usr_id = ' . get_user_id() . ' group by kwd_id order by cnt desc, kwd_name');
+	$res = mysql_query('select kwd_id, kwd_name, count(kwl_id) as cnt from usrTags left join keyword_links on kwl_kwd_id=kwd_id where kwd_usr_id = ' . get_user_id() . ' group by kwd_id order by cnt desc, kwd_name');
 } else {
-	$res = mysql_query('select kwd_id, kwd_name, count(kwl_id) as cnt from keywords left join keyword_links on kwl_kwd_id=kwd_id where kwd_usr_id = ' . get_user_id() . ' group by kwd_id order by kwd_name');
+	$res = mysql_query('select kwd_id, kwd_name, count(kwl_id) as cnt from usrTags left join keyword_links on kwl_kwd_id=kwd_id where kwd_usr_id = ' . get_user_id() . ' group by kwd_id order by kwd_name');
 }
 
 $foreach_kwd = $foreach_kwd_js = '';
@@ -225,7 +225,7 @@ while ($row = mysql_fetch_row($res)) {
 }
 
 $kwd_select = "<select id=kwd_select style=\"display: none;\"><option value=\"\" disabled selected>select tag...</option>";
-$res = mysql_query('select kwd_id, kwd_name from keywords where kwd_usr_id = ' . get_user_id() . ' order by kwd_name');
+$res = mysql_query('select kwd_id, kwd_name from usrTags where kwd_usr_id = ' . get_user_id() . ' order by kwd_name');
 while ($row = mysql_fetch_row($res)) {
 	$kwd_select .= "<option value=".$row[0].">".htmlspecialchars($row[1])."</option>";
 }

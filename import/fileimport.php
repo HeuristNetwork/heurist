@@ -346,7 +346,7 @@ hyperlinks of interest).</p>
 <?php
 	} else if ($nextmode == 'printurls') {
 
-		$keywords = mysql__select_array('keywords', 'kwd_name', 'kwd_usr_id='.get_user_id().' order by kwd_name');
+		$keywords = mysql__select_array('usrTags', 'kwd_name', 'kwd_usr_id='.get_user_id().' order by kwd_name');
 		$keyword_options = '';
 		foreach ($keywords as $kwd)
 			$keyword_options .= '<option value="'.htmlspecialchars($kwd).'">'.htmlspecialchars($kwd)."</option>\n";
@@ -535,7 +535,7 @@ function bookmark_insert($url, $title, $keywords, $rec_id) {
 	))) {
 		$bkm_ID = mysql_insert_id();
 
-		$all_keywords = mysql__select_assoc('keywords', 'lower(kwd_name)', 'kwd_id', 'kwd_usr_id='.get_user_id());
+		$all_keywords = mysql__select_assoc('usrTags', 'lower(kwd_name)', 'kwd_id', 'kwd_usr_id='.get_user_id());
 		$input_keywords = explode(',', $keywords);
 		$kwd_ids = array();
 

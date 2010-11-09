@@ -25,11 +25,11 @@ if (! is_logged_in()) {
 	return;
 }
 
-$tags = mysql__select_array("keywords", "distinct kwd_name", "kwd_usr_id=" . get_user_id());
+$tags = mysql__select_array("usrTags", "distinct kwd_name", "kwd_usr_id=" . get_user_id());
 
 $workgroups = mysql__select_array(USERS_DATABASE.".UserGroups", "distinct ug_group_id", "ug_user_id=" . get_user_id());
 
-$res = mysql_query("select kwd_id, kwd_name, kwd_wg_id from keywords, ".USERS_DATABASE.".UserGroups where ug_group_id=kwd_wg_id and ug_user_id=" . get_user_id());
+$res = mysql_query("select kwd_id, kwd_name, kwd_wg_id from usrTags, ".USERS_DATABASE.".UserGroups where ug_group_id=kwd_wg_id and ug_user_id=" . get_user_id());
 $workgroupKeywords = array();
 while ($row = mysql_fetch_row($res)) { array_push($workgroupKeywords, $row); }
 

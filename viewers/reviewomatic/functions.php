@@ -40,7 +40,7 @@ function get_classes($user_id) {
 function get_assignments($grp_id) {
 	$grp_id = intval($grp_id);
 	$res = mysql_query('SELECT kwd_id, kwd_name
-						  FROM keywords
+						  FROM usrTags
 						 WHERE kwd_wg_id=' . $grp_id . '
 						   AND kwd_name LIKE "Assignment: %"
 					  ORDER BY kwd_name');
@@ -99,7 +99,7 @@ function get_genre($bkmk_id, $class_grp_id) {
 	$class_grp_id = intval($class_grp_id);
 	$res = mysql_query('SELECT kwd_id, kwd_name
 						  FROM keyword_links
-					 LEFT JOIN keywords ON kwd_id=kwl_kwd_id
+					 LEFT JOIN usrTags ON kwd_id=kwl_kwd_id
 						 WHERE kwl_pers_id=' . $bkmk_id . '
 						   AND kwd_wg_id=' . $class_grp_id . '
 						   AND kwd_name like "Genre: %"');
@@ -143,7 +143,7 @@ function get_review($bkmk_id, $class_grp_id) {
 	$review['tags'] = array();
 	$res = mysql_query('SELECT kwd_name
 						  FROM keyword_links
-					 LEFT JOIN keywords ON kwd_id = kwl_kwd_id
+					 LEFT JOIN usrTags ON kwd_id = kwl_kwd_id
 						 WHERE kwl_pers_id = '.$bkmk_id.'
 						   AND kwd_usr_id = '.get_user_id().'
 						   AND kwd_wg_id is null
@@ -158,7 +158,7 @@ function get_genres($class_grp_id) {
 	$class_grp_id = intval($class_grp_id);
 	$genres = array();
 	$res = mysql_query('SELECT kwd_id, kwd_name
-						  FROM keywords
+						  FROM usrTags
 						 WHERE kwd_wg_id=' . $class_grp_id . '
 						   AND kwd_name like "Genre: %"
 					  ORDER BY kwd_name');

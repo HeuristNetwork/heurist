@@ -47,7 +47,7 @@ if ($bkm_ID  &&  $_POST["save-mode"] == "edit") {
 
 
 function doKeywordInsertion($bkm_ID) {
-	$kwds = mysql__select_array("keyword_links, keywords",
+	$kwds = mysql__select_array("keyword_links, usrTags",
 	                            "kwd_name", "kwl_pers_id=$bkm_ID and kwd_id=kwl_kwd_id and kwd_usr_id=".get_user_id()." order by kwl_order, kwl_id");
 	$keywordString = join(",", $kwds);
 
@@ -56,7 +56,7 @@ function doKeywordInsertion($bkm_ID) {
 
 
 	$keywords = array_filter(array_map("trim", explode(",", str_replace("\\", "/", $_POST["keywordstring"]))));	// replace backslashes with forwardslashes
-	$kwd_map = mysql__select_assoc("keywords", "trim(lower(kwd_name))", "kwd_id",
+	$kwd_map = mysql__select_assoc("usrTags", "trim(lower(kwd_name))", "kwd_id",
 	                               "kwd_usr_id=".get_user_id()." and kwd_name in (\"".join("\",\"", array_map("addslashes", $keywords))."\")");
 
 	$kwd_ids = array();
@@ -65,7 +65,7 @@ function doKeywordInsertion($bkm_ID) {
 		if (@$kwd_map[strtolower($keyword)]) {
 			$kwd_id = $kwd_map[strtolower($keyword)];
 		} else {
-			mysql_query("insert into keywords (kwd_name, kwd_usr_id) values (\"" . addslashes($keyword) . "\", " . get_user_id() . ")");
+			mysql_query("insert into usrTags (kwd_name, kwd_usr_id) values (\"" . addslashes($keyword) . "\", " . get_user_id() . ")");
 			$kwd_id = mysql_insert_id();
 		}
 		array_push($kwd_ids, $kwd_id);
@@ -76,7 +76,7 @@ function doKeywordInsertion($bkm_ID) {
 	if (! $rec_id) $rec_id = "NULL";
 
 	// Delete all non-workgroup keywords for this bookmark
-	mysql_query("delete keyword_links from keyword_links, keywords where kwl_pers_id = $bkm_ID and kwd_id=kwl_kwd_id and kwd_wg_id is null");
+	mysql_query("delete keyword_links from keyword_links, usrTags where kwl_pers_id = $bkm_ID and kwd_id=kwl_kwd_id and kwd_wg_id is null");
 
 	if (count($kwd_ids) > 0) {
 		$query = "";
@@ -89,7 +89,7 @@ function doKeywordInsertion($bkm_ID) {
 	}
 
 	// return new keyword string
-	$kwds = mysql__select_array("keyword_links, keywords",
+	$kwds = mysql__select_array("keyword_links, usrTags",
 	                            "kwd_name", "kwl_bkm_ID=$bkm_ID and kwd_id=kwl_kwd_id and kwd_usr_id=".get_user_id()." order by kwl_order, kwl_id");
 	return join(",", $kwds);
 }

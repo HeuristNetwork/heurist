@@ -24,7 +24,7 @@ $body->global_vars['keywords'] = '';
 
 $res = mysql_query('select kwd_name,count(kwl_id) as bkmks
                       from keyword_links
-                 left join keywords on kwl_kwd_id=kwd_id
+                 left join usrTags on kwl_kwd_id=kwd_id
                      where kwd_usr_id='.$_REQUEST['Id'].'
                   group by kwd_name
                   order by '. ($_REQUEST['sort'] == 'alpha' ? 'kwd_name, bkmks desc' : 'bkmks desc, kwd_name'));

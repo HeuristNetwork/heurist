@@ -346,7 +346,7 @@ function loadUserDependentData(&$record) {
 	}
 
 	$record["tags"] = mysql__select_array(
-		"keyword_links, keywords",
+		"keyword_links, usrTags",
 		"kwd_name",
 		"kwd_id = kwl_kwd_id and
 		 kwd_usr_id = ".get_user_id()." and
@@ -354,7 +354,7 @@ function loadUserDependentData(&$record) {
 		 order by kwl_order");
 
 	$record["keywords"] = mysql__select_array(
-		"keyword_links, keywords, ".USERS_DATABASE.".UserGroups",
+		"keyword_links, usrTags, ".USERS_DATABASE.".UserGroups",
 		"kwl_kwd_id",
 		"kwd_id = kwl_kwd_id and
 		 kwd_wg_id = ug_group_id and

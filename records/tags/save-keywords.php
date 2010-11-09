@@ -37,7 +37,7 @@ if ($rec_id  &&  $actions) {
 		mysql_query("insert into keyword_links (kwl_kwd_id, kwl_rec_id) values (" . join(",$rec_id), (", $additions) . ",$rec_id)");
 
 
-	$res = mysql_query("select kwd_id from keyword_links, keywords where kwl_kwd_id=kwd_id and kwl_rec_id=$rec_id");
+	$res = mysql_query("select kwd_id from keyword_links, usrTags where kwl_kwd_id=kwd_id and kwl_rec_id=$rec_id");
 	$kwd_ids = array();
 	while ($row = mysql_fetch_row($res)) array_push($kwd_ids, $row[0]);
 

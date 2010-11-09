@@ -320,7 +320,7 @@ function doDetailInsertion($bibID, $details, $recordType, $group, &$nonces, &$re
 
 
 function doTagInsertion($bibID, $bkmkID, $tagString) {
-	$kwds = mysql__select_array("keyword_links, keywords",
+	$kwds = mysql__select_array("keyword_links, usrTags",
 	"kwd_name", "kwl_pers_id=$bkmkID and kwd_id=kwl_kwd_id and kwd_usr_id=".get_user_id()." order by kwl_order, kwl_id");
 	$existingTagString = join(",", $kwds);
 
@@ -329,7 +329,7 @@ function doTagInsertion($bibID, $bkmkID, $tagString) {
 
 
 	$tags = array_filter(array_map("trim", explode(",", str_replace("\\", "/", $tagString))));     // replace backslashes with forwardslashes
-	$tagMap = mysql__select_assoc("keywords", "trim(lower(kwd_name))", "kwd_id",
+	$tagMap = mysql__select_assoc("usrTags", "trim(lower(kwd_name))", "kwd_id",
 	"kwd_usr_id=".get_user_id()." and kwd_name in (\"".join("\",\"", array_map("addslashes", $tags))."\")");
 
 	$kwd_ids = array();
@@ -337,14 +337,14 @@ function doTagInsertion($bibID, $bkmkID, $tagString) {
 		if (@$tagMap[strtolower($tag)]) {
 			$kwd_id = $tagMap[strtolower($tag)];
 		} else {
-			mysql_query("insert into keywords (kwd_name, kwd_usr_id) values (\"" . addslashes($tag) . "\", " . get_user_id() . ")");
+			mysql_query("insert into usrTags (kwd_name, kwd_usr_id) values (\"" . addslashes($tag) . "\", " . get_user_id() . ")");
 			$kwd_id = mysql_insert_id();
 		}
 		array_push($kwd_ids, $kwd_id);
 	}
 
 	// Delete all non-workgroup keywords for this bookmark
-	mysql_query("delete keyword_links from keyword_links, keywords where kwl_pers_id=$bkmkID and kwd_id=kwl_kwd_id and kwd_wg_id is null");
+	mysql_query("delete keyword_links from keyword_links, usrTags where kwl_pers_id=$bkmkID and kwd_id=kwl_kwd_id and kwd_wg_id is null");
 
 	if (count($kwd_ids) > 0) {
 		$query = "";
@@ -361,22 +361,22 @@ function doKeywordInsertion($bibID, $keywordIDs) {
 	if ($keywordIDs != ""  &&  ! preg_match("/^\\d+(?:,\\d+)*$/", $keywordIDs)) return;
 
 	if ($keywordIDs) {
-		mysql_query("delete keyword_links from keyword_links, keywords, ".USERS_DATABASE.".UserGroups where kwl_rec_id=$bibID and kwl_kwd_id=kwd_id and kwd_wg_id=ug_group_id and ug_user_id=".get_user_id()." and kwd_id not in ($keywordIDs)");
+		mysql_query("delete keyword_links from keyword_links, usrTags, ".USERS_DATABASE.".UserGroups where kwl_rec_id=$bibID and kwl_kwd_id=kwd_id and kwd_wg_id=ug_group_id and ug_user_id=".get_user_id()." and kwd_id not in ($keywordIDs)");
 		if (mysql_error()) jsonError("database error - " . mysql_error());
 	} else {
-		mysql_query("delete keyword_links from keyword_links, keywords, ".USERS_DATABASE.".UserGroups where kwl_rec_id=$bibID and kwl_kwd_id=kwd_id and kwd_wg_id=ug_group_id and ug_user_id=".get_user_id());
+		mysql_query("delete keyword_links from keyword_links, usrTags, ".USERS_DATABASE.".UserGroups where kwl_rec_id=$bibID and kwl_kwd_id=kwd_id and kwd_wg_id=ug_group_id and ug_user_id=".get_user_id());
 		if (mysql_error()) jsonError("database error - " . mysql_error());
 		return;
 	}
 
-	$existingKeywordIDs = mysql__select_assoc("keyword_links, keywords, ".USERS_DATABASE.".UserGroups", "kwl_kwd_id", "1", "kwl_rec_id=$bibID and kwl_kwd_id=kwd_id and kwd_wg_id=ug_group_id and ug_user_id=".get_user_id());
+	$existingKeywordIDs = mysql__select_assoc("keyword_links, usrTags, ".USERS_DATABASE.".UserGroups", "kwl_kwd_id", "1", "kwl_rec_id=$bibID and kwl_kwd_id=kwd_id and kwd_wg_id=ug_group_id and ug_user_id=".get_user_id());
 	$newKeywordIDs = array();
 	foreach (explode(",", $keywordIDs) as $kwdID) {
 		if (! @$existingKeywordIDs[$kwdID]) array_push($newKeywordIDs, $kwdID);
 	}
 
 	if ($newKeywordIDs) {
-		mysql_query("insert into keyword_links (kwl_kwd_id, kwl_rec_id) select kwd_id, $bibID from keywords, ".USERS_DATABASE.".UserGroups where kwd_wg_id=ug_group_id and ug_user_id=".get_user_id()." and kwd_id in (" . join(",", $newKeywordIDs) . ")");
+		mysql_query("insert into keyword_links (kwl_kwd_id, kwl_rec_id) select kwd_id, $bibID from usrTags, ".USERS_DATABASE.".UserGroups where kwd_wg_id=ug_group_id and ug_user_id=".get_user_id()." and kwd_id in (" . join(",", $newKeywordIDs) . ")");
 		if (mysql_error()) jsonError("database error - " . mysql_error());
 	}
 }

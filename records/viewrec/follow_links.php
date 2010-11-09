@@ -41,11 +41,11 @@ $body = new BodyScope($lexer);
 $body->global_vars['rec_id'] = $_REQUEST['rec_id'];
 $body->global_vars['bkm_ID'] = $_REQUEST['bkm_ID'];
 
-$my_kwds = mysql__select_array('keyword_links left join keywords on kwl_kwd_id=kwd_id', 'kwd_name', 'kwl_pers_id='.$bkmk['bkm_ID']);
+$my_kwds = mysql__select_array('keyword_links left join usrTags on kwl_kwd_id=kwd_id', 'kwd_name', 'kwl_pers_id='.$bkmk['bkm_ID']);
 
 $keywords = mysql__select_assoc('usrBookmarks
 								 left join keyword_links on bkm_ID=kwl_pers_id
-								 left join keywords on kwl_kwd_id=kwd_id
+								 left join usrTags on kwl_kwd_id=kwd_id
 								 left join '.USERS_DATABASE.'.Users on Id=kwd_usr_id',
 								'kwd_name', 'count(kwd_id) as kcount',
 								'bkm_recID='.$bib['rec_id'].'
@@ -58,7 +58,7 @@ $keywords = mysql__select_assoc('usrBookmarks
 $res = mysql_query('select concat(firstname," ",lastname) as bkmk_user, kwd_name
 					from usrBookmarks
 					left join keyword_links on bkm_ID=kwl_pers_id
-					left join keywords on kwl_kwd_id=kwd_id
+					left join usrTags on kwl_kwd_id=kwd_id
 					left join '.USERS_DATABASE.'.Users on bkm_UGrpID=Id
 					where bkm_recID='.$bib['rec_id'].' and kwl_id is not null order by bkmk_user, kwd_name');
 
@@ -86,7 +86,7 @@ if ($keywords) {
 		$res = mysql_query('select Id, concat(firstname," ",lastname) as bkmk_user
 							from usrBookmarks
 							left join keyword_links on bkm_ID=kwl_pers_id
-							left join keywords on kwl_kwd_id=kwd_id
+							left join usrTags on kwl_kwd_id=kwd_id
 							left join '.USERS_DATABASE.'.Users on bkm_UGrpID=Id
 							where bkm_recID='.$bib['rec_id'].'
 							and kwl_id is not null
@@ -120,7 +120,7 @@ $res = mysql_query('
      from records
 left join usrBookmarks on bkm_recID=rec_id
 left join keyword_links on kwl_pers_id=bkm_ID
-left join keywords on kwd_id=kwl_kwd_id and kwd_usr_id=bkm_UGrpID
+left join usrTags on kwd_id=kwl_kwd_id and kwd_usr_id=bkm_UGrpID
 left join '.USERS_DATABASE.'.Users on Id=bkm_UGrpID
     where rec_id='.$bib['rec_id'].'
       and kwd_id is null

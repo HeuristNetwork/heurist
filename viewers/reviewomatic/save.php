@@ -66,7 +66,7 @@ for ($i = 0; $i < get_assignment_tag_count($ass_kwd_id); $i++) {
 	if (@$_REQUEST['tag'.$i] != @$review['tags'][$i]) {
 		if ($review['tags'][$i]) {
 			mysql_query('DELETE kwd_link
-						   FROM keywords, kwd_link
+						   FROM usrTags, kwd_link
 						  WHERE kwd_label = "' . $review['tags'][$i] . '"
 							AND kwd_user_id = ' . get_user_id() . '
 							AND kwi_kwd_id = kwd_id
@@ -75,14 +75,14 @@ for ($i = 0; $i < get_assignment_tag_count($ass_kwd_id); $i++) {
 		if (@$_REQUEST['tag'.$i]) {
 			$kwd_id = 0;
 			$res = mysql_query('SELECT kwd_id
-								  FROM keywords
+								  FROM usrTags
 								 WHERE kwd_label = "' . $_REQUEST['tag'.$i] . '"
 								   AND kwd_user_id = ' . get_user_id());
 			if (mysql_num_rows($res)) {
 				$row = mysql_fetch_assoc($res);
 				$kwd_id = intval($row['kwd_id']);
 			} else {
-				$res = mysql_query('INSERT INTO keywords
+				$res = mysql_query('INSERT INTO usrTags
 											SET kwd_label = "' . $_REQUEST['tag'.$i] . '",
 												kwd_user_id = ' . get_user_id());
 				$kwd_id = mysql_insert_id();

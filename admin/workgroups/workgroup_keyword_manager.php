@@ -72,7 +72,7 @@ function delete_keyword(kwd_id) {
 		print '<b>' . htmlspecialchars($grp['grp_name']) . '</b>';
 
 		print '<ul>';
-		$res = mysql_query('select kwd_id, kwd_name, count(kwl_id) as kwi_count from keywords left join keyword_links on kwl_kwd_id=kwd_id where kwd_wg_id='.$grp['grp_id'].' group by kwd_id, kwl_kwd_id order by kwd_name');
+		$res = mysql_query('select kwd_id, kwd_name, count(kwl_id) as kwi_count from usrTags left join keyword_links on kwl_kwd_id=kwd_id where kwd_wg_id='.$grp['grp_id'].' group by kwd_id, kwl_kwd_id order by kwd_name');
 		while ($kwd = mysql_fetch_assoc($res)) {
 			$searchlink = HEURIST_URL_BASE.'search/search.html?q=keyword%3A%22'.$grp['grp_name'].'%5C'.$kwd['kwd_name'].'%22&w=all&stype=';
 			if ($kwd['kwi_count'] == 0) $used = '';
@@ -113,7 +113,7 @@ function add_keywords() {
 	}
 	if (! $insert_stmt) return;
 
-	$insert_stmt = 'insert into keywords (kwd_name, kwd_wg_id) values ' . $insert_stmt;
+	$insert_stmt = 'insert into usrTags (kwd_name, kwd_wg_id) values ' . $insert_stmt;
 	mysql_connection_db_overwrite(DATABASE);
 	mysql_query($insert_stmt);
 	if (mysql_affected_rows() == 1) {
@@ -129,7 +129,7 @@ function add_keywords() {
 function delete_keyword() {
 	$kwd_id = intval($_REQUEST['deleting']);
 	mysql_connection_db_overwrite(DATABASE);
-	mysql_query('delete from keywords where kwd_id = ' . $kwd_id . ' and kwd_wg_id is not null');
+	mysql_query('delete from usrTags where kwd_id = ' . $kwd_id . ' and kwd_wg_id is not null');
 	if (mysql_affected_rows() >= 1) {	// overkill
 		print '<div style="color: red;">1 tag deleted</div>';
 	} else {

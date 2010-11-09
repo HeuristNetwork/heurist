@@ -490,7 +490,7 @@ function writeReversePointers($bib, $depth) {
 }
 
 /**
- * This function retrieves workgroup keywords for the record
+ * This function retrieves workgroup usrTags for the record
  *
  * @global $XML the xml document where it writes to
  * @param string $bib record id
@@ -501,7 +501,7 @@ function writeKeywords($bib) {
 
 	$query = 'SELECT distinct grp_name, kwd_name
 				FROM keyword_links
-		   LEFT JOIN keywords ON kwd_id = kwl_kwd_id
+		   LEFT JOIN usrTags ON kwd_id = kwl_kwd_id
 		   LEFT JOIN '.USERS_DATABASE.'.Groups ON grp_id = kwd_wg_id
 			   WHERE kwl_rec_id = '.$bib.'
 				 AND kwd_wg_id > 0

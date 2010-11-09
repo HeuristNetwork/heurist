@@ -44,7 +44,7 @@ $MAINTABLES['RATING_QUALITY'] = 'ratings_quality';
 $MAINTABLES['RATING_INTEREST'] = 'ratings_interest';
 	$PKEY['RATING_INTEREST'] = 'ri_id';
 
-$MAINTABLES['KEYWORD'] = 'keywords';
+$MAINTABLES['KEYWORD'] = 'usrTags';
 	$PKEY['KEYWORD'] = 'kwd_id';
 
 $MAINTABLES['REFTYPE'] = 'rec_types';

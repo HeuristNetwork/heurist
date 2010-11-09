@@ -892,7 +892,7 @@ function mode_crosswalking() {
         <nobr><a href="#" target="_ignore" onclick="add_keyword('To Read'); return false;">To Read</a></nobr>&nbsp;
       </div>
        <?php
-	$top_keywords = mysql__select_array('keyword_links left join keywords on kwl_kwd_id=kwd_id',
+	$top_keywords = mysql__select_array('keyword_links left join usrTags on kwl_kwd_id=kwd_id',
 	                                    'kwd_name, count(kwd_id) as count',
 	                                    'kwd_usr_id='.get_user_id().' group by kwd_id order by count desc limit 5');
 	if ($top_keywords) {
@@ -911,7 +911,7 @@ function mode_crosswalking() {
        ?>
 
        <?php
-	$recent_keywords = mysql__select_array('keyword_links left join keywords on kwl_kwd_id=kwd_id',
+	$recent_keywords = mysql__select_array('keyword_links left join usrTags on kwl_kwd_id=kwd_id',
 	                                    'distinct(kwd_name)',
 	                                    'kwd_usr_id='.get_user_id().' order by kwl_id desc limit 5');
 	if ($recent_keywords) {
@@ -957,7 +957,7 @@ function add_keyword(tag) {
 
 <?php
 	/* are there any workgroup-keywords for any workgroups this user is in? If so, show the workgroup-keyword section */
-	$res = mysql_query('select kwd_id, grp_name, kwd_name from keywords, '.USERS_DATABASE.'.UserGroups, '.USERS_DATABASE.'.Groups where kwd_wg_id=ug_group_id and ug_group_id=grp_id and ug_user_id=' . get_user_id() . ' order by grp_name, kwd_name');
+	$res = mysql_query('select kwd_id, grp_name, kwd_name from usrTags, '.USERS_DATABASE.'.UserGroups, '.USERS_DATABASE.'.Groups where kwd_wg_id=ug_group_id and ug_group_id=grp_id and ug_user_id=' . get_user_id() . ' order by grp_name, kwd_name');
 	if (mysql_num_rows($res) > 0) {
 ?>
     <div style="margin-top: 1ex; margin-left: 10ex;">
@@ -1034,7 +1034,7 @@ function mode_entry_insertion() {
 	$session_data['import_time'] =  date('Y-m-d H:i:s');
 	// add a keyword (tag) for this import session to all entries
 	$import_kwd = 'File Import ' . $session_data['import_time'];
-	$res = mysql__insert('keywords', array(
+	$res = mysql__insert('usrTags', array(
 		'kwd_name'		=> $import_kwd,
 		'kwd_usr_id'	=> get_user_id()));
 	// add a saved search for records with this tag
@@ -1939,7 +1939,7 @@ function insert_keywords(&$entry, $keyword_map=array()) {
 // easy one first: see if there is a workgroup keyword to be added, and that we have access to that workgroup
 $wgKwd = $entry->getWorkgroupKeyword();
 if ($wgKwd) {
-	$res = mysql_query("select * from keywords, ".USERS_DATABASE.".UserGroups where kwd_wg_id=ug_group_id and ug_user_id=" . get_user_id() . " and kwd_id=" . $wgKwd);
+	$res = mysql_query("select * from usrTags, ".USERS_DATABASE.".UserGroups where kwd_wg_id=ug_group_id and ug_user_id=" . get_user_id() . " and kwd_id=" . $wgKwd);
 	if (mysql_num_rows($res) != 1) $wgKwd = 0;
 }
 
@@ -1957,12 +1957,12 @@ if ($wgKwd) {
 		if ($kwd_select_clause) $kwd_select_clause .= ',';
 		$kwd_select_clause .= '"'.addslashes($kwd).'"';
 	}
-	$res = mysql_query('select kwd_id, lower(trim(kwd_name)) from keywords where kwd_name in (' . $kwd_select_clause . ')'
+	$res = mysql_query('select kwd_id, lower(trim(kwd_name)) from usrTags where kwd_name in (' . $kwd_select_clause . ')'
 	                                                             . ' and kwd_usr_id = ' . get_user_id());
 	$keywords = array();
 	while ($row = mysql_fetch_row($res)) $keywords[$row[1]] = $row[0];
 
-	$all_keywords = mysql__select_assoc('keywords, '.USERS_DATABASE.'.UserGroups, '.USERS_DATABASE.'.Groups', 'lower(concat(grp_name, "\\\\", kwd_name))', 'kwd_id',
+	$all_keywords = mysql__select_assoc('usrTags, '.USERS_DATABASE.'.UserGroups, '.USERS_DATABASE.'.Groups', 'lower(concat(grp_name, "\\\\", kwd_name))', 'kwd_id',
 	                                    'kwd_wg_id=ug_group_id and ug_group_id=grp_id and ug_user_id='.get_user_id());
 	foreach ($all_keywords as $kwd => $id) $keywords[$kwd] = $id;
 
@@ -1978,7 +1978,7 @@ if ($wgKwd) {
 /**** 	"Don't insert new keywords unannounced"
 	Well, it's very very difficult to get feedback from the user, so we just won't insert any new keywords at all, I guess.  Hope you're happy.
 */		else if (! $wg_kwd) {	// do not insert new workgroup keywords
-			mysql_query('insert into keywords (kwd_usr_id, kwd_name) ' .
+			mysql_query('insert into usrTags (kwd_usr_id, kwd_name) ' .
 			                         ' values ('.get_user_id().', "'.addslashes($kwd).'")');
 			$kwd_id = mysql_insert_id();
 			array_push($entry_kwd_ids, $kwd_id);
@@ -2218,7 +2218,7 @@ function print_keyword_stuff(&$out_entries) {
 		if ($query) $query .= "', '";
 		$query .= addslashes($kwd);
 	}
-	$query = "select kwd_name from keywords where kwd_name in ('" . $query . "')";
+	$query = "select kwd_name from usrTags where kwd_name in ('" . $query . "')";
 	$res = mysql_query($query);
 	$existing_keywords = array();
 	while ($row = mysql_fetch_row($res)) {

@@ -353,16 +353,16 @@ if ($rec_id) {
 				$pos = strpos($keyword, "\\");
 				$grpName = substr($keyword, 0, $pos);
 				$kwdName = substr($keyword, $pos+1);
-				$res = mysql_query("select kwd_id from keywords, ".USERS_DATABASE.".Groups, ".USERS_DATABASE.".UserGroups where kwd_name='".addslashes($kwdName)."' and grp_name='".addslashes($grpName)."' and kwd_wg_id=grp_id and ug_group_id=grp_id and ug_user_id=".get_user_id());
+				$res = mysql_query("select kwd_id from usrTags, ".USERS_DATABASE.".Groups, ".USERS_DATABASE.".UserGroups where kwd_name='".addslashes($kwdName)."' and grp_name='".addslashes($grpName)."' and kwd_wg_id=grp_id and ug_group_id=grp_id and ug_user_id=".get_user_id());
 				$kwd_id = mysql_fetch_row($res);
 				$kwd_id = $kwd_id[0];
 			}
 			else {
-				$res = mysql_query('select kwd_id from keywords where kwd_name = "'.addslashes($keyword).'" and kwd_usr_id = ' . get_user_id());
+				$res = mysql_query('select kwd_id from usrTags where kwd_name = "'.addslashes($keyword).'" and kwd_usr_id = ' . get_user_id());
 				if ($row = mysql_fetch_assoc($res)) {
 					$kwd_id = $row['kwd_id'];
 				} else {
-					mysql__insert('keywords', array(
+					mysql__insert('usrTags', array(
 						'kwd_usr_id' => get_user_id(),
 						'kwd_name' => $keyword
 					));

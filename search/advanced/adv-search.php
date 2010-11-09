@@ -756,7 +756,7 @@ class KeywordPredicate extends Predicate {
 				return $not . 'exists (select * from keyword_links where kwl_pers_id=bkm_ID and kwl_kwd_id in ('.join(',', $this->value).'))';
 			} else if (! $this->wg_value) {
 				// this runs faster (like TEN TIMES FASTER) - think it's to do with the join
-				$query=$not . 'exists (select * from keyword_links kwi left join keywords kwd on kwi.kwl_kwd_id=kwd.kwd_id '
+				$query=$not . 'exists (select * from keyword_links kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.kwd_id '
 				                    . 'where kwi.kwl_rec_id=rec_id and (';
 				$first_value = true;
 				foreach ($this->value as $value) {
@@ -771,7 +771,7 @@ class KeywordPredicate extends Predicate {
 				}
 				$query .=              ') and kwd.kwd_usr_id='.get_user_id().') ';
 			} else {
-				$query=$not . 'exists (select * from '.USERS_DATABASE.'.Groups, keyword_links kwi left join keywords kwd on kwi.kwl_kwd_id=kwd.kwd_id '
+				$query=$not . 'exists (select * from '.USERS_DATABASE.'.Groups, keyword_links kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.kwd_id '
 				                    . 'where grp_id=kwd_wg_id and kwi.kwl_rec_id=rec_id and (';
 				for ($i=0; $i < count($this->value); ++$i) {
 					if ($i > 0) $query .= 'or ';
@@ -793,7 +793,7 @@ class KeywordPredicate extends Predicate {
 			}
 		} else {
 			if (! $this->wg_value) {
-				$query = $not . 'exists (select * from keyword_links kwi left join keywords kwd on kwi.kwl_kwd_id=kwd.kwd_id '
+				$query = $not . 'exists (select * from keyword_links kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.kwd_id '
 				                    . 'where kwi.kwl_rec_id=rec_id and (';
 				$first_value = true;
 				foreach ($this->value as $value) {
@@ -808,7 +808,7 @@ class KeywordPredicate extends Predicate {
 				}
 				$query .= ')) ';
 			} else {
-				$query = $not . 'exists (select * from keyword_links kwi left join keywords kwd on kwi.kwl_kwd_id=kwd.kwd_id left join '.USERS_DATABASE.'.Groups on grp_id=kwd_wg_id '
+				$query = $not . 'exists (select * from keyword_links kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.kwd_id left join '.USERS_DATABASE.'.Groups on grp_id=kwd_wg_id '
 				                    . 'where kwi.kwl_rec_id=rec_id and (';
 				for ($i=0; $i < count($this->value); ++$i) {
 					if ($i > 0) $query .= 'or ';
