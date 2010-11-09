@@ -500,7 +500,7 @@ function writeKeywords($bib) {
 	global $XML;
 
 	$query = 'SELECT distinct grp_name, tag_Text
-				FROM keyword_links
+				FROM usrRecTagLinks
 		   LEFT JOIN usrTags ON tag_ID = kwl_kwd_id
 		   LEFT JOIN '.USERS_DATABASE.'.Groups ON grp_id = tag_UGrpID
 			   WHERE kwl_rec_id = '.$bib.'

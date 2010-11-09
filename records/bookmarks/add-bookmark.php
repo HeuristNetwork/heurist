@@ -51,7 +51,7 @@ if (mysql_num_rows($res) == 0) {
 }
 else {
 	$bkmk = mysql_fetch_assoc($res);
-	$kwds = mysql__select_array("keyword_links left join usrTags on tag_ID=kwl_kwd_id", "tag_Text", "kwl_pers_id=".$bkmk["bkm_ID"]." and tag_UGrpID=".get_user_id() . " order by kwl_order, kwl_id");
+	$kwds = mysql__select_array("usrRecTagLinks left join usrTags on tag_ID=kwl_kwd_id", "tag_Text", "kwl_pers_id=".$bkmk["bkm_ID"]." and tag_UGrpID=".get_user_id() . " order by kwl_order, kwl_id");
 	$bkmk["tagString"] = join(",", $kwds);
 }
 

@@ -753,10 +753,10 @@ class KeywordPredicate extends Predicate {
 		$not = ($this->parent->negate)? 'not ' : '';
 		if ($query->search_type == BOOKMARK) {
 			if (is_numeric(join('', $this->value))) {	// if all keyword specs are numeric then don't need a join
-				return $not . 'exists (select * from keyword_links where kwl_pers_id=bkm_ID and kwl_kwd_id in ('.join(',', $this->value).'))';
+				return $not . 'exists (select * from usrRecTagLinks where kwl_pers_id=bkm_ID and kwl_kwd_id in ('.join(',', $this->value).'))';
 			} else if (! $this->wg_value) {
 				// this runs faster (like TEN TIMES FASTER) - think it's to do with the join
-				$query=$not . 'exists (select * from keyword_links kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.tag_ID '
+				$query=$not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.tag_ID '
 				                    . 'where kwi.kwl_rec_id=rec_id and (';
 				$first_value = true;
 				foreach ($this->value as $value) {
@@ -771,7 +771,7 @@ class KeywordPredicate extends Predicate {
 				}
 				$query .=              ') and kwd.tag_UGrpID='.get_user_id().') ';
 			} else {
-				$query=$not . 'exists (select * from '.USERS_DATABASE.'.Groups, keyword_links kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.tag_ID '
+				$query=$not . 'exists (select * from '.USERS_DATABASE.'.Groups, usrRecTagLinks kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.tag_ID '
 				                    . 'where grp_id=tag_UGrpID and kwi.kwl_rec_id=rec_id and (';
 				for ($i=0; $i < count($this->value); ++$i) {
 					if ($i > 0) $query .= 'or ';
@@ -793,7 +793,7 @@ class KeywordPredicate extends Predicate {
 			}
 		} else {
 			if (! $this->wg_value) {
-				$query = $not . 'exists (select * from keyword_links kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.tag_ID '
+				$query = $not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.tag_ID '
 				                    . 'where kwi.kwl_rec_id=rec_id and (';
 				$first_value = true;
 				foreach ($this->value as $value) {
@@ -808,7 +808,7 @@ class KeywordPredicate extends Predicate {
 				}
 				$query .= ')) ';
 			} else {
-				$query = $not . 'exists (select * from keyword_links kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.tag_ID left join '.USERS_DATABASE.'.Groups on grp_id=tag_UGrpID '
+				$query = $not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.tag_ID left join '.USERS_DATABASE.'.Groups on grp_id=tag_UGrpID '
 				                    . 'where kwi.kwl_rec_id=rec_id and (';
 				for ($i=0; $i < count($this->value); ++$i) {
 					if ($i > 0) $query .= 'or ';

@@ -38,10 +38,10 @@ mysql_connection_db_overwrite(DATABASE);
 		$bibs = mysql_affected_rows();
 		mysql_query('delete from rec_details where rd_rec_id = ' . $rec_id);
 		mysql_query('delete from reminders where rem_rec_id = ' . $rec_id);
-		mysql_query('delete from keyword_links where kwl_rec_id = ' . $rec_id);
+		mysql_query('delete from usrRecTagLinks where kwl_rec_id = ' . $rec_id);
 		$res = mysql_query('select bkm_ID from usrBookmarks where bkm_recID = ' . $rec_id);
 		while ($row = mysql_fetch_assoc($res))
-			mysql_query('delete from keyword_links where kwl_pers_id = ' . $row['bkm_ID']);
+			mysql_query('delete from usrRecTagLinks where kwl_pers_id = ' . $row['bkm_ID']);
 		mysql_query('delete from usrBookmarks where bkm_recID = ' . $rec_id);
 		$bkmks = mysql_affected_rows();
 		return array($bibs, $bkmks);

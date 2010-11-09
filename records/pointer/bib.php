@@ -165,7 +165,7 @@ function getBaseProperties($rec_id, $bkm_ID) {
 
 	if ($bkm_ID) {
 		// grab the user tags for this bookmark, as a single comma-delimited string
-		$kwds = mysql__select_array("keyword_links left join usrTags on tag_ID=kwl_kwd_id", "tag_Text", "kwl_pers_id=$bkm_ID and tag_UGrpID=".get_user_id() . " order by kwl_order, kwl_id");
+		$kwds = mysql__select_array("usrRecTagLinks left join usrTags on tag_ID=kwl_kwd_id", "tag_Text", "kwl_pers_id=$bkm_ID and tag_UGrpID=".get_user_id() . " order by kwl_order, kwl_id");
 		$props["tagString"] = join(",", $kwds);
 	}
 
@@ -352,7 +352,7 @@ function getAllComments($rec_id) {
 
 function getAllWorkgroupKeywords($rec_id) {
 // FIXME: should limit this just to workgroups that the user is in
-	$res = mysql_query("select tag_ID from keyword_links, usrTags where kwl_kwd_id=tag_ID and kwl_rec_id=$rec_id");
+	$res = mysql_query("select tag_ID from usrRecTagLinks, usrTags where kwl_kwd_id=tag_ID and kwl_rec_id=$rec_id");
 	$kwd_ids = array();
 	while ($row = mysql_fetch_row($res)) array_push($kwd_ids, $row[0]);
 	return $kwd_ids;

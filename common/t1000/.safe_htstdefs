@@ -66,7 +66,7 @@ $MAINTABLES['USER'] = USERS_DATABASE.'.'.USERS_TABLE;
 			'ratings_interest' => 'pers_interest_rating=ri_id');
 */
 
-$MAINTABLES["BOOKMARKS_TO_KEYWORDS"] = 'keyword_links';
+$MAINTABLES["BOOKMARKS_TO_KEYWORDS"] = 'usrRecTagLinks';
 	$PKEY["BOOKMARKS_TO_KEYWORDS"] = 'kwl_id';
         $LINK_KEYS["BOOKMARKS_TO_KEYWORDS"] = array(	"BOOKMARK-ID" => "kwl_pers_id",
 							"KEYWORD-ID"  => "kwl_kwd_id");
@@ -82,7 +82,7 @@ $SEARCHES["BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left jo
 		)
 		";	/* may be over-written by search.php */
 
-$SEARCHES["augmented_BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left join records on bkm_recID=rec_id left join keyword_links on kwl_pers_id=bkm_ID WHERE (
+$SEARCHES["augmented_BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left join records on bkm_recID=rec_id left join usrRecTagLinks on kwl_pers_id=bkm_ID WHERE (
 		(bkm_UGrpID = [logged-in-user-id]) and
 		[word-match:bkmk_title:bkmk_title] and 
 		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and

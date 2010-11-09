@@ -129,7 +129,7 @@ function saveRecord($id, $type, $url, $notes, $group, $vis, $personalised, $pnot
 	}
 	else if ($bkm_ID) {
 		// Record is bookmarked, but the user doesn't want it to be
-		mysql_query("delete usrBookmarks, keyword_links from usrBookmarks left join keyword_links on kwl_pers_id = bkm_ID where bkm_ID=$bkm_ID and bkm_recID=$id and bkm_UGrpID=" . get_user_id());
+		mysql_query("delete usrBookmarks, usrRecTagLinks from usrBookmarks left join usrRecTagLinks on kwl_pers_id = bkm_ID where bkm_ID=$bkm_ID and bkm_recID=$id and bkm_UGrpID=" . get_user_id());
 		if (mysql_error()) jsonError("database error - " . mysql_error());
 	}
 
@@ -320,7 +320,7 @@ function doDetailInsertion($bibID, $details, $recordType, $group, &$nonces, &$re
 
 
 function doTagInsertion($bibID, $bkmkID, $tagString) {
-	$kwds = mysql__select_array("keyword_links, usrTags",
+	$kwds = mysql__select_array("usrRecTagLinks, usrTags",
 	"tag_Text", "kwl_pers_id=$bkmkID and tag_ID=kwl_kwd_id and tag_UGrpID=".get_user_id()." order by kwl_order, kwl_id");
 	$existingTagString = join(",", $kwds);
 
@@ -344,7 +344,7 @@ function doTagInsertion($bibID, $bkmkID, $tagString) {
 	}
 
 	// Delete all non-workgroup tags for this bookmark
-	mysql_query("delete keyword_links from keyword_links, usrTags where kwl_pers_id=$bkmkID and tag_ID=kwl_kwd_id and ???kwd_wg_id is null");
+	mysql_query("delete usrRecTagLinks from usrRecTagLinks, usrTags where kwl_pers_id=$bkmkID and tag_ID=kwl_kwd_id and ???kwd_wg_id is null");
 
 	if (count($kwd_ids) > 0) {
 		$query = "";
@@ -352,7 +352,7 @@ function doTagInsertion($bibID, $bkmkID, $tagString) {
 			if ($query) $query .= ", ";
 			$query .= "($bkmkID, $bibID, ".($i+1).", ".$kwd_ids[$i].")";
 		}
-		$query = "insert into keyword_links (kwl_pers_id, kwl_rec_id, kwl_order, kwl_kwd_id) values " . $query;
+		$query = "insert into usrRecTagLinks (kwl_pers_id, kwl_rec_id, kwl_order, kwl_kwd_id) values " . $query;
 		mysql_query($query);
 	}
 }
@@ -361,22 +361,22 @@ function doKeywordInsertion($bibID, $keywordIDs) {
 	if ($keywordIDs != ""  &&  ! preg_match("/^\\d+(?:,\\d+)*$/", $keywordIDs)) return;
 
 	if ($keywordIDs) {
-		mysql_query("delete keyword_links from keyword_links, usrTags, ".USERS_DATABASE.".UserGroups where kwl_rec_id=$bibID and kwl_kwd_id=tag_ID and tag_UGrpID=ug_group_id and ug_user_id=".get_user_id()." and tag_ID not in ($keywordIDs)");
+		mysql_query("delete usrRecTagLinks from usrRecTagLinks, usrTags, ".USERS_DATABASE.".UserGroups where kwl_rec_id=$bibID and kwl_kwd_id=tag_ID and tag_UGrpID=ug_group_id and ug_user_id=".get_user_id()." and tag_ID not in ($keywordIDs)");
 		if (mysql_error()) jsonError("database error - " . mysql_error());
 	} else {
-		mysql_query("delete keyword_links from keyword_links, usrTags, ".USERS_DATABASE.".UserGroups where kwl_rec_id=$bibID and kwl_kwd_id=tag_ID and tag_UGrpID=ug_group_id and ug_user_id=".get_user_id());
+		mysql_query("delete usrRecTagLinks from usrRecTagLinks, usrTags, ".USERS_DATABASE.".UserGroups where kwl_rec_id=$bibID and kwl_kwd_id=tag_ID and tag_UGrpID=ug_group_id and ug_user_id=".get_user_id());
 		if (mysql_error()) jsonError("database error - " . mysql_error());
 		return;
 	}
 
-	$existingKeywordIDs = mysql__select_assoc("keyword_links, usrTags, ".USERS_DATABASE.".UserGroups", "kwl_kwd_id", "1", "kwl_rec_id=$bibID and kwl_kwd_id=tag_ID and tag_UGrpID=ug_group_id and ug_user_id=".get_user_id());
+	$existingKeywordIDs = mysql__select_assoc("usrRecTagLinks, usrTags, ".USERS_DATABASE.".UserGroups", "kwl_kwd_id", "1", "kwl_rec_id=$bibID and kwl_kwd_id=tag_ID and tag_UGrpID=ug_group_id and ug_user_id=".get_user_id());
 	$newKeywordIDs = array();
 	foreach (explode(",", $keywordIDs) as $kwdID) {
 		if (! @$existingKeywordIDs[$kwdID]) array_push($newKeywordIDs, $kwdID);
 	}
 
 	if ($newKeywordIDs) {
-		mysql_query("insert into keyword_links (kwl_kwd_id, kwl_rec_id) select tag_ID, $bibID from usrTags, ".USERS_DATABASE.".UserGroups where tag_UGrpID=ug_group_id and ug_user_id=".get_user_id()." and tag_ID in (" . join(",", $newKeywordIDs) . ")");
+		mysql_query("insert into usrRecTagLinks (kwl_kwd_id, kwl_rec_id) select tag_ID, $bibID from usrTags, ".USERS_DATABASE.".UserGroups where tag_UGrpID=ug_group_id and ug_user_id=".get_user_id()." and tag_ID in (" . join(",", $newKeywordIDs) . ")");
 		if (mysql_error()) jsonError("database error - " . mysql_error());
 	}
 }

@@ -548,7 +548,7 @@ function bookmark_insert($url, $title, $keywords, $rec_id) {
 			}
 		}
 
-		mysql_query('delete from keyword_links where kwl_pers_id='.$bkm_ID);
+		mysql_query('delete from usrRecTagLinks where kwl_pers_id='.$bkm_ID);
 		if ($kwd_ids) {
 			$insert_stmt = '';
 			$kwi_count = 0;
@@ -557,7 +557,7 @@ function bookmark_insert($url, $title, $keywords, $rec_id) {
 				$insert_stmt .= '(' . $bkm_ID . ',' . $rec_id . ',' . $kwd_id . ',' . ++$kwi_count . ')';
 			}
 
-			$insert_stmt = 'insert into keyword_links (kwl_pers_id, kwl_rec_id, kwl_kwd_id, kwl_order) values ' . $insert_stmt;
+			$insert_stmt = 'insert into usrRecTagLinks (kwl_pers_id, kwl_rec_id, kwl_kwd_id, kwl_order) values ' . $insert_stmt;
 			mysql_query($insert_stmt);
 		}
 

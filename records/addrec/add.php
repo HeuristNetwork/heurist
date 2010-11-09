@@ -371,7 +371,7 @@ if ($rec_id) {
 			}
 
 			if ($kwd_id) {
-				mysql__insert('keyword_links', array(
+				mysql__insert('usrRecTagLinks', array(
 					'kwl_pers_id' => $bkm_ID,
 					'kwl_rec_id' => $rec_id,
 					'kwl_kwd_id' => $kwd_id

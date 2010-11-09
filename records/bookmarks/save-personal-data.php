@@ -47,7 +47,7 @@ if ($bkm_ID  &&  $_POST["save-mode"] == "edit") {
 
 
 function doKeywordInsertion($bkm_ID) {
-	$kwds = mysql__select_array("keyword_links, usrTags",
+	$kwds = mysql__select_array("usrRecTagLinks, usrTags",
 	                            "tag_Text", "kwl_pers_id=$bkm_ID and tag_ID=kwl_kwd_id and tag_UGrpID=".get_user_id()." order by kwl_order, kwl_id");
 	$tagString = join(",", $kwds);
 
@@ -76,7 +76,7 @@ function doKeywordInsertion($bkm_ID) {
 	if (! $rec_id) $rec_id = "NULL";
 
 	// Delete all non-workgroup tags for this bookmark
-	mysql_query("delete keyword_links from keyword_links, usrTags where kwl_pers_id = $bkm_ID and tag_ID=kwl_kwd_id and ???kwd_wg_id is null");
+	mysql_query("delete usrRecTagLinks from usrRecTagLinks, usrTags where kwl_pers_id = $bkm_ID and tag_ID=kwl_kwd_id and ???kwd_wg_id is null");
 
 	if (count($kwd_ids) > 0) {
 		$query = "";
@@ -84,12 +84,12 @@ function doKeywordInsertion($bkm_ID) {
 			if ($query) $query .= ", ";
 			$query .= "($bkm_ID, $rec_id, ".($i+1).", ".$kwd_ids[$i].")";
 		}
-		$query = "insert into keyword_links (kwl_pers_id, kwl_rec_id, kwl_order, kwl_kwd_id) values " . $query;
+		$query = "insert into usrRecTagLinks (kwl_pers_id, kwl_rec_id, kwl_order, kwl_kwd_id) values " . $query;
 		mysql_query($query);
 	}
 
 	// return new keyword string
-	$kwds = mysql__select_array("keyword_links, usrTags",
+	$kwds = mysql__select_array("usrRecTagLinks, usrTags",
 	                            "tag_Text", "kwl_bkm_ID=$bkm_ID and tag_ID=kwl_kwd_id and tag_UGrpID=".get_user_id()." order by kwl_order, kwl_id");
 	return join(",", $kwds);
 }

@@ -23,7 +23,7 @@ $name = $name[0];
 $body->global_vars['tags'] = '';
 
 $res = mysql_query('select tag_Text,count(kwl_id) as bkmks
-                      from keyword_links
+                      from usrRecTagLinks
                  left join usrTags on kwl_kwd_id=tag_ID
                      where tag_UGrpID='.$_REQUEST['Id'].'
                   group by tag_Text

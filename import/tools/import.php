@@ -892,7 +892,7 @@ function mode_crosswalking() {
         <nobr><a href="#" target="_ignore" onclick="add_keyword('To Read'); return false;">To Read</a></nobr>&nbsp;
       </div>
        <?php
-	$top_keywords = mysql__select_array('keyword_links left join usrTags on kwl_kwd_id=tag_ID',
+	$top_keywords = mysql__select_array('usrRecTagLinks left join usrTags on kwl_kwd_id=tag_ID',
 	                                    'tag_Text, count(tag_ID) as count',
 	                                    'tag_UGrpID='.get_user_id().' group by tag_ID order by count desc limit 5');
 	if ($top_keywords) {
@@ -911,7 +911,7 @@ function mode_crosswalking() {
        ?>
 
        <?php
-	$recent_keywords = mysql__select_array('keyword_links left join usrTags on kwl_kwd_id=tag_ID',
+	$recent_keywords = mysql__select_array('usrRecTagLinks left join usrTags on kwl_kwd_id=tag_ID',
 	                                    'distinct(tag_Text)',
 	                                    'tag_UGrpID='.get_user_id().' order by kwl_id desc limit 5');
 	if ($recent_keywords) {
@@ -1590,7 +1590,7 @@ where BD1.rd_rec_id=rec_id and (rdt_id != 158  and  rdt_type = "resource") and r
 
 function insert_biblio(&$entry) {
 	// Insert records entries for this entry and its containers,
-	// and the associated rec_details and keyword_links entris.
+	// and the associated rec_details and usrRecTagLinks entris.
 	global $session_data;
 	global $bib_type_names;
 	if (! $bib_type_names) load_bib_type_names();
@@ -1995,7 +1995,7 @@ if ($wgKwd) {
 		if ($kwi_insert_stmt) $kwi_insert_stmt .= ',';
 		$kwi_insert_stmt .= '(' . $entry->getBookmarkID() . ', ' . $entry->getBiblioID() . ', ' . $kwd_id . ', 1)'; //FIXME getBookmarkID and getBiblioID return empty string
 	}
-	mysql_query('insert ignore into keyword_links (kwl_pers_id, kwl_rec_id, kwl_kwd_id, kwl_auto) values ' . $kwi_insert_stmt);
+	mysql_query('insert ignore into usrRecTagLinks (kwl_pers_id, kwl_rec_id, kwl_kwd_id, kwl_auto) values ' . $kwi_insert_stmt);
 }
 
 

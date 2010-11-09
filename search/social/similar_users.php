@@ -34,7 +34,7 @@ if ($_REQUEST['user']) {
    select B.bkm_UGrpID,
           concat('.USERS_FIRSTNAME_FIELD.'," ",'.USERS_LASTNAME_FIELD.') as name,
 		  count(B.bkm_UGrpID) as freq
-     from keyword_links
+     from usrRecTagLinks
 left join usrBookmarks A on A.bkm_ID=kwl_pers_id
 left join records on rec_id=A.bkm_recID
 left join usrBookmarks B on B.bkm_recID=rec_id

@@ -72,7 +72,7 @@ function delete_keyword(tag_ID) {
 		print '<b>' . htmlspecialchars($grp['grp_name']) . '</b>';
 
 		print '<ul>';
-		$res = mysql_query('select tag_ID, tag_Text, count(kwl_id) as kwi_count from usrTags left join keyword_links on kwl_kwd_id=tag_ID where tag_UGrpID='.$grp['grp_id'].' group by tag_ID, kwl_kwd_id order by tag_Text');
+		$res = mysql_query('select tag_ID, tag_Text, count(kwl_id) as kwi_count from usrTags left join usrRecTagLinks on kwl_kwd_id=tag_ID where tag_UGrpID='.$grp['grp_id'].' group by tag_ID, kwl_kwd_id order by tag_Text');
 		while ($kwd = mysql_fetch_assoc($res)) {
 			$searchlink = HEURIST_URL_BASE.'search/search.html?q=keyword%3A%22'.$grp['grp_name'].'%5C'.$kwd['tag_Text'].'%22&w=all&stype=';
 			if ($kwd['kwi_count'] == 0) $used = '';
@@ -136,7 +136,7 @@ function delete_keyword() {
 		print '<div style="color: red;">No tags deleted</div>';
 	}
 
-	mysql_query('delete from keyword_links where kwl_kwd_id = ' . $kwd_id);
+	mysql_query('delete from usrRecTagLinks where kwl_kwd_id = ' . $kwd_id);
 }
 
 ?>

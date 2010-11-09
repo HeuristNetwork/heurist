@@ -182,7 +182,7 @@ if ($_REQUEST['_submit']  &&  $dup_check_ok) {
 'select NEWUSER_BKMK.bkm_ID, NEWUSER_KWD.tag_ID, MODUSER_KWDL.kwl_order, MODUSER_KWDL.kwl_rec_id
    from usrBookmarks NEWUSER_BKMK left join usrBookmarks MODUSER_BKMK on NEWUSER_BKMK.bkm_recID=MODUSER_BKMK.bkm_recID
                                                                and MODUSER_BKMK.bkm_UGrpID='.$model_usr_id.'
-                               left join keyword_links MODUSER_KWDL on MODUSER_KWDL.kwl_pers_id=MODUSER_BKMK.bkm_ID
+                               left join usrRecTagLinks MODUSER_KWDL on MODUSER_KWDL.kwl_pers_id=MODUSER_BKMK.bkm_ID
                                left join usrTags MODUSER_KWD on MODUSER_KWD.tag_ID=MODUSER_KWDL.kwl_kwd_id
                                left join usrTags NEWUSER_KWD on NEWUSER_KWD.tag_Text=MODUSER_KWD.tag_Text
                                                              and NEWUSER_KWD.tag_UGrpID='.$usr_id.'
@@ -192,7 +192,7 @@ if ($_REQUEST['_submit']  &&  $dup_check_ok) {
 			while ($row = mysql_fetch_row($res))
 				array_push($insert_pairs, '(' . intval($row[0]) . ',' . intval($row[1]) . ',' . intval($row[2]) . ',' . intval($row[3]) . ')');
 			if ($insert_pairs)
-				mysql_query('insert into keyword_links (kwl_pers_id, kwl_kwd_id, kwl_order, kwl_rec_id) values ' . join(',', $insert_pairs));
+				mysql_query('insert into usrRecTagLinks (kwl_pers_id, kwl_kwd_id, kwl_order, kwl_rec_id) values ' . join(',', $insert_pairs));
 
 mysql_connection_localhost_overwrite(DATABASE);
 /* END HEURIST STUFF */

@@ -119,7 +119,7 @@ $MAINTABLES['USER_CLOUDS_TO_USERS'] = 'coll_group_links';
 	$LINK_KEYS['USER_CLOUDS_TO_USERS'] = array(	'USER_CLOUD-ID' => 'cgl_cgr_id',
         		                                'USER-ID' => 'cgl_usr_id');
 
-$MAINTABLES["BOOKMARKS_TO_KEYWORDS"] = 'keyword_links';
+$MAINTABLES["BOOKMARKS_TO_KEYWORDS"] = 'usrRecTagLinks';
 	$PKEY["BOOKMARKS_TO_KEYWORDS"] = 'kwl_id';
         $LINK_KEYS["BOOKMARKS_TO_KEYWORDS"] = array(	"BOOKMARK-ID" => "kwl_pers_id",
 							"KEYWORD-ID"  => "kwl_kwd_id");
@@ -210,7 +210,7 @@ $SEARCHES["BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left jo
 		)
 		";	/* may be over-written by search.php */
 
-$SEARCHES["augmented_BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left join records on bkm_recID=rec_id left join keyword_links on kwl_pers_id=bkm_ID WHERE (
+$SEARCHES["augmented_BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left join records on bkm_recID=rec_id left join usrRecTagLinks on kwl_pers_id=bkm_ID WHERE (
 		(bkm_UGrpID = [logged-in-user-id]) and
 		[word-match:bkmk_title:bkmk_title] and 
 		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
@@ -266,7 +266,7 @@ $SEARCHES["simple_BIBLIO_search"] = "select distinct rec_id from records  where 
          and not rec_temporary
 	)
 	";
-$SEARCHES["augmented_simple_BIBLIO_search"] = "select distinct rec_id from records left join usrBookmarks on bkm_recID=rec_id left join keyword_links on kwl_pers_id=bkm_ID where (
+$SEARCHES["augmented_simple_BIBLIO_search"] = "select distinct rec_id from records left join usrBookmarks on bkm_recID=rec_id left join usrRecTagLinks on kwl_pers_id=bkm_ID where (
 	[word-match:rec_title:rec_title] and 
 	if ([bib_advanced_search] and [rec_url]!='', rec_url like [%rec_url%], 1) and
 	if ([bib_advanced_search] and [rec_type]!='', rec_type = [rec_type], 1)
@@ -287,7 +287,7 @@ $SEARCHES["others_BIBLIO_search"] = "select distinct rec_id from records
 $SEARCHES['augmented_others_BIBLIO_search'] = "select distinct rec_id from records
 	                               left join usrBookmarks A on A.bkm_recID=rec_id
                                        left join usrBookmarks B on B.bkm_recID=A.bkm_recID and B.bkm_UGrpID = [logged-in-user-id]
-                                       left join keyword_links on kwl_pers_id=A.bkm_ID where (
+                                       left join usrRecTagLinks on kwl_pers_id=A.bkm_ID where (
 	B.bkm_ID is null and
 	[word-match:rec_title:rec_title] and 
 	if ([bib_advanced_search] and [rec_url]!='', rec_url like [%rec_url%], 1) and
@@ -324,6 +324,6 @@ define('CUSTOMBOOKMARK_search-order', '!(ss_url like "%w=bookmark%" OR ss_url li
 
 define('user_kwds-order', 'kwd_name');
 define('user_kwds-RESULTS_PER_PAGE', 10000);
-$SEARCHES['user_kwds'] = 'select distinct tag_ID from usrTags left join keyword_links on tag_ID=kwl_kwd_id where kwl_id is not null and tag_UGrpID = [logged-in-user-id]';
+$SEARCHES['user_kwds'] = 'select distinct tag_ID from usrTags left join usrRecTagLinks on tag_ID=kwl_kwd_id where kwl_id is not null and tag_UGrpID = [logged-in-user-id]';
 
 ?>

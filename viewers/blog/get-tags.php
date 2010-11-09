@@ -18,7 +18,7 @@ if (! $userID) return "";
 mysql_connection_select(DATABASE);
 // get a list of tags linked to any of the 'blog entry' records for this user
 $res = mysql_query("select rec_id, group_concat(tag_Text)
-					  from records, keyword_links, usrTags
+					  from records, usrRecTagLinks, usrTags
 					 where rec_type = 137 and kwl_rec_id = rec_id
 					   and tag_ID = kwl_kwd_id
 					   and tag_UGrpID= " . $userID . "

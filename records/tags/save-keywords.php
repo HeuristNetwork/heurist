@@ -32,12 +32,12 @@ if ($rec_id  &&  $actions) {
 	}
 
 	if (count($deletions) > 0)
-		mysql_query("delete from keyword_links where kwl_rec_id=$rec_id and kwl_kwd_id in (" . join($deletions,",") . ")");
+		mysql_query("delete from usrRecTagLinks where kwl_rec_id=$rec_id and kwl_kwd_id in (" . join($deletions,",") . ")");
 	if (count($additions) > 0)
-		mysql_query("insert into keyword_links (kwl_kwd_id, kwl_rec_id) values (" . join(",$rec_id), (", $additions) . ",$rec_id)");
+		mysql_query("insert into usrRecTagLinks (kwl_kwd_id, kwl_rec_id) values (" . join(",$rec_id), (", $additions) . ",$rec_id)");
 
 
-	$res = mysql_query("select tag_ID from keyword_links, usrTags where kwl_kwd_id=tag_ID and kwl_rec_id=$rec_id");
+	$res = mysql_query("select tag_ID from usrRecTagLinks, usrTags where kwl_kwd_id=tag_ID and kwl_rec_id=$rec_id");
 	$kwd_ids = array();
 	while ($row = mysql_fetch_row($res)) array_push($kwd_ids, $row[0]);
 

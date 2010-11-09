@@ -58,7 +58,7 @@ while ($row = mysql_fetch_row($res)) {
 
     top.HEURIST.user.topKeywords = [<?php
 /* find the top five tags for this user */
-$res = mysql_query("select tag_Text, count(kwl_id) as c from usrTags left join keyword_links on kwl_kwd_id=tag_ID
+$res = mysql_query("select tag_Text, count(kwl_id) as c from usrTags left join usrRecTagLinks on kwl_kwd_id=tag_ID
                      where tag_UGrpID=".get_user_id()." group by tag_Text order by c desc limit 5");
 $first = true;
 while ($row = mysql_fetch_row($res)) {
@@ -69,7 +69,7 @@ while ($row = mysql_fetch_row($res)) {
 
    top.HEURIST.user.recentTags = [<?php
 /* find the ten most recently used tags for this user */
-$res = mysql_query("select distinct(tag_Text) from usrTags left join keyword_links on kwl_kwd_id=tag_ID
+$res = mysql_query("select distinct(tag_Text) from usrTags left join usrRecTagLinks on kwl_kwd_id=tag_ID
                      where tag_UGrpID=".get_user_id()." group by kwl_kwd_id order by max(kwl_id) desc limit 10");
 $first = true;
 while ($row = mysql_fetch_row($res)) {

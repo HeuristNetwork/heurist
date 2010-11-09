@@ -250,13 +250,13 @@ function update_my_settings() {
 			$updated = 1;
 		}
 
-		/* for each of the model user's keyword_links entries, make a corresponding entry for the new user */
+		/* for each of the model user's usrRecTagLinks entries, make a corresponding entry for the new user */
 		/* hold onto your hats, folks: this is a five-table join across three tables! */
 		$res = mysql_query(
 'select NEWUSER_BKMK.bkm_ID, NEWUSER_KWD.tag_ID, MODUSER_KWDL.kwl_order, MODUSER_KWDL.kwl_rec_id
    from usrBookmarks NEWUSER_BKMK left join usrBookmarks MODUSER_BKMK on NEWUSER_BKMK.bkm_recID=MODUSER_BKMK.bkm_recID
                                                                and MODUSER_BKMK.bkm_ID in ('.join(',',$bkmks).')
-                               left join keyword_links MODUSER_KWDL on MODUSER_KWDL.kwl_pers_id=MODUSER_BKMK.bkm_ID
+                               left join usrRecTagLinks MODUSER_KWDL on MODUSER_KWDL.kwl_pers_id=MODUSER_BKMK.bkm_ID
                                left join usrTags MODUSER_KWD on MODUSER_KWD.tag_ID=MODUSER_KWDL.kwl_kwd_id
                                left join usrTags NEWUSER_KWD on NEWUSER_KWD.tag_Text=MODUSER_KWD.tag_Text
                                                              and NEWUSER_KWD.tag_UGrpID='.get_user_id().'
@@ -266,7 +266,7 @@ function update_my_settings() {
 		while ($row = mysql_fetch_row($res))
 			array_push($insert_pairs, '(' . intval($row[0]) . ',' . intval($row[1]) . ',' . intval($row[2]) . ',' . intval($row[3]) . ')');
 		if ($insert_pairs)
-			mysql_query('insert into keyword_links (kwl_pers_id, kwl_kwd_id, kwl_order, kwl_rec_id) values ' . join(',', $insert_pairs));
+			mysql_query('insert into usrRecTagLinks (kwl_pers_id, kwl_kwd_id, kwl_order, kwl_rec_id) values ' . join(',', $insert_pairs));
 
 	}
 

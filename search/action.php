@@ -75,7 +75,7 @@ function delete_bookmarks() {
 	$bkmk_ids = array_map('intval', explode(',', $_REQUEST['bkmk_ids']));
 
 	mysql_connection_db_overwrite(DATABASE);
-	mysql_query('delete keyword_links from usrBookmarks left join keyword_links on kwl_pers_id=bkm_ID where bkm_ID in ('.join(',', $bkmk_ids).') and bkm_UGrpID=' . get_user_id());
+	mysql_query('delete usrRecTagLinks from usrBookmarks left join usrRecTagLinks on kwl_pers_id=bkm_ID where bkm_ID in ('.join(',', $bkmk_ids).') and bkm_UGrpID=' . get_user_id());
 	mysql_query('delete from usrBookmarks where bkm_ID in ('.join(',', $bkmk_ids).') and bkm_UGrpID=' . get_user_id());
 	$deleted_count = mysql_affected_rows();
 
@@ -104,7 +104,7 @@ function add_keywords() {
 		mysql_connection_db_overwrite(DATABASE);
 
 		$keywords = get_ids_for_keywords(array_filter(explode(',', $_REQUEST['tagString'])), true);
-		mysql_query('insert ignore into keyword_links (kwl_pers_id, kwl_rec_id, kwl_kwd_id) '
+		mysql_query('insert ignore into usrRecTagLinks (kwl_pers_id, kwl_rec_id, kwl_kwd_id) '
 				  . 'select bkm_ID, bkm_recID, tag_ID from usrBookmarks, usrTags '
 				  . ' where bkm_ID in (' . join(',', $bkmk_ids) . ') and bkm_UGrpID = ' . get_user_id()
 				  . ' and tag_ID in (' . join(',', $keywords) . ')');
@@ -137,7 +137,7 @@ function add_wgTags_by_id() {
 		mysql_connection_db_overwrite(DATABASE);
 
 		$keywords = array_map('intval', explode(',', $_REQUEST["kwd_ids"]));
-		mysql_query('insert ignore into keyword_links (kwl_rec_id, kwl_pers_id, kwl_kwd_id) '
+		mysql_query('insert ignore into usrRecTagLinks (kwl_rec_id, kwl_pers_id, kwl_kwd_id) '
 				  . 'select rec_id, bkm_ID, tag_ID from usrTags, '.USERS_DATABASE.'.UserGroups, records left join usrBookmarks on rec_id=bkm_recID and bkm_UGrpID= '.get_user_id()
 				  . ' where rec_id in (' . join(',', $bib_ids) . ') '
 				  . ' and ug_group_id=tag_UGrpID and ug_user_id='.get_user_id()
@@ -173,13 +173,13 @@ function remove_wgTags_by_id() {
 		mysql_connection_db_overwrite(DATABASE);
 
 		$keywords = array_map('intval', explode(',', $_REQUEST["kwd_ids"]));
-		mysql_query('delete keyword_links from usrBookmarks'
-				 . ' left join keyword_links on kwl_pers_id = bkm_ID'
+		mysql_query('delete usrRecTagLinks from usrBookmarks'
+				 . ' left join usrRecTagLinks on kwl_pers_id = bkm_ID'
 				 . ' left join usrTags on tag_ID = kwl_kwd_id'
 		         . ' where bkm_recID in (' . join(',', $bib_ids) . ') and bkm_UGrpID = ' . get_user_id()
 		         . ' and tag_ID in (' . join(',', $keywords) . ')');
 		$keyword_count += mysql_affected_rows();
-		mysql_query('delete keyword_links from keyword_links'
+		mysql_query('delete usrRecTagLinks from usrRecTagLinks'
 				 . ' left join usrTags on tag_ID = kwl_kwd_id'
 				 . ' left join '.USERS_DATABASE.'.UserGroups on ug_group_id = tag_UGrpID'
 		         . ' where kwl_pers_id = 0 and kwl_rec_id in (' . join(',', $bib_ids) . ')'
@@ -216,8 +216,8 @@ function remove_keywords() {
 		$keyword_count = 0;
 		$keywords = get_ids_for_keywords(array_filter(explode(',', $_REQUEST['tagString'])), false);
 		if (count($bkmk_ids)  &&  $keywords  &&  count($keywords)) {
-			mysql_query('delete keyword_links from usrBookmarks'
-					 . ' left join keyword_links on kwl_pers_id = bkm_ID'
+			mysql_query('delete usrRecTagLinks from usrBookmarks'
+					 . ' left join usrRecTagLinks on kwl_pers_id = bkm_ID'
 					 . ' left join usrTags on tag_ID = kwl_kwd_id'
 					 . ' where bkm_ID in (' . join(',', $bkmk_ids) . ') and bkm_UGrpID = ' . get_user_id()
 					 . ' and tag_ID in (' . join(',', $keywords) . ')');
@@ -320,7 +320,7 @@ function bookmark_and_tag_bibids ( $phpReturn ) {
 
 	} else {	//we have bookmarks lets add teh tags
 		$keywords = get_ids_for_keywords(array_filter(explode(',', $_REQUEST['tagString'])), true);
-		mysql_query('insert ignore into keyword_links (kwl_pers_id, kwl_rec_id, kwl_kwd_id) '
+		mysql_query('insert ignore into usrRecTagLinks (kwl_pers_id, kwl_rec_id, kwl_kwd_id) '
 				  . 'select bkm_ID, bkm_recID, tag_ID from usrBookmarks, usrTags '
 				  . ' where bkm_ID in (' . join(',', $bkmk_ids) . ') and bkm_UGrpID = ' . get_user_id()
 				  . ' and tag_ID in (' . join(',', $keywords) . ')');
