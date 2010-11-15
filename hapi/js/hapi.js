@@ -399,22 +399,22 @@ HAPI.UnsavedRecordException = HUnsavedRecordException;
 HAPI.inherit(HUnsavedRecordException, HException);
 
 
-var HKeyword = function(id, name, workgroup) {
+var HWorkgroupTag = function(id, name, workgroup) {
 	var _id = id;
 	var _name = name;
 	var _workgroup = workgroup;
 
-	if (HAPI.KeywordManager) {
-		throw "Cannot construct new HKeyword objects";
+	if (HAPI.WorkgroupTagManager) {
+		throw "Cannot construct new HWorkgroupTag objects";
 	}
 
 	this.getID = function() { return _id; };
 	this.getName = function() { return _name; };
 	this.getWorkgroup = function() { return _workgroup; };
 };
-HKeyword.getClass = function() { return "HKeyword"; };
-HAPI.inherit(HKeyword, HObject);
-HAPI.Keyword = HKeyword;
+HWorkgroupTag.getClass = function() { return "HWorkgroupTag"; };
+HAPI.inherit(HWorkgroupTag, HObject);
+HAPI.WorkgroupTag = HWorkgroupTag;
 
 
 var HWorkgroup = function(id, name, longName, description, url) {
@@ -1116,33 +1116,33 @@ var HRecord = function() {
 	};
 
 	this.getWgTags = this.getKeywords = function() { return _wgTags.slice(0); };
-	this.addWgTag = this.addKeyword = function(kwd) {
-		/* PRE */ if (! HAPI.isA(kwd, "HKeyword")) { throw new HTypeException("HKeyword object required"); }
-		if (! HCurrentUser.isInWorkgroup(kwd.getWorkgroup())) {
+	this.addWgTag = this.addKeyword = function(tag) {
+		/* PRE */ if (! HAPI.isA(tag, "HWorkgroupTag")) { throw new HTypeException("HWorkgroupTag object required"); }
+		if (! HCurrentUser.isInWorkgroup(tag.getWorkgroup())) {
 			// This shouldn't happen ... you shouldn't be able to get tags for workgroups you're not a member of
-			throw new HInvalidWorkgroupException("User is not a member of keyword's workgroup");
+			throw new HInvalidWorkgroupException("User is not a member of tag's workgroup");
 		}
 
-		if (! _wgTagsMap[kwd.getID()]) {
-			_wgTags.push(kwd);
-			_wgTagsMap[kwd.getID()] = true;
+		if (! _wgTagsMap[tag.getID()]) {
+			_wgTags.push(tag);
+			_wgTagsMap[tag.getID()] = true;
 			_modified = true;
 		}
 	};
-	this.removeWgTag = this.removeKeyword = function(kwd) {
-		/* PRE */ if (! HAPI.isA(kwd, "HKeyword")) { throw new HTypeException("HKeyword object required"); }
-		if (! HCurrentUser.isInWorkgroup(kwd.getWorkgroup())) {
+	this.removeWgTag = this.removeKeyword = function(tag) {
+		/* PRE */ if (! HAPI.isA(tag, "HWorkgroupTag")) { throw new HTypeException("HWorkgroupTag object required"); }
+		if (! HCurrentUser.isInWorkgroup(tag.getWorkgroup())) {
 			// This shouldn't happen ... you shouldn't be able to get tags for workgroups you're not a member of
-			throw new HInvalidWorkgroupException("User is not a member of keyword's workgroup");
+			throw new HInvalidWorkgroupException("User is not a member of tag's workgroup");
 		}
 
 		var i;
-		if (_wgTagsMap[kwd.getID()]) {
+		if (_wgTagsMap[tag.getID()]) {
 			for (i=0; i < _wgTags.length; ++i) {
-				if (_wgTags[i] === kwd) {
-					// Found the keyword in the list; remove it
+				if (_wgTags[i] === tag) {
+					// Found the tag in the list; remove it
 					_wgTags.splice(i, 1);
-					delete _wgTagsMap[kwd.getID()];
+					delete _wgTagsMap[tag.getID()];
 					_modified = true;
 					break;
 				}
@@ -1390,7 +1390,8 @@ var HRecord = function() {
 		return jso;
 	};
 
-	this.setAll = function(sm, id, version, type, title, details, url, notes, wg, nonwgVis, urlDate, urlError, cDate, mDate, creator, hhash, bkmkID, pNotes, rating, irate, qrate, tags, kwds, readonly) {
+		// setAll relies on the load-search ordering of record data
+	this.setAll = function(sm, id, version, type, title, details, url, notes, wg, nonwgVis, urlDate, urlError, cDate, mDate, creator, hhash, bkmkID, pNotes, rating, irate, qrate, tags, wgTags, readonly) {
 		// Set all the details (even the secret ones!) for a record in one place ... only available to the storage manager
 		if (! HAPI.isA(sm, "HStorageManager")) { throw "Do not call HRecord::setAll"; }
 
@@ -1424,11 +1425,11 @@ var HRecord = function() {
 			_removedNotifications = [];
 		}
 
-		_wgTags = kwds || [];
+		_wgTags = wgTags || [];
 		_wgTagsMap = {};
 		for (i=0; i < _wgTags.length; ++i) {
 			_wgTagsMap[_wgTags[i]] = true;
-			_wgTags[i] = HKeywordManager.getKeywordById(_wgTags[i]);
+			_wgTags[i] = HWorkgroupTagManager.getWgTagById(_wgTags[i]);
 		}
 
 		_addedComments = [];
@@ -2214,20 +2215,20 @@ HWorkgroupManager.prototype = new HObject();
 HAPI.WorkgroupManager = HWorkgroupManager;
 
 
-var HKeywordManager = new function(wgTags) {
+var HWorkgroupTagManager = new function(wgTags) {
 	/* wgTags is an array, each entry is a triplet of [id, name, workgroupID] */
 	var _wgTags = [];
     var _wgTagsById = {};
     var _wgTagsByName = {};
 	var _wgTagsByGroup = {};
 
-	/* wgTags are constructed by the keyword manager */
+	/* wgTags are constructed by the tag manager */
 	var i, workgroup, newWgTag;
 	for (i=0; i < wgTags.length; ++i) {
 		workgroup = HWorkgroupManager.getWorkgroupById(wgTags[i][2]);
 		if (! workgroup) { continue; }
 
-		newWgTag = new HKeyword(parseInt(wgTags[i][0]), wgTags[i][1], workgroup);
+		newWgTag = new HWorkgroupTag(parseInt(wgTags[i][0]), wgTags[i][1], workgroup);
 
 		_wgTags.push(newWgTag);
         _wgTagsById[wgTags[i][0]] = newWgTag;
@@ -2240,28 +2241,28 @@ var HKeywordManager = new function(wgTags) {
 		}
 	}
 
-    this.getKeywordById = function(id) {
+    this.getWgTagById = function(id) {
         if (! HCurrentUser.isLoggedIn()) { throw new HNotLoggedInException(); }
         return (_wgTagsById[id] || null);
     };
-    this.getKeywordByName = function(name) {
+    this.getWgTagByName = function(name) {
         if (! HCurrentUser.isLoggedIn()) { throw new HNotLoggedInException(); }
         return (_wgTagsByName[name.toLowerCase()] || null);
     };
-	this.getAllKeywords = function() {
+	this.getAllWgTags = function() {
 		if (! HCurrentUser.isLoggedIn()) { throw new HNotLoggedInException(); }
 		return _wgTags.slice(0);
 	};
-	this.getWorkgroupKeywords = function(workgroup) {
+	this.getWorkgroupTags = function(workgroup) {
 		if (! HCurrentUser.isLoggedIn()) { throw new HNotLoggedInException(); }
 		if (! HCurrentUser.isInWorkgroup(workgroup)) {
 			throw new HInvalidWorkgroupException("User is not a member of this workgroup");
 		}
 		return (_wgTagsByGroup[workgroup.getID()] || []).slice(0);
 	};
-}(HAPI_userData.workgroupKeywords || []);
-HKeywordManager.prototype = new HObject();
-HAPI.KeywordManager = HKeywordManager;
+}(HAPI_userData.workgroupTags || []);
+HWorkgroupTagManager.prototype = new HObject();
+HAPI.WorkgroupTagManager = HWorkgroupTagManager;
 
 
 var HColleagueGroupManager = new function(groups) {
@@ -3193,14 +3194,14 @@ var HeuristScholarDB = new HStorageManager();
 				}
 
 				// notifications and comments need to be added after the rest of the record is set up
-				notifications = recordDetails[22];
-				comments = recordDetails[23];
-				recordDetails.pop();
-				recordDetails.pop();
+				notifications = recordDetails[22]; //cache notifications
+				comments = recordDetails[23]; //cache comments
+				recordDetails.pop(); //remove comments
+				recordDetails.pop(); //remove notifications
 
 				// Set all of the new record's details ... we add "that" (the storage manager) onto the start of the argument list
 				recordDetails.unshift(that);
-				record.setAll.apply(record, recordDetails);
+				record.setAll.apply(record, recordDetails); //passes all args except readonly which is passed as null
 
 				// If this is a relationship, add appropriate relationship-cache entries
 				if (HAPI.isA(record, "HRelationship")) { that.addRelationshipToCache(record); }
@@ -3705,7 +3706,7 @@ HAPI.importSymbols = function(from, to) {
 		"HValueException",
 		"HTypeException",
 		"HUnsavedRecordException",
-		"HKeyword",
+		"HWorkgroupTag",
 		"HWorkgroup",
 		"HColleagueGroup",
 		"HRecordType",
@@ -3733,7 +3734,7 @@ HAPI.importSymbols = function(from, to) {
 		"HWikiManager",
 		"HTagManager",
 		"HWorkgroupManager",
-		"HKeywordManager",
+		"HWorkgroupTagManager",
 		"HColleagueGroupManager",
 		"HRecordTypeManager",
 		"HDetailManager",

@@ -81,15 +81,15 @@ top.HEURIST.workgroup = {
 			}
 		}
 
-		var keyword_select = document.getElementById("keyword-select");
-		if (keyword_select.options.length <= 1) {
+		var wgtag_select = document.getElementById("wgtag-select");
+		if (wgtag_select.options.length <= 1) {
 			top.HEURIST.workgroup.kwds = [];
-			if (top.HEURIST.user  &&  top.HEURIST.user.workgroupKeywords) {
-				for (var i = 0; i < top.HEURIST.user.workgroupKeywordOrder.length; ++i) {
-					var kwdId = top.HEURIST.user.workgroupKeywordOrder[i];
-					var kwd = top.HEURIST.user.workgroupKeywords[kwdId];
+			if (top.HEURIST.user  &&  top.HEURIST.user.workgroupTags) {
+				for (var i = 0; i < top.HEURIST.user.workgroupTagOrder.length; ++i) {
+					var kwdId = top.HEURIST.user.workgroupTagOrder[i];
+					var kwd = top.HEURIST.user.workgroupTags[kwdId];
 					if (kwd[0] == top.HEURIST.workgroup.wg_id) {
-						keyword_select[keyword_select.length] = new Option(kwd[1],kwdId);
+						wgtag_select[wgtag_select.length] = new Option(kwd[1],kwdId);
 						top.HEURIST.workgroup.kwds.push(kwdId);
 					}
 				}
@@ -99,7 +99,7 @@ top.HEURIST.workgroup = {
 
 	filterSearch: function(predicate, value) {
 		var rft = document.getElementById("reftype-select").value;
-		var kwd = document.getElementById("keyword-select").value;
+		var kwd = document.getElementById("wgtag-select").value;
 		var sortby = document.getElementById("sortby-select").value;
 		var q = (rft ? " type:" + rft + ((kwd || top.HEURIST.workgroup.kwds.length) ? " AND ": "") : "")
 			  + (kwd ? " tag:\"" + kwd + "\"" : "tag:\"" + top.HEURIST.workgroup.kwds.join(",") + "\"")

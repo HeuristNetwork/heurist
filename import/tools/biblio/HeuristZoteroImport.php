@@ -41,7 +41,7 @@ $zotero_to_heurist_detail_map = array(
 		'accessDate' => '349',
 		'rights' => '290',
 		'repository' => '350',
-        'tag' => 'keyword',		// SAW added
+        'tag' => 'tag',		// SAW added
 		'url' => 'url',			// SAW added
 
 		'series' => ':160',
@@ -83,7 +83,7 @@ $zotero_to_heurist_detail_map = array(
 		'repository' => '350',
 		'start-page' => '164',
 		'end-page' => '165',
-		'tag' => 'keyword',		// SAW added
+		'tag' => 'tag',		// SAW added
 		'url' => 'url',			// SAW added
 
 		'bookTitle' => ':160',
@@ -135,7 +135,7 @@ $zotero_to_heurist_detail_map = array(
 		'callNumber' => '190',
 		'start-page' => '164',	//SAW preprocessed from pages if not present
 		'end-page' => '165',		//SAW preprocessed from pages if not present
-		'tag' => 'keyword',		// SAW added
+		'tag' => 'tag',		// SAW added
 		'url' => 'url',			// SAW added
 
 		'publicationTitle' => ':160',  // SAW  changed
@@ -185,7 +185,7 @@ $zotero_to_heurist_detail_map = array(
 		'thesisType' => '243',
 		'repository' => '350',
 		'callNumber' => '190',
-		'tag' => 'keyword',		// SAW added
+		'tag' => 'tag',		// SAW added
 		'url' => 'url',			// SAW added
 
 		'place' => ':172',
@@ -221,7 +221,7 @@ $zotero_to_heurist_detail_map = array(
 		'rights' => '290',
 		'repository' => '350',
 		'callNumber' => '190',
-		'tag' => 'keyword',		// SAW added
+		'tag' => 'tag',		// SAW added
 		'url' => 'url',			// SAW added
 
 		'seriesTitle' => ':160',
@@ -265,7 +265,7 @@ $zotero_to_heurist_detail_map = array(
 		'callNumber' => '190',
 		'start-page' => '164',
 		'end-page' => '165',
-		'tag' => 'keyword',		// SAW added
+		'tag' => 'tag',		// SAW added
 		'url' => 'url',			// SAW added
 
 		'bookTitle' => ':160',
@@ -298,7 +298,7 @@ $zotero_to_heurist_detail_map = array(
 		'edition' => '176',
 		'rights' => '290',
 		'repository' => '350',
-		'tag' => 'keyword',		// SAW added
+		'tag' => 'tag',		// SAW added
 		'url' => 'url',			// SAW added
 
 		'series' => ':160',
@@ -319,7 +319,7 @@ $zotero_to_heurist_detail_map = array(
 		'accessDate' => '349',
 		'rights' => '290',
 		'repository' => '350',
-		'tag' => 'keyword',		// SAW added
+		'tag' => 'tag',		// SAW added
 		'url' => 'url',			// SAW added
 
 		'volume' => ':184',
@@ -361,7 +361,7 @@ $zotero_to_heurist_detail_map = array(
 		'accessDate' => '349',
 		'rights' => '290',
 		'repository' => '350',
-		'tag' => 'keyword',		// SAW added
+		'tag' => 'tag',		// SAW added
 		'url' => 'url',			// SAW added
 
 		'volume' => ':184',
@@ -391,7 +391,7 @@ $zotero_to_heurist_detail_map = array(
 		'accessDate' => '349',
 		'edition' => '176',
 		'rights' => '290',
-		'tag' => 'keyword',		// SAW added
+		'tag' => 'tag',		// SAW added
 		'url' => 'url',			// SAW added
 		'repository' => '350'
 	),
@@ -411,7 +411,7 @@ $zotero_to_heurist_detail_map = array(
 		'ISBN' => '187',
 		'callNumber' => '190',
 		'DOI' => '198',
-		'tag' => 'keyword',		// SAW added
+		'tag' => 'tag',		// SAW added
 		'url' => 'url',			// SAW added
 		'ISSN' => '188'
 	)
@@ -687,7 +687,7 @@ class HeuristZoteroEntry extends HeuristForeignEntry {
 			} else {
 				if ($zoteroType == 'tag') {
 					foreach ($fields[$zoteroType] as $f)
-						$entry->addKeyword($f);
+						$entry->addTag($f);
 				} else {
 					foreach ($fields[$zoteroType] as $f) {
 						$entry->addField(new HeuristNativeField($heuristTag, $f));

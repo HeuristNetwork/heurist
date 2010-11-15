@@ -74,14 +74,14 @@ if (@$_REQUEST['submit']) $updated = update_my_settings();
 
 <table border="0" class="normal" style="text-align: left;">
 <?php
-	$res = kwd_query();
+	$res = tag_query();
 	if (mysql_num_rows($res)) {
 ?>
-<tr><td colspan="3" style="font-weight: bold;" id="keyword_section">Tags</td></tr>
+<tr><td colspan="3" style="font-weight: bold;" id="tag_section">Tags</td></tr>
 <?php
 	} else {
 ?>
-<tr><td colspan="3" id="keyword_section">(no new tags)</td></tr>
+<tr><td colspan="3" id="tag_section">(no new tags)</td></tr>
 <style type="text/css">
 <!--
 .keyword_link { display: none; }
@@ -93,7 +93,7 @@ if (@$_REQUEST['submit']) $updated = update_my_settings();
 ?>
   <tr>
    <td style="width: 16px;">&nbsp;</td>
-   <td style="width: 16px;"><input type="checkbox" name="kwd[<?= $row['tag_ID'] ?>]" value="1" checked class="kwd"></td>
+   <td style="width: 16px;"><input type="checkbox" name="tag[<?= $row['tag_ID'] ?>]" value="1" checked class="tag"></td>
    <td><?= htmlspecialchars($row['tag_Text']) ?></td>
   </tr>
 <?php
@@ -102,8 +102,8 @@ if (@$_REQUEST['submit']) $updated = update_my_settings();
 ?>
   <tr><td colspan="3">
     <span class="small">
-    <input type="button" value="Select all" onClick="for (i in form.elements) if (form.elements[i].className=='kwd') form.elements[i].checked=true;">
-    <input type="button" value="Select none" onClick="for (i in form.elements) if (form.elements[i].className=='kwd') form.elements[i].checked=false;">
+    <input type="button" value="Select all" onClick="for (i in form.elements) if (form.elements[i].className=='tag') form.elements[i].checked=true;">
+    <input type="button" value="Select none" onClick="for (i in form.elements) if (form.elements[i].className=='tag') form.elements[i].checked=false;">
 	</span>
   </td></tr>
 <?php
@@ -212,11 +212,11 @@ if (@$_REQUEST['submit']) $updated = update_my_settings();
 function update_my_settings() {
 	$updated = 0;
 
-	$keys = array_map('intval', array_keys($_REQUEST['kwd']));
+	$keys = array_map('intval', array_keys($_REQUEST['tag']));
 	$bkmks = array_map('intval', array_keys($_REQUEST['bkmk']));
 	$ssearches = array_map('intval', array_keys($_REQUEST['ssearch']));
 
-	$keys = mysql__select_array('usrTags', 'tag_ID', 'tag_UGrpID= '.MODEL_USER_ID.' and tag_ID in (0, ' . join(', ', $keys) . ')');
+	$keys = mysql__select_array('usrTags', 'tag_ID', 'tag_UGrpID= '.MODEL_USER_ID.' and tag_ID in (0, ' . join(', ', $keys) . ')');	//saw CHECK: is 0 ok for all of these
 	$bkmks = mysql__select_array('usrBookmarks', 'bkm_ID', 'bkm_UGrpID = '.MODEL_USER_ID.' and bkm_ID in (0, ' . join(', ', $bkmks) . ')');
 	$ssearches = mysql__select_array('saved_searches', 'ss_id', 'ss_usr_id = '.MODEL_USER_ID.' and ss_id in (0, ' . join(', ', $ssearches) . ')');
 
@@ -246,27 +246,27 @@ function update_my_settings() {
 			$row['bkm_Added'] = date('Y-m-d H:i:s');
 			$row['bkm_Modified'] = date('Y-m-d H:i:s');
 
-			mysql__insert('usrBookmarks', $row);
+			mysql__insert('usrBookmarks', $row);	//saw CHECK: for case where user already has bookmarks.
 			$updated = 1;
 		}
 
 		/* for each of the model user's usrRecTagLinks entries, make a corresponding entry for the new user */
 		/* hold onto your hats, folks: this is a five-table join across three tables! */
 		$res = mysql_query(
-'select NEWUSER_BKMK.bkm_ID, NEWUSER_KWD.tag_ID, MODUSER_KWDL.kwl_order, MODUSER_KWDL.kwl_rec_id
+'select NEWUSER_KWD.tag_ID, MODUSER_KWDL.rtl_Order, MODUSER_KWDL.rtl_RecID
    from usrBookmarks NEWUSER_BKMK left join usrBookmarks MODUSER_BKMK on NEWUSER_BKMK.bkm_recID=MODUSER_BKMK.bkm_recID
                                                                and MODUSER_BKMK.bkm_ID in ('.join(',',$bkmks).')
-                               left join usrRecTagLinks MODUSER_KWDL on MODUSER_KWDL.kwl_pers_id=MODUSER_BKMK.bkm_ID
-                               left join usrTags MODUSER_KWD on MODUSER_KWD.tag_ID=MODUSER_KWDL.kwl_kwd_id
+                               left join usrRecTagLinks MODUSER_KWDL on MODUSER_KWDL.rtl_RecID=MODUSER_BKMK.bkm_RecID
+                               left join usrTags MODUSER_KWD on MODUSER_KWD.tag_ID=MODUSER_KWDL.rtl_TagID
                                left join usrTags NEWUSER_KWD on NEWUSER_KWD.tag_Text=MODUSER_KWD.tag_Text
                                                              and NEWUSER_KWD.tag_UGrpID='.get_user_id().'
   where NEWUSER_BKMK.bkm_UGrpID='.get_user_id().' and NEWUSER_KWD.tag_ID is not null'
 		);
 		$insert_pairs = array();
 		while ($row = mysql_fetch_row($res))
-			array_push($insert_pairs, '(' . intval($row[0]) . ',' . intval($row[1]) . ',' . intval($row[2]) . ',' . intval($row[3]) . ')');
+			array_push($insert_pairs, '(' . intval($row[0]) . ',' . intval($row[1]) . ',' . intval($row[2]) . ')');
 		if ($insert_pairs)
-			mysql_query('insert into usrRecTagLinks (kwl_pers_id, kwl_kwd_id, kwl_order, kwl_rec_id) values ' . join(',', $insert_pairs));
+			mysql_query('insert into usrRecTagLinks ( rtl_TagID, rtl_Order, rtl_RecID) values ' . join(',', $insert_pairs));
 
 	}
 
@@ -291,7 +291,7 @@ function update_my_settings() {
 }
 
 
-function kwd_query() {
+function tag_query() {	//saw CHECK: how can B.tag_ID be null
 	return mysql_query("select A.tag_ID as tag_ID, A.tag_Text as tag_Text from usrTags A
 	                           left join usrTags B on A.tag_Text=B.tag_Text and B.tag_UGrpID=".get_user_id()."
 	                     where A.tag_UGrpID= ".MODEL_USER_ID." and B.tag_ID is null");

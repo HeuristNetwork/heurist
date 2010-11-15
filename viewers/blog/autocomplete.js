@@ -654,7 +654,7 @@ top.HEURIST.tagAutofill = function(term) {
 };
 
 top.HEURIST.getKeywordAutofillFn = function(group) {
-	var wgTags = HKeywordManager.getWorkgroupKeywords(group);
+	var wgTags = HWorkgroupTagManager.getWorkgroupTags(group);
 	var count = 20;
 	return function(term) {
 		var regex, regexSafeTerm;

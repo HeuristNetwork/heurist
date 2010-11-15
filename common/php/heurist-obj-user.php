@@ -53,12 +53,12 @@ while ($row = mysql_fetch_row($res)) {
 	array_push($ids, $kwd_id);
 }
 ?>
-    top.HEURIST.user.workgroupKeywords = <?= json_format($rows); ?>;
-    top.HEURIST.user.workgroupKeywordOrder = <?= json_format($ids); ?>;
+    top.HEURIST.user.workgroupTags = <?= json_format($rows); ?>;
+    top.HEURIST.user.workgroupTagOrder = <?= json_format($ids); ?>;
 
-    top.HEURIST.user.topKeywords = [<?php
+    top.HEURIST.user.topTags = [<?php
 /* find the top five tags for this user */
-$res = mysql_query("select tag_Text, count(kwl_id) as c from usrTags left join usrRecTagLinks on kwl_kwd_id=tag_ID
+$res = mysql_query("select tag_Text, count(rtl_ID) as c from usrTags left join usrRecTagLinks on rtl_TagID=tag_ID
                      where tag_UGrpID=".get_user_id()." group by tag_Text order by c desc limit 5");
 $first = true;
 while ($row = mysql_fetch_row($res)) {
@@ -69,8 +69,8 @@ while ($row = mysql_fetch_row($res)) {
 
    top.HEURIST.user.recentTags = [<?php
 /* find the ten most recently used tags for this user */
-$res = mysql_query("select distinct(tag_Text) from usrTags left join usrRecTagLinks on kwl_kwd_id=tag_ID
-                     where tag_UGrpID=".get_user_id()." group by kwl_kwd_id order by max(kwl_id) desc limit 10");
+$res = mysql_query("select distinct(tag_Text) from usrTags left join usrRecTagLinks on rtl_TagID=tag_ID
+                     where tag_UGrpID=".get_user_id()." group by rtl_TagID order by max(rtl_ID) desc limit 10");
 $first = true;
 while ($row = mysql_fetch_row($res)) {
     if (! $first) print ",";  print " "; $first = false;

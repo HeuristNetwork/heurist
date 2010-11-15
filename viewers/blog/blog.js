@@ -676,7 +676,7 @@ BlogEntry: function(record, parentElement, isNew) {
 		if (Blog.group) {
 			var $taginput = $(".entry-edit-wg-tags-input", this.table);
 			var $select = $("<select><option value=''>Select a tag...</option></select>");
-			var wgTags = HKeywordManager.getWorkgroupKeywords(Blog.group);
+			var wgTags = HWorkgroupTagManager.getWorkgroupTags(Blog.group);
 			var l = wgTags.length;
 			for (var i = 0; i < l; ++i) {
 				(function (kwd) {
@@ -696,7 +696,7 @@ BlogEntry: function(record, parentElement, isNew) {
 			}
 			$(".entry-edit-wg-tags-input", this.table).after("&nbsp;&nbsp;add ", $select);
 			if (HCurrentUser.isAdministrator()) {
-				$select.after("<a target='_blank' href='../../admin/workgroups/workgroup_keyword_manager.php"+(instance ? "&instance="+instance : "")+"'>admin</a>");
+				$select.after("<a target='_blank' href='../../admin/workgroups/workgroup_tag_manager.php"+(instance ? "&instance="+instance : "")+"'>admin</a>");
 			}
 		}
 
@@ -810,7 +810,7 @@ BlogEntry: function(record, parentElement, isNew) {
 			}
 
 			if (wgtags  &&  wgtags.length) {
-				wgTags = HKeywordManager.getWorkgroupKeywords(Blog.group);
+				wgTags = HWorkgroupTagManager.getWorkgroupTags(Blog.group);
 				for (var i = 0; i < wgtags.length; ++i) {
 					for (var j = 0; j < wgTags.length; ++j) {
 						if (wgtags[i]){

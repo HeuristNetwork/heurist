@@ -35,8 +35,8 @@ if (array_key_exists("records", $result)) {
 			@$record["bkm_ID"],                  // 15
 			@$record["pers_notes"],               // 16
 			@$record["bkm_Rating"],      // 17
-			@$record["pers_interest_rating"],     // 18
-			@$record["pers_quality_rating"],      // 19
+			null, //@$record["pers_interest_rating"],     // 18  // pass null to not affect ordering HAPI expects
+			null, //@$record["pers_quality_rating"],      // 19  //saw FIXME: should just change the internal interface removing old args.
 			@$record["tags"],                     // 20
 			@$record["wgTags"],                   // 21
 			@$record["notifies"],                 // 22

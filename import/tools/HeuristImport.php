@@ -334,8 +334,8 @@ class HeuristNativeEntry {
 	var $_title_field, $_author_fields;
 	var $_title_metaphone;
 
-	var $_keywords;
-	var $_workgroupKeyword;
+	var $_tags;
+	var $_workgroupTag;
 
 	var $_missing_fields;
 	var $_other_errors;
@@ -372,7 +372,7 @@ class HeuristNativeEntry {
 		$this->_title_metaphone = NULL;
 
 		$this->_tags = array();
-		$this->_workgroupKeyword = 0;
+		$this->_workgroupTag = 0;
 
 		$this->_missing_fields = array();
 		$this->_other_errors = array();
@@ -409,8 +409,8 @@ class HeuristNativeEntry {
 	function getFields() { return $this->_fields; }
 		// Return an array of HeuristNativeField objects
 
-	function addKeyword($tag, $userSupplied=false) {
-		global $allKeywords;
+	function addTag($tag, $userSupplied=false) {
+		global $allTags;
 
 		// Do a bit of cooking here: tags are typically comma or newline separated
 		if (preg_match('/\\n/s', $tag))
@@ -420,15 +420,15 @@ class HeuristNativeEntry {
 		foreach ($tags as $kwd) {
 			if (substr($kwd, -1) == '.') $kwd = substr($kwd, 0, -1);
 			array_push($this->_tags, $kwd);
-			if (! $userSupplied) $allKeywords[$kwd] = $kwd;
+			if (! $userSupplied) $allTags[$kwd] = $kwd;
 		}
 	}
-	function getKeywords() { return $this->_tags; }
+	function getTags() { return $this->_tags; }
 
-	function setWorkgroupKeyword($kwd_id) {
-		$this->_workgroupKeyword = $kwd_id;
+	function setWorkgroupTag($kwd_id) {
+		$this->_workgroupTag = $kwd_id;
 	}
-	function getWorkgroupKeyword() { return $this->_workgroupKeyword; }
+	function getWorkgroupTag() { return $this->_workgroupTag; }
 
 	function setContainerEntry(&$entry) { $this->_container = &$entry; }
 		// $entry is a HeuristNativeEntry, used to set the container for this entry

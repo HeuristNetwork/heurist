@@ -436,7 +436,7 @@ function writeDetails($bib, $depth) {
 	global $RQS;
 	global $REVERSE;
 
-	writeKeywords($bib);
+	writeTags($bib);
 
     $assoc_resources = array();
 	$query = 'SELECT rec_type, rd_val, rdt_id, rdt_type, rd_type, rd_file_id FROM rec_details
@@ -496,19 +496,18 @@ function writeReversePointers($bib, $depth) {
  * @param string $bib record id
  *
  */
-function writeKeywords($bib) {
+function writeTags($bib) {
 	global $XML;
 
 	$query = 'SELECT distinct grp_name, tag_Text
 				FROM usrRecTagLinks
-		   LEFT JOIN usrTags ON tag_ID = kwl_kwd_id
+		   LEFT JOIN usrTags ON tag_ID = rtl_TagID
 		   LEFT JOIN '.USERS_DATABASE.'.Groups ON grp_id = tag_UGrpID
-			   WHERE kwl_rec_id = '.$bib.'
-				 AND ???kwd_wg_id > 0
+			   WHERE rtl_RecID = '.$bib.'
 			ORDER BY grp_name, tag_Text';
 	$res = mysql_query($query);
 	while ($row = mysql_fetch_assoc($res)) {
-		$XML .= "<keyword workgroup=\"".$row['grp_name']."\">".$row['tag_Text']."</keyword>\n";
+		$XML .= "<tag workgroup=\"".$row['grp_name']."\">".$row['tag_Text']."</tag>\n";
 	}
 }
 

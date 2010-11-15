@@ -30,8 +30,8 @@ $tags = mysql__select_array("usrTags", "distinct tag_Text", "tag_UGrpID=" . get_
 $workgroups = mysql__select_array(USERS_DATABASE.".UserGroups", "distinct ug_group_id", "ug_user_id=" . get_user_id());
 
 $res = mysql_query("select tag_ID, tag_Text, tag_UGrpID from usrTags, ".USERS_DATABASE.".UserGroups where ug_group_id=tag_UGrpID and ug_user_id=" . get_user_id());
-$workgroupKeywords = array();
-while ($row = mysql_fetch_row($res)) { array_push($workgroupKeywords, $row); }
+$workgroupTags = array();
+while ($row = mysql_fetch_row($res)) { array_push($workgroupTags, $row); }
 
 $res = mysql_query("select cgr_id, cgr_name from coll_groups where cgr_owner_id=" . get_user_id());
 $colleagueGroups = array();
@@ -41,7 +41,7 @@ $currentUser = array(get_user_id(), is_admin(), $workgroups, @$_SESSION[HEURIST_
 
 $userData = array(
 	"tags" => $tags,
-	"workgroupKeywords" => $workgroupKeywords,
+	"workgroupTags" => $workgroupTags,
 	"colleagueGroups" => $colleagueGroups,
 	"currentUser" => $currentUser
 );

@@ -128,7 +128,7 @@ return {
 		FlexImport.workgroupSelect.onchange = function() {
 			FlexImport.workgroupTags = {};
 			if (this.value) {
-				var wgkwds = HKeywordManager.getWorkgroupKeywords(FlexImport.workgroups[this.value]);
+				var wgkwds = HWorkgroupTagManager.getWorkgroupTags(FlexImport.workgroups[this.value]);
 				var i, l = wgkwds.length;
 				for (i = 0; i < l; ++i) {
 					FlexImport.workgroupTags[wgkwds[i].getName()] = wgkwds[i];
@@ -146,7 +146,7 @@ return {
 		p.appendChild(document.createTextNode(" (NOTE: Workgroup tags must be pre-existing!  Create them "));
 		var a = p.appendChild(document.createElement("a"));
 			a.target = "_blank";
-			a.href = HAPI.HeuristBaseURL + "admin/workgroups/workgroup_keyword_manager.php"
+			a.href = HAPI.HeuristBaseURL + "admin/workgroups/workgroup_tag_manager.php"
 			a.innerHTML = "here";
 		p.appendChild(document.createTextNode(" then start over.)"));
 

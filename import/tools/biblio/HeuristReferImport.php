@@ -879,8 +879,8 @@ class HeuristReferEntry extends HeuristForeignEntry {
 						$entry->addField(new HeuristNativeField($heurist_tag, $refer_field->getValue()));
 				}
 
-			} else if ($refer_field->getTagName() == 'K') {	// keywords are handled specially, of course
-				$base_entry->addKeyword($refer_field->getRawValue());
+			} else if ($refer_field->getTagName() == 'K') {	// tags are handled specially, of course
+				$base_entry->addTag($refer_field->getRawValue());
 
 			} else if (@$personal_notes_tags[$refer_field->getTagName()]) {
 				$base_entry->addBkmkNotes($personal_notes_tags[$refer_field->getTagName()].': '.$refer_field->getValue());

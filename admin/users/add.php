@@ -164,7 +164,7 @@ if ($_REQUEST['_submit']  &&  $dup_check_ok) {
 			$res = mysql_query("select * from usrBookmarks where bkm_UGrpID = $model_usr_id");	// model user
 			while ($row = mysql_fetch_assoc($res)) {
 				// add a new bookmark for each of the model user's bookmarks
-				// (all fields the same except for user id and keyword id)
+				// (all fields the same except for user id)
 
 				unset($row['bkm_ID']);
 
@@ -179,20 +179,20 @@ if ($_REQUEST['_submit']  &&  $dup_check_ok) {
 			/* for each of the model user's kwd_link entries, make a corresponding entry for the new user */
 			/* hold onto your hats, folks: this is a five-table join across three tables! */
 			$res = mysql_query(
-'select NEWUSER_BKMK.bkm_ID, NEWUSER_KWD.tag_ID, MODUSER_KWDL.kwl_order, MODUSER_KWDL.kwl_rec_id
-   from usrBookmarks NEWUSER_BKMK left join usrBookmarks MODUSER_BKMK on NEWUSER_BKMK.bkm_recID=MODUSER_BKMK.bkm_recID
+'select NEWUSER_KWD.tag_ID, MODUSER_KWDL.rtl_Order, MODUSER_KWDL.rtl_RecID
+   from usrBookmarks NEWUSER_BKMK left join usrBookmarks MODUSER_BKMK on NEWUSER_BKMK.bkm_RecID=MODUSER_BKMK.bkm_RecID
                                                                and MODUSER_BKMK.bkm_UGrpID='.$model_usr_id.'
-                               left join usrRecTagLinks MODUSER_KWDL on MODUSER_KWDL.kwl_pers_id=MODUSER_BKMK.bkm_ID
-                               left join usrTags MODUSER_KWD on MODUSER_KWD.tag_ID=MODUSER_KWDL.kwl_kwd_id
+                               left join usrRecTagLinks MODUSER_KWDL on MODUSER_KWDL.rtl_RecID=MODUSER_BKMK.bkm_RecID
+                               left join usrTags MODUSER_KWD on MODUSER_KWD.tag_ID=MODUSER_KWDL.rtl_TagID
                                left join usrTags NEWUSER_KWD on NEWUSER_KWD.tag_Text=MODUSER_KWD.tag_Text
                                                              and NEWUSER_KWD.tag_UGrpID='.$usr_id.'
   where NEWUSER_BKMK.bkm_UGrpID='.$usr_id.' and NEWUSER_KWD.tag_ID is not null'
 			);
 			$insert_pairs = array();
 			while ($row = mysql_fetch_row($res))
-				array_push($insert_pairs, '(' . intval($row[0]) . ',' . intval($row[1]) . ',' . intval($row[2]) . ',' . intval($row[3]) . ')');
+				array_push($insert_pairs, '(' . intval($row[0]) . ',' . intval($row[1]) . ',' . intval($row[2]) . ')');
 			if ($insert_pairs)
-				mysql_query('insert into usrRecTagLinks (kwl_pers_id, kwl_kwd_id, kwl_order, kwl_rec_id) values ' . join(',', $insert_pairs));
+				mysql_query('insert into usrRecTagLinks (rtl_TagID, rtl_Order, rtl_RecID) values ' . join(',', $insert_pairs));
 
 mysql_connection_localhost_overwrite(DATABASE);
 /* END HEURIST STUFF */

@@ -67,9 +67,9 @@ $MAINTABLES['USER'] = USERS_DATABASE.'.'.USERS_TABLE;
 */
 
 $MAINTABLES["BOOKMARKS_TO_KEYWORDS"] = 'usrRecTagLinks';
-	$PKEY["BOOKMARKS_TO_KEYWORDS"] = 'kwl_id';
+	$PKEY["BOOKMARKS_TO_KEYWORDS"] = 'rtl_ID';
         $LINK_KEYS["BOOKMARKS_TO_KEYWORDS"] = array(	"BOOKMARK-ID" => "kwl_pers_id",
-							"KEYWORD-ID"  => "kwl_kwd_id");
+							"KEYWORD-ID"  => "rtl_TagID");
 
 
 $SEARCHES["BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left join records on bkm_recID=rec_id WHERE (

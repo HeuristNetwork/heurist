@@ -29,16 +29,16 @@ if (@$_REQUEST['submitted']) {
 	}
 }
 
-$keyword_message = '';
+$tag_message = '';
 if (@$_REQUEST['delete_kwd_id']) {
 	mysql_connection_db_overwrite(DATABASE);
 	$kwd_id = intval(@$_REQUEST['delete_kwd_id']);
 	mysql_query('delete from usrTags where tag_ID = ' . $kwd_id . ' and tag_UGrpID= ' . get_user_id());
 	if (mysql_affected_rows()) {
-		mysql_query('delete from usrRecTagLinks where kwl_kwd_id = ' . $kwd_id);
-		$keyword_message .= '<div class="success">Tag was deleted</div>';
+		mysql_query('delete from usrRecTagLinks where rtl_TagID = ' . $kwd_id);
+		$tag_message .= '<div class="success">Tag was deleted</div>';
 	} else {
-		$keyword_message .= '<div class="failure">Tag was not deleted</div>';
+		$tag_message .= '<div class="failure">Tag was not deleted</div>';
 	}
 }
 if (@$_REQUEST['update_kwd_from']  and  @$_REQUEST['update_kwd_to']) {
@@ -49,18 +49,18 @@ if (@$_REQUEST['update_kwd_from']  and  @$_REQUEST['update_kwd_to']) {
 	/* check that both tags belong to this user */
 	$res = mysql_query('select * from usrTags where tag_ID in ('.$kwd_from.','.$kwd_to.') and tag_UGrpID='.get_user_id());
 	if (mysql_num_rows($res) == 2) {
-		mysql_query('update ignore usrRecTagLinks set kwl_kwd_id = '.$kwd_to.' where kwl_kwd_id = '.$kwd_from);
+		mysql_query('update ignore usrRecTagLinks set rtl_TagID = '.$kwd_to.' where rtl_TagID = '.$kwd_from);
 		$count = mysql_affected_rows();
 		mysql_query('delete from usrTags where tag_ID = '.$kwd_from);
 
 		if ($count == -1)
-			$keyword_message .= '<div class="success">Tag changed: duplicate tag links removed</div>';
+			$tag_message .= '<div class="success">Tag changed: duplicate tag links removed</div>';
 		else if ($count != 1)
-			$keyword_message .= '<div class="success">Tag changed: ' . $count . ' tag links updated</div>';
+			$tag_message .= '<div class="success">Tag changed: ' . $count . ' tag links updated</div>';
 		else
-			$keyword_message .= '<div class="success">Tag changed: one tag link updated</div>';
+			$tag_message .= '<div class="success">Tag changed: one tag link updated</div>';
 	} else {
-		$keyword_message .= '<div class="failure">Tag not changed</div>';
+		$tag_message .= '<div class="failure">Tag not changed</div>';
 	}
 }
 if (@$_REQUEST['change_names']) {
@@ -76,25 +76,25 @@ if (@$_REQUEST['change_names']) {
 		}
 	}
 	if ($count > 1)
-		$keyword_message .= '<div class="success">'.$count.' tags renamed</div>';
+		$tag_message .= '<div class="success">'.$count.' tags renamed</div>';
 	else if ($count == 1)
-		$keyword_message .= '<div class="success">One tag renamed</div>';
+		$tag_message .= '<div class="success">One tag renamed</div>';
 	else
-		$keyword_message .= '<div class="failure">Error of some sort: ' . mysql_error() . '</div>';
+		$tag_message .= '<div class="failure">Error of some sort: ' . mysql_error() . '</div>';
 }
 if (@$_REQUEST['replace_kwd']) {
 	mysql_connection_db_overwrite(DATABASE);
-	mysql_query('update usrRecTagLinks set kwl_kwd_id = '.intval(@$_REQUEST['replace_with_kwd_id']).' where kwl_kwd_id = '.intval($_REQUEST['replace_kwd_id']));
-	$keyword_message .= '<div class="success">Tag replaced</div>';
+	mysql_query('update usrRecTagLinks set rtl_TagID = '.intval(@$_REQUEST['replace_with_kwd_id']).' where rtl_TagID = '.intval($_REQUEST['replace_kwd_id']));
+	$tag_message .= '<div class="success">Tag replaced</div>';
 }
 if (@$_REQUEST['delete_multiple_kwds']) {
 	$kwd_ids = array_map('intval', array_keys($_REQUEST['delete_kwds']));
 	if (count($kwd_ids)) {
 		mysql_connection_db_overwrite(DATABASE);
-		$res = mysql_query('delete usrTags, usrRecTagLinks from usrTags left join usrRecTagLinks on kwl_kwd_id = tag_ID where tag_ID in ('. join(', ', $kwd_ids) .') and tag_UGrpID='.get_user_id());
-		$keyword_message .= mysql_error() . '<div class="success">Tags deleted</div>';
+		$res = mysql_query('delete usrTags, usrRecTagLinks from usrTags left join usrRecTagLinks on rtl_TagID = tag_ID where tag_ID in ('. join(', ', $kwd_ids) .') and tag_UGrpID='.get_user_id());
+		$tag_message .= mysql_error() . '<div class="success">Tags deleted</div>';
 	} else {
-		$keyword_message .= mysql_error() . '<div class="success">No tags deleted</div>';
+		$tag_message .= mysql_error() . '<div class="success">No tags deleted</div>';
 	}
 }
 
@@ -162,11 +162,11 @@ if (! array_key_exists('body_only', $_REQUEST)) {
 	$template = str_replace('<body ', '<body width=600 height=650 ', $template);
 }
 
-if (@$_REQUEST['keyword_edit'])
-	$template = str_replace('<body ', '<body class=keyword_edit ', $template);
+if (@$_REQUEST['tag_edit'])
+	$template = str_replace('<body ', '<body class=tag_edit ', $template);
 else if (@$_REQUEST['bookmark_import'])
 	$template = str_replace('<body ', '<body class=bookmark_import ', $template);
-$template = str_replace('{keyword_edit}', @$_REQUEST['keyword_edit'], $template);
+$template = str_replace('{tag_edit}', @$_REQUEST['tag_edit'], $template);
 $template = str_replace('{bookmark_import}', @$_REQUEST['bookmark_import'], $template);
 $template = str_replace('{body_only}', (array_key_exists('body_only', $_REQUEST)? '<input type=hidden name=body_only>' : ''), $template);
 
@@ -194,14 +194,14 @@ $hyperlinks_ignored = '<div>' .
 $template = str_replace('{hyperlinks_ignored}', $hyperlinks_ignored, $template);
 $template = str_replace('{Bookmarklet}', file_get_contents('bookmarklet.js'), $template);
 
-$res = mysql_query('select count(kwl_id) as cnt from usrTags left join usrRecTagLinks on kwl_kwd_id=tag_ID where tag_UGrpID= ' . get_user_id() . ' group by tag_ID order by cnt desc, tag_Text limit 1');
+$res = mysql_query('select count(rtl_ID) as cnt from usrTags left join usrRecTagLinks on rtl_TagID=tag_ID where tag_UGrpID= ' . get_user_id() . ' group by tag_ID order by cnt desc, tag_Text limit 1');
 $row = mysql_fetch_row($res);
 $max_cnt = intval($row[0]);
 
 if (@$_REQUEST['order_by_popularity']) {
-	$res = mysql_query('select tag_ID, tag_Text, count(kwl_id) as cnt from usrTags left join usrRecTagLinks on kwl_kwd_id=tag_ID where tag_UGrpID= ' . get_user_id() . ' group by tag_ID order by cnt desc, tag_Text');
+	$res = mysql_query('select tag_ID, tag_Text, count(rtl_ID) as cnt from usrTags left join usrRecTagLinks on rtl_TagID=tag_ID where tag_UGrpID= ' . get_user_id() . ' group by tag_ID order by cnt desc, tag_Text');
 } else {
-	$res = mysql_query('select tag_ID, tag_Text, count(kwl_id) as cnt from usrTags left join usrRecTagLinks on kwl_kwd_id=tag_ID where tag_UGrpID= ' . get_user_id() . ' group by tag_ID order by tag_Text');
+	$res = mysql_query('select tag_ID, tag_Text, count(rtl_ID) as cnt from usrTags left join usrRecTagLinks on rtl_TagID=tag_ID where tag_UGrpID= ' . get_user_id() . ' group by tag_ID order by tag_Text');
 }
 
 $foreach_kwd = $foreach_kwd_js = '';
@@ -239,9 +239,9 @@ $sortby_input = @$_REQUEST['order_by_popularity']
 	: '<input type="hidden" id="sortby_input" name="order_by_popularity" value="">';
 
 
-$template = str_replace('{ForeachKeyword}', $foreach_kwd, $template);
-$template = str_replace('{ForeachKeywordJs}', $foreach_kwd_js, $template);
-$template = str_replace('{KeywordMessage}', $keyword_message, $template);
+$template = str_replace('{ForeachTag}', $foreach_kwd, $template);
+$template = str_replace('{ForeachTagJs}', $foreach_kwd_js, $template);
+$template = str_replace('{TagMessage}', $tag_message, $template);
 $template = str_replace('{UserHyperlinksImport}', $user_hyperlinks_import, $template);
 $template = str_replace('{sortby_button}', $sortby_button, $template);
 $template = str_replace('{sortby_input}', $sortby_input, $template);

@@ -169,7 +169,7 @@ error_log($base_url_base);
 
 
 $disambiguate_bib_ids = array();
-if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_keywords'])  &&  @$_REQUEST['links']) {
+if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags'])  &&  @$_REQUEST['links']) {
 	$bkmk_insert_count = 0;
 	foreach (@$_REQUEST['links'] as $linkno => $checked) {
 		if (! @$checked) continue;
@@ -182,7 +182,7 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_keyw
 		}
 		if (! @$rec_id) continue;	/* malformed URL */
 
-		if (@$_REQUEST['adding_keywords']) {
+		if (@$_REQUEST['adding_tags']) {
 			$kwd = @$_REQUEST['wgTags'];
 		} else {
 			$kwd = @$_REQUEST['kwd'][$linkno];
@@ -310,7 +310,7 @@ function unCheckAll() {
 <form action="fileimport.php" method="post" enctype="multipart/form-data" name="mainform" style="margin: 0px 3px;">
 
 <input type="hidden" name="wgTags" id="wgTags">
-<input type="hidden" name="adding_keywords" value="0" id="adding_keywords_elt">
+<input type="hidden" name="adding_tags" value="0" id="adding_tags_elt">
 <input type="hidden" name="titlegrabber_lock">
 
 <?php
@@ -346,11 +346,12 @@ hyperlinks of interest).</p>
 <?php
 	} else if ($nextmode == 'printurls') {
 
-		$keywords = mysql__select_array('usrTags', 'tag_Text', 'tag_UGrpID='.get_user_id().' order by tag_Text');
-		$keyword_options = '';
-		foreach ($keywords as $kwd)
-			$keyword_options .= '<option value="'.htmlspecialchars($kwd).'">'.htmlspecialchars($kwd)."</option>\n";
-
+/* removed by saw 2010/11/12 doesn't seemed to be used anymore
+		$tags = mysql__select_array('usrTags', 'tag_Text', 'tag_UGrpID='.get_user_id().' order by tag_Text');
+		$tag_options = '';
+		foreach ($tags as $kwd)
+			$tag_options .= '<option value="'.htmlspecialchars($kwd).'">'.htmlspecialchars($kwd)."</option>\n";
+*/
 		mysql_connection_db_select(USERS_DATABASE);
 		$res = mysql_query('select WordLimit from '.USERS_TABLE.' where '.USERS_ID_FIELD.' = '.get_user_id());
 		$row = mysql_fetch_row($res);
@@ -402,7 +403,7 @@ The list is reloaded after each addition and after change of settings.
    &nbsp;&nbsp;
    <a href="#" onClick="unCheckAll(); return false;">Uncheck all</a>
    &nbsp;&nbsp;
-   <input type="submit" name="mode" value="Bookmark checked links" style="font-weight: bold;" onclick="top.HEURIST.util.popupURL(window, '<?=HEURIST_SITE_PATH?>records/tags/add-tags.html', { callback: function(tags) { document.getElementById('wgTags').value = tags; document.getElementById('adding_keywords_elt').value = 1; document.forms[0].submit(); } } ); return false;">
+   <input type="submit" name="mode" value="Bookmark checked links" style="font-weight: bold;" onclick="top.HEURIST.util.popupURL(window, '<?=HEURIST_SITE_PATH?>records/tags/add-tags.html', { callback: function(tags) { document.getElementById('wgTags').value = tags; document.getElementById('adding_tags_elt').value = 1; document.forms[0].submit(); } } ); return false;">
   </td>
  </tr>
 
@@ -490,6 +491,7 @@ function biblio_check($url, $title, $notes, $user_bib_id) {
 	}
 
 	// no similar URLs, no exactly matching URL, or user has explicitly selected "add new URL"
+	//insert the main record
 	if (mysql__insert('records', array(
 		'rec_type' => 1,
 		'rec_url' => $url,
@@ -500,11 +502,13 @@ function biblio_check($url, $title, $notes, $user_bib_id) {
 		'rec_added_by_usr_id' => get_user_id()
 	))) {
 		$rec_id = mysql_insert_id();
+		//add title detail
 		mysql__insert('rec_details', array(
 			'rd_rec_id' => $rec_id,
 			'rd_type' => 160,
 			'rd_val' => $title
 		));
+		//add notes detail
 		mysql__insert('rec_details', array(
 			'rd_rec_id' => $rec_id,
 			'rd_type' => 191,
@@ -516,7 +520,7 @@ function biblio_check($url, $title, $notes, $user_bib_id) {
 	return 0;
 }
 
-function bookmark_insert($url, $title, $keywords, $rec_id) {
+function bookmark_insert($url, $title, $tags, $rec_id) {
 	/*
 	 * Insert a new bookmark with the relevant details;
 	 * return true on success,
@@ -525,39 +529,39 @@ function bookmark_insert($url, $title, $keywords, $rec_id) {
 
 	$res = mysql_query('select * from usrBookmarks where bkm_recID="'.addslashes($rec_id).'"
 	                                              and bkm_UGrpID="'.get_user_id().'"');
+	//if already bookmarked then return
 	if (mysql_num_rows($res) > 0) return 0;
-
+	//insert the bookmark
 	if (mysql__insert('usrBookmarks', array(
 		'bkm_recID' => $rec_id,
 		'bkm_Added' => date('Y-m-d H:i:s'),
 		'bkm_Modified' => date('Y-m-d H:i:s'),
-		'bkm_UGrpID' => get_user_id()
-	))) {
+		'bkm_UGrpID' => get_user_id()))) {
 		$bkm_ID = mysql_insert_id();
+		// find the tag ids for each tag.
+		$all_tags = mysql__select_assoc('usrTags', 'lower(tag_Text)', 'tag_ID', 'tag_UGrpID='.get_user_id());
+		$input_tags = explode(',', $tags);
+		$tag_ids = array();
 
-		$all_keywords = mysql__select_assoc('usrTags', 'lower(tag_Text)', 'tag_ID', 'tag_UGrpID='.get_user_id());
-		$input_keywords = explode(',', $keywords);
-		$kwd_ids = array();
-
-		$kwd_string = '';
-		foreach ($input_keywords as $kwd) {
-			if ($all_keywords[strtolower(trim($kwd))]) {
-				array_push($kwd_ids, $all_keywords[strtolower(trim($kwd))]);
-				if ($kwd_string) $kwd_string .= ',';
-				$kwd_string .= trim($kwd);
+//		$kwd_string = '';
+		foreach ($input_tags as $tag) {
+			if ($all_tags[strtolower(trim($tag))]) {
+				array_push($tag_ids, $all_tags[strtolower(trim($tag))]);
+//				if ($kwd_string) $kwd_string .= ',';
+//				$kwd_string .= trim($kwd);
 			}
 		}
 
-		mysql_query('delete from usrRecTagLinks where kwl_pers_id='.$bkm_ID);
-		if ($kwd_ids) {
+//		mysql_query('delete from usrRecTagLinks where kwl_pers_id='.$bkm_ID);
+		if ($tag_ids) {
 			$insert_stmt = '';
-			$kwi_count = 0;
-			foreach ($kwd_ids as $kwd_id) {
+			$tgi_count = 0;
+			foreach ($tag_ids as $tag_id) {
 				if ($insert_stmt) $insert_stmt .= ',';
-				$insert_stmt .= '(' . $bkm_ID . ',' . $rec_id . ',' . $kwd_id . ',' . ++$kwi_count . ')';
+				$insert_stmt .= '(' . $rec_id . ',' . $tag_id . ',' . ++$tgi_count . ')';
 			}
 
-			$insert_stmt = 'insert into usrRecTagLinks (kwl_pers_id, kwl_rec_id, kwl_kwd_id, kwl_order) values ' . $insert_stmt;
+			$insert_stmt = 'insert into usrRecTagLinks (rtl_RecID, rtl_TagID, rtl_Order) values ' . $insert_stmt;
 			mysql_query($insert_stmt);
 		}
 

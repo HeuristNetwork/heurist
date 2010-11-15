@@ -127,7 +127,7 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="../help/webhelp/index.html?GettingStarted1" target="_blank" title="Functions to set up your computer for use with Heurist">Install tools</a></li>
 
 					<li class="yuimenuitem divider"><a class="yuimenuitemlabel" href="../search/popup_modelcopy.php" name="auto-popup" title="Add useful resources to your collection from a range of academic templates">Load profiles</a></li>
-					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="../user/profile/configuration.php?body_only&amp;keyword_edit=1" name="auto-popup" title="Delete, combine, rename your personal tags">Manage tags</a></li>
+					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="../user/profile/configuration.php?body_only&amp;tag_edit=1" name="auto-popup" title="Delete, combine, rename your personal tags">Manage tags</a></li>
 					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="?ver=1&amp;w=bookmark&amp;q=-tag&amp;label=Bookmarks+without+tags" title="Find bookmarks which you have not tagged">Bookmarks without tags</a></li>
 
 					<li class="yuimenuitem divider"><a class="yuimenuitemlabel" href="../search/social/similar_users.php" name="auto-popup" title="Find people with similar bookmarking patterns">Find similar users</a></li>
@@ -167,7 +167,7 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 					<div class=content>
 						<div class=saved-search-subsubheading><a href="?ver=1&amp;w=bookmark&amp;q=tag:Favourites+OR+tag:Favorites&amp;label=Favourites" onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">My Favourites</a></div>
 						<div class=saved-search-subsubheading><a href="?ver=1&amp;w=bookmark&amp;q=sortby:-m&amp;label=Recently+modified" onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">Recent changes</a></div>
-						<div class=saved-search-subsubheading><a id=search-by-keyword-link href="#" onClick="top.HEURIST.search.showKeywordSearchLinks(); return false;">My Tags</a></div>
+						<div class=saved-search-subsubheading><a id=search-by-tag-link href="#" onClick="top.HEURIST.search.showTagSearchLinks(); return false;">My Tags</a></div>
 						<div class=saved-search-subsubheading><a id=my-blog-link target="_blank" href="#">My Blog</a></div>
 						<div class=saved-search-subsubheading>Saved searches</div>
 						<div id=my-records-saved-searches-searches></div>
@@ -193,7 +193,7 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 				</div>
 			</div>
 
-			<div id=keyword-search-links></div>
+			<div id=tag-search-links></div>
 		</div>
 	</div>
 </div>

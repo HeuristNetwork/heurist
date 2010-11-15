@@ -68,7 +68,7 @@ if (! $rec_id) {
 		$record["reminders"] = getAllReminders($rec_id);
 		$record["wikis"] = getAllWikis($rec_id, $bkm_ID);
 		$record["comments"] = getAllComments($rec_id);
-		$record["workgroupKeywords"] = getAllWorkgroupKeywords($rec_id);
+		$record["workgroupTags"] = getAllworkgroupTags($rec_id);
 		$record["relatedRecords"] = getAllRelatedRecords($rec_id);
 		$record["rtConstraintsByDType"] = getConstraintsByRdt($record['reftypeID']);
 		$record["retrieved"] = date('Y-m-d H:i:s');	// the current time according to the server
@@ -131,15 +131,17 @@ function findRecordIDs() {
 
 function getBaseProperties($rec_id, $bkm_ID) {
 	// Return an array of the basic scalar properties for this record / bookmark
-
+	if (!$rec_id && !$bkm_ID) return array("error"=>"invalid parameters passed to getBaseProperties");
 	if ($bkm_ID) {
-		$res = mysql_query('select rec_title as title, rt_name as reftype, rt_id as reftypeID, rec_url as url, grp_id as workgroupID, grp_name as workgroup, rec_scratchpad as notes, rec_visibility as visibility, bkm_PwdReminder as passwordReminder, bkm_Rating as rating, pers_notes as quickNotes, rec_modified, rec_temporary from usrBookmarks left join records on bkm_recID=rec_id and bkm_UGrpID='.get_user_id().' left join rec_types on rt_id = rec_type left join '.USERS_DATABASE.'.Groups on grp_id=rec_wg_id where bkm_ID='.$bkm_ID);
+		$res = mysql_query('select rec_id, rec_title as title, rt_name as reftype, rt_id as reftypeID, rec_url as url, grp_id as workgroupID, grp_name as workgroup, rec_scratchpad as notes, rec_visibility as visibility, bkm_PwdReminder as passwordReminder, bkm_Rating as rating, rec_modified, rec_temporary from usrBookmarks left join records on bkm_recID=rec_id and bkm_UGrpID='.get_user_id().' left join rec_types on rt_id = rec_type left join '.USERS_DATABASE.'.Groups on grp_id=rec_wg_id where bkm_ID='.$bkm_ID);
 	} else if ($rec_id) {
-		$res = mysql_query('select rec_title as title, rt_name as reftype, rt_id as reftypeID, rec_url as url, grp_id as workgroupID, grp_name as workgroup, rec_scratchpad as notes, rec_visibility as visibility, rec_modified, rec_temporary from records left join usrBookmarks on bkm_recID=rec_id left join rec_types on rt_id = rec_type left join '.USERS_DATABASE.'.Groups on grp_id=rec_wg_id where rec_id='.$rec_id);
+		$res = mysql_query('select rec_id, rec_title as title, rt_name as reftype, rt_id as reftypeID, rec_url as url, grp_id as workgroupID, grp_name as workgroup, rec_scratchpad as notes, rec_visibility as visibility, rec_modified, rec_temporary from records left join usrBookmarks on bkm_recID=rec_id left join rec_types on rt_id = rec_type left join '.USERS_DATABASE.'.Groups on grp_id=rec_wg_id where rec_id='.$rec_id);
 	}
 
 	$row = mysql_fetch_assoc($res);
+	$rec_id = $row["rec_id"];
 	$props = array();
+
 	if ($rec_id) $props["bibID"] = $rec_id;
 	if ($bkm_ID) $props["bkmkID"] = $bkm_ID;
 	$props["title"] = $row["title"];
@@ -161,11 +163,11 @@ function getBaseProperties($rec_id, $bkm_ID) {
 		$props['workgroup'] = $row['workgroup'];
 		if ($row['visibility']) $props['workgroupVisibility'] = $row['visibility'];
 	}
-	$props['notes'] = $row['notes'];
+//	$props['notes'] = $row['notes']; // saw TODO: add code to get personal woots
 
 	if ($bkm_ID) {
 		// grab the user tags for this bookmark, as a single comma-delimited string
-		$kwds = mysql__select_array("usrRecTagLinks left join usrTags on tag_ID=kwl_kwd_id", "tag_Text", "kwl_pers_id=$bkm_ID and tag_UGrpID=".get_user_id() . " order by kwl_order, kwl_id");
+		$kwds = mysql__select_array("usrRecTagLinks left join usrTags on tag_ID=rtl_TagID", "tag_Text", "rtl_RecID=$rec_id and tag_UGrpID=".get_user_id() . " order by rtl_Order, rtl_ID");
 		$props["tagString"] = join(",", $kwds);
 	}
 
@@ -213,7 +215,7 @@ function getAllBibDetails($rec_id) {
 		}
 		else if ($row["envelope"]  &&  preg_match("/^POLYGON[(][(]([^ ]+) ([^ ]+),[^,]*,([^ ]+) ([^,]+)/", $row["envelope"], $poly)) {
 			list($match, $minX, $minY, $maxX, $maxY) = $poly;
-error_log($match);
+//error_log($match);
 			$x = 0.5 * ($minX + $maxX);
 			$y = 0.5 * ($minY + $maxY);
 
@@ -350,9 +352,9 @@ function getAllComments($rec_id) {
 	return $comments;
 }
 
-function getAllWorkgroupKeywords($rec_id) {
+function getAllworkgroupTags($rec_id) {
 // FIXME: should limit this just to workgroups that the user is in
-	$res = mysql_query("select tag_ID from usrRecTagLinks, usrTags where kwl_kwd_id=tag_ID and kwl_rec_id=$rec_id");
+	$res = mysql_query("select tag_ID from usrRecTagLinks, usrTags where rtl_TagID=tag_ID and rtl_RecID=$rec_id");
 	$kwd_ids = array();
 	while ($row = mysql_fetch_row($res)) array_push($kwd_ids, $row[0]);
 	return $kwd_ids;

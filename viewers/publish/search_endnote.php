@@ -226,8 +226,8 @@ function print_biblio($bib) {
 
 	if ($bib['rec_url']) $output .= '%U ' . $bib['rec_url'] . "\n";
 
-	$kwds = mysql__select_array('usrBookmarks left join usrRecTagLinks on kwl_pers_id = bkm_ID
-	                                       left join usrTags on tag_ID = kwl_kwd_id',
+	$kwds = mysql__select_array('usrBookmarks left join usrRecTagLinks on rtl_RecID = bkm_RecID
+	                                       left join usrTags on tag_ID = rtl_TagID',
 	                            'tag_Text',
 	                            'bkm_recID = ' . $bib['rec_id'] . ' and bkm_UGrpID = ' . get_user_id() . ' and tag_Text != "" and tag_Text is not null');
 	if (count($kwds)) $output .= '%K ' . join(', ', $kwds) . "\n";

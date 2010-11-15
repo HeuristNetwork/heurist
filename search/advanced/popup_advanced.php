@@ -137,11 +137,11 @@ function update(elt) {
 	if (new_q_val.match(/\bOR\b(?!.*\bAND\b)/)  &&  new_q_val.length > snippet.length  &&  ! snippet.match(/^sortby:/)) {
 		/*
 		   One of the snippets contains an OR, so search construction will not do what the user expects ...
-		   e.g. if they type  xxx  in the title box, and  x OR y  in the keyword box,
+		   e.g. if they type  xxx  in the title box, and  x OR y  in the tag box,
 		   then the constructed search would be
-		      xxx keyword:x OR keyword:y
-		   which would find title xxx and keyword x, OR keyword y
-		   when what they want is title xxx and keyword x, OR title xxx and keyword y.
+		      xxx tag:x OR tag:y
+		   which would find title xxx and tag x, OR tag y
+		   when what they want is title xxx and tag x, OR title xxx and tag y.
 		   i.e. the OR is not distributed.
 		   Now, we could do a mass-o piece-by-piece OR distribution,
 		   or we can introduce top-top-level AND.
@@ -208,14 +208,14 @@ function load_query() {
 
 	reconstruct_query();
 
-	// document.getElementById('keyword').focus();
+	// document.getElementById('tag').focus();
 }
 
 
 function reconstruct_query() {
 	// reconstruct the query in the SEARCH box (using the canonical fully-modified form)
 
-	var field_names = ['title', 'keyword', 'url', 'type', 'notes', 'user'];
+	var field_names = ['title', 'tag', 'url', 'type', 'notes', 'user'];
 
 	var q_val = '';
 	for (var i=0; i < field_names.length; ++i) {
@@ -282,12 +282,12 @@ function keypress(e) {
 }
 
 
-function add_keyword(kwd) {
-	if (kwd.indexOf(' ')) kwd = '"' + kwd + '"';
+function add_tag(tag) {
+	if (tag.indexOf(' ')) tag = '"' + tag + '"';
 
 	var q_elt = document.getElementById('q');
 	if (q_elt.value) q_elt.value += ' ';
-	q_elt.value += 'tag:' + kwd;
+	q_elt.value += 'tag:' + tag;
 }
 
 
@@ -412,7 +412,7 @@ function clear_fields() {
 
    <tr>
     <td class=r>Tags:</td>
-    <td><input name=tag id=keyword onchange="update(this);" onkeypress="return keypress(event);"></td>
+    <td><input name=tag id=tag onchange="update(this);" onkeypress="return keypress(event);"></td>
     <td rowspan=6 style="vertical-align: top;">
 
      <fieldset style="padding: 4px;">
@@ -458,7 +458,7 @@ function clear_fields() {
    <tr>
     <td class=r>Workgroup&nbsp;tags:</td>
     <td style="padding-top: 6px; padding-bottom: 6px; text-align: left;" colspan=2>
-     <select onchange="if (selectedIndex) add_keyword(options[selectedIndex].value);">
+     <select onchange="if (selectedIndex) add_tag(options[selectedIndex].value);">
       <option value="" selected disabled>(select...)</option>
 <?php		while ($row = mysql_fetch_row($res)) {	?>
       <option value="<?= htmlspecialchars($row[0]) ?>"><?= htmlspecialchars($row[0]) ?></option>

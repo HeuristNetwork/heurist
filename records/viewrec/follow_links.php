@@ -41,15 +41,15 @@ $body = new BodyScope($lexer);
 $body->global_vars['rec_id'] = $_REQUEST['rec_id'];
 $body->global_vars['bkm_ID'] = $_REQUEST['bkm_ID'];
 
-$my_kwds = mysql__select_array('usrRecTagLinks left join usrTags on kwl_kwd_id=tag_ID', 'tag_Text', 'kwl_pers_id='.$bkmk['bkm_ID']);
+$my_kwds = mysql__select_array('usrRecTagLinks left join usrTags on rtl_TagID=tag_ID', 'tag_Text', 'rtl_RecID='.$bib['rec_id']);
 
-$keywords = mysql__select_assoc('usrBookmarks
-								 left join usrRecTagLinks on bkm_ID=kwl_pers_id
-								 left join usrTags on kwl_kwd_id=tag_ID
+$tags = mysql__select_assoc('usrBookmarks
+								 left join usrRecTagLinks on bkm_RecID=rtl_RecID
+								 left join usrTags on rtl_TagID=tag_ID
 								 left join '.USERS_DATABASE.'.Users on Id=tag_UGrpID',
 								'tag_Text', 'count(tag_ID) as kcount',
-								'bkm_recID='.$bib['rec_id'].'
-								 and kwl_id is not null
+								'bkm_RecID='.$bib['rec_id'].'
+								 and rtl_ID is not null
 								 and Active="Y"
 								 group by tag_Text
 								 order by kcount desc, tag_Text');
@@ -58,39 +58,39 @@ $keywords = mysql__select_assoc('usrBookmarks
 $res = mysql_query('select concat(firstname," ",lastname) as bkmk_user, tag_Text
 					from usrBookmarks
 					left join usrRecTagLinks on bkm_ID=kwl_pers_id
-					left join usrTags on kwl_kwd_id=tag_ID
+					left join usrTags on rtl_TagID=tag_ID
 					left join '.USERS_DATABASE.'.Users on bkm_UGrpID=Id
-					where bkm_recID='.$bib['rec_id'].' and kwl_id is not null order by bkmk_user, tag_Text');
+					where bkm_recID='.$bib['rec_id'].' and rtl_ID is not null order by bkmk_user, tag_Text');
 
-$user_keywords = array();
+$user_tags = array();
 while ($row = mysql_fetch_assoc($res)) {
 	$bkmk_user = $row['bkmk_user'];
 	$kwd_name = $row['tag_Text'];
 
-	if ($user_keywords[$bkmk_user])
-		array_push($user_keywords[$bkmk_user], $kwd_name);
+	if ($user_tags[$bkmk_user])
+		array_push($user_tags[$bkmk_user], $kwd_name);
 	else
-		$user_keywords[$bkmk_user] = array($kwd_name);
+		$user_tags[$bkmk_user] = array($kwd_name);
 }
 */
 
-if ($keywords) {
+if ($tags) {
 	$kwd_list = '';
-	foreach ($keywords as $keyword => $count) {
+	foreach ($tags as $tag => $count) {
 		$kwd_list .= ' <tr>';
-		$kwd_list .= '  <td style="vertical-align: top;"><nobr><a target=_top href="../?w=all&q=tag:%22'.urlencode($keyword).'%22" onclick="opener.location.href = this.href; window.close();" title="Search for references with the keyword \''.$keyword.'\'">'
-											. (in_array($keyword, $my_kwds) ? '<b>'.htmlspecialchars($keyword).'</b>' : htmlspecialchars($keyword))
+		$kwd_list .= '  <td style="vertical-align: top;"><nobr><a target=_top href="../?w=all&q=tag:%22'.urlencode($tag).'%22" onclick="opener.location.href = this.href; window.close();" title="Search for references with the tag \''.$tag.'\'">'
+											. (in_array($tag, $my_kwds) ? '<b>'.htmlspecialchars($tag).'</b>' : htmlspecialchars($tag))
 											. "</a>&nbsp;</nobr></td>\n";
 
 		$kwd_list .= "  <td>\n";
 		$res = mysql_query('select Id, concat(firstname," ",lastname) as bkmk_user
 							from usrBookmarks
-							left join usrRecTagLinks on bkm_ID=kwl_pers_id
-							left join usrTags on kwl_kwd_id=tag_ID
+							left join usrRecTagLinks on bkm_RecID=rtl_RecID
+							left join usrTags on rtl_TagID=tag_ID
 							left join '.USERS_DATABASE.'.Users on bkm_UGrpID=Id
 							where bkm_recID='.$bib['rec_id'].'
-							and kwl_id is not null
-							and tag_Text="'.$keyword.'"
+							and rtl_ID is not null
+							and tag_Text="'.$tag.'"
 							and Active="Y"
 							order by bkmk_user');
 		$i = 0;
@@ -112,15 +112,15 @@ if ($keywords) {
 	$kwd_list = '<tr><td>(no matching tags)</td></tr>';
 }
 
-$body->global_vars['keyword-list'] = $kwd_list;
+$body->global_vars['tag-list'] = $kwd_list;
 
 
 $res = mysql_query('
    select Id, concat(firstname," ",lastname) as bkmk_user
      from records
 left join usrBookmarks on bkm_recID=rec_id
-left join usrRecTagLinks on kwl_pers_id=bkm_ID
-left join usrTags on tag_ID=kwl_kwd_id and tag_UGrpID=bkm_UGrpID
+left join usrRecTagLinks on rtl_RecID=bkm_RecID
+left join usrTags on tag_ID=rtl_TagID and tag_UGrpID=bkm_UGrpID
 left join '.USERS_DATABASE.'.Users on Id=bkm_UGrpID
     where rec_id='.$bib['rec_id'].'
       and tag_ID is null
@@ -152,14 +152,14 @@ else {
 
 
 /*
-$body->global_vars['user-keywords'] = '';
-if ($user_keywords) {
-	foreach ($user_keywords as $usr => $kwds) {
-		$body->global_vars['user-keywords'] .= "  <tr>\n    <td>" . $usr . ": &nbsp;&nbsp;</td>\n    <td>\n";
+$body->global_vars['user-tags'] = '';
+if ($user_tags) {
+	foreach ($user_tags as $usr => $kwds) {
+		$body->global_vars['user-tags'] .= "  <tr>\n    <td>" . $usr . ": &nbsp;&nbsp;</td>\n    <td>\n";
 		foreach ($kwds as $kwd) {
-			$body->global_vars['user-keywords'] .= '      <a href="search.php?search_type=records&_simple_BIBLIO_search_search=1&biblio_search_all=true&search_advanced_search=1&adv_search=show&sort_order_dropdown=title&search_tagString=%22'.urlencode($kwd).'%22" onclick="opener.location.href = this.href; window.close();">'.htmlspecialchars($kwd)."</a>\n";
+			$body->global_vars['user-tags'] .= '      <a href="search.php?search_type=records&_simple_BIBLIO_search_search=1&biblio_search_all=true&search_advanced_search=1&adv_search=show&sort_order_dropdown=title&search_tagString=%22'.urlencode($kwd).'%22" onclick="opener.location.href = this.href; window.close();">'.htmlspecialchars($kwd)."</a>\n";
 		}
-		$body->global_vars['user-keywords'] .= "    </td>\n  </tr>\n";
+		$body->global_vars['user-tags'] .= "    </td>\n  </tr>\n";
 	}
 }
 */

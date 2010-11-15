@@ -25,16 +25,16 @@ if (recTypeIDs.length == 1){
 }    //  FIXME  add error code for else case
 
 // process any tags that were passed in the search
-if (qBits.keyword){
+if (qBits.wgTag){
     var recWgKwds = [];
-    for (var n in qBits.keyword[0]){ 
+    for (var n in qBits.wgTag[0]){
         // find quotes at the beginning or end and remove them
-        var temp =  qBits.keyword[0][n].replace(/^\"|\"$/g,'');
+        var temp =  qBits.wgTag[0][n].replace(/^\"|\"$/g,'');
         
         // split the string into WG name and Kwd name      format should be "WG \ Kwd"  
         temp = temp.split(/\\/);            
         
-        //store work group - keyword pairs   note that we have the possibility of having multiple tags for the same workgroup
+        //store work group - tag pairs   note that we have the possibility of having multiple tags for the same workgroup
         recWgKwds[temp[0]] = temp[1].split(",");  
     } 
     
@@ -47,8 +47,8 @@ if (qBits.keyword){
         // if user not in workgroup we can't reliably add record so we're done
         if  (!hWg || ! HCurrentUser.isInWorkgroup(hWg)) callGhostBusters("invalid workgroup");  
 
-        // get all the Heurist keyword objects for this workgroup
-        var wgKwds = HKeywordManager.getWorkgroupKeywords(hWg);
+        // get all the Heurist wgTag objects for this workgroup
+        var wgKwds = HWorkgroupTagManager.getWorkgroupTags(hWg);
         
         // iterate through all the WG tags
         for (var i in wgKwds){           
@@ -59,13 +59,13 @@ if (qBits.keyword){
                 // if not a match skip to the next
                 if (wgKwds[i].getName().toLowerCase() != recWgKwds[wgName][j].toLowerCase() ) continue;
                 
-                //add the HKeyword to the record
+                //add the HWorkgroupTag to the record
                 record.addWgTag(wgKwds[i]);     // FIXME   record is a global in the common-functions.js
                 
-                // remove keyword name from the search-keyword array  
+                // remove wgTag name from the search-tag array
                 recWgKwds[wgName].splice(j,1);  
                    
-                // found and processed  wg keyword  let's break this inner loop
+                // found and processed  wg tag  let's break this inner loop
                  break;
             }  // next search kwd
              // if there are no more tags for this WG  remove it from the array and go to next WG
@@ -77,8 +77,8 @@ if (qBits.keyword){
         //if there are no more tags to lookup exit the loop
  //       if (recWgKwds.length == 0) break;
        
-        // search keyword was not found in work group there is probably a problem with the search keyword
-        if (recWgKwds[wgName].length > 0)  callGhostBusters("unknown workgroup keyword");
+        // search wgTag was not found in work group there is probably a problem with the search wgTag
+        if (recWgKwds[wgName].length > 0)  callGhostBusters("unknown workgroup tag");
     }  // next WG
 } 
 

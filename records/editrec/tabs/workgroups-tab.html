@@ -28,17 +28,17 @@
 
      <tr>
       <td>
-       <div class=keyword-list><table border=0 cellspacing=0 cellpadding=0 width="260px"><tbody id=all-workgroup-tags></tbody></table></div>
+       <div class=wgtag-list><table border=0 cellspacing=0 cellpadding=0 width="260px"><tbody id=all-workgroup-tags></tbody></table></div>
       </td>
       <td>
        <div id=button-box>
-        <div><input type=button value="&gt;" title="Add a tag" onMouseDown="HEURIST.keywordEditor.addWgTag(window.selectedRow)" disabled id=add-button></div>
+        <div><input type=button value="&gt;" title="Add a tag" onMouseDown="HEURIST.wgTagEditor.addWgTag(window.selectedRow)" disabled id=add-button></div>
         <div>&nbsp;&nbsp;</div>
-        <div><input type=button value="&lt;" title="Remove a tag" onMouseDown="HEURIST.keywordEditor.removeWgTag(window.selectedRow)" disabled id=remove-button></div>
+        <div><input type=button value="&lt;" title="Remove a tag" onMouseDown="HEURIST.wgTagEditor.removeWgTag(window.selectedRow)" disabled id=remove-button></div>
        </div>
       </td>
       <td>
-       <div class=keyword-list><table border=0 cellspacing=0 cellpadding=0 width="260px"><tbody id=current-workgroup-tags></tbody></table></div>
+       <div class=wgtag-list><table border=0 cellspacing=0 cellpadding=0 width="260px"><tbody id=current-workgroup-tags></tbody></table></div>
       </td>
      </tr>
 
@@ -48,13 +48,13 @@
       <td class=prompt>Double-click on a tag to remove it from this record</td>
      </tr>
      <tr><td>
-     	<div id="admin-wgKeywords"><br><a href="../../../admin/workgroups/workgroup_keyword_manager.php" target="_blank"> Click here </a> to add/delete tags for workgroups (administrators only). </div>
+      <div id="admin-wgTags"><br><a href="../../../admin/workgroups/workgroup_tag_manager.php" target="_blank"> Click here </a> to add/delete tags for workgroups (administrators only). </div>
      </td></tr>
     </table>
 <script>
-	document.write('<form id=keyword-form method=post jsonAction="'+top.HEURIST.basePath+'records/tags/update-taglinks.php" action="'+top.HEURIST.basePath+'records/tags/update-taglinks.php"></form>');
+	document.write('<form id=wgtag-form method=post jsonAction="'+top.HEURIST.basePath+'records/tags/update-taglinks.php" action="'+top.HEURIST.basePath+'records/tags/update-taglinks.php"></form>');
 </script>
-<script src="../../tags/keyword-editor.js"></script>
+<script src="../../tags/wgtag-editor.js"></script>
 <script>
 
 var removeButton = document.getElementById("remove-button");
@@ -63,7 +63,7 @@ var addButton = document.getElementById("add-button");
 document.forms[0].heuristSubmit = function() {
 	top.HEURIST.util.xhrFormSubmit(document.forms[0], function(json) {
 		var vals = eval(json.responseText);
-		if (vals) parent.HEURIST.edit.record.workgroupKeywords = vals;
+		if (vals) parent.HEURIST.edit.record.workgroupTags = vals;
 		window.location.reload();
 	});
 };
@@ -71,12 +71,12 @@ var bibInput = document.createElement("input");
 	bibInput.type = "hidden";
 	bibInput.name = "bib_id";
 	bibInput.value = top.HEURIST.edit.record.bibID;
-document.getElementById("keyword-form").appendChild(bibInput);
+document.getElementById("wgtag-form").appendChild(bibInput);
 
 
 var currWgTagsElt = document.getElementById("current-workgroup-tags");
 var allWgTagsElt = document.getElementById("all-workgroup-tags");
-new HEURIST.keywordEditor.KeywordEditor(currWgTagsElt, allWgTagsElt, addButton, removeButton);
+new HEURIST.wgTagEditor.WgTagEditor(currWgTagsElt, allWgTagsElt, addButton, removeButton);
 
 </script>
    </div>

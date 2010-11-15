@@ -4,8 +4,7 @@ if (@$_REQUEST['t']) $_REQUEST['bkmrk_bkmk_title'] = $_REQUEST['t'];
 if (@$_REQUEST['u']) $_REQUEST['bkmrk_bkmk_url'] = $_REQUEST['u'];
 if (@$_REQUEST['d']) $_REQUEST['bkmrk_bkmk_description'] = $_REQUEST['d'];
 if (@$_REQUEST['v']) $_REQUEST['version'] = $_REQUEST['v'];
-if (@$_REQUEST['k']) $_REQUEST['keyword'] = $_REQUEST['k'];	//TODO: mod this file for tags instead of keywords ?? t is in use so use tag?
-
+if (@$_REQUEST['k']) $_REQUEST['tag'] = $_REQUEST['k'];
 // $_REQUEST['bkmrk_bkmk_description'] = mb_convert_encoding($_REQUEST['bkmrk_bkmk_description'], 'utf-8');
 
 if (! @$_REQUEST['bkmrk_bkmk_title']) $_REQUEST['bkmrk_bkmk_title'] = '';
@@ -44,9 +43,9 @@ if (!is_logged_in()) {
 		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE.'&bkmrk_bkmk_title='.urlencode($_REQUEST['bkmrk_bkmk_title']).'&bkmrk_bkmk_url='.urlencode($_REQUEST['bkmrk_bkmk_url']).'&bkmrk_bkmk_description='.urlencode($_REQUEST['bkmrk_bkmk_description']));
 	return;
 }
-
+$usrID = get_user_id();
 mysql_connection_db_overwrite(DATABASE);
-mysql_query('set @logged_in_user_id = ' . get_user_id());
+mysql_query("set @logged_in_user_id = $usrID");
 
 /* preprocess any description */
 if (@$_REQUEST['bkmrk_bkmk_description']) {
@@ -100,7 +99,7 @@ if ($_REQUEST['bkmrk_bkmk_url']) {
 	if (substr($burl, -1) == '/') $burl = substr($burl, 0, strlen($burl)-1);
 
 	/* look up the user's bookmark (usrBookmarks) table, see if they've already got this URL bookmarked -- if so, just edit it */
-	$res = mysql_query('select bkm_ID from usrBookmarks left join records on rec_id=bkm_recID where bkm_UGrpID="'.addslashes(get_user_id()).'"
+	$res = mysql_query('select bkm_ID from usrBookmarks left join records on rec_id=bkm_recID where bkm_UGrpID="'.addslashes($usrID).'"
 							and (rec_url="'.addslashes($burl).'" or rec_url="'.addslashes($burl).'/")');
 	if (mysql_num_rows($res) > 0) {
 		$bkmk = mysql_fetch_assoc($res);
@@ -122,7 +121,7 @@ if ($_REQUEST['bib_id'] == -1) {
 
 // check workgroup permissions
 if (@$_REQUEST['bib_workgroup']) {
-	$res = mysql_query("select ug_group_id from ".USERS_DATABASE.".UserGroups where ug_group_id=".intval($_REQUEST['bib_workgroup'])." and ug_user_id=".get_user_id());
+	$res = mysql_query("select ug_group_id from ".USERS_DATABASE.".UserGroups where ug_group_id=".intval($_REQUEST['bib_workgroup'])." and ug_user_id=$usrID");
 	if (mysql_num_rows($res) == 0) {
 		$wg = '&wg=' . intval($_REQUEST['bib_workgroup']);
 		unset($_REQUEST['bib_workgroup']);
@@ -131,35 +130,35 @@ if (@$_REQUEST['bib_workgroup']) {
 	}
 }
 //  Process tags for workgroups ensuring that the user is a memeber of the workgroup
-if (@$_REQUEST['keyword']  &&  strpos($_REQUEST['keyword'], "\\")) {
-	// workgroup keyword
+if (@$_REQUEST['tag']  &&  strpos($_REQUEST['tag'], "\\")) {
+	// workgroup tag
 	// workgroup is ...
-	$keywords = explode(',', $_REQUEST['keyword']);
-	$outKeywords = array();
-	foreach ($keywords as $keyword) {
-		$pos = strpos($keyword, "\\");
+	$tags = explode(',', $_REQUEST['tag']);
+	$outTags = array();
+	foreach ($tags as $tag) {
+		$pos = strpos($tag, "\\");
 		if ($pos !== false) {
-			$grpName = substr($keyword, 0, $pos);
-			$res = mysql_query("select grp_id from ".USERS_DATABASE.".Groups, ".USERS_DATABASE.".UserGroups where grp_name='".addslashes($grpName)."' and ug_group_id=grp_id and ug_user_id=".get_user_id());
+			$grpName = substr($tag, 0, $pos);
+			$res = mysql_query("select grp_id from ".USERS_DATABASE.".Groups, ".USERS_DATABASE.".UserGroups where grp_name='".addslashes($grpName)."' and ug_group_id=grp_id and ug_user_id=$usrID");
 			if (mysql_num_rows($res) == 0) {
-				$wg .= '&wgkwd=' . urlencode($keyword);
-				array_push($outKeywords, str_replace("\\", "", $keyword));
+				$wg .= '&wgkwd=' . urlencode($tag);
+				array_push($outTags, str_replace("\\", "", $tag));
 				// print "You are not a member of workgroup ".$grpName.".  You may not use tags belonging to that workgroup.";
 				// return;
 			}
 			else {
-				array_push($outKeywords, $keyword);
+				array_push($outTags, $tag);
 			}
 		}
 		else {
-			array_push($outKeywords, $keyword);
+			array_push($outTags, $tag);
 		}
 	}
-	if (count($outKeywords)) {
-		$_REQUEST['keyword'] = join(',', $outKeywords);
+	if (count($outTags)) {
+		$_REQUEST['tag'] = join(',', $outTags);
 	}
 	else {
-		unset($_REQUEST['keyword']);
+		unset($_REQUEST['tag']);
 	}
 }
 
@@ -204,7 +203,7 @@ if (! @$_REQUEST['_submit']  &&  $_REQUEST['bkmrk_bkmk_url']) {
 								. '&f=' . urlencode($_REQUEST["f"])
 								. '&bkmk_url=' . urlencode($url)
 								. '&bkmk_description=' . urlencode($description)
-								. '&keyword=' . urlencode($_REQUEST['keyword'])
+								. '&tag=' . urlencode($_REQUEST['tag'])
 								. (@$_REQUEST['bib_reftype'] ? '&bib_reftype=' . urlencode($_REQUEST['bib_reftype']) : ''));
 			return;
 		}
@@ -232,7 +231,7 @@ if (! @$_REQUEST['_submit']  &&  $_REQUEST['bkmrk_bkmk_url']) {
 	                                      'rec_scratchpad' => $description,
 		                              'rec_added' => date('Y-m-d H:i:s'),
 		                              'rec_modified' => date('Y-m-d H:i:s'),
-		                              'rec_added_by_usr_id' => intval(get_user_id()),
+		                              'rec_added_by_usr_id' => intval($usrID),
 		                              'rec_type' => $_REQUEST['bib_reftype'],
 		                              'rec_wg_id' => intval($_REQUEST['bib_workgroup']),
 		                              'rec_visibility' => (intval($_REQUEST['bib_workgroup'])? ((strtolower($_REQUEST['bib_visibility']) == 'hidden')? 'Hidden' : 'Viewable') : NULL),
@@ -274,7 +273,7 @@ if (! $rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 	                              'rec_scratchpad' => $description,
 	                              'rec_added' => date('Y-m-d H:i:s'),
 	                              'rec_modified' => date('Y-m-d H:i:s'),
-	                              'rec_added_by_usr_id' => intval(get_user_id()),
+	                              'rec_added_by_usr_id' => intval($usrID),
 		                      'rec_type' => ($_REQUEST['bib_reftype']? intval($_REQUEST['bib_reftype']) : NULL),
 		                      'rec_wg_id' => intval($_REQUEST['bib_workgroup']),
 		                      'rec_visibility' => (intval($_REQUEST['bib_workgroup'])? ((strtolower($_REQUEST['bib_visibility']) == 'hidden')? 'Hidden' : 'Viewable') : NULL),
@@ -297,7 +296,7 @@ if ($rec_id  &&  ! @$_REQUEST['force_new']) {
 	 * If they do in fact have it bookmarked, redirect to the edit bookmark page
 	 * and add the new notes to the end of their existing notes.  FMS
 	 */
-	$res = mysql_query('select * from usrBookmarks where bkm_UGrpID='.get_user_id().' and bkm_recID = '.$rec_id);
+	$res = mysql_query("select * from usrBookmarks where bkm_UGrpID=$usrID and bkm_recID = $rec_id");
 	$bkmk = mysql_fetch_assoc($res);
 	if ($bkmk  &&  $bkmk['bkm_ID']) {
 		if ($description) {
@@ -338,43 +337,43 @@ if ($rec_id) {
 		'bkm_recID' => $rec_id,
 		'bkm_Added' => date('Y-m-d H:i:s'),
 		'bkm_Modified' => date('Y-m-d H:i:s'),
-		'bkm_UGrpID' => get_user_id()
+		'bkm_UGrpID' => $usrID
 	));
 
 	$bkm_ID = mysql_insert_id();
 
-	// add keyword
-	if (@$_REQUEST['keyword']) {
-		$keywords = explode(',', $_REQUEST['keyword']);
-		foreach ($keywords as $keyword) {
-			if (strpos($keyword, "\\")) {
-				// workgroup keyword
+	// add tag
+	if (@$_REQUEST['tag']) {
+		$tags = explode(',', $_REQUEST['tag']);
+		foreach ($tags as $tag) {
+			if (strpos($tag, "\\")) {
+				// workgroup tag
 				// workgroup is ...
-				$pos = strpos($keyword, "\\");
-				$grpName = substr($keyword, 0, $pos);
-				$kwdName = substr($keyword, $pos+1);
-				$res = mysql_query("select tag_ID from usrTags, ".USERS_DATABASE.".Groups, ".USERS_DATABASE.".UserGroups where tag_Text='".addslashes($kwdName)."' and grp_name='".addslashes($grpName)."' and tag_UGrpID=grp_id and ug_group_id=grp_id and ug_user_id=".get_user_id());
+				$pos = strpos($tag, "\\");
+				$grpName = substr($tag, 0, $pos);
+				$kwdName = substr($tag, $pos+1);
+				$res = mysql_query("select tag_ID from usrTags, ".USERS_DATABASE.".Groups, ".USERS_DATABASE.".UserGroups where tag_Text='".addslashes($kwdName)."' and grp_name='".addslashes($grpName)."' and tag_UGrpID=grp_id and ug_group_id=grp_id and ug_user_id=$usrID");
 				$kwd_id = mysql_fetch_row($res);
 				$kwd_id = $kwd_id[0];
 			}
 			else {
-				$res = mysql_query('select tag_ID from usrTags where tag_Text = "'.addslashes($keyword).'" and tag_UGrpID= ' . get_user_id());
+				//check for existing usr personal tag
+				$res = mysql_query("select tag_ID from usrTags where tag_Text = \"".addslashes($tag)."\" and tag_UGrpID=$usrID");
 				if ($row = mysql_fetch_assoc($res)) {
 					$kwd_id = $row['tag_ID'];
-				} else {
+				} else {// no existing tag so add it
 					mysql__insert('usrTags', array(
-						'tag_UGrpID' => get_user_id(),
-						'tag_Text' => $keyword
+						'tag_UGrpID' => $usrID,
+						'tag_Text' => $tag
 					));
 					$kwd_id = mysql_insert_id();
 				}
 			}
 
-			if ($kwd_id) {
+			if ($kwd_id) { //tag was found so link it to the record
 				mysql__insert('usrRecTagLinks', array(
-					'kwl_pers_id' => $bkm_ID,
-					'kwl_rec_id' => $rec_id,
-					'kwl_kwd_id' => $kwd_id
+					'rtl_RecID' => $rec_id,
+					'rtl_TagID' => $kwd_id
 				));
 			}
 		}
@@ -387,15 +386,15 @@ if ($rec_id) {
 			mysql_query("select rdl_value from rec_detail_lookups where rdl_rdt_id = 200 and rdl_value like '".addslashes($_REQUEST["reltype"])."' limit 1;");
 			if (mysql_num_rows($res) > 0) {
 				$row = mysql_fetch_assoc($res);
-				$reln_type = $row["rdl_value"];
+				$reln_type = $row["rdl_value"];	// saw TODO: check that this is aligned with the enum value change
 			}
 		}
 		mysql__insert("records", array(
-			"rec_title" => "Relationship ($rec_id $reln_type $other_bib_id)",
+			"rec_title" => "Relationship ($rec_id $reln_type $other_bib_id)",	// saw TODO: do we want to create a human readable string here??
 					"rec_added"     => date('Y-m-d H:i:s'),
 					"rec_modified"  => date('Y-m-d H:i:s'),
 					"rec_type"   => 52,
-					"rec_added_by_usr_id" => get_user_id()
+					"rec_added_by_usr_id" => $usrID
 		));
 		$relnBibID = mysql_insert_id();
 
@@ -452,9 +451,10 @@ function insert_woot_content($rec_id, $content) {
 }
 
 function check_reftype_exist($rt) {
+global $usrID;
 	$res = mysql_query("select distinct rt_id,rt_name from active_rec_types
 	                 left join rec_types on rt_id=art_id
-	                 left join ".USERS_DATABASE.".".USER_GROUPS_TABLE." on ".USER_GROUPS_USER_ID_FIELD."=".get_user_id()."
+	                 left join ".USERS_DATABASE.".".USER_GROUPS_TABLE." on ".USER_GROUPS_USER_ID_FIELD."=$usrID
 	                 left join rec_detail_requirements_overrides on rdr_rec_type=rt_id
 	                 left join ".USERS_DATABASE.".".GROUPS_TABLE." on ".GROUPS_ID_FIELD."=".USER_GROUPS_GROUP_ID_FIELD." and ".GROUPS_ID_FIELD."=rdr_wg_id
 	                  where rt_id

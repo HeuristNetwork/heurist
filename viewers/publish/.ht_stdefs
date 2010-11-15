@@ -120,9 +120,9 @@ $MAINTABLES['USER_CLOUDS_TO_USERS'] = 'coll_group_links';
         		                                'USER-ID' => 'cgl_usr_id');
 
 $MAINTABLES["BOOKMARKS_TO_KEYWORDS"] = 'usrRecTagLinks';
-	$PKEY["BOOKMARKS_TO_KEYWORDS"] = 'kwl_id';
+	$PKEY["BOOKMARKS_TO_KEYWORDS"] = 'rtl_ID';
         $LINK_KEYS["BOOKMARKS_TO_KEYWORDS"] = array(	"BOOKMARK-ID" => "kwl_pers_id",
-							"KEYWORD-ID"  => "kwl_kwd_id");
+							"KEYWORD-ID"  => "rtl_TagID");
 
 /* Custom searches  */
 
@@ -324,6 +324,6 @@ define('CUSTOMBOOKMARK_search-order', '!(ss_url like "%w=bookmark%" OR ss_url li
 
 define('user_kwds-order', 'kwd_name');
 define('user_kwds-RESULTS_PER_PAGE', 10000);
-$SEARCHES['user_kwds'] = 'select distinct tag_ID from usrTags left join usrRecTagLinks on tag_ID=kwl_kwd_id where kwl_id is not null and tag_UGrpID = [logged-in-user-id]';
+$SEARCHES['user_kwds'] = 'select distinct tag_ID from usrTags left join usrRecTagLinks on tag_ID=rtl_TagID where rtl_ID is not null and tag_UGrpID = [logged-in-user-id]';
 
 ?>

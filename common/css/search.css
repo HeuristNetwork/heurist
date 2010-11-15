@@ -236,9 +236,9 @@ div.right_margin_info div.mini-tools:hover{-moz-border-radius:7px 7px 7px 7px;-w
 #saved-search-links a { font-weight: bold; text-decoration: none; color: #515151; }
 #saved-search-links a:hover { text-decoration: underline; }
 
-#keyword-search-links { display: none; overflow: auto; font-size: 85%; }
-#keyword-search-links a { white-space: nowrap; display: block; text-decoration: none; color: #515151; margin: 0 2px; }
-#keyword-search-links a:hover { text-decoration: underline; }
+#tag-search-links { display: none; overflow: auto; font-size: 85%; }
+#tag-search-links a { white-space: nowrap; display: block; text-decoration: none; color: #515151; margin: 0 2px; }
+#tag-search-links a:hover { text-decoration: underline; }
 
 #curated-collections-link {padding-bottom: 5px;margin-bottom: 5px;}
 

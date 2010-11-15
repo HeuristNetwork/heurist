@@ -94,7 +94,7 @@ function do_fix_dupe($bibIDs) {
         mysql_query("update ignore usrBookmarks set bkm_recID=$masterBibID where bkm_recID in ($bibIDlist)");
 	$bkmkCount = mysql_affected_rows();
 		$errors .= mysql_error() . ' ';
-        mysql_query("update ignore usrRecTagLinks set kwl_rec_id=$masterBibID where kwl_rec_id in ($bibIDlist)");
+        mysql_query("update ignore usrRecTagLinks set rtl_RecID=$masterBibID where rtl_RecID in ($bibIDlist)");
 	$kwiCount = mysql_affected_rows();
 		$errors .= mysql_error() . ' ';
         mysql_query("update ignore reminders set rem_rec_id=$masterBibID where rem_rec_id in ($bibIDlist)");

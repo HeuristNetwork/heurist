@@ -881,28 +881,28 @@ function mode_crosswalking() {
 	}
 
 	if ($out_entries) {
-		print_keyword_stuff($out_entries);
+		print_tag_stuff($out_entries);
 ?>
    <p style="margin-left: 15px;">
     <p>Specify tags to add to all imported records:</p>
 
      <div class="smallgr" style="padding-left: 10ex; margin-left: 10px;">
        <nobr>Add:</nobr>
-        <nobr><a href="#" target="_ignore" onclick="add_keyword('Favourites'); return false;">Favourites</a></nobr>&nbsp;
-        <nobr><a href="#" target="_ignore" onclick="add_keyword('To Read'); return false;">To Read</a></nobr>&nbsp;
+        <nobr><a href="#" target="_ignore" onclick="add_tag('Favourites'); return false;">Favourites</a></nobr>&nbsp;
+        <nobr><a href="#" target="_ignore" onclick="add_tag('To Read'); return false;">To Read</a></nobr>&nbsp;
       </div>
        <?php
-	$top_keywords = mysql__select_array('usrRecTagLinks left join usrTags on kwl_kwd_id=tag_ID',
+	$top_tags = mysql__select_array('usrRecTagLinks left join usrTags on rtl_TagID=tag_ID',
 	                                    'tag_Text, count(tag_ID) as count',
 	                                    'tag_UGrpID='.get_user_id().' group by tag_ID order by count desc limit 5');
-	if ($top_keywords) {
+	if ($top_tags) {
 ?>
       <div class="smallgr" style="padding-left: 10ex; margin-left: 10px;">
        <nobr>Top:</nobr>
 <?php
-		foreach ($top_keywords as $kwd) {
-			$kwd = htmlspecialchars($kwd);
-?>      <nobr><a href="#" target="_ignore" onclick="add_keyword('<?=$kwd?>'); return false;"><?=$kwd?></a></nobr>&nbsp; <?php
+		foreach ($top_tags as $tag) {
+			$tag = htmlspecialchars($tag);
+?>      <nobr><a href="#" target="_ignore" onclick="add_tag('<?=$tag?>'); return false;"><?=$tag?></a></nobr>&nbsp; <?php
 		}
 ?>
       </div>
@@ -911,17 +911,17 @@ function mode_crosswalking() {
        ?>
 
        <?php
-	$recent_keywords = mysql__select_array('usrRecTagLinks left join usrTags on kwl_kwd_id=tag_ID',
+	$recent_tags = mysql__select_array('usrRecTagLinks left join usrTags on rtl_TagID=tag_ID',
 	                                    'distinct(tag_Text)',
-	                                    'tag_UGrpID='.get_user_id().' order by kwl_id desc limit 5');
-	if ($recent_keywords) {
+	                                    'tag_UGrpID='.get_user_id().' order by rtl_ID desc limit 5');
+	if ($recent_tags) {
 ?>
       <div class="smallgr" style="padding-left: 10ex; margin-left: 10px; padding-bottom: 5px;">
        <nobr>Recent:</nobr>
 <?php
-		foreach ($recent_keywords as $kwd) {
-			$kwd = htmlspecialchars($kwd);
-?>      <nobr><a href="#" target="_ignore" onclick="add_keyword('<?=$kwd?>'); return false;"><?=$kwd?></a></nobr>&nbsp; <?php
+		foreach ($recent_tags as $tag) {
+			$tag = htmlspecialchars($tag);
+?>      <nobr><a href="#" target="_ignore" onclick="add_tag('<?=$tag?>'); return false;"><?=$tag?></a></nobr>&nbsp; <?php
 		}
 ?>
       </div>
@@ -934,13 +934,13 @@ function mode_crosswalking() {
 
 
 
-    <div style="padding-left: 10ex;"><input type="text" name="keywords_for_all" id="keywords_for_all" style="width: 180px; border: 1px solid black;" autocomplete=off>
+    <div style="padding-left: 10ex;"><input type="text" name="tags_for_all" id="tags_for_all" style="width: 180px; border: 1px solid black;" autocomplete=off>
 <script>
-var tagsElt = document.getElementById("keywords_for_all");
-new top.HEURIST.autocomplete.AutoComplete(tagsElt, top.HEURIST.util.keywordAutofill, { nonVocabularyCallback: top.HEURIST.util.showConfirmNewTag });
+var tagsElt = document.getElementById("tags_for_all");
+new top.HEURIST.autocomplete.AutoComplete(tagsElt, top.HEURIST.util.tagAutofill, { nonVocabularyCallback: top.HEURIST.util.showConfirmNewTag });
 
-function add_keyword(tag) {
-	// check if the keyword is already in the list somewhere
+function add_tag(tag) {
+	// check if the tag is already in the list somewhere
 	var tags = tagsElt.value.split(/,/);
 	for (var i=0; i < tags.length; ++i) {
 		if (tags[i].replace(/^\s+|\s+$/g, '').replace(/\s+/, ' ').toLowerCase() == tag.toLowerCase()) return;
@@ -956,7 +956,7 @@ function add_keyword(tag) {
     </div>
 
 <?php
-	/* are there any workgroup-tags for any workgroups this user is in? If so, show the workgroup-keyword section */
+	/* are there any workgroup-tags for any workgroups this user is in? If so, show the workgroup-tag section */
 	$res = mysql_query('select tag_ID, grp_name, tag_Text from usrTags, '.USERS_DATABASE.'.UserGroups, '.USERS_DATABASE.'.Groups where tag_UGrpID=ug_group_id and ug_group_id=grp_id and ug_user_id=' . get_user_id() . ' order by grp_name, tag_Text');
 	if (mysql_num_rows($res) > 0) {
 ?>
@@ -964,7 +964,7 @@ function add_keyword(tag) {
      <nobr>Workgroup tag:</nobr>
      <select name="workgroup_tag">
       <option selected></option>
-<?php		while ($row = mysql_fetch_assoc($res)) {	?>
+<?php		while ($row = mysql_fetch_assoc($res)) {	//saw TODO: add option grouping by workgroup and remove groupname\ ?>
       <option value="<?= addslashes($row['tag_ID']) ?>">
        <?= htmlspecialchars($row['grp_name']) ?> \ <?= htmlspecialchars($row['tag_Text']) ?>
       </option>
@@ -1018,30 +1018,30 @@ function mode_entry_insertion() {
 	global $import_id;
 
 
-	$keyword_map = array();
+	$tag_map = array();
 	if (@$_REQUEST['orig_tags']) {
 		$orig_tags = $_REQUEST['orig_tags'];
 		$tags = $_REQUEST['tags'];
 		if (count($orig_tags) == count($tags)) {
 			for ($i=0; $i < count($tags); ++$i)
-				$keyword_map[strtolower($orig_tags[$i])] = $tags[$i];
+				$tag_map[strtolower($orig_tags[$i])] = $tags[$i];
 		}
 	}
 
-	$keywords_for_all = explode(',', $_REQUEST['keywords_for_all']);
+	$tags_for_all = explode(',', $_REQUEST['tags_for_all']);
 	$workgroup_tag_id = intval($_REQUEST["workgroup_tag"]);
 
 	$session_data['import_time'] =  date('Y-m-d H:i:s');
-	// add a keyword (tag) for this import session to all entries
-	$import_kwd = 'File Import ' . $session_data['import_time'];
+	// add a tag (tag) for this import session to all entries
+	$import_tag = 'File Import ' . $session_data['import_time'];
 	$res = mysql__insert('usrTags', array(
-		'tag_Text'		=> $import_kwd,
+		'tag_Text'		=> $import_tag,
 		'tag_UGrpID'	=> get_user_id()));
 	// add a saved search for records with this tag
 	$now = date('Y-m-d');
 	mysql__insert('saved_searches', array(
-		'ss_name'		=> $import_kwd,
-		'ss_url'		=> '?ver=1&w=all&q=kwd%3A%22'.str_replace(' ','%20',$import_kwd).'%22',
+		'ss_name'		=> $import_tag,
+		'ss_url'		=> '?ver=1&w=all&q=kwd%3A%22'.str_replace(' ','%20',$import_tag).'%22',
 		'ss_usr_id'	=> get_user_id(),
 		'ss_added'		=> $now,
 		'ss_modified'	=> $now));
@@ -1053,13 +1053,13 @@ function mode_entry_insertion() {
 	$j = 0;
 	foreach (array_keys($session_data['out_entries']) as $i) {
 		$entry = &$session_data['out_entries'][$i];
-		$entry->addKeyword($import_kwd); // add general import kwd
-		if ($keywords_for_all) {
-			foreach ($keywords_for_all as $kwd)
-				if (trim($kwd)) $entry->addKeyword(trim($kwd), true);
+		$entry->addTag($import_tag); // add general import kwd
+		if ($tags_for_all) {
+			foreach ($tags_for_all as $tag)
+				if (trim($tag)) $entry->addTag(trim($tag), true);
 		}
 		if ($workgroup_tag_id)
-			$entry->setWorkgroupKeyword($workgroup_tag_id);
+			$entry->setWorkgroupTag($workgroup_tag_id);
 
 		$_entry = &$entry;
 		do { // for each container set up the author records
@@ -1140,7 +1140,7 @@ function mode_entry_insertion() {
 
 			if (insert_bookmark($entry)) @++$session_data['added-bookmark-count'];
 			else @++$session_data['dupe-bookmark-count'];
-			insert_keywords($entry, $keyword_map);
+			insert_tags($entry, $tag_map);
 			delete_biblio($entry);
 			unset($session_data['out_entries'][$i]);
 
@@ -1179,7 +1179,7 @@ function mode_entry_insertion() {
 			@++$session_data['added-records-count'];
 			if (insert_bookmark($entry)) @++$session_data['added-bookmark-count'];
 			else @++$session_data['dupe-bookmark-count'];
-			insert_keywords($entry, $keyword_map);
+			insert_tags($entry, $tag_map);
 			unset($session_data['out_entries'][$i]);
 		} else {
 			// If we get here then the entry has an ancestor set but no definite/possible records ID for that ancestor.
@@ -1196,7 +1196,7 @@ function mode_entry_insertion() {
 			++$session_data['added-records-count'];
 			if (insert_bookmark($entry)) ++$session_data['added-bookmark-count'];
 			else ++$session_data['dupe-bookmark-count'];
-			insert_keywords($entry, $keyword_map);
+			insert_tags($entry, $tag_map);
 			unset($session_data['out_entries'][$i]);
 		}
 
@@ -1933,69 +1933,69 @@ function insert_bookmark(&$entry) {
 }
 
 
-function insert_keywords(&$entry, $keyword_map=array()) {
-	// automatic keyword insertion for the bookmark associated with this entry
+function insert_tags(&$entry, $tag_map=array()) {
+	// automatic tag insertion for the bookmark associated with this entry
 
-// easy one first: see if there is a workgroup keyword to be added, and that we have access to that workgroup
-$wgKwd = $entry->getWorkgroupKeyword();
-if ($wgKwd) {
+	// easy one first: see if there is a workgroup tag to be added, and that we have access to that workgroup
+	$wgKwd = $entry->getWorkgroupTag();
+	if ($wgKwd) {
 	$res = mysql_query("select * from usrTags, ".USERS_DATABASE.".UserGroups where tag_UGrpID=ug_group_id and ug_user_id=" . get_user_id() . " and tag_ID=" . $wgKwd);
-	if (mysql_num_rows($res) != 1) $wgKwd = 0;
-}
-
-
-
-	if (! $entry->getKeywords()) return;
-
-	$kwd_select_clause = '';
-	foreach ($entry->getKeywords() as $kwd) {
-		$kwd = str_replace('\\', '/', $kwd);
-
-		if (array_key_exists(strtolower(trim($kwd)), $keyword_map))
-			$kwd = $keyword_map[strtolower(trim($kwd))];
-
-		if ($kwd_select_clause) $kwd_select_clause .= ',';
-		$kwd_select_clause .= '"'.addslashes($kwd).'"';
+		if (mysql_num_rows($res) != 1) $wgKwd = 0;// saw CHECK SPEC: can there be more than 1 , this code ingnores if 0 or more than 1
 	}
-	$res = mysql_query('select tag_ID, lower(trim(tag_Text)) from usrTags where tag_Text in (' . $kwd_select_clause . ')'
+
+	if (! $entry->getTags()) return;
+
+	$tag_select_clause = '';
+	foreach ($entry->getTags() as $tag) {
+		$tag = str_replace('\\', '/', $tag);
+
+		if (array_key_exists(strtolower(trim($tag)), $tag_map))
+			$tag = $tag_map[strtolower(trim($tag))];
+
+		if ($tag_select_clause) $tag_select_clause .= ',';
+		$tag_select_clause .= '"'.addslashes($tag).'"';
+	}
+	// create user specific tagText to tagID lookup
+	$res = mysql_query('select tag_ID, lower(trim(tag_Text)) from usrTags where tag_Text in (' . $tag_select_clause . ')'
 	                                                             . ' and tag_UGrpID= ' . get_user_id());
 	$tags = array();
 	while ($row = mysql_fetch_row($res)) $tags[$row[1]] = $row[0];
 
-	$all_keywords = mysql__select_assoc('usrTags, '.USERS_DATABASE.'.UserGroups, '.USERS_DATABASE.'.Groups', 'lower(concat(grp_name, "\\\\", tag_Text))', 'tag_ID',
-	                                    'tag_UGrpID=ug_group_id and ug_group_id=grp_id and ug_user_id='.get_user_id()); //FIXME: check this is correct to import wgTags with a slash
-	foreach ($all_keywords as $kwd => $id) $tags[$kwd] = $id;
+	//now let's add in all the wgTags for this user's workgroups
+	$all_wgTags = mysql__select_assoc('usrTags, '.USERS_DATABASE.'.UserGroups, '.USERS_DATABASE.'.Groups', 'lower(concat(grp_name, "\\\\", tag_Text))', 'tag_ID',
+	                                    'tag_UGrpID=ug_group_id and ug_group_id=grp_id and ug_user_id='.get_user_id()); //saw CHECK SPEC: is it correct to import wgTags with a slash
+	foreach ($all_wgTags as $tag => $id) $tags[$tag] = $id;
 
-	$entry_kwd_ids = array();
-	foreach ($entry->getKeywords() as $kwd) {
-		if (preg_match('/^(.*?)\\s*\\\\\\s*(.*)$/', $kwd, $matches)) {
-			$kwd = $matches[1] . '\\' . $matches[2];
-			$wg_kwd = true;
-		} else $wg_kwd = false;
+	$entry_tag_ids = array();
+	foreach ($entry->getTags() as $tag) {
+		if (preg_match('/^(.*?)\\s*\\\\\\s*(.*)$/', $tag, $matches)) {
+			$tag = $matches[1] . '\\' . $matches[2];
+			$wg_tag = true;
+		} else $wg_tag = false;
 
-		$kwd_id = @$tags[strtolower(trim($kwd))];
-		if ($kwd_id) array_push($entry_kwd_ids, $kwd_id);
+		$tag_id = @$tags[strtolower(trim($tag))];
+		if ($tag_id) array_push($entry_tag_ids, $tag_id);
 /**** 	"Don't insert new tags unannounced"
 	Well, it's very very difficult to get feedback from the user, so we just won't insert any new tags at all, I guess.  Hope you're happy.
-*/		else if (! $wg_kwd) {	// do not insert new workgroup tags
+*/		else if (! $wg_tag) {	// do not insert new workgroup tags
 			mysql_query('insert into usrTags (tag_UGrpID, tag_Text) ' .
-			                         ' values ('.get_user_id().', "'.addslashes($kwd).'")');
-			$kwd_id = mysql_insert_id();
-			array_push($entry_kwd_ids, $kwd_id);
-			$tags[strtolower(trim($kwd))] = $kwd_id;
+			                         ' values ('.get_user_id().', "'.addslashes($tag).'")');
+			$tag_id = mysql_insert_id();
+			array_push($entry_tag_ids, $tag_id);
+			$tags[strtolower(trim($tag))] = $tag_id;
 		}
 
 	}
 
 	$kwi_insert_stmt = '';
 	if ($wgKwd) {
-		$kwi_insert_stmt .= '(' . $entry->getBookmarkID() . ', ' . $entry->getBiblioID() . ', ' . $wgKwd . ', 1)';
+		$kwi_insert_stmt .= '(' . $entry->getBiblioID() . ', ' . $wgKwd . ', 1)';
 	}
-	foreach ($entry_kwd_ids as $kwd_id) {
+	foreach ($entry_tag_ids as $tag_id) {
 		if ($kwi_insert_stmt) $kwi_insert_stmt .= ',';
-		$kwi_insert_stmt .= '(' . $entry->getBookmarkID() . ', ' . $entry->getBiblioID() . ', ' . $kwd_id . ', 1)'; //FIXME getBookmarkID and getBiblioID return empty string
+		$kwi_insert_stmt .= '(' . $entry->getBiblioID() . ', ' . $tag_id . ', 1)'; //FIXME getBookmarkID and getBiblioID return empty string
 	}
-	mysql_query('insert ignore into usrRecTagLinks (kwl_pers_id, kwl_rec_id, kwl_kwd_id, kwl_auto) values ' . $kwi_insert_stmt);
+	mysql_query('insert ignore into usrRecTagLinks (rtl_RecID, rtl_TagID, rtl_AddedByImport) values ' . $kwi_insert_stmt);
 }
 
 
@@ -2197,46 +2197,46 @@ function setPermanentBiblioID(&$entry, $new_biblio_id) {
 }
 
 
-function print_keyword_stuff(&$out_entries) {
+function print_tag_stuff(&$out_entries) {
 	$tags = array();
 	$orig_tags = array();
 	$j = 0;
 	foreach (array_keys($out_entries) as $i) {
-		$my_keywords = $out_entries[$i]->getKeywords();
-		foreach ($my_keywords as $kwd) {
-			$kwd = trim($kwd);
-			if (! $kwd) continue;
-			if (! array_key_exists(strtolower($kwd), $tags)) {
-				$tags[strtolower($kwd)] = true;
-				array_push($orig_tags, $kwd);
+		$my_tags = $out_entries[$i]->getTags();
+		foreach ($my_tags as $tag) {
+			$tag = trim($tag);
+			if (! $tag) continue;
+			if (! array_key_exists(strtolower($tag), $tags)) {
+				$tags[strtolower($tag)] = true;
+				array_push($orig_tags, $tag);
 			}
 		}
 	}
 
 	$query = "";
-	foreach ($orig_tags as $kwd) {
+	foreach ($orig_tags as $tag) {
 		if ($query) $query .= "', '";
-		$query .= addslashes($kwd);
+		$query .= addslashes($tag);
 	}
 	$query = "select tag_Text from usrTags where tag_Text in ('" . $query . "')";
 	$res = mysql_query($query);
 	$existing_tags = array();
 	while ($row = mysql_fetch_row($res)) {
-		$kwd = $row[0];
-		$existing_tags[strtolower($kwd)] = $kwd;
+		$tag = $row[0];
+		$existing_tags[strtolower($tag)] = $tag;
 	}
 
-	$new_keywords = false;
-	foreach ($orig_tags as $i => $kwd) {
-		if (! @$existing_tags[strtolower($kwd)]) {
-			$new_keywords = true;
+	$new_tags = false;
+	foreach ($orig_tags as $i => $tag) {
+		if (! @$existing_tags[strtolower($tag)]) {
+			$new_tags = true;
 			break;
 		}
 	}
 
 	if ($orig_tags) {
 
-		if ($new_keywords) {
+		if ($new_tags) {
 ?>
 <p>The following tags appear in the import file, but aren't in your list of Heurist tags.<br>
    Un-selected tags will be ignored during the import process.</p>
@@ -2244,23 +2244,23 @@ function print_keyword_stuff(&$out_entries) {
 <p style="margin-left: 15px;">
 <?php
 		}
-		foreach ($orig_tags as $i => $kwd) {
-			if (@$existing_tags[strtolower($kwd)]) {
-				print '<input type=hidden name=tags[] value="'.htmlspecialchars($kwd).'">';
-				print '<input type=hidden name=orig_tags[] value="'.htmlspecialchars($kwd).'">';
+		foreach ($orig_tags as $i => $tag) {
+			if (@$existing_tags[strtolower($tag)]) {
+				print '<input type=hidden name=tags[] value="'.htmlspecialchars($tag).'">';
+				print '<input type=hidden name=orig_tags[] value="'.htmlspecialchars($tag).'">';
 				continue;
 			}
 
 			print '<div style="margin-left: 2em;">';
-			print '<input type="hidden" name="tags[]" value="' . htmlspecialchars($kwd) . '">';
+			print '<input type="hidden" name="tags[]" value="' . htmlspecialchars($tag) . '">';
 			print '<label for=kwd-' . $i . '>';
-			print   '<input type="checkbox" name="orig_tags[]" value="' . htmlspecialchars($kwd) . '" id=kwd-' . $i . ' style="margin: 0; border: 0; padding: 0; margin-right: 5px;">';
-			print   htmlspecialchars($kwd);
+			print   '<input type="checkbox" name="orig_tags[]" value="' . htmlspecialchars($tag) . '" id=kwd-' . $i . ' style="margin: 0; border: 0; padding: 0; margin-right: 5px;">';
+			print   htmlspecialchars($tag);
 			print '</label>';
 			print "</div>\n";
 		}
 
-		if ($new_keywords) {
+		if ($new_tags) {
 ?>
 
 <br clear=all>

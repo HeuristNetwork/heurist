@@ -1,14 +1,14 @@
 <html>
  <head>
   <link rel=stylesheet href="../../common/css/heurist.css">
-  <link rel=stylesheet href="../../common/css/keyword-editor.css">
+  <link rel=stylesheet href="../../common/css/wgtag-editor.css">
 
   <title>Workgroup tags</title>
  </head>
  <body width=700 height=600>
   <script src="../../common/js/heurist.js"></script>
   <script src="../../common/php/display-preferences.php"></script>
-  <script src=keyword-editor.js></script>
+  <script src=wgtag-editor.js></script>
 
     <table><tr>
 	 <td style="font-size: 150%; font-weight: bold; vertical-align: top;"><nobr>Workgroup tags &nbsp;&nbsp;</nobr></td>
@@ -29,17 +29,17 @@
 
      <tr>
       <td>
-       <div class=keyword-list><table border=0 cellspacing=0 cellpadding=0><tbody id=all-workgroup-tags></tbody></table></div>
+       <div class=wgtag-list><table border=0 cellspacing=0 cellpadding=0><tbody id=all-workgroup-tags></tbody></table></div>
       </td>
       <td>
        <div id=button-box>
-        <div><input type=button value="&gt;" title="Add a tag" onmousedown="HEURIST.keywordEditor.addWgTag(window.selectedRow)" disabled id=add-button></div>
+        <div><input type=button value="&gt;" title="Add a tag" onmousedown="HEURIST.wgTagEditor.addWgTag(window.selectedRow)" disabled id=add-button></div>
         <div>&nbsp;&nbsp;</div>
-        <div><input type=button value="&lt;" title="Remove a tag" onmousedown="HEURIST.keywordEditor.removeWgTag(window.selectedRow)" disabled id=remove-button></div>
+        <div><input type=button value="&lt;" title="Remove a tag" onmousedown="HEURIST.wgTagEditor.removeWgTag(window.selectedRow)" disabled id=remove-button></div>
        </div>
       </td>
       <td>
-       <div class=keyword-list><table border=0 cellspacing=0 cellpadding=0><tbody id=current-workgroup-tags></tbody></table></div>
+       <div class=wgtag-list><table border=0 cellspacing=0 cellpadding=0><tbody id=current-workgroup-tags></tbody></table></div>
       </td>
      </tr>
 
@@ -51,7 +51,7 @@
 
     <tr>
      <td>
-      <a href="../../admin/workgroups/workgroup_keyword_manager.php" target="blank">Modify Tag Definitions (admins only) </a>
+      <a href="../../admin/workgroups/workgroup_tag_manager.php" target="blank">Modify Tag Definitions (admins only) </a>
       <div style="font-size: 11px; ">Reload edit form to see new tags</div>
      </td>
      <td></td>
@@ -70,7 +70,7 @@
     </table>
 
     <!-- not used in this form ... just for compatibility with the edit/workgroups tab ... safe to FIXME when we refactor -->
-    <form id=keyword-form jsonAction="update-taglinks.php" action="update-taglinks.php"></form>
+    <form id=wgtag-form jsonAction="update-taglinks.php" action="update-taglinks.php"></form>
 
 <script>
 
@@ -79,7 +79,7 @@ var addButton = document.getElementById("add-button");
 
 var currWgTagsElt = document.getElementById("current-workgroup-tags");
 var allWgTagsElt = document.getElementById("all-workgroup-tags");
-new HEURIST.keywordEditor.KeywordEditor(currWgTagsElt, allWgTagsElt, addButton, removeButton);
+new HEURIST.wgTagEditor.WgTagEditor(currWgTagsElt, allWgTagsElt, addButton, removeButton);
 
 
 function saveKeywords(add) {

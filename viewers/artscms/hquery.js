@@ -46,7 +46,7 @@ var HQuery = (function() {
 			case 'ids': bit_type = 'id'; break;
 			case 'usr': bit_type = 'user'; break;
 			case 'wg': bit_type = 'workgroup'; break;
-			case 'kwd': case 'tag': bit_type = 'keyword'; break;
+			case 'kwd': case 'keyword': bit_type = 'tag'; break;
 			case 'any': bit_type = 'all'; break;
 			case 'f': case 'field':
 			bit_type = 'field';

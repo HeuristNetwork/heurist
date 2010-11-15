@@ -1,0 +1,47 @@
+.wgtag-list {
+	min-width: 200px;
+	height: 350px;
+
+	background-color: white;
+	border: 1px solid black;
+	overflow: auto;
+}
+
+.wgtag-list table { width: 100%; cursor: default; }
+.wgtag-list table tr td {
+	padding: 2px;
+	white-space: nowrap;
+}
+.wgtag-list table tr td.group-name {
+	font-weight: bold;
+}
+
+.wgtag-list tr:focus {
+	outline: none;
+	background-color: #660000;
+	color: white;
+}
+
+.wgtag-list tr:focus ::-moz-selection {
+	background-color: #660000;
+	color: white;
+}
+.wgtag-list tr ::-moz-selection {
+	background-color: white;
+	color: black;
+}
+
+
+#button-box {
+	padding: 1em;
+}
+#button-box input {
+	font-size: 20px;
+	font-weight: bold;
+	border: 2px solid black;
+	width: 40px;
+	height: 30px;
+}
+#button-box input[disabled] {
+	border-color: lightgray;
+}

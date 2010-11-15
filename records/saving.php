@@ -24,43 +24,43 @@
 
 	-->*/
 require_once(dirname(__FILE__)."/../search/saved/loading.php");
-
-function saveRecord($id, $type, $url, $notes, $group, $vis, $personalised, $pnotes, $rating, $irate, $qrate, $tags, $keywords, $details, $notifyREMOVE, $notifyADD, $commentREMOVE, $commentMOD, $commentADD, &$nonces=null, &$retitleRecs=null) {
-	$id = intval($id);
-	$group = intval($group);
-	if ($group) {
-		$res = mysql_query("select * from ".USERS_DATABASE.".UserGroups where ug_user_id=" . get_user_id() . " and ug_group_id=" . $group);
+// NOTE  tags are a complete replacement list of personal tags for this record and are only used if personalised is true
+function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $pnotes, $rating, $irate, $qrate, $tags, $wgTags, $details, $notifyREMOVE, $notifyADD, $commentREMOVE, $commentMOD, $commentADD, &$nonces=null, &$retitleRecs=null) {
+	$recordID = intval($recordID);
+	$wg = intval($wg);
+	if ($wg) {
+		$res = mysql_query("select * from ".USERS_DATABASE.".UserGroups where ug_user_id=" . get_user_id() . " and ug_group_id=" . $wg);
 		if (mysql_num_rows($res) < 1) jsonError("invalid workgroup");
 	}
 
 	$type = intval($type);
-	if ($id  &&  ! $type) {
+	if ($recordID  &&  ! $type) {
 		jsonError("cannot change existing record to private note");
 	}
 
 	$now = date('Y-m-d H:i:s');
 
 	// public records data
-	if (! $id) {
+	if (! $recordID) {
 		mysql__insert("records", array(
 		"rec_type" => $type,
 		"rec_url" => $url,
 		"rec_scratchpad" => $notes,
-		"rec_wg_id" => $group,
-		"rec_visibility" => $group? ($vis? "Viewable" : "Hidden") : NULL,
+		"rec_wg_id" => $wg,
+		"rec_visibility" => $wg? ($vis? "Viewable" : "Hidden") : NULL,
 		"rec_added_by_usr_id" => get_user_id(),
 		"rec_added" => $now,
 		"rec_modified" => $now
 		));
 		if (mysql_error()) jsonError("database write error - " . mysql_error());
 
-		$id = mysql_insert_id();
+		$recordID = mysql_insert_id();
 	}else{
-		$res = mysql_query("select * from records left join ".USERS_DATABASE.".UserGroups on ug_group_id=rec_wg_id and ug_user_id=".get_user_id()." where rec_id=$id");
-		$bib = mysql_fetch_assoc($res);
+		$res = mysql_query("select * from records left join ".USERS_DATABASE.".UserGroups on ug_group_id=rec_wg_id and ug_user_id=".get_user_id()." where rec_id=$recordID");
+		$record = mysql_fetch_assoc($res);
 
-		if ($group != $bib["rec_wg_id"]) {
-			if ($bib["rec_wg_id"] > 0  &&  $bib["ug_role"] != "admin") {
+		if ($wg != $record["rec_wg_id"]) {
+			if ($record["rec_wg_id"] > 0  &&  $record["ug_role"] != "admin") {
 				// user is trying to change the workgroup when they are not an admin
 				jsonError("user is not a workgroup admin");
 			} else if (! is_admin()) {
@@ -68,14 +68,14 @@ function saveRecord($id, $type, $url, $notes, $group, $vis, $personalised, $pnot
 				jsonError("user does not have sufficient authority to change public record to workgroup record");
 			}
 		}
-		if (! $group) { $vis = NULL; }
+		if (! $wg) { $vis = NULL; }
 
-		mysql__update("records", "rec_id=$id", array(
+		mysql__update("records", "rec_id=$recordID", array(
 		"rec_type" => $type,
 		"rec_url" => $url,
 		"rec_scratchpad" => $notes,
-		"rec_wg_id" => $group,
-		"rec_visibility" => $group? ($vis? "Viewable" : "Hidden") : NULL,
+		"rec_wg_id" => $wg,
+		"rec_visibility" => $wg? ($vis? "Viewable" : "Hidden") : NULL,
 		"rec_modified" => $now
 		));
 		if (mysql_error()) jsonError("database write error" . mysql_error());
@@ -83,16 +83,16 @@ function saveRecord($id, $type, $url, $notes, $group, $vis, $personalised, $pnot
 
 	// public rec_details data
 	if ($details) {
-		$bdIDs = doDetailInsertion($id, $details, $type, $group, $nonces, $retitleRecs);
+		$bdIDs = doDetailInsertion($recordID, $details, $type, $wg, $nonces, $retitleRecs);
 	}
 
 	// check that all the required fields are present
-	$res = mysql_query("select rdr_id from rec_detail_requirements left join rec_details on rd_rec_id=$id and rdr_rdt_id=rd_type where rdr_rec_type=$type and rdr_required='Y' and rd_id is null");
+	$res = mysql_query("select rdr_id from rec_detail_requirements left join rec_details on rd_rec_id=$recordID and rdr_rdt_id=rd_type where rdr_rec_type=$type and rdr_required='Y' and rd_id is null");
 	if (mysql_num_rows($res) > 0) {
 		// at least one missing field
 		jsonError("record is missing required field(s)");
 	}
-	$res = mysql_query("select rdr_id from rec_detail_requirements_overrides left join rec_details on rd_rec_id=$id and rdr_rdt_id=rd_type where (rdr_wg_id = 0 or rdr_wg_id=$group) and rdr_wg_id = rdr_rec_type=$type and rdr_required='Y' and rd_id is null");
+	$res = mysql_query("select rdr_id from rec_detail_requirements_overrides left join rec_details on rd_rec_id=$recordID and rdr_rdt_id=rd_type where (rdr_wg_id = 0 or rdr_wg_id=$wg) and rdr_wg_id = rdr_rec_type=$type and rdr_required='Y' and rd_id is null");
 	if (mysql_num_rows($res) > 0) {
 		// at least one missing field
 		jsonError("record is missing required field(s)");
@@ -100,51 +100,54 @@ function saveRecord($id, $type, $url, $notes, $group, $vis, $personalised, $pnot
 
 	// calculate title, do an update
 	$mask = mysql__select_array("rec_types", "rt_title_mask", "rt_id=$type");  $mask = $mask[0];
-	$title = fill_title_mask($mask, $id, $type);
+	$title = fill_title_mask($mask, $recordID, $type);
 	if ($title) {
-		mysql_query("update records set rec_title = '" . addslashes($title) . "' where rec_id = $id");
+		mysql_query("update records set rec_title = '" . addslashes($title) . "' where rec_id = $recordID");
 	}
 
 	// Update memcache: we can do this here since it's only the public data that we cache.
-	updateCachedRecord($id);
+	updateCachedRecord($recordID);
 
 	// private data
-	$bkmk = @mysql_fetch_row(mysql_query("select bkm_ID from usrBookmarks where bkm_UGrpID=" . get_user_id() . " and bkm_recID=" . $id));
+	$bkmk = @mysql_fetch_row(mysql_query("select bkm_ID from usrBookmarks where bkm_UGrpID=" . get_user_id() . " and bkm_recID=" . $recordID));
 	$bkm_ID = @$bkmk[0];
 	if ($personalised) {
 		if (! $bkm_ID) {
 			// Record is not yet bookmarked, but we want it to be
-			mysql_query("insert into usrBookmarks (bkm_Added,bkm_Modified,bkm_UGrpID,bkm_recID) values (now(),now(),".get_user_id().",$id)");
+			mysql_query("insert into usrBookmarks (bkm_Added,bkm_Modified,bkm_UGrpID,bkm_recID) values (now(),now(),".get_user_id().",$recordID)");
 			if (mysql_error()) jsonError("database error - " . mysql_error());
 			$bkm_ID = mysql_insert_id();
 		}
 
 		mysql__update("usrBookmarks", "bkm_ID=$bkm_ID", array(
-		"pers_notes" => $pnotes,
+//		"pers_notes" => $pnotes,	//saw TODO: need to add code to place this in a personal woot
 		"bkm_Rating" => $rating,
 		"bkm_Modified" => date('Y-m-d H:i:s')
 		));
-
-		doTagInsertion($id, $bkm_ID, $tags);
-	}
-	else if ($bkm_ID) {
+		//WARNING  tags is assumed to be a complete replacement list for personal tags on this record.
+		doTagInsertion($recordID, $bkm_ID, $tags);
+	} else if ($bkm_ID) {
 		// Record is bookmarked, but the user doesn't want it to be
-		mysql_query("delete usrBookmarks, usrRecTagLinks from usrBookmarks left join usrRecTagLinks on kwl_pers_id = bkm_ID where bkm_ID=$bkm_ID and bkm_recID=$id and bkm_UGrpID=" . get_user_id());
-		if (mysql_error()) jsonError("database error - " . mysql_error());
+		mysql_query("delete usrBookmarks, usrRecTagLinks ".
+					"from usrBookmarks left join usrRecTagLinks on rtl_RecID = bkm_recID ".
+					"left join usrTags tag_ID = rtl_TagID ".
+					"where bkm_ID=$bkm_ID and bkm_recID=$recordID and bkm_UGrpID = tag_UGrpID and bkm_UGrpID=" . get_user_id());
+		if (mysql_error()) jsonError("database error while removing bookmark- " . mysql_error());
+		//saw TODO: add code to remove other personal data reminders, personal notes (woots), etc.
 	}
 
-	doKeywordInsertion($id, $keywords);
+	doWgTagInsertion($recordID, $wgTags);
 
 	if ($notifyREMOVE  ||  $notifyADD) {
-		$notifyIDs = handleNotifications($id, $notifyREMOVE, $notifyADD);
+		$notifyIDs = handleNotifications($recordID, $notifyREMOVE, $notifyADD);
 	}
 
 	if ($commentREMOVE  ||  $commentMOD  ||  $commentADD) {
-		$commentIDs = handleComments($id, $commentREMOVE, $commentMOD, $commentADD);
+		$commentIDs = handleComments($recordID, $commentREMOVE, $commentMOD, $commentADD);
 	}
 
 
-	$rval = array("bibID" => $id, "bkmkID" => $bkm_ID, "modified" => $now);
+	$rval = array("bibID" => $recordID, "bkmkID" => $bkm_ID, "modified" => $now);
 	if ($title) {
 		$rval["title"] = $title;
 	}
@@ -179,7 +182,7 @@ details : [t:xxx] => [ [bd:yyy] => val ]*
 */
 
 
-function doDetailInsertion($bibID, $details, $recordType, $group, &$nonces, &$retitleRecs) {
+function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$retitleRecs) {
 	/* $nonces :  nonce-to-bibID mapping, makes it possible to resolve rec_details values of reference variety */
 	/* $retitleRecs : set of records whos titles could be out of date and need recalc */
 	// do a double-pass to grab the expected varieties for each bib-detail-type we encounter
@@ -256,7 +259,7 @@ function doDetailInsertion($bibID, $details, $recordType, $group, &$nonces, &$re
 						}
 					}
 
-					if (mysql_num_rows(mysql_query("select rec_id from records where (! rec_wg_id or rec_wg_id=$group) and rec_id=".intval($val))) <= 0)
+					if (mysql_num_rows(mysql_query("select rec_id from records where (! rec_wg_id or rec_wg_id=$wg) and rec_id=".intval($val))) <= 0)
 					jsonError("invalid resource #".intval($val));
 					$bdVal = intval($val);
 					break;
@@ -290,15 +293,15 @@ function doDetailInsertion($bibID, $details, $recordType, $group, &$nonces, &$re
 			}
 
 			if ($bdID) {
-				array_push($updates, "update rec_details set rd_val=$bdVal, rd_file_id=$bdFileID, rd_geo=$bdGeo where rd_id=$bdID and rd_type=$bdtID and rd_rec_id=$bibID");
+				array_push($updates, "update rec_details set rd_val=$bdVal, rd_file_id=$bdFileID, rd_geo=$bdGeo where rd_id=$bdID and rd_type=$bdtID and rd_rec_id=$recordID");
 				array_push($dontDeletes, $bdID);
 			}
 			else {
-				array_push($inserts, "($bibID, $bdtID, $bdVal, $bdFileID, $bdGeo)");
+				array_push($inserts, "($recordID, $bdtID, $bdVal, $bdFileID, $bdGeo)");
 			}
 		}
 	}
-	$deleteDetailQuery = "delete from rec_details where rd_rec_id=$bibID";
+	$deleteDetailQuery = "delete from rec_details where rd_rec_id=$recordID";
 	if (count($dontDeletes)) $deleteDetailQuery .= " and rd_id not in (" . join(",", $dontDeletes) . ")";
 	mysql_query($deleteDetailQuery);
 	if (mysql_error()) jsonError("database error - " . mysql_error());
@@ -318,75 +321,78 @@ function doDetailInsertion($bibID, $details, $recordType, $group, &$nonces, &$re
 	}
 }
 
-
-function doTagInsertion($bibID, $bkmkID, $tagString) {
+function doTagInsertion($recordID, $bkmkID, $tagString) {
+	$usrID = get_user_id();
+	//get all existing personal tags for this record
 	$kwds = mysql__select_array("usrRecTagLinks, usrTags",
-	"tag_Text", "kwl_pers_id=$bkmkID and tag_ID=kwl_kwd_id and tag_UGrpID=".get_user_id()." order by kwl_order, kwl_id");
+	"tag_Text", "rtl_RecID=$recordID and tag_ID=rtl_TagID and tag_UGrpID=$usrID order by rtl_Order, rtl_ID");
 	$existingTagString = join(",", $kwds);
 
-	// Nothing to do here
+	// if tags are already there Nothing to do
 	if (strtolower(trim($tagString)) == strtolower(trim($existingTagString))) return;
 
 
 	$tags = array_filter(array_map("trim", explode(",", str_replace("\\", "/", $tagString))));     // replace backslashes with forwardslashes
+	// create a map of this user's personal tags to tagIDs
 	$tagMap = mysql__select_assoc("usrTags", "trim(lower(tag_Text))", "tag_ID",
 	"tag_UGrpID=".get_user_id()." and tag_Text in (\"".join("\",\"", array_map("addslashes", $tags))."\")");
 
-	$kwd_ids = array();
+	//create an ordered list of personal tag ids
+	$tag_ids = array();
 	foreach ($tags as $tag) {
-		if (@$tagMap[strtolower($tag)]) {
-			$kwd_id = $tagMap[strtolower($tag)];
-		} else {
-			mysql_query("insert into usrTags (tag_Text, tag_UGrpID) values (\"" . addslashes($tag) . "\", " . get_user_id() . ")");
-			$kwd_id = mysql_insert_id();
+		if (@$tagMap[strtolower($tag)]) {// existing tag
+			$tag_id = $tagMap[strtolower($tag)];
+		} else { // new tag so add it
+			mysql_query("insert into usrTags (tag_Text, tag_UGrpID) values (\"" . addslashes($tag) . "\", $usrID)");
+			$tag_id = mysql_insert_id();
 		}
-		array_push($kwd_ids, $kwd_id);
+		array_push($tag_ids, $tag_id);
 	}
 
-	// Delete all non-workgroup tags for this bookmark
-	mysql_query("delete usrRecTagLinks from usrRecTagLinks, usrTags where kwl_pers_id=$bkmkID and tag_ID=kwl_kwd_id and ???kwd_wg_id is null");
+	// Delete all non-workgroup personal tags for this record
+	mysql_query("delete usrRecTagLinks from usrRecTagLinks, usrTags where rtl_RecID=$recordID and tag_ID=rtl_TagID and tag_UGrpID =$usrID");
 
-	if (count($kwd_ids) > 0) {
+	if (count($tag_ids) > 0) {
 		$query = "";
-		for ($i=0; $i < count($kwd_ids); ++$i) {
+		for ($i=0; $i < count($tag_ids); ++$i) {
 			if ($query) $query .= ", ";
-			$query .= "($bkmkID, $bibID, ".($i+1).", ".$kwd_ids[$i].")";
+			$query .= "($recordID, ".($i+1).", ".$tag_ids[$i].")";
 		}
-		$query = "insert into usrRecTagLinks (kwl_pers_id, kwl_rec_id, kwl_order, kwl_kwd_id) values " . $query;
+		$query = "insert into usrRecTagLinks (rtl_RecID, rtl_Order, rtl_TagID) values " . $query;
 		mysql_query($query);
 	}
 }
 
-function doKeywordInsertion($bibID, $keywordIDs) {
-	if ($keywordIDs != ""  &&  ! preg_match("/^\\d+(?:,\\d+)*$/", $keywordIDs)) return;
+function doWgTagInsertion($recordID, $wgTagIDs) {
+	if ($wgTagIDs != ""  &&  ! preg_match("/^\\d+(?:,\\d+)*$/", $wgTagIDs)) return;
 
-	if ($keywordIDs) {
-		mysql_query("delete usrRecTagLinks from usrRecTagLinks, usrTags, ".USERS_DATABASE.".UserGroups where kwl_rec_id=$bibID and kwl_kwd_id=tag_ID and tag_UGrpID=ug_group_id and ug_user_id=".get_user_id()." and tag_ID not in ($keywordIDs)");
+	if ($wgTagIDs) {
+		mysql_query("delete usrRecTagLinks from usrRecTagLinks, usrTags, ".USERS_DATABASE.".UserGroups where rtl_RecID=$recordID and rtl_TagID=tag_ID and tag_UGrpID=ug_group_id and ug_user_id=".get_user_id()." and tag_ID not in ($wgTagIDs)");
 		if (mysql_error()) jsonError("database error - " . mysql_error());
 	} else {
-		mysql_query("delete usrRecTagLinks from usrRecTagLinks, usrTags, ".USERS_DATABASE.".UserGroups where kwl_rec_id=$bibID and kwl_kwd_id=tag_ID and tag_UGrpID=ug_group_id and ug_user_id=".get_user_id());
+		mysql_query("delete usrRecTagLinks from usrRecTagLinks, usrTags, ".USERS_DATABASE.".UserGroups where rtl_RecID=$recordID and rtl_TagID=tag_ID and tag_UGrpID=ug_group_id and ug_user_id=".get_user_id());
 		if (mysql_error()) jsonError("database error - " . mysql_error());
 		return;
 	}
 
-	$existingKeywordIDs = mysql__select_assoc("usrRecTagLinks, usrTags, ".USERS_DATABASE.".UserGroups", "kwl_kwd_id", "1", "kwl_rec_id=$bibID and kwl_kwd_id=tag_ID and tag_UGrpID=ug_group_id and ug_user_id=".get_user_id());
+	$existingKeywordIDs = mysql__select_assoc("usrRecTagLinks, usrTags, ".USERS_DATABASE.".UserGroups", "rtl_TagID", "1", "rtl_RecID=$recordID and rtl_TagID=tag_ID and tag_UGrpID=ug_group_id and ug_user_id=".get_user_id());
 	$newKeywordIDs = array();
-	foreach (explode(",", $keywordIDs) as $kwdID) {
+	foreach (explode(",", $wgTagIDs) as $kwdID) {
 		if (! @$existingKeywordIDs[$kwdID]) array_push($newKeywordIDs, $kwdID);
 	}
 
 	if ($newKeywordIDs) {
-		mysql_query("insert into usrRecTagLinks (kwl_kwd_id, kwl_rec_id) select tag_ID, $bibID from usrTags, ".USERS_DATABASE.".UserGroups where tag_UGrpID=ug_group_id and ug_user_id=".get_user_id()." and tag_ID in (" . join(",", $newKeywordIDs) . ")");
+		mysql_query("insert into usrRecTagLinks (rtl_TagID, rtl_RecID) select tag_ID, $recordID from usrTags, ".USERS_DATABASE.".UserGroups where tag_UGrpID=ug_group_id and ug_user_id=".get_user_id()." and tag_ID in (" . join(",", $newKeywordIDs) . ")");
 		if (mysql_error()) jsonError("database error - " . mysql_error());
 	}
 }
 
 
-function handleNotifications($bibID, $removals, $additions) {
+function handleNotifications($recordID, $removals, $additions) {
 	// removals are encoded as just the notification ID# ... easy!
 	$removals = array_map("intval", $removals);
 	if ($removals) {
-		mysql_query("delete from reminders where rem_id in (" . join(",",$removals) . ") and rem_rec_id=$bibID and rem_owner_id=" . get_user_id());
+		mysql_query("delete from reminders where rem_id in (" . join(",",$removals) . ") and rem_rec_id=$recordID and rem_owner_id=" . get_user_id());
 	}
 
 	// additions have properties
@@ -411,7 +417,7 @@ function handleNotifications($bibID, $removals, $additions) {
 		}
 
 		$insertVals = array(
-		"rem_rec_id" => $bibID,
+		"rem_rec_id" => $recordID,
 		"rem_owner_id" => get_user_id(),
 		"rem_startdate" => date('Y-m-d', strtotime($startDate)),
 		"rem_message" => $addition["message"]
@@ -454,12 +460,12 @@ function handleNotifications($bibID, $removals, $additions) {
 }
 
 
-function handleComments($bibID, $removals, $modifications, $additions) {
+function handleComments($recordID, $removals, $modifications, $additions) {
 	// removals are encoded as just the comments ID# ... easy.
 	if ($removals) {
 		$removals = array_map("intval", $removals);
 		mysql_query("update comments set cmt_deleted=1
-		where cmt_usr_id=".get_user_id()." and cmt_rec_id=$bibID and cmt_id in (".join(",",$removals).")");
+		where cmt_usr_id=".get_user_id()." and cmt_rec_id=$recordID and cmt_id in (".join(",",$removals).")");
 	}
 
 	// modifications have the values
@@ -477,7 +483,7 @@ function handleComments($bibID, $removals, $modifications, $additions) {
 
 		// do a sanity check first: does this reply make sense?
 		$parentTest = $parentID? "cmt_id=$parentID" : "cmt_id is null";
-		if (! mysql__select_array("records left join comments on rec_id=cmt_rec_id and $parentTest", "rec_id", "rec_id=$bibID and $parentTest")) {
+		if (! mysql__select_array("records left join comments on rec_id=cmt_rec_id and $parentTest", "rec_id", "rec_id=$recordID and $parentTest")) {
 			array_push($newIDs, array("error" => "invalid parent comments"));
 			continue;
 		}
@@ -485,7 +491,7 @@ function handleComments($bibID, $removals, $modifications, $additions) {
 		if (! $parentID) { $parentId = NULL; }
 
 		mysql__insert("comments", array("cmt_text" => $addition["text"], "cmt_date" => date('Y-m-d H:i:s'), "cmt_usr_id" => get_user_id(),
-		"cmt_parent_cmt_id" => $parentID, "cmt_rec_id" => $bibID));
+		"cmt_parent_cmt_id" => $parentID, "cmt_rec_id" => $recordID));
 		array_push($newIDs, array("id" => mysql_insert_id()));
 	}
 

@@ -1198,8 +1198,8 @@ top.HEURIST.search = {
 				}
 
 				var tags = [];
-				for (var j = 0; j < top.HEURIST.user.workgroupKeywordOrder.length; ++j) {
-					var tag = top.HEURIST.user.workgroupKeywords[top.HEURIST.user.workgroupKeywordOrder[j]];
+				for (var j = 0; j < top.HEURIST.user.workgroupTagOrder.length; ++j) {
+					var tag = top.HEURIST.user.workgroupTags[top.HEURIST.user.workgroupTagOrder[j]];
 					if (tag[0] == w) tags.push(tag[1]);
 				}
 
@@ -1266,7 +1266,7 @@ top.HEURIST.search = {
 			kwd = encodeURIComponent(tags[i]);
 			innerHTML += "<a href='"+top.HEURIST.basePath+"search/search.html?ver=1&w=bookmark&q=tag:\"" + kwd + "\"&label=Tag+\"" + kwd + "\"'>" + tags[i] + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "") + "</a> ";
 		}
-		var kwd_search_elt = top.document.getElementById("keyword-search-links");
+		var kwd_search_elt = top.document.getElementById("tag-search-links");
 		if (kwd_search_elt) {
 			kwd_search_elt.innerHTML = innerHTML;
 		}
@@ -1553,7 +1553,7 @@ top.HEURIST.search = {
 				return;
 			}
 
-			action_elt.value = (add ? "add" : "remove") + "_keywords";
+			action_elt.value = (add ? "add" : "remove") + "_tags";
 			tagString_elt.value = tags;
 			var bkmk_ids_list = top.HEURIST.search.get_bkmk_ids();
 			bkmk_ids_elt.value = bkmk_ids_list.join(',');
@@ -1568,21 +1568,21 @@ top.HEURIST.search = {
 			alert("Select at least one record to add / remove workgroup tags");
 			return;
 		}
-		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "records/tags/wgTags.html" + (top.HEURIST.instance && top.HEURIST.instance.name ? "?instance=" + top.HEURIST.instance.name : ""), { callback: function(add, kwd_ids) {
-			if (! kwd_ids) return;
+		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "records/tags/wgTags.html" + (top.HEURIST.instance && top.HEURIST.instance.name ? "?instance=" + top.HEURIST.instance.name : ""), { callback: function(add, wgTag_ids) {
+			if (! wgTag_ids) return;
 
 			var action_fr = top.document.getElementById("i_action");
 			var action_elt = action_fr.contentWindow.document.getElementById('action');
 			var bib_ids_elt = action_fr.contentWindow.document.getElementById('bib_ids');
-			var kwd_ids_elt = action_fr.contentWindow.document.getElementById('kwd_ids');
+			var wgTag_ids_elt = action_fr.contentWindow.document.getElementById('wgTag_ids');
 
-			if (! action_fr  ||  ! action_elt  ||  ! bib_ids_elt  ||  ! kwd_ids_elt) {
+			if (! action_fr  ||  ! action_elt  ||  ! bib_ids_elt  ||  ! wgTag_ids_elt) {
 				alert("Problem contacting server - try again in a moment");
 				return;
 			}
 
 			action_elt.value = (add ? "add" : "remove") + "_wgTags_by_id";
-			kwd_ids_elt.value = kwd_ids.join(",");
+			wgTag_ids_elt.value = wgTag_ids.join(",");
 			bib_ids_elt.value = bib_ids_list.join(',');
 
 			action_elt.form.submit();
@@ -1772,8 +1772,8 @@ top.HEURIST.search = {
 		top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/collection.php", top.HEURIST.search.addRemoveCollectionCB, "fetch=1&remove=" + bib_ids_list.join(","));
 	},
 
-	showKeywordSearchLinks: function() {
-		var elt = document.getElementById("keyword-search-links");
+	showTagSearchLinks: function() {
+		var elt = document.getElementById("tag-search-links");
 		var link = document.getElementById("saved");
 		var pos = top.HEURIST.getPosition(link);
 		top.HEURIST.util.popupTinyElement(window, elt, { x: pos.x, y: pos.y, width: link.offsetWidth, height: 300 });

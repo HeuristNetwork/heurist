@@ -36,7 +36,7 @@ function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL) {
 			    case SORT_POPULARITY:
 				$q .= ' order by rec_popularity desc, rec_added desc'; break;
 			    case SORT_RATING:
-				$q .= ' order by -if(pers_content_rating > pers_quality_rating, if(pers_content_rating > pers_interest_rating, pers_content_rating, pers_interest_rating), if(pers_quality_rating > pers_interest_rating, pers_quality_rating, pers_interest_rating)), -(pers_content_rating+pers_quality_rating+pers_interest_rating)'; break;
+				$q .= ' order by bkm_Rating desc'; break;
 			    case SORT_URL:
 				$q .= ' order by rec_url is null, rec_url'; break;
 			    case SORT_MODIFIED:
@@ -254,7 +254,7 @@ class AndLimb {
 			$pred_val = $this->cleanQuotedValue($text);
 
 			if (defined('stype')  &&  stype == 'key')
-				return new KeywordPredicate($this, $pred_val);
+				return new TagPredicate($this, $pred_val);
 			else if (defined('stype')  &&  stype == 'all')
 				return new AnyPredicate($this, $pred_val);
 			else	// title search is default search
@@ -301,7 +301,7 @@ class AndLimb {
 		    case 'keyword':
 		    case 'kwd':
 		    case 'tag':
-			return new KeywordPredicate($this, $pred_val);
+			return new TagPredicate($this, $pred_val);
 
 		    case 'any':
 		    case 'all':
@@ -368,8 +368,8 @@ class AndLimb {
 		}
 
 		// no predicate-type specified ... look at search type specification
-		if (defined('stype')  &&  stype == 'key') {	// "default" search should be on keyword
-			return new KeywordPredicate($this, $pred_val);
+		if (defined('stype')  &&  stype == 'key') {	// "default" search should be on tag
+			return new TagPredicate($this, $pred_val);
 		} else if (defined('stype')  &&  stype == 'all') {
 			return new AnyPredicate($this, $pred_val);
 		} else {
@@ -720,10 +720,10 @@ class FieldPredicate extends Predicate {
 }
 
 
-class KeywordPredicate extends Predicate {
+class TagPredicate extends Predicate {
 	var $wg_value;
 
-	function KeywordPredicate(&$parent, $value) {
+	function TagPredicate(&$parent, $value) {
 		$this->parent = &$parent;
 
 		$this->value = array();
@@ -731,13 +731,13 @@ class KeywordPredicate extends Predicate {
 		$values = explode(',', $value);
 		$any_wg_values = false;
 
-		// Heavy, heavy DWIM here: if the keyword for which we're searching contains comma(s),
+		// Heavy, heavy DWIM here: if the tag for which we're searching contains comma(s),
 		// then split it into several tags, and do an OR search on those.
 		for ($i=0; $i < count($values); ++$i) {
 			if (strpos($values[$i], '\\') === FALSE) {
 				array_push($this->value, trim($values[$i]));
 				array_push($this->wg_value, '');
-			} else {	// A workgroup keyword.  How nice.
+			} else {	// A workgroup tag.  How nice.
 				preg_match('/(.*?)\\\\(.*)/', $values[$i], $matches);
 				array_push($this->wg_value, trim($matches[1]));
 				array_push($this->value, trim($matches[2]));
@@ -752,17 +752,17 @@ class KeywordPredicate extends Predicate {
 		$query = &$this->getQuery();
 		$not = ($this->parent->negate)? 'not ' : '';
 		if ($query->search_type == BOOKMARK) {
-			if (is_numeric(join('', $this->value))) {	// if all keyword specs are numeric then don't need a join
-				return $not . 'exists (select * from usrRecTagLinks where kwl_pers_id=bkm_ID and kwl_kwd_id in ('.join(',', $this->value).'))';
+			if (is_numeric(join('', $this->value))) {	// if all tag specs are numeric then don't need a join
+				return $not . 'exists (select * from usrRecTagLinks where rtl_RecID=bkm_RecID and rtl_TagID in ('.join(',', $this->value).'))';
 			} else if (! $this->wg_value) {
 				// this runs faster (like TEN TIMES FASTER) - think it's to do with the join
-				$query=$not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.tag_ID '
-				                    . 'where kwi.kwl_rec_id=rec_id and (';
+				$query=$not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
+				                    . 'where kwi.rtl_RecID=rec_id and (';
 				$first_value = true;
 				foreach ($this->value as $value) {
 					if (! $first_value) $query .= 'or ';
 					if (is_numeric($value)) {
-						$query .= 'kwl_kwd_id='.intval($value).' ';
+						$query .= 'rtl_TagID='.intval($value).' ';
 					} else {
 						$query .=     ($this->parent->exact? 'kwd.tag_Text = "'.addslashes($value).'" '
 					                                           : 'kwd.tag_Text like "'.addslashes($value).'%" ');
@@ -771,8 +771,8 @@ class KeywordPredicate extends Predicate {
 				}
 				$query .=              ') and kwd.tag_UGrpID='.get_user_id().') ';
 			} else {
-				$query=$not . 'exists (select * from '.USERS_DATABASE.'.Groups, usrRecTagLinks kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.tag_ID '
-				                    . 'where grp_id=tag_UGrpID and kwi.kwl_rec_id=rec_id and (';
+				$query=$not . 'exists (select * from '.USERS_DATABASE.'.Groups, usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
+				                    . 'where grp_id=tag_UGrpID and kwi.rtl_RecID=rec_id and (';
 				for ($i=0; $i < count($this->value); ++$i) {
 					if ($i > 0) $query .= 'or ';
 
@@ -793,8 +793,8 @@ class KeywordPredicate extends Predicate {
 			}
 		} else {
 			if (! $this->wg_value) {
-				$query = $not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.tag_ID '
-				                    . 'where kwi.kwl_rec_id=rec_id and (';
+				$query = $not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
+				                    . 'where kwi.rtl_RecID=rec_id and (';
 				$first_value = true;
 				foreach ($this->value as $value) {
 					if (! $first_value) $query .= 'or ';
@@ -808,8 +808,8 @@ class KeywordPredicate extends Predicate {
 				}
 				$query .= ')) ';
 			} else {
-				$query = $not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.kwl_kwd_id=kwd.tag_ID left join '.USERS_DATABASE.'.Groups on grp_id=tag_UGrpID '
-				                    . 'where kwi.kwl_rec_id=rec_id and (';
+				$query = $not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID left join '.USERS_DATABASE.'.Groups on grp_id=tag_UGrpID '
+				                    . 'where kwi.rtl_RecID=rec_id and (';
 				for ($i=0; $i < count($this->value); ++$i) {
 					if ($i > 0) $query .= 'or ';
 

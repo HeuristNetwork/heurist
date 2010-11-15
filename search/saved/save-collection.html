@@ -2,11 +2,11 @@
 	<head>
 		<!-- link rel=stylesheet href='../../common/css/global.css' -->
 		<link rel=stylesheet href='../../common/css/import.css'>
-		<!-- link rel=stylesheet href='../../common/css/keyword-editor.css'-->
+		<!-- link rel=stylesheet href='../../common/css/wgtag-editor.css'-->
 		<link rel=stylesheet href='../../common/css/autocomplete.css'>
 		<title></title>
 		<script src='../../external/jquery/jquery.js'></script>
-		<script src='../../records/tags/keyword-editor.js'></script>
+		<script src='../../records/tags/wgtag-editor.js'></script>
 		<script>
 			if (top.HEURIST.search.collectCount == 0) {
 				alert("No records have been collected. Please select records from the search results and press collect to add records, then press save.");
@@ -75,14 +75,14 @@
 				document.title += " Save collection (" + top.HEURIST.search.collectCount + " records) as Saved Search";
 				setTimeout(function() { document.getElementById('search-select').focus() }, 10);
 				var tagsElt = document.getElementById('personal-tags');
-				window.autocomplete = new top.HEURIST.autocomplete.AutoComplete(tagsElt, top.HEURIST.util.keywordAutofill, { nonVocabularyCallback: top.HEURIST.util.showConfirmNewTag });
+				window.autocomplete = new top.HEURIST.autocomplete.AutoComplete(tagsElt, top.HEURIST.util.tagAutofill, { nonVocabularyCallback: top.HEURIST.util.showConfirmNewTag });
 
 				var removeButton = document.getElementById("remove-button");
 				var addButton = document.getElementById("add-button");
 
 				var currWgTagsElt = document.getElementById("current-workgroup-tags");
 				var allWgTagsElt = document.getElementById("all-workgroup-tags");
-				top.HEURIST.keywordEditor.KeywordEditor(currWgTagsElt, allWgTagsElt, addButton, removeButton);
+				top.HEURIST.wgTagEditor.WgTagEditor(currWgTagsElt, allWgTagsElt, addButton, removeButton);
 
 			}
 
@@ -172,8 +172,8 @@
 				var disableID = '#' + fromID.match(/^[^_]+_/)[0] + "span";
 				$( enableID + " input, " + enableID + " select").attr("disabled",false);
 				$( disableID + " input, " + disableID + " select").attr("disabled",true);
-				$(enableID + " .keyword-list tr").show()
-				$(disableID + " .keyword-list tr").hide()
+				$(enableID + " .wgtag-list tr").show()
+				$(disableID + " .wgtag-list tr").hide()
 				$('#'+focusID).focus();
 			}
 
@@ -264,17 +264,17 @@
 
 							<tr>
 								<td>
-									<div class=keyword-list style="height:200px;"><table border=0 cellspacing=0 cellpadding=0><tbody id=all-workgroup-tags></tbody></table></div>
+									<div class=wgtag-list style="height:200px;"><table border=0 cellspacing=0 cellpadding=0><tbody id=all-workgroup-tags></tbody></table></div>
 								</td>
 								<td>
 									<div id=button-box>
-										<div><input type=button value="&gt;" title="Add a tag" onmousedown="top.HEURIST.keywordEditor.addWgTag(window.selectedRow)" disabled id=add-button></div>
+										<div><input type=button value="&gt;" title="Add a tag" onmousedown="top.HEURIST.wgTagEditor.addWgTag(window.selectedRow)" disabled id=add-button></div>
 										<div>&nbsp;&nbsp;</div>
-										<div><input type=button value="&lt;" title="Remove a tag" onmousedown="top.HEURIST.keywordEditor.removeWgTag(window.selectedRow)" disabled id=remove-button></div>
+										<div><input type=button value="&lt;" title="Remove a tag" onmousedown="top.HEURIST.wgTagEditor.removeWgTag(window.selectedRow)" disabled id=remove-button></div>
 									</div>
 								</td>
 								<td>
-									<div class=keyword-list style="height:200px;"><table border=0 cellspacing=0 cellpadding=0><tbody id=current-workgroup-tags></tbody></table></div>
+									<div class=wgtag-list style="height:200px;"><table border=0 cellspacing=0 cellpadding=0><tbody id=current-workgroup-tags></tbody></table></div>
 								</td>
 							</tr>
 
@@ -284,11 +284,11 @@
 								<td class=prompt>Double-click to deselect a tag</td>
 							</tr>
 							<tr><td>
-									<div id="admin-wgKeywords"><br><a href="../../admin/workgroup/workgroup_keyword_manager.php" target="_blank">add/delete</a> tags for workgroups (administrators only). </div>
+									<div id="admin-wgTags"><br><a href="../../admin/workgroup/workgroup_tag_manager.php" target="_blank">add/delete</a> tags for workgroups (administrators only). </div>
 							</td></tr>
 						</table>
 
-						<form id=keyword-form onsubmit="return false;"></form> <!-- not used so stub teh submit -->
+						<form id=wgtag-form onsubmit="return false;"></form> <!-- not used so stub teh submit -->
 
 						Default result style:
 						<select id=result-style-select>

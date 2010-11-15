@@ -62,10 +62,10 @@ function get_reviews($user_id, $class_grp_id, $ass_kwd_id, $get_text=false, $ind
 							   rec_id, rec_title, rec_url, bkm_ID, bkm_Added,
 							   concat(firstname," ",lastname) as author'.($get_text?', pers_notes':'').'
 						  FROM usrRecTagLinks
-					 LEFT JOIN usrBookmarks ON bkm_ID=kwl_pers_id
-					 LEFT JOIN records ON rec_id=kwl_rec_id
+					 LEFT JOIN usrBookmarks ON bkm_RecID=rtl_RecID
+					 LEFT JOIN records ON rec_id=rtl_RecID
 					 LEFT JOIN ACLAdmin.Users on Id=bkm_UGrpID
-						 WHERE kwl_kwd_id=' . $ass_kwd_id .
+						 WHERE rtl_TagID=' . $ass_kwd_id .
 		 ($user_id > 0 ? ' AND bkm_UGrpID=' . $user_id : '').'
 						 ORDER BY bkm_Added desc
 	   '.($count > 0 ? ' LIMIT ' . $index . ', ' . $count : ''));
@@ -99,10 +99,11 @@ function get_genre($bkmk_id, $class_grp_id) {
 	$class_grp_id = intval($class_grp_id);
 	$res = mysql_query('SELECT tag_ID, tag_Text
 						  FROM usrRecTagLinks
-					 LEFT JOIN usrTags ON tag_ID=kwl_kwd_id
-						 WHERE kwl_pers_id=' . $bkmk_id . '
+					 LEFT JOIN usrBookmarks ON rtl_RecID = bkm_RecID
+					 LEFT JOIN usrTags ON tag_ID=rtl_TagID
+						 WHERE bkm_ID=' . $bkmk_id . '
 						   AND tag_UGrpID=' . $class_grp_id . '
-						   AND tag_Text like "Genre: %"');
+						   AND tag_Text like "Genre: %"');	// saw CHECK: made best guess are this funcitonality and changes made for new struct
 	if ($row = mysql_fetch_assoc($res)) {
 		return array($row['tag_ID'], str_replace('Genre: ', '', $row['tag_Text']));
 	} else {
@@ -143,11 +144,11 @@ function get_review($bkmk_id, $class_grp_id) {
 	$review['tags'] = array();
 	$res = mysql_query('SELECT tag_Text
 						  FROM usrRecTagLinks
-					 LEFT JOIN usrTags ON tag_ID = kwl_kwd_id
-						 WHERE kwl_pers_id = '.$bkmk_id.'
+					 LEFT JOIN usrBookmarks ON rtl_RecID = bkm_RecID
+					 LEFT JOIN usrTags ON tag_ID = rtl_TagID
+						 WHERE bkm_ID = '.$bkmk_id.'
 						   AND tag_UGrpID= '.get_user_id().'
-						   AND ???kwd_wg_id is null
-					  ORDER BY kwl_order');
+					  ORDER BY rtl_Order');
 	while ($row = mysql_fetch_assoc($res)) {
 		array_push($review['tags'], $row['tag_Text']);
 	}
@@ -241,20 +242,19 @@ function add_review($bib_id, $title, $ass_kwd_id, $genre_id, $user_id) {
 		'bkm_UGrpID' => $user_id));
 	$bkmk_id = mysql_insert_id();
 	mysql__insert('usrRecTagLinks', array(
-		'kwl_pers_id' => $bkmk_id,
-		'kwl_rec_id' => $bib_id,
-		'kwl_kwd_id' => $ass_kwd_id));
+		'rtl_RecID' => $bib_id,
+		'rtl_TagID' => $ass_kwd_id));
 	mysql__insert('usrRecTagLinks', array(
-		'kwl_pers_id' => $bkmk_id,
-		'kwl_rec_id' => $bib_id,
-		'kwl_kwd_id' => $genre_id));
+		'rtl_RecID' => $bib_id,
+		'rtl_TagID' => $genre_id));
 	return $bkmk_id;
 }
 
 function delete_review($bkmk_id) {
 	mysql_connection_overwrite('heuristdb');
-	mysql_query('DELETE FROM usrBookmarks WHERE bkm_ID=' . intval($bkmk_id));
-	mysql_query('DELETE FROM usrRecTagLinks WHERE kwl_pers_id=' . intval($bkmk_id));
+	// saw TODO: modify this code to call api to remove bookmarks which should cleanup that tags.
+//	mysql_query('DELETE FROM usrBookmarks WHERE bkm_ID=' . intval($bkmk_id));
+//	mysql_query('DELETE FROM usrRecTagLinks WHERE kwl_pers_id=' . intval($bkmk_id));
 }
 
 function print_error($err) {

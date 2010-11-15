@@ -787,7 +787,7 @@ body.w-all #all-records-button, body.w-bookmark #my-records-button {
 
 /*  keyword editoi css */
 
-.keyword-list {
+.wgtag-list {
 	width: 270px;
 	height: 350px;
 	padding: 5px;
@@ -798,26 +798,26 @@ body.w-all #all-records-button, body.w-bookmark #my-records-button {
 	margin: 0;
 }
 
-.keyword-list table { width: 100%; cursor: default; }
-.keyword-list table tr td {
+.wgtag-list table { width: 100%; cursor: default; }
+.wgtag-list table tr td {
 	padding: 2px;
 	white-space: nowrap;
 }
-.keyword-list table tr td.group-name {
+.wgtag-list table tr td.group-name {
 	font-weight: bold;
 }
 
-.keyword-list tr:focus {
+.wgtag-list tr:focus {
 	outline: none;
 	background-color: #A4B4CB;
 	color: white;
 }
 
-.keyword-list tr:focus ::-moz-selection {
+.wgtag-list tr:focus ::-moz-selection {
 	background-color: #A4B4CB;
 	color: white;
 }
-.keyword-list tr ::-moz-selection {
+.wgtag-list tr ::-moz-selection {
 	background-color: white;
 	color: black;
 }

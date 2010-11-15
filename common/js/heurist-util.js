@@ -990,7 +990,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		}, postData);
 	},
 
-	keywordAutofill: function(term) {
+	tagAutofill: function(term) {
 	// FIXME: we can improve this a lot by doing very simple caching
 
 		if (term === "") return [];
@@ -998,7 +998,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		var tags = top.HEURIST.user.tags;
 
 		/* Do complicated matching:
-		 * We match the (whitespace-separated) words in the term with the words in the keyword.
+		 * We match the (whitespace-separated) words in the term with the words in the tag.
 		 * If there is just one word in the term this is very easy.
 		 * Note that punctuation is treated as whitespace for the purposes of this experiment
 		 *
@@ -1010,17 +1010,17 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		var regexSafeTerm = term.replace(/[\\^.$|()\[\]*+?{}]/g, "\\$0");	// neutralise any special regex characters
 		var regex;
 		if (regexSafeTerm.indexOf(" ") == -1) {
-			// term is a single word ... look for it to start any word in the keyword
+			// term is a single word ... look for it to start any word in the tag
 			regex = new RegExp("(.?)\\b" + regexSafeTerm);
 		} else {
-			// multiple words: match all of them at the start of words in the keyword
+			// multiple words: match all of them at the start of words in the tag
 			/*
 			for input
 				WORD1 WORD2 WORD3 WORD4 ...
 			want output
 				(?=.*?\bWORD2)(?=.*?\bWORD3)(?=.*?\bWORD4) ... (^.*?)\bWORD1
 			This matches all words in the search term using look-ahead (no matter what order they are in)
-			except for the first word, which it prefers to match at the beginning of the keyword.
+			except for the first word, which it prefers to match at the beginning of the tag.
 			When it matches at the beginning, $1 is empty: we test this to float it to the top of the results.
 			*/
 			var bits = regexSafeTerm.split(/ /);

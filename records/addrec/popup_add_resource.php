@@ -27,22 +27,22 @@ $(document).ready(function() {
 		return false;
 	});
 
-	$("#reftype_elt, #restrict_elt, #rec_wg_id, #keyword, #rec_visibility, #add-link-title, #add-link-tags").change(update_link);
+	$("#reftype_elt, #restrict_elt, #rec_wg_id, #tag, #rec_visibility, #add-link-title, #add-link-tags").change(update_link);
 
 	var matches = location.search.match(/wg_id=(\d+)/);
-	buildWorkgroupKeywordSelect(matches ? matches[1] : null);
+	buildworkgroupTagselect(matches ? matches[1] : null);
 });
 
-function buildWorkgroupKeywordSelect(wgID) {
+function buildworkgroupTagselect(wgID) {
 	var i, l, kwd, val;
-	$("#keyword").empty();
-	$("<option value='' selected disabled>(select workgroup keyword)</option>").appendTo("#keyword");
-	l = top.HEURIST.user.workgroupKeywordOrder.length;
+	$("#tag").empty();
+	$("<option value='' selected disabled>(select workgroup tag)</option>").appendTo("#tag");
+	l = top.HEURIST.user.workgroupTagOrder.length;
 	for (i = 0; i < l; ++i) {
-		kwd = top.HEURIST.user.workgroupKeywords[top.HEURIST.user.workgroupKeywordOrder[i]];
+		kwd = top.HEURIST.user.workgroupTags[top.HEURIST.user.workgroupTagOrder[i]];
 		if (! wgID  ||  wgID == kwd[0]) {
 			val = top.HEURIST.workgroups[kwd[0]].name + "\\" + kwd[1];
-			$("<option value='" + val + "'>" + kwd[1] + "</option>").appendTo("#keyword");
+			$("<option value='" + val + "'>" + kwd[1] + "</option>").appendTo("#tag");
 		}
 	}
 }
@@ -56,7 +56,7 @@ function update_link() {
 	var title = $("#add-link-title").val();
 
 	if (tags) {
-		link += (link.match(/&keyword=/))  ?  "," + tags  :  "&keyword=" + tags;
+		link += (link.match(/&tag=/))  ?  "," + tags  :  "&tag=" + tags;
 	}
 
 	// removed Ian 19/9/08 - title in form is confusing
@@ -73,10 +73,10 @@ function update_link() {
 	$("#add-link-input").val(link);
 
 	$("#broken-kwd-link").hide();
-	if ($("#keyword").val()) {
+	if ($("#tag").val()) {
 		$("#broken-kwd-link").show()[0].href =
-			"../?w=all&q=tag:\"" + $("#keyword").val().replace(/\\/, "") + "\"" +
-			          " -tag:\"" + $("#keyword").val() + "\"";
+			"../?w=all&q=tag:\"" + $("#tag").val().replace(/\\/, "") + "\"" +
+			          " -tag:\"" + $("#tag").val() + "\"";
 	}
 }
 
@@ -88,8 +88,8 @@ function compute_args() {
 			extra_parms = '&bib_workgroup=' + wg_id;
 			extra_parms += '&bib_visibility=' + document.getElementById('rec_visibility').value;
 
-			var kwdList = document.getElementById('keyword');
-			if (kwdList.selectedIndex > 0) extra_parms += "&keyword=" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value);
+			var kwdList = document.getElementById('tag');
+			if (kwdList.selectedIndex > 0) extra_parms += "&tag=" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value);
 		}
 	}
 
@@ -113,8 +113,8 @@ function add_note(e) {
 			extra_parms = '&bib_workgroup=' + wg_id;
 			extra_parms += '&bib_visibility=' + document.getElementById('rec_visibility').value;
 
-			var kwdList = document.getElementById('keyword');
-			if (kwdList.selectedIndex > 0) extra_parms += "&keyword=" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value);
+			var kwdList = document.getElementById('tag');
+			if (kwdList.selectedIndex > 0) extra_parms += "&tag=" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value);
 		}
 		else {
 			alert('Please select a group to which this record shall be restricted');
@@ -221,7 +221,7 @@ hr { margin: 20px 0; }
      </nobr>
     </td>
     <td class=workgroup><nobr>
-     <select name="rec_wg_id" id="rec_wg_id" style="width: 200px;" onchange="buildWorkgroupKeywordSelect(options[selectedIndex].value)">
+     <select name="rec_wg_id" id="rec_wg_id" style="width: 200px;" onchange="buildworkgroupTagselect(options[selectedIndex].value)">
       <option value="0" disabled selected>(select group)</option>
 <?php
 	$res = mysql_query('select '.GROUPS_ID_FIELD.', '.GROUPS_NAME_FIELD.' from '.USERS_DATABASE.'.'.USER_GROUPS_TABLE.' left join '.USERS_DATABASE.'.'.GROUPS_TABLE.' on '.GROUPS_ID_FIELD.'='.USER_GROUPS_GROUP_ID_FIELD.' where '.USER_GROUPS_USER_ID_FIELD.'='.get_user_id().' and '.GROUPS_TYPE_FIELD.'!="Usergroup" order by '.GROUPS_NAME_FIELD);
@@ -241,10 +241,10 @@ hr { margin: 20px 0; }
     <td>
     </td>
     <td style="text-align: right;">
-     Workgroup keyword:
+     Workgroup tag:
     </td>
     <td>
-     <select name="keyword" id="keyword" style="width: 200px;">
+     <select name="tag" id="tag" style="width: 200px;">
      </select>
     </td>
    </tr>

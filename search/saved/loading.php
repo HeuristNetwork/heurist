@@ -348,19 +348,19 @@ function loadUserDependentData(&$record) {
 	$record["tags"] = mysql__select_array(
 		"usrRecTagLinks, usrTags",
 		"tag_Text",
-		"tag_ID = kwl_kwd_id and
+		"tag_ID = rtl_TagID and
 		 tag_UGrpID= ".get_user_id()." and
-		 kwl_rec_id = $recID
-		 order by kwl_order");
+		 rtl_RecID = $recID
+		 order by rtl_Order");
 
 	$record["wgTags"] = mysql__select_array(
 		"usrRecTagLinks, usrTags, ".USERS_DATABASE.".UserGroups",
-		"kwl_kwd_id",
-		"tag_ID = kwl_kwd_id and
+		"rtl_TagID",
+		"tag_ID = rtl_TagID and
 		 tag_UGrpID = ug_group_id and
 		 ug_user_id = ".get_user_id()." and
-		 kwl_rec_id = $recID
-		 order by kwl_order");
+		 rtl_RecID = $recID
+		 order by rtl_Order");
 
 	$record["notifies"] = $reminders;
 	$record["comments"] = $comments;

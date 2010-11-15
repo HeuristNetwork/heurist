@@ -97,7 +97,7 @@
 			var tags = document.getElementById("tags");
 			tags.value = tags.defaultValue = top.HEURIST.edit.record.tagString  ||  "";
 
-			new top.HEURIST.autocomplete.AutoComplete(tags, top.HEURIST.util.keywordAutofill, { nonVocabularyCallback: top.HEURIST.util.showConfirmNewTag });
+			new top.HEURIST.autocomplete.AutoComplete(tags, top.HEURIST.util.tagAutofill, { nonVocabularyCallback: top.HEURIST.util.showConfirmNewTag });
 
 
 			tags.onchange = function() { top.HEURIST.edit.changed("personal"); };
@@ -135,10 +135,10 @@
 			var alphasort = function(a,b) { a = a.toLowerCase(); b = b.toLowerCase(); return (a < b)? -1 : (a > b)? 1 : 0; };
 
 			var topTagsCell = document.getElementById("top-tags-cell");
-			var topKeywords = top.HEURIST.user.topKeywords.slice(0);
-			topKeywords.sort(alphasort);
-			for (var i=0; i < topKeywords.length; ++i) {
-				addTagLink(topKeywords[i], topTagsCell);
+			var topTags = top.HEURIST.user.topTags.slice(0);
+			topTags.sort(alphasort);
+			for (var i=0; i < topTags.length; ++i) {
+				addTagLink(topTags[i], topTagsCell);
 			}
 			var recentTagsCell = document.getElementById("recent-tags-cell");
 			var recentTags = top.HEURIST.user.recentTags.slice(0, 8);
