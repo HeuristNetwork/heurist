@@ -260,15 +260,37 @@
   </xsl:template>
 
   <xsl:template name="start-date" match="detail[@id=177]">
-	<xsl:if test="self::node()[@id =177]">
-	  <xsl:value-of select="self::node()[@id =177]/raw"/>
-	</xsl:if>
+		<xsl:choose>
+			<xsl:when test="temporal[@type='Simple Date']/date/raw">
+				<xsl:value-of select="temporal/date/raw"/>
+			</xsl:when>
+			<xsl:when test="temporal/date[@type='PDB']/raw and temporal/date[@type='PDE']/raw">
+				<xsl:value-of select="temporal/date[@type='PDB']/raw"/> – <xsl:value-of select="temporal/date[@type='PDE']/raw"/>
+			</xsl:when>
+			<xsl:when test="temporal/date[@type='TPQ']/raw and temporal/date[@type='TAQ']/raw">
+				<xsl:value-of select="temporal/date[@type='TPQ']/raw"/> – <xsl:value-of select="temporal/date[@type='TAQ']/raw"/>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:value-of select="raw"/>
+			</xsl:otherwise>
+		</xsl:choose>
   </xsl:template>
 
     <xsl:template name="end-date" match="detail[@id=178]">
-	<xsl:if test="self::node()[@id =178]">
-	  <xsl:value-of select="self::node()[@id =178]/raw"/>
-	</xsl:if>
+		<xsl:choose>
+			<xsl:when test="temporal[@type='Simple Date']/date/raw">
+				<xsl:value-of select="temporal/date/raw"/>
+			</xsl:when>
+			<xsl:when test="temporal/date[@type='PDB']/raw and temporal/date[@type='PDE']/raw">
+				<xsl:value-of select="temporal/date[@type='PDB']/raw"/> – <xsl:value-of select="temporal/date[@type='PDE']/raw"/>
+			</xsl:when>
+			<xsl:when test="temporal/date[@type='TPQ']/raw and temporal/date[@type='TAQ']/raw">
+				<xsl:value-of select="temporal/date[@type='TPQ']/raw"/> – <xsl:value-of select="temporal/date[@type='TAQ']/raw"/>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:value-of select="raw"/>
+			</xsl:otherwise>
+		</xsl:choose>
   </xsl:template>
 
   <xsl:template name="url">

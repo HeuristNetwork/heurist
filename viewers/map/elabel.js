@@ -20,7 +20,7 @@
 // version 1.8      remove the old GMarkerManager support due to clashes with v2.143
 
 
-      function ELabel(point, html, classname, pixelOffset, percentOpacity, overlap) {
+function ELabel(point, html, classname, pixelOffset, percentOpacity, overlap) {
         // Mandatory parameters
         this.point = point;
         this.html = html;
@@ -35,11 +35,11 @@
         this.percentOpacity = percentOpacity;
         this.overlap=overlap||false;
         this.hidden = false;
-      } 
+}
       
-      ELabel.prototype = new GOverlay();
+ELabel.prototype = new GOverlay();
 
-      ELabel.prototype.initialize = function(map) {
+ELabel.prototype.initialize = function(map) {
         var div = document.createElement("div");
         div.style.position = "absolute";
         div.innerHTML = '<div class="' + this.classname + '">' + this.html + '</div>' ;
@@ -59,62 +59,62 @@
         if (this.hidden) {
           this.hide();
         }
-      }
+}
 
-      ELabel.prototype.remove = function() {
+ELabel.prototype.remove = function() {
         this.div_.parentNode.removeChild(this.div_);
-      }
+}
 
-      ELabel.prototype.copy = function() {
+ELabel.prototype.copy = function() {
         return new ELabel(this.point, this.html, this.classname, this.pixelOffset, this.percentOpacity, this.overlap);
-      }
+}
 
-      ELabel.prototype.redraw = function(force) {
+ELabel.prototype.redraw = function(force) {
         var p = this.map_.fromLatLngToDivPixel(this.point);
         var h = parseInt(this.div_.clientHeight);
         this.div_.style.left = (p.x + this.pixelOffset.width) + "px";
         this.div_.style.top = (p.y +this.pixelOffset.height - h) + "px";
-      }
+}
 
-      ELabel.prototype.show = function() {
+ELabel.prototype.show = function() {
         if (this.div_) {
           this.div_.style.display="";
           this.redraw();
         }
         this.hidden = false;
-      }
+}
       
-      ELabel.prototype.hide = function() {
+ELabel.prototype.hide = function() {
         if (this.div_) {
           this.div_.style.display="none";
         }
         this.hidden = true;
-      }
+}
       
-      ELabel.prototype.isHidden = function() {
+ELabel.prototype.isHidden = function() {
         return this.hidden;
-      }
+}
       
-      ELabel.prototype.supportsHide = function() {
+ELabel.prototype.supportsHide = function() {
         return true;
-      }
+}
 
-      ELabel.prototype.setContents = function(html) {
+ELabel.prototype.setContents = function(html) {
         this.html = html;
         this.div_.innerHTML = '<div class="' + this.classname + '">' + this.html + '</div>' ;
         this.redraw(true);
-      }
+}
       
-      ELabel.prototype.setPoint = function(point) {
+ELabel.prototype.setPoint = function(point) {
         this.point = point;
         if (this.overlap) {
           var z = GOverlay.getZIndex(this.point.lat());
           this.div_.style.zIndex = z;
         }
         this.redraw(true);
-      }
+}
       
-      ELabel.prototype.setOpacity = function(percentOpacity) {
+ELabel.prototype.setOpacity = function(percentOpacity) {
         if (percentOpacity) {
           if(percentOpacity<0){percentOpacity=0;}
           if(percentOpacity>100){percentOpacity=100;}
@@ -126,8 +126,23 @@
           if(typeof(this.div_.style.MozOpacity)=='string'){this.div_.style.MozOpacity=this.percentOpacity/100;}
           if(typeof(this.div_.style.opacity)=='string'){this.div_.style.opacity=this.percentOpacity/100;}
         }
-      }
+}
 
-      ELabel.prototype.getPoint = function() {
+ELabel.prototype.getPoint = function() {
         return this.point;
-      }
+}
+ELabel.prototype.getLatLng = function() {
+	return this.point;
+}
+ELabel.prototype.getIcon = function() {
+	return this.icon;
+}
+ELabel.prototype.setIcon = function(icon) {
+	this.icon = icon;
+}
+ELabel.prototype.getHtml = function() {
+	return this.html;
+}
+ELabel.prototype.setHtml = function(html) {
+	this.html = html;
+}

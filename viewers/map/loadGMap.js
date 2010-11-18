@@ -10,7 +10,7 @@
 var map;
 var iconsByReftype = [];
 var onclickfn;
-
+var allMarkers = [];
 
 function loadMap(options) {
 	if (! options) options = {};
@@ -45,9 +45,9 @@ function loadMap(options) {
 	var baseIcon = new GIcon();
 	baseIcon.image = "../../common/images/reftype-icons/questionmark.gif";
 	baseIcon.shadow = "../../common/images/shadow.png";
-	baseIcon.iconAnchor = new GPoint(8, 16);
-	baseIcon.infoWindowAnchor = new GPoint(8,8);
-	baseIcon.iconSize = new GSize(16, 16);
+	baseIcon.iconAnchor = new GPoint(16, 31);
+	baseIcon.infoWindowAnchor = new GPoint(16,16);
+	baseIcon.iconSize = new GSize(31, 31);
 	baseIcon.shadowSize = new GSize(30, 18);
 
 	for (var i in HEURIST.tmap.geoObjects) {
@@ -65,7 +65,7 @@ function loadMap(options) {
 			iconsByReftype[record.reftype] = new GIcon(baseIcon);
 			//iconsByReftype[record.reftype].image = "../../common/images/reftype-icons/" + record.reftype + ".png";
 			//iconsByReftype[record.reftype].image = "../../common/images/pointerMapWhite.png";
-			iconsByReftype[record.reftype].image = "../../common/images/16x16.gif";
+			iconsByReftype[record.reftype].image = "../../common/images/31x31.gif";
 		}
 
 		var marker = null;
@@ -180,7 +180,10 @@ function loadMap(options) {
 			if (! record.overlays) record.overlays = [];
 			record.overlays.push(marker);
 			record.overlays.push(label);
-			map.addOverlay(marker);
+			label.setIcon(marker.getIcon());
+			allMarkers.push(label);
+//			allMarkers.push(marker);
+//			map.addOverlay(marker);
 			map.addOverlay(label);
 			GEvent.addListener(marker, "click", markerClick);
 		}
@@ -198,7 +201,12 @@ function loadMap(options) {
 		var related;
 		related = document.getElementById(relatedID);
 		related.appendChild(xhtmlResultDoc);
-	}
+		label.setContents(related.parentNode.innerHTML);
+		if (marker) map.removeOverlay(label); // hack need to replace this by creating all the html up front
+	} // end of for Geo
+	var cluster=new ClusterMarker(map, { markers:allMarkers } );
+	cluster.fitMapToMarkers();
+
 }
 
 function loadXMLDocFromFile(filename)

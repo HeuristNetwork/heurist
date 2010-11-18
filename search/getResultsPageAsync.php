@@ -200,7 +200,7 @@ if (top.HEURIST && top.HEURIST.firedEvents["heurist-search-html-loaded"] && top.
 	print ' -->';
 ?>
  <body>
-<?php foreach ($reftypes as $rt_id) if ($rt_id > 0) print "<img src=../common/images/reftype-icons/".$rt_id.".gif>"; ?>
+<?php foreach ($reftypes as $rt_id) if ($rt_id > 0) print "<img src=../common/images/reftype-icons/".$rt_id.".png>"; ?>
  </body>
 </html>
 <?php

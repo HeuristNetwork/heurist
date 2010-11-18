@@ -59,18 +59,18 @@ if (location.search.match(/\btimeline=0\b/)) {
 
   <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w"></script>
   <script src="epoly.js"></script>
-  <script src="../../external/js/elabel.js"></script>
+  <script src="elabel.js"></script>
 
-  <script src="../ClusterMarker.js"></script>
+  <script src="../js/ClusterMarker.js"></script>
   <script src="loadGMap.js"></script>
   <script src="loadTimeline.js"></script>
 
   <script>
 if (top.HEURIST) {
 	top.HEURIST.registerEvent(this,"heurist-selectionchange",onSelectionChange);
-	}
+}
 
-  function load(){
+function load(){
 	if (HEURIST.tmap.totalRecordCount == 0) {
 		document.body.style.margin = "10px";
 		document.body.innerHTML = "<h3>The search results you are trying to plot do not contain any geographic objects</h3>";
@@ -86,7 +86,7 @@ if (top.HEURIST) {
 		if (! location.search.match(/\btimeline=0\b/)) loadTimeline();
 	}
 
-	//var resizerCell = document.getElementById("resizer");
+	var resizerCell = document.getElementById("resizer");
 	var timelineCell = document.getElementById("timeline-cell");
 	resizerCell.onmousedown = function(e) {
 		if (! e) e = window.event;

@@ -1,9 +1,9 @@
 /*
 	ClusterMarker Version 1.3.2
-	
+
 	A marker manager for the Google Maps API
 	http://googlemapsapi.martinpearman.co.uk/clustermarker
-	
+
 	Copyright Martin Pearman 2008
 	Last updated 29th September 2008
 
@@ -12,7 +12,7 @@
 	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
+
 
 	This version modified by Steve White (Nov 28 2010) - allows you to pass in a marker creation link for clusters
 	to do: modify to pass out the default zoom out behaviour
@@ -202,7 +202,7 @@ ClusterMarker.prototype.fitMapToMarkers=function(){
 		$markersBounds.extend($mapMarkers[i].getLatLng());
 	}
 	var $fitMapToMarkersZoom=this._map.getBoundsZoomLevel($markersBounds);
-		
+
 	if(this.fitMapMaxZoom && $fitMapToMarkersZoom>this.fitMapMaxZoom){
 		$fitMapToMarkersZoom=this.fitMapMaxZoom;
 	}
@@ -328,12 +328,12 @@ ClusterMarker.prototype.triggerClick=function($index){
 			}
 			for(i=$clusteredMarkersIndexes.length-1; i>=0; i--){
 				$clusteredMarkerIndex=$clusteredMarkersIndexes[i];
-				if($clusteredMarkerIndex!==$index && $iconBounds[$mapZoomLevel][$clusteredMarkerIndex].intersects($iconBounds[$mapZoomLevel][$index])){	
+				if($clusteredMarkerIndex!==$index && $iconBounds[$mapZoomLevel][$clusteredMarkerIndex].intersects($iconBounds[$mapZoomLevel][$index])){
 					$intersectDetected=true;
 					break;
 				}
 			}
-			
+
 		};
 		this._map.setCenter($marker.getLatLng(), $mapZoomLevel);
 		this.triggerClick($index);
