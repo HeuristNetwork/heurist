@@ -88,7 +88,7 @@ error_log($base_url_base);
 		}
 
 		mysql_connection_db_select(USERS_DATABASE);
-		$res = mysql_query('select WordLimit from '.USERS_TABLE.' where '.USERS_ID_FIELD.' = '.get_user_id());
+		$res = mysql_query('select ugr_MinHyperlinkWords from '.USERS_TABLE.' where '.USERS_ID_FIELD.' = '.get_user_id());
 		$row = mysql_fetch_row($res);
 		$word_limit = $row[0];	// minimum number of words that must appear in the link
 		mysql_connection_db_overwrite(DATABASE);
@@ -353,7 +353,7 @@ hyperlinks of interest).</p>
 			$tag_options .= '<option value="'.htmlspecialchars($kwd).'">'.htmlspecialchars($kwd)."</option>\n";
 */
 		mysql_connection_db_select(USERS_DATABASE);
-		$res = mysql_query('select WordLimit from '.USERS_TABLE.' where '.USERS_ID_FIELD.' = '.get_user_id());
+		$res = mysql_query('select ugr_MinHyperlinkWords from '.USERS_TABLE.' where '.USERS_ID_FIELD.' = '.get_user_id());
 		$row = mysql_fetch_row($res);
 		$word_limit = $row[0];	// minimum number of words that must appear in the link
 		mysql_connection_db_overwrite(DATABASE);

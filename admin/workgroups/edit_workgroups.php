@@ -37,42 +37,42 @@ define('MSG_INSERTED', 'Record has been added successfully.
 define('MSG_DELETED', "Record has been deleted successfully.
     Click <a href=\"?mode=s&amp;start=%d\">here</a> to return to main page.");
 
-$table = 'Groups';
+$table = 'sysUGrps';
 $scheme = '';
 $fielddef = array(
-    'f0' => array(FLD_ID => true, FLD_VISIBLE => true, FLD_DISPLAY => 'grp_id', FLD_DISPLAY_SZ => 7,
+    'f0' => array(FLD_ID => true, FLD_VISIBLE => true, FLD_DISPLAY => 'ugr_ID', FLD_DISPLAY_SZ => 7,
         FLD_INPUT => false, FLD_INPUT_TYPE => 'text',
         FLD_INPUT_SZ => 7, FLD_INPUT_MAXLEN => 10, FLD_INPUT_DFLT => '',
         FLD_INPUT_NOTEMPTY => false, FLD_INPUT_VALIDATION => 'Numeric',
-        FLD_DATABASE => 'grp_id'),
+        FLD_DATABASE => 'ugr_ID'),
     'f1' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Group name', FLD_DISPLAY_SZ => 30,
         FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
         FLD_INPUT_SZ => 60, FLD_INPUT_MAXLEN => 30, FLD_INPUT_DFLT => '',
         FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
-        FLD_DATABASE => 'grp_name'),
+        FLD_DATABASE => 'ugr_Name'),
     'f2' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Extended group description', FLD_DISPLAY_SZ => 100,
         FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
         FLD_INPUT_SZ => 80, FLD_INPUT_MAXLEN => 100, FLD_INPUT_DFLT => '',
         FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
-        FLD_DATABASE => 'grp_longname'),
+        FLD_DATABASE => 'ugr_LongName'),
 
     'f3' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Group type', FLD_DISPLAY_SZ => 31,
         FLD_INPUT => true, FLD_INPUT_TYPE => 'select',
         FLD_INPUT_SZ => 31, FLD_INPUT_MAXLEN => 31, FLD_INPUT_DFLT => '',
         FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
-        FLD_DATABASE => 'grp_type'),
+        FLD_DATABASE => 'ugr_Type'),
 /*
-    'f4' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'grp_description', FLD_DISPLAY_SZ => 100,
+    'f4' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'ugr_Description', FLD_DISPLAY_SZ => 100,
         FLD_INPUT => true, FLD_INPUT_TYPE => 'textarea',
         FLD_INPUT_SZ => 80, FLD_INPUT_MAXLEN => 0, FLD_INPUT_DFLT => '',
         FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
-        FLD_DATABASE => 'grp_description'),
+        FLD_DATABASE => 'ugr_Description'),
 */
-    'f5' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'grp_url', FLD_DISPLAY_SZ => 100,
+    'f5' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'ugr_URLs', FLD_DISPLAY_SZ => 100,
         FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
         FLD_INPUT_SZ => 0, FLD_INPUT_MAXLEN => 100, FLD_INPUT_DFLT => '',
         FLD_INPUT_NOTEMPTY => false, FLD_INPUT_VALIDATION => '',
-        FLD_DATABASE => 'grp_url')
+        FLD_DATABASE => 'ugr_URLs')
 );
 //$f3_values = array('0' => 'Usergroup', '1' => 'Workgroup', '2' => 'Ugradclass');
 $f3_values = array('Usergroup' => 'Usergroup', 'Workgroup' => 'Workgroup', 'Ugradclass' => 'Ugradclass');

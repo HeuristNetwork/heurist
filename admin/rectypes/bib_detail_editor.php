@@ -45,9 +45,9 @@ $body->global_vars['new'] = @$_REQUEST['new']? 1 : 0;
 $body->global_vars['editing_reftype'] = @$_REQUEST['rt_id']? 1 : 0;
 
 $body->global_vars['workgroup-dropdown'] = '<select name=grp_id onchange="form.submit();"><option value="">(this instance)</option>';
-$res = mysql_query('select grp_id,grp_name from '.USERS_DATABASE.'.Groups where grp_type != "Usergroup" order by grp_name');
+$res = mysql_query('select grp.ugr_ID,grp.ugr_Name from '.USERS_DATABASE.'.sysUGrps grp where grp.ugr_Type != "User" order by grp.ugr_Name');
 while ($row = mysql_fetch_assoc($res)) {
-	$body->global_vars['workgroup-dropdown'] .= '<option value="'.$row['grp_id'].'"'. ($row['grp_id'] == $grp_id ? ' selected ' : '') .'>'.$row['grp_name'].'</option>';
+	$body->global_vars['workgroup-dropdown'] .= '<option value="'.$row['ugr_ID'].'"'. ($row['ugr_ID'] == $grp_id ? ' selected ' : '') .'>'.$row['ugr_Name'].'</option>';
 }
 $body->global_vars['workgroup-dropdown'] .= '</select>';
 $body->global_vars['grp_id'] = $grp_id;

@@ -121,7 +121,7 @@ if ($_REQUEST['bib_id'] == -1) {
 
 // check workgroup permissions
 if (@$_REQUEST['bib_workgroup']) {
-	$res = mysql_query("select ug_group_id from ".USERS_DATABASE.".UserGroups where ug_group_id=".intval($_REQUEST['bib_workgroup'])." and ug_user_id=$usrID");
+	$res = mysql_query("select ugl_GroupID from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_GroupID=".intval($_REQUEST['bib_workgroup'])." and ugl_UserID=$usrID");
 	if (mysql_num_rows($res) == 0) {
 		$wg = '&wg=' . intval($_REQUEST['bib_workgroup']);
 		unset($_REQUEST['bib_workgroup']);
@@ -139,7 +139,7 @@ if (@$_REQUEST['tag']  &&  strpos($_REQUEST['tag'], "\\")) {
 		$pos = strpos($tag, "\\");
 		if ($pos !== false) {
 			$grpName = substr($tag, 0, $pos);
-			$res = mysql_query("select grp_id from ".USERS_DATABASE.".Groups, ".USERS_DATABASE.".UserGroups where grp_name='".addslashes($grpName)."' and ug_group_id=grp_id and ug_user_id=$usrID");
+			$res = mysql_query("select grp.ugr_ID from ".USERS_DATABASE.".sysUGrps grp, ".USERS_DATABASE.".sysUsrGrpLinks where grp.ugr_Name='".addslashes($grpName)."' and ugl_GroupID=grp.ugr_ID and ugl_UserID=$usrID");
 			if (mysql_num_rows($res) == 0) {
 				$wg .= '&wgkwd=' . urlencode($tag);
 				array_push($outTags, str_replace("\\", "", $tag));
@@ -352,7 +352,7 @@ if ($rec_id) {
 				$pos = strpos($tag, "\\");
 				$grpName = substr($tag, 0, $pos);
 				$kwdName = substr($tag, $pos+1);
-				$res = mysql_query("select tag_ID from usrTags, ".USERS_DATABASE.".Groups, ".USERS_DATABASE.".UserGroups where tag_Text='".addslashes($kwdName)."' and grp_name='".addslashes($grpName)."' and tag_UGrpID=grp_id and ug_group_id=grp_id and ug_user_id=$usrID");
+				$res = mysql_query("select tag_ID from usrTags, ".USERS_DATABASE.".sysUGrps grp, ".USERS_DATABASE.".sysUsrGrpLinks where tag_Text='".addslashes($kwdName)."' and grp.ugr_Name='".addslashes($grpName)."' and tag_UGrpID=grp.ugr_ID and ugl_GroupID=grp.ugr_ID and ugl_UserID=$usrID");
 				$kwd_id = mysql_fetch_row($res);
 				$kwd_id = $kwd_id[0];
 			}

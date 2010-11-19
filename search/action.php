@@ -138,9 +138,9 @@ function add_wgTags_by_id() {
 
 		$wgTags = array_map('intval', explode(',', $_REQUEST["wgTag_ids"]));
 		mysql_query('insert ignore into usrRecTagLinks (rtl_RecID, rtl_TagID) '
-				  . 'select rec_id, tag_ID from usrTags, '.USERS_DATABASE.'.UserGroups, records '
+				  . 'select rec_id, tag_ID from usrTags, '.USERS_DATABASE.'.sysUsrGrpLinks, records '
 				  . ' where rec_id in (' . join(',', $bib_ids) . ') '
-				  . ' and ug_group_id=tag_UGrpID and ug_user_id='.get_user_id()	//make sure the user blongs to the workgroup
+				  . ' and ugl_GroupID=tag_UGrpID and ugl_UserID='.get_user_id()	//make sure the user blongs to the workgroup
 				  . ' and tag_ID in (' . join(',', $wgTags) . ')');
 		$wgTag_count = mysql_affected_rows();
 	}
@@ -174,9 +174,9 @@ function remove_wgTags_by_id() {
 
 		mysql_query('delete usrRecTagLinks from usrRecTagLinks'
 				 . ' left join usrTags on tag_ID = rtl_TagID'
-				 . ' left join '.USERS_DATABASE.'.UserGroups on ug_group_id = tag_UGrpID'
+				 . ' left join '.USERS_DATABASE.'.sysUsrGrpLinks on ugl_GroupID = tag_UGrpID'
 		         . ' where rtl_RecID in (' . join(',', $bib_ids) . ')'
-				 . ' and ug_user_id = ' . get_user_id()
+				 . ' and ugl_UserID = ' . get_user_id()
 		         . ' and tag_ID in (' . join(',', $wgTags) . ')');
 		$wgTag_count += mysql_affected_rows();
 	}
@@ -493,7 +493,7 @@ function print_input_form() {
 function bib_filter($bib_ids) {
 	// return an array of only the bib_ids that exist and the user has access to (workgroup filtered)
 
-	$wg_ids = mysql__select_array(USERS_DATABASE.'.UserGroups', 'ug_group_id', 'ug_user_id='.get_user_id());
+	$wg_ids = mysql__select_array(USERS_DATABASE.'.sysUsrGrpLinks', 'ugl_GroupID', 'ugl_UserID='.get_user_id());
 	array_push($wg_ids, 0);
 	$f_bib_ids = mysql__select_array('records', 'rec_id',
 	                                 'rec_id in ('.join(',', array_map('intval', $bib_ids)).') and (rec_wg_id in ('.join(',', $wg_ids).') or rec_visibility = "viewable")');
@@ -508,7 +508,7 @@ function get_ids_for_tags($tags, $add) {
 		if ( ($slashpos = strpos($tag_name, '\\')) ) {	// it's a workgroup tag
 			$grp_name = substr($tag_name, 0, $slashpos);
 			$tag_name = substr($tag_name, $slashpos+1);
-			$res = mysql_query('select tag_ID from usrTags, '.USERS_DATABASE.'.UserGroups, '.USERS_DATABASE.'.Groups where tag_UGrpID=ug_group_id and ug_group_id=grp_id and ug_user_id='.get_user_id().' and grp_name="'.addslashes($grp_name).'" and lower(tag_Text)=lower("'.addslashes($tag_name).'")');
+			$res = mysql_query('select tag_ID from usrTags, '.USERS_DATABASE.'.sysUsrGrpLinks, '.USERS_DATABASE.'.sysUGrps grp where ugr_Type != "User" and tag_UGrpID=ugl_GroupID and ugl_GroupID=grp.ugr_ID and ugl_UserID='.get_user_id().' and grp.ugr_Name="'.addslashes($grp_name).'" and lower(tag_Text)=lower("'.addslashes($tag_name).'")');
 		}
 		else {
 			$res = mysql_query('select tag_ID from usrTags where lower(tag_Text)=lower("'.addslashes($tag_name).'") and tag_UGrpID='.get_user_id());

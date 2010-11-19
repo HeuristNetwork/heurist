@@ -31,8 +31,6 @@ $body->global_vars['approve'] = 0;
 if (@$_REQUEST['approve']  &&  is_admin())
 	$body->global_vars['approve'] = 1;
 
-$body->global_vars['proj-group-link'] = HEURIST_INSTANCE === '' ? ' | <a href="projectgroupadmin.php">Edit project groups</a>' : '';
-
 $body->verify();
 if (@$_REQUEST['_submit']) {
 	$usr_id = intval(@$_REQUEST['Id']);
@@ -56,14 +54,14 @@ if (@$_REQUEST['_submit']) {
 	if ($body->satisfied) {
 		$body->execute();
 
-		if (@$_REQUEST['Active'])
-			mysql_query("update Users set Active='Y' where Id=$usr_id");
+		if (@$_REQUEST['ugr_Enabled'])
+			mysql_query("update sysUGrps usr set ugr_Enabled='Y' where ugr_ID=$usr_id");
 		else
-			mysql_query("update Users set Active='N' where Id=$usr_id");
+			mysql_query("update sysUGrps usr set ugr_Enabled='N' where ugr_ID=$usr_id");
 
 		$body->global_vars['edit-success'] = 1;
 
-		$res = mysql_query('select * from Users where Id = '.$usr_id);
+		$res = mysql_query('select * from sysUGrps usr where ugr_ID = '.$usr_id);
 		$row = mysql_fetch_assoc($res);
 
 		if (@$_REQUEST['approved']) {
@@ -74,16 +72,16 @@ Login at:
 
 ".HEURIST_URL_BASE."
 
-with the username: " . $row['Username'] . ".
+with the username: " . $row['ugr_Name'] . ".
 
 We recommend visiting the 'Take the Tour' section and
 also visiting the Help function, which provides comprehensive
 overviews and step-by-step instructions for using Heurist.
 
 ";
-			error_log("sending user confirmation mail: " . $email . ", " . $row['Realname'].' ['.$row['EMail'].']');
-			$rv = mail($email, 'Heurist User Registration: '.$row['Realname'].' ['.$row['EMail'].']', $email_text, "From: info@acl.arts.usyd.edu.au\r\nCc: info@acl.arts.usyd.edu.au");
-			if (! $rv) error_log("mail send failed: " . $email . ", " . $row['Realname'].' ['.$row['EMail'].']');
+			error_log("sending user confirmation mail: " . $email . ", " . $row['ugr_FirstName'].' '.$row['ugr_LastName'].'['.$row['ugr_eMail'].']');
+			$rv = mail($email, 'Heurist User Registration: '.$row['ugr_FirstName'].' '.$row['ugr_LastName'].' ['.$row['ugr_eMail'].']', $email_text, "From: info@acl.arts.usyd.edu.au\r\nCc: info@acl.arts.usyd.edu.au");
+			if (! $rv) error_log("mail send failed: " . $email . ", " . $row['ugr_FirstName'].' '.$row['ugr_LastName'].' ['.$row['ugr_eMail'].']');
 		}
 
 	}

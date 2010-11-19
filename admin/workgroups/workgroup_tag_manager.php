@@ -66,22 +66,22 @@ function delete_tag(tag_ID) {
 		return;
 	}
 	$adminGroupList = join(',', $adminGroupList);
-	$gres = mysql_query('select grp_id, grp_name from '.USERS_DATABASE.'.Groups where grp_id in ('.$adminGroupList.') order by grp_name');
+	$gres = mysql_query('select grp.ugr_ID, grp.ugr_Name from '.USERS_DATABASE.'.sysUGrps grp where grp.ugr_ID in ('.$adminGroupList.') order by grp.ugr_Name');
 	while ($grp = mysql_fetch_assoc($gres)) {
 		print '<div class="gr_div">';
-		print '<b>' . htmlspecialchars($grp['grp_name']) . '</b>';
+		print '<b>' . htmlspecialchars($grp['ugr_Name']) . '</b>';
 
 		print '<ul>';
-		$res = mysql_query('select tag_ID, tag_Text, count(rtl_ID) as tgi_count from usrTags left join usrRecTagLinks on rtl_TagID=tag_ID where tag_UGrpID='.$grp['grp_id'].' group by tag_ID, rtl_TagID order by tag_Text');
+		$res = mysql_query('select tag_ID, tag_Text, count(rtl_ID) as tgi_count from usrTags left join usrRecTagLinks on rtl_TagID=tag_ID where tag_UGrpID='.$grp['ugr_ID'].' group by tag_ID, rtl_TagID order by tag_Text');
 		while ($tag = mysql_fetch_assoc($res)) {
-			$searchlink = HEURIST_URL_BASE.'search/search.html?q=tag%3A%22'.$grp['grp_name'].'%5C'.$tag['tag_Text'].'%22&w=all&stype=';
+			$searchlink = HEURIST_URL_BASE.'search/search.html?q=tag%3A%22'.$grp['ugr_Name'].'%5C'.$tag['tag_Text'].'%22&w=all&stype=';
 			if ($tag['tgi_count'] == 0) $used = '';
 			else $used = '<i>(<a target=_blank href="'.$searchlink.'">used '.($tag['tgi_count'] == 1 ? 'once' : $tag['tgi_count'].' times').'</a>)</i>';
 ?>
  <li><b><?= htmlspecialchars($tag['tag_Text']) ?></b> <?= $used ?> [<a href="#" onclick="delete_tag(<?= $tag['tag_ID'] ?>); return false;">delete</a>]</li>
 <?php
 		}
-		print ' <li><input type="text" class="tbox" name="new[' . htmlspecialchars($grp['grp_id']) . ']" onkeypress="return (event.which != 92  &&  event.keyCode != 92);" value="' . htmlspecialchars($_REQUEST['new'][$grp['grp_id']]) . '"></li>';
+		print ' <li><input type="text" class="tbox" name="new[' . htmlspecialchars($grp['ugr_ID']) . ']" onkeypress="return (event.which != 92  &&  event.keyCode != 92);" value="' . htmlspecialchars($_REQUEST['new'][$grp['ugr_ID']]) . '"></li>';
 		print '</ul>';
 		print '</div>';
 	}
@@ -106,7 +106,7 @@ function add_tags() {
 	foreach ($_REQUEST['new'] as $key => $value) {
 		$_REQUEST['new'][$key] = '';	// clear existing value
 		$value = trim($value);
-		if ($value == '') continue;
+		if ($value == '' || intval($key) == 0) continue;	// saw NOTE: assumes UGrpID 0 is not valid for tagging
 
 		if ($insert_stmt) $insert_stmt .= ', ';
 		$insert_stmt .= '("' . addslashes($value) . '", ' . intval($key) . ')';
@@ -129,7 +129,7 @@ function add_tags() {
 function delete_tag() {
 	$tag_id = intval($_REQUEST['deleting']);
 	mysql_connection_db_overwrite(DATABASE);
-	mysql_query('delete from usrTags where tag_ID = ' . $tag_id . ' and ???kwd_wg_id is not null');
+	mysql_query('delete from usrTags where tag_ID = ' . $tag_id );
 	if (mysql_affected_rows() >= 1) {	// overkill
 		print '<div style="color: red;">1 tag deleted</div>';
 	} else {

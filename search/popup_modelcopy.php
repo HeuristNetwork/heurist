@@ -58,9 +58,9 @@ if (@$_REQUEST['submit']) $updated = update_my_settings();
     Show new data for:
     <select name="model_user_id" onchange="form.submit();">
 <?php
-	$res = mysql_query("select Id, concat(firstname,' ',lastname) as realname from ".USERS_DATABASE.".Users where IsModelUser=1");
+	$res = mysql_query("select usr.ugr_ID, concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as realname from ".USERS_DATABASE.".sysUGrps usr where usr.ugr_IsModelUser=1");
 	while ($row = mysql_fetch_assoc($res)) { ?>
-  <option value="<?=$row['Id']?>"<?=($row['Id']==MODEL_USER_ID ? ' selected' : '')?>><?=$row['realname']?></option>
+  <option value="<?=$row['ugr_ID']?>"<?=($row['ugr_ID']==MODEL_USER_ID ? ' selected' : '')?>><?=$row['realname']?></option>
 <?php	} ?>
     </select>
    </form>

@@ -42,28 +42,22 @@ define('WRITEPASS', 'smith18');
 
    mysql -u root -p < database_create.sql  */
 
-$MAINTABLES['USER'] = USERS_DATABASE.'.Users';
-	$PKEY['USER'] = 'Id';
+$MAINTABLES['USER'] = USERS_DATABASE.'.sysUGrps';
+	$PKEY['USER'] = 'ugr_ID';
 
-$MAINTABLES['GROUP'] = USERS_DATABASE.'.Groups';
-	$PKEY['GROUP'] = 'grp_id';
+$MAINTABLES['GROUP'] = USERS_DATABASE.'.sysUGrps';
+	$PKEY['GROUP'] = 'ugr_ID';
 
 $MAINTABLES['PROJECT'] = USERS_DATABASE.'.projects';
 	$PKEY['PROJECT'] = 'code';
 
-$MAINTABLES['USER_GROUPS'] = USERS_DATABASE.'.UserGroups';
-	$PKEY['USER_GROUPS'] = 'ug_id';
-
-$MAINTABLES['PROJECT_GROUPS'] = USERS_DATABASE.'.ProjectGroups';
-	$PKEY['PROJECT_GROUPS'] = 'pg_id';
+$MAINTABLES['USER_GROUPS'] = USERS_DATABASE.'.sysUsrGrpLinks';
+	$PKEY['USER_GROUPS'] = 'ugl_ID';
 
 
 /* Many-to-many relationships with the main table */
 
-	$LINK_KEYS["USER_GROUPS"] = array("USER-ID" => "ug_user_id", 
-									"GROUP-ID" => "ug_group_id");
-
-	$LINK_KEYS["PROJECT_GROUPS"] = array("PROJECT-ID" => "pg_project_id", 
-									"GROUP-ID" => "pg_group_id");
+	$LINK_KEYS["USER_GROUPS"] = array("USER-ID" => "ugl_UserID",
+									"GROUP-ID" => "ugl_GroupID");
 
 ?>

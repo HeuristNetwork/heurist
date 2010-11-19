@@ -11,20 +11,20 @@ if (! defined('BASE_PATH'))
 	define('BASE_PATH', '');
 
 define('USERS_DATABASE', 'ACLAdmin');
-define('USERS_TABLE', 'Users');
-define('USERS_ID_FIELD', 'Id');
-define('USERS_USERNAME_FIELD', 'Username');
-define('USERS_PASSWORD_FIELD', 'Password');
-define('USERS_FIRSTNAME_FIELD', 'firstname');
-define('USERS_LASTNAME_FIELD', 'lastname');
-define('USERS_ACTIVE_FIELD', 'Active');
-define('GROUPS_TABLE', 'Groups');
-define('GROUPS_ID_FIELD', 'grp_id');
-define('GROUPS_NAME_FIELD', 'grp_name');
-define('USER_GROUPS_TABLE', 'UserGroups');
-define('USER_GROUPS_USER_ID_FIELD', 'ug_user_id');
-define('USER_GROUPS_GROUP_ID_FIELD', 'ug_group_id');
-define('USER_GROUPS_ROLE_FIELD', 'ug_role');
+define('USERS_TABLE', 'sysUGrps');
+define('USERS_ID_FIELD', 'ugr_ID');
+define('USERS_USERNAME_FIELD', 'ugr_Name');
+define('USERS_PASSWORD_FIELD', 'ugr_Password');
+define('USERS_FIRSTNAME_FIELD', 'ugr_FirstName');
+define('USERS_LASTNAME_FIELD', 'ugr_LastName');
+define('USERS_ACTIVE_FIELD', 'ugr_Enabled');
+define('GROUPS_TABLE', 'sysUGrps');
+define('GROUPS_ID_FIELD', 'ugr_ID');
+define('GROUPS_NAME_FIELD', 'ugr_Name');
+define('USER_GROUPS_TABLE', 'sysUsrGrpLinks');
+define('USER_GROUPS_USER_ID_FIELD', 'ugl_UserID');
+define('USER_GROUPS_GROUP_ID_FIELD', 'ugl_GroupID');
+define('USER_GROUPS_ROLE_FIELD', 'ugl_Role');
 
 
 mysql_connection_localhost_select(USERS_DATABASE);
@@ -33,13 +33,13 @@ mysql_connection_localhost_select(USERS_DATABASE);
 $LOGIN_ERROR = '';
 if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 
-	$res = mysql_query('select * from '.USERS_TABLE.' where '.USERS_USERNAME_FIELD.' = "'.addslashes($_REQUEST['username']).'"');
+	$res = mysql_query('select * from '.USERS_TABLE.' usr where usr.'.USERS_USERNAME_FIELD.' = "'.addslashes($_REQUEST['username']).'"');
     if ( ($user = mysql_fetch_assoc($res))  &&
 		 $user[USERS_ACTIVE_FIELD] == 'Y'  &&
-		 (crypt($_REQUEST['password'], $user[USERS_PASSWORD_FIELD]) == $user[USERS_PASSWORD_FIELD]  ||  $_SESSION['shsseri_user_name'] == 'johnson')) {
+		 (crypt($_REQUEST['password'], $user[USERS_PASSWORD_FIELD]) == $user[USERS_PASSWORD_FIELD])) {
 
-		$res = mysql_query('select '.GROUPS_ID_FIELD.','.USER_GROUPS_ROLE_FIELD.' from '.USER_GROUPS_TABLE.','.GROUPS_TABLE.
-							' where '.USER_GROUPS_GROUP_ID_FIELD.'='.GROUPS_ID_FIELD.
+		$res = mysql_query('select grp.'.GROUPS_ID_FIELD.','.USER_GROUPS_ROLE_FIELD.' from '.USER_GROUPS_TABLE.','.GROUPS_TABLE.' grp'.
+							' where '.USER_GROUPS_GROUP_ID_FIELD.'=grp.'.GROUPS_ID_FIELD.
 							' and '.USER_GROUPS_USER_ID_FIELD.'="'.$user[USERS_ID_FIELD].'"');
 		while ($row = mysql_fetch_assoc($res)) {
 			if ($row[USER_GROUPS_ROLE_FIELD])
@@ -67,10 +67,10 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 
 		/* bookkeeping */
 		mysql_connection_localhost_overwrite(USERS_DATABASE);
-		mysql_query('update Users set LastUsed=now(), LoginCount=LoginCount+1
+		mysql_query('update sysUGrps usr set usr.ugr_LastLoginTime=now(), usr.ugr_LoginCount=ugr_LoginCount+1
 					  where Id='.$user[USERS_ID_FIELD]);
 		mysql_connection_db_overwrite(USERS_DATABASE);	// replication
-		mysql_query('update Users set LastUsed=now(), LoginCount=LoginCount+1
+		mysql_query('update sysUGrps usr set usr.ugr_LastLoginTime=now(), usr.ugr_LoginCount=ugr_LoginCount+1
 					  where Id='.$user[USERS_ID_FIELD]);
 		mysql_connection_localhost_select(USERS_DATABASE);
 

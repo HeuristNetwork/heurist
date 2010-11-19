@@ -34,16 +34,15 @@ $body->global_vars['new-user-id'] = 0;
 
 
 $body->global_vars['model-user-dropdown'] = '<select name="model_usr_id">'."\n";
-$res = mysql_query("select Id, concat(firstname,' ',lastname) as realname from ".USERS_DATABASE.".Users where IsModelUser = 1" . (@$_REQUEST['register'] ? ' limit 1' : ''));
+$res = mysql_query("select usr.ugr_ID, concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as realname from ".USERS_DATABASE.".sysUGrps usr where usr.ugr_IsModelUser = 1" . (@$_REQUEST['register'] ? ' limit 1' : ''));
 while ($row = mysql_fetch_assoc($res)) {
-	$body->global_vars['model-user-dropdown'] .= ' <option value="'.$row['Id'].'">'.$row['realname'].'</option>'."\n";
+	$body->global_vars['model-user-dropdown'] .= ' <option value="'.$row['ugr_ID'].'">'.$row['realname'].'</option>'."\n";
 }
 $body->global_vars['model-user-dropdown'] .= '</select>'."\n";
 if (@$_REQUEST['register']) {
 	$body->global_vars['model-user-dropdown'] = '<input type="hidden" name="model_usr_id" value="96">'."\n";
 }
 
-$body->global_vars['proj-group-link'] = HEURIST_INSTANCE === '' ? ' | <a href="'.HEURIST_URL_BASE.'admin/users/projectgroupadmin.php">Edit project groups</a>' : '';
 
 $body->verify();
 
@@ -52,12 +51,12 @@ $dup_check_ok = true;
 if (@$_REQUEST['_submit']) {
 
 	// check for duplicate fields
-	$res = mysql_query('select Id from '.USERS_DATABASE.'.Users where Username = "'.$_REQUEST['user_insert_Username'].'"');
+	$res = mysql_query('select ugr_ID from '.USERS_DATABASE.'.sysUGrps usr where usr.ugr_Name = "'.$_REQUEST['user_insert_Username'].'"');
 	if (mysql_num_rows($res) > 0) {
 		$body->global_vars['-ERRORS'][] = 'The Username you have chosen is already in use.  Please choose another.';
 		$dup_check_ok = false;
 	}
-	$res = mysql_query('select Id from '.USERS_DATABASE.'.Users where EMail = "'.$_REQUEST['user_insert_EMail'].'"');
+	$res = mysql_query('select ugr_ID from '.USERS_DATABASE.'.sysUGrps usr where ugr_eMail = "'.$_REQUEST['user_insert_EMail'].'"');
 	if (mysql_num_rows($res) > 0) {
 		$body->global_vars['-ERRORS'][] = 'The EMail address you have entered is already registered.  Please use another.';
 		$dup_check_ok = false;
@@ -108,16 +107,14 @@ if ($_REQUEST['_submit']  &&  $dup_check_ok) {
 		$usr_id = mysql_insert_id();
 
 		if ($usr_id) {
-			// set Realname field
-			mysql_query("update ".USERS_DATABASE.".Users set Realname=concat(firstname,' ',lastname) where Id=$usr_id");
 
 
 			$model_usr_id = $_REQUEST['model_usr_id'];
-			$res = mysql_query("select WordLimit from ".USERS_DATABASE.".Users where Id=$model_usr_id");
+			$res = mysql_query("select ugr_MinHyperlinkWords from ".USERS_DATABASE.".sysUGrps usr where ugr_ID=$model_usr_id");
 			$row = mysql_fetch_row($res);
 			$word_limit = intval($row[0]);
 
-			mysql_query("update ".USERS_DATABASE.".Users set WordLimit='".addslashes($word_limit)."' where Id=$usr_id");
+			mysql_query("update ".USERS_DATABASE.".sysUGrps usr set ugr_MinHyperlinkWords='".addslashes($word_limit)."' where ugr_ID=$usr_id");
 
 
 			/* copy tags from the model_user */
@@ -199,10 +196,10 @@ mysql_connection_localhost_overwrite(DATABASE);
 
 
 			// add user to Heurist and TMWiki groups
-			mysql_query("insert into ".USERS_DATABASE.".UserGroups (ug_user_id, ug_group_id) values ($usr_id, 2), ($usr_id, 4)");
+			mysql_query("insert into ".USERS_DATABASE.".sysUsrGrpLinks (ugl_UserID, ugl_GroupID) values ($usr_id, 2), ($usr_id, 4)");
 
 			if ($_REQUEST['register']) {
-				mysql_query("update ".USERS_DATABASE.".Users set Active='N' where Id=$usr_id");
+				mysql_query("update ".USERS_DATABASE.".sysUGrps usr set ugr_Enabled='N' where ugr_ID=$usr_id");
 
 				// send email to admin with link to approve page
 				$email_text =
@@ -226,9 +223,9 @@ Go to the address below to review further details and approve the registration:
 ".HEURIST_URL_BASE."admin/users/edit.php?approve=1&Id=$usr_id
 
 ";
-				$admins = mysql__select_array("UserGroups left join Users on Id = ug_user_id",
-				                              "EMail",
-				                              "ug_group_id = " . HEURIST_ADMIN_GROUP_ID . " and ug_role = 'admin'");
+				$admins = mysql__select_array("sysUsrGrpLinks left join sysUGrps usr on ugr_ID = ugl_UserID",
+				                              "ugr_eMail",
+				                              "ugl_GroupID = " . HEURIST_ADMIN_GROUP_ID . " and ugl_Role = 'admin'");
 				if (! @$admins  ||  count($admins) === 0) {
 					$admins = array("info@acl.arts.usyd.edu.au");
 				}

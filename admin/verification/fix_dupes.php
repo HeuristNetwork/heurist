@@ -643,8 +643,8 @@ function do_fix_dupe() {
         unset($master_pers_record['bkm_ID']);
         mysql__update('usrBookmarks','bkm_ID='.$master_bkm_ID,$master_pers_record);
             }
-//for every delete dup kwd link whoses kwd id is not already linked to the master record change the record id to master
-	//get kwd links for the soon to be deleted dup records
+//for every delete dup tag link whoses tag id is not already linked to the master record change the record id to master
+	//get tag links for the soon to be deleted dup records
     $delete_dup_rtl_ids = mysql__select_assoc('usrRecTagLinks','rtl_ID', 'rtl_TagID', 'rtl_RecID in'. $dup_rec_list);
     foreach ($delete_dup_rtl_ids as $rtl_ID => $tag_id) {
         if (count($master_tag_ids) && array_search($tag_id,$master_tag_ids)){ //if it's already linked to the master delete it

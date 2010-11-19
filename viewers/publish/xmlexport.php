@@ -374,7 +374,7 @@ function writeGeneralData($bib, $depth) {
 
 	$query = 'SELECT * FROM records
 						LEFT JOIN rec_types on rec_type = rt_id
-						LEFT JOIN '.USERS_DATABASE.'.Users on rec_added_by_usr_id = Id
+						LEFT JOIN '.USERS_DATABASE.'.sysUGrps usr on rec_added_by_usr_id = Id
 						WHERE rec_id=' . $bib;
 	$res = mysql_query($query);
 	// do we have results ?
@@ -394,7 +394,7 @@ function writeGeneralData($bib, $depth) {
 		$XML .= "<title>" . htmlspecialchars($row['rec_title']) . "</title>\n";
 
 		// construct username who added record
-		$person = $row['firstname'] . ' ' . $row['lastname'];
+		$person = $row['ugr_FirstName'] . ' ' . $row['ugr_LastName'];
 		// remove multiple spaces
 		$person = trim(preg_replace('/[\s]+/', ' ', $person));
 		$XML .= "<added_by>" . htmlspecialchars($person) . "</added_by>\n";
@@ -407,10 +407,10 @@ function writeGeneralData($bib, $depth) {
 		// get workgroup from users database
 		else {
 			mysql_connection_db_select(USERS_DATABASE) or die(mysql_error());
-			$query = 'SELECT grp_name FROM Groups WHERE grp_id=' . $workgroup;
+			$query = 'SELECT grp.ugr_Name FROM sysUGrps grp WHERE grp.ugr_ID=' . $workgroup;
 			$res = mysql_query($query);
 			$row = mysql_fetch_assoc($res);
-			$XML .= "<workgroup>" . htmlspecialchars($row['grp_name']) . "</workgroup>\n";
+			$XML .= "<workgroup>" . htmlspecialchars($row['ugr_Name']) . "</workgroup>\n";
 			// set database back
 			mysql_connection_db_select(DATABASE) or die(mysql_error());
 		}
@@ -490,7 +490,7 @@ function writeReversePointers($bib, $depth) {
 }
 
 /**
- * This function retrieves workgroup usrTags for the record
+ * This function write workgroup usrTags for the record
  *
  * @global $XML the xml document where it writes to
  * @param string $bib record id
@@ -499,15 +499,15 @@ function writeReversePointers($bib, $depth) {
 function writeTags($bib) {
 	global $XML;
 
-	$query = 'SELECT distinct grp_name, tag_Text
+	$query = 'SELECT distinct grp.ugr_Name, tag_Text
 				FROM usrRecTagLinks
 		   LEFT JOIN usrTags ON tag_ID = rtl_TagID
-		   LEFT JOIN '.USERS_DATABASE.'.Groups ON grp_id = tag_UGrpID
+		   LEFT JOIN '.USERS_DATABASE.'.sysUGrps grp ON grp.ugr_Type != "User" AND grp.ugr_ID = tag_UGrpID
 			   WHERE rtl_RecID = '.$bib.'
-			ORDER BY grp_name, tag_Text';
+			ORDER BY grp.ugr_Name, tag_Text';
 	$res = mysql_query($query);
 	while ($row = mysql_fetch_assoc($res)) {
-		$XML .= "<tag workgroup=\"".$row['grp_name']."\">".$row['tag_Text']."</tag>\n";
+		$XML .= "<tag workgroup=\"".$row['ugr_Name']."\">".$row['tag_Text']."</tag>\n";
 	}
 }
 

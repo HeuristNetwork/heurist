@@ -957,7 +957,7 @@ function add_tag(tag) {
 
 <?php
 	/* are there any workgroup-tags for any workgroups this user is in? If so, show the workgroup-tag section */
-	$res = mysql_query('select tag_ID, grp_name, tag_Text from usrTags, '.USERS_DATABASE.'.UserGroups, '.USERS_DATABASE.'.Groups where tag_UGrpID=ug_group_id and ug_group_id=grp_id and ug_user_id=' . get_user_id() . ' order by grp_name, tag_Text');
+	$res = mysql_query('select tag_ID, grp.ugr_Name, tag_Text from usrTags, '.USERS_DATABASE.'.sysUsrGrpLinks, '.USERS_DATABASE.'.sysUGrps grp where tag_UGrpID=ugl_GroupID and ugl_GroupID=grp.ugr_ID and ugl_UserID=' . get_user_id() . ' order by grp.ugr_Name, tag_Text');
 	if (mysql_num_rows($res) > 0) {
 ?>
     <div style="margin-top: 1ex; margin-left: 10ex;">
@@ -966,7 +966,7 @@ function add_tag(tag) {
       <option selected></option>
 <?php		while ($row = mysql_fetch_assoc($res)) {	//saw TODO: add option grouping by workgroup and remove groupname\ ?>
       <option value="<?= addslashes($row['tag_ID']) ?>">
-       <?= htmlspecialchars($row['grp_name']) ?> \ <?= htmlspecialchars($row['tag_Text']) ?>
+       <?= htmlspecialchars($row['ugr_Name']) ?> \ <?= htmlspecialchars($row['tag_Text']) ?>
       </option>
 <?php		}	?>
      </select>
@@ -1939,7 +1939,7 @@ function insert_tags(&$entry, $tag_map=array()) {
 	// easy one first: see if there is a workgroup tag to be added, and that we have access to that workgroup
 	$wgKwd = $entry->getWorkgroupTag();
 	if ($wgKwd) {
-	$res = mysql_query("select * from usrTags, ".USERS_DATABASE.".UserGroups where tag_UGrpID=ug_group_id and ug_user_id=" . get_user_id() . " and tag_ID=" . $wgKwd);
+		$res = mysql_query("select * from usrTags, ".USERS_DATABASE.".sysUsrGrpLinks where tag_UGrpID=ugl_GroupID and ugl_UserID=" . get_user_id() . " and tag_ID=" . $wgKwd);
 		if (mysql_num_rows($res) != 1) $wgKwd = 0;// saw CHECK SPEC: can there be more than 1 , this code ingnores if 0 or more than 1
 	}
 
@@ -1962,8 +1962,8 @@ function insert_tags(&$entry, $tag_map=array()) {
 	while ($row = mysql_fetch_row($res)) $tags[$row[1]] = $row[0];
 
 	//now let's add in all the wgTags for this user's workgroups
-	$all_wgTags = mysql__select_assoc('usrTags, '.USERS_DATABASE.'.UserGroups, '.USERS_DATABASE.'.Groups', 'lower(concat(grp_name, "\\\\", tag_Text))', 'tag_ID',
-	                                    'tag_UGrpID=ug_group_id and ug_group_id=grp_id and ug_user_id='.get_user_id()); //saw CHECK SPEC: is it correct to import wgTags with a slash
+	$all_wgTags = mysql__select_assoc('usrTags, '.USERS_DATABASE.'.sysUsrGrpLinks, '.USERS_DATABASE.'.sysUGrps grp', 'lower(concat(grp.ugr_Name, "\\\\", tag_Text))', 'tag_ID',
+	                                    'tag_UGrpID=ugl_GroupID and ugl_GroupID=grp.ugr_ID and ugl_UserID='.get_user_id()); //saw CHECK SPEC: is it correct to import wgTags with a slash
 	foreach ($all_wgTags as $tag => $id) $tags[$tag] = $id;
 
 	$entry_tag_ids = array();

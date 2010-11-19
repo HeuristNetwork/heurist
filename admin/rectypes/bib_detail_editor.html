@@ -186,7 +186,7 @@
  <body>
 
   <script>
-    if ([grp_id] > 0) document.body.className = "wg";
+    if ([ugr_Type] != "User") document.body.className = "wg";
   </script>
 
   {PageHeader}
@@ -206,8 +206,6 @@
 <a href="../users/usergroupadmin.php?instance=[instance-name!]">List all users</a>
 |
 <a href="../../search/search.html?q=_BROKEN_&amp;w=all&amp;instance=[instance-name!]">Records with broken urls</a>
-|
-<a href="../workgroups/wg_overrides.php?instance=[instance-name!]">Record types with overrides</a>
 |
 <a href="../workgroups/groups.php?instance=[instance-name!]">Take your hat off (exit group)</a>
 <br>

@@ -27,9 +27,9 @@ if (! is_logged_in()) {
 
 $tags = mysql__select_array("usrTags", "distinct tag_Text", "tag_UGrpID=" . get_user_id());
 
-$workgroups = mysql__select_array(USERS_DATABASE.".UserGroups", "distinct ug_group_id", "ug_user_id=" . get_user_id());
+$workgroups = mysql__select_array(USERS_DATABASE.".sysUsrGrpLinks", "distinct ugl_GroupID", "ugl_UserID=" . get_user_id());
 
-$res = mysql_query("select tag_ID, tag_Text, tag_UGrpID from usrTags, ".USERS_DATABASE.".UserGroups where ug_group_id=tag_UGrpID and ug_user_id=" . get_user_id());
+$res = mysql_query("select tag_ID, tag_Text, tag_UGrpID from usrTags, ".USERS_DATABASE.".sysUsrGrpLinks where ugl_GroupID=tag_UGrpID and ugl_UserID=" . get_user_id());
 $workgroupTags = array();
 while ($row = mysql_fetch_row($res)) { array_push($workgroupTags, $row); }
 

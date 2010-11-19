@@ -206,44 +206,44 @@ top.HEURIST.ratings = {"0": "not rated",
 	$workgroupIDs = array();
 	$workgroupsLength = 0;
 
-	$res = mysql_query("select grp_id, grp_name, grp_description, grp_url, count(ug_user_id) as members
-						  from ".USERS_DATABASE.".Groups
-					 left join ".USERS_DATABASE.".UserGroups on ug_group_id = grp_id
-					 left join ".USERS_DATABASE.".Users on Id = ug_user_id
-						 where grp_type != 'Usergroup'
-						   and (ug_user_id is null  or  Active = 'Y')
-					  group by grp_id order by grp_name");
+	$res = mysql_query("select grp.ugr_ID as grpID, grp.ugr_Name as grpName, grp.ugr_Description as description, grp.ugr_URLs as URL, count(ugl_UserID) as members
+						  from ".USERS_DATABASE.".sysUGrps grp
+					 left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_GroupID = grp.ugr_ID
+					 left join ".USERS_DATABASE.".sysUGrps b on b.ugr_ID = ugl_UserID
+						 where grp.ugr_Type != 'User'
+						   and b.ugr_Enabled  = 'Y'
+					  group by grp.ugr_ID order by a.ugr_Name");
 	while ($row = mysql_fetch_assoc($res)) {
-		$workgroups[$row["grp_id"]] = array(
-			"name" => $row["grp_name"],
-			"description" => $row["grp_description"],
-			"url" => $row["grp_url"],
+		$workgroups[$row["grpID"]] = array(
+			"name" => $row["grpName"],
+			"description" => $row["description"],
+			"url" => $row["URL"],
 			"memberCount" => $row["members"]
 		);
-		$workgroupIDs[$row["grp_name"]] = $row["grp_id"];
+		$workgroupIDs[$row["grpName"]] = $row["grpID"];
 
-		$workgroupsLength = max($workgroupsLength, intval($row["grp_id"])+1);
+		$workgroupsLength = max($workgroupsLength, intval($row["grpID"])+1);
 	}
 	$workgroups["length"] = $workgroupsLength;
 
-	$res = mysql_query("select ug_group_id, concat(firstname,' ',lastname) as name, EMail
-						  from ".USERS_DATABASE.".Groups
-					 left join ".USERS_DATABASE.".UserGroups on ug_group_id = grp_id
-					 left join ".USERS_DATABASE.".Users on Id = ug_user_id
-						 where grp_type != 'Usergroup'
-						   and ug_role = 'admin'
-						   and Active = 'Y'
-					  order by ug_group_id, lastname, firstname");
+	$res = mysql_query("select ugl_GroupID, concat(b.ugr_FirstName,' ',b.ugr_LastName) as name, b.ugr_eMail
+						  from ".USERS_DATABASE.".sysUGrps grp
+					 left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_GroupID = grp.ugr_ID
+					 left join ".USERS_DATABASE.".sysUGrps b on b.ugr_ID = ugl_UserID
+						 where grp.ugr_Type != 'User'
+						   and ugl_Role = 'admin'
+						   and b.ugr_Enabled  = 'Y'
+					  order by ugl_GroupID, b.ugr_LastName, b.ugr_FirstName");
 	$grp_id = 0;
 	while ($row = mysql_fetch_assoc($res)) {
-		if ($grp_id == 0   ||  $grp_id != $row["ug_group_id"]) {
-			if ($workgroups[$row["ug_group_id"]])
-				$workgroups[$row["ug_group_id"]]["admins"] = array();
+		if ($grp_id == 0   ||  $grp_id != $row["ugl_GroupID"]) {
+			if ($workgroups[$row["ugl_GroupID"]])
+				$workgroups[$row["ugl_GroupID"]]["admins"] = array();
 		}
-		$grp_id = $row["ug_group_id"];
+		$grp_id = $row["ugl_GroupID"];
 
 		if ($workgroups[$grp_id])
-			array_push($workgroups[$grp_id]["admins"], array("name" => $row["name"], "email" => $row["EMail"]));
+			array_push($workgroups[$grp_id]["admins"], array("name" => $row["name"], "email" => $row["ugr_eMail"]));
 	}
 
 	print "top.HEURIST.workgroups = " . json_format($workgroups) . ";\n";

@@ -42,7 +42,7 @@
  <tr>
   <td align="left"><h2>User Group Administration</h2></td>
   <td align="right" valign="top">
-	<a href="add.php">Add user</a>[proj-group-link!]<br><br>
+	<a href="add.php">Add user</a><br><br>
    <font color="#008000"><small>Logged in as: </small><tt>[logged-in-user-username]</tt></font><br>
    [if-eq : logged-in-user-username : ""]
    <a href="../../common/connect/login.php?instance=[instance-name!]"><small>Log in</small></a>
@@ -82,29 +82,29 @@ Click "+" / "-" to grant / revoke admin privileges for a group.<br>
  <th align="left">Add to</th>
 </tr>
 [foreach USER users_foreach]
-[if-eq : Active : "Y"]
+[if-eq : ugr_Enabled : "Y"]
 
 <tr>
- <td valign="top">[Id]&nbsp;&nbsp;</td>
- <td valign="top">[Username]&nbsp;&nbsp;&nbsp;&nbsp;</td>
- <td valign="top">[firstname] [lastname]&nbsp;&nbsp;&nbsp;&nbsp;</td>
+ <td valign="top">[ugr_ID]&nbsp;&nbsp;</td>
+ <td valign="top">[ugr_Name]&nbsp;&nbsp;&nbsp;&nbsp;</td>
+ <td valign="top">[ugr_FirstName] [ugr_LastName]&nbsp;&nbsp;&nbsp;&nbsp;</td>
  <td>
 
   <table border="0" cellspacing="0" cellpadding="0">
   [foreach USER_GROUPS user_groups_foreach]
    <tr>
     [select GROUP groups_select]
-     <td width="150">[grp_name]&nbsp;&nbsp;</td>
+     <td width="150">[ugr_Name]&nbsp;&nbsp;</td>
 	 <td width="40">
-	  <a title="remove from group" href="#" onclick="elt=document.getElementById('remove_group_link_elt'); if (elt) { elt.value=[ug_id]; elt.form.submit(); return true; } return false;" style="text-decoration: none; color: blue"><tt><b>x</b></tt></a>
+	  <a title="remove from group" href="#" onclick="elt=document.getElementById('remove_group_link_elt'); if (elt) { elt.value=[ugl_ID]; elt.form.submit(); return true; } return false;" style="text-decoration: none; color: blue"><tt><b>x</b></tt></a>
      </td>
      <td>
       <nobr>
-      <a title="grant admin privilege" href="#" onclick="elt=document.getElementById('make_admin_elt'); if (elt) { elt.value=[ug_id]; elt.form.submit(); return true; } return false;" style="text-decoration: none; color: blue"><tt><b>+</b></tt></a>
-      <a title="revoke admin privilege" href="#" onclick="elt=document.getElementById('unmake_admin_elt'); if (elt) { elt.value=[ug_id]; elt.form.submit(); return true; } return false;" style="text-decoration: none; color: blue"><tt><b>-</b></tt></a>&nbsp;
+      <a title="grant admin privilege" href="#" onclick="elt=document.getElementById('make_admin_elt'); if (elt) { elt.value=[ugl_ID]; elt.form.submit(); return true; } return false;" style="text-decoration: none; color: blue"><tt><b>+</b></tt></a>
+      <a title="revoke admin privilege" href="#" onclick="elt=document.getElementById('unmake_admin_elt'); if (elt) { elt.value=[ugl_ID]; elt.form.submit(); return true; } return false;" style="text-decoration: none; color: blue"><tt><b>-</b></tt></a>&nbsp;
       </nobr>
      </td>
-     <td>[ug_role]&nbsp;&nbsp;</td>
+     <td>[ugl_Role]&nbsp;&nbsp;</td>
 
     [end-select]
      </tr>
@@ -116,8 +116,8 @@ Click "+" / "-" to grant / revoke admin privileges for a group.<br>
  <td></td>
  <td valign="top">
   [insert USER_GROUPS user_groups_insert]
-   [auto : ug_user_id : Id]
-   [dropdown required : ug_group_id : groups dropdown : select grp_id,grp_name from Groups order by grp_name : style="width: 100;" : ]
+   [auto : ugl_UserID : ugr_ID]
+   [dropdown required : ugl_GroupID : groups dropdown : select grp.ugr_ID,grp.ugr_Name from sysUGrps grp order by grp.ugr_Name : style="width: 100;" : ]
   [end-insert]
  </td>
  <td valign="top">

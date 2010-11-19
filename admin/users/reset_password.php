@@ -50,15 +50,15 @@ if (@$_REQUEST['username']) {
 
 	$username = addslashes($_REQUEST['username']);
 
-	$res = mysql_query('select Id,EMail,firstname from Users where Username = "'.$username.'" or EMail = "'.$username.'"');
+	$res = mysql_query('select ugr_ID,ugr_eMail,ugr_FirstName from sysUGrps usr where usr.ugr_Name = "'.$username.'" or ugr_eMail = "'.$username.'"');
 	$row = mysql_fetch_assoc($res);
-	$user_id = $row['Id'];
-	$email = $row['EMail'];
-	$firstname = $row['firstname'];
+	$user_id = $row['ugr_ID'];
+	$email = $row['ugr_eMail'];
+	$firstname = $row['ugr_FirstName'];
 
 	if ($user_id) {
 		$new_passwd = generate_passwd();
-		mysql_query('update Users set Password = "'.hash_it($new_passwd).'" where Id = ' . $user_id);
+		mysql_query('update sysUGrps usr set ugr_Password = "'.hash_it($new_passwd).'" where ugr_ID = ' . $user_id);
 
 		email_user($user_id, $firstname, $email, $new_passwd);
 

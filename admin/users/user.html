@@ -33,19 +33,16 @@
 
 <table border="0" cellpadding="2" cellspacing="0" style="border-collapse: collapse">
   <tr>
-    <td><b>[firstname] [lastname]</b></td>
+    <td><b>[ugr_FirstName] [ugr_LastName]</b></td>
   </tr>
- [if : Department]
-  <tr><td>[Department]</td></tr>
+ [if : ugr_Department]
+  <tr><td>[ugr_Department]</td></tr>
  [end-if]
- [if : Organisation]
-  <tr><td>[Organisation]</td></tr>
- [end-if]
- [if : telephone]
-  <tr><td>[telephone]</td></tr>
+ [if : ugr_Organisation]
+  <tr><td>[ugr_Organisation]</td></tr>
  [end-if]
   <tr>
-    <td><a href="mailto:[EMail]">[EMail]</a></td>
+    <td><a href="mailto:[ugr_eMail]">[ugr_eMail]</a></td>
   </tr>
 
 
@@ -101,8 +98,8 @@ function show_tags(n) {
 -->
 </script>
 sort:
-<a href="user.php?Id=[Id]&sort=freq"[if-eq : sort : "freq"] style="font-weight: bold;"[end-if-eq]>freq</a>
-<a href="user.php?Id=[Id]&sort=alpha"[if-eq : sort : "alpha"] style="font-weight: bold;"[end-if-eq]>alpha</a>
+<a href="user.php?Id=[ugr_ID]&sort=freq"[if-eq : sort : "freq"] style="font-weight: bold;"[end-if-eq]>freq</a>
+<a href="user.php?Id=[ugr_ID]&sort=alpha"[if-eq : sort : "alpha"] style="font-weight: bold;"[end-if-eq]>alpha</a>
 
 &nbsp;&nbsp;
 

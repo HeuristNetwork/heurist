@@ -52,8 +52,6 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 		$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_realname'] = $user[USERS_FIRSTNAME_FIELD] . ' ' . $user[USERS_LASTNAME_FIELD];
 		$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_id'] = $user[USERS_ID_FIELD];
 		$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'] = $groups;
-		$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_roles'] = mysql__select_array(USERS_DATABASE.'.Roles, '.USERS_DATABASE.'.UserRoles',
-																'Rolename', 'Id_Role = Id and Id_User = '.$user['Id']);
 
 
 		$time = 0;
@@ -69,11 +67,11 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 
 		/* bookkeeping */
 		mysql_connection_db_overwrite(USERS_DATABASE);
-		mysql_query('update Users set LastUsed=now(), LoginCount=LoginCount+1
+		mysql_query('update sysUGrps usr set ugr_LastLoginTime=now(), ugr_LoginCount=ugr_LoginCount+1
 					  where Id='.$user[USERS_ID_FIELD]);
 		if (HOST === "heuristscholar.org"  &&  HEURIST_INSTANCE === "") {
 			mysql_connection_felix_overwrite(USERS_DATABASE);	// replication
-			mysql_query('update Users set LastUsed=now(), LoginCount=LoginCount+1
+			mysql_query('update sysUGrps usr set ugr_LastLoginTime=now(), ugr_LoginCount=ugr_LoginCount+1
 						  where Id='.$user[USERS_ID_FIELD]);
 		}
 		mysql_connection_db_select(USERS_DATABASE);
@@ -94,7 +92,6 @@ if (@$_REQUEST['logout']) {
 	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_realname']);
 	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_id']);
 	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access']);
-	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_roles']);
 	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['search-results']);
 	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['sessionid']);
 	setcookie('favourites', '', time() - 3600);

@@ -44,7 +44,7 @@ while ($row = mysql_fetch_row($res)) {
     ];
 <?php
 
-$res = mysql_query("select tag_ID, tag_UGrpID, tag_Text from usrTags, ".USERS_DATABASE.".UserGroups, ".USERS_DATABASE.".Groups where ug_group_id=tag_UGrpID and ug_group_id=grp_id and ug_user_id=".get_user_id()." and grp_type!='Usergroup' order by grp_name, tag_Text");
+$res = mysql_query("select tag_ID, tag_UGrpID, tag_Text from usrTags, ".USERS_DATABASE.".sysUsrGrpLinks, ".USERS_DATABASE.".sysUGrps grp where ugl_GroupID=tag_UGrpID and ugl_GroupID=grp.ugr_ID and ugl_UserID=".get_user_id()." and grp.ugr_Type!='User' order by grp.ugr_Name, tag_Text");
 $rows = array();
 $ids = array();
 while ($row = mysql_fetch_row($res)) {
@@ -80,7 +80,7 @@ while ($row = mysql_fetch_row($res)) {
 
     top.HEURIST.user.workgroups = [<?php
 if (is_array(@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'])) {
-	$workgroups = mysql__select_array(USERS_DATABASE.".Groups", "grp_id", "grp_id in (".join(",", array_keys($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'])).") and grp_type!='Usergroup' order by grp_name");
+	$workgroups = mysql__select_array(USERS_DATABASE.".sysUGrps grp", "grp.ugr_ID", "grp.ugr_ID in (".join(",", array_keys($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'])).") and grp.ugr_Type !='User' order by grp.ugr_Name");
 	print join(", ", $workgroups);
 }
 ?> ];
@@ -88,7 +88,7 @@ if (is_array(@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'])) {
     top.HEURIST.user.workgroupSavedSearches = <?php
 $ws = array();
 if (@$workgroups) {
-	$res = mysql_query("select ss_wg_id, ss_id, ss_name, ss_query from saved_searches left join ".USERS_DATABASE.".Groups on grp_id = ss_wg_id where ss_wg_id in (".join(",", $workgroups).") order by grp_name, ss_name");
+	$res = mysql_query("select ss_wg_id, ss_id, ss_name, ss_query from saved_searches left join ".USERS_DATABASE.".sysUGrps grp on grp.ugr_ID = ss_wg_id where ss_wg_id in (".join(",", $workgroups).") order by grp.ugr_Name, ss_name");
 	while ($row = mysql_fetch_assoc($res)) {
 		$wg = $row['ss_wg_id'];
 		if (! @$ws[$wg])
@@ -146,9 +146,9 @@ $bdr_details = array("colNames" => $colNames, "valuesByReftypeID" => $bdrs);
 <?php
 }
 
-$res = mysql_query("select Id, Username, concat(firstname, ' ', lastname) as fullname
-					  from ".USERS_DATABASE.".Users
-					 where Active='Y' and firstname is not null and lastname is not null and !IsModelUser
+$res = mysql_query("select usr.Id, usr.ugr_Name, concat(usr.ugr_FirstName, ' ', usr.ugr_LastName) as fullname
+					  from ".USERS_DATABASE.".sysUGrps usr
+					 where usr.ugr_Enabled='Y' and usr.ugr_FirstName is not null and usr.ugr_LastName is not null and !usr.ugr_IsModelUser
 				  order by fullname");
 print "    top.HEURIST.allUsers = {\n";
 $first = true;

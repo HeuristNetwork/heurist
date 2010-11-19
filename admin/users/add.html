@@ -21,7 +21,7 @@
 <td rowspan="2">
 [if : register]
 [else]
-<a href="usergroupadmin.php">Edit user groups</a>[proj-group-link!]
+<a href="usergroupadmin.php">Edit user groups</a>
 [end-if]
 </td>
 <td align="right" style="vertical-align: baseline;">
@@ -65,9 +65,9 @@
   <hr color="#cccccc" size="1" width="100%" align="left">
 <b>Search for user</b>
 
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; First name&nbsp; [textbox : firstname : user ??? : size=&quot;20&quot;]&nbsp;
-Last name&nbsp; [textbox : lastname : user ??? : size=&quot;20&quot;]&nbsp;&nbsp;
-Email [textbox : EMail : user email: size=&quot;30&quot;]&nbsp;
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; First name&nbsp; [textbox : ugr_FirstName : user ??? : size=&quot;20&quot;]&nbsp;
+Last name&nbsp; [textbox : ugr_LastName : user ??? : size=&quot;20&quot;]&nbsp;&nbsp;
+Email [textbox : ugr_eMail : user email: size=&quot;30&quot;]&nbsp;
 
   <input type="submit" value="Find"><i><span class="smallfont"> Search will match partial
 strings</span></i></p>
@@ -86,9 +86,9 @@ strings</span></i></p>
   <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse">
   [foreach USER searchrecordloop]
     <tr>
-      <td style="padding-right: 20px;"><b>[Id]</b></td>
-      <td style="padding-right: 20px;"><b><a href="edit.php?Id=[Id]">[firstname] [lastname]</a></b></td>
-	  <td><a href="usergroupadmin.php?filterId=[Id]">edit groups</a></td>
+      <td style="padding-right: 20px;"><b>[ugr_ID]</b></td>
+      <td style="padding-right: 20px;"><b><a href="edit.php?Id=[ugr_ID]">[ugr_FirstName] [ugr_LastName]</a></b></td>
+	  <td><a href="usergroupadmin.php?filterId=[ugr_ID]">edit groups</a></td>
     </tr>
   [end-foreach]
   </table>
@@ -111,17 +111,17 @@ strings</span></i></p>
 <div id="required" style="margin-top:20px;">
 <a>Required information </a>
 <br>
-	<label>First name</label>[textbox required : firstname : First name : size=&quot;20&quot;]
-	<label>Last name</label>[textbox required : lastname : Last name : size=&quot;40&quot;]
+	<label>First name</label>[textbox required : ugr_FirstName : First name : size=&quot;20&quot;]
+	<label>Last name</label>[textbox required : ugr_LastName : Last name : size=&quot;40&quot;]
 	<label>Email<br>
 	<span class="hint">This will be your User Name</span></label>
-	[textbox required : EMail : email: size=&quot;50&quot; onKeyUp=document.getElementById('username').value=this.value;]
+	[textbox required : ugr_eMail : email: size=&quot;50&quot; onKeyUp=document.getElementById('username').value=this.value;]
 	<label>Institution/company<br>
 	<span class="hint">Enter 'None' if not affiliated with an institution or company</span></label>
-	[textbox required : Organisation : Institution/company : size=&quot;40&quot;]
-	<label>Research Interests</label>[textbox required : Interests : Research Interests : size=&quot;60&quot;]
-	<label>Login name</label>[textbox required : Username : Login name : size=&quot;20&quot; id=username]
-	<label>Password</label>[password required : Password : two matching passwords : size=&quot;20&quot;]
+	[textbox required : ugr_Organisation : Institution/company : size=&quot;40&quot;]
+	<label>Research Interests</label>[textbox required : ugr_Interests : Research Interests : size=&quot;60&quot;]
+	<label>Login name</label>[textbox required : ugr_Name : Login name : size=&quot;20&quot; id=username]
+	<label>Password</label>[password required : ugr_Password : two matching passwords : size=&quot;20&quot;]
 	<label>Repeat password</label><input type="password" name="password2" size="20">
 
 <p>Warning: this is not an encrypted connection, so please don't use your institutional or banking password.</p>
@@ -130,13 +130,11 @@ strings</span></i></p>
 <div class="hide" id="optional"><a onMouseDown="$('#options').slideToggle('fast'); $('#optional').toggleClass('hide');">Optional information</a>
 	<div id="options" style="display:none;">
 	<br>
-		<label>Department</label>[textbox : Department : Department : size=&quot;50&quot;]
+		<label>Department</label>[textbox : ugr_Department : Department : size=&quot;50&quot;]
 		<label>URL</label>[textbox : URL : website : size=&quot;50&quot;]
-		<label>Street Address</label>[textbox : Address : Street Address : size=&quot;50&quot;]
-		<label>Suburb/City</label>[textbox : City : Suburb/City : size=&quot;30&quot;]
-		<label>State</label>[textbox : State : State : size=&quot;30&quot;]
-		<label>Post/zipcode</label>[textbox : Postcode : Post/zipcode : size=&quot;10&quot;]
-		<label style="padding-bottom:30PX; ">Phone</label>[textbox : telephone : Phone : size=&quot;20&quot;]
+		<label>Suburb/City</label>[textbox : ugr_City : Suburb/City : size=&quot;30&quot;]
+		<label>State</label>[textbox : ugr_State : State : size=&quot;30&quot;]
+		<label>Post/zipcode</label>[textbox : ugr_Postcode : Post/zipcode : size=&quot;10&quot;]
 	</div>
 </div>
 <br>
@@ -161,8 +159,6 @@ strings</span></i></p>
   </tr>
 </table>
 [end-if]
-[auto : PasswordType : "1"]
-[auto : Realm : "*"]
 
 [if : register]
 <div>

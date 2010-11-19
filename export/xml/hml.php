@@ -174,7 +174,7 @@ while ($row = mysql_fetch_assoc($res)) {
 
 // group names
 mysql_connection_db_select(USERS_DATABASE) or die(mysql_error());
-$WGN = mysql__select_assoc('Groups', 'grp_id', 'grp_name', '1');
+$WGN = mysql__select_assoc('sysUGrps grp', 'grp.ugr_ID', 'grp.ugr_Name', '1');
 mysql_connection_db_select(DATABASE) or die(mysql_error());
 
 

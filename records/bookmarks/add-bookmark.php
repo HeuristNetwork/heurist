@@ -24,10 +24,10 @@ if (! $bib) {
 
 /* check workgroup permissions */
 if ($bib["rec_wg_id"]  &&  $bib["rec_visibility"] == "Hidden") {
-	error_log("select ug_group_id from ".USERS_DATABASE.".Groups where ug_user_id=$usrID and ug_group_id=" . intval($bib["rec_wg_id"]));
-	$res = mysql_query("select ug_group_id from ".USERS_DATABASE.".Groups where ug_user_id=$usrID and ug_group_id=" . intval($bib["rec_wg_id"]));
+	error_log("select ugl_GroupID from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=$usrID and ugl_GroupID=" . intval($bib["rec_wg_id"]));
+	$res = mysql_query("select ugl_GroupID from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=$usrID and ugl_GroupID=" . intval($bib["rec_wg_id"]));
 	if (! mysql_num_rows($res)) {
-		$res = mysql_query("select grp_name from ".USERS_DATABASE.".Groups where grp_id=" . $bib["rec_wg_id"]);
+		$res = mysql_query("select grp.ugr_Name from ".USERS_DATABASE.".sysUGrps grp where grp.ugr_ID=" . $bib["rec_wg_id"]);
 		$grp_name = mysql_fetch_row($res);  $grp_name = $grp_name[0];
 		print "{ error: \"record is restricted to workgroup " . slash($grp_name) . "\" }";
 		return;

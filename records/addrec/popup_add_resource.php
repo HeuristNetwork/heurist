@@ -179,14 +179,14 @@ hr { margin: 20px 0; }
     <td><nobr><label><input type="radio" name="a" id="reference_elt" onclick="note_type_click();"> Record type:</label></nobr></td>
     <td colspan=2>
 <?php
-	$res = mysql_query("select distinct rt_id,rt_name,rt_notes, ifnull(grp_name, if(rt_primary,'Bibliographic record','Other record')) as section
+	$res = mysql_query("select distinct rt_id,rt_name,rt_notes, ifnull(grp.ugr_Name, if(rt_primary,'Bibliographic record','Other record')) as section
 	                      from active_rec_types
 	                 left join rec_types on rt_id=art_id
 	                 left join ".USERS_DATABASE.".".USER_GROUPS_TABLE." on ".USER_GROUPS_USER_ID_FIELD."=".get_user_id()."
 	                 left join rec_detail_requirements_overrides on rdr_rec_type=rt_id
-	                 left join ".USERS_DATABASE.".".GROUPS_TABLE." on ".GROUPS_ID_FIELD."=".USER_GROUPS_GROUP_ID_FIELD." and ".GROUPS_ID_FIELD."=rdr_wg_id
+	                 left join ".USERS_DATABASE.".".GROUPS_TABLE." grp on grp.".GROUPS_ID_FIELD."=".USER_GROUPS_GROUP_ID_FIELD." and grp.".GROUPS_ID_FIELD."=rdr_wg_id
 	                  where rt_id
-	                  order by ".GROUPS_NAME_FIELD." is null, ".GROUPS_NAME_FIELD.", ! rt_primary, rt_name");
+	                  order by grp.".GROUPS_NAME_FIELD." is null, grp.".GROUPS_NAME_FIELD.", ! rt_primary, rt_name");
 ?>
      <select name="ref_type"  title="New bibliographic record type" style="margin: 3px;" id="reftype_elt" onChange='document.getElementById("reference_elt").checked = true; document.getElementById("note_elt").checked = false;'>
       <option selected disabled value="0">(select record type)</option>

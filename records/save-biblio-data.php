@@ -91,11 +91,11 @@ function updateRecord($bibID) {
 
 	// Check that the user has permissions to edit it.
 	$res = mysql_query("select * from records
-	                        left join ".USERS_DATABASE.".UserGroups on ug_group_id=rec_wg_id
+	                        left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_GroupID=rec_wg_id
 	                        left join rec_types on rt_id=rec_type
-	                     where rec_id=$bibID and (! rec_wg_id or ug_user_id=".get_user_id().")");
+	                     where rec_id=$bibID and (! rec_wg_id or ugl_UserID=".get_user_id().")");
 	if (mysql_num_rows($res) == 0) {
-		$res = mysql_query("select grp_name from records, ".USERS_DATABASE.".Groups where rec_id=$bibID and grp_id=rec_wg_id");
+		$res = mysql_query("select grp.ugr_Name from records, ".USERS_DATABASE.".sysUGrps grp where rec_id=$bibID and grp.ugr_ID=rec_wg_id");
 		$grpName = mysql_fetch_row($res);  $grpName = $grpName[0];
 
 		print '({ error: "Sorry - you can\'t edit this record.\nYou aren\'t in the ' . slash($grpName) . ' workgroup" })';

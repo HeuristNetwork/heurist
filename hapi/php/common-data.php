@@ -23,17 +23,19 @@ mysql_connection_db_select(DATABASE);
 
 
 if (defined('HEURIST_USER_GROUP_ID')) {
-	$res = mysql_query("select Id, Username, Realname from ".USERS_DATABASE.".Users, ".USERS_DATABASE.".UserGroups
-	                     where ug_group_id=2 and ug_user_id=Id and Active='Y' and firstname is not null and lastname is not null and !IsModelUser");
+	$res = mysql_query("select usr.Id, ugr_Name, concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname from ".USERS_DATABASE.".sysUGrps usr, ".USERS_DATABASE.".sysUsrGrpLinks
+	                     where ugl_GroupID=2 and ugl_UserID=Id and usr.ugr_Enabled='Y' and usr.ugr_FirstName is not null and usr.ugr_LastName is not null and !usr.ugr_IsModelUser");
 } else {
-	$res = mysql_query("select Id, Username, Realname from ".USERS_DATABASE.".Users
-	                     where Active='Y' and firstname is not null and lastname is not null and !IsModelUser");
+	$res = mysql_query("select usr.Id, ugr_Name, concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname from ".USERS_DATABASE.".sysUGrps usr
+	                     where usr.ugr_Enabled='Y' and usr.ugr_FirstName is not null and usr.ugr_LastName is not null and !usr.ugr_IsModelUser");
 }
 
 $users = array();
 while ($row = mysql_fetch_row($res)) { array_push($users, $row); }
 
-$res = mysql_query("select distinct grp_id, grp_name, grp_longname, grp_description, grp_url from ".USERS_DATABASE.".Groups, ".USERS_DATABASE.".UserGroups where ug_group_id=grp_id");
+$res = mysql_query("select distinct grp.ugr_ID, grp.ugr_Name, grp.ugr_LongName, grp.ugr_Description, grp.ugr_URLs
+					from ".USERS_DATABASE.".sysUGrps grp, ".USERS_DATABASE.".sysUsrGrpLinks
+					where ugl_GroupID=grp.ugr_ID");
 $workgroups = array();
 while ($row = mysql_fetch_row($res)) { array_push($workgroups, $row); }
 $res = mysql_query("select rt_id, rt_name, rt_canonical_title_mask from active_rec_types inner join rec_types on rt_id=art_id");

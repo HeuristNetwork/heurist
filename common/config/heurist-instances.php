@@ -60,22 +60,22 @@ function define_constants($instance) {
 	define('DATABASE', $instances[$instance]["db"]);
 	define('USERS_DATABASE', $instances[$instance]["userdb"]);
 
-	define('USERS_TABLE', 'Users');
-	define('USERS_ID_FIELD', 'Id');
-	define('USERS_USERNAME_FIELD', 'Username');
-	define('USERS_PASSWORD_FIELD', 'Password');
-	define('USERS_FIRSTNAME_FIELD', 'firstname');
-	define('USERS_LASTNAME_FIELD', 'lastname');
-	define('USERS_ACTIVE_FIELD', 'Active');
-	define('USERS_EMAIL_FIELD', 'EMail');
-	define('GROUPS_TABLE', 'Groups');
-	define('GROUPS_ID_FIELD', 'grp_id');
-	define('GROUPS_NAME_FIELD', 'grp_name');
-	define('GROUPS_TYPE_FIELD', 'grp_type');
-	define('USER_GROUPS_TABLE', 'UserGroups');
-	define('USER_GROUPS_USER_ID_FIELD', 'ug_user_id');
-	define('USER_GROUPS_GROUP_ID_FIELD', 'ug_group_id');
-	define('USER_GROUPS_ROLE_FIELD', 'ug_role');
+	define('USERS_TABLE', 'sysUGrps');
+	define('USERS_ID_FIELD', 'ugr_ID');
+	define('USERS_USERNAME_FIELD', 'ugr_Name');
+	define('USERS_PASSWORD_FIELD', 'ugr_Password');
+	define('USERS_FIRSTNAME_FIELD', 'ugr_FirstName');
+	define('USERS_LASTNAME_FIELD', 'ugr_LastName');
+	define('USERS_ACTIVE_FIELD', 'ugr_Enabled');
+	define('USERS_EMAIL_FIELD', 'ugr_eMail');
+	define('GROUPS_TABLE', 'sysUGrps');
+	define('GROUPS_ID_FIELD', 'ugr_ID');
+	define('GROUPS_NAME_FIELD', 'ugr_Name');
+	define('GROUPS_TYPE_FIELD', 'ugr_Type');
+	define('USER_GROUPS_TABLE', 'sysUsrGrpLinks');
+	define('USER_GROUPS_USER_ID_FIELD', 'ugl_UserID');
+	define('USER_GROUPS_GROUP_ID_FIELD', 'ugl_GroupID');
+	define('USER_GROUPS_ROLE_FIELD', 'ugl_Role');
 
 	define('H_INSTANCE_RAN','1');
 

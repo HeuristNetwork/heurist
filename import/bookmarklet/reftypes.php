@@ -40,17 +40,17 @@ print "HEURIST_reftypes.names = " . json_format($names) . ";\n\n";
 $groups = array();
 $primary = array();
 $other = array();
-$res = mysql_query("select distinct rt_id, grp_name, rt_primary
+$res = mysql_query("select distinct rt_id, grp.ugr_Name, rt_primary
 					  from active_rec_types
 				 left join rec_types on rt_id=art_id
-				 left join ".USERS_DATABASE.".UserGroups on ug_user_id=".get_user_id()."
+				 left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_UserID=".get_user_id()."
 				 left join rec_detail_requirements_overrides on rdr_rec_type=rt_id
-				 left join ".USERS_DATABASE.".Groups on grp_id=ug_group_id and grp_id=rdr_wg_id
-				  order by grp_name is null, grp_name, ! rt_primary, rt_name");
+				 left join ".USERS_DATABASE.".sysUGrps grp on grp.ugr_ID=ugl_GroupID and grp.ugr_ID=rdr_wg_id
+				  order by grp.ugr_Name is null, grp.ugr_Name, ! rt_primary, rt_name");
 while ($row = mysql_fetch_assoc($res)) {
-	if (@$row["grp_name"]) {
-		if (! @$groups[$row["grp_name"]]) $groups[$row["grp_name"]] = array();
-		array_push($groups[$row["grp_name"]], $row["rt_id"]);
+	if (@$row["ugr_Name"]) {
+		if (! @$groups[$row["ugr_Name"]]) $groups[$row["ugr_Name"]] = array();
+		array_push($groups[$row["ugr_Name"]], $row["rt_id"]);
 	}
 	if ($row["rt_primary"]) {
 		array_push($primary, $row["rt_id"]);

@@ -618,10 +618,15 @@ class UserPredicate extends Predicate {
 			return $not . 'exists (select * from usrBookmarks bkmk where bkmk.bkm_recID=rec_id '
 			                                                  . ' and bkmk.bkm_UGrpID in (' . $this->value . '))';
 		}
-		else {
-			return $not . 'exists (select * from usrBookmarks bkmk, '.USERS_DATABASE.'.Users usr '
+		else if (preg_match('/^(\D+)\s+(\D+)$/', $this->value,$matches)){	// saw MODIFIED: 16/11/2010 since Realname field was removed.
+			return $not . 'exists (select * from usrBookmarks bkmk, '.USERS_DATABASE.'.sysUGrps usr '
 			                    . ' where bkmk.bkm_recID=rec_id and bkmk.bkm_UGrpID = usr.Id '
-			                      . ' and (usr.Realname = "' . addslashes($this->value) . '" or usr.Username = "' . addslashes($this->value) . '"))';
+			                      . ' and (usr.ugr_FirstName = "' . addslashes($matches[1]) . '" and usr.ugr_LastName = "' . addslashes($matches[2]) . '"))';
+		}
+		else {
+			return $not . 'exists (select * from usrBookmarks bkmk, '.USERS_DATABASE.'.sysUGrps usr '
+			                    . ' where bkmk.bkm_recID=rec_id and bkmk.bkm_UGrpID = usr.Id '
+			                      . ' and usr.ugr_Name = "' . addslashes($this->value) . '"))';
 		}
 	}
 }
@@ -639,7 +644,7 @@ class AddedByPredicate extends Predicate {
 		}
 		else {
 			$not = ($this->parent->negate)? "not" : "";
-			return "rec_added_by_usr_id $not in (select Id from ".USERS_DATABASE.".Users where Username = '" . addslashes($this->value) . "')";
+			return "rec_added_by_usr_id $not in (select usr.Id from ".USERS_DATABASE.".sysUGrps usr where usr.ugr_Name = '" . addslashes($this->value) . "')";
 		}
 	}
 }
@@ -771,8 +776,8 @@ class TagPredicate extends Predicate {
 				}
 				$query .=              ') and kwd.tag_UGrpID='.get_user_id().') ';
 			} else {
-				$query=$not . 'exists (select * from '.USERS_DATABASE.'.Groups, usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
-				                    . 'where grp_id=tag_UGrpID and kwi.rtl_RecID=rec_id and (';
+				$query=$not . 'exists (select * from '.USERS_DATABASE.'.sysUGrps, usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
+				                    . 'where ugr_ID=tag_UGrpID and kwi.rtl_RecID=rec_id and (';
 				for ($i=0; $i < count($this->value); ++$i) {
 					if ($i > 0) $query .= 'or ';
 
@@ -783,7 +788,7 @@ class TagPredicate extends Predicate {
 						$query .= '(';
 						$query .=      ($this->parent->exact? 'kwd.tag_Text = "'.addslashes($value).'" '
 					                                            : 'kwd.tag_Text like "'.addslashes($value).'%" ');
-						$query .=      ' and grp_name = "'.addslashes($wg_value).'") ';
+						$query .=      ' and ugr_Name = "'.addslashes($wg_value).'") ';
 					} else {
 						$query .=      ($this->parent->exact? 'kwd.tag_Text = "'.addslashes($value).'" '
 					                                            : 'kwd.tag_Text like "'.addslashes($value).'%" ');
@@ -808,7 +813,7 @@ class TagPredicate extends Predicate {
 				}
 				$query .= ')) ';
 			} else {
-				$query = $not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID left join '.USERS_DATABASE.'.Groups on grp_id=tag_UGrpID '
+				$query = $not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID left join '.USERS_DATABASE.'.sysUGrps on ugr_ID=tag_UGrpID '
 				                    . 'where kwi.rtl_RecID=rec_id and (';
 				for ($i=0; $i < count($this->value); ++$i) {
 					if ($i > 0) $query .= 'or ';
@@ -820,7 +825,7 @@ class TagPredicate extends Predicate {
 						$query .= '(';
 						$query .=      ($this->parent->exact? 'kwd.tag_Text = "'.addslashes($value).'" '
 					                                            : 'kwd.tag_Text like "'.addslashes($value).'%" ');
-					        $query .=      ' and grp_name = "'.addslashes($wg_value).'") ';
+						$query .= ' and ugr_Name = "'.addslashes($wg_value).'") ';
 					} else {
 						if (is_numeric($value)) {
 							$query .= "kwd.tag_ID=$value ";
@@ -828,7 +833,7 @@ class TagPredicate extends Predicate {
 							$query .= '(';
 							$query .=      ($this->parent->exact? 'kwd.tag_Text = "'.addslashes($value).'" '
 						                                            : 'kwd.tag_Text like "'.addslashes($value).'%" ');
-							$query .= ' and grp_id is null) ';
+							$query .= ' and ugr_ID is null) ';
 						}
 					}
 				}
@@ -995,7 +1000,7 @@ class WorkgroupPredicate extends Predicate {
 			return "rec_wg_id $in (" . $this->value . ")";
 		}
 		else {
-			return "rec_wg_id $eq (select grp.grp_id from ".USERS_DATABASE.".Groups grp where grp.grp_name = '".addslashes($this->value)."' limit 1)";
+			return "rec_wg_id $eq (select grp.ugr_ID from ".USERS_DATABASE.".sysUGrps grp where grp.ugr_Name = '".addslashes($this->value)."' limit 1)";
 		}
 	}
 }
@@ -1136,8 +1141,8 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL) {
 	define('stype', @$parms['stype']);
 
 	if (! $wg_ids  &&  function_exists('get_user_id')) {
-		$wg_ids = mysql__select_array(USERS_DATABASE.'.UserGroups left join '.USERS_DATABASE.'.Groups on grp_id=ug_group_id', 'ug_group_id',
-		                              'ug_user_id='.get_user_id().' and grp_type != "Usergroup"order by ug_group_id');
+		$wg_ids = mysql__select_array(USERS_DATABASE.'.sysUsrGrpLinks left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID',
+		                              'ugl_UserID='.get_user_id().' and grp.ugr_Type != "User" order by ugl_GroupID');
 	}
 
 	if (! @$parms['qq']  &&  ! preg_match('/&&|\\bAND\\b/i', @$parms['q'])) {

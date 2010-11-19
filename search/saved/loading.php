@@ -354,11 +354,11 @@ function loadUserDependentData(&$record) {
 		 order by rtl_Order");
 
 	$record["wgTags"] = mysql__select_array(
-		"usrRecTagLinks, usrTags, ".USERS_DATABASE.".UserGroups",
+		"usrRecTagLinks, usrTags, ".USERS_DATABASE.".sysUsrGrpLinks",
 		"rtl_TagID",
 		"tag_ID = rtl_TagID and
-		 tag_UGrpID = ug_group_id and
-		 ug_user_id = ".get_user_id()." and
+		 tag_UGrpID = ugl_GroupID and
+		 ugl_UserID = ".get_user_id()." and
 		 rtl_RecID = $recID
 		 order by rtl_Order");
 

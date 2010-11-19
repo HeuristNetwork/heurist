@@ -133,9 +133,9 @@ function getBaseProperties($rec_id, $bkm_ID) {
 	// Return an array of the basic scalar properties for this record / bookmark
 	if (!$rec_id && !$bkm_ID) return array("error"=>"invalid parameters passed to getBaseProperties");
 	if ($bkm_ID) {
-		$res = mysql_query('select rec_id, rec_title as title, rt_name as reftype, rt_id as reftypeID, rec_url as url, grp_id as workgroupID, grp_name as workgroup, rec_scratchpad as notes, rec_visibility as visibility, bkm_PwdReminder as passwordReminder, bkm_Rating as rating, rec_modified, rec_temporary from usrBookmarks left join records on bkm_recID=rec_id and bkm_UGrpID='.get_user_id().' left join rec_types on rt_id = rec_type left join '.USERS_DATABASE.'.Groups on grp_id=rec_wg_id where bkm_ID='.$bkm_ID);
+		$res = mysql_query('select rec_id, rec_title as title, rt_name as reftype, rt_id as reftypeID, rec_url as url, grp.ugr_ID as workgroupID, grp.ugr_Name as workgroup, rec_scratchpad as notes, rec_visibility as visibility, bkm_PwdReminder as passwordReminder, bkm_Rating as rating, rec_modified, rec_temporary from usrBookmarks left join records on bkm_recID=rec_id and bkm_UGrpID='.get_user_id().' left join rec_types on rt_id = rec_type left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=rec_wg_id where bkm_ID='.$bkm_ID);
 	} else if ($rec_id) {
-		$res = mysql_query('select rec_id, rec_title as title, rt_name as reftype, rt_id as reftypeID, rec_url as url, grp_id as workgroupID, grp_name as workgroup, rec_scratchpad as notes, rec_visibility as visibility, rec_modified, rec_temporary from records left join usrBookmarks on bkm_recID=rec_id left join rec_types on rt_id = rec_type left join '.USERS_DATABASE.'.Groups on grp_id=rec_wg_id where rec_id='.$rec_id);
+		$res = mysql_query('select rec_id, rec_title as title, rt_name as reftype, rt_id as reftypeID, rec_url as url, grp.ugr_ID as workgroupID, grp.ugr_Name as workgroup, rec_scratchpad as notes, rec_visibility as visibility, rec_modified, rec_temporary from records left join usrBookmarks on bkm_recID=rec_id left join rec_types on rt_id = rec_type left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=rec_wg_id where rec_id='.$rec_id);
 	}
 
 	$row = mysql_fetch_assoc($res);
@@ -304,7 +304,7 @@ function getAllWikis($rec_id, $bkm_ID) {
 			array_push($wikiNames, "Biblio:$rec_id");
 		}
 
-		$res = mysql_query("select grp_id, grp_name from ".USERS_DATABASE.".UserGroups left join ".USERS_DATABASE.".Groups on ug_group_id=grp_id where ug_user_id=".get_user_id()." and grp_type !=' Usergroup' order by grp_name");
+		$res = mysql_query("select grp.ugr_ID, grp.ugr_Name from ".USERS_DATABASE.".sysUsrGrpLinks left join ".USERS_DATABASE.".sysUGrps grp on ugl_GroupID=grp.ugr_ID where ugl_UserID=".get_user_id()." and grp.ugr_Type !='User' order by grp.ugr_Name");
 		while ($grp = mysql_fetch_row($res)) {
 			array_push($wikis, array(htmlspecialchars($grp[1]), "Biblio:".$rec_id."_Workgroup:".$grp[0]));
 			array_push($wikiNames, slash("Biblio:".$rec_id."_Workgroup:".$grp[0]));
@@ -323,7 +323,7 @@ function getAllWikis($rec_id, $bkm_ID) {
 }
 
 function getAllComments($rec_id) {
-	$res = mysql_query("select cmt_id, cmt_deleted, cmt_text, cmt_parent_cmt_id, cmt_date, cmt_modified, cmt_usr_id, Realname from comments left join ".USERS_DATABASE.".Users on cmt_usr_id=Id where cmt_rec_id = $rec_id order by cmt_date");
+	$res = mysql_query("select cmt_id, cmt_deleted, cmt_text, cmt_parent_cmt_id, cmt_date, cmt_modified, cmt_usr_id, concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname from comments left join ".USERS_DATABASE.".sysUGrps usr on cmt_usr_id=usr.ugr_ID where cmt_rec_id = $rec_id order by cmt_date");
 
 	$comments = array();
 	while ($cmt = mysql_fetch_assoc($res)) {

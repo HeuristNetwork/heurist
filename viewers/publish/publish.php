@@ -38,11 +38,11 @@
 
 	//function to select workgroups users belong to
 	function get_wg(){
-		$res = mysql_query('select a.grp_name, a.grp_id from '.USERS_DATABASE.'.Groups a, '.USERS_DATABASE.'.UserGroups b where b.ug_group_id =a.grp_id and b.ug_user_id = '.get_user_id(). ' ORDER BY a.grp_name');
+		$res = mysql_query('select grp.ugr_Name, grp.ugr_ID from '.USERS_DATABASE.'.sysUGrps grp, '.USERS_DATABASE.'.sysUsrGrpLinks b where b.ugl_GroupID =grp.ugr_ID and b.ugl_UserID = '.get_user_id(). ' ORDER BY grp.ugr_Name');
 		$rows = array();
 
 		while ($row = mysql_fetch_assoc($res)){
-			$rows[$row['grp_id']] = $row['grp_name'];
+			$rows[$row['ugr_ID']] = $row['ugr_Name'];
 		}
 
 		return $rows;

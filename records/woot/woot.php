@@ -160,15 +160,16 @@ function loadWoot($args) {
 			return(array("success" => false, "errorType" => "insufficient permissions on woot"));
 		}
 
-		$pres = mysql_query("select ".WOOT_PERMISSION_TABLE.".*, grp_name, Username from ".WOOT_PERMISSION_TABLE."
-						  left join ".USERS_DATABASE.".Groups on grp_id=wperm_group_id left join ".USERS_DATABASE.".Users on Id=wperm_user_id
+		$pres = mysql_query("select ".WOOT_PERMISSION_TABLE.".*, a.ugr_Name as Groupname, b.ugr_Name as Username from ".WOOT_PERMISSION_TABLE."
+						  left join ".USERS_DATABASE.".sysUGrps a on a.ugr_ID=wperm_group_id
+						  left join ".USERS_DATABASE.".sysUGrps b on b.ugr_ID=wperm_user_id
 							  where wperm_woot_id=".$wootId);
 		while ($perm = mysql_fetch_assoc($pres)) {
 			array_push($wootPermissions, array("type" => $perm["wperm_type"],
 										   "userId" => $perm["wperm_user_id"]? $perm["wperm_user_id"] : NULL,
 										   "userName" => $perm["wperm_user_id"]? $perm["Username"] : NULL,
 										   "groupId" => $perm["wperm_group_id"]? $perm["wperm_group_id"] : NULL,
-										   "groupName" => $perm["wperm_group_id"]? $perm["grp_name"] : NULL));
+										   "groupName" => $perm["wperm_group_id"]? $perm["Groupname"] : NULL));
 		}
 	}
 
@@ -192,15 +193,16 @@ function loadWoot($args) {
 			);
 
 			$permissions = array();
-			$pres = mysql_query("select ".PERMISSION_TABLE.".*, grp_name, Username from ".PERMISSION_TABLE."
-							  left join ".USERS_DATABASE.".Groups on grp_id=perm_group_id left join ".USERS_DATABASE.".Users on Id=perm_user_id
+			$pres = mysql_query("select ".PERMISSION_TABLE.".*, a.ugr_Name as Groupname, b.ugr_Name as Username from ".PERMISSION_TABLE."
+							  left join ".USERS_DATABASE.".sysUGrps a on a.ugr_ID=perm_group_id
+							  left join ".USERS_DATABASE.".sysUGrps b on b.ugr_ID=perm_user_id
 								  where perm_chunk_id=".$chunkData["chunk_id"]);
 			while ($perm = mysql_fetch_assoc($pres)) {
 				array_push($permissions, array("type" => $perm["perm_type"],
 											   "userId" => $perm["perm_user_id"]? $perm["perm_user_id"] : NULL,
 											   "userName" => $perm["perm_user_id"]? $perm["Username"] : NULL,
 											   "groupId" => $perm["perm_group_id"]? $perm["perm_group_id"] : NULL,
-											   "groupName" => $perm["perm_group_id"]? $perm["grp_name"] : NULL));
+											   "groupName" => $perm["perm_group_id"]? $perm["Groupname"] : NULL));
 			}
 			$chunk["permissions"] = $permissions;
 

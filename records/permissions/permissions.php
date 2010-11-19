@@ -11,7 +11,7 @@ function have_bkmk_permissions($bkm_ID) {
 return true;
 	$bkmkbib = mysql_fetch_assoc($res);
 	if ($bkmkbib['rec_wg_id']  &&  $bkmkbib['rec_visibility'] == 'Hidden') {
-		$res = mysql_query('select * from '.USERS_DATABASE.'.UserGroups where ug_group_id='.intval($bkmkbib['rec_wg_id']).' and ug_user_id='.get_user_id());
+		$res = mysql_query('select * from '.USERS_DATABASE.'.sysUsrGrpLinks where ugl_GroupID='.intval($bkmkbib['rec_wg_id']).' and ugl_UserID='.get_user_id());
 		// they're not in the restricted workgroup
 		if (mysql_num_rows($res) <= 0) return false;
 	}
@@ -28,7 +28,7 @@ function have_bib_permissions($rec_id) {
 
 	$bib = mysql_fetch_assoc($res);
 	if ($bib['rec_wg_id']  &&  $bib['rec_visibility'] == 'Hidden') {
-		$res = mysql_query('select * from '.USERS_DATABASE.'.UserGroups where ug_group_id='.intval($bib['rec_wg_id']).' and ug_user_id='.get_user_id());
+		$res = mysql_query('select * from '.USERS_DATABASE.'.sysUsrGrpLinks where ugl_GroupID='.intval($bib['rec_wg_id']).' and ugl_UserID='.get_user_id());
 		// they're not in the restricted workgroup
 		if (mysql_num_rows($res) <= 0) return false;
 	}

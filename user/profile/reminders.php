@@ -70,12 +70,11 @@ mysql_connection_db_select(DATABASE);
 
 $future_clause = $future ? "and rem_freq != 'once' or rem_startdate > now()" : "";
 
-$res = mysql_query("select reminders.*, rec_title, grp_name, cgr_name, concat(".USERS_FIRSTNAME_FIELD.",' ',".USERS_LASTNAME_FIELD.") as username
+$res = mysql_query("select reminders.*, rec_title, grp.".GROUPS_NAME_FIELD.",  concat(usr.".USERS_FIRSTNAME_FIELD.",' ',usr.".USERS_LASTNAME_FIELD.") as username
 					  from reminders
 				 left join records on rec_id = rem_rec_id
-				 left join ".USERS_DATABASE.".".GROUPS_TABLE." on ".GROUPS_ID_FIELD." = rem_wg_id
-				 left join coll_groups on cgr_id = rem_cgr_id
-				 left join ".USERS_DATABASE.".".USERS_TABLE." on ".USERS_ID_FIELD." = rem_usr_id
+				 left join ".USERS_DATABASE.".".GROUPS_TABLE." gpr on gpr.".GROUPS_ID_FIELD." = rem_wg_id
+				 left join ".USERS_DATABASE.".".USERS_TABLE." usr on usr.".USERS_ID_FIELD." = rem_usr_id
 					 where rem_owner_id = " . get_user_id() . "
 					 $future_clause
 				  order by rem_rec_id, rem_startdate");
@@ -88,8 +87,7 @@ if (mysql_num_rows($res) == 0) {
 
 while ($row = mysql_fetch_assoc($res)) {
 	$recipient = $row[GROUPS_NAME_FIELD] ? $row[GROUPS_NAME_FIELD] :
-					($row["cgr_name"] ? $row["cgr_name"] :
-						($row["username"] ? $row["username"] : $row["rem_email"]));
+					($row["username"] ? $row["username"] : $row["rem_email"]);
 ?>
     <tr>
      <td><a title=delete href=# onclick="del(<?= $row["rem_id"] ?>); return false;"><img src="<?=HEURIST_SITE_PATH?>common/images/cross.gif"></a></td>

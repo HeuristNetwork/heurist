@@ -29,7 +29,7 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 	$recordID = intval($recordID);
 	$wg = intval($wg);
 	if ($wg) {
-		$res = mysql_query("select * from ".USERS_DATABASE.".UserGroups where ug_user_id=" . get_user_id() . " and ug_group_id=" . $wg);
+		$res = mysql_query("select * from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=" . get_user_id() . " and ugl_GroupID=" . $wg);
 		if (mysql_num_rows($res) < 1) jsonError("invalid workgroup");
 	}
 
@@ -56,11 +56,11 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 
 		$recordID = mysql_insert_id();
 	}else{
-		$res = mysql_query("select * from records left join ".USERS_DATABASE.".UserGroups on ug_group_id=rec_wg_id and ug_user_id=".get_user_id()." where rec_id=$recordID");
+		$res = mysql_query("select * from records left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_GroupID=rec_wg_id and ugl_UserID=".get_user_id()." where rec_id=$recordID");
 		$record = mysql_fetch_assoc($res);
 
 		if ($wg != $record["rec_wg_id"]) {
-			if ($record["rec_wg_id"] > 0  &&  $record["ug_role"] != "admin") {
+			if ($record["rec_wg_id"] > 0  &&  $record["ugl_Role"] != "admin") {
 				// user is trying to change the workgroup when they are not an admin
 				jsonError("user is not a workgroup admin");
 			} else if (! is_admin()) {
@@ -367,22 +367,22 @@ function doWgTagInsertion($recordID, $wgTagIDs) {
 	if ($wgTagIDs != ""  &&  ! preg_match("/^\\d+(?:,\\d+)*$/", $wgTagIDs)) return;
 
 	if ($wgTagIDs) {
-		mysql_query("delete usrRecTagLinks from usrRecTagLinks, usrTags, ".USERS_DATABASE.".UserGroups where rtl_RecID=$recordID and rtl_TagID=tag_ID and tag_UGrpID=ug_group_id and ug_user_id=".get_user_id()." and tag_ID not in ($wgTagIDs)");
+		mysql_query("delete usrRecTagLinks from usrRecTagLinks, usrTags, ".USERS_DATABASE.".sysUsrGrpLinks where rtl_RecID=$recordID and rtl_TagID=tag_ID and tag_UGrpID=ugl_GroupID and ugl_UserID=".get_user_id()." and tag_ID not in ($wgTagIDs)");
 		if (mysql_error()) jsonError("database error - " . mysql_error());
 	} else {
-		mysql_query("delete usrRecTagLinks from usrRecTagLinks, usrTags, ".USERS_DATABASE.".UserGroups where rtl_RecID=$recordID and rtl_TagID=tag_ID and tag_UGrpID=ug_group_id and ug_user_id=".get_user_id());
+		mysql_query("delete usrRecTagLinks from usrRecTagLinks, usrTags, ".USERS_DATABASE.".sysUsrGrpLinks where rtl_RecID=$recordID and rtl_TagID=tag_ID and tag_UGrpID=ugl_GroupID and ugl_UserID=".get_user_id());
 		if (mysql_error()) jsonError("database error - " . mysql_error());
 		return;
 	}
 
-	$existingKeywordIDs = mysql__select_assoc("usrRecTagLinks, usrTags, ".USERS_DATABASE.".UserGroups", "rtl_TagID", "1", "rtl_RecID=$recordID and rtl_TagID=tag_ID and tag_UGrpID=ug_group_id and ug_user_id=".get_user_id());
+	$existingKeywordIDs = mysql__select_assoc("usrRecTagLinks, usrTags, ".USERS_DATABASE.".sysUsrGrpLinks", "rtl_TagID", "1", "rtl_RecID=$recordID and rtl_TagID=tag_ID and tag_UGrpID=ugl_GroupID and ugl_UserID=".get_user_id());
 	$newKeywordIDs = array();
 	foreach (explode(",", $wgTagIDs) as $kwdID) {
 		if (! @$existingKeywordIDs[$kwdID]) array_push($newKeywordIDs, $kwdID);
 	}
 
 	if ($newKeywordIDs) {
-		mysql_query("insert into usrRecTagLinks (rtl_TagID, rtl_RecID) select tag_ID, $recordID from usrTags, ".USERS_DATABASE.".UserGroups where tag_UGrpID=ug_group_id and ug_user_id=".get_user_id()." and tag_ID in (" . join(",", $newKeywordIDs) . ")");
+		mysql_query("insert into usrRecTagLinks (rtl_TagID, rtl_RecID) select tag_ID, $recordID from usrTags, ".USERS_DATABASE.".sysUsrGrpLinks where tag_UGrpID=ugl_GroupID and ugl_UserID=".get_user_id()." and tag_ID in (" . join(",", $newKeywordIDs) . ")");
 		if (mysql_error()) jsonError("database error - " . mysql_error());
 	}
 }
@@ -424,7 +424,7 @@ function handleNotifications($recordID, $removals, $additions) {
 		);
 
 		if (@$addition["user"]) {
-			if (! mysql__select_array(USERS_DATABASE.".Users", "Id", "Id=".intval($addition["user"])." and Active='Y'")) {
+			if (! mysql__select_array(USERS_DATABASE.".sysUGrps usr", "Id", "Id=".intval($addition["user"])." and ugr_Enabled='Y'")) {
 				array_push($newIDs, array("error" => "invalid recipient"));
 				continue;
 			}
@@ -438,7 +438,7 @@ function handleNotifications($recordID, $removals, $additions) {
 			$insertVals["rem_cgr_id"] = intval($addition["colleagueGroup"]);
 		}
 		else if (@$addition["workgroup"]) {
-			if (! mysql__select_array(USERS_DATABASE.".UserGroups", "ug_id", "ug_group_id=".intval($addition["workgroup"])." and ug_user_id=" . get_user_id())) {
+			if (! mysql__select_array(USERS_DATABASE.".sysUsrGrpLinks", "ugl_ID", "ugl_GroupID=".intval($addition["workgroup"])." and ugl_UserID=" . get_user_id())) {
 				array_push($newIDs, array("error" => "invalid recipient"));
 				continue;
 			}

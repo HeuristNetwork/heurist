@@ -86,16 +86,16 @@ function reset_group() {
    </div>
     &nbsp;
 <?php
-	$res = mysql_query('select '.USERS_ID_FIELD.',concat('.USERS_FIRSTNAME_FIELD.'," ",'.USERS_LASTNAME_FIELD.') as fullname
-                              from '.USERS_DATABASE.'.'.USERS_TABLE.'
-                             where '.USERS_ACTIVE_FIELD.'="Y" and '.USERS_FIRSTNAME_FIELD.' is not null and '.USERS_LASTNAME_FIELD.' is not null and !IsModelUser
+	$res = mysql_query('select usr.'.USERS_ID_FIELD.',concat(usr.'.USERS_FIRSTNAME_FIELD.'," ",usr.'.USERS_LASTNAME_FIELD.') as fullname
+                              from '.USERS_DATABASE.'.'.USERS_TABLE.' usr
+                             where usr.'.USERS_ACTIVE_FIELD.'="Y" and usr.'.USERS_FIRSTNAME_FIELD.' is not null and usr.'.USERS_LASTNAME_FIELD.' is not null and !usr.ugr_IsModelUser
                           order by fullname');
 	if (mysql_num_rows($res)) {
 ?>
  <select name="notify_person" id="notify_person" style="width: 120px;" onchange="reset_group(); reset_coll_grp(); reset_email();">
   <option value="0">Person...</option>
 <?php		while ($row = mysql_fetch_assoc($res)) { ?>
-  <option value="<?=$row['Id']?>" <?=($row['Id']==get_user_id())? 'selected' : ''?>><?=htmlspecialchars($row['fullname'])?></option>
+  <option value="<?=$row[USERS_ID_FIELD]?>" <?=($row[USERS_ID_FIELD]==get_user_id())? 'selected' : ''?>><?=htmlspecialchars($row['fullname'])?></option>
 <?php		} ?>
  </select>
 <?php	} ?>
@@ -221,7 +221,7 @@ function handle_notification() {
 		                     where cgl_cgr_id='.intval($_REQUEST['notify_coll_grp']));
 		$count =  mysql_num_rows($res);
 		while ($row = mysql_fetch_assoc($res))
-			$email_headers .= "\r\nBcc: ".$row['EMail'];
+			$email_headers .= "\r\nBcc: ".$row['ugr_eMail'];
 		mail(get_user_name().' <'.$user_email.'>', $email_subject, $email_text, $email_headers);
 
 		return 'Notification email sent to colleague group '.$grpname.' ('.$count.' members)';

@@ -23,7 +23,7 @@
 <td rowspan="2" id="logo-cell"><a href="../.."><img src="../../common/images/hlogo-small.jpg" alt="Heurist" title="Click the logo at top left of any Heurist page to return to your favourites"></a></td>
 <td rowspan="2">
 	<a href="add.php">Add user</a> |
-	<a href="usergroupadmin.php">Edit user groups</a>[proj-group-link!]
+	<a href="usergroupadmin.php">Edit user groups</a>
 </td>
 <td align="right" style="vertical-align: baseline;">
 	<font color="#008000"><small>Logged in as: </small><tt>[logged-in-user-username]</tt></font><br>
@@ -53,46 +53,43 @@
 <div class="box" id="required" style="margin-top:10px;">
 <a>Required information </a>
 <br>
-	<label>First name</label>[textbox required : firstname : First name : size=&quot;20&quot;]
-	<label>Last name</label>[textbox required : lastname : Last name : size=&quot;40&quot;]
-	<label>Initials</label>[textbox : initials : Initials : size=&quot;5&quot;]
+	<label>First name</label>[textbox required : ugr_FirstName : First name : size=&quot;20&quot;]
+	<label>Last name</label>[textbox required : ugr_LastName : Last name : size=&quot;40&quot;]
 	<label>Email<br>
 	<span class="hint">This will be your User Name</span></label>
-	[textbox required : EMail : email: size=&quot;50&quot;]
+	[textbox required : ugr_eMail : email: size=&quot;50&quot;]
 	<label>Institution/company<br>
 	<span class="hint">Enter 'None' if not affiliated with an institution or company</span></label>
-	[textbox required : Organisation : Institution/company : size=&quot;40&quot;]
-	<label>Research Interests</label>[textbox required : Interests : Research Interests : size=&quot;60&quot;]
+	[textbox required : ugr_Organisation : Institution/company : size=&quot;40&quot;]
+	<label>Research Interests</label>[textbox required : ugr_Interests : Research Interests : size=&quot;60&quot;]
 
     <label>Login name</label>
 	[if : logged-in-is-admin]
 		[update USER username_update]
-     		[textbox required : Username : Login name : size=&quot;20&quot;]
+			[textbox required : ugr_Name : Login name : size=&quot;20&quot;]
 	 	[end-update]
 	[else]
-    	[Username]
+		[ugr_Name]
 	[end-if]
 </div>
 <br>
 <div class="box" id="optional"><a onMouseDown="$('#options').slideToggle('fast');">Optional information</a>
 	<div id="options" style="display:none;">
 	<br>
-		<label>Department</label>[textbox : Department : Department : size=&quot;50&quot;]
+		<label>Department</label>[textbox : ugr_Department : Department : size=&quot;50&quot;]
 		<label>URL</label>[textbox : URL : website : size=&quot;50&quot;]
-		<label>Street Address</label>[textbox : Address : Street Address : size=&quot;50&quot;]
-		<label>Suburb/City</label>[textbox : City : Suburb/City : size=&quot;30&quot;]
-		<label>State</label>[textbox : State : State : size=&quot;30&quot;]
-		<label>Post/zipcode</label>[textbox : Postcode : Post/zipcode : size=&quot;10&quot;]
-		<label >Phone</label>[textbox : telephone : Phone : size=&quot;20&quot;]
-		<label>Change password</label>[password : Password : two matching passwords : size=&quot;20&quot;]
+		<label>Suburb/City</label>[textbox : ugr_City : Suburb/City : size=&quot;30&quot;]
+		<label>State</label>[textbox : ugr_State : State : size=&quot;30&quot;]
+		<label>Post/zipcode</label>[textbox : ugr_Postcode : Post/zipcode : size=&quot;10&quot;]
+		<label>Change password</label>[password : ugr_Password : two matching passwords : size=&quot;20&quot;]
 		<label>Repeat password</label><input type="password" name="password2" size="20">
-		<label>Jobtrack</label>[checkbox : Jobtrack : Jobtrack : style="margin-left: 0;"]&nbsp;&nbsp;
+		<label>Jobtrack</label>[checkbox : ugr_FlagJT : Jobtrack : style="margin-left: 0;"]&nbsp;&nbsp;
 		[if : approve]
 	[else]
-	 [if-eq : Active : "Y"]
-	  <label>Active</label><input type="checkbox" name="Active" value="1"  style="margin-left: 0;" checked>
+	 [if-eq : ugr_Enabled : "Y"]
+	  <label>Active</label><input type="checkbox" name="ugr_Enabled" value="1"  style="margin-left: 0;" checked>
 	 [else]
-	  <label>Active</label><input type="checkbox" name="Active" value="1"  style="margin-left: 0;">
+	  <label>Active</label><input type="checkbox" name="ugr_Enabled" value="1"  style="margin-left: 0;">
 	 [end-if-eq]
 	[end-if]
 	</div>
@@ -100,11 +97,11 @@
 <br>
 
 [if : approve]
- [if-eq : Active : "Y"]
+ [if-eq : ugr_Enabled : "Y"]
   <p class="red"><b>This user has already been approved</b></p>
  [else]
   <input type="hidden" name="approved" value="1">
-  <input type="hidden" name="Active" value="1">
+  <input type="hidden" name="ugr_Enabled" value="1">
   &nbsp;&nbsp;&nbsp;<input type="submit" value="approve user">&nbsp;&nbsp;&nbsp;
   <p class="red">An email will be sent to the user informing them that they have been approved</p>
  [end-if-eq]

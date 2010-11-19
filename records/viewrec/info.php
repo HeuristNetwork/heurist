@@ -101,7 +101,7 @@ function add_sid() {
 
 <?php
 // get a list of workgroups the user belongs to.
-$wg_ids = mysql__select_array(USERS_DATABASE.'.UserGroups', 'ug_group_id', 'ug_user_id='.get_user_id());
+$wg_ids = mysql__select_array(USERS_DATABASE.'.sysUsrGrpLinks', 'ugl_GroupID', 'ugl_UserID='.get_user_id());
 array_push($wg_ids, 0);
 
 // if we get a record id tehn see if there is a personal bookmark for it.
@@ -187,7 +187,7 @@ function print_header_line($bib) {
 //this  function displays private info if there is any.
 function print_private_details($bib) {
 
-	$res = mysql_query('select grp_name from records, '.USERS_DATABASE.'.Groups where grp_id=rec_wg_id and rec_id='.$bib['rec_id']);
+	$res = mysql_query('select grp.ugr_Name from records, '.USERS_DATABASE.'.sysUGrps grp where grp.ugr_ID=rec_wg_id and grp.ugr_Type!="User"  and rec_id='.$bib['rec_id']);
 	$workgroup_name = NULL;
 	// check to see if this record is owned by a workgroup
 	if (mysql_num_rows($res) > 0) {
@@ -195,7 +195,7 @@ function print_private_details($bib) {
 		$workgroup_name = $row[0];
 	}
 	// check for workgroup tags
-	$res = mysql_query('select grp_name, tag_Text from usrRecTagLinks left join usrTags on rtl_TagID=tag_ID left join '.USERS_DATABASE.'.Groups on tag_UGrpID=grp_id left join '.USERS_DATABASE.'.UserGroups on ug_group_id=grp_id and ug_user_id='.get_user_id().' where rtl_RecID='.$bib['rec_id'].' and ???kwd_wg_id and ug_id is not null order by rtl_Order');
+	$res = mysql_query('select grp.ugr_Name, tag_Text from usrRecTagLinks left join usrTags on rtl_TagID=tag_ID left join '.USERS_DATABASE.'.sysUGrps grp on tag_UGrpID=grp.ugr_ID left join '.USERS_DATABASE.'.sysUsrGrpLinks on ugl_GroupID=ugr_ID and ugl_UserID='.get_user_id().' where rtl_RecID='.$bib['rec_id'].' and tag_UGrpID is not null and ugl_ID is not null order by rtl_Order');
 	$kwds = array();
 	while ($row = mysql_fetch_row($res)) array_push($kwds, $row);
 	if ( $workgroup_name || count($kwds) || $bib['bkm_ID']) {
@@ -676,7 +676,7 @@ function orderComments($cmts) {
 
 
 function getAllComments($rec_id) {
-	$res = mysql_query("select cmt_id, cmt_deleted, cmt_text, cmt_parent_cmt_id, cmt_date, cmt_modified, cmt_usr_id, Realname from comments left join ".USERS_DATABASE.".Users on cmt_usr_id=Id where cmt_rec_id = $rec_id order by cmt_date");
+	$res = mysql_query("select cmt_id, cmt_deleted, cmt_text, cmt_parent_cmt_id, cmt_date, cmt_modified, cmt_usr_id,  concat(ugr_FirstName,' ',ugr_LastName) as Realname from comments left join ".USERS_DATABASE.".sysUGrps usr on cmt_usr_id=Id where cmt_rec_id = $rec_id order by cmt_date");
 	$comments = array();
 	while ($cmt = mysql_fetch_assoc($res)) {
 		if ($cmt["cmt_deleted"]) {

@@ -42,7 +42,8 @@ if (! top.HEURIST.json) top.HEURIST.json = {
 			if (callback) callback(wg_id);
 		});
 	}
- ,
+/*	saw 16/11/2010 deprecated as this tries to call published_searches table which hasn't existed for 2 years.
+,
  loadPubSearches: function(wg_id) {
 		if (top.HEURIST.workgroups[wg_id].wgSearches  &&
 			top.HEURIST.workgroups[wg_id].mySearches &&
@@ -58,5 +59,5 @@ if (! top.HEURIST.json) top.HEURIST.json = {
 			if (callback) callback(wg_id);
 		});
 	}
-
+*/
 };

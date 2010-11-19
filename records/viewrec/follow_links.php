@@ -14,7 +14,7 @@ mysql_connection_db_overwrite(DATABASE);
 $template = file_get_contents('follow_links.html');
 $template = str_replace('[logged-in-user-id]', intval(get_user_id()), $template);
 
-$wg_ids = mysql__select_array(USERS_DATABASE.'.UserGroups', 'ug_group_id', 'ug_user_id='.get_user_id());
+$wg_ids = mysql__select_array(USERS_DATABASE.'.sysUsrGrpLinks', 'ugl_GroupID', 'ugl_UserID='.get_user_id());
 array_push($wg_ids, 0);
 
 if (@$_REQUEST['bkmk_id']) {
@@ -46,20 +46,20 @@ $my_kwds = mysql__select_array('usrRecTagLinks left join usrTags on rtl_TagID=ta
 $tags = mysql__select_assoc('usrBookmarks
 								 left join usrRecTagLinks on bkm_RecID=rtl_RecID
 								 left join usrTags on rtl_TagID=tag_ID
-								 left join '.USERS_DATABASE.'.Users on Id=tag_UGrpID',
+								 left join '.USERS_DATABASE.'.sysUGrps usr on Id=tag_UGrpID',
 								'tag_Text', 'count(tag_ID) as kcount',
 								'bkm_RecID='.$bib['rec_id'].'
 								 and rtl_ID is not null
-								 and Active="Y"
+								 and ugr_Enabled="Y"
 								 group by tag_Text
 								 order by kcount desc, tag_Text');
 
 /*
-$res = mysql_query('select concat(firstname," ",lastname) as bkmk_user, tag_Text
+$res = mysql_query('select concat(ugr_FirstName," ",ugr_LastName) as bkmk_user, tag_Text
 					from usrBookmarks
-					left join usrRecTagLinks on bkm_ID=kwl_pers_id
+					left join usrRecTagLinks on bkm_RecID=rtl_RecID
 					left join usrTags on rtl_TagID=tag_ID
-					left join '.USERS_DATABASE.'.Users on bkm_UGrpID=Id
+					left join '.USERS_DATABASE.'.sysUGrps usr on bkm_UGrpID=Id
 					where bkm_recID='.$bib['rec_id'].' and rtl_ID is not null order by bkmk_user, tag_Text');
 
 $user_tags = array();
@@ -83,15 +83,15 @@ if ($tags) {
 											. "</a>&nbsp;</nobr></td>\n";
 
 		$kwd_list .= "  <td>\n";
-		$res = mysql_query('select Id, concat(firstname," ",lastname) as bkmk_user
+		$res = mysql_query('select Id, concat(ugr_FirstName," ",ugr_LastName) as bkmk_user
 							from usrBookmarks
 							left join usrRecTagLinks on bkm_RecID=rtl_RecID
 							left join usrTags on rtl_TagID=tag_ID
-							left join '.USERS_DATABASE.'.Users on bkm_UGrpID=Id
+							left join '.USERS_DATABASE.'.sysUGrps usr on bkm_UGrpID=Id
 							where bkm_recID='.$bib['rec_id'].'
 							and rtl_ID is not null
 							and tag_Text="'.$tag.'"
-							and Active="Y"
+							and ugr_Enabled="Y"
 							order by bkmk_user');
 		$i = 0;
 		while ($row = mysql_fetch_assoc($res)) {
@@ -116,17 +116,17 @@ $body->global_vars['tag-list'] = $kwd_list;
 
 
 $res = mysql_query('
-   select Id, concat(firstname," ",lastname) as bkmk_user
+   select Id, concat(ugr_FirstName," ",ugr_LastName) as bkmk_user
      from records
 left join usrBookmarks on bkm_recID=rec_id
 left join usrRecTagLinks on rtl_RecID=bkm_RecID
 left join usrTags on tag_ID=rtl_TagID and tag_UGrpID=bkm_UGrpID
-left join '.USERS_DATABASE.'.Users on Id=bkm_UGrpID
+left join '.USERS_DATABASE.'.sysUGrps usr on Id=bkm_UGrpID
     where rec_id='.$bib['rec_id'].'
       and tag_ID is null
       and Id is not null
       and Id!='.get_user_id().'
-	  and Active="Y"
+	  and ugr_Enabled="Y"
  order by bkmk_user;');
 
 if (mysql_num_rows($res)) {

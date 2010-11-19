@@ -16,7 +16,7 @@ $rec_id = intval($_POST["bib_id"]);
 $rem_id = intval($_POST["rem_id"]);
 if ($rec_id  &&  $_POST["save-mode"] == "add") {
 	if ($_POST["reminder-user"]) {
-		$res = mysql_query("select Id from ".USERS_DATABASE.".Users where concat(firstname, ' ', lastname) = '" . addslashes($_POST["reminder-user"]) . "'");
+		$res = mysql_query("select Id from ".USERS_DATABASE.".sysUGrps usr where concat(ugr_FirstName, ' ', ugr_LastName) = '" . addslashes($_POST["reminder-user"]) . "'");
 		$user = mysql_fetch_row($res);
 		if ($user) {
 			$_POST["reminder-user"] = intval($user[0]);

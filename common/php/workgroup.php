@@ -21,7 +21,7 @@ if (! $wg_id) {
 
 mysql_connection_db_select(DATABASE);
 
-$res = mysql_query("select ug_user_id from ".USERS_DATABASE.".UserGroups where ug_user_id=".get_user_id()." and ug_group_id=".$wg_id);
+$res = mysql_query("select ugl_UserID from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=".get_user_id()." and ugl_GroupID=".$wg_id);
 if (mysql_num_rows($res) < 1) {
 	print '({ "error": "User unauthorised to fetch workgroup data for workgroup '.$wg_id.'" })';
 	return;
@@ -30,12 +30,12 @@ if (mysql_num_rows($res) < 1) {
 
 {
 	"members": [<?php
-$res = mysql_query("select Id, concat(firstname,' ',lastname) as name, EMail
-					  from ".USERS_DATABASE.".UserGroups
-				 left join ".USERS_DATABASE.".Users on Id = ug_user_id
-					 where ug_group_id = ".$wg_id."
-					   and Active = 'Y'
-				  order by lastname");
+$res = mysql_query("select Id, concat(ugr_FirstName,' ',lastname) as name, ugr_eMail
+					  from ".USERS_DATABASE.".sysUsrGrpLinks
+				 left join ".USERS_DATABASE.".sysUGrps usr on Id = ugl_UserID
+					 where ugl_GroupID = ".$wg_id."
+					   and ugr_Enabled = 'Y'
+				  order by ugr_LastName");
 $first = true;
 while ($row = mysql_fetch_row($res)) {
 	if (! $first) print ",";  print "\n"; $first = false;

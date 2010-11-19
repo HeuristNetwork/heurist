@@ -16,11 +16,11 @@ if (! $groupID  &&  ! $userID) {
 }
 
 function get_group_members($gid) {
-	$query = "SELECT Id as id, firstname, lastname
+	$query = "SELECT usr.Id as id, usr.ugr_FirstName as firstname, usr.ugr_LastName as lastname
 	            FROM ".USERS_DATABASE.".".USER_GROUPS_TABLE."
-	      INNER JOIN ".USERS_DATABASE.".".USERS_TABLE." ON Id = ug_user_id
-	           WHERE ug_group_id = $gid
-	        ORDER BY lastname, firstname";
+	      INNER JOIN ".USERS_DATABASE.".".USERS_TABLE." usr ON usr.Id = ugl_UserID
+	           WHERE ugl_GroupID = $gid
+	        ORDER BY usr.ugr_LastName, usr.ugr_FirstName";
 	$res = mysql_query($query);
 	$rv = array();
 	while ($row = mysql_fetch_assoc($res)) {
@@ -85,9 +85,9 @@ function print_blog_entries($uid, $name, $date) {
 
 
 function print_comments($rec_id) {
-	$query = "SELECT Realname, cmt_date, cmt_text
+	$query = "SELECT concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname, cmt_date, cmt_text
 	          FROM comments
-			  LEFT JOIN ACLAdmin.Users ON ID = cmt_usr_id
+			  LEFT JOIN sysUGrps usr usr ON usr.ID = cmt_usr_id
 	          WHERE cmt_rec_id = $rec_id
 	          AND ! cmt_deleted
 	          ORDER BY cmt_date";
@@ -104,9 +104,9 @@ function print_comments($rec_id) {
 mysql_connection_select(DATABASE);
 
 if ($groupID) {
-	$gres = mysql_query("select grp_name from ACLAdmin.Groups where grp_id = $groupID");
+	$gres = mysql_query("select grp.ugr_Name from sysUGrps grp where grp.ugr_ID = $groupID");
 	$row = mysql_fetch_assoc($gres);
-	$grp_name = $row["grp_name"];
+	$grp_name = $row["ugr_Name"];
 	print "<h1>Blog report for group $grp_name</h1>\n";
 	print_heading($date);
 	$members = get_group_members($groupID);
@@ -115,12 +115,12 @@ if ($groupID) {
 	}
 }
 else {
-	$ures = mysql_query("select Realname from ACLAdmin.Users where Id = $userID");
+	$ures = mysql_query("select concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname from sysUGrps usr usr where usr.Id = $userID");
 	$row = mysql_fetch_assoc($ures);
 	$usr_name = $row["Realname"];
 	print "<h1>Blog report for user $usr_name</h1>\n";
 	print_heading($date);
-	print_blog_entries($userID, $row["Realname"], $date);
+	print_blog_entries($userID, $usr_name, $date);
 }
 
 ?>

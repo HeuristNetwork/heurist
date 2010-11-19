@@ -12,9 +12,9 @@ if (! is_logged_in()) {
 
 if (@$_REQUEST['submitted']) {
 	mysql_connection_db_overwrite(USERS_DATABASE);
-	mysql_query('update Users set WordLimit = '.intval(@$_REQUEST['word_limit']).' where Id='.get_user_id());
+	mysql_query('update sysUGrps usr set ugr_MinHyperlinkWords = '.intval(@$_REQUEST['word_limit']).' where Id='.get_user_id());
 	mysql_connection_db_overwrite(USERS_DATABASE);
-	mysql_query('update Users set WordLimit = '.intval(@$_REQUEST['word_limit']).' where Id='.get_user_id());
+	mysql_query('update sysUGrps usr set ugr_MinHyperlinkWords = '.intval(@$_REQUEST['word_limit']).' where Id='.get_user_id());
 	mysql_connection_db_overwrite(DATABASE);
 
 	if (@$_REQUEST['new_hyp_text']) {
@@ -133,9 +133,9 @@ if (get_user_id() == 96) {
    <option value="">(select a user)</option>
 ';
 	if (defined('HEURIST_USER_GROUP_ID')) {
-		$usernames = mysql__select_assoc(USERS_DATABASE.'.Users left join '.USERS_DATABASE.'.UserGroups on ug_user_id=Id', 'Id', 'Username', 'ug_group_id='.HEURIST_USER_GROUP_ID.' and Id != 96 order by Username');
+		$usernames = mysql__select_assoc(USERS_DATABASE.'.sysUGrps usr left join '.USERS_DATABASE.'.sysUsrGrpLinks on ugl_UserID=usr.Id', 'usr.Id', 'usr.ugr_Name', 'ugl_GroupID='.HEURIST_USER_GROUP_ID.' and usr.Id != 96 order by usr.ugr_Name');
 	} else {
-		$usernames = mysql__select_assoc(USERS_DATABASE.'.Users', 'Id', 'Username', 'Id != 96 order by Username');
+		$usernames = mysql__select_assoc(USERS_DATABASE.'.sysUGrps usr', 'usr.Id', 'usr.ugr_Name', 'usr.Id != 96 order by usr.ugr_Name');
 	}
 	foreach ($usernames as $id => $name) {
 		$user_hyperlinks_import .=
@@ -173,7 +173,7 @@ $template = str_replace('{body_only}', (array_key_exists('body_only', $_REQUEST)
 $template = str_replace('{section}', @$_REQUEST['section'], $template);
 
 mysql_connection_db_select(USERS_DATABASE);
-$res = mysql_query('select WordLimit from Users where Id = '.get_user_id());
+$res = mysql_query('select ugr_MinHyperlinkWords from sysUGrps usr where Id = '.get_user_id());
 $row = mysql_fetch_row($res);
 $word_limit = $row[0];	// minimum number of spaces that must appear in the link text
 mysql_connection_db_select(DATABASE);

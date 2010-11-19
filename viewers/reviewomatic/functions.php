@@ -25,14 +25,14 @@ function get_ass_kwd_id($assignments, $class_grp_id) {
 
 function get_classes($user_id) {
 	$user_id = intval($user_id);
-	$res = mysql_query('SELECT grp_id, grp_name
-						  FROM ACLAdmin.UserGroups
-					 LEFT JOIN ACLAdmin.Groups ON grp_id=ug_group_id
-						 WHERE ug_user_id = ' . $user_id . '
-						   AND grp_type = "UgradClass"
-					  ORDER BY grp_name');
+	$res = mysql_query('SELECT grp.ugr_ID, grp.ugr_Name
+						  FROM sysUsrGrpLinks
+					 LEFT JOIN sysUGrps grp ON grp.ugr_ID=ugl_GroupID
+						 WHERE ugl_UserID = ' . $user_id . '
+						   AND grp.ugr_Type = "Ugradclass"
+					  ORDER BY grp.ugr_Name');
 	while ($row = mysql_fetch_assoc($res)) {
-		$classes[$row['grp_id']] = $row['grp_name'];
+		$classes[$row['ugr_ID']] = $row['ugr_Name'];
 	}
 	return $classes;
 }
@@ -60,11 +60,11 @@ function get_reviews($user_id, $class_grp_id, $ass_kwd_id, $get_text=false, $ind
 	$reviews = array();
 	$res = mysql_query('SELECT SQL_CALC_FOUND_ROWS
 							   rec_id, rec_title, rec_url, bkm_ID, bkm_Added,
-							   concat(firstname," ",lastname) as author'.($get_text?', pers_notes':'').'
-						  FROM usrRecTagLinks
+							   concat(usr.ugr_FirstName," ",usr.ugr_LastName) as author'./*.($get_text?', pers_notes':'').' */
+						 'FROM usrRecTagLinks
 					 LEFT JOIN usrBookmarks ON bkm_RecID=rtl_RecID
 					 LEFT JOIN records ON rec_id=rtl_RecID
-					 LEFT JOIN ACLAdmin.Users on Id=bkm_UGrpID
+					 LEFT JOIN sysUGrps usr on usr.ugr_ID=bkm_UGrpID
 						 WHERE rtl_TagID=' . $ass_kwd_id .
 		 ($user_id > 0 ? ' AND bkm_UGrpID=' . $user_id : '').'
 						 ORDER BY bkm_Added desc
