@@ -53,8 +53,6 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 		$_SESSION['shsseri_user_realname'] = $user[USERS_FIRSTNAME_FIELD] . ' ' . $user[USERS_LASTNAME_FIELD];
 		$_SESSION['shsseri_user_id'] = $user[USERS_ID_FIELD];
 		$_SESSION['shsseri_user_access'] = $groups;
-		$_SESSION['shsseri_user_roles'] = mysql__select_array('ACLAdmin.Roles, ACLAdmin.UserRoles',
-																'Rolename', 'Id_Role = Id and Id_User = '.$user['Id']);
 
 
 		$expiry = '';
@@ -67,11 +65,11 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 
 		/* bookkeeping */
 		mysql_connection_localhost_overwrite(USERS_DATABASE);
-		mysql_query('update sysUGrps usr set usr.ugr_LastLoginTime=now(), usr.ugr_LoginCount=ugr_LoginCount+1
-					  where Id='.$user[USERS_ID_FIELD]);
+		mysql_query('update sysUGrps usr set usr.ugr_LastLoginTime=now(), usr.ugr_LoginCount=usr.ugr_LoginCount+1
+					  where usr.ugr_ID='.$user[USERS_ID_FIELD]);
 		mysql_connection_db_overwrite(USERS_DATABASE);	// replication
-		mysql_query('update sysUGrps usr set usr.ugr_LastLoginTime=now(), usr.ugr_LoginCount=ugr_LoginCount+1
-					  where Id='.$user[USERS_ID_FIELD]);
+		mysql_query('update sysUGrps usr set usr.ugr_LastLoginTime=now(), usr.ugr_LoginCount=usr.ugr_LoginCount+1
+					  where usr.ugr_ID='.$user[USERS_ID_FIELD]);
 		mysql_connection_localhost_select(USERS_DATABASE);
 
 		header('Location: .');

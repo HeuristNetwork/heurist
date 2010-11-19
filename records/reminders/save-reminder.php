@@ -16,7 +16,7 @@ $rec_id = intval($_POST["bib_id"]);
 $rem_id = intval($_POST["rem_id"]);
 if ($rec_id  &&  $_POST["save-mode"] == "add") {
 	if ($_POST["reminder-user"]) {
-		$res = mysql_query("select Id from ".USERS_DATABASE.".sysUGrps usr where concat(ugr_FirstName, ' ', ugr_LastName) = '" . addslashes($_POST["reminder-user"]) . "'");
+		$res = mysql_query("select usr.ugr_ID from ".USERS_DATABASE.".sysUGrps usr where concat(usr.ugr_FirstName, ' ', usr.ugr_LastName) = '" . addslashes($_POST["reminder-user"]) . "'");
 		$user = mysql_fetch_row($res);
 		if ($user) {
 			$_POST["reminder-user"] = intval($user[0]);
@@ -32,7 +32,6 @@ if ($rec_id  &&  $_POST["save-mode"] == "add") {
 		"rem_owner_id" => get_user_id(),
 		"rem_usr_id" => ($_POST["reminder-user"] > 0 ? $_POST["reminder-user"] : null),
 		"rem_wg_id" => ($_POST["reminder-group"] > 0 ? $_POST["reminder-group"] : null),
-		"rem_cgr_id" => ($_POST["reminder-colleagues"] > 0 ? $_POST["reminder-colleagues"] : null),
 		"rem_email" => $_POST["reminder-email"],
 		"rem_startdate" => $_POST["reminder-when"],
 		"rem_freq" => $_POST["reminder-frequency"],
@@ -59,7 +58,6 @@ if ($rec_id  &&  $_POST["save-mode"] == "add") {
      id: <?= $rem["rem_id"] ?>,
      user: <?= intval($rem["rem_usr_id"]) ?>,
      group: <?= intval($rem["rem_wg_id"]) ?>,
-     colleagueGroup: <?= intval($rem["rem_cgr_id"]) ?>,
      email: "<?= slash($rem["rem_email"]) ?>",
      message: "<?= slash($rem["rem_message"]) ?>",
      when: "<?= slash($rem["rem_startdate"]) ?>",

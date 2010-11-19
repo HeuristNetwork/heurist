@@ -124,15 +124,6 @@ $bdr_details = array("colNames" => $colNames, "valuesByReftypeID" => $bdrs);
 ?>
    top.HEURIST.user.bibDetailRequirements = <?= json_format($bdr_details) ?>;
 
-    top.HEURIST.user.colleagueGroups = {<?php
-	$res = mysql_query("select cgr_id, cgr_name from coll_groups where cgr_owner_id=".get_user_id()." order by cgr_name");
-	$first = true;
-	while ($row = mysql_fetch_row($res)) {
-		if (! $first) print ",";  print "\n"; $first = false;
-		print "\t\"".$row[0]."\":\t\"".slash($row[1])."\"";
-	}
-?>
-
     };
 
     top.HEURIST.user.isInWorkgroup = function(wg_id) {
@@ -146,7 +137,7 @@ $bdr_details = array("colNames" => $colNames, "valuesByReftypeID" => $bdrs);
 <?php
 }
 
-$res = mysql_query("select usr.Id, usr.ugr_Name, concat(usr.ugr_FirstName, ' ', usr.ugr_LastName) as fullname
+$res = mysql_query("select usr.ugr_ID, usr.ugr_Name, concat(usr.ugr_FirstName, ' ', usr.ugr_LastName) as fullname
 					  from ".USERS_DATABASE.".sysUGrps usr
 					 where usr.ugr_Enabled='Y' and usr.ugr_FirstName is not null and usr.ugr_LastName is not null and !usr.ugr_IsModelUser
 				  order by fullname");

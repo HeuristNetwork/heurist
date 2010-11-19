@@ -116,25 +116,10 @@ function reset_group() {
  </select>
 <?php	} ?>
     &nbsp;
-    or
-<?php
-	$res = mysql_query('select cgr_id,cgr_name from coll_groups where cgr_owner_id='.get_user_id().' order by cgr_name');
-	if (mysql_num_rows($res)) {
-?>
- <select name="notify_coll_grp" id="notify_coll_grp" style="width: 120px;" onchange="reset_person(); reset_group(); reset_email(); document.getElementById('coll_grp_members_link_div').style.display = ''; document.getElementById('coll_grp_members_link').cgr_id = this.value;">
-  <option value="0">Colleague group...</option>
-<?php		while ($row = mysql_fetch_assoc($res)) { ?>
-  <option value="<?=$row['cgr_id']?>"><?=htmlspecialchars($row['cgr_name'])?></option>
-<?php		} ?>
- </select>
-<?php	} ?>
-
-    &nbsp;
     or email:
     <input type="text" name="notify_email" id="notify_email" onfocus="reset_person(); reset_group(); reset_coll_grp();">
     <br>
 	<div id="grp_members_link_div" style="text-align: center; display: none;">&nbsp;<a id="grp_members_link" href=# onclick="top.HEURIST.util.popupURL(window, '/common/html/workgroup-members.html?wg_id='+this.wg_id); return false;">Show group members</a></div>
-	<div id="coll_grp_members_link_div" style="text-align: center; display: none;">&nbsp;<a id="coll_grp_members_link" href=# onclick="top.HEURIST.util.popupURL(window, '/user/colleagues/user_clouds_edit.php?cgr_id='+this.cgr_id); return false;">Show colleague group members</a></div>
     &nbsp;
     <textarea name="notify_message" title="email message" style="width: 95%;" rows="3"
               onfocus="if (this.value=='(enter message here)') this.value='';">(enter message here)</textarea>
@@ -212,19 +197,6 @@ function handle_notification() {
 		mail(get_user_name().' <'.$user_email.'>', $email_subject, $email_text, $email_headers);
 
 		return 'Notification email sent to group '.$grpname.' ('.$count.' members)';
-	} else if ($_REQUEST['notify_coll_grp']) {
-		$res = mysql_query('select cgr_name from coll_groups where cgr_id='.intval($_REQUEST['notify_coll_grp']));
-		$row = mysql_fetch_assoc($res);
-		$grpname = $row['cgr_name'];
-		$res = mysql_query('select '.USERS_EMAIL_FIELD.'
-		                      from '.USERS_DATABASE.'.'.USERS_TABLE.' left join coll_group_links on cgl_usr_id=Id
-		                     where cgl_cgr_id='.intval($_REQUEST['notify_coll_grp']));
-		$count =  mysql_num_rows($res);
-		while ($row = mysql_fetch_assoc($res))
-			$email_headers .= "\r\nBcc: ".$row['ugr_eMail'];
-		mail(get_user_name().' <'.$user_email.'>', $email_subject, $email_text, $email_headers);
-
-		return 'Notification email sent to colleague group '.$grpname.' ('.$count.' members)';
 	} else if ($_REQUEST['notify_person']) {
 		$res = mysql_query('select '.USERS_EMAIL_FIELD.', concat('.USERS_FIRSTNAME_FIELD.'," ",'.USERS_LASTNAME_FIELD.') as fullname from '.USERS_DATABASE.'.'.USERS_TABLE.' where '.USERS_ID_FIELD.'='.$_REQUEST['notify_person']);
 		$psn = mysql_fetch_assoc($res);

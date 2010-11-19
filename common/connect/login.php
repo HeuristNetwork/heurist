@@ -67,12 +67,12 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 
 		/* bookkeeping */
 		mysql_connection_db_overwrite(USERS_DATABASE);
-		mysql_query('update sysUGrps usr set ugr_LastLoginTime=now(), ugr_LoginCount=ugr_LoginCount+1
-					  where Id='.$user[USERS_ID_FIELD]);
+		mysql_query('update sysUGrps usr set usr.ugr_LastLoginTime=now(), usr.ugr_LoginCount=usr.ugr_LoginCount+1
+					  where usr.ugr_ID='.$user[USERS_ID_FIELD]);
 		if (HOST === "heuristscholar.org"  &&  HEURIST_INSTANCE === "") {
 			mysql_connection_felix_overwrite(USERS_DATABASE);	// replication
-			mysql_query('update sysUGrps usr set ugr_LastLoginTime=now(), ugr_LoginCount=ugr_LoginCount+1
-						  where Id='.$user[USERS_ID_FIELD]);
+			mysql_query('update sysUGrps usr set usr.ugr_LastLoginTime=now(), usr.ugr_LoginCount=usr.ugr_LoginCount+1
+						  where usr.ugr_ID='.$user[USERS_ID_FIELD]);
 		}
 		mysql_connection_db_select(USERS_DATABASE);
 

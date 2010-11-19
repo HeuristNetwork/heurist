@@ -439,21 +439,6 @@ HWorkgroup.getClass = function() { return "HWorkgroup"; };
 HAPI.Workgroup = HWorkgroup;
 
 
-var HColleagueGroup = function(id, name) {
-	var _id = id;
-	var _name = name;
-
-	if (HAPI.ColleagueGroupManager) {
-		throw "Cannot construct new HWorkgroup objects";
-	}
-
-	this.getID = function() { return _id; };
-	this.getName = function() { return _name; };
-};
-HColleagueGroup.getClass = function() { return "HColleagueGroup"; };
-HAPI.inherit(HColleagueGroup, HObject);
-HAPI.ColleagueGroup = HColleagueGroup;
-
 
 var HRecordType = function(id, name, mask) {
 	var _id = id;
@@ -1697,7 +1682,7 @@ var HNotification = function(id, record, recipient, message, startDate, frequenc
 	if (! HAPI.isA(record, "HRecord")  ||  HNotification.caller !== record.addNotification) {
 		throw "HNotification must be constructed using HRecord::addNotification";
 	}
-	/* PRE */ if (! (HAPI.isA(recipient, "HUser")  ||  HAPI.isA(recipient, "HWorkgroup")  ||  HAPI.isA(recipient, "HColleagueGroup")  ||
+	/* PRE */ if (! (HAPI.isA(recipient, "HUser")  ||  HAPI.isA(recipient, "HWorkgroup")  ||
 			("" + recipient).match(/^[-!#$%*\/?|&^{}`~&'+=_A-Za-z0-9]+@[-.A-Za-z0-9]+$/) /* patent-pending: very simple email address regexp */)) {
 		throw "Invalid notification recipient";
 	}
@@ -1715,7 +1700,6 @@ var HNotification = function(id, record, recipient, message, startDate, frequenc
 
 		if (HAPI.isA(recipient, "HUser")) { jso.user = recipient.getID(); }
 		else if (HAPI.isA(recipient, "HWorkgroup")) { jso.workgroup = recipient.getID(); }
-		else if (HAPI.isA(recipient, "HColleagueGroup")) { jso.colleagueGroup = recipient.getID(); }
 		else { jso.email = recipient; }
 
 		jso.date = _startDate;
@@ -1729,7 +1713,6 @@ var HNotification = function(id, record, recipient, message, startDate, frequenc
 	this.getID = function() { return _id; };
 	this.getRecord = function() { return _record; };
 	this.getWorkgroupRecipient = function() { return HAPI.isA(_recipient, "HWorkgroup")? _recipient : null; };
-	this.getColleagueGroupRecipient = function() { return HAPI.isA(_recipient, "HColleagueGroup")? _recipient : null; };
 	this.getUserRecipient = function() { return HAPI.isA(_recipient, "HUser")? _recipient : null; };
 	this.getEmailRecipient = function() { return (("" + _recipient) === _recipient)? _recipient : null; };
 	this.getRecipient = function() { return _recipient; };
@@ -2263,25 +2246,6 @@ var HWorkgroupTagManager = new function(wgTags) {
 }(HAPI_userData.workgroupTags || []);
 HWorkgroupTagManager.prototype = new HObject();
 HAPI.WorkgroupTagManager = HWorkgroupTagManager;
-
-
-var HColleagueGroupManager = new function(groups) {
-	// groups is an array of [id, name] values
-	var _groups = [];
-	var _groupsMap = {};
-
-	var i, newGroup;
-	for (i=0; i < groups.length; ++i) {
-		newGroup = new HColleagueGroup(parseInt(groups[i][0]), groups[i][1]);
-		_groups.push(newGroup);
-		_groupsMap[groups[i][0]] = newGroup;
-	}
-
-	this.getColleagueGroupById = function(id) { return (_groupsMap[id] || null); };
-	this.getColleagueGroups = function() { return _groups.slice(0); };
-}(HAPI_userData.colleagueGroups || []);
-HColleagueGroupManager.prototype = new HObject();
-HAPI.ColleagueGroupManager = HColleagueGroupManager;
 
 
 var HRecordTypeManager = new function(types) {
@@ -3209,13 +3173,12 @@ var HeuristScholarDB = new HStorageManager();
 				for (j=0; j < notifications.length; ++j) {
 					args = notifications[j];
 					if (args[1]) { recipient = HWorkgroupManager.getWorkgroupById(args[1]); }
-					else if (args[2]) { recipient = HColleagueGroupManager.getColleagueGroupById(args[2]); }
-					else if (args[3]) { recipient = HUserManager.getUserById(args[3]); }
-					else { recipient = args[4]; }
+					else if (args[2]) { recipient = HUserManager.getUserById(args[3]); }
+					else { recipient = args[3]; }
 
-					text = args[5];
-					date = new Date(args[6].replace(/-/g, "/"));
-					freq = args[7];
+					text = args[4];
+					date = new Date(args[5].replace(/-/g, "/"));
+					freq = args[6];
 
 					try {	// make a best effort -- no guarantees
 						record.addNotification(recipient, text, date, freq).setID(parseInt(args[0]));
@@ -3708,7 +3671,7 @@ HAPI.importSymbols = function(from, to) {
 		"HUnsavedRecordException",
 		"HWorkgroupTag",
 		"HWorkgroup",
-		"HColleagueGroup",
+//		"HColleagueGroup",
 		"HRecordType",
 		"HRatings",
 		"HUser",
@@ -3735,7 +3698,7 @@ HAPI.importSymbols = function(from, to) {
 		"HTagManager",
 		"HWorkgroupManager",
 		"HWorkgroupTagManager",
-		"HColleagueGroupManager",
+//		"HColleagueGroupManager",
 		"HRecordTypeManager",
 		"HDetailManager",
 		"HCurrentUser",

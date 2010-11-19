@@ -374,7 +374,7 @@ function writeGeneralData($bib, $depth) {
 
 	$query = 'SELECT * FROM records
 						LEFT JOIN rec_types on rec_type = rt_id
-						LEFT JOIN '.USERS_DATABASE.'.sysUGrps usr on rec_added_by_usr_id = Id
+						LEFT JOIN '.USERS_DATABASE.'.sysUGrps usr on rec_added_by_usr_id = usr.ugr_ID
 						WHERE rec_id=' . $bib;
 	$res = mysql_query($query);
 	// do we have results ?

@@ -30,12 +30,12 @@ if (mysql_num_rows($res) < 1) {
 
 {
 	"members": [<?php
-$res = mysql_query("select Id, concat(ugr_FirstName,' ',lastname) as name, ugr_eMail
+$res = mysql_query("select usr.ugr_ID, concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as name, usr.ugr_eMail
 					  from ".USERS_DATABASE.".sysUsrGrpLinks
-				 left join ".USERS_DATABASE.".sysUGrps usr on Id = ugl_UserID
-					 where ugl_GroupID = ".$wg_id."
-					   and ugr_Enabled = 'Y'
-				  order by ugr_LastName");
+				 left join ".USERS_DATABASE.".sysUGrps usr on usr.ugr_ID = ugl_UserID
+					 where usr.ugl_GroupID = ".$wg_id."
+					   and usr.ugr_Enabled = 'Y'
+				  order by usr.ugr_LastName");
 $first = true;
 while ($row = mysql_fetch_row($res)) {
 	if (! $first) print ",";  print "\n"; $first = false;

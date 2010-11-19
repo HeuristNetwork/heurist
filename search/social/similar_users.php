@@ -32,18 +32,18 @@ if ($_REQUEST['user']) {
 	if ($_REQUEST['kwd']) {
 		$res = mysql_query('
    select B.bkm_UGrpID,
-          concat('.USERS_FIRSTNAME_FIELD.'," ",'.USERS_LASTNAME_FIELD.') as name,
+          concat(usr.'.USERS_FIRSTNAME_FIELD.'," ",usr.'.USERS_LASTNAME_FIELD.') as name,
 		  count(B.bkm_UGrpID) as freq
      from usrRecTagLinks
 left join usrBookmarks A on A.bkm_RecID=rtl_RecID
 left join records on rec_id=A.bkm_recID
 left join usrBookmarks B on B.bkm_recID=rec_id
-left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=B.bkm_UGrpID
+left join '.USERS_DATABASE.'.'.USERS_TABLE.' usr on usr.'.USERS_ID_FIELD.'=B.bkm_UGrpID
     where rtl_TagID='.$_REQUEST['kwd'].'
       and A.bkm_UGrpID='.$_REQUEST['user'].'
 	  and B.bkm_UGrpID!='.$_REQUEST['user'].'
-	  and '.USERS_ID_FIELD.' is not null
-	  and '.USERS_ACTIVE_FIELD.'="Y"
+	  and usr.'.USERS_ID_FIELD.' is not null
+	  and usr.'.USERS_ACTIVE_FIELD.'="Y"
  group by B.bkm_UGrpID
  order by freq desc, name;');
 
@@ -51,16 +51,16 @@ left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=B.bkm_UGrpID
 	else {
 		$res = mysql_query('
    select B.bkm_UGrpID,
-          concat('.USERS_FIRSTNAME_FIELD.'," ",'.USERS_LASTNAME_FIELD.') as name,
+          concat(usr.'.USERS_FIRSTNAME_FIELD.'," ",usr.'.USERS_LASTNAME_FIELD.') as name,
 		  count(B.bkm_UGrpID) as freq
      from usrBookmarks A
 left join records on rec_id=A.bkm_recID
 left join usrBookmarks B on B.bkm_recID=rec_id
-left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=B.bkm_UGrpID
+left join '.USERS_DATABASE.'.'.USERS_TABLE.' usr on usr.'.USERS_ID_FIELD.'=B.bkm_UGrpID
     where A.bkm_UGrpID='.$_REQUEST['user'].'
 	  and B.bkm_UGrpID!='.$_REQUEST['user'].'
-	  and '.USERS_ID_FIELD.' is not null
-	  and '.USERS_ACTIVE_FIELD.'="Y"
+	  and usr.'.USERS_ID_FIELD.' is not null
+	  and usr.'.USERS_ACTIVE_FIELD.'="Y"
  group by B.bkm_UGrpID
  order by freq desc, name;');
 	}

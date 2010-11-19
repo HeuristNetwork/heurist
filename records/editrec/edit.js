@@ -1962,9 +1962,7 @@ top.HEURIST.edit.Reminder = function(parentElement, reminderDetails) {
 	} else if (reminderDetails.group) {
 		who = top.HEURIST.workgroups[reminderDetails.group]
 		if (who) who = who.name;
-	} else if (reminderDetails.colleagueGroup) {
-		who = top.HEURIST.user.colleagueGroups[reminderDetails.colleagueGroup];
-	} else if (reminderDetails.email) {
+d	} else if (reminderDetails.email) {
 		who = reminderDetails.email;
 	} else {
 		who = "";
@@ -2028,7 +2026,6 @@ top.HEURIST.edit.inputs.ReminderInput = function(parentElement) {
 	var reminderDetails = {
 		user: top.HEURIST.get_user_id(),
 		group: 0,
-		colleagueGroup: 0,
 		email: "",
 		when: oneWeekFromNow,
 		frequency: "once",
@@ -2054,7 +2051,7 @@ top.HEURIST.edit.inputs.ReminderInput = function(parentElement) {
 
 	var tr1 = tbody.appendChild(this.document.createElement("div"));
 		var tds = [];
-		for (var i=0; i < 8; ++i) {
+		for (var i=0; i < 6; ++i) {
 			var td = tr1.appendChild(this.document.createElement("span"));
 			td.className = "col-"+(i+1);
 			tds.push(td);
@@ -2088,35 +2085,17 @@ top.HEURIST.edit.inputs.ReminderInput = function(parentElement) {
 				this.groupDropdown.selectedIndex = i;
 		}
 
-		tds[4].appendChild(this.document.createTextNode("or"));
+		tds[4].appendChild(this.document.createTextNode("or email"));
 
-		this.colleaguesDropdown = tds[5].appendChild(this.document.createElement("select"));
-			this.colleaguesDropdown.className = "colleagues-dropdown";
-			this.colleaguesDropdown.name = "reminder-colleagues";
-			top.HEURIST.edit.addOption(this.document, this.colleaguesDropdown, "Colleague group ...", "");
-			this.colleaguesDropdown.selectedIndex = 0;
-		var i = 0;
-		for (var cgID in top.HEURIST.user.colleagueGroups) {
-			var cgName = top.HEURIST.user.colleagueGroups[cgID];
-			if (! cgName) continue;
-
-			top.HEURIST.edit.addOption(this.document, this.colleaguesDropdown, cgName, cgID);
-			if (cgID == reminderDetails.colleagueGroup)
-				this.colleaguesDropdown.selectedIndex = i;
-		}
-
-		tds[6].appendChild(this.document.createTextNode("or email"));
-
-		this.emailTextbox = tds[7].appendChild(this.document.createElement("input"));
+		this.emailTextbox = tds[5].appendChild(this.document.createElement("input"));
 			this.emailTextbox.type = "text";
 			this.emailTextbox.className = "in";
 			this.emailTextbox.name = "reminder-email";
 			this.emailTextbox.value = reminderDetails.email;
 
-		var ut = this.userTextbox, gd = this.groupDropdown, cd = this.colleaguesDropdown, et = this.emailTextbox;
+		var ut = this.userTextbox, gd = this.groupDropdown, et = this.emailTextbox;
 		ut.onchange = function() { gd.selectedIndex = cd.selectedIndex = 0; et.value = ""; }
 		gd.onchange = function() { cd.selectedIndex = 0; ut.value = et.value = ""; }
-		cd.onchange = function() { gd.selectedIndex = 0; ut.value = et.value = ""; }
 		et.onchange = function() { gd.selectedIndex = cd.selectedIndex = 0; ut.value = ""; }
 
 	var tr2 = tbody.appendChild(this.document.createElement("div"));
@@ -2227,7 +2206,7 @@ top.HEURIST.edit.inputs.ReminderInput.prototype.save = function(immediate, auto)
 	// If "auto" is set, then we will abort silently rather than alert the user
 
 	if ((! this.userTextbox.value  ||  this.userTextbox.value === this.userTextbox.getAttribute("prompt"))  &&
-		! this.groupDropdown.value  &&  ! this.colleaguesDropdown.value  &&  ! this.emailTextbox.value) {
+		! this.groupDropdown.value  &&  ! this.emailTextbox.value) {
 		this.userTextbox.focus();
 		if (! auto) alert("You must select a user, a group, or an email address");
 		return true;

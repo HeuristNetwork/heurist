@@ -16,9 +16,9 @@ if (! $groupID  &&  ! $userID) {
 }
 
 function get_group_members($gid) {
-	$query = "SELECT usr.Id as id, usr.ugr_FirstName as firstname, usr.ugr_LastName as lastname
+	$query = "SELECT usr.ugr_ID as id, usr.ugr_FirstName as firstname, usr.ugr_LastName as lastname
 	            FROM ".USERS_DATABASE.".".USER_GROUPS_TABLE."
-	      INNER JOIN ".USERS_DATABASE.".".USERS_TABLE." usr ON usr.Id = ugl_UserID
+	      INNER JOIN ".USERS_DATABASE.".".USERS_TABLE." usr ON usr.ugr_ID = ugl_UserID
 	           WHERE ugl_GroupID = $gid
 	        ORDER BY usr.ugr_LastName, usr.ugr_FirstName";
 	$res = mysql_query($query);
@@ -115,7 +115,7 @@ if ($groupID) {
 	}
 }
 else {
-	$ures = mysql_query("select concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname from sysUGrps usr usr where usr.Id = $userID");
+	$ures = mysql_query("select concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname from sysUGrps usr usr where usr.ugr_ID = $userID");
 	$row = mysql_fetch_assoc($ures);
 	$usr_name = $row["Realname"];
 	print "<h1>Blog report for user $usr_name</h1>\n";

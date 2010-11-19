@@ -676,7 +676,7 @@ function orderComments($cmts) {
 
 
 function getAllComments($rec_id) {
-	$res = mysql_query("select cmt_id, cmt_deleted, cmt_text, cmt_parent_cmt_id, cmt_date, cmt_modified, cmt_usr_id,  concat(ugr_FirstName,' ',ugr_LastName) as Realname from comments left join ".USERS_DATABASE.".sysUGrps usr on cmt_usr_id=Id where cmt_rec_id = $rec_id order by cmt_date");
+	$res = mysql_query("select cmt_id, cmt_deleted, cmt_text, cmt_parent_cmt_id, cmt_date, cmt_modified, cmt_usr_id,  concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname from comments left join ".USERS_DATABASE.".sysUGrps usr on cmt_usr_id=usr.ugr_ID where cmt_rec_id = $rec_id order by cmt_date");
 	$comments = array();
 	while ($cmt = mysql_fetch_assoc($res)) {
 		if ($cmt["cmt_deleted"]) {

@@ -46,11 +46,11 @@ $my_kwds = mysql__select_array('usrRecTagLinks left join usrTags on rtl_TagID=ta
 $tags = mysql__select_assoc('usrBookmarks
 								 left join usrRecTagLinks on bkm_RecID=rtl_RecID
 								 left join usrTags on rtl_TagID=tag_ID
-								 left join '.USERS_DATABASE.'.sysUGrps usr on Id=tag_UGrpID',
+								 left join '.USERS_DATABASE.'.sysUGrps usr on usr.ugr_ID=tag_UGrpID',
 								'tag_Text', 'count(tag_ID) as kcount',
 								'bkm_RecID='.$bib['rec_id'].'
 								 and rtl_ID is not null
-								 and ugr_Enabled="Y"
+								 and usr.ugr_Enabled="Y"
 								 group by tag_Text
 								 order by kcount desc, tag_Text');
 
@@ -59,7 +59,7 @@ $res = mysql_query('select concat(ugr_FirstName," ",ugr_LastName) as bkmk_user, 
 					from usrBookmarks
 					left join usrRecTagLinks on bkm_RecID=rtl_RecID
 					left join usrTags on rtl_TagID=tag_ID
-					left join '.USERS_DATABASE.'.sysUGrps usr on bkm_UGrpID=Id
+					left join '.USERS_DATABASE.'.sysUGrps usr on bkm_UGrpID=usr.ugr_ID
 					where bkm_recID='.$bib['rec_id'].' and rtl_ID is not null order by bkmk_user, tag_Text');
 
 $user_tags = array();
@@ -83,22 +83,22 @@ if ($tags) {
 											. "</a>&nbsp;</nobr></td>\n";
 
 		$kwd_list .= "  <td>\n";
-		$res = mysql_query('select Id, concat(ugr_FirstName," ",ugr_LastName) as bkmk_user
+		$res = mysql_query('select usr.ugr_ID, concat(usr.ugr_FirstName," ",usr.ugr_LastName) as bkmk_user
 							from usrBookmarks
 							left join usrRecTagLinks on bkm_RecID=rtl_RecID
 							left join usrTags on rtl_TagID=tag_ID
-							left join '.USERS_DATABASE.'.sysUGrps usr on bkm_UGrpID=Id
+							left join '.USERS_DATABASE.'.sysUGrps usr on bkm_UGrpID=usr.ugr_ID
 							where bkm_recID='.$bib['rec_id'].'
 							and rtl_ID is not null
 							and tag_Text="'.$tag.'"
-							and ugr_Enabled="Y"
+							and usr.ugr_Enabled="Y"
 							order by bkmk_user');
 		$i = 0;
 		while ($row = mysql_fetch_assoc($res)) {
 			if ($i++ == 3) {
 				$kwd_list .= '   <span class="collapsed"><span class="hide_on_collapse">'."\n";
 			}
-			$kwd_list .= '   <a href="'.HEURIST_SITE_PATH.'admin/users/user.php?Id='.$row['Id'].'" title="View user profile for '.$row['bkmk_user'].'"><nobr>'.$row['bkmk_user']."</nobr></a>&nbsp;\n";
+			$kwd_list .= '   <a href="'.HEURIST_SITE_PATH.'admin/users/user.php?Id='.$row['ugr_ID'].'" title="View user profile for '.$row['bkmk_user'].'"><nobr>'.$row['bkmk_user']."</nobr></a>&nbsp;\n";
 		}
 		if ($i > 3) {
 			$kwd_list .= '   </span>'."\n";
@@ -116,17 +116,17 @@ $body->global_vars['tag-list'] = $kwd_list;
 
 
 $res = mysql_query('
-   select Id, concat(ugr_FirstName," ",ugr_LastName) as bkmk_user
+   select usr.ugr_ID, concat(usr.ugr_FirstName," ",usr.ugr_LastName) as bkmk_user
      from records
 left join usrBookmarks on bkm_recID=rec_id
 left join usrRecTagLinks on rtl_RecID=bkm_RecID
 left join usrTags on tag_ID=rtl_TagID and tag_UGrpID=bkm_UGrpID
-left join '.USERS_DATABASE.'.sysUGrps usr on Id=bkm_UGrpID
+left join '.USERS_DATABASE.'.sysUGrps usr on usr.ugr_ID=bkm_UGrpID
     where rec_id='.$bib['rec_id'].'
       and tag_ID is null
-      and Id is not null
-      and Id!='.get_user_id().'
-	  and ugr_Enabled="Y"
+      and usr.ugr_ID is not null
+      and usr.ugr_ID!='.get_user_id().'
+	  and usr.ugr_Enabled="Y"
  order by bkmk_user;');
 
 if (mysql_num_rows($res)) {
@@ -136,7 +136,7 @@ if (mysql_num_rows($res)) {
 		if ($i++ == 3) {
 			$body->global_vars['other-users'] .= ' <span class="collapsed"><span class="hide_on_collapse">'."\n";
 		}
-		$body->global_vars['other-users'] .= ' <a href="'.HEURIST_SITE_PATH.'admin/users/user.php?Id='.$row['Id'].'" title="View user profile for '.$row['bkmk_user'].'"><nobr>'.$row['bkmk_user']."</nobr></a>&nbsp;\n";
+		$body->global_vars['other-users'] .= ' <a href="'.HEURIST_SITE_PATH.'admin/users/user.php?Id='.$row['ugr_ID'].'" title="View user profile for '.$row['bkmk_user'].'"><nobr>'.$row['bkmk_user']."</nobr></a>&nbsp;\n";
 	}
 	if ($i > 3) {
 		$body->global_vars['other-users'] .= ' </span>'."\n";

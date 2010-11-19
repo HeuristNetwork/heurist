@@ -392,16 +392,16 @@ function handleNotifications($recordID, $removals, $additions) {
 	// removals are encoded as just the notification ID# ... easy!
 	$removals = array_map("intval", $removals);
 	if ($removals) {
-		mysql_query("delete from reminders where rem_id in (" . join(",",$removals) . ") and rem_rec_id=$recordID and rem_owner_id=" . get_user_id());
+		mysql_query("delete from reminders where rem_ID in (" . join(",",$removals) . ") and rem_rec_id=$recordID and rem_owner_id=" . get_user_id());
 	}
 
 	// additions have properties
-	// {.user OR .workgroup OR .colleagueGroup OR .email}, .date, .frequency and .message
+	// {.user OR .workgroup OR ..email}, .date, .frequency and .message
 	$newIDs = array();
 	foreach ($additions as $addition) {
 		// Input-checking ... this is all done in JS too, so if somebody gets this far they've been doing funny buggers.
 
-		if (! (@$addition["user"] || @$addition["workgroup"] || @$addition["colleagueGroup"] || @$addition["email"])) {
+		if (! (@$addition["user"] || @$addition["workgroup"] || @$addition["email"])) {
 			array_push($newIDs, array("error" => "invalid recipient"));
 			continue;
 		}
@@ -424,18 +424,11 @@ function handleNotifications($recordID, $removals, $additions) {
 		);
 
 		if (@$addition["user"]) {
-			if (! mysql__select_array(USERS_DATABASE.".sysUGrps usr", "Id", "Id=".intval($addition["user"])." and ugr_Enabled='Y'")) {
+			if (! mysql__select_array(USERS_DATABASE.".sysUGrps usr", "usr.ugr_ID", "usr.ugr_ID=".intval($addition["user"])." and usr.ugr_Enabled='Y'")) {
 				array_push($newIDs, array("error" => "invalid recipient"));
 				continue;
 			}
 			$insertVals["rem_usr_id"] = intval($addition["user"]);
-		}
-		else if (@$addition["colleagueGroup"]) {
-			if (! mysql__select_array("coll_groups", "cgr_id", "cgr_id=".intval($addition["colleagueGroup"])." and cgr_owner_id=" . get_user_id())) {
-				array_push($newIDs, array("error" => "invalid recipient"));
-				continue;
-			}
-			$insertVals["rem_cgr_id"] = intval($addition["colleagueGroup"]);
 		}
 		else if (@$addition["workgroup"]) {
 			if (! mysql__select_array(USERS_DATABASE.".sysUsrGrpLinks", "ugl_ID", "ugl_GroupID=".intval($addition["workgroup"])." and ugl_UserID=" . get_user_id())) {

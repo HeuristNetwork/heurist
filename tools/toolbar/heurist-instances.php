@@ -91,7 +91,7 @@ function define_constants($instance) {
 	define('USERS_DATABASE', $instances[$instance]["userdb"]);
 
 	define('USERS_TABLE', 'sysUGrps');
-	define('USERS_ID_FIELD', 'Id');
+	define('USERS_ID_FIELD', 'ugr_ID');
 	define('USERS_USERNAME_FIELD', 'ugr_Name');
 	define('USERS_PASSWORD_FIELD', 'ugr_Password');
 	define('USERS_FIRSTNAME_FIELD', 'ugr_FirstName');

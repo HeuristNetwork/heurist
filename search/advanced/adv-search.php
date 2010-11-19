@@ -620,12 +620,12 @@ class UserPredicate extends Predicate {
 		}
 		else if (preg_match('/^(\D+)\s+(\D+)$/', $this->value,$matches)){	// saw MODIFIED: 16/11/2010 since Realname field was removed.
 			return $not . 'exists (select * from usrBookmarks bkmk, '.USERS_DATABASE.'.sysUGrps usr '
-			                    . ' where bkmk.bkm_recID=rec_id and bkmk.bkm_UGrpID = usr.Id '
+			                    . ' where bkmk.bkm_recID=rec_id and bkmk.bkm_UGrpID = usr.ugr_ID '
 			                      . ' and (usr.ugr_FirstName = "' . addslashes($matches[1]) . '" and usr.ugr_LastName = "' . addslashes($matches[2]) . '"))';
 		}
 		else {
 			return $not . 'exists (select * from usrBookmarks bkmk, '.USERS_DATABASE.'.sysUGrps usr '
-			                    . ' where bkmk.bkm_recID=rec_id and bkmk.bkm_UGrpID = usr.Id '
+			                    . ' where bkmk.bkm_recID=rec_id and bkmk.bkm_UGrpID = usr.ugr_ID '
 			                      . ' and usr.ugr_Name = "' . addslashes($this->value) . '"))';
 		}
 	}
@@ -644,7 +644,7 @@ class AddedByPredicate extends Predicate {
 		}
 		else {
 			$not = ($this->parent->negate)? "not" : "";
-			return "rec_added_by_usr_id $not in (select usr.Id from ".USERS_DATABASE.".sysUGrps usr where usr.ugr_Name = '" . addslashes($this->value) . "')";
+			return "rec_added_by_usr_id $not in (select usr.ugr_ID from ".USERS_DATABASE.".sysUGrps usr where usr.ugr_Name = '" . addslashes($this->value) . "')";
 		}
 	}
 }

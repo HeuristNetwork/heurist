@@ -33,16 +33,11 @@ $res = mysql_query("select tag_ID, tag_Text, tag_UGrpID from usrTags, ".USERS_DA
 $workgroupTags = array();
 while ($row = mysql_fetch_row($res)) { array_push($workgroupTags, $row); }
 
-$res = mysql_query("select cgr_id, cgr_name from coll_groups where cgr_owner_id=" . get_user_id());
-$colleagueGroups = array();
-while ($row = mysql_fetch_row($res)) { array_push($colleagueGroups, $row); }
-
 $currentUser = array(get_user_id(), is_admin(), $workgroups, @$_SESSION[HEURIST_INSTANCE_PREFIX."heurist"]["display-preferences"]);
 
 $userData = array(
 	"tags" => $tags,
 	"workgroupTags" => $workgroupTags,
-	"colleagueGroups" => $colleagueGroups,
 	"currentUser" => $currentUser
 );
 

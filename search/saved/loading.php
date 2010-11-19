@@ -308,7 +308,6 @@ function loadUserDependentData(&$record) {
 	    "select rem_rec_id,
 	            rem_id,
 	            rem_wg_id,
-	            rem_cgr_id,
 	            rem_usr_id,
 	            rem_email,
 	            rem_message,

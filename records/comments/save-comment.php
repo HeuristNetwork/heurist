@@ -24,7 +24,7 @@ if ($cmt_id) {
 	mysql__update("comments", "cmt_id=$cmt_id and cmt_usr_id=".get_user_id(), $updates);
 	if (mysql_error()) $error = mysql_error();
 
-	$res = mysql_query("select * from comments left join ".USERS_DATABASE.".sysUGrps usr on cmt_usr_id=Id where cmt_id=$cmt_id and ! cmt_deleted");
+	$res = mysql_query("select * from comments left join ".USERS_DATABASE.".sysUGrps usr on cmt_usr_id=usr.ugr_ID where cmt_id=$cmt_id and ! cmt_deleted");
 	$cmt = mysql_fetch_assoc($res);
 }
 else if ($rec_id) {
@@ -33,7 +33,7 @@ else if ($rec_id) {
 	mysql__insert("comments", $inserts);
 	if (mysql_error()) $error = mysql_error();
 
-	$res = mysql_query("select * from comments left join ".USERS_DATABASE.".sysUGrps usr on cmt_usr_id=Id where cmt_id=".mysql_insert_id());
+	$res = mysql_query("select * from comments left join ".USERS_DATABASE.".sysUGrps usr on cmt_usr_id=usr.ugr_ID where cmt_id=".mysql_insert_id());
 	$cmt = mysql_fetch_assoc($res);
 }
 
