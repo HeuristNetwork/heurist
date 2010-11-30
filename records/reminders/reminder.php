@@ -6,10 +6,10 @@ function sendReminderEmail($reminder, $USERS_DATABASE, $HOST) {
 	if ($HOST === NULL) $HOST = HOST;
 
 	$recipients = array();
-	if (@$reminder['rem_email']) {
+	if (@$reminder['rem_Email']) {
 		array_push($recipients, array(
-			"email" => $reminder['rem_email'],
-			"e"		=> $reminder['rem_email'],
+			"email" => $reminder['rem_Email'],
+			"e"		=> $reminder['rem_Email'],
 			"u"		=> null));
 	}
 	else if (@$reminder['rem_ToUserID']) {
@@ -22,15 +22,15 @@ function sendReminderEmail($reminder, $USERS_DATABASE, $HOST) {
 				"u"		=> $reminder['rem_ToUserID']));
 		}
 	}
-	else if (@$reminder['rem_wg_id']) {
+	else if (@$reminder['rem_ToWorkgroupID']) {
 		$res = @$reminder['rem_ID']
 				? mysql_query('select usr.ugr_FirstName,usr.ugr_LastName,usr.ugr_eMail,usr.ugr_ID
 							   from '.$USERS_DATABASE.'.sysUsrGrpLinks left join '.$USERS_DATABASE.'.sysUGrps usr on ugl_UserID=usr.ugr_ID
-							   left join reminders_blacklist on rbl_user_id=usr.ugr_ID and rbl_rem_id = '.$reminder['rem_ID'].'
-							   where ugl_GroupID = '.$reminder['rem_wg_id'].' and isnull(rbl_id)')
+							   left join usrRemindersBlockList on rbl_UGrpID=usr.ugr_ID and rbl_RemID = '.$reminder['rem_ID'].'
+							   where ugl_GroupID = '.$reminder['rem_ToWorkgroupID'].' and isnull(rbl_ID)')
 				: mysql_query('select usr.ugr_FirstName,usr.ugr_LastName,ugr_eMail,usr.ugr_ID
 							   from '.$USERS_DATABASE.'.sysUsrGrpLinks left join '.$USERS_DATABASE.'.sysUGrps usr on ugl_UserID=usr.ugr_ID
-							   where ugl_GroupID = '.$reminder['rem_wg_id']);
+							   where ugl_GroupID = '.$reminder['rem_ToWorkgroupID']);
 		while ($row = mysql_fetch_assoc($res))
 			array_push($recipients, array(
 				"email" => $row['ugr_FirstName'].' '.$row['ugr_LastName'].' <'.$row['ugr_eMail'].'>',
@@ -43,7 +43,7 @@ function sendReminderEmail($reminder, $USERS_DATABASE, $HOST) {
 	$res = mysql_query('select usr.ugr_FirstName,usr.ugr_LastName,usr.ugr_eMail from '.$USERS_DATABASE.'.sysUGrps usr where usr.ugr_Type = "User" and usr.ugr_ID = '.$reminder['rem_OwnerUGrpID']);
 	$owner = mysql_fetch_assoc($res);
 	if ($owner) {
-		if (@$reminder['rem_email']  || (@$reminder['rem_user_id']  &&  @$reminder['rem_ToUserID'] != @$reminder['rem_OwnerUGrpID']))
+		if (@$reminder['rem_Email']  || (@$reminder['rem_user_id']  &&  @$reminder['rem_ToUserID'] != @$reminder['rem_OwnerUGrpID']))
 			$email_headers .= "\r\nCc: ".$owner['ugr_FirstName'].' '.$owner['ugr_LastName'].' <'.$owner['ugr_eMail'].'>';
 		$email_headers .= "\r\nReply-To: ".$owner['ugr_FirstName'].' '.$owner['ugr_LastName'].' <'.$owner['ugr_eMail'].'>';
 	}
@@ -67,14 +67,14 @@ function sendReminderEmail($reminder, $USERS_DATABASE, $HOST) {
          				.	"You must be logged in to Heurist and a member of this workgroup to view it". "\n\n";
 		}
 		
-		$email_text .= 'Message: '.$reminder['rem_message'] . "\n\n";
+		$email_text .= 'Message: '.$reminder['rem_Message'] . "\n\n";
 		
-		if (@$reminder['rem_ID']  &&  $reminder['rem_freq'] != "once") {
+		if (@$reminder['rem_ID']  &&  $reminder['rem_Freq'] != "once") {
 			$email_text .= "-------------------------------------------\n\n"
-						.  "You will receive this reminder " . $reminder['rem_freq'] . "\n"
+						.  "You will receive this reminder " . $reminder['rem_Freq'] . "\n"
 						.  "Click below if you do not wish to receive this reminder again:\n\n"
 						.  "http://".$HOST."/heurist/php/delete-reminder.php?r=".$reminder['rem_ID']
-						.  ($recipient['u'] ? "&u=".$recipient['u'] : "&e=".$recipient['e']) . "&h=".$reminder['rem_nonce'] . "\n\n";
+						.  ($recipient['u'] ? "&u=".$recipient['u'] : "&e=".$recipient['e']) . "&h=".$reminder['rem_Nonce'] . "\n\n";
 		} else {
 			$email_text .= "-------------------------------------------\n\n"
 						.  "You will not receive this reminder again.\n\n";

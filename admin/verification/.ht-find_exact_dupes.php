@@ -97,7 +97,7 @@ function do_fix_dupe($bibIDs) {
         mysql_query("update ignore usrRecTagLinks set rtl_RecID=$masterBibID where rtl_RecID in ($bibIDlist)");
 	$kwiCount = mysql_affected_rows();
 		$errors .= mysql_error() . ' ';
-        mysql_query("update ignore reminders set rem_RecID=$masterBibID where rem_RecID in ($bibIDlist)");
+        mysql_query("update ignore usrReminders set rem_RecID=$masterBibID where rem_RecID in ($bibIDlist)");
 	$remCount = mysql_affected_rows();
 		$errors .= mysql_error() . ' ';
 

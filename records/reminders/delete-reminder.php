@@ -19,22 +19,22 @@ if ($u) {
 
 mysql_connection_db_overwrite(DATABASE);
 
-$res = mysql_query("select rem_nonce from reminders where rem_ID = ".$r);
+$res = mysql_query("select rem_Nonce from usrReminders where rem_ID = ".$r);
 $row = mysql_fetch_assoc($res);
-if ($h != $row["rem_nonce"]) {
+if ($h != $row["rem_Nonce"]) {
 	return;
 }
 
 if ($e) {
-	mysql_query("delete from reminders where rem_ID = ".$r." and rem_email = '".addslashes($e)."'");
+	mysql_query("delete from usrReminders where rem_ID = ".$r." and rem_Email = '".addslashes($e)."'");
 	if (! mysql_affected_rows()) {
 		return;
 	}
 } else if ($u) {
-	mysql_query("delete from reminders where rem_ID = ".$r." and rem_ToUserID = '".$u."'");
+	mysql_query("delete from usrReminders where rem_ID = ".$r." and rem_ToUserID = '".$u."'");
 	if (! mysql_affected_rows()) {
 		// must be a group - insert a blacklist entry
-		mysql_query("insert into reminders_blacklist (rbl_rem_id, rbl_user_id) values (".$r.", ".$u.")");
+		mysql_query("insert into usrRemindersBlockList (rbl_RemID, rbl_UGrpID) values (".$r.", ".$u.")");
 		if (! mysql_affected_rows()) {
 			return;
 		}

@@ -307,13 +307,13 @@ function loadUserDependentData(&$record) {
 	$res = mysql_query(
 	    "select rem_RecID,
 	            rem_ID,
-	            rem_wg_id,
+	            rem_ToWorkgroupID,
 	            rem_ToUserID,
-	            rem_email,
-	            rem_message,
-	            rem_startdate,
-	            rem_freq
-	       from reminders
+	            rem_Email,
+	            rem_Message,
+	            rem_StartDate,
+	            rem_Freq
+	       from usrReminders
 	      where rem_RecID = $recID
 	        and rem_OwnerUGrpID=".get_user_id());
 	$reminders = array();

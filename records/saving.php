@@ -392,7 +392,7 @@ function handleNotifications($recordID, $removals, $additions) {
 	// removals are encoded as just the notification ID# ... easy!
 	$removals = array_map("intval", $removals);
 	if ($removals) {
-		mysql_query("delete from reminders where rem_ID in (" . join(",",$removals) . ") and rem_RecID=$recordID and rem_OwnerUGrpID=" . get_user_id());
+		mysql_query("delete from usrReminders where rem_ID in (" . join(",",$removals) . ") and rem_RecID=$recordID and rem_OwnerUGrpID=" . get_user_id());
 	}
 
 	// additions have properties
@@ -419,8 +419,8 @@ function handleNotifications($recordID, $removals, $additions) {
 		$insertVals = array(
 		"rem_RecID" => $recordID,
 		"rem_OwnerUGrpID" => get_user_id(),
-		"rem_startdate" => date('Y-m-d', strtotime($startDate)),
-		"rem_message" => $addition["message"]
+		"rem_StartDate" => date('Y-m-d', strtotime($startDate)),
+		"rem_Message" => $addition["message"]
 		);
 
 		if (@$addition["user"]) {
@@ -438,14 +438,14 @@ function handleNotifications($recordID, $removals, $additions) {
 			$insertVals["rem_ToWorkgroupID"] = intval($addition["workgroup"]);
 		}
 		else if (@$addition["email"]) {
-			$insertVals["rem_email"] = $addition["email"];
+			$insertVals["rem_Email"] = $addition["email"];
 		}
 		else {	// can't happen
 			array_push($newIDs, array("error" => "invalid recipient"));
 			continue;
 		}
 
-		mysql__insert("reminders", $insertVals);
+		mysql__insert("usrReminders", $insertVals);
 		array_push($newIDs, array("id" => mysql_insert_id()));
 	}
 

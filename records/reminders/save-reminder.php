@@ -31,12 +31,12 @@ if ($rec_id  &&  $_POST["save-mode"] == "add") {
 		"rem_RecID" => $rec_id,
 		"rem_OwnerUGrpID" => get_user_id(),
 		"rem_ToUserID" => ($_POST["reminder-user"] > 0 ? $_POST["reminder-user"] : null),
-		"rem_wg_id" => ($_POST["reminder-group"] > 0 ? $_POST["reminder-group"] : null),
-		"rem_email" => $_POST["reminder-email"],
-		"rem_startdate" => $_POST["reminder-when"],
-		"rem_freq" => $_POST["reminder-frequency"],
-		"rem_message" => $_POST["reminder-message"],
-		"rem_nonce" => dechex(rand())
+		"rem_ToWorkgroupID" => ($_POST["reminder-group"] > 0 ? $_POST["reminder-group"] : null),
+		"rem_Email" => $_POST["reminder-email"],
+		"rem_StartDate" => $_POST["reminder-when"],
+		"rem_Freq" => $_POST["reminder-frequency"],
+		"rem_Message" => $_POST["reminder-message"],
+		"rem_Nonce" => dechex(rand())
 	);
 
 	if ($_POST["mail-now"]) {
@@ -44,31 +44,31 @@ if ($rec_id  &&  $_POST["save-mode"] == "add") {
 		require_once("reminder.php");
 		print sendReminderEmail($rem);
 	} else {
-		mysql__insert("reminders", $rem);
+		mysql__insert("usrReminders", $rem);
 		if (mysql_error()) {
 			print "({ error: \"Internal database error - " . mysql_error() . "\" })";
 			return;
 		}
 
 		$rem_id = mysql_insert_id();
-		$res = mysql_query("select * from reminders where rem_ID = $rem_id");
+		$res = mysql_query("select * from usrReminders where rem_ID = $rem_id");
 		$rem = mysql_fetch_assoc($res);
 ?>
 ({ reminder: {
      id: <?= $rem["rem_ID"] ?>,
      user: <?= intval($rem["rem_ToUserID"]) ?>,
-     group: <?= intval($rem["rem_wg_id"]) ?>,
-     email: "<?= slash($rem["rem_email"]) ?>",
-     message: "<?= slash($rem["rem_message"]) ?>",
-     when: "<?= slash($rem["rem_startdate"]) ?>",
-     frequency: "<?= slash($rem["rem_freq"]) ?>"
+     group: <?= intval($rem["rem_ToWorkgroupID"]) ?>,
+     email: "<?= slash($rem["rem_Email"]) ?>",
+     message: "<?= slash($rem["rem_Message"]) ?>",
+     when: "<?= slash($rem["rem_StartDate"]) ?>",
+     frequency: "<?= slash($rem["rem_Freq"]) ?>"
   }
 })
 <?php
 	}
 
 } else if ($rec_id  &&  $rem_id  &&  $_POST["save-mode"] == "delete") {
-	$res = mysql_query("delete from reminders where rem_ID=$rem_id and rem_RecID=$rec_id and rem_OwnerUGrpID=".get_user_id());
+	$res = mysql_query("delete from usrReminders where rem_ID=$rem_id and rem_RecID=$rec_id and rem_OwnerUGrpID=".get_user_id());
 	if (! mysql_error()) {
 		print "1";
 	} else {
