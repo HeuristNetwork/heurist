@@ -392,7 +392,7 @@ function handleNotifications($recordID, $removals, $additions) {
 	// removals are encoded as just the notification ID# ... easy!
 	$removals = array_map("intval", $removals);
 	if ($removals) {
-		mysql_query("delete from reminders where rem_ID in (" . join(",",$removals) . ") and rem_rec_id=$recordID and rem_owner_id=" . get_user_id());
+		mysql_query("delete from reminders where rem_ID in (" . join(",",$removals) . ") and rem_RecID=$recordID and rem_OwnerUGrpID=" . get_user_id());
 	}
 
 	// additions have properties
@@ -417,25 +417,25 @@ function handleNotifications($recordID, $removals, $additions) {
 		}
 
 		$insertVals = array(
-		"rem_rec_id" => $recordID,
-		"rem_owner_id" => get_user_id(),
+		"rem_RecID" => $recordID,
+		"rem_OwnerUGrpID" => get_user_id(),
 		"rem_startdate" => date('Y-m-d', strtotime($startDate)),
 		"rem_message" => $addition["message"]
 		);
 
 		if (@$addition["user"]) {
-			if (! mysql__select_array(USERS_DATABASE.".sysUGrps usr", "usr.ugr_ID", "usr.ugr_ID=".intval($addition["user"])." and usr.ugr_Enabled='Y'")) {
+			if (! mysql__select_array(USERS_DATABASE.".sysUGrps usr", "usr.ugr_ID", "usr.ugr_ID=".intval($addition["user"])." and usr.ugr_Type = 'User' and  and usr.ugr_Enabled='Y'")) {
 				array_push($newIDs, array("error" => "invalid recipient"));
 				continue;
 			}
-			$insertVals["rem_usr_id"] = intval($addition["user"]);
+			$insertVals["rem_ToUserID"] = intval($addition["user"]);
 		}
 		else if (@$addition["workgroup"]) {
 			if (! mysql__select_array(USERS_DATABASE.".sysUsrGrpLinks", "ugl_ID", "ugl_GroupID=".intval($addition["workgroup"])." and ugl_UserID=" . get_user_id())) {
 				array_push($newIDs, array("error" => "invalid recipient"));
 				continue;
 			}
-			$insertVals["rem_wg_id"] = intval($addition["workgroup"]);
+			$insertVals["rem_ToWorkgroupID"] = intval($addition["workgroup"]);
 		}
 		else if (@$addition["email"]) {
 			$insertVals["rem_email"] = $addition["email"];

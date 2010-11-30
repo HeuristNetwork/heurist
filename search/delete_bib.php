@@ -37,7 +37,7 @@ mysql_connection_db_overwrite(DATABASE);
 		mysql_query('delete from records where rec_id = ' . $rec_id);
 		$bibs = mysql_affected_rows();
 		mysql_query('delete from rec_details where rd_rec_id = ' . $rec_id);
-		mysql_query('delete from reminders where rem_rec_id = ' . $rec_id);
+		mysql_query('delete from reminders where rem_RecID = ' . $rec_id);
 		mysql_query('delete from usrRecTagLinks where rtl_RecID = ' . $rec_id);
 		mysql_query('delete from usrBookmarks where bkm_recID = ' . $rec_id);
 		$bkmks = mysql_affected_rows();

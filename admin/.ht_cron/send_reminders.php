@@ -21,7 +21,7 @@ foreach (get_all_instances() as $prefix => $instance) {
 		$start_timestamp = mktime(0, 0, 0, $month, $day, $year);
 
 	/*
-		echo 'id:              ' . $row['rem_id'] . "\n";
+		echo 'id:              ' . $row['rem_ID'] . "\n";
 		echo 'startdate:       ' . $row['rem_startdate'] . "\n";
 		echo 'freq:            ' . $row['rem_freq'] . "\n";
 		echo 'start_timestamp: ' . $start_timestamp . "\n";

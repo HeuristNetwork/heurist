@@ -31,7 +31,7 @@ if ($e) {
 		return;
 	}
 } else if ($u) {
-	mysql_query("delete from reminders where rem_ID = ".$r." and rem_usr_id = '".$u."'");
+	mysql_query("delete from reminders where rem_ID = ".$r." and rem_ToUserID = '".$u."'");
 	if (! mysql_affected_rows()) {
 		// must be a group - insert a blacklist entry
 		mysql_query("insert into reminders_blacklist (rbl_rem_id, rbl_user_id) values (".$r.", ".$u.")");

@@ -259,7 +259,7 @@ function getAllReminders($rec_id) {
 	if (! $rec_id) return array();
 
 	// ... MYSTIFYINGLY these are stored by rec_id+user_id, not bkm_ID
-	$res = mysql_query("select * from reminders where rem_rec_id=$rec_id and rem_owner_id=".get_user_id()." order by rem_startdate");
+	$res = mysql_query("select * from reminders where rem_RecID=$rec_id and rem_OwnerUGrpID=".get_user_id()." order by rem_startdate");
 
 	$reminders = array();
 	if (mysql_num_rows($res) > 0) {
@@ -267,7 +267,7 @@ function getAllReminders($rec_id) {
 
 			array_push($reminders, array(
 				"id" => $rem["rem_ID"],
-				"user" => $rem["rem_usr_id"],
+				"user" => $rem["rem_ToUserID"],
 				"group" => $rem["rem_wg_id"],
 				"email" => $rem["rem_email"],
 				"message" => $rem["rem_message"],

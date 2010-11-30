@@ -34,7 +34,7 @@ function deleteRecord($id) {
 			mysql_query('delete from rec_details where rd_rec_id = ' . $id);
 			if (mysql_error()) jsonError("database error - " . mysql_error());
 
-			mysql_query('delete from reminders where rem_rec_id = ' . $id);
+			mysql_query('delete from reminders where rem_RecID = ' . $id);
 			if (mysql_error()) jsonError("database error - " . mysql_error());
 
 			mysql_query('delete from usrRecTagLinks where rtl_RecID = ' . $id);

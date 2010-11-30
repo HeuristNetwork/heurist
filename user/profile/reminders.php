@@ -8,9 +8,9 @@ if (! is_logged_in()) {
 	return;
 }
 
-if (@$_REQUEST["action"] == "delete"  &&  @$_REQUEST["rem_id"]) {
+if (@$_REQUEST["action"] == "delete"  &&  @$_REQUEST["rem_ID"]) {
 	mysql_connection_db_overwrite(DATABASE);
-	mysql_query("delete from reminders where rem_id = " . intval($_REQUEST["rem_id"]) . " and rem_owner_id = " . get_user_id());
+	mysql_query("delete from reminders where rem_ID = " . intval($_REQUEST["rem_ID"]) . " and rem_OwnerUGrpID = " . get_user_id());
 }
 
 $future = (! @$_REQUEST["show"]  ||  $_REQUEST["show"] === "future");
@@ -52,7 +52,7 @@ $future = (! @$_REQUEST["show"]  ||  $_REQUEST["show"] === "future");
    </form>
 
    <form method=post>
-    <input type=hidden name=rem_id id=rem_id_input>
+    <input type=hidden name=rem_ID id=rem_id_input>
     <input type=hidden name=action id=action_input>
    </form>
 
@@ -72,12 +72,12 @@ $future_clause = $future ? "and rem_freq != 'once' or rem_startdate > now()" : "
 
 $res = mysql_query("select reminders.*, rec_title, grp.".GROUPS_NAME_FIELD.",  concat(usr.".USERS_FIRSTNAME_FIELD.",' ',usr.".USERS_LASTNAME_FIELD.") as username
 					  from reminders
-				 left join records on rec_id = rem_rec_id
+				 left join records on rec_id = rem_RecID
 				 left join ".USERS_DATABASE.".".GROUPS_TABLE." gpr on gpr.".GROUPS_ID_FIELD." = rem_wg_id
-				 left join ".USERS_DATABASE.".".USERS_TABLE." usr on usr.".USERS_ID_FIELD." = rem_usr_id
-					 where rem_owner_id = " . get_user_id() . "
+				 left join ".USERS_DATABASE.".".USERS_TABLE." usr on usr.".USERS_ID_FIELD." = rem_ToUserID
+					 where rem_OwnerUGrpID = " . get_user_id() . "
 					 $future_clause
-				  order by rem_rec_id, rem_startdate");
+				  order by rem_RecID, rem_startdate");
 
 print(mysql_error());
 
@@ -90,8 +90,8 @@ while ($row = mysql_fetch_assoc($res)) {
 					($row["username"] ? $row["username"] : $row["rem_email"]);
 ?>
     <tr>
-     <td><a title=delete href=# onclick="del(<?= $row["rem_id"] ?>); return false;"><img src="<?=HEURIST_SITE_PATH?>common/images/cross.gif"></a></td>
-     <td><a href="<?=HEURIST_SITE_PATH?>records/editrec/edit.html?bib_id=<?= $row["rem_rec_id"] ?>#personal"><b><?= $row["rec_title"] ?></b></a></td>
+     <td><a title=delete href=# onclick="del(<?= $row["rem_ID"] ?>); return false;"><img src="<?=HEURIST_SITE_PATH?>common/images/cross.gif"></a></td>
+     <td><a href="<?=HEURIST_SITE_PATH?>records/editrec/edit.html?bib_id=<?= $row["rem_RecID"] ?>#personal"><b><?= $row["rec_title"] ?></b></a></td>
      <td><b><?= $recipient ?></b></td>
      <td><b><?= $row["rem_freq"] ?></b> from <b><?= $row["rem_startdate"] ?></b></td>
      <td><?= $row["rem_message"] ?></td>

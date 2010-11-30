@@ -280,7 +280,7 @@ if (! @$do_merge_details){  // display a page to user for selecting which record
 	    $kwd_count = mysql_fetch_array(mysql_query('select count(distinct rtl_ID) from usrBookmarks left join usrRecTagLinks on rtl_RecID=bkm_recID where bkm_RecID='.$record['rec_id'].' and rtl_ID is not null'));
 	    if ($kwd_count[0]) print '<tr><td>Tags</td><td>'.$kwd_count[0].'</td></tr>';
 
-	    $res2 = mysql_query('select concat('.USERS_FIRSTNAME_FIELD.'," ",'.USERS_LASTNAME_FIELD.') as name, rem_freq, rem_startdate from reminders left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=rem_owner_id where rem_rec_id='.$record['rec_id']);
+	    $res2 = mysql_query('select concat(usr.'.USERS_FIRSTNAME_FIELD.'," ",usr.'.USERS_LASTNAME_FIELD.') as name, rem_freq, rem_startdate from reminders left join '.USERS_DATABASE.'.'.USERS_TABLE.' usr on usr.'.USERS_ID_FIELD.'=rem_OwnerUGrpID where ugr_Type = "User" and rem_RecID='.$record['rec_id']);
 	    $rems = Array();
 	    while ($rem = mysql_fetch_assoc($res2))
 		    $rems[] = $rem['name'].' '.$rem['rem_freq'].($rem['rem_freq']=='once' ? ' on ' : ' from ').$rem['rem_startdate'];
@@ -385,7 +385,7 @@ if (! @$do_merge_details){  // display a page to user for selecting which record
         $kwd_count = mysql_fetch_array(mysql_query('select count(distinct rtl_ID) from usrBookmarks left join usrRecTagLinks on rtl_RecID=bkm_recID where bkm_RecID='.$record['rec_id'].' and rtl_ID is not null'));
         if ($kwd_count[0]) print '<tr><td>Tags</td><td>'.$kwd_count[0].'</td></tr>';
 
-        $res2 = mysql_query('select concat('.USERS_FIRSTNAME_FIELD.'," ",'.USERS_LASTNAME_FIELD.') as name, rem_freq, rem_startdate from reminders left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=rem_owner_id where rem_rec_id='.$record['rec_id']);
+        $res2 = mysql_query('select concat(usr.'.USERS_FIRSTNAME_FIELD.'," ",usr.'.USERS_LASTNAME_FIELD.') as name, rem_freq, rem_startdate from reminders left join '.USERS_DATABASE.'.'.USERS_TABLE.' usr on usr.'.USERS_ID_FIELD.'=rem_OwnerUGrpID where rem_RecID='.$record['rec_id']);
         $rems = Array();
         while ($rem = mysql_fetch_assoc($res2))
             $rems[] = $rem['name'].' '.$rem['rem_freq'].($rem['rem_freq']=='once' ? ' on ' : ' from ').$rem['rem_startdate'];
@@ -656,7 +656,7 @@ function do_fix_dupe() {
     }
 
 // move reminders to master
-    mysql_query('update reminders set rem_rec_id='.$master_rec_id.' where rem_rec_id in '.$dup_rec_list);   //?FIXME  do we need to check reminders like we checked usrBookmarks
+    mysql_query('update reminders set rem_RecID='.$master_rec_id.' where rem_RecID in '.$dup_rec_list);   //?FIXME  do we need to check reminders like we checked usrBookmarks
 //delete master details
    if($master_delete_dt_ids && count($master_delete_dt_ids)){
         $master_detail_delete_list = '('.join(',',$master_delete_dt_ids).')';

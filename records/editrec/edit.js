@@ -1988,7 +1988,7 @@ d	} else if (reminderDetails.email) {
 top.HEURIST.edit.Reminder.prototype.remove = function() {
 	var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 	var fakeForm = { action: top.HEURIST.basePath+"records/reminders/save-reminder.php",
-	                 elements: [ { name: "rem_id", value: this.reminderID },
+	                 elements: [ { name: "rem_ID", value: this.reminderID },
 	                             { name: "bib_id", value: windowRef.parent.HEURIST.edit.record.bibID },
 	                             { name: "save-mode", value: "delete" } ] };
 	var thisRef = this;
