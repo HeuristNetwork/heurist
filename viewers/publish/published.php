@@ -57,13 +57,13 @@ if (array_key_exists('style', $_REQUEST)){
 if ($_REQUEST['pub_id']) {
 
 	mysql_connection_db_select(DATABASE);
-	$res = mysql_query('select * from saved_searches where ss_id='.$_REQUEST['pub_id']);
+	$res = mysql_query('select * from usrSavedSearches where svs_ID='.$_REQUEST['pub_id']);
 
 	if (mysql_num_rows($res) != 0) {
 
 		if (!$style) { //that means we are dealing with "forced" searches
 			$pub = mysql_fetch_assoc($res);
-			$style = get_style_from_pubargs($pub['ss_publish_args']);
+			$style = get_style_from_pubargs($pub['svs_PublishArgs']);
 			if ($style === "endnotexml") {
 				$style = "endnotexml.xsl"; //cheater! should have modified cocoon pipeline instead!
 				$output = "xml";

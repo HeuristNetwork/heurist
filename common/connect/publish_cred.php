@@ -6,18 +6,18 @@ if (! $_REQUEST['pub_id'])
 	die('No published search id supplied');
 
 mysql_connection_db_select(DATABASE);
-$res = mysql_query('select * from saved_searches where ss_id='.$_REQUEST['pub_id']);
+$res = mysql_query('select * from usrSavedSearches where svs_ID='.$_REQUEST['pub_id']);
 if ($pub = mysql_fetch_assoc($res)) {
 	// redirect to the correct script for the published search
 	//if (basename($_SERVER['SCRIPT_NAME']) != $pub['pub_script'])
 		//header('Location: ' . $pub['pub_script'] . '?pub_id=' . $pub['pub_id']);
 	//replace request vars with those of the saved search
 	//unset($_REQUEST);
-	add_args_from_string(urldecode($pub['ss_query']));
+	add_args_from_string(urldecode($pub['svs_Query']));
 	//add_args_from_string($pub['pub_args']);
 
 	// fake login (alternative to cred.php)
-	$pub_usr_id = $pub['ss_usr_id'];
+	$pub_usr_id = $pub['svs_UGrpID'];
 	function get_user_id() { global $pub_usr_id; return $pub_usr_id; }
 	function get_user_name() { return ''; }
 	function get_user_username() { return ''; }

@@ -16,13 +16,13 @@
 	//_______________________________________________________
 	//function to ccheck wether this search can be viewed (only owner or members of owner's workgoup)
 	function check_if_authorised(){
-		$pubquery = 'select * from saved_searches where ss_id='.$_REQUEST['pub_id'];
+		$pubquery = 'select * from usrSavedSearches where svs_ID='.$_REQUEST['pub_id'];
 		$res = mysql_query($pubquery);
 		if ($pub = mysql_fetch_assoc($res)) {
-			if ($pub['ss_usr_id'] != get_user_id()){
+			if ($pub['svs_UGrpID'] != get_user_id()){
 				$rows = get_wg();
 				if (!empty($rows)){
-					if (!array_key_exists($pub['ss_wg_id'], $rows)){
+					if (!array_key_exists($pub['svs_UGrpID'], $rows)){
 						$authorise = false;
 					} else {
 						$authorise = true;
@@ -55,8 +55,8 @@
 			$args = "&style=".$args;
 		}
 
-		$pub['ss_publish_args'] = $args;
-		mysql__update('saved_searches', 'ss_id='.$id, $pub);
+		$pub['svs_PublishArgs'] = $args;
+		mysql__update('usrSavedSearches', 'svs_ID='.$id, $pub);
 	}
 
 
@@ -101,20 +101,20 @@
 
 	if (@$_REQUEST['pub_id']) {
 		if ($authorise = check_if_authorised()){
-			//get ss_query
-			$pubquery = 'select * from saved_searches where ss_id='.$_REQUEST['pub_id'];
+			//get svs_Query
+			$pubquery = 'select * from usrSavedSearches where svs_ID='.$_REQUEST['pub_id'];
 			$res = mysql_query($pubquery);
 			if ($pub = mysql_fetch_assoc($res)) {
-				$label = $pub['ss_name'];
-				$wg_id = $pub['ss_wg_id'];
+				$label = $pub['svs_Name'];
+				$wg_id = $pub['svs_UGrpID'];
 
-				if ($pub['ss_publish_args'] != ""){
-					$fs = explode("=", strstr($pub['ss_publish_args'], "&style="));
+				if ($pub['svs_PublishArgs'] != ""){
+					$fs = explode("=", strstr($pub['svs_PublishArgs'], "&style="));
 					$force_style = $fs[1];
 					$forced = true;
 				}
 
-				$query = $pub['ss_query'];
+				$query = $pub['svs_Query'];
 			}
 
 		} else {

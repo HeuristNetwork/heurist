@@ -1039,12 +1039,12 @@ function mode_entry_insertion() {
 		'tag_UGrpID'	=> get_user_id()));
 	// add a saved search for records with this tag
 	$now = date('Y-m-d');
-	mysql__insert('saved_searches', array(
-		'ss_name'		=> $import_tag,
+	mysql__insert('usrSavedSearches', array(
+		'svs_Name'		=> $import_tag,
 		'ss_url'		=> '?ver=1&w=all&q=kwd%3A%22'.str_replace(' ','%20',$import_tag).'%22',
-		'ss_usr_id'	=> get_user_id(),
-		'ss_added'		=> $now,
-		'ss_modified'	=> $now));
+		'svs_UGrpID'	=> get_user_id(),
+		'svs_Added'		=> $now,
+		'svs_Modified'	=> $now));
 ?>
 
 <?php

@@ -47,7 +47,7 @@ $MAINTABLES['RATING_INTEREST'] = 'ratings_interest';
 */
 
 $MAINTABLES['KEYWORD'] = 'usrTags';
-	$PKEY['KEYWORD'] = 'kwd_id';
+	$PKEY['KEYWORD'] = 'tag_ID';
 
 $MAINTABLES['REFTYPE'] = 'rec_types';
 	$PKEY['REFTYPE'] = 'rt_id';
@@ -64,10 +64,10 @@ $MAINTABLES['WORKGROUP'] = USERS_DATABASE.'.'.GROUPS_TABLE;
 	$PKEY['WORKGROUP'] = GROUPS_ID_FIELD;
 
 
-$MAINTABLES['CUSTOMBOOKMARK'] = 'saved_searches';
-	$PKEY['CUSTOMBOOKMARK'] = 'ss_id';
-	$INIDATE_FIELD['CUSTOMBOOKMARK'] = 'ss_added';
-      $MODDATE_FIELD['CUSTOMBOOKMARK'] = 'ss_modified';
+$MAINTABLES['CUSTOMBOOKMARK'] = 'usrSavedSearches';
+	$PKEY['CUSTOMBOOKMARK'] = 'svs_ID';
+	$INIDATE_FIELD['CUSTOMBOOKMARK'] = 'svs_Added';
+      $MODDATE_FIELD['CUSTOMBOOKMARK'] = 'svs_Modified';
 
 
 
@@ -154,7 +154,7 @@ if (@$_REQUEST['showall']) {
 
 /* My Bookmarks search */
 
-define('KEYWORD_search-order', 'kwd_name');
+define('KEYWORD_search-order', 'tag_Text');
 
 if (@$_REQUEST['sort_order_dropdown']  &&  in_array($_REQUEST['sort_order_dropdown'], array('title', 'modified', 'added', 'url', 'popularity'))) {
 	if ($_REQUEST['sort_order_dropdown'] == 'added'  or
@@ -215,7 +215,7 @@ $SEARCHES["BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left jo
 		)
 		";	/* may be over-written by search.php */
 
-$SEARCHES["augmented_BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left join records on bkm_recID=rec_id left join usrRecTagLinks on kwl_pers_id=bkm_ID WHERE (
+$SEARCHES["augmented_BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left join records on bkm_recID=rec_id left join usrRecTagLinks on rtl_RecID=bkm_RecID WHERE (
 		(bkm_UGrpID = [logged-in-user-id]) and
 		[word-match:bkmk_title:bkmk_title] and
 		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
@@ -271,7 +271,7 @@ $SEARCHES["simple_BIBLIO_search"] = "select distinct rec_id from records  where 
          and not rec_temporary
 	)
 	";
-$SEARCHES["augmented_simple_BIBLIO_search"] = "select distinct rec_id from records left join usrBookmarks on bkm_recID=rec_id left join usrRecTagLinks on kwl_pers_id=bkm_ID where (
+$SEARCHES["augmented_simple_BIBLIO_search"] = "select distinct rec_id from records left join usrBookmarks on bkm_recID=rec_id left join usrRecTagLinks on rtl_RecID=bkm_RecID where (
 	[word-match:rec_title:rec_title] and
 	if ([bib_advanced_search] and [rec_url]!='', rec_url like [%rec_url%], 1) and
 	if ([bib_advanced_search] and [rec_type]!='', rec_type = [rec_type], 1)
@@ -324,10 +324,10 @@ $SEARCHES["CATEGORY_search"] = "SELECT cat_id FROM categories WHERE (
 		(cat_user_id = [logged-in-user-id]) and
 		if ([cat_label]!='', cat_label like [%cat_label%], 1)  )";
 
-define('CUSTOMBOOKMARK_search-order', '!(ss_url like "%w=bookmark%" OR ss_url like "%search_type=bookmark%"), ss_name');
+define('CUSTOMBOOKMARK_search-order', '!(ss_url like "%w=bookmark%" OR ss_url like "%search_type=bookmark%"), svs_Name');
 
 
-define('user_kwds-order', 'kwd_name');
+define('user_kwds-order', 'tag_Text');
 define('user_kwds-RESULTS_PER_PAGE', 10000);
 $SEARCHES['user_kwds'] = 'select distinct tag_ID from usrTags left join usrRecTagLinks on tag_ID=rtl_TagID where rtl_ID is not null and tag_UGrpID = [logged-in-user-id]';
 

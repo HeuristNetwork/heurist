@@ -64,10 +64,10 @@ $MAINTABLES['WORKGROUP'] = USERS_DATABASE.'.'.GROUPS_TABLE;
 	$PKEY['WORKGROUP'] = GROUPS_ID_FIELD;
 
 
-$MAINTABLES['CUSTOMBOOKMARK'] = 'saved_searches';
-	$PKEY['CUSTOMBOOKMARK'] = 'ss_id';
-	$INIDATE_FIELD['CUSTOMBOOKMARK'] = 'ss_added';
-      $MODDATE_FIELD['CUSTOMBOOKMARK'] = 'ss_modified';
+$MAINTABLES['CUSTOMBOOKMARK'] = 'usrSavedSearches';
+	$PKEY['CUSTOMBOOKMARK'] = 'svs_ID';
+	$INIDATE_FIELD['CUSTOMBOOKMARK'] = 'svs_Added';
+      $MODDATE_FIELD['CUSTOMBOOKMARK'] = 'svs_Modified';
 
 
 
@@ -319,7 +319,7 @@ $SEARCHES["CATEGORY_search"] = "SELECT cat_id FROM categories WHERE (
 		(cat_user_id = [logged-in-user-id]) and 
 		if ([cat_label]!='', cat_label like [%cat_label%], 1)  )";
 
-define('CUSTOMBOOKMARK_search-order', '!(ss_url like "%w=bookmark%" OR ss_url like "%search_type=bookmark%"), ss_name');
+define('CUSTOMBOOKMARK_search-order', '!(ss_url like "%w=bookmark%" OR ss_url like "%search_type=bookmark%"), svs_Name');
 
 
 define('user_kwds-order', 'tag_Text');

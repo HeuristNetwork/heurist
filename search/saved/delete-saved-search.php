@@ -22,9 +22,9 @@ $label = @$_REQUEST["label"];
 $wg = intval(@$_REQUEST["wg"]);
 
 if ($wg > 0) {
-	mysql_query("delete from saved_searches where ss_name='$label' and ss_wg_id=$wg");
+	mysql_query("delete from usrSavedSearches where svs_Name='$label' and svs_UGrpID=$wg");
 } else {
-	mysql_query("delete from saved_searches where ss_name='$label' and ss_usr_id=".get_user_id());
+	mysql_query("delete from usrSavedSearches where svs_Name='$label' and svs_UGrpID=".get_user_id());
 }
 
 print "{\"deleted\":" . (mysql_affected_rows() > 0 ? "true" : "false") . "}";

@@ -20,15 +20,15 @@ if (is_logged_in()) {
 	top.HEURIST.user = {};
 
     top.HEURIST.user.savedSearches = [<?php
-$res = mysql_query('select ss_name, ss_query, ss_query not like "%w=bookmark%" as w_all, ss_id from saved_searches where ss_usr_id='.get_user_id().' and ! ss_wg_id order by w_all, ss_name');
+$res = mysql_query('select svs_Name, svs_Query, svs_Query not like "%w=bookmark%" as w_all, svs_ID from usrSavedSearches where svs_UGrpID='.get_user_id().' order by w_all, svs_Name');
 $first = true;
 while ($row = mysql_fetch_assoc($res)) {
     if (! $first) print ",";  print "\n"; $first = false;
 	//this is for searches from  obsolete published-searches table. they start with "q";
-	if (preg_match('/^q/', $row['ss_query'])) {
-		$row['ss_query'] = "?".$row['ss_query'];
+	if (preg_match('/^q/', $row['svs_Query'])) {
+		$row['svs_Query'] = "?".$row['svs_Query'];
     }
-    print "        [ \"" . addslashes($row['ss_name']) . "\", \"" . addslashes($row['ss_query']) . "\", ". $row['ss_id'] .", 0, " . intval($row['w_all']) ." ]";
+    print "        [ \"" . addslashes($row['svs_Name']) . "\", \"" . addslashes($row['svs_Query']) . "\", ". $row['svs_ID'] .", 0, " . intval($row['w_all']) ." ]";
 }
 ?>
     ];
@@ -88,16 +88,16 @@ if (is_array(@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'])) {
     top.HEURIST.user.workgroupSavedSearches = <?php
 $ws = array();
 if (@$workgroups) {
-	$res = mysql_query("select ss_wg_id, ss_id, ss_name, ss_query from saved_searches left join ".USERS_DATABASE.".sysUGrps grp on grp.ugr_ID = ss_wg_id where ss_wg_id in (".join(",", $workgroups).") order by grp.ugr_Name, ss_name");
+	$res = mysql_query("select svs_UGrpID, svs_ID, svs_Name, svs_Query from usrSavedSearches left join ".USERS_DATABASE.".sysUGrps grp on grp.ugr_ID = svs_UGrpID where svs_UGrpID in (".join(",", $workgroups).") order by grp.ugr_Name, svs_Name");
 	while ($row = mysql_fetch_assoc($res)) {
-		$wg = $row['ss_wg_id'];
+		$wg = $row['svs_UGrpID'];
 		if (! @$ws[$wg])
 			$ws[$wg] = array();
 		//this is for searches from  obsolete published-searches table. they start with "q";
-		if (preg_match('/^q/', $row['ss_query'])) {
-			$row['ss_query'] = "?".$row['ss_query'];
+		if (preg_match('/^q/', $row['svs_Query'])) {
+			$row['svs_Query'] = "?".$row['svs_Query'];
     	}
-		array_push($ws[$wg], array($row['ss_name'], $row['ss_query'], $row['ss_id']));
+		array_push($ws[$wg], array($row['svs_Name'], $row['svs_Query'], $row['svs_ID']));
 	}
 }
 print json_format($ws, true);

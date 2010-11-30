@@ -175,8 +175,8 @@ if (@$_REQUEST['submit']) $updated = update_my_settings();
 ?>
   <tr>
    <td style="width: 16px;">&nbsp;</td>
-   <td style="width: 16px;"><input type="checkbox" name="ssearch[<?= $row['ss_id'] ?>]" value="1" checked class="ssearch"></td>
-   <td><a href="<?= $row['ss_url'] ?>" target="_testwindow"><?= htmlspecialchars($row['ss_name']) ?></a></td>
+   <td style="width: 16px;"><input type="checkbox" name="ssearch[<?= $row['svs_ID'] ?>]" value="1" checked class="ssearch"></td>
+   <td><a href="<?= $row['ss_url'] ?>" target="_testwindow"><?= htmlspecialchars($row['svs_Name']) ?></a></td>
   </tr>
 <?php
 	}
@@ -218,7 +218,7 @@ function update_my_settings() {
 
 	$keys = mysql__select_array('usrTags', 'tag_ID', 'tag_UGrpID= '.MODEL_USER_ID.' and tag_ID in (0, ' . join(', ', $keys) . ')');	//saw CHECK: is 0 ok for all of these
 	$bkmks = mysql__select_array('usrBookmarks', 'bkm_ID', 'bkm_UGrpID = '.MODEL_USER_ID.' and bkm_ID in (0, ' . join(', ', $bkmks) . ')');
-	$ssearches = mysql__select_array('saved_searches', 'ss_id', 'ss_usr_id = '.MODEL_USER_ID.' and ss_id in (0, ' . join(', ', $ssearches) . ')');
+	$ssearches = mysql__select_array('usrSavedSearches', 'svs_ID', 'svs_UGrpID = '.MODEL_USER_ID.' and svs_ID in (0, ' . join(', ', $ssearches) . ')');
 
 	if ($keys) {
 		$res = mysql_query('select tag_Text from usrTags where tag_ID in ('.join(',',$keys).')');
@@ -271,18 +271,18 @@ function update_my_settings() {
 	}
 
 	if ($ssearches) {
-		$res = mysql_query('select * from saved_searches where ss_id in ('.join(',',$ssearches).')');
+		$res = mysql_query('select * from usrSavedSearches where svs_ID in ('.join(',',$ssearches).')');
 		while ($row = mysql_fetch_assoc($res)) {
 			// add a new custombookmark for each of the selected saved-searches
 			// (all fields the same except for user id)
 
-			unset($row['ss_id']);
+			unset($row['svs_ID']);
 
-			$row['ss_usr_id'] = get_user_id();
-			$row['ss_added'] = date('Y-m-d H:i:s');
-			$row['ss_modified'] = date('Y-m-d H:i:s');
+			$row['svs_UGrpID'] = get_user_id();
+			$row['svs_Added'] = date('Y-m-d H:i:s');
+			$row['svs_Modified'] = date('Y-m-d H:i:s');
 
-			mysql__insert('saved_searches', $row);
+			mysql__insert('usrSavedSearches', $row);
 			$updated = 1;
 		}
 	}
@@ -291,13 +291,13 @@ function update_my_settings() {
 }
 
 
-function tag_query() {	//saw CHECK: how can B.tag_ID be null
+function tag_query() {	// get all model user tags that are not used by the user.
 	return mysql_query("select A.tag_ID as tag_ID, A.tag_Text as tag_Text from usrTags A
 	                           left join usrTags B on A.tag_Text=B.tag_Text and B.tag_UGrpID=".get_user_id()."
 	                     where A.tag_UGrpID= ".MODEL_USER_ID." and B.tag_ID is null");
 }
 
-function bkmk_query() {
+function bkmk_query() {	// get all model user bookmarks on records that are not bookmarked by the user.
 	return mysql_query("select A.bkm_ID, rec_url, rec_title from usrBookmarks A
 	                           left join records on rec_id = A.bkm_recID
 	                           left join usrBookmarks B on A.bkm_recID = B.bkm_recID and B.bkm_UGrpID=".get_user_id()."
@@ -305,9 +305,9 @@ function bkmk_query() {
 	                     order by A.bkm_ID");
 }
 
-function saved_search_query() {
-	return mysql_query("select A.ss_id, A.ss_name, A.ss_url from saved_searches A
-	                           left join saved_searches B on A.ss_url = B.ss_url and B.ss_usr_id=".get_user_id()."
-	                     where A.ss_usr_id=".MODEL_USER_ID." and B.ss_id is null
-	                     order by A.ss_id");
+function saved_search_query() {	// get all model user saved searches that are not used by the user.
+	return mysql_query("select A.svs_ID, A.svs_Name, A.ss_url from usrSavedSearches A
+	                           left join usrSavedSearches B on A.ss_url = B.ss_url and B.svs_UGrpID=".get_user_id()."
+	                     where A.svs_UGrpID=".MODEL_USER_ID." and B.svs_ID is null
+	                     order by A.svs_ID");
 }

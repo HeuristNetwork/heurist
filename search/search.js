@@ -1272,15 +1272,15 @@ top.HEURIST.search = {
 		}
 	},
 
-	insertSavedSearch: function(label, url, wg, ss_id) {
+	insertSavedSearch: function(label, url, wg, svs_ID) {
 		var w_all = url.match(/w=bookmark/) ? 0 : 1;
 		var savedSearches = wg ? top.HEURIST.user.workgroupSavedSearches[wg] : top.HEURIST.user.savedSearches;
-		var newEntry = wg ? [label, url, ss_id] : [label, url, ss_id, 0, w_all];
+		var newEntry = wg ? [label, url, svs_ID] : [label, url, svs_ID, 0, w_all];
 		var i = 0;
 		while (i < savedSearches.length) {
 			var sid = savedSearches[i][2];
 			//if this is a renamed search or ovewritten search
-			if (sid == ss_id) {
+			if (sid == svs_ID) {
 				document.getElementById("active-label").innerHTML = newEntry[0];
 				savedSearches[i] = newEntry;
 				top.HEURIST.search.fillInSavedSearches();

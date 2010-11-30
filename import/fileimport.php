@@ -75,8 +75,8 @@ error_log($base_url_base);
 		preg_match_all('!(<a[^>]*?href=["\']?([^"\'>\s]+)["\']?[^>]*?'.'>(.*?)</a>.*?)(?=<a\s|$)!is', $src, $matches);
 
 		/* get a list of the link-texts that we are going to ignore */
-		$ignored = mysql__select_assoc('ignored_hyperlink_texts', 'lcase(hyp_text)', '-1',
-		                               'hyp_usr_id is null or hyp_usr_id='.get_user_id());
+		$ignored = mysql__select_assoc('usrHyperlinkFilter', 'lcase(hyf_String)', '-1',
+		                               'hyf_UGrpID is null or hyf_UGrpID='.get_user_id());
 		$wildcard_ignored = array();
 		foreach ($ignored as $key => $val) {
 			$key_len = strlen($key);

@@ -349,32 +349,32 @@ function bookmark_tag_and_save_seach() {
 	} else {
 		preg_replace('/Success/','',$message);
 	}
-	$wg = intval(@$_REQUEST['ss_wg_id']);
+	$wg = intval(@$_REQUEST['svs_UGrpID']);
 
 	$now = date('Y-m-d');
 	$cmb = Array(
-		'ss_name'     => $_REQUEST['ss_name'],
-		'ss_query'    => urldecode($_REQUEST['ss_query']),
-		'ss_usr_id'   => get_user_id(),
-		'ss_added'     => $now,
-		'ss_modified'  => $now);
+		'svs_Name'     => $_REQUEST['svs_Name'],
+		'svs_Query'    => urldecode($_REQUEST['svs_Query']),
+		'svs_UGrpID'   => get_user_id(),
+		'svs_Added'     => $now,
+		'svs_Modified'  => $now);
 
-	if ($wg) {
-		$cmb['ss_wg_id'] = $wg;
+	if ($wg) {	// user / group id was passed in so use it over teh current user id.
+		$cmb['svs_UGrpID'] = $wg;
 	}
 
 	// overwrites saved search with same name
-	$res = mysql_query('select ss_id, ss_wg_id from saved_searches where ss_name="'.slash($_REQUEST['ss_name']).'" and '.
-									($wg ? 'ss_wg_id='.$wg : 'ss_wg_id=0 and ss_usr_id='.get_user_id()));
+	$res = mysql_query('select svs_ID, svs_UGrpID from usrSavedSearches where svs_Name="'.slash($_REQUEST['svs_Name']).'" and '.
+									($wg ? 'svs_UGrpID='.$wg : 'svs_UGrpID='.get_user_id()));
 	$row = mysql_fetch_row($res);
 
 	if ($row) {
 		if ($row && $row[1] == $wg) {
 			$ss = intval($row[0]);
 		}
-		mysql__update('saved_searches', 'ss_id='.$ss, $cmb);
+		mysql__update('usrSavedSearches', 'svs_ID='.$ss, $cmb);
 	} else {
-		mysql__insert('saved_searches', $cmb);
+		mysql__insert('usrSavedSearches', $cmb);
 		$ss = mysql_insert_id();
 	}
 
@@ -382,9 +382,9 @@ function bookmark_tag_and_save_seach() {
 		$onload = 'alert(\'Database problem (' . addslashes(mysql_error()).') - search not saved\'); location.replace(\'action.php\');';
 	} else {
 		$onload = 'location.replace(\'action.php\');'.
-					'top.HEURIST.search.insertSavedSearch(\''.slash($_REQUEST['ss_name']).'\', \''.slash($_REQUEST['ss_query']).'\', '.$wg.', '.$ss.');'.
+					'top.HEURIST.search.insertSavedSearch(\''.slash($_REQUEST['svs_Name']).'\', \''.slash($_REQUEST['svs_Query']).'\', '.$wg.', '.$ss.');'.
 					'top.HEURIST.util.getJsonData("'. BASE_PATH.'search/collection.php?clear", top.HEURIST.search.addRemoveCollectionCB);'.
-					'top.HEURIST.search.popupNotice(\' Search \"'.$_REQUEST['ss_name'].'\" saved. '. $message.'\');' .
+					'top.HEURIST.search.popupNotice(\' Search \"'.$_REQUEST['svs_Name'].'\" saved. '. $message.'\');' .
 					'top.location.href = top.location.href + (top.location.href.match(/\?/) ? \'&\' : \'?\') + \'sid='.$ss.'\';';
 	}
 	return $onload;
@@ -393,35 +393,35 @@ function bookmark_tag_and_save_seach() {
 function save_search() {
     define('T1000_DEBUG', 1);
 	mysql_connection_db_overwrite(DATABASE);
-	$wg = intval(@$_REQUEST['ss_wg_id']);
-	$ss = $_REQUEST['ss_id'];
+	$wg = intval(@$_REQUEST['svs_UGrpID']);
+	$ss = $_REQUEST['svs_ID'];
 	$publish = $_REQUEST['publish'];
-	$label = @$_REQUEST['ss_name'];
+	$label = @$_REQUEST['svs_Name'];
 
 	$now = date('Y-m-d');
 	$cmb = Array(
-		'ss_name'     => $_REQUEST['ss_name'],
-		'ss_query'    => urldecode($_REQUEST['ss_query']),
-		'ss_usr_id'   => get_user_id(),
-		'ss_added'     => $now,
-		'ss_modified'  => $now);
+		'svs_Name'     => $_REQUEST['svs_Name'],
+		'svs_Query'    => urldecode($_REQUEST['svs_Query']),
+		'svs_UGrpID'   => get_user_id(),
+		'svs_Added'     => $now,
+		'svs_Modified'  => $now);
 
-	if ($wg) {
-		$cmb['ss_wg_id'] = $wg;
+	if ($wg) {	// user / group id was passed in so use it over teh current user id.
+		$cmb['svs_UGrpID'] = $wg;
 	}
 
 	// overwrites saved search with same name
-	$res = mysql_query('select ss_id, ss_wg_id from saved_searches where ss_name="'.slash($_REQUEST['ss_name']).'" and '.
-									($wg ? 'ss_wg_id='.$wg : 'ss_wg_id=0 and ss_usr_id='.get_user_id()));
+	$res = mysql_query('select svs_ID, svs_UGrpID from usrSavedSearches where svs_Name="'.slash($_REQUEST['svs_Name']).'" and '.
+									($wg ? 'svs_UGrpID='.$wg : 'svs_UGrpID='.get_user_id()));
 	$row = mysql_fetch_row($res);
 
 	if ($row || $ss) {
 		if ($row && $row[1] == $wg) {
 		 	$ss = intval($row[0]);
 		}
-		mysql__update('saved_searches', 'ss_id='.$ss, $cmb);
+		mysql__update('usrSavedSearches', 'svs_ID='.$ss, $cmb);
 	} else {
-		mysql__insert('saved_searches', $cmb);
+		mysql__insert('usrSavedSearches', $cmb);
 		$ss = mysql_insert_id();
 	}
 
@@ -429,7 +429,7 @@ function save_search() {
 
 		$onload = 'alert(\'Database problem (' . addslashes(mysql_error()).') - search not saved\'); location.replace(\'action.php\');';
 	} else {
-		$onload = 'location.replace(\'action.php\'); top.HEURIST.search.insertSavedSearch(\''.slash($_REQUEST['ss_name']).'\', \''.slash($_REQUEST['ss_query']).'\', '.$wg.', '.$ss.');';
+		$onload = 'location.replace(\'action.php\'); top.HEURIST.search.insertSavedSearch(\''.slash($_REQUEST['svs_Name']).'\', \''.slash($_REQUEST['svs_Query']).'\', '.$wg.', '.$ss.');';
 		if ($publish) {
 			$onload .= ' top.location.href = top.location.href + (top.location.href.match(/\?/) ? \'&\' : \'?\') + \'pub=1&label='.$label.'&sid='.$ss.'\';';
 		}else{
@@ -476,10 +476,10 @@ function print_input_form() {
 <input type="hidden" name="tagString" id="tagString" value="">
 <input type="hidden" name="wgTag_ids" id="wgTag_ids" value="">
 <input type="hidden" name="rating" id="rating" value="">
-<input type="hidden" name="ss_id" id="ss_id" value="">
-<input type="hidden" name="ss_name" id="ss_name" value="">
-<input type="hidden" name="ss_query" id="ss_query" value="">
-<input type="hidden" name="ss_wg_id" id="ss_wg_id" value="">
+<input type="hidden" name="svs_ID" id="svs_ID" value="">
+<input type="hidden" name="svs_Name" id="svs_Name" value="">
+<input type="hidden" name="svs_Query" id="svs_Query" value="">
+<input type="hidden" name="svs_UGrpID" id="svs_UGrpID" value="">
 <input type="hidden" name="publish" id="publish" value="">
 <input type="hidden" name="wg_id" id="wg_id" value="">
 <input type="hidden" name="vis" id="vis" value="">

@@ -46,14 +46,14 @@ while ($row = mysql_fetch_row($res)) {
 	],
 
 	"savedSearches": [ <?php
-$res = mysql_query("select ss_name, ss_url, ss_url not like '%w=bookmark%' as w_all
-					  from saved_searches
-					 where ss_wg_id=".$wg_id."
-				  order by ss_name");
+$res = mysql_query("select svs_Name, ss_url, ss_url not like '%w=bookmark%' as w_all
+					  from usrSavedSearches
+					 where svs_UGrpID=".$wg_id."
+				  order by svs_Name");
 $first = true;
 while ($row = mysql_fetch_assoc($res)) {
     if (! $first) print ",";  print "\n"; $first = false;
-    print "\t\t[ \"" . addslashes($row['ss_name']) . "\", \"" . addslashes($row['ss_url']) . "\", 0, " . intval($row['w_all']) . " ]";
+    print "\t\t[ \"" . addslashes($row['svs_Name']) . "\", \"" . addslashes($row['ss_url']) . "\", 0, " . intval($row['w_all']) . " ]";
 }
 ?>
 

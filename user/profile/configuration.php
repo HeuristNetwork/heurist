@@ -18,13 +18,13 @@ if (@$_REQUEST['submitted']) {
 	mysql_connection_db_overwrite(DATABASE);
 
 	if (@$_REQUEST['new_hyp_text']) {
-		$res = mysql_query('select * from ignored_hyperlink_texts
-		                     where (hyp_usr_id is null or hyp_usr_id='.get_user_id().')
-		                       and hyp_text="'.addslashes(@$_REQUEST['new_hyp_text']).'"');
+		$res = mysql_query('select * from usrHyperlinkFilter
+		                     where (hyf_UGrpID is null or hyf_UGrpID='.get_user_id().')
+		                       and hyf_String="'.addslashes(@$_REQUEST['new_hyp_text']).'"');
 		if (mysql_num_rows($res) == 0) {
-			mysql__insert('ignored_hyperlink_texts',
-			             array('hyp_text' => @$_REQUEST['new_hyp_text'],
-			                   'hyp_usr_id' => get_user_id()));
+			mysql__insert('usrHyperlinkFilter',
+			             array('hyf_String' => @$_REQUEST['new_hyp_text'],
+			                   'hyf_UGrpID' => get_user_id()));
 		}
 	}
 }
@@ -103,15 +103,15 @@ if (get_user_id() == 96) {
 
 	$user_hyperlinks_import = '<p>';
 	if (@$_REQUEST['import_hyperlinks_user']) {
-		$hls = mysql__select_array('ignored_hyperlink_texts', 'hyp_text',
-		                           'hyp_usr_id='.intval(@$_REQUEST['import_hyperlinks_user']));
+		$hls = mysql__select_array('usrHyperlinkFilter', 'hyf_String',
+		                           'hyf_UGrpID='.intval(@$_REQUEST['import_hyperlinks_user']));
 		if ($hls) {
 			$insert_stmt = '';
 			foreach ($hls as $hl) {
 				if ($insert_stmt) $insert_stmt .= ', ';
 				$insert_stmt .= '("'.addslashes($hl).'", get_user_id())';
 			}
-			$insert_stmt = 'insert into ignored_hyperlink_texts (hyp_text, hyp_usr_id) values ' . $insert_stmt;
+			$insert_stmt = 'insert into usrHyperlinkFilter (hyf_String, hyf_UGrpID) values ' . $insert_stmt;
 			mysql_query($insert_stmt);
 			$row_count = mysql_affected_rows();
 		} else $row_count = 0;
@@ -189,7 +189,7 @@ $template = str_replace('{word_limit_options}', $word_limit_options, $template);
 
 $hyperlinks_ignored = '<div>' .
   join("</div>\n<div>",
-       mysql__select_array('ignored_hyperlink_texts', 'hyp_text', 'hyp_usr_id is null or hyp_usr_id='.get_user_id())) .
+       mysql__select_array('usrHyperlinkFilter', 'hyf_String', 'hyf_UGrpID is null or hyf_UGrpID='.get_user_id())) .
                       '</div>';
 $template = str_replace('{hyperlinks_ignored}', $hyperlinks_ignored, $template);
 $template = str_replace('{Bookmarklet}', file_get_contents('bookmarklet.js'), $template);

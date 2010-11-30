@@ -128,20 +128,20 @@ if ($_REQUEST['_submit']  &&  $dup_check_ok) {
 				mysql_query("insert into usrTags (tag_Text, tag_UGrpID) values $values");
 
 
-			/* copy ignored_hyperlink_texts from the model_user */
-			$res = mysql_query("select hyp_text from ignored_hyperlink_texts where hyp_usr_id=$model_usr_id");
+			/* copy usrHyperlinkFilter from the model_user */
+			$res = mysql_query("select hyf_String from usrHyperlinkFilter where hyf_UGrpID=$model_usr_id");
 			$values = '';
 			while ($row = mysql_fetch_row($res)) {
 				if ($values) $values .= ', ';
 				$values .= '("'.addslashes($row[0]).'", ' . $usr_id . ')';
 			}
 			if ($values)
-				mysql_query("insert into ignored_hyperlink_texts values $values");
+				mysql_query("insert into usrHyperlinkFilter values $values");
 
 
 			/* copy saved searches from the model_user */
 
-			$res = mysql_query("select ss_name, ss_query from saved_searches where ss_usr_id=$model_usr_id");
+			$res = mysql_query("select svs_Name, svs_Query from usrSavedSearches where svs_UGrpID=$model_usr_id");
 			$values = '';
 			$now = addslashes(date('Y-m-d H:i:s'));
 			while ($row = mysql_fetch_row($res)) {
@@ -150,7 +150,7 @@ if ($_REQUEST['_submit']  &&  $dup_check_ok) {
 			}
 
 			if ($values)
-				mysql_query("insert into saved_searches (ss_name, ss_query, ss_usr_id, ss_added, ss_modified) values $values");
+				mysql_query("insert into usrSavedSearches (svs_Name, svs_Query, svs_UGrpID, svs_Added, svs_Modified) values $values");
 
 
 			/* mapping of model user's tag_ID to new user's tag_ID */
