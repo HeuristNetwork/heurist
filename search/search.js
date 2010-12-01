@@ -534,7 +534,7 @@ top.HEURIST.search = {
 			var t_span = result.childNodes[0];
 			var rec_title = $(".rec_title", result)[0];
 			var reftype_img = result.childNodes[4];
-			var pin_img = result.childNodes[0];
+			var pin_img = result.childNodes[2];
 
 			top.HEURIST.registerEvent(result, "click", top.HEURIST.search.resultItemOnClick);
 			top.HEURIST.registerEvent(t_span, "click", top.HEURIST.search.resultItemOnClick);

@@ -20,6 +20,9 @@
 // version 1.8      remove the old GMarkerManager support due to clashes with v2.143
 
 
+//Customised by Steve White - Nov 28 2010
+
+
 function ELabel(point, html, classname, pixelOffset, percentOpacity, overlap) {
         // Mandatory parameters
         this.point = point;
@@ -127,6 +130,10 @@ ELabel.prototype.setOpacity = function(percentOpacity) {
           if(typeof(this.div_.style.opacity)=='string'){this.div_.style.opacity=this.percentOpacity/100;}
         }
 }
+
+//the following six functions added by Steve White
+//elabel is essentially an HTML overlay that acts like a marker
+
 
 ELabel.prototype.getPoint = function() {
         return this.point;

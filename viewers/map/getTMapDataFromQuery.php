@@ -54,14 +54,27 @@ while ($bib = mysql_fetch_assoc($res)) {
 }
 
 foreach ($bibIDs as $bibID) {
-	$res = mysql_query("select a.dtl_Value, b.dtl_Value, rec_URL
+	$res = mysql_query("select a.dtl_Value, b.dtl_Value, rec_URL,c.dtl_UploadedFileID,d.dtl_UploadedFileID,e.dtl_UploadedFileID,f.dtl_UploadedFileID
 						  from Records
 					 left join recDetails a on a.dtl_RecID=rec_ID and a.dtl_DetailTypeID=303
 					 left join recDetails b on b.dtl_RecID=rec_ID and b.dtl_DetailTypeID=191
+					 left join recDetails c on c.dtl_RecID=rec_ID and c.dtl_DetailTypeID=221
+					 left join recDetails d on d.dtl_RecID=rec_ID and d.dtl_DetailTypeID=222
+					 left join recDetails e on e.dtl_RecID=rec_ID and e.dtl_DetailTypeID=223
+					 left join recDetails f on f.dtl_RecID=rec_ID and f.dtl_DetailTypeID=224
 						 where rec_ID=$bibID");
 	$row = mysql_fetch_row($res);
 	$records[$bibID]["description"] = ($row[0] ? $row[0] : $row[1]);
 	$records[$bibID]["url"] = ($row[2] ? $row[2] : '');
+	$fileID = ($row[3] ? $row[3] : ($row[4] ? $row[4] : ($row[5] ? $row[5] :($row[6] ? $row[6] :""))));
+	if ($fileID) {
+			$fres = mysql_query(
+			    "select file_nonce
+			            from files
+			      where file_id = " . intval($fileID));
+	}
+	if ($fres) $row = mysql_fetch_row($fres);
+	$records[$bibID]["thumb_file_id"] = $row[0] ? $row[0] : "";
 }
 
 

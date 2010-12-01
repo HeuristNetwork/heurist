@@ -11,9 +11,17 @@ var map;
 var iconsByReftype = [];
 var onclickfn;
 var allMarkers = [];
+var markerGroups = {};
 
 function loadMap(options) {
 	if (! options) options = {};
+
+	top.HEURIST.clusterClickHandlers = [];
+	top.HEURIST.dispatchClusterClick = function (index){
+		if (typeof top.HEURIST.clusterClickHandlers[index] == "function"){
+			top.HEURIST.clusterClickHandlers[index]();
+		}
+	}
 
 	map = new GMap2(document.getElementById("map"));
 
@@ -50,6 +58,7 @@ function loadMap(options) {
 	baseIcon.iconSize = new GSize(31, 31);
 	baseIcon.shadowSize = new GSize(30, 18);
 
+
 	for (var i in HEURIST.tmap.geoObjects) {
 		var geo = HEURIST.tmap.geoObjects[i];
 		var record = HEURIST.tmap.records[geo.bibID];
@@ -72,15 +81,20 @@ function loadMap(options) {
 		var polygon = null;
 		switch (geo.type) {
 			case "point":
-			marker = new GMarker(new GLatLng(geo.geo.y, geo.geo.x), getIcon(record));
-			ELabelLoc = new GLatLng(geo.geo.y, geo.geo.x);
+				var y = Math.round(geo.geo.y * 1000000)/1000000, x = Math.round(geo.geo.x * 1000000)/1000000;
+				if (!markerGroups[y]) {
+					markerGroups[y] = {};
+				}
+				if (!markerGroups[y][x]) {
+					markerGroups[y][x] = {};
+				}
+				if (!markerGroups[y][x][record.reftype]) {
+					markerGroups[y][x][[record.reftype]] = { records : [] };
+				}
+				markerGroups[y][x][record.reftype].records.push(record);
 			break;
 
 			case "circle":
-			if (window.heurist_useLabelledMapIcons) {
-				addPointMarker(new GLatLng(geo.geo.y, geo.geo.x), record);
-			}
-
 			var points = [];
 			for (var i=0; i <= 40; ++i) {
 				var x = geo.geo.x + geo.geo.radius * Math.cos(i * 2*Math.PI / 40);
@@ -93,14 +107,9 @@ function loadMap(options) {
 				polygon = new GPolygon(points, "#0000ff", 1, 0.5, "#aaaaff", 0.3);
 			}
 
-			ELabelLoc = new GLatLng(geo.geo.y, geo.geo.x);
 			break;
 
 			case "rect":
-			if (window.heurist_useLabelledMapIcons) {
-				addPointMarker(new GLatLng((geo.geo.y0+geo.geo.y1)/2, (geo.geo.x0+geo.geo.x1)/2), record);
-			}
-
 			var points = [];
 			points.push(new GLatLng(geo.geo.y0, geo.geo.x0));
 			points.push(new GLatLng(geo.geo.y0, geo.geo.x1));
@@ -113,14 +122,9 @@ function loadMap(options) {
 				polygon = new GPolygon(points, "#0000ff", 1, 0.5, "#aaaaff", 0.3);
 			}
 
-			ELabelLoc = (new GLatLng(geo.geo.y0, (geo.geo.x0+geo.geo.x1)/2));
 			break;
 
 			case "polygon":
-			if (window.heurist_useLabelledMapIcons) {
-				addPointMarker(new GLatLng(geo.geo.points[1].y, geo.geo.points[1].x), record);
-			}
-
 			var points = [];
 			for (var i=0; i < geo.geo.points.length; ++i)
 				points.push(new GLatLng(geo.geo.points[i].y, geo.geo.points[i].x));
@@ -130,83 +134,216 @@ function loadMap(options) {
 			} else {
 				polygon = new GPolygon(points, "#0000ff", 1, 0.5, "#aaaaff", 0.3);
 			}
-			ELabelLoc = (new GLatLng(geo.geo.points[0].y, geo.geo.points[0].x));
 			break;
 
 			case "path":
-			//var points = [];
-			//for (var i=0; i < geo.geo.points.length; ++i)
-			//	points.push(new GLatLng(geo.geo.points[i].y, geo.geo.points[i].x));
 			if (highlight) {
 				polygon = new GPolyline.fromEncoded({ color: "#ff0000", weight: 3, opacity: 0.8, points: geo.geo.points, zoomFactor: 3, levels: geo.geo.levels, numLevels: 21 });
 			} else {
 				polygon = new GPolyline.fromEncoded({ color: "#0000ff", weight: 3, opacity: 0.8, points: geo.geo.points, zoomFactor: 3, levels: geo.geo.levels, numLevels: 21 });
 			}
-			if (window.heurist_useLabelledMapIcons) {
-				addPointMarker(polygon.getVertex(Math.floor(polygon.getVertexCount() / 2)), record);
-			}
 			break;
 		}
-		// Pointer Records loading section
-		var mapLabelXSL;
-		var xmlRecDepth1 = loadXMLDocFromFile("http://heuristscholar.org"+ top.HEURIST.basePath+
-								"export/xml/hml.php?q=ids:"+record.bibID+"&depth=1&woot=1"+
-								(top.HEURIST.instance.name? "&instance=" + top.HEURIST.instance.name:""));
-			if (!xmlRecDepth1) return;
-			if (!mapLabelXSL) {
-				mapLabelXSL = loadXMLDocFromFile("mapLabel.xsl");
-			}
-			var xhtmlResultDoc;
-			if (window.ActiveXObject){
-				var xmlResultStr = xmlRecDepth1.transformNode(mapLabelXSL);
-				xhtmlResultDoc=new ActiveXObject("Microsoft.XMLDOM");
-				xhtmlResultDoc.async="false";
-				xhtmlResultDoc.loadXML(xmlResultStr);
-			// code for Mozilla, Firefox, Opera, etc.
-			}else {
-				var xsltProcessor=new XSLTProcessor();
-				xsltProcessor.importStylesheet(mapLabelXSL);
-				xhtmlResultDoc = xsltProcessor.transformToFragment(xmlRecDepth1,document);
-			}
-		//Creates custom label HTML
-		var labelContent =
-			"<div id="+record.bibID+" class='maplabel'><div class='MapPointer'></div></div>";
 
-		//custom label sent to elabel
-		var label = new ELabel(ELabelLoc,labelContent,"",GSize(200,20),100,true);
-
-		if (marker) {
-			marker.record = record;
-			if (! record.overlays) record.overlays = [];
-			record.overlays.push(marker);
-			record.overlays.push(label);
-			label.setIcon(marker.getIcon());
-			allMarkers.push(label);
-//			allMarkers.push(marker);
-//			map.addOverlay(marker);
-			map.addOverlay(label);
-			GEvent.addListener(marker, "click", markerClick);
-		}
-		else if (polygon) {
+		if (polygon) {
 			polygon.record = record;
 			if (! record.overlays) record.overlays = [];
 			record.overlays.push(polygon);
-			record.overlays.push(label);
 			map.addOverlay(polygon);
-			map.addOverlay(label);
 			GEvent.addListener(polygon, "click", polygonClick);
 		}
 
-		var relatedID = record.bibID;
-		var related;
-		related = document.getElementById(relatedID);
-		related.appendChild(xhtmlResultDoc);
-		label.setContents(related.parentNode.innerHTML);
-		if (marker) map.removeOverlay(label); // hack need to replace this by creating all the html up front
 	} // end of for Geo
-	var cluster=new ClusterMarker(map, { markers:allMarkers } );
+// run through marker groups to generate base icons
+	for (var y in markerGroups){
+		for (var x in markerGroups[y]) {
+			var marker = getHtmlMarker(y, x, [markerGroups[y][x]], 1, {id:allMarkers.length});
+			allMarkers.push(marker);
+		}
+	}
+
+    //the following line encapsulates the core changes made by Steve White - this modified call allows
+    //an additional, optional parameter which is a call back to create the cluster marker.
+    //normally one would make the following call:
+    //var cluster=new ClusterMarker(map, { markers:allMarkers} );
+    //you'd get the standard cluster marker - slightly customisable by basically standard
+    //with the additional call you can now do all sorts of data dependent presentation as HTML which is used to build the marker
+
+
+	var cluster=new ClusterMarker(map, { markers:allMarkers, makeClusterMarker: makeHTMLClusterMarker} );
+
+
 	cluster.fitMapToMarkers();
 
+}
+
+//this is the callout function for the cluster marker library (modified by Steve White - see internal comments)
+
+function makeHTMLClusterMarker( location, markerIndices, clusterClickHandler) {
+	//run through the markerIndices and combine all the RecsByType into an array, then call getHtmlMarker
+
+	// setup a ditspatch table for the clusterMarkers for the click event.
+	var handlerIndex = top.HEURIST.clusterClickHandlers.length;
+	top.HEURIST.clusterClickHandlers.push(clusterClickHandler);
+	var numMarkers = 0;
+	var arrayRecsByTypeObjs = [];
+	for (var i =0; i < markerIndices.length; i++){
+		numMarkers ++;
+		arrayRecsByTypeObjs.push(allMarkers[markerIndices[i]].recsByType);
+	}
+	return getHtmlMarker(location.lat(),location.lng(),arrayRecsByTypeObjs,numMarkers,{clickHandlerIndex : handlerIndex});
+}
+
+
+//this code is fairly specific to the Heurist data model but could easily be addapted to another data model
+//it looks for a location, an array of data objects associated with the location, the number of markers represented (anything more than one is assumed to be a cluster),
+//and some options for future use - e.g. double click on marker and zoom in to extent that will explode the cluster into single items
+
+
+function getHtmlMarker(y,x,arrayRecsByTypeObjs,numMarkers, options) {
+
+
+		var markerLoc = new GLatLng(y, x); // location for this marker
+		var numTypes = 0;
+		var typeOrder = [];
+		var recsByType = {};
+		var recIDs = [];
+		var recIDsByType = {};
+
+		// combine all record sets with the same type
+		// NOTE: these maybe be from different marker record sets as when called from cluster manager
+		for (var set = 0; set < arrayRecsByTypeObjs.length; set++) {
+			for (var type in arrayRecsByTypeObjs[set]) {
+				if (!recsByType[type]){ // add new rec id records
+					numTypes++;
+					typeOrder.push(type);
+					recsByType[type] = { recIdMap : {}, records : [] };
+					recIDsByType[type] = [];
+				}
+				for(var i = 0; i < arrayRecsByTypeObjs[set][type].records.length; i++) {
+					var record = arrayRecsByTypeObjs[set][type].records[i];
+					if (! recsByType[type].recIdMap[record.bibID]){ // new record
+						recsByType[type].recIdMap[record.bibID] = 1;
+						recIDsByType[type].push(record.bibID);
+						recIDs.push(record.bibID);
+						recsByType[type].records.push(record);
+					}
+				}
+			}
+		}
+
+		var showRecsURL = top.HEURIST.baseURL + "search/search.html?w=all&amp;q=ids:" + recIDs.join(",") + "&amp;instance=" + top.HEURIST.instance.name;
+
+		function compareNumbers(a, b) {
+			return a - b
+		}
+		typeOrder = typeOrder.sort(compareNumbers);
+		//get base part html using numMarkers >1 is cluster with numMarkers markers
+		var useDefaultHandler = (typeof options.clickHandlerIndex != "undefined"? false :true);
+		var indicatorHTML =	(useDefaultHandler ? "<a href=\""+showRecsURL+"\" target=\"_blank\">" :
+												"<a href=\"\" onclick=\"top.HEURIST.dispatchClusterClick("+options.clickHandlerIndex+"); return false;\">")+
+							"<div class=\"indicator "+
+							(numMarkers == 1 ? "single" :
+								(numMarkers <3 ? "small" :
+									(numMarkers < 7 ? "medium" : "large"))) + "\">" +
+							(numMarkers > 1 ? "<div class=\"numMarkers\">" +numMarkers + "</div>": "") +"</div></a>";
+
+		var iconHeight = 30;
+		var markerHeight = (numMarkers == 1 ? 16 :
+								(numMarkers <3 ? 24 :
+									(numMarkers < 7 ? 32 : 40)))+iconHeight;
+
+		function getURLforRecords(Records,recType){
+			var url = top.HEURIST.baseURL;
+			if (Records.length == 1 && Records[0]['thumb_file_id']){
+				//get thumb
+				url += "common/php/resize_image.php?instance=" + top.HEURIST.instance.name + "&amp;file_id=" + Records[0]['thumb_file_id'];
+			}else {
+				//get recType image
+				url += "common/images/reftype-icons/map-icons/map_" + recType + ".png";
+			}
+			return url;
+		}
+
+		function getHTMLforIcon(Records,recType){
+			var recNum = Records.length;
+			var showRecsTypeURL = top.HEURIST.baseURL + "search/search.html?w=all&amp;q=ids:" + recIDsByType[recType].join(",") + "&amp;instance=" + top.HEURIST.instance.name;
+			var html = "<a href=\""+showRecsTypeURL+"\" target=\"_blank\"><div class=\"icon\" style=\"background-image:url("+getURLforRecords(Records,recType) +")\" onmouseover=\"this.firstChild.style.display='block'\" onmouseout=\"this.firstChild.style.display='none'\">";
+			// create info div
+			html += "<div class=\"recInfo\" style=\"display:none\">";
+			if (recNum > 1) {
+				html += "<b>" + recNum + " " + top.HEURIST.reftypes.pluralNames[recType] +"</b><br/>";
+			}else{
+				html += "<b>" + top.HEURIST.reftypes.names[recType] +"</b><br/>";
+			}
+			for(var i = 0; i < recNum; i++){
+				html += "<p>" + Records[i].title +"</p>";
+			}
+			html += "</div>";
+			// create ref count div
+			if (recNum > 1) {
+				html += "<div class=\"refCount\"> " + recNum + "</div>";
+			}
+			html += "</div></a>";
+			return html;
+		}
+
+		//the following section (plus getHTMLforIcon) is essentially sum total of the visual language one wishes to use
+		//this could be modified to be called from a separte location that could be swapped for different visualisations
+		var markerClass = "geomarker";
+		var markerIcon = new GIcon();
+		var markerHTML = "<div class=\"marker\" ";
+		switch (numTypes){
+			case 1:
+				markerHTML += "style=\"width:24px;\">"
+				+ getHTMLforIcon(recsByType[typeOrder[0]].records,typeOrder[0])
+				+ "</div>"
+				+ indicatorHTML;
+				markerIcon.iconSize = new GSize(24, markerHeight);
+				markerIcon.iconAnchor = new GPoint(12, markerHeight);
+				break;
+			case 2:
+				markerHTML += "style=\"width:49px;\">"
+				+ getHTMLforIcon(recsByType[typeOrder[0]].records,typeOrder[0]) + "<div class=\"spacer\"></div>"// insert spacer
+				+ getHTMLforIcon(recsByType[typeOrder[1]].records,typeOrder[1])
+				+ "</div>"
+				+ indicatorHTML;
+				markerIcon.iconSize = new GSize(48, markerHeight);
+				markerIcon.iconAnchor = new GPoint(24, markerHeight);
+				markerClass = "geomarker50";
+				break;
+			case 3:
+				markerHTML += "style=\"width:74px;\">"
+				+ getHTMLforIcon(recsByType[typeOrder[0]].records,typeOrder[0]) + "<div class=\"spacer\"></div>"// insert spacer
+				+ getHTMLforIcon(recsByType[typeOrder[1]].records,typeOrder[1]) + "<div class=\"spacer\"></div>"// insert spacer
+				+ getHTMLforIcon(recsByType[typeOrder[2]].records,typeOrder[2])
+				+ "</div>"
+				+ indicatorHTML;
+				markerIcon.iconSize = new GSize(72, markerHeight);
+				markerIcon.iconAnchor = new GPoint(36, markerHeight);
+				markerClass = "geomarker76";
+				break;
+			default:
+				markerHTML += "style=\"width:24px;\">"
+							+ "<div class=\"icon\" style=\"background-image:url("+HEURIST.baseURL+"common/images/reftype-icons/map-icons/map_multiRecords.png\")\">"
+							+ "<div class=\"refCount\"> " + Records.length + "</div></div>"
+				+ "</div>"
+				+ indicatorHTML;
+				markerIcon.iconSize = new GSize(24, markerHeight);
+				break;
+		}
+
+		//Creates custom label HTML based on number types
+		var labelMarker = new ELabel(markerLoc,markerHTML,markerClass,GSize(200,20),100,true);
+		labelMarker.recsByType = recsByType;
+		labelMarker.setIcon(markerIcon);
+		if (options.id) {
+			labelMarker.id = options.id;
+		}
+		if (options.clickHandler) {
+			labelMarker.indicatorClick = options.clickHandler;
+		}
+		return labelMarker
 }
 
 function loadXMLDocFromFile(filename)

@@ -58,7 +58,7 @@
 					</div>
 			</xsl:when>
 			<xsl:otherwise>
-				<span class="icon" title="{title}" style="width:48px; display:table-cell;padding:0;)"> 
+				<span class="icon" title="{title}" style="width:48px; display:table-cell;padding:0;">
 					<div class="iconIMG" style="margin-left:-3px; background-image:url(../../common/images/reftype-icons/thumb/th_{hml/records/record/type/@id}.png">
 						<img src="../../common/images/31x31.gif"/>
 						<xsl:if test="count(hml/records/record/detail/record)&gt;0">  

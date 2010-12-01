@@ -116,5 +116,28 @@ body div { line-height: 1.5em; }
 .iconCount{position: absolute;background-color: #AA0000;-moz-border-radius:8px;-webkit-border-radius:8px;border-radius:8px;min-width:16px;max-width:18px;height:16px; font-weight: bold;font-size: 11px;left:50%;line-height:16px;margin-left:-12px; top:-6px;display: block;padding:0;text-align: center;overflow: hidden;}
 .recInfo{position: absolute;width:16px;height:16px; font-weight: bold;font-size: 11px;left:50%;margin-left:-12px;top:-6px;display: block;padding:0;text-align: center;overflow: hidden;-moz-border-radius:10px;-webkit-border-radius:10px;border-radius:10px; border:2px solid #FFF;}
 .titlesList {width:200px; background-color:RGBA(0,0,0,0.5);font-weight: normal;text-align: left;padding:6px;line-height: 10px;font-size: 10px;position: relative;left:-88px;top:0px;-moz-border-radius:6px;-webkit-border-radius:6px;border-radius:6px;box-shadow:0 3px 6px #000000;-moz-box-shadow:0 3px 6px #000000;-webkit-box-shadow:0 3px 6px #000000;border:1px solid #FFF;}
-
 .mapPointer {background-image: url(../images/pointerMapWhite.png);background-position:center top;background-repeat: no-repeat; background-color: transparent;position: absolute;bottom:0;height:16px;width:100%;margin-left:-3px;}
+
+/*  HEURIST map markers  */
+.geomarker {height:45px;width:26px;margin-left:-12px;}
+.geomarker50 {height:45px;width:51px;margin-left:-24px;}
+.geomarker76 {height:45px;width:75px;margin-left:-36px;}
+.marker {text-decoration:none;background-color: #FFF; border: 1px solid #FFF;border-collapse:collapse; box-shadow:0 2px 4px #000000;-moz-box-shadow:0 2px 4px #000000;-webkit-box-shadow:0 2px 4px #000000;-moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;}
+.icon {margin-right:0px; background-color:#CCC;overflow:visible; width:24px; height: 30px; display: inline-block;}
+.refCount {display:table-cell;vertical-align: middle; position:absolute;padding:0; bottom:14px;height:10px; width:24px;background-color: RGBA(0,0,0,0.5); font-size: 10px; line-height:10px;font-weight: bold; color: #FFF;text-align:center}
+.recInfo { position:absolute;color:#FFF;left:-61px;top:-110px;width:150px;height:100px; overflow-y: auto; background-color:RGBA(0,0,0,0.5);font-weight: normal;text-align: left;padding:6px;line-height: 10px;font-size: 10px;-moz-border-radius:6px;-webkit-border-radius:6px;border-radius:6px;box-shadow:0 3px 6px #000000;-moz-box-shadow:0 3px 6px #000000;-webkit-box-shadow:0 3px 6px #000000;border:1px solid #FFF;}
+.indicator {clear: both; width:100%; height:16px; background-position:top center; background-repeat:no-repeat; }
+.marker a .icon .recInfo p {color:#FFF; line-height:12px; border-bottom :none}
+.marker a {color:#FFF; text-decoration: none;}
+.indicator.single {background-image: url(../images/pointerMapWhite.png);}
+.indicator.small {background-image: url(../images/cluster_small.png);height:21px}
+.indicator.small .numMarkers{line-height:14px}
+.indicator.large .numMarkers{line-height:32px}
+.indicator.medium {background-image: url(../images/cluster_medium.png);height:32px; width:40px}
+.indicator.large {background-image: url(../images/cluster_large.png);height:43px; width:53px}
+.geomarker a .indicator.medium  {margin-left:-6px}
+.geomarker a .indicator.large  {margin-left:-18px}
+.geomarker50 a .indicator.single, .geomarker50 a .indicator.small, .geomarker50 a .indicator.medium, .geomarker50 a .indicator.large {min-width:50px}
+.geomarker76 a .indicator.single, .geomarker76 a .indicator.small, .geomarker76 a .indicator.medium, .geomarker76 a .indicator.large, {min-width:75px}
+.numMarkers {text-align: center; font-size: 14px; color: #FFF;}
+.spacer {display:inline-block; width:1px}

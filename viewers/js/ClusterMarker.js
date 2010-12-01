@@ -13,7 +13,6 @@
 
 	You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 	This version modified by Steve White (Nov 28 2010) - allows you to pass in a marker creation link for clusters
 	to do: modify to pass out the default zoom out behaviour
 
@@ -168,6 +167,7 @@ ClusterMarker.prototype._filterActiveMapMarkers=function(){
 	}
 	return $uncachedIconBoundsIndexes;
 };
+
 ClusterMarker.prototype.dispatchMarkerClick = function($markerIndex) {
 	if ( typeof this._clusterMarkers[$markerIndex] == "object" && typeof this._clusterMarkers[$markerIndex].clickHandler == "function") {
 		this._clusterMarkers[$markerIndex].clickHandler();
