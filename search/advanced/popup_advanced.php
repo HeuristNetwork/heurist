@@ -481,16 +481,16 @@ function clear_fields() {
            <option value="" selected="selected">(any type)</option>
            <optgroup label="Bibliographic reference types">
 <?php
-	$res = mysql_query('select rt_id, rt_name from '.DATABASE.'.active_rec_types left join '.DATABASE.'.rec_types on rt_id=art_id where rt_primary order by rt_name');
+	$res = mysql_query('select rty_ID, rty_Name from '.DATABASE.'.defRecTypes where rty_RecTypeGroupID = 1 order by rty_Name');
 	while ($row = mysql_fetch_assoc($res)) {
-?>          <option value="&quot;<?= htmlspecialchars($row['rt_name']) ?>&quot;"><?= htmlspecialchars($row['rt_name']) ?></option>
+?>          <option value="&quot;<?= htmlspecialchars($row['rty_Name']) ?>&quot;"><?= htmlspecialchars($row['rty_Name']) ?></option>
 <?php	}	?>
            </optgroup>
            <optgroup label="Other reference types">
-<?php
-	$res = mysql_query('select rt_id, rt_name from '.DATABASE.'.active_rec_types left join '.DATABASE.'.rec_types on rt_id=art_id where ! rt_primary order by rt_name');
+<?php	   //saw FIXME TODO  need to change this to show this list by RecTypeGgroup.
+	$res = mysql_query('select rty_ID, rty_Name from '.DATABASE.'.defRecTypes where rty_RecTypeGroupID > 1 order by rty_Name');
 	while ($row = mysql_fetch_assoc($res)) {
-?>          <option value="&quot;<?= htmlspecialchars($row['rt_name']) ?>&quot;"><?= htmlspecialchars($row['rt_name']) ?></option>
+?>          <option value="&quot;<?= htmlspecialchars($row['rty_Name']) ?>&quot;"><?= htmlspecialchars($row['rty_Name']) ?></option>
 <?php	}	?>
            </optgroup>
           </select>

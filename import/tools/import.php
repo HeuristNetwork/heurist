@@ -841,7 +841,7 @@ function mode_crosswalking() {
     <!-- <b>Valid entries for import:</b> -->
 <?php
 		foreach ($out_entry_count_by_reftype as $type => $count) { ?>
-     <tr><td><?= htmlspecialchars($heurist_reftypes[$type]['rt_name']) ?></td><td><?= intval($count) ?></td></tr>
+     <tr><td><?= htmlspecialchars($heurist_reftypes[$type]['rty_Name']) ?></td><td><?= intval($count) ?></td></tr>
 <?php		}
 ?>
     </table>
@@ -1435,7 +1435,7 @@ function format_missing_field_errors(&$entry) {
 			else if ($err_msg) $err_msg .= ' and ';			// except for the final one
 			$err_msg .= strtoupper($bib_requirement_names[$entry->getReferenceType()][$field]);
 		}
-		$err_msg = strtoupper($heurist_reftypes[$entry->getReferenceType()]['rt_name'])
+		$err_msg = strtoupper($heurist_reftypes[$entry->getReferenceType()]['rty_Name'])
 		         . ' is missing ' . $err_msg . ($have_multiple? ' fields' : ' field');
 		array_push($errors, $err_msg);
 	}
@@ -2079,7 +2079,7 @@ function print_disambiguation_options(&$entry) {
 	else
 		$ambig_entry = &$entry->_ancestor;  //disambiguation searches the containment heirarchy for near matches and if found points to it _ancestor to it
 
-	$entry_type = $heurist_reftypes[$entry->getReferenceType()]['rt_name'];
+	$entry_type = $heurist_reftypes[$entry->getReferenceType()]['rty_Name'];
 
 	$compare_link = "interface/side-by-side.php?ids=" . $ambig_entry->getBiblioID() . "," . join(',', $ambig_entry->getPotentialMatches());
 ?>
@@ -2088,7 +2088,7 @@ function print_disambiguation_options(&$entry) {
 <?php if ($entry == $ambig_entry) { ?>
    <div><span style="font-weight: bold;"><?= $entry_type ?></span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=<?= $compare_link ?> onclick="var win = open(href, 'compare', 'width=600,height=300,scrollbars=1,resizable=1'); win.focus(); return false;">compare versions</a></div>
 <?php } else { ?>
-   <div><span style="font-weight: bold;"><?= $heurist_reftypes[$ambig_entry->getReferenceType()]["rt_name"] ?></span> of &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=<?= $compare_link ?> onclick="var win = open(href, 'compare', 'width=600,height=300,scrollbars=1,resizable=1'); win.focus(); return false;">compare versions</a></div>
+   <div><span style="font-weight: bold;"><?= $heurist_reftypes[$ambig_entry->getReferenceType()]["rty_Name"] ?></span> of &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=<?= $compare_link ?> onclick="var win = open(href, 'compare', 'width=600,height=300,scrollbars=1,resizable=1'); win.focus(); return false;">compare versions</a></div>
    <div style="margin-top: 1ex; margin-left: 3ex; background-color: #f0f0f0;"><?= htmlspecialchars($entry->getTitle()) ?> <i>(<?= $entry_type ?>)</i></div>
 <?php } ?>
 

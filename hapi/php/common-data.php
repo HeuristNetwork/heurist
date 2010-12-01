@@ -38,7 +38,7 @@ $res = mysql_query("select distinct grp.ugr_ID, grp.ugr_Name, grp.ugr_LongName, 
 					where ugl_GroupID=grp.ugr_ID");
 $workgroups = array();
 while ($row = mysql_fetch_row($res)) { array_push($workgroups, $row); }
-$res = mysql_query("select rt_id, rt_name, rt_canonical_title_mask from active_rec_types inner join rec_types on rt_id=art_id");
+$res = mysql_query("select rty_ID, rty_Name, rty_CanonicalTitleMask from active_rec_types inner join defRecTypes on rty_ID=art_id");
 $recordTypes = array();
 while ($row = mysql_fetch_row($res)) array_push($recordTypes, $row);
 

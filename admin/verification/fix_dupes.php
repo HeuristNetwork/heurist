@@ -119,9 +119,9 @@ $reference_bdts = mysql__select_assoc('rec_detail_types', 'rdt_id', 'rdt_name', 
 print '<input type="hidden" name="bib_ids" value="'.$_REQUEST['bib_ids'].'">';
 
 $rfts = array();
-$res = mysql_query('select rt_id, rt_name from records left join rec_types on rt_id=rec_type where rec_id in ('.$_REQUEST['bib_ids'].')');
+$res = mysql_query('select rty_ID, rty_Name from records left join defRecTypes on rty_ID=rec_type where rec_id in ('.$_REQUEST['bib_ids'].')');
 //FIXME add code to pprint cross type matching  header " Cross Type - Author Editor with Person with Book"
-while ($row = mysql_fetch_assoc($res)) $rfts[$row['rt_id']]= $row['rt_name'];
+while ($row = mysql_fetch_assoc($res)) $rfts[$row['rty_ID']]= $row['rty_Name'];
 
 $temptypes = '';
 if (count($rfts) > 0) {
@@ -132,7 +132,7 @@ if (count($rfts) > 0) {
     print '<tr><td colspan="3" style="text-align: center; font-weight: bold;">'.$temptypes.'</td></tr>';
 }
 //save rec type for merging code
-if (!@$_SESSION['rec_type_id']) $_SESSION['rt_id'] = @$rfts[0]['rt_id'];
+if (!@$_SESSION['rec_type_id']) $_SESSION['rty_ID'] = @$rfts[0]['rty_ID'];
 //get requirements for details
 $res = mysql_query('select rdr_rec_type,rdr_rdt_id, rdr_name, rdr_required, rdr_repeatable from rec_detail_requirements where rdr_rec_type in ('.join(',',array_keys($rfts)).')');
 $rec_requirements =  array();
@@ -529,7 +529,7 @@ function do_fix_dupe() {
 //process keeps - which means find repeatables in master record to delete  all_details - keeps = deletes
 //get array of repeatable detail ids for master
     $master_rep_dt_ids = array();
-    $res = mysql_query('select rdr_rdt_id from rec_detail_requirements where rdr_repeatable = 1 and rdr_rec_type = '.$_SESSION['rt_id']);
+    $res = mysql_query('select rdr_rdt_id from rec_detail_requirements where rdr_repeatable = 1 and rdr_rec_type = '.$_SESSION['rty_ID']);
     while ($row = mysql_fetch_array( $res)) {
             array_push($master_rep_dt_ids, $row[0]);
     }
@@ -684,8 +684,8 @@ function do_fix_dupe() {
 
  //try to get the record to update title and hash
     // calculate title, do an update
-    $type =  $_SESSION['rt_id'];
-    $mask = mysql__select_array("rec_types", "rt_title_mask", "rt_id=".$type);  $mask = $mask[0];
+    $type =  $_SESSION['rty_ID'];
+    $mask = mysql__select_array("defRecTypes", "rty_TitleMask", "rty_ID=".$type);  $mask = $mask[0];
     $title = fill_title_mask($mask, $master_rec_id, $type);
     if ($title) {
         mysql_query("update records set rec_title = '" . addslashes($title) . "' where rec_id = $master_rec_id");

@@ -362,7 +362,7 @@ function _title_mask__get_rec_detail($rec_id, $rdt_id) {
 
 function _title_mask__get_rec_types() {
 	static $rct;
-	if (! $rct) $rct = mysql__select_assoc('rec_types', 'rt_id', 'rt_name', '1');
+	if (! $rct) $rct = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', '1');
 	return $rct;
 }
 

@@ -48,8 +48,8 @@ $MAINTABLES['RATING_INTEREST'] = 'ratings_interest';
 $MAINTABLES['KEYWORD'] = 'usrTags';
 	$PKEY['KEYWORD'] = 'tag_ID';
 
-$MAINTABLES['REFTYPE'] = 'rec_types';
-	$PKEY['REFTYPE'] = 'rt_id';
+$MAINTABLES['REFTYPE'] = 'defRecTypes';
+	$PKEY['REFTYPE'] = 'rty_ID';
 
 $MAINTABLES['USER'] = USERS_DATABASE.'.'.USERS_TABLE;
 	$PKEY['USER'] = USERS_ID_FIELD;

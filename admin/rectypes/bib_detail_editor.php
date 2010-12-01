@@ -32,7 +32,7 @@ if (@$_REQUEST['update-active-rec-types']) {
 
 $template = file_get_contents('bib_detail_editor.html');
 $template = str_replace('{PageHeader}', '[literal]'.file_get_contents('../describe/menu.html').'[end-literal]', $template);
-$template = str_replace('[special-rt_id]', intval(@$_REQUEST['rt_id']), $template);
+$template = str_replace('[special-rty_ID]', intval(@$_REQUEST['rty_ID']), $template);
 $template = str_replace('[special-grp_id]', $grp_id, $template);
 $lexer = new Lexer($template);
 
@@ -42,7 +42,7 @@ $body->global_vars['added-metadata-element'] = false;
 $body->global_vars['field-errors'] = false;
 $body->global_vars['new-field-errors'] = false;
 $body->global_vars['new'] = @$_REQUEST['new']? 1 : 0;
-$body->global_vars['editing_reftype'] = @$_REQUEST['rt_id']? 1 : 0;
+$body->global_vars['editing_reftype'] = @$_REQUEST['rty_ID']? 1 : 0;
 
 $body->global_vars['workgroup-dropdown'] = '<select name=grp_id onchange="form.submit();"><option value="">(this instance)</option>';
 $res = mysql_query('select grp.ugr_ID,grp.ugr_Name from '.USERS_DATABASE.'.sysUGrps grp where grp.ugr_Type != "User" order by grp.ugr_Name');
@@ -59,7 +59,7 @@ $body->global_vars['edit-master-types-link'] = HEURIST_INSTANCE === "" ? "<a hre
 $body->verify();
 if (@$_REQUEST['_submit']) {
 
-	$field_error = check_title_mask($_REQUEST['rt1_rt_title_mask'], intval($_REQUEST['rt_id']));
+	$field_error = check_title_mask($_REQUEST['rt1_rt_title_mask'], intval($_REQUEST['rty_ID']));
 	if ($field_error) $body->global_vars['new-field-errors'] = 'The title mask has an error: ' . $field_error;
 
 	$body->input_check();
@@ -71,7 +71,7 @@ if (@$_REQUEST['_submit']) {
 					system('cd ../../common/images/reftype-icons  &&  cp questionmark.gif ' . $rt_id . '.gif');
 				}
 
-				header('Location: bib_detail_editor.php?rt_id=' . $rt_id . '&new=1');
+				header('Location: bib_detail_editor.php?rty_ID=' . $rt_id . '&new=1');
 				return;
 			} else if (! $MYSQL_ERRORS  and  @$_REQUEST['action'] == 'Save') {
 				$body->global_vars['edit-success'] = true;

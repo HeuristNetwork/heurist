@@ -133,9 +133,9 @@ function getBaseProperties($rec_id, $bkm_ID) {
 	// Return an array of the basic scalar properties for this record / bookmark
 	if (!$rec_id && !$bkm_ID) return array("error"=>"invalid parameters passed to getBaseProperties");
 	if ($bkm_ID) {
-		$res = mysql_query('select rec_id, rec_title as title, rt_name as reftype, rt_id as reftypeID, rec_url as url, grp.ugr_ID as workgroupID, grp.ugr_Name as workgroup, rec_scratchpad as notes, rec_visibility as visibility, bkm_PwdReminder as passwordReminder, bkm_Rating as rating, rec_modified, rec_temporary from usrBookmarks left join records on bkm_recID=rec_id and bkm_UGrpID='.get_user_id().' left join rec_types on rt_id = rec_type left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=rec_wg_id where bkm_ID='.$bkm_ID);
+		$res = mysql_query('select rec_id, rec_title as title, rty_Name as reftype, rty_ID as reftypeID, rec_url as url, grp.ugr_ID as workgroupID, grp.ugr_Name as workgroup, rec_scratchpad as notes, rec_visibility as visibility, bkm_PwdReminder as passwordReminder, bkm_Rating as rating, rec_modified, rec_temporary from usrBookmarks left join records on bkm_recID=rec_id and bkm_UGrpID='.get_user_id().' left join defRecTypes on rty_ID = rec_type left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=rec_wg_id where bkm_ID='.$bkm_ID);
 	} else if ($rec_id) {
-		$res = mysql_query('select rec_id, rec_title as title, rt_name as reftype, rt_id as reftypeID, rec_url as url, grp.ugr_ID as workgroupID, grp.ugr_Name as workgroup, rec_scratchpad as notes, rec_visibility as visibility, rec_modified, rec_temporary from records left join usrBookmarks on bkm_recID=rec_id left join rec_types on rt_id = rec_type left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=rec_wg_id where rec_id='.$rec_id);
+		$res = mysql_query('select rec_id, rec_title as title, rty_Name as reftype, rty_ID as reftypeID, rec_url as url, grp.ugr_ID as workgroupID, grp.ugr_Name as workgroup, rec_scratchpad as notes, rec_visibility as visibility, rec_modified, rec_temporary from records left join usrBookmarks on bkm_recID=rec_id left join defRecTypes on rty_ID = rec_type left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=rec_wg_id where rec_id='.$rec_id);
 	}
 
 	$row = mysql_fetch_assoc($res);
@@ -361,7 +361,7 @@ function getAllworkgroupTags($rec_id) {
 
 function getConstraintsByRdt($recType) {
 	$rcons = array();
-	$res = mysql_query("select rcon_target_rt_id as rt_id, rcon_rdt_id as rdt_id,
+	$res = mysql_query("select rcon_target_rt_id as rty_ID, rcon_rdt_id as rdt_id,
 						rcon_rdl_ids as rdl_ids, rcon_ont_id as ont_id, rcon_order, rcon_limit
 						from rec_constraints
 						where rcon_source_rt_id=$recType
@@ -370,10 +370,10 @@ function getConstraintsByRdt($recType) {
 		if (! @$rcons[$row["rdt_id"]]) {
 			$rcons[$row["rdt_id"]] = array();
 		}
-		if (! @$rcons[$row["rdt_id"]][$row["rt_id"]]) {
-			$rcons[$row["rdt_id"]][$row["rt_id"]] = array();
+		if (! @$rcons[$row["rdt_id"]][$row["rty_ID"]]) {
+			$rcons[$row["rdt_id"]][$row["rty_ID"]] = array();
 		}
-		array_push($rcons[$row["rdt_id"]][$row["rt_id"]],$row);
+		array_push($rcons[$row["rdt_id"]][$row["rty_ID"]],$row);
 	}
 	return $rcons;
 }

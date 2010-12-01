@@ -210,7 +210,7 @@ else
 
 mysql_connection_db_select(DATABASE);
 
-$REFTYPE = mysql__select_assoc('rec_types', 'rt_id', 'rt_name', '1');
+$REFTYPE = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', '1');
 
 $res = mysql_query(REQUEST_to_query('select distinct rec_id, rec_url, rec_scratchpad, rec_type ', $search_type));
 

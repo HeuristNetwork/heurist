@@ -2,7 +2,7 @@
 
 /* Copies the Heurist "master" tables:
  *
- * rec_types
+ * defRecTypes
  * red_detail_types
  * rec_detail_lookups
  * rec_detail_requirements
@@ -22,8 +22,8 @@ foreach (get_all_instances() as $instance_name => $instance) {
 	mysql_connection_db_overwrite($instance["db"]);
 
 	mysql_query("START TRANSACTION");
-	mysql_query("DELETE FROM rec_types");
-	mysql_query("INSERT INTO rec_types SELECT * FROM `heurist-common`.rec_types");
+	mysql_query("DELETE FROM defRecTypes");
+	mysql_query("INSERT INTO defRecTypes SELECT * FROM `heurist-common`.defRecTypes");
 	mysql_query("DELETE FROM ontologies");
 	mysql_query("INSERT INTO ontologies SELECT * FROM `heurist-common`.ontologies");
 	mysql_query("DELETE FROM rel_constraints");

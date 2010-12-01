@@ -31,7 +31,7 @@ if ($delete_bdt_id) {
 
 $template = file_get_contents('master_bib_detail_editor.html');
 $template = str_replace('{PageHeader}', '[literal]'.file_get_contents('../describe/menu.html').'[end-literal]', $template);
-$template = str_replace('[special-rt_id]', intval(@$_REQUEST['rt_id']), $template);
+$template = str_replace('[special-rty_ID]', intval(@$_REQUEST['rty_ID']), $template);
 $lexer = new Lexer($template);
 
 $body = new BodyScope($lexer);
@@ -40,7 +40,7 @@ $body->global_vars['added-detail-type'] = false;
 $body->global_vars['field-errors'] = false;
 $body->global_vars['new-field-errors'] = false;
 $body->global_vars['new'] = @$_REQUEST['new']? 1 : 0;
-$body->global_vars['editing_reftype'] = @$_REQUEST['rt_id']? 1 : 0;
+$body->global_vars['editing_reftype'] = @$_REQUEST['rty_ID']? 1 : 0;
 
 
 
@@ -48,7 +48,7 @@ $body->verify();
 if (@$_REQUEST['_submit']) {
 
 	$title_mask = @$_REQUEST['rt1_rt_title_mask'];
-	$field_error = check_title_mask($title_mask, intval($_REQUEST['rt_id']));
+	$field_error = check_title_mask($title_mask, intval($_REQUEST['rty_ID']));
 	if ($field_error) $body->global_vars['new-field-errors'] = 'The title mask has an error: ' . $field_error;
 
 	$body->input_check();
@@ -60,14 +60,14 @@ if (@$_REQUEST['_submit']) {
 					system('cd ../../common/images/reftype-icons  &&  cp questionmark.gif ' . $rt_id . '.gif');
 				}
 
-				header('Location: '.HEURIST_URL_BASE.'admin/rectypes/master_bib_detail_editor.php?rt_id=' . $rt_id . '&new=1');
+				header('Location: '.HEURIST_URL_BASE.'admin/rectypes/master_bib_detail_editor.php?rty_ID=' . $rt_id . '&new=1');
 				return;
 			} else if (! $MYSQL_ERRORS  and  @$_REQUEST['action'] == 'Save') {
 				$body->global_vars['edit-success'] = true;
-				$ctm = make_canonical_title_mask($title_mask, intval($_REQUEST['rt_id']));
-				mysql_query('update rec_types
-				                set rt_canonical_title_mask = "' . $ctm . '"
-				              where rt_id = ' . intval($_REQUEST['rt_id']));
+				$ctm = make_canonical_title_mask($title_mask, intval($_REQUEST['rty_ID']));
+				mysql_query('update defRecTypes
+				                set rty_CanonicalTitleMask = "' . $ctm . '"
+				              where rty_ID = ' . intval($_REQUEST['rty_ID']));
 			} else if (! $MYSQL_ERRORS  and  @$_REQUEST['action'] == 'Add detail type (field)') {
 				$body->global_vars['added-detail-type'] = true;
 			}

@@ -573,12 +573,12 @@ class TypePredicate extends Predicate {
 			return "rec_type $eq ".intval($this->value);
 		}
 		else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
-			// comma-separated list of rec_types ids
+			// comma-separated list of defRecTypes ids
 			$in = ($this->parent->negate)? 'not in' : 'in';
 			return "rec_type $in (" . $this->value . ")";
 		}
 		else {
-			return "rec_type $eq (select rft.rt_id from rec_types rft where rft.rt_name = '".addslashes($this->value)."' limit 1)";
+			return "rec_type $eq (select rft.rty_ID from defRecTypes rft where rft.rty_Name = '".addslashes($this->value)."' limit 1)";
 		}
 	}
 }
@@ -1124,7 +1124,7 @@ function construct_legacy_search() {
 	}
 	if (@$_REQUEST['u']) $q .= 'u:"' . $_REQUEST['u']. '" ';
 	if (@$_REQUEST['n']) $q .= 'n:"' . $_REQUEST['n']. '" ';
-	if (@$_REQUEST['r']) $q .= 't:' . intval($_REQUEST['r']) . ' ';	// note: rec_types was 'r', now 't' (for TYPE!)
+	if (@$_REQUEST['r']) $q .= 't:' . intval($_REQUEST['r']) . ' ';	// note: defRecTypes was 'r', now 't' (for TYPE!)
 	if (@$_REQUEST['uid']) $q .= 'usr:' . intval($_REQUEST['uid']) . ' ';
 	if (@$_REQUEST['bi']) $q .= 'id:"' . $_REQUEST['bi'] . '" ';
 	if (@$_REQUEST['a']) $q .= 'any:"' . $_REQUEST['a'] . '" ';

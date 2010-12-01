@@ -134,11 +134,11 @@ $RDL = array();	//record detail lookup
 $RDLV = array();	//record detail lookup by value
 $ONT = array();	//ontology lookup
 // record type labels
-$query = 'SELECT rt_id, rt_name FROM rec_types';
+$query = 'SELECT rty_ID, rty_Name FROM defRecTypes';
 $res = mysql_query($query);
 while ($row = mysql_fetch_assoc($res)) {
-	$RTN[$row['rt_id']] = $row['rt_name'];
-	foreach (getRecordRequirements($row['rt_id']) as $rdr_rdt_id => $rdr) {
+	$RTN[$row['rty_ID']] = $row['rty_Name'];
+	foreach (getRecordRequirements($row['rty_ID']) as $rdr_rdt_id => $rdr) {
 	// type-specific names for detail types
 		$RQS[$rdr['rdr_rec_type']][$rdr['rdr_rdt_id']] = $rdr['rdr_name'];
 	}

@@ -119,8 +119,8 @@ class HeuristKMLParser extends HeuristForeignParser {
 	function getReferenceTypes() {
 		if (HeuristKMLParser::$_referenceTypes) return array_keys($this->_referenceTypes);
 
-		mysql_connection_db_select(DATABASE);
-		HeuristKMLParser::$_referenceTypes = mysql__select_assoc("active_rec_types left join rec_types on rt_id=art_id", "rt_name", "rt_id", "rt_id order by !rt_primary, rt_name");
+		mysql_connection_db_select(DATABASE);	// saw TODO check that this is correct seems that it is trying onder on non bib types.
+		HeuristKMLParser::$_referenceTypes = mysql__select_assoc("defRecTypes", "rty_Name", "rty_ID", "rty_ID order by rty_RecTypeGroupID > 1, rty_Name");
 
 		return array_keys(HeuristKMLParser::$_referenceTypes);
 	}

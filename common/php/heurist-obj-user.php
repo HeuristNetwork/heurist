@@ -109,7 +109,7 @@ $bdrs = array();
 $colNames = array("rdr_rec_type", "rdr_rdt_id", "rdr_name", "rdr_prompt", "rdr_default", "rdr_required", "rdr_repeatable", "rdr_size", "rdr_match", "rdr_wg_id");
 if (@$workgroups) {
 	$res = mysql_query("select " . join(", ", $colNames) . " from rec_detail_requirements_overrides where rdr_wg_id in (" . join(',', $workgroups) . ") order by rdr_rec_type, rdr_order is null, rdr_order");
-	array_shift($colNames);	// don't print rec_types on every row
+	array_shift($colNames);	// don't print defRecTypes on every row
 	array_shift($colNames);	// don't print rdt_id on every row
 
 	while ($row = mysql_fetch_row($res)) {

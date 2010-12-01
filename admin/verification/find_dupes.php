@@ -56,7 +56,7 @@ if (@$_REQUEST['personmatch']){
     $res = mysql_query('select rec_id, rec_type, rec_title, rd_val from records left join rec_details on rd_rec_id=rec_id and rd_type=160 where rec_type != 52 and not rec_temporary order by rec_type desc');
 }
 
-$reftypes = mysql__select_assoc('rec_types', 'rt_id', 'rt_name', '1');
+$reftypes = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', '1');
 
 while ($row = mysql_fetch_assoc($res)) {
     if ($personMatch){

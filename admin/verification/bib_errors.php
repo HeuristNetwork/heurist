@@ -28,11 +28,11 @@ require_once(dirname(__FILE__).'/../../common/connect/db.php');
 
 mysql_connection_db_select(DATABASE);
 
-$res = mysql_query('select rd_rec_id, rdt_name, rdt_constrain_rec_type, rec_id, rec_title, rt_name
+$res = mysql_query('select rd_rec_id, rdt_name, rdt_constrain_rec_type, rec_id, rec_title, rty_Name
                       from rec_detail_types
                  left join rec_details on rdt_id = rd_type
                  left join records on rec_id = rd_val
-                 left join rec_types on rt_id = rec_type
+                 left join defRecTypes on rty_ID = rec_type
                      where rdt_type = "resource"
                        and rdt_constrain_rec_type > 0
                        and rec_type != rdt_constrain_rec_type');
@@ -54,7 +54,7 @@ foreach ($bibs as $row) {
   <td><a target=_new href='../../records/editrec/edit.html?bib_id=<?= $row['rd_rec_id'] ?>'><?= $row['rd_rec_id'] ?></a></td>
   <td><?= $row['rdt_name'] ?></td>
   <td>points to</td>
-  <td><?= $row['rec_id'] ?> (<?= $row['rt_name'] ?>) - <?= substr($row['rec_title'], 0, 50) ?></td>
+  <td><?= $row['rec_id'] ?> (<?= $row['rty_Name'] ?>) - <?= substr($row['rec_title'], 0, 50) ?></td>
  </tr>
 <?php
 }

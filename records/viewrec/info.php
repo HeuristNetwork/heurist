@@ -115,11 +115,11 @@ array_push($wg_ids, 0);
 $bkm_ID = intval(@$_REQUEST['bkmk_id']);
 $rec_id = intval(@$_REQUEST['bib_id']);
 if ($bkm_ID) {
-	$res = mysql_query('select * from usrBookmarks left join records on bkm_recID=rec_id left join rec_types on rec_type=rt_id where bkm_ID='.$bkm_ID.' and bkm_UGrpID='.get_user_id().' and (not rec_temporary or rec_temporary is null)');
+	$res = mysql_query('select * from usrBookmarks left join records on bkm_recID=rec_id left join defRecTypes on rec_type=rty_ID where bkm_ID='.$bkm_ID.' and bkm_UGrpID='.get_user_id().' and (not rec_temporary or rec_temporary is null)');
 	$bibInfo = mysql_fetch_assoc($res);
 	print_details($bibInfo);
 } else if ($rec_id) {
-	$res = mysql_query('select * from records left join rec_types on rec_type=rt_id where rec_id='.$rec_id.' and not rec_temporary');
+	$res = mysql_query('select * from records left join defRecTypes on rec_type=rty_ID where rec_id='.$rec_id.' and not rec_temporary');
 	$bibInfo = mysql_fetch_assoc($res);
 	print_details($bibInfo);
 } else {
@@ -163,7 +163,7 @@ function print_header_line($bib) {
 ?>
 <div class=HeaderRow><h2><?= htmlspecialchars($bib['rec_title']) ?></h2>
 <div id=footer>
-<h3><?= htmlspecialchars($bib['rt_name']) ?></h3>
+<h3><?= htmlspecialchars($bib['rty_Name']) ?></h3>
 <div id=recID>Record ID:<?= htmlspecialchars($rec_id) ?><nobr><span class="link"><a id=edit-link class=normal target=_self href="../editrec/edit.html?bib_id=<?= $rec_id ?>" onclick="return sane_link_opener(this);"><img src="../../common/images/edit-pencil.png" title="Edit Record"></a></span></nobr></div>
 </div>
 </div>

@@ -40,11 +40,11 @@ foreach ($_REQUEST["records"] as $nonce => $record) {
 if (count($retitleRecs) > 0) {
 	foreach ( $retitleRecs as $id  ) {
 		// calculate title, do an update
-		$query = "select rt_title_mask, rt_id from rec_types left join records on rt_id=rec_type where rec_id = $id";
+		$query = "select rty_TitleMask, rty_ID from defRecTypes left join records on rty_ID=rec_type where rec_id = $id";
 		$res = mysql_query($query);
 		$mask = mysql_fetch_assoc($res);
-		$type = $mask["rt_id"];
-		$mask = $mask["rt_title_mask"];
+		$type = $mask["rty_ID"];
+		$mask = $mask["rty_TitleMask"];
 		$title = fill_title_mask($mask, $id, $type);
 		if ($title) {
 			mysql_query("update records set rec_title = '" . addslashes($title) . "' where rec_id = $id");

@@ -451,16 +451,15 @@ function insert_woot_content($rec_id, $content) {
 }
 
 function check_reftype_exist($rt) {
-global $usrID;
-	$res = mysql_query("select distinct rt_id,rt_name from active_rec_types
-	                 left join rec_types on rt_id=art_id
+global $usrID;	//saw TODO check that this still works in the new structure.
+	$res = mysql_query("select distinct rty_ID,rty_Name from defRecTypes
 	                 left join ".USERS_DATABASE.".".USER_GROUPS_TABLE." on ".USER_GROUPS_USER_ID_FIELD."=$usrID
-	                 left join rec_detail_requirements_overrides on rdr_rec_type=rt_id
+	                 left join rec_detail_requirements_overrides on rdr_rec_type=rty_ID
 	                 left join ".USERS_DATABASE.".".GROUPS_TABLE." on ".GROUPS_ID_FIELD."=".USER_GROUPS_GROUP_ID_FIELD." and ".GROUPS_ID_FIELD."=rdr_wg_id
-	                  where rt_id
-	                  order by ".GROUPS_NAME_FIELD." is null, ".GROUPS_NAME_FIELD.", ! rt_primary, rt_name");
+	                  where rty_ID
+	                  order by ".GROUPS_NAME_FIELD." is null, ".GROUPS_NAME_FIELD.", rty_RecTypeGroupID > 1, rty_Name");
 	while ($row = mysql_fetch_assoc($res)) {
-		if ($row["rt_id"] == $rt) {
+		if ($row["rty_ID"] == $rt) {
 			return true;
 		}
 	}

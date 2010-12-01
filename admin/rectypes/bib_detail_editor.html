@@ -127,14 +127,14 @@
 		return cur;
 	}
 
-	function upload_icon(rt_id) {
-		var img = document.getElementById('rt'+rt_id);
+	function upload_icon(rty_ID) {
+		var img = document.getElementById('rt'+rty_ID);
 
-		top.popup_url('upload_reftype_icon.php?instance=[instance-name!]&amp;rt_id='+rt_id, 100, 300);
+		top.popup_url('upload_reftype_icon.php?instance=[instance-name!]&amp;rty_ID='+rty_ID, 100, 300);
 	}
 
-	function icon_refresh(rt_id) {
-		var img = document.getElementById('rt'+rt_id);
+	function icon_refresh(rty_ID) {
+		var img = document.getElementById('rt'+rty_ID);
 		img.src = img.src.replace(/\?.*/, '') + '?' + (new Date()).getTime();
 	}
 
@@ -231,7 +231,7 @@
 
 [if : editing_reftype]
 <form method="get">
- <input type=hidden name=rt_id value="[select REFTYPE rts][rt_id][end-select]">
+ <input type=hidden name=rty_ID value="[select REFTYPE rts][rty_ID][end-select]">
  Editing requirements for: [workgroup-dropdown!]
 </form>
 [end-if]
@@ -244,7 +244,7 @@
   [if : edit-success]
    <p style="color: green; font-weight: bold;">Changes saved</p>
   [end-if]
-  <div class="headline">Editing record type <span style="letter-spacing: -2px;">&lt;&lt;</span><b>[rt_name]</b><span style="letter-spacing: -2px;">&gt;&gt;</span></div>
+  <div class="headline">Editing record type <span style="letter-spacing: -2px;">&lt;&lt;</span><b>[rty_Name]</b><span style="letter-spacing: -2px;">&gt;&gt;</span></div>
 
   <p/>
 
@@ -286,17 +286,17 @@ window.reqMatchField = 1;
    <tr class="base-only">
     <td style="width: 100px; font-weight: bold; text-align: right; vertical-align: top;">Notes on this record type</td>
     <td style="width: 300px;">
-     [textarea : rt_notes : notes : style="width: 500px;" rows="1"]
+     [textarea : rty_Description : notes : style="width: 500px;" rows="1"]
     </td>
    </tr>
 
    <tr class="base-only">
     <td style="font-weight: bold; text-align: right;">Icon</td>
 	<td>
-     <img src="../../common/images/reftype-icons/[rt_id].gif" style="vertical-align: middle;" class="rft_icon" onclick="upload_icon([rt_id]);">
+     <img src="../../common/images/reftype-icons/[rty_ID].gif" style="vertical-align: middle;" class="rft_icon" onclick="upload_icon([rty_ID]);">
      &nbsp;&nbsp;&nbsp;&nbsp;
      <span style="font-weight: bold; text-align: right;">Bibliographic record types</span>
-     [checkbox : rt_primary : primary record type : style="margin: 0px;"]
+     [checkbox : rty_RecTypeGroupID : primary record type : style="margin: 0px;"]
     </td>
    </tr>
 
@@ -310,7 +310,7 @@ window.reqMatchField = 1;
       The interpolated value is used as the default title for spontaneously-created bibliographic records of this type.
       To insert a literal square-bracket, use two consecutive square-brackets (&#91;&#91; or &#93;&#93;).
      </div>
-     [textbox : rt_title_mask : combination of bibliographic details to make a title : style="width: 60%;"]
+     [textbox : rty_TitleMask : combination of bibliographic details to make a title : style="width: 60%;"]
      <div style="color: red; font-weight: bold; width: 80%;">[new-field-errors]</div>
     </td>
    </tr>
@@ -324,7 +324,7 @@ window.reqMatchField = 1;
     <td>
      <table id="bib_detail_table" border="0" cellspacing="0" style="border-collapse: collapse;">
 	 [search BDR_OVERRIDES bdr_search]
-	 [auto : rdr_rec_type : rt_id]
+	 [auto : rdr_rec_type : rty_ID]
 	 [auto : rdr_wg_id : grp_id]
      [foreach BDR_OVERRIDES bdr : 1 order by rdr_order, rdr_id]
       <tr class="friendly_border">
@@ -372,10 +372,10 @@ window.reqMatchField = 1;
     [insert BDR_OVERRIDES new_bdr]
     <td style="font-weight: bold; text-align: right;">Add new detail to this type</td>
     <td>
-     [dropdown required : rdr_rdt_id : : select rdt_id, concat(rdt_id,'  ',rdt_name) from rec_detail_types left join rec_detail_requirements_overrides on rdr_rec_type=[special-rt_id] and rdr_rdt_id=rdt_id and rdr_wg_id=[special-grp_id] where rdr_id is null order by rdt_name : onchange="document.getElementById('new_bdr_label').value = this.options&#91;this.selectedIndex&#93;.text.replace(/&#91;0-9&#93;+\s*/,''); document.getElementById('new_bdr_order').value = this.options&#91;this.selectedIndex&#93;.value;"]
+     [dropdown required : rdr_rdt_id : : select rdt_id, concat(rdt_id,'  ',rdt_name) from rec_detail_types left join rec_detail_requirements_overrides on rdr_rec_type=[special-rty_ID] and rdr_rdt_id=rdt_id and rdr_wg_id=[special-grp_id] where rdr_id is null order by rdt_name : onchange="document.getElementById('new_bdr_label').value = this.options&#91;this.selectedIndex&#93;.text.replace(/&#91;0-9&#93;+\s*/,''); document.getElementById('new_bdr_order').value = this.options&#91;this.selectedIndex&#93;.value;"]
      [auto : rdr_wg_id : grp_id]
      [hidden : rdr_name : : id="new_bdr_label"]
-     [auto : rdr_rec_type : rt_id]
+     [auto : rdr_rec_type : rty_ID]
      [hidden : rdr_order : : id="new_bdr_order"]
      [auto : rdr_size : "30"]
      &nbsp;&nbsp;&nbsp;&nbsp;Additions override base requirements. Set "Not Permitted" to hide fields.
@@ -413,8 +413,8 @@ window.reqMatchField = 1;
 
  <div style="width: 300px; height: 500px; overflow: auto; padding: 3px;" class="friendly_border">
   <table border="0">
-   [foreach REFTYPE rtf : 1 order by (!rt_primary), rt_name]
-    <tr><td><input type=checkbox name='active_rt[literal][[end-literal][rt_id][literal]][end-literal]' [select ACTIVE_REFTYPE art]checked[end-select][not-found][end-not-found]></td><td style="text-align: right;">[rt_id]</td><td><img src="../../common/images/reftype-icons/[rt_id].gif" id="rt[rt_id]" class="rft_icon" onclick="upload_icon([rt_id]);"><a href="?rt_id=[rt_id]&amp;instance=[instance-name!]">[rt_name]</a></td></tr>
+   [foreach REFTYPE rtf : 1 order by (rty_RecTypeGroupID > 1), rty_Name]
+    <tr><td style="text-align: right;">[rty_ID]</td><td><img src="../../common/images/reftype-icons/[rty_ID].gif" id="rt[rty_ID]" class="rft_icon" onclick="upload_icon([rty_ID]);"><a href="?rty_ID=[rty_ID]&amp;instance=[instance-name!]">[rty_Name]</a></td></tr>
    [end-foreach]
    [not-found][end-not-found]
   </table>
@@ -430,7 +430,7 @@ window.reqMatchField = 1;
     <tr>
      <td>[rdt_id]</td>
      <td style="width: 200px;"><span id="name[rdt_id]">[rdt_name]</span></td>
-     <td style="text-align: left;">[if-eq : rdt_type : "enum"]<a href="#" onclick="edit_enum_types([rdt_id]); return false;">[rdt_type]</a>[else][rdt_type][end-if-eq][if-eq : rdt_type : "resource"] ([if : rdt_constrain_rec_type][select REFTYPE rft][rt_name][end-select][else]unconstrained[end-if])[end-if-eq]</td>
+     <td style="text-align: left;">[if-eq : rdt_type : "enum"]<a href="#" onclick="edit_enum_types([rdt_id]); return false;">[rdt_type]</a>[else][rdt_type][end-if-eq][if-eq : rdt_type : "resource"] ([if : rdt_constrain_rec_type][select REFTYPE rft][rty_Name][end-select][else]unconstrained[end-if])[end-if-eq]</td>
     </tr>
    [end-foreach]
   </table>

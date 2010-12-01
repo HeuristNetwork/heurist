@@ -19,7 +19,7 @@ mysql_connection_db_select(DATABASE);
 header("Content-type: text/javascript");
 
 
-$res = mysql_query("select datestamp from last_update where table_name = 'rec_types'");
+$res = mysql_query("select datestamp from last_update where table_name = 'defRecTypes'");
 $lastModified = mysql_fetch_row($res);
 $lastModified = strtotime($lastModified[0]);
 
@@ -31,31 +31,30 @@ if (strtotime(@$_SERVER["HTTP_IF_MODIFIED_SINCE"]) > $lastModified) {
 print "HEURIST_reftypes = {};\n\n";
 
 $names = array();
-$res = mysql_query("select rt_id, rt_name from active_rec_types left join rec_types on rt_id=art_id order by rt_name");
+$res = mysql_query("select rty_ID, rty_Name from active_rec_types left join defRecTypes on rty_ID=art_id order by rty_Name");
 while ($row = mysql_fetch_assoc($res)) {
-	$names[$row["rt_id"]] = $row["rt_name"];
+	$names[$row["rty_ID"]] = $row["rty_Name"];
 }
 print "HEURIST_reftypes.names = " . json_format($names) . ";\n\n";
 
 $groups = array();
 $primary = array();
 $other = array();
-$res = mysql_query("select distinct rt_id, grp.ugr_Name, rt_primary
-					  from active_rec_types
-				 left join rec_types on rt_id=art_id
+$res = mysql_query("select distinct rty_ID, grp.ugr_Name, rty_RecTypeGroupID
+					  from defRecTypes
 				 left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_UserID=".get_user_id()."
-				 left join rec_detail_requirements_overrides on rdr_rec_type=rt_id
+				 left join rec_detail_requirements_overrides on rdr_rec_type=rty_ID
 				 left join ".USERS_DATABASE.".sysUGrps grp on grp.ugr_ID=ugl_GroupID and grp.ugr_ID=rdr_wg_id
-				  order by grp.ugr_Name is null, grp.ugr_Name, ! rt_primary, rt_name");
+				  order by grp.ugr_Name is null, grp.ugr_Name, rty_RecTypeGroupID > 1, rty_Name");
 while ($row = mysql_fetch_assoc($res)) {
 	if (@$row["ugr_Name"]) {
 		if (! @$groups[$row["ugr_Name"]]) $groups[$row["ugr_Name"]] = array();
-		array_push($groups[$row["ugr_Name"]], $row["rt_id"]);
+		array_push($groups[$row["ugr_Name"]], $row["rty_ID"]);
 	}
-	if ($row["rt_primary"]) {
-		array_push($primary, $row["rt_id"]);
+	if ($row["rty_RecTypeGroupID"]) {
+		array_push($primary, $row["rty_ID"]);
 	} else {
-		array_push($other, $row["rt_id"]);
+		array_push($other, $row["rty_ID"]);
 	}
 }
 print "HEURIST_reftypes.groups = " . json_format($groups) . ";\n\n";

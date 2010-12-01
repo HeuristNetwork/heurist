@@ -9,15 +9,15 @@ require_once(dirname(__FILE__).'/../../../common/connect/db.php');
 mysql_connection_db_select(DATABASE);
 
 $bdt = mysql__select_assoc('rec_detail_types', 'rdt_id', 'rdt_name', '1');
-$rft = mysql__select_assoc('rec_types', 'rt_id', 'rt_name', '1');
-$res = mysql_query('select * from rec_types left join rec_detail_requirements on rdr_rec_type=rt_id order by !rt_primary, rt_name');
+$rft = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', '1');
+$res = mysql_query('select * from defRecTypes left join rec_detail_requirements on rdr_rec_type=rty_ID order by rty_RecTypeGroupID > 1, rty_Name');
 $bdr = array();
 while ($row = mysql_fetch_assoc($res)) {
-	if (! $bdr[$row['rt_id']])
-		$bdr[$row['rt_id']] = array();
-	$bdr[$row['rt_id']][$row['rdr_rdt_id']] = $row;
+	if (! $bdr[$row['rty_ID']])
+		$bdr[$row['rty_ID']] = array();
+	$bdr[$row['rty_ID']][$row['rdr_rdt_id']] = $row;
 	foreach ($bdt as $rdt_id => $rdt_name)
-		$bdr[$row['rt_id']][$rdt_id]['rdt_name'] = $rdt_name;
+		$bdr[$row['rty_ID']][$rdt_id]['rdt_name'] = $rdt_name;
 }
 
 ?>

@@ -252,10 +252,10 @@ function rollRecordBack ($rec_id, $changes) {
 
 	// update record title if necessary
 	$res = mysql_query("
-		select rec_type, rt_title_mask
-		from records, rec_types
+		select rec_type, rty_TitleMask
+		from records, defRecTypes
 		where rec_id = $rec_id
-		and rt_id = rec_type
+		and rty_ID = rec_type
 	");
 	if ($res) {
 		$row = mysql_fetch_row($res);

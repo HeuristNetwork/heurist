@@ -7,13 +7,13 @@
 	define('REFTYPE_DIRECTORY', HEURIST_SITE_PATH.'common/images/reftype-icons/');
 	if (! (is_logged_in()  &&  is_admin()  &&  HEURIST_INSTANCE_PREFIX == "")) return;
 
-	$rt_id = intval($_REQUEST['rt_id']);
+	$rt_id = intval($_REQUEST['rty_ID']);
 	if (! $rt_id) return;
 
 	require_once(dirname(__FILE__).'/../../common/connect/db.php');
 	mysql_connection_db_select(DATABASE);
 
-	$res = mysql_query('select * from rec_types where rt_id = ' . $rt_id);
+	$res = mysql_query('select * from defRecTypes where rty_ID = ' . $rt_id);
 	$rt = mysql_fetch_assoc($res);
 
 	list($success_msg, $failure_msg) = upload_file($rt_id);
@@ -30,7 +30,7 @@
  </head>
 
  <body style="background-color: transparent; width: 320px; height: 160px;">
-  <div class="headline">Upload icon for reference type <?= htmlspecialchars($rt['rt_name']) ?></div>
+  <div class="headline">Upload icon for reference type <?= htmlspecialchars($rt['rty_Name']) ?></div>
 
   <div style="line-height: 30px;">
    Current icon:
@@ -44,7 +44,7 @@
 <?php	} ?>
 
   <form action="upload_reftype_icon.php" method="post" enctype="multipart/form-data">
-   <input type="hidden" name="rt_id" value="<?= $rt_id ?>">
+   <input type="hidden" name="rty_ID" value="<?= $rt_id ?>">
    <input type="hidden" name="uploading" value="1">
 
 

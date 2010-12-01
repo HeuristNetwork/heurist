@@ -135,13 +135,13 @@ if (@$argv) {
 	}
 }
 
-// initialise rec_types labels
-$query = 'SELECT rt_id, rt_name FROM rec_types';
+// initialise defRecTypes labels
+$query = 'SELECT rty_ID, rty_Name FROM defRecTypes';
 $res = mysql_query($query);
 while ($row = mysql_fetch_assoc($res)) {
 
-	$RFT[$row['rt_id']] = $row['rt_name'];
-	foreach (getRecordRequirements($row['rt_id']) as $rdr_rdt_id => $rdr) {
+	$RFT[$row['rty_ID']] = $row['rty_Name'];
+	foreach (getRecordRequirements($row['rty_ID']) as $rdr_rdt_id => $rdr) {
 	// initialise requirements and names for detailtypes ($RQS)
 		$RQS[$rdr['rdr_rec_type']][$rdr['rdr_rdt_id']]['rdr_required'] = $rdr['rdr_required'];
 		$RQS[$rdr['rdr_rec_type']][$rdr['rdr_rdt_id']]['rdr_name'] = $rdr['rdr_name'];
@@ -287,7 +287,7 @@ wish to export all of this data
  * @param $rec_id the rec_id for the record
  * @param $depth current depth (0 == root level)
  * @param $rd_type rd_type of the pointer to this reference (only applicable when depth > 0)
- * @param $rec_types rec_types of this reference (only applicable when depth > 0)
+ * @param $rec_types defRecTypes of this reference (only applicable when depth > 0)
  */
 function writeReference($rec_id, $depth = 0, $rd_type = 0, $rec_types = 0, $rev = false) {
 	global $XML;
@@ -373,7 +373,7 @@ function writeGeneralData($bib, $depth) {
 	global $MAX_DEPTH;
 
 	$query = 'SELECT * FROM records
-						LEFT JOIN rec_types on rec_type = rt_id
+						LEFT JOIN defRecTypes on rec_type = rty_ID
 						LEFT JOIN '.USERS_DATABASE.'.sysUGrps usr on rec_added_by_usr_id = usr.ugr_ID
 						WHERE rec_id=' . $bib;
 	$res = mysql_query($query);
@@ -384,7 +384,7 @@ function writeGeneralData($bib, $depth) {
 
 		// the htmlspecialchars method replaces specific chars for a 'well-formed' XML document
 
-		$XML .= "<reftype id=\"" . htmlspecialchars($row['rt_id']). "\">" . htmlspecialchars($row['rt_name']) . "</reftype>\n";
+		$XML .= "<reftype id=\"" . htmlspecialchars($row['rty_ID']). "\">" . htmlspecialchars($row['rty_Name']) . "</reftype>\n";
 		$XML .= "<id>" . htmlspecialchars($bib) . "</id>\n";
 		//$XML .= "<query>" . htmlspecialchars($query) . "</query>\n";
 		$XML .= "<url>" . htmlspecialchars($row['rec_url']) . "</url>\n";

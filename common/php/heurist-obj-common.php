@@ -44,30 +44,30 @@ print "if (!top.HEURIST.baseURL) top.HEURIST.baseURL = ".json_format(HEURIST_URL
 print "top.HEURIST.reftypes = {};\n";
 
 $names = array();
-$res = mysql_query("select rt_id, rt_name from active_rec_types left join rec_types on rt_id=art_id where rt_id order by rt_name");
+$res = mysql_query("select rty_ID, rty_Name from defRecTypes where rty_ID order by rty_Name");
 while ($row = mysql_fetch_assoc($res)) {
-	$names[$row["rt_id"]] = $row["rt_name"];
+	$names[$row["rty_ID"]] = $row["rty_Name"];
 }
 print "top.HEURIST.reftypes.names = " . json_format($names) . ";\n\n";
 
 $plurals = array();
-$res = mysql_query("select rt_id, rt_plural from active_rec_types left join rec_types on rt_id=art_id where rt_id");
+$res = mysql_query("select rty_ID, rty_Plural from defRecTypes where rty_ID");
 while ($row = mysql_fetch_assoc($res)) {
-	$plurals[$row["rt_id"]] = $row["rt_plural"];
+	$plurals[$row["rty_ID"]] = $row["rty_Plural"];
 }
 print "top.HEURIST.reftypes.pluralNames = " . json_format($plurals) . ";\n\n";
 
 $primary = array();
-$res = mysql_query("select rt_id from active_rec_types left join rec_types on rt_id=art_id where rt_id and rt_primary order by rt_name");
+$res = mysql_query("select rty_ID from defRecTypes where rty_ID and rty_RecTypeGroupID == 1 order by rty_Name");
 while ($row = mysql_fetch_assoc($res)) {
-	array_push($primary, intval($row["rt_id"]));
+	array_push($primary, intval($row["rty_ID"]));
 }
 print "top.HEURIST.reftypes.primary = " . json_format($primary) . ";\n\n";
-
+	// saw FIXME TODO change this to create an array by RecTypeGroup.
 $other = array();
-$res = mysql_query("select rt_id from active_rec_types left join rec_types on rt_id=art_id where rt_id and ! rt_primary order by rt_name");
+$res = mysql_query("select rty_ID from defRecTypes where rty_ID and rty_RecTypeGroupID > 1 order by rty_Name");
 while ($row = mysql_fetch_assoc($res)) {
-	array_push($other, intval($row["rt_id"]));
+	array_push($other, intval($row["rty_ID"]));
 }
 print "top.HEURIST.reftypes.other = " . json_format($other) . ";\n\n\n";
 

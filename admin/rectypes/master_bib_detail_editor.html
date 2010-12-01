@@ -147,14 +147,14 @@
 		return cur;
 	}
 
-	function upload_icon(rt_id) {
-		var img = document.getElementById('rt'+rt_id);
+	function upload_icon(rty_ID) {
+		var img = document.getElementById('rt'+rty_ID);
 
-		top.popup_url('upload_reftype_icon.php?rt_id='+rt_id, 100, 300);
+		top.popup_url('upload_reftype_icon.php?rty_ID='+rty_ID, 100, 300);
 	}
 
-	function icon_refresh(rt_id) {
-		var img = document.getElementById('rt'+rt_id);
+	function icon_refresh(rty_ID) {
+		var img = document.getElementById('rt'+rty_ID);
 		img.src = img.src.replace(/\?.*/, '') + '?' + (new Date()).getTime();
 	}
 
@@ -249,7 +249,7 @@
   [if : edit-success]
    <p style="color: green; font-weight: bold;">Changes saved</p>
   [end-if]
-  <div class="headline">Editing record type <span style="letter-spacing: -2px;">&lt;&lt;</span><b>[rt_name]</b><span style="letter-spacing: -2px;">&gt;&gt;</span></div>
+  <div class="headline">Editing record type <span style="letter-spacing: -2px;">&lt;&lt;</span><b>[rty_Name]</b><span style="letter-spacing: -2px;">&gt;&gt;</span></div>
 
   <p/>
 
@@ -263,17 +263,17 @@
    <tr class="base-only">
     <td style="width: 100px; font-weight: bold; text-align: right; vertical-align: top;">Notes on this record type</td>
     <td style="width: 300px;">
-     [textarea : rt_notes : notes : style="width: 500px;" rows="1"]
+     [textarea : rty_Description : notes : style="width: 500px;" rows="1"]
     </td>
    </tr>
 
    <tr class="base-only">
     <td style="font-weight: bold; text-align: right;">Icon</td>
 	<td>
-     <img src="../../common/images/reftype-icons/[rt_id].gif" style="vertical-align: middle;" class="rft_icon" onClick="upload_icon([rt_id]);">
+     <img src="../../common/images/reftype-icons/[rty_ID].gif" style="vertical-align: middle;" class="rft_icon" onClick="upload_icon([rty_ID]);">
      &nbsp;&nbsp;&nbsp;&nbsp;
      <span style="font-weight: bold; text-align: right;">Bibliographic record types</span>
-     [checkbox : rt_primary : primary record type : style="margin: 0px;"]
+     [checkbox : rty_RecTypeGroupID : primary record type : style="margin: 0px;"]
     </td>
    </tr>
 
@@ -287,7 +287,7 @@
       The interpolated value is used as the default title for spontaneously-created bibliographic records of this type.
       To insert a literal square-bracket, use two consecutive square-brackets (&#91;&#91; or &#93;&#93;).
      </div>
-     [textbox : rt_title_mask : combination of bibliographic details to make a title : style="width: 60%;"]
+     [textbox : rty_TitleMask : combination of bibliographic details to make a title : style="width: 60%;"]
      <div style="color: red; font-weight: bold; width: 80%;">[new-field-errors]</div>
     </td>
    </tr>
@@ -299,7 +299,7 @@
    <tr class="base-only">
     <td style="font-weight: bold; text-align: right; vertical-align: top;">Record Constraints</td>
     <td>
-     <input type="button" value="Add/Edit Constraints" onClick="edit_reftype_constraints([rt_id]);">
+     <input type="button" value="Add/Edit Constraints" onClick="edit_reftype_constraints([rty_ID]);">
     </td>
    </tr>
 
@@ -312,7 +312,7 @@
     <td>
      <table id="bib_detail_table" border="0" cellspacing="0" style="border-collapse: collapse;">
 	 [search BIB_DETAIL_REQ bdr_search /* find all the detail requirements*/]
-	 [auto : rdr_rec_type : rt_id /* for the current update record type */]
+	 [auto : rdr_rec_type : rty_ID /* for the current update record type */]
      [foreach BIB_DETAIL_REQ bdr : 1 order by rdr_order, rdr_id /*itereate through each of the results*/]
       <tr class="friendly_border">
        <td style="vertical-align: top; font-weight: bold;">
@@ -359,9 +359,9 @@
     [insert BIB_DETAIL_REQ new_bdr]
     <td style="font-weight: bold; text-align: right;">Add new detail to this type</td>
     <td>
-     [dropdown required : rdr_rdt_id : : select rdt_id, concat(rdt_id,' ',rdt_type,'  ',rdt_name) from rec_detail_types left join rec_detail_requirements on rdr_rec_type=[special-rt_id] and rdr_rdt_id=rdt_id where rdr_id is null order by rdt_type,rdt_name : onchange="document.getElementById('new_bdr_label').value = this.options&#91;this.selectedIndex&#93;.text.replace(/&#91;0-9&#93;+\s*/,''); document.getElementById('new_bdr_order').value = this.options&#91;this.selectedIndex&#93;.value;"]
+     [dropdown required : rdr_rdt_id : : select rdt_id, concat(rdt_id,' ',rdt_type,'  ',rdt_name) from rec_detail_types left join rec_detail_requirements on rdr_rec_type=[special-rty_ID] and rdr_rdt_id=rdt_id where rdr_id is null order by rdt_type,rdt_name : onchange="document.getElementById('new_bdr_label').value = this.options&#91;this.selectedIndex&#93;.text.replace(/&#91;0-9&#93;+\s*/,''); document.getElementById('new_bdr_order').value = this.options&#91;this.selectedIndex&#93;.value;"]
      [hidden : rdr_name : : id="new_bdr_label"]
-     [auto : rdr_rec_type : rt_id]
+     [auto : rdr_rec_type : rty_ID]
      [hidden : rdr_order : : id="new_bdr_order"]
      [auto : rdr_size : "30"]
     </td>
@@ -396,8 +396,8 @@
 
  <div style="width: 300px; height: 500px; overflow: auto; padding: 3px;" class="friendly_border">
   <table border="0">
-   [foreach REFTYPE rtf : 1 order by (!rt_primary), rt_name]
-    <tr><td style="text-align: right;">[rt_id]</td><td><img src="../../common/images/reftype-icons/[rt_id].gif" id="rt[rt_id]" class="rft_icon" onClick="upload_icon([rt_id]);"><a href="?rt_id=[rt_id]">[rt_name]</a></td></tr>
+   [foreach REFTYPE rtf : 1 order by (rty_RecTypeGroupID > 1), rty_Name]
+    <tr><td style="text-align: right;">[rty_ID]</td><td><img src="../../common/images/reftype-icons/[rty_ID].gif" id="rt[rty_ID]" class="rft_icon" onClick="upload_icon([rty_ID]);"><a href="?rty_ID=[rty_ID]">[rty_Name]</a></td></tr>
    [end-foreach]
    [not-found][end-not-found]
   </table>
@@ -411,11 +411,11 @@
  <table border="0">
   <tr>
    <td style="width: 100px; font-weight: bold; text-align: right;">Short description</td>
-   <td>[textbox required : rt_name : record type : style="width: 200px;"]</td>
+   <td>[textbox required : rty_Name : record type : style="width: 200px;"]</td>
   </tr>
   <tr>
    <td style="width: 100px; font-weight: bold; text-align: right;">Notes</td>
-   <td>[textbox : rt_notes : notes : style="width: 200px;"]</td>
+   <td>[textbox : rty_Description : notes : style="width: 200px;"]</td>
   </tr>
   <tr>
    <td></td>
@@ -434,7 +434,7 @@
     <tr>
      <td>[rdt_id]</td>
      <td style="width: 200px;"><!--img src="cross.gif" onclick="delete_bdt([rdt_id]);" class="delete_icon"--> <span id="name[rdt_id]">[rdt_name]</span></td>
-     <td style="text-align: left;">[if-eq : rdt_type : "enum"]<a href="#" onClick="edit_enum_types([rdt_id]); return false;">[rdt_type]</a>[else][rdt_type][end-if-eq][if-eq : rdt_type : "resource"] <a href="#" onClick="edit_constrain_reftype([rdt_id]); return false;">([if : rdt_constrain_rec_type][select REFTYPE rft][rt_name][end-select][else]unconstrained[end-if])</a>[end-if-eq]</td>
+     <td style="text-align: left;">[if-eq : rdt_type : "enum"]<a href="#" onClick="edit_enum_types([rdt_id]); return false;">[rdt_type]</a>[else][rdt_type][end-if-eq][if-eq : rdt_type : "resource"] <a href="#" onClick="edit_constrain_reftype([rdt_id]); return false;">([if : rdt_constrain_rec_type][select REFTYPE rft][rty_Name][end-select][else]unconstrained[end-if])</a>[end-if-eq]</td>
     </tr>
    [end-foreach]
    <!--form action="master_bib_detail_editor.php" method="post"><input type="hidden" name="delete_bdt_field" value="" id="delete_bdt"></form-->

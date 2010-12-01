@@ -49,9 +49,9 @@ $MAINTABLES['RATING_INTEREST'] = 'ratings_interest';
 $MAINTABLES['KEYWORD'] = 'usrTags';
 	$PKEY['KEYWORD'] = 'tag_ID';
 
-$MAINTABLES['REFTYPE'] = 'rec_types';
-	$PKEY['REFTYPE'] = 'rt_id';
-	$JOINS['REFTYPE'] = array('ACTIVE_REFTYPE-ID' => 'rt_id');
+$MAINTABLES['REFTYPE'] = 'defRecTypes';
+	$PKEY['REFTYPE'] = 'rty_ID';
+	$JOINS['REFTYPE'] = array('ACTIVE_REFTYPE-ID' => 'rty_ID');
 
 $MAINTABLES['ACTIVE_REFTYPE'] = 'active_rec_types';
 	$PKEY['ACTIVE_REFTYPE'] = 'art_id';

@@ -356,7 +356,7 @@ class HeuristNativeEntry {
 	var $_bkmk_personal_notes;
 
 	function HeuristNativeEntry($rt) {
-		// Create a native entry of the given type (a rec_types.rt_id, not an rt_name)
+		// Create a native entry of the given type (a defRecTypes.rty_ID, not an rty_Name)
 		$this->_reftype = $rt;
 		$this->_fields = array();
 		$this->_fields_by_bdt_id = array();
@@ -560,7 +560,7 @@ class HeuristNativeEntry {
 
 		if ($this->_title) return $this->_title;
 
-		$mask = $heurist_reftypes[$this->_reftype]['rt_title_mask'];
+		$mask = $heurist_reftypes[$this->_reftype]['rty_TitleMask'];
 		$this->_title = fill_title_mask($mask, $this->getBiblioID(), $this->getReferenceType());
 
 		return $this->_title;
@@ -572,7 +572,7 @@ class HeuristNativeEntry {
 		if (! $heurist_reftypes) load_heurist_reftypes();
 		if (! $bib_type_names) load_bib_type_names();
 
-		$mask = $heurist_reftypes[$this->_reftype]['rt_title_mask'];
+		$mask = $heurist_reftypes[$this->_reftype]['rty_TitleMask'];
 		if (! $mask) return '';
 
 
@@ -983,31 +983,31 @@ function load_bib_type_name_to_id() {
 
 
 function load_heurist_reftypes() {
-	// $heurist_reftypes is just the obvious mapping of rt_id to the rest of the fields
+	// $heurist_reftypes is just the obvious mapping of rty_ID to the rest of the fields
 	global $heurist_reftypes;
 
 	$heurist_reftypes = array();
 
 	// mysql_connection_db_select('SHSSERI_bookmarks');
-	$res = mysql_query('select * from active_rec_types left join rec_types on rt_id=art_id where rt_id');
+	$res = mysql_query('select * from active_rec_types left join defRecTypes on rty_ID=art_id where rty_ID');
 	while ($row = mysql_fetch_assoc($res)) {
 		// fix up the title masks
 
 		// magical strings unlikely to appear in a title mask: magic-open-bracket becomes [, magic-close-bracket becomes ]
-		$row['rt_title_mask'] = str_replace(array('[[', ']]'), array('magic-open-bracket', 'magic-close-bracket'), $row['rt_title_mask']);
-		$row['rt_title_mask'] = preg_replace('/\\[([^\\]]+)\\]/e', "'['.strtolower('\\1').']'", $row['rt_title_mask']);
+		$row['rty_TitleMask'] = str_replace(array('[[', ']]'), array('magic-open-bracket', 'magic-close-bracket'), $row['rty_TitleMask']);
+		$row['rty_TitleMask'] = preg_replace('/\\[([^\\]]+)\\]/e', "'['.strtolower('\\1').']'", $row['rty_TitleMask']);
 
-		$heurist_reftypes[$row['rt_id']] = $row;
+		$heurist_reftypes[$row['rty_ID']] = $row;
 	}
 }
 
 
 function load_reftype_name_to_id() {
-	// $bib_type_names is the mapping of rt_name to rt_id
+	// $bib_type_names is the mapping of rty_Name to rty_ID
 	global $reftype_name_to_id;
 
 	// mysql_connection_db_select('SHSSERI_bookmarks');
-	$res = mysql_query('select rt_id, rt_name from active_rec_types left join rec_types on rt_id=art_id where rt_id');
+	$res = mysql_query('select rty_ID, rty_Name from active_rec_types left join defRecTypes on rty_ID=art_id where rty_ID');
 	$reftype_name_to_id = array();
 	while ($row = mysql_fetch_row($res))
 		$reftype_name_to_id[strtolower($row[1])] = $row[0];

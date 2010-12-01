@@ -458,7 +458,7 @@ $personal_notes_tags = array(
 $refer_to_heurist_type_map = array(
 	/* This might be a little harder to interpet:
 	   Each array entry corresponds to a REFER entry reference type;
-	   the rvalues are the Heurist reference types (rt_id) for the records entry, its container, its container's container etc.
+	   the rvalues are the Heurist reference types (rty_ID) for the records entry, its container, its container's container etc.
 
 	   This is a data-driven version of the big switch statement in importer.php lines 1276 onwards.
 	 */

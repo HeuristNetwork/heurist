@@ -55,7 +55,7 @@ $type_names = $bib_requirement_names[$entry->getReferenceType()];
    <tr>
     <td style="font-weight: bold; text-align: right; vertical-align: top;">Title&nbsp;&nbsp;&nbsp;</td>
     <td><b><?= htmlspecialchars($ambig_entry->getTitle()) ?></b>
-        - <?= htmlspecialchars($heurist_reftypes[$ambig_entry->getReferenceType()]['rt_name']) ?></td>
+        - <?= htmlspecialchars($heurist_reftypes[$ambig_entry->getReferenceType()]['rty_Name']) ?></td>
    </tr>
 
    <tr>

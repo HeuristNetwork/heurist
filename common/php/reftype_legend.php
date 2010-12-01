@@ -40,7 +40,7 @@ img {vertical-align: text-bottom;}
 <?php
 require_once(dirname(__FILE__).'/../connect/db.php');
 	mysql_connection_db_select(DATABASE);
-	$res = mysql_query('select rt_id, rt_name from active_rec_types left join rec_types on rt_id=art_id order by rt_id');
+	$res = mysql_query('select rty_ID, rty_Name from active_rec_types left join defRecTypes on rty_ID=art_id order by rty_ID');
 	while ($row = mysql_fetch_row($res)) {
 ?>
      <div>

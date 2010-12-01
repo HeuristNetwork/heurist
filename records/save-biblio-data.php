@@ -92,7 +92,7 @@ function updateRecord($bibID) {
 	// Check that the user has permissions to edit it.
 	$res = mysql_query("select * from records
 	                        left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_GroupID=rec_wg_id
-	                        left join rec_types on rt_id=rec_type
+	                        left join defRecTypes on rty_ID=rec_type
 	                     where rec_id=$bibID and (! rec_wg_id or ugl_UserID=".get_user_id().")");
 	if (mysql_num_rows($res) == 0) {
 		$res = mysql_query("select grp.ugr_Name from records, ".USERS_DATABASE.".sysUGrps grp where rec_id=$bibID and grp.ugr_ID=rec_wg_id");
@@ -243,7 +243,7 @@ function updateRecord($bibID) {
 	if ($updatedRowCount > 0  ||  $insertedRowCount > 0  ||  $deletedRowCount > 0  ||  $biblioUpdated) {
 		/* something changed: update the records title and commit all changes */
 		mysql_query("update records
-		                set rec_title = '" . addslashes(fill_title_mask($bib["rt_title_mask"], $bib["rec_id"], $bib["rec_type"])) . "'
+		                set rec_title = '" . addslashes(fill_title_mask($bib["rty_TitleMask"], $bib["rec_id"], $bib["rec_type"])) . "'
 		              where rec_id = $bibID");
 
 		mysql_query("commit");

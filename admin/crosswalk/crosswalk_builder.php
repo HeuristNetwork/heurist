@@ -43,20 +43,18 @@ $version = 1; // Definitions exchange format version number. Update in get_defin
 
 DROP TABLE IF EXISTS `temp_rec_types`;
 CREATE TABLE IF NOT EXISTS `temp_rec_types` (
-  `rt_id` tinyint(3) unsigned NOT NULL,
-  `rt_name` varchar(63) NOT NULL,
-  `rt_order` tinyint(3) unsigned NOT NULL default '0',
-  `rt_notes` blob,
-  `rt_primary` tinyint(1) NOT NULL default '0',
-  `rt_list_order` varchar(4) default NULL,
-  `rt_category` enum('bibtype','bibcontainer','geotype','mediatype') default NULL,
-  `rt_title_mask` varchar(255) default NULL,
-  `rt_canonical_title_mask` varchar(255) default NULL,
-  `rt_plural` varchar(63) default NULL,
-  PRIMARY KEY  (`rt_id`)
+  `rty_ID` tinyint(3) unsigned NOT NULL,
+  `rty_Name` varchar(63) NOT NULL,
+  `rty_OrderInGroup` tinyint(3) unsigned NOT NULL default '0',
+  `rty_Description` blob,
+  `rty_RecTypeGroupID` tinyint(1) default NULL,
+  `rty_TitleMask` varchar(255) default NULL,
+  `rty_CanonicalTitleMask` varchar(255) default NULL,
+  `rty_Plural` varchar(63) default NULL,
+  PRIMARY KEY  (`rty_ID`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
 
-INSERT INTO `temp_rec_types` (`rt_id`, `rt_name`, `rt_order`, `rt_notes`, `rt_primary`, `rt_list_order`, `rt_category`, `rt_title_mask`, `rt_canonical_title_mask`, `rt_plural`) VALUES
+INSERT INTO `temp_rec_types` (`rty_ID`, `rty_Name`, `rty_OrderInGroup`, `rty_Description`, `rty_RecTypeGroupID`, `rty_TitleMask`, `rty_CanonicalTitleMask`, `rty_Plural`) VALUES
 
 // Steve: Parse the stream from get_definitions until you get to a line with    > Start
 // then send the stream to MySQL until you get to a line with   > End

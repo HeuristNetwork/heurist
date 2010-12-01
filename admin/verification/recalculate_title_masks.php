@@ -28,7 +28,7 @@ while ($row = mysql_fetch_assoc($res)) {
 }
 
 
-$masks = mysql__select_assoc('rec_types', 'rt_id', 'rt_title_mask', '1');
+$masks = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_TitleMask', '1');
 $updates = array();
 $blank_count = 0;
 $repair_count = 0;

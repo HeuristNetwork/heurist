@@ -44,8 +44,8 @@ $version = 1; // Output format version number. This will be read by the crosswal
 // RECORD TYPES (this will be repeated for each of the tables)
 
     print "\n-- RECORD TYPES";print "\n";
-    print "-- rt_id,rt_name,rt_order,rt_notes,rt_primary,rt_list_order,rt_category,rt_title_mask,rt_canonical_title_mask,rt_plural\n";
-    $query = "select * from rec_types limit $lim";
+    print "-- rty_ID,rty_Name,rty_OrderInGroup,rty_Description,rty_RecTypeGroupID,rty_TitleMask,rty_CanonicalTitleMask,rty_Plural\n";
+    $query = "select * from defRecTypes limit $lim";
     $res = mysql_query($query);
     $fmt = 'rectypes';
 
@@ -134,9 +134,9 @@ function print_row($row,$fmt) {
 
       switch ($fmt) {  // select the output formatting according to the table
 
-      case 'rectypes': // Data from the rec_types table
-        print "($row[rt_id],'$row[rt_name]',$row[rt_order], `$row[rt_notes]`,$row[rt_primary],$row[rt_list_order],
-        `$row[rt_category]`,`$row[rt_title_mask]`,`$row[rt_canonical_title_mask]`,`$row[rt_plural]`),\n";
+      case 'rectypes': // Data from the defRecTypes table
+        print "($row[rty_ID],'$row[rty_Name]',$row[rty_OrderInGroup], `$row[rty_Description]`,$row[rty_RecTypeGroupID],
+        `$row[rty_TitleMask]`,`$row[rty_CanonicalTitleMask]`,`$row[rty_Plural]`),\n";
          break;
 
       case 'recdetailtypes': // Data from the rec_details table

@@ -99,7 +99,7 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 	}
 
 	// calculate title, do an update
-	$mask = mysql__select_array("rec_types", "rt_title_mask", "rt_id=$type");  $mask = $mask[0];
+	$mask = mysql__select_array("defRecTypes", "rty_TitleMask", "rty_ID=$type");  $mask = $mask[0];
 	$title = fill_title_mask($mask, $recordID, $type);
 	if ($title) {
 		mysql_query("update records set rec_title = '" . addslashes($title) . "' where rec_id = $recordID");
