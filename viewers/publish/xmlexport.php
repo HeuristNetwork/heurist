@@ -149,11 +149,11 @@ while ($row = mysql_fetch_assoc($res)) {
 }
 
 // initialise default names for detailtypes ($DTN)
-$query = 'SELECT rdt_id, rdt_name FROM rec_detail_types';
+$query = 'SELECT dty_ID, dty_Name FROM defDetailTypes';
 $res = mysql_query($query);
 while ($row = mysql_fetch_assoc($res)) {
 
-	$DTN[$row['rdt_id']] = $row['rdt_name'];
+	$DTN[$row['dty_ID']] = $row['dty_Name'];
 }
 
 
@@ -439,12 +439,12 @@ function writeDetails($bib, $depth) {
 	writeTags($bib);
 
     $assoc_resources = array();
-	$query = 'SELECT rec_type, rd_val, rdt_id, rdt_type, rd_type, rd_file_id FROM rec_details
-						LEFT JOIN rec_detail_types on rd_type = rdt_id
+	$query = 'SELECT rec_type, rd_val, dty_ID, dty_Type, rd_type, rd_file_id FROM rec_details
+						LEFT JOIN defDetailTypes on rd_type = dty_ID
 						LEFT JOIN records on rec_id = rd_rec_id
-						LEFT JOIN rec_detail_requirements on rdr_rdt_id = rdt_id and rdr_rec_type = rec_type
+						LEFT JOIN rec_detail_requirements on rdr_rdt_id = dty_ID and rdr_rec_type = rec_type
 						WHERE rd_rec_id=' . $bib .'
-						ORDER BY rdr_order is null, rdr_order, rdt_id, rd_id';
+						ORDER BY rdr_order is null, rdr_order, dty_ID, rd_id';
 
 	$res = mysql_query($query);
 
@@ -453,7 +453,7 @@ if (mysql_error()) error_log(mysql_error());
 	while ($row = mysql_fetch_assoc($res)) {
 
 		// if it's a record pointer, write the record pointed to
-		if ($row['rdt_type'] == 'resource') {
+		if ($row['dty_Type'] == 'resource') {
 			writeReference($row['rd_val'], $depth + 1, $row['rd_type'], $row['rec_type'], false);
 
 		}
@@ -478,9 +478,9 @@ if (mysql_error()) error_log(mysql_error());
 function writeReversePointers($bib, $depth) {
 	global $XML;
 
-	$q_reverse= 'SELECT * FROM rec_details LEFT JOIN rec_detail_types ON rdt_id = rd_type
+	$q_reverse= 'SELECT * FROM rec_details LEFT JOIN defDetailTypes ON dty_ID = rd_type
 	             LEFT JOIN records ON rec_id = rd_rec_id
-	             WHERE rd_val ='.$bib .' AND rdt_type = "resource" AND rec_temporary != 1 ORDER BY rec_type';
+	             WHERE rd_val ='.$bib .' AND dty_Type = "resource" AND rec_temporary != 1 ORDER BY rec_type';
 
 	$results = mysql_query($q_reverse);
 

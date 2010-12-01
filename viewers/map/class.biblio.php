@@ -52,10 +52,10 @@ class Biblio {
 								 limit 1");
 			if (mysql_num_rows($res) !== 1) {
 				$res = mysql_query("select files.*
-				                      from rec_details a, rec_detail_types, records, rec_details b, files
+				                      from rec_details a, defDetailTypes, records, rec_details b, files
 				                     where a.rd_rec_id = $rec_id
-				                       and a.rd_type = rdt_id
-				                       and rdt_type = 'resource'
+				                       and a.rd_type = dty_ID
+				                       and dty_Type = 'resource'
 				                       and rec_id = a.rd_val
 				                       and b.rd_rec_id = rec_id
 				                       and file_id = b.rd_file_id
@@ -89,11 +89,11 @@ class Biblio {
 				// created for Event records, which may point to Site records
 				$res = mysql_query('select astext(g.rd_geo) geo, g.rd_val, astext(envelope(g.rd_geo)) as rect
 				                      from rec_details p
-				                 left join rec_detail_types on rdt_id = p.rd_type
+				                 left join defDetailTypes on dty_ID = p.rd_type
 				                 left join records on rec_id = p.rd_val
 				                 left join rec_details g on g.rd_rec_id = rec_id
 				                     where p.rd_rec_id = ' . $rec_id . '
-				                       and rdt_type = "resource"
+				                       and dty_Type = "resource"
 				                       and g.rd_geo is not null');
 			}
 

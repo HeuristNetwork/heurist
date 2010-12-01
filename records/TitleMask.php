@@ -119,12 +119,12 @@ function _title_mask__check_field_name($field_name, $rt) {
 		} else {
 			if (! array_key_exists(strtolower($field_name), $rdr[$rt]))	// field does not exist
 				return 'Type "' . $rct[$rt] . '" does not have "' . $field_name . '" field';
-			$rdt_id = $rdt[strtolower($field_name)]['rdt_id'];
+			$rdt_id = $rdt[strtolower($field_name)]['dty_ID'];
 			$rdt_name = '"' . $field_name . '" field';
 		}
 
 		// check that the field is of a sensible type
-		if ($rdt[$rdt_id]['rdt_type'] != 'resource'  ||  $rt == 52) {	// special exception for relationships
+		if ($rdt[$rdt_id]['dty_Type'] != 'resource'  ||  $rt == 52) {	// special exception for relationships
 			return '';
 		} else {
 			return $rdt_name . ' in type "' . $rct[$rt] . '" is a resource identifier - that is definitely not what you want.  ' .
@@ -181,7 +181,7 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt) {
 			$rdt_id = $matches[1];
 		} else {
 			$rdt = _title_mask__get_rec_detail_types();
-			$rdt_id = $rdt[strtolower($field_name)]['rdt_id'];
+			$rdt_id = $rdt[strtolower($field_name)]['dty_ID'];
 		}
 
 		return _title_mask__get_rec_detail($rec_id, $rdt_id);
@@ -193,15 +193,15 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt) {
 		$rdt_id = $matches[1];
 		$inner_field_name = $matches[2];
 	} else if (preg_match('/^([^.]+?)\\s*\\.\\s*(.+)$/', $field_name, $matches)) {
-		$rdt_id = $rdt[strtolower($matches[1])]['rdt_id'];
+		$rdt_id = $rdt[strtolower($matches[1])]['dty_ID'];
 		$inner_field_name = $matches[2];
 	} else {
 		return '';
 	}
 
-	$rt_id = $rdt[$rdt_id]['rdt_constrain_rec_type'];
+	$rt_id = $rdt[$rdt_id]['dty_PtrConstraints'];
 
-	$res = mysql_query('select rd_val from rec_details left join rec_detail_types on rdt_id=rd_type where rd_rec_id='.$rec_id.' and rdt_id='.$rdt_id.' order by rd_id asc');
+	$res = mysql_query('select rd_val from rec_details left join defDetailTypes on dty_ID=rd_type where rd_rec_id='.$rec_id.' and dty_ID='.$rdt_id.' order by rd_id asc');
 
 	if ($rt_id != 0  &&  $inner_field_name) {
 		if ($rt_id != 75) {	// not an AuthorEditor
@@ -275,7 +275,7 @@ function _title_mask__get_rec_detail($rec_id, $rdt_id) {
 	$res = mysql_query('select rec_details.* from rec_details'
 	                  .' where rd_rec_id = ' . intval($rec_id) . ' order by rd_id asc');
 	while ($rd = mysql_fetch_assoc($res)) {
-		$rdt_type = $rdt[$rd['rd_type']]['rdt_type'];
+		$rdt_type = $rdt[$rd['rd_type']]['dty_Type'];
 
 		if ($rdt_type == 'file') {	/* handle files specially */
 			if (@$rec_details[$rec_id][$rd['rd_type']])// repeated values
@@ -375,17 +375,17 @@ function _title_mask__get_rec_detail_requirements() {
 	if (! $rdr) {
 		$rdr = array();
 
-		$res = mysql_query('select rdr_rec_type, rdt_id, lower(rdt_name) as rdt_name, rdt_constrain_rec_type
-		                      from rec_detail_requirements left join rec_detail_types on rdr_rdt_id=rdt_id
+		$res = mysql_query('select rdr_rec_type, dty_ID, lower(dty_Name) as dty_Name, dty_PtrConstraints
+		                      from rec_detail_requirements left join defDetailTypes on rdr_rdt_id=dty_ID
 		                     where rdr_required in ("Y", "R", "O")');
 		while ($row = mysql_fetch_assoc($res)) {
 			if (@$rdr[$row['rdr_rec_type']]) {
-				$rdr[$row['rdr_rec_type']][$row['rdt_id']] = $row['rdt_constrain_rec_type'];
-				$rdr[$row['rdr_rec_type']][$row['rdt_name']] = $row['rdt_constrain_rec_type'];
+				$rdr[$row['rdr_rec_type']][$row['dty_ID']] = $row['dty_PtrConstraints'];
+				$rdr[$row['rdr_rec_type']][$row['dty_Name']] = $row['dty_PtrConstraints'];
 			} else {
 				$rdr[$row['rdr_rec_type']] = array(
-					$row['rdt_id'] => $row['rdt_constrain_rec_type'],
-					$row['rdt_name'] => $row['rdt_constrain_rec_type']
+					$row['dty_ID'] => $row['dty_PtrConstraints'],
+					$row['dty_Name'] => $row['dty_PtrConstraints']
 				);
 			}
 		}
@@ -401,10 +401,10 @@ function _title_mask__get_rec_detail_types() {
 	if (! $rdt) {
 		$rdt = array();
 
-		$res = mysql_query('select rdt_id, rdt_name, rdt_type, rdt_constrain_rec_type from rec_detail_types');
+		$res = mysql_query('select dty_ID, dty_Name, dty_Type, dty_PtrConstraints from defDetailTypes');
 		while ($row = mysql_fetch_assoc($res)) {
-			$rdt[$row['rdt_id']] = $row;
-			$rdt[strtolower($row['rdt_name'])] = $row;
+			$rdt[$row['dty_ID']] = $row;
+			$rdt[strtolower($row['dty_Name'])] = $row;
 		}
 	}
 
@@ -446,7 +446,7 @@ function _title_mask__get_field_number($field_name, $rt) {
 			$rdt_id = $matches[1];
 		} else {
 			$rdt = _title_mask__get_rec_detail_types();
-			$rdt_id = $rdt[strtolower($field_name)]['rdt_id'];
+			$rdt_id = $rdt[strtolower($field_name)]['dty_ID'];
 		}
 		return $rdt_id;
 	}
@@ -456,7 +456,7 @@ function _title_mask__get_field_number($field_name, $rt) {
 		$inner_field_name = $matches[2];
 	} else if (preg_match('/^([^.]+?)\\s*\\.\\s*(.+)$/', $field_name, $matches)) {
 		$rdt = _title_mask__get_rec_detail_types();
-		$rdt_id = $rdt[strtolower($matches[1])]['rdt_id'];
+		$rdt_id = $rdt[strtolower($matches[1])]['dty_ID'];
 		$inner_field_name = $matches[2];
 	} else {
 		return "";

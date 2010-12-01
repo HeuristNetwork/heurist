@@ -145,11 +145,11 @@ while ($row = mysql_fetch_assoc($res)) {
 }
 
 // base names, varieties for detail types
-$query = 'SELECT rdt_id, rdt_name, rdt_type FROM rec_detail_types';
+$query = 'SELECT dty_ID, dty_Name, dty_Type FROM defDetailTypes';
 $res = mysql_query($query);
 while ($row = mysql_fetch_assoc($res)) {
-	$DTN[$row['rdt_id']] = $row['rdt_name'];
-	$DTT[$row['rdt_id']] = $row['rdt_type'];
+	$DTN[$row['dty_ID']] = $row['dty_Name'];
+	$DTT[$row['dty_ID']] = $row['dty_Type'];
 }
 
 $INV = mysql__select_assoc('rec_detail_lookups',	//saw Enum change just assoc id to related id
@@ -250,9 +250,9 @@ function findPointers($rec_ids) {
 	$rv = array();
 	$query = 'SELECT distinct rd_val
 	            FROM rec_details
-	       LEFT JOIN rec_detail_types on rd_type = rdt_id
+	       LEFT JOIN defDetailTypes on rd_type = dty_ID
 	           WHERE rd_rec_id in (' . join(',', $rec_ids) .')
-	             AND rdt_type = "resource"';
+	             AND dty_Type = "resource"';
 	$res = mysql_query($query);
 	while ($row = mysql_fetch_assoc($res)) {
 		array_push($rv, $row['rd_val']);
@@ -264,9 +264,9 @@ function findReversePointers($rec_ids, &$pointers) {
 	$rv = array();
 	$query = 'SELECT rd_val, rd_type, rd_rec_id
 	            FROM rec_details
-	       LEFT JOIN rec_detail_types ON rd_type = rdt_id
+	       LEFT JOIN defDetailTypes ON rd_type = dty_ID
 	       LEFT JOIN records ON rec_id = rd_rec_id
-	           WHERE rdt_type = "resource"
+	           WHERE dty_Type = "resource"
 	             AND rd_val IN (' . join(',', $rec_ids) .')
 	             AND rec_type != 52';
 	$res = mysql_query($query);

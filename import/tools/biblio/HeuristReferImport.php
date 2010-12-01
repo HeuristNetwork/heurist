@@ -6,7 +6,7 @@ require_once(dirname(__FILE__)."/../HeuristImport.php");
 $refer_to_heurist_map = array(
 	/* Hopefully this is fairly easy to interpret:
 	   Each array entry corresponds to a REFER entry reference type;
-	   the rvalues are associative arrays looking up the REFER tag type to the Heurist rdt_id.
+	   the rvalues are associative arrays looking up the REFER tag type to the Heurist dty_ID.
 	   Some rvalue-rvalues are prefixed with one or more colons; these indicate that the REFER
 	   value doesn't go in the Heurist records entry, but rather in the records's container (:),
 	   container container (::) et cetera.

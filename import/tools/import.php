@@ -1550,9 +1550,9 @@ function biblio_are_equal($bib_id1, $bib_id2) {
 left join rec_details BD2 on BD1.rd_type=BD2.rd_type and (BD1.rd_val=BD2.rd_val or (length(BD1.rd_val_precis) > 20 and cast(liposuction(BD1.rd_val) as char) = cast(liposuction(BD2.rd_val) as char)))
 left join records on BD1.rd_rec_id=rec_id
 left join rec_detail_requirements on rdr_rdt_id=BD1.rd_type and rdr_rec_type=rec_type
-left join rec_detail_types on rdt_id=BD1.rd_type
+left join defDetailTypes on dty_ID=BD1.rd_type
     where BD1.rd_rec_id=' . $bib_id1 . ' and BD2.rd_rec_id in (' . $bib_id1 . ',' . $bib_id2 . ')
-          and (BD1.rd_type = 158  or  rdt_type != "resource")
+          and (BD1.rd_type = 158  or  dty_Type != "resource")
  group by BD2.rd_rec_id
  order by BD1.rd_rec_id != BD2.rd_rec_id
 ';
@@ -1568,12 +1568,12 @@ left join rec_detail_types on rdt_id=BD1.rd_type
 	 * If this returns any rows, then each row gives us two new records records that need to be tested for equality.
 	 */
 	$res = mysql_query('select BD1.rd_val as bd1_resource, BD2.rd_val as bd2_resource
-from rec_detail_types
+from defDetailTypes
 left join records on rec_id='.$bib_id1.'
-left join rec_detail_requirements on rdr_rdt_id=rdt_id and rdr_rec_type=rec_type
-left join rec_details BD1 on BD1.rd_type=rdt_id
-left join rec_details BD2 on BD2.rd_type=rdt_id and BD2.rd_rec_id='.$bib_id2.'
-where BD1.rd_rec_id=rec_id and (rdt_id != 158  and  rdt_type = "resource") and rdr_match and BD1.rd_id is not null');
+left join rec_detail_requirements on rdr_rdt_id=dty_ID and rdr_rec_type=rec_type
+left join rec_details BD1 on BD1.rd_type=dty_ID
+left join rec_details BD2 on BD2.rd_type=dty_ID and BD2.rd_rec_id='.$bib_id2.'
+where BD1.rd_rec_id=rec_id and (dty_ID != 158  and  dty_Type = "resource") and rdr_match and BD1.rd_id is not null');
 
 	if (mysql_num_rows($res) == 0) return true;	// there are no resource-pointer types required for a match
 	while ($row = mysql_fetch_row($res)) {
@@ -1720,16 +1720,16 @@ if ($master_bib_id == 44) { error_log(str_replace("\n", " ", '
    select '.$master_bib_id.', S.rd_type, S.rd_val, 2
      from rec_details S
 left join rec_details M on S.rd_type=M.rd_type and S.rd_val_precis=M.rd_val_precis and M.rd_rec_id='.$master_bib_id.'
-left join rec_detail_types on rdt_id=S.rd_type
-    where S.rd_rec_id='.$slave_bib_id.' and M.rd_rec_id is null and (rdt_type != "resource" or S.rd_type=158)')); }
+left join defDetailTypes on dty_ID=S.rd_type
+    where S.rd_rec_id='.$slave_bib_id.' and M.rd_rec_id is null and (dty_Type != "resource" or S.rd_type=158)')); }
 */
 
 	$new_bd_query = '
    select '.$master_bib_id.', S.rd_type, S.rd_val, 2
      from rec_details S
 left join rec_details M on S.rd_type=M.rd_type and S.rd_val_precis=M.rd_val_precis and M.rd_rec_id='.$master_bib_id.'
-left join rec_detail_types on rdt_id=S.rd_type
-    where S.rd_rec_id='.$slave_bib_id.' and M.rd_rec_id is null and (rdt_type != "resource" or S.rd_type=158)';	// ignore non-author references
+left join defDetailTypes on dty_ID=S.rd_type
+    where S.rd_rec_id='.$slave_bib_id.' and M.rd_rec_id is null and (dty_Type != "resource" or S.rd_type=158)';	// ignore non-author references
 	$res = mysql_query($new_bd_query);
 	$num_bd_rows = mysql_num_rows($res);
 
@@ -1785,10 +1785,10 @@ function merge_new_biblio_data($master_biblio_id, &$entry) {
 	$bib_ids = array($master_biblio_id);
 
 	while ($rec_id = array_pop($bib_ids)) {
-		$res = mysql_query("select rd_type, rd_val, rdt_type from rec_details left join rec_detail_types on rdt_id=rd_type where rd_rec_id = " . intval($rec_id));
+		$res = mysql_query("select rd_type, rd_val, dty_Type from rec_details left join defDetailTypes on dty_ID=rd_type where rd_rec_id = " . intval($rec_id));
 
 		while ($bd = mysql_fetch_assoc($res)) {
-			if ($bd["rdt_type"] === "resource") {
+			if ($bd["dty_Type"] === "resource") {
 				if ($bd["rd_type"] !== 158) array_push($bib_ids, $bd["rd_val"]);	// also pull in fields from non-author related fields
 			}
 			else {

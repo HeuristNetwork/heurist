@@ -141,10 +141,10 @@ $dates = array();
 $years =array();
 $res = mysql_query("select rec_id, min(d.rd_val), max(d.rd_val)
 					  from records
-				cross join rec_detail_types dt
-				 left join rec_details d on d.rd_rec_id = rec_id and d.rd_type = dt.rdt_id
+				cross join defDetailTypes dt
+				 left join rec_details d on d.rd_rec_id = rec_id and d.rd_type = dt.dty_ID
 					 where rec_id in (" . join(",", $bibIDs) . ")
-					   and dt.rdt_type = 'date'
+					   and dt.dty_Type = 'date'
 				  group by rec_id");
 while ($val = mysql_fetch_row($res)) {
 	if (preg_match("/^\\d+\\s*bc/i", $val[1])) {
@@ -159,10 +159,10 @@ while ($val = mysql_fetch_row($res)) {
 
 $res = mysql_query("select rec_id, min(d.rd_val), max(d.rd_val)
 					  from records
-				cross join rec_detail_types yt
-				 left join rec_details y on y.rd_rec_id = rec_id and y.rd_type = yt.rdt_id
+				cross join defDetailTypes yt
+				 left join rec_details y on y.rd_rec_id = rec_id and y.rd_type = yt.dty_ID
 					 where rec_id in (" . join(",", $bibIDs) . ")
-					   and yt.rdt_type = 'yesr'
+					   and yt.dty_Type = 'yesr'
 				  group by rec_id");
 while ($val = mysql_fetch_row($res)) {
 	if (preg_match("/^\\d+\\s*bc/i", $val[1])) {

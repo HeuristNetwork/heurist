@@ -6,7 +6,7 @@ require_once(dirname(__FILE__).'/../connect/db.php');
 
 mysql_connection_db_select(DATABASE);
 
-$ref_detail_types = mysql__select_array('rec_detail_types', 'rdt_id', 'rdt_type="resource"');
+$ref_detail_types = mysql__select_array('defDetailTypes', 'dty_ID', 'dty_Type="resource"');
 
 function ref_detail_types () {
 	global $ref_detail_types;

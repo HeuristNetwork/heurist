@@ -28,8 +28,8 @@ foreach (get_all_instances() as $instance_name => $instance) {
 	mysql_query("INSERT INTO defVocabularies SELECT * FROM `heurist-common`.defVocabularies");
 	mysql_query("DELETE FROM rel_constraints");
 	mysql_query("INSERT INTO rel_constraints SELECT * FROM `heurist-common`.rec_constraints");
-	mysql_query("DELETE FROM rec_detail_types");
-	mysql_query("INSERT INTO rec_detail_types SELECT * FROM `heurist-common`.rec_detail_types");
+	mysql_query("DELETE FROM defDetailTypes");
+	mysql_query("INSERT INTO defDetailTypes SELECT * FROM `heurist-common`.defDetailTypes");
 	mysql_query("DELETE FROM rec_detail_lookups");
 	mysql_query("INSERT INTO rec_detail_lookups SELECT * FROM `heurist-common`.rec_detail_lookups");
 	mysql_query("DELETE FROM rec_detail_requirements");

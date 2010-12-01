@@ -15,7 +15,7 @@ mysql_connection_db_overwrite(HEURIST_COMMON_DB);
 $delete_bdl_id = intval(@$_REQUEST['delete_bdl_field']);
 if ($delete_bdl_id) {
 	mysql_query('delete from rec_detail_lookups where rdl_id = ' . $delete_bdl_id);
-	header('Location: edit_enum.php?rdt_id=' . $_REQUEST['rdt_id']);
+	header('Location: edit_enum.php?dty_ID=' . $_REQUEST['dty_ID']);
 	return;
 }
 
@@ -26,7 +26,7 @@ if ($update_bdl_id) {
 	$set_commands .= (@$_REQUEST[ 'bd_rdl_ont_id_'.@$_REQUEST['rdl_id']] ? ($set_commands?',':'').' rdl_ont_id = '. $_REQUEST[ 'bd_rdl_ont_id_'.@$_REQUEST['rdl_id']] : '');
 
 	mysql_query('update rec_detail_lookups '. $set_commands. ' where rdl_id = ' . $update_bdl_id);
-	header('Location: edit_enum.php?rdt_id=' . @$_REQUEST['rdt_id'].'&updating='.$set_commands );
+	header('Location: edit_enum.php?dty_ID=' . @$_REQUEST['dty_ID'].'&updating='.$set_commands );
 	return;
 }
 
@@ -39,7 +39,7 @@ $template = file_get_contents('edit_enum.html');
 $lexer = new Lexer($template);
 
 $body = new BodyScope($lexer);
-$body->global_vars['rdt_id'] = @$_REQUEST['rdt_id']? $_REQUEST['rdt_id'] : 0;
+$body->global_vars['dty_ID'] = @$_REQUEST['dty_ID']? $_REQUEST['dty_ID'] : 0;
 
 $body->verify();
 if (@$_REQUEST['_new_bdl_submit'] ) {

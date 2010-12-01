@@ -8,7 +8,7 @@ require_once(dirname(__FILE__).'/../../../common/connect/db.php');
 
 mysql_connection_db_select(DATABASE);
 
-$bdt = mysql__select_assoc('rec_detail_types', 'rdt_id', 'rdt_name', '1');
+$bdt = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '1');
 $rft = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', '1');
 $res = mysql_query('select * from defRecTypes left join rec_detail_requirements on rdr_rec_type=rty_ID order by rty_RecTypeGroupID > 1, rty_Name');
 $bdr = array();
@@ -17,7 +17,7 @@ while ($row = mysql_fetch_assoc($res)) {
 		$bdr[$row['rty_ID']] = array();
 	$bdr[$row['rty_ID']][$row['rdr_rdt_id']] = $row;
 	foreach ($bdt as $rdt_id => $rdt_name)
-		$bdr[$row['rty_ID']][$rdt_id]['rdt_name'] = $rdt_name;
+		$bdr[$row['rty_ID']][$rdt_id]['dty_Name'] = $rdt_name;
 }
 
 ?>
@@ -77,7 +77,7 @@ function decode_bdt($rec_types, $bdt_code) {
 
 	$rt_id = $refer_to_heurist_type_map[$rec_types][$colon_count];
 	$my_bdr = $bdr[$rt_id][intval(substr($bdt_code, $colon_count))];
-	$name = $my_bdr['rdr_name']? $my_bdr['rdr_name'] : $my_bdr['rdt_name'];
+	$name = $my_bdr['rdr_name']? $my_bdr['rdr_name'] : $my_bdr['dty_Name'];
 	return '<span class=red>'.$reftypeDescription.'</span>' . $name;
 }
 

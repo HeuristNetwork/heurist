@@ -64,9 +64,9 @@
 	<tbody>
 	 [foreach BIB_DETAIL_REQ bdr : 1 order by rdr_order, rdr_id]
 	 <tr>
-	  <td>[select BIB_DETAIL_TYPE bdt][rdt_id][end-select]</td>
+	  <td>[select BIB_DETAIL_TYPE bdt][dty_ID][end-select]</td>
 	  <td>[rdr_name]</td>
-	  <td>[select BIB_DETAIL_TYPE bdt][rdt_type][end-select]</td>
+	  <td>[select BIB_DETAIL_TYPE bdt][dty_Type][end-select]</td>
 	  <td></td>
 	  <td style="text-align: center;"><script type="text/javascript">document.write('[rdr_required]' == 'O'?'':'[rdr_required]');</script></td>
 	  <td style="text-align: center;"><script type="text/javascript">document.write([rdr_repeatable]?'1':'');</script></td>
@@ -100,9 +100,9 @@
 		[end-foreach]
 		[not-found]
 		 <tr style="color:gray;">
-		  <td>[select BIB_DETAIL_TYPE bdt][rdt_id][end-select]</td>
+		  <td>[select BIB_DETAIL_TYPE bdt][dty_ID][end-select]</td>
 		  <td>[rdr_name]</td>
-		  <td>[select BIB_DETAIL_TYPE bdt][rdt_type][end-select]</td>
+		  <td>[select BIB_DETAIL_TYPE bdt][dty_Type][end-select]</td>
 		  <td>[rdr_wg_id]</td>
 		  <td style="text-align: center;"><script type="text/javascript">document.write('[rdr_required]' == 'O'?'':'[rdr_required]');</script></td>
 		  <td style="text-align: center;"><script type="text/javascript">document.write([rdr_repeatable]?'1':'');</script></td>

@@ -700,19 +700,19 @@ error_log(print_r($bib_requirement_names[55], 1));
 
 		global $hash_info;
 		if (! $hash_info) {
-			// hash_info contains all the good stuff we need for determining the hash, indexed by reftype, and then by rdt_id
-			$res = mysql_query("select rdr_rec_type, rdt_id, rdt_type = 'resource' as isResource from rec_detail_requirements, rec_detail_types
-			                     where rdr_rdt_id=rdt_id and ((rdt_type != 'resource' and rdr_match) or (rdt_type = 'resource' and rdr_required = 'Y'))
-			                  order by rdr_rec_type, rdt_type = 'resource', rdt_id");
+			// hash_info contains all the good stuff we need for determining the hash, indexed by reftype, and then by dty_ID
+			$res = mysql_query("select rdr_rec_type, dty_ID, dty_Type = 'resource' as isResource from rec_detail_requirements, defDetailTypes
+			                     where rdr_rdt_id=dty_ID and ((dty_Type != 'resource' and rdr_match) or (dty_Type = 'resource' and rdr_required = 'Y'))
+			                  order by rdr_rec_type, dty_Type = 'resource', dty_ID");
 			$hash_info = array();
 			while ($row = mysql_fetch_assoc($res)) {
 				if (! @$hash_info[$row["rdr_rec_type"]]) $hash_info[$row["rdr_rec_type"]] = array();
-				$hash_info[$row["rdr_rec_type"]][$row["rdt_id"]] = $row["isResource"];
+				$hash_info[$row["rdr_rec_type"]][$row["dty_ID"]] = $row["isResource"];
 			}
 		}
 		global $bdt_to_reftype;
 		if (! @$bdt_to_reftype)
-			$bdt_to_reftype = mysql__select_assoc('rec_detail_types', 'rdt_id', 'rdt_constrain_rec_type', 'rdt_constrain_rec_type is not null');
+			$bdt_to_reftype = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_PtrConstraints', 'dty_PtrConstraints is not null');
 
 		$infos = $hash_info[$this->_reftype];
 
@@ -758,19 +758,19 @@ error_log(print_r($bib_requirement_names[55], 1));
 
 		global $hash_info;
 		if (! $hash_info) {
-			// hash_info contains all the good stuff we need for determining the hash, indexed by reftype, and then by rdt_id
-			$res = mysql_query("select rdr_rec_type, rdt_id, rdt_type = 'resource' as isResource from rec_detail_requirements, rec_detail_types
-			                     where rdr_rdt_id=rdt_id and ((rdt_type != 'resource' and rdr_match) or (rdt_type = 'resource' and rdr_required = 'Y'))
-			                  order by rdr_rec_type, rdt_type = 'resource', rdt_id");
+			// hash_info contains all the good stuff we need for determining the hash, indexed by reftype, and then by dty_ID
+			$res = mysql_query("select rdr_rec_type, dty_ID, dty_Type = 'resource' as isResource from rec_detail_requirements, defDetailTypes
+			                     where rdr_rdt_id=dty_ID and ((dty_Type != 'resource' and rdr_match) or (dty_Type = 'resource' and rdr_required = 'Y'))
+			                  order by rdr_rec_type, dty_Type = 'resource', dty_ID");
 			$hash_info = array();
 			while ($row = mysql_fetch_assoc($res)) {
 				if (! @$hash_info[$row["rdr_rec_type"]]) $hash_info[$row["rdr_rec_type"]] = array();
-				$hash_info[$row["rdr_rec_type"]][$row["rdt_id"]] = $row["isResource"];
+				$hash_info[$row["rdr_rec_type"]][$row["dty_ID"]] = $row["isResource"];
 			}
 		}
 		global $bdt_to_reftype;
 		if (! @$bdt_to_reftype)
-			$bdt_to_reftype = mysql__select_assoc('rec_detail_types', 'rdt_id', 'rdt_constrain_rec_type', 'rdt_constrain_rec_type is not null');
+			$bdt_to_reftype = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_PtrConstraints', 'dty_PtrConstraints is not null');
 
 		$infos = $hash_info[$this->_reftype];
 
@@ -852,7 +852,7 @@ class HeuristNativeField {
 	}
 
 	function getType() { return $this->_type; }
-		// Return bib_detail_type.rdt_id for this field, or 0 if this has no recognised type in Heurist
+		// Return bib_detail_type.dty_ID for this field, or 0 if this has no recognised type in Heurist
 		// (0-typed fields end up in the 'Other bibliographic data' section)
 
 	function getRawValue() { return $this->_raw_value; }
@@ -894,7 +894,7 @@ function decode_thesis_type(&$foreign_field) {	//SAW bug fix - the value passed 
 
 function is_enum_field($heurist_type) {
 	static $bdt_enums = NULL;
-	if (! $bdt_enums) $bdt_enums = mysql__select_assoc('rec_detail_types', 'rdt_id', '1', 'rdt_type="enum"');
+	if (! $bdt_enums) $bdt_enums = mysql__select_assoc('defDetailTypes', 'dty_ID', '1', 'dty_Type="enum"');
 
 	if (@$bdt_enums[$heurist_type]) return true;
 	else return false;
@@ -930,7 +930,7 @@ function load_bib_detail_requirements() {
 
 	// mysql_connection_db_select('SHSSERI_bookmarks');
 	//mysql_connection_select(DATABASE);
-	$res = mysql_query('select rdr_rec_type, rdr_rdt_id from rec_detail_requirements left join rec_detail_types on rdr_rdt_id=rdt_id where rdr_required = "Y" and rdt_type != "resource"');
+	$res = mysql_query('select rdr_rec_type, rdr_rdt_id from rec_detail_requirements left join defDetailTypes on rdr_rdt_id=dty_ID where rdr_required = "Y" and dty_Type != "resource"');
 	$rec_detail_requirements = array();
 	while ($row = mysql_fetch_row($res)) {
 		if (array_key_exists($row[0], $rec_detail_requirements))
@@ -943,11 +943,11 @@ function load_bib_detail_requirements() {
 
 function load_bib_requirement_names() {
 	// $bib_requirement_names is an array of arrays; outer array is indexed by reftype,
-	// inner array is a mapping of rdt_id to rdr_name, union a mapping of rdr_name to rdt_id
+	// inner array is a mapping of dty_ID to rdr_name, union a mapping of rdr_name to dty_ID
 	global $bib_requirement_names;
 
 	// mysql_connection_db_select('SHSSERI_bookmarks');
-	$res = mysql_query('select rdr_rec_type, rdr_rdt_id, rdr_name, rdt_name from rec_detail_requirements left join rec_detail_types on rdr_rdt_id=rdt_id');
+	$res = mysql_query('select rdr_rec_type, rdr_rdt_id, rdr_name, dty_Name from rec_detail_requirements left join defDetailTypes on rdr_rdt_id=dty_ID');
 	$bib_requirement_names = array();
 	while ($row = mysql_fetch_row($res)) {
 		if (! array_key_exists($row[0], $bib_requirement_names))
@@ -959,11 +959,11 @@ function load_bib_requirement_names() {
 
 
 function load_bib_type_names() {
-	// $bib_type_names is the mapping of rdt_id to rdt_name
+	// $bib_type_names is the mapping of dty_ID to dty_Name
 	global $bib_type_names;
 
 	// mysql_connection_db_select('SHSSERI_bookmarks');
-	$res = mysql_query('select rdt_id, rdt_name from rec_detail_types');
+	$res = mysql_query('select dty_ID, dty_Name from defDetailTypes');
 	$bib_type_names = array();
 	while ($row = mysql_fetch_row($res))
 		$bib_type_names[$row[0]] = $row[1];
@@ -971,11 +971,11 @@ function load_bib_type_names() {
 
 
 function load_bib_type_name_to_id() {
-	// $bib_type_names is the mapping of rdt_name to rdt_id
+	// $bib_type_names is the mapping of dty_Name to dty_ID
 	global $bib_type_name_to_id;
 
 	// mysql_connection_db_select('SHSSERI_bookmarks');
-	$res = mysql_query('select rdt_id, rdt_name from rec_detail_types');
+	$res = mysql_query('select dty_ID, dty_Name from defDetailTypes');
 	$bib_type_name_to_id = array();
 	while ($row = mysql_fetch_row($res))
 		$bib_type_name_to_id[strtolower($row[1])] = $row[0];
@@ -1016,7 +1016,7 @@ function load_reftype_name_to_id() {
 
 function load_bib_detail_lookups() {
 	// $rec_detail_lookups is an array of arrays:
-	// the outer keys are the rdt_id, the inner arrays are mapping from the lookup value to the lookup ID
+	// the outer keys are the dty_ID, the inner arrays are mapping from the lookup value to the lookup ID
 
 	global $rec_detail_lookups, $bib_detail_lookups_lc;	// staid and lowercase versions of this data
 

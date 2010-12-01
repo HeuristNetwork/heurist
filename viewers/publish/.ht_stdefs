@@ -75,9 +75,9 @@ $MAINTABLES['BIB_DETAIL'] = 'rec_details';
 	$PKEY['BIB_DETAIL'] = 'rd_id';
 	$JOINS['BIB_DETAIL'] = array('BIBLIO-ID' => 'rd_rec_id', 'LINKED_BIBLIO-ID' => 'rd_rec_id', 'BIB_DETAIL_TYPE-ID' => 'rd_type');
 
-$MAINTABLES['BIB_DETAIL_TYPE'] = 'rec_detail_types';
-	$PKEY['BIB_DETAIL_TYPE'] = 'rdt_id';
-	$JOINS['BIB_DETAIL_TYPE'] = array('REFTYPE-ID' => 'rdt_constrain_rec_type');
+$MAINTABLES['BIB_DETAIL_TYPE'] = 'defDetailTypes';
+	$PKEY['BIB_DETAIL_TYPE'] = 'dty_ID';
+	$JOINS['BIB_DETAIL_TYPE'] = array('REFTYPE-ID' => 'dty_PtrConstraints');
 
 $MAINTABLES['BIB_DETAIL_REQ'] = 'rec_detail_requirements';
 	$PKEY['BIB_DETAIL_REQ'] = 'rdr_id';

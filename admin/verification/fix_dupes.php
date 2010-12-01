@@ -34,8 +34,8 @@ if (! @$_REQUEST['bib_ids']) return;
 mysql_connection_db_select(DATABASE);
 //mysql_connection_db_select("`heuristdb-nyirti`");   //for debug
 
-$bdts = mysql__select_assoc('rec_detail_types', 'rdt_id', 'rdt_name', '1');
-$reference_bdts = mysql__select_assoc('rec_detail_types', 'rdt_id', 'rdt_name', 'rdt_type="resource"');
+$bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '1');
+$reference_bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', 'dty_Type="resource"');
 
 ?>
 
@@ -670,8 +670,8 @@ function do_fix_dupe() {
     }
 
  // move dup record pointers to master record
-    mysql_query('update rec_details left join rec_detail_types on rdt_id=rd_type set rd_val='.$master_rec_id.
-                 ' where rd_val in '.$dup_rec_list.' and rdt_type="resource"');
+    mysql_query('update rec_details left join defDetailTypes on dty_ID=rd_type set rd_val='.$master_rec_id.
+                 ' where rd_val in '.$dup_rec_list.' and dty_Type="resource"');
 
 //delete dups
     mysql_query('delete from records where rec_id in '.$dup_rec_list);

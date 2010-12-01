@@ -466,8 +466,8 @@ class SortPhrase {
 					return array("$bd_name.rd_val".$scending, "$bd_name.rd_val".$scending,
 					             "left join rec_details $bd_name on $bd_name.rd_rec_id=rec_id and rd_type=$field_id ");
 				} else {
-					// have to introduce a rec_detail_types join to ensure that we only use the linked resource's title if this is in fact a resource type (previously any integer, e.g. a date, could potentially index another records record)
-					return array(" ifnull((select if(rdt_type='resource', link.rec_title, rd_val) from rec_details left join rec_detail_types on rdt_id=rd_type left join records link on rd_val=link.rec_id where rd_rec_id=TOPBIBLIO.rec_id and rd_type=$field_id order by if($field_id=$CREATOR, rd_id, link.rec_title) limit 1), '~~') ".$scending,
+					// have to introduce a defDetailTypes join to ensure that we only use the linked resource's title if this is in fact a resource type (previously any integer, e.g. a date, could potentially index another records record)
+					return array(" ifnull((select if(dty_Type='resource', link.rec_title, rd_val) from rec_details left join defDetailTypes on dty_ID=rd_type left join records link on rd_val=link.rec_id where rd_rec_id=TOPBIBLIO.rec_id and rd_type=$field_id order by if($field_id=$CREATOR, rd_id, link.rec_title) limit 1), '~~') ".$scending,
 							"rd_type=$field_id", NULL);
 				}
 			} else if (preg_match('/^(?:f|field):"?([^":]+)"?(:m)?/i', $text, $matches)) {
@@ -476,10 +476,10 @@ class SortPhrase {
 				if ($show_multiples) {	// "multiple" flag has been provided -- provide (potentially) multiple matches for each entry by left-joining rec_details
 					$bd_name = 'bd' . (count($this->parent->sort_phrases) + 1);
 					return array("$bd_name.rd_val".$scending, "$bd_name.rd_val".$scending,
-					             "left join rec_detail_types bdt$bd_name on bdt$bd_name.rdt_name='".addslashes($field_name)."' "
-					            ."left join rec_details $bd_name on $bd_name.rd_rec_id=rec_id and $bd_name.rd_type=bdt$bd_name.rdt_id ");
+					             "left join defDetailTypes bdt$bd_name on bdt$bd_name.dty_Name='".addslashes($field_name)."' "
+					            ."left join rec_details $bd_name on $bd_name.rd_rec_id=rec_id and $bd_name.rd_type=bdt$bd_name.dty_ID ");
 				} else {
-					return array(" ifnull((select if(rdt_type='resource', link.rec_title, rd_val) from rec_detail_types, rec_details left join records link on rd_val=link.rec_id where rdt_name='".addslashes($field_name)."' and rd_rec_id=TOPBIBLIO.rec_id and rd_type=rdt_id order by if(rdt_id=$CREATOR,rd_id,link.rec_title) limit 1), '~~') ".$scending,
+					return array(" ifnull((select if(dty_Type='resource', link.rec_title, rd_val) from defDetailTypes, rec_details left join records link on rd_val=link.rec_id where dty_Name='".addslashes($field_name)."' and rd_rec_id=TOPBIBLIO.rec_id and rd_type=dty_ID order by if(dty_ID=$CREATOR,rd_id,link.rec_title) limit 1), '~~') ".$scending,
 							"rd_type=$field_id", NULL);
 				}
 			}
@@ -653,10 +653,10 @@ class AnyPredicate extends Predicate {
 	function makeSQL() {
 		$not = ($this->parent->negate)? 'not ' : '';
 		return $not . ' (exists (select * from rec_details rd '
-		                          . 'left join rec_detail_types on rd_type=rdt_id '
+		                          . 'left join defDetailTypes on rd_type=dty_ID '
 		                          . 'left join records link on rd.rd_val=link.rec_id '
 		                       . 'where rd.rd_rec_id=TOPBIBLIO.rec_id '
-		                       . '  and if(rdt_type != "resource", '
+		                       . '  and if(dty_Type != "resource", '
 		                                  .'rd.rd_val like "%'.addslashes($this->value).'%", '
 		                                  .'link.rec_title like "%'.addslashes($this->value).'%"))'
 		                         .' or rec_title like "%'.addslashes($this->value).'%") ';
@@ -707,16 +707,16 @@ class FieldPredicate extends Predicate {
 		}
 		else {
 			/* user has specified the field name */
-			$rd_type_clause = 'rdt.rdt_name like "' . addslashes($this->field_type) . '%"';
+			$rd_type_clause = 'rdt.dty_Name like "' . addslashes($this->field_type) . '%"';
 		}
 
 		return $not . 'exists (select * from rec_details rd '
-		                        . 'left join rec_detail_types rdt on rdt.rdt_id=rd.rd_type '
+		                        . 'left join defDetailTypes rdt on rdt.dty_ID=rd.rd_type '
 		                        . 'left join records link on rd.rd_val=link.rec_id '
 		                            . 'where rd.rd_rec_id=TOPBIBLIO.rec_id '
-		                            . '  and if(rdt_type = "resource", '
+		                            . '  and if(dty_Type = "resource", '
 		                                      .'link.rec_title ' . $match_pred . ', '
-		                       . ($timestamp ? 'if(rdt_type = "date", '
+		                       . ($timestamp ? 'if(dty_Type = "date", '
 		                                         .'str_to_date(rd.rd_val, "%Y-%m-%d %H:%i:%s") ' . $date_match_pred . ', '
 		                                         .'rd.rd_val ' . $match_pred . ')'
 		                                     : 'rd.rd_val ' . $match_pred ) . ')'
@@ -857,13 +857,13 @@ class BibIDPredicate extends Predicate {
 class LinkToPredicate extends Predicate {
 	function makeSQL() {
 		if ($this->value) {
-			return 'exists (select * from rec_detail_types, rec_details bd '
-			              . 'where bd.rd_rec_id=TOPBIBLIO.rec_id and rdt_id=rd_type and rdt_type="resource" '
+			return 'exists (select * from defDetailTypes, rec_details bd '
+			              . 'where bd.rd_rec_id=TOPBIBLIO.rec_id and dty_ID=rd_type and dty_Type="resource" '
 			              . '  and bd.rd_val in (' . join(',', array_map('intval', explode(',', $this->value))) . '))';
 		}
 		else {
-			return 'exists (select * from rec_detail_types, rec_details bd '
-			              . 'where bd.rd_rec_id=TOPBIBLIO.rec_id and rdt_id=rd_type and rdt_type="resource")';
+			return 'exists (select * from defDetailTypes, rec_details bd '
+			              . 'where bd.rd_rec_id=TOPBIBLIO.rec_id and dty_ID=rd_type and dty_Type="resource")';
 		}
 	}
 }
@@ -872,13 +872,13 @@ class LinkToPredicate extends Predicate {
 class LinkedToPredicate extends Predicate {
 	function makeSQL() {
 		if ($this->value) {
-			return 'exists (select * from rec_detail_types, rec_details bd '
-			              . 'where bd.rd_rec_id in (' . join(',', array_map('intval', explode(',', $this->value))) .') and rdt_id=rd_type and rdt_type="resource" '
+			return 'exists (select * from defDetailTypes, rec_details bd '
+			              . 'where bd.rd_rec_id in (' . join(',', array_map('intval', explode(',', $this->value))) .') and dty_ID=rd_type and dty_Type="resource" '
 			              . '  and bd.rd_val=TOPBIBLIO.rec_id)';
 		}
 		else {
-			return 'exists (select * from rec_detail_types, rec_details bd '
-			              . 'where bd.rd_val=TOPBIBLIO.rec_id and rdt_id=rd_type and rdt_type="resource")';
+			return 'exists (select * from defDetailTypes, rec_details bd '
+			              . 'where bd.rd_val=TOPBIBLIO.rec_id and dty_ID=rd_type and dty_Type="resource")';
 		}
 	}
 }

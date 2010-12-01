@@ -309,7 +309,7 @@ function uploadFiles() {
 /*
 		$bdr = &get_bdr($matches[1]);
 		$bdt = &get_bdt($bdr['rdr_rdt_id']);
-		if (! $bdr  ||  ! $bdt  ||  $bdt['rdt_type'] != 'file') continue;
+		if (! $bdr  ||  ! $bdt  ||  $bdt['dty_Type'] != 'file') continue;
 */
 
 		/* Ooh, this is annoying / odd:
@@ -400,7 +400,7 @@ function upload_file($name, $type, $tmp_name, $error, $size) {
 function getInputHandlerForType($typeID) {
 	static $typeToSpecies = null;
 	if (! $typeToSpecies) {
-		$typeToSpecies = mysql__select_assoc("rec_detail_types", "rdt_id", "rdt_type", "1");
+		$typeToSpecies = mysql__select_assoc("defDetailTypes", "dty_ID", "dty_Type", "1");
 	}
 
 	static $speciesToInput = null;

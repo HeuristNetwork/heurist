@@ -58,8 +58,8 @@ $version = 1; // Output format version number. This will be read by the crosswal
 // RECORD DETAIL TYPES
 
     print "\n\n\n-- RECORD DETAIL TYPES";print "\n";
-    print "-- rdt_id,rdt_name,rdt_description,rdt_type,rdt_prompt,rdt_help,rdt_constrain_rec_type\n";
-    $query = "select * from rec_detail_types limit $lim";
+    print "-- dty_ID,dty_Name,dty_Description,dty_Type,dty_Prompt,dty_Help,dty_PtrConstraints\n";
+    $query = "select * from defDetailTypes limit $lim";
     $res = mysql_query($query);
     $fmt = 'recdetailtypes';
 
@@ -140,7 +140,7 @@ function print_row($row,$fmt) {
          break;
 
       case 'recdetailtypes': // Data from the rec_details table
-        print "($row[rdt_id],`$row[rdt_name]`,`$row[rdt_description]`,$row[rdt_type],`$row[rdt_prompt]`,`$row[rdt_help]`,$row[rdt_constrain_rec_type]),\n";
+        print "($row[dty_ID],`$row[dty_Name]`,`$row[dty_Description]`,$row[dty_Type],`$row[dty_Prompt]`,`$row[dty_Help]`,$row[dty_PtrConstraints]),\n";
         break;
 
       case 'recdetailrequirements': // Data from the rec_detail_requirements table

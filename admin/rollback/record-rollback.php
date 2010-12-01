@@ -112,7 +112,7 @@ function showRecordRollback ($record, $changes) {
 	print '</div>';
 
 	$reqs = getRecordRequirements($record["rec_type"]);
-	$detail_names = mysql__select_assoc("rec_detail_types", "rdt_id", "rdt_name", 1);
+	$detail_names = mysql__select_assoc("defDetailTypes", "dty_ID", "dty_Name", 1);
 
 
 	foreach ($reqs as $dt => $req) {

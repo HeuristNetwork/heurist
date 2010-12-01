@@ -28,14 +28,14 @@ require_once(dirname(__FILE__).'/../../common/connect/db.php');
 
 mysql_connection_db_select(DATABASE);
 
-$res = mysql_query('select rd_rec_id, rdt_name, rdt_constrain_rec_type, rec_id, rec_title, rty_Name
-                      from rec_detail_types
-                 left join rec_details on rdt_id = rd_type
+$res = mysql_query('select rd_rec_id, dty_Name, dty_PtrConstraints, rec_id, rec_title, rty_Name
+                      from defDetailTypes
+                 left join rec_details on dty_ID = rd_type
                  left join records on rec_id = rd_val
                  left join defRecTypes on rty_ID = rec_type
-                     where rdt_type = "resource"
-                       and rdt_constrain_rec_type > 0
-                       and rec_type != rdt_constrain_rec_type');
+                     where dty_Type = "resource"
+                       and dty_PtrConstraints > 0
+                       and rec_type not in (dty_PtrConstraints)');
 $bibs = array();
 while ($row = mysql_fetch_assoc($res))
 	$bibs[$row['rd_rec_id']] = $row;
@@ -52,7 +52,7 @@ foreach ($bibs as $row) {
 ?>
  <tr>
   <td><a target=_new href='../../records/editrec/edit.html?bib_id=<?= $row['rd_rec_id'] ?>'><?= $row['rd_rec_id'] ?></a></td>
-  <td><?= $row['rdt_name'] ?></td>
+  <td><?= $row['dty_Name'] ?></td>
   <td>points to</td>
   <td><?= $row['rec_id'] ?> (<?= $row['rty_Name'] ?>) - <?= substr($row['rec_title'], 0, 50) ?></td>
  </tr>
@@ -64,12 +64,12 @@ foreach ($bibs as $row) {
 <hr>
 
 <?php
-$res = mysql_query('select rd_rec_id, rdt_name, a.rec_title
+$res = mysql_query('select rd_rec_id, dty_Name, a.rec_title
                       from rec_details
-                 left join rec_detail_types on rdt_id = rd_type
+                 left join defDetailTypes on dty_ID = rd_type
                  left join records a on a.rec_id = rd_rec_id
                  left join records b on b.rec_id = rd_val
-                     where rdt_type = "resource"
+                     where dty_Type = "resource"
 		               and a.rec_id is not null
                        and b.rec_id is null');
 $bibs = array();
@@ -92,7 +92,7 @@ foreach ($bibs as $row) {
   <td><input type=checkbox name=bib_cb value=<?= $row['rd_rec_id'] ?>></td>
   <td><a target=_new href='../../records/editrec/edit.html?bib_id=<?= $row['rd_rec_id'] ?>'><?= $row['rd_rec_id'] ?></a></td>
   <td><?= $row['rec_title'] ?></td>
-  <td><?= $row['rdt_name'] ?></td>
+  <td><?= $row['dty_Name'] ?></td>
  </tr>
 <?php
 }

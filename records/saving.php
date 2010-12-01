@@ -193,7 +193,7 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 		if (! ($bdtID = intval(substr($type, 2)))) continue;
 		array_push($types, $bdtID);
 	}
-	$typeVarieties = mysql__select_assoc("rec_detail_types", "rdt_id", "rdt_type", "rdt_id in (" . join($types, ",") . ")");
+	$typeVarieties = mysql__select_assoc("defDetailTypes", "dty_ID", "dty_Type", "dty_ID in (" . join($types, ",") . ")");
 	$repeatable = mysql__select_assoc("rec_detail_requirements", "rdr_rdt_id", "rdr_repeatable", "rdr_rdt_id in (" . join($types, ",") . ") and rdr_rec_type=" . $recordType);
 
 	$updates = array();

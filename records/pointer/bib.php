@@ -185,9 +185,9 @@ function getAllBibDetails($rec_id) {
 	                           if(rd_geo is not null, astext(envelope(rd_geo)), null) as envelope,
 	                           if(rd_geo is not null, astext(rd_geo), null) as rd_geo
 	                      from rec_details
-	                 left join rec_detail_types on rdt_id=rd_type
-	                 left join records on rec_id=rd_val and rdt_type='resource'
-	                 left join rec_detail_lookups on rdt_type='enum' and rdl_id = rd_val
+	                 left join defDetailTypes on dty_ID=rd_type
+	                 left join records on rec_id=rd_val and dty_Type='resource'
+	                 left join rec_detail_lookups on dty_Type='enum' and rdl_id = rd_val
 	                     where rd_rec_id = $rec_id order by rd_id");
 	$bibDetails = array();
 	while ($row = mysql_fetch_assoc($res)) {
@@ -361,19 +361,19 @@ function getAllworkgroupTags($rec_id) {
 
 function getConstraintsByRdt($recType) {
 	$rcons = array();
-	$res = mysql_query("select rcon_target_rt_id as rty_ID, rcon_rdt_id as rdt_id,
+	$res = mysql_query("select rcon_target_rt_id as rty_ID, rcon_rdt_id as dty_ID,
 						rcon_rdl_ids as rdl_ids, rcon_ont_id as vcb_ID, rcon_order, rcon_limit
 						from rec_constraints
 						where rcon_source_rt_id=$recType
 						order by rcon_rdt_id, rcon_target_rt_id, rcon_order ");
 	while($row = mysql_fetch_assoc($res)) {
-		if (! @$rcons[$row["rdt_id"]]) {
-			$rcons[$row["rdt_id"]] = array();
+		if (! @$rcons[$row["dty_ID"]]) {
+			$rcons[$row["dty_ID"]] = array();
 		}
-		if (! @$rcons[$row["rdt_id"]][$row["rty_ID"]]) {
-			$rcons[$row["rdt_id"]][$row["rty_ID"]] = array();
+		if (! @$rcons[$row["dty_ID"]][$row["rty_ID"]]) {
+			$rcons[$row["dty_ID"]][$row["rty_ID"]] = array();
 		}
-		array_push($rcons[$row["rdt_id"]][$row["rty_ID"]],$row);
+		array_push($rcons[$row["dty_ID"]][$row["rty_ID"]],$row);
 	}
 	return $rcons;
 }

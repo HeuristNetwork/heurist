@@ -44,13 +44,13 @@ body {
 <div id="maindiv">
 [select BIB_DETAIL_TYPE bdt]
   <span style="float: right; cursor: pointer;" onclick="window.parent.finish_edit_enum_types();">&#91;close&#93;</span>
-  <div style="font-weight: bold;">Values for &lt;[rdt_name]&gt;:</div>
+  <div style="font-weight: bold;">Values for &lt;[dty_Name]&gt;:</div>
 
   <form method="post">
   <div style="height: 200px; overflow: auto; margin: 5px; border: 1px dotted lightgray; background-color: #FFFFDD;">
 
   [search BIB_DETAIL_LOOKUP bdl]
-    [auto : rdl_rdt_id : rdt_id]
+    [auto : rdl_rdt_id : dty_ID]
     [foreach BIB_DETAIL_LOOKUP bd : 1 order by rdl_id]
      <div><input style="margin: 1px;" type=checkbox name='active_rdl[literal][[end-literal][rdl_id][literal]][end-literal]' [select ACTIVE_BIB_DETAIL_LOOKUP abdl]checked[end-select][not-found][end-not-found]> [rdl_value]</div>
     [end-foreach]
@@ -59,7 +59,7 @@ body {
   </div>
   <div>
 
-   <input type="hidden" name="rdt_id" value="[rdt_id]">
+   <input type="hidden" name="dty_ID" value="[dty_ID]">
    <input type="hidden" name=update-active-rdls value=1>
    <input type=submit value=save style="font-weight: bold;">
   </div>

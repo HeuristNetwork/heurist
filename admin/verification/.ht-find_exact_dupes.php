@@ -85,9 +85,9 @@ function do_fix_dupe($bibIDs) {
         $bibCount = mysql_affected_rows();
 		$errors .= mysql_error() . ' ';
 
-        mysql_query("update rec_details left join rec_detail_types on rdt_id=rd_type
+        mysql_query("update rec_details left join defDetailTypes on dty_ID=rd_type
                                              set rd_val=$masterBibID
-                                           where rd_val in ($bibIDlist) and rdt_type='resource'");
+                                           where rd_val in ($bibIDlist) and dty_Type='resource'");
 	$bdCount = mysql_affected_rows();
 		$errors .= mysql_error() . ' ';
 

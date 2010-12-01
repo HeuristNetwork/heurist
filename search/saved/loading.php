@@ -208,14 +208,14 @@ function loadRecordDetails(&$record) {
 	            rd_val,
 	            astext(rd_geo) as rd_geo,
 	            rd_file_id,
-	            rdt_type,
+	            dty_Type,
 	            rec_id,
 	            rec_title,
 	            rec_type,
 	            rec_hhash
 	       from rec_details
-	  left join rec_detail_types on rdt_id = rd_type
-	  left join records on rec_id = rd_val and rdt_type = 'resource'
+	  left join defDetailTypes on dty_ID = rd_type
+	  left join records on rec_id = rd_val and dty_Type = 'resource'
 	      where rd_rec_id = $recID");
 
 	$details = array();
@@ -226,7 +226,7 @@ function loadRecordDetails(&$record) {
 
 		$detailValue = null;
 
-		switch ($rd["rdt_type"]) {
+		switch ($rd["dty_Type"]) {
 			case "freetext": case "blocktext":
 			case "integer": case "float": case "boolean":
 			case "date": case "year":

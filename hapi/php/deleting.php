@@ -9,9 +9,9 @@ function deleteRecord($id) {
 
 	// find any references to the record
 	$res = mysql_query("SELECT DISTINCT rd_rec_id
-	                      FROM rec_detail_types
-	                 LEFT JOIN rec_details ON rd_type = rdt_id
-	                     WHERE rdt_type = 'resource'
+	                      FROM defDetailTypes
+	                 LEFT JOIN rec_details ON rd_type = dty_ID
+	                     WHERE dty_Type = 'resource'
 	                       AND rd_val = " . $id);
 	$reference_count = mysql_num_rows($res);
 	$reference_ids = array();

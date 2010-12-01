@@ -424,9 +424,9 @@ function clear_fields() {
  <optgroup id=rec_type-specific-fields label="Reftype specific fields" style="display: none;"></optgroup>
  <optgroup label="Generic fields">
 <?php
-	$res = mysql_query('select rdt_id, rdt_name from '.DATABASE.'.rec_detail_types order by rdt_name');
+	$res = mysql_query('select dty_ID, dty_Name from '.DATABASE.'.defDetailTypes order by dty_Name');
 	while ($row = mysql_fetch_assoc($res)) {
-?>          <option value="&quot;<?= htmlspecialchars($row['rdt_name']) ?>&quot;"><?= htmlspecialchars($row['rdt_name']) ?></option>
+?>          <option value="&quot;<?= htmlspecialchars($row['dty_Name']) ?>&quot;"><?= htmlspecialchars($row['dty_Name']) ?></option>
 <?php	}	?>
  </optgroup>
 </select>
@@ -592,9 +592,9 @@ function setAscDescLabels(sortbyValue) {
  <option value=p>popularity</option>
 <optgroup label="Detail fields">
 <?php
-	$res = mysql_query('select rdt_id, rdt_name from '.DATABASE.'.rec_detail_types order by rdt_name');
+	$res = mysql_query('select dty_ID, dty_Name from '.DATABASE.'.defDetailTypes order by dty_Name');
 	while ($row = mysql_fetch_assoc($res)) {
-?>          <option value="f:&quot;<?= $row['rdt_name'] ?>&quot;"><?= htmlspecialchars($row['rdt_name']) ?></option>
+?>          <option value="f:&quot;<?= $row['dty_Name'] ?>&quot;"><?= htmlspecialchars($row['dty_Name']) ?></option>
 <?php	}	?>
 </optgroup>
 </select>

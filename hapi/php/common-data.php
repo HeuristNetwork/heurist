@@ -42,12 +42,12 @@ $res = mysql_query("select rty_ID, rty_Name, rty_CanonicalTitleMask from active_
 $recordTypes = array();
 while ($row = mysql_fetch_row($res)) array_push($recordTypes, $row);
 
-$res = mysql_query("select rdt_id, rdt_name, rdt_prompt, rdt_type, NULL as enums, rdt_constrain_rec_type from rec_detail_types");
+$res = mysql_query("select dty_ID, dty_Name, dty_Prompt, dty_Type, NULL as enums, dty_PtrConstraints from defDetailTypes");
 $detailTypes = array();
 $detailTypesById = array();
 while ($row = mysql_fetch_row($res)) {
-	switch ($row[3]) {	// determine variety from rdt_type
-		// these ones thoughtfully have the same name for their variety as they do for their rdt_type
+	switch ($row[3]) {	// determine variety from dty_Type
+		// these ones thoughtfully have the same name for their variety as they do for their dty_Type
 	    case "date":
 	    case "file":
 		break;
@@ -58,7 +58,7 @@ while ($row = mysql_fetch_row($res)) {
 
 	    case "enum":
 		$row[3] = "enumeration";
-		$lres = mysql_query("select A.rdl_value, B.rdl_value from active_rec_detail_lookups left join rec_detail_lookups A on ardl_id=A.rdl_id left join rec_detail_lookups B on A.rdl_id=B.rdl_related_rdl_id where A.rdl_rdt_id=" . intval($row[0])." and A.rdl_value is not null");
+		$lres = mysql_query("select A.rdl_value, B.rdl_value from rec_detail_lookups A left join rec_detail_lookups B on A.rdl_id=B.rdl_related_rdl_id where A.rdl_rdt_id=" . intval($row[0])." and A.rdl_value is not null");
 		$row[4] = array();
 
 		$rdl = mysql_fetch_row($lres);

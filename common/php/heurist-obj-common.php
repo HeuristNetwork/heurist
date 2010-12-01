@@ -123,8 +123,8 @@ print "\n\t}\n};\n";
 
 /* bibDetailTypes */
 
-$colNames = array("rdt_id", "rdt_name", "rdt_type", "rdt_constrain_rec_type");
-$res = mysql_query("select " . join(", ", $colNames) . " from rec_detail_types order by rdt_id");
+$colNames = array("dty_ID", "dty_Name", "dty_Type", "dty_PtrConstraints");
+$res = mysql_query("select " . join(", ", $colNames) . " from defDetailTypes order by dty_ID");
 
 $bdt = array();
 $first = true;
@@ -134,7 +134,7 @@ print "\tvaluesByBibDetailTypeID: {\n";
 while ($row = mysql_fetch_assoc($res)) {
 	if (! $first) print ",\n";
 	$first = false;
-	print "\t\t\"".slash($row["rdt_id"])."\": [ \"";
+	print "\t\t\"".slash($row["dty_ID"])."\": [ \"";
 	print join("\", \"", array_map("slash", $row)) . "\" ]";
 }
 print "\n\t}\n};\n";
@@ -146,13 +146,13 @@ print "\n\t}\n};\n";
 | rdl_value  | varchar(63) | YES  |     | NULL    |                |
 | rdl_ont_id | smallint(6) | YES  | MUL | NULL    |                |
 */
-$res = mysql_query("select rdl_id,rdl_rdt_id, rdl_value, rdl_ont_id from active_rec_detail_lookups left join rec_detail_lookups on rdl_id = ardl_id order by rdl_rdt_id,rdl_ont_id, rdl_value");
+$res = mysql_query("select rdl_id,rdl_rdt_id, rdl_value, rdl_ont_id from rec_detail_lookups order by rdl_rdt_id,rdl_ont_id, rdl_value");
 print "\ntop.HEURIST.bibDetailLookups = {\n";
 $first = true;
 $prev_rdt_id = -1;
 while ($row = mysql_fetch_assoc($res)) {
 	if (!$row["rdl_rdt_id"]) continue;	// detail type id in not valid so skip it
-	if ($prev_rdt_id != $row["rdl_rdt_id"]) {	/* new rdt_id */
+	if ($prev_rdt_id != $row["rdl_rdt_id"]) {	/* new dty_ID */
 		$prev_ont_id = -1;
 		if (! $first) {
 			print " ]},\n\t\"" . $row["rdl_rdt_id"] . "\": {\n\t\t\"". $row['rdl_ont_id'] . "\": [ ";

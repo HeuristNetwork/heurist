@@ -299,15 +299,15 @@ function print_private_details($bib) {
 	
 
 	function print_public_details($bib) {
-		$bds_res = mysql_query('select rdt_id,
-		                               ifnull(rdro.rdr_name, ifnull(rdr.rdr_name, rdt_name)) as name,
+		$bds_res = mysql_query('select dty_ID,
+		                               ifnull(rdro.rdr_name, ifnull(rdr.rdr_name, dty_Name)) as name,
 		                               rd_val as val,
 		                               rd_file_id,
-		                               rdt_type,
+		                               dty_Type,
 		                               if(rd_geo is not null, astext(rd_geo), null) as rd_geo,
 		                               if(rd_geo is not null, astext(envelope(rd_geo)), null) as bd_geo_envelope
 		                          from rec_details
-		                     left join rec_detail_types on rdt_id = rd_type
+		                     left join defDetailTypes on dty_ID = rd_type
 		                     left join rec_detail_requirements rdr on rdr.rdr_rdt_id = rd_type
 		                                                          and rdr.rdr_rec_type = '.$bib['rec_type'].'
 		                     left join rec_detail_requirements_overrides rdro on rdro.rdr_rdt_id = rd_type
@@ -318,7 +318,7 @@ function print_private_details($bib) {
 		                               rdro.rdr_order,
 		                               rdr.rdr_order is null,
 		                               rdr.rdr_order,
-		                               rdt_id,
+		                               dty_ID,
 		                               rd_id');
 
 		$bds = array();
@@ -326,19 +326,19 @@ function print_private_details($bib) {
 
 		while ($bd = mysql_fetch_assoc($bds_res)) {
 
-			if ($bd['rdt_id'] == 603) {
+			if ($bd['dty_ID'] == 603) {
 				array_push($thumbs, array(
 					'url' => $bd['val'],
 					'thumb' => HEURIST_SITE_PATH.'common/php/resize_image.php?file_url='.$bd['val']
 				));
 			}
 
-			if ($bd['rdt_type'] == 'resource') {
+			if ($bd['dty_Type'] == 'resource') {
 
 				$res = mysql_query('select rec_title from records where rec_id='.intval($bd['val']));
 				$row = mysql_fetch_row($res);
 				$bd['val'] = '<a target="_new" href="'.HEURIST_SITE_PATH.'records/viewrec/view.php?bib_id='.$bd['val'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row[0]).'</a>';
-			} else if ($bd['rdt_type'] == 'file'  &&  $bd['rd_file_id']) {
+			} else if ($bd['dty_Type'] == 'file'  &&  $bd['rd_file_id']) {
 				$res = mysql_query('select * from files where file_id='.intval($bd['rd_file_id']));
 				$file = mysql_fetch_assoc($res);
 				if ($file) {
@@ -484,10 +484,10 @@ function print_relation_details($bib) {
 function print_linked_details($bib) {
 	$res = mysql_query('select *
 	                      from rec_details
-	                 left join rec_detail_types on rdt_id = rd_type
+	                 left join defDetailTypes on dty_ID = rd_type
 	                 left join records on rec_id = rd_rec_id
-	                     where rdt_type = "resource"
-	                       and rd_type = rdt_id
+	                     where dty_Type = "resource"
+	                       and rd_type = dty_ID
 	                       and rd_val = ' . $bib['rec_id'] . '
 	                       and rec_type != 52');
 
