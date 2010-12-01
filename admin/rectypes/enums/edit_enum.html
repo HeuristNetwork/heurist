@@ -78,7 +78,7 @@
 			<div style="font-weight: bold;">
 				<span style="margin: 0px 0px 0px 25px;">Values for </span>
 				<span style="margin: 0px 20px 0px 10px;">&nbsp;&lt;<span style="max-width: 30px; overflow: hidden; ">[rdt_name]</span>&gt;</span>
-				<span style="margin: 0px 10px;">in Ontology</span>
+				<span style="margin: 0px 10px;">in Vocabulary</span>
 				<span style="margin: 0px 20px;">Description</span>
 			</div>
 			<div class="enum-list-div">
@@ -91,7 +91,7 @@
 						<input type="text" name="rdl_value" value="[rdl_value]" class="col1 row-elem" style="width: 110px;">
 						<input type="text" name="rdt1_id" value="[rdl_rdt_id]" class="col2 row-elem" disabled="disabled" >
 						<input type="hidden" name="rdt_id" value="[rdl_rdt_id]">
-						[dropdown required : rdl_ont_id : Ontology : select ont_id, ont_name from ontologies :class="col3 row-elem" : Select Ontology]
+						[dropdown required : rdl_ont_id : Vocabulary : select vcb_ID, vcb_Name from defVocabularies :class="col3 row-elem" : Select Vocabulary]
 						<input type="text" name="rdl_description" value="[rdl_description]" class="col4 row-elem">
 						<input type="submit" value="Update" class="button row-button-elem">
 					</div>
@@ -107,7 +107,7 @@
 					[insert MASTER_BIB_DETAIL_LOOKUP new_bdl]
 					[auto : rdl_rdt_id : rdt_id]
 					New value: [textbox REQUIRED: rdl_value : new enumeration value : style="width: 110px;" id="new_value_elt"]
-					Ontology: [dropdown REQUIRED: rdl_ont_id : ontology for new enumeration : select ont_id, ont_name from ontologies :style="width: 60px;" id="new_ont_elt": Select Ontology... ]
+					Vocabulary: [dropdown REQUIRED: rdl_ont_id : vocabulary for new enumeration : select vcb_ID, vcb_Name from defVocabularies :style="width: 60px;" id="new_ont_elt": Select Vocabulary... ]
 					Description: [textbox : rdl_description : description : style="width: 110px;" id="new_desc_elt"]
 					<input type="submit" value="Add" style="font-weight: bold;">
 					[end-insert]

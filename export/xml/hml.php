@@ -132,7 +132,7 @@ $INV = array();	//detail type inverse
 $WGN = array();	//work group name
 $RDL = array();	//record detail lookup
 $RDLV = array();	//record detail lookup by value
-$ONT = array();	//ontology lookup
+$VOC = array();	//vocabulary lookup
 // record type labels
 $query = 'SELECT rty_ID, rty_Name FROM defRecTypes';
 $res = mysql_query($query);
@@ -165,11 +165,11 @@ while ($row = mysql_fetch_assoc($res)) {
 	$RDLV[$row['rdl_value']] = $row;
 }
 
-// lookup for ontologies
-$query = 'SELECT ont_id, ont_name, ont_refurl FROM ontologies';
+// lookup for defVocabularies
+$query = 'SELECT vcb_ID, vcb_Name, vcb_RefURL FROM defVocabularies';
 $res = mysql_query($query);
 while ($row = mysql_fetch_assoc($res)) {
-	$ONT[$row['ont_id']] = $row;
+	$VOC[$row['vcb_ID']] = $row;
 }
 
 // group names
@@ -394,7 +394,7 @@ function outputRecordStub($recordStub) {
 }
 
 function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $depth=0, $outputStub) {
-	global $DTN, $DTT, $RDL, $ONT, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH;
+	global $DTN, $DTT, $RDL, $VOC, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH;
 
 	$attrs = array('id' => $dt);
 	if (array_key_exists($dt, $DTN)) {
@@ -457,8 +457,8 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 		outputRecord(loadRecord($value), $reverse_pointers, $relationships, $depth + 1, $outputStub);
 		closeTag('detail');
 	} else if ($DTT[$dt] === 'enum' && array_key_exists($value,$RDL)) {
-		if (array_key_exists($RDL[$value]['rdl_ont_id'],$ONT)) {
-			$attrs['ontology'] = $ONT[$RDL[$value]['rdl_ont_id']]['ont_name'];
+		if (array_key_exists($RDL[$value]['rdl_ont_id'],$VOC)) {
+			$attrs['vocabulary'] = $VOC[$RDL[$value]['rdl_ont_id']]['vcb_Name'];
 		}
 		makeTag('detail', $attrs, $RDL[$value]['rdl_value']);	//saw Enum  possible change
 	} else {
@@ -732,15 +732,15 @@ makeTag('dateStamp', null, date('c'));
 if (array_key_exists('error', $result)) {
 	makeTag('error', null, $result['error']);
 } else {
-	openTag('ontologies');
-	foreach($ONT as $ontology){
-		$attrs = array('id' => $ontology['ont_id']);
-		if ($ontology['ont_refurl']) {
-			$attrs['namespace'] = $ontology['ont_refurl'];
+	openTag('vocabularies');
+	foreach($VOC as $vocabulary){
+		$attrs = array('id' => $vocabulary['vcb_ID']);
+		if ($vocabulary['vcb_RefURL']) {
+			$attrs['namespace'] = $vocabulary['vcb_RefURL'];
 		}
-		makeTag('ontology', $attrs, $ontology['ont_name']);
+		makeTag('vocabulary', $attrs, $vocabulary['vcb_Name']);
 	}
-	closeTag('ontologies');
+	closeTag('vocabularies');
 	makeTag('resultCount', null, $result['resultCount']);
 	makeTag('recordCount', null, $result['recordCount']);
 	openTag('records');

@@ -149,18 +149,18 @@ INSERT INTO `temp_rec_detail_lookups` (`rdl_id`, `rdl_rdt_id`, `rdl_value`, `rdl
 
 // Steve: SEND THIS TO mysqL
 
-DROP TABLE IF EXISTS `temp_ontologies`;
-CREATE TABLE IF NOT EXISTS `temp_ontologies` (
-  `ont_id` smallint(6) unsigned NOT NULL,
-  `ont_name` varchar(64) character set utf8 NOT NULL,
-  `ont_description` text character set utf8,
-  `ont_refurl` varchar(128) character set utf8 default NULL,
-  `ont_added` date default NULL,
-  `ont_modified` date default NULL,
-  PRIMARY KEY  (`ont_id`)
+DROP TABLE IF EXISTS `temp_vocabularies`;
+CREATE TABLE IF NOT EXISTS `temp_vocabularies` (
+  `vcb_ID` smallint(6) unsigned NOT NULL,
+  `vcb_Name` varchar(64) character set utf8 NOT NULL,
+  `vcb_Description` text character set utf8,
+  `vcb_RefURL` varchar(128) character set utf8 default NULL,
+  `vcb_Added` date default NULL,
+  `vcb_Modified` date default NULL,
+  PRIMARY KEY  (`vcb_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-INSERT INTO `temp_ontologies` (`ont_id`, `ont_name`, `ont_description`, `ont_refurl`, `ont_added`, `ont_modified`) VALUES
+INSERT INTO `temp_vocabularies` (`vcb_ID`, `vcb_Name`, `vcb_Description`, `vcb_RefURL`, `vcb_Added`, `vcb_Modified`) VALUES
 
 // Steve: Parse the stream from get_definitions until you get to a line with    > Start
 // then send the stream to MySQL until you get to a line with   > End

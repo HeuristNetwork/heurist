@@ -362,7 +362,7 @@ function getAllworkgroupTags($rec_id) {
 function getConstraintsByRdt($recType) {
 	$rcons = array();
 	$res = mysql_query("select rcon_target_rt_id as rty_ID, rcon_rdt_id as rdt_id,
-						rcon_rdl_ids as rdl_ids, rcon_ont_id as ont_id, rcon_order, rcon_limit
+						rcon_rdl_ids as rdl_ids, rcon_ont_id as vcb_ID, rcon_order, rcon_limit
 						from rec_constraints
 						where rcon_source_rt_id=$recType
 						order by rcon_rdt_id, rcon_target_rt_id, rcon_order ");

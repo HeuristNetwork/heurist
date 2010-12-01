@@ -96,7 +96,7 @@ Relationship.prototype.remove = function() {
 	this.manager.remove(this);
 };
 
-var EditableRelationship = function(parentElement, details, reftype,dtID, relOntology, manager) {
+var EditableRelationship = function(parentElement, details, reftype,dtID, relVocabulary, manager) {
 	var elt = parentElement;
 	do { elt = elt.parentNode; } while (elt.nodeType != 9 /* DOCUMENT_NODE */);
 	this.document = elt;
@@ -140,22 +140,22 @@ var EditableRelationship = function(parentElement, details, reftype,dtID, relOnt
 	tr.className = "input-row";
 	var td = tr.appendChild(this.document.createElement("td"));
 	td.className = "input-header-cell";
-	td.appendChild(this.document.createTextNode("Using Ontology"));
+	td.appendChild(this.document.createTextNode("Using Vocabulary"));
 
 	td = tr.appendChild(this.document.createElement("td"));
 	this.relOnt = td.appendChild(this.document.createElement("select"));
-	this.relOnt.id = "ontology";
-	this.relOnt.name = "ontology";
-	var firstOption = this.relOnt.options[0] = new Option("(select an ontology)", "");
+	this.relOnt.id = "vocabulary";
+	this.relOnt.name = "vocabulary";
+	var firstOption = this.relOnt.options[0] = new Option("(select a vocabulary)", "");
 	firstOption.disabled = true;
 	firstOption.selected = true;
 
-	var onts = top.HEURIST.ontologyLookup;
-	if (!relOntology) relOntology = 1; // if the calling code didn't pass an ontology then set it to basic
+	var onts = top.HEURIST.vocabularyLookup;
+	if (!relVocabulary) relVocabulary = 1; // if the calling code didn't pass an vocabulary then set it to basic
 	for (var ont in onts) {
 		this.relOnt.options[this.relOnt.length] = new Option(onts[ont],ont);
-		if (ont == relOntology)
-		this.relOnt.value = relOntology;
+		if (ont == relVocabulary)
+		this.relOnt.value = relVocabulary;
 	}
 
 	tr = tbody.appendChild(this.document.createElement("tr"));
@@ -178,7 +178,7 @@ var EditableRelationship = function(parentElement, details, reftype,dtID, relOnt
 	var relTypes = top.HEURIST.bibDetailLookups[200];  //saw need to change restricted reltypes from rel_constraints pass in a param
 	for (var ont in relTypes) {
 		var grp = document.createElement("optgroup");
-		grp.label = top.HEURIST.ontologyLookup[ont];
+		grp.label = top.HEURIST.vocabularyLookup[ont];
 		this.relType.appendChild(grp);
 		for (var i = 0; i < relTypes[ont].length; ++i) {
 			var rdl = relTypes[ont][i];

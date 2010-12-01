@@ -24,8 +24,8 @@ foreach (get_all_instances() as $instance_name => $instance) {
 	mysql_query("START TRANSACTION");
 	mysql_query("DELETE FROM defRecTypes");
 	mysql_query("INSERT INTO defRecTypes SELECT * FROM `heurist-common`.defRecTypes");
-	mysql_query("DELETE FROM ontologies");
-	mysql_query("INSERT INTO ontologies SELECT * FROM `heurist-common`.ontologies");
+	mysql_query("DELETE FROM defVocabularies");
+	mysql_query("INSERT INTO defVocabularies SELECT * FROM `heurist-common`.defVocabularies");
 	mysql_query("DELETE FROM rel_constraints");
 	mysql_query("INSERT INTO rel_constraints SELECT * FROM `heurist-common`.rec_constraints");
 	mysql_query("DELETE FROM rec_detail_types");

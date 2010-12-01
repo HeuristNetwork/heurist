@@ -635,8 +635,8 @@ top.HEURIST.edit = {
 					for (var j = 0; j < list.length; j++) {
 						rdtConstrainedLookups[list[j]] = '';
 					}
-				} else if (dtRelConstForRecType[i]['ont_id']) {	// get all the rel lookups for this ontology
-					var ontRelations = top.HEURIST.bibDetailLookups[200][dtRelConstForRecType[i]['ont_id']];
+				} else if (dtRelConstForRecType[i]['vcb_ID']) {	// get all the rel lookups for this vocabulary
+					var ontRelations = top.HEURIST.bibDetailLookups[200][dtRelConstForRecType[i]['vcb_ID']];
 					for (var j = 0; j < ontRelations.length; j++) {
 						rdtConstrainedLookups[ontRelations[j][0]] = '';
 					}
@@ -1582,7 +1582,7 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdV
 		var selectIndex = 0;
 		for (var ont in allOptions) {
 			var grp = document.createElement("optgroup");
-			grp.label = top.HEURIST.ontologyLookup[ont];
+			grp.label = top.HEURIST.vocabularyLookup[ont];
 			newInput.appendChild(grp);
 			for (var i = 0; i < allOptions[ont].length; ++i) {
 				var rdl = allOptions[ont][i];

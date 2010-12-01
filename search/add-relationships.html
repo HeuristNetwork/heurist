@@ -41,7 +41,7 @@ function init () {
 	var relTypes = top.HEURIST.bibDetailLookups[200];
 	for (var ont in relTypes) {
 		var grp = document.createElement("optgroup");
-		grp.label = top.HEURIST.ontologyLookup[ont];
+		grp.label = top.HEURIST.vocabularyLookup[ont];
 		relTypeSelect.appendChild(grp);
 		for (var i = 0; i < relTypes[ont].length; ++i) {
 			var rdl = relTypes[ont][i];

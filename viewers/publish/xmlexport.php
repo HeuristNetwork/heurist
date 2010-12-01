@@ -67,7 +67,7 @@ $DTN = array();	  // the default names of detailtypes
 $LOOP = array();	// holds visited record ids for loop detection while going through containers
 $RFT = array();		// reftype labels
 $RDL = array();	//record detail lookup
-$ONT = array();	//ontology lookup
+$VOC = array();	//vocabulary lookup
 
 
 mysql_connection_db_select(DATABASE);
@@ -164,11 +164,11 @@ while ($row = mysql_fetch_assoc($res)) {
 	$RDL[$row['rdl_id']] = $row;
 }
 
-// lookup for ontologies
-$query = 'SELECT ont_id, ont_name, ont_refurl FROM ontologies';
+// lookup for defVocabularies
+$query = 'SELECT vcb_ID, vcb_Name, vcb_RefURL FROM defVocabularies';
 $res = mysql_query($query);
 while ($row = mysql_fetch_assoc($res)) {
-	$ONT[$row['ont_id']] = $row;
+	$VOC[$row['vcb_ID']] = $row;
 }
 
 
@@ -226,15 +226,15 @@ if (@$_REQUEST['w'])
     $XML .= "w='" . $_REQUEST['w'] . "' ";
 $XML .= "/>\n";
 
-$XML .= "<ontologies>\n";
-foreach($ONT as $ontology){
-	$XML .="<ontology id=\"" .$ontology['ont_id']. "\"";
-	if ($ontology['ont_refurl']) {
-		$XML .= " namespace=\"". htmlspecialchars($ontology['ont_refurl']). "\"";
+$XML .= "<vocabularies>\n";
+foreach($VOC as $vocabulary){
+	$XML .="<vocabulary id=\"" .$vocabulary['vcb_ID']. "\"";
+	if ($vocabulary['vcb_RefURL']) {
+		$XML .= " namespace=\"". htmlspecialchars($vocabulary['vcb_RefURL']). "\"";
 	}
-	$XML .= ">" .$ontology['ont_name']. "</ontology>\n";
+	$XML .= ">" .$vocabulary['vcb_Name']. "</vocabulary>\n";
 }
-$XML .= "</ontologies>\n";
+$XML .= "</vocabularies>\n";
 
 
 $XML .= "<references>\n";
@@ -655,7 +655,7 @@ function writeRelatedData($bib, $depth) {
 function writeRelatedRecord ($rel, $depth) {
 	global $XML;
 	global $MAX_DEPTH;
-	global $RFT,$ONT;
+	global $RFT,$VOC;
 
 	$XML .= '<related';
 	if (@$rel['ID']) $XML .= ' id="' . htmlspecialchars($rel['ID']) . '"';
@@ -664,8 +664,8 @@ function writeRelatedRecord ($rel, $depth) {
 	}else if (@$rel['RelationType']) {
 		$XML .= ' type="' . htmlspecialchars($rel['RelationType']) . '"';	//saw Enum change
 	}
-	if (@$rel['OntologyID'] && array_key_exists($rel['OntologyID'],$ONT))
-		 $XML .= ' ontology="' . htmlspecialchars($ONT[$rel['OntologyID']]['ont_name']) . '"';
+	if (@$rel['VocabularyID'] && array_key_exists($rel['VocabularyID'],$VOC))
+		 $XML .= ' vocabulary="' . htmlspecialchars($VOC[$rel['VocabularyID']]['vcb_Name']) . '"';
 	if (@$rel['Title']) $XML .= ' title="' . htmlspecialchars($rel['Title']) . '"';
 	if (@$rel['Notes']) $XML .= ' notes="' . htmlspecialchars($rel['Notes']) . '"';
 	if (@$rel['StartDate']) $XML .= ' start="' . htmlspecialchars($rel['StartDate']) . '"';

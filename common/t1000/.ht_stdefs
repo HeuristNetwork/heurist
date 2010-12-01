@@ -110,8 +110,8 @@ $MAINTABLES['ACTIVE_BIB_DETAIL_LOOKUP'] = 'active_rec_detail_lookups';
 			'ratings_quality' => 'pers_quality_rating=rq_id',
 			'ratings_interest' => 'pers_interest_rating=ri_id');
 */
-$MAINTABLES['ONTOLOGIES_LOOKUP'] = 'ontologies';
-      $PKEY['ONTOLOGIES_LOOKUP'] = 'ont_id';
+$MAINTABLES['ONTOLOGIES_LOOKUP'] = 'defVocabularies';
+      $PKEY['ONTOLOGIES_LOOKUP'] = 'vcb_ID';
 
 $MAINTABLES['USER_CLOUD'] = 'coll_groups';
       $PKEY['USER_CLOUD'] = 'cgr_id';

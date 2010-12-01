@@ -161,7 +161,7 @@ function fetch_relation_details($rec_id, $i_am_primary) {
 			}
 			$relval = mysql_fetch_assoc(mysql_query('select rdl_value,rdl_ont_id from rec_detail_lookups where rdl_id = ' .  intval($bd['RelationType'])));
 			$bd['RelationValue'] = $relval['rdl_value'];
-			$bd['OntologyID'] = $relval['rdl_ont_id'];
+			$bd['VocabularyID'] = $relval['rdl_ont_id'];
 			break;
 
 		    case 199:	// linked resource

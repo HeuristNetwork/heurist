@@ -96,13 +96,13 @@ $version = 1; // Output format version number. This will be read by the crosswal
     print "> End\n";
 
 // ------------------------------------------------------------------------------------------
-// ONTOLOGIES
+// VOCABULARIES
 
-    print "\n\n\n-- ONTOLOGIES";print "\n";
-    print "-- ont_id,ont_name,ont_description,ont_refurl,ont_added,ont_modified\n";
-    $query = "select * from ontologies limit $lim";
+    print "\n\n\n-- VOCABULARIES";print "\n";
+    print "-- vcb_ID,vcb_Name,vcb_Description,vcb_RefURL,vcb_Added,vcb_Modified\n";
+    $query = "select * from defVocabularies limit $lim";
     $res = mysql_query($query);
-    $fmt = 'ontologies';
+    $fmt = 'defVocabularies';
 
     print "\n> Start\n";
     while ($row = mysql_fetch_assoc($res)) { print_row($row, $fmt); }
@@ -152,8 +152,8 @@ function print_row($row,$fmt) {
         print "($row[rdl_id],`$row[rdl_rdt_id]`,`$row[rdl_value]`,`$row[rdl_related_rdl_id]`),\n";
         break;
 
-      case 'ontologies': // Data from Ontologies table
-        print "($row[ont_id],`$row[ont_name]`,`$row[ont_description]`,`$row[ont_refurl]`,`$row[ont_added]`,`$row[ont_modified]`),\n";
+      case 'defVocabularies': // Data from Vocabularies table
+        print "($row[vcb_ID],`$row[vcb_Name]`,`$row[vcb_Description]`,`$row[vcb_RefURL]`,`$row[vcb_Added]`,`$row[vcb_Modified]`),\n";
         break;
 
       case 'rel_constraints': // Data from rel_constraints table

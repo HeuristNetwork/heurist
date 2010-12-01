@@ -161,9 +161,9 @@ while ($row = mysql_fetch_assoc($res)) {
 		}
 		$first = false;
 	} else {
-		if ( $prev_ont_id == $row['rdl_ont_id']) { // another id value pair for the same ontology
+		if ( $prev_ont_id == $row['rdl_ont_id']) { // another id value pair for the same vocabulary
 			print ", ";
-		}else{	// a new ontology set for this detail type
+		}else{	// a new vocabulary set for this detail type
 			print " ],\n\t\t\"". $row['rdl_ont_id'] . "\": [ ";
 		}
 	}
@@ -180,14 +180,14 @@ print " ]\n\t}\n};\n";
 | rdl_value  | varchar(63) | YES  |     | NULL    |                |
 | rdl_ont_id | smallint(6) | YES  | MUL | NULL    |                |
 */
-$res = mysql_query("select ont_id,ont_name from ontologies where 1 order by ont_id");
-print "\ntop.HEURIST.ontologyLookup = {\n";
+$res = mysql_query("select vcb_ID,vcb_Name from defVocabularies where 1 order by vcb_ID");
+print "\ntop.HEURIST.vocabularyLookup = {\n";
 $first = true;
 while ($row = mysql_fetch_assoc($res)) {
 	if (! $first) {
-		print " ,\n\t\"" . $row["ont_id"] . "\" : \"". $row['ont_name'] . "\" ";
+		print " ,\n\t\"" . $row["vcb_ID"] . "\" : \"". $row['vcb_Name'] . "\" ";
 	}else{
-		print "\t\"" . $row["ont_id"] . "\" : \"". $row['ont_name'] . "\" ";
+		print "\t\"" . $row["vcb_ID"] . "\" : \"". $row['vcb_Name'] . "\" ";
 	}
 	$first = false;
 }
