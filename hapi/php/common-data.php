@@ -58,7 +58,7 @@ while ($row = mysql_fetch_row($res)) {
 
 	    case "enum":
 		$row[3] = "enumeration";
-		$lres = mysql_query("select A.rdl_value, B.rdl_value from rec_detail_lookups A left join rec_detail_lookups B on A.rdl_id=B.rdl_related_rdl_id where A.rdl_rdt_id=" . intval($row[0])." and A.rdl_value is not null");
+		$lres = mysql_query("select A.trm_Label, B.trm_Label from defTerms A left join defTerms B on A.trm_ID=B.trm_InverseTermID where A.rdl_rdt_id=" . intval($row[0])." and A.trm_Label is not null");
 		$row[4] = array();
 
 		$rdl = mysql_fetch_row($lres);

@@ -152,17 +152,17 @@ while ($row = mysql_fetch_assoc($res)) {
 	$DTT[$row['dty_ID']] = $row['dty_Type'];
 }
 
-$INV = mysql__select_assoc('rec_detail_lookups',	//saw Enum change just assoc id to related id
-							'rdl_id',
-							'rdl_related_rdl_id',
+$INV = mysql__select_assoc('defTerms',	//saw Enum change just assoc id to related id
+							'trm_ID',
+							'trm_InverseTermID',
 							'1');
 
-// lookup for detail type enum values
-$query = 'SELECT rdl_id, rdl_value, rdl_ont_id FROM rec_detail_lookups';
+// lookup detail type enum values
+$query = 'SELECT trm_ID, trm_Label, trm_VocabID FROM defTerms';
 $res = mysql_query($query);
 while ($row = mysql_fetch_assoc($res)) {
-	$RDL[$row['rdl_id']] = $row;
-	$RDLV[$row['rdl_value']] = $row;
+	$RDL[$row['trm_ID']] = $row;
+	$RDLV[$row['trm_Label']] = $row;
 }
 
 // lookup for defVocabularies
@@ -404,7 +404,7 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 		$attrs['name'] = $RQS[$rt][$dt];
 	}
 	if ($dt === 200  &&  array_key_exists($value, $INV) && array_key_exists($INV[$value], $RDL)) {	//saw Enum change
-		$attrs['inverse'] = $RDL[$INV[$value]]['rdl_value'];
+		$attrs['inverse'] = $RDL[$INV[$value]]['trm_Label'];
 	}
 
 	if (is_array($value)) {
@@ -457,10 +457,10 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 		outputRecord(loadRecord($value), $reverse_pointers, $relationships, $depth + 1, $outputStub);
 		closeTag('detail');
 	} else if ($DTT[$dt] === 'enum' && array_key_exists($value,$RDL)) {
-		if (array_key_exists($RDL[$value]['rdl_ont_id'],$VOC)) {
-			$attrs['vocabulary'] = $VOC[$RDL[$value]['rdl_ont_id']]['vcb_Name'];
+		if (array_key_exists($RDL[$value]['trm_VocabID'],$VOC)) {
+			$attrs['vocabulary'] = $VOC[$RDL[$value]['trm_VocabID']]['vcb_Name'];
 		}
-		makeTag('detail', $attrs, $RDL[$value]['rdl_value']);	//saw Enum  possible change
+		makeTag('detail', $attrs, $RDL[$value]['trm_Label']);	//saw Enum  possible change
 	} else {
 		makeTag('detail', $attrs, replaceIllegalChars($value));
 	}

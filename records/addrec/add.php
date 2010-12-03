@@ -383,10 +383,10 @@ if ($rec_id) {
 		$other_bib_id = $_REQUEST["related"];
 		$reln_type = "IsRelatedTo";
 		if (@$_REQUEST["reltype"]) {
-			mysql_query("select rdl_value from rec_detail_lookups where rdl_rdt_id = 200 and rdl_value like '".addslashes($_REQUEST["reltype"])."' limit 1;");
+			mysql_query("select trm_Label from defTerms where rdl_rdt_id = 200 and trm_Label like '".addslashes($_REQUEST["reltype"])."' limit 1;");
 			if (mysql_num_rows($res) > 0) {
 				$row = mysql_fetch_assoc($res);
-				$reln_type = $row["rdl_value"];	// saw TODO: check that this is aligned with the enum value change
+				$reln_type = $row["trm_Label"];	// saw TODO: check that this is aligned with the enum value change
 			}
 		}
 		mysql__insert("records", array(

@@ -1020,14 +1020,14 @@ function load_bib_detail_lookups() {
 
 	global $rec_detail_lookups, $bib_detail_lookups_lc;	// staid and lowercase versions of this data
 
-	$res = mysql_query('select * from rec_detail_lookups');
+	$res = mysql_query('select * from defTerms');
 	$rec_detail_lookups = array();
 	while ($row = mysql_fetch_assoc($res)) {
 		if (! @$rec_detail_lookups[$row['rdl_rdt_id']])
 			$rec_detail_lookups[$row['rdl_rdt_id']] = array();
 
-		$rec_detail_lookups[$row['rdl_rdt_id']][$row['rdl_value']] = $row['rdl_id'];
-		$bib_detail_lookups_lc[$row['rdl_rdt_id']][strtolower($row['rdl_value'])] = $row['rdl_id'];
+		$rec_detail_lookups[$row['rdl_rdt_id']][$row['trm_Label']] = $row['trm_ID'];
+		$bib_detail_lookups_lc[$row['rdl_rdt_id']][strtolower($row['trm_Label'])] = $row['trm_ID'];
 	}
 }
 

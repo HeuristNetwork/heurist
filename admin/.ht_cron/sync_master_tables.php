@@ -4,7 +4,7 @@
  *
  * defRecTypes
  * red_detail_types
- * rec_detail_lookups
+ * defTerms
  * rec_detail_requirements
  *
  * from the "heurist-common" database to each of the Heurist instance databases
@@ -30,8 +30,8 @@ foreach (get_all_instances() as $instance_name => $instance) {
 	mysql_query("INSERT INTO rel_constraints SELECT * FROM `heurist-common`.rec_constraints");
 	mysql_query("DELETE FROM defDetailTypes");
 	mysql_query("INSERT INTO defDetailTypes SELECT * FROM `heurist-common`.defDetailTypes");
-	mysql_query("DELETE FROM rec_detail_lookups");
-	mysql_query("INSERT INTO rec_detail_lookups SELECT * FROM `heurist-common`.rec_detail_lookups");
+	mysql_query("DELETE FROM defTerms");
+	mysql_query("INSERT INTO defTerms SELECT * FROM `heurist-common`.defTerms");
 	mysql_query("DELETE FROM rec_detail_requirements");
 	mysql_query("INSERT INTO rec_detail_requirements SELECT * FROM `heurist-common`.rec_detail_requirements");
 	mysql_query("COMMIT");

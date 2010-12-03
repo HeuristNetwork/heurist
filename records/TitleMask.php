@@ -346,8 +346,8 @@ function _title_mask__get_rec_detail($rec_id, $rdt_id) {
 				$rec_details[$rec_id][$rd['rd_type']] = $str;
 		} else {
 			if ($rdt_type == 'enum'){ //saw Enum change
-				$relval = mysql_fetch_assoc(mysql_query("select rdl_value from rec_detail_lookups where rdl_id = ".$rd['rd_val']));
-				$rd['rd_val'] = $relval['rdl_value'];
+				$relval = mysql_fetch_assoc(mysql_query("select trm_Label from defTerms where trm_ID = ".$rd['rd_val']));
+				$rd['rd_val'] = $relval['trm_Label'];
 			}
 			if (@$rec_details[$rec_id][$rd['rd_type']])// repeated values
 				$rec_details[$rec_id][$rd['rd_type']] .= ', ' . $rd['rd_val'];

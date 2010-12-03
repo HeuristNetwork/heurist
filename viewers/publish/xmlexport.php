@@ -158,10 +158,10 @@ while ($row = mysql_fetch_assoc($res)) {
 
 
 // lookup for detail type enum values
-$query = 'SELECT rdl_id, rdl_value, rdl_ont_id FROM rec_detail_lookups';
+$query = 'SELECT trm_ID, trm_Label, trm_VocabID FROM defTerms';
 $res = mysql_query($query);
 while ($row = mysql_fetch_assoc($res)) {
-	$RDL[$row['rdl_id']] = $row;
+	$RDL[$row['trm_ID']] = $row;
 }
 
 // lookup for defVocabularies

@@ -88,12 +88,12 @@ $MAINTABLES['BDR_OVERRIDES'] = 'rec_detail_requirements_overrides';
 	$LINK_KEYS['BDR_OVERRIDES'] = array('REFTYPE-ID' => 'rdr_rec_type', 'BIB_DETAIL_TYPE-ID' => 'rdr_rdt_id');
 
 
-$MAINTABLES['MASTER_BIB_DETAIL_LOOKUP'] = 'rec_detail_lookups';
-	$PKEY['MASTER_BIB_DETAIL_LOOKUP'] = 'rdl_id';
+$MAINTABLES['MASTER_BIB_DETAIL_LOOKUP'] = 'defTerms';
+	$PKEY['MASTER_BIB_DETAIL_LOOKUP'] = 'trm_ID';
 
-$MAINTABLES['BIB_DETAIL_LOOKUP'] = 'rec_detail_lookups';
-	$PKEY['BIB_DETAIL_LOOKUP'] = 'rdl_id';
-	$JOINS['BIB_DETAIL_LOOKUP'] = array('ACTIVE_BIB_DETAIL_LOOKUP-ID' => 'rdl_id');
+$MAINTABLES['BIB_DETAIL_LOOKUP'] = 'defTerms';
+	$PKEY['BIB_DETAIL_LOOKUP'] = 'trm_ID';
+	$JOINS['BIB_DETAIL_LOOKUP'] = array('ACTIVE_BIB_DETAIL_LOOKUP-ID' => 'trm_ID');
 
 $MAINTABLES['ACTIVE_BIB_DETAIL_LOOKUP'] = 'active_rec_detail_lookups';
 	$PKEY['ACTIVE_BIB_DETAIL_LOOKUP'] = 'ardl_id';

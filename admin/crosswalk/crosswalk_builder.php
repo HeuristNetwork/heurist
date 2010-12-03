@@ -128,15 +128,15 @@ CREATE TABLE IF NOT EXISTS `temp_rec_detail_requirements` (
 
 DROP TABLE IF EXISTS `temp_rec_detail_lookups`;
 CREATE TABLE IF NOT EXISTS `temp_rec_detail_lookups` (
-  `rdl_id` smallint(6) NOT NULL auto_increment,
-  `rdl_rdt_id` smallint(6) default NULL,
-  `rdl_value` varchar(63) default NULL,
-  `rdl_related_rdl_id` smallint(6) default NULL,
-  PRIMARY KEY  (`rdl_id`),
-  UNIQUE KEY `bdl_bdt_id` (`rdl_rdt_id`,`rdl_value`)
+  `trm_ID` smallint(6) NOT NULL auto_increment,
+  `trm_VocabID` smallint(6) default NULL,
+  `trm_Label` varchar(63) default NULL,
+  `trm_InverseTermID` smallint(6) default NULL,
+  PRIMARY KEY  (`trm_ID`),
+  UNIQUE KEY `bdl_bdt_id` (`trm_VocabID`,`trm_Label`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
 
-INSERT INTO `temp_rec_detail_lookups` (`rdl_id`, `rdl_rdt_id`, `rdl_value`, `rdl_related_rdl_id`) VALUES
+INSERT INTO `temp_rec_detail_lookups` (`trm_ID`, `trm_VocabID`, `trm_Label`, `trm_InverseTermID`) VALUES
 
 // Steve: Parse the stream from get_definitions until you get to a line with    > Start
 // then send the stream to MySQL until you get to a line with   > End

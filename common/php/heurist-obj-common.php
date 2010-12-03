@@ -141,44 +141,36 @@ print "\n\t}\n};\n";
 
 
 /*
-| rdl_id     | smallint(6) | NO   | PRI | NULL    | auto_increment |
-| rdl_rdt_id | smallint(6) | YES  | MUL | NULL    |                |
-| rdl_value  | varchar(63) | YES  |     | NULL    |                |
-| rdl_ont_id | smallint(6) | YES  | MUL | NULL    |                |
+| trm_ID     | smallint(6) | NO   | PRI | NULL    | auto_increment |
+| trm_VocabID | smallint(6) | YES  | MUL | NULL    |                |
+| trm_Label  | varchar(63) | YES  |     | NULL    |                |
 */
-$res = mysql_query("select rdl_id,rdl_rdt_id, rdl_value, rdl_ont_id from rec_detail_lookups order by rdl_rdt_id,rdl_ont_id, rdl_value");
+// saw FIXME TODO make sure that VocabID actually exist in Vocab table
+$res = mysql_query("select trm_ID,trm_VocabID, trm_Label from defTerms order by trm_VocabID, trm_Label");
 print "\ntop.HEURIST.bibDetailLookups = {\n";
 $first = true;
-$prev_rdt_id = -1;
+$prev_vcb_id = -1;
 while ($row = mysql_fetch_assoc($res)) {
-	if (!$row["rdl_rdt_id"]) continue;	// detail type id in not valid so skip it
-	if ($prev_rdt_id != $row["rdl_rdt_id"]) {	/* new dty_ID */
-		$prev_ont_id = -1;
+	if (!$row["trm_VocabID"]) continue;	// vocab id in not valid so skip it
+	if ($prev_vcb_id != $row["trm_VocabID"]) {	/* new vcb_ID */
 		if (! $first) {
-			print " ]},\n\t\"" . $row["rdl_rdt_id"] . "\": {\n\t\t\"". $row['rdl_ont_id'] . "\": [ ";
+			print " ,\n\t\"" . $row["trm_VocabID"] . "\": ";
 		}else{
-			print "\t\"" . $row["rdl_rdt_id"] . "\": {\n\t\t\"". $row['rdl_ont_id'] . "\": [ ";
-		}
+			print "\t\"" . $row["trm_VocabID"] . "\": ";
 		$first = false;
-	} else {
-		if ( $prev_ont_id == $row['rdl_ont_id']) { // another id value pair for the same vocabulary
-			print ", ";
-		}else{	// a new vocabulary set for this detail type
-			print " ],\n\t\t\"". $row['rdl_ont_id'] . "\": [ ";
 		}
 	}
-	print "[ ".$row["rdl_id"].", \"" . slash($row["rdl_value"]) . "\" ]";
-	$prev_rdt_id = $row["rdl_rdt_id"];
-	$prev_ont_id = $row["rdl_ont_id"];
+	print "[ ".$row["trm_ID"].", \"" . slash($row["trm_Label"]) . "\" ]";
+	$prev_vcb_id = $row["trm_VocabID"];
 }
-print " ]\n\t}\n};\n";
+print " \n};\n";
 
 
 /*
-| rdl_id     | smallint(6) | NO   | PRI | NULL    | auto_increment |
+| trm_ID     | smallint(6) | NO   | PRI | NULL    | auto_increment |
 | rdl_rdt_id | smallint(6) | YES  | MUL | NULL    |                |
-| rdl_value  | varchar(63) | YES  |     | NULL    |                |
-| rdl_ont_id | smallint(6) | YES  | MUL | NULL    |                |
+| trm_Label  | varchar(63) | YES  |     | NULL    |                |
+| trm_VocabID | smallint(6) | YES  | MUL | NULL    |                |
 */
 $res = mysql_query("select vcb_ID,vcb_Name from defVocabularies where 1 order by vcb_ID");
 print "\ntop.HEURIST.vocabularyLookup = {\n";

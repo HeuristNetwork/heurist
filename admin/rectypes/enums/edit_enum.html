@@ -61,9 +61,9 @@
 
 		<script type="text/javascript">
 			<!--
-			function delete_bdl(rdl_id) {
+			function delete_bdl(trm_ID) {
 				var delete_bdl_elt = document.getElementById('delete_bdl');
-				delete_bdl_elt.value = rdl_id;
+				delete_bdl_elt.value = trm_ID;
 				delete_bdl_elt.form.submit();
 			}
 
@@ -83,16 +83,16 @@
 			</div>
 			<div class="enum-list-div">
 				[search BIB_DETAIL_LOOKUP bdl /* search the detail lookups (enums) which is filtered by the active detail lookups table*/]
-				[auto : rdl_rdt_id : dty_ID  /* restrict the results to only the rows that match the passed in detail type*/]
-				[foreach BIB_DETAIL_LOOKUP bd : 1 order by rdl_ont_id, rdl_value  /* iterate through each result and output the following */]
+				[auto : trm_VocabID : dty_ID  /* restrict the results to only the rows that match the passed in detail type*/]
+				[foreach BIB_DETAIL_LOOKUP bd : 1 order by trm_VocabID, trm_Label  /* iterate through each result and output the following */]
 				<form action="edit_enum.php" method="post">
-					<input type="hidden" name="rdl_id" value="[rdl_id]">
-					<div><img src="../img/cross.gif"  onclick="delete_bdl([rdl_id]);" class="delete_icon">
-						<input type="text" name="rdl_value" value="[rdl_value]" class="col1 row-elem" style="width: 110px;">
-						<input type="text" name="rdt1_id" value="[rdl_rdt_id]" class="col2 row-elem" disabled="disabled" >
-						<input type="hidden" name="dty_ID" value="[rdl_rdt_id]">
-						[dropdown required : rdl_ont_id : Vocabulary : select vcb_ID, vcb_Name from defVocabularies :class="col3 row-elem" : Select Vocabulary]
-						<input type="text" name="rdl_description" value="[rdl_description]" class="col4 row-elem">
+					<input type="hidden" name="trm_ID" value="[trm_ID]">
+					<div><img src="../img/cross.gif"  onclick="delete_bdl([trm_ID]);" class="delete_icon">
+						<input type="text" name="trm_Label" value="[trm_Label]" class="col1 row-elem" style="width: 110px;">
+						<input type="text" name="rdt1_id" value="[trm_VocabID]" class="col2 row-elem" disabled="disabled" >
+						<input type="hidden" name="dty_ID" value="[trm_VocabID]">
+						[dropdown required : trm_VocabID : Vocabulary : select vcb_ID, vcb_Name from defVocabularies :class="col3 row-elem" : Select Vocabulary]
+						<input type="text" name="trm_Description" value="[trm_Description]" class="col4 row-elem">
 						<input type="submit" value="Update" class="button row-button-elem">
 					</div>
 				</form>
@@ -105,10 +105,10 @@
 					<input type="hidden" name="dty_ID" value="[dty_ID]">
 					<input type="hidden" name="delete_bdl_field" value="" id="delete_bdl">
 					[insert MASTER_BIB_DETAIL_LOOKUP new_bdl]
-					[auto : rdl_rdt_id : dty_ID]
-					New value: [textbox REQUIRED: rdl_value : new enumeration value : style="width: 110px;" id="new_value_elt"]
-					Vocabulary: [dropdown REQUIRED: rdl_ont_id : vocabulary for new enumeration : select vcb_ID, vcb_Name from defVocabularies :style="width: 60px;" id="new_ont_elt": Select Vocabulary... ]
-					Description: [textbox : rdl_description : description : style="width: 110px;" id="new_desc_elt"]
+					[auto : trm_VocabID : dty_ID]
+					New value: [textbox REQUIRED: trm_Label : new enumeration value : style="width: 110px;" id="new_value_elt"]
+					Vocabulary: [dropdown REQUIRED: trm_VocabID : vocabulary for new enumeration : select vcb_ID, vcb_Name from defVocabularies :style="width: 60px;" id="new_ont_elt": Select Vocabulary... ]
+					Description: [textbox : trm_Description : description : style="width: 110px;" id="new_desc_elt"]
 					<input type="submit" value="Add" style="font-weight: bold;">
 					[end-insert]
 				</form>

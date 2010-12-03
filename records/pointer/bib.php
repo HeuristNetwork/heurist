@@ -181,13 +181,13 @@ function getAllBibDetails($rec_id) {
 	// geo entries have geo data associated,
 	// record references have title data associated.
 
-	$res = mysql_query("select rd_id, rd_type, rd_val, rec_title, rd_file_id, rdl_value,
+	$res = mysql_query("select rd_id, rd_type, rd_val, rec_title, rd_file_id, trm_Label,
 	                           if(rd_geo is not null, astext(envelope(rd_geo)), null) as envelope,
 	                           if(rd_geo is not null, astext(rd_geo), null) as rd_geo
 	                      from rec_details
 	                 left join defDetailTypes on dty_ID=rd_type
 	                 left join records on rec_id=rd_val and dty_Type='resource'
-	                 left join rec_detail_lookups on dty_Type='enum' and rdl_id = rd_val
+	                 left join defTerms on dty_Type='enum' and trm_ID = rd_val
 	                     where rd_rec_id = $rec_id order by rd_id");
 	$bibDetails = array();
 	while ($row = mysql_fetch_assoc($res)) {
@@ -195,7 +195,7 @@ function getAllBibDetails($rec_id) {
 
 		$detail["id"] = $row["rd_id"];
 		$detail["value"] = $row["rd_val"];
-		if (array_key_exists('rdl_value',$row) && $row['rdl_value']) $detail["enumValue"] = $row["rdl_value"];	// saw Enum change
+		if (array_key_exists('trm_Label',$row) && $row['trm_Label']) $detail["enumValue"] = $row["trm_Label"];	// saw Enum change
 		if ($row["rec_title"]) $detail["title"] = $row["rec_title"];
 
 		if ($row["rd_file_id"]) {

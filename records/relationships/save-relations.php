@@ -102,8 +102,8 @@ else if (@$_REQUEST["save-mode"] == "new") {
 }
 
 function saveRelationship($rec_id, $reln_type, $other_bib_id, $interp_id, $title, $notes, $start_date, $end_date) {
-	$relval = mysql_fetch_assoc(mysql_query("select rdl_value from rec_detail_lookups where rdl_id = $reln_type"));
-	$relval = $relval['rdl_value'];
+	$relval = mysql_fetch_assoc(mysql_query("select trm_Label from defTerms where trm_ID = $reln_type"));
+	$relval = $relval['trm_Label'];
 	mysql__insert("records", array(
 		"rec_title" => "$title ($rec_id $relval $other_bib_id)",
                 "rec_added"     => date('Y-m-d H:i:s'),

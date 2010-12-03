@@ -239,7 +239,7 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 
 				case "enum":
 					// validate that the id is for the given detail type.
-					if (mysql_num_rows(mysql_query("select rdl_id from rec_detail_lookups where rdl_rdt_id=$bdtID and rdl_id='".$val."'")) <= 0)
+					if (mysql_num_rows(mysql_query("select trm_ID from defTerms where rdl_rdt_id=$bdtID and trm_ID='".$val."'")) <= 0)
 					jsonError("invalid enumeration value \"$val\"");
 					$bdVal = "'" . $val . "'";
 					break;

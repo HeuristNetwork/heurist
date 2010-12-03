@@ -14,18 +14,18 @@ mysql_connection_db_overwrite(HEURIST_COMMON_DB);
 
 $delete_bdl_id = intval(@$_REQUEST['delete_bdl_field']);
 if ($delete_bdl_id) {
-	mysql_query('delete from rec_detail_lookups where rdl_id = ' . $delete_bdl_id);
+	mysql_query('delete from defTerms where trm_ID = ' . $delete_bdl_id);
 	header('Location: edit_enum.php?dty_ID=' . $_REQUEST['dty_ID']);
 	return;
 }
 
-$update_bdl_id = intval(@$_REQUEST['rdl_id']);
+$update_bdl_id = intval(@$_REQUEST['trm_ID']);
 if ($update_bdl_id) {
-	$set_commands = 'set' . (@$_REQUEST['rdl_value'] ? ' rdl_value = "'. $_REQUEST['rdl_value'].'"' : '');
-	$set_commands .= (@$_REQUEST[ 'rdl_description'] ? ($set_commands?',':'').' rdl_description = '. $_REQUEST['rdl_description'] : '');
-	$set_commands .= (@$_REQUEST[ 'bd_rdl_ont_id_'.@$_REQUEST['rdl_id']] ? ($set_commands?',':'').' rdl_ont_id = '. $_REQUEST[ 'bd_rdl_ont_id_'.@$_REQUEST['rdl_id']] : '');
+	$set_commands = 'set' . (@$_REQUEST['trm_Label'] ? ' trm_Label = "'. $_REQUEST['trm_Label'].'"' : '');
+	$set_commands .= (@$_REQUEST[ 'trm_Description'] ? ($set_commands?',':'').' trm_Description = '. $_REQUEST['trm_Description'] : '');
+	$set_commands .= (@$_REQUEST[ 'bd_rdl_ont_id_'.@$_REQUEST['trm_ID']] ? ($set_commands?',':'').' trm_VocabID = '. $_REQUEST[ 'bd_rdl_ont_id_'.@$_REQUEST['trm_ID']] : '');
 
-	mysql_query('update rec_detail_lookups '. $set_commands. ' where rdl_id = ' . $update_bdl_id);
+	mysql_query('update defTerms '. $set_commands. ' where trm_ID = ' . $update_bdl_id);
 	header('Location: edit_enum.php?dty_ID=' . @$_REQUEST['dty_ID'].'&updating='.$set_commands );
 	return;
 }

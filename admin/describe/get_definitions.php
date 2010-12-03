@@ -47,7 +47,7 @@ $version = 1; // Output format version number. This will be read by the crosswal
     print "-- rty_ID,rty_Name,rty_OrderInGroup,rty_Description,rty_RecTypeGroupID,rty_TitleMask,rty_CanonicalTitleMask,rty_Plural\n";
     $query = "select * from defRecTypes limit $lim";
     $res = mysql_query($query);
-    $fmt = 'rectypes';
+    $fmt = 'recTypes';
 
     print "\n> Start\n";
     while ($row = mysql_fetch_assoc($res)) { print_row($row, $fmt); }
@@ -61,7 +61,7 @@ $version = 1; // Output format version number. This will be read by the crosswal
     print "-- dty_ID,dty_Name,dty_Description,dty_Type,dty_Prompt,dty_Help,dty_PtrConstraints\n";
     $query = "select * from defDetailTypes limit $lim";
     $res = mysql_query($query);
-    $fmt = 'recdetailtypes';
+    $fmt = 'detailTypes';
 
     print "\n> Start\n";
     while ($row = mysql_fetch_assoc($res)) { print_row($row, $fmt); }
@@ -75,7 +75,7 @@ $version = 1; // Output format version number. This will be read by the crosswal
     print "-- rdr_id,rdr_rec_type,rdr_rdt_id,rdr_required,rdr_name,rdr_description,rdr_prompt,rdr_help,rdr_repeatable,rdr_order,rdr_size,rdr_default,rdr_match\n";
     $query = "select * from rec_detail_requirements limit $lim";
     $res = mysql_query($query);
-    $fmt = 'recdetailrequirements';
+    $fmt = 'detailRequirements';
 
     print "\n> Start\n";
     while ($row = mysql_fetch_assoc($res)) { print_row($row, $fmt); }
@@ -83,13 +83,13 @@ $version = 1; // Output format version number. This will be read by the crosswal
 
 
 // ------------------------------------------------------------------------------------------
-// RECORD DETAIL LOOKUPS
+// Detail Type TERMS
 
-    print "\n\n\n-- RECORD DETAIL LOOKUPS";print "\n";
-    print "-- rdl_id,rdl_rdt_id,rdl_value,rdl_related_rdl_id\n";
-    $query = "select * from rec_detail_lookups limit $lim";
+    print "\n\n\n-- TERMS";print "\n";
+    print "-- trm_ID,trm_VocabID,trm_Label,trm_InverseTermID\n";
+    $query = "select * from defTerms limit $lim";
     $res = mysql_query($query);
-    $fmt = 'recdetaillookups';
+    $fmt = 'defTerms';
 
     print "\n> Start\n";
     while ($row = mysql_fetch_assoc($res)) { print_row($row, $fmt); }
@@ -116,7 +116,7 @@ $version = 1; // Output format version number. This will be read by the crosswal
     print "-- rcon_id,rcon_rdt_id,rcon_source_rtd_id,rcon_target_rdt_id,rcon_rdl_ids,rcon_ont_id,rcon_description\n";
     $query = "select * from rel_constraints limit $lim";
     $res = mysql_query($query);
-    $fmt = 'rel_constraints';
+    $fmt = 'relConstraints';
 
     print "\n> Start\n";
     while ($row = mysql_fetch_assoc($res)) { print_row($row, $fmt); }
@@ -134,29 +134,29 @@ function print_row($row,$fmt) {
 
       switch ($fmt) {  // select the output formatting according to the table
 
-      case 'rectypes': // Data from the defRecTypes table
+      case 'recTypes': // Data from the defRecTypes table
         print "($row[rty_ID],'$row[rty_Name]',$row[rty_OrderInGroup], `$row[rty_Description]`,$row[rty_RecTypeGroupID],
         `$row[rty_TitleMask]`,`$row[rty_CanonicalTitleMask]`,`$row[rty_Plural]`),\n";
          break;
 
-      case 'recdetailtypes': // Data from the rec_details table
+      case 'detailTypes': // Data from the rec_details table
         print "($row[dty_ID],`$row[dty_Name]`,`$row[dty_Description]`,$row[dty_Type],`$row[dty_Prompt]`,`$row[dty_Help]`,$row[dty_PtrConstraints]),\n";
         break;
 
-      case 'recdetailrequirements': // Data from the rec_detail_requirements table
+      case 'detailRequirements': // Data from the rec_detail_requirements table
         print "($row[rdr_id],`$row[rdr_rec_type]`,`$row[rdr_rdt_id]`,`$row[rdr_required]`,`$row[rdr_name]`,`$row[rdr_description]`,
         `$row[rdr_prompt]`,`$row[rdr_help]`,`$row[rdr_repeatable]`,`$row[rdr_order]`,`$row[rdr_size]`,`$row[rdr_default]`,`$row[rdr_match]`),\n";
         break;
 
-      case 'recdetaillookups': // Data from the rec_details_lookup table
-        print "($row[rdl_id],`$row[rdl_rdt_id]`,`$row[rdl_value]`,`$row[rdl_related_rdl_id]`),\n";
+      case 'defTerms': // Data from the rec_details_lookup table
+        print "($row[trm_ID],`$row[trm_VocabID]`,`$row[trm_Label]`,`$row[trm_InverseTermID]`),\n";
         break;
 
       case 'defVocabularies': // Data from Vocabularies table
         print "($row[vcb_ID],`$row[vcb_Name]`,`$row[vcb_Description]`,`$row[vcb_RefURL]`,`$row[vcb_Added]`,`$row[vcb_Modified]`),\n";
         break;
 
-      case 'rel_constraints': // Data from rel_constraints table
+      case 'relConstraints': // Data from rel_constraints table
         print "($row[rcon_id],`$row[rcon_rdt_id]`,`$row[rcon_source_rt_id]`,`$row[rcon_target_rt_id]`,`$row[rcon_rdl_ids]`,
         `$row[rcon_ont_id]`,`$row[rcon_description]`),\n";
         break;

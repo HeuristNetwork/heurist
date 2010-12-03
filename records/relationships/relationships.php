@@ -121,8 +121,8 @@ $ranks['Uses'] = 0;
 function reltype_inverse ($reltype) {	//saw Enum change - find inverse as an id instead of a string
 	global $inverses;
 	if (! $inverses) {
-//		$inverses = mysql__select_assoc("rec_detail_lookups A left join rec_detail_lookups B on B.rdl_id=A.rdl_related_rdl_id", "A.rdl_value", "B.rdl_value", "A.rdl_rdt_id=200 and A.rdl_value is not null");
-		$inverses = mysql__select_assoc("rec_detail_lookups A left join rec_detail_lookups B on B.rdl_id=A.rdl_related_rdl_id", "A.rdl_id", "B.rdl_id", "A.rdl_rdt_id=200 and A.rdl_value is not null and B.rdl_value is not null");
+//		$inverses = mysql__select_assoc("defTerms A left join defTerms B on B.trm_ID=A.trm_InverseTermID", "A.trm_Label", "B.trm_Label", "A.rdl_rdt_id=200 and A.trm_Label is not null");
+		$inverses = mysql__select_assoc("defTerms A left join defTerms B on B.trm_ID=A.trm_InverseTermID", "A.trm_ID", "B.trm_ID", "A.rdl_rdt_id=200 and A.trm_Label is not null and B.trm_Label is not null");
 	}
 
 	$inverse = @$inverses[$reltype];
@@ -153,15 +153,15 @@ function fetch_relation_details($rec_id, $i_am_primary) {
 	);
 	while ($row = mysql_fetch_assoc($res)) {
 		switch ($row['rd_type']) {
-		    case 200:	//saw Enum change - added ReleationValue for UI
+		    case 200:	//saw Enum change - added RelationValue for UI
 			if ($i_am_primary) {
 				$bd['RelationType'] = $row['rd_val'];
 			}else{
 				$bd['RelationType'] = reltype_inverse($row['rd_val']);
 			}
-			$relval = mysql_fetch_assoc(mysql_query('select rdl_value,rdl_ont_id from rec_detail_lookups where rdl_id = ' .  intval($bd['RelationType'])));
-			$bd['RelationValue'] = $relval['rdl_value'];
-			$bd['VocabularyID'] = $relval['rdl_ont_id'];
+			$relval = mysql_fetch_assoc(mysql_query('select trm_Label,trm_VocabID from defTerms where trm_ID = ' .  intval($bd['RelationType'])));
+			$bd['RelationValue'] = $relval['trm_Label'];
+			$bd['VocabularyID'] = $relval['trm_VocabID'];
 			break;
 
 		    case 199:	// linked resource
@@ -238,8 +238,8 @@ error_log($query);
 		switch ($bd["rd_type"]) {
 		case 200:	//saw Enum change - nothing to do since rd_val is an id and inverse returns an id
 			$relations[$rec_id]["RelationType"] = $i_am_primary? $bd["rd_val"] : reltype_inverse($bd["rd_val"]);
-			$relval = mysql_fetch_assoc(mysql_query('select rdl_value from rec_detail_lookups where rdl_id = ' .  intval($relations[$rec_id]["RelationType"])));
-			$relations[$rec_id]['RelationValue'] = $relval['rdl_value'];
+			$relval = mysql_fetch_assoc(mysql_query('select trm_Label from defTerms where trm_ID = ' .  intval($relations[$rec_id]["RelationType"])));
+			$relations[$rec_id]['RelationValue'] = $relval['trm_Label'];
 			break;
 
 		case 199:
