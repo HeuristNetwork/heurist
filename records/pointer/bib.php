@@ -280,7 +280,6 @@ function getAllReminders($rec_id) {
 	return $reminders;
 }
 
-
 function getAllWikis($rec_id, $bkm_ID) {
 	// Get all wikis for this record / bookmark as an array/object
 
@@ -361,11 +360,11 @@ function getAllworkgroupTags($rec_id) {
 
 function getConstraintsByRdt($recType) {
 	$rcons = array();
-	$res = mysql_query("select rcon_target_rt_id as rty_ID, rcon_rdt_id as dty_ID,
-						rcon_rdl_ids as rdl_ids, rcon_ont_id as vcb_ID, rcon_order, rcon_limit
-						from rec_constraints
-						where rcon_source_rt_id=$recType
-						order by rcon_rdt_id, rcon_target_rt_id, rcon_order ");
+	$res = mysql_query("select rcs_TargetRectypeID as rty_ID, rcs_DetailtypeID as dty_ID,
+						rcs_TermIDs as trm_ids, rcs_VocabID as vcb_ID, rcs_Order, rcs_TermLimit, rcs_RelationshipsLimit
+						from defRelationshipConstraints
+						where rcs_SourceRectypeID=$recType
+						order by rcs_DetailtypeID, rcs_TargetRectypeID, rcs_Order ");
 	while($row = mysql_fetch_assoc($res)) {
 		if (! @$rcons[$row["dty_ID"]]) {
 			$rcons[$row["dty_ID"]] = array();

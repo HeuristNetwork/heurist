@@ -113,7 +113,7 @@ $version = 1; // Output format version number. This will be read by the crosswal
 // RELATIONSHIP CONSTRAINTS
 
     print "\n\n\n-- RELATIONSHIP CONSTRAINTS";print "\n";
-    print "-- rcon_id,rcon_rdt_id,rcon_source_rtd_id,rcon_target_rdt_id,rcon_rdl_ids,rcon_ont_id,rcon_description\n";
+    print "-- rcs_ID,rcs_DetailtypeID,rcs_SourceRectypeID,rcs_TargetRectypeID,rcs_TermIDs,rcs_VocabID,rcs_Description,rcs_TermLimit,rcs_RelationshipsLimit\n";
     $query = "select * from rel_constraints limit $lim";
     $res = mysql_query($query);
     $fmt = 'relConstraints';
@@ -157,8 +157,8 @@ function print_row($row,$fmt) {
         break;
 
       case 'relConstraints': // Data from rel_constraints table
-        print "($row[rcon_id],`$row[rcon_rdt_id]`,`$row[rcon_source_rt_id]`,`$row[rcon_target_rt_id]`,`$row[rcon_rdl_ids]`,
-        `$row[rcon_ont_id]`,`$row[rcon_description]`),\n";
+        print "($row[rcs_ID],`$row[rcs_DetailtypeID]`,`$row[rcs_SourceRectypeID]`,`$row[rcs_TargetRectypeID]`,`$row[rcs_TermIDs]`,
+        `$row[rcs_VocabID]`,`$row[rcs_Description]`,`$row[rcs_TermLimit]`,`$row[rcs_RelationshipsLimit]`),\n";
         break;
 
       // Additional case statements here for additional tables if required

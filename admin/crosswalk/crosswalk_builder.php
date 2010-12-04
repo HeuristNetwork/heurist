@@ -175,17 +175,19 @@ INSERT INTO `temp_vocabularies` (`vcb_ID`, `vcb_Name`, `vcb_Description`, `vcb_R
 
 DROP TABLE IF EXISTS `temp_rel_constraints`;
 CREATE TABLE IF NOT EXISTS `temp_rel_constraints` (
-  `rcon_id` smallint(6) unsigned NOT NULL,
-  `rcon_rdt_id` smallint(6) unsigned NOT NULL default '0',
-  `rcon_source_rt_id` smallint(6) unsigned NOT NULL default '0',
-  `rcon_target_rt_id` smallint(6) unsigned NOT NULL default '0',
-  `rcon_rdl_ids` varchar(255) character set utf8 default NULL,
-  `rcon_ont_id` smallint(6) unsigned NOT NULL,
-  `rcon_description` text character set utf8,
-  PRIMARY KEY  (`rcon_id`)
+  `rcs_ID` smallint(6) unsigned NOT NULL,
+  `rcs_DetailtypeID` smallint(6) unsigned NOT NULL default '0',
+  `rcs_SourceRectypeID` smallint(6) unsigned NOT NULL default '0',
+  `rcs_TargetRectypeID` smallint(6) unsigned NOT NULL default '0',
+  `rcs_TermIDs` varchar(255) character set utf8 default NULL,
+  `rcs_VocabID` smallint(6) unsigned NOT NULL,
+  `rcs_Description` text varchar(1000) character set utf8 default "Please describe ...",
+  `rcs_TermLimit` tinyint(1) unsigned Not Null default '0',
+  `rcs_RelationshipsLimit` tinyint(1) unsigned Not Null default '0',
+  PRIMARY KEY  (`rcs_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-INSERT INTO `temp_rel_constraints` (`rcon_id`, `rcon_rdt_id`, `rcon_source_rt_id`, `rcon_target_rt_id`, `rcon_rdl_ids`, `rcon_ont_id`, `rcon_description`) VALUES
+INSERT INTO `temp_rel_constraints` (`rcs_ID`, `rcs_DetailtypeID`, `rcs_SourceRectypeID`, `rcs_TargetRectypeID`, `rcs_TermIDs`, `rcs_VocabID`, `rcs_Description`) VALUES
 
 // Steve: Parse the stream from get_definitions until you get to a line with    > Start
 // then send the stream to MySQL until you get to a line with   > End

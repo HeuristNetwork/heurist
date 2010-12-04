@@ -629,7 +629,7 @@ top.HEURIST.edit = {
 			var dtRelConstForRecType = top.HEURIST.edit.record.rtConstraintsByDType[rdtID][rType];
 			if (!dtRelConstForRecType) continue;
 			for (var i = 0; i<dtRelConstForRecType.length; i++) {
-				var list = dtRelConstForRecType[i]['rdl_ids'];
+				var list = dtRelConstForRecType[i]['trm_ids'];
 				if (list) {
 					list = list.split(",");
 					for (var j = 0; j < list.length; j++) {
