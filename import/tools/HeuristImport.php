@@ -470,7 +470,7 @@ class HeuristNativeEntry {
 		if ($this->_is_valid !== NULL) return $this->_is_valid;
 
 		global $rec_detail_requirements;
-		if (! $rec_detail_requirements) load_bib_detail_requirements();    //FIXME doesn't load rec_detail_requirements equal empty array
+		if (! $rec_detail_requirements) load_bib_detail_requirements();    //FIXME doesn't load defRecStructure equal empty array
 
 		$field_lookup = array();
 		foreach (array_keys($this->_fields) as $i) {
@@ -701,13 +701,13 @@ error_log(print_r($bib_requirement_names[55], 1));
 		global $hash_info;
 		if (! $hash_info) {
 			// hash_info contains all the good stuff we need for determining the hash, indexed by reftype, and then by dty_ID
-			$res = mysql_query("select rdr_rec_type, dty_ID, dty_Type = 'resource' as isResource from rec_detail_requirements, defDetailTypes
-			                     where rdr_rdt_id=dty_ID and ((dty_Type != 'resource' and rdr_match) or (dty_Type = 'resource' and rdr_required = 'Y'))
-			                  order by rdr_rec_type, dty_Type = 'resource', dty_ID");
+			$res = mysql_query("select rst_RecTypeID, dty_ID, dty_Type = 'resource' as isResource from defRecStructure, defDetailTypes
+			                     where rst_DetailTypeID=dty_ID and ((dty_Type != 'resource' and rst_RecordMatchOrder) or (dty_Type = 'resource' and rdr_required = 'Y'))
+			                  order by rst_RecTypeID, dty_Type = 'resource', dty_ID");
 			$hash_info = array();
 			while ($row = mysql_fetch_assoc($res)) {
-				if (! @$hash_info[$row["rdr_rec_type"]]) $hash_info[$row["rdr_rec_type"]] = array();
-				$hash_info[$row["rdr_rec_type"]][$row["dty_ID"]] = $row["isResource"];
+				if (! @$hash_info[$row["rst_RecTypeID"]]) $hash_info[$row["rst_RecTypeID"]] = array();
+				$hash_info[$row["rst_RecTypeID"]][$row["dty_ID"]] = $row["isResource"];
 			}
 		}
 		global $bdt_to_reftype;
@@ -759,13 +759,13 @@ error_log(print_r($bib_requirement_names[55], 1));
 		global $hash_info;
 		if (! $hash_info) {
 			// hash_info contains all the good stuff we need for determining the hash, indexed by reftype, and then by dty_ID
-			$res = mysql_query("select rdr_rec_type, dty_ID, dty_Type = 'resource' as isResource from rec_detail_requirements, defDetailTypes
-			                     where rdr_rdt_id=dty_ID and ((dty_Type != 'resource' and rdr_match) or (dty_Type = 'resource' and rdr_required = 'Y'))
-			                  order by rdr_rec_type, dty_Type = 'resource', dty_ID");
+			$res = mysql_query("select rst_RecTypeID, dty_ID, dty_Type = 'resource' as isResource from defRecStructure, defDetailTypes
+			                     where rst_DetailTypeID=dty_ID and ((dty_Type != 'resource' and rst_RecordMatchOrder) or (dty_Type = 'resource' and rdr_required = 'Y'))
+			                  order by rst_RecTypeID, dty_Type = 'resource', dty_ID");
 			$hash_info = array();
 			while ($row = mysql_fetch_assoc($res)) {
-				if (! @$hash_info[$row["rdr_rec_type"]]) $hash_info[$row["rdr_rec_type"]] = array();
-				$hash_info[$row["rdr_rec_type"]][$row["dty_ID"]] = $row["isResource"];
+				if (! @$hash_info[$row["rst_RecTypeID"]]) $hash_info[$row["rst_RecTypeID"]] = array();
+				$hash_info[$row["rst_RecTypeID"]][$row["dty_ID"]] = $row["isResource"];
 			}
 		}
 		global $bdt_to_reftype;
@@ -828,7 +828,7 @@ error_log(print_r($bib_requirement_names[55], 1));
 		if (! $this->_container) return true;
 
 		$containerBDType = intval($reftype_to_bdt_id_map[ $this->_container->getReferenceType() ]);
-		$res = mysql_query("select * from rec_detail_requirements where rdr_rdt_id = $containerBDType and rdr_rec_type = " . $this->_reftype . " and rdr_required = 'y'");
+		$res = mysql_query("select * from defRecStructure where rst_DetailTypeID = $containerBDType and rst_RecTypeID = " . $this->_reftype . " and rdr_required = 'y'");
 		if (mysql_num_rows($res) == 0) return true;
 		return false;
 	}
@@ -870,7 +870,7 @@ class HeuristNativeField {
 function decode_thesis_type(&$foreign_field) {	//SAW bug fix - the value passed in is not a Native Field structure it is just the raw value.
 	/* see also the general DECODE ENUM TYPE */
 	global $rec_detail_lookups;
-	if (! $rec_detail_lookups) load_bib_detail_lookups();
+	if (! $rec_detail_lookups) load_rec_detail_lookups();
 
 	$value = trim($foreign_field);
 	if (preg_match('/\\b(M)[.]?\\s*(A|Phil|Sc)\\b/', $value, $matches))	// masters
@@ -903,11 +903,11 @@ function is_enum_field($heurist_type) {
 
 function decode_enum($heurist_type, &$foreign_field) {// saw TODO Enum change   need to ensure this code and calling code use ids
 	// find the best match for the given value, in the list of existing enum lookups
-	global $bib_detail_lookups_lc;
-	if (! $bib_detail_lookups_lc) load_bib_detail_lookups();
+	global $rec_detail_lookups_lc;
+	if (! $rec_detail_lookups_lc) load_rec_detail_lookups();
 
 	$in_value = strtolower(trim($foreign_field));
-	$possible_values = $bib_detail_lookups_lc[$heurist_type];
+	$possible_values = $rec_detail_lookups_lc[$heurist_type];
 
 	// check for an exact match
 	if (@$possible_values[$in_value]) return $possible_values[$in_value];
@@ -930,7 +930,7 @@ function load_bib_detail_requirements() {
 
 	// mysql_connection_db_select('SHSSERI_bookmarks');
 	//mysql_connection_select(DATABASE);
-	$res = mysql_query('select rdr_rec_type, rdr_rdt_id from rec_detail_requirements left join defDetailTypes on rdr_rdt_id=dty_ID where rdr_required = "Y" and dty_Type != "resource"');
+	$res = mysql_query('select rst_RecTypeID, rst_DetailTypeID from defRecStructure left join defDetailTypes on rst_DetailTypeID=dty_ID where rdr_required = "Y" and dty_Type != "resource"');
 	$rec_detail_requirements = array();
 	while ($row = mysql_fetch_row($res)) {
 		if (array_key_exists($row[0], $rec_detail_requirements))
@@ -943,11 +943,11 @@ function load_bib_detail_requirements() {
 
 function load_bib_requirement_names() {
 	// $bib_requirement_names is an array of arrays; outer array is indexed by reftype,
-	// inner array is a mapping of dty_ID to rdr_name, union a mapping of rdr_name to dty_ID
+	// inner array is a mapping of dty_ID to rst_NameInForm, union a mapping of rst_NameInForm to dty_ID
 	global $bib_requirement_names;
 
 	// mysql_connection_db_select('SHSSERI_bookmarks');
-	$res = mysql_query('select rdr_rec_type, rdr_rdt_id, rdr_name, dty_Name from rec_detail_requirements left join defDetailTypes on rdr_rdt_id=dty_ID');
+	$res = mysql_query('select rst_RecTypeID, rst_DetailTypeID, rst_NameInForm, dty_Name from defRecStructure left join defDetailTypes on rst_DetailTypeID=dty_ID');
 	$bib_requirement_names = array();
 	while ($row = mysql_fetch_row($res)) {
 		if (! array_key_exists($row[0], $bib_requirement_names))
@@ -1014,20 +1014,20 @@ function load_reftype_name_to_id() {
 }
 
 
-function load_bib_detail_lookups() {
+function load_rec_detail_lookups() {
 	// $rec_detail_lookups is an array of arrays:
 	// the outer keys are the dty_ID, the inner arrays are mapping from the lookup value to the lookup ID
 
-	global $rec_detail_lookups, $bib_detail_lookups_lc;	// staid and lowercase versions of this data
+	global $rec_detail_lookups, $rec_detail_lookups_lc;	// staid and lowercase versions of this data
 
 	$res = mysql_query('select * from defTerms');
 	$rec_detail_lookups = array();
 	while ($row = mysql_fetch_assoc($res)) {
-		if (! @$rec_detail_lookups[$row['rdl_rdt_id']])
-			$rec_detail_lookups[$row['rdl_rdt_id']] = array();
+		if (! @$rec_detail_lookups[$row['trm_VocabID']])
+			$rec_detail_lookups[$row['trm_VocabID']] = array();
 
-		$rec_detail_lookups[$row['rdl_rdt_id']][$row['trm_Label']] = $row['trm_ID'];
-		$bib_detail_lookups_lc[$row['rdl_rdt_id']][strtolower($row['trm_Label'])] = $row['trm_ID'];
+		$rec_detail_lookups[$row['trm_VocabID']][$row['trm_Label']] = $row['trm_ID'];
+		$rec_detail_lookups_lc[$row['trm_VocabID']][strtolower($row['trm_Label'])] = $row['trm_ID'];
 	}
 }
 

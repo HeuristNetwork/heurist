@@ -182,7 +182,7 @@ hr { margin: 20px 0; }
 	$res = mysql_query("select distinct rty_ID,rty_Name,rty_Description, ifnull(grp.ugr_Name, if(rty_RecTypeGroupID == 1,'Bibliographic record','Other record')) as section
 	                      from defRecTypes
 	                 left join ".USERS_DATABASE.".".USER_GROUPS_TABLE." on ".USER_GROUPS_USER_ID_FIELD."=".get_user_id()."
-	                 left join rec_detail_requirements_overrides on rdr_rec_type=rty_ID
+	                 left join rec_detail_requirements_overrides on rst_RecTypeID=rty_ID
 	                 left join ".USERS_DATABASE.".".GROUPS_TABLE." grp on grp.".GROUPS_ID_FIELD."=".USER_GROUPS_GROUP_ID_FIELD." and grp.".GROUPS_ID_FIELD."=rdr_wg_id
 	                  where rty_ID
 	                  order by grp.".GROUPS_NAME_FIELD." is null, grp.".GROUPS_NAME_FIELD.", rty_RecTypeGroupID > 1, rty_Name");

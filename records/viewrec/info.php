@@ -300,7 +300,7 @@ function print_private_details($bib) {
 
 	function print_public_details($bib) {
 		$bds_res = mysql_query('select dty_ID,
-		                               ifnull(rdro.rdr_name, ifnull(rdr.rdr_name, dty_Name)) as name,
+		                               ifnull(rdro.rst_NameInForm, ifnull(rdr.rst_NameInForm, dty_Name)) as name,
 		                               rd_val as val,
 		                               rd_file_id,
 		                               dty_Type,
@@ -308,16 +308,16 @@ function print_private_details($bib) {
 		                               if(rd_geo is not null, astext(envelope(rd_geo)), null) as bd_geo_envelope
 		                          from rec_details
 		                     left join defDetailTypes on dty_ID = rd_type
-		                     left join rec_detail_requirements rdr on rdr.rdr_rdt_id = rd_type
-		                                                          and rdr.rdr_rec_type = '.$bib['rec_type'].'
-		                     left join rec_detail_requirements_overrides rdro on rdro.rdr_rdt_id = rd_type
-		                                                                     and rdro.rdr_rec_type = '.$bib['rec_type'].'
+		                     left join defRecStructure rdr on rdr.rst_DetailTypeID = rd_type
+		                                                          and rdr.rst_RecTypeID = '.$bib['rec_type'].'
+		                     left join rec_detail_requirements_overrides rdro on rdro.rst_DetailTypeID = rd_type
+		                                                                     and rdro.rst_RecTypeID = '.$bib['rec_type'].'
 		                                                                     and rdro.rdr_wg_id = 0
 		                         where rd_rec_id = ' . $bib['rec_id'] .'
-		                      order by rdro.rdr_order is null,
-		                               rdro.rdr_order,
-		                               rdr.rdr_order is null,
-		                               rdr.rdr_order,
+		                      order by rdro.rst_OrderInForm is null,
+		                               rdro.rst_OrderInForm,
+		                               rdr.rst_OrderInForm is null,
+		                               rdr.rst_OrderInForm,
 		                               dty_ID,
 		                               rd_id');
 

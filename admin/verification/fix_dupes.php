@@ -1,46 +1,46 @@
 <?php
 
-define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
-require_once(dirname(__FILE__).'/../../common/connect/cred.php');
-require_once(dirname(__FILE__).'/../../common/connect/db.php');
-require_once(dirname(__FILE__).'/../../records/TitleMask.php');
-require_once(dirname(__FILE__).'/../../common/php/fetch_bib_details.php');
+	define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
+	require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+	require_once(dirname(__FILE__).'/../../common/connect/db.php');
+	require_once(dirname(__FILE__).'/../../records/TitleMask.php');
+	require_once(dirname(__FILE__).'/../../common/php/fetch_bib_details.php');
 
-if (! is_logged_in()  ||  ! is_admin()) return;
+	if (! is_logged_in()  ||  ! is_admin()) return;
 
-session_start();
+	session_start();
 
-$do_merge_details = false;
+	$do_merge_details = false;
 
-if (@$_REQUEST['keep']  &&  @$_REQUEST['duplicate']){  //user has select master and dups- time to merge details
+	if (@$_REQUEST['keep']  &&  @$_REQUEST['duplicate']){  //user has select master and dups- time to merge details
    $do_merge_details = true;
    $_REQUEST['bib_ids'] = join(',',array_merge($_REQUEST['duplicate'],array($_REQUEST['keep']))); //copy only the selected items
 
-}elseif(@$_REQUEST['commit']){
+	}elseif(@$_REQUEST['commit']){
    do_fix_dupe();
    return;
-}
+	}
 
-$finished_merge = false;
-if (@$_SESSION['finished_merge']){
+	$finished_merge = false;
+	if (@$_SESSION['finished_merge']){
    unset($_SESSION['finished_merge']);
    $finished_merge = true;
-}
+	}
 
-if (@$_REQUEST['keep'])  $_SESSION['master_rec_id'] = $master_rec_id = $_REQUEST['keep']; //store the master record id in the session
+	if (@$_REQUEST['keep'])  $_SESSION['master_rec_id'] = $master_rec_id = $_REQUEST['keep']; //store the master record id in the session
 
-if (! @$_REQUEST['bib_ids']) return;
+	if (! @$_REQUEST['bib_ids']) return;
 
-mysql_connection_db_select(DATABASE);
-//mysql_connection_db_select("`heuristdb-nyirti`");   //for debug
+	mysql_connection_db_select(DATABASE);
+	//mysql_connection_db_select("`heuristdb-nyirti`");   //for debug
 
-$bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '1');
-$reference_bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', 'dty_Type="resource"');
+	$bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '1');
+	$reference_bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', 'dty_Type="resource"');
 
 ?>
 
 <html>
-<head>
+	<head>
  <style type="text/css">
  * { font-size: 100%; font-family: verdana;}
  body { font-size: 0.7em; }
@@ -90,81 +90,81 @@ $reference_bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', 'd
 	}
  -->
  </script>
-</head>
-<body>
-<form>
+	</head>
+	<body>
+		<form>
 
-<div style="width: 500px;">
-<?php
+			<div style="width: 500px;">
+				<?php
  if (! @$do_merge_details){
      print 'This function combines duplicate records. One record MUST be selected as a master record'.
  ' and there must be at least one duplicate selected. Processing duplicates allows you to merge,'.
  'data with the master record.<br/><br/>'.
  'Bookmarks, Tags and Relationships from deleted records are added to the master record.'.
  'None of these data are duplicated if they already exist in the master record.';
-} else{
+					} else{
     print 'Select the data items which should be retained, added or replaced in the master records.'.
     ' Repeatable (multi-valued)fields are indicated by checkboxes and single value fields are '.
     ' indicated by radio buttons. Pressing the "commit changes" button will start the process to'.
     ' save the changes to the master record. You will be able to view the master record to verify '.
     'the changes.';
-}
-?>
+					}
+				?>
  </div><br/><hr/>
 
-<table><tbody id="tb">
+			<table><tbody id="tb">
 
-<?php
+					<?php
 
-print '<input type="hidden" name="bib_ids" value="'.$_REQUEST['bib_ids'].'">';
+						print '<input type="hidden" name="bib_ids" value="'.$_REQUEST['bib_ids'].'">';
 
-$rfts = array();
-$res = mysql_query('select rty_ID, rty_Name from records left join defRecTypes on rty_ID=rec_type where rec_id in ('.$_REQUEST['bib_ids'].')');
-//FIXME add code to pprint cross type matching  header " Cross Type - Author Editor with Person with Book"
-while ($row = mysql_fetch_assoc($res)) $rfts[$row['rty_ID']]= $row['rty_Name'];
+						$rfts = array();
+						$res = mysql_query('select rty_ID, rty_Name from records left join defRecTypes on rty_ID=rec_type where rec_id in ('.$_REQUEST['bib_ids'].')');
+						//FIXME add code to pprint cross type matching  header " Cross Type - Author Editor with Person with Book"
+						while ($row = mysql_fetch_assoc($res)) $rfts[$row['rty_ID']]= $row['rty_Name'];
 
-$temptypes = '';
-if (count($rfts) > 0) {
+						$temptypes = '';
+						if (count($rfts) > 0) {
     foreach ($rfts as $rft){
         if (!$temptypes) $temptypes = $rft;
         else $temptypes .= '/'.$rft;
     }
     print '<tr><td colspan="3" style="text-align: center; font-weight: bold;">'.$temptypes.'</td></tr>';
-}
-//save rec type for merging code
-if (!@$_SESSION['rec_type_id']) $_SESSION['rty_ID'] = @$rfts[0]['rty_ID'];
-//get requirements for details
-$res = mysql_query('select rdr_rec_type,rdr_rdt_id, rdr_name, rdr_required, rdr_repeatable from rec_detail_requirements where rdr_rec_type in ('.join(',',array_keys($rfts)).')');
-$rec_requirements =  array();
-while ($req = mysql_fetch_assoc($res)) $rec_requirements[$req['rdr_rec_type']][$req['rdr_rdt_id']]= $req;
-// get overrides - this will potentially overwrite the main requirements
-$wg_ids_list = join(',',array_keys($_SESSION['heurist']['user_access']));
-$res = mysql_query('select rdr_rec_type, rdr_rdt_id, rdr_name, rdr_required, rdr_repeatable from rec_detail_requirements_overrides where rdr_rec_type in ('.join(',',array_keys($rfts)).') AND rdr_wg_id in ('.$wg_ids_list.')');
-$precedence = array( "Y"=> 4, "R"=> 3, "O"=> 2, "X"=> 1 );
+						}
+						//save rec type for merging code
+						if (!@$_SESSION['rec_type_id']) $_SESSION['rty_ID'] = @$rfts[0]['rty_ID'];
+						//get requirements for details
+						$res = mysql_query('select rst_RecTypeID,rst_DetailTypeID, rst_NameInForm, rdr_required, rst_Repeats from defRecStructure where rst_RecTypeID in ('.join(',',array_keys($rfts)).')');
+						$rec_requirements =  array();
+						while ($req = mysql_fetch_assoc($res)) $rec_requirements[$req['rst_RecTypeID']][$req['rst_DetailTypeID']]= $req;
+						// get overrides - this will potentially overwrite the main requirements
+						$wg_ids_list = join(',',array_keys($_SESSION['heurist']['user_access']));
+						$res = mysql_query('select rst_RecTypeID, rst_DetailTypeID, rst_NameInForm, rdr_required, rst_Repeats from rec_detail_requirements_overrides where rst_RecTypeID in ('.join(',',array_keys($rfts)).') AND rdr_wg_id in ('.$wg_ids_list.')');
+						$precedence = array( "Y"=> 4, "R"=> 3, "O"=> 2, "X"=> 1 );
 
-while ($req = mysql_fetch_assoc($res)) {
-    $rdt_id = $req['rdr_rdt_id'];
-    $type = $req['rdr_rec_type'];
+						while ($req = mysql_fetch_assoc($res)) {
+							$rdt_id = $req['rst_DetailTypeID'];
+							$type = $req['rst_RecTypeID'];
     if (!$rec_requirements[$type][$rdt_id]) $rec_requirements[$type][$rdt_id] = $req; //if it doesn't exist then add it
     else {  // if name doesn't exist append it and select max required and max repeatable
-        $name = $req['rdr_name'];
+								$name = $req['rst_NameInForm'];
         $required = $req['rdr_required'];
-        $repeatable = $req['rdr_repeatable'];
-        if (strpos($rec_requirements[$type][$rdt_id]['rdr_name'],$name) === false) $rec_requirements[$type][$rdt_id]['rdr_name'] .= '/'.$name ;
+								$repeatable = $req['rst_Repeats'];
+								if (strpos($rec_requirements[$type][$rdt_id]['rst_NameInForm'],$name) === false) $rec_requirements[$type][$rdt_id]['rst_NameInForm'] .= '/'.$name ;
         if ( $precedence[$rec_requirements[$type][$rdt_id]['rdr_required']] < $precedence[$required])
             $rec_requirements[$type][$rdt_id]['rdr_required'] = $required;
-        if ( intval($rec_requirements[$type][$rdt_id]['rdr_repeatable']) < intval($repeatable))
-            $rec_requirements[$type][$rdt_id]['rdr_repeatable'] = intval($repeatable);
-    }
-}
+								if ( intval($rec_requirements[$type][$rdt_id]['rst_Repeats']) < intval($repeatable))
+								$rec_requirements[$type][$rdt_id]['rst_Repeats'] = intval($repeatable);
+							}
+						}
 
-$res = mysql_query('select * from records where rec_id in ('.$_REQUEST['bib_ids'].') order by find_in_set(rec_id, "'.$_REQUEST['bib_ids'].'")');
-$records = array();
-$counts = array();
-$rec_references = array();
-$invalid_rec_references = array();
-while ($rec = mysql_fetch_assoc($res)) $records[$rec['rec_id']] = $rec;
-foreach($records as $index => $record){
+						$res = mysql_query('select * from records where rec_id in ('.$_REQUEST['bib_ids'].') order by find_in_set(rec_id, "'.$_REQUEST['bib_ids'].'")');
+						$records = array();
+						$counts = array();
+						$rec_references = array();
+						$invalid_rec_references = array();
+						while ($rec = mysql_fetch_assoc($res)) $records[$rec['rec_id']] = $rec;
+						foreach($records as $index => $record){
     $rec_references = mysql__select_array('rec_details', 'rd_rec_id', 'rd_val='.$records[$index]['rec_id'].' and rd_type in ('.join(',', array_keys($reference_bdts)).')');
     if ($rec_references){
         // only store the references that are actually records
@@ -190,15 +190,15 @@ foreach($records as $index => $record){
         }
         array_push($records[$index]['details'][$type], $row);
     }
-}
-//FIXME place results into array and output record with most references and/or date rule first - not sure what to do here
-$rec_keys = array_keys($records);
-if (! @$master_rec_id){
+						}
+						//FIXME place results into array and output record with most references and/or date rule first - not sure what to do here
+						$rec_keys = array_keys($records);
+						if (! @$master_rec_id){
     array_multisort($counts,SORT_NUMERIC, SORT_DESC, $rec_keys );
     $master_rec_id = $rec_keys[0];
-}
-if (! @$do_merge_details){  // display a page to user for selecting which record should be the master record
-//    foreach($records as $index) {
+						}
+						if (! @$do_merge_details){  // display a page to user for selecting which record should be the master record
+							//    foreach($records as $index) {
     foreach($records as $record) {
       //  $record = $records[$index];
         $is_master = ($record['rec_id']== $master_rec_id);
@@ -241,12 +241,15 @@ if (! @$do_merge_details){  // display a page to user for selecting which record
             $detail = detail_str($rd_type, $temp);
             unset($temp);
             if (is_array($detail)) {
-                 if (intval($rec_requirements[$record['rec_type']][$rd_type]['rdr_repeatable'])>0){
+										$repeatCount = intval($rec_requirements[$record['rec_type']][$rd_type]['rst_Repeats']);
+										if ($repeatCount==0){
                      foreach ($detail as $val) {
                        print '<div>'. $val . '</div>';
                      }
                  } else{
-                    print '<div>'. $detail[0] . '</div>';
+											for ($i = 0; $i < $repeatCount; $i++) {
+												print '<div>'. $detail[$i] . '</div>';
+											}
                     //FIXME  add code to remove the extra details that are not supposed to be there
                  }
             } else{
@@ -293,7 +296,7 @@ if (! @$do_merge_details){  // display a page to user for selecting which record
 	    print '<tr><td colspan=3><hr /></td></tr>';
 	    print "</tr>\n\n";
     }
-}else{  //display page for the user to select the set of details to keep for this record  - this is the basic work for the merge
+						}else{  //display page for the user to select the set of details to keep for this record  - this is the basic work for the merge
     $master_index = array_search($master_rec_id, $rec_keys);
     if ($master_index === FALSE){  // no master selected we can't do a merge
         return;
@@ -339,8 +342,8 @@ if (! @$do_merge_details){  // display a page to user for selecting which record
             //FIXME place a keep checkbox on values for repeatable fields , place a radio button for non-repeatable fields with
             //keep_dt_### where ### is detail Type id and mark both "checked" for master record
             print '<td style="padding-left:10px;">';
-            $is_type_repeatable =  intval($rec_requirements[$master_rec_type][$rd_type]['rdr_repeatable']) > 0 ;
-            $detail = detail_get_html_input_str( $detail, $is_type_repeatable, $is_master );
+									$repeatCount =  intval($rec_requirements[$master_rec_type][$rd_type]['rst_Repeats']);
+									$detail = detail_get_html_input_str( $detail, $repeatCount, $is_master );
             if (is_array($detail)) {
                  if ($is_type_repeatable){
                      foreach ($detail as $val) {
@@ -398,25 +401,26 @@ if (! @$do_merge_details){  // display a page to user for selecting which record
         print '<tr><td colspan=3><hr /></td></tr>';
         print "</tr>\n\n";
     }
-}
-?>
+						}
+					?>
 
-</tbody></table>
-<?php
+			</tbody></table>
+			<?php
     if (! $finished_merge) {
        print '<input type="submit" name="'.($do_merge_details? "commit":"merge").'" style="background-color:#fbb;" value="'. ($do_merge_details? "commit&nbsp;changes":"merge&nbsp;duplicates").'" >';
     } else{
        print '<div> Changes were commited </div>';
        print '<input type="button" name="close_window" id="close_window" value="Close Window"   title="Cick here to close this window" onclick="window.close();">';
     }
-?>
-</form>
-</body>
+			?>
+		</form>
+	</body>
 </html>
 
 <?php
 
-function detail_get_html_input_str( $detail, $is_type_repeatable, $is_master ) {
+	function detail_get_html_input_str( $detail, $repeatCount, $is_master ) {
+		$is_type_repeatable = $repeatCount != 1;
      foreach($detail as $rg){
         $detail_id = $rg['rd_id'];
         $detail_type = $rg['rd_type'];
@@ -439,13 +443,13 @@ function detail_get_html_input_str( $detail, $is_type_repeatable, $is_master ) {
        $rv[]= $input;
      }
     return $rv;
-}
-/*      master
+	}
+	/*      master
         print '<input type="radio"    name="update'.$detail_type.'"   checked=checked value="master" id="update'.$detail_id.'><div style="font-size: 70%;">'.detail_str($detail_type,$detail_val).'</div>';
-rep     print '<input type="checkbox" name="keep'.$detail_type.'[]" checked=checked value="'.$detail_id.'" id="keep_detail_id'.$detail_id.'" ><div style="font-size: 70%;">'.detail_str($detail_type,$detail_val).'</div>';
+	rep     print '<input type="checkbox" name="keep'.$detail_type.'[]" checked=checked value="'.$detail_id.'" id="keep_detail_id'.$detail_id.'" ><div style="font-size: 70%;">'.detail_str($detail_type,$detail_val).'</div>';
       dup
         print '<td><input type="radio" name="update" '.$detail_type.' value="'.$detail_id.'" id="update'.$detail_id.'"><div style="font-size: 70%;">'.detail_str($detail_type,$detail_val).'</div>';
-rep        print '<input type="checkbox" name="add'.$detail_type.'[]"  value="'.$detail_id.'" id="add_detail_id'.$detail_id.'"><div style="font-size: 70%;">'.detail_str($detail_type,$detail_val).'</div></td>';
+	rep        print '<input type="checkbox" name="add'.$detail_type.'[]"  value="'.$detail_id.'" id="add_detail_id'.$detail_id.'"><div style="font-size: 70%;">'.detail_str($detail_type,$detail_val).'</div></td>';
  *
  *"<input type=\"checkbox\" name=\"keep158[]\"checked=checkedvalue=\"250491\" id=\"keep_detail_id158[]\"><a target=\"edit\" href=\"../edit?bib_id=61985\">Fajsák, G</a>"
  "<input type=\"checkbox\" name=\"keep158[]\"checked=checkedvalue=\"250492\" id=\"keep_detail_id158[]\"><a target=\"edit\" href=\"../edit?bib_id=61986\">Renner, G</a>"
@@ -453,7 +457,7 @@ rep        print '<input type="checkbox" name="add'.$detail_type.'[]"  value="'.
 
  */
 
-function detail_str($rd_type, $rd_val) {
+	function detail_str($rd_type, $rd_val) {
 	global $reference_bdts;
 	if (in_array($rd_type, array_keys($reference_bdts))) {
 		if (is_array($rd_val)) {
@@ -482,11 +486,11 @@ function detail_str($rd_type, $rd_val) {
 	*/
 	else
 		return $rd_val;
-}
+	}
 
-// ---------------------------------------------- //
-// function to actually fix stuff on form submission
-function do_fix_dupe() {
+	// ---------------------------------------------- //
+	// function to actually fix stuff on form submission
+	function do_fix_dupe() {
 	$master_rec_id = $_SESSION['master_rec_id'];
     $master_details = $_SESSION['master_details'];
     unset($_SESSION['master_details']); //clear master_details so we don't re-enter this code
@@ -518,18 +522,18 @@ function do_fix_dupe() {
      }
     }
 
-//   mysql_connection_db_overwrite("`heuristdb-nyirti`");   //for debug
+		//   mysql_connection_db_overwrite("`heuristdb-nyirti`");   //for debug
 	mysql_connection_db_overwrite(DATABASE);
-//    mysql_query('set @suppress_update_trigger:=1'); // shut off update triggers to let us munge the records with out worrying about the archive.
+		//    mysql_query('set @suppress_update_trigger:=1'); // shut off update triggers to let us munge the records with out worrying about the archive.
 
-// set modified on master so the changes will stick  aslo update url if there is one.
+		// set modified on master so the changes will stick  aslo update url if there is one.
      $now = date('Y-m-d H:i:s');
      $pairs =(@$_REQUEST['URL']? array("rec_url" =>$_REQUEST['URL'], "rec_modified" => $now): array("rec_modified" => $now));
      mysql__update("records", "rec_id=$master_rec_id", $pairs );
-//process keeps - which means find repeatables in master record to delete  all_details - keeps = deletes
-//get array of repeatable detail ids for master
+		//process keeps - which means find repeatables in master record to delete  all_details - keeps = deletes
+		//get array of repeatable detail ids for master
     $master_rep_dt_ids = array();
-    $res = mysql_query('select rdr_rdt_id from rec_detail_requirements where rdr_repeatable = 1 and rdr_rec_type = '.$_SESSION['rty_ID']);
+		$res = mysql_query('select rst_DetailTypeID from defRecStructure where rst_Repeats != 1 and rst_RecTypeID = '.$_SESSION['rty_ID']);
     while ($row = mysql_fetch_array( $res)) {
             array_push($master_rep_dt_ids, $row[0]);
     }
@@ -542,7 +546,7 @@ function do_fix_dupe() {
        }
     }
 
-//get flat array of keep detail ids
+		//get flat array of keep detail ids
     if ($keep_dt_ids && count($keep_dt_ids)){
         $master_keep_ids = array();
         foreach($keep_dt_ids as $dt_id => $details){
@@ -550,10 +554,10 @@ function do_fix_dupe() {
             array_push($master_keep_ids,$detail);
         }
     }
-//diff the arrays  don't delet yet as the user might be adding an existing value
+		//diff the arrays  don't delet yet as the user might be adding an existing value
    $master_delete_dt_ids = array();
    if($master_rep_detail_ids) $master_delete_dt_ids = array_diff($master_rep_detail_ids,$master_keep_ids);
-//FIXME add code to remove any none repeatable extra details
+		//FIXME add code to remove any none repeatable extra details
  //for each update
    if ($update_dt_ids){
        $update_detail=array();
@@ -572,7 +576,7 @@ function do_fix_dupe() {
             }
        }
    }
-//process adds
+		//process adds
   if($add_dt_ids){
     $add_details = array();
     // for each add detail
@@ -598,16 +602,16 @@ function do_fix_dupe() {
         //saw FIXME  we should update the relationship table on both rr_rec_idxxx  fields
 	}
 
-// move dup bookmarks and tags to master unless they are already there
-//get bookmarkid =>userid for bookmarks of master record
+		// move dup bookmarks and tags to master unless they are already there
+		//get bookmarkid =>userid for bookmarks of master record
     $master_bkm_UGrpIDs = mysql__select_assoc('usrBookmarks', 'bkm_ID','bkm_UGrpID', 'bkm_recID = '.$master_rec_id);
-//get kwd_ids for  all bookmarks of master record
+		//get kwd_ids for  all bookmarks of master record
     $master_tag_ids = mysql__select_array('usrRecTagLinks', 'rtl_TagID', 'rtl_RecID = '.$master_rec_id);
-//get bookmarkid => userid of bookmarks for dup records
+		//get bookmarkid => userid of bookmarks for dup records
     $dup_bkm_UGrpIDs = mysql__select_assoc('usrBookmarks','bkm_ID', 'bkm_UGrpID', 'bkm_recID in'. $dup_rec_list);
 
 
-// if dup userid already has a bookmark on master record then add dup bkm_ID to delete_bkm_IDs_list else add to  update_bkm_IDs
+		// if dup userid already has a bookmark on master record then add dup bkm_ID to delete_bkm_IDs_list else add to  update_bkm_IDs
     $update_bkm_IDs  = array();
     $delete_bkm_IDs = array();
     $dup_delete_bkm_ID_to_master_bkm_id = array();
@@ -622,28 +626,28 @@ function do_fix_dupe() {
             $master_bkm_UGrpIDs[$dup_bkm_ID] = $dup_bkm_UGrpID;
         }
     }
-//move duplicate record bookmarks for users without bookmarks on the master record
+		//move duplicate record bookmarks for users without bookmarks on the master record
     $update_bkm_IDs_list  = '('.join(',',$update_bkm_IDs). ")";
     $delete_bkm_IDs_list  = '('.join(',',$delete_bkm_IDs). ")";
 
     if (strlen($update_bkm_IDs_list)>2) { // update the bookmarks and tags that are not in the master
         mysql_query('update usrBookmarks set bkm_recID='.$master_rec_id.' where bkm_ID in '.$update_bkm_IDs_list);
-//        mysql_query('update usrRecTagLinks set rtl_RecID='.$master_rec_id.' where kwl_pers_id in '.$update_bkm_IDs_list);
+			//        mysql_query('update usrRecTagLinks set rtl_RecID='.$master_rec_id.' where kwl_pers_id in '.$update_bkm_IDs_list);
     }
-// process to be deleted dup bookmarks
+		// process to be deleted dup bookmarks
     foreach ($delete_bkm_IDs as $delete_dup_bkm_ID) {
         //copy soon to be deleted dup bookmark data to master record bookmark  by concat notes and pwd_reminder, max of ratings and copy zotero if non existant
         $master_bkm_ID = $dup_delete_bkm_ID_to_master_bmk_id[$delete_dup_bkm_ID];
         $master_pers_record = mysql_fetch_assoc(mysql_query('select * from usrBookmarks where bkm_ID='.$master_bkm_ID));
         $delete_dup_pers_record = mysql_fetch_assoc(mysql_query('select * from usrBookmarks where bkm_ID='.$delete_dup_bkm_ID));
-//        $master_pers_record['pers_notes'] .= $delete_dup_pers_record['pers_notes'];
+			//        $master_pers_record['pers_notes'] .= $delete_dup_pers_record['pers_notes'];
         $master_pers_record['bkm_PwdReminder'] .= "; ". $delete_dup_pers_record['bkm_PwdReminder'];
         $master_pers_record['bkm_Rating'] = max($master_pers_record['bkm_Rating'],$delete_dup_pers_record['bkm_Rating']);
         if (!$master_pers_record['bkm_ZoteroID']) $master_pers_record['bkm_ZoteroID']= $delete_dup_pers_record['bkm_ZoteroID'];
         unset($master_pers_record['bkm_ID']);
         mysql__update('usrBookmarks','bkm_ID='.$master_bkm_ID,$master_pers_record);
             }
-//for every delete dup tag link whoses tag id is not already linked to the master record change the record id to master
+		//for every delete dup tag link whoses tag id is not already linked to the master record change the record id to master
 	//get tag links for the soon to be deleted dup records
     $delete_dup_rtl_ids = mysql__select_assoc('usrRecTagLinks','rtl_ID', 'rtl_TagID', 'rtl_RecID in'. $dup_rec_list);
     foreach ($delete_dup_rtl_ids as $rtl_ID => $tag_id) {
@@ -655,16 +659,16 @@ function do_fix_dupe() {
         }
     }
 
-// move reminders to master
+		// move reminders to master
     mysql_query('update usrReminders set rem_RecID='.$master_rec_id.' where rem_RecID in '.$dup_rec_list);   //?FIXME  do we need to check reminders like we checked usrBookmarks
-//delete master details
+		//delete master details
    if($master_delete_dt_ids && count($master_delete_dt_ids)){
         $master_detail_delete_list = '('.join(',',$master_delete_dt_ids).')';
         mysql_query('delete from rec_details where rd_id in '.$master_detail_delete_list);  //FIXME add error code
    }
-//delete dup details
+		//delete dup details
     mysql_query('delete from rec_details where rd_rec_id in '.$dup_rec_list);
-//delete dup usrBookmarks
+		//delete dup usrBookmarks
     if (strlen($delete_bkm_IDs_list)>2) {
         mysql_query('delete from usrBookmarks where bkm_ID in '.$delete_bkm_IDs_list);
     }
@@ -673,10 +677,10 @@ function do_fix_dupe() {
     mysql_query('update rec_details left join defDetailTypes on dty_ID=rd_type set rd_val='.$master_rec_id.
                  ' where rd_val in '.$dup_rec_list.' and dty_Type="resource"');
 
-//delete dups
+		//delete dups
     mysql_query('delete from records where rec_id in '.$dup_rec_list);
 
-//delete unwanted details in master
+		//delete unwanted details in master
  //if ($master_delete_dt_ids && $master_delete_dt_ids[0]){
  //    $master_delete_dt_ids_list = '('.join(',',$master_delete_dt_ids). ')' ;
  //    mysql_query('delete from rec_details where rd_id in '.$master_delete_dt_ids_list);
@@ -694,6 +698,6 @@ function do_fix_dupe() {
 
 
  	header('Location: fix_dupes.php?bib_ids='.$_REQUEST['bib_ids']);
-}
+	}
 
 ?>

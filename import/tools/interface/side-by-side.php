@@ -28,7 +28,7 @@ while (count($bib_ids_to_fetch) > 0) {
 	$bib_data[$rec_id]["notes"] = $row["rec_scratchpad"];
 
 	$bib_data[$rec_id]["values"] = array();
-	$res = mysql_query("select rd_type, rd_val, dty_Type from rec_details left join defDetailTypes on dty_ID=rd_type left join rec_detail_requirements on rdr_rdt_id=dty_ID and rdr_rec_type = " . intval($row["rec_type"]) . " where rd_rec_id = $rec_id order by rdr_order, dty_ID, rd_id");
+	$res = mysql_query("select rd_type, rd_val, dty_Type from rec_details left join defDetailTypes on dty_ID=rd_type left join defRecStructure on rst_DetailTypeID=dty_ID and rst_RecTypeID = " . intval($row["rec_type"]) . " where rd_rec_id = $rec_id order by rst_OrderInForm, dty_ID, rd_id");
 	while ($bd = mysql_fetch_assoc($res)) {
 		if (! @$bib_data[$rec_id]["values"][$bd["rd_type"]]) $bib_data[$rec_id]["values"][$bd["rd_type"]] = array();
 		array_push($bib_data[$rec_id]["values"][$bd["rd_type"]], $bd["rd_val"]);

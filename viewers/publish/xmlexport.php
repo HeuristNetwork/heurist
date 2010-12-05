@@ -143,8 +143,8 @@ while ($row = mysql_fetch_assoc($res)) {
 	$RFT[$row['rty_ID']] = $row['rty_Name'];
 	foreach (getRecordRequirements($row['rty_ID']) as $rdr_rdt_id => $rdr) {
 	// initialise requirements and names for detailtypes ($RQS)
-		$RQS[$rdr['rdr_rec_type']][$rdr['rdr_rdt_id']]['rdr_required'] = $rdr['rdr_required'];
-		$RQS[$rdr['rdr_rec_type']][$rdr['rdr_rdt_id']]['rdr_name'] = $rdr['rdr_name'];
+		$RQS[$rdr['rst_RecTypeID']][$rdr['rst_DetailTypeID']]['rdr_required'] = $rdr['rdr_required'];
+		$RQS[$rdr['rst_RecTypeID']][$rdr['rst_DetailTypeID']]['rst_NameInForm'] = $rdr['rst_NameInForm'];
 	}
 }
 
@@ -314,7 +314,7 @@ function writeReference($rec_id, $depth = 0, $rd_type = 0, $rec_types = 0, $rev 
 			}else{
 			   $XML .= "<pointer ";
 			}
-			$XML .= "name=\"" . htmlspecialchars(@$RQS[$rec_types][$rd_type]['rdr_name']) . "\" type=\"" . htmlspecialchars(@$DTN[$rd_type]) . "\" id=\"" . htmlspecialchars($rd_type) . "\">\n";
+			$XML .= "name=\"" . htmlspecialchars(@$RQS[$rec_types][$rd_type]['rst_NameInForm']) . "\" type=\"" . htmlspecialchars(@$DTN[$rd_type]) . "\" id=\"" . htmlspecialchars($rd_type) . "\">\n";
 		}
 
 		// print all general data
@@ -442,9 +442,9 @@ function writeDetails($bib, $depth) {
 	$query = 'SELECT rec_type, rd_val, dty_ID, dty_Type, rd_type, rd_file_id FROM rec_details
 						LEFT JOIN defDetailTypes on rd_type = dty_ID
 						LEFT JOIN records on rec_id = rd_rec_id
-						LEFT JOIN rec_detail_requirements on rdr_rdt_id = dty_ID and rdr_rec_type = rec_type
+						LEFT JOIN defRecStructure on rst_DetailTypeID = dty_ID and rst_RecTypeID = rec_type
 						WHERE rd_rec_id=' . $bib .'
-						ORDER BY rdr_order is null, rdr_order, dty_ID, rd_id';
+						ORDER BY rst_OrderInForm is null, rst_OrderInForm, dty_ID, rd_id';
 
 	$res = mysql_query($query);
 
@@ -603,7 +603,7 @@ function writeTag($reftype, $detail, $value, $file_id) {
 
 	// if the value is not empty OR empty but required, write tag with escaping weird chars
 	if (!empty($value) || (empty($value) && $RQS[$reftype][$detail]['rdr_required'] == 'Y')) {
-		$XML.= "<detail name='". htmlspecialchars(@$RQS[$reftype][$detail]['rdr_name']) ."' type='" . htmlspecialchars(@$DTN[$detail]) . "' id='" . $detail . "'>" . $value . "</detail>\n";
+		$XML.= "<detail name='". htmlspecialchars(@$RQS[$reftype][$detail]['rst_NameInForm']) ."' type='" . htmlspecialchars(@$DTN[$detail]) . "' id='" . $detail . "'>" . $value . "</detail>\n";
 	}
 }
 

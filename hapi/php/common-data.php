@@ -42,7 +42,7 @@ $res = mysql_query("select rty_ID, rty_Name, rty_CanonicalTitleMask from active_
 $recordTypes = array();
 while ($row = mysql_fetch_row($res)) array_push($recordTypes, $row);
 
-$res = mysql_query("select dty_ID, dty_Name, dty_Prompt, dty_Type, NULL as enums, dty_PtrConstraints from defDetailTypes");
+$res = mysql_query("select dty_ID, dty_Name, dty_Prompt, dty_Type, NULL as enums, dty_PtrConstraints, dty_NativeVocabID from defDetailTypes");
 $detailTypes = array();
 $detailTypesById = array();
 while ($row = mysql_fetch_row($res)) {
@@ -57,8 +57,8 @@ while ($row = mysql_fetch_row($res)) {
 		break;
 
 	    case "enum":
-		$row[3] = "enumeration";
-		$lres = mysql_query("select A.trm_Label, B.trm_Label from defTerms A left join defTerms B on A.trm_ID=B.trm_InverseTermID where A.rdl_rdt_id=" . intval($row[0])." and A.trm_Label is not null");
+		$row[3] = "enumeration";	// saw FIXME TODO  need to change this to account for overrides
+		$lres = mysql_query("select A.trm_Label, B.trm_Label from defTerms A left join defTerms B on A.trm_ID=B.trm_InverseTermID where A.trm_VocabID=" . intval($row[6])." and A.trm_Label is not null");
 		$row[4] = array();
 
 		$rdl = mysql_fetch_row($lres);
@@ -93,20 +93,20 @@ while ($row = mysql_fetch_row($res)) {
 
 // detailRequirements is an array of [recordTypeID, detailTypeID, requiremence, repeatable, name, prompt, match, size, order, default] values
 $detailRequirements = array();
-$rec_types = mysql__select_array("rec_detail_requirements", "distinct rdr_rec_type", "1 order by rdr_rec_type");
+$rec_types = mysql__select_array("defRecStructure", "distinct rst_RecTypeID", "1 order by rst_RecTypeID");
 foreach ($rec_types as $rec_type) {
 	foreach (getRecordRequirements($rec_type) as $rdr) {
 		array_push($detailRequirements, array(
-			$rdr["rdr_rec_type"],
-			$rdr["rdr_rdt_id"],
+			$rdr["rst_RecTypeID"],
+			$rdr["rst_DetailTypeID"],
 			$rdr["rdr_required"],
-			intval($rdr["rdr_repeatable"]),
-			($rdr["rdr_name"] != $detailTypesById[$rdr["rdr_rdt_id"]][1] ? $rdr["rdr_name"] : null),
-			($rdr["rdr_prompt"] != $detailTypesById[$rdr["rdr_rdt_id"]][2] ? $rdr["rdr_prompt"]: null),
-			intval($rdr["rdr_match"]),
-			intval($rdr["rdr_size"]),
-			intval($rdr["rdr_order"]),
-			$rdr["rdr_default"]
+			intval($rdr["rst_Repeats"]),
+			($rdr["rst_NameInForm"] != $detailTypesById[$rdr["rst_DetailTypeID"]][1] ? $rdr["rst_NameInForm"] : null),
+			($rdr["rst_Prompt"] != $detailTypesById[$rdr["rst_DetailTypeID"]][2] ? $rdr["rst_Prompt"]: null),
+			intval($rdr["rst_RecordMatchOrder"]),
+			intval($rdr["rst_DisplayWidth"]),
+			intval($rdr["rst_OrderInForm"]),
+			$rdr["rst_DefaultValue"]
 		));
 	}
 }
@@ -116,7 +116,7 @@ $commonData = array(
 	"users" => $users,
 	"workgroups" => $workgroups,
 	"ratings" => array("0"=>"not rated",
-						"1"=> "*",
+						"1"=>"*",
 						"2"=>"**",
 						"3"=>"***",
 						"4"=>"****",

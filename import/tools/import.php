@@ -1459,7 +1459,7 @@ function format_missing_field_errors(&$entry) {
 
 
 function find_exact_entry(&$entry) {
-	// See if there's an entry in the database that exactly matches this one in all the rdr_match fields
+	// See if there's an entry in the database that exactly matches this one in all the rst_RecordMatchOrder fields
 
 	if ($entry->getBiblioID()  &&  $entry->_permanent) {
 		// might be an exact match already, if specified in the input file
@@ -1545,11 +1545,11 @@ function biblio_are_equal($bib_id1, $bib_id2) {
 
 	$equality_query =
 '
-   select sum(rdr_match) as bdr_match_count
+   select sum(rst_RecordMatchOrder) as bdr_match_count
      from rec_details BD1
 left join rec_details BD2 on BD1.rd_type=BD2.rd_type and (BD1.rd_val=BD2.rd_val or (length(BD1.rd_val_precis) > 20 and cast(liposuction(BD1.rd_val) as char) = cast(liposuction(BD2.rd_val) as char)))
 left join records on BD1.rd_rec_id=rec_id
-left join rec_detail_requirements on rdr_rdt_id=BD1.rd_type and rdr_rec_type=rec_type
+left join defRecStructure on rst_DetailTypeID=BD1.rd_type and rst_RecTypeID=rec_type
 left join defDetailTypes on dty_ID=BD1.rd_type
     where BD1.rd_rec_id=' . $bib_id1 . ' and BD2.rd_rec_id in (' . $bib_id1 . ',' . $bib_id2 . ')
           and (BD1.rd_type = 158  or  dty_Type != "resource")
@@ -1563,17 +1563,17 @@ left join defDetailTypes on dty_ID=BD1.rd_type
 	if ($bd1_counts['bdr_match_count'] != $bd2_counts['bdr_match_count']) return false;	// not at all equal
 
 	/* This one took a long time to compose, so DON'T MESS IT UP.
-	 * For each detail type which is marked rdr_match,
+	 * For each detail type which is marked rst_RecordMatchOrder,
 	 * grab the corresponding bib_ids from the two records currently being matched.
 	 * If this returns any rows, then each row gives us two new records records that need to be tested for equality.
 	 */
 	$res = mysql_query('select BD1.rd_val as bd1_resource, BD2.rd_val as bd2_resource
 from defDetailTypes
 left join records on rec_id='.$bib_id1.'
-left join rec_detail_requirements on rdr_rdt_id=dty_ID and rdr_rec_type=rec_type
+left join defRecStructure on rst_DetailTypeID=dty_ID and rst_RecTypeID=rec_type
 left join rec_details BD1 on BD1.rd_type=dty_ID
 left join rec_details BD2 on BD2.rd_type=dty_ID and BD2.rd_rec_id='.$bib_id2.'
-where BD1.rd_rec_id=rec_id and (dty_ID != 158  and  dty_Type = "resource") and rdr_match and BD1.rd_id is not null');
+where BD1.rd_rec_id=rec_id and (dty_ID != 158  and  dty_Type = "resource") and rst_RecordMatchOrder and BD1.rd_id is not null');
 
 	if (mysql_num_rows($res) == 0) return true;	// there are no resource-pointer types required for a match
 	while ($row = mysql_fetch_row($res)) {

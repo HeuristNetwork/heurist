@@ -308,7 +308,7 @@ function uploadFiles() {
 		/* FIXME: should check that the given element is supposed to be a file */
 /*
 		$bdr = &get_bdr($matches[1]);
-		$bdt = &get_bdt($bdr['rdr_rdt_id']);
+		$bdt = &get_bdt($bdr['rst_DetailTypeID']);
 		if (! $bdr  ||  ! $bdt  ||  $bdt['dty_Type'] != 'file') continue;
 */
 

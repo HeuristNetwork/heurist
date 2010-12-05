@@ -122,7 +122,7 @@ function reltype_inverse ($reltype) {	//saw Enum change - find inverse as an id 
 	global $inverses;
 	if (! $inverses) {
 //		$inverses = mysql__select_assoc("defTerms A left join defTerms B on B.trm_ID=A.trm_InverseTermID", "A.trm_Label", "B.trm_Label", "A.rdl_rdt_id=200 and A.trm_Label is not null");
-		$inverses = mysql__select_assoc("defTerms A left join defTerms B on B.trm_ID=A.trm_InverseTermID", "A.trm_ID", "B.trm_ID", "A.rdl_rdt_id=200 and A.trm_Label is not null and B.trm_Label is not null");
+		$inverses = mysql__select_assoc("defTerms A left join defTerms B on B.trm_ID=A.trm_InverseTermID", "A.trm_ID", "B.trm_ID", "A.trm_VocabID=1 and A.trm_Label is not null and B.trm_Label is not null");
 	}
 
 	$inverse = @$inverses[$reltype];

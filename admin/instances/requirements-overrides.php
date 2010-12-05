@@ -1,22 +1,22 @@
 <?php
 
 function getRecordRequirements($rt_id) {
-	// returns [ rdr_rec_type, rdr_rdt_id, rdr_name, rdr_prompt, rdr_default,
-	//           rdr_required, rdr_repeatable, rdr_size, rdr_match, rdr_order ]
+	// returns [ rst_RecTypeID, rst_DetailTypeID, rst_NameInForm, rst_Prompt, rst_DefaultValue,
+	//           rdr_required, rst_Repeats, rst_DisplayWidth, rst_RecordMatchOrder, rst_OrderInForm ]
 	$rdrs = array();
 	$rdros = array();
 	$patched_rdrs = array();
-	$colNames = array("rdr_rec_type", "rdr_rdt_id", "rdr_name", "rdr_prompt", "rdr_default",
-	                  "rdr_required", "rdr_repeatable", "rdr_size", "rdr_match", "rdr_order");
+	$colNames = array("rst_RecTypeID", "rst_DetailTypeID", "rst_NameInForm", "rst_Prompt", "rst_DefaultValue",
+	                  "rdr_required", "rst_Repeats", "rst_DisplayWidth", "rst_RecordMatchOrder", "rst_OrderInForm");
 
-	$res = mysql_query("select ".join(",", $colNames)." from rec_detail_requirements where rdr_rec_type=".$rt_id." order by rdr_rdt_id");
+	$res = mysql_query("select ".join(",", $colNames)." from defRecStructure where rst_RecTypeID=".$rt_id." order by rst_DetailTypeID");
 	while ($row = mysql_fetch_assoc($res)) {
-		$rdrs[$row["rdr_rdt_id"]] = $row;
+		$rdrs[$row["rst_DetailTypeID"]] = $row;
 	}
 
-	$res = mysql_query("select ".join(",", $colNames)." from rec_detail_requirements_overrides where rdr_rec_type=".$rt_id." and ! rdr_wg_id order by rdr_rdt_id");
+	$res = mysql_query("select ".join(",", $colNames)." from rec_detail_requirements_overrides where rst_RecTypeID=".$rt_id." and ! rdr_wg_id order by rst_DetailTypeID");
 	while ($row = mysql_fetch_assoc($res)) {
-		$rdros[$row["rdr_rdt_id"]] = $row;
+		$rdros[$row["rst_DetailTypeID"]] = $row;
 	}
 
 	// calculate overridden fields
@@ -39,7 +39,7 @@ function getRecordRequirements($rt_id) {
 		}
 	}
 
-	// sort by rdr_order
+	// sort by rst_OrderInForm
 	uasort($patched_rdrs, "cmp");
 	return $patched_rdrs;
 }
@@ -49,8 +49,8 @@ function override($base, $override) {
 	// Other fields are also overridden regardless of requiremence.  --kj, 2008-08-05
 	if (@$override) {
 		$final = $base;
-		$fields = array("rdr_name", "rdr_prompt", "rdr_default", 
-		                "rdr_repeatable", "rdr_order", "rdr_size");
+		$fields = array("rst_NameInForm", "rst_Prompt", "rst_DefaultValue",
+		                "rst_Repeats", "rst_OrderInForm", "rst_DisplayWidth");
 		foreach ($fields as $f) {
 			if (@$override[$f]) $final[$f] = $override[$f];
 		}
@@ -64,8 +64,8 @@ function override($base, $override) {
 }
 
 function cmp($a, $b) {
-	if ($a["rdr_order"] == $b["rdr_order"]) return 0;
-	return ($a["rdr_order"] < $b["rdr_order"]) ? -1 : 1;
+	if ($a["rst_OrderInForm"] == $b["rst_OrderInForm"]) return 0;
+	return ($a["rst_OrderInForm"] < $b["rst_OrderInForm"]) ? -1 : 1;
 }
 
 /*no carriage returns after closing script tags please, it breaks xml script genenerator that uses this file as include */

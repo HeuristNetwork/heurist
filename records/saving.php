@@ -87,12 +87,12 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 	}
 
 	// check that all the required fields are present
-	$res = mysql_query("select rdr_id from rec_detail_requirements left join rec_details on rd_rec_id=$recordID and rdr_rdt_id=rd_type where rdr_rec_type=$type and rdr_required='Y' and rd_id is null");
+	$res = mysql_query("select rst_ID from defRecStructure left join rec_details on rd_rec_id=$recordID and rst_DetailTypeID=rd_type where rst_RecTypeID=$type and rdr_required='Y' and rd_id is null");
 	if (mysql_num_rows($res) > 0) {
 		// at least one missing field
 		jsonError("record is missing required field(s)");
 	}
-	$res = mysql_query("select rdr_id from rec_detail_requirements_overrides left join rec_details on rd_rec_id=$recordID and rdr_rdt_id=rd_type where (rdr_wg_id = 0 or rdr_wg_id=$wg) and rdr_wg_id = rdr_rec_type=$type and rdr_required='Y' and rd_id is null");
+	$res = mysql_query("select rst_ID from rec_detail_requirements_overrides left join rec_details on rd_rec_id=$recordID and rst_DetailTypeID=rd_type where (rdr_wg_id = 0 or rdr_wg_id=$wg) and rdr_wg_id = rst_RecTypeID=$type and rdr_required='Y' and rd_id is null");
 	if (mysql_num_rows($res) > 0) {
 		// at least one missing field
 		jsonError("record is missing required field(s)");
@@ -194,28 +194,31 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 		array_push($types, $bdtID);
 	}
 	$typeVarieties = mysql__select_assoc("defDetailTypes", "dty_ID", "dty_Type", "dty_ID in (" . join($types, ",") . ")");
-	$repeatable = mysql__select_assoc("rec_detail_requirements", "rdr_rdt_id", "rdr_repeatable", "rdr_rdt_id in (" . join($types, ",") . ") and rdr_rec_type=" . $recordType);
+	$repeats = mysql__select_assoc("defRecStructure", "rst_DetailTypeID", "rst_Repeats", "rst_DetailTypeID in (" . join($types, ",") . ") and rst_RecTypeID=" . $recordType);
 
 	$updates = array();
 	$inserts = array();
 	$dontDeletes = array();
 	foreach ($details as $type => $pairs) {
 		if (substr($type, 0, 2) != "t:") continue;
-		if (! ($bdtID = intval(substr($type, 2)))) continue;
+		if (! ($bdtID = intval(substr($type, 2)))) continue;	// invalid type id so skip it
 
 		foreach ($pairs as $bdID => $val) {
-			if (substr($bdID, 0, 3) == "bd:") {
-				// this detail corresponds to an existing rec_details: remember its existing rd_id
-				if (! ($bdID = intval(substr($bdID, 3)))) continue;
-			}
-			else {
+			if (substr($bdID, 0, 3) == "bd:") {// this detail corresponds to an existing rec_details: remember its existing rd_id
+				if (! ($bdID = intval(substr($bdID, 3)))) continue; // invalid id so skip it
+			}else {	// simple case: this is a new detail (no existing rd_id)
 				if ($bdID != intval($bdID)) continue;
-				// simple case: this is a new detail (no existing rd_id)
 				$bdID = "";
 			}
 			$val = trim($val);
 
 			$bdVal = $bdFileID = $bdGeo = "NULL";
+			if ( ! array_key_exists($bdtID,$repeats)) continue; // detail type not allowed or hit limit
+			if ($repeats[$bdtID] > 1) {
+				$repeats[$bdtID] = $repeats[$bdtID] - 1; // decrement to reduce limit count NOTE: assumes that all details are given to save
+			} else if ($repeats[$bdtID] == 1) {
+				unset ($repeats[$bdtID]);	// remove this type so no more values can be accepted
+			}
 			switch ($typeVarieties[$bdtID]) {
 				case "integer":
 					if (intval($val)  ||  $val == "0") $bdVal = intval($val);
@@ -239,8 +242,11 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 
 				case "enum":
 					// validate that the id is for the given detail type.
-					if (mysql_num_rows(mysql_query("select trm_ID from defTerms where rdl_rdt_id=$bdtID and trm_ID='".$val."'")) <= 0)
+					if (mysql_num_rows(mysql_query("select trm_ID from defTerms
+														left join defDetailTypes on dty_NativeVocabID = trm_VocabID
+														where dty_ID=$bdtID and trm_ID='".$val."'")) <= 0) {
 					jsonError("invalid enumeration value \"$val\"");
+					}
 					$bdVal = "'" . $val . "'";
 					break;
 

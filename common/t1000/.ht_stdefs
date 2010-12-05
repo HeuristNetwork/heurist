@@ -79,13 +79,13 @@ $MAINTABLES['BIB_DETAIL_TYPE'] = 'defDetailTypes';
 	$PKEY['BIB_DETAIL_TYPE'] = 'dty_ID';
 	$JOINS['BIB_DETAIL_TYPE'] = array('REFTYPE-ID' => 'dty_PtrConstraints');
 
-$MAINTABLES['BIB_DETAIL_REQ'] = 'rec_detail_requirements';
-	$PKEY['BIB_DETAIL_REQ'] = 'rdr_id';
-	$LINK_KEYS['BIB_DETAIL_REQ'] = array('REFTYPE-ID' => 'rdr_rec_type', 'BIB_DETAIL_TYPE-ID' => 'rdr_rdt_id');
+$MAINTABLES['BIB_DETAIL_REQ'] = 'defRecStructure';
+	$PKEY['BIB_DETAIL_REQ'] = 'rst_ID';
+	$LINK_KEYS['BIB_DETAIL_REQ'] = array('REFTYPE-ID' => 'rst_RecTypeID', 'BIB_DETAIL_TYPE-ID' => 'rst_DetailTypeID');
 
 $MAINTABLES['BDR_OVERRIDES'] = 'rec_detail_requirements_overrides';
-	$PKEY['BDR_OVERRIDES'] = 'rdr_id';
-	$LINK_KEYS['BDR_OVERRIDES'] = array('REFTYPE-ID' => 'rdr_rec_type', 'BIB_DETAIL_TYPE-ID' => 'rdr_rdt_id');
+	$PKEY['BDR_OVERRIDES'] = 'rst_ID';
+	$LINK_KEYS['BDR_OVERRIDES'] = array('REFTYPE-ID' => 'rst_RecTypeID', 'BIB_DETAIL_TYPE-ID' => 'rst_DetailTypeID');
 
 
 $MAINTABLES['MASTER_BIB_DETAIL_LOOKUP'] = 'defTerms';

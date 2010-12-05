@@ -43,7 +43,7 @@ $other = array();
 $res = mysql_query("select distinct rty_ID, grp.ugr_Name, rty_RecTypeGroupID
 					  from defRecTypes
 				 left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_UserID=".get_user_id()."
-				 left join rec_detail_requirements_overrides on rdr_rec_type=rty_ID
+				 left join rec_detail_requirements_overrides on rst_RecTypeID=rty_ID
 				 left join ".USERS_DATABASE.".sysUGrps grp on grp.ugr_ID=ugl_GroupID and grp.ugr_ID=rdr_wg_id
 				  order by grp.ugr_Name is null, grp.ugr_Name, rty_RecTypeGroupID > 1, rty_Name");
 while ($row = mysql_fetch_assoc($res)) {

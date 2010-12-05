@@ -106,9 +106,9 @@ print json_format($ws, true);
 
 <?php
 $bdrs = array();
-$colNames = array("rdr_rec_type", "rdr_rdt_id", "rdr_name", "rdr_prompt", "rdr_default", "rdr_required", "rdr_repeatable", "rdr_size", "rdr_match", "rdr_wg_id");
+$colNames = array("rst_RecTypeID", "rst_DetailTypeID", "rst_NameInForm", "rst_Prompt", "rst_DefaultValue", "rdr_required", "rst_Repeats", "rst_DisplayWidth", "rst_RecordMatchOrder", "rdr_wg_id");
 if (@$workgroups) {
-	$res = mysql_query("select " . join(", ", $colNames) . " from rec_detail_requirements_overrides where rdr_wg_id in (" . join(',', $workgroups) . ") order by rdr_rec_type, rdr_order is null, rdr_order");
+	$res = mysql_query("select " . join(", ", $colNames) . " from rec_detail_requirements_overrides where rdr_wg_id in (" . join(',', $workgroups) . ") order by rst_RecTypeID, rst_OrderInForm is null, rst_OrderInForm");
 	array_shift($colNames);	// don't print defRecTypes on every row
 	array_shift($colNames);	// don't print dty_ID on every row
 

@@ -28,8 +28,8 @@
 
 	var existing_details = new Object();
 
-	function delete_bdr(rdr_id) {
-		var delement = document.forms['edit_form'].elements['bdr_delete_del_field_'+rdr_id];
+	function delete_bdr(rst_ID) {
+		var delement = document.forms['edit_form'].elements['bdr_delete_del_field_'+rst_ID];
 		if (delement) {
 			delement.value = 1;
 			delement.form.submit();
@@ -312,28 +312,28 @@
     <td>
      <table id="bib_detail_table" border="0" cellspacing="0" style="border-collapse: collapse;">
 	 [search BIB_DETAIL_REQ bdr_search /* find all the detail requirements*/]
-	 [auto : rdr_rec_type : rty_ID /* for the current update record type */]
-     [foreach BIB_DETAIL_REQ bdr : 1 order by rdr_order, rdr_id /*itereate through each of the results*/]
+	 [auto : rst_RecTypeID : rty_ID /* for the current update record type */]
+     [foreach BIB_DETAIL_REQ bdr : 1 order by rst_OrderInForm, rst_ID /*itereate through each of the results*/]
       <tr class="friendly_border">
        <td style="vertical-align: top; font-weight: bold;">
-        <img src="../../common/images/cross.gif" onClick="delete_bdr([rdr_id]);" class="delete_icon">
+        <img src="../../common/images/cross.gif" onClick="delete_bdr([rst_ID]);" class="delete_icon">
         [delete BIB_DETAIL_REQ bdr_delete][hidden required : del_field/* create hidden field to control marking this detail requirement for deletion*/][end-delete]
         [select BIB_DETAIL_TYPE bdt][dty_Name] <span style="font-size: 80%; font-weight: normal;">([dty_ID])</span>[end-select]&nbsp;
 </td>
 <td style="padding-bottom: 1ex;">
 <nobr>
         [update BIB_DETAIL_REQ bdr]
-         &nbsp;&nbsp;&nbsp;label [textbox : rdr_name : contextual name : style="width: 200px;"]&nbsp;
+         &nbsp;&nbsp;&nbsp;label [textbox : rst_NameInForm : contextual name : style="width: 200px;"]&nbsp;
 [dropdown required : rdr_required : : select req_abbrev, req_full from requirements order by req_order : style="width: 90px;"]&nbsp;
 <img src="../../common/images/10x10.gif">
-         &nbsp;size [textbox : rdr_size : field width : style="width: 30px;"]
-          &nbsp;<label>repeatable [checkbox : rdr_repeatable : repeatable : style="margin: 0px;"]</label>&nbsp;
-          &nbsp;<label>matching [checkbox : rdr_match : is this field used for identifying possible matches? : style="margin: 0px;"]</label>&nbsp;
-          &nbsp;order&nbsp;[textbox : rdr_order : : style="width: 30px; padding: 0px 2px;"]&nbsp;
-         &nbsp;default [textbox : rdr_default : default value : style="width: 100px;"]&nbsp;
-         [textarea : rdr_help : help text : style="height: 25px; width: 200px; vertical-align: top;"]
+         &nbsp;size [textbox : rst_DisplayWidth : field width : style="width: 30px;"]
+          &nbsp;<label>repeatable [textbox : rst_Repeats : repeat : style="width: 30px; padding: 0px 2px;"]</label>&nbsp;
+          &nbsp;<label>matching [checkbox : rst_RecordMatchOrder : is this field used for identifying possible matches? : style="margin: 0px;"]</label>&nbsp;
+          &nbsp;order&nbsp;[textbox : rst_OrderInForm : : style="width: 30px; padding: 0px 2px;"]&nbsp;
+         &nbsp;default [textbox : rst_DefaultValue : default value : style="width: 100px;"]&nbsp;
+         [textarea : rst_FormHelpText : help text : style="height: 25px; width: 200px; vertical-align: top;"]
          </nobr>
-         <nobr>prompt [textbox : rdr_prompt : prompt : style="width: 700px;"]&nbsp;
+         <nobr>prompt [textbox : rst_Prompt : prompt : style="width: 700px;"]&nbsp;
 [select BIB_DETAIL_TYPE bdt]
          &nbsp;data&nbsp;type : [if-eq : dty_Type : "enum"]<a href="#" onClick="edit_enum_types_with_pos([dty_ID], findPos(this.parentNode)); return false;">[dty_Type]</a>[else][dty_Type][end-if-eq]
 &nbsp;&nbsp;
@@ -359,11 +359,11 @@
     [insert BIB_DETAIL_REQ new_bdr]
     <td style="font-weight: bold; text-align: right;">Add new detail to this type</td>
     <td>
-     [dropdown required : rdr_rdt_id : : select dty_ID, concat(dty_ID,' ',dty_Type,'  ',dty_Name) from defDetailTypes left join rec_detail_requirements on rdr_rec_type=[special-rty_ID] and rdr_rdt_id=dty_ID where rdr_id is null order by dty_Type,dty_Name : onchange="document.getElementById('new_bdr_label').value = this.options&#91;this.selectedIndex&#93;.text.replace(/&#91;0-9&#93;+\s*/,''); document.getElementById('new_bdr_order').value = this.options&#91;this.selectedIndex&#93;.value;"]
-     [hidden : rdr_name : : id="new_bdr_label"]
-     [auto : rdr_rec_type : rty_ID]
-     [hidden : rdr_order : : id="new_bdr_order"]
-     [auto : rdr_size : "30"]
+     [dropdown required : rst_DetailTypeID : : select dty_ID, concat(dty_ID,' ',dty_Type,'  ',dty_Name) from defDetailTypes left join defRecStructure on rst_RecTypeID=[special-rty_ID] and rst_DetailTypeID=dty_ID where rst_ID is null order by dty_Type,dty_Name : onchange="document.getElementById('new_bdr_label').value = this.options&#91;this.selectedIndex&#93;.text.replace(/&#91;0-9&#93;+\s*/,''); document.getElementById('new_bdr_order').value = this.options&#91;this.selectedIndex&#93;.value;"]
+     [hidden : rst_NameInForm : : id="new_bdr_label"]
+     [auto : rst_RecTypeID : rty_ID]
+     [hidden : rst_OrderInForm : : id="new_bdr_order"]
+     [auto : rst_DisplayWidth : "30"]
     </td>
     [end-insert]
    </tr>

@@ -23,7 +23,7 @@ mysql_connection_db_overwrite(HEURIST_COMMON_DB);
 $delete_bdt_id = intval(@$_REQUEST['delete_bdt_field']);
 if ($delete_bdt_id) {
 	mysql_query('delete from defDetailTypes where dty_ID = ' . $delete_bdt_id);
-	mysql_query('delete from rec_detail_requirements where rdr_rdt_id = ' . $delete_bdt_id);
+	mysql_query('delete from defRecStructure where rst_DetailTypeID = ' . $delete_bdt_id);
 	header('Location: master_bib_detail_editor.php');
 	return;
 }

@@ -375,15 +375,15 @@ function _title_mask__get_rec_detail_requirements() {
 	if (! $rdr) {
 		$rdr = array();
 
-		$res = mysql_query('select rdr_rec_type, dty_ID, lower(dty_Name) as dty_Name, dty_PtrConstraints
-		                      from rec_detail_requirements left join defDetailTypes on rdr_rdt_id=dty_ID
+		$res = mysql_query('select rst_RecTypeID, dty_ID, lower(dty_Name) as dty_Name, dty_PtrConstraints
+		                      from defRecStructure left join defDetailTypes on rst_DetailTypeID=dty_ID
 		                     where rdr_required in ("Y", "R", "O")');
 		while ($row = mysql_fetch_assoc($res)) {
-			if (@$rdr[$row['rdr_rec_type']]) {
-				$rdr[$row['rdr_rec_type']][$row['dty_ID']] = $row['dty_PtrConstraints'];
-				$rdr[$row['rdr_rec_type']][$row['dty_Name']] = $row['dty_PtrConstraints'];
+			if (@$rdr[$row['rst_RecTypeID']]) {
+				$rdr[$row['rst_RecTypeID']][$row['dty_ID']] = $row['dty_PtrConstraints'];
+				$rdr[$row['rst_RecTypeID']][$row['dty_Name']] = $row['dty_PtrConstraints'];
 			} else {
-				$rdr[$row['rdr_rec_type']] = array(
+				$rdr[$row['rst_RecTypeID']] = array(
 					$row['dty_ID'] => $row['dty_PtrConstraints'],
 					$row['dty_Name'] => $row['dty_PtrConstraints']
 				);

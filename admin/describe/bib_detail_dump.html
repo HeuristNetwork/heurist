@@ -62,55 +62,55 @@
 	 <tr><th>Code</th><th>Label</th><th>Type</th><th>WG</th><th>Req</th><th>Rpt</th><th>Match</th><th>Order</th><th>Default</th><th>Width</th><th>Prompt</th></tr>
 	</thead>
 	<tbody>
-	 [foreach BIB_DETAIL_REQ bdr : 1 order by rdr_order, rdr_id]
+	 [foreach BIB_DETAIL_REQ bdr : 1 order by rst_OrderInForm, rst_ID]
 	 <tr>
 	  <td>[select BIB_DETAIL_TYPE bdt][dty_ID][end-select]</td>
-	  <td>[rdr_name]</td>
+	  <td>[rst_NameInForm]</td>
 	  <td>[select BIB_DETAIL_TYPE bdt][dty_Type][end-select]</td>
 	  <td></td>
 	  <td style="text-align: center;"><script type="text/javascript">document.write('[rdr_required]' == 'O'?'':'[rdr_required]');</script></td>
-	  <td style="text-align: center;"><script type="text/javascript">document.write([rdr_repeatable]?'1':'');</script></td>
-	  <td style="text-align: center;"><script type="text/javascript">document.write([rdr_match]?'1':'');</script></td>
-	  <td>[rdr_order]</td>
-	  <td>[rdr_default]</td>
-	  <td>[rdr_size]</td>
-	  <td>[rdr_prompt]</td>
+	  <td style="text-align: center;"><script type="text/javascript">document.write([rst_Repeats]==0?'unlimited':'[rst_Repeats]');</script></td>
+	  <td style="text-align: center;"><script type="text/javascript">document.write([rst_RecordMatchOrder]?'[rst_RecordMatchOrder]':'');</script></td>
+	  <td>[rst_OrderInForm]</td>
+	  <td>[rst_DefaultValue]</td>
+	  <td>[rst_DisplayWidth]</td>
+	  <td>[rst_Prompt]</td>
 	 </tr>
      	 [foreach BDR_OVERRIDES bdr : 1]
 			 <tr style="color:gray;">
 			  <td></td>
-			  <td>[rdr_name]</td>
+			  <td>[rst_NameInForm]</td>
 			  <td></td>
 			  <td>[rdr_wg_id]</td>
 			  <td style="text-align: center;"><script type="text/javascript">document.write('[rdr_required]' == 'O'?'':'[rdr_required]');</script></td>
-			  <td style="text-align: center;"><script type="text/javascript">document.write([rdr_repeatable]?'1':'');</script></td>
-			  <td style="text-align: center;"><script type="text/javascript">document.write([rdr_match]?'1':'');</script></td>
-			  <td>[rdr_order]</td>
-			  <td>[rdr_default]</td>
-			  <td>[rdr_size]</td>
-			  <td>[rdr_prompt]</td>
+			  <td style="text-align: center;"><script type="text/javascript">document.write([rst_Repeats]==0?'unlimited':'[rst_Repeats]');</script></td>
+			  <td style="text-align: center;"><script type="text/javascript">document.write([rst_RecordMatchOrder]?'[rst_RecordMatchOrder]':'');</script></td>
+			  <td>[rst_OrderInForm]</td>
+			  <td>[rst_DefaultValue]</td>
+			  <td>[rst_DisplayWidth]</td>
+			  <td>[rst_Prompt]</td>
 			 </tr>
 		 [end-foreach]
 		 [not-found][end-not-found]
 
 	 [end-foreach]
 	 [not-found][end-not-found]
-	 [foreach BDR_OVERRIDES bdr : 1 order by rdr_order, rdr_id]
-		[foreach BIB_DETAIL_REQ bdr : 1 order by rdr_order, rdr_id]
+	 [foreach BDR_OVERRIDES bdr : 1 order by rst_OrderInForm, rst_ID]
+		[foreach BIB_DETAIL_REQ bdr : 1 order by rst_OrderInForm, rst_ID]
 		[end-foreach]
 		[not-found]
 		 <tr style="color:gray;">
 		  <td>[select BIB_DETAIL_TYPE bdt][dty_ID][end-select]</td>
-		  <td>[rdr_name]</td>
+		  <td>[rst_NameInForm]</td>
 		  <td>[select BIB_DETAIL_TYPE bdt][dty_Type][end-select]</td>
 		  <td>[rdr_wg_id]</td>
 		  <td style="text-align: center;"><script type="text/javascript">document.write('[rdr_required]' == 'O'?'':'[rdr_required]');</script></td>
-		  <td style="text-align: center;"><script type="text/javascript">document.write([rdr_repeatable]?'1':'');</script></td>
-		  <td style="text-align: center;"><script type="text/javascript">document.write([rdr_match]?'1':'');</script></td>
-		  <td>[rdr_order]</td>
-		  <td>[rdr_default]</td>
-		  <td>[rdr_size]</td>
-		  <td>[rdr_prompt]</td>
+		  <td style="text-align: center;"><script type="text/javascript">document.write([rst_Repeats]==0?'unlimited':'[rst_Repeats]');</script></td>
+		  <td style="text-align: center;"><script type="text/javascript">document.write([rst_RecordMatchOrder]?'[rst_RecordMatchOrder]':'');</script></td>
+		  <td>[rst_OrderInForm]</td>
+		  <td>[rst_DefaultValue]</td>
+		  <td>[rst_DisplayWidth]</td>
+		  <td>[rst_Prompt]</td>
 		 </tr>
 		[end-not-found]
 	 [end-foreach]

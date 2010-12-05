@@ -96,24 +96,24 @@ INSERT INTO `temp_rec_detail_types` (`dty_ID`, `dty_Name`, `dty_Description`, `d
 
 DROP TABLE IF EXISTS `temp_rec_detail_requirements`;
 CREATE TABLE IF NOT EXISTS `temp_rec_detail_requirements` (
-  `rdr_id` smallint(6) NOT NULL,
-  `rdr_rec_type` smallint(5) unsigned NOT NULL default '0',
-  `rdr_rdt_id` smallint(6) NOT NULL default '0',
+  `rst_ID` smallint(6) NOT NULL,
+  `rst_RecTypeID` smallint(5) unsigned NOT NULL default '0',
+  `rst_DetailTypeID` smallint(6) NOT NULL default '0',
   `rdr_required` enum('Y','R','O','X') NOT NULL default 'O',
-  `rdr_name` varchar(255) default NULL,
-  `rdr_description` text,
-  `rdr_prompt` text,
-  `rdr_help` varchar(255) default NULL,
-  `rdr_repeatable` tinyint(1) NOT NULL default '0',
-  `rdr_order` smallint(6) default NULL,
-  `rdr_size` smallint(6) default NULL,
-  `rdr_default` varchar(255) default NULL,
-  `rdr_match` tinyint(1) NOT NULL,
-  PRIMARY KEY  (`rdr_id`),
-  UNIQUE KEY `bdr_reftype` (`rdr_rec_type`,`rdr_rdt_id`)
+  `rst_NameInForm` varchar(255) default NULL,
+  `rst_Description` text,
+  `rst_Prompt` text,
+  `rst_FormHelpText` varchar(255) default NULL,
+  `rst_Repeats` tinyint(1) NOT NULL default '0',
+  `rst_OrderInForm` smallint(6) default NULL,
+  `rst_DisplayWidth` smallint(6) default NULL,
+  `rst_DefaultValue` varchar(255) default NULL,
+  `rst_RecordMatchOrder` tinyint(1) NOT NULL,
+  PRIMARY KEY  (`rst_ID`),
+  UNIQUE KEY `bdr_reftype` (`rst_RecTypeID`,`rst_DetailTypeID`)
   ) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
 
-  INSERT INTO `temp_rec_detail_requirements` (`rdr_id`, `rdr_rec_type`, `rdr_rdt_id`, `rdr_required`, `rdr_name`, `rdr_description`, `rdr_prompt`, `rdr_help`, `rdr_repeatable`, `rdr_order`, `rdr_size`, `rdr_default`, `rdr_match`) VALUES
+  INSERT INTO `temp_rec_detail_requirements` (`rst_ID`, `rst_RecTypeID`, `rst_DetailTypeID`, `rdr_required`, `rst_NameInForm`, `rst_Description`, `rst_Prompt`, `rst_FormHelpText`, `rst_Repeats`, `rst_OrderInForm`, `rst_DisplayWidth`, `rst_DefaultValue`, `rst_RecordMatchOrder`) VALUES
 
 // Steve: Parse the stream from get_definitions until you get to a line with    > Start
 // then send the stream to MySQL until you get to a line with   > End

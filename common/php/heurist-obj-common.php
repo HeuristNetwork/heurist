@@ -19,7 +19,8 @@ mysql_connection_db_select(DATABASE);
 
 header("Content-type: text/javascript");
 
-
+// for all tables used in common obj find the lastest update date and if it's not great than the last request
+// signal requester
 $res = mysql_query("select max(datestamp) from last_update where common = 1");
 $lastModified = mysql_fetch_row($res);
 $lastModified = strtotime($lastModified[0]);
@@ -76,8 +77,8 @@ print "top.HEURIST.reftypes.other = " . json_format($other) . ";\n\n\n";
  * which contains
  */
 
-$colNames = array("rdr_name", "rdr_prompt", "rdr_default", "rdr_required", "rdr_repeatable", "rdr_size", "rdr_match");
-$rec_types = mysql__select_array("rec_detail_requirements", "distinct rdr_rec_type", "1 order by rdr_rec_type");
+$colNames = array("rst_NameInForm", "rst_Prompt", "rst_DefaultValue", "rdr_required", "rst_Repeats", "rst_DisplayWidth", "rst_RecordMatchOrder");
+$rec_types = mysql__select_array("defRecStructure", "distinct rst_RecTypeID", "1 order by rst_RecTypeID");
 
 print "\ntop.HEURIST.bibDetailRequirements = {\n";
 print "\tcolNames: [ \"" . join("\", \"", $colNames) . "\" ],\n";
@@ -93,9 +94,9 @@ foreach ($rec_types as $rec_type) {
 	foreach (getRecordRequirements($rec_type) as $rdr_rdt_id => $rdr) {
 		if (! $first_rdr) print ",\n";
 		$first_rdr = false;
-		unset($rdr["rdr_rec_type"]);
-		unset($rdr["rdr_rdt_id"]);
-		unset($rdr["rdr_order"]);
+		unset($rdr["rst_RecTypeID"]);
+		unset($rdr["rst_DetailTypeID"]);
+		unset($rdr["rst_OrderInForm"]);
 		print "\t\t\t\"" . $rdr_rdt_id . "\": [ \"" . join("\", \"", array_map("slash", $rdr)) . "\" ]";
 	}
 }
@@ -122,8 +123,7 @@ print "\n\t}\n};\n";
 
 
 /* bibDetailTypes */
-
-$colNames = array("dty_ID", "dty_Name", "dty_Type", "dty_PtrConstraints");
+$colNames = array("dty_ID", "dty_Name", "dty_Type", "dty_Prompt", "dty_Help", "dty_PtrConstraints", "dty_NativeVocabID");
 $res = mysql_query("select " . join(", ", $colNames) . " from defDetailTypes order by dty_ID");
 
 $bdt = array();
@@ -167,10 +167,6 @@ print " \n};\n";
 
 
 /*
-| trm_ID     | smallint(6) | NO   | PRI | NULL    | auto_increment |
-| rdl_rdt_id | smallint(6) | YES  | MUL | NULL    |                |
-| trm_Label  | varchar(63) | YES  |     | NULL    |                |
-| trm_VocabID | smallint(6) | YES  | MUL | NULL    |                |
 */
 $res = mysql_query("select vcb_ID,vcb_Name from defVocabularies where 1 order by vcb_ID");
 print "\ntop.HEURIST.vocabularyLookup = {\n";

@@ -10,7 +10,7 @@ if (@$_REQUEST['k']) $_REQUEST['tag'] = $_REQUEST['k'];
 if (! @$_REQUEST['bkmrk_bkmk_title']) $_REQUEST['bkmrk_bkmk_title'] = '';
 
 
-define('LATEST_BOOKMARKLET_VERSION', '20060713');
+define('LATEST_BOOKMARKLET_VERSION', '20060713');	//saw FIXME  update this, what is the latest date
 if (@$_REQUEST['addref']) {
 	if (@$_REQUEST['bib_type'])
 		$outdate = '&edit_type=records';
@@ -383,7 +383,7 @@ if ($rec_id) {
 		$other_bib_id = $_REQUEST["related"];
 		$reln_type = "IsRelatedTo";
 		if (@$_REQUEST["reltype"]) {
-			mysql_query("select trm_Label from defTerms where rdl_rdt_id = 200 and trm_Label like '".addslashes($_REQUEST["reltype"])."' limit 1;");
+			mysql_query("select trm_Label from defTerms where trm_VocabID = 1 and trm_Label like '".addslashes($_REQUEST["reltype"])."' limit 1;");
 			if (mysql_num_rows($res) > 0) {
 				$row = mysql_fetch_assoc($res);
 				$reln_type = $row["trm_Label"];	// saw TODO: check that this is aligned with the enum value change
@@ -454,7 +454,7 @@ function check_reftype_exist($rt) {
 global $usrID;	//saw TODO check that this still works in the new structure.
 	$res = mysql_query("select distinct rty_ID,rty_Name from defRecTypes
 	                 left join ".USERS_DATABASE.".".USER_GROUPS_TABLE." on ".USER_GROUPS_USER_ID_FIELD."=$usrID
-	                 left join rec_detail_requirements_overrides on rdr_rec_type=rty_ID
+	                 left join rec_detail_requirements_overrides on rst_RecTypeID=rty_ID
 	                 left join ".USERS_DATABASE.".".GROUPS_TABLE." on ".GROUPS_ID_FIELD."=".USER_GROUPS_GROUP_ID_FIELD." and ".GROUPS_ID_FIELD."=rdr_wg_id
 	                  where rty_ID
 	                  order by ".GROUPS_NAME_FIELD." is null, ".GROUPS_NAME_FIELD.", rty_RecTypeGroupID > 1, rty_Name");

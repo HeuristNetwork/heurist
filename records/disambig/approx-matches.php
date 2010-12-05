@@ -5,8 +5,8 @@ function findFuzzyMatches($fields, $rec_types, $rec_id=NULL, $fuzziness=NULL) {
 	if (! $fuzziness) $fuzziness = 0.5;
 
 	// Get some data about the matching data for the given record type
-	$types = mysql__select_assoc('rec_detail_requirements left join defDetailTypes on rdr_rdt_id=dty_ID',
-	                             'dty_ID', 'dty_Type', 'rdr_rec_type=' . $rec_types[0] . ' and rdr_match or rdr_rdt_id=160');
+	$types = mysql__select_assoc('defRecStructure left join defDetailTypes on rst_DetailTypeID=dty_ID',
+	                             'dty_ID', 'dty_Type', 'rst_RecTypeID=' . $rec_types[0] . ' and rst_RecordMatchOrder or rst_DetailTypeID=160');
 	$fuzzyFields = array();
 	$strictFields = array();
 	foreach ($fields as $key => $vals) {
