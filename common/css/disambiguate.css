@@ -15,16 +15,18 @@ input#tags, .input-cell .in, .input-cell .resource-title {background:none repeat
 #loginDiv {background-color:#ECF1FB !important;padding: 10px;overflow: hidden;}
 #login-table {width:500px; margin:10px auto; border-bottom: 1px solid #A4B4CB;padding-bottom: 20px;}
 .common_url { color: lightgray; }
-.newRecord {width: 49%;float:left; border: 1px solid #6A7C99;bottom: 0;min-height: 200px;max-height:100%;}
-.existingRecords {border:1px solid #AAAAAA;float:right;max-height:100%;min-height:200px;overflow:auto;position:absolute;right:0;top:0;width:49%;}
+
+.newRecord {width: 49%;float:right; border: 1px solid #6A7C99;bottom: 0;min-height: 200px;max-height:100%;}
+.existingRecords {border:1px solid #AAAAAA;float:left;max-height:100%;min-height:200px;overflow:auto;position:absolute;left:0;top:0;width:49%;}
+
 #comparoTable {bottom:10px;display:block;left:10px;position:absolute;right:10px;text-align:left;top:120px;}
 .label {padding:5px 0 5px 25px;text-align:left;}
 .url {text-align: left;padding:0px 5px 0 25px}
-.newRecordItem .label *{font-size:16px;line-height:16px;padding:0px;text-align:left;vertical-align: baseline;}
+/* .newRecordItem .label *{font-size:16px;line-height:16px;padding:0px;text-align:left;vertical-align: baseline;}   */
 newRecordItem .url *{text-align: left;padding:0px 5px 0 20px; font-size: 16px;}
 .existingRecordItem {border-top: 1px solid #EEE;margin : 0 0 5px 0;padding-bottom: 5px;}
-.warning {color:red;font-size: 11px;font-weight: bold;padding: 0 5px;}
-.info {font-size: 11px;font-weight: normal;padding: 5px;}
+.warning {color:red;font-size: 11px;font-weight: bold;padding: 0 10px;}
+.info {font-size: 11px;font-weight: normal;padding: 5px 10px;}
 .newRecordItem {padding: 5px 0;font-size: 14px;}
 .newRecordItem .url {font-size:14px; padding:0 27px;}
 .newRecord label { line-height:100%;margin-left:-17px;padding:1px;vertical-align:top;}

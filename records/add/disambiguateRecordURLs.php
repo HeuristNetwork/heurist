@@ -133,18 +133,18 @@ or <a href="addRecordPopup.php?bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST[
 		<div class=label>
 			<label>
 			<input type="radio" name="bib_id" value="-1">
-				<b><?= htmlspecialchars($_REQUEST['bkmk_title']) ?></b>
+				<?= htmlspecialchars($_REQUEST['bkmk_title']) ?>
 			</label>
 		</div>
 		<div class=url>
      &#91;<a target="_testwindow" href="<?= htmlspecialchars($_REQUEST['bkmk_url']) ?>"
                                 onClick="return checkURL(&quot;<?= htmlspecialchars($_REQUEST['bkmk_url']) ?>&quot;);">visit</a>&#93;&nbsp;
-<b><tt title="<?= htmlspecialchars($_REQUEST['bkmk_url']) ?>"><?php
+<tt title="<?= htmlspecialchars($_REQUEST['bkmk_url']) ?>"><?php
 		if (strlen($_REQUEST['bkmk_url']) < 100)
 			print htmlspecialchars($_REQUEST['bkmk_url']);
 		else
 			print htmlspecialchars(substr($_REQUEST['bkmk_url'], 0, 90) . '...')
-      ?></tt></b>
+      ?></tt>
  </div>
 </div>
 </div>
