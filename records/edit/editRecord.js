@@ -710,7 +710,9 @@ top.HEURIST.edit = {
 				top.HEURIST.edit.fileInputUploaded.call(thisRef, element, statusDiv, { error: e, origName: i.value.replace(/.*[\/\\]/, "") });
 			}
 		);
-		HeuristScholarDB.saveFile(fileInput, saver, function(fileInput, bytesUploaded, bytesTotal) {
+		HeuristScholarDB.saveFile(fileInput,
+									saver,
+									function(fileInput, bytesUploaded, bytesTotal) {
 			if (bytesUploaded  &&  bytesTotal) {
 				var pc = Math.min(Math.round(bytesUploaded / bytesTotal * 100), 100);
 				if (! progressDiv.style.width  ||  parseInt(progressDiv.style.width) < pc) progressDiv.style.paddingLeft = pc + "%";

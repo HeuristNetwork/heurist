@@ -45,12 +45,11 @@ function outputAsRedirect($text) {
 
 		session_start();
 		$_SESSION[$token] = $text;
-//		error_log("Location: " . $baseURL . "blank.html#token=" . $token);
-
+//		error_log("Location: " . $baseURL . "common/html/blank.html#token=" . $token);
 		header("Location: " . $baseURL . "common/html/blank.html#token=" . $token);
 	}
 	else {
-//		error_log("Location: " . $baseURL . "blank.html#data=" . urlencode($val));
+//		error_log("Location: " . $baseURL . "common/html/blank.html#data=" . urlencode($val));
 		header("Location: " . $baseURL . "common/html/blank.html#data=" . urlencode($val));
 	}
 
@@ -95,7 +94,7 @@ if (! ($auth = get_location($key))) {
 	print "{\"error\":\"unknown API key\"}";
 	return;
 }
-// error_log(print_r($auth, 1));
+//error_log(print_r($auth, 1));
 $baseURL = HEURIST_URL_BASE;
 //$baseURL = $auth["hl_location"];
 

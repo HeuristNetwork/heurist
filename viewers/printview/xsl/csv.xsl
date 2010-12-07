@@ -4,7 +4,7 @@
 
  To begin with this is just a specific record type - namely events
 
- One a preamble is added to HML describing records then we will make it more generic
+ Once a preamble is added to HML describing records then we will make it more generic
 
  author  Steven Hayes
   -->
@@ -58,6 +58,8 @@
 			<xsl:value-of select="id"/>,
 			<xsl:value-of select="title"/>,
 			<xsl:value-of select="url"/>,
+			<xsl:value-of select="detail[@id=197]"/>,
+			"<xsl:value-of select="detail[@id=173]"/>",
 			"<xsl:value-of select="detail[@id=303]"/>",
 			<xsl:if test="detail[@id= 177]">
 				<xsl:call-template name="start-date"></xsl:call-template>
@@ -99,5 +101,6 @@
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
+
 
 </xsl:stylesheet>

@@ -3414,9 +3414,9 @@ var HeuristScholarDB = new HStorageManager();
 
 		var uploadIdentifier, uploadName;
 		do {
-			uploadIdentifier = Math.floor(Math.random() * 1000000000);
+			uploadIdentifier = Math.floor(Math.random() * 1000000000); //file upload handle/identifier
 			uploadName = "upload-" + uploadIdentifier;
-		} while (that.uploadsInProgress.names[uploadName]);
+		} while (that.uploadsInProgress.names[uploadName]); //keep trying until we find an unused id
 
 		/* Oh, hello ... what's this?  An undocumented feature?
 		 * If a third parameter (a function) is passed to saveFile, then it is used as a PROGRESS callback.
@@ -3446,7 +3446,7 @@ var HeuristScholarDB = new HStorageManager();
 			newForm.enctype = "multipart/form-data";
 			newForm.encoding = "multipart/form-data";
 			newForm.method = "post";
-			newForm.target = newIframe.name;
+			newForm.target = newIframe.name; // connect the frame to the form
 			s = newForm.style;
 			s.position = "absolute";
 			s.width = "0";
@@ -3460,7 +3460,7 @@ var HeuristScholarDB = new HStorageManager();
 			// obviously this won't work if hapi is being served from a numbered IP address
 		var baseURL = _dbWebPrefix;
 			if (! baseURL.match(/\d+\.\d+\.\d+\.\d+/)) {
-				baseURL = baseURL.replace(/^http:\/\//, "http://" + Math.round(Math.random()*100) + ".");
+//				baseURL = baseURL.replace(/^http:\/\//, "http://" + Math.round(Math.random()*100) + ".");
 			}
 			// Insert XSS incantations if HAPI.key is set.
 			newForm.action = baseURL + (HAPI.key? ("hapi/php/dispatcher.php?method=saveFile&key=" + encodeURIComponent(HAPI.key)) : "saveFile");//saw FIXME: add instance code.
@@ -3469,7 +3469,7 @@ var HeuristScholarDB = new HStorageManager();
 
 		var uploadIdentifierInput = doc.createElement("input");
 			uploadIdentifierInput.type = "hidden";
-			uploadIdentifierInput.name = "UPLOAD_IDENTIFIER";	// magic name, works with progress indicator
+			uploadIdentifierInput.name = "UPLOAD_IDENTIFIER";	// magic name, works with progress indicator - passes to php in request.
 			uploadIdentifierInput.value = uploadIdentifier;
 			newForm.appendChild(uploadIdentifierInput);
 
@@ -3489,8 +3489,6 @@ var HeuristScholarDB = new HStorageManager();
 			newForm.appendChild(heurist_sessionidInput);
 		}
 
-		doc.body.appendChild(newIframe);
-
 		newForm.appendChild(fileInput);
 		fileInput.name = "file";
 
@@ -3499,7 +3497,10 @@ var HeuristScholarDB = new HStorageManager();
 			var data;
 			try {
 				data = HAPI.XHR.evalJSON(HAPI.base64.decode(decodeURIComponent(newIframe.contentWindow.document.location.hash.substring(6))));	// #data=....
-			} catch (e) { return; } // return seems to try again
+			} catch (e) {
+//				 setTimeout(function() { that.onload();},100);
+				 return; // return seems to try again
+			}
 
 			var response = (data  ||  { error: "internal Heurist error while uploading file" });
 			var newFile, d;
@@ -3537,6 +3538,8 @@ var HeuristScholarDB = new HStorageManager();
 			if (callback) { setTimeout(callback, 0); }
 		};
 
+		doc.body.appendChild(newIframe);
+
 		/* Submit the form -- detach it from the main thread so that the new frame can be inserted into the frames hierarchy
 		 * (a slight delay is also necessary)
 		 */
@@ -3559,7 +3562,7 @@ var HeuristScholarDB = new HStorageManager();
 
 		if (progressCallback) {
 			if (! HAPI.progressIntervalID) {
-				HAPI.progressIntervalID = setInterval(saveFileProgress, 500);
+				HAPI.progressIntervalID = setInterval(saveFileProgress, 1000);
 			}
 		}
 	};
@@ -3582,7 +3585,7 @@ var HeuristScholarDB = new HStorageManager();
 		if (! infos) { return; }
 
 		for (var uploadID in infos) {
-console.log(uploadID + " => " + infos[uploadID]);
+//console.log(uploadID + " => " + infos[uploadID]);
 			progress = infos[uploadID];
 			fileInfo = that.uploadsInProgress.names["upload-" + uploadID];
 			callback = (fileInfo  &&  fileInfo.callback);
