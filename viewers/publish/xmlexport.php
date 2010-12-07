@@ -182,7 +182,7 @@ if (@$_REQUEST['style']  &&  !eregi ('.xsl', @$_REQUEST['style'])  &&  @$_REQUES
 /*
  * The main loop. It loops through the array with records ids and makes a '<reference>' in
  * the XML document for all valid records. It gets general data from table records and all
- * available data in rec_details. If it has a container, it will be added within a <container>
+ * available data in recDetails. If it has a container, it will be added within a <container>
  * tag, recursively going through all containers till none are found.
  */
 
@@ -279,14 +279,14 @@ wish to export all of this data
 /**
  * This function writes the begin- and endtag to the XML document per reference. This
  * includes the containers found in records. Between it, it puts the general data
- * and all details found in rec_details.
+ * and all details found in recDetails.
  *
  * @global $XML the xml document where it writes to
  * @global $LOOP the array with visited records ids for loop detection on containers
  * @global $ERROR the log to which the errors will be added
- * @param $rec_id the rec_id for the record
+ * @param $rec_id the rec_ID for the record
  * @param $depth current depth (0 == root level)
- * @param $rd_type rd_type of the pointer to this reference (only applicable when depth > 0)
+ * @param $rd_type dtl_DetailTypeID of the pointer to this reference (only applicable when depth > 0)
  * @param $rec_types defRecTypes of this reference (only applicable when depth > 0)
  */
 function writeReference($rec_id, $depth = 0, $rd_type = 0, $rec_types = 0, $rev = false) {
@@ -297,7 +297,7 @@ function writeReference($rec_id, $depth = 0, $rd_type = 0, $rec_types = 0, $rev 
 	global $RQS;
 	global $MAX_DEPTH;
 
-	// check if rec_id is already visited
+	// check if rec_ID is already visited
 	if (!in_array($rec_id, $LOOP)) {
 
 		// add bib id to loop array
@@ -354,7 +354,7 @@ function writeReference($rec_id, $depth = 0, $rd_type = 0, $rec_types = 0, $rev 
 			$path .= " -> " . $l;
 		}
 		// add error
-		$ERROR .= "<error>loop detected for rec_id: " . $rec_id . ", path: " . $path . " -> " . $rec_id . "</error>\n";
+		$ERROR .= "<error>loop detected for rec_ID: " . $rec_id . ", path: " . $path . " -> " . $rec_id . "</error>\n";
 	}
 }
 
@@ -372,10 +372,10 @@ function writeGeneralData($bib, $depth) {
 	global $DB;
 	global $MAX_DEPTH;
 
-	$query = 'SELECT * FROM records
-						LEFT JOIN defRecTypes on rec_type = rty_ID
-						LEFT JOIN '.USERS_DATABASE.'.sysUGrps usr on rec_added_by_usr_id = usr.ugr_ID
-						WHERE rec_id=' . $bib;
+	$query = 'SELECT * FROM Records
+						LEFT JOIN defRecTypes on rec_RecTypeID = rty_ID
+						LEFT JOIN '.USERS_DATABASE.'.sysUGrps usr on rec_AddedByUGrpID = usr.ugr_ID
+						WHERE rec_ID=' . $bib;
 	$res = mysql_query($query);
 	// do we have results ?
 	if(!empty($res)) {
@@ -387,11 +387,11 @@ function writeGeneralData($bib, $depth) {
 		$XML .= "<reftype id=\"" . htmlspecialchars($row['rty_ID']). "\">" . htmlspecialchars($row['rty_Name']) . "</reftype>\n";
 		$XML .= "<id>" . htmlspecialchars($bib) . "</id>\n";
 		//$XML .= "<query>" . htmlspecialchars($query) . "</query>\n";
-		$XML .= "<url>" . htmlspecialchars($row['rec_url']) . "</url>\n";
-		$XML .= "<added>" . htmlspecialchars($row['rec_added']) . "</added>\n";
-		$XML .= "<modified>" . htmlspecialchars($row['rec_modified']) . "</modified>\n";
-		$XML .= "<notes>" . htmlspecialchars($row['rec_scratchpad']) . "</notes>\n";
-		$XML .= "<title>" . htmlspecialchars($row['rec_title']) . "</title>\n";
+		$XML .= "<url>" . htmlspecialchars($row['rec_URL']) . "</url>\n";
+		$XML .= "<added>" . htmlspecialchars($row['rec_Added']) . "</added>\n";
+		$XML .= "<modified>" . htmlspecialchars($row['rec_Modified']) . "</modified>\n";
+		$XML .= "<notes>" . htmlspecialchars($row['rec_ScratchPad']) . "</notes>\n";
+		$XML .= "<title>" . htmlspecialchars($row['rec_Title']) . "</title>\n";
 
 		// construct username who added record
 		$person = $row['ugr_FirstName'] . ' ' . $row['ugr_LastName'];
@@ -400,7 +400,7 @@ function writeGeneralData($bib, $depth) {
 		$XML .= "<added_by>" . htmlspecialchars($person) . "</added_by>\n";
 
 		// check if it's a public record, if not, get workgroup from users database
-		$workgroup = $row['rec_wg_id'];
+		$workgroup = $row['rec_OwnerUGrpID'];
 		if ($workgroup == 0 || empty($workgroup)) {
 			$XML .= "<workgroup>public</workgroup>\n";
 		}
@@ -424,7 +424,7 @@ function writeGeneralData($bib, $depth) {
 }
 
 /**
- * This function loops through all the occurences in rec_details for the record.
+ * This function loops through all the occurences in recDetails for the record.
  * If one is an author or editor that tag gets three subtags with the firstname,
  * othernames and surname of that person from the persons table.
  * If it is a container detail it fires the writing of the container.
@@ -439,12 +439,12 @@ function writeDetails($bib, $depth) {
 	writeTags($bib);
 
     $assoc_resources = array();
-	$query = 'SELECT rec_type, rd_val, dty_ID, dty_Type, rd_type, rd_file_id FROM rec_details
-						LEFT JOIN defDetailTypes on rd_type = dty_ID
-						LEFT JOIN records on rec_id = rd_rec_id
-						LEFT JOIN defRecStructure on rst_DetailTypeID = dty_ID and rst_RecTypeID = rec_type
-						WHERE rd_rec_id=' . $bib .'
-						ORDER BY rst_OrderInForm is null, rst_OrderInForm, dty_ID, rd_id';
+	$query = 'SELECT rec_RecTypeID, dtl_Value, dty_ID, dty_Type, dtl_DetailTypeID, dtl_UploadedFileID FROM recDetails
+						LEFT JOIN defDetailTypes on dtl_DetailTypeID = dty_ID
+						LEFT JOIN Records on rec_ID = dtl_RecID
+						LEFT JOIN defRecStructure on rst_DetailTypeID = dty_ID and rst_RecTypeID = rec_RecTypeID
+						WHERE dtl_RecID=' . $bib .'
+						ORDER BY rst_OrderInForm is null, rst_OrderInForm, dty_ID, dtl_ID';
 
 	$res = mysql_query($query);
 
@@ -454,11 +454,11 @@ if (mysql_error()) error_log(mysql_error());
 
 		// if it's a record pointer, write the record pointed to
 		if ($row['dty_Type'] == 'resource') {
-			writeReference($row['rd_val'], $depth + 1, $row['rd_type'], $row['rec_type'], false);
+			writeReference($row['dtl_Value'], $depth + 1, $row['dtl_DetailTypeID'], $row['rec_RecTypeID'], false);
 
 		}
 		else {
-			writeTag($row['rec_type'], $row['rd_type'], $row['rd_val'], $row['rd_file_id']);
+			writeTag($row['rec_RecTypeID'], $row['dtl_DetailTypeID'], $row['dtl_Value'], $row['dtl_UploadedFileID']);
 		}
 	}
 
@@ -478,14 +478,14 @@ if (mysql_error()) error_log(mysql_error());
 function writeReversePointers($bib, $depth) {
 	global $XML;
 
-	$q_reverse= 'SELECT * FROM rec_details LEFT JOIN defDetailTypes ON dty_ID = rd_type
-	             LEFT JOIN records ON rec_id = rd_rec_id
-	             WHERE rd_val ='.$bib .' AND dty_Type = "resource" AND rec_temporary != 1 ORDER BY rec_type';
+	$q_reverse= 'SELECT * FROM recDetails LEFT JOIN defDetailTypes ON dty_ID = dtl_DetailTypeID
+	             LEFT JOIN Records ON rec_ID = dtl_RecID
+	             WHERE dtl_Value ='.$bib .' AND dty_Type = "resource" AND rec_FlagTemporary != 1 ORDER BY rec_RecTypeID';
 
 	$results = mysql_query($q_reverse);
 
 	while ($row = mysql_fetch_array($results)) {
-		writeReference($row['rd_rec_id'], $depth, $row['rd_type'], $row['rec_type'], true);
+		writeReference($row['dtl_RecID'], $depth, $row['dtl_DetailTypeID'], $row['rec_RecTypeID'], true);
 	}
 }
 
@@ -624,31 +624,31 @@ function writeRelatedData($bib, $depth) {
 	global $MAX_DEPTH;
 	global $RFT;
 
-	$from_res = mysql_query('select a.rd_rec_id
-							   from rec_details a
-						  left join rec_details b on b.rd_rec_id = a.rd_rec_id
-						  left join records on rec_id = b.rd_val
-							  where a.rd_type = 202
-								and a.rd_val = ' . $bib . '
-								and b.rd_type = 199
-								and rec_temporary != 1');        // 202 = primary resource
+	$from_res = mysql_query('select a.dtl_RecID
+							   from recDetails a
+						  left join recDetails b on b.dtl_RecID = a.dtl_RecID
+						  left join Records on rec_ID = b.dtl_Value
+							  where a.dtl_DetailTypeID = 202
+								and a.dtl_Value = ' . $bib . '
+								and b.dtl_DetailTypeID = 199
+								and rec_FlagTemporary != 1');        // 202 = primary resource
 
-	$to_res =   mysql_query('select a.rd_rec_id
-							   from rec_details a
-						  left join rec_details b on b.rd_rec_id = a.rd_rec_id
-						  left join records on rec_id = b.rd_val
-							  where a.rd_type = 199
-								and a.rd_val = ' . $bib . '
-								and b.rd_type = 202
-								and rec_temporary != 1');        // 199 = linked resource
+	$to_res =   mysql_query('select a.dtl_RecID
+							   from recDetails a
+						  left join recDetails b on b.dtl_RecID = a.dtl_RecID
+						  left join Records on rec_ID = b.dtl_Value
+							  where a.dtl_DetailTypeID = 199
+								and a.dtl_Value = ' . $bib . '
+								and b.dtl_DetailTypeID = 202
+								and rec_FlagTemporary != 1');        // 199 = linked resource
 
 	if (mysql_num_rows($from_res) <= 0  &&  mysql_num_rows($to_res) <= 0) return;
 
 	while ($reln = mysql_fetch_assoc($from_res)) {
-		writeRelatedRecord(fetch_relation_details($reln['rd_rec_id'], true), $depth);
+		writeRelatedRecord(fetch_relation_details($reln['dtl_RecID'], true), $depth);
 	}
 	while ($reln = mysql_fetch_assoc($to_res)) {
-		writeRelatedRecord(fetch_relation_details($reln['rd_rec_id'], false), $depth);
+		writeRelatedRecord(fetch_relation_details($reln['dtl_RecID'], false), $depth);
 	}
 }
 
@@ -673,12 +673,12 @@ function writeRelatedRecord ($rel, $depth) {
 	$XML .= '>';
 
 	if (@$rel['OtherResource']) {
-		$rec_id = $rel['OtherResource']['rec_id'];
+		$rec_id = $rel['OtherResource']['rec_ID'];
 		writeGeneralData($rec_id, $depth);
 		if ($depth <= $MAX_DEPTH) {
 			writeDetails($rec_id, $depth);
 		} else {
-			fetchExtraDetails($rec_id, $rel['OtherResource']['rec_type']);
+			fetchExtraDetails($rec_id, $rel['OtherResource']['rec_RecTypeID']);
 		}
 	} else {
 		$XML .=  '<title>'. htmlspecialchars($rel['Title']). '</title>';
@@ -694,9 +694,9 @@ function fetchExtraDetails($rec_id, $reftype) {
 
 	if (! $RELATED_DETAILS) return '';
 
-	$res = mysql_query('select rd_type, rd_val, rd_file_id from rec_details where rd_rec_id = ' . $rec_id . ' and rd_type in (' . join(',', $RELATED_DETAILS) . ') order by rd_type, rd_val');
+	$res = mysql_query('select dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID from recDetails where dtl_RecID = ' . $rec_id . ' and dtl_DetailTypeID in (' . join(',', $RELATED_DETAILS) . ') order by dtl_DetailTypeID, dtl_Value');
 	while ($row = mysql_fetch_assoc($res)) {
-		writeTag($reftype, $row['rd_type'], $row['rd_val'], $row['rd_file_id']);
+		writeTag($reftype, $row['dtl_DetailTypeID'], $row['dtl_Value'], $row['dtl_UploadedFileID']);
 	}
 }
 
@@ -737,13 +737,13 @@ function getRecords() {
 		$search_type = BOTH;	// all records
 
 	// NOTE THAT WE LIMIT THE OUTPUT to MAX_ROWS entries
-	$res = mysql_query(REQUEST_to_query('select SQL_CALC_FOUND_ROWS rec_id ', $search_type).' limit ' . MAX_ROWS);
+	$res = mysql_query(REQUEST_to_query('select SQL_CALC_FOUND_ROWS rec_ID ', $search_type).' limit ' . MAX_ROWS);
 	$fres = mysql_query('select found_rows()');
 	$num_rows = mysql_fetch_row($fres); $total_num_rows = $num_rows[0];
 
 	// this fills the array with the records ids
 	while ($row = mysql_fetch_assoc($res)) {
-		$Bibs[] = $row['rec_id'];
+		$Bibs[] = $row['rec_ID'];
 	}
 
 	return $Bibs;
@@ -756,14 +756,14 @@ function getRecords() {
 function have_bib_permissions_forall($rec_id) {
 
 	$rec_id = intval($rec_id);
-	$query = 'select * from records where rec_id='.$rec_id;
+	$query = 'select * from Records where rec_ID='.$rec_id;
 	$res = mysql_query($query);
 
 	if (mysql_num_rows($res) < 1) return false;
 
 	$bib = mysql_fetch_assoc($res);
 
-	if ($bib['rec_wg_id']  &&  $bib['rec_visibility'] == 'Hidden') {
+	if ($bib['rec_OwnerUGrpID']  &&  $bib['rec_NonOwnerVisibility'] == 'Hidden') {
 		return false;
 	}
 

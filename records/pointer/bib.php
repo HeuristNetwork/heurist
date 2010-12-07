@@ -26,7 +26,7 @@
 */
 
 
-/* Take rec_id or bkm_ID, fill in window.HEURIST.record.bibID and window.HEURIST.record.bkmkID as appropriate */
+/* Take rec_ID or bkm_ID, fill in window.HEURIST.record.bibID and window.HEURIST.record.bkmkID as appropriate */
 /* FIXME: leave around some useful error messages */
 
 if (! defined("SAVE_URI")) {
@@ -89,8 +89,8 @@ top.HEURIST.fireEvent(window, "heurist-record-loaded");
 
 
 function findRecordIDs() {
-	// Look at the request parameters rec_id and bkm_ID,
-	// return the actual rec_id and bkm_ID as the user has access to them
+	// Look at the request parameters rec_ID and bkm_ID,
+	// return the actual rec_ID and bkm_ID as the user has access to them
 
 	/* chase down replaced-by-bib-id references */
 	$replaced = false;
@@ -111,18 +111,18 @@ function findRecordIDs() {
 	$bkm_ID = 0;
 	if (intval(@$_REQUEST['bib_id'])) {
 		$rec_id = intval($_REQUEST['bib_id']);
-		$res = mysql_query('select rec_id, bkm_ID from records left join usrBookmarks on bkm_recID=rec_id and bkm_UGrpID='.get_user_id().' where rec_id='.$rec_id);
+		$res = mysql_query('select rec_ID, bkm_ID from Records left join usrBookmarks on bkm_recID=rec_ID and bkm_UGrpID='.get_user_id().' where rec_ID='.$rec_id);
 		$row = mysql_fetch_assoc($res);
-		$rec_id = intval($row['rec_id']);
+		$rec_id = intval($row['rec_ID']);
 		$bkm_ID = intval($row['bkm_ID']);
 	}
 
 	if (! $rec_id  &&  intval(@$_REQUEST['bkmk_id'])) {
 		$bkm_ID = intval($_REQUEST['bkmk_id']);
-		$res = mysql_query('select bkm_ID, rec_id from usrBookmarks left join records on bkm_recID=rec_id where bkm_ID='.$bkm_ID.' and bkm_UGrpID='.get_user_id());
+		$res = mysql_query('select bkm_ID, rec_ID from usrBookmarks left join Records on bkm_recID=rec_ID where bkm_ID='.$bkm_ID.' and bkm_UGrpID='.get_user_id());
 		$row = mysql_fetch_assoc($res);
 		$bkm_ID = intval($row['bkm_ID']);
-		$rec_id = intval($row['rec_id']);
+		$rec_id = intval($row['rec_ID']);
 	}
 
 	return array($rec_id, $bkm_ID, $replaced);
@@ -133,13 +133,13 @@ function getBaseProperties($rec_id, $bkm_ID) {
 	// Return an array of the basic scalar properties for this record / bookmark
 	if (!$rec_id && !$bkm_ID) return array("error"=>"invalid parameters passed to getBaseProperties");
 	if ($bkm_ID) {
-		$res = mysql_query('select rec_id, rec_title as title, rty_Name as reftype, rty_ID as reftypeID, rec_url as url, grp.ugr_ID as workgroupID, grp.ugr_Name as workgroup, rec_scratchpad as notes, rec_visibility as visibility, bkm_PwdReminder as passwordReminder, bkm_Rating as rating, rec_modified, rec_temporary from usrBookmarks left join records on bkm_recID=rec_id and bkm_UGrpID='.get_user_id().' left join defRecTypes on rty_ID = rec_type left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=rec_wg_id where bkm_ID='.$bkm_ID);
+		$res = mysql_query('select rec_ID, rec_Title as title, rty_Name as reftype, rty_ID as reftypeID, rec_URL as url, grp.ugr_ID as workgroupID, grp.ugr_Name as workgroup, rec_ScratchPad as notes, rec_NonOwnerVisibility as visibility, bkm_PwdReminder as passwordReminder, bkm_Rating as rating, rec_Modified, rec_FlagTemporary from usrBookmarks left join Records on bkm_recID=rec_ID and bkm_UGrpID='.get_user_id().' left join defRecTypes on rty_ID = rec_RecTypeID left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID where bkm_ID='.$bkm_ID);
 	} else if ($rec_id) {
-		$res = mysql_query('select rec_id, rec_title as title, rty_Name as reftype, rty_ID as reftypeID, rec_url as url, grp.ugr_ID as workgroupID, grp.ugr_Name as workgroup, rec_scratchpad as notes, rec_visibility as visibility, rec_modified, rec_temporary from records left join usrBookmarks on bkm_recID=rec_id left join defRecTypes on rty_ID = rec_type left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=rec_wg_id where rec_id='.$rec_id);
+		$res = mysql_query('select rec_ID, rec_Title as title, rty_Name as reftype, rty_ID as reftypeID, rec_URL as url, grp.ugr_ID as workgroupID, grp.ugr_Name as workgroup, rec_ScratchPad as notes, rec_NonOwnerVisibility as visibility, rec_Modified, rec_FlagTemporary from Records left join usrBookmarks on bkm_recID=rec_ID left join defRecTypes on rty_ID = rec_RecTypeID left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID where rec_ID='.$rec_id);
 	}
 
 	$row = mysql_fetch_assoc($res);
-	$rec_id = $row["rec_id"];
+	$rec_id = $row["rec_ID"];
 	$props = array();
 
 	if ($rec_id) $props["bibID"] = $rec_id;
@@ -148,8 +148,8 @@ function getBaseProperties($rec_id, $bkm_ID) {
 	$props["reftype"] = $row["reftype"];
 	$props["reftypeID"] = $row["reftypeID"];
 	$props["url"] = $row["url"];
-	$props["moddate"] = $row["rec_modified"];
-	$props["isTemporary"] = $row["rec_temporary"]? true : false;
+	$props["moddate"] = $row["rec_Modified"];
+	$props["isTemporary"] = $row["rec_FlagTemporary"]? true : false;
 
 	if (@$row["passwordReminder"]) {
 		$props["passwordReminder"] = $row["passwordReminder"];
@@ -175,31 +175,31 @@ function getBaseProperties($rec_id, $bkm_ID) {
 }
 
 function getAllBibDetails($rec_id) {
-	// Get all rec_details entries for this entry,
+	// Get all recDetails entries for this entry,
 	// as an array.
 	// File entries have file data associated,
 	// geo entries have geo data associated,
 	// record references have title data associated.
 
-	$res = mysql_query("select rd_id, rd_type, rd_val, rec_title, rd_file_id, trm_Label,
-	                           if(rd_geo is not null, astext(envelope(rd_geo)), null) as envelope,
-	                           if(rd_geo is not null, astext(rd_geo), null) as rd_geo
-	                      from rec_details
-	                 left join defDetailTypes on dty_ID=rd_type
-	                 left join records on rec_id=rd_val and dty_Type='resource'
-	                 left join defTerms on dty_Type='enum' and trm_ID = rd_val
-	                     where rd_rec_id = $rec_id order by rd_id");
+	$res = mysql_query("select dtl_ID, dtl_DetailTypeID, dtl_Value, rec_Title, dtl_UploadedFileID, trm_Label,
+	                           if(dtl_Geo is not null, astext(envelope(dtl_Geo)), null) as envelope,
+	                           if(dtl_Geo is not null, astext(dtl_Geo), null) as dtl_Geo
+	                      from recDetails
+	                 left join defDetailTypes on dty_ID=dtl_DetailTypeID
+	                 left join Records on rec_ID=dtl_Value and dty_Type='resource'
+	                 left join defTerms on dty_Type='enum' and trm_ID = dtl_Value
+	                     where dtl_RecID = $rec_id order by dtl_ID");
 	$bibDetails = array();
 	while ($row = mysql_fetch_assoc($res)) {
 		$detail = array();
 
-		$detail["id"] = $row["rd_id"];
-		$detail["value"] = $row["rd_val"];
+		$detail["id"] = $row["dtl_ID"];
+		$detail["value"] = $row["dtl_Value"];
 		if (array_key_exists('trm_Label',$row) && $row['trm_Label']) $detail["enumValue"] = $row["trm_Label"];	// saw Enum change
-		if ($row["rec_title"]) $detail["title"] = $row["rec_title"];
+		if ($row["rec_Title"]) $detail["title"] = $row["rec_Title"];
 
-		if ($row["rd_file_id"]) {
-			$fileRes = mysql_query("select * from files where file_id=" . intval($row["rd_file_id"]));
+		if ($row["dtl_UploadedFileID"]) {
+			$fileRes = mysql_query("select * from files where file_id=" . intval($row["dtl_UploadedFileID"]));
 			if (mysql_num_rows($fileRes) == 1) {
 				$file = mysql_fetch_assoc($fileRes);
 				$detail["file"] = array(
@@ -221,11 +221,11 @@ function getAllBibDetails($rec_id) {
 
 			// This is a bit ugly ... but it is useful.
 			// Do things differently for a path -- set minX,minY to the first point in the path, maxX,maxY to the last point
-			if ($row["rd_val"] == "l"  &&  preg_match("/^LINESTRING[(]([^ ]+) ([^ ]+),.*,([^ ]+) ([^ ]+)[)]$/", $row["rd_geo"], $matches)) {
+			if ($row["dtl_Value"] == "l"  &&  preg_match("/^LINESTRING[(]([^ ]+) ([^ ]+),.*,([^ ]+) ([^ ]+)[)]$/", $row["dtl_Geo"], $matches)) {
 				list($dummy, $minX, $minY, $maxX, $maxY) = $matches;
 			}
 
-			switch ($row["rd_val"]) {
+			switch ($row["dtl_Value"]) {
 			  case "p": $type = "point"; break;
 			  case "pl": $type = "polygon"; break;
 			  case "c": $type = "circle"; break;
@@ -233,7 +233,7 @@ function getAllBibDetails($rec_id) {
 			  case "l": $type = "path"; break;
 			  default: $type = "unknown";
 			}
-			$wkt = $row["rd_val"] . " " . $row["rd_geo"];	// well-known text value
+			$wkt = $row["dtl_Value"] . " " . $row["dtl_Geo"];	// well-known text value
 			$detail["geo"] = array(
 				"minX" => $minX,
 				"minY" => $minY,
@@ -246,8 +246,8 @@ function getAllBibDetails($rec_id) {
 			);
 		}
 
-		if (! @$bibDetails[$row["rd_type"]]) $bibDetails[$row["rd_type"]] = array();
-		array_push($bibDetails[$row["rd_type"]], $detail);
+		if (! @$bibDetails[$row["dtl_DetailTypeID"]]) $bibDetails[$row["dtl_DetailTypeID"]] = array();
+		array_push($bibDetails[$row["dtl_DetailTypeID"]], $detail);
 	}
 
 	return $bibDetails;
@@ -258,7 +258,7 @@ function getAllReminders($rec_id) {
 	// Get any reminders as an array;
 	if (! $rec_id) return array();
 
-	// ... MYSTIFYINGLY these are stored by rec_id+user_id, not bkm_ID
+	// ... MYSTIFYINGLY these are stored by rec_ID+user_id, not bkm_ID
 	$res = mysql_query("select * from usrReminders where rem_RecID=$rec_id and rem_OwnerUGrpID=".get_user_id()." order by rem_StartDate");
 
 	$reminders = array();
@@ -292,11 +292,11 @@ function getAllWikis($rec_id, $bkm_ID) {
 	}
 
 	if ($rec_id) {
-		$res = mysql_query("select rec_url from records where rec_id=".$rec_id);
+		$res = mysql_query("select rec_URL from Records where rec_ID=".$rec_id);
 		$row = mysql_fetch_assoc($res);
-		if (preg_match("!(acl.arts.usyd.edu.au|heuristscholar.org)/tmwiki!", @$row["rec_url"])) {	//FIXME: this needs to be configurable or generic for installations
-			array_push($wikis, array("Public", preg_replace("!.*/!", "", $row["rec_url"])));
-			array_push($wikiNames, preg_replace("!.*/!", "", $row["rec_url"]));
+		if (preg_match("!(acl.arts.usyd.edu.au|heuristscholar.org)/tmwiki!", @$row["rec_URL"])) {	//FIXME: this needs to be configurable or generic for installations
+			array_push($wikis, array("Public", preg_replace("!.*/!", "", $row["rec_URL"])));
+			array_push($wikiNames, preg_replace("!.*/!", "", $row["rec_URL"]));
 		} else {
 			array_push($wikis, array("Public", "Biblio:$rec_id"));
 			array_push($wikiNames, "Biblio:$rec_id");

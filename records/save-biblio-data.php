@@ -74,7 +74,7 @@ if ($_POST["save-mode"] == "edit"  &&  intval($_POST["bib_id"])) {
 
 if ($updated) {
 	// Update bib record data
-	// Update rec_details, rec_scratchpad and rec_title in (parent.parent).HEURIST.record
+	// Update recDetails, rec_ScratchPad and rec_Title in (parent.parent).HEURIST.record
 	print "(";
 	define("JSON_RESPONSE", 1);
 	require_once(dirname(__FILE__)."/pointer/bib.php");
@@ -90,12 +90,12 @@ function updateRecord($bibID) {
 	$bibID = intval($bibID);
 
 	// Check that the user has permissions to edit it.
-	$res = mysql_query("select * from records
-	                        left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_GroupID=rec_wg_id
-	                        left join defRecTypes on rty_ID=rec_type
-	                     where rec_id=$bibID and (! rec_wg_id or ugl_UserID=".get_user_id().")");
+	$res = mysql_query("select * from Records
+	                        left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_GroupID=rec_OwnerUGrpID
+	                        left join defRecTypes on rty_ID=rec_RecTypeID
+	                     where rec_ID=$bibID and (! rec_OwnerUGrpID or ugl_UserID=".get_user_id().")");
 	if (mysql_num_rows($res) == 0) {
-		$res = mysql_query("select grp.ugr_Name from records, ".USERS_DATABASE.".sysUGrps grp where rec_id=$bibID and grp.ugr_ID=rec_wg_id");
+		$res = mysql_query("select grp.ugr_Name from Records, ".USERS_DATABASE.".sysUGrps grp where rec_ID=$bibID and grp.ugr_ID=rec_OwnerUGrpID");
 		$grpName = mysql_fetch_row($res);  $grpName = $grpName[0];
 
 		print '({ error: "Sorry - you can\'t edit this record.\nYou aren\'t in the ' . slash($grpName) . ' workgroup" })';
@@ -135,14 +135,14 @@ function updateRecord($bibID) {
 
 			$bdID = substr($eltID, 3);	// everything after "bd:"
 			$bibDetailUpdates[$bdID] = $bdInputHandler->convertPostToMysql($val);
-			$bibDetailUpdates[$bdID]["rd_type"] = $bdType;
+			$bibDetailUpdates[$bdID]["dtl_DetailTypeID"] = $bdType;
 
 			unset($_POST[$eltName][$eltID]);	// remove data from post submission
 			unset($bibDetails[$eltName][$eltID]);	// remove data from local reflection of the database
 		}
 	}
 
-	// Anything left in bibDetails now represents rec_details rows that need to be deleted because they were removed before submission
+	// Anything left in bibDetails now represents recDetails rows that need to be deleted because they were removed before submission
 
 	$bibDetailDeletes = array();
 
@@ -153,7 +153,7 @@ function updateRecord($bibID) {
 		}
 	}
 
-	// Try to insert anything left in POST as new rec_details rows
+	// Try to insert anything left in POST as new recDetails rows
 	$bibDetailInserts = array();
 
 	foreach ($_POST as $eltName => $bds) {
@@ -166,8 +166,8 @@ function updateRecord($bibID) {
 			if (! $bdInputHandler->inputOK($val)) continue;	// faulty input ... ignore
 
 			$newBibDetail = $bdInputHandler->convertPostToMysql($val);
-			$newBibDetail["rd_type"] = $bdType;
-			$newBibDetail["rd_rec_id"] = $bibID;
+			$newBibDetail["dtl_DetailTypeID"] = $bdType;
+			$newBibDetail["dtl_RecID"] = $bibID;
 
 			array_push($bibDetailInserts, $newBibDetail);
 
@@ -178,35 +178,35 @@ function updateRecord($bibID) {
 	// Anything left in POST now is stuff that we have no intention of inserting ... ignore it
 
 	// We now have:
-	//  - $bibDetailUpdates: an assoc. array of rd_id => column values to be updated in rec_details
-	//  - $bibDetailInserts: an array of column values to be inserted into rec_details
-	//  - $bibDetailDeletes: an array of rd_id values corresponding to rows to be deleted from rec_details
+	//  - $bibDetailUpdates: an assoc. array of dtl_ID => column values to be updated in recDetails
+	//  - $bibDetailInserts: an array of column values to be inserted into recDetails
+	//  - $bibDetailDeletes: an array of dtl_ID values corresponding to rows to be deleted from recDetails
 
 	// Commence versioning ...
 	mysql_query("start transaction");
 
-	$bibUpdates = array("rec_modified" => array("now()"), "rec_temporary" => 0);
-	$bibUpdates["rec_scratchpad"] = $_POST["notes"];
+	$bibUpdates = array("rec_Modified" => array("now()"), "rec_FlagTemporary" => 0);
+	$bibUpdates["rec_ScratchPad"] = $_POST["notes"];
 	if (intval(@$_POST["reftype"])) {
-		$bibUpdates["rec_type"] = intval($_POST["reftype"]);
+		$bibUpdates["rec_RecTypeID"] = intval($_POST["reftype"]);
 	}
 	if (array_key_exists("bib_url", $_POST)) {
-		$bibUpdates["rec_url"] = $_POST["bib_url"];
+		$bibUpdates["rec_URL"] = $_POST["bib_url"];
 	}
 	if (is_admin()) {
 		if (array_key_exists("bib_workgroup", $_POST)) {
-			$bibUpdates["rec_wg_id"] = $_POST["bib_workgroup"];
+			$bibUpdates["rec_OwnerUGrpID"] = $_POST["bib_workgroup"];
 		}
 		if (array_key_exists("bib_visibility", $_POST)) {
-			$bibUpdates["rec_visibility"] = $_POST["bib_visibility"];
+			$bibUpdates["rec_NonOwnerVisibility"] = $_POST["bib_visibility"];
 		}
 	}
-	mysql__update("records", "rec_id=$bibID", $bibUpdates);
+	mysql__update("Records", "rec_ID=$bibID", $bibUpdates);
 	$biblioUpdated = (mysql_affected_rows() > 0)? true : false;
 
 	$updatedRowCount = 0;
 	foreach ($bibDetailUpdates as $bdID => $vals) {
-		mysql__update("rec_details", "rd_id=$bdID and rd_rec_id=$bibID", $vals);
+		mysql__update("recDetails", "dtl_ID=$bdID and dtl_RecID=$bibID", $vals);
 		if (mysql_affected_rows() > 0) {
 			++$updatedRowCount;
 		}
@@ -214,7 +214,7 @@ function updateRecord($bibID) {
 
 	$insertedRowCount = 0;
 	foreach ($bibDetailInserts as $vals) {
-		mysql__insert("rec_details", $vals);
+		mysql__insert("recDetails", $vals);
 		if (mysql_affected_rows() > 0) {
 			++$insertedRowCount;
 		}
@@ -222,7 +222,7 @@ function updateRecord($bibID) {
 
 	$deletedRowCount = 0;
 	if ($bibDetailDeletes) {
-		mysql_query("delete from rec_details where rd_id in (" . join($bibDetailDeletes, ",") . ") and rd_rec_id=$bibID");
+		mysql_query("delete from recDetails where dtl_ID in (" . join($bibDetailDeletes, ",") . ") and dtl_RecID=$bibID");
 		if (mysql_affected_rows() > 0) {
 			$deletedRowCount = mysql_affected_rows();
 		}
@@ -242,9 +242,9 @@ function updateRecord($bibID) {
 
 	if ($updatedRowCount > 0  ||  $insertedRowCount > 0  ||  $deletedRowCount > 0  ||  $biblioUpdated) {
 		/* something changed: update the records title and commit all changes */
-		mysql_query("update records
-		                set rec_title = '" . addslashes(fill_title_mask($bib["rty_TitleMask"], $bib["rec_id"], $bib["rec_type"])) . "'
-		              where rec_id = $bibID");
+		mysql_query("update Records
+		                set rec_Title = '" . addslashes(fill_title_mask($bib["rty_TitleMask"], $bib["rec_ID"], $bib["rec_RecTypeID"])) . "'
+		              where rec_ID = $bibID");
 
 		mysql_query("commit");
 
@@ -261,15 +261,15 @@ function updateRecord($bibID) {
 
 
 function insertRecord() {
-	// Try to insert anything in POST as new rec_details rows.
+	// Try to insert anything in POST as new recDetails rows.
 	// We do this by creating a stub record, and then updating it.
-	mysql__insert("records", array(
-		"rec_added" => date('Y-m-d H:i:s'),
-		"rec_added_by_usr_id" => get_user_id(),
-		"rec_type" => $_POST["reftype"],
-		"rec_scratchpad" => $_POST["notes"],
-		"rec_url" => $_POST["url"]? $_POST["url"] : ""));
-	$_REQUEST["rec_id"] = $bibID = mysql_insert_id();
+	mysql__insert("Records", array(
+		"rec_Added" => date('Y-m-d H:i:s'),
+		"rec_AddedByUGrpID" => get_user_id(),
+		"rec_RecTypeID" => $_POST["reftype"],
+		"rec_ScratchPad" => $_POST["notes"],
+		"rec_URL" => $_POST["url"]? $_POST["url"] : ""));
+	$_REQUEST["rec_ID"] = $bibID = mysql_insert_id();
 	updateRecord($bibID);
 
 	return true;
@@ -280,14 +280,14 @@ function getBiblioDetails($bibID) {
 	$bibID = intval($bibID);
 	$bd = array();
 
-	$res = mysql_query("select * from rec_details where rd_rec_id = " . $bibID);
+	$res = mysql_query("select * from recDetails where dtl_RecID = " . $bibID);
 	while ($val = mysql_fetch_assoc($res)) {
-		$elt_name = "type:".$val["rd_type"];
+		$elt_name = "type:".$val["dtl_DetailTypeID"];
 
 		if (! @$bd[$elt_name]) {
 			$bd[$elt_name] = array();
 		}
-		$bd[$elt_name]["bd:".$val["rd_id"]] = $val;
+		$bd[$elt_name]["bd:".$val["dtl_ID"]] = $val;
 	}
 
 	return $bd;
@@ -445,7 +445,7 @@ class BibDetailInput {
 	function convertPostToMysql($postVal) {
 		// Given a value corresponding to a single input from a POST submission,
 		// return array of values split into their respective MySQL columns
-		return array("rd_val" => $postVal);
+		return array("dtl_Value" => $postVal);
 	}
 	function inputOK($postVal) {
 		// This is abstract
@@ -454,7 +454,7 @@ class BibDetailInput {
 }
 class BibDetailFreetextInput extends BibDetailInput {
 	function convertPostToMysql($postVal) {
-		return array("rd_val" => trim($postVal));
+		return array("dtl_Value" => trim($postVal));
 	}
 	function inputOK($postVal) {
 		return (strlen(trim($postVal)) > 0);
@@ -493,11 +493,11 @@ class BibDetailResourceInput extends BibDetailInput {
 class BibDetailBooleanInput extends BibDetailInput {
 	function convertPostToMysql($postVal) {
 		if ($postVal == "yes"  ||  $postVal == "true")
-			return array("rd_val" => "true");
+			return array("dtl_Value" => "true");
 		else if ($postVal)
-			return array("rd_val" => "false");
+			return array("dtl_Value" => "false");
 		else
-			return array("rd_val" => NULL);
+			return array("dtl_Value" => NULL);
 	}
 	function inputOK($postVal) {
 		return preg_match("/^(?:yes|true|no|false)$/", $postVal);
@@ -510,7 +510,7 @@ class BibDetailDropdownInput extends BibDetailInput {
 }
 class BibDetailFileInput extends BibDetailInput {
 	function convertPostToMysql($postVal) {
-		return array("rd_file_id" => $postVal);
+		return array("dtl_UploadedFileID" => $postVal);
 	}
 	function inputOK($postVal) {
 		return preg_match("/\\S/", $postVal);
@@ -519,7 +519,7 @@ class BibDetailFileInput extends BibDetailInput {
 class BibDetailGeographicInput extends BibDetailInput {
 	function convertPostToMysql($postVal) {
 		if (preg_match("/^(p(?= point)|r(?= polygon)|[cl](?= linestring)|pl(?= polygon)) ((?:point|polygon|linestring)\\(?\\([-0-9.+, ]+?\\)\\)?)$/i", $postVal, $matches)) {
-			return array("rd_val" => $matches[1], "rd_geo" => array("geomfromtext(\"" . $matches[2] . "\")"));
+			return array("dtl_Value" => $matches[1], "dtl_Geo" => array("geomfromtext(\"" . $matches[2] . "\")"));
 		} else
 			return array();
 	}

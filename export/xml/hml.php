@@ -107,11 +107,12 @@ function closeCDATA() {
 
 function single_record_retrieval($q) {
    if (preg_match ('/\bids?:([0-9]+)(?!,)\b/i', $q, $matches)) {
-		$query = 'select * from records where rec_id='.$matches[1];
+		$query = 'select * from Records where rec_ID='.$matches[1];
 		$res = mysql_query($query);
 		if (mysql_num_rows($res) < 1) return false;
 		$rec = mysql_fetch_assoc($res);
-		if ($rec['rec_wg_id']  &&  $rec['rec_visibility'] === 'Hidden') {
+		//saw FIXME need to compare against current user's UGrpID, need to say no user or group user belongs to and is HIDDEN
+		if ($rec['rec_OwnerUGrpID']  &&  $rec['rec_NonOwnerVisibility'] === 'Hidden') {
 			return false;
 		}
 		return true;
@@ -248,50 +249,50 @@ if (@$ARGV) {
 
 function findPointers($rec_ids) {
 	$rv = array();
-	$query = 'SELECT distinct rd_val
-	            FROM rec_details
-	       LEFT JOIN defDetailTypes on rd_type = dty_ID
-	           WHERE rd_rec_id in (' . join(',', $rec_ids) .')
+	$query = 'SELECT distinct dtl_Value
+	            FROM recDetails
+	       LEFT JOIN defDetailTypes on dtl_DetailTypeID = dty_ID
+	           WHERE dtl_RecID in (' . join(',', $rec_ids) .')
 	             AND dty_Type = "resource"';
 	$res = mysql_query($query);
 	while ($row = mysql_fetch_assoc($res)) {
-		array_push($rv, $row['rd_val']);
+		array_push($rv, $row['dtl_Value']);
 	}
 	return $rv;
 }
 
 function findReversePointers($rec_ids, &$pointers) {
 	$rv = array();
-	$query = 'SELECT rd_val, rd_type, rd_rec_id
-	            FROM rec_details
-	       LEFT JOIN defDetailTypes ON rd_type = dty_ID
-	       LEFT JOIN records ON rec_id = rd_rec_id
+	$query = 'SELECT dtl_Value, dtl_DetailTypeID, dtl_RecID
+	            FROM recDetails
+	       LEFT JOIN defDetailTypes ON dtl_DetailTypeID = dty_ID
+	       LEFT JOIN Records ON rec_ID = dtl_RecID
 	           WHERE dty_Type = "resource"
-	             AND rd_val IN (' . join(',', $rec_ids) .')
-	             AND rec_type != 52';
+	             AND dtl_Value IN (' . join(',', $rec_ids) .')
+	             AND rec_RecTypeID != 52';
 	$res = mysql_query($query);
 	while ($row = mysql_fetch_assoc($res)) {
-		if (! @$pointers[$row['rd_val']]) {
-			$pointers[$row['rd_val']] = array();
+		if (! @$pointers[$row['dtl_Value']]) {
+			$pointers[$row['dtl_Value']] = array();
 		}
-		$pointers[$row['rd_val']][$row['rd_rec_id']] = $row['rd_type'];
-		$rv[$row['rd_rec_id']] = 1;
+		$pointers[$row['dtl_Value']][$row['dtl_RecID']] = $row['dtl_DetailTypeID'];
+		$rv[$row['dtl_RecID']] = 1;
 	}
 	return array_keys($rv);
 }
 
 function findRelatedRecords($rec_ids, &$relationships) {
 	$rv = array();
-	$query = 'SELECT a.rd_val,
-	                 rec_id,
-	                 b.rd_val
-	            FROM rec_details a
-	       LEFT JOIN records ON rec_id = a.rd_rec_id
-	       LEFT JOIN rec_details b ON b.rd_rec_id = rec_id
-	           WHERE a.rd_type IN (202,199)
-	             AND rec_type = 52
-	             AND a.rd_val IN (' . join(',', $rec_ids) . ')
-	             AND b.rd_type = IF (a.rd_type = 202, 199, 202)';
+	$query = 'SELECT a.dtl_Value,
+	                 rec_ID,
+	                 b.dtl_Value
+	            FROM recDetails a
+	       LEFT JOIN Records ON rec_ID = a.dtl_RecID
+	       LEFT JOIN recDetails b ON b.dtl_RecID = rec_ID
+	           WHERE a.dtl_DetailTypeID IN (202,199)
+	             AND rec_RecTypeID = 52
+	             AND a.dtl_Value IN (' . join(',', $rec_ids) . ')
+	             AND b.dtl_DetailTypeID = IF (a.dtl_DetailTypeID = 202, 199, 202)';
 	$res = mysql_query($query);
 	while ($row = mysql_fetch_row($res)) {
 		if (! @$relationships[$row[0]]) {
@@ -327,31 +328,32 @@ function buildTree($rec_ids, &$reverse_pointers, &$relationships) {
 
 function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $outputStub=false) {
 	global $RTN, $DTN, $RQS, $WGN, $MAX_DEPTH, $WOOT;
-//error_log("rec = ".$record['rec_id']);
+//error_log("rec = ".$record['rec_ID']);
 	openTag('record');
-	makeTag('id', null, $record['rec_id']);
-	makeTag('type', array('id' => $record['rec_type']), $RTN[$record['rec_type']]);
-	makeTag('title', null, $record['rec_title']);
-	if ($record['rec_url']) {
-		makeTag('url', null, $record['rec_url']);
+	makeTag('id', null, $record['rec_ID']);
+	makeTag('type', array('id' => $record['rec_RecTypeID']), $RTN[$record['rec_RecTypeID']]);
+	makeTag('title', null, $record['rec_Title']);
+	if ($record['rec_URL']) {
+		makeTag('url', null, $record['rec_URL']);
 	}
-	if ($record['rec_scratchpad']) {
-		makeTag('notes', null, replaceIllegalChars($record['rec_scratchpad']));
+	if ($record['rec_ScratchPad']) {
+		makeTag('notes', null, replaceIllegalChars($record['rec_ScratchPad']));
 	}
-	makeTag('added', null, $record['rec_added']);
-	makeTag('modified', null, $record['rec_modified']);
-	makeTag('workgroup', array('id' => $record['rec_wg_id']), $record['rec_wg_id'] > 0 ? $WGN[$record['rec_wg_id']] : 'public');
+	makeTag('added', null, $record['rec_Added']);
+	makeTag('modified', null, $record['rec_Modified']);
+	// saw FIXME  - need to output groups only
+	makeTag('workgroup', array('id' => $record['rec_OwnerUGrpID']), $record['rec_OwnerUGrpID'] > 0 ? $WGN[$record['rec_OwnerUGrpID']] : 'public');
 
 	foreach ($record['details'] as $dt => $details) {
 		foreach ($details as $value) {
-			outputDetail($dt, $value, $record['rec_type'], $reverse_pointers, $relationships, $depth, $outputStub);
+			outputDetail($dt, $value, $record['rec_RecTypeID'], $reverse_pointers, $relationships, $depth, $outputStub);
 		}
 	}
 
 	if ($WOOT > $depth) {
-		$result = loadWoot(array('title' => 'record:'.$record['rec_id']));
+		$result = loadWoot(array('title' => 'record:'.$record['rec_ID']));
 		if ($result['success']) {
-			openTag('woot', array('title' => 'record:'.$record['rec_id']));
+			openTag('woot', array('title' => 'record:'.$record['rec_ID']));
 //			openCDATA();
 			foreach ($result['woot']['chunks'] as $chunk) {
 				echo replaceIllegalChars($chunk['text']) . "\n";
@@ -362,17 +364,17 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $o
 	}
 
 	if ($depth < $MAX_DEPTH) {
-		if (array_key_exists($record['rec_id'], $reverse_pointers)) {
-			foreach ($reverse_pointers[$record['rec_id']] as $rec_id => $dt) {
+		if (array_key_exists($record['rec_ID'], $reverse_pointers)) {
+			foreach ($reverse_pointers[$record['rec_ID']] as $rec_id => $dt) {
 				$child = loadRecord($rec_id);
-				openTag('reversePointer', array('id' => $dt, 'type' => $DTN[$dt], 'name' => $RQS[$child['rec_type']][$dt]));
+				openTag('reversePointer', array('id' => $dt, 'type' => $DTN[$dt], 'name' => $RQS[$child['rec_RecTypeID']][$dt]));
 				outputRecord($child, $reverse_pointers, $relationships, $depth + 1);
 				closeTag('reversePointer');
 			}
 		}
-		if (array_key_exists($record['rec_id'], $relationships)  &&  count($relationships[$record['rec_id']]) > 0) {
+		if (array_key_exists($record['rec_ID'], $relationships)  &&  count($relationships[$record['rec_ID']]) > 0) {
 			openTag('relationships');
-			foreach ($relationships[$record['rec_id']] as $rel_id) {
+			foreach ($relationships[$record['rec_ID']] as $rel_id) {
 				$rel = loadRecord($rel_id);
 				outputRecord($rel, $reverse_pointers, $relationships, $depth);
 			}
@@ -664,7 +666,7 @@ function outputRecords($result) {
 
 	$rec_ids = array();
 	foreach ($result['records'] as $record) {
-		array_push($rec_ids, $record['rec_id']);
+		array_push($rec_ids, $record['rec_ID']);
 	}
 
 	buildTree($rec_ids, $reverse_pointers, $relationships);

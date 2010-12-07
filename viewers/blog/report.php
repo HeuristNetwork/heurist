@@ -34,14 +34,14 @@ function print_heading($date) {
 }
 
 function get_blog_entries($uid, $date) {
-	$query = "SELECT rec_id as id,
-	                 rec_added as added,
-	                 rec_title as title
-	            FROM records
-	           WHERE rec_added_by_usr_id = $uid
-	             AND rec_type = 137
-	" . ($date ? "AND rec_added >= '".addslashes($date)."'" : "") . "
-	         ORDER BY rec_added DESC";
+	$query = "SELECT rec_ID as id,
+	                 rec_Added as added,
+	                 rec_Title as title
+	            FROM Records
+	           WHERE rec_AddedByUGrpID = $uid
+	             AND rec_RecTypeID = 137
+	" . ($date ? "AND rec_Added >= '".addslashes($date)."'" : "") . "
+	         ORDER BY rec_Added DESC";
 	error_log($query);
 	$res = mysql_query($query);
 	$rv = array();

@@ -55,7 +55,7 @@ class Search{
    */
   function fetch() {
       if($row = mysql_fetch_array($this->result)) {
-        return new Biblio($row['rec_id']);
+        return new Biblio($row['rec_ID']);
       } else {
         return false;
       }

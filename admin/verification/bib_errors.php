@@ -28,21 +28,21 @@ require_once(dirname(__FILE__).'/../../common/connect/db.php');
 
 mysql_connection_db_select(DATABASE);
 
-$res = mysql_query('select rd_rec_id, dty_Name, dty_PtrConstraints, rec_id, rec_title, rty_Name
+$res = mysql_query('select dtl_RecID, dty_Name, dty_PtrConstraints, rec_ID, rec_Title, rty_Name
                       from defDetailTypes
-                 left join rec_details on dty_ID = rd_type
-                 left join records on rec_id = rd_val
-                 left join defRecTypes on rty_ID = rec_type
+                 left join recDetails on dty_ID = dtl_DetailTypeID
+                 left join Records on rec_ID = dtl_Value
+                 left join defRecTypes on rty_ID = rec_RecTypeID
                      where dty_Type = "resource"
                        and dty_PtrConstraints > 0
-                       and rec_type not in (dty_PtrConstraints)');
+                       and rec_RecTypeID not in (dty_PtrConstraints)');
 $bibs = array();
 while ($row = mysql_fetch_assoc($res))
-	$bibs[$row['rd_rec_id']] = $row;
+	$bibs[$row['dtl_RecID']] = $row;
 
 ?>
 <div style="font-weight: bold;">
- Records with resource pointers to the wrong rec_type
+ Records with resource pointers to the wrong rec_RecTypeID
  &nbsp;&nbsp;
  <a target=_new href='../../search/search.html?w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>(show all in search)</a>
 </div>
@@ -51,10 +51,10 @@ while ($row = mysql_fetch_assoc($res))
 foreach ($bibs as $row) {
 ?>
  <tr>
-  <td><a target=_new href='../../records/editrec/edit.html?bib_id=<?= $row['rd_rec_id'] ?>'><?= $row['rd_rec_id'] ?></a></td>
+  <td><a target=_new href='../../records/editrec/edit.html?bib_id=<?= $row['dtl_RecID'] ?>'><?= $row['dtl_RecID'] ?></a></td>
   <td><?= $row['dty_Name'] ?></td>
   <td>points to</td>
-  <td><?= $row['rec_id'] ?> (<?= $row['rty_Name'] ?>) - <?= substr($row['rec_title'], 0, 50) ?></td>
+  <td><?= $row['rec_ID'] ?> (<?= $row['rty_Name'] ?>) - <?= substr($row['rec_Title'], 0, 50) ?></td>
  </tr>
 <?php
 }
@@ -64,17 +64,17 @@ foreach ($bibs as $row) {
 <hr>
 
 <?php
-$res = mysql_query('select rd_rec_id, dty_Name, a.rec_title
-                      from rec_details
-                 left join defDetailTypes on dty_ID = rd_type
-                 left join records a on a.rec_id = rd_rec_id
-                 left join records b on b.rec_id = rd_val
+$res = mysql_query('select dtl_RecID, dty_Name, a.rec_Title
+                      from recDetails
+                 left join defDetailTypes on dty_ID = dtl_DetailTypeID
+                 left join Records a on a.rec_ID = dtl_RecID
+                 left join Records b on b.rec_ID = dtl_Value
                      where dty_Type = "resource"
-		               and a.rec_id is not null
-                       and b.rec_id is null');
+		               and a.rec_ID is not null
+                       and b.rec_ID is null');
 $bibs = array();
 while ($row = mysql_fetch_assoc($res))
-	$bibs[$row['rd_rec_id']] = $row;
+	$bibs[$row['dtl_RecID']] = $row;
 
 ?>
 <div style="font-weight: bold;">
@@ -89,9 +89,9 @@ while ($row = mysql_fetch_assoc($res))
 foreach ($bibs as $row) {
 ?>
  <tr>
-  <td><input type=checkbox name=bib_cb value=<?= $row['rd_rec_id'] ?>></td>
-  <td><a target=_new href='../../records/editrec/edit.html?bib_id=<?= $row['rd_rec_id'] ?>'><?= $row['rd_rec_id'] ?></a></td>
-  <td><?= $row['rec_title'] ?></td>
+  <td><input type=checkbox name=bib_cb value=<?= $row['dtl_RecID'] ?>></td>
+  <td><a target=_new href='../../records/editrec/edit.html?bib_id=<?= $row['dtl_RecID'] ?>'><?= $row['dtl_RecID'] ?></a></td>
+  <td><?= $row['rec_Title'] ?></td>
   <td><?= $row['dty_Name'] ?></td>
  </tr>
 <?php

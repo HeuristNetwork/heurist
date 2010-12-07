@@ -104,14 +104,14 @@ function showRecordRollback ($record, $changes) {
 	print '<div class="record">';
 	print '<div class="header">';
 	print '<div class="detail-type">';
-	print $record["rec_id"] . ": " . $record["rec_title"];
+	print $record["rec_ID"] . ": " . $record["rec_Title"];
 	print '</div>';
 	print '<div class="current-val">Current values</div>';
 	print '<div class="new-val">Will be changed to</div>';
 	print '<div class="clearall"></div>';
 	print '</div>';
 
-	$reqs = getRecordRequirements($record["rec_type"]);
+	$reqs = getRecordRequirements($record["rec_RecTypeID"]);
 	$detail_names = mysql__select_assoc("defDetailTypes", "dty_ID", "dty_Name", 1);
 
 

@@ -201,7 +201,7 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt) {
 
 	$rt_id = $rdt[$rdt_id]['dty_PtrConstraints'];
 
-	$res = mysql_query('select rd_val from rec_details left join defDetailTypes on dty_ID=rd_type where rd_rec_id='.$rec_id.' and dty_ID='.$rdt_id.' order by rd_id asc');
+	$res = mysql_query('select dtl_Value from recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID where dtl_RecID='.$rec_id.' and dty_ID='.$rdt_id.' order by dtl_ID asc');
 
 	if ($rt_id != 0  &&  $inner_field_name) {
 		if ($rt_id != 75) {	// not an AuthorEditor
@@ -272,25 +272,25 @@ function _title_mask__get_rec_detail($rec_id, $rdt_id) {
 
 	$rec_details[$rec_id] = array();
 
-	$res = mysql_query('select rec_details.* from rec_details'
-	                  .' where rd_rec_id = ' . intval($rec_id) . ' order by rd_id asc');
+	$res = mysql_query('select recDetails.* from recDetails'
+	                  .' where dtl_RecID = ' . intval($rec_id) . ' order by dtl_ID asc');
 	while ($rd = mysql_fetch_assoc($res)) {
-		$rdt_type = $rdt[$rd['rd_type']]['dty_Type'];
+		$rdt_type = $rdt[$rd['dtl_DetailTypeID']]['dty_Type'];
 
 		if ($rdt_type == 'file') {	/* handle files specially */
-			if (@$rec_details[$rec_id][$rd['rd_type']])// repeated values
-				$rec_details[$rec_id][$rd['rd_type']] = (intval($rec_details[$rec_id][$rd['rd_type']])+1).' files';
+			if (@$rec_details[$rec_id][$rd['dtl_DetailTypeID']])// repeated values
+				$rec_details[$rec_id][$rd['dtl_DetailTypeID']] = (intval($rec_details[$rec_id][$rd['dtl_DetailTypeID']])+1).' files';
 			else
-				$rec_details[$rec_id][$rd['rd_type']] = '1 file';
+				$rec_details[$rec_id][$rd['dtl_DetailTypeID']] = '1 file';
 
 		} else if ($rdt_type == 'geo') {	/* handle geographic objects specially */
-			if (@$rec_details[$rec_id][$rd['rd_type']])// repeated values
-				$rec_details[$rec_id][$rd['rd_type']] =
-				  (intval($rec_details[$rec_id][$rd['rd_type']])+1).' geographic objects';
+			if (@$rec_details[$rec_id][$rd['dtl_DetailTypeID']])// repeated values
+				$rec_details[$rec_id][$rd['dtl_DetailTypeID']] =
+				  (intval($rec_details[$rec_id][$rd['dtl_DetailTypeID']])+1).' geographic objects';
 			else
-				$rec_details[$rec_id][$rd['rd_type']] = '1 geographic object';
+				$rec_details[$rec_id][$rd['dtl_DetailTypeID']] = '1 geographic object';
 		} else if ($rdt_type == 'date') {	/* handle date objects specially */
-			$str = trim($rd['rd_val']);
+			$str = trim($rd['dtl_Value']);
 			if (strlen($str) > 0 && preg_match("/\|VER/",$str)) { // we have a temporal
 				preg_match("/TYP=([s|p|c|f|d])/",$str,$typ);
 				switch  ($typ[1]) {
@@ -340,19 +340,19 @@ function _title_mask__get_rec_detail($rec_id, $rdt_id) {
 				}
 			}
 
-			if (@$rec_details[$rec_id][$rd['rd_type']])// repeated values
-				$rec_details[$rec_id][$rd['rd_type']] .=', ' . $str;
+			if (@$rec_details[$rec_id][$rd['dtl_DetailTypeID']])// repeated values
+				$rec_details[$rec_id][$rd['dtl_DetailTypeID']] .=', ' . $str;
 			else
-				$rec_details[$rec_id][$rd['rd_type']] = $str;
+				$rec_details[$rec_id][$rd['dtl_DetailTypeID']] = $str;
 		} else {
 			if ($rdt_type == 'enum'){ //saw Enum change
-				$relval = mysql_fetch_assoc(mysql_query("select trm_Label from defTerms where trm_ID = ".$rd['rd_val']));
-				$rd['rd_val'] = $relval['trm_Label'];
+				$relval = mysql_fetch_assoc(mysql_query("select trm_Label from defTerms where trm_ID = ".$rd['dtl_Value']));
+				$rd['dtl_Value'] = $relval['trm_Label'];
 			}
-			if (@$rec_details[$rec_id][$rd['rd_type']])// repeated values
-				$rec_details[$rec_id][$rd['rd_type']] .= ', ' . $rd['rd_val'];
+			if (@$rec_details[$rec_id][$rd['dtl_DetailTypeID']])// repeated values
+				$rec_details[$rec_id][$rd['dtl_DetailTypeID']] .= ', ' . $rd['dtl_Value'];
 			else
-				$rec_details[$rec_id][$rd['rd_type']] = $rd['rd_val'];
+				$rec_details[$rec_id][$rd['dtl_DetailTypeID']] = $rd['dtl_Value'];
 		}
 	}
 

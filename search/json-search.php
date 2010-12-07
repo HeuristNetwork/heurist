@@ -37,14 +37,14 @@ else 				// all records entries
 $query = 'select SQL_CALC_FOUND_ROWS
           bkm_ID,
           bkm_UGrpID,
-          rec_id,
-          rec_url,
-          rec_type,
-          rec_title,
-          rec_wg_id,
-          if(rec_visibility="Hidden",1,0),
-          rec_url_last_verified,
-          rec_url_error,
+          rec_ID,
+          rec_URL,
+          rec_RecTypeID,
+          rec_Title,
+          rec_OwnerUGrpID,
+          if(rec_NonOwnerVisibility="Hidden",1,0),
+          rec_URLLastVerified,
+          rec_URLErrorMessage,
           bkm_PwdReminder ';
 
 
@@ -64,14 +64,14 @@ $query = REQUEST_to_query($query, $search_type);
 //error_log($query);
 
 if (@$broken) {
-	$query = str_replace(' where ', ' where (to_days(now()) - to_days(rec_url_last_verified) >= 8) and ', $query);
+	$query = str_replace(' where ', ' where (to_days(now()) - to_days(rec_URLLastVerified) >= 8) and ', $query);
 }
 
 if (@$collected) {
 	session_start();
 	$collection = &$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['record-collection'];
 	if (count($collection) > 0) {
-		$query = str_replace(' where ', ' where rec_id in (' . join(',', array_keys($collection)) . ') and ', $query);
+		$query = str_replace(' where ', ' where rec_ID in (' . join(',', array_keys($collection)) . ') and ', $query);
 	} else {
 		$query = str_replace(' where ', ' where 0 and ', $query);
 	}
@@ -209,35 +209,35 @@ function print_result($row) {
 		// 222  Logo image
 		// 224  Images
 		$res = mysql_query("select files.*
-		                      from rec_details
-		                 left join files on file_id = rd_file_id
-		                     where rd_rec_id = " . $row[2] . "
-		                       and rd_type in (223,222,224,221,231)
+		                      from recDetails
+		                 left join files on file_id = dtl_UploadedFileID
+		                     where dtl_RecID = " . $row[2] . "
+		                       and dtl_DetailTypeID in (223,222,224,221,231)
 		                       and file_mimetype like 'image%'
-		                  order by rd_type = 223 desc, rd_type = 222 desc, rd_type = 224 desc, rd_type
+		                  order by dtl_DetailTypeID = 223 desc, dtl_DetailTypeID = 222 desc, dtl_DetailTypeID = 224 desc, dtl_DetailTypeID
 		                     limit 1");
 		if (mysql_num_rows($res) == 1) {
 			$file = mysql_fetch_assoc($res);
 			$thumb_url = "../common/php/resize_image.php?file_id=".$file['file_nonce'];
 		} else {
 			// 606  Thumbimage url
-			$res = mysql_query("select rd_val
-			                      from rec_details
-			                     where rd_rec_id = " . $row[2] . "
-		                           and rd_type = 606
+			$res = mysql_query("select dtl_Value
+			                      from recDetails
+			                     where dtl_RecID = " . $row[2] . "
+		                           and dtl_DetailTypeID = 606
 		                         limit 1");
 			if (mysql_num_rows($res) == 1) {	//FIXME: we should see about uploading this to the file table
 				$row = mysql_fetch_assoc($res);
-				$thumb_url = "".htmlspecialchars(addslashes($row['rd_val']));
+				$thumb_url = "".htmlspecialchars(addslashes($row['dtl_Value']));
 			}else{	// 603  Full image url
-				$res = mysql_query("select rd_val
-				                      from rec_details
-				                     where rd_rec_id = " . $row[2] . "
-			                           and rd_type = 603
+				$res = mysql_query("select dtl_Value
+				                      from recDetails
+				                     where dtl_RecID = " . $row[2] . "
+			                           and dtl_DetailTypeID = 603
 			                         limit 1");
 				if (mysql_num_rows($res) == 1) {
 					$row = mysql_fetch_assoc($res);
-					$thumb_url = "../common/php/resize_image.php?file_url=".htmlspecialchars($row['rd_val']);
+					$thumb_url = "../common/php/resize_image.php?file_url=".htmlspecialchars($row['dtl_Value']);
 				}
 			}
 		}

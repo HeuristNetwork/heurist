@@ -21,10 +21,10 @@ require_once(dirname(__FILE__).'/../../records/TitleMask.php');
 mysql_connection_db_overwrite(DATABASE);
 
 
-$res = mysql_query('select rec_id, rec_title, rec_type from records where ! rec_temporary order by rand()');
+$res = mysql_query('select rec_ID, rec_Title, rec_RecTypeID from Records where ! rec_FlagTemporary order by rand()');
 $bibs = array();
 while ($row = mysql_fetch_assoc($res)) {
-	$bibs[$row['rec_id']] = $row;
+	$bibs[$row['rec_ID']] = $row;
 }
 
 
@@ -83,16 +83,16 @@ foreach ($bibs as $rec_id => $bib) {
 		flush();
 	}
 
-	$mask = $masks[$bib['rec_type']];
-	$new_title = trim(fill_title_mask($mask, $rec_id, $bib['rec_type']));
+	$mask = $masks[$bib['rec_RecTypeID']];
+	$new_title = trim(fill_title_mask($mask, $rec_id, $bib['rec_RecTypeID']));
 	++$processed_count;
-	$bib_title = trim($bib['rec_title']);
+	$bib_title = trim($bib['rec_Title']);
 	if ($new_title && $bib_title && $new_title == $bib_title && strstr($new_title, $bib_title) )  continue;
 
 	if (! preg_match('/^\\s*$/', $new_title)) {	// if new title is blank, leave the existing title
 		$updates[$rec_id] = $new_title;
 	}else {
-		if ( $rec['rec_type'] == 1 && $rec['rec_title']) {
+		if ( $rec['rec_RecTypeID'] == 1 && $rec['rec_Title']) {
 			array_push($reparables, $rec_id);
 			++$repair_count;
 		}else{
@@ -103,15 +103,15 @@ foreach ($bibs as $rec_id => $bib) {
 	continue;
 
 /*
-	if (substr($new_title, 0, strlen($bib['rec_title']) == $bib['rec_title']))
-		print '<li><b>' . htmlspecialchars($bib['rec_title']) . '<span>' . htmlspecialchars(substr($new_title, strlen($bib['rec_title']))) . '</span>' . '</b> [' . $rec_id . ': ' . htmlspecialchars($bib['rec_title']) . ']';
+	if (substr($new_title, 0, strlen($bib['rec_Title']) == $bib['rec_Title']))
+		print '<li><b>' . htmlspecialchars($bib['rec_Title']) . '<span>' . htmlspecialchars(substr($new_title, strlen($bib['rec_Title']))) . '</span>' . '</b> [' . $rec_id . ': ' . htmlspecialchars($bib['rec_Title']) . ']';
 	else
-		print '<li><b>' . htmlspecialchars($new_title) . '</b> [' . $rec_id . ': ' . htmlspecialchars($bib['rec_title']) . ']';
+		print '<li><b>' . htmlspecialchars($new_title) . '</b> [' . $rec_id . ': ' . htmlspecialchars($bib['rec_Title']) . ']';
 */
-	if ($new_title == preg_replace('/\\s+/', ' ', $bib['rec_title']))
-		print '<li class=same>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($bib['rec_title']) . '';
+	if ($new_title == preg_replace('/\\s+/', ' ', $bib['rec_Title']))
+		print '<li class=same>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($bib['rec_Title']) . '';
 	else
-		print '<li>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($bib['rec_title']) . '';
+		print '<li>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($bib['rec_Title']) . '';
 
 	print ' <a target=_blank href="'.HEURIST_URL_BASE.'records/editrec/edit.html?bib_id='.$rec_id.'">*</a> <br> <br>';
 
@@ -134,9 +134,9 @@ if (count($updates) > 0) {
 	$i = 0;
 	foreach ($updates as $rec_id => $new_title) {
 /*
-		mysql_query('update records set rec_modified=now(), rec_title="'.addslashes($new_title).'" where rec_id='.$rec_id.' and rec_title!="'.addslashes($new_title).'"');
+		mysql_query('update Records set rec_Modified=now(), rec_Title="'.addslashes($new_title).'" where rec_ID='.$rec_id.' and rec_Title!="'.addslashes($new_title).'"');
 */
-		mysql_query('update records set rec_title="'.addslashes($new_title).'" where rec_id='.$rec_id);
+		mysql_query('update Records set rec_Title="'.addslashes($new_title).'" where rec_ID='.$rec_id);
 		++$i;
 		if ($rec_id % 10 == 0) {
 			print '<script type="text/javascript">update_counts2('.$i.','.count($updates).')</script>'."\n";
@@ -146,14 +146,14 @@ if (count($updates) > 0) {
 	}
 	foreach ($reparables as $rec_id) {
 		$rec = $bibs[$rec_id];
-		if ( $rec['rec_type'] == 1 && $rec['rec_title']) {
-			$has_detail_160 = (mysql_num_rows(mysql_query('select rd_id from rec_details where rd_type = 160 and rd_rec_id ='. $rec_id)) > 0);
+		if ( $rec['rec_RecTypeID'] == 1 && $rec['rec_Title']) {
+			$has_detail_160 = (mysql_num_rows(mysql_query('select dtl_ID from recDetails where dtl_DetailTypeID = 160 and dtl_RecID ='. $rec_id)) > 0);
 			//touch the record so we can update it  (required by the heuristdb triggers)
-			mysql_query('update records set rec_type=1 where rec_id='.$rec_id);
+			mysql_query('update Records set rec_RecTypeID=1 where rec_ID='.$rec_id);
 			if ($has_detail_160) {
-				mysql_query('update rec_details set rd_val="' .$rec['rec_title'] . '" where rd_type = 160 and rd_rec_id='.$rec_id);
+				mysql_query('update recDetails set dtl_Value="' .$rec['rec_Title'] . '" where dtl_DetailTypeID = 160 and dtl_RecID='.$rec_id);
 			}else{
-				mysql_query('insert into rec_details (rd_rec_id, rd_val) VALUES(' .$rec_id . ','.$rec['rec_title'] . ')');
+				mysql_query('insert into recDetails (dtl_RecID, dtl_Value) VALUES(' .$rec_id . ','.$rec['rec_Title'] . ')');
 			}
 		}
 	}

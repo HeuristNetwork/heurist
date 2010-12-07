@@ -74,8 +74,8 @@ print json_format($locations);
 
 
 function get_relatives($bibID) {
-	$res = mysql_query("select distinct rec_id from records, rec_relationships where (rr_rec_id=rec_id or rr_rec_id199=rec_id or rr_rec_id202=rec_id)
-		                                                                    and (rr_rec_id202 = $bibID or rr_rec_id199 = $bibID) and rec_id != $bibID");
+	$res = mysql_query("select distinct rec_ID from Records, rec_relationships where (rr_rec_id=rec_ID or rr_rec_id199=rec_ID or rr_rec_id202=rec_ID)
+		                                                                    and (rr_rec_id202 = $bibID or rr_rec_id199 = $bibID) and rec_ID != $bibID");
 	$ids = array();
 	while ($row = mysql_fetch_row($res)) { array_push($ids, $row[0]); }
 	return $ids;
@@ -83,7 +83,7 @@ function get_relatives($bibID) {
 
 function get_locations($ids) {
 	$ids = join(",", $ids);
-	$res = mysql_query("select rec_id, group_concat(astext(envelope(A.rd_geo))), A.rd_val, B.rd_val from records left join rec_details A on A.rd_rec_id=rec_id and (A.rd_geo is not null or A.rd_type=210) left join rec_details B on B.rd_rec_id=rec_id and B.rd_type=211 where (A.rd_geo is not null or B.rd_val is not null) and rec_id in ($ids) group by rec_id, A.rd_geo is null");
+	$res = mysql_query("select rec_ID, group_concat(astext(envelope(A.dtl_Geo))), A.dtl_Value, B.dtl_Value from Records left join recDetails A on A.dtl_RecID=rec_ID and (A.dtl_Geo is not null or A.dtl_DetailTypeID=210) left join recDetails B on B.dtl_RecID=rec_ID and B.dtl_DetailTypeID=211 where (A.dtl_Geo is not null or B.dtl_Value is not null) and rec_ID in ($ids) group by rec_ID, A.dtl_Geo is null");
 	$locs = array();
 	while ($row = mysql_fetch_row($res)) {
 		$relBibID = $row[0];

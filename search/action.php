@@ -138,8 +138,8 @@ function add_wgTags_by_id() {
 
 		$wgTags = array_map('intval', explode(',', $_REQUEST["wgTag_ids"]));
 		mysql_query('insert ignore into usrRecTagLinks (rtl_RecID, rtl_TagID) '
-				  . 'select rec_id, tag_ID from usrTags, '.USERS_DATABASE.'.sysUsrGrpLinks, records '
-				  . ' where rec_id in (' . join(',', $bib_ids) . ') '
+				  . 'select rec_ID, tag_ID from usrTags, '.USERS_DATABASE.'.sysUsrGrpLinks, Records '
+				  . ' where rec_ID in (' . join(',', $bib_ids) . ') '
 				  . ' and ugl_GroupID=tag_UGrpID and ugl_UserID='.get_user_id()	//make sure the user blongs to the workgroup
 				  . ' and tag_ID in (' . join(',', $wgTags) . ')');
 		$wgTag_count = mysql_affected_rows();
@@ -260,16 +260,16 @@ function bookmark_references() {
 	mysql_connection_db_overwrite(DATABASE);
 
 	$bib_ids = bib_filter(explode(',', $_REQUEST['bib_ids']));
-	$new_bib_ids = mysql__select_array('records left join usrBookmarks on bkm_recID=rec_id and bkm_UGrpID='.get_user_id(),
-	                                   'rec_id', 'bkm_ID is null and rec_id in (' . join(',', $bib_ids) . ')');
-	$existing_bkmk_ids = mysql__select_array('records left join usrBookmarks on bkm_recID=rec_id and bkm_UGrpID='.get_user_id(),
-	                                   'concat(bkm_ID,":true")', 'bkm_ID is not null and rec_id in (' . join(',', $bib_ids) . ')');
+	$new_bib_ids = mysql__select_array('Records left join usrBookmarks on bkm_recID=rec_ID and bkm_UGrpID='.get_user_id(),
+	                                   'rec_ID', 'bkm_ID is null and rec_ID in (' . join(',', $bib_ids) . ')');
+	$existing_bkmk_ids = mysql__select_array('Records left join usrBookmarks on bkm_recID=rec_ID and bkm_UGrpID='.get_user_id(),
+	                                   'concat(bkm_ID,":true")', 'bkm_ID is not null and rec_ID in (' . join(',', $bib_ids) . ')');
 
 	if ($new_bib_ids) {
 		mysql_query('insert into usrBookmarks
 		                  (bkm_UGrpID, bkm_Added, bkm_Modified, bkm_recID)
-		                  select ' . get_user_id() . ', now(), now(), rec_id
-		                    from records where rec_id in (' . join(',', $new_bib_ids) . ')');
+		                  select ' . get_user_id() . ', now(), now(), rec_ID
+		                    from Records where rec_ID in (' . join(',', $new_bib_ids) . ')');
 		$inserted_count = mysql_affected_rows();
 		$bkmk_ids = mysql__select_array('usrBookmarks', 'concat(bkm_ID,":true")', 'bkm_recID in ('.join(',',$new_bib_ids).') and bkm_UGrpID = ' . get_user_id());
 	} else {
@@ -293,14 +293,14 @@ function bookmark_and_tag_bibids ( $phpReturn ) {
 	mysql_connection_db_overwrite(DATABASE);
 
 	$bib_ids = bib_filter(explode(',', $_REQUEST['bib_ids']));
-	$new_bib_ids = mysql__select_array('records left join usrBookmarks on bkm_recID=rec_id and bkm_UGrpID='.get_user_id(),
-										'rec_id', 'bkm_ID is null and rec_id in (' . join(',', $bib_ids) . ')');
+	$new_bib_ids = mysql__select_array('Records left join usrBookmarks on bkm_recID=rec_ID and bkm_UGrpID='.get_user_id(),
+										'rec_ID', 'bkm_ID is null and rec_ID in (' . join(',', $bib_ids) . ')');
 
 	if ($new_bib_ids) {
 		mysql_query('insert into usrBookmarks
 					  (bkm_UGrpID, bkm_Added, bkm_Modified, bkm_recID)
-					  select ' . get_user_id() . ', now(), now(), rec_id
-						from records where rec_id in (' . join(',', $new_bib_ids) . ')');
+					  select ' . get_user_id() . ', now(), now(), rec_ID
+						from Records where rec_ID in (' . join(',', $new_bib_ids) . ')');
 		$inserted_count = mysql_affected_rows();
 	}
 
@@ -451,9 +451,9 @@ function set_wg_and_vis() {
 			if ($wg === 0) $vis = 'NULL';
 			else $vis = '"' . $vis . '"';
 
-			mysql_query('update records
-			                set rec_wg_id = ' . $wg . ', rec_visibility = ' . $vis . '
-			              where rec_id in (' . join(',', $bib_ids) . ')');
+			mysql_query('update Records
+			                set rec_OwnerUGrpID = ' . $wg . ', rec_NonOwnerVisibility = ' . $vis . '
+			              where rec_ID in (' . join(',', $bib_ids) . ')');
 
 			$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['action-message'] = mysql_affected_rows().' records updated';
 			session_write_close();
@@ -495,8 +495,8 @@ function bib_filter($bib_ids) {
 
 	$wg_ids = mysql__select_array(USERS_DATABASE.'.sysUsrGrpLinks', 'ugl_GroupID', 'ugl_UserID='.get_user_id());
 	array_push($wg_ids, 0);
-	$f_bib_ids = mysql__select_array('records', 'rec_id',
-	                                 'rec_id in ('.join(',', array_map('intval', $bib_ids)).') and (rec_wg_id in ('.join(',', $wg_ids).') or rec_visibility = "viewable")');
+	$f_bib_ids = mysql__select_array('Records', 'rec_ID',
+	                                 'rec_ID in ('.join(',', array_map('intval', $bib_ids)).') and (rec_OwnerUGrpID in ('.join(',', $wg_ids).') or rec_NonOwnerVisibility = "viewable")');
 
 	return $f_bib_ids;
 }

@@ -144,34 +144,34 @@ or <a href="add.php?bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST['bkmk_url']
 		$bkmk_url = $_REQUEST['bkmk_url'];
 		$bkmk_url_len = strlen($bkmk_url);
 
-		$res = mysql_query('select * from records where rec_id in (' . join(',', $bib_ids) . ') and (rec_wg_id=0 or rec_visibility="viewable")');
+		$res = mysql_query('select * from Records where rec_ID in (' . join(',', $bib_ids) . ') and (rec_OwnerUGrpID=0 or rec_NonOwnerVisibility="viewable")');
 		$all_bibs = array();
 		while ($row = mysql_fetch_assoc($res))
-			$all_bibs[$row['rec_id']] = $row;
+			$all_bibs[$row['rec_ID']] = $row;
 
 		foreach ($bib_ids as $bib_id) {
 			$row = $all_bibs[$bib_id];
-			$common_url = find_commonality($row['rec_url'], $bkmk_url);
+			$common_url = find_commonality($row['rec_URL'], $bkmk_url);
 ?>
 	<div class=existingRecordItem>
 	<div class=label>
 		<label>
-			<input type="radio" name="bib_id" value="<?= $row['rec_id'] ?>">
-			<?= htmlspecialchars($row['rec_title']) ?>
+			<input type="radio" name="bib_id" value="<?= $row['rec_ID'] ?>">
+			<?= htmlspecialchars($row['rec_Title']) ?>
 		</label>
 	</div>
 	<div class=url>
-		&#91;<a target="_testwindow" href="<?= htmlspecialchars($row['rec_url']) ?>"
-			onClick="return checkURL(&quot;<?= htmlspecialchars($row['rec_url']) ?>&quot;);">visit</a>&#93;&nbsp; <tt title="<?= htmlspecialchars($row['rec_url']) ?>"><?php
+		&#91;<a target="_testwindow" href="<?= htmlspecialchars($row['rec_URL']) ?>"
+			onClick="return checkURL(&quot;<?= htmlspecialchars($row['rec_URL']) ?>&quot;);">visit</a>&#93;&nbsp; <tt title="<?= htmlspecialchars($row['rec_URL']) ?>"><?php
 	/*
-			if (strlen($row['rec_url']) < 100)
-				print htmlspecialchars($row['rec_url']);
+			if (strlen($row['rec_URL']) < 100)
+				print htmlspecialchars($row['rec_URL']);
 			else
-				print htmlspecialchars(substr($row['rec_url'], 0, 90) . '...');
+				print htmlspecialchars(substr($row['rec_URL'], 0, 90) . '...');
 	*/
 			$common_url_len = strlen($common_url);
-			print '<span class="common_url" title="'.htmlspecialchars($row['rec_url']).'">'.htmlspecialchars($common_url).'</span>'.substr($row['rec_url'], $common_url_len, $bkmk_url_len-$common_url_len + 10);
-			if (strlen($row['rec_url']) > $bkmk_url_len+10) print '...';
+			print '<span class="common_url" title="'.htmlspecialchars($row['rec_URL']).'">'.htmlspecialchars($common_url).'</span>'.substr($row['rec_URL'], $common_url_len, $bkmk_url_len-$common_url_len + 10);
+			if (strlen($row['rec_URL']) > $bkmk_url_len+10) print '...';
 		?></tt>
 	</div>
 	</div>

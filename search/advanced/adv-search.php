@@ -13,7 +13,7 @@ define('SORT_TITLE', 't');
 
 
 function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL) {
-	// wg_ids is a list of the workgroups we can access; records records marked with a rec_wg_id not in this list are omitted
+	// wg_ids is a list of the workgroups we can access; records records marked with a rec_OwnerUGrpID not in this list are omitted
 
 	// clean up the query.
 	// liposuction out all the non-kocher characters
@@ -29,35 +29,35 @@ function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL) {
 	if ($query->sort_phrases) {
 		// handled in Query logic
 	} else if (preg_match('/^f:(\d+)/', $sort_order, $matches)) {
-		$q .= ' order by ifnull((select if(link.rec_id is null, rd_val, link.rec_title) from rec_details left join records link on rd_val=link.rec_id where rd_rec_id=TOPBIBLIO.rec_id and rd_type='.$matches[1].' order by link.rec_title limit 1), "~~"), rec_title';
+		$q .= ' order by ifnull((select if(link.rec_ID is null, dtl_Value, link.rec_Title) from recDetails left join Records link on dtl_Value=link.rec_ID where dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID='.$matches[1].' order by link.rec_Title limit 1), "~~"), rec_Title';
 	} else {
 		if ($search_type == BOOKMARK) {
 			switch ($sort_order) {
 			    case SORT_POPULARITY:
-				$q .= ' order by rec_popularity desc, rec_added desc'; break;
+				$q .= ' order by rec_Popularity desc, rec_Added desc'; break;
 			    case SORT_RATING:
 				$q .= ' order by bkm_Rating desc'; break;
 			    case SORT_URL:
-				$q .= ' order by rec_url is null, rec_url'; break;
+				$q .= ' order by rec_URL is null, rec_URL'; break;
 			    case SORT_MODIFIED:
 				$q .= ' order by bkm_Modified desc'; break;
 			    case SORT_ADDED:
 				$q .= ' order by bkm_Added desc'; break;
 			    case SORT_TITLE: default:
-				$q .= ' order by rec_title = "", rec_title';
+				$q .= ' order by rec_Title = "", rec_Title';
 			}
 		} else {
 			switch ($sort_order) {
 			    case SORT_POPULARITY:
-				$q .= ' order by rec_popularity desc, rec_added desc'; break;
+				$q .= ' order by rec_Popularity desc, rec_Added desc'; break;
 			    case SORT_URL:
-				$q .= ' order by rec_url is null, rec_url'; break;
+				$q .= ' order by rec_URL is null, rec_URL'; break;
 			    case SORT_MODIFIED:
-				$q .= ' order by rec_modified desc'; break;
+				$q .= ' order by rec_Modified desc'; break;
 			    case SORT_ADDED:
-				$q .= ' order by rec_added desc'; break;
+				$q .= ' order by rec_Added desc'; break;
 			    case SORT_TITLE: default:
-				$q .= ' order by rec_title = "", rec_title';
+				$q .= ' order by rec_Title = "", rec_Title';
 			}
 		}
 	}
@@ -106,7 +106,7 @@ class Query {
 
 	function addWorkgroupRestriction($wg_ids) {
 		if ($wg_ids) $this->workgroups = $wg_ids;
-		array_push($this->workgroups, 0);	// everybody can access records with rec_wg_id set to 0
+		array_push($this->workgroups, 0);	// everybody can access records with rec_OwnerUGrpID set to 0
 	}
 
 	function makeSQL() {
@@ -137,24 +137,24 @@ class Query {
 		if ($sort_clause) $sort_clause = ' order by ' . $sort_clause;
 
 		if ($this->search_type == BOOKMARK)
-			$from_clause = 'from usrBookmarks TOPBKMK left join records TOPBIBLIO on bkm_recID=rec_id ';
+			$from_clause = 'from usrBookmarks TOPBKMK left join Records TOPBIBLIO on bkm_recID=rec_ID ';
 		else
-			$from_clause = 'from records TOPBIBLIO left join usrBookmarks TOPBKMK on bkm_recID=rec_id and bkm_UGrpID='.get_user_id().' ';
+			$from_clause = 'from Records TOPBIBLIO left join usrBookmarks TOPBKMK on bkm_recID=rec_ID and bkm_UGrpID='.get_user_id().' ';
 
 		$from_clause .= join(' ', $this->sort_tables);	// sorting may require the introduction of more tables
 
 
 		if ($this->search_type == BOOKMARK) {
 			if ($where_clause) $where_clause = '(' . $where_clause . ') and ';
-			$where_clause .= 'bkm_UGrpID = ' . get_user_id() . ' and (rec_temporary is null or not rec_temporary) ';
+			$where_clause .= 'bkm_UGrpID = ' . get_user_id() . ' and (rec_FlagTemporary is null or not rec_FlagTemporary) ';
 		} else if ($this->search_type == BIBLIO) {
 			if ($where_clause) $where_clause = '(' . $where_clause . ') and ';
-			$where_clause .= 'bkm_UGrpID is null and not rec_temporary ';
+			$where_clause .= 'bkm_UGrpID is null and not rec_FlagTemporary ';
 		} else {
 			if ($where_clause) $where_clause = '(' . $where_clause . ') and ';
-			$where_clause .= 'not rec_temporary ';
+			$where_clause .= 'not rec_FlagTemporary ';
 		}
-		$where_clause = '(rec_wg_id is null or rec_visibility="viewable" or rec_wg_id in (' . join(',', $this->workgroups) . ')) and ' . $where_clause;
+		$where_clause = '(rec_OwnerUGrpID is null or rec_NonOwnerVisibility="viewable" or rec_OwnerUGrpID in (' . join(',', $this->workgroups) . ')) and ' . $where_clause;
 
 		return $from_clause . 'where ' . $where_clause . $sort_clause;
 	}
@@ -327,7 +327,7 @@ class AndLimb {
 				return new FieldPredicate($this, $this->cleanQuotedValue(substr($raw_pred_val, 0, $colon_pos)),
 				                                 $this->cleanQuotedValue(substr($raw_pred_val, $colon_pos+1)));
 
-		    case 'linkto':	// linkto:XXX matches records that have a rec_details reference to XXX
+		    case 'linkto':	// linkto:XXX matches records that have a recDetails reference to XXX
 			return new LinkToPredicate($this, $pred_val);
 		    case 'linkedto':	// linkedto:XXX matches records that are referenced in one of XXX's bib_details
 			return new LinkedToPredicate($this, $pred_val);
@@ -424,68 +424,68 @@ class SortPhrase {
 
 		switch (strtolower($subtext)) {
 		    case 'p': case 'popularity':
-			return array('-rec_popularity'.$scending.', -rec_id'.$scending, 'rec_popularity', NULL);
+			return array('-rec_Popularity'.$scending.', -rec_ID'.$scending, 'rec_Popularity', NULL);
 
 		    case 'r': case 'rating':
 			if ($this->parent->search_type == BOOKMARK) {
 				return array('-(bkm_Rating)'.$scending, 'bkmk_rating', NULL); //SAW Ratings Change todo: test queries with rating
 			} else {	// default to popularity sort
-				return array('-rec_popularity'.$scending.', -rec_id'.$scending, 'rec_popularity', NULL);
+				return array('-rec_Popularity'.$scending.', -rec_ID'.$scending, 'rec_Popularity', NULL);
 			}
 
 		    case 'interest':	//todo: change help file to reflect depricated predicates
 		    case 'content':
 		    case 'quality':
-				return array('rec_title'.$scending, NULL);	// default to title sort
+				return array('rec_Title'.$scending, NULL);	// default to title sort
 			break;
 
 		    case 'u': case 'url':
-			return array('rec_url'.$scending, 'rec_url', NULL);
+			return array('rec_URL'.$scending, 'rec_URL', NULL);
 
 		    case 'm': case 'modified':
 			if ($this->parent->search_type == BOOKMARK) return array('bkm_Modified'.$scending, NULL);
-			else return array('rec_modified'.$scending, 'rec_modified', NULL);
+			else return array('rec_Modified'.$scending, 'rec_Modified', NULL);
 
 		    case 'a': case 'added':
 			if ($this->parent->search_type == BOOKMARK) return array('bkm_Added'.$scending, NULL);
-			else return array('rec_added'.$scending, 'rec_added', NULL);
+			else return array('rec_Added'.$scending, 'rec_Added', NULL);
 
 		    case 'f': case 'field':
 			/* Sort by field is complicated.
 			 * Unless the "multiple" flag is set, then if there are multiple values for a particular field for a particular record,
 			 * then we can only sort by one of them.  We choose a representative value: this is the lex-lowest of all the values,
-			 * UNLESS it is field 158 (creator), in which case the order of the authors is important, and we choose the one with the lowest rd_id
+			 * UNLESS it is field 158 (creator), in which case the order of the authors is important, and we choose the one with the lowest dtl_ID
 			 */
 			$CREATOR = 158;
 
 			if (preg_match('/^(?:f|field):(\\d+)(:m)?/i', $text, $matches)) {
 				@list($_, $field_id, $show_multiples) = $matches;
 
-				if ($show_multiples) {	// "multiple" flag has been provided -- provide (potentially) multiple matches for each entry by left-joining rec_details
+				if ($show_multiples) {	// "multiple" flag has been provided -- provide (potentially) multiple matches for each entry by left-joining recDetails
 					$bd_name = 'bd' . (count($this->parent->sort_phrases) + 1);
-					return array("$bd_name.rd_val".$scending, "$bd_name.rd_val".$scending,
-					             "left join rec_details $bd_name on $bd_name.rd_rec_id=rec_id and rd_type=$field_id ");
+					return array("$bd_name.dtl_Value".$scending, "$bd_name.dtl_Value".$scending,
+					             "left join recDetails $bd_name on $bd_name.dtl_RecID=rec_ID and dtl_DetailTypeID=$field_id ");
 				} else {
 					// have to introduce a defDetailTypes join to ensure that we only use the linked resource's title if this is in fact a resource type (previously any integer, e.g. a date, could potentially index another records record)
-					return array(" ifnull((select if(dty_Type='resource', link.rec_title, rd_val) from rec_details left join defDetailTypes on dty_ID=rd_type left join records link on rd_val=link.rec_id where rd_rec_id=TOPBIBLIO.rec_id and rd_type=$field_id order by if($field_id=$CREATOR, rd_id, link.rec_title) limit 1), '~~') ".$scending,
-							"rd_type=$field_id", NULL);
+					return array(" ifnull((select if(dty_Type='resource', link.rec_Title, dtl_Value) from recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID left join Records link on dtl_Value=link.rec_ID where dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID=$field_id order by if($field_id=$CREATOR, dtl_ID, link.rec_Title) limit 1), '~~') ".$scending,
+							"dtl_DetailTypeID=$field_id", NULL);
 				}
 			} else if (preg_match('/^(?:f|field):"?([^":]+)"?(:m)?/i', $text, $matches)) {
 				@list($_, $field_name, $show_multiples) = $matches;
 
-				if ($show_multiples) {	// "multiple" flag has been provided -- provide (potentially) multiple matches for each entry by left-joining rec_details
+				if ($show_multiples) {	// "multiple" flag has been provided -- provide (potentially) multiple matches for each entry by left-joining recDetails
 					$bd_name = 'bd' . (count($this->parent->sort_phrases) + 1);
-					return array("$bd_name.rd_val".$scending, "$bd_name.rd_val".$scending,
+					return array("$bd_name.dtl_Value".$scending, "$bd_name.dtl_Value".$scending,
 					             "left join defDetailTypes bdt$bd_name on bdt$bd_name.dty_Name='".addslashes($field_name)."' "
-					            ."left join rec_details $bd_name on $bd_name.rd_rec_id=rec_id and $bd_name.rd_type=bdt$bd_name.dty_ID ");
+					            ."left join recDetails $bd_name on $bd_name.dtl_RecID=rec_ID and $bd_name.dtl_DetailTypeID=bdt$bd_name.dty_ID ");
 				} else {
-					return array(" ifnull((select if(dty_Type='resource', link.rec_title, rd_val) from defDetailTypes, rec_details left join records link on rd_val=link.rec_id where dty_Name='".addslashes($field_name)."' and rd_rec_id=TOPBIBLIO.rec_id and rd_type=dty_ID order by if(dty_ID=$CREATOR,rd_id,link.rec_title) limit 1), '~~') ".$scending,
-							"rd_type=$field_id", NULL);
+					return array(" ifnull((select if(dty_Type='resource', link.rec_Title, dtl_Value) from defDetailTypes, recDetails left join Records link on dtl_Value=link.rec_ID where dty_Name='".addslashes($field_name)."' and dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID=dty_ID order by if(dty_ID=$CREATOR,dtl_ID,link.rec_Title) limit 1), '~~') ".$scending,
+							"dtl_DetailTypeID=$field_id", NULL);
 				}
 			}
 
 		    case 't': case 'title':
-			return array('rec_title'.$scending, NULL);
+			return array('rec_Title'.$scending, NULL);
 		}
 	}
 }
@@ -555,13 +555,13 @@ class TitlePredicate extends Predicate {
 
 		$query = &$this->getQuery();
 		if ($this->parent->exact)
-			return $not . 'rec_title = "'.addslashes($this->value).'"';
+			return $not . 'rec_Title = "'.addslashes($this->value).'"';
 		else if ($this->parent->lessthan)
-			return $not . 'rec_title < "'.addslashes($this->value).'"';
+			return $not . 'rec_Title < "'.addslashes($this->value).'"';
 		else if ($this->parent->greaterthan)
-			return $not . 'rec_title > "'.addslashes($this->value).'"';
+			return $not . 'rec_Title > "'.addslashes($this->value).'"';
 		else
-			return 'rec_title ' . $not . 'like "%'.addslashes($this->value).'%"';
+			return 'rec_Title ' . $not . 'like "%'.addslashes($this->value).'%"';
 	}
 }
 
@@ -570,15 +570,15 @@ class TypePredicate extends Predicate {
 	function makeSQL() {
 		$eq = ($this->parent->negate)? '!=' : '=';
 		if (is_numeric($this->value)) {
-			return "rec_type $eq ".intval($this->value);
+			return "rec_RecTypeID $eq ".intval($this->value);
 		}
 		else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
 			// comma-separated list of defRecTypes ids
 			$in = ($this->parent->negate)? 'not in' : 'in';
-			return "rec_type $in (" . $this->value . ")";
+			return "rec_RecTypeID $in (" . $this->value . ")";
 		}
 		else {
-			return "rec_type $eq (select rft.rty_ID from defRecTypes rft where rft.rty_Name = '".addslashes($this->value)."' limit 1)";
+			return "rec_RecTypeID $eq (select rft.rty_ID from defRecTypes rft where rft.rty_Name = '".addslashes($this->value)."' limit 1)";
 		}
 	}
 }
@@ -589,7 +589,7 @@ class URLPredicate extends Predicate {
 		$not = ($this->parent->negate)? 'not ' : '';
 
 		$query = &$this->getQuery();
-		return 'rec_url ' . $not . 'like "%'.addslashes($this->value).'%"';
+		return 'rec_URL ' . $not . 'like "%'.addslashes($this->value).'%"';
 	}
 }
 
@@ -602,7 +602,7 @@ class NotesPredicate extends Predicate {
 		if ($query->search_type == BOOKMARK)
 			return 'pers_notes ' . $not . 'like "%'.addslashes($this->value).'%"';
 		else
-			return 'rec_scratchpad ' . $not . 'like "%'.addslashes($this->value).'%"';
+			return 'rec_ScratchPad ' . $not . 'like "%'.addslashes($this->value).'%"';
 	}
 }
 
@@ -611,21 +611,21 @@ class UserPredicate extends Predicate {
 	function makeSQL() {
 		$not = ($this->parent->negate)? 'not ' : '';
 		if (is_numeric($this->value)) {
-			return $not . 'exists (select * from usrBookmarks bkmk where bkmk.bkm_recID=rec_id '
+			return $not . 'exists (select * from usrBookmarks bkmk where bkmk.bkm_recID=rec_ID '
 			                                                  . ' and bkmk.bkm_UGrpID = ' . intval($this->value) . ')';
 		}
 		else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
-			return $not . 'exists (select * from usrBookmarks bkmk where bkmk.bkm_recID=rec_id '
+			return $not . 'exists (select * from usrBookmarks bkmk where bkmk.bkm_recID=rec_ID '
 			                                                  . ' and bkmk.bkm_UGrpID in (' . $this->value . '))';
 		}
 		else if (preg_match('/^(\D+)\s+(\D+)$/', $this->value,$matches)){	// saw MODIFIED: 16/11/2010 since Realname field was removed.
 			return $not . 'exists (select * from usrBookmarks bkmk, '.USERS_DATABASE.'.sysUGrps usr '
-			                    . ' where bkmk.bkm_recID=rec_id and bkmk.bkm_UGrpID = usr.ugr_ID '
+			                    . ' where bkmk.bkm_recID=rec_ID and bkmk.bkm_UGrpID = usr.ugr_ID '
 			                      . ' and (usr.ugr_FirstName = "' . addslashes($matches[1]) . '" and usr.ugr_LastName = "' . addslashes($matches[2]) . '"))';
 		}
 		else {
 			return $not . 'exists (select * from usrBookmarks bkmk, '.USERS_DATABASE.'.sysUGrps usr '
-			                    . ' where bkmk.bkm_recID=rec_id and bkmk.bkm_UGrpID = usr.ugr_ID '
+			                    . ' where bkmk.bkm_recID=rec_ID and bkmk.bkm_UGrpID = usr.ugr_ID '
 			                      . ' and usr.ugr_Name = "' . addslashes($this->value) . '"))';
 		}
 	}
@@ -636,15 +636,15 @@ class AddedByPredicate extends Predicate {
 	function makeSQL() {
 		$eq = ($this->parent->negate)? '!=' : '=';
 		if (is_numeric($this->value)) {
-			return "rec_added_by_usr_id $eq " . intval($this->value);
+			return "rec_AddedByUGrpID $eq " . intval($this->value);
 		}
 		else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
 			$not = ($this->parent->negate)? "not" : "";
-			return "rec_added_by_usr_id $not in (" . $this->value . ")";
+			return "rec_AddedByUGrpID $not in (" . $this->value . ")";
 		}
 		else {
 			$not = ($this->parent->negate)? "not" : "";
-			return "rec_added_by_usr_id $not in (select usr.ugr_ID from ".USERS_DATABASE.".sysUGrps usr where usr.ugr_Name = '" . addslashes($this->value) . "')";
+			return "rec_AddedByUGrpID $not in (select usr.ugr_ID from ".USERS_DATABASE.".sysUGrps usr where usr.ugr_Name = '" . addslashes($this->value) . "')";
 		}
 	}
 }
@@ -652,14 +652,14 @@ class AddedByPredicate extends Predicate {
 class AnyPredicate extends Predicate {
 	function makeSQL() {
 		$not = ($this->parent->negate)? 'not ' : '';
-		return $not . ' (exists (select * from rec_details rd '
-		                          . 'left join defDetailTypes on rd_type=dty_ID '
-		                          . 'left join records link on rd.rd_val=link.rec_id '
-		                       . 'where rd.rd_rec_id=TOPBIBLIO.rec_id '
+		return $not . ' (exists (select * from recDetails rd '
+		                          . 'left join defDetailTypes on dtl_DetailTypeID=dty_ID '
+		                          . 'left join Records link on rd.dtl_Value=link.rec_ID '
+		                       . 'where rd.dtl_RecID=TOPBIBLIO.rec_ID '
 		                       . '  and if(dty_Type != "resource", '
-		                                  .'rd.rd_val like "%'.addslashes($this->value).'%", '
-		                                  .'link.rec_title like "%'.addslashes($this->value).'%"))'
-		                         .' or rec_title like "%'.addslashes($this->value).'%") ';
+		                                  .'rd.dtl_Value like "%'.addslashes($this->value).'%", '
+		                                  .'link.rec_Title like "%'.addslashes($this->value).'%"))'
+		                         .' or rec_Title like "%'.addslashes($this->value).'%") ';
 	}
 }
 
@@ -699,27 +699,27 @@ class FieldPredicate extends Predicate {
 
 		if (preg_match('/^\\d+$/', $this->field_type)) {
 			/* handle the easy case: user has specified a (single) specific numeric type */
-			$rd_type_clause = 'rd.rd_type = ' . intval($this->field_type);
+			$rd_type_clause = 'rd.dtl_DetailTypeID = ' . intval($this->field_type);
 		}
 		else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
 			/* user has specified a list of numeric types ... match any of them */
-			$rd_type_clause = 'rd.rd_type in (' . $this->field_type . ')';
+			$rd_type_clause = 'rd.dtl_DetailTypeID in (' . $this->field_type . ')';
 		}
 		else {
 			/* user has specified the field name */
 			$rd_type_clause = 'rdt.dty_Name like "' . addslashes($this->field_type) . '%"';
 		}
 
-		return $not . 'exists (select * from rec_details rd '
-		                        . 'left join defDetailTypes rdt on rdt.dty_ID=rd.rd_type '
-		                        . 'left join records link on rd.rd_val=link.rec_id '
-		                            . 'where rd.rd_rec_id=TOPBIBLIO.rec_id '
+		return $not . 'exists (select * from recDetails rd '
+		                        . 'left join defDetailTypes rdt on rdt.dty_ID=rd.dtl_DetailTypeID '
+		                        . 'left join Records link on rd.dtl_Value=link.rec_ID '
+		                            . 'where rd.dtl_RecID=TOPBIBLIO.rec_ID '
 		                            . '  and if(dty_Type = "resource", '
-		                                      .'link.rec_title ' . $match_pred . ', '
+		                                      .'link.rec_Title ' . $match_pred . ', '
 		                       . ($timestamp ? 'if(dty_Type = "date", '
-		                                         .'str_to_date(rd.rd_val, "%Y-%m-%d %H:%i:%s") ' . $date_match_pred . ', '
-		                                         .'rd.rd_val ' . $match_pred . ')'
-		                                     : 'rd.rd_val ' . $match_pred ) . ')'
+		                                         .'str_to_date(rd.dtl_Value, "%Y-%m-%d %H:%i:%s") ' . $date_match_pred . ', '
+		                                         .'rd.dtl_Value ' . $match_pred . ')'
+		                                     : 'rd.dtl_Value ' . $match_pred ) . ')'
 		                              .' and ' . $rd_type_clause . ')';
 	}
 }
@@ -762,7 +762,7 @@ class TagPredicate extends Predicate {
 			} else if (! $this->wg_value) {
 				// this runs faster (like TEN TIMES FASTER) - think it's to do with the join
 				$query=$not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
-				                    . 'where kwi.rtl_RecID=rec_id and (';
+				                    . 'where kwi.rtl_RecID=rec_ID and (';
 				$first_value = true;
 				foreach ($this->value as $value) {
 					if (! $first_value) $query .= 'or ';
@@ -777,7 +777,7 @@ class TagPredicate extends Predicate {
 				$query .=              ') and kwd.tag_UGrpID='.get_user_id().') ';
 			} else {
 				$query=$not . 'exists (select * from '.USERS_DATABASE.'.sysUGrps, usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
-				                    . 'where ugr_ID=tag_UGrpID and kwi.rtl_RecID=rec_id and (';
+				                    . 'where ugr_ID=tag_UGrpID and kwi.rtl_RecID=rec_ID and (';
 				for ($i=0; $i < count($this->value); ++$i) {
 					if ($i > 0) $query .= 'or ';
 
@@ -799,7 +799,7 @@ class TagPredicate extends Predicate {
 		} else {
 			if (! $this->wg_value) {
 				$query = $not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
-				                    . 'where kwi.rtl_RecID=rec_id and (';
+				                    . 'where kwi.rtl_RecID=rec_ID and (';
 				$first_value = true;
 				foreach ($this->value as $value) {
 					if (! $first_value) $query .= 'or ';
@@ -814,7 +814,7 @@ class TagPredicate extends Predicate {
 				$query .= ')) ';
 			} else {
 				$query = $not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID left join '.USERS_DATABASE.'.sysUGrps on ugr_ID=tag_UGrpID '
-				                    . 'where kwi.rtl_RecID=rec_id and (';
+				                    . 'where kwi.rtl_RecID=rec_ID and (';
 				for ($i=0; $i < count($this->value); ++$i) {
 					if ($i > 0) $query .= 'or ';
 
@@ -849,7 +849,7 @@ class TagPredicate extends Predicate {
 class BibIDPredicate extends Predicate {
 	function makeSQL() {
 		$not = ($this->parent->negate)? 'not' : '';
-		return "rec_id $not in (" . join(',', array_map('intval', explode(',', $this->value))) . ')';
+		return "rec_ID $not in (" . join(',', array_map('intval', explode(',', $this->value))) . ')';
 	}
 }
 
@@ -857,13 +857,13 @@ class BibIDPredicate extends Predicate {
 class LinkToPredicate extends Predicate {
 	function makeSQL() {
 		if ($this->value) {
-			return 'exists (select * from defDetailTypes, rec_details bd '
-			              . 'where bd.rd_rec_id=TOPBIBLIO.rec_id and dty_ID=rd_type and dty_Type="resource" '
-			              . '  and bd.rd_val in (' . join(',', array_map('intval', explode(',', $this->value))) . '))';
+			return 'exists (select * from defDetailTypes, recDetails bd '
+			              . 'where bd.dtl_RecID=TOPBIBLIO.rec_ID and dty_ID=dtl_DetailTypeID and dty_Type="resource" '
+			              . '  and bd.dtl_Value in (' . join(',', array_map('intval', explode(',', $this->value))) . '))';
 		}
 		else {
-			return 'exists (select * from defDetailTypes, rec_details bd '
-			              . 'where bd.rd_rec_id=TOPBIBLIO.rec_id and dty_ID=rd_type and dty_Type="resource")';
+			return 'exists (select * from defDetailTypes, recDetails bd '
+			              . 'where bd.dtl_RecID=TOPBIBLIO.rec_ID and dty_ID=dtl_DetailTypeID and dty_Type="resource")';
 		}
 	}
 }
@@ -872,13 +872,13 @@ class LinkToPredicate extends Predicate {
 class LinkedToPredicate extends Predicate {
 	function makeSQL() {
 		if ($this->value) {
-			return 'exists (select * from defDetailTypes, rec_details bd '
-			              . 'where bd.rd_rec_id in (' . join(',', array_map('intval', explode(',', $this->value))) .') and dty_ID=rd_type and dty_Type="resource" '
-			              . '  and bd.rd_val=TOPBIBLIO.rec_id)';
+			return 'exists (select * from defDetailTypes, recDetails bd '
+			              . 'where bd.dtl_RecID in (' . join(',', array_map('intval', explode(',', $this->value))) .') and dty_ID=dtl_DetailTypeID and dty_Type="resource" '
+			              . '  and bd.dtl_Value=TOPBIBLIO.rec_ID)';
 		}
 		else {
-			return 'exists (select * from defDetailTypes, rec_details bd '
-			              . 'where bd.rd_val=TOPBIBLIO.rec_id and dty_ID=rd_type and dty_Type="resource")';
+			return 'exists (select * from defDetailTypes, recDetails bd '
+			              . 'where bd.dtl_Value=TOPBIBLIO.rec_ID and dty_ID=dtl_DetailTypeID and dty_Type="resource")';
 		}
 	}
 }
@@ -888,12 +888,12 @@ class RelatedToPredicate extends Predicate {
 	function makeSQL() {
 		if ($this->value) {
 			$ids = "(" . join(",", array_map("intval", explode(",", $this->value))) . ")";
-			return "exists (select * from rec_relationships where (rr_rec_id199=TOPBIBLIO.rec_id and rr_rec_id202 in $ids)
-		                                                   or (rr_rec_id202=TOPBIBLIO.rec_id and rr_rec_id199 in $ids))";
+			return "exists (select * from rec_relationships where (rr_rec_id199=TOPBIBLIO.rec_ID and rr_rec_id202 in $ids)
+		                                                   or (rr_rec_id202=TOPBIBLIO.rec_ID and rr_rec_id199 in $ids))";
 		}
 		else {
 			/* just want something that has a relation */
-			return "TOPBIBLIO.rec_id in (select distinct rr_rec_id199 from rec_relationships union select distinct rr_rec_id202 from rec_relationships)";
+			return "TOPBIBLIO.rec_ID in (select distinct rr_rec_id199 from rec_relationships union select distinct rr_rec_id202 from rec_relationships)";
 		}
 	}
 }
@@ -903,30 +903,30 @@ class RelationsForPredicate extends Predicate {
 	function makeSQL() {
 		$ids = "(" . join(",", array_map("intval", explode(",", $this->value))) . ")";
 /*
-		return "exists (select * from rec_relationships where ((rr_rec_id199=TOPBIBLIO.rec_id or rr_rec_id=TOPBIBLIO.rec_id) and rr_rec_id202=$id)
-		                                                   or ((rr_rec_id202=TOPBIBLIO.rec_id or rr_rec_id=TOPBIBLIO.rec_id) and rr_rec_id199=$id))";
+		return "exists (select * from rec_relationships where ((rr_rec_id199=TOPBIBLIO.rec_ID or rr_rec_id=TOPBIBLIO.rec_ID) and rr_rec_id202=$id)
+		                                                   or ((rr_rec_id202=TOPBIBLIO.rec_ID or rr_rec_id=TOPBIBLIO.rec_ID) and rr_rec_id199=$id))";
 */
 /*
-		return "TOPBIBLIO.rec_id in (select rr_rec_id199 from rec_relationships where rr_rec_id202=$id
+		return "TOPBIBLIO.rec_ID in (select rr_rec_id199 from rec_relationships where rr_rec_id202=$id
 		                       union select rr_rec_id202 from rec_relationships where rr_rec_id199=$id
 		                       union select rr_rec_id    from rec_relationships where rr_rec_id199=$id or rr_rec_id202=$id)";
 */
 /*
-		return "exists (select * from bib_relationships2 where ((rr_rec_id199=TOPBIBLIO.rec_id or rr_rec_id=TOPBIBLIO.rec_id) and rr_rec_id202=$id))";
+		return "exists (select * from bib_relationships2 where ((rr_rec_id199=TOPBIBLIO.rec_ID or rr_rec_id=TOPBIBLIO.rec_ID) and rr_rec_id202=$id))";
 */
 		/* Okay, this isn't the way I would have done it initially, but it benchmarks well:
 		 * All of the methods above were taking 4-5 seconds.
 		 * Putting rec_relationships into the list of tables at the top-level gets us down to about 0.8 seconds, which is alright, but disruptive.
-		 * Coding the 'relationsfor:' predicate as   TOPBIBLIO.rec_id in (select distinct rec_id from rec_relationships where (rr_rec_id=TOPBIBLIO.rec_id etc etc))
+		 * Coding the 'relationsfor:' predicate as   TOPBIBLIO.rec_ID in (select distinct rec_ID from rec_relationships where (rr_rec_id=TOPBIBLIO.rec_ID etc etc))
 		 *   gets us down to about 2 seconds, but it looks like the optimiser doesn't really pick up on what we're doing.
 		 * Fastest is to do a SEPARATE QUERY to get the record IDs out of the bib_relationship table, then pass it back encoded in the predicate.
 		 * Certainly not the most elegant way to do it, but the numbers don't lie.
 		 */
-		$res = mysql_query("select group_concat( distinct rec_id ) from records, rec_relationships where (rr_rec_id=rec_id or rr_rec_id199=rec_id or rr_rec_id202=rec_id)
-		                                                                                            and (rr_rec_id202 in $ids or rr_rec_id199 in $ids) and rec_id not in $ids");
+		$res = mysql_query("select group_concat( distinct rec_ID ) from Records, rec_relationships where (rr_rec_id=rec_ID or rr_rec_id199=rec_ID or rr_rec_id202=rec_ID)
+		                                                                                            and (rr_rec_id202 in $ids or rr_rec_id199 in $ids) and rec_ID not in $ids");
 		$ids = mysql_fetch_row($res);  $ids = $ids[0];
 		if (! $ids) return "0";
-		else return "TOPBIBLIO.rec_id in ($ids)";
+		else return "TOPBIBLIO.rec_ID in ($ids)";
 	}
 }
 
@@ -937,7 +937,7 @@ class AfterPredicate extends Predicate {
 		if ($timestamp  &&  $timestamp != -1) {
 			$not = ($this->parent->negate)? 'not' : '';
 			$datestamp = date('Y-m-d H:i:s', $timestamp);
-			return "$not rec_modified >= '$datestamp'";
+			return "$not rec_Modified >= '$datestamp'";
 		}
 		return '1';
 	}
@@ -950,7 +950,7 @@ class BeforePredicate extends Predicate {
 		if ($timestamp  &&  $timestamp != -1) {
 			$not = ($this->parent->negate)? 'not' : '';
 			$datestamp = date('Y-m-d H:i:s', $timestamp);
-			return "$not rec_modified <= '$datestamp'";
+			return "$not rec_Modified <= '$datestamp'";
 		}
 		return '1';
 	}
@@ -978,13 +978,13 @@ class DatePredicate extends Predicate {
 
 class DateAddedPredicate extends DatePredicate {
 	function DateAddedPredicate(&$parent, $value) {
-		parent::DatePredicate($parent, 'rec_added', $value);
+		parent::DatePredicate($parent, 'rec_Added', $value);
 	}
 }
 
 class DateModifiedPredicate extends DatePredicate {
 	function DateModifiedPredicate(&$parent, $value) {
-		parent::DatePredicate($parent, 'rec_modified', $value);
+		parent::DatePredicate($parent, 'rec_Modified', $value);
 	}
 }
 
@@ -993,14 +993,14 @@ class WorkgroupPredicate extends Predicate {
 	function makeSQL() {
 		$eq = ($this->parent->negate)? '!=' : '=';
 		if (is_numeric($this->value)) {
-			return "rec_wg_id $eq ".intval($this->value);
+			return "rec_OwnerUGrpID $eq ".intval($this->value);
 		}
 		else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
 			$in = ($this->parent->negate)? 'not in' : 'in';
-			return "rec_wg_id $in (" . $this->value . ")";
+			return "rec_OwnerUGrpID $in (" . $this->value . ")";
 		}
 		else {
-			return "rec_wg_id $eq (select grp.ugr_ID from ".USERS_DATABASE.".sysUGrps grp where grp.ugr_Name = '".addslashes($this->value)."' limit 1)";
+			return "rec_OwnerUGrpID $eq (select grp.ugr_ID from ".USERS_DATABASE.".sysUGrps grp where grp.ugr_Name = '".addslashes($this->value)."' limit 1)";
 		}
 	}
 }
@@ -1017,30 +1017,30 @@ class LatitudePredicate extends Predicate {
 
 		if ($op[0] == '<') {
 			// see if the northernmost point of the bounding box lies south of the given latitude
-			return "exists (select * from rec_details bd
-			                 where bd.rd_rec_id=TOPBIBLIO.rec_id and bd.rd_geo is not null
-			                   and y( PointN( ExteriorRing( Envelope(bd.rd_geo) ), 4 ) ) $op " . floatval($this->value) . " limit 1)";
+			return "exists (select * from recDetails bd
+			                 where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
+			                   and y( PointN( ExteriorRing( Envelope(bd.dtl_Geo) ), 4 ) ) $op " . floatval($this->value) . " limit 1)";
 		}
 		else if ($op[0] == '>') {
 			// see if the SOUTHERNmost point of the bounding box lies north of the given latitude
-			return "exists (select * from rec_details bd
-			                 where bd.rd_rec_id=TOPBIBLIO.rec_id and bd.rd_geo is not null
-			                   and y( StartPoint( ExteriorRing( Envelope(bd.rd_geo) ) ) ) $op " . floatval($this->value) . " limit 1)";
+			return "exists (select * from recDetails bd
+			                 where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
+			                   and y( StartPoint( ExteriorRing( Envelope(bd.dtl_Geo) ) ) ) $op " . floatval($this->value) . " limit 1)";
 
 		}
 		else if ($this->parent->exact) {
 			$op = $this->parent->negate? "!=" : "=";
 			// see if there is a Point with this exact latitude
-			return "exists (select * from rec_details bd
-			                 where bd.rd_rec_id=TOPBIBLIO.rec_id and bd.rd_geo is not null and bd.rd_val = 'p'
-			                   and y(bd.rd_geo) $op " . floatval($this->value) . " limit 1)";
+			return "exists (select * from recDetails bd
+			                 where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null and bd.dtl_Value = 'p'
+			                   and y(bd.dtl_Geo) $op " . floatval($this->value) . " limit 1)";
 		}
 		else {
 			// see if this latitude passes through the bounding box
-			return "exists (select * from rec_details bd
-			                 where bd.rd_rec_id=TOPBIBLIO.rec_id and bd.rd_geo is not null
-			                   and ".floatval($this->value)." between y( StartPoint( ExteriorRing( Envelope(bd.rd_geo) ) ) )
-			                                                      and y( PointN( ExteriorRing( Envelope(bd.rd_geo) ), 4 ) ) limit 1)";
+			return "exists (select * from recDetails bd
+			                 where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
+			                   and ".floatval($this->value)." between y( StartPoint( ExteriorRing( Envelope(bd.dtl_Geo) ) ) )
+			                                                      and y( PointN( ExteriorRing( Envelope(bd.dtl_Geo) ), 4 ) ) limit 1)";
 		}
 	}
 }
@@ -1057,30 +1057,30 @@ class LongitudePredicate extends Predicate {
 
 		if ($op[0] == '<') {
 			// see if the westernmost point of the bounding box lies east of the given longitude
-			return "exists (select * from rec_details bd
-			                 where bd.rd_rec_id=TOPBIBLIO.rec_id and bd.rd_geo is not null
-			                   and x( PointN( ExteriorRing( Envelope(bd.rd_geo) ), 4 ) ) $op " . floatval($this->value) . " limit 1)";
+			return "exists (select * from recDetails bd
+			                 where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
+			                   and x( PointN( ExteriorRing( Envelope(bd.dtl_Geo) ), 4 ) ) $op " . floatval($this->value) . " limit 1)";
 		}
 		else if ($op[0] == '>') {
 			// see if the EASTERNmost point of the bounding box lies west of the given longitude
-			return "exists (select * from rec_details bd
-			                 where bd.rd_rec_id=TOPBIBLIO.rec_id and bd.rd_geo is not null
-			                   and x( StartPoint( ExteriorRing( Envelope(bd.rd_geo) ) ) ) $op " . floatval($this->value) . " limit 1)";
+			return "exists (select * from recDetails bd
+			                 where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
+			                   and x( StartPoint( ExteriorRing( Envelope(bd.dtl_Geo) ) ) ) $op " . floatval($this->value) . " limit 1)";
 
 		}
 		else if ($this->parent->exact) {
 			$op = $this->parent->negate? "!=" : "=";
 			// see if there is a Point with this exact longitude
-			return "exists (select * from rec_details bd
-			                 where bd.rd_rec_id=TOPBIBLIO.rec_id and bd.rd_geo is not null and bd.rd_val = 'p'
-			                   and x(bd.rd_geo) $op " . floatval($this->value) . " limit 1)";
+			return "exists (select * from recDetails bd
+			                 where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null and bd.dtl_Value = 'p'
+			                   and x(bd.dtl_Geo) $op " . floatval($this->value) . " limit 1)";
 		}
 		else {
 			// see if this longitude passes through the bounding box
-			return "exists (select * from rec_details bd
-			                 where bd.rd_rec_id=TOPBIBLIO.rec_id and bd.rd_geo is not null
-			                   and ".floatval($this->value)." between x( StartPoint( ExteriorRing( Envelope(bd.rd_geo) ) ) )
-			                                                      and x( PointN( ExteriorRing( Envelope(bd.rd_geo) ), 2 ) ) limit 1)";
+			return "exists (select * from recDetails bd
+			                 where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
+			                   and ".floatval($this->value)." between x( StartPoint( ExteriorRing( Envelope(bd.dtl_Geo) ) ) )
+			                                                      and x( PointN( ExteriorRing( Envelope(bd.dtl_Geo) ), 2 ) ) limit 1)";
 		}
 	}
 }
@@ -1091,11 +1091,11 @@ class HHashPredicate extends Predicate {
 		$op = '';
 		if ($this->parent->exact) {
 			$op = $this->parent->negate? "!=" : "=";
-			return "rec_hhash $op '" . addslashes($this->value) . "'";
+			return "rec_Hash $op '" . addslashes($this->value) . "'";
 		}
 		else {
 			$op = $this->parent->negate? " not like " : " like ";
-			return "rec_hhash $op '" . addslashes($this->value) . "%'";
+			return "rec_Hash $op '" . addslashes($this->value) . "%'";
 		}
 	}
 }
@@ -1134,7 +1134,7 @@ function construct_legacy_search() {
 
 
 function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL) {
-	// wg_ids is a list of the workgroups we can access; records records marked with a rec_wg_id not in this list are omitted
+	// wg_ids is a list of the workgroups we can access; Records records marked with a rec_OwnerUGrpID not in this list are omitted
 
 	/* use the supplied _REQUEST variables (or $parms if supplied) to construct a query starting with $query */
 	if (! $parms) $parms = $_REQUEST;
@@ -1165,7 +1165,7 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL) {
 		$q_clauses = array();
 		foreach ($q_bits as $q_bit) {
 			$q = parse_query($search_type, $q_bit, $parms['s'], $wg_ids);
-			preg_match('/.*?where [(]rec_wg_id is null or rec_visibility="viewable" or rec_wg_id in \\([0-9,]*\\)[)] and (.*) order by/s', $q, $matches);
+			preg_match('/.*?where [(]rec_OwnerUGrpID is null or rec_NonOwnerVisibility="viewable" or rec_OwnerUGrpID in \\([0-9,]*\\)[)] and (.*) order by/s', $q, $matches);
 			if ($matches[1]) {
 				array_push($q_clauses, '(' . $matches[1] . ')');
 			}
@@ -1173,7 +1173,7 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL) {
 		sort($q_clauses);
 		$where_clause = join(' and ', $q_clauses);
 
-		if (preg_match('/(.*?where [(]rec_wg_id is null or rec_visibility="viewable" or rec_wg_id in [(][0-9,]*[)][)] and ).*( order by.*)/s', $q, $matches))
+		if (preg_match('/(.*?where [(]rec_OwnerUGrpID is null or rec_NonOwnerVisibility="viewable" or rec_OwnerUGrpID in [(][0-9,]*[)][)] and ).*( order by.*)/s', $q, $matches))
 			$query .= $matches[1] . $where_clause . $matches[2];
 	}
 

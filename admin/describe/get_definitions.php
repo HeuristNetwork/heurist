@@ -139,7 +139,7 @@ function print_row($row,$fmt) {
         `$row[rty_TitleMask]`,`$row[rty_CanonicalTitleMask]`,`$row[rty_Plural]`),\n";
          break;
 
-      case 'detailTypes': // Data from the rec_details table
+      case 'detailTypes': // Data from the recDetails table
         print "($row[dty_ID],`$row[dty_Name]`,`$row[dty_Description]`,$row[dty_Type],`$row[dty_Prompt]`,`$row[dty_Help]`,$row[dty_PtrConstraints]),\n";
         break;
 

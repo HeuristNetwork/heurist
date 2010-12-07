@@ -22,14 +22,14 @@ function fetch_bib_details ($rec_id, $recurse=false, $visited=array()) {
 	array_push($visited, $rec_id);
 
 	$details = array();
-	$res = mysql_query('select rd_type, rd_val
-	                      from rec_details
-	                     where rd_rec_id = ' . $rec_id . '
-	                  order by rd_type, rd_id');
+	$res = mysql_query('select dtl_DetailTypeID, dtl_Value
+	                      from recDetails
+	                     where dtl_RecID = ' . $rec_id . '
+	                  order by dtl_DetailTypeID, dtl_ID');
 	while ($row = mysql_fetch_assoc($res)) {
 
-		$type = $row['rd_type'];
-		$val = $row['rd_val'];
+		$type = $row['dtl_DetailTypeID'];
+		$val = $row['dtl_Value'];
 
 		if (! $details[$type]) {
 			$details[$type] = $val;

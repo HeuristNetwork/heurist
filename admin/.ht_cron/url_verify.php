@@ -37,24 +37,24 @@ foreach (get_all_instances() as $prefix => $instance) {
 
 
 	mysql_query("set @suppress_update_trigger := 1");
-	$res = mysql_query('select rec_id, rec_url from records where rec_url is not null and rec_url != "" and not rec_temporary order by rec_url_last_verified is not null, rec_url_last_verified asc');
+	$res = mysql_query('select rec_ID, rec_URL from Records where rec_URL is not null and rec_URL != "" and not rec_FlagTemporary order by rec_URLLastVerified is not null, rec_URLLastVerified asc');
 
 	$good_bibs = array();
 	$bad_bibs = array();
 
 	while ($row = mysql_fetch_assoc($res)) {
-		$row['rec_url'] = str_replace(" ", "+", trim($row['rec_url']));
+		$row['rec_URL'] = str_replace(" ", "+", trim($row['rec_URL']));
 
-		if (preg_match('/^file/', $row['rec_url'])) continue;
+		if (preg_match('/^file/', $row['rec_URL'])) continue;
 
-		curl_setopt($ch, CURLOPT_URL, $row['rec_url']);
+		curl_setopt($ch, CURLOPT_URL, $row['rec_URL']);
 		$data = curl_exec($ch);
 
 		$error = curl_error($ch);
 		$code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
 
 		if (curl_error($ch)  ||  $code >= 400) {
-			curl_setopt($ch_ffx, CURLOPT_URL, $row['rec_url']);
+			curl_setopt($ch_ffx, CURLOPT_URL, $row['rec_URL']);
 			$data = curl_exec($ch_ffx);
 			$code = intval(curl_getinfo($ch_ffx, CURLINFO_HTTP_CODE));
 			$error = curl_error($ch_ffx);
@@ -66,14 +66,14 @@ foreach (get_all_instances() as $prefix => $instance) {
 		}
 
 		if ($error) {
-			$bad_bibs[$row['rec_id']] = array($row['rec_url'], $error);
+			$bad_bibs[$row['rec_ID']] = array($row['rec_URL'], $error);
 
 			if ( ($err = error_for_code($code)) )
-				mysql_query('update records set rec_url_error="'.$code.': '.addslashes($err).'" where rec_id = ' . $row['rec_id']);
+				mysql_query('update Records set rec_URLErrorMessage="'.$code.': '.addslashes($err).'" where rec_ID = ' . $row['rec_ID']);
 		} else {
-			array_push($good_bibs, $row['rec_id']);
+			array_push($good_bibs, $row['rec_ID']);
 
-			mysql_query('update records set rec_url_last_verified=now(), rec_url_error=null where rec_id = ' . $row['rec_id']);
+			mysql_query('update Records set rec_URLLastVerified=now(), rec_URLErrorMessage=null where rec_ID = ' . $row['rec_ID']);
 		}
 	}
 

@@ -212,7 +212,7 @@ mysql_connection_db_select(DATABASE);
 
 $REFTYPE = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', '1');
 
-$res = mysql_query(REQUEST_to_query('select distinct rec_id, rec_url, rec_scratchpad, rec_type ', $search_type));
+$res = mysql_query(REQUEST_to_query('select distinct rec_ID, rec_URL, rec_ScratchPad, rec_RecTypeID ', $search_type));
 
 while ($row = mysql_fetch_assoc($res))
 	print_biblio($row);
@@ -222,23 +222,23 @@ function print_biblio($bib) {
 	global $REFTYPE;
 	$output = '';
 
-	$output .= print_bib_details($bib['rec_id'], $bib['rec_type'], array());
+	$output .= print_bib_details($bib['rec_ID'], $bib['rec_RecTypeID'], array());
 
-	if ($bib['rec_url']) $output .= '%U ' . $bib['rec_url'] . "\n";
+	if ($bib['rec_URL']) $output .= '%U ' . $bib['rec_URL'] . "\n";
 
 	$kwds = mysql__select_array('usrBookmarks left join usrRecTagLinks on rtl_RecID = bkm_RecID
 	                                       left join usrTags on tag_ID = rtl_TagID',
 	                            'tag_Text',
-	                            'bkm_recID = ' . $bib['rec_id'] . ' and bkm_UGrpID = ' . get_user_id() . ' and tag_Text != "" and tag_Text is not null');
+	                            'bkm_recID = ' . $bib['rec_ID'] . ' and bkm_UGrpID = ' . get_user_id() . ' and tag_Text != "" and tag_Text is not null');
 	if (count($kwds)) $output .= '%K ' . join(', ', $kwds) . "\n";
 
 /*
-	if ($bib['rec_scratchpad'])
-		$output .= '%Z ' . preg_replace("/\n\n+/s", "\n", str_replace('%', '', $bib['rec_scratchpad'])) . "\n";
+	if ($bib['rec_ScratchPad'])
+		$output .= '%Z ' . preg_replace("/\n\n+/s", "\n", str_replace('%', '', $bib['rec_ScratchPad'])) . "\n";
 */
 
 	if (strlen($output))
-		print '%0 ' . $REFTYPE[$bib['rec_type']] . "\n" . $output . "\n";
+		print '%0 ' . $REFTYPE[$bib['rec_RecTypeID']] . "\n" . $output . "\n";
 }
 
 
@@ -250,32 +250,32 @@ function print_bib_details ($rec_id, $base_reftype, $visited) {
 
 	array_push($visited, $rec_id);
 
-	$res = mysql_query('select rec_type from records where rec_id = ' . $rec_id);
+	$res = mysql_query('select rec_RecTypeID from Records where rec_ID = ' . $rec_id);
 	$row = mysql_fetch_assoc($res);
-	$rt = $row['rec_type'];
+	$rt = $row['rec_RecTypeID'];
 
 	$details = array();
-	$res = mysql_query('select rd_type, rd_val
-	                      from rec_details
-	                     where rd_rec_id = ' . $rec_id);
+	$res = mysql_query('select dtl_DetailTypeID, dtl_Value
+	                      from recDetails
+	                     where dtl_RecID = ' . $rec_id);
 	while ($row = mysql_fetch_assoc($res)) {
 
-		if (! @$details[$row['rd_type']]) {
-			$details[$row['rd_type']] = $row['rd_val'];
-		} else if (@$details[$row['rd_type']]  &&  ! is_array($details[$row['rd_type']])) {
-			$details[$row['rd_type']] = array($details[$row['rd_type']] , $row['rd_val']);
-		} else if (@$details[$row['rd_type']]  &&  is_array($details[$row['rd_type']])) {
-			array_push($details[$row['rd_type']], $row['rd_val']);
+		if (! @$details[$row['dtl_DetailTypeID']]) {
+			$details[$row['dtl_DetailTypeID']] = $row['dtl_Value'];
+		} else if (@$details[$row['dtl_DetailTypeID']]  &&  ! is_array($details[$row['dtl_DetailTypeID']])) {
+			$details[$row['dtl_DetailTypeID']] = array($details[$row['dtl_DetailTypeID']] , $row['dtl_Value']);
+		} else if (@$details[$row['dtl_DetailTypeID']]  &&  is_array($details[$row['dtl_DetailTypeID']])) {
+			array_push($details[$row['dtl_DetailTypeID']], $row['dtl_Value']);
 		}
 	}
 
 	// authors
 	if (@$details['158']) {
-		$res = mysql_query("select rec_title from records where rec_id in (" .
+		$res = mysql_query("select rec_Title from Records where rec_ID in (" .
 							(is_array($details['158']) ? join(",", $details['158']) : $details['158']) . ")");
 		$details['158'] = array();
 		while ($row = mysql_fetch_assoc($res)) {
-			array_push($details['158'], $row['rec_title']);
+			array_push($details['158'], $row['rec_Title']);
 		}
 	}
 

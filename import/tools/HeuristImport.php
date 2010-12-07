@@ -318,7 +318,7 @@ class HeuristForeignField {
 
 
 class HeuristNativeEntry {
-	// A native HEURIST object -- equivalent to one records row and its associated rec_details row(s)
+	// A native HEURIST object -- equivalent to one Records row and its associated recDetails row(s)
 
 	var $_fields;
 	var $_fields_by_bdt_id;
@@ -381,7 +381,7 @@ class HeuristNativeEntry {
 		$this->_non_matches = array();
 		$this->_bib_id = NULL;
 		$this->_bkmk_id = NULL;
-		$this->_permanent = false;	// is this represented by a PERMANENT (i.e. non-temporary) records entry in the database?
+		$this->_permanent = false;	// is this represented by a PERMANENT (i.e. non-temporary) Records entry in the database?
 
 		$this->_foreign = NULL;	// object whence this sprung
 		$this->_is_valid = NULL;
@@ -441,17 +441,17 @@ class HeuristNativeEntry {
 
 	function setAncestor(&$entry) { $this->_ancestor = $entry; }
 	function getAncestor() { return $this->_ancestor; }
-		// This is not set unless there are no possible or definite records matches for this entry
-		// but there are possible or definite records matches for its container, or container-container etc.
+		// This is not set unless there are no possible or definite Records matches for this entry
+		// but there are possible or definite Records matches for its container, or container-container etc.
 		// We call such an entry the ancestor, and I acknowledge that this is a brief, rather than precise, term.
 
 	function addAuthor($author_bib_id) {
-		// $author_bib_id is either the records ID of a record containing the author's details,
+		// $author_bib_id is either the Records ID of a record containing the author's details,
 		// or a special string ("anonymous" or "et al.")
 
 		if (is_numeric($author_bib_id)) {
-			$author_details = mysql__select_assoc('rec_details', 'rd_type', 'rd_val', 'rd_rec_id='.intval($author_bib_id));
-			$res = mysql_query("select rec_hhash from records where rec_id = " . $author_bib_id);
+			$author_details = mysql__select_assoc('recDetails', 'dtl_DetailTypeID', 'dtl_Value', 'dtl_RecID='.intval($author_bib_id));
+			$res = mysql_query("select rec_Hash from Records where rec_ID = " . $author_bib_id);
 			$hash = mysql_fetch_row($res);  $hash = $hash[0];
 
 			$this->_authors[] = &$author_details;
@@ -533,19 +533,19 @@ class HeuristNativeEntry {
 			 array_push($this->_matches, $rec_id);
 	}
 	function getPotentialMatches() { return $this->_matches; }
-		// Manage a list of records IDs that might correspond to this entry
+		// Manage a list of Records IDs that might correspond to this entry
 
 	function addNonMatches($bib_ids) { foreach ($bib_ids as $rec_id) $this->_non_matches[$rec_id] = $rec_id; }
 	function getNonMatches() { return array_keys($this->_non_matches); }
-		// Manage a list of records IDs that the user has decided DO NOT correspond to this entry
+		// Manage a list of Records IDs that the user has decided DO NOT correspond to this entry
 
 	function eliminatePotentialMatches() { $this->addNonMatches($this->_matches); $this->_matches = array(); }
 		// Move all the potential matches to the non-match list (on the user's request)
 
 	function setBiblioID($rec_id) { $this->_bib_id = $rec_id; }
-		// Store the ID for the records table row corresponding to this entry
+		// Store the ID for the Records table row corresponding to this entry
 	function getBiblioID() { return $this->_bib_id; }
-		// Get the ID for the records table row corresponding to this entry
+		// Get the ID for the Records table row corresponding to this entry
 
 	function setBookmarkID($bkm_ID) { $this->_bkmk_id = $bkm_ID; }
 	function getBookmarkID() { return $this->_bkmk_id; }
@@ -859,7 +859,7 @@ class HeuristNativeField {
 		// Return the field value as it appears in the import file
 
 	function getValue() { return $this->_value; }
-		// Return the interpreted field value as it appears in the rec_details table
+		// Return the interpreted field value as it appears in the recDetails table
 
 
 	function setGeographicValue($val) { $this->_geo_value = $val; }

@@ -493,7 +493,7 @@ class HeuristKMLEntry extends HeuristForeignEntry {
 			break;
 
 		    case "multigeometry":
-			// a list of geometries -- we will add one rd_geo field per geometry
+			// a list of geometries -- we will add one dtl_Geo field per geometry
 			foreach ($innerTags as $tag => $values) {
 				foreach ($values as $value) {
 					$innerGeometries = $this->_parseGeometry($tag, $value);

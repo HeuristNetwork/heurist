@@ -22,9 +22,9 @@ error_log(" in pseudo with id=$id");
 
 		if ($item && $item instanceof SimpleXMLElement) {
 			$this->rec_id = $id;
-			$this->rec_title = (@$item->title ? $item->title : "unknown title");
-			$this->rec_url = (@$item->url ? htmlentities($item->url) : (@$item->guid ? htmlentities($item->guid) :null)); //FIXME add code to check for http:
-			$this->rec_type = "pseudo";
+			$this->rec_Title = (@$item->title ? $item->title : "unknown title");
+			$this->rec_URL = (@$item->url ? htmlentities($item->url) : (@$item->guid ? htmlentities($item->guid) :null)); //FIXME add code to check for http:
+			$this->rec_RecTypeID = "pseudo";
 //			$this->description = (@$item->description ? $item->description : null);
 
 			$geo = @$item->xpath('georss:point');

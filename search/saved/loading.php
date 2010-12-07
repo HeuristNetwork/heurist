@@ -80,7 +80,7 @@ function loadSearch($args, $bare = false, $onlyIDs = false)  {
 		$offset = intval(@$args["offset"]);  // this is back in since hml.php passes through stuff from sitemap.xmap
 	}
 
-	$query = REQUEST_to_query("select SQL_CALC_FOUND_ROWS rec_id ", $searchType, $args)
+	$query = REQUEST_to_query("select SQL_CALC_FOUND_ROWS rec_ID ", $searchType, $args)
 								. (@$limit? " limit $limit" : "") . (@$offset? " offset $offset " : "");
 	$res = mysql_query($query);
 
@@ -89,15 +89,15 @@ function loadSearch($args, $bare = false, $onlyIDs = false)  {
 
 	if ($onlyIDs) {
 		$row = mysql_fetch_assoc($res);
-		$ids = "" . ($row["rec_id"] ? $row["rec_id"]:"");
+		$ids = "" . ($row["rec_ID"] ? $row["rec_ID"]:"");
 		while ($row = mysql_fetch_assoc($res)) {
-			$ids .= ($row["rec_id"] ? ",".$row["rec_id"]:"");
+			$ids .= ($row["rec_ID"] ? ",".$row["rec_ID"]:"");
 		}
 		return array("resultCount" => $resultCount, "recordCount" => count(explode(",",$ids)), "recIDs" => $ids);
 	}else{
 		$recs = array();
 		while ($row = mysql_fetch_assoc($res)) {
-			$record = loadRecord($row["rec_id"], $fresh, $bare);
+			$record = loadRecord($row["rec_ID"], $fresh, $bare);
 			if (array_key_exists("error", $record)) {
 				return array("error" => $record["error"]);
 			}
@@ -156,42 +156,42 @@ function updateCachedRecord($id) {
 
 function loadRecordStub($id) {
 	$res = mysql_query(
-	    "select rec_id,
-	            rec_type,
-	            rec_title,
-	            rec_url,
-	            rec_scratchpad,
-	            rec_wg_id,
-	            if (rec_visibility = 'Hidden', 0, 1) as rec_visibility,
-	            rec_url_last_verified,
-	            rec_url_error,
-	            rec_added,
-	            rec_modified,
-	            rec_added_by_usr_id,
-	            rec_hhash
-	       from records
-	      where rec_id = $id");
+	    "select rec_ID,
+	            rec_RecTypeID,
+	            rec_Title,
+	            rec_URL,
+	            rec_ScratchPad,
+	            rec_OwnerUGrpID,
+	            if (rec_NonOwnerVisibility = 'Hidden', 0, 1) as rec_NonOwnerVisibility,
+	            rec_URLLastVerified,
+	            rec_URLErrorMessage,
+	            rec_Added,
+	            rec_Modified,
+	            rec_AddedByUGrpID,
+	            rec_Hash
+	       from Records
+	      where rec_ID = $id");
 	$record = mysql_fetch_assoc($res);
 	return $record;
 }
 
 function loadBareRecordFromDB($id) {
 	$res = mysql_query(
-	    "select rec_id,
-	            rec_type,
-	            rec_title,
-	            rec_url,
-	            rec_scratchpad,
-	            rec_wg_id,
-	            if (rec_visibility = 'Hidden', 0, 1) as rec_visibility,
-	            rec_url_last_verified,
-	            rec_url_error,
-	            rec_added,
-	            rec_modified,
-	            rec_added_by_usr_id,
-	            rec_hhash
-	       from records
-	      where rec_id = $id");
+	    "select rec_ID,
+	            rec_RecTypeID,
+	            rec_Title,
+	            rec_URL,
+	            rec_ScratchPad,
+	            rec_OwnerUGrpID,
+	            if (rec_NonOwnerVisibility = 'Hidden', 0, 1) as rec_NonOwnerVisibility,
+	            rec_URLLastVerified,
+	            rec_URLErrorMessage,
+	            rec_Added,
+	            rec_Modified,
+	            rec_AddedByUGrpID,
+	            rec_Hash
+	       from Records
+	      where rec_ID = $id");
 	$record = mysql_fetch_assoc($res);
 	if ($record) {
 		loadRecordDetails($record);
@@ -201,28 +201,28 @@ function loadBareRecordFromDB($id) {
 }
 
 function loadRecordDetails(&$record) {
-	$recID = $record["rec_id"];
+	$recID = $record["rec_ID"];
 	$res = mysql_query(
-	    "select rd_id,
-	            rd_type,
-	            rd_val,
-	            astext(rd_geo) as rd_geo,
-	            rd_file_id,
+	    "select dtl_ID,
+	            dtl_DetailTypeID,
+	            dtl_Value,
+	            astext(dtl_Geo) as dtl_Geo,
+	            dtl_UploadedFileID,
 	            dty_Type,
-	            rec_id,
-	            rec_title,
-	            rec_type,
-	            rec_hhash
-	       from rec_details
-	  left join defDetailTypes on dty_ID = rd_type
-	  left join records on rec_id = rd_val and dty_Type = 'resource'
-	      where rd_rec_id = $recID");
+	            rec_ID,
+	            rec_Title,
+	            rec_RecTypeID,
+	            rec_Hash
+	       from recDetails
+	  left join defDetailTypes on dty_ID = dtl_DetailTypeID
+	  left join Records on rec_ID = dtl_Value and dty_Type = 'resource'
+	      where dtl_RecID = $recID");
 
 	$details = array();
 	while ($rd = mysql_fetch_assoc($res)) {
-		if (! @$details[$rd["rd_type"]]) $details[$rd["rd_type"]] = array();
+		if (! @$details[$rd["dtl_DetailTypeID"]]) $details[$rd["dtl_DetailTypeID"]] = array();
 
-		if ( !$rd["rd_type"] === "file" && $rd["rd_val"] === null ) continue;
+		if ( !$rd["dtl_DetailTypeID"] === "file" && $rd["dtl_Value"] === null ) continue;
 
 		$detailValue = null;
 
@@ -231,7 +231,7 @@ function loadRecordDetails(&$record) {
 			case "integer": case "float": case "boolean":
 			case "date": case "year":
 			case "enum":
-			$detailValue = $rd["rd_val"];
+			$detailValue = $rd["dtl_Value"];
 			break;
 
 			case "file":
@@ -244,7 +244,7 @@ function loadRecordDetails(&$record) {
 			            file_date as date,
 			            file_description as description
 			       from files
-			      where file_id = " . intval($rd["rd_file_id"]));
+			      where file_id = " . intval($rd["dtl_UploadedFileID"]));
 			$detailValue = array("file" => mysql_fetch_assoc($fres));
 			$origName = urlencode($detailValue["file"]["origName"]);
 			$detailValue["file"]["URL"] =
@@ -257,19 +257,19 @@ function loadRecordDetails(&$record) {
 
 			case "resource":
 			$detailValue = array(
-				"id" => $rd["rec_id"],
-				"type"=>$rd["rec_type"],
-				"title" => $rd["rec_title"],
-				"hhash" => $rd["rec_hhash"]
+				"id" => $rd["rec_ID"],
+				"type"=>$rd["rec_RecTypeID"],
+				"title" => $rd["rec_Title"],
+				"hhash" => $rd["rec_Hash"]
 			);
 			break;
 
 			case "geo":
-			if ($rd["rd_val"]  &&  $rd["rd_geo"]) {
+			if ($rd["dtl_Value"]  &&  $rd["dtl_Geo"]) {
 				$detailValue = array(
 					"geo" => array(
-						"type" => $rd["rd_val"],
-						"wkt" => $rd["rd_geo"]
+						"type" => $rd["dtl_Value"],
+						"wkt" => $rd["dtl_Geo"]
 					)
 				);
 			}
@@ -282,7 +282,7 @@ function loadRecordDetails(&$record) {
 		}
 
 		if ($detailValue) {
-			$details[$rd["rd_type"]][$rd["rd_id"]] = $detailValue;
+			$details[$rd["dtl_DetailTypeID"]][$rd["dtl_ID"]] = $detailValue;
 		}
 	}
 
@@ -291,7 +291,7 @@ function loadRecordDetails(&$record) {
 
 
 function loadUserDependentData(&$record) {
-	$recID = $record["rec_id"];
+	$recID = $record["rec_ID"];
 	$res = mysql_query(
 	    "select bkm_ID,
 	            pers_notes,

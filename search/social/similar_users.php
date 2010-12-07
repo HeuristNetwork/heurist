@@ -36,8 +36,8 @@ if ($_REQUEST['user']) {
 		  count(B.bkm_UGrpID) as freq
      from usrRecTagLinks
 left join usrBookmarks A on A.bkm_RecID=rtl_RecID
-left join records on rec_id=A.bkm_recID
-left join usrBookmarks B on B.bkm_recID=rec_id
+left join Records on rec_ID=A.bkm_recID
+left join usrBookmarks B on B.bkm_recID=rec_ID
 left join '.USERS_DATABASE.'.'.USERS_TABLE.' usr on usr.'.USERS_ID_FIELD.'=B.bkm_UGrpID
     where rtl_TagID='.$_REQUEST['kwd'].'
       and A.bkm_UGrpID='.$_REQUEST['user'].'
@@ -54,8 +54,8 @@ left join '.USERS_DATABASE.'.'.USERS_TABLE.' usr on usr.'.USERS_ID_FIELD.'=B.bkm
           concat(usr.'.USERS_FIRSTNAME_FIELD.'," ",usr.'.USERS_LASTNAME_FIELD.') as name,
 		  count(B.bkm_UGrpID) as freq
      from usrBookmarks A
-left join records on rec_id=A.bkm_recID
-left join usrBookmarks B on B.bkm_recID=rec_id
+left join Records on rec_ID=A.bkm_recID
+left join usrBookmarks B on B.bkm_recID=rec_ID
 left join '.USERS_DATABASE.'.'.USERS_TABLE.' usr on usr.'.USERS_ID_FIELD.'=B.bkm_UGrpID
     where A.bkm_UGrpID='.$_REQUEST['user'].'
 	  and B.bkm_UGrpID!='.$_REQUEST['user'].'

@@ -40,27 +40,27 @@ function findFuzzyMatches($fields, $rec_types, $rec_id=NULL, $fuzziness=NULL) {
 
 
 	$tables = "records";
-	$predicates = "rec_type=$rec_types[0] and ! rec_temporary and (rec_wg_id=0 or rec_visibility='viewable')" . ($rec_id ? " and rec_id != $rec_id" : "");
+	$predicates = "rec_RecTypeID=$rec_types[0] and ! rec_FlagTemporary and (rec_OwnerUGrpID=0 or rec_NonOwnerVisibility='viewable')" . ($rec_id ? " and rec_ID != $rec_id" : "");
 	$N = 0;
 	foreach ($fuzzyFields as $field) {
 		list($rdt_id, $val) = $field;
 		$threshold = intval((strlen($val)+1) * $fuzziness);
 
 		++$N;
-		$tables .= ", rec_details bd$N";
-		$predicates .= " and (bd$N.rd_rec_id=rec_id and bd$N.rd_type=$rdt_id and limited_levenshtein(bd$N.rd_val, '".addslashes($val)."', $threshold) is not null)";
+		$tables .= ", recDetails bd$N";
+		$predicates .= " and (bd$N.dtl_RecID=rec_ID and bd$N.dtl_DetailTypeID=$rdt_id and limited_levenshtein(bd$N.dtl_Value, '".addslashes($val)."', $threshold) is not null)";
 	}
 	foreach ($strictFields as $field) {
 		list($rdt_id, $val) = $field;
 
 		++$N;
-		$tables .= ", rec_details bd$N";
-		$predicates .= " and (bd$N.rd_rec_id=rec_id and bd$N.rd_type=$rdt_id and bd$N.rd_val = '".addslashes($val)."')";
+		$tables .= ", recDetails bd$N";
+		$predicates .= " and (bd$N.dtl_RecID=rec_ID and bd$N.dtl_DetailTypeID=$rdt_id and bd$N.dtl_Value = '".addslashes($val)."')";
 	}
 
 	$matches = array();
-	$res = mysql_query("select rec_id as id, rec_title as title, rec_hhash as hhash from $tables where $predicates order by rec_title limit 100");
-	error_log("approx-matching: select rec_id as id, rec_title as title, rec_hhash as hhash from $tables where $predicates order by rec_title limit 100");
+	$res = mysql_query("select rec_ID as id, rec_Title as title, rec_Hash as hhash from $tables where $predicates order by rec_Title limit 100");
+	error_log("approx-matching: select rec_ID as id, rec_Title as title, rec_Hash as hhash from $tables where $predicates order by rec_Title limit 100");
 	while ($bib = mysql_fetch_assoc($res)) {
 		array_push($matches, $bib);
 	}

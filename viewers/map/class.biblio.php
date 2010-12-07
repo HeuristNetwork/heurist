@@ -21,15 +21,15 @@ class Biblio {
 		$this->minX = null; $this->minY = null; $this->maxX = null; $this->maxY = null;
 
 		if ($rec_id) {
-			$res = mysql_query('select rec_id, rec_title, rec_url, rec_type from records where rec_id='.$rec_id);
+			$res = mysql_query('select rec_ID, rec_Title, rec_URL, rec_RecTypeID from Records where rec_ID='.$rec_id);
 			$row = mysql_fetch_assoc($res);
 			if (!$row) return false;
-			$this->rec_id = $row['rec_id'];
-			$this->rec_title = htmlentities($row['rec_title']);
-			$this->rec_url = htmlentities($row['rec_url']);
-			$this->rec_type = $row['rec_type'];
+			$this->rec_id = $row['rec_ID'];
+			$this->rec_title = htmlentities($row['rec_Title']);
+			$this->rec_URL = htmlentities($row['rec_URL']);
+			$this->rec_RecTypeID = $row['rec_RecTypeID'];
 
-			$details = mysql__select_assoc('rec_details', 'rd_type', 'rd_val', 'rd_rec_id='.$rec_id);
+			$details = mysql__select_assoc('recDetails', 'dtl_DetailTypeID', 'dtl_Value', 'dtl_RecID='.$rec_id);
 
 			if (array_key_exists('177', $details)) {
 				$this->start = $details['177'];
@@ -43,22 +43,22 @@ class Biblio {
 			// 222  Logo image
 			// 224  Images
 			$res = mysql_query("select files.*
-								  from rec_details
-							 left join files on file_id = rd_file_id
-								 where rd_rec_id = $rec_id
-								   and rd_type in(223,222,224,221,231)
+								  from recDetails
+							 left join files on file_id = dtl_UploadedFileID
+								 where dtl_RecID = $rec_id
+								   and dtl_DetailTypeID in(223,222,224,221,231)
 								   and file_mimetype like 'image%'
-							  order by rd_type = 223 desc, rd_type = 222 desc, rd_type = 224 desc, rd_type
+							  order by dtl_DetailTypeID = 223 desc, dtl_DetailTypeID = 222 desc, dtl_DetailTypeID = 224 desc, dtl_DetailTypeID
 								 limit 1");
 			if (mysql_num_rows($res) !== 1) {
 				$res = mysql_query("select files.*
-				                      from rec_details a, defDetailTypes, records, rec_details b, files
-				                     where a.rd_rec_id = $rec_id
-				                       and a.rd_type = dty_ID
+				                      from recDetails a, defDetailTypes, Records, recDetails b, files
+				                     where a.dtl_RecID = $rec_id
+				                       and a.dtl_DetailTypeID = dty_ID
 				                       and dty_Type = 'resource'
-				                       and rec_id = a.rd_val
-				                       and b.rd_rec_id = rec_id
-				                       and file_id = b.rd_file_id
+				                       and rec_ID = a.dtl_Value
+				                       and b.dtl_RecID = rec_ID
+				                       and file_id = b.dtl_UploadedFileID
 				                       and file_mimetype like 'image%'
 				                     limit 1;");
 			}
@@ -76,29 +76,29 @@ class Biblio {
 				$this->description .= $details[$text];
 			}
 
-			$res = mysql_query('SELECT AsText(rd_geo) geo, rd_val, astext(envelope(rd_geo)) as rect
-			                      FROM rec_details
-			                     WHERE NOT IsNULL(rd_geo)
-			                       AND rd_rec_id = ' . $rec_id);
+			$res = mysql_query('SELECT AsText(dtl_Geo) geo, dtl_Value, astext(envelope(dtl_Geo)) as rect
+			                      FROM recDetails
+			                     WHERE NOT IsNULL(dtl_Geo)
+			                       AND dtl_RecID = ' . $rec_id);
 
-			if (mysql_num_rows($res) < 1  &&  $this->rec_type != 52  &&  $details['177']) {
+			if (mysql_num_rows($res) < 1  &&  $this->rec_RecTypeID != 52  &&  $details['177']) {
 				// Special case behaviour!
 				// If a record has time data but not spatial data,
 				// and it points to record(s) with spatial data, use that.
 				// Although this is written in a general fashion it was
 				// created for Event records, which may point to Site records
-				$res = mysql_query('select astext(g.rd_geo) geo, g.rd_val, astext(envelope(g.rd_geo)) as rect
-				                      from rec_details p
-				                 left join defDetailTypes on dty_ID = p.rd_type
-				                 left join records on rec_id = p.rd_val
-				                 left join rec_details g on g.rd_rec_id = rec_id
-				                     where p.rd_rec_id = ' . $rec_id . '
+				$res = mysql_query('select astext(g.dtl_Geo) geo, g.dtl_Value, astext(envelope(g.dtl_Geo)) as rect
+				                      from recDetails p
+				                 left join defDetailTypes on dty_ID = p.dtl_DetailTypeID
+				                 left join Records on rec_ID = p.dtl_Value
+				                 left join recDetails g on g.dtl_RecID = rec_ID
+				                     where p.dtl_RecID = ' . $rec_id . '
 				                       and dty_Type = "resource"
-				                       and g.rd_geo is not null');
+				                       and g.dtl_Geo is not null');
 			}
 
 			while ($row = mysql_fetch_assoc($res)) {
-				$geometry = new Geometry($row['geo'], $row['rd_val'], $row['rect']);
+				$geometry = new Geometry($row['geo'], $row['dtl_Value'], $row['rect']);
 				if ($this->minX === null  ||  $geometry->minX < $this->minX) $this->minX = $geometry->minX;
 				if ($this->maxX === null  ||  $geometry->maxX > $this->maxX) $this->maxX = $geometry->maxX;
 				if ($this->minY === null  ||  $geometry->minY < $this->minY) $this->minY = $geometry->minY;

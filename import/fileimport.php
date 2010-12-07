@@ -174,7 +174,7 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags
 	foreach (@$_REQUEST['links'] as $linkno => $checked) {
 		if (! @$checked) continue;
 
-		$rec_id = biblio_check(@$_REQUEST['link'][$linkno], @$_REQUEST['title'][$linkno], @$_REQUEST['use_notes'][$linkno]? @$_REQUEST['notes'][$linkno] . @$notes_src_str : NULL, @$_REQUEST['rec_id'][$linkno]);
+		$rec_id = biblio_check(@$_REQUEST['link'][$linkno], @$_REQUEST['title'][$linkno], @$_REQUEST['use_notes'][$linkno]? @$_REQUEST['notes'][$linkno] . @$notes_src_str : NULL, @$_REQUEST['rec_ID'][$linkno]);
 		if (is_array($rec_id)  and  $rec_id) {
 			// no exact match, just a list of nearby matches; get the user to select one
 			$disambiguate_bib_ids[$_REQUEST['link'][$linkno]] = $rec_id;
@@ -201,7 +201,7 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags
 
 // filter the URLs (get rid of the ones already bookmarked)
 if (@$urls) {
-	$bkmk_urls = mysql__select_assoc('usrBookmarks left join records on rec_id = bkm_recID', 'rec_url', '1', 'bkm_UGrpID='.get_user_id());
+	$bkmk_urls = mysql__select_assoc('usrBookmarks left join Records on rec_ID = bkm_recID', 'rec_URL', '1', 'bkm_UGrpID='.get_user_id());
 	$ignore = array();
 	foreach ($urls as $url => $title)
 		if (@$bkmk_urls[$url]) $ignore[$url] = 1;
@@ -451,24 +451,25 @@ The list is reloaded after each addition and after change of settings.
 
 function biblio_check($url, $title, $notes, $user_bib_id) {
 	/*
-	 * Look for a records record corresponding to the given record;
+	 * Look for a Records record corresponding to the given record;
 	 * user_bib_id is the user's preference if there isn't an exact match.
 	 * Insert one if it doesn't already exist;
-	 * return the rec_id, or 0 on failure.
+	 * return the rec_ID, or 0 on failure.
 	 * If there are a number of similar URLs, return a list of their bib_ids.
 	 */
 
-	$res = mysql_query('select rec_id from records where rec_url = "'.addslashes($url).'" and (rec_wg_id=0 or rec_visibility="viewable")');
+	// saw FIXME thsi should be
+	$res = mysql_query('select rec_ID from Records where rec_URL = "'.addslashes($url).'" and (rec_OwnerUGrpID=0 or rec_NonOwnerVisibility="viewable")');
 	if (mysql_num_rows($res) > 0) {
 		$bib = mysql_fetch_assoc($res);
-		return $bib['rec_id'];
+		return $bib['rec_ID'];
 	}
 
 	if ($user_bib_id > 0) {
-		$res = mysql_query('select rec_id from records where rec_id = "'.addslashes($user_bib_id).'" and (rec_wg_id=0 or rec_visibility="viewable")');
+		$res = mysql_query('select rec_ID from Records where rec_ID = "'.addslashes($user_bib_id).'" and (rec_OwnerUGrpID=0 or rec_NonOwnerVisibility="viewable")');
 		if (mysql_num_rows($res) > 0) {
 			$bib = mysql_fetch_assoc($res);
-			return $bib['rec_id'];
+			return $bib['rec_ID'];
 		}
 
 	} else if (! $user_bib_id) {
@@ -480,7 +481,7 @@ function biblio_check($url, $title, $notes, $user_bib_id) {
 		if (substr($par_url, strlen($par_url)-1) == '/')	// ends in a slash; remove it
 			$par_url = substr($par_url, 0, strlen($par_url)-1);
 
-		$res = mysql_query('select rec_id from records where rec_url like "'.addslashes($par_url).'%" and (rec_wg_id=0 or rec_visibility="viewable")');
+		$res = mysql_query('select rec_ID from Records where rec_URL like "'.addslashes($par_url).'%" and (rec_OwnerUGrpID=0 or rec_NonOwnerVisibility="viewable")');
 		if (mysql_num_rows($res) > 0) {
 			$bib_ids = array();
 			while ($row = mysql_fetch_row($res))
@@ -492,27 +493,27 @@ function biblio_check($url, $title, $notes, $user_bib_id) {
 
 	// no similar URLs, no exactly matching URL, or user has explicitly selected "add new URL"
 	//insert the main record
-	if (mysql__insert('records', array(
-		'rec_type' => 1,
-		'rec_url' => $url,
-		'rec_added' => date('Y-m-d H:i:s'),
-		'rec_modified' => date('Y-m-d H:i:s'),
-		'rec_title' => $title,
-		'rec_scratchpad' => $notes,
-		'rec_added_by_usr_id' => get_user_id()
+	if (mysql__insert('Records', array(
+		'rec_RecTypeID' => 1,
+		'rec_URL' => $url,
+		'rec_Added' => date('Y-m-d H:i:s'),
+		'rec_Modified' => date('Y-m-d H:i:s'),
+		'rec_Title' => $title,
+		'rec_ScratchPad' => $notes,
+		'rec_AddedByUGrpID' => get_user_id()
 	))) {
 		$rec_id = mysql_insert_id();
 		//add title detail
-		mysql__insert('rec_details', array(
-			'rd_rec_id' => $rec_id,
-			'rd_type' => 160,
-			'rd_val' => $title
+		mysql__insert('recDetails', array(
+			'dtl_RecID' => $rec_id,
+			'dtl_DetailTypeID' => 160,
+			'dtl_Value' => $title
 		));
 		//add notes detail
-		mysql__insert('rec_details', array(
-			'rd_rec_id' => $rec_id,
-			'rd_type' => 191,
-			'rd_val' => $notes
+		mysql__insert('recDetails', array(
+			'dtl_RecID' => $rec_id,
+			'dtl_DetailTypeID' => 191,
+			'dtl_Value' => $notes
 		));
 		return $rec_id;
 	}
@@ -524,7 +525,7 @@ function bookmark_insert($url, $title, $tags, $rec_id) {
 	/*
 	 * Insert a new bookmark with the relevant details;
 	 * return true on success,
-	 * return false on failure, or if the records record is already bookmarked by this user.
+	 * return false on failure, or if the Records record is already bookmarked by this user.
 	 */
 
 	$res = mysql_query('select * from usrBookmarks where bkm_recID="'.addslashes($rec_id).'"
@@ -632,30 +633,30 @@ function print_link($url, $title) {
   <td colspan="4">
    <div style="padding-bottom:8px;">
      <label>
-      <input type="radio" name="rec_id[<?= $linkno ?>]" value="-1" onclick="selectExistingLink(<?= $linkno ?>);">
+      <input type="radio" name="rec_ID[<?= $linkno ?>]" value="-1" onclick="selectExistingLink(<?= $linkno ?>);">
       <b>New (add this URL to the database)</b>
      </label>
    </div>
 
 <?php
-		$res = mysql_query('select * from records where rec_id in (' . join(',', $disambiguate_bib_ids[$url]) . ')');
+		$res = mysql_query('select * from Records where rec_ID in (' . join(',', $disambiguate_bib_ids[$url]) . ')');
 		$all_bibs = array();
 		while ($row = mysql_fetch_assoc($res))
-			$all_bibs[$row['rec_id']] = $row;
+			$all_bibs[$row['rec_ID']] = $row;
 
 		foreach ($disambiguate_bib_ids[$url] as $rec_id) {
 			$row = $all_bibs[$rec_id];
 ?>
    <div>
     <label>
-     <input type="radio" name="rec_id[<?= $linkno ?>]" value="<?= $row['rec_id'] ?>" onclick="selectExistingLink(<?= $linkno ?>);">
-     <?= htmlspecialchars($row['rec_title']) ?>
+     <input type="radio" name="rec_ID[<?= $linkno ?>]" value="<?= $row['rec_ID'] ?>" onclick="selectExistingLink(<?= $linkno ?>);">
+     <?= htmlspecialchars($row['rec_Title']) ?>
     </label><br>
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a style ="font-size: 80%; text-decoration:none;" target="_testwindow" href="<?= htmlspecialchars($row['rec_url']) ?>"><?php
-			if (strlen($row['rec_url']) < 100)
-				print (common_substring($row['rec_url'], $url));
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a style ="font-size: 80%; text-decoration:none;" target="_testwindow" href="<?= htmlspecialchars($row['rec_URL']) ?>"><?php
+			if (strlen($row['rec_URL']) < 100)
+				print (common_substring($row['rec_URL'], $url));
 			else
-				print (common_substring(substr($row['rec_url'], 0, 90) . '...', $url));
+				print (common_substring(substr($row['rec_URL'], 0, 90) . '...', $url));
     ?></a>
    </div>
 

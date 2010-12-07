@@ -119,7 +119,7 @@
 						print '<input type="hidden" name="bib_ids" value="'.$_REQUEST['bib_ids'].'">';
 
 						$rfts = array();
-						$res = mysql_query('select rty_ID, rty_Name from records left join defRecTypes on rty_ID=rec_type where rec_id in ('.$_REQUEST['bib_ids'].')');
+						$res = mysql_query('select rty_ID, rty_Name from Records left join defRecTypes on rty_ID=rec_RecTypeID where rec_ID in ('.$_REQUEST['bib_ids'].')');
 						//FIXME add code to pprint cross type matching  header " Cross Type - Author Editor with Person with Book"
 						while ($row = mysql_fetch_assoc($res)) $rfts[$row['rty_ID']]= $row['rty_Name'];
 
@@ -158,17 +158,17 @@
 							}
 						}
 
-						$res = mysql_query('select * from records where rec_id in ('.$_REQUEST['bib_ids'].') order by find_in_set(rec_id, "'.$_REQUEST['bib_ids'].'")');
+						$res = mysql_query('select * from Records where rec_ID in ('.$_REQUEST['bib_ids'].') order by find_in_set(rec_ID, "'.$_REQUEST['bib_ids'].'")');
 						$records = array();
 						$counts = array();
 						$rec_references = array();
 						$invalid_rec_references = array();
-						while ($rec = mysql_fetch_assoc($res)) $records[$rec['rec_id']] = $rec;
+						while ($rec = mysql_fetch_assoc($res)) $records[$rec['rec_ID']] = $rec;
 						foreach($records as $index => $record){
-    $rec_references = mysql__select_array('rec_details', 'rd_rec_id', 'rd_val='.$records[$index]['rec_id'].' and rd_type in ('.join(',', array_keys($reference_bdts)).')');
+							$rec_references = mysql__select_array('recDetails', 'dtl_RecID', 'dtl_Value='.$records[$index]['rec_ID'].' and dtl_DetailTypeID in ('.join(',', array_keys($reference_bdts)).')');
     if ($rec_references){
         // only store the references that are actually records
-         $records[$index]["refs"] =  mysql__select_array('records', 'rec_id', 'rec_id in ('.join(',', $rec_references).')');
+								$records[$index]["refs"] =  mysql__select_array('Records', 'rec_ID', 'rec_ID in ('.join(',', $rec_references).')');
          $records[$index]["ref_count"] = count($records[$index]["refs"]);
          $counts[$index] = $records[$index]["ref_count"];
          $invalid_rec_references += array_diff($rec_references,$records[$index]["refs"]);
@@ -176,14 +176,14 @@
         array_push($counts,0);
     }
     $details = array();
-    $res = mysql_query('select rd_type, rd_val, rd_id, rd_file_id, if(rd_geo is not null, astext(rd_geo), null) as rd_geo
-                          from rec_details
-                         where rd_rec_id = ' . $records[$index]['rec_id'] . '
-                      order by rd_type, rd_id');
+							$res = mysql_query('select dtl_DetailTypeID, dtl_Value, dtl_ID, dtl_UploadedFileID, if(dtl_Geo is not null, astext(dtl_Geo), null) as dtl_Geo
+							from recDetails
+							where dtl_RecID = ' . $records[$index]['rec_ID'] . '
+							order by dtl_DetailTypeID, dtl_ID');
     $records[$index]['details'] = array();
     while ($row = mysql_fetch_assoc($res)) {
 
-        $type = $row['rd_type'];
+								$type = $row['dtl_DetailTypeID'];
 
         if (! array_key_exists($type, $records[$index]['details'])) {
             $records[$index]['details'][$type] = array();
@@ -201,36 +201,36 @@
 							//    foreach($records as $index) {
     foreach($records as $record) {
       //  $record = $records[$index];
-        $is_master = ($record['rec_id']== $master_rec_id);
-	    print '<tr'. ($is_master && !$finished_merge ? ' style="background-color: #bbffbb;" ': '').' id="row'.$record['rec_id'].'">';
+								$is_master = ($record['rec_ID']== $master_rec_id);
+								print '<tr'. ($is_master && !$finished_merge ? ' style="background-color: #bbffbb;" ': '').' id="row'.$record['rec_ID'].'">';
 	    $checkKeep =  $is_master? "checked" : "";
         $disableDup = $is_master? "none" : "block";
 	    if (!$finished_merge) print '<td><input type="checkbox" name="duplicate[]" '.
-              ' value="'.$record['rec_id'].
+								' value="'.$record['rec_ID'].
               '" title="Check to mark this as a duplicate record for deletion"'.
-              '  id="duplicate'.$record['rec_id'].'" style="display:'.$disableDup.
-              '" onclick="if (this.checked) delete_bib('.$record['rec_id'].'); else undelete_bib('.$record['rec_id'].
+								'  id="duplicate'.$record['rec_ID'].'" style="display:'.$disableDup.
+								'" onclick="if (this.checked) delete_bib('.$record['rec_ID'].'); else undelete_bib('.$record['rec_ID'].
               ');"><div style="font-size: 70%; display:'.$disableDup.';">DUPLICATE</div></td>';
 	    print '<td style="width: 500px;">';
 	    if (!$finished_merge) print '<input type="radio" name="keep" '.$checkKeep.
-              ' value="'.$record['rec_id'].
+								' value="'.$record['rec_ID'].
               '" title="Click to select this record as the Master record"'.
-              ' id="keep'.$record['rec_id'].
-              '" onclick="keep_bib('.$record['rec_id'].');">';
-        print '<span style="font-size: 120%;"><a target="edit" href="'.HEURIST_URL_BASE.'records/editrec/edit.html?bib_id='.$record['rec_id'].'">'.$record['rec_id'] . ' ' . '<b>'.$record['rec_title'].'</b></a> - <span style="background-color: #FFDDDD;">'. $rfts[$record['rec_type']].'</span></span>';
+								' id="keep'.$record['rec_ID'].
+								'" onclick="keep_bib('.$record['rec_ID'].');">';
+								print '<span style="font-size: 120%;"><a target="edit" href="'.HEURIST_URL_BASE.'records/editrec/edit.html?bib_id='.$record['rec_ID'].'">'.$record['rec_ID'] . ' ' . '<b>'.$record['rec_Title'].'</b></a> - <span style="background-color: #FFDDDD;">'. $rfts[$record['rec_RecTypeID']].'</span></span>';
 	    print '<table>';
 	    foreach ($record['details'] as $rd_type => $detail) {
 		    if (! $detail) continue;    //FIXME  check if required and mark it as missing and required
-            $reqmnt = $rec_requirements[$record['rec_type']][$rd_type]['rdr_required'];
+									$reqmnt = $rec_requirements[$record['rec_RecTypeID']][$rd_type]['rdr_required'];
             $color = ($reqmnt == 'Y' ? 'red': ($reqmnt == 'R'? 'black':'grey'));
 		    print '<tr><td style=" color: '.$color .';">'.$bdts[$rd_type].'</td>';
 		    print '<td style="padding-left:10px;">';
             foreach($detail as $i => $rg){
-                if ($rg['rd_val']) {
-                    if ($rg['rd_geo']) $rd_temp = $rg['rd_geo'];
-                    else $rd_temp =$rg['rd_val'];
-                }elseif ($rg['rd_file_id']) {
-                    $rd_temp = mysql_fetch_array(mysql_query('select file_orig_name from files where file_id ='.$rg['rd_file_id']));
+										if ($rg['dtl_Value']) {
+											if ($rg['dtl_Geo']) $rd_temp = $rg['dtl_Geo'];
+											else $rd_temp =$rg['dtl_Value'];
+										}elseif ($rg['dtl_UploadedFileID']) {
+											$rd_temp = mysql_fetch_array(mysql_query('select file_orig_name from files where file_id ='.$rg['dtl_UploadedFileID']));
                     $rd_temp = $rd_temp[0];
                 }
                 if(! @$temp) $temp=$rd_temp;
@@ -241,7 +241,7 @@
             $detail = detail_str($rd_type, $temp);
             unset($temp);
             if (is_array($detail)) {
-										$repeatCount = intval($rec_requirements[$record['rec_type']][$rd_type]['rst_Repeats']);
+										$repeatCount = intval($rec_requirements[$record['rec_RecTypeID']][$rd_type]['rst_Repeats']);
 										if ($repeatCount==0){
                      foreach ($detail as $val) {
                        print '<div>'. $val . '</div>';
@@ -259,10 +259,10 @@
             print '</td>';
 	    }
 
-	    if ($record['rec_url']) print '<tr><td>URL</td><td><a href="'.$record['rec_url'].'">'.$record['rec_url'].'</a></td></tr>';
+								if ($record['rec_URL']) print '<tr><td>URL</td><td><a href="'.$record['rec_URL'].'">'.$record['rec_URL'].'</a></td></tr>';
 
-	    if ($record['rec_added']) print '<tr><td>Added</td><td style="padding-left:10px;">'.substr($record['rec_added'], 0, 10).'</td></tr>';
-	    if ($record['rec_modified']) print '<tr><td>Modifed</td><td style="padding-left:10px;">'.substr($record['rec_modified'], 0, 10).'</td></tr>';
+								if ($record['rec_Added']) print '<tr><td>Added</td><td style="padding-left:10px;">'.substr($record['rec_Added'], 0, 10).'</td></tr>';
+								if ($record['rec_Modified']) print '<tr><td>Modifed</td><td style="padding-left:10px;">'.substr($record['rec_Modified'], 0, 10).'</td></tr>';
 
 
 	    print '</table></td><td>';
@@ -278,12 +278,12 @@
 		    print '</td></tr>';
 	    }
 
-	    $bkmk_count = mysql_fetch_array(mysql_query('select count(distinct bkm_ID) from usrBookmarks where bkm_RecID='.$record['rec_id']));
+								$bkmk_count = mysql_fetch_array(mysql_query('select count(distinct bkm_ID) from usrBookmarks where bkm_RecID='.$record['rec_ID']));
 	    if ($bkmk_count[0]) print '<tr><td>Bookmarks</td><td>'.$bkmk_count[0].'</td></tr>';
-	    $kwd_count = mysql_fetch_array(mysql_query('select count(distinct rtl_ID) from usrBookmarks left join usrRecTagLinks on rtl_RecID=bkm_recID where bkm_RecID='.$record['rec_id'].' and rtl_ID is not null'));
+								$kwd_count = mysql_fetch_array(mysql_query('select count(distinct rtl_ID) from usrBookmarks left join usrRecTagLinks on rtl_RecID=bkm_recID where bkm_RecID='.$record['rec_ID'].' and rtl_ID is not null'));
 	    if ($kwd_count[0]) print '<tr><td>Tags</td><td>'.$kwd_count[0].'</td></tr>';
 
-	    $res2 = mysql_query('select concat(usr.'.USERS_FIRSTNAME_FIELD.'," ",usr.'.USERS_LASTNAME_FIELD.') as name, rem_Freq, rem_StartDate from usrReminders left join '.USERS_DATABASE.'.'.USERS_TABLE.' usr on usr.'.USERS_ID_FIELD.'=rem_OwnerUGrpID where ugr_Type = "User" and rem_RecID='.$record['rec_id']);
+								$res2 = mysql_query('select concat(usr.'.USERS_FIRSTNAME_FIELD.'," ",usr.'.USERS_LASTNAME_FIELD.') as name, rem_Freq, rem_StartDate from usrReminders left join '.USERS_DATABASE.'.'.USERS_TABLE.' usr on usr.'.USERS_ID_FIELD.'=rem_OwnerUGrpID where ugr_Type = "User" and rem_RecID='.$record['rec_ID']);
 	    $rems = Array();
 	    while ($rem = mysql_fetch_assoc($res2))
 		    $rems[] = $rem['name'].' '.$rem['rem_Freq'].($rem['rem_Freq']=='once' ? ' on ' : ' from ').$rem['rem_StartDate'];
@@ -303,16 +303,16 @@
     } elseif ($master_index > 0){  // rotate the keys so the master is first
         $temp = array_slice($rec_keys, 0,$master_index);
         $rec_keys = array_merge(array_slice($rec_keys,$master_index),$temp);
-        $master_rec_type = $records[$master_rec_id]['rec_type'];
+								$master_rec_type = $records[$master_rec_id]['rec_RecTypeID'];
     }
     foreach($rec_keys as $index) {
         $record = $records[$index];
-        $is_master = ($record['rec_id']== $master_rec_id);
-        print '<tr id="row'.$record['rec_id'].'">';
+								$is_master = ($record['rec_ID']== $master_rec_id);
+								print '<tr id="row'.$record['rec_ID'].'">';
         if ($is_master) print '<td><div><b>MASTER</b></div></td>';
         else print '<td><div><b>Duplicate</b></div></td>';
         print '<td style="width: 500px;">';
-        print '<div style="font-size: 120%;"><a target="edit" href="'.HEURIST_URL_BASE.'records/editrec/edit.html?bib_id='.$record['rec_id'].'">'.$record['rec_id'] . ' ' . '<b>'.$record['rec_title'].'</b></a> - <span style="background-color: #FFDDDD;">'. $rfts[$record['rec_type']].'</span></div>';
+								print '<div style="font-size: 120%;"><a target="edit" href="'.HEURIST_URL_BASE.'records/editrec/edit.html?bib_id='.$record['rec_ID'].'">'.$record['rec_ID'] . ' ' . '<b>'.$record['rec_Title'].'</b></a> - <span style="background-color: #FFDDDD;">'. $rfts[$record['rec_RecTypeID']].'</span></div>';
         print '<table>';
         if ($is_master) $_SESSION['master_details']=$record['details']; // save master details for processing - signals code to do_fix_dupe
         foreach ($record['details'] as $rd_type => $detail) {
@@ -323,9 +323,9 @@
                 $master_details =  $_SESSION['master_details'][$rd_type];
                 foreach ($detail as $i => $d_detail){
                     foreach ($master_details as $m_detail){
-                        if (($m_detail['rd_val'] && trim($d_detail['rd_val']) == trim($m_detail['rd_val'])) ||
-                            ($m_detail['rd_geo'] && trim($d_detail['rd_geo']) == trim($m_detail['rd_geo'])) ||
-                            ($m_detail['rd_file_id'] && trim($d_detail['rd_file_id']) == trim($m_detail['rd_file_id']))){
+												if (($m_detail['dtl_Value'] && trim($d_detail['dtl_Value']) == trim($m_detail['dtl_Value'])) ||
+												($m_detail['dtl_Geo'] && trim($d_detail['dtl_Geo']) == trim($m_detail['dtl_Geo'])) ||
+												($m_detail['dtl_UploadedFileID'] && trim($d_detail['dtl_UploadedFileID']) == trim($m_detail['dtl_UploadedFileID']))){
                             //mark this detail for removal
                             array_push($removeIndices,$i);
                         }
@@ -360,14 +360,14 @@
             print '</td>';
         }
 
-        if ($record['rec_url']) print '<tr><td>URL</td><td><input type="radio" name="URL" '.($is_master?"checked=checked":"").
+								if ($record['rec_URL']) print '<tr><td>URL</td><td><input type="radio" name="URL" '.($is_master?"checked=checked":"").
                                                       ' title="'.($is_master?"Click to keep URL with Master record":"Click to replace URL in Master record (overwrite)").
-                                                      '" value="'.$record['rec_url'].
-                                                      '" id="URL'.$record['rec_id'].
-                                                      '"><a href="'.$record['rec_url'].'">'.$record['rec_url'].'</a></td></tr>';
+								'" value="'.$record['rec_URL'].
+								'" id="URL'.$record['rec_ID'].
+								'"><a href="'.$record['rec_URL'].'">'.$record['rec_URL'].'</a></td></tr>';
 
-        if ($record['rec_added']) print '<tr><td>Add &nbsp;&nbsp;&nbsp;'.substr($record['rec_added'], 0, 10).'</td></tr>';
-        if ($record['rec_modified']) print '<tr><td>Mod &nbsp;&nbsp;&nbsp;'.substr($record['rec_modified'], 0, 10).'</td></tr>';
+								if ($record['rec_Added']) print '<tr><td>Add &nbsp;&nbsp;&nbsp;'.substr($record['rec_Added'], 0, 10).'</td></tr>';
+								if ($record['rec_Modified']) print '<tr><td>Mod &nbsp;&nbsp;&nbsp;'.substr($record['rec_Modified'], 0, 10).'</td></tr>';
 
 
         print '</table></td><td>';
@@ -383,12 +383,12 @@
             print '</td></tr>';
         }
 
-        $bkmk_count = mysql_fetch_array(mysql_query('select count(distinct bkm_ID) from usrBookmarks where bkm_recID='.$record['rec_id']));
+								$bkmk_count = mysql_fetch_array(mysql_query('select count(distinct bkm_ID) from usrBookmarks where bkm_recID='.$record['rec_ID']));
         if ($bkmk_count[0]) print '<tr><td>Bookmarks</td><td>'.$bkmk_count[0].'</td></tr>';
-        $kwd_count = mysql_fetch_array(mysql_query('select count(distinct rtl_ID) from usrBookmarks left join usrRecTagLinks on rtl_RecID=bkm_recID where bkm_RecID='.$record['rec_id'].' and rtl_ID is not null'));
+								$kwd_count = mysql_fetch_array(mysql_query('select count(distinct rtl_ID) from usrBookmarks left join usrRecTagLinks on rtl_RecID=bkm_recID where bkm_RecID='.$record['rec_ID'].' and rtl_ID is not null'));
         if ($kwd_count[0]) print '<tr><td>Tags</td><td>'.$kwd_count[0].'</td></tr>';
 
-        $res2 = mysql_query('select concat(usr.'.USERS_FIRSTNAME_FIELD.'," ",usr.'.USERS_LASTNAME_FIELD.') as name, rem_Freq, rem_StartDate from usrReminders left join '.USERS_DATABASE.'.'.USERS_TABLE.' usr on usr.'.USERS_ID_FIELD.'=rem_OwnerUGrpID where rem_RecID='.$record['rec_id']);
+								$res2 = mysql_query('select concat(usr.'.USERS_FIRSTNAME_FIELD.'," ",usr.'.USERS_LASTNAME_FIELD.') as name, rem_Freq, rem_StartDate from usrReminders left join '.USERS_DATABASE.'.'.USERS_TABLE.' usr on usr.'.USERS_ID_FIELD.'=rem_OwnerUGrpID where rem_RecID='.$record['rec_ID']);
         $rems = Array();
         while ($rem = mysql_fetch_assoc($res2))
             $rems[] = $rem['name'].' '.$rem['rem_Freq'].($rem['rem_Freq']=='once' ? ' on ' : ' from ').$rem['rem_StartDate'];
@@ -422,13 +422,13 @@
 	function detail_get_html_input_str( $detail, $repeatCount, $is_master ) {
 		$is_type_repeatable = $repeatCount != 1;
      foreach($detail as $rg){
-        $detail_id = $rg['rd_id'];
-        $detail_type = $rg['rd_type'];
-        if ($rg['rd_val']) {
-            if ($rg['rd_geo']) $detail_val = $rg['rd_geo'];
-            else $detail_val = $rg['rd_val'];
-        }elseif ($rg['rd_file_id']) {
-            $rd_temp = mysql_fetch_array(mysql_query('select file_orig_name from files where file_id ='.$rg['rd_file_id']));
+			$detail_id = $rg['dtl_ID'];
+			$detail_type = $rg['dtl_DetailTypeID'];
+			if ($rg['dtl_Value']) {
+				if ($rg['dtl_Geo']) $detail_val = $rg['dtl_Geo'];
+				else $detail_val = $rg['dtl_Value'];
+			}elseif ($rg['dtl_UploadedFileID']) {
+				$rd_temp = mysql_fetch_array(mysql_query('select file_orig_name from files where file_id ='.$rg['dtl_UploadedFileID']));
             $detail_val = $rd_temp[0];
         }
 
@@ -462,14 +462,14 @@
 	if (in_array($rd_type, array_keys($reference_bdts))) {
 		if (is_array($rd_val)) {
 			foreach ($rd_val as $val){
-                $title = mysql_fetch_assoc(mysql_query('select rec_title from records where rec_id ='.$val));
-                $rv[] = '<a target="edit" href="'.HEURIST_URL_BASE.'records/editrec/edit.html?bib_id='.$val.'">'.$title['rec_title'].'</a>';
+					$title = mysql_fetch_assoc(mysql_query('select rec_Title from Records where rec_ID ='.$val));
+					$rv[] = '<a target="edit" href="'.HEURIST_URL_BASE.'records/editrec/edit.html?bib_id='.$val.'">'.$title['rec_Title'].'</a>';
             }
 			return $rv;
 		}
 		else {
-            $title = mysql_fetch_assoc(mysql_query('select rec_title from records where rec_id ='.$rd_val));
-			return '<a target="edit" href="'.HEURIST_URL_BASE.'records/editrec/edit.html?bib_id='.$rd_val.'">'.$title['rec_title'].'</a>';
+				$title = mysql_fetch_assoc(mysql_query('select rec_Title from Records where rec_ID ='.$rd_val));
+				return '<a target="edit" href="'.HEURIST_URL_BASE.'records/editrec/edit.html?bib_id='.$rd_val.'">'.$title['rec_Title'].'</a>';
 		}
 	}
 	/*
@@ -528,8 +528,8 @@
 
 		// set modified on master so the changes will stick  aslo update url if there is one.
      $now = date('Y-m-d H:i:s');
-     $pairs =(@$_REQUEST['URL']? array("rec_url" =>$_REQUEST['URL'], "rec_modified" => $now): array("rec_modified" => $now));
-     mysql__update("records", "rec_id=$master_rec_id", $pairs );
+		$pairs =(@$_REQUEST['URL']? array("rec_URL" =>$_REQUEST['URL'], "rec_Modified" => $now): array("rec_Modified" => $now));
+		mysql__update("Records", "rec_ID=$master_rec_id", $pairs );
 		//process keeps - which means find repeatables in master record to delete  all_details - keeps = deletes
 		//get array of repeatable detail ids for master
     $master_rep_dt_ids = array();
@@ -541,7 +541,7 @@
     foreach($master_rep_dt_ids as $rep_dt_id ){
        if (array_key_exists($rep_dt_id,$master_details)){
            foreach ($master_details[$rep_dt_id]as $detail){
-                array_push($master_rep_detail_ids, $detail['rd_id']);
+					array_push($master_rep_detail_ids, $detail['dtl_ID']);
            }
        }
     }
@@ -563,16 +563,16 @@
        $update_detail=array();
        foreach($update_dt_ids as $rdt_id => $rd_id){
            //look up data for detail and
-             $update_detail = mysql_fetch_assoc(mysql_query('select * from rec_details where rd_id='.$rd_id));
+				$update_detail = mysql_fetch_assoc(mysql_query('select * from recDetails where dtl_ID='.$rd_id));
             // if exist in master details  update val
             if(in_array($rdt_id,array_keys($master_details))){
-                mysql__update("rec_details", "rd_id=".$master_details[$rdt_id][0]['rd_id'], array( "rd_val" => $update_detail['rd_val']));
+					mysql__update("recDetails", "dtl_ID=".$master_details[$rdt_id][0]['dtl_ID'], array( "dtl_Value" => $update_detail['dtl_Value']));
 
             // else  insert the data as detail for master record
             }else {
-                   unset($update_detail['rd_id']);         //get rid of the detail id the insert will create a new one.
-                   $update_detail['rd_rec_id'] = $master_rec_id;   // set this as a detail of the master record
-                   mysql__insert('rec_details',$update_detail);
+					unset($update_detail['dtl_ID']);         //get rid of the detail id the insert will create a new one.
+					$update_detail['dtl_RecID'] = $master_rec_id;   // set this as a detail of the master record
+					mysql__insert('recDetails',$update_detail);
             }
        }
    }
@@ -583,14 +583,14 @@
     foreach($add_dt_ids as $key => $detail_ids){
        foreach($detail_ids as $detail_id){
        // since adds are only for repeatables check if it exist in delete array ?yes - remove from delete list if there
-           if ($key_remove = array_search($detail_id, $master_delete_dt_ids)!== FALSE){      //FIXME need to compare teh value not the rd_id (they will always be diff)
+					if ($key_remove = array_search($detail_id, $master_delete_dt_ids)!== FALSE){      //FIXME need to compare teh value not the dtl_ID (they will always be diff)
                //remove from array
                unset($master_delete_dt_ids[$key_remove]);
            }else{ //no  then lookup data for detail and insert the data as detail under the master rec id
-               $add_detail = mysql_fetch_assoc(mysql_query('select * from rec_details where rd_id='.$detail_id));
-               unset($add_detail['rd_id']); //the id is auto set during insert
-               $add_detail['rd_rec_id'] = $master_rec_id;
-               mysql__insert('rec_details',$add_detail);
+						$add_detail = mysql_fetch_assoc(mysql_query('select * from recDetails where dtl_ID='.$detail_id));
+						unset($add_detail['dtl_ID']); //the id is auto set during insert
+						$add_detail['dtl_RecID'] = $master_rec_id;
+						mysql__insert('recDetails',$add_detail);
            }
        }
     }
@@ -664,26 +664,26 @@
 		//delete master details
    if($master_delete_dt_ids && count($master_delete_dt_ids)){
         $master_detail_delete_list = '('.join(',',$master_delete_dt_ids).')';
-        mysql_query('delete from rec_details where rd_id in '.$master_detail_delete_list);  //FIXME add error code
+			mysql_query('delete from recDetails where dtl_ID in '.$master_detail_delete_list);  //FIXME add error code
    }
 		//delete dup details
-    mysql_query('delete from rec_details where rd_rec_id in '.$dup_rec_list);
+		mysql_query('delete from recDetails where dtl_RecID in '.$dup_rec_list);
 		//delete dup usrBookmarks
     if (strlen($delete_bkm_IDs_list)>2) {
         mysql_query('delete from usrBookmarks where bkm_ID in '.$delete_bkm_IDs_list);
     }
 
  // move dup record pointers to master record
-    mysql_query('update rec_details left join defDetailTypes on dty_ID=rd_type set rd_val='.$master_rec_id.
-                 ' where rd_val in '.$dup_rec_list.' and dty_Type="resource"');
+		mysql_query('update recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID set dtl_Value='.$master_rec_id.
+		' where dtl_Value in '.$dup_rec_list.' and dty_Type="resource"');
 
 		//delete dups
-    mysql_query('delete from records where rec_id in '.$dup_rec_list);
+		mysql_query('delete from Records where rec_ID in '.$dup_rec_list);
 
 		//delete unwanted details in master
  //if ($master_delete_dt_ids && $master_delete_dt_ids[0]){
  //    $master_delete_dt_ids_list = '('.join(',',$master_delete_dt_ids). ')' ;
- //    mysql_query('delete from rec_details where rd_id in '.$master_delete_dt_ids_list);
+		//    mysql_query('delete from recDetails where dtl_ID in '.$master_delete_dt_ids_list);
  // }
 
  //try to get the record to update title and hash
@@ -692,9 +692,9 @@
     $mask = mysql__select_array("defRecTypes", "rty_TitleMask", "rty_ID=".$type);  $mask = $mask[0];
     $title = fill_title_mask($mask, $master_rec_id, $type);
     if ($title) {
-        mysql_query("update records set rec_title = '" . addslashes($title) . "' where rec_id = $master_rec_id");
+			mysql_query("update Records set rec_Title = '" . addslashes($title) . "' where rec_ID = $master_rec_id");
     }
-    mysql_query('update records set rec_hhash = hhash(rec_id), rec_simple_hash = simple_hash(rec_id) where rec_id='.$master_rec_id);
+		mysql_query('update Records set rec_Hash = hhash(rec_ID) where rec_ID='.$master_rec_id);
 
 
  	header('Location: fix_dupes.php?bib_ids='.$_REQUEST['bib_ids']);

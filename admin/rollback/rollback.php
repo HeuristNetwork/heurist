@@ -12,7 +12,7 @@ mysql_connection_overwrite(DATABASE);
 function getTargetVersions ($rec_ids=null, $before_date=null) {
 	// find the last non-false-delta version before a given date,
 	// OR if no date is specifed, find the previous version of the given records
-	// returns an assoc array of (rec_id => arec_ver)
+	// returns an assoc array of (rec_ID => arec_ver)
 
 	if (! $rec_ids  &&  ! $before_date) {
 		return null;
@@ -140,7 +140,7 @@ function getDetailRollbacks ($rec_id, $version) {
 		}
 	}
 
-	$current_details = mysql__select_array("rec_details", "rd_id", "rd_rec_id = $rec_id");
+	$current_details = mysql__select_array("recDetails", "dtl_ID", "dtl_RecID = $rec_id");
 
 	foreach ($potential_deletes as $potential_delete) {
 		if (in_array($potential_delete, $current_details)) {
@@ -157,12 +157,12 @@ function getDetailRollbacks ($rec_id, $version) {
 			$ard_file_id = $potential_update["ard_file_id"];
 			$ard_geo = $potential_update["ard_geo"];
 			$res = mysql_query("
-				select rd_id
-				from rec_details
-				where rd_id = $ard_id
-				and rd_val " . ($ard_val ? "= '" . addslashes($ard_val) . "'" : "is null") . "
-				and rd_file_id " . ($ard_file_id ? "= $ard_file_id" : "is null") . "
-				and astext(rd_geo) " . ($ard_geo ? "= '$ard_geo'" : "is null")
+				select dtl_ID
+				from recDetails
+				where dtl_ID = $ard_id
+				and dtl_Value " . ($ard_val ? "= '" . addslashes($ard_val) . "'" : "is null") . "
+				and dtl_UploadedFileID " . ($ard_file_id ? "= $ard_file_id" : "is null") . "
+				and astext(dtl_Geo) " . ($ard_geo ? "= '$ard_geo'" : "is null")
 			);
 			if (mysql_num_rows($res) == 0) {
 				array_push($updates, $potential_update);
@@ -199,7 +199,7 @@ function rollRecordBack ($rec_id, $changes) {
 
 	mysql_query("start transaction");
 
-	mysql_query("update records set rec_modified = now() where rec_id = $rec_id");
+	mysql_query("update Records set rec_Modified = now() where rec_ID = $rec_id");
 	if (mysql_error()) {
 		error_log(mysql_error());
 		mysql_query("rollback");
@@ -212,10 +212,10 @@ function rollRecordBack ($rec_id, $changes) {
 		$rd_file_id  = $update["ard_file_id"] ? $update["ard_file_id"] : "null";
 		$rd_geo      = $update["ard_geo"] ? "geomfromtext('" . $update["ard_geo"] . "')" : "null";
 		mysql_query("
-			update rec_details
-			set rd_val = $rd_val, rd_file_id = $rd_file_id, rd_geo = $rd_geo
-			where rd_rec_id = $rec_id
-			and rd_id = $rd_id
+			update recDetails
+			set dtl_Value = $rd_val, dtl_UploadedFileID = $rd_file_id, dtl_Geo = $rd_geo
+			where dtl_RecID = $rec_id
+			and dtl_ID = $rd_id
 		");
 		if (mysql_error()) {
 			error_log(mysql_error());
@@ -231,7 +231,7 @@ function rollRecordBack ($rec_id, $changes) {
 		$rd_file_id  = $insert["ard_file_id"] ? $insert["ard_file_id"] : "null";
 		$rd_geo      = $insert["ard_geo"] ? "geomfromtext('" . $insert["ard_geo"] . "')" : "null";
 		mysql_query("
-			insert into rec_details (rd_rec_id, rd_type, rd_val, rd_file_id, rd_geo)
+			insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, dtl_Geo)
 			values ($rec_id, $rd_type, $rd_val, $rd_file_id, $rd_geo)
 		");
 		if (mysql_error()) {
@@ -242,7 +242,7 @@ function rollRecordBack ($rec_id, $changes) {
 	}
 
 	foreach ($changes["deletes"] as $ard_id) {
-		mysql_query("delete from rec_details where rd_id = $ard_id");
+		mysql_query("delete from recDetails where dtl_ID = $ard_id");
 		if (mysql_error()) {
 			error_log(mysql_error());
 			mysql_query("rollback");
@@ -252,10 +252,10 @@ function rollRecordBack ($rec_id, $changes) {
 
 	// update record title if necessary
 	$res = mysql_query("
-		select rec_type, rty_TitleMask
-		from records, defRecTypes
-		where rec_id = $rec_id
-		and rty_ID = rec_type
+		select rec_RecTypeID, rty_TitleMask
+		from Records, defRecTypes
+		where rec_ID = $rec_id
+		and rty_ID = rec_RecTypeID
 	");
 	if ($res) {
 		$row = mysql_fetch_row($res);
@@ -263,7 +263,7 @@ function rollRecordBack ($rec_id, $changes) {
 			$title = fill_title_mask($row[1], $rec_id, $row[0]);
 			if ($title) {
 				mysql_query("set @suppress_update_trigger := 1");
-				mysql_query("update records set rec_title = '" . addslashes($title) . "' where rec_id = $rec_id");
+				mysql_query("update Records set rec_Title = '" . addslashes($title) . "' where rec_ID = $rec_id");
 				if (mysql_error()) {
 					error_log(mysql_error());
 					mysql_query("rollback");

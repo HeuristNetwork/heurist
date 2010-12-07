@@ -99,8 +99,8 @@ if ($_REQUEST['bkmrk_bkmk_url']) {
 	if (substr($burl, -1) == '/') $burl = substr($burl, 0, strlen($burl)-1);
 
 	/* look up the user's bookmark (usrBookmarks) table, see if they've already got this URL bookmarked -- if so, just edit it */
-	$res = mysql_query('select bkm_ID from usrBookmarks left join records on rec_id=bkm_recID where bkm_UGrpID="'.addslashes($usrID).'"
-							and (rec_url="'.addslashes($burl).'" or rec_url="'.addslashes($burl).'/")');
+	$res = mysql_query('select bkm_ID from usrBookmarks left join Records on rec_ID=bkm_recID where bkm_UGrpID="'.addslashes($usrID).'"
+							and (rec_URL="'.addslashes($burl).'" or rec_URL="'.addslashes($burl).'/")');
 	if (mysql_num_rows($res) > 0) {
 		$bkmk = mysql_fetch_assoc($res);
 		$bkm_ID = $bkmk['bkm_ID'];
@@ -170,16 +170,16 @@ if (! @$_REQUEST['_submit']  &&  $_REQUEST['bkmrk_bkmk_url']) {
 	if (! $rec_id  &&  ! $force_new) {
 		/* look up the records table, see if the requested URL is already in the database; if not, add it */
 
-		$res = mysql_query('select * from records where rec_url = "'.addslashes($url).'" and (rec_wg_id=0 or rec_visibility="viewable")');
+		$res = mysql_query('select * from Records where rec_URL = "'.addslashes($url).'" and (rec_OwnerUGrpID=0 or rec_NonOwnerVisibility="viewable")');
 		if (($row = mysql_fetch_assoc($res))) {
-			$rec_id = intval($row['rec_id']);
+			$rec_id = intval($row['rec_ID']);
 			$fav = $_REQUEST["f"];
 
-			$bd = mysql__select_assoc('rec_details', 'concat(rd_type, ".", rd_val)', '1',
-				'rd_rec_id='.$rec_id.' and ((rd_type = 198 and rd_val in ("'.join('","', array_map("addslashes", $dois)).'"))
-				                        or  (rd_type = 347 and rd_val = "'.addslashes($fav).'"))
-				                        or  (rd_type = 188 and rd_val in ("'.join('","', array_map("addslashes", $issns)).'"))
-				                        or  (rd_type = 187 and rd_val in ("'.join('","', array_map("addslashes", $isbns)).'")))');
+			$bd = mysql__select_assoc('recDetails', 'concat(dtl_DetailTypeID, ".", dtl_Value)', '1',
+				'dtl_RecID='.$rec_id.' and ((dtl_DetailTypeID = 198 and dtl_Value in ("'.join('","', array_map("addslashes", $dois)).'"))
+				                        or  (dtl_DetailTypeID = 347 and dtl_Value = "'.addslashes($fav).'"))
+				                        or  (dtl_DetailTypeID = 188 and dtl_Value in ("'.join('","', array_map("addslashes", $issns)).'"))
+				                        or  (dtl_DetailTypeID = 187 and dtl_Value in ("'.join('","', array_map("addslashes", $isbns)).'")))');
 
 			$inserts = array();
 			foreach ($dois as $doi) if (! $bd["198.$doi"]) array_push($inserts, "($rec_id, 198, '" . addslashes($doi) . "')");
@@ -188,8 +188,8 @@ if (! @$_REQUEST['_submit']  &&  $_REQUEST['bkmrk_bkmk_url']) {
 			foreach ($issns as $issn) if (! $bd["188.$issn"]) array_push($inserts, "($rec_id, 188, '" . addslashes($issn) . "')");
 
 			if ($inserts) {
-				mysql_query("update records set rec_modified = now() where rec_id = $rec_id");
-				mysql_query("insert into rec_details (rd_rec_id, rd_type, rd_val) values " . join(",", $inserts));
+				mysql_query("update Records set rec_Modified = now() where rec_ID = $rec_id");
+				mysql_query("insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values " . join(",", $inserts));
 			}
 		}
 	}
@@ -226,28 +226,28 @@ if (! @$_REQUEST['_submit']  &&  $_REQUEST['bkmrk_bkmk_url']) {
 			return;
 		}
 
-		mysql__insert('records', array('rec_url' => $url,
-		                              'rec_title' => $_REQUEST['bkmrk_bkmk_title'],
-	                                      'rec_scratchpad' => $description,
-		                              'rec_added' => date('Y-m-d H:i:s'),
-		                              'rec_modified' => date('Y-m-d H:i:s'),
-		                              'rec_added_by_usr_id' => intval($usrID),
-		                              'rec_type' => $_REQUEST['bib_reftype'],
-		                              'rec_wg_id' => intval($_REQUEST['bib_workgroup']),
-		                              'rec_visibility' => (intval($_REQUEST['bib_workgroup'])? ((strtolower($_REQUEST['bib_visibility']) == 'hidden')? 'Hidden' : 'Viewable') : NULL),
-		                              'rec_temporary' => ! ($url  ||  $_REQUEST['bkmrk_bkmk_title'])));
+		mysql__insert('Records', array('rec_URL' => $url,
+		                              'rec_Title' => $_REQUEST['bkmrk_bkmk_title'],
+	                                      'rec_ScratchPad' => $description,
+		                              'rec_Added' => date('Y-m-d H:i:s'),
+		                              'rec_Modified' => date('Y-m-d H:i:s'),
+		                              'rec_AddedByUGrpID' => intval($usrID),
+		                              'rec_RecTypeID' => $_REQUEST['bib_reftype'],
+		                              'rec_OwnerUGrpID' => intval($_REQUEST['bib_workgroup']),
+		                              'rec_NonOwnerVisibility' => (intval($_REQUEST['bib_workgroup'])? ((strtolower($_REQUEST['bib_visibility']) == 'hidden')? 'Hidden' : 'Viewable') : NULL),
+		                              'rec_FlagTemporary' => ! ($url  ||  $_REQUEST['bkmrk_bkmk_title'])));
 		$rec_id = mysql_insert_id();
 
 		// there are sometimes cases where there is no title set (e.g. webpage with no TITLE tag)
 		if ($_REQUEST['bkmrk_bkmk_title']) {
-			mysql_query('insert into rec_details (rd_rec_id, rd_type, rd_val) values ('.$rec_id.',160,"'.addslashes($_REQUEST['bkmrk_bkmk_title']).'")');
+			mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id.',160,"'.addslashes($_REQUEST['bkmrk_bkmk_title']).'")');
 		}
 		$inserts = array();
 		foreach ($dois as $doi) array_push($inserts, "($rec_id, 198, '" . addslashes($doi) . "')");
 		if (@$_REQUEST["f"]) array_push($inserts, "($rec_id, 347, '" . addslashes($_REQUEST["f"]) . "')");
 		foreach ($isbns as $isbn) array_push($inserts, "($rec_id, 187, '" . addslashes($isbn) . "')");
 		foreach ($issns as $issn) array_push($inserts, "($rec_id, 188, '" . addslashes($issn) . "')");
-		if ($inserts) mysql_query('insert into rec_details (rd_rec_id, rd_type, rd_val) values ' . join(",", $inserts));
+		if ($inserts) mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ' . join(",", $inserts));
 
 		if ($description) insert_woot_content($rec_id, $description);
 	}
@@ -269,23 +269,23 @@ if (! $rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 							. '&wg_id=' . urlencode(intval($_REQUEST['bib_workgroup'])));
 		return;
 	}
-	mysql__insert('records', array('rec_title' => $_REQUEST['bkmrk_bkmk_title'],
-	                              'rec_scratchpad' => $description,
-	                              'rec_added' => date('Y-m-d H:i:s'),
-	                              'rec_modified' => date('Y-m-d H:i:s'),
-	                              'rec_added_by_usr_id' => intval($usrID),
-		                      'rec_type' => ($_REQUEST['bib_reftype']? intval($_REQUEST['bib_reftype']) : NULL),
-		                      'rec_wg_id' => intval($_REQUEST['bib_workgroup']),
-		                      'rec_visibility' => (intval($_REQUEST['bib_workgroup'])? ((strtolower($_REQUEST['bib_visibility']) == 'hidden')? 'Hidden' : 'Viewable') : NULL),
-	                              'rec_temporary' => ! $_REQUEST['bkmrk_bkmk_title']));
+	mysql__insert('Records', array('rec_Title' => $_REQUEST['bkmrk_bkmk_title'],
+	                              'rec_ScratchPad' => $description,
+	                              'rec_Added' => date('Y-m-d H:i:s'),
+	                              'rec_Modified' => date('Y-m-d H:i:s'),
+	                              'rec_AddedByUGrpID' => intval($usrID),
+		                      'rec_RecTypeID' => ($_REQUEST['bib_reftype']? intval($_REQUEST['bib_reftype']) : NULL),
+		                      'rec_OwnerUGrpID' => intval($_REQUEST['bib_workgroup']),
+		                      'rec_NonOwnerVisibility' => (intval($_REQUEST['bib_workgroup'])? ((strtolower($_REQUEST['bib_visibility']) == 'hidden')? 'Hidden' : 'Viewable') : NULL),
+	                              'rec_FlagTemporary' => ! $_REQUEST['bkmrk_bkmk_title']));
 	$rec_id = mysql_insert_id();
-	if ($_REQUEST['bkmrk_bkmk_title']) mysql_query('insert into rec_details (rd_rec_id, rd_type, rd_val) values ('.$rec_id.',160,"'.addslashes($_REQUEST['bkmrk_bkmk_title']).'")');
+	if ($_REQUEST['bkmrk_bkmk_title']) mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id.',160,"'.addslashes($_REQUEST['bkmrk_bkmk_title']).'")');
 	$inserts = array();
 	foreach ($dois as $doi) array_push($inserts, "($rec_id, 198, '" . addslashes($doi) . "')");
 	if (@$_REQUEST["f"]) array_push($inserts, "($rec_id, 347, '" . addslashes($_REQUEST["f"]) . "')");
 	foreach ($isbns as $isbn) array_push($inserts, "($rec_id, 187, '" . addslashes($isbn) . "')");
 	foreach ($issns as $issn) array_push($inserts, "($rec_id, 188, '" . addslashes($issn) . "')");
-	if ($inserts) mysql_query('insert into rec_details (rd_rec_id, rd_type, rd_val) values ' . join(",", $inserts));
+	if ($inserts) mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ' . join(",", $inserts));
 
 	if ($description) insert_woot_content($rec_id, $description);
 }
@@ -300,7 +300,7 @@ if ($rec_id  &&  ! @$_REQUEST['force_new']) {
 	$bkmk = mysql_fetch_assoc($res);
 	if ($bkmk  &&  $bkmk['bkm_ID']) {
 		if ($description) {
-			$dres = mysql_query("select rec_scratchpad from records where rec_id = " . $rec_id);
+			$dres = mysql_query("select rec_ScratchPad from Records where rec_ID = " . $rec_id);
 			$existingDescription = mysql_fetch_row($dres);
 			$existingDescription = $existingDescription[0];
 
@@ -315,7 +315,7 @@ if ($rec_id  &&  ! @$_REQUEST['force_new']) {
 				}
 			}
 			$notesOut = preg_replace("/\n\n+/", "\n", $notesOut);
-			mysql_query("update records set rec_scratchpad = '" . addslashes($notesOut) . "' where rec_id = $rec_id");
+			mysql_query("update Records set rec_ScratchPad = '" . addslashes($notesOut) . "' where rec_ID = $rec_id");
 
 			insert_woot_content($rec_id, $description);
 		}
@@ -328,9 +328,9 @@ if ($rec_id  &&  ! @$_REQUEST['force_new']) {
 // if there is a record now then add any extras that have been passed in - tags or related records
 if ($rec_id) {
 	if ($rec_id  &&  ! $url) {
-		$res = mysql_query('select * from records where rec_id = "'.addslashes($rec_id).'" and (rec_wg_id=0 or rec_visibility="viewable")');
+		$res = mysql_query('select * from Records where rec_ID = "'.addslashes($rec_id).'" and (rec_OwnerUGrpID=0 or rec_NonOwnerVisibility="viewable")');
 		$row = mysql_fetch_assoc($res);
-		$url = $row['rec_url'];
+		$url = $row['rec_URL'];
 	}
 
 	mysql__insert('usrBookmarks', array(
@@ -389,17 +389,17 @@ if ($rec_id) {
 				$reln_type = $row["trm_Label"];	// saw TODO: check that this is aligned with the enum value change
 			}
 		}
-		mysql__insert("records", array(
-			"rec_title" => "Relationship ($rec_id $reln_type $other_bib_id)",	// saw TODO: do we want to create a human readable string here??
-					"rec_added"     => date('Y-m-d H:i:s'),
-					"rec_modified"  => date('Y-m-d H:i:s'),
-					"rec_type"   => 52,
-					"rec_added_by_usr_id" => $usrID
+		mysql__insert("Records", array(
+			"rec_Title" => "Relationship ($rec_id $reln_type $other_bib_id)",	// saw TODO: do we want to create a human readable string here??
+					"rec_Added"     => date('Y-m-d H:i:s'),
+					"rec_Modified"  => date('Y-m-d H:i:s'),
+					"rec_RecTypeID"   => 52,
+					"rec_AddedByUGrpID" => $usrID
 		));
 		$relnBibID = mysql_insert_id();
 
 		if ($relnBibID > 0) {
-			$query = "insert into rec_details (rd_rec_id, rd_type, rd_val) values ";
+			$query = "insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ";
 			$query .=   "($relnBibID, 160, 'Relationship')";
 			$query .= ", ($relnBibID, 202, $rec_id)";
 			$query .= ", ($relnBibID, 199, $other_bib_id)";

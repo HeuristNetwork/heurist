@@ -115,11 +115,11 @@ array_push($wg_ids, 0);
 $bkm_ID = intval(@$_REQUEST['bkmk_id']);
 $rec_id = intval(@$_REQUEST['bib_id']);
 if ($bkm_ID) {
-	$res = mysql_query('select * from usrBookmarks left join records on bkm_recID=rec_id left join defRecTypes on rec_type=rty_ID where bkm_ID='.$bkm_ID.' and bkm_UGrpID='.get_user_id().' and (not rec_temporary or rec_temporary is null)');
+	$res = mysql_query('select * from usrBookmarks left join Records on bkm_recID=rec_ID left join defRecTypes on rec_RecTypeID=rty_ID where bkm_ID='.$bkm_ID.' and bkm_UGrpID='.get_user_id().' and (not rec_FlagTemporary or rec_FlagTemporary is null)');
 	$bibInfo = mysql_fetch_assoc($res);
 	print_details($bibInfo);
 } else if ($rec_id) {
-	$res = mysql_query('select * from records left join defRecTypes on rec_type=rty_ID where rec_id='.$rec_id.' and not rec_temporary');
+	$res = mysql_query('select * from Records left join defRecTypes on rec_RecTypeID=rty_ID where rec_ID='.$rec_id.' and not rec_FlagTemporary');
 	$bibInfo = mysql_fetch_assoc($res);
 	print_details($bibInfo);
 } else {
@@ -153,15 +153,15 @@ function print_details($bib) {
 
 // this functions outputs the header line of icons and links for managing the record.
 function print_header_line($bib) {
-	$rec_id = $bib['rec_id'];
-	$url = $bib['rec_url'];
+	$rec_id = $bib['rec_ID'];
+	$url = $bib['rec_URL'];
 	if ($url  &&  ! preg_match('!^[^\\/]+:!', $url))
 		$url = 'http://' . $url;
 
-	$webIcon = @mysql_fetch_row(mysql_query("select rd_val from rec_details where rd_rec_id=" . $bib['rec_id'] . " and rd_type=347"));
+	$webIcon = @mysql_fetch_row(mysql_query("select dtl_Value from recDetails where dtl_RecID=" . $bib['rec_ID'] . " and dtl_DetailTypeID=347"));
 	$webIcon = @$webIcon[0];
 ?>
-<div class=HeaderRow><h2><?= htmlspecialchars($bib['rec_title']) ?></h2>
+<div class=HeaderRow><h2><?= htmlspecialchars($bib['rec_Title']) ?></h2>
 <div id=footer>
 <h3><?= htmlspecialchars($bib['rty_Name']) ?></h3>
 <div id=recID>Record ID:<?= htmlspecialchars($rec_id) ?><nobr><span class="link"><a id=edit-link class=normal target=_self href="../editrec/edit.html?bib_id=<?= $rec_id ?>" onclick="return sane_link_opener(this);"><img src="../../common/images/edit-pencil.png" title="Edit Record"></a></span></nobr></div>
@@ -169,7 +169,7 @@ function print_header_line($bib) {
 </div>
 <div class=detailRowHeader>
 
-<?php if (defined('EXPLORE_URL')  &&  $bib['rec_visibility'] != 'Hidden') { ?>
+<?php if (defined('EXPLORE_URL')  &&  $bib['rec_NonOwnerVisibility'] != 'Hidden') { ?>
  <span class="link"><a target=_blank href="<?= EXPLORE_URL . $rec_id ?>"><img src="../../common/images/follow_links_16x16.gif">explore</a></span>
 <?php } ?>
 <?php if (@$url) { ?>
@@ -187,7 +187,7 @@ function print_header_line($bib) {
 //this  function displays private info if there is any.
 function print_private_details($bib) {
 
-	$res = mysql_query('select grp.ugr_Name from records, '.USERS_DATABASE.'.sysUGrps grp where grp.ugr_ID=rec_wg_id and grp.ugr_Type!="User"  and rec_id='.$bib['rec_id']);
+	$res = mysql_query('select grp.ugr_Name from Records, '.USERS_DATABASE.'.sysUGrps grp where grp.ugr_ID=rec_OwnerUGrpID and grp.ugr_Type!="User"  and rec_ID='.$bib['rec_ID']);
 	$workgroup_name = NULL;
 	// check to see if this record is owned by a workgroup
 	if (mysql_num_rows($res) > 0) {
@@ -195,7 +195,7 @@ function print_private_details($bib) {
 		$workgroup_name = $row[0];
 	}
 	// check for workgroup tags
-	$res = mysql_query('select grp.ugr_Name, tag_Text from usrRecTagLinks left join usrTags on rtl_TagID=tag_ID left join '.USERS_DATABASE.'.sysUGrps grp on tag_UGrpID=grp.ugr_ID left join '.USERS_DATABASE.'.sysUsrGrpLinks on ugl_GroupID=ugr_ID and ugl_UserID='.get_user_id().' where rtl_RecID='.$bib['rec_id'].' and tag_UGrpID is not null and ugl_ID is not null order by rtl_Order');
+	$res = mysql_query('select grp.ugr_Name, tag_Text from usrRecTagLinks left join usrTags on rtl_TagID=tag_ID left join '.USERS_DATABASE.'.sysUGrps grp on tag_UGrpID=grp.ugr_ID left join '.USERS_DATABASE.'.sysUsrGrpLinks on ugl_GroupID=ugr_ID and ugl_UserID='.get_user_id().' where rtl_RecID='.$bib['rec_ID'].' and tag_UGrpID is not null and ugl_ID is not null order by rtl_Order');
 	$kwds = array();
 	while ($row = mysql_fetch_row($res)) array_push($kwds, $row);
 	if ( $workgroup_name || count($kwds) || $bib['bkm_ID']) {
@@ -209,7 +209,7 @@ function print_private_details($bib) {
 		<div class=detail>
 			<?php
 				print '<span style="font-weight: bold; color: black;">'.htmlspecialchars($workgroup_name).'</span>';
-				if ($bib['rec_visibility'] == 'Viewable') print '<span> - read-only to others</span></div></div>';
+				if ($bib['rec_NonOwnerVisibility'] == 'Viewable') print '<span> - read-only to others</span></div></div>';
 				else print '<span> - hidden to others</span></div></div>';
 				}
 			?>
@@ -301,25 +301,25 @@ function print_private_details($bib) {
 	function print_public_details($bib) {
 		$bds_res = mysql_query('select dty_ID,
 		                               ifnull(rdro.rst_NameInForm, ifnull(rdr.rst_NameInForm, dty_Name)) as name,
-		                               rd_val as val,
-		                               rd_file_id,
+		                               dtl_Value as val,
+		                               dtl_UploadedFileID,
 		                               dty_Type,
-		                               if(rd_geo is not null, astext(rd_geo), null) as rd_geo,
-		                               if(rd_geo is not null, astext(envelope(rd_geo)), null) as bd_geo_envelope
-		                          from rec_details
-		                     left join defDetailTypes on dty_ID = rd_type
-		                     left join defRecStructure rdr on rdr.rst_DetailTypeID = rd_type
-		                                                          and rdr.rst_RecTypeID = '.$bib['rec_type'].'
-		                     left join rec_detail_requirements_overrides rdro on rdro.rst_DetailTypeID = rd_type
-		                                                                     and rdro.rst_RecTypeID = '.$bib['rec_type'].'
+		                               if(dtl_Geo is not null, astext(dtl_Geo), null) as dtl_Geo,
+		                               if(dtl_Geo is not null, astext(envelope(dtl_Geo)), null) as bd_geo_envelope
+		                          from recDetails
+		                     left join defDetailTypes on dty_ID = dtl_DetailTypeID
+		                     left join defRecStructure rdr on rdr.rst_DetailTypeID = dtl_DetailTypeID
+		                                                          and rdr.rst_RecTypeID = '.$bib['rec_RecTypeID'].'
+		                     left join rec_detail_requirements_overrides rdro on rdro.rst_DetailTypeID = dtl_DetailTypeID
+		                                                                     and rdro.rst_RecTypeID = '.$bib['rec_RecTypeID'].'
 		                                                                     and rdro.rdr_wg_id = 0
-		                         where rd_rec_id = ' . $bib['rec_id'] .'
+		                         where dtl_RecID = ' . $bib['rec_ID'] .'
 		                      order by rdro.rst_OrderInForm is null,
 		                               rdro.rst_OrderInForm,
 		                               rdr.rst_OrderInForm is null,
 		                               rdr.rst_OrderInForm,
 		                               dty_ID,
-		                               rd_id');
+		                               dtl_ID');
 
 		$bds = array();
 		$thumbs = array();
@@ -335,11 +335,11 @@ function print_private_details($bib) {
 
 			if ($bd['dty_Type'] == 'resource') {
 
-				$res = mysql_query('select rec_title from records where rec_id='.intval($bd['val']));
+				$res = mysql_query('select rec_Title from Records where rec_ID='.intval($bd['val']));
 				$row = mysql_fetch_row($res);
 				$bd['val'] = '<a target="_new" href="'.HEURIST_SITE_PATH.'records/viewrec/view.php?bib_id='.$bd['val'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row[0]).'</a>';
-			} else if ($bd['dty_Type'] == 'file'  &&  $bd['rd_file_id']) {
-				$res = mysql_query('select * from files where file_id='.intval($bd['rd_file_id']));
+			} else if ($bd['dty_Type'] == 'file'  &&  $bd['dtl_UploadedFileID']) {
+				$res = mysql_query('select * from files where file_id='.intval($bd['dtl_UploadedFileID']));
 				$file = mysql_fetch_assoc($res);
 				if ($file) {
 					$img_url = HEURIST_SITE_PATH.'records/files/fetch_file.php/'.$file['file_orig_name'].'?file_id='.$file['file_nonce'];
@@ -358,9 +358,9 @@ function print_private_details($bib) {
 					else
 						$trim_url = $bd['val'];
 					$bd['val'] = '<a href="'.$bd['val'].'" target="_new">'.htmlspecialchars($trim_url).'</a>';
-				} else if ($bd['rd_geo'] && preg_match("/^POLYGON[(][(]([^ ]+) ([^ ]+),[^,]*,([^ ]+) ([^,]+)/", $bd["bd_geo_envelope"], $poly)) {
+				} else if ($bd['dtl_Geo'] && preg_match("/^POLYGON[(][(]([^ ]+) ([^ ]+),[^,]*,([^ ]+) ([^,]+)/", $bd["bd_geo_envelope"], $poly)) {
 					list($match, $minX, $minY, $maxX, $maxY) = $poly;
-					if ($bd["val"] == "l"  &&  preg_match("/^LINESTRING[(]([^ ]+) ([^ ]+),.*,([^ ]+) ([^ ]+)[)]$/",$bd["rd_geo"],$matches)) {
+					if ($bd["val"] == "l"  &&  preg_match("/^LINESTRING[(]([^ ]+) ([^ ]+),.*,([^ ]+) ([^ ]+)[)]$/",$bd["dtl_Geo"],$matches)) {
 						list($dummy, $minX, $minY, $maxX, $maxY) = $matches;
 					}
 					$minX = intval($minX*10)/10;
@@ -409,8 +409,8 @@ function print_private_details($bib) {
 	}
 ?>
 
-<div class=detailRow><div class=detailType>Updated</div><div class=detail><?= $bib['rec_modified'] ?></div></div>
-<div class=detailRow><div class=detailType>Cite as</div><div class=detail>http://<?= HOST ?>/resource/<?= $bib['rec_id'] ?></div></div></div>
+<div class=detailRow><div class=detailType>Updated</div><div class=detail><?= $bib['rec_Modified'] ?></div></div>
+<div class=detailRow><div class=detailType>Cite as</div><div class=detail>http://<?= HOST ?>/resource/<?= $bib['rec_ID'] ?></div></div></div>
 <?php
 }
 
@@ -419,25 +419,25 @@ function print_other_tags($bib) {
 ?>
 <div class=detailRow>
 	<div class=detailType>Tags</div>
-	<div class=detail><nobr><a target=_new href="<?=HEURIST_SITE_PATH?>records/viewrec/follow_links.php?<?php print "bib_id=".$bib['rec_id']; ?>" target=_top onclick="return link_open(this);">[Other users' tags]</a></nobr>
+	<div class=detail><nobr><a target=_new href="<?=HEURIST_SITE_PATH?>records/viewrec/follow_links.php?<?php print "bib_id=".$bib['rec_ID']; ?>" target=_top onclick="return link_open(this);">[Other users' tags]</a></nobr>
 </div></div>
 <?php
 }
 
 
 function print_relation_details($bib) {
-	$from_res = mysql_query('select rec_details.*
-	                           from rec_details
-	                      left join records on rec_id = rd_rec_id
-	                          where rd_type = 202
-	                            and rec_type = 52
-	                            and rd_val = ' . $bib['rec_id']);        // 202 = primary resource
-	$to_res = mysql_query('select rec_details.*
-	                         from rec_details
-	                    left join records on rec_id = rd_rec_id
-	                        where rd_type = 199
-	                          and rec_type = 52
-	                          and rd_val = ' . $bib['rec_id']);          // 199 = linked resource
+	$from_res = mysql_query('select recDetails.*
+	                           from recDetails
+	                      left join Records on rec_ID = dtl_RecID
+	                          where dtl_DetailTypeID = 202
+	                            and rec_RecTypeID = 52
+	                            and dtl_Value = ' . $bib['rec_ID']);        // 202 = primary resource
+	$to_res = mysql_query('select recDetails.*
+	                         from recDetails
+	                    left join Records on rec_ID = dtl_RecID
+	                        where dtl_DetailTypeID = 199
+	                          and rec_RecTypeID = 52
+	                          and dtl_Value = ' . $bib['rec_ID']);          // 199 = linked resource
 
 	if (mysql_num_rows($from_res) <= 0  &&  mysql_num_rows($to_res) <= 0) return;
 ?>
@@ -445,14 +445,14 @@ function print_relation_details($bib) {
 <div class=detailRowHeader>Related Records
 <?php
 	while ($reln = mysql_fetch_assoc($from_res)) {
-		$bd = fetch_relation_details($reln['rd_rec_id'], true);
+		$bd = fetch_relation_details($reln['dtl_RecID'], true);
 
 		print '<div class=detailRow>';
 //		print '<span class=label>' . htmlspecialchars($bd['RelationType']) . '</span>';	//saw Enum change
 		print '<div class=detailType>' . htmlspecialchars($bd['RelationValue']) . '</div>'; // fetch now returns the enum string also
 		print '<div class=detail>';
 		if (@$bd['OtherResource']) {
-      			print '<a target=_new href="'.HEURIST_SITE_PATH.'records/viewrec/view.php?bib_id='.$bd['OtherResource']['rec_id'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['OtherResource']['rec_title']).'</a>';
+      			print '<a target=_new href="'.HEURIST_SITE_PATH.'records/viewrec/view.php?bib_id='.$bd['OtherResource']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['OtherResource']['rec_Title']).'</a>';
 		} else {
 			print htmlspecialchars($bd['Title']);
 		}
@@ -462,14 +462,14 @@ function print_relation_details($bib) {
 		print '</div></div>';
 	}
 	while ($reln = mysql_fetch_assoc($to_res)) {
-		$bd = fetch_relation_details($reln['rd_rec_id'], false);
+		$bd = fetch_relation_details($reln['dtl_RecID'], false);
 
 		print '<div class=detailRow>';
 //		print '<span class=label>' . htmlspecialchars($bd['RelationType']) . '</span>';	//saw Enum change
 		print '<div class=detailType>' . htmlspecialchars($bd['RelationValue']) . '</div>';
 		print '<div class=detail>';
 		if (@$bd['OtherResource']) {
-      			print '<a target=_new href="'.HEURIST_SITE_PATH.'records/viewrec/view.php?bib_id='.$bd['OtherResource']['rec_id'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['OtherResource']['rec_title']).'</a>';
+      			print '<a target=_new href="'.HEURIST_SITE_PATH.'records/viewrec/view.php?bib_id='.$bd['OtherResource']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['OtherResource']['rec_Title']).'</a>';
 		} else {
 			print htmlspecialchars($bd['Title']);
 		}
@@ -483,33 +483,33 @@ function print_relation_details($bib) {
 
 function print_linked_details($bib) {
 	$res = mysql_query('select *
-	                      from rec_details
-	                 left join defDetailTypes on dty_ID = rd_type
-	                 left join records on rec_id = rd_rec_id
+	                      from recDetails
+	                 left join defDetailTypes on dty_ID = dtl_DetailTypeID
+	                 left join Records on rec_ID = dtl_RecID
 	                     where dty_Type = "resource"
-	                       and rd_type = dty_ID
-	                       and rd_val = ' . $bib['rec_id'] . '
-	                       and rec_type != 52');
+	                       and dtl_DetailTypeID = dty_ID
+	                       and dtl_Value = ' . $bib['rec_ID'] . '
+	                       and rec_RecTypeID != 52');
 
 	if (mysql_num_rows($res) <= 0) return;
 ?>
 <div class=detailRow>
 <div class=detailType>Linked From</div>
-<div class=detail><a href="<?=HEURIST_SITE_PATH?>search/search.html?w=all&q=linkto:<?=$bib['rec_id']?>" onclick="top.location.href = this.href; return false;"><b>Show list below as search results</b></a> <b>(linkto:<?=$bib['rec_id']?> = records pointing TO this record)</b></div></div>
+<div class=detail><a href="<?=HEURIST_SITE_PATH?>search/search.html?w=all&q=linkto:<?=$bib['rec_ID']?>" onclick="top.location.href = this.href; return false;"><b>Show list below as search results</b></a> <b>(linkto:<?=$bib['rec_ID']?> = records pointing TO this record)</b></div></div>
 <?php
 	while ($row = mysql_fetch_assoc($res)) {
 
 		print '<div class=detailRow>';
 		print '<div class=detailType></div>';
 		print '<div class=detail>';
-		print '<a target=_new href="'.HEURIST_SITE_PATH.'records/viewrec/view.php?bib_id='.$row['rec_id'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_title']).'</a>';
+		print '<a target=_new href="'.HEURIST_SITE_PATH.'records/viewrec/view.php?bib_id='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a>';
 		print '</div></div>';
 	}
 }
 
 function print_text_details($bib) {
-	$cmts = getAllComments($bib["rec_id"]);
-	$result = loadWoot(array("title" => "record:".$bib["rec_id"]));
+	$cmts = getAllComments($bib["rec_ID"]);
+	$result = loadWoot(array("title" => "record:".$bib["rec_ID"]));
 	if (! $result["success"] && count($cmts) == 0) return;
 ?>
 </DIV>
@@ -597,7 +597,7 @@ function print_woot_precis($woot,$bib) {
 	}
 ?>
 
-  <div><a target=_blank href="<?=HEURIST_SITE_PATH?>records/woot/woot.html?w=record:<?= $bib['rec_id'] ?>&t=<?= $bib['rec_title'] ?>">Click here to edit</a></div>
+  <div><a target=_blank href="<?=HEURIST_SITE_PATH?>records/woot/woot.html?w=record:<?= $bib['rec_ID'] ?>&t=<?= $bib['rec_Title'] ?>">Click here to edit</a></div>
 </div>
 </div>
 <?php

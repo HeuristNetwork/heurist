@@ -134,7 +134,7 @@ if (@$_REQUEST['submit']) $updated = update_my_settings();
   <tr>
    <td style="width: 16px;">&nbsp;</td>
    <td style="width: 16px;"><input type="checkbox" name="bkmk[<?= $row['bkm_ID'] ?>]" value="1" checked class="bkmk"></td>
-   <td><a href="<?= $row['rec_url'] ?>" target="_testwindow"><?= htmlspecialchars($row['rec_title']) ?></a></td>
+   <td><a href="<?= $row['rec_URL'] ?>" target="_testwindow"><?= htmlspecialchars($row['rec_Title']) ?></a></td>
   </tr>
 <?php
 	}
@@ -298,8 +298,8 @@ function tag_query() {	// get all model user tags that are not used by the user.
 }
 
 function bkmk_query() {	// get all model user bookmarks on records that are not bookmarked by the user.
-	return mysql_query("select A.bkm_ID, rec_url, rec_title from usrBookmarks A
-	                           left join records on rec_id = A.bkm_recID
+	return mysql_query("select A.bkm_ID, rec_URL, rec_Title from usrBookmarks A
+	                           left join Records on rec_ID = A.bkm_recID
 	                           left join usrBookmarks B on A.bkm_recID = B.bkm_recID and B.bkm_UGrpID=".get_user_id()."
 	                     where A.bkm_UGrpID=".MODEL_USER_ID." and B.bkm_ID is null
 	                     order by A.bkm_ID");

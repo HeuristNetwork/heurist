@@ -23,7 +23,7 @@ else
 	$search_type = BOTH;	// all records
 
 // find all matching records
-$cols = "rec_id as bibID, rec_type as reftype, rec_title as title, rec_url as URL";
+$cols = "rec_ID as bibID, rec_RecTypeID as reftype, rec_Title as title, rec_URL as URL";
 $query = REQUEST_to_query("select $cols ", $search_type);
 
 error_log($query);
@@ -41,11 +41,11 @@ while ($bib = mysql_fetch_assoc($res)) {
 }
 
 foreach ($bibIDs as $bibID) {
-	$res = mysql_query("select a.rd_val, b.rd_val, rec_url
-						  from records
-					 left join rec_details a on a.rd_rec_id=rec_id and a.rd_type=303
-					 left join rec_details b on b.rd_rec_id=rec_id and b.rd_type=191
-						 where rec_id=$bibID");
+	$res = mysql_query("select a.dtl_Value, b.dtl_Value, rec_URL
+						  from Records
+					 left join recDetails a on a.dtl_RecID=rec_ID and a.dtl_DetailTypeID=303
+					 left join recDetails b on b.dtl_RecID=rec_ID and b.dtl_DetailTypeID=191
+						 where rec_ID=$bibID");
 	$row = mysql_fetch_row($res);
 	$records[$bibID]["description"] = ($row[0] ? $row[0] : $row[1]);
 	$records[$bibID]["url"] = ($row[2] ? $row[2] : '');
@@ -55,7 +55,7 @@ foreach ($bibIDs as $bibID) {
 // Find the records that actually have any geographic data to plot
 $geoObjects = array();
 $geoBibIDs = array();
-$res = mysql_query("select rd_rec_id, rd_val, astext(rd_geo), astext(envelope(rd_geo)) from rec_details where rd_geo is not null and rd_rec_id in (" . join(",", $bibIDs) . ")");
+$res = mysql_query("select dtl_RecID, dtl_Value, astext(dtl_Geo), astext(envelope(dtl_Geo)) from recDetails where dtl_Geo is not null and dtl_RecID in (" . join(",", $bibIDs) . ")");
 error_log(mysql_error());
 while ($val = mysql_fetch_row($res)) {
 	// get the bounding box
@@ -116,7 +116,7 @@ while ($val = mysql_fetch_row($res)) {
 	$geoBibIDs[$val[0]] = $val[0];
 }
 
-$res = mysql_query("select LAT.rd_rec_id, LNG.rd_val, LAT.rd_val from rec_details LAT, rec_details LNG where LAT.rd_type=211 and LNG.rd_type=210 and LAT.rd_rec_id=LNG.rd_rec_id and LNG.rd_rec_id in (" . join(",", $bibIDs) . ")");
+$res = mysql_query("select LAT.dtl_RecID, LNG.dtl_Value, LAT.dtl_Value from recDetails LAT, recDetails LNG where LAT.dtl_DetailTypeID=211 and LNG.dtl_DetailTypeID=210 and LAT.dtl_RecID=LNG.dtl_RecID and LNG.dtl_RecID in (" . join(",", $bibIDs) . ")");
 while ($val = mysql_fetch_row($res)) {
 	array_push($geoObjects, array("bibID" => $val[0], "type" => "point", "geo" => array("x" => floatval($val[1]), "y" => floatval($val[2]))));
 	$geoBibIDs[$val[0]] = $val[0];
@@ -126,7 +126,7 @@ while ($val = mysql_fetch_row($res)) {
 // Find time extents -- must have at least a start time (end time is optional)
 /*
 $timeObjects = array();
-$res = mysql_query("select START.rd_rec_id, START.rd_val, END.rd_val from rec_details START left join rec_details END on START.rd_rec_id=END.rd_rec_id and END.rd_type=178 where START.rd_type=177 and START.rd_val and START.rd_rec_id in (" . join(",", $bibIDs) . ")");
+$res = mysql_query("select START.dtl_RecID, START.dtl_Value, END.dtl_Value from recDetails START left join recDetails END on START.dtl_RecID=END.dtl_RecID and END.dtl_DetailTypeID=178 where START.dtl_DetailTypeID=177 and START.dtl_Value and START.dtl_RecID in (" . join(",", $bibIDs) . ")");
 while ($val = mysql_fetch_row($res)) {
 	$timeObjects[$val[0]] = array($val[1], $val[2]);
 }
@@ -134,18 +134,18 @@ while ($val = mysql_fetch_row($res)) {
 
 $timeObjects = array();
 //"
-//select d.rd_rec_id, min(d.rd_val), max(d.rd_val), min(y.rd_val), max(y.rd_val)
-//from rec_details b, rec_details y
+//select d.dtl_RecID, min(d.dtl_Value), max(d.dtl_Value), min(y.dtl_Value), max(y.dtl_Value)
+//from recDetails b, recDetails y
 //"
 $dates = array();
 $years =array();
-$res = mysql_query("select rec_id, min(d.rd_val), max(d.rd_val)
-					  from records
+$res = mysql_query("select rec_ID, min(d.dtl_Value), max(d.dtl_Value)
+					  from Records
 				cross join defDetailTypes dt
-				 left join rec_details d on d.rd_rec_id = rec_id and d.rd_type = dt.dty_ID
-					 where rec_id in (" . join(",", $bibIDs) . ")
+				 left join recDetails d on d.dtl_RecID = rec_ID and d.dtl_DetailTypeID = dt.dty_ID
+					 where rec_ID in (" . join(",", $bibIDs) . ")
 					   and dt.dty_Type = 'date'
-				  group by rec_id");
+				  group by rec_ID");
 while ($val = mysql_fetch_row($res)) {
 	if (preg_match("/^\\d+\\s*bc/i", $val[1])) {
 		$val[1] = -(preg_replace("/\\s*bc/i","",$val[1])) + 1;
@@ -157,13 +157,13 @@ while ($val = mysql_fetch_row($res)) {
 	$dates[$val[0]] = array($val[1],$val[2]);
 }
 
-$res = mysql_query("select rec_id, min(d.rd_val), max(d.rd_val)
-					  from records
+$res = mysql_query("select rec_ID, min(d.dtl_Value), max(d.dtl_Value)
+					  from Records
 				cross join defDetailTypes yt
-				 left join rec_details y on y.rd_rec_id = rec_id and y.rd_type = yt.dty_ID
-					 where rec_id in (" . join(",", $bibIDs) . ")
+				 left join recDetails y on y.dtl_RecID = rec_ID and y.dtl_DetailTypeID = yt.dty_ID
+					 where rec_ID in (" . join(",", $bibIDs) . ")
 					   and yt.dty_Type = 'yesr'
-				  group by rec_id");
+				  group by rec_ID");
 while ($val = mysql_fetch_row($res)) {
 	if (preg_match("/^\\d+\\s*bc/i", $val[1])) {
 		$val[1] = -(preg_replace("/\\s*bc/i","",$val[1])) + 1;

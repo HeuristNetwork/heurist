@@ -84,7 +84,7 @@ if ($_REQUEST['dupeDiffHash']){
 mysql_connection_db_select(DATABASE);
 //mysql_connection_db_select("`heuristdb-nyirti`");   //for debug
 //FIXME  allow user to select a single record type
-//$res = mysql_query('select rec_id, rec_type, rec_title, rd_val from records left join rec_details on rd_rec_id=rec_id and rd_type=160 where rec_type != 52 and rec_type != 55 and not rec_temporary order by rec_type desc');
+//$res = mysql_query('select rec_ID, rec_RecTypeID, rec_Title, dtl_Value from Records left join recDetails on dtl_RecID=rec_ID and dtl_DetailTypeID=160 where rec_RecTypeID != 52 and rec_RecTypeID != 55 and not rec_FlagTemporary order by rec_RecTypeID desc');
 $crosstype = false;
 $personMatch = false;
 
@@ -93,34 +93,34 @@ if (@$_REQUEST['crosstype']){
 }
 if (@$_REQUEST['personmatch']){
     $personMatch = true;
-    $res = mysql_query('select rec_id, rec_type, rec_title, rd_val from records left join rec_details on rd_rec_id=rec_id and rd_type=291 where '. (strlen($recIDs) > 0 ? "rec_id in ($recIDs) and " : "") .'rec_type = 55 and not rec_temporary order by rec_id desc');    //Given Name
+    $res = mysql_query('select rec_ID, rec_RecTypeID, rec_Title, dtl_Value from Records left join recDetails on dtl_RecID=rec_ID and dtl_DetailTypeID=291 where '. (strlen($recIDs) > 0 ? "rec_ID in ($recIDs) and " : "") .'rec_RecTypeID = 55 and not rec_FlagTemporary order by rec_ID desc');    //Given Name
     while ($row = mysql_fetch_assoc($res)) {
-       $recsGivenNames[$row['rec_id']] = $row['rd_val'];
+       $recsGivenNames[$row['rec_ID']] = $row['dtl_Value'];
     }
-    $res = mysql_query('select rec_id, rec_type, rec_title, rd_val from records left join rec_details on rd_rec_id=rec_id and rd_type=160 where '. (strlen($recIDs) > 0 ? "rec_id in ($recIDs) and " : "") .'rec_type = 55 and not rec_temporary order by rd_val asc');    //Family Name
+    $res = mysql_query('select rec_ID, rec_RecTypeID, rec_Title, dtl_Value from Records left join recDetails on dtl_RecID=rec_ID and dtl_DetailTypeID=160 where '. (strlen($recIDs) > 0 ? "rec_ID in ($recIDs) and " : "") .'rec_RecTypeID = 55 and not rec_FlagTemporary order by dtl_Value asc');    //Family Name
 
 } else{
-    $res = mysql_query('select rec_id, rec_type, rec_title, rd_val from records left join rec_details on rd_rec_id=rec_id and rd_type=160 where '. (strlen($recIDs) > 0 ? "rec_id in ($recIDs) and " : "") .'rec_type != 52 and not rec_temporary order by rec_type desc');
+    $res = mysql_query('select rec_ID, rec_RecTypeID, rec_Title, dtl_Value from Records left join recDetails on dtl_RecID=rec_ID and dtl_DetailTypeID=160 where '. (strlen($recIDs) > 0 ? "rec_ID in ($recIDs) and " : "") .'rec_RecTypeID != 52 and not rec_FlagTemporary order by rec_RecTypeID desc');
 }
 
 $reftypes = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', '1');
 
 while ($row = mysql_fetch_assoc($res)) {
     if ($personMatch){
-       if($row['rd_val']) $val = $row['rd_val'] . ($recsGivenNames[$row['rec_id']]? " ". $recsGivenNames[$row['rec_id']]: "" );
+       if($row['dtl_Value']) $val = $row['dtl_Value'] . ($recsGivenNames[$row['rec_ID']]? " ". $recsGivenNames[$row['rec_ID']]: "" );
     }else {
-	    if ($row['rec_title']) $val = $row['rec_title'];
-	    else $val = $row['rd_val'];
+	    if ($row['rec_Title']) $val = $row['rec_Title'];
+	    else $val = $row['dtl_Value'];
     }
 	$mval = metaphone(preg_replace('/^(?:a|an|the|la|il|le|die|i|les|un|der|gli|das|zur|una|ein|eine|lo|une)\\s+|^l\'\\b/i', '', $val));
 
 	if ($crosstype || $personMatch) { //for crosstype or person matching leave off the type ID
       $key = ''.substr($mval, 0, $fuzziness);
     } else {
-      $key = $row['rec_type'] . '.' . substr($mval, 0, $fuzziness);
+      $key = $row['rec_RecTypeID'] . '.' . substr($mval, 0, $fuzziness);
     }
 
-    $typekey = $reftypes[$row['rec_type']];
+    $typekey = $reftypes[$row['rec_RecTypeID']];
 
 	if (! array_key_exists($key, $bibs)) $bibs[$key] = array(); //if the key doesn't exist then make an entry for this metaphone
 	else { // it's a dupe so process it
@@ -131,7 +131,7 @@ while ($row = mysql_fetch_assoc($res)) {
         }
     }
 	// add the record to bibs
-	$bibs[$key][$row['rec_id']] = array('type' => $typekey, 'val' => $val);
+	$bibs[$key][$row['rec_ID']] = array('type' => $typekey, 'val' => $val);
 }
 
 ksort($dupes);
@@ -227,12 +227,12 @@ foreach ($dupes as $rectype => $subarr) {
 	    print '</div>';
 	    print '<ul>';
 	    foreach ($bibs[$key] as $rec_id => $vals) {
-		    $res = mysql_query('select rec_url from records where rec_id = ' . $rec_id);
+		    $res = mysql_query('select rec_URL from Records where rec_ID = ' . $rec_id);
 		    $row = mysql_fetch_assoc($res);
 		    print '<li>'.($crosstype ? $vals['type'].'&nbsp;&nbsp;' : '').
 		    		'<a target="_new" href="'.HEURIST_URL_BASE.'records/viewrec/view.php?saneopen=1&bib_id='.$rec_id.'&instance='.HEURIST_INSTANCE.'">'.$rec_id.': '.htmlspecialchars($vals['val']).'</a>';
-		    if ($row['rec_url'])
-			    print '&nbsp;&nbsp;&nbsp;<span style="font-size: 70%;">(<a target="_new" href="'.$row['rec_url'].'">' . $row['rec_url'] . '</a>)</span>';
+		    if ($row['rec_URL'])
+			    print '&nbsp;&nbsp;&nbsp;<span style="font-size: 70%;">(<a target="_new" href="'.$row['rec_URL'].'">' . $row['rec_URL'] . '</a>)</span>';
 		    print '</li>';
 	    }
 	    print '</ul>';

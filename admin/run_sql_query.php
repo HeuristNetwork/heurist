@@ -83,32 +83,32 @@ function print_row($row) {
       switch ($_REQUEST['f']) {  // select the output formatting
 
       case 'ibblank': // Internet bookmark and blank URL
-        print "<a href='".HEURIST_URL_BASE."?q=ids:$row[rec_id]'>$row[rec_id]</a>";
-        print " :  ";print $row[rec_title];print " [ ";
-        print "<a href=http://www.google.com/search?q=$row[rec_title]>Google</a>";
+        print "<a href='".HEURIST_URL_BASE."?q=ids:$row[rec_ID]'>$row[rec_ID]</a>";
+        print " :  ";print $row[rec_Title];print " [ ";
+        print "<a href=http://www.google.com/search?q=$row[rec_Title]>Google</a>";
         print " ]<br>";
         break;
       case 'garbage': // Garbage in the URL
-        print "<a href='".HEURIST_URL_BASE."?q=ids:$row[rec_id]'>$row[rec_id]</a>";
-        print " :  $row[rec_title] <br>";
+        print "<a href='".HEURIST_URL_BASE."?q=ids:$row[rec_ID]'>$row[rec_ID]</a>";
+        print " :  $row[rec_Title] <br>";
         print "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-        print "url: $row[rec_url]";print "<br>";
+        print "url: $row[rec_URL]";print "<br>";
         print "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-        print "rec type: $row[rec_type]";print "<br>";
+        print "rec type: $row[rec_RecTypeID]";print "<br>";
         break;
       case 'ibdupe': // Internet bookmark and duplicate URL with another IB
         print "<p>"; print $row[cnt]; print ": ";
-        print "$row[rec_title]<br>";
+        print "$row[rec_Title]<br>";
         print "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-        print "url: <a href='".HEURIST_URL_BASE."?q=url:$row[rec_url]'>$row[rec_url]</a>";
-        print "<a href=http://www.google.com/search?q=url:$row[rec_url]>Google</a>";
+        print "url: <a href='".HEURIST_URL_BASE."?q=url:$row[rec_URL]'>$row[rec_URL]</a>";
+        print "<a href=http://www.google.com/search?q=url:$row[rec_URL]>Google</a>";
                 break;
       case 'alldupe': // Duplicate URL with another record (all record types)
         print "<p>"; print $row[cnt]; print ": ";
-        print $row[rec_title]; print "<br>";
+        print $row[rec_Title]; print "<br>";
         print "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-        print "url: <a href='".HEURIST_URL_BASE."?q=url:$row[rec_url]'>$row[rec_url]</a> [ ";
-        print "<a href=http://www.google.com/search?q=url:$row[rec_url]>Google</a> ]";
+        print "url: <a href='".HEURIST_URL_BASE."?q=url:$row[rec_URL]'>$row[rec_URL]</a> [ ";
+        print "<a href=http://www.google.com/search?q=url:$row[rec_URL]>Google</a> ]";
                break;
       } // end Switch
 

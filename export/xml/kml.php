@@ -9,12 +9,12 @@ define("FILE_DETAIL_TYPE", 221);
 
 mysql_connection_select(DATABASE);
 
-$res = mysql_query("select rd_val from rec_details where rd_rec_id = " . intval($_REQUEST["id"]) . " and rd_type = " . KML_DETAIL_TYPE);
+$res = mysql_query("select dtl_Value from recDetails where dtl_RecID = " . intval($_REQUEST["id"]) . " and dtl_DetailTypeID = " . KML_DETAIL_TYPE);
 if (mysql_num_rows($res)) {
 	$kml = mysql_fetch_array($res);
 	print $kml[0];
 } else {
-	$res = mysql_query("select file_id from rec_details left join files on file_id = rd_file_id where rd_rec_id = " . intval($_REQUEST["id"]) . " and rd_type = " . FILE_DETAIL_TYPE);
+	$res = mysql_query("select file_id from recDetails left join files on file_id = dtl_UploadedFileID where dtl_RecID = " . intval($_REQUEST["id"]) . " and dtl_DetailTypeID = " . FILE_DETAIL_TYPE);
 	$file_id = mysql_fetch_array($res);
 	$file_id = $file_id[0];
 	print file_get_contents(UPLOAD_PATH . "/" . $file_id);

@@ -34,9 +34,9 @@ mysql_connection_db_overwrite(DATABASE);
 
 <?php
 	function delete_bib($rec_id) {
-		mysql_query('delete from records where rec_id = ' . $rec_id);
+		mysql_query('delete from Records where rec_ID = ' . $rec_id);
 		$bibs = mysql_affected_rows();
-		mysql_query('delete from rec_details where rd_rec_id = ' . $rec_id);
+		mysql_query('delete from recDetails where dtl_RecID = ' . $rec_id);
 		mysql_query('delete from usrReminders where rem_RecID = ' . $rec_id);
 		mysql_query('delete from usrRecTagLinks where rtl_RecID = ' . $rec_id);
 		mysql_query('delete from usrBookmarks where bkm_recID = ' . $rec_id);
@@ -50,11 +50,11 @@ mysql_connection_db_overwrite(DATABASE);
 		$rels = 0;
 		foreach ($_REQUEST['bib'] as $rec_id) {
 			$rec_id = intval($rec_id);
-			$res = mysql_query('select rec_added_by_usr_id from records where rec_id = ' . $rec_id);
+			$res = mysql_query('select rec_AddedByUGrpID from Records where rec_ID = ' . $rec_id);
 			$row = mysql_fetch_assoc($res);
-			$owner = $row['rec_added_by_usr_id'];
+			$owner = $row['rec_AddedByUGrpID'];
 
-			$res = mysql_query('select '.USERS_USERNAME_FIELD.' from records left join usrBookmarks on bkm_recID=rec_id left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=bkm_UGrpID where rec_id = ' . $rec_id);
+			$res = mysql_query('select '.USERS_USERNAME_FIELD.' from Records left join usrBookmarks on bkm_recID=rec_ID left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=bkm_UGrpID where rec_ID = ' . $rec_id);
 			$bkmk_count = mysql_num_rows($res);
 			$bkmk_users = array();
 			while ($row = mysql_fetch_assoc($res)) array_push($bkmk_users, $row[USERS_USERNAME_FIELD]);
@@ -67,9 +67,9 @@ mysql_connection_db_overwrite(DATABASE);
 				list($a, $b) = delete_bib($rec_id);
 				$bibs += $a;
 				$bkmks += $b;
-				$refs_res = mysql_query('select rec_id from rec_details left join defDetailTypes on dty_ID=rd_type left join records on rec_id=rd_rec_id where dty_Type="resource" and rd_val='.$rec_id.' and rec_type=52');
+				$refs_res = mysql_query('select rec_ID from recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID left join Records on rec_ID=dtl_RecID where dty_Type="resource" and dtl_Value='.$rec_id.' and rec_RecTypeID=52');
 				while ($row = mysql_fetch_assoc($refs_res)) {
-					list($a, $b) = delete_bib($row['rec_id']);
+					list($a, $b) = delete_bib($row['rec_ID']);
 					$rels += $a;
 					$bkmks += $b;
 				}
@@ -94,15 +94,15 @@ mysql_connection_db_overwrite(DATABASE);
 	$bib_ids = explode(',', $_REQUEST['ids']);
 	foreach ($bib_ids as $rec_id) {
 		if (! $rec_id) continue;
-		$res = mysql_query('select rec_title,rec_added_by_usr_id from records where rec_id = ' . $rec_id);
+		$res = mysql_query('select rec_Title,rec_AddedByUGrpID from Records where rec_ID = ' . $rec_id);
 		$row = mysql_fetch_assoc($res);
-		$rec_title = $row['rec_title'];
-		$owner = $row['rec_added_by_usr_id'];
-		$res = mysql_query('select '.USERS_USERNAME_FIELD.' from records left join usrBookmarks on bkm_recID=rec_id left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=bkm_UGrpID where rec_id = ' . $rec_id);
+		$rec_title = $row['rec_Title'];
+		$owner = $row['rec_AddedByUGrpID'];
+		$res = mysql_query('select '.USERS_USERNAME_FIELD.' from Records left join usrBookmarks on bkm_recID=rec_ID left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=bkm_UGrpID where rec_ID = ' . $rec_id);
 		$bkmk_count = mysql_num_rows($res);
 		$bkmk_users = array();
 		while ($row = mysql_fetch_assoc($res)) array_push($bkmk_users, $row[USERS_USERNAME_FIELD]);
-		$refs_res = mysql_query('select rd_rec_id from rec_details left join defDetailTypes on dty_ID=rd_type where  dty_Type="resource and rd_val='.$rec_id.' "');
+		$refs_res = mysql_query('select dtl_RecID from recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID where  dty_Type="resource and dtl_Value='.$rec_id.' "');
 		$refs = mysql_num_rows($refs_res);
 
 		$allowed = is_admin()  ||
@@ -122,7 +122,7 @@ mysql_connection_db_overwrite(DATABASE);
 		if ($refs) {
 			print ' <p style="margin-left: 20px;">Referenced by: '."\n";
 			while ($row = mysql_fetch_assoc($refs_res)) {
-				print '  <a target=_new href="'.HEURIST_SITE_PATH.'records/editrec/edit.html?bib_id='.$row['rd_rec_id'].'">'.$row['rd_rec_id'].'</a>'."\n";
+				print '  <a target=_new href="'.HEURIST_SITE_PATH.'records/editrec/edit.html?bib_id='.$row['dtl_RecID'].'">'.$row['dtl_RecID'].'</a>'."\n";
 			}
 			print "\n </p>\n";
 		}

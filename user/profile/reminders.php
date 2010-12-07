@@ -70,9 +70,9 @@ mysql_connection_db_select(DATABASE);
 
 $future_clause = $future ? "and rem_Freq != 'once' or rem_StartDate > now()" : "";
 
-$res = mysql_query("select usrReminders.*, rec_title, grp.".GROUPS_NAME_FIELD.",  concat(usr.".USERS_FIRSTNAME_FIELD.",' ',usr.".USERS_LASTNAME_FIELD.") as username
+$res = mysql_query("select usrReminders.*, rec_Title, grp.".GROUPS_NAME_FIELD.",  concat(usr.".USERS_FIRSTNAME_FIELD.",' ',usr.".USERS_LASTNAME_FIELD.") as username
 					  from usrReminders
-				 left join records on rec_id = rem_RecID
+				 left join Records on rec_ID = rem_RecID
 				 left join ".USERS_DATABASE.".".GROUPS_TABLE." gpr on gpr.".GROUPS_ID_FIELD." = rem_ToWorkgroupID
 				 left join ".USERS_DATABASE.".".USERS_TABLE." usr on usr.".USERS_ID_FIELD." = rem_ToUserID
 					 where rem_OwnerUGrpID = " . get_user_id() . "
@@ -91,7 +91,7 @@ while ($row = mysql_fetch_assoc($res)) {
 ?>
     <tr>
      <td><a title=delete href=# onclick="del(<?= $row["rem_ID"] ?>); return false;"><img src="<?=HEURIST_SITE_PATH?>common/images/cross.gif"></a></td>
-     <td><a href="<?=HEURIST_SITE_PATH?>records/editrec/edit.html?bib_id=<?= $row["rem_RecID"] ?>#personal"><b><?= $row["rec_title"] ?></b></a></td>
+     <td><a href="<?=HEURIST_SITE_PATH?>records/editrec/edit.html?bib_id=<?= $row["rem_RecID"] ?>#personal"><b><?= $row["rec_Title"] ?></b></a></td>
      <td><b><?= $recipient ?></b></td>
      <td><b><?= $row["rem_Freq"] ?></b> from <b><?= $row["rem_StartDate"] ?></b></td>
      <td><?= $row["rem_Message"] ?></td>

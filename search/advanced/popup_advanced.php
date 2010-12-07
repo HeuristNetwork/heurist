@@ -51,7 +51,7 @@ function update(elt) {
 
 	if (elt.name === "type") {
 		// update the list of record-type-specific bib-detail-types
-		var typeOptgroup = document.getElementById("rec_type-specific-fields");
+		var typeOptgroup = document.getElementById("rec_RecTypeID-specific-fields");
 		var typeSelect = document.getElementById("fieldtype");
 		var prevValue = typeSelect.options[typeSelect.selectedIndex].value;
 

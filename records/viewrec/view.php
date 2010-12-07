@@ -45,9 +45,9 @@ if (! have_bib_permissions($rec_id)) {
 
 $noclutter = array_key_exists('noclutter', $_REQUEST)? '&amp;noclutter' : '';
 
-$res = mysql_query('select rec_title from records where rec_id = ' . $rec_id);
+$res = mysql_query('select rec_Title from Records where rec_ID = ' . $rec_id);
 $row = mysql_fetch_assoc($res);
-$rec_title = $row['rec_title'];
+$rec_title = $row['rec_Title'];
 
 ?>
 

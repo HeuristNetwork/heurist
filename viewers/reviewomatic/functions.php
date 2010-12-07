@@ -59,11 +59,11 @@ function get_reviews($user_id, $class_grp_id, $ass_kwd_id, $get_text=false, $ind
 	$ass_kwd_id = intval($ass_kwd_id);
 	$reviews = array();
 	$res = mysql_query('SELECT SQL_CALC_FOUND_ROWS
-							   rec_id, rec_title, rec_url, bkm_ID, bkm_Added,
+							   rec_ID, rec_Title, rec_URL, bkm_ID, bkm_Added,
 							   concat(usr.ugr_FirstName," ",usr.ugr_LastName) as author'./*.($get_text?', pers_notes':'').' */
 						 'FROM usrRecTagLinks
 					 LEFT JOIN usrBookmarks ON bkm_RecID=rtl_RecID
-					 LEFT JOIN records ON rec_id=rtl_RecID
+					 LEFT JOIN Records ON rec_ID=rtl_RecID
 					 LEFT JOIN sysUGrps usr on usr.ugr_ID=bkm_UGrpID
 						 WHERE rtl_TagID=' . $ass_kwd_id .
 		 ($user_id > 0 ? ' AND bkm_UGrpID=' . $user_id : '').'
@@ -75,10 +75,10 @@ function get_reviews($user_id, $class_grp_id, $ass_kwd_id, $get_text=false, $ind
 	$total = $row[0];
 
 	while ($row = mysql_fetch_assoc($res)) {
-		$review['bib_id'] = $row['rec_id'];
+		$review['bib_id'] = $row['rec_ID'];
 		$review['bkmk_id'] = $row['bkm_ID'];
-		$review['title'] = $row['pers_title'] ? $row['pers_title'] : $row['rec_title'];
-		$review['url'] = $row['rec_url'];
+		$review['title'] = $row['pers_title'] ? $row['pers_title'] : $row['rec_Title'];
+		$review['url'] = $row['rec_URL'];
 		$review['added'] = $row['bkm_Added'];
 		$review['author'] = $row['author'];
 		if ($get_text) {
@@ -116,7 +116,7 @@ function have_bkmk_permissions($bkmk_id, $user_id) {
 	$user_id = intval($user_id);
 	$res = mysql_query('SELECT *
 						  FROM usrBookmarks
-					 LEFT JOIN records ON bkm_recID=rec_id
+					 LEFT JOIN Records ON bkm_recID=rec_ID
 						 WHERE bkm_ID=' . $bkmk_id . '
 						   AND bkm_UGrpID=' . $user_id);
 	return (mysql_num_rows($res) > 0);
@@ -124,15 +124,15 @@ function have_bkmk_permissions($bkmk_id, $user_id) {
 
 function get_review($bkmk_id, $class_grp_id) {
 	$bkmk_id = intval($bkmk_id);
-	$res = mysql_query('SELECT bkm_ID, pers_notes, rec_id, rec_title, rec_url
+	$res = mysql_query('SELECT bkm_ID, pers_notes, rec_ID, rec_Title, rec_URL
 						  FROM usrBookmarks
-					 LEFT JOIN records ON rec_id=bkm_recID
+					 LEFT JOIN Records ON rec_ID=bkm_recID
 						 WHERE bkm_ID=' . $bkmk_id);
 	if ($row = mysql_fetch_assoc($res)) {
-		$review['bib_id'] = $row['rec_id'];
+		$review['bib_id'] = $row['rec_ID'];
 		$review['bkmk_id'] = $row['bkm_ID'];
-		$review['title'] = $row['pers_title'] ? $row['pers_title'] : $row['rec_title'];
-		$review['url'] = $row['rec_url'];
+		$review['title'] = $row['pers_title'] ? $row['pers_title'] : $row['rec_Title'];
+		$review['url'] = $row['rec_URL'];
 		@list($review['genre_id'], $review['genre_label']) = get_genre($row['bkm_ID'], $class_grp_id);
 
 		$matches = '';
@@ -179,14 +179,14 @@ function get_similar_review($url, $reviews) {
 
 function get_matching_bib_id($url) {
 	$noproto_url = preg_replace('!^(?:http://)?(?:www[.])?(.*)!', '\1', $url);  // URL minus the protocol + possibly www.
-	$res = mysql_query('SELECT rec_id
-						  FROM records
-						 WHERE rec_url like "http://'.addslashes($noproto_url).'"
-							OR rec_url like "http://'.addslashes($noproto_url).'/"
-						 	OR rec_url like "http://www.'.addslashes($noproto_url).'"
-						 	OR rec_url like "http://www.'.addslashes($noproto_url).'/"');
+	$res = mysql_query('SELECT rec_ID
+						  FROM Records
+						 WHERE rec_URL like "http://'.addslashes($noproto_url).'"
+							OR rec_URL like "http://'.addslashes($noproto_url).'/"
+						 	OR rec_URL like "http://www.'.addslashes($noproto_url).'"
+						 	OR rec_URL like "http://www.'.addslashes($noproto_url).'/"');
 	if ($row = mysql_fetch_assoc($res)) {
-		return $row['rec_id'];
+		return $row['rec_ID'];
 	} else {
 		return '';
 	}
@@ -196,10 +196,10 @@ function get_similar_bibs($url) {
 	$bibs = array();
 	$noproto_url = preg_replace('!^(?:http://)?(?:www[.])?([^/]*).*!', '\1', $url);  // URL minus the protocol + possibly www.
 																				// and minus slash onwards
-	$res = mysql_query('SELECT rec_id, rec_title, rec_url
-						  FROM records
-						 WHERE rec_url like "http://'.addslashes($noproto_url).'%"
-						 	OR rec_url like "http://www.'.addslashes($noproto_url).'%"');
+	$res = mysql_query('SELECT rec_ID, rec_Title, rec_URL
+						  FROM Records
+						 WHERE rec_URL like "http://'.addslashes($noproto_url).'%"
+						 	OR rec_URL like "http://www.'.addslashes($noproto_url).'%"');
 	while ($row = mysql_fetch_assoc($res)) {
 		$bibs[] = $row;
 	}
@@ -211,12 +211,12 @@ function insert_bib($url, $title, $user_id) {
 	$user_id = intval($user_id);
 	mysql_connection_overwrite('heuristdb');
 	mysql_query('set @logged_in_user_id = ' . get_user_id());
-	mysql__insert('records', array(
-		'rec_url' => addslashes($url),
-		'rec_title' => addslashes($title),
-		'rec_added' => date('Y-m-d H:i:s'),
-		'rec_modified' => date('Y-m-d H:i:s'),
-		'rec_added_by_usr_id' => intval(get_user_id()),
+	mysql__insert('Records', array(
+		'rec_URL' => addslashes($url),
+		'rec_Title' => addslashes($title),
+		'rec_Added' => date('Y-m-d H:i:s'),
+		'rec_Modified' => date('Y-m-d H:i:s'),
+		'rec_AddedByUGrpID' => intval(get_user_id()),
 		'rec_reftype' => 1,	// internet bookmark
 		'rec_workgroup' => 0));
 	$bib_id = mysql_insert_id();

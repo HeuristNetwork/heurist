@@ -42,25 +42,25 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 
 	// public records data
 	if (! $recordID) {
-		mysql__insert("records", array(
-		"rec_type" => $type,
-		"rec_url" => $url,
-		"rec_scratchpad" => $notes,
-		"rec_wg_id" => $wg,
-		"rec_visibility" => $wg? ($vis? "Viewable" : "Hidden") : NULL,
-		"rec_added_by_usr_id" => get_user_id(),
-		"rec_added" => $now,
-		"rec_modified" => $now
+		mysql__insert("Records", array(
+		"rec_RecTypeID" => $type,
+		"rec_URL" => $url,
+		"rec_ScratchPad" => $notes,
+		"rec_OwnerUGrpID" => $wg,
+		"rec_NonOwnerVisibility" => $wg? ($vis? "Viewable" : "Hidden") : NULL,
+		"rec_AddedByUGrpID" => get_user_id(),
+		"rec_Added" => $now,
+		"rec_Modified" => $now
 		));
 		if (mysql_error()) jsonError("database write error - " . mysql_error());
 
 		$recordID = mysql_insert_id();
 	}else{
-		$res = mysql_query("select * from records left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_GroupID=rec_wg_id and ugl_UserID=".get_user_id()." where rec_id=$recordID");
+		$res = mysql_query("select * from Records left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_GroupID=rec_OwnerUGrpID and ugl_UserID=".get_user_id()." where rec_ID=$recordID");
 		$record = mysql_fetch_assoc($res);
 
-		if ($wg != $record["rec_wg_id"]) {
-			if ($record["rec_wg_id"] > 0  &&  $record["ugl_Role"] != "admin") {
+		if ($wg != $record["rec_OwnerUGrpID"]) {
+			if ($record["rec_OwnerUGrpID"] > 0  &&  $record["ugl_Role"] != "admin") {
 				// user is trying to change the workgroup when they are not an admin
 				jsonError("user is not a workgroup admin");
 			} else if (! is_admin()) {
@@ -70,29 +70,29 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 		}
 		if (! $wg) { $vis = NULL; }
 
-		mysql__update("records", "rec_id=$recordID", array(
-		"rec_type" => $type,
-		"rec_url" => $url,
-		"rec_scratchpad" => $notes,
-		"rec_wg_id" => $wg,
-		"rec_visibility" => $wg? ($vis? "Viewable" : "Hidden") : NULL,
-		"rec_modified" => $now
+		mysql__update("Records", "rec_ID=$recordID", array(
+		"rec_RecTypeID" => $type,
+		"rec_URL" => $url,
+		"rec_ScratchPad" => $notes,
+		"rec_OwnerUGrpID" => $wg,
+		"rec_NonOwnerVisibility" => $wg? ($vis? "Viewable" : "Hidden") : NULL,
+		"rec_Modified" => $now
 		));
 		if (mysql_error()) jsonError("database write error" . mysql_error());
 	}
 
-	// public rec_details data
+	// public recDetails data
 	if ($details) {
 		$bdIDs = doDetailInsertion($recordID, $details, $type, $wg, $nonces, $retitleRecs);
 	}
 
 	// check that all the required fields are present
-	$res = mysql_query("select rst_ID from defRecStructure left join rec_details on rd_rec_id=$recordID and rst_DetailTypeID=rd_type where rst_RecTypeID=$type and rdr_required='Y' and rd_id is null");
+	$res = mysql_query("select rst_ID from defRecStructure left join recDetails on dtl_RecID=$recordID and rst_DetailTypeID=dtl_DetailTypeID where rst_RecTypeID=$type and rdr_required='Y' and dtl_ID is null");
 	if (mysql_num_rows($res) > 0) {
 		// at least one missing field
 		jsonError("record is missing required field(s)");
 	}
-	$res = mysql_query("select rst_ID from rec_detail_requirements_overrides left join rec_details on rd_rec_id=$recordID and rst_DetailTypeID=rd_type where (rdr_wg_id = 0 or rdr_wg_id=$wg) and rdr_wg_id = rst_RecTypeID=$type and rdr_required='Y' and rd_id is null");
+	$res = mysql_query("select rst_ID from rec_detail_requirements_overrides left join recDetails on dtl_RecID=$recordID and rst_DetailTypeID=dtl_DetailTypeID where (rdr_wg_id = 0 or rdr_wg_id=$wg) and rdr_wg_id = rst_RecTypeID=$type and rdr_required='Y' and dtl_ID is null");
 	if (mysql_num_rows($res) > 0) {
 		// at least one missing field
 		jsonError("record is missing required field(s)");
@@ -102,7 +102,7 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 	$mask = mysql__select_array("defRecTypes", "rty_TitleMask", "rty_ID=$type");  $mask = $mask[0];
 	$title = fill_title_mask($mask, $recordID, $type);
 	if ($title) {
-		mysql_query("update records set rec_title = '" . addslashes($title) . "' where rec_id = $recordID");
+		mysql_query("update Records set rec_Title = '" . addslashes($title) . "' where rec_ID = $recordID");
 	}
 
 	// Update memcache: we can do this here since it's only the public data that we cache.
@@ -183,7 +183,7 @@ details : [t:xxx] => [ [bd:yyy] => val ]*
 
 
 function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$retitleRecs) {
-	/* $nonces :  nonce-to-bibID mapping, makes it possible to resolve rec_details values of reference variety */
+	/* $nonces :  nonce-to-bibID mapping, makes it possible to resolve recDetails values of reference variety */
 	/* $retitleRecs : set of records whos titles could be out of date and need recalc */
 	// do a double-pass to grab the expected varieties for each bib-detail-type we encounter
 
@@ -204,9 +204,9 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 		if (! ($bdtID = intval(substr($type, 2)))) continue;	// invalid type id so skip it
 
 		foreach ($pairs as $bdID => $val) {
-			if (substr($bdID, 0, 3) == "bd:") {// this detail corresponds to an existing rec_details: remember its existing rd_id
+			if (substr($bdID, 0, 3) == "bd:") {// this detail corresponds to an existing recDetails: remember its existing dtl_ID
 				if (! ($bdID = intval(substr($bdID, 3)))) continue; // invalid id so skip it
-			}else {	// simple case: this is a new detail (no existing rd_id)
+			}else {	// simple case: this is a new detail (no existing dtl_ID)
 				if ($bdID != intval($bdID)) continue;
 				$bdID = "";
 			}
@@ -265,7 +265,7 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 						}
 					}
 
-					if (mysql_num_rows(mysql_query("select rec_id from records where (! rec_wg_id or rec_wg_id=$wg) and rec_id=".intval($val))) <= 0)
+					if (mysql_num_rows(mysql_query("select rec_ID from Records where (! rec_OwnerUGrpID or rec_OwnerUGrpID=$wg) and rec_ID=".intval($val))) <= 0)
 					jsonError("invalid resource #".intval($val));
 					$bdVal = intval($val);
 					break;
@@ -299,7 +299,7 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 			}
 
 			if ($bdID) {
-				array_push($updates, "update rec_details set rd_val=$bdVal, rd_file_id=$bdFileID, rd_geo=$bdGeo where rd_id=$bdID and rd_type=$bdtID and rd_rec_id=$recordID");
+				array_push($updates, "update recDetails set dtl_Value=$bdVal, dtl_UploadedFileID=$bdFileID, dtl_Geo=$bdGeo where dtl_ID=$bdID and dtl_DetailTypeID=$bdtID and dtl_RecID=$recordID");
 				array_push($dontDeletes, $bdID);
 			}
 			else {
@@ -307,8 +307,8 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 			}
 		}
 	}
-	$deleteDetailQuery = "delete from rec_details where rd_rec_id=$recordID";
-	if (count($dontDeletes)) $deleteDetailQuery .= " and rd_id not in (" . join(",", $dontDeletes) . ")";
+	$deleteDetailQuery = "delete from recDetails where dtl_RecID=$recordID";
+	if (count($dontDeletes)) $deleteDetailQuery .= " and dtl_ID not in (" . join(",", $dontDeletes) . ")";
 	mysql_query($deleteDetailQuery);
 	if (mysql_error()) jsonError("database error - " . mysql_error());
 
@@ -319,7 +319,7 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 	}
 
 	if (count($inserts)) {
-		mysql_query("insert into rec_details (rd_rec_id, rd_type, rd_val, rd_file_id, rd_geo) values " . join(",", $inserts));
+		mysql_query("insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, dtl_Geo) values " . join(",", $inserts));
 		$first_bd_id = mysql_insert_id();
 		return range($first_bd_id, $first_bd_id + count($inserts) - 1);
 	}else{
@@ -482,7 +482,7 @@ function handleComments($recordID, $removals, $modifications, $additions) {
 
 		// do a sanity check first: does this reply make sense?
 		$parentTest = $parentID? "cmt_id=$parentID" : "cmt_id is null";
-		if (! mysql__select_array("records left join comments on rec_id=cmt_rec_id and $parentTest", "rec_id", "rec_id=$recordID and $parentTest")) {
+		if (! mysql__select_array("Records left join comments on rec_ID=cmt_rec_id and $parentTest", "rec_ID", "rec_ID=$recordID and $parentTest")) {
 			array_push($newIDs, array("error" => "invalid parent comments"));
 			continue;
 		}

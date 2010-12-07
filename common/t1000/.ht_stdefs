@@ -22,19 +22,19 @@ $MAINTABLES['BOOKMARK'] = 'usrBookmarks';
      $JOINS['BOOKMARK'] = array('BIBLIO-ID' => 'bkm_recID');
 
 
-$MAINTABLES['BIBLIO'] = 'records';
-	$PKEY['BIBLIO'] = 'rec_id';
-	$INIDATE_FIELD['BIBLIO'] = 'rec_added';
-      $MODDATE_FIELD['BIBLIO'] = 'rec_modified';
+$MAINTABLES['BIBLIO'] = 'Records';
+	$PKEY['BIBLIO'] = 'rec_ID';
+	$INIDATE_FIELD['BIBLIO'] = 'rec_Added';
+      $MODDATE_FIELD['BIBLIO'] = 'rec_Modified';
 
-$MAINTABLES['LINKED_BIBLIO'] = 'records';
-	$PKEY['LINKED_BIBLIO'] = 'rec_id';
-	$INIDATE_FIELD['LINKED_BIBLIO'] = 'rec_added';
-      $MODDATE_FIELD['LINKED_BIBLIO'] = 'rec_modified';
-                $JOINS['LINKED_BIBLIO'] = array('REFTYPE-ID' => 'rec_type');
+$MAINTABLES['LINKED_BIBLIO'] = 'Records';
+	$PKEY['LINKED_BIBLIO'] = 'rec_ID';
+	$INIDATE_FIELD['LINKED_BIBLIO'] = 'rec_Added';
+      $MODDATE_FIELD['LINKED_BIBLIO'] = 'rec_Modified';
+                $JOINS['LINKED_BIBLIO'] = array('REFTYPE-ID' => 'rec_RecTypeID');
 
 if (function_exists('get_user_id')) {
-      $LOOKUPS['LINKED_BIBLIO'] = array( 'usrBookmarks' => 'rec_id=bkm_recID and bkm_UGrpID='.get_user_id() );
+      $LOOKUPS['LINKED_BIBLIO'] = array( 'usrBookmarks' => 'rec_ID=bkm_recID and bkm_UGrpID='.get_user_id() );
 }
 
 /*
@@ -71,9 +71,9 @@ $MAINTABLES['CUSTOMBOOKMARK'] = 'usrSavedSearches';
 
 
 
-$MAINTABLES['BIB_DETAIL'] = 'rec_details';
-	$PKEY['BIB_DETAIL'] = 'rd_id';
-	$JOINS['BIB_DETAIL'] = array('BIBLIO-ID' => 'rd_rec_id', 'LINKED_BIBLIO-ID' => 'rd_rec_id', 'BIB_DETAIL_TYPE-ID' => 'rd_type');
+$MAINTABLES['BIB_DETAIL'] = 'recDetails';
+	$PKEY['BIB_DETAIL'] = 'dtl_ID';
+	$JOINS['BIB_DETAIL'] = array('BIBLIO-ID' => 'dtl_RecID', 'LINKED_BIBLIO-ID' => 'dtl_RecID', 'BIB_DETAIL_TYPE-ID' => 'dtl_DetailTypeID');
 
 $MAINTABLES['BIB_DETAIL_TYPE'] = 'defDetailTypes';
 	$PKEY['BIB_DETAIL_TYPE'] = 'dty_ID';
@@ -163,9 +163,9 @@ if (@$_REQUEST['sort_order_dropdown']  &&  in_array($_REQUEST['sort_order_dropdo
 		$_REQUEST['sort_order_dropdown'] = $_REQUEST['sort_order_dropdown'] . ' desc';
 	if ($_REQUEST['sort_order_dropdown'] == 'title') {
 		define('BOOKMARK_search-order', 'usrBookmarks.bkmk_title = "", usrBookmarks.bkmk_title');
-		define('BIBLIO_search_all-order', 'rec_title = "", rec_title');
-		define('simple_BIBLIO_search-order', 'rec_title = "", rec_title');
-		define('others_BIBLIO_search-order', 'rec_title = "", rec_title');
+		define('BIBLIO_search_all-order', 'rec_Title = "", rec_Title');
+		define('simple_BIBLIO_search-order', 'rec_Title = "", rec_Title');
+		define('others_BIBLIO_search-order', 'rec_Title = "", rec_Title');
 	} else {
 		define('BOOKMARK_search-order', 'usrBookmarks.bkmk_' . $_REQUEST['sort_order_dropdown']);
 		define('BIBLIO_search_all-order', 'bib_' . $_REQUEST['sort_order_dropdown']);
@@ -176,9 +176,9 @@ if (@$_REQUEST['sort_order_dropdown']  &&  in_array($_REQUEST['sort_order_dropdo
 } else if (@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['sort_order']) {
 	if ($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['sort_order'] == 'title') {
 		define('BOOKMARK_search-order', 'usrBookmarks.bkmk_title = "", usrBookmarks.bkmk_title');
-		define('BIBLIO_search_all-order', 'rec_title = "", rec_title');
-		define('simple_BIBLIO_search-order', 'rec_title = "", rec_title');
-		define('others_BIBLIO_search-order', 'rec_title = "", rec_title');
+		define('BIBLIO_search_all-order', 'rec_Title = "", rec_Title');
+		define('simple_BIBLIO_search-order', 'rec_Title = "", rec_Title');
+		define('others_BIBLIO_search-order', 'rec_Title = "", rec_Title');
 	} else {
 		define('BOOKMARK_search-order', 'usrBookmarks.bkmk_' . $_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['sort_order']);
 		define('BIBLIO_search_all-order', 'bib_' . $_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['sort_order']);
@@ -187,9 +187,9 @@ if (@$_REQUEST['sort_order_dropdown']  &&  in_array($_REQUEST['sort_order_dropdo
 	}
 } else {
 	define('BOOKMARK_search-order', 'usrBookmarks.bkmk_title = "", usrBookmarks.bkmk_title');
-	define('BIBLIO_search_all-order', 'rec_title = "", rec_title');
-	define('simple_BIBLIO_search-order', 'rec_title = "", rec_title');
-	define('others_BIBLIO_search-order', 'rec_title = "", rec_title');
+	define('BIBLIO_search_all-order', 'rec_Title = "", rec_Title');
+	define('simple_BIBLIO_search-order', 'rec_Title = "", rec_Title');
+	define('others_BIBLIO_search-order', 'rec_Title = "", rec_Title');
 }
 
 
@@ -205,23 +205,23 @@ $SEARCHES["BOOKMARK_search"] = "SELECT bkm_ID FROM usrBookmarks WHERE (
 		)
 		";
 */
-$SEARCHES["BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left join records on bkm_recID=rec_id WHERE (
+$SEARCHES["BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left join Records on bkm_recID=rec_ID WHERE (
 		(bkm_UGrpID = [logged-in-user-id]) and
 		[word-match:bkmk_title:bkmk_title] and
 		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
 		if ([bkmk_advanced_search] and [pers_notes]!='', pers_notes like [%pers_notes%], 1) and
-		if ([bkmk_advanced_search] and [bkmk_reftype]!='', rec_type = [bkmk_reftype], 1)
-                and not rec_temporary
+		if ([bkmk_advanced_search] and [bkmk_reftype]!='', rec_RecTypeID = [bkmk_reftype], 1)
+                and not rec_FlagTemporary
 		)
 		";	/* may be over-written by search.php */
 
-$SEARCHES["augmented_BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left join records on bkm_recID=rec_id left join usrRecTagLinks on rtl_RecID=bkm_RecID WHERE (
+$SEARCHES["augmented_BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left join Records on bkm_recID=rec_ID left join usrRecTagLinks on rtl_RecID=bkm_RecID WHERE (
 		(bkm_UGrpID = [logged-in-user-id]) and
 		[word-match:bkmk_title:bkmk_title] and
 		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
 		if ([bkmk_advanced_search] and [pers_notes]!='', pers_notes like [%pers_notes%], 1) and
-		if ([bkmk_advanced_search] and [bkmk_reftype]!='', rec_type = [bkmk_reftype], 1)
-                and not rec_temporary
+		if ([bkmk_advanced_search] and [bkmk_reftype]!='', rec_RecTypeID = [bkmk_reftype], 1)
+                and not rec_FlagTemporary
 		)
 		";	/* may be appended-to by search.php */
 
@@ -253,51 +253,51 @@ $SEARCHES["ALLBOOKMARK_search"] = "SELECT bkm_ID FROM usrBookmarks WHERE (
 	";
 
 
-/* search the records records for which the user doesn't have a bookmark already */
+/* search the Records records for which the user doesn't have a bookmark already */
 
-$SEARCHES["BIBLIO_search"] = "select rec_id from records
-	                               left join usrBookmarks on bkm_recID=rec_id and bkm_UGrpID = [logged-in-user-id] where (
+$SEARCHES["BIBLIO_search"] = "select rec_ID from Records
+	                               left join usrBookmarks on bkm_recID=rec_ID and bkm_UGrpID = [logged-in-user-id] where (
 	bkm_ID is null and
-	[word-match:rec_title:rec_title] and
-	if ([rec_url]!='', rec_url like [%rec_url%], 1) and
-	if ([rec_scratchpad]!='', rec_scratchpad like [%rec_scratchpad%], 1)
-         and not rec_temporary
+	[word-match:rec_Title:rec_Title] and
+	if ([rec_URL]!='', rec_URL like [%rec_URL%], 1) and
+	if ([rec_ScratchPad]!='', rec_ScratchPad like [%rec_ScratchPad%], 1)
+         and not rec_FlagTemporary
 	)
 	";
-$SEARCHES["simple_BIBLIO_search"] = "select distinct rec_id from records  where (
-	[word-match:rec_title:rec_title] and
-	if ([bib_advanced_search] and [rec_url]!='', rec_url like [%rec_url%], 1) and
-	if ([bib_advanced_search] and [rec_type]!='', rec_type = [rec_type], 1)
-         and not rec_temporary
+$SEARCHES["simple_BIBLIO_search"] = "select distinct rec_ID from Records  where (
+	[word-match:rec_Title:rec_Title] and
+	if ([bib_advanced_search] and [rec_URL]!='', rec_URL like [%rec_URL%], 1) and
+	if ([bib_advanced_search] and [rec_RecTypeID]!='', rec_RecTypeID = [rec_RecTypeID], 1)
+         and not rec_FlagTemporary
 	)
 	";
-$SEARCHES["augmented_simple_BIBLIO_search"] = "select distinct rec_id from records left join usrBookmarks on bkm_recID=rec_id left join usrRecTagLinks on rtl_RecID=bkm_RecID where (
-	[word-match:rec_title:rec_title] and
-	if ([bib_advanced_search] and [rec_url]!='', rec_url like [%rec_url%], 1) and
-	if ([bib_advanced_search] and [rec_type]!='', rec_type = [rec_type], 1)
-         and not rec_temporary
+$SEARCHES["augmented_simple_BIBLIO_search"] = "select distinct rec_ID from Records left join usrBookmarks on bkm_recID=rec_ID left join usrRecTagLinks on rtl_RecID=bkm_RecID where (
+	[word-match:rec_Title:rec_Title] and
+	if ([bib_advanced_search] and [rec_URL]!='', rec_URL like [%rec_URL%], 1) and
+	if ([bib_advanced_search] and [rec_RecTypeID]!='', rec_RecTypeID = [rec_RecTypeID], 1)
+         and not rec_FlagTemporary
 	)
 	";
 
-$SEARCHES["others_BIBLIO_search"] = "select distinct rec_id from records
-	                               left join usrBookmarks on bkm_recID=rec_id and bkm_UGrpID = [logged-in-user-id] where (
+$SEARCHES["others_BIBLIO_search"] = "select distinct rec_ID from Records
+	                               left join usrBookmarks on bkm_recID=rec_ID and bkm_UGrpID = [logged-in-user-id] where (
 	bkm_ID is null and
-	[word-match:rec_title:rec_title] and
-	if ([bib_advanced_search] and [rec_url]!='', rec_url like [%rec_url%], 1) and
-	if ([bib_advanced_search] and [rec_type]!='', rec_type = [rec_type], 1)
-         and not rec_temporary
+	[word-match:rec_Title:rec_Title] and
+	if ([bib_advanced_search] and [rec_URL]!='', rec_URL like [%rec_URL%], 1) and
+	if ([bib_advanced_search] and [rec_RecTypeID]!='', rec_RecTypeID = [rec_RecTypeID], 1)
+         and not rec_FlagTemporary
 	)
 	";
 
-$SEARCHES['augmented_others_BIBLIO_search'] = "select distinct rec_id from records
-	                               left join usrBookmarks A on A.bkm_recID=rec_id
+$SEARCHES['augmented_others_BIBLIO_search'] = "select distinct rec_ID from Records
+	                               left join usrBookmarks A on A.bkm_recID=rec_ID
                                        left join usrBookmarks B on B.bkm_recID=A.bkm_recID and B.bkm_UGrpID = [logged-in-user-id]
                                        left join usrRecTagLinks on rtl_RecID=A.bkm_RecID where (
 	B.bkm_ID is null and
-	[word-match:rec_title:rec_title] and
-	if ([bib_advanced_search] and [rec_url]!='', rec_url like [%rec_url%], 1) and
-	if ([bib_advanced_search] and [rec_type]!='', rec_type = [rec_type], 1)
-         and not rec_temporary
+	[word-match:rec_Title:rec_Title] and
+	if ([bib_advanced_search] and [rec_URL]!='', rec_URL like [%rec_URL%], 1) and
+	if ([bib_advanced_search] and [rec_RecTypeID]!='', rec_RecTypeID = [rec_RecTypeID], 1)
+         and not rec_FlagTemporary
 	)
 	";
 

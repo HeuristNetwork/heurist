@@ -291,7 +291,7 @@ HAPI.WOOT = function() {
 
 
 HAPI.WOOT.GUI = function() {
-    // WootEditor constructor   opts -   "woot" : wootObj   or "title" : "record : rec_id"   and "id" : docElementId  or "element": docElement or "container" : docElementContainer
+    // WootEditor constructor   opts -   "woot" : wootObj   or "title" : "record : rec_ID"   and "id" : docElementId  or "element": docElement or "container" : docElementContainer
     // SAW adding code to pass in eventHandling
 	function WootEditor(opts) {
 		var that = this;

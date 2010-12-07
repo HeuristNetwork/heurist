@@ -376,7 +376,7 @@
 						top.HEURIST.whenLoaded("record", function() {
 							document.getElementById("moddate").appendChild(document.createTextNode(top.HEURIST.edit.record.moddate));
 							var citeAs = document.getElementById("cite-as-url");
-							citeAs.href = "http://"+window.location.host+ top.HEURIST.basePath +"data/records/viewrec/view.php?instance="+ top.HEURIST.instance.name +"&bib_id=" + top.HEURIST.edit.record.bibID;
+							citeAs.href = "http://"+window.location.host+ top.HEURIST.basePath +"records/viewrec/view.php?instance="+ top.HEURIST.instance.name +"&bib_id=" + top.HEURIST.edit.record.bibID;
 							citeAs.appendChild(document.createTextNode(citeAs.href));
 						});
 					</script>
@@ -459,7 +459,7 @@
 					top.HEURIST.edit.unchanged(eachName);
 				}
 
-				top.location.replace(top.HEURIST.basePath+"data/records/editrec/heurist-edit.html?bib_id="+choice.details.id);
+				top.location.replace(top.HEURIST.basePath+"records/editrec/heurist-edit.html?bib_id="+choice.details.id);
 			}
 		});
 	}

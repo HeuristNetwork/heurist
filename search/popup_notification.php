@@ -143,7 +143,7 @@ function handle_notification() {
 
 	$notification_link = BASE_PATH . 'search/search.html?w=all&q=ids:' . join(',', $bib_ids);
 
-	$bib_titles = mysql__select_assoc('records', 'rec_id', 'rec_title', 'rec_id in (' . join(',', $bib_ids) . ')');
+	$bib_titles = mysql__select_assoc('Records', 'rec_ID', 'rec_Title', 'rec_ID in (' . join(',', $bib_ids) . ')');
 	$title_list = "Id      Title\n" . "------  ---------\n";
 	foreach ($bib_titles as $rec_id => $rec_title)
 		$title_list .= str_pad("$rec_id", 8) . $rec_title . "\n";

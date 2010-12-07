@@ -52,18 +52,18 @@ if (@$_REQUEST["delete"]  && $rec_id) {
 }
 
 if (count(@$deletions) > 0) {
-	/* check the deletion bib_ids to make sure they actually involve the given rec_id */
-	$res = mysql_query("select rec_id from records, rec_details
-		where rd_rec_id=rec_id and rd_type in (202, 199) and rd_val=$rec_id and rec_id in (" . join(",", $deletions) . ")");
+	/* check the deletion bib_ids to make sure they actually involve the given rec_ID */
+	$res = mysql_query("select rec_ID from Records, recDetails
+		where dtl_RecID=rec_ID and dtl_DetailTypeID in (202, 199) and dtl_Value=$rec_id and rec_ID in (" . join(",", $deletions) . ")");
 
 	$deletions = array();
 	while ($row = mysql_fetch_row($res)) array_push($deletions, $row[0]);
 
 	if ($deletions) {
 		foreach ($deletions as $del_bib_id) {
-			/* one delete query per rec_id, this way the archive_bib* versioning stuff works */
-			mysql_query("delete from records where rec_id = $del_bib_id");
-			mysql_query("delete from rec_details where rd_rec_id = $del_bib_id");
+			/* one delete query per rec_ID, this way the archive_bib* versioning stuff works */
+			mysql_query("delete from Records where rec_ID = $del_bib_id");
+			mysql_query("delete from recDetails where dtl_RecID = $del_bib_id");
 		}
 
 		$relatedRecords = getAllRelatedRecords($rec_id);
@@ -104,17 +104,17 @@ else if (@$_REQUEST["save-mode"] == "new") {
 function saveRelationship($rec_id, $reln_type, $other_bib_id, $interp_id, $title, $notes, $start_date, $end_date) {
 	$relval = mysql_fetch_assoc(mysql_query("select trm_Label from defTerms where trm_ID = $reln_type"));
 	$relval = $relval['trm_Label'];
-	mysql__insert("records", array(
-		"rec_title" => "$title ($rec_id $relval $other_bib_id)",
-                "rec_added"     => date('Y-m-d H:i:s'),
-                "rec_modified"  => date('Y-m-d H:i:s'),
-                "rec_type"   => 52,
-                "rec_added_by_usr_id" => get_user_id()
+	mysql__insert("Records", array(
+		"rec_Title" => "$title ($rec_id $relval $other_bib_id)",
+                "rec_Added"     => date('Y-m-d H:i:s'),
+                "rec_Modified"  => date('Y-m-d H:i:s'),
+                "rec_RecTypeID"   => 52,
+                "rec_AddedByUGrpID" => get_user_id()
 	));
 	$relnBibID = mysql_insert_id();
 
 	if ($relnBibID > 0) {
-		$query = "insert into rec_details (rd_rec_id, rd_type, rd_val) values ";
+		$query = "insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ";
 		$query .=   "($relnBibID, 160, '" . addslashes($title) . "')";
 		$query .= ", ($relnBibID, 202, $rec_id)";
 		$query .= ", ($relnBibID, 199, $other_bib_id)";

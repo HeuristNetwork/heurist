@@ -145,19 +145,19 @@ function reltype_rank ($reltype) {
 
 
 function fetch_relation_details($rec_id, $i_am_primary) {
-	/* Raid rec_details for the given link resource and extract all the necessary values */
+	/* Raid recDetails for the given link resource and extract all the necessary values */
 
-	$res = mysql_query('select * from rec_details where rd_rec_id = ' . $rec_id);
+	$res = mysql_query('select * from recDetails where dtl_RecID = ' . $rec_id);
 	$bd = array(
 		'ID' => $rec_id
 	);
 	while ($row = mysql_fetch_assoc($res)) {
-		switch ($row['rd_type']) {
+		switch ($row['dtl_DetailTypeID']) {
 		    case 200:	//saw Enum change - added RelationValue for UI
 			if ($i_am_primary) {
-				$bd['RelationType'] = $row['rd_val'];
+				$bd['RelationType'] = $row['dtl_Value'];
 			}else{
-				$bd['RelationType'] = reltype_inverse($row['rd_val']);
+				$bd['RelationType'] = reltype_inverse($row['dtl_Value']);
 			}
 			$relval = mysql_fetch_assoc(mysql_query('select trm_Label,trm_VocabID from defTerms where trm_ID = ' .  intval($bd['RelationType'])));
 			$bd['RelationValue'] = $relval['trm_Label'];
@@ -166,35 +166,35 @@ function fetch_relation_details($rec_id, $i_am_primary) {
 
 		    case 199:	// linked resource
 			if (! $i_am_primary) break;
-			$r = mysql_query('select rec_id, rec_title, rec_type, rec_url from records where rec_id = ' . intval($row['rd_val']));
+			$r = mysql_query('select rec_ID, rec_Title, rec_RecTypeID, rec_URL from Records where rec_ID = ' . intval($row['dtl_Value']));
 			$bd['OtherResource'] = mysql_fetch_assoc($r);
 			break;
 
 		    case 202:
 			if ($i_am_primary) break;
-			$r = mysql_query('select rec_id, rec_title, rec_type, rec_url from records where rec_id = ' . intval($row['rd_val']));
+			$r = mysql_query('select rec_ID, rec_Title, rec_RecTypeID, rec_URL from Records where rec_ID = ' . intval($row['dtl_Value']));
 			$bd['OtherResource'] = mysql_fetch_assoc($r);
 			break;
 
 		    case 638:
-			$r = mysql_query('select rec_id, rec_title, rec_type, rec_url from records where rec_id = ' . intval($row['rd_val']));
+			$r = mysql_query('select rec_ID, rec_Title, rec_RecTypeID, rec_URL from Records where rec_ID = ' . intval($row['dtl_Value']));
 			$bd['InterpResource'] = mysql_fetch_assoc($r);
 			break;
 
 		    case 201:
-			$bd['Notes'] = $row['rd_val'];
+			$bd['Notes'] = $row['dtl_Value'];
 			break;
 
 		    case 160:
-			$bd['Title'] = $row['rd_val'];
+			$bd['Title'] = $row['dtl_Value'];
 			break;
 
 		    case 177:
-			$bd['StartDate'] = $row['rd_val'];
+			$bd['StartDate'] = $row['dtl_Value'];
 			break;
 
 		    case 178:
-			$bd['EndDate'] = $row['rd_val'];
+			$bd['EndDate'] = $row['dtl_Value'];
 			break;
 		}
 	}
@@ -205,19 +205,19 @@ function fetch_relation_details($rec_id, $i_am_primary) {
 
 function getAllRelatedRecords($rec_id, $relnBibID=0) {
 	if (! $rec_id) return null;
-	$query = "select LINK.rd_type as type, DETAILS.*, DBIB.rec_title as title, DBIB.rec_type as rt, DBIB.rec_url as url
-from rec_details LINK left join records LBIB on LBIB.rec_id=LINK.rd_rec_id, rec_details DETAILS left join records DBIB on DBIB.rec_id=DETAILS.rd_val and DETAILS.rd_type in (202, 199, 158)
-where ((LINK.rd_type in (202, 199) and LBIB.rec_type=52) or LINK.rd_type=158) and LINK.rd_val = $rec_id and DETAILS.rd_rec_id = LINK.rd_rec_id";
-	if ($relnBibID) $query .= " and DETAILS.rd_rec_id = $relnBibID";
+	$query = "select LINK.dtl_DetailTypeID as type, DETAILS.*, DBIB.rec_Title as title, DBIB.rec_RecTypeID as rt, DBIB.rec_URL as url
+from recDetails LINK left join Records LBIB on LBIB.rec_ID=LINK.dtl_RecID, recDetails DETAILS left join Records DBIB on DBIB.rec_ID=DETAILS.dtl_Value and DETAILS.dtl_DetailTypeID in (202, 199, 158)
+where ((LINK.dtl_DetailTypeID in (202, 199) and LBIB.rec_RecTypeID=52) or LINK.dtl_DetailTypeID=158) and LINK.dtl_Value = $rec_id and DETAILS.dtl_RecID = LINK.dtl_RecID";
+	if ($relnBibID) $query .= " and DETAILS.dtl_RecID = $relnBibID";
 
-	$query .= " order by LINK.rd_type desc, DETAILS.rd_id";
+	$query .= " order by LINK.dtl_DetailTypeID desc, DETAILS.dtl_ID";
 
 error_log($query);
 	$res = mysql_query($query);	/* primary resources first, then non-primary, then authors */
 
 	$relations = array();
 	while ($bd = mysql_fetch_assoc($res)) {
-		$rec_id = $bd["rd_rec_id"];
+		$rec_id = $bd["dtl_RecID"];
 		$i_am_primary = ($bd["type"] == 202);
 		if (! array_key_exists($rec_id, $relations))
 			$relations[$rec_id] = array();
@@ -235,9 +235,9 @@ error_log($query);
 			$relations[$rec_id]["bibID"] = $rec_id;
 		}
 
-		switch ($bd["rd_type"]) {
-		case 200:	//saw Enum change - nothing to do since rd_val is an id and inverse returns an id
-			$relations[$rec_id]["RelationType"] = $i_am_primary? $bd["rd_val"] : reltype_inverse($bd["rd_val"]);
+		switch ($bd["dtl_DetailTypeID"]) {
+		case 200:	//saw Enum change - nothing to do since dtl_Value is an id and inverse returns an id
+			$relations[$rec_id]["RelationType"] = $i_am_primary? $bd["dtl_Value"] : reltype_inverse($bd["dtl_Value"]);
 			$relval = mysql_fetch_assoc(mysql_query('select trm_Label from defTerms where trm_ID = ' .  intval($relations[$rec_id]["RelationType"])));
 			$relations[$rec_id]['RelationValue'] = $relval['trm_Label'];
 			break;
@@ -245,36 +245,36 @@ error_log($query);
 		case 199:
 			if ($i_am_primary)
 				$relations[$rec_id]["OtherResource"] = array(
-					"Title" => $bd["title"], "Reftype" => $bd["rt"], "URL" => $bd["url"], "bibID" => $bd["rd_val"]
+					"Title" => $bd["title"], "Reftype" => $bd["rt"], "URL" => $bd["url"], "bibID" => $bd["dtl_Value"]
 				);
 			break;
 
 		case 202:
 			if (! $i_am_primary)
 				$relations[$rec_id]["OtherResource"] = array(
-					"Title" => $bd["title"], "Reftype" => $bd["rt"], "URL" => $bd["url"], "bibID" => $bd["rd_val"]
+					"Title" => $bd["title"], "Reftype" => $bd["rt"], "URL" => $bd["url"], "bibID" => $bd["dtl_Value"]
 				);
 			break;
 
 		case 638:
 			$relations[$rec_id]["InterpResource"] = array(
-				"Title" => $bd["title"], "Reftype" => $bd["rt"], "URL" => $bd["url"], "bibID" => $bd["rd_val"]);
+				"Title" => $bd["title"], "Reftype" => $bd["rt"], "URL" => $bd["url"], "bibID" => $bd["dtl_Value"]);
 			break;
 
 		case 201:
-			$relations[$rec_id]["Notes"] = $bd["rd_val"];
+			$relations[$rec_id]["Notes"] = $bd["dtl_Value"];
 			break;
 
 		case 160:
-			$relations[$rec_id]["Title"] = $bd["rd_val"];
+			$relations[$rec_id]["Title"] = $bd["dtl_Value"];
 			break;
 
 		case 177:
-			$relations[$rec_id]["StartDate"] = $bd["rd_val"];
+			$relations[$rec_id]["StartDate"] = $bd["dtl_Value"];
 			break;
 
 		case 178:
-			$relations[$rec_id]["EndDate"] = $bd["rd_val"];
+			$relations[$rec_id]["EndDate"] = $bd["dtl_Value"];
 			break;
 		}
 	}

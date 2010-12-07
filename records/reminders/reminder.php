@@ -48,10 +48,10 @@ function sendReminderEmail($reminder, $USERS_DATABASE, $HOST) {
 		$email_headers .= "\r\nReply-To: ".$owner['ugr_FirstName'].' '.$owner['ugr_LastName'].' <'.$owner['ugr_eMail'].'>';
 	}
 
-	$res = mysql_query('select rec_title, rec_wg_id, rec_visibility, grp.ugr_Name from records left join '.$USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=rec_wg_id and grp.ugr_Type != "User" where rec_id = '.$reminder['rem_RecID']);
+	$res = mysql_query('select rec_Title, rec_OwnerUGrpID, rec_NonOwnerVisibility, grp.ugr_Name from Records left join '.$USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID and grp.ugr_Type != "User" where rec_ID = '.$reminder['rem_RecID']);
 	$bib = mysql_fetch_assoc($res);
 
-	$email_subject = '[Heurist] "'.$bib['rec_title'].'"';
+	$email_subject = '[Heurist] "'.$bib['rec_Title'].'"';
 
 	if (@$reminder['rem_ToUserID'] != @$reminder['rem_OwnerUGrpID'])
 		$email_subject .= ' from ' . $owner['ugr_FirstName'].' '.$owner['ugr_LastName'];
@@ -59,10 +59,10 @@ function sendReminderEmail($reminder, $USERS_DATABASE, $HOST) {
 	foreach($recipients as $recipient) {
 		$email_text = 'Reminder From: ' . ($reminder['rem_ToUserID'] == $reminder['rem_OwnerUGrpID'] ? 'you'
 										   : $owner['ugr_FirstName'].' '.$owner['ugr_LastName'].' <'.$owner['ugr_eMail'].'>') . "\n\n"
-					. 'For: "'.$bib['rec_title'].'"' . "\n\n"
+					. 'For: "'.$bib['rec_Title'].'"' . "\n\n"
 					. 'URL: http://'.$HOST.'/heurist/?w=all&q=ids:'.$reminder['rem_RecID'] . "\n\n";
 					
-		if ($bib['rec_wg_id'] && $bib['rec_visibility'] == 'Hidden') {
+		if ($bib['rec_OwnerUGrpID'] && $bib['rec_NonOwnerVisibility'] == 'Hidden') {
 			$email_text .= "Note: Resource belongs to workgroup ".$bib['ugr_Name'] . "\n"
          				.	"You must be logged in to Heurist and a member of this workgroup to view it". "\n\n";
 		}

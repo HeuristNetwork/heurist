@@ -27,7 +27,7 @@ $(document).ready(function() {
 		return false;
 	});
 
-	$("#reftype_elt, #restrict_elt, #rec_wg_id, #tag, #rec_visibility, #add-link-title, #add-link-tags").change(update_link);
+	$("#reftype_elt, #restrict_elt, #rec_OwnerUGrpID, #tag, #rec_NonOwnerVisibility, #add-link-title, #add-link-tags").change(update_link);
 
 	var matches = location.search.match(/wg_id=(\d+)/);
 	buildworkgroupTagselect(matches ? matches[1] : null);
@@ -83,10 +83,10 @@ function update_link() {
 function compute_args() {
 	var extra_parms = '';
 	if (document.getElementById('restrict_elt').checked) {
-		var wg_id = parseInt(document.getElementById('rec_wg_id').value);
+		var wg_id = parseInt(document.getElementById('rec_OwnerUGrpID').value);
 		if (wg_id) {
 			extra_parms = '&bib_workgroup=' + wg_id;
-			extra_parms += '&bib_visibility=' + document.getElementById('rec_visibility').value;
+			extra_parms += '&bib_visibility=' + document.getElementById('rec_NonOwnerVisibility').value;
 
 			var kwdList = document.getElementById('tag');
 			if (kwdList.selectedIndex > 0) extra_parms += "&tag=" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value);
@@ -108,17 +108,17 @@ function add_note(e) {
 
 	var extra_parms = '';
 	if (document.getElementById('restrict_elt').checked) {
-		var wg_id = parseInt(document.getElementById('rec_wg_id').value);
+		var wg_id = parseInt(document.getElementById('rec_OwnerUGrpID').value);
 		if (wg_id) {
 			extra_parms = '&bib_workgroup=' + wg_id;
-			extra_parms += '&bib_visibility=' + document.getElementById('rec_visibility').value;
+			extra_parms += '&bib_visibility=' + document.getElementById('rec_NonOwnerVisibility').value;
 
 			var kwdList = document.getElementById('tag');
 			if (kwdList.selectedIndex > 0) extra_parms += "&tag=" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value);
 		}
 		else {
 			alert('Please select a group to which this record shall be restricted');
-			document.getElementById('rec_wg_id').focus();
+			document.getElementById('rec_OwnerUGrpID').focus();
 			return;
 		}
 	}
@@ -220,7 +220,7 @@ hr { margin: 20px 0; }
      </nobr>
     </td>
     <td class=workgroup><nobr>
-     <select name="rec_wg_id" id="rec_wg_id" style="width: 200px;" onchange="buildworkgroupTagselect(options[selectedIndex].value)">
+     <select name="rec_OwnerUGrpID" id="rec_OwnerUGrpID" style="width: 200px;" onchange="buildworkgroupTagselect(options[selectedIndex].value)">
       <option value="0" disabled selected>(select group)</option>
 <?php
 	$res = mysql_query('select '.GROUPS_ID_FIELD.', '.GROUPS_NAME_FIELD.' from '.USERS_DATABASE.'.'.USER_GROUPS_TABLE.' left join '.USERS_DATABASE.'.'.GROUPS_TABLE.' on '.GROUPS_ID_FIELD.'='.USER_GROUPS_GROUP_ID_FIELD.' where '.USER_GROUPS_USER_ID_FIELD.'='.get_user_id().' and '.GROUPS_TYPE_FIELD.'!="Usergroup" order by '.GROUPS_NAME_FIELD);
@@ -255,7 +255,7 @@ hr { margin: 20px 0; }
      Outside this group:
     </td>
     <td>
-     <select name="rec_visibility" id="rec_visibility" style="width: 200px;">
+     <select name="rec_NonOwnerVisibility" id="rec_NonOwnerVisibility" style="width: 200px;">
       <option value="Visible">record is read-only</option>
       <option value="Hidden">record is hidden</option>
      </select>

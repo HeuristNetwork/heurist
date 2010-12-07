@@ -18,22 +18,22 @@ while (count($bib_ids_to_fetch) > 0) {
 	$rec_id = array_shift($bib_ids_to_fetch);
 	if ($bib_data[$rec_id]) continue;
 
-	$res = mysql_query("select rec_title, rec_type, rec_scratchpad from records where rec_id = $rec_id");
+	$res = mysql_query("select rec_Title, rec_RecTypeID, rec_ScratchPad from Records where rec_ID = $rec_id");
 	$row = mysql_fetch_assoc($res);
 	if (! @$row) continue;
 
 	$bib_data[$rec_id] = array();
-	$bib_data[$rec_id]["title"] = $row["rec_title"];
-	$bib_data[$rec_id]["reftype"] = $row["rec_type"];
-	$bib_data[$rec_id]["notes"] = $row["rec_scratchpad"];
+	$bib_data[$rec_id]["title"] = $row["rec_Title"];
+	$bib_data[$rec_id]["reftype"] = $row["rec_RecTypeID"];
+	$bib_data[$rec_id]["notes"] = $row["rec_ScratchPad"];
 
 	$bib_data[$rec_id]["values"] = array();
-	$res = mysql_query("select rd_type, rd_val, dty_Type from rec_details left join defDetailTypes on dty_ID=rd_type left join defRecStructure on rst_DetailTypeID=dty_ID and rst_RecTypeID = " . intval($row["rec_type"]) . " where rd_rec_id = $rec_id order by rst_OrderInForm, dty_ID, rd_id");
+	$res = mysql_query("select dtl_DetailTypeID, dtl_Value, dty_Type from recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID left join defRecStructure on rst_DetailTypeID=dty_ID and rst_RecTypeID = " . intval($row["rec_RecTypeID"]) . " where dtl_RecID = $rec_id order by rst_OrderInForm, dty_ID, dtl_ID");
 	while ($bd = mysql_fetch_assoc($res)) {
-		if (! @$bib_data[$rec_id]["values"][$bd["rd_type"]]) $bib_data[$rec_id]["values"][$bd["rd_type"]] = array();
-		array_push($bib_data[$rec_id]["values"][$bd["rd_type"]], $bd["rd_val"]);
+		if (! @$bib_data[$rec_id]["values"][$bd["dtl_DetailTypeID"]]) $bib_data[$rec_id]["values"][$bd["dtl_DetailTypeID"]] = array();
+		array_push($bib_data[$rec_id]["values"][$bd["dtl_DetailTypeID"]], $bd["dtl_Value"]);
 
-		if ($bd["dty_Type"] == "resource") array_push($bib_ids_to_fetch, intval($bd["rd_val"]));
+		if ($bd["dty_Type"] == "resource") array_push($bib_ids_to_fetch, intval($bd["dtl_Value"]));
 	}
 }
 

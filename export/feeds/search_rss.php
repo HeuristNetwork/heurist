@@ -7,7 +7,7 @@ define('T1000_XML', 1);
 define('SAVE_URI', 'disabled');
 if (!@$_REQUEST['a'] == 1) {
 	define("BYPASS_LOGIN",true);
-	$where = "where rec_visibility ='viewable' or rec_visibility is null";
+	$where = "where rec_NonOwnerVisibility ='viewable' or rec_NonOwnerVisibility is null";
 }
 require_once(dirname(__FILE__).'/../../common/connect/cred.php');
 
@@ -36,7 +36,7 @@ if ( $_REQUEST['w'] == 'B'  ||  $_REQUEST['w'] == 'bookmark') {		// my bookmark 
 	$query = 'select distinct bkm_ID ';
 } else if (! @$_REQUEST['w']  ||$_REQUEST['w'] == 'a'  ||  $_REQUEST['w'] == 'all') {			// all records entries
 	$search_type = BOTH;
-	$query = 'select distinct rec_id ';
+	$query = 'select distinct rec_ID ';
 } else {
 	return;	// wwgd
 }
@@ -55,7 +55,7 @@ if (preg_match('/.* order by (.*)/', $query, $matches)) {
 
 
 // hack!  Instead of stupidly searching the useless usrBookmarks (bookmarks) table, give us rec_ids instead
-$query = str_replace("select distinct bkm_ID from", "select distinct rec_id from", $query);
+$query = str_replace("select distinct bkm_ID from", "select distinct rec_ID from", $query);
 $SEARCHES['rss_search'] = $query;
 error_log("query = ".$query);
 

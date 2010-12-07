@@ -8,7 +8,7 @@ if (! is_logged_in()) return;
 mysql_connection_db_overwrite(DATABASE);
 
 
-if (! @$_POST["rec_id"]) {
+if (! @$_POST["rec_ID"]) {
 	$bibID = intval($_GET["bib_id"]);
 	$bdtID = intval($_GET["bdt_id"]);
 }
@@ -56,8 +56,8 @@ $upload = $_FILES["file"];
 $fileID = upload_file($upload["name"], $upload["type"], $upload["tmp_name"], $upload["error"], $upload["size"]);
 if ($fileID) {
 	if ($bibID  &&  $bdtID) {
-		mysql_query("update records set rec_modified=now() where rec_id=$bibID");
-		mysql_query("insert into rec_details (rd_rec_id, rd_type, rd_file_id) values ($bibID, $bdtID, $fileID)");
+		mysql_query("update Records set rec_Modified=now() where rec_ID=$bibID");
+		mysql_query("insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_UploadedFileID) values ($bibID, $bdtID, $fileID)");
 	}
 
 	$res = mysql_query("select * from files where file_id = $fileID");

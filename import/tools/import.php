@@ -1466,8 +1466,8 @@ function find_exact_entry(&$entry) {
 		return true;
 	}
 
-	// error_log("select rec_id from records where ! rec_temporary and rec_type = " . $entry->getReferenceType() . " and rec_hhash = upper('" . addslashes($entry->getHHash()) . "') order by rec_id");
-	$res = mysql_query("select rec_id from records where ! rec_temporary and rec_type = " . $entry->getReferenceType() . " and rec_hhash = upper('" . addslashes($entry->getHHash()) . "') order by rec_id");
+	// error_log("select rec_ID from records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " and rec_Hash = upper('" . addslashes($entry->getHHash()) . "') order by rec_ID");
+	$res = mysql_query("select rec_ID from Records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " and rec_Hash = upper('" . addslashes($entry->getHHash()) . "') order by rec_ID");
 
 	if (mysql_num_rows($res) < 1) return false;
 	// choose One Of The Matches ... tend to think that the one with the lowest bibID has precedence ...
@@ -1489,21 +1489,17 @@ function find_similar_entries(&$entry) {
 
 	if ($entry->getReferenceType() == 44  ||  $entry->getReferenceType() == 28) {	// a publication series or journal volume
 		$hash = $entry->getHHash();
-		$hashColumn = "rec_hhash";
-	}
-	else {
-		$hash = $entry->getCrapHash();
-		$hashColumn = "rec_simple_hash";
+		$hashColumn = "rec_Hash";
 	}
 	$hash_len = intval(strlen($hash) * HASH_FUZZINESS);
 
 	// use a strict substring to take advantage of the index on hash
 	if (HASH_PREFIX_LENGTH) {
 		$hprefix = mb_substr($hash, 0, HASH_PREFIX_LENGTH);
-		$similar_query = "select rec_id as matching_bib_id, limited_levenshtein($hashColumn, upper('" . addslashes($hash) . "'), $hash_len) as lev from records where ! rec_temporary and rec_type = " . $entry->getReferenceType() . " and $hashColumn like '" . addslashes($hprefix) . "%' having lev is not null order by lev";
+		$similar_query = "select rec_ID as matching_bib_id, limited_levenshtein($hashColumn, upper('" . addslashes($hash) . "'), $hash_len) as lev from Records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " and $hashColumn like '" . addslashes($hprefix) . "%' having lev is not null order by lev";
 	}
 	else {
-		$similar_query = "select rec_id as matching_bib_id, limited_levenshtein($hashColumn, upper('" . addslashes($hash) . "'), $hash_len) as lev from records where ! rec_temporary and rec_type = " . $entry->getReferenceType() . " having lev is not null order by lev";
+		$similar_query = "select rec_ID as matching_bib_id, limited_levenshtein($hashColumn, upper('" . addslashes($hash) . "'), $hash_len) as lev from Records where ! rec_FlagTemporary and rec_RecTypeID = " . $entry->getReferenceType() . " having lev is not null order by lev";
 	}
 	// error_log($similar_query);
 
@@ -1538,23 +1534,23 @@ function find_similar_entries(&$entry) {
 
 
 function biblio_are_equal($bib_id1, $bib_id2) {
-	// do a recursive comparison on the two records records
+	// do a recursive comparison on the two Records records
 	// regard the first one as "authoritative", the second as "speculative" where this makes any sense
-	$res = mysql_query("select 1 from records where rec_id = $bib_id1 and rec_hhash = hhash($bib_id2)");
+	$res = mysql_query("select 1 from Records where rec_ID = $bib_id1 and rec_Hash = hhash($bib_id2)");
 	return (mysql_num_rows($res) > 0);
 
 	$equality_query =
 '
    select sum(rst_RecordMatchOrder) as bdr_match_count
-     from rec_details BD1
-left join rec_details BD2 on BD1.rd_type=BD2.rd_type and (BD1.rd_val=BD2.rd_val or (length(BD1.rd_val_precis) > 20 and cast(liposuction(BD1.rd_val) as char) = cast(liposuction(BD2.rd_val) as char)))
-left join records on BD1.rd_rec_id=rec_id
-left join defRecStructure on rst_DetailTypeID=BD1.rd_type and rst_RecTypeID=rec_type
-left join defDetailTypes on dty_ID=BD1.rd_type
-    where BD1.rd_rec_id=' . $bib_id1 . ' and BD2.rd_rec_id in (' . $bib_id1 . ',' . $bib_id2 . ')
-          and (BD1.rd_type = 158  or  dty_Type != "resource")
- group by BD2.rd_rec_id
- order by BD1.rd_rec_id != BD2.rd_rec_id
+     from recDetails BD1
+left join recDetails BD2 on BD1.dtl_DetailTypeID=BD2.dtl_DetailTypeID and (BD1.dtl_Value=BD2.dtl_Value or (length(BD1.dtl_ValShortened) > 20 and cast(liposuction(BD1.dtl_Value) as char) = cast(liposuction(BD2.dtl_Value) as char)))
+left join Records on BD1.dtl_RecID=rec_ID
+left join defRecStructure on rst_DetailTypeID=BD1.dtl_DetailTypeID and rst_RecTypeID=rec_RecTypeID
+left join defDetailTypes on dty_ID=BD1.dtl_DetailTypeID
+    where BD1.dtl_RecID=' . $bib_id1 . ' and BD2.dtl_RecID in (' . $bib_id1 . ',' . $bib_id2 . ')
+          and (BD1.dtl_DetailTypeID = 158  or  dty_Type != "resource")
+ group by BD2.dtl_RecID
+ order by BD1.dtl_RecID != BD2.dtl_RecID
 ';
 	$res = mysql_query($equality_query);
 	$bd1_counts = mysql_fetch_assoc($res);
@@ -1565,15 +1561,15 @@ left join defDetailTypes on dty_ID=BD1.rd_type
 	/* This one took a long time to compose, so DON'T MESS IT UP.
 	 * For each detail type which is marked rst_RecordMatchOrder,
 	 * grab the corresponding bib_ids from the two records currently being matched.
-	 * If this returns any rows, then each row gives us two new records records that need to be tested for equality.
+	 * If this returns any rows, then each row gives us two new Records records that need to be tested for equality.
 	 */
-	$res = mysql_query('select BD1.rd_val as bd1_resource, BD2.rd_val as bd2_resource
+	$res = mysql_query('select BD1.dtl_Value as bd1_resource, BD2.dtl_Value as bd2_resource
 from defDetailTypes
-left join records on rec_id='.$bib_id1.'
-left join defRecStructure on rst_DetailTypeID=dty_ID and rst_RecTypeID=rec_type
-left join rec_details BD1 on BD1.rd_type=dty_ID
-left join rec_details BD2 on BD2.rd_type=dty_ID and BD2.rd_rec_id='.$bib_id2.'
-where BD1.rd_rec_id=rec_id and (dty_ID != 158  and  dty_Type = "resource") and rst_RecordMatchOrder and BD1.rd_id is not null');
+left join Records on rec_ID='.$bib_id1.'
+left join defRecStructure on rst_DetailTypeID=dty_ID and rst_RecTypeID=rec_RecTypeID
+left join recDetails BD1 on BD1.dtl_DetailTypeID=dty_ID
+left join recDetails BD2 on BD2.dtl_DetailTypeID=dty_ID and BD2.dtl_RecID='.$bib_id2.'
+where BD1.dtl_RecID=rec_ID and (dty_ID != 158  and  dty_Type = "resource") and rst_RecordMatchOrder and BD1.dtl_ID is not null');
 
 	if (mysql_num_rows($res) == 0) return true;	// there are no resource-pointer types required for a match
 	while ($row = mysql_fetch_row($res)) {
@@ -1590,7 +1586,7 @@ where BD1.rd_rec_id=rec_id and (dty_ID != 158  and  dty_Type = "resource") and r
 
 function insert_biblio(&$entry) {
 	// Insert records entries for this entry and its containers,
-	// and the associated rec_details and usrRecTagLinks entris.
+	// and the associated recDetails and usrRecTagLinks entris.
 	global $session_data;
 	global $bib_type_names;
 	if (! $bib_type_names) load_bib_type_names();
@@ -1602,12 +1598,12 @@ function insert_biblio(&$entry) {
 		// check container->getBiblioID()
 	}
 
-	$bib = array('rec_type' => $entry->getReferenceType(),
-	             'rec_added' => date('Y-m-d H:i:s'),
-	             'rec_modified' => date('Y-m-d H:i:s'),
-	             'rec_auto' => 1,
-	             'rec_added_by_usr_id' => get_user_id(),
-	             'rec_temporary' => 1);	// always insert entries as temporary, we can perm them later
+	$bib = array('rec_RecTypeID' => $entry->getReferenceType(),
+	             'rec_Added' => date('Y-m-d H:i:s'),
+	             'rec_Modified' => date('Y-m-d H:i:s'),
+	             'rec_AddedByImport' => 1,
+	             'rec_AddedByUGrpID' => get_user_id(),
+	             'rec_FlagTemporary' => 1);	// always insert entries as temporary, we can perm them later
 
 	$bib_details = array();
 
@@ -1626,19 +1622,19 @@ function insert_biblio(&$entry) {
 			$val = $fields[$i]->getRawValue();
 			$rec_scratchpad .= is_array($val)? join("\n", $val) : $val;
 		} else if ($fields[$i]->getType() === "url") {
-			// set as the rec_url
-			$bib["rec_url"] = $fields[$i]->getRawValue();
-		} else if ($fields[$i]->getType() === 256  &&  ! @$bib["rec_url"]) {
-			// use first web link as the rec_url
-			$bib["rec_url"] = $fields[$i]->getRawValue();
+			// set as the rec_URL
+			$bib["rec_URL"] = $fields[$i]->getRawValue();
+		} else if ($fields[$i]->getType() === 256  &&  ! @$bib["rec_URL"]) {
+			// use first web link as the rec_URL
+			$bib["rec_URL"] = $fields[$i]->getRawValue();
 		} else {
 			$bib_details[] = &$fields[$i];
 		}
 	}
-	if ($rec_scratchpad) $bib['rec_scratchpad'] = $rec_scratchpad;
+	if ($rec_scratchpad) $bib['rec_ScratchPad'] = $rec_scratchpad;
 
 
-	mysql__insert('records', $bib);
+	mysql__insert('Records', $bib);
 	$rec_id = mysql_insert_id();
 	$entry->setBiblioID($rec_id);
 
@@ -1671,13 +1667,13 @@ function insert_biblio(&$entry) {
 		$bib_detail_insert .= '('.$rec_id.','.$resource_pointer_type.','.$entry->_container->getBiblioID().', NULL, 1)';
 	}
 	if ($bib_detail_insert) {
-		$bib_detail_insert = 'insert into rec_details (rd_rec_id, rd_type, rd_val, rd_geo, rd_auto) values '
+		$bib_detail_insert = 'insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_Geo, dtl_AddedByImport) values '
 		                                             . $bib_detail_insert;
 		mysql_query($bib_detail_insert);
 	}
 
 	mysql_query('set @suppress_update_trigger := 1');
-	mysql_query('update records set rec_title = "'.addslashes($entry->getTitle()).'", rec_hhash = hhash(rec_id), rec_simple_hash = simple_hash(rec_id) where rec_id='.$rec_id);
+	mysql_query('update Records set rec_Title = "'.addslashes($entry->getTitle()).'", rec_Hash = hhash(rec_ID) where rec_ID='.$rec_id);
 	mysql_query('set @suppress_update_trigger := NULL');
 }
 
@@ -1685,18 +1681,18 @@ function insert_biblio(&$entry) {
 function perm_biblio(&$entry) {
 	// mark the bibliographic record associated with this entry as NON-TEMPORARY
 	mysql_query('set @suppress_update_trigger := 1');
-	mysql_query('update records set rec_temporary = 0 where rec_id = ' . $entry->getBiblioID());
+	mysql_query('update Records set rec_FlagTemporary = 0 where rec_ID = ' . $entry->getBiblioID());
 
 	if ($entry->_container  &&  $entry->_container->_permanent) {
-		// container is already permanent: this means that we found a match in the database for the container, so our rec_details is out-of-date.  Update it.
+		// container is already permanent: this means that we found a match in the database for the container, so our recDetails is out-of-date.  Update it.
 
 		global $reftype_to_bdt_id_map;
 
-		mysql_query('update rec_details set rd_val='.$entry->_container->getBiblioID().
-		            ' where rd_rec_id='.$entry->getBiblioID().' and rd_type='.$reftype_to_bdt_id_map[ $entry->_container->getReferenceType() ]);
+		mysql_query('update recDetails set dtl_Value='.$entry->_container->getBiblioID().
+		            ' where dtl_RecID='.$entry->getBiblioID().' and dtl_DetailTypeID='.$reftype_to_bdt_id_map[ $entry->_container->getReferenceType() ]);
 	}
 
-	if ($entry->_author_bib_ids) mysql_query('update records set rec_temporary=0 where rec_id in ('.join(',', $entry->_author_bib_ids).')');
+	if ($entry->_author_bib_ids) mysql_query('update Records set rec_FlagTemporary=0 where rec_ID in ('.join(',', $entry->_author_bib_ids).')');
 
 	mysql_query('set @suppress_update_trigger := NULL');
 	$entry->_permanent = true;
@@ -1711,32 +1707,32 @@ function merge_biblio($master_bib_id, $slave_bib_id) {
 	// make sure that the record that will stay in the database (master)
 	// contains at least all the info in the one we're importing (slave)
 
-	// We need to insert into rec_details fields which aren't already in the old entry.
+	// We need to insert into recDetails fields which aren't already in the old entry.
 	// Here we just determine whether such data exists,
 	// this is to prevent false deltas in the archive tables.
 
 /*
 if ($master_bib_id == 44) { error_log(str_replace("\n", " ", '
-   select '.$master_bib_id.', S.rd_type, S.rd_val, 2
-     from rec_details S
-left join rec_details M on S.rd_type=M.rd_type and S.rd_val_precis=M.rd_val_precis and M.rd_rec_id='.$master_bib_id.'
-left join defDetailTypes on dty_ID=S.rd_type
-    where S.rd_rec_id='.$slave_bib_id.' and M.rd_rec_id is null and (dty_Type != "resource" or S.rd_type=158)')); }
+   select '.$master_bib_id.', S.dtl_DetailTypeID, S.dtl_Value, 2
+     from recDetails S
+left join recDetails M on S.dtl_DetailTypeID=M.dtl_DetailTypeID and S.dtl_ValShortened=M.dtl_ValShortened and M.dtl_RecID='.$master_bib_id.'
+left join defDetailTypes on dty_ID=S.dtl_DetailTypeID
+    where S.dtl_RecID='.$slave_bib_id.' and M.dtl_RecID is null and (dty_Type != "resource" or S.dtl_DetailTypeID=158)')); }
 */
 
 	$new_bd_query = '
-   select '.$master_bib_id.', S.rd_type, S.rd_val, 2
-     from rec_details S
-left join rec_details M on S.rd_type=M.rd_type and S.rd_val_precis=M.rd_val_precis and M.rd_rec_id='.$master_bib_id.'
-left join defDetailTypes on dty_ID=S.rd_type
-    where S.rd_rec_id='.$slave_bib_id.' and M.rd_rec_id is null and (dty_Type != "resource" or S.rd_type=158)';	// ignore non-author references
+   select '.$master_bib_id.', S.dtl_DetailTypeID, S.dtl_Value, 2
+     from recDetails S
+left join recDetails M on S.dtl_DetailTypeID=M.dtl_DetailTypeID and S.dtl_ValShortened=M.dtl_ValShortened and M.dtl_RecID='.$master_bib_id.'
+left join defDetailTypes on dty_ID=S.dtl_DetailTypeID
+    where S.dtl_RecID='.$slave_bib_id.' and M.dtl_RecID is null and (dty_Type != "resource" or S.dtl_DetailTypeID=158)';	// ignore non-author references
 	$res = mysql_query($new_bd_query);
 	$num_bd_rows = mysql_num_rows($res);
 
-	// Consider, line-by-line, the values in the entries' respective rec_scratchpad fields.
+	// Consider, line-by-line, the values in the entries' respective rec_ScratchPad fields.
 	// Any lines that are not already in the master field will be added at the end.
 
-	$rec_scratchpad = mysql__select_assoc('records', 'rec_id', 'rec_scratchpad', 'rec_id in ('.$master_bib_id.','.$slave_bib_id.')');
+	$rec_scratchpad = mysql__select_assoc('Records', 'rec_ID', 'rec_ScratchPad', 'rec_ID in ('.$master_bib_id.','.$slave_bib_id.')');
 	if (! $rec_scratchpad[$master_bib_id]) {
 		$new_val = $rec_scratchpad[$slave_bib_id];
 	} else {
@@ -1758,16 +1754,16 @@ left join defDetailTypes on dty_ID=S.rd_type
 	}
 
 	if ($new_val) {
-		mysql_query('update records set rec_scratchpad="'.addslashes($new_val).'", rec_modified=now() where rec_id='.$master_bib_id);
+		mysql_query('update Records set rec_ScratchPad="'.addslashes($new_val).'", rec_Modified=now() where rec_ID='.$master_bib_id);
 	} else if ($num_bd_rows) {
-		mysql_query('update records set rec_modified=now() where rec_id='.$master_bib_id);
+		mysql_query('update Records set rec_Modified=now() where rec_ID='.$master_bib_id);
 	}
 
 	// Insert the rows identified before.  We have the exact same select query so the database's internal-cache
 	// should recognise this and impose no performance hit; doing it this way (instead of retrieving the values above,
 	// making a valid request, etc etc) reduces parsing and traffic.
 	if ($num_bd_rows) {
-		$res = mysql_query('insert into rec_details (rd_rec_id, rd_type, rd_val, rd_auto) ' . $new_bd_query);
+		$res = mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) ' . $new_bd_query);
 	}
 
 	// update the memcached copy of this record
@@ -1785,19 +1781,19 @@ function merge_new_biblio_data($master_biblio_id, &$entry) {
 	$bib_ids = array($master_biblio_id);
 
 	while ($rec_id = array_pop($bib_ids)) {
-		$res = mysql_query("select rd_type, rd_val, dty_Type from rec_details left join defDetailTypes on dty_ID=rd_type where rd_rec_id = " . intval($rec_id));
+		$res = mysql_query("select dtl_DetailTypeID, dtl_Value, dty_Type from recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID where dtl_RecID = " . intval($rec_id));
 
 		while ($bd = mysql_fetch_assoc($res)) {
 			if ($bd["dty_Type"] === "resource") {
-				if ($bd["rd_type"] !== 158) array_push($bib_ids, $bd["rd_val"]);	// also pull in fields from non-author related fields
+				if ($bd["dtl_DetailTypeID"] !== 158) array_push($bib_ids, $bd["dtl_Value"]);	// also pull in fields from non-author related fields
 			}
 			else {
-				$existingFields[$bd["rd_type"]."-".trim(strtolower($bd["rd_val"]))] = 1;
+				$existingFields[$bd["dtl_DetailTypeID"]."-".trim(strtolower($bd["dtl_Value"]))] = 1;
 			}
 		}
 	}
 // error_log(print_r($existingFields, 1));
-	$res = mysql_query("select rec_scratchpad from records where rec_id = " . $master_biblio_id);
+	$res = mysql_query("select rec_ScratchPad from Records where rec_ID = " . $master_biblio_id);
 	$notesString = mysql_fetch_row($res);  $notesString = $notesString[0];
 	$notes = array();
 	foreach (explode("\n", $notesString) as $line) { $notes[trim(strtolower($line))] = 1; }
@@ -1840,10 +1836,10 @@ function merge_new_biblio_data($master_biblio_id, &$entry) {
 			', by user: ' . get_user_name(). ']' . "\n" . $extraNotesString;
 
 		if ($notesString) $newNotesString = $notesString . "\n" . $newNotesString;
-		mysql_query("update records set rec_modified=now(), rec_scratchpad='" . addslashes($newNotesString) . "' where rec_id=" . $master_biblio_id);
+		mysql_query("update Records set rec_Modified=now(), rec_ScratchPad='" . addslashes($newNotesString) . "' where rec_ID=" . $master_biblio_id);
 	}
 	else if (count($newFields) > 0) {
-		mysql_query("update records set rec_modified=now() where rec_id=" . $master_biblio_id);
+		mysql_query("update Records set rec_Modified=now() where rec_ID=" . $master_biblio_id);
 	}
 	else {
 		// nothing to do!
@@ -1855,7 +1851,7 @@ function merge_new_biblio_data($master_biblio_id, &$entry) {
 	foreach (array_keys($newFields) as $i) {
 		if ($newFields[$i]->getGeographicValue()) {
 			// delete existing geos
-			mysql_query("delete from rec_details where rd_rec_id = $master_biblio_id and rd_type = " . $newFields[$i]->getType());
+			mysql_query("delete from recDetails where dtl_RecID = $master_biblio_id and dtl_DetailTypeID = " . $newFields[$i]->getType());
 			if ($insertStmt) $insertStmt .= ', ';
 			$insertStmt .= "(" . $master_biblio_id . "," . $newFields[$i]->getType() . ",'" . addslashes($newFields[$i]->getValue())."',geomfromtext('".addslashes($newFields[$i]->getGeographicValue()) . "'), 1)";
 		} else {
@@ -1863,7 +1859,7 @@ function merge_new_biblio_data($master_biblio_id, &$entry) {
 			$insertStmt .= "(" . $master_biblio_id . "," . $newFields[$i]->getType() . ",'" . addslashes($newFields[$i]->getRawValue()) . "', NULL, 1)";
 		}
 	}
-	$insertStmt = "insert into rec_details (rd_rec_id, rd_type, rd_val, rd_geo, rd_auto) values " . $insertStmt;
+	$insertStmt = "insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_Geo, dtl_AddedByImport) values " . $insertStmt;
 
 	mysql_query($insertStmt);
 
@@ -1875,8 +1871,8 @@ function merge_new_biblio_data($master_biblio_id, &$entry) {
 function delete_biblio(&$entry) {
 	// delete a temporary bibliographic record
 	mysql_query('set @suppress_update_trigger := 1');
-	mysql_query('delete from records where rec_id = ' . $entry->getBiblioID() . ' and rec_temporary');
-	if (mysql_affected_rows() == 1) mysql_query('delete from_bib_detail where rd_rec_id = ' . $entry->getBiblioID());
+	mysql_query('delete from Records where rec_ID = ' . $entry->getBiblioID() . ' and rec_FlagTemporary');
+	if (mysql_affected_rows() == 1) mysql_query('delete from_bib_detail where dtl_RecID = ' . $entry->getBiblioID());
 	mysql_query('set @suppress_update_trigger := NULL');
 }
 
@@ -2020,12 +2016,12 @@ function process_author(&$field) {
 			return NULL;
 		}
 
-		$res = mysql_query('select rec_id from records
-		                             left join rec_details SURNAME on SURNAME.rd_rec_id=rec_id and SURNAME.rd_type=160
-		                             left join rec_details GIVENNAMES on GIVENNAMES.rd_rec_id=rec_id and GIVENNAMES.rd_type=291
-		                     where rec_type = 75
-		                      and SURNAME.rd_val = "'.addslashes(trim($person['surname'].' '.@$person['postfix'])).'"
-		                      and GIVENNAMES.rd_val = "'.addslashes(trim($person['first names'])).'"');
+		$res = mysql_query('select rec_ID from Records
+		                             left join recDetails SURNAME on SURNAME.dtl_RecID=rec_ID and SURNAME.dtl_DetailTypeID=160
+		                             left join recDetails GIVENNAMES on GIVENNAMES.dtl_RecID=rec_ID and GIVENNAMES.dtl_DetailTypeID=291
+		                     where rec_RecTypeID = 75
+		                      and SURNAME.dtl_Value = "'.addslashes(trim($person['surname'].' '.@$person['postfix'])).'"
+		                      and GIVENNAMES.dtl_Value = "'.addslashes(trim($person['first names'])).'"');
 
 
 		if (mysql_num_rows($res) > 0) {
@@ -2033,11 +2029,11 @@ function process_author(&$field) {
 			$rec_id = mysql_fetch_row($res);  $rec_id = $rec_id[0];
 		} else {
 			// no match -- insert a new person
-			mysql_query('insert into records (rec_title, rec_type, rec_temporary, rec_modified, rec_added) values ("'.addslashes(trim($person['surname'].' '.@$person['postfix']).', '.$person['first names']).'", 75, 1, now(), now())');
+			mysql_query('insert into Records (rec_Title, rec_RecTypeID, rec_FlagTemporary, rec_Modified, rec_Added) values ("'.addslashes(trim($person['surname'].' '.@$person['postfix']).', '.$person['first names']).'", 75, 1, now(), now())');
 			$rec_id = mysql_insert_id();
-			mysql_query('insert into rec_details (rd_rec_id, rd_type, rd_val) values ('.$rec_id.', 160, "'.addslashes(trim($person['surname'].' '.@$person['postfix'])).'"),
+			mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id.', 160, "'.addslashes(trim($person['surname'].' '.@$person['postfix'])).'"),
 			                                                                        ('.$rec_id.', 291, "'.addslashes($person['first names']).'")');
-			mysql_query("update records set rec_hhash = hhash(rec_id) where rec_id = $rec_id");
+			mysql_query("update Records set rec_Hash = hhash(rec_ID) where rec_ID = $rec_id");
 		}
 
 		array_push($person_bib_ids, $rec_id);
@@ -2099,18 +2095,18 @@ function print_disambiguation_options(&$entry) {
      <td><label for=<?= $nonce ?>><b><?= htmlspecialchars($ambig_entry->getTitle()) ?></b></label></td>
     </tr>
 <?php
-	$res = mysql_query('select rec_id,rec_title,
-	                           levenshtein(rec_hhash,upper("'.addslashes($ambig_entry->getHHash()).'")) as diff1,
-	                           levenshtein(upper(rec_title),upper("'.addslashes($ambig_entry->getTitle()).'")) as diff2
-	                      from records where rec_id in ('.join(',',$ambig_entry->getPotentialMatches()).') order by diff1, diff2');
+	$res = mysql_query('select rec_ID,rec_Title,
+	                           levenshtein(rec_Hash,upper("'.addslashes($ambig_entry->getHHash()).'")) as diff1,
+	                           levenshtein(upper(rec_Title),upper("'.addslashes($ambig_entry->getTitle()).'")) as diff2
+	                      from Records where rec_ID in ('.join(',',$ambig_entry->getPotentialMatches()).') order by diff1, diff2');
 	$is_first = true;
 	while ($bib = mysql_fetch_assoc($res)) {
-		$title_with_deltas = levenshtein_delta(strip_tags($bib['rec_title']), strip_tags($ambig_entry->getTitle()));
+		$title_with_deltas = levenshtein_delta(strip_tags($bib['rec_Title']), strip_tags($ambig_entry->getTitle()));
 ?>
     <tr>
-     <td style="text-align: right;"><nobr><?= $bib['rec_id'] ?></nobr>&nbsp;</td>
-     <td><input type="radio" name="ambig[<?= $nonce ?>]" value="<?= $bib['rec_id'] ?>" class="radio" <?= $is_first? "checked" : "" ?> id=<?= $bib['rec_id'] . '-' . $nonce ?>>
-     <td><label for=<?= $bib['rec_id'] . '-' . $nonce ?>><b title="<?= htmlspecialchars($bib['rec_title']) ?>"><?= $title_with_deltas ?></b></label></td>
+     <td style="text-align: right;"><nobr><?= $bib['rec_ID'] ?></nobr>&nbsp;</td>
+     <td><input type="radio" name="ambig[<?= $nonce ?>]" value="<?= $bib['rec_ID'] ?>" class="radio" <?= $is_first? "checked" : "" ?> id=<?= $bib['rec_ID'] . '-' . $nonce ?>>
+     <td><label for=<?= $bib['rec_ID'] . '-' . $nonce ?>><b title="<?= htmlspecialchars($bib['rec_Title']) ?>"><?= $title_with_deltas ?></b></label></td>
     </tr>
 
 <?php
