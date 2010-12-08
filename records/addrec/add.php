@@ -290,7 +290,7 @@ if (! $rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 	if ($description) insert_woot_content($rec_id, $description);
 }
 
-// there is a record and it wasn't forced directly   //SAW shouldn't this test new_rec_id
+// there is a record and it wasn't forced directly   //SAW shouldn't this test rfw_NewRecID
 if ($rec_id  &&  ! @$_REQUEST['force_new']) {
 	/* user has selected a bookmark that they may or may not have bookmarked already. FFSI!
 	 * If they do in fact have it bookmarked, redirect to the edit bookmark page

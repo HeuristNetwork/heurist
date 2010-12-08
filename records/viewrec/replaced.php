@@ -11,13 +11,13 @@ require_once(dirname(__FILE__).'/../../common/connect/db.php');
 //           - null if the chain is broken
 
 function get_replacement_bib_id ($rec_id) {
-	$res = mysql_query("select new_rec_id from aliases where old_rec_id=" . intval($rec_id));
+	$res = mysql_query("select rfw_NewRecID from recForwarding where rfw_OldRecID=" . intval($rec_id));
 	$recurseLimit = 10;
 	while (mysql_num_rows($res) > 0) {
 		$row = mysql_fetch_row($res);
 		$rec_id = $row[0];
 		$replaced = true;
-		$res = mysql_query("select new_rec_id from aliases where old_rec_id=" . $rec_id);
+		$res = mysql_query("select rfw_NewRecID from recForwarding where rfw_OldRecID=" . $rec_id);
 
 		if ($recurseLimit-- === 0) { break; }
 	}

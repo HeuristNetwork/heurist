@@ -888,12 +888,12 @@ class RelatedToPredicate extends Predicate {
 	function makeSQL() {
 		if ($this->value) {
 			$ids = "(" . join(",", array_map("intval", explode(",", $this->value))) . ")";
-			return "exists (select * from rec_relationships where (rr_rec_id199=TOPBIBLIO.rec_ID and rr_rec_id202 in $ids)
-		                                                   or (rr_rec_id202=TOPBIBLIO.rec_ID and rr_rec_id199 in $ids))";
+			return "exists (select * from recRelationshipsCache where (rrc_TargetRecID=TOPBIBLIO.rec_ID and rrc_SourceRecID in $ids)
+		                                                   or (rrc_SourceRecID=TOPBIBLIO.rec_ID and rrc_TargetRecID in $ids))";
 		}
 		else {
 			/* just want something that has a relation */
-			return "TOPBIBLIO.rec_ID in (select distinct rr_rec_id199 from rec_relationships union select distinct rr_rec_id202 from rec_relationships)";
+			return "TOPBIBLIO.rec_ID in (select distinct rrc_TargetRecID from recRelationshipsCache union select distinct rrc_SourceRecID from recRelationshipsCache)";
 		}
 	}
 }
@@ -903,27 +903,27 @@ class RelationsForPredicate extends Predicate {
 	function makeSQL() {
 		$ids = "(" . join(",", array_map("intval", explode(",", $this->value))) . ")";
 /*
-		return "exists (select * from rec_relationships where ((rr_rec_id199=TOPBIBLIO.rec_ID or rr_rec_id=TOPBIBLIO.rec_ID) and rr_rec_id202=$id)
-		                                                   or ((rr_rec_id202=TOPBIBLIO.rec_ID or rr_rec_id=TOPBIBLIO.rec_ID) and rr_rec_id199=$id))";
+		return "exists (select * from recRelationshipsCache where ((rrc_TargetRecID=TOPBIBLIO.rec_ID or rrc_RecID=TOPBIBLIO.rec_ID) and rrc_SourceRecID=$id)
+		                                                   or ((rrc_SourceRecID=TOPBIBLIO.rec_ID or rrc_RecID=TOPBIBLIO.rec_ID) and rrc_TargetRecID=$id))";
 */
 /*
-		return "TOPBIBLIO.rec_ID in (select rr_rec_id199 from rec_relationships where rr_rec_id202=$id
-		                       union select rr_rec_id202 from rec_relationships where rr_rec_id199=$id
-		                       union select rr_rec_id    from rec_relationships where rr_rec_id199=$id or rr_rec_id202=$id)";
+		return "TOPBIBLIO.rec_ID in (select rrc_TargetRecID from recRelationshipsCache where rrc_SourceRecID=$id
+		                       union select rrc_SourceRecID from recRelationshipsCache where rrc_TargetRecID=$id
+		                       union select rrc_RecID    from recRelationshipsCache where rrc_TargetRecID=$id or rrc_SourceRecID=$id)";
 */
 /*
-		return "exists (select * from bib_relationships2 where ((rr_rec_id199=TOPBIBLIO.rec_ID or rr_rec_id=TOPBIBLIO.rec_ID) and rr_rec_id202=$id))";
+		return "exists (select * from bib_relationships2 where ((rrc_TargetRecID=TOPBIBLIO.rec_ID or rrc_RecID=TOPBIBLIO.rec_ID) and rrc_SourceRecID=$id))";
 */
 		/* Okay, this isn't the way I would have done it initially, but it benchmarks well:
 		 * All of the methods above were taking 4-5 seconds.
-		 * Putting rec_relationships into the list of tables at the top-level gets us down to about 0.8 seconds, which is alright, but disruptive.
-		 * Coding the 'relationsfor:' predicate as   TOPBIBLIO.rec_ID in (select distinct rec_ID from rec_relationships where (rr_rec_id=TOPBIBLIO.rec_ID etc etc))
+		 * Putting recRelationshipsCache into the list of tables at the top-level gets us down to about 0.8 seconds, which is alright, but disruptive.
+		 * Coding the 'relationsfor:' predicate as   TOPBIBLIO.rec_ID in (select distinct rec_ID from recRelationshipsCache where (rrc_RecID=TOPBIBLIO.rec_ID etc etc))
 		 *   gets us down to about 2 seconds, but it looks like the optimiser doesn't really pick up on what we're doing.
 		 * Fastest is to do a SEPARATE QUERY to get the record IDs out of the bib_relationship table, then pass it back encoded in the predicate.
 		 * Certainly not the most elegant way to do it, but the numbers don't lie.
 		 */
-		$res = mysql_query("select group_concat( distinct rec_ID ) from Records, rec_relationships where (rr_rec_id=rec_ID or rr_rec_id199=rec_ID or rr_rec_id202=rec_ID)
-		                                                                                            and (rr_rec_id202 in $ids or rr_rec_id199 in $ids) and rec_ID not in $ids");
+		$res = mysql_query("select group_concat( distinct rec_ID ) from Records, recRelationshipsCache where (rrc_RecID=rec_ID or rrc_TargetRecID=rec_ID or rrc_SourceRecID=rec_ID)
+		                                                                                            and (rrc_SourceRecID in $ids or rrc_TargetRecID in $ids) and rec_ID not in $ids");
 		$ids = mysql_fetch_row($res);  $ids = $ids[0];
 		if (! $ids) return "0";
 		else return "TOPBIBLIO.rec_ID in ($ids)";

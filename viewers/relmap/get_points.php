@@ -74,8 +74,8 @@ print json_format($locations);
 
 
 function get_relatives($bibID) {
-	$res = mysql_query("select distinct rec_ID from Records, rec_relationships where (rr_rec_id=rec_ID or rr_rec_id199=rec_ID or rr_rec_id202=rec_ID)
-		                                                                    and (rr_rec_id202 = $bibID or rr_rec_id199 = $bibID) and rec_ID != $bibID");
+	$res = mysql_query("select distinct rec_ID from Records, recRelationshipsCache where (rrc_RecID=rec_ID or rrc_TargetRecID=rec_ID or rrc_SourceRecID=rec_ID)
+		                                                                    and (rrc_SourceRecID = $bibID or rrc_TargetRecID = $bibID) and rec_ID != $bibID");
 	$ids = array();
 	while ($row = mysql_fetch_row($res)) { array_push($ids, $row[0]); }
 	return $ids;

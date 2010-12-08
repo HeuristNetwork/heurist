@@ -95,13 +95,13 @@ function findRecordIDs() {
 	/* chase down replaced-by-bib-id references */
 	$replaced = false;
 	if (intval(@$_REQUEST["bib_id"])) {
-		$res = mysql_query("select new_rec_id from aliases where old_rec_id=" . intval(@$_REQUEST["bib_id"]));
+		$res = mysql_query("select rfw_NewRecID from recForwarding where rfw_OldRecID=" . intval(@$_REQUEST["bib_id"]));
 		$recurseLimit = 10;
 		while (mysql_num_rows($res) > 0) {
 			$row = mysql_fetch_row($res);
 			$_REQUEST["bib_id"] = $row[0];
 			$replaced = true;
-			$res = mysql_query("select new_rec_id from aliases where old_rec_id=" . $_REQUEST["bib_id"]);
+			$res = mysql_query("select rfw_NewRecID from recForwarding where rfw_OldRecID=" . $_REQUEST["bib_id"]);
 
 			if ($recurseLimit-- === 0) { return array(); }
 		}

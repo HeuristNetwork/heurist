@@ -598,7 +598,7 @@
 
 	foreach ($dup_rec_ids as $dup_rec_id) {
         //saw FIXME we should be updating the chain of links
-		mysql_query('insert into aliases (old_rec_id, new_rec_id) values ('.$dup_rec_id.', '.$master_rec_id.')');
+			mysql_query('insert into recForwarding (rfw_OldRecID, rfw_NewRecID) values ('.$dup_rec_id.', '.$master_rec_id.')');
         //saw FIXME  we should update the relationship table on both rr_rec_idxxx  fields
 	}
 

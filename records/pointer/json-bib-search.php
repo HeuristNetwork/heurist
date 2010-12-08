@@ -45,9 +45,9 @@ $colNames = array("rec_ID", "rec_Title", "rec_URL", "rec_RecTypeID");
 $query = REQUEST_to_query("select " . join(", ", $colNames) . " ", BOTH);
 
 if (@$_REQUEST["r"] == "recent") {
-	$query = preg_replace("/\\swhere\\s/", " where (TOPBIBLIO.rec_ID in (select distinct ruse_rec_id from recently_used_records where ruse_usr_id = " . get_user_id() . ")) and ", $query);
+	$query = preg_replace("/\\swhere\\s/", " where (TOPBIBLIO.rec_ID in (select distinct rre_RecID from usrRecentRecords where rre_UGrpID = " . get_user_id() . ")) and ", $query);
 	// can probably FIXME: do we want the sort order to reflect how recently the user has seen each record?
-	$query = preg_replace("/(.*)\\sorder by.*/", "$1 order by (select -max(ruse_id) from recently_used_records where ruse_usr_id=" . get_user_id() . " and ruse_rec_id=TOPBIBLIO.rec_ID)", $query);
+	$query = preg_replace("/(.*)\\sorder by.*/", "$1 order by (select -max(rre_ID) from usrRecentRecords where rre_UGrpID=" . get_user_id() . " and rre_RecID=TOPBIBLIO.rec_ID)", $query);
 }
 
 $query .= " limit $limit";

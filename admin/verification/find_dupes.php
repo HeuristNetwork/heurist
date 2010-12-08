@@ -19,16 +19,16 @@ $dupeDifferences = array();
 mysql_connection_db_insert(DATABASE);
 
 
-$res = mysql_query('select dd_hash from dupe_differences');
+$res = mysql_query('select snd_SimRecsList from recSimilarButNotDupes');
 while ($row = mysql_fetch_assoc($res)){
-	array_push($dupeDifferences,$row['dd_hash']);
+	array_push($dupeDifferences,$row['snd_SimRecsList']);
 }
 
 if ($_REQUEST['dupeDiffHash']){
 	foreach($_REQUEST['dupeDiffHash'] as $diffHash){
 		if (! in_array($diffHash,$dupeDifferences)){
 			array_push($dupeDifferences,$diffHash);
-			$res = mysql_query('insert into dupe_differences values("'.$diffHash.'")');
+			$res = mysql_query('insert into recSimilarButNotDupes values("'.$diffHash.'")');
 		}
 	}
 }
