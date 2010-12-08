@@ -1627,7 +1627,7 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 		var link = inputDiv.appendChild(this.document.createElement("a"));
 			if (bdValue.file.nonce) {
 				link.href = top.HEURIST.basePath+"records/files/fetch_file.php/" + /*encodeURIComponent(bdValue.file.origName)*/
-								"?file_id=" + encodeURIComponent(bdValue.file.nonce);
+								"?ulf_ID=" + encodeURIComponent(bdValue.file.nonce);
 			} else if (bdValue.file.url) {
 				link.href = bdValue.file.url;
 			}

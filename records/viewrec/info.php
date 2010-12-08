@@ -339,17 +339,17 @@ function print_private_details($bib) {
 				$row = mysql_fetch_row($res);
 				$bd['val'] = '<a target="_new" href="'.HEURIST_SITE_PATH.'records/viewrec/view.php?bib_id='.$bd['val'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row[0]).'</a>';
 			} else if ($bd['dty_Type'] == 'file'  &&  $bd['dtl_UploadedFileID']) {
-				$res = mysql_query('select * from files where file_id='.intval($bd['dtl_UploadedFileID']));
+				$res = mysql_query('select * from recUploadedFiles where ulf_ID='.intval($bd['dtl_UploadedFileID']));
 				$file = mysql_fetch_assoc($res);
 				if ($file) {
-					$img_url = HEURIST_SITE_PATH.'records/files/fetch_file.php/'.$file['file_orig_name'].'?file_id='.$file['file_nonce'];
+					$img_url = HEURIST_SITE_PATH.'records/files/fetch_file.php/'.$file['ulf_OrigFileName'].'?ulf_ID='.$file['ulf_ObfuscatedFileID'];
 					if ($file['file_mimetype'] == 'image/jpeg'  ||  $file['file_mimetype'] == 'image/gif'  ||  $file['file_mimetype'] == 'image/png') {
 						array_push($thumbs, array(
-							'url' => HEURIST_SITE_PATH.'records/files/fetch_file.php?file_id='.$file['file_nonce'],
-							'thumb' => HEURIST_SITE_PATH.'common/php/resize_image.php?file_id='.$file['file_nonce']
+							'url' => HEURIST_SITE_PATH.'records/files/fetch_file.php?ulf_ID='.$file['ulf_ObfuscatedFileID'],
+							'thumb' => HEURIST_SITE_PATH.'common/php/resize_image.php?ulf_ID='.$file['ulf_ObfuscatedFileID']
 						));
 					}
-					$bd['val'] = '<a target="_surf" href="'.htmlspecialchars($img_url).'"><img src="'.HEURIST_SITE_PATH.'common/images/external_link_16x16.gif">'.htmlspecialchars($file['file_orig_name']).'</a> [' .htmlspecialchars($file['file_size']) . ']';
+					$bd['val'] = '<a target="_surf" href="'.htmlspecialchars($img_url).'"><img src="'.HEURIST_SITE_PATH.'common/images/external_link_16x16.gif">'.htmlspecialchars($file['ulf_OrigFileName']).'</a> [' .htmlspecialchars($file['ulf_FileSizeKB']) . ']';
 				}
 			} else {
 				if (preg_match('/^http:/', $bd['val'])) {

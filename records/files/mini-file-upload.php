@@ -60,16 +60,16 @@ if ($fileID) {
 		mysql_query("insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_UploadedFileID) values ($bibID, $bdtID, $fileID)");
 	}
 
-	$res = mysql_query("select * from files where file_id = $fileID");
+	$res = mysql_query("select * from recUploadedFiles where ulf_ID = $fileID");
 	$file = mysql_fetch_assoc($res);
 ?>
 ({ file: {
-	id: "<?= $file["file_id"] ?>",
-	origName: "<?= slash($file["file_orig_name"]) ?>",
-	date: "<?= slash($file["file_id"]) ?>",
+	id: "<?= $file["ulf_ID"] ?>",
+	origName: "<?= slash($file["ulf_OrigFileName"]) ?>",
+	date: "<?= slash($file["ulf_ID"]) ?>",
 	mimeType: "<?= slash($file["file_mimetype"]) ?>",
-	nonce: "<?= slash($file["file_nonce"]) ?>",
-	fileSize: "<?= slash($file["file_size"]) ?>",
+	nonce: "<?= slash($file["ulf_ObfuscatedFileID"]) ?>",
+	fileSize: "<?= slash($file["ulf_FileSizeKB"]) ?>",
 	typeDescription: "<?= slash($file["file_typedescription"]) ?>"
 } })
 <?php
@@ -89,9 +89,9 @@ if ($fileID) {
 
 function upload_file($name, $type, $tmp_name, $error, $size) {
 	/* Check that the uploaded file has a sane name / size / no errors etc,
-	 * enter an appropriate record in the files table,
+	 * enter an appropriate record in the recUploadedFiles table,
 	 * save it to disk,
-	 * and return the file_id for that record.
+	 * and return the ulf_ID for that record.
 	 * This will be zero if anything went pear-shaped along the way.
 	 */
 	if ($size <= 0  ||  $error) { error_log("size is $size, error is $error"); return 0; }
@@ -102,32 +102,34 @@ function upload_file($name, $type, $tmp_name, $error, $size) {
 	$name = preg_replace('!.*/!', '', $name);
 
 	$mimetype = null;
-	$filedescription = null;
+	$mimetypeExt = null;
 	if (preg_match('/\\.([^.]+)$/', $name, $matches)) {
 		$extension = $matches[1];
-		$res = mysql_query('select * from file_to_mimetype where extension = "'.addslashes($extension).'"');
+		$res = mysql_query('select * from defFileExtToMimetype where fxm_Extension = "'.addslashes($extension).'"');
 		if (mysql_num_rows($res) == 1) {
 			$mimetype = mysql_fetch_assoc($res);
-			$file_description = $mimetype['file_description'];
-			$mimetype = $mimetype['mime_type'];
+			$mimetypeExt = $mimetype['fxm_Extension'];
 		}
 	}
 
 	$path = '';	/* can change this to something more complicated later on, to prevent crowding the upload directory
 				 the path MUST start and NOT END with a slash so that  "UPLOAD_PATH . $path . '/' .$file_id" is valid */
 
-	$file_size = '';
-	if ($size < 1000) $file_size = $size . ' bytes';
-	else if ($size < 1000000) $file_size = (round($size / 102.4)/10) . ' kb';
-	else $file_size = (round($size / (1024*102.4))/10) . ' Mb';
+	if ($size && $size < 1024) {
+		$file_size = 1;
+	}else{
+		$file_size = round($size / 1024);
+	}
 
-	$res = mysql__insert('files', array('file_orig_name' => $name, 'file_path' => $path, 'file_user_id' => get_user_id(),
-	                                    'file_date' => date('Y-m-d H:i:s'),
-	                                    'file_typedescription' => $file_description, 'file_mimetype' => $mimetype,
-	                                    'file_size' => $file_size));
+	$res = mysql__insert('recUploadedFiles', array(	'ulf_OrigFileName' => $name,
+													'ulf_UploaderUGrpID' => get_user_id(),
+													'ulf_Added' => date('Y-m-d H:i:s'),
+													'ulf_MimeExt ' => $mimetypeExt,
+													'ulf_FileSizeKB' => $file_size,
+													'ulf_Description' => $description? $description : NULL));
 	if (! $res) { error_log("error inserting: " . mysql_error()); return 0; }
 	$file_id = mysql_insert_id();
-	mysql_query('update files set file_nonce = "' . addslashes(sha1($file_id.'.'.rand())) . '" where file_id = ' . $file_id);
+	mysql_query('update recUploadedFiles set ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
 		/* nonce is a random value used to download the file */
 
 	if (move_uploaded_file($tmp_name, UPLOAD_PATH . $path .'/'. $file_id)) {
@@ -135,7 +137,7 @@ function upload_file($name, $type, $tmp_name, $error, $size) {
 	} else {
 		/* something messed up ... make a note of it and move on */
 		error_log("upload_file: <$name> / <$tmp_name> couldn't be saved as <" . UPLOAD_PATH . $path . '/' . $file_id . ">");
-		mysql_query('delete from files where file_id = ' . $file_id);
+		mysql_query('delete from recUploadedFiles where ulf_ID = ' . $file_id);
 		return 0;
 	}
 }

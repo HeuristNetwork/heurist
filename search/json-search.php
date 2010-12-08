@@ -208,9 +208,9 @@ function print_result($row) {
 		// 223  Thumbnail
 		// 222  Logo image
 		// 224  Images
-		$res = mysql_query("select files.*
+		$res = mysql_query("select recUploadedFiles.*
 		                      from recDetails
-		                 left join files on file_id = dtl_UploadedFileID
+		                 left join recUploadedFiles on ulf_ID = dtl_UploadedFileID
 		                     where dtl_RecID = " . $row[2] . "
 		                       and dtl_DetailTypeID in (223,222,224,221,231)
 		                       and file_mimetype like 'image%'
@@ -218,7 +218,7 @@ function print_result($row) {
 		                     limit 1");
 		if (mysql_num_rows($res) == 1) {
 			$file = mysql_fetch_assoc($res);
-			$thumb_url = "../common/php/resize_image.php?file_id=".$file['file_nonce'];
+			$thumb_url = "../common/php/resize_image.php?ulf_ID=".$file['ulf_ObfuscatedFileID'];
 		} else {
 			// 606  Thumbimage url
 			$res = mysql_query("select dtl_Value

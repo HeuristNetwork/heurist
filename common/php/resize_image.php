@@ -23,18 +23,18 @@ $img = null;
 mysql_connection_db_overwrite(DATABASE);
 mysql_query('set character set binary');
 
-if (array_key_exists('file_id', $_REQUEST)) {
-	$res = mysql_query('select * from files where file_nonce = "' . addslashes($_REQUEST['file_id']) . '"');
+if (array_key_exists('ulf_ID', $_REQUEST)) {
+	$res = mysql_query('select * from recUploadedFiles where ulf_ObfuscatedFileID = "' . addslashes($_REQUEST['ulf_ID']) . '"');
 	if (mysql_num_rows($res) != 1) return;
 	$file = mysql_fetch_assoc($res);
 
-	if (@$standard_thumb  &&  $file['file_thumbnail']) {
+	if (@$standard_thumb  &&  $file['ulf_Thumbnail']) {
 		// thumbnail exists
-		echo $file['file_thumbnail'];
+		echo $file['ulf_Thumbnail'];
 		return;
 	}
 
-	$filename = UPLOAD_PATH . $file['file_path'] . '/' . $file['file_id'];
+	$filename = UPLOAD_PATH . $file['file_path'] . '/' . $file['ulf_ID'];
 	$filename = str_replace('/../', '/', $filename);
 	switch($file['file_mimetype']) {
 	case 'image/jpeg':
@@ -47,11 +47,7 @@ if (array_key_exists('file_id', $_REQUEST)) {
 		$img = imagecreatefrompng($filename);
 		break;
 	default:
-		if ($file['file_typedescription'])
-			$desc = $file['file_typedescription'] . ' file';
-		else
-			$desc = '.' . strtoupper(preg_replace('/.*[.]/', '', $file['file_orig_name'])) . ' file';
-
+		$desc = '.' . strtoupper(preg_replace('/.*[.]/', '', $file['ulf_OrigFileName'])) . ' file';
 		$img = make_file_image($desc);
 		break;
 	}
@@ -114,7 +110,7 @@ unlink($resized_file);
 
 if (@$standard_thumb  &&  @$file) {
 	// store to database
-	mysql_query('update files set file_thumbnail = "' . addslashes($resized) . '" where file_id = ' . $file['file_id']);
+	mysql_query('update recUploadedFiles set ulf_Thumbnail = "' . addslashes($resized) . '" where ulf_ID = ' . $file['ulf_ID']);
 }
 
 // output to browser

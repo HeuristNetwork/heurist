@@ -43,7 +43,7 @@ if (mysql_num_rows($res)) {
 	$text = preg_replace($pat,$repPat,$rawXML);
 	print $text;
 } else {	//leaving the this after the rssfeed check allows use to cache a file in case the feed doesn't work. More coding (try catch ) is needed for this
-	$res = mysql_query("select file_id from recDetails left join files on file_id = dtl_UploadedFileID where dtl_RecID = " . intval($_REQUEST["id"]) . " and dtl_DetailTypeID = " . FILE_DETAIL_TYPE);
+	$res = mysql_query("select ulf_ID from recDetails left join recUploadedFiles on ulf_ID = dtl_UploadedFileID where dtl_RecID = " . intval($_REQUEST["id"]) . " and dtl_DetailTypeID = " . FILE_DETAIL_TYPE);
 	$file_id = mysql_fetch_array($res);
 	$file_id = $file_id[0];
 	print file_get_contents(UPLOAD_PATH . "/" . $file_id);

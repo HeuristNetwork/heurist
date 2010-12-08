@@ -199,17 +199,16 @@ function getAllBibDetails($rec_id) {
 		if ($row["rec_Title"]) $detail["title"] = $row["rec_Title"];
 
 		if ($row["dtl_UploadedFileID"]) {
-			$fileRes = mysql_query("select * from files where file_id=" . intval($row["dtl_UploadedFileID"]));
+			$fileRes = mysql_query("select * from recUploadedFiles where ulf_ID=" . intval($row["dtl_UploadedFileID"]));
 			if (mysql_num_rows($fileRes) == 1) {
 				$file = mysql_fetch_assoc($fileRes);
 				$detail["file"] = array(
-					"id" => $file["file_id"],
-					"origName" => $file["file_orig_name"],
-					"date" => $file["file_id"],
+					"id" => $file["ulf_ID"],
+					"origName" => $file["ulf_OrigFileName"],
+					"date" => $file["ulf_ID"],
 					"mimeType" => $file["file_mimetype"],
-					"nonce" => $file["file_nonce"],
-					"fileSize" => $file["file_size"],
-					"typeDescription" => $file["file_typedescription"]
+					"nonce" => $file["ulf_ObfuscatedFileID"],
+					"fileSize" => $file["ulf_FileSizeKB"]
 				);
 			}
 		}

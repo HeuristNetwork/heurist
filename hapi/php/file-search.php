@@ -24,12 +24,12 @@ if (@$_REQUEST["file-name"]) {
 	$hasQuestion = strpos($_REQUEST["file-name"], "?");
 	if ($hasStar === false  &&  $hasBracket === false  &&  $hasQuestion === false) {
 		// no need for trickiness -- direct string match
-		$fileNameQuery = "and file_orig_name = '" . addslashes($_REQUEST["file-name"]) . "'";
+		$fileNameQuery = "and ulf_OrigFileName = '" . addslashes($_REQUEST["file-name"]) . "'";
 	}
 	else if ($hasBracket === false) {
 		// an asterisk is used -- use LIKE
 		$fileName = str_replace(array("\\", "\"", "'", "%", "_", "*", "?"), array("\\\\", "\\\"", "\\'", "\\%", "\\_", "%", "_"), $_REQUEST["file-name"]);
-		$fileNameQuery = "and file_orig_name like '$fileName'";
+		$fileNameQuery = "and ulf_OrigFileName like '$fileName'";
 	}
 	else {
 		// need to do some weird gear -- convert a glob to a regular expression
@@ -58,12 +58,12 @@ if (@$_REQUEST["file-name"]) {
 		}
 		$glob .= "$";
 
-		$fileNameQuery = "and file_orig_name regexp '$glob'";
+		$fileNameQuery = "and ulf_OrigFileName regexp '$glob'";
 	}
 }
 if (@$_REQUEST["file-description"]) {
 	$fileDescriptionSpec = addslashes($_REQUEST["file-description"]);
-	$fileDescriptionQuery = "and match (file_description) against ('$fileDescriptionSpec')";
+	$fileDescriptionQuery = "and match (ulf_Description) against ('$fileDescriptionSpec')";
 }
 if (@$_REQUEST["file-type"]) {
 	$fileTypeSpec = $_REQUEST["file-type"];
@@ -79,9 +79,9 @@ if (@$_REQUEST["file-any"]) {
 	// match against either the filename or the description
 	$words = preg_split('/\\s+/', $_REQUEST["file-any"]);
 
-	$fileQuery = "match (file_description) against ('" . addslashes($_REQUEST["file-any"]) . "')";
+	$fileQuery = "match (ulf_Description) against ('" . addslashes($_REQUEST["file-any"]) . "')";
 	foreach ($words as $word) {
-		$fileQuery .= " or file_orig_name like '%" . addslashes($word) . "%'";
+		$fileQuery .= " or ulf_OrigFileName like '%" . addslashes($word) . "%'";
 	}
 }
 if (! (@$fileNameQuery  ||  @$fileDescriptionQuery  ||  @$fileTypeQuery  ||  @$fileQuery)) {
@@ -90,21 +90,21 @@ if (! (@$fileNameQuery  ||  @$fileDescriptionQuery  ||  @$fileTypeQuery  ||  @$f
 }
 
 if (@$fileQuery) {
-	$query = "select * from files where ($fileQuery) $fileTypeQuery limit " . RESULT_COUNT_LIMIT;
+	$query = "select * from recUploadedFiles where ($fileQuery) $fileTypeQuery limit " . RESULT_COUNT_LIMIT;
 }
 else {
-	$query = "select * from files where 1 $fileNameQuery $fileDescriptionQuery $fileTypeQuery limit " . RESULT_COUNT_LIMIT;
+	$query = "select * from recUploadedFiles where 1 $fileNameQuery $fileDescriptionQuery $fileTypeQuery limit " . RESULT_COUNT_LIMIT;
 }
 
 $res = mysql_query($query);
 $files = array();
 while ($file = mysql_fetch_assoc($res)) {
-//	$thumbnailURL = "http://".HEURIST_INSTANCE_PREFIX."heuristscholar.org/heurist/php/resize_image.php?file_id=" . $file["file_nonce"];
-	$thumbnailURL = "http://".HEURIST_INSTANCE_PREFIX.HEURIST_SERVER_NAME.HEURIST_SITE_PATH."common/php/resize_image.php?file_id=" . $file["file_nonce"];
-//	$URL = "http://".HEURIST_INSTANCE_PREFIX."heuristscholar.org/heurist/php/fetch_file.php/" . urlencode($file["file_orig_name"]) . "?file_id=" . $file["file_nonce"];
-	$URL = "http://".HEURIST_INSTANCE_PREFIX.HEURIST_SERVER_NAME.HEURIST_SITE_PATH."records/files/fetch_file.php/" . urlencode($file["file_orig_name"]) . "?file_id=" . $file["file_nonce"];
+//	$thumbnailURL = "http://".HEURIST_INSTANCE_PREFIX."heuristscholar.org/heurist/php/resize_image.php?ulf_ID=" . $file["ulf_ObfuscatedFileID"];
+	$thumbnailURL = "http://".HEURIST_INSTANCE_PREFIX.HEURIST_SERVER_NAME.HEURIST_SITE_PATH."common/php/resize_image.php?ulf_ID=" . $file["ulf_ObfuscatedFileID"];
+//	$URL = "http://".HEURIST_INSTANCE_PREFIX."heuristscholar.org/heurist/php/fetch_file.php/" . urlencode($file["ulf_OrigFileName"]) . "?ulf_ID=" . $file["ulf_ObfuscatedFileID"];
+	$URL = "http://".HEURIST_INSTANCE_PREFIX.HEURIST_SERVER_NAME.HEURIST_SITE_PATH."records/files/fetch_file.php/" . urlencode($file["ulf_OrigFileName"]) . "?ulf_ID=" . $file["ulf_ObfuscatedFileID"];
 	array_push($files, array(
-		$file["file_id"], $file["file_orig_name"], $file["file_size"], $file["file_mimetype"], $URL, $thumbnailURL, $file["file_description"]
+		$file["ulf_ID"], $file["ulf_OrigFileName"], $file["ulf_FileSizeKB"], $file["file_mimetype"], $URL, $thumbnailURL, $file["ulf_Description"]
 	));
 }
 

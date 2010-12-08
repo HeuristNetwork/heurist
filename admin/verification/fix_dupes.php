@@ -230,7 +230,7 @@
 											if ($rg['dtl_Geo']) $rd_temp = $rg['dtl_Geo'];
 											else $rd_temp =$rg['dtl_Value'];
 										}elseif ($rg['dtl_UploadedFileID']) {
-											$rd_temp = mysql_fetch_array(mysql_query('select file_orig_name from files where file_id ='.$rg['dtl_UploadedFileID']));
+											$rd_temp = mysql_fetch_array(mysql_query('select ulf_OrigFileName from recUploadedFiles where ulf_ID ='.$rg['dtl_UploadedFileID']));
                     $rd_temp = $rd_temp[0];
                 }
                 if(! @$temp) $temp=$rd_temp;
@@ -428,7 +428,7 @@
 				if ($rg['dtl_Geo']) $detail_val = $rg['dtl_Geo'];
 				else $detail_val = $rg['dtl_Value'];
 			}elseif ($rg['dtl_UploadedFileID']) {
-				$rd_temp = mysql_fetch_array(mysql_query('select file_orig_name from files where file_id ='.$rg['dtl_UploadedFileID']));
+				$rd_temp = mysql_fetch_array(mysql_query('select ulf_OrigFileName from recUploadedFiles where ulf_ID ='.$rg['dtl_UploadedFileID']));
             $detail_val = $rd_temp[0];
         }
 

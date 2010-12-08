@@ -65,9 +65,9 @@ if (! include_once($ht_stdefs)) {
 
 if (! defined('RESULTS_PER_PAGE')) define('RESULTS_PER_PAGE', 20);
 
-if (! defined('MIMETYPE_TABLE')) define('MIMETYPE_TABLE', 'file_to_mimetype');
-if (! defined('MIMETYPE_EXTENSION_FIELD')) define('MIMETYPE_EXTENSION_FIELD', 'extension');
-if (! defined('MIMETYPE_TYPE_FIELD')) define('MIMETYPE_TYPE_FIELD', 'mime_type');
+if (! defined('MIMETYPE_TABLE')) define('MIMETYPE_TABLE', 'defFileExtToMimetype');
+if (! defined('MIMETYPE_EXTENSION_FIELD')) define('MIMETYPE_EXTENSION_FIELD', 'fxm_Extension');
+if (! defined('MIMETYPE_TYPE_FIELD')) define('MIMETYPE_TYPE_FIELD', 'fxm_MimeType');
 
 
 if (! function_exists('get_user_id')) {

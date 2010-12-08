@@ -271,7 +271,7 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 					break;
 
 				case "file":
-					if (mysql_num_rows(mysql_query("select file_id from files where file_id=".intval($val))) <= 0)
+					if (mysql_num_rows(mysql_query("select ulf_ID from recUploadedFiles where ulf_ID=".intval($val))) <= 0)
 					jsonError("invalid file pointer");
 					$bdFileID = intval($val);
 					break;

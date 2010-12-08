@@ -236,23 +236,23 @@ function loadRecordDetails(&$record) {
 
 			case "file":
 			$fres = mysql_query(
-			    "select file_id as id,
-			            file_nonce as nonce,
-			            file_orig_name as origName,
-			            file_size as size,
+			    "select ulf_ID as id,
+			            ulf_ObfuscatedFileID as nonce,
+			            ulf_OrigFileName as origName,
+			            ulf_FileSizeKB as size,
 			            file_mimetype as type,
-			            file_date as date,
-			            file_description as description
-			       from files
-			      where file_id = " . intval($rd["dtl_UploadedFileID"]));
+			            ulf_Added as date,
+			            ulf_Description as description
+			       from recUploadedFiles
+			      where ulf_ID = " . intval($rd["dtl_UploadedFileID"]));
 			$detailValue = array("file" => mysql_fetch_assoc($fres));
 			$origName = urlencode($detailValue["file"]["origName"]);
 			$detailValue["file"]["URL"] =
 				HEURIST_URL_BASE."records/files/fetch_file.php?". (defined('HEURIST_INSTANCE') ? "instance=".HEURIST_INSTANCE."&" : "" )
-				."file_id=".$detailValue["file"]["nonce"];
+				."ulf_ID=".$detailValue["file"]["nonce"];
 			$detailValue["file"]["thumbURL"] =
 				HEURIST_URL_BASE."common/php/resize_image.php?" . (defined('HEURIST_INSTANCE') ? "instance=".HEURIST_INSTANCE."&" : "" )
-				."file_id=".$detailValue["file"]["nonce"];
+				."ulf_ID=".$detailValue["file"]["nonce"];
 			break;
 
 			case "resource":

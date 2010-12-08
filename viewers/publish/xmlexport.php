@@ -523,7 +523,7 @@ function writeTags($bib) {
  * @param int $rec_types the referencetype
  * @param int $detail the detailtype
  * @param string $value the value of the detail
- * @param int $file_id file_id if the detail is of type file
+ * @param int $file_id ulf_ID if the detail is of type file
  */
 function writeTag($reftype, $detail, $value, $file_id) {
 	global $XML;
@@ -535,15 +535,15 @@ function writeTag($reftype, $detail, $value, $file_id) {
 		$value = htmlspecialchars($value);
 
 	if ($file_id) {
-		$res = mysql_query('select * from files where file_id='.intval($file_id));
+		$res = mysql_query('select * from recUploadedFiles where ulf_ID='.intval($file_id));
 		$file = mysql_fetch_assoc($res);
 		if ($file) {
-			$value = "\n<file_id>" . htmlspecialchars($file['file_nonce']) . "</file_id>\n"
-				   . "<file_orig_name>" . htmlspecialchars($file['file_orig_name']) . "</file_orig_name>\n"
-				   . "<file_date>" . htmlspecialchars($file['file_date']) . "</file_date>\n"
-				   . "<file_size>" . htmlspecialchars($file['file_size']) . "</file_size>\n"
-				   . "<file_fetch_url>" . htmlspecialchars(HEURIST_URL_BASE.'/records/files/fetch_file.php/'.urlencode($file['file_orig_name']).'?file_id='.$file['file_nonce']) . "</file_fetch_url>\n"
-				   . "<file_thumb_url>" . htmlspecialchars(HEURIST_URL_BASE.'/common/php/resize_image.php?file_id='.$file['file_nonce']) . "</file_thumb_url>\n";
+			$value = "\n<file_id>" . htmlspecialchars($file['ulf_ObfuscatedFileID']) . "</file_id>\n"
+				   . "<file_orig_name>" . htmlspecialchars($file['ulf_OrigFileName']) . "</file_orig_name>\n"
+				   . "<file_date>" . htmlspecialchars($file['ulf_Added']) . "</file_date>\n"
+				   . "<file_size>" . htmlspecialchars($file['ulf_FileSizeKB']) . "</file_size>\n"
+				   . "<file_fetch_url>" . htmlspecialchars(HEURIST_URL_BASE.'/records/files/fetch_file.php/'.urlencode($file['ulf_OrigFileName']).'?ulf_ID='.$file['ulf_ObfuscatedFileID']) . "</file_fetch_url>\n"
+				   . "<file_thumb_url>" . htmlspecialchars(HEURIST_URL_BASE.'/common/php/resize_image.php?ulf_ID='.$file['ulf_ObfuscatedFileID']) . "</file_thumb_url>\n";
 		}
 	}
 
