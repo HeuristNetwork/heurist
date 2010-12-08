@@ -321,28 +321,28 @@ function getAllWikis($rec_id, $bkm_ID) {
 }
 
 function getAllComments($rec_id) {
-	$res = mysql_query("select cmt_id, cmt_deleted, cmt_text, cmt_parent_cmt_id, cmt_date, cmt_modified, cmt_usr_id, concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname from comments left join ".USERS_DATABASE.".sysUGrps usr on cmt_usr_id=usr.ugr_ID where cmt_rec_id = $rec_id order by cmt_date");
+	$res = mysql_query("select cmt_ID, cmt_Deleted, cmt_Text, cmt_ParentCmtID, cmt_Added, cmt_Modified, cmt_OwnerUGrpID, concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname from recThreadedComments left join ".USERS_DATABASE.".sysUGrps usr on cmt_OwnerUGrpID=usr.ugr_ID where cmt_RecID = $rec_id order by cmt_Added");
 
 	$comments = array();
 	while ($cmt = mysql_fetch_assoc($res)) {
-		if ($cmt["cmt_deleted"]) {
+		if ($cmt["cmt_Deleted"]) {
 			/* indicate that the comments exists but has been deleted */
-			$comments[$cmt["cmt_id"]] = array(
-				"id" => $cmt["cmt_id"],
-				"owner" => $cmt["cmt_parent_cmt_id"],
+			$comments[$cmt["cmt_ID"]] = array(
+				"id" => $cmt["cmt_ID"],
+				"owner" => $cmt["cmt_ParentCmtID"],
 				"deleted" => true
 			);
 			continue;
 		}
 
-		$comments[$cmt["cmt_id"]] = array(
-			"id" => $cmt["cmt_id"],
-			"text" => $cmt["cmt_text"],
-			"owner" => $cmt["cmt_parent_cmt_id"],	/* comments that owns this one (i.e. parent, just like in Dickensian times) */
-			"added" => $cmt["cmt_date"],
-			"modified" => $cmt["cmt_modified"],
+		$comments[$cmt["cmt_ID"]] = array(
+			"id" => $cmt["cmt_ID"],
+			"text" => $cmt["cmt_Text"],
+			"owner" => $cmt["cmt_ParentCmtID"],	/* comments that owns this one (i.e. parent, just like in Dickensian times) */
+			"added" => $cmt["cmt_Added"],
+			"modified" => $cmt["cmt_Modified"],
 			"user" => $cmt["Realname"],
-			"userID" => $cmt["cmt_usr_id"],
+			"userID" => $cmt["cmt_OwnerUGrpID"],
 			"deleted" => false
 		);
 	}

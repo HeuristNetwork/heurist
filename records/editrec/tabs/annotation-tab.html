@@ -179,7 +179,7 @@ Comment.prototype.remove = function() {
 
 	var fakeForm = { action: installDir + "records/comments/save-comment.php",
 			elements: [
-				{ name: "cmt_id", value: this.id },
+				{ name: "cmt_ID", value: this.id },
 				{ name: "delete", value: 1 }
 			] };
 	var thisRef = this;
@@ -315,7 +315,7 @@ EditableComment.prototype.save = function() {
 
 	var fakeForm = { action: installDir + "records/comments/save-comment.php",
 			elements: [
-				{ name: "cmt_id", value: this.id },
+				{ name: "cmt_ID", value: this.id },
 				{ name: "bib_id", value: parent.HEURIST.edit.record.bibID },
 				{ name: "owner",  value: this.parentComment.id },
 				{ name: "text",   value: this.textarea.value }

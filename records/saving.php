@@ -463,16 +463,16 @@ function handleComments($recordID, $removals, $modifications, $additions) {
 	// removals are encoded as just the comments ID# ... easy.
 	if ($removals) {
 		$removals = array_map("intval", $removals);
-		mysql_query("update comments set cmt_deleted=1
-		where cmt_usr_id=".get_user_id()." and cmt_rec_id=$recordID and cmt_id in (".join(",",$removals).")");
+		mysql_query("update recThreadedComments set cmt_Deleted=1
+		where cmt_OwnerUGrpID=".get_user_id()." and cmt_RecID=$recordID and cmt_ID in (".join(",",$removals).")");
 	}
 
 	// modifications have the values
 	// .id, .parentComment, .text
 	foreach ($modifications as $modification) {
 		// note that parentComment (of course) cannot be modified
-		mysql__update("comments", "cmt_id=".intval($modification["id"])." and cmt_usr_id=".get_user_id(),
-		array("cmt_text" => $modification["text"], "cmt_modified" => date('Y-m-d H:i:s')));
+		mysql__update("recThreadedComments", "cmt_ID=".intval($modification["id"])." and cmt_OwnerUGrpID=".get_user_id(),
+		array("cmt_Text" => $modification["text"], "cmt_Modified" => date('Y-m-d H:i:s')));
 	}
 
 	// additions are the same as modifications, except that the COMMENT-ID is blank (of course!)
@@ -481,16 +481,16 @@ function handleComments($recordID, $removals, $modifications, $additions) {
 		$parentID = intval($addition["parentComment"]);
 
 		// do a sanity check first: does this reply make sense?
-		$parentTest = $parentID? "cmt_id=$parentID" : "cmt_id is null";
-		if (! mysql__select_array("Records left join comments on rec_ID=cmt_rec_id and $parentTest", "rec_ID", "rec_ID=$recordID and $parentTest")) {
+		$parentTest = $parentID? "cmt_ID=$parentID" : "cmt_ID is null";
+		if (! mysql__select_array("Records left join recThreadedComments on rec_ID=cmt_RecID and $parentTest", "rec_ID", "rec_ID=$recordID and $parentTest")) {
 			array_push($newIDs, array("error" => "invalid parent comments"));
 			continue;
 		}
 
 		if (! $parentID) { $parentId = NULL; }
 
-		mysql__insert("comments", array("cmt_text" => $addition["text"], "cmt_date" => date('Y-m-d H:i:s'), "cmt_usr_id" => get_user_id(),
-		"cmt_parent_cmt_id" => $parentID, "cmt_rec_id" => $recordID));
+		mysql__insert("recThreadedComments", array("cmt_Text" => $addition["text"], "cmt_Added" => date('Y-m-d H:i:s'), "cmt_OwnerUGrpID" => get_user_id(),
+		"cmt_ParentCmtID" => $parentID, "cmt_RecID" => $recordID));
 		array_push($newIDs, array("id" => mysql_insert_id()));
 	}
 

@@ -323,16 +323,16 @@ function loadUserDependentData(&$record) {
 	}
 
 	$res = mysql_query(
-	    "select cmt_id,
-	            cmt_parent_cmt_id,
-	            cmt_date,
-	            cmt_modified,
-	            cmt_text,
-	            cmt_usr_id,
-	            cmt_deleted
-	       from comments
-	      where cmt_rec_id = $recID
-	   order by cmt_id");
+	    "select cmt_ID,
+	            cmt_ParentCmtID,
+	            cmt_Added,
+	            cmt_Modified,
+	            cmt_Text,
+	            cmt_OwnerUGrpID,
+	            cmt_Deleted
+	       from recThreadedComments
+	      where cmt_RecID = $recID
+	   order by cmt_ID");
 	$comments = array();
 	while ($cmt = mysql_fetch_row($res)) {
 		$cmt[1] = intval($cmt[1]);

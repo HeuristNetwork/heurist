@@ -85,18 +85,18 @@ function print_blog_entries($uid, $name, $date) {
 
 
 function print_comments($rec_id) {
-	$query = "SELECT concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname, cmt_date, cmt_text
-	          FROM comments
-			  LEFT JOIN sysUGrps usr usr ON usr.ID = cmt_usr_id
-	          WHERE cmt_rec_id = $rec_id
-	          AND ! cmt_deleted
-	          ORDER BY cmt_date";
+	$query = "SELECT concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname, cmt_Added, cmt_Text
+	          FROM recThreadedComments
+			  LEFT JOIN sysUGrps usr ON usr.ID = cmt_OwnerUGrpID
+	          WHERE cmt_RecID = $rec_id
+	          AND ! cmt_Deleted
+	          ORDER BY cmt_Added";
 	$res = mysql_query($query);
 	if (mysql_num_rows($res) > 0) {
 		print "<h3>Comments</h3>\n";
 		while ($row = mysql_fetch_assoc($res)) {
-			print "<p>" . $row["Realname"] . " - " . $row["cmt_date"] . "</p>\n";
-			print "<p>" . $row["cmt_text"] . "</p>\n";
+			print "<p>" . $row["Realname"] . " - " . $row["cmt_Added"] . "</p>\n";
+			print "<p>" . $row["cmt_Text"] . "</p>\n";
 		}
 	}
 }
