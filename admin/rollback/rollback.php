@@ -12,7 +12,7 @@ mysql_connection_overwrite(DATABASE);
 function getTargetVersions ($rec_ids=null, $before_date=null) {
 	// find the last non-false-delta version before a given date,
 	// OR if no date is specifed, find the previous version of the given records
-	// returns an assoc array of (rec_ID => arec_ver)
+	// returns an assoc array of (rec_ID => arec_Ver)
 
 	if (! $rec_ids  &&  ! $before_date) {
 		return null;
@@ -20,34 +20,34 @@ function getTargetVersions ($rec_ids=null, $before_date=null) {
 
 	$versions = array();
 
-	$where_clause = $rec_ids ? "arec_id in (" . join(",", $rec_ids) . ")" : "";
+	$where_clause = $rec_ids ? "arec_ID in (" . join(",", $rec_ids) . ")" : "";
 	if ($before_date) {
 		$where_clause .= $rec_ids ? " and " : "";
-		$where_clause .= "arec_date > '$before_date'";
+		$where_clause .= "arec_Date > '$before_date'";
 	}
 
-	$arec_ids = mysql__select_array("archive_records", "distinct arec_id", $where_clause);
+	$arec_ids = mysql__select_array("archiveRecords", "distinct arec_ID", $where_clause);
 
 	$arec_ids_str = join(",", $arec_ids);
 
 	if ($before_date) {
 		$res = mysql_query("
-			select arec_id, max(arec_date)
-			from archive_records
-			where arec_id in ($arec_ids_str) and arec_date <= '$before_date'
-			group by arec_id
-			order by max(arec_date) desc
+			select arec_ID, max(arec_Date)
+			from archiveRecords
+			where arec_ID in ($arec_ids_str) and arec_Date <= '$before_date'
+			group by arec_ID
+			order by max(arec_Date) desc
 		");
 		while ($row = mysql_fetch_row($res)) {
-			// join to archive_rec_details to find the latest non-false-delta version
+			// join to archiveDetails to find the latest non-false-delta version
 			$ver_res = mysql_query("
-				select arec_ver
-				from archive_records, archive_rec_details
-				where arec_id = " . $row[0] . "
-				and arec_date = '" . $row[1] . "'
-				and ard_rec_id = arec_id
-				and ard_ver = arec_ver
-				order by arec_ver desc
+				select arec_Ver
+				from archiveRecords, archiveDetails
+				where arec_ID = " . $row[0] . "
+				and arec_Date = '" . $row[1] . "'
+				and ard_RecID = arec_ID
+				and ard_Ver = arec_Ver
+				order by arec_Ver desc
 				limit 1
 			");
 			$arec_ver = mysql_fetch_row($ver_res);
@@ -55,25 +55,25 @@ function getTargetVersions ($rec_ids=null, $before_date=null) {
 		}
 
 	} else {
-		// join to archive_rec_details to find the latest non-false-delta version
+		// join to archiveDetails to find the latest non-false-delta version
 		$res = mysql_query("
-			select arec_id, max(arec_ver)
-			from archive_records, archive_rec_details
-			where arec_id in ($arec_ids_str)
-			and ard_rec_id = arec_id
-			and ard_ver = arec_ver
-			group by arec_id
+			select arec_ID, max(arec_Ver)
+			from archiveRecords, archiveDetails
+			where arec_ID in ($arec_ids_str)
+			and ard_RecID = arec_ID
+			and ard_Ver = arec_Ver
+			group by arec_ID
 		");
 		while ($row = mysql_fetch_row($res)) {
-			// join to archive_rec_details to find the latest non-false-delta version
+			// join to archiveDetails to find the latest non-false-delta version
 			$ver_res = mysql_query("
-				select arec_ver
-				from archive_records, archive_rec_details
-				where arec_id = " . $row[0] . "
-				and arec_ver < " . $row[1] . "
-				and ard_rec_id = arec_id
-				and ard_ver = arec_ver
-				order by arec_ver desc
+				select arec_Ver
+				from archiveRecords, archiveDetails
+				where arec_ID = " . $row[0] . "
+				and arec_Ver < " . $row[1] . "
+				and ard_RecID = arec_ID
+				and ard_Ver = arec_Ver
+				order by arec_Ver desc
 				limit 1
 			");
 			$arec_ver = mysql_fetch_row($ver_res);
@@ -86,22 +86,22 @@ function getTargetVersions ($rec_ids=null, $before_date=null) {
 
 function getAffectedDetails ($rec_id, $since_version) {
 	return mysql__select_array(
-		"archive_rec_details",
-		"distinct ard_id",
-		"ard_rec_id = $rec_id and ard_ver > $since_version"
+		"archiveDetails",
+		"distinct ard_ID",
+		"ard_RecID = $rec_id and ard_Ver > $since_version"
 	);
 }
 
 
 function getDetailHistory ($ard_id, $up_to_version) {
-	// return deltas from archive_rec_details, latest first
+	// return deltas from archiveDetails, latest first
 	$deltas = array();
 	$res = mysql_query("
-		select ard_id, ard_ver, ard_type, ard_val, ard_file_id, astext(ard_geo) as ard_geo
-		from archive_rec_details
-		where ard_id = $ard_id
-		and ard_ver <= $up_to_version
-		order by ard_ver desc
+		select ard_ID, ard_Ver, ard_DetailTypeID, ard_Value, ard_UploadedFileID, astext(ard_Geo) as ard_Geo
+		from archiveDetails
+		where ard_ID = $ard_id
+		and ard_Ver <= $up_to_version
+		order by ard_Ver desc
 	");
 	while ($row = mysql_fetch_assoc($res)) {
 		array_push($deltas, $row);
@@ -128,7 +128,7 @@ function getDetailRollbacks ($rec_id, $version) {
 			array_push($potential_deletes, $ard_id);
 		} else {
 			$latest = $deltas[0];
-			if ($latest["ard_val"]  ||  $latest["ard_file_id"]  ||  $latest["ard_geo"]) {
+			if ($latest["ard_Value"]  ||  $latest["ard_UploadedFileID"]  ||  $latest["ard_Geo"]) {
 				// an insert or update
 				array_push($potential_updates, $latest);
 			} else {
@@ -149,13 +149,13 @@ function getDetailRollbacks ($rec_id, $version) {
 	}
 
 	foreach ($potential_updates as $potential_update) {
-		if (in_array($potential_update["ard_id"], $current_details)) {
+		if (in_array($potential_update["ard_ID"], $current_details)) {
 			// check if the current value is actually the same
 			// (this would happen if the detail has been changed, and changed back)
-			$ard_id = $potential_update["ard_id"];
-			$ard_val = $potential_update["ard_val"];
-			$ard_file_id = $potential_update["ard_file_id"];
-			$ard_geo = $potential_update["ard_geo"];
+			$ard_id = $potential_update["ard_ID"];
+			$ard_val = $potential_update["ard_Value"];
+			$ard_file_id = $potential_update["ard_UploadedFileID"];
+			$ard_geo = $potential_update["ard_Geo"];
 			$res = mysql_query("
 				select dtl_ID
 				from recDetails
@@ -207,10 +207,10 @@ function rollRecordBack ($rec_id, $changes) {
 	}
 
 	foreach ($changes["updates"] as $update) {
-		$rd_id       = $update["ard_id"];
-		$rd_val      = $update["ard_val"] ? "'" . addslashes($update["ard_val"]) . "'" : "null";
-		$rd_file_id  = $update["ard_file_id"] ? $update["ard_file_id"] : "null";
-		$rd_geo      = $update["ard_geo"] ? "geomfromtext('" . $update["ard_geo"] . "')" : "null";
+		$rd_id       = $update["ard_ID"];
+		$rd_val      = $update["ard_Value"] ? "'" . addslashes($update["ard_Value"]) . "'" : "null";
+		$rd_file_id  = $update["ard_UploadedFileID"] ? $update["ard_UploadedFileID"] : "null";
+		$rd_geo      = $update["ard_Geo"] ? "geomfromtext('" . $update["ard_Geo"] . "')" : "null";
 		mysql_query("
 			update recDetails
 			set dtl_Value = $rd_val, dtl_UploadedFileID = $rd_file_id, dtl_Geo = $rd_geo
@@ -225,11 +225,11 @@ function rollRecordBack ($rec_id, $changes) {
 	}
 
 	foreach ($changes["inserts"] as $insert) {
-		$rd_id       = $insert["ard_id"];
-		$rd_type     = $insert["ard_type"];
-		$rd_val      = $insert["ard_val"] ? "'" . addslashes($insert["ard_val"]) . "'" : "null";
-		$rd_file_id  = $insert["ard_file_id"] ? $insert["ard_file_id"] : "null";
-		$rd_geo      = $insert["ard_geo"] ? "geomfromtext('" . $insert["ard_geo"] . "')" : "null";
+		$rd_id       = $insert["ard_ID"];
+		$rd_type     = $insert["ard_DetailTypeID"];
+		$rd_val      = $insert["ard_Value"] ? "'" . addslashes($insert["ard_Value"]) . "'" : "null";
+		$rd_file_id  = $insert["ard_UploadedFileID"] ? $insert["ard_UploadedFileID"] : "null";
+		$rd_geo      = $insert["ard_Geo"] ? "geomfromtext('" . $insert["ard_Geo"] . "')" : "null";
 		mysql_query("
 			insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, dtl_Geo)
 			values ($rec_id, $rd_type, $rd_val, $rd_file_id, $rd_geo)

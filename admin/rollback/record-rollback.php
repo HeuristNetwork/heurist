@@ -129,13 +129,13 @@ function showRecordRollback ($record, $changes) {
 	}
 
 	foreach ($changes["inserts"] as $insert) {
-		if (array_key_exists($insert["ard_type"], $reqs)) {
-			$name = $reqs[$insert["ard_type"]]["rst_NameInForm"];
+		if (array_key_exists($insert["ard_DetailTypeID"], $reqs)) {
+			$name = $reqs[$insert["ard_DetailTypeID"]]["rst_NameInForm"];
 		} else {
-			$name = $detail_names[$insert["ard_type"]];
+			$name = $detail_names[$insert["ard_DetailTypeID"]];
 		}
 		showDetail(
-			$insert["ard_type"] . ': ' . $name,
+			$insert["ard_DetailTypeID"] . ': ' . $name,
 			"&nbsp;",
 			'<div class="insert">' . getDetailUpdateString($insert) . '</div>'
 		);
@@ -187,21 +187,21 @@ function getCurrentValString ($val) {
 
 function getDetailUpdateString ($ard_row) {
 	$s = '';
-	if ($ard_row["ard_val"]) {
-		$s = $ard_row["ard_val"];
+	if ($ard_row["ard_Value"]) {
+		$s = $ard_row["ard_Value"];
 	}
-	if ($ard_row["ard_file_id"]) {
-		$s = $ard_row["ard_file_id"];
+	if ($ard_row["ard_UploadedFileID"]) {
+		$s = $ard_row["ard_UploadedFileID"];
 	}
-	if ($ard_row["ard_geo"]) {
-		$s .= ' [' . substr($ard_row["ard_geo"], 0, 30) . ' ... ]';
+	if ($ard_row["ard_Geo"]) {
+		$s .= ' [' . substr($ard_row["ard_Geo"], 0, 30) . ' ... ]';
 	}
 	return $s;
 }
 
 function getChangedValString ($rd_id, $changes) {
 	foreach ($changes["updates"] as $update) {
-		if ($update["ard_id"] == $rd_id) {
+		if ($update["ard_ID"] == $rd_id) {
 			return '<div class="update">' . getDetailUpdateString($update) . '</div>';
 		}
 	}
