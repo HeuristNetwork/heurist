@@ -55,14 +55,14 @@ print "\n-->\n";
 }
 
 function get_blog_entry_content($id) {
-	$query = "SELECT GROUP_CONCAT(chunk_text SEPARATOR '\n')
+	$query = "SELECT GROUP_CONCAT(chunk_Text SEPARATOR '\n')
 	            FROM woots
-	       LEFT JOIN woot_chunks ON chunk_woot_id = woot_id
-	                            AND chunk_is_latest
-	                            AND ! chunk_deleted
-	           WHERE woot_title = CONCAT('record:', $id)
-	        GROUP BY woot_id
-	        ORDER BY chunk_order";
+	       LEFT JOIN woot_Chunks ON chunk_WootID = woot_ID
+	                            AND chunk_IsLatest
+	                            AND ! chunk_Deleted
+	           WHERE woot_Title = CONCAT('record:', $id)
+	        GROUP BY woot_ID
+	        ORDER BY chunk_DisplayOrder";
 	$res = mysql_query($query);
 	if (mysql_num_rows($res) < 1) {
 		return "";

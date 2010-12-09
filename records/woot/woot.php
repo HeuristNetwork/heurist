@@ -3,9 +3,9 @@
 require_once(dirname(__FILE__)."/../../common/connect/db.php");
 
 define("WOOT_TABLE", "woots");
-define("CHUNK_TABLE", "woot_chunks");
-define("PERMISSION_TABLE", "woot_chunk_permissions");
-define("WOOT_PERMISSION_TABLE", "woot_permissions");
+define("CHUNK_TABLE", "woot_Chunks");
+define("PERMISSION_TABLE", "wootChunkPermissions");
+define("WOOT_PERMISSION_TABLE", "woot_RecPermissions");
 
 
 
@@ -15,11 +15,11 @@ function hasWootReadPermission($wootId) {
 	if (is_admin()) { return true; }
 
 	if (is_logged_in()) {
-		$res = mysql_query("select * from " . WOOT_PERMISSION_TABLE . " where wperm_woot_id=$wootId and
-		                   (wperm_user_id=".get_user_id()." or wperm_group_id in (".join(",", get_group_ids()).",-1))");
+		$res = mysql_query("select * from " . WOOT_PERMISSION_TABLE . " where wrprm_WootID=$wootId and
+		                   (wrprm_UGrpID=".get_user_id()." or wrprm_group_id in (".join(",", get_group_ids()).",-1))");
 		return (mysql_num_rows($res) > 0);
 	} else {
-		$res = mysql_query("select * from " . WOOT_PERMISSION_TABLE . " where wperm_woot_id=$wootId and wperm_group_id = -1");
+		$res = mysql_query("select * from " . WOOT_PERMISSION_TABLE . " where wrprm_WootID=$wootId and wrprm_group_id = -1");
 		return (mysql_num_rows($res) > 0);
 	}
 }
@@ -29,8 +29,8 @@ function hasWootWritePermission($wootId) {
 	if (is_admin()) { return true; }
 
 	if (is_logged_in()) {
-		$res = mysql_query("select * from " . WOOT_PERMISSION_TABLE . " where wperm_woot_id=$wootId and
-		                   (wperm_user_id=".get_user_id()." or wperm_group_id in (".join(",", get_group_ids()).",-1)) and wperm_type='RW'");
+		$res = mysql_query("select * from " . WOOT_PERMISSION_TABLE . " where wrprm_WootID=$wootId and
+		                   (wrprm_UGrpID=".get_user_id()." or wrprm_group_id in (".join(",", get_group_ids()).",-1)) and wrprm_Type='RW'");
 		return (mysql_num_rows($res) > 0);
 	} else {
 		// non-logged-in users can't edit woots!
@@ -50,17 +50,17 @@ function getReadableChunks($wootId=NULL, $restrictToCurrent=false) {
 	if (is_admin()) {
 		$restriction = "1 ";
 	} else if (is_logged_in()) {
-		$restriction = "(perm_user_id=".get_user_id()." or perm_group_id in (".join(",", get_group_ids()).",-1)) ";
+		$restriction = "(wprm_UGrpID=".get_user_id()." or wprm_group_id in (".join(",", get_group_ids()).",-1)) ";
 	} else {
-		$restriction = "(perm_group_id = -1) ";
+		$restriction = "(wprm_group_id = -1) ";
 	}
 
 	if (! $restrictToCurrent) {
-		return mysql__select_array(PERMISSION_TABLE, "perm_chunk_id", $restriction . ($wootId? " and chunk_woot_id=$wootId" : ""));
+		return mysql__select_array(PERMISSION_TABLE, "wprm_ChunkID", $restriction . ($wootId? " and chunk_WootID=$wootId" : ""));
 	}
 	else {
-		return mysql__select_array(CHUNK_TABLE . " left join " . PERMISSION_TABLE . " on chunk_id=perm_chunk_id", "perm_chunk_id",
-		                           "$restriction and chunk_is_latest" . ($wootId? " and chunk_woot_id=$wootId" : "") . " and perm_chunk_id is not null");
+		return mysql__select_array(CHUNK_TABLE . " left join " . PERMISSION_TABLE . " on chunk_ID=wprm_ChunkID", "wprm_ChunkID",
+		                           "$restriction and chunk_IsLatest" . ($wootId? " and chunk_WootID=$wootId" : "") . " and wprm_ChunkID is not null");
 	}
 }
 function getWritableChunks($wootId=NULL, $restrictToCurrent=false) {
@@ -75,14 +75,14 @@ function getWritableChunks($wootId=NULL, $restrictToCurrent=false) {
 		return array();
 	}
 
-	$restriction = is_admin()? "1 " : "(perm_user_id=".get_user_id()." or perm_group_id in (".join(",", get_group_ids()).",-1)) and perm_type='RW' ";
+	$restriction = is_admin()? "1 " : "(wprm_UGrpID=".get_user_id()." or wprm_group_id in (".join(",", get_group_ids()).",-1)) and wprm_Type='RW' ";
 	if (! $restrictToCurrent) {
-		return mysql__select_array(PERMISSION_TABLE, "perm_chunk_id",
-		                           $restriction . ($wootId? " and chunk_woot_id=$wootId" : ""));
+		return mysql__select_array(PERMISSION_TABLE, "wprm_ChunkID",
+		                           $restriction . ($wootId? " and chunk_WootID=$wootId" : ""));
 	}
 	else {
-		return mysql__select_array(CHUNK_TABLE . " left join " . PERMISSION_TABLE . " on chunk_id=perm_chunk_id", "perm_chunk_id",
-		                           "$restriction and chunk_is_latest" . ($wootId? " and chunk_woot_id=$wootId" : "") . " and perm_chunk_id is not null");
+		return mysql__select_array(CHUNK_TABLE . " left join " . PERMISSION_TABLE . " on chunk_ID=wprm_ChunkID", "wprm_ChunkID",
+		                           "$restriction and chunk_IsLatest" . ($wootId? " and chunk_WootID=$wootId" : "") . " and wprm_ChunkID is not null");
 	}
 }
 
@@ -132,7 +132,7 @@ function loadWoot($args) {
 	$wootId = intval(@$args["id"]);
 	$wootPermissions = array();
 
-	$query = $wootId? "woot_id=$wootId" : "woot_title='$wootTitle'";
+	$query = $wootId? "woot_ID=$wootId" : "woot_Title='$wootTitle'";
 	$res = mysql_query("select * from ".WOOT_TABLE." where $query");
 	if (mysql_num_rows($res) <= 0) {
 		if (! is_logged_in()) {
@@ -146,30 +146,30 @@ function loadWoot($args) {
 		else {
 			$wootId = "new";
 			$woot = array(
-				"woot_id" => $wootId,
-				"woot_title" => $wootTitle,
-				"woot_version" => 0,
-				"woot_creator" => get_user_id()
+				"woot_ID" => $wootId,
+				"woot_Title" => $wootTitle,
+				"woot_Ver" => 0,
+				"woot_CreatorID" => get_user_id()
 			);
 		}
 	}
 	else {
 		$woot = mysql_fetch_assoc($res);
-		$wootId = $woot["woot_id"];
+		$wootId = $woot["woot_ID"];
 		if (! hasWootReadPermission($wootId)) {
 			return(array("success" => false, "errorType" => "insufficient permissions on woot"));
 		}
 
 		$pres = mysql_query("select ".WOOT_PERMISSION_TABLE.".*, a.ugr_Name as Groupname, b.ugr_Name as Username from ".WOOT_PERMISSION_TABLE."
-						  left join ".USERS_DATABASE.".sysUGrps a on a.ugr_ID=wperm_group_id
-						  left join ".USERS_DATABASE.".sysUGrps b on b.ugr_ID=wperm_user_id
-							  where wperm_woot_id=".$wootId);
+						  left join ".USERS_DATABASE.".sysUGrps a on a.ugr_ID=wrprm_group_id
+						  left join ".USERS_DATABASE.".sysUGrps b on b.ugr_ID=wrprm_UGrpID
+							  where wrprm_WootID=".$wootId);
 		while ($perm = mysql_fetch_assoc($pres)) {
-			array_push($wootPermissions, array("type" => $perm["wperm_type"],
-										   "userId" => $perm["wperm_user_id"]? $perm["wperm_user_id"] : NULL,
-										   "userName" => $perm["wperm_user_id"]? $perm["Username"] : NULL,
-										   "groupId" => $perm["wperm_group_id"]? $perm["wperm_group_id"] : NULL,
-										   "groupName" => $perm["wperm_group_id"]? $perm["Groupname"] : NULL));
+			array_push($wootPermissions, array("type" => $perm["wrprm_Type"],
+										   "userId" => $perm["wrprm_UGrpID"]? $perm["wrprm_UGrpID"] : NULL,
+										   "userName" => $perm["wrprm_UGrpID"]? $perm["Username"] : NULL,
+										   "groupId" => $perm["wrprm_group_id"]? $perm["wrprm_group_id"] : NULL,
+										   "groupName" => $perm["wrprm_group_id"]? $perm["Groupname"] : NULL));
 		}
 	}
 
@@ -178,31 +178,31 @@ function loadWoot($args) {
 	$chunkIds = getReadableChunks($wootId, /* restrictToCurrent= */ true);
 	if ($chunkIds) {
 		$res = mysql_query("select * from ".CHUNK_TABLE."
-									where chunk_woot_id=$wootId and chunk_is_latest and !chunk_deleted and chunk_id in (" . join(",", $chunkIds) . ")
-								 order by chunk_order");
+									where chunk_WootID=$wootId and chunk_IsLatest and !chunk_Deleted and chunk_ID in (" . join(",", $chunkIds) . ")
+								 order by chunk_DisplayOrder");
 		$res = mysql_query("select * from ".CHUNK_TABLE."
-									where chunk_woot_id=$wootId and chunk_is_latest and !chunk_deleted and chunk_id in (" . join(",", $chunkIds) . ")
-								 order by chunk_order");
+									where chunk_WootID=$wootId and chunk_IsLatest and !chunk_Deleted and chunk_ID in (" . join(",", $chunkIds) . ")
+								 order by chunk_DisplayOrder");
 		while ($chunkData = @mysql_fetch_assoc($res)) {	// the @ hides the fact that there might not be any chunks for this woot
 			$chunk = array(
-				"number" => $chunkData["chunk_number"],
-				"text" => $chunkData["chunk_text"],
-				"modified" => $chunkData["chunk_modified"],
-				"editorId" => $chunkData["chunk_editor"],
-				"ownerId" => $chunkData["chunk_owner"]
+				"number" => $chunkData["chunk_InsertOrder"],
+				"text" => $chunkData["chunk_Text"],
+				"modified" => $chunkData["chunk_Modified"],
+				"editorId" => $chunkData["chunk_EditorID"],
+				"ownerId" => $chunkData["chunk_OwnerID"]
 			);
 
 			$permissions = array();
 			$pres = mysql_query("select ".PERMISSION_TABLE.".*, a.ugr_Name as Groupname, b.ugr_Name as Username from ".PERMISSION_TABLE."
-							  left join ".USERS_DATABASE.".sysUGrps a on a.ugr_ID=perm_group_id
-							  left join ".USERS_DATABASE.".sysUGrps b on b.ugr_ID=perm_user_id
-								  where perm_chunk_id=".$chunkData["chunk_id"]);
+							  left join ".USERS_DATABASE.".sysUGrps a on a.ugr_ID=wprm_group_id
+							  left join ".USERS_DATABASE.".sysUGrps b on b.ugr_ID=wprm_UGrpID
+								  where wprm_ChunkID=".$chunkData["chunk_ID"]);
 			while ($perm = mysql_fetch_assoc($pres)) {
-				array_push($permissions, array("type" => $perm["perm_type"],
-											   "userId" => $perm["perm_user_id"]? $perm["perm_user_id"] : NULL,
-											   "userName" => $perm["perm_user_id"]? $perm["Username"] : NULL,
-											   "groupId" => $perm["perm_group_id"]? $perm["perm_group_id"] : NULL,
-											   "groupName" => $perm["perm_group_id"]? $perm["Groupname"] : NULL));
+				array_push($permissions, array("type" => $perm["wprm_Type"],
+											   "userId" => $perm["wprm_UGrpID"]? $perm["wprm_UGrpID"] : NULL,
+											   "userName" => $perm["wprm_UGrpID"]? $perm["Username"] : NULL,
+											   "groupId" => $perm["wprm_group_id"]? $perm["wprm_group_id"] : NULL,
+											   "groupName" => $perm["wprm_group_id"]? $perm["Groupname"] : NULL));
 			}
 			$chunk["permissions"] = $permissions;
 
@@ -212,9 +212,9 @@ function loadWoot($args) {
 
 	return(array("success" => true,
 				 "woot" => array("id" => $wootId,
-								 "title" => $woot["woot_title"],
-								 "version" => $woot["woot_version"],
-								 "creator" => $woot["woot_creator"],
+								 "title" => $woot["woot_Title"],
+								 "version" => $woot["woot_Ver"],
+								 "creator" => $woot["woot_CreatorID"],
 								 "permissions" => $wootPermissions,
 								 "chunks" => $chunks)));
 
@@ -274,17 +274,17 @@ function saveWoot($args) {
 			}
 
 			mysql__insert(WOOT_TABLE, array(
-				"woot_title" => $wootTitle,
-				"woot_created" => array("now()"),
-				"woot_modified" => array("now()"),
-				"woot_version" => 0,
-				"woot_creator" => get_user_id()
+				"woot_Title" => $wootTitle,
+				"woot_Created" => array("now()"),
+				"woot_Modified" => array("now()"),
+				"woot_Ver" => 0,
+				"woot_CreatorID" => get_user_id()
 			));
 			$wootId = mysql_insert_id();
 			if (! $wootId) {
 				return(array("success" => false, "errorType" => "a woot with the given title already exists"));
 			}
-			$woot = mysql_fetch_assoc(mysql_query("select * from ".WOOT_TABLE." where woot_id=$wootId"));
+			$woot = mysql_fetch_assoc(mysql_query("select * from ".WOOT_TABLE." where woot_ID=$wootId"));
 			$woot["permissions"] = $args["permissions"];
 			$result = insertWootPermissions($wootId, $woot);
 			if ($result["success"] != true) { return($result); }
@@ -298,29 +298,29 @@ function saveWoot($args) {
 				return(array("success" => false, "errorType" => "woot doesn't exist, or insufficient permissions on woot"));
 			}
 
-			mysql_query("update ".WOOT_TABLE." set woot_version=woot_version+1 where woot_id=$wootId");
+			mysql_query("update ".WOOT_TABLE." set woot_Ver=woot_Ver+1 where woot_ID=$wootId");
 		}
-		$res = mysql_query("select * from ".WOOT_TABLE." where woot_id=$wootId");
+		$res = mysql_query("select * from ".WOOT_TABLE." where woot_ID=$wootId");
 
 	mysql_query("commit and chain");
 
 		$woot = mysql_fetch_assoc($res);
-		$version = intval($woot["woot_version"]);
+		$version = intval($woot["woot_Ver"]);
 
 		$chunkIds = getReadableChunks($wootId, /* restrictToCurrent= */ true);
 
 		$res = mysql_query("select * from ".CHUNK_TABLE."
-							 where chunk_woot_id=$wootId and chunk_is_latest and !chunk_deleted and chunk_id in (" . join(",", $chunkIds) . ")
-						  order by chunk_order");
+							 where chunk_WootID=$wootId and chunk_IsLatest and !chunk_Deleted and chunk_ID in (" . join(",", $chunkIds) . ")
+						  order by chunk_DisplayOrder");
 		$existingVisibleChunks = array();
 		while ($chunk = @mysql_fetch_assoc($res)) {	/* The @ takes care of the possibility that there are no chunks in this woot */
-			$existingVisibleChunks[$chunk["chunk_number"]] = $chunk;
+			$existingVisibleChunks[$chunk["chunk_InsertOrder"]] = $chunk;
 		}
 
 		$incomingChunks = $args["chunks"];
 
 		// Get the current chunk ordering (including the chunks the current user can't actually see)
-		$existingChunkOrder = mysql__select_array(CHUNK_TABLE, "chunk_number", "chunk_woot_id=$wootId and chunk_is_latest and ! chunk_deleted order by chunk_order");
+		$existingChunkOrder = mysql__select_array(CHUNK_TABLE, "chunk_InsertOrder", "chunk_WootID=$wootId and chunk_IsLatest and ! chunk_Deleted order by chunk_DisplayOrder");
 		reset($existingChunkOrder);
 
 		// Check that the incoming chunks are in the same order as the existing chunks, otherwise raise an error
@@ -368,15 +368,15 @@ function saveWoot($args) {
 
 				if (! @$chunk["unmodified"]) {
 					// Chunk exists, and is reported as modified.  Make a new version of it.
-					$res = mysql_query("select chunk_id, chunk_order, chunk_owner from ".CHUNK_TABLE." where chunk_woot_id=$wootId and chunk_number=$chunkNumber and chunk_is_latest");
+					$res = mysql_query("select chunk_ID, chunk_DisplayOrder, chunk_OwnerID from ".CHUNK_TABLE." where chunk_WootID=$wootId and chunk_InsertOrder=$chunkNumber and chunk_IsLatest");
 					if (mysql_num_rows($res) != 1) { /* should do something ... do we care? */ }
 
 					$prevChunk = mysql_fetch_assoc($res);
-					$prevChunkId = $prevChunk["chunk_id"];
-					$chunkOrder = $prevChunk["chunk_order"];
-					$chunkOwner = $prevChunk["chunk_owner"];
+					$prevChunkId = $prevChunk["chunk_ID"];
+					$chunkOrder = $prevChunk["chunk_DisplayOrder"];
+					$chunkOwner = $prevChunk["chunk_OwnerID"];
 
-					mysql__update(CHUNK_TABLE, "chunk_woot_id=$wootId and chunk_number=$chunkNumber", array( "chunk_is_latest" => 0 ));
+					mysql__update(CHUNK_TABLE, "chunk_WootID=$wootId and chunk_InsertOrder=$chunkNumber", array( "chunk_IsLatest" => 0 ));
 				}
 				else {
 					// Chunk exists, but is not modified.  Nothing more to do.
@@ -384,7 +384,7 @@ function saveWoot($args) {
 				}
 			}
 			else {
-				$res = mysql_query("select max(chunk_number) from ".CHUNK_TABLE." where chunk_woot_id=$wootId");
+				$res = mysql_query("select max(chunk_InsertOrder) from ".CHUNK_TABLE." where chunk_WootID=$wootId");
 				$chunkNumber = @mysql_fetch_row($res);
 				$chunkNumber = intval(@$chunkNumber[0]) + 1;
 				$chunkOrder = 0;	// chunk order will be overridden anyway since there is a new chunk to take care of
@@ -397,31 +397,31 @@ function saveWoot($args) {
 			$chunkDeleted = preg_match('/^\s*$/', $chunk["text"]);
 
 			mysql__insert(CHUNK_TABLE, array(
-				"chunk_woot_id" => $wootId,
-				"chunk_number" => $chunkNumber,
-				"chunk_version" => $version,
-				"chunk_text" => $chunk["text"],
-				"chunk_is_latest" => 1,
-				"chunk_order" => $chunkOrder,
-				"chunk_modified" => array("now()"),
-				"chunk_owner" => $chunkOwner,
-				"chunk_editor" => get_user_id(),
-				"chunk_deleted" => $chunkDeleted
+				"chunk_WootID" => $wootId,
+				"chunk_InsertOrder" => $chunkNumber,
+				"chunk_Ver" => $version,
+				"chunk_Text" => $chunk["text"],
+				"chunk_IsLatest" => 1,
+				"chunk_DisplayOrder" => $chunkOrder,
+				"chunk_Modified" => array("now()"),
+				"chunk_OwnerID" => $chunkOwner,
+				"chunk_EditorID" => get_user_id(),
+				"chunk_Deleted" => $chunkDeleted
 			));
 			$chunkId = mysql_insert_id();
 
 			if (! $chunkDeleted) {
 				if ($chunkOwner == get_user_id()  ||  is_admin()) {
 					// only the owner (or an admin) can change the permissions
-					$result = insertPermissions($chunkId, $chunk, $woot["woot_creator"]);
+					$result = insertPermissions($chunkId, $chunk, $woot["woot_CreatorID"]);
 					if ($result["success"] != true) { return($result); }
 				}
 				else {
 					// copy the permissions from the previous version of the chunk
 					mysql_query("insert into ".PERMISSION_TABLE."
-								 (perm_chunk_id, perm_user_id, perm_group_id, perm_type, perm_creator, perm_created)
-						   select distinct $chunkId, perm_user_id, perm_group_id, perm_type, perm_creator, perm_created
-							 from ".PERMISSION_TABLE." where perm_chunk_id=$prevChunkId");
+								 (wprm_ChunkID, wprm_UGrpID, wprm_group_id, wprm_Type, wprm_CreatorID, wprm_Created)
+						   select distinct $chunkId, wprm_UGrpID, wprm_group_id, wprm_Type, wprm_CreatorID, wprm_Created
+							 from ".PERMISSION_TABLE." where wprm_ChunkID=$prevChunkId");
 				}
 
 				if ($chunk["nonce"]) {
@@ -467,8 +467,8 @@ function saveWoot($args) {
 			for ($i=0; $i < count($allChunks); ++$i) {
 				$order = $i+1;
 				$chunkNumber = $allChunks[$i];
-				mysql_query("update ".CHUNK_TABLE." set chunk_order=$order
-							  where chunk_woot_id=$wootId and chunk_number=$chunkNumber and chunk_is_latest");
+				mysql_query("update ".CHUNK_TABLE." set chunk_DisplayOrder=$order
+							  where chunk_WootID=$wootId and chunk_InsertOrder=$chunkNumber and chunk_IsLatest");
 			}
 		}
 
@@ -511,12 +511,12 @@ function insertPermissions($chunkId, &$chunk, $creatorId) {
 		}
 
 		$insertValues[@$permission["userId"] . "," . @$permission["groupId"]] = array(
-			"perm_chunk_id" => $chunkId,
-			"perm_user_id" => @$permission["userId"]? $permission["userId"] : 0,
-			"perm_group_id" => @$permission["groupId"]? $permission["groupId"] : 0,
-			"perm_type" => $permission["type"],
-			"perm_creator" => get_user_id(),
-			"perm_created" => array("now()")
+			"wprm_ChunkID" => $chunkId,
+			"wprm_UGrpID" => @$permission["userId"]? $permission["userId"] : 0,
+			"wprm_group_id" => @$permission["groupId"]? $permission["groupId"] : 0,
+			"wprm_Type" => $permission["type"],
+			"wprm_CreatorID" => get_user_id(),
+			"wprm_Created" => array("now()")
 		);
 	}
 	foreach ($insertValues as $values) {
@@ -526,11 +526,11 @@ function insertPermissions($chunkId, &$chunk, $creatorId) {
 	if (! $userHasReadWriteAccess  &&  ! is_admin()) {
 		// Woah, hang on ... is the user REALLY trying to lock themselves out of this chunk?  Don't let them do THAT.
 		mysql__insert(PERMISSION_TABLE, array(
-			"perm_chunk_id" => $chunkId,
-			"perm_user_id" => get_user_id(),
-			"perm_type" => "RW",
-			"perm_creator" => get_user_id(),
-			"perm_created" => array("now()")
+			"wprm_ChunkID" => $chunkId,
+			"wprm_UGrpID" => get_user_id(),
+			"wprm_Type" => "RW",
+			"wprm_CreatorID" => get_user_id(),
+			"wprm_Created" => array("now()")
 		));
 	}
 
@@ -553,7 +553,7 @@ function insertWootPermissions($wootId, &$woot) {
 			return(array("success" => false, "errorType" => "invalid woot permissions"));
 		}
 		if (@$permission["userId"] == -1) {	// automagic reference to userId -1 is converted to the owner's id
-			$permission["userId"] = $woot["woot_creator"];
+			$permission["userId"] = $woot["woot_CreatorID"];
 		}
 
 		if (@$permission["groupId"]) {
@@ -568,12 +568,12 @@ function insertWootPermissions($wootId, &$woot) {
 		}
 
 		$insertValues[@$permission["userId"] . "," . @$permission["groupId"]] = array(
-			"wperm_woot_id" => $wootId,
-			"wperm_user_id" => @$permission["userId"]? $permission["userId"] : 0,
-			"wperm_group_id" => @$permission["groupId"]? $permission["groupId"] : 0,
-			"wperm_type" => $permission["type"],
-			"wperm_creator" => get_user_id(),
-			"wperm_created" => array("now()")
+			"wrprm_WootID" => $wootId,
+			"wrprm_UGrpID" => @$permission["userId"]? $permission["userId"] : 0,
+			"wrprm_group_id" => @$permission["groupId"]? $permission["groupId"] : 0,
+			"wrprm_Type" => $permission["type"],
+			"wrprm_CreatorID" => get_user_id(),
+			"wrprm_Created" => array("now()")
 		);
 	}
 	foreach ($insertValues as $values) {
@@ -583,11 +583,11 @@ function insertWootPermissions($wootId, &$woot) {
 	if (! $userHasReadWriteAccess  &&  ! is_admin()) {
 		// Woah, hang on ... is the user REALLY trying to lock themselves out of this woot?  Don't let them do THAT.
 		mysql__insert(WOOT_PERMISSION_TABLE, array(
-			"wperm_woot_id" => $wootId,
-			"wperm_user_id" => get_user_id(),
-			"wperm_type" => "RW",
-			"wperm_creator" => get_user_id(),
-			"wperm_created" => array("now()")
+			"wrprm_WootID" => $wootId,
+			"wrprm_UGrpID" => get_user_id(),
+			"wrprm_Type" => "RW",
+			"wrprm_CreatorID" => get_user_id(),
+			"wrprm_Created" => array("now()")
 		));
 	}
 
@@ -606,18 +606,18 @@ function searchWoots($args) {
 		return(array("success" => false, "errorType" => "invalid query"));
 	}
 
-	$res = mysql_query("select distinct woot_id, woot_title, woot_version
+	$res = mysql_query("select distinct woot_ID, woot_Title, woot_Ver
 						  from ".WOOT_TABLE.",".CHUNK_TABLE."
-						 where woot_id=chunk_woot_id and chunk_is_latest and !chunk_deleted
+						 where woot_ID=chunk_WootID and chunk_IsLatest and !chunk_Deleted
 							   and " . $text_search . "
-							   and chunk_id in (" . join(",", getReadableChunks(NULL, true)) . ")");
+							   and chunk_ID in (" . join(",", getReadableChunks(NULL, true)) . ")");
 
 	$woots = array();
 	while ($woot = mysql_fetch_assoc($res)) {
 		array_push($woots, array(
-			"id" => $woot["woot_id"],
-			"version" => $woot["woot_version"],
-			"title" => $woot["woot_title"]
+			"id" => $woot["woot_ID"],
+			"version" => $woot["woot_Ver"],
+			"title" => $woot["woot_Title"]
 		));
 	}
 
@@ -632,11 +632,11 @@ function getTextSearch($q) {
 	foreach ($searchTerms as $term) {
 		if (substr($term, 0, 1) != "-") {
 			if ($TEXT_SEARCH) { $TEXT_SEARCH .= " or "; }
-			$TEXT_SEARCH .= "chunk_text like '%" . addslashes($term) . "%'";
+			$TEXT_SEARCH .= "chunk_Text like '%" . addslashes($term) . "%'";
 		}
 		else {
 			if ($NEGATIVE_TEXT_SEARCH) { $NEGATIVE_TEXT_SEARCH .= " or "; }
-			$NEGATIVE_TEXT_SEARCH .= "chunk_text like '%" . addslashes(substr($term, 1)) . "%'";
+			$NEGATIVE_TEXT_SEARCH .= "chunk_Text like '%" . addslashes(substr($term, 1)) . "%'";
 		}
 	}
 	if ($TEXT_SEARCH) {

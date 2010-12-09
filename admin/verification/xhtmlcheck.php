@@ -6,7 +6,7 @@ require_once(dirname(__FILE__)."/../../common/connect/db.php");
 mysql_connection_select("heuristdb");	//FIXME:  need to use a configured value
 
 $woots = array();
-$res = mysql_query("select * from woots");// where woot_title='record:96990'");
+$res = mysql_query("select * from woots");// where woot_Title='record:96990'");
 while ($row = mysql_fetch_assoc($res)) {
 	array_push($woots, $row);
 }
@@ -17,11 +17,11 @@ foreach ($woots as $woot) {
 	$valid = true;
 	$errs = array();
 
-	//print "\n\nchecking woot \"" . $woot["woot_title"] . "\"... ";
+	//print "\n\nchecking woot \"" . $woot["woot_Title"] . "\"... ";
 
-	$res = mysql_query("select * from woot_chunks where chunk_woot_id = " . $woot["woot_id"] . " and chunk_is_latest and not chunk_deleted");
+	$res = mysql_query("select * from woot_Chunks where chunk_WootID = " . $woot["woot_ID"] . " and chunk_IsLatest and not chunk_Deleted");
 	while ($row = mysql_fetch_assoc($res)) {
-		$err = check($row["chunk_text"]);
+		$err = check($row["chunk_Text"]);
 		if ($err) {
 			$valid = false;
 			array_push($errs, $err);
@@ -32,8 +32,8 @@ foreach ($woots as $woot) {
 		//print "ok\n";
 	} else {
         print "<tr><td><a target=_blank href='".HEURIST_URL_BASE."records/woot/woot.html?w=";
-		print $woot["woot_title"] . "'>";
-        print $woot["woot_title"];
+		print $woot["woot_Title"] . "'>";
+        print $woot["woot_Title"];
         print "</a></td>\n";
 
 		print "<td><pre>" . htmlspecialchars(join("\n", $errs)) . "</pre></td></tr>\n";

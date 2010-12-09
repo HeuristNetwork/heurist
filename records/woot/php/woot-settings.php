@@ -1,9 +1,9 @@
 <?php
 
 define("WOOT_TABLE", "woots");
-define("CHUNK_TABLE", "woot_chunks");
-define("PERMISSION_TABLE", "woot_chunk_permissions");
-define("WOOT_PERMISSION_TABLE", "woot_permissions");
+define("CHUNK_TABLE", "woot_Chunks");
+define("PERMISSION_TABLE", "wootChunkPermissions");
+define("WOOT_PERMISSION_TABLE", "woot_RecPermissions");
 
 
 function hasWootReadPermission($wootId) {
@@ -11,8 +11,8 @@ function hasWootReadPermission($wootId) {
 
 	if (is_admin()) { return true; }
 
-	$res = mysql_query("select * from " . WOOT_PERMISSION_TABLE . " where wperm_woot_id=$wootId and
-	                   (wperm_user_id=".get_user_id()." or wperm_group_id in (".join(",", get_group_ids()).",-1))");
+	$res = mysql_query("select * from " . WOOT_PERMISSION_TABLE . " where wrprm_WootID=$wootId and
+	                   (wrprm_UGrpID=".get_user_id()." or wrprm_group_id in (".join(",", get_group_ids()).",-1))");
 	return (mysql_num_rows($res) > 0);
 }
 function hasWootWritePermission($wootId) {
@@ -20,8 +20,8 @@ function hasWootWritePermission($wootId) {
 
 	if (is_admin()) { return true; }
 
-	$res = mysql_query("select * from " . WOOT_PERMISSION_TABLE . " where wperm_woot_id=$wootId and
-	                   (wperm_user_id=".get_user_id()." or wperm_group_id in (".join(",", get_group_ids()).",-1)) and wperm_type='RW'");
+	$res = mysql_query("select * from " . WOOT_PERMISSION_TABLE . " where wrprm_WootID=$wootId and
+	                   (wrprm_UGrpID=".get_user_id()." or wrprm_group_id in (".join(",", get_group_ids()).",-1)) and wrprm_Type='RW'");
 	return (mysql_num_rows($res) > 0);
 }
 
@@ -34,13 +34,13 @@ function getReadableChunks($wootId=NULL, $restrictToCurrent=false) {
 	 * If the wootId is omitted, then the chunks may be sourced from any woot.
 	 */
 
-	$restriction = is_admin()? "1 " : "(perm_user_id=".get_user_id()." or perm_group_id in (".join(",", get_group_ids()).",-1)) ";
+	$restriction = is_admin()? "1 " : "(wprm_UGrpID=".get_user_id()." or wprm_group_id in (".join(",", get_group_ids()).",-1)) ";
 	if (! $restrictToCurrent) {
-		return mysql__select_array(PERMISSION_TABLE, "perm_chunk_id", $restriction . ($wootId? " and chunk_woot_id=$wootId" : ""));
+		return mysql__select_array(PERMISSION_TABLE, "wprm_ChunkID", $restriction . ($wootId? " and chunk_WootID=$wootId" : ""));
 	}
 	else {
-		return mysql__select_array(CHUNK_TABLE . " left join " . PERMISSION_TABLE . " on chunk_id=perm_chunk_id", "perm_chunk_id",
-		                           "$restriction and chunk_is_latest" . ($wootId? " and chunk_woot_id=$wootId" : "") . " and perm_chunk_id is not null");
+		return mysql__select_array(CHUNK_TABLE . " left join " . PERMISSION_TABLE . " on chunk_ID=wprm_ChunkID", "wprm_ChunkID",
+		                           "$restriction and chunk_IsLatest" . ($wootId? " and chunk_WootID=$wootId" : "") . " and wprm_ChunkID is not null");
 	}
 }
 function getWritableChunks($wootId=NULL, $restrictToCurrent=false) {
@@ -51,14 +51,14 @@ function getWritableChunks($wootId=NULL, $restrictToCurrent=false) {
 	 * If the wootId is omitted, then the chunks may be sourced from any woot.
 	 */
 
-	$restriction = is_admin()? "1 " : "(perm_user_id=".get_user_id()." or perm_group_id in (".join(",", get_group_ids()).",-1)) and perm_type='RW' ";
+	$restriction = is_admin()? "1 " : "(wprm_UGrpID=".get_user_id()." or wprm_group_id in (".join(",", get_group_ids()).",-1)) and wprm_Type='RW' ";
 	if (! $restrictToCurrent) {
-		return mysql__select_array(PERMISSION_TABLE, "perm_chunk_id",
-		                           $restriction . ($wootId? " and chunk_woot_id=$wootId" : ""));
+		return mysql__select_array(PERMISSION_TABLE, "wprm_ChunkID",
+		                           $restriction . ($wootId? " and chunk_WootID=$wootId" : ""));
 	}
 	else {
-		return mysql__select_array(CHUNK_TABLE . " left join " . PERMISSION_TABLE . " on chunk_id=perm_chunk_id", "perm_chunk_id",
-		                           "$restriction and chunk_is_latest" . ($wootId? " and chunk_woot_id=$wootId" : "") . " and perm_chunk_id is not null");
+		return mysql__select_array(CHUNK_TABLE . " left join " . PERMISSION_TABLE . " on chunk_ID=wprm_ChunkID", "wprm_ChunkID",
+		                           "$restriction and chunk_IsLatest" . ($wootId? " and chunk_WootID=$wootId" : "") . " and wprm_ChunkID is not null");
 	}
 }
 

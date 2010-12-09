@@ -21,7 +21,7 @@ header("Content-type: text/javascript");
 
 // for all tables used in common obj find the lastest update date and if it's not great than the last request
 // signal requester
-$res = mysql_query("select max(datestamp) from last_update where common = 1");
+$res = mysql_query("select max(tlu_DateStamp) from sysTableLastUpdated where tlu_CommonObj = 1");
 $lastModified = mysql_fetch_row($res);
 $lastModified = strtotime($lastModified[0]);
 

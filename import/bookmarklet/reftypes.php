@@ -19,7 +19,7 @@ mysql_connection_db_select(DATABASE);
 header("Content-type: text/javascript");
 
 
-$res = mysql_query("select datestamp from last_update where table_name = 'defRecTypes'");
+$res = mysql_query("select tlu_DateStamp from sysTableLastUpdated where tlu_TableName = 'defRecTypes'");
 $lastModified = mysql_fetch_row($res);
 $lastModified = strtotime($lastModified[0]);
 
