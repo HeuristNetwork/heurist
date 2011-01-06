@@ -14,7 +14,7 @@
 	var link = document.getElementById('selected_link');
 	if (!link)
 		return false;
-	link.href = '../../search/search.html?w=all&q=ids:' + ids;
+	link.href = '../../search/search.html?instance=<?= HEURIST_INSTANCE?>&w=all&q=ids:' + ids;
 	return true;
   }
  </script>
@@ -23,8 +23,8 @@
 <body>
 <?php
 
-require_once(dirname(__FILE__).'/../../common/connect/cred.php');
-require_once(dirname(__FILE__).'/../../common/connect/db.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 mysql_connection_db_select(DATABASE);
 
@@ -44,14 +44,14 @@ while ($row = mysql_fetch_assoc($res))
 <div style="font-weight: bold;">
  Records with resource pointers to the wrong rec_RecTypeID
  &nbsp;&nbsp;
- <a target=_new href='../../search/search.html?w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>(show all in search)</a>
+ <a target=_new href='../../search/search.html?instance=<?= HEURIST_INSTANCE?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>(show all in search)</a>
 </div>
 <table>
 <?php
 foreach ($bibs as $row) {
 ?>
  <tr>
-  <td><a target=_new href='../../records/editrec/edit.html?bib_id=<?= $row['dtl_RecID'] ?>'><?= $row['dtl_RecID'] ?></a></td>
+  <td><a target=_new href='../../records/edit/editRecord.html?instance=<?= HEURIST_INSTANCE?>&bib_id=<?= $row['dtl_RecID'] ?>'><?= $row['dtl_RecID'] ?></a></td>
   <td><?= $row['dty_Name'] ?></td>
   <td>points to</td>
   <td><?= $row['rec_ID'] ?> (<?= $row['rty_Name'] ?>) - <?= substr($row['rec_Title'], 0, 50) ?></td>
@@ -80,7 +80,7 @@ while ($row = mysql_fetch_assoc($res))
 <div style="font-weight: bold;">
  Records with resource pointers to non-existent records
  &nbsp;&nbsp;
- <a target=_new href='../../search/search.html?w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>(show all in search)</a>
+ <a target=_new href='../../search/search.html?instance=<?= HEURIST_INSTANCE?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>(show all in search)</a>
  &nbsp;&nbsp;
  <a target=_new href='#' id=selected_link onclick="return open_selected();">(show selected in search)</a>
 </div>
@@ -90,7 +90,7 @@ foreach ($bibs as $row) {
 ?>
  <tr>
   <td><input type=checkbox name=bib_cb value=<?= $row['dtl_RecID'] ?>></td>
-  <td><a target=_new href='../../records/editrec/edit.html?bib_id=<?= $row['dtl_RecID'] ?>'><?= $row['dtl_RecID'] ?></a></td>
+  <td><a target=_new href='../../records/edit/editRecord.html?instance=<?= HEURIST_INSTANCE?>&bib_id=<?= $row['dtl_RecID'] ?>'><?= $row['dtl_RecID'] ?></a></td>
   <td><?= $row['rec_Title'] ?></td>
   <td><?= $row['dty_Name'] ?></td>
  </tr>

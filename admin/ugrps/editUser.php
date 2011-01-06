@@ -8,18 +8,18 @@
 
 
 define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
-require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
 
 if ( ! (is_logged_in()  &&
          (is_admin()  ||  $_REQUEST['Id'] == get_user_id()) )) {
-        header('Location: '.HEURIST_URL_BASE.'common/connect/login.php');
+        header('Location: '.HEURIST_URL_BASE.'common/connect/login.php?instance='.HEURIST_INSTANCE);
         return;
 }
 
 mysql_connection_overwrite(USERS_DATABASE);
-$template = file_get_contents('edit.html');
+$template = file_get_contents('editUser.html');
 
 $lexer = new Lexer($template);
 $body = new BodyScope($lexer);
@@ -27,6 +27,7 @@ $body = new BodyScope($lexer);
 $body->global_vars['edit-success'] = 0;
 $body->global_vars['password-not-changed'] = 0;
 $body->global_vars['approve'] = 0;
+$body->global_vars['instance-name'] = HEURIST_INSTANCE;
 
 if (@$_REQUEST['approve']  &&  is_admin())
 	$body->global_vars['approve'] = 1;

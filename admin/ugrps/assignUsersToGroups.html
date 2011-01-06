@@ -42,7 +42,7 @@
  <tr>
   <td align="left"><h2>User Group Administration</h2></td>
   <td align="right" valign="top">
-	<a href="add.php">Add user</a><br><br>
+	<a href="findAddUser.php?instance=[instance-name!]">Add user</a><br><br>
    <font color="#008000"><small>Logged in as: </small><tt>[logged-in-user-username]</tt></font><br>
    [if-eq : logged-in-user-username : ""]
    <a href="../../common/connect/login.php?instance=[instance-name!]"><small>Log in</small></a>
@@ -61,7 +61,7 @@ Click "+" / "-" to grant / revoke admin privileges for a group.<br>
 
 [if : logged-in-is-admin]
 
-<form action="usergroupadmin.php" method="post" onsubmit="saveScrollPosition()">
+<form action="usergroupadmin.php?instance=[instance-name!]" method="post" onsubmit="saveScrollPosition()">
 
 <input type="hidden" name="scrollTop" value="0">
 <input type="hidden" name="make_admin" id="make_admin_elt" value="0">

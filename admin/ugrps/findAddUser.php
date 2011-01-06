@@ -1,12 +1,12 @@
 <?php
 
 define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
-require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
 
 if (!@$_REQUEST['register'] && !(is_logged_in() && is_admin())) {
-	header('Location: '.HEURIST_URL_BASE.'common/connect/login.php');
+	header('Location: '.HEURIST_URL_BASE.'common/connect/login.php?instance='.HEURIST_INSTANCE);
 	return;
 }
 
@@ -14,13 +14,14 @@ $recaptcha_public_key = "6LdOkgQAAAAAAJA5_pdkrwcKA-VFPPdihgoLiWmT";
 $recaptcha_private_key = "6LdOkgQAAAAAALRx8NbUn9HL50ykaTjf1dv5G3oq";
 
 mysql_connection_overwrite(DATABASE);
-$template = file_get_contents('add.html');
+$template = file_get_contents('findAddUser.html');
 
 $lexer = new Lexer($template);
 
 $body = new BodyScope($lexer);
 
 $body->global_vars['recaptcha'] = "";
+$body->global_vars['instance-name'] = HEURIST_INSTANCE;
 
 if (@$_REQUEST['register']) {
 	$body->global_vars['register'] = 1;
@@ -220,7 +221,7 @@ State:         $state
 
 Go to the address below to review further details and approve the registration:
 
-".HEURIST_URL_BASE."admin/users/edit.php?approve=1&Id=$usr_id
+".HEURIST_URL_BASE."admin/ugrps/editUser.php?instance=[instance-name!]&approve=1&Id=$usr_id
 
 ";
 				$admins = mysql__select_array("sysUsrGrpLinks left join sysUGrps usr on ugr_ID = ugl_UserID",
@@ -231,7 +232,7 @@ Go to the address below to review further details and approve the registration:
 				}
 				mail(join(", ", $admins), "Heurist User Registration: $firstname $lastname [$email]", $email_text, 'From: root');
 
-				header('Location: '. HEURIST_URL_BASE.'admin/users/register_success.html');
+				header('Location: '. HEURIST_URL_BASE.'admin/ugrps/msgRegistrationSuccess.html?instance='.HEURIST_INSTANCE);
 			}
 
 			$body->global_vars['new-user-id'] = $usr_id;

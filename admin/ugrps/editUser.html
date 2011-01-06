@@ -11,7 +11,7 @@
  </head>
 
 <body>
- <form action="edit.php" method="post">
+ <form action="editUser.php?instance=[instance-name!]" method="post">
 
 [update required USER user_update]
 
@@ -22,15 +22,15 @@
 <tbody><tr>
 <td rowspan="2" id="logo-cell"><a href="../.."><img src="../../common/images/hlogo-small.jpg" alt="Heurist" title="Click the logo at top left of any Heurist page to return to your favourites"></a></td>
 <td rowspan="2">
-	<a href="add.php">Add user</a> |
-	<a href="usergroupadmin.php">Edit user groups</a>
+	<a href="findAddUser.php?instance=[instance-name!]">Add user</a> |
+	<a href="assignUsersToGroups.php?instance=[instance-name!]">Edit user groups</a>
 </td>
 <td align="right" style="vertical-align: baseline;">
 	<font color="#008000"><small>Logged in as: </small><tt>[logged-in-user-username]</tt></font><br>
    [if-eq : logged-in-user-username : ""]
-   <a href="../../common/connect/login.php"><small>Log in</small></a>
+   <a href="../../common/connect/login.php?instance=[instance-name!]"><small>Log in</small></a>
    [else]
-   <a href="../../common/connect/login.php?logout=1"><small>Log out</small></a>
+   <a href="../../common/connect/login.php?logout=1&amp;instance=[instance-name!]"><small>Log out</small></a>
    [end-if-eq]
    </td>
 </tr>
@@ -114,7 +114,7 @@
 [not-found]
  <body>
   <span class="normalgr"><i>User not found</i></span>
-  <p><a href="add.php">Search for / add users</a></p>
+  <p><a href="findAddUser.php?instance=[instance-name!]">Search for / add users</a></p>
  </body>
 [end-not-found]
 

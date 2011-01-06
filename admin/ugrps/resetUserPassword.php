@@ -9,8 +9,8 @@
 <?php
 
 define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
-require_once(dirname(__FILE__).'/../../common/connect/cred.php');
-require_once(dirname(__FILE__).'/../../common/connect/db.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 function generate_passwd ($length = 8) {
 	$passwd = '';
@@ -37,7 +37,7 @@ Your Heurist password has been reset.
 Your new password is: '.$passwd.'
 
 To change your password, go to:
-'.HEURIST_URL_BASE.'admin/users/edit.php?Id='.$user_id.'
+'.HEURIST_URL_BASE.'admin/ugrps/editUser.php?instance='.HEURIST_INSTANCE.'&Id='.$user_id.'
 
 (you will first be asked to log in with the new password above)
 ';

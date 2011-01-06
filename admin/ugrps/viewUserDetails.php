@@ -1,15 +1,15 @@
 <?php
 
-require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
 if (!is_logged_in()) {
-	header('Location: '.HEURIST_URL_BASE.'common/connect/login.php');
+	header('Location: '.HEURIST_URL_BASE.'common/connect/login.php?instance='.HEURIST_INSTANCE);
 	return;
 }
 
 mysql_connection_db_overwrite(DATABASE);
-$template = file_get_contents('user.html');
+$template = file_get_contents('viewUserDetails.html');
 $template = str_replace('[logged-in-user-id]', intval(get_user_id()), $template);
 
 $lexer = new Lexer($template);
@@ -21,6 +21,7 @@ $name = mysql__select_array(USERS_DATABASE.'.'.USERS_TABLE, "concat(".USERS_FIRS
 $name = $name[0];
 
 $body->global_vars['tags'] = '';
+$body->global_vars['instance-name'] = HEURIST_INSTANCE;
 
 $res = mysql_query('select tag_Text,count(rtl_ID) as bkmks
                       from usrRecTagLinks

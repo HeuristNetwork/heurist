@@ -22,10 +22,10 @@
 <?php
 
 define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
-require_once(dirname(__FILE__)."/../../common/connect/cred.php");
-require_once(dirname(__FILE__)."/../../search/saved/loading.php");
-require_once(dirname(__FILE__)."/../../common/php/requirements-overrides.php");
-require_once("rollback.php");
+require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
+require_once(dirname(__FILE__)."/../../search/getSearchResults.php");
+require_once(dirname(__FILE__)."/../../common/php/getRecordStructure.php");
+require_once("rollbackRecordsFuncs.php");
 
 if (! is_admin()) {
 	print "Administrator access required.";
@@ -178,7 +178,7 @@ function getCurrentValString ($val) {
 			return 'geo: ' . $val["geo"]["type"] . ': [' . substr($val["geo"]["wkt"], 0, 30) . ' ... ]';
 		}
 		else if (array_key_exists("id", $val)) {
-			return '=> [' . $val["id"] . '] <a href="'.HEURIST_URL_BASE.'records/viewrec/view.php?bib_id=' . $val["id"] . '">' . $val["title"] . '</a>';
+			return '=> [' . $val["id"] . '] <a href="'.HEURIST_URL_BASE.'records/view/viewRecord.php?bib_id=' . $val["id"] . '&amp;instance='.HEURIST_INSTANCE.'">' . $val["title"] . '</a>';
 		}
 	} else {
 		return $val;

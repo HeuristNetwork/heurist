@@ -2,15 +2,15 @@
 	define('SAVE_URI', 'disabled');
 
 	define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
-	require_once(dirname(__FILE__).'/../../common/connect/cred.php');
-	require_once(dirname(__FILE__).'/../../common/config/.ht_stdefs');
+	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+	require_once(dirname(__FILE__).'/../../common/T1000/.ht_stdefs');
 	define('REFTYPE_DIRECTORY', HEURIST_SITE_PATH.'common/images/reftype-icons/');
 	if (! (is_logged_in()  &&  is_admin()  &&  HEURIST_INSTANCE_PREFIX == "")) return;
 
 	$rt_id = intval($_REQUEST['rty_ID']);
 	if (! $rt_id) return;
 
-	require_once(dirname(__FILE__).'/../../common/connect/db.php');
+	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 	mysql_connection_db_select(DATABASE);
 
 	$res = mysql_query('select * from defRecTypes where rty_ID = ' . $rt_id);
@@ -43,7 +43,7 @@
   <div class="failure"><?= $failure_msg ?></div>
 <?php	} ?>
 
-  <form action="upload_reftype_icon.php" method="post" enctype="multipart/form-data">
+  <form action="uploadReftypeIcon.php?instance=<?= HEURIST_INSTANCE?>" method="post" enctype="multipart/form-data">
    <input type="hidden" name="rty_ID" value="<?= $rt_id ?>">
    <input type="hidden" name="uploading" value="1">
 

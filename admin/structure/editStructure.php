@@ -1,12 +1,12 @@
 <?php
 
 define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
-require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
-require_once(dirname(__FILE__).'/../../records/TitleMask.php');
+require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
 
 if (! is_logged_in()) {
-	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
+	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE);
 	return;
 }
 if (! is_admin()  ||  HEURIST_INSTANCE != "") {
@@ -24,13 +24,13 @@ $delete_bdt_id = intval(@$_REQUEST['delete_bdt_field']);
 if ($delete_bdt_id) {
 	mysql_query('delete from defDetailTypes where dty_ID = ' . $delete_bdt_id);
 	mysql_query('delete from defRecStructure where rst_DetailTypeID = ' . $delete_bdt_id);
-	header('Location: master_bib_detail_editor.php');
+	header('Location: editStructure.php?instance='.HEURIST_INSTANCE);
 	return;
 }
 
 
-$template = file_get_contents('master_bib_detail_editor.html');
-$template = str_replace('{PageHeader}', '[literal]'.file_get_contents('../describe/menu.html').'[end-literal]', $template);
+$template = file_get_contents('editStructure.html');
+$template = str_replace('{PageHeader}', '[literal]'.file_get_contents('../../common/html/simpleHeader.html').'[end-literal]', $template);
 $template = str_replace('[special-rty_ID]', intval(@$_REQUEST['rty_ID']), $template);
 $lexer = new Lexer($template);
 
@@ -41,6 +41,7 @@ $body->global_vars['field-errors'] = false;
 $body->global_vars['new-field-errors'] = false;
 $body->global_vars['new'] = @$_REQUEST['new']? 1 : 0;
 $body->global_vars['editing_reftype'] = @$_REQUEST['rty_ID']? 1 : 0;
+$body->global_vars['instance-name'] = HEURIST_INSTANCE;
 
 
 
@@ -60,7 +61,7 @@ if (@$_REQUEST['_submit']) {
 					system('cd ../../common/images/reftype-icons  &&  cp questionmark.gif ' . $rt_id . '.gif');
 				}
 
-				header('Location: '.HEURIST_URL_BASE.'admin/rectypes/master_bib_detail_editor.php?rty_ID=' . $rt_id . '&new=1');
+				header('Location: '.HEURIST_URL_BASE.'admin/structure/editStructure.php?instance='.HEURIST_INSTANCE.'&amp;rty_ID=' . $rt_id . '&new=1');
 				return;
 			} else if (! $MYSQL_ERRORS  and  @$_REQUEST['action'] == 'Save') {
 				$body->global_vars['edit-success'] = true;

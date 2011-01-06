@@ -1,7 +1,7 @@
 <?php
 
 define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
-require_once(dirname(__FILE__)."/../../common/connect/db.php");
+require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 
 mysql_connection_select("heuristdb");	//FIXME:  need to use a configured value
 
@@ -31,7 +31,7 @@ foreach ($woots as $woot) {
 	if ($valid) {
 		//print "ok\n";
 	} else {
-        print "<tr><td><a target=_blank href='".HEURIST_URL_BASE."records/woot/woot.html?w=";
+        print "<tr><td><a target=_blank href='".HEURIST_URL_BASE."records/woot/woot.html?instance=".HEURIST_INSTANCE."w=";
 		print $woot["woot_Title"] . "'>";
         print $woot["woot_Title"];
         print "</a></td>\n";

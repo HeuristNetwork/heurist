@@ -1,10 +1,10 @@
 <?php
 
-require_once(dirname(__FILE__).'/../../common/connect/cred.php');
-require_once(dirname(__FILE__).'/../../common/connect/db.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 if (! is_logged_in()) {
-	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
+	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE);
 	return;
 }
 
@@ -22,7 +22,7 @@ You must specify a record  (?recIDs=12345) a records set (?recIDs=12345,23456,67
 <?php
 }
 
-require_once(dirname(__FILE__).'/../../records/TitleMask.php');
+require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
 
 
 mysql_connection_db_overwrite(DATABASE);
@@ -118,7 +118,7 @@ foreach ($bibs as $rec_id => $bib) {
 	else
 		print '<li>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($bib['rec_Title']) . '';
 
-	print ' <a target=_blank href="'.HEURIST_URL_BASE.'records/editrec/edit.html?bib_id='.$rec_id.'&instance='.HEURIST_INSTANCE.'">*</a> <br> <br>';
+	print ' <a target=_blank href="'.HEURIST_URL_BASE.'records/edit/editRecord.html?bib_id='.$rec_id.'&instance='.HEURIST_INSTANCE.'">*</a> <br> <br>';
 
 	if ($rec_id % 10 == 0) {
 		ob_flush();

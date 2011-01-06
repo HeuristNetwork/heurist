@@ -1,9 +1,9 @@
 <?php
 
 define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
-require_once(dirname(__FILE__).'/../../common/connect/cred.php');
-require_once(dirname(__FILE__).'/../../common/connect/db.php');
-require_once(dirname(__FILE__).'/../../search/saved/loading.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
 
 //if (! is_logged_in()  ||  ! is_admin()) return;
 if (! is_logged_in()) return;
@@ -230,7 +230,7 @@ foreach ($dupes as $rectype => $subarr) {
 		    $res = mysql_query('select rec_URL from Records where rec_ID = ' . $rec_id);
 		    $row = mysql_fetch_assoc($res);
 		    print '<li>'.($crosstype ? $vals['type'].'&nbsp;&nbsp;' : '').
-		    		'<a target="_new" href="'.HEURIST_URL_BASE.'records/viewrec/view.php?saneopen=1&bib_id='.$rec_id.'&instance='.HEURIST_INSTANCE.'">'.$rec_id.': '.htmlspecialchars($vals['val']).'</a>';
+		    		'<a target="_new" href="'.HEURIST_URL_BASE.'records/view/viewRecord.php?saneopen=1&bib_id='.$rec_id.'&instance='.HEURIST_INSTANCE.'">'.$rec_id.': '.htmlspecialchars($vals['val']).'</a>';
 		    if ($row['rec_URL'])
 			    print '&nbsp;&nbsp;&nbsp;<span style="font-size: 70%;">(<a target="_new" href="'.$row['rec_URL'].'">' . $row['rec_URL'] . '</a>)</span>';
 		    print '</li>';

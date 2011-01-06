@@ -6,7 +6,7 @@
   <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
 
   <link rel="stylesheet" type="text/css" href="../../common/css/Popup.css">
-  <script type="text/javascript" src="v05/Popup.js"></script>
+  <script type="text/javascript" src="../../common/js/Popup.js"></script>
 
   <link rel="stylesheet" type="text/css" href="../../common/css/newshsseri.css">
   <style type="text/css">
@@ -52,7 +52,7 @@
 	}
 
 	function edit_enum_types_with_pos(dty_ID, pos) {
-		popup_frame(pos, 'enums/edit_enum.php?dty_ID='+dty_ID, finish_edit_enum_types);
+		popup_frame(pos, 'editVocab.php?instance=[instance-name!]&amp;dty_ID='+dty_ID, finish_edit_enum_types);
 	}
 
 	function finish_edit_enum_types() {
@@ -60,23 +60,23 @@
 	}
 
 	function edit_reftype_constraints(dty_ID) {
-		popup_frame(pos, 'constraints/edit_reftype_constraints.php?dty_ID='+dty_ID, finish_edit_reftype_constraints);
+		popup_frame(pos, 'editReftypeConstraints.php?instance=[instance-name!]&amp;dty_ID='+dty_ID, finish_edit_reftype_constraints);
 	}
 
 	function finish_edit_reftype_constraints() {
 		close_popup_frame();
-		document.location.replace('../master_bib_detail_editor.php');//note: called in the context of the popup
+		document.location.replace('../editStructure.php?instance=[instance-name!]');//note: called in the context of the popup
 	}
 
 	function edit_constrain_reftype(dty_ID) {
 		var name_span = document.getElementById('name'+dty_ID);
 		var pos = findPos(name_span);
-		popup_frame(pos, 'constraints/edit_constrain_reftype.php?dty_ID='+dty_ID, finish_edit_constrain_reftype,true);
+		popup_frame(pos, 'editReftypeConstraints.php?instance=[instance-name!]&amp;dty_ID='+dty_ID, finish_edit_constrain_reftype,true);
 	}
 
 	function finish_edit_constrain_reftype() {
 		close_popup_frame();
-		document.location.replace('../master_bib_detail_editor.php'); //note: called in the context of the popup
+		document.location.replace('../editStructure.php'); //note: called in the context of the popup
 	}
 
 	function popup_frame(position, location, finish_fn, keepRelPos) {
@@ -150,7 +150,7 @@
 	function upload_icon(rty_ID) {
 		var img = document.getElementById('rt'+rty_ID);
 
-		top.popup_url('upload_reftype_icon.php?rty_ID='+rty_ID, 100, 300);
+		top.popup_url('uploadRectypeIcon.php?instance=[instance-name!]&amp;rty_ID='+rty_ID, 100, 300);
 	}
 
 	function icon_refresh(rty_ID) {
@@ -212,19 +212,29 @@
 
   <div>
 
-<a href="../users/add.php">User admin</a>
+<a href="../ugrps/findAddUser.php?instance=[instance-name!]">User admin</a>
 |
-<a href="../verification/recalculate_title_masks.php">Rebuild titles</a>
+<a href="../verification/recalcTitlesAllRecords.php?instance=[instance-name!]">Rebuild titles</a>
 |
-<a href="../verification/find_dupes.php?fuzziness=10">Find duplicates</a>
+<a href="../verification/listDuplicateRecords.php?fuzziness=10&amp;instance=[instance-name!]">Find duplicates</a>
 |
-<a href="../workgroups/workgroup_tag_manager.php">Workgroup tags</a>
+<a href="../ugrps/editGroupTags.php?instance=[instance-name!]">Group tags</a>
 |
-<a href="../users/usergroupadmin.php">List all users</a>
+<a href="../ugrps/assignUsersToGroups.php?instance=[instance-name!]">List all users</a>
 |
-<a href="../../search/search.html?q=_BROKEN_&amp;w=all">Records with broken urls</a>
+<a href="../../search/search.html?q=_BROKEN_&amp;w=all&amp;instance=[instance-name!]">Records with broken urls</a>
 |
-<a href="../workgroups/groups.php">Take your hat off (exit group)</a>
+<a href="../ugrps/quitGroupForSession.php?instance=[instance-name!]">Take your hat off (exit group)</a>
+<br>
+<a href="../verification/checkXHTML.php?instance=[instance-name!]">Woot XHTML check</a>
+|
+<a href="../verification/checkInvalidChars.php?instance=[instance-name!]" >invalid Character check</a>
+|
+<a href="../verification/cleanInvalidChars.php?instance=[instance-name!]">clean invalid Character</a>
+|
+<a href="../ugrps/editGroups.php?instance=[instance-name!]">Add/edit groups</a>
+|
+<a href="../rollback/rollbackRecords.php?instance=[instance-name!]">Record rollback</a>
 
   </div>
 
@@ -377,7 +387,7 @@
     <td>
      <input type="submit" name="action" value="Save" style="font-weight: bold;">
      &nbsp;&nbsp;
-     <input type="button" value="Return to list" onClick="window.location.href = 'master_bib_detail_editor.php';">
+     <input type="button" value="Return to list" onClick="window.location.href = 'editStructure.php?instance=[instance-name!]';">
     </td>
    </tr>
   </table>
@@ -386,11 +396,10 @@
 </form>
 
 [not-found]
-<p>Master record type data will be copied to instances nightly.  Click <a href="../.ht_cron/sync_master_tables.php" target=_blank>here</a> to sync now.</p>
 <div class="headline">Record types</div>
 <p/>
 <table border="0">
- <tr><td></td><td style="text-align: right;"><a href="../describe/bib_detail_dump.php">print-friendly dump</a> | <a href="../verification/bib_errors.php">records with errors</a></td></tr>
+ <tr><td></td><td style="text-align: right;"><a href="../describe/listRectypeDescriptions.php?instance=[instance-name!]">print-friendly dump</a> | <a href="../verification/listRecordPointerErrors.php?instance=[instance-name!]">records with errors</a></td></tr>
 <tr><td>
  <p><b>Select a record type to edit:</b></p>
 
@@ -477,7 +486,7 @@
 
   </div>
 
-  <iframe name="popup_frame" id="popup_frame_obj" src="enums/edit_enum.php" style="z-index: 51; width: 550px; height: 570px; position: absolute; top: -700px; left: 0px;" frameborder="0"></iframe>
+  <iframe name="popup_frame" id="popup_frame_obj" src="editVocab.php?instance=[instance-name!]" style="z-index: 51; width: 550px; height: 570px; position: absolute; top: -700px; left: 0px;" frameborder="0"></iframe>
 
   </div>
 

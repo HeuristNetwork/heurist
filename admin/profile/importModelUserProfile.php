@@ -3,12 +3,12 @@
 
 define('SAVE_URI', 'disabled');
 
-require_once(dirname(__FILE__).'/../common/connect/db.php');
-require_once(dirname(__FILE__).'/../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../common/t1000/.ht_stdefs');
 
 if (! is_logged_in()) {
-	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
+	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE);
 	return;
 }
 

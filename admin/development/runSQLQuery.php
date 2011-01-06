@@ -6,20 +6,20 @@
 // The first parameter indicates the formatting in the switch in print_row
 // Ian Johnson and Steve White 25 Feb 2010
 
-require_once(dirname(__FILE__).'/../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
 if (!is_logged_in()) {
-	    header('Location: ' . HEURIST_URL_BASE . 'login.php');
+	    header('Location: ' . HEURIST_URL_BASE . 'login.php?instance='.HEURIST_INSTANCE);
 	    return;
         }
 
 if (! is_admin()) {
-    print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href='".HEURIST_URL_BASE."common/connect/login.php?logout=1>Log out</a></p></body></html>";
+    print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href='".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;instance=".HEURIST_INSTANCE."'>Log out</a></p></body></html>";
     return;
 }
 
-require_once(dirname(__FILE__).'/../common/connect/db.php');
-require_once(dirname(__FILE__).'/../common/t1000/.ht_stdefs');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../../common/t1000/.ht_stdefs');
 ?>
 
 <html>

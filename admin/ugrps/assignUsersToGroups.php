@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
 if (!is_logged_in()) {
@@ -37,7 +37,7 @@ if (!is_logged_in()) {
 if (@$_REQUEST['filterId'])
 	$_REQUEST['Id'] = $_REQUEST['filterId'];
 
-$template = file_get_contents('usergroupadmin.html');
+$template = file_get_contents('assignUsersToGroups.html');
 
 $lexer = new Lexer($template);
 $body = new BodyScope($lexer);

@@ -1,10 +1,10 @@
 <?php
 
-require_once(dirname(__FILE__).'/../../common/connect/cred.php');
-require_once(dirname(__FILE__).'/../../common/connect/db.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 if (! is_logged_in()) {
-	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
+	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE);
 	return;
 }
 
@@ -91,7 +91,7 @@ while ($row = mysql_fetch_assoc($res)) {
 ?>
     <tr>
      <td><a title=delete href=# onclick="del(<?= $row["rem_ID"] ?>); return false;"><img src="<?=HEURIST_SITE_PATH?>common/images/cross.gif"></a></td>
-     <td><a href="<?=HEURIST_SITE_PATH?>records/editrec/edit.html?bib_id=<?= $row["rem_RecID"] ?>#personal"><b><?= $row["rec_Title"] ?></b></a></td>
+     <td><a href="<?=HEURIST_SITE_PATH?>records/edit/editRecord.html?bib_id=<?= $row["rem_RecID"] ?>#personal"><b><?= $row["rec_Title"] ?></b></a></td>
      <td><b><?= $recipient ?></b></td>
      <td><b><?= $row["rem_Freq"] ?></b> from <b><?= $row["rem_StartDate"] ?></b></td>
      <td><?= $row["rem_Message"] ?></td>

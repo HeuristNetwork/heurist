@@ -1,10 +1,10 @@
 <?php
 
 	define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
-	require_once(dirname(__FILE__).'/../../common/connect/cred.php');
-	require_once(dirname(__FILE__).'/../../common/connect/db.php');
-	require_once(dirname(__FILE__).'/../../records/TitleMask.php');
-	require_once(dirname(__FILE__).'/../../common/php/fetch_bib_details.php');
+	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+	require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
+	require_once(dirname(__FILE__).'/../../admin/verification/fetchRecordDetails.php');
 
 	if (! is_logged_in()  ||  ! is_admin()) return;
 
@@ -217,7 +217,7 @@
               '" title="Click to select this record as the Master record"'.
 								' id="keep'.$record['rec_ID'].
 								'" onclick="keep_bib('.$record['rec_ID'].');">';
-								print '<span style="font-size: 120%;"><a target="edit" href="'.HEURIST_URL_BASE.'records/editrec/edit.html?bib_id='.$record['rec_ID'].'">'.$record['rec_ID'] . ' ' . '<b>'.$record['rec_Title'].'</b></a> - <span style="background-color: #FFDDDD;">'. $rfts[$record['rec_RecTypeID']].'</span></span>';
+								print '<span style="font-size: 120%;"><a target="edit" href="'.HEURIST_URL_BASE.'records/edit/editRecord.html?instance='.HEURIST_INSTANCE.'&bib_id='.$record['rec_ID'].'">'.$record['rec_ID'] . ' ' . '<b>'.$record['rec_Title'].'</b></a> - <span style="background-color: #FFDDDD;">'. $rfts[$record['rec_RecTypeID']].'</span></span>';
 	    print '<table>';
 	    foreach ($record['details'] as $rd_type => $detail) {
 		    if (! $detail) continue;    //FIXME  check if required and mark it as missing and required
@@ -273,7 +273,7 @@
 		    print '<tr><td>References</td><td>';
 		    $i = 1;
 		    foreach ($record["refs"] as $ref) {  //FIXME  check for reference to be a valid record else mark detail for delete and don't print
-			    print '<a target="edit" href="'.HEURIST_URL_BASE.'records/editrec/edit.html?bib_id='.$ref.'">'.$i++.'</a> ';
+			    print '<a target="edit" href="'.HEURIST_URL_BASE.'records/edit/editRecord.html?instance='.HEURIST_INSTANCE.'&bib_id='.$ref.'">'.$i++.'</a> ';
 		    }
 		    print '</td></tr>';
 	    }
@@ -312,7 +312,7 @@
         if ($is_master) print '<td><div><b>MASTER</b></div></td>';
         else print '<td><div><b>Duplicate</b></div></td>';
         print '<td style="width: 500px;">';
-								print '<div style="font-size: 120%;"><a target="edit" href="'.HEURIST_URL_BASE.'records/editrec/edit.html?bib_id='.$record['rec_ID'].'">'.$record['rec_ID'] . ' ' . '<b>'.$record['rec_Title'].'</b></a> - <span style="background-color: #FFDDDD;">'. $rfts[$record['rec_RecTypeID']].'</span></div>';
+								print '<div style="font-size: 120%;"><a target="edit" href="'.HEURIST_URL_BASE.'records/edit/editRecord.html?instance='.HEURIST_INSTANCE.'&bib_id='.$record['rec_ID'].'">'.$record['rec_ID'] . ' ' . '<b>'.$record['rec_Title'].'</b></a> - <span style="background-color: #FFDDDD;">'. $rfts[$record['rec_RecTypeID']].'</span></div>';
         print '<table>';
         if ($is_master) $_SESSION['master_details']=$record['details']; // save master details for processing - signals code to do_fix_dupe
         foreach ($record['details'] as $rd_type => $detail) {
@@ -378,7 +378,7 @@
             print '<tr><td>References</td><td>';
             $i = 1;
             foreach ($record["refs"] as $ref) {
-                print '<a target="edit" href="'.HEURIST_URL_BASE.'records/editrec/edit.html?bib_id='.$ref.'">'.$i++.'</a> ';
+                print '<a target="edit" href="'.HEURIST_URL_BASE.'records/edit/editRecord.html?instance='.HEURIST_INSTANCE.'&bib_id='.$ref.'">'.$i++.'</a> ';
             }
             print '</td></tr>';
         }
@@ -463,13 +463,13 @@
 		if (is_array($rd_val)) {
 			foreach ($rd_val as $val){
 					$title = mysql_fetch_assoc(mysql_query('select rec_Title from Records where rec_ID ='.$val));
-					$rv[] = '<a target="edit" href="'.HEURIST_URL_BASE.'records/editrec/edit.html?bib_id='.$val.'">'.$title['rec_Title'].'</a>';
+					$rv[] = '<a target="edit" href="'.HEURIST_URL_BASE.'records/edit/editRecord.html?instance='.HEURIST_INSTANCE.'&bib_id='.$val.'">'.$title['rec_Title'].'</a>';
             }
 			return $rv;
 		}
 		else {
 				$title = mysql_fetch_assoc(mysql_query('select rec_Title from Records where rec_ID ='.$rd_val));
-				return '<a target="edit" href="'.HEURIST_URL_BASE.'records/editrec/edit.html?bib_id='.$rd_val.'">'.$title['rec_Title'].'</a>';
+				return '<a target="edit" href="'.HEURIST_URL_BASE.'records/edit/editRecord.html?instance='.HEURIST_INSTANCE.'&bib_id='.$rd_val.'">'.$title['rec_Title'].'</a>';
 		}
 	}
 	/*
@@ -697,7 +697,7 @@
 		mysql_query('update Records set rec_Hash = hhash(rec_ID) where rec_ID='.$master_rec_id);
 
 
- 	header('Location: fix_dupes.php?bib_ids='.$_REQUEST['bib_ids']);
+ 	header('Location: combineDuplicateRecords.php?instance='.HEURIST_INSTANCE.'&bib_ids='.$_REQUEST['bib_ids']);
 	}
 
 ?>

@@ -5,14 +5,14 @@
 
 <iframe id=i style="width: 90%; height: 90%;"></iframe>
 
-<script src="../../common/js/heurist.js"></script>
-<script src="../../common/php/heurist-obj-common.php"></script>
-<script src="../../common/php/heurist-obj-user.php"></script>
-<script src="../../common/php/display-preferences.php"></script>
+<script src="../../common/js/utilsLoad.js"></script>
+<script src="../../common/php/loadCommonInfo.php"></script>
+<script src="../../common/php/loadUserInfo.php"></script>
+<script src="../../common/php/displayPreferences.php"></script>
 <script>
 
-if (! top.HEURIST.util) top.HEURIST.loadScript(top.HEURIST.basePath+"common/js/heurist-util.js");
-if (! top.HEURIST.json) top.HEURIST.loadScript(top.HEURIST.basePath+"common/heurist-json.js");
+if (! top.HEURIST.util) top.HEURIST.loadScript(top.HEURIST.basePath+"common/js/utilsUI.js");
+if (! top.HEURIST.json) top.HEURIST.loadScript(top.HEURIST.basePath+"common/js/loadGroupInfo.js");
 
 
 top.HEURIST.whenLoaded("obj-user", function() {

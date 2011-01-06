@@ -1,6 +1,6 @@
 <html>
  <head>
-  <title>Workgroup members</title>
+  <title>Group members</title>
   <link rel=stylesheet href="../../common/css/heurist.css">
 
   <style>
@@ -13,7 +13,7 @@ td { padding-right: 20px; }
 
  <body width=600 height=400>
 
-  <script src="heurist.js"></script>
+  <script src="utilsLoad.js"></script>
   <script>
 window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 
@@ -22,7 +22,7 @@ function showMembers() {
 	if (! wg) {
 		// We only make it here if someone's screwing around ...
 		// It does give a flash of popup window, but it's a bit hard to work around that.
-		alert("Sorry - no workgroup members visible");
+		alert("Sorry - no group members visible");
 		setTimeout(function() { window.close(); }, 0);
 		return;
 	}
@@ -57,7 +57,7 @@ function showMembers() {
 			td = tr.appendChild(document.createElement("td"));
 			link = td.appendChild(document.createElement("a"));
 			link.target = "_blank";
-			link.href = "../../viewers/blog/index.html?u="+wg.members[i].id;
+			link.href = "../../viewers/blog/index.html?u="+wg.members[i].id;//saw TODO: instance awareness
 			link.appendChild(document.createTextNode("blog"));
 		}
 
@@ -65,7 +65,7 @@ function showMembers() {
 			td = tr.appendChild(document.createElement("td"));
 			var a = td.appendChild(document.createElement("a"));
 				a.target = "_blank";
-				a.href = "../../viewers/blog/report.php?u=" + wg.members[i].id + "&d=" + dateString;
+				a.href = "../../viewers/blog/reportForUGrpBlog.php?u=" + wg.members[i].id + "&d=" + dateString;//saw TODO: instance awareness
 				a.appendChild(document.createTextNode("blog report"));
 		}
 	}
@@ -75,7 +75,7 @@ function showMembers() {
 			div.style.cssFloat = div.style.styleFloat = "right";
 		var a = div.appendChild(document.createElement("a"));
 			a.target = "_blank";
-			a.href = "../../viewers/blog/report.php?g=" + window.HEURIST.parameters["wg_id"] + "&d=" + dateString;
+			a.href = "../../viewers/blog/reportForUGrpBlog.php?g=" + window.HEURIST.parameters["wg_id"] + "&d=" + dateString;//saw TODO: instance awareness
 			a.appendChild(document.createTextNode("group blog report"));
 		table.parentNode.insertBefore(div, table);
 	}

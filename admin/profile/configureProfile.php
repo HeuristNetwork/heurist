@@ -1,11 +1,11 @@
 <?php
 
-require_once(dirname(__FILE__).'/../../common/connect/db.php');
-require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/t1000/.ht_stdefs');
 
 if (! is_logged_in()) {
-	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
+	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE);
 	return;
 }
 
@@ -156,7 +156,7 @@ $template = file_get_contents('configuration.html');
 if (! array_key_exists('body_only', $_REQUEST)) {
 	/* Replaces the word {PageHeader} in the web page with the concatenation of the files specified */
 
-	$template = str_replace('{PageHeader}', file_get_contents(dirname(__FILE__).'/../../admin/describe/menu.html'), $template);
+	$template = str_replace('{PageHeader}', file_get_contents(dirname(__FILE__).'/../../common/html/simpleHeader.html'), $template);
 } else {
 	$template = str_replace('{PageHeader}', '', $template);
 	$template = str_replace('<body ', '<body width=600 height=650 ', $template);

@@ -7,7 +7,7 @@
 // Coded with NuSphere PHP-Ed
 
 define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
-require_once(dirname(__FILE__)."/../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../external/nusphere/config.inc.php");
 require_once(dirname(__FILE__)."/../../external/nusphere/db_utils.inc");
 require_once(dirname(__FILE__)."/../../external/nusphere/db_". $config['db'] . ".inc");
@@ -15,11 +15,11 @@ require_once(dirname(__FILE__)."/../../external/nusphere/db_". $config['db'] . "
 
 
 if (! is_logged_in()) {
-	header("Location: " . HEURIST_URL_BASE . "common/connect/login.php");
+	header("Location: " . HEURIST_URL_BASE . "common/connect/login.php?instance=".HEURIST_INSTANCE);
 	return;
 }
 if (! is_admin()) {
-	print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href='".HEURIST_URL_BASE."common/connect/login.php?logout=1'>Log out</a></p></body></html>";
+	print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href='".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;instance=".HEURIST_INSTANCE."'>Log out</a></p></body></html>";
 	return;
 }
 

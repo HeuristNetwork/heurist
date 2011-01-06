@@ -11,16 +11,16 @@
 
 <body width=600 height=500 style="font-size: 11px;">
 
-<form action="similar_users.php" method="get">
+<form action="showSimilarUsers.php?instance=<?=HEURIST_INSTANCE?>" method="get">
 
 <?php
 
 require_once(dirname(__FILE__).'/../../common/t1000/.ht_stdefs');
-require_once(dirname(__FILE__).'/../../common/connect/cred.php');
-require_once(dirname(__FILE__).'/../../common/connect/db.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 if (! is_logged_in()) {
-    header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
+    header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE);
     return;
 }
 
@@ -120,8 +120,8 @@ Users with similar interests to you: (show
 
 	$i = 0;
 	while ($row = mysql_fetch_assoc($res)) {
-		echo ' <tr'. (++$i > 10 ? ' style="display: none;"' : '') .'><td><a href="'.HEURIST_SITE_PATH.'admin/user/user.php?Id='.$row['bkm_UGrpID'].'" title="View user profile for '.$row['name'].'">'.$row['name']."</a>&nbsp;&nbsp;&nbsp;&nbsp;</td>\n";
-		echo '     <td><a target="_top" href="'.HEURIST_SITE_PATH.'search/search.html?w=bookmark&q=user:%22'.$row['name'].'%22" title="Search for records that you and '.$row['name'].' share"><b>'.$row['freq']."</b> records in common</a></td></tr>\n";
+		echo ' <tr'. (++$i > 10 ? ' style="display: none;"' : '') .'><td><a href="'.HEURIST_SITE_PATH.'admin/ugrps/viewUserDetails.php?instance='.HEURIST_INSTANCE.'&Id='.$row['bkm_UGrpID'].'" title="View user profile for '.$row['name'].'">'.$row['name']."</a>&nbsp;&nbsp;&nbsp;&nbsp;</td>\n";
+		echo '     <td><a target="_top" href="'.HEURIST_SITE_PATH.'search/search.html?instance='.HEURIST_INSTANCE.'&w=bookmark&q=user:%22'.$row['name'].'%22" title="Search for records that you and '.$row['name'].' share"><b>'.$row['freq']."</b> records in common</a></td></tr>\n";
 	}
 }
 
