@@ -3,21 +3,21 @@
 define('SEARCH_VERSION', 1);
 
 header('Content-type: text/plain');
-require_once(dirname(__FILE__).'/../../common/config/heurist-instances.php');
+require_once(dirname(__FILE__).'/../../common/config/manageInstancesDeprecated.php');
 
 if ($_REQUEST['pub_id']) {
-	require_once(dirname(__FILE__).'/../../common/connect/publish_cred.php');
+	require_once(dirname(__FILE__).'/../../common/connect/bypassCredentialsForPublished.php');
 } else {
-	require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	if (!is_logged_in()) {
-	        header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
+	        header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE);
 	        return;
 	}
 }
 
-require_once(dirname(__FILE__).'/../../common/connect/db.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once('.ht_stdefs');
-require_once(dirname(__FILE__).'/../../search/advanced/adv-search.php');
+require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
 
 
 $heurist_to_refer_map = array(

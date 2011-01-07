@@ -1,6 +1,6 @@
 <html>
  <head>
-  <title>Flexible Export v 1.04 </title>
+  <title>Rectype Delimited Export v 1.04 </title>
 
   <!--
    This HAPI tool is designed to export multiple details for a selected resource
@@ -14,12 +14,12 @@
    with a vertical bar (|).
   -->
 
-  <script src="../../common/php/load-hapi.php"></script>
+  <script src="../../common/php/loadHapi.php"></script>
   <script>
-      if (!(HCurrentUser.isLoggedIn()&& HCurrentUser.isAdministrator())) window.location =  HAPI.HeuristBaseURL + "common/connect/login.php";
+      if (!(HCurrentUser.isLoggedIn()&& HCurrentUser.isAdministrator())) window.location =  HAPI.HeuristBaseURL + "common/connect/login.php"; // saw TODO: add instance code here
   </script>
 
-  <script src="flexport.js"></script>
+  <script src="exportDelimitedForRectype.js"></script>
 
   <style>
 	#csv-textarea {

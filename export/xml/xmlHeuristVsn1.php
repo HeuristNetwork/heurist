@@ -47,12 +47,12 @@ define('SEARCH_VERSION', 1);
 // give a xml header
 header('Content-type: text/xml; charset=utf-8');
 
-require_once(dirname(__FILE__).'/../../common/config/heurist-instances.php');
+require_once(dirname(__FILE__).'/../../common/config/manageInstancesDeprecated.php');
 
-require_once(dirname(__FILE__).'/../../common/connect/db.php');
-require_once(dirname(__FILE__).'/../../search/advanced/adv-search.php');
-require_once(dirname(__FILE__).'/../../records/relationships/relationships.php');
-require_once(dirname(__FILE__).'/../../common/php/requirements-overrides.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
+require_once(dirname(__FILE__).'/../../common/php/getRelationshipRecords.php');
+require_once(dirname(__FILE__).'/../../common/php/getRecordStructure.php');
 require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 
 
@@ -72,7 +72,7 @@ $VOC = array();	//vocabulary lookup
 
 mysql_connection_db_select(DATABASE);
 
-// have to do this before publish_cred.php unsets our request parameters!
+// have to do this before bypassCredentialsForPublished.php unsets our request parameters!
 $MAX_DEPTH = @$_REQUEST['depth'] ? intval($_REQUEST['depth']) : 0;
 $REVERSE = @$_REQUEST['rev'] =='yes' ? true : false;
 $RELATED_DETAILS = NULL;
@@ -110,7 +110,7 @@ if (@$argv) {
 } else if (@$_REQUEST['pub_id']) {
 	$pub_id = intval($_REQUEST['pub_id']);
 	$rec_id = intval(@$_REQUEST['bib_id']);
-	require_once(dirname(__FILE__).'/../../common/connect/publish_cred.php');
+	require_once(dirname(__FILE__).'/../../common/connect/bypassCredentialsForPublished.php');
 
 	if ($rec_id) $_REQUEST['q'] .= ' && ids:' . $rec_id;
 
@@ -125,11 +125,11 @@ if (@$argv) {
 
 } else {
 	$pub_id = 0;
-	require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
 	if (!is_logged_in()) { // check if the record being retrieved is a singe non-protected record
 		if (!single_record_retrieval($_REQUEST['q'])) {
-			header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
+			header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE);
 			return;
 		}
 	}
@@ -542,8 +542,8 @@ function writeTag($reftype, $detail, $value, $file_id) {
 				   . "<file_orig_name>" . htmlspecialchars($file['ulf_OrigFileName']) . "</file_orig_name>\n"
 				   . "<file_date>" . htmlspecialchars($file['ulf_Added']) . "</file_date>\n"
 				   . "<file_size>" . htmlspecialchars($file['ulf_FileSizeKB']) . "</file_size>\n"
-				   . "<file_fetch_url>" . htmlspecialchars(HEURIST_URL_BASE.'/records/files/fetch_file.php/'.urlencode($file['ulf_OrigFileName']).'?ulf_ID='.$file['ulf_ObfuscatedFileID']) . "</file_fetch_url>\n"
-				   . "<file_thumb_url>" . htmlspecialchars(HEURIST_URL_BASE.'/common/php/resize_image.php?ulf_ID='.$file['ulf_ObfuscatedFileID']) . "</file_thumb_url>\n";
+				   . "<file_fetch_url>" . htmlspecialchars(HEURIST_URL_BASE.'/records/files/downloadFile.php/'.urlencode($file['ulf_OrigFileName']).'?instance='.HEURIST_INSTANCE.'&ulf_ID='.$file['ulf_ObfuscatedFileID']) . "</file_fetch_url>\n"
+				   . "<file_thumb_url>" . htmlspecialchars(HEURIST_URL_BASE.'/common/php/resizeImage.php?instance='.HEURIST_INSTANCE.'&ulf_ID='.$file['ulf_ObfuscatedFileID']) . "</file_thumb_url>\n";
 		}
 	}
 

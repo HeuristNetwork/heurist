@@ -9,18 +9,18 @@ if (!@$_REQUEST['a'] == 1) {
 	define("BYPASS_LOGIN",true);
 	$where = "where rec_NonOwnerVisibility ='viewable' or rec_NonOwnerVisibility is null";
 }
-require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
 if (!is_logged_in()) {
-        header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
+        header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE);
         return;
 }
 
 
 //define('T1000_DEFS', '.safe_htstdefs');
 require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
-require_once(dirname(__FILE__).'/../../common/connect/db.php');
-require_once(dirname(__FILE__).'/../../search/advanced/adv-search.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
 
 $_REQUEST['_rss_search_search'] = 1;
 define('rss_search-RESULTS_PER_PAGE', 500);
@@ -68,6 +68,7 @@ $lexer = new Lexer($template);
 $body = new BodyScope($lexer);
 
 $body->global_vars['hBase'] = HEURIST_URL_BASE;
+$body->global_vars['instance-name'] = HEURIST_INSTANCE;
 
 if ($search_type == BOOKMARK) $body->global_vars['search-type'] = 'bookmark';
 else $body->global_vars['search-type'] = 'biblio';
