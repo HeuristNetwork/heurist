@@ -1,5 +1,5 @@
 <?php
-require_once(dirname(__FILE__).'/../connect/cred.php');
+require_once(dirname(__FILE__).'/../connect/applyCredentials.php');
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
@@ -38,7 +38,7 @@ img {vertical-align: text-bottom;}
 <div class="column right">
      <h3>Reference types</h3>
 <?php
-require_once(dirname(__FILE__).'/../connect/db.php');
+require_once("dbMySqlWrappers.php");
 	mysql_connection_db_select(DATABASE);
 	$res = mysql_query('select rty_ID, rty_Name from active_rec_types left join defRecTypes on rty_ID=art_id order by rty_ID');
 	while ($row = mysql_fetch_row($res)) {

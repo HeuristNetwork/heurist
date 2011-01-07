@@ -1,5 +1,5 @@
 <?php
-/*<!-- load-hapi.php
+/*<!-- loadHapi.php
 
 	Copyright 2005 - 2010 University of Sydney Digital Innovation Unit
 	This file is part of the Heurist academic knowledge management system (http://HeuristScholar.org)
@@ -36,8 +36,8 @@ if (@$_REQUEST["instance"]) {
 	define("HEURIST_INSTANCE", $_REQUEST["instance"]);
 	define("HOST", $_SERVER["HTTP_HOST"]);
 }
-require_once(dirname(__FILE__)."/../config/heurist-instances.php");
-require_once(dirname(__FILE__)."/../connect/db.php");
+require_once(dirname(__FILE__)."/../config/manageInstancesDeprecated.php");
+require_once("dbMySqlWrappers.php");
 
 mysql_connection_select("hapi");
 $query = "SELECT hl_key
@@ -53,5 +53,5 @@ if (! $row) {
 $key = $row["hl_key"];
 ?>
 
-document.write("<" + "script src=\"<?=HEURIST_SITE_PATH?>hapi/load.php?instance=<?= HEURIST_INSTANCE ?>&key=<?= $key?> <?=(@$_REQUEST["inclGeo"]? "&inclGeo=1":"")?>\"><" + "/script>\n");
+document.write("<" + "scr" +"ipt src=\"<?=HEURIST_SITE_PATH?>hapi/hapiLoader.php?instance=<?= HEURIST_INSTANCE ?>&key=<?= $key?> <?=(@$_REQUEST["inclGeo"]? "&inclGeo=1":"")?>\"><" + "/script>\n");
 

@@ -1,13 +1,13 @@
 <?php
 
-require_once('heurist-ini.php');
+require_once('initialise.php');
 $db = HEURIST_COMMON_DB;	//the database which holds the database configuration information
 $db_prefix = HEURIST_DB_PREFIX;	//database name prefix for instance
 //error_log("in h-instance");
 $uploads = HEURIST_UPLOAD_BASEPATH;
 $instances = array();
 
-require_once(dirname(__FILE__).'/../connect/db.php');
+require_once(dirname(__FILE__).'/../php/dbMySqlWrappers.php');
 
 mysql_connection_db_select($db);
 

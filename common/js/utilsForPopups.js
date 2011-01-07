@@ -150,7 +150,7 @@ function cover_top_document() {
 
 	top.coverall_iframe = top.document.createElement('div');
 	top.coverall_iframe.className = 'coverall';
-	top.coverall_iframe.src = '../messages/blank.html';
+	top.coverall_iframe.src = '../html/blank.html';
 	top.coverall_iframe.frameBorder = 0;
 	top.document.body.appendChild(top.coverall_iframe);
 		top.coverall_iframe.style.width = page_size.w + 'px';

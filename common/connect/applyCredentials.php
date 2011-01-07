@@ -1,6 +1,6 @@
 <?php
 /* Login and credential management */
-require_once(dirname(__FILE__)."/../config/heurist-instances.php");
+require_once(dirname(__FILE__)."/../config/manageInstancesDeprecated.php");
 
 if (!defined("HEURIST_INSTANCE") && @$_REQUEST["instance"]) {	//fallback if heurist-instanc
 	define("HEURIST_INSTANCE", $_REQUEST["instance"]);

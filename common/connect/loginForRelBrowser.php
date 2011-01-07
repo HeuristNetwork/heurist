@@ -2,8 +2,8 @@
 
 define('SAVE_URI', 'disabled');
 
-require_once('cred.php');
-require_once('db.php');
+require_once('applyCredentials.php');
+require_once('../php/dbMySqlWrappers.php');
 session_start();
 
 $last_uri = urldecode(@$_REQUEST['last_uri']);
@@ -97,7 +97,7 @@ if (@$_REQUEST['logout']) {
 	setcookie('favourites', '', time() - 3600);
 
 
-	header('Location: login-vanilla.php' . ($logo ? '?logo=' . urlencode($logo) : '') . ($home ? '&home=' . urlencode($home) : ''));
+	header('Location: login-vanilla.php?instance='.HEURIST_INSTANCE . ($logo ? '&logo=' . urlencode($logo) : '') . ($home ? '&home=' . urlencode($home) : ''));
 
 	return;
 }
@@ -165,7 +165,7 @@ div.indent {
 <script>
  if (window.parent != window) {
    <?php if (@$last_uri) { ?>
-   top.location = "login.php?last_uri=<?=$last_uri?>";
+   top.location = "login.php?<?=HEURIST_INSTANCE?>&last_uri=<?=$last_uri?>";
    <?php } else { ?>
    top.location = window.location;
    <?php } ?>
@@ -225,7 +225,7 @@ div.indent {
 <div class=indent>
  <span class=heading>Forgotten your password?</span>
  &nbsp;
- <a href="<?=HEURIST_URL_BASE?>admin/users/reset_password.php" onclick="window.open(this.href,'','status=0,scrollbars=0,width=400,height=200'); return false;">Click here to reset your password</a>
+ <a href="<?=HEURIST_URL_BASE?>admin/ugrps/resetUserPassword.php?instance=<?=HEURIST_INSTANCE?>" onclick="window.open(this.href,'','status=0,scrollbars=0,width=400,height=200'); return false;">Click here to reset your password</a>
 </div>
 
 

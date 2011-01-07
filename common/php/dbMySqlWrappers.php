@@ -17,7 +17,7 @@ if (!defined('DEFAULT_MYSQLSRV'))  define('DEFAULT_MYSQLSRV','localhost');	// de
 
 function mysql_connection_select($database='', $server=DEFAULT_MYSQLSRV) {
 /* User name and password for Select access */
-	if (! READONLY_DBUSERNAME && ! READONLY_DBUSERPSWD) { print "PLEASE SET USERNAME/PASSWORD for SELECT in db.php\n"; exit(2); }
+	if (! READONLY_DBUSERNAME && ! READONLY_DBUSERPSWD) { print "PLEASE SET USERNAME/PASSWORD for SELECT in dbMySqlWrappers.php\n"; exit(2); }
 
 	$db = mysql_connect($server, READONLY_DBUSERNAME, READONLY_DBUSERPSWD) or die(mysql_error());
 	if ($database != '') mysql_query("use $database") or die(mysql_error());
@@ -29,7 +29,7 @@ function mysql_connection_select($database='', $server=DEFAULT_MYSQLSRV) {
 }
 function mysql_connection_insert($database='', $server=DEFAULT_MYSQLSRV) {
 /* User name and password for insert access - must allow writing to database */
-	if (! ADMIN_DBUSERNAME && ! ADMIN_DBUSERPSWD) { print "PLEASE SET USERNAME/PASSWORD for INSERT in db.php\n"; exit(2); }
+	if (! ADMIN_DBUSERNAME && ! ADMIN_DBUSERPSWD) { print "PLEASE SET USERNAME/PASSWORD for INSERT in dbMySqlWrappers.php\n"; exit(2); }
 
 //	if (defined('use_alt_db')  &&  $database == 'heuristdb') $database = 'heuristdb_alt';
 
@@ -45,7 +45,7 @@ function mysql_connection_insert($database='', $server=DEFAULT_MYSQLSRV) {
 }
 function mysql_connection_overwrite($database='', $server=DEFAULT_MYSQLSRV) {
 /* User name and password for overwrite access - must allow writing to database */
-	if (! ADMIN_DBUSERNAME && ! ADMIN_DBUSERPSWD) { print "PLEASE SET USERNAME/PASSWORD for OVERWRITE in db.php\n"; exit(2); }
+	if (! ADMIN_DBUSERNAME && ! ADMIN_DBUSERPSWD) { print "PLEASE SET USERNAME/PASSWORD for OVERWRITE in dbMySqlWrappers.php\n"; exit(2); }
 
 //	if (defined('use_alt_db')  &&  $database == 'heuristdb') $database = 'heuristdb_alt';
 

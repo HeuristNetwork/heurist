@@ -2,8 +2,8 @@
 header('Content-type: image/png');
 
 define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
-require_once(dirname(__FILE__).'/../connect/cred.php');
-require_once(dirname(__FILE__).'/../connect/db.php');
+require_once(dirname(__FILE__).'/../connect/applyCredentials.php');
+require_once("dbMySqlWrappers.php");
 
 if (! @$_REQUEST['w']  &&  ! @$_REQUEST['h']  &&  ! @$_REQUEST['maxw']  &&  ! @$_REQUEST['maxh']) {
 	$standard_thumb = true;

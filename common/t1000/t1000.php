@@ -45,8 +45,8 @@ $SEARCHES = array();
 
 $MYSQL_ERRORS = array();
 
-if (! include_once(dirname(__FILE__).'/../connect/db.php')) {
-	print("db.php not found: check PHP include path\n");
+if (! include_once(dirname(__FILE__).'/../php/dbMySqlWrappers.php')) {
+	print("dbMySqlWrappers.php not found: check PHP include path\n");
 	exit();
 }
 $ht_stdefs = '.ht_stdefs';

@@ -1,5 +1,5 @@
 <?php
-/*<!--  bib.php
+/*<!--  loadRecordDate.php
 
 	Copyright 2005 - 2010 University of Sydney Digital Innovation Unit
 	This file is part of the Heurist academic knowledge management system (http://HeuristScholar.org)
@@ -38,9 +38,9 @@ if (! defined("SAVE_URI")) {
  */
 
 if (! defined("JSON_RESPONSE")) {
-	require_once(dirname(__FILE__)."/../relationships/relationships.php");
-	require_once(dirname(__FILE__)."/../../common/connect/cred.php");
-	require_once(dirname(__FILE__)."/../../common/connect/db.php");
+	require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
+	require_once("dbMySqlWrappers.php");
+	require_once("getRelationshipRecords.php");//saw TEST: moved here to after mySqlWrappers defined
 	if (! is_logged_in()) return;
 
 	header('Content-type: text/javascript');

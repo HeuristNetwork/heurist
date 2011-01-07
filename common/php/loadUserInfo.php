@@ -6,8 +6,8 @@ define("SAVE_URI", "disabled");
 
 // using ob_gzhandler makes this stuff up on IE6-
 
-require_once(dirname(__FILE__).'/../connect/cred.php');
-require_once(dirname(__FILE__).'/../connect/db.php');
+require_once(dirname(__FILE__).'/../connect/applyCredentials.php');
+require_once("dbMySqlWrappers.php");
 
 header('Content-type: text/javascript');
 

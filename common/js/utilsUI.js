@@ -867,7 +867,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 			// top-level stuff
 			replacementRegExp = new RegExp('$');
 
-			if (! top.HEURIST.displayPreferences) {	// hmm ... display-preferences.php didn't load
+			if (! top.HEURIST.displayPreferences) {	// hmm ... displayPreferences.php didn't load
 								// we can wing it for now
 				top.HEURIST.displayPreferences = {};
 			}
@@ -879,7 +879,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				}
 			}
 			top.HEURIST.displayPreferences[prefName] = val;
-			top.HEURIST.loadScript(top.HEURIST.basePath+'common/php/display-preferences.php?' + encodeURIComponent(prefName) + '=' + encodeURIComponent(val));
+			top.HEURIST.loadScript(top.HEURIST.basePath+'common/php/displayPreferences.php?instance='+ (top.HEURIST.instance.name ? top.HEURIST.instance.name: "")+'&' + encodeURIComponent(prefName) + '=' + encodeURIComponent(val));
 
 			win = top;
 		}

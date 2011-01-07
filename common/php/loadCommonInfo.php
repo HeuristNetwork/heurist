@@ -11,9 +11,9 @@ ini_set("zlib.output_compression_level", 5);
 //ob_start('ob_gzhandler');
 
 
-require_once(dirname(__FILE__)."/../connect/cred.php");
-require_once(dirname(__FILE__)."/../connect/db.php");
-require_once("requirements-overrides.php");
+require_once(dirname(__FILE__)."/../connect/applyCredentials.php");
+require_once("dbMySqlWrappers.php");
+require_once("getRecordStructure.php");
 
 mysql_connection_db_select(DATABASE);
 

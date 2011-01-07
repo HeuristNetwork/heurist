@@ -1,6 +1,6 @@
 <?php
 
-require_once('db.php');
+require_once('../php/dbMySqlWrappers.php');
 
 if (! $_REQUEST['pub_id'])
 	die('No published search id supplied');

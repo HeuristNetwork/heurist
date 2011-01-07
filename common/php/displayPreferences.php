@@ -15,7 +15,7 @@
 
 define("SAVE_URI", "disabled");
 
-require_once(dirname(__FILE__)."/../connect/cred.php");
+require_once(dirname(__FILE__)."/../connect/applyCredentials.php");
 
 header("Content-type: text/javascript");
 
@@ -68,7 +68,7 @@ if ($writeMode) return;	// suppress normal output
 
 if (! document.body) {
 	// Document manipulation becomes much harder if we can't access the body.
-	throw document.location.href + ": include display-preferences.php in the body, not the head";
+	throw document.location.href + ": include displayPreferences.php in the body, not the head";
 }
 
 <?php

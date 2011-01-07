@@ -23,8 +23,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
 if (! top.HEURIST.json) top.HEURIST.json = {
 
 	loadWorkgroupDetails: function(wg_id, callback) {
@@ -34,7 +32,7 @@ if (! top.HEURIST.json) top.HEURIST.json = {
 			if (callback) callback(wg_id);
 			return;
 		}
-		top.HEURIST.util.getJsonData(top.HEURIST.basePath+"common/php/workgroup.php?wg_id="+wg_id, function(obj) {
+		top.HEURIST.util.getJsonData(top.HEURIST.basePath+"common/php/loadGroupSavedSearches.php?instance="+ (top.HEURIST.instance.name ? top.HEURIST.instance.name: "") + "&wg_id="+wg_id, function(obj) {
 			if (! obj  || obj.error) return;
 			top.HEURIST.workgroups[wg_id].members = obj.members;
 			top.HEURIST.workgroups[wg_id].savedSearches = obj.savedSearches;
@@ -42,22 +40,4 @@ if (! top.HEURIST.json) top.HEURIST.json = {
 			if (callback) callback(wg_id);
 		});
 	}
-/*	saw 16/11/2010 deprecated as this tries to call published_searches table which hasn't existed for 2 years.
-,
- loadPubSearches: function(wg_id) {
-		if (top.HEURIST.workgroups[wg_id].wgSearches  &&
-			top.HEURIST.workgroups[wg_id].mySearches &&
-			top.HEURIST.workgroups[wg_id].allSearches) {
-			if (callback) callback(wg_id);
-			return;
-		}
-		top.HEURIST.util.getJsonData(top.HEURIST.basePath+"common/php/pub.php?pub_id="+wg_id, function(obj) {
-			if (! obj  || obj.error) return;
-			top.HEURIST.workgroups[wg_id].wgSearches = obj.wgSearches;
-			top.HEURIST.workgroups[wg_id].mySearches = obj.mySearches;
-			top.HEURIST.workgroups[wg_id].allSearches = obj.allSearches;
-			if (callback) callback(wg_id);
-		});
-	}
-*/
 };
