@@ -11,8 +11,8 @@ if (mysql_error()) { print "ERROR: " . mysql_error() . "\n"; }
 	return $res;
 }
 
-require_once(dirname(__FILE__)."/../../common/connect/cred.php");
-require_once(dirname(__FILE__)."/../../common/connect/db.php");
+require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
+require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 require_once("deleting.php");
 
 

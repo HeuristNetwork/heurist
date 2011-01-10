@@ -1,22 +1,22 @@
 <?php
 
 $legalMethods = array(
-	"load-search",
-	"save-record",
-	"save-records",
-	"delete-record",
+	"loadSearch",
+	"saveRecord",
+	"saveRecords",
+	"deleteRecord",
 
-	"similar-records",
+	"findSimilarRecords",
 
-	"file-search",
-	"save-file",
+	"getFileMetadata",
+	"saveFile",
 
-	"pj-retrieve",
-	"pj-store",
+	"retrievePersistentJS.php",
+	"storePersistentJS.php",
 
-	"upload-progress",
+	"reportUploadProgress",
 
-	"fetch"
+	"fetchResultsFromSession"
 );
 
 function outputAsRedirect($text) {
@@ -32,13 +32,13 @@ function outputAsRedirect($text) {
 
 		session_start();
 		$_SESSION[$token] = $text;
-		error_log("Location: " . $baseURL . "blank.html#token=" . $token);
+//		error_log("Location: " . $baseURL . "blank.html#token=" . $token);
 
-		header("Location: " . $baseURL . "common/messages/blank.html#token=" . $token);
+		header("Location: " . $baseURL . "common/html/blank.html#token=" . $token);
 	}
 	else {
-		error_log("Location: " . $baseURL . "blank.html#data=" . urlencode($val));
-		header("Location: " . $baseURL . "common/messages/blank.html#data=" . urlencode($val));
+//		error_log("Location: " . $baseURL . "blank.html#data=" . urlencode($val));
+		header("Location: " . $baseURL . "common/html/blank.html#data=" . urlencode($val));
 	}
 
 	return "";
@@ -74,9 +74,9 @@ $method = @$_REQUEST['method'];
 if (!@$_REQUEST['method']) $method = preg_replace('!.*/([-a-z]+)$!', '$1', $_SERVER['PATH_INFO']);
 $key = @$_REQUEST["key"];
 
-require_once(dirname(__FILE__)."/../../common/connect/db.php");
-require_once(dirname(__FILE__)."/../../common/connect/cred.php");
-require_once("auth.php");
+require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
+require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
+require_once("validateKeyedAccess.php");
 
 if (! ($auth = get_location($key))) {
 	print "{\"error\":\"unknown API key\"}";
@@ -88,7 +88,7 @@ $baseURL = HEURIST_URL_BASE;
 
 define_constants($auth["hl_instance"]);
 
-error_log("hapi xss baseURL = ".$baseURL." Heurist base = ".HEURIST_URL_BASE);
+//error_log("hapi xss baseURL = ".$baseURL." Heurist base = ".HEURIST_URL_BASE);
 
 if (! @$method  ||  ! in_array($method, $legalMethods)) {
 	print "{\"error\":\"unknown method\"}";

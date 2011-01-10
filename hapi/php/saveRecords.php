@@ -1,9 +1,9 @@
 <?php
 
-require_once(dirname(__FILE__)."/../../common/connect/cred.php");
-require_once(dirname(__FILE__)."/../../common/connect/db.php");
-require_once(dirname(__FILE__)."/../../records/saving.php");
-require_once(dirname(__FILE__)."/../../records/TitleMask.php");
+require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
+require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
+require_once(dirname(__FILE__)."/../../common/php/saveRecord.php.php");
+require_once(dirname(__FILE__)."/../../common/php/utilsTitleMask.php");
 
 
 if (! is_logged_in()) {

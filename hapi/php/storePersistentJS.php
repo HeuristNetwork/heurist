@@ -1,7 +1,7 @@
 <?php
 
-require_once(dirname(__FILE__)."/../../common/connect/cred.php");
-require_once(dirname(__FILE__)."/../../common/connect/db.php");
+require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
+require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 
 mysql_connection_db_overwrite("hapi");
 

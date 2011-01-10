@@ -13,7 +13,11 @@
   <h3>Heurist API (HAPI)</h3>
 
   <p>
-   The Heurist API is a Javascript library that provides full access to the <a href="http://heuristscholar.org/h3/">Heurist</a> database.
+			<script>
+				var html = "The Heurist API is a Javascript library that provides full access to the <a href=\"" +
+				document.location.href.replace("hapi\/","")+"\">Heurist</a> database.";
+				document.write(html);
+			</script>
   </p>
 
   <!--p>To use the  Heurist API, <a href=>get a HAPI key</a></p-->

@@ -2,7 +2,7 @@
 
 /* Generate a Heurist API key for a given site */
 
-require_once(dirname(__FILE__)."/../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../common/connect/applyCredentials.php");
 
 $instances = get_all_instances();
 $user_instances = array();
@@ -65,7 +65,7 @@ if (! @$_REQUEST["url"]) {
 	return;
 }
 
-require_once(dirname(__FILE__)."/../common/connect/db.php");
+require_once(dirname(__FILE__)."/../common/php/dbMySqlWrappers.php");
 mysql_connection_insert("hapi");
 
 $url = $_REQUEST["url"];

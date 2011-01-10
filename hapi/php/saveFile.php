@@ -1,9 +1,9 @@
 <?php
 
-require_once(dirname(__FILE__)."/../../common/connect/cred.php");
-require_once(dirname(__FILE__)."/../../common/connect/db.php");
+require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
+require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 
-error_log("in save-file baseURL = ".HEURIST_URL_BASE );
+//error_log("in saveFile baseURL = ".HEURIST_URL_BASE );
 if (! defined("USING-XSS")) {
 	function outputAsRedirect($text) {
 		$val = base64_encode($text);
@@ -13,7 +13,7 @@ if (! defined("USING-XSS")) {
 	ob_start("outputAsRedirect");
 
 	if ($_POST["heurist-sessionid"] != $_COOKIE["heurist-sessionid"]) {
-		// save-file is only available through xss.php, or if heurist-sessionid is known (presumably only our scripts will know this)
+		// saveFile is only available through dispatcher.php, or if heurist-sessionid is known (presumably only our scripts will know this)
 		jsonError("unauthorised HAPI user");
 	}
 }
@@ -34,9 +34,9 @@ $fileID = upload_file($upload["name"], $upload["type"], $upload["tmp_name"], $up
 if ($fileID) {
 	$res = mysql_query("select * from recUploadedFiles where ulf_ID = $fileID");
 	$file = mysql_fetch_assoc($res);
-	$thumbnailURL = "http://".HEURIST_INSTANCE_PREFIX.HEURIST_SERVER_NAME.HEURIST_SITE_PATH."common/php/resize_image.php?ulf_ID=" . $file["ulf_ObfuscatedFileID"];
-	$URL = "http://".HEURIST_INSTANCE_PREFIX.HEURIST_SERVER_NAME.HEURIST_SITE_PATH."records/files/fetch_file.php/" . urlencode($file["ulf_OrigFileName"]) . "?ulf_ID=" . $file["ulf_ObfuscatedFileID"];
-error_log("url = ". $URL);
+	$thumbnailURL = HEURIST_URL_BASE."common/php/resizeImage.php?instance=".HEURIST_INSTANCE."&ulf_ID=" . $file["ulf_ObfuscatedFileID"];
+	$URL = HEURIST_URL_BASE."records/files/downloadFile.php/" . urlencode($file["ulf_OrigFileName"]) . "?instance=".HEURIST_INSTANCE."&ulf_ID=" . $file["ulf_ObfuscatedFileID"];
+//error_log("url = ". $URL);
 	print json_format(array("file" => array(
 		$file["ulf_ID"], $file["ulf_OrigFileName"], $file["ulf_FileSizeKB"], $file["file_mimetype"], $URL, $thumbnailURL, $file["ulf_Description"]
 	)));
@@ -64,7 +64,7 @@ function upload_file($name, $type, $tmp_name, $error, $size, $description) {
 	 * and return the ulf_ID for that record.
 	 * This will be zero if anything went pear-shaped along the way.
 	 */
-error_log("in save-file upload_file  name = ". $name. " type = ". $type. " error = ". $error. " size = " . $size . " uploadPath = ". UPLOAD_PATH );
+//error_log("in saveFile upload_file  name = ". $name. " type = ". $type. " error = ". $error. " size = " . $size . " uploadPath = ". UPLOAD_PATH );
 
 	if ($size <= 0  ||  $error) { error_log("size is $size, error is $error"); return 0; }
 

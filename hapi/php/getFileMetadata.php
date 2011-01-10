@@ -6,7 +6,7 @@ define('SEARCH_VERSION', 1);
 
 define('RESULT_COUNT_LIMIT', 20);
 
-require_once(dirname(__FILE__)."/../../common/connect/db.php");
+require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 
 mysql_connection_db_select(DATABASE);
 
@@ -99,10 +99,10 @@ else {
 $res = mysql_query($query);
 $files = array();
 while ($file = mysql_fetch_assoc($res)) {
-//	$thumbnailURL = "http://".HEURIST_INSTANCE_PREFIX."heuristscholar.org/heurist/php/resize_image.php?ulf_ID=" . $file["ulf_ObfuscatedFileID"];
-	$thumbnailURL = "http://".HEURIST_INSTANCE_PREFIX.HEURIST_SERVER_NAME.HEURIST_SITE_PATH."common/php/resize_image.php?ulf_ID=" . $file["ulf_ObfuscatedFileID"];
-//	$URL = "http://".HEURIST_INSTANCE_PREFIX."heuristscholar.org/heurist/php/fetch_file.php/" . urlencode($file["ulf_OrigFileName"]) . "?ulf_ID=" . $file["ulf_ObfuscatedFileID"];
-	$URL = "http://".HEURIST_INSTANCE_PREFIX.HEURIST_SERVER_NAME.HEURIST_SITE_PATH."records/files/fetch_file.php/" . urlencode($file["ulf_OrigFileName"]) . "?ulf_ID=" . $file["ulf_ObfuscatedFileID"];
+//	$thumbnailURL = "http://".HEURIST_INSTANCE_PREFIX."heuristscholar.org/heurist/php/resizeImage.php?ulf_ID=" . $file["ulf_ObfuscatedFileID"];
+	$thumbnailURL = HEURIST_URL_BASE."common/php/resizeImage.php?instance=".HEURIST_INSTANCE."&ulf_ID=" . $file["ulf_ObfuscatedFileID"];
+//	$URL = "http://".HEURIST_INSTANCE_PREFIX."heuristscholar.org/heurist/php/downloadFile.php/" . urlencode($file["ulf_OrigFileName"]) . "?ulf_ID=" . $file["ulf_ObfuscatedFileID"];
+	$URL = HEURIST_URL_BASE."records/files/downloadFile.php/" . urlencode($file["ulf_OrigFileName"]) . "?instance=".HEURIST_INSTANCE."&ulf_ID=" . $file["ulf_ObfuscatedFileID"];
 	array_push($files, array(
 		$file["ulf_ID"], $file["ulf_OrigFileName"], $file["ulf_FileSizeKB"], $file["file_mimetype"], $URL, $thumbnailURL, $file["ulf_Description"]
 	));

@@ -1375,7 +1375,7 @@ var HRecord = function() {
 		return jso;
 	};
 
-		// setAll relies on the load-search ordering of record data
+		// setAll relies on the loadSearch ordering of record data
 	this.setAll = function(sm, id, version, type, title, details, url, notes, wg, nonwgVis, urlDate, urlError, cDate, mDate, creator, hhash, bkmkID, pNotes, rating, irate, qrate, tags, wgTags, readonly) {
 		// Set all the details (even the secret ones!) for a record in one place ... only available to the storage manager
 		if (! HAPI.isA(sm, "HStorageManager")) { throw "Do not call HRecord::setAll"; }
@@ -2461,8 +2461,8 @@ HAPI.XHR = {
 		}
 		if (! req) { return; }
 
-		if (url.match(/^[-a-z]+$/)) { /* only the HAPI method was supplied, not an absolute URL */
-			url = HAPI.XHR.defaultURLPrefix + "hapi/php/" + url + ".php";
+		if (url.match(/^[-a-zA-Z]+$/)) { /* only the HAPI method was supplied, not an absolute URL */
+			url = HAPI.XHR.defaultURLPrefix + "hapi/php/" + url + ".php"; //saw FIXME: add instance code.
 		}
 
 		var method = jso? "POST" : "GET";
@@ -2601,7 +2601,7 @@ HAPI.XHR = {
 		return stringify;
 	}(),
 
-	_xssWebPrefix: HeuristBaseURL + "hapi/php/xss.php?",
+	_xssWebPrefix: HeuristBaseURL + "hapi/php/dispatcher.php?", //saw FIXME: add instance code.
 
 	txURLLen: 1900,
 	rxURLLen: (navigator.userAgent.match(/MSIE/))? 2000 : null,
@@ -2626,11 +2626,11 @@ HAPI.XHR = {
 					// too much data to transmit as a URL fragment -- use xssGet to retrieve it
 					HAPI.removeListener(handler);
 					setTimeout(function (){HAPI.XHR.releaseIframe(fr);},0);
-					return HAPI.XHR.xssGet("fetch", callback, { token: token[1] }, xssWebPrefix);
+					return HAPI.XHR.xssGet("fetchResultsFromSession", callback, { token: token[1] }, xssWebPrefix);
 				} else if (hash.match(/^#data=/)) {
 					data = HAPI.XHR.evalJSON(HAPI.base64.decode(decodeURIComponent(hash.substring(6))));	// #data=....
 				}
-				else {
+				else {//saw FIXME: decide what todo for the default case.
 				}
 			} catch (e) {
 				alert(e.description || e);
@@ -2746,7 +2746,7 @@ HAPI.XHR = {
 				if ( (token=hash.match(/^#token=(data[a-f0-9]+)/)) ) {
 					// too much data to transmit as a URL fragment -- use xssGet to retrieve it
 					HAPI.XHR.releaseIframe(fr);
-					return HAPI.XHR.xssGet("fetch", callback, { token: token[1] }, xssWebPrefix);
+					return HAPI.XHR.xssGet("fetchResultsFromSession", callback, { token: token[1] }, xssWebPrefix);
 				} else if (hash.match(/^#data=/)) {
 					data = HAPI.XHR.evalJSON(HAPI.base64.decode(decodeURIComponent(hash.substring(6))));	// #data=....
 				}
@@ -2975,7 +2975,7 @@ var HeuristScholarDB = new HStorageManager();
 
 		record.internalLock();
 		var recordData = record.toJSO();
-		HAPI.XHR.sendRequest("save-record", function(response) { saveRecordCallback(record, saver, response); }, recordData);
+		HAPI.XHR.sendRequest("saveRecord", function(response) { saveRecordCallback(record, saver, response); }, recordData);
 	};
 
 	/* private */ function saveRecordsCallback(recordSet, saver, response) {
@@ -3033,7 +3033,7 @@ var HeuristScholarDB = new HStorageManager();
 			}
 		}
 
-		HAPI.XHR.sendRequest("save-records", function(response) { saveRecordsCallback(recordSet, saver, response); }, { records: recordData });
+		HAPI.XHR.sendRequest("saveRecords", function(response) { saveRecordsCallback(recordSet, saver, response); }, { records: recordData });
 	};
 
 	/* private */ function deleteRecordCallback(record, deletor, response) {
@@ -3067,7 +3067,7 @@ var HeuristScholarDB = new HStorageManager();
 		/* could check for refs here and avoid contacting the server */
 
 		record.internalLock();
-		HAPI.XHR.sendRequest("delete-record", function(response) { deleteRecordCallback(record, deletor, response); }, { "id": record.getID() });
+		HAPI.XHR.sendRequest("deleteRecord", function(response) { deleteRecordCallback(record, deletor, response); }, { "id": record.getID() });
 	};
 
 
@@ -3281,7 +3281,7 @@ var HeuristScholarDB = new HStorageManager();
 		if (options["fresh"]) { searchData.f = true; }
 
 		// Could do this with a GET request, but IE tends to cache it
-		HAPI.XHR.sendRequest("load-search", function(response) { loadRecordsCallback(searchSpec, loader, response); }, searchData);
+		HAPI.XHR.sendRequest("loadSearch", function(response) { loadRecordsCallback(searchSpec, loader, response); }, searchData);
 	};
 
 	/* private */ function findSimilarRecordsCallback(record, loader, response) {
@@ -3333,7 +3333,7 @@ var HeuristScholarDB = new HStorageManager();
 			id: record.getID()
 		};
 
-		HAPI.XHR.sendRequest("similar-records", function(response) { findSimilarRecordsCallback(record, loader, response); }, recordData);
+		HAPI.XHR.sendRequest("findSimilarRecords", function(response) { findSimilarRecordsCallback(record, loader, response); }, recordData);
 	};
 
 	/* private */ function findFilesCallback(searchSpec, loader, response) {
@@ -3372,7 +3372,7 @@ var HeuristScholarDB = new HStorageManager();
 		/* PRE */ if (! HAPI.isA(loader, "HLoader")) { throw new HTypeException("HLoader object expected for argument #2"); }
 
 		// Could do this with a GET request, but IE tends to cache it
-		HAPI.XHR.sendRequest("file-search", function(response) { findFilesCallback(searchSpec, loader, response); }, searchSpec);
+		HAPI.XHR.sendRequest("getFileMetadata", function(response) { findFilesCallback(searchSpec, loader, response); }, searchSpec);
 	};
 	this.saveFile = function(opts, saver, progressCallback) {
 		// Previously, one saved a file by providing a FileInputElement as the first argument.
@@ -3454,7 +3454,7 @@ var HeuristScholarDB = new HStorageManager();
 				baseURL = baseURL.replace(/^http:\/\//, "http://" + Math.round(Math.random()*100) + ".");
 			}
 			// Insert XSS incantations if HAPI.key is set.
-			newForm.action = baseURL + (HAPI.key? ("hapi/php/xss.php?method=save-file&key=" + encodeURIComponent(HAPI.key)) : "save-file");
+			newForm.action = baseURL + (HAPI.key? ("hapi/php/dispatcher.php?method=saveFile&key=" + encodeURIComponent(HAPI.key)) : "saveFile");//saw FIXME: add instance code.
 
 		doc.body.appendChild(newForm);
 
@@ -3561,7 +3561,7 @@ var HeuristScholarDB = new HStorageManager();
 
 		var url;
 		if (ids.length > 0  &&  that.uploadsInProgress.counter > 0) {
-			HAPI.XHR.sendRequest("upload-progress", saveFileProgressCallback, { uploadIDs: ids });
+			HAPI.XHR.sendRequest("reportUploadProgress", saveFileProgressCallback, { uploadIDs: ids });
 		}
 		else {
 			clearInterval(HAPI.progressIntervalID);
@@ -3634,7 +3634,7 @@ HAPI.PJ = {
 
 		var callback = opts.callback  ||  function() { };
 
-		HAPI.XHR.sendRequest("pj-store", function(response) { callback(name, value, response); }, data);
+		HAPI.XHR.sendRequest("storePersistentJS.php", function(response) { callback(name, value, response); }, data);
 	},
 
 	retrieve: function(name, callback, opts) {
@@ -3646,7 +3646,7 @@ HAPI.PJ = {
 
 		var callback = callback  ||  function() { };
 
-		HAPI.XHR.sendRequest("pj-retrieve", function(response) { callback(name, response.value, response); }, data);
+		HAPI.XHR.sendRequest("retrievePersistentJS.php", function(response) { callback(name, response.value, response); }, data);
 	}
 };
 
