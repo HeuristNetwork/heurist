@@ -1,7 +1,7 @@
 <?php
 
-require_once(dirname(__FILE__)."/../../../common/connect/db.php");
-require_once(dirname(__FILE__)."/../../../common/connect/cred.php");
+require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
+require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 
 if (! is_logged_in()) return;
 
@@ -50,9 +50,9 @@ while (count($bib_ids_to_fetch) > 0) {
  </head>
  <body>
 
-  <script src="<?=HEURIST_SITE_PATH?>common/js/heurist.js"></script>
-  <script src="<?=HEURIST_SITE_PATH?>common/php/heurist-obj-common.php"></script>
-  <script src="side-by-side.js"></script>
+  <script src="<?=HEURIST_SITE_PATH?>common/js/utilsLoad.js"></script>
+  <script src="<?=HEURIST_SITE_PATH?>common/php/loadCommonInfo.php"></script>
+  <script src="showSideBySide.js"></script>
 
  <style>
 body { margin: 0; }

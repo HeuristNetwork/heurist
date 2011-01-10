@@ -32,5 +32,5 @@ function lookupTitle(button) {
 	button.disabled = true;
 	titleElt.disabled = true;
 
-	frames['grabber'].location.href = 'titlegrabber.php?num='+buttonNum+'&url='+escape(urlElt.value);
+	frames['grabber'].location.href = 'getTitleFromURL.php?num='+buttonNum+'&url='+escape(urlElt.value);
 }

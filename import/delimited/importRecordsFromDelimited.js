@@ -146,7 +146,7 @@ return {
 		p.appendChild(document.createTextNode(" (NOTE: Workgroup tags must be pre-existing!  Create them "));
 		var a = p.appendChild(document.createElement("a"));
 			a.target = "_blank";
-			a.href = HAPI.HeuristBaseURL + "admin/workgroups/workgroup_tag_manager.php"
+			a.href = HAPI.HeuristBaseURL + "admin/ugrps/editGroupTags.php"
 			a.innerHTML = "here";
 		p.appendChild(document.createTextNode(" then start over.)"));
 
@@ -161,7 +161,7 @@ return {
 		p = e.appendChild(document.createElement("p"));
 		a = p.appendChild(document.createElement("a"));
 		a.target = "_blank";
-		a.href = HAPI.HeuristBaseURL +"admin/describe/bib_detail_dump.php#rt" + FlexImport.recType.getID();
+		a.href = HAPI.HeuristBaseURL +"admin/describe/listRectypeDescriptions.php#rt" + FlexImport.recType.getID();
 		a.innerHTML = "Detail requirements for " + FlexImport.recType.getName() + " records";
 
 

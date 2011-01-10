@@ -3,10 +3,10 @@
 if (! $_REQUEST['import_id']) return;	// no time for funny buggers
 
 // Make sure these are loaded before the session data is loaded, so that the class definitions are in place
-require_once(dirname(__FILE__).'/../HeuristImport.php');
+require_once(dirname(__FILE__).'/../importerBaseClass.php');
 
-require_once(dirname(__FILE__).'/../../../common/connect/db.php');
-require_once(dirname(__FILE__).'/../../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
 
 jump_sessions();

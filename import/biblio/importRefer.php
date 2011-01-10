@@ -1,6 +1,6 @@
 <?php
 
-require_once(dirname(__FILE__)."/../HeuristImport.php");
+require_once(dirname(__FILE__)."/../importerBaseClass.php");
 
 
 $refer_to_heurist_map = array(
@@ -1022,7 +1022,7 @@ function heurist_refer_add_supplementary_fields(&$entry) {
 			$field->_superseded = true;
 		}
 
-// FIXME: many, many more.  Look in refer-import.php, line 163 onwards
+// FIXME: many, many more.  Look in refer-importerFramework.php, line 163 onwards
 // Here I've just done the ones interpreted by "book section".
 
 		/* look for "* edition" in some fields and move to Ed field */

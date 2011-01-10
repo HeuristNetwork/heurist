@@ -2,18 +2,18 @@
  <head>
   <title>Heurist Flexible Import System</title>
 
-  <script src="../../../common/php/load-hapi.php"></script>
+  <script src="../../../common/php/loadHAPI.php"></script>
   <script>
 	if ( HAPI && ! (HCurrentUser.isLoggedIn()  &&  HCurrentUser.isAdministrator())){
-		window.location = HAPI.HeuristBaseURL + "common/connect/login.php";
+		window.location = HAPI.HeuristBaseURL + "common/connect/login.php";//saw FIXME: instance code here
 	}
   </script>
 
   <script src="../../../hapi/js/goi.js"></script>
 
   <script src="../../../external/jquery/jquery.js"></script>
-  <script src="../common/js/temporal.js"></script>
-  <script src="fleximport.js"></script>
+  <script src="../common/js/temporalObjectLibrary.js"></script>
+  <script src="importRecordsFromDelimited.js"></script>
 
   <style>
 	#csv-textarea {

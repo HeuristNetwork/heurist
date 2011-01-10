@@ -1,10 +1,10 @@
 <?php
-/* Subclass of the HeuristReferImport stuff, specially suited to the quirks of the REFER stuff pumped out by EndNote.
+/* Subclass of the importRefer stuff, specially suited to the quirks of the REFER stuff pumped out by EndNote.
    Note that these quirks are not implemented here, except for type determination.
    The rest are left as an exercise for the reader, or for the author when he gets back from Greece.
  */
 
-require_once('HeuristReferImport.php');
+require_once('importRefer.php');
 
 
 class HeuristEndnoteReferParser extends HeuristReferParser {

@@ -3,9 +3,9 @@
 
 define('SAVE_URI', 'disabled');
 
-require_once(dirname(__FILE__).'/../common/connect/cred.php');
-require_once(dirname(__FILE__).'/../common/connect/db.php');
-require_once(dirname(__FILE__).'/../records/disambig/similar.php');
+require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../records/disambig/testSimilarURLs.php');
 require_once(dirname(__FILE__).'/../common/t1000/.ht_stdefs');
 
 if (! is_logged_in()) {
@@ -43,7 +43,7 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 		$error = curl_error($ch);
 		$code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		if (intval($code) >= 400)
-			$error = 'URL could not be retrieved. <span style="font-weight: normal;">You might try saving the page you are importing, and then <a href="fileimport.php">import from file</a>.</span>';
+			$error = 'URL could not be retrieved. <span style="font-weight: normal;">You might try saving the page you are importing, and then <a href="importHyperlinks.php">import from file</a>.</span>';
 		$srcname = @$_REQUEST['url'];
 	}
 
@@ -219,14 +219,14 @@ if (@$urls) {
 <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/heurist.css">
 <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/import.css">
 
-<script src="titlegrabber.js"></script>
-<script src="fileimport.js"></script>
+<script src="getTitleFromURL.js"></script>
+<script src="importHyperlinks.js"></script>
 
 <body width=600 height=400>
 
-<script src="<?=HEURIST_SITE_PATH?>common/js/heurist.js"></script>
-<script src="<?=HEURIST_SITE_PATH?>common/php/heurist-obj-user.php"></script>
-<script src="<?=HEURIST_SITE_PATH?>common/php/display-preferences.php"></script>
+<script src="<?=HEURIST_SITE_PATH?>common/js/utilsLoad.js"></script>
+<script src="<?=HEURIST_SITE_PATH?>common/php/loadUserInfo.php"></script>
+<script src="<?=HEURIST_SITE_PATH?>common/php/displayPreferences.php"></script>
 
 <script type="text/javascript">
 <!--
@@ -307,7 +307,7 @@ function unCheckAll() {
   </tr>
 </table>
 
-<form action="fileimport.php" method="post" enctype="multipart/form-data" name="mainform" style="margin: 0px 3px;">
+<form action="importHyperlinks.php" method="post" enctype="multipart/form-data" name="mainform" style="margin: 0px 3px;">
 
 <input type="hidden" name="wgTags" id="wgTags">
 <input type="hidden" name="adding_tags" value="0" id="adding_tags_elt">
@@ -370,7 +370,7 @@ Note: the list only shows links which you have not already bookmarked.<br>
 <?php } else { ?>Common<?php } ?>
   hyperlink texts are ignored.
   &nbsp;&nbsp;
-  <input type="button" onclick="top.HEURIST.util.popupURL(top, '<?=HEURIST_SITE_PATH?>user/profile/configuration.php?body_only&bookmark_import=1&section=bookmarkimport', { callback: function() { document.forms[0].submit(); } });" value="Change settings">
+  <input type="button" onclick="top.HEURIST.util.popupURL(top, '<?=HEURIST_SITE_PATH?>admin/profile/configureProfile.php?body_only&bookmark_import=1&section=bookmarkimport', { callback: function() { document.forms[0].submit(); } });" value="Change settings">
 </p>
 
 <p style="margin-left: 20px;" class="normal">
