@@ -31,7 +31,7 @@
 <link rel="stylesheet" media="screen and (max-device-width: 800px)" href="../common/css/smallscreen.css"/>
 <link rel=icon href="../favicon.ico" type="image/x-icon">
 <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
-<link id=httprsslink rel=alternate type="application/rss+xml" title="HTTP RSS feed" href="../export/feeds/search_rss.php?q=tag:Favourite+OR+tag:Favorite">
+<link id=httprsslink rel=alternate type="application/rss+xml" title="HTTP RSS feed" href="../export/feeds/searchRSS.php?q=tag:Favourite+OR+tag:Favorite">
 
 <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.6.0/build/menu/assets/skins/sam/menu.css">
 <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/yahoo-dom-event/yahoo-dom-event.js"></script>
@@ -55,14 +55,14 @@ a:hover{} a:active{} a:focus{}
 
 <iframe id=searchFrame frameborder=0 style="width:0;height:0;position:absolute;"></iframe>
 
-<script src="../common/js/heurist.js"></script>	<!-- core HEURIST functions -->
+<script src="../common/js/utilsLoad.js"></script>	<!-- core HEURIST functions -->
 
 <script>
 var hBase = "http://" + window.location.host + top.HEURIST.basePath;
 var instance = location.search.match(/instance=([^&]+)/) ? location.search.match(/instance=([^&]+)/)[1]:"";
 
 if (location.search.match(/[&?]q=[^&]+/)) {		//there is a search string
-	document.getElementById("searchFrame").src = top.HEURIST.basePath+"search/json-search.php" + location.search;
+	document.getElementById("searchFrame").src = top.HEURIST.basePath+"search/getResultsPageAsync.php" + location.search;
 	top.suppressAutoSearch = true;
 } else {
 	//	this is a substitute for loading the user's default saved search - it's more intuitive
@@ -82,13 +82,13 @@ if (! document.body.className) {
 }
 
 // start loading this early
-top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/heurist-obj-user.php");		// user-specific HEURIST data
+top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadUserInfo.php");		// user-specific HEURIST data
 
 top.HEURIST.whenLoaded(["search-html", "obj-common"], top.HEURIST.util.setInstanceName);
 
 top.HEURIST.whenLoaded(["search-html", "obj-common", "search-js"], function() {
 	var action_fr = document.getElementById("i_action");
-	action_fr.src = top.HEURIST.basePath+ "search/action.php" +
+	action_fr.src = top.HEURIST.basePath+ "search/actions/actionHandler.php" +
 					(top.HEURIST.instance && top.HEURIST.instance.name ? "?instance=" + top.HEURIST.instance.name : "");
 	// if there are results waiting, render them
 	var searchFrame = document.getElementById("searchFrame");
@@ -106,8 +106,8 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 });
 </script>
 
-<script src="../common/php/display-preferences.php"></script>	<!-- sets body css classes based on prefs in session -->
-<iframe src="../search/action.php" id=i_action></iframe>	<!-- action.php is written to return a form by default or running javascript followed by reload teh default-->
+<script src="../common/php/displayPreferences.php"></script>	<!-- sets body css classes based on prefs in session -->
+<iframe src="../search/actions/actionHandler.php" id=i_action></iframe>	<!-- actionHandler.php is written to return a form by default or running javascript followed by reload teh default-->
 <a id=home-link>
 <div id=logo title="Click the logo at top left of any Heurist page to return to your Favourites"></div>
 </a>
@@ -123,35 +123,50 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 		<div id="my-heurist-menu" class="yuimenu" style="display: none;">
 			<div class="bd dialogBox">
 				<ul>
-					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="../user/profile/prefs.html" name="auto-popup" title="Display preferences">Preferences</a></li>
+					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="../admin/profile/editPreferences.html" name="auto-popup" title="Display preferences">Preferences</a></li>
 					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="../help/webhelp/index.html?GettingStarted1" target="_blank" title="Functions to set up your computer for use with Heurist">Install tools</a></li>
 
-					<li class="yuimenuitem divider"><a class="yuimenuitemlabel" href="../search/popup_modelcopy.php" name="auto-popup" title="Add useful resources to your collection from a range of academic templates">Load profiles</a></li>
-					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="../user/profile/configuration.php?body_only&amp;tag_edit=1" name="auto-popup" title="Delete, combine, rename your personal tags">Manage tags</a></li>
+					<li class="yuimenuitem divider"><a class="yuimenuitemlabel" href="../admin/profile/importModelUserProfile.php" name="auto-popup" title="Add useful resources to your collection from a range of academic templates">Load profiles</a></li>
+					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="../admin/profile/configureProfile.php?body_only&amp;tag_edit=1" name="auto-popup" title="Delete, combine, rename your personal tags">Manage tags</a></li>
 					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="?ver=1&amp;w=bookmark&amp;q=-tag&amp;label=Bookmarks+without+tags" title="Find bookmarks which you have not tagged">Bookmarks without tags</a></li>
 
-					<li class="yuimenuitem divider"><a class="yuimenuitemlabel" href="../search/social/similar_users.php" name="auto-popup" title="Find people with similar bookmarking patterns">Find similar users</a></li>
-					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="../user/profile/reminders.php" name="auto-popup" title="View and delete automatic notification emails sent from your bookmarks">Manage reminders</a></li>
+					<li class="yuimenuitem divider"><a class="yuimenuitemlabel" href="../admin/ugrps/showSimilarUsers.php" name="auto-popup" title="Find people with similar bookmarking patterns">Find similar users</a></li>
+					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="../admin/profile/manageReminders.php" name="auto-popup" title="View and delete automatic notification emails sent from your bookmarks">Manage reminders</a></li>
 
-					<li class="yuimenuitem divider"><a class="yuimenuitemlabel" href="../import/fileimport.php" name="auto-popup" title="Import web links from a browser bookmarks file or an html web page file">Import hyperlinks</a></li>
-					<li class="yuimenuitem"><a href="../user/profile/configuration.php?body_only&amp;bookmark_import=1" name="auto-popup" title="Settings for web links importer">Importer settings</a></li>
-					<li class="yuimenuitem divider"><a href="../import/tools/import.php?format=BIB" name="auto-popup" title="Import bibliographic exchange format files">Import bibliographic</a></li>
-					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="../import/tools/import.php?format=GEO" name="auto-popup" title="Import KML files">Import geographic</a></li>
-					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="../import/tools/csv/fleximport.html" title="Import a delimited text file of data for one record type" target="_blank">Import delimited</a></li>
-					<li class="yuimenuitem admin-only"><a class="yuimenuitemlabel" href="../import/tools/detailupdater/detail-updater.html" target="_blank" title="Update record details using delimited text">Detail updater</a></li>
-					<li class="yuimenuitem admin-only"><a class="yuimenuitemlabel" href="../export/csv/flexport.html" target="_blank" title="Export records as delimited text">Export delimited</a></li>
+					<li class="yuimenuitem divider"><a class="yuimenuitemlabel" href="../import/hyperlinks/importHyperlinks.php" name="auto-popup" title="Import web links from a browser bookmarks file or an html web page file">Import hyperlinks</a></li>
+					<li class="yuimenuitem"><a href="../admin/profile/configureProfile.php?body_only&amp;bookmark_import=1" name="auto-popup" title="Settings for web links importer">Importer settings</a></li>
+					<li class="yuimenuitem divider"><a href="../import/importerFramework.php?format=BIB" name="auto-popup" title="Import bibliographic exchange format files">Import bibliographic</a></li>
+					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="../import/importerFramework.php?format=GEO" name="auto-popup" title="Import KML files">Import geographic</a></li>
+					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="../import/delimited/importRecordsFromDelimited.html" title="Import a delimited text file of data for one record type" target="_blank">Import delimited</a></li>
+					<li class="yuimenuitem admin-only"><a class="yuimenuitemlabel" href="../import/delimited/updateDetailsFromDelimited.html" target="_blank" title="Update record details using delimited text">Detail updater</a></li>
+					<li class="yuimenuitem admin-only"><a class="yuimenuitemlabel" href="../export/csv/exportDelimitedForRectype.html" target="_blank" title="Export records as delimited text">Export delimited</a></li>
 
 					<li class="yuimenuitem divider"><a class="yuimenuitemlabel" href="http://www.timemap.net/tmissues.php" target="_blank" title="Add a bug report directly into our bug tracking system">Report a bug</a></li>
-					<li class="yuimenuitem admin-only"><a class="yuimenuitemlabel" href="../admin/rectypes/bib_detail_editor.php" onclick="this.href = '../admin/rectypes/bib_detail_editor.php?instance=' + instance;" target="_blank" title="For administrators only">Administrator tools</a></li>
+					<li class="yuimenuitem admin-only"><a class="yuimenuitemlabel" href="../admin/structure/editStructure.php" onclick="this.href = '../admin/structure/editStructure.php?instance=' + instance;" target="_blank" title="For administrators only">Administrator tools</a></li>
 				</ul>
 			</div>
 		</div>
 	<a href="../help/webhelp" target=_blank title="Overview and guides to the use of Heurist plus comprehensive detailed help"><b>Help</b></a> |
 	<a id=contact-link style="display:none" title="Send us an email with bug information or feature requests" href="mailto:info@heuristscholar.org"><b>Contact us</b></a>
-	<a title="Drag the Heurist Bookmarklet link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites." href="javascript:(function(){h='http://heuristscholar.org/h3-ig/';d=document;c=d.contentType;if(c=='text/html'||!c){if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();s=d.createElement('script');s.type='text/javascript';s.src=(h+'import/bookmarklet/bookmarklet-popup.js?'+new%20Date().getTime()).slice(0,-8);d.getElementsByTagName('head')[0].appendChild(s);}else{e=encodeURIComponent;w=open(h%20+'records/addrec/add.php?t='+e(d.title)+'&u='+e(location.href));window.setTimeout('w.focus()',200);}})();"><b>Bookmarklet</b></a></nobr></div>
+	<script>
+		var html = "<a title=\"Drag the Heurist Bookmarklet link to your browser bookmarks toolbar, or right-click the link,"
+					+ " choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.\""
+					+ " href=\"javascript:(function(){h='" + document.location.href.replace(/search\/.*/,"") + "';"
+							+ "d=document;c=d.contentType;"
+							+ "if(c=='text/html'||!c){"
+								+ "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
+								+ "s=d.createElement('script');s.type='text/javascript';"
+								+ "s.src=h+'import/bookmarklet/bookmarkletPopup.php';"
+								+ "d.getElementsByTagName('head')[0].appendChild(s);}"
+							+ "else{e=encodeURIComponent;w=open(h+'records/add/addRecordPopup.php?t='+e(d.title)+'&u='+e(location.href));"
+								+ "window.setTimeout('w.focus()',200);}"
+							+ "})();\"><b>Bookmarklet</b></a>";
+				document.write(html);
+	</script>
+	</nobr></div>
 </div>
 
-<div id="add-record"><a id=add-record-link class="toolbar-large-icon-link logged-in-only" title="Add a new record to the Heurist database, setting record type and ownership" href="#" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/addrec/popup_add_resource.php'); return false;"><img src="../common/images/add-record.png"></a> </div>
+<div id="add-record"><a id=add-record-link class="toolbar-large-icon-link logged-in-only" title="Add a new record to the Heurist database, setting record type and ownership" href="#" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/addRecordPopup.php'); return false;"><img src="../common/images/add-record.png"></a> </div>
 
 <div id="sidebar">
 	<div id="saved-search-heading" class="banner">
@@ -249,11 +264,11 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 				<a class=collected-hidden href="#" onClick="top.HEURIST.search.addToCollection();return false;" title="Select one or more records, then click to add to the collection">Add</a>
 				<span class="collected-hidden"></span>
 				<a class=collected-shown href="#" onClick="top.HEURIST.search.removeFromCollection(); return false;" title="Select one or more records, then click to remove records from the collection">Remove</a>
-				<a class=toolbar-large-icon-link-normal href=" " title="Empty records from the collection" onclick='top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/collection.php?clear", top.HEURIST.search.addRemoveCollectionCB); document.getElementById("q").focus(); return false;'>Remove all</a>
-				<a class=toolbar-large-icon-link-normal href=" " title="Save current set of records in collection" onClick="top.HEURIST.util.popupURL(window, 'saved/save-collection.html',{width:590, height:600}); return false;">Save to...</a>
+				<a class=toolbar-large-icon-link-normal href=" " title="Empty records from the collection" onclick='top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/manageCollection.php?clear", top.HEURIST.search.addRemoveCollectionCB); document.getElementById("q").focus(); return false;'>Remove all</a>
+				<a class=toolbar-large-icon-link-normal href=" " title="Save current set of records in collection" onClick="top.HEURIST.util.popupURL(window, 'saved/saveCollectionPopup.html',{width:590, height:600}); return false;">Save to...</a>
 				<a class=toolbar-large-icon-link-normal href="?q=_COLLECTED_&amp;label=Collected" title="Show current set of records in collection" >Show</a>
 				<span id=active-label>Save search</span>
-				<a class=toolbar-large-icon-link href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members" onClick="top.HEURIST.util.popupURL(window, 'saved/save-search.html'); return false;">Save search to...</a>
+				<a class=toolbar-large-icon-link href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members" onClick="top.HEURIST.util.popupURL(window, 'saved/saveSearchPopup.html'); return false;">Save search to...</a>
 			</div>
 		</div>
 	</div>
@@ -294,7 +309,7 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
             <p> We are also very happy to provide advice - from simple email assistance<br>
               ( <a href="mailto:info@heuristscholar.org">info@heuristscholar.org</a> )
               to the design of complete eResearch systems. </p>
-            <p> Please <a href="../admin/users/add.php?register=1">register</a> and then <a href="../common/connect/login.php">login</a> to take full advantage of the system. </p>
+            <p> Please <a href="../admin/ugrps/findAddUser.php?register=1">register</a> and then <a href="../common/connect/login.php">login</a> to take full advantage of the system. </p>
           </div>
           <div id=noresult-search-status> <b>No matching records</b>
             <div class=not-logged-in-only>To see workgoup-owned and non-public records you may need to log in</div>
@@ -357,10 +372,10 @@ rpc.style.width = (rpc.parentNode.offsetWidth || (rpc.parentNode.parentNode.offs
 rpc.style.height = (rpc.parentNode.offsetHeight || (rpc.parentNode.parentNode.offsetHeight - 10)) + "px";
 */
 
-top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/heurist-obj-common.php");	// core HEURIST object definitions (dynamically generated)
-top.HEURIST.loadScript("stype.js");
+top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadCommonInfo.php");	// core HEURIST object definitions (dynamically generated)
+top.HEURIST.loadScript("searchTypes.js");
 top.HEURIST.loadScript("search.js");				// search-specific HEURIST functions
-//top.HEURIST.loadScript(top.HEURIST.basePath+"records/editrec/edit.js");				// edit-specific HEURIST functions
+//top.HEURIST.loadScript(top.HEURIST.basePath+"records/edit/editRecord.js");				// edit-specific HEURIST functions
 top.HEURIST.fireEvent(window, "heurist-search-html-loaded");
 top.HEURIST.contentLoaded();
 </script>

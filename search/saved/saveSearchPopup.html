@@ -8,7 +8,7 @@
 	var sid = top.HEURIST.parameters["sid"];
 	var q = top.HEURIST.parameters["q"];
 
-	// if the user pressed Save when showing a collection then divert them to save-collection.html
+	// if the user pressed Save when showing a collection then divert them to saveCollectionPopup.html
 	if (!q) {
 		q = decodeURIComponent(getParams("q"));
 	}
@@ -17,7 +17,7 @@
 			alert("There is no search string to save. Please enter a search and then save.");
 			setTimeout(function() { window.close(); }, 100);
 		}else{
-			setTimeout(function() { window.close(); top.HEURIST.util.popupURL(top, 'save-collection.html');},100);
+			setTimeout(function() { window.close(); top.HEURIST.util.popupURL(top, 'saveCollectionPopup.html');},100);
 		}
 	}
 

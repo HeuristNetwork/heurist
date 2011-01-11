@@ -1,5 +1,5 @@
 <?php
-	/*<!-- loading.php
+	/*<!-- getSearchResults.php
 
 	Copyright 2005 - 2010 University of Sydney Digital Innovation Unit
 	This file is part of the Heurist academic knowledge management system (http://HeuristScholar.org)
@@ -28,7 +28,7 @@ if (! defined('SEARCH_VERSION')) {
 }
 define('MEMCACHED_PORT', 11211);
 
-require_once(dirname(__FILE__).'/../advanced/adv-search.php');
+require_once(dirname(__FILE__).'/parseQueryToSQL.php');
 
 $memcache = null;
 
@@ -248,10 +248,10 @@ function loadRecordDetails(&$record) {
 			$detailValue = array("file" => mysql_fetch_assoc($fres));
 			$origName = urlencode($detailValue["file"]["origName"]);
 			$detailValue["file"]["URL"] =
-				HEURIST_URL_BASE."records/files/fetch_file.php?". (defined('HEURIST_INSTANCE') ? "instance=".HEURIST_INSTANCE."&" : "" )
+				HEURIST_URL_BASE."records/files/downloadFile.php?". (defined('HEURIST_INSTANCE') ? "instance=".HEURIST_INSTANCE."&" : "" )
 				."ulf_ID=".$detailValue["file"]["nonce"];
 			$detailValue["file"]["thumbURL"] =
-				HEURIST_URL_BASE."common/php/resize_image.php?" . (defined('HEURIST_INSTANCE') ? "instance=".HEURIST_INSTANCE."&" : "" )
+				HEURIST_URL_BASE."common/php/resizeImage.php?" . (defined('HEURIST_INSTANCE') ? "instance=".HEURIST_INSTANCE."&" : "" )
 				."ulf_ID=".$detailValue["file"]["nonce"];
 			break;
 

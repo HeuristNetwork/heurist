@@ -2,10 +2,10 @@
 
 define('SAVE_URI', 'disabled');
 
-require_once(dirname(__FILE__).'/../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
 if (! is_logged_in()) return;
 
-require_once(dirname(__FILE__).'/../common/connect/db.php');
+require_once(dirname(__FILE__).'/../common/php/dbMySqlWrappers.php');
 
 session_start();
 $script = "";
@@ -80,18 +80,18 @@ function delete_bookmarks() {
 	$deleted_count = mysql_affected_rows();
 
 	if (mysql_error()) {
-		$onload = 'alert(\'Database problem - no bookmarks deleted\'); location.replace(\'action.php\');';
+		$onload = 'alert(\'Database problem - no bookmarks deleted\'); location.replace(\'actionHandler.php\');';
 	} else if ($deleted_count == 0) {
-		$onload = 'location.replace(\'action.php\');';
+		$onload = 'location.replace(\'actionHandler.php\');';
 	} else if ($deleted_count == 1) {
 		$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['action-message'] = 'Deleted one bookmark';
 		session_write_close();
-		header('Location: action.php');
+		header('Location: actionHandler.php');
 		exit();
 	} else {
 		$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['action-message'] = 'Deleted ' . $deleted_count . ' bookmarks';
 		session_write_close();
-		header('Location: action.php');
+		header('Location: actionHandler.php');
 		exit();
 	}
 	return $onload;
@@ -112,19 +112,19 @@ function add_tags() {
 	}
 
 	if (! trim($_REQUEST['tagString'])) {
-		$onload = 'top.HEURIST.search.popupNotice(\'No tags have been added\'); location.replace(\'action.php\');';
+		$onload = 'top.HEURIST.search.popupNotice(\'No tags have been added\'); location.replace(\'actionHandler.php\');';
 	} else if (mysql_error()) {
-		$onload = 'alert(\'Database problem - ' . addslashes(mysql_error()) . ' - no tags added\'); location.replace(\'action.php\');';
+		$onload = 'alert(\'Database problem - ' . addslashes(mysql_error()) . ' - no tags added\'); location.replace(\'actionHandler.php\');';
 	} else if ($tag_count == 0) {
-		$onload = 'top.HEURIST.search.popupNotice(\'No new tags needed to be added\'); location.replace(\'action.php\');';
+		$onload = 'top.HEURIST.search.popupNotice(\'No new tags needed to be added\'); location.replace(\'actionHandler.php\');';
 	} else if ($tag_count > 0) {
 		if ($_REQUEST['reload']) {
 			$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['action-message'] = 'Tags added';
 			session_write_close();
-			header('Location: action.php'); //TODO: add instance code here
+			header('Location: actionHandler.php'); //TODO: add instance code here
 			exit();
 		} else {
-			$onload = 'top.HEURIST.search.popupNotice(\''.$tag_count.' Tags added\'); location.replace(\'action.php\');'; //TODO: add instance code here
+			$onload = 'top.HEURIST.search.popupNotice(\''.$tag_count.' Tags added\'); location.replace(\'actionHandler.php\');'; //TODO: add instance code here
 		}
 	}
 	return $onload;
@@ -146,19 +146,19 @@ function add_wgTags_by_id() {
 	}
 
 	if (! @$wgTags) {
-		$onload = 'top.HEURIST.search.popupNotice(\'No workgroup tags have been added\'); location.replace(\'action.php\');';
+		$onload = 'top.HEURIST.search.popupNotice(\'No workgroup tags have been added\'); location.replace(\'actionHandler.php\');';
 	} else if (mysql_error()) {
-		$onload = 'alert(\'Database problem - ' . addslashes(mysql_error()) . ' - no workgroup tags added\'); location.replace(\'action.php\');';
+		$onload = 'alert(\'Database problem - ' . addslashes(mysql_error()) . ' - no workgroup tags added\'); location.replace(\'actionHandler.php\');';
 	} else if ($wgTag_count == 0) {
-		$onload = 'top.HEURIST.search.popupNotice(\'No new workgroup tags needed to be added\'); location.replace(\'action.php\');';
+		$onload = 'top.HEURIST.search.popupNotice(\'No new workgroup tags needed to be added\'); location.replace(\'actionHandler.php\');';
 	} else if ($wgTag_count > 0) {
 		if ($_REQUEST['reload']) {
 			$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['action-message'] = 'Workgroup tags added';
 			session_write_close();
-			header('Location: action.php');
+			header('Location: actionHandler.php');
 			exit();
 		} else {
-			$onload = 'top.HEURIST.search.popupNotice(\''.$wgTag_count.' workgroup tags added\'); location.replace(\'action.php\');';
+			$onload = 'top.HEURIST.search.popupNotice(\''.$wgTag_count.' workgroup tags added\'); location.replace(\'actionHandler.php\');';
 		}
 	}
 	return $onload;
@@ -182,19 +182,19 @@ function remove_wgTags_by_id() {
 	}
 
 	if (! @$wgTags) {
-		$onload = 'top.HEURIST.search.popupNotice(\'No workgroup tags have been removed\'); location.replace(\'action.php\');';
+		$onload = 'top.HEURIST.search.popupNotice(\'No workgroup tags have been removed\'); location.replace(\'actionHandler.php\');';
 	} else if (mysql_error()) {
-		$onload = 'alert(\'Database problem - ' . addslashes(mysql_error()) . ' - no workgroup tags removed\'); location.replace(\'action.php\');';
+		$onload = 'alert(\'Database problem - ' . addslashes(mysql_error()) . ' - no workgroup tags removed\'); location.replace(\'actionHandler.php\');';
 	} else if ($wgTag_count == 0) {
-		$onload = 'top.HEURIST.search.popupNotice(\'No workgroup tags matched, none removed\'); location.replace(\'action.php\');';
+		$onload = 'top.HEURIST.search.popupNotice(\'No workgroup tags matched, none removed\'); location.replace(\'actionHandler.php\');';
 	} else if ($wgTag_count > 0) {
 		if ($_REQUEST['reload']) {
 			$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['action-message'] = $wgTag_count.' workgroup tags removed';
 			session_write_close();
-			header('Location: action.php');	// saw TODO: make instance aware
+			header('Location: actionHandler.php');	// saw TODO: make instance aware
 			exit();
 		} else {
-			$onload = 'top.HEURIST.search.popupNotice(\''.$wgTag_count.' workgroup tags removed\'); location.replace(\'action.php\');';
+			$onload = 'top.HEURIST.search.popupNotice(\''.$wgTag_count.' workgroup tags removed\'); location.replace(\'actionHandler.php\');';
 		}
 	}
 	return $onload;
@@ -220,19 +220,19 @@ function remove_tags() {
 	}
 
 	if (! trim($_REQUEST['tagString'])) {
-		$onload = 'top.HEURIST.search.popupNotice(\'No tags removed\'); location.replace(\'action.php\');';	// saw TODO: make instance aware
+		$onload = 'top.HEURIST.search.popupNotice(\'No tags removed\'); location.replace(\'actionHandler.php\');';	// saw TODO: make instance aware
 	} else if (mysql_error()) {
-		$onload = 'alert(\'Database problem - ' . addslashes(mysql_error()) . ' - no tags removed\'); location.replace(\'action.php\');';	// saw TODO: make instance aware
+		$onload = 'alert(\'Database problem - ' . addslashes(mysql_error()) . ' - no tags removed\'); location.replace(\'actionHandler.php\');';	// saw TODO: make instance aware
 	} else if ($tag_count == 0) {
-		$onload = 'top.HEURIST.search.popupNotice(\'No tags matched, none removed\'); location.replace(\'action.php\');';	// saw TODO: make instance aware
+		$onload = 'top.HEURIST.search.popupNotice(\'No tags matched, none removed\'); location.replace(\'actionHandler.php\');';	// saw TODO: make instance aware
 	} else if ($tag_count > 0) {
 		if ($_REQUEST['reload']) {
 			$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['action-message'] = $tag_count.' tags removed';
 			session_write_close();
-			header('Location: action.php');	// saw TODO: make instance aware
+			header('Location: actionHandler.php');	// saw TODO: make instance aware
 			exit();
 		} else {
-			$onload = 'top.HEURIST.search.popupNotice(\''.$tag_count.' tags removed\'); location.replace(\'action.php\');';	// saw TODO: make instance aware
+			$onload = 'top.HEURIST.search.popupNotice(\''.$tag_count.' tags removed\'); location.replace(\'actionHandler.php\');';	// saw TODO: make instance aware
 		}
 	}
 	return $onload;
@@ -247,11 +247,11 @@ function set_ratings() {
 			  . ' where bkm_ID in (' . join(',', $bkmk_ids) . ') and bkm_UGrpID = ' . get_user_id());
 	$update_count = mysql_affected_rows();
 	if (mysql_error()) {
-		$onload = 'alert(\'Database problem - ' . addslashes(mysql_error()) . ' - ratings not set\'); location.replace(\'action.php\');';
+		$onload = 'alert(\'Database problem - ' . addslashes(mysql_error()) . ' - ratings not set\'); location.replace(\'actionHandler.php\');';
 	} else if ($update_count == 0) {
-		$onload = 'top.HEURIST.search.popupNotice(\'No changes made - ratings are up-to-date\'); location.replace(\'action.php\');';
+		$onload = 'top.HEURIST.search.popupNotice(\'No changes made - ratings are up-to-date\'); location.replace(\'actionHandler.php\');';
 	} else {
-		$onload = 'top.HEURIST.search.popupNotice(\'Ratings have been set\'); location.replace(\'action.php\');';
+		$onload = 'top.HEURIST.search.popupNotice(\'Ratings have been set\'); location.replace(\'actionHandler.php\');';
 	}
 	return $onload;
 }
@@ -277,14 +277,14 @@ function bookmark_references() {
 	}
 
 	if (mysql_error()) {
-		$onload = 'alert(\'Database problem (' . addslashes(mysql_error()) . ') - no bookmarks added\'); location.replace(\'action.php\');';
+		$onload = 'alert(\'Database problem (' . addslashes(mysql_error()) . ') - no bookmarks added\'); location.replace(\'actionHandler.php\');';
 	} else if ($inserted_count < 1  &&  count($existing_bkmk_ids) < 1) {
-		$onload = 'location.replace(\'action.php\');';
+		$onload = 'location.replace(\'actionHandler.php\');';
 	} else {
 		$bkmk_ids_string = join(',',$bkmk_ids);
 		if (count($existing_bkmk_ids))
 			$bkmk_ids_string .= ($bkmk_ids_string?',':'') . join(',',$existing_bkmk_ids);
-		$onload = 'location.replace(\'action.php\'); top.HEURIST.search.bkmk_ids = {'.$bkmk_ids_string.'}; top.HEURIST.search.addTagsPopup(true);';
+		$onload = 'location.replace(\'actionHandler.php\'); top.HEURIST.search.bkmk_ids = {'.$bkmk_ids_string.'}; top.HEURIST.search.addTagsPopup(true);';
 	}
 	return $onload;
 }
@@ -336,7 +336,7 @@ function bookmark_and_tag_bibids ( $phpReturn ) {
 	if ($phpReturn) {
 		return $message;
 	} else {
-		return  'top.HEURIST.search.popupNotice(\''. $message .'\'); location.replace(\'action.php\');';
+		return  'top.HEURIST.search.popupNotice(\''. $message .'\'); location.replace(\'actionHandler.php\');';
 	}
 }
 
@@ -345,7 +345,7 @@ function bookmark_tag_and_save_seach() {
 	$message = bookmark_and_tag_bibids(true);
 	if ( preg_match('/Success/i',$message) == "0") {
 		return 'alert(\' Error while bookmarking and tagging - ' .
-				$message . ' - Search not saved.\'); location.replace(\'action.php\');';
+				$message . ' - Search not saved.\'); location.replace(\'actionHandler.php\');';
 	} else {
 		preg_replace('/Success/','',$message);
 	}
@@ -379,11 +379,11 @@ function bookmark_tag_and_save_seach() {
 	}
 
 	if (mysql_error()) {
-		$onload = 'alert(\'Database problem (' . addslashes(mysql_error()).') - search not saved\'); location.replace(\'action.php\');';
+		$onload = 'alert(\'Database problem (' . addslashes(mysql_error()).') - search not saved\'); location.replace(\'actionHandler.php\');';
 	} else {
-		$onload = 'location.replace(\'action.php\');'.
+		$onload = 'location.replace(\'actionHandler.php\');'.
 					'top.HEURIST.search.insertSavedSearch(\''.slash($_REQUEST['svs_Name']).'\', \''.slash($_REQUEST['svs_Query']).'\', '.$wg.', '.$ss.');'.
-					'top.HEURIST.util.getJsonData("'. BASE_PATH.'search/collection.php?clear", top.HEURIST.search.addRemoveCollectionCB);'.
+					'top.HEURIST.util.getJsonData("'. BASE_PATH.'search/saved/manageCollection.php?clear", top.HEURIST.search.addRemoveCollectionCB);'.
 					'top.HEURIST.search.popupNotice(\' Search \"'.$_REQUEST['svs_Name'].'\" saved. '. $message.'\');' .
 					'top.location.href = top.location.href + (top.location.href.match(/\?/) ? \'&\' : \'?\') + \'sid='.$ss.'\';';
 	}
@@ -427,9 +427,9 @@ function save_search() {
 
 	if (mysql_error()) {
 
-		$onload = 'alert(\'Database problem (' . addslashes(mysql_error()).') - search not saved\'); location.replace(\'action.php\');';
+		$onload = 'alert(\'Database problem (' . addslashes(mysql_error()).') - search not saved\'); location.replace(\'actionHandler.php\');';
 	} else {
-		$onload = 'location.replace(\'action.php\'); top.HEURIST.search.insertSavedSearch(\''.slash($_REQUEST['svs_Name']).'\', \''.slash($_REQUEST['svs_Query']).'\', '.$wg.', '.$ss.');';
+		$onload = 'location.replace(\'actionHandler.php\'); top.HEURIST.search.insertSavedSearch(\''.slash($_REQUEST['svs_Name']).'\', \''.slash($_REQUEST['svs_Query']).'\', '.$wg.', '.$ss.');';
 		if ($publish) {
 			$onload .= ' top.location.href = top.location.href + (top.location.href.match(/\?/) ? \'&\' : \'?\') + \'pub=1&label='.$label.'&sid='.$ss.'\';';
 		}else{
@@ -457,20 +457,20 @@ function set_wg_and_vis() {
 
 			$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['action-message'] = mysql_affected_rows().' records updated';
 			session_write_close();
-			header('Location: action.php');
+			header('Location: actionHandler.php');
 			exit();
 		} else {
-			$onload = 'alert(\'Invalid arguments\'); location.replace(\'action.php\');';
+			$onload = 'alert(\'Invalid arguments\'); location.replace(\'actionHandler.php\');';
 		}
 	} else {
-		$onload = 'alert(\'Permission denied\'); location.replace(\'action.php\');';
+		$onload = 'alert(\'Permission denied\'); location.replace(\'actionHandler.php\');';
 	}
 	return $onload;
 }
 
 function print_input_form() {
 ?>
-<form action="action.php" method="get" id="action_form">
+<form action="actionHandler.php" method="get" id="action_form">
 <input type="hidden" name="bkmk_ids" id="bkmk_ids" value="">
 <input type="hidden" name="bib_ids" id="bib_ids" value="">
 <input type="hidden" name="tagString" id="tagString" value="">

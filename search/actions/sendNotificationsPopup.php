@@ -1,7 +1,7 @@
 <?php
 
-require_once(dirname(__FILE__).'/../common/connect/cred.php');
-require_once(dirname(__FILE__).'/../common/connect/db.php');
+require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../common/php/dbMySqlWrappers.php');
 
 if (! is_logged_in()) return;
 
@@ -79,7 +79,7 @@ function reset_group() {
 
   <?= $notification_sent_message ?>
 
-  <form action="popup_notification.php" method="post" style="display: inline;">
+  <form action="sendNotificationsPopup.php" method="post" style="display: inline;">
 
    <div style="font-weight: bold; margin-bottom: 3px;">
     Share these records with other users via email:
@@ -119,7 +119,7 @@ function reset_group() {
     or email:
     <input type="text" name="notify_email" id="notify_email" onfocus="reset_person(); reset_group(); reset_coll_grp();">
     <br>
-	<div id="grp_members_link_div" style="text-align: center; display: none;">&nbsp;<a id="grp_members_link" href=# onclick="top.HEURIST.util.popupURL(window, '/common/html/workgroup-members.html?wg_id='+this.wg_id); return false;">Show group members</a></div>
+	<div id="grp_members_link_div" style="text-align: center; display: none;">&nbsp;<a id="grp_members_link" href=# onclick="top.HEURIST.util.popupURL(window, '/admin/ugrps/listUsergroupMembers.html?wg_id='+this.wg_id); return false;">Show group members</a></div>
     &nbsp;
     <textarea name="notify_message" title="email message" style="width: 95%;" rows="3"
               onfocus="if (this.value=='(enter message here)') this.value='';">(enter message here)</textarea>

@@ -6,7 +6,7 @@
 		<link rel=stylesheet href='../../common/css/autocomplete.css'>
 		<title></title>
 		<script src='../../external/jquery/jquery.js'></script>
-		<script src='../../records/tags/wgtag-editor.js'></script>
+		<script src='../../records/tags/usergroupTagEditorLibrary.js'></script>
 		<script>
 			if (top.HEURIST.search.collectCount == 0) {
 				alert("No records have been collected. Please select records from the search results and press collect to add records, then press save.");
@@ -188,7 +188,7 @@
 
 	</head>
 	<body onload="init();">
-		<script src='../../records/tags/autocomplete.js'></script>
+		<script src='../../records/tags/autocompleteTags.js'></script>
 		<div id="mainbody">
 			<div id="add_to_search" class="bggray">
 				<input style="margin-left: 10px;" type="radio" name="ssType" id="ssType" value="0" checked="checked" onclick="switchMode('add_to_search','create_new_search','search-select');">&nbsp;<b>Add to existing saved search</b>
@@ -284,7 +284,7 @@
 								<td class=prompt>Double-click to deselect a tag</td>
 							</tr>
 							<tr><td>
-									<div id="admin-wgTags"><br><a href="../../admin/workgroup/workgroup_tag_manager.php" target="_blank">add/delete</a> tags for workgroups (administrators only). </div>
+									<div id="admin-wgTags"><br><a href="../../admin/ugrps/editGroupTags.php" target="_blank">add/delete</a> tags for workgroups (administrators only). </div>
 							</td></tr>
 						</table>
 

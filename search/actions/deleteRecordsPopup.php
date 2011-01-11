@@ -2,8 +2,8 @@
 
 define('SAVE_URI', 'disabled');
 
-require_once(dirname(__FILE__).'/../common/connect/cred.php');
-require_once(dirname(__FILE__).'/../common/connect/db.php');
+require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../common/php/dbMySqlWrappers.php');
 
 if (! is_logged_in()) {
 	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
@@ -86,7 +86,7 @@ mysql_connection_db_overwrite(DATABASE);
 <?php
 
 	if (is_admin()) {
-		print '<a style="float: right;" target=_new href=fix_dupes.php?bib_ids='.$_REQUEST['ids'].'>fix duplicates</a>';
+		print '<a style="float: right;" target=_new href=../../admin/verification/combineDuplicateRecords.php?bib_ids='.$_REQUEST['ids'].'>fix duplicates</a>';
 	} else {
 		print '<p>NOTE: You may not delete records you did not create, or records that have been bookmarked by other users</p>';
 	}
@@ -112,7 +112,7 @@ mysql_connection_db_overwrite(DATABASE);
 
 		print "<div".(! $allowed ? ' class=greyed' : '').">\n";
 		print ' <p><input type="checkbox" name="bib[]" value="'.$rec_id.'"'.($bkmk_count <= 1  &&  $refs == 0  &&  $allowed ? ' checked' : '').(! $allowed ? ' disabled' : '').'>' ."\n";
-		print ' ' . $rec_id . '<a target=_new href="'.HEURIST_SITE_PATH.'records/editrec/edit.html?bib_id='.$rec_id.'"><img src='.HEURIST_SITE_PATH.'common/images/external_link_16x16.gif></a>' ."\n";
+		print ' ' . $rec_id . '<a target=_new href="'.HEURIST_SITE_PATH.'records/edit/editRecord.html?bib_id='.$rec_id.'"><img src='.HEURIST_SITE_PATH.'common/images/external_link_16x16.gif></a>' ."\n";
 		print ' ' . $rec_title ."</p>\n";
 
 		print ' <p style="margin-left: 20px;"><b>' . $bkmk_count . '</b> bookmark' . ($bkmk_count == 1 ? '' : 's') . ($bkmk_count > 0 ? ':' : '') . "\n  ";
@@ -122,7 +122,7 @@ mysql_connection_db_overwrite(DATABASE);
 		if ($refs) {
 			print ' <p style="margin-left: 20px;">Referenced by: '."\n";
 			while ($row = mysql_fetch_assoc($refs_res)) {
-				print '  <a target=_new href="'.HEURIST_SITE_PATH.'records/editrec/edit.html?bib_id='.$row['dtl_RecID'].'">'.$row['dtl_RecID'].'</a>'."\n";
+				print '  <a target=_new href="'.HEURIST_SITE_PATH.'records/edit/editRecord.html?bib_id='.$row['dtl_RecID'].'">'.$row['dtl_RecID'].'</a>'."\n";
 			}
 			print "\n </p>\n";
 		}

@@ -10,9 +10,9 @@ define('SEARCH_VERSION', 1);
 
 if (array_key_exists('alt', $_REQUEST)) define('use_alt_db', 1);
 
-require_once(dirname(__FILE__).'/../common/connect/cred.php');
-require_once(dirname(__FILE__).'/../common/connect/db.php');
-require_once(dirname(__FILE__).'/advanced/adv-search.php');
+require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/parseQueryToSQL.php');
 
 
 list($usec, $sec) = explode(' ', microtime());
@@ -218,7 +218,7 @@ function print_result($row) {
 		                     limit 1");
 		if (mysql_num_rows($res) == 1) {
 			$file = mysql_fetch_assoc($res);
-			$thumb_url = "../common/php/resize_image.php?ulf_ID=".$file['ulf_ObfuscatedFileID'];
+			$thumb_url = "../common/php/resizeImage.php?ulf_ID=".$file['ulf_ObfuscatedFileID'];
 		} else {
 			// 606  Thumbimage url
 			$res = mysql_query("select dtl_Value
@@ -237,7 +237,7 @@ function print_result($row) {
 			                         limit 1");
 				if (mysql_num_rows($res) == 1) {
 					$row = mysql_fetch_assoc($res);
-					$thumb_url = "../common/php/resize_image.php?file_url=".htmlspecialchars($row['dtl_Value']);
+					$thumb_url = "../common/php/resizeImage.php?file_url=".htmlspecialchars($row['dtl_Value']);
 				}
 			}
 		}
@@ -250,7 +250,7 @@ function print_result($row) {
 
 
 function rss_url() {
-	return HEURIST_URL_BASE.'export/feeds/search_rss.php?s='.@$_REQUEST['s'].'&w='.@$_REQUEST['w'].'&q='.urlencode(@$_REQUEST['q']);
+	return HEURIST_URL_BASE.'export/feeds/searchRSS.php?s='.@$_REQUEST['s'].'&w='.@$_REQUEST['w'].'&q='.urlencode(@$_REQUEST['q']);
 }
 
 ?>

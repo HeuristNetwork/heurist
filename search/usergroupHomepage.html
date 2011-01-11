@@ -32,7 +32,7 @@
 	<body>
 
 		<script src="../../external/jquery/jquery.js"></script>
-		<script src="../../common/js/heurist.js"></script><!-- core HEURIST functions --><script src="../external/jquery/jquery-1.4.2.min.js"></script>
+		<script src="../../common/js/utilsLoad.js"></script><!-- core HEURIST functions --><script src="../external/jquery/jquery-1.4.2.min.js"></script>
 		<script src="../../external/jquery/jquery-ui-1.7.2.custom.min.js"></script>
 		<script src="../../external/jquery/jquery.flip.js"></script>
 		<script src="../../external/jquery/jquery.flip.min.js"></script>
@@ -44,7 +44,7 @@
 			});
 		</script>
 
-		<script src="../../common/php/display-preferences.php"></script>	<!-- sets body css classes based on prefs in session -->
+		<script src="../../common/php/displayPreferences.php"></script>	<!-- sets body css classes based on prefs in session -->
 
 <a id=home-link href='../../'>
 <div id=logo title="Click the logo at top left of any Heurist page to return to your Favourites"></div>
@@ -69,7 +69,7 @@
 	<div id=wg-description></div><div id=ellipsis>...</div>
 	<div id=wg-controls>
 		<a id=exit-link href='../../' title="Click here or logo at top left to return to your Favourites" >Exit workgroup mode</a><br>
-		<a id=add-fav-link target=_blank href='../../records/addrec/add.php?addref=1&amp;k=Favourites' title="Bookmarks this workgroup mode page as a Favourite for easy access">Add this page to my favourites</a>
+		<a id=add-fav-link target=_blank href='../../records/add/addRecordPopup.php?addref=1&amp;k=Favourites' title="Bookmarks this workgroup mode page as a Favourite for easy access">Add this page to my favourites</a>
 	</div>
 </div>
 
@@ -78,7 +78,7 @@
 	<tr id=info-row>
 	<td><nobr><a id=wg-link target=_blank>Workgroup web site</a>&nbsp;&nbsp;&nbsp;</nobr></td>
 	<td><nobr><a id=blog-link target=_blank href='../../viewers/blog/?g='>Workgroup blog</a>&nbsp;&nbsp;&nbsp;</nobr></td>
-	<td>Membership: &nbsp; <a href='#' onclick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath + 'common/html/workgroup-members.html?wg_id='+top.HEURIST.workgroup.wg_id); return false;"><nobr><span id=wg-members></span>&nbsp;members</nobr></a></td>
+	<td>Membership: &nbsp; <a href='#' onclick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath + 'admin/ugrps/listUsergroupMembers.html?wg_id='+top.HEURIST.workgroup.wg_id); return false;"><nobr><span id=wg-members></span>&nbsp;members</nobr></a></td>
 	<td>&nbsp;</td>
 	<td>Administrators: &nbsp; <span id=wg-admins></span> </td>
 	</tr>
@@ -105,7 +105,7 @@
 				</p-->
 			</td>
 			<td id=img-buttons-cell>
-				Add workgroup-owned record<img class="img-button logged-in-only" title="Add new record" src='../../common/images/add-record.png' onclick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath + 'records/addrec/popup_add_resource.php?wg_id='+top.HEURIST.workgroup.wg_id);">
+				Add workgroup-owned record<img class="img-button logged-in-only" title="Add new record" src='../../common/images/add-record.png' onclick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath + 'records/add/addRecord.php?wg_id='+top.HEURIST.workgroup.wg_id);">
 
 			</td>
 	</tr></table>
@@ -115,7 +115,7 @@
 
 <div id=saved></div>
 	<div id="saved-search-heading" class="banner">Workgroup searches
-	<a id=wg-manage-saved-searches-link href='../saved/manage-saved-searches.html' onclick="top.HEURIST.util.popupURL(window, this.href); return false;">manage</a>
+	<a id=wg-manage-saved-searches-link href='../saved/manageSavedSearchesPopup.html' onclick="top.HEURIST.util.popupURL(window, this.href); return false;">manage</a>
 	</div>
 	<div id="sidebar-inner"><div id=wg-saved-search-msg>Links open a new search window</div>
 		<div id=left-panel-content class="panel-main-content"></div>
@@ -151,11 +151,11 @@
 
 
 <script>
-			top.HEURIST.loadScript(top.HEURIST.basePath + "common/php/heurist-obj-common.php");	// core HEURIST object definitions (dynamically generated)
-			top.HEURIST.loadScript(top.HEURIST.basePath + "common/php/heurist-obj-user.php");		// user-specific HEURIST data
+			top.HEURIST.loadScript(top.HEURIST.basePath + "common/php/loadCommonInfo.php");	// core HEURIST object definitions (dynamically generated)
+			top.HEURIST.loadScript(top.HEURIST.basePath + "common/php/loadUserInfo.php");		// user-specific HEURIST data
 			top.HEURIST.loadScript(top.HEURIST.basePath + "search/search.js");				// search-specific HEURIST functions
-			top.HEURIST.loadScript("workgroup.js");			// workgroup-page-specific HEURIST functions
-			// have to lie a bit to get php/json-search.php to work - refer to that file to see why
+			top.HEURIST.loadScript("usergroupHomepage.js");			// workgroup-page-specific HEURIST functions
+			// have to lie a bit to get php/getResultsPageAsync.php to work - refer to that file to see why
 			top.HEURIST.fireEvent(window, "heurist-search-html-loaded");
 			top.HEURIST.contentLoaded();
 </script>
