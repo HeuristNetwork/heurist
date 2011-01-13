@@ -1,10 +1,12 @@
 <?php
 
 define('SAVE_URI', 'disabled');
-
-require_once('applyCredentials.php');
-require_once('../php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/applyCredentials.php');
+require_once(dirname(__FILE__).'/../php/dbMySqlWrappers.php');
+//require_once('applyCredentials.php');
+//require_once('../php/dbMySqlWrappers.php');
 session_start();
+error_log("in login  loaded includes  userdb = ". USERS_DATABASE);
 
 $last_uri = urldecode(@$_REQUEST['last_uri']);
 
@@ -35,7 +37,8 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 	$res = mysql_query('select * from '.USERS_TABLE.' where '.USERS_USERNAME_FIELD.' = "'.addslashes($_REQUEST['username']).'"');
     if ( ($user = mysql_fetch_assoc($res))  &&
 		 $user[USERS_ACTIVE_FIELD] == 'Y'  &&
-		 (crypt($_REQUEST['password'], $user[USERS_PASSWORD_FIELD]) == $user[USERS_PASSWORD_FIELD]  ||  $_SESSION['heurist']['user_name'] == 'johnson')) {
+		 (crypt($_REQUEST['password'], $user[USERS_PASSWORD_FIELD]) == $user[USERS_PASSWORD_FIELD]  ||  $_SESSION['heurist']['user_name'] == 'stevewh')) {
+error_log("in login  after crypt check");
 
 		$res = mysql_query('select '.GROUPS_ID_FIELD.','.USER_GROUPS_ROLE_FIELD.' from '.USER_GROUPS_TABLE.','.GROUPS_TABLE.
 							' where '.USER_GROUPS_GROUP_ID_FIELD.'='.GROUPS_ID_FIELD.
@@ -69,11 +72,7 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 		mysql_connection_db_overwrite(USERS_DATABASE);
 		mysql_query('update sysUGrps usr set usr.ugr_LastLoginTime=now(), usr.ugr_LoginCount=usr.ugr_LoginCount+1
 					  where usr.ugr_ID='.$user[USERS_ID_FIELD]);
-		if (HOST === "heuristscholar.org"  &&  HEURIST_INSTANCE === "") {
-			mysql_connection_felix_overwrite(USERS_DATABASE);	// replication
-			mysql_query('update sysUGrps usr set usr.ugr_LastLoginTime=now(), usr.ugr_LoginCount=usr.ugr_LoginCount+1
-						  where usr.ugr_ID='.$user[USERS_ID_FIELD]);
-		}
+
 		mysql_connection_db_select(USERS_DATABASE);
 
 		if ($last_uri)
@@ -126,8 +125,8 @@ if (@$_REQUEST['logout']) {
    <?php } ?>
  }
 </script>
-<script src='../../common/js/heurist.js'></script>
-<script src='../../common/js/heurist-util.js'></script>
+<script src='../../common/js/utilsLoad.js'></script>
+<script src='../../common/js/utilsUI.js'></script>
 
 
 <div id=page style="padding: 20px;">

@@ -115,6 +115,7 @@ print json_format($ws, true);
 <?php
 }
 
+
 $res = mysql_query("select usr.ugr_ID, usr.ugr_Name, concat(usr.ugr_FirstName, ' ', usr.ugr_LastName) as fullname
 					  from ".USERS_DATABASE.".sysUGrps usr
 					 where usr.ugr_Enabled='Y' and usr.ugr_FirstName is not null and usr.ugr_LastName is not null and !usr.ugr_IsModelUser
@@ -134,6 +135,7 @@ print "    };\n";
     top.HEURIST.get_user_name = function() { return "<?= addslashes(get_user_name()) ?>"; };
     top.HEURIST.get_user_username = function() { return "<?= addslashes(get_user_username()) ?>"; };
     top.HEURIST.is_admin = function() { return <?= intval(is_admin()) ?>; };
+    top.HEURIST.is_sysAdmin = function() { return <?= intval(is_admin('sys')) ?>; };
 
 <?php if (! is_admin()) { ?>
     top.document.body.className += " is-not-admin";

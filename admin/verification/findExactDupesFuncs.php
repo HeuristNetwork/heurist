@@ -9,7 +9,7 @@ require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 if (! is_admin()) return;
 
 
-mysql_connection_localhost_overwrite(DATABASE);
+mysql_connection_overwrite(DATABASE);
 
 
 /* Necessary but insufficient condition is for the rec_Hash to be the same */

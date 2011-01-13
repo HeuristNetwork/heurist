@@ -2,11 +2,6 @@
 /* Login and credential management */
 require_once(dirname(__FILE__)."/../config/manageInstancesDeprecated.php");
 
-if (!defined("HEURIST_INSTANCE") && @$_REQUEST["instance"]) {	//fallback if heurist-instanc
-	define("HEURIST_INSTANCE", $_REQUEST["instance"]);
-	defined("HOST") || define("HOST", $_SERVER["HTTP_HOST"]);
-}
-
 if (! defined('COOKIE_VERSION'))
 	define('COOKIE_VERSION', 1);		// increment to force re-login when required
 
@@ -21,6 +16,7 @@ session_cache_limiter('none');
 session_start();
 
 if (_is_logged_in()) {
+	error_log("in applyCred with valid login");
 	if ((! defined('SAVE_URI'))  ||  strtoupper(SAVE_URI) != 'DISABLED') {
 		if (defined('HEURIST_INSTANCE_PREFIX')) {
 			$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['last_uri'] = $_SERVER['REQUEST_URI'];
@@ -30,8 +26,8 @@ if (_is_logged_in()) {
 	if (@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['keepalive']) {
 		$rv = setcookie('heurist-sessionid', session_id(), time() + 7*24*60*60, '/', HOST_BASE);
 	}
-	if (((! defined('REPLACE_INST'))  ||  strtoupper(REPLACE_INST) != 'DISABLED')&& defined("HEURIST_INSTANCE")) {
-		$_SESSION['heurist_last_used_instance'] = HEURIST_INSTANCE ;
+	if (((! defined('REPLACE_DBNAME'))  ||  strtoupper(REPLACE_DBNAME) != 'DISABLED')&& defined("HEURIST_DBNAME")) {
+		$_SESSION['heurist_last_used_dbname'] = HEURIST_DBNAME ;
 	}
 
 }
@@ -54,7 +50,9 @@ function get_roles() {
 
 function _is_logged_in() {
 	return (!!@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_name']  &&
-			(!defined('HEURIST_USER_GROUP_ID')  ||  @$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'][HEURIST_USER_GROUP_ID])  &&
+			(!defined('HEURIST_RESTRICT_GROUP_ID')  ||
+				@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'][HEURIST_RESTRICT_GROUP_ID]  ||
+				@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'][HEURIST_SYS_GROUP_ID])  &&
 			is_cookie_current_version());
 }
 
@@ -63,7 +61,7 @@ if (!_is_logged_in()  &&  defined("BYPASS_LOGIN")) {
 	function get_user_id() { return 0; }
 	function get_user_name() { return ''; }
 	function get_user_username() { return ''; }
-	function get_group_ids() { return (defined("HEURIST_USER_GROUP_ID") ? array(HEURIST_USER_GROUP_ID) : array()); }
+	function get_group_ids() { return array(0); } //everyone is part of the AllUsersGroup
 	function is_admin() { return false; }
 	function is_logged_in() { return true; }
 }else{
@@ -71,11 +69,22 @@ if (!_is_logged_in()  &&  defined("BYPASS_LOGIN")) {
 		return _is_logged_in();
 	}
 
-	function is_admin() {
-		if (defined('HEURIST_ADMIN_GROUP_ID'))
-			return is_logged_in()  &&  @$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'][HEURIST_ADMIN_GROUP_ID] == 'admin';
-		else if (defined('APP_OWNER')  &&  APP_OWNER)
-			return is_logged_in()  &&  @$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_name'] == APP_OWNER;
+	function is_admin($contx = 'database',$ug = 0) {
+		if (!is_logged_in()) return false;
+		switch ($contx) {
+			case 'sys':
+				return @$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'][1] == 'admin';
+				break;
+			case 'group':
+				if ($ug > 0)
+					return @$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'][$ug] == 'admin';
+				return false;
+				break;
+			case 'database':
+			default:
+				return  @$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'][HEURIST_OWNER_GROUP_ID] == 'admin' ||
+						@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'][1] == 'admin';
+		}
 	}
 
 	function get_user_id() {
@@ -110,7 +119,6 @@ function get_access_levels() {
 }
 
 function is_modeluser() { return (get_user_username() == 'model_user'); }
-
 
 
 function jump_sessions() {

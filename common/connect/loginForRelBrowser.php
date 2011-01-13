@@ -67,11 +67,6 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 		mysql_connection_db_overwrite(USERS_DATABASE);
 		mysql_query('update sysUGrps usr set usr.ugr_LastLoginTime=now(), usr.ugr_LoginCount=usr.ugr_LoginCount+1
 					  where usr.ugr_ID='.$user[USERS_ID_FIELD]);
-		if (HEURIST_INSTANCE === "") {
-			mysql_connection_felix_overwrite(USERS_DATABASE);	// replication
-			mysql_query('update sysUGrps usr set usr.ugr_LastLoginTime=now(), usr.ugr_LoginCount=usr.ugr_LoginCount+1
-						  where usr.ugr_ID='.$user[USERS_ID_FIELD]);
-		}
 		mysql_connection_db_select(USERS_DATABASE);
 
 		if ($last_uri)

@@ -21,7 +21,7 @@ if ($pub = mysql_fetch_assoc($res)) {
 	function get_user_id() { global $pub_usr_id; return $pub_usr_id; }
 	function get_user_name() { return ''; }
 	function get_user_username() { return ''; }
-	function get_group_ids() { return array(2); }
+	function get_group_ids() { return array(1); }
 	function is_admin() { return false; }
 	function is_logged_in() { return true; }
 

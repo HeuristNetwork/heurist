@@ -59,7 +59,7 @@ while ($row = mysql_fetch_assoc($res)) {
 print "top.HEURIST.reftypes.pluralNames = " . json_format($plurals) . ";\n\n";
 
 $primary = array();
-$res = mysql_query("select rty_ID from defRecTypes where rty_ID and rty_RecTypeGroupID == 1 order by rty_Name");
+$res = mysql_query("select rty_ID from defRecTypes where rty_ID and rty_RecTypeGroupID = 1 order by rty_Name");
 while ($row = mysql_fetch_assoc($res)) {
 	array_push($primary, intval($row["rty_ID"]));
 }
@@ -154,16 +154,18 @@ while ($row = mysql_fetch_assoc($res)) {
 	if (!$row["trm_VocabID"]) continue;	// vocab id in not valid so skip it
 	if ($prev_vcb_id != $row["trm_VocabID"]) {	/* new vcb_ID */
 		if (! $first) {
-			print " ,\n\t\"" . $row["trm_VocabID"] . "\": ";
+			print "] ,\n\t\"" . $row["trm_VocabID"] . "\": [";
 		}else{
-			print "\t\"" . $row["trm_VocabID"] . "\": ";
+			print "\t\"" . $row["trm_VocabID"] . "\": [";
 		$first = false;
 		}
+	}else {
+		print ", ";
 	}
 	print "[ ".$row["trm_ID"].", \"" . slash($row["trm_Label"]) . "\" ]";
 	$prev_vcb_id = $row["trm_VocabID"];
 }
-print " \n};\n";
+print "] \n};\n";
 
 
 /*
@@ -200,7 +202,7 @@ top.HEURIST.ratings = {"0": "not rated",
 					 left join ".USERS_DATABASE.".sysUGrps b on b.ugr_ID = ugl_UserID
 						 where grp.ugr_Type != 'User'
 						   and b.ugr_Enabled  = 'Y'
-					  group by grp.ugr_ID order by a.ugr_Name");
+					  group by grp.ugr_ID order by grp.ugr_Name");
 	while ($row = mysql_fetch_assoc($res)) {
 		$workgroups[$row["grpID"]] = array(
 			"name" => $row["grpName"],

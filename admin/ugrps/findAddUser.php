@@ -192,12 +192,11 @@ if ($_REQUEST['_submit']  &&  $dup_check_ok) {
 			if ($insert_pairs)
 				mysql_query('insert into usrRecTagLinks (rtl_TagID, rtl_Order, rtl_RecID) values ' . join(',', $insert_pairs));
 
-mysql_connection_localhost_overwrite(DATABASE);
 /* END HEURIST STUFF */
 
 
 			// add user to Heurist and TMWiki groups
-			mysql_query("insert into ".USERS_DATABASE.".sysUsrGrpLinks (ugl_UserID, ugl_GroupID) values ($usr_id, 2), ($usr_id, 4)");
+// TODO: check this is necessary			mysql_query("insert into ".USERS_DATABASE.".sysUsrGrpLinks (ugl_UserID, ugl_GroupID) values ($usr_id, 2), ($usr_id, 4)");
 
 			if ($_REQUEST['register']) {
 				mysql_query("update ".USERS_DATABASE.".sysUGrps usr set ugr_Enabled='N' where ugr_ID=$usr_id");
@@ -221,12 +220,12 @@ State:         $state
 
 Go to the address below to review further details and approve the registration:
 
-".HEURIST_URL_BASE."admin/ugrps/editUser.php?instance=[instance-name!]&approve=1&Id=$usr_id
+".HEURIST_URL_BASE."admin/ugrps/editUser.php?instance=".HEURIST_INSTANCE."&approve=1&Id=$usr_id
 
 ";
 				$admins = mysql__select_array("sysUsrGrpLinks left join sysUGrps usr on ugr_ID = ugl_UserID",
 				                              "ugr_eMail",
-				                              "ugl_GroupID = " . HEURIST_ADMIN_GROUP_ID . " and ugl_Role = 'admin'");
+				                              "ugl_GroupID = " . HEURIST_DBADMIN_GROUP_ID . " and ugl_Role = 'admin'");
 				if (! @$admins  ||  count($admins) === 0) {
 					$admins = array("info@acl.arts.usyd.edu.au");
 				}
