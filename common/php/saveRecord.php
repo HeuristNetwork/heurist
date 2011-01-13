@@ -87,17 +87,18 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 	}
 
 	// check that all the required fields are present
-	$res = mysql_query("select rst_ID from defRecStructure left join recDetails on dtl_RecID=$recordID and rst_DetailTypeID=dtl_DetailTypeID where rst_RecTypeID=$type and rdr_required='Y' and dtl_ID is null");
+	$res = mysql_query("select rst_ID from defRecStructure left join recDetails on dtl_RecID=$recordID and rst_DetailTypeID=dtl_DetailTypeID where rst_RecTypeID=$type and rst_RequirementType='Required' and dtl_ID is null");
 	if (mysql_num_rows($res) > 0) {
 		// at least one missing field
 		jsonError("record is missing required field(s)");
 	}
-	$res = mysql_query("select rst_ID from rec_detail_requirements_overrides left join recDetails on dtl_RecID=$recordID and rst_DetailTypeID=dtl_DetailTypeID where (rdr_wg_id = 0 or rdr_wg_id=$wg) and rdr_wg_id = rst_RecTypeID=$type and rdr_required='Y' and dtl_ID is null");
+/* Override  code removed by SAW on 13/1/11
+	$res = mysql_query("select rst_ID from rec_detail_requirements_overrides left join recDetails on dtl_RecID=$recordID and rst_DetailTypeID=dtl_DetailTypeID where (rdr_wg_id = 0 or rdr_wg_id=$wg) and rdr_wg_id = rst_RecTypeID=$type and rst_RequirementType='Required' and dtl_ID is null");
 	if (mysql_num_rows($res) > 0) {
 		// at least one missing field
 		jsonError("record is missing required field(s)");
 	}
-
+*/
 	// calculate title, do an update
 	$mask = mysql__select_array("defRecTypes", "rty_TitleMask", "rty_ID=$type");  $mask = $mask[0];
 	$title = fill_title_mask($mask, $recordID, $type);
@@ -194,7 +195,7 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 		array_push($types, $bdtID);
 	}
 	$typeVarieties = mysql__select_assoc("defDetailTypes", "dty_ID", "dty_Type", "dty_ID in (" . join($types, ",") . ")");
-	$repeats = mysql__select_assoc("defRecStructure", "rst_DetailTypeID", "rst_Repeats", "rst_DetailTypeID in (" . join($types, ",") . ") and rst_RecTypeID=" . $recordType);
+	$repeats = mysql__select_assoc("defRecStructure", "rst_DetailTypeID", "rst_MaxValues", "rst_DetailTypeID in (" . join($types, ",") . ") and rst_RecTypeID=" . $recordType);
 
 	$updates = array();
 	$inserts = array();

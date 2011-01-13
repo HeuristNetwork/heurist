@@ -300,7 +300,7 @@ function print_private_details($bib) {
 
 	function print_public_details($bib) {
 		$bds_res = mysql_query('select dty_ID,
-		                               ifnull(rdro.rst_NameInForm, ifnull(rdr.rst_NameInForm, dty_Name)) as name,
+		                               ifnull(rdro.rst_DisplayName, ifnull(rdr.rst_DisplayName, dty_Name)) as name,
 		                               dtl_Value as val,
 		                               dtl_UploadedFileID,
 		                               dty_Type,
@@ -310,14 +310,9 @@ function print_private_details($bib) {
 		                     left join defDetailTypes on dty_ID = dtl_DetailTypeID
 		                     left join defRecStructure rdr on rdr.rst_DetailTypeID = dtl_DetailTypeID
 		                                                          and rdr.rst_RecTypeID = '.$bib['rec_RecTypeID'].'
-		                     left join rec_detail_requirements_overrides rdro on rdro.rst_DetailTypeID = dtl_DetailTypeID
-		                                                                     and rdro.rst_RecTypeID = '.$bib['rec_RecTypeID'].'
-		                                                                     and rdro.rdr_wg_id = 0
 		                         where dtl_RecID = ' . $bib['rec_ID'] .'
-		                      order by rdro.rst_OrderInForm is null,
-		                               rdro.rst_OrderInForm,
-		                               rdr.rst_OrderInForm is null,
-		                               rdr.rst_OrderInForm,
+		                      order by rdr.rst_DisplayOrder is null,
+		                               rdr.rst_DisplayOrder,
 		                               dty_ID,
 		                               dtl_ID');
 

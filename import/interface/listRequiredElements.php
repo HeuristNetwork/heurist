@@ -77,7 +77,7 @@ function decode_bdt($rec_types, $bdt_code) {
 
 	$rt_id = $refer_to_heurist_type_map[$rec_types][$colon_count];
 	$my_bdr = $bdr[$rt_id][intval(substr($bdt_code, $colon_count))];
-	$name = $my_bdr['rst_NameInForm']? $my_bdr['rst_NameInForm'] : $my_bdr['dty_Name'];
+	$name = $my_bdr['rst_DisplayName']? $my_bdr['rst_DisplayName'] : $my_bdr['dty_Name'];
 	return '<span class=red>'.$reftypeDescription.'</span>' . $name;
 }
 

@@ -72,7 +72,7 @@ $version = 1; // Output format version number. This will be read by the crosswal
 // RECORD DETAIL REQUIREMENTS
 
     print "\n\n\n-- RECORD DETAIL REQUIREMENTS";print "\n";
-    print "-- rst_ID,rst_RecTypeID,rst_DetailTypeID,rdr_required,rst_NameInForm,rst_Description,rst_Prompt,rst_FormHelpText,rst_Repeats,rst_OrderInForm,rst_DisplayWidth,rst_DefaultValue,rst_RecordMatchOrder\n";
+    print "-- rst_ID,rst_RecTypeID,rst_DetailTypeID,rst_RequirementType,rst_DisplayName,rst_DisplayDescription,rst_DisplayPrompt,rst_DisplayHelp,rst_MaxValues,rst_DisplayOrder,rst_DisplayWidth,rst_DefaultValue,rst_RecordMatchOrder\n";
     $query = "select * from defRecStructure limit $lim";
     $res = mysql_query($query);
     $fmt = 'detailRequirements';
@@ -144,8 +144,8 @@ function print_row($row,$fmt) {
         break;
 
       case 'detailRequirements': // Data from the defRecStructure table
-        print "($row[rst_ID],`$row[rst_RecTypeID]`,`$row[rst_DetailTypeID]`,`$row[rdr_required]`,`$row[rst_NameInForm]`,`$row[rst_Description]`,
-        `$row[rst_Prompt]`,`$row[rst_FormHelpText]`,`$row[rst_Repeats]`,`$row[rst_OrderInForm]`,`$row[rst_DisplayWidth]`,`$row[rst_DefaultValue]`,`$row[rst_RecordMatchOrder]`),\n";
+        print "($row[rst_ID],`$row[rst_RecTypeID]`,`$row[rst_DetailTypeID]`,`$row[rst_RequirementType]`,`$row[rst_DisplayName]`,`$row[rst_DisplayDescription]`,
+        `$row[rst_DisplayPrompt]`,`$row[rst_DisplayHelp]`,`$row[rst_MaxValues]`,`$row[rst_DisplayOrder]`,`$row[rst_DisplayWidth]`,`$row[rst_DefaultValue]`,`$row[rst_RecordMatchOrder]`),\n";
         break;
 
       case 'defTerms': // Data from the rec_details_lookup table

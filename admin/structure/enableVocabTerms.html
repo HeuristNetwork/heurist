@@ -52,7 +52,7 @@ body {
   [search BIB_DETAIL_LOOKUP bdl]
     [auto : trm_VocabID : dty_ID]
     [foreach BIB_DETAIL_LOOKUP bd : 1 order by trm_ID]
-     <div><input style="margin: 1px;" type=checkbox name='active_rdl[literal][[end-literal][trm_ID][literal]][end-literal]' [select ACTIVE_BIB_DETAIL_LOOKUP abdl]checked[end-select][not-found][end-not-found]> [trm_Label]</div>
+     <div><input style="margin: 1px;" type=checkbox name='active_trm[literal][[end-literal][trm_ID][literal]][end-literal]' [if trm_Enabled]checked[end-if][not-found][end-not-found]> [trm_Label]</div>
     [end-foreach]
     [not-found]<div style="font-style: italic;">(none)</div>[end-not-found]
   [end-search]

@@ -143,8 +143,8 @@ while ($row = mysql_fetch_assoc($res)) {
 	$RFT[$row['rty_ID']] = $row['rty_Name'];
 	foreach (getRecordRequirements($row['rty_ID']) as $rdr_rdt_id => $rdr) {
 	// initialise requirements and names for detailtypes ($RQS)
-		$RQS[$rdr['rst_RecTypeID']][$rdr['rst_DetailTypeID']]['rdr_required'] = $rdr['rdr_required'];
-		$RQS[$rdr['rst_RecTypeID']][$rdr['rst_DetailTypeID']]['rst_NameInForm'] = $rdr['rst_NameInForm'];
+		$RQS[$rdr['rst_RecTypeID']][$rdr['rst_DetailTypeID']]['rst_RequirementType'] = $rdr['rst_RequirementType'];
+		$RQS[$rdr['rst_RecTypeID']][$rdr['rst_DetailTypeID']]['rst_DisplayName'] = $rdr['rst_DisplayName'];
 	}
 }
 
@@ -314,7 +314,7 @@ function writeReference($rec_id, $depth = 0, $rd_type = 0, $rec_types = 0, $rev 
 			}else{
 			   $XML .= "<pointer ";
 			}
-			$XML .= "name=\"" . htmlspecialchars(@$RQS[$rec_types][$rd_type]['rst_NameInForm']) . "\" type=\"" . htmlspecialchars(@$DTN[$rd_type]) . "\" id=\"" . htmlspecialchars($rd_type) . "\">\n";
+			$XML .= "name=\"" . htmlspecialchars(@$RQS[$rec_types][$rd_type]['rst_DisplayName']) . "\" type=\"" . htmlspecialchars(@$DTN[$rd_type]) . "\" id=\"" . htmlspecialchars($rd_type) . "\">\n";
 		}
 
 		// print all general data
@@ -444,7 +444,7 @@ function writeDetails($bib, $depth) {
 						LEFT JOIN Records on rec_ID = dtl_RecID
 						LEFT JOIN defRecStructure on rst_DetailTypeID = dty_ID and rst_RecTypeID = rec_RecTypeID
 						WHERE dtl_RecID=' . $bib .'
-						ORDER BY rst_OrderInForm is null, rst_OrderInForm, dty_ID, dtl_ID';
+						ORDER BY rst_DisplayOrder is null, rst_DisplayOrder, dty_ID, dtl_ID';
 
 	$res = mysql_query($query);
 
@@ -597,13 +597,13 @@ function writeTag($reftype, $detail, $value, $file_id) {
 	}
 
 	// if value is required but empty, make a notice of missing detail
-	if (empty($value) && $RQS[$reftype][$detail]['rdr_required'] == 'Y') {
+	if (empty($value) && $RQS[$reftype][$detail]['rst_RequirementType'] == 'Required') {
 		$ERROR .= "<error>missing required detail</error>\n";
 	}
 
 	// if the value is not empty OR empty but required, write tag with escaping weird chars
-	if (!empty($value) || (empty($value) && $RQS[$reftype][$detail]['rdr_required'] == 'Y')) {
-		$XML.= "<detail name='". htmlspecialchars(@$RQS[$reftype][$detail]['rst_NameInForm']) ."' type='" . htmlspecialchars(@$DTN[$detail]) . "' id='" . $detail . "'>" . $value . "</detail>\n";
+	if (!empty($value) || (empty($value) && $RQS[$reftype][$detail]['rst_RequirementType'] == 'Required')) {
+		$XML.= "<detail name='". htmlspecialchars(@$RQS[$reftype][$detail]['rst_DisplayName']) ."' type='" . htmlspecialchars(@$DTN[$detail]) . "' id='" . $detail . "'>" . $value . "</detail>\n";
 	}
 }
 

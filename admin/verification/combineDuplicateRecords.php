@@ -134,30 +134,31 @@
 						//save rec type for merging code
 						if (!@$_SESSION['rec_type_id']) $_SESSION['rty_ID'] = @$rfts[0]['rty_ID'];
 						//get requirements for details
-						$res = mysql_query('select rst_RecTypeID,rst_DetailTypeID, rst_NameInForm, rdr_required, rst_Repeats from defRecStructure where rst_RecTypeID in ('.join(',',array_keys($rfts)).')');
+						$res = mysql_query('select rst_RecTypeID,rst_DetailTypeID, rst_DisplayName, rst_RequirementType, rst_MaxValues from defRecStructure where rst_RecTypeID in ('.join(',',array_keys($rfts)).')');
 						$rec_requirements =  array();
 						while ($req = mysql_fetch_assoc($res)) $rec_requirements[$req['rst_RecTypeID']][$req['rst_DetailTypeID']]= $req;
+/* Override merge code removed by SAW on 13/1/11
 						// get overrides - this will potentially overwrite the main requirements
 						$wg_ids_list = join(',',array_keys($_SESSION['heurist']['user_access']));
-						$res = mysql_query('select rst_RecTypeID, rst_DetailTypeID, rst_NameInForm, rdr_required, rst_Repeats from rec_detail_requirements_overrides where rst_RecTypeID in ('.join(',',array_keys($rfts)).') AND rdr_wg_id in ('.$wg_ids_list.')');
-						$precedence = array( "Y"=> 4, "R"=> 3, "O"=> 2, "X"=> 1 );
+						$res = mysql_query('select rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_RequirementType, rst_MaxValues from rec_detail_requirements_overrides where rst_RecTypeID in ('.join(',',array_keys($rfts)).') AND rdr_wg_id in ('.$wg_ids_list.')');
+						$precedence = array( 'Required'=> 4, 'Recommended'=> 3, 'Optional'=> 2, 'Forbidden'=> 1 );
 
 						while ($req = mysql_fetch_assoc($res)) {
 							$rdt_id = $req['rst_DetailTypeID'];
 							$type = $req['rst_RecTypeID'];
     if (!$rec_requirements[$type][$rdt_id]) $rec_requirements[$type][$rdt_id] = $req; //if it doesn't exist then add it
     else {  // if name doesn't exist append it and select max required and max repeatable
-								$name = $req['rst_NameInForm'];
-        $required = $req['rdr_required'];
-								$repeatable = $req['rst_Repeats'];
-								if (strpos($rec_requirements[$type][$rdt_id]['rst_NameInForm'],$name) === false) $rec_requirements[$type][$rdt_id]['rst_NameInForm'] .= '/'.$name ;
-        if ( $precedence[$rec_requirements[$type][$rdt_id]['rdr_required']] < $precedence[$required])
-            $rec_requirements[$type][$rdt_id]['rdr_required'] = $required;
-								if ( intval($rec_requirements[$type][$rdt_id]['rst_Repeats']) < intval($repeatable))
-								$rec_requirements[$type][$rdt_id]['rst_Repeats'] = intval($repeatable);
+								$name = $req['rst_DisplayName'];
+        $required = $req['rst_RequirementType'];
+								$repeatable = $req['rst_MaxValues'];
+								if (strpos($rec_requirements[$type][$rdt_id]['rst_DisplayName'],$name) === false) $rec_requirements[$type][$rdt_id]['rst_DisplayName'] .= '/'.$name ;
+        if ( $precedence[$rec_requirements[$type][$rdt_id]['rst_RequirementType']] < $precedence[$required])
+            $rec_requirements[$type][$rdt_id]['rst_RequirementType'] = $required;
+								if ( intval($rec_requirements[$type][$rdt_id]['rst_MaxValues']) < intval($repeatable))
+								$rec_requirements[$type][$rdt_id]['rst_MaxValues'] = intval($repeatable);
 							}
 						}
-
+*/
 						$res = mysql_query('select * from Records where rec_ID in ('.$_REQUEST['bib_ids'].') order by find_in_set(rec_ID, "'.$_REQUEST['bib_ids'].'")');
 						$records = array();
 						$counts = array();
@@ -221,8 +222,8 @@
 	    print '<table>';
 	    foreach ($record['details'] as $rd_type => $detail) {
 		    if (! $detail) continue;    //FIXME  check if required and mark it as missing and required
-									$reqmnt = $rec_requirements[$record['rec_RecTypeID']][$rd_type]['rdr_required'];
-            $color = ($reqmnt == 'Y' ? 'red': ($reqmnt == 'R'? 'black':'grey'));
+									$reqmnt = $rec_requirements[$record['rec_RecTypeID']][$rd_type]['rst_RequirementType'];
+            $color = ($reqmnt == 'Required' ? 'red': ($reqmnt == 'Recommended'? 'black':'grey'));
 		    print '<tr><td style=" color: '.$color .';">'.$bdts[$rd_type].'</td>';
 		    print '<td style="padding-left:10px;">';
             foreach($detail as $i => $rg){
@@ -241,7 +242,7 @@
             $detail = detail_str($rd_type, $temp);
             unset($temp);
             if (is_array($detail)) {
-										$repeatCount = intval($rec_requirements[$record['rec_RecTypeID']][$rd_type]['rst_Repeats']);
+										$repeatCount = intval($rec_requirements[$record['rec_RecTypeID']][$rd_type]['rst_MaxValues']);
 										if ($repeatCount==0){
                      foreach ($detail as $val) {
                        print '<div>'. $val . '</div>';
@@ -336,13 +337,13 @@
                 unset($detail[$i]);
             }
             if (count($detail) == 0) continue;
-            $reqmnt = $rec_requirements[$master_rec_type][$rd_type]['rdr_required'];
-            $color = ($reqmnt == 'Y' ? 'red': ($reqmnt == 'R'? 'black':'grey'));
+            $reqmnt = $rec_requirements[$master_rec_type][$rd_type]['rst_RequirementType'];
+            $color = ($reqmnt == 'Required' ? 'red': ($reqmnt == 'Recommended'? 'black':'grey'));
             print '<tr><td style=" color: '.$color .';">'.$bdts[$rd_type].'</td>';
             //FIXME place a keep checkbox on values for repeatable fields , place a radio button for non-repeatable fields with
             //keep_dt_### where ### is detail Type id and mark both "checked" for master record
             print '<td style="padding-left:10px;">';
-									$repeatCount =  intval($rec_requirements[$master_rec_type][$rd_type]['rst_Repeats']);
+									$repeatCount =  intval($rec_requirements[$master_rec_type][$rd_type]['rst_MaxValues']);
 									$detail = detail_get_html_input_str( $detail, $repeatCount, $is_master );
             if (is_array($detail)) {
                  if ($is_type_repeatable){
@@ -533,7 +534,7 @@
 		//process keeps - which means find repeatables in master record to delete  all_details - keeps = deletes
 		//get array of repeatable detail ids for master
     $master_rep_dt_ids = array();
-		$res = mysql_query('select rst_DetailTypeID from defRecStructure where rst_Repeats != 1 and rst_RecTypeID = '.$_SESSION['rty_ID']);
+		$res = mysql_query('select rst_DetailTypeID from defRecStructure where rst_MaxValues != 1 and rst_RecTypeID = '.$_SESSION['rty_ID']);
     while ($row = mysql_fetch_array( $res)) {
             array_push($master_rep_dt_ids, $row[0]);
     }

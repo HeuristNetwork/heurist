@@ -104,28 +104,6 @@ print json_format($ws, true);
 ?>;
 
 
-<?php
-$bdrs = array();
-$colNames = array("rst_RecTypeID", "rst_DetailTypeID", "rst_NameInForm", "rst_Prompt", "rst_DefaultValue", "rdr_required", "rst_Repeats", "rst_DisplayWidth", "rst_RecordMatchOrder", "rdr_wg_id");
-if (@$workgroups) {
-	$res = mysql_query("select " . join(", ", $colNames) . " from rec_detail_requirements_overrides where rdr_wg_id in (" . join(',', $workgroups) . ") order by rst_RecTypeID, rst_OrderInForm is null, rst_OrderInForm");
-	array_shift($colNames);	// don't print defRecTypes on every row
-	array_shift($colNames);	// don't print dty_ID on every row
-
-	while ($row = mysql_fetch_row($res)) {
-		$rt_id = array_shift($row);
-		$rdt_id = array_shift($row);
-		if (! @$bdrs[$rt_id]) $bdrs[$rt_id] = array();
-		if (! @$bdrs[$rt_id][$rdt_id]) $bdrs[$rt_id][$rdt_id] = array();
-		array_push($bdrs[$rt_id][$rdt_id], $row);
-	}
-}
-$bdr_details = array("colNames" => $colNames, "valuesByReftypeID" => $bdrs);
-?>
-   top.HEURIST.user.bibDetailRequirements = <?= json_format($bdr_details) ?>;
-
-    };
-
     top.HEURIST.user.isInWorkgroup = function(wg_id) {
 		if (! top.HEURIST.user.workgroups) return false;
 		for (var i in top.HEURIST.user.workgroups) {

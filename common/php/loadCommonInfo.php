@@ -77,7 +77,7 @@ print "top.HEURIST.reftypes.other = " . json_format($other) . ";\n\n\n";
  * which contains
  */
 
-$colNames = array("rst_NameInForm", "rst_Prompt", "rst_DefaultValue", "rdr_required", "rst_Repeats", "rst_DisplayWidth", "rst_RecordMatchOrder");
+$colNames = array("rst_DisplayName", "rst_DisplayPrompt", "rst_DefaultValue", "rst_RequirementType", "rst_MaxValues", "rst_DisplayWidth", "rst_RecordMatchOrder");
 $rec_types = mysql__select_array("defRecStructure", "distinct rst_RecTypeID", "1 order by rst_RecTypeID");
 
 print "\ntop.HEURIST.bibDetailRequirements = {\n";
@@ -96,7 +96,7 @@ foreach ($rec_types as $rec_type) {
 		$first_rdr = false;
 		unset($rdr["rst_RecTypeID"]);
 		unset($rdr["rst_DetailTypeID"]);
-		unset($rdr["rst_OrderInForm"]);
+		unset($rdr["rst_DisplayOrder"]);
 		print "\t\t\t\"" . $rdr_rdt_id . "\": [ \"" . join("\", \"", array_map("slash", $rdr)) . "\" ]";
 	}
 }

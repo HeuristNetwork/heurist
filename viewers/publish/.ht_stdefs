@@ -51,11 +51,6 @@ $MAINTABLES['KEYWORD'] = 'usrTags';
 
 $MAINTABLES['REFTYPE'] = 'defRecTypes';
 	$PKEY['REFTYPE'] = 'rty_ID';
-	$JOINS['REFTYPE'] = array('ACTIVE_REFTYPE-ID' => 'rty_ID');
-
-$MAINTABLES['ACTIVE_REFTYPE'] = 'active_rec_types';
-	$PKEY['ACTIVE_REFTYPE'] = 'art_id';
-	$JOINS['ACTIVE_REFTYPE'] = array('REFTYPE-ID' => 'art_id');
 
 $MAINTABLES['USER'] = USERS_DATABASE.'.'.USERS_TABLE;
 	$PKEY['USER'] = USERS_ID_FIELD;
@@ -83,18 +78,9 @@ $MAINTABLES['BIB_DETAIL_REQ'] = 'defRecStructure';
 	$PKEY['BIB_DETAIL_REQ'] = 'rst_ID';
 	$LINK_KEYS['BIB_DETAIL_REQ'] = array('REFTYPE-ID' => 'rst_RecTypeID', 'BIB_DETAIL_TYPE-ID' => 'rst_DetailTypeID');
 
-$MAINTABLES['BDR_OVERRIDES'] = 'rec_detail_requirements_overrides';
-	$PKEY['BDR_OVERRIDES'] = 'rst_ID';
-	$LINK_KEYS['BDR_OVERRIDES'] = array('REFTYPE-ID' => 'rst_RecTypeID', 'BIB_DETAIL_TYPE-ID' => 'rst_DetailTypeID');
-
 
 $MAINTABLES['BIB_DETAIL_LOOKUP'] = 'defTerms';
 	$PKEY['BIB_DETAIL_LOOKUP'] = 'trm_ID';
-	$JOINS['BIB_DETAIL_LOOKUP'] = array('ACTIVE_BIB_DETAIL_LOOKUP-ID' => 'trm_ID');
-
-$MAINTABLES['ACTIVE_BIB_DETAIL_LOOKUP'] = 'active_rec_detail_lookups';
-	$PKEY['ACTIVE_BIB_DETAIL_LOOKUP'] = 'ardl_id';
-	$JOINS['ACTIVE_BIB_DETAIL_LOOKUP'] = array('BIB_DETAIL_LOOKUP-ID' => 'ardl_id');
 
 
 /* Define lookups for fields which should be coded values (many-to-one with main table)

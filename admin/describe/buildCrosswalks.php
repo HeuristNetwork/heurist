@@ -99,13 +99,13 @@ CREATE TABLE IF NOT EXISTS `temp_rec_detail_requirements` (
   `rst_ID` smallint(6) NOT NULL,
   `rst_RecTypeID` smallint(5) unsigned NOT NULL default '0',
   `rst_DetailTypeID` smallint(6) NOT NULL default '0',
-  `rdr_required` enum('Y','R','O','X') NOT NULL default 'O',
-  `rst_NameInForm` varchar(255) default NULL,
-  `rst_Description` text,
-  `rst_Prompt` text,
-  `rst_FormHelpText` varchar(255) default NULL,
-  `rst_Repeats` tinyint(1) NOT NULL default '0',
-  `rst_OrderInForm` smallint(6) default NULL,
+  `rst_RequirementType` enum('Required','Recommended','Optional','Forbidden') NOT NULL default 'Optional',
+  `rst_DisplayName` varchar(255) default NULL,
+  `rst_DisplayDescription` text,
+  `rst_DisplayPrompt` text,
+  `rst_DisplayHelp` varchar(255) default NULL,
+  `rst_MaxValues` tinyint(1) NOT NULL default '0',
+  `rst_DisplayOrder` smallint(6) default NULL,
   `rst_DisplayWidth` smallint(6) default NULL,
   `rst_DefaultValue` varchar(255) default NULL,
   `rst_RecordMatchOrder` tinyint(1) NOT NULL,
@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS `temp_rec_detail_requirements` (
   UNIQUE KEY `bdr_reftype` (`rst_RecTypeID`,`rst_DetailTypeID`)
   ) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
 
-  INSERT INTO `temp_rec_detail_requirements` (`rst_ID`, `rst_RecTypeID`, `rst_DetailTypeID`, `rdr_required`, `rst_NameInForm`, `rst_Description`, `rst_Prompt`, `rst_FormHelpText`, `rst_Repeats`, `rst_OrderInForm`, `rst_DisplayWidth`, `rst_DefaultValue`, `rst_RecordMatchOrder`) VALUES
+  INSERT INTO `temp_rec_detail_requirements` (`rst_ID`, `rst_RecTypeID`, `rst_DetailTypeID`, `rst_RequirementType`, `rst_DisplayName`, `rst_DisplayDescription`, `rst_DisplayPrompt`, `rst_DisplayHelp`, `rst_MaxValues`, `rst_DisplayOrder`, `rst_DisplayWidth`, `rst_DefaultValue`, `rst_RecordMatchOrder`) VALUES
 
 // Steve: Parse the stream from get_definitions until you get to a line with    > Start
 // then send the stream to MySQL until you get to a line with   > End

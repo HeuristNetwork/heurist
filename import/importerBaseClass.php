@@ -702,7 +702,7 @@ error_log(print_r($bib_requirement_names[55], 1));
 		if (! $hash_info) {
 			// hash_info contains all the good stuff we need for determining the hash, indexed by reftype, and then by dty_ID
 			$res = mysql_query("select rst_RecTypeID, dty_ID, dty_Type = 'resource' as isResource from defRecStructure, defDetailTypes
-			                     where rst_DetailTypeID=dty_ID and ((dty_Type != 'resource' and rst_RecordMatchOrder) or (dty_Type = 'resource' and rdr_required = 'Y'))
+			                     where rst_DetailTypeID=dty_ID and ((dty_Type != 'resource' and rst_RecordMatchOrder) or (dty_Type = 'resource' and rst_RequirementType = 'Required'))
 			                  order by rst_RecTypeID, dty_Type = 'resource', dty_ID");
 			$hash_info = array();
 			while ($row = mysql_fetch_assoc($res)) {
@@ -760,7 +760,7 @@ error_log(print_r($bib_requirement_names[55], 1));
 		if (! $hash_info) {
 			// hash_info contains all the good stuff we need for determining the hash, indexed by reftype, and then by dty_ID
 			$res = mysql_query("select rst_RecTypeID, dty_ID, dty_Type = 'resource' as isResource from defRecStructure, defDetailTypes
-			                     where rst_DetailTypeID=dty_ID and ((dty_Type != 'resource' and rst_RecordMatchOrder) or (dty_Type = 'resource' and rdr_required = 'Y'))
+			                     where rst_DetailTypeID=dty_ID and ((dty_Type != 'resource' and rst_RecordMatchOrder) or (dty_Type = 'resource' and rst_RequirementType = 'Required'))
 			                  order by rst_RecTypeID, dty_Type = 'resource', dty_ID");
 			$hash_info = array();
 			while ($row = mysql_fetch_assoc($res)) {
@@ -828,7 +828,7 @@ error_log(print_r($bib_requirement_names[55], 1));
 		if (! $this->_container) return true;
 
 		$containerBDType = intval($reftype_to_bdt_id_map[ $this->_container->getReferenceType() ]);
-		$res = mysql_query("select * from defRecStructure where rst_DetailTypeID = $containerBDType and rst_RecTypeID = " . $this->_reftype . " and rdr_required = 'y'");
+		$res = mysql_query("select * from defRecStructure where rst_DetailTypeID = $containerBDType and rst_RecTypeID = " . $this->_reftype . " and rst_RequirementType = 'Required'");
 		if (mysql_num_rows($res) == 0) return true;
 		return false;
 	}
@@ -930,7 +930,7 @@ function load_bib_detail_requirements() {
 
 	// mysql_connection_db_select('SHSSERI_bookmarks');
 	//mysql_connection_select(DATABASE);
-	$res = mysql_query('select rst_RecTypeID, rst_DetailTypeID from defRecStructure left join defDetailTypes on rst_DetailTypeID=dty_ID where rdr_required = "Y" and dty_Type != "resource"');
+	$res = mysql_query('select rst_RecTypeID, rst_DetailTypeID from defRecStructure left join defDetailTypes on rst_DetailTypeID=dty_ID where rst_RequirementType = "Y" and dty_Type != "resource"');
 	$rec_detail_requirements = array();
 	while ($row = mysql_fetch_row($res)) {
 		if (array_key_exists($row[0], $rec_detail_requirements))
@@ -943,11 +943,11 @@ function load_bib_detail_requirements() {
 
 function load_bib_requirement_names() {
 	// $bib_requirement_names is an array of arrays; outer array is indexed by reftype,
-	// inner array is a mapping of dty_ID to rst_NameInForm, union a mapping of rst_NameInForm to dty_ID
+	// inner array is a mapping of dty_ID to rst_DisplayName, union a mapping of rst_DisplayName to dty_ID
 	global $bib_requirement_names;
 
 	// mysql_connection_db_select('SHSSERI_bookmarks');
-	$res = mysql_query('select rst_RecTypeID, rst_DetailTypeID, rst_NameInForm, dty_Name from defRecStructure left join defDetailTypes on rst_DetailTypeID=dty_ID');
+	$res = mysql_query('select rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, dty_Name from defRecStructure left join defDetailTypes on rst_DetailTypeID=dty_ID');
 	$bib_requirement_names = array();
 	while ($row = mysql_fetch_row($res)) {
 		if (! array_key_exists($row[0], $bib_requirement_names))
@@ -989,7 +989,7 @@ function load_heurist_reftypes() {
 	$heurist_reftypes = array();
 
 	// mysql_connection_db_select('SHSSERI_bookmarks');
-	$res = mysql_query('select * from active_rec_types left join defRecTypes on rty_ID=art_id where rty_ID');
+	$res = mysql_query('select * from join defRecTypes where rty_ID');
 	while ($row = mysql_fetch_assoc($res)) {
 		// fix up the title masks
 
@@ -1007,7 +1007,7 @@ function load_reftype_name_to_id() {
 	global $reftype_name_to_id;
 
 	// mysql_connection_db_select('SHSSERI_bookmarks');
-	$res = mysql_query('select rty_ID, rty_Name from active_rec_types left join defRecTypes on rty_ID=art_id where rty_ID');
+	$res = mysql_query('select rty_ID, rty_Name from defRecTypes where rty_ID');
 	$reftype_name_to_id = array();
 	while ($row = mysql_fetch_row($res))
 		$reftype_name_to_id[strtolower($row[1])] = $row[0];

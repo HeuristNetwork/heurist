@@ -38,7 +38,7 @@ $res = mysql_query("select distinct grp.ugr_ID, grp.ugr_Name, grp.ugr_LongName, 
 					where ugl_GroupID=grp.ugr_ID");
 $workgroups = array();
 while ($row = mysql_fetch_row($res)) { array_push($workgroups, $row); }
-$res = mysql_query("select rty_ID, rty_Name, rty_CanonicalTitleMask from active_rec_types inner join defRecTypes on rty_ID=art_id");
+$res = mysql_query("select rty_ID, rty_Name, rty_CanonicalTitleMask from defRecTypes ");
 $recordTypes = array();
 while ($row = mysql_fetch_row($res)) array_push($recordTypes, $row);
 
@@ -99,13 +99,13 @@ foreach ($rec_types as $rec_type) {
 		array_push($detailRequirements, array(
 			$rdr["rst_RecTypeID"],
 			$rdr["rst_DetailTypeID"],
-			$rdr["rdr_required"],
-			intval($rdr["rst_Repeats"]),
-			($rdr["rst_NameInForm"] != $detailTypesById[$rdr["rst_DetailTypeID"]][1] ? $rdr["rst_NameInForm"] : null),
-			($rdr["rst_Prompt"] != $detailTypesById[$rdr["rst_DetailTypeID"]][2] ? $rdr["rst_Prompt"]: null),
+			$rdr["rst_RequirementType"],
+			intval($rdr["rst_MaxValues"]),
+			($rdr["rst_DisplayName"] != $detailTypesById[$rdr["rst_DetailTypeID"]][1] ? $rdr["rst_DisplayName"] : null),
+			($rdr["rst_DisplayPrompt"] != $detailTypesById[$rdr["rst_DetailTypeID"]][2] ? $rdr["rst_DisplayPrompt"]: null),
 			intval($rdr["rst_RecordMatchOrder"]),
 			intval($rdr["rst_DisplayWidth"]),
-			intval($rdr["rst_OrderInForm"]),
+			intval($rdr["rst_DisplayOrder"]),
 			$rdr["rst_DefaultValue"]
 		));
 	}

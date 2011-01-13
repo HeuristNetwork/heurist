@@ -141,7 +141,7 @@ while ($row = mysql_fetch_assoc($res)) {
 	$RTN[$row['rty_ID']] = $row['rty_Name'];
 	foreach (getRecordRequirements($row['rty_ID']) as $rdr_rdt_id => $rdr) {
 	// type-specific names for detail types
-		$RQS[$rdr['rst_RecTypeID']][$rdr['rst_DetailTypeID']] = $rdr['rst_NameInForm'];
+		$RQS[$rdr['rst_RecTypeID']][$rdr['rst_DetailTypeID']] = $rdr['rst_DisplayName'];
 	}
 }
 

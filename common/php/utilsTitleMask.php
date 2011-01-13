@@ -377,7 +377,7 @@ function _title_mask__get_rec_detail_requirements() {
 
 		$res = mysql_query('select rst_RecTypeID, dty_ID, lower(dty_Name) as dty_Name, dty_PtrConstraints
 		                      from defRecStructure left join defDetailTypes on rst_DetailTypeID=dty_ID
-		                     where rdr_required in ("Y", "R", "O")');
+		                     where rst_RequirementType in ("Required", "Recommended", "Optional")');
 		while ($row = mysql_fetch_assoc($res)) {
 			if (@$rdr[$row['rst_RecTypeID']]) {
 				$rdr[$row['rst_RecTypeID']][$row['dty_ID']] = $row['dty_PtrConstraints'];

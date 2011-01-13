@@ -40,7 +40,7 @@ img {vertical-align: text-bottom;}
 <?php
 require_once("dbMySqlWrappers.php");
 	mysql_connection_db_select(DATABASE);
-	$res = mysql_query('select rty_ID, rty_Name from active_rec_types left join defRecTypes on rty_ID=art_id order by rty_ID');
+	$res = mysql_query('select rty_ID, rty_Name from  defRecTypes order by rty_ID');
 	while ($row = mysql_fetch_row($res)) {
 ?>
      <div>

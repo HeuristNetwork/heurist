@@ -118,7 +118,7 @@ function showRecordRollback ($record, $changes) {
 	foreach ($reqs as $dt => $req) {
 		if (array_key_exists($dt, $record["details"])) {
 			$values = $record["details"][$dt];
-			showDetails($dt . ': ' . $req["rst_NameInForm"], $values, $changes);
+			showDetails($dt . ': ' . $req["rst_DisplayName"], $values, $changes);
 		}
 	}
 
@@ -130,7 +130,7 @@ function showRecordRollback ($record, $changes) {
 
 	foreach ($changes["inserts"] as $insert) {
 		if (array_key_exists($insert["ard_DetailTypeID"], $reqs)) {
-			$name = $reqs[$insert["ard_DetailTypeID"]]["rst_NameInForm"];
+			$name = $reqs[$insert["ard_DetailTypeID"]]["rst_DisplayName"];
 		} else {
 			$name = $detail_names[$insert["ard_DetailTypeID"]];
 		}

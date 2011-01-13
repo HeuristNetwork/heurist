@@ -31,7 +31,7 @@ if (strtotime(@$_SERVER["HTTP_IF_MODIFIED_SINCE"]) > $lastModified) {
 print "HEURIST_reftypes = {};\n\n";
 
 $names = array();
-$res = mysql_query("select rty_ID, rty_Name from active_rec_types left join defRecTypes on rty_ID=art_id order by rty_Name");
+$res = mysql_query("select rty_ID, rty_Name from defRecTypes order by rty_Name");
 while ($row = mysql_fetch_assoc($res)) {
 	$names[$row["rty_ID"]] = $row["rty_Name"];
 }
@@ -43,15 +43,14 @@ $other = array();
 $res = mysql_query("select distinct rty_ID, grp.ugr_Name, rty_RecTypeGroupID
 					  from defRecTypes
 				 left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_UserID=".get_user_id()."
-				 left join rec_detail_requirements_overrides on rst_RecTypeID=rty_ID
-				 left join ".USERS_DATABASE.".sysUGrps grp on grp.ugr_ID=ugl_GroupID and grp.ugr_ID=rdr_wg_id
-				  order by grp.ugr_Name is null, grp.ugr_Name, rty_RecTypeGroupID > 1, rty_Name");
+				 left join ".USERS_DATABASE.".sysUGrps grp on grp.ugr_ID=ugl_GroupID
+				  order by grp.ugr_Name is null, grp.ugr_Name, rty_RecTypeGroupID, rty_Name");
 while ($row = mysql_fetch_assoc($res)) {
 	if (@$row["ugr_Name"]) {
 		if (! @$groups[$row["ugr_Name"]]) $groups[$row["ugr_Name"]] = array();
 		array_push($groups[$row["ugr_Name"]], $row["rty_ID"]);
 	}
-	if ($row["rty_RecTypeGroupID"]) {
+	if ($row["rty_RecTypeGroupID"] == 1) {
 		array_push($primary, $row["rty_ID"]);
 	} else {
 		array_push($other, $row["rty_ID"]);

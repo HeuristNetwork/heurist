@@ -459,7 +459,7 @@ top.HEURIST.edit = {
 			var bdrs = {};
 			var orig_bdrs = top.HEURIST.bibDetailRequirements.valuesByReftypeID[reftypeID];
 			var wg_bdrs = top.HEURIST.user.bibDetailRequirements.valuesByReftypeID[reftypeID];
-			var precedence = { "Y": 4, "R": 3, "O": 2, "X": 1 };
+			var precedence = { 'Required': 4, 'Recommended': 3, 'Optional': 2, 'Forbidden': 1 };
 
 			// keep track of the original requiremences, as a fallback if they're not overridden
 			for (var bdt_id in orig_bdrs) {
@@ -552,7 +552,7 @@ top.HEURIST.edit = {
 		} else {
 			// fake low-rent bdr if reftype isn't specified
 			// name, prompt,default, required, repeatable, size, match
-			bdr = [ bdt[1], "", "", "O", 0, 0, 0 ];
+			bdr = [ bdt[1], "", "", 'Optional', 0, 0, 0 ];
 		}
 
 		var newInput;
@@ -779,7 +779,7 @@ top.HEURIST.edit = {
 		var i, l = order.length;
 		for (i = 0; i < l; ++i) {
 			var bdtID = order[i];
-			if (bdrs[bdtID][3] == "X") continue;
+			if (bdrs[bdtID][3] == 'Forbidden') continue;
 
 			var newInput = top.HEURIST.edit.createInput(bdtID, reftypeID, bdValues[bdtID] || [], container);
 			inputs.push(newInput);
@@ -1145,9 +1145,9 @@ top.HEURIST.edit.inputs.BibDetailInput = function(bibDetailType, bibDetailRequir
 	this.shortName = bibDetailRequirements[0];
 
 	var required = bibDetailRequirements[3];
-		if (required == "O") required = "optional";
-		else if (required == "Y") required = "required";
-		else if (required == "R") required = "recommended";
+		if (required == 'Optional') required = "optional";
+		else if (required == 'Required') required = "required";
+		else if (required == 'Recommended') required = "recommended";
 		else required = "";
 	this.required = required;
 

@@ -741,7 +741,7 @@ var HRecord = function() {
 			if (HDetailManager.getDetailMatching(_type, detailType)) { _hhash = null; }
 		}
 		else {
-			if (HDetailManager.getDetailRequiremence(_type, detailType) === "Y") { _hhash = null; }
+			if (HDetailManager.getDetailRequiremence(_type, detailType) === 'Required') { _hhash = null; }
 		}
 // FIXME
 // need to invalidate title as necessary
@@ -1856,10 +1856,10 @@ HAPI.Variety = HVariety;
 
 
 var HRequiremence = {
-	REQUIRED: "Y",
-	RECOMMENDED: "R",
-	OPTIONAL: "O",
-	FORBIDDEN: "X",
+	REQUIRED: 'Required',
+	RECOMMENDED: 'Recommended',
+	OPTIONAL: 'Optional',
+	FORBIDDEN: 'Forbidden',
 
 	getClass: function() { return "HRequiremence"; }
 };
@@ -2299,16 +2299,16 @@ var HDetailManager = new function(detailTypes, detailRequirements) {
         dr = detailRequirements[i];
         _recordPlusTypeDetails[dr[0]+"."+dr[1]] = dr.slice(2, 10);
 
-        if (dr[2] !== "X") {    // non-excluded detail
+        if (dr[2] !== 'Forbidden') {    // non-excluded detail
             type = _typesById[dr[1]];
             if (_detailTypesByRecordType[dr[0]]) { _detailTypesByRecordType[dr[0]].push(type); }
             else { _detailTypesByRecordType[dr[0]] = [type]; }
 
-            if (dr[2] === "Y") {    // required detail
+            if (dr[2] === 'Required') {    // required detail
                 if (_requiredDetailTypesByRecordType[dr[0]]) { _requiredDetailTypesByRecordType[dr[0]].push(type); }
                 else { _requiredDetailTypesByRecordType[dr[0]] = [type]; }
             }
-            else if (dr[2] === "R") {    // recommended detail
+            else if (dr[2] === 'Recommended') {    // recommended detail
                 if (_recommendedDetailTypesByRecordType[dr[0]]) { _recommendedDetailTypesByRecordType[dr[0]].push(type); }
                 else { _recommendedDetailTypesByRecordType[dr[0]] = [type]; }
             }

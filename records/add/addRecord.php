@@ -220,9 +220,8 @@ if (! @$_REQUEST['_submit']  &&  $_REQUEST['bkmrk_bkmk_url']) {
 			header('Location: ' . BASE_PATH . 'records/addrec/popup_add_resource.php'
 								. '?instance='.HEURIST_INSTANCE
 								. '&t=' . urlencode($_REQUEST['t'])
-								. '&error_msg=' . urlencode('Record Type #'. $rt . ' does not exist in this instance of Heurist'
-								. ' (it may not have been enabled). Please choose the record type from the pulldown ')
-								. '&wg_id=' . urlencode(intval($_REQUEST['bib_workgroup'])));
+								. '&error_msg=' . urlencode('Record Type #'. $rt . ' does not exist in this Heurist database'
+								. ' (it may not have been enabled). Please choose the record type from the pulldown '));
 			return;
 		}
 
@@ -264,9 +263,8 @@ if (! $rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 		header('Location: ' . BASE_PATH . 'records/addrec/popup_add_resource.php'
 							. '?instance='.HEURIST_INSTANCE
 							. '&t=' . urlencode($_REQUEST['t'])
-							. '&error_msg=' . urlencode('Record Type #'. $rt . ' does not exist in this instance of Heurist'
-							. ' (it may not have been enabled). Please choose the record type from the pulldown ')
-							. '&wg_id=' . urlencode(intval($_REQUEST['bib_workgroup'])));
+							. '&error_msg=' . urlencode('Record Type #'. $rt . ' does not exist in this Heurist Database'
+							. ' (it may not have been enabled). Please choose the record type from the pulldown '));
 		return;
 	}
 	mysql__insert('Records', array('rec_Title' => $_REQUEST['bkmrk_bkmk_title'],
@@ -277,7 +275,7 @@ if (! $rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 		                      'rec_RecTypeID' => ($_REQUEST['bib_reftype']? intval($_REQUEST['bib_reftype']) : NULL),
 		                      'rec_OwnerUGrpID' => intval($_REQUEST['bib_workgroup']),
 		                      'rec_NonOwnerVisibility' => (intval($_REQUEST['bib_workgroup'])? ((strtolower($_REQUEST['bib_visibility']) == 'hidden')? 'Hidden' : 'Viewable') : NULL),
-	                              'rec_FlagTemporary' => ! $_REQUEST['bkmrk_bkmk_title']));
+	                              'rec_FlagTemporary' => ! $_REQUEST['bkmrk_bkmk_title'])); // saw BUG???
 	$rec_id = mysql_insert_id();
 	if ($_REQUEST['bkmrk_bkmk_title']) mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id.',160,"'.addslashes($_REQUEST['bkmrk_bkmk_title']).'")');
 	$inserts = array();
@@ -454,8 +452,7 @@ function check_reftype_exist($rt) {
 global $usrID;	//saw TODO check that this still works in the new structure.
 	$res = mysql_query("select distinct rty_ID,rty_Name from defRecTypes
 	                 left join ".USERS_DATABASE.".".USER_GROUPS_TABLE." on ".USER_GROUPS_USER_ID_FIELD."=$usrID
-	                 left join rec_detail_requirements_overrides on rst_RecTypeID=rty_ID
-	                 left join ".USERS_DATABASE.".".GROUPS_TABLE." on ".GROUPS_ID_FIELD."=".USER_GROUPS_GROUP_ID_FIELD." and ".GROUPS_ID_FIELD."=rdr_wg_id
+	                 left join ".USERS_DATABASE.".".GROUPS_TABLE." on ".GROUPS_ID_FIELD."=".USER_GROUPS_GROUP_ID_FIELD."
 	                  where rty_ID
 	                  order by ".GROUPS_NAME_FIELD." is null, ".GROUPS_NAME_FIELD.", rty_RecTypeGroupID > 1, rty_Name");
 	while ($row = mysql_fetch_assoc($res)) {
