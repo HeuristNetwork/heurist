@@ -10,7 +10,7 @@
 	top.HAPI.importSymbols(top, this);
   </script>
   <script src="../../../external/tinymce/jscripts/tiny_mce/tiny_mce.js"></script>
-  <script src="../../woot/js/woot.js"></script>
+  <script src="../../woot/woot.js"></script>
 
  </head>
  <body onload="onshow()">
@@ -120,7 +120,7 @@ var Comment = function(parentComment, details) {
 	var detailText = details.text || "";
 		detailText = detailText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 		detailText = detailText.replace(/(http:\/\/[\041-\176]+)/g, "<a href=\"$1\">$1</a>");
-		detailText = detailText.replace(/\[(\d+)\]/g, "[<a href=\""+ installDir +"records/viewrec/view.php?bib_id=$1\">$1</a>]");
+		detailText = detailText.replace(/\[(\d+)\]/g, "[<a href=\""+ installDir +"records/view/viewRecord.php?bib_id=$1\">$1</a>]");
 
 	this.textDiv = this.innerDiv.appendChild(this.document.createElement("div"));
 		this.textDiv.className = "text";
@@ -177,7 +177,7 @@ Comment.prototype.reply = function() {
 Comment.prototype.remove = function() {
 	if (! confirm("Delete this comment?")) return;
 
-	var fakeForm = { action: installDir + "records/comments/save-comment.php",
+	var fakeForm = { action: installDir + "records/comments/saveThreadedComments.php",
 			elements: [
 				{ name: "cmt_ID", value: this.id },
 				{ name: "delete", value: 1 }
@@ -313,7 +313,7 @@ EditableComment.prototype.save = function() {
 		return;
 	}
 
-	var fakeForm = { action: installDir + "records/comments/save-comment.php",
+	var fakeForm = { action: installDir + "records/comments/saveThreadedComments.php",
 			elements: [
 				{ name: "cmt_ID", value: this.id },
 				{ name: "bib_id", value: parent.HEURIST.edit.record.bibID },

@@ -32,11 +32,11 @@
 
  <body width=600 height=400>
 
-  <script src="../../common/js/heurist.js"></script>
-  <script src="../../common/php/display-preferences.php"></script>
+  <script src="../../common/js/utilsLoad.js"></script>
+  <script src="../../common/php/displayPreferences.php"></script>
   <script>
 window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-window.HEURIST.loadScript(top.HEURIST.basePath +'common/php/bib.php?bib_id='+window.HEURIST.parameters['bib_id']+'&bkmk_id='+window.HEURIST.parameters['bkmk_id'], true);
+window.HEURIST.loadScript(top.HEURIST.basePath +'common/php/loadRecordData.php?bib_id='+window.HEURIST.parameters['bib_id']+'&bkmk_id='+window.HEURIST.parameters['bkmk_id'], true);
 
 function showRecordProperties() {
 	if (! window.HEURIST.record) {
@@ -60,7 +60,7 @@ function loadPublicEditFrame() {
 
 	var parameters = window.HEURIST.record;
 	if (parameters  &&  parameters.bibID) {
-		editFrame.src = top.HEURIST.basePath + "records/editrec/tabs/public-tab.html?bib_id=" + parameters.bibID;
+		editFrame.src = top.HEURIST.basePath + "records/editrec/tabs/publicInfoTab.html?bib_id=" + parameters.bibID;
 		editFrame.style.display = "block";
 	}
 

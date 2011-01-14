@@ -2,8 +2,8 @@
 
 define('SAVE_URI', 'disabled');
 
-require_once(dirname(__FILE__).'/../../common/connect/cred.php');
-require_once(dirname(__FILE__).'/../../common/connect/db.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 if (! is_logged_in()) return;
 
@@ -49,7 +49,7 @@ function buildworkgroupTagselect(wgID) {
 
 
 function update_link() {
-	var base = "<?= HEURIST_URL_BASE?>records/addrec/add.php?addref=1&instance=<?=HEURIST_INSTANCE?>";
+	var base = "<?= HEURIST_URL_BASE?>records/add/addRecordPopup.php?addref=1&instance=<?=HEURIST_INSTANCE?>";
 	var link = base + compute_args();
 
 	var tags = $("#add-link-tags").val();
@@ -139,7 +139,7 @@ function add_note(e) {
 
     if (! rt) rt = "2";  //added ian 19/9/08 to re-enable notes as default
 
-	top.location.href = '<?= HEURIST_URL_BASE?>records/addrec/add.php?addref=1&instance=<?=HEURIST_INSTANCE?>&bib_reftype='+rt + extra_parms;
+	top.location.href = '<?= HEURIST_URL_BASE?>records/add/addRecordPopup.php?addref=1&instance=<?=HEURIST_INSTANCE?>&bib_reftype='+rt + extra_parms;
 
 }
 function note_type_click() {

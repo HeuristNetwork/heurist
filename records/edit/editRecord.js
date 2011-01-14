@@ -1,4 +1,4 @@
-	/* heurist-edit.js
+	/* heurist-editRecord.js
 
 	Copyright 2005 - 2010 University of Sydney Digital Innovation Unit
 	This file is part of the Heurist academic knowledge management system (http://HeuristScholar.org)
@@ -26,16 +26,16 @@ if (! top.HEURIST.edit) {
 
 top.HEURIST.edit = {
 	modules: {
-		'public': { url: 'tabs/public-tab.html', 'link-id': 'public-link', loaded: false, loading: false, changed: false,
+		'public': { url: 'tabs/publicInfoTab.html', 'link-id': 'public-link', loaded: false, loading: false, changed: false,
 				preload: function() { return (top.HEURIST.edit.record.bibID  &&  top.HEURIST.edit.record.bibID != 0); } },
 		'personal': { url: 'tabs/personal-tab.html', 'link-id': 'personal-link', loaded: false, loading: false, changed: false,
 				preload: function() { return (top.HEURIST.edit.record.bkmkID  &&  top.HEURIST.edit.record.bkmkID != 0); },
 				disabledFunction: function() { top.HEURIST.edit.addMissingBookmark() } },
-		'annotation': { url: 'tabs/annotation-tab.html', 'link-id': 'annotation-link', loaded: false, loading: false, changed: false,
+		'annotation': { url: 'tabs/annotationTab.html', 'link-id': 'annotation-link', loaded: false, loading: false, changed: false,
 				preload: function() { return true; } },
-		'workgroups': { url: 'tabs/workgroups-tab.html', 'link-id': 'workgroups-link', loaded: false, loading: false, changed: false,
+		'workgroups': { url: 'tabs/usergroupsTab.html', 'link-id': 'workgroups-link', loaded: false, loading: false, changed: false,
 				preload: function() { return (top.HEURIST.edit.record.bibID  &&  top.HEURIST.edit.record.bibID != 0  &&  top.HEURIST.user.workgroups.length > 0); } },
-		'relationships': { url: 'tabs/relationships-tab.html', 'link-id': 'relationships-link', loaded: false, loading: false, changed: false,
+		'relationships': { url: 'tabs/relationshipsTab.html', 'link-id': 'relationships-link', loaded: false, loading: false, changed: false,
 				preload: function() { return (top.HEURIST.edit.record.bibID  &&  top.HEURIST.edit.record.bibID != 0); } }
 	},
 
@@ -310,7 +310,7 @@ top.HEURIST.edit = {
 		if (personalWindow  &&  ! personalWindow.tagCheckDone  &&  personalWindow.document.getElementById("tags").value.replace(/^\s+|\s+$/g, "") == "") {
 			// personal tags field is empty -- popup the add tags dialogue
 			personalWindow.tagCheckDone = true;
-			top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "records/tags/add-tags.html?no-tags", { callback: function(tags) {
+			top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "records/tags/addTagsPopup.html?no-tags", { callback: function(tags) {
 				if (tags) {
 					personalWindow.document.getElementById("tags").value = tags;
 					top.HEURIST.edit.changed("personal");
@@ -1443,7 +1443,7 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 		newDiv.appendChild(hiddenElt);	// have to do this AFTER the type is set
 
 	top.HEURIST.registerEvent(editImg, "click", function() {
-		top.HEURIST.util.popupURL(window,top.HEURIST.basePath +"records/editrec/mini-edit.html?bib_id=" + hiddenElt.value, {
+		top.HEURIST.util.popupURL(window,top.HEURIST.basePath +"records/edit/formEditRecordPopup.html?bib_id=" + hiddenElt.value, {
 			callback: function(bibTitle) { if (bibTitle) textElt.defaultValue = textElt.value = bibTitle; }
 		});
 	});
@@ -1474,7 +1474,7 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.chooseResource = functi
 	var thisRef = this;
 
 	if (! searchValue) searchValue = element.textElt.value;
-	var url = top.HEURIST.basePath+"records/pointer/bib-list.html?q="+encodeURIComponent(searchValue)
+	var url = top.HEURIST.basePath+"records/pointer/selectRecordFromSearch.html?q="+encodeURIComponent(searchValue)
 	if (element.input.constrainReftype)
 		url += "&t="+element.input.constrainReftype;
 	top.HEURIST.util.popupURL(window, url, {
@@ -1626,7 +1626,7 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 
 		var link = inputDiv.appendChild(this.document.createElement("a"));
 			if (bdValue.file.nonce) {
-				link.href = top.HEURIST.basePath+"records/files/fetch_file.php/" + /*encodeURIComponent(bdValue.file.origName)*/
+				link.href = top.HEURIST.basePath+"records/files/downloadFile.php/" + /*encodeURIComponent(bdValue.file.origName)*/
 								"?ulf_ID=" + encodeURIComponent(bdValue.file.nonce);
 			} else if (bdValue.file.url) {
 				link.href = bdValue.file.url;
@@ -1796,7 +1796,7 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 		// This is a bit complicated:
 		// We don't put in an input if there's already a value,
 		// because MySQL says   bd_geo != geomfromtext(astext(bd_geo))   so we would get false deltas.
-		// save-biblio-data.php leaves bib_detail rows alone if they are not mentioned in $_POST.
+		// edit/saveRecordDetails.php leaves bib_detail rows alone if they are not mentioned in $_POST.
 		// We give it the name (underscore + name), and only give it the proper name if we try to edit the value.
 		if (bdValue  &&  bdValue.id  && ! bdValue.geo) {
 			// as from removeGeo - we want to save this deletion!
@@ -1987,7 +1987,7 @@ d	} else if (reminderDetails.email) {
 };
 top.HEURIST.edit.Reminder.prototype.remove = function() {
 	var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
-	var fakeForm = { action: top.HEURIST.basePath+"records/reminders/save-reminder.php",
+	var fakeForm = { action: top.HEURIST.basePath+"records/reminders/saveReminder.php",
 	                 elements: [ { name: "rem_ID", value: this.reminderID },
 	                             { name: "bib_id", value: windowRef.parent.HEURIST.edit.record.bibID },
 	                             { name: "save-mode", value: "delete" } ] };

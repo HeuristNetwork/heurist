@@ -1,10 +1,10 @@
 <?php
 
 $legalMethods = array(
-	"load-woot",
-	"save-woot",
-	"search-woots",
-	"fetch"
+	"loadWoot",
+	"saveWoot",
+	"searchWoots",
+	"fetchChunk"
 );
 
 function outputAsRedirect($text) {
@@ -21,10 +21,10 @@ function outputAsRedirect($text) {
 		session_start();
 		$_SESSION[$token] = $text;
 
-		header("Location: " . $baseURL . "common/messages/blank.html#token=" . $token);
+		header("Location: " . $baseURL . "common/html/blank.html#token=" . $token);
 	}
 	else {
-		header("Location: " . $baseURL . "common/messages/blank.html#data=" . urlencode($val));
+		header("Location: " . $baseURL . "common/html/blank.html#data=" . urlencode($val));
 	}
 
 	return "";
@@ -58,9 +58,9 @@ if ($callback  &&  preg_match('/^cb[0-9]+$/', $callback)) {
 $method = @$_REQUEST["method"];
 $key = @$_REQUEST["key"];
 
-require_once(dirname(__FILE__)."/../../../common/connect/cred.php");
-require_once(dirname(__FILE__)."/../../../common/connect/db.php");
-require_once("auth.php");
+require_once(dirname(__FILE__)."/../../../common/connect/applyCredentials.php");
+require_once(dirname(__FILE__)."/../../../common/php/dbMySqlWrappers.php");
+require_once("authorise.php");
 
 if (! ($auth = get_location($key))) {
 	print "{\"error\":\"unknown API key\"}";

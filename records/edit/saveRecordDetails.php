@@ -1,6 +1,5 @@
 <?php
-	/*<!-- save-biblio-data.php
-
+	/*<!-- saveRecordDetails.php
 	Copyright 2005 - 2010 University of Sydney Digital Innovation Unit
 	This file is part of the Heurist academic knowledge management system (http://HeuristScholar.org)
 	mailto:info@heuristscholar.org
@@ -29,12 +28,12 @@
 
 define('SAVE_URI', 'disabled');
 
-require_once(dirname(__FILE__)."/../common/connect/cred.php");
-require_once(dirname(__FILE__)."/../common/connect/db.php");
-require_once("TitleMask.php");
-require_once(dirname(__FILE__)."/relationships/relationships.php");
-require_once("disambig/approx-matches.php");
-require_once(dirname(__FILE__)."/../search/saved/loading.php");
+require_once(dirname(__FILE__)."/../common/connect/applyCredentials.php");
+require_once(dirname(__FILE__)."/../common/php/dbMySqlWrappers.php");
+require_once(dirname(__FILE__)."/../common/php/utilsTitleMask.php");
+require_once(dirname(__FILE__)."/../common/php/getRelationshipRecords.php");
+require_once(dirname(__FILE__)."/../disambig/findFuzzyRecordMatches.php");
+require_once(dirname(__FILE__)."/../search/getSearchResults.php");
 
 if (! is_logged_in()) return;
 
@@ -77,7 +76,7 @@ if ($updated) {
 	// Update recDetails, rec_ScratchPad and rec_Title in (parent.parent).HEURIST.record
 	print "(";
 	define("JSON_RESPONSE", 1);
-	require_once(dirname(__FILE__)."/pointer/bib.php");
+	require_once(dirname(__FILE__)."/../../common/php/loadRecordData.php");
 	print ")";
 }
 /***** END OF OUTPUT *****/

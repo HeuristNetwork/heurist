@@ -4,10 +4,10 @@
   <title>Find records</title>
  </head>
  <body width="500" height="250" >
-  <script src="../../common/js/heurist.js"></script>
+  <script src="../../common/js/utilsLoad.js"></script>
   <script>
 if (window == top) {
-	top.HEURIST.loadScript(top.HEURIST.basePath +"common/php/heurist-obj-common.php");	// core HEURIST object definitions (dynamically generated)
+	top.HEURIST.loadScript(top.HEURIST.basePath +"common/php/loadCommonInfo.php");	// core HEURIST object definitions (dynamically generated)
 }
   </script>
 
@@ -42,7 +42,7 @@ if (window == top) {
 <!--   </div>-->
    <div id="add_records_footer">
     Didn't find what you were looking for?
-    <a href="#" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/addrec/mini-add.html?reftype='+document.getElementById('t').value+'&amp;title='+document.getElementById('q').value, { callback: function(title, bd, bibID) { if (bibID) { window.close(bibID, title); } else { document.forms[0].submit(); } } }); return false;"><img src="../../common/images/add-record-small.png" />Add a new record</a>
+    <a href="#" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/formAddRecordPopup.html?reftype='+document.getElementById('t').value+'&amp;title='+document.getElementById('q').value, { callback: function(title, bd, bibID) { if (bibID) { window.close(bibID, title); } else { document.forms[0].submit(); } } }); return false;"><img src="../../common/images/add-record-small.png" />Add a new record</a>
    </div>
   </table>
   </form>
@@ -135,7 +135,7 @@ document.forms[0].submit = function() {
 	var resultsDiv = document.getElementById("results");
 	resultsDiv.innerHTML = "<i style='padding: 1ex;'>Searching ...</i>";
 
-	top.HEURIST.util.sendRequest(top.HEURIST.basePath + "records/pointer/json-bib-search.php", notifyResults, query);
+	top.HEURIST.util.sendRequest(top.HEURIST.basePath + "records/pointer/loadRecordListForSearch.php", notifyResults, query);
 
 	return false;
 }

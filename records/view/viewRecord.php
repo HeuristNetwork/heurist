@@ -2,8 +2,8 @@
 
 if (array_key_exists('alt', $_REQUEST)) define('use_alt_db', 1);
 
-require_once(dirname(__FILE__).'/../../common/connect/cred.php');
-require_once('replaced.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once('findReplacedRecord.php');
 
 if (!is_logged_in()) {
         header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
@@ -36,9 +36,9 @@ if (@$_REQUEST['bkmk_id']) {
 	$bkm_ID = $bkmk['bkm_ID'];
 }
 
-require_once(dirname(__FILE__).'/../permissions/permissions.php');
+require_once(dirname(__FILE__).'/testPermissions.php');
 if (! have_bib_permissions($rec_id)) {
-	header('Location: ' . BASE_PATH . 'common/messages/denied.html?'.$rec_id);
+	header('Location: ' . BASE_PATH . 'common/html/denied.html?'.$rec_id);
 	return;
 }
 
@@ -68,7 +68,7 @@ $rec_title = $row['rec_Title'];
 
 <div style="padding: 10px;">
  <p style="font-weight: bold;"><?= htmlspecialchars($rec_title) ?></p>
- <iframe name="viewer" frameborder="0" style="width: 100%;height: 100%;" src="<?=HEURIST_SITE_PATH?>records/viewrec/info.php?<?= ($bkm_ID ? ('bkmk_id='.$bkm_ID) : ('bib_id='.$rec_id)) ?><?= $noclutter ?>"></iframe>
+ <iframe name="viewer" frameborder="0" style="width: 100%;height: 100%;" src="<?=HEURIST_SITE_PATH?>records/view/renderRecordData.php?<?= ($bkm_ID ? ('bkmk_id='.$bkm_ID) : ('bib_id='.$rec_id)) ?><?= $noclutter ?>"></iframe>
 </div>
 
 </body>

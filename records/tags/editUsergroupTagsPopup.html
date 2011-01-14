@@ -6,9 +6,9 @@
   <title>Workgroup tags</title>
  </head>
  <body width=700 height=600>
-  <script src="../../common/js/heurist.js"></script>
-  <script src="../../common/php/display-preferences.php"></script>
-  <script src=wgtag-editor.js></script>
+  <script src="../../common/js/utilsLoad.js"></script>
+  <script src="../../common/php/displayPreferences.php"></script>
+  <script src=usergroupTagEditorLibrary.js></script>
 
     <table><tr>
 	 <td style="font-size: 150%; font-weight: bold; vertical-align: top;"><nobr>Workgroup tags &nbsp;&nbsp;</nobr></td>
@@ -51,7 +51,7 @@
 
     <tr>
      <td>
-      <a href="../../admin/workgroups/workgroup_tag_manager.php" target="blank">Modify Tag Definitions (admins only) </a>
+      <a href="../../admin/ugrps/editGroupTags.php" target="blank">Modify Tag Definitions (admins only) </a>
       <div style="font-size: 11px; ">Reload edit form to see new tags</div>
      </td>
      <td></td>
@@ -70,7 +70,7 @@
     </table>
 
     <!-- not used in this form ... just for compatibility with the edit/workgroups tab ... safe to FIXME when we refactor -->
-    <form id=wgtag-form jsonAction="update-taglinks.php" action="update-taglinks.php"></form>
+    <form id=wgtag-form jsonAction="updateRecordTagLinks.php" action="updateRecordTagLinks.php"></form>
 
 <script>
 

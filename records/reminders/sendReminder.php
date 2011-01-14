@@ -1,9 +1,10 @@
 <?php
 
-function sendReminderEmail($reminder, $USERS_DATABASE, $HOST) {
+function sendReminderEmail($reminder, $USERS_DATABASE, $HOST, $BASE_URL) {
 
 	if (! $USERS_DATABASE) $USERS_DATABASE = USERS_DATABASE;
 	if ($HOST === NULL) $HOST = HOST;
+	if ($BASE_URL === NULL) $BASE_URL = HEURIST_URL_BASE;
 
 	$recipients = array();
 	if (@$reminder['rem_Email']) {
@@ -60,7 +61,7 @@ function sendReminderEmail($reminder, $USERS_DATABASE, $HOST) {
 		$email_text = 'Reminder From: ' . ($reminder['rem_ToUserID'] == $reminder['rem_OwnerUGrpID'] ? 'you'
 										   : $owner['ugr_FirstName'].' '.$owner['ugr_LastName'].' <'.$owner['ugr_eMail'].'>') . "\n\n"
 					. 'For: "'.$bib['rec_Title'].'"' . "\n\n"
-					. 'URL: http://'.$HOST.'/heurist/?w=all&q=ids:'.$reminder['rem_RecID'] . "\n\n";
+					. 'URL: http://'.$BASE_URL.'?w=all&q=ids:'.$reminder['rem_RecID'] . "\n\n";
 					
 		if ($bib['rec_OwnerUGrpID'] && $bib['rec_NonOwnerVisibility'] == 'Hidden') {
 			$email_text .= "Note: Resource belongs to workgroup ".$bib['ugr_Name'] . "\n"
@@ -73,7 +74,7 @@ function sendReminderEmail($reminder, $USERS_DATABASE, $HOST) {
 			$email_text .= "-------------------------------------------\n\n"
 						.  "You will receive this reminder " . $reminder['rem_Freq'] . "\n"
 						.  "Click below if you do not wish to receive this reminder again:\n\n"
-						.  "http://".$HOST."/heurist/php/delete-reminder.php?r=".$reminder['rem_ID']
+						.  "http://".$BASE_URL."records/reminders/deleteReminder.php?r=".$reminder['rem_ID']
 						.  ($recipient['u'] ? "&u=".$recipient['u'] : "&e=".$recipient['e']) . "&h=".$reminder['rem_Nonce'] . "\n\n";
 		} else {
 			$email_text .= "-------------------------------------------\n\n"

@@ -1,5 +1,5 @@
 <?php
-	/*<!-- save-relations.php
+	/*<!-- saveRrelations.php
 
 	Copyright 2005 - 2010 University of Sydney Digital Innovation Unit
 	This file is part of the Heurist academic knowledge management system (http://HeuristScholar.org)
@@ -27,8 +27,8 @@
 
 define("SAVE_URI", "disabled");
 
-require_once(dirname(__FILE__)."/../../common/connect/cred.php");
-require_once(dirname(__FILE__)."/../../common/connect/db.php");
+require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
+require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 if (! is_logged_in()) return;
 
 require_once("relationships.php");

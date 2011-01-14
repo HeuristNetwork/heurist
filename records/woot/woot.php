@@ -1,6 +1,6 @@
 <?php
 
-require_once(dirname(__FILE__)."/../../common/connect/db.php");
+require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 
 define("WOOT_TABLE", "woots");
 define("CHUNK_TABLE", "woot_Chunks");

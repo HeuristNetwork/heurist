@@ -1,6 +1,6 @@
 <?php
 
-require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
 if (!is_logged_in()) {
@@ -11,7 +11,7 @@ if (!is_logged_in()) {
 error_log(print_r($LOOKUPS, 1));
 
 mysql_connection_db_overwrite(DATABASE);
-$template = file_get_contents('follow_links.html');
+$template = file_get_contents('viewRecordTags.html');
 $template = str_replace('[logged-in-user-id]', intval(get_user_id()), $template);
 
 $wg_ids = mysql__select_array(USERS_DATABASE.'.sysUsrGrpLinks', 'ugl_GroupID', 'ugl_UserID='.get_user_id());
@@ -98,7 +98,7 @@ if ($tags) {
 			if ($i++ == 3) {
 				$kwd_list .= '   <span class="collapsed"><span class="hide_on_collapse">'."\n";
 			}
-			$kwd_list .= '   <a href="'.HEURIST_SITE_PATH.'admin/users/user.php?Id='.$row['ugr_ID'].'" title="View user profile for '.$row['bkmk_user'].'"><nobr>'.$row['bkmk_user']."</nobr></a>&nbsp;\n";
+			$kwd_list .= '   <a href="'.HEURIST_SITE_PATH.'admin/ugrps/viewUserDetails.php?Id='.$row['ugr_ID'].'" title="View user profile for '.$row['bkmk_user'].'"><nobr>'.$row['bkmk_user']."</nobr></a>&nbsp;\n";
 		}
 		if ($i > 3) {
 			$kwd_list .= '   </span>'."\n";
@@ -136,7 +136,7 @@ if (mysql_num_rows($res)) {
 		if ($i++ == 3) {
 			$body->global_vars['other-users'] .= ' <span class="collapsed"><span class="hide_on_collapse">'."\n";
 		}
-		$body->global_vars['other-users'] .= ' <a href="'.HEURIST_SITE_PATH.'admin/users/user.php?Id='.$row['ugr_ID'].'" title="View user profile for '.$row['bkmk_user'].'"><nobr>'.$row['bkmk_user']."</nobr></a>&nbsp;\n";
+		$body->global_vars['other-users'] .= ' <a href="'.HEURIST_SITE_PATH.'admin/ugrps/viewUserDetails.php?Id='.$row['ugr_ID'].'" title="View user profile for '.$row['bkmk_user'].'"><nobr>'.$row['bkmk_user']."</nobr></a>&nbsp;\n";
 	}
 	if ($i > 3) {
 		$body->global_vars['other-users'] .= ' </span>'."\n";

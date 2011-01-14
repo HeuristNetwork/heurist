@@ -1,5 +1,5 @@
 <html>
-	<!-- heurist-search.html
+	<!-- editRecord.html
 
 	* Main Heurist search page: this page is the effective home page for the Heurist application *
 
@@ -25,9 +25,9 @@
 	</head>
 	<body>
 
-		<script src="../../common/js/heurist.js"></script>
-		<script src="heurist-relation.js"></script>
-		<script src="../../common/php/heurist-obj-user.php"></script>
+		<script src="../../common/js/utilsLoad.js"></script>
+		<script src="relationshipsObjectLibrary.js"></script>
+		<script src="../../common/php/loadUserInfo.php"></script>
 		<script>
 			top.HEURIST.whenLoaded("obj-user", function() {
 				if (! top.HEURIST.is_logged_in()) {
@@ -35,12 +35,12 @@
 				}
 			});
 		</script>
-		<script src="../../common/php/heurist-obj-common.php"></script>
-		<script src="../../common/php/display-preferences.php"></script>
+		<script src="../../common/php/loadCommonInfo.php"></script>
+		<script src="../../common/php/displayPreferences.php"></script>
 		<script>
 
 		</script>
-		<script src="edit.js"></script>
+		<script src="editRecord.js"></script>
 		<script>
 			var queryStr = (top.HEURIST.parameters["bib_id"]? "bib_id="+top.HEURIST.parameters["bib_id"] :
 							(window.location.search.match(/bib_id=(\d+).*$/)? window.location.search.match(/bib_id=(\d+).*$/)[1] : ""));
@@ -48,17 +48,17 @@
 				if (queryStr) queryStr += "&";
 				queryStr += "bkmk_id="+top.HEURIST.parameters["bkmk_id"];
 			}
-			top.HEURIST.loadScript(top.HEURIST.basePath +"records/pointer/bib.php?"+queryStr);
+			top.HEURIST.loadScript(top.HEURIST.basePath +"common/php/loadRecordData.php?"+queryStr);
 		</script>
 		<script>
 			top.HEURIST.whenLoaded(["record","edit-html"], function() {
 				var rec = (top && top.HEURIST && top.HEURIST.edit && top.HEURIST.edit.record ? top.HEURIST.edit.record:null);
 				var bib_id =  ((rec?rec.bibID : 0) || (window.HEURIST ? window.HEURIST.parameters["bib_id"]:0) || (top.HEURIST ? top.HEURIST.parameters["bib_id"]:0));
 				if (! rec) {
-					window.location.replace(top.HEURIST.basePath +"common/messages/invalid.html"+ (bib_id ? "?" + bib_id : ""));
+					window.location.replace(top.HEURIST.basePath +"common/html/invalid.html"+ (bib_id ? "?" + bib_id : ""));
 				}
 				if (rec.denied) {
-					window.location.replace(window.HEURIST.basePath +"common/messages/denied.html"+ (bib_id ? "?" + bib_id : ""));
+					window.location.replace(window.HEURIST.basePath +"common/html/denied.html"+ (bib_id ? "?" + bib_id : ""));
 				}
 				if (rec.replacedBy) {
 					// This record has been deprecated in favour of another ...
@@ -67,7 +67,7 @@
 				}
 			});
 		</script>
-		<script src="../../common/php/load-hapi.php"></script> <!-- FIXME:  need to just change hapi to load without instances and keys  -->
+		<script src="../../common/php/loadHAPI.php"></script> <!-- FIXME:  need to just change hapi to load without instances and keys  -->
 
 		<script>
 			top.HEURIST.registerEvent(window, "contentloaded", function() {
@@ -376,7 +376,7 @@
 						top.HEURIST.whenLoaded("record", function() {
 							document.getElementById("moddate").appendChild(document.createTextNode(top.HEURIST.edit.record.moddate));
 							var citeAs = document.getElementById("cite-as-url");
-							citeAs.href = "http://"+window.location.host+ top.HEURIST.basePath +"records/viewrec/view.php?instance="+ top.HEURIST.instance.name +"&bib_id=" + top.HEURIST.edit.record.bibID;
+							citeAs.href = "http://"+window.location.host+ top.HEURIST.basePath +"records/view/viewRecord.php?instance="+ top.HEURIST.instance.name +"&bib_id=" + top.HEURIST.edit.record.bibID;
 							citeAs.appendChild(document.createTextNode(citeAs.href));
 						});
 					</script>
@@ -444,7 +444,7 @@
 	</div>
 </div>
 
-<script src="../disambig/disambiguate.js"></script>
+<script src="../disambig/similarRecordsPopup.js"></script>
 <script>
 	function popupDisambiguation(matches) {
 		_popupDisambiguation(matches, function(choice) {
@@ -459,7 +459,7 @@
 					top.HEURIST.edit.unchanged(eachName);
 				}
 
-				top.location.replace(top.HEURIST.basePath+"records/editrec/heurist-edit.html?bib_id="+choice.details.id);
+				top.location.replace(top.HEURIST.basePath+"records/edit/editRecord.html?bib_id="+choice.details.id);
 			}
 		});
 	}
