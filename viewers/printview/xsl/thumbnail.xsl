@@ -73,7 +73,7 @@
 			
 			<xsl:when test="not (detail[@id=224]) and (detail[@id=603])">
 				<div class="thumbnail">
-					<img  src="{$hBase}common/php/resize_image.php?file_url={detail[@id=603]}&amp;w=140" title="603"/>
+					<img  src="{$hBase}common/php/resizeImage.php?file_url={detail[@id=603]}&amp;w=140" title="603"/>
 				</div>
 			</xsl:when>
 

@@ -8,7 +8,7 @@
 
 	// using ob_gzhandler makes this stuff up on IE6-
 
-	require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
 	header('Content-type: text/javascript');
 

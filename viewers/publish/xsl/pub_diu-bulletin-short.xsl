@@ -47,7 +47,7 @@
           <tr>
             <td>
               <a target="_new"
-                href="{$hBase}records/editrec/edit.html?bib_id={id}">
+                href="{$hBase}records/edit/editRecord.html?bib_id={id}">
                 <img style="border: none;"
                   src="{$hBase}common/images/edit_pencil_16x16.gif"/>
               </a>

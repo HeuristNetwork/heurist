@@ -76,7 +76,7 @@ function displayResults(s,r) {
 	for (var i = 0; i < r.length; i++) {
 		if (r[i].getRecordType()){
 			innerHTML += "<img src=\""+ thisInstancePath + "common/images/reftype-icons/" + r[i].getRecordType().getID() + ".png\"/>";
-			innerHTML += " <a href='" + thisInstancePath + "records/viewrec/view.php?bib_id=" + r[i].getID() + "' target=\"_blank\">" + r[i].getTitle() + "</a><br/>";
+			innerHTML += " <a href='" + thisInstancePath + "records/view/viewRecord.php?bib_id=" + r[i].getID() + "' target=\"_blank\">" + r[i].getTitle() + "</a><br/>";
 		}
 	}
 

@@ -1,8 +1,8 @@
 <html>
  <head>
   <script>top.HEURIST = {};</script>
-  <script src="../../common/php/heurist-obj-common.php"></script>
-  <script src="../../common/php/heurist-obj-user.php"></script>
+  <script src="../../common/php/loadCommonInfo.php"></script>
+  <script src="../../common/php/loadUserInfo.php"></script>
   <script>
 	function load() {
 		var matches, id = "", g = "", s;
@@ -14,7 +14,7 @@
 		if (matches && matches[1]) {
 			g = matches[1];
 		}
-		s = "../../records/addrec/popup_add_resource.php" + "?wg_id=" +	g + "&related=" + id;
+		s = "../../records/add/addRecord.php" + "?wg_id=" +	g + "&related=" + id;
 		document.getElementById("f").src = s;
 	}
   </script>

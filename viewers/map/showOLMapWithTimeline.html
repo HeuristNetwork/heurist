@@ -42,7 +42,7 @@ if (location.search.match(/\btimeline=0\b/)) {
 	document.getElementById("info-cell").style.display = "none";
 }
 var HEURIST = {};
-document.write('<scr'+'ipt src="tmap-data.php' + location.search + '"></scr'+'ipt>');
+document.write('<scr'+'ipt src="getTMapDataFromQueryResults.php' + location.search + '"></scr'+'ipt>');
 </script>
 
 <script>
@@ -64,9 +64,9 @@ else {
 
   <script src="http://openlayers.org/dev/OpenLayers.js"></script>
 
-  <script src="openlayers-mapper.js"></script>
+  <script src="loadOLMap.js"></script>
 
-  <script src="timeline.js"></script>
+  <script src="loadTimeline.js"></script>
 
   <script>
 if (HEURIST.tmap.totalRecordCount > 0) {

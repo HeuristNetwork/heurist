@@ -123,7 +123,7 @@ function drawGeo(id, detail){
            		html += "<div id=\"geoDiv" +[i]+"\"><div class=\"inp-div\"  ><input type=hidden name=\""+id+"\" id=\""+id+"\" value=geo extra=\""+detail[i].getWKT()+"\"><img src=\""+path+"common/images/geo.gif\" align=absmiddle> "+detail[i].toString()+"&nbsp<a href=\"#\" id=\"editgeo"+[i]+"\" onclick=\"window.open('../addGeoObject.html?id="+rec_id+"&did="+id+"&eid=editgeo"+[i]+"','form','width=600,height=400,scrollbars=yes');\")>edit</a><input type=\"hidden\" id=\"geodetail"+[i]+"\" value=\""+ detail[i].getWKT()+ "\"><input type=\"hidden\" id=\"geotype"+[i]+"\" value=\""+ detail[i].toString()+ "\">&nbsp;"+" <img src=\""+path+"common/images/cross.gif\" align=absmiddle onclick=\"remGeo("+id+",'"+detail[i].getWKT()+"');\"></div></div>";
 			}
 	 	} else {
-	  		html = "<div class=\"inp-div\"><input type=hidden name=\""+id+"\" id=\""+id+"\" value=geo extra=\"\"><a href=\"#\" onclick=\"window.open('addGeoObject.html?id="+rec_id+"&did="+id+"','form','width=600,height=400,scrollbars=yes');\")>add</a></div>";
+	  		html = "<div class=\"inp-div\"><input type=hidden name=\""+id+"\" id=\""+id+"\" value=geo extra=\"\"><a href=\"#\" onclick=\"window.open('../addGeoObject.html?id="+rec_id+"&did="+id+"','form','width=600,height=400,scrollbars=yes');\")>add</a></div>";
 	 	}
 	}
 	sel.innerHTML += html;

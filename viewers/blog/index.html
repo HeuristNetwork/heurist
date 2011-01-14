@@ -9,7 +9,7 @@
 
 <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w"></script>
 
-<script src="../../common/php/load-hapi.php"></script>
+<script src="../../common/php/loadHAPI.php"></script>
 <script src="../../hapi/js/goi.js"></script>
 
 <script>
@@ -18,9 +18,9 @@
 	}
 </script>
 
-<script src="../../records/comments/comments.js"></script>
+<script src="../../records/comments/threadedComments.js"></script>
 <script src="../../external/tinymce/jscripts/tiny_mce/tiny_mce.js"></script>
-<script src="../../records/woot/js/woot.js"></script>
+<script src="../../records/woot/woot.js"></script>
 <script src="blog.js"></script>
 
 <script src="http://yui.yahooapis.com/2.5.2/build/yahoo/yahoo-min.js"></script>
@@ -163,7 +163,7 @@ function reload() {
  <!-- iframe id=yui-history-iframe src="../../common/images/hlogo-small-blog-only.gif"></iframe -->
  <input id=yui-history-field type=hidden>
 
- <script src=autocomplete.js></script>
+ <script src=autocompleteBlogTags.js></script>
 
 <a id=home-link href="/h3-ig/">
 <div title="Click the logo at top left of any Heurist page to return to your Favourites" id="logo"></div>
@@ -176,7 +176,7 @@ function reload() {
  </div>
 <div id=sidebar>
 	<div class=banner>
-		<div id=add-fav><a id=add-fav-link href="../../records/addrec/add.php?addref=1&amp;k=Favourites">Add page to favourites</a></div>
+		<div id=add-fav><a id=add-fav-link href="../../records/add/addRecordPopup.php?addref=1&amp;k=Favourites">Add page to favourites</a></div>
 	</div>
 	
 	<div id="sidebar-inner">

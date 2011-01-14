@@ -64,7 +64,7 @@ class Biblio {
 			}
 			if (mysql_num_rows($res) == 1) {
 				$file = mysql_fetch_assoc($res);
-				$thumb_url = "../../common/php/resize_image.php?ulf_ID=".$file['ulf_ObfuscatedFileID'];
+				$thumb_url = "../../common/php/resizeImage.php?ulf_ID=".$file['ulf_ObfuscatedFileID'];
 			}
 
 			$text = @$details['191'] ? '191' : (@$details['303'] ? '303' : null);

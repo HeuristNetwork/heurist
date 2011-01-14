@@ -1,7 +1,7 @@
 <?php
 /**
  *
- * Filename: class.kmlbuilder.php
+ * Filename: generateKMLFromCursor.php
  * Author:   Tobias Peirick
  * Description:
  * Generates a KML output
@@ -13,9 +13,9 @@
  *
  */
 
-require_once('class.biblio.php');
+require_once('class.record.php');
 require_once('class.geometry.php');
-require_once('class.search.php');
+require_once('class.searchCursor.php');
 
 
 class KMLBuilder {
@@ -25,7 +25,7 @@ class KMLBuilder {
 	/**
 	 *  Constructor
 	 *
-	 *  @param $search [class.search.php]
+	 *  @param $search [class.searchCursor.php]
 	 */
 	function KMLBuilder($search) {
 		$this->search = $search;

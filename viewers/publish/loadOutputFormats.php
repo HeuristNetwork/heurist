@@ -1,8 +1,8 @@
 <?php
 /**
- * load_output_styles.php - to  load stylesheet names into the dropdown list for heurist publishing wizard
+ * loadOutputFormats.php - to  load stylesheet names into the dropdown list for heurist publishing wizard
  *
- * @package load_output_styles.php
+ * @package loadOutputFormats.php
  * @version 2007-06-13
  * @author Maria Shvedova
  * (c) 2007 Archaeological Computing Laboratory, University of Sydney

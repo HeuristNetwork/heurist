@@ -1,15 +1,15 @@
 <?php
 /**
- * FileName:    class.search.php
+ * FileName:    class.searchCursor.php
  * Author:      Hanna Chamoun
  *
  * Description: This class is used to perform search action on the heurist
  *              database for the use of accessing Biblio items
  *
  */
-require_once('class.pseudorssbib.php');
-//require_once(dirname(__FILE__).'/../../common/connect/cred.php');
-require_once(dirname(__FILE__).'/../../common/connect/db.php');
+require_once('rssItemAsRecord.php');
+//require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 class RssSearch{
   var $result;

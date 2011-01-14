@@ -16,22 +16,22 @@ header("content-type:application/vnd.google-earth.kml+xml");
  * include requiered files
  */
 
-require_once(dirname(__FILE__).'/../../common/config/heurist-instances.php');
+require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 
 
 
 define('SEARCH_VERSION', 1);
 if( !empty($_REQUEST['pub_id'])) {
-	require_once(dirname(__FILE__).'/../../common/connect/publish_cred.php');
+	require_once(dirname(__FILE__).'/../../common/connect/bypassCredentialsForPublished.php');
 } else {
 	define("BYPASS_LOGIN", true);
-	require_once(dirname(__FILE__).'/../../common/connect/cred.php');
+	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 }
 
-require_once(dirname(__FILE__).'/../../common/connect/db.php');
-require_once(dirname(__FILE__).'/../../search/advanced/adv-search.php');
-require_once('class.search.php');
-require_once('class.kmlbuilder.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
+require_once('class.searchCursor.php');
+require_once('generateKMLFromCursor.php');
 
 mysql_connection_db_select(DATABASE);
 

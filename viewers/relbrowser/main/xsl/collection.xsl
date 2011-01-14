@@ -47,7 +47,7 @@
 							<img  src="{detail[@id=224]/file_thumb_url}"/>
 						</xsl:when>
 						<xsl:otherwise>
-							<img  src="{$hBase}common/php/resize_image.php?file_url={detail[@id=603]}&amp;w=150"/>
+							<img  src="{$hBase}common/php/resizeImage.php?file_url={detail[@id=603]}&amp;w=150"/>
 						</xsl:otherwise>
 						</xsl:choose -->
 						<div class="artwork" style="display:block; width:130px; height:130px; overflow:hidden">
@@ -65,7 +65,7 @@
 							</xsl:when>
 							<xsl:otherwise>
                             <a href="{$cocoonBase}item/{id}/?instance={$instanceName}" class="bodynav" style="display:block; width:130px;">
-							<img  src="{$hBase}common/php/resize_image.php?file_url={detail[@id=603]}&amp;w=130"/>
+							<img  src="{$hBase}common/php/resizeImage.php?file_url={detail[@id=603]}&amp;w=130"/>
 							</a>
                             </xsl:otherwise>
                           	</xsl:choose>

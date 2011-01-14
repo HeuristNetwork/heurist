@@ -443,7 +443,7 @@ BlogEntry: function(record, parentElement, isNew) {
 					};
 				} else {
 					return function () {
-						window.open("../../records/addrec/add.php?addref=1&bib_reftype=" + type +
+						window.open("../../records/add/addRecordPopup.php?addref=1&bib_reftype=" + type +
 							"&related=" + that.record.getID() + (instance ? "&instance="+instance : ""), "_blank");
 						return false;
 					};
@@ -472,7 +472,7 @@ BlogEntry: function(record, parentElement, isNew) {
 			$("<a href='#'>add</a>")
 				.click((function(type) {
 					return function () {
-						window.open("../../records/addrec/add.php?addref=1&bib_reftype=" + type +
+						window.open("../../records/add/addRecordPopup.php?addref=1&bib_reftype=" + type +
 							"&related=" + that.record.getID() + (instance ? "&instance="+instance : ""), "_blank");
 						return false;
 					};
@@ -493,7 +493,7 @@ BlogEntry: function(record, parentElement, isNew) {
 		$p = $("<p class='related-link'/>").appendTo($div);
 			$("<a href='#'>add</a>")
 				.click(function () {
-					window.open("add-record.html?id=" + that.record.getID() +
+					window.open("addBlogPost.html?id=" + that.record.getID() +
 						(Blog.group ? "&g=" + Blog.group.getID() : "") +
 						(instance ? "&instance="+instance : ""), "_blank");
 					return false;
@@ -696,7 +696,7 @@ BlogEntry: function(record, parentElement, isNew) {
 			}
 			$(".entry-edit-wg-tags-input", this.table).after("&nbsp;&nbsp;add ", $select);
 			if (HCurrentUser.isAdministrator()) {
-				$select.after("<a target='_blank' href='../../admin/workgroups/workgroup_tag_manager.php"+(instance ? "&instance="+instance : "")+"'>admin</a>");
+				$select.after("<a target='_blank' href='../../admin/ugrps/editGroupTags.php"+(instance ? "&instance="+instance : "")+"'>admin</a>");
 			}
 		}
 
@@ -875,7 +875,7 @@ BlogEntry: function(record, parentElement, isNew) {
 
 
 loadTags: function() {
-	HAPI.XHR.sendRequest("../../viewers/blog/get-tags.php?u=" + Blog.user.getID() + (instance ? "&instance="+instance : ""),  function(response) {	//FIXME: we should bring this into the HAPI php commands
+	HAPI.XHR.sendRequest("../../viewers/blog/getTags.php?u=" + Blog.user.getID() + (instance ? "&instance="+instance : ""),  function(response) {	//FIXME: we should bring this into the HAPI php commands
 		Blog.tags = response;
 		Blog.displayTagList();
 		Blog.displayBlogEntries();

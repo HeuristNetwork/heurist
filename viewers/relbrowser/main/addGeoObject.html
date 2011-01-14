@@ -11,7 +11,7 @@
 	var instance = (top && top.HEURIST && top.HEURIST.instance? top.HEURIST.instance.name : location.search.match(/instance=([^&]+)/)[1]);
 </script>
  <script>
-	document.write("<" + "script src=\"" +  basePath + "hapi/load.php?instance=" +  window.opener.HAPI.instance + "&key=" + window.opener.HAPI.key + "\"><" + "/script>\n");
+	document.write("<" + "script src=\"" +  basePath + "hapi/hapiLoader.php?instance=" +  window.opener.HAPI.instance + "&key=" + window.opener.HAPI.key + "\"><" + "/script>\n");
 </script>
  <script>
 	document.write("<" + "script src=\"" +  basePath + "hapi/js/goi.js\"><" + "/script>\n" );

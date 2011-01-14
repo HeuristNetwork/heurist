@@ -1,7 +1,7 @@
 <?php
 
-require_once(dirname(__FILE__).'/../../common/connect/cred.php');
-require_once(dirname(__FILE__).'/../../common/connect/db.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 if (! is_admin()) {
 	header("Location: ".HEURIST_URL_BASE."common/connect/login.php");

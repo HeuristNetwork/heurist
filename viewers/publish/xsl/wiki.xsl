@@ -105,7 +105,7 @@
                     <a style=" font-family:Verdana,Helvetica,Arial,sans-serif; font-size:10px;"
                         target="_new" href="wiki/{id}">[view details]</a>&#160;<a
                         style=" font-family:Verdana,Helvetica,Arial,sans-serif; font-size:10px;"
-                        target="_new" href="{$hBase}records/editrec/edit.html?bib_id={id}">
+                        target="_new" href="{$hBase}records/edit/editRecord.html?bib_id={id}">
                         [edit] </a>
                     <br/>
                     <xsl:if
@@ -148,7 +148,7 @@
             </td>
             <td style="font-weight: bold;">
                 <a style="float: right;" target="_new"
-                    href="{$hBase}records/editrec/edit.html?bib_id={id}">
+                    href="{$hBase}records/edit/editRecord.html?bib_id={id}">
                     <img style="border: none;"
                         src="{$hBase}common/images/edit_pencil_16x16.gif"/>
                 </a>

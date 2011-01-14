@@ -42,7 +42,7 @@
 
             <td>
                 <p><xsl:value-of select="title"/></p>
-                <p>[<a href="{$hBase}records/viewrec/view.php?bib_id={id}" target="_blank"><xsl:value-of select="id"/></a>] [<a href="{$hBase}records/editrec/edit.html?bkmk_id={id}" target="_blank">edit</a>]</p>
+                <p>[<a href="{$hBase}records/view/viewRecord.php?bib_id={id}" target="_blank"><xsl:value-of select="id"/></a>] [<a href="{$hBase}records/edit/editRecord.html?bkmk_id={id}" target="_blank">edit</a>]</p>
             </td>
             <td>
                 <p><xsl:value-of select="added_by"/></p>

@@ -1,8 +1,8 @@
 <?php
 /**
- * published.php - specifies the script and redirection to produce desired output style
+ * publisherOutput.php - specifies the script and redirection to produce desired output style
  *
- * @package published.php
+ * @package publisherOutput.php
  * @version 2007-03-28
  * @author Kim Jackson, Maria Shvedova
  * last modified 2008-09-04 ms. its readable. at last.
@@ -35,8 +35,8 @@ function get_style_from_pubargs($ss_publish_args){
 	return $arr_args[1];
 }
 
-require_once(dirname(__FILE__).'/../../common/connect/cred.php');
-require_once(dirname(__FILE__).'/../../common/connect/db.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 
 if (array_key_exists('js', $_REQUEST)) $js = '-javascript'; else $js = '';
@@ -78,7 +78,7 @@ if ($_REQUEST['pub_id']) {
 		switch ($style) {
 
 			case 'endnoterefer': //last remaining style that is not Cocoon driven YET.
-			header('Location: search_endnote.php?pub_id=' . $_REQUEST['pub_id']);
+			header('Location: '.HEURIST_URL_BASE.'export/other/endnote.php?pub_id=' . $_REQUEST['pub_id']);
 			break;
 
 		case 'genericxml': //no javascript parameter for genericxml

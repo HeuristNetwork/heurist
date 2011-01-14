@@ -1,15 +1,15 @@
 <?php
 	/*
-	* publish.php - to save, load, preview and link to published searches
+	* publisher.php - to save, load, preview and link to published searches
 	*
 	* @version 2007-04-23
 	* @author Erik Baaij, Marco Springer, Kim Jackson, Maria Shvedova
 	* (c) 2007 Archaeological Computing Laboratory, University of Sydney
 	*/
 
-	require_once(dirname(__FILE__).'/../../common/connect/cred.php');
-	require_once(dirname(__FILE__).'/../../common/connect/db.php');
-	require_once('load_output_styles.php');
+	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+	require_once('loadOutputFormats.php');
 
 	//______________________________________________________
 	//functions
@@ -177,8 +177,8 @@
 	</nobr></div>
 	</div>
 	
-		<script src="<?=HEURIST_SITE_PATH?>common/js/heurist.js"></script>	<!-- core HEURIST functions -->
-		<script src="<?=HEURIST_SITE_PATH?>common/php/display-preferences.php<?=(HEURIST_INSTANCE ? "?instance=".HEURIST_INSTANCE : "")?>"></script>	<!-- sets body css classes based on prefs in session -->
+		<script src="<?=HEURIST_SITE_PATH?>common/js/utilsLoad.js"></script>	<!-- core HEURIST functions -->
+		<script src="<?=HEURIST_SITE_PATH?>common/php/displayPreferences.php<?=(HEURIST_INSTANCE ? "?instance=".HEURIST_INSTANCE : "")?>"></script>	<!-- sets body css classes based on prefs in session -->
 
 		<script type="text/javascript">
 			<!--'
@@ -204,25 +204,25 @@
 
 				switch (style) {
 					case 'genericxml':
-					script = 'xmlexport.php';
+					script = 'xmlHeuristVsn1.php';
 					args = '&style=' + style;
 					addjavascript = false;
 					break;
 
 					case 'endnotexml':
-					script = 'xmlexport.php';
+					script = 'xmlHeuristVsn1.php';
 					args = '&out=xml&style=' + style+'.xsl';
 					addjavascript = false;
 					break;
 
 					case 'endnoterefer':
-					script = 'search_endnote.php';
+					script = 'endnote.php';
 					args = '&style=' + style;
 					addjavascript = false;
 					break;
 
 					default:
-					script = 'xmlexport.php';
+					script = 'xmlHeuristVsn1.php';
 					args = '&style=' + style+'.xsl';
 					addjavascript = true;
 					break;
@@ -235,10 +235,10 @@
 				//TODO: write code here that checks for the implementation parameter and adds it to the URI below
 
 				if (document.getElementById('chk_force').checked) {
-					publink = '<?= HEURIST_URL_BASE ?>viewers/publish/published.php?pub_id='+ pub_id +'<?=(HEURIST_INSTANCE ? "&instance=".HEURIST_INSTANCE : "")?>';
+					publink = '<?= HEURIST_URL_BASE ?>viewers/publish/publisherOutput.php?pub_id='+ pub_id +'<?=(HEURIST_INSTANCE ? "&instance=".HEURIST_INSTANCE : "")?>';
 					forpreviewframe = publink + args;
 				} else {
-					publink = '<?= HEURIST_URL_BASE ?>viewers/publish/published.php?pub_id='+ pub_id +'<?=(HEURIST_INSTANCE ? "&instance=".HEURIST_INSTANCE : "")?>'+ args;
+					publink = '<?= HEURIST_URL_BASE ?>viewers/publish/publisherOutput.php?pub_id='+ pub_id +'<?=(HEURIST_INSTANCE ? "&instance=".HEURIST_INSTANCE : "")?>'+ args;
 					forpreviewframe = publink+'&depth=1';
 				}
 
@@ -360,12 +360,12 @@
 			<div>
 				<span id=wizard-subheading >Embed the code below in your webpage or use:</span><span style="padding:5px;"></span><span id = "emb-span"></span>
 				<span id ="link-span">
-					<a id="dynalink" href="published.php?pub_id=<?= $_REQUEST['pub_id'] ?><?=(HEURIST_INSTANCE ? "&instance=".HEURIST_INSTANCE : "")?>&style=<?= $force_style; ?>" target="_blank">link to published page</a> [opens new window - copy and paste to your web page].
+					<a id="dynalink" href="publisherOutput.php?pub_id=<?= $_REQUEST['pub_id'] ?><?=(HEURIST_INSTANCE ? "&instance=".HEURIST_INSTANCE : "")?>&style=<?= $force_style; ?>" target="_blank">link to published page</a> [opens new window - copy and paste to your web page].
 				</span>
 			</div>
 			<div class="breaker"></div>
 			<span class="spacer"></span>
-			<textarea id="embed" style="width: 100%; height: 90px;">&lt;iframe width=&quot;100%&quot; height=&quot;100%&quot; frameborder=&quot;0&quot; src=&quot;published.php?pub_id=<?= $_REQUEST['pub_id'] ?>&style=<?= $force_style; ?>&quot;&gt;&lt;/iframe&gt;" </textarea>
+			<textarea id="embed" style="width: 100%; height: 90px;">&lt;iframe width=&quot;100%&quot; height=&quot;100%&quot; frameborder=&quot;0&quot; src=&quot;publisherOutput.php?pub_id=<?= $_REQUEST['pub_id'] ?>&style=<?= $force_style; ?>&quot;&gt;&lt;/iframe&gt;" </textarea>
 			<div class="breaker"></div><div class="breaker"></div>
 			<div id=query-highlight class=roundedBoth>&nbsp;<img src="<?= HEURIST_URL_BASE ?>common/images/small-magglass.gif" align="absbottom"/> Search query:
 			<?php echo $query;?>

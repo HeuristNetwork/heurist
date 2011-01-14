@@ -86,16 +86,16 @@
 					}
 
 				</script>
-				<script src="{$hBase}common/php/load-hapi.php?instance={$hapi-instance}&amp;key={$hapi-key}"/>
+				<script src="{$hBase}common/php/loadHAPI.php?instance={$hapi-instance}&amp;key={$hapi-key}"/>
 				<script>
 					if (!HCurrentUser.isLoggedIn()) {
-						window.location = '<xsl:value-of select="$hBase"/>common/connect/login-vanilla.php?instance=<xsl:value-of select="$instanceName"/>&amp;logo=<xsl:value-of select="$appBase"/>images/logo.png&amp;home=<xsl:value-of select="$appBase"/>';
+						window.location = '<xsl:value-of select="$hBase"/>common/connect/loginForRelBrowser.php?instance=<xsl:value-of select="$instanceName"/>&amp;logo=<xsl:value-of select="$appBase"/>images/logo.png&amp;home=<xsl:value-of select="$appBase"/>';
 					}</script>
 				<script src="{$appBase}js/search.js"/>
 				<script>
 					top.HEURIST = {};
 					top.HEURIST.fireEvent = function(e, e){};</script>
-				<script src="{$hBase}common/php/heurist-obj-user.php?instance={$instanceName}"/>
+				<script src="{$hBase}common/php/loadUserInfo.php?instance={$instanceName}"/>
 				<!-- Time Map rendering -->
 				<xsl:if test="export/references/reference/reftype[@id=103 or @id=51 or @id=165 or @id=122 or @id=57]">
 					<script>
@@ -137,7 +137,7 @@
 								<script type="text/javascript">
 
 						var a = document.createElement("a");
-						a.href ='<xsl:value-of select="$hBase"/>common/connect/login-vanilla.php?logo={$appBase}images/logo.png&amp;home={$serBaseUrl}{$appBase}';
+						a.href ='<xsl:value-of select="$hBase"/>common/connect/loginForRelBrowser.php?logo={$appBase}images/logo.png&amp;home={$serBaseUrl}{$appBase}';
 
 
 						if (HCurrentUser.isLoggedIn()) {

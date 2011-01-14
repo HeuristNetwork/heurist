@@ -53,7 +53,7 @@ margin-left: -100%;}
 
   <script>
   var HEURIST = {};
-document.write('<scr'+'ipt src="'+location.pathname.replace(/\/[^\/]*$/,"/")+'tmap-data.php' + location.search + '"></scr'+'ipt>');
+document.write('<scr'+'ipt src="'+location.pathname.replace(/\/[^\/]*$/,"/")+'getTMapDataFromQueryResults.php' + location.search + '"></scr'+'ipt>');
 </script>
 
 
@@ -74,8 +74,8 @@ if (location.search.match(/\btimeline=0\b/)) {
   <script src="epoly.js"></script>
   <script src="../../external/js/elabel.js"></script>
 
-  <script src="mapper.js"></script>
-  <script src="timeline.js"></script>
+  <script src="loadGMap"></script>
+  <script src="loadTimeline.js"></script>
 
   <script>
   function load(){

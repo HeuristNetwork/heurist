@@ -19,7 +19,7 @@
           }
         </style>
 		
-       <script src="/heurist/php/js/load-hapi.php"/>
+       <script src="/heurist/php/js/loadHAPI.php"/>
 	<script src="http://hapi.heuristscholar.org/03/goi.js"/>
 	<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAogdH9AwvOFbvnh0YaNkLgBTSYVSXM3_pxTZfKUi_fD1c4-9PWxSMejnbLNsbQ7VMTSucGheu4pvMbA"/>
         <script src="http://www.google.com/uds/api?file=uds.js&amp;v=1.0&amp;key=ABQIAAAAogdH9AwvOFbvnh0YaNkLgBTSYVSXM3_pxTZfKUi_fD1c4-9PWxSMejnbLNsbQ7VMTSucGheu4pvMbA" type="text/javascript"></script>
