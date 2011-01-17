@@ -1,3 +1,12 @@
+/*
+ * filename, brief description, date of creation, by whom
+ * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+ * @link: http://HeuristScholar.org
+ * @license http://www.gnu.org/licenses/gpl-3.0.txt
+ * @package Heurist academic knowledge management system
+ * @todo
+ */
+
 /**
 * Constructor for Relationship class a relationship display line. It displays the Relation Type
 * with the record title, delete button and edit button.
