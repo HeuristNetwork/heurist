@@ -1,3 +1,12 @@
+/*
+ * filename, brief description, date of creation, by whom
+ * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+ * @link: http://HeuristScholar.org
+ * @license http://www.gnu.org/licenses/gpl-3.0.txt
+ * @package Heurist academic knowledge management system
+ * @todo
+ */
+
 /* login specific overrides */
 #logo, #home-link  {position: relative; width:100%;text-align: center;left:0; top:0}
 #logo {display:inline-block;width:146px;}
