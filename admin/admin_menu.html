@@ -1,0 +1,104 @@
+<html>
+
+	<!-- File: admin_menu.html Menu for database administrators, Ian Johnson 11 Oct 2010
+	/**
+	* @copyright 2005-2010 University of Sydney Digital Innovation Unit.
+	* @link: http://HeuristScholar.org
+	* @license http://www.gnu.org/licenses/gpl-3.0.txt
+	* @package Heurist academic knowledge management system
+	* @todo
+	**/
+	-->
+
+	<head>
+	<title>Heurist - Administration Functions Menu</title>
+
+	<link rel="icon" href="../../favicon.ico" type="image/x-icon">
+	<link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+
+	<link rel="stylesheet" type="text/css" href="../../common/css/Popup.css">
+	<script type="text/javascript" src="../../common/js/Popup.js"></script>
+
+	<link rel="stylesheet" type="text/css" href="../../common/css/newshsseri.css">
+	<style type="text/css">
+		a img { border: 0; }
+		.friendly_border { border: 1px dotted lightgray; background-color: #FFFFDD; border-collapse: collapse; }
+		.delete_icon { cursor: pointer; }
+
+		.rft_icon {
+			margin-right: 5px;
+			vertical-align: middle;
+			cursor: pointer;
+		}
+		body.wg .base-only { display: none; }
+	</style>
+
+
+	<base target="_blank">
+
+
+	<h2><b>Heurist System Administration&nbsp;&nbsp;&nbsp; <font size="2">
+	<a href="../index.php">return to search page</a></font></b></h2>
+	<blockquote>
+		<p><b>User admin</b></p>
+		<blockquote>
+			<p><a href="../users/add.php?db=[instance-name!]">User management</a>
+			(find/edit/disable users, add to groups)</p>
+			<p><a href="../users/usergroupadmin.php?db=[instance-name!]">List all users</a>
+			(list users + workgroup membership)</p>
+			<p>
+				<a href="../workgroups/edit_workgroups.php?db=[instance-name!]">Workgroup
+				management</a>
+			(add/edit workgroups)</p>
+			<p>
+				<a href="../workgroups/workgroup_keyword_manager.php?db=[instance-name!]">Workgroup
+			tags</a> (add/edit workgroup tags)</p>
+			<p><a href="../workgroups/groups.php?db=[instance-name!]">Take your hat off</a>
+			(temporarily leave workgroup)</p>
+		</blockquote>
+		<p><b>Database definitions</b></p>
+		<blockquote>
+			<p><a target="_blank" href="create/new_database.php">Create new database</a></p>
+			<p><a href="create/edit_system_identification.php">Edit system identification</a></p>
+			<p><a href="create/register_with_heurist">Register database with Heurist</a>&nbsp; [registered ID xxxxx | not yet
+			registered]</p>
+			<p>Add/edit:&nbsp;&nbsp;&nbsp;
+				Record types&nbsp;&nbsp;&nbsp; Detail types (fields)&nbsp;&nbsp;&nbsp;
+			Ontologies&nbsp;&nbsp;&nbsp; Vocabularies&nbsp;&nbsp;&nbsp; Enumerated values</p>
+			<p><a href="crosswalk/crosswalk_builder.php">Import/synchronise definitions</a>
+			(with another Heurist database)</p>
+			<p><a href="rectypes/edit_constrain_reftype.php">Set up/modify relationship
+			constraints</a></p>
+			<p><a href="description/bib_detail_dump.php">Print-friendly dump</a> (of database
+			definitions)</p>
+			<p><a href="create/edit_mimetypes.php">Add/edit file mime types</a></p>
+		</blockquote>
+		<p><b>Checking and fixes</b></p>
+		<blockquote>
+			<p>
+				<a href="../verification/recalculate_title_masks.php?db=[instance-name!]">Rebuild
+			constructed titles</a></p>
+			<p>
+				<a href="../verification/find_dupes.php?fuzziness=10&amp;db=[instance-name!]">Find/eliminate duplicate
+			records</a></p>
+			<p>
+				<a href="../../search/search.html?q=_BROKEN_&amp;w=all&amp;db=[instance-name!]">Records with broken
+			URLs</a></p>
+			<p><a href="../verification/xhtmlcheck.php?db=[instance-name!]">
+				WYSIWYG XHTML check</a>&nbsp;&nbsp;&nbsp;
+				<a href="../verification/invalidcharactercheck.php?db=[instance-name!]" >Invalid
+				character check</a>&nbsp;&nbsp;&nbsp;
+				<a href="../verification/invalidcharacterclean.php?db=[instance-name!]">Clean invalid
+			characters</a></p>
+			<p><a href="verification/bib_errors.php">Check for invalid pointers</a></p>
+		</blockquote>
+		<p class="MsoNormal"><b>Admin</b></p>
+		<blockquote>
+			<p><a href="../rollback/record-rollback.php?db=[instance-name!]">Record rollback</a></p>
+		</blockquote>
+		<p>&nbsp;</p>
+		<p>&nbsp;</p>
+	</blockquote>
+
+
+</html>
