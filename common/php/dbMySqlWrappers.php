@@ -1,4 +1,17 @@
 <?php
+
+/**
+ * filename, brief description, date of creation, by whom
+ * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+ * @link: http://HeuristScholar.org
+ * @license http://www.gnu.org/licenses/gpl-3.0.txt
+ * @package Heurist academic knowledge management system
+ * @todo
+ **/
+
+?>
+
+<?php
 /* T1000 Database template system
    (c) 2005 Archaeological Computing Laboratory, University of Sydney
    Developed by Tom Murtagh, Version 1.0,  16 Aug 2005 */

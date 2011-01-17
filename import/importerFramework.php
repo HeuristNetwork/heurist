@@ -1,5 +1,18 @@
 <?php
 
+/**
+ * filename, brief description, date of creation, by whom
+ * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+ * @link: http://HeuristScholar.org
+ * @license http://www.gnu.org/licenses/gpl-3.0.txt
+ * @package Heurist academic knowledge management system
+ * @todo
+ **/
+
+?>
+
+<?php
+
 /* Tuning parameters to determine how similar two bibliographic records are.
  * HASH_FUZZINESS controls how many differences there can be between the records' hashes,
  * as a fraction of the length.

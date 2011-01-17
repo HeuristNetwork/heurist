@@ -1,5 +1,18 @@
 <?php
 
+/**
+ * filename, brief description, date of creation, by whom
+ * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+ * @link: http://HeuristScholar.org
+ * @license http://www.gnu.org/licenses/gpl-3.0.txt
+ * @package Heurist academic knowledge management system
+ * @todo
+ **/
+
+?>
+
+<?php
+
 /* Search for records entries matching the given standard query string in $_REQUEST['q']
  * The returned fields include rec_ID, rec_Title, rec_URL and rec_RecTypeID.
  * If $_REQUEST['l'] is supplied, it is used as the maximum number of results to return,
