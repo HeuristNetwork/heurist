@@ -74,8 +74,8 @@ $record = array(
 	"tagString" => $tagString,
 	"rating" => $bkmk["bkm_Rating"],
 	"reminders" => array(),	// FIXME: should really import these freshly in case the bkmk already exists
-	"passwordReminder" => $bkmk["bkm_PwdReminder"],
-	"quickNotes" => $bkmk["pers_notes"]? $bkmk["pers_notes"] : ""
+	"passwordReminder" => $bkmk["bkm_PwdReminder"]//,
+//	"quickNotes" => $bkmk["pers_notes"]? $bkmk["pers_notes"] : ""	// saw TODO possibly need to change this to include woot
 );
 
 print json_format($record);

@@ -18,7 +18,7 @@
   <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
 
   <link rel="stylesheet" type="text/css" href="../../common/css/Popup.css">
-  <script type="text/javascript" src="../../common/js/Popup.js"></script>
+  <script type="text/javascript" src="../../common/js/utilsForPopups.js"></script>
 
   <link rel="stylesheet" type="text/css" href="../../common/css/newshsseri.css">
   <style type="text/css">
@@ -77,7 +77,7 @@
 
 	function finish_edit_reftype_constraints() {
 		close_popup_frame();
-		document.location.replace('../editStructure.php?instance=[instance-name!]');//note: called in the context of the popup
+		document.location.replace('editStructure.php?instance=[instance-name!]');//note: called in the context of the popup
 	}
 
 	function edit_constrain_reftype(dty_ID) {
@@ -88,7 +88,7 @@
 
 	function finish_edit_constrain_reftype() {
 		close_popup_frame();
-		document.location.replace('../editStructure.php'); //note: called in the context of the popup
+		document.location.replace('editStructure.php?instance=[instance-name!]'); //note: called in the context of the popup
 	}
 
 	function popup_frame(position, location, finish_fn, keepRelPos) {
@@ -264,7 +264,7 @@
  This will affect ALL Heurist instances
 </div>
 
-<form action="master_bib_detail_editor.php" method="post" name="edit_form" onSubmit="return check_prompts();">
+<form action="editStructure.php?instance=[instance-name!]" method="post" name="edit_form" onSubmit="return check_prompts();">
 [update REFTYPE rt1]
 
   [errors]
@@ -292,7 +292,7 @@
    <tr class="base-only">
     <td style="font-weight: bold; text-align: right;">Icon</td>
 	<td>
-     <img src="../../common/images/reftype-icons/[rty_ID].gif" style="vertical-align: middle;" class="rft_icon" onClick="upload_icon([rty_ID]);">
+     <img src="../../common/images/reftype-icons/[rty_ID].png" style="vertical-align: middle;" class="rft_icon" onClick="upload_icon([rty_ID]);">
      &nbsp;&nbsp;&nbsp;&nbsp;
      <span style="font-weight: bold; text-align: right;">Bibliographic record types</span>
      [checkbox : rty_RecTypeGroupID : primary record type : style="margin: 0px;"]
@@ -418,7 +418,7 @@
  <div style="width: 300px; height: 500px; overflow: auto; padding: 3px;" class="friendly_border">
   <table border="0">
    [foreach REFTYPE rtf : 1 order by (rty_RecTypeGroupID > 1), rty_Name]
-    <tr><td style="text-align: right;">[rty_ID]</td><td><img src="../../common/images/reftype-icons/[rty_ID].gif" id="rt[rty_ID]" class="rft_icon" onClick="upload_icon([rty_ID]);"><a href="?rty_ID=[rty_ID]">[rty_Name]</a></td></tr>
+    <tr><td style="text-align: right;">[rty_ID]</td><td><img src="../../common/images/reftype-icons/[rty_ID].png" id="rt[rty_ID]" class="rft_icon" onClick="upload_icon([rty_ID]);"><a href="?rty_ID=[rty_ID]">[rty_Name]</a></td></tr>
    [end-foreach]
    [not-found][end-not-found]
   </table>

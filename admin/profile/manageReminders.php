@@ -86,13 +86,12 @@ $future_clause = $future ? "and rem_Freq != 'once' or rem_StartDate > now()" : "
 $res = mysql_query("select usrReminders.*, rec_Title, grp.".GROUPS_NAME_FIELD.",  concat(usr.".USERS_FIRSTNAME_FIELD.",' ',usr.".USERS_LASTNAME_FIELD.") as username
 					  from usrReminders
 				 left join Records on rec_ID = rem_RecID
-				 left join ".USERS_DATABASE.".".GROUPS_TABLE." gpr on gpr.".GROUPS_ID_FIELD." = rem_ToWorkgroupID
+				 left join ".USERS_DATABASE.".".GROUPS_TABLE." grp on grp.".GROUPS_ID_FIELD." = rem_ToWorkgroupID
 				 left join ".USERS_DATABASE.".".USERS_TABLE." usr on usr.".USERS_ID_FIELD." = rem_ToUserID
 					 where rem_OwnerUGrpID = " . get_user_id() . "
 					 $future_clause
 				  order by rem_RecID, rem_StartDate");
 
-print(mysql_error());
 
 if (mysql_num_rows($res) == 0) {
 	print "<tr><td></td><td colspan=4>No reminders</td></tr>";

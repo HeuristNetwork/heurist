@@ -300,14 +300,7 @@ function print_private_details($bib) {
 	</div>
 	</div>
 	
-	<?php	if (@$bkmk['pers_notes']) { ?>
-	<div class=detailRow>
-	<div class=detailType>Notes</div>
-	<div class=detail><?= htmlspecialchars($bkmk['pers_notes']) ?>
-	</div>
-	</div>
-	
-	<?php	}
+	<?php
 	}
 	
 

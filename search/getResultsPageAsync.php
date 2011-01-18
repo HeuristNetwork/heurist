@@ -229,7 +229,7 @@ function print_result($row) {
 		                       and file_mimetype like 'image%'
 		                  order by dtl_DetailTypeID = 223 desc, dtl_DetailTypeID = 222 desc, dtl_DetailTypeID = 224 desc, dtl_DetailTypeID
 		                     limit 1");
-		if (mysql_num_rows($res) == 1) {
+		if ($res && mysql_num_rows($res) == 1) {
 			$file = mysql_fetch_assoc($res);
 			$thumb_url = "../common/php/resizeImage.php?ulf_ID=".$file['ulf_ObfuscatedFileID'];
 		} else {
@@ -239,7 +239,7 @@ function print_result($row) {
 			                     where dtl_RecID = " . $row[2] . "
 		                           and dtl_DetailTypeID = 606
 		                         limit 1");
-			if (mysql_num_rows($res) == 1) {	//FIXME: we should see about uploading this to the file table
+			if ($res && mysql_num_rows($res) == 1) {	//FIXME: we should see about uploading this to the file table
 				$row = mysql_fetch_assoc($res);
 				$thumb_url = "".htmlspecialchars(addslashes($row['dtl_Value']));
 			}else{	// 603  Full image url
@@ -248,7 +248,7 @@ function print_result($row) {
 				                     where dtl_RecID = " . $row[2] . "
 			                           and dtl_DetailTypeID = 603
 			                         limit 1");
-				if (mysql_num_rows($res) == 1) {
+				if ($res && mysql_num_rows($res) == 1) {
 					$row = mysql_fetch_assoc($res);
 					$thumb_url = "../common/php/resizeImage.php?file_url=".htmlspecialchars($row['dtl_Value']);
 				}

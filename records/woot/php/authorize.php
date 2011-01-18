@@ -9,10 +9,6 @@
  * @todo
  **/
 
-?>
-
-<?php
-
 require_once(dirname(__FILE__)."/../../../common/php/dbMySqlWrappers.php");
 
 function get_location($key) {

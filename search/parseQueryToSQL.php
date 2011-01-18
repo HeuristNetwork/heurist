@@ -612,8 +612,8 @@ class NotesPredicate extends Predicate {
 		$not = ($this->parent->negate)? 'not ' : '';
 
 		$query = &$this->getQuery();
-		if ($query->search_type == BOOKMARK)
-			return 'pers_notes ' . $not . 'like "%'.addslashes($this->value).'%"';
+		if ($query->search_type == BOOKMARK)	// saw TODO change this to check for woot match or full text search
+			return '';
 		else
 			return 'rec_ScratchPad ' . $not . 'like "%'.addslashes($this->value).'%"';
 	}

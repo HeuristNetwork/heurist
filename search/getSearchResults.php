@@ -1,18 +1,15 @@
 <?php
 
-/**
+/*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- **/
+ -->*/
 
-?>
-
-<?php
-	/*<!-- getSearchResults.php
+/*<!-- getSearchResults.php
 
 	Copyright 2005 - 2010 University of Sydney Digital Innovation Unit
 	This file is part of the Heurist academic knowledge management system (http://HeuristScholar.org)
@@ -253,7 +250,7 @@ function loadRecordDetails(&$record) {
 			            ulf_ObfuscatedFileID as nonce,
 			            ulf_OrigFileName as origName,
 			            ulf_FileSizeKB as size,
-			            file_mimetype as type,
+			            'depricated' as type,
 			            ulf_Added as date,
 			            ulf_Description as description
 			       from recUploadedFiles
@@ -307,12 +304,11 @@ function loadUserDependentData(&$record) {
 	$recID = $record["rec_ID"];
 	$res = mysql_query(
 	    "select bkm_ID,
-	            pers_notes,
 	            bkm_Rating,
 	       from usrBookmarks
 	      where bkm_recID = $recID
 	        and bkm_UGrpID = ".get_user_id());
-	if (mysql_num_rows($res) > 0) {
+	if ($res && mysql_num_rows($res) > 0) {
 		$row = mysql_fetch_assoc($res);
 		$record = array_merge($record, $row);
 	}
@@ -330,7 +326,7 @@ function loadUserDependentData(&$record) {
 	      where rem_RecID = $recID
 	        and rem_OwnerUGrpID=".get_user_id());
 	$reminders = array();
-	while ($rem = mysql_fetch_row($res)) {
+	while ($res && $rem = mysql_fetch_row($res)) {
 		$rec_id = array_shift($rem);
 		array_push($reminders, $rem);
 	}

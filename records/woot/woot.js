@@ -21,7 +21,9 @@ HAPI.WootException = HWootException;
 
 
 HAPI.WOOT = function() {
-	var _xssWebPrefix = HAPI.HeuristBaseURL + "records/woot/php/wootDispatcher.php?";
+	var _xssWebPrefix = (window.HeuristBaseURL ? window.HeuristBaseURL :
+							(window.HEURIST && window.HEURIST.baseURL ? HEURIST.baseURL :
+								(window.HAPI && window.HAPI.XHR.defaultURLPrefix))) + "records/woot/php/wootDispatcher.php?";
 
 	function Woot(id, title, version, creatorId, permissions, chunks) {
 		this.id = id;
@@ -155,7 +157,7 @@ HAPI.WOOT = function() {
 	function loadWoot(idOrTitle, loader) {
 		var loadSpec = (typeof idOrTitle === "number")? { id: idOrTitle } : { title: idOrTitle };
 
-		HAPI.XHR.xssComm("load-woot", function(jso) {
+		HAPI.XHR.xssComm("loadWoot", function(jso) {
 			var callback;
 			var i, j;
 			var woot;
@@ -200,7 +202,7 @@ HAPI.WOOT = function() {
 
 
 	function saveWoot(woot, saver) {
-		HAPI.XHR.xssComm("save-woot", function(jso) {
+		HAPI.XHR.xssComm("saveWoot", function(jso) {
 			var callback;
 			var nonce;
 			var chunk;
@@ -230,7 +232,7 @@ HAPI.WOOT = function() {
 
 
 	function searchWoots(query, loader) {
-		HAPI.XHR.xssComm("search-woots", function(jso) {
+		HAPI.XHR.xssComm("searchWoot", function(jso) {
 			var callback;
 
 			if (! jso.error) {

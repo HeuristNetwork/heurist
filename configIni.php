@@ -1,18 +1,6 @@
 <?php
 
-/**
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
-
-?>
-
-<?php
-/** 
+/*<!--
  * configIni.php - Configuration information for Heurist Initialization - USER EDITABLE
  * @version $Id$
  * @copyright 2005-2010 University of Sydney Digital Innovation Unit.
@@ -21,11 +9,7 @@
  * @package Heurist academic knowledge management system
  * @todo
  *
- * Note 1: Heurist requires MySQL 5
- *
- * Note 2: If host, name, username and password are left blank or fillEd with xxxxxx
- *         Heurist will look for a db.ini file in the parent directory
- **/
+ -->*/
 
  
 // [database]
@@ -82,13 +66,13 @@ $sysAdminEmail = "";
 // email address to which info@<installation server> will be redirected
 // leaving this blank will suppress info inquiry emails
 $infoEmail = "";
-error_log("in config dbHost = $dbHost");
+// error_log("in config dbHost = $dbHost");
 
 // system defult file
 $parentIni = dirname(__FILE__)."/../heuristConfigIni.php";
-error_log("in config dbHost = $dbHost  and parent path = $parentIni");
+// error_log("in config dbHost = $dbHost  and parent path = $parentIni");
 if (is_file($parentIni)){
-error_log("trying to load parent configIni");
+// error_log("trying to load parent configIni");
 	include_once($parentIni);
 }
 

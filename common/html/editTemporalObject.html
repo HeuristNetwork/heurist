@@ -306,7 +306,7 @@
 					<span >This field is stored in the temporal to record the original values entered.</span>
 				</div>
 		</div>
-		<script type="text/javascript" src="../js/temporal.js"></script>
+		<script type="text/javascript" src="../js/temporalObjectLibrary.js"></script>
 		<script type="text/javascript" src="../../external/jquery/jquery.js"></script>
 		<script type="text/javascript">
 
@@ -504,7 +504,7 @@
 					}
 
 					// select the tab for the initial temporal's type and change the label to show the user this is where things started
-					_tabView.selectTab(_type2TabIndexMap[that.curTemporal.getType()]);
+					_tabView.selectTab(_type2TabIndexMap[that.curTemporal.getType() ? that.curTemporal.getType():'s']);
 					var activeTab = _tabView.getAttributeConfig("activeTab").value;
 					activeTab.set("label", "<i>" + activeTab.get("label") + "</i>", false);
 					_updateUIFromTemporal(that.curTemporal);

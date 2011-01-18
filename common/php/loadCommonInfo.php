@@ -90,7 +90,7 @@ print "top.HEURIST.reftypes.other = " . json_format($other) . ";\n\n\n";
  * which contains
  */
 
-$colNames = array("rst_DisplayName", "rst_DisplayPrompt", "rst_DefaultValue", "rst_RequirementType", "rst_MaxValues", "rst_DisplayWidth", "rst_RecordMatchOrder");
+$colNames = array("rst_DisplayName", "rst_DisplayPrompt", "rst_DefaultValue", "rst_RequirementType", "rst_MaxValues", "rst_MinValues", "rst_DisplayWidth", "rst_RecordMatchOrder");
 $rec_types = mysql__select_array("defRecStructure", "distinct rst_RecTypeID", "1 order by rst_RecTypeID");
 
 print "\ntop.HEURIST.bibDetailRequirements = {\n";

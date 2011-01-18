@@ -18,8 +18,9 @@ define('SAVE_URI', 'disabled');
 
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
-require_once("validateKeyedAccess.php");
 
+/* removed hapi keys  saw 17/1/11
+require_once("validateKeyedAccess.php");
 if (! @$_REQUEST["key"]) {
 	print 'alert("No Heurist API key specified");';
 	return;
@@ -30,7 +31,7 @@ if (! ($loc = get_location($_REQUEST["key"]))) {
 	return;
 }
 define_constants($loc["hl_instance"]);
-
+*/
 mysql_connection_db_select(DATABASE);
 
 if (! is_logged_in()) {

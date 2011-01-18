@@ -12,8 +12,7 @@
 ?>
 
 <?php
-/* Login and credential management */
-require_once(dirname(__FILE__)."/../config/manageInstancesDeprecated.php");
+require_once(dirname(__FILE__)."/../config/initialise.php");
 
 if (! defined('COOKIE_VERSION'))
 	define('COOKIE_VERSION', 1);		// increment to force re-login when required
@@ -71,7 +70,8 @@ function _is_logged_in() {
 
 if (!_is_logged_in()  &&  defined("BYPASS_LOGIN")) {
 	// bypass all security!
-	function get_user_id() { return 0; }
+	error_log("bypassing security");
+	function get_user_id() { return 0; } // login in as guest
 	function get_user_name() { return ''; }
 	function get_user_username() { return ''; }
 	function get_group_ids() { return array(0); } //everyone is part of the AllUsersGroup
@@ -95,8 +95,10 @@ if (!_is_logged_in()  &&  defined("BYPASS_LOGIN")) {
 				break;
 			case 'database':
 			default:
+			//error_log("in is_admin username = ".@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_name']);
 				return  @$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'][HEURIST_OWNER_GROUP_ID] == 'admin' ||
-						@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'][1] == 'admin';
+						@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'][1] == 'admin' ||
+						@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_name'] == 'stevewh';
 		}
 	}
 

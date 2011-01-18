@@ -12,7 +12,7 @@
 ?>
 
 <?php
-	require_once(dirname(__FILE__).'/common/config/heurist-ini.php');
+	require_once(dirname(__FILE__).'/common/config/initialise.php');
 //error_log("request params = ". $_SERVER["QUERY_STRING"]);
 	if (@$_SERVER["QUERY_STRING"]) {
 		$q = $_SERVER["QUERY_STRING"];

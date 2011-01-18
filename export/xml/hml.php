@@ -1,18 +1,17 @@
 <?php
 
 /**
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+ * configIni.php - Configuration information for Heurist Initialization - USER EDITABLE
+ * @version $Id$
+ * @copyright 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
+ *
  **/
 
-?>
-
-<?php
-	/*<!-- hml.php
+/*<!-- hml.php
 
 	Copyright 2005 - 2010 University of Sydney Digital Innovation Unit
 	This file is part of the Heurist academic knowledge management system (http://HeuristScholar.org)
@@ -37,35 +36,42 @@
 
 	-->*/
 
-header('Content-type: text/xml; charset=utf-8');
 
 if (@$argv) {
 	// handle command-line queries
 
 	$ARGV = array();
-	for ($i=1; $i < count($argv); ++$i) {
+	for ($i=0; $i < count($argv); ++$i) {
 		if ($argv[$i][0] === '-') {
+			if (@$argv[$i+1] && $argv[$i+1][0] != '-') {
 			$ARGV[$argv[$i]] = $argv[$i+1];
 			++$i;
+			}else{
+				$ARGV[$argv[$i]] = true;
+			}
 		} else {
 			array_push($ARGV, $argv[$i]);
 		}
 	}
 
-	define('HEURIST_INSTANCE', @$ARGV['-instance'] ? $ARGV['-instance'] : '');
+	if(@$ARGV['-instance']) $_REQUEST['instance'] = $ARGV['-instance'];
 
+	if (@$ARGV['-f']) $_REQUEST['f'] = $ARGV['-f'];
 	$_REQUEST['q'] = @$ARGV['-q'];
 	$_REQUEST['w'] = @$ARGV['-w']? $ARGV['-w'] : 'a';	// default to ALL RESOURCES
-	$_REQUEST['stype'] = @$ARGV['-stype'];
+	if (@$ARGV['-stype']) $_REQUEST['stype'] = $ARGV['-stype'];
 	$_REQUEST['style'] = '';
-	$_REQUEST['depth'] = @$ARGV['-depth'];
-	$_REQUEST['rev'] = @$ARGV['-rev'];
-	$_REQUEST['woot'] = @$ARGV['-woot'];
+	$_REQUEST['depth'] = @$ARGV['-depth'] ? $ARGV['-depth']: 0;
+	if (@$ARGV['-rev'])$_REQUEST['rev'] = $ARGV['-rev'];
+	if (@$ARGV['-woot'])$_REQUEST['woot'] = $ARGV['-woot'];
 	if (@$ARGV['-stub']) $_REQUEST['stub'] = '1';
+
 }
+header('Content-type: text/xml; charset=utf-8');
+echo "<?xml version='1.0' encoding='UTF-8'?>\n";
 
 require_once(dirname(__FILE__).'/../../common/config/defineFriendlyServers.php');
-require_once(dirname(__FILE__).'/../../common/config/manageInstancesDeprecated.php');
+require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
 require_once(dirname(__FILE__).'/../../common/php/getRecordStructure.php');
@@ -95,6 +101,7 @@ function makeTag($name, $attributes=null, $textContent=null, $close=true) {
 		$tag .= "</$name>";
 	}
 	echo $tag . "\n";
+//	error_log("in makeTag tag = $tag");
 }
 
 function openTag($name, $attributes=null) {
@@ -103,6 +110,7 @@ function openTag($name, $attributes=null) {
 
 function closeTag($name) {
 	echo "</$name>\n";
+//	error_log("in closeTag name = $name");
 }
 
 function openCDATA() {
@@ -237,7 +245,7 @@ if (@$ARGV) {
 	function get_user_id() { return 0; }
 	function get_user_name() { return ''; }
 	function get_user_username() { return ''; }
-	function get_group_ids() { return array(2); }
+	function get_group_ids() { return array(0); }
 	function is_admin() { return false; }
 	function is_logged_in() { return true; }
 	$pub_id = 0;
@@ -261,6 +269,7 @@ if (@$ARGV) {
 //----------------------------------------------------------------------------//
 
 function findPointers($rec_ids) {
+//error_log("in findPointers");
 	$rv = array();
 	$query = 'SELECT distinct dtl_Value
 	            FROM recDetails
@@ -275,6 +284,7 @@ function findPointers($rec_ids) {
 }
 
 function findReversePointers($rec_ids, &$pointers) {
+//error_log("in findReversePointers");
 	$rv = array();
 	$query = 'SELECT dtl_Value, dtl_DetailTypeID, dtl_RecID
 	            FROM recDetails
@@ -295,6 +305,7 @@ function findReversePointers($rec_ids, &$pointers) {
 }
 
 function findRelatedRecords($rec_ids, &$relationships) {
+//error_log("in findRelatedRecords");
 	$rv = array();
 	$query = 'SELECT a.dtl_Value,
 	                 rec_ID,
@@ -342,6 +353,7 @@ function buildTree($rec_ids, &$reverse_pointers, &$relationships) {
 function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $outputStub=false) {
 	global $RTN, $DTN, $RQS, $WGN, $MAX_DEPTH, $WOOT;
 //error_log("rec = ".$record['rec_ID']);
+//error_log(" in outputRecord record = \n".print_r($record,true));
 	openTag('record');
 	makeTag('id', null, $record['rec_ID']);
 	makeTag('type', array('id' => $record['rec_RecTypeID']), $RTN[$record['rec_RecTypeID']]);
@@ -364,7 +376,9 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $o
 	}
 
 	if ($WOOT > $depth) {
+//error_log(" in outputRecord WOOT = \n".print_r($WOOT,true));
 		$result = loadWoot(array('title' => 'record:'.$record['rec_ID']));
+//error_log(" in outputRecord-WOOT result = \n".print_r($result,true));
 		if ($result['success']) {
 			openTag('woot', array('title' => 'record:'.$record['rec_ID']));
 //			openCDATA();
@@ -394,6 +408,7 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $o
 			closeTag('relationships');
 		}
 	}
+//error_log(" leaving outputRecord ");
 	closeTag('record');
 }
 
@@ -410,6 +425,7 @@ function outputRecordStub($recordStub) {
 
 function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $depth=0, $outputStub) {
 	global $DTN, $DTT, $RDL, $VOC, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH;
+//error_log("in outputDetail dt = $dt value = ". print_r($value,true));
 
 	$attrs = array('id' => $dt);
 	if (array_key_exists($dt, $DTN)) {
@@ -438,6 +454,7 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 			}
 		} else if (array_key_exists('file', $value)) {
 			$file = $value['file'];
+//error_log(" in outputDetail file = \n".print_r($file,true));
 			openTag('detail', $attrs);
 				openTag('file');
 					makeTag('id', null, $file['id']);
@@ -727,7 +744,6 @@ ob_implicit_flush(1);
 
 $result = loadSearch($_REQUEST);
 
-echo "<?xml version='1.0' encoding='UTF-8'?>\n";
 openTag('hml');
 /*
 openTag('hml', array(
@@ -747,7 +763,7 @@ makeTag('dateStamp', null, date('c'));
 if (array_key_exists('error', $result)) {
 	makeTag('error', null, $result['error']);
 } else {
-	openTag('vocabularies');
+/*	openTag('vocabularies');
 	foreach($VOC as $vocabulary){
 		$attrs = array('id' => $vocabulary['vcb_ID']);
 		if ($vocabulary['vcb_RefURL']) {
@@ -756,7 +772,7 @@ if (array_key_exists('error', $result)) {
 		makeTag('vocabulary', $attrs, $vocabulary['vcb_Name']);
 	}
 	closeTag('vocabularies');
-	makeTag('resultCount', null, $result['resultCount']);
+*/	makeTag('resultCount', null, $result['resultCount']);
 	makeTag('recordCount', null, $result['recordCount']);
 	openTag('records');
 	outputRecords($result);
@@ -766,3 +782,4 @@ if (array_key_exists('error', $result)) {
 closeTag('hml');
 
 ?>
+

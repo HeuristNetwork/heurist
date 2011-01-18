@@ -52,7 +52,7 @@ $rv = array(
 );
 
 if (array_key_exists('fetch', $_REQUEST)) {
-	$rv['ids'] = array_keys(@$collection);
+	$rv['ids'] = @$collection ? array_keys($collection): array();
 }
 
 print json_format($rv);

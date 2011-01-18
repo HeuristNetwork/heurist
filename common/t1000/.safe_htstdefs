@@ -76,7 +76,6 @@ $SEARCHES["BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left jo
 		(bkm_UGrpID = [logged-in-user-id]) and
 		[word-match:bkmk_title:bkmk_title] and 
 		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
-		if ([bkmk_advanced_search] and [pers_notes]!='', pers_notes like [%pers_notes%], 1) and
 		if ([bkmk_advanced_search] and [bkmk_reftype]!='', rec_RecTypeID = [bkmk_reftype], 1)
                 and not rec_FlagTemporary
 		)
@@ -86,7 +85,6 @@ $SEARCHES["augmented_BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmar
 		(bkm_UGrpID = [logged-in-user-id]) and
 		[word-match:bkmk_title:bkmk_title] and 
 		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
-		if ([bkmk_advanced_search] and [pers_notes]!='', pers_notes like [%pers_notes%], 1) and
 		if ([bkmk_advanced_search] and [bkmk_reftype]!='', rec_RecTypeID = [bkmk_reftype], 1)
                 and not rec_FlagTemporary
 		)

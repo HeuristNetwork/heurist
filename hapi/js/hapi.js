@@ -1388,7 +1388,7 @@ var HRecord = function() {
 	this.setAll = function(sm, id, version, type, title, details, url, notes, wg, nonwgVis, urlDate, urlError, cDate, mDate, creator, hhash, bkmkID, pNotes, rating, irate, qrate, tags, wgTags, readonly) {
 		// Set all the details (even the secret ones!) for a record in one place ... only available to the storage manager
 		if (! HAPI.isA(sm, "HStorageManager")) { throw "Do not call HRecord::setAll"; }
-
+		// saw TODO add code to check irate and qrate are null as they are deprecated
 		var i;
 		_storageManager = sm;
 		_id = id;

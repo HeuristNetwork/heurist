@@ -37,7 +37,7 @@ top.HEURIST.edit = {
 	modules: {
 		'public': { url: 'tabs/publicInfoTab.html', 'link-id': 'public-link', loaded: false, loading: false, changed: false,
 				preload: function() { return (top.HEURIST.edit.record.bibID  &&  top.HEURIST.edit.record.bibID != 0); } },
-		'personal': { url: 'tabs/personal-tab.html', 'link-id': 'personal-link', loaded: false, loading: false, changed: false,
+		'personal': { url: 'tabs/personalInfoTab.html', 'link-id': 'personal-link', loaded: false, loading: false, changed: false,
 				preload: function() { return (top.HEURIST.edit.record.bkmkID  &&  top.HEURIST.edit.record.bkmkID != 0); },
 				disabledFunction: function() { top.HEURIST.edit.addMissingBookmark() } },
 		'annotation': { url: 'tabs/annotationTab.html', 'link-id': 'annotation-link', loaded: false, loading: false, changed: false,
@@ -996,7 +996,7 @@ top.HEURIST.edit = {
 			popupOptions.x = buttonPos.x + 8 - 120;
 			popupOptions.y = buttonPos.y + 8 - 80;
 
-			top.HEURIST.util.popupURL(windowRef,top.HEURIST.basePath + "common/html/calendar.html#"+dateBox.value, popupOptions);
+			top.HEURIST.util.popupURL(windowRef,top.HEURIST.basePath + "common/html/calendarTemplate.html#"+dateBox.value, popupOptions);
 		}
 
 		return buttonElt;
@@ -1089,7 +1089,7 @@ top.HEURIST.edit = {
 			popupOptions.x = buttonPos.x + 8 - 380;
 			popupOptions.y = buttonPos.y + 8 - 380;
 
-			top.HEURIST.util.popupURL(windowRef, top.HEURIST.basePath + "common/html/temporal.html?" + (dateBox.strTemporal ? dateBox.strTemporal : dateBox.value), popupOptions);
+			top.HEURIST.util.popupURL(windowRef, top.HEURIST.basePath + "common/html/editTemporalObject.html?" + (dateBox.strTemporal ? dateBox.strTemporal : dateBox.value), popupOptions);
 		}
 
 		return buttonElt;
@@ -1233,8 +1233,8 @@ top.HEURIST.edit.inputs.BibDetailInput.prototype.addInputHelper = function(bdVal
 		}
 		else	this.constrainReftype = 0;
 	}
-	if (parseFloat(this.bibDetailRequirements[5]) > 0) {	//if the size is greater than zero
-		element.style.width = Math.round(4/3 * this.bibDetailRequirements[5]) + "ex";
+	if (parseFloat(this.bibDetailRequirements[6]) > 0) {	//if the size is greater than zero
+		element.style.width = Math.round(4/3 * this.bibDetailRequirements[6]) + "ex";
 	}
 
 	element.expando = true;

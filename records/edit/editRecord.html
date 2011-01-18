@@ -89,7 +89,7 @@
 			top.HEURIST.whenLoaded(["record", "edit-html"], function() {
 				top.HEURIST.edit.showRecordProperties();
 				if (top.HEURIST.parameters["sid"]) {
-					top.HEURIST.util.getJsonData(top.HEURIST.basePath+"records/editrec/result-context.php?s="+top.HEURIST.parameters["sid"]+"&id="+top.HEURIST.edit.record.bibID, function(context) {
+					top.HEURIST.util.getJsonData(top.HEURIST.basePath+"records/edit/setResultsNavigation.php?s="+top.HEURIST.parameters["sid"]+"&id="+top.HEURIST.edit.record.bibID, function(context) {
 						if (! context) return;
 						document.getElementById("search-nav").innerHTML =
 						"<p>Record "+context.pos+" of "+context.count+" search results</p>" +

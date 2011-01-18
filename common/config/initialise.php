@@ -1,17 +1,14 @@
 <?php
 
-/**
+/*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- **/
+ -->*/
 
-?>
-
-<?php
 require_once(dirname(__FILE__).'/../../configIni.php');  // read in the configuration file
 
 
@@ -32,8 +29,10 @@ define('READONLY_DBUSERPSWD',$dbReadonlyPassword);
 
 define('HEURIST_DB_PREFIX', $dbPrefix);	//database name prefix which is added to db=name to compose the mysql dbname used in queries
 define('HEURIST_SYSTEM_DB', $dbPrefix."HeuristSystem");	//database which contains Heurist System level data
+define('HEURIST_REFERENCE_BASE_URL', "HTTP://heuristscholar.org/master/");	//Heurist Installation which contains reference structure definition
+define('HEURIST_INDEX_BASE_URL', "HTTP://heuristscholar.org/master/");	//Heurist Installation which contains index of registered Heurist databases
 define('HEURIST_SYS_GROUP_ID', 1);	//ID of Heurist System User Group which has special privileges
-error_log("in initialise dbHost = $dbHost");
+//error_log("in initialise dbHost = $dbHost");
 //test db connect valid db
 $db = mysql_connect(HEURIST_DBSERVER_NAME, $dbAdminUsername, $dbAdminPassword) or die("unable to connect to db server with admin acct: ".mysql_error());
 $db = mysql_connect(HEURIST_DBSERVER_NAME, $dbReadonlyUsername, $dbReadonlyPassword) or die("unable to connect to db server with readonly acct: ".mysql_error());

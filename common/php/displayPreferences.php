@@ -77,7 +77,7 @@ if ($writeMode) return;	// suppress normal output
 
 ?>
 
-//document.domain = "h3.heuristscholar.org";
+//document.domain = "<?= HEURIST_HOST_NAME ?>";
 
 if (! document.body) {
 	// Document manipulation becomes much harder if we can't access the body.

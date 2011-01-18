@@ -86,7 +86,7 @@
 					}
 
 				</script>
-				<script src="{$hBase}common/php/loadHAPI.php?instance={$hapi-instance}&amp;key={$hapi-key}"/>
+				<script src="{$hBase}common/php/loadHAPI.php?instance={$hapi-instance}"/>
 				<script>
 					if (!HCurrentUser.isLoggedIn()) {
 						window.location = '<xsl:value-of select="$hBase"/>common/connect/loginForRelBrowser.php?instance=<xsl:value-of select="$instanceName"/>&amp;logo=<xsl:value-of select="$appBase"/>images/logo.png&amp;home=<xsl:value-of select="$appBase"/>';

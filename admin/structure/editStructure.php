@@ -13,7 +13,6 @@
 
 <?php
 
-define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
@@ -22,7 +21,8 @@ if (! is_logged_in()) {
 	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE);
 	return;
 }
-if (! is_admin()  ||  HEURIST_INSTANCE != "") {
+
+if (! is_admin()) {
 	print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href=".HEURIST_URL_BASE.">Return to Heurist</a></p></body></html>";
 	return;
 }
@@ -31,7 +31,7 @@ if (! is_admin()  ||  HEURIST_INSTANCE != "") {
 
 $_REQUEST['_bdr_search_search'] = 1;
 
-mysql_connection_db_overwrite(HEURIST_COMMON_DB);
+mysql_connection_db_overwrite(DATABASE);
 
 $delete_bdt_id = intval(@$_REQUEST['delete_bdt_field']);
 if ($delete_bdt_id) {
@@ -55,7 +55,6 @@ $body->global_vars['new-field-errors'] = false;
 $body->global_vars['new'] = @$_REQUEST['new']? 1 : 0;
 $body->global_vars['editing_reftype'] = @$_REQUEST['rty_ID']? 1 : 0;
 $body->global_vars['instance-name'] = HEURIST_INSTANCE;
-
 
 
 $body->verify();
@@ -91,6 +90,7 @@ if (@$_REQUEST['_submit']) {
 
 if (! @$_REQUEST['new_bdt_bdt_required'])
 	$_REQUEST['new_bdt_bdt_required'] = 'Y';
+
 $body->render();
 
 

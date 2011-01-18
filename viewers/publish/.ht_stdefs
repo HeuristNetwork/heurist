@@ -123,7 +123,6 @@ if (@$_REQUEST['showall']) {
 		bkm_UGrpID != [logged-in-user-id] and
 		if ([bkmk_title]!='', if([bkmk_title]!='=', bkmk_title like [%bkmk_title%], bkmk_title = ''), 1) and
 		if ([bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
-		if ([pers_notes]!='', pers_notes like [%pers_notes%], 1) and
 		if ([bkmk_category_id]!='', bkmk_category_id = [bkmk_category_id], 1) and
 		if ([bkmk_keywordstring]!='', bkmk_keywordstring like [%bkmk_keywordstring%], 1)
 		)
@@ -179,7 +178,6 @@ $SEARCHES["BOOKMARK_search"] = "SELECT bkm_ID FROM usrBookmarks WHERE (
 		(bkm_UGrpID = [logged-in-user-id]) and
 		if ([bkmk_title]!='', if([bkmk_title]!='=', bkmk_title like [%bkmk_title%], bkmk_title = ''), 1) and
 		if ([bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
-		if ([pers_notes]!='', pers_notes like [%pers_notes%], 1) and
 		if ([bkmk_category_id]!='', bkmk_category_id = [bkmk_category_id], 1) and
 		if ([bkmk_keywordstring]!='', bkmk_keywordstring like [%bkmk_keywordstring%], 1) and
 		if ([bkmk_reftype]!='', bkmk_reftype = [bkmk_reftype], 1)
@@ -190,7 +188,6 @@ $SEARCHES["BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left jo
 		(bkm_UGrpID = [logged-in-user-id]) and
 		[word-match:bkmk_title:bkmk_title] and 
 		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
-		if ([bkmk_advanced_search] and [pers_notes]!='', pers_notes like [%pers_notes%], 1) and
 		if ([bkmk_advanced_search] and [bkmk_reftype]!='', rec_RecTypeID = [bkmk_reftype], 1)
                 and not rec_FlagTemporary
 		)
@@ -200,7 +197,6 @@ $SEARCHES["augmented_BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmar
 		(bkm_UGrpID = [logged-in-user-id]) and
 		[word-match:bkmk_title:bkmk_title] and 
 		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
-		if ([bkmk_advanced_search] and [pers_notes]!='', pers_notes like [%pers_notes%], 1) and
 		if ([bkmk_advanced_search] and [bkmk_reftype]!='', rec_RecTypeID = [bkmk_reftype], 1)
                 and not rec_FlagTemporary
 		)
@@ -217,7 +213,6 @@ $SEARCHES["BOOKMARK_search_all"] = "SELECT bkm_ID, bkm_UGrpID FROM usrBookmarks 
 		bkm_UGrpID != [logged-in-user-id] and
 		if ([bkmk_title]!='', bkmk_title like [%bkmk_title%], 1) and
 		if ([bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
-		if ([pers_notes]!='', pers_notes like [%pers_notes%], 1) and
 		if ([bkmk_keywordstring]!='', bkmk_keywordstring like [%bkmk_keywordstring%], 1)
 		)";
 */
@@ -228,8 +223,7 @@ define('ALLBOOKMARK_search-order', 'bkmk_title');
 
 $SEARCHES["ALLBOOKMARK_search"] = "SELECT bkm_ID FROM usrBookmarks WHERE (
 	if ([bkmk_title]!='', bkmk_title like [%bkmk_title%], 1) and
-	if ([bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
-	if ([pers_notes]!='', pers_notes like [%pers_notes%], 1)
+	if ([bkmk_url]!='', bkmk_url like [%bkmk_url%], 1)
 	)
 	";
 

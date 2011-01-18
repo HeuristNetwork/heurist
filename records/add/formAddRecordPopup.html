@@ -74,7 +74,7 @@ if (! reftype) {
 		var reftype = reftypeDropdown.options[reftypeDropdown.selectedIndex].value;
 
 		var editFrame = document.getElementById("edit-frame");
-		editFrame.src = "../editrec/tabs/publicInfoTab.html?reftype="+reftype;
+		editFrame.src = "../edit/tabs/publicInfoTab.html?reftype="+reftype;
 		editFrame.style.display = "block";
 
 		reftypeDropdown.onchange = setReftype;
@@ -123,7 +123,7 @@ if (! reftype) {
 
 } else {
 	var editFrame = document.getElementById("edit-frame");
-	editFrame.src = "../editrec/tabs/publicInfoTab.html?reftype="+reftype+"&title="+encodeURIComponent(title);
+	editFrame.src = "../edit/tabs/publicInfoTab.html?reftype="+reftype+"&title="+encodeURIComponent(title);
 	editFrame.style.display = "block";
 
 	document.getElementById("reftype-val").appendChild(document.createTextNode(top.HEURIST.reftypes.names[reftype]));

@@ -44,14 +44,15 @@
  */
 
 header("Content-type: text/javascript");
-
+/* hapi key's removed saw 17/1/11
 if (@$_REQUEST["instance"]) {
 	define("HEURIST_INSTANCE", $_REQUEST["instance"]);
 	define("HOST", $_SERVER["HTTP_HOST"]);
 }
-require_once(dirname(__FILE__)."/../config/manageInstancesDeprecated.php");
+*/
+require_once(dirname(__FILE__)."/../config/initialise.php");
 require_once("dbMySqlWrappers.php");
-
+/*
 mysql_connection_select("hapi");
 $query = "SELECT hl_key
             FROM hapi_locations
@@ -64,7 +65,8 @@ if (! $row) {
 	exit;
 }
 $key = $row["hl_key"];
+*/
 ?>
 
-document.write("<" + "scr" +"ipt src=\"<?=HEURIST_SITE_PATH?>hapi/hapiLoader.php?instance=<?= HEURIST_INSTANCE ?>&key=<?= $key?> <?=(@$_REQUEST["inclGeo"]? "&inclGeo=1":"")?>\"><" + "/script>\n");
+document.write("<" + "scr" +"ipt src=\"<?=HEURIST_URL_BASE?>hapi/hapiLoader.php?instance=<?= HEURIST_INSTANCE ?><?=(@$_REQUEST["inclGeo"]? "&inclGeo=1":"")?>\"><" + "/script>\n");
 
