@@ -16,36 +16,11 @@
   <title>Heurist Resource Database - Map and Timeline</title>
 
   <style>
-#all-table { width: 100%; height: 100%; }
-
-#map, #timeline { width: 100%; height: 100%; }
-#timeline-cell { height: 200px; }
-#info-cell { height: 2em; padding: 0 1ex; }
-
-#timeline-cell * { font-size: 11px; }
-
-#resizer, #resizer div { font-size: 4px; line-height: 4px; overflow: hidden; height: 4px; background-color: white; cursor: n-resize; }
-
-body div { line-height: 1.5em; }
-
-.testLabel {
-background-color:RGBA(0,0,0,0.6);
-border: 1px solid #FFF;
--moz-border-radius: 6px;
--moz-box-shadow: 0 2px 4px #666;
-background-repeat:no-repeat;
-font-size:10px;
-line-height:10px;
-padding:3px 3px 3px 18px;
-width:auto;
-color:#FFF;
-margin-bottom: 20px;
-margin-left: -100%;}
-
 
   </style>
   <!--<script src="http://simile.mit.edu/timeline/api/timeline-api.js"></script> -->
   <script src="../../external/simile/timeline-api.js" type="text/javascript"></script>
+  <link rel="stylesheet" href="../../common/css/maps.css"/>
 
  </head>
 
@@ -86,10 +61,15 @@ if (location.search.match(/\btimeline=0\b/)) {
   <script src="epoly.js"></script>
   <script src="../../external/js/elabel.js"></script>
 
+  <script src="../ClusterMarker.js"></script>
   <script src="loadGMap.js"></script>
   <script src="loadTimeline.js"></script>
 
   <script>
+if (top.HEURIST) {
+	top.HEURIST.registerEvent(this,"heurist-selectionchange",onSelectionChange);
+	}
+
   function load(){
 	if (HEURIST.tmap.totalRecordCount == 0) {
 		document.body.style.margin = "10px";
@@ -106,7 +86,7 @@ if (location.search.match(/\btimeline=0\b/)) {
 		if (! location.search.match(/\btimeline=0\b/)) loadTimeline();
 	}
 
-	var resizerCell = document.getElementById("resizer");
+	//var resizerCell = document.getElementById("resizer");
 	var timelineCell = document.getElementById("timeline-cell");
 	resizerCell.onmousedown = function(e) {
 		if (! e) e = window.event;
@@ -140,6 +120,15 @@ if (location.search.match(/\btimeline=0\b/)) {
 			document.attachEvent("onmouseup", resizerCell.document_mouseup);
 		}
 	};
+}
+
+function onSelectionChange(eventType, argList) {
+	if (parent.document.getElementById("m").className == "yui-hidden") {
+		return false;
+		}else {
+	if (eventType == "heurist-selectionchange"){
+	top.HEURIST.search.mapSelected();}
+	}
 }
   </script>
 

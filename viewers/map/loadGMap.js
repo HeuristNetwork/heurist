@@ -63,17 +63,20 @@ function loadMap(options) {
 
 		if (! iconsByReftype[record.reftype]) {
 			iconsByReftype[record.reftype] = new GIcon(baseIcon);
-			iconsByReftype[record.reftype].image = "../../common/images/reftype-icons/" + record.reftype + ".png";
+			//iconsByReftype[record.reftype].image = "../../common/images/reftype-icons/" + record.reftype + ".png";
+			//iconsByReftype[record.reftype].image = "../../common/images/pointerMapWhite.png";
+			iconsByReftype[record.reftype].image = "../../common/images/16x16.gif";
 		}
 
 		var marker = null;
 		var polygon = null;
 		switch (geo.type) {
-		    case "point":
+			case "point":
 			marker = new GMarker(new GLatLng(geo.geo.y, geo.geo.x), getIcon(record));
+			ELabelLoc = new GLatLng(geo.geo.y, geo.geo.x);
 			break;
 
-		    case "circle":
+			case "circle":
 			if (window.heurist_useLabelledMapIcons) {
 				addPointMarker(new GLatLng(geo.geo.y, geo.geo.x), record);
 			}
@@ -89,9 +92,11 @@ function loadMap(options) {
 			} else {
 				polygon = new GPolygon(points, "#0000ff", 1, 0.5, "#aaaaff", 0.3);
 			}
+
+			ELabelLoc = new GLatLng(geo.geo.y, geo.geo.x);
 			break;
 
-		    case "rect":
+			case "rect":
 			if (window.heurist_useLabelledMapIcons) {
 				addPointMarker(new GLatLng((geo.geo.y0+geo.geo.y1)/2, (geo.geo.x0+geo.geo.x1)/2), record);
 			}
@@ -107,9 +112,11 @@ function loadMap(options) {
 			} else {
 				polygon = new GPolygon(points, "#0000ff", 1, 0.5, "#aaaaff", 0.3);
 			}
+
+			ELabelLoc = (new GLatLng(geo.geo.y0, (geo.geo.x0+geo.geo.x1)/2));
 			break;
 
-		    case "polygon":
+			case "polygon":
 			if (window.heurist_useLabelledMapIcons) {
 				addPointMarker(new GLatLng(geo.geo.points[1].y, geo.geo.points[1].x), record);
 			}
@@ -123,9 +130,10 @@ function loadMap(options) {
 			} else {
 				polygon = new GPolygon(points, "#0000ff", 1, 0.5, "#aaaaff", 0.3);
 			}
+			ELabelLoc = (new GLatLng(geo.geo.points[0].y, geo.geo.points[0].x));
 			break;
 
-		    case "path":
+			case "path":
 			//var points = [];
 			//for (var i=0; i < geo.geo.points.length; ++i)
 			//	points.push(new GLatLng(geo.geo.points[i].y, geo.geo.points[i].x));
@@ -134,33 +142,95 @@ function loadMap(options) {
 			} else {
 				polygon = new GPolyline.fromEncoded({ color: "#0000ff", weight: 3, opacity: 0.8, points: geo.geo.points, zoomFactor: 3, levels: geo.geo.levels, numLevels: 21 });
 			}
-
 			if (window.heurist_useLabelledMapIcons) {
 				addPointMarker(polygon.getVertex(Math.floor(polygon.getVertexCount() / 2)), record);
 			}
-
 			break;
 		}
+		// Pointer Records loading section
+		var mapLabelXSL;
+		var xmlRecDepth1 = loadXMLDocFromFile("http://heuristscholar.org"+ top.HEURIST.basePath+
+								"export/xml/hml.php?q=ids:"+record.bibID+"&depth=1&woot=1"+
+								(top.HEURIST.instance.name? "&instance=" + top.HEURIST.instance.name:""));
+			if (!xmlRecDepth1) return;
+			if (!mapLabelXSL) {
+				mapLabelXSL = loadXMLDocFromFile("mapLabel.xsl");
+			}
+			var xhtmlResultDoc;
+			if (window.ActiveXObject){
+				var xmlResultStr = xmlRecDepth1.transformNode(mapLabelXSL);
+				xhtmlResultDoc=new ActiveXObject("Microsoft.XMLDOM");
+				xhtmlResultDoc.async="false";
+				xhtmlResultDoc.loadXML(xmlResultStr);
+			// code for Mozilla, Firefox, Opera, etc.
+			}else {
+				var xsltProcessor=new XSLTProcessor();
+				xsltProcessor.importStylesheet(mapLabelXSL);
+				xhtmlResultDoc = xsltProcessor.transformToFragment(xmlRecDepth1,document);
+			}
+		//Creates custom label HTML
+		var labelContent =
+			"<div id="+record.bibID+" class='maplabel'><div class='MapPointer'></div></div>";
+
+		//custom label sent to elabel
+		var label = new ELabel(ELabelLoc,labelContent,"",GSize(200,20),100,true);
 
 		if (marker) {
 			marker.record = record;
 			if (! record.overlays) record.overlays = [];
 			record.overlays.push(marker);
+			record.overlays.push(label);
 			map.addOverlay(marker);
+			map.addOverlay(label);
 			GEvent.addListener(marker, "click", markerClick);
 		}
 		else if (polygon) {
 			polygon.record = record;
 			if (! record.overlays) record.overlays = [];
 			record.overlays.push(polygon);
+			record.overlays.push(label);
 			map.addOverlay(polygon);
+			map.addOverlay(label);
 			GEvent.addListener(polygon, "click", polygonClick);
 		}
-		var offset = GSize(200,20);
-		var label = new ELabel(new GLatLng(geo.geo.y, geo.geo.x), "<div class='testLabel' style='background-image:url(../../common/images/reftype-icons/"+record.reftype+".png)'>"+record.title+"</div>","",offset,100,true);
-		map.addOverlay(label);
 
+		var relatedID = record.bibID;
+		var related;
+		related = document.getElementById(relatedID);
+		related.appendChild(xhtmlResultDoc);
 	}
+}
+
+function loadXMLDocFromFile(filename)
+{
+	var xmlDoc=null;
+	var errorMsg = "Error loading " + filename + " using XMLHttpRequest";
+	var d;
+	try {
+		d = new XMLHttpRequest();
+	} catch (trymicrosoft) {
+		try {
+			d = new ActiveXObject("Msxml2.XMLHTTP");
+		} catch (othermicrosoft) {
+			try {
+				d = new ActiveXObject("Microsoft.XMLHTTP");
+			} catch (failed) {
+				d = false;
+			}
+		}
+	}
+	if (d) {
+		try{
+			d.open("GET", filename, false);
+			d.send("");
+			xmlDoc=d.responseXML;
+		}catch(e){
+			alert(errorMsg + " Hint : " + e);
+		}
+	}else{
+		alert("Your browser doesn't process XSL. Unable to view content.");
+	}
+	return xmlDoc;
 }
 
 
@@ -225,8 +295,6 @@ function polygonClick(point) {
 		map.openInfoWindowHtml(point, html);
 	}
 }
-
-
 
 var iconNumber = 0;
 var legendIcons;
@@ -297,7 +365,6 @@ function getIcon(record) {
 		return iconsByReftype[record.reftype];
 	}
 }
-
 
 function addPointMarker(latlng, record) {
 	var marker = new GMarker(latlng, getIcon(record));

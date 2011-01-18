@@ -1013,8 +1013,11 @@ top.HEURIST.search = {
 
 		//send selectionChange event
 		var viewerFrame = document.getElementById("viewer-frame");
+		var mapFrame = document.getElementById("map-frame");
 		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", "selectedIds=" + top.HEURIST.search.selectedRecordIds.join(","));
+		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange", "selectedIds=" + top.HEURIST.search.selectedRecordIds.join(","));
 		return false;
+
 	},
 
 
@@ -1377,6 +1380,10 @@ top.HEURIST.search = {
 	},
 
 	mapSelected: function() {
+		if (top.HEURIST.search.selectedRecordIds.length == 0) {
+			alert("Selected a record first");
+			return;
+		};
 		var p = top.HEURIST.parameters;
 		var recIds = top.HEURIST.search.selectedRecordIds.slice(0,500); // maximum number of records ids 500
 		if (top.HEURIST.search.selectedRecordIds.length >= 500) {
@@ -1404,7 +1411,8 @@ top.HEURIST.search = {
 		mapiFrame.style.height = "100%";
 		mapiFrame.src = url
 		mapDiv.appendChild(mapiFrame);
-		document.getElementById("page").appendChild(mapDiv);
+		//document.getElementById("page").appendChild(mapDiv);
+		document.getElementById("map-frame").src = url;
 	},
 	closeMap: function() {
 		var mapDiv = document.getElementById("mapDiv");

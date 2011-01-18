@@ -501,7 +501,7 @@ body, .darkBG {
 }
 #logo {
 /*	background-image:url(../images/branding/h3logo_small.png) !important;*/	
-	background-image:url(../images/branding/h3logo_haloween.png) !important;
+	background-image:url(../images/branding/h3logo_small.png) !important;
 	background-repeat: no-repeat;
 }
 #search {height:40px;left:10px;padding:0;position:absolute;right:10px;top:65px;}

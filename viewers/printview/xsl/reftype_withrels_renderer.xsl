@@ -2,7 +2,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 
 	<xsl:param name="arg"/>
-
+<!-- 
 	<xsl:include href="course_unit.xsl"/>
 	<xsl:include href="event.xsl"/>
 	<xsl:include href="conference.xsl"/>
@@ -15,9 +15,8 @@
 	<xsl:include href="fieldwork_opportunity.xsl"/>
 	<xsl:include href="thesis.xsl"/>
 	<xsl:include href="publications.xsl"/>
-	<!-- book, chapter, conf paper, journal volume etc -->
 	<xsl:include href="grant.xsl"/>
-
+-->
 
 
 	<xsl:template match="/">
@@ -31,25 +30,15 @@
 			[output]reftype_withrels_renderer[/output]
 		</xsl:comment>
 		<!-- end including code -->
-		<html>
-			<head>
-				<title/>
-				<link rel="stylesheet" type="text/css"
-					href="http://www.arts.usyd.edu.au/departs/archaeology/styles/base_internal.css"/>
-				<style type="text/css">
-				body { font-size: 80%; }
-				td { vertical-align: top; }
-			</style>
-			</head>
-			<body>
+
 				<xsl:attribute name="pub_id">
 					<xsl:value-of select="/hml/query[@pub_id]"/>
 				</xsl:attribute>
-				<table>
+
+					START of Document <br/>
 					<xsl:choose>
 						<xsl:when test="number($arg) > 0">
-
-							<xsl:apply-templates select="hml/records/record[id=$arg]"/>
+							<xsl:apply-templates select="hml/records/record[id=$arg]"/>ARGUMENT<br/>
 						</xsl:when>
 						<xsl:when test="string(number($arg)) = 'NaN'">
 							<xsl:apply-templates select="hml/records/record">
@@ -61,50 +50,44 @@
 								<xsl:with-param name="month" select="substring(/hml/dateStamp, 6, 2)"/>
 								<xsl:with-param name="day" select="substring(/hml/dateStamp, 9, 2)"/>
 							</xsl:apply-templates>
+							<br/>
 						</xsl:when>
 						<xsl:otherwise>
 							<xsl:apply-templates select="hml/records/record"/>
+							hml/records/record <br/>
 						</xsl:otherwise>
 					</xsl:choose>
-				</table>
-			</body>
-		</html>
 	</xsl:template>
 
 
 	<!-- detail output template -->
-	<xsl:template match="record[id=$arg]">
-		<!--tr>
-		<a href="javascript:history.go(-1);">Back to list</a>
-	</tr-->
+	<xsl:template match="record">
+	<div id="{id}" class="record">
+	<table>
 		<tr>
-			<td style="padding-right: 10px;">
+			<td class="detailType">
 				<img>
-					<xsl:attribute name="src">http://heuristscholar.org/reftype/<xsl:value-of
-							select="type/@id"/>.gif</xsl:attribute>
+					<xsl:attribute name="src">../../common/images/reftype-icons/<xsl:value-of select="type/@id"/>.png</xsl:attribute>
 				</img>
 			</td>
-			<td style="font-weight: bold;">
-				<a style="float: right;" target="_new"
-					href="http://heuristscholar.org/heurist/edit?bib_id={id}">
-					<img style="border: none;"
-						src="http://heuristscholar.org/heurist/img/edit_pencil_16x16.gif"/>
-				</a>
+			<td class="detail" style="font-weight: bold;">
 				<xsl:value-of select="title"/>
 			</td>
 		</tr>
+
 		<tr>
-			<td style="padding-right: 10px;">
+			<td class="detailType">
 				<nobr>Reference type</nobr>
 			</td>
-			<td>
+			<td class="detail">
 				<xsl:value-of select="type"/>
 			</td>
 		</tr>
+
 		<xsl:if test="url != ''">
 			<tr>
-				<td style="padding-right: 10px;">URL</td>
-				<td>
+				<td class="detailType">URL</td>
+				<td class="detail">
 					<a href="{url}">
 						<xsl:choose>
 							<xsl:when test="string-length(url) &gt; 50">
@@ -118,18 +101,20 @@
 			</tr>
 		</xsl:if>
 
-		<!-- this calls  ? -->
+		<!-- this calls  short summary / description -->
 		<xsl:for-each select="detail[@id!=222 and @id!=223 and @id!=224]">
 			<tr>
-				<td style="padding-right: 10px;">
+				<td class="detailType">
 					<nobr>
 						<xsl:choose>
-							<xsl:when test="string-length(@name)"><xsl:value-of select="@name"/></xsl:when>
-							<xsl:otherwise> <xsl:value-of select="@type"/></xsl:otherwise>
+							<xsl:when test="string-length(@name)">
+								<xsl:value-of select="@name"/>
+							</xsl:when>
+							<xsl:otherwise><xsl:value-of select="@type"/></xsl:otherwise>
 						</xsl:choose>
 					</nobr>
 				</td>
-				<td>
+				<td class="detail">
 					<xsl:choose>
 						<!-- 268 = Contact details URL,  256 = Web links -->
 						<xsl:when test="@id=268  or  @id=256  or  starts-with(text(), 'http')">
@@ -138,7 +123,7 @@
 									<xsl:when test="string-length() &gt; 50">
 										<xsl:value-of select="substring(text(), 0, 50)"/> ... </xsl:when>
 									<xsl:otherwise>
-										<xsl:value-of select="text()"/>
+										<xsl:copy-of select="text()"/>
 									</xsl:otherwise>
 								</xsl:choose>
 							</a>
@@ -149,36 +134,34 @@
 								<xsl:value-of select="file/origName"/>
 							</a>
 						</xsl:when>
-						<xsl:otherwise> <xsl:value-of select="text()"/></xsl:otherwise>
+						<xsl:otherwise><xsl:copy-of select="text()"/></xsl:otherwise>
 					</xsl:choose>
 				</td>
 			</tr>
 		</xsl:for-each>
 
-
 		<tr>
-			<td style="padding-right: 10px;">
+			<td class="detailType">
 				<xsl:value-of select="detail[@id=264]/record/@name"/>
 			</td>
-			<td>
-		<xsl:apply-templates select="detail[@id=264]/record"></xsl:apply-templates>
-
+			<td class="detail">
+				<xsl:apply-templates select="detail[@id=264]/record"></xsl:apply-templates>
 			</td>
 		</tr>
+		
 		<tr>
-			<td style="padding-right: 10px;">
-				<xsl:value-of select="detail[@id=267]/record/@name"/>
+			<td class="detailType">
+				<xsl:value-of select="detail[@id=267]/record/@name"/> 
 			</td>
-			<td>
-
+			<td class="detail">
 				<xsl:apply-templates select="detail[@id=267]/record"></xsl:apply-templates>
 			</td>
 		</tr>
 
 		<xsl:if test="notes != ''">
 			<tr>
-				<td style="padding-right: 10px;">Notes</td>
-				<td>
+				<td class="detailType">Notes</td>
+				<td class="detail">
 					<xsl:value-of select="notes"/>
 				</td>
 			</tr>
@@ -186,8 +169,8 @@
 
 		<xsl:if test="detail[@id=222 or @id=223 or @id=224]">
 			<tr>
-				<td style="padding-right: 10px;">Images</td>
-				<td>
+				<td class="detailType">Images</td>
+				<td class="detail">
 					<!-- 222 = Logo image,  223 = Thumbnail,  224 = Images -->
 					<xsl:for-each select="detail[@id=222 or @id=223 or @id=224]">
 						<a href="{file/url}">
@@ -196,23 +179,15 @@
 				</td>
 			</tr>
 		</xsl:if>
-
+		</table>
+		</div>
 	</xsl:template>
+
 <xsl:template match="detail/record">
 	<xsl:call-template name="title_group"/>
 </xsl:template>
+
 <xsl:template name="title_group" mode="blah">
-	<!-- only output reftype title once -->
-	<table>
-		<tr>
-			<td>
-				<xsl:value-of select="title"/>
-			</td>
-			</tr>
-	</table>
-
-
-
-
+	<xsl:value-of select="title"/><br/>
 </xsl:template>
 </xsl:stylesheet>

@@ -97,29 +97,32 @@
 									<!-- <xsl:value-of select="./record/type"/>: -->
 									<a target="_new" href="#" onclick="this.href = hBase +'search/search.html?q=ids:{self::node()/record/id}&amp;instance=' + instance;"> <xsl:value-of select="./record/title"/> </a>
 								</xsl:when>
-								<xsl:when test="self::node()[@id!= 222 and @id!= 221 and @id!=177 and @id != 223 and @id != 231 and @id != 268 and @id !=256 and @id!=304 and @id != 224]">
+								<xsl:when test="self::node()[@id!= 222 and @id!= 221 and @id!=177 and @id!=178 and @id != 223 and @id != 231 and @id != 268 and @id !=256 and @id!=304 and @id != 224]">
 									<xsl:value-of select="."/>
 								</xsl:when>
 								<xsl:otherwise>
 									<xsl:if test="self::node()[@id= 177]">
 										<xsl:call-template name="start-date"></xsl:call-template>
-								</xsl:if>
-								<xsl:if test="self::node()[@id= 231 or @id=221]">
-									<xsl:call-template name="file">
-										<xsl:with-param name="id"><xsl:value-of select="@id"/></xsl:with-param>
-									</xsl:call-template>
-								</xsl:if>
-								<xsl:if test="self::node()[@id= 268 or @id=304]">
-									<xsl:call-template name="url">
-										<xsl:with-param name="key"><xsl:value-of select="."/></xsl:with-param>
-										<xsl:with-param name="value"><xsl:value-of select="."/></xsl:with-param>
-									</xsl:call-template>
-								</xsl:if>
-								<xsl:if test="self::node()[@id= 256]">
-									<xsl:call-template name="url">
-										<xsl:with-param name="key"><xsl:value-of select="."/></xsl:with-param>
-										<xsl:with-param name="value"><xsl:value-of select="."/></xsl:with-param>
-									</xsl:call-template>
+									</xsl:if>
+									<xsl:if test="self::node()[@id= 178]">
+										<xsl:call-template name="end-date"></xsl:call-template>
+									</xsl:if>
+									<xsl:if test="self::node()[@id= 231 or @id=221]">
+										<xsl:call-template name="file">
+											<xsl:with-param name="id"><xsl:value-of select="@id"/></xsl:with-param>
+										</xsl:call-template>
+									</xsl:if>
+									<xsl:if test="self::node()[@id= 268 or @id=304]">
+										<xsl:call-template name="url">
+											<xsl:with-param name="key"><xsl:value-of select="."/></xsl:with-param>
+											<xsl:with-param name="value"><xsl:value-of select="."/></xsl:with-param>
+										</xsl:call-template>
+									</xsl:if>
+									<xsl:if test="self::node()[@id= 256]">
+										<xsl:call-template name="url">
+											<xsl:with-param name="key"><xsl:value-of select="."/></xsl:with-param>
+											<xsl:with-param name="value"><xsl:value-of select="."/></xsl:with-param>
+										</xsl:call-template>
 								</xsl:if>
 								</xsl:otherwise>
 							</xsl:choose><br/>
@@ -258,7 +261,13 @@
 
   <xsl:template name="start-date" match="detail[@id=177]">
 	<xsl:if test="self::node()[@id =177]">
-	  <xsl:value-of select="self::node()[@id =177]/year"/>
+	  <xsl:value-of select="self::node()[@id =177]/raw"/>
+	</xsl:if>
+  </xsl:template>
+
+    <xsl:template name="end-date" match="detail[@id=178]">
+	<xsl:if test="self::node()[@id =178]">
+	  <xsl:value-of select="self::node()[@id =178]/raw"/>
 	</xsl:if>
   </xsl:template>
 

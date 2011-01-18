@@ -6,7 +6,7 @@
 	<xsl:template match="/">
 
 		<!-- Relationship Header goes here -->
-			<div id="relationshipHeader{hml/records/record/id}" class="relatedHeader" >Related Records:</div>
+			<div id="relationshipHeader{hml/records/record/id}" class="relatedHeader" ><a target="_new" href="#" onclick="this.href = hBase +'search/search.html?q=relatedto:{hml/records/record/id}&amp;instance=' + instance;">Related Records</a></div>
 
 		<xsl:call-template name="relationShip_record_section">
 			<xsl:with-param name="items" select="hml/records/record/relationships/record"/>
@@ -14,7 +14,7 @@
 		</xsl:call-template>
 
 		<!-- reversePointer Header -->
-			<div id="reversePointerHeader{hml/records/record/id}" class="relatedHeader" >Records Pointing to this Record</div>
+			<div id="reversePointerHeader{hml/records/record/id}" class="relatedHeader" ><a target="_new" href="#" onclick="this.href = hBase +'search/search.html?q=linkedto:{hml/records/record/id}&amp;instance=' + instance;">Records Pointing to this Record</a></div>
 
 		<xsl:call-template name="reversePointer_section">
 			<xsl:with-param name="items" select="hml/records/record/reversePointer/record"/>

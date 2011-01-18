@@ -38,8 +38,6 @@
 
 <head>
 <title>Heurist Reference Database - Search - &copy; 2005-2010 University of Sydney</title>
-<link rel=stylesheet href="../common/css/global.css" media="all">
-<link rel=stylesheet href="../common/css/search.css" media="all">
 <link rel="stylesheet" media="screen and (max-device-width: 800px)" href="../common/css/smallscreen.css"/>
 <link rel=icon href="../favicon.ico" type="image/x-icon">
 <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
@@ -49,12 +47,19 @@
 <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/yahoo-dom-event/yahoo-dom-event.js"></script>
 <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/container/container_core-min.js"></script>
 <script type="text/javascript" src="http://yui.yahooapis.com/2.6.0/build/menu/menu-min.js"></script>
-
 <script src="../external/jquery/jquery.js"></script>
-<!--script src="../external/jquery/jquery-1.4.2.min.js"></script>
-<script src="../external/jquery/jquery-ui-1.7.2.custom.min.js"></script>
-<script src="../external/jquery/jquery.flip.js"></script>
-<script src="../external/jquery/jquery.flip.min.js"></script-->
+
+<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.8.0r4/build/fonts/fonts-min.css" />
+<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.8.0r4/build/tabview/assets/skins/sam/tabview.css" />
+<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.8.0r4/build/calendar/assets/skins/sam/calendar.css" />
+
+<link rel=stylesheet href="../common/css/global.css" media="all">
+<link rel=stylesheet href="../common/css/search.css" media="all">
+
+<script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/element/element-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/tabview/tabview-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/calendar/calendar-min.js"></script>
 
 <style>
 /* Hack for IE7 betas -- :hover etc in external CSS not respected without these rules */
@@ -337,18 +342,34 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 
 
 
-  <div id="page-right">
-  	<div id="applications">
+  <!--div id="page-right">
+<  	<div id="applications">
 	<span id="application_links" class="tableCell">
-		<!-- <a href="#" id=record-style-full-link title="View Full Recors" class="pressed" onClick="top.HEURIST.search.setRecordView('full')"><img src="../common/images/19x15.gif"></a>
-		<a href="#" id=record-style-summary-link title="View summary of selected record" onClick="top.HEURIST.search.setRecordView('summary')"><img src="../common/images/19x15.gif"></a> -->
 		<a id="map_link" href="#" title="Map ( + timeline ) for current search results in Google Earth, Google Maps, TimeMap or OpenLayers" onClick="top.HEURIST.search.mapSelected();"><img src="../common/images/b_Map.png"></a>
 	</span>
 	</div>
 	<div id="applications_window">
-   <iframe id="viewer-frame" ></iframe>
-   </div>
+   <iframe id="viewer-frame" src="../viewers/viewers.html" ></iframe>
+   </div>-->
+
+   <!-- new application tabs -->
+   <div id="page-right" class=" yui-skin-sam">
+	<div id=applications class="yui-navset">
+			<ul class="yui-nav">
+				<li class="selected"><a href="#p" ><em>Print View</em></a></li>
+				<li><a href="#m" onClick="top.HEURIST.search.mapSelected();"><em>Map View</em></a></li>
+			</ul>
+			<div class="yui-content">
+				<div id="p">
+					<iframe id="viewer-frame" class=viewers></iframe>
+				</div>
+				<div id="m">
+					<iframe id="map-frame" class=viewers></iframe>
+				</div>
+			</div>
+		</div>
   </div>
+  <!-- end page right -->
   <div id="record-view"></div>
 </div>
 
@@ -383,6 +404,9 @@ lpc.style.height = (lpc.parentNode.offsetHeight || (lpc.parentNode.parentNode.of
 rpc.style.width = (rpc.parentNode.offsetWidth || (rpc.parentNode.parentNode.offsetWidth - 10)) + "px";
 rpc.style.height = (rpc.parentNode.offsetHeight || (rpc.parentNode.parentNode.offsetHeight - 10)) + "px";
 */
+_tabView = new YAHOO.widget.TabView('applications');
+
+
 
 top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadCommonInfo.php");	// core HEURIST object definitions (dynamically generated)
 top.HEURIST.loadScript("searchTypes.js");

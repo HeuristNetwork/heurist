@@ -49,64 +49,31 @@
             <xsl:when test="$mnth = '12'">December</xsl:when>
         </xsl:choose>
     </xsl:template>
-    <xsl:template name="creator" match="detail/record" mode="creator">
-        <xsl:choose>
-            <xsl:when test="contains(title,',') ">
-                <!-- display initials instead of a full first name, if applicable-->
-                <xsl:variable name="lname">
-                    <xsl:value-of select="substring-before(title, ',')"/>
-                </xsl:variable>
-                <xsl:variable name="fname">
-                    <xsl:value-of select="substring-after(title, ', ')"/>
-                </xsl:variable>
-                <xsl:value-of select="$lname"/>&#xa0; <xsl:choose>
-                    <xsl:when test="contains($fname,' ') or contains($fname, '.')">
-                        <xsl:choose>
-                            <xsl:when test="string-length($fname) &gt; 4">
-                                <xsl:value-of select="substring($fname, 1, 1)"/>. </xsl:when>
-                            <xsl:otherwise>
-                                <xsl:value-of select="$fname"/>
-                            </xsl:otherwise>
-                        </xsl:choose>
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <xsl:value-of select="substring($fname, 1, 1)"/>. </xsl:otherwise>
-                </xsl:choose>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:value-of select="title"/>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:template>
-  <xsl:template match="/">
 
-    <!-- use the following bit of code to include the stylesheet to display it in Heurist publishing wizard
-      otherwise it will be ommited-->
-    <!-- begin including code -->
-    <xsl:comment>
-      <!-- name (desc.) that will appear in dropdown list --> [name]Harvard style bibliography[/name] <!-- match the filename of the stylesheet--> [output]harvard[/output] </xsl:comment>
-    <!-- end including code -->
-        <xsl:attribute name="pub_id">
-          <xsl:value-of select="/hml/query[@pub_id]"/>
-        </xsl:attribute>
+<xsl:template match="/">
+	<!-- use the following bit of code to include the stylesheet to display it in Heurist publishing wizard otherwise it will be ommited-->
+	<!-- begin including code -->
+	<xsl:comment>
+	<!-- name (desc.) that will appear in dropdown list -->
+		[name]Harvard bibliography[/name]
+		<!-- match the filename of the stylesheet-->
+		[output]harvard[/output] </xsl:comment>
+		<!-- end including code -->
+	<xsl:attribute name="pub_id">
+		<xsl:value-of select="/hml/query[@pub_id]"/>
+	</xsl:attribute>
+	<xsl:apply-templates select="hml/records/record"/>
+</xsl:template>
 
-          <xsl:apply-templates select="hml/records/record"/>
-
-  </xsl:template>
   <!-- =================  42: ARCHIVE RECORD =============================== -->
   <xsl:template name="archive" match="record[type/@id=42]">
    <div id="{id}" class="record">
-   <table>
-    <tr>
-      <td>
         <!-- if Title are missing, don't print -->
-        <xsl:if test="detail[@id='160']">
+        <xsl:if test="detail[@id=160]">
           <!-- author(s), year and title -->
           <xsl:apply-templates select="detail[@id=158]/record" mode="process-creator"/>
           <xsl:if test="detail[@id='159']"> &#160;<xsl:value-of select="detail[@id = '159']"/>, </xsl:if>
-          <i> &#160;<xsl:value-of select="detail[@id = '160']"/>
-          </i>
-
+          <i> &#160;<xsl:value-of select="detail[@id = '160']"/></i>
           <!-- type of work -->
           <xsl:if test="detail[@id = '175']"> [<xsl:value-of select="detail[@id = '175']"/>].
           </xsl:if>
@@ -121,53 +88,44 @@
           </xsl:if>
           <xsl:call-template name="output_weblink"/>
         </xsl:if>
-      </td>
-    </tr>
-    </table>
 	</div>
   </xsl:template>
 
-  <!-- =================  5: BOOK =============================== -->
-  <xsl:template name="publications" match="record[type/@id=5]">
-  <div id="{id}" class="record">
-  <table>
-    <tr>
-      <td>
-        <!-- if Title are missing, don't print -->
-        <xsl:if test="detail[@id='160']">
-          <!-- author(s), year and title -->
-          <xsl:apply-templates select="detail[@id=158]/record" mode="process-creator"/>
-          <xsl:if test="detail[@id='159']"> &#160;<xsl:value-of select="detail[@id = '159']"/>, </xsl:if>
-          <i> &#160;<xsl:value-of select="detail[@id = '160']"/>. </i>
+<!-- =================  5: BOOK =============================== -->
+<xsl:template name="publications" match="record[type/@id=5]">
+	<div id="{id}" class="record" title="{title}">
+		<!-- if Title are missing, don't print -->
+		<xsl:if test="detail[@id=160]">
+		<!-- author(s), year and title -->
+		<xsl:variable name="authorsCount" select="count(detail[@id=158]/record)"/>
+		<xsl:apply-templates select="detail[@id=158]/record" mode="process-creator">
+			<xsl:with-param name="auth" select="count"/>
+		</xsl:apply-templates>
 
-          <!-- Publisher name, Place published -->
-		  <xsl:choose>
-		  <xsl:when test="detail[@id = 228]/record/detail[@id = 229]/record">
-		  &#160;<xsl:apply-templates
-              select="detail[@id = 228]/record/detail[@id = 229]/record"/>
-		  </xsl:when>
-		  <xsl:otherwise>
-		  &#160;<xsl:value-of select="detail[@id = 228]/record/title"/>
-		  </xsl:otherwise>
-		  </xsl:choose>
-
-        </xsl:if>
-        <xsl:if test="detail[@id=187]">
-          &#160;<xsl:value-of select="detail[@id=187]/@type"/>: <xsl:value-of select="detail[@id=187]"/>.
-        </xsl:if>
-        <xsl:if test="detail[@id=198]">
-          &#160;<xsl:value-of select="detail[@id=198]/@type"/>: <xsl:value-of select="detail[@id=198]"/>.
-        </xsl:if>
-        <xsl:if  test="url!=''">
-          &#160;<a href="{url}" target="_blank">web</a>
-        </xsl:if>
-        <xsl:call-template name="output_weblink"/>
-      </td>
-    </tr>
-    </table>
-    </div>
-
-  </xsl:template>
+			<xsl:if test="detail[@id=159]"><xsl:value-of select="detail[@id=159]/raw"/>,&#160;</xsl:if>
+		<i><xsl:value-of select="detail[@id = 160]"/>,&#160;</i>
+		<!-- Publisher name, Place published -->
+		<xsl:choose>
+			<xsl:when test="detail[@id = 228]/record/detail[@id = 229]/record">
+				<xsl:apply-templates select="detail[@id = 228]/record/detail[@id = 229]/record"/>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:value-of select="detail[@id = 228]/record/title"/>
+			</xsl:otherwise>
+		</xsl:choose>
+		</xsl:if>
+		<xsl:if test="detail[@id=187]">
+			<xsl:value-of select="detail[@id=187]/@type"/>:&#160; <xsl:value-of select="detail[@id=187]"/>.
+		</xsl:if>
+		<xsl:if test="detail[@id=198]">
+			<xsl:value-of select="detail[@id=198]/@type"/>:&#160; <xsl:value-of select="detail[@id=198]"/>.
+		</xsl:if>
+		<xsl:if  test="url!=''">
+			<a href="{url}" target="_blank">web</a>
+		</xsl:if>
+		<xsl:call-template name="output_weblink"/>
+	</div>
+</xsl:template>
 
   <!-- =================  4: BOOK CHAPTER  =============================== -->
   <xsl:template name="book_chap" match="record[type/@id=4]">
@@ -808,4 +766,41 @@
       </xsl:choose>
     </xsl:if>
   </xsl:template>
+
+
+      <xsl:template name="creator" match="detail/record" mode="creator">
+      <xsl:param name="auth" select="count"/>
+      <xsl:value-of select="$auth"/>COUNT
+        <xsl:choose>
+            <xsl:when test="contains(title,',') ">
+                <!-- display initials instead of a full first name, if applicable-->
+                <xsl:variable name="lname">
+                    <xsl:value-of select="substring-before(title, ',')"/>,
+                </xsl:variable>
+                <xsl:variable name="fname">
+                    <xsl:value-of select="substring-after(title, ', ')"/>,
+                </xsl:variable>
+                <xsl:value-of select="$lname"/>
+                <xsl:choose>
+                    <xsl:when test="contains($fname,' ') or contains($fname, '.')">
+                        <xsl:choose>
+                            <xsl:when test="string-length($fname) &gt; 4">
+                                <xsl:value-of select="substring($fname, 1, 1)"/>&#160;
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <xsl:value-of select="$fname"/>&#160;
+                            </xsl:otherwise>
+                        </xsl:choose>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="substring($fname, 1, 1)"/>,&#160;</xsl:otherwise>
+                </xsl:choose>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="title"/>,
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+
 </xsl:stylesheet>
