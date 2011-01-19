@@ -23,7 +23,7 @@ w: 370,
 h: 240,
 
 uriBase: "<?= HEURIST_URL_BASE ?>",
-uriHost: "http://heuristscholar.org/",
+uriHost: "http://<?= HEURIST_HOST_NAME ?>/",
 
 init: function () {
 	// toggle display if our div is already present in the DOM
