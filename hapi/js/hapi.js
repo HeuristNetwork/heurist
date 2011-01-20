@@ -26,7 +26,7 @@ var HAPI = {
 	getVersion: function() { return "0.3"; },
 
 	key: "",
-	instance: "",
+	instance: (top && top.HeuristInstance ? top.HeuristInstance : (window.HeuristInstance ? window.HeuristInstance:"")),
 	setKey: function(key, instance, url) {
 		var error;
 		var baseURL, path;
@@ -2610,7 +2610,7 @@ HAPI.XHR = {
 		return stringify;
 	}(),
 
-	_xssWebPrefix: HeuristBaseURL + "hapi/php/dispatcher.php?", //saw FIXME: add instance code.
+	_xssWebPrefix: HeuristBaseURL + "hapi/php/dispatcher.php?",
 
 	txURLLen: 1900,
 	rxURLLen: (navigator.userAgent.match(/MSIE/))? 2000 : null,
@@ -2657,8 +2657,9 @@ HAPI.XHR = {
 
 		void( frames[fr.name].name );	// something about lazy evaluation perhaps -- this yanks the frame violently into existence.
 		fr.contentWindow.location.replace((xssWebPrefix || HAPI.XHR._xssWebPrefix) + "method=" + encodeURIComponent(method) +
-				"&key=" + encodeURIComponent(HAPI.key || "") +
+//				"&key=" + encodeURIComponent(HAPI.key || "") +
 				"&data=" + encodeURIComponent(HAPI.base64.encode(jsonData)) +
+				"&instance=" + encodeURIComponent(HAPI.instance || window.HeuristInstance) +
 				(HAPI.XHR.rxURLLen? ("&rxlen="+HAPI.XHR.rxURLLen) : ""));
 	},
 
@@ -2733,7 +2734,9 @@ HAPI.XHR = {
 
 		form.method = "post";
 		form.target = fr.name;
-		form.action = (xssWebPrefix || HAPI.XHR._xssWebPrefix) + "method=" + encodeURIComponent(method);
+		form.action = (xssWebPrefix || HAPI.XHR._xssWebPrefix) +
+							"instance=" + encodeURIComponent(HAPI.instance || window.HeuristInstance) +
+							"&method=" + encodeURIComponent(method);
 
 		var elt = document.createElement("input");
 			elt.type = "hidden";
@@ -2741,12 +2744,13 @@ HAPI.XHR = {
 			elt.value = HAPI.XHR.convertToJSON(data);
 		form.appendChild(elt);
 
+/*
 		elt = document.createElement("input");
 			elt.type = "hidden";
 			elt.name = "key";
-			elt.value = HAPI.key;
+			elt.value = ;
 		form.appendChild(elt);
-
+*/
 		fr.onload = function() {
 			var data;
 			var hash, token;
@@ -2786,7 +2790,10 @@ HAPI.XHR = {
 
 		var scr = document.createElement("script");
 		scr.type = "text/javascript";
-		scr.src = (xssWebPrefix || HAPI.XHR._xssWebPrefix) + "method=" + encodeURIComponent(method) + "&key=" + encodeURIComponent(HAPI.key || "") + "&data=" + encodeURIComponent(HAPI.base64.encode(HAPI.XHR.convertToJSON(data))) + "&cb=" + name;
+		scr.src = (xssWebPrefix || HAPI.XHR._xssWebPrefix) + "method=" + encodeURIComponent(method) +
+					/*"&key=" + encodeURIComponent(HAPI.key || "") + */
+					"&instance=" + encodeURIComponent(HAPI.instance || window.HeuristInstance) +
+					"&data=" + encodeURIComponent(HAPI.base64.encode(HAPI.XHR.convertToJSON(data))) + "&cb=" + name;
 
 		var headElt = document.getElementsByTagName("head")[0];
 
@@ -3463,7 +3470,9 @@ var HeuristScholarDB = new HStorageManager();
 //				baseURL = baseURL.replace(/^http:\/\//, "http://" + Math.round(Math.random()*100) + ".");
 			}
 			// Insert XSS incantations if HAPI.key is set.
-			newForm.action = baseURL + (HAPI.key? ("hapi/php/dispatcher.php?method=saveFile&key=" + encodeURIComponent(HAPI.key)) : "saveFile");//saw FIXME: add instance code.
+			newForm.action = baseURL + "hapi/php/dispatcher.php?method=saveFile"  //saw FIXME: add instance code.
+									"&instance=" + encodeURIComponent(HAPI.instance || window.HeuristInstance) //+
+									/* &key=" + encodeURIComponent(HAPI.key)) : "saveFile")*/;
 
 		doc.body.appendChild(newForm);
 

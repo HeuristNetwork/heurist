@@ -49,7 +49,7 @@ if ($fileID) {
 	$file = mysql_fetch_assoc($res);
 	$thumbnailURL = HEURIST_URL_BASE."common/php/resizeImage.php?instance=".HEURIST_INSTANCE."&ulf_ID=" . $file["ulf_ObfuscatedFileID"];
 	$URL = HEURIST_URL_BASE."records/files/downloadFile.php/" . urlencode($file["ulf_OrigFileName"]) . "?instance=".HEURIST_INSTANCE."&ulf_ID=" . $file["ulf_ObfuscatedFileID"];
-//error_log("url = ". $URL);
+error_log("url = ". $URL);
 	print json_format(array("file" => array(
 		$file["ulf_ID"], $file["ulf_OrigFileName"], $file["ulf_FileSizeKB"], $file["file_mimetype"], $URL, $thumbnailURL, $file["ulf_Description"]
 	)));
@@ -77,7 +77,7 @@ function upload_file($name, $type, $tmp_name, $error, $size, $description) {
 	 * and return the ulf_ID for that record.
 	 * This will be zero if anything went pear-shaped along the way.
 	 */
-//error_log("in saveFile upload_file  name = ". $name. " type = ". $type. " error = ". $error. " size = " . $size . " uploadPath = ". UPLOAD_PATH );
+error_log("in saveFile upload_file  name = ". $name. " type = ". $type. " error = ". $error. " size = " . $size . " uploadPath = ". UPLOAD_PATH );
 
 	if ($size <= 0  ||  $error) { error_log("size is $size, error is $error"); return 0; }
 
@@ -117,11 +117,11 @@ function upload_file($name, $type, $tmp_name, $error, $size, $description) {
 	mysql_query('update recUploadedFiles set ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
 		/* nonce is a random value used to download the file */
 
-	if (move_uploaded_file($tmp_name, UPLOAD_PATH . $path . '/' . $file_id)) {
+	if (move_uploaded_file($tmp_name, UPLOAD_PATH . $path . $file_id)) {
 		return $file_id;
 	} else {
 		/* something messed up ... make a note of it and move on */
-		error_log("upload_file: <$name> / <$tmp_name> couldn't be saved as <" . UPLOAD_PATH . $path . '/' . $file_id . ">");
+		error_log("upload_file: <$name> / <$tmp_name> couldn't be saved as <" . UPLOAD_PATH . $path . $file_id . ">");
 		mysql_query('delete from recUploadedFiles where ulf_ID = ' . $file_id);
 		return 0;
 	}

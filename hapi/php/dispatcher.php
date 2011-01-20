@@ -84,21 +84,23 @@ if ($callback  &&  preg_match('/^cb[0-9]+$/', $callback)) {
 
 $method = @$_REQUEST['method'];
 if (!@$_REQUEST['method']) $method = preg_replace('!.*/([-a-z]+)$!', '$1', $_SERVER['PATH_INFO']);
-$key = @$_REQUEST["key"];
+//$key = @$_REQUEST["key"];
+error_log("hapi dispatch method = ".$method." Heurist base = ".HEURIST_URL_BASE);
 
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
-require_once("validateKeyedAccess.php");
+//require_once("validateKeyedAccess.php");
 
-if (! ($auth = get_location($key))) {
+/*if (! ($auth = get_location($key))) {
 	print "{\"error\":\"unknown API key\"}";
 	return;
 }
+*/
 //error_log(print_r($auth, 1));
 $baseURL = HEURIST_URL_BASE;
 //$baseURL = $auth["hl_location"];
 
-define_constants($auth["hl_instance"]);
+//define_constants($auth["hl_instance"]);
 
 //error_log("hapi xss baseURL = ".$baseURL." Heurist base = ".HEURIST_URL_BASE);
 
