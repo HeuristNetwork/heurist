@@ -12,7 +12,7 @@
 ?>
 
 <?php
-	/*<!-- saveRrelations.php
+	/*<!-- saveRelations.php
 
 	Copyright 2005 - 2010 University of Sydney Digital Innovation Unit
 	This file is part of the Heurist academic knowledge management system (http://HeuristScholar.org)
@@ -44,7 +44,7 @@ require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 if (! is_logged_in()) return;
 
-require_once("relationships.php");
+require_once(dirname(__FILE__)."/../../common/php/getRelationshipRecords.php");
 
 mysql_connection_overwrite(DATABASE);
 
@@ -71,12 +71,15 @@ if (count(@$deletions) > 0) {
 
 	$deletions = array();
 	while ($row = mysql_fetch_row($res)) array_push($deletions, $row[0]);
-
 	if ($deletions) {
 		foreach ($deletions as $del_bib_id) {
 			/* one delete query per rec_ID, this way the archive_bib* versioning stuff works */
-			mysql_query("delete from Records where rec_ID = $del_bib_id");
+			mysql_query("update Records set rec_Modified=now() where rec_ID = $del_bib_id");
+error_log("in delete code $del_bib_id ");
 			mysql_query("delete from recDetails where dtl_RecID = $del_bib_id");
+error_log("in deleted details for record $del_bib_id ".mysql_error());
+			mysql_query("delete from Records where rec_ID = $del_bib_id");
+error_log("in deleted delete record $del_bib_id ".mysql_error());
 		}
 
 		$relatedRecords = getAllRelatedRecords($rec_id);

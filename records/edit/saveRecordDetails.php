@@ -41,12 +41,12 @@
 
 define('SAVE_URI', 'disabled');
 
-require_once(dirname(__FILE__)."/../common/connect/applyCredentials.php");
-require_once(dirname(__FILE__)."/../common/php/dbMySqlWrappers.php");
-require_once(dirname(__FILE__)."/../common/php/utilsTitleMask.php");
-require_once(dirname(__FILE__)."/../common/php/getRelationshipRecords.php");
+require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
+require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
+require_once(dirname(__FILE__)."/../../common/php/utilsTitleMask.php");
+require_once(dirname(__FILE__)."/../../common/php/getRelationshipRecords.php");
 require_once(dirname(__FILE__)."/../disambig/findFuzzyRecordMatches.php");
-require_once(dirname(__FILE__)."/../search/getSearchResults.php");
+require_once(dirname(__FILE__)."/../../search/getSearchResults.php");
 
 if (! is_logged_in()) return;
 
@@ -213,32 +213,39 @@ function updateRecord($bibID) {
 			$bibUpdates["rec_NonOwnerVisibility"] = $_POST["bib_visibility"];
 		}
 	}
+	error_log(" in saveRecord update recUpdates = ".print_r($bibUpdates,true));
 	mysql__update("Records", "rec_ID=$bibID", $bibUpdates);
 	$biblioUpdated = (mysql_affected_rows() > 0)? true : false;
-
+if (mysql_error()) error_log("error rec update".mysql_error());
 	$updatedRowCount = 0;
 	foreach ($bibDetailUpdates as $bdID => $vals) {
+	error_log(" in saveRecord update details dtl_ID = $bdID value =".print_r($vals,true));
 		mysql__update("recDetails", "dtl_ID=$bdID and dtl_RecID=$bibID", $vals);
 		if (mysql_affected_rows() > 0) {
 			++$updatedRowCount;
 		}
 	}
+if (mysql_error()) error_log("error detail updates".mysql_error());
 
 	$insertedRowCount = 0;
 	foreach ($bibDetailInserts as $vals) {
+	error_log(" in saveRecord insert details detail =".print_r($vals,true));
 		mysql__insert("recDetails", $vals);
 		if (mysql_affected_rows() > 0) {
 			++$insertedRowCount;
 		}
 	}
+if (mysql_error()) error_log("error detail inserts".mysql_error());
 
 	$deletedRowCount = 0;
 	if ($bibDetailDeletes) {
+	error_log(" in saveRecord delete details ".print_r($bibDetailDeletes,true));
 		mysql_query("delete from recDetails where dtl_ID in (" . join($bibDetailDeletes, ",") . ") and dtl_RecID=$bibID");
 		if (mysql_affected_rows() > 0) {
 			$deletedRowCount = mysql_affected_rows();
 		}
 	}
+if (mysql_error()) error_log("error detail deletes".mysql_error());
 
 	// eliminate any duplicated lines
 	$notesIn = explode("\n", str_replace("\r", "", $_POST["notes"]));

@@ -1591,18 +1591,19 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdV
 			newOption.text = "";
 			newOption.value = "";
 		var selectIndex = 0;
-		for (var ont in allOptions) {
-			var grp = document.createElement("optgroup");
-			grp.label = top.HEURIST.vocabularyLookup[ont];
-			newInput.appendChild(grp);
-			for (var i = 0; i < allOptions[ont].length; ++i) {
-				var rdl = allOptions[ont][i];
+//		for (var ont in allOptions) {
+//			var grp = document.createElement("optgroup");
+//			grp.label = top.HEURIST.vocabularyLookup[ont];
+//			newInput.appendChild(grp);
+//			for (var i = 0; i < allOptions[ont].length; ++i) {
+			for (var i = 0; i < allOptions.length; ++i) {
+				var rdl = allOptions[i];
 				newInput.options[newInput.length] = new Option(rdl[1], rdl[0]);
 				if (bdValue && bdValue.value == rdl[0]) {
 					selectIndex = newInput.length - 1;
 				}
 			}
-		}
+//		}
 	newInput.selectedIndex = selectIndex;
 	this.addInputHelper.call(this, bdValue, newInput);
 	newInput.style.width = "auto";

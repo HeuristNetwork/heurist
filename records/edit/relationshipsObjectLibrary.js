@@ -296,7 +296,7 @@ EditableRelationship.prototype.save = function() {
 		return;
 	}
 
-	var fakeForm = { action: top.HEURIST.basePath +"records/relationships/saveRrelations.php",
+	var fakeForm = { action: top.HEURIST.basePath +"records/relationships/saveRelationships.php",
 		elements: [
 		{ name: "bib_id", value: parent.HEURIST.record.bibID },
 		{ name: "save-mode", value: "new" },

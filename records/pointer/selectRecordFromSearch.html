@@ -1,4 +1,4 @@
-<?php
+<!--
 
 /**
  * filename, brief description, date of creation, by whom
@@ -9,8 +9,7 @@
  * @todo
  **/
 
-?>
-
+-->
 <html>
  <head>
   <link rel=stylesheet href="../../common/css/import.css">
@@ -148,7 +147,7 @@ document.forms[0].submit = function() {
 	var resultsDiv = document.getElementById("results");
 	resultsDiv.innerHTML = "<i style='padding: 1ex;'>Searching ...</i>";
 
-	top.HEURIST.util.sendRequest(top.HEURIST.basePath + "records/pointer/loadRecordListForSearch.php", notifyResults, query);
+	top.HEURIST.util.sendRequest(top.HEURIST.basePath + "records/pointer/getRecordListForSearch.php", notifyResults, query);
 
 	return false;
 }
