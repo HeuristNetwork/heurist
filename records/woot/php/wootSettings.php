@@ -25,7 +25,7 @@ function hasWootReadPermission($wootId) {
 	if (is_admin()) { return true; }
 
 	$res = mysql_query("select * from " . WOOT_PERMISSION_TABLE . " where wrprm_WootID=$wootId and
-	                   (wrprm_UGrpID=".get_user_id()." or wrprm_group_id in (".join(",", get_group_ids()).",-1))");
+	                   (wrprm_UGrpID=".get_user_id()." or wrprm_GroupID in (".join(",", get_group_ids()).",-1))");
 	return (mysql_num_rows($res) > 0);
 }
 function hasWootWritePermission($wootId) {
@@ -34,7 +34,7 @@ function hasWootWritePermission($wootId) {
 	if (is_admin()) { return true; }
 
 	$res = mysql_query("select * from " . WOOT_PERMISSION_TABLE . " where wrprm_WootID=$wootId and
-	                   (wrprm_UGrpID=".get_user_id()." or wrprm_group_id in (".join(",", get_group_ids()).",-1)) and wrprm_Type='RW'");
+	                   (wrprm_UGrpID=".get_user_id()." or wrprm_GroupID in (".join(",", get_group_ids()).",-1)) and wrprm_Type='RW'");
 	return (mysql_num_rows($res) > 0);
 }
 
@@ -47,7 +47,7 @@ function getReadableChunks($wootId=NULL, $restrictToCurrent=false) {
 	 * If the wootId is omitted, then the chunks may be sourced from any woot.
 	 */
 
-	$restriction = is_admin()? "1 " : "(wprm_UGrpID=".get_user_id()." or wprm_group_id in (".join(",", get_group_ids()).",-1)) ";
+	$restriction = is_admin()? "1 " : "(wprm_UGrpID=".get_user_id()." or wprm_GroupID in (".join(",", get_group_ids()).",-1)) ";
 	if (! $restrictToCurrent) {
 		return mysql__select_array(PERMISSION_TABLE, "wprm_ChunkID", $restriction . ($wootId? " and chunk_WootID=$wootId" : ""));
 	}
@@ -64,7 +64,7 @@ function getWritableChunks($wootId=NULL, $restrictToCurrent=false) {
 	 * If the wootId is omitted, then the chunks may be sourced from any woot.
 	 */
 
-	$restriction = is_admin()? "1 " : "(wprm_UGrpID=".get_user_id()." or wprm_group_id in (".join(",", get_group_ids()).",-1)) and wprm_Type='RW' ";
+	$restriction = is_admin()? "1 " : "(wprm_UGrpID=".get_user_id()." or wprm_GroupID in (".join(",", get_group_ids()).",-1)) and wprm_Type='RW' ";
 	if (! $restrictToCurrent) {
 		return mysql__select_array(PERMISSION_TABLE, "wprm_ChunkID",
 		                           $restriction . ($wootId? " and chunk_WootID=$wootId" : ""));

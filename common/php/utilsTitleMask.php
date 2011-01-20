@@ -212,7 +212,7 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt) {
 		return '';
 	}
 
-	$rt_id = $rdt[$rdt_id]['dty_PtrConstraints'];
+	$rt_id = $rdt[$rdt_id]['dty_PtrTargetRectypes'];
 
 	$res = mysql_query('select dtl_Value from recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID where dtl_RecID='.$rec_id.' and dty_ID='.$rdt_id.' order by dtl_ID asc');
 
@@ -388,17 +388,17 @@ function _title_mask__get_rec_detail_requirements() {
 	if (! $rdr) {
 		$rdr = array();
 
-		$res = mysql_query('select rst_RecTypeID, dty_ID, lower(dty_Name) as dty_Name, dty_PtrConstraints
+		$res = mysql_query('select rst_RecTypeID, dty_ID, lower(dty_Name) as dty_Name, dty_PtrTargetRectypes
 		                      from defRecStructure left join defDetailTypes on rst_DetailTypeID=dty_ID
 		                     where rst_RequirementType in ("Required", "Recommended", "Optional")');
 		while ($row = mysql_fetch_assoc($res)) {
 			if (@$rdr[$row['rst_RecTypeID']]) {
-				$rdr[$row['rst_RecTypeID']][$row['dty_ID']] = $row['dty_PtrConstraints'];
-				$rdr[$row['rst_RecTypeID']][$row['dty_Name']] = $row['dty_PtrConstraints'];
+				$rdr[$row['rst_RecTypeID']][$row['dty_ID']] = $row['dty_PtrTargetRectypes'];
+				$rdr[$row['rst_RecTypeID']][$row['dty_Name']] = $row['dty_PtrTargetRectypes'];
 			} else {
 				$rdr[$row['rst_RecTypeID']] = array(
-					$row['dty_ID'] => $row['dty_PtrConstraints'],
-					$row['dty_Name'] => $row['dty_PtrConstraints']
+					$row['dty_ID'] => $row['dty_PtrTargetRectypes'],
+					$row['dty_Name'] => $row['dty_PtrTargetRectypes']
 				);
 			}
 		}
@@ -414,7 +414,7 @@ function _title_mask__get_rec_detail_types() {
 	if (! $rdt) {
 		$rdt = array();
 
-		$res = mysql_query('select dty_ID, dty_Name, dty_Type, dty_PtrConstraints from defDetailTypes');
+		$res = mysql_query('select dty_ID, dty_Name, dty_Type, dty_PtrTargetRectypes from defDetailTypes');
 		while ($row = mysql_fetch_assoc($res)) {
 			$rdt[$row['dty_ID']] = $row;
 			$rdt[strtolower($row['dty_Name'])] = $row;

@@ -455,7 +455,7 @@
     <tr>
      <td>[dty_ID]</td>
      <td style="width: 200px;"><!--img src="cross.gif" onclick="delete_bdt([dty_ID]);" class="delete_icon"--> <span id="name[dty_ID]">[dty_Name]</span></td>
-     <td style="text-align: left;">[if-eq : dty_Type : "enum"]<a href="#" onClick="edit_enum_types([dty_ID]); return false;">[dty_Type]</a>[else][dty_Type][end-if-eq][if-eq : dty_Type : "resource"] <a href="#" onClick="edit_constrain_reftype([dty_ID]); return false;">([if : dty_PtrConstraints][select REFTYPE rft][rty_Name][end-select][else]unconstrained[end-if])</a>[end-if-eq]</td>
+     <td style="text-align: left;">[if-eq : dty_Type : "enum"]<a href="#" onClick="edit_enum_types([dty_ID]); return false;">[dty_Type]</a>[else][dty_Type][end-if-eq][if-eq : dty_Type : "resource"] <a href="#" onClick="edit_constrain_reftype([dty_ID]); return false;">([if : dty_PtrTargetRectypes][select REFTYPE rft][rty_Name][end-select][else]unconstrained[end-if])</a>[end-if-eq]</td>
     </tr>
    [end-foreach]
    <!--form action="master_bib_detail_editor.php" method="post"><input type="hidden" name="delete_bdt_field" value="" id="delete_bdt"></form-->

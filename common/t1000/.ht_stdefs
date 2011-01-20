@@ -73,7 +73,7 @@ $MAINTABLES['BIB_DETAIL'] = 'recDetails';
 
 $MAINTABLES['BIB_DETAIL_TYPE'] = 'defDetailTypes';
 	$PKEY['BIB_DETAIL_TYPE'] = 'dty_ID';
-	$JOINS['BIB_DETAIL_TYPE'] = array('REFTYPE-ID' => 'dty_PtrConstraints');
+	$JOINS['BIB_DETAIL_TYPE'] = array('REFTYPE-ID' => 'dty_PtrTargetRectypes');
 
 $MAINTABLES['BIB_DETAIL_REQ'] = 'defRecStructure';
 	$PKEY['BIB_DETAIL_REQ'] = 'rst_ID';

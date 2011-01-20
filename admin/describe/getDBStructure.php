@@ -62,7 +62,7 @@
 	// DETAIL TYPES
 
 	print "\n\n\n-- DETAIL TYPES";print "\n";
-	print "-- dty_ID, dty_Name, dty_Description, dty_Type, dty_Prompt, dty_Help, dty_Status, dty_OriginatingDB, dty_PtrConstraints, dty_NativeVocabID\n";
+	print "-- dty_ID, dty_Name, dty_Description, dty_Type, dty_Prompt, dty_Help, dty_Status, dty_OriginatingDB, dty_PtrTargetRectypes, dty_NativeVocabID\n";
 	$query = "select * from defDetailTypes limit $lim";
 	$res = mysql_query($query);
 	$fmt = 'defDetailTypes';
@@ -130,7 +130,7 @@
 	// RELATIONSHIP CONSTRAINTS
 
 	print "\n\n\n-- RELATIONSHIP CONSTRAINTS";print "\n";
-	print "-- rcs_ID, rcs_DetailtypeID, rcs_SourceRectypeID, rcs_TargetRectypeID, rcs_VocabConstraint, rcs_VocabID, rcs_Description, rcs_Order, rcs_RelationshipsLimit, rcs_Status, rcs_OriginatingDB, rcs_TermLimit\n";
+	print "-- rcs_ID, rcs_DetailtypeID, rcs_SourceRectypeID, rcs_TargetRectypeID, rcs_VocabSubset, rcs_VocabID, rcs_Description, rcs_Order, rcs_RelationshipsLimit, rcs_Status, rcs_OriginatingDB, rcs_TermLimit\n";
 	$query = "select * from defRelationshipConstraints limit $lim";
 	$res = mysql_query($query);
 	$fmt = 'defRelationshipConstraints';
@@ -185,7 +185,7 @@
 
 			case 'defDetailTypes': // Data from the recDetails table
 			print "($row[dty_ID],`$row[dty_Name]`,`$row[dty_Description]`,$row[dty_Type],`$row[dty_Prompt]`,`$row[dty_Help]`,
-			,`$row[dty_Status]`,`$row[dty_OriginatingDB]`,`$row[dty_PtrConstraints]`,`$row[dty_NativeVocabID]`),\n";
+			,`$row[dty_Status]`,`$row[dty_OriginatingDB]`,`$row[dty_PtrTargetRectypes]`,`$row[dty_NativeVocabID]`),\n";
 			break;
 
 			case 'defRecStructure': // Data from the defRecStructure table
@@ -211,7 +211,7 @@
 			break;
 
 			case 'defRelationshipConstraints': // Data from relationship constraints table
-			print "($row[rcs_ID],`$row[rcs_DetailtypeID]`,`$row[rcs_SourceRectypeID]`,`$row[rcs_TargetRectypeID]`,`$row[rcs_VocabConstraint]`,`$row[rcs_VocabID]`,
+			print "($row[rcs_ID],`$row[rcs_DetailtypeID]`,`$row[rcs_SourceRectypeID]`,`$row[rcs_TargetRectypeID]`,`$row[rcs_VocabSubset]`,`$row[rcs_VocabID]`,
 			`$row[rcs_Description]`,`$row[rcs_Order]`,`$row[rcs_RelationshipsLimit]`,`$row[rcs_Status]`,`$row[rcs_OriginatingDB]`,`$row[rcs_TermLimit]`),\n";
 			break;
 

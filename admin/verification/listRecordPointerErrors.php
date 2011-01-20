@@ -41,14 +41,14 @@ require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 mysql_connection_db_select(DATABASE);
 
-$res = mysql_query('select dtl_RecID, dty_Name, dty_PtrConstraints, rec_ID, rec_Title, rty_Name
+$res = mysql_query('select dtl_RecID, dty_Name, dty_PtrTargetRectypes, rec_ID, rec_Title, rty_Name
                       from defDetailTypes
                  left join recDetails on dty_ID = dtl_DetailTypeID
                  left join Records on rec_ID = dtl_Value
                  left join defRecTypes on rty_ID = rec_RecTypeID
                      where dty_Type = "resource"
-                       and dty_PtrConstraints > 0
-                       and rec_RecTypeID not in (dty_PtrConstraints)');
+                       and dty_PtrTargetRectypes > 0
+                       and rec_RecTypeID not in (dty_PtrTargetRectypes)');
 $bibs = array();
 while ($row = mysql_fetch_assoc($res))
 	$bibs[$row['dtl_RecID']] = $row;

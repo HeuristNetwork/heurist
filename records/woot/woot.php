@@ -26,10 +26,10 @@ function hasWootReadPermission($wootId) {
 
 	if (is_logged_in()) {
 		$res = mysql_query("select * from " . WOOT_PERMISSION_TABLE . " where wrprm_WootID=$wootId and
-		                   (wrprm_UGrpID=".get_user_id()." or wrprm_group_id in (".join(",", get_group_ids()).",-1))");
+		                   (wrprm_UGrpID=".get_user_id()." or wrprm_GroupID in (".join(",", get_group_ids()).",-1))");
 		return (mysql_num_rows($res) > 0);
 	} else {
-		$res = mysql_query("select * from " . WOOT_PERMISSION_TABLE . " where wrprm_WootID=$wootId and wrprm_group_id = -1");
+		$res = mysql_query("select * from " . WOOT_PERMISSION_TABLE . " where wrprm_WootID=$wootId and wrprm_GroupID = -1");
 		return (mysql_num_rows($res) > 0);
 	}
 }
@@ -40,7 +40,7 @@ function hasWootWritePermission($wootId) {
 
 	if (is_logged_in()) {
 		$res = mysql_query("select * from " . WOOT_PERMISSION_TABLE . " where wrprm_WootID=$wootId and
-		                   (wrprm_UGrpID=".get_user_id()." or wrprm_group_id in (".join(",", get_group_ids()).",-1)) and wrprm_Type='RW'");
+		                   (wrprm_UGrpID=".get_user_id()." or wrprm_GroupID in (".join(",", get_group_ids()).",-1)) and wrprm_Type='RW'");
 		return (mysql_num_rows($res) > 0);
 	} else {
 		// non-logged-in users can't edit woots!
@@ -60,9 +60,9 @@ function getReadableChunks($wootId=NULL, $restrictToCurrent=false) {
 	if (is_admin()) {
 		$restriction = "1 ";
 	} else if (is_logged_in()) {
-		$restriction = "(wprm_UGrpID=".get_user_id()." or wprm_group_id in (".join(",", get_group_ids()).",-1)) ";
+		$restriction = "(wprm_UGrpID=".get_user_id()." or wprm_GroupID in (".join(",", get_group_ids()).",-1)) ";
 	} else {
-		$restriction = "(wprm_group_id = -1) ";
+		$restriction = "(wprm_GroupID = -1) ";
 	}
 
 	if (! $restrictToCurrent) {
@@ -85,7 +85,7 @@ function getWritableChunks($wootId=NULL, $restrictToCurrent=false) {
 		return array();
 	}
 
-	$restriction = is_admin()? "1 " : "(wprm_UGrpID=".get_user_id()." or wprm_group_id in (".join(",", get_group_ids()).",-1)) and wprm_Type='RW' ";
+	$restriction = is_admin()? "1 " : "(wprm_UGrpID=".get_user_id()." or wprm_GroupID in (".join(",", get_group_ids()).",-1)) and wprm_Type='RW' ";
 	if (! $restrictToCurrent) {
 		return mysql__select_array(PERMISSION_TABLE, "wprm_ChunkID",
 		                           $restriction . ($wootId? " and chunk_WootID=$wootId" : ""));
@@ -171,15 +171,15 @@ function loadWoot($args) {
 		}
 
 		$pres = mysql_query("select ".WOOT_PERMISSION_TABLE.".*, a.ugr_Name as Groupname, b.ugr_Name as Username from ".WOOT_PERMISSION_TABLE."
-						  left join ".USERS_DATABASE.".sysUGrps a on a.ugr_ID=wrprm_group_id
+						  left join ".USERS_DATABASE.".sysUGrps a on a.ugr_ID=wrprm_GroupID
 						  left join ".USERS_DATABASE.".sysUGrps b on b.ugr_ID=wrprm_UGrpID
 							  where wrprm_WootID=".$wootId);
 		while ($perm = mysql_fetch_assoc($pres)) {
 			array_push($wootPermissions, array("type" => $perm["wrprm_Type"],
 										   "userId" => $perm["wrprm_UGrpID"]? $perm["wrprm_UGrpID"] : NULL,
 										   "userName" => $perm["wrprm_UGrpID"]? $perm["Username"] : NULL,
-										   "groupId" => $perm["wrprm_group_id"]? $perm["wrprm_group_id"] : NULL,
-										   "groupName" => $perm["wrprm_group_id"]? $perm["Groupname"] : NULL));
+										   "groupId" => $perm["wrprm_GroupID"]? $perm["wrprm_GroupID"] : NULL,
+										   "groupName" => $perm["wrprm_GroupID"]? $perm["Groupname"] : NULL));
 		}
 	}
 
@@ -204,15 +204,15 @@ function loadWoot($args) {
 
 			$permissions = array();
 			$pres = mysql_query("select ".PERMISSION_TABLE.".*, a.ugr_Name as Groupname, b.ugr_Name as Username from ".PERMISSION_TABLE."
-							  left join ".USERS_DATABASE.".sysUGrps a on a.ugr_ID=wprm_group_id
+							  left join ".USERS_DATABASE.".sysUGrps a on a.ugr_ID=wprm_GroupID
 							  left join ".USERS_DATABASE.".sysUGrps b on b.ugr_ID=wprm_UGrpID
 								  where wprm_ChunkID=".$chunkData["chunk_ID"]);
 			while ($perm = mysql_fetch_assoc($pres)) {
 				array_push($permissions, array("type" => $perm["wprm_Type"],
 											   "userId" => $perm["wprm_UGrpID"]? $perm["wprm_UGrpID"] : NULL,
 											   "userName" => $perm["wprm_UGrpID"]? $perm["Username"] : NULL,
-											   "groupId" => $perm["wprm_group_id"]? $perm["wprm_group_id"] : NULL,
-											   "groupName" => $perm["wprm_group_id"]? $perm["Groupname"] : NULL));
+											   "groupId" => $perm["wprm_GroupID"]? $perm["wprm_GroupID"] : NULL,
+											   "groupName" => $perm["wprm_GroupID"]? $perm["Groupname"] : NULL));
 			}
 			$chunk["permissions"] = $permissions;
 
@@ -429,8 +429,8 @@ function saveWoot($args) {
 				else {
 					// copy the permissions from the previous version of the chunk
 					mysql_query("insert into ".PERMISSION_TABLE."
-								 (wprm_ChunkID, wprm_UGrpID, wprm_group_id, wprm_Type, wprm_CreatorID, wprm_Created)
-						   select distinct $chunkId, wprm_UGrpID, wprm_group_id, wprm_Type, wprm_CreatorID, wprm_Created
+								 (wprm_ChunkID, wprm_UGrpID, wprm_GroupID, wprm_Type, wprm_CreatorID, wprm_Created)
+						   select distinct $chunkId, wprm_UGrpID, wprm_GroupID, wprm_Type, wprm_CreatorID, wprm_Created
 							 from ".PERMISSION_TABLE." where wprm_ChunkID=$prevChunkId");
 				}
 
@@ -523,7 +523,7 @@ function insertPermissions($chunkId, &$chunk, $creatorId) {
 		$insertValues[@$permission["userId"] . "," . @$permission["groupId"]] = array(
 			"wprm_ChunkID" => $chunkId,
 			"wprm_UGrpID" => @$permission["userId"]? $permission["userId"] : 0,
-			"wprm_group_id" => @$permission["groupId"]? $permission["groupId"] : 0,
+			"wprm_GroupID" => @$permission["groupId"]? $permission["groupId"] : 0,
 			"wprm_Type" => $permission["type"],
 			"wprm_CreatorID" => get_user_id(),
 			"wprm_Created" => array("now()")
@@ -580,7 +580,7 @@ function insertWootPermissions($wootId, &$woot) {
 		$insertValues[@$permission["userId"] . "," . @$permission["groupId"]] = array(
 			"wrprm_WootID" => $wootId,
 			"wrprm_UGrpID" => @$permission["userId"]? $permission["userId"] : 0,
-			"wrprm_group_id" => @$permission["groupId"]? $permission["groupId"] : 0,
+			"wrprm_GroupID" => @$permission["groupId"]? $permission["groupId"] : 0,
 			"wrprm_Type" => $permission["type"],
 			"wrprm_CreatorID" => get_user_id(),
 			"wrprm_Created" => array("now()")

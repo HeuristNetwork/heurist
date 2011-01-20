@@ -725,7 +725,7 @@ error_log(print_r($bib_requirement_names[55], 1));
 		}
 		global $bdt_to_reftype;
 		if (! @$bdt_to_reftype)
-			$bdt_to_reftype = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_PtrConstraints', 'dty_PtrConstraints is not null');
+			$bdt_to_reftype = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_PtrTargetRectypes', 'dty_PtrTargetRectypes is not null');
 
 		$infos = $hash_info[$this->_reftype];
 
@@ -783,7 +783,7 @@ error_log(print_r($bib_requirement_names[55], 1));
 		}
 		global $bdt_to_reftype;
 		if (! @$bdt_to_reftype)
-			$bdt_to_reftype = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_PtrConstraints', 'dty_PtrConstraints is not null');
+			$bdt_to_reftype = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_PtrTargetRectypes', 'dty_PtrTargetRectypes is not null');
 
 		$infos = $hash_info[$this->_reftype];
 

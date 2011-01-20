@@ -304,7 +304,7 @@ CREATE TABLE defRelationshipConstraints (
   rcs_DetailtypeID smallint(5) unsigned default NULL COMMENT 'RelMarker detail type to be constrained, 200 = enum for vanilla relationship',
   rcs_SourceRectypeID smallint(5) unsigned default NULL COMMENT 'Source record type for this constraint, 0 = all types',
   rcs_TargetRectypeID smallint(5) unsigned default NULL COMMENT 'Target record type pointed to by relationship record, 0 = any type',
-  rcs_VocabConstraint varchar(5000) collate utf8_unicode_ci default NULL COMMENT 'Constrain the terms further from within the defined vocab',
+  rcs_VocabSubset varchar(5000) collate utf8_unicode_ci default NULL COMMENT 'Constrain the terms further from within the defined vocab',
   rcs_VocabID smallint(5) unsigned NOT NULL default '1' COMMENT 'Vocab to use, msut be in the vocabs defined for this source-target pair',
   rcs_Description varchar(1000) collate utf8_unicode_ci default 'Please describe ...',
   rcs_Order tinyint(3) unsigned default NULL COMMENT 'Ordering value to allow controlling the display order of the vocabularies',
@@ -313,7 +313,6 @@ CREATE TABLE defRelationshipConstraints (
   rcs_OriginatingDB smallint(5) unsigned NOT NULL default '0' COMMENT 'Database where this constraint originated, 0 or local db code = locally',
   rcs_TermLimit tinyint(3) unsigned NOT NULL default '0' COMMENT '0 = No limit, 1, 2 = max # of relations which can use each term',
   PRIMARY KEY  (rcs_ID),
-  UNIQUE KEY rcs_CompositeKey (rcs_SourceRectypeID,rcs_TargetRectypeID,rcs_DetailtypeID),
   KEY rcs_VocabID (rcs_VocabID),
   KEY rcs_DetailtypeID_2 (rcs_DetailtypeID),
   KEY rcs_TargetRectypeID_2 (rcs_TargetRectypeID)
@@ -853,11 +852,11 @@ CREATE TABLE usrTags (
 CREATE TABLE woot_ChunkPermissions (
   wprm_ChunkID int(11) NOT NULL COMMENT 'ID of chunk for which permission is specified, may be repeated',
   wprm_UGrpID smallint(6) NOT NULL COMMENT 'User with specified right to this chunk',
-  wprm_group_id smallint(6) NOT NULL COMMENT 'User groups with specified right to this chunk',
+  wprm_GroupID smallint(6) NOT NULL COMMENT 'User groups with specified right to this chunk',
   wprm_Type enum('RW','RO') NOT NULL COMMENT 'Read-write or read-only permission for this chunk/user/wg',
   wprm_CreatorID smallint(6) NOT NULL COMMENT 'Creator of the permission (= user ID ???? <check>)',
   wprm_Created datetime NOT NULL COMMENT 'Date and time of creation of the permission',
-  UNIQUE KEY wprm_chunk_composite_key (wprm_ChunkID,wprm_UGrpID,wprm_group_id)
+  UNIQUE KEY wprm_chunk_composite_key (wprm_ChunkID,wprm_UGrpID,wprm_GroupID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Permissions value for individual woot chunks';
 
 -- --------------------------------------------------------
@@ -892,11 +891,11 @@ CREATE TABLE woot_Chunks (
 CREATE TABLE woot_RecPermissions (
   wrprm_WootID int(11) NOT NULL COMMENT 'ID of the woot entry to which this permission applies, may be repeated',
   wrprm_UGrpID int(11) NOT NULL COMMENT 'User ID to which this permission is being granted',
-  wrprm_group_id int(11) NOT NULL COMMENT 'User group ID to which this permission is being granted',
+  wrprm_GroupID int(11) NOT NULL COMMENT 'User group ID to which this permission is being granted',
   wrprm_Type enum('RW','RO') NOT NULL COMMENT 'Type of permission being granted - read only or read-write',
   wrprm_CreatorID int(11) NOT NULL COMMENT 'Creator of the permission',
   wrprm_Created datetime NOT NULL COMMENT 'Date and time of creation of the permission',
-  UNIQUE KEY wrprm_composite_key (wrprm_WootID,wrprm_UGrpID,wrprm_group_id)
+  UNIQUE KEY wrprm_composite_key (wrprm_WootID,wrprm_UGrpID,wrprm_GroupID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Overall permissions for the woot record (entry/page)';
 
 -- --------------------------------------------------------

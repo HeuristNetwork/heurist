@@ -136,7 +136,7 @@ print "\n\t}\n};\n";
 
 
 /* bibDetailTypes */
-$colNames = array("dty_ID", "dty_Name", "dty_Type", "dty_Prompt", "dty_Help", "dty_PtrConstraints", "dty_NativeVocabID");
+$colNames = array("dty_ID", "dty_Name", "dty_Type", "dty_Prompt", "dty_Help", "dty_PtrTargetRectypes", "dty_NativeVocabID");
 $res = mysql_query("select " . join(", ", $colNames) . " from defDetailTypes order by dty_ID");
 
 $bdt = array();
