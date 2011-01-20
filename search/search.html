@@ -13,13 +13,12 @@
 <html>
 	<!-- search.html
 
-	Copyright 2005 - 2010 University of Sydney Digital Innovation Unit
+	Copyright 2005 - 2011 The University of Sydney Digital Innovation Unit
 	This file is part of the Heurist academic knowledge management system (http://HeuristScholar.org)
 	mailto:info@heuristscholar.org
 
 	Concept and direction: Ian Johnson.
-	Developers: Tom Murtagh, Kim Jackson, Steve White, Steven Hayes,
-				Maria Shvedova, Artem Osmakov, Maxim Nikitin.
+	Developers: Tom Murtagh, Kim Jackson, Steve White, Steven Hayes,Maria Shvedova, Artem Osmakov, Maxim Nikitin, Ireneusz Golka.
 	Design and advice: Andrew Wilson, Ireneusz Golka, Martin King.
 
 	Heurist is free software; you can redistribute it and/or modify it under the terms of the
@@ -97,7 +96,6 @@ if (location.search.match(/[&?]q=[^&]+/)) {		//there is a search string
 if (! document.body.className) {
 	document.body.className = location.search.match(/w=bookmark/) ? "w-bookmark" : "w-all";
 }
-
 // start loading this early
 top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadUserInfo.php");		// user-specific HEURIST data
 
@@ -122,12 +120,13 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 	top.HEURIST.search.setupSearchPage();
 });
 </script>
-
 <script src="../common/php/displayPreferences.php"></script>	<!-- sets body css classes based on prefs in session -->
 <iframe src="../search/actions/actionHandler.php" id=i_action></iframe>	<!-- actionHandler.php is written to return a form by default or running javascript followed by reload teh default-->
+
 <a id=home-link>
 <div id=logo title="Click the logo at top left of any Heurist page to return to your Favourites"></div>
 </a>
+
 <div id=version></div>
 <!-- instance name -->
 <div id=instance-name ></div>
@@ -188,7 +187,6 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 <div id="sidebar">
 	<div id="saved-search-heading" class="banner">
 		<!-- collection-commands -->
-
 	</div>
 	<div id="sidebar-inner">
 		<div id=left-panel-content class="panel-main-content">
@@ -223,7 +221,6 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 					<div id=collection-info></div>
 				</div>
 			</div>
-
 			<div id=tag-search-links></div>
 		</div>
 	</div>
@@ -231,21 +228,21 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 <!-- page -->
 <div id="page">
 <div class="banner">
-  <div id=search>
-  <form onSubmit="top.HEURIST.search.checkSearchForm();" class="table">
-    <input type=hidden id=w-input name=w>
-
-    <div class="tableCell"><!-- add record -->
-
-      <div class="outline roundedBoth"><b>Search</b>
-        <input id=q name=q type=text style="width:300px">
-        <input id=my-records-button type=button value="my bookmarks" title="Search only records which have been bookmarked into your collection" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();">
-        <input id=all-records-button type=button value="all records"  title="Search across all records in Heurist" onClick="document.getElementById('w-input').value = ''; top.HEURIST.search.submitSearchForm();">
-        <a id=web-search-link href="#" title="Search the web using Google" onClick="top.HEURIST.search.launchWebSearch(); return false;">web search</a> </div>
-      &nbsp;&nbsp; <a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">advanced</a> &nbsp;&nbsp; <a href="../help/advanced_search.html" title="Detailed description of the syntax for advanced search strings" target=_blank>help</a></div>
-
-</form>
-  </div>
+<div id=search>
+	<form onSubmit="top.HEURIST.search.checkSearchForm();" class="table">
+	<input type=hidden id=w-input name=w>
+	<div class="tableCell"><!-- add record -->
+	<div class="outline roundedBoth"><b>Search</b>
+		<input id=q name=q type=text style="width:300px">
+		<input id=my-records-button type=button value="my bookmarks" title="Search only records which have been bookmarked into your collection" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();">
+		<input id=all-records-button type=button value="all records"  title="Search across all records in Heurist" onClick="document.getElementById('w-input').value = ''; top.HEURIST.search.submitSearchForm();">
+		<a id=web-search-link href="#" title="Search the web using Google" onClick="top.HEURIST.search.launchWebSearch(); return false;">web search</a> </div>
+		<span id="advancedSearch">
+		<a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">advanced search</a>
+		<a href="../help/advanced_search.html" title="Detailed description of the syntax for advanced search strings" target=_blank>help</a></div>
+		</span>
+	</form>
+	</div>
 
 </div>
 
@@ -256,7 +253,6 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 		<div id="toolbox">
 			<div id=tools-right-cell class="toolboxcolumn left">
 				<span class="toolboxheading">With selected</span>
-
 				<a href="#" onClick="top.HEURIST.search.addRemoveTagsPopup(false); return false;" title="Select one or more records, then click to add or remove tags">Tag (personal)</a>
 				<a href="#" onClick="top.HEURIST.search.addRemoveKeywordsPopup(); return false;" title="Select one or more records, then click to add or remove workgroup tags">Tag (workgroup)</a>
 				<a href="#" onClick="top.HEURIST.search.setRatingsPopup(); return false;" title="Select one or more records, then click to set ratings">Rate (stars)</a>
@@ -265,14 +261,13 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 				<a href="#" onClick="top.HEURIST.search.notificationPopup(); return false;" title="Select one or more records, then click to send notification">Share (email notifications)</a>
 				<a href="#" onClick="top.HEURIST.search.addRelationshipsPopup(); return false;" title="Select one or more records, then click to add relationships">Relate (link records)</a>
 				<span class=admin-only>
-				<a href="#" onClick="top.HEURIST.search.setWorkgroupPopup(); return false;" title="Select one or more records, then click to set workgroup ownership and visibility">Set workgroup</a>
+					<a href="#" onClick="top.HEURIST.search.setWorkgroupPopup(); return false;" title="Select one or more records, then click to set workgroup ownership and visibility">Set workgroup</a>
 				</span>
 				<span class="toolboxheading">Admin</span>
 				<span class=admin-only>
 				<a href="#" onClick="top.HEURIST.search.deleteBiblios(); return false;" title="Select one or more records, then click to delete">Delete</a>
-   				<a href="#" onClick="top.HEURIST.search.fixDuplicates(); return false;" title="Select one or more records, then click to fix duplicates">Merge dupes</a>
+				<a href="#" onClick="top.HEURIST.search.fixDuplicates(); return false;" title="Select one or more records, then click to fix duplicates">Merge dupes</a>
 				<a href="#" onClick="top.HEURIST.search.collectDuplicates(); return false;" title="Click to identify possible duplicates in the current query and create collections for each set">Collect dupes</a>
-
 				</span>
 			</div>
 			<div class="toolboxcolumn right">
@@ -294,7 +289,6 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 			<a href="#" id=result-style-list-link title="View results as a list" onClick="top.HEURIST.search.setResultStyle('list'); return false;"><img src="../common/images/19x15.gif"></a>
 			<a href="#" id=result-style-two-col-link title="View results in two columns" onClick="top.HEURIST.search.setResultStyle('two-col'); return false;"><img src="../common/images/19x15.gif"></a>
 			<a href="#" id=result-style-thumbs-link title="View results as thumbnails" onClick="top.HEURIST.search.setResultStyle('thumbs'); return false;"><img src="../common/images/19x15.gif"></a>
-			<a href="#" id=result-style-blog-link title="View results as a blog!" onClick="alert('not yet implemented'); return false;"><img src="../common/images/19x15.gif"></a>
 		</span>
 	</div>
 	<div class=selectAll style="display:none"><input id=select-all-checkbox type=checkbox title="Check/uncheck this box to select/deselect all records in the current set of results" onClick="if (this.checked) top.HEURIST.search.selectAll(); else top.HEURIST.search.deselectAll();"></div>
@@ -303,57 +297,37 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 	<div><a href="#" title="Click to hide/show the legend" onClick="top.HEURIST.search.toggleLegend(); blur(); return false;" id=legend-link>legend</a></div>
 
 	</div>
-    <div id=result-container>
-      <div id=results>
-        <div id=results-message></div>
-        <div id=search-status class=loading>
-          <div id=loading-search-status>
-            <div><a href="#" onClick="document.getElementById('search-not-loading-message').style.display = ''; this.style.display = 'none'; return false;">Search not loading?</a></div>
-            <div id=search-not-loading-message style="display: none; color: green;">Clear the cache by shift-reloading the page. If this fails, try Tools &gt; Clear browsing data/recent history &gt; clear cache</div>
-            <p>Loading ...</p>
-          </div>
-          <div id=noquery-search-status class=result_thumb>
-            <h2>Welcome to Heurist</h2>
-            <p> Heurist is a sophisticated eResearch tool for managing web bookmarks, references, notes, and
-              a wide range of research data. Designed for individual or collaborative use, it
-              may at first appear puzzling - why, for instance, is the home page just a
-              search - but it will all become clear if you persist a bit. </p>
-            <p> We strongly recommend that you click <a target="_blank" href="../help/tour.html">Take the Tour</a> to get oriented. Please also visit <a target="_blank" href="../help/webhelp">Help</a> (link at top right) - don't ignore it until you have a problem, as users generally find it quite
-              approachable and very, very helpful. </p>
-            <p> Heurist is a stable system running several major web sites (see Example Collections once you've
-              logged in). It is also a system in rapid development, so if you have suggestions we want to hear them.
-              You may be surprised how quickly your suggestions pop up in the software. </p>
-            <p> We are also very happy to provide advice - from simple email assistance<br>
-              ( <a href="mailto:info@heuristscholar.org">info@heuristscholar.org</a> )
-              to the design of complete eResearch systems. </p>
-            <p> Please <a href="../admin/ugrps/findAddUser.php?register=1">register</a> and then <a href="../common/connect/login.php">login</a> to take full advantage of the system. </p>
-          </div>
-          <div id=noresult-search-status> <b>No matching records</b>
-            <div class=not-logged-in-only>To see workgoup-owned and non-public records you may need to log in</div>
-            <div class=logged-in-only>Note: some records are only visible to members of particular workgroups</div>
-            <div id=noresult-search-status-search-all>Click <a href="#" onClick="top.HEURIST.search.searchAll(); return false;">all records</a> to search all of Heurist</div>
-            <div id=noresult-search-status-search-web>Click <a href="#" onClick="top.HEURIST.search.launchWebSearch(); return false;">web search</a> to search the web</div>
-          </div>
-        </div>
-        <div id=result-rows></div>
-      </div>
-    </div>
-  </div>
-
-
-
-  <!--div id="page-right">
-<  	<div id="applications">
-	<span id="application_links" class="tableCell">
-		<a id="map_link" href="#" title="Map ( + timeline ) for current search results in Google Earth, Google Maps, TimeMap or OpenLayers" onClick="top.HEURIST.search.mapSelected();"><img src="../common/images/b_Map.png"></a>
-	</span>
+	<div id=result-container>
+	<div id=results>
+		<div id=results-message></div>
+		<div id=search-status class=loading>
+			<div id=loading-search-status>
+			<div><a href="#" onClick="document.getElementById('search-not-loading-message').style.display = ''; this.style.display = 'none'; return false;">Search not loading?</a></div>
+			<div id=search-not-loading-message style="display: none; color: green;">Clear the cache by shift-reloading the page. If this fails, try Tools &gt; Clear browsing data/recent history &gt; clear cache</div>
+			<p>Loading ...</p>
+		</div>
+		<div id=noquery-search-status class=result_thumb>
+			<h2>Welcome to Heurist</h2>
+			<p>Heurist is a sophisticated eResearch tool for managing web bookmarks, references, notes, and a wide range of research data. Designed for individual or collaborative use, it may at first appear puzzling - why, for instance, is the home page just a search - but it will all become clear if you persist a bit.</p>
+			<p>We strongly recommend that you click <a target="_blank" href="../help/tour.html">Take the Tour</a> to get oriented. Please also visit <a target="_blank" href="../help/webhelp">Help</a> (link at top right) - don't ignore it until you have a problem, as users generally find it quite approachable and very, very helpful. </p>
+			<p>Heurist is a stable system running several major web sites (see Example Collections once you've logged in). It is also a system in rapid development, so if you have suggestions we want to hear them. You may be surprised how quickly your suggestions pop up in the software. </p>
+			<p>We are also very happy to provide advice - from simple email assistance<br> ( <a href="mailto:info@heuristscholar.org">info@heuristscholar.org</a> ) to the design of complete eResearch systems. </p>
+			<p>Please <a href="../admin/ugrps/findAddUser.php?register=1">register</a> and then <a href="../common/connect/login.php">login</a> to take full advantage of the system. </p>
+		</div>
+		<div id=noresult-search-status> <b>No matching records</b>
+			<div class=not-logged-in-only>To see workgoup-owned and non-public records you may need to log in</div>
+			<div class=logged-in-only>Note: some records are only visible to members of particular workgroups</div>
+			<div id=noresult-search-status-search-all>Click <a href="#" onClick="top.HEURIST.search.searchAll(); return false;">all records</a> to search all of Heurist</div>
+			<div id=noresult-search-status-search-web>Click <a href="#" onClick="top.HEURIST.search.launchWebSearch(); return false;">web search</a> to search the web</div>
+		</div>
+		</div>
+		<div id=result-rows></div>
 	</div>
-	<div id="applications_window">
-   <iframe id="viewer-frame" src="../viewers/viewers.html" ></iframe>
-   </div>-->
+	</div>
+</div>
 
-   <!-- new application tabs -->
-   <div id="page-right" class=" yui-skin-sam">
+<!-- new application tabs -->
+	<div id="page-right" class=" yui-skin-sam">
 	<div id=applications class="yui-navset">
 			<ul class="yui-nav">
 				<li class="selected"><a href="#p" ><em>Print View</em></a></li>
@@ -368,18 +342,16 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 				</div>
 			</div>
 		</div>
-  </div>
-  <!-- end page right -->
-  <div id="record-view"></div>
+	</div>
+
+<!-- end page right -->
+<div id="record-view"></div>
 </div>
 
 <!-- footer -->
 <div id="footer">
-	<!-- AddThis Button BEGIN
-	<a class="addthis_button" href="http://www.addthis.com/bookmark.php?v=250&amp;pub=xa-4a9df3d02c812a01"><img src="http://s7.addthis.com/static/btn/sm-bookmark-en.gif" width="83" height="16" align="top" alt="Bookmark and Share" style="border:0"></a>
-	<script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js?pub=xa-4a9df3d02c812a01"></script>-->
-	<!-- AddThis Button END -->
-<div id=pageNavCount> <nobr> <span id=page-nav></span> <span id=resource-count></span> </nobr></div> </div>
+	<div id=pageNavCount> <nobr> <span id=page-nav></span> <span id=resource-count></span> </nobr></div>
+</div>
 <div id=password>
 	<div><b>Username / password reminder:</b></div>
 	<div id=reminder></div>
@@ -405,9 +377,6 @@ rpc.style.width = (rpc.parentNode.offsetWidth || (rpc.parentNode.parentNode.offs
 rpc.style.height = (rpc.parentNode.offsetHeight || (rpc.parentNode.parentNode.offsetHeight - 10)) + "px";
 */
 _tabView = new YAHOO.widget.TabView('applications');
-
-
-
 top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadCommonInfo.php");	// core HEURIST object definitions (dynamically generated)
 top.HEURIST.loadScript("searchTypes.js");
 top.HEURIST.loadScript("search.js");				// search-specific HEURIST functions
