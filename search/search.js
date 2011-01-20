@@ -534,7 +534,7 @@ top.HEURIST.search = {
 			var t_span = result.childNodes[0];
 			var rec_title = $(".rec_title", result)[0];
 			var reftype_img = result.childNodes[4];
-			var pin_img = result.childNodes[2];
+			var pin_img = result.childNodes[0];
 
 			top.HEURIST.registerEvent(result, "click", top.HEURIST.search.resultItemOnClick);
 			top.HEURIST.registerEvent(t_span, "click", top.HEURIST.search.resultItemOnClick);
@@ -547,8 +547,6 @@ top.HEURIST.search = {
 		var thumbs = $(".result_thumb", resultsDiv).get();
 		for (var i=0; i < thumbs.length; ++i) {
 			var result = thumbs[i];
-//			var t_span = result.childNodes[0];
-//			var info_button = $(".info_button", result)[0];
 			var pin_img = $(".unbookmarked", result)[0];
 			var thumb_img = $(".thumbnail, .no-thumbnail, .rec_title", result)[0];
 			var rec_title = $(".rec_title", result)[0];
@@ -559,12 +557,6 @@ top.HEURIST.search = {
 				top.HEURIST.registerEvent(pin_img, "click", result.getAttribute("bkmk_id") ? function(){} : top.HEURIST.search.addBookmark);
 			}
 			top.HEURIST.registerEvent(result, "dblclick", (top.HEURIST.util.getDisplayPreference("double-click-action") == "edit") ? top.HEURIST.search.edit : top.HEURIST.search.open_out);
-//			if (rec_edit_link) {
-//					top.HEURIST.registerEvent(rec_edit_link, "click", top.HEURIST.search.edit);
-//			}
-//			if (rec_quickview_link) {
-//				top.HEURIST.registerEvent(rec_quickview_link, "click", top.HEURIST.search.quickview);
-//			}
 			if (rec_title) {
 					top.HEURIST.registerEvent(rec_title, "click", top.HEURIST.search.resultItemOnClick);
 			}
