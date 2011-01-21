@@ -54,7 +54,7 @@ require_once(dirname(__FILE__)."/algorithms/parseAuthorNames.php");
 
 require_once(dirname(__FILE__)."/../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../common/php/dbMySqlWrappers.php");
-require_once(dirname(__FILE__)."/algorithms/calcLevenstheinDelta.php");
+require_once(dirname(__FILE__)."/algorithms/calcLevenshteinDelta.php");
 
 require_once(dirname(__FILE__)."/../common/php/saveRecord.php");
 
@@ -246,7 +246,7 @@ function mode_file_selection() {
 		if ($frm == "BIB") {
 ?>
     Currently, support is limited to EndNote REFER and Zotero formats.<br>
-    <a href="<?=HEURIST_SITE_PATH?>impot/interface/listRequiredElements.php" target=_new>Show tag definitions</a> for supported REFER record formats.<br>
+    <a href="<?=HEURIST_SITE_PATH?>import/interface/listRequiredElements.php" target=_new>Show tag definitions</a> for supported REFER record formats.<br>
 <?php
 		}else if ($frm == "GEO") {
 ?>

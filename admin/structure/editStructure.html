@@ -1,13 +1,13 @@
 <!--
 
 /**
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
+* filename, brief description, date of creation, by whom
+* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+* @todo
+**/
 
 -->
 <html>
@@ -34,10 +34,10 @@
 	body.wg .base-only { display: none; }
   </style>
 
-[literal]
+		[literal]
   <script type="text/javascript">
    <!--
-
+			var instance = "[end-literal][instance-name!][literal]";
 	var existing_details = new Object();
 
 	function delete_bdr(rst_ID) {
@@ -64,7 +64,7 @@
 	}
 
 	function edit_enum_types_with_pos(dty_ID, pos) {
-		popup_frame(pos, 'editVocab.php?instance=[instance-name!]&amp;dty_ID='+dty_ID, finish_edit_enum_types);
+				popup_frame(pos, 'editVocab.php?instance='+ instance + '&amp;dty_ID='+dty_ID, finish_edit_enum_types);
 	}
 
 	function finish_edit_enum_types() {
@@ -72,23 +72,23 @@
 	}
 
 	function edit_reftype_constraints(dty_ID) {
-		popup_frame(pos, 'editReftypeConstraints.php?instance=[instance-name!]&amp;dty_ID='+dty_ID, finish_edit_reftype_constraints);
+				popup_frame(pos, 'editReftypeConstraints.php?instance='+ instance + '&amp;dty_ID='+dty_ID, finish_edit_reftype_constraints);
 	}
 
 	function finish_edit_reftype_constraints() {
 		close_popup_frame();
-		document.location.replace('editStructure.php?instance=[instance-name!]');//note: called in the context of the popup
+				document.location.replace('editStructure.php?instance='+ instance );//note: called in the context of the popup
 	}
 
 	function edit_constrain_reftype(dty_ID) {
 		var name_span = document.getElementById('name'+dty_ID);
 		var pos = findPos(name_span);
-		popup_frame(pos, 'editReftypeConstraints.php?instance=[instance-name!]&amp;dty_ID='+dty_ID, finish_edit_constrain_reftype,true);
+				popup_frame(pos, 'editReftypeConstraints.php?instance='+ instance + '&amp;dty_ID='+dty_ID, finish_edit_constrain_reftype,true);
 	}
 
 	function finish_edit_constrain_reftype() {
 		close_popup_frame();
-		document.location.replace('editStructure.php?instance=[instance-name!]'); //note: called in the context of the popup
+				document.location.replace('editStructure.php?instance='+ instance ); //note: called in the context of the popup
 	}
 
 	function popup_frame(position, location, finish_fn, keepRelPos) {
@@ -162,7 +162,7 @@
 	function upload_icon(rty_ID) {
 		var img = document.getElementById('rt'+rty_ID);
 
-		top.popup_url('uploadRectypeIcon.php?instance=[instance-name!]&amp;rty_ID='+rty_ID, 100, 300);
+				top.popup_url('uploadRectypeIcon.php?instance='+ instance + '&amp;rty_ID='+rty_ID, 100, 300);
 	}
 
 	function icon_refresh(rty_ID) {
@@ -212,7 +212,7 @@
 
    //-->
   </script>
-[end-literal]
+		[end-literal]
 
  </head>
 
@@ -224,29 +224,29 @@
 
   <div>
 
-<a href="../ugrps/findAddUser.php?instance=[instance-name!]">User admin</a>
-|
-<a href="../verification/recalcTitlesAllRecords.php?instance=[instance-name!]">Rebuild titles</a>
-|
-<a href="../verification/listDuplicateRecords.php?fuzziness=10&amp;instance=[instance-name!]">Find duplicates</a>
-|
-<a href="../ugrps/editGroupTags.php?instance=[instance-name!]">Group tags</a>
-|
-<a href="../ugrps/assignUsersToGroups.php?instance=[instance-name!]">List all users</a>
-|
-<a href="../../search/search.html?q=_BROKEN_&amp;w=all&amp;instance=[instance-name!]">Records with broken urls</a>
-|
-<a href="../ugrps/quitGroupForSession.php?instance=[instance-name!]">Take your hat off (exit group)</a>
-<br>
-<a href="../verification/checkXHTML.php?instance=[instance-name!]">Woot XHTML check</a>
-|
-<a href="../verification/checkInvalidChars.php?instance=[instance-name!]" >invalid Character check</a>
-|
-<a href="../verification/cleanInvalidChars.php?instance=[instance-name!]">clean invalid Character</a>
-|
-<a href="../ugrps/editGroups.php?instance=[instance-name!]">Add/edit groups</a>
-|
-<a href="../rollback/rollbackRecords.php?instance=[instance-name!]">Record rollback</a>
+				<a href="../ugrps/findAddUser.php?instance=[instance-name!]">User admin</a>
+				|
+				<a href="../verification/recalcTitlesAllRecords.php?instance=[instance-name!]">Rebuild titles</a>
+				|
+				<a href="../verification/listDuplicateRecords.php?fuzziness=10&amp;instance=[instance-name!]">Find duplicates</a>
+				|
+				<a href="../ugrps/editGroupTags.php?instance=[instance-name!]">Group tags</a>
+				|
+				<a href="../ugrps/assignUsersToGroups.php?instance=[instance-name!]">List all users</a>
+				|
+				<a href="../../search/search.html?q=_BROKEN_&amp;w=all&amp;instance=[instance-name!]">Records with broken urls</a>
+				|
+				<a href="../ugrps/quitGroupForSession.php?instance=[instance-name!]">Take your hat off (exit group)</a>
+				<br>
+				<a href="../verification/checkXHTML.php?instance=[instance-name!]">Woot XHTML check</a>
+				|
+				<a href="../verification/checkInvalidChars.php?instance=[instance-name!]" >invalid Character check</a>
+				|
+				<a href="../verification/cleanInvalidChars.php?instance=[instance-name!]">clean invalid Character</a>
+				|
+				<a href="../ugrps/editGroups.php?instance=[instance-name!]">Add/edit groups</a>
+				|
+				<a href="../rollback/rollbackRecords.php?instance=[instance-name!]">Record rollback</a>
 
   </div>
 
@@ -258,14 +258,14 @@
    <p style="color: green; font-weight: bold;">New detail type (field) added</p>
   [end-if]
 
-<div style="font-size: 16px; font-weight: bold; text-align: center; background-color: red;">
+					<div style="font-size: 16px; font-weight: bold; text-align: center; background-color: red;">
  Warning: Editing MASTER types!
  <br>
  This will affect ALL Heurist instances
-</div>
+					</div>
 
-<form action="editStructure.php?instance=[instance-name!]" method="post" name="edit_form" onSubmit="return check_prompts();">
-[update REFTYPE rt1]
+					<form action="editStructure.php?instance=[instance-name!]" method="post" name="edit_form" onSubmit="return check_prompts();">
+						[update REFTYPE rt1]
 
   [errors]
   [if : edit-success]
@@ -341,13 +341,13 @@
         <img src="../../common/images/cross.gif" onClick="delete_bdr([rst_ID]);" class="delete_icon">
         [delete BIB_DETAIL_REQ bdr_delete][hidden required : del_field/* create hidden field to control marking this detail requirement for deletion*/][end-delete]
         [select BIB_DETAIL_TYPE bdt][dty_Name] <span style="font-size: 80%; font-weight: normal;">([dty_ID])</span>[end-select]&nbsp;
-</td>
-<td style="padding-bottom: 1ex;">
-<nobr>
+											</td>
+											<td style="padding-bottom: 1ex;">
+												<nobr>
         [update BIB_DETAIL_REQ bdr]
          &nbsp;&nbsp;&nbsp;label [textbox : rst_DisplayName : contextual name : style="width: 200px;"]&nbsp;
-[dropdown required : rst_RequirementType : : select req_abbrev, req_full from requirements order by req_order : style="width: 90px;"]&nbsp;
-<img src="../../common/images/10x10.gif">
+													[dropdown required : rst_RequirementType : : select req_abbrev, req_full from requirements order by req_order : style="width: 90px;"]&nbsp;
+													<img src="../../common/images/10x10.gif">
          &nbsp;size [textbox : rst_DisplayWidth : field width : style="width: 30px;"]
           &nbsp;<label>repeatable [textbox : rst_MaxValues : repeat : style="width: 30px; padding: 0px 2px;"]</label>&nbsp;
           &nbsp;<label>matching [checkbox : rst_RecordMatchOrder : is this field used for identifying possible matches? : style="margin: 0px;"]</label>&nbsp;
@@ -356,12 +356,12 @@
          [textarea : rst_DisplayHelp : help text : style="height: 25px; width: 200px; vertical-align: top;"]
          </nobr>
          <nobr>prompt [textbox : rst_DisplayPrompt : prompt : style="width: 700px;"]&nbsp;
-[select BIB_DETAIL_TYPE bdt]
+													[select BIB_DETAIL_TYPE bdt]
          &nbsp;data&nbsp;type : [if-eq : dty_Type : "enum"]<a href="#" onClick="edit_enum_types_with_pos([dty_ID], findPos(this.parentNode)); return false;">[dty_Type]</a>[else][dty_Type][end-if-eq]
-&nbsp;&nbsp;
+													&nbsp;&nbsp;
 		 detail type description: [dty_Description]
-[end-select]
-</nobr>
+													[end-select]
+												</nobr>
        </td>
         [end-update]
 
@@ -404,15 +404,15 @@
    </tr>
   </table>
 
-[end-update]
-</form>
+						[end-update]
+					</form>
 
-[not-found]
-<div class="headline">Record types</div>
-<p/>
-<table border="0">
+					[not-found]
+					<div class="headline">Record types</div>
+					<p/>
+					<table border="0">
  <tr><td></td><td style="text-align: right;"><a href="../describe/listRectypeDescriptions.php?instance=[instance-name!]">print-friendly dump</a> | <a href="../verification/listRecordPointerErrors.php?instance=[instance-name!]">records with errors</a></td></tr>
-<tr><td>
+						<tr><td>
  <p><b>Select a record type to edit:</b></p>
 
  <div style="width: 300px; height: 500px; overflow: auto; padding: 3px;" class="friendly_border">
@@ -426,8 +426,8 @@
 
  <p><b>or add a new record type:</b></p>
 
-<form method="post">
-<input type="hidden" name="_submit" value="1">
+								<form method="post">
+									<input type="hidden" name="_submit" value="1">
    [insert REFTYPE new_rtf]
  <table border="0">
   <tr>
@@ -444,9 +444,9 @@
   </tr>
  </table>
    [end-insert]
-</form>
-</td>
-<td>
+								</form>
+							</td>
+							<td>
  <p><b>Detail types (fields)</b></p>
 
  <div style="width: 450px; height: 500px; overflow: auto; padding: 3px;" class="friendly_border">
@@ -464,9 +464,9 @@
 
  <p><b>or add a new detail type (field):</b>
  <span style="color:red; float:right; font-weight: bold;">Please check that no suitable field already exists</span>
-</p>
-<form method="post">
-<input type="hidden" name="_submit" value="1">
+								</p>
+								<form method="post">
+									<input type="hidden" name="_submit" value="1">
    [insert BIB_DETAIL_TYPE new_bdt]
  <table border="0">
   <tr>
@@ -483,18 +483,18 @@
    </tr>
  </table>
    [end-insert]
-</form>
-</td></tr></table>
+								</form>
+					</td></tr></table>
 
-[end-not-found]
+					[end-not-found]
 
    </span>
 
-<div style="font-size: 16px; font-weight: bold; text-align: center; background-color: red;">
+				<div style="font-size: 16px; font-weight: bold; text-align: center; background-color: red;">
  Warning: Editing MASTER types!
  <br>
  This will affect ALL Heurist instances
-</div>
+				</div>
 
   </div>
 

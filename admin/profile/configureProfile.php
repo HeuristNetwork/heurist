@@ -164,7 +164,7 @@ mysql_connection_db_select(DATABASE);
 
 
 /* Specify the template file containing the web page to be processed and displayed */
-$template = file_get_contents('configuration.html');
+$template = file_get_contents('configureProfile.html');
 
 if (! array_key_exists('body_only', $_REQUEST)) {
 	/* Replaces the word {PageHeader} in the web page with the concatenation of the files specified */
@@ -205,7 +205,7 @@ $hyperlinks_ignored = '<div>' .
        mysql__select_array('usrHyperlinkFilter', 'hyf_String', 'hyf_UGrpID is null or hyf_UGrpID='.get_user_id())) .
                       '</div>';
 $template = str_replace('{hyperlinks_ignored}', $hyperlinks_ignored, $template);
-$template = str_replace('{Bookmarklet}', file_get_contents('bookmarklet.js'), $template);
+$template = str_replace('{Bookmarklet}', file_get_contents(dirname(__FILE__).'/../../import/bookmarklet/bookmarklet.js'), $template);
 
 $res = mysql_query('select count(rtl_ID) as cnt from usrTags left join usrRecTagLinks on rtl_TagID=tag_ID where tag_UGrpID= ' . get_user_id() . ' group by tag_ID order by cnt desc, tag_Text limit 1');
 $row = mysql_fetch_row($res);

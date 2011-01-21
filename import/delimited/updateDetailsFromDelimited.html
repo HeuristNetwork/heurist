@@ -26,13 +26,13 @@
 		-->
 
 
-		<script src="../../../common/php/loadHAPI.php"></script>         <!--FIXME  sometimes get and error that hapi be loaded before goi, need to send switch to load-hapi to also load gio. -->
+		<script src="../../common/php/loadHAPI.php"></script>         <!--FIXME  sometimes get and error that hapi be loaded before goi, need to send switch to load-hapi to also load gio. -->
 		<script>
-			if (! (HCurrentUser.isLoggedIn()  &&  HCurrentUser.isAdministrator())) window.location = "../../../common/connect/login.php";//saw FIXME: instance code here
+			if (! (HCurrentUser.isLoggedIn()  &&  HCurrentUser.isAdministrator())) window.location = "../../common/connect/login.php";//saw FIXME: instance code here
 		</script>
 
-		<script src="../../../hapi/js/goi.js"></script>
-		<script src="../../../common/js/temporalObjectLibrary.js"></script>
+		<script src="../../hapi/js/goi.js"></script>
+		<script src="../../common/js/temporalObjectLibrary.js"></script>
 
 		<script>
 			const recChunk = 1000;

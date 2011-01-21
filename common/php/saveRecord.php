@@ -36,7 +36,7 @@
 	or write to the Free Software Foundation,Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 	-->*/
-require_once(dirname(__FILE__)."/../search/getSearchResults.php");
+require_once(dirname(__FILE__)."/../../search/getSearchResults.php");
 // NOTE  tags are a complete replacement list of personal tags for this record and are only used if personalised is true
 function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $pnotes, $rating, $irate, $qrate, $tags, $wgTags, $details, $notifyREMOVE, $notifyADD, $commentREMOVE, $commentMOD, $commentADD, &$nonces=null, &$retitleRecs=null) {
 	$recordID = intval($recordID);
