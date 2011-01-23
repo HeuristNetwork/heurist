@@ -1,19 +1,13 @@
-/*
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- */
-
 /***** import global styles ********************/
 
 @import url(../../../../common/css/global.css);
 
 /***** HEADINGS AND GENERIC FONT STYLING *****/
 
-
+#page {left:305px;}
+#header {display:block;}
+#instance-name {left:305px}
+#logo {top:5px; left:10px}
 TD {
 	font-family: Helvetica, Arial, Verdana;
 	font-size: 12px;
@@ -51,10 +45,9 @@ table {
 	cursor:pointer;
 	height:15px;
 }
-#page, #sidebar {top:65px}
+#page, #sidebar {top:55px}
+
 /***** STYLING FOR FORM FIELD ELEMENTS *****/
-
-
 .inputone {
 	font-family: Verdana, Arial, Helvetica, sans-serif;
 	font-size: 8px;

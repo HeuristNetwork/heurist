@@ -52,7 +52,7 @@ function loadAllRecords(query, options, loader) {
 function showSearch(query) {
 	// hide footnotes
 	document.getElementById("footnotes").style.display = "none";
-	document.getElementById("page").style.bottom = "10px";
+	//document.getElementById("page").style.bottom = "10px";
 
 	// turn off any highlighting
 	if (window.highlightElem) {
@@ -86,7 +86,7 @@ function displayResults(s,r) {
 	for (var i = 0; i < r.length; i++) {
 		if (r[i].getRecordType()){
 			innerHTML += "<div class='displayTable'><div class='editIcon'><img src=\""+ thisInstancePath + "common/images/reftype-icons/" + r[i].getRecordType().getID() + ".png\"/></div>";
-			innerHTML += "<div class='link'><a href='../" + r[i].getID() + "' target=\"_blank\">" + r[i].getTitle() + "</a></div></div>"; 
+			innerHTML += "<div class='link'><a href='../" + r[i].getID() + "' target=\"_blank\">" + r[i].getTitle() + "</a></div></div>";
 		}
 	}
 
