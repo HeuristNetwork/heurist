@@ -704,10 +704,10 @@ top.HEURIST.edit = {
 		var thisRef = this;
 		var saver = new HSaver(
 			function(i,f) {
-				top.HEURIST.edit.fileInputUploaded.call(thisRef, element, statusDiv, { file: f });
+				top.HEURIST.edit.fileInputUploaded.call(thisRef, element, uploadsDiv, { file: f });
 			},
 			function(i,e) {
-				top.HEURIST.edit.fileInputUploaded.call(thisRef, element, statusDiv, { error: e, origName: i.value.replace(/.*[\/\\]/, "") });
+				top.HEURIST.edit.fileInputUploaded.call(thisRef, element, uploadsDiv, { error: e, origName: i.value.replace(/.*[\/\\]/, "") });
 			}
 		);
 		HeuristScholarDB.saveFile(fileInput,
@@ -720,31 +720,32 @@ top.HEURIST.edit = {
 		});
 	},
 
-	fileInputUploaded: function(element, statusDiv, fileDetails) {
+	fileInputUploaded: function(element, uploadsDiv, fileDetails) {
 		var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
-		var closeButton = this.document.createElement("img");
-			closeButton.src = top.HEURIST.basePath + "common/images/black-cross.gif";
-			closeButton.style.width = "12px";
-			closeButton.style.height = "12px";
-			closeButton.style.cursor = "pointer";
-			closeButton.style.cssFloat = "right";
-			closeButton.style.styleFloat = "right";
-			closeButton.onclick = function() { statusDiv.parentNode.removeChild(statusDiv); };
+		var closeButton = this.document.createElement("div");
+			closeButton.className = "close-button";
+//			closeButton.src = top.HEURIST.basePath + "common/images/black-cross.gif";
+//			closeButton.style.width = "12px";
+//			closeButton.style.height = "12px";
+//			closeButton.style.cursor = "pointer";
+//			closeButton.style.cssFloat = "right";
+//			closeButton.style.styleFloat = "right";
+			closeButton.onclick = function() { uploadsDiv.parentNode.removeChild(uploadsDiv); };
 
-		statusDiv.innerHTML = "";
-		statusDiv.appendChild(closeButton);
+		uploadsDiv.innerHTML = "";
+		uploadsDiv.appendChild(closeButton);
 
 
 		if (fileDetails.error) {
 			// There was an error!  Display it.
 			element.input.replaceInput(element);
-			statusDiv.className = "error";
-			var b = statusDiv.appendChild(this.document.createElement("b"));
+			uploadsDiv.className = "error";
+			var b = uploadsDiv.appendChild(this.document.createElement("b"));
 				b.appendChild(this.document.createTextNode(fileDetails.origName));
 				b.title = fileDetails.origName;
-			statusDiv.appendChild(this.document.createElement("br"));
-			statusDiv.appendChild(this.document.createTextNode(fileDetails.error));
+			uploadsDiv.appendChild(this.document.createElement("br"));
+			uploadsDiv.appendChild(this.document.createTextNode(fileDetails.error));
 		} else {
 			// translate the HFile object back into something we can use here
 			fileObj = {
@@ -754,11 +755,11 @@ top.HEURIST.edit = {
 				fileSize: fileDetails.file.getSize()
 			};
 
-			var b = statusDiv.appendChild(this.document.createElement("b"));
+			var b = uploadsDiv.appendChild(this.document.createElement("b"));
 				b.appendChild(this.document.createTextNode(fileObj.origName));
 				b.title = fileObj.origName;
-			statusDiv.appendChild(this.document.createElement("br"));
-			statusDiv.appendChild(this.document.createTextNode("File has been uploaded"));
+			uploadsDiv.appendChild(this.document.createElement("br"));
+			uploadsDiv.appendChild(this.document.createTextNode("File has been uploaded"));
 
 			// update the BibDetailFileInput to show the file
 			element.input.replaceInput(element, { file: fileObj });

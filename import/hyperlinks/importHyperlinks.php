@@ -229,13 +229,12 @@ if (@$urls) {
 
 </head>
 
-<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/heurist.css">
-<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/import.css">
+<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
 
 <script src="getTitleFromURL.js"></script>
 <script src="importHyperlinks.js"></script>
 
-<body width=600 height=400>
+<body class="popup" width=600 height=400>
 
 <script src="<?=HEURIST_SITE_PATH?>common/js/utilsLoad.js"></script>
 <script src="<?=HEURIST_SITE_PATH?>common/php/loadUserInfo.php"></script>
@@ -314,11 +313,11 @@ function unCheckAll() {
 
 <iframe style="display: none;" name="grabber"></iframe>
 
-<table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" height="16">
+<!--<table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" height="16">
   <tr>
-    <td><H3>Import bookmarks</H3></td>
+    <td><H2>Import bookmarks</H2></td>
   </tr>
-</table>
+</table>-->
 
 <form action="importHyperlinks.php" method="post" enctype="multipart/form-data" name="mainform" style="margin: 0px 3px;">
 

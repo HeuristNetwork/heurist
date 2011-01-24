@@ -12,10 +12,19 @@
 -->
 <html>
  <head>
-  <link rel=stylesheet href="../../common/css/import.css">
+  <link rel=stylesheet href="../../common/css/global.css">
   <title>Find records</title>
+  <style>
+	#search {height: 55px;left: 0;margin-bottom: 10px;position: relative;top: 0;}
+	#results {bottom: 26px;display: block;left: 0;overflow-y: auto;position: absolute;right: 0;top: 60px;}
+	body.popup {padding: 0 !important; overflow: hidden;}
+	.result_row {padding:1ex 10px 0 10px;}
+	.result_row .id{width:10ex;display:inline-block;text-align: right;color:#999;}
+	.result_row img{margin:0 8px;}
+	div.result_row:hover{cursor: pointer;}
+  </style>
  </head>
- <body width="500" height="250" >
+ <body class="popup" width="500" height="250" >
   <script src="../../common/js/utilsLoad.js"></script>
   <script>
 if (window == top) {
@@ -24,7 +33,7 @@ if (window == top) {
   </script>
 
   <form onSubmit="this.submit(); return false;">
-  <div id="search">
+  <div id="search" class="banner" style="top:0">
     <table border=0 cellspacing=0 cellpadding=0 class=expander style="margin-bottom: 1em;"><tr>
      <td style="width: 40px; text-align: right;">Find&nbsp;</td>
      <td style="padding: 5px;">
@@ -103,14 +112,15 @@ function notifyResults(results) {
 		record = records[i];
 
 		recordDiv = resultsDiv.appendChild(document.createElement("div"));
-		recordDiv.className = "record";
+		recordDiv.className = "result_row";
 
 		bibID = recordDiv.appendChild(document.createElement("span"));
 		bibID.appendChild(document.createTextNode(record[0]));
 		bibID.className = "id";
 
 		img = recordDiv.appendChild(document.createElement("img"));
-		img.src = top.HEURIST.basePath + "common/images/reftype-icons/" + (record[3]? record[3] : "blank") + ".png";
+		img.src = top.HEURIST.basePath + "common/images/16x16.gif";
+		img.style.backgroundImage = "url("+ top.HEURIST.basePath + "common/images/reftype-icons/" + (record[3]? record[3] : "blank") + ".png)";
 
 		title = recordDiv.appendChild(document.createElement("span"));
 		title.appendChild(document.createTextNode(record[1]));

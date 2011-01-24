@@ -13,8 +13,8 @@
 
 <?php
 	define ('SAVE_URI', 'DISABLED');
-	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+	require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
+	require_once(dirname(__FILE__).'/../common/php/dbMySqlWrappers.php');
 
 	mysql_connection_db_select(USERS_DATABASE);
 ?>

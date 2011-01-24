@@ -141,14 +141,11 @@ function print_common_header($fileName) {
   <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
 
-  <link rel=stylesheet href='<?=HEURIST_SITE_PATH?>common/css/newshsseri.css'>
-  <link rel=stylesheet href='<?=HEURIST_SITE_PATH?>common/css/Popup.css'>
-  <link rel=stylesheet href='<?=HEURIST_SITE_PATH?>common/css/autocomplete.css'>
-  <link rel=stylesheet href='<?=HEURIST_SITE_PATH?>common/css/import.css'>
+  <link rel=stylesheet href='<?=HEURIST_SITE_PATH?>common/css/global.css'>
 
   <script src=displayImportProgress.js></script>
  </head>
- <body width=720 height=480>
+ <body class="popup" width=720 height=480>
   <script src='<?=HEURIST_SITE_PATH?>common/js/utilsLoad.js'></script>
   <script>
 if (! top.HEURIST.user) top.HEURIST.loadScript('<?=HEURIST_SITE_PATH?>common/php/loadUserInfo.php', true);
@@ -268,7 +265,10 @@ function mode_file_selection() {
     <input type="file" size="50" name="import_file">
    </div>
    <br clear=all>
-   <hr>
+
+<div class="separator_row" style="margin:10px 0"></div>
+
+
    <br clear=all>
     <input type=button value="Cancel" onclick="window.close();" style="margin-right: 4ex;">
     <input type="submit" value="Continue" style="font-weight: bold;">

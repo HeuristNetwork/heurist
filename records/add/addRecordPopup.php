@@ -25,7 +25,7 @@ mysql_connection_db_select(DATABASE);
 ?>
 <html>
  <head>
-  <link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/heurist.css">
+  <link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/global.css">
   <title>Add new record</title>
 
   <script src="<?=HEURIST_SITE_PATH?>external/jquery/jquery.js"></script>

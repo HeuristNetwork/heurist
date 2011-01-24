@@ -13,8 +13,8 @@
 
 <?php
 
-require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 if (! is_logged_in()) return;
 
@@ -23,7 +23,7 @@ mysql_connection_db_select(DATABASE);
 ?>
 <html>
  <head>
-  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/import.css">
+  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
 
   <title>Set ratings</title>
 
@@ -62,7 +62,7 @@ function set_ratings() {
   </script>
  </head>
 
- <body width=350 height=250>
+ <body class="popup" width=350 height=250>
 
    <table>
     <tr>
@@ -74,11 +74,11 @@ function set_ratings() {
      <td style="text-align: right;">Rating</td>
      <td><select name="overall-rating" id="overall-rating" style="width: 150px;">
 			<option value="0">Not Rated</option>
-			<option value="1">*</option>
-			<option value="2">**</option>
-			<option value="3">***</option>
-			<option value="4">****</option>
-			<option value="5">*****</option>
+			<option value="1" style="background-image: url(../../common/images/star-yellow.png);height:14px; width:8px;"></option>
+			<option value="2" style="background-image: url(../../common/images/star-yellow.png);height:14px; width:24px;"></option>
+			<option value="3" style="background-image: url(../../common/images/star-yellow.png);height:14px; width:40px;"></option>
+			<option value="4" style="background-image: url(../../common/images/star-yellow.png);height:14px; width:56px;"></option>
+			<option value="5" style="background-image: url(../../common/images/star-yellow.png);height:14px; width:72px;"></option>
          </select>
      </td>
     </tr>

@@ -41,11 +41,15 @@ if (@$_REQUEST['submit']) $updated = update_my_settings();
 <html>
 <head>
  <title>Update settings from model user</title>
- <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/import.css">
-
+ <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+<style type="text/css">
+<!--
+table.normal {margin:10px 0}
+-->
+</style>
 </head>
 
-<body width=600 height=500 style="font-size: 11px;">
+<body class="popup" width=600 height=500 style="font-size: 11px;">
 
 <table border="0" cellpadding="3" cellspacing="0" width="100%" class="normal">
   <tr>
@@ -85,6 +89,8 @@ if (@$_REQUEST['submit']) $updated = update_my_settings();
 <form method="post">
 <input type="hidden" name="submit" value="1">
 
+<div class="separator_row" style="margin-top:20px"></div>
+
 <table border="0" class="normal" style="text-align: left;">
 <?php
 	$res = tag_query();
@@ -122,8 +128,9 @@ if (@$_REQUEST['submit']) $updated = update_my_settings();
 <?php
 	}
 ?>
+
 </table>
-<hr size="1px">
+<div class="separator_row"></div>
 <table border="0" class="normal" style="text-align: left;">
 <?php
 
@@ -164,8 +171,8 @@ if (@$_REQUEST['submit']) $updated = update_my_settings();
 ?>
 </table>
 
+<div class="separator_row"></div>
 
-<hr size="1px">
 <table border="0" class="normal" style="text-align: left;">
 <?php
 
@@ -204,8 +211,9 @@ if (@$_REQUEST['submit']) $updated = update_my_settings();
 <?php
 	}
 ?>
-</table>
 
+</table>
+<div class="separator_row"></div>
   </td>
   </tr>
 </table>
@@ -215,6 +223,7 @@ if (@$_REQUEST['submit']) $updated = update_my_settings();
     <td align="right"><span class="small"><input type="submit" value="Add selected items" style="font-weight: bold;"></span>&nbsp;&nbsp;</td>
   </tr>
 </table>
+
 </form>
 
 </body>

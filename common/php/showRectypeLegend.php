@@ -18,26 +18,19 @@ require_once(dirname(__FILE__).'/../connect/applyCredentials.php');
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
- <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
- <title>Legend & Reference Types</title>
- <link rel="stylesheet" type="text/css" href= "<?=HEURIST_SITE_PATH?>common/css/import.css">
- <style type=text/css>
-
-
-div { line-height: 22px; border-bottom:1px solid #DDD;}
-div.column{ vertical-align: top;width:250px; position: absolute;top:0; border: none; }
-.right {left:280px;}
-.left {left:10px}
-img {vertical-align: text-bottom;}
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Legend & Reference Types</title>
+<link rel="stylesheet" type="text/css" href= "<?=HEURIST_SITE_PATH?>common/css/global.css">
+<style type=text/css>
+	div { line-height: 22px; border-bottom:1px solid #DDD;}
+	div.column{ vertical-align: top;width:250px; position: absolute;top:0; border: none; }
+	.right {left:280px;}
+	.left {left:10px}
+	img {vertical-align: text-bottom;}
 </style>
 </head>
 
-<body width=580 height=400>
-
-
-
-<!-- p><b>Heurist legend</b></p -->
-
+<body class="popup" width=580 height=400>
 
 <div class="column left">
 	<h3>Search list icons </h3>
@@ -62,7 +55,7 @@ require_once("dbMySqlWrappers.php");
      	<td width="24px" align="center"><img src="<?=HEURIST_SITE_PATH?>common/images/reftype-icons/<?= $row[0] ?>.png"></td>
      	<td><?= htmlspecialchars($row[1]) ?></td>
      	</tr></table>
-     </div>
+</div>
 <?php
 	}
 ?>

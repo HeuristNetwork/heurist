@@ -19,10 +19,10 @@
   <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
 
-  <link rel="stylesheet" type="text/css" href= "../../common/css/import.css">
+  <link rel="stylesheet" type="text/css" href= "../../common/css/global.css">
 </head>
 
-<body width=600 height=500 style="font-size: 11px;">
+<body class="popup" width=600 height=500 style="font-size: 11px;">
 
 <form action="showSimilarUsers.php?instance=<?=HEURIST_INSTANCE?>" method="get">
 
