@@ -1646,7 +1646,7 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 			link.target = "_surf";
 			link.onclick = function() { top.open(link.href, "", "width=300,height=200,resizable=yes"); return false; };
 
-		link.appendChild(this.document.createTextNode(bdValue.file.origName));
+		link.appendChild(this.document.createTextNode(bdValue.file.origName));	//saw TODO: add a title to this which is the bdValue.file.description
 
 		var linkImg = link.appendChild(this.document.createElement("img"));
 			linkImg.src = top.HEURIST.basePath+"common/images/external_link_16x16.gif";
@@ -1669,9 +1669,9 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 		inputDiv.className = "file-div";
 
 	} else {
-		if (top.HEURIST.browser.isEarlyWebkit) {
+		if (top.HEURIST.browser.isEarlyWebkit) {	// old way of doing things
 			var newIframe = this.document.createElement("iframe");
-				newIframe.src = top.HEURIST.basePath+"records/files/mini-file-upload.php?bib_id=" + windowRef.parent.HEURIST.edit.record.bibID + "&bdt_id=" + this.bibDetailType[0];
+				newIframe.src = top.HEURIST.basePath+"records/files/uploadFile.php?bib_id=" + windowRef.parent.HEURIST.edit.record.bibID + "&bdt_id=" + this.bibDetailType[0];
 				newIframe.frameBorder = 0;
 				newIframe.style.width = "90%";
 				newIframe.style.height = "2em";

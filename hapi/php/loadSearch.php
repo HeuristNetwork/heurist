@@ -20,7 +20,7 @@ session_cache_limiter('no-cache');
 define('SAVE_URI', 'disabled');
 define('SEARCH_VERSION', 1);
 
-require_once(dirname(__FILE__)."/../../search/saved/loading.php");
+require_once(dirname(__FILE__)."/../../search/getSearchResults.php");
 
 $args = json_decode(@$_POST["data"]?  $_POST["data"] : base64_decode(@$_GET["data"]), true);
 

@@ -17,7 +17,7 @@
 	if (@$_SERVER["QUERY_STRING"]) {
 		$q = $_SERVER["QUERY_STRING"];
 	}else{
-		$q = "instance=".HEURIST_DEFAULT_INSTANCE;
+		$q = "instance=".HEURIST_DBNAME;
 	}
 	header('Location: '.HEURIST_URL_BASE.'search/search.html?'.$q);
 ?>

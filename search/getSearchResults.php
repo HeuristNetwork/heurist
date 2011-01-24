@@ -245,16 +245,17 @@ function loadRecordDetails(&$record) {
 			break;
 
 			case "file":
-			$fres = mysql_query(
+			$fres = mysql_query(//saw NOTE! these field names match thoses used in HAPI to init an HFile object.
 			    "select ulf_ID as id,
 			            ulf_ObfuscatedFileID as nonce,
 			            ulf_OrigFileName as origName,
 			            ulf_FileSizeKB as size,
-			            'depricated' as type,
+			            fxm_MimeType as type,
 			            ulf_Added as date,
 			            ulf_Description as description
-			       from recUploadedFiles
+			       from recUploadedFiles left join defFileExtToMimetype on ulf_MimeExt = fxm_Extension
 			      where ulf_ID = " . intval($rd["dtl_UploadedFileID"]));
+
 			$detailValue = array("file" => mysql_fetch_assoc($fres));
 			$origName = urlencode($detailValue["file"]["origName"]);
 			$detailValue["file"]["URL"] =

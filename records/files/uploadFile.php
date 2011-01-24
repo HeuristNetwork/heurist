@@ -65,7 +65,7 @@ function fireParentSubmitFunction() {
 
 print "var fileDetails = ";
 
-$upload = $_FILES["file"];
+$upload = $_FILES["file"];// saw NOTE!! this must be the same as the input type=file name (see above)
 $fileID = upload_file($upload["name"], $upload["type"], $upload["tmp_name"], $upload["error"], $upload["size"]);
 if ($fileID) {
 	if ($bibID  &&  $bdtID) {
@@ -76,14 +76,14 @@ if ($fileID) {
 	$res = mysql_query("select * from recUploadedFiles where ulf_ID = $fileID");
 	$file = mysql_fetch_assoc($res);
 ?>
-({ file: {
+({ file: {	// saw TODO:  update this to include url or nonce and thumbURL
 	id: "<?= $file["ulf_ID"] ?>",
 	origName: "<?= slash($file["ulf_OrigFileName"]) ?>",
-	date: "<?= slash($file["ulf_ID"]) ?>",
-	mimeType: "<?= slash($file["file_mimetype"]) ?>",
+	date: "<?= slash($file["ulf_Added"]) ?>",
+	mimeType: "<?= slash($file["ulf_MimeExt"]) ?>",
 	nonce: "<?= slash($file["ulf_ObfuscatedFileID"]) ?>",
 	fileSize: "<?= slash($file["ulf_FileSizeKB"]) ?>",
-	typeDescription: "<?= slash($file["file_typedescription"]) ?>"
+	description: "<?= slash($file["ulf_Description"]) ?>"
 } })
 <?php
 } else {
@@ -145,11 +145,11 @@ function upload_file($name, $type, $tmp_name, $error, $size) {
 	mysql_query('update recUploadedFiles set ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
 		/* nonce is a random value used to download the file */
 
-	if (move_uploaded_file($tmp_name, UPLOAD_PATH . $path .'/'. $file_id)) {
+	if (move_uploaded_file($tmp_name, HEURIST_UPLOAD_PATH . $file_id)) {
 		return $file_id;
 	} else {
 		/* something messed up ... make a note of it and move on */
-		error_log("upload_file: <$name> / <$tmp_name> couldn't be saved as <" . UPLOAD_PATH . $path . '/' . $file_id . ">");
+		error_log("upload_file: <$name> / <$tmp_name> couldn't be saved as <" . HEURIST_UPLOAD_PATH . $file_id . ">");
 		mysql_query('delete from recUploadedFiles where ulf_ID = ' . $file_id);
 		return 0;
 	}

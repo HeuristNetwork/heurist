@@ -61,6 +61,7 @@ function get_roles() {
 }
 
 function _is_logged_in() {
+	error_log("in _is_logged_in instance prefix = ".HEURIST_INSTANCE_PREFIX);
 	return (!!@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_name']  &&
 			(!defined('HEURIST_RESTRICT_GROUP_ID')  ||
 				@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'][HEURIST_RESTRICT_GROUP_ID]  ||

@@ -3105,6 +3105,7 @@ var HeuristScholarDB = new HStorageManager();
 			f = details.file;
 			// Oh, wow ... this really isn't the best way to protect the HFile constructor.  FIXME
 			that.initFile = makeDetail;
+			// HFile (sm, id, originalName, size, type, URL, thumbnailURL, description)
 			val = new HFile(that, parseInt(f.id), f.origName, f.size, f.type, f.URL, f.thumbURL, f.description);
 			delete that.initFile;
 			return val;
@@ -3499,7 +3500,7 @@ var HeuristScholarDB = new HStorageManager();
 		}
 
 		newForm.appendChild(fileInput);
-		fileInput.name = "file";
+		fileInput.name = "file";	// saw NOTE!! this must be the same as the $_FILES['file'] becoasue on form submit this is passed
 
 		// XXX -- should this be done with attachEvent etc?  Might avoid double-load events
 		newIframe.onload = function() {
@@ -3523,7 +3524,8 @@ var HeuristScholarDB = new HStorageManager();
 				d = response.file;
 
 				// the file's details are returned as an array:
-				// id, name, size, mime-type, download URL, thumbnail URL
+				// id, name, sizeKB, mime-type, download URL, thumbnail URL, description
+				//sm, id, originalName, size, type, URL, thumbnailURL, description
 				that.initFile = newIframe.onload;
 				newFile = new HFile(that, parseInt(d[0]), d[1], d[2], d[3], d[4], d[5], d[6]);
 				delete that.initFile;

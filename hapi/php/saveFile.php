@@ -25,7 +25,7 @@ if (! defined("USING-XSS")) {
 	}
 	ob_start("outputAsRedirect");
 
-	if ($_POST["heurist-sessionid"] != $_COOKIE["heurist-sessionid"]) {
+	if ($_POST["heurist-sessionid"] != $_COOKIE["heurist-sessionid"]) {	// saw TODO: check that this is ok or should this be the database session?
 		// saveFile is only available through dispatcher.php, or if heurist-sessionid is known (presumably only our scripts will know this)
 		jsonError("unauthorised HAPI user");
 	}
@@ -42,6 +42,7 @@ mysql_query("start transaction");
 
 
 $upload = $_FILES["file"];
+error_log("upload file info - ". print_r($_FILES["file"],true));
 $fileID = upload_file($upload["name"], $upload["type"], $upload["tmp_name"], $upload["error"], $upload["size"], $_REQUEST["description"]);
 
 if ($fileID) {
@@ -50,7 +51,7 @@ if ($fileID) {
 	$thumbnailURL = HEURIST_URL_BASE."common/php/resizeImage.php?instance=".HEURIST_INSTANCE."&ulf_ID=" . $file["ulf_ObfuscatedFileID"];
 	$URL = HEURIST_URL_BASE."records/files/downloadFile.php/" . urlencode($file["ulf_OrigFileName"]) . "?instance=".HEURIST_INSTANCE."&ulf_ID=" . $file["ulf_ObfuscatedFileID"];
 error_log("url = ". $URL);
-	print json_format(array("file" => array(
+	print json_format(array("file" => array(	// file[0] => id , file [1] => origFileName, etc...
 		$file["ulf_ID"], $file["ulf_OrigFileName"], $file["ulf_FileSizeKB"], $file["file_mimetype"], $URL, $thumbnailURL, $file["ulf_Description"]
 	)));
 	mysql_query("commit");
@@ -112,16 +113,16 @@ error_log("in saveFile upload_file  name = ". $name. " type = ". $type. " error 
 													'ulf_MimeExt ' => $mimetypeExt,
 													'ulf_FileSizeKB' => $file_size,
 													'ulf_Description' => $description? $description : NULL));
-	if (! $res) { error_log("error inserting: " . mysql_error()); return 0; }
+	if (! $res) { error_log("error inserting file upload info: " . mysql_error()); return 0; }
 	$file_id = mysql_insert_id();
 	mysql_query('update recUploadedFiles set ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
 		/* nonce is a random value used to download the file */
 
-	if (move_uploaded_file($tmp_name, UPLOAD_PATH . $path . $file_id)) {
+	if (move_uploaded_file($tmp_name, HEURIST_UPLOAD_PATH . $file_id)) {
 		return $file_id;
 	} else {
 		/* something messed up ... make a note of it and move on */
-		error_log("upload_file: <$name> / <$tmp_name> couldn't be saved as <" . UPLOAD_PATH . $path . $file_id . ">");
+		error_log("upload_file: <$name> / <$tmp_name> couldn't be saved as <" . HEURIST_UPLOAD_PATH . $file_id . ">");
 		mysql_query('delete from recUploadedFiles where ulf_ID = ' . $file_id);
 		return 0;
 	}

@@ -41,9 +41,16 @@ if ($defaultDBname != '') {
 	define('HEURIST_DEFAULT_DBNAME',$defaultDBname);	//default dbname used when the URI is abiguous about the db
 }
 
+error_log("initialise REQUEST = ".print_r($_REQUEST,true));
 if (@$_REQUEST["db"]) {
 	$dbName = $_REQUEST["db"];
+}else if (@$_REQUEST["instance"]) { // saw TODO: temporary until change instance to db
+	$dbName = $_REQUEST["instance"];
+// let's try the refer in case we are being called from an HTML page.
 }else if (@$_SERVER["HTTP_REFERER"] && preg_match("/.*db=([^&]*).*/",$_SERVER["HTTP_REFERER"],$refer_instance)) {
+	$dbName = $refer_instance[1];
+// saw TODO: temporary until change instance to db
+	}else if (@$_SERVER["HTTP_REFERER"] && preg_match("/.*instance=([^&]*).*/",$_SERVER["HTTP_REFERER"],$refer_instance)) {
 	$dbName = $refer_instance[1];
 }else if (@$_SESSION["heurist_last_used_dbname"]) {
 	$dbName = $_SESSION["heurist_last_used_dbname"];

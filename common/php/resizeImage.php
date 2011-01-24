@@ -12,11 +12,10 @@
 ?>
 
 <?php
-header('Content-type: image/png');
+// header('Content-type: image/png');
 
-define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
 require_once(dirname(__FILE__).'/../connect/applyCredentials.php');
-require_once("dbMySqlWrappers.php");
+require_once(dirname(__FILE__)."/dbMySqlWrappers.php");
 
 if (! @$_REQUEST['w']  &&  ! @$_REQUEST['h']  &&  ! @$_REQUEST['maxw']  &&  ! @$_REQUEST['maxh']) {
 	$standard_thumb = true;
@@ -40,23 +39,30 @@ if (array_key_exists('ulf_ID', $_REQUEST)) {
 	$res = mysql_query('select * from recUploadedFiles where ulf_ObfuscatedFileID = "' . addslashes($_REQUEST['ulf_ID']) . '"');
 	if (mysql_num_rows($res) != 1) return;
 	$file = mysql_fetch_assoc($res);
-
+error_log("results for file = ".print_r($file, true));
 	if (@$standard_thumb  &&  $file['ulf_Thumbnail']) {
 		// thumbnail exists
+error_log("outputting thumbnail");
+header('Content-type: image/jpeg');
 		echo $file['ulf_Thumbnail'];
 		return;
 	}
 
-	$filename = UPLOAD_PATH . $file['file_path'] . '/' . $file['ulf_ID'];
+	$filename = HEURIST_UPLOAD_PATH . '/' . $file['ulf_ID'];
 	$filename = str_replace('/../', '/', $filename);
-	switch($file['file_mimetype']) {
+error_log("filename = $filename");
+	switch($file['ulf_MimeExt']) {
 	case 'image/jpeg':
+	case 'jpg':
+	case 'jpeg':
 		$img = imagecreatefromjpeg($filename);
 		break;
 	case 'image/gif':
+	case 'gif':
 		$img = imagecreatefromgif($filename);
 		break;
 	case 'image/png':
+	case 'png':
 		$img = imagecreatefrompng($filename);
 		break;
 	default:
