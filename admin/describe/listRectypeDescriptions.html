@@ -55,7 +55,7 @@
 
 <table border="0">
 
- [foreach REFTYPE rtf : rty_ID order by (rty_RecTypeGroupID > 1), rty_OrderInGroup, rty_Name]
+ [foreach REFTYPE rtf : rty_ID order by (rty_RecTypeGroupID), rty_OrderInGroup, rty_Name]
  <tr class="rty_Name">
   <td style="text-align: right;">[rty_ID]</td>
   <td><img src="../../common/images/reftype-icons/[rty_ID].gif" id="rt[rty_ID]" class="rft_icon"><span class="rty_Name">[rty_Name]</span></td>
@@ -65,7 +65,9 @@
   <td>
    <table border="0">
     <tr><td>Notes:</td><td>[rty_Description]</td></tr>
-    <tr><td>Bibliographic:</td><td><script type="text/javascript">document.write([rty_RecTypeGroupID == 1]?'Yes':'No');</script></td></tr>
+    <tr><td>Bibliographic:</td><td><script type="text/javascript">document.write([rty_RecTypeGroupID]?'Yes':'No');</script></td></tr>
+    <!-- WAS: rty_RecTypeGroupID == 1  above
+       -->
     <tr><td>Title Mask:</td><td>[rty_TitleMask]</td></tr>
    </table>
    Details:

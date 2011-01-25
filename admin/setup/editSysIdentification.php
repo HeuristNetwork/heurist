@@ -5,6 +5,9 @@
 	// Copyright (C) 2010 University of Sydney, Digital Innovation Unit
 	// Coded with NuSphere PHP-Ed
 
+    // TO DO: This fucntion needs to go directly to edit mode ('u') by passing the dispaly of the (single)
+    // database record in this table.
+    
 	require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 	require_once(dirname(__FILE__)."/../../external/nusphere/config.inc.php");
 	require_once(dirname(__FILE__)."/../../external/nusphere/db_utils.inc");
@@ -30,8 +33,10 @@
 	define('ERR_INVALID_REQUEST', '<html><body>Invalid request.
 		Click <a href="?mode=s">here</a> to return to main page.</body></html>');
 	define('ERR_NO_KEY', '<html><body>Could not proceed. This form requires a key field that will uniquely identify records in the table</body></html>');
-	define('MSG_UPDATED', "Record has been updated successfully.
-		Click <a href=\"?mode=s&amp;start=%d\">here</a> to return to main page.");
+
+	define('MSG_UPDATED', "<h3>\ndone ...</h3><p>\n\nHeurist System Identification Record has been updated successfully.
+		Click <a href=\"?mode=s&amp;start=%d\">here</a> to return to Heurist home page.</p>");
+        
 	define('MSG_INSERTED', 'Record has been added successfully.
 		Click <a href="?mode=s&amp;start=-1">here</a> to return to main page.');
 	define('MSG_DELETED', "Record has been deleted successfully.
@@ -71,57 +76,57 @@
 	// These fields are editable by adminstrator, FLD_INPUT => True
 	'f5' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'IMap Server for incoming emails to be archived', FLD_DISPLAY_SZ => 100,
 	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 100, FLD_INPUT_MAXLEN => 301, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
+	FLD_INPUT_SZ => 60, FLD_INPUT_MAXLEN => 301, FLD_INPUT_DFLT => '',
+	FLD_INPUT_NOTEMPTY => False, FLD_INPUT_VALIDATION => '',
 	FLD_DATABASE => 'sys_eMailImapServer'),
 	'f6' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Port for incoming mail', FLD_DISPLAY_SZ => 100,
 	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 100, FLD_INPUT_MAXLEN => 16, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
+	FLD_INPUT_SZ => 16, FLD_INPUT_MAXLEN => 16, FLD_INPUT_DFLT => '',
+	FLD_INPUT_NOTEMPTY => False, FLD_INPUT_VALIDATION => '',
 	FLD_DATABASE => 'sys_eMailImapPort'),
 	'f7' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Protocol for incoming mail', FLD_DISPLAY_SZ => 100,
 	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 100, FLD_INPUT_MAXLEN => 16, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
+	FLD_INPUT_SZ => 16, FLD_INPUT_MAXLEN => 16, FLD_INPUT_DFLT => '',
+	FLD_INPUT_NOTEMPTY => False, FLD_INPUT_VALIDATION => '',
 	FLD_DATABASE => 'sys_eMailImapProtocol'),
 	'f8' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'IMap Username for incoming mail', FLD_DISPLAY_SZ => 100,
 	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 100, FLD_INPUT_MAXLEN => 151, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
+	FLD_INPUT_SZ => 20, FLD_INPUT_MAXLEN => 151, FLD_INPUT_DFLT => '',
+	FLD_INPUT_NOTEMPTY => False, FLD_INPUT_VALIDATION => '',
 	FLD_DATABASE => 'sys_eMailImapUsername'),
 	'f9' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'IMap Password for incoming mail', FLD_DISPLAY_SZ => 100,
 	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 100, FLD_INPUT_MAXLEN => 61, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
+	FLD_INPUT_SZ => 20, FLD_INPUT_MAXLEN => 61, FLD_INPUT_DFLT => '',
+	FLD_INPUT_NOTEMPTY => False, FLD_INPUT_VALIDATION => '',
 	FLD_DATABASE => 'sys_eMailImapPassword'),
 	'f10' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Database for access control tables (blank = self)', FLD_DISPLAY_SZ => 100,
 	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 100, FLD_INPUT_MAXLEN => 193, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
+	FLD_INPUT_SZ => 40, FLD_INPUT_MAXLEN => 193, FLD_INPUT_DFLT => '',
+	FLD_INPUT_NOTEMPTY => False, FLD_INPUT_VALIDATION => '',
 	FLD_DATABASE => 'sys_UGrpsDatabase'),
 	'f11' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'ID of Group owning database (>0, default 1)', FLD_DISPLAY_SZ => 7,
 	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 7, FLD_INPUT_MAXLEN => 10, FLD_INPUT_DFLT => '',
+	FLD_INPUT_SZ => 3, FLD_INPUT_MAXLEN => 10, FLD_INPUT_DFLT => '',
 	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'Numeric',
 	FLD_DATABASE => 'sys_OwnerGroupId'),
 	'f12' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Set 1 to restrict access to group owning database', FLD_DISPLAY_SZ => 7,
 	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 7, FLD_INPUT_MAXLEN => 5, FLD_INPUT_DFLT => '',
+	FLD_INPUT_SZ => 2, FLD_INPUT_MAXLEN => 5, FLD_INPUT_DFLT => '',
 	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'Numeric',
 	FLD_DATABASE => 'sys_RestrictAccessToOwnerGroup'),
 	'f13' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Display name for the database (generally longer than DB name)', FLD_DISPLAY_SZ => 50,
 	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 100, FLD_INPUT_MAXLEN => 193, FLD_INPUT_DFLT => '',
+	FLD_INPUT_SZ => 50, FLD_INPUT_MAXLEN => 193, FLD_INPUT_DFLT => '',
 	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
 	FLD_DATABASE => 'sys_dbName'),
 	'f14' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Name/insitution of owner (or URL to owner information)', FLD_DISPLAY_SZ => 100,
 	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 100, FLD_INPUT_MAXLEN => 751, FLD_INPUT_DFLT => '',
+	FLD_INPUT_SZ => 50, FLD_INPUT_MAXLEN => 751, FLD_INPUT_DFLT => '',
 	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
 	FLD_DATABASE => 'sys_dbOwner'),
 	'f15' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Database rights statement (or URL to rights statement)', FLD_DISPLAY_SZ => 100,
 	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 100, FLD_INPUT_MAXLEN => 1000, FLD_INPUT_DFLT => '',
+	FLD_INPUT_SZ => 50, FLD_INPUT_MAXLEN => 1000, FLD_INPUT_DFLT => '',
 	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
 	FLD_DATABASE => 'sys_dbRights'),
 	'f16' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Description of the database/content up to 1Kb (may reference a URL)', FLD_DISPLAY_SZ => 100,
@@ -131,37 +136,37 @@
 	FLD_DATABASE => 'sys_dbDescription'),
 	'f17' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Database with which defintions are to be kept in sync (not yet impl.)', FLD_DISPLAY_SZ => 100,
 	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 100, FLD_INPUT_MAXLEN => 193, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
-	FLD_DATABASE => 'sys_SyncDefsWithDb'),
+	FLD_INPUT_SZ => 2, FLD_INPUT_MAXLEN => 193, FLD_INPUT_DFLT => '',
+	FLD_INPUT_NOTEMPTY => False, FLD_INPUT_VALIDATION => '',
+	FLD_DATABASE => 'sys_SyncDefsWithDb'),  // THIS ONE NOT ALLOWING BLANK ?????
 	'f18' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => '0 = no, 1 = carry out nightly URL validity verification (can overload targets)', FLD_DISPLAY_SZ => 7,
 	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 7, FLD_INPUT_MAXLEN => 5, FLD_INPUT_DFLT => '',
+	FLD_INPUT_SZ => 2, FLD_INPUT_MAXLEN => 5, FLD_INPUT_DFLT => '',
 	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'Numeric',
 	FLD_DATABASE => 'sys_URLCheckFlag'),
 	'f19' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Directory for uploaded files (full path, overrides default)', FLD_DISPLAY_SZ => 100,
 	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 100, FLD_INPUT_MAXLEN => 385, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
+	FLD_INPUT_SZ => 50, FLD_INPUT_MAXLEN => 385, FLD_INPUT_DFLT => '',
+	FLD_INPUT_NOTEMPTY => false, FLD_INPUT_VALIDATION => '',
 	FLD_DATABASE => 'sys_UploadDirectory'),
 	'f20' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Additional folders containing files for indexing (FieldHelper compatibility)', FLD_DISPLAY_SZ => 100,
 	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
 	FLD_INPUT_SZ => 100, FLD_INPUT_MAXLEN => 1000, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
-	FLD_DATABASE => 'sys_MediaFolders'),
+	FLD_INPUT_NOTEMPTY => false, FLD_INPUT_VALIDATION => '',
+	FLD_DATABASE => 'sys_MediaFolders'),  // THIS ONE NOT ALLOWING BLANK  ?????
 	'f21' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => '0 = no, 1 = allow online registration as user (confirmed by SysAdmin)', FLD_DISPLAY_SZ => 7,
 	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 7, FLD_INPUT_MAXLEN => 5, FLD_INPUT_DFLT => '',
+	FLD_INPUT_SZ => 2, FLD_INPUT_MAXLEN => 5, FLD_INPUT_DFLT => '',
 	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'Numeric',
 	FLD_DATABASE => 'sys_AllowRegistration'),
 	'f22' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Default owner group # for new records', FLD_DISPLAY_SZ => 7,
 	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 7, FLD_INPUT_MAXLEN => 5, FLD_INPUT_DFLT => '',
+	FLD_INPUT_SZ => 3, FLD_INPUT_MAXLEN => 5, FLD_INPUT_DFLT => '',
 	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'Numeric',
 	FLD_DATABASE => 'sys_NewRecOwnerGrpID'),
-	'f23' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Default for new record visibility (Viewable, Hidden) by non-members of owner group', FLD_DISPLAY_SZ => 100,
+	'f23' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Non-owner default new record visibility (Viewable, Hidden)', FLD_DISPLAY_SZ => 100,
 	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 100, FLD_INPUT_MAXLEN => 25, FLD_INPUT_DFLT => '',
+	FLD_INPUT_SZ => 10, FLD_INPUT_MAXLEN => 25, FLD_INPUT_DFLT => '',
 	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'Viewable, Hidden',
 	FLD_DATABASE => 'sys_NewRecAccess')
 	);
@@ -204,7 +209,9 @@
 	if (!$keys) {
 		dbu_handle_error(ERR_NO_KEY);
 	}
+    
 	$idx = 0;
+    
 	foreach($fielddef as $fkey=>$fld) {
 		if ($fld[FLD_INPUT]) {
 			if ($fld[FLD_INPUT_NOTEMPTY]) {
@@ -226,31 +233,14 @@
 	$dbconn->db_connect($config['dbhost'], $config['dblogin'], $config['dbpass'], $config['dbname'], $config['dbport']);
 
 	switch ($mode) {
-		case 's':
-		$pager=array();
-		$start = (isset($_GET[INP_START]) && is_numeric($_GET[INP_START])) ? (int)$_GET[INP_START] : 0;
-		$rows = dbu_handle_select($fielddef, $scheme, $table, $dbconn, $keys, $start, $config['rows_per_page'], $config['pager_items'], $pager);
-		if (!$rows && $dbconn->db_lasterror())
-		dbu_handle_error($dbconn->db_lasterror());
-		$show_data = true;
-		break;
-		case 'i':
-		$row = dbu_get_input_defaults($fielddef);
-		$nextmode = 'i2';
-		$show_input = true;
-		break;
-		/*  THERE IS ONLY EVER ONE sysIdentification RECORD
-		case 'i2':
-		$rslt = dbu_handle_insert($fielddef, $scheme, $table, $dbconn, $_POST);
-		if ($rslt) {
-		$show_message = true;
-		$message = MSG_INSERTED;
-		} else {
-		dbu_handle_error($dbconn->db_lasterror());
-		}
-		$dbconn->db_close();
-		break;
-		*/
+    case 's':
+        $pager=array();
+        $start = (isset($_GET[INP_START]) && is_numeric($_GET[INP_START])) ? (int)$_GET[INP_START] : 0;
+        $rows = dbu_handle_select($fielddef, $scheme, $table, $dbconn, $keys, $start, $config['rows_per_page'], $config['pager_items'], $pager);
+        if (!$rows && $dbconn->db_lasterror())
+            dbu_handle_error($dbconn->db_lasterror());
+        $show_data = true;
+        break;
 		case 'u':
 		$row = dbu_fetch_by_key($fielddef, $scheme, $table, $dbconn, $_POST, $keys);
 		$nextmode = 'u2';
@@ -261,13 +251,15 @@
 		if ($rslt) {
 			$show_message = true;
 			$message = sprintf(MSG_UPDATED, $start);
+            header('Location: ' .HEURIST_BASE_URL. '?instance='.HEURIST_INSTANCE);
 		} else {
 			dbu_handle_error($dbconn->db_lasterror());
 		}
 		$dbconn->db_close();
 		$nextmode = 's';
 		break;
-		case 'd':
+		/* 
+        case 'd':
 		$rslt = dbu_handle_delete($fielddef, $scheme, $table, $dbconn, $_POST, $keys);
 		if ($rslt) {
 			$show_message = true;
@@ -277,10 +269,12 @@
 		}
 		$dbconn->db_close();
 		$nextmode = 's';
-		break;
+		break; 
+        */                    
 	}
 
 ?>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html><head>
 		<title>Heurist Database identification/setting record (sysIdentification table)</title>
@@ -418,7 +412,9 @@
 			//-->
 		</script>
 	</head>
-	<body>
+	
+    
+    <body>
 		<?php
 			if ($show_message) {
 			?>
@@ -431,13 +427,15 @@
 
 			<?php
 				} else if ($show_input) {
+                    $temp=HEURIST_DBNAME;
 			?>
 			<form name="InputForm" method="post" enctype="multipart-form-data"
 				onsubmit="return CheckForm(this)"
 				action="">
-				<table border="0">
-					<?php  // INPUT
-						foreach($fielddef as $fkey=>$fld) {
+				<table border="0"> 
+                	<?php  // INPUT
+				    echo "<tr><td><h3>Heurist System Identification Record for db = $temp</h3></td></tr>";
+                		foreach($fielddef as $fkey=>$fld) {
 							if ($fld[FLD_INPUT]) {
 								echo "<tr><td>$fld[FLD_DISPLAY]</td>";
 								$val = htmlentities($row[$fkey], ENT_QUOTES, $config['encoding']);
@@ -531,10 +529,8 @@
 				<br />
 				<table cellpadding="1" cellspacing="0" border="0" bgcolor="#ababab"><tr><td>
 							<table cellpadding="1" cellspacing="0" border="0" bgcolor="#fcfcfc"><tr><td>
-										<input type="button" value="insert" onclick="document.forms.ActionForm.action='?mode=i'; document.forms.ActionForm.submit()" />&nbsp;
-										<input type="button" value="update" onclick="document.forms.ActionForm.action='?mode=u'; document.forms.ActionForm.submit()" />&nbsp;
-										<input type="button" value="delete" onclick="document.forms.ActionForm.action='?mode=d'; document.forms.ActionForm.submit()" />
-								</td></tr>
+							<input type="button" value="Edit" onclick="document.forms.ActionForm.action='?mode=u'; document.forms.ActionForm.submit()" />&nbsp;
+							</td></tr>
 							</table>
 					</td></tr>
 				</table>

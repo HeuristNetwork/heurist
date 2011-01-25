@@ -46,6 +46,20 @@
 		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE);
 		return;
 	}
+    
+    ?>
+    <html>
+    <head>
+    <title>Heurist Definitions Importer / Crosswalk builder</title>
+    </head>
+    
+    <body>
+    Reading data for crosswalking ...
+    </body>
+    
+    </html>
+    
+    <?php
 
 	// ------Administrative stuff ------------------------------------------------------------------------------------
 
@@ -60,7 +74,8 @@
 	}
 
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-	require_once(dirname(__FILE__).'/../../common/T1000/.ht_stdefs');
+	require_once(dirname(__FILE__).'/../../common/t1000/.ht_stdefs');
+    require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
 	// Deals with all the database connections stuff
 
