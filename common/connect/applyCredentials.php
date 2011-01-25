@@ -1,17 +1,14 @@
 <?php
 
-/**
+/*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- **/
+ -->*/
 
-?>
-
-<?php
 require_once(dirname(__FILE__)."/../config/initialise.php");
 
 if (! defined('COOKIE_VERSION'))
@@ -28,7 +25,7 @@ session_cache_limiter('none');
 session_start();
 
 if (_is_logged_in()) {
-	error_log("in applyCred with valid login");
+//	error_log("in applyCred with valid login");
 	if ((! defined('SAVE_URI'))  ||  strtoupper(SAVE_URI) != 'DISABLED') {
 		if (defined('HEURIST_INSTANCE_PREFIX')) {
 			$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['last_uri'] = $_SERVER['REQUEST_URI'];
@@ -61,7 +58,7 @@ function get_roles() {
 }
 
 function _is_logged_in() {
-	error_log("in _is_logged_in instance prefix = ".HEURIST_INSTANCE_PREFIX);
+//	error_log("in _is_logged_in instance prefix = ".HEURIST_INSTANCE_PREFIX);
 	return (!!@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_name']  &&
 			(!defined('HEURIST_RESTRICT_GROUP_ID')  ||
 				@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'][HEURIST_RESTRICT_GROUP_ID]  ||

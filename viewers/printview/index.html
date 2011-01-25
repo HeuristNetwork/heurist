@@ -79,7 +79,8 @@
 			var pageCount = 0;
 			var hBase = "http://" + window.location.host +
 						(top && top.HEURIST && top.HEURIST.basePath? top.HEURIST.basePath : window.location.pathname.match(/^\/[^\/]+\//));
-			var instance = (top && top.HEURIST && top.HEURIST.instance? top.HEURIST.instance.name : location.search.match(/instance=([^&]+)/)[1]);
+			var instance = (top && top.HEURIST && top.HEURIST.instance? top.HEURIST.instance.name :
+								(location.search.match(/instance=([^&]+)/) ? location.search.match(/instance=([^&]+)/)[1]: ""));
 
 			function init() {
 			//initialize parameters

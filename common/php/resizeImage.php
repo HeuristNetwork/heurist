@@ -1,21 +1,8 @@
 <?php
-
-/**
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
-
-?>
-
-<?php
-// header('Content-type: image/png');
+header('Content-type: image/png');
 
 require_once(dirname(__FILE__).'/../connect/applyCredentials.php');
-require_once(dirname(__FILE__)."/dbMySqlWrappers.php");
+require_once(dirname(__FILE__).'/dbMySqlWrappers.php');
 
 if (! @$_REQUEST['w']  &&  ! @$_REQUEST['h']  &&  ! @$_REQUEST['maxw']  &&  ! @$_REQUEST['maxh']) {
 	$standard_thumb = true;
@@ -39,22 +26,29 @@ if (array_key_exists('ulf_ID', $_REQUEST)) {
 	$res = mysql_query('select * from recUploadedFiles where ulf_ObfuscatedFileID = "' . addslashes($_REQUEST['ulf_ID']) . '"');
 	if (mysql_num_rows($res) != 1) return;
 	$file = mysql_fetch_assoc($res);
-error_log("results for file = ".print_r($file, true));
+
 	if (@$standard_thumb  &&  $file['ulf_Thumbnail']) {
 		// thumbnail exists
-error_log("outputting thumbnail");
-header('Content-type: image/jpeg');
 		echo $file['ulf_Thumbnail'];
 		return;
 	}
 
-	$filename = HEURIST_UPLOAD_PATH . '/' . $file['ulf_ID'];
+	$filename = HEURIST_UPLOAD_PATH. $file['ulf_ID'];
 	$filename = str_replace('/../', '/', $filename);
-error_log("filename = $filename");
-	switch($file['ulf_MimeExt']) {
+
+	$mimeExt = '';
+	if ($file['ulf_MimeExt']) {
+		$mimeExt = $file['ulf_MimeExt'];
+	} else {
+		preg_match('/\\.([^.]+)$/', $file["ulf_OrigFileName"], $matches);	//find the extention
+		$mimeExt = $matches[1];
+	}
+error_log("filename = $filename and mime = $mimeExt");
+
+	switch($mimeExt) {
 	case 'image/jpeg':
-	case 'jpg':
 	case 'jpeg':
+	case 'jpg':
 		$img = imagecreatefromjpeg($filename);
 		break;
 	case 'image/gif':
@@ -66,7 +60,7 @@ error_log("filename = $filename");
 		$img = imagecreatefrompng($filename);
 		break;
 	default:
-		$desc = '.' . strtoupper(preg_replace('/.*[.]/', '', $file['ulf_OrigFileName'])) . ' file';
+		$desc = '***' . strtoupper(preg_replace('/.*[.]/', '', $file['ulf_OrigFileName'])) . ' file';
 		$img = make_file_image($desc);
 		break;
 	}
@@ -98,14 +92,14 @@ error_log("filename = $filename");
 
 
 if (!$img) {
-	header('Location: 100x100.gif');
+	header('Location: ../images/100x100-check.gif');
 	return;
 }
 // calculate image size
 // note - we never change the aspect ratio of the image!
 $orig_x = imagesx($img);
 $orig_y = imagesy($img);
-
+error_log(" image orig size x= $orig_x  y=$orig_y");
 $rx = $x / $orig_x;
 $ry = $y / $orig_y;
 
@@ -117,6 +111,7 @@ if ($no_enlarge  &&  $scale > 1) {
 
 $new_x = ceil($orig_x * $scale);
 $new_y = ceil($orig_y * $scale);
+error_log(" image new size x= $new_x  y=$new_y");
 
 $img_resized = imagecreatetruecolor($new_x, $new_y)  or die;
 imagecopyresampled($img_resized, $img, 0, 0, 0, 0, $new_x, $new_y, $orig_x, $orig_y)  or die;

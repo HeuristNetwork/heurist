@@ -1,17 +1,14 @@
 <?php
 
-/**
+/*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- **/
+ -->*/
 
-?>
-
-<?php
 	/*<!-- saveRecordDetails.php
 	Copyright 2005 - 2010 University of Sydney Digital Innovation Unit
 	This file is part of the Heurist academic knowledge management system (http://HeuristScholar.org)
@@ -105,7 +102,7 @@ function updateRecord($bibID) {
 	$res = mysql_query("select * from Records
 	                        left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_GroupID=rec_OwnerUGrpID
 	                        left join defRecTypes on rty_ID=rec_RecTypeID
-	                     where rec_ID=$bibID and (! rec_OwnerUGrpID or ugl_UserID=".get_user_id().")");
+	                     where rec_ID=$bibID and (! rec_OwnerUGrpID or rec_OwnerUGrpID=".get_user_id()." or ugl_UserID=".get_user_id().")");
 	if (mysql_num_rows($res) == 0) {
 		$res = mysql_query("select grp.ugr_Name from Records, ".USERS_DATABASE.".sysUGrps grp where rec_ID=$bibID and grp.ugr_ID=rec_OwnerUGrpID");
 		$grpName = mysql_fetch_row($res);  $grpName = $grpName[0];

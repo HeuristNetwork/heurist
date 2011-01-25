@@ -116,7 +116,7 @@ function upload_file($name, $type, $tmp_name, $error, $size) {
 
 	$mimetype = null;
 	$mimetypeExt = null;
-	if (preg_match('/\\.([^.]+)$/', $name, $matches)) {
+	if (preg_match('/\\.([^.]+)$/', $name, $matches)) {	//find the extention
 		$extension = $matches[1];
 		$res = mysql_query('select * from defFileExtToMimetype where fxm_Extension = "'.addslashes($extension).'"');
 		if (mysql_num_rows($res) == 1) {

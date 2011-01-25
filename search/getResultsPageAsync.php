@@ -1,17 +1,14 @@
 <?php
 
-/**
+/*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- **/
+ -->*/
 
-?>
-
-<?php
 
 session_cache_limiter('no-cache');
 
@@ -74,7 +71,7 @@ if (preg_match('/\\b_COLLECTED_\\b/', $_REQUEST['q'])) {
 }
 
 $query = REQUEST_to_query($query, $search_type);
-//error_log($query);
+error_log($query);
 
 if (@$broken) {
 	$query = str_replace(' where ', ' where (to_days(now()) - to_days(rec_URLLastVerified) >= 8) and ', $query);

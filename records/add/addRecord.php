@@ -1,13 +1,13 @@
 <?php
 
-/**
+/*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- **/
+ -->*/
 
 ?>
 
@@ -21,6 +21,8 @@ if (@$_REQUEST['k']) $_REQUEST['tag'] = $_REQUEST['k'];
 // $_REQUEST['bkmrk_bkmk_description'] = mb_convert_encoding($_REQUEST['bkmrk_bkmk_description'], 'utf-8');
 
 if (! @$_REQUEST['bkmrk_bkmk_title']) $_REQUEST['bkmrk_bkmk_title'] = '';
+
+error_log("in add record request - ".print_r($_REQUEST,true));
 
 
 define('LATEST_BOOKMARKLET_VERSION', '20060713');	//saw FIXME  update this, what is the latest date
@@ -103,11 +105,11 @@ if (preg_match_all('!ISSN(?:-?1[03])?[^a-z]*?([0-9]{4}-?[0-9]{3}[0-9X])!i', $des
 }
 
 /*  fix url to be complete with protocol and remove any trailing slash */
-if ($_REQUEST['bkmrk_bkmk_url']  &&  ! preg_match('!^[a-z]+:!i', $_REQUEST['bkmrk_bkmk_url']))
+if (@$_REQUEST['bkmrk_bkmk_url']  &&  ! preg_match('!^[a-z]+:!i', $_REQUEST['bkmrk_bkmk_url']))
 	// prefix http:// if no protocol specified
 	$_REQUEST['bkmrk_bkmk_url'] = 'http://' . $_REQUEST['bkmrk_bkmk_url'];
 
-if ($_REQUEST['bkmrk_bkmk_url']) {
+if (@$_REQUEST['bkmrk_bkmk_url']) {
 	$burl = $_REQUEST['bkmrk_bkmk_url'];
 	if (substr($burl, -1) == '/') $burl = substr($burl, 0, strlen($burl)-1);
 
@@ -124,10 +126,10 @@ if ($_REQUEST['bkmrk_bkmk_url']) {
 	$url = $_REQUEST['bkmrk_bkmk_url'];
 }
 
-if ($_REQUEST['bib_id'] == -1) {
+if (@$_REQUEST['bib_id'] == -1) {
 	$rec_id = NULL;
 	$force_new = 1;
-} else {
+} else if (@$_REQUEST['bib_id'] > 0){
 	$rec_id = intval($_REQUEST['bib_id']);
 	$force_new = 0;
 }
@@ -178,7 +180,7 @@ if (@$_REQUEST['tag']  &&  strpos($_REQUEST['tag'], "\\")) {
 $new_rec_id = false;
 
 /* arrive with a new (un-bookmarked) URL to process */
-if (! @$_REQUEST['_submit']  &&  $_REQUEST['bkmrk_bkmk_url']) {
+if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 
 	if (! $rec_id  &&  ! $force_new) {
 		/* look up the records table, see if the requested URL is already in the database; if not, add it */
@@ -251,7 +253,7 @@ if (! @$_REQUEST['_submit']  &&  $_REQUEST['bkmrk_bkmk_url']) {
 		$rec_id = mysql_insert_id();
 
 		// there are sometimes cases where there is no title set (e.g. webpage with no TITLE tag)
-		if ($_REQUEST['bkmrk_bkmk_title']) {
+		if (@$_REQUEST['bkmrk_bkmk_title']) {
 			mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id.',160,"'.addslashes($_REQUEST['bkmrk_bkmk_title']).'")');
 		}
 		$inserts = array();
@@ -266,14 +268,14 @@ if (! @$_REQUEST['_submit']  &&  $_REQUEST['bkmrk_bkmk_url']) {
 } // end pre-processing of url
 
 // no bib_id or url passed in so create a new record
-if (! $rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
+if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 	/* create a new public note */
-
+error_log("in add making new records");
 	$new_rec_id = true;
 	$rt = intval($_REQUEST['bib_reftype']);
 	if (!check_reftype_exist($rt)) {
 		// the reftype passed in is not available on this instance  send them to the  add resource popup
-		header('Location: ' . BASE_PATH . 'records/add/addRecord.php'
+		header('Location: ' . HEURIST_BASE_URL . 'records/add/addRecord.php'
 							. '?instance='.HEURIST_INSTANCE
 							. '&t=' . urlencode($_REQUEST['t'])
 							. '&error_msg=' . urlencode('Record Type #'. $rt . ' does not exist in this Heurist Database'
@@ -285,12 +287,13 @@ if (! $rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 	                              'rec_Added' => date('Y-m-d H:i:s'),
 	                              'rec_Modified' => date('Y-m-d H:i:s'),
 	                              'rec_AddedByUGrpID' => intval($usrID),
-		                      'rec_RecTypeID' => ($_REQUEST['bib_reftype']? intval($_REQUEST['bib_reftype']) : NULL),
-		                      'rec_OwnerUGrpID' => intval($_REQUEST['bib_workgroup']),
-		                      'rec_NonOwnerVisibility' => (intval($_REQUEST['bib_workgroup'])? ((strtolower($_REQUEST['bib_visibility']) == 'hidden')? 'Hidden' : 'Viewable') : NULL),
+		                      'rec_RecTypeID' => ($_REQUEST['bib_reftype']? intval(@$_REQUEST['bib_reftype']) : NULL),
+		                      'rec_OwnerUGrpID' => (intval(@$_REQUEST['bib_workgroup'])?intval(@$_REQUEST['bib_workgroup']): intval($usrID)),
+		                      'rec_NonOwnerVisibility' => (intval(@$_REQUEST['bib_workgroup'])? ((strtolower(@$_REQUEST['bib_visibility']) == 'hidden')? 'Hidden' : 'Viewable') : NULL),
 	                              'rec_FlagTemporary' => ! $_REQUEST['bkmrk_bkmk_title'])); // saw BUG???
+	error_log(mysql_error());
 	$rec_id = mysql_insert_id();
-	if ($_REQUEST['bkmrk_bkmk_title']) mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id.',160,"'.addslashes($_REQUEST['bkmrk_bkmk_title']).'")');
+	if (@$_REQUEST['bkmrk_bkmk_title']) mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id.',160,"'.addslashes($_REQUEST['bkmrk_bkmk_title']).'")');
 	$inserts = array();
 	foreach ($dois as $doi) array_push($inserts, "($rec_id, 198, '" . addslashes($doi) . "')");
 	if (@$_REQUEST["f"]) array_push($inserts, "($rec_id, 347, '" . addslashes($_REQUEST["f"]) . "')");
@@ -462,12 +465,8 @@ function insert_woot_content($rec_id, $content) {
 }
 
 function check_reftype_exist($rt) {
-global $usrID;	//saw TODO check that this still works in the new structure.
 	$res = mysql_query("select distinct rty_ID,rty_Name from defRecTypes
-	                 left join ".USERS_DATABASE.".".USER_GROUPS_TABLE." on ".USER_GROUPS_USER_ID_FIELD."=$usrID
-	                 left join ".USERS_DATABASE.".".GROUPS_TABLE." on ".GROUPS_ID_FIELD."=".USER_GROUPS_GROUP_ID_FIELD."
-	                  where rty_ID
-	                  order by ".GROUPS_NAME_FIELD." is null, ".GROUPS_NAME_FIELD.", rty_RecTypeGroupID > 1, rty_Name");
+	                  where rty_ID");
 	while ($row = mysql_fetch_assoc($res)) {
 		if ($row["rty_ID"] == $rt) {
 			return true;

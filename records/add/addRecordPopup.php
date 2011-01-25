@@ -1,13 +1,13 @@
 <?php
 
-/**
+/*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- **/
+ -->*/
 
 ?>
 
@@ -62,7 +62,7 @@ function buildworkgroupTagselect(wgID) {
 
 
 function update_link() {
-	var base = "<?= HEURIST_URL_BASE?>records/add/addRecordPopup.php?addref=1&instance=<?=HEURIST_INSTANCE?>";
+	var base = "<?= HEURIST_URL_BASE?>records/add/addRecord.php?addref=1&instance=<?=HEURIST_INSTANCE?>";
 	var link = base + compute_args();
 
 	var tags = $("#add-link-tags").val();
@@ -152,7 +152,7 @@ function add_note(e) {
 
     if (! rt) rt = "2";  //added ian 19/9/08 to re-enable notes as default
 
-	top.location.href = '<?= HEURIST_URL_BASE?>records/add/addRecordPopup.php?addref=1&instance=<?=HEURIST_INSTANCE?>&bib_reftype='+rt + extra_parms;
+	top.location.href = '<?= HEURIST_URL_BASE?>records/add/addRecord.php?addref=1&instance=<?=HEURIST_INSTANCE?>&bib_reftype='+rt + extra_parms;
 
 }
 function note_type_click() {
@@ -192,12 +192,10 @@ hr { margin: 20px 0; }
     <td><nobr><label><input type="radio" name="a" id="reference_elt" onclick="note_type_click();"> Record type:</label></nobr></td>
     <td colspan=2>
 <?php
-	$res = mysql_query("select distinct rty_ID,rty_Name,rty_Description, ifnull(grp.ugr_Name, if(rty_RecTypeGroupID == 1,'Bibliographic record','Other record')) as section
+	$res = mysql_query("select distinct rty_ID,rty_Name,rty_Description, if(rty_RecTypeGroupID = 1,'Bibliographic record','Other record') as section
 	                      from defRecTypes
-	                 left join ".USERS_DATABASE.".".USER_GROUPS_TABLE." on ".USER_GROUPS_USER_ID_FIELD."=".get_user_id()."
-	                 left join ".USERS_DATABASE.".".GROUPS_TABLE." grp on grp.".GROUPS_ID_FIELD."=".USER_GROUPS_GROUP_ID_FIELD."
 	                  where rty_ID
-	                  order by grp.".GROUPS_NAME_FIELD." is null, grp.".GROUPS_NAME_FIELD.", rty_RecTypeGroupID , rty_Name");
+	                    order by section, rty_RecTypeGroupID , rty_Name");
 ?>
      <select name="ref_type"  title="New bibliographic record type" style="margin: 3px;" id="reftype_elt" onChange='document.getElementById("reference_elt").checked = true; document.getElementById("note_elt").checked = false;'>
       <option selected disabled value="0">(select record type)</option>

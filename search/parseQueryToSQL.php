@@ -167,7 +167,7 @@ class Query {
 			if ($where_clause) $where_clause = '(' . $where_clause . ') and ';
 			$where_clause .= 'not rec_FlagTemporary ';
 		}
-		$where_clause = '(rec_OwnerUGrpID is null or rec_NonOwnerVisibility="viewable" or rec_OwnerUGrpID in (' . join(',', $this->workgroups) . ')) and ' . $where_clause;
+		$where_clause = '(rec_OwnerUGrpID is null or rec_OwnerUGrpID='. get_user_id().' or rec_NonOwnerVisibility="viewable" or rec_OwnerUGrpID in (' . join(',', $this->workgroups) . ')) and ' . $where_clause;
 
 		return $from_clause . 'where ' . $where_clause . $sort_clause;
 	}
@@ -1178,7 +1178,7 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL) {
 		$q_clauses = array();
 		foreach ($q_bits as $q_bit) {
 			$q = parse_query($search_type, $q_bit, $parms['s'], $wg_ids);
-			preg_match('/.*?where [(]rec_OwnerUGrpID is null or rec_NonOwnerVisibility="viewable" or rec_OwnerUGrpID in \\([0-9,]*\\)[)] and (.*) order by/s', $q, $matches);
+			preg_match('/.*?where [(]rec_OwnerUGrpID is null or rec_OwnerUGrpID=[0-9]* or rec_NonOwnerVisibility="viewable" or rec_OwnerUGrpID in \\([0-9,]*\\)[)] and (.*) order by/s', $q, $matches);
 			if ($matches[1]) {
 				array_push($q_clauses, '(' . $matches[1] . ')');
 			}
@@ -1186,7 +1186,7 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL) {
 		sort($q_clauses);
 		$where_clause = join(' and ', $q_clauses);
 
-		if (preg_match('/(.*?where [(]rec_OwnerUGrpID is null or rec_NonOwnerVisibility="viewable" or rec_OwnerUGrpID in [(][0-9,]*[)][)] and ).*( order by.*)/s', $q, $matches))
+		if (preg_match('/(.*?where [(]rec_OwnerUGrpID is null or rec_OwnerUGrpID=[0-9]* or rec_NonOwnerVisibility="viewable" or rec_OwnerUGrpID in [(][0-9,]*[)][)] and ).*( order by.*)/s', $q, $matches))
 			$query .= $matches[1] . $where_clause . $matches[2];
 	}
 

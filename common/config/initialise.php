@@ -41,7 +41,7 @@ if ($defaultDBname != '') {
 	define('HEURIST_DEFAULT_DBNAME',$defaultDBname);	//default dbname used when the URI is abiguous about the db
 }
 
-error_log("initialise REQUEST = ".print_r($_REQUEST,true));
+// error_log("initialise REQUEST = ".print_r($_REQUEST,true));
 if (@$_REQUEST["db"]) {
 	$dbName = $_REQUEST["db"];
 }else if (@$_REQUEST["instance"]) { // saw TODO: temporary until change instance to db
@@ -52,14 +52,16 @@ if (@$_REQUEST["db"]) {
 // saw TODO: temporary until change instance to db
 	}else if (@$_SERVER["HTTP_REFERER"] && preg_match("/.*instance=([^&]*).*/",$_SERVER["HTTP_REFERER"],$refer_instance)) {
 	$dbName = $refer_instance[1];
-}else if (@$_SESSION["heurist_last_used_dbname"]) {
-	$dbName = $_SESSION["heurist_last_used_dbname"];
-}else if (defined("HEURIST_DEFAULT_DBNAME")) {
-	$dbName = HEURIST_DEFAULT_DBNAME;
-} else {
-	die("ambiguous or no db name supplied");
 }
-
+if (!@$dbName) {
+	if (@$_SESSION["heurist_last_used_dbname"]) {
+	$dbName = $_SESSION["heurist_last_used_dbname"];
+	}else if (defined("HEURIST_DEFAULT_DBNAME")) {
+	$dbName = HEURIST_DEFAULT_DBNAME;
+	} else {
+	die("ambiguous or no db name supplied");
+	}
+}
 define('HEURIST_DBNAME', $dbName);
 $dbFullName = HEURIST_DB_PREFIX.HEURIST_DBNAME;
 if ($dbFullName == "") {
@@ -129,12 +131,13 @@ define('HEURIST_BASE_URL','http://'.HEURIST_HOST_NAME.HEURIST_SITE_PATH);
 // upload path
 $upload = $sysValues['sys_UploadDirectory'];
 if ($upload) {
+//	error_log("upload = $upload");
 	define('HEURIST_UPLOAD_PATH', $upload);// upload must be a full path
 }else{
 	if ($defaultRootFileUploadPath) {
 		define('HEURIST_UPLOAD_PATH', $defaultRootFileUploadPath.$dbName."/");
 	} else {
-		define('HEURIST_UPLOAD_PATH', HEURIST_DOCUMENT_ROOT."/upload/$dbName/");
+		define('HEURIST_UPLOAD_PATH', HEURIST_DOCUMENT_ROOT."/uploaded-heurist-files/$dbName/");
 	}
 }
 
