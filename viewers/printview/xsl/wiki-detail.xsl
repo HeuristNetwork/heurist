@@ -13,7 +13,7 @@
             </td>
             <td style="font-weight: bold;">
                 <a style="float: right;" target="_new"
-                    href="http://heuristscholar.org/heurist/bibedit.php?bib_id={id}">
+                    href="{hbase}records/edit/editRecord.html?bib_id={id}">
                     <img style="border: none;"
                         src="http://heuristscholar.org/heurist/edit_pencil_16x16.gif"/>
                 </a>

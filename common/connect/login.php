@@ -19,7 +19,7 @@ require_once(dirname(__FILE__).'/../php/dbMySqlWrappers.php');
 //require_once('applyCredentials.php');
 //require_once('../php/dbMySqlWrappers.php');
 session_start();
-error_log("in login  loaded includes  userdb = ". USERS_DATABASE);
+//error_log("in login  loaded includes  userdb = ". USERS_DATABASE);
 
 $last_uri = urldecode(@$_REQUEST['last_uri']);
 
@@ -50,8 +50,9 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 	$res = mysql_query('select * from '.USERS_TABLE.' where '.USERS_USERNAME_FIELD.' = "'.addslashes($_REQUEST['username']).'"');
     if ( ($user = mysql_fetch_assoc($res))  &&
 		 $user[USERS_ACTIVE_FIELD] == 'Y'  &&
-		 (crypt($_REQUEST['password'], $user[USERS_PASSWORD_FIELD]) == $user[USERS_PASSWORD_FIELD]  ||  $_SESSION['heurist']['user_name'] == 'stevewh')) {
-error_log("in login  after crypt check");
+		 crypt($_REQUEST['password'], $user[USERS_PASSWORD_FIELD]) == $user[USERS_PASSWORD_FIELD] ) {
+//		 (crypt($_REQUEST['password'], $user[USERS_PASSWORD_FIELD]) == $user[USERS_PASSWORD_FIELD]  ||  $_SESSION['heurist']['user_name'] == 'stevewh')) {
+//error_log("in login  after crypt check");
 
 		$res = mysql_query('select '.GROUPS_ID_FIELD.','.USER_GROUPS_ROLE_FIELD.' from '.USER_GROUPS_TABLE.','.GROUPS_TABLE.
 							' where '.USER_GROUPS_GROUP_ID_FIELD.'='.GROUPS_ID_FIELD.
@@ -60,7 +61,7 @@ error_log("in login  after crypt check");
 			if ($row[USER_GROUPS_ROLE_FIELD])
 				$groups[$row[GROUPS_ID_FIELD]] = $row[USER_GROUPS_ROLE_FIELD];
 			else
-				$groups[$row[GROUPS_ID_FIELD]] = 'user';
+				$groups[$row[GROUPS_ID_FIELD]] = 'member';
 		}
 
 		$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['cookie_version'] = COOKIE_VERSION;

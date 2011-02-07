@@ -59,10 +59,11 @@ function get_roles() {
 
 function _is_logged_in() {
 //	error_log("in _is_logged_in instance prefix = ".HEURIST_INSTANCE_PREFIX);
+//	error_log("in _is_logged_in restrict = ".defined('HEURIST_RESTRICT_GROUP_ID'));
 	return (!!@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_name']  &&
 			(!defined('HEURIST_RESTRICT_GROUP_ID')  ||
-				@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'][HEURIST_RESTRICT_GROUP_ID]  ||
-				@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'][HEURIST_SYS_GROUP_ID])  &&
+				(@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'][HEURIST_RESTRICT_GROUP_ID]  ||
+				@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'][HEURIST_SYS_GROUP_ID]))  &&
 			is_cookie_current_version());
 }
 
@@ -95,8 +96,8 @@ if (!_is_logged_in()  &&  defined("BYPASS_LOGIN")) {
 			default:
 			//error_log("in is_admin username = ".@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_name']);
 				return  @$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'][HEURIST_OWNER_GROUP_ID] == 'admin' ||
-						@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'][1] == 'admin' ||
-						@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_name'] == 'stevewh';
+						@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'][1] == 'admin'; // ||
+//						@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_name'] == 'stevewh';
 		}
 	}
 
@@ -119,7 +120,7 @@ if (!_is_logged_in()  &&  defined("BYPASS_LOGIN")) {
 
 function get_user_access() {
 	if (is_admin()) return 'admin';
-	if (is_logged_in()) return 'user';
+	if (is_logged_in()) return 'member';
 	return 'not-logged-in';
 }
 
@@ -127,7 +128,7 @@ function get_access_levels() {
 	return array(
 		'modeluser' => is_modeluser() ? 1 : 0,
 		'admin' => is_admin() ? 1 : 0,
-		'user'=> is_logged_in() ? 1 : 0
+		'member'=> is_logged_in() ? 1 : 0
 	);
 }
 

@@ -111,6 +111,7 @@
 						<td>
 							<xsl:choose>
 							<xsl:when test="$countMaps &gt; 1">
+							<!-- saw TODO: need to make loadmap an html and call it with param ?recID=  since this is client side xsl-->
 								<a href="#" onclick="window.open('loadmap/{parent::node()/id}', '', 'resizable=yes,width=500,height=400')">map (<xsl:value-of select="$countMaps"/> objects)</a>
 							</xsl:when>
 							<xsl:otherwise>

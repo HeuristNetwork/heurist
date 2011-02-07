@@ -14,13 +14,13 @@
 	<title>Heurist - Administration Functions Menu</title>
 
     
-	<link rel="icon" href="../../favicon.ico" type="image/x-icon">
-	<link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+	<link rel="icon" href="../favicon.ico" type="image/x-icon">
+	<link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
 
-	<link rel="stylesheet" type="text/css" href="../../common/css/Popup.css">
-	<script type="text/javascript" src="../../common/js/Popup.js"></script>
+	<link rel="stylesheet" type="text/css" href="../common/css/Popup.css">
+	<script type="text/javascript" src="../common/js/utilsForPopups.js"></script>
 
-	<link rel="stylesheet" type="text/css" href="../../common/css/newshsseri.css">
+	<link rel="stylesheet" type="text/css" href="../common/css/newshsseri.css">
 
 	<style type="text/css">
 		a img { border: 0; }
@@ -44,18 +44,18 @@
    
 
 	<h2><b>Heurist System Administration &nbsp;&nbsp;&nbsp;db: [instance-name!]&nbsp;&nbsp;&nbsp;&nbsp;
-	<font size="2"><a href="../index.php?db=[instance-name!]">return to search page</a></font></b></h2>
+	<font size="2"><a href="../index.php?instance=[instance-name!]">return to search page</a></font></b></h2>
 	<blockquote>
 		<p><b>User admin</b></p>
 		<blockquote>
 
 			<p>
-                <a href="ugrps/findAddUser.php?db=[instance-name!]">Manage users / group membership</a>&nbsp;&nbsp;&nbsp;
-                <a href="ugrps/assignUsersToGroups.php?db=[instance-name!]">List all</a></p>
+                <a href="ugrps/findAddUser.php?instance=[instance-name!]">Manage users / group membership</a>&nbsp;&nbsp;&nbsp;
+                <a href="ugrps/assignUsersToGroups.php?instance=[instance-name!]">List all</a></p>
             <p>
-                <a href="ugrps/editGroups.php?db=[instance-name!]">Manage user groups</a>&nbsp;&nbsp;&nbsp;
-	                <a href="ugrps/editGroupTags.php?db=[instance-name!]">Manage group tags</a>&nbsp;&nbsp;&nbsp;
-                <a href="ugrps/quitGroupForSession.php?db=[instance-name!]">Quit group for session</a></p>
+                <a href="ugrps/editGroups.php?instance=[instance-name!]">Manage user groups</a>&nbsp;&nbsp;&nbsp;
+	                <a href="ugrps/editGroupTags.php?instance=[instance-name!]">Manage group tags</a>&nbsp;&nbsp;&nbsp;
+                <a href="ugrps/quitGroupForSession.php?instance=[instance-name!]">Quit group for session</a></p>
 		</blockquote>
 		
         <p><b>Database definitions</b></p>
@@ -66,60 +66,60 @@
 			<p><a target="_blank" href="setup/createNewDB.php">New database</a> NOT WORKING&nbsp;&nbsp;&nbsp;
             
     <!-- NEEDS TO GO DIRECT TO EDIT FORM -->
-			<a href="setup/editSysIdentification.php?db=[instance-name!]">Edit identification info</a>&nbsp;&nbsp;&nbsp;
+			<a href="setup/editSysIdentification.php?instance=[instance-name!]">Edit identification info</a>&nbsp;&nbsp;&nbsp;
             
     <!-- not working, problem with success checks anbd need to fix up fcall to next registration #-->
     <!-- to do: should be disabed if alrteady registered and show registration # -->
-			<a href="setup/registerDB.php?db=[instance-name!]">Register with HeuristScholar.org</a> NOT WORKING</p>
+			<a href="setup/registerDB.php?instance=[instance-name!]">Register with HeuristScholar.org</a> NOT WORKING</p>
 
     <!-- WE REALLY NEED TO SPLIT THESE UP INTO SEPARATE FUCNTIONS -->                     
-            <p><a href="structure/editStructure.php?db=[instance-name!]">Manage record types and details (fields)</a>&nbsp;&nbsp;&nbsp;
-            <a href="describe/listRectypeDescriptions.php?db=[instance-name!]">Print-friendly list</a></p>
+            <p><a href="structure/editStructure.php?instance=[instance-name!]">Manage record types and details (fields)</a>&nbsp;&nbsp;&nbsp;
+            <a href="describe/listRectypeDescriptions.php?instance=[instance-name!]">Print-friendly list</a></p>
                   
-            <p><a href="structure/editDefOntologies.php?db=[instance-name!]">Manage ontologies</a>&nbsp;&nbsp;&nbsp;
-            <a href="structure/editVocabularies.php?db=[instance-name!]">Manage vocabularies</a>&nbsp;&nbsp;&nbsp;
-            <a href="structure/editTerms.php?db=[instance-name!]">Manage terms</a></p>
+            <p><a href="structure/editDefOntologies.php?instance=[instance-name!]">Manage ontologies</a>&nbsp;&nbsp;&nbsp;
+            <a href="structure/editVocabularies.php?instance=[instance-name!]">Manage vocabularies</a>&nbsp;&nbsp;&nbsp;
+            <a href="structure/editTerms.php?instance=[instance-name!]">Manage terms</a></p>
 
      <!-- NOT WORKING YET-->
-            <p><a href="structure/editRectypeConstraints.php?db=[instance-name!]">Manage record relationship constraints</a> NOT WORKING</p>
+            <p><a href="structure/editRectypeConstraints.php?instance=[instance-name!]">Manage record relationship constraints</a> NOT WORKING</p>
    
      <!-- NOT WORKING YET -->
-			<p><a href="describe/buildCrosswalks.php?db=[instance-name!]">Import/synchronise database definitions</a> NOT WORKING</p>
+			<p><a href="describe/buildCrosswalks.php?instance=[instance-name!]">Import/synchronise database definitions</a> NOT WORKING</p>
  
     <!-- gives a blank form box??
             <p><a href="structure/editVocab.php?db=[instance-name!]">Add/edit vocabularies</a>
             THIS NEEDS REDOING, CURRENTLY TRIES TO EDIT TERMS USING T1000</p>
     -->
-            <p><a href="setup/editMimetypes.php?db=[instance-name!]">Manage file mime types</a></p>
+            <p><a href="setup/editMimetypes.php?instance=[instance-name!]">Manage file mime types</a></p>
             
 		</blockquote>
 
 		<p><b>Checking and fixes</b></p>
 		<blockquote>
 			<p>
-				<a href="verification/recalcTitlesAllRecords.php?db=[instance-name!]">
+				<a href="verification/recalcTitlesAllRecords.php?instance=[instance-name!]">
                 Rebuild constructed titles (all records)</a></p>
             <p>
                 <!-- : Also have capabuility for specific records and rectypes</p> -->
-                <a href="verification/listRecordPointerErrors.php?db=[instance-name!]">Check for invalid record pointers</a></p>
+                <a href="verification/listRecordPointerErrors.php?instance=[instance-name!]">Check for invalid record pointers</a></p>
 			<p>
-				<a href="verification/listDuplicateRecords.php?fuzziness=10&amp;db=[instance-name!]">
+				<a href="verification/listDuplicateRecords.php?fuzziness=10&amp;instance=[instance-name!]">
                 Find/eliminate duplicate records (fuzziness 10, change in URL))</a></p>
             <p>
-				<a href="../search/search.html?q=_BROKEN_&amp;w=all&amp;db=[instance-name!]">
+				<a href="../search/search.html?q=_BROKEN_&amp;w=all&amp;instance=[instance-name!]">
                 Find records with broken URLs (in the main URL pointer) RETRIEVES 18k RECORDS, MANY OK</a></p>
 			<p>
-                Wysiwyg text (XHTML): <a href="verification/checkXHTML.php?db=[instance-name!]">
+                Wysiwyg text (XHTML): <a href="verification/checkXHTML.php?instance=[instance-name!]">
 				General health check</a>&nbsp;&nbsp;&nbsp;
-				<a href="verification/checkInvalidChars.php?db=[instance-name!]" >
+				<a href="verification/checkInvalidChars.php?instance=[instance-name!]" >
                 Invalid	characters</a>&nbsp;&nbsp;&nbsp;
-				<a href="verification/cleanInvalidChars.php?db=[instance-name!]">
+				<a href="verification/cleanInvalidChars.php?instance=[instance-name!]">
                 Clean invalid characters</a></p>
                
 		</blockquote>
 		<p class="MsoNormal"><b>Admin</b></p>
 		<blockquote>
-			<p><a href="rollback/rollbackRecords.php?db=[instance-name!]">Record rollback</a> NOT WORKING </p>
+			<p><a href="rollback/rollbackRecords.php?instance=[instance-name!]">Record rollback</a> NOT WORKING </p>
 		</blockquote>
 		<p>&nbsp;</p>
 		<p>&nbsp;</p>

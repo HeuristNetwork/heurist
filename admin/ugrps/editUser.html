@@ -89,7 +89,7 @@
 	<div id="options" style="display:none;">
 	<br>
 		<label>Department</label>[textbox : ugr_Department : Department : size=&quot;50&quot;]
-		<label>URL</label>[textbox : URL : website : size=&quot;50&quot;]
+		<label>URL</label>[textbox : ugr_URLs : URLs : size=&quot;50&quot;]
 		<label>Suburb/City</label>[textbox : ugr_City : Suburb/City : size=&quot;30&quot;]
 		<label>State</label>[textbox : ugr_State : State : size=&quot;30&quot;]
 		<label>Post/zipcode</label>[textbox : ugr_Postcode : Post/zipcode : size=&quot;10&quot;]
@@ -121,10 +121,9 @@
  &nbsp;&nbsp;&nbsp;<input type="submit" value="save">&nbsp;&nbsp;&nbsp;
 [end-if]
 
-<p>[end-update]</p>
+[end-update]
 
 [not-found]
- <body>
   <span class="normalgr"><i>User not found</i></span>
   <p><a href="findAddUser.php?instance=[instance-name!]">Search for / add users</a></p>
  </body>

@@ -58,6 +58,7 @@ $SEARCHES = array();
 
 $MYSQL_ERRORS = array();
 
+
 if (! include_once(dirname(__FILE__).'/../php/dbMySqlWrappers.php')) {
 	print("dbMySqlWrappers.php not found: check PHP include path\n");
 	exit();
@@ -1496,7 +1497,7 @@ if (defined('T1000_DEBUG')) print "<!-- final query: $query -->";
 		global $SEARCHES;
 
 		if (! defined('T1000_SUPPRESS_HIDDEN_FIELDS')) print '<input type="hidden" name="_'.$this->name.'_search" value="1">';
-		$vars[$this->name.'-searched'] = $_REQUEST['_'.$this->name.'_search'];	// were we searched last time?
+		$vars[$this->name.'-searched'] = @$_REQUEST['_'.$this->name.'_search'];	// were we searched last time?
 
 		if (@$SEARCHES[$this->name])
 			$this->decode_search_stmt($vars, $auto_vars);
@@ -2641,9 +2642,9 @@ class Password extends InputComponent {
 		$var_name = $this->container->name . '.' . $this->name;
 		$param_name = $this->container->name . '_' . $this->name . @$vars['-SUFFIX'];
 		if (array_key_exists($param_name, $_REQUEST))
-			$value = $_REQUEST[$param_name];
+			$value = $_REQUEST[$param_name];	//saw TODO: why do we set $value when it's not used.
 		else
-			$value = $vars["-nodups-$var_name"];
+			$value = @$vars["-nodups-$var_name"];
 
 		print '<input type="password" name="'.$param_name.'" '.'title="'.htmlspecialchars($this->description).'" '.$this->extra_html.'>';
 	}

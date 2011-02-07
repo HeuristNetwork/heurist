@@ -1,17 +1,14 @@
 <?php
 
-/**
+/*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- **/
+ -->*/
 
-?>
-
-<?php
 /* Filename: edit_users.php
 *  Template File: edit_users.html
 *  Rederer File: edit_users.php
@@ -19,8 +16,7 @@
 *  File Function: Render page.
 */
 
-
-define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
+define('T1000_DEBUG',1);
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
@@ -45,24 +41,27 @@ $body->global_vars['instance-name'] = HEURIST_INSTANCE;
 if (@$_REQUEST['approve']  &&  is_admin())
 	$body->global_vars['approve'] = 1;
 
+error_log("in editUser before verify");
+
 $body->verify();
 if (@$_REQUEST['_submit']) {
 	$usr_id = intval(@$_REQUEST['Id']);
 
-	if (@$_REQUEST['user_update_Password']) {
-		if ($_REQUEST['user_update_Password'] != @$_REQUEST['password2']) {
-			$_REQUEST['user_update_Password'] = '';
+error_log("in editUser in Submit");
+	if (@$_REQUEST['user_update_ugr_Password']) {
+		if ($_REQUEST['user_update_ugr_Password'] != @$_REQUEST['password2']) {
+			$_REQUEST['user_update_ugr_Password'] = '';
 			$body->global_vars['password-not-changed'] = 1;
 		}
 		else {
 			$s = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
 			$salt = $s[rand(0, strlen($s)-1)] . $s[rand(0, strlen($s)-1)];
-			$_REQUEST['user_update_Password'] = crypt($_REQUEST['user_update_Password'], $salt);
+			$_REQUEST['user_update_ugr_Password'] = crypt($_REQUEST['user_update_ugr_Password'], $salt);
 		}
 	}
 
-	$username = $_REQUEST['user_update_Username'];
-	$email = $_REQUEST['user_update_EMail'];
+	$username = $_REQUEST['user_update_ugr_Name'];
+	$email = $_REQUEST['user_update_ugr_eMail'];
 
 	$body->input_check();
 	if ($body->satisfied) {

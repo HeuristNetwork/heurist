@@ -1,19 +1,15 @@
 <?php
 
-/**
+/*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- **/
+ -->*/
 
-?>
 
-<?php
-
-define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
@@ -65,12 +61,12 @@ $dup_check_ok = true;
 if (@$_REQUEST['_submit']) {
 
 	// check for duplicate fields
-	$res = mysql_query('select ugr_ID from '.USERS_DATABASE.'.sysUGrps usr where usr.ugr_Name = "'.$_REQUEST['user_insert_Username'].'"');
+	$res = mysql_query('select ugr_ID from '.USERS_DATABASE.'.sysUGrps usr where usr.ugr_Name = "'.$_REQUEST['user_insert_ugr_Name'].'"');
 	if (mysql_num_rows($res) > 0) {
 		$body->global_vars['-ERRORS'][] = 'The Username you have chosen is already in use.  Please choose another.';
 		$dup_check_ok = false;
 	}
-	$res = mysql_query('select ugr_ID from '.USERS_DATABASE.'.sysUGrps usr where ugr_eMail = "'.$_REQUEST['user_insert_EMail'].'"');
+	$res = mysql_query('select ugr_ID from '.USERS_DATABASE.'.sysUGrps usr where ugr_eMail = "'.$_REQUEST['user_insert_ugr_eMail'].'"');
 	if (mysql_num_rows($res) > 0) {
 		$body->global_vars['-ERRORS'][] = 'The EMail address you have entered is already registered.  Please use another.';
 		$dup_check_ok = false;
@@ -90,26 +86,26 @@ if (@$_REQUEST['_submit']) {
 	}
 }
 
-if ($_REQUEST['_submit']  &&  $dup_check_ok) {
+if (@$_REQUEST['_submit']  &&  $dup_check_ok) {
 
-	if ($_REQUEST['user_insert_Password'] != $_REQUEST['password2'])
-		$_REQUEST['user_insert_Password'] = '';
+	if (@$_REQUEST['user_insert_ugr_Password'] != $_REQUEST['password2'])
+		$_REQUEST['user_insert_ugr_Password'] = '';
 	else {
 		$s = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
 		$salt = $s[rand(0, strlen($s)-1)] . $s[rand(0, strlen($s)-1)];
-		$_REQUEST['user_insert_Password'] = crypt($_REQUEST['user_insert_Password'], $salt);
+		$_REQUEST['user_insert_ugr_Password'] = crypt($_REQUEST['user_insert_ugr_Password'], $salt);
 	}
 
-	$firstname =    preg_replace('/\s+/s', ' ', $_REQUEST['user_insert_firstname']);
-	$lastname =     preg_replace('/\s+/s', ' ', $_REQUEST['user_insert_lastname']);
-	$email =        preg_replace('/\s+/s', '', $_REQUEST['user_insert_EMail']);
-	$url =          preg_replace('/\s+/s', '', $_REQUEST['user_insert_URL']);
-	$organisation = preg_replace('/\s+/s', ' ', $_REQUEST['user_insert_Organisation']);
-	$interests =    preg_replace('/\s+/s', ' ', $_REQUEST['user_insert_Interests']);
-	$department =   preg_replace('/\s+/s', ' ', $_REQUEST['user_insert_Department']);
-	$address =      preg_replace('/\s+/s', ' ', $_REQUEST['user_insert_Address']);
-	$city =         preg_replace('/\s+/s', ' ', $_REQUEST['user_insert_City']);
-	$state =        preg_replace('/\s+/s', ' ', $_REQUEST['user_insert_State']);
+	$firstname =    preg_replace('/\s+/s', ' ', $_REQUEST['user_insert_ugr_FirstName']);
+	$lastname =     preg_replace('/\s+/s', ' ', $_REQUEST['user_insert_ugr_LastName']);
+	$email =        preg_replace('/\s+/s', '', $_REQUEST['user_insert_ugr_eMail']);
+	$url =          preg_replace('/\s+/s', '', $_REQUEST['user_insert_ugr_URLs']);
+	$organisation = preg_replace('/\s+/s', ' ', $_REQUEST['user_insert_ugr_Organisation']);
+	$interests =    preg_replace('/\s+/s', ' ', $_REQUEST['user_insert_ugr_Interests']);
+	$department =   preg_replace('/\s+/s', ' ', $_REQUEST['user_insert_ugr_Department']);
+	$address =      preg_replace('/\s+/s', ' ', $_REQUEST['user_insert_ugr_Address']);
+	$city =         preg_replace('/\s+/s', ' ', $_REQUEST['user_insert_ugr_City']);
+	$state =        preg_replace('/\s+/s', ' ', $_REQUEST['user_insert_ugr_State']);
 
 	$tmwikiname = preg_replace('/ /', '', $firstname . $lastname);
 
@@ -223,7 +219,7 @@ The user details submitted are:
 First name:    $firstname
 Last name:     $lastname
 Email address: $email
-URL:           $url
+URLs:           $url
 Organisation:  $organisation
 Interests:     $interests
 Department:    $department

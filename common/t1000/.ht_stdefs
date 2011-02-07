@@ -7,8 +7,6 @@
                  For multi-table system please see full documentation */
 
 define('RESULTS_PER_PAGE', 50);
-if (! defined('UPLOAD_PATH'))
-	define('UPLOAD_PATH','');
 
 /* Define the tables and joins/lookups needed
    An appropriate database and table may be created by running t1000_database_create.sql
@@ -97,17 +95,6 @@ $MAINTABLES['BIB_DETAIL_LOOKUP'] = 'defTerms';
 */
 $MAINTABLES['ONTOLOGIES_LOOKUP'] = 'defVocabularies';
       $PKEY['ONTOLOGIES_LOOKUP'] = 'vcb_ID';
-
-$MAINTABLES['USER_CLOUD'] = 'coll_groups';
-      $PKEY['USER_CLOUD'] = 'cgr_id';
-
-$MAINTABLES['USER_CLOUDS_TO_USERS'] = 'coll_group_links';
-      $PKEY['USER_CLOUDS_TO_USERS'] = 'cgl_id';
-
-/* Many-to-many relationships with the main table */
-
-	$LINK_KEYS['USER_CLOUDS_TO_USERS'] = array(	'USER_CLOUD-ID' => 'cgl_cgr_id',
-        		                                'USER-ID' => 'cgl_usr_id');
 
 $MAINTABLES["BOOKMARKS_TO_KEYWORDS"] = 'usrRecTagLinks';
 	$PKEY["BOOKMARKS_TO_KEYWORDS"] = 'rtl_ID';

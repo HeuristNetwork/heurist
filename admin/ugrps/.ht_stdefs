@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                  For multi-table system please see full documentation */
 
 define('RESULTS_PER_PAGE', 50);
-define('UPLOAD_PATH', '.');
+//define('UPLOAD_PATH', '.');
 
 define('READUSER', 'readonly');
 define('READPASS', 'mitnick');

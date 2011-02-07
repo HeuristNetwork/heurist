@@ -221,9 +221,10 @@ function print_result($row) {
 		$res = mysql_query("select recUploadedFiles.*
 		                      from recDetails
 		                 left join recUploadedFiles on ulf_ID = dtl_UploadedFileID
+		                 left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt
 		                     where dtl_RecID = " . $row[2] . "
 		                       and dtl_DetailTypeID in (223,222,224,221,231)
-		                       and file_mimetype like 'image%'
+		                       and fxm_MimeType like 'image%'
 		                  order by dtl_DetailTypeID = 223 desc, dtl_DetailTypeID = 222 desc, dtl_DetailTypeID = 224 desc, dtl_DetailTypeID
 		                     limit 1");
 		if ($res && mysql_num_rows($res) == 1) {

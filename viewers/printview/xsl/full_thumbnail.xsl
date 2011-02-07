@@ -64,7 +64,7 @@
 				</div>
 			</xsl:when>
 			<xsl:when test="not (detail[@id=224]) and (detail[@id=603])">
-				<div id="{id}" class="record full_result_thumb" style="background-image:url({$hBase}common/php/resize_image.php?file_url={detail[@id=603]}&amp;w=140)">
+				<div id="{id}" class="record full_result_thumb" style="background-image:url({$hBase}common/php/resizeImage.php?file_url={detail[@id=603]}&amp;w=140)">
 					<xsl:call-template name="recordInfo"></xsl:call-template>
 				</div>
 			</xsl:when>

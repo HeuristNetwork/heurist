@@ -41,21 +41,18 @@
 
             <td>
                 <p><xsl:value-of select="title"/></p>
-                <p>[<a href="http://heuristscholar.org/resource/{id}" target="_blank"><xsl:value-of select="id"/></a>] [<a href="http://heuristscholar.org/heurist/edit.php?bkmk_id={id}" target="_blank">edit</a>]</p>
+	<p>[<a href="{hbase}records/view/viewRecord.php?bib_id={id}" target="_blank"><xsl:value-of select="id"/></a>] [<a href="{hbase}records/edit/editRecord.php?bkmk_id={id}" target="_blank">edit</a>]</p>
             </td>
             <td>
                 <p><xsl:value-of select="added"/></p>
             </td>
             <td>
                 
-                
-             
-                
                 <xsl:variable name="doubleEscapedURL"><xsl:value-of select="substring-before(url,'%')"/>%25<xsl:value-of select="substring-after(url,'%')"/></xsl:variable>
 								
 								<xsl:element name="img">
-                            <xsl:attribute name="src"><xsl:value-of select="$baseURL"
-                            />/imagemanip/ImageManipulation?url=<xsl:value-of select="$doubleEscapedURL"/><xsl:value-of
+	<!-- saw TODO: why is this calling imagemanip, need to change this to standard code ??resizeImage.php-->
+	<xsl:attribute name="src"><xsl:value-of select="$baseURL"/>/imagemanip/ImageManipulation?url=<xsl:value-of select="$doubleEscapedURL"/><xsl:value-of
                                 select="$imageFunction"/></xsl:attribute>
                             <xsl:attribute name="border">0</xsl:attribute>
                         <xsl:attribute name="align">left</xsl:attribute>
@@ -72,12 +69,6 @@
                     </br>
                 </td>
                 
-                
-                
-                
-                
-                
-         
         </xsl:element>
 
 

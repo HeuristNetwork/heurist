@@ -167,7 +167,7 @@ if ($sysValues['sys_OwnerGroupID']){
 	define ('HEURIST_OWNER_GROUP_ID', 1);
 }
 
-if ( $sysValues['sys_RestrictAccessToOwnerGroup']) {
+if ( @$sysValues['sys_RestrictAccessToOwnerGroup'] > 0) {
 	define('HEURIST_RESTRICT_GROUP_ID',$sysValues['sys_OwnerGroupID']);
 }
 
