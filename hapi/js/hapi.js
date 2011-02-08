@@ -3657,7 +3657,7 @@ HAPI.PJ = {
 
 		var callback = opts.callback  ||  function() { };
 
-		HAPI.XHR.sendRequest("storePersistentJS.php", function(response) { callback(name, value, response); }, data);
+		HAPI.XHR.sendRequest("storePersistentJS", function(response) { callback(name, value, response); }, data);
 	},
 
 	retrieve: function(name, callback, opts) {
@@ -3669,7 +3669,7 @@ HAPI.PJ = {
 
 		var callback = callback  ||  function() { };
 
-		HAPI.XHR.sendRequest("retrievePersistentJS.php", function(response) { callback(name, response.value, response); }, data);
+		HAPI.XHR.sendRequest("retrievePersistentJS", function(response) { callback(name, response.value, response); }, data);
 	}
 };
 

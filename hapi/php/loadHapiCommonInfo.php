@@ -57,7 +57,7 @@ $res = mysql_query("select rty_ID, rty_Name, rty_CanonicalTitleMask from defRecT
 $recordTypes = array();
 while ($row = mysql_fetch_row($res)) array_push($recordTypes, $row);
 
-$res = mysql_query("select dty_ID, dty_Name, dty_Prompt, dty_Type, NULL as enums, dty_PtrTargetRectypes, dty_NativeVocabID from defDetailTypes");
+$res = mysql_query("select dty_ID, dty_Name, dty_Prompt, dty_Type, NULL as enums, dty_PtrTargetRectypeIDs, dty_EnumVocabIDs, dty_EnumTermIDs from defDetailTypes");
 $detailTypes = array();
 $detailTypesById = array();
 while ($row = mysql_fetch_row($res)) {

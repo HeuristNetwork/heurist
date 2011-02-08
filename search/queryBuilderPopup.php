@@ -77,13 +77,13 @@ function update(elt) {
 				break;
 			}
 		}
-		var bdr = top.HEURIST.bibDetailRequirements.valuesByrectypeID[rt];
+		var bdr = top.HEURIST.bibDetailRequirements.valuesByRectypeID[rt];
 		if (! bdr) {
 			// no type specified; hide type-specific options
 			typeOptgroup.style.display = "none";
 		}
 		else {
-			var bdts = top.HEURIST.bibDetailTypes.valuesByBibDetailTypeID;
+			var bdts = top.HEURIST.bibDetailTypes.valuesByRecDetailTypeID;
 			for (var bdtID in bdr) {
 				typeOptgroup.appendChild(new Option(bdr[bdtID][0], '"' + bdts[bdtID][1] + '"'));
 			}

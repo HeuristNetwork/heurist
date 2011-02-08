@@ -188,13 +188,13 @@
 	`dty_Type` enum('freetext','blocktext','integer','date','year','person lookup','boolean','enum','resource','float','file','geo','separator') default NULL,
 	`dty_Prompt` varchar(255) default NULL,
 	`dty_Help` text,
-	`dty_PtrTargetRectypes` smallint(6) default NULL,
+	`dty_PtrTargetRectypeIDs` smallint(6) default NULL,
 	PRIMARY KEY  (`dty_ID`),
 	UNIQUE KEY `bdt_name` (`dty_Name`),
 	KEY `bdt_type` (`dty_Type`)
 	) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
 
-	INSERT INTO `temp_rec_detail_types` (`dty_ID`, `dty_Name`, `dty_Description`, `dty_Type`,`dty_Prompt`, `dty_Help`, `dty_PtrTargetRectypes`) VALUES
+	INSERT INTO `temp_rec_detail_types` (`dty_ID`, `dty_Name`, `dty_Description`, `dty_Type`,`dty_Prompt`, `dty_Help`, `dty_PtrTargetRectypeIDs`) VALUES
 
 	// ????: Parse the stream from get_definitions until you get to a line with    > Start
 	// then send the stream to MySQL until you get to a line with   > End

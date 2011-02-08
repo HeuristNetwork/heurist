@@ -456,9 +456,9 @@ top.HEURIST.edit = {
 
 
 	getBibDetailRequirements: function(rectypeID) {
-		if (! top.HEURIST.user.bibDetailRequirements  ||  ! top.HEURIST.user.bibDetailRequirements.valuesByrectypeID[rectypeID]) {
+		if (! top.HEURIST.user.bibDetailRequirements  ||  ! top.HEURIST.user.bibDetailRequirements.valuesByRectypeID[rectypeID]) {
 			// easy case -- no special bibDetailRequirements for this rectype, considering this user's workgroups
-			return top.HEURIST.bibDetailRequirements.valuesByrectypeID[rectypeID];
+			return top.HEURIST.bibDetailRequirements.valuesByRectypeID[rectypeID];
 		}
 		else if (top.HEURIST.patchedBibDetailRequirements  &&  top.HEURIST.patchedBibDetailRequirements[rectypeID]) {
 			return top.HEURIST.patchedBibDetailRequirements[rectypeID];
@@ -466,8 +466,8 @@ top.HEURIST.edit = {
 		else {
 			// make a copy of the original bdrs and override with any workgroup-specific stuff
 			var bdrs = {};
-			var orig_bdrs = top.HEURIST.bibDetailRequirements.valuesByrectypeID[rectypeID];
-			var wg_bdrs = top.HEURIST.user.bibDetailRequirements.valuesByrectypeID[rectypeID];
+			var orig_bdrs = top.HEURIST.bibDetailRequirements.valuesByRectypeID[rectypeID];
+			var wg_bdrs = top.HEURIST.user.bibDetailRequirements.valuesByRectypeID[rectypeID];
 			var precedence = { 'Required': 4, 'Recommended': 3, 'Optional': 2, 'Forbidden': 1 };
 
 			// keep track of the original requiremences, as a fallback if they're not overridden
@@ -509,25 +509,25 @@ top.HEURIST.edit = {
 	getBibDetailNonRequirements: function(rectypeID) {
 		var non_reqs = {};
 		var reqs = top.HEURIST.edit.getBibDetailRequirements(rectypeID);
-		for (var bdt_id in top.HEURIST.bibDetailTypes.valuesByBibDetailTypeID) {
+		for (var bdt_id in top.HEURIST.bibDetailTypes.valuesByRecDetailTypeID) {
 			var skip = false;
 			for (var i in reqs) {
 				if (i == bdt_id) skip = true;
 			}
 			if (skip) continue;
-			non_reqs[bdt_id] = top.HEURIST.bibDetailTypes.valuesByBibDetailTypeID[bdt_id];
+			non_reqs[bdt_id] = top.HEURIST.bibDetailTypes.valuesByRecDetailTypeID[bdt_id];
 		}
 		return non_reqs;
 	},
 
 	getBibDetailOrder: function (rectypeID) {
-		var order = top.HEURIST.bibDetailRequirements.orderByrectypeID[rectypeID];
-		var bdrs = top.HEURIST.bibDetailRequirements.valuesByrectypeID[rectypeID];
+		var order = top.HEURIST.bibDetailRequirements.orderByRectypeID[rectypeID];
+		var bdrs = top.HEURIST.bibDetailRequirements.valuesByRectypeID[rectypeID];
 
 		if (top.HEURIST.user.bibDetailRequirements  &&
-			top.HEURIST.user.bibDetailRequirements.valuesByrectypeID[rectypeID]) {
+			top.HEURIST.user.bibDetailRequirements.valuesByRectypeID[rectypeID]) {
 			// add any wg overrides that are additions - they get pushed on the end
-			var wg_bdrs = top.HEURIST.user.bibDetailRequirements.valuesByrectypeID[rectypeID];
+			var wg_bdrs = top.HEURIST.user.bibDetailRequirements.valuesByRectypeID[rectypeID];
 			for (var bdt_id in wg_bdrs) {
 				if (! bdrs[bdt_id]) {
 					order.push(bdt_id);
@@ -554,7 +554,7 @@ top.HEURIST.edit = {
 	allInputs: [],
 	createInput: function(bibDetailTypeID, rectypeID, bdValues, container) {
 		// Get Detail Type info  id, name, canonical type, rec type contraint
-		var bdt = top.HEURIST.bibDetailTypes.valuesByBibDetailTypeID[bibDetailTypeID];
+		var bdt = top.HEURIST.bibDetailTypes.valuesByRecDetailTypeID[bibDetailTypeID];
 		var bdr;
 		if (rectypeID) {
 			bdr = top.HEURIST.edit.getBibDetailRequirements(rectypeID)[bibDetailTypeID];

@@ -602,7 +602,7 @@ class HeuristZoteroEntry extends HeuristForeignEntry {
 
 		global $bdt_to_rectype;
 		if (! @$bdt_to_rectype)
-			$bdt_to_rectype = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_PtrTargetRectypes', 'dty_PtrTargetRectypes is not null');
+			$bdt_to_rectype = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_PtrTargetRectypeIDs', 'dty_PtrTargetRectypeIDs is not null');
 
 		$fields = $this->_raw;
 		if (array_key_exists($fields['itemType'], $zotero_to_heurist_type_map))

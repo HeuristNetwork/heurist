@@ -93,7 +93,7 @@ error_log(print_r($typesByGroup,true));
 print "top.HEURIST.rectypes.typesByGroup = " . json_format($typesByGroup) . ";\n\n";
 	// saw FIXME TODO change this to create an array by RecTypeGroup.
 
-/* bibDetailRequirements contains colNames valuesByrectypeID,
+/* bibDetailRequirements contains colNames valuesByRectypeID,
  * which contains
  */
 
@@ -102,7 +102,7 @@ $rec_types = mysql__select_array("defRecStructure", "distinct rst_RecTypeID", "1
 
 print "\ntop.HEURIST.bibDetailRequirements = {\n";
 print "\tcolNames: [ \"" . join("\", \"", $colNames) . "\" ],\n";
-print "\tvaluesByrectypeID: {\n";
+print "\tvaluesByRectypeID: {\n";
 
 $first = true;
 foreach ($rec_types as $rec_type) {
@@ -122,7 +122,7 @@ foreach ($rec_types as $rec_type) {
 }
 print "\n\t\t}\n\t},\n";
 
-print "\torderByrectypeID: {\n";
+print "\torderByRectypeID: {\n";
 
 $first = true;
 foreach ($rec_types as $rec_type) {
@@ -143,17 +143,20 @@ print "\n\t}\n};\n";
 
 
 /* bibDetailTypes */
-$colNames = array("dty_ID", "dty_Name", "dty_Type", "dty_Prompt", "dty_Help", "dty_PtrTargetRectypes", "dty_NativeVocabID");
+$colNames = array("dty_ID", "dty_Name", "dty_Type", "dty_Prompt", "dty_Help", "dty_PtrTargetRectypeIDs", "dty_EnumVocabIDs", "dty_EnumTermIDs");
 $res = mysql_query("select " . join(", ", $colNames) . " from defDetailTypes order by dty_ID");
 
 $bdt = array();
 $first = true;
 print "\ntop.HEURIST.bibDetailTypes = {\n";
 print "\tcolNames: [ \"" . join("\", \"", $colNames) . "\" ],\n";
-print "\tvaluesByBibDetailTypeID: {\n";
+print "\tvaluesByRecDetailTypeID: {\n";
 while ($row = mysql_fetch_assoc($res)) {
-	if (! $first) print ",\n";
+	if (! $first) {
+		print ",\n";
+	}else{
 	$first = false;
+	}
 	print "\t\t\"".slash($row["dty_ID"])."\": [ \"";
 	print join("\", \"", array_map("slash", $row)) . "\" ]";
 }
