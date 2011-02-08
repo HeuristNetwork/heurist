@@ -51,7 +51,7 @@
 
 <!-- main template -->
 <xsl:template match="/hml/records/record">
-	<!-- HEADER  -->
+
 	<div id="{id}" class="record">
 		<div class="headerRow">
 			<div id="recID">Record ID: <xsl:value-of select="id"/></div>
@@ -59,11 +59,16 @@
 			<h3><xsl:value-of select="type"/></h3>
 		</div>
 
-		<xsl:if test="detail[@id= 222 or @id= 223 or  @id= 224]">
+	<!-- THUMBNAILS  -->
+		<xsl:if test="detail[@id=222 or @id=223 or @id=224 or @id=606]">
 			<div class="thumbnail">
-					<!-- only display 223 = Thumbnail in top-right corner -->
 					<xsl:element name="img">
-					<xsl:attribute name="src"><xsl:value-of select="detail[@id= 222 or @id= 223 or  @id= 224]/file/thumbURL"/></xsl:attribute>
+					<xsl:if test="detail[@id= 222 or @id= 223 or @id= 224]">
+						<xsl:attribute name="src"><xsl:value-of select="detail[@id= 222 or @id= 223 or  @id= 224]/file/thumbURL"/></xsl:attribute>
+					</xsl:if>
+					<xsl:if test="detail[@id=606]">
+						<xsl:attribute name="src"><xsl:value-of select="detail[@id= 606]"/></xsl:attribute>
+					</xsl:if>
 					</xsl:element>
 			</div>
 		</xsl:if>
