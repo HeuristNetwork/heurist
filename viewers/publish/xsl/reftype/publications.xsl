@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-	<xsl:template name="publications" match="reference[reftype/@id=4 or reftype/@id=5 or reftype/@id=7 or reftype/@id=10 or reftype/@id=12 or reftype/@id=28 or reftype/@id=31]">
+	<xsl:template name="publications" match="reference[rectype/@id=4 or rectype/@id=5 or rectype/@id=7 or rectype/@id=10 or rectype/@id=12 or rectype/@id=28 or rectype/@id=31]">
 		<tr>
 			<td>
 				<xsl:if test="detail[@id=303] and detail[@id=223]"><!-- thumbnail -->
@@ -20,7 +20,7 @@
 				<xsl:for-each select="detail[@id=221]"><!-- associated file -->
 					&#160;[<a href="{file_fetch_url}"><xsl:value-of select="file_orig_name"/></a>, <xsl:value-of select="file_size"/>]
 				</xsl:for-each>
-				&#160;<a target="_new" href="reftype_renderer/{id}">details</a>
+				&#160;<a target="_new" href="rectype_renderer/{id}">details</a>
 				<br/>
 				<xsl:for-each select="pointer[@id=158]"><!-- creator -->
 					<xsl:choose>

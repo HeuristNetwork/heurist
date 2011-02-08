@@ -12,7 +12,7 @@
 
 
 
-	<xsl:template name="collectionInFocus" match="reference[reftype/@id=115]">
+	<xsl:template name="collectionInFocus" match="reference[rectype/@id=115]">
 
 		<h1><xsl:value-of select="title"/></h1>
 
@@ -94,7 +94,7 @@
 
 
 
-	<xsl:template match="related[reftype/@id=115] | pointer[reftype/@id=115] | reverse-pointer[reftype/@id=115] ">
+	<xsl:template match="related[rectype/@id=115] | pointer[rectype/@id=115] | reverse-pointer[rectype/@id=115] ">
 		<!-- render for collection record in sidebar -->
 	    <div class="relatedItem">
            <div class="editIcon">
@@ -111,9 +111,9 @@
 					<p>Collection (or custodian) URL: <a class="sb_two" href="{url}"><xsl:value-of select="url"/></a></p>
 					</em></small></p>   -->
 			</div>
-			<div class="reftypeIcon">
-				<!-- change this to pick up the actuall system name of the reftye or to use the mapping method as in JHSB that calls human-readable-names.xml -->
-				<img style="vertical-align: middle;horizontal-align: right" src="{$hBase}common/images/reftype-icons/{reftype/@id}.png"/>
+			<div class="rectypeIcon">
+				<!-- change this to pick up the actuall system name of the rectype or to use the mapping method as in JHSB that calls human-readable-names.xml -->
+				<img style="vertical-align: middle;horizontal-align: right" src="{$hBase}common/images/rectype-icons/{rectype/@id}.png"/>
 			</div>
 
 	   </div>

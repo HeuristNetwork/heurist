@@ -3,7 +3,7 @@
 <xsl:template name="organisation" match="record[type/@id=53]">
 <div id="{id}" class="record">
                 <a target="_new">
-                    <xsl:attribute name="href">reftype_renderer/<xsl:value-of select="id"/></xsl:attribute>
+                    <xsl:attribute name="href">rectype_renderer/<xsl:value-of select="id"/></xsl:attribute>
                     <xsl:value-of select="title"/>
                 </a>
                 <br/>

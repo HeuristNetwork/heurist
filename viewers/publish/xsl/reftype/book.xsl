@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-    <xsl:template name="book" match="reference[reftype/@id=5]">
+    <xsl:template name="book" match="reference[rectype/@id=5]">
         <tr>
             <td>
                  <xsl:choose>

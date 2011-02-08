@@ -29,12 +29,12 @@ body {
 }
 
 
-#reftype-editor table tr td, #url-editor table tr td, #workgroup-editor table tr td { white-space: nowrap; font-size: 11px; }
-#popup-reftype-value { padding-bottom: 1ex; }
+#rectype-editor table tr td, #url-editor table tr td, #workgroup-editor table tr td { white-space: nowrap; font-size: 11px; }
+#popup-rectype-value { padding-bottom: 1ex; }
 #new-url-value { width: 100%; }
 
-#reftype-img { margin: 0 3px; vertical-align: top; }
-#reftype-val { font-size: 11px; line-height: 16px; font-weight: bold; }
+#rectype-img { margin: 0 3px; vertical-align: top; }
+#rectype-val { font-size: 11px; line-height: 16px; font-weight: bold; }
 .edit { margin-left: 1ex; margin-right: 1ex; line-height: 16px; cursor: pointer; color: blue; }
 
 #title-arrow { padding-left: 16px; padding-right: 4px; }

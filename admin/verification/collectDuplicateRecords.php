@@ -116,7 +116,7 @@ if (@$_REQUEST['personmatch']){
     $res = mysql_query('select rec_ID, rec_RecTypeID, rec_Title, dtl_Value from Records left join recDetails on dtl_RecID=rec_ID and dtl_DetailTypeID=160 where '. (strlen($recIDs) > 0 ? "rec_ID in ($recIDs) and " : "") .'rec_RecTypeID != 52 and not rec_FlagTemporary order by rec_RecTypeID desc');
 }
 
-$reftypes = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', '1');
+$rectypes = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', '1');
 
 while ($row = mysql_fetch_assoc($res)) {
     if ($personMatch){
@@ -133,7 +133,7 @@ while ($row = mysql_fetch_assoc($res)) {
       $key = $row['rec_RecTypeID'] . '.' . substr($mval, 0, $fuzziness);
     }
 
-    $typekey = $reftypes[$row['rec_RecTypeID']];
+    $typekey = $rectypes[$row['rec_RecTypeID']];
 
 	if (! array_key_exists($key, $bibs)) $bibs[$key] = array(); //if the key doesn't exist then make an entry for this metaphone
 	else { // it's a dupe so process it

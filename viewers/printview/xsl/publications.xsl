@@ -20,7 +20,7 @@
 				<xsl:for-each select="detail[@id=221]"><!-- associated file -->
 					&#160;[<a href="{file/url}"><xsl:value-of select="origName"/></a>, <xsl:value-of select="size"/>]
 				</xsl:for-each>
-				&#160;<a target="_new" href="reftype_renderer/{id}">details</a>
+				&#160;<a target="_new" href="rectype_renderer/{id}">details</a>
 				<br/>
 				<xsl:for-each select="detail[@id=158]/record"><!-- creator -->
 					<xsl:choose>

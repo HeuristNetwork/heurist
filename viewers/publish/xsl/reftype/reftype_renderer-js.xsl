@@ -35,12 +35,12 @@ document.writeln("			</table>");
 <!-- detail output template -->
 <xsl:template match="reference[id=$bib_id]">
 document.writeln("	<tr>");
-document.writeln("		<td><img><xsl:attribute name="src"><xsl:value-of select="$hBase"/>common/images/reftype-icons/<xsl:value-of select="reftype/@id"/>.png</xsl:attribute></img></td>");
+document.writeln("		<td><img><xsl:attribute name="src"><xsl:value-of select="$hBase"/>common/images/rectype-icons/<xsl:value-of select="rectype/@id"/>.png</xsl:attribute></img></td>");
 document.writeln('		<td style="font-weight: bold;"><xsl:value-of select="title"/></td>');
 document.writeln("	</tr>");
 document.writeln("	<tr>");
 document.writeln("		<td><nobr>Reference type</nobr></td>");
-document.writeln("		<td><xsl:value-of select="reftype"/></td>");
+document.writeln("		<td><xsl:value-of select="rectype"/></td>");
 document.writeln("	</tr>");
 	<xsl:if test="url != ''">
 document.writeln("		<tr>");

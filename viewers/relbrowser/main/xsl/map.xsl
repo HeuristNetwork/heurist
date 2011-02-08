@@ -3,7 +3,7 @@
                 xmlns:exsl="http://exslt.org/common"
                 version="1.0">
 
-	<xsl:template name="kml" match="reference[reftype/@id=103 or reftype/@id=51 or reftype/@id=165 or reftype/@id=122 or reftype/@id=57 or reftype/@id=168]">
+	<xsl:template name="kml" match="reference[rectype/@id=103 or rectype/@id=51 or rectype/@id=165 or rectype/@id=122 or rectype/@id=57 or rectype/@id=168]">
 
 		<div>
 
@@ -34,7 +34,7 @@
 						</source>
 					</xsl:for-each>
 					<!-- related entities that have a TimePlace factoid -->
-					<xsl:for-each select="related[reftype/@id=151]
+					<xsl:for-each select="related[rectype/@id=151]
 					                             [reverse-pointer[@id=528]
 					                                             [detail[@id=526]='TimePlace']]">
 						<source>

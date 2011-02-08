@@ -2,7 +2,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:str="http://exslt.org/strings" version="1.0">
 
 
-	<xsl:template name="event" match="reference[reftype/@id=150]">
+	<xsl:template name="event" match="reference[rectype/@id=150]">
 
 		<xsl:if test="detail[@id=223]">
 			<!-- thumbnail -->

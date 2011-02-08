@@ -83,7 +83,7 @@ if (! $rec_id) {
 		$record["comments"] = getAllComments($rec_id);
 		$record["workgroupTags"] = getAllworkgroupTags($rec_id);
 		$record["relatedRecords"] = getAllRelatedRecords($rec_id);
-		$record["rtConstraintsByDType"] = getConstraintsByRdt($record['reftypeID']);
+		$record["rtConstraintsByDType"] = getConstraintsByRdt($record['rectypeID']);
 		$record["retrieved"] = date('Y-m-d H:i:s');	// the current time according to the server
 	}
 }
@@ -146,9 +146,9 @@ function getBaseProperties($rec_id, $bkm_ID) {
 	// Return an array of the basic scalar properties for this record / bookmark
 	if (!$rec_id && !$bkm_ID) return array("error"=>"invalid parameters passed to getBaseProperties");
 	if ($bkm_ID) {
-		$res = mysql_query('select rec_ID, rec_Title as title, rty_Name as reftype, rty_ID as reftypeID, rec_URL as url, grp.ugr_ID as workgroupID, grp.ugr_Name as workgroup, rec_ScratchPad as notes, rec_NonOwnerVisibility as visibility, bkm_PwdReminder as passwordReminder, bkm_Rating as rating, rec_Modified, rec_FlagTemporary from usrBookmarks left join Records on bkm_recID=rec_ID and bkm_UGrpID='.get_user_id().' left join defRecTypes on rty_ID = rec_RecTypeID left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID where bkm_ID='.$bkm_ID);
+		$res = mysql_query('select rec_ID, rec_Title as title, rty_Name as rectype, rty_ID as rectypeID, rec_URL as url, grp.ugr_ID as workgroupID, grp.ugr_Name as workgroup, rec_ScratchPad as notes, rec_NonOwnerVisibility as visibility, bkm_PwdReminder as passwordReminder, bkm_Rating as rating, rec_Modified, rec_FlagTemporary from usrBookmarks left join Records on bkm_recID=rec_ID and bkm_UGrpID='.get_user_id().' left join defRecTypes on rty_ID = rec_RecTypeID left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID where bkm_ID='.$bkm_ID);
 	} else if ($rec_id) {
-		$res = mysql_query('select rec_ID, rec_Title as title, rty_Name as reftype, rty_ID as reftypeID, rec_URL as url, grp.ugr_ID as workgroupID, grp.ugr_Name as workgroup, rec_ScratchPad as notes, rec_NonOwnerVisibility as visibility, rec_Modified, rec_FlagTemporary from Records left join usrBookmarks on bkm_recID=rec_ID left join defRecTypes on rty_ID = rec_RecTypeID left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID where rec_ID='.$rec_id);
+		$res = mysql_query('select rec_ID, rec_Title as title, rty_Name as rectype, rty_ID as rectypeID, rec_URL as url, grp.ugr_ID as workgroupID, grp.ugr_Name as workgroup, rec_ScratchPad as notes, rec_NonOwnerVisibility as visibility, rec_Modified, rec_FlagTemporary from Records left join usrBookmarks on bkm_recID=rec_ID left join defRecTypes on rty_ID = rec_RecTypeID left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID where rec_ID='.$rec_id);
 	}
 
 	$row = mysql_fetch_assoc($res);
@@ -158,8 +158,8 @@ function getBaseProperties($rec_id, $bkm_ID) {
 	if ($rec_id) $props["bibID"] = $rec_id;
 	if ($bkm_ID) $props["bkmkID"] = $bkm_ID;
 	$props["title"] = $row["title"];
-	$props["reftype"] = $row["reftype"];
-	$props["reftypeID"] = $row["reftypeID"];
+	$props["rectype"] = $row["rectype"];
+	$props["rectypeID"] = $row["rectypeID"];
 	$props["url"] = $row["url"];
 	$props["moddate"] = $row["rec_Modified"];
 	$props["isTemporary"] = $row["rec_FlagTemporary"]? true : false;

@@ -3,7 +3,7 @@
 
 	<xsl:param name="flavour"/>
 
-	<xsl:template match="related[reftype/@id=55] | pointer[reftype/@id=55] | reverse-pointer[reftype/@id=55]">
+	<xsl:template match="related[rectype/@id=55] | pointer[rectype/@id=55] | reverse-pointer[rectype/@id=55]">
 		<xsl:param name="matches"/>
 
 		<!-- trickiness!
@@ -28,13 +28,13 @@
 							</xsl:if>
 						</xsl:attribute>
 						<xsl:if test="detail/file_thumb_url">
-							<a href="{$base}/item/{id}/{/export/references/reference/reftype/@id}?flavour={$flavour}">
+							<a href="{$base}/item/{id}/{/export/references/reference/rectype/@id}?flavour={$flavour}">
 								<img src="{detail/file_thumb_url}"/>
 							</a>
 							<br/>
 						</xsl:if>
 
-						<a href="{$base}/item/{id}/{/export/references/reference/reftype/@id}?flavour={$flavour}">
+						<a href="{$base}/item/{id}/{/export/references/reference/rectype/@id}?flavour={$flavour}">
 							<xsl:value-of select="detail[@id=291]"/>
 							<xsl:text> </xsl:text>
 							<xsl:value-of select="detail[@id=160]"/>
@@ -46,7 +46,7 @@
 	</xsl:template>
 
 
-	<xsl:template name="person" match="reference[reftype/@id=55]">
+	<xsl:template name="person" match="reference[rectype/@id=55]">
 		<table>
 			<tr>
 				<td>

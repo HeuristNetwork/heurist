@@ -78,20 +78,20 @@ function decode_bdt($rec_types, $bdt_code) {
 	global $bdr;
 	global $rft;
 
-	$reftypeDescription = "";
+	$rectypeDescription = "";
 
 	$colon_count = substr_count($bdt_code, ':');
 	for ($i=1; $i <= $colon_count; ++$i) {
 		$rt_id = $refer_to_heurist_type_map[$rec_types][$i];
 		if (! $rt_id) return '<i>error</i>';
 
-		$reftypeDescription .= $rft[$rt_id] . ".";
+		$rectypeDescription .= $rft[$rt_id] . ".";
 	}
 
 	$rt_id = $refer_to_heurist_type_map[$rec_types][$colon_count];
 	$my_bdr = $bdr[$rt_id][intval(substr($bdt_code, $colon_count))];
 	$name = $my_bdr['rst_DisplayName']? $my_bdr['rst_DisplayName'] : $my_bdr['dty_Name'];
-	return '<span class=red>'.$reftypeDescription.'</span>' . $name;
+	return '<span class=red>'.$rectypeDescription.'</span>' . $name;
 }
 
 ?>

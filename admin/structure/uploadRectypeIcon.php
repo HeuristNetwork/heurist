@@ -17,7 +17,7 @@
 	define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/T1000/.ht_stdefs');
-	define('REFTYPE_DIRECTORY', HEURIST_SITE_PATH.'common/images/reftype-icons/');
+	define('rectype_DIRECTORY', HEURIST_SITE_PATH.'common/images/rectype-icons/');
 	if (! (is_logged_in()  &&  is_admin()  &&  HEURIST_INSTANCE_PREFIX == "")) return;
 
 	$rt_id = intval($_REQUEST['rty_ID']);
@@ -47,7 +47,7 @@
 
   <div style="line-height: 30px;">
    Current icon:
-   <img src="../../common/images/reftype-icons/<?= $rt_id ?>.gif?<?= time() ?>" style="vertical-align: middle; width: 16px; height: 16px;">
+   <img src="../../common/images/rectype-icons/<?= $rt_id ?>.gif?<?= time() ?>" style="vertical-align: middle; width: 16px; height: 16px;">
   </div>
 
 <?php	if ($success_msg) { ?>
@@ -56,7 +56,7 @@
   <div class="failure"><?= $failure_msg ?></div>
 <?php	} ?>
 
-  <form action="uploadReftypeIcon.php?instance=<?= HEURIST_INSTANCE?>" method="post" enctype="multipart/form-data">
+  <form action="uploadrectypeIcon.php?instance=<?= HEURIST_INSTANCE?>" method="post" enctype="multipart/form-data">
    <input type="hidden" name="rty_ID" value="<?= $rt_id ?>">
    <input type="hidden" name="uploading" value="1">
 
@@ -90,7 +90,7 @@ function upload_file($rt_id) {
 		$warning = '<div style="font-weight: bold; color: orange;">but the icon has no transparency defined - it may look dodgy</div>';
 	else	$warning = '';
 
-	if (move_uploaded_file($_FILES['new_icon']['tmp_name'], REFTYPE_DIRECTORY . $rt_id . '.gif'))
+	if (move_uploaded_file($_FILES['new_icon']['tmp_name'], rectype_DIRECTORY . $rt_id . '.gif'))
 		return array('File has been uploaded successfully' . $warning, '');
 	else
 		return array('', 'An error occurred while uploading the file - check directory permissions');

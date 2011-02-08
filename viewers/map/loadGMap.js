@@ -8,7 +8,7 @@
  */
 
 var map;
-var iconsByReftype = [];
+var iconsByrectype = [];
 var onclickfn;
 var allMarkers = [];
 var markerGroups = {};
@@ -51,7 +51,7 @@ function loadMap(options) {
 	/* add objects to the map */
 
 	var baseIcon = new GIcon();
-	baseIcon.image = "../../common/images/reftype-icons/questionmark.gif";
+	baseIcon.image = "../../common/images/rectype-icons/questionmark.gif";
 	baseIcon.shadow = "../../common/images/shadow.png";
 	baseIcon.iconAnchor = new GPoint(16, 31);
 	baseIcon.infoWindowAnchor = new GPoint(16,16);
@@ -70,11 +70,11 @@ function loadMap(options) {
 			}
 		}
 
-		if (! iconsByReftype[record.reftype]) {
-			iconsByReftype[record.reftype] = new GIcon(baseIcon);
-			//iconsByReftype[record.reftype].image = "../../common/images/reftype-icons/" + record.reftype + ".png";
-			//iconsByReftype[record.reftype].image = "../../common/images/pointerMapWhite.png";
-			iconsByReftype[record.reftype].image = "../../common/images/31x31.gif";
+		if (! iconsByrectype[record.rectype]) {
+			iconsByrectype[record.rectype] = new GIcon(baseIcon);
+			//iconsByrectype[record.rectype].image = "../../common/images/rectype-icons/" + record.rectype + ".png";
+			//iconsByrectype[record.rectype].image = "../../common/images/pointerMapWhite.png";
+			iconsByrectype[record.rectype].image = "../../common/images/31x31.gif";
 		}
 
 		var marker = null;
@@ -88,10 +88,10 @@ function loadMap(options) {
 				if (!markerGroups[y][x]) {
 					markerGroups[y][x] = {};
 				}
-				if (!markerGroups[y][x][record.reftype]) {
-					markerGroups[y][x][[record.reftype]] = { records : [] };
+				if (!markerGroups[y][x][record.rectype]) {
+					markerGroups[y][x][[record.rectype]] = { records : [] };
 				}
-				markerGroups[y][x][record.reftype].records.push(record);
+				markerGroups[y][x][record.rectype].records.push(record);
 			break;
 
 			case "circle":
@@ -260,7 +260,7 @@ function getHtmlMarker(y,x,arrayRecsByTypeObjs,numMarkers, options) {
 				url += "common/php/resize_image.php?instance=" + top.HEURIST.instance.name + "&amp;file_id=" + Records[0]['thumb_file_id'];
 			}else {
 				//get recType image
-				url += "common/images/reftype-icons/map-icons/map_" + recType + ".png";
+				url += "common/images/rectype-icons/map-icons/map_" + recType + ".png";
 			}
 			return url;
 		}
@@ -272,9 +272,9 @@ function getHtmlMarker(y,x,arrayRecsByTypeObjs,numMarkers, options) {
 			// create info div
 			html += "<div class=\"recInfo\" style=\"display:none\">";
 			if (recNum > 1) {
-				html += "<b>" + recNum + " " + top.HEURIST.reftypes.pluralNames[recType] +"</b><br/>";
+				html += "<b>" + recNum + " " + top.HEURIST.rectypes.pluralNames[recType] +"</b><br/>";
 			}else{
-				html += "<b>" + top.HEURIST.reftypes.names[recType] +"</b><br/>";
+				html += "<b>" + top.HEURIST.rectypes.names[recType] +"</b><br/>";
 			}
 			for(var i = 0; i < recNum; i++){
 				html += "<p>" + Records[i].title +"</p>";
@@ -325,7 +325,7 @@ function getHtmlMarker(y,x,arrayRecsByTypeObjs,numMarkers, options) {
 				break;
 			default:
 				markerHTML += "style=\"width:24px;\">"
-							+ "<div class=\"icon\" style=\"background-image:url("+HEURIST.baseURL+"common/images/reftype-icons/map-icons/map_multiRecords.png\")\">"
+							+ "<div class=\"icon\" style=\"background-image:url("+HEURIST.baseURL+"common/images/rectype-icons/map-icons/map_multiRecords.png\")\">"
 							+ "<div class=\"refCount\"> " + Records.length + "</div></div>"
 				+ "</div>"
 				+ indicatorHTML;
@@ -445,7 +445,7 @@ var iconNumber = 0;
 var legendIcons;
 function getIcon(record) {
 	if (! window.heurist_useLabelledMapIcons) {
-		return iconsByReftype[record.reftype];
+		return iconsByrectype[record.rectype];
 	}
 	if (! legendIcons) {
 		var protoLegendImgs = document.getElementsByTagName("img");
@@ -507,7 +507,7 @@ function getIcon(record) {
 		return legendIcons[ record.bibID ];
 	}
 	else {
-		return iconsByReftype[record.reftype];
+		return iconsByrectype[record.rectype];
 	}
 }
 

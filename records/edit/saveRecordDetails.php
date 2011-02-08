@@ -54,7 +54,7 @@ mysql_query('set @logged_in_user_id = ' . get_user_id());
 $checkSimilar = array_key_exists("check-similar", $_POST);
 if ($checkSimilar) {
 	$rec_id = intval(@$_POST["bib_id"]);
-	$rec_types = array(intval(@$_POST["reftype"]));
+	$rec_types = array(intval(@$_POST["rectype"]));
 
 	$fields = array();
 	foreach ($_POST as $key => $val) {
@@ -196,8 +196,8 @@ function updateRecord($bibID) {
 
 	$bibUpdates = array("rec_Modified" => array("now()"), "rec_FlagTemporary" => 0);
 	$bibUpdates["rec_ScratchPad"] = $_POST["notes"];
-	if (intval(@$_POST["reftype"])) {
-		$bibUpdates["rec_RecTypeID"] = intval($_POST["reftype"]);
+	if (intval(@$_POST["rectype"])) {
+		$bibUpdates["rec_RecTypeID"] = intval($_POST["rectype"]);
 	}
 	if (array_key_exists("bib_url", $_POST)) {
 		$bibUpdates["rec_URL"] = $_POST["bib_url"];
@@ -282,7 +282,7 @@ function insertRecord() {
 	mysql__insert("Records", array(
 		"rec_Added" => date('Y-m-d H:i:s'),
 		"rec_AddedByUGrpID" => get_user_id(),
-		"rec_RecTypeID" => $_POST["reftype"],
+		"rec_RecTypeID" => $_POST["rectype"],
 		"rec_ScratchPad" => $_POST["notes"],
 		"rec_URL" => $_POST["url"]? $_POST["url"] : ""));
 	$_REQUEST["rec_ID"] = $bibID = mysql_insert_id();

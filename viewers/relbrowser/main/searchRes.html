@@ -94,7 +94,7 @@ function doSearch(){
 			var recTitle =r[i].getTitle();
 	        var newdiv = document.createElement('div');
 			newdiv.setAttribute("class", "mini-pad");
-			newdiv.innerHTML += "<span class=\"clickable\" onClick=\"pickMe("+recId+",'"+recTitle+"',"+rec_det_id+","+extra+");\">" +recId + " <img src=\""+ path +"img/reftype/"+recImage+".gif\" align=absmiddle> " +recTitle +"</span>";
+			newdiv.innerHTML += "<span class=\"clickable\" onClick=\"pickMe("+recId+",'"+recTitle+"',"+rec_det_id+","+extra+");\">" +recId + " <img src=\""+ path +"img/rectype/"+recImage+".gif\" align=absmiddle> " +recTitle +"</span>";
 	        div.appendChild(newdiv);//append new div right after embedding code div
 	    }
 	}

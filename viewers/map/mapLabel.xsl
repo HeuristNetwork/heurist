@@ -46,7 +46,7 @@
 								<span class="icon" title="{title}" style="width:48px; display:table-cell;padding:0;background-color:{detail[@id=678]};backgound-image:url({detail[@id= 221 or @id= 222 or @id= 223 or @id= 224]/file/thumbURL})"><a target="_new" href="../../search/search.html?q=ids:{self::node()/id}&amp;instance=' + instance;"><div class="iconIMG"><img src="{detail[@id= 222 or @id= 223 or @id= 224]/file/thumbURL}"/></div></a></span>
 							</xsl:when>
 							<xsl:otherwise>
-								<span class="icon" title="{title}" style="width:48px; display:table-cell;padding:0;background-color:{detail[@id=678]};background-image:url(../../common/images/reftype-icons/thumb/th_{type/@id}.png)"><a target="_new" href="../../search/search.html?q=ids:{self::node()/id}&amp;instance=' + instance;"><img src="../../common/images/31x31.gif"/></a></span>
+								<span class="icon" title="{title}" style="width:48px; display:table-cell;padding:0;background-color:{detail[@id=678]};background-image:url(../../common/images/rectype-icons/thumb/th_{type/@id}.png)"><a target="_new" href="../../search/search.html?q=ids:{self::node()/id}&amp;instance=' + instance;"><img src="../../common/images/31x31.gif"/></a></span>
 							</xsl:otherwise>
 						</xsl:choose>
 				</xsl:for-each>
@@ -59,7 +59,7 @@
 			</xsl:when>
 			<xsl:otherwise>
 				<span class="icon" title="{title}" style="width:48px; display:table-cell;padding:0;">
-					<div class="iconIMG" style="margin-left:-3px; background-image:url(../../common/images/reftype-icons/thumb/th_{hml/records/record/type/@id}.png">
+					<div class="iconIMG" style="margin-left:-3px; background-image:url(../../common/images/rectype-icons/thumb/th_{hml/records/record/type/@id}.png">
 						<img src="../../common/images/31x31.gif"/>
 						<xsl:if test="count(hml/records/record/detail/record)&gt;0">  
 						<div class="iconCount" onmouseover="this.style.overflow='visible'" onmouseout="this.style.overflow='hidden'">

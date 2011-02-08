@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-    <xsl:template name="conference" match="reference[reftype/@id=49]">
+    <xsl:template name="conference" match="reference[rectype/@id=49]">
         <xsl:param name="style"/>
         <tr>
             <!--td><xsl:value-of select="detail[@id=205]"/></td-->

@@ -115,7 +115,7 @@ $parent_detail_types = array(
 	217, 225, 226, 227, 228, 229, 236, 237, 238, 241, 242
 );
 
-$reftype_parent_map = array(
+$rectype_parent_map = array(
 	// Book chapter
 	4 => array(
 		// Book
@@ -223,7 +223,7 @@ else
 
 mysql_connection_db_select(DATABASE);
 
-$REFTYPE = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', '1');
+$rectype = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', '1');
 
 $res = mysql_query(REQUEST_to_query('select distinct rec_ID, rec_URL, rec_ScratchPad, rec_RecTypeID ', $search_type));
 
@@ -232,7 +232,7 @@ while ($row = mysql_fetch_assoc($res))
 
 
 function print_biblio($bib) {
-	global $REFTYPE;
+	global $rectype;
 	$output = '';
 
 	$output .= print_bib_details($bib['rec_ID'], $bib['rec_RecTypeID'], array());
@@ -251,14 +251,14 @@ function print_biblio($bib) {
 */
 
 	if (strlen($output))
-		print '%0 ' . $REFTYPE[$bib['rec_RecTypeID']] . "\n" . $output . "\n";
+		print '%0 ' . $rectype[$bib['rec_RecTypeID']] . "\n" . $output . "\n";
 }
 
 
-function print_bib_details ($rec_id, $base_reftype, $visited) {
+function print_bib_details ($rec_id, $base_rectype, $visited) {
 	global $heurist_to_refer_map;
 	global $parent_detail_types;
-	global $reftype_parent_map;
+	global $rectype_parent_map;
 	$output = '';
 
 	array_push($visited, $rec_id);
@@ -300,17 +300,17 @@ function print_bib_details ($rec_id, $base_reftype, $visited) {
 
 	foreach ($details as $rd_type => $detail) {
 		// suppress output of some fields
-		if (@$reftype_parent_map[$base_reftype][$rt][$rd_type] === 'SUPPRESS'  ||
+		if (@$rectype_parent_map[$base_rectype][$rt][$rd_type] === 'SUPPRESS'  ||
 			@$heurist_to_refer_map[$rd_type] === 'SUPPRESS') {
 			continue;
 		// type specific overrides e.g. B instead of T for Book Title
-		} else if (@$reftype_parent_map[$base_reftype][$rt][$rd_type]) {
+		} else if (@$rectype_parent_map[$base_rectype][$rt][$rd_type]) {
 			if (is_array($detail)) {
 				foreach ($detail as $val) {
-					$output .= '%' . $reftype_parent_map[$base_reftype][$rt][$rd_type] . ' ' . $val . "\n";
+					$output .= '%' . $rectype_parent_map[$base_rectype][$rt][$rd_type] . ' ' . $val . "\n";
 				}
 			} else {
-				$output .= '%' . $reftype_parent_map[$base_reftype][$rt][$rd_type] . ' ' . $detail . "\n";
+				$output .= '%' . $rectype_parent_map[$base_rectype][$rt][$rd_type] . ' ' . $detail . "\n";
 			}
 		// standard output types
 		} else if (@$heurist_to_refer_map[$rd_type]) {
@@ -327,7 +327,7 @@ function print_bib_details ($rec_id, $base_reftype, $visited) {
 				// error - should only have one parent
 			} else {
 				if (! in_array(intval($detail), $visited))	// avoid infinite recursion
-					$output .= print_bib_details(intval($detail), $base_reftype, $visited);
+					$output .= print_bib_details(intval($detail), $base_rectype, $visited);
 			}
 		// undefined - dump out under %O
 		/* no - don't output it

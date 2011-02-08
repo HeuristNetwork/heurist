@@ -150,13 +150,13 @@ if (top.HEURIST && top.HEURIST.firedEvents["heurist-search-html-loaded"] && top.
 	$page = 0;
 	$results = array();
 	$first_of_page = true;
-	$reftypes = array();
+	$rectypes = array();
 
 	print "results.records.push(\n";
 	while ($row = mysql_fetch_row($res)) {
 		if (! $first_of_page) print ",\n";
 
-		$reftypes[$row[4]] = $row[4];
+		$rectypes[$row[4]] = $row[4];
 		print_result($row);
 
 		$first_of_page = false;
@@ -197,7 +197,7 @@ if (top.HEURIST && top.HEURIST.firedEvents["heurist-search-html-loaded"] && top.
 	print ' -->';
 ?>
  <body>
-<?php foreach ($reftypes as $rt_id) if ($rt_id > 0) print "<img src=../common/images/reftype-icons/".$rt_id.".png>"; ?>
+<?php foreach ($rectypes as $rt_id) if ($rt_id > 0) print "<img src=../common/images/rectype-icons/".$rt_id.".png>"; ?>
  </body>
 </html>
 <?php

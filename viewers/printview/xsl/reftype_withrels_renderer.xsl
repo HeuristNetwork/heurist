@@ -27,7 +27,7 @@
 			<!-- name (desc.) that will appear in dropdown list -->
 			[name]Departmental website style with relations[/name]
 			<!-- match the name of the stylesheet-->
-			[output]reftype_withrels_renderer[/output]
+			[output]rectype_withrels_renderer[/output]
 		</xsl:comment>
 		<!-- end including code -->
 
@@ -67,7 +67,7 @@
 		<tr>
 			<td class="detailType">
 				<img>
-					<xsl:attribute name="src">../../common/images/reftype-icons/<xsl:value-of select="type/@id"/>.png</xsl:attribute>
+					<xsl:attribute name="src">../../common/images/rectype-icons/<xsl:value-of select="type/@id"/>.png</xsl:attribute>
 				</img>
 			</td>
 			<td class="detail" style="font-weight: bold;">

@@ -53,7 +53,7 @@ $body->global_vars['added-detail-type'] = false;
 $body->global_vars['field-errors'] = false;
 $body->global_vars['new-field-errors'] = false;
 $body->global_vars['new'] = @$_REQUEST['new']? 1 : 0;
-$body->global_vars['editing_reftype'] = @$_REQUEST['rty_ID']? 1 : 0;
+$body->global_vars['editing_rectype'] = @$_REQUEST['rty_ID']? 1 : 0;
 $body->global_vars['instance-name'] = HEURIST_INSTANCE;
 
 
@@ -70,7 +70,7 @@ if (@$_REQUEST['_submit']) {
 			if (@$_REQUEST['action'] == 'Add record type') {
 				$rt_id = mysql_insert_id();
 				if ($rt_id > 0) {
-					system('cd ../../common/images/reftype-icons  &&  cp questionmark.gif ' . $rt_id . '.gif');
+					system('cd ../../common/images/rectype-icons  &&  cp questionmark.gif ' . $rt_id . '.gif');
 				}
 
 				header('Location: '.HEURIST_URL_BASE.'admin/structure/editStructure.php?instance='.HEURIST_INSTANCE.'&amp;rty_ID=' . $rt_id . '&new=1');

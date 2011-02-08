@@ -56,9 +56,9 @@
 	</xsl:template>
 
 	<xsl:template match="record/type">
-		<reftype>
+		<rectype>
 			<xsl:apply-templates select="@*|node()"/>
-		</reftype>
+		</rectype>
 	</xsl:template>
 
 	<xsl:template match="relationships">

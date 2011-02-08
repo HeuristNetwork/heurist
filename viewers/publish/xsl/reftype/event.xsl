@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-    <xsl:template name="event" match="reference[reftype/@id=64]">
+    <xsl:template name="event" match="reference[rectype/@id=64]">
         <xsl:param name="style"/>
         <xsl:param name="year"/>
         <xsl:param name="month"/>
@@ -45,7 +45,7 @@
 				<xsl:value-of select="detail[@id=234]"/><!-- End time -->
 			</xsl:if>
 			<br/>
-			<a target="_new" href="reftype_renderer/{id}" style="text-decoration:none;"><span style="font-weight: bold;"><xsl:value-of select="detail[@id=160]"/></span></a>
+			<a target="_new" href="rectype_renderer/{id}" style="text-decoration:none;"><span style="font-weight: bold;"><xsl:value-of select="detail[@id=160]"/></span></a>
 			<!-- Title -->
 		</div>
 

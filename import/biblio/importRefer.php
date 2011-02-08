@@ -843,10 +843,10 @@ class HeuristReferEntry extends HeuristForeignEntry {
 			error_log("Invalid REFER type: " . $this->_type);
 			return NULL;	// FIXME: probably store an error message somewhere
 		}
-		$heurist_reftypes = $refer_to_heurist_type_map[$refer_type];
+		$heurist_rectypes = $refer_to_heurist_type_map[$refer_type];
 
 		$base_entry = $last_entry = NULL;
-		foreach ($heurist_reftypes as $rt) {
+		foreach ($heurist_rectypes as $rt) {
 			// construct an empty entry [and its containers]
 			unset($new_entry);
 			$new_entry = &new HeuristNativeEntry($rt);

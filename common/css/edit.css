@@ -34,13 +34,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #workgroup-val-div {white-space: nowrap;padding-left: 20px;background: transparent url(../images/workgroup_icon-small.gif) scroll top left no-repeat;}
 #workgroup-access {padding-left: 20px;background: transparent url(../images/public_icon-small.gif) scroll top left no-repeat;}
 
-#reftype-edit {border-left:1px solid #D6D6D6;bottom:0;overflow:hidden;padding:10px 0;position:absolute;right:260px;text-align:center;top:0;width:210px;}
-#reftype-editor table tr td, #url-editor table tr td, #workgroup-editor table tr td { white-space: nowrap; font-size: 11px; }
-#popup-reftype-value { padding-bottom: 1ex; }
+#rectype-edit {border-left:1px solid #D6D6D6;bottom:0;overflow:hidden;padding:10px 0;position:absolute;right:260px;text-align:center;top:0;width:210px;}
+#rectype-editor table tr td, #url-editor table tr td, #workgroup-editor table tr td { white-space: nowrap; font-size: 11px; }
+#popup-rectype-value { padding-bottom: 1ex; }
 #new-url-value { width: 100%; }
 
-#reftype-img { background-position:50% 50%;background-repeat:no-repeat;height:40px;margin:0 10px 0 0;width:16px;}
-#reftype-val { font-size: 11px; line-height: 16px; font-weight: bold; }
+#rectype-img { background-position:50% 50%;background-repeat:no-repeat;height:40px;margin:0 10px 0 0;width:16px;}
+#rectype-val { font-size: 11px; line-height: 16px; font-weight: bold; }
 .edit { margin-left: 1ex; margin-right: 1ex; line-height: 16px; cursor: pointer; color: blue; }
 
 #title-arrow { padding-left: 16px; padding-right: 4px; }
@@ -190,7 +190,7 @@ div.draggable table {
 }
 div.draggable td.header {
 	background-color:RGBA(247,209,0,0.5);
-	background-image:url("../images/reftype-icons/57.png");
+	background-image:url("../images/rectype-icons/57.png");
 	background-position: right;
 	background-repeat:no-repeat;
 	border-bottom:1px solid #CC9933;

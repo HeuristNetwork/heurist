@@ -1,19 +1,14 @@
 <?php
 
-/**
+/*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- **/
+ -->*/
 
-?>
-
-<?php
-/*<!--  loadRecordDate.php  -->
-*/
 	header('Content-type: text/javascript');
 	require_once(dirname(__FILE__)."/../../common/config/initialise.php");
 ?>
@@ -55,7 +50,7 @@ init: function () {
 	var scr = document.createElement('script');
 	scr.type = 'text/javascript';
 //	scr.src = Heurist.uriBase +'import/bookmarklet/getRectypesAsJSON.php';
-	scr.src = Heurist.uriHost +'h3h2/import/bookmarklet/reftypes.php'; //saw FIXME: temp, remove when getRectypesAsJSON.php works
+	scr.src = Heurist.uriHost +'h3h2/import/bookmarklet/rectypes.php'; //saw FIXME: temp, remove when getRectypesAsJSON.php works
 	document.getElementsByTagName('head')[0].appendChild(scr);
 
 	// get bkmk id if already bookmarked
@@ -175,8 +170,8 @@ render: function() {
 		td.style.height = "30px";
 
 	} else {
-		// specify reftype
-		td.appendChild(Heurist.renderReftypeSelect());
+		// specify rectype
+		td.appendChild(Heurist.renderrectypeSelect());
 
 		td = tr.appendChild(document.createElement("td"));
 		var button = document.createElement("input");
@@ -185,7 +180,7 @@ render: function() {
 		button.value = "Add";
 		button.disabled = true;
 		button.onclick = function() {
-			var r = document.getElementById("reftype-select").value;
+			var r = document.getElementById("rectype-select").value;
 			if (r) Heurist.bookmark(r);
 		};
 		td.appendChild(button);
@@ -335,7 +330,7 @@ findFavicon: function() {
 	return "";
 },
 
-bookmark: function(reftype) {
+bookmark: function(rectype) {
 	Heurist.close();
 	var version='20060713';
 	var findSelection = function(w) {
@@ -360,15 +355,15 @@ bookmark: function(reftype) {
 				 '&u=' + Heurist.urlcleaner(encodeURIComponent(url)) +
 				 '&d=' + Heurist.urlcleaner(encodeURIComponent(sel)) +
 				 (favicon? ('&f=' + encodeURIComponent(favicon)) : '') +
-				 (reftype ? '&bib_reftype=' + reftype : '') +
+				 (rectype ? '&bib_rectype=' + rectype : '') +
 				 '&version=' + version);
 	void(window.setTimeout('w.focus()',200));
 },
 
 
-renderReftypeSelect: function(sel) {
+renderrectypeSelect: function(sel) {
 	var sel = document.createElement('select');
-	sel.id = 'reftype-select';
+	sel.id = 'rectype-select';
 	sel.onchange = function() {
 		document.getElementById("add-as-type-button").disabled = ! this.value;
 	};
@@ -376,36 +371,15 @@ renderReftypeSelect: function(sel) {
 	sel.options[0].selected = true;
 	sel.options[0].disabled = true;
 
-	for (var g in HEURIST_reftypes.groups) {
-		var grp = document.createElement("optgroup");
-		grp.label = g + " record types";
-		sel.appendChild(grp);
-		for (var i = 0; i < HEURIST_reftypes.groups[g].length; ++i) {
-			var opt = document.createElement("option");
-			opt.value = i;
-			opt.innerHTML = HEURIST_reftypes.names[HEURIST_reftypes.groups[g][i]];
-			grp.appendChild(opt);
-		}
-	}
-
+	for (var grpID in HEURIST_rectypes.typesByGroup){
 	var grp = document.createElement("optgroup");
-	grp.label = "Bibliographic record types";
+		grp.label = HEURIST_rectypes.groupNamesInDisplayOrder[grpID];
 	sel.appendChild(grp);
-	for (var i = 0; i < HEURIST_reftypes.primary.length; ++i) {
-		var opt = document.createElement("option");
-		opt.value = HEURIST_reftypes.primary[i];
-		opt.innerHTML = HEURIST_reftypes.names[HEURIST_reftypes.primary[i]];
-		grp.appendChild(opt);
+		for (var i=0; i < HEURIST_rectypes.typesByGroup[grpID].length; ++i) {
+			var value = HEURIST_rectypes.typesByGroup[grpID][i];
+			var name = HEURIST_rectypes.names[value];
+			sel.appendChild( new Option(name, value));
 	}
-
-	grp = document.createElement("optgroup");
-	grp.label = "Other record types";
-	sel.appendChild(grp);
-	for (var i = 0; i < HEURIST_reftypes.other.length; ++i) {
-		var opt = document.createElement("option");
-		opt.value = HEURIST_reftypes.other[i];
-		opt.innerHTML = HEURIST_reftypes.names[HEURIST_reftypes.other[i]];
-		grp.appendChild(opt);
 	}
 
 	return sel;
@@ -413,15 +387,15 @@ renderReftypeSelect: function(sel) {
 
 };
 
-var HEURIST_reftypesOnload = function() {
-	Heurist.reftypesLoaded = true;
-	if (Heurist.reftypesLoaded  &&  Heurist.urlBookmarkedLoaded)
+var HEURIST_rectypesOnload = function() {
+	Heurist.rectypesLoaded = true;
+	if (Heurist.rectypesLoaded  &&  Heurist.urlBookmarkedLoaded)
 		Heurist.render();
 };
 
 var HEURIST_urlBookmarkedOnload = function() {
 	Heurist.urlBookmarkedLoaded = true;
-	if (Heurist.reftypesLoaded  &&  Heurist.urlBookmarkedLoaded)
+	if (Heurist.rectypesLoaded  &&  Heurist.urlBookmarkedLoaded)
 		Heurist.render();
 };
 

@@ -335,7 +335,7 @@ class HeuristNativeEntry {
 
 	var $_fields;
 	var $_fields_by_bdt_id;
-	var $_reftype;
+	var $_rectype;
 	var $_container;
 	var $_references;
 	var $_ancestor;
@@ -370,7 +370,7 @@ class HeuristNativeEntry {
 
 	function HeuristNativeEntry($rt) {
 		// Create a native entry of the given type (a defRecTypes.rty_ID, not an rty_Name)
-		$this->_reftype = $rt;
+		$this->_rectype = $rt;
 		$this->_fields = array();
 		$this->_fields_by_bdt_id = array();
 		$this->_container = NULL;
@@ -406,7 +406,7 @@ class HeuristNativeEntry {
 
 	function getForeignPrototype() { return $this->_foreign; }
 
-	function getReferenceType() { return $this->_reftype; }
+	function getReferenceType() { return $this->_rectype; }
 
 	function addField(&$field) {
 		// $field is a HeuristNativeField
@@ -567,13 +567,13 @@ class HeuristNativeEntry {
 	function getTitle() {
 		// Construct/retrieve the formatted title for this entry,
 		// based on the reference type's title mask.
-		global $heurist_reftypes;
-		if (! $heurist_reftypes) load_heurist_reftypes();
+		global $heurist_rectypes;
+		if (! $heurist_rectypes) load_heurist_rectypes();
 		if (! $this->getBiblioID()) { return ""; }
 
 		if ($this->_title) return $this->_title;
 
-		$mask = $heurist_reftypes[$this->_reftype]['rty_TitleMask'];
+		$mask = $heurist_rectypes[$this->_rectype]['rty_TitleMask'];
 		$this->_title = fill_title_mask($mask, $this->getBiblioID(), $this->getReferenceType());
 
 		return $this->_title;
@@ -581,11 +581,11 @@ class HeuristNativeEntry {
 // fin     FIXME  the code below never executes, looks old and refactored into TitleMask.php ?remove?
 
 
-		global $heurist_reftypes, $bib_type_names;
-		if (! $heurist_reftypes) load_heurist_reftypes();
+		global $heurist_rectypes, $bib_type_names;
+		if (! $heurist_rectypes) load_heurist_rectypes();
 		if (! $bib_type_names) load_bib_type_names();
 
-		$mask = $heurist_reftypes[$this->_reftype]['rty_TitleMask'];
+		$mask = $heurist_rectypes[$this->_rectype]['rty_TitleMask'];
 		if (! $mask) return '';
 
 
@@ -628,10 +628,10 @@ class HeuristNativeEntry {
 	function get_field_value($field_name) {
 		/* Return the value for the given field in this record */
 
-		global $bib_type_name_to_id, $bib_requirement_names, $reftype_name_to_id;
+		global $bib_type_name_to_id, $bib_requirement_names, $rectype_name_to_id;
 		if (! $bib_type_name_to_id) load_bib_type_name_to_id();
 		if (! $bib_requirement_names) load_bib_requirement_names();
-		if (! $reftype_name_to_id) load_reftype_name_to_id();
+		if (! $rectype_name_to_id) load_rectype_name_to_id();
 
 		if (count($this->_fields_by_bdt_id) == 0) {
 // dupe code ... FIXME ... safe to remove now that this is handled in addField ..?
@@ -661,7 +661,7 @@ class HeuristNativeEntry {
 /*
 			$bdr = _title_mask__get_bib_detail_requirements();
 
-			$rt_id = $reftype_name_to_id$bib_requirement_names[$rt][strtolower($matches[1])];
+			$rt_id = $rectype_name_to_id$bib_requirement_names[$rt][strtolower($matches[1])];
 */
 // FIXME : currently assuming that the resource type linked to is the (former) container type
 			$rt_id = $this->_container->getReferenceType();
@@ -672,7 +672,7 @@ class HeuristNativeEntry {
 
 		if ($rt_id  &&  $inner_field_name) {
 			// FIXME: we only understand two types of resource reference at the moment --
-			// a person reference (author), and whatever used to correspond to the container type for this reftype
+			// a person reference (author), and whatever used to correspond to the container type for this rectype
 
 			if ($rt_id == 75) {	// author reference
 				if (preg_match('/^(\\d+)/', $inner_field_name, $matches))
@@ -713,7 +713,7 @@ error_log(print_r($bib_requirement_names[55], 1));
 
 		global $hash_info;
 		if (! $hash_info) {
-			// hash_info contains all the good stuff we need for determining the hash, indexed by reftype, and then by dty_ID
+			// hash_info contains all the good stuff we need for determining the hash, indexed by rectype, and then by dty_ID
 			$res = mysql_query("select rst_RecTypeID, dty_ID, dty_Type = 'resource' as isResource from defRecStructure, defDetailTypes
 			                     where rst_DetailTypeID=dty_ID and ((dty_Type != 'resource' and rst_RecordMatchOrder) or (dty_Type = 'resource' and rst_RequirementType = 'Required'))
 			                  order by rst_RecTypeID, dty_Type = 'resource', dty_ID");
@@ -723,13 +723,13 @@ error_log(print_r($bib_requirement_names[55], 1));
 				$hash_info[$row["rst_RecTypeID"]][$row["dty_ID"]] = $row["isResource"];
 			}
 		}
-		global $bdt_to_reftype;
-		if (! @$bdt_to_reftype)
-			$bdt_to_reftype = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_PtrTargetRectypes', 'dty_PtrTargetRectypes is not null');
+		global $bdt_to_rectype;
+		if (! @$bdt_to_rectype)
+			$bdt_to_rectype = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_PtrTargetRectypes', 'dty_PtrTargetRectypes is not null');
 
-		$infos = $hash_info[$this->_reftype];
+		$infos = $hash_info[$this->_rectype];
 
-		$hhash = $this->_reftype . ":";
+		$hhash = $this->_rectype . ":";
 		foreach ($infos as $rdt_id => $isResource) {
 			if (! $isResource) {
 				$values = @$this->_fields_by_bdt_id[$rdt_id];
@@ -747,14 +747,14 @@ error_log(print_r($bib_requirement_names[55], 1));
 				if (count($_vals)) $hhash .= join(";", $_vals) . ";";
 			}
 			else {
-				if ($bdt_to_reftype[$rdt_id] == 75) {	// Author/Editor
+				if ($bdt_to_rectype[$rdt_id] == 75) {	// Author/Editor
 					if ($this->_author_hashes) {
 						sort($this->_author_hashes);
 						$hhash .= '^' . join('$^', $this->_author_hashes) . '$';
 					}
 				}
 				else {
-					if ($this->_container  &&  $this->_container->getReferenceType() == $bdt_to_reftype[$rdt_id]) {
+					if ($this->_container  &&  $this->_container->getReferenceType() == $bdt_to_rectype[$rdt_id]) {
 						$hhash .= '^' . $this->_container->getHHash() . '$';
 					}
 				}
@@ -771,7 +771,7 @@ error_log(print_r($bib_requirement_names[55], 1));
 
 		global $hash_info;
 		if (! $hash_info) {
-			// hash_info contains all the good stuff we need for determining the hash, indexed by reftype, and then by dty_ID
+			// hash_info contains all the good stuff we need for determining the hash, indexed by rectype, and then by dty_ID
 			$res = mysql_query("select rst_RecTypeID, dty_ID, dty_Type = 'resource' as isResource from defRecStructure, defDetailTypes
 			                     where rst_DetailTypeID=dty_ID and ((dty_Type != 'resource' and rst_RecordMatchOrder) or (dty_Type = 'resource' and rst_RequirementType = 'Required'))
 			                  order by rst_RecTypeID, dty_Type = 'resource', dty_ID");
@@ -781,13 +781,13 @@ error_log(print_r($bib_requirement_names[55], 1));
 				$hash_info[$row["rst_RecTypeID"]][$row["dty_ID"]] = $row["isResource"];
 			}
 		}
-		global $bdt_to_reftype;
-		if (! @$bdt_to_reftype)
-			$bdt_to_reftype = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_PtrTargetRectypes', 'dty_PtrTargetRectypes is not null');
+		global $bdt_to_rectype;
+		if (! @$bdt_to_rectype)
+			$bdt_to_rectype = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_PtrTargetRectypes', 'dty_PtrTargetRectypes is not null');
 
-		$infos = $hash_info[$this->_reftype];
+		$infos = $hash_info[$this->_rectype];
 
-		$hhash = $this->_reftype . ":";
+		$hhash = $this->_rectype . ":";
 		foreach ($infos as $rdt_id => $isResource) {
 			if (! $isResource) {
 				$values = @$this->_fields_by_bdt_id[$rdt_id];
@@ -806,14 +806,14 @@ error_log(print_r($bib_requirement_names[55], 1));
 			}
 /*
 			else {
-				if ($rdt_id === 158  &&  $bdt_to_reftype[$rdt_id] == 75) {	// Author/Editor
+				if ($rdt_id === 158  &&  $bdt_to_rectype[$rdt_id] == 75) {	// Author/Editor
 					if ($this->_author_hashes) {
 						sort($this->_author_hashes);
 						$hhash .= '^' . join('$^', $this->_author_hashes) . '$';
 					}
 				}
 				else {
-					if ($this->_container  &&  $this->_container->getReferenceType() == $bdt_to_reftype[$rdt_id]) {
+					if ($this->_container  &&  $this->_container->getReferenceType() == $bdt_to_rectype[$rdt_id]) {
 						$hhash .= '^' . $this->_container->getHHash() . '$';
 					}
 				}
@@ -836,12 +836,12 @@ error_log(print_r($bib_requirement_names[55], 1));
 
 	function containerIsOptional() {
 		/* returns true if the container for this type is not a required field */
-		global $reftype_to_bdt_id_map;
+		global $rectype_to_bdt_id_map;
 
 		if (! $this->_container) return true;
 
-		$containerBDType = intval($reftype_to_bdt_id_map[ $this->_container->getReferenceType() ]);
-		$res = mysql_query("select * from defRecStructure where rst_DetailTypeID = $containerBDType and rst_RecTypeID = " . $this->_reftype . " and rst_RequirementType = 'Required'");
+		$containerBDType = intval($rectype_to_bdt_id_map[ $this->_container->getReferenceType() ]);
+		$res = mysql_query("select * from defRecStructure where rst_DetailTypeID = $containerBDType and rst_RecTypeID = " . $this->_rectype . " and rst_RequirementType = 'Required'");
 		if (mysql_num_rows($res) == 0) return true;
 		return false;
 	}
@@ -936,7 +936,7 @@ function decode_enum($heurist_type, &$foreign_field) {// saw TODO Enum change   
 
 
 function load_bib_detail_requirements() {
-	// $rec_detail_requirements is just an array of arrays; outer array is indexed by reftype,
+	// $rec_detail_requirements is just an array of arrays; outer array is indexed by rectype,
 	// inner array is a list of the bdt_ids required by that reference type.
 	// Should probably detail with eXcluded elements at some stage, but not now.
 	global $rec_detail_requirements;
@@ -955,7 +955,7 @@ function load_bib_detail_requirements() {
 
 
 function load_bib_requirement_names() {
-	// $bib_requirement_names is an array of arrays; outer array is indexed by reftype,
+	// $bib_requirement_names is an array of arrays; outer array is indexed by rectype,
 	// inner array is a mapping of dty_ID to rst_DisplayName, union a mapping of rst_DisplayName to dty_ID
 	global $bib_requirement_names;
 
@@ -995,11 +995,11 @@ function load_bib_type_name_to_id() {
 }
 
 
-function load_heurist_reftypes() {
-	// $heurist_reftypes is just the obvious mapping of rty_ID to the rest of the fields
-	global $heurist_reftypes;
+function load_heurist_rectypes() {
+	// $heurist_rectypes is just the obvious mapping of rty_ID to the rest of the fields
+	global $heurist_rectypes;
 
-	$heurist_reftypes = array();
+	$heurist_rectypes = array();
 
 	// mysql_connection_db_select('SHSSERI_bookmarks');
 	$res = mysql_query('select * from join defRecTypes where rty_ID');
@@ -1010,20 +1010,20 @@ function load_heurist_reftypes() {
 		$row['rty_TitleMask'] = str_replace(array('[[', ']]'), array('magic-open-bracket', 'magic-close-bracket'), $row['rty_TitleMask']);
 		$row['rty_TitleMask'] = preg_replace('/\\[([^\\]]+)\\]/e', "'['.strtolower('\\1').']'", $row['rty_TitleMask']);
 
-		$heurist_reftypes[$row['rty_ID']] = $row;
+		$heurist_rectypes[$row['rty_ID']] = $row;
 	}
 }
 
 
-function load_reftype_name_to_id() {
+function load_rectype_name_to_id() {
 	// $bib_type_names is the mapping of rty_Name to rty_ID
-	global $reftype_name_to_id;
+	global $rectype_name_to_id;
 
 	// mysql_connection_db_select('SHSSERI_bookmarks');
 	$res = mysql_query('select rty_ID, rty_Name from defRecTypes where rty_ID');
-	$reftype_name_to_id = array();
+	$rectype_name_to_id = array();
 	while ($row = mysql_fetch_row($res))
-		$reftype_name_to_id[strtolower($row[1])] = $row[0];
+		$rectype_name_to_id[strtolower($row[1])] = $row[0];
 }
 
 

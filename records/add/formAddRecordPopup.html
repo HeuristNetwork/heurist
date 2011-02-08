@@ -20,7 +20,7 @@
  <body class="popup" width=600 height=400>
   <script src="../../common/js/utilsLoad.js"></script>
   <script src="../../common/php/displayPreferences.php"></script>
-<div id="search"><b><span id=reftype-val></span></b><span id=title-val></span></div>
+<div id="search"><b><span id=rectype-val></span></b><span id=title-val></span></div>
 <div id="results"><iframe frameborder=0 class=tab id=edit-frame style="width: 100%; height: 100%;"></iframe></div>
 <div id="add_records_footer"><input type=button onClick="window.HEURIST.edit.save();" value="Save new record"></div>
   <script>
@@ -60,7 +60,7 @@ window.HEURIST.edit = {
 };
 
 window.HEURIST.parameters = top.HEURIST.parseParams(window.location.search);
-var reftype = parseInt(window.HEURIST.parameters["reftype"]);
+var rectype = parseInt(window.HEURIST.parameters["rectype"]);
 var titleBits = (window.HEURIST.parameters["title"] || "").split(/\s+/);
 for (var i=0; i < titleBits.length; ++i) {
 	titleBits[i] = titleBits[i].charAt(0).toUpperCase() + titleBits[i].substring(1);
@@ -68,64 +68,57 @@ for (var i=0; i < titleBits.length; ++i) {
 var title = titleBits.join(" ");
 document.getElementById("title-val").appendChild(document.createTextNode(title || ""));
 var url = window.HEURIST.parameters["url"];
-if (! reftype) {
-	var setInitialReftype = function() {
-		var reftype = reftypeDropdown.options[reftypeDropdown.selectedIndex].value;
+if (! rectype) {
+	var setInitialrectype = function() {
+		var rectype = rectypeDropdown.options[rectypeDropdown.selectedIndex].value;
 
 		var editFrame = document.getElementById("edit-frame");
-		editFrame.src = "../edit/tabs/publicInfoTab.html?reftype="+reftype;
+		editFrame.src = "../edit/tabs/publicInfoTab.html?rectype="+rectype;
 		editFrame.style.display = "block";
 
-		reftypeDropdown.onchange = setReftype;
+		rectypeDropdown.onchange = setrectype;
 	}
-	var setReftype = function() {
+	var setrectype = function() {
 		if (! confirm("Existing details will be lost - continue?")) return;
 
-		var reftype = reftypeDropdown.options[reftypeDropdown.selectedIndex].value;
+		var rectype = rectypeDropdown.options[rectypeDropdown.selectedIndex].value;
 
 		var editFrame = document.getElementById("edit-frame");
-		editFrame.contentWindow.setReftype(reftype);
+		editFrame.contentWindow.setrectype(rectype);
 	}
 
 
-	var reftypeDiv = document.getElementById("reftype-val");
-	var reftypeDropdown = document.createElement("select");
-		reftypeDropdown.id = "reftype";
+	var rectypeDiv = document.getElementById("rectype-val");
+	var rectypeDropdown = document.createElement("select");
+		rectypeDropdown.id = "rectype";
 
 	var j = 0;
-	var firstOption = reftypeDropdown.options[j++] = new Option("(select a record type)", "");
+	var firstOption = rectypeDropdown.options[j++] = new Option("(select a record type)", "");
 		firstOption.disabled = true;
 		firstOption.selected = true;
 
-	// bibliographic reftypes
+	// rectypes displayed in Groups by group display order then by display order within group
+	for (var grpID in top.HEURIST.rectypes.typesByGroup){
 	var grp = document.createElement("optgroup");
-	grp.label = "Bibliographic reference types";
-	reftypeDropdown.appendChild(grp);
-	for (var i=0; i < top.HEURIST.reftypes.primary.length; ++i) {
-		var value = top.HEURIST.reftypes.primary[i];
-		var name = top.HEURIST.reftypes.names[value];
-		reftypeDropdown.options[j++] = new Option(name, value);
+		grp.label = top.HEURIST.rectypes.groupNamesInDisplayOrder[grpID];
+		rectypeDropdown.appendChild(grp);
+		for (var i=0; i < top.HEURIST.rectypes.typesByGroup[grpID].length; ++i) {
+			var value = top.HEURIST.rectypes.typesByGroup[grpID][i];
+			var name = top.HEURIST.rectypes.names[value];
+			rectypeDropdown.appendChild( new Option(name, value));
 	}
-	// other reftypes
-	var grp = document.createElement("optgroup");
-	grp.label = "Other reference types";
-	reftypeDropdown.appendChild(grp);
-	for (var i=0; i < top.HEURIST.reftypes.other.length; ++i) {
-		var value = top.HEURIST.reftypes.other[i];
-		var name = top.HEURIST.reftypes.names[value];
-		reftypeDropdown.options[j++] = new Option(name, value);
 	}
 
-	reftypeDropdown.onchange = setInitialReftype;
+	rectypeDropdown.onchange = setInitialrectype;
 
-	reftypeDiv.appendChild(reftypeDropdown);
+	rectypeDiv.appendChild(rectypeDropdown);
 
 } else {
 	var editFrame = document.getElementById("edit-frame");
-	editFrame.src = "../edit/tabs/publicInfoTab.html?reftype="+reftype+"&title="+encodeURIComponent(title);
+	editFrame.src = "../edit/tabs/publicInfoTab.html?rectype="+rectype+"&title="+encodeURIComponent(title);
 	editFrame.style.display = "block";
 
-	document.getElementById("reftype-val").appendChild(document.createTextNode(top.HEURIST.reftypes.names[reftype]));
+	document.getElementById("rectype-val").appendChild(document.createTextNode(top.HEURIST.rectypes.names[rectype]));
 }
 
 </script>

@@ -3,7 +3,7 @@
 <xsl:template name="student_project_topic" match="record[type/@id=65]">
 <div id="{id}" class="record">
 	<a target="_new">
-		<xsl:attribute name="href">reftype_renderer/<xsl:value-of select="id"/></xsl:attribute>
+		<xsl:attribute name="href">rectype_renderer/<xsl:value-of select="id"/></xsl:attribute>
 		<xsl:value-of select="detail[@id=160]"/><!-- Title -->
 	</a>
 	<br/>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-	<xsl:template name="faq" match="reference[reftype/@id=47]">
+	<xsl:template name="faq" match="reference[rectype/@id=47]">
 		<tr>
 			<td>
-				<a target="_new" href="reftype_renderer/{id}">
+				<a target="_new" href="rectypes_renderer/{id}">
 					<xsl:value-of select="detail[@id=160]"/><!-- Title -->
 				</a>
 				<br/>

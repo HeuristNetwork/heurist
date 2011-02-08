@@ -258,20 +258,20 @@ error_log($query);
 		case 199:
 			if ($i_am_primary)
 				$relations[$rec_id]["OtherResource"] = array(
-					"Title" => $bd["title"], "Reftype" => $bd["rt"], "URL" => $bd["url"], "bibID" => $bd["dtl_Value"]
+					"Title" => $bd["title"], "Rectype" => $bd["rt"], "URL" => $bd["url"], "bibID" => $bd["dtl_Value"]
 				);
 			break;
 
 		case 202:
 			if (! $i_am_primary)
 				$relations[$rec_id]["OtherResource"] = array(
-					"Title" => $bd["title"], "Reftype" => $bd["rt"], "URL" => $bd["url"], "bibID" => $bd["dtl_Value"]
+					"Title" => $bd["title"], "Rectype" => $bd["rt"], "URL" => $bd["url"], "bibID" => $bd["dtl_Value"]
 				);
 			break;
 
 		case 638:
 			$relations[$rec_id]["InterpResource"] = array(
-				"Title" => $bd["title"], "Reftype" => $bd["rt"], "URL" => $bd["url"], "bibID" => $bd["dtl_Value"]);
+				"Title" => $bd["title"], "Rectype" => $bd["rt"], "URL" => $bd["url"], "bibID" => $bd["dtl_Value"]);
 			break;
 
 		case 201:

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-    <xsl:template name="conference_paper" match="reference[reftype/@id=31]">
+    <xsl:template name="conference_paper" match="reference[rectype/@id=31]">
         <tr>
             <td>
                  <xsl:choose>

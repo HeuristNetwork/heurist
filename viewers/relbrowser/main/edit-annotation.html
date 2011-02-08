@@ -194,7 +194,7 @@ function displayResults(r, active) {
 		var innerHTML = "";
 		for (var i = 0; i < r.length; i++) {
 			if (r[i].getRecordType().getID() != 52) {
-				innerHTML += "<img src=/heurist/img/reftype/"+r[i].getRecordType().getID()+".gif> ";
+				innerHTML += "<img src=/heurist/img/rectype/"+r[i].getRecordType().getID()+".gif> ";
 				innerHTML += "<a href=# onclick=\"setRecord("+r[i].getID()+", this.innerHTML, '" + active +"'); return false;\">" + r[i].getTitle() + "</a><br/>";
 			}
 		}

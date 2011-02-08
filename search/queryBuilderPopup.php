@@ -71,13 +71,13 @@ function update(elt) {
 		typeOptgroup.innerHTML = "";	// remove all record-type-specific options
 
 		var rt = elt.options[elt.selectedIndex].value.replace(/"/g, "");;
-		for (var rftID in top.HEURIST.reftypes.names) {
-			if (top.HEURIST.reftypes.names[rftID] === rt) {
+		for (var rftID in top.HEURIST.rectypes.names) {
+			if (top.HEURIST.rectypes.names[rftID] === rt) {
 				rt = rftID;
 				break;
 			}
 		}
-		var bdr = top.HEURIST.bibDetailRequirements.valuesByReftypeID[rt];
+		var bdr = top.HEURIST.bibDetailRequirements.valuesByrectypeID[rt];
 		if (! bdr) {
 			// no type specified; hide type-specific options
 			typeOptgroup.style.display = "none";
@@ -87,7 +87,7 @@ function update(elt) {
 			for (var bdtID in bdr) {
 				typeOptgroup.appendChild(new Option(bdr[bdtID][0], '"' + bdts[bdtID][1] + '"'));
 			}
-			typeOptgroup.label = top.HEURIST.reftypes.names[rt] + " fields";
+			typeOptgroup.label = top.HEURIST.rectypes.names[rt] + " fields";
 			typeOptgroup.style.display = "";
 		}
 
@@ -434,7 +434,7 @@ function clear_fields() {
       <nobr>
 <select name=fieldtype id=fieldtype onchange="update(this);" style="width: 200px;">
  <option value="" style="font-weight: bold;">Any field</option>
- <optgroup id=rec_type-specific-fields label="Reftype specific fields" style="display: none;"></optgroup>
+ <optgroup id=rec_type-specific-fields label="rectype specific fields" style="display: none;"></optgroup>
  <optgroup label="Generic fields">
 <?php
 	$res = mysql_query('select dty_ID, dty_Name from '.DATABASE.'.defDetailTypes order by dty_Name');

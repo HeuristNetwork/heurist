@@ -8,7 +8,7 @@
 		</xsl:for-each>
 	</xsl:if>
 	<a target="_new">
-		<xsl:attribute name="href">reftype_renderer/<xsl:value-of select="id"/></xsl:attribute>
+		<xsl:attribute name="href">rectype_renderer/<xsl:value-of select="id"/></xsl:attribute>
 		<xsl:value-of select="detail[@id=160]"/><!-- Title -->
 	</a>
 	(<xsl:value-of select="detail[@id=177]/text()"/><!-- Start Date -->

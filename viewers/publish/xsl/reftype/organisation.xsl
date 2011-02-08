@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-    <xsl:template name="organisation" match="reference[reftype/@id=53]">
+    <xsl:template name="organisation" match="reference[rectype/@id=53]">
         <tr>
             <td>
                 <a target="_new">
-                    <xsl:attribute name="href">reftype_renderer/<xsl:value-of select="id"/></xsl:attribute>
+                    <xsl:attribute name="href">rectype_renderer/<xsl:value-of select="id"/></xsl:attribute>
                     <xsl:value-of select="title"/>
                 </a>
                 <br/>

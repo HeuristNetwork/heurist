@@ -33,7 +33,7 @@
 	<!-- old bibliography style output 
 		maria shvedova, 24/05/2007 -->
 	<!-- journal -->
-	<xsl:template name="journal_volume" match="reference[reftype/@id=28]">
+	<xsl:template name="journal_volume" match="reference[rectype/@id=28]">
 		<tr>
 			<td>
 				
@@ -52,7 +52,7 @@
 		</tr>
 	</xsl:template>
 	<!-- journal article etc. -->
-	<xsl:template name="publications" match="reference[reftype/@id=3 or reftype/@id=10 ]">
+	<xsl:template name="publications" match="reference[rectype/@id=3 or rectype/@id=10 ]">
 		<tr>
 			<td>
 				<!-- creator -->
@@ -79,7 +79,7 @@
 	</xsl:template>
 	
 	
-	<xsl:template name="conf-paper" match="reference[reftype/@id=31]">
+	<xsl:template name="conf-paper" match="reference[rectype/@id=31]">
 		<tr>
 			<td>
 				<!-- creator -->
@@ -105,7 +105,7 @@
 		</tr>
 	</xsl:template>
 	<!-- book etc. -->
-	<xsl:template name="book" match="reference[reftype/@id=5 ]">
+	<xsl:template name="book" match="reference[rectype/@id=5 ]">
 		<tr>
 			<td>
 				<!-- creator -->
@@ -128,7 +128,7 @@
 	</xsl:template>
 	<!-- book chapter -->
 	
-	<xsl:template name="book-chap" match="reference[reftype/@id=4 ]">
+	<xsl:template name="book-chap" match="reference[rectype/@id=4 ]">
 		<tr>
 			<td>
 				<!-- creator -->
@@ -155,7 +155,7 @@
 	</xsl:template>
 	
 	<!-- report  -->
-	<xsl:template name="report" match="reference[reftype/@id=12 ]">
+	<xsl:template name="report" match="reference[rectype/@id=12 ]">
 		<tr>
 			<td>
 				<!-- creator -->
@@ -178,7 +178,7 @@
 	</xsl:template>
 	
 	<!-- thesis  -->
-	<xsl:template name="thesis" match="reference[reftype/@id=13 ]">
+	<xsl:template name="thesis" match="reference[rectype/@id=13 ]">
 		<tr>
 			<td>
 				<!-- creator -->
@@ -201,7 +201,7 @@
 	</xsl:template>
 	
 	<!-- thesis  -->
-	<xsl:template name="conference_proceedings" match="reference[reftype/@id=7 ]">
+	<xsl:template name="conference_proceedings" match="reference[rectype/@id=7 ]">
 		<tr>
 			<td>
 				<!-- creator -->
@@ -282,7 +282,7 @@
 		
 	</xsl:template>
 	<!-- audio -->
-	<xsl:template name="audio" match="reference[reftype/@id=83]">
+	<xsl:template name="audio" match="reference[rectype/@id=83]">
 		<tr>
 			<td>
 				<!-- creator -->
@@ -313,7 +313,7 @@
 	
 	
 	
-	<xsl:template name="video" match="reference[reftype/@id=84]">
+	<xsl:template name="video" match="reference[rectype/@id=84]">
 		<tr>
 			<td>
 				<!-- creator -->

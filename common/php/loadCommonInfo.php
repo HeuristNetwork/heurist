@@ -53,40 +53,47 @@ print "top.HEURIST.instance.exploreURL = " . json_format(EXPLORE_URL) . ";\n";
 print "if (!top.HEURIST.basePath) top.HEURIST.basePath = ".json_format(HEURIST_SITE_PATH) . ";\n";
 print "if (!top.HEURIST.baseURL) top.HEURIST.baseURL = ".json_format(HEURIST_URL_BASE) . ";\n";
 
-/* Reftypes are an array of names sorted alphabetically, and lists of
-   primary (bibliographic) and other reftypes, also sorted alphbetically */
-print "top.HEURIST.reftypes = {};\n";
+/* rectypes are an array of names sorted alphabetically, and lists of
+   primary (bibliographic) and other rectypes, also sorted alphbetically */
+print "top.HEURIST.rectypes = {};\n";
 
 $names = array();
 $res = mysql_query("select rty_ID, rty_Name from defRecTypes where rty_ID order by rty_Name");
 while ($row = mysql_fetch_assoc($res)) {
 	$names[$row["rty_ID"]] = $row["rty_Name"];
 }
-print "top.HEURIST.reftypes.names = " . json_format($names) . ";\n\n";
+print "top.HEURIST.rectypes.names = " . json_format($names) . ";\n\n";
 
 $plurals = array();
 $res = mysql_query("select rty_ID, rty_Plural from defRecTypes where rty_ID");
 while ($row = mysql_fetch_assoc($res)) {
 	$plurals[$row["rty_ID"]] = $row["rty_Plural"];
 }
-print "top.HEURIST.reftypes.pluralNames = " . json_format($plurals) . ";\n\n";
+print "top.HEURIST.rectypes.pluralNames = " . json_format($plurals) . ";\n\n";
 
-$primary = array();
-$res = mysql_query("select rty_ID from defRecTypes where rty_ID and rty_RecTypeGroupID = 1 order by rty_Name");
+$groups = array();
+$res = mysql_query("select * from defRecTypeGroups where 1 order by rtg_Order, rtg_Name");
 while ($row = mysql_fetch_assoc($res)) {
-	array_push($primary, intval($row["rty_ID"]));
+	$groups[$row["rtg_ID"]] = $row["rtg_Name"];
 }
-print "top.HEURIST.reftypes.primary = " . json_format($primary) . ";\n\n";
+print "top.HEURIST.rectypes.groupNamesInDisplayOrder = " . json_format($groups) . ";\n\n";
+error_log("get types by group");
+$typesByGroup = array();
+$res = mysql_query("select rtg_ID,rty_ID
+						from defRecTypes left join defRecTypeGroups on rtg_ID = rty_RecTypeGroupID
+						where 1 order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
+while ($row = mysql_fetch_assoc($res)) {
+error_log(print_r($row,true));
+	if (!array_key_exists($row['rtg_ID'],$typesByGroup)){
+		$typesByGroup[$row['rtg_ID']] = array();
+	}
+	array_push($typesByGroup[$row['rtg_ID']], intval($row["rty_ID"]));
+}
+error_log(print_r($typesByGroup,true));
+print "top.HEURIST.rectypes.typesByGroup = " . json_format($typesByGroup) . ";\n\n";
 	// saw FIXME TODO change this to create an array by RecTypeGroup.
-$other = array();
-$res = mysql_query("select rty_ID from defRecTypes where rty_ID and rty_RecTypeGroupID > 1 order by rty_Name");
-while ($row = mysql_fetch_assoc($res)) {
-	array_push($other, intval($row["rty_ID"]));
-}
-print "top.HEURIST.reftypes.other = " . json_format($other) . ";\n\n\n";
 
-
-/* bibDetailRequirements contains colNames valuesByReftypeID,
+/* bibDetailRequirements contains colNames valuesByrectypeID,
  * which contains
  */
 
@@ -95,7 +102,7 @@ $rec_types = mysql__select_array("defRecStructure", "distinct rst_RecTypeID", "1
 
 print "\ntop.HEURIST.bibDetailRequirements = {\n";
 print "\tcolNames: [ \"" . join("\", \"", $colNames) . "\" ],\n";
-print "\tvaluesByReftypeID: {\n";
+print "\tvaluesByrectypeID: {\n";
 
 $first = true;
 foreach ($rec_types as $rec_type) {
@@ -115,7 +122,7 @@ foreach ($rec_types as $rec_type) {
 }
 print "\n\t\t}\n\t},\n";
 
-print "\torderByReftypeID: {\n";
+print "\torderByrectypeID: {\n";
 
 $first = true;
 foreach ($rec_types as $rec_type) {

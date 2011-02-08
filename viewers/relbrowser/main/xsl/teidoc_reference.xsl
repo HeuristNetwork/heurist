@@ -6,7 +6,7 @@
 
 	<xsl:include href="clean_quote.xsl"/>
 	<xsl:template
-		match="related[reftype=99] | pointer[reftype/@id=99] | reverse-pointer[reftype/@id=99]">
+		match="related[rectype=99] | pointer[rectype/@id=99] | reverse-pointer[rectype/@id=99]">
 		<xsl:param name="matches"/>
 		<xsl:choose>
 			<xsl:when test="$matches">
@@ -21,7 +21,7 @@
 			</xsl:when>
 			<xsl:otherwise>
 				<div class="relatedItem">
-						<!--a href="{$base}/item/{id}/{/export/references/reference/reftype/@id}?flavour={$flavour}#ref1"-->
+						<!--a href="{$base}/item/{id}/{/export/references/reference/rectype/@id}?flavour={$flavour}#ref1"-->
 
 						<!-- chose if base id = annotation target id - then include onclick handler and href is below -->
 						<div class="editIcon">
@@ -48,7 +48,7 @@
 									<xsl:value-of select="pointer[@id=322]/title"/>
 								</em>
 								<img style="vertical-align: middle;horizontal-align: right"
-									src="{$hBase}common/images/reftype-icons/{pointer[@id=322]/reftype/@id}.png"/>)
+									src="{$hBase}common/images/rectype-icons/{pointer[@id=322]/rectype/@id}.png"/>)
 								</span>
 							</xsl:otherwise>
 						</xsl:choose>
@@ -64,7 +64,7 @@
 		</xsl:choose>
 	</xsl:template>
 
-	<xsl:template match="reverse-pointer[reftype/@id=99]" mode="footnote">
+	<xsl:template match="reverse-pointer[rectype/@id=99]" mode="footnote">
 		<div name="footnote" recordID="{id}">
 
 			<div name="footnotesleft">
@@ -102,10 +102,10 @@
 											</td>
 											<td>
 
-												<!-- change this to pick up the actuall system name of the reftye or to use the mapping method as in JHSB that calls human-readable-names.xml -->
+												<!-- change this to pick up the actuall system name of the rectype or to use the mapping method as in JHSB that calls human-readable-names.xml -->
 												<img
 												style="vertical-align: middle;horizontal-align: right"
-												src="{$hBase}common/images/reftype-icons/{pointer[@id=152]/reftype/@id}.png"
+												src="{$hBase}common/images/rectype-icons/{pointer[@id=152]/rectype/@id}.png"
 												/>
 											</td>
 										</tr>
@@ -124,7 +124,7 @@
 	</xsl:template>
 
 
-	<xsl:template match="reference[reftype/@id=99]">
+	<xsl:template match="reference[rectype/@id=99]">
 <xsl:comment>reference template</xsl:comment>
 		<script src="{$appBase}js/highlight.js"/>
 		<style>

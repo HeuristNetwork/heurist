@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-	<xsl:template name="news_item" match="reference[reftype/@id=48]">
+	<xsl:template name="news_item" match="reference[rectype/@id=48]">
         <xsl:param name="style"/>
         <xsl:param name="year"/> 
         <xsl:param name="month"/>
@@ -44,7 +44,7 @@
 					</xsl:for-each>
 					<br/>
 				</xsl:if>
-				<a target="_new" href="reftype_renderer/{id}">
+				<a target="_new" href="rectype_renderer/{id}">
 					<xsl:value-of select="detail[@id=160]"/><!-- Title -->
 				</a>
 				<xsl:text>,&#160;

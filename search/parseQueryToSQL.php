@@ -1121,7 +1121,7 @@ function construct_legacy_search() {
 	if (@$_REQUEST['search_tagString']) $_REQUEST['k'] = $_REQUEST['search_tagString'];
 	if (@$_REQUEST['search_url']) $_REQUEST['u'] = $_REQUEST['search_url'];
 	if (@$_REQUEST['search_description']) $_REQUEST['n'] = $_REQUEST['search_description'];
-	if (@$_REQUEST['search_reftype']) $_REQUEST['r'] = $_REQUEST['search_reftype'];
+	if (@$_REQUEST['search_rectype']) $_REQUEST['r'] = $_REQUEST['search_rectype'];
 	if (@$_REQUEST['search_user_id']) $_REQUEST['uid'] = $_REQUEST['search_user_id'];
 
 

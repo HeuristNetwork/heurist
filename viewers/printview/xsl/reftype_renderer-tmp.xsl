@@ -2,7 +2,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 
 	<xsl:param name="arg"/>
-	<xsl:include href="reftype_default.xsl"/>
+	<xsl:include href="rectype_default.xsl"/>
 	<xsl:include href="course_unit.xsl"/>
 	<xsl:include href="event.xsl"/>
 	<xsl:include href="conference.xsl"/>
@@ -28,7 +28,7 @@
 			<!-- name (desc.) that will appear in dropdown list -->
 			[name]Departmental website style temp[/name]
 			<!-- match the name of the stylesheet-->
-			[output]reftype_renderer-tmp[/output]
+			[output]rectype_renderer-tmp[/output]
 		</xsl:comment>
 		<!-- end including code -->
 		<html>
@@ -66,7 +66,7 @@
 		<tr>
 			<td style="padding-right: 10px;">
 				<img>
-					<xsl:attribute name="src">http://heuristscholar.org/reftype/<xsl:value-of
+					<xsl:attribute name="src">http://heuristscholar.org/rectype/<xsl:value-of
 							select="type/@id"/>.gif</xsl:attribute>
 				</img>
 			</td>
@@ -189,7 +189,7 @@
 </xsl:template>
 
 <xsl:template name="title_group" mode="blah">
-	<!-- only output reftype title once -->
+	<!-- only output rectype title once -->
 	<table>
 		<tr name="test">
 			<td id="title">

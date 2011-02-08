@@ -60,8 +60,8 @@ function showRecordProperties() {
 	}
 
 	// fill in the toolbar fields with the details for this record
-	document.getElementById('reftype-val').innerHTML = '';
-	document.getElementById('reftype-val').appendChild(document.createTextNode(window.HEURIST.record.reftype));
+	document.getElementById('rectype-val').innerHTML = '';
+	document.getElementById('rectype-val').appendChild(document.createTextNode(window.HEURIST.record.rectype));
 
 	document.getElementById('title-val').innerHTML = '';
 	document.getElementById('title-val').appendChild(document.createTextNode(window.HEURIST.record.title));
@@ -127,7 +127,7 @@ top.HEURIST.registerEvent(window, "load", showRecordProperties);
   <table border=0 cellspacing=0 cellpadding=0 class=expander>
    <tr>
     <td style="height: 60px; padding: 5px;">
-     <div><b><span id=reftype-val></span></b></div>
+     <div><b><span id=rectype-val></span></b></div>
      <div><span id=title-val></span></div>
     </td>
     <td style="width: 120px;">

@@ -61,7 +61,7 @@ $use_site_hierarchy = array_key_exists('site_hierarchy', $_REQUEST);
 <input type="hidden" name="bkmrk_bkmk_description" value="<?= htmlspecialchars($_REQUEST['bkmk_description']) ?>">
 <input type="hidden" name="f" value="<?= htmlspecialchars($_REQUEST['f']) ?>">
 <input type="hidden" name="tag" value="<?= htmlspecialchars($_REQUEST['tag']) ?>">
-<input type="hidden" name="bib_reftype" value="<?= htmlspecialchars(@$_REQUEST['bib_reftype']) ?>">
+<input type="hidden" name="bib_rectype" value="<?= htmlspecialchars(@$_REQUEST['bib_rectype']) ?>">
 
 <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse;" width="100%" class="normal">
 

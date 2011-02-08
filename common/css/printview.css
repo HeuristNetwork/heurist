@@ -67,7 +67,7 @@ input { padding: 0; margin: 0; }
 #add_records_footer {position:absolute; right:0; left:0; bottom:0; height:20px;background-image: url("../images/backgrounds/banner_bg.png");background-position: bottom;background-repeat: repeat-x;padding: 0 1ex;}
 #add_records_footer a img {vertical-align: text-bottom;}
 .tab {background-color: #ECF1FB !important;} /* to match tabs in edit */
-#reftype-val {left:2ex;position:relative;top:2.5ex;}
+#rectype-val {left:2ex;position:relative;top:2.5ex;}
 #mainbody {margin-top:2ex}
 input[type="radio"] {vertical-align: text-top;}
 .div-section {padding: 5px 0;}
@@ -98,7 +98,7 @@ img {border:0 none;vertical-align:middle;}
 #loading{position: absolute;top:0;bottom:0;left:0;right:0; background-image: url("../images/loading-animation-white.gif");background-position: 50% 50%;background-repeat: no-repeat;}
 .loading{background-image: url("../images/loading-animation-white.gif");background-position: 50% 50%;background-repeat: no-repeat;height:100px}
 .separator_row {height: 1px; border-bottom: 1px solid #A4B4CB;clear:both}
-.reftype { color: #999999;vertical-align: top; }
+.rectype { color: #999999;vertical-align: top; }
 .record-table {margin-bottom: 10px;}
 record {display: block;margin:10px}
 records {margin:20px}

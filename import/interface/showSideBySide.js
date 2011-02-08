@@ -16,7 +16,7 @@ function formatDetails(bib, prefix, indent) {
 	if (! indent) indent = 0;
 
 	var html = "";
-	var bdr = top.HEURIST.bibDetailRequirements.valuesByReftypeID[bib.reftype];
+	var bdr = top.HEURIST.bibDetailRequirements.valuesByrectypeID[bib.rectype];
 
 	for (var bdt_id in bib.values) {
 		var name = /* prefix + " " + */ bdr[bdt_id]? bdr[bdt_id][0]  :  top.HEURIST.bibDetailTypes.valuesByBibDetailTypeID[bdt_id][1];
@@ -32,13 +32,13 @@ function formatDetails(bib, prefix, indent) {
 				var innerBibID = parseInt(bib.values[bdt_id][i]);
 				var innerBib = bibs[innerBibID];
 				if (! innerBib) continue;
-				var reftype = top.HEURIST.reftypes.names[innerBib.reftype];
+				var rectype = top.HEURIST.rectypes.names[innerBib.rectype];
 
-				if (innerBib.reftype == 75) {
+				if (innerBib.rectype == 75) {
 					// author editor is treated specially
 					html += "<tr><td style='padding-left: " + indent + "em;'><i>" + prefix + " Author/Editor</i></td><td>" + htmlEscape(innerBib.title) + "</td></tr>";
 				}
-				else html += formatDetails(innerBib, reftype, indent+1);
+				else html += formatDetails(innerBib, rectype, indent+1);
 			}
 		}
 	}
@@ -63,7 +63,7 @@ function fillInColumn(colNum, bibID) {
 
 	var bib = bibs[bibID];
 
-	if (! colNum) bibCell.innerHTML = "<b>Imported " + htmlEscape(top.HEURIST.reftypes.names[bib.reftype]).toLowerCase() + " record</b>";
+	if (! colNum) bibCell.innerHTML = "<b>Imported " + htmlEscape(top.HEURIST.rectypes.names[bib.rectype]).toLowerCase() + " record</b>";
 	else {
 		bibCell.innerHTML = "<b>Existing record #" + bibID + "</b>";
 		if (altBibIDs.length > 0) {

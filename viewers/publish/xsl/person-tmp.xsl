@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-    <xsl:template name="person" match="reference[reftype/@id=55]">
+    <xsl:template name="person" match="reference[rectype/@id=55]">
         <tr>
             <td hrecord="{id}">
 				<xsl:if test="detail[@id=223]"><!-- thumbnail -->
@@ -11,7 +11,7 @@
 					</div>
 				</xsl:if>
 				<div>
-	                <a target="_new" href="reftype_renderer/{id}">
+	                <a target="_new" href="rectype_renderer/{id}">
 	                    <xsl:value-of select="title"/>
 	                </a>
 				</div>

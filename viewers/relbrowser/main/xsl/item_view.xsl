@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:str="http://exslt.org/strings" version="1.0" xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 	<xsl:param name="id"/>
-	<xsl:param name="related_reftype_filter"/>
+	<xsl:param name="related_rectype_filter"/>
 	<xsl:include href="myvariables.xsl"/>
 	<xsl:include href="author_editor.xsl"/>
 	<xsl:include href="books-etc.xsl"/>
@@ -31,7 +31,7 @@
 				<script src="{$hBase}external/jquery/jquery.js"/>
 				<script>
 					var itemPath = "<xsl:value-of select="$cocoonBase"/>item/";
-					var imgpath = "<xsl:value-of select="$hBase"/>common/images/reftype-icons/";
+					var imgpath = "<xsl:value-of select="$hBase"/>common/images/rectype-icons/";
 
 					function showFootnote(recordID) {
 						document.getElementById("page").style.bottom = "105px";
@@ -97,7 +97,7 @@
 					top.HEURIST.fireEvent = function(e, e){};</script>
 				<script src="{$hBase}common/php/loadUserInfo.php?instance={$instanceName}"/>
 				<!-- Time Map rendering -->
-				<xsl:if test="export/references/reference/reftype[@id=103 or @id=51 or @id=165 or @id=122 or @id=57]">
+				<xsl:if test="export/references/reference/rectype[@id=103 or @id=51 or @id=165 or @id=122 or @id=57]">
 					<script>
 						var appBase = '<xsl:value-of select="$appBase"/>';
 						var enableMapTrack  = <xsl:value-of select="$enableMapTrack"/>;
@@ -195,7 +195,7 @@
 				<div class="banner">
 						<a href="{$appBase}edit.html?id={$currentid}&amp;instance={$instanceName}" onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;" title="edit" style="background-image:url({$hBase}common/images/edit-pencil.png)">
 						Edit Record</a><nobr></nobr>
-					<xsl:if test="export/references/reference/reftype/@id = 98">
+					<xsl:if test="export/references/reference/rectype/@id = 98">
 					<xsl:if test=" $id != $home-id">
 						<a href="#" onclick="window.open('{$appBase}edit-annotation.html?refid={export/references/reference/id}','','status=0,scrollbars=1,resizable=1,width=700,height=500'); return false;" title="add Annotation" style="background-image:url({$appBase}images/annotation_tool.png)">Add Annotation</a>
 						</xsl:if>
@@ -205,7 +205,7 @@
 				</div>
 
 <!--					<xsl:choose>
-						<xsl:when test="export/references/reference/reftype[@id = 51 or @id = 55]" -->
+						<xsl:when test="export/references/reference/rectype[@id = 51 or @id = 55]" -->
 							<div id="page-inner">
 								<!-- full version of record -->
 								<xsl:apply-templates select="export/references/reference"/>
@@ -224,7 +224,7 @@
 				</div>
 				<div id="footnotes">
 					<div id="footnotes-inner">
-						<xsl:apply-templates select="export/references/reference/reverse-pointer[reftype/@id=99]" mode="footnote"/>
+						<xsl:apply-templates select="export/references/reference/reverse-pointer[rectype/@id=99]" mode="footnote"/>
 					</div>
 				</div>
 			</body>
@@ -263,10 +263,10 @@
 					<xsl:when test="@type != 'Map image layer reference' and @type != 'Source entity reference' and @type != 'Entity reference' and @type != 'Target entity reference'">
 						<!-- small>[<xsl:value-of select="local-name()"/>]</small -->
 						<xsl:call-template name="related_items_by_reltype">
-							<xsl:with-param name="reftype_id" select="reftype/@id"/>
+							<xsl:with-param name="rectype_id" select="rectype/@id"/>
 							<xsl:with-param name="reltype" select="@type"/>
 							<xsl:with-param name="reldirection" select="local-name()"/>
-							<xsl:with-param name="items" select="$items[@type = current()/@type and reftype/@id != 52]"/>
+							<xsl:with-param name="items" select="$items[@type = current()/@type and rectype/@id != 52]"/>
 						</xsl:call-template>
 					</xsl:when>
 				</xsl:choose>
@@ -276,23 +276,23 @@
 
 	</xsl:template>
 	<xsl:template name="related_items_by_reltype">
-		<xsl:param name="reftype_id"/>
+		<xsl:param name="rectype_id"/>
 		<xsl:param name="reltype"/>
 		<xsl:param name="reldirection"/>
 		<xsl:param name="items"/>
 		<xsl:if test="count($items) &gt; 0">
-			<xsl:if test="$reftype_id != 150  or  ../reftype/@id = 103">
+			<xsl:if test="$rectype_id != 150  or  ../rectype/@id = 103">
 
 				<div class="relType">
 						<div class="relTypeHeading">
 							<xsl:choose>
-								<xsl:when test="$reftype_id = 99">Annotations</xsl:when>
+								<xsl:when test="$rectype_id = 99">Annotations</xsl:when>
 								<xsl:otherwise>
 
 									<xsl:call-template name="translate_relations">
 										<xsl:with-param name="reltype" select="$reltype"/>
 										<xsl:with-param name="reldirection" select="$reldirection"/>
-										<xsl:with-param name="reftype_id" select="$reftype_id"/>
+										<xsl:with-param name="rectype_id" select="$rectype_id"/>
 									</xsl:call-template>
 									<!-- xsl:value-of select="$reltype"/ -->
 									<xsl:value-of select="../@id"/>
@@ -314,23 +314,23 @@
 	</xsl:template>
 
 	<xsl:template name="related_items">
-		<xsl:param name="reftype_id"/>
-		<xsl:param name="reftype_label"/>
+		<xsl:param name="rectype_id"/>
+		<xsl:param name="rectype_label"/>
 		<xsl:param name="items"/>
 		<xsl:if test="count($items) &gt; 0">
-			<xsl:if test="$reftype_id != 150  or  ../reftype/@id = 103">
+			<xsl:if test="$rectype_id != 150  or  ../rectype/@id = 103">
 				<tr>
 					<td>
 						<b>
-							<a href="#" onclick="openRelated({$reftype_id}); return false;">
-								<xsl:value-of select="$reftype_label"/>
+							<a href="#" onclick="openRelated({$rectype_id}); return false;">
+								<xsl:value-of select="$rectype_label"/>
 								<!-- (<xsl:value-of select="count($items)"/>) -->
 							</a>
 						</b>
 					</td>
 				</tr>
-				<tr name="related" reftype="{$reftype_id}">
-					<xsl:if test="$reftype_id!=$related_reftype_filter">
+				<tr name="related" rectype="{$rectype_id}">
+					<xsl:if test="$rectype_id!=$related_rectype_filter">
 						<xsl:attribute name="style">display: none;</xsl:attribute>
 					</xsl:if>
 					<td>
@@ -346,7 +346,7 @@
 	</xsl:template>
 	<xsl:template match="related | pointer | reverse-pointer">
 		<!-- this is where the display work is done summarising the related items of various types - pictures, events etc -->
-		<!-- reftype-specific templates take precedence over this one -->
+		<!-- rectype-specific templates take precedence over this one -->
 		<xsl:param name="matches"/>
 		<!-- trickiness!
 		     First off, this template will catch a single related (/ pointer / reverse-pointer) record,
@@ -372,13 +372,13 @@
 					</div>
 					<div class="thumbnailCell">
 						<!-- PRESENTATION  for KML Map 103, Historical Event 51, KML file 165 , Place record 122 and Site record 57-->
-						<xsl:if test="(../reftype/@id = 103 or ../reftype/@id = 165 or ../reftype/@id = 122 or ../reftype/@id = 57)">
+						<xsl:if test="(../rectype/@id = 103 or ../rectype/@id = 165 or ../rectype/@id = 122 or ../rectype/@id = 57)">
 							<xsl:call-template name="renderAppropriateLegend">
 								<xsl:with-param name="record" select="."/>
 								<xsl:with-param name="themeToUse" select="$relatedTheme"/>
 							</xsl:call-template>
 						</xsl:if>
-						<xsl:if test=" ../reftype/@id=51">
+						<xsl:if test=" ../rectype/@id=51">
 							<xsl:choose>
 								<xsl:when test="@id = 276">
 									<!-- pointer to a site record -->
@@ -433,9 +433,9 @@
 							</xsl:choose>
 						</a>
 					</div>
-					<div class="reftypeIcon">
-						<!-- change this to pick up the actuall system name of the reftye or to use the mapping method as in JHSB that calls human-readable-names.xml -->
-						<img style="vertical-align: middle;horizontal-align: right" src="{$hBase}common/images/reftype-icons/{reftype/@id}.png" title="{reftype}"/>
+					<div class="rectypeIcon">
+						<!-- change this to pick up the actuall system name of the rectype or to use the mapping method as in JHSB that calls human-readable-names.xml -->
+						<img style="vertical-align: middle;horizontal-align: right" src="{$hBase}common/images/rectype-icons/{rectype/@id}.png" title="{rectype}"/>
 					</div>
                 </div>
 			</xsl:otherwise>
@@ -448,9 +448,9 @@
 
 
             <div class="recordTypeHeading">
-					<img src="{$hBase}common/images/reftype-icons/{reftype/@id}.png"/>
+					<img src="{$hBase}common/images/rectype-icons/{rectype/@id}.png"/>
 					<xsl:text> </xsl:text>
-					<xsl:value-of select="reftype"/>
+					<xsl:value-of select="rectype"/>
             </div>
 
 			<div class="detailRow">

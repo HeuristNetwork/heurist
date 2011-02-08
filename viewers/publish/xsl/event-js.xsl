@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-    <xsl:template name="event" match="reference[reftype/@id=64]">
+    <xsl:template name="event" match="reference[rectype/@id=64]">
 document.writeln("        <tr>");
 document.writeln("            <!--td><xsl:value-of select="detail[@id=205]"/></td--><!-- Discipline -->");
 document.writeln("            <!--td><xsl:value-of select="detail[@id=232]"/></td--><!-- Event type -->");
@@ -10,7 +10,7 @@ document.writeln("            </td>");
 document.writeln("		</tr>");
 document.writeln("		<tr>");
 document.writeln("            <td>");
-                <xsl:for-each select="container[reftype/@id=75]"><!-- Author/Editor -->
+                <xsl:for-each select="container[rectype/@id=75]"><!-- Author/Editor -->
 document.writeln("                    <xsl:value-of select="title"/>,");
                 </xsl:for-each>
 document.writeln("            </td>");

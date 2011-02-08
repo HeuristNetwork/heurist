@@ -2,7 +2,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 
 
-	<xsl:template name="note" match="reference[reftype/@id=2]">
+	<xsl:template name="note" match="reference[rectype/@id=2]">
 		<table width="100%">
 			<tr>
 				<td width="100%">
@@ -14,7 +14,7 @@
 
 	</xsl:template>
 
-	<xsl:template name="book" match="reference[reftype/@id=5]">
+	<xsl:template name="book" match="reference[rectype/@id=5]">
 		<table width="100%">
 			<tr>
 				<td width="100%">
@@ -61,7 +61,7 @@
 
 	</xsl:template>
 
-	<!-- xsl:template name="person-summary" match="reference[reftype/@id=55]">
+	<!-- xsl:template name="person-summary" match="reference[rectype/@id=55]">
 		<table>
 			<tr>
 				<td>

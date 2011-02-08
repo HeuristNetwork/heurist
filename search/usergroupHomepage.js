@@ -71,22 +71,16 @@ top.HEURIST.workgroup = {
 
 
 	renderFilterOptions: function() {
-		var reftype_select = document.getElementById("reftype-select");
-		if (reftype_select.options.length <= 1) {
+		var rectype_select = document.getElementById("rectype-select");
+		// rectypes displayed in Groups by group display order then by display order within group
+		for (var grpID in top.HEURIST.rectypes.typesByGroup){
 			var grp = document.createElement("optgroup");
-			grp.label = "Bibliographic reference types";
-			reftype_select.appendChild(grp);
-			for (var i = 0; i < top.HEURIST.reftypes.primary.length; ++i) {
-				var rft = top.HEURIST.reftypes.primary[i];
-				reftype_select.options[reftype_select.length] = new Option(top.HEURIST.reftypes.names[rft], rft);
-			}
-
-			var grp = document.createElement("optgroup");
-			grp.label = "Other reference types";
-			reftype_select.appendChild(grp);
-			for (var i = 0; i < top.HEURIST.reftypes.other.length; ++i) {
-				var rft = top.HEURIST.reftypes.other[i];
-				reftype_select.options[reftype_select.length] = new Option(top.HEURIST.reftypes.names[rft], rft);
+			grp.label = top.HEURIST.rectypes.groupNamesInDisplayOrder[grpID];
+			rectype_select.appendChild(grp);
+			for (var i=0; i < top.HEURIST.rectypes.typesByGroup[grpID].length; ++i) {
+				var value = top.HEURIST.rectypes.typesByGroup[grpID][i];
+				var name = top.HEURIST.rectypes.names[value];
+				rectype_select.options[j++] = new Option(name, value);
 			}
 		}
 
@@ -107,7 +101,7 @@ top.HEURIST.workgroup = {
 	},
 
 	filterSearch: function(predicate, value) {
-		var rft = document.getElementById("reftype-select").value;
+		var rft = document.getElementById("rectype-select").value;
 		var kwd = document.getElementById("wgtag-select").value;
 		var sortby = document.getElementById("sortby-select").value;
 		var q = (rft ? " type:" + rft + ((kwd || top.HEURIST.workgroup.kwds.length) ? " AND ": "") : "")

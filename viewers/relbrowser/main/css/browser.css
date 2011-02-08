@@ -281,16 +281,16 @@ input[type=text] {
 div#page-inner .link{
 width:100%;
 }
-.reftype-heading a {
+.rectype-heading a {
 	text-decoration: none;
 }
-.reftype-heading a img {
+.rectype-heading a img {
 	margin: 0;
 }
-.reftype-heading a.open img.right {
+.rectype-heading a.open img.right {
 	display: none;
 }
-.reftype-heading a.closed img.down {
+.rectype-heading a.closed img.down {
 	display: none;
 }
 #titleunderlinea {
@@ -590,7 +590,7 @@ div.link a {
 .annotation span img {
 	padding: 0 0 0 3px;
 }
-.reftypeIcon {
+.rectypeIcon {
 	display: table-cell;
 	vertical-align: middle;
 	right: 0pt;

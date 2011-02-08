@@ -26,7 +26,7 @@
 
 
 
-<xsl:template name="person" match="reference[reftype/@id=55]">
+<xsl:template name="person" match="reference[rectype/@id=55]">
         <tr>
 		<td align="left" valign="top">
 		

@@ -60,8 +60,8 @@ require_once(dirname(__FILE__)."/../common/php/saveRecord.php");
 
 require_once(dirname(__FILE__)."/../common/php/utilsTitleMask.php");
 
-global $reftype_to_bdt_id_map;
-$reftype_to_bdt_id_map = array(
+global $rectype_to_bdt_id_map;
+$rectype_to_bdt_id_map = array(
 	/* the appropriate bib_detail_type for a resource pointer constrained to type X */
 
 	5 => 227,  /* Book Reference */
@@ -112,10 +112,10 @@ switch (@$session_data['mode']) {
     case 'zotero request parsing':
         mode_zotero_request_parsing(); break;
 
-    case 'print reftype selection':
-        mode_print_reftype_selection(); break;
-    case 'apply reftype heuristic':
-        mode_apply_reftype_heuristic(); break;
+    case 'print rectype selection':
+        mode_print_rectype_selection(); break;
+    case 'apply rectype heuristic':
+        mode_apply_rectype_heuristic(); break;
     case 'crosswalking':
         mode_crosswalking(); break;
     case 'entry insertion':
@@ -445,18 +445,18 @@ function postmode_file_parsing() {
 	global $session_data;
 // error_log("postmode_file_parsing");
 
-	// Might skip over reftype selection if there are no unknown reftypes
-	$known_reftype_count = 0;
-	$unknown_reftype_count = 0;
+	// Might skip over rectype selection if there are no unknown rectypes
+	$known_rectype_count = 0;
+	$unknown_rectype_count = 0;
 	foreach (array_keys($session_data['in_entries']) as $i) {
-		if ($session_data['in_entries'][$i]->getReferenceType()) ++$known_reftype_count;
-		else ++$unknown_reftype_count;
+		if ($session_data['in_entries'][$i]->getReferenceType()) ++$known_rectype_count;
+		else ++$unknown_rectype_count;
 	}
 
-	if ($unknown_reftype_count) {
-		$session_data['known-reftype-count'] = $known_reftype_count;
-		$session_data['unknown-reftype-count'] = $unknown_reftype_count;
-		$session_data['mode'] = 'print reftype selection';
+	if ($unknown_rectype_count) {
+		$session_data['known-rectype-count'] = $known_rectype_count;
+		$session_data['unknown-rectype-count'] = $unknown_rectype_count;
+		$session_data['mode'] = 'print rectype selection';
 	} else {
 		$session_data['mode'] = 'crosswalking';
 	}
@@ -527,9 +527,9 @@ function mode_zotero_request_parsing() {
 }
 
 
-function mode_print_reftype_selection() {
+function mode_print_rectype_selection() {
 	global $session_data, $import_id;
-// error_log("mode_print_reftype_selection");
+// error_log("mode_print_rectype_selection");
 
 ?>
    <h1>Specify record types</h1>
@@ -537,11 +537,11 @@ function mode_print_reftype_selection() {
    <div>File read: <?= htmlspecialchars($session_data['in_filename']) ?></div>
 
    <table cellpadding="5">
-    <tr><td>Records read:</td><td><?= $session_data['known-reftype-count']+$session_data['unknown-reftype-count'] ?></td></tr>
+    <tr><td>Records read:</td><td><?= $session_data['known-rectype-count']+$session_data['unknown-rectype-count'] ?></td></tr>
     <tr><td>Record type:</td>
-        <td>specified <?= $session_data['known-reftype-count'] ?>
+        <td>specified <?= $session_data['known-rectype-count'] ?>
             &nbsp;&nbsp;&nbsp;
-            unspecified / unrecognised <?= $session_data['unknown-reftype-count'] ?></td></tr>
+            unspecified / unrecognised <?= $session_data['unknown-rectype-count'] ?></td></tr>
    </table>
    <br>
    <hr>
@@ -580,7 +580,7 @@ function heuristic_enabler(enabled) {
 //-->
 </script>
      <td>
-      <label><input type="radio" name="set-reftype" value="use heuristic" onclick="if (this.checked) heuristic_enabler(true)">
+      <label><input type="radio" name="set-rectype" value="use heuristic" onclick="if (this.checked) heuristic_enabler(true)">
       <span style="vertical-align: top;">or <b>let Heurist guess</b> the additional record types</span></label>
       <br>
       <input type="radio" style="visibility: hidden;">
@@ -593,16 +593,16 @@ function heuristic_enabler() { }
      <td></td>
 <?php	} ?>
     </tr>
-<?php	foreach ($session_data['parser']->getReferenceTypes() as $reftype) { ?>
+<?php	foreach ($session_data['parser']->getReferenceTypes() as $rectype) { ?>
     <tr>
-     <td style="text-align: right;"><label>&nbsp;<input type="radio" name="set-reftype" value="<?= htmlspecialchars($reftype) ?>" onclick="if (this.checked) heuristic_enabler(false);">&nbsp;</label></td>
+     <td style="text-align: right;"><label>&nbsp;<input type="radio" name="set-rectype" value="<?= htmlspecialchars($rectype) ?>" onclick="if (this.checked) heuristic_enabler(false);">&nbsp;</label></td>
      <td>
       <label>
 <?php	if ($session_data['parser']->supportsReferenceTypeGuessing()) { ?>
-       <input type="checkbox" name="use-heuristic[]" value="<?= htmlspecialchars($reftype) ?>"
-             <?= ($_REQUEST['set-reftype'] == 'use heuristic')? '' : 'disabled' ?>>
+       <input type="checkbox" name="use-heuristic[]" value="<?= htmlspecialchars($rectype) ?>"
+             <?= ($_REQUEST['set-rectype'] == 'use heuristic')? '' : 'disabled' ?>>
 <?php	} ?>
-       <?= htmlspecialchars($reftype) ?>
+       <?= htmlspecialchars($rectype) ?>
       </label>
      </td>
     </tr>
@@ -622,19 +622,19 @@ function heuristic_enabler() { }
 }
 
 
-function postmode_print_reftype_selection() {
+function postmode_print_rectype_selection() {
 	global $session_data;
-// error_log("postmode_print_reftype_selection");
-	if (@$_REQUEST['set-reftype']  &&  in_array($_REQUEST['set-reftype'], $session_data['parser']->getReferenceTypes())) {
+// error_log("postmode_print_rectype_selection");
+	if (@$_REQUEST['set-rectype']  &&  in_array($_REQUEST['set-rectype'], $session_data['parser']->getReferenceTypes())) {
 		// set the record type for all un-typed (and therefore still un-imported) entries
 		foreach (array_keys($session_data['in_entries']) as $i)
 			if (!$session_data['in_entries'][$i]->getReferenceType()){ // set only the ones that don't already have a type.
-				$session_data['in_entries'][$i]->setReferenceType($_REQUEST['set-reftype']);
+				$session_data['in_entries'][$i]->setReferenceType($_REQUEST['set-rectype']);
 			}
 		$session_data['mode'] = 'crosswalking';
 		return;
 
-	} else if (@$_REQUEST['set-reftype'] == 'use heuristic') {
+	} else if (@$_REQUEST['set-rectype'] == 'use heuristic') {
 		// user can leave all types unchecked, in which case any choices the heuristic makes are suggestions only
 		$all_okay = TRUE;
 		foreach (@$_REQUEST['use-heuristic'] as $heuristic_type) {
@@ -644,25 +644,25 @@ function postmode_print_reftype_selection() {
 			}
 		}
 		if ($all_okay) {
-			$session_data['mode'] = 'apply reftype heuristic';
+			$session_data['mode'] = 'apply rectype heuristic';
 			return;
 		}
 	}
 
 	// Only get here if no options were selected, or funny buggers.  Remember: never ACCUSE the user of anything.
 	$session_data['error'] = 'Please select a single record type for all remaining entries, or one or more types for Heurist to choose from.';
-	$session_data['mode'] = 'print reftype selection';	// go back to this page
+	$session_data['mode'] = 'print rectype selection';	// go back to this page
 }
 
 
-function mode_apply_reftype_heuristic() {
+function mode_apply_rectype_heuristic() {
 	global $session_data;
 
 ?>
    <table cellpadding="5">
-    <tr><td>Total records read:</td><td><?= $session_data['known-reftype-count']+$session_data['unknown-reftype-count'] ?></td></tr>
-    <tr><td>Record type specified in file:</td><td><?= $session_data['known-reftype-count'] ?></td></tr>
-    <tr><td>Record type unspecified / unrecognised:</td><td><?= $session_data['unknown-reftype-count'] ?></td></tr>
+    <tr><td>Total records read:</td><td><?= $session_data['known-rectype-count']+$session_data['unknown-rectype-count'] ?></td></tr>
+    <tr><td>Record type specified in file:</td><td><?= $session_data['known-rectype-count'] ?></td></tr>
+    <tr><td>Record type unspecified / unrecognised:</td><td><?= $session_data['unknown-rectype-count'] ?></td></tr>
    </table>
 
 <?php
@@ -675,8 +675,8 @@ function mode_apply_reftype_heuristic() {
 
 	set_progress_bar_title('Determining record types');
 
-	$suggested_by_reftype = array();
-	$definite_by_reftype = array();
+	$suggested_by_rectype = array();
+	$definite_by_rectype = array();
 	$unknown_count = 0;
 	foreach (array_keys($session_data['in_entries']) as $i) {
 		$entry = &$session_data['in_entries'][$i];
@@ -688,23 +688,23 @@ function mode_apply_reftype_heuristic() {
 			if ($type) {
 				if (@$allowed_type_lookup[$type]) {
 					$entry->setReferenceType($type);
-					@++$definite_by_reftype[$type];
+					@++$definite_by_rectype[$type];
 				} else {
 					$entry->setPotentialReferenceType($type);
-					@++$suggested_by_reftype[$type];
+					@++$suggested_by_rectype[$type];
 				}
 			} else {
 				++$unknown_count;
 			}
 		} else {
-			@++$definite_by_reftype[$entry->getReferenceType()];
+			@++$definite_by_rectype[$entry->getReferenceType()];
 		}
 
 		update_progress_bar(++$j / count($session_data['in_entries']));
 	}
 	update_progress_bar(-1);
 
-	if (@$definite_by_reftype  ||  $unknown_count) {
+	if (@$definite_by_rectype  ||  $unknown_count) {
 ?>
    <h2>Fully allocated record types</h2>
 
@@ -712,7 +712,7 @@ function mode_apply_reftype_heuristic() {
 <?php		if ($unknown_count > 0) { ?>
     <tr><td>Unknown</td><td><?= $unknown_count ?> <small><i>omitted from import</i></small></td></tr>
 <?php		}
-		foreach ($already_known_by_reftype as $type => $count) {
+		foreach ($already_known_by_rectype as $type => $count) {
 ?>
     <tr><td><?= htmlspecialchars($type) ?></td><td><?= $count ?></td></tr>
 <?php		} ?>
@@ -721,7 +721,7 @@ function mode_apply_reftype_heuristic() {
 <?php
 	}
 
-	if (@$suggested_by_reftype) {
+	if (@$suggested_by_rectype) {
 ?>
    <h2>Pending record types</h2>
 
@@ -735,13 +735,13 @@ function mode_apply_reftype_heuristic() {
      <th>Definite (will be imported)</th>
     </tr>
 <?php
-		foreach (array_keys($suggested_by_reftype) as $type) {
+		foreach (array_keys($suggested_by_rectype) as $type) {
 ?>
     <tr>
      <td><label>&nbsp;<input type="checkbox" name="use-suggested[]" value="<?= htmlspecialchars($type) ?>">&nbsp;</label></td>
      <td><?= htmlspecialchars($type) ?></td>
-     <td><?= intval($suggested_by_reftype[$type]) ?></td>
-     <td><?= intval($definite_by_reftype[$type]) ?></td>
+     <td><?= intval($suggested_by_rectype[$type]) ?></td>
+     <td><?= intval($definite_by_rectype[$type]) ?></td>
     </tr>
 <?php
 		}
@@ -758,7 +758,7 @@ function mode_apply_reftype_heuristic() {
 <?php		} ?>
    <input type="submit" name="use-suggestions" value="Add checked record types">
    <input type="submit" name="continue" value="Continue" style="font-weight: bold;">
-<?php	} else if ($definite_by_reftype) { ?>
+<?php	} else if ($definite_by_rectype) { ?>
 
    <br clear=all>
    <hr>
@@ -791,16 +791,16 @@ function mode_apply_reftype_heuristic() {
 function mode_crosswalking() {
 	global $session_data;
 	global $import_id;
-	global $heurist_reftypes;
-	if (! $heurist_reftypes) load_heurist_reftypes();
+	global $heurist_rectypes;
+	if (! $heurist_rectypes) load_heurist_rectypes();
 
 	set_progress_bar_title('Crosswalking entries');
 
 	$out_entries = array();
-	$out_entry_count_by_reftype = array();
+	$out_entry_count_by_rectype = array();
 	$data_error_entries = array();
-	$no_reftype_entries = array();
-	$non_out_entries = array();	// = data_error_entries + no_reftype_entries
+	$no_rectype_entries = array();
+	$non_out_entries = array();	// = data_error_entries + no_rectype_entries
 	$j = 0;
 	foreach (array_keys($session_data['in_entries']) as $i) {
 		// FIXME: do fancy progress bar stuff
@@ -820,7 +820,7 @@ function mode_crosswalking() {
 //print $out_entry->getTitle() . "<br>";
 				if ($out_entry->isValid()) {
 					$out_entries[] = &$out_entry;
-					@++$out_entry_count_by_reftype[$out_entry->getReferenceType()];
+					@++$out_entry_count_by_rectype[$out_entry->getReferenceType()];
 				} else {
 					$in_entry->addValidationErrors(format_missing_field_errors($out_entry));
 					$in_entry->addValidationErrors($out_entry->getOtherErrors());
@@ -832,7 +832,7 @@ function mode_crosswalking() {
 				$non_out_entries[] = &$in_entry;
 			}
 		} else {
-			$no_reftype_entries[] = &$in_entry;
+			$no_rectype_entries[] = &$in_entry;
 			$non_out_entries[] = &$in_entry;
 		}
 	}
@@ -840,11 +840,11 @@ function mode_crosswalking() {
 	$session_data['out_entries'] = &$out_entries;
 
 	// make the error entries available to the session so that they can be downloaded
-	$session_data['no_reftype_entries'] = &$no_reftype_entries;
+	$session_data['no_rectype_entries'] = &$no_rectype_entries;
 	$session_data['data_error_entries'] = &$data_error_entries;
 	$session_data['non_out_entries'] = &$non_out_entries;
 
-	if ($out_entry_count_by_reftype) {
+	if ($out_entry_count_by_rectype) {
 ?>
     <table border=0 cellspacing=0 cellpadding=0>
      <tr>
@@ -853,8 +853,8 @@ function mode_crosswalking() {
     <table cellpadding="5">
     <!-- <b>Valid entries for import:</b> -->
 <?php
-		foreach ($out_entry_count_by_reftype as $type => $count) { ?>
-     <tr><td><?= htmlspecialchars($heurist_reftypes[$type]['rty_Name']) ?></td><td><?= intval($count) ?></td></tr>
+		foreach ($out_entry_count_by_rectype as $type => $count) { ?>
+     <tr><td><?= htmlspecialchars($heurist_rectypes[$type]['rty_Name']) ?></td><td><?= intval($count) ?></td></tr>
 <?php		}
 ?>
     </table>
@@ -864,11 +864,11 @@ function mode_crosswalking() {
      <tr><td>Valid records:</td><td><b><?= intval(count($out_entries)) ?></b></td><td>&nbsp;</td></tr>
 <?php
 	if ($non_out_entries) {
-		if ($no_reftype_entries) { ?>
+		if ($no_rectype_entries) { ?>
      <tr>
       <td style="color: red;">Unallocated record type:<br><nobr>(will not be imported)</nobr></td>
-      <td><?= count($no_reftype_entries) ?></td>
-      <td><a target="_errors" href="interface/downloadRecsWithoutType.php/<?= htmlspecialchars($import_id) ?>-no_reftype.txt?import_id=<?= htmlspecialchars($import_id) ?>">Download errors</td>
+      <td><?= count($no_rectype_entries) ?></td>
+      <td><a target="_errors" href="interface/downloadRecsWithoutType.php/<?= htmlspecialchars($import_id) ?>-no_rectype.txt?import_id=<?= htmlspecialchars($import_id) ?>">Download errors</td>
       <td></td>
      </tr>
 <?php 		}
@@ -879,7 +879,7 @@ function mode_crosswalking() {
       <td><a target="_errors" href="interface/downloadRecsWithErrors.php/<?= htmlspecialchars($import_id) ?>-data_error.txt?import_id=<?= htmlspecialchars($import_id) ?>">Download errors</a></td>
      </tr>
 <?php		} ?>
-     <tr><td>Total records:</td><td><b><?= intval(count($out_entries) + count($no_reftype_entries) + count($data_error_entries)) ?></b></td><td>&nbsp;</td></tr>
+     <tr><td>Total records:</td><td><b><?= intval(count($out_entries) + count($no_rectype_entries) + count($data_error_entries)) ?></b></td><td>&nbsp;</td></tr>
 <?php
 	}
 ?>
@@ -1328,14 +1328,14 @@ function do_entry_parsing() {
 
 	$good_entries = array();
 	$bad_entries = array();
-	$known_reftypes = 0;
+	$known_rectypes = 0;
 	$j = 0;
 	foreach (array_keys($entries) as $i) {
 		$entry = & $entries[$i];
 		$errors = $entry->parseEntry();
 		if (! $errors) {
 			$good_entries[] = &$entry;
-			if ($entry->getReferenceType()) ++$known_reftypes;
+			if ($entry->getReferenceType()) ++$known_rectypes;
 		} else {
 			$bad_entries[] = &$entry;
 		}
@@ -1348,7 +1348,7 @@ function do_entry_parsing() {
 
 ?>
     <tr<?php if (count($bad_entries) > 0) print ' style="color: red;"'; ?>><td style="padding-left: 10ex;">Bad format:</td><td><?= count($bad_entries) ?></td></tr>
-    <tr><td style="padding-left: 10ex; padding-right: 4ex;">Record type not specified:</td><td><?= count($good_entries) - $known_reftypes ?></td></tr>
+    <tr><td style="padding-left: 10ex; padding-right: 4ex;">Record type not specified:</td><td><?= count($good_entries) - $known_rectypes ?></td></tr>
    </table>
 <?php
 	flush_fo_shizzle();
@@ -1393,16 +1393,16 @@ function choose_next_mode() {
 
 	    case 'file parsing':
 	    case 'zotero request parsing':
-		// might skip over reftype selection if there are no unknown reftypes
+		// might skip over rectype selection if there are no unknown rectypes
 		postmode_file_parsing();
 		break;
 
-	    case 'print reftype selection':
+	    case 'print rectype selection':
 		// user might have selected "set all to X", or "choose between X, Y, Z"
-		postmode_print_reftype_selection();
+		postmode_print_rectype_selection();
 		break;
 
-	    case 'apply reftype heuristic':
+	    case 'apply rectype heuristic':
 		// only one way forward
 		$session_data['mode'] = 'crosswalking';
 		break;
@@ -1433,8 +1433,8 @@ function choose_next_mode() {
 function format_missing_field_errors(&$entry) {
 	// $entry is a HeuristNativeEntry with validation problems;
 	// return an array of errors describing the missing fields in the entry and its containers
-	global $heurist_reftypes, $bib_requirement_names;
-	if (! $heurist_reftypes) load_heurist_reftypes();
+	global $heurist_rectypes, $bib_requirement_names;
+	if (! $heurist_rectypes) load_heurist_rectypes();
 	if (! $bib_requirement_names) load_bib_requirement_names();
 
 	$errors = array();
@@ -1448,7 +1448,7 @@ function format_missing_field_errors(&$entry) {
 			else if ($err_msg) $err_msg .= ' and ';			// except for the final one
 			$err_msg .= strtoupper($bib_requirement_names[$entry->getReferenceType()][$field]);
 		}
-		$err_msg = strtoupper($heurist_reftypes[$entry->getReferenceType()]['rty_Name'])
+		$err_msg = strtoupper($heurist_rectypes[$entry->getReferenceType()]['rty_Name'])
 		         . ' is missing ' . $err_msg . ($have_multiple? ' fields' : ' field');
 		array_push($errors, $err_msg);
 	}
@@ -1672,10 +1672,10 @@ function insert_biblio(&$entry) {
 	}
 
 	if ($entry->_container  &&  $entry->_container->isValid()) {
-		global $reftype_to_bdt_id_map;
+		global $rectype_to_bdt_id_map;
 		if ($bib_detail_insert) $bib_detail_insert .= ', ';
 
-		$resource_pointer_type = @$reftype_to_bdt_id_map[$entry->_container->getReferenceType()];
+		$resource_pointer_type = @$rectype_to_bdt_id_map[$entry->_container->getReferenceType()];
 		if (! $resource_pointer_type) $resource_pointer_type = 267;
 		$bib_detail_insert .= '('.$rec_id.','.$resource_pointer_type.','.$entry->_container->getBiblioID().', NULL, 1)';
 	}
@@ -1699,10 +1699,10 @@ function perm_biblio(&$entry) {
 	if ($entry->_container  &&  $entry->_container->_permanent) {
 		// container is already permanent: this means that we found a match in the database for the container, so our recDetails is out-of-date.  Update it.
 
-		global $reftype_to_bdt_id_map;
+		global $rectype_to_bdt_id_map;
 
 		mysql_query('update recDetails set dtl_Value='.$entry->_container->getBiblioID().
-		            ' where dtl_RecID='.$entry->getBiblioID().' and dtl_DetailTypeID='.$reftype_to_bdt_id_map[ $entry->_container->getReferenceType() ]);
+		            ' where dtl_RecID='.$entry->getBiblioID().' and dtl_DetailTypeID='.$rectype_to_bdt_id_map[ $entry->_container->getReferenceType() ]);
 	}
 
 	if ($entry->_author_bib_ids) mysql_query('update Records set rec_FlagTemporary=0 where rec_ID in ('.join(',', $entry->_author_bib_ids).')');
@@ -2060,8 +2060,8 @@ function process_author(&$field) {
 function print_disambiguation_options(&$entry) {
 	global $session_data;
 	global $import_id;
-	global $heurist_reftypes;
-	if (! $heurist_reftypes) load_heurist_reftypes();
+	global $heurist_rectypes;
+	if (! $heurist_rectypes) load_heurist_rectypes();
 
 	if (count($session_data['ambiguities']) == 0) {
 		// This is the first ambiguous record, print out a header
@@ -2088,7 +2088,7 @@ function print_disambiguation_options(&$entry) {
 	else
 		$ambig_entry = &$entry->_ancestor;  //disambiguation searches the containment heirarchy for near matches and if found points to it _ancestor to it
 
-	$entry_type = $heurist_reftypes[$entry->getReferenceType()]['rty_Name'];
+	$entry_type = $heurist_rectypes[$entry->getReferenceType()]['rty_Name'];
 
 	$compare_link = "interface/showSideBySidee.php?ids=" . $ambig_entry->getBiblioID() . "," . join(',', $ambig_entry->getPotentialMatches());
 ?>
@@ -2097,7 +2097,7 @@ function print_disambiguation_options(&$entry) {
 <?php if ($entry == $ambig_entry) { ?>
    <div><span style="font-weight: bold;"><?= $entry_type ?></span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=<?= $compare_link ?> onclick="var win = open(href, 'compare', 'width=600,height=300,scrollbars=1,resizable=1'); win.focus(); return false;">compare versions</a></div>
 <?php } else { ?>
-   <div><span style="font-weight: bold;"><?= $heurist_reftypes[$ambig_entry->getReferenceType()]["rty_Name"] ?></span> of &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=<?= $compare_link ?> onclick="var win = open(href, 'compare', 'width=600,height=300,scrollbars=1,resizable=1'); win.focus(); return false;">compare versions</a></div>
+   <div><span style="font-weight: bold;"><?= $heurist_rectypes[$ambig_entry->getReferenceType()]["rty_Name"] ?></span> of &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=<?= $compare_link ?> onclick="var win = open(href, 'compare', 'width=600,height=300,scrollbars=1,resizable=1'); win.focus(); return false;">compare versions</a></div>
    <div style="margin-top: 1ex; margin-left: 3ex; background-color: #f0f0f0;"><?= htmlspecialchars($entry->getTitle()) ?> <i>(<?= $entry_type ?>)</i></div>
 <?php } ?>
 

@@ -41,7 +41,7 @@
 <!-- detail output template -->
 <xsl:template match="record[id=$bib_id]">
 	<tr>
-		<td><img><xsl:attribute name="src">http://heuristscholar.org/reftype/<xsl:value-of select="type/@id"/>.gif</xsl:attribute></img></td>
+		<td><img><xsl:attribute name="src">http://heuristscholar.org/rectype/<xsl:value-of select="type/@id"/>.gif</xsl:attribute></img></td>
 		<td style="font-weight: bold;"><xsl:value-of select="title"/></td>
 	</tr>
 	<tr>

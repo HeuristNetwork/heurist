@@ -59,7 +59,7 @@
 			<map:parameter name="instanceName" value="{request-param:instance}"/>
 			<map:parameter name="serverBaseUrl" value="http://{global:serverName}"/>
 			<map:parameter name="cocoonBase" value="/cocoon/{request-param:installDir}/publish/{request-param:appDir}/"/>
-			<map:parameter name="related_reftype_filter" value="{../2}"/>
+			<map:parameter name="related_rectype_filter" value="{../2}"/>
         </map:transform>
         <map:transform src="/{request-param:installDir}/viewers/publish/xsl/javascript.xsl"/>
       </map:act>
@@ -77,7 +77,7 @@
 			<map:parameter name="instanceName" value="{request-param:instance}"/>
 			<map:parameter name="serverBaseUrl" value="http://{global:serverName}"/>
 			<map:parameter name="cocoonBase" value="/cocoon/{request-param:installDir}/publish/{request-param:appDir}/"/>
-			<map:parameter name="related_reftype_filter" value="{../3}"/>
+			<map:parameter name="related_rectype_filter" value="{../3}"/>
         </map:transform>
         <map:call resource="display-{../2}"/>
       </map:act>
@@ -95,7 +95,7 @@
 			<map:parameter name="instanceName" value="{request-param:instance}"/>
 			<map:parameter name="serverBaseUrl" value="http://{global:serverName}"/>
 			<map:parameter name="cocoonBase" value="/cocoon/{request-param:installDir}/publish/{request-param:appDir}/"/>
-			<map:parameter name="related_reftype_filter" value="{../2}"/>
+			<map:parameter name="related_rectype_filter" value="{../2}"/>
         </map:transform>
       </map:act>
       <map:serialize/>
@@ -121,7 +121,7 @@
 			<map:parameter name="instanceName" value="{request-param:instance}"/>
 			<map:parameter name="serverBaseUrl" value="http://{global:serverName}"/>
 			<map:parameter name="cocoonBase" value="/cocoon/{request-param:installDir}/publish/{request-param:appDir}/"/>
-			<map:parameter name="related_reftype_filter" value="{../2}"/>
+			<map:parameter name="related_rectype_filter" value="{../2}"/>
         </map:transform>
         <map:transform src="/{request-param:installDir}/viewers/publish/xsl/javascript.xsl"/>
       </map:act>
@@ -139,7 +139,7 @@
 			<map:parameter name="instanceName" value="{request-param:instance}"/>
 			<map:parameter name="serverBaseUrl" value="http://{global:serverName}"/>
 			<map:parameter name="cocoonBase" value="/cocoon/{request-param:installDir}/publish/{request-param:appDir}/"/>
-			<map:parameter name="related_reftype_filter" value="{../2}"/>
+			<map:parameter name="related_rectype_filter" value="{../2}"/>
         </map:transform>
         <map:transform src="/{request-param:installDir}/viewers/publish/xsl/javascript.xsl"/>
       </map:act>
@@ -157,7 +157,7 @@
 			<map:parameter name="instanceName" value="{request-param:instance}"/>
 			<map:parameter name="serverBaseUrl" value="http://{global:serverName}"/>
 			<map:parameter name="cocoonBase" value="/cocoon/{request-param:installDir}/publish/{request-param:appDir}/"/>
-			<map:parameter name="related_reftype_filter" value="{../2}"/>
+			<map:parameter name="related_rectype_filter" value="{../2}"/>
         </map:transform>
       </map:act>
       <map:serialize/>
@@ -174,7 +174,7 @@
 			<map:parameter name="instanceName" value="{request-param:instance}"/>
 			<map:parameter name="serverBaseUrl" value="http://{global:serverName}"/>
 			<map:parameter name="cocoonBase" value="/cocoon/{request-param:installDir}/publish/{request-param:appDir}/"/>
-			<map:parameter name="related_reftype_filter" value="{../2}"/>
+			<map:parameter name="related_rectype_filter" value="{../2}"/>
         </map:transform>
       </map:act>
       <map:serialize/>

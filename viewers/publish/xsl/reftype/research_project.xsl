@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-    <xsl:template name="research_project" match="reference[reftype/@id=63]">
+    <xsl:template name="research_project" match="reference[rectype/@id=63]">
         <tr>
             <td>
 				<xsl:if test="detail[@id=223]"><!-- thumbnail -->
@@ -11,7 +11,7 @@
 					</div>
 				</xsl:if>
                 <a target="_new">
-                    <xsl:attribute name="href">reftype_renderer/<xsl:value-of select="id"/></xsl:attribute>
+                    <xsl:attribute name="href">rectype_renderer/<xsl:value-of select="id"/></xsl:attribute>
                     <xsl:value-of select="detail[@id=160]"/><!-- Title -->
                 </a>&#160;
                 (<xsl:value-of select="detail[@id=177]/text()"/><!-- Start Date -->

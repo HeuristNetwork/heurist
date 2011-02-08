@@ -86,13 +86,13 @@
 <div style="font-size: 11px; font-weight: bold;">
         <img>
           <xsl:attribute name="align">abstop</xsl:attribute>
-          <xsl:attribute name="src">../../common/images/reftype-icons/<xsl:value-of select="type/@id"/>.png</xsl:attribute>
+          <xsl:attribute name="src">../../common/images/rectype-icons/<xsl:value-of select="type/@id"/>.png</xsl:attribute>
         </img> &#160; 
         <xsl:value-of select="title"/> &#160; <span style="font-weight:normal">[id: <xsl:value-of select="id"/>]</span>
 </div>
 <div style="font-size: 11px;">
         <xsl:value-of select="type"/> ; <xsl:if test="modified !=''"> &#160; <span
-            class="reftype">updated:</span>&#160; <xsl:apply-templates select="modified"/>
+            class="rectype">updated:</span>&#160; <xsl:apply-templates select="modified"/>
         </xsl:if>
         <xsl:if test="url != ''"> &#160; <a href="{url}" TARGET="_blank">
             <xsl:choose>
@@ -106,7 +106,7 @@
 </div>
 </xsl:template>
 
-<!-- url  reftype only -->
+<!-- url  rectype only -->
 <xsl:template match="record[type/@id=1]">
 <div id="{id}" class="record">
 	<xsl:call-template name="header"/>
@@ -118,7 +118,7 @@
 </div>
 </xsl:template>
 
-<!-- all reftypes template -->
+<!-- all rectypes template -->
 <xsl:template match="record">
 <div id="{id}" class="record">
 	<xsl:call-template name="header"/>
@@ -141,7 +141,7 @@
       <xsl:if test="generate-id(.)=
           generate-id($details[@id=current()/@id][1]) and self::node()[@id!= 249]">
 
-        <span class="reftype">
+        <span class="rectype">
           <xsl:choose>
             <xsl:when test="@name !=''">
               <xsl:value-of select="@name"/>
@@ -238,7 +238,7 @@
   </xsl:template>
 
   <xsl:template name="body-detail-1">
-    <!-- DETAIL LISTING reftype 1 -->
+    <!-- DETAIL LISTING rectype 1 -->
     <!--put what is being grouped in a variable-->
     <xsl:variable name="details" select="detail"/>
     <!--walk through the variable-->
@@ -248,7 +248,7 @@
         generate-id($details[@id=current()/@id][1])">
         <!-- do not display page title, since its a repetition of the heading-->
         <xsl:if test="@id !=160">
-          <span class="reftype">
+          <span class="rectype">
             <xsl:choose>
               <xsl:when test="@name !=''">
                 <xsl:value-of select="@name"/>
@@ -348,7 +348,7 @@
     <xsl:for-each select="detail">
       <!--act on the first in document order-->
       <xsl:if test="generate-id(.)=generate-id($pointer[@id=current()/@id][1]) and self::node()[@id= 249]">
-        <span class="reftype">
+        <span class="rectype">
           <xsl:choose>
             <xsl:when test="@name !=''">
               <xsl:value-of select="@name"/>
@@ -380,7 +380,7 @@
       <!--act on the first in document order-->
       <xsl:if test="generate-id(.)=
           generate-id($relation[@type=current()/@type][1])">
-        <span class="reftype">
+        <span class="rectype">
           <xsl:value-of select="@type"/>: &#160; </span>
         <!--revisit all-->
         <xsl:for-each select="$relation[@type=current()/@type]">

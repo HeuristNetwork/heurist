@@ -105,14 +105,14 @@ Relationship.prototype.remove = function() {
 	this.manager.remove(this);
 };
 
-var EditableRelationship = function(parentElement, details, reftype,dtID, relVocabulary, manager) {
+var EditableRelationship = function(parentElement, details, rectype,dtID, relVocabulary, manager) {
 	var elt = parentElement;
 	do { elt = elt.parentNode; } while (elt.nodeType != 9 /* DOCUMENT_NODE */);
 	this.document = elt;
 
-	if (reftype && reftype.search(",") != -1) {
-		this.reftypes = reftype;
-		reftype = reftype.split(",")[0];
+	if (rectype && rectype.search(",") != -1) {
+		this.rectypes = rectype;
+		rectype = rectype.split(",")[0];
 	}
 	var thisRef = this;
 	this.manager = manager;
@@ -123,7 +123,7 @@ var EditableRelationship = function(parentElement, details, reftype,dtID, relVoc
 	else {
 		this.details = {
 			RelationType: "",
-			OtherResource: { Title: "", Reftype: (reftype ? reftype : 0), URL: "", bibID: 0 },
+			OtherResource: { Title: "", rectype: (rectype ? rectype : 0), URL: "", bibID: 0 },
 			Notes: "",
 			Title: "",
 			StartDate: null,
@@ -198,7 +198,7 @@ var EditableRelationship = function(parentElement, details, reftype,dtID, relVoc
 		}
 	}
 
-	var fakeBDT = [199, "Related record", "resource", this.reftypes? this.reftypes : (reftype ? reftype : 0)];
+	var fakeBDT = [199, "Related record", "resource", this.rectypes? this.rectypes : (rectype ? rectype : 0)];
 	var fakeBDR = ["Related record", "", "", "N", 0, null, 0];
 	this.otherResource = new top.HEURIST.edit.inputs.BibDetailResourceInput(fakeBDT, fakeBDR, [], tbody);
 	this.otherResourceID = this.otherResource.inputs[0].hiddenElt;
@@ -374,11 +374,11 @@ EditableRelationship.prototype.remove = function() {
 * @param parentElement a DOM element where the Relationship will be displayed
 * @param details a reference to an object containing the record details for the relationship record
 */
-var RelationManager = function(parentElement, reftypeID, relatedRecords, bibDetailTypeID, changeNotification, supressHeaders) {
-	if (!parentElement || isNaN(reftypeID)) return null;
+var RelationManager = function(parentElement, rectypeID, relatedRecords, bibDetailTypeID, changeNotification, supressHeaders) {
+	if (!parentElement || isNaN(rectypeID)) return null;
 	var thisRef = this;
 	this.parentElement = parentElement;
-	this.reftypeID = parseInt(reftypeID);
+	this.rectypeID = parseInt(rectypeID);
 	if (relatedRecords) {
 		this.relatedRecords = relatedRecords;
 	}
@@ -404,13 +404,13 @@ var RelationManager = function(parentElement, reftypeID, relatedRecords, bibDeta
 	var relatedRecordsNoType = [];
 	for (var bib_id in relatedRecords) {
 		var rec = relatedRecords[bib_id];
-		if (rec.OtherResource && rec.OtherResource.Reftype) {
-			if (constrainRecTypes && !constrainRecTypes[rec.OtherResource.Reftype])  continue;
-			if (! this.relatedRecordsByType[rec.OtherResource.Reftype]) {
-				this.relatedRecordsByType[rec.OtherResource.Reftype] = [ rec ];
+		if (rec.OtherResource && rec.OtherResource.rectype) {
+			if (constrainRecTypes && !constrainRecTypes[rec.OtherResource.rectype])  continue;
+			if (! this.relatedRecordsByType[rec.OtherResource.rectype]) {
+				this.relatedRecordsByType[rec.OtherResource.rectype] = [ rec ];
 			}
 			else {
-				this.relatedRecordsByType[rec.OtherResource.Reftype].push(rec);
+				this.relatedRecordsByType[rec.OtherResource.rectype].push(rec);
 			}
 		}
 		else {
@@ -431,7 +431,7 @@ var RelationManager = function(parentElement, reftypeID, relatedRecords, bibDeta
 
 	this.relationships = [];
 	// create sections for each group of related records of the same type
-	for (var reftype in this.relatedRecordsByType) {
+	for (var rectype in this.relatedRecordsByType) {
 		// create a section header
 		if (!supressHeaders) {
 			var titleRow = document.createElement("tr");
@@ -439,7 +439,7 @@ var RelationManager = function(parentElement, reftypeID, relatedRecords, bibDeta
 			var titleCell = titleRow.appendChild(document.createElement("td"));
 			titleCell.colSpan = 7;
 			titleCell.appendChild(document.createElement("span")).appendChild(document.createTextNode(
-				(top.HEURIST.reftypes.pluralNames[reftype] || "Other") + ": "));
+				(top.HEURIST.rectypes.pluralNames[rectype] || "Other") + ": "));
 			// create a button for adding new relationships to the group
 			var a = titleCell.appendChild(document.createElement("a"));
 			a.href = "#";
@@ -453,13 +453,13 @@ var RelationManager = function(parentElement, reftypeID, relatedRecords, bibDeta
 					rel.nonce = thisRef.getNonce();
 					thisRef.openRelationships[rel.nonce] = rel;
 					rel.relType.focus();
-					}; }(titleRow, reftype,bibDetailTypeID);
+					}; }(titleRow, rectype,bibDetailTypeID);
 
 			this.parentElement.appendChild(titleRow);
 		}
 
-		for (var i=0; i < this.relatedRecordsByType[reftype].length; ++i) {	//saw reftype maybe constrained modify to handle constrained set of reftypes
-			this.relationships.push(new Relationship(this.parentElement, this.relatedRecordsByType[reftype][i],this));
+		for (var i=0; i < this.relatedRecordsByType[rectype].length; ++i) {	//saw rectype maybe constrained modify to handle constrained set of rectypes
+			this.relationships.push(new Relationship(this.parentElement, this.relatedRecordsByType[rectype][i],this));
 		}
 	}
 	var addOtherTr = document.createElement("tr");

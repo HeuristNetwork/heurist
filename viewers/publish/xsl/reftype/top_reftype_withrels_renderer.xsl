@@ -28,7 +28,7 @@
 			<!-- name (desc.) that will appear in dropdown list -->
 			[name]Departmental website style[/name]
 			<!-- match the name of the stylesheet-->
-			[output]reftype_renderer[/output]
+			[output]rectype_renderer[/output]
 		</xsl:comment>
 		<!-- end including code -->
 		<html>
@@ -77,8 +77,8 @@
 		<tr>
 			<td style="padding-right: 10px;">
 				<img>
-					<xsl:attribute name="src"><xsl:value-of select="$hBase"/>common/images/reftype-icons/<xsl:value-of
-							select="reftype/@id"/>.gif</xsl:attribute>
+					<xsl:attribute name="src"><xsl:value-of select="$hBase"/>common/images/rectype-icons/<xsl:value-of
+							select="rectype/@id"/>.gif</xsl:attribute>
 				</img>
 			</td>
 			<td style="font-weight: bold;">
@@ -95,7 +95,7 @@
 				<nobr>Reference type</nobr>
 			</td>
 			<td>
-				<xsl:value-of select="reftype"/>
+				<xsl:value-of select="rectype"/>
 			</td>
 		</tr>
 		<xsl:if test="url != ''">
@@ -199,7 +199,7 @@
 	<xsl:call-template name="title_group"/>
 </xsl:template>
 <xsl:template name="title_group" mode="blah">
-	<!-- only output reftype title once -->
+	<!-- only output rectype title once -->
 	<table>
 		<tr>
 			<td>

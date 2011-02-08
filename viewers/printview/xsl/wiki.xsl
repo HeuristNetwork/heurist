@@ -9,7 +9,7 @@
 
                 <style type="text/css"> body {font-family:Verdana,Helvetica,Arial,sans-serif;
                     font-size:12px; background: #EAF3D9;} td { vertical-align: top; } a:hover {
-                    text-decoration:none; } a { color:#0367AD; text-decoration:underline; } .reftype
+                    text-decoration:none; } a { color:#0367AD; text-decoration:underline; } .rectype
                     { color: #999999; padding-right: 10px; } </style>
             </head>
             <body>
@@ -139,9 +139,9 @@
     <xsl:template match="record[id=$arg]">
 
         <tr>
-            <td class="reftype">
+            <td class="rectype">
                 <img>
-                    <xsl:attribute name="src">http://heuristscholar.org/reftype/<xsl:value-of
+                    <xsl:attribute name="src">http://heuristscholar.org/rectype/<xsl:value-of
                             select="type/@id"/>.gif</xsl:attribute>
                 </img>
             </td>
@@ -155,7 +155,7 @@
             </td>
         </tr>
         <tr>
-            <td class="reftype">
+            <td class="rectype">
                 <nobr>Reference type</nobr>
             </td>
             <td>
@@ -164,7 +164,7 @@
         </tr>
         <xsl:if test="url != ''">
             <tr>
-                <td class="reftype">URL</td>
+                <td class="rectype">URL</td>
                 <td>
                     <a href="{url}">
                         <xsl:choose>
@@ -181,7 +181,7 @@
         <xsl:if test="detail[@id=203]">
             <!--organisation type -->
             <tr>
-                <td class="reftype">
+                <td class="rectype">
                     <xsl:call-template name="title_grouped">
                         <xsl:with-param name="name">
                             <xsl:value-of select="detail[@id=203]/@name"/>
@@ -199,11 +199,11 @@
                 </td>
             </tr>
         </xsl:if>
-        <!-- list reftypes and data-->
+        <!-- list rectypes and data-->
         <xsl:for-each select="detail[@id!=222 and @id!=223 and @id!=224 and @id!=203]">
 
             <tr>
-                <td class="reftype">
+                <td class="rectype">
                     <nobr>
                         <xsl:choose>
                             <xsl:when test="string-length(@name)">
@@ -245,7 +245,7 @@
         </xsl:for-each>
         <!-- director-->
         <tr>
-            <td class="reftype">
+            <td class="rectype">
                 <xsl:call-template name="title_grouped">
                     <xsl:with-param name="name">
                         <xsl:value-of select="detail[@id=315]/record/@name"/>
@@ -263,7 +263,7 @@
         </tr>
         <!-- staff-->
         <tr>
-            <td class="reftype">
+            <td class="rectype">
                 <xsl:call-template name="title_grouped">
                     <xsl:with-param name="name">
                         <xsl:value-of select="detail[@id=316]/record/@name"/>
@@ -281,7 +281,7 @@
         </tr>
         <!-- research projects-->
         <tr>
-            <td class="reftype">
+            <td class="rectype">
                 <xsl:call-template name="title_grouped">
                     <xsl:with-param name="name">
                         <xsl:value-of select="detail[@id=264]/record/@name"/>
@@ -300,7 +300,7 @@
 
         <xsl:if test="notes != ' ' ">
             <tr>
-                <td class="reftype">Notes</td>
+                <td class="rectype">Notes</td>
                 <td>
                     <xsl:value-of select="notes"/>
                 </td>
@@ -309,7 +309,7 @@
 
         <xsl:if test="detail[@id=222 or @id=223 or @id=224]">
             <tr>
-                <td class="reftype">Images</td>
+                <td class="rectype">Images</td>
                 <td>
                     <!-- 222 = Logo image,  223 = Thumbnail,  224 = Images -->
                     <xsl:for-each select="detail[@id=222 or @id=223 or @id=224]">

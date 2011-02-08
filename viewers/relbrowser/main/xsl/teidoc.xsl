@@ -2,7 +2,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:str="http://exslt.org/strings" xmlns:xi="http://www.w3.org/2001/XInclude" version="1.0">
 
 
-	<xsl:template name="xmldoc" match="reference[reftype/@id=98]">
+	<xsl:template name="xmldoc" match="reference[rectype/@id=98]">
 
 		<script src="{$appBase}js/highlight.js"/>
 		<script src="{$appBase}js/selection.js"/>
@@ -112,7 +112,7 @@
 
 	<xsl:template match="related | pointer | reverse-pointer">
 		<!-- this is where the display work is done summarising the related items of various types - pictures, events etc -->
-		<!-- reftype-specific templates take precedence over this one -->
+		<!-- rectype-specific templates take precedence over this one -->
 		<xsl:param name="matches"/>
 
 		<!-- trickiness!
@@ -163,17 +163,17 @@
 						</a>
 					</td>
 					<td align="right">
-						<!-- change this to pick up the actuall system name of the reftye or to use the mapping method as in JHSB that calls human-readable-names.xml -->
-						<img style="vertical-align: middle;horizontal-align: right" src="{$hBase}common/images/reftype-icons/{reftype/@id}.png"/>
+						<!-- change this to pick up the actuall system name of the rectype or to use the mapping method as in JHSB that calls human-readable-names.xml -->
+						<img style="vertical-align: middle;horizontal-align: right" src="{$hBase}common/images/rectype-icons/{rectype/@id}.png"/>
 					</td>
 				</tr>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
 
-	<xsl:template match="related[reftype/@id=98] | pointer[reftype/@id=98] | reverse-pointer[reftype/@id=98]">
+	<xsl:template match="related[rectype/@id=98] | pointer[rectype/@id=98] | reverse-pointer[rectype/@id=98]">
 		<!-- this is where the display work is done summarising the related items of various types - pictures, events etc -->
-		<!-- reftype-specific templates take precedence over this one -->
+		<!-- rectype-specific templates take precedence over this one -->
 		<xsl:param name="matches"/>
 
 		<!-- trickiness!
@@ -199,8 +199,8 @@
 						<a href="{$cocoonBase}item/{id}?instance={$instanceName}" class="sb_two"><xsl:value-of select="detail[@id=160]"/></a>
 					</td>
 					<td align="right">
-						<!-- change this to pick up the actuall system name of the reftye or to use the mapping method as in JHSB that calls human-readable-names.xml -->
-						<img style="vertical-align: middle;horizontal-align: right" src="{$hBase}common/images/reftype-icons/{reftype/@id}.png"/>
+						<!-- change this to pick up the actuall system name of the rectype or to use the mapping method as in JHSB that calls human-readable-names.xml -->
+						<img style="vertical-align: middle;horizontal-align: right" src="{$hBase}common/images/rectype-icons/{rectype/@id}.png"/>
 					</td>
 				</tr>
 			</xsl:otherwise>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-	<xsl:template name="artwork" match="reference[reftype/@id=129]">
+	<xsl:template name="artwork" match="reference[rectype/@id=129]">
 		<!-- root template for artworks -->
 
 		<div id="artwork" class="artwork">

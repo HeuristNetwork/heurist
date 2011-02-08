@@ -90,7 +90,7 @@
 				</div>
 			</xsl:when>
 			<xsl:otherwise>
-				<div id="{id}" class="record full_result_thumb" style="background-image:url(../../common/images/reftype-icons/thumb/th_{type/@id}.png)">
+				<div id="{id}" class="record full_result_thumb" style="background-image:url(../../common/images/rectype-icons/thumb/th_{type/@id}.png)">
 					<xsl:call-template name="recordInfo"></xsl:call-template>
 				</div>
 			</xsl:otherwise>

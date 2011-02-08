@@ -44,7 +44,7 @@
 					</xsl:for-each>
 					<br/>
 				</xsl:if>
-				<a target="_new" href="reftype_renderer/{id}">
+				<a target="_new" href="rectype_renderer/{id}">
 					<xsl:value-of select="detail[@id=160]"/><!-- Title -->
 				</a>
 				<xsl:text>,&#160;

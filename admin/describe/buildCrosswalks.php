@@ -222,7 +222,7 @@
 	`rst_DefaultValue` varchar(255) default NULL,
 	`rst_RecordMatchOrder` tinyint(1) NOT NULL,
 	PRIMARY KEY  (`rst_ID`),
-	UNIQUE KEY `bdr_reftype` (`rst_RecTypeID`,`rst_DetailTypeID`)
+	UNIQUE KEY `bdr_rectype` (`rst_RecTypeID`,`rst_DetailTypeID`)
 	) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
 
 	INSERT INTO `temp_rec_detail_requirements` (`rst_ID`, `rst_RecTypeID`, `rst_DetailTypeID`, `rst_RequirementType`, `rst_DisplayName`, `rst_DisplayDescription`, `rst_DisplayPrompt`, `rst_DisplayHelp`, `rst_MaxValues`, `rst_DisplayOrder`, `rst_DisplayWidth`, `rst_DefaultValue`, `rst_RecordMatchOrder`) VALUES

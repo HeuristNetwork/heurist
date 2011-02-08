@@ -24,7 +24,7 @@
         <style type="text/css">
           body {font-family:Verdana,Helvetica,Arial,sans-serif; font-size:11px; }
           td { vertical-align: top; }
-          .reftype {
+          .rectype {
           color: #999999;
 
           }

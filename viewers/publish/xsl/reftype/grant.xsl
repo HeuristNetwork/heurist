@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-	<xsl:template name="grant" match="reference[reftype/@id=61]">
+	<xsl:template name="grant" match="reference[rectype/@id=61]">
 		<tr>
 			<td>
 				<b><xsl:value-of select="detail[@id=160]"/></b><!-- title -->

@@ -30,7 +30,7 @@ $MAINTABLES['LINKED_BIBLIO'] = 'Records';
 	$PKEY['LINKED_BIBLIO'] = 'rec_ID';
 	$INIDATE_FIELD['LINKED_BIBLIO'] = 'rec_Added';
       $MODDATE_FIELD['LINKED_BIBLIO'] = 'rec_Modified';
-                $JOINS['LINKED_BIBLIO'] = array('REFTYPE-ID' => 'rec_RecTypeID');
+                $JOINS['LINKED_BIBLIO'] = array('rectype-ID' => 'rec_RecTypeID');
 
 if (function_exists('get_user_id')) {
       $LOOKUPS['LINKED_BIBLIO'] = array( 'usrBookmarks' => 'rec_ID=bkm_recID and bkm_UGrpID='.get_user_id() );
@@ -48,8 +48,8 @@ $MAINTABLES['RATING_INTEREST'] = 'ratings_interest';
 $MAINTABLES['KEYWORD'] = 'usrTags';
 	$PKEY['KEYWORD'] = 'tag_ID';
 
-$MAINTABLES['REFTYPE'] = 'defRecTypes';
-	$PKEY['REFTYPE'] = 'rty_ID';
+$MAINTABLES['rectype'] = 'defRecTypes';
+	$PKEY['rectype'] = 'rty_ID';
 
 $MAINTABLES['USER'] = USERS_DATABASE.'.'.USERS_TABLE;
 	$PKEY['USER'] = USERS_ID_FIELD;
@@ -76,7 +76,7 @@ $SEARCHES["BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left jo
 		(bkm_UGrpID = [logged-in-user-id]) and
 		[word-match:bkmk_title:bkmk_title] and 
 		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
-		if ([bkmk_advanced_search] and [bkmk_reftype]!='', rec_RecTypeID = [bkmk_reftype], 1)
+		if ([bkmk_advanced_search] and [bkmk_rectype]!='', rec_RecTypeID = [bkmk_rectype], 1)
                 and not rec_FlagTemporary
 		)
 		";	/* may be over-written by search.php */
@@ -85,7 +85,7 @@ $SEARCHES["augmented_BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmar
 		(bkm_UGrpID = [logged-in-user-id]) and
 		[word-match:bkmk_title:bkmk_title] and 
 		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
-		if ([bkmk_advanced_search] and [bkmk_reftype]!='', rec_RecTypeID = [bkmk_reftype], 1)
+		if ([bkmk_advanced_search] and [bkmk_rectype]!='', rec_RecTypeID = [bkmk_rectype], 1)
                 and not rec_FlagTemporary
 		)
 		";	/* may be appended-to by search.php */

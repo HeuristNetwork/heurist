@@ -61,7 +61,7 @@ input { padding: 0; margin: 0; }
 #add_records_footer {position:absolute; right:0; left:0; bottom:0; height:20px;background-image: url("../images/backgrounds/banner_bg.png");background-position: bottom;background-repeat: repeat-x;padding: 0 1ex;}
 #add_records_footer a img {vertical-align: text-bottom;}
 .tab {background-color: #ECF1FB !important;} /* to match tabs in edit */
-#reftype-val {left:2ex;position:relative;top:2.5ex;}
+#rectype-val {left:2ex;position:relative;top:2.5ex;}
 #mainbody {margin-top:2ex}
 input[type="radio"] {vertical-align: text-top;}
 .div-section {padding: 5px 0;}

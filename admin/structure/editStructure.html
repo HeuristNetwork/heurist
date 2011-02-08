@@ -70,22 +70,22 @@
 		close_popup_frame();
 	}
 
-	function edit_reftype_constraints(dty_ID) {
-				popup_frame(pos, 'editReftypeConstraints.php?instance='+ instance + '&amp;dty_ID='+dty_ID, finish_edit_reftype_constraints);
+	function edit_rectype_constraints(dty_ID) {
+				popup_frame(pos, 'editrectypeConstraints.php?instance='+ instance + '&amp;dty_ID='+dty_ID, finish_edit_rectype_constraints);
 	}
 
-	function finish_edit_reftype_constraints() {
+	function finish_edit_rectype_constraints() {
 		close_popup_frame();
 				document.location.replace('editStructure.php?instance='+ instance );//note: called in the context of the popup
 	}
 
-	function edit_constrain_reftype(dty_ID) {
+	function edit_constrain_rectype(dty_ID) {
 		var name_span = document.getElementById('name'+dty_ID);
 		var pos = findPos(name_span);
-				popup_frame(pos, 'editReftypeConstraints.php?instance='+ instance + '&amp;dty_ID='+dty_ID, finish_edit_constrain_reftype,true);
+				popup_frame(pos, 'editrectypeConstraints.php?instance='+ instance + '&amp;dty_ID='+dty_ID, finish_edit_constrain_rectype,true);
 	}
 
-	function finish_edit_constrain_reftype() {
+	function finish_edit_constrain_rectype() {
 		close_popup_frame();
 				document.location.replace('editStructure.php?instance='+ instance ); //note: called in the context of the popup
 	}
@@ -264,7 +264,7 @@
 					</div>
 
 					<form action="editStructure.php?instance=[instance-name!]" method="post" name="edit_form" onSubmit="return check_prompts();">
-						[update REFTYPE rt1]
+						[update rectype rt1]
 
   [errors]
   [if : edit-success]
@@ -291,7 +291,7 @@
    <tr class="base-only">
     <td style="font-weight: bold; text-align: right;">Icon</td>
 	<td>
-     <img src="../../common/images/reftype-icons/[rty_ID].png" style="vertical-align: middle;" class="rft_icon" onClick="upload_icon([rty_ID]);">
+     <img src="../../common/images/rectype-icons/[rty_ID].png" style="vertical-align: middle;" class="rft_icon" onClick="upload_icon([rty_ID]);">
      &nbsp;&nbsp;&nbsp;&nbsp;
      <span style="font-weight: bold; text-align: right;">Bibliographic record types</span>
      [checkbox : rty_RecTypeGroupID : primary record type : style="margin: 0px;"]
@@ -320,7 +320,7 @@
    <tr class="base-only">
     <td style="font-weight: bold; text-align: right; vertical-align: top;">Record Constraints</td>
     <td>
-     <input type="button" value="Add/Edit Constraints" onClick="edit_reftype_constraints([rty_ID]);">
+     <input type="button" value="Add/Edit Constraints" onClick="edit_rectype_constraints([rty_ID]);">
     </td>
    </tr>
 
@@ -416,8 +416,8 @@
 
  <div style="width: 300px; height: 500px; overflow: auto; padding: 3px;" class="friendly_border">
   <table border="0">
-   [foreach REFTYPE rtf : 1 order by (rty_RecTypeGroupID > 1), rty_Name]
-    <tr><td style="text-align: right;">[rty_ID]</td><td><img src="../../common/images/reftype-icons/[rty_ID].png" id="rt[rty_ID]" class="rft_icon" onClick="upload_icon([rty_ID]);"><a href="?rty_ID=[rty_ID]">[rty_Name]</a></td></tr>
+   [foreach rectype rtf : 1 order by (rty_RecTypeGroupID > 1), rty_Name]
+    <tr><td style="text-align: right;">[rty_ID]</td><td><img src="../../common/images/rectype-icons/[rty_ID].png" id="rt[rty_ID]" class="rft_icon" onClick="upload_icon([rty_ID]);"><a href="?rty_ID=[rty_ID]">[rty_Name]</a></td></tr>
    [end-foreach]
    [not-found][end-not-found]
   </table>
@@ -427,7 +427,7 @@
 
 								<form method="post">
 									<input type="hidden" name="_submit" value="1">
-   [insert REFTYPE new_rtf]
+   [insert rectype new_rtf]
  <table border="0">
   <tr>
    <td style="width: 100px; font-weight: bold; text-align: right;">Short description</td>
@@ -454,7 +454,7 @@
     <tr>
      <td>[dty_ID]</td>
      <td style="width: 200px;"><!--img src="cross.gif" onclick="delete_bdt([dty_ID]);" class="delete_icon"--> <span id="name[dty_ID]">[dty_Name]</span></td>
-     <td style="text-align: left;">[if-eq : dty_Type : "enum"]<a href="#" onClick="edit_enum_types([dty_ID]); return false;">[dty_Type]</a>[else][dty_Type][end-if-eq][if-eq : dty_Type : "resource"] <a href="#" onClick="edit_constrain_reftype([dty_ID]); return false;">([if : dty_PtrTargetRectypes][select REFTYPE rft][rty_Name][end-select][else]unconstrained[end-if])</a>[end-if-eq]</td>
+     <td style="text-align: left;">[if-eq : dty_Type : "enum"]<a href="#" onClick="edit_enum_types([dty_ID]); return false;">[dty_Type]</a>[else][dty_Type][end-if-eq][if-eq : dty_Type : "resource"] <a href="#" onClick="edit_constrain_rectype([dty_ID]); return false;">([if : dty_PtrTargetRectypes][select rectype rft][rty_Name][end-select][else]unconstrained[end-if])</a>[end-if-eq]</td>
     </tr>
    [end-foreach]
    <!--form action="master_bib_detail_editor.php" method="post"><input type="hidden" name="delete_bdt_field" value="" id="delete_bdt"></form-->

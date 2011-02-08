@@ -59,8 +59,8 @@ function onshow() {
 }
 
 
-function setReftype(rftID) {
-	parent.HEURIST.edit.record.reftype = parent.HEURIST.reftypes.names[rftID];
+function setrectype(rftID) {
+	parent.HEURIST.edit.record.rectype = parent.HEURIST.rectypes.names[rftID];
 	renderInputs(parent.HEURIST.edit.record.bibID, rftID);
 
 	changed();
@@ -126,7 +126,7 @@ function handleSaved(json) {
 }
 
 
-function renderInputs(bibID, reftype) {
+function renderInputs(bibID, rectype) {
 	// Clear out any existing inputs
 
 	var allInputs = document.getElementById("all-inputs");
@@ -146,13 +146,13 @@ function renderInputs(bibID, reftype) {
 
 		var record = top.HEURIST.edit.record;
 
-		var inputs = top.HEURIST.edit.createInputsForReftype(record.reftypeID, record.bdValuesByType, allInputs);
+		var inputs = top.HEURIST.edit.createInputsForrectype(record.rectypeID, record.bdValuesByType, allInputs);
 
 		renderShowAll();
 
-		renderAdditionalDataSection(allInputs, record.reftypeID, record.bdValuesByType);
+		renderAdditionalDataSection(allInputs, record.rectypeID, record.bdValuesByType);
 
-		var extraInputs = top.HEURIST.edit.createInputsNotForReftype(record.reftypeID, record.bdValuesByType, allInputs);
+		var extraInputs = top.HEURIST.edit.createInputsNotForrectype(record.rectypeID, record.bdValuesByType, allInputs);
 		if (extraInputs.length > 0) {
 			for (var i=0; i < extraInputs.length; ++i) {
 				inputs.push(extraInputs[i]);
@@ -207,11 +207,11 @@ function renderInputs(bibID, reftype) {
 		window.HEURIST.inputs = inputs;
 
 	}
-	else if (reftype) {
+	else if (rectype) {
 
 		var defaultInputValues = {};
 		if (window.HEURIST.parameters["title"]) {
-			if (reftype == 28) {
+			if (rectype == 28) {
 				// journal volume - put the title into the journal pointer field, not the journal volume title field
 				defaultInputValues["226"] = [ { "title" : window.HEURIST.parameters["title"] } ];
 			} else {
@@ -219,11 +219,11 @@ function renderInputs(bibID, reftype) {
 			}
 		}
 
-		var inputs = top.HEURIST.edit.createInputsForReftype(reftype, defaultInputValues, allInputs);
+		var inputs = top.HEURIST.edit.createInputsForrectype(rectype, defaultInputValues, allInputs);
 
 		renderShowAll();
 
-		renderAdditionalDataSection(allInputs, reftype);
+		renderAdditionalDataSection(allInputs, rectype);
 
 		if (! top.document.getElementById("notes")) {
 			var width = 400;
@@ -266,18 +266,18 @@ function renderInputs(bibID, reftype) {
 	}
 
 
-	var rftElement = document.getElementById("reftype");
+	var rftElement = document.getElementById("rectype");
 	if (! rftElement) {
 		rftElement = document.createElement("input");
 		rftElement.type = "hidden";
-		rftElement.name = "reftype";
-		rftElement.id = "reftype";
+		rftElement.name = "rectype";
+		rftElement.id = "rectype";
 		document.forms[0].appendChild(rftElement);
 	}
-	rftElement.value = reftype || record.reftypeID;
+	rftElement.value = rectype || record.rectypeID;
 }
 
-function renderAdditionalDataSection(container, reftypeID, bdValues) {
+function renderAdditionalDataSection(container, rectypeID, bdValues) {
 	var hrRow = container.appendChild(document.createElement("tr"));
 
 	var hrCell = hrRow.appendChild(document.createElement("td"));
@@ -303,7 +303,7 @@ function renderAdditionalDataSection(container, reftypeID, bdValues) {
 		addCell.style.padding = "0 0 5px 0";
 		addCell.appendChild(document.createTextNode("Add field:"));
 
-	var bdts = top.HEURIST.edit.getBibDetailNonRequirements(reftypeID);
+	var bdts = top.HEURIST.edit.getBibDetailNonRequirements(rectypeID);
 	if (bdValues) {
 		for (var bdt_id in bdValues) {
 			delete bdts[bdt_id];
@@ -410,7 +410,7 @@ document.forms[0].heuristSubmit = function() {
 /* Necessary to do this stuff BEFORE LOAD -- other windows have dibs on our onload handler, they will get in before we get a chance */
 window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 var bibID;
-var reftype = parseInt(window.HEURIST.parameters["reftype"]);
+var rectype = parseInt(window.HEURIST.parameters["rectype"]);
 if (parent.HEURIST  &&  parent.HEURIST.edit && parent.HEURIST.edit.record) {
 	bibID = parent.HEURIST.edit.record;
 }else if (top.HEURIST && top.HEURIST.edit && top.HEURIST.edit.record) {
@@ -419,9 +419,9 @@ if (parent.HEURIST  &&  parent.HEURIST.edit && parent.HEURIST.edit.record) {
 	if (! parent.HEURIST) parent.HEURIST = {};
 	if (! parent.HEURIST.edit) parent.HEURIST.edit = {};
 	if (! parent.HEURIST.edit.record) parent.HEURIST.edit.record = {};
-	parent.HEURIST.edit.record.reftype = reftype;
+	parent.HEURIST.edit.record.rectype = rectype;
 }
-renderInputs(bibID, reftype);
+renderInputs(bibID, rectype);
   </script>
  </body>
 </html>

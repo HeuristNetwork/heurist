@@ -7,7 +7,7 @@
 if (! window.heurist_images) window.heurist_images = new Array(
 	<!-- select Media references (type 74), with appropriate Mimetype (detail type 289) -->
 	<!-- detail type 221 is "Associated file" - the address of a script to retrieve the file -->
-	<xsl:for-each select="export/references/reference[reftype/@id=74][detail[@id=289]='image/jpeg' or detail[@id=289]='image/png' or detail[@id=289]='image/gif' or detail[@id=289]='image/bmp']">
+	<xsl:for-each select="export/references/reference[rectype/@id=74][detail[@id=289]='image/jpeg' or detail[@id=289]='image/png' or detail[@id=289]='image/gif' or detail[@id=289]='image/bmp']">
 		[ '<xsl:value-of select="detail[@id=221]/file_fetch_url"/>', "<xsl:value-of select="detail[@id=160]"/>" ]<xsl:if test="position() != last()">,</xsl:if>
 	</xsl:for-each>
 );

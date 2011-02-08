@@ -177,7 +177,7 @@ top.HEURIST.search = {
 	renderResultRow: function(res) {
 
 		/* res[0]   res[1]        res[2]  res[3]   res[4]       res[5]     res[6]        */
-		/* bkmk_id, bkmk_user_id, bib_id, bib_url, bib_reftype, bib_title, bib_workgroup */
+		/* bkmk_id, bkmk_user_id, bib_id, bib_url, bib_rectype, bib_title, bib_workgroup */
 		/* res[7] => bib_visibility, res[8] => bib_url_last_verified, res[9] => bib_url_error, res[10] => bkmk_user_pwd */
 
 		var pinAttribs = res[0]? "class='logged-in-only bookmarked' title='Bookmarked - click to see details'"
@@ -219,7 +219,7 @@ top.HEURIST.search = {
 			href = href.htmlEscape();
 		}
 		else if (res[4] == 2) {
-			// special handling for notes reftype: link to view page if no URL
+			// special handling for notes rectype: link to view page if no URL
 			href = top.HEURIST.basePath+ "records/view/viewRecord.php?bib_id="+res[2] + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "");
 		}
 
@@ -227,17 +227,17 @@ top.HEURIST.search = {
 		if (res[10]) userPwd = "style='display:inline;cursor:pointer;' user_pwd='"+res[10].htmlEscape()+"'";
 		else userPwd = "style='display:none;'";
 
-		var reftypeImg = "style='background-image:url("+ top.HEURIST.basePath+"common/images/reftype-icons/" + (res[4]? res[4] : "blank") + ".png)'";
-		var reftypeTitle = "Click to see details";
-		if (top.HEURIST.reftypes.names[parseInt(res[4])])
-			reftypeTitle = top.HEURIST.reftypes.names[parseInt(res[4])] + " - click to see details";
+		var rectypeImg = "style='background-image:url("+ top.HEURIST.basePath+"common/images/rectype-icons/" + (res[4]? res[4] : "blank") + ".png)'";
+		var rectypeTitle = "Click to see details";
+		if (top.HEURIST.rectypes.names[parseInt(res[4])])
+			rectypeTitle = top.HEURIST.rectypes.names[parseInt(res[4])] + " - click to see details";
 
 		var html = "<div class=result_row title='Double-click to edit' bkmk_id='"+res[0]+"' bib_id="+res[2]+">"+
 		"<img src=" +top.HEURIST.basePath+ "common/images/13x13.gif " + pinAttribs + ">"+
 		"<span class='wg-id-container logged-in-only'>"+
 		"<span class=wg-id title='"+linkTitle+"' " + (wgColor? wgColor: "") + ">" + (wgHTML? wgHTML.htmlEscape() : "") + "</span>"+
 		"</span>"+
-		"<img src=" +top.HEURIST.basePath+ "common/images/16x16.gif title='"+reftypeTitle.htmlEscape()+"' "+reftypeImg+" class=rft>"+
+		"<img src=" +top.HEURIST.basePath+ "common/images/16x16.gif title='"+rectypeTitle.htmlEscape()+"' "+rectypeImg+" class=rft>"+
 		"<span class='rec_title'>" + (res[3].length ? "<a href='"+res[3]+"' target='_blank'>"+linkText + "</a>" : linkText ) + "</span>" +
 		"<div class=right_margin_info>"+
 		"<span><img class='passwordIcon' onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src=" +top.HEURIST.basePath+ "common/images/lock.png " + userPwd + "></span>"+
@@ -264,7 +264,7 @@ top.HEURIST.search = {
 	renderResultThumb: function(res) {
 
 		/* res[0]   res[1]        res[2]  res[3]   res[4]       res[5]     res[6]        */
-		/* bkmk_id, bkmk_user_id, bib_id, bib_url, bib_reftype, bib_title, bib_workgroup */
+		/* bkmk_id, bkmk_user_id, bib_id, bib_url, bib_rectype, bib_title, bib_workgroup */
 
 		/* res[7]          res[8]                 res[9]         res[10]        res[11]   */
 		/* bib_visibility, bib_url_last_verified, bib_url_error, bkmk_user_pwd, thumbnail */
@@ -300,7 +300,7 @@ top.HEURIST.search = {
 			href = href.htmlEscape();
 		}
 		else if (res[4] == 2) {
-			// special handling for notes reftype: link to view page if no URL
+			// special handling for notes rectype: link to view page if no URL
 			href = top.HEURIST.basePath+ "records/view/viewRecord.php?bib_id="+res[2] +(top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "");
 		}
 
@@ -308,21 +308,21 @@ top.HEURIST.search = {
 		if (res[10]) userPwd = "style='display:inline;cursor:pointer;' user_pwd='"+res[10].htmlEscape()+"'";
 		else userPwd = "style='display:none;'";
 
-		var reftypeImg = "style='background-image:url("+ top.HEURIST.basePath+"common/images/reftype-icons/" + (res[4]? res[4] : "blank") + ".png)'";
-		var reftypeThumb = "style='background-image:url("+ top.HEURIST.basePath+"common/images/reftype-icons/thumb/th_" + (res[4]? res[4] : "blank") + ".png)'";
-		var reftypeTitle = "Click to see details";
-		if (top.HEURIST.reftypes.names[parseInt(res[4])])
-			reftypeTitle = top.HEURIST.reftypes.names[parseInt(res[4])] + " - click to see details";
+		var rectypeImg = "style='background-image:url("+ top.HEURIST.basePath+"common/images/rectype-icons/" + (res[4]? res[4] : "blank") + ".png)'";
+		var rectypeThumb = "style='background-image:url("+ top.HEURIST.basePath+"common/images/rectype-icons/thumb/th_" + (res[4]? res[4] : "blank") + ".png)'";
+		var rectypeTitle = "Click to see details";
+		if (top.HEURIST.rectypes.names[parseInt(res[4])])
+			rectypeTitle = top.HEURIST.rectypes.names[parseInt(res[4])] + " - click to see details";
 
 		var html =
 		"<div class=result_thumb  title='Double-click to edit' bkmk_id='"+res[0]+"' bib_id="+res[2]+">" +
 		"<input style='display:none' type=checkbox name=bib[] onclick=top.HEURIST.search.resultItemOnClick(this) class='logged-in-only' title='Check box to apply Actions to this record'>"+
-		   (res[11] && res[11].length ? "<div class='thumbnail' style='background-image:url("+res[11]+")' ></div>":"<div class='no-thumbnail' "+reftypeThumb+" ></div>") +
+		   (res[11] && res[11].length ? "<div class='thumbnail' style='background-image:url("+res[11]+")' ></div>":"<div class='no-thumbnail' "+rectypeThumb+" ></div>") +
 		"<div class='rec_title'>" + (res[3].length ? "<a href='"+res[3]+"' target='_blank'>"+linkText + "</a>" : linkText ) + "</div>" +
 		   "<div class=icons  bkmk_id='"+res[0]+"' bib_id="+res[2]+">" +
 
 
-		   "<img src='"+ top.HEURIST.basePath+"common/images/16x16.gif' title='"+reftypeTitle.htmlEscape()+"' "+reftypeImg+" class='rft'>"+
+		   "<img src='"+ top.HEURIST.basePath+"common/images/16x16.gif' title='"+rectypeTitle.htmlEscape()+"' "+rectypeImg+" class='rft'>"+
 		   "<img src='"+ top.HEURIST.basePath+"common/images/13x13.gif' " + pinAttribs + ">"+
 		   "<span class='wg-id-container logged-in-only'>"+
 		   "<span class=wg-id title='"+linkTitle.htmlEscape()+"' " + (wgColor? wgColor: "") + ">" + (wgHTML? wgHTML.htmlEscape() : "") + "</span>"+
@@ -533,12 +533,12 @@ top.HEURIST.search = {
 			var result = rows[i];
 			var t_span = result.childNodes[0];
 			var rec_title = $(".rec_title", result)[0];
-			var reftype_img = result.childNodes[4];
+			var rectype_img = result.childNodes[4];
 			var pin_img = result.childNodes[0];
 
 			top.HEURIST.registerEvent(result, "click", top.HEURIST.search.resultItemOnClick);
 			top.HEURIST.registerEvent(t_span, "click", top.HEURIST.search.resultItemOnClick);
-			top.HEURIST.registerEvent(reftype_img, "click", top.HEURIST.search.resultItemOnClick);
+			top.HEURIST.registerEvent(rectype_img, "click", top.HEURIST.search.resultItemOnClick);
 			top.HEURIST.registerEvent(rec_title, "click", top.HEURIST.search.resultItemOnClick);
 			top.HEURIST.registerEvent(pin_img, "click", result.getAttribute("bkmk_id") ? top.HEURIST.search.resultItemOnClick : top.HEURIST.search.addBookmark);
 			top.HEURIST.registerEvent(result, "dblclick", (top.HEURIST.util.getDisplayPreference("double-click-action") == "edit") ? top.HEURIST.search.edit : top.HEURIST.search.resultItemOnClick);
@@ -1799,11 +1799,11 @@ top.HEURIST.search = {
 
 	launchWebSearch: function() {
 		var q = document.getElementById("q").value;
-		// look up reftypes
+		// look up rectypes
 		var re = new RegExp("(t|type):([0-9]+)");
 		var matches;
 		while (matches = q.match(re)) {
-			var type = top.HEURIST.reftypes.names[matches[2]];
+			var type = top.HEURIST.rectypes.names[matches[2]];
 			q = q.replace(new RegExp("(t|type):"+matches[2], "g"), "\""+type+"\"");
 		}
 		// look up workgroups
@@ -1859,7 +1859,7 @@ top.HEURIST.search = {
 			return;
 		}
 
-		var visible_reftypes = {};
+		var visible_rectypes = {};
 		var results = top.HEURIST.search.results;
 
 		if (! results) return;
@@ -1869,7 +1869,7 @@ top.HEURIST.search = {
 		var firstOnPage = currentPage * resultsPerPage;
 		var lastOnPage = Math.min((currentPage+1)*resultsPerPage, results.totalRecordCount)-1;
 		for (var i = firstOnPage; i <= lastOnPage; ++i) {
-			visible_reftypes[results.records[i][4]] = true;
+			visible_rectypes[results.records[i][4]] = true;
 		}
 
 		var legend_box_elt = document.createElement("div");
@@ -1889,9 +1889,9 @@ top.HEURIST.search = {
 		document.body.appendChild(legend_box_elt);
 
 		var iHTML = "";
-		for (var i in visible_reftypes) {
-			if (top.HEURIST.reftypes.names[i])
-				iHTML += "<li><img src='"+ top.HEURIST.basePath+"common/images/reftype-icons/"+i+".png'>"+top.HEURIST.reftypes.names[i]+"</li>";
+		for (var i in visible_rectypes) {
+			if (top.HEURIST.rectypes.names[i])
+				iHTML += "<li><img src='"+ top.HEURIST.basePath+"common/images/rectype-icons/"+i+".png'>"+top.HEURIST.rectypes.names[i]+"</li>";
 		}
 
 		document.getElementById("legend-box-list").innerHTML = iHTML;

@@ -3,16 +3,16 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
  <xsl:output method="xml"/>
     <!-- Go through the export XML and make a endnote xml record for every reference found in the xml.
-           This document consists of 3 parts, the main loop, the reftype templates and helper fucntions.
+           This document consists of 3 parts, the main loop, the rectype templates and helper fucntions.
            If a reference type is not recognized, it will use a default template with EndNote type 'Generic'.
            
            The first part goes through the list, calling the right template per reference.
-           > insert more reftypes here and call their template (or add their template).
+           > insert more rectypes here and call their template (or add their template).
            
-           The reftype templates describe how the translation takes place.
-           > add and define translations per reftype (templates) here.
+           The rectype templates describe how the translation takes place.
+           > add and define translations per rectype (templates) here.
            
-           The helper functions are used for mutual use between reftypes.
+           The helper functions are used for mutual use between rectypes.
            > add reusable functions here .
         
         Author: Erik Baaij, Marco Springer.
@@ -32,40 +32,40 @@
                         <xsl:value-of select="id"/>
                     </rec-number>
                     <xsl:choose>
-                        <xsl:when test="reftype='Book'">
+                        <xsl:when test="rectype='Book'">
                             <xsl:call-template name="Book"/>
                         </xsl:when>
-                        <xsl:when test="reftype='Internet bookmark'">
+                        <xsl:when test="rectype='Internet bookmark'">
                             <xsl:call-template name="Internet_bookmark"/>
                         </xsl:when>
-                        <xsl:when test="reftype='Journal Article'">
+                        <xsl:when test="rectype='Journal Article'">
                             <xsl:call-template name="Journal_Article"/>
                         </xsl:when>
-                        <xsl:when test="reftype='Book chapter'">
+                        <xsl:when test="rectype='Book chapter'">
                             <xsl:call-template name="Book_Section"/>
                         </xsl:when>
-                        <xsl:when test="reftype='Conferene Proceedings'">
+                        <xsl:when test="rectype='Conferene Proceedings'">
                             <xsl:call-template name="Conference_Proceeding"/>
                         </xsl:when>
-                        <xsl:when test="reftype='Newspaper Article'">
+                        <xsl:when test="rectype='Newspaper Article'">
                             <xsl:call-template name="Newspaper_Article"/>
                         </xsl:when>
-                        <xsl:when test="reftype='Magazine Article'">
+                        <xsl:when test="rectype='Magazine Article'">
                             <xsl:call-template name="Magazine_Article"/>
                         </xsl:when>
-                        <xsl:when test="reftype='Pers. Comm.'">
+                        <xsl:when test="rectype='Pers. Comm.'">
                             <xsl:call-template name="Personal_Communication"/>
                         </xsl:when>
-                        <xsl:when test="reftype='Report'">
+                        <xsl:when test="rectype='Report'">
                             <xsl:call-template name="Report"/>
                         </xsl:when>
-                        <xsl:when test="reftype='Thesis'">
+                        <xsl:when test="rectype='Thesis'">
                             <xsl:call-template name="Thesis"/>
                         </xsl:when>
-                        <xsl:when test="reftype='Conference Paper'">
+                        <xsl:when test="rectype='Conference Paper'">
                             <xsl:call-template name="Conference_Paper"/>
                         </xsl:when>
-                        <!-- add more reftypes here, write a template for each -->
+                        <!-- add more rectypes here, write a template for each -->
                         <xsl:otherwise>
                             <xsl:call-template name="default"/>
                         </xsl:otherwise>
@@ -77,79 +77,79 @@
         <!-- end of endnote xml document -->
     </xsl:template>
 
-    <!-- REFTYPE TEMPLATES -->
+    <!-- rectype TEMPLATES -->
 
     <!-- template for books -->
     <xsl:template name="Book">
-        <xsl:element name="ref-type"><xsl:attribute name="name">Book</xsl:attribute>6</xsl:element>
+        <xsl:element name="rec-type"><xsl:attribute name="name">Book</xsl:attribute>6</xsl:element>
         <xsl:call-template name="default_data"/>
     </xsl:template>
 
     <!-- template for internet bookmarks -->
     <xsl:template name="Internet_bookmark">
-        <xsl:element name="ref-type"><xsl:attribute name="name">Electronic Source</xsl:attribute>12</xsl:element>
+        <xsl:element name="rec-type"><xsl:attribute name="name">Electronic Source</xsl:attribute>12</xsl:element>
         <xsl:call-template name="default_data"/>
     </xsl:template>
 
     <!-- template for journal articles -->
     <xsl:template name="Journal_Article">
-        <xsl:element name="ref-type"><xsl:attribute name="name">Journal Article</xsl:attribute>17</xsl:element>
+        <xsl:element name="rec-type"><xsl:attribute name="name">Journal Article</xsl:attribute>17</xsl:element>
         <xsl:call-template name="default_data"/>
     </xsl:template>
 
     <!-- template for book chapters -->
     <xsl:template name="Book_Section">
-        <xsl:element name="ref-type"><xsl:attribute name="name">Book Chapter</xsl:attribute>5</xsl:element>
+        <xsl:element name="rec-type"><xsl:attribute name="name">Book Chapter</xsl:attribute>5</xsl:element>
         <xsl:call-template name="default_data"/>
     </xsl:template>
 
     <!-- template for conference proceedings -->
     <xsl:template name="Conference_Proceeding">
-        <xsl:element name="ref-type"><xsl:attribute name="name">Conference Proceeding</xsl:attribute>10</xsl:element>
+        <xsl:element name="rec-type"><xsl:attribute name="name">Conference Proceeding</xsl:attribute>10</xsl:element>
         <xsl:call-template name="default_data"/>
     </xsl:template>
 
     <!-- template for newspaper articles -->
     <xsl:template name="Newspaper_Article">
-        <xsl:element name="ref-type"><xsl:attribute name="name">Newspaper Article</xsl:attribute>23</xsl:element>
+        <xsl:element name="rec-type"><xsl:attribute name="name">Newspaper Article</xsl:attribute>23</xsl:element>
         <xsl:call-template name="default_data"/>
     </xsl:template>
 
     <!-- template for magazine articles -->
     <xsl:template name="Magazine_Article">
-        <xsl:element name="ref-type"><xsl:attribute name="name">Magazine Article</xsl:attribute>19</xsl:element>
+        <xsl:element name="rec-type"><xsl:attribute name="name">Magazine Article</xsl:attribute>19</xsl:element>
         <xsl:call-template name="default_data"/>
     </xsl:template>
 
     <!-- template for personal communications -->
     <xsl:template name="Personal_Communication">
-        <xsl:element name="ref-type"><xsl:attribute name="name">Personal Communication</xsl:attribute>26</xsl:element>
+        <xsl:element name="rec-type"><xsl:attribute name="name">Personal Communication</xsl:attribute>26</xsl:element>
         <xsl:call-template name="default_data"/>
     </xsl:template>
 
     <!-- template for reports -->
     <xsl:template name="Report">
-        <xsl:element name="ref-type"><xsl:attribute name="name">Report</xsl:attribute>27</xsl:element>
+        <xsl:element name="rec-type"><xsl:attribute name="name">Report</xsl:attribute>27</xsl:element>
         <xsl:call-template name="default_data"/>
     </xsl:template>
 
     <!-- template for theses -->
     <xsl:template name="Thesis">
-        <xsl:element name="ref-type"><xsl:attribute name="name">Thesis</xsl:attribute>32</xsl:element>
+        <xsl:element name="rec-type"><xsl:attribute name="name">Thesis</xsl:attribute>32</xsl:element>
         <xsl:call-template name="default_data"/>
     </xsl:template>
 
     <!-- template for conference papers -->
     <xsl:template name="Conference_Paper">
-        <xsl:element name="ref-type"><xsl:attribute name="name">Conference Paper</xsl:attribute>47</xsl:element>
+        <xsl:element name="rec-type"><xsl:attribute name="name">Conference Paper</xsl:attribute>47</xsl:element>
         <xsl:call-template name="default_data"/>
     </xsl:template>
 
     <!-- default template -->
     <xsl:template name="default">
-        <!-- the ref-type tag gets an attribute called name with the Heurist name of the reference and value 13, which is EndNote type 'Generic' -->
-        <xsl:element name="ref-type"><xsl:attribute name="name">
-                <xsl:value-of select="reftype"/>
+        <!-- the rec-type tag gets an attribute called name with the Heurist name of the reference and value 13, which is EndNote type 'Generic' -->
+        <xsl:element name="rec-type"><xsl:attribute name="name">
+                <xsl:value-of select="rectype"/>
             </xsl:attribute>13</xsl:element>
         <xsl:call-template name="default_data"/>
     </xsl:template>

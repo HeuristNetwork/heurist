@@ -42,8 +42,8 @@ if (@$_REQUEST['addref']) {
 		$outdate = '';
 }
 // url with no type specified gets treated as an internet bookmark
-if (@$_REQUEST['bkmrk_bkmk_url']  &&  ! @$_REQUEST['bib_reftype'])
-	$_REQUEST['bib_reftype'] = 1;
+if (@$_REQUEST['bkmrk_bkmk_url']  &&  ! @$_REQUEST['bib_rectype'])
+	$_REQUEST['bib_rectype'] = 1;
 
 
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
@@ -95,13 +95,13 @@ if (preg_match_all('!DOI:\s*(10\.[-a-zA-Z.0-9]+/\S+)!i', $description, $matches,
 $isbns = array();
 if (preg_match_all('!ISBN(?:-?1[03])?[^a-z]*?(97[89][-0-9]{9,13}[0-9]|[0-9][-0-9]{7,10}[0-9X])\\b!i', $description, $matches, PREG_PATTERN_ORDER)) {
 	$isbns = array_unique($matches[1]);
-	if (! @$_REQUEST['bib_reftype']) $_REQUEST['bib_reftype'] = 5;
+	if (! @$_REQUEST['bib_rectype']) $_REQUEST['bib_rectype'] = 5;
 }
 
 $issns = array();
 if (preg_match_all('!ISSN(?:-?1[03])?[^a-z]*?([0-9]{4}-?[0-9]{3}[0-9X])!i', $description, $matches, PREG_PATTERN_ORDER)) {
 	$issns = array_unique($matches[1]);
-	if (! @$_REQUEST['bib_reftype']) $_REQUEST['bib_reftype'] = 3;
+	if (! @$_REQUEST['bib_rectype']) $_REQUEST['bib_rectype'] = 3;
 }
 
 /*  fix url to be complete with protocol and remove any trailing slash */
@@ -219,19 +219,19 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 								. '&bkmk_url=' . urlencode($url)
 								. '&bkmk_description=' . urlencode($description)
 								. '&tag=' . urlencode($_REQUEST['tag'])
-								. (@$_REQUEST['bib_reftype'] ? '&bib_reftype=' . urlencode($_REQUEST['bib_reftype']) : ''));
+								. (@$_REQUEST['bib_rectype'] ? '&bib_rectype=' . urlencode($_REQUEST['bib_rectype']) : ''));
 			return;
 		}
 	}
-//if no similar url's and bib_id was -1 then force a new record of bib_reftype supplied
+//if no similar url's and bib_id was -1 then force a new record of bib_rectype supplied
 	if (! $rec_id  ||  $force_new) {
 		$new_rec_id = true;
-		$rt = intval($_REQUEST['bib_reftype']);
+		$rt = intval($_REQUEST['bib_rectype']);
 		if (! $rt) {
-			if ($url) $_REQUEST['bib_reftype'] = 1;	/* Internet bookmark */
-			else $_REQUEST['bib_reftype'] = 2;	/* Floating note */
-		} else if (!check_reftype_exist($rt)) {
-			// the reftype passed in is not available on this instance  send them to the  add resource popup
+			if ($url) $_REQUEST['bib_rectype'] = 1;	/* Internet bookmark */
+			else $_REQUEST['bib_rectype'] = 2;	/* Floating note */
+		} else if (!check_rectype_exist($rt)) {
+			// the rectype passed in is not available on this instance  send them to the  add resource popup
 			header('Location: ' . BASE_PATH . 'records/add/addRecord.php'
 								. '?instance='.HEURIST_INSTANCE
 								. '&t=' . urlencode($_REQUEST['t'])
@@ -246,7 +246,7 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 		                              'rec_Added' => date('Y-m-d H:i:s'),
 		                              'rec_Modified' => date('Y-m-d H:i:s'),
 		                              'rec_AddedByUGrpID' => intval($usrID),
-		                              'rec_RecTypeID' => $_REQUEST['bib_reftype'],
+		                              'rec_RecTypeID' => $_REQUEST['bib_rectype'],
 		                              'rec_OwnerUGrpID' => intval($_REQUEST['bib_workgroup']),
 		                              'rec_NonOwnerVisibility' => (intval($_REQUEST['bib_workgroup'])? ((strtolower($_REQUEST['bib_visibility']) == 'hidden')? 'Hidden' : 'Viewable') : NULL),
 		                              'rec_FlagTemporary' => ! ($url  ||  $_REQUEST['bkmrk_bkmk_title'])));
@@ -272,9 +272,9 @@ if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 	/* create a new public note */
 error_log("in add making new records");
 	$new_rec_id = true;
-	$rt = intval($_REQUEST['bib_reftype']);
-	if (!check_reftype_exist($rt)) {
-		// the reftype passed in is not available on this instance  send them to the  add resource popup
+	$rt = intval($_REQUEST['bib_rectype']);
+	if (!check_rectype_exist($rt)) {
+		// the rectype passed in is not available on this instance  send them to the  add resource popup
 		header('Location: ' . HEURIST_BASE_URL . 'records/add/addRecord.php'
 							. '?instance='.HEURIST_INSTANCE
 							. '&t=' . urlencode($_REQUEST['t'])
@@ -287,7 +287,7 @@ error_log("in add making new records");
 	                              'rec_Added' => date('Y-m-d H:i:s'),
 	                              'rec_Modified' => date('Y-m-d H:i:s'),
 	                              'rec_AddedByUGrpID' => intval($usrID),
-		                      'rec_RecTypeID' => ($_REQUEST['bib_reftype']? intval(@$_REQUEST['bib_reftype']) : NULL),
+		                      'rec_RecTypeID' => ($_REQUEST['bib_rectype']? intval(@$_REQUEST['bib_rectype']) : NULL),
 		                      'rec_OwnerUGrpID' => (intval(@$_REQUEST['bib_workgroup'])?intval(@$_REQUEST['bib_workgroup']): intval($usrID)),
 		                      'rec_NonOwnerVisibility' => (intval(@$_REQUEST['bib_workgroup'])? ((strtolower(@$_REQUEST['bib_visibility']) == 'hidden')? 'Hidden' : 'Viewable') : NULL),
 	                              'rec_FlagTemporary' => ! $_REQUEST['bkmrk_bkmk_title'])); // saw BUG???
@@ -464,7 +464,7 @@ function insert_woot_content($rec_id, $content) {
 	if (! $result["success"]) error_log($result["errorType"]);
 }
 
-function check_reftype_exist($rt) {
+function check_rectype_exist($rt) {
 	$res = mysql_query("select distinct rty_ID,rty_Name from defRecTypes
 	                  where rty_ID");
 	while ($row = mysql_fetch_assoc($res)) {

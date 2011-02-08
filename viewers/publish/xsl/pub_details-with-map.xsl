@@ -27,7 +27,7 @@
       <head>
 
         <style type="text/css"> body {font-family:Verdana,Helvetica,Arial,sans-serif;
-          font-size:11px; }  .reftype { color: #999999; }
+          font-size:11px; }  .rectype { color: #999999; }
           .record-table {margin-bottom: 10px;}
 
         </style>
@@ -58,7 +58,7 @@
       </tr>
       <tr>
         <td colspan="2">
-          <span class="reftype">
+          <span class="rectype">
           Reference type:
           </span>
 
@@ -66,7 +66,7 @@
 
       <xsl:if test="modified !=''">
         &#160;
-        <span class="reftype">
+        <span class="rectype">
             Last Updated:
           </span>
             <xsl:value-of select="modified"/>
@@ -74,7 +74,7 @@
       </xsl:if>
       <xsl:if test="url != ''">
         &#160;
-        <span class="reftype">URL: </span>
+        <span class="rectype">URL: </span>
 
             <a href="{url}">
               <xsl:choose>
@@ -102,7 +102,7 @@
         <xsl:if test="generate-id(.)=
               generate-id($details[@id=current()/@id][1]) and self::node()[@id!= 249]">
           <tr>
-            <td class="reftype" width="150">
+            <td class="rectype" width="150">
               <xsl:choose>
                 <xsl:when test="@name !=''">
                   <xsl:value-of select="@name"/>
@@ -207,7 +207,7 @@
         <xsl:if test="generate-id(.)=
               generate-id($pointer[@id=current()/@id][1]) and self::node()[@id= 249]">
           <tr>
-            <td class="reftype" width="150">
+            <td class="rectype" width="150">
               <xsl:choose>
                 <xsl:when test="@name !=''">
                   <xsl:value-of select="@name"/>
@@ -243,7 +243,7 @@
         <xsl:if test="generate-id(.)=
         generate-id($relation[@type=current()/@type][1])">
           <tr>
-            <td class="reftype" width="150">
+            <td class="rectype" width="150">
               <xsl:value-of select="@type"/>
             </td>
             <td>
@@ -259,7 +259,7 @@
       </xsl:for-each>
       <xsl:if test="woot !=''">
         <tr>
-          <td class="reftype"> WYSIWIG Text </td>
+          <td class="rectype"> WYSIWIG Text </td>
           <td>
             <xsl:call-template name="woot_content"/>
           </td>

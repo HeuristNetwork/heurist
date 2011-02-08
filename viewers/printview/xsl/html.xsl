@@ -59,7 +59,7 @@
               <b><xsl:value-of select="id"/>: &#160;
                 <img>
                   <xsl:attribute name="align">absbottom</xsl:attribute>
-                  <xsl:attribute name="src">../../common/images/reftype-icons/<xsl:value-of
+                  <xsl:attribute name="src">../../common/images/rectype-icons/<xsl:value-of
                     select="type/@id"/>.png</xsl:attribute>
                 </img>
 
@@ -69,7 +69,7 @@
             </td>
           </tr>
           <tr>
-            <td class="reftype">
+            <td class="rectype">
               <nobr>Reference type</nobr>
             </td>
             <td>
@@ -78,7 +78,7 @@
           </tr>
     <xsl:if test="modified !=''">
           <tr>
-            <td class="reftype">
+            <td class="rectype">
               <nobr>Last Updated</nobr>
             </td>
             <td>
@@ -88,7 +88,7 @@
     </xsl:if>
           <xsl:if test="url != ''">
             <tr>
-              <td class="reftype">URL</td>
+              <td class="rectype">URL</td>
               <td>
                 <a href="{url}" TARGET="_blank">
                   <xsl:choose>
@@ -114,7 +114,7 @@
             <xsl:if test="generate-id(.)=
               generate-id($details[@id=current()/@id][1]) and self::node()[@id!= 249]">
               <tr>
-                <td class="reftype" width="150">
+                <td class="rectype" width="150">
                   <xsl:choose>
                     <xsl:when test="@name !=''">
                       <xsl:value-of select="@name"/>
@@ -173,7 +173,7 @@
             <xsl:if test="generate-id(.)=
               generate-id($pointer[@id=current()/@id][1]) and self::node()[@id= 249]">
               <tr>
-                <td class="reftype" width="150">
+                <td class="rectype" width="150">
                   <xsl:choose>
                     <xsl:when test="@name !=''">
                       <xsl:value-of select="@name"/>
@@ -209,7 +209,7 @@
       <xsl:if test="generate-id(.)=
         generate-id($relation[@type=current()/@type][1])">
         <tr>
-          <td class="reftype" width="150">
+          <td class="rectype" width="150">
             <xsl:value-of select="@type"/>
           </td>
           <td>
@@ -225,7 +225,7 @@
     </xsl:for-each>
         <xsl:if test="woot !=''">
        <tr>
-         <td  class="reftype">
+         <td  class="rectype">
            WYSIWIG Text
          </td>
          <td>

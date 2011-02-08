@@ -37,7 +37,7 @@ while (count($bib_ids_to_fetch) > 0) {
 
 	$bib_data[$rec_id] = array();
 	$bib_data[$rec_id]["title"] = $row["rec_Title"];
-	$bib_data[$rec_id]["reftype"] = $row["rec_RecTypeID"];
+	$bib_data[$rec_id]["rectype"] = $row["rec_RecTypeID"];
 	$bib_data[$rec_id]["notes"] = $row["rec_ScratchPad"];
 
 	$bib_data[$rec_id]["values"] = array();

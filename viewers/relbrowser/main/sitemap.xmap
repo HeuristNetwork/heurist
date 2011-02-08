@@ -81,7 +81,7 @@
 				<map:parameter name="hBase" value="http://{global:serverName}/{request-param:installDir}/"/>
 				<map:parameter name="cocoonBase" value="/cocoon/{request-param:installDir}/relbrowser/{request-param:appDir}/"/>
 				<map:parameter name="serverBaseUrl" value="http://{global:serverName}"/>
-				<map:parameter name="related_reftype_filter" value="{2}"/>
+				<map:parameter name="related_rectype_filter" value="{2}"/>
 				<map:parameter name="instanceName" value="{request-param:instance}"/>
 			</map:transform>
 			<map:transform type="xinclude" label="xinclude"/>

@@ -101,54 +101,41 @@
 				}
 			});
 			top.HEURIST.whenLoaded(["record", "edit-js", "edit-html"], top.HEURIST.edit.loadAllModules);
-			top.HEURIST.whenLoaded(["record", "edit-js", "HAPI", "edit-html"],createReftypeChanger );
+			top.HEURIST.whenLoaded(["record", "edit-js", "HAPI", "edit-html"],createRectypeChanger );
 			window.onbeforeunload = top.HEURIST.edit.onbeforeunload;
 
-			function createReftypeChanger() {
-				var reftypeEdit = document.getElementById("reftype-edit");
-				var reftypeValSelect = document.createElement("select");
-				reftypeValSelect.id = "reftype-select";
-				reftypeValSelect.onchange = changeReftype;
-				reftypeEdit.appendChild(reftypeValSelect);
+			function createRectypeChanger() {
+				var rectypeEdit = document.getElementById("rectype-edit");
+				var rectypeValSelect = document.createElement("select");
+				rectypeValSelect.id = "rectype-select";
+				rectypeValSelect.onchange = changeRectype;
+				rectypeEdit.appendChild(rectypeValSelect);
 
-				if (reftypeValSelect.options.length == 0) {
-					// fill in reftype dropdown if it hasn't been done already
-					// bibliographic reftypes
+				// rectypes displayed in Groups by group display order then by display order within group
+				for (var grpID in top.HEURIST.rectypes.typesByGroup){
 					var grp = document.createElement("optgroup");
-					grp.label = "Bibliographic reference types";
-					reftypeValSelect.appendChild(grp);
-					for (var i=0; i < top.HEURIST.reftypes.primary.length; ++i) {
-						var value = top.HEURIST.reftypes.primary[i];
-						var name = top.HEURIST.reftypes.names[value];
-						reftypeValSelect.options[reftypeValSelect.length] = new Option(name, value);
-						if (name == top.HEURIST.edit.record.reftype) {
-							reftypeValSelect.selectedIndex = reftypeValSelect.options.length-1;
-						}
-					}
-					// other reftypes
-					var grp = document.createElement("optgroup");
-					grp.label = "Other reference types";
-					reftypeValSelect.appendChild(grp);
-					for (var i=0; i < top.HEURIST.reftypes.other.length; ++i) {
-						var value = top.HEURIST.reftypes.other[i];
-						var name = top.HEURIST.reftypes.names[value];
-						reftypeValSelect.options[reftypeValSelect.length] = new Option(name, value);
-						if (name == top.HEURIST.edit.record.reftype) {
-							reftypeValSelect.selectedIndex = reftypeValSelect.options.length-1;
+					grp.label = top.HEURIST.rectypes.groupNamesInDisplayOrder[grpID];
+					rectypeValSelect.appendChild(grp);
+					for (var i=0; i < top.HEURIST.rectypes.typesByGroup[grpID].length; ++i) {
+						var value = top.HEURIST.rectypes.typesByGroup[grpID][i];
+						var name = top.HEURIST.rectypes.names[value];
+						rectypeValSelect.appendChild(new Option(name, value));
+						if (name == top.HEURIST.edit.record.rectype) {
+							rectypeValSelect.selectedIndex = rectypeValSelect.options.length-1;
 						}
 					}
 				}
 			}
 
-			function changeReftype() {
-				var reftypeValue = document.getElementById("reftype-select").value;
-				if (top.HEURIST.edit.record.reftype != reftypeValue) {
-					top.HEURIST.edit.record.reftypeID = reftypeValue;
-					top.HEURIST.edit.record.reftype = top.HEURIST.reftypes.names[reftypeValue];
+			function changeRectype() {
+				var rectypeValue = document.getElementById("rectype-select").value;
+				if (top.HEURIST.edit.record.rectype != rectypeValue) {
+					top.HEURIST.edit.record.rectypeID = rectypeValue;
+					top.HEURIST.edit.record.rectype = top.HEURIST.rectypes.names[rectypeValue];
 
-					// update the public info frame to reflect the change of reftype
+					// update the public info frame to reflect the change of rectype
 					top.HEURIST.edit.showModule("public");
-					top.HEURIST.edit.modules["public"].frame.contentWindow.setReftype(reftypeValue);
+					top.HEURIST.edit.modules["public"].frame.contentWindow.setRectype(rectypeValue);
 					top.HEURIST.edit.showRecordProperties();
 				}
 			}
@@ -241,10 +228,10 @@
 <div id=search  class="roundedBoth outline bannerBG">
 	<!-- div class="tablecell" id="edit_record_title">EDIT RECORD</div -->
 	<div id=record-title>
-		<img id=reftype-img src="../../common/images/16x16.gif">
+		<img id=rectype-img src="../../common/images/16x16.gif">
 		<div id=title-val></div>
 	</div>
-	<div id=reftype-edit class=edit ></div>
+	<div id=rectype-edit class=edit ></div>
 	<div id=workgroup-div>
 		<div id=workgroup-val-div title="Restrict access by workgroup">
 			<nobr>

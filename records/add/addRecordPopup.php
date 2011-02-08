@@ -40,7 +40,7 @@ $(document).ready(function() {
 		return false;
 	});
 
-	$("#reftype_elt, #restrict_elt, #rec_OwnerUGrpID, #tag, #rec_NonOwnerVisibility, #add-link-title, #add-link-tags").change(update_link);
+	$("#rectype_elt, #restrict_elt, #rec_OwnerUGrpID, #tag, #rec_NonOwnerVisibility, #add-link-title, #add-link-tags").change(update_link);
 
 	var matches = location.search.match(/wg_id=(\d+)/);
 	buildworkgroupTagselect(matches ? matches[1] : null);
@@ -79,7 +79,7 @@ function update_link() {
     // added Ian 19/9/08 -  simple guidleine for user of URL - only on the link, not on the insert
     link += "&t=" + "enter title here ...";
 
-	if (! parseInt($("#reftype_elt").val())) {
+	if (! parseInt($("#rectype_elt").val())) {
 		link = "";
 	}
 
@@ -107,10 +107,10 @@ function compute_args() {
 	}
 
 
-	rt = parseInt(document.getElementById('reftype_elt').value);
+	rt = parseInt(document.getElementById('rectype_elt').value);
 
 	if (rt) {
-		return '&bib_reftype='+rt + extra_parms;
+		return '&bib_rectype='+rt + extra_parms;
 	}
 
 	return '';
@@ -147,17 +147,17 @@ function add_note(e) {
 	if (document.getElementById('note_elt').checked) {
 		rt = "2";
 	} else {
-		rt = parseInt(document.getElementById('reftype_elt').value);
+		rt = parseInt(document.getElementById('rectype_elt').value);
 	}
 
     if (! rt) rt = "2";  //added ian 19/9/08 to re-enable notes as default
 
-	top.location.href = '<?= HEURIST_URL_BASE?>records/add/addRecord.php?addref=1&instance=<?=HEURIST_INSTANCE?>&bib_reftype='+rt + extra_parms;
+	top.location.href = '<?= HEURIST_URL_BASE?>records/add/addRecord.php?addref=1&instance=<?=HEURIST_INSTANCE?>&bib_rectype='+rt + extra_parms;
 
 }
 function note_type_click() {
 	var ref_elt = document.getElementById('reference_elt');
-	document.getElementById('reftype_elt').disabled = !ref_elt.checked;
+	document.getElementById('rectype_elt').disabled = !ref_elt.checked;
 }
 
 
@@ -192,19 +192,18 @@ hr { margin: 20px 0; }
     <td><nobr><label><input type="radio" name="a" id="reference_elt" onclick="note_type_click();"> Record type:</label></nobr></td>
     <td colspan=2>
 <?php
-	$res = mysql_query("select distinct rty_ID,rty_Name,rty_Description, if(rty_RecTypeGroupID = 1,'Bibliographic record','Other record') as section
-	                      from defRecTypes
-	                  where rty_ID
-	                    order by section, rty_RecTypeGroupID , rty_Name");
+	$res = mysql_query("select distinct rty_ID,rty_Name,rty_Description, rty_OrderInGroup, rtg_Name, rtg_Order
+						from defRecTypes left join defRecTypeGroups on rtg_ID = rty_RecTypeGroupID
+						where 1 order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
 ?>
-     <select name="ref_type"  title="New bibliographic record type" style="margin: 3px;" id="reftype_elt" onChange='document.getElementById("reference_elt").checked = true; document.getElementById("note_elt").checked = false;'>
+     <select name="ref_type"  title="New bibliographic record type" style="margin: 3px;" id="rectype_elt" onChange='document.getElementById("reference_elt").checked = true; document.getElementById("note_elt").checked = false;'>
       <option selected disabled value="0">(select record type)</option>
 <?php
 	$section = "";
 	while ($row = mysql_fetch_assoc($res)) {
-		if ($row["section"] != $section) {
+		if ($row["rtg_Name"] != $section) {
 			if ($section) print "</optgroup>\n";
-			$section = $row["section"];
+			$section = $row["rtg_Name"];
 			print '<optgroup label="' . htmlspecialchars($section) . ' types">';
 		}
 ?>

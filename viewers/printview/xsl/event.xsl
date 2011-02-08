@@ -45,7 +45,7 @@
 				<xsl:value-of select="detail[@id=234]"/><!-- End time -->
 			</xsl:if>
 			<br/>
-			<a target="_new" href="reftype_renderer/{id}" style="text-decoration:none;"><span style="font-weight: bold;"><xsl:value-of select="detail[@id=160]"/></span></a>
+			<a target="_new" href="rectype_renderer/{id}" style="text-decoration:none;"><span style="font-weight: bold;"><xsl:value-of select="detail[@id=160]"/></span></a>
 			<!-- Title -->
 		</div>
 

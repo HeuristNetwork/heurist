@@ -2,7 +2,7 @@
 xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 
 
-<xsl:template name="kml" match="reference[reftype/@id=103 or reftype/@id=51 or reftype/@id=165 or reftype/@id=122 or reftype/@id=57 or reftype/@id=168]">
+<xsl:template name="kml" match="reference[rectype/@id=103 or rectype/@id=51 or rectype/@id=165 or rectype/@id=122 or rectype/@id=57 or rectype/@id=168]">
 	<div id="main" class="div-main">
 		<div id="map" class="map"/>
 		<div id="map-types" class="map-timeline-key"/>
@@ -92,7 +92,7 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 			<xsl:with-param name="title">Focus record</xsl:with-param>
 			<xsl:with-param name="link">
 				<xsl:choose>
-					<xsl:when test="reftype[@id = 165]">http://heuristscholar.org<xsl:value-of select="$cocoonBase"/>kmlfile/<xsl:value-of select="id"/></xsl:when>
+					<xsl:when test="rectype[@id = 165]">http://heuristscholar.org<xsl:value-of select="$cocoonBase"/>kmlfile/<xsl:value-of select="id"/></xsl:when>
 					<xsl:otherwise>http://heuristscholar.org<xsl:value-of select="$cocoonBase"/>kml/id:<xsl:value-of select="id"/></xsl:otherwise>
 				</xsl:choose>
 			</xsl:with-param>
@@ -119,13 +119,13 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 
 <xsl:template name="checkForGeoData">
 		<!-- Historical event 51 -->
-	<xsl:if test="reftype/@id = 51 or reftype/@id = 122 or reftype/@id = 57">
+	<xsl:if test="rectype/@id = 51 or rectype/@id = 122 or rectype/@id = 57">
 			<xsl:for-each select="detail[@id=230]">
 				<xsl:value-of select="normalize-space(.)"/><xsl:if test="position() != last()">,</xsl:if>
 			</xsl:for-each>
 		</xsl:if>
 		<!-- KML maps 103-->
-		<xsl:if test="reftype/@id = 103">
+		<xsl:if test="rectype/@id = 103">
 			<xsl:for-each select="pointer[@id=564]">
 				<!-- fix me for uploaded files! -->
 				<xsl:if test="contains(detail[@id=551],'Polygon') or contains(detail[@id=551],'LineString') or contains(detail[@id=551],'MultiGeometry')">l</xsl:if>
@@ -134,7 +134,7 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 			</xsl:for-each>
 		</xsl:if>
 		<!-- KML maps 165-->
-		<xsl:if test="reftype/@id = 165">
+		<xsl:if test="rectype/@id = 165">
 			<!-- fix me for uploaded files! -->
 			<xsl:if test="contains(detail[@id=551],'Polygon') or contains(detail[@id=551],'LineString') or contains(detail[@id=551],'MultiGeometry')">l</xsl:if>
 			<xsl:if test="contains(detail[@id=551],'Point')">p</xsl:if>
@@ -147,15 +147,15 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 	<xsl:param name="related"/>
 	<xsl:param name="currentId"/>
 
-	<xsl:if test="reftype[@id = 103]">
+	<xsl:if test="rectype[@id = 103]">
 		<!-- KML MAP (103) can contain pointers(564) to To KML file (165) or related Historical Events (51) -->
 		<xsl:if test="pointer[@id=564]">
 			<xsl:for-each select="pointer[@id=564]">
 				<xsl:call-template name="KMLFile165"/>
 			</xsl:for-each>
 		</xsl:if>
-		<xsl:if test="related/reftype[@id=51]">
-			<xsl:for-each select="related/reftype[@id=51]">
+		<xsl:if test="related/rectype[@id=51]">
+			<xsl:for-each select="related/rectype[@id=51]">
 				<xsl:if test="../id != $currentId">
 					<xsl:call-template name="generateTimeMapObjects">
 						<xsl:with-param name="title">Related records</xsl:with-param>
@@ -166,7 +166,7 @@ xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 			</xsl:for-each>
 		</xsl:if>
 	</xsl:if>
-	<xsl:if test="reftype[@id = 165]">
+	<xsl:if test="rectype[@id = 165]">
 		<!-- KML file (165) may or may not have a default symbology colour (567) detail type -->
 		<xsl:call-template name="KMLFile165"/>
 	</xsl:if>

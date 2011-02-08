@@ -600,9 +600,9 @@ class HeuristZoteroEntry extends HeuristForeignEntry {
 	function crosswalk() {
 		global $zotero_to_heurist_detail_map, $zotero_to_heurist_type_map;
 
-		global $bdt_to_reftype;
-		if (! @$bdt_to_reftype)
-			$bdt_to_reftype = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_PtrTargetRectypes', 'dty_PtrTargetRectypes is not null');
+		global $bdt_to_rectype;
+		if (! @$bdt_to_rectype)
+			$bdt_to_rectype = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_PtrTargetRectypes', 'dty_PtrTargetRectypes is not null');
 
 		$fields = $this->_raw;
 		if (array_key_exists($fields['itemType'], $zotero_to_heurist_type_map))

@@ -227,11 +227,11 @@ top.HEURIST.edit = {
 
 	showRecordProperties: function() {
 		// fill in the toolbar fields with the details for this record
-//		document.getElementById('reftype-val').innerHTML = '';
-//		document.getElementById('reftype-val').appendChild(document.createTextNode(top.HEURIST.record.reftype));
+//		document.getElementById('rectype-val').innerHTML = '';
+//		document.getElementById('rectype-val').appendChild(document.createTextNode(top.HEURIST.record.rectype));
 		if (document) {
-			if (document.getElementById('reftype-img')) {
-				document.getElementById('reftype-img').style.backgroundImage = "url("+ top.HEURIST.basePath+"common/images/reftype-icons/" + top.HEURIST.edit.record.reftypeID + ".png)";
+			if (document.getElementById('rectype-img')) {
+				document.getElementById('rectype-img').style.backgroundImage = "url("+ top.HEURIST.basePath+"common/images/rectype-icons/" + top.HEURIST.edit.record.rectypeID + ".png)";
 			}
 			if (document.getElementById('title-val')) {
 				document.getElementById('title-val').innerHTML = '';
@@ -455,19 +455,19 @@ top.HEURIST.edit = {
 	},
 
 
-	getBibDetailRequirements: function(reftypeID) {
-		if (! top.HEURIST.user.bibDetailRequirements  ||  ! top.HEURIST.user.bibDetailRequirements.valuesByReftypeID[reftypeID]) {
-			// easy case -- no special bibDetailRequirements for this reftype, considering this user's workgroups
-			return top.HEURIST.bibDetailRequirements.valuesByReftypeID[reftypeID];
+	getBibDetailRequirements: function(rectypeID) {
+		if (! top.HEURIST.user.bibDetailRequirements  ||  ! top.HEURIST.user.bibDetailRequirements.valuesByrectypeID[rectypeID]) {
+			// easy case -- no special bibDetailRequirements for this rectype, considering this user's workgroups
+			return top.HEURIST.bibDetailRequirements.valuesByrectypeID[rectypeID];
 		}
-		else if (top.HEURIST.patchedBibDetailRequirements  &&  top.HEURIST.patchedBibDetailRequirements[reftypeID]) {
-			return top.HEURIST.patchedBibDetailRequirements[reftypeID];
+		else if (top.HEURIST.patchedBibDetailRequirements  &&  top.HEURIST.patchedBibDetailRequirements[rectypeID]) {
+			return top.HEURIST.patchedBibDetailRequirements[rectypeID];
 		}
 		else {
 			// make a copy of the original bdrs and override with any workgroup-specific stuff
 			var bdrs = {};
-			var orig_bdrs = top.HEURIST.bibDetailRequirements.valuesByReftypeID[reftypeID];
-			var wg_bdrs = top.HEURIST.user.bibDetailRequirements.valuesByReftypeID[reftypeID];
+			var orig_bdrs = top.HEURIST.bibDetailRequirements.valuesByrectypeID[rectypeID];
+			var wg_bdrs = top.HEURIST.user.bibDetailRequirements.valuesByrectypeID[rectypeID];
 			var precedence = { 'Required': 4, 'Recommended': 3, 'Optional': 2, 'Forbidden': 1 };
 
 			// keep track of the original requiremences, as a fallback if they're not overridden
@@ -501,14 +501,14 @@ top.HEURIST.edit = {
 			}
 
 			if (! top.HEURIST.patchedBibDetailRequirements) top.HEURIST.patchedBibDetailRequirements = {};
-			top.HEURIST.patchedBibDetailRequirements[reftypeID] = bdrs;
+			top.HEURIST.patchedBibDetailRequirements[rectypeID] = bdrs;
 			return bdrs;
 		}
 	},
 
-	getBibDetailNonRequirements: function(reftypeID) {
+	getBibDetailNonRequirements: function(rectypeID) {
 		var non_reqs = {};
-		var reqs = top.HEURIST.edit.getBibDetailRequirements(reftypeID);
+		var reqs = top.HEURIST.edit.getBibDetailRequirements(rectypeID);
 		for (var bdt_id in top.HEURIST.bibDetailTypes.valuesByBibDetailTypeID) {
 			var skip = false;
 			for (var i in reqs) {
@@ -520,14 +520,14 @@ top.HEURIST.edit = {
 		return non_reqs;
 	},
 
-	getBibDetailOrder: function (reftypeID) {
-		var order = top.HEURIST.bibDetailRequirements.orderByReftypeID[reftypeID];
-		var bdrs = top.HEURIST.bibDetailRequirements.valuesByReftypeID[reftypeID];
+	getBibDetailOrder: function (rectypeID) {
+		var order = top.HEURIST.bibDetailRequirements.orderByrectypeID[rectypeID];
+		var bdrs = top.HEURIST.bibDetailRequirements.valuesByrectypeID[rectypeID];
 
 		if (top.HEURIST.user.bibDetailRequirements  &&
-			top.HEURIST.user.bibDetailRequirements.valuesByReftypeID[reftypeID]) {
+			top.HEURIST.user.bibDetailRequirements.valuesByrectypeID[rectypeID]) {
 			// add any wg overrides that are additions - they get pushed on the end
-			var wg_bdrs = top.HEURIST.user.bibDetailRequirements.valuesByReftypeID[reftypeID];
+			var wg_bdrs = top.HEURIST.user.bibDetailRequirements.valuesByrectypeID[rectypeID];
 			for (var bdt_id in wg_bdrs) {
 				if (! bdrs[bdt_id]) {
 					order.push(bdt_id);
@@ -552,14 +552,14 @@ top.HEURIST.edit = {
 	},
 
 	allInputs: [],
-	createInput: function(bibDetailTypeID, reftypeID, bdValues, container) {
+	createInput: function(bibDetailTypeID, rectypeID, bdValues, container) {
 		// Get Detail Type info  id, name, canonical type, rec type contraint
 		var bdt = top.HEURIST.bibDetailTypes.valuesByBibDetailTypeID[bibDetailTypeID];
 		var bdr;
-		if (reftypeID) {
-			bdr = top.HEURIST.edit.getBibDetailRequirements(reftypeID)[bibDetailTypeID];
+		if (rectypeID) {
+			bdr = top.HEURIST.edit.getBibDetailRequirements(rectypeID)[bibDetailTypeID];
 		} else {
-			// fake low-rent bdr if reftype isn't specified
+			// fake low-rent bdr if rectype isn't specified
 			// name, prompt,default, required, repeatable, size, match
 			bdr = [ bdt[1], "", "", 'Optional', 0, 0, 0 ];
 		}
@@ -767,8 +767,8 @@ top.HEURIST.edit = {
 		}
 	},
 
-	createInputsForReftype: function(reftypeID, bdValues, container) {
-		var bdrs = top.HEURIST.edit.getBibDetailRequirements(reftypeID);
+	createInputsForrectype: function(rectypeID, bdValues, container) {
+		var bdrs = top.HEURIST.edit.getBibDetailRequirements(rectypeID);
 		if (! container.ownerDocument) {
 			var elt = container;
 			do { elt = elt.parentNode; } while (elt.nodeType != 9 /* DOCUMENT_NODE */);
@@ -781,27 +781,27 @@ top.HEURIST.edit = {
 		var inputs = [];
 
 		var defaultURL = (windowRef.parent.HEURIST.edit.record  &&  windowRef.parent.HEURIST.edit.record.url)? windowRef.parent.HEURIST.edit.record.url : "";
-		var required = (reftypeID == 1);	// URL input is only REQUIRED for internet bookmark
+		var required = (rectypeID == 1);	// URL input is only REQUIRED for internet bookmark
 		var URLInput = new top.HEURIST.edit.inputs.BibURLInput(container, defaultURL, required);
 		top.HEURIST.edit.allInputs.push(URLInput);
 		inputs.push(URLInput);
 
-		var order = top.HEURIST.edit.getBibDetailOrder(reftypeID);
+		var order = top.HEURIST.edit.getBibDetailOrder(rectypeID);
 
 		var i, l = order.length;
 		for (i = 0; i < l; ++i) {
 			var bdtID = order[i];
 			if (bdrs[bdtID][3] == 'Forbidden') continue;
 
-			var newInput = top.HEURIST.edit.createInput(bdtID, reftypeID, bdValues[bdtID] || [], container);
+			var newInput = top.HEURIST.edit.createInput(bdtID, rectypeID, bdValues[bdtID] || [], container);
 			inputs.push(newInput);
 		}
 
 		return inputs;
 	},
 
-	createInputsNotForReftype: function(reftypeID, bdValues, container) {
-		var bdrs = top.HEURIST.edit.getBibDetailRequirements(reftypeID);
+	createInputsNotForrectype: function(rectypeID, bdValues, container) {
+		var bdrs = top.HEURIST.edit.getBibDetailRequirements(rectypeID);
 
 		var inputs = [];
 		for (var bdtID in bdValues) {
@@ -1231,10 +1231,10 @@ top.HEURIST.edit.inputs.BibDetailInput.prototype.addInputHelper = function(bdVal
 			top.HEURIST.registerEvent(element, "keypress", function() { windowRef.changed(); });
 		}
 	if (this.bibDetailType[2] === "resource" || this.bibDetailType[2] === "relmarker") {	// bdt_type
-		if (this.bibDetailType[3]) {	// bdt_constrain_reftype
-			this.constrainReftype = this.bibDetailType[3]; // saw TODO  modify this to validate the list first.
+		if (this.bibDetailType[3]) {	// bdt_constrain_rectype
+			this.constrainrectype = this.bibDetailType[3]; // saw TODO  modify this to validate the list first.
 		}
-		else	this.constrainReftype = 0;
+		else	this.constrainrectype = 0;
 	}
 	if (parseFloat(this.bibDetailRequirements[6]) > 0) {	//if the size is greater than zero
 		element.style.width = Math.round(4/3 * this.bibDetailRequirements[6]) + "ex";
@@ -1487,8 +1487,8 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.chooseResource = functi
 
 	if (! searchValue) searchValue = element.textElt.value;
 	var url = top.HEURIST.basePath+"records/pointer/selectRecordFromSearch.html?q="+encodeURIComponent(searchValue)
-	if (element.input.constrainReftype)
-		url += "&t="+element.input.constrainReftype;
+	if (element.input.constrainrectype)
+		url += "&t="+element.input.constrainrectype;
 	top.HEURIST.util.popupURL(window, url, {
 		callback: function(bibID, bibTitle) {
 			if (bibID) element.input.setResource(element, bibID, bibTitle);
@@ -1958,7 +1958,7 @@ top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.addInput = function(bd
 	tb.id = "relations-tbody";
 	newInput.appendChild(tb);
 	var relatedRecords = parent.HEURIST.edit.record.relatedRecords;
-	this.relManager = new RelationManager(tb,top.HEURIST.edit.record.reftypeID, relatedRecords,this.bibDetailType[0],this.changeNotification,true);
+	this.relManager = new RelationManager(tb,top.HEURIST.edit.record.rectypeID, relatedRecords,this.bibDetailType[0],this.changeNotification,true);
 
 };
 

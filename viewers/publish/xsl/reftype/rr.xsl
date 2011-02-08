@@ -41,12 +41,12 @@
 <!-- detail output template -->
 <xsl:template match="reference[id=$bib_id]">
 	<tr>
-		<td><img><xsl:attribute name="src"><xsl:value-of select="$hBase"/>common/images/reftype-icons/<xsl:value-of select="reftype/@id"/>.png</xsl:attribute></img></td>
+		<td><img><xsl:attribute name="src"><xsl:value-of select="$hBase"/>common/images/rectype-icons/<xsl:value-of select="rectype/@id"/>.png</xsl:attribute></img></td>
 		<td style="font-weight: bold;"><xsl:value-of select="title"/></td>
 	</tr>
 	<tr>
 		<td><nobr>Reference type</nobr></td>
-		<td><xsl:value-of select="reftype"/></td>
+		<td><xsl:value-of select="rectype"/></td>
 	</tr>
 	<xsl:if test="url">
 		<tr>

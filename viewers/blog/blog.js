@@ -452,7 +452,7 @@ BlogEntry: function(record, parentElement, isNew) {
 					};
 				} else {
 					return function () {
-						window.open("../../records/add/addRecordPopup.php?addref=1&bib_reftype=" + type +
+						window.open("../../records/add/addRecordPopup.php?addref=1&bib_rectype=" + type +
 							"&related=" + that.record.getID() + (instance ? "&instance="+instance : ""), "_blank");
 						return false;
 					};
@@ -481,7 +481,7 @@ BlogEntry: function(record, parentElement, isNew) {
 			$("<a href='#'>add</a>")
 				.click((function(type) {
 					return function () {
-						window.open("../../records/add/addRecordPopup.php?addref=1&bib_reftype=" + type +
+						window.open("../../records/add/addRecordPopup.php?addref=1&bib_rectype=" + type +
 							"&related=" + that.record.getID() + (instance ? "&instance="+instance : ""), "_blank");
 						return false;
 					};

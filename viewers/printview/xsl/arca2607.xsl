@@ -5,7 +5,7 @@
     Modified: Maria Shvedova.
     Version/Date: 28/05/2007.
     
-    Supports the following BIBLIOGRAPHICAL reftypes:
+    Supports the following BIBLIOGRAPHICAL rectypes:
     -> 42: Archive Record
     -> 5  : Book
     -> 4  : Book Chapter

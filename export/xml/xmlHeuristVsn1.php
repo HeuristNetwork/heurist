@@ -78,7 +78,7 @@ $ERROR = '';			// the errors
 $RQS = array();   // the required detailtypes per referencetype
 $DTN = array();	  // the default names of detailtypes
 $LOOP = array();	// holds visited record ids for loop detection while going through containers
-$RFT = array();		// reftype labels
+$RFT = array();		// rectype labels
 $RDL = array();	//record detail lookup
 $VOC = array();	//vocabulary lookup
 
@@ -397,7 +397,7 @@ function writeGeneralData($bib, $depth) {
 
 		// the htmlspecialchars method replaces specific chars for a 'well-formed' XML document
 
-		$XML .= "<reftype id=\"" . htmlspecialchars($row['rty_ID']). "\">" . htmlspecialchars($row['rty_Name']) . "</reftype>\n";
+		$XML .= "<rectype id=\"" . htmlspecialchars($row['rty_ID']). "\">" . htmlspecialchars($row['rty_Name']) . "</rectype>\n";
 		$XML .= "<id>" . htmlspecialchars($bib) . "</id>\n";
 		//$XML .= "<query>" . htmlspecialchars($query) . "</query>\n";
 		$XML .= "<url>" . htmlspecialchars($row['rec_URL']) . "</url>\n";
@@ -538,7 +538,7 @@ function writeTags($bib) {
  * @param string $value the value of the detail
  * @param int $file_id ulf_ID if the detail is of type file
  */
-function writeTag($reftype, $detail, $value, $file_id) {
+function writeTag($rectype, $detail, $value, $file_id) {
 	global $XML;
 	global $RQS;
 	global $DTN;
@@ -610,13 +610,13 @@ function writeTag($reftype, $detail, $value, $file_id) {
 	}
 
 	// if value is required but empty, make a notice of missing detail
-	if (empty($value) && $RQS[$reftype][$detail]['rst_RequirementType'] == 'Required') {
+	if (empty($value) && $RQS[$rectype][$detail]['rst_RequirementType'] == 'Required') {
 		$ERROR .= "<error>missing required detail</error>\n";
 	}
 
 	// if the value is not empty OR empty but required, write tag with escaping weird chars
-	if (!empty($value) || (empty($value) && $RQS[$reftype][$detail]['rst_RequirementType'] == 'Required')) {
-		$XML.= "<detail name='". htmlspecialchars(@$RQS[$reftype][$detail]['rst_DisplayName']) ."' type='" . htmlspecialchars(@$DTN[$detail]) . "' id='" . $detail . "'>" . $value . "</detail>\n";
+	if (!empty($value) || (empty($value) && $RQS[$rectype][$detail]['rst_RequirementType'] == 'Required')) {
+		$XML.= "<detail name='". htmlspecialchars(@$RQS[$rectype][$detail]['rst_DisplayName']) ."' type='" . htmlspecialchars(@$DTN[$detail]) . "' id='" . $detail . "'>" . $value . "</detail>\n";
 	}
 }
 
@@ -700,7 +700,7 @@ function writeRelatedRecord ($rel, $depth) {
 	$XML .= '</related>';
 }
 
-function fetchExtraDetails($rec_id, $reftype) {
+function fetchExtraDetails($rec_id, $rectype) {
 	global $RELATED_DETAILS;
 	global $RQS;
 	global $DTN;
@@ -709,7 +709,7 @@ function fetchExtraDetails($rec_id, $reftype) {
 
 	$res = mysql_query('select dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID from recDetails where dtl_RecID = ' . $rec_id . ' and dtl_DetailTypeID in (' . join(',', $RELATED_DETAILS) . ') order by dtl_DetailTypeID, dtl_Value');
 	while ($row = mysql_fetch_assoc($res)) {
-		writeTag($reftype, $row['dtl_DetailTypeID'], $row['dtl_Value'], $row['dtl_UploadedFileID']);
+		writeTag($rectype, $row['dtl_DetailTypeID'], $row['dtl_Value'], $row['dtl_UploadedFileID']);
 	}
 }
 

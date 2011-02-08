@@ -87,7 +87,7 @@ document.write('<tr><tx><xsl:call-template name="quote_escaper"><xsl:with-param 
  </xsl:choose>
 </xsl:template>
 
-<xsl:template match="td//a[starts-with(@href,'reftype_renderer')]" priority="1">
+<xsl:template match="td//a[starts-with(@href,'rectype_renderer')]" priority="1">
  <a>
   <xsl:copy-of select="@*"/>
   <xsl:attribute name="href"><xsl:value-of select="concat('http://sylvester.acl.arts.usyd.edu.au/cocoon/heurist/',/html/body/@pub_id,'/', @href)"/></xsl:attribute>

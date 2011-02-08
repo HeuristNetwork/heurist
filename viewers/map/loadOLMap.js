@@ -8,7 +8,7 @@
  */
 
 var map;
-var iconsByReftype = [];
+var iconsByrectype = [];
 var onclickfn;
 
 
@@ -46,7 +46,7 @@ function loadMap(options) {
 
 	/* add objects to the map */
 
-	var url = "../../common/images/reftype-icons/questionmark.gif";
+	var url = "../../common/images/rectype-icons/questionmark.gif";
 
 	var sz = new OpenLayers.Size(16, 16);
 	var calculateOffset = function(size) {
@@ -66,9 +66,9 @@ function loadMap(options) {
 			}
 		}
 
-		if (! iconsByReftype[record.reftype]) {
-			iconsByReftype[record.reftype] = baseIcon.clone();
-			iconsByReftype[record.reftype].setUrl("../../common/images/reftype-icons/" + record.reftype + ".png");
+		if (! iconsByrectype[record.rectype]) {
+			iconsByrectype[record.rectype] = baseIcon.clone();
+			iconsByrectype[record.rectype].setUrl("../../common/images/rectype-icons/" + record.rectype + ".png");
 		}
 
 		var marker = null;
@@ -237,7 +237,7 @@ var iconNumber = 0;
 var legendIcons;
 function getIcon(record) {
 	if (! window.heurist_useLabelledMapIcons) {
-		return iconsByReftype[record.reftype];
+		return iconsByrectype[record.rectype];
 	}
 	if (! legendIcons) {
 		var protoLegendImgs = document.getElementsByTagName("img");
@@ -299,7 +299,7 @@ function getIcon(record) {
 		return legendIcons[ record.bibID ];
 	}
 	else {
-		return iconsByReftype[record.reftype];
+		return iconsByrectype[record.rectype];
 	}
 }
 

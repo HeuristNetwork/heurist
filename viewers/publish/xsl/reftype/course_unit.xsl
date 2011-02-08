@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-	<xsl:template name="course_unit" match="reference[reftype/@id=70]">
+	<xsl:template name="course_unit" match="reference[rectype/@id=70]">
 		<xsl:param name="style"/>
 		<tr>
 			<td>
@@ -9,7 +9,7 @@
 				</b>
 				<!-- Course Code -->
 				<br/>
-				<a target="_new" href="reftype_renderer/{id}">
+				<a target="_new" href="rectype_renderer/{id}">
 					<xsl:value-of select="detail[@id=160]"/>
 					<!-- Title -->
 				</a>

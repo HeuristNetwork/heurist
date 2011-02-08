@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 
-	<xsl:template name="media" match="reference[reftype/@id=74]">
+	<xsl:template name="media" match="reference[rectype/@id=74]">
 
 
 		<div id="artwork" class="artwork">
@@ -43,7 +43,7 @@
 								<img src="{file_fetch_url}" vspace="10" hspace="10" align="center"/>
 							</xsl:for-each>
 							<xsl:if test="detail/file_thumb_url">
-								<a href="{$cocoonBase}item/{id}/{/export/references/reference/reftype/@id}?flavour={$flavour}">
+								<a href="{$cocoonBase}item/{id}/{/export/references/reference/rectype/@id}?flavour={$flavour}">
 									<img src="{detail/file_thumb_url}"/>
 								</a>
 								<br/>
@@ -139,7 +139,7 @@
 		</xsl:choose>
 	</xsl:template>
 
-	<!-- xsl:template match="reverse-pointer[reftype/@id=129]">
+	<!-- xsl:template match="reverse-pointer[rectype/@id=129]">
 		Additional image for
 
 

@@ -32,6 +32,6 @@ if (! $session_data) return;	// print out something about session expiry, even t
 
 header('Content-type: text/plain');
 
-print $session_data['parser']->outputEntries($session_data['no_reftype_entries']);
+print $session_data['parser']->outputEntries($session_data['no_rectype_entries']);
 
 ?>

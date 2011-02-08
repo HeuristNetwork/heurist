@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 
-	<xsl:template name="artist" match="reference[reftype/@id=128]">
+	<xsl:template name="artist" match="reference[rectype/@id=128]">
 
 		<div class="recordTypeHeading">
-					<img src="{$hBase}common/images/reftype-icons/{reftype/@id}.png"/>
+					<img src="{$hBase}common/images/rectype-icons/{rectype/@id}.png"/>
 					<xsl:text> </xsl:text>
-					<xsl:value-of select="reftype"/>
+					<xsl:value-of select="rectype"/>
         </div>
  
 		<xsl:call-template name="personDetailsForArtist"> 

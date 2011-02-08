@@ -31,7 +31,7 @@
 			<xsl:sort select="type"/>
 			<xsl:sort select="title"/>
 			<div class="detailRow" id="{id}">
-				<div class="detailType" title="{type}" style="background-image:url(../../common/images/reftype-icons/{type/@id}.png)"><img src="../../common/images/16x16.gif" /></div>
+				<div class="detailType" title="{type}" style="background-image:url(../../common/images/rectype-icons/{type/@id}.png)"><img src="../../common/images/16x16.gif" /></div>
 				<div class="detail"><a target="_new" href="#" onclick="this.href = hBase +'search/search.html?q=ids:{self::node()/id}&amp;instance=' + instance;"> <xsl:value-of select="title"/> </a></div>
 			</div>
 		</xsl:for-each>
@@ -44,7 +44,7 @@
 			<xsl:sort select="type"/>
 			<xsl:sort select="title"/>
 			<div class="detailRow" id="{id}">
-				<div class="detailType" title="{type}" style="background-image:url(../../common/images/reftype-icons/{type/@id}.png)"><img src="../../common/images/16x16.gif" /></div>
+				<div class="detailType" title="{type}" style="background-image:url(../../common/images/rectype-icons/{type/@id}.png)"><img src="../../common/images/16x16.gif" /></div>
 				<div class="detail"><a target="_new" href="#" onclick="this.href = hBase +'search/search.html?q=ids:{self::node()/id}&amp;instance=' + instance;"> <xsl:value-of select="title"/> </a></div>
 			</div>
 		</xsl:for-each>

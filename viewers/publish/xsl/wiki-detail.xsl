@@ -6,10 +6,10 @@
     <xsl:template match="reference[id=$arg]">
 
         <tr>
-            <td class="reftype">
+            <td class="rectype">
                 <img>
-                    <xsl:attribute name="src"><xsl:value-of select="$hBase"/>common/images/reftype-icons/<xsl:value-of
-                        select="reftype/@id"/>.png</xsl:attribute>
+                    <xsl:attribute name="src"><xsl:value-of select="$hBase"/>common/images/rectype-icons/<xsl:value-of
+                        select="rectype/@id"/>.png</xsl:attribute>
                 </img>
             </td>
             <td style="font-weight: bold;">
@@ -22,16 +22,16 @@
             </td>
         </tr>
         <tr>
-            <td class="reftype">
+            <td class="rectype">
                 <nobr>Reference type</nobr>
             </td>
             <td>
-                <xsl:value-of select="reftype"/>
+                <xsl:value-of select="rectype"/>
             </td>
         </tr>
         <xsl:if test="url != ''">
             <tr>
-                <td class="reftype">URL</td>
+                <td class="rectype">URL</td>
                 <td>
                     <a href="{url}">
                         <xsl:choose>
@@ -48,7 +48,7 @@
         <xsl:if test="detail[@id=203]">
             <!--organisation type -->
             <tr>
-                <td class="reftype">
+                <td class="rectype">
                     <xsl:call-template name="title_grouped">
                         <xsl:with-param name="name"><xsl:value-of select="detail[@id=203]/@name"/></xsl:with-param>
                         <xsl:with-param name="type"><xsl:value-of select="detail[@id=203]/@type"/></xsl:with-param>
@@ -61,11 +61,11 @@
                 </td>
             </tr>
         </xsl:if>
-        <!-- list reftypes and data-->
+        <!-- list rectypes and data-->
         <xsl:for-each select="detail[@id!=222 and @id!=223 and @id!=224 and @id!=203]">
 
             <tr>
-                <td class="reftype">
+                <td class="rectype">
                     <nobr>
                         <xsl:choose>
                             <xsl:when test="string-length(@name)"><xsl:value-of select="@name"/></xsl:when>
@@ -101,7 +101,7 @@
         </xsl:for-each>
         <!-- director-->
         <tr>
-            <td class="reftype">
+            <td class="rectype">
                 <xsl:call-template name="title_grouped">
                     <xsl:with-param name="name"><xsl:value-of select="pointer[@id=315]/@name"/></xsl:with-param>
                     <xsl:with-param name="type"><xsl:value-of select="pointer[@id=315]/@type"/></xsl:with-param>
@@ -115,7 +115,7 @@
         </tr>
         <!-- staff-->
         <tr>
-            <td class="reftype">
+            <td class="rectype">
                 <xsl:call-template name="title_grouped">
                     <xsl:with-param name="name"><xsl:value-of select="pointer[@id=316]/@name"/></xsl:with-param>
                     <xsl:with-param name="type"><xsl:value-of select="pointer[@id=316]/@type"/></xsl:with-param>
@@ -129,7 +129,7 @@
         </tr>
         <!-- research projects-->
         <tr>
-            <td class="reftype">
+            <td class="rectype">
                 <xsl:call-template name="title_grouped">
                     <xsl:with-param name="name"><xsl:value-of select="pointer[@id=264]/@name"/></xsl:with-param>
                     <xsl:with-param name="type"><xsl:value-of select="pointer[@id=264]/@type"/></xsl:with-param>
@@ -144,7 +144,7 @@
 
         <xsl:if test="notes != ''">
             <tr>
-                <td class="reftype">Notes</td>
+                <td class="rectype">Notes</td>
                 <td>
                     <xsl:value-of select="notes"/>
                 </td>
@@ -153,7 +153,7 @@
 
         <xsl:if test="detail[@id=222 or @id=223 or @id=224]">
             <tr>
-                <td class="reftype">Images</td>
+                <td class="rectype">Images</td>
                 <td>
                     <!-- 222 = Logo image,  223 = Thumbnail,  224 = Images -->
                     <xsl:for-each select="detail[@id=222 or @id=223 or @id=224]">

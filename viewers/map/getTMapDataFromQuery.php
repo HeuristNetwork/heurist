@@ -36,7 +36,7 @@ else
 	$search_type = BOTH;	// all records
 
 // find all matching records
-$cols = "rec_ID as bibID, rec_RecTypeID as reftype, rec_Title as title, rec_URL as URL";
+$cols = "rec_ID as bibID, rec_RecTypeID as rectype, rec_Title as title, rec_URL as URL";
 $query = REQUEST_to_query("select $cols ", $search_type);
 
 error_log($query);
