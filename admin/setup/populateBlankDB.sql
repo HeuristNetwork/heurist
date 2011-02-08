@@ -10,6 +10,11 @@
 
 -- --------------------------------------------------------
 
+-- --------------------------------------------------------
+
+-- TO DO: We need to dump the content as well as the structure of some tables
+--        or else import content from HeuristSchoalr.org/?db=hdb_reference
+
 -- 
 -- Table structure for table 'Records'
 -- 
@@ -22,7 +27,7 @@ CREATE TABLE Records (
   rec_Title varchar(1023) NOT NULL COMMENT 'Composite (constructed) title of the record, used for display and search',
   rec_ScratchPad text COMMENT 'Scratchpad, mainly for text captured with bookmarklet',
   rec_RecTypeID smallint(5) unsigned NOT NULL COMMENT 'Record type, foreign key to defRecTypes table',
-  rec_AddedByUGrpID smallint(5) unsigned NOT NULL COMMENT 'ID of the user who created the record',
+  rec_AddedByUGrpID smallint(5) unsigned default NULL COMMENT 'ID of the user who created the record',
   rec_AddedByImport tinyint(1) NOT NULL default '0' COMMENT 'Whether added by an import (value 1) or by manual entry (value 0)',
   rec_Popularity int(11) NOT NULL default '0' COMMENT 'Calculated popularity rating for sorting order, set by cron job',
   rec_FlagTemporary tinyint(1) default '0' COMMENT 'Flags a partially created record before fully populated',
@@ -39,17 +44,18 @@ CREATE TABLE Records (
   KEY rec_UGrpIDKey (rec_OwnerUGrpID),
   KEY rec_HashKey (rec_Hash(40)),
   KEY rec_AddedByUGrpID (rec_AddedByUGrpID)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=0;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
 
 -- 
--- RELATIONS FOR TABLE Records:
---   rec_RecTypeID
---       defRecTypes -> rty_ID
---   rec_AddedByUGrpID
---       sysUGrps -> ugr_ID
---   rec_OwnerUGrpID
---       sysUGrps -> ugr_ID
+-- Table structure for table 'active_rec_detail_lookups'
 -- 
+
+CREATE TABLE active_rec_detail_lookups (
+  ardl_id int(11) NOT NULL,
+  UNIQUE KEY ardl_id (ardl_id)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -59,10 +65,10 @@ CREATE TABLE Records (
 
 CREATE TABLE archiveDetails (
   ard_RecID int(11) NOT NULL COMMENT 'Record ID to which these details apply',
-  ard_ID int(11) NOT NULL COMMENT 'The detail ID (Details.dtl_ID) for this detail, not necessary to archive',
-  ard_Ver int(10) unsigned NOT NULL default '0' COMMENT 'Version number for this detail, probably tied to record archive',
+  ard_ID int(11) NOT NULL COMMENT 'The detail ID (recDetails.dtl_ID) for this detail, not necessary to archive',
+  ard_Ver int(10) unsigned NOT NULL COMMENT 'Version number for this detail, probably tied to record archive',
   ard_DetailTypeID smallint(6) default NULL COMMENT 'Detailtype for this detail',
-  ard_ValueAsText mediumtext COMMENT 'Value of this detail',
+  ard_Value mediumtext COMMENT 'Value of this detail',
   ard_UploadedFileID int(11) default NULL COMMENT 'File id for this detail',
   ard_Geo geometry default NULL COMMENT 'Geometry for this detail',
   KEY ard_record_id_key (ard_RecID),
@@ -86,7 +92,7 @@ CREATE TABLE archiveRecords (
   arec_ScratchPad mediumtext COMMENT 'The scratchpad from this version of the record',
   arec_RecTypeID smallint(5) unsigned default NULL COMMENT 'The record type for this version of the record',
   PRIMARY KEY  (arec_ID,arec_Ver)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Records past versions of records to allow rollback' AUTO_INCREMENT=0 ;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Records past versions of records to allow rollback';
 
 -- --------------------------------------------------------
 
@@ -162,7 +168,20 @@ CREATE TABLE defCrosswalk (
   crw_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'The date when this mapping added or modified',
   PRIMARY KEY  (crw_ID),
   UNIQUE KEY crw_composite_key (crw_SourcedbID,crw_DefType,crw_LocalCode)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Map the codes used in this Heurist DB to codes used in other' AUTO_INCREMENT=0 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Map the codes used in this Heurist DB to codes used in other';
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table 'defDetailTypeGroups'
+-- 
+
+CREATE TABLE defDetailTypeGroups (
+  dtg_ID tinyint(3) unsigned NOT NULL auto_increment COMMENT 'Primary ID - Code for detail type groups',
+  dtg_Name varchar(64) NOT NULL COMMENT 'Descriptive heading to be displayed for each group of details (fields)',
+  dtg_Description varchar(255) NOT NULL COMMENT 'General description fo this group of detail (field) types',
+  PRIMARY KEY  (dtg_ID)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Groups detail types for display in separate sections of edit';
 
 -- --------------------------------------------------------
 
@@ -172,19 +191,55 @@ CREATE TABLE defCrosswalk (
 
 CREATE TABLE defDetailTypes (
   dty_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Code for the detail type (field) - may vary between Heurist DBs',
-  dty_Name varchar(255) NOT NULL COMMENT 'The canonical (standard) name of the detail type',
-  dty_Description varchar(5000) NOT NULL default 'Please provide a description ...' COMMENT 'A description of the detail type, what it means, how defined',
-  dty_Type enum('freetext','blocktext','integer','date','year','relmarker','boolean','enum','resource','float','file','geo','separator') NOT NULL COMMENT 'The field type/value type of the detail type',
-  dty_Prompt varchar(255) NOT NULL COMMENT 'The default prompt displayed to the user',
-  dty_Help varchar(5000) NOT NULL default 'Please provide a help text ...' COMMENT 'The default extended text describing this detail type',
-  dty_Status enum('Reserved','Approved','Pending','Open') NOT NULL default 'Open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
-  dty_OriginatingDB smallint(5) unsigned NOT NULL default '0' COMMENT 'Database where this detail type originated, 0 or local db code = locally',
-  dty_PtrConstraint varchar(40) default NULL COMMENT 'Ptr details only: CSVlist of rectypes, null = any, can be further constrained in defRecStructure',
-  dty_NativeVocabID smallint(6) NOT NULL default '1' COMMENT 'Enum details only: vocab to use, may be further constrained in defRecStructure',
+  dty_Name varchar(255) character set latin1 NOT NULL COMMENT 'The canonical (standard) name of the detail type',
+  dty_Description varchar(5000) character set latin1 NOT NULL default 'Please provide a description ...' COMMENT 'A description of the detail type, what it means, how defined',
+  dty_Type enum('freetext','blocktext','integer','date','year','relmarker','boolean','enum','resource','float','file','geo','separator') character set latin1 NOT NULL COMMENT 'The field type/value type of the detail type',
+  dty_FunctionalGroup tinyint(3) unsigned NOT NULL default '1' COMMENT 'The section of the edit form in which this detail will occur',
+  dty_OverrideGroup tinyint(3) unsigned default NULL COMMENT 'Allowsdetail to be allocated to a different group for a specific record type',
+  dty_VisibleToEndUser tinyint(1) unsigned NOT NULL default '1' COMMENT 'Flags if detail type is to be shown in end-user interface, 1=yes, 2=no',
+  dty_Prompt varchar(255) character set latin1 NOT NULL COMMENT 'The default prompt displayed to the user',
+  dty_Help varchar(5000) character set latin1 NOT NULL default 'Please provide a help text ...' COMMENT 'The default extended text describing this detail type',
+  dty_Status enum('Reserved','Approved','Pending','Open') character set latin1 NOT NULL default 'Open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
+  dty_OriginatingDBID smallint(5) unsigned NOT NULL default '0' COMMENT 'Database where this detail type originated, 0 = locally',
+  dty_NameInOriginatingDB varchar(255) character set latin1 NOT NULL default '' COMMENT 'Name used in database where this detail type originated',
+  dty_IDInOriginatingDB smallint(5) unsigned NOT NULL default '0' COMMENT 'ID used in database where this detail type originated',
+  dty_PtrTargetRectypes varchar(40) character set latin1 default NULL COMMENT 'Ptr details only: CSVlist of target rectypes, null = any',
+  dty_NativeVocabID smallint(6) NOT NULL default '1' COMMENT 'Enum details only: vocab to use, may be overridden by defEnumVocabs',
   PRIMARY KEY  (dty_ID),
   UNIQUE KEY dty_NameKey (dty_Name),
-  KEY dty_TypeKey (dty_Type)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='The detail types (fields) which can be attached to records' AUTO_INCREMENT=0 ;
+  KEY dty_TypeKey (dty_Type),
+  KEY dty_FunctionalGroup (dty_FunctionalGroup)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='The detail types (fields) which can be attached to records';
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table 'defEnumVocabOverride'
+-- 
+
+CREATE TABLE defEnumVocabOverride (
+  evo_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Primary key',
+  evo_DetailtypeID smallint(5) unsigned NOT NULL COMMENT 'The enumerated detail type for which a list of terms is being defined',
+  evo_TermIDs varchar(1000) NOT NULL COMMENT 'A CSV list of vocab codes prefixed V and term codes for this detail',
+  evo_Description varchar(1000) default NULL COMMENT 'A note about the choice of vocabularies and terms used',
+  PRIMARY KEY  (evo_ID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Override an enum detail type''s native vocabulary, for advanc';
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table 'defEnumVocabs'
+-- 
+
+CREATE TABLE defEnumVocabs (
+  env_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Primary key for defEnumVocabs',
+  env_RecTypeID smallint(5) unsigned NOT NULL COMMENT 'The context - record type - in which the detail type is to be used',
+  env_DetailTypeID smallint(5) unsigned NOT NULL COMMENT 'The detail type to which a vocabulary and subset are being assigned',
+  env_VocabID smallint(5) unsigned NOT NULL COMMENT 'A vocabulary to be used with this record type and detail type',
+  env_VocabSubset varchar(1024) default NULL COMMENT 'Comma sep. list of term IDs to use, terms not in the vocab are ignored',
+  PRIMARY KEY  (env_ID),
+  KEY env_RecTypeDetailTypeKey (env_RecTypeID,env_DetailTypeID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Specify vocab(s) for a detail type within specific record ty';
 
 -- --------------------------------------------------------
 
@@ -200,7 +255,7 @@ CREATE TABLE defFileExtToMimetype (
   fxm_FiletypeName varchar(31) default NULL COMMENT 'A textual name for the file type represented by the extension',
   fxm_ImagePlaceholder varchar(64) default NULL COMMENT 'Thumbnail size representation for display, generate from fxm_FiletypeName',
   PRIMARY KEY  (fxm_Extension)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Converts extensions to mimetypes and provides icons and mime';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Converts extensions to mimetypes and provides icons and mime';
 
 -- --------------------------------------------------------
 
@@ -214,8 +269,15 @@ CREATE TABLE defOntologies (
   ont_FullName varchar(128) NOT NULL COMMENT 'The commonly used full name of the ontology',
   ont_Description varchar(1000) default NULL COMMENT 'An optional descriptuion of the domain, origina and aims of the ontology',
   ont_RefURI varchar(250) default NULL COMMENT 'The URI to a definition of the ontology',
-  PRIMARY KEY  (ont_ID)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='A table of references to different ontologies used by Heuris' AUTO_INCREMENT=0 ;
+  ont_Status enum('Reserved','Approved','Pending','Open') NOT NULL default 'Open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
+  ont_OriginatingDBID smallint(5) unsigned NOT NULL default '0' COMMENT 'Database where this ontology originated, 0 = locally',
+  ont_NameInOriginatingDB varchar(64) NOT NULL default '' COMMENT 'Name used in database where this ontology originated',
+  ont_IDInOriginatingDB smallint(5) unsigned NOT NULL default '0' COMMENT 'ID used in database where this ontology originated',
+  ont_added date default NULL COMMENT 'Date of addition of this ontology record',
+  ont_modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this ontology record',
+  PRIMARY KEY  (ont_ID),
+  UNIQUE KEY ont_ShortName (ont_ShortName)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='A table of references to different ontologies used by Heuris';
 
 -- --------------------------------------------------------
 
@@ -227,33 +289,29 @@ CREATE TABLE defRecStructure (
   rst_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Primary key for the record structures table',
   rst_RecTypeID smallint(5) unsigned NOT NULL COMMENT 'The record type to which this detail is allocated',
   rst_DetailTypeID smallint(5) unsigned NOT NULL COMMENT 'The detail type required (or otherwise) by this record type',
-  rst_OverrideName varchar(255) default NULL COMMENT 'Display name for this dtl type in this rectype, null=use name in defDetailtype table',
-  rst_OverDescription varchar(1000) default NULL COMMENT 'The extended description to be displayed for this detail type in this record type',
-  rst_OverPrompt varchar(100) default NULL COMMENT 'The user prompt to be displayed for this detail type in this record type',
-  rst_OverHelp varchar(255) default NULL COMMENT 'The help text to be displayed for this detail type in this record type',
-  rst_OrderInForm smallint(5) unsigned NOT NULL default '999' COMMENT 'A sort order for display of this detail type in the record edit form',
+  rst_DisplayName varchar(255) character set latin1 default NULL COMMENT 'Display name for this dtl type in this rectype, null=use name in defDetailtype table',
+  rst_DisplayDescription varchar(1000) character set latin1 default NULL COMMENT 'The extended description to be displayed for this detail type in this record type',
+  rst_DisplayPrompt varchar(100) character set latin1 default NULL COMMENT 'The user prompt to be displayed for this detail type in this record type',
+  rst_DisplayHelp varchar(255) character set latin1 default NULL COMMENT 'The help text to be displayed for this detail type in this record type',
+  rst_FunctionalGroupOverride tinyint(3) unsigned default NULL COMMENT 'If set, locates the detail in specified DetailTypeGroup instead of the one specified in dty_FunctionalGroup',
+  rst_DisplayOrder smallint(5) unsigned NOT NULL default '999' COMMENT 'A sort order for display of this detail type in the record edit form',
   rst_DisplayWidth tinyint(3) unsigned default '30' COMMENT 'The field width displayed for this detail type in this record type',
-  rst_DefaultValue varchar(64) default NULL COMMENT 'The default value for this detail type for this record type',
+  rst_DefaultValue varchar(64) character set latin1 default NULL COMMENT 'The default value for this detail type for this record type',
   rst_RecordMatchOrder tinyint(1) unsigned NOT NULL default '0' COMMENT 'Indicates order of significance in detecting duplicate records, 1 = highest',
-  rst_RequirementType enum('Required','Recommended','Optional','Forbidden') NOT NULL default 'Optional',
-  rst_Status enum('Reserved','Approved','Pending','Open') NOT NULL default 'Open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
-  rst_OriginatingDB smallint(5) unsigned NOT NULL default '0' COMMENT 'Database where this record structure originated, 0 or local db code = locally',
-  rst_Repeats tinyint(1) unsigned NOT NULL default '1' COMMENT 'Allowed repeats of this detail type for this record type, 0 = unlimited ',
-  rst_VocabConstraints varchar(250) default NULL COMMENT 'enum detail type only: CSV list of allowed terms from within the Vocab defined in defDetailType',
-  rst_PtrConstraints varchar(100) default NULL COMMENT 'Pointer detail types only: CSV list of allowed rectypes within list defined by defDetailType',
+  rst_RequirementType enum('Required','Recommended','Optional','Forbidden') character set latin1 NOT NULL default 'Optional',
+  rst_Status enum('Reserved','Approved','Pending','Open') character set latin1 NOT NULL default 'Open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
+  rst_MayModify enum('Locked','Discouraged','Open') character set latin1 NOT NULL default 'Open' COMMENT 'Extent to which detail may be modified within this record structure',
+  rst_OriginatingDBID smallint(5) unsigned NOT NULL default '0' COMMENT 'Database where this record structure element originated, 0 = locally',
+  rst_IDInOriginatingDB smallint(5) unsigned NOT NULL default '0' COMMENT 'ID used in database where this record structure element originated',
+  rst_MaxValues tinyint(3) unsigned NOT NULL default '1' COMMENT 'Maximum number of values per record for this detail, 0 = unlimited',
+  rst_MinValues tinyint(3) unsigned NOT NULL default '1' COMMENT 'If required, minimum number of values per record for this detail',
+  rst_VocabConstraints varchar(250) character set latin1 default NULL COMMENT 'enum detail type only: CSV list of allowed terms from within the Vocab defined in defDetailType',
+  rst_PtrConstraints varchar(100) character set latin1 default NULL COMMENT 'Pointer detail types only: CSV list of allowed rectypes within list defined by defDetailType',
   rst_ThumbnailFromDetailTypeID smallint(5) unsigned default '0' COMMENT 'Generate thumbnail from given multimedia record pointer detail, 0 = from record URL target',
   PRIMARY KEY  (rst_ID),
   UNIQUE KEY rst_CompositeKey (rst_RecTypeID,rst_DetailTypeID),
-  KEY rst_DetailTypeID_2 (rst_DetailTypeID)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='The record details (fields) required for each record type' AUTO_INCREMENT=0 ;
-
--- 
--- RELATIONS FOR TABLE defRecStructure:
---   rst_DetailTypeID
---       defDetailTypes -> dty_ID
---   rst_RecTypeID
---       defRecTypes -> rty_ID
--- 
+  KEY rst_DetailTypeID (rst_DetailTypeID)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='The record details (fields) required for each record type';
 
 -- --------------------------------------------------------
 
@@ -263,14 +321,12 @@ CREATE TABLE defRecStructure (
 
 CREATE TABLE defRecTypeGroups (
   rtg_ID tinyint(2) unsigned NOT NULL auto_increment COMMENT 'Record type group ID referenced in defRectypes',
-  rtg_Name varchar(40) NOT NULL COMMENT 'Name for this group of record types',
-  rtg_Order tinyint(2) NOT NULL COMMENT 'Ordering of record type groups within pulldown lsits',
-  PRIMARY KEY  (rtg_ID)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Grouping mechanism for record types in pulldowns' AUTO_INCREMENT=0 ;
-
-INSERT INTO defRecTypeGroups (rtg_ID, rtg_Name, rtg_Order) VALUES 
-(1, 'Bibliographic', 1),
-(2, 'Generic', 2);
+  rtg_Name varchar(40) NOT NULL COMMENT 'Name for this group of record types, shown as heading in lists',
+  rtg_Order tinyint(2) NOT NULL COMMENT 'Ordering of record type groups within pulldown lists',
+  rtg_Description varchar(250) default NULL COMMENT 'A description of the record type group and its purpose',
+  PRIMARY KEY  (rtg_ID),
+  UNIQUE KEY rtg_Name (rtg_Name)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Grouping mechanism for record types in pulldowns';
 
 -- --------------------------------------------------------
 
@@ -280,18 +336,22 @@ INSERT INTO defRecTypeGroups (rtg_ID, rtg_Name, rtg_Order) VALUES
 
 CREATE TABLE defRecTypes (
   rty_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Record type code, widely used to reference record types, primary key',
-  rty_Name varchar(63) NOT NULL COMMENT 'The name which is used to describe this record (object) type',
-  rty_OrderInGroup tinyint(3) unsigned NOT NULL default '0' COMMENT 'Used to logically order the bibliographic record types',
-  rty_Description varchar(5000) NOT NULL COMMENT 'Description of this record type',
-  rty_RecTypeGroupID tinyint(2) unsigned default NULL COMMENT 'Display group in Rectype pulldowns, startign with bibliographic',
-  rty_TitleMask varchar(500) NOT NULL default '[title]' COMMENT 'Mask to build a composite title by combining field values',
-  rty_CanonicalTitleMask varchar(500) default '160' COMMENT 'Version of the mask converted to detail codes for processing',
-  rty_Plural varchar(63) default NULL COMMENT 'Plural form of the record type name, manually entered',
-  rty_Status enum('Reserved','Approved','Pending','Open') NOT NULL default 'Open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
-  rty_OriginatingDB smallint(5) unsigned NOT NULL default '0' COMMENT 'Database where this record type originated, 0 or local db code = locally',
-  rty_ReferenceURL varchar(250) default NULL COMMENT 'A reference URL describing/defining the record type',
-  PRIMARY KEY  (rty_ID)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='Defines record types, which corresponds with a set of detail' AUTO_INCREMENT=0 ;
+  rty_Name varchar(63) character set latin1 NOT NULL COMMENT 'The name which is used to describe this record (object) type',
+  rty_OrderInGroup tinyint(3) unsigned default '0' COMMENT 'Ordering within record type display groups for pulldowns',
+  rty_Description varchar(5000) character set latin1 NOT NULL COMMENT 'Description of this record type',
+  rty_TitleMask varchar(500) character set latin1 NOT NULL default '[title]' COMMENT 'Mask to build a composite title by combining field values',
+  rty_CanonicalTitleMask varchar(500) character set latin1 default '160' COMMENT 'Version of the mask converted to detail codes for processing',
+  rty_Plural varchar(63) character set latin1 default NULL COMMENT 'Plural form of the record type name, manually entered',
+  rty_Status enum('Reserved','Approved','Pending','Open') character set latin1 NOT NULL default 'Open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
+  rty_VisibleToEndUser tinyint(1) unsigned NOT NULL default '1' COMMENT 'Flags if record type is to be shown in end-user interface, 1=yes, 2=no',
+  rty_OriginatingDBID smallint(5) unsigned NOT NULL default '0' COMMENT 'Database where this record type originated, 0 = locally',
+  rty_NameInOriginatingDB varchar(63) character set latin1 NOT NULL default '' COMMENT 'Name used in database where this record type originated',
+  rty_IDInOriginatingDB smallint(5) unsigned NOT NULL default '0' COMMENT 'ID in database where this record type originated',
+  rty_RecTypeGroupID tinyint(2) unsigned default NULL COMMENT 'Display group in Rectype pulldowns, starting with 1=bibliographic, null = at end',
+  rty_ReferenceURL varchar(250) character set latin1 default NULL COMMENT 'A reference URL describing/defining the record type',
+  PRIMARY KEY  (rty_ID),
+  UNIQUE KEY rty_Name (rty_Name)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Defines record types, which corresponds with a set of detail';
 
 -- --------------------------------------------------------
 
@@ -301,34 +361,24 @@ CREATE TABLE defRecTypes (
 
 CREATE TABLE defRelationshipConstraints (
   rcs_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Record-detailtype constraint table primary key',
-  rcs_DetailtypeID smallint(5) unsigned default NULL COMMENT 'RelMarker detail type to be constrained, 200 = enum for vanilla relationship',
+  rcs_DetailtypeID smallint(5) unsigned NOT NULL default '200' COMMENT 'RelMarker detail type to be constrained, 200 = enum dtl for vanilla relationship',
   rcs_SourceRectypeID smallint(5) unsigned default NULL COMMENT 'Source record type for this constraint, 0 = all types',
-  rcs_TargetRectypeID smallint(5) unsigned default NULL COMMENT 'Target record type pointed to by relationship record, 0 = any type',
-  rcs_VocabSubset varchar(5000) collate utf8_unicode_ci default NULL COMMENT 'Constrain the terms further from within the defined vocab',
-  rcs_VocabID smallint(5) unsigned NOT NULL default '1' COMMENT 'Vocab to use, msut be in the vocabs defined for this source-target pair',
-  rcs_Description varchar(1000) collate utf8_unicode_ci default 'Please describe ...',
+  rcs_TargetRectypeID smallint(5) unsigned default NULL COMMENT 'Target record type pointed to by relationship record, 0 = all types',
+  rcs_VocabSubset varchar(1024) character set utf8 collate utf8_unicode_ci default NULL COMMENT 'CVSList of Term IDs to use from Vocab, ignored if term not in vocab',
+  rcs_VocabID smallint(5) unsigned NOT NULL default '1' COMMENT 'Vocab to use. If rcs_VocabSubset is set, restrict to these terms from vocab',
+  rcs_Description varchar(1000) character set utf8 collate utf8_unicode_ci default 'Please describe ...',
   rcs_Order tinyint(3) unsigned default NULL COMMENT 'Ordering value to allow controlling the display order of the vocabularies',
-  rcs_RelationshipsLimit tinyint(1) unsigned NOT NULL default '0' COMMENT '0 = no limit; 1, 2 ... = maximum # of relations per record',
-  rcs_Status enum('Reserved','Approved','Pending','Open') collate utf8_unicode_ci NOT NULL default 'Open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
-  rcs_OriginatingDB smallint(5) unsigned NOT NULL default '0' COMMENT 'Database where this constraint originated, 0 or local db code = locally',
-  rcs_TermLimit tinyint(3) unsigned NOT NULL default '0' COMMENT '0 = No limit, 1, 2 = max # of relations which can use each term',
+  rcs_RelationshipsLimit tinyint(1) unsigned NOT NULL default '0' COMMENT '0 = no limit; 1, 2 ... = maximum # of relationship records per record per detailtype/rectypes triplet',
+  rcs_Status enum('Reserved','Approved','Pending','Open') character set utf8 collate utf8_unicode_ci NOT NULL default 'Open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
+  rcs_OriginatingDBID smallint(5) unsigned NOT NULL default '0' COMMENT 'Database where this constraint originated, 0 = locally',
+  rcs_IDInOriginatingDB smallint(5) unsigned NOT NULL default '0' COMMENT 'ID used in database where this constraint originated',
+  rcs_TermLimit tinyint(1) unsigned NOT NULL default '0' COMMENT '0 = no limit; 1, 2 ... = maximum # of relations which can use each term',
   PRIMARY KEY  (rcs_ID),
-  KEY rcs_VocabID (rcs_VocabID),
-  KEY rcs_DetailtypeID_2 (rcs_DetailtypeID),
-  KEY rcs_TargetRectypeID_2 (rcs_TargetRectypeID)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Constrain target-rectype/vocabularies/values for a pointer d' AUTO_INCREMENT=0 ;
-
--- 
--- RELATIONS FOR TABLE defRelationshipConstraints:
---   rcs_DetailtypeID
---       defDetailTypes -> dty_ID
---   rcs_VocabID
---       defVocabularies -> vcb_ID
---   rcs_SourceRectypeID
---       defRecTypes -> rty_ID
---   rcs_TargetRectypeID
---       defRecTypes -> rty_ID
--- 
+  KEY rcs_CompositeKey (rcs_SourceRectypeID,rcs_TargetRectypeID,rcs_DetailtypeID),
+  KEY rcs_DetailtypeID (rcs_DetailtypeID),
+  KEY rcs_TargetRectypeID (rcs_TargetRectypeID),
+  KEY rcs_VocabID (rcs_VocabID)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Constrain target-rectype/vocabularies/values for a pointer d';
 
 -- --------------------------------------------------------
 
@@ -338,24 +388,36 @@ CREATE TABLE defRelationshipConstraints (
 
 CREATE TABLE defTerms (
   trm_ID int(11) unsigned NOT NULL auto_increment COMMENT 'Primary key, the term code used in the detail record',
-  trm_Label varchar(63) NOT NULL COMMENT 'Text label for the term, cannot be blank',
-  trm_InverseTermId mediumint(8) unsigned default NULL COMMENT 'ID for the inverse value (relationships), null if no inverse',
+  trm_Label varchar(63) character set latin1 NOT NULL COMMENT 'Text label for the term, cannot be blank',
+  trm_InverseTermId int(10) unsigned default NULL COMMENT 'ID for the inverse value (relationships), null if no inverse',
   trm_VocabID smallint(5) unsigned NOT NULL COMMENT 'The vocabulary to which this term belongs',
-  trm_Description varchar(500) default NULL COMMENT 'A description/gloss on the meaning of the term',
-  trm_Status enum('Reserved','Approved','Pending','Open') NOT NULL default 'Open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
-  trm_OriginatingDB smallint(5) unsigned NOT NULL default '0' COMMENT 'Database where this detail type originated, 0 = local db code = locally',
+  trm_Description varchar(500) character set latin1 default NULL COMMENT 'A description/gloss on the meaning of the term',
+  trm_Status enum('Reserved','Approved','Pending','Open') character set latin1 NOT NULL default 'Open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
+  trm_OriginatingDBID smallint(5) unsigned NOT NULL default '0' COMMENT 'Database where this detail type originated, 0 = locally',
+  trm_NameInOriginatingDB varchar(63) character set latin1 NOT NULL default '' COMMENT 'Name (label) for this term in originating database',
+  trm_IDInOriginatingDB smallint(5) unsigned NOT NULL default '0' COMMENT 'ID used in database where this  term originated',
   trm_AddedByImport tinyint(1) unsigned default '0' COMMENT 'Set to 1 if term added by an import, otherwise 0',
-  trm_LocalExtension tinyint(10) unsigned NOT NULL default '0' COMMENT 'Flag that this value not in the externally referenced vocabulary',
+  trm_LocalExtension tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flag that this value not in the externally referenced vocabulary',
   PRIMARY KEY  (trm_ID),
   UNIQUE KEY trm_composite_key (trm_VocabID,trm_Label),
-  UNIQUE KEY trm_InverseTermIDKey (trm_InverseTermId)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='Terms by detail type and the vocabulary they belong to' AUTO_INCREMENT=0 ;
+  KEY trm_InverseTermId (trm_InverseTermId)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Terms by detail type and the vocabulary they belong to';
+
+-- --------------------------------------------------------
 
 -- 
--- RELATIONS FOR TABLE defTerms:
---   trm_VocabID
---       defVocabularies -> vcb_ID
+-- Table structure for table 'defTranslations'
 -- 
+
+CREATE TABLE defTranslations (
+  trn_ID int(10) unsigned NOT NULL auto_increment COMMENT 'Primary key of defTranslations table',
+  trn_Source enum('rty_Name','dty_Name','ont_ShortName','vcb_Name','trm_Label','rst_DisplayName','rtg_Name') NOT NULL COMMENT 'The table/column to be translated (unique names identify source)',
+  trn_Code smallint(5) unsigned NOT NULL COMMENT 'The primary key / ID in the table containing the text to be translated',
+  trn_Language enum('Arabic','French','Italian','Spanish','Portuguese','German','Greek','Turkish','Russian','Swedish','Finish','Latvian','Estonian','Hungarian','Czech','Polish','Serbian','Croatian','Swahili','Chinese','Indonesian','Hindi','Japanese','Malaysian','Korean','Vietnamese','Thai','Cambodian') NOT NULL COMMENT 'The translation language for this record',
+  trn_Translation varchar(250) NOT NULL COMMENT 'The translation of the text in this location (table/field/id)',
+  PRIMARY KEY  (trn_ID),
+  UNIQUE KEY trn_SourceCodeLanguageKey (trn_Source,trn_Code,trn_Language)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Translation table into multiple languages for all translatab';
 
 -- --------------------------------------------------------
 
@@ -368,7 +430,7 @@ CREATE TABLE defURLPrefixes (
   urp_Prefix varchar(250) NOT NULL COMMENT 'URL prefix which is prepended to record URLs',
   PRIMARY KEY  (urp_ID),
   UNIQUE KEY urp_PrefixKey (urp_Prefix)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Common URL prefixes allowing single-point change of URL for ' AUTO_INCREMENT=0 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Common URL prefixes allowing single-point change of URL for ';
 
 -- --------------------------------------------------------
 
@@ -384,9 +446,13 @@ CREATE TABLE defVocabularies (
   vcb_Added date default NULL COMMENT 'Date of addition of this vocabulary record',
   vcb_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this vocabulary record',
   vcb_Status enum('Reserved','Approved','Pending','Open') NOT NULL default 'Open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
-  vcb_OriginatingDB smallint(5) unsigned NOT NULL default '0' COMMENT 'Database where this record vocabulary originated, 0 = local db code = locally',
+  vcb_OriginatingDBID smallint(5) unsigned NOT NULL default '0' COMMENT 'Database where this record vocabulary originated, 0 = locally',
+  vcb_NameInOriginatingDB varchar(64) NOT NULL default '' COMMENT 'Name used in database where this vocabulary originated',
+  vcb_IDInOriginatingDB smallint(5) unsigned NOT NULL default '0' COMMENT 'ID used in database where this vocabulary originated',
   vcb_OntID smallint(5) unsigned NOT NULL default '0' COMMENT 'Ontology from which this vocabulary originated, 0 = locally defined ontology ',
-  PRIMARY KEY  (vcb_ID)
+  vcb_Domain enum('RelationshipTypes','EnumValues') NOT NULL default 'EnumValues' COMMENT 'Indicates whether vocab is used for relationship types or ordinary enum fields',
+  PRIMARY KEY  (vcb_ID),
+  UNIQUE KEY vcb_Name (vcb_Name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Controlled vocabularies to which terms belong';
 
 -- --------------------------------------------------------
@@ -408,19 +474,9 @@ CREATE TABLE recDetails (
   KEY dtl_DetailtypeIDkey (dtl_DetailTypeID),
   KEY dtl_RecIDKey (dtl_RecID),
   KEY dtl_ValShortenedKey (dtl_ValShortened),
-  KEY dtl_ValueAsTextKey (dtl_Value(64)),
+  KEY dtl_ValueKey (dtl_Value(64)),
   KEY dtl_UploadedFileIDKey (dtl_UploadedFileID)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='The detail (field) values for each record - public data' AUTO_INCREMENT=0 ;
-
--- 
--- RELATIONS FOR TABLE recDetails:
---   dtl_DetailTypeID
---       defDetailTypes -> dty_ID
---   dtl_RecID
---       Records -> rec_ID
---   dtl_UploadedFileID
---       recUploadedFiles -> ulf_ID
--- 
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='The detail (field) values for each record - public data';
 
 -- --------------------------------------------------------
 
@@ -433,7 +489,7 @@ CREATE TABLE recForwarding (
   rfw_NewRecID int(10) unsigned NOT NULL COMMENT 'The new record to which this ID will be forwarded',
   PRIMARY KEY  (rfw_OldRecID),
   KEY rfw_NewRecID (rfw_NewRecID)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Allows referer routine to redirect certain calls to a replac';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Allows referer routine to redirect certain calls to a replac';
 
 -- --------------------------------------------------------
 
@@ -448,7 +504,7 @@ CREATE TABLE recRelationshipsCache (
   PRIMARY KEY  (rrc_RecID),
   KEY rrc_sourcePtrKey (rrc_SourceRecID),
   KEY rrc_TargetPtrKey (rrc_TargetRecID)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='A cache for record relationship pointers to speed access';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='A cache for record relationship pointers to speed access';
 
 -- --------------------------------------------------------
 
@@ -472,25 +528,14 @@ CREATE TABLE recThreadedComments (
   cmt_Text varchar(5000) NOT NULL COMMENT 'Text of comment',
   cmt_OwnerUgrpID smallint(5) unsigned NOT NULL COMMENT 'User ID of user making comment',
   cmt_Added datetime default '0000-00-00 00:00:00' COMMENT 'Date and time of creation of comment',
-  cmt_ParentCmtID int(11) unsigned default NULL COMMENT 'Parent comment of this comment',
+  cmt_ParentCmtID int(10) unsigned default NULL COMMENT 'Parent comment of this comment',
   cmt_Deleted tinyint(1) NOT NULL default '0' COMMENT 'Flag deleted comments',
   cmt_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date and time of modification of comment',
   cmt_RecID int(10) unsigned NOT NULL COMMENT 'Record ID to which this comment applies, required',
   PRIMARY KEY  (cmt_ID),
   KEY cmt_OwnerUgrpID (cmt_OwnerUgrpID),
-  KEY cmt_ParentCmtID (cmt_ParentCmtID),
   KEY cmt_RecID (cmt_RecID)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Threaded comments for each record' AUTO_INCREMENT=0 ;
-
--- 
--- RELATIONS FOR TABLE recThreadedComments:
---   cmt_RecID
---       Records -> rec_ID
---   cmt_OwnerUgrpID
---       sysUGrps -> ugr_ID
---   cmt_ParentCmtID
---       recThreadedComments -> cmt_ID
--- 
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Threaded comments for each record';
 
 -- --------------------------------------------------------
 
@@ -509,12 +554,13 @@ CREATE TABLE recUploadedFiles (
   ulf_AddedByImport tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flag whether added by import = 1 or manual editing = 0',
   ulf_MimeExt varchar(6) default NULL COMMENT 'Extension of the file, used to look up in mimetype table',
   ulf_FileSizeKB int(10) unsigned default NULL COMMENT 'File size in Kbytes calculated at upload',
+  temp varchar(64) default NULL COMMENT 'temp',
   PRIMARY KEY  (ulf_ID),
   KEY ulf_ObfuscatedFileIDKey (ulf_ObfuscatedFileID),
+  KEY ulf_DescriptionKey (ulf_Description(100)),
   KEY ulf_UploaderUGrpID (ulf_UploaderUGrpID),
-  KEY ulf_MimeExt (ulf_MimeExt),
-  KEY ulf_DescriptionKey (ulf_Description(100))
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Index to uploaded files linked from records' AUTO_INCREMENT=0 ;
+  KEY ulf_MimeExt (ulf_MimeExt)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Index to uploaded files linked from records';
 
 -- --------------------------------------------------------
 
@@ -523,38 +569,32 @@ CREATE TABLE recUploadedFiles (
 -- 
 
 CREATE TABLE sysIdentification (
-  sys_ID tinyint(3) unsigned NOT NULL COMMENT 'Only 1 record should exist in this table',
+  sys_ID tinyint(1) unsigned NOT NULL COMMENT 'Only 1 record should exist in this table',
   sys_dbRegisteredID int(10) unsigned NOT NULL default '0' COMMENT 'Allocated by HeuristScholar.org, 0 indicates not yet registered',
-  sys_dbVersion tinyint(3) unsigned NOT NULL default '3' COMMENT 'Major version for the database structure',
+  sys_dbVersion tinyint(3) unsigned NOT NULL COMMENT 'Major version for the database structure',
   sys_dbSubVersion tinyint(3) unsigned NOT NULL default '0' COMMENT 'Sub version',
   sys_dbSubSubVersion tinyint(3) unsigned NOT NULL default '0' COMMENT 'Sub-sub version',
-  sys_eMailImapServer varchar(100) collate utf8_unicode_ci default NULL COMMENT 'Email server intermediary for record creation via email',
-  sys_eMailImapPort varchar(5) collate utf8_unicode_ci default NULL COMMENT 'port for imap email server',
-  sys_eMailImapProtocol varchar(5) collate utf8_unicode_ci default NULL COMMENT 'protocol for imap email server',
-  sys_eMailImapUsername varchar(50) collate utf8_unicode_ci default NULL COMMENT 'user name for imap email server',
-  sys_eMailImapPassword varchar(20) collate utf8_unicode_ci default NULL COMMENT 'password for imap email server',
-  sys_UGrpsDatabase varchar(64) collate utf8_unicode_ci default NULL COMMENT 'Name of SQL database containing user tables, null = use internal users/groups tables',
-  sys_OwnerGroupId int(11) unsigned NOT NULL default '1' COMMENT 'User group which owns this database, 2 by default',
-  sys_RestrictAccessToOwnerGroup tinyint(3) unsigned NOT NULL default '0' COMMENT 'If set, only members of the owner group can gain access',
-  sys_dbName varchar(64) collate utf8_unicode_ci NOT NULL COMMENT 'A short descriptive display name for this database, distinct from the name in the URL',
-  sys_dbOwner varchar(250) collate utf8_unicode_ci NOT NULL COMMENT 'Information on the owner of the database, may be a URL reference',
-  sys_dbRights varchar(1000) collate utf8_unicode_ci NOT NULL COMMENT 'A statement of ownership and copyright for this database and content',
-  sys_dbDescription varchar(1000) collate utf8_unicode_ci default NULL COMMENT 'A longer description of the content of this database',
-  sys_SyncDefsWithDb varchar(64) collate utf8_unicode_ci default NULL COMMENT 'The name of the database with which local definitions are to be synchronised',
+  sys_eMailImapServer varchar(100) character set utf8 collate utf8_unicode_ci default NULL COMMENT 'Email server intermediary for record creation via email',
+  sys_eMailImapPort varchar(5) character set utf8 collate utf8_unicode_ci default NULL COMMENT 'port for imap email server',
+  sys_eMailImapProtocol varchar(5) character set utf8 collate utf8_unicode_ci default NULL COMMENT 'protocol for imap email server',
+  sys_eMailImapUsername varchar(50) character set utf8 collate utf8_unicode_ci default NULL COMMENT 'user name for imap email server',
+  sys_eMailImapPassword varchar(20) character set utf8 collate utf8_unicode_ci default NULL COMMENT 'password for imap email server',
+  sys_UGrpsDatabase varchar(64) character set utf8 collate utf8_unicode_ci default NULL COMMENT 'Full name of SQL database containing user tables, null = use internal users/groups tables',
+  sys_OwnerGroupID int(10) unsigned NOT NULL default '1' COMMENT 'User group which owns/administers this database, 1 by default',
+  sys_dbName varchar(64) character set utf8 collate utf8_unicode_ci NOT NULL COMMENT 'A short descriptive display name for this database, distinct from the name in the URL',
+  sys_dbOwner varchar(250) character set utf8 collate utf8_unicode_ci NOT NULL COMMENT 'Information on the owner of the database, may be a URL reference',
+  sys_dbRights varchar(1000) character set utf8 collate utf8_unicode_ci NOT NULL COMMENT 'A statement of ownership and copyright for this database and content',
+  sys_dbDescription varchar(1000) character set utf8 collate utf8_unicode_ci default NULL COMMENT 'A longer description of the content of this database',
+  sys_SyncDefsWithDb varchar(64) character set utf8 collate utf8_unicode_ci default NULL COMMENT 'The name of the SQL database with which local definitions are to be synchronised',
+  sys_RestrictAccessToOwnerGroup tinyint(1) unsigned NOT NULL default '0' COMMENT 'If set, database may only be accessed by members of owners group',
   sys_URLCheckFlag tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flags whether system should send out requests to URLs to test for validity',
-  sys_UploadDirectory varchar(128) collate utf8_unicode_ci default NULL COMMENT 'Full directory path for uploaded files (absolute, starts with / or drive:)',
-  sys_MediaFolders varchar(10000) collate utf8_unicode_ci default NULL COMMENT 'Additional comm-sep directories which can contain files indexed in database',
-  sys_AllowRegistration tinyint(1) unsigned NOT NULL default '1' COMMENT 'If set, people can apply for registration through web-based form',
+  sys_UploadDirectory varchar(128) character set utf8 collate utf8_unicode_ci default NULL COMMENT 'Absolute directory path for uploaded files (blank = use default from installation)',
   sys_NewRecOwnerGrpID smallint(5) unsigned NOT NULL default '0' COMMENT 'Group which by default owns new records - allow override per user',
-  sys_NewRecAccess enum('Viewable','Hidden') collate utf8_unicode_ci NOT NULL default 'Viewable' COMMENT 'Default visibility/editability for new records - allow override per user',
+  sys_NewRecAccess enum('Viewable','Hidden') character set utf8 collate utf8_unicode_ci NOT NULL default 'Viewable' COMMENT 'Default visibility for new records - allow override per user',
+  sys_AllowRegistration tinyint(1) unsigned NOT NULL default '1' COMMENT 'If set, people can apply for registration through web-based form',
+  sys_MediaFolders varchar(10000) character set utf8 collate utf8_unicode_ci default NULL COMMENT 'Additional comm-sep directories which can contain files indexed in database',
   PRIMARY KEY  (sys_ID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Identification/version for this Heurist database (single rec';
-
- INSERT INTO sysIdentification(sys_ID,sys_dbRegisteredID,sys_dbVersion,sys_dbSubVersion,sys_dbSubSubVersion,
-    sys_eMailImapServer,sys_eMailImapPort,sys_eMailImapProtocol,sys_eMailImapUsername,sys_eMailImapPassword,
-    sys_UGrpsdatabase,sys_OwnerGroupId)
-    VALUES (1,0,3,0,0,NULL,NULL,NULL,NULL,NULL,NULL,1);
-  -- 0 is everyone, 1 is the owning admins group, 2 is default dbAdmin user
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Identification/version for this Heurist database (single rec';
 
 -- --------------------------------------------------------
 
@@ -563,21 +603,11 @@ CREATE TABLE sysIdentification (
 -- 
 
 CREATE TABLE sysTableLastUpdated (
-  tlu_TableName varchar(40) NOT NULL COMMENT 'Name of table for which we are recording time of last update',
+  tlu_TableName varchar(40) character set latin1 NOT NULL COMMENT 'Name of table for which we are recording time of last update',
   tlu_DateStamp datetime default NULL COMMENT 'Date and time of last update of table',
   tlu_CommonObj tinyint(1) unsigned NOT NULL COMMENT 'Indicates tables which contain data defs required in common-obj',
   PRIMARY KEY  (tlu_TableName)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Datestamp, determines if updates since definitions loaded in';
-
-INSERT INTO sysTableLastUpdated (tlu_TableName, tlu_DateStamp, tlu_CommonObj) VALUES 
-('defTerms', '2000-1-01 00:00:0', 1),
-('defRecStructure', '2000-1-01 00:00:0', 1),
-('defDetailTypes', '2000-1-01 00:00:0', 1),
-('defRecTypes', '2000-1-01 00:00:0', 1),
-('sysUGrps', '2000-1-01 00:00:0', 1),
-('sysUsrGrpLinks', '2000-1-01 00:00:0', 1),
-('defRelationshipConstraints', '2000-1-01 00:00:0', 1),
-('defVocabularies', '2000-1-01 00:00:0', 1);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Datestamp, determines if updates since definitions loaded in';
 
 -- --------------------------------------------------------
 
@@ -612,20 +642,8 @@ CREATE TABLE sysUGrps (
   PRIMARY KEY  (ugr_ID),
   UNIQUE KEY ugr_NameKey (ugr_Name),
   UNIQUE KEY ugr_eMailKey (ugr_eMail)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Contains User and Workgroup records, distinguished by ugr_Ty' AUTO_INCREMENT=0 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Contains User and Workgroup records, distinguished by ugr_Ty';
 
-INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMail)
- VALUES (1,'Database owners',
- 'Group 1 owns databases by default. DO NOT DELETE.',
- 'Workgroup','PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=1');
- -- Note: ugr_id=1 is set as the database owner group in the sysidentification table
-
-INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMail)
- VALUES (2,'dbAdmin','User 2 is default administrator for databases. DO NOT DELETE', 
- 'User','cfefBRSMX8ggU','EMAIL NOT SET FOR ID=2');  -- password is 'none'
-  -- Note: ugr_id=2 is set as the database admin in the sysUsrGrpLinks table
-  -- there can be multipl admins for a database
-  
 -- --------------------------------------------------------
 
 -- 
@@ -640,11 +658,7 @@ CREATE TABLE sysUsrGrpLinks (
   PRIMARY KEY  (ugl_ID),
   UNIQUE KEY ugl_CompositeKey (ugl_UserID,ugl_GroupID),
   KEY ugl_GroupID (ugl_GroupID)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='Identifies groups to which a user belongs and their role in ' AUTO_INCREMENT=0 ;
-
--- Insert a row to define the link between group 1 (dbowners) and user 2 (dbAdmin)
-INSERT INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID,ugl_Role) VALUES (2,1,'admin');
-
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Identifies groups to which a user belongs and their role in ';
 
 -- --------------------------------------------------------
 
@@ -666,34 +680,20 @@ CREATE TABLE usrBookmarks (
   UNIQUE KEY bkm_RecID (bkm_RecID,bkm_UGrpID),
   KEY bkm_UGrpIDKey (bkm_UGrpID),
   KEY bkm_ModifiedKey (bkm_Modified)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Bookmark = personal data relating to a record, one for each ' AUTO_INCREMENT=0 ;
-
--- 
--- RELATIONS FOR TABLE usrBookmarks:
---   bkm_RecID
---       Records -> rec_ID
---   bkm_UGrpID
---       sysUGrps -> ugr_ID
--- 
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Bookmark = personal data relating to a record, one for each ';
 
 -- --------------------------------------------------------
 
 -- 
--- Table structure for table 'usrHyperlinkFilter'
+-- Table structure for table 'usrHyperlinkFilters'
 -- 
 
-CREATE TABLE usrHyperlinkFilter (
+CREATE TABLE usrHyperlinkFilters (
   hyf_String varchar(64) NOT NULL COMMENT 'Hyperlink string to be ignored when encountered in hyperlink import',
   hyf_UGrpID smallint(5) unsigned NOT NULL COMMENT 'User for which this string is to be ignored',
   UNIQUE KEY hyf_CompositeKey (hyf_String,hyf_UGrpID),
   KEY hyf_UGrpID (hyf_UGrpID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Configure hyperlink import to ignore common link strings';
-
--- 
--- RELATIONS FOR TABLE usrHyperlinkFilter:
---   hyf_UGrpID
---       sysUGrps -> ugr_ID
--- 
 
 -- --------------------------------------------------------
 
@@ -710,15 +710,7 @@ CREATE TABLE usrRecTagLinks (
   PRIMARY KEY  (rtl_ID),
   UNIQUE KEY rtl_composite_key (rtl_RecID,rtl_TagID),
   KEY rtl_TagIDKey (rtl_TagID)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='Link table connecting tags to records' AUTO_INCREMENT=0 ;
-
--- 
--- RELATIONS FOR TABLE usrRecTagLinks:
---   rtl_RecID
---       Records -> rec_ID
---   rtl_TagID
---       usrTags -> tag_ID
--- 
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Link table connecting tags to records';
 
 -- --------------------------------------------------------
 
@@ -734,15 +726,7 @@ CREATE TABLE usrRecentRecords (
   PRIMARY KEY  (rre_ID),
   KEY rre_CompositeKey (rre_UGrpID,rre_RecID),
   KEY rre_RecID (rre_RecID)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=0 ;
-
--- 
--- RELATIONS FOR TABLE usrRecentRecords:
---   rre_UGrpID
---       sysUGrps -> ugr_ID
---   rre_RecID
---       Records -> rec_ID
--- 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -756,29 +740,17 @@ CREATE TABLE usrReminders (
   rem_OwnerUGrpID smallint(5) unsigned NOT NULL COMMENT 'Owner of the reminder, the person who created it',
   rem_ToWorkgroupID smallint(5) unsigned default NULL COMMENT 'The workgroup to which the reminder should be sent',
   rem_ToUserID smallint(5) unsigned default NULL COMMENT 'The individual user to whom the reminder should be sent',
-  rem_ToEmail varchar(255) default NULL COMMENT 'The individual email address(es) to which the reminder should be sent',
-  rem_Message varchar(1000) default NULL COMMENT 'The message to be attached to the reminder, optional',
+  rem_ToEmail varchar(255) character set latin1 default NULL COMMENT 'The individual email address(es) to which the reminder should be sent',
+  rem_Message varchar(1000) character set latin1 default NULL COMMENT 'The message to be attached to the reminder, optional',
   rem_StartDate date NOT NULL default '1970-01-01' COMMENT 'The first (or only) date for sending the reminder',
-  rem_Freq enum('once','daily','weekly','monthly','annually') NOT NULL default 'once' COMMENT 'The frequency of sending reminders',
-  rem_Nonce varchar(31) default NULL COMMENT 'Random number hash for reminders',
+  rem_Freq enum('once','daily','weekly','monthly','annually') character set latin1 NOT NULL default 'once' COMMENT 'The frequency of sending reminders',
+  rem_Nonce varchar(31) character set latin1 default NULL COMMENT 'Random number hash for reminders',
   PRIMARY KEY  (rem_ID),
   KEY rem_RecID (rem_RecID),
   KEY rem_OwnerUGrpID (rem_OwnerUGrpID),
   KEY rem_ToWorkgroupID (rem_ToWorkgroupID),
   KEY rem_ToUserID (rem_ToUserID)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='Reminders attached to records and recipients, with start dat' AUTO_INCREMENT=0 ;
-
--- 
--- RELATIONS FOR TABLE usrReminders:
---   rem_ToWorkgroupID
---       sysUGrps -> ugr_ID
---   rem_ToUserID
---       sysUGrps -> ugr_ID
---   rem_RecID
---       Records -> rec_ID
---   rem_OwnerUGrpID
---       sysUGrps -> ugr_ID
--- 
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Reminders attached to records and recipients, with start dat';
 
 -- --------------------------------------------------------
 
@@ -793,7 +765,7 @@ CREATE TABLE usrRemindersBlockList (
   PRIMARY KEY  (rbl_ID),
   UNIQUE KEY rbl_composite_key (rbl_RemID,rbl_UGrpID),
   KEY rbl_UGrpID (rbl_UGrpID)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='Allows user to block resending of specific reminders to them' AUTO_INCREMENT=0 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Allows user to block resending of specific reminders to them';
 
 -- --------------------------------------------------------
 
@@ -811,13 +783,7 @@ CREATE TABLE usrSavedSearches (
   svs_publish_args varchar(250) default '' COMMENT 'Name of XSL to lock in this publish format, blank = any XSL OK',
   PRIMARY KEY  (svs_ID),
   KEY svs_UGrpID (svs_UGrpID)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Saved searches for personal/usergroup use and for publishing' AUTO_INCREMENT=0 ;
-
--- 
--- RELATIONS FOR TABLE usrSavedSearches:
---   svs_UGrpID
---       sysUGrps -> ugr_ID
--- 
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Saved searches for personal/usergroup use and for publishing';
 
 -- --------------------------------------------------------
 
@@ -835,13 +801,7 @@ CREATE TABLE usrTags (
   UNIQUE KEY tag_composite_key (tag_Text,tag_UGrpID),
   KEY tag_UGrpIDKey (tag_UGrpID),
   KEY tag_TextKey (tag_Text)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Personal and user group tags (formerly keywords)' AUTO_INCREMENT=0 ;
-
--- 
--- RELATIONS FOR TABLE usrTags:
---   tag_UGrpID
---       sysUGrps -> ugr_ID
--- 
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Personal and user group tags (formerly keywords)';
 
 -- --------------------------------------------------------
 
@@ -851,12 +811,13 @@ CREATE TABLE usrTags (
 
 CREATE TABLE woot_ChunkPermissions (
   wprm_ChunkID int(11) NOT NULL COMMENT 'ID of chunk for which permission is specified, may be repeated',
-  wprm_UGrpID smallint(6) NOT NULL COMMENT 'User with specified right to this chunk',
-  wprm_GroupID smallint(6) NOT NULL COMMENT 'User groups with specified right to this chunk',
+  wprm_UGrpID smallint(6) unsigned NOT NULL COMMENT 'User with specified right to this chunk',
+  wprm_GroupID smallint(6) unsigned NOT NULL COMMENT 'User groups with specified right to this chunk',
   wprm_Type enum('RW','RO') NOT NULL COMMENT 'Read-write or read-only permission for this chunk/user/wg',
-  wprm_CreatorID smallint(6) NOT NULL COMMENT 'Creator of the permission (= user ID ???? <check>)',
+  wprm_CreatorID smallint(6) unsigned NOT NULL COMMENT 'Creator of the permission (= user ID ???? <check>)',
   wprm_Created datetime NOT NULL COMMENT 'Date and time of creation of the permission',
-  UNIQUE KEY wprm_chunk_composite_key (wprm_ChunkID,wprm_UGrpID,wprm_GroupID)
+  UNIQUE KEY wprm_chunk_composite_key (wprm_ChunkID,wprm_UGrpID,wprm_GroupID),
+  KEY wprm_CreatorID (wprm_CreatorID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Permissions value for individual woot chunks';
 
 -- --------------------------------------------------------
@@ -869,7 +830,7 @@ CREATE TABLE woot_Chunks (
   chunk_ID int(11) NOT NULL auto_increment COMMENT 'Primary ID for a version of the text chunks making up a woot entry (page)',
   chunk_WootID int(11) NOT NULL COMMENT 'The ID of the woot entry (page) to which this chunk belongs',
   chunk_InsertOrder int(11) NOT NULL COMMENT 'Order of chunk within woot.',
-  chunk_Ver int(11) NOT NULL COMMENT 'A version code for the chunk, incremented when edited',
+  chunk_Version int(11) NOT NULL COMMENT 'A version code for the chunk, incremented when edited',
   chunk_IsLatest tinyint(1) NOT NULL COMMENT 'Presumably flags whether this is the latest version of the chunk',
   chunk_DisplayOrder int(11) NOT NULL COMMENT 'The order number of the chunk within the woot entry (page)',
   chunk_Text text COMMENT 'The actual XHTML content of the chunk',
@@ -878,9 +839,9 @@ CREATE TABLE woot_Chunks (
   chunk_Deleted tinyint(1) NOT NULL COMMENT 'Deletion marker for this chunk',
   chunk_EditorID int(11) NOT NULL COMMENT 'Editor (user ID) of the chunk - presumably the last person to edit',
   PRIMARY KEY  (chunk_ID),
-  UNIQUE KEY chunk_composite_key (chunk_WootID,chunk_InsertOrder,chunk_Ver),
+  UNIQUE KEY chunk_composite_key (chunk_WootID,chunk_InsertOrder,chunk_Version),
   KEY chunk_is_latest_key (chunk_IsLatest)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=0 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -891,11 +852,11 @@ CREATE TABLE woot_Chunks (
 CREATE TABLE woot_RecPermissions (
   wrprm_WootID int(11) NOT NULL COMMENT 'ID of the woot entry to which this permission applies, may be repeated',
   wrprm_UGrpID int(11) NOT NULL COMMENT 'User ID to which this permission is being granted',
-  wrprm_GroupID int(11) NOT NULL COMMENT 'User group ID to which this permission is being granted',
+  wrprm_GroupId int(11) NOT NULL COMMENT 'User group ID to which this permission is being granted',
   wrprm_Type enum('RW','RO') NOT NULL COMMENT 'Type of permission being granted - read only or read-write',
   wrprm_CreatorID int(11) NOT NULL COMMENT 'Creator of the permission',
   wrprm_Created datetime NOT NULL COMMENT 'Date and time of creation of the permission',
-  UNIQUE KEY wrprm_composite_key (wrprm_WootID,wrprm_UGrpID,wrprm_GroupID)
+  UNIQUE KEY wrprm_composite_key (wrprm_WootID,wrprm_UGrpID,wrprm_GroupId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Overall permissions for the woot record (entry/page)';
 
 -- --------------------------------------------------------
@@ -909,11 +870,11 @@ CREATE TABLE woots (
   woot_Title varchar(8191) default NULL COMMENT 'Name of the woot page, unique identifier of the woot page',
   woot_Created datetime default NULL COMMENT 'Date and time of creation of the woot record/entry/page',
   woot_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date and time of modification of the woot record/entry/page',
-  woot_Ver int(11) NOT NULL COMMENT 'Version of the woot record/entry/page, presumably incremented on edit',
+  woot_Version int(11) NOT NULL COMMENT 'Version of the woot record/entry/page, presumably incremented on edit',
   woot_CreatorID int(11) default NULL COMMENT 'Creator (user id) of the woot',
   PRIMARY KEY  (woot_ID),
   UNIQUE KEY woot_title_key (woot_Title(200))
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Woot records (entries, pages) are linked to a set of XHTML c' AUTO_INCREMENT=0 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Woot records (entries, pages) are linked to a set of XHTML c';
 
 -- 
 -- Constraints for dumped tables
@@ -925,35 +886,37 @@ CREATE TABLE woots (
 ALTER TABLE `Records`
   ADD CONSTRAINT Records_ibfk_1 FOREIGN KEY (rec_RecTypeID) REFERENCES defRecTypes (rty_ID),
 ALTER TABLE `Records`
-  ADD CONSTRAINT Records_ibfk_1 FOREIGN KEY (rec_RecTypeID) REFERENCES defRecTypes (rty_ID),  ADD CONSTRAINT Records_ibfk_2 FOREIGN KEY (rec_AddedByUGrpID) REFERENCES sysUGrps (ugr_ID),
+  ADD CONSTRAINT Records_ibfk_1 FOREIGN KEY (rec_RecTypeID) REFERENCES defRecTypes (rty_ID),  ADD CONSTRAINT Records_ibfk_2 FOREIGN KEY (rec_AddedByUGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE SET NULL,
 ALTER TABLE `Records`
-  ADD CONSTRAINT Records_ibfk_1 FOREIGN KEY (rec_RecTypeID) REFERENCES defRecTypes (rty_ID),  ADD CONSTRAINT Records_ibfk_2 FOREIGN KEY (rec_AddedByUGrpID) REFERENCES sysUGrps (ugr_ID),  ADD CONSTRAINT Records_ibfk_3 FOREIGN KEY (rec_OwnerUGrpID) REFERENCES sysUGrps (ugr_ID);
+  ADD CONSTRAINT Records_ibfk_1 FOREIGN KEY (rec_RecTypeID) REFERENCES defRecTypes (rty_ID),  ADD CONSTRAINT Records_ibfk_2 FOREIGN KEY (rec_AddedByUGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE SET NULL,  ADD CONSTRAINT Records_ibfk_3 FOREIGN KEY (rec_OwnerUGrpID) REFERENCES sysUGrps (ugr_ID);
+
+-- 
+-- Constraints for table `defDetailTypes`
+-- 
+ALTER TABLE `defDetailTypes`
+  ADD CONSTRAINT defDetailTypes_ibfk_1 FOREIGN KEY (dty_FunctionalGroup) REFERENCES defDetailTypeGroups (dtg_ID),
+ALTER TABLE `defDetailTypes`
+  ADD CONSTRAINT defDetailTypes_ibfk_1 FOREIGN KEY (dty_FunctionalGroup) REFERENCES defDetailTypeGroups (dtg_ID),  ADD CONSTRAINT defDetailTypes_ibfk_2 FOREIGN KEY (dty_FunctionalGroup) REFERENCES defDetailTypeGroups (dtg_ID) ON UPDATE CASCADE;
 
 -- 
 -- Constraints for table `defRecStructure`
 -- 
 ALTER TABLE `defRecStructure`
-  ADD CONSTRAINT defRecStructure_ibfk_1 FOREIGN KEY (rst_DetailTypeID) REFERENCES defDetailTypes (dty_ID),
+  ADD CONSTRAINT defRecStructure_ibfk_1 FOREIGN KEY (rst_RecTypeID) REFERENCES defRecTypes (rty_ID) ON DELETE CASCADE,
 ALTER TABLE `defRecStructure`
-  ADD CONSTRAINT defRecStructure_ibfk_1 FOREIGN KEY (rst_DetailTypeID) REFERENCES defDetailTypes (dty_ID),  ADD CONSTRAINT defRecStructure_ibfk_2 FOREIGN KEY (rst_DetailTypeID) REFERENCES defDetailTypes (dty_ID) ON DELETE CASCADE,
-ALTER TABLE `defRecStructure`
-  ADD CONSTRAINT defRecStructure_ibfk_1 FOREIGN KEY (rst_DetailTypeID) REFERENCES defDetailTypes (dty_ID),  ADD CONSTRAINT defRecStructure_ibfk_2 FOREIGN KEY (rst_DetailTypeID) REFERENCES defDetailTypes (dty_ID) ON DELETE CASCADE,  ADD CONSTRAINT defRecStructure_ibfk_3 FOREIGN KEY (rst_RecTypeID) REFERENCES defRecTypes (rty_ID) ON DELETE CASCADE;
+  ADD CONSTRAINT defRecStructure_ibfk_1 FOREIGN KEY (rst_RecTypeID) REFERENCES defRecTypes (rty_ID) ON DELETE CASCADE,  ADD CONSTRAINT defRecStructure_ibfk_2 FOREIGN KEY (rst_DetailTypeID) REFERENCES defDetailTypes (dty_ID) ON DELETE CASCADE;
 
 -- 
 -- Constraints for table `defRelationshipConstraints`
 -- 
 ALTER TABLE `defRelationshipConstraints`
-  ADD CONSTRAINT defRelationshipConstraints_ibfk_1 FOREIGN KEY (rcs_DetailtypeID) REFERENCES defDetailTypes (dty_ID),
+  ADD CONSTRAINT defRelationshipConstraints_ibfk_1 FOREIGN KEY (rcs_DetailtypeID) REFERENCES defDetailTypes (dty_ID) ON DELETE CASCADE,
 ALTER TABLE `defRelationshipConstraints`
-  ADD CONSTRAINT defRelationshipConstraints_ibfk_1 FOREIGN KEY (rcs_DetailtypeID) REFERENCES defDetailTypes (dty_ID),  ADD CONSTRAINT defRelationshipConstraints_ibfk_2 FOREIGN KEY (rcs_VocabID) REFERENCES defVocabularies (vcb_ID),
+  ADD CONSTRAINT defRelationshipConstraints_ibfk_1 FOREIGN KEY (rcs_DetailtypeID) REFERENCES defDetailTypes (dty_ID) ON DELETE CASCADE,  ADD CONSTRAINT defRelationshipConstraints_ibfk_2 FOREIGN KEY (rcs_SourceRectypeID) REFERENCES defRecTypes (rty_ID) ON DELETE CASCADE,
 ALTER TABLE `defRelationshipConstraints`
-  ADD CONSTRAINT defRelationshipConstraints_ibfk_1 FOREIGN KEY (rcs_DetailtypeID) REFERENCES defDetailTypes (dty_ID),  ADD CONSTRAINT defRelationshipConstraints_ibfk_2 FOREIGN KEY (rcs_VocabID) REFERENCES defVocabularies (vcb_ID),  ADD CONSTRAINT defRelationshipConstraints_ibfk_3 FOREIGN KEY (rcs_DetailtypeID) REFERENCES defDetailTypes (dty_ID) ON DELETE CASCADE,
+  ADD CONSTRAINT defRelationshipConstraints_ibfk_1 FOREIGN KEY (rcs_DetailtypeID) REFERENCES defDetailTypes (dty_ID) ON DELETE CASCADE,  ADD CONSTRAINT defRelationshipConstraints_ibfk_2 FOREIGN KEY (rcs_SourceRectypeID) REFERENCES defRecTypes (rty_ID) ON DELETE CASCADE,  ADD CONSTRAINT defRelationshipConstraints_ibfk_3 FOREIGN KEY (rcs_TargetRectypeID) REFERENCES defRecTypes (rty_ID) ON DELETE CASCADE,
 ALTER TABLE `defRelationshipConstraints`
-  ADD CONSTRAINT defRelationshipConstraints_ibfk_1 FOREIGN KEY (rcs_DetailtypeID) REFERENCES defDetailTypes (dty_ID),  ADD CONSTRAINT defRelationshipConstraints_ibfk_2 FOREIGN KEY (rcs_VocabID) REFERENCES defVocabularies (vcb_ID),  ADD CONSTRAINT defRelationshipConstraints_ibfk_3 FOREIGN KEY (rcs_DetailtypeID) REFERENCES defDetailTypes (dty_ID) ON DELETE CASCADE,  ADD CONSTRAINT defRelationshipConstraints_ibfk_4 FOREIGN KEY (rcs_SourceRectypeID) REFERENCES defRecTypes (rty_ID) ON DELETE CASCADE,
-ALTER TABLE `defRelationshipConstraints`
-  ADD CONSTRAINT defRelationshipConstraints_ibfk_1 FOREIGN KEY (rcs_DetailtypeID) REFERENCES defDetailTypes (dty_ID),  ADD CONSTRAINT defRelationshipConstraints_ibfk_2 FOREIGN KEY (rcs_VocabID) REFERENCES defVocabularies (vcb_ID),  ADD CONSTRAINT defRelationshipConstraints_ibfk_3 FOREIGN KEY (rcs_DetailtypeID) REFERENCES defDetailTypes (dty_ID) ON DELETE CASCADE,  ADD CONSTRAINT defRelationshipConstraints_ibfk_4 FOREIGN KEY (rcs_SourceRectypeID) REFERENCES defRecTypes (rty_ID) ON DELETE CASCADE,  ADD CONSTRAINT defRelationshipConstraints_ibfk_5 FOREIGN KEY (rcs_TargetRectypeID) REFERENCES defRecTypes (rty_ID) ON DELETE CASCADE,
-ALTER TABLE `defRelationshipConstraints`
-  ADD CONSTRAINT defRelationshipConstraints_ibfk_1 FOREIGN KEY (rcs_DetailtypeID) REFERENCES defDetailTypes (dty_ID),  ADD CONSTRAINT defRelationshipConstraints_ibfk_2 FOREIGN KEY (rcs_VocabID) REFERENCES defVocabularies (vcb_ID),  ADD CONSTRAINT defRelationshipConstraints_ibfk_3 FOREIGN KEY (rcs_DetailtypeID) REFERENCES defDetailTypes (dty_ID) ON DELETE CASCADE,  ADD CONSTRAINT defRelationshipConstraints_ibfk_4 FOREIGN KEY (rcs_SourceRectypeID) REFERENCES defRecTypes (rty_ID) ON DELETE CASCADE,  ADD CONSTRAINT defRelationshipConstraints_ibfk_5 FOREIGN KEY (rcs_TargetRectypeID) REFERENCES defRecTypes (rty_ID) ON DELETE CASCADE,  ADD CONSTRAINT defRelationshipConstraints_ibfk_6 FOREIGN KEY (rcs_TargetRectypeID) REFERENCES defRecTypes (rty_ID) ON DELETE CASCADE;
+  ADD CONSTRAINT defRelationshipConstraints_ibfk_1 FOREIGN KEY (rcs_DetailtypeID) REFERENCES defDetailTypes (dty_ID) ON DELETE CASCADE,  ADD CONSTRAINT defRelationshipConstraints_ibfk_2 FOREIGN KEY (rcs_SourceRectypeID) REFERENCES defRecTypes (rty_ID) ON DELETE CASCADE,  ADD CONSTRAINT defRelationshipConstraints_ibfk_3 FOREIGN KEY (rcs_TargetRectypeID) REFERENCES defRecTypes (rty_ID) ON DELETE CASCADE,  ADD CONSTRAINT defRelationshipConstraints_ibfk_4 FOREIGN KEY (rcs_VocabID) REFERENCES defVocabularies (vcb_ID);
 
 -- 
 -- Constraints for table `defTerms`
@@ -961,85 +924,89 @@ ALTER TABLE `defRelationshipConstraints`
 ALTER TABLE `defTerms`
   ADD CONSTRAINT defTerms_ibfk_1 FOREIGN KEY (trm_VocabID) REFERENCES defVocabularies (vcb_ID),
 ALTER TABLE `defTerms`
-  ADD CONSTRAINT defTerms_ibfk_1 FOREIGN KEY (trm_VocabID) REFERENCES defVocabularies (vcb_ID),  ADD CONSTRAINT defTerms_ibfk_2 FOREIGN KEY (trm_VocabID) REFERENCES defVocabularies (vcb_ID);
+  ADD CONSTRAINT defTerms_ibfk_1 FOREIGN KEY (trm_VocabID) REFERENCES defVocabularies (vcb_ID),  ADD CONSTRAINT defTerms_ibfk_2 FOREIGN KEY (trm_InverseTermId) REFERENCES defTerms (trm_ID),
+ALTER TABLE `defTerms`
+  ADD CONSTRAINT defTerms_ibfk_1 FOREIGN KEY (trm_VocabID) REFERENCES defVocabularies (vcb_ID),  ADD CONSTRAINT defTerms_ibfk_2 FOREIGN KEY (trm_InverseTermId) REFERENCES defTerms (trm_ID),  ADD CONSTRAINT defTerms_ibfk_3 FOREIGN KEY (trm_InverseTermId) REFERENCES defTerms (trm_ID) ON DELETE SET NULL;
 
 -- 
 -- Constraints for table `recDetails`
 -- 
 ALTER TABLE `recDetails`
-  ADD CONSTRAINT recDetails_ibfk_1 FOREIGN KEY (dtl_DetailTypeID) REFERENCES defDetailTypes (dty_ID),
+  ADD CONSTRAINT recDetails_ibfk_4 FOREIGN KEY (dtl_RecID) REFERENCES Records (rec_ID) ON DELETE CASCADE,
 ALTER TABLE `recDetails`
-  ADD CONSTRAINT recDetails_ibfk_1 FOREIGN KEY (dtl_DetailTypeID) REFERENCES defDetailTypes (dty_ID),  ADD CONSTRAINT recDetails_ibfk_2 FOREIGN KEY (dtl_RecID) REFERENCES Records (rec_ID),
-ALTER TABLE `recDetails`
-  ADD CONSTRAINT recDetails_ibfk_1 FOREIGN KEY (dtl_DetailTypeID) REFERENCES defDetailTypes (dty_ID),  ADD CONSTRAINT recDetails_ibfk_2 FOREIGN KEY (dtl_RecID) REFERENCES Records (rec_ID),  ADD CONSTRAINT recDetails_ibfk_3 FOREIGN KEY (dtl_DetailTypeID) REFERENCES defDetailTypes (dty_ID),
-ALTER TABLE `recDetails`
-  ADD CONSTRAINT recDetails_ibfk_1 FOREIGN KEY (dtl_DetailTypeID) REFERENCES defDetailTypes (dty_ID),  ADD CONSTRAINT recDetails_ibfk_2 FOREIGN KEY (dtl_RecID) REFERENCES Records (rec_ID),  ADD CONSTRAINT recDetails_ibfk_3 FOREIGN KEY (dtl_DetailTypeID) REFERENCES defDetailTypes (dty_ID),  ADD CONSTRAINT recDetails_ibfk_4 FOREIGN KEY (dtl_UploadedFileID) REFERENCES recUploadedFiles (ulf_ID);
+  ADD CONSTRAINT recDetails_ibfk_4 FOREIGN KEY (dtl_RecID) REFERENCES Records (rec_ID) ON DELETE CASCADE,  ADD CONSTRAINT recDetails_ibfk_5 FOREIGN KEY (dtl_DetailTypeID) REFERENCES defDetailTypes (dty_ID);
 
 -- 
 -- Constraints for table `recThreadedComments`
 -- 
 ALTER TABLE `recThreadedComments`
-  ADD CONSTRAINT recThreadedComments_ibfk_4 FOREIGN KEY (cmt_RecID) REFERENCES Records (rec_ID),
+  ADD CONSTRAINT recThreadedComments_ibfk_1 FOREIGN KEY (cmt_OwnerUgrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE,
 ALTER TABLE `recThreadedComments`
-  ADD CONSTRAINT recThreadedComments_ibfk_4 FOREIGN KEY (cmt_RecID) REFERENCES Records (rec_ID),  ADD CONSTRAINT recThreadedComments_ibfk_1 FOREIGN KEY (cmt_OwnerUgrpID) REFERENCES sysUGrps (ugr_ID),
-ALTER TABLE `recThreadedComments`
-  ADD CONSTRAINT recThreadedComments_ibfk_4 FOREIGN KEY (cmt_RecID) REFERENCES Records (rec_ID),  ADD CONSTRAINT recThreadedComments_ibfk_1 FOREIGN KEY (cmt_OwnerUgrpID) REFERENCES sysUGrps (ugr_ID),  ADD CONSTRAINT recThreadedComments_ibfk_2 FOREIGN KEY (cmt_ParentCmtID) REFERENCES recThreadedComments (cmt_ID) ON UPDATE CASCADE,
-ALTER TABLE `recThreadedComments`
-  ADD CONSTRAINT recThreadedComments_ibfk_4 FOREIGN KEY (cmt_RecID) REFERENCES Records (rec_ID),  ADD CONSTRAINT recThreadedComments_ibfk_1 FOREIGN KEY (cmt_OwnerUgrpID) REFERENCES sysUGrps (ugr_ID),  ADD CONSTRAINT recThreadedComments_ibfk_2 FOREIGN KEY (cmt_ParentCmtID) REFERENCES recThreadedComments (cmt_ID) ON UPDATE CASCADE,  ADD CONSTRAINT recThreadedComments_ibfk_3 FOREIGN KEY (cmt_ParentCmtID) REFERENCES recThreadedComments (cmt_ID);
+  ADD CONSTRAINT recThreadedComments_ibfk_1 FOREIGN KEY (cmt_OwnerUgrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE,  ADD CONSTRAINT recThreadedComments_ibfk_2 FOREIGN KEY (cmt_RecID) REFERENCES Records (rec_ID) ON DELETE CASCADE;
+
+-- 
+-- Constraints for table `recUploadedFiles`
+-- 
+ALTER TABLE `recUploadedFiles`
+  ADD CONSTRAINT recUploadedFiles_ibfk_1 FOREIGN KEY (ulf_UploaderUGrpID) REFERENCES sysUGrps (ugr_ID),
+ALTER TABLE `recUploadedFiles`
+  ADD CONSTRAINT recUploadedFiles_ibfk_1 FOREIGN KEY (ulf_UploaderUGrpID) REFERENCES sysUGrps (ugr_ID),  ADD CONSTRAINT recUploadedFiles_ibfk_2 FOREIGN KEY (ulf_MimeExt) REFERENCES defFileExtToMimetype (fxm_Extension),
+ALTER TABLE `recUploadedFiles`
+  ADD CONSTRAINT recUploadedFiles_ibfk_1 FOREIGN KEY (ulf_UploaderUGrpID) REFERENCES sysUGrps (ugr_ID),  ADD CONSTRAINT recUploadedFiles_ibfk_2 FOREIGN KEY (ulf_MimeExt) REFERENCES defFileExtToMimetype (fxm_Extension),  ADD CONSTRAINT recUploadedFiles_ibfk_3 FOREIGN KEY (ulf_MimeExt) REFERENCES defFileExtToMimetype (fxm_Extension);
 
 -- 
 -- Constraints for table `usrBookmarks`
 -- 
 ALTER TABLE `usrBookmarks`
-  ADD CONSTRAINT usrBookmarks_ibfk_2 FOREIGN KEY (bkm_RecID) REFERENCES Records (rec_ID),
+  ADD CONSTRAINT usrBookmarks_ibfk_1 FOREIGN KEY (bkm_UGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE,
 ALTER TABLE `usrBookmarks`
-  ADD CONSTRAINT usrBookmarks_ibfk_2 FOREIGN KEY (bkm_RecID) REFERENCES Records (rec_ID),  ADD CONSTRAINT usrBookmarks_ibfk_1 FOREIGN KEY (bkm_UGrpID) REFERENCES sysUGrps (ugr_ID);
+  ADD CONSTRAINT usrBookmarks_ibfk_1 FOREIGN KEY (bkm_UGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE,  ADD CONSTRAINT usrBookmarks_ibfk_2 FOREIGN KEY (bkm_RecID) REFERENCES Records (rec_ID) ON DELETE CASCADE;
 
 -- 
--- Constraints for table `usrHyperlinkFilter`
+-- Constraints for table `usrHyperlinkFilters`
 -- 
-ALTER TABLE `usrHyperlinkFilter`
-  ADD CONSTRAINT usrHyperlinkFilter_ibfk_1 FOREIGN KEY (hyf_UGrpID) REFERENCES sysUGrps (ugr_ID);
+ALTER TABLE `usrHyperlinkFilters`
+  ADD CONSTRAINT usrHyperlinkFilters_ibfk_1 FOREIGN KEY (hyf_UGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE;
 
 -- 
 -- Constraints for table `usrRecTagLinks`
 -- 
 ALTER TABLE `usrRecTagLinks`
-  ADD CONSTRAINT usrRecTagLinks_ibfk_2 FOREIGN KEY (rtl_RecID) REFERENCES Records (rec_ID),
+  ADD CONSTRAINT usrRecTagLinks_ibfk_1 FOREIGN KEY (rtl_TagID) REFERENCES usrTags (tag_ID) ON DELETE CASCADE,
 ALTER TABLE `usrRecTagLinks`
-  ADD CONSTRAINT usrRecTagLinks_ibfk_2 FOREIGN KEY (rtl_RecID) REFERENCES Records (rec_ID),  ADD CONSTRAINT usrRecTagLinks_ibfk_1 FOREIGN KEY (rtl_TagID) REFERENCES usrTags (tag_ID);
+  ADD CONSTRAINT usrRecTagLinks_ibfk_1 FOREIGN KEY (rtl_TagID) REFERENCES usrTags (tag_ID) ON DELETE CASCADE,  ADD CONSTRAINT usrRecTagLinks_ibfk_2 FOREIGN KEY (rtl_RecID) REFERENCES Records (rec_ID) ON DELETE CASCADE;
 
 -- 
 -- Constraints for table `usrRecentRecords`
 -- 
 ALTER TABLE `usrRecentRecords`
-  ADD CONSTRAINT usrRecentRecords_ibfk_1 FOREIGN KEY (rre_UGrpID) REFERENCES sysUGrps (ugr_ID),
+  ADD CONSTRAINT usrRecentRecords_ibfk_1 FOREIGN KEY (rre_UGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE,
 ALTER TABLE `usrRecentRecords`
-  ADD CONSTRAINT usrRecentRecords_ibfk_1 FOREIGN KEY (rre_UGrpID) REFERENCES sysUGrps (ugr_ID),  ADD CONSTRAINT usrRecentRecords_ibfk_2 FOREIGN KEY (rre_RecID) REFERENCES Records (rec_ID);
+  ADD CONSTRAINT usrRecentRecords_ibfk_1 FOREIGN KEY (rre_UGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE,  ADD CONSTRAINT usrRecentRecords_ibfk_2 FOREIGN KEY (rre_RecID) REFERENCES Records (rec_ID) ON DELETE CASCADE;
 
 -- 
 -- Constraints for table `usrReminders`
 -- 
 ALTER TABLE `usrReminders`
-  ADD CONSTRAINT usrReminders_ibfk_3 FOREIGN KEY (rem_ToWorkgroupID) REFERENCES sysUGrps (ugr_ID),
+  ADD CONSTRAINT usrReminders_ibfk_1 FOREIGN KEY (rem_RecID) REFERENCES Records (rec_ID) ON DELETE CASCADE,
 ALTER TABLE `usrReminders`
-  ADD CONSTRAINT usrReminders_ibfk_3 FOREIGN KEY (rem_ToWorkgroupID) REFERENCES sysUGrps (ugr_ID),  ADD CONSTRAINT usrReminders_ibfk_4 FOREIGN KEY (rem_ToUserID) REFERENCES sysUGrps (ugr_ID),
+  ADD CONSTRAINT usrReminders_ibfk_1 FOREIGN KEY (rem_RecID) REFERENCES Records (rec_ID) ON DELETE CASCADE,  ADD CONSTRAINT usrReminders_ibfk_2 FOREIGN KEY (rem_OwnerUGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE,
 ALTER TABLE `usrReminders`
-  ADD CONSTRAINT usrReminders_ibfk_3 FOREIGN KEY (rem_ToWorkgroupID) REFERENCES sysUGrps (ugr_ID),  ADD CONSTRAINT usrReminders_ibfk_4 FOREIGN KEY (rem_ToUserID) REFERENCES sysUGrps (ugr_ID),  ADD CONSTRAINT usrReminders_ibfk_1 FOREIGN KEY (rem_RecID) REFERENCES Records (rec_ID),
+  ADD CONSTRAINT usrReminders_ibfk_1 FOREIGN KEY (rem_RecID) REFERENCES Records (rec_ID) ON DELETE CASCADE,  ADD CONSTRAINT usrReminders_ibfk_2 FOREIGN KEY (rem_OwnerUGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE,  ADD CONSTRAINT usrReminders_ibfk_3 FOREIGN KEY (rem_ToWorkgroupID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE,
 ALTER TABLE `usrReminders`
-  ADD CONSTRAINT usrReminders_ibfk_3 FOREIGN KEY (rem_ToWorkgroupID) REFERENCES sysUGrps (ugr_ID),  ADD CONSTRAINT usrReminders_ibfk_4 FOREIGN KEY (rem_ToUserID) REFERENCES sysUGrps (ugr_ID),  ADD CONSTRAINT usrReminders_ibfk_1 FOREIGN KEY (rem_RecID) REFERENCES Records (rec_ID),  ADD CONSTRAINT usrReminders_ibfk_2 FOREIGN KEY (rem_OwnerUGrpID) REFERENCES sysUGrps (ugr_ID);
+  ADD CONSTRAINT usrReminders_ibfk_1 FOREIGN KEY (rem_RecID) REFERENCES Records (rec_ID) ON DELETE CASCADE,  ADD CONSTRAINT usrReminders_ibfk_2 FOREIGN KEY (rem_OwnerUGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE,  ADD CONSTRAINT usrReminders_ibfk_3 FOREIGN KEY (rem_ToWorkgroupID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE,  ADD CONSTRAINT usrReminders_ibfk_4 FOREIGN KEY (rem_ToUserID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE;
 
 -- 
 -- Constraints for table `usrSavedSearches`
 -- 
 ALTER TABLE `usrSavedSearches`
-  ADD CONSTRAINT usrSavedSearches_ibfk_1 FOREIGN KEY (svs_UGrpID) REFERENCES sysUGrps (ugr_ID);
+  ADD CONSTRAINT usrSavedSearches_ibfk_1 FOREIGN KEY (svs_UGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE;
 
 -- 
 -- Constraints for table `usrTags`
 -- 
 ALTER TABLE `usrTags`
-  ADD CONSTRAINT usrTags_ibfk_1 FOREIGN KEY (tag_UGrpID) REFERENCES sysUGrps (ugr_ID);
+  ADD CONSTRAINT usrTags_ibfk_1 FOREIGN KEY (tag_UGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE;
 
 -- 
 -- Procedures
@@ -1048,32 +1015,32 @@ ALTER TABLE `usrTags`
 -- 
 CREATE DEFINER=root@localhost PROCEDURE set_all_hhash()
 begin
- 		create temporary table t (rec_ID int);
- 		repeat
- 			begin
- 			truncate t;
- 			insert into t select rec_ID
- 							from Records A
- 							where A.rec_Hhash is null
- 								and not exists (select *
- 												from Details, defDetailTypes, defRecStructure, Records B
- 												where dtl_RecID=A.rec_ID and
- 														dtl_DetailTypeID=dty_ID and
- 														dty_Type="resource" and
- 														B.rec_ID=dtl_ValueAsText and
- 														B.rec_Hhash is null and
- 														rst_RecTypeID=A.rec_RecType and
- 														rst_DetailTypeID=dty_ID and
- 														rst_RequirementType="Required");
- 			set @tcount := row_count();
- 			update Records
- 				set rec_Hhash = hhash(rec_ID)
- 				where rec_ID in (select * from t);
- 			end;
- 			until @tcount = 0
- 		end repeat;
- 		drop table t;
- 	end$$
+        create temporary table t (rec_ID int);
+        repeat
+            begin
+            truncate t;
+            insert into t select rec_ID
+                            from Records A
+                            where A.rec_Hhash is null
+                                and not exists (select *
+                                                from Details, defDetailTypes, defRecStructure, Records B
+                                                where dtl_RecID=A.rec_ID and
+                                                        dtl_DetailTypeID=dty_ID and
+                                                        dty_Type="resource" and
+                                                        B.rec_ID=dtl_Value and
+                                                        B.rec_Hhash is null and
+                                                        rst_RecTypeID=A.rec_RecTypeID and
+                                                        rst_DetailTypeID=dty_ID and
+                                                        rst_RequirementType="Required");
+            set @tcount := row_count();
+            update Records
+                set rec_Hhash = hhash(rec_ID)
+                where rec_ID in (select * from t);
+            end;
+            until @tcount = 0
+        end repeat;
+        drop table t;
+    end$$
 
 -- 
 -- DELIMITER ;
@@ -1085,61 +1052,55 @@ CREATE DEFINER=root@localhost FUNCTION hhash(recID int) RETURNS varchar(4095) CH
     READS SQL DATA
     DETERMINISTIC
 begin
- 		declare rectype int;
- 		declare non_resource_fields varchar(4095);
- 		declare resource_fields varchar(4095);
- 
- 		select rec_RecType into rectype from Records where rec_ID = recID;
- 
- 		select group_concat(liposuction(upper(dtl_ValueAsText)) order by dty_ID, upper(dtl_ValueAsText) separator ';')
- 			into non_resource_fields
- 			from Details, Records, defDetailTypes, defRecStructure
- 			where dtl_RecID=rec_ID and
- 					dtl_DetailTypeID=dty_ID and
- 					rec_RecType=rst_RecTypeID and
- 					rst_DetailTypeID=dty_ID and
- 					rst_RecordMatchOrder and
- 					dty_Type != "resource" and
- 					rec_ID = recID;
- 
- 		select group_concat(DST.rec_Hhash order by dty_ID, dty_ID, DST.rec_Hhash separator '$^')
- 			into resource_fields
- 			from Details, Records SRC, defDetailTypes, defRecStructure, Records DST
- 			where dtl_RecID=SRC.rec_ID and
- 					dtl_DetailTypeID=dty_ID and
- 					SRC.rec_RecType=rst_RecTypeID and
- 					rst_DetailTypeID=dty_ID and
- 					rst_RequirementType = 'Required' and
- 					dty_Type = "resource" and
- 					dtl_ValueAsText = DST.rec_ID and
- 					dtl_RecID=recID;
- 
- 		return concat(ifnull(rectype,'N'), ':',
- 
- 		if(non_resource_fields is not null and non_resource_fields != '', concat(non_resource_fields, ';'), ''),
- 
- 		if(resource_fields is not null and resource_fields != '', concat('^', resource_fields, '$'), ''));
- 	end
+        declare rectype int;
+        declare non_resource_fields varchar(4095);
+        declare resource_fields varchar(4095);
+        select rec_RecTypeID into rectype from Records where rec_ID = recID;
+        select group_concat(liposuction(upper(dtl_Value)) order by dty_ID, upper(dtl_Value) separator ';')
+            into non_resource_fields
+            from Details, Records, defDetailTypes, defRecStructure
+            where dtl_RecID=rec_ID and
+                    dtl_DetailTypeID=dty_ID and
+                    rec_RecTypeID=rst_RecTypeID and
+                    rst_DetailTypeID=dty_ID and
+                    rst_RecordMatchOrder and
+                    dty_Type != "resource" and
+                    rec_ID = recID;
+        select group_concat(DST.rec_Hhash order by dty_ID, dty_ID, DST.rec_Hhash separator '$^')
+            into resource_fields
+            from Details, Records SRC, defDetailTypes, defRecStructure, Records DST
+            where dtl_RecID=SRC.rec_ID and
+                    dtl_DetailTypeID=dty_ID and
+                    SRC.rec_RecTypeID=rst_RecTypeID and
+                    rst_DetailTypeID=dty_ID and
+                    rst_RequirementType = 'Required' and
+                    dty_Type = "resource" and
+                    dtl_Value = DST.rec_ID and
+                    dtl_RecID=recID;
+        return concat(ifnull(rectype,'N'), ':',
+        if(non_resource_fields is not null and non_resource_fields != '', concat(non_resource_fields, ';'), ''),
+        if(resource_fields is not null and resource_fields != '', concat('^', resource_fields, '$'), ''));
+    end
 
 CREATE DEFINER=root@localhost FUNCTION simple_hash(recID int) RETURNS varchar(4095) CHARSET utf8
     READS SQL DATA
     DETERMINISTIC
 begin
- 		declare rectype int;
- 		declare non_resource_fields varchar(4095);
- 		declare author_fields varchar(4095);
- 		select rec_RecType into rectype from Records where rec_ID = recID;
- 		select group_concat(liposuction(upper(dtl_ValueAsText)) order by dty_ID, upper(dtl_ValueAsText) separator ';')
- 			into non_resource_fields
- 			from Details, Records, defDetailTypes, defRecStructure
- 			where dtl_RecID=rec_ID and
- 					dtl_DetailTypeID=dty_ID and
- 					rec_RecType=rst_RecTypeID and
- 					rst_DetailTypeID=dty_ID and
- 					rst_RecordMatchOrder and
- 					dty_Type != "resource" and
- 					rec_ID = recID;
- 		return concat(ifnull(rectype,'N'), ':',
- 		if(non_resource_fields is not null and non_resource_fields != '', concat(non_resource_fields, ';'), ''));
- 	end
+        declare rectype int;
+        declare non_resource_fields varchar(4095);
+        declare author_fields varchar(4095);
+        select rec_RecTypeID into rectype from Records where rec_ID = recID;
+        select group_concat(liposuction(upper(dtl_Value)) order by dty_ID, upper(dtl_Value) separator ';')
+            into non_resource_fields
+            from Details, Records, defDetailTypes, defRecStructure
+            where dtl_RecID=rec_ID and
+                    dtl_DetailTypeID=dty_ID and
+                    rec_RecTypeID=rst_RecTypeID and
+                    rst_DetailTypeID=dty_ID and
+                    rst_RecordMatchOrder and
+                    dty_Type != "resource" and
+                    rec_ID = recID;
+        return concat(ifnull(rectype,'N'), ':',
+        if(non_resource_fields is not null and non_resource_fields != '', concat(non_resource_fields, ';'), ''));
+    end
 

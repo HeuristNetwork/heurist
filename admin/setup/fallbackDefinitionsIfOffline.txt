@@ -1,0 +1,200 @@
+
+ -- fallbackDefinitionsIfOffline.sql: SQL file of definitions data in case offline or
+ --                                   heuristscholar.org/hdb_reference not accessible
+ -- @author Ian Johnson 11/1/2011
+ -- @copyright 2005-2010 University of Sydney Digital Innovation Unit.
+ -- @link: http://HeuristScholar.org
+ -- @license http://www.gnu.org/licenses/gpl-3.0.txt
+ -- @package Heurist academic knowledge management system
+ -- @todo
+ 
+ -- THIS FILE NEEDS TO BE FILLED WITH THE RESULTS FROM  
+ -- http://heuristscholar.org/h3-ij/admin/describe/getDBStructure.php?db=reference
+ -- AS FOLLOWS:
+
+ -- *** note: THIS FILE IS CURRENTLY AN INCOMPLETE TEST VERSION CREATED 8 FEB 2011
+ 
+-- Heurist Definitions Exchange File Vsn 1 - Full export 
+-- Installation = http://heuristscholar.org/h3-ij/; db = reference ; Format Version = 1 
+
+-- RECORD TYPES
+-- rty_ID, rty_Name, rty_OrderInGroup, rty_Description, rty_RecTypeGroupID, rty_TitleMask, rty_CanonicalTitleMask, rty_Plural, rty_Status, rty_VisibleToEndUser, rty_OriginatingDBid, rty_NameInOriginatingdb, rty_IDinOriginatingDB, rty_ReferenceURL
+
+> Start 
+(0,'System: Dummy rectype, details for inclusion in all record type',0, `System: dummy rectype provides the detail specifications for shared fields across all record types `,1, `[title]`,`160`,`Details for inclusion in all record types`,`Reserved`, ``,``,``), 
+(1,'Web bookmark',1, `Use this for an Internet web page`,2, `[Title]`,`[160]`,`Internet bookmarks`,`Open`, ``,``,``), 
+(2,'Notes',2, `Please supply a description of this record type`,2, `[Title]`,`[160]`,`Notes`,`Open`, ``,``,``), 
+(3,'Journal Article',3, `Use this for an article in a Journal`,2, `[Title]. [Creator.Title], [Creator.Given names] ( [Journal Volume Reference.Year] ) [Journal Volume Reference.Journal Reference.Title] [Journal Volume Reference.Volume] - [Journal Volume Reference.Part / Issue]`,`[160]. [158.160], [158.291] ( [225.159] ) [225.226.160] [225.184] - [225.169]`,`Journal Articles`,`Open`, ``,``,``), 
+(4,'Book chapter',4, `Use this for a chapter or section of a multi-author edited book`,2, `[Title] - [Creator.Title], [Creator.Given names] ( [Book Reference.Year] ) in [Book Reference.Creator.Title], [Book Reference.Creator.Given names] (ed) [Book Reference.Title]`,`[160] - [158.160], [158.291] ( [227.159] ) in [227.158.160], [227.158.291] (ed) [227.160]`,`Book chapters`,`Open`, ``,``,``), 
+
+> End
+
+ 
+
+ 
+
+-- DETAIL TYPES
+
+-- dty_ID, dty_Name, dty_Description, dty_Type, dty_Prompt, dty_Help, dty_Status, dty_VisibleToEndUser, dty_OriginatingDBid, dty_NameInOriginatingdb, dty_IDinOriginatingDB, dty_PtrTargetRectypes, dty_NativeVocabID
+
+> Start 
+(158,`Creator`,``,resource,`Creator`,``, ,`Open`,``,`75`,`1`), 
+(159,`Year`,``,date,`Year`,``, ,`Open`,``,``,`1`), 
+(160,`Name / Title`,``,freetext,`Title`,``, ,`Open`,``,``,`1`), 
+(163,`Number of pages`,``,freetext,`Number of pages`,``, ,`Open`,``,``,`1`), 
+(164,`Start page`,``,freetext,`Start page`,``, ,`Open`,``,``,`1`), 
+
+> End
+
+ 
+
+ 
+
+-- RECORD STRUCTURE
+
+-- rst_ID, rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_DisplayDescription, rst_DisplayPrompt, rst_DisplayHelp, rst_DisplayOrder, rst_DisplayWidth, rst_DefaultValue, rst_RecordMatchOrder, rst_RequirementType, rst_Status, rst_MayModify, rst_OriginatingDBid, rst_IDinOriginatingDB, rst_MaxValues, rst_MinValues, rst_VocabConstraints, rst_PtrConstraints, rst_ThumbnailFromDetailTypeID
+
+> Start 
+(35,`3`,`158`,`Author(s)`,``, `Enter as Judge, W.James or Judge, W.J.`,``,`2`,`40`, ``,`0`),`Required`),`Open`),``), `0`),`1`),``),``),`0`), 
+(37,`3`,`160`,`Title of Article`,``, `Enter the correctly capitalised title as published`,`help text`,`1`,`60`, ``,`1`),`Required`),`Open`),``), `1`),`1`),``),``),`0`), 
+(39,`3`,`164`,`Start Page`,``, `Start page number`,``,`4`,`5`, ``,`0`),`Recommended`),`Open`),``), `1`),`1`),``),``),`0`), 
+(40,`3`,`165`,`End Page`,``, `End page number`,``,`5`,`5`, ``,`0`),`Recommended`),`Open`),``), `1`),`1`),``),``),`0`), 
+(43,`28`,`169`,`Part/Issue`,``, `The Part/Issue number or equivalent`,``,`4`,`10`, ``,`0`),`Recommended`),`Open`),``), `1`),`1`),``),``),`0`), 
+
+> End
+
+ 
+
+ 
+
+-- TERMS
+
+-- trm_ID, trm_Label, trm_InverseTermId, trm_VocabID, trm_Description, trm_Status, trm_OriginatingDBid, trm_NameInOriginatingdb, trm_IDinOriginatingDB, trm_AddedByImport, trm_LocalExtension
+
+> Start 
+(5,`IsPartOf`,``,`200`,``, `Open`,``,`0`,`0`), 
+(6,`IsSimilarTo`,``,`200`,``, `Open`,``,`0`,`0`), 
+(7,`IsSameAs`,``,`200`,``, `Open`,``,`0`,`0`), 
+(8,`IsReferencedBy`,``,`200`,``, `Open`,``,`0`,`0`), 
+(9,`References`,``,`200`,``, `Open`,``,`0`,`0`), 
+
+> End
+
+ 
+
+ 
+
+-- VOCABULARIES
+
+-- vcb_ID, vcb_Name, vcb_Description, vcb_RefURL, vcb_Added, vcb_Modified, vcb_Status, vcb_OriginatingDBid, vcb_NameInOriginatingdb, vcb_IDinOriginatingDB, vcb_OntID
+
+> Start 
+(0,`Null vocabulary`,`An empty vocabulary which can be complemented by specific terms`,``,`2011-01-27`,`2011-01-27 16:49:59`, `Open`,``,`0`), 
+(1,`Generic Heurist Relationships`,`A default vocabulary for all relationship types not set more specifically`,``,`2011-01-27`,`2011-01-27 16:49:59`, `Open`,``,`0`), 
+(200,`RelationType [vocab]`,`Vocabulary derived from RelationType in Heurist vsn 2`,``,`2011-01-27`,`2011-02-07 18:02:25`, `Open`,``,`0`), 
+(203,`Organisation type [vocab]`,`Vocabulary derived from Organisation type in Heurist vsn 2`,``,`2011-01-27`,`2011-01-27 16:50:18`, `Open`,``,`0`), 
+(205,`Discipline [vocab]`,`Vocabulary derived from Discipline in Heurist vsn 2`,``,`2011-01-27`,`2011-01-27 16:50:18`, `Open`,``,`0`), 
+
+> End
+
+ 
+
+ 
+
+-- ONTOLOGIES
+
+-- ont_ID, ont_ShortName, ont_FullName, ont_Description, ont_RefURI, ont_Status, ont_OriginatingDBid, ont_NameInOriginatingdb, ont_IDinOriginatingDB, ont_Added, ont_Modified
+
+> Start 
+(1,`local`,`Null ontology`,`An empty ontology which can be complemented`,`http://heuristscholar.org/reference/getOntology.php`), 
+(2,`DC`,`Dublin Core`,``,`http://www.iso.org/iso/iso_catalogue/catalogue_tc/catalogue_detail.htm?csnumber=52142`), 
+(3,`CIDOC-CRM`,`CIDOC-CRM`,``,`http://www.iso.org/iso/iso_catalogue/catalogue_tc/catalogue_detail.htm?csnumber=34424`), 
+
+> End
+
+ 
+
+ 
+
+-- RELATIONSHIP CONSTRAINTS
+
+-- rcs_ID, rcs_DetailtypeID, rcs_SourceRectypeID, rcs_TargetRectypeID, rcs_VocabSubset, rcs_VocabID, rcs_Description, rcs_Order, rcs_RelationshipsLimit, rcs_Status, rcs_OriginatingDBid, rcs_IDinOriginatingDB, rcs_TermLimit
+
+> Start 
+(1,`200`,``,``,``,`200`, `Standard Heurist relationship types between any record types`,``,`0`,`Reserved`,``,`0`), 
+
+> End
+
+ 
+
+ 
+
+-- FILE EXTENSIONS TO MIME TYPES
+
+-- fxm_Extension, fxm_MimeType, fxm_OpenNewWindow, fxm_IconFileName, fxm_FiletypeName, fxm_ImagePlaceholder
+
+> Start 
+(16,`invalid`,`0`,``,``,``), 
+(183,`invalid`,`0`,``,``,``), 
+(ai,`application/postscript`,`0`,``,``,``), 
+(aif,`audio/x-aiff`,`0`,`movie.gif`,`AIFF audio`,``), 
+(aifc,`audio/x-aiff`,`0`,`movie.gif`,`AIFF audio`,``), 
+
+> End
+
+ 
+
+ 
+
+-- RECORD TYPE CLASSES
+
+-- rtg_ID, rtg_Name, rtg_Order
+
+> Start 
+(1,`Generic`,`001`), 
+(2,`Bibliographic`,`002`), 
+(3,`GIS datasets`,`003`), 
+(4,`Annotation`,`004`), 
+(5,`Excavation`,`005`), 
+
+> End
+
+ 
+
+ 
+
+-- Enumerated value vocabs
+
+-- env_ID , env_RecTypeID , env_DetailTypeID, env_VocabID, env_VocabSubset
+
+> Start 
+
+> End
+
+ 
+
+ 
+
+-- Enumerated value vocabs override
+
+-- evo_ID , evo_DetailTypeID, evo_TermIDs, evo_Description
+
+> Start 
+
+> End
+
+ 
+
+ 
+
+-- Definitions translations
+
+-- trn_ID , trn_Source, trn_Code, trn_Language, trn_Translation
+
+> Start 
+
+> End
+
+ 
+
+ 

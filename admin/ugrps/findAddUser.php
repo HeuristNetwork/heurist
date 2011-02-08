@@ -9,10 +9,10 @@
  * @todo
  -->*/
 
-
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
+// TO DO: set flag from sysIdentification.sys_AllowRegistration and exit here if false
 
 if (!@$_REQUEST['register'] && !(is_logged_in() && is_admin())) {
 	header('Location: '.HEURIST_URL_BASE.'common/connect/login.php?instance='.HEURIST_INSTANCE);
