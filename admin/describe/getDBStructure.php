@@ -1,31 +1,28 @@
 <?php
 
-    /**
-    * getDBStrcture.php - returns database definitions (rectypes, details etc.) as SQL statements re4ady for INSERT processing
+	/*,!--
+	* getDBStructure.php - returns database definitions (rectypes, details etc.)
+	*                      as SQL statements ready for INSERT processing
     * Ian Johnson 2 March 2010 updated to Vsn 3 13/1/2011
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
     * @param includeUgrps=1 will output user and group information in addition to definitions    
+	* @param approvedDefsOnly=1 will only output Reserved and Approved definitions
  * @todo
- **/
-
-?>
-
-<?php
+	-->*/
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
 
-    $lim=5; //LIMITED FOR TESTING ONLY , REMOVE LIMIT STATEMENTS
-
-
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
-    // Normally jsut outputs definitions, thsi will include users/groups
-    $includeUgrps=1;
+	// Normally jsut outputs definitions, this will include users/groups
     $includeUgrps=@$_REQUEST["includeUgrps"];  // returns null if not set
+
+	$approvedDefsOnly=@$_REQUEST["approvedDefsOnly"];  // returns null if not set
+	// TO DO: filter for reserved and approved definitions only if this is set
 
 
 	// Deals with all the database connections stuff
@@ -55,7 +52,7 @@
     print "-- rty_ID, rty_Name, rty_OrderInGroup, rty_Description, rty_RecTypeGroupID, 
     rty_TitleMask, rty_CanonicalTitleMask, rty_Plural, rty_Status, rty_VisibleToEndUser, 
     rty_OriginatingDBid, rty_NameInOriginatingdb, rty_IDinOriginatingDB, rty_ReferenceURL\n";
-	$query = "select * from defRecTypes limit $lim";
+	$query = "select * from defRecTypes";
 	$res = mysql_query($query);
 	$fmt = 'defRecTypes';
 
@@ -74,8 +71,8 @@
 	print "\n\n\n-- DETAIL TYPES";print "\n";
     print "<p>";
     print "-- dty_ID, dty_Name, dty_Description, dty_Type, dty_Prompt, dty_Help, dty_Status, dty_VisibleToEndUser,
-    dty_OriginatingDBid, dty_NameInOriginatingdb, dty_IDinOriginatingDB, dty_PtrTargetRectypes, dty_NativeVocabID\n";
-	$query = "select * from defDetailTypes limit $lim";
+	dty_OriginatingDBid, dty_NameInOriginatingdb, dty_IDinOriginatingDB, dty_PtrTargetRectypeIDs, dty_EnumVocabIDs, dty_EnumTermIDs\n";
+	$query = "select * from defDetailTypes";
 	$res = mysql_query($query);
 	$fmt = 'defDetailTypes';
 
@@ -96,8 +93,8 @@
     print "-- rst_ID, rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_DisplayDescription, rst_DisplayPrompt, rst_DisplayHelp, 
     rst_DisplayOrder, rst_DisplayWidth, rst_DefaultValue, rst_RecordMatchOrder, rst_RequirementType, rst_Status, rst_MayModify, 
     rst_OriginatingDBid, rst_IDinOriginatingDB, rst_MaxValues, rst_MinValues, 
-    rst_VocabConstraints, rst_PtrConstraints, rst_ThumbnailFromDetailTypeID\n";
-	$query = "select * from defRecStructure limit $lim";
+	rst_EnumConstraintIDs, rst_PtrConstraintIDs, rst_ThumbnailFromDetailTypeID\n";
+	$query = "select * from defRecStructure";
 	$res = mysql_query($query);
 	$fmt = 'defRecStructure';
 
@@ -117,7 +114,7 @@
     print "<p>";
     print "-- trm_ID, trm_Label, trm_InverseTermId, trm_VocabID, trm_Description, trm_Status, 
     trm_OriginatingDBid, trm_NameInOriginatingdb, trm_IDinOriginatingDB,  trm_AddedByImport, trm_LocalExtension\n";
-	$query = "select * from defTerms limit $lim";
+	$query = "select * from defTerms";
 	$res = mysql_query($query);
 	$fmt = 'defTerms';
 
@@ -136,7 +133,7 @@
     print "<p>";
     print "-- vcb_ID, vcb_Name, vcb_Description, vcb_RefURL, vcb_Added, vcb_Modified, vcb_Status, 
     vcb_OriginatingDBid, vcb_NameInOriginatingdb, vcb_IDinOriginatingDB,  vcb_OntID\n";
-	$query = "select * from defVocabularies limit $lim";
+	$query = "select * from defVocabularies";
 	$res = mysql_query($query);
 	$fmt = 'defVocabularies';
 
@@ -156,7 +153,7 @@
     print "<p>";
     print "-- ont_ID, ont_ShortName, ont_FullName, ont_Description, ont_RefURI, ont_Status, 
     ont_OriginatingDBid, ont_NameInOriginatingdb, ont_IDinOriginatingDB, ont_Added, ont_Modified\n";
-	$query = "select * from defOntologies limit $lim";
+	$query = "select * from defOntologies";
 	$res = mysql_query($query);
 	$fmt = 'defOntologies';
 
@@ -176,7 +173,7 @@
     print "-- rcs_ID, rcs_DetailtypeID, rcs_SourceRectypeID, rcs_TargetRectypeID, rcs_VocabSubset, 
     rcs_VocabID, rcs_Description, rcs_Order, rcs_RelationshipsLimit, rcs_Status, 
     rcs_OriginatingDBid, rcs_IDinOriginatingDB, rcs_TermLimit\n";
-	$query = "select * from defRelationshipConstraints limit $lim";
+	$query = "select * from defRelationshipConstraints";
 	$res = mysql_query($query);
 	$fmt = 'defRelationshipConstraints';
 
@@ -194,7 +191,7 @@
 	print "\n\n\n-- FILE EXTENSIONS TO MIME TYPES";print "\n";
     print "<p>";
 	print "-- fxm_Extension, fxm_MimeType, fxm_OpenNewWindow, fxm_IconFileName, fxm_FiletypeName, fxm_ImagePlaceholder\n";
-	$query = "select * from defFileExtToMimetype limit $lim";
+	$query = "select * from defFileExtToMimetype";
 	$res = mysql_query($query);
 	$fmt = 'defFileExtToMimetype';
 
@@ -211,8 +208,8 @@
 
 	print "\n\n\n-- RECORD TYPE CLASSES";print "\n";
     print "<p>";
-	print "-- rtg_ID, rtg_Name, rtg_Order\n";
-	$query = "select * from defRecTypeGroups limit $lim";
+	print "-- rtg_ID, rtg_Name, rtg_Description, rtg_Order\n";
+	$query = "select * from defRecTypeGroups";
 	$res = mysql_query($query);
 	$fmt = 'defRecTypeGroups';
 
@@ -224,16 +221,15 @@
     print "> End\n";
     print "<p>&nbsp;<p>&nbsp;<p>";
 
-
     // ------------------------------------------------------------------------------------------
-    // defenumVocabs
+	// defDetailTypeGroups
 
-    print "\n\n\n-- Enumerated value vocabs";print "\n";
+	print "\n\n\n-- DETAIL TYPE CLASSES";print "\n";
     print "<p>";
-    print "-- env_ID , env_RecTypeID , env_DetailTypeID, env_VocabID, env_VocabSubset\n";
-    $query = "select * from defEnumVocabs limit $lim";
+	print "-- dtg_ID, dtg_Name, dtg_Description, dtg_Order\n";
+	$query = "select * from defDetailTypeGroups";
     $res = mysql_query($query);
-    $fmt = 'defEnumVocabs';
+	$fmt = 'defDetailTypeGroups';
 
     print "<p>";
     print "\n> Start\n";
@@ -243,23 +239,6 @@
     print "> End\n";
     print "<p>&nbsp;<p>&nbsp;<p>";
 
-    // ------------------------------------------------------------------------------------------
-    // defenumVocabOverride
-
-    print "\n\n\n-- Enumerated value vocabs override";print "\n";
-    print "<p>";
-    print "-- evo_ID , evo_DetailTypeID, evo_TermIDs, evo_Description\n";
-    $query = "select * from defEnumVocabOverride limit $lim";
-    $res = mysql_query($query);
-    $fmt = 'defEnumVocabOverride';
-
-    print "<p>";
-    print "\n> Start\n";
-    print "<br>";
-    while ($row = mysql_fetch_assoc($res)) { print_row($row, $fmt); }
-    print "<br>";
-    print "> End\n";
-    print "<p>&nbsp;<p>&nbsp;<p>";
 
     // ------------------------------------------------------------------------------------------
     // defTranslations
@@ -268,7 +247,7 @@
     print "<p>";
     print "-- trn_ID , trn_Source, trn_Code, trn_Language, trn_Translation\n";
     $query = "select * from defTranslations where trn_Source in 
-    ('rty_Name', 'dty_Name', 'ont_ShortName', 'vcb_Name', 'trm_Label', 'rst_DisplayName', 'rtg_Name')  limit $lim";
+	('rty_Name', 'dty_Name', 'ont_ShortName', 'vcb_Name', 'trm_Label', 'rst_DisplayName', 'rtg_Name')";
     // filters to only definition (not data) translations - add others as required
     $res = mysql_query($query);
     $fmt = 'defTranslations';
@@ -300,7 +279,7 @@
         ugr_FirstName, ugr_LastName, ugr_Department, ugr_Organisation, ugr_City, ugr_State, ugr_Postcode, 
         ugr_Interests, ugr_Enabled, ugr_LastLoginTime, ugr_MinHyperlinkWords, ugr_LoginCount, ugr_IsModelUser, 
         ugr_IncomingEmailAddresses, ugr_URLs, ugr_FlagJT\n";
-    $query = "select * from sysUGrps limit $lim";
+	$query = "select * from sysUGrps";
     $res = mysql_query($query);
     $fmt = 'sysUGrps';
 
@@ -318,7 +297,7 @@
     print "\n\n\n-- Users to Group membership and roles";print "\n";
     print "<p>";
     print "-- ugl_ID,ugl_UserID,ugl_GroupID,ugl_Role\n";
-    $query = "select * from sysUsrGrpLinks limit $lim";
+	$query = "select * from sysUsrGrpLinks";
     $res = mysql_query($query);
     $fmt = 'sysUsrGrpLinks';
 
@@ -336,7 +315,7 @@
     print "\n\n\n-- User's hyperlink filters";print "\n";
     print "<p>";
     print "-- hyf_String,hyf_UGrpId\n";
-    $query = "select * from usrHyperlinkFilters limit $lim";
+	$query = "select * from usrHyperlinkFilters";
     $res = mysql_query($query);
     $fmt = 'usrHyperlinkFilters';
 
@@ -354,7 +333,7 @@
     print "\n\n\n-- User's tags";print "\n";
     print "<p>";
     print "-- tag_ID,tag_UGrpID,tag_Text,tag_Description,tag_AddedByImport\n";
-    $query = "select * from UsrTags limit $lim";
+	$query = "select * from UsrTags";
     $res = mysql_query($query);
     $fmt = 'UsrTags';
 
@@ -387,15 +366,19 @@
 			break;
 
 			case 'defDetailTypes': // Data from the recDetails table
-			print "($row[dty_ID],`$row[dty_Name]`,`$row[dty_Description]`,$row[dty_Type],`$row[dty_Prompt]`,`$row[dty_Help]`,
-			,`$row[dty_Status]`,`$row[dty_OriginatingDB]`,`$row[dty_PtrTargetRectypes]`,`$row[dty_NativeVocabID]`),\n";
+			print "($row[dty_ID],`$row[dty_Name]`,`$row[dty_Description]`,$row[dty_Type],`$row[dty_Prompt]`,
+			`$row[dty_Help]`,`$row[dty_Status]`,`$row[dty_OriginatingDB]`,`$row[dty_PtrTargetRectypeIDs]`,
+			`$row[dty_EnumVocabIDs]`,`$row[dty_EnumTermIDs]`),\n";
 			break;
 
 			case 'defRecStructure': // Data from the defRecStructure table
-			print "($row[rst_ID],`$row[rst_RecTypeID]`,`$row[rst_DetailTypeID]`,`$row[rst_DisplayName]`,`$row[rst_Description]`,
-			`$row[rst_DisplayPrompt]`,`$row[rst_DisplayHelp]`,`$row[rst_DisplayOrder]`,`$row[rst_DisplayWidth]`,
-			`$row[rst_DefaultValue]`,`$row[rst_RecordMatchOrder]`),`$row[rst_RequirementType]`),`$row[rst_Status]`),`$row[rst_OriginatingDB]`),
-			`$row[rst_MaxValues]`),`$row[rst_MinValues]`),`$row[rst_VocabConstraints]`),`$row[rst_PtrConstraints]`),`$row[rst_ThumbnailFromDetailTypeID]`),\n";
+			print "($row[rst_ID],`$row[rst_RecTypeID]`,`$row[rst_DetailTypeID]`,`$row[rst_DisplayName]`,
+			`$row[rst_Description]`,`$row[rst_DisplayPrompt]`,`$row[rst_DisplayHelp]`,
+			`$row[rst_DisplayOrder]`,`$row[rst_DisplayWidth]`,`$row[rst_DefaultValue]`,
+			`$row[rst_RecordMatchOrder]`),`$row[rst_RequirementType]`),`$row[rst_Status]`),
+			`$row[rst_OriginatingDB]`),`$row[rst_MaxValues]`),`$row[rst_MinValues]`),
+			`$row[rst_EnumConstraintIDs]`),`$row[rst_PtrConstraintIDs]`),
+			`$row[rst_ThumbnailFromDetailTypeID]`),\n";
 
 			break;
 
@@ -423,7 +406,11 @@
 			break;
 
 			case 'defRecTypeGroups': // Data from record type classes table
-			print "($row[rtg_ID],`$row[rtg_Name]`,`$row[rtg_Order]`),\n";
+			print "($row[rtg_ID],`$row[rtg_Name]`,`$row[rtg_Description]`,`$row[rtg_Order]`),\n";
+			break;
+
+			case 'defDetailTypeGroups': // Data from detail type classes table
+			print "($row[dtg_ID],`$row[dtg_Name]`,`$row[dtg_Description]`,`$row[dtg_Order]`),\n";
 			break;
 
         case 'defEnumVocabs': // Data from enum vocabs
