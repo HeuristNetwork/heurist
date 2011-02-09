@@ -1268,7 +1268,8 @@ top.HEURIST.search = {
 		var kwd;
 		for (var i = 0; i < tags.length; ++i) {
 			kwd = encodeURIComponent(tags[i]);
-			innerHTML += "<a href='"+top.HEURIST.basePath+"search/search.html?ver=1&w=bookmark&q=tag:\"" + kwd + "\"&label=Tag+\"" + kwd + "\"'>" + tags[i] + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "") + "</a> ";
+//			innerHTML += "<a href='"+top.HEURIST.basePath+"search/search.html?ver=1&w=bookmark&q=tag:\"" + kwd + "\"&label=Tag+\"" + kwd + "\"'>" + tags[i] + (top.HEURIST.instance && top.HEURIST.instance.name ? "&instance=" + top.HEURIST.instance.name : "") + "</a> ";
+			innerHTML += "<a href='"+top.HEURIST.basePath+"search/search.html?ver=1&w=bookmark&q=tag:\"" + kwd + "\"&label=Tag+\"" + kwd + "\"'>" + tags[i] + "</a> ";
 		}
 		var kwd_search_elt = top.document.getElementById("tag-search-links");
 		if (kwd_search_elt) {

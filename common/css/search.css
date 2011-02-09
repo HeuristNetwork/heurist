@@ -102,7 +102,7 @@ body.w-bookmark .bookmarked { background-image: none; }
 .result_thumb_inner {position: absolute;top:0;bottom: 0;right:0;left: 0;overflow: hidden;padding: 6px;}
 .result_thumb .thumbnail, .result_thumb .rec_title, .result_thumb .icons, .links {left:2px;overflow:hidden;position:absolute;z-index:1;text-align: left;padding-left:0px;}
 .result_thumb .icons {overflow: visible;}
-.result_thumb .thumbnail, .result_thumb .thumbnail .no-thumbnail, .thumbnail, .no-thumbnail {-moz-background-size:100% auto;background-size:100% auto;background-position:center center;background-repeat:no-repeat;height:75px;left:0;position:absolute;right:0;text-align:center;top:10px;}
+.result_thumb .thumbnail, .result_thumb .thumbnail .no-thumbnail, .thumbnail, .no-thumbnail {-moz-background-size:100% auto;background-size:100% auto;background-position:center center;background-repeat:no-repeat;height:75px;left:0;position:absolute;right:0;text-align:center;top:10px;margin:0}
 .result_thumb .thumbnail img {bottom:0;left:0;position:absolute;right:0;top:0;margin:auto;background-position: center center;}
 .result_thumb .thumbnail .no-thumbnail, .no-thumbnail {opacity:0.3;}
 .result_thumb .rec_title {height:25px;line-height:12px;text-align:left;top:90px;color:#666;}
@@ -152,8 +152,8 @@ div.right_margin_info div.mini-tools:hover{-moz-border-radius:7px 7px 7px 7px;-w
 #tour-button:hover, #tour-button:active { background-image: url(../images/b_tour_down.png); }
 #saved-search-links a { font-weight: bold; text-decoration: none; color: #515151; }
 #saved-search-links a:hover { text-decoration: underline; }
-#tag-search-links { display: none; overflow: auto; font-size: 85%; }
-#tag-search-links a { white-space: nowrap; display: block; text-decoration: none; color: #515151; margin: 0 2px; }
+#tag-search-links { display: none; overflow:hidden; overflow-y: auto; font-size: 85%; }
+#tag-search-links a { white-space: nowrap; display: block; text-decoration: none; color: #7D9AAA; padding: 3px; border-bottom:1px solid #FFFFFF}
 #tag-search-links a:hover { text-decoration: underline; }
 #curated-collections-link {padding-bottom: 5px;margin-bottom: 5px;}
 #saved-search-heading {font-weight: bold;padding: 5px;height:15px;color:#7D9AAA;padding-top: 6px;padding-right: 5px;padding-bottom: 6px;padding-left: 5px;height: 27px;-moz-border-radius-bottomleft:0;-moz-border-radius-bottomright:0;-moz-border-radius-topleft:10px;-moz-border-radius-topright:10px;-webkit-border-bottom-left-radius:0;-webkit-border-bottom-right-radius:0;-webkit-border-top-left-radius:10px;-webkit-border-top-right-radius:10px;	border-bottom-left-radius:0;border-bottom-right-radius:0;border-top-left-radius:10px;border-top-right-radius:10px;}
@@ -231,8 +231,7 @@ div.hide .saved-search-subheading {background-image:url("../images/sub_heading_s
 #sidebar, #page, .mapDiv {bottom:20px;top:55px}
 #sidebar {width:200px;}
 #page, .mapDiv {left:220px;}
-#page-right {right:0; border-left: 1px solid #A4B4CB;bottom:10px;left:50%;position:absolute;top:40px;overflow: hidden;background}
-#page-inner {right:50%;top:40px;overflow: hidden;}
+
 #sidebar-inner {top:40px;}
 #footer {position:absolute;left:200px;right:0;bottom:0px;height:20px;}
 #search {display:block;height:29px;padding:0;position:relative;top:0;left:2px;width:100%}

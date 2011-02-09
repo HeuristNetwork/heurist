@@ -36,7 +36,7 @@
 	-->
 
 <head>
-<title>Heurist Reference Database - Search - &copy; 2005-2010 University of Sydney</title>
+<title>Heurist Reference Database - &copy; 2005-2010 The University of Sydney</title>
 <link rel="stylesheet" media="screen and (max-device-width: 800px)" href="../common/css/smallscreen.css"/>
 <link rel=icon href="../favicon.ico" type="image/x-icon">
 <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
@@ -100,6 +100,7 @@ if (! document.body.className) {
 top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadUserInfo.php");		// user-specific HEURIST data
 
 top.HEURIST.whenLoaded(["search-html", "obj-common"], top.HEURIST.util.setInstanceName);
+top.HEURIST.whenLoaded(["search-html", "obj-common"], top.HEURIST.util.setDocumentTitle);
 
 top.HEURIST.whenLoaded(["search-html", "obj-common", "search-js"], function() {
 	var action_fr = document.getElementById("i_action");

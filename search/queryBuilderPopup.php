@@ -21,16 +21,19 @@
 <html>
  <head>
   <title>Advanced search</title>
-<style type="text/css">
-input, select { width: 180px; margin: 3px; }
-* { font-family: Arial, Helvetica, sans-serif; font-size: 11px; }
-td.l { text-align: left; }
-td.r { text-align: right; }
 
-td.h { padding-left: 20px; font-weight: bold; font-size: 14px; }
+	<link rel="stylesheet" type="text/css" href="../common/css/global.css">
 
-select#user option { color: black; }
-</style>
+	<style type="text/css">
+		input, select { width: 180px; margin: 2px 0;}
+		* { font-family: Arial, Helvetica, sans-serif; font-size: 11px; }
+		td.l { text-align: left; }
+		td.r { text-align: right;width:90px }
+		td.h { padding-left: 20px; font-weight: bold; font-size: 14px; }
+		select#user option { color: black; }
+		td {vertical-align: top;}
+		#q {border-radius:0; -webkit-border-radius:0; -moz-border-radius:0; border:1px solid #A4B4CB}
+	</style>
 
 <script src='queryBuilder.js'></script>
 
@@ -406,22 +409,16 @@ function clear_fields() {
 
 </script>
 
- </head>
- <body width=640 height=600 style="overflow: hidden;" onload="load_query();">
+</head>
+<body class="popup" width=700 height=600 style="overflow: hidden;" onload="load_query();">
+
+<div style="float: right;"><a href="#" onclick="clear_fields(); return false;">Clear search string</a></div>
+<div>Build search using fields below, or edit the search string directly, here or on the main page</div>
+
+<div class="separator_row" style="margin:10px 0"></div>
 
   <table border=0 cellspacing=0 style="font-size: 10px; width: 620px; padding-right: 8px;">
-   <tr>
-    <td colspan=3 style="color: red; text-align: left; padding-left: 10px;">
-     <div style="float: right;"><a href="#" onclick="clear_fields(); return false;">Clear search string</a></div>
-     <div>Build search using fields below, or edit the search string directly, here or on the main page</div>
-    </td>
-   </tr>
-
-   <tr>
-    <td colspan=3><hr></td>
-   </tr>
-
-   <tr><td colspan=3 class=h>Selection:</td></tr>
+   <tr><td colspan=3><h3>Selection:</h3></td></tr>
 
    <tr>
     <td class=r>Tags:</td>
@@ -460,9 +457,8 @@ function clear_fields() {
       </div>
      </fieldset>
 
-
-    </td>
-   </tr>
+</td>
+</tr>
 
 <?php
 	$res = mysql_query('select concat('.GROUPS_NAME_FIELD.', "\\\\", tag_Text) from '.DATABASE.'.usrTags, '.USER_GROUPS_TABLE.', '.GROUPS_TABLE.' where tag_UGrpID='.USER_GROUPS_GROUP_ID_FIELD.' and '.USER_GROUPS_GROUP_ID_FIELD.'='.GROUPS_ID_FIELD.' and '.USER_GROUPS_USER_ID_FIELD.'=' . get_user_id() . ' order by '.GROUPS_NAME_FIELD.', tag_Text');
@@ -570,11 +566,12 @@ function clear_fields() {
     <td><span style="color: green;">Type name to find users</td>
    </tr>
 
-   <tr>
-    <td colspan=3><hr></td>
-   </tr>
+</table>
 
-   <tr><td colspan=3 class=h>Ordering:</td></tr>
+	<div class="separator_row" style="margin:10px 0"></div>
+
+<table>
+   <tr><td colspan=3><h3>Ordering:</h3></td></tr>
 
    <tr>
     <td class=r>Sort&nbsp;by</td>
@@ -629,14 +626,16 @@ function setAscDescLabels(sortbyValue) {
     </td>
    </tr>
 
-   <tr>
-    <td colspan=3><hr></td>
-   </tr>
+</table>
 
-   <tr><td colspan=3 class=h>Search:</td></tr>
+	<div class="separator_row" style="margin:10px 0"></div>
+
+<table>
+
+   <tr><td colspan=3><h3>Search:</h3></td></tr>
 
    <tr>
-    <td colspan=3 style="padding-left: 30px; color: green;">
+    <td colspan=3 style="padding-left: 30px; color: #666;">
       Use <b>tag:</b>, <b>type:</b>, <b>url:</b>, <b>notes:</b>, <b>workgroup:</b>, <b>user:</b>, <b>field:</b> and <b>all:</b> modifiers.<br>
       To find records with geographic objects that contain a given point, use <b>latitude</b> and <b>longitude</b>, e.g.
        <b>latitude:10 longitude:100</b><br>
@@ -647,18 +646,23 @@ function setAscDescLabels(sortbyValue) {
     </td>
    </tr>
 
-   <tr>
-    <td style="padding-left: 50px;">
-     Search&nbsp;string
-    </td>
-    <td colspan=2 style="padding-top: 5px;">
-     <input style="width: 350px;" name=q id=q>
-     <a href="#" onclick="clear_fields(); return false;">Clear</a>
-     &nbsp;&nbsp;
-     <input type="button" style="font-weight: bold; width: auto;" value="Search" onclick="do_search();">
-    </td>
-   </tr>
-  </table>
+	<tr>
+	<td colspan="2" style="padding-left: 30px;">
+	<strong>Search&nbsp;string</strong>
+	</td>
+</tr>
+<tr>
+	<td colspan=2 style="padding-left: 30px;">
+	<input style="width: 100%; padding:0 3px" name=q id=q >
+	</td>
+</tr>
+<tr>
+	<td colspan=2 style="padding-left: 30px;">
+		<button type="button" onclick="clear_fields(); return false;" style="margin-right:10px">Clear</button>
+		<button type="button" onclick="do_search();">Search</button>
+	</td>
+</tr>
+</table>
 
  </body>
 </html>

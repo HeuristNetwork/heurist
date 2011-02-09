@@ -172,7 +172,7 @@ hr { margin: 20px 0; }
 
  </head>
 
- <body width=500 height=400 style="font-size: 11px;">
+ <body class="popup" width=500 height=400 style="font-size: 11px;">
 
 
   <table border="0" id=maintable<?= @$_REQUEST['wg_id'] > 0 ? "" : " class=hide_workgroup" ?>>

@@ -26,45 +26,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #sidebar, #page {top:140px;bottom:20px;}
 #page {background-color:#ECF1FB  !important; left:200px; bottom: 80px; min-height: 310px;}
 #workgroup-div {border-left:1px solid #D6D6D6;bottom:0;padding:8px 0;position:absolute;right:135px;top:0;width: 130px;}
-#record-title {bottom:0;display:table;left:10px;position:absolute;margin-right:480px;top:0;vertical-align:middle;overflow: hidden;}
+#record-title {bottom:0;display:table;left:10px;position:absolute;margin: 5px 480px 5px 5px;top:0;vertical-align:middle;overflow: hidden;}
 .tableCell  {padding:10px 13px;}
 #edit_record_title {font-size: 16px; font-weight: bold; text-transform: uppercase; color: rgba(0,0,0,0.2);line-height: 21px;}
 #popup-saved {text-align :center; color:#FFF; font-size: 18px; background-color: RGBA(0,0,0,0.8);padding: 0; width: 200px; height: 75px; top: 50%; left:50%; margin :-50px -100px; position: absolute;overflow: visible;-moz-border-radius-bottomleft:10px;-moz-border-radius-bottomright:10px;-moz-border-radius-topleft:10px;-moz-border-radius-topright:10px;-webkit-border-bottom-left-radius:10px;-webkit-border-bottom-right-radius:10px;-webkit-border-top-left-radius:10px;-webkit-border-top-right-radius:10px;border-bottom-left-radius:10px;border-bottom-right-radius:10px;border-top-left-radius:10px;border-top-right-radius:10px;border :2px solid #FFF;-webkit-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);-moz-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);z-index: 100;}
 #popup-saved b {font-size: 16px;line-height:75px;}
 #workgroup-val-div {white-space: nowrap;padding-left: 20px;background: transparent url(../images/workgroup_icon-small.gif) scroll top left no-repeat;}
 #workgroup-access {padding-left: 20px;background: transparent url(../images/public_icon-small.gif) scroll top left no-repeat;}
-
 #rectype-edit {border-left:1px solid #D6D6D6;bottom:0;overflow:hidden;padding:10px 0;position:absolute;right:260px;text-align:center;top:0;width:210px;}
+#rectype-select {width:200px}
 #rectype-editor table tr td, #url-editor table tr td, #workgroup-editor table tr td { white-space: nowrap; font-size: 11px; }
 #popup-rectype-value { padding-bottom: 1ex; }
 #new-url-value { width: 100%; }
-
-#rectype-img { background-position:50% 50%;background-repeat:no-repeat;height:40px;margin:0 10px 0 0;width:16px;}
+#record-title #rectype-img { background-position:50% 50%;background-repeat:no-repeat;height:40px;margin:0 10px 0 0;width:16px; position: absolute;top:0}
 #rectype-val { font-size: 11px; line-height: 16px; font-weight: bold; }
 .edit { margin-left: 1ex; margin-right: 1ex; line-height: 16px; cursor: pointer; color: blue; }
-
 #title-arrow { padding-left: 16px; padding-right: 4px; }
-#title-val {bottom:0;display:table-cell;font-size:13px;font-weight:bold;left:36px;line-height:14px;top:0;vertical-align:middle;right:480px}
-
+#title-val {bottom: 0;display: table-cell;font-size: 13px;font-weight: bold;left: 36px;line-height: 16px;padding-left: 31px;right: 480px;top: 0;vertical-align: middle;}
 #save-record-buttons {border-left:1px solid #D6D6D6;bottom:0;padding:10px 0;position:absolute;right:0;top:0;width:135px; text-align: center;}
-
-#action-cell div {
-	padding: 2px 0;
-}
-#sidebar{
-	background:none repeat scroll 0 0 transparent;
-	border:medium none;
-	left:10px;
-	padding-top:26px;
-	width:200px;
-	z-index:1;
-	background-image:none !important;
-	}
-#footer {
-	position:absolute;
-	left:200px;
-	top:120px;
-}
+#action-cell div {padding: 2px 0;}
+#sidebar{background:none repeat scroll 0 0 transparent;border:medium none;left:10px;padding-top:26px;width:200px;z-index:1;background-image:none !important;}
+#footer {position:absolute;left:200px;top:120px;}
 #footer span{padding-right:20px;}
 #moddate {color:#6A7C99}
 .sidebar-link {
@@ -129,7 +111,7 @@ body div#sidebar div.sidebar-link.selected {	/* overrides even the .selected:hov
 
 img { vertical-align: middle; }
 
-div#tab-holder {bottom:0; cursor:wait;position:absolute;top:0;// when no iframe is visible, use the loading cursor ...}
+div#tab-holder {bottom:0; cursor:wait;position:absolute;top:0;left:0;right:0}
 
 iframe.tab {
 	display: none;
@@ -271,6 +253,7 @@ div#notes {
 	font-size: 11px;
 }
 /* relationship table styles */
+
 .relation td.rel {color: #6A7C99;text-align: right; width: 15ex; padding:0 2ex 0 0;}
 
 /***** tab css *****/
@@ -534,3 +517,5 @@ hr { background-color: #660000; border: 1px solid lightgray; height: 2px; margin
                 min-height: 85%;
                 background-color: #EFF2F6;
             }
+
+#page-inner {right:0px;}

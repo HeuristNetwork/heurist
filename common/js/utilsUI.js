@@ -52,6 +52,10 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		}
 	},
 
+	setDocumentTitle: function() {
+		document.title = "HEURIST" + top.HEURIST.VERSION + " - "+ top.HEURIST.instance.name;
+	},
+
 	/* see README.style for comments on the autosize functions */
 
 	autosizeElement: function(elt) {

@@ -45,7 +45,7 @@ a:hover {text-decoration: underline;}
 #title-cell a {color: #7D9AAA;text-decoration: none;}
 #title-cell a:hover {color: #7D9AAA;text-decoration: underline;}
 #quicklink-cell {vertical-align: top;text-align: right;width: 250px;color: #666;font-size:3ex;clear:both;position:absolute;right:10px;top:20px;}
-#quicklink-cell a {color: #7D9AAA;text-decoration: none;margin: 0 1ex;}
+#quicklink-cell a {color: #5F5F5F/*color: #7D9AAA*/;text-decoration: none;margin: 0 1ex;}
 #quicklink-cell a:hover {text-decoration: underline;}
 #menu-cell {vertical-align: bottom;text-align: right;width: 10px;}
 #toolbar {height: 80px;color: #333;}/* #main { height: auto; } -- expands to rest of #page height */
@@ -121,14 +121,15 @@ body.advanced tr.advanced {display: table-row;}
 select, input, textarea {font:2ex;}
 
 /******* backgrounds ********/
-body, .darkBG {background-image:url("../images/backgrounds/dark_bg.png") !important;background-repeat:repeat;}
-body.editTab, body.popup, body.tag_edit, body.bookmark_import, body.body_only {font-size: 11px;background-image:none !important;padding:15px 20px 10px 30px;overflow:auto;}
+body, .darkBG {background-image:none;background-color: #BDBDBD;}
+/*body, .darkBG {background-image:url("../images/backgrounds/dark_bg.png") !important;background-repeat:repeat;}*/
+body.editTab, body.popup, body.tag_edit, body.bookmark_import, body.body_only {font-size: 11px;background-image:none !important;background-color: transparent; padding:15px 20px 10px 30px;overflow:auto;}
 body.popup, body.tag_edit, body.bookmark_import, body.body_only {padding:10px}
 #sidebar, #footnotes, .mediumBG {background-color:#DBDFE6;}
 #page, .lightBG {background-image:none !important;background-repeat:repeat;background-color:#FFF !important;}
 .banner, .bannerBG {background-color:#F2F2F2;background-image:url("../images/backgrounds/banner_bg.png") !important;background-position:center bottom;background-repeat:repeat-x;}
 #logo {background-image:url(../images/branding/h3logo_small.png) !important;background-repeat: no-repeat;}
-#search {height:40px;left:10px;padding:0;position:absolute;right:10px;top:65px;}
+#search {height:40px;left:10px;padding:0;position:absolute;right:10px;top:55px;overflow: hidden;}
 
 /******* layouts (sidebar on left) ********/
 #page, #sidebar {padding: 0;margin: 0;position: absolute;bottom: 10px;overflow: visible;/* IE only */height: expression(document.documentElement.clientHeight-100);width: expression(document.documentElement.clientWidth-250);-moz-border-radius-bottomleft:10px;-moz-border-radius-bottomright:10px;-moz-border-radius-topleft:10px;-moz-border-radius-topright:10px;-webkit-border-bottom-left-radius:10px;-webkit-border-bottom-right-radius:10px;-webkit-border-top-left-radius:10px;-webkit-border-top-right-radius:10px;border-bottom-left-radius:10px;border-bottom-right-radius:10px;border-top-left-radius:10px;border-top-right-radius:10px;border:1px solid #999999;top:55px;bottom:20px;}
@@ -150,7 +151,8 @@ img {border: 0;}
 .banner {padding: 0;margin: 0;position: absolute;top: 0px;left: 0px;right:0px;height: 25px;overflow: visible;/* IE only */width: expression(document.documentElement.clientWidth-151);-moz-border-radius-bottomleft:0px;-moz-border-radius-bottomright:0px;-moz-border-radius-topleft:10px;-moz-border-radius-topright:10px;-webkit-border-bottom-left-radius:0px;-webkit-border-bottom-right-radius:0px;-webkit-border-top-left-radius:10px;-webkit-border-top-right-radius:10px;border-bottom-left-radius:0px;border-bottom-right-radius:0px;border-top-left-radius:10px;border-top-right-radius:10px;border-bottom :1px solid #999999;color:#333333;}
 #login, #heurist-link {padding: 5px;vertical-align: middle;display: table-cell;color: #6A7C99;}
 #login {padding:0 10px;width:100%;display: inline;}
-
+#page-right {right:0; border-left: 1px solid #A4B4CB;bottom:10px;left:50%;position:absolute;top:40px;overflow: hidden;background}
+#page-inner {right:50%;top:40px;overflow: hidden;}
 /******* basic paragraph styles ********/
 H1 {color:#666;font-size: 16px;vertical-align: middle;line-height: 18px;}
 H2 {color:#6A7C99;font-size: 14px;text-transform: uppercase;}
@@ -307,3 +309,5 @@ body div.result_row.selected {background-color: #CDDCF3; }
 .result_row span.sp { padding: 0 24px 0 0; }
 .result_row img.rft { margin-left: 16px; margin-right: 8px; }
 .separator_row {height: 1px; border-bottom: 1px solid #A4B4CB;}
+
+li {list-style:disc ;}
