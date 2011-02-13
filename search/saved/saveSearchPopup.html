@@ -209,7 +209,6 @@
 	}
   </script>
   <style>
-    body { line-height: 1; font-size: 70%; padding-left: 20px;}
     #message { color: red; }
 	#warning-message { color: #990000; }
 	input, select{ margin-top: 5px;}
@@ -217,16 +216,14 @@
 	#save {font-weight: bold;}
   </style>
  </head>
- <body class="popup" width=400 height=300 onload="init();">
+ <body class="popup" width=400 height=200 onload="init();">
  <div id="mainbody">
  <p id=warning-message></p>
-  <p>
-   Enter a name for this search:
-   <input type=text id=search-name onkeypress="return keypress(event)">
-  </p>
+   <div style="width:150px; text-align:right; display:inline-block">Enter a name for this search:</div>
+   <input style="width:200px;height: 17px; margin-left: 5px;" type=text id=search-name onkeypress="return keypress(event)">
   <p id=wg-p>
-   Add search to:
-   <select id=wg-select onChange="displayBookmarkCheck();">
+   <div style="width:150px; text-align:right; display:inline-block">Add search to:</div>
+   <select style="width:200px;height: 17px; margin-left: 5px;" id=wg-select onChange="displayBookmarkCheck();">
     <option value="">personal saved searches</option>
     <optgroup label="workgroup saved searches" id=wg-options></optgroup>
    </select>
@@ -234,8 +231,8 @@
    <p id="bookmark-check-p"><label for="bookmark-check"><input type="checkbox" id="bookmark-check"/> return only records I have bookmarked</label>
   </p>
   <p>
-   Default result style:
-   <select id=result-style-select>
+   <div style="width:150px; text-align:right; display:inline-block">Default result style:</div>
+   <select style="width:200px;height: 17px; margin-left: 5px;" id=result-style-select>
     <option value="" selected>Status quo</option>
     <option value=list>One column</option>
     <option value=two-col>Two columns</option>
@@ -243,7 +240,9 @@
     <option value=blog disabled>Blog</option>
    </select>
   </p>
-  <p><input type=button value=Save id=save onclick="check();"></p>
+  		<div class="separator_row" style="margin:20px 0"></div>
+
+<input style="float:right" type=button value=Save id=save onclick="check();">
   <p id=message></p>
   </div>
   <div id = "overwrite"></div>

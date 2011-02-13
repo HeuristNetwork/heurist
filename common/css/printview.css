@@ -137,5 +137,5 @@ div.show-related:hover {text-decoration: underline;}
 .result_thumb .icons, .info_button, .done_button, .rec_links {bottom:0px;}
 .result_thumb .icons img {vertical-align: text-bottom; margin-left: 0px;}
 .result_thumb .icons input {vertical-align: text-bottom;}
-.rec_type {-moz-border-radius:6px 6px 6px 6px;-webkit-border-radius:6px 6px 6px 6px;border-radius:6px 6px 6px 6px; background-color:RGBA(0,0,0,0.3);color:#7D9AAA;left:0;padding:0 3px;position:absolute;text-align:center;top:126px;width:134px;}
+.rec_type {-moz-border-radius:6px 6px 6px 6px;-webkit-border-radius:6px 6px 6px 6px;border-radius:6px 6px 6px 6px; background-color:RGBA(0,0,0,0.3);color:#FFFFFF;left:0;padding:0 3px;position:absolute;text-align:center;top:126px;width:134px;}
 .greyType {color: #999999}

@@ -31,7 +31,7 @@ function init_stype() {
 	var q_elt = document.getElementById('q');
 		q_elt.style.paddingLeft = '31px';
 		q_elt.style.backgroundRepeat = 'no-repeat';
-		q_elt.style.backgroundPosition = '3px 1px';
+		q_elt.style.backgroundPosition = '3px 3px';
 		if (q_elt.attachEvent) q_elt.attachEvent('onmousemove', function(e) {
 			if (! e) e = window.event;
 			var targ = e.target;  if (! targ) targ = e.srcElement;
@@ -147,7 +147,7 @@ function set_stype_option(id) {
 
 	var q_elt = document.getElementById('q');
 
-	q_elt.style.backgroundImage = 'url(/common/images/stype/'+selected_option.icon+')';
+	q_elt.style.backgroundImage = 'url(../common/images/stype/'+selected_option.icon+')';
 	q_elt.title = selected_option.title.replace('Search', 'Searching');
 	q_elt.focus();
 }

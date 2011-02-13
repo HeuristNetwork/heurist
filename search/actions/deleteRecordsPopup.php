@@ -15,8 +15,8 @@
 
 define('SAVE_URI', 'disabled');
 
-require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 if (! is_logged_in()) {
 	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
@@ -28,22 +28,21 @@ mysql_connection_db_overwrite(DATABASE);
 ?>
 
 <html>
-
- <head>
+<head>
   <title>HEURIST: Delete records</title>
-
   <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
-
-  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/newshsseri.css">
+	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
 
   <style type=text/css>
    a img { border: none; }
    .greyed, .greyed div { color: gray; }
+		p {line-height:11px;margin:6px 0}
+		.deleteButton {color: #BB0000;float: right;font-weight: bold;height: 20px;margin: 10px 0;text-transform: uppercase; width: 60px;}
   </style>
- </head>
+</head>
 
- <body width=600 height=500 style="margin: 10px;">
+<body class="popup" width=450 height=350>
 
 <?php
 	function delete_bib($rec_id) {
@@ -94,14 +93,14 @@ mysql_connection_db_overwrite(DATABASE);
 	} else {
 ?>
 
-  <form method="post">
+<form method="post">
 
 <?php
 
 	if (is_admin()) {
 		print '<a style="float: right;" target=_new href=../../admin/verification/combineDuplicateRecords.php?bib_ids='.$_REQUEST['ids'].'>fix duplicates</a>';
 	} else {
-		print '<p>NOTE: You may not delete records you did not create, or records that have been bookmarked by other users</p>';
+		print '<p style="color:#BB0000; font-size:12px; line-height:14px"><strong>NOTE:</strong>You may not delete records you did not create, or records that have been bookmarked by other users</p><div class="separator_row"></div>';
 	}
 
 	$bib_ids = explode(',', $_REQUEST['ids']);
@@ -140,19 +139,19 @@ mysql_connection_db_overwrite(DATABASE);
 			print "\n </p>\n";
 		}
 
-		print "\n</div>\n\n";
+		print "\n<div class='separator_row'></div></div>\n\n";
 	}
 ?>
 
 <input type="hidden" name="delete" value="1">
-<input type="submit" value="delete" onclick="return confirm('ARE YOU SURE YOU WISH TO DELETE THE SELECTED RECORDS, ALONG WITH ALL ASSOCIATED BOOKMARKS?')  &&  confirm('REALLY REALLY SURE?');">
+<input class="deleteButton "type="submit" value="delete" onclick="return confirm('ARE YOU SURE YOU WISH TO DELETE THE SELECTED RECORDS, ALONG WITH ALL ASSOCIATED BOOKMARKS?')  &&  confirm('REALLY REALLY SURE?');">
 
-  </form>
+</form>
 
 <?php
 	}
 ?>
 
- </body>
+</body>
 </html>
 

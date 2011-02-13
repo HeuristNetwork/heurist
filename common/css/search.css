@@ -234,7 +234,7 @@ div.hide .saved-search-subheading {background-image:url("../images/sub_heading_s
 
 #sidebar-inner {top:40px;}
 #footer {position:absolute;left:200px;right:0;bottom:0px;height:20px;}
-#search {display:block;height:29px;padding:0;position:relative;top:0;left:2px;width:100%}
+#search {display:block;height:29px;padding:0;position:relative;top:0;left:2px;width:100%;overflow:visible;}
 .banner a, .banner a:hover, .banner input {border:medium none;height:auto;padding:0;}
 #add-record-link img{margin:-6px -4px;padding:0;}
 #add-record-link{margin:-6px -4px;padding:0;}
@@ -281,9 +281,10 @@ input[type=checkbox] {display: none;}
 
 /* tabbed view overrides */
 #applications {width:100%; height:auto; bottom: 0;}
-.yui-skin-sam .yui-navset .yui-nav, .yui-skin-sam .yui-navset .yui-navset-top .yui-nav {border:none;left:0;position:absolute;right:0;top:8px;border-bottom:1px solid rgba(0, 0, 0, 0.2); padding:0 3px}
+.yui-skin-sam .yui-navset .yui-nav, .yui-skin-sam .yui-navset .yui-navset-top .yui-nav {    border-style: none none solid;border-width: medium medium 0;height: 28px;left: 0;padding: 0 3px;position: absolute;right: 0;top: 12px;}
 .yui-skin-sam .yui-navset .yui-content, .yui-skin-sam .yui-navset .yui-navset-top .yui-content {position:absolute;border:none;padding:0;right:0;bottom:0;left:0; top:30px; background-color: #FFF;}
 .yui-skin-sam .yui-navset .yui-nav .selected a, .yui-skin-sam .yui-navset .yui-nav .selected a em {border-color:rgba(0, 0, 0, 0.2);}
 .yui-skin-sam .yui-navset .yui-nav a, .yui-skin-sam .yui-navset .yui-navset-top .yui-nav a {background:none;}
 .yui-skin-sam .yui-navset .yui-nav .selected a, .yui-skin-sam .yui-navset .yui-nav .selected a:focus, .yui-skin-sam .yui-navset .yui-nav .selected a:hover {background-image:none; background-color: #FFF; color:#666;}
 .yui-skin-sam .yui-navset .yui-nav a em, .yui-skin-sam .yui-navset .yui-navset-top .yui-nav a em {border-color:rgba(0, 0, 0, 0.1);border-style:solid;border-width:1px 0 0;bottom:0;left:0; padding:0.25em 0.75em;position:relative;right:0;top:-1px;color:#6A7C99;}
+.yui-skin-sam .yui-navset .yui-nav li, .yui-skin-sam .yui-navset .yui-navset-top .yui-nav li {height:26px}

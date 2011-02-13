@@ -49,6 +49,11 @@ if (!@$_REQUEST['q'] || array_key_exists("error", @$result) || @$result['resultC
 <title>Heurist Collect Duplicate Records</title>
 <link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/global.css'>
 <link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/publish.css'>
+
+	<style type="text/css">
+		.banner h2{padding:5px 10px; display: table-cell; vertical-align: middle;}
+	</style>
+
 </head>
 <body>
 
@@ -157,6 +162,11 @@ foreach ($dupes as $typekey => $subarr) {
 <title>Heurist Collect Duplicate Records</title>
 <link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/global.css'>
 <link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/publish.css'>
+
+	<style type="text/css">
+		.banner h2{padding:5px 10px; display: table-cell; vertical-align: middle;}
+	</style>
+
 </head>
 <body>
 
@@ -169,30 +179,29 @@ foreach ($dupes as $typekey => $subarr) {
 	</div>
 <form>
 <div class="wizard-box roundedBoth">
-Select fuzziness: <select name="fuzziness" id="fuzziness" onchange="form.submit();">
-<option value=3>3</option>
-<option value=4 <?= $fuzziness == 4  ? "selected" : "" ?>>4</option>
-<option value=5 <?= $fuzziness == 5 ? "selected" : "" ?>>5</option>
-<option value=6 <?= $fuzziness == 6 ? "selected" : "" ?>>6</option>
-<option value=7 <?= $fuzziness == 7 ? "selected" : "" ?>>7</option>
-<option value=8 <?= $fuzziness == 8 ? "selected" : "" ?>>8</option>
-<option value=9 <?= $fuzziness == 9 ? "selected" : "" ?>>9</option>
-<option value=10 <?= $fuzziness >= 10 && $fuzziness < 12 ? "selected" : "" ?>>10</option>
-<option value=12 <?= $fuzziness >= 12 && $fuzziness < 15 ? "selected" : "" ?>>12</option>
-<option value=15 <?= $fuzziness >= 15 && $fuzziness < 20 ? "selected" : "" ?>>15</option>
-<option value=20 <?= $fuzziness >= 20 && $fuzziness < 25 ? "selected" : "" ?>>20</option>
-<option value=25 <?= $fuzziness >= 25 && $fuzziness < 30 ? "selected" : "" ?>>25</option>
-<option value=30 <?= $fuzziness >= 30 ? "selected" : "" ?>>30</option>
-</select>
-characters of metaphone must match
-<div id=searchString>Search string: <input type="text" name="q" id="q" value="<?= @$_REQUEST['q'] ?>" /></div>
+	Select fuzziness: <select name="fuzziness" id="fuzziness" onchange="form.submit();">
+	<option value=3>3</option>
+	<option value=4 <?= $fuzziness == 4  ? "selected" : "" ?>>4</option>
+	<option value=5 <?= $fuzziness == 5 ? "selected" : "" ?>>5</option>
+	<option value=6 <?= $fuzziness == 6 ? "selected" : "" ?>>6</option>
+	<option value=7 <?= $fuzziness == 7 ? "selected" : "" ?>>7</option>
+	<option value=8 <?= $fuzziness == 8 ? "selected" : "" ?>>8</option>
+	<option value=9 <?= $fuzziness == 9 ? "selected" : "" ?>>9</option>
+	<option value=10 <?= $fuzziness >= 10 && $fuzziness < 12 ? "selected" : "" ?>>10</option>
+	<option value=12 <?= $fuzziness >= 12 && $fuzziness < 15 ? "selected" : "" ?>>12</option>
+	<option value=15 <?= $fuzziness >= 15 && $fuzziness < 20 ? "selected" : "" ?>>15</option>
+	<option value=20 <?= $fuzziness >= 20 && $fuzziness < 25 ? "selected" : "" ?>>20</option>
+	<option value=25 <?= $fuzziness >= 25 && $fuzziness < 30 ? "selected" : "" ?>>25</option>
+	<option value=30 <?= $fuzziness >= 30 ? "selected" : "" ?>>30</option>
+	</select>
+	characters of metaphone must match
+	<div id=searchString>Search string: <input type="text" name="q" id="q" value="<?= @$_REQUEST['q'] ?>" /></div>
 </div>
-<br />Cross type matching will attemp to match titles of different record types. This is potentially a long search with many matching results. Increasing fuzziness will reduce the number of matches.
-<br />
-<br />
-<input type="checkbox" class="options" name="crosstype" id="crosstype" value=1 <?= $crosstype ? "checked" : "" ?>  onclick="form.submit();"> Do Cross Type Matching
-<br />
-<input type="checkbox" class="options" name="personmatch" id="personmatch" value=1   onclick="form.submit();"> Do Person Matching by SurName first
+<div style="padding:5px">
+Cross type matching will attemp to match titles of different record types. This is potentially a long search with many matching results. Increasing fuzziness will reduce the number of matches.
+<div style="padding:5px"><input type="checkbox" class="options" name="crosstype" id="crosstype" value=1 <?= $crosstype ? "checked" : "" ?>  onclick="form.submit();"> Do Cross Type Matching</div>
+<div style="padding:5px"><input type="checkbox" class="options" name="personmatch" id="personmatch" value=1   onclick="form.submit();"> Do Person Matching by SurName first</div>
+</div>
 <?php
 if (@$_REQUEST['w']) {
 ?>

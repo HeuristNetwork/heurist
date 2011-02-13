@@ -12,7 +12,7 @@
 -->
 <html>
 	<head>
-		<link rel=stylesheet href='../../common/css/GLOBAL.css'>
+		<link rel=stylesheet href='../../common/css/global.css'>
 		<title></title>
 		<script src='../../external/jquery/jquery.js'></script>
 		<script src='../../records/tags/usergroupTagEditorLibrary.js'></script>
@@ -194,41 +194,43 @@
 				}
 			}
 		</script>
-
 	</head>
+
 	<body class="popup" onload="init();">
+
 		<script src='../../records/tags/autocompleteTags.js'></script>
-		<div id="mainbody">
-			<div id="add_to_search" class="bggray">
-				<input style="margin-left: 10px;" type="radio" name="ssType" id="ssType" value="0" checked="checked" onclick="switchMode('add_to_search','create_new_search','search-select');">&nbsp;<b>Add to existing saved search</b>
+
+		<div id="add_to_search" style="padding:10px 0">
+				<input type="radio" name="ssType" id="ssType" value="0" checked="checked" onclick="switchMode('add_to_search','create_new_search','search-select');">&nbsp;<b>Add to existing saved search</b>
 				<span id="add_span">
 				<select id="search-select" style="max-width:150px" onchange="document.getElementById('search-tag-list').innerHTML = this.options[this.selectedIndex].value; document.getElementById('ssType').click(); return false;">
 				</select>
-				<span class="help prompt" >
-					&nbsp;&nbsp;&nbsp;&nbsp;Only tag-based searchs can be used
+				<span class="help prompt" style="margin-left:5px" >
+					Only tag-based searches can be used
 				</span><br/>
-				<div style="height:30px">
-					<span style="margin-left: 200px;"><i>The following tag(s) will be added:</i></span>
-					<div id="search-tag-list" style="color: blue; float:right; width:200px; margin-right: 15px;" ></div>
+				<div style="margin:10px 0">
+					<span style="margin-left: 16px;">The following tag(s) will be added: </span>
+					<span id="search-tag-list" style="color: #6A7C99" ></span>
 				</div>
 				</span>
 			</div>
-			<hr>
+
+		<div class="separator_row" style="margin-bottom:20px"></div>
+
 			<div id="create_new_search">
-				<input  style="margin-left: 10px;" type="radio" name="ssType" value="1" onclick="switchMode('create_new_search','add_to_search','search-name');">&nbsp;<b>Create new saved search</b><br/>
-				<span id="create_span">
-				<div style="margin-left: 20px;">
+			<input type="radio" name="ssType" value="1" onclick="switchMode('create_new_search','add_to_search','search-name');">&nbsp;<b>Create new saved search</b><br/>
+			<div style="margin-left:16px">
 					<div class="div-section">
-						Name for this search:
-						<input style="height: 17px; margin-left: 25px;" type=text id=search-name onkeypress="return keypress(event)">
+					<div style="width:125px; text-align:right; display:inline-block">Name for this search:</div>
+					<input style="width:150px;height: 17px; margin-left: 5px;" type=text id=search-name onkeypress="return keypress(event)">
 						<span style="float: right; margin-right: 107px;">
 							<input type="radio" name="w" value="all" id="all" checked="checked" onclick="document.getElementById('bookmark-warning').style.display = 'none';">
 							<label for="all" >&nbsp;search all records</label><br/>
 						</span>
 					</div>
 					<div class="div-section">
-						Add search to:
-						<select id=wg-select onChange="displayBookmarkCheck();" style="margin-left: 55px; height: 17px;">
+					<div style="width:125px; text-align:right; display:inline-block">Add search to:</div>
+					<select id=wg-select onChange="displayBookmarkCheck();" style="width:150px;margin-left: 5px; height: 17px;">
 							<option value="">personal saved searches</option>
 							<optgroup label="workgroup saved searches" id=wg-options></optgroup>
 						</select>
@@ -238,25 +240,20 @@
 							<span class="warning-message" id="bookmark-warning" style="margin-left: 25px; display: none;">&nbsp;records in collection will be bookmarked</span>
 						</span>
 					</div>
-					<div style="margin: 0px;">&nbsp;</div>
+	<!--					<div style="margin: 0px;">&nbsp;</div>
 					<div class="div-section">
 						Tag(s) identifying this set of records
 						<span class="help prompt">
 							&nbsp;&nbsp;Note: any records with these tags will be included in the saved search
 						</span>
-					</div>
+				</div>-->
 					<div class="div-section">
-						Personal tag(s)
-						<input style="height: 17px;" type=text id="personal-tags" onkeypress="setTimeout(function(){checkPersonalTags();},10); return true;">
-						<span>
-							<span class="help prompt">
-								&nbsp;&nbsp;Note: any records with these tags will be included in the saved search
-							</span><br clear="none"/>
-							<span>&nbsp;</span>
-							<span class="warning-message" id="personal-tags-warning" style="margin-left: 210px; display:none;">&nbsp;records in collection will be bookmarked</span>
-						</span>
+					<div style="width:125px; text-align:right; display:inline-block">Personal tag(s)</div>
+					<input style="width:150px;height: 17px; margin-left:5px" type=text id="personal-tags" onkeypress="setTimeout(function(){checkPersonalTags();},10); return true;"><span class="warning-message" id="personal-tags-warning" style="margin-left: 5px; display:none;">records in collection will be bookmarked</span>
+				<div class="help prompt" style="margin-left:133px">
+				Note: any records with these tags will be included in the saved search
 					</div>
-					<div class="div-section">
+				<div class="div-section" style="margin-top:20px">
 						<span style="float: left; margin: 0;">Workgroup tag(s) &nbsp;&nbsp;</span>
 						<span class="help prompt" >
 							Use for personal or workgroup saved searches.
@@ -266,24 +263,23 @@
 
 						<table border=0 cellspacing=0 cellpadding=0 style="margin: 10px 0;">
 							<tr>
-								<td style="width:200px;"><b>Available</b></td>
-								<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-								<td style="width:200px;"><b>Selected</b></td>
+							<td style="width:45%;"><b>Available</b></td>
+							<td style="width:10%;"></td>
+							<td style="width:45%;"><b>Selected</b></td>
 							</tr>
 
 							<tr>
 								<td>
-									<div class=wgtag-list style="height:200px;"><table border=0 cellspacing=0 cellpadding=0><tbody id=all-workgroup-tags></tbody></table></div>
+								<div class=wgtag-list style="height:150px;"><table border=0 cellspacing=0 cellpadding=0><tbody id=all-workgroup-tags></tbody></table></div>
 								</td>
 								<td>
-									<div id=button-box>
-										<div><input type=button value="&gt;" title="Add a tag" onmousedown="top.HEURIST.wgTagEditor.addWgTag(window.selectedRow)" disabled id=add-button></div>
-										<div>&nbsp;&nbsp;</div>
-										<div><input type=button value="&lt;" title="Remove a tag" onmousedown="top.HEURIST.wgTagEditor.removeWgTag(window.selectedRow)" disabled id=remove-button></div>
+								<div id=button-box style="text-align:center; padding:0">
+									<div style="padding:5px"><input type=button value="&gt;" title="Add a tag" onmousedown="top.HEURIST.wgTagEditor.addWgTag(window.selectedRow)" disabled id=add-button></div>
+									<div style="padding:5px"><input type=button value="&lt;" title="Remove a tag" onmousedown="top.HEURIST.wgTagEditor.removeWgTag(window.selectedRow)" disabled id=remove-button></div>
 									</div>
 								</td>
 								<td>
-									<div class=wgtag-list style="height:200px;"><table border=0 cellspacing=0 cellpadding=0><tbody id=current-workgroup-tags></tbody></table></div>
+								<div class=wgtag-list style="height:150px;"><table border=0 cellspacing=0 cellpadding=0><tbody id=current-workgroup-tags></tbody></table></div>
 								</td>
 							</tr>
 
@@ -309,10 +305,14 @@
 						</select>
 					</div>
 				</div>
-				</span>
+
 			</div>
-			<hr>
-			<p><input type=button value=Save id=save onclick="save();" style="float: right; margin-right: 50px;"></p>
 		</div>
+
+		<div class="separator_row" style="margin:20px 0"></div>
+
+		<p><input type=button value=Save id=save onclick="save();" style="float: right; margin-right: 50px;"></p>
+
 	</body>
+
 </html>
