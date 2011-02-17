@@ -1,9 +1,0 @@
-<!-- FILENAME.EXT Brief description here, date of creation, by whom
-/** 
- * @copyright 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
--->

@@ -1,17 +1,20 @@
 -- Created by Steve White 2010-10-23
--- This file contains the stored procedures and triggers for h3 database
+-- Last updated 14th Feb 2011 Ian Johnson - removed deprecated archive triggers
+
+
+-- This file contains the stored procedures and triggers for h3 databases
+
+-- RUN FROM COMMAND LINE LOGGED IN AS ROOT IN DIRECTORY /var/www/htdocs/h3-xx WITH:
+--   mysql -u root -ppassword databasename < admin/setup/addProceduresTriggers.sql
+-- Note: this file cannot be run in PHPMySQL because it doesn't recognise the delimiter changes
+
+-- MAY NOT REPORT ERRORS, POSSIBLE NEED TO SET STDOUT FIRST AND/OR USE TEE TO WRITE TO OUTPUT FILE
+-- AND INSPECT
+
+
+
 -- Stored Procedures
 -- ------------------------------------------------------------------------------
-
--- Updated and applied to hdb_sandpit3 @ 21/1/11
-
--- RUN FROM COMMAND LINE WITH:
---   mysql -u root -psmith18 databasename < /var/www/htdocs/
---           h2-h3-upgrade-scripts-doco/convert_h3_add_procedures_triggers.sql
-
-
--- MAY NOT REPORT ERRORS, POSSIBLE NEED TO SET STDOUT FIRST AND/OR USE TEE TO WRITE TOU OUTPUT FILE
--- AND INSPECT
 
 DROP function IF EXISTS `hhash`;
 
@@ -135,89 +138,6 @@ DELIMITER ;
 --  Triggers
 -- ------------------------------------------------------------------------------
 
-
-DELIMITER $$
-
-	DROP TRIGGER IF EXISTS tag_insert_trigger$$
-
-	CREATE
-	DEFINER=`root`@`localhost`
-	TRIGGER `tag_insert_trigger`
-	AFTER INSERT ON `usrTags`
-	FOR EACH ROW
-		begin
-			if @suppress_update_trigger is null
-				then insert into archiveTagLinkCreations (atc_ID, atc_UGrpID, atc_Name, atc_Created, atc_CreatorID)
-				values (NEW.tag_ID, NEW.tag_UGrpID, NEW.tag_Text, now(), @logged_in_user_id);
-			end if;
-		end$$
-
-DELIMITER ;
-DELIMITER $$
-
-	DROP TRIGGER IF EXISTS kwd_delete_trigger$$
-
-	CREATE
-	DEFINER=`root`@`localhost`
-	TRIGGER `kwd_delete_trigger`
-	BEFORE DELETE ON `usrTags`
-	FOR EACH ROW
-		begin
-			if @suppress_update_trigger is null
-				then insert into archiveTagLinkDeletions (atd_ID, atd_UGrpID, atd_Name, atd_Deleted, atd_DeletorID)
-				values (OLD.tag_ID, OLD.tag_UGrpID, OLD.tag_Text,  now(), @logged_in_user_id);
-			end if;
-		end$$
-
-DELIMITER ;
-
--- ------------------------------------------------------------------------------
-
-DELIMITER $$
-
-	DROP TRIGGER IF EXISTS rtl_insert_trigger$$
-
-	CREATE
-	DEFINER=`root`@`localhost`
-	TRIGGER `rtl_insert_trigger`
-	AFTER INSERT ON `usrRecTagLinks`
-	FOR EACH ROW
-		begin
-			if @suppress_update_trigger is null
-				then insert into
-					archiveTagLinkCreations (atlc_ID,  atlc_TagID, atlc_RecID, atlc_Created, atlc_CreatorID)
-						values (NEW.rtl_ID,
-								NEW.rtl_TagID,
-								NEW.rtl_RecID,
-								now(),
-								@logged_in_user_id);
-				end if;
-		end$$
-
-DELIMITER ;
-DELIMITER $$
-
-	DROP TRIGGER IF EXISTS rtl_delete_trigger$$
-
-	CREATE
-	DEFINER=`root`@`localhost`
-	TRIGGER `rtl_delete_trigger`
-	BEFORE DELETE ON `usrRecTagLinks`
-	FOR EACH ROW
-	begin
-		if @suppress_update_trigger is null
-			then insert into
-				archiveTagLinkDeletions (atld_ID, atld_TagID, atld_RecID, atld_Deleted, atld_DeletorID)
-					values (OLD.rtl_ID,
-							OLD.rtl_TagID,
-							OLD.rtl_RecID,
-							now(),
-							@logged_in_user_id);
-		end if;
-	end$$
-
-DELIMITER ;
-
 -- ------------------------------------------------------------------------------
 
 DELIMITER $$
@@ -242,8 +162,6 @@ DELIMITER $$
 	AFTER INSERT ON `recDetails`
 	FOR EACH ROW
 	begin
-		insert into archiveDetails (ard_RecID, ard_ID, ard_Ver, ard_DetailTypeID, ard_Value, ard_UploadedFileID, ard_Geo)
-			values (NEW.dtl_RecID, NEW.dtl_ID, @rec_version, NEW.dtl_DetailTypeID, NEW.dtl_Value, NEW.dtl_UploadedFileID, NEW.dtl_Geo);
 		if NEW.dtl_DetailTypeID=199 then
 			update recRelationshipsCache
 				set rrc_TargetRecID = NEW.dtl_Value
@@ -283,16 +201,6 @@ DELIMITER $$
 	AFTER UPDATE ON `recDetails`
 	FOR EACH ROW
 	begin
-		if @suppress_update_trigger is null then
-			insert into archiveDetails (ard_RecID, ard_ID, ard_Ver, ard_DetailTypeID, ard_Value, ard_UploadedFileID, ard_Geo)
-				values (NEW.dtl_RecID,
-						NEW.dtl_ID,
-						@rec_version,
-						NEW.dtl_DetailTypeID,
-						if (NEW.dtl_Value=OLD.dtl_Value, NULL, NEW.dtl_Value),
-						if (NEW.dtl_UploadedFileID=OLD.dtl_UploadedFileID, NULL, NEW.dtl_UploadedFileID),
-						if (NEW.dtl_Geo=OLD.dtl_Geo, NULL, NEW.dtl_Geo));
-		end if;
 		if NEW.dtl_DetailTypeID=199 then
 			update recRelationshipsCache
 				set rrc_TargetRecID = NEW.dtl_Value
@@ -302,23 +210,6 @@ DELIMITER $$
 				set rrc_SourceRecID = NEW.dtl_Value
 				where rrc_RecID=NEW.dtl_RecID;
 		end if;
-	end$$
-
-DELIMITER ;
-DELIMITER $$
-
-	DROP TRIGGER IF EXISTS delete_Details_trigger$$
-
-	CREATE
-	DEFINER=`root`@`localhost`
-	TRIGGER `delete_Details_trigger`
-	AFTER DELETE ON `recDetails`
-	FOR EACH ROW
-	begin
-	if @suppress_update_trigger is null then
-		insert into archiveDetails (ard_RecID, ard_ID, ard_Ver, ard_DetailTypeID)
-			values (OLD.dtl_RecID, OLD.dtl_ID, @rec_version, OLD.dtl_DetailTypeID);
-	end if;
 	end$$
 
 DELIMITER ;
@@ -335,11 +226,6 @@ DELIMITER $$
 	AFTER INSERT ON `Records`
 	FOR EACH ROW
 	begin
-		insert into archiveRecords (arec_ID, arec_UGrpID, arec_Date, arec_URL, arec_Title, arec_ScratchPad, arec_RecTypeID)
-			values (NEW.rec_ID, NEW.rec_AddedByUGrpID, now(), NEW.rec_URL, NEW.rec_Title, NEW.rec_ScratchPad, NEW.rec_RecTypeID);
-			set @rec_version := last_insert_id();
-			insert into usrRecentRecords (rre_UGrpID, rre_RecID, rre_Time)
-				values (@logged_in_user_id, NEW.rec_ID, now()); set @rec_id := last_insert_id(NEW.rec_ID);
 		if NEW.rec_RecTypeID = 52 then
 			insert into recRelationshipsCache (rrc_RecID) values (NEW.rec_ID);
 		end if;
@@ -357,13 +243,16 @@ DELIMITER $$
 	FOR EACH ROW
 	begin
 		if @suppress_update_trigger is null then
-			insert into archiveRecords (arec_ID, arec_UGrpID, arec_Date, arec_URL, arec_Title, arec_ScratchPad, arec_RecTypeID)
-				values (NEW.rec_ID, @logged_in_user_id, now(),
-						if (NEW.rec_URL=OLD.rec_URL, NULL, NEW.rec_URL),
-						if (NEW.rec_Title=OLD.rec_Title, NULL, NEW.rec_Title),
-						if (NEW.rec_ScratchPad=OLD.rec_ScratchPad, NULL, NEW.rec_ScratchPad),
-						if (NEW.rec_RecTypeID=OLD.rec_RecTypeID, NULL, NEW.rec_RecTypeID));
+--			insert into archiveRecords (arec_ID, arec_UGrpID, arec_Date, arec_URL, arec_Title, arec_ScratchPad, arec_RecTypeID)
+--				values (NEW.rec_ID, @logged_in_user_id, now(),
+--						if (NEW.rec_URL=OLD.rec_URL, NULL, NEW.rec_URL),
+--						if (NEW.rec_Title=OLD.rec_Title, NULL, NEW.rec_Title),
+--						if (NEW.rec_ScratchPad=OLD.rec_ScratchPad, NULL, NEW.rec_ScratchPad),
+--						if (NEW.rec_RecTypeID=OLD.rec_RecTypeID, NULL, NEW.rec_RecTypeID));
+
+-- 14/2/11 Ian: Do we need this value set by the previous insert?
 			set @rec_version := last_insert_id();
+			
 		end if;
 		if NEW.rec_URL != OLD.rec_URL OR NEW.rec_URL is null then
 			set NEW.rec_URLLastVerified := NULL;
@@ -401,9 +290,12 @@ DELIMITER $$
 	AFTER DELETE ON `Records`
 	FOR EACH ROW
 	begin
-		insert into archiveRecords (arec_ID, arec_UGrpID, arec_Date)
-			values (OLD.rec_ID, @logged_in_user_id, now());
+--		insert into archiveRecords (arec_ID, arec_UGrpID, arec_Date)
+--			values (OLD.rec_ID, @logged_in_user_id, now());
+
+-- 14/2/11 Ian: Do we need this value set by the previous insert?
 		set @rec_version := last_insert_id();
+
 		if OLD.rec_RecTypeID = 52 then
 			delete ignore from recRelationshipsCache where rrc_RecID = OLD.rec_ID;
 		end if;
@@ -639,4 +531,6 @@ DELIMITER $$
 		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRelationshipConstraints"$$
 
 DELIMITER ;
+
+-- --------------------------------------------------------------------------------
 
