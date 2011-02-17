@@ -43,7 +43,7 @@ CREATE TABLE Records (
   rec_Popularity int(11) NOT NULL default '0' COMMENT 'Calculated popularity rating for sorting order, set by cron job',
   rec_FlagTemporary tinyint(1) default '0' COMMENT 'Flags a partially created record before fully populated',
   rec_OwnerUGrpID smallint(5) unsigned NOT NULL default '1' COMMENT 'User group which owns this record, 1 = everyone',
-  rec_NonOwnerVisibility enum('Viewable','Hidden') default 'Viewable' COMMENT 'Defines if record visible outside owning user group(s)',
+  rec_NonOwnerVisibility enum('viewable','hidden') default 'viewable' COMMENT 'Defines if record visible outside owning user group(s)',
   rec_URLLastVerified datetime default NULL COMMENT 'Last date time when URL was verified as contactable',
   rec_URLErrorMessage varchar(255) default NULL COMMENT 'Error returned by URL checking script for bad/inaccessible URLs',
   rec_Hash varchar(60) default NULL COMMENT 'A composite truncated metaphones + numeric values hash of significant fields',
@@ -200,7 +200,7 @@ CREATE TABLE defDetailTypes (
   dty_VisibleToEndUser tinyint(1) unsigned NOT NULL default '1' COMMENT 'Flags if this detail type shoudl be displayed in end-user interface',
   dty_Prompt varchar(255) NOT NULL COMMENT 'The default prompt displayed to the user',
   dty_Help varchar(5000) NOT NULL default 'Please provide a help text ...' COMMENT 'The default extended text describing this detail type',
-  dty_Status enum('Reserved','Approved','Pending','Open') NOT NULL default 'Open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
+  dty_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
   dty_OriginatingDBID smallint(5) unsigned NOT NULL default '0' COMMENT 'Database where this detail type originated, 0 or local db code = locally',
   dty_PtrTargetRectypeIDs varchar(250) default NULL COMMENT 'CSVlist of target Rectype IDs, null = any',
   dty_EnumVocabIDs varchar(255) default NULL COMMENT 'Vocabularies to use for an enum detail, may be further constrained in defRecStructure',
@@ -241,7 +241,7 @@ CREATE TABLE defOntologies (
   ont_FullName varchar(128) NOT NULL COMMENT 'The commonly used full name of the ontology',
   ont_Description varchar(1000) default NULL COMMENT 'An optional descriptuion of the domain, origina and aims of the ontology',
   ont_RefURI varchar(250) default NULL COMMENT 'The URI to a definition of the ontology',
-  ont_Status enum('Reserved','Approved','Pending','Open') NOT NULL default 'Open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
+  ont_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
   ont_OriginatingDBID smallint(5) unsigned NOT NULL default '0' COMMENT 'Database where this ontology originated, 0 = locally',
   ont_NameInOriginatingDB varchar(64) NOT NULL default '' COMMENT 'Name used in database where this ontology originated',
   ont_IDInOriginatingDB smallint(5) unsigned NOT NULL default '0' COMMENT 'ID used in database where this ontology originated',
@@ -270,9 +270,8 @@ CREATE TABLE defRecStructure (
   rst_DisplayWidth tinyint(3) unsigned default '30' COMMENT 'The field width displayed for this detail type in this record type',
   rst_DefaultValue varchar(64) default NULL COMMENT 'The default value for this detail type for this record type',
   rst_RecordMatchOrder tinyint(1) unsigned NOT NULL default '0' COMMENT 'Indicates order of significance in detecting duplicate records, 1 = highest',
-  rst_RequirementType enum('Required','Recommended','Optional','Forbidden') NOT NULL default 'Optional',
-  rst_Status enum('Reserved','Approved','Pending','Open') NOT NULL default 'Open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
-  rst_MayModify enum('Locked','Discouraged','Open') NOT NULL default 'Open' COMMENT 'Extent to which detail may be modified within this record structure',
+  rst_RequirementType enum('required','recommended','optional','forbidden') NOT NULL default 'optional',
+  rst_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
   rst_OriginatingDBID smallint(5) unsigned NOT NULL default '0' COMMENT 'Database where this record structure originated, 0 or local db code = locally',
   rst_MaxValues tinyint(3) unsigned NOT NULL default '1' COMMENT 'Maximum number of values per record for this detail, 0 = unlimited ',
   rst_MinValues tinyint(3) unsigned NOT NULL default '1' COMMENT 'If required, minimum number of values for this detail per record',
@@ -315,7 +314,7 @@ CREATE TABLE defRecTypes (
   rty_TitleMask varchar(500) NOT NULL default '[title]' COMMENT 'Mask to build a composite title by combining field values',
   rty_CanonicalTitleMask varchar(500) default '160' COMMENT 'Version of the mask converted to detail codes for processing',
   rty_Plural varchar(63) default NULL COMMENT 'Plural form of the record type name, manually entered',
-  rty_Status enum('Reserved','Approved','Pending','Open') NOT NULL default 'Open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
+  rty_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
   rty_VisibleToEndUser tinyint(1) unsigned NOT NULL default '1' COMMENT 'Flags if record type is to be shown in lists, 1=yes, 2=no',
   rty_OriginatingDBID smallint(5) unsigned NOT NULL default '0' COMMENT 'Database where this record type originated, 0 or local db code = locally',
   rty_ReferenceURL varchar(250) default NULL COMMENT 'A reference URL describing/defining the record type',
@@ -341,7 +340,7 @@ CREATE TABLE defRelationshipConstraints (
   rcs_Description varchar(1000) collate utf8_unicode_ci default 'Please describe ...',
   rcs_Order tinyint(3) unsigned default NULL COMMENT 'Ordering value to allow controlling the display order of the vocabularies',
   rcs_RelationshipsLimit tinyint(1) unsigned NOT NULL default '0' COMMENT '0 = no limit; 1, 2 ... = maximum # of relations per record',
-  rcs_Status enum('Reserved','Approved','Pending','Open') collate utf8_unicode_ci NOT NULL default 'Open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
+  rcs_Status enum('reserved','approved','pending','open') collate utf8_unicode_ci NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
   rcs_OriginatingDBID smallint(5) unsigned NOT NULL default '0' COMMENT 'Database where this constraint originated, 0 or local db code = locally',
   rcs_TermLimit tinyint(3) unsigned NOT NULL default '0' COMMENT '0 = No limit, 1, 2 = max # of relations which can use each term',
   rcs_IDInOriginatingDB smallint(5) unsigned NOT NULL default '0' COMMENT 'Code in database where this constraint originated',
@@ -364,7 +363,7 @@ CREATE TABLE defTerms (
   trm_InverseTermId mediumint(8) unsigned default NULL COMMENT 'ID for the inverse value (relationships), null if no inverse',
   trm_VocabID smallint(5) unsigned NOT NULL COMMENT 'The vocabulary to which this term belongs',
   trm_Description varchar(500) default NULL COMMENT 'A description/gloss on the meaning of the term',
-  trm_Status enum('Reserved','Approved','Pending','Open') NOT NULL default 'Open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
+  trm_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
   trm_OriginatingDBID smallint(5) unsigned NOT NULL default '0' COMMENT 'Database where this detail type originated, 0 = local db code = locally',
   trm_AddedByImport tinyint(1) unsigned default '0' COMMENT 'Set to 1 if term added by an import, otherwise 0',
   trm_LocalExtension tinyint(10) unsigned NOT NULL default '0' COMMENT 'Flag that this value not in the externally referenced vocabulary',
@@ -417,10 +416,10 @@ CREATE TABLE defVocabularies (
   vcb_RefURL varchar(250) default NULL COMMENT 'reference URL for the vocabulary definition',
   vcb_Added date default NULL COMMENT 'Date of addition of this vocabulary record',
   vcb_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this vocabulary record',
-  vcb_Status enum('Reserved','Approved','Pending','Open') NOT NULL default 'Open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
+  vcb_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
   vcb_OriginatingDBID smallint(5) unsigned NOT NULL default '0' COMMENT 'Database where this record vocabulary originated, 0 = local db code = locally',
   vcb_OntID smallint(5) unsigned NOT NULL default '0' COMMENT 'Ontology from which this vocabulary originated, 0 = locally defined ontology ',
-  vcb_Domain enum('RelationshipTypes','EnumValues') NOT NULL default 'EnumValues' COMMENT 'Indicates whetthjer vocab is used for relationship types or ordinary enum fields',
+  vcb_Domain enum('relationshiptypes','enumvalues') NOT NULL default 'enumvalues' COMMENT 'Indicates whetthjer vocab is used for relationship types or ordinary enum fields',
   vcb_NameInOriginatingDB varchar(63) NOT NULL default '' COMMENT 'Name in database where this vocabulary originated',
   vcb_IDInOriginatingDB smallint(5) unsigned NOT NULL default '0' COMMENT 'Code in database where this vocabulary originated',
   PRIMARY KEY  (vcb_ID),
@@ -565,7 +564,7 @@ CREATE TABLE sysIdentification (
   sys_MediaFolders varchar(10000) collate utf8_unicode_ci default NULL COMMENT 'Additional comm-sep directories which can contain files indexed in database',
   sys_AllowRegistration tinyint(1) unsigned NOT NULL default '1' COMMENT 'If set, people can apply for registration through web-based form',
   sys_NewRecOwnerGrpID smallint(5) unsigned NOT NULL default '0' COMMENT 'Group which by default owns new records - allow override per user',
-  sys_NewRecAccess enum('Viewable','Hidden') collate utf8_unicode_ci NOT NULL default 'Viewable' COMMENT 'Default visibility/editability for new records - allow override per user',
+  sys_NewRecAccess enum('viewable','hidden') collate utf8_unicode_ci NOT NULL default 'viewable' COMMENT 'Default visibility/editability for new records - allow override per user',
   PRIMARY KEY  (sys_ID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Identification/version for this Heurist database (single rec';
 
@@ -590,7 +589,7 @@ CREATE TABLE sysTableLastUpdated (
 
 CREATE TABLE sysUGrps (
   ugr_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'User or group ID, used wherever a user or group is to be identified',
-  ugr_Type enum('User','Workgroup','Ugradclass') NOT NULL default 'User' COMMENT 'User or workgroup, special workgroup types also supported',
+  ugr_Type enum('user','workgroup','ugradclass') NOT NULL default 'user' COMMENT 'User or workgroup, special workgroup types also supported',
   ugr_Name varchar(64) NOT NULL COMMENT 'The unique user/login/group name, user name defaults to email address',
   ugr_LongName varchar(128) default NULL COMMENT 'An optional longer descriptive name for a user group',
   ugr_Description varchar(1000) default NULL COMMENT 'Extended description of a user group displayed on homepage',
@@ -604,7 +603,7 @@ CREATE TABLE sysUGrps (
   ugr_State varchar(20) default NULL,
   ugr_Postcode varchar(20) default NULL,
   ugr_Interests varchar(255) default NULL COMMENT 'List of research interests, only for Users, not Workgroups',
-  ugr_Enabled enum('Y','N') NOT NULL default 'N' COMMENT 'Flags if user can use Heurist, normally needs authorising by admin',
+  ugr_Enabled enum('y','n') NOT NULL default 'n' COMMENT 'Flags if user can use Heurist, normally needs authorising by admin',
   ugr_LastLoginTime datetime default NULL COMMENT 'Date and time of last login (but user may stay logged in)',
   ugr_MinHyperlinkWords tinyint(4) NOT NULL default '3' COMMENT 'Filter hyperlink strings with less than this word count on hyperlink import ',
   ugr_LoginCount int(11) NOT NULL default '0' COMMENT 'Number of times user haslogged in',
@@ -1044,12 +1043,12 @@ begin
                     dtl_DetailTypeID=dty_ID and
                      SRC.rec_RecType=rst_RecTypeID and
                     rst_DetailTypeID=dty_ID and
-                    rst_RequirementType = 'Required' and
+                    rst_RequirementType = 'required' and
                     dty_Type = "resource" and
                      dtl_ValueAsText = DST.rec_ID and
                     dtl_RecID=recID;
 
-        return concat(ifnull(rectype,'N'), ':',
+        return concat(ifnull(rectype,'n'), ':',
 
         if(non_resource_fields is not null and non_resource_fields != '', concat(non_resource_fields, ';'), ''),
 
@@ -1074,7 +1073,7 @@ begin
                     rst_RecordMatchOrder and
                     dty_Type != "resource" and
                     rec_ID = recID;
-        return concat(ifnull(rectype,'N'), ':',
+        return concat(ifnull(rectype,'n'), ':',
         if(non_resource_fields is not null and non_resource_fields != '', concat(non_resource_fields, ';'), ''));
     end
 

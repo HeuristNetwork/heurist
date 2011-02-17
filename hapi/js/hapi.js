@@ -750,7 +750,7 @@ var HRecord = function() {
 			if (HDetailManager.getDetailMatching(_type, detailType)) { _hhash = null; }
 		}
 		else {
-			if (HDetailManager.getDetailRequiremence(_type, detailType) === 'Required') { _hhash = null; }
+			if (HDetailManager.getDetailRequiremence(_type, detailType) === 'required') { _hhash = null; }
 		}
 // FIXME
 // need to invalidate title as necessary
@@ -1865,10 +1865,10 @@ HAPI.Variety = HVariety;
 
 
 var HRequiremence = {
-	REQUIRED: 'Required',
-	RECOMMENDED: 'Recommended',
-	OPTIONAL: 'Optional',
-	FORBIDDEN: 'Forbidden',
+	REQUIRED: 'required',
+	RECOMMENDED: 'recommended',
+	OPTIONAL: 'optional',
+	FORBIDDEN: 'forbidden',
 
 	getClass: function() { return "HRequiremence"; }
 };
@@ -2284,7 +2284,12 @@ HAPI.RecordTypeManager = HRecordTypeManager;
 
 var HDetailManager = new function(detailTypes, detailRequirements) {
     // detailTypes is an array of [id, name, prompt, variety, enums, contraint] values
-	// detailRequirements is an array of [recordTypeID, detailTypeID, requiremence, repeatable, name, prompt, match, size, order, default] values
+	// detailRequirements is an array of
+		// OLD VALUES [recordTypeID, detailTypeID, requiremence, repeatable, name, prompt, match, size, order, default] values
+		//[ rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
+		// rst_DefaultValue, rst_RequirementType, rst_MaxValues, rst_MinValues, rst_DisplayWidth, rst_RecordMatchOrder,
+		// rst_DisplayOrder, rst_DisplayDetailTypeGroupID, rst_EnumFilteredIDs, rst_PtrFilteredIDs, rst_CalcFunctionID,
+		// rst_PriorityForThumbnail] values
     var _typesById = {};
     var _typesByName = {};
     var _detailTypesByRecordType = {};
@@ -2306,18 +2311,18 @@ var HDetailManager = new function(detailTypes, detailRequirements) {
     var dr, type;
     for (i=0; i < detailRequirements.length; ++i) {
         dr = detailRequirements[i];
-        _recordPlusTypeDetails[dr[0]+"."+dr[1]] = dr.slice(2, 10);
+        _recordPlusTypeDetails[dr[0]+"."+dr[1]] = dr.slice(2);
 
-        if (dr[2] !== 'Forbidden') {    // non-excluded detail
+        if (dr[2] !== 'forbidden') {    // non-excluded detail
             type = _typesById[dr[1]];
             if (_detailTypesByRecordType[dr[0]]) { _detailTypesByRecordType[dr[0]].push(type); }
             else { _detailTypesByRecordType[dr[0]] = [type]; }
 
-            if (dr[2] === 'Required') {    // required detail
+            if (dr[2] === 'required') {    // required detail
                 if (_requiredDetailTypesByRecordType[dr[0]]) { _requiredDetailTypesByRecordType[dr[0]].push(type); }
                 else { _requiredDetailTypesByRecordType[dr[0]] = [type]; }
             }
-            else if (dr[2] === 'Recommended') {    // recommended detail
+            else if (dr[2] === 'recommended') {    // recommended detail
                 if (_recommendedDetailTypesByRecordType[dr[0]]) { _recommendedDetailTypesByRecordType[dr[0]].push(type); }
                 else { _recommendedDetailTypesByRecordType[dr[0]] = [type]; }
             }

@@ -68,9 +68,9 @@ error_log("in editUser in Submit");
 		$body->execute();
 
 		if (@$_REQUEST['ugr_Enabled'])
-			mysql_query("update sysUGrps usr set ugr_Enabled='Y' where ugr_ID=$usr_id");
+			mysql_query("update sysUGrps usr set ugr_Enabled='y' where ugr_ID=$usr_id");
 		else
-			mysql_query("update sysUGrps usr set ugr_Enabled='N' where ugr_ID=$usr_id");
+			mysql_query("update sysUGrps usr set ugr_Enabled='n' where ugr_ID=$usr_id");
 
 		$body->global_vars['edit-success'] = 1;
 

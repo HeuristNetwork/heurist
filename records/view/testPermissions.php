@@ -23,7 +23,7 @@ function have_bkmk_permissions($bkm_ID) {
 
 return true;
 	$bkmkbib = mysql_fetch_assoc($res);
-	if ($bkmkbib['rec_OwnerUGrpID']  &&  $bkmkbib['rec_NonOwnerVisibility'] == 'Hidden') {
+	if ($bkmkbib['rec_OwnerUGrpID']  &&  $bkmkbib['rec_NonOwnerVisibility'] == 'hidden') {
 		$res = mysql_query('select * from '.USERS_DATABASE.'.sysUsrGrpLinks where ugl_GroupID='.intval($bkmkbib['rec_OwnerUGrpID']).' and ugl_UserID='.get_user_id());
 		// they're not in the restricted workgroup
 		if (mysql_num_rows($res) <= 0) return false;
@@ -40,7 +40,7 @@ function have_bib_permissions($rec_id) {
 	if (mysql_num_rows($res) < 1) return false;
 
 	$bib = mysql_fetch_assoc($res);
-	if ($bib['rec_OwnerUGrpID']  &&  $bib['rec_NonOwnerVisibility'] == 'Hidden') {
+	if ($bib['rec_OwnerUGrpID']  &&  $bib['rec_NonOwnerVisibility'] == 'hidden') {
 		$res = mysql_query('select * from '.USERS_DATABASE.'.sysUsrGrpLinks where ugl_GroupID='.intval($bib['rec_OwnerUGrpID']).' and ugl_UserID='.get_user_id());
 		// they're not in the restricted workgroup
 		if (mysql_num_rows($res) <= 0) return false;

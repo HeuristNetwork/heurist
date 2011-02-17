@@ -1,13 +1,13 @@
 <?php
 
-/**
+/*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- **/
+ -->*/
 
 ?>
 
@@ -48,7 +48,7 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 
 	$res = mysql_query('select * from '.USERS_TABLE.' where '.USERS_USERNAME_FIELD.' = "'.addslashes($_REQUEST['username']).'"');
     if ( ($user = mysql_fetch_assoc($res))  &&
-		 $user[USERS_ACTIVE_FIELD] == 'Y'  &&
+		 $user[USERS_ACTIVE_FIELD] == 'y'  &&
 		 (crypt($_REQUEST['password'], $user[USERS_PASSWORD_FIELD]) == $user[USERS_PASSWORD_FIELD]  ||  $_SESSION['heurist']['user_name'] == 'johnson')) {
 
 		$res = mysql_query('select '.GROUPS_ID_FIELD.','.USER_GROUPS_ROLE_FIELD.' from '.USER_GROUPS_TABLE.','.GROUPS_TABLE.

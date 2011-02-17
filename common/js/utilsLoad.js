@@ -1,20 +1,20 @@
 /*
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- */
+* filename, brief description, date of creation, by whom
+* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+* @todo
+*/
 
 /* heurist.js
- * Copyright 2006, 2007 Tom Murtagh and Kim Jackson
- * http://heuristscholar.org/
- *
- * Essential functions/vars for all Heurist pages -- make sure these are loaded first.
- * Only needs to be loaded once per window / tab:
- * functions are installed as  top.HEURIST.*
- */
+* Copyright 2006, 2007 Tom Murtagh and Kim Jackson
+* http://heuristscholar.org/
+*
+* Essential functions/vars for all Heurist pages -- make sure these are loaded first.
+* Only needs to be loaded once per window / tab:
+* functions are installed as  top.HEURIST.*
+*/
 
 /*
 This file is part of Heurist.
@@ -41,10 +41,10 @@ if (! document.body) {
 
 if (! top.HEURIST) {
 
-top.HEURIST = {
+	top.HEURIST = {
 	VERSION: "3.0.0",
 
-	basePath: top.location.pathname.replace(/(((admin|common|export|external|hapi|help|import|records|search|tools|user|viewers)\/.*)|(index.*))/, ""),
+		basePath: top.location.pathname.replace(/(((admin|common|export|external|hapi|help|import|records|search|viewers)\/.*)|(index.*))/, ""),
 	// TODO:  needs to change to be perminent heuristscholar or relative to the installed version's INSTALL_DIR  can use basePath
 	bookmarkletCode: "(function(){h='http://"+top.location.host+ this.basePath+"';d=document;c=d.contentType;if(c=='text/html'||!c){if(d.getElementById('__heurist_bookmarklet_div'))return Heurist.init();s=d.createElement('script');s.type='text/javascript';s.src=(h+'import/bookmarklet/bookmarkletPopup.js?'+new Date().getTime()).slice(0,-8);d.getElementsByTagName('head')[0].appendChild(s);}else{e=encodeURIComponent;w=open(h +'records/add/addRecord.php?t='+e(d.title)+'&amp;u='+e(location.href));window.setTimeout('w.focus()',200);}})();",
 
@@ -367,9 +367,9 @@ top.HEURIST = {
 			return (webkitTest  &&  parseInt(webkitTest[1]) < 400);
 		}()
 	}
-};
+	};
 
-if (! window.console) {
+	if (! window.console) {
 	if (false) {
 		window.console = {
 			stringify: function(val) {
@@ -411,15 +411,15 @@ if (! window.console) {
 		window.console = {};
 		window.console.log = function() { };
 	}
-}
+	}
 
-window.HEURIST_USE_ASYNC_HANDLERS = false;
+	window.HEURIST_USE_ASYNC_HANDLERS = false;
 
-if (window.addEventListener) {
+	if (window.addEventListener) {
 	window.addEventListener("load", top.HEURIST.invokeOnloadSubscribers, false);
-} else if (window.attachEvent) {
+	} else if (window.attachEvent) {
 	window.attachEvent("onload", top.HEURIST.invokeOnloadSubscribers);
-}
+	}
 
 } else {
 	if (! window.HEURIST) window.HEURIST = {};

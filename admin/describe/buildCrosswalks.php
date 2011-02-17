@@ -1,17 +1,13 @@
 <?php
 
-	/**
+	/*<!--
 	* filename, brief description, date of creation, by whom
 	* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
 	* @link: http://HeuristScholar.org
 	* @license http://www.gnu.org/licenses/gpl-3.0.txt
 	* @package Heurist academic knowledge management system
 	* @todo
-	**/
-
-?>
-
-<?php
+	-->*/
 
 	// crosswalk_builder.php  - gets definitions from a specified installation of Heurist
 	// Processes them into local definitions, allows the administrator to import definitions
@@ -39,7 +35,7 @@
 	// without importing new definitions, in other words jsut setting up the crosswalk to be able to send queries
 	// and/or download data from another instance.
 
-
+	echo "test";
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
 	if (!is_logged_in()) {
@@ -211,7 +207,7 @@
 	`rst_ID` smallint(6) NOT NULL,
 	`rst_RecTypeID` smallint(5) unsigned NOT NULL default '0',
 	`rst_DetailTypeID` smallint(6) NOT NULL default '0',
-	`rst_RequirementType` enum('Required','Recommended','Optional','Forbidden') NOT NULL default 'Optional',
+	`rst_RequirementType` enum('required','recommended','optional','forbidden') NOT NULL default 'optional',
 	`rst_DisplayName` varchar(255) default NULL,
 	`rst_DisplayDescription` text,
 	`rst_DisplayPrompt` text,
@@ -554,5 +550,3 @@
 	return;
 
 ?>
-
-// END OF FILE

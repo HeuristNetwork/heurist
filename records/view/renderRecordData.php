@@ -182,7 +182,7 @@ function print_header_line($bib) {
 </div>
 <div class=detailRowHeader>
 
-<?php if (defined('EXPLORE_URL')  &&  $bib['rec_NonOwnerVisibility'] != 'Hidden') { ?>
+<?php if (defined('EXPLORE_URL')  &&  $bib['rec_NonOwnerVisibility'] != 'hidden') { ?>
  <span class="link"><a target=_blank href="<?= EXPLORE_URL . $rec_id ?>"><img src="../../common/images/follow_links_16x16.gif">explore</a></span>
 <?php } ?>
 <?php if (@$url) { ?>
@@ -222,7 +222,7 @@ function print_private_details($bib) {
 		<div class=detail>
 			<?php
 				print '<span style="font-weight: bold; color: black;">'.htmlspecialchars($workgroup_name).'</span>';
-				if ($bib['rec_NonOwnerVisibility'] == 'Viewable') print '<span> - read-only to others</span></div></div>';
+				if ($bib['rec_NonOwnerVisibility'] == 'viewable') print '<span> - read-only to others</span></div></div>';
 				else print '<span> - hidden to others</span></div></div>';
 				}
 			?>

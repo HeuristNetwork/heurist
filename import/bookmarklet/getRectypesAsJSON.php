@@ -58,14 +58,14 @@ while ($row = mysql_fetch_assoc($res)) {
 print "HEURIST_ref.groupNamesInDisplayOrder = " . json_format($groups) . ";\n\n";
 
 $typesByGroup = array();
-$res = mysql_query("select rtg_ID,rty_ID
-						from defRecTypes left join defRecTypeGroups on rtg_ID = rty_RecTypeGroupID
+$res = mysql_query("select rtg_ID,rty_ID, rty_ShowInLists
+						from defRecTypes left join defRecTypeGroups on rtg_ID = (select substring_index(rty_RecTypeGroupIDs,',',1))
 						where 1 order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
 while ($row = mysql_fetch_assoc($res)) {
 	if (!array_key_exists($row['rtg_ID'],$typesByGroup)){
 		$typesByGroup[$row['rtg_ID']] = array();
 	}
-	array_push($typesByGroup[$row['rtg_ID']], intval($row["rty_ID"]));
+	$typesByGroup[$row['rtg_ID']][$row["rty_ID"]] = $row["rty_ShowInLists"];
 }
 print "HEURIST_rectypes.typesByGroup = " . json_format($typesByGroup) . ";\n\n";
 

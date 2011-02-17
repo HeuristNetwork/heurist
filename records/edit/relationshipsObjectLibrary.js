@@ -184,7 +184,7 @@ var EditableRelationship = function(parentElement, details, rectype,dtID, relVoc
 	if (dtID && dtID != 200) {
 		var allowedLookups = top.HEURIST.edit.getLookupConstraintsList(dtID);
 	}
-	var relTypes = top.HEURIST.bibDetailLookups[200];  //saw need to change restricted reltypes from rel_constraints pass in a param
+	var relTypes = top.HEURIST.vocabTermLookup[200];  //saw need to change restricted reltypes from rel_constraints pass in a param
 	for (var ont in relTypes) {
 		var grp = document.createElement("optgroup");
 		grp.label = top.HEURIST.vocabularyLookup[ont];

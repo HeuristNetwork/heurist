@@ -1,17 +1,14 @@
 <?php
 
-/**
+/*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- **/
+ -->*/
 
-?>
-
-<?php
 
 header("Content-Type: text/javascript");
 define('SAVE_URI', 'disabled');
@@ -39,10 +36,10 @@ mysql_connection_db_select(DATABASE);
 
 if (defined('HEURIST_USER_GROUP_ID')) {
 	$res = mysql_query("select usr.ugr_ID, usr.ugr_Name, concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname from ".USERS_DATABASE.".sysUGrps usr, ".USERS_DATABASE.".sysUsrGrpLinks
-	                     where ugl_GroupID=2 and ugl_UserID=usr.ugr_ID and usr.ugr_Enabled='Y' and usr.ugr_FirstName is not null and usr.ugr_LastName is not null and !usr.ugr_IsModelUser");
+	                     where ugl_GroupID=2 and ugl_UserID=usr.ugr_ID and usr.ugr_Enabled='y' and usr.ugr_FirstName is not null and usr.ugr_LastName is not null and !usr.ugr_IsModelUser");
 } else {
 	$res = mysql_query("select usr.ugr_ID, usr.ugr_Name, concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname from ".USERS_DATABASE.".sysUGrps usr
-	                     where usr.ugr_Enabled='Y' and usr.ugr_FirstName is not null and usr.ugr_LastName is not null and !usr.ugr_IsModelUser");
+	                     where usr.ugr_Enabled='y' and usr.ugr_FirstName is not null and usr.ugr_LastName is not null and !usr.ugr_IsModelUser");
 }
 
 $users = array();
@@ -57,7 +54,9 @@ $res = mysql_query("select rty_ID, rty_Name, rty_CanonicalTitleMask from defRecT
 $recordTypes = array();
 while ($row = mysql_fetch_row($res)) array_push($recordTypes, $row);
 
-$res = mysql_query("select dty_ID, dty_Name, dty_Prompt, dty_Type, NULL as enums, dty_PtrTargetRectypeIDs, dty_EnumVocabIDs, dty_EnumTermIDs from defDetailTypes");
+$res = mysql_query("select dty_ID, dty_Name, dty_HelpText, dty_Type, NULL as enums, dty_PtrTargetRectypeIDs,
+					dty_EnumVocabIDs, dty_EnumTermIDs, dty_ExtendedDescription, dty_DetailTypeGroupID, dty_ShowInPulldowns
+					from defDetailTypes");
 $detailTypes = array();
 $detailTypesById = array();
 while ($row = mysql_fetch_row($res)) {
@@ -72,18 +71,23 @@ while ($row = mysql_fetch_row($res)) {
 		break;
 
 	    case "enum":
-		$row[3] = "enumeration";	// saw FIXME TODO  need to change this to account for overrides
-		$lres = mysql_query("select A.trm_Label, B.trm_Label from defTerms A left join defTerms B on A.trm_ID=B.trm_InverseTermID where A.trm_VocabID=" . intval($row[6])." and A.trm_Label is not null");
+		$row[3] = "enumeration";
+		$whereClause = $row[6]?"A.trm_VocabID in(" . $row[6].")" : ""; // get all terms in vocab
+		$whereClause .= $row[7] && $whereClause ?" or " : "";
+		$whereClause .= $row[7] ? "A.trm_ID in(" . $row[7].")" : "";// get all listed terms
+
+		$lres = mysql_query("select vcb_Name,A.trm_Label, B.trm_Label
+								from defTerms A left join defTerms B on A.trm_ID=B.trm_InverseTermID
+									left join defVocabularies on A.trm_VocabID = vcb_ID
+								where (" . $whereClause.") and A.trm_Label is not null
+								order by vcb_Name, A.trm_Label");
 		$row[4] = array();
 
-		$rdl = mysql_fetch_row($lres);
-		if ($rdl[1]) {	// two columns: the related value is present for this lookup type
-			array_push($row[4], $rdl);
-			while ($rdl = mysql_fetch_row($lres)) array_push($row[4], $rdl);
+		while ($trm = mysql_fetch_row($lres)){
+			if (! array_key_exists($trm[0],$row[4])) { // create vocab array
+				$row[4][$trm[0]] = array();
 		}
-		else if ($rdl) {		// no value in the second column, omit it
-			array_push($row[4], $rdl[0]);
-			while ($rdl = mysql_fetch_row($lres)) array_push($row[4], $rdl[0]);
+			array_push($row[4][$trm[0]], array("".$trm[1].($trm[2]?",".$trm[2]:"")));
 		}
 		break;
 
@@ -103,12 +107,15 @@ while ($row = mysql_fetch_row($res)) {
 		$row[3] = "literal";
 	}
 	array_push($detailTypes, $row);
-	$detailTypesById[$row[0]] = $row;
 }
 
 // detailRequirements is an array of [recordTypeID, detailTypeID, requiremence, repeatable, name, prompt, match, size, order, default] values
 $detailRequirements = array();
 $rec_types = mysql__select_array("defRecStructure", "distinct rst_RecTypeID", "1 order by rst_RecTypeID");
+		// rdr = [ rst_DetailTypeID => [ rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
+		// rst_DefaultValue, rst_RequirementType, rst_MaxValues, rst_MinValues, rst_DisplayWidth, rst_RecordMatchOrder,
+		// rst_DisplayOrder, rst_DisplayDetailTypeGroupID, rst_EnumFilteredIDs, rst_PtrFilteredIDs, rst_CalcFunctionID, rst_PriorityForThumbnail] ...]
+
 foreach ($rec_types as $rec_type) {
 	foreach (getRecordRequirements($rec_type) as $rdr) {
 		array_push($detailRequirements, array(
@@ -116,12 +123,19 @@ foreach ($rec_types as $rec_type) {
 			$rdr["rst_DetailTypeID"],
 			$rdr["rst_RequirementType"],
 			intval($rdr["rst_MaxValues"]),
-			($rdr["rst_DisplayName"] != $detailTypesById[$rdr["rst_DetailTypeID"]][1] ? $rdr["rst_DisplayName"] : null),
-			($rdr["rst_DisplayPrompt"] != $detailTypesById[$rdr["rst_DetailTypeID"]][2] ? $rdr["rst_DisplayPrompt"]: null),
+			$rdr["rst_DisplayName"],
+			$rdr["rst_DisplayHelpText"],
 			intval($rdr["rst_RecordMatchOrder"]),
 			intval($rdr["rst_DisplayWidth"]),
 			intval($rdr["rst_DisplayOrder"]),
-			$rdr["rst_DefaultValue"]
+			$rdr["rst_DefaultValue"],
+			$rdr["rst_DisplayExtendedDescription"],
+			$rdr["rst_MinValues"],
+			$rdr["rst_DisplayDetailTypeGroupID"],
+			$rdr["rst_EnumFilteredIDs"],
+			$rdr["rst_PtrFilteredIDs"],
+			$rdr["rst_CalcFunctionID"],
+			$rdr["rst_PriorityForThumbnail"]
 		));
 	}
 }

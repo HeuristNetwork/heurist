@@ -1,6 +1,6 @@
 <?php
 
-/**
+	/**
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
@@ -35,15 +35,15 @@
 		#q {border-radius:0; -webkit-border-radius:0; -moz-border-radius:0; border:1px solid #A4B4CB}
 	</style>
 
-<script src='queryBuilder.js'></script>
+		<script src='queryBuilder.js'></script>
 
-<script type="text/javascript">
+		<script type="text/javascript">
 
 
-var last_vals = new Object();
+			var last_vals = new Object();
 
-var updateTimeoutID = 0;
-function update(elt) {
+			var updateTimeoutID = 0;
+			function update(elt) {
 	if (updateTimeoutID) { clearTimeout(updateTimeoutID); updateTimeoutID = 0; }
 
 	var q_elt = document.getElementById('q');
@@ -80,13 +80,13 @@ function update(elt) {
 				break;
 			}
 		}
-		var bdr = top.HEURIST.bibDetailRequirements.valuesByRectypeID[rt];
+					var bdr = top.HEURIST.recDetailRequirements.valuesByRectypeID[rt];
 		if (! bdr) {
 			// no type specified; hide type-specific options
 			typeOptgroup.style.display = "none";
 		}
 		else {
-			var bdts = top.HEURIST.bibDetailTypes.valuesByRecDetailTypeID;
+						var bdts = top.HEURIST.recDetailTypes.valuesByRecDetailTypeID;
 			for (var bdtID in bdr) {
 				typeOptgroup.appendChild(new Option(bdr[bdtID][0], '"' + bdts[bdtID][1] + '"'));
 			}
@@ -171,11 +171,11 @@ function update(elt) {
 	if (elt.name == 'fieldtype') last_vals['field'] = '';
 
 	q_elt.value = new_q_val.replace(/^\s*AND\b|\bAND\s*$|\bAND\s+(?=AND\b)/g, '').replace(/^\s+|\s+$/g, '');
-}
+			}
 
 
-function do_search() {
-/*
+			function do_search() {
+				/*
 	var s_elt = top.document.getElementById('s');
 	var s_val = document.getElementById('sortby').value;
 	if (s_val && s_val.match(/^f:\d+$/)) {
@@ -184,12 +184,12 @@ function do_search() {
 		f_elt.disabled = false;
 	}
 	s_elt.value = s_val;
-*/
+				*/
 	window.close(document.getElementById('q').value);
-}
+			}
 
 
-function load_query() {
+			function load_query() {
 	var q = location.search;
 	if (q.charAt(0) == '?') q = q.substr(1);
 
@@ -225,10 +225,10 @@ function load_query() {
 	reconstruct_query();
 
 	// document.getElementById('tag').focus();
-}
+			}
 
 
-function reconstruct_query() {
+			function reconstruct_query() {
 	// reconstruct the query in the SEARCH box (using the canonical fully-modified form)
 
 	var field_names = ['title', 'tag', 'url', 'type', 'notes', 'user'];
@@ -274,10 +274,10 @@ function reconstruct_query() {
 	}
 
 	document.getElementById('q').value = q_val;
-}
+			}
 
 
-function keypress(e) {
+			function keypress(e) {
 	var targ;
 	if (! e) e = window.event;
 	if (e.target) targ = e.target;
@@ -295,25 +295,25 @@ function keypress(e) {
 	updateTimeoutID = setTimeout(function() { update(targ) }, 100);
 
 	return true;
-}
+			}
 
 
-function add_tag(tag) {
+			function add_tag(tag) {
 	if (tag.indexOf(' ')) tag = '"' + tag + '"';
 
 	var q_elt = document.getElementById('q');
 	if (q_elt.value) q_elt.value += ' ';
 	q_elt.value += 'tag:' + tag;
-}
+			}
 
 
-var filterTimeout = 0;
-function invoke_refilter() {
+			var filterTimeout = 0;
+			function invoke_refilter() {
 	if (filterTimeout) clearTimeout(filterTimeout);
 	filterTimeout = setTimeout(refilter_usernames, 50);
-}
+			}
 
-function refilter_usernames() {
+			function refilter_usernames() {
 	if (filterTimeout) clearTimeout(filterTimeout);
 	filterTimeout = 0;
 
@@ -358,9 +358,9 @@ function refilter_usernames() {
 
 	user_elt.disabled = false;
 	user_elt.options[0].style.color = user_elt.style.color = 'gray';
-}
+			}
 
-function reset_usernames() {
+			function reset_usernames() {
 	if (filterTimeout) clearTimeout(filterTimeout);
 	filterTimeout = 0;
 
@@ -369,9 +369,9 @@ function reset_usernames() {
 	user_elt.options[0].style.color = user_elt.style.color = 'black';
 	while (user_elt.length > 1)
 		user_elt.remove(user_elt.length - 1);
-}
+			}
 
-function keypressRedirector(e) {
+			function keypressRedirector(e) {
 	if (! e) e = window.event;
 	if (e.keyCode) code = e.keyCode;
 	else if (e.which) code = e.which;
@@ -394,9 +394,9 @@ function keypressRedirector(e) {
 	}
 
 	return true;
-}
+			}
 
-function clear_fields() {
+			function clear_fields() {
     document.getElementById('q').value='';
 	var elts = document.getElementsByTagName('input');
 	for (var i = 0; i < elts.length; i++)
@@ -405,17 +405,17 @@ function clear_fields() {
 	for (var i = 0; i < elts.length; i++)
 		elts[i].selectedIndex = 0;
 	reset_usernames();
-}
+			}
 
-</script>
+		</script>
 
-</head>
-<body class="popup" width=700 height=600 style="overflow: hidden;" onload="load_query();">
+	</head>
+	<body class="popup" width=700 height=600 style="overflow: hidden;" onload="load_query();">
 
-<div style="float: right;"><a href="#" onclick="clear_fields(); return false;">Clear search string</a></div>
-<div>Build search using fields below, or edit the search string directly, here or on the main page</div>
+		<div style="float: right;"><a href="#" onclick="clear_fields(); return false;">Clear search string</a></div>
+		<div>Build search using fields below, or edit the search string directly, here or on the main page</div>
 
-<div class="separator_row" style="margin:10px 0"></div>
+		<div class="separator_row" style="margin:10px 0"></div>
 
   <table border=0 cellspacing=0 style="font-size: 10px; width: 620px; padding-right: 8px;">
    <tr><td colspan=3><h3>Selection:</h3></td></tr>
@@ -429,17 +429,17 @@ function clear_fields() {
       <legend>Bibliographic/public data fields</legend>
       <div style="float: right;">
       <nobr>
-<select name=fieldtype id=fieldtype onchange="update(this);" style="width: 200px;">
+								<select name=fieldtype id=fieldtype onchange="update(this);" style="width: 200px;">
  <option value="" style="font-weight: bold;">Any field</option>
  <optgroup id=rec_type-specific-fields label="rectype specific fields" style="display: none;"></optgroup>
  <optgroup label="Generic fields">
-<?php
+										<?php
 	$res = mysql_query('select dty_ID, dty_Name from '.DATABASE.'.defDetailTypes order by dty_Name');
 	while ($row = mysql_fetch_assoc($res)) {
-?>          <option value="&quot;<?= htmlspecialchars($row['dty_Name']) ?>&quot;"><?= htmlspecialchars($row['dty_Name']) ?></option>
-<?php	}	?>
+											?>          <option value="&quot;<?= htmlspecialchars($row['dty_Name']) ?>&quot;"><?= htmlspecialchars($row['dty_Name']) ?></option>
+											<?php	}	?>
  </optgroup>
-</select>
+								</select>
       </nobr>
       </div>
       <br clear=all>
@@ -457,50 +457,55 @@ function clear_fields() {
       </div>
      </fieldset>
 
-</td>
-</tr>
+				</td>
+			</tr>
 
-<?php
+			<?php
 	$res = mysql_query('select concat('.GROUPS_NAME_FIELD.', "\\\\", tag_Text) from '.DATABASE.'.usrTags, '.USER_GROUPS_TABLE.', '.GROUPS_TABLE.' where tag_UGrpID='.USER_GROUPS_GROUP_ID_FIELD.' and '.USER_GROUPS_GROUP_ID_FIELD.'='.GROUPS_ID_FIELD.' and '.USER_GROUPS_USER_ID_FIELD.'=' . get_user_id() . ' order by '.GROUPS_NAME_FIELD.', tag_Text');
 	if (mysql_num_rows($res) > 0) {
-?>
+				?>
    <tr>
     <td class=r>Workgroup&nbsp;tags:</td>
     <td style="padding-top: 6px; padding-bottom: 6px; text-align: left;" colspan=2>
      <select onchange="if (selectedIndex) add_tag(options[selectedIndex].value);">
       <option value="" selected disabled>(select...)</option>
-<?php		while ($row = mysql_fetch_row($res)) {	?>
+							<?php		while ($row = mysql_fetch_row($res)) {	?>
       <option value="<?= htmlspecialchars($row[0]) ?>"><?= htmlspecialchars($row[0]) ?></option>
-<?php		}	?>
+								<?php		}	?>
      </select>
     </td>
    </tr>
-<?php
+				<?php
 	} else {
-?>
+				?>
     <td><td colspan=2></td></tr>
-<?php
+				<?php
 	}
-?>
+			?>
 
    <tr>
     <td class=r>Resource&nbsp;type:</td>
     <td>
+					<?php
+						$res = mysql_query("select distinct rty_ID,rty_Name,rty_Description, rtg_Name
+						from defRecTypes left join defRecTypeGroups on rtg_ID = (select substring_index(rty_RecTypeGroupIDs,',',1))
+						where rty_ShowInLists = 1 order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
+					?>
           <select name="type" id="type" onchange="update(this);">
-           <option value="" selected="selected">(any type)</option>
-           <optgroup label="Bibliographic reference types">
-<?php
-	$res = mysql_query('select rty_ID, rty_Name from '.DATABASE.'.defRecTypes where rty_RecTypeGroupID = 1 order by rty_Name');
+						<option selected="selected" value="">(select record type)</option>
+						<?php
+							$section = "";
 	while ($row = mysql_fetch_assoc($res)) {
-?>          <option value="&quot;<?= htmlspecialchars($row['rty_Name']) ?>&quot;"><?= htmlspecialchars($row['rty_Name']) ?></option>
-<?php	}	?>
-           </optgroup>
-           <optgroup label="Other reference types">
-<?php	   //saw FIXME TODO  need to change this to show this list by RecTypeGgroup.
-	$res = mysql_query('select rty_ID, rty_Name from '.DATABASE.'.defRecTypes where rty_RecTypeGroupID > 1 order by rty_Name');
-	while ($row = mysql_fetch_assoc($res)) {
-?>          <option value="&quot;<?= htmlspecialchars($row['rty_Name']) ?>&quot;"><?= htmlspecialchars($row['rty_Name']) ?></option>
-<?php	}	?>
+								if ($row["rtg_Name"] != $section) {
+									if ($section) print "</optgroup>\n";
+									$section = $row["rtg_Name"];
+									print '<optgroup label="' . htmlspecialchars($section) . ' types">';
+								}
+						?>
+						<option value="<?= $row["rty_ID"] ?>" title="<?= htmlspecialchars($row["rty_Description"]) ?>"><?= htmlspecialchars($row["rty_Name"]) ?></option>
+						<?php
+							}
+						?>
            </optgroup>
           </select>
     </td>
@@ -521,41 +526,41 @@ function clear_fields() {
     <td class=l><input id=notes name=notes onchange="update(this);" onkeypress="return keypress(event);"></td>
    </tr>
 
-<?php
-	$groups = mysql__select_assoc(USERS_DATABASE.".".USER_GROUPS_TABLE." left join ".USERS_DATABASE.".".GROUPS_TABLE." on ".USER_GROUPS_GROUP_ID_FIELD."=".GROUPS_ID_FIELD, GROUPS_ID_FIELD, GROUPS_NAME_FIELD, USER_GROUPS_USER_ID_FIELD."=".get_user_id()." and ".GROUPS_TYPE_FIELD."='Workgroup' order by ".GROUPS_NAME_FIELD);
+			<?php
+				$groups = mysql__select_assoc(USERS_DATABASE.".".USER_GROUPS_TABLE." left join ".USERS_DATABASE.".".GROUPS_TABLE." on ".USER_GROUPS_GROUP_ID_FIELD."=".GROUPS_ID_FIELD, GROUPS_ID_FIELD, GROUPS_NAME_FIELD, USER_GROUPS_USER_ID_FIELD."=".get_user_id()." and ".GROUPS_TYPE_FIELD."='workgroup' order by ".GROUPS_NAME_FIELD);
 	if ($groups  &&  count($groups) > 0) {
-?>
+				?>
    <tr>
     <td class=r>Workgroup:</td>
     <td class=l>
      <select name="workgroup" id="workgroup" onchange="update(this);">
       <option value="" selected="selected">(any workgroup)</option>
-<?php	foreach ($groups as $id => $name) { ?>
+						<?php	foreach ($groups as $id => $name) { ?>
       <option value="&quot;<?= htmlspecialchars($name) ?>&quot;"><?= htmlspecialchars($name) ?></option>
-<?php	} ?>
+							<?php	} ?>
      </select>
    </tr>
-<?php
+				<?php
 	}
-?>
+			?>
 
    <tr>
     <td class=r>Bookmarked&nbsp;by:</td>
     <td>
-<nobr>
+					<nobr>
      <select name="user" id="user" onchange="style.color = 'black'; update(this);" onkeypress="return keypressRedirector(event)">
        <option value="" selected="selected">(matching users)</option>
      </select>
      <select name="users_all" id="users_all" style="display: none;">
-<?php
+							<?php
 	$res = mysql_query('select '.USERS_ID_FIELD.', concat('.USERS_FIRSTNAME_FIELD.'," ",'.USERS_LASTNAME_FIELD.') as fullname from '.USERS_TABLE.' left join '.USER_GROUPS_TABLE.' on '.USER_GROUPS_USER_ID_FIELD.'='.USERS_ID_FIELD.' where '.USERS_ACTIVE_FIELD.' = "Y" and '.USER_GROUPS_GROUP_ID_FIELD.'=2 order by fullname');
 	while ($row = mysql_fetch_row($res)) {
 		print '<option value="&quot;'.htmlspecialchars($row[1]).'&quot;">'.htmlspecialchars($row[1]).'</option>'."\n";
 	}
-?>
+							?>
      </select>
     &nbsp;&nbsp;&nbsp;&nbsp;<img src=<?=HEURIST_URL_BASE?>common/images/leftarrow.gif>
-</nobr>
+					</nobr>
     </td>
     <td>
      <input onchange="refilter_usernames()" onkeypress="invoke_refilter()" value="(search for a user)" id=user_search onfocus="if (value == defaultValue) { value = ''; }">
@@ -566,18 +571,18 @@ function clear_fields() {
     <td><span style="color: green;">Type name to find users</td>
    </tr>
 
-</table>
+		</table>
 
 	<div class="separator_row" style="margin:10px 0"></div>
 
-<table>
+		<table>
    <tr><td colspan=3><h3>Ordering:</h3></td></tr>
 
    <tr>
     <td class=r>Sort&nbsp;by</td>
     <td>
-<script>
-function setAscDescLabels(sortbyValue) {
+					<script>
+						function setAscDescLabels(sortbyValue) {
 	var ascLabel = document.getElementById("asc-label");
 	var descLabel = document.getElementById("desc-label");
 
@@ -591,46 +596,46 @@ function setAscDescLabels(sortbyValue) {
 		ascLabel.text = "ascending";
 		descLabel.text = "descending";
 	}
-}
-</script>
-<select name=sortby id=sortby onchange="setAscDescLabels(options[selectedIndex].value); update(this);" style="width: 200px;">
+						}
+					</script>
+					<select name=sortby id=sortby onchange="setAscDescLabels(options[selectedIndex].value); update(this);" style="width: 200px;">
  <option value=t>record title</option>
  <option value=u>record URL</option>
  <option value=m>date modified</option>
  <option value=a>date added</option>
  <option value=r>personal rating</option>
  <option value=p>popularity</option>
-<optgroup label="Detail fields">
-<?php
+						<optgroup label="Detail fields">
+							<?php
 	$res = mysql_query('select dty_ID, dty_Name from '.DATABASE.'.defDetailTypes order by dty_Name');
 	while ($row = mysql_fetch_assoc($res)) {
-?>          <option value="f:&quot;<?= $row['dty_Name'] ?>&quot;"><?= htmlspecialchars($row['dty_Name']) ?></option>
-<?php	}	?>
-</optgroup>
-</select>
+								?>          <option value="f:&quot;<?= $row['dty_Name'] ?>&quot;"><?= htmlspecialchars($row['dty_Name']) ?></option>
+								<?php	}	?>
+						</optgroup>
+					</select>
     </td>
     <td>
-<div style="float: right;">
-<input type=checkbox id=sortby_multiple style="margin: 0; padding: 0; height: auto; width: auto; vertical-align: middle;" disabled onclick="update(document.getElementById('sortby'));">
-<label for=sortby_multiple id=sortby_multiple_label style="color: gray;">Bibliographic<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(sort by first value only)</label>
-</div>
+					<div style="float: right;">
+						<input type=checkbox id=sortby_multiple style="margin: 0; padding: 0; height: auto; width: auto; vertical-align: middle;" disabled onclick="update(document.getElementById('sortby'));">
+						<label for=sortby_multiple id=sortby_multiple_label style="color: gray;">Bibliographic<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(sort by first value only)</label>
+					</div>
 
 
-<select id=ascdesc style="width: 100px;" onchange="update(document.getElementById('sortby'));">
-<option value="" selected id=asc-label>ascending</option>
-<option value="-" id=desc-label>descending</option>
-</select>
-&nbsp;&nbsp;
+					<select id=ascdesc style="width: 100px;" onchange="update(document.getElementById('sortby'));">
+						<option value="" selected id=asc-label>ascending</option>
+						<option value="-" id=desc-label>descending</option>
+					</select>
+					&nbsp;&nbsp;
 
 
     </td>
    </tr>
 
-</table>
+		</table>
 
 	<div class="separator_row" style="margin:10px 0"></div>
 
-<table>
+		<table>
 
    <tr><td colspan=3><h3>Search:</h3></td></tr>
 
@@ -650,19 +655,19 @@ function setAscDescLabels(sortbyValue) {
 	<td colspan="2" style="padding-left: 30px;">
 	<strong>Search&nbsp;string</strong>
 	</td>
-</tr>
-<tr>
+			</tr>
+			<tr>
 	<td colspan=2 style="padding-left: 30px;">
 	<input style="width: 100%; padding:0 3px" name=q id=q >
 	</td>
-</tr>
-<tr>
+			</tr>
+			<tr>
 	<td colspan=2 style="padding-left: 30px;">
 		<button type="button" onclick="clear_fields(); return false;" style="margin-right:10px">Clear</button>
 		<button type="button" onclick="do_search();">Search</button>
 	</td>
-</tr>
-</table>
+			</tr>
+		</table>
 
  </body>
 </html>

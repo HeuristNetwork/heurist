@@ -46,12 +46,12 @@ CREATE DEFINER=`root`@`localhost` FUNCTION `hhash`(recID int) RETURNS varchar(40
 					dtl_DetailTypeID=dty_ID and
 					SRC.rec_RecTypeID=rst_RecTypeID and
 					rst_DetailTypeID=dty_ID and
-					rst_RequirementType = 'Required' and
+					rst_RequirementType = 'required' and
 					dty_Type = "resource" and
 					dtl_Value = DST.rec_ID and
 					dtl_RecID=recID;
 
-		return concat(ifnull(rectype,'N'), ':',
+		return concat(ifnull(rectype,'n'), ':',
 
 		if(non_resource_fields is not null and non_resource_fields != '', concat(non_resource_fields, ';'), ''),
 
@@ -85,7 +85,7 @@ DELIMITER $$
 					rst_RecordMatchOrder and
 					dty_Type != "resource" and
 					rec_ID = recID;
-		return concat(ifnull(rectype,'N'), ':',
+		return concat(ifnull(rectype,'n'), ':',
 		if(non_resource_fields is not null and non_resource_fields != '', concat(non_resource_fields, ';'), ''));
 	end
 	$$

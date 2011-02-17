@@ -1,6 +1,6 @@
 <?php
 
-/**
+	/**
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
@@ -13,41 +13,43 @@
 
 <?php
 
-require_once(dirname(__FILE__).'/../biblio/importRefer.php');
+	require_once(dirname(__FILE__).'/../biblio/importRefer.php');
 
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 
-mysql_connection_db_select(DATABASE);
+	mysql_connection_db_select(DATABASE);
 
-$bdt = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '1');
-$rft = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', '1');
-$res = mysql_query('select * from defRecTypes left join defRecStructure on rst_RecTypeID=rty_ID order by rty_RecTypeGroupID > 1, rty_Name');
-$bdr = array();
-while ($row = mysql_fetch_assoc($res)) {
+	$bdt = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '1');
+	$rft = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', '1');
+	$res = mysql_query('select * from defRecTypes left join defRecStructure on rst_RecTypeID=rty_ID
+								left join defRecTypeGroups on rtg_ID = (select substring_index(rty_RecTypeGroupIDs,',',1))
+								order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name');
+	$bdr = array();
+	while ($row = mysql_fetch_assoc($res)) {
 	if (! $bdr[$row['rty_ID']])
 		$bdr[$row['rty_ID']] = array();
 	$bdr[$row['rty_ID']][$row['rst_DetailTypeID']] = $row;
 	foreach ($bdt as $rdt_id => $rdt_name)
 		$bdr[$row['rty_ID']][$rdt_id]['dty_Name'] = $rdt_name;
-}
+	}
 
 ?>
 <style type="text/css">
-* { font-family: monospace; }
-li .red { color: red; }
-li .gray { color: lightgray; }
-li .gray .red { color: lightgray; }
+	* { font-family: monospace; }
+	li .red { color: red; }
+	li .gray { color: lightgray; }
+	li .gray .red { color: lightgray; }
 </style>
 
 <?php
 
-print "<h2>EndNote export field definitions</h2>";
-print "<p>Heurist imports the EndNote field on the left to the Heurist field on the right</p>";
+	print "<h2>EndNote export field definitions</h2>";
+	print "<p>Heurist imports the EndNote field on the left to the Heurist field on the right</p>";
 
-print '<ul>';
-foreach ($refer_to_heurist_map as $type => $details) {
+	print '<ul>';
+	foreach ($refer_to_heurist_map as $type => $details) {
 	print '<li><b>' . $type . ':</b><br>';
 	print '<ul>';
 	foreach ($details as $code => $bdts) {
@@ -68,12 +70,12 @@ foreach ($refer_to_heurist_map as $type => $details) {
 	}
 	print '</ul>';
 	print '<br>';
-}
-print '</ul>';
+	}
+	print '</ul>';
 
 
 
-function decode_bdt($rec_types, $bdt_code) {
+	function decode_bdt($rec_types, $bdt_code) {
 	global $refer_to_heurist_type_map;
 	global $bdr;
 	global $rft;
@@ -92,6 +94,6 @@ function decode_bdt($rec_types, $bdt_code) {
 	$my_bdr = $bdr[$rt_id][intval(substr($bdt_code, $colon_count))];
 	$name = $my_bdr['rst_DisplayName']? $my_bdr['rst_DisplayName'] : $my_bdr['dty_Name'];
 	return '<span class=red>'.$rectypeDescription.'</span>' . $name;
-}
+	}
 
 ?>

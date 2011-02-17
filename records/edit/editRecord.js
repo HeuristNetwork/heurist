@@ -456,9 +456,9 @@ top.HEURIST.edit = {
 
 
 	getBibDetailRequirements: function(rectypeID) {
-		if (! top.HEURIST.user.bibDetailRequirements  ||  ! top.HEURIST.user.bibDetailRequirements.valuesByRectypeID[rectypeID]) {
-			// easy case -- no special bibDetailRequirements for this rectype, considering this user's workgroups
-			return top.HEURIST.bibDetailRequirements.valuesByRectypeID[rectypeID];
+		if (! top.HEURIST.user.recDetailRequirements  ||  ! top.HEURIST.user.recDetailRequirements.valuesByRectypeID[rectypeID]) {
+			// easy case -- no special recDetailRequirements for this rectype, considering this user's workgroups
+			return top.HEURIST.recDetailRequirements.valuesByRectypeID[rectypeID];
 		}
 		else if (top.HEURIST.patchedBibDetailRequirements  &&  top.HEURIST.patchedBibDetailRequirements[rectypeID]) {
 			return top.HEURIST.patchedBibDetailRequirements[rectypeID];
@@ -466,9 +466,9 @@ top.HEURIST.edit = {
 		else {
 			// make a copy of the original bdrs and override with any workgroup-specific stuff
 			var bdrs = {};
-			var orig_bdrs = top.HEURIST.bibDetailRequirements.valuesByRectypeID[rectypeID];
-			var wg_bdrs = top.HEURIST.user.bibDetailRequirements.valuesByRectypeID[rectypeID];
-			var precedence = { 'Required': 4, 'Recommended': 3, 'Optional': 2, 'Forbidden': 1 };
+			var orig_bdrs = top.HEURIST.recDetailRequirements.valuesByRectypeID[rectypeID];
+			var wg_bdrs = top.HEURIST.user.recDetailRequirements.valuesByRectypeID[rectypeID];
+			var precedence = { 'required': 4, 'recommended': 3, 'optional': 2, 'forbidden': 1 };
 
 			// keep track of the original requiremences, as a fallback if they're not overridden
 			for (var bdt_id in orig_bdrs) {
@@ -496,7 +496,7 @@ top.HEURIST.edit = {
 
 				if (names.length) bdrs[bdt_id][0] = names.join(' / ');
 				if (prompts.length) bdrs[bdt_id][1] = prompts.join(' / ');
-				if (maxRequiremence  &&  bdrs[bdt_id][3] != 'Y') bdrs[bdt_id][3] = maxRequiremence;
+				if (maxRequiremence  &&  bdrs[bdt_id][3] != 'y') bdrs[bdt_id][3] = maxRequiremence;
 				if (repeat > 0) bdrs[bdt_id][4] = "1";
 			}
 
@@ -509,25 +509,25 @@ top.HEURIST.edit = {
 	getBibDetailNonRequirements: function(rectypeID) {
 		var non_reqs = {};
 		var reqs = top.HEURIST.edit.getBibDetailRequirements(rectypeID);
-		for (var bdt_id in top.HEURIST.bibDetailTypes.valuesByRecDetailTypeID) {
+		for (var bdt_id in top.HEURIST.recDetailTypes.valuesByRecDetailTypeID) {
 			var skip = false;
 			for (var i in reqs) {
 				if (i == bdt_id) skip = true;
 			}
 			if (skip) continue;
-			non_reqs[bdt_id] = top.HEURIST.bibDetailTypes.valuesByRecDetailTypeID[bdt_id];
+			non_reqs[bdt_id] = top.HEURIST.recDetailTypes.valuesByRecDetailTypeID[bdt_id];
 		}
 		return non_reqs;
 	},
 
 	getBibDetailOrder: function (rectypeID) {
-		var order = top.HEURIST.bibDetailRequirements.orderByRectypeID[rectypeID];
-		var bdrs = top.HEURIST.bibDetailRequirements.valuesByRectypeID[rectypeID];
+		var order = top.HEURIST.recDetailRequirements.orderByRectypeID[rectypeID];
+		var bdrs = top.HEURIST.recDetailRequirements.valuesByRectypeID[rectypeID];
 
-		if (top.HEURIST.user.bibDetailRequirements  &&
-			top.HEURIST.user.bibDetailRequirements.valuesByRectypeID[rectypeID]) {
+		if (top.HEURIST.user.recDetailRequirements  &&
+			top.HEURIST.user.recDetailRequirements.valuesByRectypeID[rectypeID]) {
 			// add any wg overrides that are additions - they get pushed on the end
-			var wg_bdrs = top.HEURIST.user.bibDetailRequirements.valuesByRectypeID[rectypeID];
+			var wg_bdrs = top.HEURIST.user.recDetailRequirements.valuesByRectypeID[rectypeID];
 			for (var bdt_id in wg_bdrs) {
 				if (! bdrs[bdt_id]) {
 					order.push(bdt_id);
@@ -554,14 +554,14 @@ top.HEURIST.edit = {
 	allInputs: [],
 	createInput: function(bibDetailTypeID, rectypeID, bdValues, container) {
 		// Get Detail Type info  id, name, canonical type, rec type contraint
-		var bdt = top.HEURIST.bibDetailTypes.valuesByRecDetailTypeID[bibDetailTypeID];
+		var bdt = top.HEURIST.recDetailTypes.valuesByRecDetailTypeID[bibDetailTypeID];
 		var bdr;
 		if (rectypeID) {
 			bdr = top.HEURIST.edit.getBibDetailRequirements(rectypeID)[bibDetailTypeID];
 		} else {
 			// fake low-rent bdr if rectype isn't specified
 			// name, prompt,default, required, repeatable, size, match
-			bdr = [ bdt[1], "", "", 'Optional', 0, 0, 0 ];
+			bdr = [ bdt[1], "", "", 'optional', 0, 0, 0 ];
 		}
 
 		var newInput;
@@ -645,7 +645,7 @@ top.HEURIST.edit = {
 						rdtConstrainedLookups[list[j]] = '';
 					}
 				} else if (dtRelConstForRecType[i]['vcb_ID']) {	// get all the rel lookups for this vocabulary
-					var ontRelations = top.HEURIST.bibDetailLookups[200][dtRelConstForRecType[i]['vcb_ID']];
+					var ontRelations = top.HEURIST.vocabTermLookup[200][dtRelConstForRecType[i]['vcb_ID']];
 					for (var j = 0; j < ontRelations.length; j++) {
 						rdtConstrainedLookups[ontRelations[j][0]] = '';
 					}
@@ -791,7 +791,7 @@ top.HEURIST.edit = {
 		var i, l = order.length;
 		for (i = 0; i < l; ++i) {
 			var bdtID = order[i];
-			if (bdrs[bdtID][3] == 'Forbidden') continue;
+			if (bdrs[bdtID][3] == 'forbidden') continue;
 
 			var newInput = top.HEURIST.edit.createInput(bdtID, rectypeID, bdValues[bdtID] || [], container);
 			inputs.push(newInput);
@@ -827,7 +827,7 @@ top.HEURIST.edit = {
 			if (! inputs[i].verify()) {
 				// disaster! incomplete input
 /*
-				var niceName = inputs[i].bibDetailRequirements[0].toLowerCase();
+				var niceName = inputs[i].recDetailRequirements[0].toLowerCase();
 				    niceName = niceName.substring(0, 1).toUpperCase() + niceName.substring(1);
 */
 				missingFields.push("\"" + inputs[i].shortName + "\" field requires " + inputs[i].typeDescription);
@@ -1144,38 +1144,38 @@ top.HEURIST.edit = {
 
 top.HEURIST.edit.inputs = { };
 
-top.HEURIST.edit.inputs.BibDetailInput = function(bibDetailType, bibDetailRequirements, bdValues, parentElement) {
+top.HEURIST.edit.inputs.BibDetailInput = function(bibDetailType, recDetailRequirements, bdValues, parentElement) {
 	if (arguments.length == 0) return;	// for prototyping
 	var thisRef = this;
 
 	this.bibDetailType = bibDetailType;
-	this.bibDetailRequirements = bibDetailRequirements;
+	this.recDetailRequirements = recDetailRequirements;
 	this.parentElement = parentElement;
 	var elt = parentElement;
 	do { elt = elt.parentNode; } while (elt.nodeType != 9 /* DOCUMENT_NODE */);
 	this.document = elt;
-	this.shortName = bibDetailRequirements[0];
+	this.shortName = recDetailRequirements[0];
 
-	var required = bibDetailRequirements[3];
-		if (required == 'Optional') required = "optional";
-		else if (required == 'Required') required = "required";
-		else if (required == 'Recommended') required = "recommended";
+	var required = recDetailRequirements[3];
+		if (required == 'optional') required = "optional";
+		else if (required == 'required') required = "required";
+		else if (required == 'recommended') required = "recommended";
 		else required = "";
 	this.required = required;
 
-	this.repeatable = (bibDetailRequirements[4] == "1")? true : false;
+	this.repeatable = (recDetailRequirements[4] == "1")? true : false;
 
 	this.row = parentElement.appendChild(this.document.createElement("tr"));
 		this.row.className = "input-row " + required;
 
 	this.headerCell = this.row.appendChild(this.document.createElement("td"));
 		this.headerCell.className = "input-header-cell";
-		this.headerCell.appendChild(this.document.createTextNode(bibDetailRequirements[0]));	// bdr_name
+		this.headerCell.appendChild(this.document.createTextNode(recDetailRequirements[0]));	// bdr_name
 	if (this.repeatable) {
 		var dupImg = this.headerCell.appendChild(this.document.createElement('img'));
 			dupImg.src = top.HEURIST.basePath + "common/images/duplicate.gif";
 			dupImg.className = "duplicator";
-			dupImg.alt = dupImg.title = "Add another " + bibDetailRequirements[0] + " field";
+			dupImg.alt = dupImg.title = "Add another " + recDetailRequirements[0] + " field";
 			top.HEURIST.registerEvent(dupImg, "click", function() { thisRef.duplicateInput.call(thisRef); } );
 	}
 
@@ -1185,7 +1185,7 @@ top.HEURIST.edit.inputs.BibDetailInput = function(bibDetailType, bibDetailRequir
 	// make sure that the promptDiv is the last item in the input cell
 	this.promptDiv = this.inputCell.appendChild(this.document.createElement("div"));
 		this.promptDiv.className = "help prompt";
-		this.promptDiv.innerHTML = bibDetailRequirements[1];
+		this.promptDiv.innerHTML = recDetailRequirements[1];
 
 	this.inputs = [];
 	if (this.repeatable) {
@@ -1218,7 +1218,7 @@ top.HEURIST.edit.inputs.BibDetailInput.prototype.duplicateInput = function() { t
 top.HEURIST.edit.inputs.BibDetailInput.prototype.addInputHelper = function(bdValue, element) {
 	this.elementName = "type:" + this.bibDetailType[0];
 		element.name = (bdValue && bdValue.id)? (this.elementName + "[bd:" + bdValue.id + "]") : (this.elementName + "[]");
-		element.title = this.bibDetailRequirements[0];
+		element.title = this.recDetailRequirements[0];
 		element.setAttribute("bib-detail-type", this.bibDetailType[0]);
 		var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
@@ -1236,8 +1236,8 @@ top.HEURIST.edit.inputs.BibDetailInput.prototype.addInputHelper = function(bdVal
 		}
 		else	this.constrainrectype = 0;
 	}
-	if (parseFloat(this.bibDetailRequirements[6]) > 0) {	//if the size is greater than zero
-		element.style.width = Math.round(4/3 * this.bibDetailRequirements[6]) + "ex";
+	if (parseFloat(this.recDetailRequirements[6]) > 0) {	//if the size is greater than zero
+		element.style.width = Math.round(4/3 * this.recDetailRequirements[6]) + "ex";
 	}
 
 	element.expando = true;
@@ -1585,7 +1585,7 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.getPrimaryValue = funct
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.typeDescription = "a value from the dropdown";
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.regex = new RegExp(".");
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdValue) {
-	var allOptions = top.HEURIST.bibDetailLookups[this.bibDetailType[0]]  ||  [];
+	var allOptions = top.HEURIST.vocabTermLookup[this.bibDetailType[0]]  ||  [];
 
 	var newInput = this.document.createElement("select");
 		var newOption = newInput.appendChild(this.document.createElement("option"));	// default blank option
@@ -1915,7 +1915,7 @@ top.HEURIST.edit.inputs.BibDetailUnknownInput = function() { top.HEURIST.edit.in
 top.HEURIST.edit.inputs.BibDetailUnknownInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
 top.HEURIST.edit.inputs.BibDetailUnknownInput.prototype.typeDescription = "some value";
 top.HEURIST.edit.inputs.BibDetailUnknownInput.prototype.addInput = function(bdValue) {
-	var allOptions = top.HEURIST.bibDetailLookups[this.bibDetailType[0]]  ||  [];
+	var allOptions = top.HEURIST.vocabTermLookup[this.bibDetailType[0]]  ||  [];
 
 	var newInput = this.document.createElement("div");
 		newInput.appendChild(this.document.createTextNode("Input type \"" + this.bibDetailType[2] + "\" not implemented"));
@@ -1934,7 +1934,7 @@ top.HEURIST.edit.inputs.BibDetailSeparator.prototype.addInput = function(bdValue
 	if (this.promptDiv){
 		this.promptDiv.className = "";
 		this.promptDiv.style.display = "none";
-		newInput.title = this.bibDetailRequirements[1];
+		newInput.title = this.recDetailRequirements[1];
 	}
 };
 

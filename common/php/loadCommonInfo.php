@@ -1,17 +1,14 @@
 <?php
 
-/**
+/*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- **/
+ -->*/
 
-?>
-
-<?php
 
 /* load some very basic HEURIST objects into top.HEURIST */
 
@@ -77,30 +74,35 @@ while ($row = mysql_fetch_assoc($res)) {
 	$groups[$row["rtg_ID"]] = $row["rtg_Name"];
 }
 print "top.HEURIST.rectypes.groupNamesInDisplayOrder = " . json_format($groups) . ";\n\n";
-error_log("get types by group");
+//error_log("get types by group");
 $typesByGroup = array();
-$res = mysql_query("select rtg_ID,rty_ID
-						from defRecTypes left join defRecTypeGroups on rtg_ID = rty_RecTypeGroupID
+$res = mysql_query("select rtg_ID,rty_ID, rty_ShowInLists
+						from defRecTypes left join defRecTypeGroups on rtg_ID = (select substring_index(rty_RecTypeGroupIDs,',',1))
 						where 1 order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
 while ($row = mysql_fetch_assoc($res)) {
-error_log(print_r($row,true));
+//error_log(print_r($row,true));
 	if (!array_key_exists($row['rtg_ID'],$typesByGroup)){
 		$typesByGroup[$row['rtg_ID']] = array();
 	}
-	array_push($typesByGroup[$row['rtg_ID']], intval($row["rty_ID"]));
+	$typesByGroup[$row['rtg_ID']][$row["rty_ID"]] = $row["rty_ShowInLists"];
 }
-error_log(print_r($typesByGroup,true));
+//error_log(print_r($typesByGroup,true));
 print "top.HEURIST.rectypes.typesByGroup = " . json_format($typesByGroup) . ";\n\n";
-	// saw FIXME TODO change this to create an array by RecTypeGroup.
 
-/* bibDetailRequirements contains colNames valuesByRectypeID,
+/* recDetailRequirements contains colNames valuesByRectypeID,
  * which contains
  */
 
-$colNames = array("rst_DisplayName", "rst_DisplayPrompt", "rst_DefaultValue", "rst_RequirementType", "rst_MaxValues", "rst_MinValues", "rst_DisplayWidth", "rst_RecordMatchOrder");
+// returns [ rst_DetailTypeID => [ rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
+// rst_DefaultValue, rst_RequirementType, rst_MaxValues, rst_MinValues, rst_DisplayWidth, rst_RecordMatchOrder,
+// rst_DisplayOrder, rst_DisplayDetailTypeGroupID, rst_EnumFilteredIDs, rst_PtrFilteredIDs, rst_CalcFunctionID, rst_PriorityForThumbnail] ...]
+$colNames = array("rst_DisplayName", "rst_DisplayHelpText", "rst_DisplayExtendedDescription", "rst_DefaultValue",
+					"rst_RequirementType", "rst_MaxValues", "rst_MinValues", "rst_DisplayWidth", "rst_RecordMatchOrder", "rst_DisplayOrder",
+					"rst_DisplayDetailTypeGroupID", "rst_EnumFilteredIDs", "rst_PtrFilteredIDs", "rst_CalcFunctionID", "rst_PriorityForThumbnail");
+//get a list of record type IDs
 $rec_types = mysql__select_array("defRecStructure", "distinct rst_RecTypeID", "1 order by rst_RecTypeID");
 
-print "\ntop.HEURIST.bibDetailRequirements = {\n";
+print "\ntop.HEURIST.recDetailRequirements = {\n";
 print "\tcolNames: [ \"" . join("\", \"", $colNames) . "\" ],\n";
 print "\tvaluesByRectypeID: {\n";
 
@@ -116,7 +118,6 @@ foreach ($rec_types as $rec_type) {
 		$first_rdr = false;
 		unset($rdr["rst_RecTypeID"]);
 		unset($rdr["rst_DetailTypeID"]);
-		unset($rdr["rst_DisplayOrder"]);
 		print "\t\t\t\"" . $rdr_rdt_id . "\": [ \"" . join("\", \"", array_map("slash", $rdr)) . "\" ]";
 	}
 }
@@ -141,14 +142,16 @@ foreach ($rec_types as $rec_type) {
 print "\n\t}\n};\n";
 
 
-
-/* bibDetailTypes */
-$colNames = array("dty_ID", "dty_Name", "dty_Type", "dty_Prompt", "dty_Help", "dty_PtrTargetRectypeIDs", "dty_EnumVocabIDs", "dty_EnumTermIDs");
-$res = mysql_query("select " . join(", ", $colNames) . " from defDetailTypes order by dty_ID");
+/* recDetailTypes */
+$colNames = array("dty_ID", "dty_Name", "dty_Type", "dty_DetailTypeGroupID", "dty_HelpText", "dty_ExtendedDescription",
+					"dty_PtrTargetRectypeIDs", "dty_EnumVocabIDs", "dty_EnumTermIDs","dty_ShowInLists");
+$res = mysql_query("select " . join(", ", $colNames) . "
+					from defDetailTypes left join defDetailTypeGroups on dty_DetailTypeGroupID = dtg_ID
+					order by dtg_Order, dty_Type, dty_Name, dty_ID");
 
 $bdt = array();
 $first = true;
-print "\ntop.HEURIST.bibDetailTypes = {\n";
+print "\ntop.HEURIST.recDetailTypes = {\n";
 print "\tcolNames: [ \"" . join("\", \"", $colNames) . "\" ],\n";
 print "\tvaluesByRecDetailTypeID: {\n";
 while ($row = mysql_fetch_assoc($res)) {
@@ -163,18 +166,15 @@ while ($row = mysql_fetch_assoc($res)) {
 print "\n\t}\n};\n";
 
 
-/*
-| trm_ID     | smallint(6) | NO   | PRI | NULL    | auto_increment |
-| trm_VocabID | smallint(6) | YES  | MUL | NULL    |                |
-| trm_Label  | varchar(63) | YES  |     | NULL    |                |
-*/
-// saw FIXME TODO make sure that VocabID actually exist in Vocab table
-$res = mysql_query("select trm_ID,trm_VocabID, trm_Label from defTerms order by trm_VocabID, trm_Label");
-print "\ntop.HEURIST.bibDetailLookups = {\n";
+$res = mysql_query("select trm_ID,trm_VocabID, trm_Label
+					from defTerms left join defVocabularies on trm_VocabID = vcb_ID
+					where vcb_ID is not null
+					order by trm_VocabID, trm_Label");
+print "\ntop.HEURIST.vocabTermLookup = {\n";
 $first = true;
 $prev_vcb_id = -1;
 while ($row = mysql_fetch_assoc($res)) {
-	if (!$row["trm_VocabID"]) continue;	// vocab id in not valid so skip it
+	if (!$row["trm_VocabID"]) continue;	// term doesn't have a valid vocab id so skip it
 	if ($prev_vcb_id != $row["trm_VocabID"]) {	/* new vcb_ID */
 		if (! $first) {
 			print "] ,\n\t\"" . $row["trm_VocabID"] . "\": [";
@@ -223,8 +223,8 @@ top.HEURIST.ratings = {"0": "not rated",
 						  from ".USERS_DATABASE.".sysUGrps grp
 					 left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_GroupID = grp.ugr_ID
 					 left join ".USERS_DATABASE.".sysUGrps b on b.ugr_ID = ugl_UserID
-						 where grp.ugr_Type != 'User'
-						   and b.ugr_Enabled  = 'Y'
+						 where grp.ugr_Type != 'user'
+						   and b.ugr_Enabled  = 'y'
 					  group by grp.ugr_ID order by grp.ugr_Name");
 	while ($row = mysql_fetch_assoc($res)) {
 		$workgroups[$row["grpID"]] = array(
@@ -243,9 +243,9 @@ top.HEURIST.ratings = {"0": "not rated",
 						  from ".USERS_DATABASE.".sysUGrps grp
 					 left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_GroupID = grp.ugr_ID
 					 left join ".USERS_DATABASE.".sysUGrps b on b.ugr_ID = ugl_UserID
-						 where grp.ugr_Type != 'User'
+						 where grp.ugr_Type != 'user'
 						   and ugl_Role = 'admin'
-						   and b.ugr_Enabled  = 'Y'
+						   and b.ugr_Enabled  = 'y'
 					  order by ugl_GroupID, b.ugr_LastName, b.ugr_FirstName");
 	$grp_id = 0;
 	while ($row = mysql_fetch_assoc($res)) {

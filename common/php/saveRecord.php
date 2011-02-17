@@ -100,13 +100,13 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 	}
 
 	// check that all the required fields are present
-	$res = mysql_query("select rst_ID from defRecStructure left join recDetails on dtl_RecID=$recordID and rst_DetailTypeID=dtl_DetailTypeID where rst_RecTypeID=$type and rst_RequirementType='Required' and dtl_ID is null");
+	$res = mysql_query("select rst_ID from defRecStructure left join recDetails on dtl_RecID=$recordID and rst_DetailTypeID=dtl_DetailTypeID where rst_RecTypeID=$type and rst_RequirementType='required' and dtl_ID is null");
 	if (mysql_num_rows($res) > 0) {
 		// at least one missing field
 		jsonError("record is missing required field(s)");
 	}
 /* Override  code removed by SAW on 13/1/11
-	$res = mysql_query("select rst_ID from rec_detail_requirements_overrides left join recDetails on dtl_RecID=$recordID and rst_DetailTypeID=dtl_DetailTypeID where (rdr_wg_id = 0 or rdr_wg_id=$wg) and rdr_wg_id = rst_RecTypeID=$type and rst_RequirementType='Required' and dtl_ID is null");
+	$res = mysql_query("select rst_ID from rec_detail_requirements_overrides left join recDetails on dtl_RecID=$recordID and rst_DetailTypeID=dtl_DetailTypeID where (rdr_wg_id = 0 or rdr_wg_id=$wg) and rdr_wg_id = rst_RecTypeID=$type and rst_RequirementType='required' and dtl_ID is null");
 	if (mysql_num_rows($res) > 0) {
 		// at least one missing field
 		jsonError("record is missing required field(s)");
@@ -444,7 +444,7 @@ function handleNotifications($recordID, $removals, $additions) {
 		);
 
 		if (@$addition["user"]) {
-			if (! mysql__select_array(USERS_DATABASE.".sysUGrps usr", "usr.ugr_ID", "usr.ugr_ID=".intval($addition["user"])." and usr.ugr_Type = 'User' and  and usr.ugr_Enabled='Y'")) {
+			if (! mysql__select_array(USERS_DATABASE.".sysUGrps usr", "usr.ugr_ID", "usr.ugr_ID=".intval($addition["user"])." and usr.ugr_Type = 'User' and  and usr.ugr_Enabled='y'")) {
 				array_push($newIDs, array("error" => "invalid recipient"));
 				continue;
 			}

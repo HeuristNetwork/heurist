@@ -610,12 +610,12 @@ function writeTag($rectype, $detail, $value, $file_id) {
 	}
 
 	// if value is required but empty, make a notice of missing detail
-	if (empty($value) && $RQS[$rectype][$detail]['rst_RequirementType'] == 'Required') {
+	if (empty($value) && $RQS[$rectype][$detail]['rst_RequirementType'] == 'required') {
 		$ERROR .= "<error>missing required detail</error>\n";
 	}
 
 	// if the value is not empty OR empty but required, write tag with escaping weird chars
-	if (!empty($value) || (empty($value) && $RQS[$rectype][$detail]['rst_RequirementType'] == 'Required')) {
+	if (!empty($value) || (empty($value) && $RQS[$rectype][$detail]['rst_RequirementType'] == 'required')) {
 		$XML.= "<detail name='". htmlspecialchars(@$RQS[$rectype][$detail]['rst_DisplayName']) ."' type='" . htmlspecialchars(@$DTN[$detail]) . "' id='" . $detail . "'>" . $value . "</detail>\n";
 	}
 }
@@ -776,7 +776,7 @@ function have_bib_permissions_forall($rec_id) {
 
 	$bib = mysql_fetch_assoc($res);
 
-	if ($bib['rec_OwnerUGrpID']  &&  $bib['rec_NonOwnerVisibility'] == 'Hidden') {
+	if ($bib['rec_OwnerUGrpID']  &&  $bib['rec_NonOwnerVisibility'] == 'hidden') {
 		return false;
 	}
 

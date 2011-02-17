@@ -50,7 +50,7 @@ function init () {
 
 	recCountSpan.innerHTML = top.HEURIST.search.get_bib_ids().length;
 
-	var relTypes = top.HEURIST.bibDetailLookups[200];
+	var relTypes = top.HEURIST.vocabTermLookup[200];
 	for (var ont in relTypes) {
 		var grp = document.createElement("optgroup");
 		grp.label = top.HEURIST.vocabularyLookup[ont];

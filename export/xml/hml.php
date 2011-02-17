@@ -133,7 +133,7 @@ function single_record_retrieval($q) {
 		if (mysql_num_rows($res) < 1) return false;
 		$rec = mysql_fetch_assoc($res);
 		//saw FIXME need to compare against current user's UGrpID, need to say no user or group user belongs to and is HIDDEN
-		if ($rec['rec_OwnerUGrpID']  &&  $rec['rec_NonOwnerVisibility'] === 'Hidden') {
+		if ($rec['rec_OwnerUGrpID']  &&  $rec['rec_NonOwnerVisibility'] === 'hidden') {
 			return false;
 		}
 		return true;

@@ -1,17 +1,14 @@
 <?php
 
-/**
+/*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- **/
+ -->*/
 
-?>
-
-<?php
 	/*<!-- importerBaseClass.php
 
 	Copyright 2005 - 2010 University of Sydney Digital Innovation Unit
@@ -679,9 +676,9 @@ class HeuristNativeEntry {
 					$inner_bdt_id = $matches[1];
 				else
 					$inner_bdt_id = $bib_requirement_names[55][strtolower($inner_field_name)];
-error_log($inner_bdt_id);
-error_log($inner_field_name);
-error_log(print_r($bib_requirement_names[55], 1));
+//error_log($inner_bdt_id);
+//error_log($inner_field_name);
+//error_log(print_r($bib_requirement_names[55], 1));
 
 
 				if ($this->_authors[0] == 'anonymous') {
@@ -715,7 +712,7 @@ error_log(print_r($bib_requirement_names[55], 1));
 		if (! $hash_info) {
 			// hash_info contains all the good stuff we need for determining the hash, indexed by rectype, and then by dty_ID
 			$res = mysql_query("select rst_RecTypeID, dty_ID, dty_Type = 'resource' as isResource from defRecStructure, defDetailTypes
-			                     where rst_DetailTypeID=dty_ID and ((dty_Type != 'resource' and rst_RecordMatchOrder) or (dty_Type = 'resource' and rst_RequirementType = 'Required'))
+			                     where rst_DetailTypeID=dty_ID and ((dty_Type != 'resource' and rst_RecordMatchOrder) or (dty_Type = 'resource' and rst_RequirementType = 'required'))
 			                  order by rst_RecTypeID, dty_Type = 'resource', dty_ID");
 			$hash_info = array();
 			while ($row = mysql_fetch_assoc($res)) {
@@ -724,9 +721,12 @@ error_log(print_r($bib_requirement_names[55], 1));
 			}
 		}
 		global $bdt_to_rectype;
-		if (! @$bdt_to_rectype)
-			$bdt_to_rectype = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_PtrTargetRectypeIDs', 'dty_PtrTargetRectypeIDs is not null');
-
+		if (! @$bdt_to_rectype) {
+			$temp = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_PtrTargetRectypeIDs', 'dty_PtrTargetRectypeIDs is not null');
+			foreach ($temp as $dtyID => $ptrTargetString) {
+				$bdt_to_rectype[$dtyID] = explode(",",$ptrTargetString);
+			}
+		}
 		$infos = $hash_info[$this->_rectype];
 
 		$hhash = $this->_rectype . ":";
@@ -745,21 +745,12 @@ error_log(print_r($bib_requirement_names[55], 1));
 				sort($_vals);
 
 				if (count($_vals)) $hhash .= join(";", $_vals) . ";";
-			}
-			else {
-				if ($bdt_to_rectype[$rdt_id] == 75) {	// Author/Editor
-					if ($this->_author_hashes) {
-						sort($this->_author_hashes);
-						$hhash .= '^' . join('$^', $this->_author_hashes) . '$';
-					}
-				}
-				else {
-					if ($this->_container  &&  $this->_container->getReferenceType() == $bdt_to_rectype[$rdt_id]) {
+			} else { //resource pointer
+				if ($this->_container  &&  in_array($this->_container->getReferenceType(), $bdt_to_rectype[$rdt_id])) {
 						$hhash .= '^' . $this->_container->getHHash() . '$';
 					}
 				}
 			}
-		}
 
 		$this->_hhash = $hhash;
 		return $hhash;
@@ -773,7 +764,7 @@ error_log(print_r($bib_requirement_names[55], 1));
 		if (! $hash_info) {
 			// hash_info contains all the good stuff we need for determining the hash, indexed by rectype, and then by dty_ID
 			$res = mysql_query("select rst_RecTypeID, dty_ID, dty_Type = 'resource' as isResource from defRecStructure, defDetailTypes
-			                     where rst_DetailTypeID=dty_ID and ((dty_Type != 'resource' and rst_RecordMatchOrder) or (dty_Type = 'resource' and rst_RequirementType = 'Required'))
+			                     where rst_DetailTypeID=dty_ID and ((dty_Type != 'resource' and rst_RecordMatchOrder) or (dty_Type = 'resource' and rst_RequirementType = 'required'))
 			                  order by rst_RecTypeID, dty_Type = 'resource', dty_ID");
 			$hash_info = array();
 			while ($row = mysql_fetch_assoc($res)) {
@@ -782,8 +773,12 @@ error_log(print_r($bib_requirement_names[55], 1));
 			}
 		}
 		global $bdt_to_rectype;
-		if (! @$bdt_to_rectype)
-			$bdt_to_rectype = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_PtrTargetRectypeIDs', 'dty_PtrTargetRectypeIDs is not null');
+		if (! @$bdt_to_rectype) {
+			$temp = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_PtrTargetRectypeIDs', 'dty_PtrTargetRectypeIDs is not null');
+			foreach ($temp as $dtyID => $ptrTargetString) {
+				$bdt_to_rectype[$dtyID] = explode(",",$ptrTargetString);
+			}
+		}
 
 		$infos = $hash_info[$this->_rectype];
 
@@ -803,23 +798,12 @@ error_log(print_r($bib_requirement_names[55], 1));
 				sort($_vals);
 
 				if (count($_vals)) $hhash .= join(";", $_vals) . ";";
-			}
-/*
-			else {
-				if ($rdt_id === 158  &&  $bdt_to_rectype[$rdt_id] == 75) {	// Author/Editor
-					if ($this->_author_hashes) {
-						sort($this->_author_hashes);
-						$hhash .= '^' . join('$^', $this->_author_hashes) . '$';
-					}
-				}
-				else {
-					if ($this->_container  &&  $this->_container->getReferenceType() == $bdt_to_rectype[$rdt_id]) {
+			} else {
+				if ($this->_container  &&  in_array($this->_container->getReferenceType(), $bdt_to_rectype[$rdt_id])) {
 						$hhash .= '^' . $this->_container->getHHash() . '$';
 					}
 				}
 			}
-*/
-		}
 
 		$this->_craphash = $hhash;
 		return $hhash;
@@ -841,7 +825,7 @@ error_log(print_r($bib_requirement_names[55], 1));
 		if (! $this->_container) return true;
 
 		$containerBDType = intval($rectype_to_bdt_id_map[ $this->_container->getReferenceType() ]);
-		$res = mysql_query("select * from defRecStructure where rst_DetailTypeID = $containerBDType and rst_RecTypeID = " . $this->_rectype . " and rst_RequirementType = 'Required'");
+		$res = mysql_query("select * from defRecStructure where rst_DetailTypeID = $containerBDType and rst_RecTypeID = " . $this->_rectype . " and rst_RequirementType = 'required'");
 		if (mysql_num_rows($res) == 0) return true;
 		return false;
 	}

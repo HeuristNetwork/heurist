@@ -59,17 +59,17 @@ function drawInputForm(detailType, recType){
 	var reqClass = "";
 
 	switch (detRequiremence){
-	case 'Required':
+	case 'required':
 		reqText = "Required";
 	 	reqClass = "required";
 	 	break;
 
-	case 'Recommended':
+	case 'recommended':
 		reqText = "Recommended";
 	 	reqClass = "recommended";
 	 	break;
 
-	case 'Optional':
+	case 'optional':
 		reqText = "Optional";
 	 	reqClass = "optional";
 		break;

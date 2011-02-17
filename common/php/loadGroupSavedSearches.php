@@ -47,7 +47,7 @@ $res = mysql_query("select usr.ugr_ID, concat(usr.ugr_FirstName,' ',usr.ugr_Last
 					  from ".USERS_DATABASE.".sysUsrGrpLinks
 				 left join ".USERS_DATABASE.".sysUGrps usr on usr.ugr_ID = ugl_UserID
 					 where usr.ugl_GroupID = ".$wg_id."
-					   and usr.ugr_Enabled = 'Y'
+					   and usr.ugr_Enabled = 'y'
 				  order by usr.ugr_LastName");
 $first = true;
 while ($row = mysql_fetch_row($res)) {

@@ -458,7 +458,7 @@ function set_wg_and_vis() {
 		$wg = intval(@$_REQUEST['wg_id']);
 		$vis = $_REQUEST['vis'];
 
-		if (($wg == 0  ||  in_array($wg, get_group_ids()))  &&  ($vis == 'Viewable'  ||  $vis == 'Hidden')) {
+		if (($wg == 0  ||  in_array($wg, get_group_ids()))  &&  ($vis == 'viewable'  ||  $vis == 'hidden')) {
 			mysql_connection_db_overwrite(DATABASE);
 
 			if ($wg === 0) $vis = 'NULL';

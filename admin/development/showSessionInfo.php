@@ -9,10 +9,6 @@
  * @todo
  **/
 
-?>
-
-<?php
-
 if ($_COOKIE['heurist-sessionid']) session_id($_COOKIE['heurist-sessionid']);
 session_start();
 

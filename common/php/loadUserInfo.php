@@ -57,7 +57,7 @@ while ($row = mysql_fetch_row($res)) {
     ];
 <?php
 
-$res = mysql_query("select tag_ID, tag_UGrpID, tag_Text from usrTags, ".USERS_DATABASE.".sysUsrGrpLinks, ".USERS_DATABASE.".sysUGrps grp where ugl_GroupID=tag_UGrpID and ugl_GroupID=grp.ugr_ID and ugl_UserID=".get_user_id()." and grp.ugr_Type!='User' order by grp.ugr_Name, tag_Text");
+$res = mysql_query("select tag_ID, tag_UGrpID, tag_Text from usrTags, ".USERS_DATABASE.".sysUsrGrpLinks, ".USERS_DATABASE.".sysUGrps grp where ugl_GroupID=tag_UGrpID and ugl_GroupID=grp.ugr_ID and ugl_UserID=".get_user_id()." and grp.ugr_Type!='user' order by grp.ugr_Name, tag_Text");
 $rows = array();
 $ids = array();
 while ($row = mysql_fetch_row($res)) {
@@ -93,7 +93,7 @@ while ($row = mysql_fetch_row($res)) {
 
     top.HEURIST.user.workgroups = [<?php
 if (is_array(@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'])) {
-	$workgroups = mysql__select_array(USERS_DATABASE.".sysUGrps grp", "grp.ugr_ID", "grp.ugr_ID in (".join(",", array_keys($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'])).") and grp.ugr_Type !='User' order by grp.ugr_Name");
+	$workgroups = mysql__select_array(USERS_DATABASE.".sysUGrps grp", "grp.ugr_ID", "grp.ugr_ID in (".join(",", array_keys($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'])).") and grp.ugr_Type !='user' order by grp.ugr_Name");
 	print join(", ", $workgroups);
 }
 ?> ];
@@ -131,7 +131,7 @@ print json_format($ws, true);
 
 $res = mysql_query("select usr.ugr_ID, usr.ugr_Name, concat(usr.ugr_FirstName, ' ', usr.ugr_LastName) as fullname
 					  from ".USERS_DATABASE.".sysUGrps usr
-					 where usr.ugr_Enabled='Y' and usr.ugr_FirstName is not null and usr.ugr_LastName is not null and !usr.ugr_IsModelUser
+					 where usr.ugr_Enabled='y' and usr.ugr_FirstName is not null and usr.ugr_LastName is not null and !usr.ugr_IsModelUser
 				  order by fullname");
 print "    top.HEURIST.allUsers = {\n";
 $first = true;

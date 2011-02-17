@@ -1,13 +1,13 @@
 <?php
 
-/**
+/*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- **/
+ -->*/
 
 ?>
 
@@ -494,7 +494,7 @@ class HeuristZoteroParser extends HeuristForeignParser {
 					$entry_details[$key] = $request[$key][$i];
 			}
 
-			$entries[] = &new HeuristZoteroEntry($entry_details);
+			$entries[] = new HeuristZoteroEntry($entry_details);
 		}
 
 		return array( NULL, &$entries );
@@ -600,10 +600,6 @@ class HeuristZoteroEntry extends HeuristForeignEntry {
 	function crosswalk() {
 		global $zotero_to_heurist_detail_map, $zotero_to_heurist_type_map;
 
-		global $bdt_to_rectype;
-		if (! @$bdt_to_rectype)
-			$bdt_to_rectype = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_PtrTargetRectypeIDs', 'dty_PtrTargetRectypeIDs is not null');
-
 		$fields = $this->_raw;
 		if (array_key_exists($fields['itemType'], $zotero_to_heurist_type_map))
 			unset($fields['itemType']);
@@ -652,7 +648,7 @@ class HeuristZoteroEntry extends HeuristForeignEntry {
 		$last_entry = NULL;
 		$new_entry = NULL;
 		foreach ($zotero_to_heurist_type_map[$this->_type] as $rt) {
-			$entry = &new HeuristNativeEntry($rt);
+			$entry = new HeuristNativeEntry($rt);
 
 			if ($new_entry == NULL) $new_entry = &$entry;
 			else $last_entry->setContainerEntry($entry);

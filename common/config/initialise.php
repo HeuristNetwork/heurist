@@ -44,10 +44,10 @@
     define('READONLY_DBUSERNAME',$dbReadonlyUsername);	//readonly user for access to user and heurist databases
     define('READONLY_DBUSERPSWD',$dbReadonlyPassword);
 
-    define('HEURIST_DB_PREFIX', $dbPrefix);	//database name prefix which is added to db=name to compose the mysql dbname used in queries
+	define('HEURIST_DB_PREFIX', (@$_REQUEST['prefix']? $_REQUEST['prefix'] : $dbPrefix));	//database name prefix which is added to db=name to compose the mysql dbname used in queries
     define('HEURIST_SYSTEM_DB', $dbPrefix."HeuristSystem");	//database which contains Heurist System level data
-    define('HEURIST_REFERENCE_BASE_URL', "HTTP://heuristscholar.org/master/");	//Heurist Installation which contains reference structure definition
-    define('HEURIST_INDEX_BASE_URL', "HTTP://heuristscholar.org/master/");	//Heurist Installation which contains index of registered Heurist databases
+	define('HEURIST_REFERENCE_BASE_URL', "HTTP://heuristscholar.org/h3/");	//Heurist Installation which contains reference structure definition
+	define('HEURIST_INDEX_BASE_URL', "HTTP://heuristscholar.org/h3/");	//Heurist Installation which contains index of registered Heurist databases
     define('HEURIST_SYS_GROUP_ID', 1);	//ID of Heurist System User Group which has special privileges
     //error_log("in initialise dbHost = $dbHost");
     //test db connect valid db
@@ -59,6 +59,7 @@
     }
 
     // error_log("initialise REQUEST = ".print_r($_REQUEST,true));
+
     if (@$_REQUEST["db"]) {
         $dbName = $_REQUEST["db"];
     }else if (@$_REQUEST["instance"]) { // saw TODO: temporary until change instance to db

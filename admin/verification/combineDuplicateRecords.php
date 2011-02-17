@@ -154,7 +154,7 @@
 						// get overrides - this will potentially overwrite the main requirements
 						$wg_ids_list = join(',',array_keys($_SESSION['heurist']['user_access']));
 						$res = mysql_query('select rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_RequirementType, rst_MaxValues from rec_detail_requirements_overrides where rst_RecTypeID in ('.join(',',array_keys($rfts)).') AND rdr_wg_id in ('.$wg_ids_list.')');
-						$precedence = array( 'Required'=> 4, 'Recommended'=> 3, 'Optional'=> 2, 'Forbidden'=> 1 );
+						$precedence = array( 'required'=> 4, 'recommended'=> 3, 'optional'=> 2, 'forbidden'=> 1 );
 
 						while ($req = mysql_fetch_assoc($res)) {
 							$rdt_id = $req['rst_DetailTypeID'];
@@ -236,7 +236,7 @@
 	    foreach ($record['details'] as $rd_type => $detail) {
 		    if (! $detail) continue;    //FIXME  check if required and mark it as missing and required
 									$reqmnt = $rec_requirements[$record['rec_RecTypeID']][$rd_type]['rst_RequirementType'];
-            $color = ($reqmnt == 'Required' ? 'red': ($reqmnt == 'Recommended'? 'black':'grey'));
+            $color = ($reqmnt == 'required' ? 'red': ($reqmnt == 'recommended'? 'black':'grey'));
 		    print '<tr><td style=" color: '.$color .';">'.$bdts[$rd_type].'</td>';
 		    print '<td style="padding-left:10px;">';
             foreach($detail as $i => $rg){
@@ -351,7 +351,7 @@
             }
             if (count($detail) == 0) continue;
             $reqmnt = $rec_requirements[$master_rec_type][$rd_type]['rst_RequirementType'];
-            $color = ($reqmnt == 'Required' ? 'red': ($reqmnt == 'Recommended'? 'black':'grey'));
+            $color = ($reqmnt == 'required' ? 'red': ($reqmnt == 'recommended'? 'black':'grey'));
             print '<tr><td style=" color: '.$color .';">'.$bdts[$rd_type].'</td>';
             //FIXME place a keep checkbox on values for repeatable fields , place a radio button for non-repeatable fields with
             //keep_dt_### where ### is detail Type id and mark both "checked" for master record

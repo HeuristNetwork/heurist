@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS sysIdentification (
 CREATE TABLE IF NOT EXISTS sysUGrps (
   ugr_ID smallint(5) unsigned NOT NULL auto_increment
     COMMENT 'User or group ID, used wherever a user or group is to be identified',
-  ugr_Type enum('User','Workgroup','Ugradclass') NOT NULL default 'User'
+  ugr_Type enum('user','workgroup','ugradclass') NOT NULL default 'user'
     COMMENT 'User or workgroup, special workgroup types also supported',
   ugr_Name varchar(64) NOT NULL
     COMMENT 'The unique user/login/group name, user name defaults to email address',
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS sysUGrps (
   ugr_Postcode varchar(20) default NULL,
   ugr_Interests varchar(255) default NULL
     COMMENT 'List of research interests, only for Users, not Workgroups',
-  ugr_Enabled enum('Y','N') NOT NULL default 'N'
+  ugr_Enabled enum('y','n') NOT NULL default 'n'
     COMMENT 'Flags if user can use Heurist, normally needs authorising by admin',
   ugr_LastLoginTime datetime default NULL
     COMMENT 'Date and time of last login (but user may stay logged in)',
@@ -98,11 +98,11 @@ CREATE TABLE IF NOT EXISTS sysUGrps (
 INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMail)
  VALUES (1,'Database owners',
  'Group 1 owns new databases by default',
- 'Workgroup','PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=1');
+ 'workgroup','PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=1');
 
 INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMail)
  VALUES (2,'dbAdmin','User 2 is default owner/adminstration group for all databases',
- 'User','cfefBRSMX8ggU','EMAIL NOT SET FOR ID=2');  -- password is 'none'
+ 'user','cfefBRSMX8ggU','EMAIL NOT SET FOR ID=2');  -- password is 'none'
 
 -- ------------------------------------------------------------------------------
 

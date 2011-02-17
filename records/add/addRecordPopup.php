@@ -1,6 +1,6 @@
 <?php
 
-/*<!--
+	/*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
@@ -13,14 +13,14 @@
 
 <?php
 
-define('SAVE_URI', 'disabled');
+	define('SAVE_URI', 'disabled');
 
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
-if (! is_logged_in()) return;
+	if (! is_logged_in()) return;
 
-mysql_connection_db_select(DATABASE);
+	mysql_connection_db_select(DATABASE);
 
 ?>
 <html>
@@ -33,7 +33,7 @@ mysql_connection_db_select(DATABASE);
   <script>
 
 
-$(document).ready(function() {
+			$(document).ready(function() {
 	$("#show-adv-link").click(function() {
 		$(this).hide();
 		$('#advanced-section').show();
@@ -44,9 +44,9 @@ $(document).ready(function() {
 
 	var matches = location.search.match(/wg_id=(\d+)/);
 	buildworkgroupTagselect(matches ? matches[1] : null);
-});
+			});
 
-function buildworkgroupTagselect(wgID) {
+			function buildworkgroupTagselect(wgID) {
 	var i, l, kwd, val;
 	$("#tag").empty();
 	$("<option value='' selected disabled>(select workgroup tag)</option>").appendTo("#tag");
@@ -58,10 +58,10 @@ function buildworkgroupTagselect(wgID) {
 			$("<option value='" + val + "'>" + kwd[1] + "</option>").appendTo("#tag");
 		}
 	}
-}
+			}
 
 
-function update_link() {
+			function update_link() {
 	var base = "<?= HEURIST_URL_BASE?>records/add/addRecord.php?addref=1&instance=<?=HEURIST_INSTANCE?>";
 	var link = base + compute_args();
 
@@ -91,9 +91,9 @@ function update_link() {
 			"../?w=all&q=tag:\"" + $("#tag").val().replace(/\\/, "") + "\"" +
 			          " -tag:\"" + $("#tag").val() + "\"";
 	}
-}
+			}
 
-function compute_args() {
+			function compute_args() {
 	var extra_parms = '';
 	if (document.getElementById('restrict_elt').checked) {
 		var wg_id = parseInt(document.getElementById('rec_OwnerUGrpID').value);
@@ -114,9 +114,9 @@ function compute_args() {
 	}
 
 	return '';
-}
+			}
 
-function add_note(e) {
+			function add_note(e) {
 	if (! e) e = window.event;
 
 	var extra_parms = '';
@@ -154,20 +154,20 @@ function add_note(e) {
 
 	top.location.href = '<?= HEURIST_URL_BASE?>records/add/addRecord.php?addref=1&instance=<?=HEURIST_INSTANCE?>&bib_rectype='+rt + extra_parms;
 
-}
-function note_type_click() {
+			}
+			function note_type_click() {
 	var ref_elt = document.getElementById('reference_elt');
 	document.getElementById('rectype_elt').disabled = !ref_elt.checked;
-}
+			}
 
 
   </script>
 
   <style type=text/css>
-.hide_workgroup .workgroup { visibility: hidden; }
-hr { margin: 20px 0; }
-#add-link-input { width: 95%; }
-#add-link-tags {width : 70%;}
+			.hide_workgroup .workgroup { visibility: hidden; }
+			hr { margin: 20px 0; }
+			#add-link-input { width: 95%; }
+			#add-link-tags {width : 70%;}
   </style>
 
  </head>
@@ -177,10 +177,9 @@ hr { margin: 20px 0; }
 
   <table border="0" id=maintable<?= @$_REQUEST['wg_id'] > 0 ? "" : " class=hide_workgroup" ?>>
    <tr><td colspan=3 style="color: red; margin-bottom:5px;">
-<?php
+				<?php
 	 print  ''. @$_REQUEST['error_msg'] ? $_REQUEST['error_msg'] . '' : '' ;
-
-?>
+				?>
    </td></tr>
    <tr>
     <td colspan=3> &nbsp;</td>
@@ -191,14 +190,14 @@ hr { margin: 20px 0; }
    <tr>
     <td><nobr><label><input type="radio" name="a" id="reference_elt" onclick="note_type_click();"> Record type:</label></nobr></td>
     <td colspan=2>
-<?php
-	$res = mysql_query("select distinct rty_ID,rty_Name,rty_Description, rty_OrderInGroup, rtg_Name, rtg_Order
-						from defRecTypes left join defRecTypeGroups on rtg_ID = rty_RecTypeGroupID
-						where 1 order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
-?>
-     <select name="ref_type"  title="New bibliographic record type" style="margin: 3px;" id="rectype_elt" onChange='document.getElementById("reference_elt").checked = true; document.getElementById("note_elt").checked = false;'>
+					<?php
+						$res = mysql_query("select distinct rty_ID,rty_Name,rty_Description, rtg_Name
+						from defRecTypes left join defRecTypeGroups on rtg_ID = (select substring_index(rty_RecTypeGroupIDs,',',1))
+						where rty_ShowInLists = 1 order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
+					?>
+					<select name="ref_type"  title="New record type" style="margin: 3px;" id="rectype_elt" onChange='document.getElementById("reference_elt").checked = true; document.getElementById("note_elt").checked = false;'>
       <option selected disabled value="0">(select record type)</option>
-<?php
+						<?php
 	$section = "";
 	while ($row = mysql_fetch_assoc($res)) {
 		if ($row["rtg_Name"] != $section) {
@@ -206,11 +205,11 @@ hr { margin: 20px 0; }
 			$section = $row["rtg_Name"];
 			print '<optgroup label="' . htmlspecialchars($section) . ' types">';
 		}
-?>
+						?>
   <option value="<?= $row["rty_ID"] ?>" title="<?= htmlspecialchars($row["rty_Description"]) ?>"><?= htmlspecialchars($row["rty_Name"]) ?></option>
-<?php
+						<?php
 	}
-?>
+						?>
       </optgroup>
      </select>
     </td>
@@ -231,14 +230,14 @@ hr { margin: 20px 0; }
     <td class=workgroup><nobr>
      <select name="rec_OwnerUGrpID" id="rec_OwnerUGrpID" style="width: 200px;" onchange="buildworkgroupTagselect(options[selectedIndex].value)">
       <option value="0" disabled selected>(select group)</option>
-<?php
+							<?php
 	$res = mysql_query('select '.GROUPS_ID_FIELD.', '.GROUPS_NAME_FIELD.' from '.USERS_DATABASE.'.'.USER_GROUPS_TABLE.' left join '.USERS_DATABASE.'.'.GROUPS_TABLE.' on '.GROUPS_ID_FIELD.'='.USER_GROUPS_GROUP_ID_FIELD.' where '.USER_GROUPS_USER_ID_FIELD.'='.get_user_id().' and '.GROUPS_TYPE_FIELD.'!="Usergroup" order by '.GROUPS_NAME_FIELD);
 	$wgs = array();
 	while ($row = mysql_fetch_row($res)) {
 		print "      <option value=".$row[0].(@$_REQUEST['wg_id']==$row[0] ? " selected" : "").">".htmlspecialchars($row[1])." only</option>\n";
 		array_push($wgs, $row[0]);
 	}
-?>
+							?>
      </select>
 
      </nobr>

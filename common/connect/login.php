@@ -49,7 +49,7 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 
 	$res = mysql_query('select * from '.USERS_TABLE.' where '.USERS_USERNAME_FIELD.' = "'.addslashes($_REQUEST['username']).'"');
     if ( ($user = mysql_fetch_assoc($res))  &&
-		 $user[USERS_ACTIVE_FIELD] == 'Y'  &&
+		 $user[USERS_ACTIVE_FIELD] == 'y'  &&
 		 crypt($_REQUEST['password'], $user[USERS_PASSWORD_FIELD]) == $user[USERS_PASSWORD_FIELD] ) {
 //		 (crypt($_REQUEST['password'], $user[USERS_PASSWORD_FIELD]) == $user[USERS_PASSWORD_FIELD]  ||  $_SESSION['heurist']['user_name'] == 'stevewh')) {
 //error_log("in login  after crypt check");
