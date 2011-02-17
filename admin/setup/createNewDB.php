@@ -26,37 +26,79 @@
         print "<html><body><p>You need to be a system administrator to create a new database</p><p>
         <a href=".HEURIST_URL_BASE.">Return to Heurist</a></p></body></html>";
         return;
-        }
-?>
-
-
-<?php	// ???? is there a reason that you made a separate php block? If not, please remove it.
+    }
+    
+    if (isset($_POST['dbname'])) {
+		makeDatabase();
+	}
 
 function makeDatabase() {
-
-// ???? lines like the one right above create bloat in the code, please setup your editor to avoid these
+	if(ADMIN_DBUSERNAME == "") {
+		if(ADMIN_DBUSERPSWD == "") {
+			echo "Admin username and password have not been set. Please do so before trying to create a new database.";
+			return;
+		}
+		echo "Admin username has not been set. Please do so before trying to create a new database.";
+		return;
+	}
+	if(ADMIN_DBUSERPSWD == "") {
+		echo "Admin password has not been set. Please do so before trying to create a new database.";
+		return;
+	}
     /* Create the new blank database */
+	$dbname=$_POST['dbname'];
+    $newname= HEURIST_DB_PREFIX . $dbname; // all databases have common prefix
 
-        $newname= HEURIST_DB_PREFIX . $newname; // all databases have common prefix
+    $cmdline="mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'create database $newname'";
+    $output1 = exec($cmdline . ' 2>&1', $output, $res1);
 
-        $cmdline="mysql -u$dbAdminUsername -p$dbAdminPassword -e'create database $newname'";
-        exec($cmdline,$output,$res);
+    /* TO DO: TEST $RES TO SEE IF SUCCESSFUL, WARN IF NOT AND TAKE ACTION */
 
-        /* TO DO: TEST $RES TO SEE IF SUCCESSFUL, WARN IF NOT AND TAKE ACTION */
-
-        /* Populate the blank database from the template SQL file */
-        $cmdline="mysql -u$dbAdminUsername -p$dbAdminPassword -D$newname < populateBlankDB.sql";
-        exec($cmdline,$output,$res);
-
-        /* TO DO: TEST $RES TO SEE IF SUCCESSFUL, WARN IF NOT AND TAKE ACTION */
-
+    
+    /* Test if creation was succesful */
+    if($res1 == 0) {
+    	/* Populate the blank database from the template SQL file */
+        $cmdline="mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D$newname < populateBlankDB.sql";
+        $output2 = exec($cmdline . ' 2>&1', $output, $res2);
+        
+        if($res2 == 0) {
+	       	echo "Database successfully created with name: " . $newname . "<br />";
+	    }
+	    else {
+	    	$errorOrWarning = split(" ", $output2);
+	    	if($errorOrWarning[0] == "Warning") {
+	    		echo "An warning was given trying to populate the blank database from the template SQL file:<br />";
+	    	}
+	    	else {
+		    	echo "An error accurred trying to populate the blank database from the template SQL file:<br />";
+	    	}
+	    	echo $output2 . "<br />";
+	    }
+    }
+    else {
+    	$sqlErrorCode = split(" ", $output1);
+    	if($sqlErrorCode[1] == "1007") {
+    		echo "A database with that name already exists.";
+    	}
+    	else {
+			$errorOrWarning2 = split(" ", $output1);
+	    	if($errorOrWarning2[0] == "Warning") {
+	    		echo "An warning was given trying to create the database:<br />";
+	    		
+	    	}
+	    	else {
+		    	echo "An error accurred trying to create the database:<br />";
+	    	}
+	    	echo $output1 . "<br />";
+    	}
+    	
+    }
+        
 } // end makeDatabase
 
 ?>
 
-
 <!-- Step 1: Get a name for the new Heurist database -->
-
 <html>
 	<head>
 		<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
@@ -64,19 +106,14 @@ function makeDatabase() {
 	</head>
 
 	<body>
-		<form method="post" name="NewDBName">
+		<form action="createNewDB.php" method="POST" name="NewDBName">
 			<h3>Create new Heurist database</h3>
 			<br>
-			<?php echo "Enter name for new database (" . HEURIST_DB_PREFIX . " will be prepended):"; // ??? see line below ?>
-			Enter a name for the new database "<?= HEURIST_DB_PREFIX ?>" will be prepended before creating the database
-			<input maxlength="64" size="25" name="dbname">
+			Enter a name for the new database. The prefix "<?= HEURIST_DB_PREFIX ?>" will be prepended before creating the database.<br /><br />
+			<input type="text" maxlength="64" size="25" name="dbname">
 
-			<input type="button" name="submit" value="Create database"
-                        style="font-weight: bold;" onclick=<?php "makeDatabase();"?> >
+			<input type="submit" name="submit" value="Create database" style="font-weight: bold;" onClick="<?php makeDatabase(); ?>" >
 
 		</form>
-
     </body>
-
 </html>
-
