@@ -62,7 +62,7 @@
 
 
 			function update_link() {
-	var base = "<?= HEURIST_URL_BASE?>records/add/addRecord.php?addref=1&instance=<?=HEURIST_INSTANCE?>";
+	var base = "<?= HEURIST_URL_BASE?>records/add/addRecord.php?addref=1&db=<?=HEURIST_DBNAME?>";
 	var link = base + compute_args();
 
 	var tags = $("#add-link-tags").val();
@@ -152,7 +152,7 @@
 
     if (! rt) rt = "2";  //added ian 19/9/08 to re-enable notes as default
 
-	top.location.href = '<?= HEURIST_URL_BASE?>records/add/addRecord.php?addref=1&instance=<?=HEURIST_INSTANCE?>&bib_rectype='+rt + extra_parms;
+	top.location.href = '<?= HEURIST_URL_BASE?>records/add/addRecord.php?addref=1&db=<?=HEURIST_DBNAME?>&bib_rectype='+rt + extra_parms;
 
 			}
 			function note_type_click() {

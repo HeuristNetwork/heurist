@@ -6,7 +6,7 @@
 	<xsl:template match="/">
 
 		<!-- Relationship Header goes here -->
-			<div id="relationshipHeader{hml/records/record/id}" class="relatedHeader" ><a target="_new" href="#" onclick="this.href = hBase +'search/search.html?q=relatedto:{hml/records/record/id}&amp;instance=' + instance;">Related Records</a></div>
+			<div id="relationshipHeader{hml/records/record/id}" class="relatedHeader" ><a target="_new" href="#" onclick="this.href = hBase +'search/search.html?q=relatedto:{hml/records/record/id}&amp;db=' + database;">Related Records</a></div>
 
 		<xsl:call-template name="relationShip_record_section">
 			<xsl:with-param name="items" select="hml/records/record/relationships/record"/>
@@ -14,7 +14,7 @@
 		</xsl:call-template>
 
 		<!-- reversePointer Header -->
-			<div id="reversePointerHeader{hml/records/record/id}" class="relatedHeader" ><a target="_new" href="#" onclick="this.href = hBase +'search/search.html?q=linkedto:{hml/records/record/id}&amp;instance=' + instance;">Records Pointing to this Record</a></div>
+			<div id="reversePointerHeader{hml/records/record/id}" class="relatedHeader" ><a target="_new" href="#" onclick="this.href = hBase +'search/search.html?q=linkedto:{hml/records/record/id}&amp;db=' + database;">Records Pointing to this Record</a></div>
 
 		<xsl:call-template name="reversePointer_section">
 			<xsl:with-param name="items" select="hml/records/record/reversePointer/record"/>
@@ -32,7 +32,7 @@
 			<xsl:sort select="title"/>
 			<div class="detailRow" id="{id}">
 				<div class="detailType" title="{type}" style="background-image:url(../../common/images/rectype-icons/{type/@id}.png)"><img src="../../common/images/16x16.gif" /></div>
-				<div class="detail"><a target="_new" href="#" onclick="this.href = hBase +'search/search.html?q=ids:{self::node()/id}&amp;instance=' + instance;"> <xsl:value-of select="title"/> </a></div>
+				<div class="detail"><a target="_new" href="#" onclick="this.href = hBase +'search/search.html?q=ids:{self::node()/id}&amp;db=' + database;"> <xsl:value-of select="title"/> </a></div>
 			</div>
 		</xsl:for-each>
 	</xsl:template>
@@ -45,7 +45,7 @@
 			<xsl:sort select="title"/>
 			<div class="detailRow" id="{id}">
 				<div class="detailType" title="{type}" style="background-image:url(../../common/images/rectype-icons/{type/@id}.png)"><img src="../../common/images/16x16.gif" /></div>
-				<div class="detail"><a target="_new" href="#" onclick="this.href = hBase +'search/search.html?q=ids:{self::node()/id}&amp;instance=' + instance;"> <xsl:value-of select="title"/> </a></div>
+				<div class="detail"><a target="_new" href="#" onclick="this.href = hBase +'search/search.html?q=ids:{self::node()/id}&amp;db=' + database;"> <xsl:value-of select="title"/> </a></div>
 			</div>
 		</xsl:for-each>
 	</xsl:template>

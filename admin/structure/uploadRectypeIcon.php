@@ -56,7 +56,7 @@
   <div class="failure"><?= $failure_msg ?></div>
 <?php	} ?>
 
-  <form action="uploadrectypeIcon.php?instance=<?= HEURIST_INSTANCE?>" method="post" enctype="multipart/form-data">
+  <form action="uploadrectypeIcon.php?db=<?= HEURIST_DBNAME?>" method="post" enctype="multipart/form-data">
    <input type="hidden" name="rty_ID" value="<?= $rt_id ?>">
    <input type="hidden" name="uploading" value="1">
 

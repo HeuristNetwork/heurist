@@ -54,7 +54,7 @@ if (@$argv) {
 		}
 	}
 
-	if(@$ARGV['-instance']) $_REQUEST['instance'] = $ARGV['-instance'];
+	if(@$ARGV['-db']) $_REQUEST["db"] = $ARGV['-db'];
 
 	if (@$ARGV['-f']) $_REQUEST['f'] = $ARGV['-f'];
 	$_REQUEST['q'] = @$ARGV['-q'];
@@ -255,7 +255,7 @@ if (@$ARGV) {
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	if (!is_logged_in()) { // check if the record being retrieved is a single non-protected record
 		if (!single_record_retrieval($_REQUEST['q'])) {
-			header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE);
+			header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
 			return;
 		}
 	}
@@ -752,7 +752,7 @@ openTag('hml', array(
 	'xsi:schemaLocation' => 'http://heuristscholar.org/heurist/hml http://heuristscholar.org/heurist/schemas/hml.xsd')
 );
 */
-$query_attrs = array_intersect_key($_REQUEST, array('q'=>1,'w'=>1,'depth'=>1,'f'=>1,'limit'=>1,'offset'=>1,'instance'=>1,'stub'=>1,'woot'=>1));
+$query_attrs = array_intersect_key($_REQUEST, array('q'=>1,'w'=>1,'depth'=>1,'f'=>1,'limit'=>1,'offset'=>1,'db'=>1,'stub'=>1,'woot'=>1));
 if ($pub_id) {
 	$query_attrs['pubID'] = $pub_id;
 }

@@ -26,7 +26,7 @@
 
 <script>
 	if (! HCurrentUser.isLoggedIn()) {
-		window.location = HAPI.HeuristBaseURL + "common/connect/login.php" + (instance ? "?instance="+instance : "");
+		window.location = HAPI.HeuristBaseURL + "common/connect/login.php" + (database ? "?db="+database : "");
 	}
 </script>
 
@@ -47,13 +47,13 @@ $(document).ready(function() {
 	matches = location.href.match(/[?&]u=(\d+)/);	// extract the userID from the URI
 	if (matches) {
 		user = HUserManager.getUserById(matches[1]);
-		$("#bloglogo a").attr("href", "?u=" + matches[1] + (instance ? "&instance="+instance : ""));
+		$("#bloglogo a").attr("href", "?u=" + matches[1] + (database ? "&db="+database : ""));
 	}
 	if (! user) {
 		matches = location.href.match(/[?&]g=(\d+)/);	// extract the groupID from the URI
 		if (matches) {
 			group = HWorkgroupManager.getWorkgroupById(matches[1]);
-			$("#bloglogo a").attr("href", "?g=" + matches[1] + (instance ? "&instance="+instance : ""));
+			$("#bloglogo a").attr("href", "?g=" + matches[1] + (database ? "&db="+database : ""));
 		}
 	}
 	if (! (user || group)) { alert("user / group ID invalid or not provided"); return; }
@@ -89,7 +89,7 @@ $(document).ready(function() {
 	// blog select
 	$("<option value='u=" + HCurrentUser.getID() + "'>" + HCurrentUser.getRealName() + "</option>")
 		.click(function () {
-			location.href = "?" + this.value  + (instance ? "&instance="+instance : "");
+			location.href = "?" + this.value  + (database ? "&db="+database : "");
 		})
 		.appendTo("#blog-select");
 	var wgs = HCurrentUser.getWorkgroups();
@@ -97,7 +97,7 @@ $(document).ready(function() {
 	for (var i = 0; i < wgs.length; ++i) {
 		$("<option value='g=" + wgs[i].getID() + "'>" + wgs[i].getName() + "</option>")
 			.click(function () {
-				location.href = "?" + this.value + (instance ? "&instance="+instance : "");
+				location.href = "?" + this.value + (database ? "&db="+database : "");
 			})
 			.appendTo("#blog-select");
 	}
@@ -122,8 +122,8 @@ $(document).ready(function() {
 		else if (matches[4]) search["tag"] = matches[4];
 	}
 
-	$("#add-fav").append("<br>" + HCurrentUser.getRealName() + " : <a href='"+ (hBase ? hBase : HAPI.HeuristBaseURL) +"/login.php?logout=1"+ + (instance ? "&instance="+instance : "")+"'>log out</a>");
-	$("#add-fav-link")[0].href += "&t=" + encodeURIComponent(document.title) + "&u=" + encodeURIComponent(window.location.href) + (instance ? "&instance="+instance : "");
+	$("#add-fav").append("<br>" + HCurrentUser.getRealName() + " : <a href='"+ (hBase ? hBase : HAPI.HeuristBaseURL) +"/login.php?logout=1"+ + (database ? "&db="+database : "")+"'>log out</a>");
+	$("#add-fav-link")[0].href += "&t=" + encodeURIComponent(document.title) + "&u=" + encodeURIComponent(window.location.href) + (database ? "&db="+database : "");
 
 	if ((user  &&  HCurrentUser == user) ||
 		(group  &&  HCurrentUser.isInWorkgroup(group))) {
@@ -181,8 +181,8 @@ function reload() {
 <div title="Click the logo at top left of any Heurist page to return to your Favourites" id="logo"></div>
 </a>
 <div id=version></div>
-<!-- instance name -->
-<div id=instance-name ></div>
+<!-- database name -->
+<div id=dbname ></div>
   
  </div>
  </div>

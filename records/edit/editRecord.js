@@ -118,7 +118,7 @@ top.HEURIST.edit = {
 		var parameters = top.HEURIST.edit.record;
 		if (parameters.bibID) urlBits.push("bib_id=" + parameters.bibID);
 		if (parameters.bkmkID) urlBits.push("bkmk_id=" + parameters.bkmkID);
-		if (HAPI.instance) urlBits.push("instance=" + HAPI.instance);
+		if (HAPI.database) urlBits.push("db=" + HAPI.database);
 		var url = module.url;
 		if (urlBits.length > 0) url += "?" + urlBits.join("&");
 		newIframe.src = url;
@@ -262,7 +262,7 @@ top.HEURIST.edit = {
 			top.HEURIST.edit.modules.personal.disabledFunction = null;
 
 			// add the bookmark, patch the record structure, and view the personal tab
-			top.HEURIST.util.getJsonData(top.HEURIST.basePath + "records/bookmarks/add-bookmark.php?bib_id=" + top.HEURIST.edit.record.bibID + "&instance=" + HAPI.instance, function(vals) {
+			top.HEURIST.util.getJsonData(top.HEURIST.basePath + "records/bookmarks/add-bookmark.php?bib_id=" + top.HEURIST.edit.record.bibID + "&db=" + HAPI.database, function(vals) {
 				for (var i in vals) {
 					top.HEURIST.edit.record[i] = vals[i];
 				}
@@ -389,7 +389,7 @@ top.HEURIST.edit = {
 		}
 		else if (document.getElementById("act-recent").checked) {
 			setTimeout(function() {
-				top.location.href = top.HEURIST.basePath + "search/search.html?q=sortby:-m&instance=" + HAPI.instance;
+				top.location.href = top.HEURIST.basePath + "search/search.html?q=sortby:-m&db=" + HAPI.database;
 			}, 0);
 		}
 	},

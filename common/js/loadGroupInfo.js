@@ -41,7 +41,7 @@ if (! top.HEURIST.json) top.HEURIST.json = {
 			if (callback) callback(wg_id);
 			return;
 		}
-		top.HEURIST.util.getJsonData(top.HEURIST.basePath+"common/php/loadGroupSavedSearches.php?instance="+ (top.HEURIST.instance.name ? top.HEURIST.instance.name: "") + "&wg_id="+wg_id, function(obj) {
+		top.HEURIST.util.getJsonData(top.HEURIST.basePath+"common/php/loadGroupSavedSearches.php?db="+ (top.HEURIST.database.name ? top.HEURIST.database.name: "") + "&wg_id="+wg_id, function(obj) {
 			if (! obj  || obj.error) return;
 			top.HEURIST.workgroups[wg_id].members = obj.members;
 			top.HEURIST.workgroups[wg_id].savedSearches = obj.savedSearches;

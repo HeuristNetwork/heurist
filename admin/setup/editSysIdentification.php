@@ -14,11 +14,11 @@
 	require_once(dirname(__FILE__)."/../../external/nusphere/db_". $config['db'] . ".inc");
 
 	if (! is_logged_in()) {
-		header("Location: " . HEURIST_URL_BASE . "common/connect/login.php?instance=".HEURIST_INSTANCE);
+		header("Location: " . HEURIST_URL_BASE . "common/connect/login.php?db=".HEURIST_DBNAME);
 		return;
 	}
 	if (! is_admin()) {
-		print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href='".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;instance=".HEURIST_INSTANCE."'>Log out</a></p></body></html>";
+		print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href='".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME."'>Log out</a></p></body></html>";
 		return;
 	}
 
@@ -251,7 +251,7 @@
 		if ($rslt) {
 			$show_message = true;
 			$message = sprintf(MSG_UPDATED, $start);
-            header('Location: ' .HEURIST_BASE_URL. '?instance='.HEURIST_INSTANCE);
+            header('Location: ' .HEURIST_BASE_URL. '?db='.HEURIST_DBNAME);
 		} else {
 			dbu_handle_error($dbconn->db_lasterror());
 		}

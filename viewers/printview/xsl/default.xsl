@@ -100,7 +100,7 @@
 							<xsl:choose>
 								<xsl:when test="self::node()/record">
 									<!-- <xsl:value-of select="./record/type"/>: -->
-									<a target="_new" href="#" onclick="this.href = hBase +'search/search.html?q=ids:{self::node()/record/id}&amp;instance=' + instance;"> <xsl:value-of select="./record/title"/> </a>
+									<a target="_new" href="#" onclick="this.href = hBase +'search/search.html?q=ids:{self::node()/record/id}&amp;db=' + database;"> <xsl:value-of select="./record/title"/> </a>
 								</xsl:when>
 								<xsl:when test="self::node()[@id!= 222 and @id!= 221 and @id!=177 and @id!=178 and @id != 223 and @id != 231 and @id != 268 and @id !=256 and @id!=304 and @id != 224]">
 									<xsl:value-of select="."/>

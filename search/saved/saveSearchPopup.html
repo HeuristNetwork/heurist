@@ -150,7 +150,7 @@
 		var cmb_url_elt = action_fr.document.getElementById("svs_Query");
 		var cmb_workgroup_elt = action_fr.document.getElementById("svs_UGrpID");
 		var cmb_id_elt = action_fr.document.getElementById("svs_ID");
-		var cmb_instance = action_fr.document.getElementById("instance");
+		var cmb_instance = action_fr.document.getElementById("db");
 		var publish_elt = action_fr.document.getElementById("publish");
 		var bkmk_only = document.getElementById("bookmark-check");
 
@@ -183,7 +183,7 @@
 		}
 
 		for (var p in top.HEURIST.parameters) {
-			if (p != "label" && p != "sid" && p != "instance") {
+			if (p != "label" && p != "sid" && p != "db") {
 				query.push(p + "=" + encodeURIComponent(top.HEURIST.parameters[p]));
 			}
 		}
@@ -192,8 +192,8 @@
 		if (result_style) {
 			query.push("view=" + result_style);
 		}
-		if (top.HEURIST.instance.name)
-			cmb_instance.value = top.HEURIST.instance.name;
+		if (top.HEURIST.database.name)
+			cmb_instance.value = top.HEURIST.database.name;
 
 		cmb_url_elt.value = "?" + query.join("&");
 		action_elt.form.submit();

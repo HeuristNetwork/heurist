@@ -54,24 +54,24 @@
 						<xsl:choose>
 
 							<xsl:when test="detail[@id=224]">
-                            <a href="{$cocoonBase}item/{id}/?instance={$instanceName}" class="bodynav" >
+                            <a href="{$cocoonBase}item/{id}/?db={$dbName}" class="bodynav" >
 							<img  src="{detail[@id=224]/file_thumb_url}" style="width:130px;vertical-align:middle"/>
                             </a>
 							</xsl:when>
 							<xsl:when test="detail[@id=606]">
-                            <a href="{$cocoonBase}item/{id}/?instance={$instanceName}" class="bodynav">
+                            <a href="{$cocoonBase}item/{id}/?db={$dbName}" class="bodynav">
 								<img  src="{detail[@id=606]}" style="width:130px; vertical-align:middle"/>
                              </a>
 							</xsl:when>
 							<xsl:otherwise>
-                            <a href="{$cocoonBase}item/{id}/?instance={$instanceName}" class="bodynav" style="display:block; width:130px;">
+                            <a href="{$cocoonBase}item/{id}/?db={$dbName}" class="bodynav" style="display:block; width:130px;">
 							<img  src="{$hBase}common/php/resizeImage.php?file_url={detail[@id=603]}&amp;w=130"/>
 							</a>
                             </xsl:otherwise>
                           	</xsl:choose>
 						</div>
 
-					<p><a href="{$cocoonBase}item/{id}/?instance={$instanceName}" class="bodynav"><xsl:value-of select="title"/></a></p>
+					<p><a href="{$cocoonBase}item/{id}/?db={$dbName}" class="bodynav"><xsl:value-of select="title"/></a></p>
 
 					</div>
 
@@ -98,13 +98,13 @@
 		<!-- render for collection record in sidebar -->
 	    <div class="relatedItem">
            <div class="editIcon">
-				<a href="{$appBase}edit.html?id={id}/?instance={$instanceName}" onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;" title="edit">
+				<a href="{$appBase}edit.html?id={id}/?db={$dbName}" onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;" title="edit">
 					<img src="{$hBase}common/images/edit-pencil.png" class="editPencil"/>
 				</a>
 			</div>
 
         	<div class="link">
-				<a class="sb_two" href="{$cocoonBase}item/{id}/?instance={$instanceName}"><xsl:value-of select="title"/></a>
+				<a class="sb_two" href="{$cocoonBase}item/{id}/?db={$dbName}"><xsl:value-of select="title"/></a>
 				<!-- <br/>
 				<p><small><em>permission to publish images from this collection on this website <xsl:value-of select="detail[@id=201]"/>
 					 citation protocol

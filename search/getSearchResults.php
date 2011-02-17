@@ -130,7 +130,7 @@ function loadRecord($id, $fresh = false, $bare = false) {
 			return array("error" => "couldn't connect to memcached");
 		}
 	}
-	$key = HEURIST_INSTANCE . ":record:" . $id;
+	$key = HEURIST_DBNAME . ":record:" . $id;
 	$record = null;
 	if (! $fresh) {
 		$record = $memcache->get($key);
@@ -156,7 +156,7 @@ function updateCachedRecord($id) {
 			return array("error" => "couldn't connect to memcached");
 		}
 	}
-	$key = HEURIST_INSTANCE . ":record:" . $id;
+	$key = HEURIST_DBNAME . ":record:" . $id;
 	$record = $memcache->get($key);
 	if ($record) {
 		$record = loadBareRecordFromDB($id);
@@ -259,10 +259,10 @@ function loadRecordDetails(&$record) {
 			$detailValue = array("file" => mysql_fetch_assoc($fres));
 			$origName = urlencode($detailValue["file"]["origName"]);
 			$detailValue["file"]["URL"] =
-				HEURIST_URL_BASE."records/files/downloadFile.php?". (defined('HEURIST_INSTANCE') ? "instance=".HEURIST_INSTANCE."&" : "" )
+				HEURIST_URL_BASE."records/files/downloadFile.php?". (defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )
 				."ulf_ID=".$detailValue["file"]["nonce"];
 			$detailValue["file"]["thumbURL"] =
-				HEURIST_URL_BASE."common/php/resizeImage.php?" . (defined('HEURIST_INSTANCE') ? "instance=".HEURIST_INSTANCE."&" : "" )
+				HEURIST_URL_BASE."common/php/resizeImage.php?" . (defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )
 				."ulf_ID=".$detailValue["file"]["nonce"];
 			break;
 

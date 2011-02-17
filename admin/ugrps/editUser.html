@@ -23,7 +23,7 @@
  </head>
 
 <body>
- <form action="editUser.php?instance=[instance-name!]" method="post">
+ <form action="editUser.php?db=[dbname!]" method="post">
 
 [update required USER user_update]
 
@@ -34,15 +34,15 @@
 <tbody><tr>
 <td rowspan="2" id="logo-cell"><a href="../.."><img src="../../common/images/hlogo-small.jpg" alt="Heurist" title="Click the logo at top left of any Heurist page to return to your favourites"></a></td>
 <td rowspan="2">
-	<a href="findAddUser.php?instance=[instance-name!]">Add user</a> |
-	<a href="assignUsersToGroups.php?instance=[instance-name!]">Edit user groups</a>
+	<a href="findAddUser.php?db=[dbname!]">Add user</a> |
+	<a href="assignUsersToGroups.php?db=[dbname!]">Edit user groups</a>
 </td>
 <td align="right" style="vertical-align: baseline;">
 	<font color="#008000"><small>Logged in as: </small><tt>[logged-in-user-username]</tt></font><br>
    [if-eq : logged-in-user-username : ""]
-   <a href="../../common/connect/login.php?instance=[instance-name!]"><small>Log in</small></a>
+   <a href="../../common/connect/login.php?db=[dbname!]"><small>Log in</small></a>
    [else]
-   <a href="../../common/connect/login.php?logout=1&amp;instance=[instance-name!]"><small>Log out</small></a>
+   <a href="../../common/connect/login.php?logout=1&amp;db=[dbname!]"><small>Log out</small></a>
    [end-if-eq]
    </td>
 </tr>
@@ -125,7 +125,7 @@
 
 [not-found]
   <span class="normalgr"><i>User not found</i></span>
-  <p><a href="findAddUser.php?instance=[instance-name!]">Search for / add users</a></p>
+  <p><a href="findAddUser.php?db=[dbname!]">Search for / add users</a></p>
  </body>
 [end-not-found]
 

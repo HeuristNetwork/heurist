@@ -17,7 +17,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 if (! is_logged_in()) {
-	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE);
+	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
 	return;
 }
 
@@ -126,7 +126,7 @@ foreach ($bibs as $rec_id => $bib) {
 	else
 		print '<li>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($bib['rec_Title']) . '';
 
-	print ' <a target=_blank href="'.HEURIST_URL_BASE.'records/edit/editRecord.html?instance='.HEURIST_INSTANCE.'&bib_id='.$rec_id.'">*</a> <br> <br>';
+	print ' <a target=_blank href="'.HEURIST_URL_BASE.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bib_id='.$rec_id.'">*</a> <br> <br>';
 
 	if ($rec_id % 10 == 0) {
 		ob_flush();
@@ -174,9 +174,9 @@ if (count($updates) > 0) {
 
 	print '<hr>';
 
-	print '<a target=_blank href="'.HEURIST_URL_BASE.'search/search.html?instance='.HEURIST_INSTANCE.'&w=all&q=ids:'.join(',', array_keys($updates)).'">Updated records</a><br>';
+	print '<a target=_blank href="'.HEURIST_URL_BASE.'search/search.html?db='.HEURIST_DBNAME.'&w=all&q=ids:'.join(',', array_keys($updates)).'">Updated records</a><br>';
 }
-print '<a target=_blank href="'.HEURIST_URL_BASE.'search/search.html?instance='.HEURIST_INSTANCE.'&w=all&q=ids:'.join(',', $blanks).'">Unchanged records (title would be blank)</a>';
+print '<a target=_blank href="'.HEURIST_URL_BASE.'search/search.html?db='.HEURIST_DBNAME.'&w=all&q=ids:'.join(',', $blanks).'">Unchanged records (title would be blank)</a>';
 
 ob_flush();
 flush();

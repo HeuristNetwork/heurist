@@ -45,15 +45,15 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		}
 	},
 
-	setInstanceName: function() {
-		var e = document.getElementById("instance-name");
+	setDBName: function() {
+		var e = document.getElementById("dbname");
 		if (e) {
-			e.innerHTML = top.HEURIST.instance.name;
+			e.innerHTML = top.HEURIST.database.name;
 		}
 	},
 
 	setDocumentTitle: function() {
-		document.title = "HEURIST" + top.HEURIST.VERSION + " - "+ top.HEURIST.instance.name;
+		document.title = "HEURIST" + top.HEURIST.VERSION + " - "+ top.HEURIST.database.name;
 	},
 
 	/* see README.style for comments on the autosize functions */
@@ -892,7 +892,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				}
 			}
 			top.HEURIST.displayPreferences[prefName] = val;
-			top.HEURIST.loadScript(top.HEURIST.basePath+'common/php/displayPreferences.php?instance='+ (top.HEURIST.instance.name ? top.HEURIST.instance.name: "")+'&' + encodeURIComponent(prefName) + '=' + encodeURIComponent(val));
+			top.HEURIST.loadScript(top.HEURIST.basePath+'common/php/displayPreferences.php?db='+ (top.HEURIST.database.name ? top.HEURIST.database.name: "")+'&' + encodeURIComponent(prefName) + '=' + encodeURIComponent(val));
 
 			win = top;
 		}

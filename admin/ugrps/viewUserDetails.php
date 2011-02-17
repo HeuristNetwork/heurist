@@ -17,7 +17,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
 if (!is_logged_in()) {
-	header('Location: '.HEURIST_URL_BASE.'common/connect/login.php?instance='.HEURIST_INSTANCE);
+	header('Location: '.HEURIST_URL_BASE.'common/connect/login.php?db='.HEURIST_DBNAME);
 	return;
 }
 
@@ -34,7 +34,7 @@ $name = mysql__select_array(USERS_DATABASE.'.'.USERS_TABLE, "concat(".USERS_FIRS
 $name = $name[0];
 
 $body->global_vars['tags'] = '';
-$body->global_vars['instance-name'] = HEURIST_INSTANCE;
+$body->global_vars['dbname'] = HEURIST_DBNAME;
 
 $res = mysql_query('select tag_Text,count(rtl_ID) as bkmks
                       from usrRecTagLinks

@@ -15,13 +15,13 @@
 			<!-- detail 231 is associated WordML file -->
 			<xsl:when test="detail[@id=231]">
 				<div id="tei" style="padding-right: 80px">
-					<xi:include href="{detail[@id=231]/file_fetch_url}?instance={$instanceName}"/>
+					<xi:include href="{detail[@id=231]/file_fetch_url}?db={$dbName}"/>
 				</div>
 			</xsl:when>
 			<!-- detail 221 is associated TEI file -->
 			<xsl:when test="detail[@id=221]">
 				<div id="tei" style="padding-right: 10px">
-					<xi:include href="{detail[@id=221]/file_fetch_url}?instance={$instanceName}"/>
+					<xi:include href="{detail[@id=221]/file_fetch_url}?db={$dbName}"/>
 				</div>
 			</xsl:when>
 		</xsl:choose>
@@ -36,7 +36,7 @@
 							<nobr>TEI</nobr>
 						</td>
 						<td>
-							<a href="{$cocoonBase}item/{//id}/tei?instance={$instanceName}">
+							<a href="{$cocoonBase}item/{//id}/tei?db={$dbName}">
 								[TEI document]
 							</a>
 						</td>
@@ -76,7 +76,7 @@
 							</xsl:when>
 							<!-- 231 = WordML File! -->
 							<xsl:when test="@id=231 or @id=221">
-								<a href="{file_fetch_url}?instance={$instanceName}">
+								<a href="{file_fetch_url}?db={$dbName}">
 									[<xsl:value-of select="file_orig_name"/>]
 								</a>
 
@@ -132,7 +132,7 @@
 					<td>
 						<xsl:if test="detail[@id = 222 or @id=223 or @id=224]">
 							<xsl:if test="detail/file_thumb_url">
-								<a href="{$cocoonBase}item/{id}?instance={$instanceName}">
+								<a href="{$cocoonBase}item/{id}?db={$dbName}">
 
 									<img src="{detail/file_thumb_url}"/>
 
@@ -143,7 +143,7 @@
 							</xsl:if>
 						</xsl:if>
 
-						<a href="{$cocoonBase}item/{id}?instance={$instanceName}" class="sb_two">
+						<a href="{$cocoonBase}item/{id}?db={$dbName}" class="sb_two">
 							<xsl:choose>
 								<!-- related / notes -->
 								<xsl:when test="@notes">
@@ -191,12 +191,12 @@
 
 				<tr>
 					<td>
-					     <a href="{$appBase}edit.html?id={id}?instance={$instanceName}"
+					     <a href="{$appBase}edit.html?id={id}?db={$dbName}"
 							onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;"
 							title="edit">
 						<img src="{$hBase}common/images/edit-pencil.png"/>
 						</a>
-						<a href="{$cocoonBase}item/{id}?instance={$instanceName}" class="sb_two"><xsl:value-of select="detail[@id=160]"/></a>
+						<a href="{$cocoonBase}item/{id}?db={$dbName}" class="sb_two"><xsl:value-of select="detail[@id=160]"/></a>
 					</td>
 					<td align="right">
 						<!-- change this to pick up the actuall system name of the rectype or to use the mapping method as in JHSB that calls human-readable-names.xml -->

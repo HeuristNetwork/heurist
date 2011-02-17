@@ -97,7 +97,7 @@
 				[search BIB_DETAIL_LOOKUP bdl /* search the detail lookups (enums) which is filtered by the active detail lookups table*/]
 				[auto : trm_VocabID : dty_ID  /* restrict the results to only the rows that match the passed in detail type*/]
 				[foreach BIB_DETAIL_LOOKUP bd : 1 order by trm_VocabID, trm_Label  /* iterate through each result and output the following */]
-				<form action="edit_enum.php?instance=[instance-name]" method="post">
+				<form action="edit_enum.php?db=[dbname]" method="post">
 					<input type="hidden" name="trm_ID" value="[trm_ID]">
 					<div><img src="../img/cross.gif"  onclick="delete_bdl([trm_ID]);" class="delete_icon">
 						<input type="text" name="trm_Label" value="[trm_Label]" class="col1 row-elem" style="width: 110px;">
@@ -113,7 +113,7 @@
 				[end-search]
 			</div>
 			<div>
-				<form action="edit_enum.php?instance=[instance-name]" method="post">
+				<form action="edit_enum.php?db=[dbname]" method="post">
 					<input type="hidden" name="dty_ID" value="[dty_ID]">
 					<input type="hidden" name="delete_bdl_field" value="" id="delete_bdl">
 					[insert BIB_DETAIL_LOOKUP new_bdl]

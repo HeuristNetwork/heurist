@@ -100,7 +100,7 @@
  <!-- helper templates -->
 <xsl:template name="recordInfo">
 	<div class="rec_title" title="{title}"><xsl:value-of select="title"/><br/>
-		<div id="recID"><a target="_new" href="#" onclick="this.href = hBase +'search/search.html?q=ids:{id}&amp;instance=' + instance;"><nobr><span class="greyType">Record ID: </span><xsl:value-of select="id"/></nobr></a></div>
+		<div id="recID"><a target="_new" href="#" onclick="this.href = hBase +'search/search.html?q=ids:{id}&amp;db=' + database;"><nobr><span class="greyType">Record ID: </span><xsl:value-of select="id"/></nobr></a></div>
 	</div>
 	<div class="rec_type" title="{type}"><xsl:value-of select="type"/></div>
 </xsl:template>

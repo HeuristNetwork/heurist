@@ -19,7 +19,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
 if (! is_logged_in()  ||  ! is_admin()  ) {
-	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE);
+	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
 	return;
 }
 
@@ -28,7 +28,7 @@ mysql_connection_db_overwrite(DATABASE);
 $delete_bdl_id = intval(@$_REQUEST['delete_bdl_field']);
 if ($delete_bdl_id) {
 	mysql_query('delete from defTerms where trm_ID = ' . $delete_bdl_id);
-	header('Location: edit_enum.php?instance='.HEURIST_INSTANCE.'&amp;dty_ID=' . $_REQUEST['dty_ID']);
+	header('Location: edit_enum.php?db='.HEURIST_DBNAME.'&amp;dty_ID=' . $_REQUEST['dty_ID']);
 	return;
 }
 
@@ -39,7 +39,7 @@ if ($update_bdl_id) {
 	$set_commands .= (@$_REQUEST[ 'bd_rdl_ont_id_'.@$_REQUEST['trm_ID']] ? ($set_commands?',':'').' trm_VocabID = '. $_REQUEST[ 'bd_rdl_ont_id_'.@$_REQUEST['trm_ID']] : '');
 
 	mysql_query('update defTerms '. $set_commands. ' where trm_ID = ' . $update_bdl_id);
-	header('Location: edit_enum.php?instance='.HEURIST_INSTANCE.'&amp;dty_ID=' . @$_REQUEST['dty_ID'].'&updating='.$set_commands );
+	header('Location: edit_enum.php?db='.HEURIST_DBNAME.'&amp;dty_ID=' . @$_REQUEST['dty_ID'].'&updating='.$set_commands );
 	return;
 }
 
@@ -53,7 +53,7 @@ $lexer = new Lexer($template);
 
 $body = new BodyScope($lexer);
 $body->global_vars['dty_ID'] = @$_REQUEST['dty_ID']? $_REQUEST['dty_ID'] : 0;
-$body->global_vars['instance-name'] = HEURIST_INSTANCE;
+$body->global_vars['dbname'] = HEURIST_DBNAME;
 
 $body->verify();
 if (@$_REQUEST['_new_bdl_submit'] ) {

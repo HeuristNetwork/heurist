@@ -50,7 +50,7 @@ Your Heurist password has been reset.
 Your new password is: '.$passwd.'
 
 To change your password, go to:
-'.HEURIST_URL_BASE.'admin/ugrps/editUser.php?instance='.HEURIST_INSTANCE.'&Id='.$user_id.'
+'.HEURIST_URL_BASE.'admin/ugrps/editUser.php?db='.HEURIST_DBNAME.'&Id='.$user_id.'
 
 (you will first be asked to log in with the new password above)
 ';

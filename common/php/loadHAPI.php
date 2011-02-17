@@ -38,15 +38,15 @@
 	-->
 */
 
-/* Load HAPI with the correct instance key.  Since this file has the privelege
+/* Load HAPI with the correct database key.  Since this file has the privelege
  * of being on the server with the hapi key database it can look at that directly
- * and save us hard-coding a map of instance => key (yuck).
+ * and save us hard-coding a map of database => key (yuck).
  */
 
 header("Content-type: text/javascript");
 /* hapi key's removed saw 17/1/11
-if (@$_REQUEST["instance"]) {
-	define("HEURIST_INSTANCE", $_REQUEST["instance"]);
+if (@$_REQUEST["db"]) {
+	define("HEURIST_DBNAME", $_REQUEST["db"]);
 	define("HOST", $_SERVER["HTTP_HOST"]);
 }
 */
@@ -56,17 +56,17 @@ require_once("dbMySqlWrappers.php");
 mysql_connection_select("hapi");
 $query = "SELECT hl_key
             FROM hapi_locations
-           WHERE hl_instance = '" . HEURIST_INSTANCE . "'
+           WHERE hl_instance = '" . HEURIST_DBNAME . "'
              AND hl_location = 'http://" . HOST . "/'";
 $res = mysql_query($query);
 $row = mysql_fetch_assoc($res);
 if (! $row) {
-	print "Failed to load hapi. No key found for instance = '".HEURIST_INSTANCE."  and uri = http:/".HOST."/";
+	print "Failed to load hapi. No key found for database = '".HEURIST_DBNAME."  and uri = http:/".HOST."/";
 	exit;
 }
 $key = $row["hl_key"];
 */
 ?>
 
-document.write("<" + "scr" +"ipt src=\"<?=HEURIST_URL_BASE?>hapi/hapiLoader.php?instance=<?= HEURIST_INSTANCE ?><?=(@$_REQUEST["inclGeo"]? "&inclGeo=1":"")?>\"><" + "/script>\n");
+document.write("<" + "scr" +"ipt src=\"<?=HEURIST_URL_BASE?>hapi/hapiLoader.php?db=<?= HEURIST_DBNAME ?><?=(@$_REQUEST["inclGeo"]? "&inclGeo=1":"")?>\"><" + "/script>\n");
 

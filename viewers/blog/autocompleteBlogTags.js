@@ -218,7 +218,7 @@ top.HEURIST.autocomplete.AutoComplete.prototype.textbox_onkeypress = function(e)
 			acObject.collapse();
 			break;
 		}
-		return;	// allow this to have its usual effect ... allows submission of forms, for instance.
+		return;	// allow this to have its usual effect ... allows submission of forms, for database.
 		// break;
 
 	  case 27: // esc

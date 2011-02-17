@@ -83,7 +83,7 @@
 
 		<script>
 			top.HEURIST.registerEvent(window, "contentloaded", function() {
-				document.getElementById("home-link").href = top.HEURIST.basePath + "?instance=" +top.HEURIST.instance.name;
+				document.getElementById("home-link").href = top.HEURIST.basePath + "?db=" +top.HEURIST.database.name;
 			});
 
 			top.HEURIST.whenLoaded(["record", "edit-html"], function() {
@@ -199,8 +199,8 @@
 <div id=logo title="Click the logo to return to your Favourites"></div>
 </a>
 <div id=version></div>
-<!-- instance name -->
-<div id=instance-name ></div>
+<!-- database name -->
+<div id=dbname ></div>
 <!-- message of the day -->
 <div id="message"> Heurist 3 : Open Source <a href="../help/webhelp/index.html?ACL" target="_blank" title="Click for full information. Design: Ireneusz Golka, Ian Johnson &amp; Ingrid Mason. Programming: Steve Whtie, Kim Jackson, Tom Murtagh &amp; Maria Shvedova. University of Sydney Digital Innovation Unit."><br><font style="font-size:11px">Credits</font></a> </div>
 <!-- quicklinks -->
@@ -213,7 +213,7 @@
 		<a id=help-link href='#' onClick="top.HEURIST.util.helpToggler(this)"></a>
 
 		<script>
-			top.HEURIST.whenLoaded(["edit-html", "obj-common"], top.HEURIST.util.setInstanceName);
+			top.HEURIST.whenLoaded(["edit-html", "obj-common"], top.HEURIST.util.setDBName);
 			top.HEURIST.whenLoaded("record", function() {
 				var contactLinkSubject = "HEURIST v" + top.HEURIST.VERSION + " user:"+top.HEURIST.get_user_username() + " edit";
 				if (top.HEURIST.edit.record.bibID) contactLinkSubject += " bibID:"+top.HEURIST.edit.record.bibID;
@@ -375,7 +375,7 @@
 						top.HEURIST.whenLoaded("record", function() {
 							document.getElementById("moddate").appendChild(document.createTextNode(top.HEURIST.edit.record.moddate));
 							var citeAs = document.getElementById("cite-as-url");
-							citeAs.href = "http://"+window.location.host+ top.HEURIST.basePath +"records/view/viewRecord.php?instance="+ top.HEURIST.instance.name +"&bib_id=" + top.HEURIST.edit.record.bibID;
+							citeAs.href = "http://"+window.location.host+ top.HEURIST.basePath +"records/view/viewRecord.php?db="+ top.HEURIST.database.name +"&bib_id=" + top.HEURIST.edit.record.bibID;
 							citeAs.appendChild(document.createTextNode(citeAs.href));
 						});
 					</script>

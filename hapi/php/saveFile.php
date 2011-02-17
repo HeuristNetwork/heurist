@@ -48,8 +48,8 @@ $fileID = upload_file($upload["name"], $upload["type"], $upload["tmp_name"], $up
 if ($fileID) {
 	$res = mysql_query("select * from recUploadedFiles where ulf_ID = $fileID");
 	$file = mysql_fetch_assoc($res);
-	$thumbnailURL = HEURIST_URL_BASE."common/php/resizeImage.php?instance=".HEURIST_INSTANCE."&ulf_ID=" . $file["ulf_ObfuscatedFileID"];
-	$URL = HEURIST_URL_BASE."records/files/downloadFile.php/" . urlencode($file["ulf_OrigFileName"]) . "?instance=".HEURIST_INSTANCE."&ulf_ID=" . $file["ulf_ObfuscatedFileID"];
+	$thumbnailURL = HEURIST_URL_BASE."common/php/resizeImage.php?db=".HEURIST_DBNAME."&ulf_ID=" . $file["ulf_ObfuscatedFileID"];
+	$URL = HEURIST_URL_BASE."records/files/downloadFile.php/" . urlencode($file["ulf_OrigFileName"]) . "?db=".HEURIST_DBNAME."&ulf_ID=" . $file["ulf_ObfuscatedFileID"];
 error_log("url = ". $URL);
 	print json_format(array("file" => array(	// file[0] => id , file [1] => origFileName, etc...
 		$file["ulf_ID"], $file["ulf_OrigFileName"], $file["ulf_FileSizeKB"], $file["file_mimetype"], $URL, $thumbnailURL, $file["ulf_Description"]

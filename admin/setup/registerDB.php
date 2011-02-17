@@ -23,14 +23,14 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/getNextDBRegistrationID.php');
 
 if (!is_logged_in()) {
-    header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE);
+    header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
     return;
 }
 
 // User must be system administrator or admin of the owners group for this database
 if (!is_admin()) {
     print "<html><body><p>You must be logged in as system administrator to register a database</p><p><a href=" .
-        HEURIST_URL_BASE . "common/connect/login.php?logout=1&amp;instance=" . HEURIST_INSTANCE . 
+        HEURIST_URL_BASE . "common/connect/login.php?logout=1&amp;db=" . HEURIST_DBNAME .
         "'>Log out</a></p></body></html>";
     return;
 }

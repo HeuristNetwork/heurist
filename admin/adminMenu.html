@@ -11,7 +11,7 @@
 	-->
 
 	<head>
-	<title>Heurist - [instance-name!] Admin</title>
+	<title>Heurist - [dbname!] Admin</title>
 
 	<link rel="icon" href="../favicon.ico" type="image/x-icon">
 	<link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
@@ -39,24 +39,24 @@
 </a>
 
 <div id=version></div>
-<!-- instance name -->
-<div id=instance-name >[instance-name!]</div>
+<!-- database name -->
+<div id=dbname >[dbname!]</div>
 <div id="page" style="left:10px">
 	<div class="banner">
 		<div style="display:table; height:25px">
 			<h2>Heurist System Administration</h2>
-			<a href="../index.php?db=[instance-name!]">return to search page</a>
+			<a href="../index.php?db=[dbname!]">return to search page</a>
 		</div>
 </div>
 
 <div id="page-inner">
 <h3>User admin</h3>
 <ul>
-	<li><a href="ugrps/findAddUser.php?instance=[instance-name!]">Manage users / group membership</a></li>
-	<li><a href="ugrps/assignUsersToGroups.php?instance=[instance-name!]">List all</a></li>
-	<li><a href="ugrps/editGroups.php?instance=[instance-name!]">Manage user groups</a></li>
-	<li><a href="ugrps/editGroupTags.php?instance=[instance-name!]">Manage group tags</a></li>
-	<li><a href="ugrps/quitGroupForSession.php?instance=[instance-name!]">Quit group for session</a></li>
+	<li><a href="ugrps/findAddUser.php?db=[dbname!]">Manage users / group membership</a></li>
+	<li><a href="ugrps/assignUsersToGroups.php?db=[dbname!]">List all</a></li>
+	<li><a href="ugrps/editGroups.php?db=[dbname!]">Manage user groups</a></li>
+	<li><a href="ugrps/editGroupTags.php?db=[dbname!]">Manage group tags</a></li>
+	<li><a href="ugrps/quitGroupForSession.php?db=[dbname!]">Quit group for session</a></li>
 </UL>
 <div class="separator_row"></div>
 
@@ -65,56 +65,56 @@
 	<!-- largely done but <span class="nw"> NOT WORKING</span> yet asked Steve to debug-->
 	<li><a target="_blank" href="setup/createNewDB.php">New database</a> <span class="nw"> NOT WORKING</span></li>
 	<!-- NEEDS TO GO DIRECT TO EDIT FORM -->
-	<li><a href="setup/editSysIdentification.php?instance=[instance-name!]">Edit identification info</a></li>
+	<li><a href="setup/editSysIdentification.php?db=[dbname!]">Edit identification info</a></li>
 	<!-- <span class="nw"> NOT WORKING</span>, problem with success checks anbd need to fix up fcall to next registration #-->
 	<!-- to do: should be disabed if alrteady registered and show registration # -->
-	<li><a href="setup/registerDB.php?instance=[instance-name!]">Register with HeuristScholar.org</a> <span class="nw"> NOT WORKING</span></li>
+	<li><a href="setup/registerDB.php?db=[dbname!]">Register with HeuristScholar.org</a> <span class="nw"> NOT WORKING</span></li>
 	<!-- WE REALLY NEED TO SPLIT THESE UP INTO SEPARATE FUCNTIONS -->
-	<li><a href="structure/editStructure.php?instance=[instance-name!]">Manage record types and details (fields)</a></li>
-	<li><a href="describe/listRectypeDescriptions.php?instance=[instance-name!]">Print-friendly list</a></li>
-	<li><a href="structure/editDefOntologies.php?instance=[instance-name!]">Manage ontologies</a></li>
-	<li><a href="structure/editVocabularies.php?instance=[instance-name!]">Manage vocabularies</a></li>
-	<li><a href="structure/editTerms.php?instance=[instance-name!]">Manage terms</a></li>
+	<li><a href="structure/editStructure.php?db=[dbname!]">Manage record types and details (fields)</a></li>
+	<li><a href="describe/listRectypeDescriptions.php?db=[dbname!]">Print-friendly list</a></li>
+	<li><a href="structure/editDefOntologies.php?db=[dbname!]">Manage ontologies</a></li>
+	<li><a href="structure/editVocabularies.php?db=[dbname!]">Manage vocabularies</a></li>
+	<li><a href="structure/editTerms.php?db=[dbname!]">Manage terms</a></li>
 	<!-- <span class="nw"> NOT WORKING</span> YET-->
-	<li><a href="structure/editRectypeConstraints.php?instance=[instance-name!]">Manage record relationship constraints</a> <span class="nw"> NOT WORKING</span></li>
+	<li><a href="structure/editRectypeConstraints.php?db=[dbname!]">Manage record relationship constraints</a> <span class="nw"> NOT WORKING</span></li>
 	<!-- <span class="nw"> NOT WORKING</span> YET -->
-	<li><a href="describe/buildCrosswalks.php?instance=[instance-name!]">Import/synchronise database definitions</a> <span class="nw"> NOT WORKING</span></li>
+	<li><a href="describe/buildCrosswalks.php?db=[dbname!]">Import/synchronise database definitions</a> <span class="nw"> NOT WORKING</span></li>
 	<!-- gives a blank form box??
-	<li><a href="structure/editVocab.php?db=[instance-name!]">Add/edit vocabularies</a>THIS NEEDS REDOING, CURRENTLY TRIES TO EDIT TERMS USING T1000-->
-	<li><a href="setup/editMimetypes.php?instance=[instance-name!]">Manage file mime types</a></li>
+	<li><a href="structure/editVocab.php?db=[dbname!]">Add/edit vocabularies</a>THIS NEEDS REDOING, CURRENTLY TRIES TO EDIT TERMS USING T1000-->
+	<li><a href="setup/editMimetypes.php?db=[dbname!]">Manage file mime types</a></li>
 </ul>
 
 </div>
 <div id=page-right>
 <h3>Checking and fixes</h3>
 <ul>
-	<li><a href="verification/recalcTitlesAllRecords.php?instance=[instance-name!]">Rebuild constructed titles (all records)</a></li>
+	<li><a href="verification/recalcTitlesAllRecords.php?db=[dbname!]">Rebuild constructed titles (all records)</a></li>
 	<!-- : Also have capabuility for specific records and rectypes</p> -->
-	<li><a href="verification/listRecordPointerErrors.php?instance=[instance-name!]">Check for invalid record pointers</a></li>
-	<li><a href="verification/listDuplicateRecords.php?fuzziness=10&amp;instance=[instance-name!]">Find/eliminate duplicate records (fuzziness 10, change in URL))</a></li>
-	<li><a href="../search/search.html?q=_BROKEN_&amp;w=all&amp;instance=[instance-name!]">Find records with broken URLs (in the main URL pointer) RETRIEVES 18k RECORDS, MANY OK</a></li>
+	<li><a href="verification/listRecordPointerErrors.php?db=[dbname!]">Check for invalid record pointers</a></li>
+	<li><a href="verification/listDuplicateRecords.php?fuzziness=10&amp;db=[dbname!]">Find/eliminate duplicate records (fuzziness 10, change in URL))</a></li>
+	<li><a href="../search/search.html?q=_BROKEN_&amp;w=all&amp;db=[dbname!]">Find records with broken URLs (in the main URL pointer) RETRIEVES 18k RECORDS, MANY OK</a></li>
 	<!-- <span class="nw"> NOT WORKING</span> YET-->
-	<li><a href="structure/editRectypeConstraints.php?instance=[instance-name!]">Manage record relationship constraints</a> <span class="nw"> NOT WORKING</span></li>
+	<li><a href="structure/editRectypeConstraints.php?db=[dbname!]">Manage record relationship constraints</a> <span class="nw"> NOT WORKING</span></li>
 	<!-- <span class="nw"> NOT WORKING</span> YET -->
-	<li><a href="describe/buildCrosswalks.php?db=[instance-name!]">Import/synchronise database definitions</a> <span class="nw"> NOT WORKING</span></li>
-	<li><a href="describe/getDBStructure.php?db=[instance-name!]">Return database definitions</a></li>
+	<li><a href="describe/buildCrosswalks.php?db=[dbname!]">Import/synchronise database definitions</a> <span class="nw"> NOT WORKING</span></li>
+	<li><a href="describe/getDBStructure.php?db=[dbname!]">Return database definitions</a></li>
 	<!-- gives a blank form box??
-	<p><a href="structure/editVocab.php?db=[instance-name!]">Add/edit vocabularies</a>
+	<p><a href="structure/editVocab.php?db=[dbname!]">Add/edit vocabularies</a>
 	THIS NEEDS REDOING, CURRENTLY TRIES TO EDIT TERMS USING T1000</p>
 	-->
-	<li><a href="setup/editMimetypes.php?instance=[instance-name!]">Manage file mime types</a></li>
+	<li><a href="setup/editMimetypes.php?db=[dbname!]">Manage file mime types</a></li>
 </ul>
 <div class="separator_row"></div>
 <h3>Wysiwyg text (XHTML)</h3>
-	<li><a href="verification/checkXHTML.php?instance=[instance-name!]">General health check</a></li>
-	<li><a href="verification/checkInvalidChars.php?instance=[instance-name!]" >Invalid characters</a></li>
-	<li><a href="verification/cleanInvalidChars.php?instance=[instance-name!]">Clean invalid characters</a></li>
+	<li><a href="verification/checkXHTML.php?db=[dbname!]">General health check</a></li>
+	<li><a href="verification/checkInvalidChars.php?db=[dbname!]" >Invalid characters</a></li>
+	<li><a href="verification/cleanInvalidChars.php?db=[dbname!]">Clean invalid characters</a></li>
 
 <div class="separator_row"></div>
 
 <h3>Admin</h3>
 <ul>
-	<li><a href="rollback/rollbackRecords.php?instance=[instance-name!]">Record rollback</a> <span class="nw"> NOT WORKING</span></li>
+	<li><a href="rollback/rollbackRecords.php?db=[dbname!]">Record rollback</a> <span class="nw"> NOT WORKING</span></li>
 </ul>
 </div>
 </div>

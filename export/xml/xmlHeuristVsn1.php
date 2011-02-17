@@ -1,17 +1,14 @@
 <?php
 
-/**
+/*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- **/
+ -->*/
 
-?>
-
-<?php
 	/*<!-- xmlexport.php
 
 	* Main Heurist search page: this page is the effective home page for the Heurist application *
@@ -142,7 +139,7 @@ if (@$argv) {
 
 	if (!is_logged_in()) { // check if the record being retrieved is a singe non-protected record
 		if (!single_record_retrieval($_REQUEST['q'])) {
-			header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE);
+			header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
 			return;
 		}
 	}
@@ -555,8 +552,8 @@ function writeTag($rectype, $detail, $value, $file_id) {
 				   . "<file_orig_name>" . htmlspecialchars($file['ulf_OrigFileName']) . "</file_orig_name>\n"
 				   . "<file_date>" . htmlspecialchars($file['ulf_Added']) . "</file_date>\n"
 				   . "<file_size>" . htmlspecialchars($file['ulf_FileSizeKB']) . "</file_size>\n"
-				   . "<file_fetch_url>" . htmlspecialchars(HEURIST_URL_BASE.'/records/files/downloadFile.php/'.urlencode($file['ulf_OrigFileName']).'?instance='.HEURIST_INSTANCE.'&ulf_ID='.$file['ulf_ObfuscatedFileID']) . "</file_fetch_url>\n"
-				   . "<file_thumb_url>" . htmlspecialchars(HEURIST_URL_BASE.'/common/php/resizeImage.php?instance='.HEURIST_INSTANCE.'&ulf_ID='.$file['ulf_ObfuscatedFileID']) . "</file_thumb_url>\n";
+				   . "<file_fetch_url>" . htmlspecialchars(HEURIST_URL_BASE.'/records/files/downloadFile.php/'.urlencode($file['ulf_OrigFileName']).'?db='.HEURIST_DBNAME.'&ulf_ID='.$file['ulf_ObfuscatedFileID']) . "</file_fetch_url>\n"
+				   . "<file_thumb_url>" . htmlspecialchars(HEURIST_URL_BASE.'/common/php/resizeImage.php?db='.HEURIST_DBNAME.'&ulf_ID='.$file['ulf_ObfuscatedFileID']) . "</file_thumb_url>\n";
 		}
 	}
 

@@ -79,8 +79,8 @@
 			var pageCount = 0;
 			var hBase = "http://" + window.location.host +
 						(top && top.HEURIST && top.HEURIST.basePath? top.HEURIST.basePath : window.location.pathname.match(/^\/[^\/]+\//));
-			var instance = (top && top.HEURIST && top.HEURIST.instance? top.HEURIST.instance.name :
-								(location.search.match(/instance=([^&]+)/) ? location.search.match(/instance=([^&]+)/)[1]: ""));
+			var database = (top && top.HEURIST && top.HEURIST.database? top.HEURIST.database.name :
+								(location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]: ""));
 
 			function init() {
 			//initialize parameters
@@ -133,8 +133,8 @@
 						}
 					}
 
-					if (query && query.search("instance")== -1){
-						query += "&instance=" + instance;
+					if (query && query.search("db")== -1){
+						query += "&db=" + database;
 					}
 					if (query && query.search("a=")== -1){
 						query += "&a=1";
@@ -185,7 +185,7 @@
 
 					var xmlRecDepth1 = loadXMLDocFromFile("http://heuristscholar.org"+ top.HEURIST.basePath+
 										"export/xml/hml.php?q=ids:"+recID+"&depth=1&woot=1"+
-										(top.HEURIST.instance.name? "&instance=" + top.HEURIST.instance.name:""));
+										(top.HEURIST.database.name? "&db=" + top.HEURIST.database.name:""));
 					if (!xmlRecDepth1) return;
 					if (!relatedRecListXSL) {
 						relatedRecListXSL = loadXMLDocFromFile("xsl/relatedRecList.xsl");

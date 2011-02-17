@@ -224,9 +224,9 @@ if (@$_REQUEST['stype']) {
 }
 ?>
 <?php
-if (@$_REQUEST['instance']) {
+if (@$_REQUEST["db"]) {
 ?>
-<input type="hidden" name="instance" id="instance" value="<?= $_REQUEST['instance'] ?>" />
+<input type="hidden" name="db" id="db" value="<?= $_REQUEST["db"] ?>" />
 <?php
 }
 
@@ -252,13 +252,13 @@ foreach ($dupes as $rectype => $subarr) {
 		    $res = mysql_query('select rec_URL from Records where rec_ID = ' . $rec_id);
 		    $row = mysql_fetch_assoc($res);
 		    print '<li>'.($crosstype ? $vals['type'].'&nbsp;&nbsp;' : '').
-		    		'<a target="_new" href="'.HEURIST_URL_BASE.'records/view/viewRecord.php?saneopen=1&bib_id='.$rec_id.'&instance='.HEURIST_INSTANCE.'">'.$rec_id.': '.htmlspecialchars($vals['val']).'</a>';
+		    		'<a target="_new" href="'.HEURIST_URL_BASE.'records/view/viewRecord.php?saneopen=1&bib_id='.$rec_id.'&db='.HEURIST_DBNAME.'">'.$rec_id.': '.htmlspecialchars($vals['val']).'</a>';
 		    if ($row['rec_URL'])
 			    print '&nbsp;&nbsp;&nbsp;<span style="font-size: 70%;">(<a target="_new" href="'.$row['rec_URL'].'">' . $row['rec_URL'] . '</a>)</span>';
 		    print '</li>';
 	    }
 	    print '</ul>';
-		print '<a target="_new" href="'.HEURIST_URL_BASE.'search/search.html?q=ids:'.join(",",array_keys($bibs[$key])).'&instance='.HEURIST_INSTANCE.'">view duplicate set</a></div>';
+		print '<a target="_new" href="'.HEURIST_URL_BASE.'search/search.html?q=ids:'.join(",",array_keys($bibs[$key])).'&db='.HEURIST_DBNAME.'">view duplicate set</a></div>';
     }
 }
 ?>

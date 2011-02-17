@@ -33,7 +33,7 @@
 <td rowspan="2">
 [if : register]
 [else]
-<a href="assignUsersToGroups.php?instance=[instance-name!]">Edit user groups</a>
+<a href="assignUsersToGroups.php?db=[dbname!]">Edit user groups</a>
 [end-if]
 </td>
 <td align="right" style="vertical-align: baseline;">
@@ -41,9 +41,9 @@
 [else]
 <font color="#008000"><small>Logged in as: </small><tt>[logged-in-user-username]</tt></font><br>
    [if-eq : logged-in-user-username : ""]
-   <a href="../../common/connect/login.php?instance=[instance-name!]"><small>Log in</small></a>
+   <a href="../../common/connect/login.php?db=[dbname!]"><small>Log in</small></a>
    [else]
-   <a href="../../common/connect/login.php?logout=1&amp;instance=[instance-name!]"><small>Log out</small></a>
+   <a href="../../common/connect/login.php?logout=1&amp;db=[dbname!]"><small>Log out</small></a>
    [end-if-eq]
  [end-if]
 </td>
@@ -70,7 +70,7 @@
 
 [if : register]
 [else]
-<form action="findAddUser.php?instance=[instance-name!]">
+<form action="findAddUser.php?db=[dbname!]">
   <p>[extended-search USER USER_search]
   </p>
 
@@ -99,8 +99,8 @@ strings</span></i></p>
   [foreach USER searchrecordloop]
     <tr>
       <td style="padding-right: 20px;"><b>[ugr_ID]</b></td>
-      <td style="padding-right: 20px;"><b><a href="editUser.php?instance=[instance-name!]&amp;Id=[ugr_ID]">[ugr_FirstName] [ugr_LastName]</a></b></td>
-	  <td><a href="assignUsersToGroups.php?instance=[instance-name!]&amp;filterId=[ugr_ID]">edit groups</a></td>
+      <td style="padding-right: 20px;"><b><a href="editUser.php?db=[dbname!]&amp;Id=[ugr_ID]">[ugr_FirstName] [ugr_LastName]</a></b></td>
+	  <td><a href="assignUsersToGroups.php?db=[dbname!]&amp;filterId=[ugr_ID]">edit groups</a></td>
     </tr>
   [end-foreach]
   </table>
@@ -110,7 +110,7 @@ strings</span></i></p>
  </form>
 [end-if]
 <!-- end non-registration code -->
-<form action="findAddUser.php?instance=[instance-name!]" method="post">
+<form action="findAddUser.php?db=[dbname!]" method="post">
 [insert required USER user_insert]
 
 [if : register]
@@ -267,7 +267,7 @@ strings</span></i></p>
 [if : new-user-id]
 <p>
  <span class="red">User added</span><br>
- <a href="editUser.php?instance=[instance-name!]&amp;Id=[new-user-id]">Click here to edit</a>
+ <a href="editUser.php?db=[dbname!]&amp;Id=[new-user-id]">Click here to edit</a>
 </p>
 [end-if]
 

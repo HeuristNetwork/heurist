@@ -20,10 +20,10 @@
 <script>
 	var basePath = (top && top.HEURIST && top.HEURIST.basePath? top.HEURIST.basePath : window.location.pathname.match(/^\/[^\/]+\//));
 	var hBase = "http://" + window.location.host + basePath;
-	var instance = (top && top.HEURIST && top.HEURIST.instance? top.HEURIST.instance.name : location.search.match(/instance=([^&]+)/)[1]);
+	var database = (top && top.HEURIST && top.HEURIST.database? top.HEURIST.database.name : location.search.match(/db=([^&]+)/)[1]);
 </script>
  <script>
-	document.write("<" + "script src=\"" +  basePath + "hapi/hapiLoader.php?instance=" +  window.opener.HAPI.instance + "&key=" + window.opener.HAPI.key + "\"><" + "/script>\n");
+	document.write("<" + "script src=\"" +  basePath + "hapi/hapiLoader.php?db=" +  window.opener.HAPI.database + "&key=" + window.opener.HAPI.key + "\"><" + "/script>\n");
 </script>
  <script>
 	document.write("<" + "script src=\"" +  basePath + "hapi/js/goi.js\"><" + "/script>\n" );

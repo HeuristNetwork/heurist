@@ -26,8 +26,8 @@ var HAPI = {
 	getVersion: function() { return "0.3"; },
 
 	key: "",
-	instance: (top && top.HeuristInstance ? top.HeuristInstance : (window.HeuristInstance ? window.HeuristInstance:"")),
-	setKey: function(key, instance, url) {
+	database: (top && top.HeuristInstance ? top.HeuristInstance : (window.HeuristInstance ? window.HeuristInstance:"")),
+	setKey: function(key, database, url) {
 		var error;
 		var baseURL, path;
 
@@ -46,9 +46,9 @@ var HAPI = {
 
 			do {
 				// try the key against all path prefixes
-				if (HAPI.SHA1(instance + baseURL + path) === key) {	//CHECKTHIS: noticed that the port is fixed perhaps we need to try without portnumber also
+				if (HAPI.SHA1(database + baseURL + path) === key) {	//CHECKTHIS: noticed that the port is fixed perhaps we need to try without portnumber also
 					HAPI.key = key;
-					HAPI.instance = instance;
+					HAPI.database = database;
 					HAPI.HeuristBaseURL = url;
 					if (HeuristSitePath) HAPI.HeuristSitePath = HeuristSitePath;
 					return;
@@ -56,7 +56,7 @@ var HAPI = {
 				path = path.replace(/[^\/]*\/$/, "");
 			} while (path);
 
-			error = "was registered for a different web site or Heurist instance";
+			error = "was registered for a different web site or Heurist database";
 		}
 
 		alert("The Heurist API key used on this web site " + error);
@@ -2357,7 +2357,7 @@ var HDetailManager = new function(detailTypes, detailRequirements) {
 		return (_optionalDetailTypesByRecordType[recordType.getID()] || []).slice(0);
 	};
 	this.getMatchingDetailTypesForRecordType = function(recordType) {
-		// Internal function, this one ... use it to construct the HHash, for instance
+		// Internal function, this one ... use it to construct the HHash, for database
 		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected"); }
 		return (_matchingDetailTypesByRecordType[recordType.getID()] || []).slice(0);
 	};
@@ -2664,7 +2664,7 @@ HAPI.XHR = {
 		fr.contentWindow.location.replace((xssWebPrefix || HAPI.XHR._xssWebPrefix) + "method=" + encodeURIComponent(method) +
 //				"&key=" + encodeURIComponent(HAPI.key || "") +
 				"&data=" + encodeURIComponent(HAPI.base64.encode(jsonData)) +
-				"&instance=" + encodeURIComponent(HAPI.instance || window.HeuristInstance) +
+				"&db=" + encodeURIComponent(HAPI.database || window.HeuristInstance) +
 				(HAPI.XHR.rxURLLen? ("&rxlen="+HAPI.XHR.rxURLLen) : ""));
 	},
 
@@ -2740,7 +2740,7 @@ HAPI.XHR = {
 		form.method = "post";
 		form.target = fr.name;
 		form.action = (xssWebPrefix || HAPI.XHR._xssWebPrefix) +
-							"instance=" + encodeURIComponent(HAPI.instance || window.HeuristInstance) +
+							"db=" + encodeURIComponent(HAPI.database || window.HeuristInstance) +
 							"&method=" + encodeURIComponent(method);
 
 		var elt = document.createElement("input");
@@ -2797,7 +2797,7 @@ HAPI.XHR = {
 		scr.type = "text/javascript";
 		scr.src = (xssWebPrefix || HAPI.XHR._xssWebPrefix) + "method=" + encodeURIComponent(method) +
 					/*"&key=" + encodeURIComponent(HAPI.key || "") + */
-					"&instance=" + encodeURIComponent(HAPI.instance || window.HeuristInstance) +
+					"&db=" + encodeURIComponent(HAPI.database || window.HeuristInstance) +
 					"&data=" + encodeURIComponent(HAPI.base64.encode(HAPI.XHR.convertToJSON(data))) + "&cb=" + name;
 
 		var headElt = document.getElementsByTagName("head")[0];
@@ -3477,7 +3477,7 @@ var HeuristScholarDB = new HStorageManager();
 			}
 			// Insert XSS incantations if HAPI.key is set.
 			newForm.action = baseURL + "hapi/php/dispatcher.php?method=saveFile"  //saw FIXME: add instance code.
-									"&instance=" + encodeURIComponent(HAPI.instance || window.HeuristInstance) //+
+									"&db=" + encodeURIComponent(HAPI.database || window.HeuristInstance) //+
 									/* &key=" + encodeURIComponent(HAPI.key)) : "saveFile")*/;
 
 		doc.body.appendChild(newForm);

@@ -68,7 +68,7 @@
     }else if (@$_SERVER["HTTP_REFERER"] && preg_match("/.*db=([^&]*).*/",$_SERVER["HTTP_REFERER"],$refer_instance)) {
         $dbName = $refer_instance[1];
         // saw TODO: temporary until change instance to db
-        }else if (@$_SERVER["HTTP_REFERER"] && preg_match("/.*instance=([^&]*).*/",$_SERVER["HTTP_REFERER"],$refer_instance)) {
+        }else if (@$_SERVER["HTTP_REFERER"] && preg_match("/.*db=([^&]*).*/",$_SERVER["HTTP_REFERER"],$refer_instance)) {
         $dbName = $refer_instance[1];
     }
     if (!@$dbName) {

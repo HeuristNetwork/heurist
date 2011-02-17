@@ -60,8 +60,8 @@
 						VALUES  ($ownerGrpEmail,$pwd,$ownerGrpEmail,'Yes')");
 			if ($res) {
 				$ownerGrpID= mysql_insert_id();
-                header('Location: ' . HEURIST_MASTER_INDEX_URL . '/common/connect/login.php?instance='
-                        .HEURIST_INSTANCE . ($last_uri ? '&last_uri=' . urlencode($last_uri) : ''));
+                header('Location: ' . HEURIST_MASTER_INDEX_URL . '/common/connect/login.php?db='
+                        .HEURIST_DBNAME . ($last_uri ? '&last_uri=' . urlencode($last_uri) : ''));
 			} else { // Unable to create the new user
                 $error="Unable to write new user in Heurist master index database\n" .
                         "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";

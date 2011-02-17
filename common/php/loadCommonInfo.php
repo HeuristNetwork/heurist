@@ -43,10 +43,10 @@ if (strtotime(@$_SERVER["HTTP_IF_MODIFIED_SINCE"]) > $lastModified) {
 
 
 // This is the best place I can think of to stick this stuff --kj, 2008-07-21
-print "top.HEURIST.instance = {};\n";
-print "top.HEURIST.instance.name = " . json_format(HEURIST_INSTANCE) . ";\n";
-print "top.HEURIST.instance.prefix = " . json_format(HEURIST_INSTANCE_PREFIX) . ";\n";
-print "top.HEURIST.instance.exploreURL = " . json_format(EXPLORE_URL) . ";\n";
+print "top.HEURIST.database = {};\n";
+print "top.HEURIST.database.name = " . json_format(HEURIST_DBNAME) . ";\n";
+print "top.HEURIST.database.sessionPrefix = " . json_format(HEURIST_SESSION_DB_PREFIX) . ";\n";
+print "top.HEURIST.database.exploreURL = " . json_format(EXPLORE_URL) . ";\n";
 print "if (!top.HEURIST.basePath) top.HEURIST.basePath = ".json_format(HEURIST_SITE_PATH) . ";\n";
 print "if (!top.HEURIST.baseURL) top.HEURIST.baseURL = ".json_format(HEURIST_URL_BASE) . ";\n";
 

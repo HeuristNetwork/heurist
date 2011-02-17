@@ -79,23 +79,23 @@
 
 						if (val.getRecordType().getID() == 74) {
 							var img=val.getDetail(HDetailManager.getDetailTypeById(221)). getThumbnailURL();
-							elts.innerHTML += "&lt;br>&lt;a href=\""+itemPath+val.getID()+"/?instance=<xsl:value-of select="$instanceName"/>" + "\">&lt;img src=\"" + img+ "\"/>&lt;/a>";
+							elts.innerHTML += "&lt;br>&lt;a href=\""+itemPath+val.getID()+"/?db=<xsl:value-of select="$dbName"/>" + "\">&lt;img src=\"" + img+ "\"/>&lt;/a>";
 						}else{
 							elts.innerHTML += "&lt;br>&lt;br>&lt;span style=\"padding-right:5px; vertical-align:top\">&lt;a href=\""+itemPath+val.getID()+"\">"+val.getTitle()+"&lt;/a>&lt;/span>"+"&lt;img src=\"" + imgpath+val.getRecordType().getID() +".png\"/>";
 						}
 					}
 
 				</script>
-				<script src="{$hBase}common/php/loadHAPI.php?instance={$instanceName}"/>
+				<script src="{$hBase}common/php/loadHAPI.php?db={$dbName}"/>
 				<script>
 					if (!HCurrentUser.isLoggedIn()) {
-						window.location = '<xsl:value-of select="$hBase"/>common/connect/loginForRelBrowser.php?instance=<xsl:value-of select="$instanceName"/>&amp;logo=<xsl:value-of select="$appBase"/>images/logo.png&amp;home=<xsl:value-of select="$appBase"/>';
+						window.location = '<xsl:value-of select="$hBase"/>common/connect/loginForRelBrowser.php?db=<xsl:value-of select="$dbName"/>&amp;logo=<xsl:value-of select="$appBase"/>images/logo.png&amp;home=<xsl:value-of select="$appBase"/>';
 					}</script>
 				<script src="{$appBase}js/search.js"/>
 				<script>
 					top.HEURIST = {};
 					top.HEURIST.fireEvent = function(e, e){};</script>
-				<script src="{$hBase}common/php/loadUserInfo.php?instance={$instanceName}"/>
+				<script src="{$hBase}common/php/loadUserInfo.php?db={$dbName}"/>
 				<!-- Time Map rendering -->
 				<xsl:if test="export/references/reference/rectype[@id=103 or @id=51 or @id=165 or @id=122 or @id=57]">
 					<script>
@@ -121,12 +121,12 @@
 			</head>
 			<body pub_id="{/export/@pub_id}">
 				<div id="header">
-					<a href="{$hBase}search/search.html?instance={$instanceName}">
+					<a href="{$hBase}search/search.html?db={$dbName}">
 						<div id="logo"></div>
 					</a>
-					<div id="instance-name"><xsl:value-of select="$instanceName"/></div>
+					<div id="dbname"><xsl:value-of select="$dbName"/></div>
 					<div id="home-link">
-						<a href="{$hBase}search/search.html?q=id:{export/references/reference/id}&amp;instance={$instanceName}">Record id:
+						<a href="{$hBase}search/search.html?q=id:{export/references/reference/id}&amp;db={$dbName}">Record id:
 							<xsl:value-of select="export/references/reference/id"/>
 						</a>
 					</div>
@@ -193,7 +193,7 @@
 
 			<div id="page">
 				<div class="banner">
-						<a href="{$appBase}edit.html?id={$currentid}&amp;instance={$instanceName}" onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;" title="edit" style="background-image:url({$hBase}common/images/edit-pencil.png)">
+						<a href="{$appBase}edit.html?id={$currentid}&amp;db={$dbName}" onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;" title="edit" style="background-image:url({$hBase}common/images/edit-pencil.png)">
 						Edit Record</a><nobr></nobr>
 					<xsl:if test="export/references/reference/rectype/@id = 98">
 					<xsl:if test=" $id != $home-id">
@@ -201,7 +201,7 @@
 						</xsl:if>
 					</xsl:if>
 					<!-- a href="#" id="addRelationship" title="add Relationship" style="background-image:url({$appBase}images/rel_icon.png)">Add Relationship Popup Test</a -->
-					<a href="#" onclick="window.open('{$appBase}addrelationship.html?typeId=52&amp;source={export/references/reference/id}&amp;instance={$instanceName}','','status=0,scrollbars=1,resizable=1,width=700,height=500'); return false;" title="add Relationship" style="background-image:url({$appBase}images/rel_icon.png)">Add Relationship</a>
+					<a href="#" onclick="window.open('{$appBase}addrelationship.html?typeId=52&amp;source={export/references/reference/id}&amp;db={$dbName}','','status=0,scrollbars=1,resizable=1,width=700,height=500'); return false;" title="add Relationship" style="background-image:url({$appBase}images/rel_icon.png)">Add Relationship</a>
 				</div>
 
 <!--					<xsl:choose>
@@ -366,7 +366,7 @@
 			<xsl:otherwise>
 				<div class="relatedItem">
                     <div class="editIcon">
-						<a href="{$appBase}edit.html?id={id}&amp;instance={$instanceName}" onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;" title="edit">
+						<a href="{$appBase}edit.html?id={id}&amp;db={$dbName}" onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;" title="edit">
 							<img src="{$hBase}common/images/edit-pencil.png" class="editPencil"/>
 						</a>
 					</div>
@@ -398,14 +398,14 @@
 
 						<!--  renders thumbnails  -->
 						 <xsl:if test="detail[@id=606]">
-								<a href="{$cocoonBase}item/{id}/?instance={$instanceName}">
+								<a href="{$cocoonBase}item/{id}/?db={$dbName}">
 									<img src="{detail[@id=606]}" title="{detail[@id=606]}" class="thumbnail"/>
 								</a>
 						 </xsl:if>
 
 						 <xsl:if test="detail[@id = 222 or @id=223 or @id=224]">
 							<xsl:if test="detail/file_thumb_url">
-								<a href="{$cocoonBase}item/{id}/?instance={$instanceName}">
+								<a href="{$cocoonBase}item/{id}/?db={$dbName}">
 									<img src="{detail/file_thumb_url}" class="thumbnail"/>
 								</a>
 							</xsl:if>
@@ -414,7 +414,7 @@
 
 					<div class="link">
 
-						<a href="{$cocoonBase}item/{id}/?instance={$instanceName}">
+						<a href="{$cocoonBase}item/{id}/?db={$dbName}">
 							<xsl:choose>
 								<!-- related / notes -->
 								<xsl:when test="@notes">

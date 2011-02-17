@@ -15,7 +15,7 @@ require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 // TO DO: set flag from sysIdentification.sys_AllowRegistration and exit here if false
 
 if (!@$_REQUEST['register'] && !(is_logged_in() && is_admin())) {
-	header('Location: '.HEURIST_URL_BASE.'common/connect/login.php?instance='.HEURIST_INSTANCE);
+	header('Location: '.HEURIST_URL_BASE.'common/connect/login.php?db='.HEURIST_DBNAME);
 	return;
 }
 
@@ -30,7 +30,7 @@ $lexer = new Lexer($template);
 $body = new BodyScope($lexer);
 
 $body->global_vars['recaptcha'] = "";
-$body->global_vars['instance-name'] = HEURIST_INSTANCE;
+$body->global_vars['dbname'] = HEURIST_DBNAME;
 
 if (@$_REQUEST['register']) {
 	$body->global_vars['register'] = 1;
@@ -229,7 +229,7 @@ State:         $state
 
 Go to the address below to review further details and approve the registration:
 
-".HEURIST_URL_BASE."admin/ugrps/editUser.php?instance=".HEURIST_INSTANCE."&approve=1&Id=$usr_id
+".HEURIST_URL_BASE."admin/ugrps/editUser.php?db=".HEURIST_DBNAME."&approve=1&Id=$usr_id
 
 ";
 				$admins = mysql__select_array("sysUsrGrpLinks left join sysUGrps usr on ugr_ID = ugl_UserID",
@@ -240,7 +240,7 @@ Go to the address below to review further details and approve the registration:
 				}
 				mail(join(", ", $admins), "Heurist User Registration: $firstname $lastname [$email]", $email_text, 'From: root');
 
-				header('Location: '. HEURIST_URL_BASE.'admin/ugrps/msgRegistrationSuccess.html?instance='.HEURIST_INSTANCE);
+				header('Location: '. HEURIST_URL_BASE.'admin/ugrps/msgRegistrationSuccess.html?db='.HEURIST_DBNAME);
 			}
 
 			$body->global_vars['new-user-id'] = $usr_id;

@@ -25,7 +25,7 @@
 
 						<!-- chose if base id = annotation target id - then include onclick handler and href is below -->
 						<div class="editIcon">
-						<a href="{$appBase}edit-annotation.html?id={id}?instance={$instanceName}"
+						<a href="{$appBase}edit-annotation.html?id={id}?db={$dbName}"
 							onclick="window.open(this.href,'','status=0,scrollbars=1,resizable=1,width=800,height=600'); return false;"
 							title="edit">
 							<img src="{$hBase}common/images/edit-pencil.png"/>
@@ -41,7 +41,7 @@
 								</a>
 							</xsl:when>
 							<xsl:otherwise>
-								<a href="{$cocoonBase}item/{pointer[@id=322]/id}/#ref{id}?instance={$instanceName}" class="sb_two">
+								<a href="{$cocoonBase}item/{pointer[@id=322]/id}/#ref{id}?db={$dbName}" class="sb_two">
 									<xsl:value-of select="title"/>
 								</a>
 								<span>(annotation in: <em>
@@ -81,7 +81,7 @@
 						<p>
 							<xsl:choose>
 								<xsl:when test="pointer[@id=152]/detail/file_thumb_url">
-									<a href="{$cocoonBase}item/{pointer[@id=152]/id}/?instance={$instanceName}">
+									<a href="{$cocoonBase}item/{pointer[@id=152]/id}/?db={$dbName}">
 										<img src="{pointer[@id=152]/detail/file_thumb_url}"
 											border="0"/>
 									</a>
@@ -91,7 +91,7 @@
 										<tr>
 											<td>
 
-												<a href="{$cocoonBase}item/{pointer[@id=152]/id}/?instance={$instanceName}"
+												<a href="{$cocoonBase}item/{pointer[@id=152]/id}/?db={$dbName}"
 												class="sb_two">
 												<xsl:value-of
 												select="pointer[@id=152]/detail[@id=291]"/>

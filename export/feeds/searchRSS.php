@@ -25,7 +25,7 @@ if (!@$_REQUEST['a'] == 1) {
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
 if (!is_logged_in()) {
-        header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE);
+        header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
         return;
 }
 
@@ -81,7 +81,7 @@ $lexer = new Lexer($template);
 $body = new BodyScope($lexer);
 
 $body->global_vars['hBase'] = HEURIST_URL_BASE;
-$body->global_vars['instance-name'] = HEURIST_INSTANCE;
+$body->global_vars['dbname'] = HEURIST_DBNAME;
 
 if ($search_type == BOOKMARK) $body->global_vars['search-type'] = 'bookmark';
 else $body->global_vars['search-type'] = 'biblio';

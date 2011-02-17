@@ -848,7 +848,7 @@ FlexImport.Saver = (function () {
 	return {
 		saveRecords: function () {
 			if (! confirm("This will attempt to save all the displayed records to " +
-					(HAPI.instance ? "the \""+HAPI.instance+"\" Heurist instance" : "Heurist") + ". Are you sure you want to continue?")) return;
+					(HAPI.database ? "the \""+HAPI.database+"\" Heurist database" : "Heurist") + ". Are you sure you want to continue?")) return;
 
 			_getChunk();
 		}

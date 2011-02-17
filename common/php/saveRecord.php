@@ -77,7 +77,7 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 				// user is trying to change the workgroup when they are not an admin
 				jsonError("user is not a workgroup admin");
 			} else if (! is_admin()) {
-				// you must be an instance admin to change a public record into a workgroup record
+				// you must be an database admin to change a public record into a workgroup record
 				jsonError("user does not have sufficient authority to change public record to workgroup record");
 			}
 		}

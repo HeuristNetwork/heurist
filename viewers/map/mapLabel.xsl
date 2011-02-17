@@ -6,7 +6,7 @@
 		<xsl:when test="hml/records/record/detail[@id=221 or @id= 222 or @id= 223 or  @id= 224]">
 			<span class="icon" title="{title}" style="width:48px; display:table-cell;padding:0;background-color:{detail[@id=678]};">
 					<div class="iconIMG">
-						<a target="_new" href="../../search/search.html?q=ids:{hml/records/record/id}&amp;instance=' + instance;">
+						<a target="_new" href="../../search/search.html?q=ids:{hml/records/record/id}&amp;db=' + database;">
 							<img src="{hml/records/record/detail[@id=221 or @id= 222 or @id= 223 or  @id= 224]/file/thumbURL}"/>
 						</a> 
 						<xsl:if test="count(hml/records/record/detail/record)&gt;0">
@@ -43,10 +43,10 @@
 					<xsl:sort select="title"/>
 						<xsl:choose>
 							<xsl:when test="detail[@id= 221 or @id= 222 or @id= 223 or  @id= 224]">
-								<span class="icon" title="{title}" style="width:48px; display:table-cell;padding:0;background-color:{detail[@id=678]};backgound-image:url({detail[@id= 221 or @id= 222 or @id= 223 or @id= 224]/file/thumbURL})"><a target="_new" href="../../search/search.html?q=ids:{self::node()/id}&amp;instance=' + instance;"><div class="iconIMG"><img src="{detail[@id= 222 or @id= 223 or @id= 224]/file/thumbURL}"/></div></a></span>
+								<span class="icon" title="{title}" style="width:48px; display:table-cell;padding:0;background-color:{detail[@id=678]};backgound-image:url({detail[@id= 221 or @id= 222 or @id= 223 or @id= 224]/file/thumbURL})"><a target="_new" href="../../search/search.html?q=ids:{self::node()/id}&amp;db=' + database;"><div class="iconIMG"><img src="{detail[@id= 222 or @id= 223 or @id= 224]/file/thumbURL}"/></div></a></span>
 							</xsl:when>
 							<xsl:otherwise>
-								<span class="icon" title="{title}" style="width:48px; display:table-cell;padding:0;background-color:{detail[@id=678]};background-image:url(../../common/images/rectype-icons/thumb/th_{type/@id}.png)"><a target="_new" href="../../search/search.html?q=ids:{self::node()/id}&amp;instance=' + instance;"><img src="../../common/images/31x31.gif"/></a></span>
+								<span class="icon" title="{title}" style="width:48px; display:table-cell;padding:0;background-color:{detail[@id=678]};background-image:url(../../common/images/rectype-icons/thumb/th_{type/@id}.png)"><a target="_new" href="../../search/search.html?q=ids:{self::node()/id}&amp;db=' + database;"><img src="../../common/images/31x31.gif"/></a></span>
 							</xsl:otherwise>
 						</xsl:choose>
 				</xsl:for-each>

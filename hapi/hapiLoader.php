@@ -27,18 +27,18 @@ define("HAPI_HOME" /* makes ME laugh */, HEURIST_BASE_URL."hapi/");
 
 
 header("Content-type: text/javascript");
-$instance = (@$_REQUEST["instance"] ? $_REQUEST['instance']:"");
+$instance = (@$_REQUEST["db"] ? $_REQUEST["db"]:"");
 
 $scripts = array(
-//	HAPI_HOME . "php/loadHapiCommonInfo.php?key=" . addslashes($_REQUEST["key"])."&instance=".$instance,
-//	HAPI_HOME . "php/loadHapiUserInfo.php?key=" . addslashes($_REQUEST["key"])."&instance=".$instance,
-	HAPI_HOME . "php/loadHapiCommonInfo.php?instance=".$instance,
-	HAPI_HOME . "php/loadHapiUserInfo.php?instance=".$instance,
-	HAPI_HOME . "js/hapi.js?instance=".$instance
+//	HAPI_HOME . "php/loadHapiCommonInfo.php?key=" . addslashes($_REQUEST["key"])."&db=".$instance,
+//	HAPI_HOME . "php/loadHapiUserInfo.php?key=" . addslashes($_REQUEST["key"])."&db=".$instance,
+	HAPI_HOME . "php/loadHapiCommonInfo.php?db=".$instance,
+	HAPI_HOME . "php/loadHapiUserInfo.php?db=".$instance,
+	HAPI_HOME . "js/hapi.js?db=".$instance
 );
 
 if (@$_REQUEST["inclGeo"]) {
-	array_push($scripts,HAPI_HOME."js/geo.js?instance=".$instance);
+	array_push($scripts,HAPI_HOME."js/geo.js?db=".$instance);
 }
 
 ?>

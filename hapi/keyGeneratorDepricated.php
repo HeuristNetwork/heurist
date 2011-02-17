@@ -61,11 +61,11 @@ if (! @$_REQUEST["url"]) {
 <?php
 	if (count($user_instances) == 1) {
 		print "<input type=hidden name=instance value=".$user_instances[0]."></input>\n";
-		print "<p>Note: you are logged in to the ".($user_instances[0] ? "<tt>".$user_instances[0]."</tt>" : "primary")." instance.  To generate a key for a different instance, log in to that instance first.</p>";
+		print "<p>Note: you are logged in to the ".($user_instances[0] ? "<tt>".$user_instances[0]."</tt>" : "primary")." database.  To generate a key for a different database, log in to that database first.</p>";
 	} else {
-		print "<p>You are logged into more than one Heurist instance.  Select one: <select name=instance>\n";
+		print "<p>You are logged into more than one Heurist database.  Select one: <select name=instance>\n";
 		foreach ($user_instances as $instance) {
-			print "<option value=$instance>".($instance ? $instance : "the \"primary\" Heurist instance") ."</option>\n";
+			print "<option value=$instance>".($instance ? $instance : "the \"primary\" Heurist database") ."</option>\n";
 		}
 		print "</select></p>\n";
 	}
@@ -82,11 +82,11 @@ require_once(dirname(__FILE__)."/../common/php/dbMySqlWrappers.php");
 mysql_connection_insert("hapi");
 
 $url = $_REQUEST["url"];
-$instance = $_REQUEST["instance"];
+$instance = $_REQUEST["db"];
 $user_id = $instance ? @$_SESSION[$instance.".heurist"]["user_id"] : get_user_id();
 
 if (! $user_id) {
-	print "<p>You are not logged in to the specified instance</p>\n";
+	print "<p>You are not logged in to the specified database</p>\n";
 	return;
 }
 
@@ -114,8 +114,8 @@ if (mysql_num_rows($res) > 0) {
 ?>
   <p>Your HAPI key is:</p>
   <pre><?= $key ?></pre>
-  <p>This key is for the Heurist instance:</p>
-  <pre><?= $instance ? '"'.$instance.'"' : '"" (the "primary" Heurist instance)' ?></pre>
+  <p>This key is for the Heurist database:</p>
+  <pre><?= $instance ? '"'.$instance.'"' : '"" (the "primary" Heurist database)' ?></pre>
   <p>This key is valid for all URLs in this directory:</p>
   <pre><?= $url ?></pre>
   <p>To load the Heurist API, you can use:</p>

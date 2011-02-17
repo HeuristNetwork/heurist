@@ -43,7 +43,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
 if (!is_logged_in()) {
-	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE);
+	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
 	return;
 }
 
@@ -57,7 +57,7 @@ $body = new BodyScope($lexer);
 
 $body->global_vars['presetScrollTop'] = intval(@$_REQUEST['scrollTop']);
 $body->global_vars['filterId'] = @$_REQUEST['filterId'];
-$body->global_vars['instance-name'] = HEURIST_INSTANCE;
+$body->global_vars['dbname'] = HEURIST_DBNAME;
 
 mysql_connection_overwrite(USERS_DATABASE);
 $body->verify();
@@ -82,7 +82,7 @@ if (@$_REQUEST['_submit']) {
 		if ($body->execute()) {
 			$ugl_ID = mysql_insert_id();
 
-			header('Location: usergroupadmin.php?instance='.HEURIST_INSTANCE.(@$_REQUEST['filterId'] ? '&amp;filterId='.$_REQUEST['filterId'] : '') );
+			header('Location: usergroupadmin.php?db='.HEURIST_DBNAME.(@$_REQUEST['filterId'] ? '&amp;filterId='.$_REQUEST['filterId'] : '') );
 		}
 	}
 }

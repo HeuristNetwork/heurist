@@ -20,7 +20,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.phps');
 require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
 if (! is_logged_in()  ||  ! is_admin()) {
-	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE);
+	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
 	return;
 }
 
@@ -43,7 +43,7 @@ $template = file_get_contents('enableVocabTerms.html');
 $lexer = new Lexer($template);
 
 $body = new BodyScope($lexer);
-$body->global_vars['instance-name'] = HEURIST_INSTANCE;
+$body->global_vars['dbname'] = HEURIST_DBNAME;
 
 $body->verify();
 if (@$_REQUEST['_submit']) {

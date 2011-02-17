@@ -22,14 +22,14 @@ if (! is_logged_in()) {
 // if (is_admin()) {
 //	}
 
-$body->global_vars['instance-name'] = HEURIST_INSTANCE;
+$body->global_vars['dbname'] = HEURIST_DBNAME;
 
 $template = file_get_contents('adminMenu.html');
 $template = str_replace('{PageHeader}', '[literal]'.file_get_contents(dirname(__FILE__).'/../common/html/simpleHeader.html').'[end-literal]', $template);
 $lexer = new Lexer($template);
 
 $body = new BodyScope($lexer);
-$body->global_vars['instance-name'] = HEURIST_INSTANCE;
+$body->global_vars['dbname'] = HEURIST_DBNAME;
 
 $body->verify();
 

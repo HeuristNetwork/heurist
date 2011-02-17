@@ -16,7 +16,7 @@
 <script>
 //initially attempted to load hapi window.opener.HAPI.importSymbols(window.opener, this);
 //this fails for date and geographical data types, possibly because of x-domain? so we actually need to reload hapi in this window
-document.write("<" + "script src=http://hapi.heuristscholar.org/load?instance=" +  window.opener.HAPI.instance + "&key=" + window.opener.HAPI.key + "><" + "/script>\n");
+document.write("<" + "script src=http://hapi.heuristscholar.org/load?db=" +  window.opener.HAPI.database + "&key=" + window.opener.HAPI.key + "><" + "/script>\n");
 </script>
 <script src="js/common-functions.js"></script>
 

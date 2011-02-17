@@ -191,7 +191,7 @@
 	</div>
 	
 		<script src="<?=HEURIST_SITE_PATH?>common/js/utilsLoad.js"></script>	<!-- core HEURIST functions -->
-		<script src="<?=HEURIST_SITE_PATH?>common/php/displayPreferences.php<?=(HEURIST_INSTANCE ? "?instance=".HEURIST_INSTANCE : "")?>"></script>	<!-- sets body css classes based on prefs in session -->
+		<script src="<?=HEURIST_SITE_PATH?>common/php/displayPreferences.php<?=(HEURIST_DBNAME ? "?db=".HEURIST_DBNAME : "")?>"></script>	<!-- sets body css classes based on prefs in session -->
 
 		<script type="text/javascript">
 			<!--'
@@ -248,10 +248,10 @@
 				//TODO: write code here that checks for the implementation parameter and adds it to the URI below
 
 				if (document.getElementById('chk_force').checked) {
-					publink = '<?= HEURIST_URL_BASE ?>viewers/publish/publisherOutput.php?pub_id='+ pub_id +'<?=(HEURIST_INSTANCE ? "&instance=".HEURIST_INSTANCE : "")?>';
+					publink = '<?= HEURIST_URL_BASE ?>viewers/publish/publisherOutput.php?pub_id='+ pub_id +'<?=(HEURIST_DBNAME ? "&db=".HEURIST_DBNAME : "")?>';
 					forpreviewframe = publink + args;
 				} else {
-					publink = '<?= HEURIST_URL_BASE ?>viewers/publish/publisherOutput.php?pub_id='+ pub_id +'<?=(HEURIST_INSTANCE ? "&instance=".HEURIST_INSTANCE : "")?>'+ args;
+					publink = '<?= HEURIST_URL_BASE ?>viewers/publish/publisherOutput.php?pub_id='+ pub_id +'<?=(HEURIST_DBNAME ? "&db=".HEURIST_DBNAME : "")?>'+ args;
 					forpreviewframe = publink+'&depth=1';
 				}
 
@@ -373,7 +373,7 @@
 			<div>
 				<span id=wizard-subheading >Embed the code below in your webpage or use:</span><span style="padding:5px;"></span><span id = "emb-span"></span>
 				<span id ="link-span">
-					<a id="dynalink" href="publisherOutput.php?pub_id=<?= $_REQUEST['pub_id'] ?><?=(HEURIST_INSTANCE ? "&instance=".HEURIST_INSTANCE : "")?>&style=<?= $force_style; ?>" target="_blank">link to published page</a> [opens new window - copy and paste to your web page].
+					<a id="dynalink" href="publisherOutput.php?pub_id=<?= $_REQUEST['pub_id'] ?><?=(HEURIST_DBNAME ? "&db=".HEURIST_DBNAME : "")?>&style=<?= $force_style; ?>" target="_blank">link to published page</a> [opens new window - copy and paste to your web page].
 				</span>
 			</div>
 			<div class="breaker"></div>

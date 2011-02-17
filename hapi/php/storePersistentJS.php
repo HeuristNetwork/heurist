@@ -47,7 +47,7 @@ if (preg_match("/^([a-zA-Z0-9_]+)((?:[.][a-zA-Z0-9_]+)+)$/", $varName, $matches)
 	if (@$_REQUEST["crossSession"]) {
 		// cross-session values are stored in the database
 		$res = mysql_query("select * from hapi_pj_party where pj_location='" . addslashes($location) . "'" .
-		                                                " and pj_instance='" . HEURIST_INSTANCE . "'" .
+		                                                " and pj_instance='" . HEURIST_DBNAME . "'" .
 		                                                " and pj_user_id=" . get_user_id() .
 		                                                " and pj_varname='" . addslashes($topLevelVarName) . "'");
 		$topObject = mysql_fetch_assoc($res);
@@ -58,7 +58,7 @@ if (preg_match("/^([a-zA-Z0-9_]+)((?:[.][a-zA-Z0-9_]+)+)$/", $varName, $matches)
 
 		mysql_query("replace hapi_pj_party (pj_location, pj_instance, pj_user_id, pj_varname, pj_value)
 		                            values ('".addslashes($location)."',
-		                                     '".HEURIST_INSTANCE."',
+		                                     '".HEURIST_DBNAME."',
 		                                     ".get_user_id().",
 		                                     '".addslashes($topLevelVarName)."',
 		                                     '".addslashes(json_encode($topObject))."')");
@@ -82,7 +82,7 @@ else if (preg_match("/^([a-zA-Z0-9_]+)$/", $varName)) {
 	if (@$_REQUEST["crossSession"]) {
 		mysql_query("replace hapi_pj_party (pj_location, pj_instance, pj_user_id, pj_varname, pj_value)
 		                            values ('".addslashes($location)."',
-		                                     '".HEURIST_INSTANCE."',
+		                                     '".HEURIST_DBNAME."',
 		                                     ".get_user_id().",
 		                                     '".addslashes($varName)."',
 		                                     '".addslashes(json_encode($value))."')");

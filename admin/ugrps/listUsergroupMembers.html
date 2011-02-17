@@ -65,7 +65,7 @@ function showMembers() {
 		link.href = "mailto:"+wg.members[i].email;
 		link.appendChild(document.createTextNode("email"));
 
-		if (top.HEURIST.instance.name == "") {
+		if (top.HEURIST.database.name == "") {
 			td = tr.appendChild(document.createElement("td"));
 			link = td.appendChild(document.createElement("a"));
 			link.target = "_blank";

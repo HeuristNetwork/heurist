@@ -23,7 +23,7 @@ require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
 if ( ! (is_logged_in()  &&
          (is_admin()  ||  $_REQUEST['Id'] == get_user_id()) )) {
-        header('Location: '.HEURIST_URL_BASE.'common/connect/login.php?instance='.HEURIST_INSTANCE);
+        header('Location: '.HEURIST_URL_BASE.'common/connect/login.php?db='.HEURIST_DBNAME);
         return;
 }
 
@@ -36,7 +36,7 @@ $body = new BodyScope($lexer);
 $body->global_vars['edit-success'] = 0;
 $body->global_vars['password-not-changed'] = 0;
 $body->global_vars['approve'] = 0;
-$body->global_vars['instance-name'] = HEURIST_INSTANCE;
+$body->global_vars['dbname'] = HEURIST_DBNAME;
 
 if (@$_REQUEST['approve']  &&  is_admin())
 	$body->global_vars['approve'] = 1;

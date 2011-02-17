@@ -18,7 +18,7 @@ require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
 
 if (! is_logged_in()) {
-	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE);
+	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
 	return;
 }
 
@@ -37,7 +37,7 @@ $delete_bdt_id = intval(@$_REQUEST['delete_bdt_field']);
 if ($delete_bdt_id) {
 	mysql_query('delete from defDetailTypes where dty_ID = ' . $delete_bdt_id);
 	mysql_query('delete from defRecStructure where rst_DetailTypeID = ' . $delete_bdt_id);
-	header('Location: editStructure.php?instance='.HEURIST_INSTANCE);
+	header('Location: editStructure.php?db='.HEURIST_DBNAME);
 	return;
 }
 
@@ -54,7 +54,7 @@ $body->global_vars['field-errors'] = false;
 $body->global_vars['new-field-errors'] = false;
 $body->global_vars['new'] = @$_REQUEST['new']? 1 : 0;
 $body->global_vars['editing_rectype'] = @$_REQUEST['rty_ID']? 1 : 0;
-$body->global_vars['instance-name'] = HEURIST_INSTANCE;
+$body->global_vars['dbname'] = HEURIST_DBNAME;
 
 
 $body->verify();
@@ -73,7 +73,7 @@ if (@$_REQUEST['_submit']) {
 					system('cd ../../common/images/rectype-icons  &&  cp questionmark.gif ' . $rt_id . '.gif');
 				}
 
-				header('Location: '.HEURIST_URL_BASE.'admin/structure/editStructure.php?instance='.HEURIST_INSTANCE.'&amp;rty_ID=' . $rt_id . '&new=1');
+				header('Location: '.HEURIST_URL_BASE.'admin/structure/editStructure.php?db='.HEURIST_DBNAME.'&amp;rty_ID=' . $rt_id . '&new=1');
 				return;
 			} else if (! $MYSQL_ERRORS  and  @$_REQUEST['action'] == 'Save') {
 				$body->global_vars['edit-success'] = true;

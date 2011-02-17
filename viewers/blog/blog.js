@@ -16,9 +16,9 @@ var basePath = (top && top.HEURIST && top.HEURIST.basePath? top.HEURIST.basePath
 				(opener && opener.HEURIST && opener.HEURIST.basePath? opener.HEURIST.basePath :
 				(window.location.pathname.match(/^\/[^\/]+\//) ? window.location.pathname.match(/^\/[^\/]+\//)[0] : "/")));
 var hBase = "http://" + window.location.host + basePath;
-var instance = (top && top.HEURIST && top.HEURIST.instance? top.HEURIST.instance.name :
-				(opener && opener.HEURIST && opener.HEURIST.instance? opener.HEURIST.instance.name :
-				(location.search.match(/instance=([^&]+)/) ? location.search.match(/instance=([^&]+)/)[1]:"")));
+var database = (top && top.HEURIST && top.HEURIST.database? top.HEURIST.database.name :
+				(opener && opener.HEURIST && opener.HEURIST.database? opener.HEURIST.database.name :
+				(location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"")));
 
 var Blog = {
 
@@ -358,7 +358,7 @@ BlogEntry: function(record, parentElement, isNew) {
 		var $content = null;
 		var mapURL = Blog.getStaticMapURL(this.record);
 		if (Blog.canEdit()) {
-			var $a = $("<a title='Click to edit' href='../../viewers/blog/gigitiser-blog/edit-geos.html?cb=reload&id=" + this.record.getID() + (instance ? "&instance="+instance : "") + "'>")
+			var $a = $("<a title='Click to edit' href='../../viewers/blog/gigitiser-blog/edit-geos.html?cb=reload&id=" + this.record.getID() + (database ? "&db="+database : "") + "'>")
 				.click(function () {
 					window.open(this.href, "", "status=0,width=600,height=500");
 					return false;
@@ -436,7 +436,7 @@ BlogEntry: function(record, parentElement, isNew) {
 
 			link = (Blog.user ? "?u=" + Blog.user.getID() : "?g=" + Blog.group.getID()) +
 				"&t=" + type.getID() +
-				"&q=relatedto:" + that.record.getID() + (instance ? "&instance="+instance : "");
+				"&q=relatedto:" + that.record.getID() + (database ? "&db="+database : "");
 			title = "Click to see these related " + type.getName() + " records in blog layout";
 			return $("<a href='" + link + "' title='" + title + "'>" + label + "</a>");
 		};
@@ -453,7 +453,7 @@ BlogEntry: function(record, parentElement, isNew) {
 				} else {
 					return function () {
 						window.open("../../records/add/addRecordPopup.php?addref=1&bib_rectype=" + type +
-							"&related=" + that.record.getID() + (instance ? "&instance="+instance : ""), "_blank");
+							"&related=" + that.record.getID() + (database ? "&db="+database : ""), "_blank");
 						return false;
 					};
 				}
@@ -482,7 +482,7 @@ BlogEntry: function(record, parentElement, isNew) {
 				.click((function(type) {
 					return function () {
 						window.open("../../records/add/addRecordPopup.php?addref=1&bib_rectype=" + type +
-							"&related=" + that.record.getID() + (instance ? "&instance="+instance : ""), "_blank");
+							"&related=" + that.record.getID() + (database ? "&db="+database : ""), "_blank");
 						return false;
 					};
 				})(type))
@@ -504,7 +504,7 @@ BlogEntry: function(record, parentElement, isNew) {
 				.click(function () {
 					window.open("addBlogPost.html?id=" + that.record.getID() +
 						(Blog.group ? "&g=" + Blog.group.getID() : "") +
-						(instance ? "&instance="+instance : ""), "_blank");
+						(database ? "&db="+database : ""), "_blank");
 					return false;
 				})
 				.attr("title", "Click to add a new record of any type related to this " +
@@ -517,7 +517,7 @@ BlogEntry: function(record, parentElement, isNew) {
 			$("<a href='#'/>")
 				.click(function () {
 					window.open("../../records/edit/editRecord.html?bib_id=" + that.record.getID() +
-						(instance ? "&instance="+instance : "") + "#relationships", "_blank");
+						(database ? "&db="+database : "") + "#relationships", "_blank");
 					return false;
 				})
 				.attr("title", "Click to add new or edit existing relationships for this " +
@@ -590,7 +590,7 @@ BlogEntry: function(record, parentElement, isNew) {
 
 		if (Blog.canEdit()  ||  HCurrentUser.isAdministrator()) {
 			$("<a href='../../records/edit/editRecord.html?bib_id=" + this.record.getID() +
-						(instance ? "&instance="+instance : "") +
+						(database ? "&db="+database : "") +
 						"#annotation' target='_blank' title='edit record in Heurist'>edit full record</a>")
 				.addClass("heurist-edit-link")
 				.appendTo($(".entry-date", this.$table))
@@ -705,7 +705,7 @@ BlogEntry: function(record, parentElement, isNew) {
 			}
 			$(".entry-edit-wg-tags-input", this.table).after("&nbsp;&nbsp;add ", $select);
 			if (HCurrentUser.isAdministrator()) {
-				$select.after("<a target='_blank' href='../../admin/ugrps/editGroupTags.php"+(instance ? "&instance="+instance : "")+"'>admin</a>");
+				$select.after("<a target='_blank' href='../../admin/ugrps/editGroupTags.php"+(database ? "&db="+database : "")+"'>admin</a>");
 			}
 		}
 
@@ -751,7 +751,7 @@ BlogEntry: function(record, parentElement, isNew) {
 		} else {
 			$td = $("<td><a>add location</a></td>");
 		}
-		$("a", $td).attr("href", "../../viewers/blog/gigitiser-blog/edit-geos.html?id=" + this.record.getID() + (instance ? "&instance="+instance : ""))
+		$("a", $td).attr("href", "../../viewers/blog/gigitiser-blog/edit-geos.html?id=" + this.record.getID() + (database ? "&db="+database : ""))
 			.click(function () {
 				window.open(this.href, "", "status=0,width=600,height=500");
 				return false;
@@ -884,7 +884,7 @@ BlogEntry: function(record, parentElement, isNew) {
 
 
 loadTags: function() {
-	HAPI.XHR.sendRequest("../../viewers/blog/getTags.php?u=" + Blog.user.getID() + (instance ? "&instance="+instance : ""),  function(response) {	//FIXME: we should bring this into the HAPI php commands
+	HAPI.XHR.sendRequest("../../viewers/blog/getTags.php?u=" + Blog.user.getID() + (database ? "&db="+database : ""),  function(response) {	//FIXME: we should bring this into the HAPI php commands
 		Blog.tags = response;
 		Blog.displayTagList();
 		Blog.displayBlogEntries();

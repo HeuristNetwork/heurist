@@ -109,7 +109,7 @@ if (@$_REQUEST['logout']) {
 	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['sessionid']);
 	setcookie('favourites', '', time() - 3600);
 
-	header('Location: login.php?instance='.HEURIST_INSTANCE . ($last_uri ? '&last_uri=' . urlencode($last_uri) : ''));
+	header('Location: login.php?db='.HEURIST_DBNAME . ($last_uri ? '&last_uri=' . urlencode($last_uri) : ''));
 
 	return;
 }
@@ -133,7 +133,7 @@ if (@$_REQUEST['logout']) {
 <script>
  if (window.parent != window) {
    <?php if (@$last_uri) { ?>
-   top.location = "login.php?instance=<?=HEURIST_INSTANCE?>&last_uri=<?=$last_uri?>";
+   top.location = "login.php?db=<?=HEURIST_DBNAME?>&last_uri=<?=$last_uri?>";
    <?php } else { ?>
    top.location = window.location;
    <?php } ?>
@@ -193,7 +193,7 @@ if (@$_REQUEST['logout']) {
  <p align=center>
   Forgotten your password?
   &nbsp; 
-  <a href='<?=HEURIST_URL_BASE?>admin/ugrps/resetUserPassword.php?instance=<?=HEURIST_INSTANCE?>' onclick="window.open(this.href,'','status=0,scrollbars=0,width=400,height=200'); return false;">Click here to reset your password</a>
+  <a href='<?=HEURIST_URL_BASE?>admin/ugrps/resetUserPassword.php?db=<?=HEURIST_DBNAME?>' onclick="window.open(this.href,'','status=0,scrollbars=0,width=400,height=200'); return false;">Click here to reset your password</a>
  </p>
 
 
@@ -214,7 +214,7 @@ if (@$_REQUEST['logout']) {
 			echo "<p><b><a href=\"{$last_uri}\">Return to application</a></b></p>\n\n";
 ?>
 
-<p><b><a href='login.php?instance=<?=HEURIST_INSTANCE?>&logout=1'>Log out</a></b></p>
+<p><b><a href='login.php?db=<?=HEURIST_DBNAME?>&logout=1'>Log out</a></b></p>
 
 <br>
 
