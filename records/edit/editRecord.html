@@ -116,15 +116,16 @@
 					var grp = document.createElement("optgroup");
 					grp.label = top.HEURIST.rectypes.groupNamesInDisplayOrder[grpID];
 					rectypeValSelect.appendChild(grp);
-					for (var i=0; i < top.HEURIST.rectypes.typesByGroup[grpID].length; ++i) {
-						var value = top.HEURIST.rectypes.typesByGroup[grpID][i];
-						var name = top.HEURIST.rectypes.names[value];
-						rectypeValSelect.appendChild(new Option(name, value));
+					for (var recTypeID in top.HEURIST.rectypes.typesByGroup[grpID]) {
+						if (top.HEURIST.rectypes.typesByGroup[grpID][recTypeID]) {
+							var name = top.HEURIST.rectypes.names[recTypeID];
+							rectypeValSelect.appendChild(new Option(name, recTypeID));
 						if (name == top.HEURIST.edit.record.rectype) {
 							rectypeValSelect.selectedIndex = rectypeValSelect.options.length-1;
 						}
 					}
 				}
+			}
 			}
 
 			function changeRectype() {

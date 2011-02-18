@@ -86,7 +86,7 @@
 			typeOptgroup.style.display = "none";
 		}
 		else {
-						var bdts = top.HEURIST.recDetailTypes.valuesByRecDetailTypeID;
+						var bdts = top.HEURIST.detailTypes.valuesByDetailTypeID;
 			for (var bdtID in bdr) {
 				typeOptgroup.appendChild(new Option(bdr[bdtID][0], '"' + bdts[bdtID][1] + '"'));
 			}

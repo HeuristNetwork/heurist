@@ -146,9 +146,24 @@ function getBaseProperties($rec_id, $bkm_ID) {
 	// Return an array of the basic scalar properties for this record / bookmark
 	if (!$rec_id && !$bkm_ID) return array("error"=>"invalid parameters passed to getBaseProperties");
 	if ($bkm_ID) {
-		$res = mysql_query('select rec_ID, rec_Title as title, rty_Name as rectype, rty_ID as rectypeID, rec_URL as url, grp.ugr_ID as workgroupID, grp.ugr_Name as workgroup, rec_ScratchPad as notes, rec_NonOwnerVisibility as visibility, bkm_PwdReminder as passwordReminder, bkm_Rating as rating, rec_Modified, rec_FlagTemporary from usrBookmarks left join Records on bkm_recID=rec_ID and bkm_UGrpID='.get_user_id().' left join defRecTypes on rty_ID = rec_RecTypeID left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID where bkm_ID='.$bkm_ID);
+		$res = mysql_query('select rec_ID, rec_Title as title, rty_Name as rectype,
+									rty_ID as rectypeID, rec_URL as url, grp.ugr_ID as workgroupID,
+									grp.ugr_Name as workgroup, rec_ScratchPad as notes,
+									rec_NonOwnerVisibility as visibility, bkm_PwdReminder as passwordReminder,
+									bkm_Rating as rating, rec_Modified, rec_FlagTemporary
+								from usrBookmarks left join Records on bkm_recID=rec_ID and bkm_UGrpID='.get_user_id().'
+												left join defRecTypes on rty_ID = rec_RecTypeID
+												left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID
+								where bkm_ID='.$bkm_ID);
 	} else if ($rec_id) {
-		$res = mysql_query('select rec_ID, rec_Title as title, rty_Name as rectype, rty_ID as rectypeID, rec_URL as url, grp.ugr_ID as workgroupID, grp.ugr_Name as workgroup, rec_ScratchPad as notes, rec_NonOwnerVisibility as visibility, rec_Modified, rec_FlagTemporary from Records left join usrBookmarks on bkm_recID=rec_ID left join defRecTypes on rty_ID = rec_RecTypeID left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID where rec_ID='.$rec_id);
+		$res = mysql_query('select rec_ID, rec_Title as title, rty_Name as rectype, rty_ID as rectypeID,
+									rec_URL as url, grp.ugr_ID as workgroupID, grp.ugr_Name as workgroup,
+									rec_ScratchPad as notes, rec_NonOwnerVisibility as visibility, rec_Modified,
+									rec_FlagTemporary
+								from Records left join usrBookmarks on bkm_recID=rec_ID
+											left join defRecTypes on rty_ID = rec_RecTypeID
+											left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID
+								where rec_ID='.$rec_id);
 	}
 
 	$row = mysql_fetch_assoc($res);
@@ -194,6 +209,10 @@ function getAllBibDetails($rec_id) {
 	// geo entries have geo data associated,
 	// record references have title data associated.
 
+	// here we want  list of detail values for this record grouped by detail Type
+	// recordType can contain pseudoDetailTypes that are structural only information (relmarker, separator and fieldsetmarker)
+	// since these will never be instantiated to a detail (data value) we don't need to worry about them here. Any detail will
+	// will be of valid type and might not be in teh definition of the rec type (Heurist separates data storage for type definition).
 	$res = mysql_query("select dtl_ID, dtl_DetailTypeID, dtl_Value, rec_Title, dtl_UploadedFileID, trm_Label,
 	                           if(dtl_Geo is not null, astext(envelope(dtl_Geo)), null) as envelope,
 	                           if(dtl_Geo is not null, astext(dtl_Geo), null) as dtl_Geo
@@ -201,7 +220,7 @@ function getAllBibDetails($rec_id) {
 	                 left join defDetailTypes on dty_ID=dtl_DetailTypeID
 	                 left join Records on rec_ID=dtl_Value and dty_Type='resource'
 	                 left join defTerms on dty_Type='enum' and trm_ID = dtl_Value
-	                     where dtl_RecID = $rec_id order by dtl_ID");
+	                     where dtl_RecID = $rec_id order by dtl_DetailTypeID, dtl_ID");
 	$bibDetails = array();
 	while ($row = mysql_fetch_assoc($res)) {
 		$detail = array();

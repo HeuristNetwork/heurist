@@ -22,7 +22,8 @@
 							"rst_RequirementType", "rst_MaxValues", "rst_MinValues","rst_DisplayWidth", "rst_RecordMatchOrder",
 							"rst_DisplayOrder",
 							"if(rst_DisplayDetailTypeGroupID,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID) as rst_DisplayDetailTypeGroupID",
-							"rst_EnumFilteredIDs", "rst_PtrFilteredIDs", "rst_CalcFunctionID", "rst_PriorityForThumbnail");
+							"rst_EnumFilteredIDs", "rst_PtrFilteredIDs", "rst_CalcFunctionID",
+							"rst_PriorityForThumbnail", "dty_FieldSetRectypeID");
 
 		// get rec Structure info ordered by the detailType Group order, then by recStruct display order and then by ID in recStruct incase 2 have the same order
 		$res = mysql_query("select ".join(",", $colNames)." from defRecStructure

@@ -509,13 +509,13 @@ top.HEURIST.edit = {
 	getBibDetailNonRequirements: function(rectypeID) {
 		var non_reqs = {};
 		var reqs = top.HEURIST.edit.getBibDetailRequirements(rectypeID);
-		for (var bdt_id in top.HEURIST.recDetailTypes.valuesByRecDetailTypeID) {
+		for (var bdt_id in top.HEURIST.detailTypes.valuesByDetailTypeID) {
 			var skip = false;
 			for (var i in reqs) {
 				if (i == bdt_id) skip = true;
 			}
 			if (skip) continue;
-			non_reqs[bdt_id] = top.HEURIST.recDetailTypes.valuesByRecDetailTypeID[bdt_id];
+			non_reqs[bdt_id] = top.HEURIST.detailTypes.valuesByDetailTypeID[bdt_id];
 		}
 		return non_reqs;
 	},
@@ -552,12 +552,12 @@ top.HEURIST.edit = {
 	},
 
 	allInputs: [],
-	createInput: function(bibDetailTypeID, rectypeID, bdValues, container) {
+	createInput: function(detailTypeID, rectypeID, bdValues, container) {
 		// Get Detail Type info  id, name, canonical type, rec type contraint
-		var bdt = top.HEURIST.recDetailTypes.valuesByRecDetailTypeID[bibDetailTypeID];
+		var bdt = top.HEURIST.detailTypes.valuesByDetailTypeID[detailTypeID];
 		var bdr;
 		if (rectypeID) {
-			bdr = top.HEURIST.edit.getBibDetailRequirements(rectypeID)[bibDetailTypeID];
+			bdr = top.HEURIST.recDetailRequirements.valuesByRectypeID[rectypeID][detailTypeID];
 		} else {
 			// fake low-rent bdr if rectype isn't specified
 			// name, prompt,default, required, repeatable, size, match
@@ -604,6 +604,9 @@ top.HEURIST.edit = {
 				break;
 			case "relmarker": // note we make sure that values are ignored for a relmarker as it gets it's data from the record's related array
 				newInput = new top.HEURIST.edit.inputs.BibDetailRelationMarker(bdt, bdr, [], container);
+				break;
+			case "fieldsetmarker": // note we make sure that values are ignored for a fieldsetmarker as it is a container for a set of details
+				newInput = new top.HEURIST.edit.inputs.BibDetailFieldSetMarker(bdt, bdr, [], container);
 				break;
 			default:
 				//alert("Type " + bdt[2] + " not implemented");
@@ -767,7 +770,7 @@ top.HEURIST.edit = {
 		}
 	},
 
-	createInputsForrectype: function(rectypeID, bdValues, container) {
+	createInputsForRectype: function(rectypeID, bdValues, container) {
 		var bdrs = top.HEURIST.edit.getBibDetailRequirements(rectypeID);
 		if (! container.ownerDocument) {
 			var elt = container;
@@ -800,7 +803,7 @@ top.HEURIST.edit = {
 		return inputs;
 	},
 
-	createInputsNotForrectype: function(rectypeID, bdValues, container) {
+	createInputsNotForRectype: function(rectypeID, bdValues, container) {
 		var bdrs = top.HEURIST.edit.getBibDetailRequirements(rectypeID);
 
 		var inputs = [];
@@ -1165,10 +1168,10 @@ top.HEURIST.edit.inputs.BibDetailInput = function(bibDetailType, recDetailRequir
 
 	this.repeatable = (recDetailRequirements[4] == "1")? true : false;
 
-	this.row = parentElement.appendChild(this.document.createElement("tr"));
+	this.row = parentElement.appendChild(this.document.createElement("div"));
 		this.row.className = "input-row " + required;
 
-	this.headerCell = this.row.appendChild(this.document.createElement("td"));
+	this.headerCell = this.row.appendChild(this.document.createElement("div"));
 		this.headerCell.className = "input-header-cell";
 		this.headerCell.appendChild(this.document.createTextNode(recDetailRequirements[0]));	// bdr_name
 	if (this.repeatable) {
@@ -1179,7 +1182,7 @@ top.HEURIST.edit.inputs.BibDetailInput = function(bibDetailType, recDetailRequir
 			top.HEURIST.registerEvent(dupImg, "click", function() { thisRef.duplicateInput.call(thisRef); } );
 	}
 
-	this.inputCell = this.row.appendChild(this.document.createElement("td"));
+	this.inputCell = this.row.appendChild(this.document.createElement("div"));
 		this.inputCell.className = "input-cell";
 
 	// make sure that the promptDiv is the last item in the input cell
@@ -1237,7 +1240,7 @@ top.HEURIST.edit.inputs.BibDetailInput.prototype.addInputHelper = function(bdVal
 		else	this.constrainrectype = 0;
 	}
 	if (parseFloat(this.recDetailRequirements[6]) > 0) {	//if the size is greater than zero
-		element.style.width = Math.round(4/3 * this.recDetailRequirements[6]) + "ex";
+		element.style.width = Math.round(4/3 * this.recDetailRequirements[7]) + "ex";
 	}
 
 	element.expando = true;
@@ -1947,18 +1950,11 @@ top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.changeNotification = f
 top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.addInput = function(bdValue) {
 
 	this.windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
-	var newInput = this.document.createElement("table");
-	newInput.border = 0;
-	newInput.cellpadding = 0;
-	newInput.cellspacing = 0;
-	//newInput.style.marginLeft = "1ex";
-	//newInput.style.width = "100%";
+	var newInput = this.document.createElement("div");
 	this.addInputHelper.call(this, bdValue, newInput);
-	var tb = this.document.createElement("tbody");
-	tb.id = "relations-tbody";
-	newInput.appendChild(tb);
+	newInput.id = "relations-tbody";
 	var relatedRecords = parent.HEURIST.edit.record.relatedRecords;
-	this.relManager = new RelationManager(tb,top.HEURIST.edit.record.rectypeID, relatedRecords,this.bibDetailType[0],this.changeNotification,true);
+	this.relManager = new RelationManager(newInput,top.HEURIST.edit.record.rectypeID, relatedRecords,this.bibDetailType[0],this.changeNotification,true);
 
 };
 
@@ -2285,7 +2281,7 @@ top.HEURIST.edit.inputs.BibURLInput = function(parentElement, defaultValue, requ
 	this.typeDescription = "URL (internet address)";
 	this.shortName = "URL";
 
-	var row = parentElement.appendChild(this.document.createElement("tr"));
+	var row = parentElement.appendChild(this.document.createElement("div"));
 	if (required) {	// internet bookmark
 		row.className = "input-row required";
 		this.required = "required";
@@ -2293,10 +2289,10 @@ top.HEURIST.edit.inputs.BibURLInput = function(parentElement, defaultValue, requ
 		row.className = "input-row recommended";
 		this.required = "optional";
 	}
-	var headerCell = row.appendChild(this.document.createElement("td"));
+	var headerCell = row.appendChild(this.document.createElement("div"));
 		headerCell.className = "input-header-cell";
 		headerCell.appendChild(this.document.createTextNode("URL"));
-	var inputCell = row.appendChild(this.document.createElement("td"));
+	var inputCell = row.appendChild(this.document.createElement("div"));
 		inputCell.className = "input-cell";
 
 	var inputField = inputCell.appendChild(this.document.createElement("input"));

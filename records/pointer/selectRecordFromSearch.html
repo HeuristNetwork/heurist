@@ -195,10 +195,11 @@ function initPage() {
 		var grp = document.createElement("optgroup");
 			grp.label = top.HEURIST.rectypes.groupNamesInDisplayOrder[grpID];
 		tElt.appendChild(grp);
-			for (var i=0; i < top.HEURIST.rectypes.typesByGroup[grpID].length; ++i) {
-				var value = top.HEURIST.rectypes.typesByGroup[grpID][i];
-				var name = top.HEURIST.rectypes.names[value];
-				tElt.appendChild( new Option(name, value));
+			for (var recTypeID in top.HEURIST.rectypes.typesByGroup[grpID]) {
+				if (top.HEURIST.rectypes.typesByGroup[grpID][recTypeID]) {
+					var name = top.HEURIST.rectypes.names[recTypeID];
+					tElt.appendChild( new Option(name, recTypeID));
+				}
 	}
 		}
 	}else{

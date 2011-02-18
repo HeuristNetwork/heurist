@@ -95,10 +95,11 @@ print "top.HEURIST.rectypes.typesByGroup = " . json_format($typesByGroup) . ";\n
 
 // returns [ rst_DetailTypeID => [ rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
 // rst_DefaultValue, rst_RequirementType, rst_MaxValues, rst_MinValues, rst_DisplayWidth, rst_RecordMatchOrder,
-// rst_DisplayOrder, rst_DisplayDetailTypeGroupID, rst_EnumFilteredIDs, rst_PtrFilteredIDs, rst_CalcFunctionID, rst_PriorityForThumbnail] ...]
-$colNames = array("rst_DisplayName", "rst_DisplayHelpText", "rst_DisplayExtendedDescription", "rst_DefaultValue",
-					"rst_RequirementType", "rst_MaxValues", "rst_MinValues", "rst_DisplayWidth", "rst_RecordMatchOrder", "rst_DisplayOrder",
-					"rst_DisplayDetailTypeGroupID", "rst_EnumFilteredIDs", "rst_PtrFilteredIDs", "rst_CalcFunctionID", "rst_PriorityForThumbnail");
+// rst_DisplayOrder, rst_DisplayDetailTypeGroupID, rst_EnumFilteredIDs, rst_PtrFilteredIDs, rst_CalcFunctionID,
+// rst_PriorityForThumbnail] ...]
+$colNames = array("rst_DisplayName", "rst_DisplayHelpText", "rst_DisplayExtendedDescription", "rst_DefaultValue", "rst_RequirementType",
+					 "rst_MaxValues", "rst_MinValues", "rst_DisplayWidth", "rst_RecordMatchOrder", "rst_DisplayOrder", "rst_DisplayDetailTypeGroupID",
+					 "rst_EnumFilteredIDs", "rst_PtrFilteredIDs", "rst_CalcFunctionID", "rst_PriorityForThumbnail");
 //get a list of record type IDs
 $rec_types = mysql__select_array("defRecStructure", "distinct rst_RecTypeID", "1 order by rst_RecTypeID");
 
@@ -142,18 +143,18 @@ foreach ($rec_types as $rec_type) {
 print "\n\t}\n};\n";
 
 
-/* recDetailTypes */
+/* detailTypes */
 $colNames = array("dty_ID", "dty_Name", "dty_Type", "dty_DetailTypeGroupID", "dty_HelpText", "dty_ExtendedDescription",
-					"dty_PtrTargetRectypeIDs", "dty_EnumVocabIDs", "dty_EnumTermIDs","dty_ShowInLists");
+					"dty_PtrTargetRectypeIDs", "dty_EnumVocabIDs", "dty_EnumTermIDs","dty_ShowInLists", "dty_FieldSetRectypeID");
 $res = mysql_query("select " . join(", ", $colNames) . "
 					from defDetailTypes left join defDetailTypeGroups on dty_DetailTypeGroupID = dtg_ID
 					order by dtg_Order, dty_Type, dty_Name, dty_ID");
 
 $bdt = array();
 $first = true;
-print "\ntop.HEURIST.recDetailTypes = {\n";
+print "\ntop.HEURIST.detailTypes = {\n";
 print "\tcolNames: [ \"" . join("\", \"", $colNames) . "\" ],\n";
-print "\tvaluesByRecDetailTypeID: {\n";
+print "\tvaluesByDetailTypeID: {\n";
 while ($row = mysql_fetch_assoc($res)) {
 	if (! $first) {
 		print ",\n";

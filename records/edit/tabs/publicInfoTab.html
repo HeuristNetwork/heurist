@@ -27,7 +27,7 @@
 				' action="'+top.HEURIST.basePath+'records/edit/saveRecordDetails.php" target=save-frame>' +
 				' <input type=hidden name=save-mode id=save-mode>' +
 				' <input type=hidden name=notes id=notes>' +
-				' <table><tbody id=all-inputs></tbody></table>' +
+				' <div id=all-inputs></div>' +
 				' </form>');
    </script>
 
@@ -146,13 +146,13 @@ function renderInputs(bibID, rectype) {
 
 		var record = top.HEURIST.edit.record;
 
-		var inputs = top.HEURIST.edit.createInputsForrectype(record.rectypeID, record.bdValuesByType, allInputs);
+		var inputs = top.HEURIST.edit.createInputsForRectype(record.rectypeID, record.bdValuesByType, allInputs);
 
 		renderShowAll();
 
 		renderAdditionalDataSection(allInputs, record.rectypeID, record.bdValuesByType);
 
-		var extraInputs = top.HEURIST.edit.createInputsNotForrectype(record.rectypeID, record.bdValuesByType, allInputs);
+		var extraInputs = top.HEURIST.edit.createInputsNotForRectype(record.rectypeID, record.bdValuesByType, allInputs);
 		if (extraInputs.length > 0) {
 			for (var i=0; i < extraInputs.length; ++i) {
 				inputs.push(extraInputs[i]);
@@ -219,7 +219,7 @@ function renderInputs(bibID, rectype) {
 			}
 		}
 
-		var inputs = top.HEURIST.edit.createInputsForrectype(rectype, defaultInputValues, allInputs);
+		var inputs = top.HEURIST.edit.createInputsForRectype(rectype, defaultInputValues, allInputs);
 
 		renderShowAll();
 
@@ -278,28 +278,26 @@ function renderInputs(bibID, rectype) {
 }
 
 function renderAdditionalDataSection(container, rectypeID, bdValues) {
-	var hrRow = container.appendChild(document.createElement("tr"));
+	var hrRow = container.appendChild(document.createElement("div"));
 
-	var hrCell = hrRow.appendChild(document.createElement("td"));
+	var hrCell = hrRow.appendChild(document.createElement("div"));
 		hrCell.className = "separator_row";
-		hrCell.colSpan = 2;
 		hrCell.innerHTML = "&nbsp";
 
-	var explainRow = container.appendChild(document.createElement("tr"));
+	var explainRow = container.appendChild(document.createElement("div"));
 
-	var hrCell = explainRow.appendChild(document.createElement("td"));
+	var hrCell = explainRow.appendChild(document.createElement("div"));
 		hrCell.style.height = "20px";
 		hrCell.innerHTML = "<b>Additional data</b>";
 		hrCell.className = "additional-header-cell";
 
-	var explainCell = explainRow.appendChild(document.createElement("td"));
+	var explainCell = explainRow.appendChild(document.createElement("div"));
 		explainCell.innerHTML = "Non-standard fields for this record type";
 
-	var addRow = container.appendChild(document.createElement("tr"));
-		addRow.appendChild(document.createElement("td"));
+	var addRow = container.appendChild(document.createElement("div"));
+//		addRow.appendChild(document.createElement("div"));
 
-	var addCell = addRow.appendChild(document.createElement("td"));
-		addCell.colSpan = 2;
+	var addCell = addRow.appendChild(document.createElement("div"));
 		addCell.style.padding = "0 0 5px 0";
 		addCell.appendChild(document.createTextNode("Add field:"));
 
@@ -344,16 +342,16 @@ function renderAdditionalDataSection(container, rectypeID, bdValues) {
 
 
 function renderShowAll() {
-	var hrRow = document.getElementById("all-inputs").appendChild(document.createElement("tr"));
-		hrRow.appendChild(document.createElement("td"));
+	var hrRow = document.getElementById("all-inputs").appendChild(document.createElement("div"));
+		hrRow.appendChild(document.createElement("div"));
 		hrRow.className = "not-optional-fields";
-	var hrCell = hrRow.appendChild(document.createElement("td"));
+	var hrCell = hrRow.appendChild(document.createElement("div"));
 		hrCell.style.height = "20px";
 
 	// this could probably stand to be static html
-	var showTr = document.getElementById("all-inputs").appendChild(document.createElement("tr"));
-		showTr.appendChild(document.createElement("td"));
-	var showTd = showTr.appendChild(document.createElement("td"));
+	var showTr = document.getElementById("all-inputs").appendChild(document.createElement("div"));
+//		showTr.appendChild(document.createElement("div"));
+	var showTd = showTr.appendChild(document.createElement("div"));
 		showTd.style.padding = 0;
 
 	var showDiv = showTd.appendChild(document.createElement("div"));

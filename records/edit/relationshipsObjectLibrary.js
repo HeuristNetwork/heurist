@@ -27,25 +27,25 @@ var Relationship = function(parentElement, details, manager) {
 	this.details = details;
 	this.manager = manager;
 
-	this.tr = this.document.createElement("tr");
+	this.tr = this.document.createElement("div");
 	this.tr.className = "relation";
 
-	var deleteTd = this.tr.appendChild(this.document.createElement("td"));
+	var deleteTd = this.tr.appendChild(this.document.createElement("div"));
 	deleteTd.className = "delete";
 	deleteTd.title = "Delete this relationship";
 	deleteTd.appendChild(this.document.createElement("img")).src = top.HEURIST.basePath + "common/images/cross.gif";
 	deleteTd.onclick = function() { thisRef.remove(); };
-	var editTd = this.tr.appendChild(this.document.createElement("td"));
+	var editTd = this.tr.appendChild(this.document.createElement("div"));
 	editTd.className = "edit";
 	editTd.title = "Edit this relationship";
 	editTd.appendChild(this.document.createElement("img")).src = top.HEURIST.basePath + "common/images/edit-pencil.png";
 	editTd.onclick = function() { thisRef.edit(); };
 
-	this.relSpan = this.tr.appendChild(this.document.createElement("td")).appendChild(this.document.createElement("div"));
+	this.relSpan = this.tr.appendChild(this.document.createElement("div")).appendChild(this.document.createElement("div"));
 	this.relSpan.parentNode.className = "rel";
 	this.relSpan.appendChild(this.document.createTextNode(details.RelationValue));
 
-	this.titleSpan = this.tr.appendChild(this.document.createElement("td")).appendChild(this.document.createElement("div"));
+	this.titleSpan = this.tr.appendChild(this.document.createElement("div")).appendChild(this.document.createElement("div"));
 	this.titleSpan.parentNode.className = "title";
 	this.titleSpan.appendChild(this.document.createTextNode((details.OtherResource? details.OtherResource.Title : details.Title)));
 
@@ -53,13 +53,13 @@ var Relationship = function(parentElement, details, manager) {
 //	this.ellipsesTd1.className = "ellipses";
 //	this.ellipsesTd1.innerHTML = "&nbsp;...";
 
-	this.datesTd = this.tr.appendChild(this.document.createElement("td")).appendChild(this.document.createElement("div"));
+	this.datesTd = this.tr.appendChild(this.document.createElement("div")).appendChild(this.document.createElement("div"));
 	this.datesTd.parentNode.className = "dates";
 	if (details.StartDate) {
 		this.datesTd.appendChild(this.document.createTextNode(details.StartDate));
 	}
 
-	this.notesField = this.tr.appendChild(this.document.createElement("td")).appendChild(this.document.createElement("div"));
+	this.notesField = this.tr.appendChild(this.document.createElement("div")).appendChild(this.document.createElement("div"));
 	this.notesField.parentNode.className = "notes-field";
 	this.notesField.appendChild(this.document.createTextNode(details.Notes || ""));
 
@@ -142,16 +142,15 @@ var EditableRelationship = function(parentElement, details, rectype,dtID, relVoc
 	var detailsElt = this.div.appendChild(this.document.createElement("div"));
 	detailsElt.className = "resource";
 
-	var table = detailsElt.appendChild(this.document.createElement("table"));
-	var tbody = table.appendChild(this.document.createElement("tbody"));
+	var tbody = detailsElt.appendChild(this.document.createElement("div"));
 
-	var tr = tbody.appendChild(this.document.createElement("tr"));
+	var tr = tbody.appendChild(this.document.createElement("div"));
 	tr.className = "input-row";
-	var td = tr.appendChild(this.document.createElement("td"));
+	var td = tr.appendChild(this.document.createElement("div"));
 	td.className = "input-header-cell";
 	td.appendChild(this.document.createTextNode("Using Vocabulary"));
 
-	td = tr.appendChild(this.document.createElement("td"));
+	td = tr.appendChild(this.document.createElement("div"));
 	this.relOnt = td.appendChild(this.document.createElement("select"));
 	this.relOnt.id = "vocabulary";
 	this.relOnt.name = "vocabulary";
@@ -167,13 +166,13 @@ var EditableRelationship = function(parentElement, details, rectype,dtID, relVoc
 		this.relOnt.value = relVocabulary;
 	}
 
-	tr = tbody.appendChild(this.document.createElement("tr"));
+	tr = tbody.appendChild(this.document.createElement("div"));
 	tr.className = "input-row";
-	td = tr.appendChild(this.document.createElement("td"));
+	td = tr.appendChild(this.document.createElement("div"));
 	td.className = "input-header-cell";
 	td.appendChild(this.document.createTextNode("This record"));
 
-	td = tr.appendChild(this.document.createElement("td"));
+	td = tr.appendChild(this.document.createElement("div"));
 	this.relType = td.appendChild(this.document.createElement("select"));
 	this.relType.id = "relationship-type";
 	this.relType.name = "relationship-type";
@@ -204,10 +203,10 @@ var EditableRelationship = function(parentElement, details, rectype,dtID, relVoc
 	this.otherResourceID = this.otherResource.inputs[0].hiddenElt;
 
 
-	tr = tbody.appendChild(this.document.createElement("tr"));
+	tr = tbody.appendChild(this.document.createElement("div"));
 	tr.className = "input-row";
-	td = tr.appendChild(this.document.createElement("td"));
-	td = tr.appendChild(this.document.createElement("td"));
+	td = tr.appendChild(this.document.createElement("div"));
+	td = tr.appendChild(this.document.createElement("div"));
 
 	var saveButton = this.document.createElement("input");
 	saveButton.type = "button";
@@ -226,14 +225,13 @@ var EditableRelationship = function(parentElement, details, rectype,dtID, relVoc
 	td.appendChild(cancelButton);
 
 
-	tr = tbody.appendChild(this.document.createElement("tr"));
-	td = tr.appendChild(this.document.createElement("td"));
-	td.colSpan = 2;
+	tr = tbody.appendChild(this.document.createElement("div"));
+	td = tr.appendChild(this.document.createElement("div"));
 	td.style.height = "2em";
 
-	tr = tbody.appendChild(this.document.createElement("tr"));
+	tr = tbody.appendChild(this.document.createElement("div"));
 	tr.className = "input-row optional";
-	td = tr.appendChild(this.document.createElement("td"));
+	td = tr.appendChild(this.document.createElement("div"));
 	td.className = "section-header-cell optional";
 	td.appendChild(this.document.createTextNode("OPTIONAL FIELDS"));
 
@@ -243,12 +241,12 @@ var EditableRelationship = function(parentElement, details, rectype,dtID, relVoc
 	this.interpResource = new top.HEURIST.edit.inputs.BibDetailResourceInput(fakeBDT, fakeBDR, [], tbody);
 	this.interpResourceID = this.interpResource.inputs[0].hiddenElt;
 
-	tr = tbody.appendChild(this.document.createElement("tr"));
+	tr = tbody.appendChild(this.document.createElement("div"));
 	tr.className = "input-row optional";
-	td = tr.appendChild(this.document.createElement("td"));
+	td = tr.appendChild(this.document.createElement("div"));
 	td.className = "input-header-cell";
 	td.appendChild(this.document.createTextNode("Validity"));
-	td = tr.appendChild(this.document.createElement("td"));
+	td = tr.appendChild(this.document.createElement("div"));
 
 	this.startDate = td.appendChild(this.document.createElement("input"));
 	this.startDate.className = "in";
@@ -264,22 +262,22 @@ var EditableRelationship = function(parentElement, details, rectype,dtID, relVoc
 	this.endDate.style.width = "90px";
 	top.HEURIST.edit.makeDateButton(this.endDate, this.document);//saw TODO makeTemporal for Temporal switch
 
-	tr = tbody.appendChild(this.document.createElement("tr"));
+	tr = tbody.appendChild(this.document.createElement("div"));
 	tr.className = "input-row optional";
-	td = tr.appendChild(this.document.createElement("td"));
+	td = tr.appendChild(this.document.createElement("div"));
 	td.className = "input-header-cell";
 	td.appendChild(this.document.createTextNode("Description"));
-	td = tr.appendChild(this.document.createElement("td"));
+	td = tr.appendChild(this.document.createElement("div"));
 	this.description = td.appendChild(this.document.createElement("input"));
 	this.description.value = "Relationship";
 	this.description.className = "in";
 
-	tr = tbody.appendChild(this.document.createElement("tr"));
+	tr = tbody.appendChild(this.document.createElement("div"));
 	tr.className = "input-row optional";
-	td = tr.appendChild(this.document.createElement("td"));
+	td = tr.appendChild(this.document.createElement("div"));
 	td.className = "input-header-cell";
 	td.appendChild(this.document.createTextNode("Notes"));
-	td = tr.appendChild(this.document.createElement("td"));
+	td = tr.appendChild(this.document.createElement("div"));
 	this.notes = td.appendChild(this.document.createElement("textarea"));
 	this.notes.className = "in";
 };
@@ -434,10 +432,10 @@ var RelationManager = function(parentElement, rectypeID, relatedRecords, bibDeta
 	for (var rectype in this.relatedRecordsByType) {
 		// create a section header
 		if (!supressHeaders) {
-			var titleRow = document.createElement("tr");
+			var titleRow = document.createElement("div");
 			titleRow.className = "relation-title";
-			var titleCell = titleRow.appendChild(document.createElement("td"));
-			titleCell.colSpan = 7;
+			var titleCell = titleRow.appendChild(document.createElement("div"));
+//			titleCell.colSpan = 7;
 			titleCell.appendChild(document.createElement("span")).appendChild(document.createTextNode(
 				(top.HEURIST.rectypes.pluralNames[rectype] || "Other") + ": "));
 			// create a button for adding new relationships to the group
@@ -445,9 +443,9 @@ var RelationManager = function(parentElement, rectypeID, relatedRecords, bibDeta
 			a.href = "#";
 			a.innerHTML = "add";
 			a.onclick = function(tRow, rtype, dtID) { return function() {
-					var newRow = document.createElement("tr");
-					var newCell = newRow.appendChild(document.createElement("td"));
-					newCell.colSpan = 7;
+					var newRow = document.createElement("div");
+					var newCell = newRow.appendChild(document.createElement("div"));
+//					newCell.colSpan = 7;
 					thisRef.parentElement.insertBefore(newRow, tRow.nextSibling);
 					var rel = new EditableRelationship(newCell, null, rtype || 0,dtID,null,thisRef);
 					rel.nonce = thisRef.getNonce();
@@ -462,8 +460,8 @@ var RelationManager = function(parentElement, rectypeID, relatedRecords, bibDeta
 			this.relationships.push(new Relationship(this.parentElement, this.relatedRecordsByType[rectype][i],this));
 		}
 	}
-	var addOtherTr = document.createElement("tr");
-	var addOtherTd = addOtherTr.appendChild(document.createElement("td"));
+	var addOtherTr = document.createElement("div");
+	var addOtherTd = addOtherTr.appendChild(document.createElement("div"));
 	addOtherTd.style.paddingTop = "20px";
 	addOtherTd.colSpan = 7;
 	var a = addOtherTd.appendChild(document.createElement("a"));
@@ -484,8 +482,8 @@ var RelationManager = function(parentElement, rectypeID, relatedRecords, bibDeta
 	}
 	a.style.textDecoration = "none";
 	a.onclick = function(rtype,dtID) { return function() {
-		var newRow = document.createElement("tr");
-		var newCell = newRow.appendChild(document.createElement("td"));
+		var newRow = document.createElement("div");
+		var newCell = newRow.appendChild(document.createElement("div"));
 		newCell.colSpan = 7;
 		thisRef.parentElement.appendChild(newRow);
 		var rel = new EditableRelationship(newCell,null,rtype,dtID,null,thisRef);
