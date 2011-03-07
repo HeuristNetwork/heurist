@@ -49,15 +49,15 @@ init: function () {
 	// get record types
 	var scr = document.createElement('script');
 	scr.type = 'text/javascript';
-//	scr.src = Heurist.uriBase +'import/bookmarklet/getRectypesAsJSON.php';
-	scr.src = Heurist.uriHost +'h3h2/import/bookmarklet/rectypes.php'; //saw FIXME: temp, remove when getRectypesAsJSON.php works
+	scr.src = Heurist.uriBase +'import/bookmarklet/getRectypesAsJSON.php';
+//	scr.src = Heurist.uriHost +'h3h2/import/bookmarklet/rectypes.php'; //saw FIXME: temp, remove when getRectypesAsJSON.php works
 	document.getElementsByTagName('head')[0].appendChild(scr);
 
 	// get bkmk id if already bookmarked
 	scr = document.createElement('script');
 	scr.type = 'text/javascript';
-//	scr.src = Heurist.uriBase +'import/bookmarklet/getRecordIDFromURL.php?url=' + Heurist.urlcleaner(encodeURIComponent(location.href));
-	scr.src = Heurist.uriHost +'h3h2/import/bookmarklet/url-bookmarked.php?url=' + Heurist.urlcleaner(encodeURIComponent(location.href));//saw FIXME: temp, remove when getRecordIDFromURL.php works
+	scr.src = Heurist.uriBase +'import/bookmarklet/getRecordIDFromURL.php?url=' + Heurist.urlcleaner(encodeURIComponent(location.href));
+//	scr.src = Heurist.uriHost +'h3h2/import/bookmarklet/url-bookmarked.php?url=' + Heurist.urlcleaner(encodeURIComponent(location.href));//saw FIXME: temp, remove when getRecordIDFromURL.php works
 	document.getElementsByTagName('head')[0].appendChild(scr);
 },
 
@@ -371,12 +371,12 @@ renderrectypeSelect: function(sel) {
 	sel.options[0].selected = true;
 	sel.options[0].disabled = true;
 
-	for (var grpID in HEURIST_rectypes.typesByGroup){
+	for (var grpID in HEURIST_rectypes.groups){
 	var grp = document.createElement("optgroup");
-		grp.label = HEURIST_rectypes.groupNamesInDisplayOrder[grpID];
+		grp.label = HEURIST_rectypes.groups[grpID].name;
 	sel.appendChild(grp);
-		for (var i=0; i < HEURIST_rectypes.typesByGroup[grpID].length; ++i) {
-			var value = HEURIST_rectypes.typesByGroup[grpID][i];
+		for (var i=0; i < HEURIST_rectypes.groups[grpID].types.length; ++i) {
+			var value = HEURIST_rectypes.groups[grpID].types[i];
 			var name = HEURIST_rectypes.names[value];
 			sel.appendChild( new Option(name, value));
 	}

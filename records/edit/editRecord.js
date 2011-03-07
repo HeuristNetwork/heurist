@@ -243,7 +243,7 @@ top.HEURIST.edit = {
 					document.getElementById('workgroup-val').appendChild(document.createTextNode(top.HEURIST.edit.record.workgroup));
 					document.getElementById('workgroup-div').style.display = "inline-block";
 
-					var othersAccess = (top.HEURIST.edit.record.workgroupVisibility == "Hidden")? "not visible" : "visible";
+					var othersAccess = (top.HEURIST.edit.record.workgroupVisibility == "hidden")? "not visible" : "visible";
 					document.getElementById('workgroup-access').innerHTML = othersAccess;
 				} else {
 					document.getElementById('workgroup-val').innerHTML = 'everyone';
@@ -455,87 +455,23 @@ top.HEURIST.edit = {
 	},
 
 
-	getBibDetailRequirements: function(rectypeID) {
-		if (! top.HEURIST.user.recDetailRequirements  ||  ! top.HEURIST.user.recDetailRequirements.valuesByRectypeID[rectypeID]) {
-			// easy case -- no special recDetailRequirements for this rectype, considering this user's workgroups
-			return top.HEURIST.recDetailRequirements.valuesByRectypeID[rectypeID];
-		}
-		else if (top.HEURIST.patchedBibDetailRequirements  &&  top.HEURIST.patchedBibDetailRequirements[rectypeID]) {
-			return top.HEURIST.patchedBibDetailRequirements[rectypeID];
-		}
-		else {
-			// make a copy of the original bdrs and override with any workgroup-specific stuff
-			var bdrs = {};
-			var orig_bdrs = top.HEURIST.recDetailRequirements.valuesByRectypeID[rectypeID];
-			var wg_bdrs = top.HEURIST.user.recDetailRequirements.valuesByRectypeID[rectypeID];
-			var precedence = { 'required': 4, 'recommended': 3, 'optional': 2, 'forbidden': 1 };
-
-			// keep track of the original requiremences, as a fallback if they're not overridden
-			for (var bdt_id in orig_bdrs) {
-				bdrs[bdt_id] = [];
-				for (var i=0; i < orig_bdrs[bdt_id].length; ++i)
-					bdrs[bdt_id][i] = orig_bdrs[bdt_id][i];
-			}
-			// Now, go through the workgroup-specific requiremences, and take the maximum
-			for (var bdt_id in wg_bdrs) {
-				var names = [];
-				var prompts = [];
-				var maxRequiremence = '';
-				var repeat = 0;
-
-				for (var i=0; i < wg_bdrs[bdt_id].length; ++i) {
-					var wg_vals = wg_bdrs[bdt_id][i];
-					if (wg_vals[0]) names.push(wg_vals[0]);
-					if (wg_vals[1]) prompts.push(wg_vals[1]);
-					if (! maxRequiremence  ||  precedence[wg_vals[3]] > precedence[maxRequiremence]) maxRequiremence = wg_vals[3];
-					if (wg_vals[4]) repeat = wg_vals[4];
-				}
-
-				// there might be bdts that are not in the original requiremences
-				if (! bdrs[bdt_id]) bdrs[bdt_id] = [];
-
-				if (names.length) bdrs[bdt_id][0] = names.join(' / ');
-				if (prompts.length) bdrs[bdt_id][1] = prompts.join(' / ');
-				if (maxRequiremence  &&  bdrs[bdt_id][3] != 'y') bdrs[bdt_id][3] = maxRequiremence;
-				if (repeat > 0) bdrs[bdt_id][4] = "1";
-			}
-
-			if (! top.HEURIST.patchedBibDetailRequirements) top.HEURIST.patchedBibDetailRequirements = {};
-			top.HEURIST.patchedBibDetailRequirements[rectypeID] = bdrs;
-			return bdrs;
-		}
+	getRecFieldRequirements: function(rectypeID) {
+			return top.HEURIST.rectypes.typedefs[rectypeID].dtFields;
 	},
 
-	getBibDetailNonRequirements: function(rectypeID) {
+	getNonRecDetailTypedefs: function(rectypeID) {
 		var non_reqs = {};
-		var reqs = top.HEURIST.edit.getBibDetailRequirements(rectypeID);
-		for (var bdt_id in top.HEURIST.detailTypes.valuesByDetailTypeID) {
+		var reqs = top.HEURIST.edit.getRecFieldRequirements(rectypeID);
+		for (var dt_id in top.HEURIST.detailTypes.typedefs) {
+			if (dt_id == "commomFieldNames") continue;
 			var skip = false;
-			for (var i in reqs) {
-				if (i == bdt_id) skip = true;
+			for (var dtID in reqs) {
+				if (dtID == dt_id) skip = true;
 			}
 			if (skip) continue;
-			non_reqs[bdt_id] = top.HEURIST.detailTypes.valuesByDetailTypeID[bdt_id];
+			non_reqs[dt_id] = top.HEURIST.detailTypes.typedefs[dt_id];
 		}
 		return non_reqs;
-	},
-
-	getBibDetailOrder: function (rectypeID) {
-		var order = top.HEURIST.recDetailRequirements.orderByRectypeID[rectypeID];
-		var bdrs = top.HEURIST.recDetailRequirements.valuesByRectypeID[rectypeID];
-
-		if (top.HEURIST.user.recDetailRequirements  &&
-			top.HEURIST.user.recDetailRequirements.valuesByRectypeID[rectypeID]) {
-			// add any wg overrides that are additions - they get pushed on the end
-			var wg_bdrs = top.HEURIST.user.recDetailRequirements.valuesByRectypeID[rectypeID];
-			for (var bdt_id in wg_bdrs) {
-				if (! bdrs[bdt_id]) {
-					order.push(bdt_id);
-				}
-			}
-		}
-
-		return order;
 	},
 
 	focusFirstElement: function() {
@@ -552,52 +488,53 @@ top.HEURIST.edit = {
 	},
 
 	allInputs: [],
-	createInput: function(detailTypeID, rectypeID, bdValues, container) {
+	createInput: function(detailTypeID, rectypeID, fieldValues, container) {
 		// Get Detail Type info  id, name, canonical type, rec type contraint
-		var bdt = top.HEURIST.detailTypes.valuesByDetailTypeID[detailTypeID];
-		var bdr;
+		var bdt = top.HEURIST.detailTypes.typedefs[detailTypeID];
+		var bdr = null;
 		if (rectypeID) {
-			bdr = top.HEURIST.recDetailRequirements.valuesByRectypeID[rectypeID][detailTypeID];
-		} else {
+			bdr = top.HEURIST.rectypes.typedefs[rectypeID]['dtFields'][detailTypeID];
+		}
+		if (!bdr) {
 			// fake low-rent bdr if rectype isn't specified
 			// name, prompt,default, required, repeatable, size, match
-			bdr = [ bdt[1], "", "", 'optional', 0, 0, 0 ];
+			bdr = [ bdt['commonFields'][0], "", "", 'optional', 0, 0, 0 ];
 		}
 
 		var newInput;
-		switch (bdt[2]) {
+		switch (bdt['commonFields'][2]) {
 			case "freetext":
-				newInput = new top.HEURIST.edit.inputs.BibDetailFreetextInput(bdt, bdr, bdValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailFreetextInput(bdt, bdr, fieldValues, container);
 				break;
 			case "blocktext":
-				newInput = new top.HEURIST.edit.inputs.BibDetailBlocktextInput(bdt, bdr, bdValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailBlocktextInput(bdt, bdr, fieldValues, container);
 				break;
 			case "integer":
-				newInput = new top.HEURIST.edit.inputs.BibDetailIntegerInput(bdt, bdr, bdValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailIntegerInput(bdt, bdr, fieldValues, container);
 				break;
 			case "year":
-				newInput = new top.HEURIST.edit.inputs.BibDetailYearInput(bdt, bdr, bdValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailYearInput(bdt, bdr, fieldValues, container);
 				break;
 			case "date":
-				newInput = new top.HEURIST.edit.inputs.BibDetailTemporalInput(bdt, bdr, bdValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailTemporalInput(bdt, bdr, fieldValues, container);
 				break;
 			case "boolean":
-				newInput = new top.HEURIST.edit.inputs.BibDetailBooleanInput(bdt, bdr, bdValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailBooleanInput(bdt, bdr, fieldValues, container);
 				break;
 			case "resource":
-				newInput = new top.HEURIST.edit.inputs.BibDetailResourceInput(bdt, bdr, bdValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailResourceInput(bdt, bdr, fieldValues, container);
 				break;
 			case "float":
-				newInput = new top.HEURIST.edit.inputs.BibDetailFloatInput(bdt, bdr, bdValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailFloatInput(bdt, bdr, fieldValues, container);
 				break;
 			case "enum":
-				newInput = new top.HEURIST.edit.inputs.BibDetailDropdownInput(bdt, bdr, bdValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailDropdownInput(bdt, bdr, fieldValues, container);
 				break;
 			case "file":
-				newInput = new top.HEURIST.edit.inputs.BibDetailFileInput(bdt, bdr, bdValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailFileInput(bdt, bdr, fieldValues, container);
 				break;
 			case "geo":
-				newInput = new top.HEURIST.edit.inputs.BibDetailGeographicInput(bdt, bdr, bdValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailGeographicInput(bdt, bdr, fieldValues, container);
 				break;
 			case "separator": // note we make sure that values are ignored for a separator as it is not an input
 				newInput = new top.HEURIST.edit.inputs.BibDetailSeparator(bdt, bdr, [], container);
@@ -610,17 +547,17 @@ top.HEURIST.edit = {
 				break;
 			default:
 				//alert("Type " + bdt[2] + " not implemented");
-				newInput = new top.HEURIST.edit.inputs.BibDetailUnknownInput(bdt, bdr, bdValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailUnknownInput(bdt, bdr, fieldValues, container);
 		}
 		top.HEURIST.edit.allInputs.push(newInput);
 		return newInput;
 	},
 
-	getRecTypeConstraintsList: function(dTypeID) {
+	getRecTypeConstraintsList: function(dTypeID) {	//saw TODO: change this to terms pass in scrRectypeID
 		var listRecTypeConst = "";
 		var first = true;
-		var rdtID = top.HEURIST.edit.record.rtConstraintsByDType[dTypeID] ? dTypeID : 200;
-		for (var rType in top.HEURIST.edit.record.rtConstraintsByDType[rdtID]) {	// saw TODO  need to change this to dTypeID for relmarkers
+		var rdtID = top.HEURIST.edit.record.rtConstraints[dTypeID] ? dTypeID : 200;
+		for (var rType in top.HEURIST.edit.record.rtConstraints[rdtID]) {	// saw TODO  need to change this to dTypeID for relmarkers
 			if (first) {
 				listRecTypeConst += "" + rType;
 				first = false;
@@ -634,11 +571,11 @@ top.HEURIST.edit = {
 		return listRecTypeConst;
 	},
 
-	getLookupConstraintsList: function(dTypeID) {
+	getLookupConstraintsList: function(dTypeID) {	//saw TODO: change this to terms pass in scrRectypeID
 		var rdtConstrainedLookups = {};
-		var rdtID = top.HEURIST.edit.record.rtConstraintsByDType[dTypeID] ? dTypeID : 200;
-		for (var rType in top.HEURIST.edit.record.rtConstraintsByDType[rdtID]) {
-			var dtRelConstForRecType = top.HEURIST.edit.record.rtConstraintsByDType[rdtID][rType];
+		var rdtID = top.HEURIST.edit.record.rtConstraints[dTypeID] ? dTypeID : 200;
+		for (var rType in top.HEURIST.edit.record.rtConstraints[rdtID]) {
+			var dtRelConstForRecType = top.HEURIST.edit.record.rtConstraints[rdtID][rType];
 			if (!dtRelConstForRecType) continue;
 			for (var i = 0; i<dtRelConstForRecType.length; i++) {
 				var list = dtRelConstForRecType[i]['trm_ids'];
@@ -770,8 +707,8 @@ top.HEURIST.edit = {
 		}
 	},
 
-	createInputsForRectype: function(rectypeID, bdValues, container) {
-		var bdrs = top.HEURIST.edit.getBibDetailRequirements(rectypeID);
+	createInputsForRectype: function(rectypeID, fieldValues, container) {
+		var bdrs = top.HEURIST.edit.getRecFieldRequirements(rectypeID);
 		if (! container.ownerDocument) {
 			var elt = container;
 			do { elt = elt.parentNode; } while (elt.nodeType != 9 /* DOCUMENT_NODE */);
@@ -789,28 +726,28 @@ top.HEURIST.edit = {
 		top.HEURIST.edit.allInputs.push(URLInput);
 		inputs.push(URLInput);
 
-		var order = top.HEURIST.edit.getBibDetailOrder(rectypeID);
+		var order = top.HEURIST.rectypes.dtDisplayOrder[rectypeID];
 
 		var i, l = order.length;
 		for (i = 0; i < l; ++i) {
 			var bdtID = order[i];
 			if (bdrs[bdtID][3] == 'forbidden') continue;
 
-			var newInput = top.HEURIST.edit.createInput(bdtID, rectypeID, bdValues[bdtID] || [], container);
+			var newInput = top.HEURIST.edit.createInput(bdtID, rectypeID, fieldValues[bdtID] || [], container);
 			inputs.push(newInput);
 		}
 
 		return inputs;
 	},
 
-	createInputsNotForRectype: function(rectypeID, bdValues, container) {
-		var bdrs = top.HEURIST.edit.getBibDetailRequirements(rectypeID);
+	createInputsNotForRectype: function(rectypeID, fieldValues, container) {
+		var bdrs = top.HEURIST.edit.getRecFieldRequirements(rectypeID);
 
 		var inputs = [];
-		for (var bdtID in bdValues) {
+		for (var bdtID in fieldValues) {
 			if (bdrs  &&  bdrs[bdtID]) continue;
 
-			var input = top.HEURIST.edit.createInput(bdtID, 0, bdValues[bdtID] || [], container);
+			var input = top.HEURIST.edit.createInput(bdtID, 0, fieldValues[bdtID] || [], container);
 			//input.setReadonly(true);
 			inputs.push(input);
 		}
@@ -1147,7 +1084,7 @@ top.HEURIST.edit = {
 
 top.HEURIST.edit.inputs = { };
 
-top.HEURIST.edit.inputs.BibDetailInput = function(bibDetailType, recDetailRequirements, bdValues, parentElement) {
+top.HEURIST.edit.inputs.BibDetailInput = function(bibDetailType, recDetailRequirements, fieldValues, parentElement) {
 	if (arguments.length == 0) return;	// for prototyping
 	var thisRef = this;
 
@@ -1191,16 +1128,16 @@ top.HEURIST.edit.inputs.BibDetailInput = function(bibDetailType, recDetailRequir
 		this.promptDiv.innerHTML = recDetailRequirements[1];
 
 	this.inputs = [];
-	if (this.repeatable) {
-		for (var i=0; i < bdValues.length; ++i) {
-			this.addInput(bdValues[i]);
+	if (this.repeatable) {	//saw TODO adjust this code for Cardinality
+		for (var i=0; i < fieldValues.length; ++i) {
+			this.addInput(fieldValues[i]);
 		}
-		if (bdValues.length == 0) {
+		if (fieldValues.length == 0) {
 			this.addInput();	// add an empty input
 		}
 	} else {
-		if (bdValues.length > 0) {
-			this.addInput(bdValues[0]);
+		if (fieldValues.length > 0) {
+			this.addInput(fieldValues[0]);
 		} else {
 			this.addInput();
 		}
@@ -1597,7 +1534,7 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdV
 		var selectIndex = 0;
 //		for (var ont in allOptions) {
 //			var grp = document.createElement("optgroup");
-//			grp.label = top.HEURIST.vocabularyLookup[ont];
+//			grp.label = top.HEURIST.vocabLookup[ont];
 //			newInput.appendChild(grp);
 //			for (var i = 0; i < allOptions[ont].length; ++i) {
 			for (var i = 0; i < allOptions.length; ++i) {

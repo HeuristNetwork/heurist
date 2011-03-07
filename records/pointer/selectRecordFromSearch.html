@@ -191,12 +191,12 @@ function initPage() {
 	if (!rectypes) {
 		tElt.options[tElt.options.length] = new Option("Any record type", "");
 		// rectypes displayed in Groups by group display order then by display order within group
-		for (var grpID in top.HEURIST.rectypes.typesByGroup){
+		for (var grpID in top.HEURIST.rectypes.groups){
 		var grp = document.createElement("optgroup");
-			grp.label = top.HEURIST.rectypes.groupNamesInDisplayOrder[grpID];
+			grp.label = top.HEURIST.rectypes.groups[grpID].name;
 		tElt.appendChild(grp);
-			for (var recTypeID in top.HEURIST.rectypes.typesByGroup[grpID]) {
-				if (top.HEURIST.rectypes.typesByGroup[grpID][recTypeID]) {
+			for (var recTypeID in top.HEURIST.rectypes.groups[grpID].types) {
+				if (top.HEURIST.rectypes.groups[grpID].types[recTypeID]) {
 					var name = top.HEURIST.rectypes.names[recTypeID];
 					tElt.appendChild( new Option(name, recTypeID));
 				}

@@ -15,7 +15,7 @@ define('SAVE_URI', 'disabled');
 
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
-require_once(dirname(__FILE__)."/../../common/php/getRecordStructure.php");
+require_once(dirname(__FILE__)."/../../common/php/getRecordInfoLibrary.php");
 
 /* removed hapi keys  saw 17/1/11
 require_once("validateKeyedAccess.php");
@@ -55,7 +55,7 @@ $recordTypes = array();
 while ($row = mysql_fetch_row($res)) array_push($recordTypes, $row);
 
 $res = mysql_query("select dty_ID, dty_Name, dty_HelpText, dty_Type, NULL as enums, dty_PtrTargetRectypeIDs,
-					dty_EnumVocabIDs, dty_EnumTermIDs, dty_ExtendedDescription, dty_DetailTypeGroupID, dty_ShowInPulldowns
+					dty_JsonTermIDTree, dty_HeaderTermIDs, dty_ExtendedDescription, dty_DetailTypeGroupID, dty_ShowInPulldowns
 					from defDetailTypes");
 $detailTypes = array();
 $detailTypesById = array();
@@ -71,7 +71,8 @@ while ($row = mysql_fetch_row($res)) {
 		break;
 
 	    case "enum":
-		$row[3] = "enumeration";
+		$row[3] = "enumeration";	//sawTODO not needed since the field has teh termTree definition
+/*
 		$whereClause = $row[6]?"A.trm_VocabID in(" . $row[6].")" : ""; // get all terms in vocab
 		$whereClause .= $row[7] && $whereClause ?" or " : "";
 		$whereClause .= $row[7] ? "A.trm_ID in(" . $row[7].")" : "";// get all listed terms
@@ -81,14 +82,16 @@ while ($row = mysql_fetch_row($res)) {
 									left join defVocabularies on A.trm_VocabID = vcb_ID
 								where (" . $whereClause.") and A.trm_Label is not null
 								order by vcb_Name, A.trm_Label");
+*/
 		$row[4] = array();
-
+/*
 		while ($trm = mysql_fetch_row($lres)){
 			if (! array_key_exists($trm[0],$row[4])) { // create vocab array
 				$row[4][$trm[0]] = array();
 		}
 			array_push($row[4][$trm[0]], array("".$trm[1].($trm[2]?",".$trm[2]:"")));
 		}
+*/
 		break;
 
 	    case "geo":
@@ -117,7 +120,7 @@ $rec_types = mysql__select_array("defRecStructure", "distinct rst_RecTypeID", "1
 		// rst_DisplayOrder, rst_DisplayDetailTypeGroupID, rst_EnumFilteredIDs, rst_PtrFilteredIDs, rst_CalcFunctionID, rst_PriorityForThumbnail] ...]
 
 foreach ($rec_types as $rec_type) {
-	foreach (getRecordRequirements($rec_type) as $rdr) {
+	foreach (getRectypeFields($rec_type) as $rdr) {
 		array_push($detailRequirements, array(
 			$rdr["rst_RecTypeID"],
 			$rdr["rst_DetailTypeID"],
@@ -130,9 +133,11 @@ foreach ($rec_types as $rec_type) {
 			intval($rdr["rst_DisplayOrder"]),
 			$rdr["rst_DefaultValue"],
 			$rdr["rst_DisplayExtendedDescription"],
-			$rdr["rst_MinValues"],
+			intval($rdr["rst_MinValues"]),
 			$rdr["rst_DisplayDetailTypeGroupID"],
-			$rdr["rst_EnumFilteredIDs"],
+			$rdr["rst_FilteredJsonTermIDTree"],
+			$rdr["rst_AdditionalHeaderTermIDs"],
+			$rdr["dty_HeaderTermIDs"],
 			$rdr["rst_PtrFilteredIDs"],
 			$rdr["rst_CalcFunctionID"],
 			$rdr["rst_PriorityForThumbnail"]

@@ -49,9 +49,10 @@
 
 	print "\n-- RECORD TYPES";print "\n";
     print "<p>";
-    print "-- rty_ID, rty_Name, rty_OrderInGroup, rty_Description, rty_RecTypeGroupID, 
-    rty_TitleMask, rty_CanonicalTitleMask, rty_Plural, rty_Status, rty_VisibleToEndUser, 
-    rty_OriginatingDBid, rty_NameInOriginatingdb, rty_IDinOriginatingDB, rty_ReferenceURL\n";
+	print "-- rty_ID, rty_Name, rty_OrderInGroup, rty_Description, rty_RecTypeGroupID, rty_TitleMask,
+			rty_CanonicalTitleMask, rty_Plural, rty_Status, rty_OriginatingDBid, rty_NameInOriginatingdb,
+			rty_IDinOriginatingDB, rty_ShowInLists, rty_RecTypeGroupIDs, rty_FlagAsFieldset, rty_ReferenceURL,
+			rty_AlternativeRecEditor, rty_Type\n";
 	$query = "select * from defRecTypes";
 	$res = mysql_query($query);
 	$fmt = 'defRecTypes';
@@ -70,8 +71,10 @@
 
 	print "\n\n\n-- DETAIL TYPES";print "\n";
     print "<p>";
-    print "-- dty_ID, dty_Name, dty_Description, dty_Type, dty_Prompt, dty_Help, dty_Status, dty_VisibleToEndUser,
-	dty_OriginatingDBid, dty_NameInOriginatingdb, dty_IDinOriginatingDB, dty_PtrTargetRectypeIDs, dty_EnumVocabIDs, dty_EnumTermIDs\n";
+	print "-- dty_ID, dty_Name, dty_Documentation, dty_Type, dty_HelpText, dty_ExtendedDescription, dty_Status,
+			dty_OriginatingDBid, dty_NameInOriginatingdb, dty_IDinOriginatingDB, dty_DetailTypeGroupID,
+			dty_OrderInGroup, dty_PtrTargetRectypeIDs, dty_JsonTreeOfTermIDs, dty_HeaderTermIDs,
+			dty_FieldSetRecTypeID, dty_ShowInLists,\n";
 	$query = "select * from defDetailTypes";
 	$res = mysql_query($query);
 	$fmt = 'defDetailTypes';
@@ -90,10 +93,10 @@
 
 	print "\n\n\n-- RECORD STRUCTURE";print "\n";
     print "<p>";
-    print "-- rst_ID, rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_DisplayDescription, rst_DisplayPrompt, rst_DisplayHelp, 
-    rst_DisplayOrder, rst_DisplayWidth, rst_DefaultValue, rst_RecordMatchOrder, rst_RequirementType, rst_Status, rst_MayModify, 
-    rst_OriginatingDBid, rst_IDinOriginatingDB, rst_MaxValues, rst_MinValues, 
-	rst_EnumConstraintIDs, rst_PtrConstraintIDs, rst_ThumbnailFromDetailTypeID\n";
+	print "-- rst_ID, rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
+			rst_DisplayOrder, rst_DisplayWidth, rst_DefaultValue, rst_RecordMatchOrder, rst_CalcFunctionID,
+			rst_RequirementType, rst_Status, rst_OriginatingDBid, rst_IDinOriginatingDB, rst_MaxValues, rst_MinValues,
+			rst_DisplayDetailTypeGroupID, rst_FilteredJsonTermIDTree, rst_PtrConstraintIDs, rst_OrderForThumbnailGeneration\n";
 	$query = "select * from defRecStructure";
 	$res = mysql_query($query);
 	$fmt = 'defRecStructure';
@@ -112,8 +115,9 @@
 
 	print "\n\n\n-- TERMS";print "\n";
     print "<p>";
-    print "-- trm_ID, trm_Label, trm_InverseTermId, trm_VocabID, trm_Description, trm_Status, 
-    trm_OriginatingDBid, trm_NameInOriginatingdb, trm_IDinOriginatingDB,  trm_AddedByImport, trm_LocalExtension\n";
+	print "-- trm_ID, trm_Label, trm_InverseTermId, trm_Description, trm_Status, trm_OriginatingDBid,
+			trm_AddedByImport, trm_IsLocalExtension, trm_NameInOriginatingdb, trm_IDinOriginatingDB,
+			trm_ParentTermID, trm_Domain, trm_ChildCount, trm_ParentTermVocabID, trm_Depth, trm_OntID\n";
 	$query = "select * from defTerms";
 	$res = mysql_query($query);
 	$fmt = 'defTerms';
@@ -125,26 +129,6 @@
     print "<br>";
 	print "> End\n";
     print "<p>&nbsp;<p>&nbsp;<p>";
-
-	// ------------------------------------------------------------------------------------------
-	// VOCABULARIES
-
-	print "\n\n\n-- VOCABULARIES";print "\n";
-    print "<p>";
-    print "-- vcb_ID, vcb_Name, vcb_Description, vcb_RefURL, vcb_Added, vcb_Modified, vcb_Status, 
-    vcb_OriginatingDBid, vcb_NameInOriginatingdb, vcb_IDinOriginatingDB,  vcb_OntID\n";
-	$query = "select * from defVocabularies";
-	$res = mysql_query($query);
-	$fmt = 'defVocabularies';
-
-    print "<p>";
-	print "\n> Start\n";
-    print "<br>";
-	while ($row = mysql_fetch_assoc($res)) { print_row($row, $fmt); }
-    print "<br>";
-	print "> End\n";
-    print "<p>&nbsp;<p>&nbsp;<p>";
-
 
 	// ------------------------------------------------------------------------------------------
 	// Detail Type ONTOLOGIES
@@ -170,9 +154,8 @@
 
 	print "\n\n\n-- RELATIONSHIP CONSTRAINTS";print "\n";
     print "<p>";
-    print "-- rcs_ID, rcs_DetailtypeID, rcs_SourceRectypeID, rcs_TargetRectypeID, rcs_VocabSubset, 
-    rcs_VocabID, rcs_Description, rcs_Order, rcs_RelationshipsLimit, rcs_Status, 
-    rcs_OriginatingDBid, rcs_IDinOriginatingDB, rcs_TermLimit\n";
+	print "-- rcs_ID, rcs_TermID, rcs_SourceRectypeID, rcs_TargetRectypeID, rcs_Description, rcs_Status,
+			rcs_OriginatingDBID, rcs_TermLimit, rcs_IDinOriginatingDB\n";
 	$query = "select * from defRelationshipConstraints";
 	$res = mysql_query($query);
 	$fmt = 'defRelationshipConstraints';
@@ -206,9 +189,9 @@
 	// ------------------------------------------------------------------------------------------
 	// defRecTypeGroups
 
-	print "\n\n\n-- RECORD TYPE CLASSES";print "\n";
+	print "\n\n\n-- RECORD TYPE GROUPS";print "\n";
     print "<p>";
-	print "-- rtg_ID, rtg_Name, rtg_Description, rtg_Order\n";
+	print "-- rtg_ID, rtg_Name, rtg_Domain, rtg_Order, rtg_Description\n";
 	$query = "select * from defRecTypeGroups";
 	$res = mysql_query($query);
 	$fmt = 'defRecTypeGroups';
@@ -224,7 +207,7 @@
     // ------------------------------------------------------------------------------------------
 	// defDetailTypeGroups
 
-	print "\n\n\n-- DETAIL TYPE CLASSES";print "\n";
+	print "\n\n\n-- DETAIL TYPE GROUPS";print "\n";
     print "<p>";
 	print "-- dtg_ID, dtg_Name, dtg_Description, dtg_Order\n";
 	$query = "select * from defDetailTypeGroups";
@@ -366,9 +349,9 @@
 			break;
 
 			case 'defDetailTypes': // Data from the recDetails table
-			print "($row[dty_ID],`$row[dty_Name]`,`$row[dty_Description]`,$row[dty_Type],`$row[dty_Prompt]`,
-			`$row[dty_Help]`,`$row[dty_Status]`,`$row[dty_OriginatingDB]`,`$row[dty_PtrTargetRectypeIDs]`,
-			`$row[dty_EnumVocabIDs]`,`$row[dty_EnumTermIDs]`),\n";
+			print "($row[dty_ID],`$row[dty_Name]`,`$row[dty_Documentation]`,$row[dty_Type],`$row[dty_HelpText]`,
+			`$row[dty_ExtendedDescription]`,`$row[dty_Status]`,`$row[dty_OriginatingDB]`,`$row[dty_PtrTargetRectypeIDs]`,
+			`$row[dty_JsonTreeOfTermIDs]`,`$row[dty_HeaderTermIDs]`),\n";
 			break;
 
 			case 'defRecStructure': // Data from the defRecStructure table
@@ -377,19 +360,14 @@
 			`$row[rst_DisplayOrder]`,`$row[rst_DisplayWidth]`,`$row[rst_DefaultValue]`,
 			`$row[rst_RecordMatchOrder]`),`$row[rst_RequirementType]`),`$row[rst_Status]`),
 			`$row[rst_OriginatingDB]`),`$row[rst_MaxValues]`),`$row[rst_MinValues]`),
-			`$row[rst_EnumConstraintIDs]`),`$row[rst_PtrConstraintIDs]`),
-			`$row[rst_ThumbnailFromDetailTypeID]`),\n";
+			`$row[rst_FilteredJsonTermIDTree]`),`$row[rst_PtrConstraintIDs]`),
+			`$row[rst_OrderForThumbnailGeneration]`),\n";
 
 			break;
 
 			case 'defTerms': // Data from the rec_details_lookup table
 			print "($row[trm_ID],`$row[trm_Label]`,`$row[trm_InverseTermID]`,`$row[trm_VocabID]`,`$row[trm_Description]`,
-			`$row[trm_Status]`,`$row[trm_OriginatingDB]`,`$row[trm_AddedByImport]`,`$row[trm_LocalExtension]`),\n";
-			break;
-
-			case 'defVocabularies': // Data from Vocabularies table
-			print "($row[vcb_ID],`$row[vcb_Name]`,`$row[vcb_Description]`,`$row[vcb_RefURL]`,`$row[vcb_Added]`,`$row[vcb_Modified]`,
-			`$row[vcb_Status]`,`$row[vcb_OriginatingDB]`,`$row[vcb_OntID]`),\n";
+			`$row[trm_Status]`,`$row[trm_OriginatingDB]`,`$row[trm_AddedByImport]`,`$row[trm_IsLocalExtension]`),\n";
 			break;
 
 			case 'defOntologies': // Data from Ontologies table
@@ -398,7 +376,7 @@
 
 			case 'defRelationshipConstraints': // Data from relationship constraints table
 			print "($row[rcs_ID],`$row[rcs_DetailtypeID]`,`$row[rcs_SourceRectypeID]`,`$row[rcs_TargetRectypeID]`,`$row[rcs_VocabSubset]`,`$row[rcs_VocabID]`,
-			`$row[rcs_Description]`,`$row[rcs_Order]`,`$row[rcs_RelationshipsLimit]`,`$row[rcs_Status]`,`$row[rcs_OriginatingDB]`,`$row[rcs_TermLimit]`),\n";
+			`$row[rcs_Description]`,`$row[rcs_Status]`,`$row[rcs_OriginatingDB]`,`$row[rcs_TermLimit]`),\n";
 			break;
 
 			case 'defFileExtToMimetype': // Data from fiel extension to mimetype table

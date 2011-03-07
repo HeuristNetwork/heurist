@@ -112,9 +112,9 @@ else {
 $res = mysql_query($query);
 $files = array();
 while ($file = mysql_fetch_assoc($res)) {
-//	$thumbnailURL = "http://".HEURIST_INSTANCE_PREFIX."heuristscholar.org/heurist/php/resizeImage.php?ulf_ID=" . $file["ulf_ObfuscatedFileID"];
+//	$thumbnailURL = "http://".HEURIST_SESSION_DB_PREFIX."heuristscholar.org/heurist/php/resizeImage.php?ulf_ID=" . $file["ulf_ObfuscatedFileID"];
 	$thumbnailURL = HEURIST_URL_BASE."common/php/resizeImage.php?db=".HEURIST_DBNAME."&ulf_ID=" . $file["ulf_ObfuscatedFileID"];
-//	$URL = "http://".HEURIST_INSTANCE_PREFIX."heuristscholar.org/heurist/php/downloadFile.php/" . urlencode($file["ulf_OrigFileName"]) . "?ulf_ID=" . $file["ulf_ObfuscatedFileID"];
+//	$URL = "http://".HEURIST_SESSION_DB_PREFIX."heuristscholar.org/heurist/php/downloadFile.php/" . urlencode($file["ulf_OrigFileName"]) . "?ulf_ID=" . $file["ulf_ObfuscatedFileID"];
 	$URL = HEURIST_URL_BASE."records/files/downloadFile.php/" . urlencode($file["ulf_OrigFileName"]) . "?db=".HEURIST_DBNAME."&ulf_ID=" . $file["ulf_ObfuscatedFileID"];
 	array_push($files, array(
 		$file["ulf_ID"], $file["ulf_OrigFileName"], $file["ulf_FileSizeKB"], $file["file_mimetype"], $URL, $thumbnailURL, $file["ulf_Description"]

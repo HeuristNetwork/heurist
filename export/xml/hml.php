@@ -74,7 +74,7 @@ require_once(dirname(__FILE__).'/../../common/config/defineFriendlyServers.php')
 require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
-require_once(dirname(__FILE__).'/../../common/php/getRecordStructure.php');
+require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 require_once(dirname(__FILE__).'/../../common/php/getRelationshipRecords.php');
 require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 
@@ -152,15 +152,14 @@ $DTN = array();	//detail type name
 $DTT = array();	//detail type base type
 $INV = array();	//detail type inverse
 $WGN = array();	//work group name
-$RDL = array();	//record detail lookup
-$RDLV = array();	//record detail lookup by value
-$VOC = array();	//vocabulary lookup
+$TL = array();	//record detail lookup
+$TLV = array();	//record detail lookup by value
 // record type labels
 $query = 'SELECT rty_ID, rty_Name FROM defRecTypes';
 $res = mysql_query($query);
 while ($row = mysql_fetch_assoc($res)) {
 	$RTN[$row['rty_ID']] = $row['rty_Name'];
-	foreach (getRecordRequirements($row['rty_ID']) as $rdr_rdt_id => $rdr) {
+	foreach (getRectypeStructureFields($row['rty_ID']) as $rdr_rdt_id => $rdr) {
 	// type-specific names for detail types
 		$RQS[$rdr['rst_RecTypeID']][$rdr['rst_DetailTypeID']] = $rdr['rst_DisplayName'];
 	}
@@ -180,23 +179,16 @@ $INV = mysql__select_assoc('defTerms',	//saw Enum change just assoc id to relate
 							'1');
 
 // lookup detail type enum values
-$query = 'SELECT trm_ID, trm_Label, trm_VocabID FROM defTerms';
+$query = 'SELECT trm_ID, trm_Label, trm_ParentTermID, trm_OntID FROM defTerms';
 $res = mysql_query($query);
 while ($row = mysql_fetch_assoc($res)) {
-	$RDL[$row['trm_ID']] = $row;
-	$RDLV[$row['trm_Label']] = $row;
+	$TL[$row['trm_ID']] = $row;
+	$TLV[$row['trm_Label']] = $row;
 }
 
-// lookup for defVocabularies
-$query = 'SELECT vcb_ID, vcb_Name, vcb_RefURL FROM defVocabularies';
-$res = mysql_query($query);
-while ($row = mysql_fetch_assoc($res)) {
-	$VOC[$row['vcb_ID']] = $row;
-}
-
-// group names
+/// group names
 mysql_connection_db_select(USERS_DATABASE) or die(mysql_error());
-$WGN = mysql__select_assoc('sysUGrps grp', 'grp.ugr_ID', 'grp.ugr_Name', '1');
+$WGN = mysql__select_assoc('sysUGrps grp', 'grp.ugr_ID', 'grp.ugr_Name', "ugr_Type in ('Workgroup','Ugradclass')");
 mysql_connection_db_select(DATABASE) or die(mysql_error());
 
 
@@ -215,7 +207,7 @@ $OUTPUT_STUBS = @$_REQUEST['stub'] === '1'? true : false;
 
 if (preg_match('/_COLLECTED_/', $_REQUEST['q'])) {
 if (!session_id()) session_start();
-	$collection = &$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['record-collection'];
+	$collection = &$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['record-collection'];
 	if (count($collection) > 0) {
 		$_REQUEST['q'] = 'ids:' . join(',', array_keys($collection));
 	} else {
@@ -424,7 +416,7 @@ function outputRecordStub($recordStub) {
 }
 
 function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $depth=0, $outputStub) {
-	global $DTN, $DTT, $RDL, $VOC, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH;
+	global $DTN, $DTT, $TL, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH;
 //error_log("in outputDetail dt = $dt value = ". print_r($value,true));
 
 	$attrs = array('id' => $dt);
@@ -434,8 +426,8 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 	if (array_key_exists($rt, $RQS)  &&  array_key_exists($dt, $RQS[$rt])) {
 		$attrs['name'] = $RQS[$rt][$dt];
 	}
-	if ($dt === 200  &&  array_key_exists($value, $INV) && array_key_exists($INV[$value], $RDL)) {	//saw Enum change
-		$attrs['inverse'] = $RDL[$INV[$value]]['trm_Label'];
+	if ($dt === 200  &&  array_key_exists($value, $INV) && array_key_exists($INV[$value], $TL)) {	//saw Enum change
+		$attrs['inverse'] = $TL[$INV[$value]]['trm_Label'];
 	}
 
 	if (is_array($value)) {
@@ -488,11 +480,11 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 		openTag('detail', $attrs);
 		outputRecord(loadRecord($value), $reverse_pointers, $relationships, $depth + 1, $outputStub);
 		closeTag('detail');
-	} else if ($DTT[$dt] === 'enum' && array_key_exists($value,$RDL)) {
-		if (array_key_exists($RDL[$value]['trm_VocabID'],$VOC)) {
-			$attrs['vocabulary'] = $VOC[$RDL[$value]['trm_VocabID']]['vcb_Name'];
+	} else if ($DTT[$dt] === 'enum' && array_key_exists($value,$TL)) {
+		if (@$TL[$value]['trm_ParentTermID']) {
+			$attrs['ParentTerm'] = $TL[$TL[$value]['trm_ParentTermID']]['trm_Label'];
 		}
-		makeTag('detail', $attrs, $RDL[$value]['trm_Label']);	//saw Enum  possible change
+		makeTag('detail', $attrs, $TL[$value]['trm_Label']);
 	} else {
 		makeTag('detail', $attrs, replaceIllegalChars($value));
 	}
@@ -763,7 +755,7 @@ makeTag('dateStamp', null, date('c'));
 if (array_key_exists('error', $result)) {
 	makeTag('error', null, $result['error']);
 } else {
-/*	openTag('vocabularies');
+/*	openTag('vocabularies'); //	saw TODO change to output Ontologies
 	foreach($VOC as $vocabulary){
 		$attrs = array('id' => $vocabulary['vcb_ID']);
 		if ($vocabulary['vcb_RefURL']) {

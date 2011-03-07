@@ -48,26 +48,17 @@ $res = mysql_query("select rty_ID, rty_Name from defRecTypes order by rty_Name")
 while ($row = mysql_fetch_assoc($res)) {
 	$names[$row["rty_ID"]] = $row["rty_Name"];
 }
-print "HEURIST_rectypes.names = " . json_format($names) . ";\n\n";
+print "top.HEURIST_rectypes.names = " . json_format($names) . ";\n\n";
 
-$groups = array();
-$res = mysql_query("select * from defRecTypeGroups where 1 order by rtg_Order, rtg_Name");
+$plurals = array();
+$res = mysql_query("select rty_ID, rty_Plural from defRecTypes where rty_ID");
 while ($row = mysql_fetch_assoc($res)) {
-	$groups[$row["rtg_ID"]] = $row["rtg_Name"];
+	$plurals[$row["rty_ID"]] = $row["rty_Plural"];
 }
-print "HEURIST_ref.groupNamesInDisplayOrder = " . json_format($groups) . ";\n\n";
+print "top.HEURIST_rectypes.pluralNames = " . json_format($plurals) . ";\n\n";
 
-$typesByGroup = array();
-$res = mysql_query("select rtg_ID,rty_ID, rty_ShowInLists
-						from defRecTypes left join defRecTypeGroups on rtg_ID = (select substring_index(rty_RecTypeGroupIDs,',',1))
-						where 1 order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
-while ($row = mysql_fetch_assoc($res)) {
-	if (!array_key_exists($row['rtg_ID'],$typesByGroup)){
-		$typesByGroup[$row['rtg_ID']] = array();
-	}
-	$typesByGroup[$row['rtg_ID']][$row["rty_ID"]] = $row["rty_ShowInLists"];
-}
-print "HEURIST_rectypes.typesByGroup = " . json_format($typesByGroup) . ";\n\n";
+//print "top.HEURIST_rectypes.groupNamesInDisplayOrder = " . json_format(getRectypeGroups()) . ";\n\n";
+print "top.HEURIST_rectypes.groups = " . json_format(getRecTypesByGroup()) . ";\n\n";
 
 print "if (window.HEURIST_rectypesOnload) HEURIST_rectypesOnload();\n\n";
 

@@ -23,7 +23,7 @@ ini_set("zlib.output_compression_level", 5);
 
 require_once(dirname(__FILE__)."/../connect/applyCredentials.php");
 require_once("dbMySqlWrappers.php");
-require_once("getRecordStructure.php");
+require_once("getRecordInfoLibrary.php");
 
 mysql_connection_db_select(DATABASE);
 
@@ -34,7 +34,7 @@ header("Content-type: text/javascript");
 $res = mysql_query("select max(tlu_DateStamp) from sysTableLastUpdated where tlu_CommonObj = 1");
 $lastModified = mysql_fetch_row($res);
 $lastModified = strtotime($lastModified[0]);
-
+//error_log("lastmod = $lastModified with current time = ".@$_SERVER["REQUEST_TIME"]);
 // not changed since last requested so return
 if (strtotime(@$_SERVER["HTTP_IF_MODIFIED_SINCE"]) > $lastModified) {
   header('HTTP/1.1 304 Not Modified');
@@ -43,6 +43,7 @@ if (strtotime(@$_SERVER["HTTP_IF_MODIFIED_SINCE"]) > $lastModified) {
 
 
 // This is the best place I can think of to stick this stuff --kj, 2008-07-21
+print "if (!top.HEURIST) top.HEURIST = {};\n";
 print "top.HEURIST.database = {};\n";
 print "top.HEURIST.database.name = " . json_format(HEURIST_DBNAME) . ";\n";
 print "top.HEURIST.database.sessionPrefix = " . json_format(HEURIST_SESSION_DB_PREFIX) . ";\n";
@@ -52,8 +53,8 @@ print "if (!top.HEURIST.baseURL) top.HEURIST.baseURL = ".json_format(HEURIST_URL
 
 /* rectypes are an array of names sorted alphabetically, and lists of
    primary (bibliographic) and other rectypes, also sorted alphbetically */
-print "top.HEURIST.rectypes = {};\n";
-
+print "top.HEURIST.rectypes = ".json_format(getAllRectypeStructures()).";\n";
+/*
 $names = array();
 $res = mysql_query("select rty_ID, rty_Name from defRecTypes where rty_ID order by rty_Name");
 while ($row = mysql_fetch_assoc($res)) {
@@ -68,145 +69,47 @@ while ($row = mysql_fetch_assoc($res)) {
 }
 print "top.HEURIST.rectypes.pluralNames = " . json_format($plurals) . ";\n\n";
 
-$groups = array();
-$res = mysql_query("select * from defRecTypeGroups where 1 order by rtg_Order, rtg_Name");
-while ($row = mysql_fetch_assoc($res)) {
-	$groups[$row["rtg_ID"]] = $row["rtg_Name"];
-}
-print "top.HEURIST.rectypes.groupNamesInDisplayOrder = " . json_format($groups) . ";\n\n";
-//error_log("get types by group");
-$typesByGroup = array();
-$res = mysql_query("select rtg_ID,rty_ID, rty_ShowInLists
-						from defRecTypes left join defRecTypeGroups on rtg_ID = (select substring_index(rty_RecTypeGroupIDs,',',1))
-						where 1 order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
-while ($row = mysql_fetch_assoc($res)) {
-//error_log(print_r($row,true));
-	if (!array_key_exists($row['rtg_ID'],$typesByGroup)){
-		$typesByGroup[$row['rtg_ID']] = array();
-	}
-	$typesByGroup[$row['rtg_ID']][$row["rty_ID"]] = $row["rty_ShowInLists"];
-}
-//error_log(print_r($typesByGroup,true));
-print "top.HEURIST.rectypes.typesByGroup = " . json_format($typesByGroup) . ";\n\n";
+print "top.HEURIST.rectypes.groups = " . json_format(getRecTypesByGroup()) . ";\n\n";
 
-/* recDetailRequirements contains colNames valuesByRectypeID,
- * which contains
- */
 
-// returns [ rst_DetailTypeID => [ rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
-// rst_DefaultValue, rst_RequirementType, rst_MaxValues, rst_MinValues, rst_DisplayWidth, rst_RecordMatchOrder,
-// rst_DisplayOrder, rst_DisplayDetailTypeGroupID, rst_EnumFilteredIDs, rst_PtrFilteredIDs, rst_CalcFunctionID,
-// rst_PriorityForThumbnail] ...]
-$colNames = array("rst_DisplayName", "rst_DisplayHelpText", "rst_DisplayExtendedDescription", "rst_DefaultValue", "rst_RequirementType",
-					 "rst_MaxValues", "rst_MinValues", "rst_DisplayWidth", "rst_RecordMatchOrder", "rst_DisplayOrder", "rst_DisplayDetailTypeGroupID",
-					 "rst_EnumFilteredIDs", "rst_PtrFilteredIDs", "rst_CalcFunctionID", "rst_PriorityForThumbnail");
 //get a list of record type IDs
-$rec_types = mysql__select_array("defRecStructure", "distinct rst_RecTypeID", "1 order by rst_RecTypeID");
+$rectypeIDs = mysql__select_array("defRecStructure", "distinct rst_RecTypeID", "1 order by rst_RecTypeID");
+$rectypeStructures = getRectypeStructures($rectypeIDs);
+print "top.HEURIST.rectypes.typedefs = " . json_format($rectypeStructures) . ";\n\n";
 
-print "\ntop.HEURIST.recDetailRequirements = {\n";
-print "\tcolNames: [ \"" . join("\", \"", $colNames) . "\" ],\n";
-print "\tvaluesByRectypeID: {\n";
-
-$first = true;
-foreach ($rec_types as $rec_type) {
-	if (! $first) print "\n\t\t},\n";
-	$first = false;
-	print "\t\t\"".slash($rec_type)."\": {\n";
-
-	$first_rdr = true;
-	foreach (getRecordRequirements($rec_type) as $rdr_rdt_id => $rdr) {
-		if (! $first_rdr) print ",\n";
-		$first_rdr = false;
-		unset($rdr["rst_RecTypeID"]);
-		unset($rdr["rst_DetailTypeID"]);
-		print "\t\t\t\"" . $rdr_rdt_id . "\": [ \"" . join("\", \"", array_map("slash", $rdr)) . "\" ]";
-	}
-}
-print "\n\t\t}\n\t},\n";
-
-print "\torderByRectypeID: {\n";
+print "top.HEURIST.rectypes.dtDisplayOrder = {\n";
 
 $first = true;
-foreach ($rec_types as $rec_type) {
+unset($rectypeStructures['commonFieldNames']);
+unset($rectypeStructures['dtFieldNames']);
+foreach ($rectypeStructures as $rectypeID => $rtStruct) {
 	if (! $first) print ",\n";
 	$first = false;
-	print "\t\t\"".slash($rec_type)."\": [";
-
-	$first_rdr = true;
-	foreach (getRecordRequirements($rec_type) as $rdr_rdt_id => $rdr) {
-		if (! $first_rdr) print ",";
-		$first_rdr = false;
-		print $rdr_rdt_id;
+	print "\t\t\"".slash($rectypeID)."\": [";
+	$first_rtfs = true;
+	foreach ($rtStruct['dtFields'] as $rtdtID => $rtfs) {
+		if (! $first_rtfs) print ",";
+		$first_rtfs = false;
+		print $rtdtID;
 	}
 	print "]";
 }
-print "\n\t}\n};\n";
-
+print "\n};\n";
+*/
 
 /* detailTypes */
-$colNames = array("dty_ID", "dty_Name", "dty_Type", "dty_DetailTypeGroupID", "dty_HelpText", "dty_ExtendedDescription",
-					"dty_PtrTargetRectypeIDs", "dty_EnumVocabIDs", "dty_EnumTermIDs","dty_ShowInLists", "dty_FieldSetRectypeID");
-$res = mysql_query("select " . join(", ", $colNames) . "
-					from defDetailTypes left join defDetailTypeGroups on dty_DetailTypeGroupID = dtg_ID
-					order by dtg_Order, dty_Type, dty_Name, dty_ID");
 
-$bdt = array();
-$first = true;
-print "\ntop.HEURIST.detailTypes = {\n";
-print "\tcolNames: [ \"" . join("\", \"", $colNames) . "\" ],\n";
-print "\tvaluesByDetailTypeID: {\n";
-while ($row = mysql_fetch_assoc($res)) {
-	if (! $first) {
-		print ",\n";
-	}else{
-	$first = false;
-	}
-	print "\t\t\"".slash($row["dty_ID"])."\": [ \"";
-	print join("\", \"", array_map("slash", $row)) . "\" ]";
-}
-print "\n\t}\n};\n";
+//get a list of detail type IDs
+print "top.HEURIST.detailTypes = " . json_format(getAllDetailTypeStructures()) . ";\n\n";
 
+print "\ntop.HEURIST.terms = {}\n\n";
 
-$res = mysql_query("select trm_ID,trm_VocabID, trm_Label
-					from defTerms left join defVocabularies on trm_VocabID = vcb_ID
-					where vcb_ID is not null
-					order by trm_VocabID, trm_Label");
-print "\ntop.HEURIST.vocabTermLookup = {\n";
-$first = true;
-$prev_vcb_id = -1;
-while ($row = mysql_fetch_assoc($res)) {
-	if (!$row["trm_VocabID"]) continue;	// term doesn't have a valid vocab id so skip it
-	if ($prev_vcb_id != $row["trm_VocabID"]) {	/* new vcb_ID */
-		if (! $first) {
-			print "] ,\n\t\"" . $row["trm_VocabID"] . "\": [";
-		}else{
-			print "\t\"" . $row["trm_VocabID"] . "\": [";
-		$first = false;
-		}
-	}else {
-		print ", ";
-	}
-	print "[ ".$row["trm_ID"].", \"" . slash($row["trm_Label"]) . "\" ]";
-	$prev_vcb_id = $row["trm_VocabID"];
-}
-print "] \n};\n";
+print "\ntop.HEURIST.terms.termsByDomainLookup = \n" . json_format(getTerms(),true) . ";\n";
 
+print "\ntop.HEURIST.terms.treesByDomain = { 'relation' : " . json_format(getTermTree("reltype","prefix"),true).",\n
+												'enum' : " . json_format(getTermTree("enum","prefix"),true)." };\n";
 
-/*
-*/
-$res = mysql_query("select vcb_ID,vcb_Name from defVocabularies where 1 order by vcb_ID");
-print "\ntop.HEURIST.vocabularyLookup = {\n";
-$first = true;
-while ($row = mysql_fetch_assoc($res)) {
-	if (! $first) {
-		print " ,\n\t\"" . $row["vcb_ID"] . "\" : \"". $row['vcb_Name'] . "\" ";
-	}else{
-		print "\t\"" . $row["vcb_ID"] . "\" : \"". $row['vcb_Name'] . "\" ";
-	}
-	$first = false;
-}
-print "\n};\n";?>
-
+?>
 top.HEURIST.ratings = {"0": "not rated",
 						"1": "*",
 						"2": "**",
@@ -263,10 +166,11 @@ top.HEURIST.ratings = {"0": "not rated",
 	print "top.HEURIST.workgroups = " . json_format($workgroups) . ";\n";
 	print "top.HEURIST.workgroupIDs = " . json_format($workgroupIDs) . ";\n";
 	print "\n";
+//error_log("made to line ".__LINE__." in file ".__FILE__);
 
 ?>
 
-top.HEURIST.fireEvent(window, "heurist-obj-common-loaded");
+if (typeof top.HEURIST.fireEvent == "function") top.HEURIST.fireEvent(window, "heurist-obj-common-loaded");
 
 <?php
 ob_end_flush();

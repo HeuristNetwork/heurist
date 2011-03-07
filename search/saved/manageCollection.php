@@ -23,7 +23,7 @@ header('Content-type: text/javascript');
 session_start();
 
 // note $collection is a reference - SW also we suppress warnings to let the system create the key
-$collection = &$_SESSION[@HEURIST_INSTANCE_PREFIX.'heurist'][@'record-collection'];
+$collection = &$_SESSION[@HEURIST_SESSION_DB_PREFIX.'heurist'][@'record-collection'];
 
 function digits ($s) {
 	return preg_match('/^\d+$/', $s);

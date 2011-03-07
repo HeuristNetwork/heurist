@@ -18,7 +18,7 @@
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/T1000/.ht_stdefs');
 	define('rectype_DIRECTORY', HEURIST_SITE_PATH.'common/images/rectype-icons/');
-	if (! (is_logged_in()  &&  is_admin()  &&  HEURIST_INSTANCE_PREFIX == "")) return;
+	if (! (is_logged_in()  &&  is_admin()  &&  HEURIST_SESSION_DB_PREFIX == "")) return;
 
 	$rt_id = intval($_REQUEST['rty_ID']);
 	if (! $rt_id) return;

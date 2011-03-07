@@ -1,17 +1,13 @@
 <?php
 
-/**
+/*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- **/
-
-?>
-
-<?php
+ -->*/
 
 /* Load the user's display preferences.
  * Display preferences are added as CSS classes to the document body:
@@ -23,7 +19,7 @@
  * Setting  xxx=yyy  will add class  xxx-yyy  to the body,
  * but then setting  xxx=xyz  would add  xxx-xyz  INSTEAD.
  *
- * Preferences are currently stored in the $_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'], maybe they would eventually be in the DB.
+ * Preferences are currently stored in the $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'], maybe they would eventually be in the DB.
  */
 
 define("SAVE_URI", "disabled");
@@ -69,7 +65,7 @@ session_start();
 $writeMode = false;
 foreach ($_REQUEST as $property => $value) {
 	if (array_key_exists($property, $prefs)) {
-		$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']["display-preferences"][$property] = $value;
+		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"][$property] = $value;
 		$writeMode = true;
 	}
 }
@@ -95,8 +91,8 @@ if ($prefs) {
 		if (! $first) print ",";  $first = false;
 		print "\n";
 
-		if (@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']["display-preferences"][$property])
-			$value = $_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']["display-preferences"][$property];
+		if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"][$property])
+			$value = $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"][$property];
 
 		print "\t\"".addslashes($property)."\": \"".addslashes($value)."\"";
 

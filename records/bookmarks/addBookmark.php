@@ -36,7 +36,7 @@ if (! $bib) {
 }
 
 /* check workgroup permissions */
-if ($bib["rec_OwnerUGrpID"]  &&  $bib["rec_NonOwnerVisibility"] == "Hidden") {
+if ($bib["rec_OwnerUGrpID"]  &&  $bib["rec_NonOwnerVisibility"] == "hidden") {
 	error_log("select ugl_GroupID from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=$usrID and ugl_GroupID=" . intval($bib["rec_OwnerUGrpID"]));
 	$res = mysql_query("select ugl_GroupID from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=$usrID and ugl_GroupID=" . intval($bib["rec_OwnerUGrpID"]));
 	if (! mysql_num_rows($res)) {

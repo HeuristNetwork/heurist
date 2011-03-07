@@ -482,33 +482,6 @@ DELIMITER ;
 
 DELIMITER $$
 
-	DROP TRIGGER IF EXISTS defVocabularies_last_insert$$
-
-	CREATE
-	DEFINER=`root`@`localhost`
-	TRIGGER `defVocabularies_last_insert`
-	AFTER INSERT ON `defVocabularies`
-	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defVocabularies"$$
-        
-DELIMITER ;
-DELIMITER $$
-
-	DROP TRIGGER IF EXISTS defVocabularies_last_update$$
-
-	CREATE
-	DEFINER=`root`@`localhost`
-	TRIGGER `defVocabularies_last_update`
-	AFTER UPDATE ON `defVocabularies`
-	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defVocabularies"$$
-
-DELIMITER ;
-
--- ------------------------------------------------------------------------------
-
-DELIMITER $$
-
 	DROP TRIGGER IF EXISTS defRelationshipConstraints_last_insert$$
 
 	CREATE

@@ -37,7 +37,7 @@ foreach ($textDetails as $textDetail) {
 	if (! check($textDetail['dtl_Value'])){
 		if ($prevInvalidRecId < $textDetail['dtl_RecID']) {
 			print "<tr><td><a target=_blank href='".HEURIST_URL_BASE."records/edit/editRecord.html?bib_id=".
-					$textDetail['dtl_RecID'] . "&instance=".HEURIST_INSTANCE. "'> " . $textDetail['dtl_RecID']. "</a></td></tr>\n";
+					$textDetail['dtl_RecID'] . "&db=".HEURIST_DBNAME. "'> " . $textDetail['dtl_RecID']. "</a></td></tr>\n";
 			$prevInvalidRecId = $textDetail['dtl_RecID'];
 			mysql__update("Records", "rec_ID=".$textDetail['dtl_RecID'],array("rec_Modified" => $now));
 		}

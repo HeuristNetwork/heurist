@@ -126,7 +126,7 @@ function loadRecord($id, $fresh = false, $bare = false) {
 	}
 	if (! $memcache) {
 		$memcache = new Memcache;
-		if (! $memcache->connect('localhost', MEMCACHED_PORT)) {
+		if (! $memcache->connect('localhost', MEMCACHED_PORT)) {	//saw Decision: error or just load raw???
 			return array("error" => "couldn't connect to memcached");
 		}
 	}
@@ -158,7 +158,7 @@ function updateCachedRecord($id) {
 	}
 	$key = HEURIST_DBNAME . ":record:" . $id;
 	$record = $memcache->get($key);
-	if ($record) {
+	if ($record) {	// will only update if previously cached
 		$record = loadBareRecordFromDB($id);
 		$memcache->set($key, $record);
 	}

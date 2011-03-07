@@ -132,7 +132,7 @@ if ($DBID==0) { // not yet registered
         "You will need to log in to the HeuristIndex database with user name $ownerGrpEmail";
         // print "<script>alert('" . $msg . "');</script>\n";
         // TO DO; NEED TO CHANGE 'instance' --> 'db' and 'bib_id' --> 'RecID'
-        header('Location: ' . HEURIST_BASE_URL . '/records/edit/editRecord.html?bib_id=$dbID&instance=HeuristIndex';
+        header('Location: ' . HEURIST_BASE_URL . '/records/edit/editRecord.html?bib_id=$dbID&db=HeuristIndex';
         return;
     } 
    

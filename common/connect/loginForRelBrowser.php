@@ -25,7 +25,7 @@ $logo = urldecode(@$_REQUEST['logo']);
 if (!$logo) {
 	$logo = "../../common/images/hlogo-big.gif";
 }
-$instance_name = ucwords(eregi_replace("[.]", "", HEURIST_INSTANCE_PREFIX));
+$instance_name = ucwords(eregi_replace("[.]", "", HEURIST_SESSION_DB_PREFIX));
 
 if (! $last_uri) {
 	if (@$_SERVER['HTTP_REFERER']  &&  strpos($_SERVER['HTTP_REFERER'], $_SERVER['SERVER_NAME'] . $_SERVER['SCRIPT_NAME']) === false) {
@@ -61,11 +61,11 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 				$groups[$row[GROUPS_ID_FIELD]] = 'user';
 		}
 
-		$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['cookie_version'] = COOKIE_VERSION;
-		$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_name'] = $user[USERS_USERNAME_FIELD];
-		$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_realname'] = $user[USERS_FIRSTNAME_FIELD] . ' ' . $user[USERS_LASTNAME_FIELD];
-		$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_id'] = $user[USERS_ID_FIELD];
-		$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'] = $groups;
+		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['cookie_version'] = COOKIE_VERSION;
+		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_name'] = $user[USERS_USERNAME_FIELD];
+		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_realname'] = $user[USERS_FIRSTNAME_FIELD] . ' ' . $user[USERS_LASTNAME_FIELD];
+		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_id'] = $user[USERS_ID_FIELD];
+		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'] = $groups;
 
 
 		$expiry = '';
@@ -96,12 +96,12 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 
 
 if (@$_REQUEST['logout']) {
-	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_name']);
-	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_realname']);
-	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_id']);
-	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access']);
-	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_roles']);
-	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['search-results']);
+	unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_name']);
+	unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_realname']);
+	unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_id']);
+	unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access']);
+	unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_roles']);
+	unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results']);
 	setcookie('favourites', '', time() - 3600);
 
 

@@ -47,7 +47,7 @@ $res = mysql_query("select tag_ID, tag_Text, tag_UGrpID from usrTags, ".USERS_DA
 $workgroupTags = array();
 while ($row = mysql_fetch_row($res)) { array_push($workgroupTags, $row); }
 
-$currentUser = array(get_user_id(), is_admin(), $workgroups, @$_SESSION[HEURIST_INSTANCE_PREFIX."heurist"]["display-preferences"]);
+$currentUser = array(get_user_id(), is_admin(), $workgroups, @$_SESSION[HEURIST_SESSION_DB_PREFIX."heurist"]["display-preferences"]);
 
 $userData = array(
 	"tags" => $tags,

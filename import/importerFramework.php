@@ -1,17 +1,13 @@
 <?php
 
-/**
+/*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- **/
-
-?>
-
-<?php
+ -->*/
 
 /* Tuning parameters to determine how similar two bibliographic records are.
  * HASH_FUZZINESS controls how many differences there can be between the records' hashes,
@@ -33,7 +29,7 @@ import-clear.php goes through any old import data and removes it from the sessio
 Rather than sticking all our data in the global session scope,
 each import is allocated an import_id based on the name of the file being imported,
 the user's ID, and the current time.
-All data relating to this import is stored in an array stored in $_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['heurist-import-' . <import_id>]
+All data relating to this import is stored in an array stored in $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['heurist-import-' . <import_id>]
 including - and this is important - the current stage of the import (mode).  By moving this stuff into the
 session rather than keeping it in the request as is usual, the potential for user meddling is somewhat decreased.
 It would probably be possible (using JavaScript and appropriate HTTP redirects) to minimise the impact on the
@@ -94,11 +90,11 @@ mysql_connection_db_overwrite(DATABASE);
 mysql_query('set @logged_in_user_id = ' . get_user_id());
 
 // error_log("made it to importerFramework.php");
-//error_log('session ZoteroItems: ' . print_r($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['ZoteroItems'], 1));
+//error_log('session ZoteroItems: ' . print_r($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['ZoteroItems'], 1));
 
 jump_sessions();
 setup_session_vars();
-if ($import_id) { $session_data = &$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']["heurist-import-" . $_REQUEST["import_id"]]; }
+if ($import_id) { $session_data = &$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["heurist-import-" . $_REQUEST["import_id"]]; }
 choose_next_mode();
 
 print_common_header(($session_data["mode"] != "file parsing")? @$session_data["in_filename"] : NULL);	/* note that in_filename may be undefined */
@@ -215,9 +211,9 @@ function print_common_footer() {
 
 
 function clear_session() {
-	foreach ($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'] as $name => $val) {
+	foreach ($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'] as $name => $val) {
 		if (strpos($name, 'heurist-import-') === 0)
-			unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'][$name]);
+			unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][$name]);
 	}
 }
 
@@ -468,7 +464,7 @@ function mode_zotero_request_parsing() {
 	global $import_id;
 
 	$_import_id = 'zotero-'.get_user_id().'-'.date('Y_m_d-H:i:s');
-	$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']["heurist-import-$_import_id"] = &$session_data;
+	$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["heurist-import-$_import_id"] = &$session_data;
 	$session_data['in_filename'] = 'Zotero items';
 	$import_id = $_import_id;
 
@@ -476,8 +472,8 @@ function mode_zotero_request_parsing() {
 	$session_data['parser'] = new HeuristZoteroParser();
 	$session_data['zoteroImport'] = true;
 
-	list($errors, $entries) = $session_data['parser']->parseRequest($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['ZoteroItems']);
-	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['ZoteroItems']);
+	list($errors, $entries) = $session_data['parser']->parseRequest($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['ZoteroItems']);
+	unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['ZoteroItems']);
 
 	if ($errors) {
 ?>
@@ -1414,7 +1410,7 @@ function choose_next_mode() {
 
 	    case '':
 		$heurist_import_count = 0;
-		foreach ($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'] as $name => $val) {
+		foreach ($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'] as $name => $val) {
 			if (strpos($name, 'heurist-import-') === 0) ++$heurist_import_count;
 		}
 		if ($heurist_import_count > 0) {
@@ -2292,8 +2288,8 @@ function setup_session_vars() {
 	global $import_id;
 
  // print "<p><b>" . $_REQUEST['import_id'] . "</b>";
- // print '<i>' . print_r($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['heurist-import-' . $_REQUEST['import_id']], 1) . '</i></p>';
-	if (! @$_REQUEST['import_id']  ||  ! @$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['heurist-import-' . $_REQUEST['import_id']]) {
+ // print '<i>' . print_r($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['heurist-import-' . $_REQUEST['import_id']], 1) . '</i></p>';
+	if (! @$_REQUEST['import_id']  ||  ! @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['heurist-import-' . $_REQUEST['import_id']]) {
 		$session_data = array();
 		return;
 	}
@@ -2313,7 +2309,7 @@ function initialise_import_session() {
 	$_import_id = preg_replace('/-heurist-\\d+-\\d+_\\d+\\d+-\\d+:\\d+:\\d+.*/i', '', $_import_id);
 	$_import_id = $_import_id.'-heurist-'.get_user_id().'-'.date('Y_m_d-H:i:s');
 
-	$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']["heurist-import-$_import_id"] = &$session_data;
+	$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["heurist-import-$_import_id"] = &$session_data;
 	$session_data['in_filename'] = $_FILES['import_file']['name'];
 	$import_id = $_import_id;
 }

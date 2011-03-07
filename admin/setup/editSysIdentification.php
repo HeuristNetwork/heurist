@@ -164,10 +164,10 @@
 	FLD_INPUT_SZ => 3, FLD_INPUT_MAXLEN => 5, FLD_INPUT_DFLT => '',
 	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'Numeric',
 	FLD_DATABASE => 'sys_NewRecOwnerGrpID'),
-	'f23' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Non-owner default new record visibility (Viewable, Hidden)', FLD_DISPLAY_SZ => 100,
+	'f23' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Non-owner default new record visibility (viewable, hidden)', FLD_DISPLAY_SZ => 100,
 	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
 	FLD_INPUT_SZ => 10, FLD_INPUT_MAXLEN => 25, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'Viewable, Hidden',
+	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'viewable, hidden',
 	FLD_DATABASE => 'sys_NewRecAccess')
 	);
 

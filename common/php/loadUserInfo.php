@@ -92,8 +92,8 @@ while ($row = mysql_fetch_row($res)) {
 ?> ];
 
     top.HEURIST.user.workgroups = [<?php
-if (is_array(@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'])) {
-	$workgroups = mysql__select_array(USERS_DATABASE.".sysUGrps grp", "grp.ugr_ID", "grp.ugr_ID in (".join(",", array_keys($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'])).") and grp.ugr_Type !='user' order by grp.ugr_Name");
+if (is_array(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'])) {
+	$workgroups = mysql__select_array(USERS_DATABASE.".sysUGrps grp", "grp.ugr_ID", "grp.ugr_ID in (".join(",", array_keys($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'])).") and grp.ugr_Type !='user' order by grp.ugr_Name");
 	print join(", ", $workgroups);
 }
 ?> ];

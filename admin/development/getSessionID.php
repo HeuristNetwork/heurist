@@ -26,9 +26,9 @@ print 'currently in session ' . session_id() . '<br>';
 
 
 function jump_sessions() {
-	$alt_sessionid = $_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['alt-sessionid'];
+	$alt_sessionid = $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['alt-sessionid'];
 	if (! $alt_sessionid) {
-		$alt_sessionid = $_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['alt-sessionid'] = sha1('import:' . rand());
+		$alt_sessionid = $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['alt-sessionid'] = sha1('import:' . rand());
 	}
 
 	session_write_close();

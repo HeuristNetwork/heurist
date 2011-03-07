@@ -78,7 +78,7 @@
 
 	// write the core database record describing the database to be registered and allocate registration ID
 
-	$fullURL="$serverURL?instance=$dbReg";
+	$fullURL="$serverURL?db=$dbReg";
 	$res = mysql_query("insert into Records
 				(rec_URL, rec_Added, rec_Title, rec_RecTypeID, rec_AddedByImport, rec_OwnerUGrpID, rec_NonOwnerVisibility)
 				VALUES  ($fullURL, now(), $dbTitle, " . HEURIST_DB_DESCRIPTOR_RECTYPE . ", 1, $ownerGrpID, 'Visible')");

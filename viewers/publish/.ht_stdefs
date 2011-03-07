@@ -152,18 +152,18 @@ if (@$_REQUEST['sort_order_dropdown']  &&  in_array($_REQUEST['sort_order_dropdo
 		define('simple_BIBLIO_search-order', 'bib_' . $_REQUEST['sort_order_dropdown']);
 		define('others_BIBLIO_search-order', 'bib_' . $_REQUEST['sort_order_dropdown']);
 	}
-	$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'][HEURIST_INSTANCE_PREFIX.'heurist']['sort_order'] = $_REQUEST['sort_order_dropdown'];
-} else if (@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'][HEURIST_INSTANCE_PREFIX.'heurist']['sort_order']) {
-	if ($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'][HEURIST_INSTANCE_PREFIX.'heurist']['sort_order'] == 'title') {
+	$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][HEURIST_SESSION_DB_PREFIX.'heurist']['sort_order'] = $_REQUEST['sort_order_dropdown'];
+} else if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][HEURIST_SESSION_DB_PREFIX.'heurist']['sort_order']) {
+	if ($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][HEURIST_SESSION_DB_PREFIX.'heurist']['sort_order'] == 'title') {
 		define('BOOKMARK_search-order', 'usrBookmarks.bkmk_title = "", usrBookmarks.bkmk_title');
 		define('BIBLIO_search_all-order', 'rec_Title = "", rec_Title');
 		define('simple_BIBLIO_search-order', 'rec_Title = "", rec_Title');
 		define('others_BIBLIO_search-order', 'rec_Title = "", rec_Title');
 	} else {
-		define('BOOKMARK_search-order', 'usrBookmarks.bkmk_' . $_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'][HEURIST_INSTANCE_PREFIX.'heurist']['sort_order']);
-		define('BIBLIO_search_all-order', 'bib_' . $_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'][HEURIST_INSTANCE_PREFIX.'heurist']['sort_order']);
-		define('simple_BIBLIO_search-order', 'bib_' . $_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'][HEURIST_INSTANCE_PREFIX.'heurist']['sort_order']);
-		define('others_BIBLIO_search-order', 'bib_' . $_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'][HEURIST_INSTANCE_PREFIX.'heurist']['sort_order']);
+		define('BOOKMARK_search-order', 'usrBookmarks.bkmk_' . $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][HEURIST_SESSION_DB_PREFIX.'heurist']['sort_order']);
+		define('BIBLIO_search_all-order', 'bib_' . $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][HEURIST_SESSION_DB_PREFIX.'heurist']['sort_order']);
+		define('simple_BIBLIO_search-order', 'bib_' . $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][HEURIST_SESSION_DB_PREFIX.'heurist']['sort_order']);
+		define('others_BIBLIO_search-order', 'bib_' . $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][HEURIST_SESSION_DB_PREFIX.'heurist']['sort_order']);
 	}
 } else {
 	define('BOOKMARK_search-order', 'usrBookmarks.bkmk_title = "", usrBookmarks.bkmk_title');

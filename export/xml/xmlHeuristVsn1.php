@@ -62,7 +62,7 @@ require_once(dirname(__FILE__).'/../../common/config/manageInstancesDeprecated.p
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
 require_once(dirname(__FILE__).'/../../common/php/getRelationshipRecords.php');
-require_once(dirname(__FILE__).'/../../common/php/getRecordStructure.php');
+require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 
 
@@ -76,8 +76,7 @@ $RQS = array();   // the required detailtypes per referencetype
 $DTN = array();	  // the default names of detailtypes
 $LOOP = array();	// holds visited record ids for loop detection while going through containers
 $RFT = array();		// rectype labels
-$RDL = array();	//record detail lookup
-$VOC = array();	//vocabulary lookup
+$TL = array();	//record detail lookup
 
 
 mysql_connection_db_select(DATABASE);
@@ -151,7 +150,7 @@ $res = mysql_query($query);
 while ($row = mysql_fetch_assoc($res)) {
 
 	$RFT[$row['rty_ID']] = $row['rty_Name'];
-	foreach (getRecordRequirements($row['rty_ID']) as $rdr_rdt_id => $rdr) {
+	foreach (getRectypeStructureFields($row['rty_ID']) as $rdr_rdt_id => $rdr) {
 	// initialise requirements and names for detailtypes ($RQS)
 		$RQS[$rdr['rst_RecTypeID']][$rdr['rst_DetailTypeID']]['rst_RequirementType'] = $rdr['rst_RequirementType'];
 		$RQS[$rdr['rst_RecTypeID']][$rdr['rst_DetailTypeID']]['rst_DisplayName'] = $rdr['rst_DisplayName'];
@@ -168,19 +167,11 @@ while ($row = mysql_fetch_assoc($res)) {
 
 
 // lookup for detail type enum values
-$query = 'SELECT trm_ID, trm_Label, trm_VocabID FROM defTerms';
+$query = 'SELECT trm_ID, trm_Label, trm_ParentTermID, trm_OntID FROM defTerms';
 $res = mysql_query($query);
 while ($row = mysql_fetch_assoc($res)) {
-	$RDL[$row['trm_ID']] = $row;
+	$TL[$row['trm_ID']] = $row;
 }
-
-// lookup for defVocabularies
-$query = 'SELECT vcb_ID, vcb_Name, vcb_RefURL FROM defVocabularies';
-$res = mysql_query($query);
-while ($row = mysql_fetch_assoc($res)) {
-	$VOC[$row['vcb_ID']] = $row;
-}
-
 
 
 // get the resultset from the searchpage (fill $BIBLIO_IDS)
@@ -236,6 +227,7 @@ if (@$_REQUEST['w'])
     $XML .= "w='" . $_REQUEST['w'] . "' ";
 $XML .= "/>\n";
 
+/*	saw TODO change this to ontologies
 $XML .= "<vocabularies>\n";
 foreach($VOC as $vocabulary){
 	$XML .="<vocabulary id=\"" .$vocabulary['vcb_ID']. "\"";
@@ -245,7 +237,7 @@ foreach($VOC as $vocabulary){
 	$XML .= ">" .$vocabulary['vcb_Name']. "</vocabulary>\n";
 }
 $XML .= "</vocabularies>\n";
-
+*/
 
 $XML .= "<references>\n";
 
@@ -605,6 +597,8 @@ function writeTag($rectype, $detail, $value, $file_id) {
 
 		}
 	}
+
+//	saw TODO add case for 'enum' Detail Type to out put the term value not the ID
 
 	// if value is required but empty, make a notice of missing detail
 	if (empty($value) && $RQS[$rectype][$detail]['rst_RequirementType'] == 'required') {

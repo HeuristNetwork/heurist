@@ -119,4 +119,4 @@ if (mysql_num_rows($res) > 0) {
   <p>This key is valid for all URLs in this directory:</p>
   <pre><?= $url ?></pre>
   <p>To load the Heurist API, you can use:</p>
-  <pre>&lt;script src=http:<?=HEURIST_URL_BASE?>/hapi/load.php?<?= $instance ? "instance=$instance&amp;" : "" ?>key=<?=$key?>&gt;&lt;/script&gt;</pre>
+  <pre>&lt;script src=http:<?=HEURIST_URL_BASE?>/hapi/load.php?<?= $instance ? "db=$instance&amp;" : "" ?>key=<?=$key?>&gt;&lt;/script&gt;</pre>

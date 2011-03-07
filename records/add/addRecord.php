@@ -397,10 +397,10 @@ if ($rec_id) {
 		$other_bib_id = $_REQUEST["related"];
 		$reln_type = "IsRelatedTo";
 		if (@$_REQUEST["reltype"]) {
-			mysql_query("select trm_Label from defTerms where trm_VocabID = 1 and trm_Label like '".addslashes($_REQUEST["reltype"])."' limit 1;");
+			mysql_query("select trm_ID,trm_Label from defTerms where trm_Label like '".addslashes($_REQUEST["reltype"])."' limit 1;");
 			if (mysql_num_rows($res) > 0) {
 				$row = mysql_fetch_assoc($res);
-				$reln_type = $row["trm_Label"];	// saw TODO: check that this is aligned with the enum value change
+				$reln_type = $row["trm_ID"];	// saw TODO: check that this is aligned with the enum value change
 			}
 		}
 		mysql__insert("Records", array(
@@ -417,7 +417,7 @@ if ($rec_id) {
 			$query .=   "($relnBibID, 160, 'Relationship')";
 			$query .= ", ($relnBibID, 202, $rec_id)";
 			$query .= ", ($relnBibID, 199, $other_bib_id)";
-			$query .= ", ($relnBibID, 200, '" . addslashes($reln_type) . "')";
+			$query .= ", ($relnBibID, 200, '" . addslashes($reln_type) . "')"; //saw BUG!!! places in label not ID
 			mysql_query($query);
 		}
 	}

@@ -1,17 +1,13 @@
 <?php
 
-/**
+/*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- **/
-
-?>
-
-<?php
+ -->*/
 
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
@@ -30,12 +26,12 @@ $sid = $_REQUEST["s"];
 
 session_start();
 
-if (! @$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']["search-results"][$sid]) {
+if (! @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["search-results"][$sid]) {
 	print "null";
 	return;
 }
 
-$results = $_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']["search-results"][$sid];
+$results = $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["search-results"][$sid];
 
 foreach ($results as $i => $rec_id) {
 	if ($rec_id == $_REQUEST["id"]) {

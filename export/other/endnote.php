@@ -23,7 +23,7 @@ if ($_REQUEST['pub_id']) {
 } else {
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	if (!is_logged_in()) {
-	        header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?instance='.HEURIST_INSTANCE);
+	        header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
 	        return;
 	}
 }

@@ -19,25 +19,25 @@ session_start();
 
 if ($_REQUEST['delete']) {
 	foreach ($_REQUEST['delete'] as $del)
-		unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'][$del]);
+		unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][$del]);
 }
 
-foreach ($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'] as $key => $val) {
+foreach ($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'] as $key => $val) {
 	print '<div><input type=checkbox name="delete[]" value="' . htmlspecialchars($key) . '" id="'.htmlspecialchars($key).'"><label for="' . htmlspecialchars($key) . '">' . htmlspecialchars($key) . ': ' . substr(print_r($val, 1), 0, 30) . ' ... ' . '(' . round(strlen(print_r($val, 1)) / 1024) . 'kb)</label></div>';
 }
 
-if ($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['alt-sessionid']) {
+if ($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['alt-sessionid']) {
 	print '<hr>';
 	print '<div><b>Alternative session</b></div>';
 
 	session_write_close();
-	session_id($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['alt-sessionid']);
+	session_id($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['alt-sessionid']);
 	session_start();
 	if ($_REQUEST['alt_delete']) {
 		foreach ($_REQUEST['alt_delete'] as $del)
-			unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'][$del]);
+			unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'][$del]);
 	}
-	foreach ($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist'] as $key => $val) {
+	foreach ($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'] as $key => $val) {
 		print '<div><input type=checkbox name="alt_delete[]" value="' . htmlspecialchars($key) . '" id="'.htmlspecialchars($key).'"><label for="' . htmlspecialchars($key) . '">' . htmlspecialchars($key) . ': ' . substr(print_r($val, 1), 0, 30) . ' ... ' . '(' . round(strlen(print_r($val, 1)) / 1024) . 'kb)</label></div>';
 	}
 }

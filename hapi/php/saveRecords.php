@@ -15,7 +15,7 @@
 
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
-require_once(dirname(__FILE__)."/../../common/php/saveRecord.php.php");
+require_once(dirname(__FILE__)."/../../common/php/saveRecord.php");
 require_once(dirname(__FILE__)."/../../common/php/utilsTitleMask.php");
 
 
@@ -46,7 +46,7 @@ foreach ($_REQUEST["records"] as $nonce => $record) {
 $out = array("record" => array());
 foreach ($_REQUEST["records"] as $nonce => $record) {
 // FIXME?  should we perhaps index these by the nonce
-	array_push($out["record"], saveRecord(@$record["id"], @$record["type"], @$record["url"], @$record["notes"], @$record["group"], @$record["vis"], @$record["bookmark"], @$record["pnotes"], @$record["rating"], null, null, @$record["tags"], @$record["wgTags"], @$record["detail"], @$record["-notify"], @$record["+notify"], @$record["-comment"], @$record["comment"], @$record["+comment"], $nonces, $retitleRecs));
+	array_push($out["record"], saveRecord(@$record["id"], @$record["type"], @$record["url"], @$record["notes"], @$record["group"], @$record["vis"], @$record["bookmark"], @$record["pnotes"], @$record["rating"], @$record["tags"], @$record["wgTags"], @$record["detail"], @$record["-notify"], @$record["+notify"], @$record["-comment"], @$record["comment"], @$record["+comment"], $nonces, $retitleRecs));
 }
 
 

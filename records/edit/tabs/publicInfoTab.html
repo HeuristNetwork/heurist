@@ -301,41 +301,41 @@ function renderAdditionalDataSection(container, rectypeID, bdValues) {
 		addCell.style.padding = "0 0 5px 0";
 		addCell.appendChild(document.createTextNode("Add field:"));
 
-	var bdts = top.HEURIST.edit.getBibDetailNonRequirements(rectypeID);
+	var dts = top.HEURIST.edit.getNonRecDetailTypedefs(rectypeID);
 	if (bdValues) {
-		for (var bdt_id in bdValues) {
-			delete bdts[bdt_id];
+		for (var dtID in bdValues) {
+			delete dts[dtID];
 		}
 	}
 
-	var bdtsByName = {};
-	for (var bdt_id in bdts) {
-		bdtsByName[bdts[bdt_id][1]] = bdts[bdt_id];
+	var dtsByName = {};
+	for (var dtID in dts) {
+		dtsByName[dts[dtID]['commonFields'][0]]= [dtID].concat(dts[dtID]['commonFields']);// saw TODO: type struct change needed
 	}
-	var bdtNames = [];
-	for (var name in bdtsByName) {
-		bdtNames.push(name);
+	var dtNames = [];
+	for (var name in dtsByName) {
+		dtNames.push(name);
 	}
-	bdtNames = bdtNames.sort();
+	dtNames = dtNames.sort();
 
-	var bdtSelect = addCell.appendChild(document.createElement("select"));
-		bdtSelect.style.marginLeft = "5px";
-		bdtSelect.options[0] = new Option("Select a type...", "");
-		bdtSelect.options[0].disabled = true;
+	var dtSelect = addCell.appendChild(document.createElement("select"));
+		dtSelect.style.marginLeft = "5px";
+		dtSelect.options[0] = new Option("Select a type...", "");
+		dtSelect.options[0].disabled = true;
 	var i = 1;
-	for (var n = 0; n < bdtNames.length; ++n) {
-		var name = bdtNames[n];
-		bdtSelect.options[i++] = new Option(bdtsByName[name][1], bdtsByName[name][0]);
+	for (var n = 0; n < dtNames.length; ++n) {
+		var name = dtNames[n];
+		dtSelect.options[i++] = new Option(dtsByName[name][1], dtsByName[name][0]);// saw TODO: type struct change needed
 	}
 
 	var button = document.createElement("input");
 		button.type = "button";
 		button.value = "add";
 		button.onclick = function() {
-			if (bdtSelect.selectedIndex == 0) return;
-			window.HEURIST.inputs.push(top.HEURIST.edit.createInput(bdtSelect.value, 0, [], container));
-			bdtSelect.remove(bdtSelect.selectedIndex);
-			bdtSelect.selectedIndex = 0;
+			if (dtSelect.selectedIndex == 0) return;
+			window.HEURIST.inputs.push(top.HEURIST.edit.createInput(dtSelect.value, 0, [], container));
+			dtSelect.remove(dtSelect.selectedIndex);
+			dtSelect.selectedIndex = 0;
 		};
 	addCell.appendChild(button);
 }

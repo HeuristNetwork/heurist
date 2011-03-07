@@ -29,11 +29,11 @@ if ($_COOKIE['heurist-sessionid']) session_id($_COOKIE['heurist-sessionid']);
 session_start();
 
 if (@$_REQUEST["a"]) {
-	$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']["user_access"][$_REQUEST["a"]] = "user";
+	$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["user_access"][$_REQUEST["a"]] = "user";
 	session_write_close();
 }
 if (@$_REQUEST["g"]) {
-	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']["user_access"][$_REQUEST["g"]]);
+	unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["user_access"][$_REQUEST["g"]]);
 	session_write_close();
 }
 
@@ -50,12 +50,12 @@ if (@$_REQUEST["g"]) {
 
 mysql_connection_db_select(USERS_DATABASE);
 
-$grp_ids = array_keys($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']["user_access"]);
+$grp_ids = array_keys($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["user_access"]);
 $grp_names = mysql__select_assoc(GROUPS_TABLE, GROUPS_ID_FIELD, GROUPS_NAME_FIELD, GROUPS_ID_FIELD." in (".join(",",$grp_ids).")");
 
 foreach ($grp_ids as $grp_id) {
 	print("<tr><td>".$grp_names[$grp_id]."</td><td>");
-	if ($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']["user_access"][$grp_id] == "admin") {
+	if ($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["user_access"][$grp_id] == "admin") {
 		print("<a href=?a=$grp_id>-admin</a>");
 	}
 	print("</td><td><a href=?g=$grp_id>exit</td></tr>");

@@ -70,6 +70,12 @@ var Relationship = function(parentElement, details, manager) {
 	parentElement.appendChild(this.tr);
 };
 
+function countObjElements(obj) {
+	var i =0;
+	for ( var j in obj) i++;
+	return i;
+}
+
 /**
 * Helper function that lanches the mini-edit.html popup with the record id of the relationship record.
 * @author Tom Murtagh
@@ -105,7 +111,7 @@ Relationship.prototype.remove = function() {
 	this.manager.remove(this);
 };
 
-var EditableRelationship = function(parentElement, details, rectype,dtID, relVocabulary, manager) {
+var EditableRelationship = function(parentElement, details, rectype, dtID, manager) {
 	var elt = parentElement;
 	do { elt = elt.parentNode; } while (elt.nodeType != 9 /* DOCUMENT_NODE */);
 	this.document = elt;
@@ -122,12 +128,12 @@ var EditableRelationship = function(parentElement, details, rectype,dtID, relVoc
 	}
 	else {
 		this.details = {
-			RelationType: "",
-			OtherResource: { Title: "", rectype: (rectype ? rectype : 0), URL: "", bibID: 0 },
-			Notes: "",
-			Title: "",
-			StartDate: null,
-			EndDate: null
+			relTermID: "",
+			relatedRec: { title: "", rectype: (rectype ? rectype : 0), URL: "", recID: 0 },
+			notes: "",
+			title: "",
+			startDate: null,
+			endDate: null
 		};
 	}
 
@@ -144,28 +150,27 @@ var EditableRelationship = function(parentElement, details, rectype,dtID, relVoc
 
 	var tbody = detailsElt.appendChild(this.document.createElement("div"));
 
-	var tr = tbody.appendChild(this.document.createElement("div"));
+/*	var tr = tbody.appendChild(this.document.createElement("div"));
 	tr.className = "input-row";
 	var td = tr.appendChild(this.document.createElement("div"));
 	td.className = "input-header-cell";
 	td.appendChild(this.document.createTextNode("Using Vocabulary"));
 
 	td = tr.appendChild(this.document.createElement("div"));
-	this.relOnt = td.appendChild(this.document.createElement("select"));
-	this.relOnt.id = "vocabulary";
-	this.relOnt.name = "vocabulary";
-	var firstOption = this.relOnt.options[0] = new Option("(select a vocabulary)", "");
-	firstOption.disabled = true;
+	this.relVocab = td.appendChild(this.document.createElement("select"));
+	this.relVocab.id = "vocabulary";
+	this.relVocab.name = "vocabulary";
+	var firstOption = this.relVocab.options[0] = new Option("(show all vocabularies)", "");
 	firstOption.selected = true;
 
-	var onts = top.HEURIST.vocabularyLookup;
-	if (!relVocabulary) relVocabulary = 1; // if the calling code didn't pass an vocabulary then set it to basic
-	for (var ont in onts) {
-		this.relOnt.options[this.relOnt.length] = new Option(onts[ont],ont);
-		if (ont == relVocabulary)
-		this.relOnt.value = relVocabulary;
+	var relVocabs = top.HEURIST.vocabLookup.relationships;
+	for (var vocab in relVocabs) {
+		if (!countObjElements(top.HEURIST.vocabTermLookup[vocab])) continue;
+		this.relVocab.options[this.relVocab.length] = new Option(relVocabs[vocab],vocab);
+		if (vocab == relVocabulary)
+			this.relVocab.value = relVocabulary;
 	}
-
+*/
 	tr = tbody.appendChild(this.document.createElement("div"));
 	tr.className = "input-row";
 	td = tr.appendChild(this.document.createElement("div"));
@@ -186,7 +191,7 @@ var EditableRelationship = function(parentElement, details, rectype,dtID, relVoc
 	var relTypes = top.HEURIST.vocabTermLookup[200];  //saw need to change restricted reltypes from rel_constraints pass in a param
 	for (var ont in relTypes) {
 		var grp = document.createElement("optgroup");
-		grp.label = top.HEURIST.vocabularyLookup[ont];
+		grp.label = top.HEURIST.vocabLookup[ont];
 		this.relType.appendChild(grp);
 		for (var i = 0; i < relTypes[ont].length; ++i) {
 			var rdl = relTypes[ont][i];
@@ -296,11 +301,11 @@ EditableRelationship.prototype.save = function() {
 
 	var fakeForm = { action: top.HEURIST.basePath +"records/relationships/saveRelationships.php",
 		elements: [
-		{ name: "bib_id", value: parent.HEURIST.record.bibID },
+		{ name: "recID", value: parent.HEURIST.record.bibID },
 		{ name: "save-mode", value: "new" },
-		{ name: "RelationType", value: this.relType.value },	//saw Enum change - nothing to do on the save side value is the id
-		{ name: "OtherResource", value: this.otherResourceID.value },
-		{ name: "InterpResource", value: this.interpResourceID.value },
+		{ name: "RelTermID", value: this.relType.value },	//saw Enum change - nothing to do on the save side value is the id
+		{ name: "RelatedRecID", value: this.otherResourceID.value },
+		{ name: "InterpRecID", value: this.interpResourceID.value },
 		{ name: "Notes", value: this.notes.value },
 		{ name: "Title", value: this.description.value },
 		{ name: "StartDate", value: this.startDate.value },
@@ -317,7 +322,7 @@ EditableRelationship.prototype.save = function() {
 			alert("Error while saving:\n" + vals.error);
 		}
 		else if (vals.relationship) {
-			parent.HEURIST.record.relatedRecords[ vals.relationship.bibID ] = vals.relationship;
+			parent.HEURIST.record.relatedRecords[ vals.relationship.recID ] = vals.relationship;
 
 			var myTR = thisRef.div.parentNode.parentNode;
 			var newReln = new Relationship(myTR.parentNode, vals.relationship,thisRef.manager);
@@ -372,7 +377,7 @@ EditableRelationship.prototype.remove = function() {
 * @param parentElement a DOM element where the Relationship will be displayed
 * @param details a reference to an object containing the record details for the relationship record
 */
-var RelationManager = function(parentElement, rectypeID, relatedRecords, bibDetailTypeID, changeNotification, supressHeaders) {
+var RelationManager = function(parentElement, rectypeID, relatedRecords, detailTypeID, changeNotification, supressHeaders) {
 	if (!parentElement || isNaN(rectypeID)) return null;
 	var thisRef = this;
 	this.parentElement = parentElement;
@@ -385,9 +390,9 @@ var RelationManager = function(parentElement, rectypeID, relatedRecords, bibDeta
 	}
 	this.openRelationships ={};
 
-	if (bibDetailTypeID) {
+	if (detailTypeID) {
 		var constrainRecTypes = {};
-		var constrRecTypeList = temp = top.HEURIST.edit.getRecTypeConstraintsList(bibDetailTypeID);
+		var constrRecTypeList = temp = top.HEURIST.edit.getRecTypeConstraintsList(detailTypeID);
 		if (temp) {
 			temp = temp.split(",");
 			for (var i = 0; i < temp.length; i++) {
@@ -400,15 +405,15 @@ var RelationManager = function(parentElement, rectypeID, relatedRecords, bibDeta
 
 	this.relatedRecordsByType = {};
 	var relatedRecordsNoType = [];
-	for (var bib_id in relatedRecords) {
-		var rec = relatedRecords[bib_id];
-		if (rec.OtherResource && rec.OtherResource.rectype) {
-			if (constrainRecTypes && !constrainRecTypes[rec.OtherResource.rectype])  continue;
-			if (! this.relatedRecordsByType[rec.OtherResource.rectype]) {
-				this.relatedRecordsByType[rec.OtherResource.rectype] = [ rec ];
+	for (var recID in relatedRecords) {	//divide the related records into the contrained types categories
+		var rec = relatedRecords[recID];
+		if (rec.relatedRec && rec.relatedRec.rectype) {
+			if (constrainRecTypes && !constrainRecTypes[rec.relatedRec.rectype])  continue;
+			if (! this.relatedRecordsByType[rec.relatedRec.rectype]) {
+				this.relatedRecordsByType[rec.relatedRec.rectype] = [ rec ];
 			}
 			else {
-				this.relatedRecordsByType[rec.OtherResource.rectype].push(rec);
+				this.relatedRecordsByType[rec.relatedRec.rectype].push(rec);
 			}
 		}
 		else {
@@ -435,7 +440,6 @@ var RelationManager = function(parentElement, rectypeID, relatedRecords, bibDeta
 			var titleRow = document.createElement("div");
 			titleRow.className = "relation-title";
 			var titleCell = titleRow.appendChild(document.createElement("div"));
-//			titleCell.colSpan = 7;
 			titleCell.appendChild(document.createElement("span")).appendChild(document.createTextNode(
 				(top.HEURIST.rectypes.pluralNames[rectype] || "Other") + ": "));
 			// create a button for adding new relationships to the group
@@ -445,13 +449,12 @@ var RelationManager = function(parentElement, rectypeID, relatedRecords, bibDeta
 			a.onclick = function(tRow, rtype, dtID) { return function() {
 					var newRow = document.createElement("div");
 					var newCell = newRow.appendChild(document.createElement("div"));
-//					newCell.colSpan = 7;
 					thisRef.parentElement.insertBefore(newRow, tRow.nextSibling);
-					var rel = new EditableRelationship(newCell, null, rtype || 0,dtID,null,thisRef);
+					var rel = new EditableRelationship(newCell, null, rtype || 0,dtID,thisRef);
 					rel.nonce = thisRef.getNonce();
 					thisRef.openRelationships[rel.nonce] = rel;
 					rel.relType.focus();
-					}; }(titleRow, rectype,bibDetailTypeID);
+					}; }(titleRow, rectype, detailTypeID);
 
 			this.parentElement.appendChild(titleRow);
 		}
@@ -486,11 +489,11 @@ var RelationManager = function(parentElement, rectypeID, relatedRecords, bibDeta
 		var newCell = newRow.appendChild(document.createElement("div"));
 		newCell.colSpan = 7;
 		thisRef.parentElement.appendChild(newRow);
-		var rel = new EditableRelationship(newCell,null,rtype,dtID,null,thisRef);
+		var rel = new EditableRelationship(newCell,null,rtype,dtID,thisRef);
 		rel.nonce = thisRef.getNonce();
 		thisRef.openRelationships[rel.nonce] = rel;
 		rel.relType.focus();
-		}; }((constrRecTypeList ? constrRecTypeList : 0),bibDetailTypeID);
+		}; }((constrRecTypeList ? constrRecTypeList : 0),detailTypeID);
 	this.parentElement.appendChild(addOtherTr);
 
 	// check title lengths and if too long show ellipses

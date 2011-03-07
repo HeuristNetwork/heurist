@@ -18,9 +18,9 @@ ALTER TABLE `Records`
   ADD CONSTRAINT FOREIGN KEY (rec_AddedByUGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE SET NULL,
   ADD CONSTRAINT FOREIGN KEY (rec_OwnerUGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE RESTRICT;
 
-  -- ADD CONSTRAINT FOREIGN KEY (rec_RecTypeID) REFERENCES def_RecTypes (rty_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (rec_AddedByUGrpID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (rec_OwnerUGrpID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (rec_RecTypeID) REFERENCES def_RecTypes (rty_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (rec_AddedByUGrpID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (rec_OwnerUGrpID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
 
 
 ALTER TABLE defDetailTypes
@@ -34,9 +34,6 @@ ALTER TABLE defDetailTypes
 -- Next may fail on term IDs pointed to by trm_InverseTermID. Use this query and set missining 
 -- inverse term IDs to NULL (NOT to 0). Also beware multiple recs with same inverse term
 SELECT `trm_InverseTermId` from defTerms where NOT `trm_InverseTermId` in (select `trm_ID` from defTerms);
-  
-ALTER TABLE defTerms
-  ADD CONSTRAINT FOREIGN KEY (trm_VocabID) REFERENCES defVocabularies (vcb_ID) ON DELETE RESTRICT;
   
 -- ******* TO DO: REMOVED TEMPROARILY 9/2/11 - THIS IS FAILING ON hdb_index and sandpit3 
 -- because of FK constraint failure******
@@ -53,13 +50,13 @@ ALTER TABLE defRecStructure
   ADD CONSTRAINT FOREIGN KEY (rst_RecTypeID) REFERENCES defRecTypes (rty_ID) ON DELETE Cascade,
   ADD CONSTRAINT FOREIGN KEY (rst_DetailtypeID) REFERENCES defDetailTypes (dty_ID) ON DELETE Cascade;
 
-  -- ADD CONSTRAINT FOREIGN KEY (rst_RecTypeID) REFERENCES defRecTypes (rty_ID) ON UPDATE CASCADE,  -- Fails
-  -- ADD CONSTRAINT FOREIGN KEY (rst_DetailtypeID) REFERENCES defDetailtypes (dty_ID) ON UPDATE CASCADE;
+-- ADD CONSTRAINT FOREIGN KEY (rst_RecTypeID) REFERENCES defRecTypes (rty_ID) ON UPDATE CASCADE,-- Fails
+-- ADD CONSTRAINT FOREIGN KEY (rst_DetailtypeID) REFERENCES defDetailtypes (dty_ID) ON UPDATE CASCADE;
 
 -- ---------------------------------------------------------------------------
 
 ALTER TABLE  defRelationshipConstraints 
-  ADD CONSTRAINT FOREIGN KEY (rcs_DetailTypeID) REFERENCES defDetailTypes (dty_ID) ON DELETE CASCADE;
+  ADD CONSTRAINT FOREIGN KEY (rcs_TermID) REFERENCES defTermss (trm_ID) ON DELETE CASCADE;
   
 Update defRelationshipConstraints Set rcs_SourceRecTypeID=NULL Where rcs_SourceRecTypeID=0;
 Update defRelationshipConstraints Set rcs_TargetRecTypeID=NULL Where rcs_TargetRecTypeID=0;
@@ -67,20 +64,20 @@ ALTER TABLE  defRelationshipConstraints
   ADD CONSTRAINT FOREIGN KEY (rcs_SourceRecTypeID) REFERENCES defRecTypes (rty_ID) ON DELETE CASCADE,
   ADD CONSTRAINT FOREIGN KEY (rcs_TargetRecTypeID) REFERENCES defRecTypes (rty_ID) ON DELETE CASCADE;
 
- -- NOW USES MULTI-VALUE FIELDS
- --  ADD CONSTRAINT FOREIGN KEY (rcs_VocabID) REFERENCES defVocabularies (vcb_ID) ON DELETE RESTRICT;
+-- NOW USES MULTI-VALUE FIELDS
+--  ADD CONSTRAINT FOREIGN KEY (rcs_VocabID) REFERENCES defVocabularies (vcb_ID) ON DELETE RESTRICT;
   
-  -- ADD CONSTRAINT FOREIGN KEY (rcs_DetailTypeID) REFERENCES defDetailTypes (dty_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (rcs_SourceRecTypeID) REFERENCES defRecTypes (rty_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (rcs_TargetRecTypeID) REFERENCES defRecTypes (rty_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (rcs_VocabID) REFERENCES defVocabularies (vcb_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (rcs_DetailTypeID) REFERENCES defDetailTypes (dty_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (rcs_SourceRecTypeID) REFERENCES defRecTypes (rty_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (rcs_TargetRecTypeID) REFERENCES defRecTypes (rty_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (rcs_VocabID) REFERENCES defVocabularies (vcb_ID) ON UPDATE CASCADE,
 
 -- ---------------------------------------------------------------------------
 
 ALTER TABLE recForwarding
   ADD CONSTRAINT FOREIGN KEY (rfw_NewRecID) REFERENCES Records (rec_ID) ON DELETE RESTRICT;
 
-  -- ADD CONSTRAINT FOREIGN KEY (rfw_NewRecID) REFERENCES Records (rec_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (rfw_NewRecID) REFERENCES Records (rec_ID) ON UPDATE CASCADE,
   
 -- ---------------------------------------------------------------------------
 
@@ -88,8 +85,8 @@ ALTER TABLE recRelationshipsCache
   ADD CONSTRAINT FOREIGN KEY (rrc_SourceRecID) REFERENCES Records (rec_ID) ON DELETE CASCADE,
   ADD CONSTRAINT FOREIGN KEY (rrc_TargetRecID) REFERENCES Records (rec_ID) ON DELETE CASCADE;
 
-  -- ADD CONSTRAINT FOREIGN KEY (rrc_SourcePtr) REFERENCES Records (rec_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (rrc_TargetPtr) REFERENCES Records (rec_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (rrc_SourcePtr) REFERENCES Records (rec_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (rrc_TargetPtr) REFERENCES Records (rec_ID) ON UPDATE CASCADE,
 
 -- ---------------------------------------------------------------------------
 
@@ -102,11 +99,11 @@ ALTER TABLE recDetails
 ALTER TABLE  `recUploadedFiles` ENGINE = INNODB;
 ALTER TABLE recDetails
   ADD CONSTRAINT FOREIGN KEY (dtl_UploadedFileID) REFERENCES recUploadedFiles (ulf_ID) ON DELETE RESTRICT;
-  -- RESTRICT b/c there might be more than one detail pointign to an uploaded file
+-- RESTRICT b/c there might be more than one detail pointign to an uploaded file
 
-  -- ADD CONSTRAINT FOREIGN KEY (dtl_RecID) REFERENCES Records (rec_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (dtl_DetailTypeID) REFERENCES defDetailTypes (dty_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (dtl_UploadedFileID) REFERENCES recUploadedFiles (ulf_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (dtl_RecID) REFERENCES Records (rec_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (dtl_DetailTypeID) REFERENCES defDetailTypes (dty_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (dtl_UploadedFileID) REFERENCES recUploadedFiles (ulf_ID) ON UPDATE CASCADE,
 
 -- ---------------------------------------------------------------------------
 
@@ -128,8 +125,8 @@ ALTER TABLE recThreadedComments
   ADD CONSTRAINT FOREIGN KEY (cmt_ParentCmtID) REFERENCES recThreadedComments (cmt_ID) ON DELETE RESTRICT,
   ADD CONSTRAINT FOREIGN KEY (cmt_RecID) REFERENCES Records (rec_ID) ON DELETE CASCADE;
 
-  -- ADD CONSTRAINT FOREIGN KEY (cmt_OwnerUgrpID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (cmt_RecID) REFERENCES Records (rec_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (cmt_OwnerUgrpID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (cmt_RecID) REFERENCES Records (rec_ID) ON UPDATE CASCADE,
 
 -- ---------------------------------------------------------------------------
 
@@ -149,8 +146,8 @@ ALTER TABLE recUploadedFiles
   ADD CONSTRAINT FOREIGN KEY (ugl_UserID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE,
   ADD CONSTRAINT FOREIGN KEY (ugl_GroupID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE;
 
-  -- ADD CONSTRAINT FOREIGN KEY (ugl_UserID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (ugl_GroupID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (ugl_UserID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (ugl_GroupID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
 
 -- ---------------------------------------------------------------------------
 
@@ -159,18 +156,18 @@ ALTER TABLE usrBookmarks
 
 ALTER TABLE usrBookmarks
   ADD CONSTRAINT FOREIGN KEY (bkm_RecID) REFERENCES Records (rec_ID) ON DELETE CASCADE;
-  -- while this does allow someone to delete other people's bookmarks, record deletion is only available to
-  -- system adminstrators, and the function checks to see if the record has been bookmarked and warns
+-- while this does allow someone to delete other people's bookmarks, record deletion is only available to
+-- system adminstrators, and the function checks to see if the record has been bookmarked and warns
 
-  -- ADD CONSTRAINT FOREIGN KEY (bkm_UGrpID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (bkm_RecID) REFERENCES Records (rec_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (bkm_UGrpID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (bkm_RecID) REFERENCES Records (rec_ID) ON UPDATE CASCADE,
 
 -- ---------------------------------------------------------------------------
 
 ALTER TABLE usrHyperlinkFilters
   ADD CONSTRAINT FOREIGN KEY (hyf_UGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE;
 
-  -- ADD CONSTRAINT FOREIGN KEY (hyf_UGrpID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (hyf_UGrpID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
 
 -- ---------------------------------------------------------------------------
 
@@ -179,12 +176,12 @@ ALTER TABLE usrRecTagLinks
   
 ALTER TABLE usrRecTagLinks
   ADD CONSTRAINT FOREIGN KEY (rtl_RecID) REFERENCES Records (rec_ID) ON DELETE CASCADE;   
-  -- as with bookmarks, only sysadmins can delete records, but they can delete records others have tagged
-  -- and at vsn 3.0 there is only a check on bookmarking, not on tagging; that works for individual
-  -- users but might allow deletion of workgroup-only tagged records without warning
+-- as with bookmarks, only sysadmins can delete records, but they can delete records others have tagged
+-- and at vsn 3.0 there is only a check on bookmarking, not on tagging; that works for individual
+-- users but might allow deletion of workgroup-only tagged records without warning
 
-  -- ADD CONSTRAINT FOREIGN KEY (rtl_TagID) REFERENCES usrTags (tag_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (rtl_RecID) REFERENCES Records (rec_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (rtl_TagID) REFERENCES usrTags (tag_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (rtl_RecID) REFERENCES Records (rec_ID) ON UPDATE CASCADE,
 
 -- ---------------------------------------------------------------------------
 
@@ -192,8 +189,8 @@ ALTER TABLE usrRecentRecords
   ADD CONSTRAINT FOREIGN KEY (rre_UGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE,
   ADD CONSTRAINT FOREIGN KEY (rre_RecID) REFERENCES Records (rec_ID) ON DELETE CASCADE;
 
-  -- ADD CONSTRAINT FOREIGN KEY (rre_UGrpID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (rre_RecID) REFERENCES Records (rec_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (rre_UGrpID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (rre_RecID) REFERENCES Records (rec_ID) ON UPDATE CASCADE,
 
 -- ---------------------------------------------------------------------------
 
@@ -204,15 +201,15 @@ ALTER TABLE usrReminders
 ALTER TABLE usrReminders
   ADD CONSTRAINT FOREIGN KEY (rem_ToWorkgroupID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE,
   ADD CONSTRAINT FOREIGN KEY (rem_ToUserID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE;
-  -- Steve wants reminders retained even if the recipient is deleted so they can be reallocated to a new one
-  -- Ian thinks this is  not a good idea, for the one or two people who might ever use this we will need a    
-  -- to write a reallocation interface and/or cleanout routine. In fact, reallocating the user to the 
-  -- new person is no less obscure a methodology and takes no programming
+-- Steve wants reminders retained even if the recipient is deleted so they can be reallocated to a new one
+-- Ian thinks this is  not a good idea, for the one or two people who might ever use this we will need a
+-- to write a reallocation interface and/or cleanout routine. In fact, reallocating the user to the
+-- new person is no less obscure a methodology and takes no programming
 
-  -- ADD CONSTRAINT FOREIGN KEY (rem_RecID) REFERENCES Records (rec_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY rem_OwnerID() REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (rem_ToWorkgroupID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (rem_ToUserID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (rem_RecID) REFERENCES Records (rec_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY rem_OwnerID() REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (rem_ToWorkgroupID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (rem_ToUserID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
 
 -- ---------------------------------------------------------------------------
 
@@ -220,22 +217,22 @@ ALTER TABLE usrRemindersBlockList
   ADD CONSTRAINT FOREIGN KEY (rbl_RemID) REFERENCES usrReminders (rem_ID) ON DELETE CASCADE,
   ADD CONSTRAINT FOREIGN KEY (rbl_UGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE;
 
-  -- ADD CONSTRAINT FOREIGN KEY (rbl_RemID) REFERENCES usrReminders (rem_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (rbl_UGrpID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (rbl_RemID) REFERENCES usrReminders (rem_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (rbl_UGrpID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
 
 -- ---------------------------------------------------------------------------
 
 ALTER TABLE usrSavedSearches
   ADD CONSTRAINT FOREIGN KEY (svs_UGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE;
 
-  -- ADD CONSTRAINT FOREIGN KEY (svs_UGrpID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (svs_UGrpID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
 
 -- ---------------------------------------------------------------------------
 
 ALTER TABLE usrTags
   ADD CONSTRAINT FOREIGN KEY (tag_UGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE;
 
-  -- ADD CONSTRAINT FOREIGN KEY (tag_UGrpID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (tag_UGrpID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
 
 -- -----------------------------------------------------------------------------
 
@@ -245,45 +242,45 @@ ALTER TABLE usrTags
 -- ALTER TABLE woot_ChunkPermissions
 --   ADD CONSTRAINT FOREIGN KEY (wprm_chunkid) REFERENCES woot_Chunks (wchnk_id) ON UPDATE CASCADE,
 --   ADD CONSTRAINT FOREIGN KEY (wprm_chunkid) REFERENCES woot_Chunks (wchnk_id) ON DELETE RESTRICT,
-  -- ADD CONSTRAINT FOREIGN KEY (wprm_UGrpID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (wprm_UGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE RESTRICT,
-  -- ADD CONSTRAINT FOREIGN KEY (wprm_groupid) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (wprm_groupid) REFERENCES sysUGrps (ugr_ID) ON DELETE RESTRICT,
-  -- ADD CONSTRAINT FOREIGN KEY (wprm_creatorid) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (wprm_creatorid) REFERENCES sysUGrps (ugr_ID) ON DELETE RESTRICT;
+-- ADD CONSTRAINT FOREIGN KEY (wprm_UGrpID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (wprm_UGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE RESTRICT,
+-- ADD CONSTRAINT FOREIGN KEY (wprm_groupid) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (wprm_groupid) REFERENCES sysUGrps (ugr_ID) ON DELETE RESTRICT,
+-- ADD CONSTRAINT FOREIGN KEY (wprm_creatorid) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (wprm_creatorid) REFERENCES sysUGrps (ugr_ID) ON DELETE RESTRICT;
 -- 
 -- ALTER TABLE woot_Chunks
-  -- ADD CONSTRAINT FOREIGN KEY (wchnk_woot_id) REFERENCES woot_records (woot_id) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (wchnk_woot_id) REFERENCES woot_records (woot_id) ON DELETE RESTRICT,
-  -- ADD CONSTRAINT FOREIGN KEY (wchnk_owner) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (wchnk_owner) REFERENCES sysUGrps (ugr_ID) ON DELETE RESTRICT,
-  -- ADD CONSTRAINT FOREIGN KEY (wchnk_editor) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (wchnk_editor) REFERENCES sysUGrps (ugr_ID) ON DELETE RESTRICT;
+-- ADD CONSTRAINT FOREIGN KEY (wchnk_woot_id) REFERENCES woot_records (woot_id) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (wchnk_woot_id) REFERENCES woot_records (woot_id) ON DELETE RESTRICT,
+-- ADD CONSTRAINT FOREIGN KEY (wchnk_owner) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (wchnk_owner) REFERENCES sysUGrps (ugr_ID) ON DELETE RESTRICT,
+-- ADD CONSTRAINT FOREIGN KEY (wchnk_editor) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (wchnk_editor) REFERENCES sysUGrps (ugr_ID) ON DELETE RESTRICT;
 -- 
 -- ALTER TABLE woot_record_permissions
-  -- ADD CONSTRAINT FOREIGN KEY (wrprm_woot_id) REFERENCES woot_records (woot_id) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (wrprm_woot_id) REFERENCES woot_records (woot_id) ON DELETE RESTRICT,
-  -- ADD CONSTRAINT FOREIGN KEY (wrprm_UGrpID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (wrprm_UGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE RESTRICT,
-  -- ADD CONSTRAINT FOREIGN KEY (wrprm_group_id) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (wrprm_group_id) REFERENCES sysUGrps (ugr_ID) ON DELETE RESTRICT,
-  -- ADD CONSTRAINT FOREIGN KEY (wrprm_creator) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (wrprm_creator) REFERENCES sysUGrps (ugr_ID) ON DELETE RESTRICT;
+-- ADD CONSTRAINT FOREIGN KEY (wrprm_woot_id) REFERENCES woot_records (woot_id) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (wrprm_woot_id) REFERENCES woot_records (woot_id) ON DELETE RESTRICT,
+-- ADD CONSTRAINT FOREIGN KEY (wrprm_UGrpID) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (wrprm_UGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE RESTRICT,
+-- ADD CONSTRAINT FOREIGN KEY (wrprm_group_id) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (wrprm_group_id) REFERENCES sysUGrps (ugr_ID) ON DELETE RESTRICT,
+-- ADD CONSTRAINT FOREIGN KEY (wrprm_creator) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (wrprm_creator) REFERENCES sysUGrps (ugr_ID) ON DELETE RESTRICT;
 -- 
 -- ALTER TABLE woot_records
-  -- ADD CONSTRAINT FOREIGN KEY (woot_creator) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (woot_creator) REFERENCES sysUGrps (ugr_ID) ON DELETE RESTRICT;
+-- ADD CONSTRAINT FOREIGN KEY (woot_creator) REFERENCES sysUGrps (ugr_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (woot_creator) REFERENCES sysUGrps (ugr_ID) ON DELETE RESTRICT;
 -- 
 -- ALTER TABLE archive_rec_Details
-  -- ADD CONSTRAINT FOREIGN KEY (ard_record_id) REFERENCES Records (rec_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (ard_record_id) REFERENCES Records (rec_ID) ON DELETE RESTRICT,
+-- ADD CONSTRAINT FOREIGN KEY (ard_record_id) REFERENCES Records (rec_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (ard_record_id) REFERENCES Records (rec_ID) ON DELETE RESTRICT,
 -- -- This appears to be the actual primary key of the details table
 -- --  ADD CONSTRAINT FOREIGN KEY (ard_id) REFERENCES defRecTypes (rty_ID) ON UPDATE CASCADE,
 -- --  ADD CONSTRAINT FOREIGN KEY (ard_id) REFERENCES defRecTypes (rty_ID) ON DELETE RESTRICT,
-  -- ADD CONSTRAINT FOREIGN KEY (ard_DetailTypeID) REFERENCES defDetailTypes (dty_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (ard_DetailTypeID) REFERENCES defDetailTypes (dty_ID) ON DELETE RESTRICT,
-  -- ADD CONSTRAINT FOREIGN KEY (ard_file_id) REFERENCES recUploadedFiles (ulf_ID) ON UPDATE CASCADE,
-  -- ADD CONSTRAINT FOREIGN KEY (ard_file_id) REFERENCES recUploadedFiles (ulf_ID) ON DELETE RESTRICT;
+-- ADD CONSTRAINT FOREIGN KEY (ard_DetailTypeID) REFERENCES defDetailTypes (dty_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (ard_DetailTypeID) REFERENCES defDetailTypes (dty_ID) ON DELETE RESTRICT,
+-- ADD CONSTRAINT FOREIGN KEY (ard_file_id) REFERENCES recUploadedFiles (ulf_ID) ON UPDATE CASCADE,
+-- ADD CONSTRAINT FOREIGN KEY (ard_file_id) REFERENCES recUploadedFiles (ulf_ID) ON DELETE RESTRICT;
 -- 
 -- ------------------------------------------------------------------------------
 

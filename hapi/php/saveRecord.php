@@ -26,7 +26,7 @@ if (mysql_error()) { print "ERROR: " . mysql_error() . "\n"; }
 
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
-require_once(dirname(__FILE__)."/../../common/php/saveRecord.php.php");
+require_once(dirname(__FILE__)."/../../common/php/saveRecord.php");
 require_once(dirname(__FILE__)."/../../common/php/utilsTitleMask.php");
 
 
@@ -41,7 +41,7 @@ mysql_connection_db_overwrite(DATABASE);
 
 mysql_query("start transaction");
 
-$out = saveRecord(@$_REQUEST["id"], @$_REQUEST["type"], @$_REQUEST["url"], @$_REQUEST["notes"], @$_REQUEST["group"], @$_REQUEST["vis"], @$_REQUEST["bookmark"], @$_REQUEST["pnotes"], @$_REQUEST["rating"], null, null, @$_REQUEST["tags"], @$_REQUEST["wgTags"], @$_REQUEST["detail"], @$_REQUEST["-notify"], @$_REQUEST["+notify"], @$_REQUEST["-comment"], @$_REQUEST["comment"], @$_REQUEST["+comment"]);
+$out = saveRecord(@$_REQUEST["id"], @$_REQUEST["type"], @$_REQUEST["url"], @$_REQUEST["notes"], @$_REQUEST["group"], @$_REQUEST["vis"], @$_REQUEST["bookmark"], @$_REQUEST["pnotes"], @$_REQUEST["rating"], @$_REQUEST["tags"], @$_REQUEST["wgTags"], @$_REQUEST["detail"], @$_REQUEST["-notify"], @$_REQUEST["+notify"], @$_REQUEST["-comment"], @$_REQUEST["comment"], @$_REQUEST["+comment"]);
 
 mysql_query("commit");
 

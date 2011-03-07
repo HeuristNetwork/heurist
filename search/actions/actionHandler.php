@@ -72,9 +72,9 @@ if (@$script) {
 	print "<script>$script</script>\n";
 }
 
-if (@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['action-message']) {
-	$msg = $_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['action-message'];
-	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['action-message']);
+if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['action-message']) {
+	$msg = $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['action-message'];
+	unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['action-message']);
 	session_write_close();
 	print "<script>alert('" . $msg . "'); top.location.reload();</script>\n";
 } else {
@@ -97,12 +97,12 @@ function delete_bookmarks() {
 	} else if ($deleted_count == 0) {
 		$onload = 'location.replace(\'actionHandler.php\');';
 	} else if ($deleted_count == 1) {
-		$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['action-message'] = 'Deleted one bookmark';
+		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['action-message'] = 'Deleted one bookmark';
 		session_write_close();
 		header('Location: actionHandler.php');
 		exit();
 	} else {
-		$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['action-message'] = 'Deleted ' . $deleted_count . ' bookmarks';
+		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['action-message'] = 'Deleted ' . $deleted_count . ' bookmarks';
 		session_write_close();
 		header('Location: actionHandler.php');
 		exit();
@@ -132,7 +132,7 @@ function add_tags() {
 		$onload = 'top.HEURIST.search.popupNotice(\'No new tags needed to be added\'); location.replace(\'actionHandler.php\');';
 	} else if ($tag_count > 0) {
 		if ($_REQUEST['reload']) {
-			$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['action-message'] = 'Tags added';
+			$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['action-message'] = 'Tags added';
 			session_write_close();
 			header('Location: actionHandler.php'); //TODO: add instance code here
 			exit();
@@ -166,7 +166,7 @@ function add_wgTags_by_id() {
 		$onload = 'top.HEURIST.search.popupNotice(\'No new workgroup tags needed to be added\'); location.replace(\'actionHandler.php\');';
 	} else if ($wgTag_count > 0) {
 		if ($_REQUEST['reload']) {
-			$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['action-message'] = 'Workgroup tags added';
+			$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['action-message'] = 'Workgroup tags added';
 			session_write_close();
 			header('Location: actionHandler.php');
 			exit();
@@ -202,7 +202,7 @@ function remove_wgTags_by_id() {
 		$onload = 'top.HEURIST.search.popupNotice(\'No workgroup tags matched, none removed\'); location.replace(\'actionHandler.php\');';
 	} else if ($wgTag_count > 0) {
 		if ($_REQUEST['reload']) {
-			$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['action-message'] = $wgTag_count.' workgroup tags removed';
+			$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['action-message'] = $wgTag_count.' workgroup tags removed';
 			session_write_close();
 			header('Location: actionHandler.php');	// saw TODO: make instance aware
 			exit();
@@ -240,7 +240,7 @@ function remove_tags() {
 		$onload = 'top.HEURIST.search.popupNotice(\'No tags matched, none removed\'); location.replace(\'actionHandler.php\');';	// saw TODO: make instance aware
 	} else if ($tag_count > 0) {
 		if ($_REQUEST['reload']) {
-			$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['action-message'] = $tag_count.' tags removed';
+			$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['action-message'] = $tag_count.' tags removed';
 			session_write_close();
 			header('Location: actionHandler.php');	// saw TODO: make instance aware
 			exit();
@@ -468,7 +468,7 @@ function set_wg_and_vis() {
 			                set rec_OwnerUGrpID = ' . $wg . ', rec_NonOwnerVisibility = ' . $vis . '
 			              where rec_ID in (' . join(',', $bib_ids) . ')');
 
-			$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['action-message'] = mysql_affected_rows().' records updated';
+			$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['action-message'] = mysql_affected_rows().' records updated';
 			session_write_close();
 			header('Location: actionHandler.php');
 			exit();

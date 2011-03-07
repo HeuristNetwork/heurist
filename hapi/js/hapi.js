@@ -1,27 +1,27 @@
 /*
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- */
+* filename, brief description, date of creation, by whom
+* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+* @todo
+*/
 
 /* Heurist API  v0.3
- * Copyright (c) Archaeological Computing Laboratory, University of Sydney 2007
- * Author: Tom Murtagh <tfm@acl.arts.usyd.edu.au>
- *
- * 0.2 (2007/12/12) - JSON data transfer both upstream and downstream
- * 0.1 - initial release
- */
+* Copyright (c) Archaeological Computing Laboratory, University of Sydney 2007
+* Author: Tom Murtagh <tfm@acl.arts.usyd.edu.au>
+*
+* 0.2 (2007/12/12) - JSON data transfer both upstream and downstream
+* 0.1 - initial release
+*/
 
 if (! window.console) { console = { log: function() { } } }
 if (! window.firebug) { firebug = console; }
 if (! HAPI_userData) { HAPI_userData = {}; }
 
 /* Google API style, we have two naming systems available:
- * HFooBar is also available as HAPI.FooBar
- */
+* HFooBar is also available as HAPI.FooBar
+*/
 var HAPI = {
 	getVersion: function() { return "0.3"; },
 
@@ -752,8 +752,8 @@ var HRecord = function() {
 		else {
 			if (HDetailManager.getDetailRequiremence(_type, detailType) === 'required') { _hhash = null; }
 		}
-// FIXME
-// need to invalidate title as necessary
+		// FIXME
+		// need to invalidate title as necessary
 	}
 
 	this.getDetail = function(detailType) {
@@ -1461,7 +1461,7 @@ var HRecord = function() {
 		}
 		if ((! detailIDs  &&  tmpDetails.length > 0)  ||  (detailIDs  &&  tmpDetails.length !== detailIDs.length)) {
 			/* FIXME: an inconsistency from the server.  Should reload this record, huh. */
-console.log("saveChanges: " + this.toString() + ": detailIDs / _details mismatch");
+			console.log("saveChanges: " + this.toString() + ": detailIDs / _details mismatch");
 		}
 
 		var detailTypeID, value;
@@ -1659,7 +1659,7 @@ HAPI.Notes = HNotes;
 
 var HAnonymousAuthor = new function() {
 	this.prototype = new HRecord();
-// FIXME: need to handle this carefully.  What functions need to be overridden?  What values do they return?
+	// FIXME: need to handle this carefully.  What functions need to be overridden?  What values do they return?
 }();
 HAPI.AnonymousAuthor = HAnonymousAuthor;
 
@@ -2312,7 +2312,7 @@ var HDetailManager = new function(detailTypes, detailRequirements) {
     for (i=0; i < detailRequirements.length; ++i) {
         dr = detailRequirements[i];
         _recordPlusTypeDetails[dr[0]+"."+dr[1]] = dr.slice(2);
-
+		type = null;
         if (dr[2] !== 'forbidden') {    // non-excluded detail
             type = _typesById[dr[1]];
             if (_detailTypesByRecordType[dr[0]]) { _detailTypesByRecordType[dr[0]].push(type); }
@@ -2332,7 +2332,7 @@ var HDetailManager = new function(detailTypes, detailRequirements) {
             }
         }
 
-        if (dr[6]) {
+		if (dr[6] && type) {
             if (_matchingDetailTypesByRecordType[dr[0]]) { _matchingDetailTypesByRecordType[dr[0]].push(type); }
             else { _matchingDetailTypesByRecordType[dr[0]] = [type]; }
         }
@@ -2662,7 +2662,7 @@ HAPI.XHR = {
 
 		void( frames[fr.name].name );	// something about lazy evaluation perhaps -- this yanks the frame violently into existence.
 		fr.contentWindow.location.replace((xssWebPrefix || HAPI.XHR._xssWebPrefix) + "method=" + encodeURIComponent(method) +
-//				"&key=" + encodeURIComponent(HAPI.key || "") +
+		//				"&key=" + encodeURIComponent(HAPI.key || "") +
 				"&data=" + encodeURIComponent(HAPI.base64.encode(jsonData)) +
 				"&db=" + encodeURIComponent(HAPI.database || window.HeuristInstance) +
 				(HAPI.XHR.rxURLLen? ("&rxlen="+HAPI.XHR.rxURLLen) : ""));
@@ -2749,13 +2749,13 @@ HAPI.XHR = {
 			elt.value = HAPI.XHR.convertToJSON(data);
 		form.appendChild(elt);
 
-/*
+		/*
 		elt = document.createElement("input");
 			elt.type = "hidden";
 			elt.name = "key";
 			elt.value = ;
 		form.appendChild(elt);
-*/
+		*/
 		fr.onload = function() {
 			var data;
 			var hash, token;
@@ -3159,7 +3159,7 @@ var HeuristScholarDB = new HStorageManager();
 				results.push(record);
 			}
 			for (i=0; i < response.records.length; ++i) {
-// FIXME: doesn't work for private notes
+				// FIXME: doesn't work for private notes
 				recordDetails = response.records[i];
 				id = parseInt(recordDetails[0]);
 				record = that.getRecord(id);
@@ -3229,7 +3229,7 @@ var HeuristScholarDB = new HStorageManager();
 				}
 				comments = processedComments;
 
-// XXX: why do the comments and notifications have to be handled after the record's details have been set, and then we have to re-set the details?
+				// XXX: why do the comments and notifications have to be handled after the record's details have been set, and then we have to re-set the details?
 				if (notifications  ||  comments) {
 					record.setNotificationsAndComments(that, notifications, comments);
 				}
@@ -3473,7 +3473,7 @@ var HeuristScholarDB = new HStorageManager();
 			// obviously this won't work if hapi is being served from a numbered IP address
 		var baseURL = _dbWebPrefix;
 			if (! baseURL.match(/\d+\.\d+\.\d+\.\d+/)) {
-//				baseURL = baseURL.replace(/^http:\/\//, "http://" + Math.round(Math.random()*100) + ".");
+			//				baseURL = baseURL.replace(/^http:\/\//, "http://" + Math.round(Math.random()*100) + ".");
 			}
 			// Insert XSS incantations if HAPI.key is set.
 			newForm.action = baseURL + "hapi/php/dispatcher.php?method=saveFile"  //saw FIXME: add instance code.
@@ -3513,7 +3513,7 @@ var HeuristScholarDB = new HStorageManager();
 			try {
 				data = HAPI.XHR.evalJSON(HAPI.base64.decode(decodeURIComponent(newIframe.contentWindow.document.location.hash.substring(6))));	// #data=....
 			} catch (e) {
-//				 setTimeout(function() { that.onload();},100);
+				//				 setTimeout(function() { that.onload();},100);
 				 return; // return seems to try again
 			}
 
@@ -3601,7 +3601,7 @@ var HeuristScholarDB = new HStorageManager();
 		if (! infos) { return; }
 
 		for (var uploadID in infos) {
-//console.log(uploadID + " => " + infos[uploadID]);
+			//console.log(uploadID + " => " + infos[uploadID]);
 			progress = infos[uploadID];
 			fileInfo = that.uploadsInProgress.names["upload-" + uploadID];
 			callback = (fileInfo  &&  fileInfo.callback);
@@ -3699,7 +3699,7 @@ HAPI.importSymbols = function(from, to) {
 		"HUnsavedRecordException",
 		"HWorkgroupTag",
 		"HWorkgroup",
-//		"HColleagueGroup",
+	//		"HColleagueGroup",
 		"HRecordType",
 		"HRatings",
 		"HUser",
@@ -3726,7 +3726,7 @@ HAPI.importSymbols = function(from, to) {
 		"HTagManager",
 		"HWorkgroupManager",
 		"HWorkgroupTagManager",
-//		"HColleagueGroupManager",
+	//		"HColleagueGroupManager",
 		"HRecordTypeManager",
 		"HDetailManager",
 		"HCurrentUser",

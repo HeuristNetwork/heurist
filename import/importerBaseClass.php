@@ -1011,7 +1011,7 @@ function load_rectype_name_to_id() {
 }
 
 
-function load_rec_detail_lookups() {
+function load_rec_detail_lookups() {	//saw TODO enumTerms change
 	// $rec_detail_lookups is an array of arrays:
 	// the outer keys are the dty_ID, the inner arrays are mapping from the lookup value to the lookup ID
 
@@ -1020,8 +1020,8 @@ function load_rec_detail_lookups() {
 	$res = mysql_query('select * from defTerms');
 	$rec_detail_lookups = array();
 	while ($row = mysql_fetch_assoc($res)) {
-		if (! @$rec_detail_lookups[$row['trm_VocabID']])
-			$rec_detail_lookups[$row['trm_VocabID']] = array();
+		if (! @$rec_detail_lookups[$row['trm_Label']])
+			$rec_detail_lookups[$row['trm_Label']] = array();
 
 		$rec_detail_lookups[$row['trm_VocabID']][$row['trm_Label']] = $row['trm_ID'];
 		$rec_detail_lookups_lc[$row['trm_VocabID']][strtolower($row['trm_Label'])] = $row['trm_ID'];

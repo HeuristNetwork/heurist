@@ -67,7 +67,7 @@
 		</map:match>
 
 		<map:match pattern="xml2/*">
-			<map:generate src="http://{global:serverName}/{request-param:installDir}/export/xml/hml.php?db={request-param:instance}&amp;q=ids:{1}&amp;depth=2" label="hml"/>
+			<map:generate src="http://{global:serverName}/{request-param:installDir}/export/xml/hml.php?db={request-param:db}&amp;q=ids:{1}&amp;depth=2" label="hml"/>
 			<map:transform src="xsl/heurist_legacy_xml.xsl"/>
 			<map:serialize type="xml"/>
 		</map:match>
@@ -82,7 +82,7 @@
 				<map:parameter name="cocoonBase" value="/cocoon/{request-param:installDir}/relbrowser/{request-param:appDir}/"/>
 				<map:parameter name="serverBaseUrl" value="http://{global:serverName}"/>
 				<map:parameter name="related_rectype_filter" value="{2}"/>
-				<map:parameter name="dbName" value="{request-param:instance}"/>
+				<map:parameter name="dbName" value="{request-param:db}"/>
 			</map:transform>
 			<map:transform type="xinclude" label="xinclude"/>
 			<map:transform src="xsl/wordml2TEI.xsl" label="wordmltotei"/>

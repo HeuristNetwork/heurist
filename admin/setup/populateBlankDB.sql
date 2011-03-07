@@ -134,8 +134,8 @@ CREATE TABLE defDetailTypes (
   dty_IDInOriginatingDB smallint(5) unsigned default NULL COMMENT 'ID used in database where this detail type originated',
   dty_DetailTypeGroupID tinyint(3) unsigned NOT NULL default '1' COMMENT 'The section of the edit form in which this detail will be displayed by default',
   dty_PtrTargetRectypeIDs varchar(63) default NULL COMMENT 'CSVlist of target Rectype IDs, null = any',
-  dty_EnumVocabIDs varchar(255) default NULL COMMENT 'Vocabularies to use for an enum detail, may be constrained in defRecStructure',
-  dty_EnumTermIDs varchar(255) default NULL COMMENT 'Additional terms to use for an enum detail, may be constrained in defRecStructure',
+  dty_JsonTermIDTree varchar(500) default NULL COMMENT 'Tree of Term IDs that define the term heirarchy shown for this field (IDs in the Header list will be display only)',
+  dty_HeaderTermIDs varchar(255) default NULL COMMENT 'List of term ids that show as group headers and are not selectable as values for the field.',
   dty_FieldSetRectypeID smallint(5) default NULL COMMENT 'For a FieldSetMarker, the record type to be inserted as a fieldset',
   dty_ShowInLists tinyint(1) unsigned NOT NULL default '1' COMMENT 'Flags if detail type is to be shown in end-user interface, 1=yes',
   PRIMARY KEY  (dty_ID),
@@ -214,13 +214,13 @@ CREATE TABLE defRecStructure (
   rst_CalcFunctionID tinyint(3) unsigned default NULL COMMENT 'FK to table of function specifications for calculating string values',
   rst_RequirementType enum('required','recommended','optional','forbidden') NOT NULL default 'optional',
   rst_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
-  rst_MayModify enum('locked','discouraged','open') NOT NULL default 'open' COMMENT 'Extent to which detail may be modified within this record structure',
   rst_OriginatingDBID smallint(5) unsigned default NULL COMMENT 'Database where this record structure element originated, 0 = locally',
   rst_IDInOriginatingDB smallint(5) unsigned default NULL COMMENT 'ID used in database where this record structure element originated',
   rst_MaxValues tinyint(3) unsigned NOT NULL default '0' COMMENT 'Maximum number of values per record for this detail, 0 = unlimited',
   rst_MinValues tinyint(3) unsigned NOT NULL default '1' COMMENT 'If required, minimum number of values per record for this detail',
   rst_DisplayDetailTypeGroupID tinyint(3) unsigned default NULL COMMENT 'If set, places detail in specified group instead of according to dty_DetailTypeGroup',
-  rst_EnumFilteredIDs varchar(250) default NULL COMMENT 'Allowed term IDs (CSV) from within vocabs/terms defined in defDetailType (for enum details)',
+  rst_FilteredJsonTermIDTree varchar(500) default NULL COMMENT 'JSON encoded tree of allowed terms restrict to be a subset of those defined in defDetailType:relmarker and enum detail type only:',
+  rst_AdditionalHeaderTermIDs varchar(250) default NULL COMMENT 'Additional IDs that will be headers for this RecType. DetailType Headers will be unchanged.',
   rst_PtrFilteredIDs varchar(250) default NULL COMMENT 'Allowed Rectypes (CSV) within list defined by defDetailType (for pointer details)',
   rst_OrderForThumbnailGeneration tinyint(3) unsigned default NULL COMMENT 'Priority order of fields to use in generating thumbnail, null = do not use',
   PRIMARY KEY  (rst_ID),
@@ -280,23 +280,21 @@ CREATE TABLE defRecTypes (
 
 CREATE TABLE defRelationshipConstraints (
   rcs_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Record-detailtype constraint table primary key',
-  rcs_DetailtypeID smallint(5) unsigned NOT NULL default '200' COMMENT 'RelMarker detail type to be constrained, 200 = enum dtl for vanilla relationship',
-  rcs_SourceRectypeID smallint(5) unsigned default NULL COMMENT 'Source record type for this constraint, 0 = all types',
-  rcs_TargetRectypeID smallint(5) unsigned default NULL COMMENT 'Target record type pointed to by relationship record, 0 = all types',
-  rcs_ReltypeTermIDs varchar(2000) default NULL COMMENT 'CSV lsit of Term IDs to use, add to vocabs in rcs_ReltypeVocabIDs',
-  rcs_ReltypeVocabIDs varchar(63) default '200' COMMENT 'CSV lsit of vocab(s) to use, to which individual terms can be added in rcs_ReltypeTermIDs',
+  rcs_TermID mediumint(8) unsigned default NULL COMMENT 'RelMarker detail type to be constrained, 200 = enum for vanilla relationship',
+  rcs_SourceRectypeID smallint(5) unsigned default NULL COMMENT 'Source record type for this constraint, NULL = any type',
+  rcs_TargetRectypeID smallint(5) unsigned default NULL COMMENT 'Target record type pointed to by relationship record, NULL = any type',
   rcs_Description varchar(1000) default 'Please describe ...',
-  rcs_Order tinyint(3) unsigned zerofill default '255' COMMENT 'Ordering value to allow controlling the display order of the vocabularies',
-  rcs_RelationshipsLimit tinyint(3) unsigned NOT NULL default '0' COMMENT '0 = no limit; 1, 2 ... = maximum # of relationship records per record per detailtype/rectypes triplet',
   rcs_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
-  rcs_OriginatingDBID smallint(5) unsigned default NULL COMMENT 'Database where this constraint originated, 0 = locally',
-  rcs_IDInOriginatingDB smallint(5) unsigned default NULL COMMENT 'ID used in database where this constraint originated',
-  rcs_TermLimit tinyint(2) unsigned NOT NULL default '0' COMMENT '0 = no limit; 1, 2 ... = maximum # of relations which can use each term',
+  rcs_OriginatingDBID smallint(5) unsigned NOT NULL default '0' COMMENT 'Database where this constraint originated, 0 or local db code = locally',
+  rcs_IDInOriginatingDB smallint(5) unsigned NOT NULL default '0' COMMENT 'Code in database where this constraint originated',
+  rcs_TermLimit tinyint(3) unsigned default '0' COMMENT 'NULL = No Limit, 0 = Not Allowed  1, 2 = max # of times which field  can use a term from the termSet identified by TermID',
   PRIMARY KEY  (rcs_ID),
-  KEY rcs_CompositeKey (rcs_SourceRectypeID,rcs_TargetRectypeID,rcs_DetailtypeID),
-  KEY rcs_DetailtypeID_2 (rcs_DetailtypeID),
-  KEY rcs_SourceRectypeID (rcs_SourceRectypeID),
-  KEY rcs_TargetRectypeID (rcs_TargetRectypeID)
+  KEY rcs_CompositeKey (rcs_SourceRectypeID,rcs_TargetRectypeID,rcs_TermID),
+  KEY rcs_TermID (rcs_TermID),
+  KEY rcs_TargetRectypeID (rcs_TargetRectypeID),
+  CONSTRAINT defRelationshipConstraints_ibfk_11 FOREIGN KEY (rcs_SourceRectypeID) REFERENCES defRecTypes (rty_ID) ON DELETE CASCADE,
+  CONSTRAINT defRelationshipConstraints_ibfk_12 FOREIGN KEY (rcs_TargetRectypeID) REFERENCES defRecTypes (rty_ID) ON DELETE CASCADE,
+  CONSTRAINT defRelationshipConstraints_ibfk_13 FOREIGN KEY (rcs_TermID) REFERENCES defTerms (trm_ID) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Constrain target-rectype/vocabularies/values for a pointer d' AUTO_INCREMENT=2 ;
 
 -- --------------------------------------------------------
@@ -309,16 +307,23 @@ CREATE TABLE defTerms (
   trm_ID int(10) unsigned NOT NULL auto_increment COMMENT 'Primary key, the term code used in the detail record',
   trm_Label varchar(63) NOT NULL COMMENT 'Text label for the term, cannot be blank',
   trm_InverseTermId int(10) unsigned default NULL COMMENT 'ID for the inverse value (relationships), null if no inverse',
-  trm_VocabID smallint(5) unsigned NOT NULL COMMENT 'The vocabulary to which this term belongs',
   trm_Description varchar(1000) default NULL COMMENT 'A description/gloss on the meaning of the term',
   trm_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
-  trm_OriginatingDBID smallint(5) unsigned default NULL COMMENT 'Database where this detail type originated, 0 = locally',
-  trm_NameInOriginatingDB varchar(63) default NULL COMMENT 'Name (label) for this term in originating database',
-  trm_IDInOriginatingDB smallint(5) unsigned default NULL COMMENT 'ID used in database where this  term originated',
-  trm_AddedByImport tinyint(1) unsigned NOT NULL default '0' COMMENT 'Set to 1 if term added by an import, otherwise 0',
+  trm_OriginatingDBID smallint(5) unsigned NOT NULL default '0' COMMENT 'Database where this detail type originated, 0 = local db code = locally',
+  trm_AddedByImport tinyint(1) unsigned default '0' COMMENT 'Set to 1 if term added by an import, otherwise 0',
   trm_IsLocalExtension tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flag that this value not in the externally referenced vocabulary',
+  trm_NameInOriginatingDB varchar(63) NOT NULL default '' COMMENT 'Name in database where this record type originated',
+  trm_IDInOriginatingDB smallint(5) unsigned NOT NULL default '0' COMMENT 'Code in database where this  term originated',
+  trm_ParentTermID int(10) unsigned default NULL,
+  trm_Domain enum('enum','reltype','reltypevocab','enumvocab') NOT NULL default 'enum',
+  trm_ChildCount tinyint(3) NOT NULL default '0',
+  trm_ParentTermVocabID int(10) unsigned default NULL,
+  trm_Depth tinyint(1) unsigned NOT NULL default '1' COMMENT 'depth of term in the term tree, should always be 1+parent depth',
+  trm_OntID smallint(5) unsigned NOT NULL default '0' COMMENT 'Ontology from which this vocabulary originated, 0 = locally defined ontology ',
   PRIMARY KEY  (trm_ID),
-  UNIQUE KEY trm_composite (trm_VocabID,trm_Label)
+  UNIQUE KEY trm_InverseTermIDKey (trm_InverseTermId),
+  KEY trm_ParentTermID (trm_ParentTermID),
+  CONSTRAINT defTerms_ibfk_3 FOREIGN KEY (trm_ParentTermID) REFERENCES defTerms (trm_ID),
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Terms by detail type and the vocabulary they belong to' AUTO_INCREMENT=2537 ;
 
 -- --------------------------------------------------------
@@ -350,27 +355,6 @@ CREATE TABLE defURLPrefixes (
   PRIMARY KEY  (urp_ID),
   UNIQUE KEY urp_Prefix (urp_Prefix)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Common URL prefixes allowing single-point change of URL for ' AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table 'defVocabularies'
---
-
-CREATE TABLE defVocabularies (
-  vcb_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Vocabulary primary ID, referenced in terms and constraints',
-  vcb_Name varchar(63) NOT NULL COMMENT 'Name of the vocabulary',
-  vcb_Description varchar(1000) NOT NULL default 'Please insert a description of this vocabulary' COMMENT 'A description of the purpose and nature of the vocabulary',
-  vcb_RefURL varchar(250) default NULL COMMENT 'reference URL for the vocabulary definition',
-  vcb_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
-  vcb_OriginatingDBID smallint(5) unsigned default NULL COMMENT 'Database where this record vocabulary originated, 0 = locally',
-  vcb_NameInOriginatingDB varchar(63) default NULL COMMENT 'Name used in database where this vocabulary originated',
-  vcb_IDInOriginatingDB smallint(5) unsigned default NULL COMMENT 'ID used in database where this vocabulary originated',
-  vcb_OntID smallint(5) unsigned NOT NULL default '0' COMMENT 'Ontology from which this vocabulary originated, 0 = locally defined ontology ',
-  vcb_Domain enum('relationshiptypes','enumvalues') NOT NULL default 'enumvalues' COMMENT 'Indicates whether vocab is used for relationship types or ordinary enum fields',
-  PRIMARY KEY  (vcb_ID),
-  UNIQUE KEY vcb_Name (vcb_Name)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Controlled vocabularies to which terms belong' AUTO_INCREMENT=1000 ;
 
 -- --------------------------------------------------------
 

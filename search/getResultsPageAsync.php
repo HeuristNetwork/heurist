@@ -52,7 +52,7 @@ $query = 'select SQL_CALC_FOUND_ROWS
           rec_RecTypeID,
           rec_Title,
           rec_OwnerUGrpID,
-          if(rec_NonOwnerVisibility="Hidden",1,0),
+          if(rec_NonOwnerVisibility="hidden",1,0),
           rec_URLLastVerified,
           rec_URLErrorMessage,
           bkm_PwdReminder ';
@@ -79,7 +79,7 @@ if (@$broken) {
 
 if (@$collected) {
 	session_start();
-	$collection = &$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['record-collection'];
+	$collection = &$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['record-collection'];
 	if (count($collection) > 0) {
 		$query = str_replace(' where ', ' where rec_ID in (' . join(',', array_keys($collection)) . ') and ', $query);
 	} else {
@@ -108,16 +108,16 @@ session_start();
 if ($num_rows <= SEARCH_SET_SAVE_LIMIT) {
 	$sid = dechex(rand());
 
-	if (! @$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['search-results'])
-		$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['search-results'] = array();
+	if (! @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'])
+		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'] = array();
 
 	// limit to 5 sets of results
-	while (count($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['search-results']) > 4) {
+	while (count($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results']) > 4) {
 		// remove older result sets
-		array_shift($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['search-results']);
+		array_shift($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results']);
 	}
 
-	$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['search-results'][$sid] = array();
+	$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$sid] = array();
 }
 
 ?>
@@ -176,7 +176,7 @@ if (top.HEURIST && top.HEURIST.firedEvents["heurist-search-html-loaded"] && top.
 
 		array_push($results, $row);
 		if ($num_rows <= SEARCH_SET_SAVE_LIMIT) {
-			array_push($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['search-results'][$sid], $row[2]);
+			array_push($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$sid], $row[2]);
 		}
 	}
 	print ");\n";
@@ -202,7 +202,7 @@ if (top.HEURIST && top.HEURIST.firedEvents["heurist-search-html-loaded"] && top.
 </html>
 <?php
 
-$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['last-search-url'] = @$_SERVER['HTTP_REFERER'];
+$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['last-search-url'] = @$_SERVER['HTTP_REFERER'];
 
 
 function print_result($row) {
@@ -213,7 +213,7 @@ function print_result($row) {
 		if ($i > 0) print ',';
 		print "'".str_replace("\n", '\\n', str_replace("\r", '', addslashes($val)))."'";
 	}
-	if (@$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['display-preferences']['search-result-style'] == "thumbs") {
+	if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['display-preferences']['search-result-style'] == "thumbs") {
 		$thumb_url = "";
 		// 223  Thumbnail
 		// 222  Logo image

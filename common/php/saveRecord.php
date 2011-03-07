@@ -1,17 +1,14 @@
 <?php
 
-/**
+/*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- **/
+ -->*/
 
-?>
-
-<?php
 	/*<!-- saving.php
 
 	Copyright 2005 - 2010 University of Sydney Digital Innovation Unit
@@ -38,7 +35,7 @@
 	-->*/
 require_once(dirname(__FILE__)."/../../search/getSearchResults.php");
 // NOTE  tags are a complete replacement list of personal tags for this record and are only used if personalised is true
-function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $pnotes, $rating, $irate, $qrate, $tags, $wgTags, $details, $notifyREMOVE, $notifyADD, $commentREMOVE, $commentMOD, $commentADD, &$nonces=null, &$retitleRecs=null) {
+function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $pnotes, $rating, $tags, $wgTags, $details, $notifyREMOVE, $notifyADD, $commentREMOVE, $commentMOD, $commentADD, &$nonces=null, &$retitleRecs=null) {
 	$recordID = intval($recordID);
 	$wg = intval($wg);
 	if ($wg) {
@@ -60,7 +57,7 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 		"rec_URL" => $url,
 		"rec_ScratchPad" => $notes,
 		"rec_OwnerUGrpID" => $wg,
-		"rec_NonOwnerVisibility" => $wg? ($vis? "Viewable" : "Hidden") : NULL,
+		"rec_NonOwnerVisibility" => $wg? ($vis? "viewable" : "hidden") : NULL,
 		"rec_AddedByUGrpID" => get_user_id(),
 		"rec_Added" => $now,
 		"rec_Modified" => $now
@@ -88,7 +85,7 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 		"rec_URL" => $url,
 		"rec_ScratchPad" => $notes,
 		"rec_OwnerUGrpID" => $wg,
-		"rec_NonOwnerVisibility" => $wg? ($vis? "Viewable" : "Hidden") : NULL,
+		"rec_NonOwnerVisibility" => $wg? ($vis? "viewable" : "hidden") : NULL,
 		"rec_Modified" => $now
 		));
 		if (mysql_error()) jsonError("database write error" . mysql_error());
@@ -254,13 +251,14 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 					$bdVal = ($val && $val != "0")? "'true'" : "'false'";
 					break;
 
-				case "enum":
+				case "enum":	//saw TODO: change this to call validateEnumTerm(RectypeID, DetailTypeID) also Term limits
 					// validate that the id is for the given detail type.
-					if (mysql_num_rows(mysql_query("select trm_ID from defTerms
+					/*if (mysql_num_rows(mysql_query("select trm_ID from defTerms
 														left join defDetailTypes on dty_NativeVocabID = trm_VocabID
 														where dty_ID=$bdtID and trm_ID='".$val."'")) <= 0) {
 					jsonError("invalid enumeration value \"$val\"");
 					}
+					*/
 					$bdVal = "'" . $val . "'";
 					break;
 
@@ -305,6 +303,7 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 				case "separator":
 				case "relmarker":
 					continue;	//noop since separators and relmarker have no detail values
+								// saw Decide - should we do a relationConstraints check here
 
 				default:
 					// ???

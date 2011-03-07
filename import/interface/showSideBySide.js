@@ -16,12 +16,14 @@ function formatDetails(bib, prefix, indent) {
 	if (! indent) indent = 0;
 
 	var html = "";
-	var bdr = top.HEURIST.recDetailRequirements.valuesByRectypeID[bib.rectype];
+	var bdr = top.HEURIST.rectypes.typedefs[bib.rectype];
 
 	for (var bdt_id in bib.values) {
-		var name = /* prefix + " " + */ bdr[bdt_id]? bdr[bdt_id][0]  :  top.HEURIST.detailTypes.valuesByDetailTypeID[bdt_id][1];
+// saw changed since new common data does override code in the query no need to do it here.
+//		var name = /* prefix + " " + */ bdr[bdt_id]? bdr[bdt_id][0]  :  top.HEURIST.detailTypes.typedefs[bdt_id][1];
+		var name = bdr['dtFields'][bdt_id][0];	//saw TODO: test this for changed record type where dt not in struct
 
-		if (top.HEURIST.detailTypes.valuesByDetailTypeID[bdt_id][2] != "resource") {
+		if (top.HEURIST.detailTypes.typedefs[bdt_id]['commonFields'][2] != "resource") {
 			html += "<tr><td style='padding-left: " + indent + "em;'><i>" + htmlEscape(name) + "</i></td><td>";
  			for (var i=0; i < bib.values[bdt_id].length; ++i)
 				html += htmlEscape(bib.values[bdt_id][i]) + "<br>";

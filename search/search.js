@@ -1632,7 +1632,7 @@ top.HEURIST.search = {
 				action_elt.value = "set_wg_and_vis";
 				bib_ids_elt.value = bib_ids_list.join(',');
 				wg_elt.value = wg;
-				vis_elt.value = hidden ? "Hidden" : "Viewable";
+				vis_elt.value = hidden ? "hidden" : "viewable";
 
 				action_elt.form.submit();
 			}

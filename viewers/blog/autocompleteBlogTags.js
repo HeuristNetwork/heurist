@@ -66,7 +66,7 @@ var sE = top.HEURIST.autocomplete.soundEmbed = document.createElement("embed");
 	sE.style.height = "1px";
 	sE.style.left = "-1000px";
 	sE.style.top = "-1000px";
-	sE.src = "../../common/other_media/sounds/beep.swf";
+	sE.src = "../../common/media/beep.swf";
 	document.body.appendChild(sE);
 top.HEURIST.autocomplete.beep = function() {
 	try {

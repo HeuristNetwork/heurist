@@ -1,17 +1,14 @@
 <?php
 
-	/**
+/*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- **/
+ -->*/
 
-?>
-
-<?php
 	define ('SAVE_URI', 'DISABLED');
 	require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../common/php/dbMySqlWrappers.php');
@@ -80,15 +77,15 @@
 				break;
 			}
 		}
-					var bdr = top.HEURIST.recDetailRequirements.valuesByRectypeID[rt];
+		var bdr = top.HEURIST.rectypes.typedefs[rt];
 		if (! bdr) {
 			// no type specified; hide type-specific options
 			typeOptgroup.style.display = "none";
 		}
 		else {
-						var bdts = top.HEURIST.detailTypes.valuesByDetailTypeID;
-			for (var bdtID in bdr) {
-				typeOptgroup.appendChild(new Option(bdr[bdtID][0], '"' + bdts[bdtID][1] + '"'));
+			var bdts = top.HEURIST.detailTypes.typedefs;
+			for (var bdtID in bdr['dtFields']) {
+				typeOptgroup.appendChild(new Option(bdr['dtFields'][bdtID][0], '"' + bdts[bdtID]['commonFields'][0] + '"'));
 			}
 			typeOptgroup.label = top.HEURIST.rectypes.names[rt] + " fields";
 			typeOptgroup.style.display = "";

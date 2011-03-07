@@ -9,9 +9,6 @@
  * @todo
  -->*/
 
-?>
-
-<?php
 
 	define('SAVE_URI', 'disabled');
 
@@ -68,7 +65,7 @@
 	var tags = $("#add-link-tags").val();
 	var title = $("#add-link-title").val();
 
-	if (tags) {
+				if (tags) {	// saw BUGGY but works, assumes that tag= is on eol if it exist appends new tags top the end
 		link += (link.match(/&tag=/))  ?  "," + tags  :  "&tag=" + tags;
 	}
 
@@ -102,10 +99,11 @@
 			extra_parms += '&bib_visibility=' + document.getElementById('rec_NonOwnerVisibility').value;
 
 			var kwdList = document.getElementById('tag');
-			if (kwdList.selectedIndex > 0) extra_parms += "&tag=" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value);
+						if (kwdList.selectedIndex > 0) {
+							extra_parms += "&tag=" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value);
+						}
 		}
 	}
-
 
 	rt = parseInt(document.getElementById('rectype_elt').value);
 
@@ -265,7 +263,7 @@
     <td>
      <select name="rec_NonOwnerVisibility" id="rec_NonOwnerVisibility" style="width: 200px;">
       <option value="Visible">record is read-only</option>
-      <option value="Hidden">record is hidden</option>
+						<option value="hidden">record is hidden</option>
      </select>
     </td>
    </tr>

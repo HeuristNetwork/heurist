@@ -112,12 +112,12 @@
 				rectypeEdit.appendChild(rectypeValSelect);
 
 				// rectypes displayed in Groups by group display order then by display order within group
-				for (var grpID in top.HEURIST.rectypes.typesByGroup){
+				for (var grpID in top.HEURIST.rectypes.groups){
 					var grp = document.createElement("optgroup");
-					grp.label = top.HEURIST.rectypes.groupNamesInDisplayOrder[grpID];
+					grp.label = top.HEURIST.rectypes.groups[grpID].name;
 					rectypeValSelect.appendChild(grp);
-					for (var recTypeID in top.HEURIST.rectypes.typesByGroup[grpID]) {
-						if (top.HEURIST.rectypes.typesByGroup[grpID][recTypeID]) {
+					for (var recTypeID in top.HEURIST.rectypes.groups[grpID].types) {
+						if (top.HEURIST.rectypes.groups[grpID].types[recTypeID]) {
 							var name = top.HEURIST.rectypes.names[recTypeID];
 							rectypeValSelect.appendChild(new Option(name, recTypeID));
 						if (name == top.HEURIST.edit.record.rectype) {
@@ -143,7 +143,7 @@
 
 
 			function openWorkgroupChanger() {
-				if (top.HEURIST.edit.record.workgroupVisibility == "Hidden") {
+				if (top.HEURIST.edit.record.workgroupVisibility == "hidden") {
 					document.getElementById("non-wg-hide").checked = true;
 				} else {
 					document.getElementById("non-wg-view").checked = true;
@@ -177,7 +177,7 @@
 			function closeWorkgroupChanger(cancel) {
 				if (! cancel) {
 					var wgValue = document.getElementById("new-workgroup-value").value;
-					var wgVisValue = document.getElementById("non-wg-hide").checked? "Hidden" : "Viewable";
+					var wgVisValue = document.getElementById("non-wg-hide").checked? "hidden" : "viewable";
 					if (top.HEURIST.edit.record.workgroup != wgValue  ||  top.HEURIST.edit.record.workgroupVisibility != wgVisValue) {
 						top.HEURIST.edit.record.workgroup = wgValue? top.HEURIST.workgroups[wgValue].name : null;
 						top.HEURIST.edit.record.workgroupVisibility = wgVisValue;
@@ -392,11 +392,11 @@
 				</tr>
 				<tr>
 					<td><span style="position: relative; top: 1.2ex;">Other Heurist users</span></td>
-					<td><label for=non-wg-view><input type=radio name=new-non-workgroup value=Viewable id=non-wg-view> cannot edit the record</label></td>
+					<td><label for=non-wg-view><input type=radio name=new-non-workgroup value=viewable id=non-wg-view> cannot edit the record</label></td>
 				</tr>
 				<tr>
 					<td>&nbsp;</td>
-					<td><label for=non-wg-hide><input type=radio name=new-non-workgroup value=Hidden id=non-wg-hide> cannot view or edit the record</label></td>
+					<td><label for=non-wg-hide><input type=radio name=new-non-workgroup value=hidden id=non-wg-hide> cannot view or edit the record</label></td>
 				</tr>
 				<tr><td style="text-align: right; padding: 2px;" colspan=2>
 						<input type=button value="Change" style="font-weight: bold;" onClick="closeWorkgroupChanger();">

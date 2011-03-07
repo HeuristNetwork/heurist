@@ -24,7 +24,7 @@ session_start();
 $last_uri = urldecode(@$_REQUEST['last_uri']);
 
 //if (! $last_uri)
-//	$last_uri = @$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['last_uri'];
+//	$last_uri = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['last_uri'];
 if (! $last_uri) {
 	if (@$_SERVER['HTTP_REFERER']  &&  strpos($_SERVER['HTTP_REFERER'], $_SERVER['SERVER_NAME'] . $_SERVER['SCRIPT_NAME']) === false) {
 		$last_uri = $_SERVER['HTTP_REFERER'];
@@ -64,11 +64,11 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 				$groups[$row[GROUPS_ID_FIELD]] = 'member';
 		}
 
-		$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['cookie_version'] = COOKIE_VERSION;
-		$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_name'] = $user[USERS_USERNAME_FIELD];
-		$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_realname'] = $user[USERS_FIRSTNAME_FIELD] . ' ' . $user[USERS_LASTNAME_FIELD];
-		$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_id'] = $user[USERS_ID_FIELD];
-		$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access'] = $groups;
+		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['cookie_version'] = COOKIE_VERSION;
+		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_name'] = $user[USERS_USERNAME_FIELD];
+		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_realname'] = $user[USERS_FIRSTNAME_FIELD] . ' ' . $user[USERS_LASTNAME_FIELD];
+		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_id'] = $user[USERS_ID_FIELD];
+		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'] = $groups;
 
 
 		$time = 0;
@@ -78,7 +78,7 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 			$time = time() + 24*60*60;
 		} else if ($_REQUEST['session_type'] == 'remember') {
 			$time = time() + 7*24*60*60;
-			$_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['keepalive'] = true;
+			$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['keepalive'] = true;
 		}
 		setcookie('heurist-sessionid', session_id(), $time, '/', HOST_BASE);
 
@@ -101,12 +101,12 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 
 
 if (@$_REQUEST['logout']) {
-	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_name']);
-	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_realname']);
-	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_id']);
-	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['user_access']);
-	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['search-results']);
-	unset($_SESSION[HEURIST_INSTANCE_PREFIX.'heurist']['sessionid']);
+	unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_name']);
+	unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_realname']);
+	unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_id']);
+	unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access']);
+	unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results']);
+	unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['sessionid']);
 	setcookie('favourites', '', time() - 3600);
 
 	header('Location: login.php?db='.HEURIST_DBNAME . ($last_uri ? '&last_uri=' . urlencode($last_uri) : ''));

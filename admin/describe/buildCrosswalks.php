@@ -180,17 +180,17 @@
 	CREATE TABLE IF NOT EXISTS `temp_rec_detail_types` (
 	`dty_ID` smallint(6) NOT NULL,
 	`dty_Name` varchar(255) default NULL,
-	`dty_Description` text,
+	`dty_Documentation` text,
 	`dty_Type` enum('freetext','blocktext','integer','date','year','person lookup','boolean','enum','resource','float','file','geo','separator') default NULL,
-	`dty_Prompt` varchar(255) default NULL,
-	`dty_Help` text,
+	`dty_HelpText` varchar(255) default NULL,
+	`dty_ExtendedDescription` text,
 	`dty_PtrTargetRectypeIDs` smallint(6) default NULL,
 	PRIMARY KEY  (`dty_ID`),
 	UNIQUE KEY `bdt_name` (`dty_Name`),
 	KEY `bdt_type` (`dty_Type`)
 	) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
 
-	INSERT INTO `temp_rec_detail_types` (`dty_ID`, `dty_Name`, `dty_Description`, `dty_Type`,`dty_Prompt`, `dty_Help`, `dty_PtrTargetRectypeIDs`) VALUES
+	INSERT INTO `temp_rec_detail_types` (`dty_ID`, `dty_Name`, `dty_Documentation`, `dty_Type`,`dty_HelpText`, `dty_ExtendedDescription`, `dty_PtrTargetRectypeIDs`) VALUES
 
 	// ????: Parse the stream from get_definitions until you get to a line with    > Start
 	// then send the stream to MySQL until you get to a line with   > End
@@ -238,10 +238,10 @@
 	`dty_id` smallint(6) NOT NULL,
 	`dty_is_reserved` Boolean Not Null default False,
 	`dty_name` varchar(255) default NULL,
-	`dty_description` text,
+	`dty_Documentation` text,
 	`dty_type` enum('freetext','blocktext','integer','date','year','person lookup','boolean','enum','resource','float','file','geo','separator') default NULL,
-	`dty_prompt` varchar(255) default NULL,
-	`dty_help` text,
+	`dty_HelpText` varchar(255) default NULL,
+	`dty_ExtendedDescription` text,
 	`dty_constrain_rec_type` smallint(6) default NULL,
 	PRIMARY KEY  (`dty_id`),
 	UNIQUE KEY `dty_name` (`dty_name`),
@@ -424,7 +424,7 @@
 		// ???? HERE WE NEED A CHECKBOX TO ALLOW USER TO SELECT THE DETAIL TYPE
 		// ???? ANY DETAILTYPE IN $detailtypeset (ie MENTIONED IN A SELECTED RECORDTYPE OR CONSTRAINT)
 		// SHOULD BE CHECKED AND DISABLED
-		print "$row[dty_id],$row[dty_name],$row[dty_type],$row[dty_prompt]\n";
+		print "$row[dty_id],$row[dty_name],$row[dty_type],$row[dty_HelpText]\n";
 	};
 
 	// ???? PROCESS THE FORM SUBMISSION, ADD ANY ADDITIONAL DETAIL TYPES CHECKED ON THE FORM TO $detailtypeset

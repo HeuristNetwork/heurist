@@ -37,7 +37,7 @@
 define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../search/getSearchResults.php");
-require_once(dirname(__FILE__)."/../../common/php/getRecordStructure.php");
+require_once(dirname(__FILE__)."/../../common/php/getRecordInfoLibrary.php");
 require_once("rollbackRecordsFuncs.php");
 
 if (! is_admin()) {
@@ -124,7 +124,7 @@ function showRecordRollback ($record, $changes) {
 	print '<div class="clearall"></div>';
 	print '</div>';
 
-	$reqs = getRecordRequirements($record["rec_RecTypeID"]);
+	$reqs = getRectypeStructureFields($record["rec_RecTypeID"]);
 	$detail_names = mysql__select_assoc("defDetailTypes", "dty_ID", "dty_Name", 1);
 
 

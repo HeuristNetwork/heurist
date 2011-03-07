@@ -73,12 +73,12 @@ top.HEURIST.workgroup = {
 	renderFilterOptions: function() {
 		var rectype_select = document.getElementById("rectype-select");
 		// rectypes displayed in Groups by group display order then by display order within group
-		for (var grpID in top.HEURIST.rectypes.typesByGroup){
+		for (var grpID in top.HEURIST.rectypes.groups){
 			var grp = document.createElement("optgroup");
-			grp.label = top.HEURIST.rectypes.groupNamesInDisplayOrder[grpID];
+			grp.label = top.HEURIST.rectypes.groups[grpID].name;
 			rectype_select.appendChild(grp);
-			for (var i=0; i < top.HEURIST.rectypes.typesByGroup[grpID].length; ++i) {
-				var value = top.HEURIST.rectypes.typesByGroup[grpID][i];
+			for (var i=0; i < top.HEURIST.rectypes.groups[grpID].types.length; ++i) {
+				var value = top.HEURIST.rectypes.groups[grpID].types[i];
 				var name = top.HEURIST.rectypes.names[value];
 				rectype_select.options[j++] = new Option(name, value);
 			}
