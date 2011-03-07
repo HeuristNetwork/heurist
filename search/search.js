@@ -1374,38 +1374,40 @@ top.HEURIST.search = {
 
 	mapSelected: function() {
 		if (top.HEURIST.search.selectedRecordIds.length == 0) {
-			alert("Selected a record first");
+			alert("Selected a record first","map");
+			_tabView.set('activeIndex', 0);
 			return;
-		};
-		var p = top.HEURIST.parameters;
-		var recIds = top.HEURIST.search.selectedRecordIds.slice(0,500); // maximum number of records ids 500
-		if (top.HEURIST.search.selectedRecordIds.length >= 500) {
-			alert("Selected record count is great than 500, mapping the first 500 records!");
-		}
-		var query_string = '?ver='+(p['ver'] || "") + '&w=all&q=ids:' +
-			recIds.join(",") +
-			'&stype='+(p['stype'] || "") +
-			'&db='+(p["db"] || "");
-		query_string = encodeURI(query_string);
-		url = top.HEURIST.basePath+ "viewers/map/showGMapWithTimeline.html" + query_string;
-		// set frame source to url
-		// make frame visible
-		var mapDiv = document.createElement("div");
-		mapDiv.id = "mapDiv";
-		mapDiv.style.display = "block";
-		var closeMapButton = document.createElement("div");
-		closeMapButton.className = "close-button";
-		closeMapButton.onclick = top.HEURIST.search.closeMap;
-		closeMapButton.title = "Close Map";
-		mapDiv.appendChild(closeMapButton);
-		var mapiFrame = document.createElement("iFrame");
-		mapiFrame.style.border = "0";
-		mapiFrame.style.width = "100%";
-		mapiFrame.style.height = "100%";
-		mapiFrame.src = url
-		mapDiv.appendChild(mapiFrame);
-		//document.getElementById("page").appendChild(mapDiv);
-		document.getElementById("map-frame").src = url;
+		} else {
+			var p = top.HEURIST.parameters;
+			var recIds = top.HEURIST.search.selectedRecordIds.slice(0,500); // maximum number of records ids 500
+			if (top.HEURIST.search.selectedRecordIds.length >= 500) {
+				alert("Selected record count is great than 500, mapping the first 500 records!");
+			}
+			var query_string = '?ver='+(p['ver'] || "") + '&w=all&q=ids:' +
+				recIds.join(",") +
+				'&stype='+(p['stype'] || "") +
+				'&instance='+(p['instance'] || "");
+			query_string = encodeURI(query_string);
+			url = top.HEURIST.basePath+ "viewers/map/showGMapWithTimeline.html" + query_string;
+			// set frame source to url
+			// make frame visible
+			var mapDiv = document.createElement("div");
+			mapDiv.id = "mapDiv";
+			mapDiv.style.display = "block";
+			var closeMapButton = document.createElement("div");
+			closeMapButton.className = "close-button";
+			closeMapButton.onclick = top.HEURIST.search.closeMap;
+			closeMapButton.title = "Close Map";
+			mapDiv.appendChild(closeMapButton);
+			var mapiFrame = document.createElement("iFrame");
+			mapiFrame.style.border = "0";
+			mapiFrame.style.width = "100%";
+			mapiFrame.style.height = "100%";
+			mapiFrame.src = url
+			mapDiv.appendChild(mapiFrame);
+			//document.getElementById("page").appendChild(mapDiv);
+			document.getElementById("map-frame").src = url;
+			}
 	},
 	closeMap: function() {
 		var mapDiv = document.getElementById("mapDiv");
@@ -1426,10 +1428,34 @@ top.HEURIST.search = {
 			bibs[i].checked = true;
 			var bib_id = bibs[i].parentNode.getAttribute("bib_id");
 			top.HEURIST.search.bib_ids[bib_id] = true;
+			top.HEURIST.search.selectItem(bib_id);
 			var bkmk_id = bibs[i].parentNode.getAttribute("bkmk_id");
 			if (bkmk_id)
 				top.HEURIST.search.bkmk_ids[bkmk_id] = true;
 		}
+		var viewerFrame = document.getElementById("viewer-frame");
+		var mapFrame = document.getElementById("map-frame");
+		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", "selectedIds=" + top.HEURIST.search.selectedRecordIds.join(","));
+		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange", "selectedIds=" + top.HEURIST.search.selectedRecordIds.join(","));
+		return false;
+	},
+
+	selectItem: function(bib_id) {
+		resultDiv = $('div[class~=result_thumb] , div[class~=result_row]').filter('div[bib_id='+ bib_id +']').get(0);
+		var cb = resultDiv.getElementsByTagName("INPUT");
+		if (cb[0] && cb[0].name == "bib[]") {
+			cb = cb[0];
+		}else{
+			cb = null;
+		}
+		top.HEURIST.search.bib_ids[bib_id] = true;	//deprecated
+		if (cb) cb.checked = true;					//deprecated
+		var bkmk_id = cb.parentNode.getAttribute("bkmk_id");
+		if (bkmk_id)
+				top.HEURIST.search.bkmk_ids[bkmk_id] =  true;
+		resultDiv.className += " selected";
+		top.HEURIST.search.selectedRecordDivs[bib_id] = resultDiv;
+		top.HEURIST.search.selectedRecordIds.push(bib_id);
 	},
 
 	selectAllPages: function() {
@@ -1485,15 +1511,26 @@ top.HEURIST.search = {
 	},
 
 	deselectAll: function() {
-		var bibs = document.getElementsByName("bib[]");
-		for (var i=0; i < bibs.length; ++i) {
-			bibs[i].checked = false;
-		}
-		top.HEURIST.search.bib_ids = {};
-		top.HEURIST.search.bkmk_ids = {};
-		top.HEURIST.selectedRecordIds = [];
-
-		top.HEURIST.selectedRecordDivs = {};
+//		var bibs = document.getElementsByName("bib[]");
+//		for (var i=0; i < bibs.length; ++i) {
+//			bibs[i].checked = false;
+//		}
+//		top.HEURIST.search.bib_ids = {};
+//		top.HEURIST.search.bkmk_ids = {};
+//		top.HEURIST.selectedRecordIds = [];
+//		top.HEURIST.selectedRecordDivs = {};
+		_tabView.set('activeIndex', 0); //set printView tab before deselecting to avoid mapping error
+		if (top.HEURIST.search.selectedRecordIds.length == 0) return false;
+		while (top.HEURIST.search.selectedRecordIds.length != 0 ) {
+			bib_id = top.HEURIST.search.selectedRecordIds[0];
+			top.HEURIST.search.deselectResultItem(bib_id);
+			}
+		var viewerFrame = document.getElementById("viewer-frame");
+		var mapFrame = document.getElementById("map-frame");
+		mapFrame.src = "";
+		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", "selectedIds=" + top.HEURIST.search.selectedRecordIds.join(","));
+		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange", "selectedIds=" + top.HEURIST.search.selectedRecordIds.join(","));
+		return;
 	},
 
 	get_bib_ids: function() {
@@ -2091,4 +2128,61 @@ top.HEURIST.search = {
 
 top.HEURIST.fireEvent(window, "heurist-search-js-loaded");
 
+
+//fancy dialog boxes
+// constants to define the title of the alert and button text.
+var ALERT_BUTTON_TEXT = "OK";
+var args = "";
+// over-ride the alert method only if this a newer browser.
+// Older browser will see standard alerts
+if(document.getElementById) {
+	window.alert = function(txt) {
+		createCustomAlert(txt,args);
+		return true;
+	}
+}
+
+function createCustomAlert(txt,args) {
+	// shortcut reference to the document object
+	d = document;
+
+	// if the modalContainer object already exists in the DOM, bail out.
+	if(d.getElementById("modalContainer")) return;
+
+	// create the modalContainer div as a child of the BODY element
+	mObj = d.getElementsByTagName("body")[0].appendChild(d.createElement("div"));
+	mObj.id = "modalContainer";
+	 // make sure its as tall as it needs to be to overlay all the content on the page
+	mObj.className = "coverall";
+	mObj.style.zIndex = "100000";
+
+	// create the DIV that will be the alert
+	alertObj = mObj.appendChild(d.createElement("div"));
+	alertObj.id = "alertBox";
+	//alertObj.className = "dialogBox";
+	// MSIE doesnt treat position:fixed correctly, so this compensates for positioning the alert
+	//if(d.all && !window.opera) alertObj.style.top = document.documentElement.scrollTop + "px";
+	// center the alert box
+	//alertObj.style.left = (d.documentElement.scrollWidth - alertObj.offsetWidth)/2 + "px";
+
+	// create a paragraph element to contain the txt argument
+	msg = alertObj.appendChild(d.createElement("p"));
+	msg.innerHTML = txt;
+
+	// create an anchor element to use as the confirmation button.
+	btn = alertObj.appendChild(d.createElement("button"));
+	btn.id = "closeBtn";
+	btn.appendChild(d.createTextNode(ALERT_BUTTON_TEXT));
+	btn.href = "#";
+	// set up the onclick event to remove the alert when the anchor is clicked
+	btn.onclick = function() {
+		if (args = "map") _tabView.set('activeIndex', 0);
+		removeCustomAlert();
+		return ; }
+}
+
+// removes the custom alert from the DOM
+function removeCustomAlert() {
+	document.getElementsByTagName("body")[0].removeChild(document.getElementById("modalContainer"));return;
+}
 

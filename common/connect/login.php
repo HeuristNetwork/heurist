@@ -192,7 +192,7 @@ if (@$_REQUEST['logout']) {
 
  <p align=center>
   Forgotten your password?
-  &nbsp; 
+  &nbsp;
   <a href='<?=HEURIST_URL_BASE?>admin/ugrps/resetUserPassword.php?db=<?=HEURIST_DBNAME?>' onclick="window.open(this.href,'','status=0,scrollbars=0,width=400,height=200'); return false;">Click here to reset your password</a>
  </p>
 

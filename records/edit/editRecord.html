@@ -332,56 +332,40 @@
 </div>
 <!-- end sidebar -->
 <!-- page -->
-<div id=page>
-	<!-- banner -->
-	<div class="banner">
-		<nobr>
-					<div class=public-visible>
-
-						<label for=input-visibility style="margin-left: 116px;">
-							<input style="vertical-align: middle;" type=checkbox id=input-visibility onClick="top.HEURIST.util.setDisplayPreference('input-visibility', this.checked? 'all' : 'recommended')" class=minimal>
-							show optional fields
-						</label>
-						<script>
-							top.HEURIST.whenLoaded("display-preferences", function() {
-								document.getElementById("input-visibility").checked = (top.HEURIST.displayPreferences["input-visibility"] === "all");
-							});
-						</script>
-
-					</div>
-					<span class=inconsistent-design-help-button>
-						<span class="help"
-							title="Help tips may be read using your eyes to view helpful tips about the visual elements and/or functions to which they refer"
-							onclick="top.HEURIST.util.setDisplayPreference('help', 'hide')"><input onClick="return false;" type=checkbox checked=checked> show help <span style="font-size: 10px; font-weight: bold;">&nbsp;You can also turn help on and off using the button at the top-right of every screen</span></span>
-						<span class="not-help" onClick="top.HEURIST.util.setDisplayPreference('help', 'show')"><input onClick="return false;" type=checkbox> show help</span>
-					</span>
-					&nbsp;
-			</nobr>
-	</div>
-	<!-- end banner -->
-	<!-- main panel -->
-	<div id="page-inner" class="panel-main-div">
-		<div id=tab-holder >
+	<div id=page>
+		<!-- banner -->
+		<div class="banner">
+			<div class=public-visible style="margin:3px 10px">
+					<input type=checkbox id=input-visibility onClick="top.HEURIST.util.setDisplayPreference('input-visibility', this.checked? 'all' : 'recommended')" class=minimal>
+					<label for=input-visibility>show optional fields</label>
+				<script>
+					top.HEURIST.whenLoaded("display-preferences", function() {
+						document.getElementById("input-visibility").checked = (top.HEURIST.displayPreferences["input-visibility"] === "all");
+					});
+				</script>
+			</div>
+		</div>
+		<!-- main panel -->
+		<div id="page-inner" class="panel-main-div">
+			<div id=tab-holder >
+			</div>
 		</div>
 	</div>
-
-
-</div>
 <!-- end page -->
 <!-- footer -->
-			<div id=footer>
-					<span>last accessed: <span id=moddate></span>
-					<span>cite as: <a href='#' id=cite-as-url contextmenu=enable onClick="return false;"></a></span>
-					<script>
-						top.HEURIST.whenLoaded("record", function() {
-							document.getElementById("moddate").appendChild(document.createTextNode(top.HEURIST.edit.record.moddate));
-							var citeAs = document.getElementById("cite-as-url");
-							citeAs.href = "http://"+window.location.host+ top.HEURIST.basePath +"records/view/viewRecord.php?db="+ top.HEURIST.database.name +"&bib_id=" + top.HEURIST.edit.record.bibID;
-							citeAs.appendChild(document.createTextNode(citeAs.href));
-						});
-					</script>
-					</span>
-			</div>
+	<div id=footer>
+			<span>last accessed: <span id=moddate></span>
+			<span>cite as: <a href='#' id=cite-as-url contextmenu=enable onClick="return false;"></a></span>
+			<script>
+				top.HEURIST.whenLoaded("record", function() {
+					document.getElementById("moddate").appendChild(document.createTextNode(top.HEURIST.edit.record.moddate));
+					var citeAs = document.getElementById("cite-as-url");
+					citeAs.href = "http://"+window.location.host+ top.HEURIST.basePath +"records/view/viewRecord.php?db="+ top.HEURIST.database.name +"&bib_id=" + top.HEURIST.edit.record.bibID;
+					citeAs.appendChild(document.createTextNode(citeAs.href));
+				});
+			</script>
+			</span>
+	</div>
 <!-- end footer -->
 <div style="position: absolute;"><div id=workgroup-editor style="display: none;">
 		<table id=workgroupTable border=0 cellspacing=4><tbody>

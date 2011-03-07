@@ -264,6 +264,9 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 	<div class="openTools">
 		<div id="toolbox">
 			<div id=tools-right-cell class="toolboxcolumn left">
+				<span class="toolboxheading">Search Results</span>
+				<a href="#" onClick="top.HEURIST.search.selectAllFirstPage()" title="Select All">Select All</a>
+				<a href="#" onClick="top.HEURIST.search.deselectAll()" title="Clear selection">Select None<!--<img src="../common/images/white-cross.gif">--></a>
 				<span class="toolboxheading">With selected</span>
 				<a href="#" onClick="top.HEURIST.search.addRemoveTagsPopup(false); return false;" title="Select one or more records, then click to add or remove tags">Tag (personal)</a>
 				<a href="#" onClick="top.HEURIST.search.addRemoveKeywordsPopup(); return false;" title="Select one or more records, then click to add or remove workgroup tags">Tag (workgroup)</a>
@@ -303,7 +306,9 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 			<a href="#" id=result-style-thumbs-link title="View results as thumbnails" onClick="top.HEURIST.search.setResultStyle('thumbs'); return false;"><img src="../common/images/19x15.gif"></a>
 		</span>
 	</div>
-	<div class=selectAll style="display:none"><input id=select-all-checkbox type=checkbox title="Check/uncheck this box to select/deselect all records in the current set of results" onClick="if (this.checked) top.HEURIST.search.selectAll(); else top.HEURIST.search.deselectAll();"></div>
+	<div class=selectAll>
+		<input id=select-all-checkbox style="display:none" type=checkbox title="Check/uncheck this box to select/deselect all records in the current set of results" onClick="if (this.checked) top.HEURIST.search.selectAll(); else top.HEURIST.search.deselectAll();">
+	</div>
 	<div id=publish-image-placeholder></div>
 	<div id="printingLink" onClick="top.HEURIST.search.printResultRow()" title="Print search results"></div>
 	<div><a href="#" title="Click to hide/show the legend" onClick="top.HEURIST.search.toggleLegend(); blur(); return false;" id=legend-link>legend</a></div>
@@ -388,7 +393,7 @@ lpc.style.height = (lpc.parentNode.offsetHeight || (lpc.parentNode.parentNode.of
 rpc.style.width = (rpc.parentNode.offsetWidth || (rpc.parentNode.parentNode.offsetWidth - 10)) + "px";
 rpc.style.height = (rpc.parentNode.offsetHeight || (rpc.parentNode.parentNode.offsetHeight - 10)) + "px";
 */
-_tabView = new YAHOO.widget.TabView('applications');
+_tabView = new YAHOO.widget.TabView('applications', { activeIndex: 0 });
 top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadCommonInfo.php");	// core HEURIST object definitions (dynamically generated)
 top.HEURIST.loadScript("searchTypes.js");
 top.HEURIST.loadScript("search.js");				// search-specific HEURIST functions

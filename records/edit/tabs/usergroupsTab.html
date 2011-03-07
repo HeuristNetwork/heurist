@@ -21,48 +21,32 @@
  <body class="editTab">
   <script src="../../../common/js/utilsLoad.js"></script>
   <script src="../../../common/php/displayPreferences.php"></script>
-
-   <div>
-    <h2 style="float: left; margin: 0;">Workgroup tags &nbsp;&nbsp;</h2>
-    <span class="help prompt" style="font-size: 11px;">
-       These tags can only be added or removed by members of the workgroup.<br>
-       Use them to flag records for publication in website listings.
-    </span>
-
-    <br clear=all>
-
-    <table border=0 cellspacing=0 cellpadding=0 style="margin: 10px 0; border-collapse: collapse;">
-     <tr>
-      <td width="270px"><b>Available</b></td>
-      <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-      <td width="270px"><b>Selected</b></td>
-     </tr>
-
-     <tr>
-      <td>
+	<div>
+	    <h2>Workgroup tags &nbsp;&nbsp;</h2>
+	    <span class="help prompt" style="font-size: 11px;">
+	       These tags can only be added or removed by members of the workgroup.<br>
+	       Use them to flag records for publication in website listings.
+	    </span>
+	</div>
+	<div class="tagTable">
+      <div style="width:270px; display:table-cell">
+      <b>Available</b>
        <div class=wgtag-list><table border=0 cellspacing=0 cellpadding=0 width="260px"><tbody id=all-workgroup-tags></tbody></table></div>
-      </td>
-      <td>
-       <div id=button-box>
+       <div class="help"><span class=prompt>Double-click on a tag to add it to this record</span></div>
+      </div>
+       <div id=button-box style="display:table-cell; vertical-align:middle;">
         <div><input type=button value="&gt;" title="Add a tag" onMouseDown="HEURIST.wgTagEditor.addWgTag(window.selectedRow)" disabled id=add-button></div>
         <div>&nbsp;&nbsp;</div>
         <div><input type=button value="&lt;" title="Remove a tag" onMouseDown="HEURIST.wgTagEditor.removeWgTag(window.selectedRow)" disabled id=remove-button></div>
        </div>
-      </td>
-      <td>
+      <div style="width:270px; display:table-cell">
+      <b>Selected</b>
        <div class=wgtag-list><table border=0 cellspacing=0 cellpadding=0 width="260px"><tbody id=current-workgroup-tags></tbody></table></div>
-      </td>
-     </tr>
-
-     <tr class=help>
-      <td class=prompt>Double-click on a tag to add it to this record</td>
-      <td>&nbsp;&nbsp;</td>
-      <td class=prompt>Double-click on a tag to remove it from this record</td>
-     </tr>
-     <tr><td>
+       <div class="help"><span class=prompt>Double-click on a tag to remove it from this record</span></div>
+      </div>
+	  </div>
       <div id="admin-wgTags"><br><a href="../../../admin/ugrps/editGroupTags.php" target="_blank"> Click here </a> to add/delete tags for workgroups (administrators only). </div>
-     </td></tr>
-    </table>
+
 <script>
 	document.write('<form id=wgtag-form method=post jsonAction="'+top.HEURIST.basePath+'records/tags/updateRecordTagLinks.php" action="'+top.HEURIST.basePath+'records/tags/updateRecordTagLinks.php"></form>');
 </script>
@@ -91,7 +75,7 @@ var allWgTagsElt = document.getElementById("all-workgroup-tags");
 new HEURIST.wgTagEditor.WgTagEditor(currWgTagsElt, allWgTagsElt, addButton, removeButton);
 
 </script>
-   </div>
+
 
  </body>
 </html>

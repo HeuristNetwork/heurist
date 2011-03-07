@@ -38,68 +38,58 @@
 		<input type=hidden name=save-mode id=save-mode value=edit>
 		<input type=hidden name=bkmk_id id=bkmk_id>
 
-		<table border=0 cellspacing=0 cellpadding=0 style="width: 100%;"><tbody id=all-inputs>
-				<tr class=input-row>
-					<td class=input-header-cell>Personal tags
+		<div id=all-inputs>
+				<div class=input-row>
+					<div class=input-header-cell>Personal tags
 						<div class="help prompt">
 							Type as many tags as you like, separated by commas.  Tags may contain spaces.
 							New tags are added automatically and are specific to each user.<br><br>
 							<a href="../../../help/tags.html" onClick="top.HEURIST.util.popupURL(window, this.href); return false;">How to enter tags</a>
 						</div>
-					</td>
-					<td class=input-cell>
+					</div>
+					<div class=input-cell>
 						<input id=tags name=tagString type=text>
 						<div id=top-tags-cell><span class=prompt>Top:</span>
 						<a href="#" class=add-tag-link onClick="addTag('Favourites'); return false;">Favourites </a><a href="#" class=add-tag-link onClick="addTag('To Read'); return false;"> To Read </a></div>
 						<div id=recent-tags-cell>
 							<span class=prompt>Recent:</span>
 						</div>
-					</td>
-				</tr>
+					</div>
+				</div>
 
-				<tr><td class="separator_row" colspan="2">&nbsp;</td></tr>
-
-				<tr class=input-row>
-					<td class=input-header-cell>Rating<div class="help prompt">Please enter your rating for this Record.</div></td>
-					<td class=input-cell>
+				<div class=input-row>
+					<div class=input-header-cell>Rating<div class="help prompt">Please enter your rating for this Record.</div></div>
+					<div class=input-cell>
 						<div class=rating-row><span class=header>Interest</span><span><select id=overall-rating name=overall-rating></select></span></div>
-					</td>
-				</tr>
+					</div>
+				</div>
 
-				<tr><td class="separator_row" colspan="2">&nbsp;</td></tr>
-
-				<tr class=input-row>
-					<td class=input-header-cell>Private notes<div class="help prompt">These notes are private and visible only to you.</div> </td>
-					<td class=input-cell>
+				<div class=input-row>
+					<div class=input-header-cell>Private notes<div class="help prompt">These notes are private and visible only to you.</div> </div>
+					<div class=input-cell>
 						<div id=woot></div>
 						<div>
-
 							<a id=woot-ext-link target=_blank href="../../woot/woot.html">open in new window</a>
 						</div>
+					</div>
+				</div>
 
-					</td>
-				</tr>
-
-				<tr><td class="separator_row" colspan="2">&nbsp;</td></tr>
-
-				<tr class=input-row>
-					<td class=input-header-cell>Password reminder<div class="help prompt">NOT ENCRYPTED - do not use for secure passwords</div></td>
-					<td class=input-cell>
+				<div class=input-row>
+					<div class=input-header-cell>Password reminder<div class="help prompt">NOT ENCRYPTED - do not use for secure passwords</div></div>
+					<div class=input-cell>
 						<input type=text class=in name=password-reminder id=password-reminder style="width: 200px;" onChange="window.changed();" onKeyPress="window.changed();">
 
-					</td>
-				</tr>
-
-				<tr><td class="separator_row" colspan="2">&nbsp;</td></tr>
-		</tbody></table>
+					</div>
+				</div>
+		</div>
 		</form>
 
 		<form method=post jsonAction="records/reminders/saveReminder.php" action="records/reminders/saveReminder.php" onsubmit="return false;">
-			<table border=0 cellspacing=0 cellpadding=0 style="width: 100%;"><tbody><!-- separate table, because this is a separate form -->
-					<tr class=input-row>
-						<td class=input-header-cell><div style="margin: 7px 0;">Reminders</div></td>
-						<td><div id=reminders></div></td>
-			</tr></tbody></table>
+			<div><!-- separate table, because this is a separate form -->
+					<div class=input-row>
+						<div class=input-header-cell>Reminders</div>
+						<div class=input-cell id=reminders></div>
+			</div></div>
 		</form>
 
 		<script>

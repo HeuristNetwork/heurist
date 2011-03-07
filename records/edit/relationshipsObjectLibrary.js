@@ -145,10 +145,8 @@ var EditableRelationship = function(parentElement, details, rectype, dtID, manag
 	this.header.style.marginBottom = "0.5ex";
 	this.header.appendChild(this.document.createTextNode("Add new relationship"));
 
-	var detailsElt = this.div.appendChild(this.document.createElement("div"));
-	detailsElt.className = "resource";
-
-	var tbody = detailsElt.appendChild(this.document.createElement("div"));
+	var tbody = this.div.appendChild(this.document.createElement("div"));
+	tbody.className = "resource";
 
 /*	var tr = tbody.appendChild(this.document.createElement("div"));
 	tr.className = "input-row";
@@ -211,7 +209,9 @@ var EditableRelationship = function(parentElement, details, rectype, dtID, manag
 	tr = tbody.appendChild(this.document.createElement("div"));
 	tr.className = "input-row";
 	td = tr.appendChild(this.document.createElement("div"));
+		td.className = "input-header-cell";
 	td = tr.appendChild(this.document.createElement("div"));
+		td.className = "input-cell";
 
 	var saveButton = this.document.createElement("input");
 	saveButton.type = "button";
@@ -229,24 +229,23 @@ var EditableRelationship = function(parentElement, details, rectype, dtID, manag
 
 	td.appendChild(cancelButton);
 
+	// insert a div for optional items
+	opt = tbody.appendChild(this.document.createElement("div"));
+	opt.className = "resource optional";
 
-	tr = tbody.appendChild(this.document.createElement("div"));
-	td = tr.appendChild(this.document.createElement("div"));
-	td.style.height = "2em";
-
-	tr = tbody.appendChild(this.document.createElement("div"));
+	tr = opt.appendChild(this.document.createElement("div"));
 	tr.className = "input-row optional";
 	td = tr.appendChild(this.document.createElement("div"));
 	td.className = "section-header-cell optional";
-	td.appendChild(this.document.createTextNode("OPTIONAL FIELDS"));
+	td.appendChild(this.document.createTextNode("Optional Fields"));
 
 	var fakeBDT = [638, "Interpretation", "resource", 182];
 	var helpString = "Record the evidence and/or reasoning on which this relationship is based";
 	var fakeBDR = ["Interpretation", helpString, "", "O", 0, null, 0];
-	this.interpResource = new top.HEURIST.edit.inputs.BibDetailResourceInput(fakeBDT, fakeBDR, [], tbody);
+	this.interpResource = new top.HEURIST.edit.inputs.BibDetailResourceInput(fakeBDT, fakeBDR, [], opt);
 	this.interpResourceID = this.interpResource.inputs[0].hiddenElt;
 
-	tr = tbody.appendChild(this.document.createElement("div"));
+	tr = opt.appendChild(this.document.createElement("div"));
 	tr.className = "input-row optional";
 	td = tr.appendChild(this.document.createElement("div"));
 	td.className = "input-header-cell";
@@ -267,7 +266,7 @@ var EditableRelationship = function(parentElement, details, rectype, dtID, manag
 	this.endDate.style.width = "90px";
 	top.HEURIST.edit.makeDateButton(this.endDate, this.document);//saw TODO makeTemporal for Temporal switch
 
-	tr = tbody.appendChild(this.document.createElement("div"));
+	tr = opt.appendChild(this.document.createElement("div"));
 	tr.className = "input-row optional";
 	td = tr.appendChild(this.document.createElement("div"));
 	td.className = "input-header-cell";
@@ -277,7 +276,7 @@ var EditableRelationship = function(parentElement, details, rectype, dtID, manag
 	this.description.value = "Relationship";
 	this.description.className = "in";
 
-	tr = tbody.appendChild(this.document.createElement("div"));
+	tr = opt.appendChild(this.document.createElement("div"));
 	tr.className = "input-row optional";
 	td = tr.appendChild(this.document.createElement("div"));
 	td.className = "input-header-cell";

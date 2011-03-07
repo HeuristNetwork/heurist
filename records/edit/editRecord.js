@@ -665,12 +665,6 @@ top.HEURIST.edit = {
 
 		var closeButton = this.document.createElement("div");
 			closeButton.className = "close-button";
-//			closeButton.src = top.HEURIST.basePath + "common/images/black-cross.gif";
-//			closeButton.style.width = "12px";
-//			closeButton.style.height = "12px";
-//			closeButton.style.cursor = "pointer";
-//			closeButton.style.cssFloat = "right";
-//			closeButton.style.styleFloat = "right";
 			closeButton.onclick = function() { uploadsDiv.parentNode.removeChild(uploadsDiv); };
 
 		uploadsDiv.innerHTML = "";
@@ -1256,7 +1250,6 @@ top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype.addInput = function(bdV
 		newInput.type = "text";
 		newInput.className = "in";
 		if (bdValue) newInput.value = bdValue.value;
-
 		this.addInputHelper.call(this, bdValue, newInput);
 };
 
@@ -1360,16 +1353,8 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 		newDiv.expando = true;
 	this.addInputHelper.call(this, bdValue, newDiv);
 
-	var editImg = newDiv.appendChild(this.document.createElement("img"));
-		editImg.src = top.HEURIST.basePath +"common/images/edit-pencil.png";
-		editImg.className = "edit-resource";
-		editImg.title = "Edit this resource";
-
 	var textElt = newDiv.textElt = newDiv.appendChild(this.document.createElement("input"));
 		textElt.type = "text";
-		/* textElt doesn't need to have a name -- it's just for show
-		textElt.name = "text-" + newDiv.name;
-		 */
 		textElt.value = textElt.defaultValue = bdValue? bdValue.title : "";
 		textElt.title = "Click here to search for a record, or drag-and-drop a search value";
 		textElt.setAttribute("autocomplete", "off");
@@ -1394,12 +1379,6 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 		hiddenElt.type = "hidden";
 		newDiv.appendChild(hiddenElt);	// have to do this AFTER the type is set
 
-	top.HEURIST.registerEvent(editImg, "click", function() {
-		top.HEURIST.util.popupURL(window,top.HEURIST.basePath +"records/edit/formEditRecordPopup.html?bib_id=" + hiddenElt.value, {
-			callback: function(bibTitle) { if (bibTitle) textElt.defaultValue = textElt.value = bibTitle; }
-		});
-	});
-
 	var removeImg = newDiv.appendChild(this.document.createElement("img"));
 		removeImg.src = top.HEURIST.basePath+"common/images/12x12.gif";
 		removeImg.className = "delete-resource";
@@ -1411,6 +1390,17 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 				windowRef.changed();
 			}
 		});
+
+	var editImg = newDiv.appendChild(this.document.createElement("img"));
+		editImg.src = top.HEURIST.basePath +"common/images/edit-pencil.png";
+		editImg.className = "edit-resource";
+		editImg.title = "Edit this resource";
+
+	top.HEURIST.registerEvent(editImg, "click", function() {
+		top.HEURIST.util.popupURL(window,top.HEURIST.basePath +"records/edit/formEditRecordPopup.html?bib_id=" + hiddenElt.value, {
+			callback: function(bibTitle) { if (bibTitle) textElt.defaultValue = textElt.value = bibTitle; }
+		});
+	});
 
 	if (window.HEURIST && window.HEURIST.parameters && window.HEURIST.parameters["title"]  &&  bdValue  &&  bdValue.title  &&  windowRef.parent.frameElement) {
 		// we've been given a search string for a record pointer field - pop up the search box

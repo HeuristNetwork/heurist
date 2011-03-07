@@ -278,28 +278,22 @@ function renderInputs(bibID, rectype) {
 }
 
 function renderAdditionalDataSection(container, rectypeID, bdValues) {
-	var hrRow = container.appendChild(document.createElement("div"));
-
-	var hrCell = hrRow.appendChild(document.createElement("div"));
-		hrCell.className = "separator_row";
-		hrCell.innerHTML = "&nbsp";
 
 	var explainRow = container.appendChild(document.createElement("div"));
-
+		explainRow.className = "title-row optional";
 	var hrCell = explainRow.appendChild(document.createElement("div"));
-		hrCell.style.height = "20px";
 		hrCell.innerHTML = "<b>Additional data</b>";
 		hrCell.className = "additional-header-cell";
-
 	var explainCell = explainRow.appendChild(document.createElement("div"));
 		explainCell.innerHTML = "Non-standard fields for this record type";
-
+		explainCell.className = "input-cell";
 	var addRow = container.appendChild(document.createElement("div"));
-//		addRow.appendChild(document.createElement("div"));
-
+		addRow.className = "input-row optional";
+	var addHeaderCell = addRow.appendChild(document.createElement("div"));
+		addHeaderCell.className = "input-header-cell";
+		addHeaderCell.innerHTML = "<b>Add field:</b>";
 	var addCell = addRow.appendChild(document.createElement("div"));
-		addCell.style.padding = "0 0 5px 0";
-		addCell.appendChild(document.createTextNode("Add field:"));
+		addCell.className = "input-cell";
 
 	var dts = top.HEURIST.edit.getNonRecDetailTypedefs(rectypeID);
 	if (bdValues) {
@@ -319,15 +313,13 @@ function renderAdditionalDataSection(container, rectypeID, bdValues) {
 	dtNames = dtNames.sort();
 
 	var dtSelect = addCell.appendChild(document.createElement("select"));
-		dtSelect.style.marginLeft = "5px";
-		dtSelect.options[0] = new Option("Select a type...", "");
+		dtSelect.options[0] = new Option("Select field type...", "");
 		dtSelect.options[0].disabled = true;
 	var i = 1;
 	for (var n = 0; n < dtNames.length; ++n) {
 		var name = dtNames[n];
 		dtSelect.options[i++] = new Option(dtsByName[name][1], dtsByName[name][0]);// saw TODO: type struct change needed
 	}
-
 	var button = document.createElement("input");
 		button.type = "button";
 		button.value = "add";
@@ -343,36 +335,27 @@ function renderAdditionalDataSection(container, rectypeID, bdValues) {
 
 function renderShowAll() {
 	var hrRow = document.getElementById("all-inputs").appendChild(document.createElement("div"));
-		hrRow.appendChild(document.createElement("div"));
-		hrRow.className = "not-optional-fields";
-	var hrCell = hrRow.appendChild(document.createElement("div"));
-		hrCell.style.height = "20px";
+		hrRow.className = "separator_row";
+		hrRow.style.margin = "20px 0 0 0";
 
-	// this could probably stand to be static html
-	var showTr = document.getElementById("all-inputs").appendChild(document.createElement("div"));
-//		showTr.appendChild(document.createElement("div"));
-	var showTd = showTr.appendChild(document.createElement("div"));
-		showTd.style.padding = 0;
-
-	var showDiv = showTd.appendChild(document.createElement("div"));
+	var showDiv = document.getElementById("all-inputs").appendChild(document.createElement("div"));
 		showDiv.id = "show-all-div";
-		showDiv.style.padding = "0 0 8px 0";
-		showDiv.className = "not-optional-fields";
+		showDiv.className = "title-row not-optional-fields";
 
-	var showLink = showDiv.appendChild(document.createElement("span")).appendChild(document.createElement("a"));
-		showLink.className = "not-optional-fields";
+	var showLink = showDiv.appendChild(document.createElement("div")).appendChild(document.createElement("a"));
+		showLink.className = "additional-header-cell not-optional-fields";
 		showLink.style.fontWeight = "bold";
 		showLink.href = "#";
 		showLink.appendChild(document.createTextNode("Show all fields"));
 		showLink.onclick = function() {
 			top.HEURIST.util.setDisplayPreference("input-visibility", "all");
-			top.document.getElementById("input-visibility").selectedIndex = 2;
+			top.document.getElementById("input-visibility").checked = true;
 			return false;
 		};
 
-	var showInnerDiv = showDiv.appendChild(document.createElement("span"));
+	var showInnerDiv = showDiv.appendChild(document.createElement("div"));
 		showInnerDiv.appendChild(document.createTextNode("Only "));
-		showInnerDiv.style.paddingLeft = "3em";
+		showInnerDiv.className = "input-cell";
 	var showInnerSpan = showInnerDiv.appendChild(document.createElement("span"));
 		showInnerSpan.className = "required-only";
 		showInnerSpan.style.fontWeight = "bold";
@@ -383,7 +366,6 @@ function renderShowAll() {
 		showInnerSpan.appendChild(document.createTextNode("recommended"));
 		showInnerDiv.appendChild(document.createTextNode(" fields are currently visible"));
 }
-
 
 
 document.forms[0].heuristSubmit = function() {

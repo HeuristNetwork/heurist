@@ -211,7 +211,7 @@ body.w-all #all-records-button, body.w-bookmark #my-records-button {-moz-border-
 .add_records_img {vertical-align: text-bottom;padding: 0 1ex 0 0;}
 *.openTools {position:absolute;right:5px;bottom:5px;z-index:11;cursor:pointer;height: 15px;width:28px;background-image: url("../images/cog.png");background-position: 0 0;}
 .openTools {position:absolute;left:40px;}
-#toolbox {background-color: RGBA(0,0,0,0.8);padding:0 10px;margin: 0;position: absolute;top: 22px;left: 5px;width: auto;overflow: visible;/* IE only */width: expression(document.documentElement.clientWidth-151);-moz-border-radius-bottomleft:10px;-moz-border-radius-bottomright:10px;-moz-border-radius-topleft:10px;-moz-border-radius-topright:10px;-webkit-border-bottom-left-radius:10px;-webkit-border-bottom-right-radius:10px;-webkit-border-top-left-radius:10px;-webkit-border-top-right-radius:10px;border-bottom-left-radius:10px;border-bottom-right-radius:10px;border-top-left-radius:10px;border-top-right-radius:10px;border :2px solid #FFF;-webkit-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);-moz-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);z-index: 200;}
+#toolbox, #alertBox {background-color: RGBA(0,0,0,0.8);padding:0 10px;margin: 0;position: absolute;top: 22px;left: 5px;width: auto;overflow: visible;/* IE only */width: expression(document.documentElement.clientWidth-151);-moz-border-radius-bottomleft:10px;-moz-border-radius-bottomright:10px;-moz-border-radius-topleft:10px;-moz-border-radius-topright:10px;-webkit-border-bottom-left-radius:10px;-webkit-border-bottom-right-radius:10px;-webkit-border-top-left-radius:10px;-webkit-border-top-right-radius:10px;border-bottom-left-radius:10px;border-bottom-right-radius:10px;border-top-left-radius:10px;border-top-right-radius:10px;border :2px solid #FFF;-webkit-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);-moz-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);z-index: 200;}
 #toolbox span{text-indent: 0;white-space: nowrap;font-size: 12px;display:block;z-index:12;}
 #toolbox span:hover{color: #FFF;}
 #toolbox a {color:#CCCCCC;display:block;font-size:10px;font-weight:bold;height:19px;padding:3px 10px 0;text-decoration:none;}
@@ -311,3 +311,17 @@ body div.result_row.selected {background-color: #CDDCF3; }
 .separator_row {height: 1px; border-bottom: 1px solid #A4B4CB;}
 
 li {list-style:disc ;}
+
+
+/***** custom alert box *****/
+#modalContainer {/*background-color: RGBA(100,100,100,0.5);*/}
+#alertBox {padding:10px;width:250px; height:auto; position:absolute; left:50%; top:50%; margin:-50px 0 0 -125px;text-align: center;font-size: 14px; overflow:hidden}
+#alertBox p{color:#FFFFFF; font-size: 13px;line-height:13px}
+#alertBox #closeBtn,#alertBox #OKBtn,#alertBox #cancelBtn{color:#FFFFFF; font-size: 12px;-moz-border-radius:2px; -webkit-border-radius:2px; border-radius:2px;border:1px solid #AAA;background-color: #666;width:40px; bottom:10px; left:50%; -webkit-box-shadow: 0 3px 6px #000;-moz-box-shadow: 0 3px 6px #000;box-shadow: 0 3px 6px #000}
+#alertBox #cancelBtn{width:60px;left:66%; margin-right:-30px;}
+#alertBox #OKBtn{left:33%; margin-left:-20px;}
+#alertBox #closeBtn:hover,#alertBox #OKBtn:hover,#alertBox #cancelBtn:hover{color:#333; background-color: #777;}
+
+/***** drop-down menus *****/
+optgroup {font-style: normal;font-weight:bold; background-color: #ECF1FB;padding:5px; border-top:1px solid #A4B4CB; margin-top:5px }
+option {padding-left:15px;}

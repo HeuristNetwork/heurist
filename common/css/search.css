@@ -177,7 +177,7 @@ nobr#activesaved a { padding-left:0; }
 #saved .content { padding-bottom: 6px; 	/*background-image:url(../images/backgrounds/light_bg.png)*/;}
 #saved div.hide .content { display: none; }
 #i_action { width: 1px; height: 1px; left: 0; top: 0; position: absolute; visibility: hidden; }
-#password {bottom: 0;color: #6A7C99;display: none;font-size: 85%;left: 10px; position: absolute;}
+#password {bottom: 0;color: #6A7C99;display: none;font-size: 85%;left: 0; position: absolute;}
 #password div {display: inline-block;padding: 5px}
 #footer {height: 20px;}
 #logged-in{color: #444;font-size:11px; float:right; padding: 6px;height:10px; display:block; position:relative;right:10px;}
