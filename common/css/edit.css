@@ -390,3 +390,7 @@ hr { background-color: #660000; border: 1px solid lightgray; height: 2px; margin
 #comments {border: 1px solid gray;padding: 4px;min-height: 85%;background-color: #EFF2F6;}
 #page-inner {right:0px;top:26px}
 .tagTable {display: block; margin:10px 0}
+
+/***** rating *****/
+#overall-rating option{border-right:1px solid #CCC}
+#overall-rating option[value="5"] {background-image:url("../images/star-yellow.png");background-repeat: repeat-x;width:100px;}

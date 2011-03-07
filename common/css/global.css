@@ -323,5 +323,5 @@ li {list-style:disc ;}
 #alertBox #closeBtn:hover,#alertBox #OKBtn:hover,#alertBox #cancelBtn:hover{color:#333; background-color: #777;}
 
 /***** drop-down menus *****/
-optgroup {font-style: normal;font-weight:bold; background-color: #ECF1FB;padding:5px; border-top:1px solid #A4B4CB; margin-top:5px }
-option {padding-left:15px;}
+optgroup {font-style: normal;font-weight:bold; background-color: #ECF1FB;padding:0; border-top:1px solid #A4B4CB; margin-top:5px; text-indent: 5px; }
+option {padding-left:15px;background-color: #FFF;}

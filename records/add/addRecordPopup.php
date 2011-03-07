@@ -21,9 +21,10 @@
 
 ?>
 <html>
- <head>
-  <link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/global.css">
-  <title>Add new record</title>
+<head>
+	<link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+	<link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
+	<title>Add new record</title>
 
   <script src="<?=HEURIST_SITE_PATH?>external/jquery/jquery.js"></script>
 
@@ -162,137 +163,110 @@
   </script>
 
   <style type=text/css>
-			.hide_workgroup .workgroup { visibility: hidden; }
+			.hide_workgroup .workgroup { display: none; }
 			hr { margin: 20px 0; }
-			#add-link-input { width: 95%; }
-			#add-link-tags {width : 70%;}
+			#add-link-input { width: 100%; }
+			#add-link-tags {width : 70%;float:right}
+			p {line-height: 14px;}
   </style>
 
  </head>
 
- <body class="popup" width=500 height=400 style="font-size: 11px;">
+<body class="popup" width=500 height=400 style="font-size: 11px;">
 
 
-  <table border="0" id=maintable<?= @$_REQUEST['wg_id'] > 0 ? "" : " class=hide_workgroup" ?>>
-   <tr><td colspan=3 style="color: red; margin-bottom:5px;">
-				<?php
+	<div border="0" id=maintable<?= @$_REQUEST['wg_id'] > 0 ? "" : " class=hide_workgroup" ?>>
+	<div><?php
 	 print  ''. @$_REQUEST['error_msg'] ? $_REQUEST['error_msg'] . '' : '' ;
 				?>
-   </td></tr>
-   <tr>
-    <td colspan=3> &nbsp;</td>
-   </tr>
-   <tr>
-    <td><nobr><label><input type="radio" name ="a" id="note_elt" checked onclick="note_type_click();"> Note</label></nobr></td>
-   </tr>
-   <tr>
-    <td><nobr><label><input type="radio" name="a" id="reference_elt" onclick="note_type_click();"> Record type:</label></nobr></td>
-    <td colspan=2>
+	</div>
+	<div>
+		<label style="margin-right:20px"><input type="radio" name ="a" id="note_elt" checked onclick="note_type_click();"> Note</label>
+		<label><input type="radio" name="a" id="reference_elt" onclick="note_type_click();"> Record type:</label>
 					<?php
 						$res = mysql_query("select distinct rty_ID,rty_Name,rty_Description, rtg_Name
 						from defRecTypes left join defRecTypeGroups on rtg_ID = (select substring_index(rty_RecTypeGroupIDs,',',1))
 						where rty_ShowInLists = 1 order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
 					?>
-					<select name="ref_type"  title="New record type" style="margin: 3px;" id="rectype_elt" onChange='document.getElementById("reference_elt").checked = true; document.getElementById("note_elt").checked = false;'>
-      <option selected disabled value="0">(select record type)</option>
-						<?php
-	$section = "";
-	while ($row = mysql_fetch_assoc($res)) {
-		if ($row["rtg_Name"] != $section) {
-			if ($section) print "</optgroup>\n";
-			$section = $row["rtg_Name"];
-			print '<optgroup label="' . htmlspecialchars($section) . ' types">';
-		}
-						?>
-  <option value="<?= $row["rty_ID"] ?>" title="<?= htmlspecialchars($row["rty_Description"]) ?>"><?= htmlspecialchars($row["rty_Name"]) ?></option>
-						<?php
-	}
-						?>
-      </optgroup>
-     </select>
-    </td>
-   </tr>
+		<select name="ref_type"  title="New record type" style="margin: 3px;" id="rectype_elt" onChange='document.getElementById("reference_elt").checked = true; document.getElementById("note_elt").checked = false;'>
+			<option selected disabled value="0">(select record type)</option>
+				<?php
+					$section = "";
+					while ($row = mysql_fetch_assoc($res)) {
+						if ($row["rtg_Name"] != $section) {
+							if ($section) print "</optgroup>\n";
+							$section = $row["rtg_Name"];
+							print '<optgroup label="' . htmlspecialchars($section) . ' types">';
+						}
+				?>
+			<option value="<?= $row["rty_ID"] ?>" title="<?= htmlspecialchars($row["rty_Description"]) ?>"><?= htmlspecialchars($row["rty_Name"]) ?></option>
+				<?php
+					}
+				?>
+		</optgroup>
+		</select>
+	</div>
 
-   <tr>
-    <td colspan=3></td>
-   </tr>
+	<div>
+		<div>
+			<input type="checkbox" name="bib_workgroup_restrict" id="restrict_elt" value="1" onclick="document.getElementById('maintable').className = this.checked? '' : 'hide_workgroup';" style="margin: 0; padding: 0;"<?= @$_REQUEST['wg_id'] > 0 ? " checked" : ""?>>
+			<label for=restrict_elt>Restrict access</label>
+		</div>
+		<div class="resource workgroup" style="margin:10px 0">
+			<div class="input-row workgroup">
+				<div class="input-header-cell">Select Work Group</div>
+				<div class="input-cell">
+					<select name="rec_OwnerUGrpID" id="rec_OwnerUGrpID" style="width: 200px;" onchange="buildworkgroupTagselect(options[selectedIndex].value)">
+						<option value="0" disabled selected>(select group)</option>
+											<?php
+						$res = mysql_query('select '.GROUPS_ID_FIELD.', '.GROUPS_NAME_FIELD.' from '.USERS_DATABASE.'.'.USER_GROUPS_TABLE.' left join '.USERS_DATABASE.'.'.GROUPS_TABLE.' on '.GROUPS_ID_FIELD.'='.USER_GROUPS_GROUP_ID_FIELD.' where '.USER_GROUPS_USER_ID_FIELD.'='.get_user_id().' and '.GROUPS_TYPE_FIELD.'!="Usergroup" order by '.GROUPS_NAME_FIELD);
+						$wgs = array();
+						while ($row = mysql_fetch_row($res)) {
+							print "      <option value=".$row[0].(@$_REQUEST['wg_id']==$row[0] ? " selected" : "").">".htmlspecialchars($row[1])." only</option>\n";
+							array_push($wgs, $row[0]);
+						}
+											?>
+					</select>
+				</div>
+			</div>
 
-   <tr>
-    <td></td>
-    <td style="vertical-align: top;">
-     <nobr style="vertical-align: middle;">
-      <input type="checkbox" name="bib_workgroup_restrict" id="restrict_elt" value="1" onclick="document.getElementById('maintable').className = this.checked? '' : 'hide_workgroup';" style="margin: 0; padding: 0;"<?= @$_REQUEST['wg_id'] > 0 ? " checked" : ""?>>
-      <label for=restrict_elt>Restrict access</label>
-     </nobr>
-    </td>
-    <td class=workgroup><nobr>
-     <select name="rec_OwnerUGrpID" id="rec_OwnerUGrpID" style="width: 200px;" onchange="buildworkgroupTagselect(options[selectedIndex].value)">
-      <option value="0" disabled selected>(select group)</option>
-							<?php
-	$res = mysql_query('select '.GROUPS_ID_FIELD.', '.GROUPS_NAME_FIELD.' from '.USERS_DATABASE.'.'.USER_GROUPS_TABLE.' left join '.USERS_DATABASE.'.'.GROUPS_TABLE.' on '.GROUPS_ID_FIELD.'='.USER_GROUPS_GROUP_ID_FIELD.' where '.USER_GROUPS_USER_ID_FIELD.'='.get_user_id().' and '.GROUPS_TYPE_FIELD.'!="Usergroup" order by '.GROUPS_NAME_FIELD);
-	$wgs = array();
-	while ($row = mysql_fetch_row($res)) {
-		print "      <option value=".$row[0].(@$_REQUEST['wg_id']==$row[0] ? " selected" : "").">".htmlspecialchars($row[1])." only</option>\n";
-		array_push($wgs, $row[0]);
-	}
-							?>
-     </select>
+			<div class="input-row workgroup">
+				<div class="input-header-cell">Workgroup tag:</div>
+				<div class="input-cell"><select name="tag" id="tag" style="width: 200px;"></select></div>
+			</div>
 
-     </nobr>
-    </td>
-   </tr>
+			<div class="input-row workgroup">
+				<div class="input-header-cell">Outside this group:</div>
+				<div class="input-cell">
+					<select name="rec_NonOwnerVisibility" id="rec_NonOwnerVisibility" style="width: 200px;">
+						<option value="Visible">record is read-only</option>
+						<option value="Hidden">record is hidden</option>
+					</select>
+				</div>
+			</div>
+		</div>
+	</div>
 
-   <tr class=workgroup>
-    <td>
-    </td>
-    <td style="text-align: right;">
-     Workgroup tag:
-    </td>
-    <td>
-     <select name="tag" id="tag" style="width: 200px;">
-     </select>
-    </td>
-   </tr>
+	</div>
 
-   <tr class=workgroup>
-    <td>
-    </td>
-    <td style="text-align: right;">
-     Outside this group:
-    </td>
-    <td>
-     <select name="rec_NonOwnerVisibility" id="rec_NonOwnerVisibility" style="width: 200px;">
-      <option value="Visible">record is read-only</option>
-						<option value="hidden">record is hidden</option>
-     </select>
-    </td>
-   </tr>
+	<div class="separator_row" style="margin:20px 0"></div>
 
-  </table>
+	<div id=advanced-section style="display: block;">
+		<h2>Advanced</h2>
+		<div>Add these personal tags: <input id=add-link-tags></div>
+		<div style="clear:both;margin-top:20px">Hyperlink this URL in your web page or a desktop shortcut to provide one-click addition of Heurist records with these characteristics:
+		<textarea id=add-link-input></textarea>
+		<p><a id=broken-kwd-link target=_blank style="display: none;">search for records added by non workgroup members using the above link</a></p>
+		</div>
+	</div>
 
-  <br>
+	<div class="separator_row" style="margin:20px 0"></div>
 
-  <table style="width: 100%;">
-   <tr>
-    <td class=workgroup colspan =2>
-      <nobr>
-      <input type="button" style="font-weight: bold;" value="Add" onclick="add_note(event);">
-      &nbsp;&nbsp;
-      <input type="button" value="Cancel" onclick="window.close();" id="note_cancel">
-     </nobr>
-    </td>
-   </tr>
-  </table>
+	<div>
+		<input type="button" style="font-weight: bold;" value="Add" onclick="add_note(event);">
+		&nbsp;&nbsp;
+		<input type="button" value="Cancel" onclick="window.close();" id="note_cancel">
+	</div
 
-  <hr>
-  <div id=advanced-section style="display: block;">
-   <div>
-   <h2>Advanced</h2>
-   Add these personal tags: <input id=add-link-tags></div>
-   <p>Hyperlink this URL in your web page or a desktop shortcut <br>to provide one-click addition of Heurist records with these characteristics:<br>
-   <textarea id=add-link-input></textarea></p>
-   <p><a id=broken-kwd-link target=_blank style="display: none;">search for records added by non workgroup members using the above link</a></p>
-  </div>
-
- </body>
+</body>
 </html>
