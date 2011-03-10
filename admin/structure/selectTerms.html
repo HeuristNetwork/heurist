@@ -1,0 +1,301 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>Heurist - Select terms</title>
+
+<style type="text/css">
+body {
+	margin:0;
+	padding:0;
+}
+.termTree {
+	float: left;
+	border-style: groove;
+	width: 33%;
+}
+.selectedTerms {
+	float: left;
+	border-style: groove;
+	width: 33%;
+}
+.previewList {
+	float: left;
+}
+.termTreeText {
+	width: 34%;
+	float: left;
+}
+.selectedTermsText {
+	width: 33%;
+	float: left;
+}
+.previewListText {
+	float: left;
+}
+.depth0 {
+	margin-left: 0px;
+}
+.depth1 {
+	margin-left: 10px;
+}
+.depth2 {
+	margin-left: 20px;
+}
+.depth3 {
+	margin-left: 30px;
+}
+.depth4 {
+	margin-left: 40px;
+}
+.depth5 {
+	margin-left: 50px;
+}
+.depth6 {
+	margin-left: 60px;
+}
+.depth7 {
+	margin-left: 70px;
+}
+
+</style>
+
+<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
+<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/treeview/assets/skins/sam/treeview.css" />
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/treeview/treeview-min.js"></script>
+
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
+
+<script src="../../common/php/loadCommonInfo.php"></script>
+
+</head>
+<body>
+
+<h1>Heurist</h1>
+<h2>Term selection</h2><br />
+<div id="termTreeText" class="termTreeText"><h3>Select the terms you want</h3></div>
+<div id="termTreeText" class="selectedTermsText"><h3>Select the terms to be disabled</h3></div>
+<div id="termTreeText" class="previewListText"><h3>Preview the result</h3></div>
+
+<div id="termTree" class="termTree ygtv-checkbox"></div>
+<div id="selectedTermsTree" class="selectedTerms ygtv-checkbox"></div>
+<div id="previewList" class="previewList"></div>
+
+<div id="selectedTerms"></div>
+
+<script type="text/javascript">
+
+function selectAllChildren(parent) { // Selects all children of the node clicked
+	var parentNode = termTree.getNodeByIndex(parent);
+	if(parentNode.children.length > 0) {
+		var index = 0;
+		while(index < parentNode.children.length) { // While it has children, select them and look if they have children too
+			var child = parentNode.children[index];
+			child.toggleHighlight();
+			if(child.children.length > 0) {
+				selectAllChildren(child.index); // TO DO: Stops the while loop here
+			}
+			index++;
+		}
+	}
+}
+
+function getTermIDFromNode(node) {
+	var tempTermID = node.label.split('id="');
+	var tempTermID2 = tempTermID[1].split('">'); // Use split to retrieve termID
+	var termID = tempTermID2[0];
+	return termID;
+}
+
+var termArray = {}; // Contains the tree structure */
+function createTermArray(parent, parentsArray) { // Creates an array (in var termArray) with all selected terms
+	if(parent == selectedTermsTree.getRoot()) { // If parent is root
+		termArray = {};
+		var index = 0;
+		while(index < parent.children.length) { // While root had children
+
+			var nextParent = termArray[getTermIDFromNode(parent.children[index])] = {}; // Add term to array, as a (so far empty) array
+			if(parent.children[index].children.length > 0) {
+				createTermArray(parent.children[index], nextParent); // If the term has children, run createTermArray() again
+			}
+			index++;
+		}
+		return termArray;
+	}
+	else { // If parent is not root
+		index = 0;
+		while(index < parent.children.length) { // While parent contains more children
+
+			var nextParent = parentsArray[getTermIDFromNode(parent.children[index])] = {}; // Add term to parent (instead of array root, which happens in the first if), as a (so far empty) array
+			if(parent.children[index].children.length > 0) {
+				createTermArray(parent.children[index], nextParent); // If the term has children, run createTermArray() again
+			}
+			index++;
+		}
+	}
+}
+
+var selectedTermsList;
+var selectedTermsTree;
+var termTree;
+(function() { // Builds the trees
+
+	function buildTermTree(parent) { // Look up al root terms and create the nodes
+		for (var parentElement in top.HEURIST.terms.treesByDomain.relation) {
+			nodeIndex = termTree.getNodeCount()+1;
+
+			term = new Object();
+			term.label = '<div id="'+parentElement+'"><a href="javascript:void(0)" onClick="selectAllChildren('+nodeIndex+')">All </a> '+top.HEURIST.terms.termsByDomainLookup.relation[parentElement]+'</div>';
+			term.href = "javascript:void(0)"; // To make 'select all' clickable, but not leave the page when hitting enter
+
+			topLayerParent = new YAHOO.widget.TextNode(term, parent, false); // Create the node
+			parntNode = top.HEURIST.terms.treesByDomain.relation[parentElement];
+			createChildren(parntNode, topLayerParent); // Look for children of the node
+		}
+	}
+
+	function createChildren(parentNode, parentEntry) { // Recursively get all children
+		for(var child in parentNode) {
+			nodeIndex = termTree.getNodeCount()+1;
+
+			term = new Object();
+			term.label = '<div id="'+child+'"><a href="javascript:void(0)" onClick="selectAllChildren('+nodeIndex+')">All </a> '+top.HEURIST.terms.termsByDomainLookup.relation[child]+'</div>';
+			term.href = "javascript:void(0)"; // To make 'select all' clickable, but not leave the page when hitting enter
+
+			childNode = new YAHOO.widget.TextNode(term, parentEntry, false); // Create the node
+			createChildren(parentNode[child], childNode); // createChildren() again for every child found
+		}
+	}
+
+	function buildSelectedTermsTree(termNode, parentNode) { // Build a tree with all selected terms
+		var index = 0;
+		var childNode;
+		while(index < termNode.children.length) { // While term in termTree has children
+			if(termNode.children[index].highlightState == 1) { // If the term is selected, add it to the 'selected term tree'
+
+				var tempTermName = termNode.children[index].label.split(" </a> "); // Two splits to find out the term name
+				var termName = tempTermName[1].split("</div>");
+
+				childNode = new YAHOO.widget.TextNode('<div id="'+getTermIDFromNode(termNode.children[index])+'"><a href="javascript:void(0)"></a>' + termName[0] + '</div>', parentNode, true);
+				childNode.href = "javascript:void(0)";
+
+				selectedIndex = 0;
+				while(selectedIndex < disabledTermsList.length) {
+					if(disabledTermsList[selectedIndex] == getTermIDFromNode(childNode)) {
+						childNode.toggleHighlight();
+					}
+					selectedIndex++;
+				}
+			}
+			else {
+				childNode = "";
+			}
+			if(termNode.children[index].children.length > 0) { // If term has children (selected or not doesn't matter)
+				if(childNode) { // If it's parent was selected, call buildSelectedTermsTree() with his parent, else, use the parent before that
+					buildSelectedTermsTree(termNode.children[index], childNode);
+				}
+				else {
+					buildSelectedTermsTree(termNode.children[index], parentNode);
+				}
+			}
+			else {
+				childNode = "";
+			}
+			index++;
+		}
+	}
+
+	var disabledTermsList = [];
+	function setDisabledTerms() { // Create an array with all selected (disabled) terms in the selected term tree
+		var disabledNodes = selectedTermsTree.getNodesByProperty('highlightState',1);
+		index = 0;
+		disabledTermsList = [];
+		while(index < disabledNodes.length) {
+			disabledTermsList.push(getTermIDFromNode(disabledNodes[index]));
+			index++;
+		}
+	}
+
+	var previewDropdownMenu = "";
+	function createPreview(depth, term) { // Creates the preview
+		if(depth == 0) { // createPreview is called with depth = 0, it's the first time, so create the select list
+			previewDropdownMenu = "";
+			previewDropdownMenu += '<select id=previewMenu>';
+		}
+		for(var termObj in term) { // For every term in 'term'
+			var termName = top.HEURIST.terms.termsByDomainLookup.relation[termObj];
+			var isDisabled = false;
+			for(var disabledIndex in top.HEURIST.terms.selectedDisabled) { // Check if it is in de disabled terms list, disable if so
+				var disabled = top.HEURIST.terms.selectedDisabled[disabledIndex];
+				if(disabled == termObj) {
+					previewDropdownMenu += '<option class="depth'+depth+'" id="'+termObj+'" disabled="disabled">'+termName+'</option>';
+					isDisabled = true;
+				}
+			}
+			if(!isDisabled) { // Is not disabled
+				previewDropdownMenu += '<option class="depth'+depth+'" id="'+termObj+'">'+termName+'</option>';
+			}
+			for(var termObjChild in term[termObj]) { // For every child found, repeat process
+				var hasChildren = true;
+			}
+			if(hasChildren) {
+				if(depth == 7) { // A dept of 8 (depth starts at 0) is maximum, to keep it organised
+					createPreview(depth, term[termObj]);
+				} else {
+					createPreview(depth+1, term[termObj]);
+				}
+			}
+		}
+		if(depth == 0) { // When depth = 0, this method is not called from within itself, so when this is true, close the select, and add to div
+			previewDropdownMenu += '</select>';
+			document.getElementById("previewList").innerHTML = previewDropdownMenu;
+		}
+	}
+
+	var treeInit = function() { // Initialize the trees
+		termTree = new YAHOO.widget.TreeView("termTree");
+		buildTermTree(termTree.getRoot()); // Fill the tree with all terms
+
+		// Selected terms tree
+		selectedTermsTree = new YAHOO.widget.TreeView("selectedTermsTree");
+
+		selectedTermsTree.subscribe("clickEvent",function() { // On click, select (disable) the term, and recreate the selected terms, and disabled terms arrays
+			this.onEventToggleHighlight.apply(this,arguments);
+
+			setDisabledTerms();
+			top.HEURIST.terms.selectedDisabled = disabledTermsList;
+			
+			createPreview(0, top.HEURIST.terms.selected);
+		});
+		selectedTermsTree.render();
+
+		termTree.subscribe("clickEvent",function() { // On click, select the term, and add it to the selected terms tree
+			this.onEventToggleHighlight.apply(this,arguments);
+
+			selectedTermsTree.removeChildren(selectedTermsTree.getRoot()); // Reset the 'selected terms tree'
+			buildSelectedTermsTree(termTree.getRoot(), selectedTermsTree.getRoot()); // Rebuild the 'selected terms tree'
+			selectedTermsTree.render();
+			
+			termArray = createTermArray(selectedTermsTree.getRoot()); // Create an array with all selected terms in var 'termArray'
+
+			top.HEURIST.terms.selected = termArray; // TO DO: JSON decode
+			
+			try { // In case no terms have been disabled yet
+				setDisabledTerms();
+				top.HEURIST.terms.selectedDisabled = disabledTermsList;
+			}
+			catch(e) { }
+			
+			createPreview(0, top.HEURIST.terms.selected);
+		});
+		termTree.render();
+	};
+
+	YAHOO.util.Event.onDOMReady(treeInit); // Start initializing the tree when the DOM has finished loading
+
+})();
+
+</script>
+</body>
+</html>
