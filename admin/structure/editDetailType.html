@@ -1,0 +1,260 @@
+<!--
+
+/**
+ * filename, brief description, date of creation, by whom
+ * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+ * @link: http://HeuristScholar.org
+ * @license http://www.gnu.org/licenses/gpl-3.0.txt
+ * @package Heurist academic knowledge management system
+ * @todo
+ **/
+
+-->
+<html>
+	<head>
+        <link rel=stylesheet href="../../common/css/heurist.css">
+        <link rel=stylesheet href="../../common/css/mini.css">
+
+        <style type="text/css">
+.formitem {
+    padding-bottom: 3px;
+    padding-top: 3px;
+    display: block;
+}        
+.formlabel {
+    display: inline-block;
+    width: 150px;
+    text-align: right;
+    padding-right: 3px;
+}
+        </style>
+
+<!--        
+  <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+-->
+  
+  
+  <script>
+    function fillValues(){
+        /*
+        window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+        var dty_ID = window.HEURIST.parameters['dty_ID'];
+        var edt = document.getElementById('ed_dty_ID');
+        edt.value = dty_ID;
+        */
+       
+    }   
+  </script>  
+        
+	</head>
+<body onload=" EditPopup.init()">
+    
+        <script src="../../common/js/utilsLoad.js"></script>
+        <script src="../../common/php/loadCommonInfo.php"></script>
+        <script src="../../common/php/displayPreferences.php"></script>
+
+    
+<script>
+
+            var EditPopup = (function () {
+                //private members
+                var _className = "EditPopup";
+                var _tabView;
+                var _type2TabIndexMap = {};
+                
+                var dty_ID;
+
+                // fill input controls with values
+                function _init () {
+                    if (location.search.length > 1) {
+                         window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+                         dty_ID = window.HEURIST.parameters['dty_ID'];
+                    }
+                    _updateUIFromObject();
+                    
+/*                    
+                    if (location.search.length > 1) {        // the calling app passed a parameter string - save it
+                        that.originalInputString = unescape(location.search.substring(1));
+                    }
+                    if ( Temporal.isValidFormat(that.originalInputString)) {
+                        try {
+                            that.origTemporal = Temporal.parse(that.originalInputString);
+                        }
+                        catch (e) {
+                            return "Error creating temporal from valid input string : " + that.originalInputString + " : " + e;
+                        }
+                    } else if (that.originalInputString) { // non temporal non empty string
+                        try {
+                                var tDate = TDate.parse(that.originalInputString);
+                                that.origTemporal = new Temporal();
+                                that.origTemporal.setType("s");  // simple date
+                                that.origTemporal.setTDate("DAT",tDate);
+                                that.origTemporal.setField("COM",that.originalInputString);
+                            }
+                            catch(e) { // unknown string
+                                that.origTemporal = new Temporal();
+                                that.origTemporal.setType("s");  // simple date with no date
+                                that.origTemporal.setField("COM",that.originalInputString);
+                            }
+                    } else { // empty string
+                        that.origTemporal = new Temporal();
+                        that.origTemporal.setType("s");  // simple date with no data
+                    }
+                    // set current temporal to original
+                    try {
+                        that.curTemporal = new Temporal(that.origTemporal.toString());  //FIXME should add a clone function to the temporal library
+                    }
+                    catch(e) {
+                        that.curTemporal = new Temporal();
+                        that.curTemporal.setType("s");  // simple date with no date
+                        that.curTemporal.setField("COM",that.originalInputString);
+                    }
+                    // set display
+                    _tabView = new YAHOO.widget.TabView('display-div');
+
+                    // set up temporal type to tab index mapping
+                    var tabs = _tabView.getAttributeConfig("tabs").value;
+                    for (var i=0; i < tabs.length; i++) {
+                        var type = tabs[i].getAttributeConfig("contentEl").value.id;
+                        _type2TabIndexMap[type] = i;
+                    }
+
+                    // select the tab for the initial temporal's type and change the label to show the user this is where things started
+                    _tabView.selectTab(_type2TabIndexMap[that.curTemporal.getType() ? that.curTemporal.getType():'s']);
+                    var activeTab = _tabView.getAttributeConfig("activeTab").value;
+                    activeTab.set("label", "<i>" + activeTab.get("label") + "</i>", false);
+                    _updateUIFromTemporal(that.curTemporal);
+                    _tabView.on('beforeActiveTabChange', function (ev) {
+                        var curType = ev.prevValue._configs.contentEl.value.id,
+                            newType = ev.newValue._configs.contentEl.value.id;
+                        // grab all the data from the current tab using the
+                        _updateTemporalFromUI(that.curTemporal);
+                        that.curTemporal.setType(newType);
+                        _updateUIFromTemporal(that.curTemporal);
+                        return;} );
+                    dRangeDraw();
+*/                    
+                };
+
+                function _updateUIFromObject() {
+                    var edt = document.getElementById('ed_dty_ID');
+                    if(dty_ID==null){
+                        edt.value = 'new detail type';
+                    } else{
+                        edt.value = dty_ID;
+                        
+                        var fieldnames = top.HEURIST.detailTypes.typedefs["commomFieldNames"];
+                        var values = top.HEURIST.detailTypes.typedefs[dty_ID].commonFields;
+                        
+                        for (var k in fieldnames) 
+                        if(k!=undefined){
+                            edt = document.getElementById('ed_'+fieldnames[k]);
+                            if(edt!=null && edt!=undefined){
+                                edt.value = values[k];
+                            }
+                        }
+                    }
+                }        
+
+                function _updateObjectFromUI() {
+                        var fieldnames = top.HEURIST.detailTypes.typedefs["commomFieldNames"];
+                        var values = top.HEURIST.detailTypes.typedefs[dty_ID].commonFields;
+                        for (var k in fieldnames) 
+                        if(k!=undefined){
+                            edt = document.getElementById('ed_'+fieldnames[k]);
+                            if(edt!=null && edt!=undefined){
+                                values[k] = edt.value;
+                            }
+                        }
+                        return values;
+                       /*
+                        var arr = $('[id^=ed_]');
+                        for (var k in arr){
+                            var ed = arr[k];
+                            values                                
+                        }
+                        */
+                }        
+                
+                //public members
+                var that = {
+                        originalInputString : "",
+                        origTemporal : null,
+                        curTemporal : null,
+                        name : "App",
+                        getTabView : function () {
+                            return _tabView;
+                        },
+                        init: function(){
+                            _init();
+                        },
+                        close : function () {
+                            var res = _updateObjectFromUI();
+                            
+                            /*
+                            _updateTemporalFromUI(that.curTemporal);
+                            var validity = Temporal.checkValidity(that.curTemporal);
+                            if (validity[0]) {  // valid temporal
+                                if (validity[2]) { //some extra code fields, so remove them
+                                    for (var i=0; i<validity[2].length; i++) {
+                                        that.curTemporal.removeObjForCode(validity[2][i]);
+                                    }
+                                }
+                                window.close( that.curTemporal.toString());
+                            }else{
+                                var msg = "";
+                                for (var i = 0; i < validity[1].length; i++) {
+                                 if (!msg){
+                                     msg = Temporal.getStringForCode(validity[1][i]);
+                                 }else{
+                                     msg += ", " + Temporal.getStringForCode(validity[1][i]);
+                                 }
+                                }
+                                msg = msg ? "The current temporal is missing the " + msg + " value(s)." : "";
+                                msg +=  validity[3] ? " " + validity[3] : "";
+                                if (!confirm( msg +
+                                        "Would you like to continue working? Press cancel to reset to the original string.")) {
+                                    window.close(that.originalInputString);
+                                }else{
+                                    window.close("");
+                                }
+                            }
+                            */
+                            window.close(res);
+                        },
+                        cancel : function () {
+                            window.close(null);
+                        },
+                        getClass : function () {
+                            return _className;
+                        },
+                        isA: function(strClass) {
+                            if(strClass === _className) return true;
+                            return false;
+                        }
+                };
+
+                //_init();
+                return that;
+            })();
+
+</script>    
+    
+    
+		<div id="maindiv" style="{padding:10px;}" >
+            <div class="formitem"><label class="formlabel"  for="ed_dty_ID">Code</label><input id="ed_dty_ID" readonly="readonly"/></div>
+            <div class="formitem"><label class="formlabel"  for="ed_dty_Name">Canonical (standard) name</label><input id="ed_dty_Name" maxlength="255"/></div>
+            <div class="formitem"><label class="formlabel"  for="ed_dty_DetailTypeGroupID">Group</label><input id="ed_dty_DetailTypeGroupID"/></div>
+            <div class="formitem"><label class="formlabel"  for="ed_dty_Type">Field type/value</label><input id="ed_dty_Type"/></div>
+            <div class="formitem"><label class="formlabel"  for="ed_dty_HelpText">Default prompt for user</label><input id="ed_dty_HelpText" maxlength="255"/></div>
+            <div class="formitem"><label class="formlabel"  for="ed_dty_Status">Reserved Heurist code</label><input id="ed_dty_Status"/></div>
+            <div class="formitem"><label class="formlabel"  for="ed_dty_ShowInLists">Visible for end-user</label><input id="ed_dty_ShowInLists" type="checkbox"/></div>
+            <div class="formitem"><label for="ed_dty_ExtendedDescription">Description (up to 5000 ch)</label><textarea id="ed_dty_ExtendedDescription" rows="3" style="width:400;"></textarea></div>
+        </div>
+        
+        <div style="{margin:auto; width:118;}">
+                <input type="button" tabindex="11" value="Save" onclick="EditPopup.close();" />
+                <input type="button" tabindex="12" value="Cancel" onclick="EditPopup.cancel();" />
+        </div>
+</body>
+</html>
