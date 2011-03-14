@@ -42,7 +42,7 @@ require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 if (! is_logged_in()) return;
 
-require_once(dirname(__FILE__)."/../../common/php/getRelationshipRecords.php");
+require_once(dirname(__FILE__)."/../../common/php/getRecordInfoLibrary.php");
 
 mysql_connection_overwrite(DATABASE);
 
@@ -123,7 +123,7 @@ function saveRelationship($recID, $relTermID, $trgRecID, $interpRecID, $title, $
 	$trgTitle = mysql_fetch_assoc(mysql_query("select rec_Title from Records where rec_ID = $trgRecID"));
 	$trgTitle = $trgTitle['rec_Title'];
 	mysql__insert("Records", array(
-		"rec_Title" => "$title ($recID $relval $trgRecID)",
+		"rec_Title" => "$title ($srcTitle $relval $trgTitle)",
                 "rec_Added"     => date('Y-m-d H:i:s'),
                 "rec_Modified"  => date('Y-m-d H:i:s'),
                 "rec_RecTypeID"   => 52,

@@ -61,7 +61,6 @@ require_once(dirname(__FILE__).'/../../common/config/manageInstancesDeprecated.p
 
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
-require_once(dirname(__FILE__).'/../../common/php/getRelationshipRecords.php');
 require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 

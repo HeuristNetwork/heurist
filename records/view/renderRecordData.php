@@ -46,7 +46,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 mysql_connection_db_select(DATABASE);
 
-require_once(dirname(__FILE__).'/../../common/php/getRelationshipRecords.php');
+require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 
 $noclutter = array_key_exists('noclutter', $_REQUEST);

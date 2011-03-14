@@ -285,7 +285,10 @@ function json_format($obj, $purdy=false) {
 		// Has a "0" element ... we'll call it an array
 		$json = "";
 		foreach ($obj as $val) {
-			if ($json) { $json .= ",";  if ($purdy) $json .= "\n"; }
+			if ($json) {
+				$json .= ",";
+				if ($purdy) $json .= "\n";
+			}
 			$json .= json_format($val);
 		}
 		return "[".$json."]";
@@ -294,9 +297,14 @@ function json_format($obj, $purdy=false) {
 		// Do object output
 		$json = "";
 		foreach ($obj as $key => $val) {
-			if ($json) { $json .= ","; if ($purdy) $json .= "\n"; }
-			if (preg_match('/^\d+$/', $key)) $json .= $key . ":" . json_format($val);
-			else $json .= "\"" . slash($key) . "\":" . json_format($val);
+			if ($json) {
+				$json .= ",";
+				if ($purdy) $json .= "\n";
+			}
+			if (preg_match('/^\d+$/', $key))
+				$json .= $key . ":" . json_format($val);
+			else
+				$json .= "\"" . slash($key) . "\":" . json_format($val);
 		}
 		return "{".$json."}";
 	}

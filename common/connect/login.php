@@ -20,9 +20,11 @@ require_once(dirname(__FILE__).'/../php/dbMySqlWrappers.php');
 //require_once('../php/dbMySqlWrappers.php');
 session_start();
 //error_log("in login  loaded includes  userdb = ". USERS_DATABASE);
+//error_log(" params =". $_SERVER['QUERY_STRING']);
 
 $last_uri = urldecode(@$_REQUEST['last_uri']);
 
+//error_log(" last uri = $last_uri");
 //if (! $last_uri)
 //	$last_uri = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['last_uri'];
 if (! $last_uri) {

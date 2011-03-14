@@ -164,13 +164,16 @@ DELIMITER $$
 	begin
 		if NEW.dtl_DetailTypeID=199 then
 			update recRelationshipsCache
+			-- need to also save teh RecTypeID for the record
 				set rrc_TargetRecID = NEW.dtl_Value
 				where rrc_RecID=NEW.dtl_RecID;
 		elseif NEW.dtl_DetailTypeID=202 then
 			update recRelationshipsCache
+			-- need to also save teh RecTypeID for the record
 				set rrc_SourceRecID = NEW.dtl_Value
 				where rrc_RecID=NEW.dtl_RecID;
 		end if;
+		-- need to add update for 200 to save the termID
 	end$$
 
 DELIMITER ;
@@ -203,13 +206,16 @@ DELIMITER $$
 	begin
 		if NEW.dtl_DetailTypeID=199 then
 			update recRelationshipsCache
+			-- need to also save teh RecTypeID for the record
 				set rrc_TargetRecID = NEW.dtl_Value
 				where rrc_RecID=NEW.dtl_RecID;
 		elseif NEW.dtl_DetailTypeID=202 then
 		update recRelationshipsCache
 				set rrc_SourceRecID = NEW.dtl_Value
+			-- need to also save teh RecTypeID for the record
 				where rrc_RecID=NEW.dtl_RecID;
 		end if;
+		-- need to add update for 200 to save the termID
 	end$$
 
 DELIMITER ;
@@ -226,7 +232,9 @@ DELIMITER $$
 	AFTER INSERT ON `Records`
 	FOR EACH ROW
 	begin
+	-- need to change this to check the rectype's type = relationship
 		if NEW.rec_RecTypeID = 52 then
+			--  need to also save relationship records RecTypeID
 			insert into recRelationshipsCache (rrc_RecID) values (NEW.rec_ID);
 		end if;
 	end$$
@@ -274,7 +282,9 @@ DELIMITER $$
 			insert into usrRecentRecords (rre_UGrpID, rre_RecID, rre_Time)
 				values (@logged_in_user_id, NEW.rec_ID, now());
 		end if;
+	-- need to change this to check the rectype's type = relationship
 		if NEW.rec_RecTypeID = 52 then
+			--  need to also save relationship records RecTypeID
 			insert ignore into recRelationshipsCache (rrc_RecID) values (NEW.rec_ID);
 		end if;
 	end$$
@@ -296,6 +306,7 @@ DELIMITER $$
 -- 14/2/11 Ian: Do we need this value set by the previous insert?
 		set @rec_version := last_insert_id();
 
+	-- need to change this to check the rectype's type = relationship
 		if OLD.rec_RecTypeID = 52 then
 			delete ignore from recRelationshipsCache where rrc_RecID = OLD.rec_ID;
 		end if;

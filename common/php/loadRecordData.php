@@ -54,7 +54,6 @@ if (! defined("JSON_RESPONSE")) {
 	require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 	require_once("dbMySqlWrappers.php");
 	require_once("getRecordInfoLibrary.php");
-	require_once("getRelationshipRecords.php");//saw TEST: moved here to after mySqlWrappers defined
 	if (! is_logged_in()) return;
 
 	header('Content-type: text/javascript');

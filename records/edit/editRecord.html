@@ -42,8 +42,11 @@
 		<script src="../../common/php/loadUserInfo.php"></script>
 		<script>
 			top.HEURIST.whenLoaded("obj-user", function() {
+				if (!top.HEURIST.baseURL) {
+					top.HEURIST.baseURL = "http://"+ location.hostname + top.HEURIST.basePath;
+				}
 				if (! top.HEURIST.is_logged_in()) {
-					top.location.replace(top.HEURIST.basePath + "common/connect/login.php?last_uri=" + top.HEURIST.basePath + "edit" + top.location.search);
+					top.location.replace(top.HEURIST.basePath + "common/connect/login.php?last_uri=" +escape(top.HEURIST.baseURL + "records/edit/editRecord.html" + top.location.search));
 				}
 			});
 		</script>

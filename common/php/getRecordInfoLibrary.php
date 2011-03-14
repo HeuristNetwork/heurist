@@ -9,7 +9,7 @@
  * @todo
  -->*/
 
-define('MEMCACHED_PORT', 11211);
+if (!defined('MEMCACHED_PORT')) define('MEMCACHED_PORT', 11211);
 $memcache = null;
 $lastModified = null;
 // read
@@ -31,9 +31,11 @@ function getCachedData($key) {
 	if (!$lastModified) {
 		setLastModified();
 	}
-	if (!$lastModified == $memcache->get('lastUpdate:'.$key)) {
+//error_log("key = $key lastMod = $lastModified and cached = ".$memcache->get('lastUpdate:'.$key));
+	if ($lastModified > $memcache->get('lastUpdate:'.$key)) {
 		// check the cached lastupdate value and return false on not equal meaning recreate data
-		return false;
+//		error_log("returning null from cache for key = $key");
+		return null;
 	}
 	return $memcache->get($key);
 }
@@ -49,7 +51,7 @@ function setCachedData($key, $var) {
 	if (!$lastModified) {
 		setLastModified();
 	}
-	$memcache->set('lastUpdate:'.$key,$var);
+	$memcache->set('lastUpdate:'.$key,$lastModified);
 	return $memcache->set($key,$var);
 }
 
@@ -122,6 +124,7 @@ function getBaseProperties($rec_id, $bkm_ID) {
 	$props = array();
 
 	if ($rec_id) $props["bibID"] = $rec_id;
+	if ($rec_id) $props["recID"] = $rec_id; // saw TODO leave both for now until weed out bibID
 	if ($bkm_ID) $props["bkmkID"] = $bkm_ID;
 	$props["title"] = $row["title"];
 	$props["rectype"] = $row["rectype"];
@@ -189,7 +192,7 @@ function getAllBibDetails($rec_id) {
 					"id" => $file["ulf_ID"],
 					"origName" => $file["ulf_OrigFileName"],
 					"date" => $file["ulf_ID"],
-					"mimeType" => $file["file_mimetype"],
+					"mimeType" => $file["file_mimetype"],	//	saw TODO lookup or delete
 					"nonce" => $file["ulf_ObfuscatedFileID"],
 					"fileSize" => $file["ulf_FileSizeKB"]
 				);
@@ -340,30 +343,31 @@ function getAllworkgroupTags($rec_id) {
 	return $kwd_ids;
 }
 
-function attachChild($contIndex, $index, $vocabs) {
-		if (!@count($vocabs[$index]) || $contIndex == $index) {
-			return $vocabs;
+function attachChild($contIndex, $index, $terms) {
+		if (!@count($terms[$index]) || $contIndex == $index) {
+			return $terms;
 		}
-//error_log(" enter attach $contIndex, $index, ".print_r($vocabs,true));
-		if (array_key_exists($index,$vocabs)) {
-			if (count($vocabs[$index])) {
-				foreach($vocabs[$index] as $cID => $n) {
+//error_log(" enter attach $contIndex, $index, ".print_r($terms,true));
+		if (array_key_exists($index,$terms)) {
+			if (count($terms[$index])) {
+				foreach($terms[$index] as $cID => $n) {
 					if ($cID != null) {
-						$vocabs = attachChild($index,$cID, $vocabs);
-// error_log(" after recurse $index, $cID, ".print_r($vocabs,true));
+						$terms = attachChild($index,$cID, $terms);
+// error_log(" after recurse $index, $cID, ".print_r($terms,true));
 					}
 				}
 			}
-//error_log(" attaching ".print_r($vocabs[$index],true));
-//error_log(" to ".print_r($vocabs[$contIndex],true));
-			$vocabs[$contIndex][$index] = $vocabs[$index];
-			unset($vocabs[$index]);
+//error_log(" attaching ".print_r($terms[$index],true));
+//error_log(" to ".print_r($terms[$contIndex],true));
+			$terms[$contIndex][$index] = $terms[$index];
+			unset($terms[$index]);
 		}
-// error_log(" exit attach $contIndex, $index, ".print_r($vocabs,true));
-		return $vocabs;
+// error_log(" exit attach $contIndex, $index, ".print_r($terms,true));
+		return $terms;
 	}
 
 function getTermTree($termDomain, $matching = 'exact') {	// vocabDomain can be empty, 'reltype' or 'enum' or any future term use domain defined in trm_Domain enum
+
 	$whereClause = "a.trm_Domain ".($matching == 'prefix' ?  " like '".$termDomain."%' " :
 									($matching == 'postfix' ?  " like '%".$termDomain."' " :
 									"='".$termDomain."'"));
@@ -373,41 +377,51 @@ function getTermTree($termDomain, $matching = 'exact') {	// vocabDomain can be e
 				where $whereClause
 				order by a.trm_Label, b.trm_Label";
 	$res = mysql_query($query);
-	$vocabs = array();
+	$terms = array();
 	while ($row = mysql_fetch_assoc($res)) {
-		if (!@$vocabs[$row["pID"]]) {
-			$vocabs[$row["pID"]] = array();
+		if (!@$terms[$row["pID"]]) {
+			$terms[$row["pID"]] = array();
 		}
 		if ($row['cID']) {
-				$vocabs[$row["pID"]][$row['cID']] = array();
+				$terms[$row["pID"]][$row['cID']] = array();
 		}
 	}
-	foreach ($vocabs as $pID => $cIDs) {
+	foreach ($terms as $pID => $cIDs) {
 			foreach( $cIDs as $cID => $n ) {
-				if ($cID != null && array_key_exists($cID,$vocabs)) {
-					if (count($vocabs[$cID]) ) {
-						$vocabs = attachChild($pID,$cID, $vocabs);
+				if ($cID != null && array_key_exists($cID,$terms)) {
+					if (count($terms[$cID]) ) {
+						$terms = attachChild($pID,$cID, $terms);
 					}else{
-						unset($vocabs[$cID]);
+						unset($terms[$cID]);
 					}
 				}
 			}
 	}
-	return $vocabs;
+	return $terms;
 }
 
 function getTerms() {	// vocabDomain can be empty, 'reltype' or 'enum' or any future term use domain defined in trm_Domain enum
+	$cacheKey = HEURIST_DBNAME.":getTerms";
+	$terms = getCachedData($cacheKey);
+	if ($terms) {
+		return $terms;
+	}
+
 	$query = "select trm_ID as ID, trm_Label as Term, if(trm_Domain like 'enum%', 'enum', 'relation') as Domain
 				from defTerms
 				order by Domain, trm_Label";
 	$res = mysql_query($query);
-	$vocabs = array('relation'=> array(), 'enum'=> array());
+	$terms = array('termsByDomainLookup' => array('relation'=> array(), 'enum'=> array()));
 	while ($row = mysql_fetch_assoc($res)) {
-			$vocabs[$row["Domain"]][$row["ID"]] = $row['Term'];
+			$terms['termsByDomainLookup'][$row["Domain"]][$row["ID"]] = $row['Term'];
 	}
-	return $vocabs;
+	$terms['treesByDomain'] = array('relation' => getTermTree("reltype","prefix"),
+									'enum' => getTermTree("enum","prefix"));
+	setCachedData($cacheKey,$terms);
+	return $terms;
 }
 
+/*
 function getTermSets($termDomain) {	// termDomain can be empty, 'reltype' or 'enum' or any future term use domain defined in trm_Domain enum
 	$query = "select a.trm_Label as pName, b.trm_Label as cName, a.trm_ID as pID, b.trm_ID as cID, b.trm_ChildCount as childCnt,
 					if(a.trm_ParentTermID is null,'top',if(b.trm_ChildCount = 0,'bottom', 'middle')) as nodetype
@@ -432,6 +446,7 @@ function getTermSets($termDomain) {	// termDomain can be empty, 'reltype' or 'en
 	}
 	return $terms;
 }
+*/
 
 function getRectypeConstraints($rectypeID) {
 	$query = "select rcs_SourceRectypeID as srcID,
@@ -441,33 +456,28 @@ function getRectypeConstraints($rectypeID) {
 					trm_Depth as level
 				from defRelationshipConstraints
 					left join defTerms on rcs_TermID = trm_ID
-				".(@$rectypeID ? " where rcs_SourceRectypeID = $rectypeID":"")."
+				".(@$rectypeID ? " where rcs_SourceRectypeID = $rectypeID or rcs_SourceRectypeID is null":"")."
 				order by rcs_SourceRectypeID is null,
-					rcs_TargetRectypeID is null,
 					rcs_SourceRectypeID,
-					rcs_TargetRectypeID,
-					trm_Level,
+					trm_Depth,
 					rcs_TermID is null,
-					rcs_TermID";
+					rcs_TermID,
+					rcs_TargetRectypeID is null,
+					rcs_TargetRectypeID";
 	$res = mysql_query($query);
 	$cnstrnts = array();
 	while ($row = mysql_fetch_assoc($res)) {
-		$srcID = (@$row['srcID'] === null ? 'any' : $row['srcID']);
-		$trmID = (@$row['trmID'] === null ? 'any' : $row['trmID']);
-		$trgID = (@$row['trgID'] === null ? 'any' : $row['trgID']);
-		$max = (@$row['max'] === null ? 'nolimit' : $row['max']);
+		$srcID = (@$row['srcID'] === null ? "".'0' : $row['srcID']);
+		$trmID = (@$row['trmID'] === null ? "".'0' : $row['trmID']);
+		$trgID = (@$row['trgID'] === null ? "".'0' : $row['trgID']);
+		$max = (@$row['max'] === null ? '' : $row['max']);
 		if (!@$cnstrnts[$srcID]) {
-			$cnstrnts[$srcID] = array('byTerm'=>array(), 'byTarget' => array());
+			$cnstrnts[$srcID] = array();
 		}
-		if (!@$cnstrnts[$srcID]['byTerm'][$trmID]) {
-			$cnstrnts[$srcID]['byTerm'][$trmID] = array($trgID => $max);
+		if (!@$cnstrnts[$srcID][$trmID]) {
+			$cnstrnts[$srcID][$trmID] = array($trgID => $max);
 		}else{
-			$cnstrnts[$srcID]['byTerm'][$trmID][$trgID] = $max;
-		}
-		if (!@$cnstrnts[$srcID]['byTarget'][$trgID]) {
-			$cnstrnts[$srcID]['byTarget'][$trgID] = array($trmID => $max);
-		}else{
-			$cnstrnts[$srcID]['byTarget'][$trgID][$trmID] = $max;
+			$cnstrnts[$srcID][$trmID][$trgID] = $max;
 		}
 	}
 	return $cnstrnts;
@@ -478,40 +488,65 @@ function getAllRectypeConstraint() {
 					rcs_TermID as trmID,
 					rcs_TargetRectypeID as trgID,
 					rcs_TermLimit as max,
-					trm_Depth as level
+					trm_Depth as level,
+					if(trm_ChildCount > 0, true, false) as hasCildren
 				from defRelationshipConstraints
 					left join defTerms on rcs_TermID = trm_ID
 				order by rcs_SourceRectypeID is null,
-					rcs_TargetRectypeID is null,
 					rcs_SourceRectypeID,
-					rcs_TargetRectypeID,
 					trm_Depth,
 					rcs_TermID is null,
-					rcs_TermID";
+					rcs_TermID,
+					rcs_TargetRectypeID is null,
+					rcs_TargetRectypeID";
 	$res = mysql_query($query);
 	$cnstrnts = array();
 	while ($row = mysql_fetch_assoc($res)) {
-		$srcID = (@$row['srcID'] === null ? '0 ' : $row['srcID']);
-		$trmID = (@$row['trmID'] === null ? '0 ' : $row['trmID']);
-		$trgID = (@$row['trgID'] === null ? '0 ' : $row['trgID']);
+		$srcID = (@$row['srcID'] === null ? "".'0' : $row['srcID']);
+		$trmID = (@$row['trmID'] === null ? "".'0' : $row['trmID']);
+		$trgID = (@$row['trgID'] === null ? "".'0' : $row['trgID']);
 		$max = (@$row['max'] === null ? '' : $row['max']);
 		if (!@$cnstrnts[$srcID]) {
-			$cnstrnts[$srcID] = array('byTerm'=>array(), 'byTarget' => array());
+			$cnstrnts[$srcID] = array();
 		}
-		if (!@$cnstrnts[$srcID]['byTerm'][$trmID]) {
-			$cnstrnts[$srcID]['byTerm'][$trmID] = array($trgID => $max);
-		}else{
-			$cnstrnts[$srcID]['byTerm'][$trmID][$trgID] = $max;
+		if (!@$cnstrnts[$srcID][$trmID] || @$cnstrnts[$srcID][$trmID]['inheritCnstrnt']) {
+			if(@$cnstrnts[$srcID][$trmID]['inheritCnstrnt']) {	// term has a defined constratin so override the inheritted
+				unset($cnstrnts[$srcID][$trmID]);
 		}
-		if (!@$cnstrnts[$srcID]['byTarget'][$trgID]) {
-			$cnstrnts[$srcID]['byTarget'][$trgID] = array($trmID => $max);
+			$offspring = $trmID ? getTermOffspringList($trmID):null;
+			$cnstrnts[$srcID][$trmID] = $offspring ? array('offspring' => $offspring, $trgID => $max):
+																array($trgID => $max);
 		}else{
-			$cnstrnts[$srcID]['byTarget'][$trgID][$trmID] = $max;
+			$cnstrnts[$srcID][$trmID][$trgID] = $max;
+		}
+		if (@$cnstrnts[$srcID][$trmID]['offspring']) {
+			foreach ($cnstrnts[$srcID][$trmID]['offspring'] as $childTermID) { // point all offspring to inherit from term
+				$cnstrnts[$srcID][$childTermID] = array('inheritCnstrnt' => $trmID);
+			}
 		}
 	}
 	return $cnstrnts;
 }
 
+// returns array list of all terms under a given term
+function getTermOffspringList($termID) {
+	$offspring = array();
+	if ($termID) {
+		$res = mysql_query("select * from defTerms where trm_ParentTermID = $termID");
+		if (mysql_num_rows($res)) {	//child nodes exist
+			while ($row = mysql_fetch_assoc($res)) { // for each child node
+				$subTermID = $row['trm_ID'];
+				array_push($offspring,$subTermID);
+				if ($row['trm_ChildCount'] > 0) {
+					$offspring = array_merge($offspring, getTermOffspringList($subTermID));
+				}
+			}
+		}
+	}
+	return $offspring;
+}
+
+/*
 // returns array subtree for a given term
 function getPrunedTermSubtree($termID,$pruneIDs) {
 	$subTree = "1";
@@ -531,6 +566,8 @@ function getPrunedTermSubtree($termID,$pruneIDs) {
 	}
 	return $subTree;
 }
+
+*/
 
 function getRectypeColNames(){
 	return array("rty_Name",
@@ -596,7 +633,7 @@ function getRectypeFields($rt_id) {
 						"rst_DisplayOrder",
 						"if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID) as rst_DisplayDetailTypeGroupID",
 						"if(rst_FilteredJsonTermIDTree is not null,rst_FilteredJsonTermIDTree,dty_JsonTermIDTree) as rst_FilteredJsonTermIDTree",
-						"rst_PtrFilteredIDs",
+						"if(rst_PtrFilteredIDs is not null,rst_PtrFilteredIDs,dty_PtrTargetRectypeIDs) as rst_PtrFilteredIDs",
 						"rst_AdditionalHeaderTermIDs",
 						"rst_CalcFunctionID",
 						"rst_Status",
@@ -634,7 +671,8 @@ function getRectypeStructures($rt_ids) {
 
 // returns an array of RecType Structures for all RecTypes
 function getAllRectypeStructures() {
-	$rtStructs = getCachedData(HEURIST_DBNAME.":AllRecTypeInfo");
+	$cacheKey = HEURIST_DBNAME.":AllRecTypeInfo";
+	$rtStructs = getCachedData($cacheKey);
 	if ($rtStructs) {
 		return $rtStructs;
 	}
@@ -653,7 +691,7 @@ function getAllRectypeStructures() {
 						"rst_DisplayOrder",
 						"if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID) as rst_DisplayDetailTypeGroupID",
 						"if(rst_FilteredJsonTermIDTree is not null,rst_FilteredJsonTermIDTree,dty_JsonTermIDTree) as rst_FilteredJsonTermIDTree",
-						"rst_PtrFilteredIDs",
+						"if(rst_PtrFilteredIDs is not null,rst_PtrFilteredIDs,dty_PtrTargetRectypeIDs) as rst_PtrFilteredIDs",
 						"rst_AdditionalHeaderTermIDs",
 						"rst_CalcFunctionID",
 						"rst_Status",
@@ -666,7 +704,7 @@ function getAllRectypeStructures() {
 															left join defDetailTypes on rst_DetailTypeID = dty_ID
 															left join defDetailTypeGroups on dtg_ID = if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID)
 														order by rst_RecTypeID, dtg_Order, dtg_Name,  rst_DisplayOrder, rst_ID");
-	$rtStructs = array('groups' => array(),'names' => array(),'pluralNames' => array(),'dtDisplayOrder' => array());
+	$rtStructs = array('groups' => getRectypeGroups(),'names' => array(),'pluralNames' => array(),'dtDisplayOrder' => array());
 	$rtStructs['typedefs'] = array('commomFieldNames' => getRectypeColNames(), 'dtFieldNames' => getRectypeStructureFieldColNames());
 	while ($row = mysql_fetch_row($res)) {
 		if (!array_key_exists($row[0],$rtStructs['typedefs'])) {
@@ -694,7 +732,7 @@ function getAllRectypeStructures() {
 		$rtStructs['pluralNames'][$row[0]] = $row[9];
 	}
 	$rtStructs['constraints'] = getAllRectypeConstraint();
-	setCachedData(HEURIST_DBNAME.":AllRecTypeInfo",$rtStructs);
+	setCachedData($cacheKey,$rtStructs);
 	return $rtStructs;
 }
 
@@ -702,7 +740,7 @@ function getRectypeGroups() {
 	$rtGroups = array();
 	$res = mysql_query("select * from defRecTypeGroups order by rtg_Order, rtg_Name");
 	while ($row = mysql_fetch_assoc($res)) {
-		$rtGroups[$row["rtg_ID"]] = $row["rtg_Name"];
+		$rtGroups[$row["rtg_ID"]] = array('name' => $row["rtg_Name"]);
 	}
 	return $rtGroups;
 }
@@ -722,7 +760,20 @@ function getRecTypesByGroup() {
 	return $rectypesByGroup;
 }
 
-function getDetailTypeColNames(){
+function getDetailTypeUsage() {
+	$rectypesByDetailType = array();
+	$res = mysql_query("select rst_DetailTypeID as dtID, rst_RecTypeID as rtID
+						from defRecStructure order by dtID, rtID");
+	while ($row = mysql_fetch_assoc($res)) {
+		if (!array_key_exists($row['dtID'],$rectypesByDetailType)){
+			$rectypesByDetailType[$row['dtID']] = array();
+		}
+		array_push($rectypesByDetailType[$row['dtID']],$row["rtID"]);
+	}
+	return $rectypesByDetailType;
+}
+
+function getDetailTypeColNames() {
 	return array("dty_Name",
 					"dty_ExtendedDescription",
 					"dty_Type",
@@ -733,32 +784,34 @@ function getDetailTypeColNames(){
 					"dty_DetailTypeGroupID",
 					"dty_FieldSetRecTypeID",
 					"dty_JsonTermIDTree",
-					"dty_HeaderTermIDs");
+					"dty_HeaderTermIDs",
+					"dty_PtrTargetRectypeIDs",
+					"dty_ID");
 }
 
 // returns an array of RecType Structures for all RecTypes
 function getAllDetailTypeStructures() {
-	$dtStructs = getCachedData(HEURIST_DBNAME.":AllDetailTypeInfo");
+	$cacheKey = HEURIST_DBNAME.":AllDetailTypeInfo";
+	$dtStructs = getCachedData($cacheKey);
 	if ($dtStructs) {
-		return $dtStructs;
+//		return $dtStructs;
 	}
 
-	$dtStructs = array('groups' => array(),'names' => array(), 'typedefs' => array('commomFieldNames' => getDetailTypeColNames()));
+	$dtStructs = array('groups' => getDetailTypeGroups(),
+						'names' => array(),
+						'rectypeUsage' => getDetailTypeUsage(),
+						'typedefs' => array('commomFieldNames' => getDetailTypeColNames()));
 
 	$res = mysql_query("select dty_ID, dtg_ID, dtg_Name, ".join(",", getDetailTypeColNames())." from defDetailTypes
 							left join defDetailTypeGroups  on dtg_ID = dty_DetailTypeGroupID
 							order by dtg_Order, dtg_Name, dty_OrderInGroup, dty_Name");
 
 	while ($row = mysql_fetch_row($res)) {
-		if (!array_key_exists($row[1],$dtStructs['groups'])) {
-			$dtStructs['groups'][$row[1]] = array('types'=> array($row[0] => $row[8]),'name' => $row[2]);
-		}else{
 			$dtStructs['groups'][$row[1]]['types'][$row[0]] = $row[8];
-		}
 		$dtStructs['typedefs'][$row[0]]['commonFields'] = array_slice($row,3);
 		$dtStructs['names'][$row[0]] = $row[3];
 	}
-	setCachedData(HEURIST_DBNAME.":AllDetailTypeInfo",$dtStructs);
+	setCachedData($cacheKey,$dtStructs);
 	return $dtStructs;
 }
 
@@ -792,7 +845,7 @@ function getDetailTypeGroups() {
 	$dtGroups = array();
 	$res = mysql_query("select * from defDetailTypeGroups order by dtg_Order, dtg_Name");
 	while ($row = mysql_fetch_assoc($res)) {
-		$dtGroups[$row["dtg_ID"]] = $row["dtg_Name"];
+		$dtGroups[$row["dtg_ID"]] = array( 'name' => $row["dtg_Name"]);
 	}
 	return $dtGroups;
 }
@@ -812,5 +865,325 @@ function getDetailTypesByGroup() {
 	return $detailTypesByGroup;
 }
 
+function reltype_inverse ($relTermID) {	//saw Enum change - find inverse as an id instead of a string
+	global $inverses;
+	if (!$relTermID) return;
+	if (! $inverses) {
+		//		$inverses = mysql__select_assoc("defTerms A left join defTerms B on B.trm_ID=A.trm_InverseTermID", "A.trm_Label", "B.trm_Label", "A.rdl_rdt_id=200 and A.trm_Label is not null");
+		$inverses = mysql__select_assoc("defTerms A left join defTerms B on B.trm_ID=A.trm_InverseTermID", "A.trm_ID", "B.trm_ID", "A.trm_Label is not null and B.trm_Label is not null");
+	}
+
+	$inverse = @$inverses[$relTermID];
+	if (!$inverse)
+	$inverse = array_search($relTermID, $inverses);
+	if (!$inverse)
+	$inverse = 'Inverse of '.$relTermID;
+
+	return $inverse;
+}
+
+function fetch_relation_details($recID, $i_am_primary) {
+	/* Raid recDetails for the given link resource and extract all the necessary values */
+
+	$res = mysql_query('select * from recDetails where dtl_RecID = ' . $recID);
+	$bd = array('recID' => $recID);
+	while ($row = mysql_fetch_assoc($res)) {
+		switch ($row['dtl_DetailTypeID']) {
+			case 200:	//saw Enum change - added RelationValue for UI
+				if ($i_am_primary) {
+					$bd['relTermID'] = $row['dtl_Value'];
+				}else{
+					$bd['relTermID'] = reltype_inverse($row['dtl_Value']);
+				}
+				$relval = mysql_fetch_assoc(mysql_query('select trm_Label, trm_ParentTermID from defTerms where trm_ID = ' .  intval($bd['RelTermID'])));
+				$bd['relTerm'] = $relval['trm_Label'];
+				if ($relval['trm_ParentTermID'] ) {
+					$bd['parentTermID'] = $relval['trm_ParentTermID'];
+				}
+				break;
+
+			case 199:	// linked resource
+				if (! $i_am_primary) break;
+				$r = mysql_query('select rec_ID as recID, rec_Title as title, rec_RecTypeID as rectype, rec_URL as URL
+				from Records where rec_ID = ' . intval($row['dtl_Value']));
+				$bd['relatedRecID'] = mysql_fetch_assoc($r);
+				break;
+
+			case 202:
+				if ($i_am_primary) break;
+				$r = mysql_query('select rec_ID as recID, rec_Title as title, rec_RecTypeID as rectype, rec_URL as URL
+				from Records where rec_ID = ' . intval($row['dtl_Value']));
+				$bd['relatedRecID'] = mysql_fetch_assoc($r);
+				break;
+
+			case 638:
+				$r = mysql_query('select rec_ID as recID, rec_Title as title, rec_RecTypeID as rectype, rec_URL as URL
+				from Records where rec_ID = ' . intval($row['dtl_Value']));
+				$bd['interpRecID'] = mysql_fetch_assoc($r);
+				break;
+
+			case 201:
+				$bd['notes'] = $row['dtl_Value'];
+				break;
+
+			case 160:
+				$bd['title'] = $row['dtl_Value'];
+				break;
+
+			case 177:
+				$bd['startDate'] = $row['dtl_Value'];
+				break;
+
+			case 178:
+				$bd['endDate'] = $row['dtl_Value'];
+				break;
+		}
+	}
+
+	return $bd;
+}
+function getAllRelatedRecords($recID, $relnRecID=0) {
+	if (! $recID) return null;
+	$query = "select relnID,
+					src.dtl_Value as src,
+					srcRec.rec_RecTypeID as srcRT,
+					srcRec.rec_Title as srcTitle,
+					srcRec.rec_URL as srcURL,
+					trg.dtl_Value as trg,
+					if(srcRec.rec_ID = $recID, 'Primary', 'Non-Primary') as role,
+					trgRec.rec_RecTypeID as trgRT,
+					trgRec.rec_Title as trgTitle,
+					trgRec.rec_URL as trgURL,
+					trm.dtl_Value as trmID,
+					term.trm_Label as term,
+					inv.trm_ID as invTrmID,
+					if(inv.trm_ID, inv.trm_Label, concat('inverse of ', term.trm_Label)) as invTrm,
+					rlnTtl.dtl_Value as title,
+					rlnNote.dtl_Value as note,
+					strDate.dtl_Value as strDate,
+					endDate.dtl_Value as endDate,
+					intrpRec.rec_ID as intrp,
+					intrpRec.rec_RecTypeID as intrpRT,
+					intrpRec.rec_Title as intrpTitle,
+					intrpRec.rec_URL as intrpURL
+				from (select rrc_RecID as relnID from recRelationshipsCache) rels
+					left join recDetails src on src.dtl_RecID = rels.relnID and src.dtl_DetailTypeID = 202
+					left join Records srcRec on src.dtl_Value = srcRec.rec_ID
+					left join recDetails trg on trg.dtl_RecID = rels.relnID and trg.dtl_DetailTypeID = 199
+					left join Records trgRec on trg.dtl_Value = trgRec.rec_ID
+					left join recDetails trm on trm.dtl_RecID = rels.relnID and trm.dtl_DetailTypeID = 200
+					left join defTerms term on term.trm_ID = trm.dtl_Value
+					left join defTerms inv on inv.trm_ID = term.trm_InverseTermID
+					left join recDetails intrp on intrp.dtl_RecID = rels.relnID and intrp.dtl_DetailTypeID = 638
+					left join Records intrpRec on intrp.dtl_Value = intrpRec.rec_ID
+					left join recDetails rlnTtl on rlnTtl.dtl_RecID = rels.relnID and rlnTtl.dtl_DetailTypeID = 160
+					left join recDetails rlnNote on rlnNote.dtl_RecID = rels.relnID and rlnNote.dtl_DetailTypeID = 201
+					left join recDetails strDate on strDate.dtl_RecID = rels.relnID and strDate.dtl_DetailTypeID = 177
+					left join recDetails endDate on endDate.dtl_RecID = rels.relnID and endDate.dtl_DetailTypeID = 178
+				where (srcRec.rec_ID = $recID or trgRec.rec_ID = $recID)";
+	if ($relnRecID) $query .= " and rels.relnID = $relnRecID";
+
+
+	//error_log($query);
+	$res = mysql_query($query);	/* primary resources first, then non-primary, then authors */
+
+	if (!mysql_num_rows($res)) {
+		return array();
+	}
+	$relations = array('relationshipRecs' => array());
+	while ($row = mysql_fetch_assoc($res)) {
+		$relnRecID = $row["relnID"];
+
+		$relations['relationshipRecs'][$relnRecID] = array( "relnID" => $relnRecID,
+															"title" => $row['title'],
+															"recID" => $recID,
+															"role" => $row['role'],
+															"relTermID" => $row['trmID'],
+															"relTerm" => $row['term'],
+															"relInvTerm" => $row['invTrm']);
+
+		if (@$row['invTrmID']) {
+			$relations['relationshipRecs'][$relnRecID]["relInvTermID"] = $row['invTrmID'];
+		}
+
+		if (@$row['note']) {
+			$relations['relationshipRecs'][$relnRecID]["notes"] = $row['note'];
+		}
+
+		if (@$row['strDate']) {
+			$relations['relationshipRecs'][$relnRecID]["startDate"] = $row['strDate'];
+		}
+
+		if (@$row['endDate']) {
+			$relations['relationshipRecs'][$relnRecID]["endDate"] = $row['endDate'];
+		}
+
+		if (@$row['intrp']) {
+			$relations['relationshipRecs'][$relnRecID]["interpRec"] = array("title" => $row["intrpTitle"],
+																			"rectype" => $row["intrpRT"],
+																			"URL" => $row["intrpURL"],
+																			"recID" => $row["intrp"]);
+		}
+
+		if ($row['src'] == $recID) {
+			$relations['relationshipRecs'][$relnRecID]["relatedRec"] = array("title" => $row["trgTitle"],
+																				"rectype" => $row["trgRT"],
+																				"URL" => $row["trgURL"],
+																				"recID" => $row["trg"]);
+		} else {
+			$relations['relationshipRecs'][$relnRecID]["relatedRec"] = array("title" => $row["srcTitle"],
+																				"rectype" => $row["srcRT"],
+																				"URL" => $row["srcURL"],
+																				"recID" => $row["src"]);
+		}
+	}
+
+	foreach ($relations['relationshipRecs'] as $relnRecID => $reln) {
+		$relRT = $reln['relatedRec']['rectype'];
+		$relRecID = $reln['relatedRec']['recID'];
+		$relTermID = $reln['relTermID'];
+		if (!array_key_exists('byRectype',$relations)) {
+			$relations['byRectype'] = array();
+		}
+		if (!array_key_exists($relRT,$relations['byRectype'])) {
+			$relations['byRectype'][$relRT] = array();
+		}
+		if (!array_key_exists($relTermID,$relations['byRectype'][$relRT])) {
+			$relations['byRectype'][$relRT][$relTermID] = array($relnRecID);
+		} else {
+			array_push($relations['byRectype'][$relRT][$relTermID],$relnRecID);
+		}
+		if (!array_key_exists('byTerm',$relations)) {
+			$relations['byTerm'] = array();
+		}
+		if (!array_key_exists($relTermID,$relations['byTerm'])) {
+			$relations['byTerm'][$relTermID] = array();
+		}
+		if (!array_key_exists($relRT,$relations['byTerm'][$relTermID])) {
+			$relations['byTerm'][$relTermID][$relRT] = array($relnRecID);
+		} else {
+			array_push($relations['byTerm'][$relTermID][$relRT],$relnRecID);
+		}
+	}
+
+	return $relations;
+}
+
+/*
+function getAllRelatedRecords2($recID, $relnRecID=0) {
+	if (! $recID) return null;
+	$query = "select LINK.dtl_DetailTypeID as type, DETAILS.*, DBIB.rec_Title as title,
+	DBIB.rec_RecTypeID as rt, DBIB.rec_URL as url
+	from recDetails LINK left join Records LBIB on LBIB.rec_ID=LINK.dtl_RecID,
+	recDetails DETAILS left join Records DBIB on DBIB.rec_ID=DETAILS.dtl_Value and
+	DETAILS.dtl_DetailTypeID in (202, 199, 158)
+	where ((LINK.dtl_DetailTypeID in (202, 199) and LBIB.rec_RecTypeID=52)
+	or LINK.dtl_DetailTypeID=158) and LINK.dtl_Value = $recID and DETAILS.dtl_RecID = LINK.dtl_RecID";
+	if ($relnRecID) $query .= " and DETAILS.dtl_RecID = $relnRecID";
+
+	$query .= " order by LINK.dtl_DetailTypeID desc, DETAILS.dtl_ID";
+
+	//error_log($query);
+	$res = mysql_query($query);	// primary resources first, then non-primary, then authors
+
+	if (!mysql_num_rows($res)) {
+		return array();
+	}
+	$relations = array('relationshipRecs' => array());
+	while ($row = mysql_fetch_assoc($res)) {
+		$relnRecID = $row["dtl_RecID"];
+		$i_am_primary = ($row["type"] == 202);
+		if (! array_key_exists($relnRecID, $relations['relationshipRecs'])){
+			$relations['relationshipRecs'][$relnRecID] = array();
+		}
+
+		if (! array_key_exists("role", $relations['relationshipRecs'][$relnRecID])) {
+			if ($row["type"] == 202) {
+				$relations['relationshipRecs'][$relnRecID]["role"] = "Primary";
+			} else if ($row["type"] == 199) {
+				$relations['relationshipRecs'][$relnRecID]["role"] = "Non-primary";
+			} else {
+				$relations['relationshipRecs'][$relnRecID]["role"] = "Unknown";
+			}
+		}
+		if (! array_key_exists("recID", $relations['relationshipRecs'][$relnRecID])) {
+			$relations['relationshipRecs'][$relnRecID]["recID"] = $recID;
+		}
+
+		switch ($row["dtl_DetailTypeID"]) {
+			case 200:	//saw Enum change - nothing to do since dtl_Value is an id and inverse returns an id
+				$relations['relationshipRecs'][$relnRecID]["relTermID"] = $i_am_primary? $row["dtl_Value"] : reltype_inverse($row["dtl_Value"]);
+				if($relations['relationshipRecs'][$relnRecID]["relTermID"]) {
+					$relval = mysql_fetch_assoc(mysql_query('select trm_Label from defTerms where trm_ID = ' .  intval($relations['relationshipRecs'][$relnRecID]["relTermID"])));
+					$relations['relationshipRecs'][$relnRecID]['relTerm'] = $relval['trm_Label'];
+				}
+				break;
+
+			case 199:
+			case 202:
+				if ( $row["dtl_Value"] !=  $recID) {
+					$relations['relationshipRecs'][$relnRecID]["relatedRec"] = array("title" => $row["title"],
+																					"rectype" => $row["rt"],
+																					"URL" => $row["url"],
+																					"recID" => $row["dtl_Value"]);
+				}
+				break;
+
+			case 638:
+			$relations['relationshipRecs'][$relnRecID]["interpRec"] = array("title" => $row["title"],
+																			"rectype" => $row["rt"],
+																			"URL" => $row["url"],
+																			"recID" => $row["dtl_Value"]);
+			break;
+
+			case 201:
+			$relations['relationshipRecs'][$relnRecID]["notes"] = $row["dtl_Value"];
+			break;
+
+			case 160:
+			$relations['relationshipRecs'][$relnRecID]["title"] = $row["dtl_Value"];
+			break;
+
+			case 177:
+			$relations['relationshipRecs'][$relnRecID]["startDate"] = $row["dtl_Value"];
+			break;
+
+			case 178:
+			$relations['relationshipRecs'][$relnRecID]["endDate"] = $row["dtl_Value"];
+			break;
+		}
+
+	}
+	foreach ($relations['relationshipRecs'] as $relnRecID => $reln) {
+		$relRT = $reln['relatedRec']['rectype'];
+		$relRecID = $reln['relatedRec']['recID'];
+		$relTermID = $reln['relTermID'];
+		if (!array_key_exists('byRectype',$relations)) {
+			$relations['byRectype'] = array();
+		}
+		if (!array_key_exists($relRT,$relations['byRectype'])) {
+			$relations['byRectype'][$relRT] = array();
+		}
+		if (!array_key_exists($relTermID,$relations['byRectype'][$relRT])) {
+			$relations['byRectype'][$relRT][$relTermID] = array($relRecID);
+		} else {
+			array_push($relations['byRectype'][$relRT][$relTermID],$relRecID);
+		}
+		if (!array_key_exists('byTerm',$relations)) {
+			$relations['byTerm'] = array();
+		}
+		if (!array_key_exists($relTermID,$relations['byTerm'])) {
+			$relations['byTerm'][$relTermID] = array();
+		}
+		if (!array_key_exists($relRT,$relations['byTerm'][$relTermID])) {
+			$relations['byTerm'][$relTermID][$relRT] = array($relRecID);
+		} else {
+			array_push($relations['byTerm'][$relTermID][$relRT],$relRecID);
+		}
+	}
+
+	return $relations;
+}
+*/
 	/*no carriage returns after closing script tags please, it breaks xml script genenerator that uses this file as include */
 ?>

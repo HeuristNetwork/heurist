@@ -159,9 +159,7 @@
 	/* Raid recDetails for the given link resource and extract all the necessary values */
 
 		$res = mysql_query('select * from recDetails where dtl_RecID = ' . $recID);
-	$bd = array(
-		'recID' => $recID
-	);
+		$bd = array('recID' => $recID);
 	while ($row = mysql_fetch_assoc($res)) {
 		switch ($row['dtl_DetailTypeID']) {
 		    case 200:	//saw Enum change - added RelationValue for UI
@@ -221,9 +219,13 @@
 
 	function getAllRelatedRecords($recID, $relnRecID=0) {
 		if (! $recID) return null;
-	$query = "select LINK.dtl_DetailTypeID as type, DETAILS.*, DBIB.rec_Title as title, DBIB.rec_RecTypeID as rt, DBIB.rec_URL as url
-		from recDetails LINK left join Records LBIB on LBIB.rec_ID=LINK.dtl_RecID, recDetails DETAILS left join Records DBIB on DBIB.rec_ID=DETAILS.dtl_Value and DETAILS.dtl_DetailTypeID in (202, 199, 158)
-		where ((LINK.dtl_DetailTypeID in (202, 199) and LBIB.rec_RecTypeID=52) or LINK.dtl_DetailTypeID=158) and LINK.dtl_Value = $recID and DETAILS.dtl_RecID = LINK.dtl_RecID";
+		$query = "select LINK.dtl_DetailTypeID as type, DETAILS.*, DBIB.rec_Title as title,
+		DBIB.rec_RecTypeID as rt, DBIB.rec_URL as url
+		from recDetails LINK left join Records LBIB on LBIB.rec_ID=LINK.dtl_RecID,
+		recDetails DETAILS left join Records DBIB on DBIB.rec_ID=DETAILS.dtl_Value and
+		DETAILS.dtl_DetailTypeID in (202, 199, 158)
+		where ((LINK.dtl_DetailTypeID in (202, 199) and LBIB.rec_RecTypeID=52)
+		or LINK.dtl_DetailTypeID=158) and LINK.dtl_Value = $recID and DETAILS.dtl_RecID = LINK.dtl_RecID";
 		if ($relnRecID) $query .= " and DETAILS.dtl_RecID = $relnRecID";
 
 	$query .= " order by LINK.dtl_DetailTypeID desc, DETAILS.dtl_ID";
@@ -231,70 +233,100 @@
 		//error_log($query);
 	$res = mysql_query($query);	/* primary resources first, then non-primary, then authors */
 
-	$relations = array();
+		if (!mysql_num_rows($res)) {
+			return array();
+		}
+		$relations = array('relationshipRecs' => array());
 		while ($row = mysql_fetch_assoc($res)) {
-			$recID = $row["dtl_RecID"];
+			$relnRecID = $row["dtl_RecID"];
 			$i_am_primary = ($row["type"] == 202);
-			if (! array_key_exists($recID, $relations))
-			$relations[$recID] = array();
+			if (! array_key_exists($relnRecID, $relations['relationshipRecs'])){
+				$relations['relationshipRecs'][$relnRecID] = array();
+			}
 
-			if (! array_key_exists("role", $relations[$recID])) {
+			if (! array_key_exists("role", $relations['relationshipRecs'][$relnRecID])) {
 				if ($row["type"] == 202) {
-					$relations[$recID]["role"] = "Primary";
+					$relations['relationshipRecs'][$relnRecID]["role"] = "Primary";
 				} else if ($row["type"] == 199) {
-					$relations[$recID]["role"] = "Non-primary";
+					$relations['relationshipRecs'][$relnRecID]["role"] = "Non-primary";
 			} else {
-					$relations[$recID]["role"] = "Unknown";
+					$relations['relationshipRecs'][$relnRecID]["role"] = "Unknown";
 			}
 		}
-			if (! array_key_exists("recID", $relations[$recID])) {
-				$relations[$recID]["recID"] = $recID;
+			if (! array_key_exists("recID", $relations['relationshipRecs'][$relnRecID])) {
+				$relations['relationshipRecs'][$relnRecID]["recID"] = $recID;
 		}
 
 			switch ($row["dtl_DetailTypeID"]) {
 		case 200:	//saw Enum change - nothing to do since dtl_Value is an id and inverse returns an id
-					$relations[$recID]["relTermID"] = $i_am_primary? $row["dtl_Value"] : reltype_inverse($row["dtl_Value"]);
-					if($relations[$recID]["relTermID"]) {
-						$relval = mysql_fetch_assoc(mysql_query('select trm_Label from defTerms where trm_ID = ' .  intval($relations[$recID]["RelTermID"])));
-						$relations[$recID]['relTerm'] = $relval['trm_Label'];
+					$relations['relationshipRecs'][$relnRecID]["relTermID"] = $i_am_primary? $row["dtl_Value"] : reltype_inverse($row["dtl_Value"]);
+					if($relations['relationshipRecs'][$relnRecID]["relTermID"]) {
+						$relval = mysql_fetch_assoc(mysql_query('select trm_Label from defTerms where trm_ID = ' .  intval($relations['relationshipRecs'][$relnRecID]["relTermID"])));
+						$relations['relationshipRecs'][$relnRecID]['relTerm'] = $relval['trm_Label'];
 					}
 			break;
 
 		case 199:
-			if ($i_am_primary)
-					$relations[$recID]["relatedRec"] = array("title" => $row["title"], "rectype" => $row["rt"],
-																"URL" => $row["url"], "recID" => $row["dtl_Value"]
-				);
-			break;
-
 		case 202:
-			if (! $i_am_primary)
-					$relations[$recID]["relatedRec"] = array("title" => $row["title"], "rectype" => $row["rt"],
-																"URL" => $row["url"], "recID" => $row["dtl_Value"]
-				);
+					if ( $row["dtl_Value"] !=  $recID) {
+						$relations['relationshipRecs'][$relnRecID]["relatedRec"] = array("title" => $row["title"],
+																						"rectype" => $row["rt"],
+																						"URL" => $row["url"],
+																						"recID" => $row["dtl_Value"]);
+					}
 			break;
 
 		case 638:
-					$relations[$recID]["interpRec"] = array("title" => $row["title"], "rectype" => $row["rt"],
-															 "URL" => $row["url"], "recID" => $row["dtl_Value"]);
+				$relations['relationshipRecs'][$relnRecID]["interpRec"] = array("title" => $row["title"],
+																				"rectype" => $row["rt"],
+																				"URL" => $row["url"],
+																				"recID" => $row["dtl_Value"]);
 			break;
 
 		case 201:
-				$relations[$recID]["notes"] = $row["dtl_Value"];
+				$relations['relationshipRecs'][$relnRecID]["notes"] = $row["dtl_Value"];
 			break;
 
 		case 160:
-				$relations[$recID]["title"] = $row["dtl_Value"];
+				$relations['relationshipRecs'][$relnRecID]["title"] = $row["dtl_Value"];
 			break;
 
 		case 177:
-				$relations[$recID]["startDate"] = $row["dtl_Value"];
+				$relations['relationshipRecs'][$relnRecID]["startDate"] = $row["dtl_Value"];
 			break;
 
 		case 178:
-				$relations[$recID]["endDate"] = $row["dtl_Value"];
+				$relations['relationshipRecs'][$relnRecID]["endDate"] = $row["dtl_Value"];
 			break;
 		}
+
+		}
+		foreach ($relations['relationshipRecs'] as $relnRecID => $reln) {
+			$relRT = $reln['relatedRec']['rectype'];
+			$relRecID = $reln['relatedRec']['recID'];
+			$relTermID = $reln['relTermID'];
+			if (!array_key_exists('byRectype',$relations)) {
+				$relations['byRectype'] = array();
+			}
+			if (!array_key_exists($relRT,$relations['byRectype'])) {
+				$relations['byRectype'][$relRT] = array();
+			}
+			if (!array_key_exists($relTermID,$relations['byRectype'][$relRT])) {
+				$relations['byRectype'][$relRT][$relTermID] = array($relRecID);
+			} else {
+				array_push($relations['byRectype'][$relRT][$relTermID],$relRecID);
+			}
+			if (!array_key_exists('byTerm',$relations)) {
+				$relations['byTerm'] = array();
+			}
+			if (!array_key_exists($relTermID,$relations['byTerm'])) {
+				$relations['byTerm'][$relTermID] = array();
+			}
+			if (!array_key_exists($relRT,$relations['byTerm'][$relTermID])) {
+				$relations['byTerm'][$relTermID][$relRT] = array($relRecID);
+			} else {
+				array_push($relations['byTerm'][$relTermID][$relRT],$relRecID);
+			}
 	}
 
 	return $relations;

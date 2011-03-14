@@ -36,7 +36,7 @@
 if (! defined('SEARCH_VERSION')) {
 	define('SEARCH_VERSION', 1);
 }
-define('MEMCACHED_PORT', 11211);
+if (!defined('MEMCACHED_PORT')) define('MEMCACHED_PORT', 11211);
 
 require_once(dirname(__FILE__).'/parseQueryToSQL.php');
 

@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*<!--hml.php
  * configIni.php - Configuration information for Heurist Initialization - USER EDITABLE
  * @version $Id$
  * @copyright 2005-2010 University of Sydney Digital Innovation Unit.
@@ -9,9 +9,6 @@
  * @package Heurist academic knowledge management system
  * @todo
  *
- **/
-
-/*<!-- hml.php
 
 	Copyright 2005 - 2010 University of Sydney Digital Innovation Unit
 	This file is part of the Heurist academic knowledge management system (http://HeuristScholar.org)
@@ -75,7 +72,6 @@ require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
 require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
-require_once(dirname(__FILE__).'/../../common/php/getRelationshipRecords.php');
 require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 
 mysql_connection_db_select(DATABASE);
@@ -159,7 +155,7 @@ $query = 'SELECT rty_ID, rty_Name FROM defRecTypes';
 $res = mysql_query($query);
 while ($row = mysql_fetch_assoc($res)) {
 	$RTN[$row['rty_ID']] = $row['rty_Name'];
-	foreach (getRectypeStructureFields($row['rty_ID']) as $rdr_rdt_id => $rdr) {
+	foreach (getRectypeFields($row['rty_ID']) as $rdr_rdt_id => $rdr) {
 	// type-specific names for detail types
 		$RQS[$rdr['rst_RecTypeID']][$rdr['rst_DetailTypeID']] = $rdr['rst_DisplayName'];
 	}

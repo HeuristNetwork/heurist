@@ -55,8 +55,10 @@ $recordTypes = array();
 while ($row = mysql_fetch_row($res)) array_push($recordTypes, $row);
 
 $res = mysql_query("select dty_ID, dty_Name, dty_HelpText, dty_Type, NULL as enums, dty_PtrTargetRectypeIDs,
-					dty_JsonTermIDTree, dty_HeaderTermIDs, dty_ExtendedDescription, dty_DetailTypeGroupID, dty_ShowInPulldowns
+					dty_JsonTermIDTree, dty_HeaderTermIDs, dty_ExtendedDescription, dty_DetailTypeGroupID,
+					dty_FieldSetRecTypeID, dty_ShowInLists
 					from defDetailTypes");
+
 $detailTypes = array();
 $detailTypesById = array();
 while ($row = mysql_fetch_row($res)) {
@@ -114,10 +116,11 @@ while ($row = mysql_fetch_row($res)) {
 
 // detailRequirements is an array of [recordTypeID, detailTypeID, requiremence, repeatable, name, prompt, match, size, order, default] values
 $detailRequirements = array();
-$rec_types = mysql__select_array("defRecStructure", "distinct rst_RecTypeID", "1 order by rst_RecTypeID");
+$rec_types = mysql__select_array("defRecStructure left join defDetailType on dty_ID = rst_DetailTypeID",
+									"distinct rst_RecTypeID", "1 order by rst_RecTypeID");
 		// rdr = [ rst_DetailTypeID => [ rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
 		// rst_DefaultValue, rst_RequirementType, rst_MaxValues, rst_MinValues, rst_DisplayWidth, rst_RecordMatchOrder,
-		// rst_DisplayOrder, rst_DisplayDetailTypeGroupID, rst_EnumFilteredIDs, rst_PtrFilteredIDs, rst_CalcFunctionID, rst_PriorityForThumbnail] ...]
+		// rst_DisplayOrder, rst_DisplayDetailTypeGroupID, rst_EnumFilteredIDs, rst_PtrFilteredIDs, rst_CalcFunctionID, rst_OrderForThumbnailGeneration] ...]
 
 foreach ($rec_types as $rec_type) {
 	foreach (getRectypeFields($rec_type) as $rdr) {
@@ -140,7 +143,7 @@ foreach ($rec_types as $rec_type) {
 			$rdr["dty_HeaderTermIDs"],
 			$rdr["rst_PtrFilteredIDs"],
 			$rdr["rst_CalcFunctionID"],
-			$rdr["rst_PriorityForThumbnail"]
+			$rdr["rst_OrderForThumbnailGeneration"]
 		));
 	}
 }

@@ -54,61 +54,18 @@ print "if (!top.HEURIST.baseURL) top.HEURIST.baseURL = ".json_format(HEURIST_URL
 /* rectypes are an array of names sorted alphabetically, and lists of
    primary (bibliographic) and other rectypes, also sorted alphbetically */
 print "top.HEURIST.rectypes = ".json_format(getAllRectypeStructures()).";\n";
-/*
-$names = array();
-$res = mysql_query("select rty_ID, rty_Name from defRecTypes where rty_ID order by rty_Name");
-while ($row = mysql_fetch_assoc($res)) {
-	$names[$row["rty_ID"]] = $row["rty_Name"];
-}
-print "top.HEURIST.rectypes.names = " . json_format($names) . ";\n\n";
-
-$plurals = array();
-$res = mysql_query("select rty_ID, rty_Plural from defRecTypes where rty_ID");
-while ($row = mysql_fetch_assoc($res)) {
-	$plurals[$row["rty_ID"]] = $row["rty_Plural"];
-}
-print "top.HEURIST.rectypes.pluralNames = " . json_format($plurals) . ";\n\n";
-
-print "top.HEURIST.rectypes.groups = " . json_format(getRecTypesByGroup()) . ";\n\n";
-
-
-//get a list of record type IDs
-$rectypeIDs = mysql__select_array("defRecStructure", "distinct rst_RecTypeID", "1 order by rst_RecTypeID");
-$rectypeStructures = getRectypeStructures($rectypeIDs);
-print "top.HEURIST.rectypes.typedefs = " . json_format($rectypeStructures) . ";\n\n";
-
-print "top.HEURIST.rectypes.dtDisplayOrder = {\n";
-
-$first = true;
-unset($rectypeStructures['commonFieldNames']);
-unset($rectypeStructures['dtFieldNames']);
-foreach ($rectypeStructures as $rectypeID => $rtStruct) {
-	if (! $first) print ",\n";
-	$first = false;
-	print "\t\t\"".slash($rectypeID)."\": [";
-	$first_rtfs = true;
-	foreach ($rtStruct['dtFields'] as $rtdtID => $rtfs) {
-		if (! $first_rtfs) print ",";
-		$first_rtfs = false;
-		print $rtdtID;
-	}
-	print "]";
-}
-print "\n};\n";
-*/
 
 /* detailTypes */
 
-//get a list of detail type IDs
 print "top.HEURIST.detailTypes = " . json_format(getAllDetailTypeStructures()) . ";\n\n";
 
-print "\ntop.HEURIST.terms = {}\n\n";
+print "\ntop.HEURIST.terms = \n". json_format(getTerms(),true) . ";\n";
 
-print "\ntop.HEURIST.terms.termsByDomainLookup = \n" . json_format(getTerms(),true) . ";\n";
+/*print "\ntop.HEURIST.terms.termsByDomainLookup = \n" . json_format(getTerms(),true) . ";\n";
 
 print "\ntop.HEURIST.terms.treesByDomain = { 'relation' : " . json_format(getTermTree("reltype","prefix"),true).",\n
 												'enum' : " . json_format(getTermTree("enum","prefix"),true)." };\n";
-
+*/
 ?>
 top.HEURIST.ratings = {"0": "not rated",
 						"1": "*",

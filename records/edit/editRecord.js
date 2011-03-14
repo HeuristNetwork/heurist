@@ -460,18 +460,18 @@ top.HEURIST.edit = {
 	},
 
 	getNonRecDetailTypedefs: function(rectypeID) {
-		var non_reqs = {};
-		var reqs = top.HEURIST.edit.getRecFieldRequirements(rectypeID);
+		var non_recDTs = {};
+		var rfrs = top.HEURIST.edit.getRecFieldRequirements(rectypeID);
 		for (var dt_id in top.HEURIST.detailTypes.typedefs) {
 			if (dt_id == "commomFieldNames") continue;
 			var skip = false;
-			for (var dtID in reqs) {
+			for (var dtID in rfrs) {
 				if (dtID == dt_id) skip = true;
 			}
 			if (skip) continue;
-			non_reqs[dt_id] = top.HEURIST.detailTypes.typedefs[dt_id];
+			non_recDTs[dt_id] = top.HEURIST.detailTypes.typedefs[dt_id];
 		}
-		return non_reqs;
+		return non_recDTs;
 	},
 
 	focusFirstElement: function() {
@@ -490,85 +490,83 @@ top.HEURIST.edit = {
 	allInputs: [],
 	createInput: function(detailTypeID, rectypeID, fieldValues, container) {
 		// Get Detail Type info  id, name, canonical type, rec type contraint
-		var bdt = top.HEURIST.detailTypes.typedefs[detailTypeID];
-		var bdr = null;
+		var dt = top.HEURIST.detailTypes.typedefs[detailTypeID]['commonFields'];
+		var rfr = null;
 		if (rectypeID) {
-			bdr = top.HEURIST.rectypes.typedefs[rectypeID]['dtFields'][detailTypeID];
+			rfr = top.HEURIST.rectypes.typedefs[rectypeID]['dtFields'][detailTypeID];
 		}
-		if (!bdr) {
-			// fake low-rent bdr if rectype isn't specified
+		if (!rfr) {
+			// fake low-rent rfr if rectype isn't specified
 			// name, prompt,default, required, repeatable, size, match
-			bdr = [ bdt['commonFields'][0], "", "", 'optional', 0, 0, 0 ];
+			rfr = [ dt[0], "", "", 'optional', 0, 0, 0 ];
 		}
 
 		var newInput;
-		switch (bdt['commonFields'][2]) {
+		switch (dt[2]) {
 			case "freetext":
-				newInput = new top.HEURIST.edit.inputs.BibDetailFreetextInput(bdt, bdr, fieldValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailFreetextInput(dt, rfr, fieldValues, container);
 				break;
 			case "blocktext":
-				newInput = new top.HEURIST.edit.inputs.BibDetailBlocktextInput(bdt, bdr, fieldValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailBlocktextInput(dt, rfr, fieldValues, container);
 				break;
 			case "integer":
-				newInput = new top.HEURIST.edit.inputs.BibDetailIntegerInput(bdt, bdr, fieldValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailIntegerInput(dt, rfr, fieldValues, container);
 				break;
 			case "year":
-				newInput = new top.HEURIST.edit.inputs.BibDetailYearInput(bdt, bdr, fieldValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailYearInput(dt, rfr, fieldValues, container);
 				break;
 			case "date":
-				newInput = new top.HEURIST.edit.inputs.BibDetailTemporalInput(bdt, bdr, fieldValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailTemporalInput(dt, rfr, fieldValues, container);
 				break;
 			case "boolean":
-				newInput = new top.HEURIST.edit.inputs.BibDetailBooleanInput(bdt, bdr, fieldValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailBooleanInput(dt, rfr, fieldValues, container);
 				break;
 			case "resource":
-				newInput = new top.HEURIST.edit.inputs.BibDetailResourceInput(bdt, bdr, fieldValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailResourceInput(dt, rfr, fieldValues, container);
 				break;
 			case "float":
-				newInput = new top.HEURIST.edit.inputs.BibDetailFloatInput(bdt, bdr, fieldValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailFloatInput(dt, rfr, fieldValues, container);
 				break;
 			case "enum":
-				newInput = new top.HEURIST.edit.inputs.BibDetailDropdownInput(bdt, bdr, fieldValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailDropdownInput(dt, rfr, fieldValues, container);
 				break;
 			case "file":
-				newInput = new top.HEURIST.edit.inputs.BibDetailFileInput(bdt, bdr, fieldValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailFileInput(dt, rfr, fieldValues, container);
 				break;
 			case "geo":
-				newInput = new top.HEURIST.edit.inputs.BibDetailGeographicInput(bdt, bdr, fieldValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailGeographicInput(dt, rfr, fieldValues, container);
 				break;
 			case "separator": // note we make sure that values are ignored for a separator as it is not an input
-				newInput = new top.HEURIST.edit.inputs.BibDetailSeparator(bdt, bdr, [], container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailSeparator(dt, rfr, [], container);
 				break;
 			case "relmarker": // note we make sure that values are ignored for a relmarker as it gets it's data from the record's related array
-				newInput = new top.HEURIST.edit.inputs.BibDetailRelationMarker(bdt, bdr, [], container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailRelationMarker(dt, rfr, [], container);
 				break;
 			case "fieldsetmarker": // note we make sure that values are ignored for a fieldsetmarker as it is a container for a set of details
-				newInput = new top.HEURIST.edit.inputs.BibDetailFieldSetMarker(bdt, bdr, [], container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailFieldSetMarker(dt, rfr, [], container);
 				break;
 			default:
-				//alert("Type " + bdt[2] + " not implemented");
-				newInput = new top.HEURIST.edit.inputs.BibDetailUnknownInput(bdt, bdr, fieldValues, container);
+				//alert("Type " + dt[2] + " not implemented");
+				newInput = new top.HEURIST.edit.inputs.BibDetailUnknownInput(dt, rfr, fieldValues, container);
 		}
 		top.HEURIST.edit.allInputs.push(newInput);
 		return newInput;
 	},
 
-	getRecTypeConstraintsList: function(dTypeID) {	//saw TODO: change this to terms pass in scrRectypeID
-		var listRecTypeConst = "";
-		var first = true;
-		var rdtID = top.HEURIST.edit.record.rtConstraints[dTypeID] ? dTypeID : 200;
+	getConstrainedRectypeList: function(dtyID,rtID) {	//saw TODO: change this to terms pass in scrRectypeID
+		var listConstdRectype = top.HEURIST.rectypes.typedefs[rtID].dtFields[dtyID][12];
 		for (var rType in top.HEURIST.edit.record.rtConstraints[rdtID]) {	// saw TODO  need to change this to dTypeID for relmarkers
 			if (first) {
-				listRecTypeConst += "" + rType;
+				listConstdRectype += "" + rType;
 				first = false;
 			}else{
-				listRecTypeConst += "," + rType;
+				listConstdRectype += "," + rType;
 			}
 		}
-		if (!listRecTypeConst) {
-			listRecTypeConst = "0";
+		if (!listConstdRectype) {
+			listConstdRectype = "0";
 		}
-		return listRecTypeConst;
+		return listConstdRectype;
 	},
 
 	getLookupConstraintsList: function(dTypeID) {	//saw TODO: change this to terms pass in scrRectypeID
@@ -702,7 +700,7 @@ top.HEURIST.edit = {
 	},
 
 	createInputsForRectype: function(rectypeID, fieldValues, container) {
-		var bdrs = top.HEURIST.edit.getRecFieldRequirements(rectypeID);
+		var rfrs = top.HEURIST.edit.getRecFieldRequirements(rectypeID);
 		if (! container.ownerDocument) {
 			var elt = container;
 			do { elt = elt.parentNode; } while (elt.nodeType != 9 /* DOCUMENT_NODE */);
@@ -724,10 +722,10 @@ top.HEURIST.edit = {
 
 		var i, l = order.length;
 		for (i = 0; i < l; ++i) {
-			var bdtID = order[i];
-			if (bdrs[bdtID][3] == 'forbidden') continue;
+			var dtID = order[i];
+			if (rfrs[dtID][3] == 'forbidden') continue;
 
-			var newInput = top.HEURIST.edit.createInput(bdtID, rectypeID, fieldValues[bdtID] || [], container);
+			var newInput = top.HEURIST.edit.createInput(dtID, rectypeID, fieldValues[dtID] || [], container);
 			inputs.push(newInput);
 		}
 
@@ -735,13 +733,13 @@ top.HEURIST.edit = {
 	},
 
 	createInputsNotForRectype: function(rectypeID, fieldValues, container) {
-		var bdrs = top.HEURIST.edit.getRecFieldRequirements(rectypeID);
+		var rfrs = top.HEURIST.edit.getRecFieldRequirements(rectypeID);
 
 		var inputs = [];
-		for (var bdtID in fieldValues) {
-			if (bdrs  &&  bdrs[bdtID]) continue;
+		for (var dtID in fieldValues) {
+			if (rfrs  &&  rfrs[dtID]) continue;
 
-			var input = top.HEURIST.edit.createInput(bdtID, 0, fieldValues[bdtID] || [], container);
+			var input = top.HEURIST.edit.createInput(dtID, 0, fieldValues[dtID] || [], container);
 			//input.setReadonly(true);
 			inputs.push(input);
 		}
@@ -761,7 +759,7 @@ top.HEURIST.edit = {
 			if (! inputs[i].verify()) {
 				// disaster! incomplete input
 /*
-				var niceName = inputs[i].recDetailRequirements[0].toLowerCase();
+				var niceName = inputs[i].recFieldlRequirements[0].toLowerCase();
 				    niceName = niceName.substring(0, 1).toUpperCase() + niceName.substring(1);
 */
 				missingFields.push("\"" + inputs[i].shortName + "\" field requires " + inputs[i].typeDescription);
@@ -1076,40 +1074,85 @@ top.HEURIST.edit = {
 	}
 };
 
+/**
+* Helper function that creates a select HTML object filled with an option element for each term "depth first"
+* tagged with class depthN and termHeader according to the terms tree depth and if it's id in in the headerList.
+* @author Stephen White
+* @param termIDTree an array tree of term ids
+* @param headerTermIDsList a comma separated list of term ids to be markered as headers, can be empty
+* @param termLookup a lookup array of term names
+* @param defaultTermID id of term to show as selected, can be null
+* @return selObj an HTML select object node
+**/
+top.HEURIST.edit.createTermSelect = function(termIDTree, headerTermIDsList, termLookup, defaultTermID) { // Creates the preview
+	var selObj = document.createElement("select");
+	var temp = (headerTermIDsList ? headerTermIDsList.split(",") : null);
+	var headers = {};
+	for (var id in temp) {
+		headers[temp[id]] = temp[id];
+	}
+	function createSubTreeOptions(depth, termSubTree) {
+		for(var termID in termSubTree) { // For every term in 'term'
+			var termName = termLookup[termID];
+			var isHeader = (headers[termID]? true:false);
+			var opt = new Option(termName,termID);
+			opt.className = "depth" + depth;
+			if(isHeader) { // header term behaves like an option group
+				opt.className +=  ' termHeader';
+				opt.disabled = true;
+			}
+			if (termID == defaultTermID) {
+				opt.selected = true;
+			}
+			selObj.appendChild(opt);
+			if(typeof termSubTree[termID] == "object") {
+				if(depth == 7) { // A dept of 8 (depth starts at 0) is maximum, to keep it organised
+					createSubTreeOptions(depth, termSubTree[termID]);
+				} else {
+					createSubTreeOptions(depth+1, termSubTree[termID]);
+				}
+			}
+		}
+	}
+	createSubTreeOptions(0,termIDTree);
+	if (!defaultTermID) selObj.selectedIndex = 0;
+	return selObj;
+}
+
 top.HEURIST.edit.inputs = { };
 
-top.HEURIST.edit.inputs.BibDetailInput = function(bibDetailType, recDetailRequirements, fieldValues, parentElement) {
+top.HEURIST.edit.inputs.BibDetailInput = function(detailType, recFieldlRequirements, fieldValues, parentElement) {
 	if (arguments.length == 0) return;	// for prototyping
 	var thisRef = this;
 
-	this.bibDetailType = bibDetailType;
-	this.recDetailRequirements = recDetailRequirements;
+	this.detailType = detailType;
+	this.recFieldlRequirements = recFieldlRequirements;
 	this.parentElement = parentElement;
 	var elt = parentElement;
 	do { elt = elt.parentNode; } while (elt.nodeType != 9 /* DOCUMENT_NODE */);
 	this.document = elt;
-	this.shortName = recDetailRequirements[0];
+	this.shortName = recFieldlRequirements[0];
 
-	var required = recDetailRequirements[3];
+	var required = recFieldlRequirements[4];
 		if (required == 'optional') required = "optional";
 		else if (required == 'required') required = "required";
 		else if (required == 'recommended') required = "recommended";
 		else required = "";
 	this.required = required;
 
-	this.repeatable = (recDetailRequirements[4] == "1")? true : false;
+	this.repeatable = (recFieldlRequirements[5] != 1)? true : false; //saw TODO this really needs to check many exist
 
 	this.row = parentElement.appendChild(this.document.createElement("div"));
 		this.row.className = "input-row " + required;
 
 	this.headerCell = this.row.appendChild(this.document.createElement("div"));
 		this.headerCell.className = "input-header-cell";
-		this.headerCell.appendChild(this.document.createTextNode(recDetailRequirements[0]));	// bdr_name
+		this.headerCell.appendChild(this.document.createTextNode(recFieldlRequirements[0]));	// rfr_name
 	if (this.repeatable) {
 		var dupImg = this.headerCell.appendChild(this.document.createElement('img'));
 			dupImg.src = top.HEURIST.basePath + "common/images/duplicate.gif";
 			dupImg.className = "duplicator";
-			dupImg.alt = dupImg.title = "Add another " + recDetailRequirements[0] + " field";
+			dupImg.alt = dupImg.title = "Add another " + recFieldlRequirements[0] + " field";
 			top.HEURIST.registerEvent(dupImg, "click", function() { thisRef.duplicateInput.call(thisRef); } );
 	}
 
@@ -1119,7 +1162,7 @@ top.HEURIST.edit.inputs.BibDetailInput = function(bibDetailType, recDetailRequir
 	// make sure that the promptDiv is the last item in the input cell
 	this.promptDiv = this.inputCell.appendChild(this.document.createElement("div"));
 		this.promptDiv.className = "help prompt";
-		this.promptDiv.innerHTML = recDetailRequirements[1];
+		this.promptDiv.innerHTML = recFieldlRequirements[1];
 
 	this.inputs = [];
 	if (this.repeatable) {	//saw TODO adjust this code for Cardinality
@@ -1150,10 +1193,10 @@ top.HEURIST.edit.inputs.BibDetailInput.prototype.setReadonly = function(readonly
 };
 top.HEURIST.edit.inputs.BibDetailInput.prototype.duplicateInput = function() { this.addInput(); };
 top.HEURIST.edit.inputs.BibDetailInput.prototype.addInputHelper = function(bdValue, element) {
-	this.elementName = "type:" + this.bibDetailType[0];
+	this.elementName = "type:" + this.detailType[12];
 		element.name = (bdValue && bdValue.id)? (this.elementName + "[bd:" + bdValue.id + "]") : (this.elementName + "[]");
-		element.title = this.recDetailRequirements[0];
-		element.setAttribute("bib-detail-type", this.bibDetailType[0]);
+		element.title = this.recFieldlRequirements[0];
+		element.setAttribute("bib-detail-type", this.detailType[12]);
 		var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
 		if (element.value !== undefined) {	/* if this is an input element, register the onchange event */
@@ -1164,14 +1207,14 @@ top.HEURIST.edit.inputs.BibDetailInput.prototype.addInputHelper = function(bdVal
 			 */
 			top.HEURIST.registerEvent(element, "keypress", function() { windowRef.changed(); });
 		}
-	if (this.bibDetailType[2] === "resource" || this.bibDetailType[2] === "relmarker") {	// bdt_type
-		if (this.bibDetailType[3]) {	// bdt_constrain_rectype
-			this.constrainrectype = this.bibDetailType[3]; // saw TODO  modify this to validate the list first.
+	if (this.detailType[2] === "resource" || this.detailType[2] === "relmarker") {	// dt_type
+		if (this.detailType[11]) {	// dt_constrain_rectype
+			this.constrainrectype = this.detailType[11]; // saw TODO  modify this to validate the list first.
 		}
 		else	this.constrainrectype = 0;
 	}
-	if (parseFloat(this.recDetailRequirements[6]) > 0) {	//if the size is greater than zero
-		element.style.width = Math.round(4/3 * this.recDetailRequirements[7]) + "ex";
+	if (parseFloat(this.recFieldlRequirements[7]) > 0) {	//if the size is greater than zero
+		element.style.width = Math.round(4/3 * this.recFieldlRequirements[7]) + "ex";
 	}
 
 	element.expando = true;
@@ -1181,16 +1224,16 @@ top.HEURIST.edit.inputs.BibDetailInput.prototype.addInputHelper = function(bdVal
 	this.inputs.push(element);
 	this.inputCell.insertBefore(element, this.promptDiv);
 
-	if ((this.bibDetailType[0] === "198"  ||  this.bibDetailType[0] === "187"  ||  this.bibDetailType[0] === "188")
+	if ((this.detailType[12] === "198"  ||  this.detailType[12] === "187"  ||  this.detailType[12] === "188")
 			&&  bdValue  &&  bdValue.value) { // DOI, ISBN, ISSN
 		this.webLookup = this.document.createElement("a");
-		if (this.bibDetailType[0] === "198") {
+		if (this.detailType[12] === "198") {
 			this.webLookup.href = "http://dx.doi.org/" + bdValue.value;
-		} else if (this.bibDetailType[0] === "187") {
+		} else if (this.detailType[12] === "187") {
 			// this.webLookup.href = "http://www.biblio.com/search.php?keyisbn=" + bdValue.value;	// doesn't work anymore
 			// this.webLookup.href = "http://www.biblio.com/isbnmulti.php?isbns=" + encodeURIComponent(bdValue.value) + "&stage=1";	// requires POST
 			this.webLookup.href = "http://www.biblio.com/search.php?keyisbn=" + encodeURIComponent(bdValue.value);
-		} else if (this.bibDetailType[0] === "188") {
+		} else if (this.detailType[12] === "188") {
 			var matches = bdValue.value.match(/(\d{4})-?(\d{3}[\dX])/);
 			if (matches) {
 				this.webLookup.href = "http://www.oclc.org/firstsearch/periodicals/results_issn_search.asp?database=%25&fulltext=%22%22&results=paged&PageSize=25&issn1=" + matches[1] + "&issn2=" + matches[2];
@@ -1515,27 +1558,12 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.getPrimaryValue = funct
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.typeDescription = "a value from the dropdown";
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.regex = new RegExp(".");
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdValue) {
-	var allOptions = top.HEURIST.vocabTermLookup[this.bibDetailType[0]]  ||  [];
-
-	var newInput = this.document.createElement("select");
-		var newOption = newInput.appendChild(this.document.createElement("option"));	// default blank option
-			newOption.text = "";
-			newOption.value = "";
-		var selectIndex = 0;
-//		for (var ont in allOptions) {
-//			var grp = document.createElement("optgroup");
-//			grp.label = top.HEURIST.vocabLookup[ont];
-//			newInput.appendChild(grp);
-//			for (var i = 0; i < allOptions[ont].length; ++i) {
-			for (var i = 0; i < allOptions.length; ++i) {
-				var rdl = allOptions[i];
-				newInput.options[newInput.length] = new Option(rdl[1], rdl[0]);
-				if (bdValue && bdValue.value == rdl[0]) {
-					selectIndex = newInput.length - 1;
-				}
-			}
-//		}
-	newInput.selectedIndex = selectIndex;
+	var termHeaderList = typeof this.recFieldlRequirements[17] == "string" ? this.recFieldlRequirements[17]: "";
+	termHeaderList = typeof this.recFieldlRequirements[13] == "string" ? termHeaderList.concat(",",this.recFieldlRequirements[13]): termHeaderList;
+	var newInput = top.HEURIST.edit.createTermSelect(this.recFieldlRequirements[11],
+														termHeaderList,
+														top.HEURIST.terms.termsByDomainLookup.relation,
+														(bdValue && bdValue.value ? bdValue.value : null));
 	this.addInputHelper.call(this, bdValue, newInput);
 	newInput.style.width = "auto";
 };
@@ -1602,7 +1630,7 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 	} else {
 		if (top.HEURIST.browser.isEarlyWebkit) {	// old way of doing things
 			var newIframe = this.document.createElement("iframe");
-				newIframe.src = top.HEURIST.basePath+"records/files/uploadFile.php?bib_id=" + windowRef.parent.HEURIST.edit.record.bibID + "&bdt_id=" + this.bibDetailType[0];
+				newIframe.src = top.HEURIST.basePath+"records/files/uploadFile.php?bib_id=" + windowRef.parent.HEURIST.edit.record.bibID + "&bdt_id=" + this.detailType[12];
 				newIframe.frameBorder = 0;
 				newIframe.style.width = "90%";
 				newIframe.style.height = "2em";
@@ -1845,10 +1873,9 @@ top.HEURIST.edit.inputs.BibDetailUnknownInput = function() { top.HEURIST.edit.in
 top.HEURIST.edit.inputs.BibDetailUnknownInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
 top.HEURIST.edit.inputs.BibDetailUnknownInput.prototype.typeDescription = "some value";
 top.HEURIST.edit.inputs.BibDetailUnknownInput.prototype.addInput = function(bdValue) {
-	var allOptions = top.HEURIST.vocabTermLookup[this.bibDetailType[0]]  ||  [];
 
 	var newInput = this.document.createElement("div");
-		newInput.appendChild(this.document.createTextNode("Input type \"" + this.bibDetailType[2] + "\" not implemented"));
+		newInput.appendChild(this.document.createTextNode("Input type \"" + this.detailType[2] + "\" not implemented"));
 	this.addInputHelper.call(this, bdValue, newInput);
 };
 
@@ -1864,7 +1891,7 @@ top.HEURIST.edit.inputs.BibDetailSeparator.prototype.addInput = function(bdValue
 	if (this.promptDiv){
 		this.promptDiv.className = "";
 		this.promptDiv.style.display = "none";
-		newInput.title = this.recDetailRequirements[1];
+		newInput.title = this.recFieldlRequirements[1];
 	}
 };
 
@@ -1881,7 +1908,7 @@ top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.addInput = function(bd
 	this.addInputHelper.call(this, bdValue, newInput);
 	newInput.id = "relations-tbody";
 	var relatedRecords = parent.HEURIST.edit.record.relatedRecords;
-	this.relManager = new RelationManager(newInput,top.HEURIST.edit.record.rectypeID, relatedRecords,this.bibDetailType[0],this.changeNotification,true);
+	this.relManager = new RelationManager(newInput,top.HEURIST.edit.record, relatedRecords,this.detailType[12],this.changeNotification,true);
 
 };
 
