@@ -94,14 +94,19 @@ list($usec, $sec) = explode(' ', microtime());
 $ptime = $sec + $usec;
 
 $res = mysql_query($query);
-if (mysql_error()) error_log(mysql_error());
+if (mysql_error()) {
+	error_log("queryError in getResultsPageAsync -".mysql_error());
+}
 $fres = mysql_query('select found_rows()');
 $num_rows = mysql_fetch_row($fres); $num_rows = $num_rows[0];
 
 list($usec, $sec) = explode(' ', microtime());
 $etime = $sec + $usec;
 
-if (mysql_error()) { error_log(mysql_error()); return; }
+if (mysql_error()) {
+	error_log(mysql_error());
+	return;
+}
 
 session_start();
 

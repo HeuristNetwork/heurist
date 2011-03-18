@@ -177,8 +177,10 @@ top.HEURIST.search = {
 	renderResultRow: function(res) {
 
 		/* res[0]   res[1]        res[2]  res[3]   res[4]       res[5]     res[6]        */
-		/* bkmk_id, bkmk_user_id, bib_id, bib_url, bib_rectype, bib_title, bib_workgroup */
-		/* res[7] => bib_visibility, res[8] => bib_url_last_verified, res[9] => bib_url_error, res[10] => bkmk_user_pwd */
+		/* bkm_ID, bkm_UGrpID, rec_ID, rec_URL, rec_RecTypeID, rec_Title, rec_OwnerUGrpID */
+
+		/* res[7]                      res[8]                 res[9]             res[10]        res[11]   */
+		/* rec_NonOwnerVisibility, rec_URLLastVerified, rec_URLErrorMessage, bkm_PwdReminder, thumbnailURL */
 
 		var pinAttribs = res[0]? "class='logged-in-only bookmarked' title='Bookmarked - click to see details'"
 		                       : "class='logged-in-only unbookmarked' title='Bookmark this record'";
@@ -190,7 +192,7 @@ top.HEURIST.search = {
 		var linkTitle = "";
 		var wgHTML = "";
 		var wgColor = "";
-		if (res[6]  &&  res[6] != "0") {
+		if (res[6]  &&  res[6] != "0" && res[6] != res[1]) {
 			linkTitle = "Restricted to workgroup " + top.HEURIST.workgroups[wgID].name + " - " + (res[7]==1? "hidden" : "read-only") + " to others";
 			wgHTML = res[6];
 			wgColor = " style='color:" + ((res[7]==1)? "red" : "green") + "'";
@@ -264,10 +266,10 @@ top.HEURIST.search = {
 	renderResultThumb: function(res) {
 
 		/* res[0]   res[1]        res[2]  res[3]   res[4]       res[5]     res[6]        */
-		/* bkmk_id, bkmk_user_id, bib_id, bib_url, bib_rectype, bib_title, bib_workgroup */
+		/* bkm_ID, bkm_UGrpID, rec_ID, rec_URL, rec_RecTypeID, rec_Title, rec_OwnerUGrpID */
 
 		/* res[7]          res[8]                 res[9]         res[10]        res[11]   */
-		/* bib_visibility, bib_url_last_verified, bib_url_error, bkmk_user_pwd, thumbnail */
+		/* rec_NonOwnerVisibility, rec_URLLastVerified, rec_URLErrorMessage, bkm_PwdReminder, thumbnailURL */
 
 		var pinAttribs = res[0]? "class='logged-in-only bookmarked' title='Bookmarked - click to see details'"
 		                       : "class='logged-in-only unbookmarked' title='Bookmark this record'";

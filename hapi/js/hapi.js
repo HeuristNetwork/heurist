@@ -2664,7 +2664,7 @@ HAPI.XHR = {
 		fr.contentWindow.location.replace((xssWebPrefix || HAPI.XHR._xssWebPrefix) + "method=" + encodeURIComponent(method) +
 		//				"&key=" + encodeURIComponent(HAPI.key || "") +
 				"&data=" + encodeURIComponent(HAPI.base64.encode(jsonData)) +
-				"&db=" + encodeURIComponent(HAPI.database || window.HeuristInstance) +
+				"&db=" + encodeURIComponent(HAPI.database || window.HeuristInstance) +	// saw TODO: check if there is a more appropriate db name location
 				(HAPI.XHR.rxURLLen? ("&rxlen="+HAPI.XHR.rxURLLen) : ""));
 	},
 
@@ -3148,7 +3148,7 @@ var HeuristScholarDB = new HStorageManager();
 				// first sweep: create place-holder records
 				id = parseInt(response.records[i][0]);
 				if (! (record = that.getRecord(id))) {
-					if (parseInt(response.records[i][2]) !== 52) {
+					if (parseInt(response.records[i][2]) !== 52) {	// saw TODO need to add check for rectype relation
 						record = new HRecord();
 					}
 					else {
@@ -3204,7 +3204,7 @@ var HeuristScholarDB = new HStorageManager();
 
 					try {	// make a best effort -- no guarantees
 						record.addNotification(recipient, text, date, freq).setID(parseInt(args[0]));
-					} catch (e) { }
+					} catch (e) { }	// saw TODO check what exceptions we are likely catching and handle
 				}
 
 				commentsMap = {};
@@ -3245,7 +3245,7 @@ var HeuristScholarDB = new HStorageManager();
 	}
 	this.setDefaultLoadRecordLimit = function (limit) {
 		if (!limit || parseInt(limit) == "NaN") {
-			throw new HTypeException("expected number passed into setLoadRecordLimit");
+			throw new HTypeException("expected a number to be passed into setLoadRecordLimit");
 		}
 		var temp = parseInt(limit);
 		if (temp>1000) {

@@ -794,7 +794,7 @@ function getAllDetailTypeStructures() {
 	$cacheKey = HEURIST_DBNAME.":AllDetailTypeInfo";
 	$dtStructs = getCachedData($cacheKey);
 	if ($dtStructs) {
-//		return $dtStructs;
+		return $dtStructs;
 	}
 
 	$dtStructs = array('groups' => getDetailTypeGroups(),

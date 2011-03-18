@@ -1,18 +1,16 @@
 <?php
 
-/**
- * filename, brief description, date of creation, by whom
+/*<!--
+ * saveRecords.php TODO brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- **/
+ -->*/
 
-?>
-
-<?php
-
+// helper function for debugging queries. Just requires you to add a _ to the end of mysql_query
+// TODO should all have a switch to out put to error_log
 function mysql_query_($x) {
 	print $x . "\n";
 	$res = mysql_query($x);

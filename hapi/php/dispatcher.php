@@ -85,7 +85,7 @@ if ($callback  &&  preg_match('/^cb[0-9]+$/', $callback)) {
 $method = @$_REQUEST['method'];
 if (!@$_REQUEST['method']) $method = preg_replace('!.*/([-a-z]+)$!', '$1', $_SERVER['PATH_INFO']);
 //$key = @$_REQUEST["key"];
-error_log("hapi dispatch method = ".$method." Heurist base = ".HEURIST_URL_BASE);
+//error_log("hapi dispatch method = ".$method." Heurist base = ".HEURIST_URL_BASE);
 
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");

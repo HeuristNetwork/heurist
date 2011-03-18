@@ -9,7 +9,7 @@
  * @todo
  -->*/
 
-	/*<!-- saving.php
+	/*<!-- saveRecord.php
 
 	Copyright 2005 - 2010 University of Sydney Digital Innovation Unit
 	This file is part of the Heurist academic knowledge management system (http://HeuristScholar.org)

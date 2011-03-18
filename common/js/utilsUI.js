@@ -917,7 +917,20 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 	},
 
 	// XMLHttpRequest stuff from www.quirksmode.org
+/**
+* sendRequest
+*  XMLHttpRequest stuff from www.quirksmode.org modified for HEURIST
+*  that handles the asynchronous service call
+* @author www.quirksmode.org XMLHttpRequest stuff modified for HEURIST
+* @author Tom Murtagh
+* @author Kim Jackson
+* @author Stephen White
+* @param url Fully form, root or heurist relative URL to the server application that will service this data
+* @param callback a function that will be passed the req object from the HTTPrequest application
+* @param postData data that will be sent to the service application
+**/
 	sendRequest: function(url,callback,postData) {
+		// if we don't have a fully formed or root URL then prepend the base path
 		if (! url.match(/^http:/)  &&  ! url.match(/^\//))
 			url = top.HEURIST.basePath + url;
 		var file = url;
@@ -998,7 +1011,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 	getJsonData: function(url, callback, postData) {
 		top.HEURIST.util.sendRequest(url, function(xhr) {
 			var obj = top.HEURIST.util.evalJson(xhr.responseText);
-			if (obj  &&  obj.error) alert(obj.error);
+			if (obj  &&  obj.error) alert("utilsUI:getJsonData response error -" + obj.error);
 			if (callback) callback(obj);
 		}, postData);
 	},
@@ -1222,7 +1235,52 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 			helpDiv.title = alts["hide"];
 			helpDiv.innerHTML = "<span>Help is off</span>";
 		}
+	},
+/**
+* Helper function that creates a select HTML object filled with an option element for each term "depth first"
+* tagged with class depthN and termHeader according to the terms tree depth and if it's id in in the headerList.
+* @author Stephen White
+* @param termIDTree an array tree of term ids
+* @param headerTermIDsList a comma separated list of term ids to be markered as headers, can be empty
+* @param termLookup a lookup array of term names
+* @param defaultTermID id of term to show as selected, can be null
+* @return selObj an HTML select object node
+**/
+	createTermSelect: function(termIDTree, headerTermIDsList, termLookup, defaultTermID) { // Creates the preview
+		var selObj = document.createElement("select");
+		var temp = (headerTermIDsList ? headerTermIDsList.split(",") : null);
+		var headers = {};
+		for (var id in temp) {
+			headers[temp[id]] = temp[id];
+		}
+		function createSubTreeOptions(depth, termSubTree) {
+			for(var termID in termSubTree) { // For every term in 'term'
+				var termName = termLookup[termID];
+				var isHeader = (headers[termID]? true:false);
+				var opt = new Option(termName,termID);
+				opt.className = "depth" + depth;
+				if(isHeader) { // header term behaves like an option group
+					opt.className +=  ' termHeader';
+					opt.disabled = true;
+				}
+				if (termID == defaultTermID) {
+					opt.selected = true;
+				}
+				selObj.appendChild(opt);
+				if(typeof termSubTree[termID] == "object") {
+					if(depth == 7) { // A dept of 8 (depth starts at 0) is maximum, to keep it organised
+						createSubTreeOptions(depth, termSubTree[termID]);
+					} else {
+						createSubTreeOptions(depth+1, termSubTree[termID]);
+					}
+				}
 	}
+		}
+		createSubTreeOptions(0,termIDTree);
+		if (!defaultTermID) selObj.selectedIndex = 0;
+		return selObj;
+	}
+
 };
 
 top.HEURIST.registerEvent(window, "contentloaded", top.HEURIST.util.setVersion);
