@@ -32,7 +32,6 @@ if (! is_admin()) {
 
 
 header('Content-type: text/javascript');
-
 $legalMethods = array(
 	"saveRectype",
 	"saveRT",
@@ -138,7 +137,7 @@ switch (@$_REQUEST['method']) {
 				array_push($rv,array($rtyID => updateRectype($commonNames,$dtFieldNames,$rtyID,$rt)));
 			}
 		}
-//		$rv['rectypes'] = getAllRectypeStructures();
+		$rv['rectypes'] = getAllRectypeStructures();
 		break;
 
 	case 'saveDetailType':
@@ -158,7 +157,7 @@ switch (@$_REQUEST['method']) {
 				array_push($rv,array($dtyID => updateDetailType($commonNames,$dtyID,$dt)));
 			}
 		}
-//		$rv['detailTypes'] = getAllDetailTypeStructures();
+		$rv['detailTypes'] = getAllDetailTypeStructures();
 		break;
 }
 
@@ -234,12 +233,14 @@ global $rtyColumnNames,$rstColumnNames;
 
 function updateRectype($commonNames,$dtFieldNames,$rtyID,$rt) {
 global $rtyColumnNames,$rstColumnNames;
+
 	$res = mysql_query("select * from defRecTypes where rty_ID = $rtyID");
 	if ( !mysql_num_rows($res)){
 		return array("error" => "invalid rty_ID ($rtyID) passed in data to updateRectype");
 	}
 	//$row = mysql_fetch_assoc($res);	// saw TODO: get row and add error checking code
 	//check commonNames for updating the rectype commen data
+
 	$ret = array();
 	if (count($commonNames)) {
 		$ret['common'] =array();
@@ -250,7 +251,7 @@ global $rtyColumnNames,$rstColumnNames;
 				array_push($ret['common'],array('error'=>"$colName is not a valid column name for defRecTypes val= $val was not used"));
 				continue;
 			}
-			$query = "update defRectypes set $colName = $val where rty_ID = $rtyID";
+			$query = "update defRectypes set $colName = '$val' where rty_ID = $rtyID";
 			mysql_query($query);
 			if (mysql_error()) {
 				array_push($ret['common'],array('error'=>"error updating $colName in defRecTypes - ".mysql_error()));
@@ -282,7 +283,7 @@ global $rtyColumnNames,$rstColumnNames;
 						array_push($ret['dtFields'][$dtyID],array('error'=>"$colName is not a valid column name for defRecStructure val= $val was not used"));
 						continue;
 					}
-					$query = "update defRecStructure set $colName = $val where rst_RecTypeID = $rtyID and rst_DetailTypeID = $dtyID";
+					$query = "update defRecStructure set $colName = '$val' where rst_RecTypeID = $rtyID and rst_DetailTypeID = $dtyID";
 					mysql_query($query);
 					if (mysql_error()) {
 						array_push($ret['dtFields'][$dtyID],array('error'=>"error updating $colName in field $dtyID defRecStructure - ".mysql_error()));
@@ -358,7 +359,7 @@ global $dtyColumnNames;
 				array_push($ret['common'],array('error'=>"$colName is not a valid column name for defDetailTypes val= $val was not used"));
 				continue;
 			}
-			$query = "update defDetailTypes set $colName = $val where dty_ID = $dtyID";
+			$query = "update defDetailTypes set $colName = '$val' where dty_ID = $dtyID";
 			mysql_query($query);
 			if (mysql_error()) {
 				array_push($ret['common'],array('error'=>"error updating $colName in defDetailTypes - ".mysql_error()));
