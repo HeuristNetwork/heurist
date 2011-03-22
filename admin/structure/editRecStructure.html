@@ -1,0 +1,1051 @@
+<!--
+
+/**
+ * editRecStructure.html
+ *
+ * manages the structure of given rectype, edit properties for view  (width, label, order, tooltip)
+ *  for fields and allows to preview the record's entry form on-fly,
+ * invokes editRecStructure_SelectDetailType.html - to add new detailtype into record structure
+ *
+ * 2011-03-15
+ * @autor: Artem Osmakov
+ *
+ * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+ * @link: http://HeuristScholar.org
+ * @license http://www.gnu.org/licenses/gpl-3.0.txt
+ * @package Heurist academic knowledge management system
+ * @todo  deletion
+ **/
+
+-->
+<html>
+ <head>
+  <title>Record Structure definition</title>
+
+  	<link rel="icon" href="../../favicon.ico" type="image/x-icon">
+  	<link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+
+  	<link rel="stylesheet" type="text/css" href="../../common/css/heurist.css">
+<!--  <link rel="stylesheet" type="text/css" href="../../common/css/mini.css"> -->
+  	<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+
+  <!-- YUI -->
+<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
+<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/tabview/tabview-min.js"></script>
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/history/history-min.js"></script>
+
+
+	<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
+	<script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
+
+  	<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/reset-fonts-grids/reset-fonts-grids.css"/>
+	<!-- Skin CSS files resize.css must load before layout.css -->
+	<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/assets/skins/sam/resize.css">
+	<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/assets/skins/sam/layout.css">
+	<!-- Utility Dependencies -->
+	<script src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+	<script src="../../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
+	<script src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
+	<!-- Optional Animation Support-->
+	<script src="../../external/yui/2.8.2r1/build/animation/animation-min.js"></script>
+	<!-- Optional Resize Support -->
+	<script src="../../external/yui/2.8.2r1/build/resize/resize-min.js"></script>
+	<!-- Source file for the Layout Manager -->
+	<script src="../../external/yui/2.8.2r1/build/layout/layout-min.js"></script>
+
+<!-- DATATABLE DEFS -->
+	<link type="text/css" rel="stylesheet" href="../../external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
+	<!-- datatable Dependencies -->
+	<script type="text/javascript" src="../../external/yui/2.8.2r1/build/datasource/datasource-min.js"></script>
+	<!-- OPTIONAL: Drag Drop (enables resizeable or reorderable columns) -->
+	<script type="text/javascript" src="../../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
+	<!-- Source files -->
+	<script type="text/javascript" src="../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
+<!-- END DATATABLE DEFS-->
+
+  	<link rel="stylesheet" type="text/css" href="yui-dt-expandable.css"/>
+	<script type="text/javascript" src="yui-dt-expandable.js"></script>
+<!-- END YUI -->
+
+<style type="text/css">
+.dtyField {
+	padding-bottom: 3px;
+	padding-top: 3px;
+	display: block;
+}
+.dtyLabel {
+	display: inline-block;
+	width: 150px;
+	text-align: right;
+	padding-right: 3px;
+}
+</style>
+
+ </head>
+
+ <body class="yui-skin-sam" style="overflow: auto;">
+
+    <script src="../../common/js/utilsLoad.js"></script>
+    <script src="../../common/php/displayPreferences.php"></script>
+ 	<script src="../../common/php/loadCommonInfo.php"></script>
+    <script type="text/javascript" src="../../records/edit/editRecord.js"></script>
+    <script src="../../common/js/utilsUI.js"></script>
+
+ 	<div>rty_ID:<input id="ed_rty_ID" value="1"/><input type="button" value="change" onclick="_tempFillValue()"/></div>
+
+ 	<div id="modelTabs" class="yui-navset yui-navset-top" style="width:680;margin:auto;text-align:left">
+
+	<script  type="text/javascript">
+
+	var EditStructure = (
+	function() {
+//	YAHOO.util.Event.onDOMReady( function() {
+//	    YAHOO.example.Basic = function() {
+		var _className = "EditStructure";
+
+		var myDataTable,
+			tabView = new YAHOO.widget.TabView(),
+			rty_ID,
+			isDragEnabled = false,
+			updatedDetails = [],  //list of dty_ID that were affected with edition
+			updatedFields = [];   //list of indexes in fieldname array that were affected
+
+
+
+		var Dom = YAHOO.util.Dom,
+            Event = YAHOO.util.Event,
+            DDM = YAHOO.util.DragDropMgr,
+        	myDTDrags = {};
+
+	function  _init(){
+
+		if (location.search.length > 1) {
+			window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+			rty_ID = window.HEURIST.parameters['rty_ID'];
+			document.getElementById("ed_rty_ID").value = rty_ID;
+			document.title = "Record Type: " + rty_ID+" : " + top.HEURIST.rectypes.names[rty_ID];
+        }
+
+
+		 var hToolBar = '<div style="display:inline-block; text-align:left">'+
+		 				'<input type="button" value="Add Field" onclick="onAddNewDetail()"/>'+
+		 				'<input type="button" value="Add Field Type" onclick="onDefineNewType()"/>'+
+						//'<input type="button" value="collapse all" onclick="onCollapseAll()"/>'+
+						'<input type="button" value="Enable Drag" onclick="onToggleDrag(event)"/></div>'+
+						'<div style="float:right; text-align:right">'+
+						'<input type="button" value="Save" onclick="onUpdateStructureOnServer(false)"/>'+
+						'<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/>'+
+						'</div>';
+						//'<textarea id="dbg" rows="5"></textarea>';
+
+        tabView.addTab(new YAHOO.widget.Tab({
+            id: 'design',
+            label: 'Design',
+            content: '<div id="tabDesign">'+hToolBar+'<div id="tableContainer"></div>'+hToolBar+'</div>'
+            }));
+        tabView.addTab(new YAHOO.widget.Tab({
+            id: 'preview',
+            label: 'Preview',
+            content: '<div id=all-inputs></div>'
+            }));
+		tabView.addListener("activeTabChange", _handleTabChange);
+ 		tabView.appendTo("modelTabs");
+
+ 		tabView.set("activeIndex", 0);
+	}
+     //
+	 function _handleTabChange (e) {
+	 	var ind = tabView.get("activeIndex");
+		if(e.newValue!=e.prevValue){
+			if(ind==0){
+				//reload design
+				_initTabDesign(null);
+
+			}else if(ind==1){
+				//reload preview
+				_initTabPreview();
+			}
+		}
+	}
+
+	//
+    function _initTabDesign(_rty_ID){
+		if(myDataTable==null || _rty_ID!=null){
+
+		if(_rty_ID!=null) rty_ID = _rty_ID;
+        if(rty_ID==null) return;
+
+        var typedef = top.HEURIST.rectypes.typedefs[rty_ID];
+        if(typedef==undefined){
+        	alert("Record type ID "+rty_ID+" is not exist");
+        	rty_ID = null;
+        	return;
+        }
+
+		updatedDetails = [];  //list of dty_ID that were affected with edition
+		updatedFields = [];   //list of indexes in fieldname array that were affected
+
+        var expansionFormatter  = function(el, oRecord, oColumn, oData) {
+            var cell_element    = el.parentNode;
+
+            //Set trigger
+            if( oData ){ //Row is closed
+                Dom.addClass( cell_element,
+                    "yui-dt-expandablerow-trigger" );
+            }
+
+        };
+
+        //alert("load for ed_rty_ID:"+_rty_ID);
+
+        //fill the values of record detail strcutures
+        var arr = [];
+		var _dts = typedef.dtFields;
+
+		//only for this group and  visible in UI
+		if(_dts!=null){
+			for (var rst_ID in _dts) {
+					var aval = _dts[rst_ID]
+					arr.push([ aval[9],
+aval[0], top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[2], aval[4],
+aval[6], aval[5], aval[3], aval[7], aval[15],
+aval, rst_ID ]);
+			}
+		}
+
+        var myDataSource = new YAHOO.util.LocalDataSource(arr,{
+                responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
+                responseSchema : {
+                        fields: [ "rst_DisplayOrder",
+"rst_DisplayName", "dty_Type", "rst_RequirementType",
+"rst_MinValues", "rst_MaxValues", "rst_DefaultValue", "rst_DisplayWidth", "rst_Status",
+"rst_values", "rst_ID"]
+                                 }
+        });
+
+/*
+0"rst_DisplayName", +
+1"rst_DisplayHelpText", +
+2"rst_DisplayExtendedDescription",
+3"rst_DefaultValue" +
+4"rst_RequirementType" +
+5"rst_MaxValues" +
+6"rst_MinValues" +
+7"rst_DisplayWidth" +
+8"rst_RecordMatchOrder"  ????
+9"rst_DisplayOrder" +
+10"rst_DisplayDetailTypeGroupID"
+11"rst_FilteredJsonTermIDTree"
+12"rst_PtrFilteredIDs"
+13 "rst_AdditionalHeaderTermIDs"
+14 "rst_CalcFunctionID"
+15 "rst_Status"   !!!!!
+16 "rst_OrderForThumbnailGeneration"
+17 "dty_HeaderTermIDs"
+18 "dty_FieldSetRectypeID"
+*/
+
+
+"rst_DisplayOrder",				//"rst_DisplayHelpText",
+"rst_DisplayName", "dty_Type", "rst_RequirementType",
+"rst_MinValues", "rst_MaxValues", "rst_DefaultValue", "rst_DisplayWidth", "rst_Status",
+"rst_values", "rst_ID"
+
+        var myColumnDefs = [
+        			{
+						key:"rst_DisplayOrder", label: "Order", sortable:true, hidden:false
+				    },
+                    {
+						key:"rst_DisplayName", label: "DispName", width:120, sortable:false },
+                    {
+						key:"dty_Type", label: "Type", sortable:false
+                    },
+                    //{ key:"rst_DisplayHelpText", label: "Prompt", sortable:false },
+                    {
+						key:"rst_RequirementType", label: "Required", sortable:false
+                    },
+                    {
+                        key:"rst_MinValues", label: "Min", width : "10px", sortable:false
+                    },
+                    {
+                        key:"rst_MaxValues", label: "Max", width : "10px", sortable:false
+                    },
+                    {
+                        key:"rst_DefaultValue", label: "Default", sortable:false
+                    },
+                    {
+                        key:"rst_DisplayWidth", label: "Width", sortable:false
+                    },
+                    {
+                        key:"rst_Status", label: "Status", sortable:false
+                    },
+                    {
+                        key:"rst_values",
+                        label:"Del",
+                        width : "16px",
+                        sortable: false,
+						formatter: function(elLiner, oRecord, oColumn, oData){
+								//var rst_ID = oRecord.getData('rst_ID');
+								//var arrDefType = oData;
+						elLiner.innerHTML =
+                			'<a href="#delete"><img src="../../common/images/delete_icon.png" width="16" height="16" border="0" title="Remove detail" /><\/a>';
+                		}
+                    },
+                    {
+                        key:"rst_ID",
+                        label: "Edit",
+                        width : "16px",
+                        sortable:false,
+                        formatter:expansionFormatter
+                    }
+        ];
+
+		myDataTable = new YAHOO.widget.RowExpansionDataTable(
+                "tableContainer",
+                myColumnDefs,
+                myDataSource,
+						//this is box of expandable record
+                    { rowExpansionTemplate :
+                        function ( obj ) {
+                        	var rst_ID = obj.data.getData('rst_ID');
+                        	//var rst_values = obj.data.getData('rst_values');
+/*
+THIS IS FORM to edit detail structure. It is located on expandable row of table
+*/
+				obj.liner_element.innerHTML =
+'<div style="padding-left:30; padding-bottom:5; padding-right:5">'+
+'<div class="dtyField"><label class="dtyLabel">Display name/Label:</label><input id="ed'+rst_ID+'_rst_DisplayName" title="Display Name/Label"/></div>'+
+'<div class="dtyField"><label class="dtyLabel">Help Text/Prompt:</label><input id="ed'+rst_ID+'_rst_DisplayHelpText" style="width:400px" title="Help Text"/></div>'+
+'<div class="dtyField"><label class="dtyLabel">Default Value:</label><input id="ed'+rst_ID+'_rst_DefaultValue" title="Default Value"/></div>'+
+'<div class="dtyField"><label class="dtyLabel">Width:</label><input id="ed'+rst_ID+'_rst_DisplayWidth" title="Visible width of field" style="width:40" size="4" onkeypress="validate(event)"/></div>'+
+'<div class="dtyField"><label class="dtyLabel">Requirement type:</label>'+
+	'<select id="ed'+rst_ID+'_rst_RequirementType">'+
+	'<option value="required">required</option>'+
+	'<option value="recommended">recommended</option>'+
+	'<option value="optional">optional</option>'+
+	'<option value="forbidden">forbidden</option></select>'+
+'&nbsp;&nbsp;repeat from&nbsp;<input id="ed'+rst_ID+'_rst_MinValues" title="Min Values" style="width:20" size="2"  onkeypress="validate(event)"/>&nbsp;'+
+'&nbsp;to&nbsp;<input id="ed'+rst_ID+'_rst_MaxValues" title="Max Values"  style="width:20" size="2"  onkeypress="validate(event)"/>&nbsp;times</div>'+
+'<div class="dtyField"><label class="dtyLabel">Status:</label><select id="ed'+rst_ID+'_rst_Status">'+
+	'<option value="reserved">reserved</option>'+
+	'<option value="approved">approved</option>'+
+	'<option value="pending">pending</option>'+
+	'<option value="open">open</option></select></div></div>';
+
+						}
+
+					}
+                );
+
+
+                //
+        		// Subscribe to a click event to bind to expand/collapse the row
+        		//
+		        myDataTable.subscribe( 'cellClickEvent',function(oArgs)
+		        {
+		        	if(!isDragEnabled && Dom.hasClass( oArgs.target, 'yui-dt-expandablerow-trigger' ))
+		        	//if(!isDragEnabled)
+					{
+						var record_id = oArgs.target;
+						id_expcell = record_id
+
+						if(record_id!=undefined){
+							var oRecord = this.getRecord(record_id);
+							var rst_ID = oRecord.getData("rst_ID");
+
+		        			var state = this._getRecordState( record_id );
+		        			var isExpanded = ( state && state.expanded );
+   		                	if(isExpanded){
+								fromUItoArray(rst_ID); //before collapse save from UI to HEURIST
+							}
+
+							this.onEventToggleRowExpansion(record_id);//oArgs);
+
+							if(!isExpanded){
+   		                		fromArrayToUI(rst_ID, false); //after expand restore values from HEURIST
+							}
+						}
+					}
+            	} );
+
+                //
+        		// Subscribe to a click event on delete image
+        		//
+				myDataTable.subscribe('linkClickEvent', function(oArgs){
+					YAHOO.util.Event.stopEvent(oArgs.event);
+					var elLink = oArgs.target;
+					var oRecord = this.getRecord(elLink);
+					var rst_ID = oRecord.getData("rst_ID");
+					if(elLink.hash == "#delete"){
+						var rst_values = oRecord.getData('rst_values');
+						var r=confirm("Delete detail #"+rst_ID+" '"+rst_values[0]+"' from this record structure?");
+						if (r==true) {
+							this.deleteRow(oRecord.getId(), -1);
+						}
+					}
+				});
+
+				//////////////////////////////////////////////////////////////////////////////
+        		// Create DDRows instances when DataTable is initialized
+        		//////////////////////////////////////////////////////////////////////////////
+        		// WE DO IT MANUALLY
+        		/*myDataTable.subscribe("initEvent", function() {
+            		var i, id,
+                	allRows = this.getTbodyEl().rows;
+
+            		for(i=0; i<allRows.length; i++) {
+                		id = allRows[i].id;
+                		// Clean up any existing Drag instances
+                		if (myDTDrags[id]) {
+                     		myDTDrags[id].unreg();
+                     		delete myDTDrags[id];
+                		}
+                		// Create a Drag instance for each row
+                		myDTDrags[id] = new YAHOO.example.DDRows(id);
+            		}
+        		});*/
+
+        		//////////////////////////////////////////////////////////////////////////////
+        		// Create DDRows instances when new row is added
+        		//////////////////////////////////////////////////////////////////////////////
+        		myDataTable.subscribe("rowAddEvent",function(e){
+        			if(isDragEnabled){
+            			var id = e.record.getId();
+            			myDTDrags[id] = new YAHOO.example.DDRows(id);
+					}
+        		})
+        		/*
+        		myDataTable.subscribe("rowUpdateEvent",function(e){
+            		var id = e.record.getId();
+                		if (myDTDrags[id]) {
+                     		myDTDrags[id].unreg();
+                     		delete myDTDrags[id];
+                		}
+            		myDTDrags[id] = new YAHOO.example.DDRows(id);
+        		})*/
+
+		}
+	}
+
+	//
+	// Show all our chanages on preview tab.
+	// 1) It takes values from inputs and change the structure
+	// 		top.HEURIST.rectypes.typedefs[rty_ID].dtFields
+	// 2) Creates inputs with createInputsForRectype
+	//
+    function _initTabPreview(){
+
+    	fromUItoArray(null); //save all changes
+
+    	//define new display order
+		//var arrStrucuture = top.HEURIST.rectypes.typedefs[rty_ID].dtFields;
+		//arrStrucuture
+
+		var allInputs = document.getElementById("all-inputs");
+		while (allInputs.childNodes.length > 0)
+			allInputs.removeChild(allInputs.childNodes[0]);
+
+		var showAllDiv = document.getElementById("show-all-div");
+		if (showAllDiv)
+			showAllDiv.parentNode.removeChild(showAllDiv);
+
+		var innerDims = top.HEURIST.util.innerDimensions(window);
+
+		var inputs = top.HEURIST.edit.createInputsForRectype(rty_ID, [], allInputs);
+
+	}
+
+	//
+	// save all back to HEURIST structure
+	//
+	function fromUItoArray(_rst_ID){
+
+		var arrStrucuture = top.HEURIST.rectypes.typedefs[rty_ID].dtFields;
+		var fieldnames = top.HEURIST.rectypes.typedefs.dtFieldNames;
+
+		if(_rst_ID==null){ //for all
+			//fill values from array
+			for (var rst_ID in arrStrucuture)
+			if(rst_ID!=undefined){
+				setFor(rst_ID);
+
+
+			/*
+			get array of all inputs that started with ed+rst_ID
+			var arrInputs = $('[id^=ed'+rst_ID+'_]');
+			*/
+			}
+		}else{
+				setFor(_rst_ID);
+		}
+
+    	top.HEURIST.rectypes.typedefs[rty_ID].dtFields = arrStrucuture;
+
+    	function setFor(__rst_ID){
+    		//var dbg = document.getElementById("dbg");
+    		var isChanged = false;
+
+           	//find the record with given rst_ID
+			var recs = myDataTable.getRecordSet();
+			var len = recs.getLength();
+			var dataupdate;
+			var row_index;
+			for (row_index = 0; row_index < len; row_index++ )
+			{
+				var rec = myDataTable.getRecord(row_index);
+				if(rec.getData('rst_ID') == __rst_ID){
+                	dataupdate = rec.getData();
+					break;
+				}
+			}
+
+
+			var values = arrStrucuture[__rst_ID];
+			var k;
+			for(k=0; k<fieldnames.length; k++)
+			{
+					var ed_name = 'ed'+__rst_ID+'_'+fieldnames[k];
+                	var edt = document.getElementById(ed_name);
+                    if(edt!=null && edt!=undefined){ //} && (isAll || edt.parentNode.id.indexOf("row")<0 ) ) {
+                    	//DEBUG if(values[k] != edt.value){
+                    	//	dbg.value = dbg.value + (fieldnames[k]+'='+edt.value);
+						//}
+
+						if(values[k] != edt.value){
+							values[k] = edt.value;
+
+							isChanged = true;
+							//track the changes for further save
+							if(updatedFields!=null && updatedFields.indexOf(k)<0){
+								updatedFields.push(k);
+							}
+							if(updatedDetails.indexOf(__rst_ID)<0){
+								updatedDetails.push(__rst_ID);
+							}
+
+							dataupdate[fieldnames[k]] = edt.value;
+						}
+                    }
+            }//end for
+
+        	//update visible row
+            if(isChanged){
+            	dataupdate.rst_values = values;
+            	//update data
+				myDataTable.updateRow(row_index, dataupdate);
+
+				arrStrucuture[__rst_ID] = values;
+            }
+    	}
+
+	}
+	//
+	// restore from array to controls
+	//
+	function fromArrayToUI(rst_ID, isAll){
+
+		var fieldnames = top.HEURIST.rectypes.typedefs.dtFieldNames;
+		var values = top.HEURIST.rectypes.typedefs[rty_ID].dtFields[rst_ID];
+
+			var k;
+			for(k=0; k<fieldnames.length; k++)
+			{
+					var ed_name = 'ed'+rst_ID+'_'+fieldnames[k];
+                	var edt = document.getElementById(ed_name);
+                    if( edt!=null && edt!=undefined && (isAll || edt.parentNode.id.indexOf("row")<0 ) )
+                    {
+                    	edt.value = values[k];
+                    }
+			}
+	}
+
+    /////////////////////////////////////////////////
+    //
+    // addition of new details to this structure
+    //
+	function _addDetails(dty_ID_list){
+
+		var arrDty_ID = dty_ID_list.split(",");
+		if(arrDty_ID.length<1) return;
+
+		var recDetTypes = top.HEURIST.rectypes.typedefs[rty_ID].dtFields;
+		if(recDetTypes==undefined){
+			recDetTypes = new Object;
+			recDetTypes.name = "dtFields";
+		}
+
+        var data_toadd = [];
+		var detTypes = top.HEURIST.detailTypes.typedefs;
+
+		//find max order and index to insert
+		var recs = myDataTable.getRecordSet();
+		var index_toinsert = recs.getLength()-1;
+		var order = 0;
+       	if(index_toinsert<0){
+			index_toinsert = 0;
+       	}else{
+			var rec = myDataTable.getRecord(index_toinsert);
+			order = new Number(rec.getData('rst_DisplayOrder')) + 1;
+		}
+
+		//moves detail types to
+		var k;
+		for(k=0; k<arrDty_ID.length; k++)
+		{
+				var dty_ID = arrDty_ID[k];
+				if(recDetTypes[dty_ID]==undefined){
+					var arrs = detTypes[dty_ID].commonFields;
+					//add new detail type
+									// 0		1		2	   3	4		 5   6   7    8?    9  10?
+					var arr_target = [arrs[0],arrs[4],arrs[1],"","optional","1","0","60","0",order,"1",
+									  "1", null, null, null, "open", null, null, null];
+									// 11	12    13    14     15	 16	    17    18
+
+					recDetTypes[dty_ID] = arr_target;
+
+					data_toadd.push({rst_DisplayOrder: order,
+					rst_DisplayName: arrs[0],
+					dty_Type: arrs[2],
+					rst_RequirementType: "optional",
+					rst_MinValues: 1,
+					rst_MaxValues: 1,
+					rst_DefaultValue: "",
+					rst_DisplayWidth: 60,
+					rst_Status: "open",
+					rst_values: arr_target, rst_ID:dty_ID });
+
+					updatedDetails.push(dty_ID); //track change
+
+					order++;
+				}
+		}//end for
+
+		if(data_toadd.length>0){
+			myDataTable.addRows(data_toadd, index_toinsert);
+
+			// in case of addition - all fields were affected
+			updatedFields = null;
+		}
+
+/*
+0"dty_Name"
+1"dty_ExtendedDescription"
+2"dty_Type"
+3"dty_OrderInGroup"
+4"dty_HelpText"
+5"dty_ShowInLists"
+6"dty_Status"
+7"dty_DetailTypeGroupID"
+8"dty_FieldSetRecTypeID"
+9"dty_JsonTermIDTree"
+10"dty_HeaderTermIDs"
+11"dty_PtrTargetRectypeIDs"
+12"dty_ID"
+*/
+
+	}//end _addDetails
+
+
+/*
+{ rectype:
+            {colNames:{ common:[rty_name,rty_OrderInGroup,.......], dtFields:[rst_DisplayName, ....]},
+                defs : {-1:[[common:['newRecType name',56,34],
+                			      dtFields:{dty_ID:[overide name,76,43], 160:[overide name2,136,22]}],
+                            [common:[...],dtFields:{nnn:[....],...,mmm:[....]}]],
+                        23:{common:[....],
+                                 dtFields:{nnn:[....],...,mmm:[....]}
+                            }
+                     }
+            }
+}
+
+*/
+
+	function _getUpdates()
+	{
+
+		fromUItoArray(null); //save all changes
+
+		if(rty_ID!=null && updatedDetails.length>0){
+
+			var k;
+
+			//create and fill the stiphen's structure
+			var orec = {rectype:{
+				colNames:{common:[], dtFields:[]},
+				defs: {}
+			}};
+
+
+			//fill array of updated fieldnames
+			var fieldnames = top.HEURIST.rectypes.typedefs.dtFieldNames;
+			if(updatedFields==null){ //all fields are updated
+					updatedFields = [];
+					for(k=0; k<fieldnames.length; k++)
+					{
+						orec.rectype.colNames.dtFields.push(fieldnames[k]);
+						updatedFields.push(k);
+					}
+			}else{
+					for(k=0; k<updatedFields.length; k++)
+					{
+						orec.rectype.colNames.dtFields.push(fieldnames[updatedFields[k]]);
+					}
+			}
+
+			orec.rectype.defs[rty_ID] = {common:[], dtFields:{}};
+
+			var typedefs = top.HEURIST.rectypes.typedefs[rty_ID].dtFields;
+
+			//loop through updated details
+			for(k=0; k<updatedDetails.length; k++)
+			{
+				var vals = [];
+				var l;
+					for(l=0; l<updatedFields.length; l++)
+					{
+						vals.push(typedefs[updatedDetails[k]][updatedFields[l]]);
+					}
+
+				orec.rectype.defs[rty_ID].dtFields[updatedDetails[k]] = vals;
+			}
+
+			var str = YAHOO.lang.JSON.stringify(orec);
+			return str;
+		}else{
+			return null;
+		}
+
+
+	}
+
+	//-------------------
+
+		//////////////////////////////////////////////////////////////////////////////
+        // Init drag and drop class (eanble)
+        //////////////////////////////////////////////////////////////////////////////
+		function dragDropEnable() {
+            		var i, id,
+                	allRows = myDataTable.getTbodyEl().rows;
+
+            		for(i=0; i<allRows.length; i++) {
+                		id = allRows[i].id;
+                		// Clean up any existing Drag instances
+                		if (myDTDrags[id]) {
+                     		myDTDrags[id].unreg();
+                     		delete myDTDrags[id];
+                		}
+                		// Create a Drag instance for each row
+                		myDTDrags[id] = new YAHOO.example.DDRows(id);
+					}
+		}
+		//////////////////////////////////////////////////////////////////////////////
+        // Diable drag and drop class
+        //////////////////////////////////////////////////////////////////////////////
+		function dragDropDisable() {
+            		var i, id,
+                	allRows = myDataTable.getTbodyEl().rows;
+
+            		for(i=0; i<allRows.length; i++) {
+                		id = allRows[i].id;
+                		// Clean up any existing Drag instances
+                		if (myDTDrags[id]) {
+                     		myDTDrags[id].unreg();
+                     		delete myDTDrags[id];
+                		}
+					}
+					myDTDrags = {};
+		}
+
+		////////
+		//
+        function updateOrderAfterDrag() {
+
+                var recs = myDataTable.getRecordSet();
+            	var len = recs.getLength();
+            	var neworder = [];
+            	var isChanged = false;
+
+            	//loop through current records and see if this has been added before
+            	for (var i = 0; i < len; i++ )
+            	{
+                	var rec = myDataTable.getRecord(i);
+                	var data = rec.getData();
+                	//if it's been added already, update it
+                	if(data.rst_DisplayOrder != i){
+                		data.rst_DisplayOrder = i;
+
+       					myDataTable.updateRow(i, data);
+						var id = rec.getId();
+                		if (myDTDrags[id]) {
+                     		myDTDrags[id].unreg();
+                     		delete myDTDrags[id];
+                		}
+						myDTDrags[id] = new YAHOO.example.DDRows(id);
+
+
+						if(updatedDetails.indexOf(data.rst_ID)<0){
+							updatedDetails.push(data.rst_ID);
+						}
+
+						//@todo update rst_values directly
+						top.HEURIST.rectypes.typedefs[rty_ID].dtFields[data.rst_ID][9] = i;
+						/*
+						var ed_name = 'ed'+data.rst_ID+'_rst_DisplayOrder';
+                		var edt = document.getElementById(ed_name);
+                		edt.value = i; */
+
+                		isChanged = true;
+					}
+
+                	neworder.push(data.rst_ID);
+            	}
+
+				if(isChanged){
+					//index if field rst_DisplayOrder
+					if(updatedFields!=null && updatedFields.indexOf(9)<0){
+								updatedFields.push(9);
+					}
+					top.HEURIST.rectypes.dtDisplayOrder[rty_ID] = neworder;
+
+					dragDropDisable();
+					dragDropEnable();
+//					DDM.refreshCache();
+				}
+		}
+
+
+
+		//////////////////////////////////////////////////////////////////////////////
+        // Custom drag and drop class
+        //////////////////////////////////////////////////////////////////////////////
+        YAHOO.example.DDRows = function(id, sGroup, config) {
+            YAHOO.example.DDRows.superclass.constructor.call(this, id, sGroup, config);
+            Dom.addClass(this.getDragEl(),"custom-class");
+            this.goingUp = false;
+            this.lastY = 0;
+        };
+
+        //////////////////////////////////////////////////////////////////////////////
+        // DDRows extends DDProxy
+        //////////////////////////////////////////////////////////////////////////////
+        YAHOO.extend(YAHOO.example.DDRows, YAHOO.util.DDProxy, {
+            proxyEl: null,
+            srcEl:null,
+            srcData:null,
+            srcIndex: null,
+            tmpIndex:null,
+
+            startDrag: function(x, y) {
+
+            	if(!isDragEnabled) return;
+
+                proxyEl = this.proxyEl = this.getDragEl();
+				srcEl = this.srcEl = this.getEl();
+
+				var rec = myDataTable.getRecord(this.srcEl);
+				if(rec==null) return;
+                this.srcData = rec.getData();
+                this.srcIndex = srcEl.sectionRowIndex;
+                // Make the proxy look like the source element
+                Dom.setStyle(srcEl, "visibility", "hidden");
+                //proxyEl.innerHTML = "<table><tbody>"+srcEl.innerHTML+"</tbody></table>";
+				proxyEl.innerHTML = "<div>dragging detail to new place</div>";
+
+                //var rst_ID = this.srcData.rst_ID
+				//fromUItoArray(rst_ID); //before collapse save to UI
+
+            },
+
+            endDrag: function(x,y) {
+                var position,
+                    srcEl = this.srcEl;
+
+   				proxyEl.innerHTML = "";
+                Dom.setStyle(this.proxyEl, "visibility", "hidden");
+                Dom.setStyle(srcEl, "visibility", "");
+
+                updateOrderAfterDrag();
+            },
+             onDrag: function(e) {
+                // Keep track of the direction of the drag for use during onDragOver
+                var y = Event.getPageY(e);
+
+                if (y < this.lastY) {
+                    this.goingUp = true;
+                } else if (y > this.lastY) {
+                    this.goingUp = false;
+                }
+
+                this.lastY = y;
+           },
+
+            onDragOver: function(e, id) {
+                // Reorder rows as user drags
+                var srcIndex = this.srcIndex,
+                    destEl = Dom.get(id),
+                    destIndex = destEl.sectionRowIndex,
+                    tmpIndex = this.tmpIndex;
+
+                if (destEl.nodeName.toLowerCase() === "tr") {
+                    if(tmpIndex !== null) {
+                        myDataTable.deleteRow(tmpIndex);
+                    }
+                    else {
+                        myDataTable.deleteRow(this.srcIndex);
+                    }
+
+                    //this.srcData.rst_DisplayOrder = destIndex;
+
+                    myDataTable.addRow(this.srcData, destIndex);
+                    this.tmpIndex = destIndex;
+
+                    //updateOrderAfterDrag();
+
+                    DDM.refreshCache();
+                }
+            }
+
+
+        });
+
+	//---------------------------------------------
+	//public members
+                var that = {
+                        name : "App",
+                        init: function(){
+                            _init();
+                        },
+                        getRty_ID: function(){
+							return rty_ID;
+                        },
+                        getTable: function () {
+                            return myDataTable;
+                        },
+                        toggleDrag: function () {
+                        	isDragEnabled = !isDragEnabled;
+                        	if(isDragEnabled){
+                        		fromUItoArray(null); //save all changes
+								myDataTable.collapseAllRows();
+                        		dragDropEnable();
+                        	}else{
+								dragDropDisable();
+                        	}
+                        	DDM.refreshCache();
+                            return isDragEnabled;
+                        },
+                        initTabDesign: function(rty_ID){
+                            _initTabDesign(rty_ID);
+                        },
+                        addDetails:function(dty_ID_list){
+                            _addDetails(dty_ID_list);
+                        },
+                        getUpdates:function(){
+                            return _getUpdates();
+                        }
+				};
+
+                return that;
+
+	})();
+
+	////////////////////////////////////////////////
+	//
+	// Toolbar buttons event handlers
+	//
+	function onAddNewDetail(){
+
+    	top.HEURIST.util.popupURL(top, top.HEURIST.basePath +
+    		"admin/structure/editRecStructure_SelectDetailType.html?rty_ID="+EditStructure.getRty_ID(),
+            {   "close-on-blur": false,
+                "no-resize": false,
+				height: 480,
+				width: 440,
+                callback: function(detailTypesToBeAdded) {
+										if(detailTypesToBeAdded!=null){
+													EditStructure.addDetails(detailTypesToBeAdded);
+										}
+                		}
+            });
+
+	}
+	//
+	// add new detal type dialogue
+	//
+	function onDefineNewType(){
+		//@todo
+	}
+
+	//
+	//
+	function onCollapseAll(){
+		var  myTable = EditStructure.getTable();
+		myTable.collapseAllRows();
+	}
+	//
+	function onToggleDrag(event){
+		var btn = event.target;
+		if (EditStructure.toggleDrag()){
+			btn.value = "Disable Drag";
+		}else{
+			btn.value = "Enable Drag";
+		}
+	}
+	//
+	//
+	/*
+		create magic structur (see above) to send to stephen
+	*/
+	function onUpdateStructureOnServer(needClose)
+	{
+		var str = EditStructure.getUpdates();
+		alert(str);
+		if(str!=null){
+			//http://heuristscholar.org/h3-sw/
+			var baseurl = "http://heuristscholar.org/h3-ao/admin/structure/saveStructure.php"
+			var callback = updateResult;
+			var params = "method=saveRT&";
+				params += "data=" + str;
+
+			top.HEURIST.util.getJsonData(baseurl, callback, params)
+
+			if(needClose){
+				window.close();
+			}
+		}
+	}
+
+	var updateResult = function(context){
+		alert(context);
+	}
+
+	//
+	//temp function to fill values with given rty_ID
+	//
+	function _tempFillValue(){
+		EditStructure.initTabDesign(document.getElementById("ed_rty_ID").value);
+	}
+
+	function validate(evt) { // Validate value inserted into input field. In this case, make sure it's an integer
+		var theEvent = evt || window.event;
+		var key = theEvent.keyCode || theEvent.which;
+		key = String.fromCharCode( key );
+		var regex = /[0-9]|\./;
+		if( !regex.test(key) ) {
+			theEvent.returnValue = false;
+			theEvent.preventDefault();
+		}
+	}
+
+
+	YAHOO.util.Event.addListener(window, "load", EditStructure.init);
+
+	</script>
+
+	</div>
+
+ </body>
+</html>
