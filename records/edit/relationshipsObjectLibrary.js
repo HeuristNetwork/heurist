@@ -350,12 +350,11 @@ EditableRelationship.prototype.save = function() {
 
 		if (vals.error) {
 			alert("Error while saving:\n" + vals.error);
-		}
-		else if (vals.relationship) {
-			parent.HEURIST.record.relatedRecords[ vals.relationship.recID ] = vals.relationship;
+		}else if (vals.relationship) {
+			parent.HEURIST.edit.record.relatedRecords = vals.relationship;
 
 			var myTR = thisRef.div.parentNode.parentNode;
-			var newReln = new Relationship(myTR.parentNode, vals.relationship,thisRef.manager);
+			var newReln = new Relationship(myTR.parentNode, vals.relationship.relationshipRecs[vals.relnRecID],thisRef.manager);
 			myTR.parentNode.insertBefore(newReln.tr, myTR.nextSibling); //saw might be better to store myTR.parentNode as thisref.container
 
 			thisRef.clear();
@@ -428,7 +427,7 @@ var RelationManager = function(parentElement, record, relatedRecords, dtIDRelmar
 	//get all constraints for src rectype or global constraints
 	this.constraints = (top.HEURIST.rectypes.constraints[this.rectypeID] || top.HEURIST.rectypes.constraints['0']);
 
-	if (dtIDRelmarker) { // we are dealing with a trelmark so get definitions and process them for UI
+	if (dtIDRelmarker) { // we are dealing with a relmark so get definitions and process them for UI
 		// get any trgPointer restrictions
 		var trgRectypeList = temp = top.HEURIST.rectypes.typedefs[this.rectypeID].dtFields[dtIDRelmarker][12];
 		var targetRectypes = {};
@@ -506,7 +505,7 @@ var RelationManager = function(parentElement, record, relatedRecords, dtIDRelmar
 		}
 	}
 		// calculate constraints for termset and constrained rectypes removing existing record counts
-		// if 0 then warn if over limited then flag error
+		// if 0 then warn if over limit then flag error
 	if (false  && dtIDRelmarker) {
 		if (typeof targetRectypes == "object") {
 			for (var term in this.constraints) {
@@ -562,7 +561,7 @@ var RelationManager = function(parentElement, record, relatedRecords, dtIDRelmar
 					var rel = new EditableRelationship(newCell, null, rtype || 0,dtID,thisRef);
 					rel.nonce = thisRef.getNonce();
 					thisRef.openRelationships[rel.nonce] = rel;
-					rel.relType.focus();
+					rel.relTypeSelect.focus();
 						}; }(titleRow, rectype, dtIDRelmarker);
 
 			this.parentElement.appendChild(titleRow);

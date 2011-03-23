@@ -127,30 +127,34 @@ function saveRelationship($recID, $relTermID, $trgRecID, $interpRecID, $title, $
                 "rec_Added"     => date('Y-m-d H:i:s'),
                 "rec_Modified"  => date('Y-m-d H:i:s'),
                 "rec_RecTypeID"   => 52,
-                "rec_AddedByUGrpID" => get_user_id()
-	));
-	$relnBibID = mysql_insert_id();
+									"rec_AddedByUGrpID" => get_user_id()));
 
-	if ($relnBibID > 0) {
+	if (mysql_error()) {
+		return array("error" => slash(mysql_error()));
+	}
+
+	$relnRecID = mysql_insert_id();
+
+	if ($relnRecID > 0) {
 		$query = "insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ";
-		$query .=   "($relnBibID, 160, '" . addslashes($title) . "')";
-		$query .= ", ($relnBibID, 202, $recID)";
-		$query .= ", ($relnBibID, 199, $trgRecID)";
-		$query .= ", ($relnBibID, 200, $relTermID)";
-		if ($interpRecID) $query .= ", ($relnBibID, 638, $interpRecID)";
-		if ($notes) $query .= ", ($relnBibID, 201, '" . addslashes($notes) . "')";
-		if ($start_date) $query .= ", ($relnBibID, 177, '" . addslashes($start_date) . "')";
-		if ($end_date) $query .= ", ($relnBibID, 178, '" . addslashes($end_date) . "')";
+		$query .=   "($relnRecID, 160, '" . addslashes($title) . "')";
+		$query .= ", ($relnRecID, 202, $recID)";
+		$query .= ", ($relnRecID, 199, $trgRecID)";
+		$query .= ", ($relnRecID, 200, $relTermID)";
+		if ($interpRecID) $query .= ", ($relnRecID, 638, $interpRecID)";
+		if ($notes) $query .= ", ($relnRecID, 201, '" . addslashes($notes) . "')";
+		if ($start_date) $query .= ", ($relnRecID, 177, '" . addslashes($start_date) . "')";
+		if ($end_date) $query .= ", ($relnRecID, 178, '" . addslashes($end_date) . "')";
 
 		mysql_query($query);
 	}
 
 	if (mysql_error()) {
 		return array("error" => slash(mysql_error()));
-	}
-	else {
-		$related = getAllRelatedRecords($recID, $relnBibID);
-		return array("relationship" => array_pop($related));
+	} else {
+//		$related = getAllRelatedRecords($recID, $relnRecID);
+		$related = getAllRelatedRecords($recID);
+		return array("relationship" => $related,"relnRecID" => $relnRecID);
 	}
 }
 
