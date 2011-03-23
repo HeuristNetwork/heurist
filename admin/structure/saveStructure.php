@@ -14,7 +14,6 @@
  -->*/
 
 
-
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
@@ -30,8 +29,8 @@ if (! is_admin()) {
 	return;
 }
 
-
 header('Content-type: text/javascript');
+
 $legalMethods = array(
 	"saveRectype",
 	"saveRT",
@@ -104,13 +103,13 @@ $dtyColumnNames = array(
 );
 
 
+mysql_connection_db_overwrite(DATABASE);
 
 if (!@$_REQUEST['method']) {
 	die("invalid call to saveStructure, method parameter is required");
 }else if(!in_array($_REQUEST['method'],$legalMethods)) {
 	die("unsupported method call to saveStructure");
 }
-
 
 switch (@$_REQUEST['method']) {
 	//{ rectype:
@@ -121,7 +120,8 @@ switch (@$_REQUEST['method']) {
 	//					23:{common:[....], dtFields:{nnn:[....],...,mmm:[....]}}}}}
 	case 'saveRectype':
 	case 'saveRT':
-		$rtData = @$_REQUEST['data'];
+		$srtData = @$_REQUEST['data'];
+		$rtData = json_decode($srtData, true);
 		if (!array_key_exists('rectype',$rtData) ||
 			!array_key_exists('colNames',$rtData['rectype']) ||
 			!array_key_exists('defs',$rtData['rectype'])) {
@@ -142,7 +142,9 @@ switch (@$_REQUEST['method']) {
 
 	case 'saveDetailType':
 	case 'saveDT':
-		$dtData = @$_REQUEST['data'];
+		$sdtData = @$_REQUEST['data'];
+		$dtData = json_decode($sdtData, true);
+
 		if (!array_key_exists('detailtype',$dtData) ||
 			!array_key_exists('colNames',$dtData['detailtype']) ||
 			!array_key_exists('defs',$dtData['detailtype'])) {
@@ -260,6 +262,7 @@ global $rtyColumnNames,$rstColumnNames;
 			}
 		}
 	}
+
 	//check dtFieldsNames for updating fields for this rectype
 	if (count($dtFieldNames) && count($rt['dtFields'])) {
 		$ret['dtFields'] = array();
@@ -312,17 +315,22 @@ function createDetailTypes($commonNames,$dt) {
 global $dtyColumnNames;
 	$ret = array();
 	if (count($commonNames)) {
-		$ret['common'] =array();
+		$ret['common'] = array();
 		$colNames = join(",",$commonNames);
 		foreach ( $dt as $newDT) {
-			$colValues = join(",", $newDT['common']);
+			$dtValues = array();
+			foreach($newDT['common'] as $dtVal) {
+				array_push($dtValues, "'".mysql_escape_string($dtVal)."'");
+			}
+			$colValues = join(",", $dtValues);
 			$query = "insert into defDetailTypes ($colNames) values ($colValues)";
 			$res = mysql_query($query);
 			if (mysql_error()) {
 				array_push($ret['common'],array('error'=>"error inserting into defDetailTypes - ".mysql_error()));
 			} else {
 				$dtyID = mysql_insert_id();
-				array_push($ret['common'], "insert $dtyID ok");
+				$ret['common'][$dtyID] = array();
+				array_push($ret['common'][$dtyID], "ok");
 			}
 		}
 	}
@@ -355,6 +363,7 @@ global $dtyColumnNames;
 		$vals = $dt['common'];
 		foreach ($commonNames as $colName) {
 			$val = array_shift($vals);
+			$val = mysql_escape_string($val);
 			if (!in_array($colName,$dtyColumnNames)) {
 				array_push($ret['common'],array('error'=>"$colName is not a valid column name for defDetailTypes val= $val was not used"));
 				continue;
@@ -364,7 +373,7 @@ global $dtyColumnNames;
 			if (mysql_error()) {
 				array_push($ret['common'],array('error'=>"error updating $colName in defDetailTypes - ".mysql_error()));
 			} else {
-				array_push($ret['common'], "ok");
+				array_push($ret['common'], "$colName ok");
 			}
 		}
 	}
