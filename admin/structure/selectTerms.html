@@ -1,3 +1,15 @@
+<!--
+* selectTerms.html, Show a (selection) tree with every available term. Show every selected term in a second term, and create a preview from every selected term, with the terms selected in the second tree being disabled, 15-03-2011, by Juan Adriaanse
+* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+* @todo Add the posibility to use a certain tree, instead of always showing EVERY term, so we can use it to override the terms in a detailtype
+* @todo Give tree maximum length, and make it scrollable, so all three panes are visible at all times
+* @todo Retrieve detailtypeID, to show the current tree for that detailtype, or to know where to save the created tree to
+* @todo Create possibility to create term OR relations tree instead of only relations
+-->
+
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -12,11 +24,15 @@ body {
 	float: left;
 	border-style: groove;
 	width: 33%;
+	height: 80%;
+	overflow: auto;
 }
 .selectedTerms {
 	float: left;
 	border-style: groove;
 	width: 33%;
+	height: 80%;
+	overflow: auto;
 }
 .previewList {
 	float: left;
@@ -60,9 +76,14 @@ body {
 .depth7 {
 	margin-left: 70px;
 }
-
+.dtyName {
+	padding-bottom: 3px;
+	padding-top: 3px;
+}
 </style>
 
+<link rel="stylesheet" type="text/css" href="../../common/css/heurist.css">
+<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
 <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
 <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/treeview/assets/skins/sam/treeview.css" />
 <script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
@@ -71,24 +92,108 @@ body {
 <script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
 <script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
 
-<script src="../../common/php/loadCommonInfo.php"></script>
-
 </head>
 <body>
 
-<h1>Heurist</h1>
-<h2>Term selection</h2><br />
+<script src="../../common/js/utilsLoad.js"></script>
+<script src="../../common/php/loadCommonInfo.php"></script>
+<script src="../../common/js/utilsUI.js"></script>
+
+<script type="text/javascript">
+	try {
+		var hash;
+		var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+		for(var i = 0; i < hashes.length; i++) {
+			hash = hashes[i].split('=');
+			if(hash[0] == "detailTypeID") {
+				var detailTypeID = hash[1]; // Get detailtype ID from URL
+			}
+		}
+	}
+	catch(e) {} // No detailTypeID, so give empty form to create a new one
+</script>
+
+
+<h1 class="dtyName" id="dtyName"></h1>
 <div id="termTreeText" class="termTreeText"><h3>Select the terms you want</h3></div>
 <div id="termTreeText" class="selectedTermsText"><h3>Select the terms to be disabled</h3></div>
 <div id="termTreeText" class="previewListText"><h3>Preview the result</h3></div>
 
 <div id="termTree" class="termTree ygtv-checkbox"></div>
 <div id="selectedTermsTree" class="selectedTerms ygtv-checkbox"></div>
-<div id="previewList" class="previewList"></div>
+<div id="previewList" class="previewList"></div><br /><br /><br /><br /><br />
+<input type="button" value="Save" onclick="EditPopup.close();" />
+<input type="button" value="Cancel" onclick="EditPopup.cancel();" />
 
 <div id="selectedTerms"></div>
 
 <script type="text/javascript">
+
+var termType;
+var detailType;
+if(top.HEURIST.detailTypes.names[detailTypeID]) {
+	detailType = top.HEURIST.detailTypes.typedefs[detailTypeID].commonFields;
+	termType = detailType[2];
+	if(!((termType == "enum") || (termType == "relmarker"))) {
+		document.getElementById("dtyName").innerHTML = "ERROR: Detailtype '" + detailType[0] + "' is of invalid type";
+		// TODO: Stop page from loading
+	}
+	else {
+		document.getElementById("dtyName").innerHTML = "Detailtype: " + top.HEURIST.detailTypes.names[detailTypeID];
+		if(termType == "relmarker") {
+			var treesByDomain = top.HEURIST.terms.treesByDomain['relation'];
+			var termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup['relation']
+		} else if(termType == "enum") {
+			var treesByDomain = top.HEURIST.terms.treesByDomain['enum'];
+			var termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup['enum']
+		}
+		if(detailType[9]) {
+			try {
+				var existingTree = YAHOO.lang.JSON.parse(detailType[9]);
+			} catch(e) {
+				var existingTree = "";
+			}
+		} else {
+			var existingTree = "";
+		}
+	}
+} else {
+	document.getElementById("dtyName").innerHTML = "ERROR: Detailtype was not found";
+	// TODO: Stop page from loading
+}
+
+function inExistingTree(termID) {
+	if(existingTree == termID) {
+		return true;
+	}
+	for(var term in existingTree) {
+		if(term == termID) {
+			return true;
+		} else {
+			if(typeof existingTree[term] == "object") {
+				getSubtree(existingTree[term]);
+			}
+		}
+	}
+	var foundTerm;
+	function getSubtree(tree) {
+		for(var term2 in tree) {
+			if(term2 == termID) {
+				foundTerm = true;
+			}
+			else {
+				if(typeof tree[term2] == "object") {
+					getSubtree(tree[term2]);
+				}
+			}
+		}
+	}
+	if(foundTerm) {
+		foundTerm = false;
+		return true;
+	}
+	return false;
+}
 
 function selectAllChildren(parent) { // Selects all children of the node clicked
 	var parentNode = termTree.getNodeByIndex(parent);
@@ -98,7 +203,7 @@ function selectAllChildren(parent) { // Selects all children of the node clicked
 			var child = parentNode.children[index];
 			child.toggleHighlight();
 			if(child.children.length > 0) {
-				selectAllChildren(child.index); // TO DO: Stops the while loop here
+				selectAllChildren(child.index);
 			}
 			index++;
 		}
@@ -146,15 +251,20 @@ var termTree;
 (function() { // Builds the trees
 
 	function buildTermTree(parent) { // Look up al root terms and create the nodes
-		for (var parentElement in top.HEURIST.terms.treesByDomain.relation) {
+		for (var parentElement in treesByDomain) {
 			nodeIndex = termTree.getNodeCount()+1;
 
 			term = new Object();
-			term.label = '<div id="'+parentElement+'"><a href="javascript:void(0)" onClick="selectAllChildren('+nodeIndex+')">All </a> '+top.HEURIST.terms.termsByDomainLookup.relation[parentElement]+'</div>';
+			term.label = '<div id="'+parentElement+'"><a href="javascript:void(0)" onClick="selectAllChildren('+nodeIndex+')">All </a> '+termsByDomainLookup[parentElement]+'</div>';
 			term.href = "javascript:void(0)"; // To make 'select all' clickable, but not leave the page when hitting enter
 
 			topLayerParent = new YAHOO.widget.TextNode(term, parent, false); // Create the node
-			parntNode = top.HEURIST.terms.treesByDomain.relation[parentElement];
+
+			if(inExistingTree(parentElement)) {
+				topLayerParent.highlightState = 1;
+			}
+
+			parntNode = treesByDomain[parentElement];
 			createChildren(parntNode, topLayerParent); // Look for children of the node
 		}
 	}
@@ -164,10 +274,16 @@ var termTree;
 			nodeIndex = termTree.getNodeCount()+1;
 
 			term = new Object();
-			term.label = '<div id="'+child+'"><a href="javascript:void(0)" onClick="selectAllChildren('+nodeIndex+')">All </a> '+top.HEURIST.terms.termsByDomainLookup.relation[child]+'</div>';
+			term.label = '<div id="'+child+'"><a href="javascript:void(0)" onClick="selectAllChildren('+nodeIndex+')">All </a> '+termsByDomainLookup[child]+'</div>';
 			term.href = "javascript:void(0)"; // To make 'select all' clickable, but not leave the page when hitting enter
 
 			childNode = new YAHOO.widget.TextNode(term, parentEntry, false); // Create the node
+
+			if(inExistingTree(child)) {
+				childNode.highlightState = 1;
+				parentEntry.expand();
+			}
+
 			createChildren(parentNode[child], childNode); // createChildren() again for every child found
 		}
 	}
@@ -215,59 +331,24 @@ var termTree;
 		var disabledNodes = selectedTermsTree.getNodesByProperty('highlightState',1);
 		index = 0;
 		disabledTermsList = [];
-		while(index < disabledNodes.length) {
-			disabledTermsList.push(getTermIDFromNode(disabledNodes[index]));
-			index++;
-		}
-	}
-
-	var previewDropdownMenu = "";
-	function createPreview(depth, term) { // Creates the preview
-		if(depth == 0) { // createPreview is called with depth = 0, it's the first time, so create the select list
-			previewDropdownMenu = "";
-			previewDropdownMenu += '<select id=previewMenu>';
-		}
-		for(var termObj in term) { // For every term in 'term'
-			var termName = top.HEURIST.terms.termsByDomainLookup.relation[termObj];
-			var isDisabled = false;
-			for(var disabledIndex in top.HEURIST.terms.selectedDisabled) { // Check if it is in de disabled terms list, disable if so
-				var disabled = top.HEURIST.terms.selectedDisabled[disabledIndex];
-				if(disabled == termObj) {
-					previewDropdownMenu += '<option class="depth'+depth+'" id="'+termObj+'" disabled="disabled">'+termName+'</option>';
-					isDisabled = true;
-				}
+		if(disabledNodes) {
+			while(index < disabledNodes.length) {
+				disabledTermsList.push(getTermIDFromNode(disabledNodes[index]));
+				index++;
 			}
-			if(!isDisabled) { // Is not disabled
-				previewDropdownMenu += '<option class="depth'+depth+'" id="'+termObj+'">'+termName+'</option>';
-			}
-			for(var termObjChild in term[termObj]) { // For every child found, repeat process
-				var hasChildren = true;
-			}
-			if(hasChildren) {
-				if(depth == 7) { // A dept of 8 (depth starts at 0) is maximum, to keep it organised
-					createPreview(depth, term[termObj]);
-				} else {
-					createPreview(depth+1, term[termObj]);
-				}
-			}
-		}
-		if(depth == 0) { // When depth = 0, this method is not called from within itself, so when this is true, close the select, and add to div
-			previewDropdownMenu += '</select>';
-			document.getElementById("previewList").innerHTML = previewDropdownMenu;
 		}
 	}
 
 	// demo caller function to demonstrate the calling of the createTermSelect
-	function createPreview2(termIDTree, headerTermIDsList) { // Creates the preview
+	function createPreview(termIDTree, headerTermIDsList) { // Creates the preview
 		var prev = document.getElementById("previewList");
-		for (var i =0; i < prev.children.length; i++) {
+		for (var i = 0; i < prev.children.length; i++) {
 			prev.removeChild(prev.childNodes[0]);
 		}
-		var jsonTreeString = termIDTree.toSource();
-		var tree = eval(jsonTreeString);
-		prev.appendChild(createTermSelect(tree, headerTermIDsList, top.HEURIST.terms.termsByDomainLookup['relation'],null));
+		var jsonTreeString = YAHOO.lang.JSON.stringify(termIDTree);
+		var tree = YAHOO.lang.JSON.parse(jsonTreeString);
+		prev.appendChild(createTermSelect(tree, headerTermIDsList, termsByDomainLookup,null));
 	}
-
 
 /**
 * Creates a select HTML object filled with an option element for each term "depth first"
@@ -327,8 +408,7 @@ var termTree;
 			setDisabledTerms();
 			top.HEURIST.terms.selectedDisabled = disabledTermsList;
 			
-//			createPreview(0, top.HEURIST.terms.selected);
-			createPreview2(top.HEURIST.terms.selected,disabledTermsList.join(","));
+			createPreview(top.HEURIST.terms.selected,disabledTermsList.join(","));
 		});
 		selectedTermsTree.render();
 
@@ -341,7 +421,7 @@ var termTree;
 			
 			termArray = createTermArray(selectedTermsTree.getRoot()); // Create an array with all selected terms in var 'termArray'
 
-			top.HEURIST.terms.selected = termArray; // TO DO: JSON decode
+			top.HEURIST.terms.selected = termArray;
 			
 			try { // In case no terms have been disabled yet
 				setDisabledTerms();
@@ -349,14 +429,83 @@ var termTree;
 			}
 			catch(e) { }
 			
-//			createPreview(0, top.HEURIST.terms.selected);
-			createPreview2(top.HEURIST.terms.selected,disabledTermsList.join(","));
+			createPreview(top.HEURIST.terms.selected,disabledTermsList.join(","));
 		});
+
+		disabledTermsList = [];
+		if(top.HEURIST.detailTypes.typedefs[detailTypeID].commonFields[10]) {
+			try {
+				var tempDisabledTerms = YAHOO.lang.JSON.parse(top.HEURIST.detailTypes.typedefs[detailTypeID].commonFields[10]);
+			} catch(e) {
+				var tempDisabledTerms = "";
+			}
+		} else {
+			var tempDisabledTerms = "";
+		}
+		var tempIndex = 0;
+		while(tempIndex < tempDisabledTerms.length) {
+			disabledTermsList.push(tempDisabledTerms[tempIndex]);
+			tempIndex++;
+		}
+		top.HEURIST.terms.selectedDisabled = disabledTermsList;
+
 		termTree.render();
+		buildSelectedTermsTree(termTree.getRoot(), selectedTermsTree.getRoot()); // Rebuild the 'selected terms tree'
+		selectedTermsTree.render();
+		termArray = createTermArray(selectedTermsTree.getRoot());
+		top.HEURIST.terms.selected = termArray;
+		createPreview(top.HEURIST.terms.selected,disabledTermsList.join(","));
 	};
 
 	YAHOO.util.Event.onDOMReady(treeInit); // Start initializing the tree when the DOM has finished loading
 
+})();
+
+function getUpdatedTerms() {
+
+	var termsChanged = true;
+	var disabledChanged = true;
+	if(YAHOO.lang.JSON.stringify(top.HEURIST.terms.selected)) {
+		if(top.HEURIST.detailTypes.typedefs[detailTypeID].commonFields[9] == YAHOO.lang.JSON.stringify(top.HEURIST.terms.selected)) {
+			termsChanged = false;
+		}
+	}
+	else {
+		if(top.HEURIST.detailTypes.typedefs[detailTypeID].commonFields[9] == "") {
+			disabledChanged = false;
+		}
+	}
+	if(YAHOO.lang.JSON.stringify(top.HEURIST.terms.selectedDisabled)) {
+		if(top.HEURIST.detailTypes.typedefs[detailTypeID].commonFields[10] == YAHOO.lang.JSON.stringify(top.HEURIST.terms.selectedDisabled)) {
+			disabledChanged = false;
+		}
+	}
+	else {
+		if(top.HEURIST.detailTypes.typedefs[detailTypeID].commonFields[10] == "") {
+			disabledChanged = false;
+		}
+	}
+	if(termsChanged || disabledChanged) {
+		var changedSelectedTerms = YAHOO.lang.JSON.stringify(top.HEURIST.terms.selected);
+		var changedDisabledTerms = YAHOO.lang.JSON.stringify(top.HEURIST.terms.selectedDisabled);
+
+		window.close(changedSelectedTerms, changedDisabledTerms);
+	} else {
+		window.close(null, null);
+	}
+}
+
+var EditPopup = (function () {
+	//public members
+	var that = {
+			close : function () {
+				getUpdatedTerms();
+			},
+			cancel : function () {
+				window.close(null, null);
+			}
+	};
+	return that;
 })();
 
 </script>

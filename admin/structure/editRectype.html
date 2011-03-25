@@ -1,0 +1,378 @@
+<!--
+* editRectype.html, A page to edit rectype fields, or create a new rectype, 16-03-2011, by Juan Adriaanse
+* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+* @todo Figure out a way to display all groups in which the rectype is located, and to change it
+-->
+
+<html>
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>Create new recordtype</title>
+
+<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+
+<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
+
+<style type="text/css">
+.rtyField {
+	display: block;
+}
+.rtyLabel {
+	display: inline-block;
+	width: 200px;
+	text-align: right;
+	padding-right: 3px;
+}
+.rtyValue {
+	display: inline-block;
+}
+.rectypeIcon {
+	padding-left: 203px;
+}
+.rectypeValues {
+	overflow: auto;
+}
+.helpText {
+	padding-left: 203px;
+	padding-bottom: 2px;
+}
+.actionButtons {
+	padding-left: 430px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<script src="../../common/js/utilsLoad.js"></script>
+<script src="../../common/php/displayPreferences.php"></script>
+<script src="../../common/php/loadCommonInfo.php"></script>
+
+<div style="width:680;margin:auto;">
+
+<script type="text/javascript" src="../../external/jquery/jquery.js"></script>
+<script	 type="text/javascript">
+
+	try {
+		var hash;
+		var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+		for(var i = 0; i < hashes.length; i++) {
+			hash = hashes[i].split('=');
+			if(hash[0] == "rectypeID") {
+				var rectypeID = hash[1]; // Get rectype ID from URL
+			}
+			else if(hash[0] == "groupID") {
+				var defaultGroupID = hash[1]; // Get selected tab (group) from URL
+			}
+		}
+	}
+	catch(e) {} // No rectypeID, so give empty form to create a new one
+
+</script>
+
+<br />
+<div id="statusMsg"></div>
+<div id="rectypeValues" style="{padding:10px;}" >
+	<div id="rectypeIcon" class="rectypeIcon"></div>
+	<div class="rtyField"><label class="rtyLabel" for="rty_ID">Code:</label><label id="rty_ID"/></div>
+	<div class="rtyField"><label class="rtyLabel" for="rty_Name">Name:*</label><input id="rty_Name" maxlength="63" style="width:200;" onkeyup="createPlural()" /></div>
+	<div class="helpText"><label>The name the recordtype should have</label></div>
+	<div class="rtyField"><label class="rtyLabel" for="rty_Plural">Plural:*</label><input id="rty_Plural" maxlength="63" style="width:200;" /></div>
+	<div class="helpText"><label>The name's plural</label></div>
+	<div class="rtyField"><label class="rtyLabel" for="rty_Type">Type:</label><div class="rtyValue" id="rty_Type"/></div></div>
+	<div class="helpText"><label>The type of data this recordtype will contain</label></div>
+	<div class="rtyField"><label class="rtyLabel" for="rty_FlagAsFieldset">Use as fieldset:</label><input id="rty_FlagAsFieldset" type="checkbox"/></div>
+	<div class="helpText"><label>If selected, this recordtype will point to a set of fieldtypes, contained by another recordtype</label></div>
+
+	<div class="rtyField" style="display:none"><label class="rtyLabel" for="rty_RecTypeGroupIDs">Display group:</label><div class="rtyValue" id="rty_RecTypeGroupIDs"></div></div>
+	<div class="rtyField" style="display:none"><label class="rtyLabel" for="rty_OrderInGroup">Order in group:</label><input onkeypress="validate(event)" maxlength="3" id="rty_OrderInGroup" style="width:30;"/></div>
+
+	<div class="rtyField"><label class="rtyLabel" for="rty_ShowInLists">Visible to end-user:</label><input id="rty_ShowInLists" type="checkbox"/></div>
+	<div class="helpText"><label>Wether this table will appear for the end-user</label></div>
+	<div class="rtyField"><label class="rtyLabel" for="rty_Status">Status:</label><div class="rtyValue" id="rty_Status"/></div></div>
+	<div class="helpText"><label>The recordtype's status. 'Reserverd' can not be changed, 'Open' is normal</label></div>
+	<div class="rtyField"><label class="rtyLabel" style="vertical-align:top" for="rty_Description">Description:*</label><textarea maxlength="5000" id="rty_Description" rows="3" style="width:400;"></textarea></div>
+	<div class="helpText"><label>An advanced description, describing what the recordtype is used for</label></div>
+	<div class="rtyField"><label class="rtyLabel" for="rty_TitleMask">Title mask:*</label><input maxlength="500" id="rty_TitleMask" style="width:400;"/></div>
+	<div class="helpText"><label>*Enter description here*</label></div>
+	<div class="rtyField"><label class="rtyLabel" for="rty_ReferenceURL">Reference URL:</label><input id="rty_ReferenceURL" maxlength="250" style="width:400;" /></div>
+	<div class="helpText"><label>*Enter description here*</label></div>
+	<div class="rtyField"><label class="rtyLabel" for="rty_AlternativeRecEditor">Alternative record editor:</label><input id="rty_AlternativeRecEditor" maxlength="250" style="width:400;" /></div>
+	<div class="helpText"><label>*Enter description here*</label></div>
+</div>
+<br />
+<div class="actionButtons">
+		<input type="button" style="height: 35px; width: 200px" value="Save and continue to field list ->" onclick="editRecStructureAction()" /><br /><br />
+		<input type="button" style="height: 25px; width: 99px" value="Save" onclick="EditPopup.close();" />
+		<input type="button" style="height: 25px; width: 99px" value="Cancel" onclick="EditPopup.cancel();" />
+</div>
+</div>
+
+<script type="text/javascript">
+
+	var rectype;
+	var newRectypeCode = 0; // 0: rectype with rectypeID exists - 1: no rectypeID given, create new - 2: rectype with given ID not found, error
+	if(rectypeID) { // Existing rectype, so load with values
+		try {
+			rectype = top.HEURIST.rectypes.typedefs[rectypeID].commonFields; // If succeeds, rectype with ID from URL exists, fill form with values
+			setRtyValues();
+		} catch(e) { // Invalid rectypeID, create empty form, and show error message
+			newRectypeCode = 2;
+		}
+	}
+	else {
+		newRectypeCode = 1; // No rectypeID given
+	}
+	if(newRectypeCode > 0) { // Create empty form
+		document.getElementById("rty_ID").innerHTML= "<i>(will be generated)</i>";
+		document.getElementById("rty_ShowInLists").checked = 1;
+		getGroups();
+		// Set group from URL
+		getTypes();
+		getStatus();
+		statusDropdown.selectedIndex = 3; // Set 'Open' to default status value
+		document.getElementById("rectypeIcon").innerHTML = "<a href=\"/changeIcon.php\">change icon</a>";
+	}
+	if(newRectypeCode == 2) { // Give error message
+		document.getElementById("statusMsg").innerHTML = "<strong>Error: rectype could not be found. Clicking 'save' button will create a new rectype.</strong><br /><br />";
+	}
+	
+	function setRtyValues() {
+		document.title = "Recordtype: " + rectype[0];
+		getGroups();
+		getTypes();
+		if(rectype) {
+			document.getElementById("rty_ID").innerHTML = rectypeID;
+			try {
+				document.getElementById("rectypeIcon").innerHTML = "<img src=\"../../common/images/rectype-icons/"+rectypeID+".gif\"> <a href=\"/changeIcon.php\">change icon</a>";
+			} catch(e) {
+				alert(e);
+/* 				document.getElementById("rectypeIcon").innerHTML = "<a href=\"/changeIcon.php\">change icon</a>"; */
+			}
+			document.getElementById("rty_Name").value = rectype[0];
+			document.getElementById("rty_Plural").value = rectype[6];
+			document.getElementById("rty_Description").value = rectype[1];
+			document.getElementById("rty_OrderInGroup").value = rectype[3];
+			if(rectype[7] == 1) {
+				document.getElementById("rty_ShowInLists").checked = 1;
+			}
+			document.getElementById("rty_TitleMask").value = rectype[4];
+			if(rectype[10] == 1) {
+				document.getElementById("rty_FlagAsFieldset").checked = 1;
+			}
+			document.getElementById("rty_ReferenceURL").value = rectype[11];
+			document.getElementById("rty_AlternativeRecEditor").value = rectype[12];
+		}
+		getStatus();
+	}
+
+	// Create the status dropdown menu with all possible statusses. In case it is reserved, disable the entire form. Always save the previous status in 'var status', so we can change it back to the previous status when someone 'cancels' on the prompt wether they really want to change the status to 'reserved'
+	function getStatus() {
+		statusDropdown = document.createElement("select");
+		statusDropdown.options.add(optionReserved = document.createElement("option"));
+		statusDropdown.options.add(optionApproved = document.createElement("option"));
+		statusDropdown.options.add(optionPending = document.createElement("option"));
+		statusDropdown.options.add(optionOpen = document.createElement("option"));
+
+		optionReserved.text = "Reserved";
+		optionApproved.text = "Approved";
+		optionPending.text = "Pending";
+		optionOpen.text = "Open";
+		
+		statusDropdown.onchange = function(){statusChange();};
+
+		if(rectype) {
+			switch(top.HEURIST.rectypes.typedefs[rectypeID].commonFields[8]) {
+				case "reserved":
+					statusDropdown[0].selected = "1";
+					status = 0;
+					toggleAll(true, false);
+					break;
+				case "approved":
+					statusDropdown[1].selected = "1";
+					status = 1;
+					break;
+				case "pending":
+					statusDropdown[2].selected = "1";
+					status = 2;
+					break;
+				case "open":
+					statusDropdown[3].selected = "1";
+					status = 3;
+					break;
+			}
+		}
+		else {
+			status = 3;
+		}
+		document.getElementById("rty_Status").appendChild(statusDropdown);
+	}
+
+	// Change the status. If reserved, disable the entire form. Else, enable the entire form. Always save the previous status in 'var status', so we can change it back to the previous status when someone 'cancels' on the prompt wether they really want to change the status to 'reserved'
+	function statusChange() {
+		if(statusDropdown.value == "Reserved") {
+			var changeToReserved = confirm("If you change the status to reserved, you will no longer be able to change any fields of this rectype after you save it.\n\nAre you sure?");
+			if(changeToReserved) {
+				toggleAll(true, true);
+			} else {
+				statusDropdown.selectedIndex = status;
+			}
+		} else {
+			status = statusDropdown.selectedIndex;
+			toggleAll(false, true);
+		}
+	}
+	
+	// Create the dropdown menu with all possible types, and if an existing rectype is being editted, select the right value
+	var typesDropdown;
+	function getTypes() {
+		typesDropdown = document.createElement("select");
+		typesDropdown.options.add(optionNormal = document.createElement("option"));
+		typesDropdown.options.add(optionRelationship = document.createElement("option"));
+		typesDropdown.options.add(optionDummy = document.createElement("option"));
+
+		optionNormal.text = "normal";
+		optionRelationship.text = "relationship";
+		optionDummy.text = "dummy";
+
+		if(rectype) {
+			switch(top.HEURIST.rectypes.typedefs[rectypeID].commonFields[2]) {
+				case "normal":
+					typesDropdown[0].selected = "1";
+					break;
+				case "relationship":
+					typesDropdown[1].selected = "1";
+					break;
+				case "dummy":
+					typesDropdown[2].selected = "1";
+					break;
+			}
+		}
+		document.getElementById("rty_Type").appendChild(typesDropdown);
+	}
+	
+	var groupDropdown;
+	function getGroups() {
+		groupDropdown = document.createElement("select");
+		var existingGroup = "";
+		index = 0;
+		for(var group in top.HEURIST.rectypes.groups) {
+			optn = document.createElement("option");
+			optn.text = top.HEURIST.rectypes.groups[group].name;
+			groupDropdown.options.add(optn);
+			if(rectype) {
+				if(group == top.HEURIST.rectypes.typedefs[rectypeID].commonFields[9]) {
+					selectedIndex = index;
+					var existingGroup = true;
+				}
+			}
+			else if(defaultGroupID) {
+				if(group == defaultGroupID) {
+					selectedIndex = index;
+					var existingGroup = true;
+				}
+			}
+			index++;
+		}
+		if(existingGroup) {
+			groupDropdown[selectedIndex].selected = 1;
+		}
+		document.getElementById("rty_RecTypeGroupIDs").appendChild(groupDropdown);
+	}
+
+	// Toggle fields to disable. Is called when status is set to 'Reserved'. If changed = true, it means that the status is manually changed to reserved, so untill it is saved, it can be changed back. If it was reserved when starting the editRectype, keep it disabled
+	function toggleAll(disable, changed) {
+		if(disable) {
+			document.getElementById("rty_Name").disabled = true;
+			document.getElementById("rty_Plural").disabled = true;
+			document.getElementById("rty_OrderInGroup").disabled = true;
+			groupDropdown.disabled = true;
+			document.getElementById("rty_ShowInLists").disabled = true;
+			document.getElementById("rty_TitleMask").disabled = true;
+			typesDropdown.disabled = true;
+			document.getElementById("rty_FlagAsFieldset").disabled = true;
+			if(!changed) {
+				statusDropdown.disabled = true;
+			}
+		} else {
+			document.getElementById("rty_Name").disabled = false;
+			document.getElementById("rty_Plural").disabled = false;
+			document.getElementById("rty_OrderInGroup").disabled = false;
+			groupDropdown.disabled = false;
+			document.getElementById("rty_ShowInLists").disabled = false;
+			document.getElementById("rty_TitleMask").disabled = false;
+			typesDropdown.disabled = false;
+			document.getElementById("rty_FlagAsFieldset").disabled = false;
+		}
+	}
+	
+	function editRecStructureAction() {
+		saveData();
+		editRecStructure();
+	}
+	
+	function saveAction() {
+		savaData();
+		// TODO: Close popup
+	}
+	
+	function saveData() {
+		// TODO: Save editted data, and create new rectype if necessary
+	}
+	
+	function editRecStructure() {
+		top.HEURIST.util.popupURL(top, "http://heuristscholar.org/h3-ao/admin/structure/editRecStructure.html?rty_ID="+rectypeID, { // TODO: Change to top.HEURIST.basePath + "admin/structure/editRecStructure.html?rty_ID="+rectypeID
+			"close-on-blur": false,
+			"no-resize": true, 
+			height: 480,
+			width: 620,
+			callback: function(editedRecStructure) {
+				if(editedRecStructure == null) {
+					// Canceled
+				} else {
+					alert("saved");
+				}
+			}
+		});
+	}
+	
+	function createPlural() {
+		document.getElementById("rty_Plural").value = (document.getElementById("rty_Name").value + 's');
+	}
+
+	// Validate value inserted into input field. In this case, make sure it's an integer
+	function validate(evt) {
+		var theEvent = evt || window.event;
+		var key = theEvent.keyCode || theEvent.which;
+		key = String.fromCharCode( key );
+		var regex = /[0-9]|\./;
+		if( !regex.test(key) ) {
+			theEvent.returnValue = false;
+			theEvent.preventDefault();
+		}
+	}
+
+	var EditPopup = (function () {
+		//public members
+		var that = {
+				close : function () {
+					var res = "Save these values";
+					window.close(res);
+				},
+				cancel : function () {
+					window.close(null);
+				}
+		};
+		return that;
+	})();
+
+</script>
+
+</body>
+</html>

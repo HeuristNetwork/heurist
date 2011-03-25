@@ -95,6 +95,7 @@ $dtyColumnNames = array(
 "dty_NameInOriginatingDB",
 "dty_IDInOriginatingDB",
 "dty_DetailTypeGroupID",
+"dty_OrderInGroup",
 "dty_PtrTargetRectypeIDs",
 "dty_JsonTermIDTree",
 "dty_HeaderTermIDs",

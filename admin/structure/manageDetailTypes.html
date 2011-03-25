@@ -119,6 +119,7 @@
 
 						var tabView = new YAHOO.widget.TabView();
 						var ind = 0;
+						var showTimer,hideTimer;
 
 						// init tabview with names of group
 						for (var dtg_ID in top.HEURIST.detailTypes.groups) {
@@ -533,8 +534,6 @@
 						}
 
 
-
-						var showTimer,hideTimer;
 						/*
 
 						var toolTip = new YAHOO.widget.Tooltip("myTooltip", {
@@ -595,9 +594,6 @@
 								tabView.set("activeIndex", state.substr(3));  //restre the index from history
 							});
 
-							//
-							//
-							//
 							YAHOO.util.History.onReady(function () {
 								var currentState;
 
