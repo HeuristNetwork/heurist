@@ -1,11 +1,11 @@
 <!--
 
 /**
-* editRecStructure_SelectDetailType.html
+* editRecStructure_SelectRecordType.html
 *
-* to select the detail types for addition in record structure
+* to select rectypes one (for filedsetmarker) or many (for relmarker) while editing of detail type
 *
-* 2011-03-15
+* 2011-03-24
 * @autor: Artem Osmakov
 *
 * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
@@ -21,7 +21,7 @@
 
 
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
-		<title>Heurist - details</title>
+		<title>Heurist - Select Record Types</title>
 
 		<link rel="icon" href="../../favicon.ico" type="image/x-icon">
 		<link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
@@ -94,21 +94,21 @@
 
 		<div class="tooltip" id="toolTip2"><p>popup popup</p></div>
 
-		<div style="width:400;margin:auto;">
+		<div style="width:300;margin:auto;">
 
 			<div id="toolbar" style="height:80">
 				<div><label>Filter</label></div>
 				<div><div class="labeldiv"><label>by group:</label></div><select id="inputFilterByGroup" name="inputFilterByGroup" size="1" style="width:138px;height:16"><option value="all">all groups</option></select></div>
 				<div><div class="labeldiv"><label>by name:</label></div><input type="text" id="inputFilterByName" name="inputFilterByName" style="width:140px;" value=""/></div>
-				<div><div class="labeldiv"><label>show:</label></div><input type="radio" id="inputFilterBySelection1" name="inputFilterBySelection" value="all" checked="checked"> All <input type="radio" id="inputFilterBySelection2" name="inputFilterBySelection" value="selonly"> Selected&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" id="btnClearSelection" value="clear" title="clear selection"/></div>
+				<div id="divFilterBySelection"><div class="labeldiv"><label>show:</label></div><input type="radio" id="inputFilterBySelection1" name="inputFilterBySelection" value="all" checked="checked"> All <input type="radio" id="inputFilterBySelection2" name="inputFilterBySelection" value="selonly"> Selected&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" id="btnClearSelection" value="clear" title="clear selection"/></div>
 			</div>
 
 			<div id="tb_top" style="height:30">
-				<div style="display:inline-block;"><div id="dt_pagination_top"></div></div>
+				<div style="display:inline-block; max-width:150;"><div id="dt_pagination_top"></div></div>
 				<div style="float:right; text-align:right;padding-top:5px">
 					<label id="lblSelect1"></label>
-					<input type="button" tabindex="12" value="Cancel" onclick="SelectDetailType.cancel();" />
-					<input type="button" tabindex="11" value="Insert Selection" onclick="SelectDetailType.close();" />
+					<input type="button" tabindex="12" value="Cancel" onclick="SelectRecordType.cancel();" />
+					<input type="button" tabindex="11" id="btnApply1" value="Insert Selection" onclick="SelectRecordType.close();" />
 				</div>
 			</div>
 
@@ -117,14 +117,14 @@
 				<script  type="text/javascript">
 
 					// static class
-					var SelectDetailType = (
+					var SelectRecordType = (
 					function() {
 
-						var _className = "SelectDetailType",
+						var _className = "SelectRecordType",
 						myDataTable,
 						myDataSource,
-						arr_selection = [],
-						rty_ID,  // the target record type (to filter out types that are already has been added)
+						arr_selection = [], // array of selected rectype ids
+						datatype,  // datatype of parent detailtype: relmarker or fieldsetmarker
 						showTimer,hideTimer;
 
 						//
@@ -156,32 +156,50 @@
 								if (location.search.length > 1) {
 									//window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 									top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-									rty_ID = top.HEURIST.parameters['rty_ID'];
-									document.title = top.HEURIST.rectypes.names[rty_ID];
+									datatype = top.HEURIST.parameters['type'];
+									var sIDs = top.HEURIST.parameters['ids'];
+									if (sIDs) {
+										arr_selection = sIDs.split(',');
+									}
+
+									if(datatype=="fieldsetmarker"){
+										var el = YAHOO.util.Dom.get('divFilterBySelection');
+										el.style.display = "none";
+										el = YAHOO.util.Dom.get('btnApply1');
+										el.style.display = "none";
+										el = YAHOO.util.Dom.get('btnApply2');
+										el.style.display = "none";
+									}
 								}
 
 								//////////////////// create data table
 								var arr = [];
 
 								//create datatable and fill it valurs of particular group
-								for (var dty_ID in top.HEURIST.detailTypes.typedefs) {
-									if(dty_ID!="commomFieldNames")
+								for (var rty_ID in top.HEURIST.rectypes.typedefs) {
+									if(rty_ID != "commomFieldNames" && rty_ID != "dtFieldNames")
 									{
-										var td = top.HEURIST.detailTypes.typedefs[dty_ID];
-										var deftype = td.commonFields;
+										var td = top.HEURIST.rectypes.typedefs[rty_ID];
+										var rectype = td.commonFields;
 
-										var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
-										var iusage = aUsage == undefined ? 0 : aUsage.length;
-										// add order in group, name, help, type and status,
-										// doc will be hidden (for pop-up)
-										arr.push([0, deftype[3],deftype[0],deftype[4],deftype[2],deftype[6],deftype[1],deftype[7],dty_ID,iusage]);
+										if(datatype=="relmarker" || rectype[10]=="1")
+										{
+										arr.push([(arr_selection.indexOf(rty_ID)>0),
+											"<img src=\"../../common/images/rectype-icons/"+rty_ID+".gif\">",
+											rectype[0], //name
+											rectype[1], //descr
+											rectype[8], //status
+											rectype[9], //group
+											rty_ID
+											]);
+										}
 									}
 								}
 
 								myDataSource = new YAHOO.util.LocalDataSource(arr, {
 									responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
 									responseSchema : {
-										fields: ["selection", "order", "name", "help",  "type", "status", "description", "group", "info", "usage"]
+										fields: ["selection", "icon", "name", "description",  "status", "group", "id"]
 									},
 									doBeforeCallback : function (req, raw, res, cb) {
 										// This is the filter function
@@ -202,7 +220,7 @@
 												if ((sByGroup=="all" || data[i].group==sByGroup) &&
 												(data[i].name.toLowerCase().indexOf(sByName)==0))
 												{
-													data[i].selection = (arr_selection.indexOf(data[i].info)>=0);
+													data[i].selection = (arr_selection.indexOf(data[i].id)>=0);
 													if(isBySelect || data[i].selection){
 														filtered.push(data[i]);
 													}
@@ -216,18 +234,18 @@
 								});
 
 								var myColumnDefs = [
-								{ key: "selection", label: "Sel", sortable:true, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
-								{ key: "order", label: "Order", hidden:true },
-								{ key: "name", label: "Name", sortable:true },
-								{ key: "help", label: "Help", hidden:true, sortable:false},
-								{ key: "type", label: "Type", sortable:true },
-								{ key: "status", label: "Status", hidden:true, sortable:false },
-								{ key: "description",   hidden:true},
+								{ key: "selection", label: "Sel", hidden:(datatype=="fieldsetmarker"), sortable:true, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
+								{ key: "icon", label: "Icon", sortable:false },
+								{ key: "name", label: "<u>Name</u>", sortable:true },
+								{ key: "description", hidden:true, sortable:false},
+								{ key: "status", label: "<u>Status</u>", hidden:false, sortable:false },
 								{ key: "group",   hidden:true},
-								{ key: "info", hidden:true, label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
-										elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" height="16" border="0" title="Info"/>'} },
-								{ key: "usage", label: "Usage", sortable:true }
+								{ key: "id", label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
+										elLiner.innerHTML = '<a href="#info"><img src="../../common/images/info_icon.png" width="16" height="16" border="0" title="Info" /><\/a>'}
+								},
+
 								];
+
 
 								var myConfigs = {
 									//selectionMode: "singlecell",
@@ -270,33 +288,11 @@
 									var target = oArgs.target;
 									var column = this.getColumn(target);
 
-									if (column!=null && column.key == 'help') {
+									if (column!=null && column.key == 'id') {
 										var record = this.getRecord(target);
 										var description = record.getData('description') || 'no further description';
 										var xy = [parseInt(oArgs.event.clientX,10) + 10 ,parseInt(oArgs.event.clientY,10) + 10 ];
 										textTip = '<p>'+description+'</p>';
-
-									}else if(column!=null && column.key == 'usage') {
-										var record = this.getRecord(target);
-										var dty_ID = description = record.getData('info');
-
-										if(currentTipId!=dty_ID){
-											currentTipId=dty_ID;
-
-											var xy = [parseInt(oArgs.event.clientX,10), parseInt(oArgs.event.clientY,10) - 20 ];
-
-											//find all records that reference this type
-											var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
-											if(aUsage != undefined){
-												var textTip = "<p><ul>";
-												for (var k in aUsage) {   //<a href='editRecordType.html'></a>
-													textTip = textTip + "<li>"+top.HEURIST.rectypes.names[k]+"</li>";
-												}
-												textTip = textTip + "</ul></p>";
-											}
-										}else{
-											forceHideTip = false;
-										}
 									}
 
 									if(textTip!=null){
@@ -404,16 +400,22 @@
 									var recordIndex = this.getRecordIndex(oRecord);
 									myDataTable.updateRow(recordIndex, data);
 									*/
-									if(newValue){
-										arr_selection.push(data['info']);
-									}else{
-										var ind = arr_selection.indexOf(data['info']);
+									if(newValue){ //add
+										if(datatype=="fieldsetmarker"){
+											arr_selection = [data['id']];
+											window.close(data['id']);
+										}else{
+											arr_selection.push(data['id']);
+										}
+
+									}else{ //remove
+										var ind = arr_selection.indexOf(data['id']);
 										if(ind>=0){
 											arr_selection.splice(ind,1);
 										}
 									}
 
-									lblSelect1.innerHTML = "You selected <b>"+arr_selection.length+"</b> detail type"+((arr_selection.length>1)?"s":"");
+									lblSelect1.innerHTML = "<b>"+arr_selection.length+"</b> record type"+((arr_selection.length>1)?"s":"");
 									lblSelect2.innerHTML = lblSelect1.innerHTML;
 						};
 
@@ -424,12 +426,12 @@
 						{
 							filterByGroup = YAHOO.util.Dom.get('inputFilterByGroup');
 
-							for (var dtg_ID in top.HEURIST.detailTypes.groups) {
-								var grpName = top.HEURIST.detailTypes.groups[dtg_ID].name;
+							for (var grpID in top.HEURIST.rectypes.groups) {
+								var grpName = top.HEURIST.rectypes.groups[grpID].name;
 
 								var option = document.createElement("option");
 								option.text = grpName;
-								option.value = dtg_ID;
+								option.value = grpID;
 								try
 								{
 									// for IE earlier than version 8
@@ -523,7 +525,7 @@
 
 					////////////////////////////////////////////////
 					//
-					YAHOO.util.Event.addListener(window, "load", SelectDetailType.init);
+					YAHOO.util.Event.addListener(window, "load", SelectRecordType.init);
 
 				</script>
 			</div>
@@ -532,8 +534,8 @@
 				<div style="display:inline-block;"><div id="dt_pagination_bottom"></div></div>
 				<div style="float:right; text-align:right;padding-top:5px">
 					<label id="lblSelect2"></label>
-					<input type="button" tabindex="12" value="Cancel" onclick="SelectDetailType.cancel();" />
-					<input type="button" tabindex="11" value="Insert Selection" onclick="SelectDetailType.close();" />
+					<input type="button" tabindex="12" value="Cancel" onclick="SelectRecordType.cancel();" />
+					<input type="button" tabindex="11" id="btnApply2" value="Insert Selection" onclick="SelectRecordType.close();" />
 				</div>
 			</div>
 

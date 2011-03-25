@@ -19,7 +19,7 @@
 
 
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
-		<title>Heurist - details</title>
+		<title>Heurist - Field Types</title>
 
 		<link rel=stylesheet href="../../common/css/global.css">
 
@@ -92,8 +92,7 @@
 
 		<div style="width:680;margin:auto;">
 
-			<h1>Heurist</h1>
-			<h2 id="header2">Manage Detail Types</h2>
+			<h2 id="header2">Field Types</h2>
 
 			<!--  style="position:absolute; z-index:0;"
 			Static markup required by the browser history utility. Note that the
@@ -130,15 +129,27 @@
 								label: grpName,
 								content:
 								('<div>'+                   //for="filter"
-								'<div class="markup"><label>Filter by name:</label>'+
+								'<div style="display:inline-block;"><label>Filter by name:</label>'+
 								'<input type="text" id="filter'+ind+'" value="">'+
-								'<div id="tabContainer'+dtg_ID+'"></div></div></div>')
+								'&nbsp;&nbsp;<input type="checkbox" id="filter'+ind+'vis" value="1" style="padding-top:5px;">&nbsp;Show visible only</div>'+
+								'<div style="float:right; text-align:right">'+
+								'<input type="button" id="btnAdd'+ind+'" value="Add Field Type"/></div></div>'+
+								'<div id="tabContainer'+dtg_ID+'"></div></div>')
 							}));
 
 							arrTables.push(null);
 							arrDataSources.push(null);
 							ind++;
 						} //for
+
+						//last tab for addition of new group
+						tabView.addTab(new YAHOO.widget.Tab({
+								id: "newGroup",
+								label: "+",
+								content:
+								('')
+								}));
+
 						tabView.appendTo("modelTabs");
 
 						//!!! initTabView();//initTabContent(tabView.getTab(0));
@@ -156,6 +167,13 @@
 							} catch (e) {
 							tabView.set("activeIndex", newState.substr(3)); //activate new index
 							}*/
+							if(e.newValue.get("id")=="newGroup"){
+								tabView.set("activeIndex", tabView.getTabIndex(e.prevValue) ); //restore
+
+								//@todo pop window with definition of new group
+								alert("todo - definition of new group");
+
+							}else
 							if(e.newValue!=e.prevValue){
 								initTabContent(e.newValue);
 							}
@@ -200,7 +218,8 @@
 											// add order in group, name, help, type and status,
 											// doc will be hidden (for pop-up)
 											// last 3 columns for actions
-											arr.push([deftype[3],deftype[0],deftype[4],deftype[2],deftype[6],deftype[1],0,dty_ID,dty_ID,iusage]);
+											arr.push([dty_ID, deftype[5],
+											deftype[3],deftype[0],deftype[4],deftype[2],deftype[6],deftype[1],dtg_ID,dty_ID,iusage]);
 										}
 									}
 								}
@@ -209,7 +228,7 @@
 								var myDataSource = new YAHOO.util.LocalDataSource(arr,{
 									responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
 									responseSchema : {
-										fields: [ "order", "name", "help",  "type", "status", "description", "edit", "delete", "info","usage"]
+										fields: [ "id", "vis", "order", "name", "help",  "type", "status", "description", "grp_id", "delete", "usage"]
 									},
 									doBeforeCallback : function (req,raw,res,cb) {
 										// This is the filter function
@@ -218,9 +237,17 @@
 										i,l;
 
 										if (req) {
-											req = req.toLowerCase();
+
+											var fvals = req.split("|");
+
+											var sByName   = fvals[0].toLowerCase();
+											var iByVisibility = fvals[1];
+
+											sByName = sByName.toLowerCase();
 											for (i = 0, l = data.length; i < l; ++i) {
-												if (data[i].name.toLowerCase().indexOf(req)==0) {
+												if ((data[i].name.toLowerCase().indexOf(sByName)==0)
+													&& (iByVisibility==0 || data[i].vis==iByVisibility))
+												{
 													filtered.push(data[i]);
 												}
 											}
@@ -239,26 +266,28 @@
 								YAHOO.widget.DataTable.Formatter.formatterDelete = formatterDelete;*/
 
 								var myColumnDefs = [
-								{ key: "order", label: "Order", sortable:true },
-								{ key: "name", label: "Name", sortable:true },
+								{ key: "id", label: "<u>Code</u>", sortable:true, width:20, className:'left' },
+								{ key: "vis", label: "Vis", sortable:false, width:20, className:'center' },
+								{ key: "order", label: "<u>Order</u>", sortable:true, width:20, className:'left' },
+								{ key: "name", label: "<u>Name</u>", sortable:true },
 								{ key: "help", label: "Help", sortable:false},
-								{ key: "type", label: "Type", sortable:true },
-								{ key: "status", label: "Status", sortable:true },
+								{ key: "type", label: "<u>Data Type</u>", sortable:true },
+								{ key: "status", label: "<u>Status</u>", sortable:true },
 								{ key: "description",   hidden:true},
-								{ key: "edit", label: "Edit", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
+								{ key: "grp_id", label: "Edit", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
 										elLiner.innerHTML = '<a href="#edit"><img src="../../common/images/edit_icon.png" width="16" height="16" border="0" title="Edit" /><\/a>'} },
 								{ key: "delete", label: "Del", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
 										elLiner.innerHTML = '<a href="#delete"><img src="../../common/images/delete_icon.png" width="16" height="16" border="0" title="Delete" /><\/a>'} },
-								{ key: "info", label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
-										elLiner.innerHTML = '<a href="#info"><img src="../../common/images/info_icon.png" width="16" height="16" border="0" title="Info" /><\/a>'} },
-								{ key: "usage", label: "Usage", sortable:true }
+								//{ key: "info", label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
+									//	elLiner.innerHTML = '<a href="#info"><img src="../../common/images/info_icon.png" width="16" height="16" border="0" title="Info" /><\/a>'} },
+								{ key: "usage", label: "<u>Usage</u>", sortable:true, width:20 }
 								];
 
 
 								var myConfigs = {
 									//selectionMode: "singlecell",
 									paginator : new YAHOO.widget.Paginator({
-										rowsPerPage: 25, // REQUIRED
+										rowsPerPage: 100, // REQUIRED
 										totalRecords: arr.length, // OPTIONAL
 
 										// use an existing container element
@@ -291,27 +320,21 @@
 									//                 alert("Action "+elLink.hash+" for:"+dty_ID);
 									if(elLink.hash == "#edit"){
 
-										top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "admin/structure/editDetailType.html?dty_ID="+dty_ID,
-										{   "close-on-blur": false,
-											"no-resize": true,
-											height: 320,
-											width: 450,
-											callback: function(editedDetailType) {
-												if(editedDetailType==null){
-													alert("edition is cancelled");
-												}else{
-													alert('edited dt type is '+editedDetailType[0]);
-												}
-												//setTimeout(function() { }, 0);
+										_onAddEditFieldType(dty_ID, 0);
+
+									}else if(elLink.hash == "#delete"){
+										var iUsage = oRecord.getData('usage');
+										if(isUsage<1){
+											var r=confirm("Delete field type#"+dty_ID+" '"+oRecord.getData('name')+"?");
+											if (r==true) {
+												this.deleteRow(oRecord.getId(), -1);
+												//@todo - call to saveStructure.php
 											}
-										});
-										/*
-										panelEdit.setHeader("Edit detail type #"+dty_ID);
-										panelEdit.setBody("<p>Input something here:<input id='edInput'/></p>");
-										panelEdit.cfg.setProperty("context", [elLink, "tl", "bl"]);
-										panelEdit.cfg.setProperty("visible", true);
-										*/
+										}else{
+											alert("Impossible to delele field type in usage");
+										}
 									}
+
 								});
 
 
@@ -344,9 +367,9 @@
 										tt.hide();
 										},5000);
 										},500);*/
-									}else if(column!=null && column.key == 'info') {
+									}else if(column!=null && column.key == 'usage') {
 										var record = this.getRecord(target);
-										var dty_ID = description = record.getData('info');
+										var dty_ID = description = record.getData('id');
 
 										if(currentTipId!=dty_ID){
 											currentTipId=dty_ID;
@@ -376,9 +399,31 @@
 										my_tooltip.mouseover(clearHideTimer2);
 										my_tooltip.mouseout(hideToolTip2);
 
+										var border_top = $(window).scrollTop();
+										var border_right = $(window).width();
+										var border_height = $(window).height();
+										var left_pos;
+										var top_pos;
+										var offset = 15;
+										if(border_right - (offset *2) >= my_tooltip.width() +  xy[0]) {
+											left_pos = xy[0]+offset;
+										} else {
+											left_pos = border_right-my_tooltip.width()-offset;
+										}
+
+										if((border_top + offset *2) >=  xy[1] - my_tooltip.height()) {
+											top_pos = border_top + offset + xy[1]; //
+										} else {
+											top_pos = border_top + xy[1] - my_tooltip.height()-offset;
+										}
+										if(top_pos + my_tooltip.height() > border_top+border_height){
+											top_pos	= border_top + border_height - my_tooltip.height()-5;
+										}
+
+
 										//var lft = my_tooltip.css('left');
 										my_tooltip.css( {
-											left:xy[0]+'px', top:xy[1]+'px'
+											left:left_pos+'px', top:top_pos+'px'
 										});//.fideIn(500).fideOut(5000);
 										//lft = my_tooltip.css('left');
 										my_tooltip.html(textTip);
@@ -439,6 +484,19 @@
 									clearTimeout(filterTimeout);
 									setTimeout(updateFilter,600);  };
 
+								var filtervis = YAHOO.util.Dom.get('filter'+currentTabIndex+'vis');
+								filtervis.onchange = function (e) {
+									clearTimeout(filterTimeout);
+									updateFilter();  };
+
+								var btnAdd = YAHOO.util.Dom.get('btnAdd'+currentTabIndex);
+								btnAdd.onclick = function (e) {
+									var currentTabIndex = tabView.get('activeIndex');
+									var dtg_ID = tabView.getTab(currentTabIndex).id;
+									_onAddEditFieldType(0, dtg_ID);
+								};
+
+
 								/*
 								YAHOO.util.Event.on('filter','onkeyup',function (e) {
 								clearTimeout(filterTimeout);
@@ -448,6 +506,33 @@
 
 							}
 						}
+
+						function _onAddEditFieldType(dty_ID, dtg_ID){
+
+							var url = top.HEURIST.basePath + "admin/structure/editDetailType.html";
+							if(dty_ID>0){
+								url = url + "?detailTypeID="+dty_ID; //existing
+							}else{
+								url = url + "?groupID="+dtg_ID; //new one
+							}
+
+							top.HEURIST.util.popupURL(top, url,
+										{   "close-on-blur": false,
+											"no-resize": true,
+											height: 430,
+											width: 640,
+											callback: function(editedDetailType) {
+												if(editedDetailType==null){
+													alert("Edition is cancelled");
+												}else{
+													alert('Edited dt type is '+editedDetailType[0]);
+												}
+												//setTimeout(function() { }, 0);
+											}
+										});
+						}
+
+
 
 						var showTimer,hideTimer;
 						/*
@@ -469,7 +554,6 @@
 						panelEdit.render(YAHOO.util.Dom.get('modelTabs'));
 						*/
 
-
 						//
 						// filtering by name
 						// listenter is activated along with dataTable creation
@@ -488,9 +572,10 @@
 							state.sortedBy = {key:'name', dir:YAHOO.widget.DataTable.CLASS_ASC};
 
 							var filterval = YAHOO.util.Dom.get('filter'+currentTabIndex).value;
+							var filtervis = YAHOO.util.Dom.get('filter'+currentTabIndex+'vis').checked?1:0;
 
 							// Get filtered data
-							dsource.sendRequest(filterval,{
+							dsource.sendRequest(filterval+'|'+filtervis,{
 								success : dtable.onDataReturnInitializeTable,
 								failure : dtable.onDataReturnInitializeTable,
 								scope   : dtable,
