@@ -1,0 +1,519 @@
+<!--
+* manageRectypes.html, Show a list with al rectypes and their values. Show the different recTypeGroups in tabs, and every rectype has an edit button, and an info buttons which shows all it's detailtypes, and an option to edit them, 15-03-2011, by Juan Adriaanse
+* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+* @todo Possibly add drag and drop, only allowed when sorted by 'Order'. (what to do when you e.g. drag '12', between '26' and '27'. Move 27 and every rectype below it, or just add a duplicate 'Order' number 26/27?
+* @todo Drag and drop between tabs (does not seem to be possible with YUI Datatable)
+* @todo Actually delete a rectype from database when delete button is pressed
+* @todo Save editted rectype data, detailtype data, and save newly created rectypes
+-->
+
+<html>
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>Heurist - Manage recordtypes</title>
+
+<link rel="icon" href="../../favicon.ico" type="image/x-icon">
+<link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+
+<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+
+<!-- YUI -->
+<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
+<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/tabview/tabview-min.js"></script>
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/history/history-min.js"></script>
+
+<!-- DATATABLE DEFS -->
+<link type="text/css" rel="stylesheet" href="../../external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
+<!-- datatable Dependencies -->
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/datasource/datasource-min.js"></script>
+<!-- OPTIONAL: Drag Drop (enables resizeable or reorderable columns) -->
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
+<!-- Source files -->
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
+<!-- END DATATABLE DEFS-->
+
+<!-- PAGINATOR -->
+<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/paginator/assets/skins/sam/paginator.css">
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
+<!-- END PAGINATOR -->
+
+<script type="text/javascript" src="../../external/jquery/jquery.js"></script>
+
+<style type="text/css">
+.tooltip {
+	position:absolute;
+	z-index:999;
+	left:-9999px;
+	top:0px;
+	background-color:#dedede;
+	padding:5px;
+	border:1px solid #fff;
+	min-width:200;
+}
+.newRectype {
+	float: right;
+}
+.newDetailType {
+	float: right;
+}
+#yui-history-iframe {
+	position:absolute;
+	top:0; left:0;
+	width:1px; height:1px; /* avoid scrollbars */
+	visibility:hidden;
+}
+
+#modelTabs {
+    z-index:0;
+}
+
+</style>
+
+</head>
+
+
+<body class="yui-skin-sam" style="overflow: auto;">
+
+<script src="../../common/js/utilsLoad.js"></script>
+<script src="../../common/php/displayPreferences.php"></script>
+<script src="../../common/php/loadCommonInfo.php"></script>
+
+<div class="tooltip" id="toolTip2"><p>popup popup</p></div>
+
+<div style="width:70%;margin:auto;">
+
+<h1>Heurist</h1>
+<h2 id="header2">Manage recordtypes</h2>
+
+<!--  style="position:absolute; z-index:0;"
+	 Static markup required by the browser history utility. Note that the
+	 iframe is only used on Internet Explorer. If this page is server
+	 generated (by a PHP script for example), it is a good idea to create
+	 the IFrame ONLY for Internet Explorer (use server side user agent sniffing) -->
+
+<input id="yui-history-field" type="hidden">
+
+<div id="modelTabs" class="yui-navset yui-navset-top">
+
+<script	 type="text/javascript">
+var filterval;
+var currentTabIndex;
+var currentTab;
+var hideTimer;
+YAHOO.util.Event.addListener(window, "load", function() {
+	//keep table and source - to avoid repeat load and for filtering
+	var arrTables = [];
+	var arrDataSources = [];
+
+	var currentTipId;
+	var needHideTip = true;
+
+	var tabView = new YAHOO.widget.TabView();
+	var ind = 0;
+
+	// init tabview with names of group
+	for (var grpID in top.HEURIST.rectypes.groups) {
+		var grpName = top.HEURIST.rectypes.groups[grpID].name;
+
+		tabView.addTab(new YAHOO.widget.Tab({
+			id: grpID,
+			label: grpName,
+			content:
+			('<div>'+ //for="filter"
+			'<div class="markup"><label>Filter by name: </label>'+
+			'<input type="text" id="filter'+ind+'" value="">'+
+			'<div id="tabContainer'+grpID+'"></div></div></div>')
+			}));
+
+		arrTables.push(null);
+		arrDataSources.push(null);
+		ind++;
+	}
+	tabView.addTab(new YAHOO.widget.Tab({
+		id: "newTab",
+		label: "+",
+		content:
+		('<h3>Create a new rectype group:</h3><br />'+
+		'<label>Name: </label><br />'+
+		'<label>Description: </label><br />'+
+		'<label>Type: </label><br /><br />'+
+		'<input style="padding-left: 203px;" type="button" value="Create" />'+
+		'')
+	}));
+	tabView.appendTo("modelTabs");
+
+	function handleTabChange (e) {
+		if(e.newValue!=e.prevValue){
+			initTabContent(e.newValue);
+			var tabFilter = YAHOO.util.Dom.get('filter'+currentTabIndex);
+			if(tabFilter) {
+				if(filterval) {
+					tabFilter.value = filterval;
+				}
+				else {
+					tabFilter.value = "";
+				}
+			}
+			clearTimeout(filterTimeout);
+			setTimeout(updateFilter,600);
+		}
+	}
+
+	//
+	//add listener for tabview
+	//
+	function initTabView () {
+		tabView.addListener("activeTabChange", handleTabChange);
+
+		//init the content for the first tab (table and buttons)
+		tabView.set("activeIndex", 0);
+	}
+
+	//
+	// create the content of tab: buttons and datatable
+	function initTabContent(tab) {
+
+		var grpID = tab.get('id');
+
+		//does not work var dt = YAHOO.util.Dom.get("datatable"+grpID);
+
+		currentTabIndex = tabView.get('activeIndex');
+		currentTab = tabView.get('activeTab').get('id');
+
+		var dt = arrTables[currentTabIndex];
+
+		if(dt==undefined || dt==null) {
+
+			var arr = [];
+			//create datatable and fill it values of particular group
+			for (var rectypeID in top.HEURIST.rectypes.typedefs) {
+				if(rectypeID != "commomFieldNames" && rectypeID != "dtFieldNames") {
+					var td = top.HEURIST.rectypes.typedefs[rectypeID];
+					var rectype = td.commonFields;
+
+					if(rectype[9] == grpID) {
+
+						arr.push([rectype[7] == "1", rectypeID, rectypeID, "<img src=\"../../common/images/rectype-icons/"+rectypeID+".gif\">", rectype[0],rectype[1],rectype[8], rectypeID]);
+
+						try {
+							var elementID = "rty_ShowInLists"+rectypeID;
+						}catch(e){alert(e);}
+					}
+				}
+			}
+
+			var myDataSource = new YAHOO.util.LocalDataSource(arr,{
+				responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
+				responseSchema : {
+					fields:[ "active", "edit", "info", "icon", "name", "description", "status", "delete"]
+					},
+					doBeforeCallback : function (req,raw,res,cb) {
+					// This is the filter function
+						var data  = res.results || [],
+						filtered = [],
+						i,l;
+
+						if (req) {
+							req = req.toLowerCase();
+							for (i = 0, l = data.length; i < l; ++i) {
+								if (data[i].name.toLowerCase().indexOf(req) > -1) {
+									filtered.push(data[i]);
+								}
+							}
+							res.results = filtered;
+						}
+
+						return res;
+					}
+			});
+
+			myDataSource.responseSchema = {
+				fields: [
+					"active", "edit", "info", "icon", "name", "description", "status", "delete"
+				]
+			};
+
+			var myColumnDefs = [
+				{ key: "active", label: "<u>Active</u>", sortable:true, formatter:YAHOO.widget.DataTable.formatCheckbox },
+				{ key: "edit", label: "Edit", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData) {
+					elLiner.innerHTML = '<a href="#edit"><img src="edit_icon.png" width="16" height="16" border="0" title="Edit" /><\/a>'}
+				},
+				{ key: "info", label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData) {
+					elLiner.innerHTML = '<a href="#info"><img src="info_icon.png" width="16" height="16" border="0" title="Info" /><\/a>'}
+				},
+				{ key: "icon", label: "Icon", sortable:false },
+				{ key: "name", label: "<u>Name</u>", sortable:true },
+				{ key: "description", label: "<u>Description</u>", sortable:true},
+				{ key: "status", label: "<u>Status</u>", sortable:true },
+				{ key: "delete", label: "Del", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData) {
+					elLiner.innerHTML = '<a href="#delete"><img src="delete_icon.png" width="16" height="16" border="0" title="Delete" /><\/a>'}
+				},
+
+			];
+
+			var myConfigs = {
+				//selectionMode: "singlecell",
+				paginator : new YAHOO.widget.Paginator({
+					rowsPerPage: 100,
+					totalRecords: arr.length,
+
+					// use a custom layout for pagination controls
+					template: "Page: {PageLinks} &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Show {RowsPerPageDropdown} per page <div class=\"newRectype\" id=\"newRectype\"><button id=\"createNewRectype\" onClick=\"editRectypeWindow()\">Add record type</button></div><div class=\"newDetailType\" id=\"newDetailType\"><button id=\"createNewDetailType\" onClick=\"editDetailTypeWindow()\">Add field type</button></div></div</div>",
+
+/*
+					template: "{PageLinks} Show {RowsPerPageDropdown} per page "+
+						"<div id=\"tb_top\" style=\"height:30\">"+
+						"<div style=\"display:inline-block;\">"+
+							"<div id=\"dt_pagination_top\"></div></div>"+
+
+						"<div style=\"float:right; text-align:right;padding-top:5px\"><label id=\"lblSelect1\"></label>"+
+							"<div class=\"newRectype\" id=\"newRectype\">"+
+								"<button id=\"createNewRectype\" onClick=\"editRectypeWindow()\">Add recordtype</button></div>"+
+							"<div class=\"newDetailType\" id=\"newDetailType\">"+
+								"<button id=\"createNewDetailType\" onClick=\"editDetailTypeWindow()\">Add fieldtype</button></div></div>",
+*/
+
+					// show all links
+					pageLinks: YAHOO.widget.Paginator.VALUE_UNLIMITED,
+
+					// use these in the rows-per-page dropdown
+					rowsPerPageOptions: [25, 50, 100]
+
+				})
+			};
+
+			dt = new YAHOO.widget.DataTable('tabContainer'+grpID, myColumnDefs, myDataSource, myConfigs);
+
+			//click on action images
+			dt.subscribe('linkClickEvent', function(oArgs){
+				YAHOO.util.Event.stopEvent(oArgs.event);
+
+				var elLink = oArgs.target;
+				var oRecord = this.getRecord(elLink);
+				var rectypeID = oRecord.getData("edit");
+
+				if(elLink.hash == "#edit") {
+					editRectypeWindow(rectypeID);
+				}
+				if(elLink.hash == "#delete") {
+					var value = prompt("Enter \"DELETE\" if you really want to delete this rectype");
+					if(value == "DELETE") {
+						dt.deleteRow(oRecord.getId(), -1);
+/* 						alert("Done!");*/
+						// TO DO: Actually delete the rectype
+					}
+					else {
+					}
+				}
+			});
+
+
+			//mouse over help colums shows the detailed description
+			dt.on('cellMouseoverEvent', function (oArgs) {
+				clearHideTimer();
+
+				var forceHideTip = true;
+				var textTip = null;
+				var target = oArgs.target;
+				var column = this.getColumn(target);
+
+				if(column!=null && column.key == 'info') {
+					var record = this.getRecord(target);
+					var rectypeID = record.getData('info');
+
+					if(currentTipId != rectypeID) {
+						currentTipId = rectypeID;
+						var xy = [parseInt(oArgs.event.pageX,10) + 10, parseInt(oArgs.event.pageY,10) - 20 ];
+
+						//find all records that reference this type
+						var details = top.HEURIST.rectypes.typedefs[rectypeID].dtFields;
+						var textTip = "<strong>Fields:</strong> &nbsp&nbsp <label style=\"color: #4499ff;\">Click on field type to edit</label><br /><p><ul>";
+
+						for(var detail in details) {
+							textTip = textTip + "<li><a href='javascript:void(0)' onClick=\"editDetailTypeWindow("+detail+")\">" + details[detail][0] + "</a></li>";
+						}
+						textTip = textTip + "</ul></p>";
+					} else {
+						forceHideTip = false;
+					}
+				}
+				if(textTip!=null) {
+					needHideTip = true;
+					var my_tooltip = $("#toolTip2");
+
+					my_tooltip.mouseover(clearHideTimer2);
+					my_tooltip.mouseout(hideToolTip2);
+
+					my_tooltip.css( {
+						left:xy[0]+'px', top:xy[1]+'px'
+					});
+					my_tooltip.html(textTip);
+					hideTimer = window.setTimeout(hideToolTip, 5000);
+				}
+				else if(forceHideTip) {
+					hideToolTip();
+				}
+			});
+
+			dt.on('cellMouseoutEvent', function (oArgs) {
+				hideTimer = window.setTimeout(hideToolTip, 2000);
+			});
+
+			function hideToolTip2() {
+				needHideTip = true;
+			}
+
+			function clearHideTimer2() {
+				needHideTip = false;
+				clearHideTimer();
+			}
+
+			function hideToolTip() {
+				if(needHideTip){
+					currentTipId = null;
+					clearHideTimer();
+					var my_tooltip = $("#toolTip2");
+					my_tooltip.css( {
+						left:"-9999px"
+					});
+				}
+			}
+
+			function clearHideTimer() {
+				if (hideTimer) {
+					window.clearTimeout(hideTimer);
+					hideTimer = 0;
+				}
+			}
+
+			arrTables[currentTabIndex] = dt;
+			arrDataSources[currentTabIndex] = myDataSource;
+
+			var filter = YAHOO.util.Dom.get('filter'+currentTabIndex);
+			if (filter) {
+				filter.onkeyup = function (e) {
+					clearTimeout(filterTimeout);
+					setTimeout(updateFilter,600);
+				};
+			}
+		}
+	}
+
+	//
+	// filtering by name
+	// listenter is activated along with dataTable creation
+	//
+	var filterTimeout = null;
+	var updateFilter  = function () {
+			// Reset timeout
+			filterTimeout = null;
+
+			var currentTabIndex = tabView.get('activeIndex');
+			var dtable = arrTables[currentTabIndex];
+			var dsource = arrDataSources[currentTabIndex];
+
+			// Reset sort
+			var state = dtable.getState();
+			state.sortedBy = {key:'name', dir:YAHOO.widget.DataTable.CLASS_ASC};
+
+			filterval = YAHOO.util.Dom.get('filter'+currentTabIndex);
+			filterval = (filterval ? filterval.value : "");
+
+			// Get filtered data
+			dsource.sendRequest(filterval,{
+				success : dtable.onDataReturnInitializeTable,
+				failure : dtable.onDataReturnInitializeTable,
+				scope	  : dtable,
+				argument : { pagination: { recordOffset: 0 } } // to jump to page 1
+			});
+	};
+
+
+	(function () {
+
+		var bookmarkedTabViewState = YAHOO.util.History.getBookmarkedState("tabview");
+		var initialTabViewState = bookmarkedTabViewState || "tab0";
+
+		YAHOO.util.History.register("tabview", initialTabViewState, function (state) {
+			tabView.set("activeIndex", state.substr(3));	//restre the index from history
+		});
+
+		YAHOO.util.History.onReady(function () {
+			var currentState;
+
+			initTabView();
+
+			currentState = YAHOO.util.History.getCurrentState("tabview");
+
+			if(currentState && currentState.length>3) {
+				  tabView.set("activeIndex", currentState.substr(3));  //restore active tab from history
+			}
+		});
+
+		try {
+			YAHOO.util.History.initialize("yui-history-field", "yui-history-iframe");
+		} catch (e) {
+			initTabView();
+		}
+
+	})();
+
+});
+
+function editRectypeWindow(ID) {
+	var URL = "";
+	if(ID) {
+		URL = top.HEURIST.basePath + "admin/structure/editRectype.html?rectypeID=" + ID;
+	} else {
+
+		URL = top.HEURIST.basePath + "admin/structure/editRectype.html?groupID=" + currentTab;
+	}
+	top.HEURIST.util.popupURL(top, URL, {
+		"close-on-blur": false,
+		"no-resize": true,
+		height: 620,
+		width: 660,
+		callback: function(changedValues) {
+			if(changedValues == null) {
+/* 				alert("cancel"); */
+			} else {
+/* 				alert(changedValues); */
+			}
+		}
+	});
+}
+
+function editDetailTypeWindow(detailTypeID) {
+	var URL = "";
+	if(detailTypeID) {
+		URL = top.HEURIST.basePath + "admin/structure/editDetailType.html?detailTypeID="+detailTypeID;
+	}
+	else {
+		URL = top.HEURIST.basePath + "admin/structure/editDetailType.html";
+	}
+	top.HEURIST.util.popupURL(top, URL, {
+		"close-on-blur": false,
+		"no-resize": true,
+		height: 560,
+		width: 650,
+		callback: function(changedValues) {
+			if(changedValues == null) {
+				// Canceled
+			} else {
+/* 				alert(changedValues); */
+			}
+		}
+	});
+}
+
+</script>
+</div>
+</body>
+</html>
