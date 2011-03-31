@@ -4,10 +4,8 @@
 * @link: http://HeuristScholar.org
 * @license http://www.gnu.org/licenses/gpl-3.0.txt
 * @package Heurist academic knowledge management system
-* @todo Possibly add drag and drop, only allowed when sorted by 'Order'. (what to do when you e.g. drag '12', between '26' and '27'. Move 27 and every rectype below it, or just add a duplicate 'Order' number 26/27?
-* @todo Drag and drop between tabs (does not seem to be possible with YUI Datatable)
 * @todo Actually delete a rectype from database when delete button is pressed
-* @todo Save editted rectype data, detailtype data, and save newly created rectypes
+* @todo When unchecking/checking the 'active' checkbox, write the change to database
 -->
 
 <html>
@@ -28,6 +26,7 @@
 <script type="text/javascript" src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
 <script type="text/javascript" src="../../external/yui/2.8.2r1/build/tabview/tabview-min.js"></script>
 <script type="text/javascript" src="../../external/yui/2.8.2r1/build/history/history-min.js"></script>
+		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
 
 <!-- DATATABLE DEFS -->
 <link type="text/css" rel="stylesheet" href="../../external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
@@ -46,6 +45,19 @@
 
 <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
 
+<!-- MULTISELECTION DROPDOWN -->
+<script language="javascript" type="text/javascript" src="../../external/js/arc90_multiselect.js"></script>
+<script language="javascript" type="text/javascript" src="../../external/js/arc90_multiselect.css"></script>
+<script language="javascript" type="text/javascript">
+			// change the default options for all multiselects
+			a$.NO_SELECTION	= 'No selection';		// TEXT for 'No selection' when nothing selected
+			a$.SELECTED		= 'Options selected';	// TEXT for 'XX Options selected' when over 1 selected
+			a$.SELECT_ALL	= 'Select All';			// TEXT for 'Select All' for checkboxes
+			a$.SelectAllMin	= 6;					// minimum number of options needed to show 'Select All'
+			a$.WhenToUse	= 'class';				// class | multiple | all : for how to make selects become multiselects
+			a$.msSeparator	= ',';					// separator for values (can be multiple characters)
+</script>
+
 <style type="text/css">
 .tooltip {
 	position:absolute;
@@ -57,11 +69,21 @@
 	border:1px solid #fff;
 	min-width:200;
 }
-.newRectype {
-	float: right;
+.newGroupRow {
+	display: block;
 }
-.newDetailType {
-	float: right;
+.newGroupLabel {
+	display: inline-block;
+	width: 60px;
+	text-align: right;
+	padding-right: 3px;
+}
+.newGroupValue {
+	display: inline-block;
+}
+.newGroupButton {
+	padding-left: 63px;
+	padding-bottom: 20px;
 }
 #yui-history-iframe {
 	position:absolute;
@@ -74,10 +96,15 @@
     z-index:0;
 }
 
+.yui-dt-dropdown {width:90px; border-style: none;}
+
+.yui-dt table {
+				width: 680px;
+}
+
 </style>
 
 </head>
-
 
 <body class="yui-skin-sam" style="overflow: auto;">
 
@@ -87,10 +114,12 @@
 
 <div class="tooltip" id="toolTip2"><p>popup popup</p></div>
 
-<div style="width:70%;margin:auto;">
+<div style="width:690;margin:auto;">
 
-<h1>Heurist</h1>
-<h2 id="header2">Manage recordtypes</h2>
+	<div>
+		<h2 id="header2" style="display: inline-block;">Record Types</h2>
+		<div style="float: right; padding-top: 15px"><label id="lblNoticeAboutChanges" style="display: inline-block;"></label>&nbsp;&nbsp;&nbsp;<input id="btnSave" type="button" value="Save Changes" style="float: right; display: none;"/></div>
+	</div>
 
 <!--  style="position:absolute; z-index:0;"
 	 Static markup required by the browser history utility. Note that the
@@ -107,6 +136,7 @@ var filterval;
 var currentTabIndex;
 var currentTab;
 var hideTimer;
+
 YAHOO.util.Event.addListener(window, "load", function() {
 	//keep table and source - to avoid repeat load and for filtering
 	var arrTables = [];
@@ -115,21 +145,43 @@ YAHOO.util.Event.addListener(window, "load", function() {
 	var currentTipId;
 	var needHideTip = true;
 
+	var _groups = [],  //for dropdown list
+		_deleted = []; //keep removed types to exclude on filtering
+
+	//object to send changes (visibility and group belong) for update on server
+	var _oRecordType = {rectype:{
+		colNames:{common:['rty_ShowInLists','rty_RecTypeGroupIDs']},
+		defs: {}
+	}};
+
+	var _lblNotice, //label that notify that some thing was changed - visibility of group
+		_btnSave,   //button to send changes to server side
+		_updatesCnt = 0;
+
 	var tabView = new YAHOO.widget.TabView();
 	var ind = 0;
 
 	// init tabview with names of group
 	for (var grpID in top.HEURIST.rectypes.groups) {
+
 		var grpName = top.HEURIST.rectypes.groups[grpID].name;
+
+		_groups.push({value:grpID, text:grpName});
 
 		tabView.addTab(new YAHOO.widget.Tab({
 			id: grpID,
 			label: grpName,
 			content:
-			('<div>'+ //for="filter"
-			'<div class="markup"><label>Filter by name: </label>'+
+			('<div>'+                   //for="filter"
+			'<div style="display:inline-block;"><label>Filter by name:</label>'+
 			'<input type="text" id="filter'+ind+'" value="">'+
-			'<div id="tabContainer'+grpID+'"></div></div></div>')
+			'&nbsp;&nbsp;<input type="checkbox" id="filter'+ind+'vis" value="1" style="padding-top:5px;">&nbsp;Show active only</div>'+
+			'<div style="float:right; text-align:right">'+
+			'<input type="button" id="createNewRectype'+ind+'" onClick=\"editRectypeWindow()\" value="Add Record Type"/>'+
+			'<input type="button" id="createNewDetailType'+ind+'" onClick=\"editDetailTypeWindow()\" value="Add Field Type"/>'+
+			'</div></div>'+
+			'<div id="tabContainer'+grpID+'"></div></div>')
+
 			}));
 
 		arrTables.push(null);
@@ -141,16 +193,29 @@ YAHOO.util.Event.addListener(window, "load", function() {
 		label: "+",
 		content:
 		('<h3>Create a new rectype group:</h3><br />'+
-		'<label>Name: </label><br />'+
-		'<label>Description: </label><br />'+
-		'<label>Type: </label><br /><br />'+
-		'<input style="padding-left: 203px;" type="button" value="Create" />'+
+
+		'<div class="newGroupRow">'+
+			'<label class="newGroupLabel">Name: </label>'+
+			'<input class="newGroupValue" id="rtg_Name" maxlength="40" />'+
+		'</div><br />'+
+
+		'<div class="newGroupRow">'+
+			'<label class="newGroupLabel">Description: </label>'+
+			'<input class="newGroupValue" id="rtg_Description" maxlength="250" />'+
+		'</div><br />'+
+
+		'<input class="newGroupButton" type="button" onclick="createNewModel()" value="Create" />'+
 		'')
 	}));
 	tabView.appendTo("modelTabs");
 
+	//
+	// on changing of tab - create and fill datatable for particular group
+	//
 	function handleTabChange (e) {
-		if(e.newValue!=e.prevValue){
+
+		if(e.newValue.get("id")!="newGroup" && e.newValue!=e.prevValue)
+		{
 			initTabContent(e.newValue);
 			var tabFilter = YAHOO.util.Dom.get('filter'+currentTabIndex);
 			if(tabFilter) {
@@ -197,14 +262,12 @@ YAHOO.util.Event.addListener(window, "load", function() {
 				if(rectypeID != "commomFieldNames" && rectypeID != "dtFieldNames") {
 					var td = top.HEURIST.rectypes.typedefs[rectypeID];
 					var rectype = td.commonFields;
+					if(rectype[9].indexOf(grpID)>-1) {
+						arr.push([rectypeID, rectype[7],
+						"<img src=\"../../common/images/rectype-icons/"+rectypeID+".gif\">",
+						rectype[0], rectype[1], rectype[8], rectype[9]]);
 
-					if(rectype[9] == grpID) {
-
-						arr.push([rectype[7] == "1", rectypeID, rectypeID, "<img src=\"../../common/images/rectype-icons/"+rectypeID+".gif\">", rectype[0],rectype[1],rectype[8], rectypeID]);
-
-						try {
-							var elementID = "rty_ShowInLists"+rectypeID;
-						}catch(e){alert(e);}
+						/*TODO: top.HEURIST.detailTypes.rectypeUsage[rectypeID].length*/
 					}
 				}
 			}
@@ -212,7 +275,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
 			var myDataSource = new YAHOO.util.LocalDataSource(arr,{
 				responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
 				responseSchema : {
-					fields:[ "active", "edit", "info", "icon", "name", "description", "status", "delete"]
+					fields: [ "id", "active", "icon", "name", "description", "status", "grp_ids"]
 					},
 					doBeforeCallback : function (req,raw,res,cb) {
 					// This is the filter function
@@ -221,12 +284,38 @@ YAHOO.util.Event.addListener(window, "load", function() {
 						i,l;
 
 						if (req) {
-							req = req.toLowerCase();
+
+							var fvals = req.split("|");
+
+							var sByName   = fvals[0].toLowerCase();
+							var iByVisibility = fvals[1];
+
+							// when we change the table, the datasource is not changed
+							// thus we need an additional filter to filter out the deleted rows
+							// and rows that were moved to another groups
+							var currentTabIndex = tabView.get('activeIndex');
+							var grpID = tabView.getTab(currentTabIndex).get('id');
+
 							for (i = 0, l = data.length; i < l; ++i) {
-								if (data[i].name.toLowerCase().indexOf(req) > -1) {
+
+								// when we change the table, the datasource is not changed
+								//thus we need to update visibility manually
+								var rec_ID = data[i].id;
+								var df = _oRecordType.rectype.defs[rec_ID];
+								if(df!=undefined){
+									data[i].active  = df.common[0];
+									data[i].grp_ids = df.common[1];
+								}
+
+								if ((data[i].name.toLowerCase().indexOf(sByName)>-1)
+									&& (data[i].grp_ids.indexOf(grpID)>-1)
+									&& (_deleted.indexOf(rec_ID)<0)
+									&& (iByVisibility==0 || data[i].active==iByVisibility))
+								{
 									filtered.push(data[i]);
 								}
-							}
+							}//for
+
 							res.results = filtered;
 						}
 
@@ -234,26 +323,24 @@ YAHOO.util.Event.addListener(window, "load", function() {
 					}
 			});
 
-			myDataSource.responseSchema = {
-				fields: [
-					"active", "edit", "info", "icon", "name", "description", "status", "delete"
-				]
-			};
-
 			var myColumnDefs = [
-				{ key: "active", label: "<u>Active</u>", sortable:true, formatter:YAHOO.widget.DataTable.formatCheckbox },
-				{ key: "edit", label: "Edit", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData) {
-					elLiner.innerHTML = '<a href="#edit"><img src="edit_icon.png" width="16" height="16" border="0" title="Edit" /><\/a>'}
+				{ key: "id", label: "<u>Code</u>", sortable:true, width:20, className:'left' },
+				{ key: "active", label: "Active", sortable:false, width:20, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
+				{ key: null, label: "Edit", sortable:false, width:20, formatter: function(elLiner, oRecord, oColumn, oData) {
+					elLiner.innerHTML = '<a href="#edit"><img src="../../common/images/edit_icon.png" width="16" height="16" border="0" title="Edit" /><\/a>'}
 				},
-				{ key: "info", label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData) {
-					elLiner.innerHTML = '<a href="#info"><img src="info_icon.png" width="16" height="16" border="0" title="Info" /><\/a>'}
+				{ key: null, label: "Info", sortable:false, width:20, formatter: function(elLiner, oRecord, oColumn, oData) {
+					elLiner.innerHTML = '<a href="#info"><img src="../../common/images/info_icon.png" width="16" height="16" border="0" title="Info" /><\/a>'}
 				},
+				{ key: "usage", label: "Usage", hidden:true },
+				{ key: "grp_ids", label: "Group", sortable:false, width:90,
+					formatter:YAHOO.widget.DataTable.formatDropdown, dropdownOptions:_groups},
 				{ key: "icon", label: "Icon", sortable:false },
 				{ key: "name", label: "<u>Name</u>", sortable:true },
-				{ key: "description", label: "<u>Description</u>", sortable:true},
+				{ key: "description", label: "Description", sortable:false},
 				{ key: "status", label: "<u>Status</u>", sortable:true },
-				{ key: "delete", label: "Del", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData) {
-					elLiner.innerHTML = '<a href="#delete"><img src="delete_icon.png" width="16" height="16" border="0" title="Delete" /><\/a>'}
+				{ key: null, label: "Del", width:20, sortable:false, formatter: function(elLiner, oRecord, oColumn, oData) {
+					elLiner.innerHTML = '<a href="#delete"><img src="../../common/images/delete_icon.png" width="16" height="16" border="0" title="Delete" /><\/a>'}
 				},
 
 			];
@@ -265,20 +352,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
 					totalRecords: arr.length,
 
 					// use a custom layout for pagination controls
-					template: "Page: {PageLinks} &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Show {RowsPerPageDropdown} per page <div class=\"newRectype\" id=\"newRectype\"><button id=\"createNewRectype\" onClick=\"editRectypeWindow()\">Add record type</button></div><div class=\"newDetailType\" id=\"newDetailType\"><button id=\"createNewDetailType\" onClick=\"editDetailTypeWindow()\">Add field type</button></div></div</div>",
-
-/*
-					template: "{PageLinks} Show {RowsPerPageDropdown} per page "+
-						"<div id=\"tb_top\" style=\"height:30\">"+
-						"<div style=\"display:inline-block;\">"+
-							"<div id=\"dt_pagination_top\"></div></div>"+
-
-						"<div style=\"float:right; text-align:right;padding-top:5px\"><label id=\"lblSelect1\"></label>"+
-							"<div class=\"newRectype\" id=\"newRectype\">"+
-								"<button id=\"createNewRectype\" onClick=\"editRectypeWindow()\">Add recordtype</button></div>"+
-							"<div class=\"newDetailType\" id=\"newDetailType\">"+
-								"<button id=\"createNewDetailType\" onClick=\"editDetailTypeWindow()\">Add fieldtype</button></div></div>",
-*/
+					template: "Page: {PageLinks} &nbsp Show {RowsPerPageDropdown} per page",
 
 					// show all links
 					pageLinks: YAHOO.widget.Paginator.VALUE_UNLIMITED,
@@ -297,23 +371,134 @@ YAHOO.util.Event.addListener(window, "load", function() {
 
 				var elLink = oArgs.target;
 				var oRecord = this.getRecord(elLink);
-				var rectypeID = oRecord.getData("edit");
+				var rectypeID = oRecord.getData("id");
 
 				if(elLink.hash == "#edit") {
 					editRectypeWindow(rectypeID);
 				}
 				if(elLink.hash == "#delete") {
-					var value = prompt("Enter \"DELETE\" if you really want to delete this rectype");
+					// TODO: Check if contains existing records
+					var value = prompt("Enter \"DELETE\" if you really want to delete rectype '"+oRecord.getData('name')+"'");
 					if(value == "DELETE") {
-						dt.deleteRow(oRecord.getId(), -1);
-/* 						alert("Done!");*/
-						// TO DO: Actually delete the rectype
+						var deleteResult = deleteRectype(rectypeID);
+						if(deleteResult) {
+							dt.deleteRow(oRecord.getId(), -1);
+							_deleted.push( rectypeID );
+							alert("Record type deleted");
+						} else {
+							alert("Deletion failed");
+						}
 					}
 					else {
 					}
 				}
 			});
 
+			dt.subscribe('dropdownChangeEvent', function(oArgs){
+				    var elDropdown = oArgs.target;
+				    var record = this.getRecord(elDropdown);
+					var column = this.getColumn(elDropdown);
+					var newValue = elDropdown.options[elDropdown.selectedIndex].value;
+					var oldValue = record.getData(column.key);
+					var recordIndex = this.getRecordIndex(record);
+					var recordKey = record.getData('recordKey');
+					if(newValue!=oldValue){
+						//this.deleteRow(recordIndex);
+						var data = record.getData();
+						data['grp_id'] = newValue;
+
+						var newTabIndex = elDropdown.selectedIndex; //getTabIndexByGroup(newValue);
+						var ndt = arrTables[newTabIndex];
+						if(ndt!=null){
+							// need to refill the destionation table,
+							// otherwise datasource is not updated
+							arrTables[newTabIndex] = null; //.addRow(record.getData(), 0);
+						}
+
+						//remove from this table and refresh another one
+						window.setTimeout(function() {
+										dt.deleteRow(record.getId(), -1);
+										}, 100);
+
+						//keep the track of changes in special object
+						_updateRecordType(record);
+					}
+			});
+
+			//subscribe on checkbox event (visibility)
+			dt.subscribe("checkboxClickEvent", function(oArgs) {
+						var elCheckbox = oArgs.target;
+						var oRecord = dt.getRecord(elCheckbox);
+						var data = oRecord.getData();
+						data['active'] = elCheckbox.checked?1:0;
+
+						//var recindex = dt.getRecordIndex(oRecord);
+						//dt.updateRow(recindex, data);
+
+						//keep the track of changes in special array
+						_updateRecordType(oRecord);
+			});
+
+	//
+	// keep the changes in object that will be send to server
+	//
+	function _updateRecordType(oRecord)
+	{
+			var rty_ID = oRecord.getData('id');
+			var newvals = [oRecord.getData('active'), oRecord.getData('grp_ids')];
+
+			//update HEURIST
+			var td = top.HEURIST.rectypes.typedefs[rty_ID];
+			var deftype = td.commonFields;
+			deftype[7] = newvals[0]; //visibility
+			deftype[9] = newvals[1]; //group
+
+			//update keep object
+			var dt_def = _oRecordType.rectype.defs[rty_ID];
+			if(dt_def==undefined){
+				 	_oRecordType.rectype.defs[rty_ID] = {common:newvals};
+				 	_updatesCnt++;
+			}else{
+					_oRecordType.rectype.defs[rty_ID].common = newvals;
+			}
+
+			if(_lblNotice==null){
+				_lblNotice = YAHOO.util.Dom.get("lblNoticeAboutChanges");
+				_btnSave   = YAHOO.util.Dom.get("btnSave");
+				_btnSave.onclick = _updateRecordTypeOnServer
+			}
+
+			_lblNotice.innerHTML = 'You have changed <b>'+_updatesCnt+'</b> field type'+((_updatesCnt>1)?'s':'');
+			_btnSave.style.display = 'block';
+	}
+	//
+	// send updates to server
+	//
+	function _updateRecordTypeOnServer(event) {
+		var str = YAHOO.lang.JSON.stringify(_oRecordType);
+		alert("Stringified changes: " + str);
+
+		if(str != null) {
+			_updateResult(""); //debug
+			return;//debug
+
+			// TODO: Change base URL
+			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+			var callback = _updateResult;
+			var params = "method=saveRT&";
+			params += "data=" + str;
+			top.HEURIST.util.getJsonData(baseurl, callback, params);
+		}
+	}
+	//
+	//
+	//
+	function _updateResult(context) {
+		_updatesCnt = 0;
+		_oRecordType.rectype.defs = {}; //clear keeptrack
+		_btnSave.style.display = 'none';
+		_lblNotice.innerHTML = '';
+	}
 
 			//mouse over help colums shows the detailed description
 			dt.on('cellMouseoverEvent', function (oArgs) {
@@ -326,7 +511,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
 
 				if(column!=null && column.key == 'info') {
 					var record = this.getRecord(target);
-					var rectypeID = record.getData('info');
+					var rectypeID = record.getData('id');
 
 					if(currentTipId != rectypeID) {
 						currentTipId = rectypeID;
@@ -351,9 +536,33 @@ YAHOO.util.Event.addListener(window, "load", function() {
 					my_tooltip.mouseover(clearHideTimer2);
 					my_tooltip.mouseout(hideToolTip2);
 
-					my_tooltip.css( {
-						left:xy[0]+'px', top:xy[1]+'px'
-					});
+										var border_top = $(window).scrollTop();
+										var border_right = $(window).width();
+										var border_height = $(window).height();
+										var left_pos;
+										var top_pos;
+										var offset = 15;
+										if(border_right - (offset *2) >= my_tooltip.width() +  xy[0]) {
+											left_pos = xy[0]+offset;
+										} else {
+											left_pos = border_right-my_tooltip.width()-offset;
+										}
+
+										if((border_top + offset *2) >=  xy[1] - my_tooltip.height()) {
+											top_pos = border_top + offset + xy[1]; //
+										} else {
+											top_pos = border_top + xy[1] - my_tooltip.height()-offset;
+										}
+										if(top_pos + my_tooltip.height() > border_top+border_height){
+											top_pos	= border_top + border_height - my_tooltip.height()-5;
+										}
+
+
+										//var lft = my_tooltip.css('left');
+										my_tooltip.css( {
+											left:left_pos+'px', top:top_pos+'px'
+										});
+
 					my_tooltip.html(textTip);
 					hideTimer = window.setTimeout(hideToolTip, 5000);
 				}
@@ -397,12 +606,15 @@ YAHOO.util.Event.addListener(window, "load", function() {
 			arrDataSources[currentTabIndex] = myDataSource;
 
 			var filter = YAHOO.util.Dom.get('filter'+currentTabIndex);
-			if (filter) {
-				filter.onkeyup = function (e) {
-					clearTimeout(filterTimeout);
-					setTimeout(updateFilter,600);
-				};
-			}
+			filter.onkeyup = function (e) {
+				clearTimeout(filterTimeout);
+				setTimeout(updateFilter,600);  };
+
+			var filtervis = YAHOO.util.Dom.get('filter'+currentTabIndex+'vis');
+			filtervis.onchange = function (e) {
+				clearTimeout(filterTimeout);
+				updateFilter();  };
+
 		}
 	}
 
@@ -423,11 +635,11 @@ YAHOO.util.Event.addListener(window, "load", function() {
 			var state = dtable.getState();
 			state.sortedBy = {key:'name', dir:YAHOO.widget.DataTable.CLASS_ASC};
 
-			filterval = YAHOO.util.Dom.get('filter'+currentTabIndex);
-			filterval = (filterval ? filterval.value : "");
+			var filterval = YAHOO.util.Dom.get('filter'+currentTabIndex).value;
+			var filtervis = YAHOO.util.Dom.get('filter'+currentTabIndex+'vis').checked?1:0;
 
 			// Get filtered data
-			dsource.sendRequest(filterval,{
+			dsource.sendRequest(filterval+'|'+filtervis, {
 				success : dtable.onDataReturnInitializeTable,
 				failure : dtable.onDataReturnInitializeTable,
 				scope	  : dtable,
@@ -467,6 +679,26 @@ YAHOO.util.Event.addListener(window, "load", function() {
 
 });
 
+function deleteRectype(ID) {
+	if(ID != null) {
+		// TODO: Call does not work
+		var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+		var callback = deletionResult;
+		var params = "method=deleteRT&";
+		params += "rtyID=" + ID;
+		top.HEURIST.util.getJsonData(baseurl, deletionResult, params);
+	}
+}
+
+var deletionResult = function(context) {
+	alert("Deletion result: " + context);
+	if(context) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
 function editRectypeWindow(ID) {
 	var URL = "";
 	if(ID) {
@@ -482,9 +714,9 @@ function editRectypeWindow(ID) {
 		width: 660,
 		callback: function(changedValues) {
 			if(changedValues == null) {
-/* 				alert("cancel"); */
+				// Canceled
 			} else {
-/* 				alert(changedValues); */
+				// TODO: reload datatable
 			}
 		}
 	});
@@ -507,13 +739,18 @@ function editDetailTypeWindow(detailTypeID) {
 			if(changedValues == null) {
 				// Canceled
 			} else {
-/* 				alert(changedValues); */
+				// TODO: reload datatable
 			}
 		}
 	});
 }
 
+function createNewModel() {
+	alert('Create new model: ' + document.getElementById("rtg_Name").value + ' with description: ' + document.getElementById("rtg_Description").value);
+}
+
 </script>
+</div>
 </div>
 </body>
 </html>

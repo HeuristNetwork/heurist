@@ -83,6 +83,9 @@
 				width: 60px;
 				text-align: right;
 			}
+			.yui-dt table {
+    				width: 400;
+			}
 		</style>
 
 	</head>
@@ -90,6 +93,7 @@
 
 	<body class="yui-skin-sam" style="overflow: scroll;">
 
+		<script src="../../common/js/utilsLoad.js"></script>
 		<script src="../../common/php/loadCommonInfo.php"></script>
 
 		<div class="tooltip" id="toolTip2"><p>popup popup</p></div>
@@ -163,7 +167,7 @@
 								//////////////////// create data table
 								var arr = [];
 
-								//create datatable and fill it valurs of particular group
+								//create datatable and fill it values of particular group
 								for (var dty_ID in top.HEURIST.detailTypes.typedefs) {
 									if(dty_ID!="commomFieldNames")
 									{

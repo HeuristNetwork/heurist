@@ -83,6 +83,9 @@
 				width: 60px;
 				text-align: right;
 			}
+			.yui-dt table {
+    				width: 400;
+			}
 		</style>
 
 	</head>
@@ -90,11 +93,12 @@
 
 	<body class="yui-skin-sam" style="overflow: scroll;">
 
+		<script src="../../common/js/utilsLoad.js"></script>
 		<script src="../../common/php/loadCommonInfo.php"></script>
 
 		<div class="tooltip" id="toolTip2"><p>popup popup</p></div>
 
-		<div style="width:300;margin:auto;">
+		<div style="width:400;margin:auto;">
 
 			<div id="toolbar" style="height:80">
 				<div><label>Filter</label></div>
@@ -105,7 +109,7 @@
 
 			<div id="tb_top" style="height:30">
 				<div style="display:inline-block; max-width:150;"><div id="dt_pagination_top"></div></div>
-				<div style="float:right; text-align:right;padding-top:5px">
+				<div style="float:right; text-align:right;padding-top:5px;">
 					<label id="lblSelect1"></label>
 					<input type="button" tabindex="12" value="Cancel" onclick="SelectRecordType.cancel();" />
 					<input type="button" tabindex="11" id="btnApply1" value="Insert Selection" onclick="SelectRecordType.close();" />
