@@ -1,0 +1,484 @@
+<!--
+<!--
+
+/**
+* editTerms.html
+*
+* add/edit/delete terms. Treeveiew on the left side with tabviw to select domain: enum or relmarker
+* form to edit term on the right side
+*
+* 2011-03-25
+* @autor: Artem Osmakov
+*
+* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+*
+* @todo I don't have neither description nor inverseid in HEURIST
+**/
+
+-->
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>Heurist - Edit terms</title>
+
+
+		<link rel=stylesheet href="../../common/css/global.css">
+
+		<!-- YUI -->
+		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
+		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
+		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
+		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/tabview/tabview-min.js"></script>
+		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/history/history-min.js"></script>
+
+		<!-- TREEVIEW DEFS -->
+		<!-- Required CSS -->
+		<link type="text/css" rel="stylesheet" href="../../external/yui/2.8.2r1/build/treeview/assets/skins/sam/treeview.css">
+		<!-- Optional dependency source file -->
+		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/animation/animation-min.js"></script>
+		<!-- Optional dependency source file to decode contents of yuiConfig markup attribute-->
+		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js" ></script>
+		<!-- TreeView source file -->
+		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/treeview/treeview-min.js" ></script>
+		<!-- END TREEVIEW DEFS-->
+
+		<style type="text/css">
+			.dtyField {
+				padding-bottom: 3px;
+				padding-top: 3px;
+				display: block;
+			}
+			.dtyLabel {
+				display: inline-block;
+				width: 150px;
+				text-align: right;
+				padding-right: 3px;
+			}
+		</style>
+
+</head>
+<body class="yui-skin-sam">
+
+	<script src="../../common/php/loadCommonInfo.php"></script>
+
+	<script  type="text/javascript">
+	</script>
+
+
+	<div>
+	<div id="tabContainer" class="yui-navset yui-navset-top" style="height:90%; width:300; max-width:300; float: left; overflow: hidden;"></div>
+	<div id="formContainer" style="float: left; padding-bottom:5; padding-top:40">
+
+		<div id="formSearch" style="display:block">
+			<div style="max-width:450;text-align:center; padding-left:80; padding-bottom: 20;">Search the desired term in tree or by name in the form below.<br/> Select the term in tree or in found list and edit it</div>
+			<div class="dtyField"><label class="dtyLabel">Search by name:</label>
+				<input id="edSeartch" style="width:300px"  onkeyup="{doSearch(event)}"/>
+			</div>
+			<div class="dtyField"><label class="dtyLabel" style="vertical-align:top;width:70px">Found:</label>
+				<select id="resSearch" size="5" style="width:380px" ondblclick="{EditTerms.doEdit()}"></select>
+			</div>
+				<div style="text-align: center; margin:auto; padding-top: 5;">
+					<input id="btnEdit" style="display:inline-block" type="button" value="Edit the selected" onclick="{EditTerms.doEdit()}" />
+					<input id="btnSelect" type="button" value="Accept as inversed" onclick="{EditTerms.doSelectInverse()}" />
+				</div>
+		</div>
+
+		<div id="formEditor" style="display:none; border-top: gray; padding-top:40">
+
+			<div class="dtyField"><label class="dtyLabel">ID:</label><input id="edId" readonly="readonly" style="width:50px"/></div>
+			<div class="dtyField"><label class="dtyLabel">Display name:</label><input id="edName" style="width:300px"/></div>
+			<div class="dtyField"><label class="dtyLabel">Descrption:</label><input id="edDescription" style="width:300px"/></div>
+			<div class="dtyField"><label class="dtyLabel">Inverse Term:</label><input id="edInverseTerm" readonly="readonly" style="width:260px"/>
+				<input id="btnDelete" type="button" value="clear" onclick="{clearInverseTermId()}" />
+				<input id="edInverseTermId" type="hidden"/></div>
+				<div style="text-align: center; margin:auto; padding-top:5;">
+					<input id="btnSave" style="display:inline-block" type="button" value="Save" onclick="{EditTerms.doSave()}" />
+					<input id="btnAddChild" type="button" value="Add Child" onclick="{EditTerms.doAddChild()}" />
+					<input id="btnDelete" type="button" value="Delete" onclick="{EditTerms.doDelete()}" />
+				</div>
+		</div>
+	</div>
+	</div>
+
+	<script  type="text/javascript">
+
+var g_version = "1";
+
+var EditTerms = (
+	function() {
+
+	//private members
+	var _className = "EditTerms",
+		_ver = g_version,				//version number for data representation
+		_tabView = new YAHOO.widget.TabView(),
+		_termTree1, //treeview for enum
+		_termTree2, //treeview for relmarker
+		_currTreeView,
+		_currentNode,
+		_currentDomain;
+
+
+	//public members
+	var that = {
+		name : "App",
+		init: function(){
+			_init();
+		},
+		doSave: function(){ _doSave(false); },
+		doDelete: function(){ _doDelete(true); },
+		doAddChild: function(){ _doAddChild(); },
+
+		findNodes: function(sSearch){ return _findNodes(sSearch)},
+		doEdit: function(){ _doEdit(); },
+		doSelectInverse: function(){ _doSelectInverse(); }
+	}
+
+	return that;
+
+	/*
+		creates tabview
+	*/
+	function _init (){
+
+		_tabView.addTab(new YAHOO.widget.Tab({
+							id: 'enum',
+							label: 'Enum',
+							content: '<div style="height:90%; max-width:300; overflow: auto;"><div id="termTree1" class="termTree ygtv-highlight"></div></div>'
+						}));
+		_tabView.addTab(new YAHOO.widget.Tab({
+							id: 'relmarker',
+							label: 'Relmarker',
+							content: '<div style="overlay:auto"><div id="termTree2" class="termTree ygtv-highlight"></div></div>'
+						}));
+		_tabView.addListener("activeTabChange", _handleTabChange);
+		_tabView.appendTo("tabContainer");
+
+		_tabView.set("activeIndex", 0);
+
+	};
+
+	/*
+		creates treeview if need it
+	*/
+	function _handleTabChange (e) {
+		var ind = _tabView.get("activeIndex");
+		if(e.newValue!=e.prevValue){
+			if(ind==0){
+				_currentDomain = "enum";
+
+				if(_termTree1==null){
+					_termTree1 = new YAHOO.widget.TreeView("termTree1");
+					//fill treeview with content
+					_fillTreeView(_termTree1, _currentDomain);
+				}
+				_currTreeView = _termTree1;
+
+			}else if(ind==1){
+				_currentDomain = "relation";
+
+				if(_termTree2==null){
+					_termTree2 = new YAHOO.widget.TreeView("termTree2");
+					//fill treeview with content
+					_fillTreeView(_termTree2, _currentDomain);
+				}
+				_currTreeView = _termTree2;
+			}
+		}
+	}
+
+	/*
+		fill the given treeview with the appropriate content
+	*/
+	function _fillTreeView (tv, domain) {
+
+		var tv_parent = tv.getRoot();
+			treesByDomain = top.HEURIST.terms.treesByDomain[domain],
+			termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[domain];
+
+		for (var parentElement in treesByDomain)
+		if(parentElement!=undefined){
+
+			var nodeIndex = tv.getNodeCount()+1;
+
+			var term = new Object();
+			term.label = termsByDomainLookup[parentElement];
+			term.id = parentElement;
+			term.domain = domain;
+			term.description = "";
+
+			//'<div id="'+parentElement+'"><a href="javascript:void(0)" onClick="selectAllChildren('+nodeIndex+')">All </a> '+termsByDomainLookup[parentElement]+'</div>';
+			//term.href = "javascript:void(0)";
+
+			var topLayerParent = new YAHOO.widget.TextNode(term, tv_parent, false); // Create the node
+
+			var parentNode = treesByDomain[parentElement];
+			_createChildren(parentNode, topLayerParent); // Look for children of the node
+		}
+
+  		tv.subscribe("labelClick", _onNodeClick);
+  		tv.singleNodeHighlight = true;
+  		tv.subscribe("clickEvent", tv.onEventToggleHighlight);
+
+		tv.render();
+
+		//internal function
+		function _createChildren(parentNode, parentEntry) { // Recursively get all children
+			var term,
+				childNode,
+				nodeIndex;
+
+				for(var child in parentNode)
+				if(child!=undefined){
+					nodeIndex = tv.getNodeCount()+1;
+
+					term = new Object();
+					term.label = termsByDomainLookup[child];
+					term.id = child;
+					term.domain = domain;
+					term.description = "";  //@todo I don't have neither description nor inverseid in HEURIST
+					term.inverseid = 0;
+					//term.label = '<div id="'+child+'"><a href="javascript:void(0)" onClick="selectAllChildren('+nodeIndex+')">All </a> '+termsByDomainLookup[child]+'</div>';
+					//term.href = "javascript:void(0)"; // To make 'select all' clickable, but not leave the page when hitting enter
+
+					childNode = new YAHOO.widget.TextNode(term, parentEntry, false); // Create the node
+
+			/*if(inExistingTree(child)) {
+				childNode.highlightState = 1;
+				parentEntry.expand();
+			}*/
+
+					_createChildren(parentNode[child], childNode); // createChildren() again for every child found
+			}
+		}
+	}
+
+	//
+	// find node(s) by name in current treeview
+	// it returns the array of nodes
+	//
+	function _findNodes(sSearch) {
+		sSearch = sSearch.toLowerCase();
+		var nodes = _currTreeView.getNodesBy(__doSearchByName);
+
+		//alert("search "+sSearch);
+		return nodes;
+
+		function __doSearchByName(node){
+			return (node.label.toLowerCase().indexOf(sSearch)>=0);
+		}
+	}
+	//
+	// select node by id and expand it
+	//
+	function _findNodeById(nodeid, needExpand) {
+		var nodes = _currTreeView.getNodesBy(__doSearchById);
+
+		//select and expand the node
+		if(nodes){
+			var node = nodes[0];
+			if(needExpand) {
+				node.focus();
+				node.toggle();
+			}
+			return node;
+		}else{
+			return null
+		}
+		//internal
+		function __doSearchById(node){
+			return (node.data.id==nodeid);
+		}
+	}
+
+	/*
+	  load values to edit form
+	*/
+	function _onNodeClick(node){
+		if(_currentNode != node)
+		{
+			if(_currentNode!=null){
+				_doSave(true);
+			}
+			_currentNode = node;
+
+		if(node!=null){
+			YAHOO.util.Dom.get('formEditor').style.display = "block";
+       //	alert("label was clicked"+ node.data.id+"  "+node.data.domain+"  "+node.label);
+	   		YAHOO.util.Dom.get('edId').value = node.data.id;
+	   		YAHOO.util.Dom.get('edName').value = node.label;
+	   		YAHOO.util.Dom.get('edDescription').value = node.data.description;
+
+	   		var node_invers;
+			if(node.data.inverseid>0){
+				var node_invers = _findNodeById(node.data.inverseid, false);
+			}
+			if(node_invers!=null){
+					YAHOO.util.Dom.get('edInverseTermId').value = node_invers.data.id;
+					YAHOO.util.Dom.get('edInverseTerm').value = getParentLabel(node_invers);
+			}else{
+					YAHOO.util.Dom.get('edInverseTermId').value = '0';
+					YAHOO.util.Dom.get('edInverseTerm').value = '';
+			}
+		}
+		}
+		
+		if(node==null){
+				YAHOO.util.Dom.get('formEditor').style.display = "none";
+		}
+
+	}
+
+	//
+	function _doSave(needConfirm){
+
+		var wasChanged = ((_currentNode.label != YAHOO.util.Dom.get('edName').value) ||
+	   		(_currentNode.data.description != YAHOO.util.Dom.get('edDescription').value) ||
+	   		(_currentNode.data.inverseid != YAHOO.util.Dom.get('edInverseTermId').value));
+
+	   	if(wasChanged){
+
+			if(needConfirm){
+				var r=confirm("Term was modified. Save it?");
+				if (r!=true) {
+					//if new - remove from tree
+					if(_currentNode.data.id.indexOf("-")>0){
+						_doDelete(false);
+					}
+					return;
+				}
+			}
+	   		_currentNode.label = YAHOO.util.Dom.get('edName').value;
+	   		_currentNode.data.description = YAHOO.util.Dom.get('edDescription').value;
+	   		_currentNode.data.inverseid = YAHOO.util.Dom.get('edInverseTermId').value;
+	   		_currentNode.title = _currentNode.data.description;
+			_currTreeView.render();
+			alert("TODO SAVE ON SERVER");
+		}
+	}
+	//
+	function _doDelete(needConfirm){
+		var r = (!needConfirm) || confirm("Delete term '"+_currentNode.label+"'? Are you sure? All children terms will be deleted as well");
+		if (r==true && _currTreeView!=null) {
+			//_currTreeView.removeChildren(_currentNode);
+			_currTreeView.popNode(_currentNode);
+			_currTreeView.render();
+
+			if(_currentNode.data.id.indexOf("-")<0){
+					alert("TODO REMOVE ON SERVER");
+			}
+			_currentNode = null;
+			_onNodeClick(null);
+		}
+	}
+	//
+	function _doAddChild(){
+		if(_currentNode!=null){
+			var term = new Object();
+			term.label = "New Term";
+			term.id = _currentNode.data.id+"-" + (_currentNode.getNodeCount());;  //correct
+			term.domain = _currentNode.domain;
+			term.description = "";
+			term.inverseid = 0;
+			var newNode = new YAHOO.widget.TextNode(term, _currentNode, false);
+			_currTreeView.render();
+
+			newNode.focus(); //expand
+
+			_onNodeClick(newNode);
+		}
+	}
+
+	//take the current selection from resSearch, find and open it in tree and show in edit form
+	function _doEdit(){
+		var sel = YAHOO.util.Dom.get('resSearch');
+		if(sel.selectedIndex>=0){
+			var nodeid = sel.options[sel.selectedIndex].value;
+			var node = _findNodeById(nodeid, true);
+			if(node!=null){
+				_onNodeClick(node);
+			}
+		}
+	}
+	function _doSelectInverse(){
+		var sel = YAHOO.util.Dom.get('resSearch');
+		if(sel.selectedIndex>=0 && _currentNode!=null){
+
+			var nodeid = sel.options[sel.selectedIndex].value;
+			if(_currentNode.data.id==nodeid){
+				alert("Not possible to inverse on itself");
+			}else{
+				YAHOO.util.Dom.get('edInverseTerm').value = sel.options[sel.selectedIndex].text;
+				YAHOO.util.Dom.get('edInverseTermId').value = nodeid;
+			}
+		}
+	}
+
+})();
+
+YAHOO.util.Event.addListener(window, "load", EditTerms.init);
+
+//YAHOO.util.Event.onDOMReady(EditTerms.init);
+
+
+//
+//general functions
+//
+function clearInverseTermId(){
+	YAHOO.util.Dom.get('edInverseTerm').value = "";
+	YAHOO.util.Dom.get('edInverseTermId').value = "0";
+}
+
+//create composed label with all parents
+function getParentLabel(_node){
+		if(_node.parent._type=="RootNode"){
+			return 	_node.label;
+		}else{
+			return getParentLabel(_node.parent)+" > "+_node.label;
+		}
+}
+
+function doSearch(event){
+
+	var sel = YAHOO.util.Dom.get('resSearch');
+	var el = event.target;
+
+	//remove all
+	while (sel.length>0){
+		sel.remove(0);
+	}
+
+	//el = YAHOO.util.Dom.get('edSeartch');
+	if(el.value && el.value.length>2){
+
+		//fill selection element with found nodes
+		var nodes = EditTerms.findNodes(el.value);
+		for (var ind in nodes)
+		if(ind!=undefined){
+			var node = nodes[ind];
+
+			var option = document.createElement("option");
+				option.text = getParentLabel(node);
+				option.value = node.data.id;
+			try {
+				// for IE earlier than version 8
+				sel.add(option, sel.options[null]);
+			}catch (e){
+				sel.add(option,null);
+			}
+		}
+
+	}
+
+	//alert(sSearch);
+//
+}
+
+
+	</script>
+
+</body>
+</html>

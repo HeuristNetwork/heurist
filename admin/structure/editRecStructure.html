@@ -53,8 +53,9 @@
 		<script src="../../external/yui/2.8.2r1/build/animation/animation-min.js"></script>
 		<!-- Optional Resize Support -->
 		<script src="../../external/yui/2.8.2r1/build/resize/resize-min.js"></script>
-		<!-- Source file for the Layout Manager -->
+		<!-- Source file for the Layout Manager
 		<script src="../../external/yui/2.8.2r1/build/layout/layout-min.js"></script>
+		-->
 
 		<!-- DATATABLE DEFS -->
 		<link type="text/css" rel="stylesheet" href="../../external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
@@ -135,15 +136,16 @@
 						}
 
 
-						var hToolBar = '<div style="display:inline-block; text-align:left">'+
+						var hToolBar = '<div style="width:600px"><div style="display:inline-block; text-align:left">'+
 						'<input type="button" value="Insert Field" onclick="onAddNewDetail()"/>'+
 						//'<input type="button" value="collapse all" onclick="onCollapseAll()"/>'+
 						//'<input type="button" value="Enable Drag" onclick="onToggleDrag(event)"/></div>'+
+						'<label style="width:400px;text-align:center;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Click row to edit</label>'+
 						'<div style="float:right; text-align:right;min-width:300;">'+
 						'<input  style="display:none;" type="button" id="btnSaveOrder" value="Save Order" onclick="onUpdateStructureOnServer(false)"/>'+
 						'<input  type="button" value="Add Field Type" onclick="onDefineNewType()"/>'+
 						//'<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/>'+
-						'</div>';
+						'</div></div>';
 						//'<textarea id="dbg" rows="5"></textarea>';
 
 						_tabView.addTab(new YAHOO.widget.Tab({
@@ -259,7 +261,7 @@
 							{
 								key:"expandColumn",
 								label: "Edit",
-								width : "16px",
+								hidden:true, //width : "16px",
 								sortable:false,
 								formatter:expansionFormatter
 							},
@@ -328,7 +330,7 @@
 									obj.liner_element.innerHTML =
 									'<div style="padding-left:30; padding-bottom:5; padding-right:5">'+
 									'<div class="dtyField"><label class="dtyLabel">Display name/Label:</label><input id="ed'+rst_ID+'_rst_DisplayName" title="Display Name/Label"/></div>'+
-									'<div class="dtyField"><label class="dtyLabel">Help Text/Prompt:</label><input id="ed'+rst_ID+'_rst_DisplayHelpText" style="width:400px" title="Help Text"/></div>'+
+									'<div class="dtyField"><label class="dtyLabel">Help Text/Prompt:</label><input id="ed'+rst_ID+'_rst_DisplayHelpText" style="width:350px" title="Help Text"/></div>'+
 									'<div class="dtyField"><label class="dtyLabel">Default Value:</label><input id="ed'+rst_ID+'_rst_DefaultValue" title="Default Value"/></div>'+
 									'<div class="dtyField"><label class="dtyLabel">Width:</label><input id="ed'+rst_ID+'_rst_DisplayWidth" title="Visible width of field" style="width:40" size="4" onkeypress="validate(event)"/></div>'+
 									'<div class="dtyField"><label class="dtyLabel">Requirement type:</label>'+
@@ -358,6 +360,7 @@
 
 							_myDataTable.subscribe("rowMouseoverEvent", _myDataTable.onEventHighlightRow);
 							_myDataTable.subscribe("rowMouseoutEvent", _myDataTable.onEventUnhighlightRow);
+							_myDataTable.subscribe("rowClickEvent", _myDataTable.onEventSelectRow);
 
 							//
 							// Subscribe to a click event to bind to expand/collapse the row
