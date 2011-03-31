@@ -77,7 +77,8 @@ function getResolvedIDs($recID,$bmkID) {
 	$bkm_ID = 0;
 	if (intval(@$recID)) {
 		$rec_id = intval($recID);
-		$res = mysql_query('select rec_ID, bkm_ID from Records left join usrBookmarks on bkm_recID=rec_ID and bkm_UGrpID='.get_user_id().' where rec_ID='.$rec_id);
+		$res = mysql_query('select rec_ID, bkm_ID from
+		 left join usrBookmarks on bkm_recID=rec_ID and bkm_UGrpID='.get_user_id().' where rec_ID='.$rec_id);
 		$row = mysql_fetch_assoc($res);
 		$rec_id = intval($row['rec_ID']);
 		$bkm_ID = intval($row['bkm_ID']);
@@ -704,7 +705,11 @@ function getAllRectypeStructures() {
 															left join defDetailTypes on rst_DetailTypeID = dty_ID
 															left join defDetailTypeGroups on dtg_ID = if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID)
 														order by rst_RecTypeID, dtg_Order, dtg_Name,  rst_DisplayOrder, rst_ID");
-	$rtStructs = array('groups' => getRectypeGroups(),'names' => array(),'pluralNames' => array(),'dtDisplayOrder' => array());
+	$rtStructs = array('groups' => getRectypeGroups(),
+						'names' => array(),
+						'pluralNames' => array(),
+						'usageCount' => getRecTypeUsageCount(),
+						'dtDisplayOrder' => array());
 	$rtStructs['typedefs'] = array('commomFieldNames' => getRectypeColNames(), 'dtFieldNames' => getRectypeStructureFieldColNames());
 	while ($row = mysql_fetch_row($res)) {
 		if (!array_key_exists($row[0],$rtStructs['typedefs'])) {
@@ -760,7 +765,7 @@ function getRecTypesByGroup() {
 	return $rectypesByGroup;
 }
 
-function getDetailTypeUsage() {
+function getDetailTypeDefUsage() {
 	$rectypesByDetailType = array();
 	$res = mysql_query("select rst_DetailTypeID as dtID, rst_RecTypeID as rtID
 						from defRecStructure order by dtID, rtID");
@@ -772,6 +777,31 @@ function getDetailTypeUsage() {
 	}
 	return $rectypesByDetailType;
 }
+
+
+function getRecTypeUsageCount() {
+	$recCountByRecType = array();
+	$res = mysql_query("select rty_ID as rtID, count(rec_ID) as usageCnt
+						from Records left join defRecTypes on rty_ID = rec_RecTypeID
+						group by rec_RecTypeID");
+	while ($row = mysql_fetch_assoc($res)) {
+		$recCountByRecType[$row['rtID']] = $row["usageCnt"];
+	}
+	return $recCountByRecType;
+}
+
+
+function getDetailTypeUsageCount() {
+	$recDetailsByDetailType = array();
+	$res = mysql_query("select dty_ID as dtID, count(dtl_ID) as usageCnt
+						from recDetails left join defDetailTypes on dty_ID = dtl_DetailTypeID
+						group by dtl_DetailTypeID");
+	while ($row = mysql_fetch_assoc($res)) {
+		$recDetailsByDetailType[$row['dtID']] = $row["usageCnt"];
+	}
+	return $recDetailsByDetailType;
+}
+
 
 function getDetailTypeColNames() {
 	return array("dty_Name",
@@ -799,7 +829,8 @@ function getAllDetailTypeStructures() {
 
 	$dtStructs = array('groups' => getDetailTypeGroups(),
 						'names' => array(),
-						'rectypeUsage' => getDetailTypeUsage(),
+						'rectypeUsage' => getDetailTypeDefUsage(),
+						'usageCount' => getDetailTypeUsageCount(),
 						'typedefs' => array('commomFieldNames' => getDetailTypeColNames()));
 
 	$res = mysql_query("select dty_ID, dtg_ID, dtg_Name, ".join(",", getDetailTypeColNames())." from defDetailTypes

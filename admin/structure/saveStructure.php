@@ -103,9 +103,7 @@ $dtyColumnNames = array(
 "dty_ShowInLists"
 );
 
-
 mysql_connection_db_overwrite(DATABASE);
-
 if (!@$_REQUEST['method']) {
 	die("invalid call to saveStructure, method parameter is required");
 }else if(!in_array($_REQUEST['method'],$legalMethods)) {
@@ -141,6 +139,18 @@ switch (@$_REQUEST['method']) {
 		$rv['rectypes'] = getAllRectypeStructures();
 		break;
 
+	case 'deleteRectype':
+	case 'deleteRT':
+		$rtyID = @$_REQUEST['rtyID'];
+		if (!$rtyID) {
+			die("invalid or not rectype sent with deleteRectype method call to saveStructure.php");
+		}
+		$rv = deleteRectype($rtyID);
+		if (!array_key_exists('error',$rv)) {
+			$rv['rectypes'] = getAllRectypeStructures();
+		}
+		break;
+
 	case 'saveDetailType':
 	case 'saveDT':
 		$sdtData = @$_REQUEST['data'];
@@ -162,6 +172,19 @@ switch (@$_REQUEST['method']) {
 		}
 		$rv['detailTypes'] = getAllDetailTypeStructures();
 		break;
+
+	case 'deleteDetailType':
+	case 'deleteDT':
+		$dtyID = @$_REQUEST['dtyID'];
+		if (!$dtyID) {
+			die("invalid or no detailtype sent with deleteDetailType method call to saveStructure.php");
+		}
+		$rv = deleteDetailType($dtyID);
+		if (!array_key_exists('error',$rv)) {
+			$rv['detailtypes'] = getAllDetailTypeStructures();
+		}
+		break;
+
 }
 
 if (@rv) {
@@ -224,6 +247,41 @@ global $rtyColumnNames,$rstColumnNames;
 }
 
 /**
+* deleteRectype - Helper function that delete a rectype from defRecTypes table.if there are no existing records of this type
+* @author Stephen White
+* @param $rtyID rectype ID to delete
+* @return $ret an array of return values for the various data elements created or errors if they occurred
+**/
+
+function deleteRectype($rtyID) {
+global $rtyColumnNames,$rstColumnNames;
+	$ret = array();
+	$query = "select rec_ID from Records where rec_RecTypeID =$rtyID";
+	$res = mysql_query($query);
+	if (mysql_error()) {
+		$ret['error'] = "error finding records of type $rtyID from Records - ".mysql_error();
+	} else {
+		$recCount = mysql_num_rows($res);
+		if ($recCount) { // there are records existing of this rectype, need to return error and the recIDs
+			$ret['error'] = "error deleting Rectype($rtyID) with existing data Records ($recCount) not allowed";
+			$ret['recIDs'] = array();
+			while ($row = mysql_fetch_row($res)) {
+				array_push($ret['recIDs'], $row[0]);
+			}
+		} else { // no records ok to delete this rectype. Not that this should cascade for all dependent definitions
+			$query = "delete from defRecTypes where rty_ID =$rtyID  limit = 1";
+			$res = mysql_query($query);
+			if (mysql_error()) {
+				$ret['error'] = "db error deleting of rectype $rtyID from defRecTypes - ".mysql_error();
+			} else {
+				$ret['success'] = "rectype $rtyID deleted from defRecTypes";
+			}
+		}
+	}
+	return $ret;
+}
+
+/**
 * updateRectype - Helper function that updates rectypes in the defRecTypes table.and updates or inserts any
 * fields into the defRecStructure table for the given rtyID
 * @author Stephen White
@@ -254,7 +312,7 @@ global $rtyColumnNames,$rstColumnNames;
 				array_push($ret['common'],array('error'=>"$colName is not a valid column name for defRecTypes val= $val was not used"));
 				continue;
 			}
-			$query = "update defRectypes set $colName = '$val' where rty_ID = $rtyID";
+			$query = "update defRecTypes set $colName = '$val' where rty_ID = $rtyID";
 			mysql_query($query);
 			if (mysql_error()) {
 				array_push($ret['common'],array('error'=>"error updating $colName in defRecTypes - ".mysql_error()));
@@ -318,9 +376,9 @@ global $dtyColumnNames;
 	if (count($commonNames)) {
 		$ret['common'] = array();
 		$colNames = join(",",$commonNames);
-		foreach ( $dt as $newDT) {
+error_log("dt = ".print_r($dt,true));
 			$dtValues = array();
-			foreach($newDT['common'] as $dtVal) {
+			foreach($dt['common'] as $dtVal) {
 				array_push($dtValues, "'".mysql_escape_string($dtVal)."'");
 			}
 			$colValues = join(",", $dtValues);
@@ -334,7 +392,6 @@ global $dtyColumnNames;
 				array_push($ret['common'][$dtyID], "ok");
 			}
 		}
-	}
 	if (!@$ret['common']) {
 		$ret = array("error"=>"no data supplied for inserting rectype");
 	}
@@ -350,6 +407,41 @@ global $dtyColumnNames;
 * @return $ret an array of return values for the various data elements created or errors if they occurred
 **/
 
+/**
+* deleteDetailType - Helper function that deletes a detailtype from defDetailTypes table.if there are no existing details of this type
+* @author Stephen White
+* @param $dtyID detailtype ID to delete
+* @return $ret an array of return values for the various data elements created or errors if they occurred
+**/
+
+function deleteDetailType($dtyID) {
+global $rtyColumnNames,$rstColumnNames;
+	$ret = array();
+	$query = "select dtl_ID from recDetails where dtl_DetailTypeID =$dtyID";
+	$res = mysql_query($query);
+	if (mysql_error()) {
+		$ret['error'] = "error finding records of type $dtyID from recDetails - ".mysql_error();
+	} else {
+		$dtCount = mysql_num_rows($res);
+		if ($recCount) { // there are records existing of this rectype, need to return error and the recIDs
+			$ret['error'] = "error deleting detailType($dtyID) with existing data recDetails ($dtCount) not allowed";
+			$ret['dtlIDs'] = array();
+			while ($row = mysql_fetch_row($res)) {
+				array_push($ret['dtlIDs'], $row[0]);
+			}
+		} else { // no records ok to delete this rectype. Not that this should cascade for all dependent definitions
+			$query = "delete from defDetailTypes where dty_ID =$dtyID  limit = 1";
+			$res = mysql_query($query);
+			if (mysql_error()) {
+				$ret['error'] = "db error deleting of detailtype $dtyID from defDetailTypes - ".mysql_error();
+			} else {
+				$ret['success'] = "detailtype $dtyID deleted from defDetailTypes";
+			}
+		}
+	}
+	return $ret;
+}
+
 function updateDetailType($commonNames,$dtyID,$dt) {
 global $dtyColumnNames;
 	$res = mysql_query("select * from defDetailTypes where dty_ID = $dtyID");
@@ -362,6 +454,7 @@ global $dtyColumnNames;
 	if (count($commonNames)) {
 		$ret['common'] =array();
 		$vals = $dt['common'];
+
 		foreach ($commonNames as $colName) {
 			$val = array_shift($vals);
 			$val = mysql_escape_string($val);
