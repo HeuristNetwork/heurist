@@ -21,6 +21,9 @@
 .rtyField {
 	display: block;
 }
+.rtyHiddenField {
+	display: none;
+}
 .rtyLabel {
 	display: inline-block;
 	width: 200px;
@@ -49,6 +52,10 @@
 </head>
 
 <body>
+<!-- <body class="popup editRectype"> -->
+
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json.js"></script>
 
 <script src="../../common/js/utilsLoad.js"></script>
 <script src="../../common/php/displayPreferences.php"></script>
@@ -79,32 +86,95 @@
 <br />
 <div id="statusMsg"></div>
 <div id="rectypeValues" style="{padding:10px;}" >
-	<div id="rectypeIcon" class="rectypeIcon"></div>
-	<div class="rtyField"><label class="rtyLabel" for="rty_ID">Code:</label><label id="rty_ID"/></div>
-	<div class="rtyField"><label class="rtyLabel" for="rty_Name">Name:*</label><input id="rty_Name" maxlength="63" style="width:200;" onkeyup="createPlural()" /></div>
-	<div class="helpText"><label>The name the recordtype should have</label></div>
-	<div class="rtyField"><label class="rtyLabel" for="rty_Plural">Plural:*</label><input id="rty_Plural" maxlength="63" style="width:200;" /></div>
-	<div class="helpText"><label>The name's plural</label></div>
-	<div class="rtyField"><label class="rtyLabel" for="rty_Type">Type:</label><div class="rtyValue" id="rty_Type"/></div></div>
-	<div class="helpText"><label>The type of data this recordtype will contain</label></div>
-	<div class="rtyField"><label class="rtyLabel" for="rty_FlagAsFieldset">Use as fieldset:</label><input id="rty_FlagAsFieldset" type="checkbox"/></div>
-	<div class="helpText"><label>If selected, this recordtype will point to a set of fieldtypes, contained by another recordtype</label></div>
+	<div id="rectypeIcon" class="rectypeIcon"></div><div style="padding-left: 500px;"><a href="javascript:void(0)" onClick="viewEquivalences()">View equivalences</a></div>
+	<div class="rtyField">
+		<label class="rtyLabel" for="rty_ID">Code:</label>
+		<label id="rty_ID"></label>
+	</div>
+	<div class="rtyField">
+		<label class="rtyLabel" for="rty_Name">Name:*</label>
+		<input id="rty_Name" maxlength="63" style="width:200;" onkeyup="createPlural()" />
+		<div class="helpText">
+			<label>The name the recordtype should have</label>
+		</div>
+	</div>
+	<div class="rtyField">
+		<label class="rtyLabel" for="rty_Plural">Plural:*</label>
+		<input id="rty_Plural" maxlength="63" style="width:200;" />
+		<div class="helpText">
+			<label>The name's plural</label>
+		</div>
+	</div>
+	<div class="rtyField">
+		<label class="rtyLabel" for="rty_Type">Type:</label>
+		<div class="rtyValue" id="rty_Type"></div>
+		<div class="helpText">
+			<label>The type of data this recordtype will contain</label>
+		</div>
+	</div>
+	<div class="rtyField">
+		<label class="rtyLabel" for="rty_FlagAsFieldset">Use as fieldset:</label>
+		<input id="rty_FlagAsFieldset" type="checkbox"/>
+		<div class="helpText">
+			<label>If selected, this recordtype will point to a set of fieldtypes, contained by another recordtype</label>
+		</div>
+	</div>
 
-	<div class="rtyField" style="display:none"><label class="rtyLabel" for="rty_RecTypeGroupIDs">Display group:</label><div class="rtyValue" id="rty_RecTypeGroupIDs"></div></div>
-	<div class="rtyField" style="display:none"><label class="rtyLabel" for="rty_OrderInGroup">Order in group:</label><input onkeypress="validate(event)" maxlength="3" id="rty_OrderInGroup" style="width:30;"/></div>
+	<div class="rtyField" style="display:none">
+		<label class="rtyLabel" for="rty_RecTypeGroupIDsPreview">Display group:</label>
+		<div class="rtyValue" id="rty_RecTypeGroupIDsPreview"></div>
+	</div>
+	<div class="rtyField" style="display:none">
+		<label class="rtyLabel" for="rty_OrderInGroup">Order in group:</label>
+		<input onkeypress="checkIfInteger(event)" maxlength="3" id="rty_OrderInGroup" style="width:30;"/>
+	</div>
 
-	<div class="rtyField"><label class="rtyLabel" for="rty_ShowInLists">Visible to end-user:</label><input id="rty_ShowInLists" type="checkbox"/></div>
-	<div class="helpText"><label>Wether this table will appear for the end-user</label></div>
-	<div class="rtyField"><label class="rtyLabel" for="rty_Status">Status:</label><div class="rtyValue" id="rty_Status"/></div></div>
-	<div class="helpText"><label>The recordtype's status. 'Reserverd' can not be changed, 'Open' is normal</label></div>
-	<div class="rtyField"><label class="rtyLabel" style="vertical-align:top" for="rty_Description">Description:*</label><textarea maxlength="5000" id="rty_Description" rows="3" style="width:400;"></textarea></div>
-	<div class="helpText"><label>An advanced description, describing what the recordtype is used for</label></div>
-	<div class="rtyField"><label class="rtyLabel" for="rty_TitleMask">Title mask:*</label><input maxlength="500" id="rty_TitleMask" style="width:400;"/></div>
-	<div class="helpText"><label>*Enter description here*</label></div>
-	<div class="rtyField"><label class="rtyLabel" for="rty_ReferenceURL">Reference URL:</label><input id="rty_ReferenceURL" maxlength="250" style="width:400;" /></div>
-	<div class="helpText"><label>*Enter description here*</label></div>
-	<div class="rtyField"><label class="rtyLabel" for="rty_AlternativeRecEditor">Alternative record editor:</label><input id="rty_AlternativeRecEditor" maxlength="250" style="width:400;" /></div>
-	<div class="helpText"><label>*Enter description here*</label></div>
+	<div class="rtyField">
+		<label class="rtyLabel" for="rty_ShowInLists">Visible to end-user:</label>
+		<input id="rty_ShowInLists" type="checkbox"/>
+		<div class="helpText">
+			<label>Wether this table will appear for the end-user</label>
+		</div>
+	</div>
+	<div class="rtyField">
+		<label class="rtyLabel" for="rty_Status">Status:</label>
+		<div class="rtyValue" id="rty_Status"></div>
+		<div class="helpText">
+			<label>The recordtype's status. 'Reserverd' can not be changed, 'Open' is normal</label>
+		</div>
+	</div>
+	<div class="rtyField">
+		<label class="rtyLabel" style="vertical-align:top" for="rty_Description">Description:*</label>
+		<textarea cols="200" id="rty_Description" rows="3" style="width:400;"></textarea>
+		<div class="helpText">
+			<label>An advanced description, describing what the recordtype is used for</label>
+		</div>
+	</div>
+	<div class="rtyField">
+		<label class="rtyLabel" for="rty_TitleMask">Title mask:*</label>
+		<input maxlength="500" id="rty_TitleMask" style="width:400;"/>
+		<div class="helpText">
+			<label>*Enter description here*</label>
+		</div>
+	</div>
+	<div class="rtyField">
+		<label class="rtyLabel" for="rty_ReferenceURL">Reference URL:</label>
+		<input id="rty_ReferenceURL" maxlength="250" style="width:400;" />
+		<div class="helpText">
+			<label>*Enter description here*</label>
+		</div>
+	</div>
+	<div class="rtyField">
+		<label class="rtyLabel" for="rty_AlternativeRecEditor">Alternative record editor:</label>
+		<input id="rty_AlternativeRecEditor" maxlength="250" style="width:400;" />
+		<div class="helpText">
+			<label>*Enter description here*</label>
+		</div>
+	</div>
+
+	<div class="rtyHiddenField"><input id="rty_CanonicalTitleMask" /></div>
+	<div class="rtyHiddenField"><input id="rty_RecTypeGroupIDs" /></div>
+
 </div>
 <br />
 <div class="actionButtons">
@@ -117,19 +187,34 @@
 <script type="text/javascript">
 
 	var rectype;
-	var newRectypeCode = 0; // 0: rectype with rectypeID exists - 1: no rectypeID given, create new - 2: rectype with given ID not found, error
-	if(rectypeID) { // Existing rectype, so load with values
-		try {
-			rectype = top.HEURIST.rectypes.typedefs[rectypeID].commonFields; // If succeeds, rectype with ID from URL exists, fill form with values
-			setRtyValues();
-		} catch(e) { // Invalid rectypeID, create empty form, and show error message
-			newRectypeCode = 2;
+	var rectypeID;
+	var keepOpen = false;
+	init();
+
+	function init() {
+		var typesDropdown;
+		var groupDropdown;
+		var newRectypeCode = 0; // 0: rectype with rectypeID exists - 1: no rectypeID given, create new - 2: rectype with given ID not found, error
+		if(rectypeID) { // Existing rectype, so load with values
+			try {
+				rectype = top.HEURIST.rectypes.typedefs[rectypeID].commonFields; // If succeeds, rectype with ID from URL exists, fill form with values
+				setRtyValues();
+			} catch(e) { // Invalid rectypeID, create empty form, and show error message
+				newRectypeCode = 2;
+			}
+		}
+		else {
+			newRectypeCode = 1; // No rectypeID given
+		}
+		if(newRectypeCode > 0) { // Create empty form
+			initializeEmptyForm();
+		}
+		if(newRectypeCode == 2) { // Give error message
+			document.getElementById("statusMsg").innerHTML = "<strong>Error: rectype could not be found. Clicking 'save' button will create a new rectype.</strong><br /><br />";
 		}
 	}
-	else {
-		newRectypeCode = 1; // No rectypeID given
-	}
-	if(newRectypeCode > 0) { // Create empty form
+
+	function initializeEmptyForm() {
 		document.getElementById("rty_ID").innerHTML= "<i>(will be generated)</i>";
 		document.getElementById("rty_ShowInLists").checked = 1;
 		getGroups();
@@ -139,10 +224,7 @@
 		statusDropdown.selectedIndex = 3; // Set 'Open' to default status value
 		document.getElementById("rectypeIcon").innerHTML = "<a href=\"/changeIcon.php\">change icon</a>";
 	}
-	if(newRectypeCode == 2) { // Give error message
-		document.getElementById("statusMsg").innerHTML = "<strong>Error: rectype could not be found. Clicking 'save' button will create a new rectype.</strong><br /><br />";
-	}
-	
+
 	function setRtyValues() {
 		document.title = "Recordtype: " + rectype[0];
 		getGroups();
@@ -168,6 +250,9 @@
 			}
 			document.getElementById("rty_ReferenceURL").value = rectype[11];
 			document.getElementById("rty_AlternativeRecEditor").value = rectype[12];
+
+			document.getElementById("rty_CanonicalTitleMask").value = rectype[5];
+			document.getElementById("rty_RecTypeGroupIDs").value = rectype[9];
 		}
 		getStatus();
 	}
@@ -184,7 +269,7 @@
 		optionApproved.text = "Approved";
 		optionPending.text = "Pending";
 		optionOpen.text = "Open";
-		
+
 		statusDropdown.onchange = function(){statusChange();};
 
 		if(rectype) {
@@ -228,9 +313,8 @@
 			toggleAll(false, true);
 		}
 	}
-	
+
 	// Create the dropdown menu with all possible types, and if an existing rectype is being editted, select the right value
-	var typesDropdown;
 	function getTypes() {
 		typesDropdown = document.createElement("select");
 		typesDropdown.options.add(optionNormal = document.createElement("option"));
@@ -256,8 +340,7 @@
 		}
 		document.getElementById("rty_Type").appendChild(typesDropdown);
 	}
-	
-	var groupDropdown;
+
 	function getGroups() {
 		groupDropdown = document.createElement("select");
 		var existingGroup = "";
@@ -283,7 +366,7 @@
 		if(existingGroup) {
 			groupDropdown[selectedIndex].selected = 1;
 		}
-		document.getElementById("rty_RecTypeGroupIDs").appendChild(groupDropdown);
+		document.getElementById("rty_RecTypeGroupIDsPreview").appendChild(groupDropdown);
 	}
 
 	// Toggle fields to disable. Is called when status is set to 'Reserved'. If changed = true, it means that the status is manually changed to reserved, so untill it is saved, it can be changed back. If it was reserved when starting the editRectype, keep it disabled
@@ -311,25 +394,21 @@
 			document.getElementById("rty_FlagAsFieldset").disabled = false;
 		}
 	}
-	
+
 	function editRecStructureAction() {
 		saveData();
 		editRecStructure();
 	}
-	
-	function saveAction() {
-		savaData();
-		// TODO: Close popup
-	}
-	
+
 	function saveData() {
-		// TODO: Save editted data, and create new rectype if necessary
+		keepOpen = true;
+		updateRectypeOnServer();
 	}
-	
+
 	function editRecStructure() {
-		top.HEURIST.util.popupURL(top, "http://heuristscholar.org/h3-ao/admin/structure/editRecStructure.html?rty_ID="+rectypeID, { // TODO: Change to top.HEURIST.basePath + "admin/structure/editRecStructure.html?rty_ID="+rectypeID
+		top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "admin/structure/editRecStructure.html?rty_ID="+rectypeID, {
 			"close-on-blur": false,
-			"no-resize": true, 
+			"no-resize": true,
 			height: 480,
 			width: 620,
 			callback: function(editedRecStructure) {
@@ -341,32 +420,215 @@
 			}
 		});
 	}
-	
+
 	function createPlural() {
 		document.getElementById("rty_Plural").value = (document.getElementById("rty_Name").value + 's');
 	}
 
 	// Validate value inserted into input field. In this case, make sure it's an integer
-	function validate(evt) {
-		var theEvent = evt || window.event;
-		var key = theEvent.keyCode || theEvent.which;
-		key = String.fromCharCode( key );
-		var regex = /[0-9]|\./;
-		if( !regex.test(key) ) {
-			theEvent.returnValue = false;
-			theEvent.preventDefault();
+	function checkIfInteger(evt) {
+		if((evt.keyCode) != 9) {
+			var theEvent = evt || window.event;
+			var key = theEvent.keyCode || theEvent.which;
+			key = String.fromCharCode(key);
+			var regex = /[0-9]|\./;
+			if( !regex.test(key) ) {
+				theEvent.returnValue = false;
+				theEvent.preventDefault();
+			}
 		}
+	}
+
+	function updateRectypeOnServer() {
+		var str = getUpdatedFields();
+/* 		alert("Stringified changes: " + str);  */
+		if(str != null) {
+			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+			var callback = updateResult;
+			var params = "method=saveRT&";
+			params += "data=" + str;
+			top.HEURIST.util.getJsonData(baseurl, callback, params);
+		} else {
+			alert("No changes were made");
+			if(!keepOpen) {
+				window.close(null);
+			}
+			else {
+				keepOpen = false;
+			}
+		}
+	}
+
+	var updateResult = function(context) {
+		top.HEURIST.rectypes.saveStatus = context;
+		if(!context) {
+			alert("An error occurred trying to contact the database");
+		}
+		var error = false;
+		if(!rectypeID || rectypeID == -1) { // New detail type created
+			for(var newRectype in context[0].common) {
+				try {
+					for(obj in context[0].common[0]) {
+						if(obj == "error") {
+							alert("An error occurred trying to create the recordtype: " + context[0].common[0][obj]);
+							error = true;
+						}
+					}
+				} catch(e) {
+				}
+				if(!error) {
+					status = context[0].common.toString();
+					splittedStatus = status.split(" ");
+					rectypeID = splittedStatus[1];
+					document.getElementById("rty_ID").innerHTML = rectypeID;
+					alert("Recordtype was succesfully saved with ID: " + rectypeID);
+					if(!keepOpen) {
+						window.close("succes");
+					} else {
+						keepOpen = false;
+					}
+				}
+			}
+		} else {
+			var statusIndex = 0;
+			while(statusIndex < context[0][rectypeID].common.length) {
+				statusMsg = context[0][rectypeID].common[statusIndex];
+				if(typeof(statusMsg) == "object") {
+					for(obj in context[0][rectypeID].common[statusIndex]) {
+						if(obj == "error") {
+							alert("An error occurred trying to edit the recordtype: " + context[0][rectypeID].common[statusIndex][obj]);
+							error = true;
+						}
+					}
+				}
+				statusIndex++;
+			}
+			if(!error) {
+				alert("Recordtype with ID " + rectypeID + " was succesfully saved");
+				if(!keepOpen) {
+					window.close("succes");
+				} else {
+					keepOpen = false;
+				}
+			}
+		}
+	}
+
+	function getUpdatedFields() {
+		updatedFields = [];
+		updatedDetails = [];
+		fromUItoArray(); //save all changes
+		if(rectypeID != null && updatedFields.length > 0) {
+			var k;
+
+			var oRectype = {rectype:{
+				colNames:{common:[], dtFields:[]},
+				defs: {}
+			}};
+			//fill array of updated fieldnames
+			var fieldNames = top.HEURIST.rectypes.typedefs.commomFieldNames;
+			var values = [];
+			for(k = 0; k < updatedFields.length; k++) {
+				oRectype.rectype.colNames.common.push(fieldNames[updatedFields[k]]);
+				values.push(updatedDetails[updatedFields[k]]);
+			}
+
+
+			if(rectypeID == -1) {
+				oRectype.rectype.defs[rectypeID] = [];
+				oRectype.rectype.defs[rectypeID].push({common:[],dtFields:[]});
+				for(val in values) {
+					oRectype.rectype.defs[rectypeID][0].common.push(values[val]);
+				}
+			} else {
+				oRectype.rectype.defs[rectypeID] = {};
+				oRectype.rectype.defs[rectypeID].common = [];
+				for(val in values) {
+					oRectype.rectype.defs[rectypeID].common.push(values[val]);
+				}
+			}
+
+			var str = YAHOO.lang.JSON.stringify(oRectype);
+
+			return str;
+		}
+		else {
+			return null;
+		}
+
+	}
+
+	var updatedFields = [];
+	var updatedDetails = [];
+	function fromUItoArray() {
+		if(!rectypeID || rectypeID == -1) { // New detail type, so save every field
+			rectypeID = -1;
+			var rectypeValues = [];
+		} else {
+			var rectypeValues = top.HEURIST.rectypes.typedefs[rectypeID].commonFields;
+		}
+		var fieldNames = top.HEURIST.rectypes.typedefs.commomFieldNames;
+
+		var index;
+		for(index = 0; index < fieldNames.length; index++) {
+			var fieldName = fieldNames[index];
+			var fieldNameElement = document.getElementById(fieldName);
+			var fieldNameElementValue = fieldNameElement.value;
+
+			if(index == 2 ) { // dropdown menu's. Can't get the value with element.value
+				fieldNameElementValue = typesDropdown.value;
+			} else if(index == 8) {
+				fieldNameElementValue = statusDropdown.value.toLowerCase();
+			}
+			if(index == 7) {
+				fieldNameElementValue = fieldNameElement.checked;
+				if(fieldNameElementValue) {
+					fieldNameElementValue = 1;
+				} else {
+					fieldNameElementValue = 0;
+				}
+			}
+			if(index == 10) {
+				fieldNameElementValue = fieldNameElement.checked;
+				if(fieldNameElementValue) {
+					fieldNameElementValue = 1;
+				} else {
+					fieldNameElementValue = 0;
+				}
+			}
+
+			if(rectypeValues[index] != fieldNameElementValue || rectypeID == -1) {
+				if(rectypeValues[index] == null && !fieldNameElementValue) { // Because if database value is DOM value is NULL, it doesn't enter that in input field
+				} else {
+					rectypeValues[index] = fieldNameElementValue;
+					updatedFields.push(index);
+					updatedDetails[index] = rectypeValues[index];
+				}
+			}
+		}
+	}
+
+	function viewEquivalences() {
+		alert("This function has not yet been implemented");
 	}
 
 	var EditPopup = (function () {
 		//public members
 		var that = {
 				close : function () {
-					var res = "Save these values";
-					window.close(res);
+					updateRectypeOnServer();
 				},
 				cancel : function () {
-					window.close(null);
+					fromUItoArray();
+					if(updatedFields.length > 0) {
+						var areYouSure = confirm("Changes were made. By cancelling, all changes will be lost. Are you sure?");
+						if(areYouSure) {
+							window.close(null);
+						}
+					}
+					else {
+						window.close(null);
+					}
 				}
 		};
 		return that;

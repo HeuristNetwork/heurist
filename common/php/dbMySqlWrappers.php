@@ -49,7 +49,7 @@ function mysql_connection_insert($database='', $server=HEURIST_DBSERVER_NAME) {
 }
 function mysql_connection_overwrite($database='', $server=HEURIST_DBSERVER_NAME) {
 /* User name and password for overwrite access - must allow writing to database */
-	if (! ADMIN_DBUSERNAME && ! ADMIN_DBUSERPSWD) { print "PLEASE SET USERNAME/PASSWORD for OVERWRITE in configIni.php\n"; exit(2); }
+ 	if (! ADMIN_DBUSERNAME && ! ADMIN_DBUSERPSWD) { print "PLEASE SET USERNAME/PASSWORD for OVERWRITE in configIni.php\n"; exit(2); }
 
 //	if (defined('use_alt_db')  &&  $database == 'heuristdb') $database = 'heuristdb_alt';
 
@@ -62,6 +62,26 @@ function mysql_connection_overwrite($database='', $server=HEURIST_DBSERVER_NAME)
 		mysql_query('set @logged_in_user_id = ' . get_user_id());
 
 	return $db;
+}
+
+/* artem */
+function mysqli_connection_overwrite($database='', $server=HEURIST_DBSERVER_NAME) {
+ 	if (! ADMIN_DBUSERNAME && ! ADMIN_DBUSERPSWD) { print "PLEASE SET USERNAME/PASSWORD for OVERWRITE in configIni.php\n"; exit(2); }
+
+	$mysqli = new mysqli($server, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $database);
+
+	/* check connection */
+	if (mysqli_connect_errno()) {
+    	printf("Connect failed: %s\n", mysqli_connect_error());
+    	die(mysqli_connect_error());
+	}
+
+	$mysqli->query('set character set "utf8"');
+	$mysqli->query('set names "utf8"');
+	if (function_exists('get_user_id'))
+		$mysqli->query('set @logged_in_user_id = ' . get_user_id());
+
+	return $mysqli;
 }
 
 

@@ -407,7 +407,7 @@ var termTree;
 
 			setDisabledTerms();
 			top.HEURIST.terms.selectedDisabled = disabledTermsList;
-
+			
 			createPreview(top.HEURIST.terms.selected,disabledTermsList.join(","));
 		});
 		selectedTermsTree.render();
@@ -418,17 +418,17 @@ var termTree;
 			selectedTermsTree.removeChildren(selectedTermsTree.getRoot()); // Reset the 'selected terms tree'
 			buildSelectedTermsTree(termTree.getRoot(), selectedTermsTree.getRoot()); // Rebuild the 'selected terms tree'
 			selectedTermsTree.render();
-
+			
 			termArray = createTermArray(selectedTermsTree.getRoot()); // Create an array with all selected terms in var 'termArray'
 
 			top.HEURIST.terms.selected = termArray;
-
+			
 			try { // In case no terms have been disabled yet
 				setDisabledTerms();
 				top.HEURIST.terms.selectedDisabled = disabledTermsList;
 			}
 			catch(e) { }
-
+			
 			createPreview(top.HEURIST.terms.selected,disabledTermsList.join(","));
 		});
 
@@ -488,6 +488,7 @@ function getUpdatedTerms() {
 	if(termsChanged || disabledChanged) {
 		var changedSelectedTerms = YAHOO.lang.JSON.stringify(top.HEURIST.terms.selected);
 		var changedDisabledTerms = YAHOO.lang.JSON.stringify(top.HEURIST.terms.selectedDisabled);
+
 		window.close(changedSelectedTerms, changedDisabledTerms);
 	} else {
 		window.close(null, null);

@@ -77,11 +77,25 @@
 				position:absolute;
 				z-index:0;
 			}
-			.yui-dt-dropdown {width:90px; border-style: none;}
+			.yui-dt-dropdown {width:70px; border-style: none;}
 
 			.yui-dt table {
     				width: 680px;
 			}
+			.bold_column{
+					font-weight: bold;
+			}
+.dtyField {
+	padding-bottom: 3px;
+	padding-top: 3px;
+	display: block;
+}
+.dtyLabel {
+	display: inline-block;
+	width: 150px;
+	text-align: right;
+	padding-right: 3px;
+}
 
 		</style>
 
@@ -100,7 +114,10 @@
 
 			<div>
 				<h2 id="header2" style="display: inline-block;">Field Types</h2>
-				<div style="float: right; padding-top: 15px"><label id="lblNoticeAboutChanges" style="display: inline-block;"></label>&nbsp;&nbsp;&nbsp;<input id="btnSave" type="button" value="Save Changes" style="float: right; display: none;"/></div>
+				<div style="float: right; padding-top: 15px"><label id="lblNoticeAboutChanges"
+						style="padding-left:3px; padding-right:3px; background-color:white; color:red; display: inline-block;"></label>
+						&nbsp;&nbsp;&nbsp;
+						<input id="btnSave" type="button" value="Save Changes" style="padding:2px; color:red; float: right; display: none;"/></div>
 			</div>
 
 			<!--  style="position:absolute; z-index:0;"
@@ -114,101 +131,214 @@
 			<div id="modelTabs" class="yui-navset yui-navset-top">
 
 				<script  type="text/javascript">
-					YAHOO.util.Event.addListener(window, "load", function() {
 
-						//var Dt = YAHOO.namespace('detailTypes');
+var g_version = "1";
 
-						//keep tablea and source - to avoid repeat load and for filtering
-						var arrTables = [];
-						var arrDataSources = [];
+var ManageDetailTypes = (
+	function() {
 
-						var colorBlue = false;
-						var currentTipId;
-						var needHideTip = true;
+	var _className = "ManageDetailTypes",
+		_ver = g_version,				//version number for data representation
+		showTimer,
+		hideTimer;
 
-						var _groups = [],  //for dropdown list
-							_deleted = []; //keep removed types to exclude on filtering
+	//keep tablea and source - to avoid repeat load and for filtering
+	var arrTables = [],
+		arrDataSources = [];
 
-						//object to send changes (visibility and group belong) for update on server
-						var _oDetailType = {detailtype:{
-									colNames:{common:['dty_ShowInLists','dty_DetailTypeGroupID']},
-									defs: {}
-									}};
+	var currentTipId;
+	var needHideTip = true;
 
-						var _lblNotice, //label that notify that some thing was changed - visibility of group
-							_btnSave,   //button to send changes to server side
-							_updatesCnt = 0;
+	var _groups = [],  //for dropdown list
+		_deleted = []; //keep removed types to exclude on filtering
 
-						var tabView = new YAHOO.widget.TabView();
-						var ind = 0;
-						var showTimer,hideTimer;
+	//object to send changes (visibility and group belong) for update on server
+	var _oDetailType = {detailtype:{
+						colNames:{common:['dty_ShowInLists','dty_DetailTypeGroupID']},
+						defs: {}
+						}};
 
-						YAHOO.widget.DataTable.prototype.fixedWidth = true;
+	var _lblNotice, //label that notify that some thing was changed - visibility of group
+		_btnSave,   //button to send changes to server side
+		_updatesCnt = 0; //number of affected field types
 
-						// init tabview with names of group
-						for (var dtg_ID in top.HEURIST.detailTypes.groups) {
+	var tabView = new YAHOO.widget.TabView();
 
-							var grpName = top.HEURIST.detailTypes.groups[dtg_ID].name;
+	//public members
+	var that = {
+		name : "App",
+		init: function(){
+			_init();
+		},
+		doGroupSave: function(){ _doGroupSave(); },
+		doGroupDelete: function(){ _doGroupDelete(); },
+		doGroupCancel: function(){ _doGroupCancel(); },
+		hasChanges: function(){ return  (_updatesCnt>0); }
+	}
 
-							_groups.push({value:dtg_ID, text:grpName});
+	return that;
 
-							tabView.addTab(new YAHOO.widget.Tab({
-								id: dtg_ID,
-								label: grpName,
-								content:
-								('<div>'+                   //for="filter"
-								'<div style="display:inline-block;"><label>Filter by name:</label>'+
-								'<input type="text" id="filter'+ind+'" value="">'+
-								'&nbsp;&nbsp;<input type="checkbox" id="filter'+ind+'vis" value="1" style="padding-top:5px;">&nbsp;Show visible only</div>'+
-								'<div style="float:right; text-align:right">'+
-								'<input type="button" id="btnAdd'+ind+'" value="Add Field Type"/></div></div>'+
-								'<div id="tabContainer'+dtg_ID+'"></div></div>')
-							}));
-
-							arrTables.push(null);
-							arrDataSources.push(null);
-							ind++;
-						} //for
-
-						//last tab for addition of new group
-						tabView.addTab(new YAHOO.widget.Tab({
-								id: "newGroup",
-								label: "+",
-								content:
-								('')
-								}));
-
-						tabView.appendTo("modelTabs");
-
-						//!!! initTabView();//initTabContent(tabView.getTab(0));
-
+	//
+	//
+	//
+	function _init()
+	{
+		var ind = 0;
 		//
-		// on changing of tab - create and fill datatable for particular group
-		//
-		function handleTabChange (e) {
+		// init tabview with names of group
+		for (var dtg_ID in top.HEURIST.detailTypes.groups) {
 
-			if(e.newValue.get("id")!="newGroup" && e.newValue!=e.prevValue)
-			{
-				initTabContent(e.newValue);
+			var grpName = top.HEURIST.detailTypes.groups[dtg_ID].name;
+			var grpDescription = top.HEURIST.detailTypes.groups[dtg_ID].description;
+			_addNewTab(ind, dtg_ID, grpName, grpDescription);
+			ind++;
+		} //for
+
+		tabView.addTab(new YAHOO.widget.Tab({
+			id: "newGroup",
+			label: "<label title='Create new group, edit or delete the existing group'>+</label>",
+			content:
+			('<div id="formGroupEditor" style="padding:40">'+
+		 	'<h3 style="width:100%;text-align:center">Create a new detail group or edit the existing one</h3><br/>'+
+						'<div class="dtyField"><label class="dtyLabel">Group:</label><select id="edGroupId" onchange="onGroupChange()"></select></div>'+
+						'<div class="dtyField"><label class="dtyLabel">Name:</label><input id="edName" style="width:300px"/></div>'+
+						'<div class="dtyField"><label class="dtyLabel">Descrption:</label><input id="edDescription" style="width:300px"/></div>'+
+				'<div style="text-align: center; margin:auto; padding-top:5;">'+
+					'<input id="btnSave" style="display:inline-block" type="button" value="Save" onclick="{ManageDetailTypes.doGroupSave()}" />'+
+					'<input id="btnCancel" type="button" value="Cancel" onclick="{ManageDetailTypes.doGroupCancel()}" />'+
+					'<input id="btnDelete" type="button" value="Delete" onclick="{ManageDetailTypes.doGroupDelete()}" />'+
+				'</div>'+
+		 		'</div>')
+			}));
+
+		tabView.appendTo("modelTabs");
+
+		var bookmarkedTabViewState = YAHOO.util.History.getBookmarkedState("tabview");
+		var initialTabViewState = bookmarkedTabViewState || "tab0";
+
+		YAHOO.util.History.register("tabview", initialTabViewState, function (state) {
+				tabView.set("activeIndex", state.substr(3));  //restre the index from history
+		});
+
+		YAHOO.util.History.onReady(function () {
+						var currentState;
+
+						initTabView();
+
+						currentState = YAHOO.util.History.getCurrentState("tabview");
+
+						if(currentState && currentState.length>3) {
+									tabView.set("activeIndex", currentState.substr(3));  //restore active tab from history
+								}
+						});
+
+		try {
+				YAHOO.util.History.initialize("yui-history-field", "yui-history-iframe");
+		} catch (e) {
+				initTabView();
+		}
+
+
+	}//end _init
+
+	//
+	// adds new tab and into 3 spec arrays
+	//
+	function _addNewTab(ind, grpID, grpName, grpDescription)
+	{
+				if(grpDescription==undefined || grpDescription==""){
+					grpDescription = "Describe this group!";
+				}
+
+					_groups.push({value:grpID, text:grpName});
+
+					tabView.addTab(new YAHOO.widget.Tab({
+					id: grpID,
+					label: "<label title='"+grpDescription+"'>"+grpName+"</label>",
+					content:
+					('<div>'+                   //for="filter"
+					'<div style="display:inline-block;"><label>Filter by name:</label>'+
+					'<input type="text" id="filter'+ind+'" value="">'+
+					'&nbsp;&nbsp;<input type="checkbox" id="filter'+ind+'vis" value="1" style="padding-top:5px;">&nbsp;Show active only</div>'+
+					'<div style="float:right; text-align:right">'+
+					'<input type="button" id="btnAdd'+ind+'" value="Add Field Type"/>'+
+					'</div></div>'+
+					'<div id="tabContainer'+grpID+'"></div></div>')
+
+					}), ind);
+
+					arrTables.push(null);
+					arrDataSources.push(null);
+	}
+
+	//
+	// on changing of tab - create and fill datatable for particular group
+	//
+	function _handleTabChange (e) {
+
+		hideTimer = null;
+		needHideTip = true;
+		_hideToolTip();
+
+		var id = e.newValue.get("id");
+		if(id=="newGroup"){
+			//fill combobox on edit group form
+			var sel = YAHOO.util.Dom.get('edGroupId');
+
+			//celear selection list
+			while (sel.length>0){
+				sel.remove(0);
 			}
+						var option = document.createElement("option");
+							option.text = "new group";
+							option.value = "-1";
+						try {
+							// for IE earlier than version 8
+							sel.add(option, sel.options[null]);
+						}catch (e){
+							sel.add(option,null);
+						}
+
+
+			for (var i in _groups)
+			if(i!=undefined){
+
+
+						var option = document.createElement("option");
+							option.text = _groups[i].text;
+							option.value = _groups[i].value;
+						try {
+							// for IE earlier than version 8
+							sel.add(option, sel.options[null]);
+						}catch (e){
+							sel.add(option,null);
+						}
+			} // for
+
+			YAHOO.util.Dom.get('edName').value = "";
+			YAHOO.util.Dom.get('edDescription').value = "";
+
+		}else if (e.newValue!=e.prevValue)
+		{
+			initTabContent(e.newValue);
 		}
+	}// end _handleTabChange
 
-		//
-		// assign event handler
-		//
-		function initTabView () {
+	//
+	//add listener for tabview
+	//
+	function initTabView () {
+		tabView.addListener("activeTabChange", _handleTabChange);
 
-				tabView.addListener("activeTabChange", handleTabChange);
+		//init the content for the first tab (table and buttons)
+		tabView.set("activeIndex", 0);
+	}
 
-				//init the content for the first tab (table and buttons)
-				tabView.set("activeIndex", 0);
-		}
-
-		// =============================================== START DATATABLE INIT
-		//
-		// create the content of tab: buttons and datatable
-		//
-		function initTabContent(tab){
+	// =============================================== START DATATABLE INIT
+	//
+	// create the content of tab: buttons and datatable
+	//
+	function initTabContent(tab){
 
 							var dtg_ID = tab.get('id');
 							//alert('init>>>>'+dtg_ID);
@@ -218,7 +348,7 @@
 							var currentTabIndex = tabView.get('activeIndex');
 							var dt = arrTables[currentTabIndex];
 
-							if(dt==undefined || dt==null){
+	if(dt==undefined || dt==null){
 
 								var arr = [];
 
@@ -304,17 +434,14 @@
 								var myColumnDefs = [
 								{ key: "id", label: "<u>Code</u>", sortable:true, width:20, className:'left' },
 								{ key: "vis", label: "Vis", sortable:false, width:20, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
-								{ key: "order", label: "<u>Order</u>", sortable:true, width:20, className:'left' },
-								{ key: "grp_id", label: "Group", sortable:false, width:90,
-									formatter:YAHOO.widget.DataTable.formatDropdown, dropdownOptions:_groups},
-//									editor: new YAHOO.widget.DropdownCellEditor({ dropdownOptions:_groups}) },
-//									formatter: function(elLiner, oRecord, oColumn, oData){
-//elLiner.innerHTML = 						} },
-								{ key: "name", label: "<u>Name</u>", sortable:true },
+								{ key: "order", hidden:true },
+								{ key: "name", label: "<u>Name</u>", sortable:true, className:'bold_column' },
 								{ key: "help", label: "Help", sortable:false},
 								{ key: "type", label: "<u>Data Type</u>", sortable:true },
 								{ key: "status", label: "<u>Status</u>", sortable:true },
 								{ key: "description",   hidden:true},
+								{ key: "grp_id", label: "Group", sortable:false, width:90,
+									formatter:YAHOO.widget.DataTable.formatDropdown, dropdownOptions:_groups},
 								{ key: null, label: "Edit", sortable:false, width:20, formatter: function(elLiner, oRecord, oColumn, oData){
 										elLiner.innerHTML = '<a href="#edit"><img src="../../common/images/edit_icon.png" width="16" height="16" border="0" title="Edit" /><\/a>'} },
 								{ key: null, label: "Del", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
@@ -401,6 +528,19 @@
 							arrTables[newTabIndex] = null; //.addRow(record.getData(), 0);
 						}
 
+						//@ todo
+						// show flashed message
+						needHideTip = true;
+						var my_tooltip = $("#toolTip2");
+						my_tooltip.mouseover(null);
+						my_tooltip.mouseout(null);
+
+						var xy = [$(window).width()/2 - 100, $(window).height()/2 - 50 + $(window).scrollTop()];
+						_showToolTipAt(my_tooltip, xy);
+						my_tooltip.html("<b>AAAAAAAAA</b>");
+						hideTimer = null;
+						hideTimer = window.setTimeout(_hideToolTip, 4000);
+
 						//remove from this table and refresh another one
 						window.setTimeout(function() {
 										dt.deleteRow(record.getId(), -1);
@@ -469,6 +609,7 @@
 			return;//debug
 
 			// TODO: Change base URL
+			//var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 			var callback = _updateResult;
 			var params = "method=saveDT&";
@@ -501,20 +642,6 @@
 										var xy = [parseInt(oArgs.event.clientX,10) + 10 ,parseInt(oArgs.event.clientY,10) + 10 ];
 										var textTip = '<p>'+description+'</p>';
 
-										/*     yui tooltip does not work :(
-										toolTip.setBody(description);
-										toolTip.cfg.setProperty('xy',xy);
-										toolTip.render();//.show();
-										*/
-										/*
-										showTimer = window.setTimeout(function() {
-										tt.setBody(description);
-										tt.cfg.setProperty('xy',xy);
-										tt.show();
-										hideTimer = window.setTimeout(function() {
-										tt.hide();
-										},5000);
-										},500);*/
 									}else if(column!=null && column.key == 'usage') {
 										var record = this.getRecord(target);
 										var dty_ID = description = record.getData('id');
@@ -527,7 +654,7 @@
 											//find all records that reference this type
 											var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
 											if(aUsage != undefined){
-												var textTip = "<p><ul>";
+												var textTip = '<div style="padding-left:20px;padding-top:4px">Used in the following record types</div><ul>';
 												for (var k in aUsage) {
 													textTip = textTip + "<li><a href='editRecordType.html'>"+top.HEURIST.rectypes.names[k]+"</a></li>";
 												}
@@ -547,43 +674,19 @@
 										my_tooltip.mouseover(clearHideTimer2);
 										my_tooltip.mouseout(hideToolTip2);
 
-										var border_top = $(window).scrollTop();
-										var border_right = $(window).width();
-										var border_height = $(window).height();
-										var left_pos;
-										var top_pos;
-										var offset = 15;
-										if(border_right - (offset *2) >= my_tooltip.width() +  xy[0]) {
-											left_pos = xy[0]+offset;
-										} else {
-											left_pos = border_right-my_tooltip.width()-offset;
-										}
+										_showToolTipAt(my_tooltip, xy);
 
-										if((border_top + offset *2) >=  xy[1] - my_tooltip.height()) {
-											top_pos = border_top + offset + xy[1]; //
-										} else {
-											top_pos = border_top + xy[1] - my_tooltip.height()-offset;
-										}
-										if(top_pos + my_tooltip.height() > border_top+border_height){
-											top_pos	= border_top + border_height - my_tooltip.height()-5;
-										}
-
-
-										//var lft = my_tooltip.css('left');
-										my_tooltip.css( {
-											left:left_pos+'px', top:top_pos+'px'
-										});
 										//lft = my_tooltip.css('left');
 										my_tooltip.html(textTip);
-										hideTimer = window.setTimeout(hideToolTip, 5000);
+										hideTimer = window.setTimeout(_hideToolTip, 5000);
 									}
 									else if(forceHideTip)
 									{
-										hideToolTip();
+										_hideToolTip();
 									}
 				});
 				dt.on('cellMouseoutEvent', function (oArgs) {
-									hideTimer = window.setTimeout(hideToolTip, 2000);
+									hideTimer = window.setTimeout(_hideToolTip, 2000);
 				});
 
 				function hideToolTip2(){
@@ -592,22 +695,6 @@
 				function clearHideTimer2(){
 					needHideTip = false;
 					clearHideTimer();
-				}
-				function hideToolTip(){
-					if(needHideTip){
-						currentTipId = null;
-						clearHideTimer();
-						var my_tooltip = $("#toolTip2");
-							my_tooltip.css( {
-							left:"-9999px"
-							});
-					}
-				}
-				function clearHideTimer(){
-						if (hideTimer) {
-							window.clearTimeout(hideTimer);
-							hideTimer = 0;
-						}
 				}
 
 								arrTables[currentTabIndex] = dt;
@@ -639,10 +726,94 @@
 								});    */
 
 
-							}
+	} //if(dt==undefined || dt==null)
 	}//initTabContent =============================================== END DATATABLE INIT
 
-						function _onAddEditFieldType(dty_ID, dtg_ID){
+	//
+	//
+	function clearHideTimer(){
+			if (hideTimer) {
+				window.clearTimeout(hideTimer);
+				hideTimer = 0;
+			}
+	}
+	function _hideToolTip(){
+					if(needHideTip){
+						currentTipId = null;
+						clearHideTimer();
+						var my_tooltip = $("#toolTip2");
+							my_tooltip.css( {
+							left:"-9999px"
+							});
+					}
+	}
+
+	//
+	// prevents out of border
+	//
+	function _showToolTipAt(_tooltip, xy){
+
+										var border_top = $(window).scrollTop();
+										var border_right = $(window).width();
+										var border_height = $(window).height();
+										var left_pos;
+										var top_pos;
+										var offset = 5;
+										if(border_right - (offset *2) >= _tooltip.width() +  xy[0]) {
+											left_pos = xy[0]+offset;
+										} else {
+											left_pos = border_right-_tooltip.width()-offset;
+										}
+
+										if((border_top + offset *2) >=  xy[1] - _tooltip.height()) {
+											top_pos = border_top + offset + xy[1]; //
+										} else {
+											top_pos = border_top + xy[1] - _tooltip.height()-offset;
+										}
+										if(top_pos + _tooltip.height() > border_top+border_height){
+											top_pos	= border_top + border_height - _tooltip.height()-5;
+										}
+
+
+										//var lft = _tooltip.css('left');
+										_tooltip.css( {
+											left:left_pos+'px', top:top_pos+'px'
+										});
+	}
+
+	//
+	// filtering by name
+	// listenter is activated along with dataTable creation
+	//
+	var filterTimeout = null;
+	function updateFilter() {
+							// Reset timeout
+							filterTimeout = null;
+
+							var currentTabIndex = tabView.get('activeIndex');
+							var dtable = arrTables[currentTabIndex];
+							var dsource = arrDataSources[currentTabIndex];
+
+							// Reset sort
+							var state = dtable.getState();
+							state.sortedBy = {key:'name', dir:YAHOO.widget.DataTable.CLASS_ASC};
+
+							var filterval = YAHOO.util.Dom.get('filter'+currentTabIndex).value;
+							var filtervis = YAHOO.util.Dom.get('filter'+currentTabIndex+'vis').checked?1:0;
+
+							// Get filtered data
+							dsource.sendRequest(filterval+'|'+filtervis,{
+								success : dtable.onDataReturnInitializeTable,
+								failure : dtable.onDataReturnInitializeTable,
+								scope   : dtable,
+								argument : { pagination: { recordOffset: 0 } } // to jump to page 1
+							});
+	}
+
+	//
+	// listener of add button
+	//
+	function _onAddEditFieldType(dty_ID, dtg_ID){
 
 							var url = top.HEURIST.basePath + "admin/structure/editDetailType.html";
 							if(dty_ID>0){
@@ -665,91 +836,170 @@
 												//setTimeout(function() { }, 0);
 											}
 										});
-						}
+	}
+
+	//
+	// managing goups
+	//
+	function _doGroupSave()
+	{
+		var sel = YAHOO.util.Dom.get('edGroupId'),
+			name = YAHOO.util.Dom.get('edName').value,
+			description = YAHOO.util.Dom.get('edDescription').value,
+			grpID = sel.options[sel.selectedIndex].value,
+			grp; //object in HEURIST
+
+		var orec = {dettypegroups:{
+					colNames:['dtg_Name','dtg_Description'],
+						defs: {}
+					}};
 
 
-						/*
+		//define new or exisiting
+		if(grpID<0) {
+			grp = {name: name, description:description};
+			orec.dettypegroups.defs[-1] = [];
+			orec.dettypegroups.defs[-1].push({values:[name, description]});
+		}else{
+			//for existing - rename
+			grp = top.HEURIST.detailTypes.groups[grpID];
+			grp.name = name;
+			grp.description = description;
+			orec.dettypegroups.defs[grpID] = [name, description];
+		}
 
-						var toolTip = new YAHOO.widget.Tooltip("myTooltip", {
-						showDelay:5000
-						});
+		//top.HEURIST.detailTypes.groups[grpID] = grp;
+		var str = YAHOO.lang.JSON.stringify(orec);
 
-						var panelEdit = new YAHOO.widget.Panel("panelDtEdit", {
-						width: "400px",
-						fixedcenter: true,
-						constraintoviewport: true,
-						underlay: "shadow",
-						close: true,
-						//modal: true,
-						visible: false,
-						draggable: true
-						});
-						panelEdit.render(YAHOO.util.Dom.get('modelTabs'));
-						*/
+//alert(str);
 
-						//
-						// filtering by name
-						// listenter is activated along with dataTable creation
-						//
-						var filterTimeout = null;
-						var updateFilter  = function () {
-							// Reset timeout
-							filterTimeout = null;
+		if(str!=null){
+			//http://heuristscholar.org/h3-sw/
+			var baseurl = "http://heuristscholar.org/h3-ao/admin/structure/saveStructure.php"
+			var callback = _updateOnSave;
+			var params = "method=saveDTG&";
+			params += "data=" + str;
 
-							var currentTabIndex = tabView.get('activeIndex');
-							var dtable = arrTables[currentTabIndex];
-							var dsource = arrDataSources[currentTabIndex];
+			top.HEURIST.util.getJsonData(baseurl, callback, params)
+		}
 
-							// Reset sort
-							var state = dtable.getState();
-							state.sortedBy = {key:'name', dir:YAHOO.widget.DataTable.CLASS_ASC};
+		//make this tab active
+		function _updateOnSave(context){
+			//for new - add new tab
+			if(context['0'].error!=undefined){
+				alert(context['0'].error);
+			}else{
+				var ind;
+				top.HEURIST.detailTypes = context['1'];
+				if(grpID<0){
+					grpID = context['0'].result;
+					ind = _groups.length;
+					_addNewTab(ind, grpID, name, description)
+				}else{
+					//update label
+					for (ind in _groups)
+					if(ind!=undefined && _groups[ind].value==grpID){
+						var tab = tabView.getTab(ind);
+						var el = tab._getLabelEl();
+						el.innerHTML = "<label title='"+description+"'>"+name+"</label>";
+						_groups[ind].text = name;
+						break;
+					}
+				}
+				tabView.set("activeIndex", ind);
+			}
+		}
+	}
+	//
+	//
+	function _doGroupDelete(){
 
-							var filterval = YAHOO.util.Dom.get('filter'+currentTabIndex).value;
-							var filtervis = YAHOO.util.Dom.get('filter'+currentTabIndex+'vis').checked?1:0;
+		var sel = YAHOO.util.Dom.get('edGroupId');
+		var grpID = sel.options[sel.selectedIndex].value;
 
-							// Get filtered data
-							dsource.sendRequest(filterval+'|'+filtervis,{
-								success : dtable.onDataReturnInitializeTable,
-								failure : dtable.onDataReturnInitializeTable,
-								scope   : dtable,
-								argument : { pagination: { recordOffset: 0 } } // to jump to page 1
-							});
-						};
+		if(grpID<0) return;
 
+		var grp = top.HEURIST.detailTypes.groups[grpID]
 
-						(function () {
+		if(grp.types!=undefined)
+		{
+			alert("There are types that belong to this group. Impossible to delete such group");
+		}else{
+				var r=confirm("Confirm the deletion of group '"+grp.name+"'");
+				if (r) {
+					var ind;
+					//
+					function _updateAfterDelete(context) {
+								if(context.error!=undefined){
+									// alert(context.error);
+								}else{
+									//remove tab from tab view and select 0 index
+									_groups.splice(ind, 1);
+									arrTables.splice(ind, 1);
+									arrDataSources.splice(ind, 1);
 
-							var bookmarkedTabViewState = YAHOO.util.History.getBookmarkedState("tabview");
-							var initialTabViewState = bookmarkedTabViewState || "tab0";
-
-							//var tabView;
-
-							YAHOO.util.History.register("tabview", initialTabViewState, function (state) {
-								tabView.set("activeIndex", state.substr(3));  //restre the index from history
-							});
-
-							YAHOO.util.History.onReady(function () {
-								var currentState;
-
-								initTabView();
-
-								currentState = YAHOO.util.History.getCurrentState("tabview");
-
-								//alert('!!!!'+currentState);
-								if(currentState && currentState.length>3) {
-									tabView.set("activeIndex", currentState.substr(3));  //restore active tab from history
+									tabView.removeTab(tabView.getTab(ind));
+									tabView.set("activeIndex", 0);
+									top.HEURIST.detailTypes = context.detailTypes;
 								}
-							});
+					}
 
-							try {
-								YAHOO.util.History.initialize("yui-history-field", "yui-history-iframe");
-							} catch (e) {
-								initTabView();
-							}
 
-						})();
+					//1. find index of tab to be removed
+					for (ind in _groups)
+					if(ind!=undefined && _groups[ind].value==grpID){
 
-					});
+						//var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+						var baseurl = "http://heuristscholar.org/h3-ao/admin/structure/saveStructure.php"
+						var callback = _updateAfterDelete;
+						var params = "method=deleteDTG&";
+						params += "dtgID=" + grpID;
+						top.HEURIST.util.getJsonData(baseurl, callback, params);
+
+						break;
+					}
+
+				}
+		}
+
+	}
+	//
+	// just hide tab and back to previos one
+	function _doGroupCancel(){
+		tabView.set("activeIndex", tabView.get('activeIndex'));
+	}
+
+
+})();
+
+YAHOO.util.Event.addListener(window, "load", ManageDetailTypes.init);
+window.onbeforeunload = onbeforeunload;
+
+//
+//general functions
+//
+function onGroupChange() {
+		var sel = YAHOO.util.Dom.get('edGroupId'),
+			edName = YAHOO.util.Dom.get('edName'),
+			edDescription = YAHOO.util.Dom.get('edDescription'),
+			grpID = sel.options[sel.selectedIndex].value;
+
+		if(grpID<0){
+			edName.value = "";
+			edDescription.value = "";
+		}else{
+			edName.value = top.HEURIST.detailTypes.groups[grpID].name;
+			edDescription.value = top.HEURIST.detailTypes.groups[grpID].description;
+		}
+
+}
+// prevents exit if there are changes
+//
+function onbeforeunload() {
+		var changed = ManageDetailTypes.hasChanges();
+		if (changed) return "You have made changes.  If you continue, all changes will be lost.";
+}
+
 
 				</script>
 			</div>

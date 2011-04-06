@@ -611,11 +611,11 @@ function getRectypeStructureFieldColNames(){
 					"rst_DisplayDetailTypeGroupID",
 					"rst_FilteredJsonTermIDTree",
 					"rst_PtrFilteredIDs",
-					"rst_AdditionalHeaderTermIDs",
+					"rst_TermIDTreeNonSelectableIDs",
 					"rst_CalcFunctionID",
 					"rst_Status",
 					"rst_OrderForThumbnailGeneration",
-					"dty_HeaderTermIDs",
+					"dty_TermIDTreeNonSelectableIDs",
 					"dty_FieldSetRectypeID");
 }
 
@@ -635,11 +635,11 @@ function getRectypeFields($rt_id) {
 						"if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID) as rst_DisplayDetailTypeGroupID",
 						"if(rst_FilteredJsonTermIDTree is not null,rst_FilteredJsonTermIDTree,dty_JsonTermIDTree) as rst_FilteredJsonTermIDTree",
 						"if(rst_PtrFilteredIDs is not null,rst_PtrFilteredIDs,dty_PtrTargetRectypeIDs) as rst_PtrFilteredIDs",
-						"rst_AdditionalHeaderTermIDs",
+						"rst_TermIDTreeNonSelectableIDs",
 						"rst_CalcFunctionID",
 						"rst_Status",
 						"rst_OrderForThumbnailGeneration",
-						"dty_HeaderTermIDs",
+						"dty_TermIDTreeNonSelectableIDs",
 						"dty_FieldSetRectypeID");
 
 	// get rec Structure info ordered by the detailType Group order, then by recStruct display order and then by ID in recStruct incase 2 have the same order
@@ -693,18 +693,26 @@ function getAllRectypeStructures() {
 						"if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID) as rst_DisplayDetailTypeGroupID",
 						"if(rst_FilteredJsonTermIDTree is not null,rst_FilteredJsonTermIDTree,dty_JsonTermIDTree) as rst_FilteredJsonTermIDTree",
 						"if(rst_PtrFilteredIDs is not null,rst_PtrFilteredIDs,dty_PtrTargetRectypeIDs) as rst_PtrFilteredIDs",
-						"rst_AdditionalHeaderTermIDs",
+						"rst_TermIDTreeNonSelectableIDs",
 						"rst_CalcFunctionID",
 						"rst_Status",
+						"rst_MayModify",
 						"rst_OrderForThumbnailGeneration",
-						"dty_HeaderTermIDs",
+						"dty_TermIDTreeNonSelectableIDs",
 						"dty_FieldSetRectypeID");
 
 	// get rec Structure info ordered by the detailType Group order, then by recStruct display order and then by ID in recStruct incase 2 have the same order
-	$res = mysql_query("select ".join(",", $colNames)." from defRecStructure
-															left join defDetailTypes on rst_DetailTypeID = dty_ID
-															left join defDetailTypeGroups on dtg_ID = if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID)
-														order by rst_RecTypeID, dtg_Order, dtg_Name,  rst_DisplayOrder, rst_ID");
+	$query = "select ".join(",", $colNames)." from defRecStructure
+left join defDetailTypes on rst_DetailTypeID = dty_ID
+left join defDetailTypeGroups on
+		dtg_ID = if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID)
+				order by rst_RecTypeID, dtg_Order, dtg_Name,  rst_DisplayOrder, rst_ID";
+
+error_log(">>>>>>>>>>>>>");
+error_log(">".$query);
+
+	$res = mysql_query($query);
+
 	$rtStructs = array('groups' => getRectypeGroups(),
 						'names' => array(),
 						'pluralNames' => array(),
@@ -745,7 +753,7 @@ function getRectypeGroups() {
 	$rtGroups = array();
 	$res = mysql_query("select * from defRecTypeGroups order by rtg_Order, rtg_Name");
 	while ($row = mysql_fetch_assoc($res)) {
-		$rtGroups[$row["rtg_ID"]] = array('name' => $row["rtg_Name"]);
+		$rtGroups[$row["rtg_ID"]] = array('name' => $row["rtg_Name"], 'description' => $row["rtg_Description"]);
 	}
 	return $rtGroups;
 }
@@ -812,9 +820,9 @@ function getDetailTypeColNames() {
 					"dty_ShowInLists",
 					"dty_Status",
 					"dty_DetailTypeGroupID",
-					"dty_FieldSetRecTypeID",
+					"dty_FieldSetRectypeID",
 					"dty_JsonTermIDTree",
-					"dty_HeaderTermIDs",
+					"dty_TermIDTreeNonSelectableIDs",
 					"dty_PtrTargetRectypeIDs",
 					"dty_ID");
 }
@@ -833,9 +841,12 @@ function getAllDetailTypeStructures() {
 						'usageCount' => getDetailTypeUsageCount(),
 						'typedefs' => array('commomFieldNames' => getDetailTypeColNames()));
 
-	$res = mysql_query("select dty_ID, dtg_ID, dtg_Name, ".join(",", getDetailTypeColNames())." from defDetailTypes
+	$query = "select dty_ID, dtg_ID, dtg_Name, ".join(",", getDetailTypeColNames())." from defDetailTypes
 							left join defDetailTypeGroups  on dtg_ID = dty_DetailTypeGroupID
-							order by dtg_Order, dtg_Name, dty_OrderInGroup, dty_Name");
+							order by dtg_Order, dtg_Name, dty_OrderInGroup, dty_Name";
+
+	$res = mysql_query($query);
+
 
 	while ($row = mysql_fetch_row($res)) {
 			$dtStructs['groups'][$row[1]]['types'][$row[0]] = $row[8];
@@ -876,7 +887,7 @@ function getDetailTypeGroups() {
 	$dtGroups = array();
 	$res = mysql_query("select * from defDetailTypeGroups order by dtg_Order, dtg_Name");
 	while ($row = mysql_fetch_assoc($res)) {
-		$dtGroups[$row["dtg_ID"]] = array( 'name' => $row["dtg_Name"]);
+		$dtGroups[$row["dtg_ID"]] = array( 'name' => $row["dtg_Name"], 'description' => $row["dtg_Description"] );
 	}
 	return $dtGroups;
 }

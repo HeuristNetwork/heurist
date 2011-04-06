@@ -70,11 +70,16 @@
 .depth7 {
 	margin-left: 70px;
 }
+.actionButtons {
+	padding-left: 430px;
+}
 </style>
 
 </head>
 
 <body>
+<!-- <body class="popup editFieldType"> -->
+
 <script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
 <script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json.js"></script>
 
@@ -85,7 +90,6 @@
 
 <div style="width:680;margin:auto;">
 
-<!--script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script-->
 <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
 <script	type="text/javascript">
 
@@ -97,6 +101,9 @@
 			if(hash[0] == "detailTypeID") {
 				var detailTypeID = hash[1]; // Get detailtype ID from URL
 			}
+			else if(hash[0] == "groupID") {
+				var defaultGroupID = hash[1]; // Get selected tab (group) from URL
+			}
 		}
 	}
 	catch(e) {} // No detailTypeID, so give empty form to create a new one
@@ -105,65 +112,151 @@
 <br />
 <div id="statusMsg"></div>
 <div id="detailTypeValues" style="{padding:10px;}" >
-	<div class="dtyField"><label class="dtyLabel" for="dty_ID">Code:</label><label id="dty_ID"></label></div>
-	<div class="dtyField"><label class="dtyLabel" for="dty_Name">Standard name:*</label><input id="dty_Name" maxlength="255" /></div>
-	<div class="helpText"><label>The name the recordtype should have</label></div>
-	<div class="dtyField"><label class="dtyLabel" for="dty_HelpText">Default help text:*</label><input id="dty_HelpText" maxlength="255" style="width:400;"/></div>
-	<div class="helpText"><label>The text a user will see in front of the field</label></div>
-	<div class="dtyField"><label class="dtyLabel" for="dty_ExtendedDescription">Description:</label><textarea maxlength="5000" id="dty_ExtendedDescription" rows="3" style="width:400;"></textarea></div>
-	<div class="helpText"><label>An advanced description, describing the field</label></div>
-	<div class="dtyField"><label class="dtyLabel" for="dty_DetailTypeGroupID">Display group:</label><div class="dtyValue" id="dty_DetailTypeGroupID"></div></div></div>
-	<div class="helpText"><label>The group to which this rectype should belong</label></div>
-	<div class="dtyField"><label class="dtyLabel" for="dty_OrderInGroup">Order in group:</label><input onkeypress="validate(event)" maxlength="3" id="dty_OrderInGroup" style="width:30;"/></div>
-	<div class="helpText"><label>Whereabout the rectype should be shown in its group</label></div>
-	<div class="dtyField"><label class="dtyLabel" for="dty_Status">Status:</label><div class="dtyValue" id="dty_Status"></div></div>
-	<div class="helpText"><label>The rectype's status. 'Reserverd' can not be changed, 'Open' is normal</label></div>
-	<div class="dtyField"><label class="dtyLabel" for="dty_ShowInLists">Visible to end-user:</label><input id="dty_ShowInLists" type="checkbox"/></div>
-	<div class="helpText"><label>Wether the user should be able to see this field</label></div>
-	<div class="dtyField"><label class="dtyLabel" for="dty_Type">Data type:</label><div class="dtyValue" id="dty_Type"></div></div>
-	<div class="helpText"><label>The type of data this rectype accepts</label></div>
-	<div class="dtyHiddenField" id="dtyFieldSetField"><label class="dtyLabel" for="dty_FieldSetRecTypeID">Fieldset rectype:</label><div class="dtyValue" id="dty_FieldSetRecTypeID"></div></div>
-	<div class="dtyHiddenField" id="fieldSetHelpText"><div class="helpText"><label>The recordtype that describes this fieldset</label></div></div>
-	<div class="dtyHiddenField" id="dtyTermTreeField"><label class="dtyLabel" for="dty_JsonTermIDTreePreview">Vocabulary:</label><div class="dtyValue" id="dty_JsonTermIDTreePreview"><div id="termsPreview" class="terms"></div> <input type="button" value="Change vocabulary" id="showTermSelectionWindow" onclick="showTermSelectionWindow()" class="terms" /></div></div>
-	<div class="dtyHiddenField" id="termTreeHelpText"><div class="helpText"><label>The terms which define this enum/relmarker</label></div></div>
-	<div class="dtyHiddenField" id="dtyPointerField"><label class="dtyLabel" for="dty_PtrTargetRectypeIDs">Pointer target (rectype ID):</label><div class="dtyValue" id="dty_PtrTargetRectypeIDs"></div></div>
-	<div class="dtyHiddenField" id="pointerHelpText"><div class="helpText"><label>The relmarker this rectype should point to</label></div></div>
-	<div class="dtyField"><input id="dty_JsonTermIDTree" /></div>
-	<div class="dtyField"><input id="dty_HeaderTermIDs" /></div>
+	<div class="dtyField">
+		<label class="dtyLabel" for="dty_ID">Code:</label>
+		<label id="dty_ID"></label>
+	</div>
+	<div class="dtyField">
+		<label class="dtyLabel" for="dty_Name">Standard name:*</label>
+		<input id="dty_Name" style="width:200;" maxlength="255" />
+		<div class="helpText">
+			<label>The name the recordtype should have</label>
+		</div>
+	</div>
+	<div class="dtyField">
+		<label class="dtyLabel" for="dty_HelpText">Default help text:*</label>
+		<input id="dty_HelpText" maxlength="255" style="width:400;"/>
+		<div class="helpText">
+			<label>The text a user will see in front of the field</label>
+		</div>
+	</div>
+	<div class="dtyField">
+		<label class="dtyLabel" style="vertical-align:top" for="dty_ExtendedDescription">Description:</label>
+		<textarea cols="200" id="dty_ExtendedDescription" rows="3" style="width:400;"></textarea>
+		<div class="helpText">
+			<label>An advanced description, describing the field</label>
+		</div>
+	</div>
+	<div class="dtyField">
+		<label class="dtyLabel" for="dty_DetailTypeGroupID">Display group:</label>
+		<div class="dtyValue" id="dty_DetailTypeGroupID"></div>
+		<div class="helpText">
+			<label>The group to which this rectype should belong</label>
+		</div>
+	</div>
+
+	<div class="dtyField" style="display:none">
+		<label class="dtyLabel" for="dty_OrderInGroup">Order in group:</label>
+		<input onkeypress="checkIfInteger(event)" maxlength="3" id="dty_OrderInGroup" style="width:30;"/>
+		<div class="helpText" style="display:none">
+			<label>Whereabout the rectype should be shown in its group</label>
+		</div>
+	</div>
+
+	<div class="dtyField">
+		<label class="dtyLabel" for="dty_Status">Status:</label>
+		<div class="dtyValue" id="dty_Status"></div>
+		<div class="helpText">
+			<label>The rectype's status. 'Reserverd' can not be changed, 'Open' is normal</label>
+		</div>
+	</div>
+	<div class="dtyField">
+		<label class="dtyLabel" for="dty_ShowInLists">Visible to end-user:</label>
+		<input id="dty_ShowInLists" type="checkbox"/>
+		<div class="helpText">
+			<label>Wether the user should be able to see this field</label>
+		</div>
+	</div>
+	<div class="dtyField">
+		<label class="dtyLabel" for="dty_Type">Data type:</label>
+		<div class="dtyValue" id="dty_Type"></div>
+		<div class="helpText">
+			<label>The type of data this rectype accepts</label>
+		</div>
+	</div>
+
+
+	<div class="dtyHiddenField" id="dtyFieldSetField">
+		<label class="dtyLabel" for="dty_FieldSetRecTypeIDPreview">Fieldset rectype:</label>
+		<div class="dtyValue" id="dty_FieldSetRecTypeIDPreview"></div>
+		<div class="helpText">
+			<label>The recordtype that describes this fieldset</label>
+		</div>
+	</div>
+
+
+	<div class="dtyHiddenField" id="dtyTermTreeField">
+		<label class="dtyLabel" for="dty_JsonTermIDTreePreview">Vocabulary:</label>
+		<div class="dtyValue" id="dty_JsonTermIDTreePreview">
+			<div id="termsPreview" class="terms"></div>
+			<input type="button" value="Change vocabulary" id="showTermSelectionWindow" onclick="showTermSelectionWindow()" class="terms" />
+		</div>
+		<div class="helpText">
+			<label>The terms which define this enum/relmarker</label>
+		</div>
+	</div>
+	<div class="dtyHiddenField" id="dtyPointerField">
+		<label class="dtyLabel" for="dty_PtrTargetRectypeIDsPreview">Pointer target (rectype ID):</label>
+		<div class="dtyValue" id="dty_PtrTargetRectypeIDsPreview"></div>
+		<div class="helpText">
+			<label>The relmarker this rectype should point to</label>
+		</div>
+	</div>
+
+	<div class="dtyHiddenField"><input id="dty_TypeValue" /></div>
+	<div class="dtyHiddenField"><input id="dty_FieldSetRecTypeID" /></div>
+	<div class="dtyHiddenField"><input id="dty_JsonTermIDTree" /></div>
+	<div class="dtyHiddenField"><input id="dty_HeaderTermIDs" /></div>
+	<div class="dtyHiddenField"><input id="dty_PtrTargetRectypeIDs" /></div>
 </div>
 <br />
-<div class="actionButtons" style="{margin:auto; width:118;}">
-		<input type="button" value="Save" onclick="EditPopup.close();" />
-		<input type="button" value="Cancel" onclick="EditPopup.cancel();" />
+<div class="actionButtons">
+		<input type="button" style="height: 25px; width: 99px" value="Save" onclick="EditPopup.close();" />
+		<input type="button" style="height: 25px; width: 99px" value="Cancel" onclick="EditPopup.cancel();" />
 </div>
 
 <script type="text/javascript">
+
 	var detailType;
-	var newDetailTypeCode = 0; // 0: detailType with detailTypeID exists - 1: no detailTypeID given, create new - 2: detailType with given ID not found, error
-	if(detailTypeID) { // Existing detailtype, so load with values
-		try {
-			detailType = top.HEURIST.detailTypes.typedefs[detailTypeID].commonFields; // If succeeds, detailType with ID from URL exists, fill form with values
-			setDtyValues();
-		} catch(e) { // Invalid detailTypeID, create empty form, and show error message
-			newDetailTypeCode = 2;
+	init();
+
+	function init() {
+		var groupDropdown; // Will contain the select list with all groups
+		var status; // Will contain the current detailType status
+		var statusDropdown; // Will contain the select list with all statusses
+		var typeSelect; // Will contain the select list with all data types
+
+		var newDetailTypeCode = 0; // 0: detailType with detailTypeID exists - 1: no detailTypeID given, create new - 2: detailType with given ID not found, error
+		if(detailTypeID) { // Existing detailtype, so load with values
+			try {
+				detailType = top.HEURIST.detailTypes.typedefs[detailTypeID].commonFields; // If succeeds, detailType with ID from URL exists, fill form with values
+				setDtyValues();
+			} catch(e) { // Invalid detailTypeID, create empty form, and show error message
+				newDetailTypeCode = 2;
+			}
+		}
+		else {
+			newDetailTypeCode = 1; // No detailTypeID given
+		}
+		if(newDetailTypeCode > 0) { // Create empty form
+			initializeEmptyForm();
+		}
+		if(newDetailTypeCode == 2) { // Give error message
+			document.getElementById("statusMsg").innerHTML = "<strong>Error: detailtype could not be found. Clicking 'save' button will create a new detailtype.</strong><br /><br />";
 		}
 	}
-	else {
-		newDetailTypeCode = 1; // No detailTypeID given
-	}
-	if(newDetailTypeCode > 0) { // Create empty form
-		document.getElementById("dty_ID").innerHTML= "<i>(will be generated)</i>";
+
+	// Initializes the form (get all possible groups, statusses and datatypes, sets defaults, etc.)
+	function initializeEmptyForm() {
+		document.getElementById("dty_ID").innerHTML = "<i>(will be generated)</i>";
 		document.getElementById("dty_ShowInLists").checked = 1;
-		document.getElementById("dty_FieldSetRecTypeID").innerHTML = "<input type=\"button\" value=\"Search\" id=\"setFieldsetRecTypeID\" />";
+		document.getElementById("dty_FieldSetRecTypeIDPreview").innerHTML = "<input type=\"button\" value=\"Search\" id=\"setFieldsetRecTypeID\" />";
  		document.getElementById("dty_JsonTermIDTreePreview").innerHTML = "<select></select> <input type=\"button\" value=\"Change vocabulary\" id=\"showTermSelectionWindow\" onclick=\"showTermSelectionWindow()\" />";
-		document.getElementById("dty_PtrTargetRectypeIDs").innerHTML = "<input type=\"button\" value=\"Search\" id=\"setPointer\" />";
+		document.getElementById("dty_PtrTargetRectypeIDsPreview").innerHTML = "<input type=\"button\" value=\"Search\" id=\"setPointer\" />";
 		createGroupSelector();
 		createBaseTypeSelector();
 		createStatusSelector();
 		statusDropdown.selectedIndex = 3; // Set 'Open' to default status value
-	}
-	if(newDetailTypeCode == 2) { // Give error message
-		document.getElementById("statusMsg").innerHTML = "<strong>Error: detailtype could not be found. Clicking 'save' button will create a new detailtype.</strong><br /><br />";
 	}
 
 	// Fill form with values from detailType
@@ -181,18 +274,24 @@
 				document.getElementById("dty_ShowInLists").checked = 1;
 			}
 			if(detailType[8]) {
-				document.getElementById("dty_FieldSetRecTypeID").innerHTML = top.HEURIST.rectypes.names[detailType[8]] + " <button type=\"button\" value=\"Search\" id=\"setFieldsetRecTypeID\ />";
+				document.getElementById("dty_FieldSetRecTypeIDPreview").innerHTML = top.HEURIST.rectypes.names[detailType[8]] + " <button type=\"button\" value=\"Search\" onclick=\"showRectypeSelection()\" id=\"setFieldsetRecTypeID\ />";
 			} else {
-				document.getElementById("dty_FieldSetRecTypeID").innerHTML = "<input type=\"button\" value=\"Search\" id=\"setFieldsetRecTypeID\" />";
+				document.getElementById("dty_FieldSetRecTypeIDPreview").innerHTML = "<input type=\"button\" value=\"Search\" onclick=\"showRectypeSelection()\" id=\"setFieldsetRecTypeID\" />";
 			}
-			document.getElementById("dty_FieldSetRecTypeID").value = detailType[8];
+			document.getElementById("dty_FieldSetRecTypeIDPreview").value = detailType[8];
+
 			if(detailType[11]) {
-				document.getElementById("dty_PtrTargetRectypeIDs").innerHTML = top.HEURIST.rectypes.names[detailType[11]] + " <button type=\"button\" value=\"Search2\" id=\"setPointer\" />";
+				document.getElementById("dty_PtrTargetRectypeIDsPreview").innerHTML = detailType[11] + " <input type=\"button\" value=\"Search\" onclick=\"showRectypeSelection()\" id=\"setPointer\" />";
 			} else {
-				document.getElementById("dty_PtrTargetRectypeIDs").innerHTML = "<input type=\"button\" value=\"Search\" id=\"setPointer\" />";
+				document.getElementById("dty_PtrTargetRectypeIDsPreview").innerHTML = "<input type=\"button\" value=\"Search\" onclick=\"showRectypeSelection()\" id=\"setPointer\" />";
 			}
+
+
+			document.getElementById("dty_TypeValue").value = detailType[2];
+			document.getElementById("dty_FieldSetRecTypeID").value = detailType[8];
 			document.getElementById("dty_JsonTermIDTree").value = detailType[9];
 			document.getElementById("dty_HeaderTermIDs").value = detailType[10];
+			document.getElementById("dty_PtrTargetRectypeIDs").value = detailType[11];
 		}
 		createStatusSelector();
 		var usageCount = 0;
@@ -209,7 +308,6 @@
 	}
 
 	// Get all groups in HEURIST DB, and create select list with them. If an existing detailType is being editted, select the right value
-	var groupDropdown;
 	function createGroupSelector() {
 		groupDropdown = document.createElement("select");
 		for(var groupID in top.HEURIST.detailTypes.groups) {
@@ -218,13 +316,16 @@
 			if(detailType && groupID == top.HEURIST.detailTypes.typedefs[detailTypeID].commonFields[7]) {
 				groupDropdown.selectedIndex = groupDropdown.options.length-1;
 			}
+			else if(!detailType && defaultGroupID) {
+				if(defaultGroupID == groupID) {
+					groupDropdown.selectedIndex = groupDropdown.options.length-1;
+				}
+			}
 		}
 		document.getElementById("dty_DetailTypeGroupID").appendChild(groupDropdown);
 	}
 
 	// Create the status dropdown menu with all possible statusses. In case it is reserved, disable the entire form. Always save the previous status in 'var status', so we can change it back to the previous status when someone 'cancels' on the prompt wether they really want to change the status to 'reserved'
-	var status;
-	var statusDropdown;
 	function createStatusSelector() {
 		var stati = ["reserved", "approved", "pending", "open"];
 		statusDropdown = document.createElement("select");
@@ -268,7 +369,6 @@
 	}
 
 	// Create the dropdown menu with all possible types, and if an existing detailtype is being editted, select the right value
-	var typeSelect;
 	function createBaseTypeSelector() {
 		var detailBaseTypes = ["freetext", "blocktext", "integer", "date", "year", "relmarker", "boolean", "enum",
 								"resource", "float", "file", "geo", "separator", "calculated", "fieldsetmarker"];
@@ -285,10 +385,8 @@
 		if(detailType) {
 			switch(typeSelect.value) {
 				case "relmarker":
-					document.getElementById("dtyTermTreeField").style.display = "block";
-					document.getElementById("dtyPointerField").style.display = "block";
-					document.getElementById("pointerHelpText").style.display = "block";
-					document.getElementById("termTreeHelpText").style.display = "block";
+					document.getElementById("dtyTermTreeField").className = "dtyField";
+					document.getElementById("dtyPointerField").className = "dtyField";
 
 					var prev = document.getElementById("termsPreview");
 					if(detailType[9] && !detailType[9] == "") {
@@ -305,11 +403,12 @@
 						var parsedTerms = "";
 					}
 					var disTerms =(detailType[10]? detailType[10]:"");
+					disTerms = YAHOO.lang.JSON.parse(disTerms);
+					disTerms = disTerms.join(",");
 					prev.appendChild(top.HEURIST.util.createTermSelect(parsedTerms, disTerms, top.HEURIST.terms.termsByDomainLookup['relation'], null));
 					break;
 				case "enum":
-					document.getElementById("dtyTermTreeField").style.display = "block";
-					document.getElementById("termTreeHelpText").style.display = "block";
+					document.getElementById("dtyTermTreeField").className = "dtyField";
 
 					var prev = document.getElementById("termsPreview");
 					if(detailType[9] && !detailType[9] == "") {
@@ -326,12 +425,13 @@
 						var parsedTerms = "";
 					}
 					var disTerms =(detailType[10]? detailType[10]:"");
+					disTerms = YAHOO.lang.JSON.parse(disTerms);
+					disTerms = disTerms.join(",");
 					prev.appendChild(top.HEURIST.util.createTermSelect(parsedTerms, disTerms, top.HEURIST.terms.termsByDomainLookup['enum'], null));
 
 					break;
 				case "fieldsetmarker":
-					document.getElementById("dtyFieldSetField").style.display = "block";
-					document.getElementById("fieldSetHelpText").style.display = "block";
+					document.getElementById("dtyFieldSetField").className = "dtyField";
 					break;
 			}
 		}
@@ -340,14 +440,12 @@
 
 	// Call when type is changed. If the type requires extra fields, show them, and hide the ones it does not need
 	function typeChange() {
+		document.getElementById("dty_TypeValue").value = typeSelect.value;
 		switch(typeSelect.value) {
 			case "relmarker":
-				document.getElementById("dtyTermTreeField").style.display = "block";
-				document.getElementById("dtyPointerField").style.display = "block";
-				document.getElementById("dtyFieldSetField").style.display = "none";
-				document.getElementById("pointerHelpText").style.display = "block";
-				document.getElementById("termTreeHelpText").style.display = "block";
-				document.getElementById("fieldSetHelpText").style.display = "none";
+				document.getElementById("dtyTermTreeField").className = "dtyField";
+				document.getElementById("dtyPointerField").className = "dtyField";
+				document.getElementById("dtyFieldSetField").className = "dtyHiddenField";
 
 				var prev = document.getElementById("termsPreview");
 				for (var i =0; i < prev.children.length; i++) {
@@ -368,12 +466,9 @@
 
 				break;
 			case "enum":
-				document.getElementById("dtyTermTreeField").style.display = "block";
-				document.getElementById("dtyFieldSetField").style.display = "none";
-				document.getElementById("dtyPointerField").style.display = "none";
-				document.getElementById("pointerHelpText").style.display = "none";
-				document.getElementById("termTreeHelpText").style.display = "block";
-				document.getElementById("fieldSetHelpText").style.display = "none";
+				document.getElementById("dtyTermTreeField").className = "dtyField";
+				document.getElementById("dtyFieldSetField").className = "dtyHiddenField";
+				document.getElementById("dtyPointerField").className = "dtyHiddenField";
 
 				var prev = document.getElementById("termsPreview");
 				for (var i =0; i < prev.children.length; i++) {
@@ -394,20 +489,14 @@
 
 				break;
 			case "fieldsetmarker":
-				document.getElementById("dtyFieldSetField").style.display = "block";
-				document.getElementById("dtyTermTreeField").style.display = "none";
-				document.getElementById("dtyPointerField").style.display = "none";
-				document.getElementById("pointerHelpText").style.display = "none";
-				document.getElementById("termTreeHelpText").style.display = "none";
-				document.getElementById("fieldSetHelpText").style.display = "block";
+				document.getElementById("dtyFieldSetField").className = "dtyField";
+				document.getElementById("dtyTermTreeField").className = "dtyHiddenField";
+				document.getElementById("dtyPointerField").className = "dtyHiddenField";
 				break;
 			default:
-				document.getElementById("dtyFieldSetField").style.display = "none";
-				document.getElementById("dtyTermTreeField").style.display = "none";
-				document.getElementById("dtyPointerField").style.display = "none";
-				document.getElementById("pointerHelpText").style.display = "none";
-				document.getElementById("termTreeHelpText").style.display = "none";
-				document.getElementById("fieldSetHelpText").style.display = "none";
+				document.getElementById("dtyFieldSetField").className = "dtyHiddenField";
+				document.getElementById("dtyTermTreeField").className = "dtyHiddenField";
+				document.getElementById("dtyPointerField").className = "dtyHiddenField";
 				break;
 		}
 	}
@@ -430,21 +519,41 @@
 	}
 
 	// Shows a popup window where you can select terms to create a term tree as wanted
-	function showRectypeSelection(type) {
-
-																	// ids= CS list of rty_ID
-		top.HEURIST.util.popupURL(top, top.HEURIST.basePath +
-			"admin/structure/editDetailType_SelectRecType.html?type="+((type==1)?"relmarker":"fieldsetmarker"), {
-			"close-on-blur": false,
-			"no-resize": true,
-			height: 480,
-			width: 440,
-						callback: function(recordTypesSelected) {
-							if(recordTypesSelected!=null){
-								alert("do it "+recordTypesSelected);// TODO insert values into field
-							}
+	function showRectypeSelection() {
+		var type = document.getElementById("dty_TypeValue").value;
+		var args;
+		if(type == "relmarker") {
+			if(document.getElementById("dty_FieldSetRecTypeID")) {
+				args = document.getElementById("dty_FieldSetRecTypeID").value;
+			}
+		}
+		if(type == "fieldsetmarker") {
+			if(document.getElementById("dty_PtrTargetRectypeIDs")) {
+				args = document.getElementById("dty_PtrTargetRectypeIDs").value;
+			}
+		}
+		if(args) {
+			var URL =  top.HEURIST.basePath + "admin/structure/editDetailType_SelectRecType.html?type=" + type + "&ids=" + args;
+		} else {
+			var URL =  top.HEURIST.basePath + "admin/structure/editDetailType_SelectRecType.html?type=" + type;
+		}
+		if(type == "relmarker" || type == "fieldsetmarker") {
+			top.HEURIST.util.popupURL(top, URL, {
+				"close-on-blur": false,
+				"no-resize": true,
+				height: 480,
+				width: 440,
+				callback: function(recordTypesSelected) {
+					if(recordTypesSelected != null) { // TODO: Test this
+						if(type == "relmarker") { // Change comma seperated list to right format
+							document.getElementById("dty_PtrTargetRectypeIDs").value = recordTypesSelected;
+						} else {
+							document.getElementById("dty_FieldSetRecTypeID").value = recordTypesSelected;
 						}
-		});
+					}
+				}
+			});
+		}
 	}
 
 	// Shows a popup window where you can select terms to create a term tree as wanted
@@ -462,17 +571,16 @@
 			callback: function(editedTermTree, editedDisabledTerms) {
 				if(!editedTermTree && !editedDisabledTerms) {
 				} else {
-					alert("tree - "+editedTermTree);
-					alert("dis - "+editedDisabledTerms);
-					try {
 					document.getElementById("dty_JsonTermIDTree").value = editedTermTree;
 					document.getElementById("dty_HeaderTermIDs").value = editedDisabledTerms;
-					}catch(e){alert(e);}
+					editedTermTree = YAHOO.lang.JSON.parse(editedTermTree);
+					editedDisabledTerms = YAHOO.lang.JSON.parse(editedDisabledTerms);
+					editedDisabledTerms = editedDisabledTerms.join(",");
 
 					if(editedTermTree == null) {
-					} else { // TODO: rebuilding the tree contains a bug - does not create the same tree as inside selectTerms.html, and loses all depth
+					} else {
 						var prev = document.getElementById("termsPreview");
-						for (var i =0; i < prev.children.length; i++) {
+						for (var i = 0; i < prev.children.length; i++) {
 							prev.removeChild(prev.childNodes[0]);
 						}
 						if(detailType[2] == "enum") {
@@ -492,13 +600,11 @@
 		alert("Stringified changes: " + str);
 		if(str != null) {
 			// TODO: Change base URL
-			var baseurl = "http://heuristscholar.org/h3-ja/admin/structure/saveStructure.php";
+			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 			var callback = updateResult;
 			var params = "method=saveDT&";
 			params += "data=" + str;
-			alert("Send now");
 			top.HEURIST.util.getJsonData(baseurl, callback, params);
-			alert("Sent");
 		} else {
 			if(!keepOpen) {
 				alert("No changes were made");
@@ -511,32 +617,59 @@
 		if(!context) {
 			alert("An error occurred trying to contact the database");
 		}
-		alert("result: " + context);
-		top.HEURIST.detailTypes.saveStatus = context;
-		if(!detailTypeID || detailTypeID == -1) {
-			for(var newDetailTypeID in top.HEURIST.detailTypes.saveStatus[0].common) {
-				returnedStatusMsg = top.HEURIST.detailTypes.saveStatus[0].common[newDetailTypeID];
-				if(returnedStatusMsg == "ok") {
+		var error = false;
+		if(!detailTypeID || detailTypeID == -1) { // New detail type created
+			for(var newDetailTypeID in context[0].common) {
+				try {
+					for(obj in context[0].common[0]) {
+						if(obj == "error") {
+							alert("An error occurred trying to create the fieldtype: " + context[0].common[0][obj]);
+							error = true;
+						}
+					}
+				} catch(e) {
+				}
+				if(!error) {
+					returnedStatusMsg = context[0].common[newDetailTypeID];
+					var statusIndex = 0;
+					while(statusIndex < context[0].common[newDetailTypeID].length) {
+						statusMsg = context[0].common[newDetailTypeID][statusIndex];
+						statusCode = statusMsg.substring(statusMsg.length-2,statusMsg.length);
+						if(statusCode != "ok") {
+							alert(statusMsg);
+							error = true;
+						}
+						statusIndex++;
+					}
+				}
+				if(!error) {
 					detailTypeID = newDetailTypeID;
 					document.getElementById("dty_ID").innerHTML = detailTypeID;
 					if(!keepOpen) {
 						alert("Fieldtype was succesfully saved with ID: " + newDetailTypeID);
 						window.close("succes");
 					}
-				} else {
-					alert("An error occurred trying to save the fieldtype: " + returnedStatusMsg);
 				}
 			}
-		} else {
-			returnedStatusMsg = top.HEURIST.detailTypes.saveStatus[0][detailTypeID].common;
-			if(returnedStatusMsg == "ok") {
-
+		} else { // Existing detail type editted
+			var statusIndex = 0;
+			while(statusIndex < context[0][detailTypeID].common.length) {
+				statusMsg = context[0][detailTypeID].common[statusIndex];
+				if(typeof(statusMsg) == "object") {
+					for(obj in context[0][detailTypeID].common[statusIndex]) {
+						if(obj == "error") {
+							alert("An error occurred trying to edit the fieldtype: " + context[0][detailTypeID].common[statusIndex][obj]);
+							error = true;
+						}
+					}
+				}
+				statusIndex++;
+			}
+			if(!error) {
 				if(!keepOpen) {
 					alert("Fieldtype with ID " + detailTypeID + " was succesfully saved");
 					window.close("succes");
 				}
-			} else {
-				alert("An error occurred trying to save the fieldtype: " + returnedStatusMsg);
 			}
 		}
 	}
@@ -582,7 +715,7 @@
 	var updatedFields = [];
 	var updatedDetails = [];
 	function fromUItoArray() {
-		if(!detailTypeID || detailTypeID == -1) {
+		if(!detailTypeID || detailTypeID == -1) { // New detail type, so save every field
 			detailTypeID = -1;
 			var detailTypeValues = [];
 		} else {
@@ -591,15 +724,15 @@
 		var fieldNames = top.HEURIST.detailTypes.typedefs.commomFieldNames;
 
 		var index;
-		nrOfChangableFieldNames = fieldNames.length-5;
-		for(index = 0; index < nrOfChangableFieldNames; index++) {
+		for(index = 0; index < fieldNames.length-1; index++) { // -1 because the last field is dty_ID, which can not be changed
 			var fieldName = fieldNames[index];
 			var fieldNameElement = document.getElementById(fieldName);
 			var fieldNameElementValue = fieldNameElement.value;
-			var foundGroup = false;;
+			var foundGroup = false;
 
 			if(index == 5) {
-				if(fieldNameElementValue == "on") {
+				fieldNameElementValue = document.getElementById("dty_ShowInLists").checked;
+				if(fieldNameElementValue) {
 					fieldNameElementValue = 1;
 				} else {
 					fieldNameElementValue = 0;
@@ -621,23 +754,29 @@
 				alert("ERROR: The selected group does not exist.");
 			}
 			else if(detailTypeValues[index] != fieldNameElementValue || detailTypeID == -1) {
-				detailTypeValues[index] = fieldNameElementValue;
-				updatedFields.push(index);
-				updatedDetails[index] = detailTypeValues[index];
+/* 				alert("Changed values: " + fieldName + ": " + detailTypeValues[index] + " - - - " + fieldNameElementValue); */
+				if(detailTypeValues[index] == null && !fieldNameElementValue) { // Because if database value is DOM value is NULL, it doesn't enter that in input field
+				} else {
+					detailTypeValues[index] = fieldNameElementValue;
+					updatedFields.push(index);
+					updatedDetails[index] = detailTypeValues[index];
+				}
 			}
 
 		}
 	}
 
 	// Validate value inserted into input field. In this case, make sure it's an integer
-	function validate(evt) {
-		var theEvent = evt || window.event;
-		var key = theEvent.keyCode || theEvent.which;
-		key = String.fromCharCode( key );
-		var regex = /[0-9]|\./;
-		if( !regex.test(key) ) {
-			theEvent.returnValue = false;
-			theEvent.preventDefault();
+	function checkIfInteger(evt) {
+		if((evt.keyCode) != 9) {
+			var theEvent = evt || window.event;
+			var key = theEvent.keyCode || theEvent.which;
+			key = String.fromCharCode(key);
+			var regex = /[0-9]|\./;
+			if( !regex.test(key) ) {
+				theEvent.returnValue = false;
+				theEvent.preventDefault();
+			}
 		}
 	}
 
@@ -648,13 +787,22 @@
 					updateDetailTypeOnServer();
 				},
 				cancel : function () {
-					window.close(null);
+					fromUItoArray();
+					if(updatedFields.length > 0) {
+						var areYouSure = confirm("Changes were made. By cancelling, all changes will be lost. Are you sure?");
+						if(areYouSure) {
+							window.close(null);
+						}
+					}
+					else {
+						window.close(null);
+					}
 				}
 		};
 		return that;
 	})();
 
 </script>
-
+</div>
 </body>
 </html>
