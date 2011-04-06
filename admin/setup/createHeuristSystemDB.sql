@@ -1,13 +1,13 @@
--- create_heurist_system_db.sql: SQL file to create Heurist system database (hdb_HeuristSystem)
+-- createHeuristSystemDB.sql: SQL file to create Heurist system database (HeuristSystemCommon)
 -- Ian Johnson 11/1/2011
 
 \W -- warnings to standard out
 
 -- ------------------------------------------------------------------------------
 
-Create Database If Not exists hdb_HeuristSystem;
+Create Database If Not exists HeuristSystemCommon;
 
-Use hdb_HeuristSystem;
+Use HeuristSystemCommon;
 
 CREATE TABLE IF NOT EXISTS sysDocumentation (
    doc_id tinyint unsigned auto_increment,

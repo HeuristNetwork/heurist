@@ -1,20 +1,20 @@
 -- Created by Steve White 2010-10-23
--- Last updated 14th Feb 2011 Ian Johnson - removed deprecated archive triggers
+-- Last updated 2 April 2011 Ian Johnson - removed deprecated archive triggers
 
 
 -- This file contains the stored procedures and triggers for h3 databases
 
 -- RUN FROM COMMAND LINE LOGGED IN AS ROOT IN DIRECTORY /var/www/htdocs/h3-xx WITH:
---   mysql -u root -ppassword databasename < admin/setup/addProceduresTriggers.sql
+--   mysql -u root -ppassword hdb_databasename < admin/setup/addProceduresTriggers.sql
 -- Note: this file cannot be run in PHPMySQL because it doesn't recognise the delimiter changes
 
 -- MAY NOT REPORT ERRORS, POSSIBLE NEED TO SET STDOUT FIRST AND/OR USE TEE TO WRITE TO OUTPUT FILE
 -- AND INSPECT
 
 
-
 -- Stored Procedures
 -- ------------------------------------------------------------------------------
+
 
 DROP function IF EXISTS `hhash`;
 
@@ -140,6 +140,31 @@ DELIMITER ;
 
 -- ------------------------------------------------------------------------------
 
+DELIMITER $$
+
+-- This trigger was missing, added back 24/3/2011
+
+DROP Trigger IF EXISTS insert_record_trigger$$
+
+CREATE DEFINER=`root`@`localhost` TRIGGER `insert_record_trigger`
+AFTER INSERT ON `Records`
+FOR EACH ROW
+begin 
+    insert into archiveRecords (arec_ID, arec_UGrpID, arec_Date, arec_URL,
+                                arec_Title, arec_ScratchPad, arec_RecTypeID) 
+        values (NEW.rec_ID, @logged_in_user_id, now(),
+                NEW.rec_URL, NEW.rec_Title, NEW.rec_ScratchPad, NEW.rec_RecTypeID); 
+        set @rec_version := last_insert_id(); 
+    insert into usrRecentRecords (rre_UGrpID, rre_RecID, rre_Time) 
+                    values (@logged_in_user_id, NEW.rec_ID, now()); 
+    set @rec_id := last_insert_id(NEW.rec_ID); 
+    if NEW.rec_RecTypeID = 52 then 
+        insert into recRelationshipsCache (rrc_RecID) 
+        values (NEW.rec_ID); 
+    end if;
+end$$
+
+DELIMITER ;
 DELIMITER $$
 
 	DROP TRIGGER IF EXISTS insert_Details_precis_trigger$$
@@ -518,3 +543,64 @@ DELIMITER ;
 
 -- --------------------------------------------------------------------------------
 
+-- ** New triggers from Artem 5/4/2011
+
+use hdb_sandpit2;
+DROP TRIGGER IF EXISTS defRecTypeGroups_update;
+
+	CREATE
+	DEFINER=`root`@`localhost`
+	TRIGGER `defRecTypeGroups_update`
+	AFTER UPDATE ON `defRecTypeGroups`
+	FOR EACH ROW
+		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecTypeGroups";
+
+
+DROP TRIGGER IF EXISTS defRecTypeGroups_insert;
+
+	CREATE
+	DEFINER=`root`@`localhost`
+	TRIGGER `defRecTypeGroups_insert`
+	AFTER INSERT ON `defRecTypeGroups`
+	FOR EACH ROW
+		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecTypeGroups";
+
+
+DROP TRIGGER IF EXISTS defRecTypeGroups_delete;
+
+	CREATE
+	DEFINER=`root`@`localhost`
+	TRIGGER `defRecTypeGroups_delete`
+	AFTER DELETE ON `defRecTypeGroups`
+	FOR EACH ROW
+		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecTypeGroups";
+
+
+DROP TRIGGER IF EXISTS defDetailTypeGroups_update;
+
+	CREATE
+	DEFINER=`root`@`localhost`
+	TRIGGER `defDetailTypeGroups_update`
+	AFTER UPDATE ON `defDetailTypeGroups`
+	FOR EACH ROW
+		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defDetailTypeGroups";
+
+
+DROP TRIGGER IF EXISTS defDetailTypeGroups_insert;
+
+	CREATE
+	DEFINER=`root`@`localhost`
+	TRIGGER `defDetailTypeGroups_insert`
+	AFTER INSERT ON `defDetailTypeGroups`
+	FOR EACH ROW
+		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defDetailTypeGroups";
+
+
+DROP TRIGGER IF EXISTS defDetailTypeGroups_delete;
+
+	CREATE
+	DEFINER=`root`@`localhost`
+	TRIGGER `defDetailTypeGroups_delete`
+	AFTER DELETE ON `defDetailTypeGroups`
+	FOR EACH ROW
+		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defDetailTypeGroups";
