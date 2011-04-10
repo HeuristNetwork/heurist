@@ -192,21 +192,21 @@
 			<input type="button" value="Change vocabulary" id="showTermSelectionWindow" onclick="showTermSelectionWindow()" class="terms" />
 		</div>
 		<div class="helpText">
-			<label>The terms which define this enum/relmarker</label>
+			<label>The terms which define this enum/relationtype/relmarker</label>
 		</div>
 	</div>
 	<div class="dtyHiddenField" id="dtyPointerField">
 		<label class="dtyLabel" for="dty_PtrTargetRectypeIDsPreview">Pointer target (rectype ID):</label>
 		<div class="dtyValue" id="dty_PtrTargetRectypeIDsPreview"></div>
 		<div class="helpText">
-			<label>The relmarker this rectype should point to</label>
+			<label>The rectypes this pointer/relmarker detailtype should point to</label>
 		</div>
 	</div>
 
 	<div class="dtyHiddenField"><input id="dty_TypeValue" /></div>
 	<div class="dtyHiddenField"><input id="dty_FieldSetRecTypeID" /></div>
 	<div class="dtyHiddenField"><input id="dty_JsonTermIDTree" /></div>
-	<div class="dtyHiddenField"><input id="dty_HeaderTermIDs" /></div>
+	<div class="dtyHiddenField"><input id="dty_TermIDTreeNonSelectableIDs" /></div>
 	<div class="dtyHiddenField"><input id="dty_PtrTargetRectypeIDs" /></div>
 </div>
 <br />
@@ -290,7 +290,7 @@
 			document.getElementById("dty_TypeValue").value = detailType[2];
 			document.getElementById("dty_FieldSetRecTypeID").value = detailType[8];
 			document.getElementById("dty_JsonTermIDTree").value = detailType[9];
-			document.getElementById("dty_HeaderTermIDs").value = detailType[10];
+			document.getElementById("dty_TermIDTreeNonSelectableIDs").value = detailType[10];
 			document.getElementById("dty_PtrTargetRectypeIDs").value = detailType[11];
 		}
 		createStatusSelector();
@@ -368,9 +368,25 @@
 		document.getElementById("dty_Status").appendChild(statusDropdown);
 	}
 
+	function expandJsonStructure( jsonString ) {
+		var retStruct = "";
+		if(jsonString && !jsonString == "") {
+			try {
+				retStruct = eval(jsonString);
+			} catch(e) {
+				try {
+					retStruct = YAHOO.lang.JSON.parse(jsonString);
+				} catch(e) {
+					retStruct = "";
+				}
+			}
+		}
+		return retStruct;
+	}
+
 	// Create the dropdown menu with all possible types, and if an existing detailtype is being editted, select the right value
 	function createBaseTypeSelector() {
-		var detailBaseTypes = ["freetext", "blocktext", "integer", "date", "year", "relmarker", "boolean", "enum",
+		var detailBaseTypes = ["freetext", "blocktext", "integer", "date", "year", "relmarker", "boolean", "enum","relationtype",
 								"resource", "float", "file", "geo", "separator", "calculated", "fieldsetmarker"];
 		typeSelect = document.createElement("select");
 		for (var i in detailBaseTypes) {
@@ -389,49 +405,34 @@
 					document.getElementById("dtyPointerField").className = "dtyField";
 
 					var prev = document.getElementById("termsPreview");
-					if(detailType[9] && !detailType[9] == "") {
-						try {
-							var parsedTerms = eval(detailType[9]);
-						} catch(e) {
-							try {
-								var parsedTerms = YAHOO.lang.JSON.parse(detailType[9]);
-							} catch(e) {
-								var parsedTerms = "";
-							}
-						}
-					} else {
-						var parsedTerms = "";
-					}
-					var disTerms =(detailType[10]? detailType[10]:"");
-					disTerms = YAHOO.lang.JSON.parse(disTerms);
+					var parsedTerms = expandJsonStructure(detailType[9]);
+					var disTerms = expandJsonStructure(detailType[10]);
+					if (typeof disTerms.join == "function") {
 					disTerms = disTerms.join(",");
+					}
 					prev.appendChild(top.HEURIST.util.createTermSelect(parsedTerms, disTerms, top.HEURIST.terms.termsByDomainLookup['relation'], null));
 					break;
 				case "enum":
+				case "relationtype":
 					document.getElementById("dtyTermTreeField").className = "dtyField";
 
 					var prev = document.getElementById("termsPreview");
-					if(detailType[9] && !detailType[9] == "") {
-						try {
-							var parsedTerms = eval(detailType[9]);
-						} catch(e) {
-							try {
-								var parsedTerms = YAHOO.lang.JSON.parse(detailType[9]);
-							} catch(e) {
-								var parsedTerms = "";
-							}
-						}
-					} else {
-						var parsedTerms = "";
-					}
-					var disTerms =(detailType[10]? detailType[10]:"");
-					disTerms = YAHOO.lang.JSON.parse(disTerms);
+					var parsedTerms = expandJsonStructure(detailType[9]);
+					var disTerms = expandJsonStructure(detailType[10]);
+					if (typeof disTerms.join == "function") {
 					disTerms = disTerms.join(",");
+					}
+					if (typeSelect.value == "enum") {
 					prev.appendChild(top.HEURIST.util.createTermSelect(parsedTerms, disTerms, top.HEURIST.terms.termsByDomainLookup['enum'], null));
-
+					}else{
+						prev.appendChild(top.HEURIST.util.createTermSelect(parsedTerms, disTerms, top.HEURIST.terms.termsByDomainLookup['relation'], null));
+					}
 					break;
 				case "fieldsetmarker":
 					document.getElementById("dtyFieldSetField").className = "dtyField";
+					break;
+				case "resource":
+					document.getElementById("dtyPointerField").className = "dtyField";
 					break;
 			}
 		}
@@ -451,12 +452,11 @@
 				for (var i =0; i < prev.children.length; i++) {
 					prev.removeChild(prev.childNodes[0]);
 				}
-				try {
-					var tempParsedTerms = YAHOO.lang.JSON.parse(detailType[9]);
-				} catch(e) {
-					var tempParsedTerms = "";
+				var tempParsedTerms = expandJsonStructure(detailType[9]);
+				var disTerms = expandJsonStructure(detailType[10]);
+				if (typeof disTerms.join == "function") {
+					disTerms = disTerms.join(",");
 				}
-				var disTerms = YAHOO.lang.JSON.parse(detailType[10]);
 				var tempDisabledTermsList = [];
 				for(k in disTerms) {
 					tempDisabledTermsList.push(disTerms[k]);
@@ -465,6 +465,7 @@
 				prev.appendChild(top.HEURIST.util.createTermSelect(tempParsedTerms, tempDisabledTerms, top.HEURIST.terms.termsByDomainLookup['relation'], null));
 
 				break;
+			case "relationtype":
 			case "enum":
 				document.getElementById("dtyTermTreeField").className = "dtyField";
 				document.getElementById("dtyFieldSetField").className = "dtyHiddenField";
@@ -474,24 +475,29 @@
 				for (var i =0; i < prev.children.length; i++) {
 					prev.removeChild(prev.childNodes[0]);
 				}
-				try {
-					var tempParsedTerms = YAHOO.lang.JSON.parse(detailType[9]);
-				} catch(e) {
-					var tempParsedTerms = "";
-				}
-				var disTerms = YAHOO.lang.JSON.parse(detailType[10]);
+				var tempParsedTerms = expandJsonStructure(detailType[9]);
+				var disTerms = expandJsonStructure(detailType[10]);
 				var tempDisabledTermsList = [];
 				for(k in disTerms) {
 					tempDisabledTermsList.push(disTerms[k]);
 				}
 				tempDisabledTerms = tempDisabledTermsList.join(",");
+				if (typeSelect.value == "enum") {
 				prev.appendChild(top.HEURIST.util.createTermSelect(tempParsedTerms, tempDisabledTerms, top.HEURIST.terms.termsByDomainLookup['enum'], null));
+				}else{
+					prev.appendChild(top.HEURIST.util.createTermSelect(tempParsedTerms, tempDisabledTerms, top.HEURIST.terms.termsByDomainLookup['relation'], null));
+				}
 
 				break;
 			case "fieldsetmarker":
 				document.getElementById("dtyFieldSetField").className = "dtyField";
 				document.getElementById("dtyTermTreeField").className = "dtyHiddenField";
 				document.getElementById("dtyPointerField").className = "dtyHiddenField";
+				break;
+			case "resource":
+				document.getElementById("dtyPointerField").className = "dtyField";
+				document.getElementById("dtyTermTreeField").className = "dtyHiddenField";
+				document.getElementById("dtyFieldSetField").className = "dtyHiddenField";
 				break;
 			default:
 				document.getElementById("dtyFieldSetField").className = "dtyHiddenField";
@@ -522,12 +528,12 @@
 	function showRectypeSelection() {
 		var type = document.getElementById("dty_TypeValue").value;
 		var args;
-		if(type == "relmarker") {
+		if(type == "fieldsetmarker") {
 			if(document.getElementById("dty_FieldSetRecTypeID")) {
 				args = document.getElementById("dty_FieldSetRecTypeID").value;
 			}
 		}
-		if(type == "fieldsetmarker") {
+		if(type == "relmarker" || type == "resource") {
 			if(document.getElementById("dty_PtrTargetRectypeIDs")) {
 				args = document.getElementById("dty_PtrTargetRectypeIDs").value;
 			}
@@ -537,7 +543,7 @@
 		} else {
 			var URL =  top.HEURIST.basePath + "admin/structure/editDetailType_SelectRecType.html?type=" + type;
 		}
-		if(type == "relmarker" || type == "fieldsetmarker") {
+		if(type == "relmarker" || type == "resource" || type == "fieldsetmarker") {
 			top.HEURIST.util.popupURL(top, URL, {
 				"close-on-blur": false,
 				"no-resize": true,
@@ -545,10 +551,10 @@
 				width: 440,
 				callback: function(recordTypesSelected) {
 					if(recordTypesSelected != null) { // TODO: Test this
-						if(type == "relmarker") { // Change comma seperated list to right format
-							document.getElementById("dty_PtrTargetRectypeIDs").value = recordTypesSelected;
-						} else {
+						if(type == "fieldsetmarker") { // Change comma seperated list to right format
 							document.getElementById("dty_FieldSetRecTypeID").value = recordTypesSelected;
+						} else {
+							document.getElementById("dty_PtrTargetRectypeIDs").value = recordTypesSelected;
 						}
 					}
 				}
@@ -572,10 +578,12 @@
 				if(!editedTermTree && !editedDisabledTerms) {
 				} else {
 					document.getElementById("dty_JsonTermIDTree").value = editedTermTree;
-					document.getElementById("dty_HeaderTermIDs").value = editedDisabledTerms;
-					editedTermTree = YAHOO.lang.JSON.parse(editedTermTree);
-					editedDisabledTerms = YAHOO.lang.JSON.parse(editedDisabledTerms);
+					document.getElementById("dty_TermIDTreeNonSelectableIDs").value = editedDisabledTerms;
+					editedTermTree = expandJsonStructure(editedTermTree);
+					editedDisabledTerms = expandJsonStructure(editedDisabledTerms);
+					if (typeof editedDisabledTerms.join == "function") {
 					editedDisabledTerms = editedDisabledTerms.join(",");
+					}
 
 					if(editedTermTree == null) {
 					} else {
@@ -586,7 +594,7 @@
 						if(detailType[2] == "enum") {
 							prev.appendChild(top.HEURIST.util.createTermSelect(editedTermTree, editedDisabledTerms, top.HEURIST.terms.termsByDomainLookup['enum'], null));
 						}
-						else if(detailType[2] == "relmarker") {
+						else if(detailType[2] == "relmarker" || detailType[2] == "relationtype") {
 							prev.appendChild(top.HEURIST.util.createTermSelect(editedTermTree, editedDisabledTerms, top.HEURIST.terms.termsByDomainLookup['relation'], null));
 						}
 					}
@@ -727,36 +735,30 @@
 		for(index = 0; index < fieldNames.length-1; index++) { // -1 because the last field is dty_ID, which can not be changed
 			var fieldName = fieldNames[index];
 			var fieldNameElement = document.getElementById(fieldName);
-			var fieldNameElementValue = fieldNameElement.value;
-			var foundGroup = false;
-
-			if(index == 5) {
-				fieldNameElementValue = document.getElementById("dty_ShowInLists").checked;
-				if(fieldNameElementValue) {
-					fieldNameElementValue = 1;
+			if (!fieldNameElement){ // field not used by this type
+				continue;
+			}
+			var fieldNameElementValue;
+			if (fieldNameElement.nodeName == "DIV" && fieldNameElement.firstChild && fieldNameElement.firstChild.nodeName == "SELECT") {
+				// DIV wrapped SELECT, get value from first child
+				fieldNameElementValue = fieldNameElement.firstChild.value;
+			} else if (fieldNameElement.nodeName == "INPUT" && fieldNameElement.type == "checkbox") {
+				// checkbox, covert to 1 or 0
+				fieldNameElementValue = fieldNameElement.checked ? 1:0;
 				} else {
-					fieldNameElementValue = 0;
+				fieldNameElementValue = fieldNameElement.value;
 				}
+
+			if(fieldName == "dty_Status") {
+				fieldNameElementValue = fieldNameElementValue.toLowerCase();
 			}
-			if(index == 2 ) { // dropdown menu's. Can't get the value with element.value
-				fieldNameElementValue = typeSelect.value;
-			} else if(index == 6) {
-				fieldNameElementValue = statusDropdown.value.toLowerCase();
-			} else if(index == 7) {
-				for(group in top.HEURIST.detailTypes.groups) {
-					if(group == groupDropdown.value) {
-						fieldNameElementValue = group;
-						foundGroup = true;
-					}
-				}
-			}
-			if(index == 7 && !foundGroup) {
+			if(fieldName == "dty_DetailTypeGroupID" && ! top.HEURIST.detailTypes.groups[fieldNameElementValue]) {
 				alert("ERROR: The selected group does not exist.");
 			}
-			else if(detailTypeValues[index] != fieldNameElementValue || detailTypeID == -1) {
+			// add values to the update arrays
+			if(detailTypeValues[index] != fieldNameElementValue || detailTypeID == -1) { // -1 means create new detailType
 /* 				alert("Changed values: " + fieldName + ": " + detailTypeValues[index] + " - - - " + fieldNameElementValue); */
-				if(detailTypeValues[index] == null && !fieldNameElementValue) { // Because if database value is DOM value is NULL, it doesn't enter that in input field
-				} else {
+				if( !detailTypeValues[index] == null || fieldNameElementValue) { // Because if database value is DOM value is NULL, it doesn't enter that in input field
 					detailTypeValues[index] = fieldNameElementValue;
 					updatedFields.push(index);
 					updatedDetails[index] = detailTypeValues[index];

@@ -110,7 +110,7 @@
 
 -- DETAIL TYPES
 
--- dty_ID, dty_Name, dty_Documentation, dty_Type, dty_HelpText, dty_ExtendedDescription, dty_Status, dty_ShowInLists, dty_OriginatingDBid, dty_NameInOriginatingdb, dty_IDinOriginatingDB, dty_PtrTargetRectypeIDs, dty_JsonTreeOfTermIDs, dty_HeaderTermIDs
+-- dty_ID, dty_Name, dty_Documentation, dty_Type, dty_HelpText, dty_ExtendedDescription, dty_Status, dty_ShowInLists, dty_OriginatingDBid, dty_NameInOriginatingdb, dty_IDinOriginatingDB, dty_PtrTargetRectypeIDs, dty_JsonTreeOfTermIDs, dty_TermIDTreeNonSelectableIDs
 
 > Start 
 (158,`Creator`,``,resource,`Creator`, ``,`Open`,``,``, ``,``),
@@ -145,7 +145,7 @@
 (194,`IsEdited`,``,boolean,`IsEdited`, ``,`Open`,``,``, ``,``),
 (198,`DOI`,``,freetext,`DOI`, ``,`Open`,``,``, ``,``),
 (199,`Relationship source record pointer`,``,resource,`Relationship source record pointers`, ``,`Open`,``,``, ``,``),
-(200,`RelationType`,``,enum,`RelationType`, ``,`Open`,``,``, ``,``),
+(200,`RelationType`,``,relationtype,`RelationType`, ``,`Open`,``,``, ``,``),
 (202,`Primary resource`,``,resource,`Primary resource`, ``,`Open`,``,``, ``,``),
 (203,`Organisation type`,``,enum,`Organisation type`, ``,`Open`,``,``, ``,``),
 (206,`Funding Type`,``,enum,`Funding Type`, ``,`Open`,``,``, ``,``),

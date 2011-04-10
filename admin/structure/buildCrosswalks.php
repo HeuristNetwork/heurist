@@ -335,7 +335,7 @@
 	`dty_ID` smallint(5) unsigned NOT NULL,
 	`dty_Name` varchar(255) NOT NULL,
 	`dty_Documentation` varchar(5000) default 'Please document the nature of this detail type (field)) ...',
-	`dty_Type` enum('freetext','blocktext','integer','date','year','relmarker','boolean','enum','resource','float','file','geo','separator','calculated', 'fieldsetmarker') NOT NULL,
+	`dty_Type` enum('freetext','blocktext','integer','date','year','relmarker','boolean','enum','relationtype','resource','float','file','geo','separator','calculated', 'fieldsetmarker') NOT NULL,
 	`dty_HelpText` varchar(255) NOT NULL default 'Please provide a short explanation for the user ...',
 	`dty_ExtendedDescription` varchar(5000) default 'Please provide an extended description for display on rollover ...',
 	`dty_Status` enum('Reserved','Approved','Pending','Open') NOT NULL default 'Open',
@@ -346,7 +346,7 @@
 	`dty_OrderInGroup` tinyint(3) unsigned default '0',
 	`dty_PtrTargetRectypeIDs` varchar(63),
 	`dty_JsonTermIDTree` varchar(500) default NULL,
-	`dty_HeaderTermIDs` varchar(255) default NULL,
+	`dty_TermIDTreeNonSelectableIDs` varchar(255) default NULL,
 	`dty_FieldSetRecTypeID` smallint(5) unsigned default NULL,
 	`dty_ShowInLists` tinyint(1) unsigned NOT NULL default '1',
 	PRIMARY KEY  (`dty_ID`),
@@ -360,7 +360,7 @@
 
 	if(($resultSet == "") && !mysql_error()) {
 	} else {
-		$query = "INSERT INTO `defDetailTypes` (`dty_ID`, `dty_Name`, `dty_Documentation`, `dty_Type`, `dty_HelpText`, `dty_ExtendedDescription`, `dty_Status`, `dty_OriginatingDBID`, `dty_NameInOriginatingDB`, `dty_IDInOriginatingDB`, `dty_DetailTypeGroupID`, `dty_OrderInGroup`, `dty_PtrTargetRectypeIDs`, `dty_JsonTermIDTree`, `dty_HeaderTermIDs`, `dty_FieldSetRecTypeID`, `dty_ShowInLists`) VALUES" . $resultSet;
+		$query = "INSERT INTO `defDetailTypes` (`dty_ID`, `dty_Name`, `dty_Documentation`, `dty_Type`, `dty_HelpText`, `dty_ExtendedDescription`, `dty_Status`, `dty_OriginatingDBID`, `dty_NameInOriginatingDB`, `dty_IDInOriginatingDB`, `dty_DetailTypeGroupID`, `dty_OrderInGroup`, `dty_PtrTargetRectypeIDs`, `dty_JsonTermIDTree`, `dty_TermIDTreeNonSelectableIDs`, `dty_FieldSetRecTypeID`, `dty_ShowInLists`) VALUES" . $resultSet;
 		mysql_query($query);
 		if(mysql_error()) {
 			echo "Error inserting data: " . mysql_error() . "<br />";
@@ -432,7 +432,6 @@
 	`trm_ParentTermID` mediumint(8) unsigned default NULL,
 	`trm_Domain` enum('enum', 'reltype', 'reltypevocab', 'enumvocab') NOT NULL default 'enum',
 	`trm_ChildCount` tinyint(3) NOT NULL default '0',
-	`trm_ParentTermVocabID` mediumint(8) unsigned default NULL,
 	`trm_Depth` tinyint(1) unsigned NOT NULL default '1',
 	`trm_OntID` smallint(5) unsigned NOT NULL default '0',
 	PRIMARY KEY  (`trm_ID`)
@@ -445,7 +444,7 @@
 
 	if(($resultSet == "") && !mysql_error()) {
 	} else {
-		$query = "INSERT INTO `defTerms` (`trm_ID`, `trm_Label`, `trm_InverseTermId`, `trm_Description`, `trm_Status`, `trm_OriginatingDBID`, `trm_AddedByImport`, `trm_IsLocalExtension`, `trm_NameInOriginatingDB`, `trm_IDInOriginatingDB`, `trm_ParentTermID`, `trm_Domain`, `trm_ChildCount`, `trm_ParentTermVocabID`, `trm_Depth`, `trm_OntID`) VALUES " . $resultSet;
+		$query = "INSERT INTO `defTerms` (`trm_ID`, `trm_Label`, `trm_InverseTermId`, `trm_Description`, `trm_Status`, `trm_OriginatingDBID`, `trm_AddedByImport`, `trm_IsLocalExtension`, `trm_NameInOriginatingDB`, `trm_IDInOriginatingDB`, `trm_ParentTermID`, `trm_Domain`, `trm_ChildCount`, `trm_Depth`, `trm_OntID`) VALUES " . $resultSet;
 		mysql_query($query);
 		if(mysql_error()) {
 			echo "Error inserting data: " . mysql_error() . "<br />";

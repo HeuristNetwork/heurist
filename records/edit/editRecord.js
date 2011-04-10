@@ -459,6 +459,10 @@ top.HEURIST.edit = {
 			return top.HEURIST.rectypes.typedefs[rectypeID].dtFields;
 	},
 
+	getDetailTypeBasetype: function(detailTypeID) {
+			return top.HEURIST.detailTypes.typedefs[detailTypeID].commonFields[2];
+	},
+
 	getNonRecDetailTypedefs: function(rectypeID) {
 		var non_recDTs = {};
 		var rfrs = top.HEURIST.edit.getRecFieldRequirements(rectypeID);
@@ -527,6 +531,7 @@ top.HEURIST.edit = {
 			case "float":
 				newInput = new top.HEURIST.edit.inputs.BibDetailFloatInput(dt, rfr, fieldValues, container);
 				break;
+			case "relationtype":
 			case "enum":
 				newInput = new top.HEURIST.edit.inputs.BibDetailDropdownInput(dt, rfr, fieldValues, container);
 				break;
@@ -1558,11 +1563,11 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.getPrimaryValue = funct
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.typeDescription = "a value from the dropdown";
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.regex = new RegExp(".");
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdValue) {
-	var termHeaderList = typeof this.recFieldlRequirements[17] == "string" ? this.recFieldlRequirements[17]: "";
+	var termHeaderList = typeof this.recFieldlRequirements[17] == "string" ? this.recFieldlRequirements[17]: "";//get DetailType non selectables
 	termHeaderList = typeof this.recFieldlRequirements[13] == "string" ? termHeaderList.concat(",",this.recFieldlRequirements[13]): termHeaderList;
 	var newInput = top.HEURIST.edit.createTermSelect(this.recFieldlRequirements[11],
 														termHeaderList,
-														top.HEURIST.terms.termsByDomainLookup.relation,
+														this.detailType[2] == "enum" ? top.HEURIST.terms.termsByDomainLookup['enum'] : top.HEURIST.terms.termsByDomainLookup['relation'],
 														(bdValue && bdValue.value ? bdValue.value : null));
 	this.addInputHelper.call(this, bdValue, newInput);
 	newInput.style.width = "auto";

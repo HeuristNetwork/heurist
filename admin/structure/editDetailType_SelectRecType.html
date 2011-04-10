@@ -128,7 +128,7 @@
 						myDataTable,
 						myDataSource,
 						arr_selection = [], // array of selected rectype ids
-						datatype,  // datatype of parent detailtype: relmarker or fieldsetmarker
+						datatype,  // datatype of parent detailtype: relmarker,resource or fieldsetmarker
 						showTimer,hideTimer;
 
 						//
@@ -179,14 +179,14 @@
 								//////////////////// create data table
 								var arr = [];
 
-								//create datatable and fill it valurs of particular group
+								//create datatable and fill it values of particular group
 								for (var rty_ID in top.HEURIST.rectypes.typedefs) {
 									if(rty_ID != "commomFieldNames" && rty_ID != "dtFieldNames")
 									{
 										var td = top.HEURIST.rectypes.typedefs[rty_ID];
 										var rectype = td.commonFields;
 
-										if(datatype=="relmarker" || rectype[10]=="1")
+										if(datatype=="relmarker" || rectype[10]=="1")//??????????????SAW what is this  (flagAsFieldSet)
 										{
 										arr.push([(arr_selection.indexOf(rty_ID)>0),
 											"<img src=\"../../common/images/rectype-icons/"+rty_ID+".gif\">",
@@ -238,7 +238,7 @@
 								});
 
 								var myColumnDefs = [
-								{ key: "selection", label: "Sel", hidden:(datatype=="fieldsetmarker"), sortable:true, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
+								{ key: "selection", label: "Sel", /*???????*/ hidden:(datatype=="fieldsetmarker")/* why???????*/, sortable:true, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
 								{ key: "icon", label: "Icon", sortable:false },
 								{ key: "name", label: "<u>Name</u>", sortable:true },
 								{ key: "description", hidden:true, sortable:false},
@@ -408,7 +408,7 @@
 										if(datatype=="fieldsetmarker"){
 											arr_selection = [data['id']];
 											window.close(data['id']);
-										}else{
+										}else{//relmarker or resource
 											arr_selection.push(data['id']);
 										}
 

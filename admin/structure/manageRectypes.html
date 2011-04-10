@@ -998,7 +998,7 @@ function editDetailTypeWindow(detailTypeID) {
 // prevents exit if there are changes
 //
 function onbeforeunload() {
-		var changed = ManageDetailTypes.hasChanges();
+		var changed = ManageRectypes.hasChanges();
 		if (changed) return "You have made changes.  If you continue, all changes will be lost.";
 }
 

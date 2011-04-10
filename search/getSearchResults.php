@@ -241,6 +241,7 @@ function loadRecordDetails(&$record) {
 			case "integer": case "float": case "boolean":
 			case "date": case "year":
 			case "enum":
+			case "relationtype":
 			$detailValue = $rd["dtl_Value"];
 			break;
 

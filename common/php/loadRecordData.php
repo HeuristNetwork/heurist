@@ -58,7 +58,14 @@ if (! defined("JSON_RESPONSE")) {
 
 	header('Content-type: text/javascript');
 }
-
+preg_match("/^.*\/([^\/\.]+)/",$_SERVER['HTTP_REFERER'],$matches);
+$refer = $matches[1];
+$isPopup = false;
+if ($refer == "formEditRecordPopup") {
+	$isPopup = true;
+}
+//error_log(print_r($_SERVER,true));
+error_log("refer = $refer  and  isPopup = ".($isPopup ? "1":"0") );
 mysql_connection_db_select(DATABASE);
 
 list($rec_id, $bkm_ID, $replaced) = getResolvedIDs(@$_REQUEST["bib_id"],@$_REQUEST['bkmk_id']);
@@ -72,7 +79,8 @@ if (! $rec_id) {
 	$record["replacedBy"] = $rec_id;
 } else {
 	$record = getBaseProperties($rec_id, $bkm_ID);
-	if (@$record["workgroupID"]  &&  $record["workgroupVisibility"] == "hidden"  &&  ! $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["user_access"][$record["workgroupID"]]) {
+//error_log("base Properties".print_r($record,true));
+	if (@$record["workgroupID"]  &&  $record[@"workgroupVisibility"] == "hidden"  &&  ! $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["user_access"][$record["workgroupID"]]) {
 		// record is hidden and user is not a member of owning workgroup
 		$record = array();
 		$record["denied"] = true;
@@ -90,12 +98,19 @@ if (! $rec_id) {
 
 ?>
 
-<?php if (! defined("JSON_RESPONSE")) { ?>
-if (! top.HEURIST) top.HEURIST = {};
-if (! top.HEURIST.edit) top.HEURIST.edit = {};
-top.HEURIST.edit.record = <?= json_format($record) ?>;
-top.HEURIST.fireEvent(window, "heurist-record-loaded");
+<?php if (! defined("JSON_RESPONSE")) {
+		if ($isPopup) {?>
+if (! window.HEURIST) window.HEURIST = {};
+if (! window.HEURIST.edit) window.HEURIST.edit = {};
+window.HEURIST.edit.record = <?= json_format($record) ?>;
+if (top.HEURIST.fireEvent) top.HEURIST.fireEvent(window, "heurist-record-loaded");
 <?php } else { ?>
+if (! window.HEURIST) window.HEURIST = {};
+if (! window.HEURIST.edit) window.HEURIST.edit = {};
+window.HEURIST.edit.record = <?= json_format($record) ?>;
+if (top.HEURIST.fireEvent) top.HEURIST.fireEvent(window, "heurist-record-loaded");
+<?php }
+	} else { ?>
 <?= json_format($record) ?>
 <?php }
 /***** END OF OUTPUT *****/

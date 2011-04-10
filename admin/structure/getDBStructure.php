@@ -73,7 +73,7 @@
 	print "<p>";
 	print "-- dty_ID, dty_Name, dty_Documentation, dty_Type, dty_HelpText, dty_ExtendedDescription, dty_Status,
 			dty_OriginatingDBID, dty_NameInOriginatingDB, dty_IDInOriginatingDB, dty_DetailTypeGroupID,
-			dty_OrderInGroup, dty_PtrTargetRectypeIDs, dty_JsonTermIDTree, dty_HeaderTermIDs,
+			dty_OrderInGroup, dty_PtrTargetRectypeIDs, dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs,
 			dty_FieldSetRecTypeID, dty_ShowInLists,\n";
 	$query = "select * from defDetailTypes";
 	$res = mysql_query($query);
@@ -94,7 +94,7 @@
 	print "-- rst_ID, rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
 			rst_DisplayOrder, rst_DisplayWidth, rst_DefaultValue, rst_RecordMatchOrder, rst_CalcFunctionID,
 			rst_RequirementType, rst_Status, rst_OriginatingDBID, rst_IDInOriginatingDB, rst_MaxValues, rst_MinValues,
-			rst_DisplayDetailTypeGroupID, rst_FilteredJsonTermIDTree, rst_AdditionalHeaderTermIDs, rst_PtrFilteredIDs, rst_OrderForThumbnailGeneration\n";
+			rst_DisplayDetailTypeGroupID, rst_FilteredJsonTermIDTree, rst_TermIDTreeNonSelectableIDs, rst_PtrFilteredIDs, rst_OrderForThumbnailGeneration\n";
 	$query = "select * from defRecStructure";
 	$res = mysql_query($query);
 	$fmt = 'defRecStructure';
@@ -113,7 +113,7 @@
 	print "<p>";
 	print "-- trm_ID, trm_Label, trm_InverseTermId, trm_Description, trm_Status, trm_OriginatingDBID,
 			trm_AddedByImport, trm_IsLocalExtension, trm_NameInOriginatingDB, trm_IDInOriginatingDB,
-			trm_ParentTermID, trm_Domain, trm_ChildCount, trm_ParentTermVocabID, trm_Depth, trm_OntID\n";
+			trm_ParentTermID, trm_Domain, trm_ChildCount, trm_Depth, trm_OntID\n";
 	$query = "select * from defTerms";
 	$res = mysql_query($query);
 	$fmt = 'defTerms';
@@ -404,13 +404,13 @@
 			$dty_NameInOriginatingDB = mysql_real_escape_string($row['dty_NameInOriginatingDB']);
 			$dty_PtrTargetRectypeIDs = mysql_real_escape_string($row['dty_PtrTargetRectypeIDs']);
 			$dty_JsonTermIDTree = mysql_real_escape_string($row['dty_JsonTermIDTree']);
-			$dty_HeaderTermIDs = mysql_real_escape_string($row['dty_HeaderTermIDs']);
+			$dty_TermIDTreeNonSelectableIDs = mysql_real_escape_string($row['dty_TermIDTreeNonSelectableIDs']);
 
 			print "('$row[dty_ID]','$dty_Name','$dty_Documentation','$row[dty_Type]','$dty_HelpText',
 			'$dty_ExtendedDescription','$row[dty_Status]','$row[dty_OriginatingDBID]',
 			'$dty_NameInOriginatingDB','$row[dty_IDInOriginatingDB]','$row[dty_DetailTypeGroupID]',
 			'$row[dty_OrderInGroup]','$dty_PtrTargetRectypeIDs','$dty_JsonTermIDTree',
-			'$dty_HeaderTermIDs','$row[dty_FieldSetRecTypeID]','$row[dty_ShowInLists]'),";
+			'$dty_TermIDTreeNonSelectableIDs','$row[dty_FieldSetRecTypeID]','$row[dty_ShowInLists]'),";
 			break;
 
 			case 'defRecStructure': // Data from the defRecStructure table
@@ -419,7 +419,7 @@
 			$rst_DisplayExtendedDescription = mysql_real_escape_string($row['rst_DisplayExtendedDescription']);
 			$rst_DefaultValue = mysql_real_escape_string($row['rst_DefaultValue']);
 			$rst_FilteredJsonTermIDTree = mysql_real_escape_string($row['rst_FilteredJsonTermIDTree']);
-			$rst_AdditionalHeaderTermIDs = mysql_real_escape_string($row['rst_AdditionalHeaderTermIDs']);
+			$rst_TermIDTreeNonSelectableIDs = mysql_real_escape_string($row['rst_TermIDTreeNonSelectableIDs']);
 			$rst_PtrFilteredIDs = mysql_real_escape_string($row['rst_PtrFilteredIDs']);
 			print "('$row[rst_ID]','$row[rst_RecTypeID]','$row[rst_DetailTypeID]','$rst_DisplayName',
 			'$rst_DisplayHelpText','$rst_DisplayExtendedDescription','$row[rst_DisplayOrder]',
@@ -427,7 +427,7 @@
 			'$row[rst_RecordMatchOrder]','$row[rst_CalcFunctionID]','$row[rst_RequirementType]',
 			'$row[rst_Status]','$row[rst_OriginatingDBID]','$row[rst_IDInOriginatingDB]',
 			'$row[rst_MaxValues]','$row[rst_MinValues]','$row[rst_DisplayDetailTypeGroupID]','$rst_FilteredJsonTermIDTree',
-			'$rst_AdditionalHeaderTermIDs','$rst_PtrFilteredIDs','$row[rst_OrderForThumbnailGeneration]'),";
+			'$rst_TermIDTreeNonSelectableIDs','$rst_PtrFilteredIDs','$row[rst_OrderForThumbnailGeneration]'),";
 			break;
 
 			case 'defTerms': // Data from the rec_details_lookup table
@@ -437,7 +437,7 @@
 			print "('$row[trm_ID]','$trm_Label','$row[trm_InverseTermId]','$trm_Description',
 			'$row[trm_Status]','$row[trm_OriginatingDBID]','$row[trm_AddedByImport]','$row[trm_IsLocalExtension]',
 			'$trm_NameInOriginatingDB','$row[trm_IDInOriginatingDB]','$row[trm_ParentTermID]','$row[trm_Domain]',
-			'$row[trm_ChildCount]','$row[trm_ParentTermVocabID]','$row[trm_Depth]','$row[trm_OntID]'),";
+			'$row[trm_ChildCount]','$row[trm_Depth]','$row[trm_OntID]'),";
 			break;
 
 			case 'defOntologies': // Data from Ontologies table

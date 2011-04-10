@@ -251,7 +251,9 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 					$bdVal = ($val && $val != "0")? "'true'" : "'false'";
 					break;
 
-				case "enum":	//saw TODO: change this to call validateEnumTerm(RectypeID, DetailTypeID) also Term limits
+				case "enum":
+				case "relationtype":	//saw TODO: change this to call validateEnumTerm(RectypeID, DetailTypeID) also Term limits
+										// also may need to separate enum from relationtype
 					// validate that the id is for the given detail type.
 					/*if (mysql_num_rows(mysql_query("select trm_ID from defTerms
 														left join defDetailTypes on dty_NativeVocabID = trm_VocabID

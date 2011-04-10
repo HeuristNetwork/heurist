@@ -140,11 +140,11 @@ function renderInputs(bibID, rectype) {
 	var innerDims = top.HEURIST.util.innerDimensions(window);
 
 	if (bibID) {
-		if (! top.HEURIST.edit.record  ||  ! top.HEURIST.edit.record.bibID) {	// shouldn't get here -- catch it at the parent frame
+		if (! parent.HEURIST.edit.record  ||  ! parent.HEURIST.edit.record.bibID) {	// shouldn't get here -- catch it at the parent frame
 			return;
 		}
 
-		var record = top.HEURIST.edit.record;
+		var record = parent.HEURIST.edit.record;
 
 		var inputs = top.HEURIST.edit.createInputsForRectype(record.rectypeID, record.bdValuesByType, allInputs);
 
@@ -389,19 +389,21 @@ document.forms[0].heuristSubmit = function() {
 
 /* Necessary to do this stuff BEFORE LOAD -- other windows have dibs on our onload handler, they will get in before we get a chance */
 window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-var bibID;
-var rectype = parseInt(window.HEURIST.parameters["rectype"]);
+var recID;
+var rectypeID = parseInt(window.HEURIST.parameters["rectype"]);
 if (parent.HEURIST  &&  parent.HEURIST.edit && parent.HEURIST.edit.record) {
-	bibID = parent.HEURIST.edit.record;
+	recID = parent.HEURIST.edit.record.recID;
+	rectypeID = parent.HEURIST.edit.record.rectypeID;
 }else if (top.HEURIST && top.HEURIST.edit && top.HEURIST.edit.record) {
-	bibID = top.HEURIST.edit.record.bibID;
+	recID = top.HEURIST.edit.record.recID;
+	rectypeID = top.HEURIST.edit.record.rectypeID;
 }else{
 	if (! parent.HEURIST) parent.HEURIST = {};
 	if (! parent.HEURIST.edit) parent.HEURIST.edit = {};
 	if (! parent.HEURIST.edit.record) parent.HEURIST.edit.record = {};
-	parent.HEURIST.edit.record.rectype = rectype;
+	parent.HEURIST.edit.record.rectypeID = rectypeID;
 }
-renderInputs(bibID, rectype);
+renderInputs(recID, rectypeID);
   </script>
  </body>
 </html>

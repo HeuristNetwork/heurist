@@ -77,7 +77,7 @@ function getResolvedIDs($recID,$bmkID) {
 	$bkm_ID = 0;
 	if (intval(@$recID)) {
 		$rec_id = intval($recID);
-		$res = mysql_query('select rec_ID, bkm_ID from
+		$res = mysql_query('select rec_ID, bkm_ID from Records
 		 left join usrBookmarks on bkm_recID=rec_ID and bkm_UGrpID='.get_user_id().' where rec_ID='.$rec_id);
 		$row = mysql_fetch_assoc($res);
 		$rec_id = intval($row['rec_ID']);
@@ -174,7 +174,7 @@ function getAllBibDetails($rec_id) {
 	                      from recDetails
 	                 left join defDetailTypes on dty_ID=dtl_DetailTypeID
 	                 left join Records on rec_ID=dtl_Value and dty_Type='resource'
-	                 left join defTerms on dty_Type='enum' and trm_ID = dtl_Value
+	                 left join defTerms on trm_ID = dtl_Value
 	                     where dtl_RecID = $rec_id order by dtl_DetailTypeID, dtl_ID");
 	$bibDetails = array();
 	while ($row = mysql_fetch_assoc($res)) {
@@ -405,7 +405,7 @@ function getTerms() {	// vocabDomain can be empty, 'reltype' or 'enum' or any fu
 	$cacheKey = HEURIST_DBNAME.":getTerms";
 	$terms = getCachedData($cacheKey);
 	if ($terms) {
-		return $terms;
+//		return $terms;
 	}
 
 	$query = "select trm_ID as ID, trm_Label as Term, if(trm_Domain like 'enum%', 'enum', 'relation') as Domain
@@ -416,7 +416,7 @@ function getTerms() {	// vocabDomain can be empty, 'reltype' or 'enum' or any fu
 	while ($row = mysql_fetch_assoc($res)) {
 			$terms['termsByDomainLookup'][$row["Domain"]][$row["ID"]] = $row['Term'];
 	}
-	$terms['treesByDomain'] = array('relation' => getTermTree("reltype","prefix"),
+	$terms['treesByDomain'] = array('relation' => getTermTree("relation","prefix"),
 									'enum' => getTermTree("enum","prefix"));
 	setCachedData($cacheKey,$terms);
 	return $terms;
@@ -675,7 +675,7 @@ function getAllRectypeStructures() {
 	$cacheKey = HEURIST_DBNAME.":AllRecTypeInfo";
 	$rtStructs = getCachedData($cacheKey);
 	if ($rtStructs) {
-		return $rtStructs;
+//		return $rtStructs;
 	}
 
 	$colNames = array("rst_RecTypeID",
@@ -696,23 +696,22 @@ function getAllRectypeStructures() {
 						"rst_TermIDTreeNonSelectableIDs",
 						"rst_CalcFunctionID",
 						"rst_Status",
-						"rst_MayModify",
 						"rst_OrderForThumbnailGeneration",
 						"dty_TermIDTreeNonSelectableIDs",
 						"dty_FieldSetRectypeID");
 
 	// get rec Structure info ordered by the detailType Group order, then by recStruct display order and then by ID in recStruct incase 2 have the same order
 	$query = "select ".join(",", $colNames)." from defRecStructure
-left join defDetailTypes on rst_DetailTypeID = dty_ID
-left join defDetailTypeGroups on
+					left join defDetailTypes on rst_DetailTypeID = dty_ID
+					left join defDetailTypeGroups on
 		dtg_ID = if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID)
 				order by rst_RecTypeID, dtg_Order, dtg_Name,  rst_DisplayOrder, rst_ID";
 
-error_log(">>>>>>>>>>>>>");
+//error_log(">>>>>>>>>>>>>");
 error_log(">".$query);
 
 	$res = mysql_query($query);
-
+error_log("error is ?? ".mysql_error($res));
 	$rtStructs = array('groups' => getRectypeGroups(),
 						'names' => array(),
 						'pluralNames' => array(),
@@ -832,7 +831,7 @@ function getAllDetailTypeStructures() {
 	$cacheKey = HEURIST_DBNAME.":AllDetailTypeInfo";
 	$dtStructs = getCachedData($cacheKey);
 	if ($dtStructs) {
-		return $dtStructs;
+//		return $dtStructs;
 	}
 
 	$dtStructs = array('groups' => getDetailTypeGroups(),

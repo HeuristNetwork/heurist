@@ -55,7 +55,7 @@ $recordTypes = array();
 while ($row = mysql_fetch_row($res)) array_push($recordTypes, $row);
 
 $res = mysql_query("select dty_ID, dty_Name, dty_HelpText, dty_Type, NULL as enums, dty_PtrTargetRectypeIDs,
-					dty_JsonTermIDTree, dty_HeaderTermIDs, dty_ExtendedDescription, dty_DetailTypeGroupID,
+					dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, dty_ExtendedDescription, dty_DetailTypeGroupID,
 					dty_FieldSetRecTypeID, dty_ShowInLists
 					from defDetailTypes");
 
@@ -139,8 +139,8 @@ foreach ($rec_types as $rec_type) {
 			intval($rdr["rst_MinValues"]),
 			$rdr["rst_DisplayDetailTypeGroupID"],
 			$rdr["rst_FilteredJsonTermIDTree"],
-			$rdr["rst_AdditionalHeaderTermIDs"],
-			$rdr["dty_HeaderTermIDs"],
+			$rdr["rst_TermIDTreeNonSelectableIDs"],
+			$rdr["dty_TermIDTreeNonSelectableIDs"],
 			$rdr["rst_PtrFilteredIDs"],
 			$rdr["rst_CalcFunctionID"],
 			$rdr["rst_OrderForThumbnailGeneration"]

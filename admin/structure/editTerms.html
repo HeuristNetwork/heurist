@@ -4,7 +4,7 @@
 /**
 * editTerms.html
 *
-* add/edit/delete terms. Treeveiew on the left side with tabviw to select domain: enum or relmarker
+* add/edit/delete terms. Treeveiew on the left side with tabview to select domain: enum or relation
 * form to edit term on the right side
 *
 * 2011-03-25
@@ -115,8 +115,8 @@ var EditTerms = (
 	var _className = "EditTerms",
 		_ver = g_version,				//version number for data representation
 		_tabView = new YAHOO.widget.TabView(),
-		_termTree1, //treeview for enum
-		_termTree2, //treeview for relmarker
+		_termTree1, //treeview for enum terms
+		_termTree2, //treeview for relation terms
 		_currTreeView,
 		_currentNode,
 		_currentDomain;
@@ -150,8 +150,8 @@ var EditTerms = (
 							content: '<div style="height:90%; max-width:300; overflow: auto;"><div id="termTree1" class="termTree ygtv-highlight"></div></div>'
 						}));
 		_tabView.addTab(new YAHOO.widget.Tab({
-							id: 'relmarker',
-							label: 'Relmarker',
+							id: 'relation',
+							label: 'Relation',
 							content: '<div style="overlay:auto"><div id="termTree2" class="termTree ygtv-highlight"></div></div>'
 						}));
 		_tabView.addListener("activeTabChange", _handleTabChange);

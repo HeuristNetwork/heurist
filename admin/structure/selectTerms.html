@@ -134,32 +134,40 @@ var detailType;
 if(top.HEURIST.detailTypes.names[detailTypeID]) {
 	detailType = top.HEURIST.detailTypes.typedefs[detailTypeID].commonFields;
 	termType = detailType[2];
-	if(!((termType == "enum") || (termType == "relmarker"))) {
-		document.getElementById("dtyName").innerHTML = "ERROR: Detailtype '" + detailType[0] + "' is of invalid type";
+	if(!termType == "enum" && !termType == "relationtype" && !termType == "relmarker") {
+		document.getElementById("dtyName").innerHTML = "ERROR: Detailtype '" + detailType[0] + "' is of invalid base type";
 		// TODO: Stop page from loading
 	}
 	else {
 		document.getElementById("dtyName").innerHTML = "Detailtype: " + top.HEURIST.detailTypes.names[detailTypeID];
-		if(termType == "relmarker") {
+		if(termType == "relmarker" || termType == "relationtype") {
 			var treesByDomain = top.HEURIST.terms.treesByDomain['relation'];
 			var termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup['relation']
 		} else if(termType == "enum") {
 			var treesByDomain = top.HEURIST.terms.treesByDomain['enum'];
 			var termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup['enum']
 		}
-		if(detailType[9]) {
-			try {
-				var existingTree = YAHOO.lang.JSON.parse(detailType[9]);
-			} catch(e) {
-				var existingTree = "";
-			}
-		} else {
-			var existingTree = "";
-		}
+		var existingTree = expandJsonStructure(detailType[9]);
 	}
 } else {
 	document.getElementById("dtyName").innerHTML = "ERROR: Detailtype was not found";
 	// TODO: Stop page from loading
+}
+
+function expandJsonStructure( jsonString ) {
+	var retStruct = "";
+	if(jsonString && !jsonString == "") {
+			try {
+			retStruct = eval(jsonString);
+			} catch(e) {
+			try {
+				retStruct = YAHOO.lang.JSON.parse(jsonString);
+			} catch(e) {
+				retStruct = "";
+			}
+		}
+	}
+	return retStruct;
 }
 
 function inExistingTree(termID) {
@@ -345,14 +353,12 @@ var termTree;
 		for (var i = 0; i < prev.children.length; i++) {
 			prev.removeChild(prev.childNodes[0]);
 		}
-		var jsonTreeString = YAHOO.lang.JSON.stringify(termIDTree);
-		var tree = YAHOO.lang.JSON.parse(jsonTreeString);
-		prev.appendChild(createTermSelect(tree, headerTermIDsList, termsByDomainLookup,null));
+		prev.appendChild(createTermSelect(termIDTree, headerTermIDsList, termsByDomainLookup,null));
 	}
 
 /**
 * Creates a select HTML object filled with an option element for each term "depth first"
-* tagged with class depthN and termHeader according to the terms tree depth and if it's id in in the headerList.
+* tagged with class depthN and termHeader according to the terms tree depth and if it's id in the headerList.
 * @author Stephen White
 * @param termIDTree an array tree of term ids
 * @param headerTermIDsList a comma separated list of term ids to be markered as headers, can be empty
@@ -361,6 +367,7 @@ var termTree;
 * @return selObj an HTML select object node
 **/
 	function createTermSelect(termIDTree, headerTermIDsList, termLookup, defaultTermID) { // Creates the preview
+		if (!termIDTree || termIDTree == "") return null;
 		var selObj = document.createElement("select");
 		var temp = (headerTermIDsList ? headerTermIDsList.split(",") : null);
 		var headers = {};
