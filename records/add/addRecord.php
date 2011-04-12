@@ -248,7 +248,7 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 		                              'rec_AddedByUGrpID' => intval($usrID),
 		                              'rec_RecTypeID' => $_REQUEST['bib_rectype'],
 		                              'rec_OwnerUGrpID' => intval($_REQUEST['bib_workgroup']),
-		                              'rec_NonOwnerVisibility' => (intval($_REQUEST['bib_workgroup'])? ((strtolower($_REQUEST['bib_visibility']) == 'hidden')? 'hidden' : 'viewable') : NULL),
+		                              'rec_NonOwnerVisibility' => (intval($_REQUEST['bib_workgroup'])? ((strtolower($_REQUEST['bib_visibility']) == 'hidden')? 'hidden' : 'viewable') : 'viewable'),
 		                              'rec_FlagTemporary' => ! ($url  ||  $_REQUEST['bkmrk_bkmk_title'])));
 		$rec_id = mysql_insert_id();
 
@@ -289,7 +289,7 @@ error_log("in add making new records");
 	                              'rec_AddedByUGrpID' => intval($usrID),
 		                      'rec_RecTypeID' => ($_REQUEST['bib_rectype']? intval(@$_REQUEST['bib_rectype']) : NULL),
 		                      'rec_OwnerUGrpID' => (intval(@$_REQUEST['bib_workgroup'])?intval(@$_REQUEST['bib_workgroup']): intval($usrID)),
-		                      'rec_NonOwnerVisibility' => (intval(@$_REQUEST['bib_workgroup'])? ((strtolower(@$_REQUEST['bib_visibility']) == 'hidden')? 'hidden' : 'viewable') : NULL),
+		                      'rec_NonOwnerVisibility' => (intval(@$_REQUEST['bib_workgroup'])? ((strtolower(@$_REQUEST['bib_visibility']) == 'hidden')? 'hidden' : 'viewable') : 'viewable'),
 	                              'rec_FlagTemporary' => ! $_REQUEST['bkmrk_bkmk_title'])); // saw BUG???
 	error_log(mysql_error());
 	$rec_id = mysql_insert_id();
