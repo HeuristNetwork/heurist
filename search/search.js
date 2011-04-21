@@ -193,7 +193,7 @@ top.HEURIST.search = {
 		var wgHTML = "";
 		var wgColor = "";
 		if (res[6]  &&  res[6] != "0" && res[6] != res[1]) {
-			linkTitle = "Restricted to workgroup " + top.HEURIST.workgroups[wgID].name + " - " + (res[7]==1? "hidden" : "read-only") + " to others";
+			linkTitle = "Owned by " + (top.HEURIST.workgroups[wgID] ? "workgroup " + top.HEURIST.workgroups[wgID].name:top.HEURIST.allUsers[wgID][0]) + " - " + (res[7]==1? "hidden" : "read-only") + " to others";
 			wgHTML = res[6];
 			wgColor = " style='color:" + ((res[7]==1)? "red" : "green") + "'";
 		}
@@ -282,7 +282,7 @@ top.HEURIST.search = {
 		var wgHTML = "";
 		var wgColor = "";
 		if (res[6]  &&  res[6] != "0" && res[6] != res[1]) {	// check if this is a usergroup owned record
-			linkTitle = "Restricted to workgroup " + top.HEURIST.workgroups[wgID].name + " - " + (res[7]==1? "hidden" : "read-only") + " to others";
+			linkTitle = "Owned by " + (top.HEURIST.workgroups[wgID] ? "workgroup " + top.HEURIST.workgroups[wgID].name:top.HEURIST.allUsers[wgID][0]) + " - " + (res[7]==1? "hidden" : "read-only") + " to others";
 			wgHTML = res[6];
 			wgColor = " style='color:" + ((res[7]==1)? "red" : "green") + "'";
 		}

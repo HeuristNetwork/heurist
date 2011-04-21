@@ -355,7 +355,7 @@ function _title_mask__get_rec_detail($rec_id, $rdt_id) {
 			else
 				$rec_details[$rec_id][$rd['dtl_DetailTypeID']] = $str;
 		} else {
-			if ($rdt_type == 'enum'){ //saw Enum change
+			if ($rdt_type == 'enum' || $rdt_type == 'relationtype'){ //substitute term for it's id
 				$relval = mysql_fetch_assoc(mysql_query("select trm_Label from defTerms where trm_ID = ".$rd['dtl_Value']));
 				$rd['dtl_Value'] = $relval['trm_Label'];
 			}
@@ -387,7 +387,7 @@ function _title_mask__get_rec_detail_requirements() {
 
 		$res = mysql_query('select rst_RecTypeID, dty_ID, lower(dty_Name) as dty_Name, dty_PtrTargetRectypeIDs
 		                      from defRecStructure left join defDetailTypes on rst_DetailTypeID=dty_ID
-		                     where rst_RequirementType in ("Required", "Recommended", "Optional")');
+		                     where rst_RequirementType in ("required", "recommended", "optional")');
 		while ($row = mysql_fetch_assoc($res)) {
 			if (@$rdr[$row['rst_RecTypeID']]) {
 				$rdr[$row['rst_RecTypeID']][$row['dty_ID']] = $row['dty_PtrTargetRectypeIDs'];

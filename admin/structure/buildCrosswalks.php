@@ -299,7 +299,7 @@
 	`rty_TitleMask` varchar(500) NOT NULL default '[title]',
 	`rty_CanonicalTitleMask` varchar(500) default 160,
 	`rty_Plural` varchar(63) default NULL,
-	`rty_Status` enum('Reserved', 'Approved', 'Pending', 'Open') NOT NULL default 'Open',
+	`rty_Status` enum('reserved', 'approved', 'pending', 'open') NOT NULL default 'open',
 	`rty_OriginatingDBID` smallint(5) unsigned default NULL,
 	`rty_NameInOriginatingDB` varchar(63) default NULL,
 	`rty_IDInOriginatingDB` smallint(5) unsigned default NULL,
@@ -338,7 +338,7 @@
 	`dty_Type` enum('freetext','blocktext','integer','date','year','relmarker','boolean','enum','relationtype','resource','float','file','geo','separator','calculated', 'fieldsetmarker') NOT NULL,
 	`dty_HelpText` varchar(255) NOT NULL default 'Please provide a short explanation for the user ...',
 	`dty_ExtendedDescription` varchar(5000) default 'Please provide an extended description for display on rollover ...',
-	`dty_Status` enum('Reserved','Approved','Pending','Open') NOT NULL default 'Open',
+	`dty_Status` enum('reserved','approved','pending','open') NOT NULL default 'open',
 	`dty_OriginatingDBID` smallint(5) unsigned,
 	`dty_NameInOriginatingDB` varchar(255),
 	`dty_IDInOriginatingDB` smallint(5) unsigned,
@@ -384,9 +384,9 @@
 	`rst_DefaultValue` varchar(63),
 	`rst_RecordMatchOrder` tinyint(1) unsigned NOT NULL default '0',
 	`rst_CalcFunctionID` tinyint(3) unsigned,
-	`rst_RequirementType` enum('Required', 'Recommended', 'Optional', 'Forbidden') NOT NULL default 'Optional',
-	`rst_Status` enum('Reserved', 'Approved', 'Pending', 'Open') NOT NULL default 'Open',
-	`rst_MayModify` enum('Locked', 'Discouraged', 'Open') NOT NULL default 'Open',
+	`rst_RequirementType` enum('required', 'recommended', 'optional', 'forbidden') NOT NULL default 'optional',
+	`rst_Status` enum('reserved', 'approved', 'pending', 'open') NOT NULL default 'open',
+	`rst_MayModify` enum('locked', 'discouraged', 'open') NOT NULL default 'open',
 	`rst_OriginatingDBID` smallint(5) unsigned,
 	`rst_IDInOriginatingDB` smallint(5) unsigned,
 	`rst_MaxValues` tinyint(3) unsigned NOT NULL default '0',
@@ -462,7 +462,7 @@
 	`ont_FullName` varchar(128) NOT NULL,
 	`ont_Description` varchar(1000),
 	`ont_RefURI` varchar(250),
-	`ont_Status` enum('Reserved','Approved','Pending','Open') NOT NULL default 'Open',
+	`ont_Status` enum('reserved','approved','pending','open') NOT NULL default 'open',
 	`ont_OriginatingDBID` smallint(5) unsigned,
 	`ont_NameInOriginatingDB` varchar(64),
 	`ont_IDInOriginatingDB` smallint(5) unsigned,
@@ -497,7 +497,7 @@
 	`rcs_SourceRectypeID` smallint(5) unsigned default NULL,
 	`rcs_TargetRectypeID` smallint(5) unsigned default NULL,
 	`rcs_Description` varchar(1000) default 'Please describe ...',
-	`rcs_Status` enum('Reserved','Approved','Pending','Open') NOT NULL default 'Open',
+	`rcs_Status` enum('reserved','approved','pending','open') NOT NULL default 'open',
 	`rcs_OriginatingDBID` smallint(5) unsigned default NULL,
 	`rcs_TermLimit` tinyint(3) unsigned default '0',
 	`rcs_IDInOriginatingDB` smallint(5) unsigned default NULL,
@@ -556,7 +556,7 @@
 	`rtg_Name` varchar(40) NOT NULL,
 	`rtg_Order` tinyint(3) unsigned zerofill NOT NULL default '255',
 	`rtg_Description` varchar(250) default NULL,
-	`rtg_Domain` enum('FunctionalGroup', 'ModelView') NOT NULL default 'FunctionalGroup',
+	`rtg_Domain` enum('functionalGroup', 'modelview') NOT NULL default 'FunctionalGroup',
 	PRIMARY KEY  (`rtg_ID`)
 	) ENGINE=InnoDB DEFAULT CHARSET=utf8";
 	mysql_query($query);
@@ -635,7 +635,7 @@
 
 	$query = "CREATE TABLE `defCalcFunctions` (
 	`cfn_ID` smallint(3) unsigned NOT NULL,
-	`cfn_Domain` enum('CalcFieldString','PluginPHP') NOT NULL default 'CalcFieldString',
+	`cfn_Domain` enum('calcfieldstring','pluginphp') NOT NULL default 'calcfieldstring',
 	`cfn_FunctionSpecification` text NOT NULL,
 	PRIMARY KEY  (`cfn_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
