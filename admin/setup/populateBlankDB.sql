@@ -13,7 +13,9 @@
 -- TO DO: After creating the structure from this file we need to:
 --
 --        1. create referential constraints with AddReferentialConstraints.sql
+--           (now already done by this file as part of the mysqldump output)
 --        2. add stored procedures from AddProceduresTriggers.sql
+--           ()riggers are included in the mysqldump, procedures are not)
 --           TO DO: review these files to make sure they run cleanly on new DB
 --        3. import content (database definitions) from
 --           HeuristScholar.org/?db=hdb_reference and if that is offline, read
@@ -22,7 +24,7 @@
 -- ------------------------------------------------------------------------------------
 --
 -- The next section of this file is a MySQLDump of H3 database structure
--- mysqldump -u root -ppassword -d hdb_sandpit4 > sandpit4.sql
+-- mysqldump -u root -ppassword -d hdb_dbname > dbname.sql
 
 -- ***************************************************************************
 -- BEWARE THE INSERTION STATEMENTS AT THE END ARE * NOT * PART OF THE DUMP
@@ -786,8 +788,8 @@ CREATE TABLE `sysIdentification` (
   `sys_eMailImapPassword` varchar(40) default NULL COMMENT 'password for imap email server',
   `sys_UGrpsDatabase` varchar(63) default NULL COMMENT 'Full name of SQL database containing user tables, null = use internal users/groups tables',
   `sys_OwnerGroupID` smallint(5) unsigned NOT NULL default '1' COMMENT 'User group which owns/administers this database, 1 by default',
-  `sys_dbName` varchar(63) NOT NULL COMMENT 'A short descriptive display name for this database, distinct from the name in the URL',
-  `sys_dbOwner` varchar(250) NOT NULL COMMENT 'Information on the owner of the database, may be a URL reference',
+  `sys_dbName` varchar(63) NOT NULL default "please enter a DB name ..." COMMENT 'A short descriptive display name for this database, distinct from the name in the URL',
+  `sys_dbOwner` varchar(250) NULL COMMENT 'Information on the owner of the database, may be a URL reference',
   `sys_dbRights` varchar(1000) NOT NULL default 'Please define ownership and rights here ...' COMMENT 'A statement of ownership and copyright for this database and content',
   `sys_dbDescription` varchar(1000) default NULL COMMENT 'A longer description of the content of this database',
   `sys_SyncDefsWithDB` varchar(63) default NULL COMMENT 'The name of the SQL database with which local definitions are to be synchronised',
@@ -902,6 +904,7 @@ CREATE TABLE `sysUsrGrpLinks` (
   CONSTRAINT `sysUsrGrpLinks_ibfk_2` FOREIGN KEY (`ugl_GroupID`) REFERENCES `sysUGrps` (`ugr_ID`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=4349 DEFAULT CHARSET=utf8 COMMENT='Identifies groups to which a user belongs and their role in ';
 SET character_set_client = @saved_cs_client;
+
 
 /*!50003 SET @SAVE_SQL_MODE=@@SQL_MODE*/;
 
@@ -1187,6 +1190,9 @@ SET character_set_client = @saved_cs_client;
 
 
 -- **************************************************************************************************
+-- **************************************************************************************************
+-- **************************************************************************************************
+
 
 -- INSERTION OF STANDARD DATA FOR A NEW DATABASE
 -- Copied from H2 to H3 datbase conversion script
@@ -1203,20 +1209,6 @@ SET character_set_client = @saved_cs_client;
   VALUES (1,0,3,0,0,NULL,NULL,NULL,NULL,NULL,NULL,1);
   -- 0 is everyone, 1 is the owning admins group, 2 is default dbAdmin user
 
-  
-INSERT INTO  defLanguages  (lng_Name,lng_NISOZ3953,lng_ISO639) 
-VALUES 
-('English','ENG','EN'),('Arabic','ARA','AR'), ('Yiddish','YID','YI'),('Hebrew','HEB','HE'),('French','FRE', 'FR'),
-('Italian','ITA','IT'),('Spanish','SPA','ES'),('Dutch','DUT','NL'),('Danish','DAN','DA'),
-('Norwegian','NOR','NO'),('Portuguese','POR','PT'),('German','GER','DE'),('Greek','GRE','EL'),
-('Turkish','TUR','TR'),('Russian','RUS','RU'),('Ukranian','UKR','UK'),('Swedish','SWE','SV'),
-('Finish','FIN','FI'),('Latvian','LAV','LV'),('Estonian','EST','ET'),('Hungarian','HUN','HU'),
-('Czech','CZE','CS'),('Polish','POL','PL'),('Slovak','SLO','SK'),('Serbian','SCR','SR'),
-('Croatian','SCC','HR'),('Swahili','SWA','SW'),('Chinese','CHI','ZH'),('Indonesian','IND','ID'),
-('Hindi','HIN','HI'),('Japanese','JPN','JA'),('Malay','MAL','MS'),('Korean','KOR','KO'),
-('Vietnamese','VIE','VI'),('Thai','THA','TH'),('Khmer','CAM','KM');
-
-
 INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMail,ugr_Enabled,ugr_FirstName,ugr_LastName)
  VALUES (1,'Database owners',
  'Group 1 owns databases by default. DO NOT DELETE.',
@@ -1228,8 +1220,7 @@ INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMa
   -- Note: ugr_id=2 is set as the database admin in the sysUsrGrpLinks table
   -- there can be multipl admins for a database
 
-
--- Duplicate of insertion higher up
+  -- Duplicate of insertion higher up
 -- Insert a row to define the link between group 1 (dbowners) and user 2 (dbAdmin)
 INSERT IGNORE INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID,ugl_Role) VALUES (2,1,'admin');
 
@@ -1243,24 +1234,6 @@ INSERT INTO defRecTypes (rty_ID, rty_Name, rty_OrderInGroup, rty_Description, rt
 (0, 'System: Dummy rectype, details for inclusion in all record type', 0, 
 'System: dummy rectype provides the detail specifications for shared fields across all record types ', '[title]', 
 '160', 'Details for inclusion in all record types', 'Reserved', 0, 0, '', 0, 1, NULL);
-
-
--- defVocabularies table deprecated march 2011          
-INSERT Ignore INTO defVocabularies(vcb_ID,vcb_Name,vcb_Description,vcb_RefURL,vcb_Status,vcb_Domain) 
-   VALUES
-   -- The 0 value row seems to cause a lot of problems with auto_incrementing, do we need it?
-   -- (0,'Null vocabulary','An empty vocabulary which can be complemented by specific terms',NULL,'Reserved','EnumValues'),
-   (1,'Generic Heurist Relationships','A default vocabulary for all relationship types not set more specifically',NULL,'reserved','relationshiptypes'),
-   (2,'RT Temporal', 'Temporal relationship concepts developed by the Rethinking Timelines project', 'http://www.timemap.net/timelines/','reserved','relationshiptypes'),
-   (3,'Organisational', 'The relationships between organizations and staff etc.', NULL,'reserved','relationshiptypes'),
-   (4,'Persons', 'The relationships between people', NULL,'reserved','relationshiptypes'),
-   (5,'Languages','Standard language codes for common languages','http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes','reserved','enumvalues');
-
-ALTER TABLE defVocabularies
-  CHANGE vcb_ID vcb_ID smallint unsigned NOT NULL auto_increment
-          comment "Vocabulary primary ID, referenced in terms and constraints";
-
-ALTER TABLE defVocabularies auto_increment=1000;
 
 
 Insert IGNORE INTO defOntologies (ont_ID,ont_ShortName,ont_FullName,ont_Description,ont_RefURI)
@@ -1292,45 +1265,61 @@ INSERT INTO  defDetailTypeGroups (dtg_ID,dtg_Name,dtg_Description)
   ('6','Classification','Classificatory pointer fields such as theme, discipline or target population');
      
 
+
+INSERT INTO  defLanguages  (lng_Name,lng_NISOZ3953,lng_ISO639)
+VALUES
+('English','ENG','EN'),('Arabic','ARA','AR'), ('Yiddish','YID','YI'),('Hebrew','HEB','HE'),('French','FRE', 'FR'),
+('Italian','ITA','IT'),('Spanish','SPA','ES'),('Dutch','DUT','NL'),('Danish','DAN','DA'),
+('Norwegian','NOR','NO'),('Portuguese','POR','PT'),('German','GER','DE'),('Greek','GRE','EL'),
+('Turkish','TUR','TR'),('Russian','RUS','RU'),('Ukranian','UKR','UK'),('Swedish','SWE','SV'),
+('Finish','FIN','FI'),('Latvian','LAV','LV'),('Estonian','EST','ET'),('Hungarian','HUN','HU'),
+('Czech','CZE','CS'),('Polish','POL','PL'),('Slovak','SLO','SK'),('Serbian','SCR','SR'),
+('Croatian','SCC','HR'),('Swahili','SWA','SW'),('Chinese','CHI','ZH'),('Indonesian','IND','ID'),
+('Hindi','HIN','HI'),('Japanese','JPN','JA'),('Malay','MAL','MS'),('Korean','KOR','KO'),
+('Vietnamese','VIE','VI'),('Thai','THA','TH'),('Khmer','CAM','KM');
+
+
 -- Languages inserted as specific set of codes for use in translation
+INSERT defTerms (trm_ID,trm_Label,trm_Description,trm_Status,trm_depth)
+     Values (3000,'Language [vocab]','Common languages vocabulary','Reserved','0');
 INSERT INTO defTerms(trm_ID,trm_Label,trm_ParentTermID,trm_Status) 
 VALUES 
-(2501,'English (EN, ENG)',5,'reserved'),
-(2502,'Arabic (AR, ARA)',5,'reserved'),
-(2503,'Yiddish (YI, YID)',5,'reserved'),
-(2504,'Hebrew (HE, HEB)',5,'reserved'),
-(2505,'French (FR, FRE)',5,'reserved'),
-(2506,'Italian (IT, ITA)',5,'reserved'),
-(2507,'Spanish (ES, SPA)',5,'reserved'),
-(2508,'Dutch (NL, DUTENG)',5,'reserved'),
-(2509,'Danish (DA, DAN)',5,'reserved'),                                         
-(2510,'Norwegian (NO, NOR)',5,'reserved'),
-(2511,'Portuguese} (PT, POR)',5,'reserved'),
-(2512,'German (DE, GER)',5,'reserved'),
-(2513,'Greek (EL, GRE)',5,'reserved'),
-(2514,'Turkish (TR, TUR)',5,'reserved'),
-(2515,'Russian (RU, RUS)',5,'reserved'),
-(2516,'Ukrainian (UK, UKR)',5,'reserved'),
-(2517,'Swedish (SV, SWE)',5,'reserved'),
-(2518,'Finish (FI, FIN)',5,'reserved'),
-(2519,'Latvian (LV, LAV)',5,'reserved'),
-(2520,'Estonian (ET, EST)',5,'reserved'),
-(2521,'Hungarian (HU, HUN)',5,'reserved'),
-(2522,'Czech (CS, CZE)',5,'reserved'),
-(2523,'Polish (PL, ENG)',5,'reserved'),
-(2524,'Slovak (EN, POL)',5,'reserved'),
-(2525,'Serbian (EN, SCR)',5,'reserved'),
-(2526,'Croatian (HR, SCC)',5,'reserved'),
-(2527,'Swahili (SW, SWA)',5,'reserved'),
-(2528,'Chinese (ZH, CHI)',5,'reserved'),
-(2529,'Indonesian (ID, IND)',5,'reserved'),
-(2530,'Hindi (HI, HIN)',5,'reserved'),
-(2531,'Japanese (JA, JPN)',5,'reserved'),
-(2532,'Malay (MS, MAL)',5,'reserved'),
-(2533,'Korean (KO, KOR)',5,'reserved'),
-(2534,'Vietnamese (VI, VIE)',5,'reserved'),
-(2535,'Thai (TH, THA)',5,'reserved'),
-(2536,'Khmer (KM, CAM)',5,'reserved');
+(2501,'English (EN, ENG)',3000,'reserved'),
+(2502,'Arabic (AR, ARA)',3000,'reserved'),
+(2503,'Yiddish (YI, YID)',3000,'reserved'),
+(2504,'Hebrew (HE, HEB)',3000,'reserved'),
+(2505,'French (FR, FRE)',3000,'reserved'),
+(2506,'Italian (IT, ITA)',3000,'reserved'),
+(2507,'Spanish (ES, SPA)',3000,'reserved'),
+(2508,'Dutch (NL, DUTENG)',3000,'reserved'),
+(2509,'Danish (DA, DAN)',3000,'reserved'),
+(2510,'Norwegian (NO, NOR)',3000,'reserved'),
+(2511,'Portuguese} (PT, POR)',3000,'reserved'),
+(2512,'German (DE, GER)',3000,'reserved'),
+(2513,'Greek (EL, GRE)',3000,'reserved'),
+(2514,'Turkish (TR, TUR)',3000,'reserved'),
+(2515,'Russian (RU, RUS)',3000,'reserved'),
+(2516,'Ukrainian (UK, UKR)',3000,'reserved'),
+(2517,'Swedish (SV, SWE)',3000,'reserved'),
+(2518,'Finish (FI, FIN)',3000,'reserved'),
+(2519,'Latvian (LV, LAV)',3000,'reserved'),
+(2520,'Estonian (ET, EST)',3000,'reserved'),
+(2521,'Hungarian (HU, HUN)',3000,'reserved'),
+(2522,'Czech (CS, CZE)',3000,'reserved'),
+(2523,'Polish (PL, ENG)',3000,'reserved'),
+(2524,'Slovak (EN, POL)',3000,'reserved'),
+(2525,'Serbian (EN, SCR)',3000,'reserved'),
+(2526,'Croatian (HR, SCC)',3000,'reserved'),
+(2527,'Swahili (SW, SWA)',3000,'reserved'),
+(2528,'Chinese (ZH, CHI)',3000,'reserved'),
+(2529,'Indonesian (ID, IND)',3000,'reserved'),
+(2530,'Hindi (HI, HIN)',3000,'reserved'),
+(2531,'Japanese (JA, JPN)',3000,'reserved'),
+(2532,'Malay (MS, MAL)',3000,'reserved'),
+(2533,'Korean (KO, KOR)',3000,'reserved'),
+(2534,'Vietnamese (VI, VIE)',3000,'reserved'),
+(2535,'Thai (TH, THA)',3000,'reserved'),
+(2536,'Khmer (KM, CAM)',3000,'reserved');
 
 ALTER TABLE defTerms
  comment "Terms by detail type and the vocabulary they belong to",
@@ -1338,12 +1327,6 @@ ALTER TABLE defTerms
  CHANGE trm_ID trm_ID integer  unsigned NOT NULL auto_increment
         comment "Primary key, the term code used in the detail record";
      
--- Standard relationship record constraints
-Insert into  defRelationshipConstraints
-   (rcs_ID,rcs_Status, rcs_TermID, rcs_SourceRectypeID, rcs_TargetRectypeID,
-    rcs_ReltypeVocabIDs, rcs_Description)
-   Values (200,'reserved',200,0,0,200,'Standard Heurist relationship types between any record types');
-
 ALTER TABLE defRelationshipConstraints
         comment "Constrain target-rectype/vocabularies/values for a pointer detail type",
  AUTO_INCREMENT=1000, -- reserve first 1000 for Heurist standard metadata

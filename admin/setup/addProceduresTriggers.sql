@@ -140,31 +140,7 @@ DELIMITER ;
 
 -- ------------------------------------------------------------------------------
 
-DELIMITER $$
 
--- This trigger was missing, added back 24/3/2011
-
-DROP Trigger IF EXISTS insert_record_trigger$$
-
-CREATE DEFINER=`root`@`localhost` TRIGGER `insert_record_trigger`
-AFTER INSERT ON `Records`
-FOR EACH ROW
-begin 
-    insert into archiveRecords (arec_ID, arec_UGrpID, arec_Date, arec_URL,
-                                arec_Title, arec_ScratchPad, arec_RecTypeID) 
-        values (NEW.rec_ID, @logged_in_user_id, now(),
-                NEW.rec_URL, NEW.rec_Title, NEW.rec_ScratchPad, NEW.rec_RecTypeID); 
-        set @rec_version := last_insert_id(); 
-    insert into usrRecentRecords (rre_UGrpID, rre_RecID, rre_Time) 
-                    values (@logged_in_user_id, NEW.rec_ID, now()); 
-    set @rec_id := last_insert_id(NEW.rec_ID); 
-    if NEW.rec_RecTypeID = 52 then 
-        insert into recRelationshipsCache (rrc_RecID) 
-        values (NEW.rec_ID); 
-    end if;
-end$$
-
-DELIMITER ;
 DELIMITER $$
 
 	DROP TRIGGER IF EXISTS insert_Details_precis_trigger$$
@@ -258,6 +234,9 @@ DELIMITER $$
 	FOR EACH ROW
 	begin
 	-- need to change this to check the rectype's type = relationship
+	insert into usrRecentRecords (rre_UGrpID, rre_RecID, rre_Time)
+								values (@logged_in_user_id, NEW.rec_ID, now());
+	set @rec_id := last_insert_id(NEW.rec_ID);
 		if NEW.rec_RecTypeID = 52 then
 			--  need to also save relationship records RecTypeID
 			insert into recRelationshipsCache (rrc_RecID) values (NEW.rec_ID);
@@ -305,7 +284,8 @@ DELIMITER $$
 	begin
 		if @suppress_update_trigger is null then
 			insert into usrRecentRecords (rre_UGrpID, rre_RecID, rre_Time)
-				values (@logged_in_user_id, NEW.rec_ID, now());
+				values (@logged_in_user_id, NEW.rec_ID, now())
+				on duplicate key update rre_Time = now();
 		end if;
 	-- need to change this to check the rectype's type = relationship
 		if NEW.rec_RecTypeID = 52 then
@@ -604,3 +584,25 @@ DROP TRIGGER IF EXISTS defDetailTypeGroups_delete;
 	AFTER DELETE ON `defDetailTypeGroups`
 	FOR EACH ROW
 		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defDetailTypeGroups";
+
+-- New triggers from Artem 8/4/11
+
+DROP TRIGGER IF EXISTS defDetailTypes_delete;
+
+        CREATE
+        DEFINER=`root`@`localhost`
+        TRIGGER `defDetailTypes_delete`
+        AFTER DELETE ON `defDetailTypes`
+        FOR EACH ROW
+                update sysTableLastUpdated set tlu_DateStamp=now() where
+tlu_TableName="defDetailTypes";
+
+DROP TRIGGER IF EXISTS defRecTypes_delete;
+
+        CREATE
+        DEFINER=`root`@`localhost`
+        TRIGGER `defRecTypes_delete`
+        AFTER DELETE ON `defRecTypes`
+        FOR EACH ROW
+                update sysTableLastUpdated set tlu_DateStamp=now() where
+tlu_TableName="defRecTypes";
