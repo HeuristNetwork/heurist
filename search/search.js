@@ -1388,7 +1388,7 @@ top.HEURIST.search = {
 			var query_string = '?ver='+(p['ver'] || "") + '&w=all&q=ids:' +
 				recIds.join(",") +
 				'&stype='+(p['stype'] || "") +
-				'&instance='+(p['instance'] || "");
+				'&db='+(p['db'] || "");
 			query_string = encodeURI(query_string);
 			url = top.HEURIST.basePath+ "viewers/map/showGMapWithTimeline.html" + query_string;
 			// set frame source to url
