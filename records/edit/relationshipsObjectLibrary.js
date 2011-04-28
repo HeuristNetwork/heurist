@@ -87,7 +87,8 @@ function countObjElements(obj) {
 */
 Relationship.prototype.edit = function() {
 	var thisRef = this;
-	top.HEURIST.util.popupURL(window, top.HEURIST.basePath + "records/edit/formEditRecordPopup.html?bib_id="+this.relationshipRec.relnID,
+	top.HEURIST.util.popupURL(window, top.HEURIST.basePath + "records/edit/formEditRecordPopup.html?bib_id="+this.relationshipRec.relnID +
+		"&db="+(top.HEURIST.parameters.db?top.HEURIST.parameters.db : (top.HEURIST.database.name? top.HEURIST.database.name:"")),
 	{ callback: function(newRecTitle, newDetails) {
 			if (newRecTitle) {	//saw this gets a title from the record which does match the inital title format and mini-edit always returns a title.
 				thisRef.titleSpan.innerHTML ="";

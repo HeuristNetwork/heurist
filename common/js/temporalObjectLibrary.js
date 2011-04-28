@@ -35,7 +35,7 @@ function Temporal (strInitTemporal) {
 			return;
 		}
 		Temporal.parse(that, _strTemporal);
-	};
+	}
 
 	//public members
 	var that = {
@@ -51,13 +51,14 @@ function Temporal (strInitTemporal) {
 		// function toString  returns an encode serialized string representation of the temporal
 		toString: function () {
 			var temp = "|VER=" + _ver + "|TYP=" + _type;
-			for ( var i in _dates) {
+			var i;
+			for ( i in _dates) {
 				temp += "|" + i + "=" + _dates[i].toString();
 			}
-			for ( var i in _durations) {
+			for ( i in _durations) {
 				temp += "|" + i + "=" + _durations[i].toString();
 			}
-			for ( var i in _fields) {
+			for ( i in _fields) {
 				temp += "|" + i + "=" + _fields[i];
 			}
 			return temp;
@@ -101,11 +102,11 @@ function Temporal (strInitTemporal) {
 
 		setType: function (type) {
 			type = type.toLowerCase();
-			if ( type != "u" && type != "s" && type != "c" && type != "f" && type != "p" && type != "d") {
+			if ( type !== "u" && type !== "s" && type !== "c" && type !== "f" && type !== "p" && type !== "d") {
 				return null;
 			}
 
-			return _type = type;
+			return (_type = type);
 		},
 
 		setField: function (code,value) {
@@ -127,7 +128,7 @@ function Temporal (strInitTemporal) {
 
 		setTDuration: function (code, tDur) {
 			if ( Temporal.tDurationDict[code] ) {
-				if (typeof tDur == "object" && typeof tDur.getClass == "function" && tDur.getClass() == "TemporalDuration") {
+				if (typeof tDur === "object" && typeof tDur.getClass === "function" && tDur.getClass() === "TemporalDuration") {
 					var temp = null;
 					if ( _durations[code] ) {
 						temp = _durations[code];
@@ -152,7 +153,7 @@ function Temporal (strInitTemporal) {
 
 		setTDate: function (code,tDate) {
 			if ( Temporal.tDateDict[code] ) {
-				if (typeof tDate == "object" && typeof tDate.getClass == "function" && tDate.getClass() == "TemporalDate") {
+				if (typeof tDate === "object" && typeof tDate.getClass === "function" && tDate.getClass() === "TemporalDate") {
 					var temp = null;
 					if ( _dates[code] ) {
 						temp = _dates[code];
@@ -262,7 +263,7 @@ Temporal.parse = function () {
 		}
 
 		// if a null or empty string passed in then return an empty Temporal or the passed in Temporal object.
-		if (!str || str == "" ) {
+		if (!str || str === "" ) {
 			return temporal;
 		}
 
@@ -274,7 +275,9 @@ Temporal.parse = function () {
 				fieldType = "DAT";	// save string as a TDate object
 			}
 			catch(e) {	// save string in COM field and keep an empty simple date temporal
-				if(str.replace(/\|VER=(\d)*\|TYP=./,'')=="") return; //empty temporal string
+				if(str.replace(/\|VER=(\d)*\|TYP=./,'')==="") {
+					return; //empty temporal string
+				}
 				fieldType = "COM";
 			}
 			temporal.clear(str);  // clear out all the oold stuff
@@ -288,7 +291,7 @@ Temporal.parse = function () {
 		str = str.replace(/VER=[^\|]+\|?/,"");
 
 		var type = str.match(/TYP=(.)\|?/); // match for TYP followed by a single letter defining the temporal type followed optionally by a | vertical bar
-		if (type && type.length == 2) {
+		if (type && type.length === 2) {
 			if ( temporal.setType(type[1])) {
 				str = str.replace(/TYP=[^\|]+\|?/,"");
 				type = type[1];
@@ -300,10 +303,10 @@ Temporal.parse = function () {
 		}
 
 		var fields = Temporal.getFieldsForString(type,str);  // get the list of field headers for this type
-		var val;
-		for (var i=0; i < fields.length; i++) {
+		var val,i;
+		for (i=0; i < fields.length; i++) {
 			val = str.match(new RegExp("\\|?" + fields[i] + "=([^\\|]+)","i"));
-			if (val && val.length == 2) {
+			if (val && val.length === 2) {
 				temporal.addObjForString(fields[i],val[1]);
 			}
 		}
@@ -342,9 +345,9 @@ Temporal.profiles = {	0	:	"Flat",
 						3	:	"Slow Finish"
 };
 
-Temporal.tDateDict = {	"DAT" 	:	"ISO DateTime",
-						"BPD" 	:	"Before Present (1950) Date",
-						"BCE" 	:	"Before Current Era",
+Temporal.tDateDict = {	"DAT"	:	"ISO DateTime",
+						"BPD"	:	"Before Present (1950) Date",
+						"BCE"	:	"Before Current Era",
 						"TPQ"	:	"Terminus Post Quem",
 						"TAQ"	:	"Terminus Ante Quem",
 						"PDB"	:	"Probable begin",
@@ -408,15 +411,16 @@ Temporal.isValidFormat = function ( str ) {
 	}
 	var type = str.match(/TYP=(.)/)[1],
 		map = Temporal.typeFieldMap[type],
-		headers = str.match(/\D\D\D=/g).join("");
+		headers = str.match(/\D\D\D=/g).join(""),
+		i,j;
 	if (headers.search("VER=") !== -1) { // must have a version number
 		headers = headers.replace("VER=","");
 		if (headers.search("TYP=") !== -1) { // must have a type
 			headers = headers.replace("TYP=","");
-			for (var i=0; i < map.req.length; i++) { // for each required fields pattern
+			for (i=0; i < map.req.length; i++) { // for each required fields pattern
 				var temp = headers,
 					valid = true;
-				for (var j=0; j < map.req[i].length; j++) { // must have all require fields
+				for (j=0; j < map.req[i].length; j++) { // must have all require fields
 					if (temp.search(map.req[i][j] + "=") !== -1) {
 						temp = temp.replace(map.req[i][j] + "=","");
 					} else {
@@ -425,10 +429,10 @@ Temporal.isValidFormat = function ( str ) {
 					}
 				}
 				if (valid) {  // any fields left should be optional
-					for (var j=0; j < map.opt.length; j++) {
+					for (j=0; j < map.opt.length; j++) {
 						temp = temp.replace(map.opt[j] + "=","");
 					}
-					if ( temp.search(/\S/) == -1) { //  should be nothing left, anything left is unspecified and therefore illegal
+					if ( temp.search(/\S/) === -1) { //  should be nothing left, anything left is unspecified and therefore illegal
 						return true;
 					}
 				}
@@ -436,7 +440,7 @@ Temporal.isValidFormat = function ( str ) {
 		}
 	}
 	return false;
-}
+};
 
 Temporal.checkValidity = function ( temporal ) {
 	if (!temporal || !temporal.isA || !temporal.isA("Temporal") || temporal.getVersion()>g_version) {
@@ -446,13 +450,14 @@ Temporal.checkValidity = function ( temporal ) {
 	var map = Temporal.typeFieldMap[type];
 	var ret = [false,[],[],""];
 	var headers = temporal.toString().match(/\D\D\D=/g).join("");
+	var i,j;
 	headers = headers.replace("VER=","");
 	headers = headers.replace("TYP=","");
-	for (var i=0; i < map.req.length; i++) { // for each required fields pattern
+	for (i=0; i < map.req.length; i++) { // for each required fields pattern
 		var temp = headers;
 		var valid = true;
 
-		for (var j=0; j < map.req[i].length; j++) { // must have all require fields
+		for (j=0; j < map.req[i].length; j++) { // must have all require fields
 			if (temp.search(map.req[i][j] + "=") !== -1) {
 				temp = temp.replace(map.req[i][j] + "=","");
 			} else {
@@ -466,7 +471,7 @@ Temporal.checkValidity = function ( temporal ) {
 		}
 
 		if (valid) {  // remove any optional fields
-			for (var j=0; j < map.opt.length; j++) {
+			for (j=0; j < map.opt.length; j++) {
 				temp = temp.replace(map.opt[j] + "=","");
 			}
 			if ( temp.length > 1) { //  caller wants the list of extra codes in the valid case.
@@ -678,43 +683,43 @@ var TDate = function (strDate) {
 					case " hh":
 					case "Thh":
 					case "hh":
-						return _hours ? (format.length == 3? format[0] : "") + frmPart((_hours < 13 ? _hours : (_hours - 12)),2) : "";
+						return _hours ? (format.length === 3? format[0] : "") + frmPart((_hours < 13 ? _hours : (_hours - 12)),2) : "";
 					case " h":
 					case "Th":
 					case "h":
-						return _hours ? (format.length == 2? format[0] : "") + (_hours < 13 ? _hours : (_hours - 12)) : "";
+						return _hours ? (format.length === 2? format[0] : "") + (_hours < 13 ? _hours : (_hours - 12)) : "";
 					case " HH":
 					case "THH":
 					case "HH":
-						return _hours ? (format.length == 3? format[0] : "") + frmPart(_hours,2) : "";
+						return _hours ? (format.length === 3? format[0] : "") + frmPart(_hours,2) : "";
 					case " H":
 					case "TH":
 					case "H":
-						return _hours ? (format.length == 2? format[0] : "") + _hours : "";
+						return _hours ? (format.length === 2? format[0] : "") + _hours : "";
 					case " mm":
 					case ":mm":
 					case ".mm":
 					case ",mm":
 					case "mm":
-						return _minutes ? (format.length == 3? format[0] : "") + frmPart(_minutes,2) : "";
+						return _minutes ? (format.length === 3? format[0] : "") + frmPart(_minutes,2) : "";
 					case " m":
 					case ":m":
 					case ".m":
 					case ",m":
 					case "m":
-						return _minutes ? (format.length == 2? format[0] : "") + _minutes: "";
+						return _minutes ? (format.length === 2? format[0] : "") + _minutes: "";
 					case " ss":
 					case ":ss":
 					case ".ss":
 					case ",ss":
 					case "ss":
-						return _seconds ? (format.length == 3? format[0] : "") + frmPart(_seconds,2) : "";
+						return _seconds ? (format.length === 3? format[0] : "") + frmPart(_seconds,2) : "";
 					case " s":
 					case ":s":
 					case ".s":
 					case ",s":
 					case "s":
-						return _seconds ? (format.length == 2? format[0] : "") + _seconds : "";
+						return _seconds ? (format.length === 2? format[0] : "") + _seconds : "";
 					case " sss":
 					case ":sss":
 					case ".sss":
@@ -735,12 +740,12 @@ var TDate = function (strDate) {
 					case "-dd":
 					case "/dd":
 					case "dd":
-						return _day ? (format.length == 3? format[0] : "") + frmPart(_day,2) : "";
+						return _day ? (format.length === 3? format[0] : "") + frmPart(_day,2) : "";
 					case " d":
 					case "-d":
 					case "/d":
 					case "d":
-						return _day ? (format.length == 2? format[0] : "") + _day : "";
+						return _day ? (format.length === 2? format[0] : "") + _day : "";
 					case " MMMM":
 					case "MMMM":
 						return _month ? TDate.getMonthName(_month) : "";
@@ -751,12 +756,12 @@ var TDate = function (strDate) {
 					case "-MM":
 					case "/MM":
 					case "MM":
-						return _month ? (format.length == 3 && _year ? format[0] : "") + frmPart(_month,2) : "";
+						return _month ? (format.length === 3 && _year ? format[0] : "") + frmPart(_month,2) : "";
 					case " M":
 					case "-M":
 					case "/M":
 					case "M":
-						return _month ? (format.length == 2? format[0] : "") + _month : "";
+						return _month ? (format.length === 2? format[0] : "") + _month : "";
 					case " t":
 					case "t":
 						return  (format[0] === " " ? " " : "") + (_hours < 12 ? "A" : "P");
@@ -779,9 +784,9 @@ var TDate = function (strDate) {
 		},
 
 		setTDate: function (date) {
-			if (typeof date == "string") {  // should be and encode string
+			if (typeof date === "string") {  // should be and encode string
 				 TDate.parse(date);
-			} else if (typeof date == "object" && typeof date.getClass == "function" && date.getClass() == "TemporalDate") {  //
+			} else if (typeof date === "object" && typeof date.getClass === "function" && date.getClass() === "TemporalDate") {  //
 				_origString = date.getOrigString();
 				_year = date.getYear();
 				_month = date.getYear();
@@ -808,7 +813,7 @@ var TDate = function (strDate) {
 		},
 
 		setYear: function (str) {
-			if ( str != null && str != "" ) {
+			if ( str !== null && str !== "" ) {
 				if ( isNaN(str)|| !TDate.validateYear(Number(str))) {
 					throw " TDate exception - invalid string supplied to setYear() - " + str;
 				}
@@ -817,7 +822,7 @@ var TDate = function (strDate) {
 		},
 
 		setMonth: function (str) {
-			if ( str != null && str != "" ) {
+			if ( str !== null && str !== "" ) {
 				if ( isNaN(str) || !TDate.validateMonth(Number(str))) {
 					throw " TDate exception - invalid string supplied to setMonth() - " + str;
 				}
@@ -826,7 +831,7 @@ var TDate = function (strDate) {
 		},
 
 		setDay: function (str) {
-			if ( str != null && str != "" ) {
+			if ( str !== null && str !== "" ) {
 				if ( isNaN(str) || !TDate.validateDay(Number(str),_year ,_month)) {
 					throw " TDate exception - invalid string supplied to setDay() - " + str;
 				}
@@ -835,7 +840,7 @@ var TDate = function (strDate) {
 		},
 
 		setHours: function (str) {
-			if ( str != null && str != "" ) {
+			if ( str !== null && str !== "" ) {
 				if ( isNaN(str) || !TDate.validateHour(Number(str))) {
 					throw " TDate exception - invalid string supplied to setHours() - " + str;
 				}
@@ -844,7 +849,7 @@ var TDate = function (strDate) {
 		},
 
 		setMinutes: function (str) {
-			if ( str != null && str != "" ) {
+			if ( str !== null && str !== "" ) {
 				if ( isNaN(str) || !TDate.validateMinute(Number(str))) {
 					throw " TDate exception - invalid string supplied to setMinutes() - " + str;
 				}
@@ -853,7 +858,7 @@ var TDate = function (strDate) {
 		},
 
 		setSeconds: function (str) {
-			if ( str != null && str != "" ) {
+			if ( str !== null && str !== "" ) {
 				if ( isNaN(str) || !TDate.validateSecond(Number(str))) {
 					throw " TDate exception - invalid string supplied to setSeconds() - " + str;
 				}
@@ -862,7 +867,7 @@ var TDate = function (strDate) {
 		},
 
 		setMilliseconds: function (str, sep) {
-			if ( str != null && str != "" ) {
+			if ( str !== null && str !== "" ) {
 				if ( isNaN(str) || !TDate.validateMillisecond(Number(str))) {
 					throw " TDate exception - invalid string supplied to setMilliseconds() - " + str;
 				}
@@ -878,7 +883,7 @@ var TDate = function (strDate) {
 			if (!h || !h[0] || !h[2] || h[2] > 23 || h[3] > 59) {
 					throw " TDate exception - invalid string supplied to setTimezone() - " + str;
 			} else {
-				_tzOffset = ( ( h[1] == "-" ? "-" : "+") + h[2] + (h[3] ? h[3] : "") );
+				_tzOffset = ( ( h[1] === "-" ? "-" : "+") + h[2] + (h[3] ? h[3] : "") );
 			}
 		},
 
@@ -892,17 +897,17 @@ var TDate = function (strDate) {
 				return 0;
 			}
 			ret = comp(this.getYear(), tDate2.getYear());
-			if (ret == 0) {
+			if (ret === 0) {
 				ret = comp(this.getMonth(), tDate2.getMonth());
-				if (ret == 0) {
+				if (ret === 0) {
 					ret = comp(this.getDay(), tDate2.getDay());
-					if (ret == 0) {
+					if (ret === 0) {
 						ret = comp(this.getHours(), tDate2.getHours());
-						if (ret == 0) {
+						if (ret === 0) {
 							ret = comp(this.getMinutes(), tDate2.getMinutes());
-							if (ret == 0) {
+							if (ret === 0) {
 								ret = comp(this.getSeconds(), tDate2.getSeconds());
-								if (ret == 0) {
+								if (ret === 0) {
 									ret = comp(this.getMilliseconds(), tDate2.getMilliseconds());
 								}
 							}
@@ -956,7 +961,7 @@ TDate.parse = function () {
 		}
 
 		// if a null string passed in then return an empty TDate or the passed in TDate object.
-		if (!str || str == "") {
+		if (!str || str === "") {
 			return tDate;
 		}
 
@@ -1015,7 +1020,7 @@ TDate.parse = function () {
 		var _tzOffset = null;
 
 		function _setDatePart(date,format) {
-			if ( ! date || !date.length || !format || !format.length || format.length != date.length) {
+			if ( ! date || !date.length || !format || !format.length || format.length !== date.length) {
 				throw "TDate parser exception - internal function call error setDatePart" ;
 			}
 			for (var i=0; i < date.length; i++) {
@@ -1044,7 +1049,7 @@ TDate.parse = function () {
 						date[i+1] = "-" + date[i+1];
 						date.splice(i,1);
 						break;
-					} else if (i == date.length - 2 && date[i+1] === "") { // last interation
+					} else if (i === date.length - 2 && date[i+1] === "") { // last interation
 						date.splice(i+1,1);
 					}
 			}
@@ -1058,7 +1063,7 @@ TDate.parse = function () {
 				var dateFormat = [];
 				for (var i = 0; i < date.length; i++) {
 					if (!date[i]) {
-						if ( i == date.length - 1 ) {
+						if ( i === date.length - 1 ) {
 							date.splice(i,1);
 							continue;
 						}
@@ -1088,7 +1093,7 @@ TDate.parse = function () {
 					}
 					var val = Number(date[i]);
 					if ( !yearFound && (date[i].length > 2 || val < 1 || val > 31 || (dayFound && monthFound)) ) { // definitely a year
-						if ( date.length == 3 && i == 1) { // year is the middle and not allowed
+						if ( date.length === 3 && i === 1) { // year is the middle and not allowed
 							throw "TDate parser exception -  unrecognized date string  - " + (temp && temp[1] ? temp[1] : "" );
 						}
 						for (var j=0; j < dateFormat.length; j++) {
@@ -1098,7 +1103,7 @@ TDate.parse = function () {
 									throw "TDate parser exception -  date string error - detected day followed by year  - " + (temp && temp[1] ? temp[1] : "" );
 								}
 								dayFound = true;
-								if (dateFormat.length > 1 && dateFormat[1] == "md"){
+								if (dateFormat.length > 1 && dateFormat[1] === "md"){
 									dateFormat[1] = "m";
 								}
 							}
@@ -1112,8 +1117,8 @@ TDate.parse = function () {
 						continue;
 					}
 					if ( val > 12 ) { // can't be month
-						if (date.length == 3) {  // 3 part date
-							if ( yearFound || i == 1) {  // must be a day
+						if (date.length === 3) {  // 3 part date
+							if ( yearFound || i === 1) {  // must be a day
 								for (var j=0; j < dateFormat.length; j++) {
 									dateFormat[j] = dateFormat[j].replace(/d/,""); // remove any existing day possibilities
 									if (dateFormat[j] === "y") {
@@ -1133,13 +1138,13 @@ TDate.parse = function () {
 						}
 					} else {	// can be month, day or year
 						if (dayFound) {
-							dateFormat.push( (yearFound || ( date.length == 3 && i == 1 ) ? "m" : "ym"));
+							dateFormat.push( (yearFound || ( date.length === 3 && i === 1 ) ? "m" : "ym"));
 						} else if (yearFound) {
-							dateFormat.push(  date.length == 2 ? "m" : "md");
+							dateFormat.push(  date.length === 2 ? "m" : "md");
 						} else if (monthFound) {
-							dateFormat.push(date.length == 3 && i == 1 ? "d" : "yd");
+							dateFormat.push(date.length === 3 && i === 1 ? "d" : "yd");
 						} else  {
-							dateFormat.push(date.length == 3 && i == 1 ? "md" : "ymd");
+							dateFormat.push(date.length === 3 && i === 1 ? "md" : "ymd");
 						}
 					}
 				}
@@ -1161,7 +1166,7 @@ TDate.parse = function () {
 							if (dFrm.length > 2) {
 								dFrm = dFrm.replace(/md/g,"m");  // can be mdmd  dmd  or mdd
 							}
-							if (dFrm == "dmd" || dFrm == "dm") {  // dm case
+							if (dFrm === "dmd" || dFrm === "dm") {  // dm case
 								_setDatePart( date,["d","m"]);
 							} else {
 								_setDatePart( date,["m","d"]);
@@ -1170,7 +1175,7 @@ TDate.parse = function () {
 							if ( dFrm.length === 3) {
 								_setDatePart( date,dateFormat);
 							} else if ( dFrm.length === 5) {
-								if ( dFrm[0] == "y") {  // y md md case
+								if ( dFrm[0] === "y") {  // y md md case
 									_setDatePart( date,["y","m","d"]);
 								} else { // md md y case
 									_setDatePart( date,["d","m","y"]);
@@ -1191,16 +1196,16 @@ TDate.parse = function () {
 
 			time = time.match(/\s*(\d+)(?:([\.,:\s])(\d+))?(?:([\.,:\s])(\d+))?(?:([\.,:\s])(\d+))?\s*/);
 
-			if (time[1] != null  && TDate.validateHour(time[1])) { //valid hour input
+			if (time[1] !== null  && TDate.validateHour(time[1])) { //valid hour input
 				_hours = time[1];
 
-				if (time[3] != null  &&  TDate.validateMinute(time[3])) { //valid minute input
+				if (time[3] !== null  &&  TDate.validateMinute(time[3])) { //valid minute input
 					_minutes = time[3];
 
-					if (time[5] != null  &&  TDate.validateSecond(time[5])) { //valid minute input
+					if (time[5] !== null  &&  TDate.validateSecond(time[5])) { //valid minute input
 						_seconds = time[5];
 
-						if (time[7] != null  &&  TDate.validateMillisecond(time[7])) {
+						if (time[7] !== null  &&  TDate.validateMillisecond(time[7])) {
 							_milliseconds = time[7];
 							_milliSep = time[6];
 						}
@@ -1224,7 +1229,7 @@ TDate.parse = function () {
 						if ( !zone[2] || zone[2] > 13 || zone[3] > 59) {
 							throw "TDate parser exception -  Time Zone unrecognized format should be hh or hhmm or hh:mm  - " + (temp && temp[3] ? temp[3] : "" );
 						} else {
-							_tzOffset = ( (zone[1]== "-" ? "-" : "+") + zone[2] + (zone[3] ? zone[3] : "") );
+							_tzOffset = ( (zone[1]=== "-" ? "-" : "+") + zone[2] + (zone[3] ? zone[3] : "") );
 						}
 					}
 				}
@@ -1281,7 +1286,7 @@ TDate.getDayName = function (y,m,d,shortName) {
 
 TDate.validate = function (value, min, max, name) {
 	if (value < min || value > max) {
-		if (name == "year") {
+		if (name === "year") {
 			if (value < min) throw  "Hmmmm do you know something I don't, that's BBB (before big bang)";
 			else throw  "Don't worry about it mate, neither of us will be around";
 		}else {
@@ -1351,7 +1356,7 @@ var TDuration = function (strDuration) {
 			throw "TDuration exception - illegal characters or character squences - " + str;
 		}
 		// if a null string or formatted without possible data passed in then an empty TDuration is created.
-		if (!str || str == "" || str.match(/^(?:[PT\s]*)$/)) {
+		if (!str || str === "" || str.match(/^(?:[PT\s]*)$/)) {
 			return true;
 		}
 		if (str.match(/T$/)) {
@@ -1461,9 +1466,9 @@ var TDuration = function (strDuration) {
 		},
 
 		setTDuration: function (duration) {
-			if (typeof duration == "string") {  // should be and encode string
+			if (typeof duration === "string") {  // should be and encode string
 				 _parseStr(date);
-			} else if (typeof duration == "object" && typeof duration.getClass == "function" && duration.getClass() == "TemporalDuration") {  //
+			} else if (typeof duration === "object" && typeof duration.getClass === "function" && duration.getClass() === "TemporalDuration") {  //
 				 _parseStr(duration.toString());
 			} else {
 				return null;
@@ -1472,7 +1477,7 @@ var TDuration = function (strDuration) {
 		},
 
 		setYear: function (str) {
-			if ( str != null && str != "" ) {
+			if ( str !== null && str !== "" ) {
 				if ( isNaN(str)|| str < 0) {
 					throw " TDate exception - invalid string supplied to setYear() - " + str;
 				}
@@ -1481,7 +1486,7 @@ var TDuration = function (strDuration) {
 		},
 
 		setMonth: function (str) {
-			if ( str != null && str != "" ) {
+			if ( str !== null && str !== "" ) {
 				if ( isNaN(str) || str < 0 || str > 12) {
 					throw " TDate exception - invalid string supplied to setMonth() - " + str;
 				}
@@ -1490,7 +1495,7 @@ var TDuration = function (strDuration) {
 		},
 
 		setDay: function (str) {
-			if ( str != null && str != "" ) {
+			if ( str !== null && str !== "" ) {
 				if ( isNaN(str) || str < 0 || str > 31) {
 					throw " TDate exception - invalid string supplied to setDay() - " + str;
 				}
@@ -1499,7 +1504,7 @@ var TDuration = function (strDuration) {
 		},
 
 		setHour: function (str) {
-			if ( str != null && str != "" ) {
+			if ( str !== null && str !== "" ) {
 				if ( isNaN(str) || str < 0 || str > 24) {
 					throw " TDate exception - invalid string supplied to setHour() - " + str;
 				}
@@ -1508,7 +1513,7 @@ var TDuration = function (strDuration) {
 		},
 
 		setMinute: function (str) {
-			if ( str != null && str != "" ) {
+			if ( str !== null && str !== "" ) {
 				if ( isNaN(str) || str < 0 || str> 60) {
 					throw " TDate exception - invalid string supplied to setMinute() - " + str;
 				}
@@ -1517,7 +1522,7 @@ var TDuration = function (strDuration) {
 		},
 
 		setSecond: function (str) {
-			if ( str != null && str != "" ) {
+			if ( str !== null && str !== "" ) {
 				if ( isNaN(str) || str < 0 ||  str > 60) {
 					throw " TDate exception - invalid string supplied to setSecond() - " + str;
 				}

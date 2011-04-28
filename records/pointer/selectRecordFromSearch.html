@@ -63,7 +63,7 @@ if (window == top) {
 <!--   </div>-->
    <div id="add_records_footer">
     Didn't find what you were looking for?
-    <a href="#" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/formAddRecordPopup.html?rectype='+document.getElementById('t').value+'&amp;title='+document.getElementById('q').value, { callback: function(title, bd, bibID) { if (bibID) { window.close(bibID, title); } else { document.forms[0].submit(); } } }); return false;"><img src="../../common/images/add-record-small.png" />Add a new record</a>
+    <a href="#" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/formAddRecordPopup.html?rectype='+document.getElementById('t').value+'&amp;title='+document.getElementById('q').value+'&amp;db='+(top.HEURIST.parameters.db?top.HEURIST.parameters.db(top.HEURIST.database.name? top.HEURIST.database.name:'')), { callback: function(title, bd, bibID) { if (bibID) { window.close(bibID, title); } else { document.forms[0].submit(); } } }); return false;"><img src="../../common/images/add-record-small.png" />Add a new record</a>
    </div>
   </form>
 
@@ -150,13 +150,18 @@ document.forms[0].submit = function() {
 	if (document.getElementById("r-recent").checked  ||  q == "") {
 		query += "&r=recent";
 	}
+	if (top.HEURIST.parameters.db) {
+		query += "&db=" + top.HEURIST.parameters.db;
+	}else if (top.HEURIST.database.name) {
+		query += "&db=" + top.HEURIST.database.name;
+	}
 
 	document.body.cursor = "wait";
 
 	var resultsDiv = document.getElementById("results");
 	resultsDiv.innerHTML = "<i style='padding: 1ex;'>Searching ...</i>";
 
-	top.HEURIST.util.sendRequest(top.HEURIST.basePath + "records/pointer/getRecordListForSearch.php", notifyResults, query);
+	top.HEURIST.util.sendRequest(top.HEURIST.baseURL + "records/pointer/getRecordListForSearch.php", notifyResults, query);
 
 	return false;
 }

@@ -53,13 +53,13 @@ print "if (!top.HEURIST.baseURL) top.HEURIST.baseURL = ".json_format(HEURIST_URL
 
 /* rectypes are an array of names sorted alphabetically, and lists of
    primary (bibliographic) and other rectypes, also sorted alphbetically */
-print "top.HEURIST.rectypes = ".json_format(getAllRectypeStructures()).";\n";
+print "top.HEURIST.rectypes = ".json_format(getAllRectypeStructures(true)).";\n";
 
 /* detailTypes */
 
-print "top.HEURIST.detailTypes = " . json_format(getAllDetailTypeStructures()) . ";\n\n";
+print "top.HEURIST.detailTypes = " . json_format(getAllDetailTypeStructures(true)) . ";\n\n";
 
-print "\ntop.HEURIST.terms = \n". json_format(getTerms(),true) . ";\n";
+print "\ntop.HEURIST.terms = \n". json_format(getTerms(true),true) . ";\n";
 
 /*print "\ntop.HEURIST.terms.termsByDomainLookup = \n" . json_format(getTerms(),true) . ";\n";
 
