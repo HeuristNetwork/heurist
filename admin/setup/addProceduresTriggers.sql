@@ -239,7 +239,7 @@ DELIMITER $$
 	set @rec_id := last_insert_id(NEW.rec_ID);
 		if NEW.rec_RecTypeID = 52 then
 			--  need to also save relationship records RecTypeID
-			insert into recRelationshipsCache (rrc_RecID) values (NEW.rec_ID);
+			insert into recRelationshipsCache (rrc_RecID, rrc_SourceRecID, rrc_TargetRecID) values (NEW.rec_ID,NEW.rec_ID,NEW.rec_ID);
 		end if;
 	end$$
     
@@ -282,15 +282,31 @@ DELIMITER $$
 	AFTER UPDATE ON `Records`
 	FOR EACH ROW
 	begin
+		declare srcRecID integer;
+		declare trgRecID integer;
 		if @suppress_update_trigger is null then
 			insert into usrRecentRecords (rre_UGrpID, rre_RecID, rre_Time)
-				values (@logged_in_user_id, NEW.rec_ID, now())
-				on duplicate key update rre_Time = now();
+				values (@logged_in_user_id, NEW.rec_ID, now());
 		end if;
-	-- need to change this to check the rectype's type = relationship
-		if NEW.rec_RecTypeID = 52 then
-			--  need to also save relationship records RecTypeID
-			insert ignore into recRelationshipsCache (rrc_RecID) values (NEW.rec_ID);
+		-- if change the records type from something else to relation insert cache value
+		if NEW.rec_RecTypeID = 52 AND NOT OLD.rec_RecTypeID = 52 then
+			select dtl_Value into srcRecID
+				from recDetails
+				where dtl_DetailTypeID=202 and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
+			if srcRecID is null then
+				set srcRecID = NEW.rec_ID;
+			end if;
+			select dtl_Value into trgRecID
+				from recDetails
+				where dtl_DetailTypeID=199 and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
+			if trgRecID is null then
+				set trgRecID = NEW.rec_ID;
+			end if;
+			insert into recRelationshipsCache (rrc_RecID, rrc_SourceRecID, rrc_TargetRecID) values (NEW.rec_ID,srcRecID,trgRecID);
+		end if;
+		-- if change the records type from relation to something else remove cache value
+		if OLD.rec_RecTypeID = 52 AND NOT NEW.rec_RecTypeID = 52 then
+			delete ignore from recRelationshipsCache where rrc_RecID = OLD.rec_ID;
 		end if;
 	end$$
     

@@ -1356,7 +1356,7 @@ top.HEURIST.search = {
 		else if (e.srcElement) targ = e.srcElement;
 		if (targ.nodeType == 3) targ = targ.parentNode;
 
-		if (! targ.href  &&  targ.parentNode.href) targ = targ.parentNode;	// sometimes get the span, not the link
+		if (! targ.href  && targ.parentNode && targ.parentNode.href) targ = targ.parentNode;	// sometimes get the span, not the link
 		top.HEURIST.util.popupURL(top, targ.href);
 
 		e.cancelBubble = true;
@@ -2112,9 +2112,16 @@ top.HEURIST.search = {
 		top.HEURIST.search.buildPublishLinks();
 		top.HEURIST.search.showPublishPopup();
 
-		var autoPopups = document.getElementsByName("auto-popup");
+		var autoPopups = document.getElementsByName("auto-popup"),
+			demark;
 		for (var i=0; i < autoPopups.length; ++i) {
 			autoPopups[i].onclick = top.HEURIST.search.autoPopupLink;
+			demark = autoPopups[i].href.search(/\?/);
+			if (demark === -1) {
+				autoPopups[i].href += "?db=" + (top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "");
+			}else{
+				autoPopups[i].href += "&amp;db=" + (top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "");
+			}
 		}
 		var searchForm = document.forms[0];
 		var inputInstance = document.createElement("input");

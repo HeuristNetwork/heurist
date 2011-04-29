@@ -1,22 +1,22 @@
 /*
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- */
+* filename, brief description, date of creation, by whom
+* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+* @todo
+*/
 
 FlexImport = (function () {
 
-function _addOpt(sel, val, text) {
+	function _addOpt(sel, val, text) {
 	return $("<option>")
 		.val(val)
 		.html(text)
 		.appendTo(sel)[0];
-}
+	}
 
-return {
+	return {
 
 	fields: [],
 	lineHashes: {},
@@ -96,7 +96,7 @@ return {
 		$("#info-p").html(
 			"Found <b>" + FlexImport.fields.length + "</b> rows of data," +
 			" in <b>" + FlexImport.fields[0].length + "</b> columns. " +
-			"<a href='#' onclick=\"window.location.reload(); return false;\">Start over</a>"
+			"<a href='"+HeuristBaseURL+"import/delimited/importRecordsFromDelimited.html?db="+HAPI.database+"' >Start over</a>"
 		);
 
 		FlexImport.createRecTypeOptions();
@@ -155,7 +155,7 @@ return {
 		p.appendChild(document.createTextNode(" (NOTE: Workgroup tags must be pre-existing!  Create them "));
 		var a = p.appendChild(document.createElement("a"));
 			a.target = "_blank";
-			a.href = HAPI.HeuristBaseURL + "admin/ugrps/editGroupTags.php"
+			a.href = HeuristBaseURL + "admin/ugrps/editGroupTags.php?db="+HAPI.database
 			a.innerHTML = "here";
 		p.appendChild(document.createTextNode(" then start over.)"));
 
@@ -170,7 +170,7 @@ return {
 		p = e.appendChild(document.createElement("p"));
 		a = p.appendChild(document.createElement("a"));
 		a.target = "_blank";
-		a.href = HAPI.HeuristBaseURL +"admin/describe/listRectypeDescriptions.php#rt" + FlexImport.recType.getID();
+			a.href = HeuristBaseURL +"admin/describe/listRectypeDescriptions.php?db="+ HAPI.database +"#rt" + FlexImport.recType.getID();
 		a.innerHTML = "Detail requirements for " + FlexImport.recType.getName() + " records";
 
 
@@ -754,7 +754,7 @@ return {
 			$textarea.append(line.join() + "\n");
 		}
 	}
-};
+	};
 
 })();
 
