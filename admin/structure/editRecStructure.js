@@ -1156,7 +1156,7 @@ function onAddNewDetail(){
 		var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 							(top.HEURIST.database.name?top.HEURIST.database.name:''));
 		popupSelect = top.HEURIST.util.popupURL(top, top.HEURIST.basePath +
-		"admin/structure/editRecStructure_SelectDetailType.html?rty_ID="+editStructure.getRty_ID()+"&db="+db,
+		"admin/structure/selectDetailType.html?rty_ID="+editStructure.getRty_ID()+"&db="+db,
 		{	"close-on-blur": false,
 			"no-resize": false,
 			height: 480,

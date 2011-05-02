@@ -1,7 +1,7 @@
 /**
 * editDetailType.js
 * A form to edit field type, or create a new field type. It is utilized as pop-up from manageDetailTypes and manageRectypes
-* it may call another pop-ups: selectTerms and editDetailType_SelectRecType
+* it may call another pop-ups: selectTerms and selectRecType
 *
 * 28/04/2011
 * @author: Juan Adriaanse
@@ -187,9 +187,9 @@ function onSelectRectype() {
 		}
 	}
 	if(args) {
-		URL =  top.HEURIST.basePath + "admin/structure/editDetailType_SelectRecType.html?type=" + type + "&ids=" + args;
+		URL =  top.HEURIST.basePath + "admin/structure/selectRecType.html?type=" + type + "&ids=" + args;
 	} else {
-		URL =  top.HEURIST.basePath + "admin/structure/editDetailType_SelectRecType.html?type=" + type;
+		URL =  top.HEURIST.basePath + "admin/structure/selectRecType.html?type=" + type;
 	}
 	if(type === "relmarker" || type === "resource" || type === "fieldsetmarker") {
 		top.HEURIST.util.popupURL(top, URL, {
