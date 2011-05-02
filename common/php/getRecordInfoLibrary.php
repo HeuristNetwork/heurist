@@ -836,8 +836,9 @@ function getAllDetailTypeStructures($useCachedData = false) {
 			return $dtStructs;
 		}
 	}
-
-	$dtStructs = array('groups' => getDetailTypeGroups(),
+	$dtG = getDetailTypeGroups();
+//error_log(print_r($dtG,true));
+	$dtStructs = array('groups' => $dtG,
 						'names' => array(),
 						'rectypeUsage' => getDetailTypeDefUsage(),
 						'usageCount' => getDetailTypeUsageCount(),
@@ -856,6 +857,7 @@ function getAllDetailTypeStructures($useCachedData = false) {
 		$dtStructs['names'][$row[0]] = $row[3];
 	}
 	setCachedData($cacheKey,$dtStructs);
+//error_log(print_r($dtStructs['typedefs'],true));
 	return $dtStructs;
 }
 
@@ -889,7 +891,7 @@ function getDetailTypeGroups() {
 	$dtGroups = array();
 	$res = mysql_query("select * from defDetailTypeGroups order by dtg_Order, dtg_Name");
 	while ($row = mysql_fetch_assoc($res)) {
-		$dtGroups[$row["dtg_ID"]] = array( 'name' => $row["dtg_Name"], 'description' => $row["dtg_Description"] );
+		$dtGroups[$row["dtg_ID"]] = array( 'name' => $row["dtg_Name"], 'description' => $row["dtg_Description"], 'types' => array() );
 	}
 	return $dtGroups;
 }

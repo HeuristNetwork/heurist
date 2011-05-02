@@ -1253,9 +1253,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		for (var id in temp) {
 			headers[temp[id]] = temp[id];
 		}
-		function createSubTreeOptions(depth, termSubTree) {
-			for(var termID in termSubTree) { // For every term in 'term'
-				var termName = termLookup[termID][0];
+		function createSubTreeOptions(depth, termSubTree, termLookupInner, defaultTermID) {
+			var termID;
+			var localLookup = termLookupInner;
+			for(termID in termSubTree) { // For every term in 'term'
+				var termName = (localLookup[termID] ? localLookup[termID][0] : "unknown term ID");
 				var isHeader = (headers[termID]? true:false);
 				var opt = new Option(termName,termID);
 				opt.className = "depth" + depth;
@@ -1269,14 +1271,14 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				selObj.appendChild(opt);
 				if(typeof termSubTree[termID] == "object") {
 					if(depth == 7) { // A dept of 8 (depth starts at 0) is maximum, to keep it organised
-						createSubTreeOptions(depth, termSubTree[termID]);
+						createSubTreeOptions(depth, termSubTree[termID], localLookup, defaultTermID);
 					} else {
-						createSubTreeOptions(depth+1, termSubTree[termID]);
+						createSubTreeOptions(depth+1, termSubTree[termID], localLookup, defaultTermID);
 					}
 				}
 	}
 		}
-		createSubTreeOptions(0,termIDTree);
+		createSubTreeOptions(0,termIDTree, termLookup, defaultTermID);
 		if (!defaultTermID) selObj.selectedIndex = 0;
 		return selObj;
 	}

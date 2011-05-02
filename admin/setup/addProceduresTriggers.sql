@@ -286,7 +286,8 @@ DELIMITER $$
 		declare trgRecID integer;
 		if @suppress_update_trigger is null then
 			insert into usrRecentRecords (rre_UGrpID, rre_RecID, rre_Time)
-				values (@logged_in_user_id, NEW.rec_ID, now());
+				values (@logged_in_user_id, NEW.rec_ID, now())
+				on duplicate key update rre_Time = now();
 		end if;
 		-- if change the records type from something else to relation insert cache value
 		if NEW.rec_RecTypeID = 52 AND NOT OLD.rec_RecTypeID = 52 then

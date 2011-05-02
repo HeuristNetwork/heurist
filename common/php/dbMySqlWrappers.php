@@ -283,10 +283,31 @@ function slash($str) {
 	return preg_replace("/\r\n|\r|\n/", "\\n", addslashes($str));
 }
 
+function hasFirstIndexZero($obj){
+	if (!array_key_exists(0, $obj)){
+		return false;
+	}
+	$cnt = 0;
+	foreach($obj as $i => $obj2){
+		return $i == 0;
+	}
+}
+
+function isZeroOrderedArray($obj){
+	$keys = array_keys($obj);
+	$cnt = (count($keys) > 3 ? 3 : count($keys));
+	for($i = 0; $i < $cnt ; $i++){
+		if ($i !== $keys[$i]) {
+error_log(" non array index = ". print_r($keys,true));
+			return false;
+		}
+	}
+error_log("order array keys = ". print_r($keys,true));
+	return true;
+}
 
 function json_format($obj, $purdy=false) {
 	// Return the data from $obj as a JSON format string
-
 	if (! is_array($obj)) {
 		// Primitive scalar types
 		if ($obj === null) return "null";
@@ -301,7 +322,7 @@ function json_format($obj, $purdy=false) {
 	if (count($obj) == 0) {
 		return "[]";
 	}
-	else if (array_key_exists(0, $obj)) {
+	else if (isZeroOrderedArray($obj)) {
 		// Has a "0" element ... we'll call it an array
 		$json = "";
 		foreach ($obj as $val) {
