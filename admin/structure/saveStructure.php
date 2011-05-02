@@ -1,7 +1,7 @@
 <?php
 
-/*<!--
- * saveStructure.php   TODO
+	/*<!--
+	* saveStructure.php
  * This file accepts request to update the system structural
  * definitions rectypes, detailtypes, terms and constraints.
  * it returns the entire structure for tthe affected area inorder
@@ -14,124 +14,141 @@
  -->*/
 
 
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
+	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+	require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 
 
-if (! is_logged_in()) {
+	if (! is_logged_in()) {
 	//ARTEM header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
 	//ARTEM return;
-}
+	}
 
-if (! is_admin()) {
+	if (! is_admin()) {
 	//ARTEM print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href=".HEURIST_URL_BASE.">Return to Heurist</a></p></body></html>";
 	//ARTEM return;
-}
+	}
 
-header('Content-type: text/javascript');
+	header('Content-type: text/javascript');
 
-$legalMethods = array(
+	$legalMethods = array(
 	"saveRectype",
 	"saveRT",
+	"saveRTS",
+	"deleteRTS",
 	"saveRTG",
 	"saveDetailType",
 	"saveDT",
 	"saveDTG",
+	"saveTerms",
+	"deleteTerms",
+	"deleteDT",
 	"deleteRT",
 	"deleteRTG",
 	"deleteDTG"
-);
+	);
 
-$rtyColumnNames = array(
-"rty_ID",
-"rty_Name",
-"rty_OrderInGroup",
-"rty_Description",
-"rty_TitleMask",
-"rty_CanonicalTitleMask",
-"rty_Plural",
-"rty_Status",
-"rty_OriginatingDBID",
-"rty_NameInOriginatingDB",
-"rty_IDInOriginatingDB",
-"rty_ShowInLists",
-"rty_RecTypeGroupIDs",
-"rty_FlagAsFieldset",
-"rty_ReferenceURL",
-"rty_AlternativeRecEditor",
-"rty_Type"
-);
+	$rtyColumnNames = array(
+	"rty_ID"=>"i",
+	"rty_Name"=>"s",
+	"rty_OrderInGroup"=>"i",
+	"rty_Description"=>"s",
+	"rty_TitleMask"=>"s",
+	"rty_CanonicalTitleMask"=>"s",
+	"rty_Plural"=>"s",
+	"rty_Status"=>"s",
+	"rty_OriginatingDBID"=>"i",
+	"rty_NameInOriginatingDB"=>"s",
+	"rty_IDInOriginatingDB"=>"i",
+	"rty_ShowInLists"=>"i",
+	"rty_RecTypeGroupIDs"=>"s",
+	"rty_FlagAsFieldset"=>"i",
+	"rty_ReferenceURL"=>"s",
+	"rty_AlternativeRecEditor"=>"s",
+	"rty_Type"=>"s"
+	);
 
-$rstColumnNames = array(
-"rst_ID",
-"rst_RecTypeID",
-"rst_DetailTypeID",
-"rst_DisplayName",
-"rst_DisplayHelpText",
-"rst_DisplayExtendedDescription",
-"rst_DisplayOrder",
-"rst_DisplayWidth",
-"rst_DefaultValue",
-"rst_RecordMatchOrder",
-"rst_CalcFunctionID",
-"rst_RequirementType",
-"rst_Status",
-"rst_OriginatingDBID",
-"rst_IDInOriginatingDB",
-"rst_MaxValues",
-"rst_MinValues",
-"rst_DisplayDetailTypeGroupID",
-"rst_FilteredJsonTermIDTree",
-"rst_TermIDTreeNonSelectableIDs",
-"rst_PtrFilteredIDs",
-"rst_OrderForThumbnailGeneration"
-);
+	$rstColumnNames = array(
+	"rst_ID"=>"i",
+	"rst_RecTypeID"=>"i",
+	"rst_DetailTypeID"=>"i",
+	"rst_DisplayName"=>"s",
+	"rst_DisplayHelpText"=>"s",
+	"rst_DisplayExtendedDescription"=>"s",
+	"rst_DisplayOrder"=>"i",
+	"rst_DisplayWidth"=>"i",
+	"rst_DefaultValue"=>"s",
+	"rst_RecordMatchOrder"=>"i",
+	"rst_CalcFunctionID"=>"i",
+	"rst_RequirementType"=>"s",
+	"rst_Status"=>"s",
+	"rst_OriginatingDBID"=>"i",
+	"rst_IDInOriginatingDB"=>"i",
+	"rst_MaxValues"=>"i",
+	"rst_MinValues"=>"i",
+	"rst_DisplayDetailTypeGroupID"=>"i",
+	"rst_FilteredJsonTermIDTree"=>"s",
+	"rst_TermIDTreeNonSelectableIDs"=>"s",
+	"rst_PtrFilteredIDs"=>"s",
+	"rst_OrderForThumbnailGeneration"=>"i"
+	);
 
-$dtyColumnNames = array(
-"dty_ID",
-"dty_Name",
-"dty_Documentation",
-"dty_Type",
-"dty_HelpText",
-"dty_ExtendedDescription",
-"dty_Status",
-"dty_OriginatingDBID",
-"dty_NameInOriginatingDB",
-"dty_IDInOriginatingDB",
-"dty_DetailTypeGroupID",
-"dty_OrderInGroup",
-"dty_PtrTargetRectypeIDs",
-"dty_JsonTermIDTree",
-"dty_TermIDTreeNonSelectableIDs",
-"dty_FieldSetRectypeID",
-"dty_ShowInLists"
-);
+	$dtyColumnNames = array(
+	"dty_ID"=>"i",
+	"dty_Name"=>"s",
+	"dty_Documentation"=>"s",
+	"dty_Type"=>"s",
+	"dty_HelpText"=>"s",
+	"dty_ExtendedDescription"=>"s",
+	"dty_Status"=>"s",
+	"dty_OriginatingDBID"=>"i",
+	"dty_NameInOriginatingDB"=>"s",
+	"dty_IDInOriginatingDB"=>"i",
+	"dty_DetailTypeGroupID"=>"i",
+	"dty_OrderInGroup"=>"i",
+	"dty_PtrTargetRectypeIDs"=>"s",
+	"dty_JsonTermIDTree"=>"s",
+	"dty_TermIDTreeNonSelectableIDs"=>"s",
+	"dty_FieldSetRectypeID"=>"i",
+	"dty_ShowInLists"=>"i"
+	);
 
-//field names and types for defRecTypeGroups
-$rtgColumnNames = array(
-"rtg_Name"=>"s",
-"rtg_Description"=>"s",
-);
-$dtgColumnNames = array(
-"dtg_Name"=>"s",
-"dtg_Description"=>"s",
-);
+	//field names and types for defRecTypeGroups
+	$rtgColumnNames = array(
+	"rtg_Name"=>"s",
+	"rtg_Description"=>"s",
+	);
+	$dtgColumnNames = array(
+	"dtg_Name"=>"s",
+	"dtg_Description"=>"s",
+	);
+
+	$trmColumnNames = array(
+	"trm_ID"=>"i",
+	"trm_Label"=>"s",
+	"trm_InverseTermId"=>"i",
+	"trm_Description"=>"s",
+	"trm_Domain"=>"s",
+	"trm_ParentTermID"=>"i"
+	);
 
 
 
-mysql_connection_db_overwrite(DATABASE);
+	mysql_connection_db_overwrite(DATABASE);
 
-if (!@$_REQUEST['method']) {
+	if (!@$_REQUEST['method']) {
 	die("invalid call to saveStructure, method parameter is required");
-}else if(!in_array($_REQUEST['method'],$legalMethods)) {
+	}else if(!in_array($_REQUEST['method'],$legalMethods)) {
 	die("unsupported method call to saveStructure");
-}
+	}
 
-$db = mysqli_connection_overwrite(DATABASE); //artem's
+	$db = mysqli_connection_overwrite(DATABASE); //artem's
+
+	//decode and unpack data
+	$data = json_decode(urldecode(@$_REQUEST['data']), true);
 
 
-switch (@$_REQUEST['method']) {
+	switch (@$_REQUEST['method']) {
 
 
 	//{ rectype:
@@ -142,38 +159,90 @@ switch (@$_REQUEST['method']) {
 	//					23:{common:[....], dtFields:{nnn:[....],...,mmm:[....]}}}}}
 	case 'saveRectype':
 	case 'saveRT':
-		$srtData = @$_REQUEST['data'];
-		$rtData = json_decode($srtData, true);
-		if (!array_key_exists('rectype',$rtData) ||
-			!array_key_exists('colNames',$rtData['rectype']) ||
-			!array_key_exists('defs',$rtData['rectype'])) {
+		if (!array_key_exists('rectype',$data) ||
+		!array_key_exists('colNames',$data['rectype']) ||
+		!array_key_exists('defs',$data['rectype'])) {
 			die("invalid data structure sent with saveRectype method call to saveStructure.php");
 		}
-		$commonNames = $rtData['rectype']['colNames']['common'];
-		$dtFieldNames = $rtData['rectype']['colNames']['dtFields'];
+		$commonNames = $data['rectype']['colNames']['common'];
+		//$dtFieldNames = $rtData['rectype']['colNames']['dtFields'];
 		$rv = array();
-		foreach ($rtData['rectype']['defs'] as $rtyID => $rt) {
+		$rv['result'] = array(); //result
+
+		foreach ($data['rectype']['defs'] as $rtyID => $rt) {
 			if ($rtyID == -1) {	// new rectypes
-				array_push($rv, createRectypes($commonNames,$dtFieldNames,$rt));
+				array_push($rv['result'], createRectypes($commonNames, $rt));
 			}else{
-				array_push($rv, array($rtyID => updateRectype($commonNames,$dtFieldNames,$rtyID,$rt)));
+				array_push($rv['result'], updateRectype($commonNames, $rtyID, $rt));
 			}
 		}
 		$rv['rectypes'] = getAllRectypeStructures();
 		break;
 
-	case 'saveRTG':		// SAVE RECORDTYPE GROUP
+		case 'saveRTS':
 
-		$srtData = @$_REQUEST['data'];
-		$rtData = json_decode($srtData, true);
-		if (!array_key_exists('rectypegroups',$rtData) ||
-			!array_key_exists('colNames',$rtData['rectypegroups']) ||
-			!array_key_exists('defs',$rtData['rectypegroups'])) {
+		if (!array_key_exists('rectype',$data) ||
+		!array_key_exists('colNames',$data['rectype']) ||
+		!array_key_exists('defs',$data['rectype']))
+		{
 			die("invalid data structure sent with saveRectype method call to saveStructure.php");
 		}
-		$colNames = $rtData['rectypegroups']['colNames'];
+
+		//$commonNames = $rtData['rectype']['colNames']['common'];
+		$dtFieldNames = $data['rectype']['colNames']['dtFields'];
 		$rv = array();
-		foreach ($rtData['rectypegroups']['defs'] as $rtgID => $rt) {
+		$rv['result'] = array(); //result
+
+		//actually client sends the definition only for one record type
+		foreach ($data['rectype']['defs'] as $rtyID => $rt) {
+			array_push($rv['result'], updateRecStructure($dtFieldNames, $rtyID, $rt));
+		}
+		$rv['rectypes'] = getAllRectypeStructures();
+		break;
+
+		case 'deleteRTS':
+
+		$rtyID = @$_REQUEST['rtyID'];
+		$dtyID = @$_REQUEST['dtyID'];
+
+		if (!$rtyID || !$dtyID) {
+			$rv = array();
+			$rv['error'] = "invalid or no IDs sent with deleteReStructure method call to saveStructure.php";
+		}else{
+			$rv = deleteRecStructure($rtyID, $dtyID);
+			if (!array_key_exists('error', $rv)) {
+				$rv['rectypes'] = getAllRectypeStructures();
+			}
+		}
+		break;
+
+		case 'deleteRectype':
+		case 'deleteRT':
+
+		$rtyID = @$_REQUEST['rtyID'];
+
+		if (!$rtyID) {
+			$rv = array();
+			$rv['error'] = "invalid or not rectype ID sent with deleteRectype method call to saveStructure.php";
+		}else{
+			$rv = deleteRecType($rtyID);
+			if (!array_key_exists('error',$rv)) {
+				$rv['rectypes'] = getAllRectypeStructures();
+			}
+		}
+		break;
+
+		//------------------------------------------------------------
+	case 'saveRTG':		// SAVE RECORDTYPE GROUP
+
+		if (!array_key_exists('rectypegroups',$data) ||
+		!array_key_exists('colNames',$data['rectypegroups']) ||
+		!array_key_exists('defs',$data['rectypegroups'])) {
+			die("invalid data structure sent with saveRectype method call to saveStructure.php");
+		}
+		$colNames = $data['rectypegroups']['colNames'];
+		$rv = array();
+		foreach ($data['rectypegroups']['defs'] as $rtgID => $rt) {
 			if ($rtgID == -1) {	// new rectype group
 				array_push($rv, createRectypeGroups($colNames, $rt));
 			}else{
@@ -200,16 +269,14 @@ switch (@$_REQUEST['method']) {
 
 	case 'saveDTG':		// SAVE DET TYPE GROUP
 
-		$srtData = @$_REQUEST['data'];
-		$rtData = json_decode($srtData, true);
-		if (!array_key_exists('dettypegroups',$rtData) ||
-			!array_key_exists('colNames',$rtData['dettypegroups']) ||
-			!array_key_exists('defs',$rtData['dettypegroups'])) {
+		if (!array_key_exists('dettypegroups',$data) ||
+		!array_key_exists('colNames',$data['dettypegroups']) ||
+		!array_key_exists('defs',$data['dettypegroups'])) {
 			die("invalid data structure sent with saveDettype method call to saveStructure.php");
 		}
-		$colNames = $rtData['dettypegroups']['colNames'];
+		$colNames = $data['dettypegroups']['colNames'];
 		$rv = array();
-		foreach ($rtData['dettypegroups']['defs'] as $dtgID => $rt) {
+		foreach ($data['dettypegroups']['defs'] as $dtgID => $rt) {
 			if ($dtgID == -1) {	// new dettype group
 				array_push($rv, createDettypeGroups($colNames, $rt));
 			}else{
@@ -226,7 +293,7 @@ switch (@$_REQUEST['method']) {
 
 		$dtgID = @$_REQUEST['dtgID'];
 		if (!$dtgID) {
-			die("invalid or not dettype sent with deleteDettype method call to saveStructure.php");
+			die("invalid or not dettype group ID sent with deleteDettype method call to saveStructure.php");
 		}
 		$rv = deleteDettypeGroup($dtgID);
 		if (!array_key_exists('error',$rv)) {
@@ -234,78 +301,104 @@ switch (@$_REQUEST['method']) {
 		}
 		break;
 
-	case 'deleteRectype':
-	case 'deleteRT':
-		$rtyID = @$_REQUEST['rtyID'];
-		if (!$rtyID) {
-			die("invalid or not rectype sent with deleteRectype method call to saveStructure.php");
-		}
-		$rv = deleteRectype($rtyID);
-		if (!array_key_exists('error',$rv)) {
-			$rv['rectypes'] = getAllRectypeStructures();
-		}
-		break;
-
+		//------------------------------------------------------------
 	case 'saveDetailType':
 	case 'saveDT':
-		$sdtData = @$_REQUEST['data'];
-		$dtData = json_decode($sdtData, true);
 
-		if (!array_key_exists('detailtype',$dtData) ||
-			!array_key_exists('colNames',$dtData['detailtype']) ||
-			!array_key_exists('defs',$dtData['detailtype'])) {
+		if (!array_key_exists('detailtype',$data) ||
+		!array_key_exists('colNames',$data['detailtype']) ||
+		!array_key_exists('defs',$data['detailtype'])) {
 			die("invalid data structure sent with saveDetailType method call to saveStructure.php");
 		}
-		$commonNames = $dtData['detailtype']['colNames']['common'];
+		$commonNames = $data['detailtype']['colNames']['common'];
 		$rv = array();
-		foreach ($dtData['detailtype']['defs'] as $dtyID => $dt) {
+		$rv['result'] = array(); //result
+
+		foreach ($data['detailtype']['defs'] as $dtyID => $dt) {
 			if ($dtyID == -1) {	// new detailtypes
-				array_push($rv,createDetailTypes($commonNames,$dt));
+				array_push($rv['result'], createDetailTypes($commonNames,$dt));
 			}else{
-				array_push($rv,array($dtyID => updateDetailType($commonNames,$dtyID,$dt)));
+				array_push($rv['result'], updateDetailType($commonNames, $dtyID, $dt)); //array($dtyID =>
 			}
 		}
+
 		$rv['detailTypes'] = getAllDetailTypeStructures();
 		break;
+
 
 	case 'deleteDetailType':
 	case 'deleteDT':
 		$dtyID = @$_REQUEST['dtyID'];
+
 		if (!$dtyID) {
-			die("invalid or no detailtype sent with deleteDetailType method call to saveStructure.php");
-		}
+			$rv = array();
+			$rv['error'] = "invalid or no detailtype ID sent with deleteDetailType method call to saveStructure.php";
+		}else{
 		$rv = deleteDetailType($dtyID);
 		if (!array_key_exists('error',$rv)) {
-			$rv['detailtypes'] = getAllDetailTypeStructures();
+				$rv['detailTypes'] = getAllDetailTypeStructures();
+			}
 		}
 		break;
 
-}
-$db->close();
+		case 'saveTerms':
 
-print json_format($rv);
-/*
-if (@$rv) {
+		if (!array_key_exists('terms',$data) ||
+		!array_key_exists('colNames',$data['terms']) ||
+		!array_key_exists('defs',$data['terms'])) {
+			die("invalid data structure sent with saveTerms method call to saveStructure.php");
+		}
+		$colNames = $data['terms']['colNames'];
+		$rv = array();
+		$rv['result'] = array(); //result
+
+		foreach ($data['terms']['defs'] as $trmID => $dt) {
+			$res = updateTerms($colNames, $trmID, $dt);
+			array_push($rv['result'], $res);
+		}
+
+		// $rv['terms'] = getTerms();
+		break;
+
+		case 'deleteTerms':
+		$trmID = @$_REQUEST['trmID'];
+
+		if (!trmID) {
+			$rv = array();
+			$rv['error'] = "invalid or no term ID sent with deleteTerms method call to saveStructure.php";
+		}else{
+			$rv = deleteTerms($trmID);
+			/*if (!array_key_exists('error',$rv)) {
+			$rv['detailTypes'] = getAllDetailTypeStructures();
+			}*/
+		}
+		break;
+	}
+	$db->close();
+
 	print json_format($rv);
-}*/
+	/*
+	if (@$rv) {
+	print json_format($rv);
+	}*/
 
-exit();
+	exit();
 
-/* END OF LOGIC */
+	/* END OF LOGIC */
 
-/**
-* createRectypes - Helper function that inserts a new rectype into defRecTypes table.and use the rty_ID to insert any
-* fields into the defRecStructure table
-* @author Stephen White
-* @param $commonNames an array valid column names in the defRecTypes table which match the order of data in the $rt param
-* @param $dtFieldNames an array valid column names in the defRecStructure table
-* @param $rt astructured array of which can contain the column names and data for one or more rectypes with fields
-* @return $ret an array of return values for the various data elements created or errors if they occurred
-**/
+	/**
+	* createRectypes - Helper function that inserts a new rectype into defRecTypes table.and use the rty_ID to insert any
+	* fields into the defRecStructure table
+	* @author Stephen White
+	* @param $commonNames an array valid column names in the defRecTypes table which match the order of data in the $rt param
+	* @param $dtFieldNames an array valid column names in the defRecStructure table
+	* @param $rt astructured array of which can contain the column names and data for one or more rectypes with fields
+	* @return $ret an array of return values for the various data elements created or errors if they occurred
+	**/
 
-
-function createRectypes($commonNames,$dtFieldNames,$rt) {
-global $rtyColumnNames,$rstColumnNames;
+	/* STEPHEN's
+	function createRectypes($commonNames,$dtFieldNames,$rt) {
+	global $rtyColumnNames,$rstColumnNames;
 	$ret = array();
 	if (count($commonNames)) {
 		$ret['common'] =array();
@@ -342,56 +435,98 @@ global $rtyColumnNames,$rstColumnNames;
 		$ret = array("error"=>"no data supplied for inserting rectype");
 	}
 	return $ret;
-}
+	}
+	*/
 
-/**
-* deleteRectype - Helper function that delete a rectype from defRecTypes table.if there are no existing records of this type
-* @author Stephen White
-* @param $rtyID rectype ID to delete
-* @return $ret an array of return values for the various data elements created or errors if they occurred
-**/
+	//
+	//
+	//
+	function createRectypes($commonNames, $rt) {
+		global $db, $rtyColumnNames;
 
-function deleteRectype($rtyID) {
-global $rtyColumnNames,$rstColumnNames;
+		$ret = null;
+
+		if (count($commonNames)) {
+
+			$colNames = join(",",$commonNames);
+
+			$parameters = array("");
+			$query = "";
+			foreach ($commonNames as $colName) {
+				$val = array_shift($rt[0]['common']);
+				if($query!="") $query = $query.",";
+				$query = $query."?";
+				$parameters[0] = $parameters[0].$rtyColumnNames[$colName];
+				array_push($parameters, $val);
+			}
+
+			$query = "insert into defRecTypes ($colNames) values ($query)";
+			$rows = execSQL($db, $query, $parameters, true);
+
+			if ($rows==0) {
+				$ret = "error inserting into defRecTypes - ".$db->error;
+			} else {
+				$rtyID = $db->insert_id;
+				$ret = -$rtyID;
+			}
+
+		}
+		if ($ret ==  null) {
+			$ret = "no data supplied for inserting rectype";
+		}
+		return $ret;
+	}
+
+
+
+	/**
+	* deleteRectype - Helper function that delete a rectype from defRecTypes table.if there are no existing records of this type
+	* @author Stephen White
+	* @param $rtyID rectype ID to delete
+	* @return $ret an array of return values for the various data elements created or errors if they occurred
+	**/
+	function deleteRecType($rtyID) {
+
 	$ret = array();
-	$query = "select rec_ID from Records where rec_RecTypeID =$rtyID";
+		$query = "select rec_ID from Records where rec_RecTypeID=$rtyID limit 1";
 	$res = mysql_query($query);
 	if (mysql_error()) {
-		$ret['error'] = "error finding records of type $rtyID from Records - ".mysql_error();
+			$ret['error'] = "Error finding records of type $rtyID from Records - ".mysql_error();
 	} else {
-		$recCount = mysql_num_rows($res);
+			$dtCount = mysql_num_rows($res);
 		if ($recCount) { // there are records existing of this rectype, need to return error and the recIDs
-			$ret['error'] = "error deleting Rectype($rtyID) with existing data Records ($recCount) not allowed";
+				$ret['error'] = "Error deleting Rectype($rtyID) with existing data Records ($dtCount) not allowed";
 			$ret['recIDs'] = array();
 			while ($row = mysql_fetch_row($res)) {
 				array_push($ret['recIDs'], $row[0]);
 			}
 		} else { // no records ok to delete this rectype. Not that this should cascade for all dependent definitions
-			$query = "delete from defRecTypes where rty_ID =$rtyID  limit = 1";
+				$query = "delete from defRecTypes where rty_ID = $rtyID";
 			$res = mysql_query($query);
 			if (mysql_error()) {
-				$ret['error'] = "db error deleting of rectype $rtyID from defRecTypes - ".mysql_error();
+					$ret['error'] = "DB error deleting of rectype $rtyID from defRecTypes - ".mysql_error();
 			} else {
-				$ret['success'] = "rectype $rtyID deleted from defRecTypes";
+					$ret['result'] = $rtyID;
 			}
 		}
 	}
 	return $ret;
-}
+	}
 
-/**
-* updateRectype - Helper function that updates rectypes in the defRecTypes table.and updates or inserts any
-* fields into the defRecStructure table for the given rtyID
-* @author Stephen White
-* @param $commonNames an array valid column names in the defRecTypes table which match the order of data in the $rt param
-* @param $dtFieldNames an array valid column names in the defRecStructure table
-* @param $rtyID id of the rectype to update
-* @param $rt a structured array of which can contain the column names and data for one or more rectypes with fields
-* @return $ret an array of return values for the various data elements created or errors if they occurred
-**/
+	/**
+	* updateRectype - Helper function that updates rectypes in the defRecTypes table.and updates or inserts any
+	* fields into the defRecStructure table for the given rtyID
+	* @author Stephen White
+	* @param $commonNames an array valid column names in the defRecTypes table which match the order of data in the $rt param
+	* @param $dtFieldNames an array valid column names in the defRecStructure table
+	* @param $rtyID id of the rectype to update
+	* @param $rt a structured array of which can contain the column names and data for one or more rectypes with fields
+	* @return $ret an array of return values for the various data elements created or errors if they occurred
+	**/
 
-function updateRectype($commonNames,$dtFieldNames,$rtyID,$rt) {
-global $rtyColumnNames,$rstColumnNames;
+	/* STEPHEN's
+	function updateRectype($commonNames,$dtFieldNames,$rtyID,$rt) {
+	global $rtyColumnNames,$rstColumnNames;
 
 	$res = mysql_query("select * from defRecTypes where rty_ID = $rtyID");
 	if ( !mysql_num_rows($res)){
@@ -458,18 +593,174 @@ global $rtyColumnNames,$rstColumnNames;
 		$ret = array("error"=>"no data supplied for updating rectype - $rtyID");
 	}
 	return $ret;
-}
+	}*/
 
+	//
+	function updateRectype($commonNames, $rtyID, $rt) {
 
-/**
-* createRectypeGroups - Helper function that inserts a new rectypegroup into defRecTypeGroups table
-* @author Artem Osmakov
-* @param $columnNames an array valid column names in the defRecTypeGroups table which match the order of data in the $rt param
-* @param $rt array of data
-* @return $ret an array of return values for the various data elements created or errors if they occurred
-**/
+		global $db, $rtyColumnNames;
 
-function createRectypeGroups($columnNames, $rt) {
+		$ret = null;
+
+		$db->query("select rty_ID from defRecTypes where rty_ID = $rtyID");
+
+		if ($db->affected_rows<1){
+			$ret = "invalid rty_ID ($rtyID) passed in data to updateRectype";
+		}
+
+		$query = "";
+		if (count($commonNames)) {
+
+			$parameters = array(""); //list of field date types
+			foreach ($commonNames as $colName) {
+
+				$val = array_shift($rt['common']);
+
+				//error_log(">>>>>>>>>>>>>>> $colName  val=".$val);
+
+				if (array_key_exists($colName, $rtyColumnNames)) {
+					//array_push($ret['error'], "$colName is not a valid column name for defDetailTypes val= $val was not used");
+
+					if($query!="") $query = $query.",";
+					$query = $query."$colName = ?";
+
+					$parameters[0] = $parameters[0].$rtyColumnNames[$colName]; //take datatype from array
+					array_push($parameters, $val);
+				}
+			}
+			//
+			if($query!=""){
+				$query = "update defRecTypes set ".$query." where rty_ID = $rtyID";
+
+				//error_log(">>>>>>>>>>>>>>>".$query."   params=".join(",",$parameters)."<<<<<<<<<<<<<<<");
+
+				$res = execSQL($db, $query, $parameters, true);
+				if(!is_numeric($res)){
+					$ret = "error updating $rtyID in updateRectype - ".$res;
+					//}else if ($rows==0) {
+					//	$ret = "error updating $rtyID in updateRectype - ".$db->error;
+					} else {
+					$ret = $rtyID;
+				}
+			}
+		}
+
+		if ($ret == null) {
+			$ret = "no data supplied for updating rectype - $rtyID";
+		}
+		return $ret;
+
+	}
+
+	//================================
+	//
+	// update structure for record type
+	//
+	function updateRecStructure( $dtFieldNames , $rtyID, $rt) {
+
+		global $db, $rstColumnNames;
+
+		$ret = array(); //result
+		$ret[$rtyID] = array();
+
+		$db->query("select rty_ID from defRecTypes where rty_ID = $rtyID");
+
+		if ($db->affected_rows<1){
+			array_push($ret, "invalid rty_ID ($rtyID) passed in data to updateRectype");
+		}
+
+		if (count($dtFieldNames) && count($rt['dtFields']))
+		{
+
+			foreach ($rt['dtFields'] as $dtyID => $fieldVals)
+			{
+
+				//$ret['dtFields'][$dtyID] = array();
+
+				$db->query("select rst_RecTypeID from defRecStructure where rst_RecTypeID = $rtyID and rst_DetailTypeID = $dtyID");
+
+				$isInsert = ($db->affected_rows<1);
+
+				//$fieldNames = "rst_RecTypeID,rst_DetailTypeID,".join(",",$dtFieldNames);
+
+				$query = "";
+				$fieldNames = "";
+				$parameters = array(""); //list of field date types
+				foreach ($dtFieldNames as $colName) {
+
+					$val = array_shift($fieldVals);
+
+					if (array_key_exists($colName, $rstColumnNames)) {
+						//array_push($ret['error'], "$colName is not a valid column name for defDetailTypes val= $val was not used");
+
+						if($isInsert){
+							if($query!="") $query = $query.",";
+							$fieldNames = $fieldNames.", $colName";
+							$query = $query."?";
+						}else{
+							if($query!="") $query = $query.",";
+							$query = $query."$colName = ?";
+						}
+
+						$parameters[0] = $parameters[0].$rstColumnNames[$colName]; //take datatype from array
+						array_push($parameters, $val);
+					}
+				}//for columns
+
+				if($query!=""){
+					if($isInsert){
+						$query = "insert into defRecStructure (rst_RecTypeID, rst_DetailTypeID $fieldNames) values ($rtyID, $dtyID,".$query.")";
+					}else{
+						$query = "update defRecStructure set ".$query." where rst_RecTypeID = $rtyID and rst_DetailTypeID = $dtyID";
+					}
+
+					$rows = execSQL($db, $query, $parameters, true);
+
+					if ($rows==0) {
+						$oper = (($isInsert)?"inserting":"updating");
+						array_push($ret[$rtyID], "error ".$oper." field type ".$dtyID." for record type ".$rtyID." in updateRecStructure - ".$db->error);
+					} else {
+						array_push($ret[$rtyID], $dtyID);
+					}
+				}
+			}//for each dt
+			} //if column names
+
+		if (count($ret[$rtyID])==0) {
+			array_push($ret[$rtyID], "no data supplied for updating record structure - $rtyID");
+		}
+
+		return $ret;
+	}
+
+	//================================
+	//
+	// update structure for record type
+	//
+	function deleteRecStructure($rtyID, $dtyID) {
+		global $db;
+
+		$db->query("delete from defRecStructure where rst_RecTypeID = $rtyID and rst_DetailTypeID = $dtyID limit 1");
+
+		$rv = array();
+
+		if ($db->affected_rows<1){
+			$rv['error'] = "error delting entry in defRecStructure for record type #$rtyID and field type #$dtyID";
+		}else{
+			$rv['result'] = $dtyID;
+		}
+		return $rv;
+	}
+
+	/**
+	* createRectypeGroups - Helper function that inserts a new rectypegroup into defRecTypeGroups table
+	* @author Artem Osmakov
+	* @param $columnNames an array valid column names in the defRecTypeGroups table which match the order of data in the $rt param
+	* @param $rt array of data
+	* @return $ret an array of return values for the various data elements created or errors if they occurred
+	**/
+
+	function createRectypeGroups($columnNames, $rt) {
 	global $db, $rtgColumnNames;
 
 	$ret = array();
@@ -479,8 +770,7 @@ function createRectypeGroups($columnNames, $rt) {
 		foreach ( $rt as $newRT) {
 
 			$colValues = $newRT['values'];
-			$parameters = array();
-			array_push($parameters, ""); //list of field date types
+				$parameters = array(""); //list of field date types
 			$query = "";
 			foreach ($columnNames as $colName) {
 				$val = array_shift($colValues);
@@ -495,7 +785,7 @@ function createRectypeGroups($columnNames, $rt) {
 			$rows = execSQL($db, $query, $parameters, true);
 
 			if ($rows==0) {
-				$ret['error'] = "error inserting into defRecTypeGroups - ".mysql_error();
+					$ret['error'] = "error inserting into defRecTypeGroups - ".$db->error;
 			} else {
 				$rtgID = $db->insert_id;
 				$ret['result'] = $rtgID;
@@ -509,19 +799,19 @@ function createRectypeGroups($columnNames, $rt) {
 
 
 	return $ret;
-}
+	}
 
 
-/**
-* updateRectypeGroup - Helper function that updates group in the deleteRectypeGroup table
-* @author Artem Osmakov
-* @param $columnNames an array valid column names in the deleteRectypeGroups table which match the order of data in the $rt param
-* @param $rtgID id of the group to update
-* @param $rt - data
-* @return $ret an array of return values for the various data elements created or errors if they occurred
-**/
+	/**
+	* updateRectypeGroup - Helper function that updates group in the deleteRectypeGroup table
+	* @author Artem Osmakov
+	* @param $columnNames an array valid column names in the deleteRectypeGroups table which match the order of data in the $rt param
+	* @param $rtgID id of the group to update
+	* @param $rt - data
+	* @return $ret an array of return values for the various data elements created or errors if they occurred
+	**/
 
-function updateRectypeGroup($columnNames, $rtgID, $rt) {
+	function updateRectypeGroup($columnNames, $rtgID, $rt) {
 	global $db, $rtgColumnNames;
 
 	$db->query("select * from defRecTypeGroups where rtg_ID = $rtgID");
@@ -535,8 +825,7 @@ function updateRectypeGroup($columnNames, $rtgID, $rt) {
 	if (count($columnNames)) {
 
 		$vals = $rt;
-		$parameters = array();
-		array_push($parameters, ""); //list of field date types
+			$parameters = array(""); //list of field date types
 		foreach ($columnNames as $colName) {
 			$val = array_shift($vals);
 
@@ -568,15 +857,15 @@ function updateRectypeGroup($columnNames, $rtgID, $rt) {
 	}
 
 	return $ret;
-}
+	}
 
-/**
-* deleteRectypeGroup - Helper function that delete a group from defRecTypeGroups table.if there are no existing defRectype of this group
-* @author Artem Osmakov
-* @param $rtgID rectype group ID to delete
-* @return $ret an array of return values for the various data elements created or errors if they occurred
-**/
-function deleteRectypeGroup($rtgID) {
+	/**
+	* deleteRectypeGroup - Helper function that delete a group from defRecTypeGroups table.if there are no existing defRectype of this group
+	* @author Artem Osmakov
+	* @param $rtgID rectype group ID to delete
+	* @return $ret an array of return values for the various data elements created or errors if they occurred
+	**/
+	function deleteRectypeGroup($rtgID) {
 
 	$ret = array();
 	$query = "select rty_ID from defRecTypes where rty_RecTypeGroupIDs =$rtgID";
@@ -603,18 +892,18 @@ function deleteRectypeGroup($rtgID) {
 		}
 	}
 	return $ret;
-}
+	}
 
 
-/**
-* createDettypeGroups - Helper function that inserts a new dettypegroup into defDetailTypeGroups table
-* @author Artem Osmakov
-* @param $columnNames an array valid column names in the defDetailTypeGroups table which match the order of data in the $rt param
-* @param $rt array of data
-* @return $ret an array of return values for the various data elements created or errors if they occurred
-**/
+	/**
+	* createDettypeGroups - Helper function that inserts a new dettypegroup into defDetailTypeGroups table
+	* @author Artem Osmakov
+	* @param $columnNames an array valid column names in the defDetailTypeGroups table which match the order of data in the $rt param
+	* @param $rt array of data
+	* @return $ret an array of return values for the various data elements created or errors if they occurred
+	**/
 
-function createDettypeGroups($columnNames, $rt) {
+	function createDettypeGroups($columnNames, $rt) {
 	global $db, $dtgColumnNames;
 
 	$ret = array();
@@ -624,8 +913,7 @@ function createDettypeGroups($columnNames, $rt) {
 		foreach ( $rt as $newRT) {
 
 			$colValues = $newRT['values'];
-			$parameters = array();
-			array_push($parameters, ""); //list of field date types
+				$parameters = array(""); //list of field date types
 			$query = "";
 			foreach ($columnNames as $colName) {
 				$val = array_shift($colValues);
@@ -640,7 +928,7 @@ function createDettypeGroups($columnNames, $rt) {
 			$rows = execSQL($db, $query, $parameters, true);
 
 			if ($rows==0) {
-				$ret['error'] = "error inserting into defDetailTypeGroups - ".mysql_error();
+					$ret['error'] = "error inserting into defDetailTypeGroups - ".$db->error;
 			} else {
 				$dtgID = $db->insert_id;
 				$ret['result'] = $dtgID;
@@ -654,19 +942,19 @@ function createDettypeGroups($columnNames, $rt) {
 
 
 	return $ret;
-}
+	}
 
 
-/**
-* updateDettypeGroup - Helper function that updates group in the defDetailTypeGroups table
-* @author Artem Osmakov
-* @param $columnNames an array valid column names in the defDetailTypeGroups table which match the order of data in the $rt param
-* @param $dtgID id of the group to update
-* @param $rt - data
-* @return $ret an array of return values for the various data elements created or errors if they occurred
-**/
+	/**
+	* updateDettypeGroup - Helper function that updates group in the defDetailTypeGroups table
+	* @author Artem Osmakov
+	* @param $columnNames an array valid column names in the defDetailTypeGroups table which match the order of data in the $rt param
+	* @param $dtgID id of the group to update
+	* @param $rt - data
+	* @return $ret an array of return values for the various data elements created or errors if they occurred
+	**/
 
-function updateDettypeGroup($columnNames, $dtgID, $rt) {
+	function updateDettypeGroup($columnNames, $dtgID, $rt) {
 	global $db, $dtgColumnNames;
 
 	$db->query("select * from defDetailTypeGroups where dtg_ID = $dtgID");
@@ -680,8 +968,7 @@ function updateDettypeGroup($columnNames, $dtgID, $rt) {
 	if (count($columnNames)) {
 
 		$vals = $rt;
-		$parameters = array();
-		array_push($parameters, ""); //list of field date types
+			$parameters = array(""); //list of field date types
 		foreach ($columnNames as $colName) {
 			$val = array_shift($vals);
 
@@ -713,15 +1000,15 @@ function updateDettypeGroup($columnNames, $dtgID, $rt) {
 	}
 
 	return $ret;
-}
+	}
 
-/**
-* deleteDettypeGroup - Helper function that delete a group from defDetailTypeGroups table.if there are no existing defRectype of this group
-* @author Artem Osmakov
-* @param $rtgID rectype group ID to delete
-* @return $ret an array of return values for the various data elements created or errors if they occurred
-**/
-function deleteDettypeGroup($dtgID) {
+	/**
+	* deleteDettypeGroup - Helper function that delete a group from defDetailTypeGroups table.if there are no existing defRectype of this group
+	* @author Artem Osmakov
+	* @param $rtgID rectype group ID to delete
+	* @return $ret an array of return values for the various data elements created or errors if they occurred
+	**/
+	function deleteDettypeGroup($dtgID) {
 
 	$ret = array();
 	$query = "select dty_ID from defDetailTypes where dty_DetailTypeGroupID =$dtgID";
@@ -748,133 +1035,325 @@ function deleteDettypeGroup($dtgID) {
 		}
 	}
 	return $ret;
-}
+	}
 
+	// -------------------------------  DETAILS ---------------------------------------
+	/**
+	* createDetailTypes - Helper function that inserts a new detailTypes into defDetailTypes table
+	* @author Stephen White
+	* @param $commonNames an array valid column names in the defDetailTypes table which match the order of data in the $dt param
+	* @param $dt a structured array of data which can contain the column names and data for one or more detailTypes
+	* @return $ret an array of return values for the various data elements created or errors if they occurred
+	**/
 
-/**
-* createDetailTypes - Helper function that inserts a new detailTypes into defDetailTypes table
-* @author Stephen White
-* @param $commonNames an array valid column names in the defDetailTypes table which match the order of data in the $dt param
-* @param $dt a structured array of data which can contain the column names and data for one or more detailTypes
-* @return $ret an array of return values for the various data elements created or errors if they occurred
-**/
+	function createDetailTypes($commonNames,$dt) {
+		global $db, $dtyColumnNames;
 
-function createDetailTypes($commonNames,$dt) {
-global $dtyColumnNames;
-	$ret = array();
+		$ret = null;
+
 	if (count($commonNames)) {
-		$ret['common'] = array();
+
+
 		$colNames = join(",",$commonNames);
-error_log("dt = ".print_r($dt,true));
-			$dtValues = array();
-			foreach($dt['common'] as $dtVal) {
-				array_push($dtValues, "'".mysql_escape_string($dtVal)."'");
+
+			$parameters = array(""); //list of field date types
+			$query = "";
+			foreach ($commonNames as $colName) {
+				$val = array_shift($dt['common']);
+				if($query!="") $query = $query.",";
+				$query = $query."?";
+				$parameters[0] = $parameters[0].$dtyColumnNames[$colName]; //take datatype from array
+				array_push($parameters, $val);
 			}
-			$colValues = join(",", $dtValues);
-			$query = "insert into defDetailTypes ($colNames) values ($colValues)";
-			$res = mysql_query($query);
-			if (mysql_error()) {
-				array_push($ret['common'],array('error'=>"error inserting into defDetailTypes - ".mysql_error()));
+
+			$query = "insert into defDetailTypes ($colNames) values ($query)";
+			$rows = execSQL($db, $query, $parameters, true);
+
+			if ($rows==0) {
+				$ret = "error inserting into defDetailTypes - ".$db->error;
 			} else {
-				$dtyID = mysql_insert_id();
-				$ret['common'][$dtyID] = array();
-				array_push($ret['common'][$dtyID], "ok");
+				$dtyID = $db->insert_id;
+				$ret = -$dtyID;
 			}
+
 		}
-	if (!@$ret['common']) {
-		$ret = array("error"=>"no data supplied for inserting rectype");
+		if ($ret ==  null) {
+			$ret = "no data supplied for inserting dettype";
 	}
 	return $ret;
-}
+	}
 
-/**
-* updateDetailType - Helper function that updates detailTypes in the defDetailTypes table.
-* @author Stephen White
-* @param $commonNames an array valid column names in the defDetailTypes table which match the order of data in the $dt param
-* @param $dtyID id of the rectype to update
-* @param $dt a structured array of which can contain the column names and data for one or more detailTypes with fields
-* @return $ret an array of return values for the various data elements created or errors if they occurred
-**/
+	/**
+	* updateDetailType - Helper function that updates detailTypes in the defDetailTypes table.
+	* @author Stephen White
+	* @param $commonNames an array valid column names in the defDetailTypes table which match the order of data in the $dt param
+	* @param $dtyID id of the rectype to update
+	* @param $dt a structured array of which can contain the column names and data for one or more detailTypes with fields
+	* @return $ret an array of return values for the various data elements created or errors if they occurred
+	**/
 
-/**
-* deleteDetailType - Helper function that deletes a detailtype from defDetailTypes table.if there are no existing details of this type
-* @author Stephen White
-* @param $dtyID detailtype ID to delete
-* @return $ret an array of return values for the various data elements created or errors if they occurred
-**/
+	/**
+	* deleteDetailType - Helper function that deletes a detailtype from defDetailTypes table.if there are no existing details of this type
+	* @author Stephen White
+	* @param $dtyID detailtype ID to delete
+	* @return $ret an array of return values for the various data elements created or errors if they occurred
+	**/
 
-function deleteDetailType($dtyID) {
-global $rtyColumnNames,$rstColumnNames;
+	function deleteDetailType($dtyID) {
+
 	$ret = array();
 	$query = "select dtl_ID from recDetails where dtl_DetailTypeID =$dtyID";
 	$res = mysql_query($query);
 	if (mysql_error()) {
-		$ret['error'] = "error finding records of type $dtyID from recDetails - ".mysql_error();
+			$ret['error'] = "Error finding records of type $dtyID from recDetails - ".mysql_error();
 	} else {
 		$dtCount = mysql_num_rows($res);
-		if ($recCount) { // there are records existing of this rectype, need to return error and the recIDs
-			$ret['error'] = "error deleting detailType($dtyID) with existing data recDetails ($dtCount) not allowed";
+			if ($dtCount) { // there are records existing of this rectype, need to return error and the recIDs
+				$ret['error'] = "Error deleting detailType($dtyID) with existing data recDetails ($dtCount) not allowed";
 			$ret['dtlIDs'] = array();
 			while ($row = mysql_fetch_row($res)) {
 				array_push($ret['dtlIDs'], $row[0]);
 			}
 		} else { // no records ok to delete this rectype. Not that this should cascade for all dependent definitions
-			$query = "delete from defDetailTypes where dty_ID =$dtyID  limit = 1";
+				$query = "delete from defDetailTypes where dty_ID = $dtyID";
 			$res = mysql_query($query);
 			if (mysql_error()) {
-				$ret['error'] = "db error deleting of detailtype $dtyID from defDetailTypes - ".mysql_error();
+					$ret['error'] = "DB error deleting of detailtype $dtyID from defDetailTypes - ".mysql_error();
 			} else {
-				$ret['success'] = "detailtype $dtyID deleted from defDetailTypes";
+					$ret['result'] = $dtyID;
 			}
 		}
 	}
 	return $ret;
-}
-
-function updateDetailType($commonNames,$dtyID,$dt) {
-global $dtyColumnNames;
-	$res = mysql_query("select * from defDetailTypes where dty_ID = $dtyID");
-	if ( !mysql_num_rows($res)){
-		return array("error" => "invalid dty_ID ($dtyID) passed in data to updateDetailType");
 	}
-	//$row = mysql_fetch_assoc($res);	// saw TODO: get row and add error checking code
-	//check commonNames for updating the rectype commen data
-	$ret = array();
+
+	//
+	function updateDetailType($commonNames,$dtyID,$dt) {
+
+		global $db, $dtyColumnNames;
+
+		$ret = null;
+
+		$db->query("select dty_ID from defDetailTypes where dty_ID = $dtyID");
+
+		if ($db->affected_rows<1){
+			$ret = "invalid dty_ID ($dtyID) passed in data to updateDetailType";
+	}
+
+		$query = "";
 	if (count($commonNames)) {
-		$ret['common'] =array();
-		$vals = $dt['common'];
 
+			$vals = $dt['common'];
+			$parameters = array(""); //list of field date types
 		foreach ($commonNames as $colName) {
+
 			$val = array_shift($vals);
-			$val = mysql_escape_string($val);
-			if (!in_array($colName,$dtyColumnNames)) {
-				array_push($ret['common'],array('error'=>"$colName is not a valid column name for defDetailTypes val= $val was not used"));
-				continue;
+
+				if (array_key_exists($colName, $dtyColumnNames)) {
+					//array_push($ret['error'], "$colName is not a valid column name for defDetailTypes val= $val was not used");
+
+					if($query!="") $query = $query.",";
+					$query = $query."$colName = ?";
+
+					$parameters[0] = $parameters[0].$dtyColumnNames[$colName]; //take datatype from array
+					array_push($parameters, $val);
+				}
 			}
+			//
+			if($query!=""){
+				$query = "update defDetailTypes set ".$query." where dty_ID = $dtyID";
 
-			$query = "update defDetailTypes set $colName = '$val' where dty_ID = $dtyID";
-
-			mysql_query($query);
-			if (mysql_error()) {
-				array_push($ret['common'],array('error'=>"error updating $colName in defDetailTypes - ".mysql_error()));
-			} else {
-				array_push($ret['common'], "$colName ok");
+				$rows = execSQL($db, $query, $parameters, true);
+				if ($rows==0) {
+					$ret = "error updating $dtyID in updateDetailType - ".$db->error;
+				} else {
+					$ret = $dtyID;
+				}
 			}
 		}
-	}
-	if (!@$ret['common'] ) {
-		$ret = array("error"=>"no data supplied for updating detailtype - $dtyID");
-	}
-	return $ret;
-}
 
-//ARTEM uses mysqli
-/*
-$sql = Statement to execute;
-$parameters = array of type and values of the parameters (if any)
-$close = true to close $stmt (in inserts) false to return an array with the values;
-*/
-function execSQL($mysqli, $sql, $params, $close){
+		if ($ret == null) {
+			$ret = "no data supplied for updating dettype - $dtyID";
+		}
+		return $ret;
+	}
+
+	//========================================
+
+	//================================
+	/**
+	* update terms
+	*
+	* @param $coldNames - array of field names
+	* @param $trmID - term id, in case new term this is string
+	* @param $values - array of values
+	* @return $ret - if success this is ID of term, if failure - error string
+	*/
+	function updateTerms( $colNames, $trmID, $values) {
+
+		global $db, $trmColumnNames;
+
+		$ret = null;
+
+		if (count($colNames) && count($values))
+		{
+			$isInsert = (!is_numeric($trmID) && (strrpos($trmID, "-")>0));
+
+			$query = "";
+			$fieldNames = "";
+			$parameters = array("");
+			$fieldNames = join(",",$colNames);
+
+			foreach ($colNames as $colName) {
+
+				$val = array_shift($values);
+
+				if (array_key_exists($colName, $trmColumnNames)) {
+					//array_push($ret['error'], "$colName is not a valid column name for defDetailTypes val= $val was not used");
+
+					if($query!="") $query = $query.",";
+
+					if($isInsert){
+						$query = $query."?";
+						//if($fieldNames!="") $fieldNames=$fieldNames.",";
+						//$fieldNames = $fieldNames.$colName;
+						}else{
+						$query = $query."$colName = ?";
+					}
+
+					$parameters[0] = $parameters[0].$trmColumnNames[$colName]; //take datatype from array
+					array_push($parameters, $val);
+
+				}
+			}//for columns
+
+			if($query!=""){
+				if($isInsert){
+					$query = "insert into defTerms (".$fieldNames.") values (".$query.")";
+				}else{
+					$query = "update defTerms set ".$query." where trm_ID = $trmID";
+				}
+
+				$rows = execSQL($db, $query, $parameters, true);
+
+				if ($rows==0) {
+					$oper = (($isInsert)?"inserting":"updating");
+					$ret = "error $oper term# $trmID in updateTerms - ".$db->error;
+			} else {
+					if($isInsert){
+						$trmID = $db->insert_id;
+			}
+
+					$ret = $trmID;
+		}
+	}
+		} //if column names
+
+		if ($ret==null){
+			$ret = "no data supplied for updating record structure - $trmID";
+	}
+
+	return $ret;
+	}
+
+	/**
+	* recursive function
+	* @param $ret -- array of child
+	* @param $trmID - term id to be find all children
+	*/
+	function getTermsChilds($ret, $trmID) {
+
+		$query = "select trm_ID from defTerms where trm_ParentTermID = $trmID";
+		$res = mysql_query($query);
+		while ($row = mysql_fetch_row($res)) {
+			$child_trmID = $row[0];
+			$ret = getTermsChilds($ret, $child_trmID);
+			array_push($ret, $child_trmID);
+		}
+		return $ret;
+	}
+
+	/**
+	* deletes the term with given ID and all its children
+	* before deletetion it verifies that this term or any of its children is refered in defDetailTypes dty_JsonTermIDTree
+	*
+	* @todo - need to check inverseid or it will error by foreign key constraint?
+	*/
+	function deleteTerms($trmID) {
+
+		error_log(">>>>>>>>>>>>>>>>>HERE ");
+
+		$ret = array();
+
+		$children = array();
+		//find all children
+		$children = getTermsChilds($children, $trmID);
+		array_push($children, $trmID);
+
+		error_log(">>>>>>>>>>>>>>>>>".join(",",$children));
+
+		//find possible entries in defDetailTypes dty_JsonTermIDTree
+		foreach ($children as $termID) {
+			$query = "select dty_ID from defDetailTypes where (FIND_IN_SET($termID, dty_JsonTermIDTree)>0)";
+			$res = mysql_query($query);
+			if (mysql_error()) {
+				$ret['error'] = "Error finding detail types for $termID in deleteTerm - ".mysql_error();
+				break;
+			}else{
+				$dtCount = mysql_num_rows($res);
+				if ($dtCount>0) { // there are records existing of this rectype, need to return error and the recIDs
+					$ret['error'] = "Error deleting term# $trmID. ".(($trmID==$termID)?"It":"Its child term # $termID")." is reffered in ($dtCount) Field type(s)";
+					$ret['dtyIDs'] = array();
+					while ($row = mysql_fetch_row($res)) {
+						array_push($ret['dtyIDs'], $row[0]);
+					}
+					break;
+				}
+			}
+			//need to check inverseid or it will error by foreign key constraint?
+
+
+		}//foreach
+
+		//all is clear - delete the term
+		if(!array_key_exists("error", $ret)){
+			//$query = "delete from defTerms where trm_ID in (".join(",",$children).")";
+			//$query = "delete from defTerms where trm_ID = $trmID";
+
+			foreach ($children as $termID) {
+				$query = "delete from defTerms where trm_ID = $termID";
+				$res = mysql_query($query);
+				if (mysql_error()) {
+					$ret['error'] = "DB error deleting of term $termID from defTerms - ".mysql_error();
+					break;
+				}
+			}
+
+			if(!array_key_exists("error", $ret)){
+				$ret['result'] = $children;
+			}
+
+			/*
+			$res = mysql_query($query);
+			if (mysql_error()) {
+			$ret['error'] = "DB error deleting of term $trmID and its children from defTerms - ".mysql_error();
+			} else {
+			$ret['result'] = $children;
+			}
+			*/
+		}
+
+		return $ret;
+	}
+
+
+	//ARTEM uses mysqli
+	/*
+	$sql = Statement to execute;
+	$parameters = array of type and values of the parameters (if any)
+	$close = true to close $stmt (in inserts) false to return an array with the values;
+	*/
+	function execSQL($mysqli, $sql, $params, $close){
 
 		   $stmt = $mysqli->prepare($sql) or die ("Failed to prepared the statement!");
 
@@ -883,7 +1362,10 @@ function execSQL($mysqli, $sql, $params, $close){
 		   $stmt->execute();
 
 		   if($close){
+			$result = $mysqli->error;
+			if($result == ""){
 		   		$result = $mysqli->affected_rows;
+			}
 		   } else {
 		   		$meta = $stmt->result_metadata();
 
@@ -907,9 +1389,9 @@ function execSQL($mysqli, $sql, $params, $close){
 		   	$stmt->close();
 
 		   	return  $result;
-}
+	}
 
-function refValues($arr){
+	function refValues($arr){
 		if (strnatcmp(phpversion(),'5.3') >= 0) //Reference is required for PHP 5.3+
 		{
 			$refs = array();
@@ -918,5 +1400,5 @@ function refValues($arr){
 			return $refs;
         }
 		return $arr;
-}
+	}
 ?>

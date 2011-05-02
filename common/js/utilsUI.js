@@ -1255,7 +1255,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		}
 		function createSubTreeOptions(depth, termSubTree) {
 			for(var termID in termSubTree) { // For every term in 'term'
-				var termName = termLookup[termID];
+				var termName = termLookup[termID][0];
 				var isHeader = (headers[termID]? true:false);
 				var opt = new Option(termName,termID);
 				opt.className = "depth" + depth;

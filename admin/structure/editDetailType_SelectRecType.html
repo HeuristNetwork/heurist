@@ -1,9 +1,9 @@
 <!--
 
 /**
-* editRecStructure_SelectRecordType.html
+* editDetailType_SelectRecordType.html
 *
-* to select rectypes one (for filedsetmarker) or many (for relmarker) while editing of detail type
+* to select rectypes one (for filedsetmarker) or many (for relmarker, resource) while editing of detail type
 *
 * 2011-03-24
 * @autor: Artem Osmakov
@@ -55,8 +55,10 @@
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/container/container-min.js"></script>
 		END OVERLAYS -->
 
-		<!-- <script type="text/javascript" src="../../external/jquery/jquery.js"></script> -->
+		<!--
+		<script type="text/javascript" src="../../external/jquery/jquery.js"></script>
 		<script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+		-->
 
 		<style type="text/css">
 			.tooltip {
@@ -93,8 +95,9 @@
 
 	<body class="yui-skin-sam" style="overflow: scroll;">
 
-		<script src="../../common/js/utilsLoad.js"></script>
+		<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
 		<script src="../../common/php/loadCommonInfo.php"></script>
+		<script type="text/javascript" src="../../admin/structure/editDetailType_SelectRecType.js"></script>
 
 		<div class="tooltip" id="toolTip2"><p>popup popup</p></div>
 
@@ -111,8 +114,8 @@
 				<div style="display:inline-block; max-width:150;"><div id="dt_pagination_top"></div></div>
 				<div style="float:right; text-align:right;padding-top:5px;">
 					<label id="lblSelect1"></label>
-					<input type="button" tabindex="12" value="Cancel" onclick="SelectRecordType.cancel();" />
-					<input type="button" tabindex="11" id="btnApply1" value="Insert Selection" onclick="SelectRecordType.close();" />
+					<input type="button" tabindex="12" value="Cancel" onclick="selectRecordType.cancel();" />
+					<input type="button" tabindex="11" id="btnApply1" value="Insert Selection" onclick="selectRecordType.apply();" />
 				</div>
 			</div>
 
@@ -120,416 +123,10 @@
 
 				<script  type="text/javascript">
 
-					// static class
-					var SelectRecordType = (
-					function() {
-
-						var _className = "SelectRecordType",
-						myDataTable,
-						myDataSource,
-						arr_selection = [], // array of selected rectype ids
-						datatype,  // datatype of parent detailtype: relmarker,resource or fieldsetmarker
-						showTimer,hideTimer;
-
 						//
-						// filtering controls
-						//
-						var filterTimeout = null,
-						filterByName,
-						filterByGroup,
-						filterBySelection1,
-						filterBySelection2,
-						lblSelect1,
-						lblSelect2;
-
-						//for tooltip
-						var currentTipId,
-						needHideTip = true;
-
-
-						//
-						// init
-						// 1. create and fill table of detail types
-						// 2. fill combobox with detail groups
-						// 3. assign listeners for filter controls
-						//
-						function _init()
-						{
-							if(myDataTable==null){
-
-								if (location.search.length > 1) {
-									//window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-									top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-									datatype = top.HEURIST.parameters['type'];
-									var sIDs = top.HEURIST.parameters['ids'];
-									if (sIDs) {
-										arr_selection = sIDs.split(',');
-									}
-
-									if(datatype=="fieldsetmarker"){
-										var el = YAHOO.util.Dom.get('divFilterBySelection');
-										el.style.display = "none";
-										el = YAHOO.util.Dom.get('btnApply1');
-										el.style.display = "none";
-										el = YAHOO.util.Dom.get('btnApply2');
-										el.style.display = "none";
-									}
-								}
-
-								//////////////////// create data table
-								var arr = [];
-
-								//create datatable and fill it values of particular group
-								for (var rty_ID in top.HEURIST.rectypes.typedefs) {
-									if(rty_ID != "commomFieldNames" && rty_ID != "dtFieldNames")
-									{
-										var td = top.HEURIST.rectypes.typedefs[rty_ID];
-										var rectype = td.commonFields;
-
-										if(datatype=="relmarker" || rectype[10]=="1")//??????????????SAW what is this  (flagAsFieldSet)
-										{
-										arr.push([(arr_selection.indexOf(rty_ID)>0),
-											"<img src=\"../../common/images/rectype-icons/"+rty_ID+".gif\">",
-											rectype[0], //name
-											rectype[1], //descr
-											rectype[8], //status
-											rectype[9], //group
-											rty_ID
-											]);
-										}
-									}
-								}
-
-								myDataSource = new YAHOO.util.LocalDataSource(arr, {
-									responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
-									responseSchema : {
-										fields: ["selection", "icon", "name", "description",  "status", "group", "id"]
-									},
-									doBeforeCallback : function (req, raw, res, cb) {
-										// This is the filter function
-										var data  = res.results || [],
-										filtered = [],
-										i,l;
-
-										if (req) {
-											//parse request
-											var fvals = req.split("|");
-
-											var sByGroup  = fvals[0];
-											var sByName   = fvals[1].toLowerCase();
-											var isBySelect = (fvals[2]==0);
-
-											for (i = 0, l = data.length; i < l; ++i)
-											{
-												if ((sByGroup=="all" || data[i].group==sByGroup) &&
-												(data[i].name.toLowerCase().indexOf(sByName)==0))
-												{
-													data[i].selection = (arr_selection.indexOf(data[i].id)>=0);
-													if(isBySelect || data[i].selection){
-														filtered.push(data[i]);
-													}
-												}
-											}
-											res.results = filtered;
-										}
-
-										return res;
-									}
-								});
-
-								var myColumnDefs = [
-								{ key: "selection", label: "Sel", /*???????*/ hidden:(datatype=="fieldsetmarker")/* why???????*/, sortable:true, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
-								{ key: "icon", label: "Icon", sortable:false },
-								{ key: "name", label: "<u>Name</u>", sortable:true },
-								{ key: "description", hidden:true, sortable:false},
-								{ key: "status", label: "<u>Status</u>", hidden:false, sortable:false },
-								{ key: "group",   hidden:true},
-								{ key: "id", label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
-										elLiner.innerHTML = '<a href="#info"><img src="../../common/images/info_icon.png" width="16" height="16" border="0" title="Info" /><\/a>'}
-								},
-
-								];
-
-
-								var myConfigs = {
-									//selectionMode: "singlecell",
-									paginator : new YAHOO.widget.Paginator({
-										rowsPerPage: 100, // REQUIRED
-										totalRecords: arr.length, // OPTIONAL
-										containers: ['dt_pagination_top','dt_pagination_bottom'],
-										// use a custom layout for pagination controls
-										template: "{PageLinks}",  //" Show {RowsPerPageDropdown} per page",
-										// show all links
-										pageLinks: YAHOO.widget.Paginator.VALUE_UNLIMITED
-										// use these in the rows-per-page dropdown
-										//, rowsPerPageOptions: [100]
-									})
-								};
-
-								myDataTable = new YAHOO.widget.DataTable('tabContainer', myColumnDefs, myDataSource, myConfigs);
-
-								//subscribe on datatable events
-								myDataTable.subscribe("checkboxClickEvent", function(oArgs) {
-									//YAHOO.util.Event.stopEvent(oArgs.event);
-									var elCheckbox = oArgs.target;
-									toggleSelection(elCheckbox);
-								});
-
-								//
-								myDataTable.on('cellMouseoutEvent', function (oArgs) {
-									hideTimer = window.setTimeout(hideToolTip, 2000);
-								});
-
-								//
-								// mouse over help colums shows the datailed description
-								//
-								myDataTable.on('cellMouseoverEvent', function (oArgs){
-
-									clearHideTimer();
-
-									var forceHideTip = true;
-									var textTip = null;
-									var target = oArgs.target;
-									var column = this.getColumn(target);
-
-									if (column!=null && column.key == 'id') {
-										var record = this.getRecord(target);
-										var description = record.getData('description') || 'no further description';
-										var xy = [parseInt(oArgs.event.clientX,10) + 10 ,parseInt(oArgs.event.clientY,10) + 10 ];
-										textTip = '<p>'+description+'</p>';
-									}
-
-									if(textTip!=null){
-
-										needHideTip = true;
-
-										var my_tooltip = $("#toolTip2");
-
-										my_tooltip.mouseover(function(){needHideTip = false; clearHideTimer();});
-										my_tooltip.mouseout(function(){ needHideTip = true;});
-
-										var border_top = $(window).scrollTop();
-										var border_right = $(window).width();
-										var border_height = $(window).height();
-										var left_pos;
-										var top_pos;
-										var offset = 15;
-										if(border_right - (offset *2) >= my_tooltip.width() +  xy[0]) {
-											left_pos = xy[0]+offset;
-										} else {
-											left_pos = border_right-my_tooltip.width()-offset;
-										}
-
-										if((border_top + offset *2) >=  xy[1] - my_tooltip.height()) {
-											top_pos = border_top + offset + xy[1]; //
-										} else {
-											top_pos = border_top + xy[1] - my_tooltip.height()-offset;
-										}
-										if(top_pos + my_tooltip.height() > border_top+border_height){
-											top_pos	= border_top + border_height - my_tooltip.height()-5;
-										}
-
-
-										//var lft = my_tooltip.css('left');
-										my_tooltip.css( {
-											left:left_pos+'px', top:top_pos+'px'
-										});//.fideIn(500).fideOut(5000);
-										//lft = my_tooltip.css('left');
-										my_tooltip.html(textTip);
-										hideTimer = window.setTimeout(hideToolTip, 5000);
-									}
-									else if(forceHideTip)
-									{
-										hideToolTip();
-									}
-								});//end _onCellMouseOver
-
-
-								function hideToolTip(){
-									if(needHideTip){
-										currentTipId = null;
-										clearHideTimer();
-										var my_tooltip = $("#toolTip2");
-										my_tooltip.css( {
-											left:"-9999px"
-										});
-									}
-								}
-								function clearHideTimer(){
-									if (hideTimer) {
-										window.clearTimeout(hideTimer);
-										hideTimer = 0;
-									}
-								}
-
-								// Subscribe to events for row selection
-								myDataTable.subscribe("rowMouseoverEvent", myDataTable.onEventHighlightRow);
-								myDataTable.subscribe("rowMouseoutEvent", myDataTable.onEventUnhighlightRow);
-								myDataTable.subscribe("cellClickEvent", function(oArgs){
-
-								//YAHOO.util.Event.stopEvent(oArgs.event);
-								//var elTarget = oArgs.target;
-								//var elTargetRow = myDataTable.getTrEl(elTarget);
-								var elTargetCell = oArgs.target;
-								if(elTargetCell) {
-        							var oRecord = myDataTable.getRecord(elTargetCell);
-        							//get first cell
-        							var cell = myDataTable.getTdEl({record:oRecord, column:myDataTable.getColumn("selection")});
-        							if(elTargetCell!=cell){
-        								var elCheckbox = cell.firstChild.firstChild;
-        								elCheckbox.checked = !elCheckbox.checked;
-        								toggleSelection(elCheckbox);
-									}
-								}
-
-								});//myDataTable.onEventSelectRow);
-
-								// init Group Combo Box Filter
-								_initGroupComboBoxFilter();
-
-								//init listeners for filter controls
-								_initListeners();
-
-							}
-						}//end of initialization
-
-						function toggleSelection(elCheckbox)
-						{
-									var newValue = elCheckbox.checked;
-									var oRecord = myDataTable.getRecord(elCheckbox);
-
-									var data = oRecord.getData();
-									data['selection'] = newValue;
-									/* it works
-									var recordIndex = this.getRecordIndex(oRecord);
-									myDataTable.updateRow(recordIndex, data);
-									*/
-									if(newValue){ //add
-										if(datatype=="fieldsetmarker"){
-											arr_selection = [data['id']];
-											window.close(data['id']);
-										}else{//relmarker or resource
-											arr_selection.push(data['id']);
-										}
-
-									}else{ //remove
-										var ind = arr_selection.indexOf(data['id']);
-										if(ind>=0){
-											arr_selection.splice(ind,1);
-										}
-									}
-
-									lblSelect1.innerHTML = "<b>"+arr_selection.length+"</b> record type"+((arr_selection.length>1)?"s":"");
-									lblSelect2.innerHTML = lblSelect1.innerHTML;
-						};
-
-						//
-						// init combobox with names of group
-						//
-						function _initGroupComboBoxFilter()
-						{
-							filterByGroup = YAHOO.util.Dom.get('inputFilterByGroup');
-
-							for (var grpID in top.HEURIST.rectypes.groups) {
-								var grpName = top.HEURIST.rectypes.groups[grpID].name;
-
-								var option = document.createElement("option");
-								option.text = grpName;
-								option.value = grpID;
-								try
-								{
-									// for IE earlier than version 8
-									filterByGroup.add(option, filterByGroup.options[null]);
-								}
-								catch (e)
-								{
-									filterByGroup.add(option,null);
-								}
-
-							} //for
-
-							filterByGroup.onchange = updateFilter;
-
-						}
-
-						//
-						//
-						//
-						function _initListeners()
-						{
-							filterByName = YAHOO.util.Dom.get('inputFilterByName');
-							filterByName.onkeyup = function (e) {
-								clearTimeout(filterTimeout);
-								setTimeout(updateFilter, 600);
-							};
-
-							filterBySelection1 = YAHOO.util.Dom.get('inputFilterBySelection1');
-							filterBySelection1.onchange = updateFilter;
-							filterBySelection2 = YAHOO.util.Dom.get('inputFilterBySelection2');
-							filterBySelection2.onchange = updateFilter;
-
-							lblSelect1 = YAHOO.util.Dom.get('lblSelect1');
-							lblSelect2 = YAHOO.util.Dom.get('lblSelect2');
-							var btnClear = YAHOO.util.Dom.get('btnClearSelection');
-							btnClear.onclick = _clearSelection;
-						}
-
-						//
-						function _clearSelection(){
-							arr_selection = [];
-							lblSelect1.innerHTML = "";
-							lblSelect2.innerHTML = "";
-							updateFilter();
-						}
-
-						//
-						var updateFilter  = function () {
-							// Reset timeout
-							filterTimeout = null;
-
-							// Reset sort
-							var state = myDataTable.getState();
-							state.sortedBy = {key:'name', dir:YAHOO.widget.DataTable.CLASS_ASC};
-
-							var filter_name  = filterByName.value;
-							var filter_group = filterByGroup.value;
-							var filter_select = ((filterBySelection2.checked)?1:0);
-
-							// Get filtered data
-							myDataSource.sendRequest(filter_group+'|'+filter_name+'|'+filter_select, {
-								success : myDataTable.onDataReturnInitializeTable,
-								failure : myDataTable.onDataReturnInitializeTable,
-								scope   : myDataTable,
-								argument : { pagination: { recordOffset: 0 } } // to jump to page 1
-							});
-						};
-
-						//---------------------------------------------
-						//public members
-						var that = {
-							name : "App",
-							init: function(){
-								_init();
-							},
-							close : function () {
-								var res = arr_selection.join(",");
-								window.close(res);
-							},
-							cancel : function () {
-								window.close(null);
-							},
-						};
-
-						return that;
-
-
-
-					})();
-
-
-					////////////////////////////////////////////////
+				//  starts initialization on load completion of this window
 					//
-					YAHOO.util.Event.addListener(window, "load", SelectRecordType.init);
+				YAHOO.util.Event.addListener(window, "load", function(){ selectRecordType = new  SelectRecordType(); });
 
 				</script>
 			</div>
@@ -538,8 +135,8 @@
 				<div style="display:inline-block;"><div id="dt_pagination_bottom"></div></div>
 				<div style="float:right; text-align:right;padding-top:5px">
 					<label id="lblSelect2"></label>
-					<input type="button" tabindex="12" value="Cancel" onclick="SelectRecordType.cancel();" />
-					<input type="button" tabindex="11" id="btnApply2" value="Insert Selection" onclick="SelectRecordType.close();" />
+					<input type="button" tabindex="12" value="Cancel" onclick="selectRecordType.cancel();" />
+					<input type="button" tabindex="11" id="btnApply2" value="Insert Selection" onclick="selectRecordType.apply();" />
 				</div>
 			</div>
 

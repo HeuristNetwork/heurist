@@ -205,7 +205,7 @@ var EditTerms = (
 			var nodeIndex = tv.getNodeCount()+1;
 
 			var term = new Object();
-			term.label = termsByDomainLookup[parentElement];
+			term.label = termsByDomainLookup[parentElement][0];
 			term.id = parentElement;
 			term.domain = domain;
 			term.description = "";
@@ -236,7 +236,7 @@ var EditTerms = (
 					nodeIndex = tv.getNodeCount()+1;
 
 					term = new Object();
-					term.label = termsByDomainLookup[child];
+					term.label = termsByDomainLookup[child][0];
 					term.id = child;
 					term.domain = domain;
 					term.description = "";  //@todo I don't have neither description nor inverseid in HEURIST
