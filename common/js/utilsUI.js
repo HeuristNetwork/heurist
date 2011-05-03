@@ -1295,3 +1295,71 @@ top.HEURIST.registerEvent(window, "resize", function() {
 	}
 	window.resizeTimeout = window.setTimeout(function() { top.HEURIST.util.autosizeAllElements(); window.resizeTimeout = 0; }, 250);
 });
+
+
+//ARTEM added these
+
+/**
+*
+*/
+function isnull(obj){
+	return ( (typeof obj==="undefined") || (obj===null));
+}
+
+/**
+*
+*/
+function isempty(obj){
+	return ( isnull(obj) || (obj==="") || (obj==="null") );
+}
+
+/**
+* Utility function to validate that input value is as integer
+* @todo move to common util
+*/
+function validate(evt) {
+	var theEvent = evt || window.event;
+	var key = theEvent.keyCode || theEvent.which;
+	key = String.fromCharCode( key );
+	var regex = /[0-9]|\./;
+	if( !regex.test(key) ) {
+		theEvent.returnValue = false;
+		theEvent.preventDefault();
+	}
+}
+
+/**
+* helper function. utilized in recreateTermsPreviewSelector only
+* converts json string to array
+*/
+function expandJsonStructure( jsonString ) {
+	var retStruct = "";
+	if(jsonString && jsonString !== "") {
+		try {
+			retStruct = eval(jsonString);
+		} catch(e) {
+			try {
+				retStruct = YAHOO.lang.JSON.parse(jsonString);
+			} catch(e1) {
+				retStruct = "";
+			}
+		}
+	}
+	return retStruct;
+}
+
+/**
+* deep cloning of object
+*/
+function cloneObj(o) {
+	if(typeof(o) != "object") return o;
+
+	if(o == null) return o;
+
+	var newO = new Object();
+
+	for(var i in o) newO[i] = cloneObj(o[i]);
+
+	return newO;
+}
+

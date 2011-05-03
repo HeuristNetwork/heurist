@@ -28,15 +28,18 @@
 		<link rel="stylesheet" type="text/css" href="../../common/css/heurist.css">
 		<!--  <link rel="stylesheet" type="text/css" href="../../common/css/mini.css"> -->
 		<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+		<link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
 
 		<!-- YUI -->
 		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
 		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
+		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/treeview/assets/skins/sam/treeview.css" />
+
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/tabview/tabview-min.js"></script>
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/history/history-min.js"></script>
-
+		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/treeview/treeview-min.js"></script>
 
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
@@ -75,6 +78,9 @@
 
 
 		<style type="text/css">
+button {
+	width: 80px;
+}
 			.dtyField {
 				padding-bottom: 3px;
 				padding-top: 3px;
@@ -86,11 +92,93 @@
 				text-align: right;
 				padding-right: 3px;
 			}
+			.dtyValue {
+				display: inline-block;
+			}
 			.yui-dt table
 			{
 				width: 590;
 				max-width: 590;
 			}
+			.tooltip {
+				position:absolute;
+				z-index:999;
+				left:-9999px;
+				top:0px;
+				background-color:#dedede;
+				padding:5px;
+				border:1px solid #fff;
+				min-width:300;
+				min-height:300;
+			}
+
+.depth0 {
+	margin-left: 0px;
+}
+.depth1 {
+	margin-left: 10px;
+}
+.depth2 {
+	margin-left: 20px;
+}
+.depth3 {
+	margin-left: 30px;
+}
+.depth4 {
+	margin-left: 40px;
+}
+.depth5 {
+	margin-left: 50px;
+}
+.depth6 {
+	margin-left: 60px;
+}
+.depth7 {
+	margin-left: 70px;
+}
+
+.termTree {
+	float: left;
+	border-style: groove;
+	width: 33%;
+	height: 80%;
+	overflow: auto;
+}
+.selectedTerms {
+	float: left;
+	border-style: groove;
+	width: 33%;
+	height: 80%;
+	overflow: auto;
+}
+.termTreeText {
+	width: 33%;
+	padding:2px;
+	float: left;
+	vertical-align: bottom;
+}
+.selectedTermsText {
+	width: 33%;
+	padding:2px;
+	float: left;
+}
+.previewListText {
+	padding:2px;
+	float: left;
+}
+.previewList {
+	width: 180px;
+	max-width: 180px;
+}
+.termHeader {
+	font-weight: bold;
+	color: black;
+}
+.dtyName {
+	padding-bottom: 3px;
+	padding-top: 3px;
+}
+
 		</style>
 
 	</head>
@@ -101,12 +189,41 @@
 		<script src="../../common/php/displayPreferences.php"></script>
 		<script src="../../common/php/loadCommonInfo.php"></script>
 		<script type="text/javascript" src="../../records/edit/editRecord.js"></script>
+		<script type="text/javascript" src="../../records/edit/relationshipsObjectLibrary.js"></script>
 		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
+
 		<script type="text/javascript" src="../../admin/structure/editRecStructure.js"></script>
+		<script type="text/javascript" src="../../admin/structure/selectTerms.js"></script>
 
 <!-- DEBUG
 		<div style="display: none;">rty_ID:<input id="ed_rty_ID" value="1"/><input type="button" value="change" onclick="_tempFillValue()"/></div>
 -->
+<!-- panel to filter json terms tree -->
+		<div class="tooltip" id="termsFilter">
+			<h1 class="dtyName" id="dtyName"></h1>
+			<div id="termTreeText" class="termTreeText"><h3>Select the terms you want</h3></div>
+			<div id="termTreeText" class="selectedTermsText"><h3>This is filtered tree</h3></div>
+			<div id="termTreeText" class="previewListText"><h3>Preview the result</h3></div>
+
+			<div id="termTree" class="termTree ygtv-checkbox"></div>
+			<div id="selectedTermsTree" class="selectedTerms ygtv-checkbox"></div>
+			<div id="termTreeText" class="previewListText">
+				<div>
+					<button title="Clear selection" onclick="selectTerms.clearSelection()">Clear</button>
+					<button title="Clear disbales" onclick="selectTerms.clearDisables()">Enable All</button>
+				</div>
+				<div><select id="previewList" class="previewList"></select></div>
+				<div>
+					<button title="Clear selection" onclick="selectTerms.apply();">Select</button>
+					<button title="Clear disbales" onclick="selectTerms.cancel()">Cancel</button>
+				</div>
+			</div>
+		</div>
+
+<!-- panel to filter rectype pointers -->
+		<div class="tooltip" id="pointerFilter">
+			<button onclick="closeDivPopup()">Close</button>
+		</div>
 
 		<div id="modelTabs" class="yui-navset yui-navset-top" style="width:600;margin:auto;text-align:left">
 

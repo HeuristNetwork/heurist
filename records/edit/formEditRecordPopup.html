@@ -54,47 +54,48 @@
 
 			function showRecordProperties() {
 				if (! window.HEURIST.edit.record) {
-		// We only make it here if someone's screwing around ...
-		// It does give a flash of popup window, but it's a bit hard to work around that.
-		alert("Sorry - record not found");
-		setTimeout(function() { window.close(); }, 0);
-		return;
-	}
+					// We only make it here if someone's screwing around ...
+					// It does give a flash of popup window, but it's a bit hard to work around that.
+					alert("Sorry - record not found");
+					setTimeout(function() { window.close(); }, 0);
+					return;
+				}
 
-	// fill in the toolbar fields with the details for this record
-	document.getElementById('rectype-val').innerHTML = '';
+				// fill in the toolbar fields with the details for this record
+				document.getElementById('rectype-val').innerHTML = '';
 				document.getElementById('rectype-val').appendChild(document.createTextNode(window.HEURIST.edit.record.rectype));
 
-	document.getElementById('title-val').innerHTML = '';
+				document.getElementById('title-val').innerHTML = '';
 				document.getElementById('title-val').appendChild(document.createTextNode(window.HEURIST.edit.record.title));
 			}
 
 			function loadPublicEditFrame() {
-	var editFrame = document.getElementById("edit-frame");
+				var editFrame = document.getElementById("edit-frame");
 
 				var parameters = window.HEURIST.edit.record;
-	if (parameters  &&  parameters.bibID) {
+				if (parameters  &&  parameters.bibID) {
 					editFrame.src = top.HEURIST.baseURL + "records/edit/tabs/publicInfoTab.html?bib_id=" + parameters.bibID;
-		editFrame.style.display = "block";
-	}
+					editFrame.style.display = "block";
+				}
 
-	var defaultClose = window.frameElement.close;
-	window.frameElement.close = function() {
+				var defaultClose = window.frameElement.close;
+				window.frameElement.close = function() {
 					defaultClose(window.HEURIST.edit.record.title, window.HEURIST.edit.record.bdValuesByType);
-	};
+				};
 			}
 
 
-			window.HEURIST.edit = {
+window.HEURIST.edit = {
+
 	publicHasChanged: false,
 
 	unchanged: function() {
-		window.HEURIST.edit.publicHasChanged = false;
-	},
+			window.HEURIST.edit.publicHasChanged = false;
+		},
 
 	changed: function() {
-		window.HEURIST.edit.publicHasChanged = true;
-	},
+			window.HEURIST.edit.publicHasChanged = true;
+		},
 
 	save: function() {
 		// Attempt to save the public tab
@@ -107,7 +108,7 @@
 				return;	// submit failed ... up to the individual form handlers to display messages
 			}
 
-						window.HEURIST.registerEvent(editFrame, "load", function() {
+			window.HEURIST.registerEvent(editFrame, "load", function() {
 				window.HEURIST.edit.unchanged("public");
 				window.HEURIST.edit.save();	// will continue where we left off
 			});
@@ -120,7 +121,7 @@
 		// Grab the biblio title from the saved document, and close the window.
 		window.close();
 	}
-			};
+};
 
 			top.HEURIST.registerEvent(window, "load", showRecordProperties);
 

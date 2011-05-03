@@ -4,12 +4,10 @@ var editStructure;
 // reference to popup window - select or add new field type
 var popupSelect = null;
 
-/**
-*
-*/
-function isnull(obj){
-	return ((obj===null) || (obj===undefined));// old js way typeof(obj)==='undefined');
-}
+//aliases
+var Dom = YAHOO.util.Dom,
+	Event = YAHOO.util.Event,
+	DDM = YAHOO.util.DragDropMgr;
 
 /**
 * EditRecStructure - class for pop-up edit record type structure
@@ -30,11 +28,6 @@ function EditRecStructure() {
 	_expandedRecord = null, //rstID of record (row) in design datatable that is (was) expanded (edited)
 	_isServerOperationInProgress = false; //prevents send request if there is not respoce from previous one
 	myDTDrags = {};
-
-	//aliases
-	var Dom = YAHOO.util.Dom,
-	Event = YAHOO.util.Event,
-	DDM = YAHOO.util.DragDropMgr;
 
 	/**
 	* Initialization of input form
@@ -73,13 +66,25 @@ function EditRecStructure() {
 		_tabView.addTab(new YAHOO.widget.Tab({
 			id: 'preview',
 			label: 'Preview',
-			content: '<div id=all-inputs></div>'
+			content:
+			'<div id="all-inputs" style="width:590, max-width:590;"></div>'
 		}));
 		_tabView.addListener("activeTabChange", _handleTabChange);
 		_tabView.appendTo("modelTabs");
 
 		//init design tab
 		_tabView.set("activeIndex", 0);
+/*
+			'<div id="previewpage">'+
+				'<input type=checkbox id=input-visibility onClick="top.HEURIST.util.setDisplayPreference(\'input-visibility\', this.checked? \'all\' : \'recommended\')" class=minimal>'+
+				'<label for=input-visibility>show optional fields</label>'+
+			'</div>'+
+				'<script>'+
+					'top.HEURIST.whenLoaded("display-preferences", function() {'+
+						'document.getElementById("input-visibility").checked = (top.HEURIST.displayPreferences["input-visibility"] === "all");'+
+					'});'+
+				'</script>'+
+*/
 	}
 
 	/**
@@ -233,8 +238,8 @@ function EditRecStructure() {
 				key:"rst_Status", label: "Status", sortable:false
 			},
 			{
-				key:"rst_values",
-				label:"Del",
+				key: "rst_values",
+				label: "Del",
 				width : "16px",
 				sortable: false,
 				formatter: function(elLiner, oRecord, oColumn, oData){
@@ -263,8 +268,9 @@ function EditRecStructure() {
 					'<div class="dtyField"><label class="dtyLabel">Help Text/Prompt:</label><input id="ed'+rst_ID+'_rst_DisplayHelpText" style="width:350px" title="Help Text"/></div>'+
 					'<div class="dtyField"><label class="dtyLabel">Default Value:</label><input id="ed'+rst_ID+'_rst_DefaultValue" title="Default Value"/></div>'+
 					'<div class="dtyField"><label class="dtyLabel">Width:</label><input id="ed'+rst_ID+'_rst_DisplayWidth" title="Visible width of field" style="width:40" size="4" onkeypress="validate(event)"/></div>'+
+
 					'<div class="dtyField"><label class="dtyLabel">Requirement type:</label>'+
-					'<select id="ed'+rst_ID+'_rst_RequirementType">'+
+					'<select id="ed'+rst_ID+'_rst_RequirementType" onchange="onReqtypeChange(event)">'+
 					'<option value="required">required</option>'+
 					'<option value="recommended">recommended</option>'+
 					'<option value="optional">optional</option>'+
@@ -273,13 +279,21 @@ function EditRecStructure() {
 					'_rst_MinValues" title="Min Values" style="width:20" size="2"  onkeypress="validate(event)"/>&nbsp;'+
 					'&nbsp;to&nbsp;<input id="ed'+rst_ID+
 					'_rst_MaxValues" title="Max Values"  style="width:20" size="2"  onkeypress="validate(event)"/>&nbsp;times</div>'+
+
+					'<div class="dtyField"><label class="dtyLabel">Vocabulary:</label>'+
+					'<div id="termsPreview" class="dtyValue"></div>'+
+					'<input id="ed'+rst_ID+'_rst_FilteredJsonTermIDTree" type="hidden"/>'+
+					'<input id="ed'+rst_ID+'_rst_TermIDTreeNonSelectableIDs" type="hidden"/>'+
+					'<input type="button" value="Filter terms" id="btnSelTerms" onclick="showTermsTree('+rst_ID+', event)"/></div>'+
+
 					'<div class="dtyField"><label class="dtyLabel">Status:</label><select id="ed'+rst_ID+
 					'_rst_Status" style="display:inline-block">'+
 					'<option value="reserved">reserved</option>'+
 					'<option value="approved">approved</option>'+
 					'<option value="pending">pending</option>'+
 					'<option value="open">open</option></select>'+
-					'<div style="float:right; text-align:right;min-width:200;">'+
+
+					'<div style="float:right; text-align:right;min-width:250;">'+
 					'<input id="btnSave_'+rst_ID+
 					'" style="display:inline-block" type="button" value="Save" onclick="doExpliciteCollapse(event);" />'+
 					'<input id="btnCancel_'+rst_ID+
@@ -473,25 +487,124 @@ function EditRecStructure() {
 		//save all changes
 		_doExpliciteCollapse(null, true);
 
-		//define new display order
-		//var arrStrucuture = top.HEURIST.rectypes.typedefs[rty_ID].dtFields;
-		//arrStrucuture
 
-		var allInputs = Dom.get("all-inputs");
-		while (allInputs.childNodes.length > 0){
-			allInputs.removeChild(allInputs.childNodes[0]);
-		}
+			top.HEURIST.edit.allInputs = [];
+			//top.HEURIST.edit.inputs = {};
+			top.HEURIST.edit.modules = {};
 
-		var showAllDiv = Dom.get("show-all-div");
-		if (showAllDiv){
-			showAllDiv.parentNode.removeChild(showAllDiv);
-		}
+			top.HEURIST.edit.record = {bdValuesByType:{},
+					bibID: null,
+					bkmkID: null,
+					comments:[],
+					isTemporary:[],
+					moddate:"",
+					quickNotes:"",
+					recID: "0",
+					rectype: "", //name of rectype
+					rectypeID: rty_ID,
+					relatedRecords:[],
+					reminders:[],
+					retrieved:"",
+					rtConstraints:[],
+					tagString:"",
+					title:"kala mala",
+					url:"",
+					wikis:[],
+					workgroup:"Heurist",
+					workgroupID: "12",
+					workgroupTags:[]
 
-		var innerDims = top.HEURIST.util.innerDimensions(window);
+		};
 
-		var inputs = top.HEURIST.edit.createInputsForRectype(rty_ID, [], allInputs);
 
+		//loadPublicEditFrame();
+		//setTimeout(renderInputs, 500);
+		renderInputs();
 	}
+
+function renderInputs() {
+
+	var rectype = rty_ID;
+	// Clear out any existing inputs
+
+	var allInputs = document.getElementById("all-inputs");
+	while (allInputs.childNodes.length > 0)
+		allInputs.removeChild(allInputs.childNodes[0]);
+
+	var showAllDiv = document.getElementById("show-all-div");
+	if (showAllDiv)
+		showAllDiv.parentNode.removeChild(showAllDiv);
+
+	var innerDims = top.HEURIST.util.innerDimensions(window);
+
+	if (rectype) {
+
+		var defaultInputValues = {};
+
+		/*if(!window.HEURIST.edit){
+			window.HEURIST.edit = top.HEURIST.edit;
+		}*/
+
+		var inputs = top.HEURIST.edit.createInputsForRectype(rectype, defaultInputValues, allInputs);
+
+		renderShowAll();
+
+		//renderAdditionalDataSection(allInputs, rectype);
+		//window.HEURIST.inputs = inputs;
+	}
+
+}
+
+function renderShowAll() {
+	var hrRow = document.getElementById("all-inputs").appendChild(document.createElement("div"));
+		hrRow.className = "separator_row";
+		hrRow.style.margin = "20px 0 0 0";
+
+	var showDiv = document.getElementById("all-inputs").appendChild(document.createElement("div"));
+		showDiv.id = "show-all-div";
+		showDiv.className = "title-row not-optional-fields";
+
+	var showLink = showDiv.appendChild(document.createElement("div")).appendChild(document.createElement("a"));
+		showLink.className = "additional-header-cell not-optional-fields";
+		showLink.style.fontWeight = "bold";
+		showLink.href = "#";
+		showLink.appendChild(document.createTextNode("Show all fields"));
+		showLink.onclick = function() {
+			top.HEURIST.util.setDisplayPreference("input-visibility", "all");
+			//Dom.get("input-visibility").checked = true;
+			return false;
+		};
+
+	var showInnerDiv = showDiv.appendChild(document.createElement("div"));
+		showInnerDiv.appendChild(document.createTextNode("Only "));
+		showInnerDiv.className = "input-cell";
+	var showInnerSpan = showInnerDiv.appendChild(document.createElement("span"));
+		showInnerSpan.className = "required-only";
+		showInnerSpan.style.fontWeight = "bold";
+		showInnerSpan.appendChild(document.createTextNode("required"));
+		showInnerSpan = showInnerDiv.appendChild(document.createElement("span"));
+		showInnerSpan.className = "recommended";
+		showInnerSpan.style.fontWeight = "bold";
+		showInnerSpan.appendChild(document.createTextNode("recommended"));
+		showInnerDiv.appendChild(document.createTextNode(" fields are currently visible"));
+}
+
+
+	/*function loadPublicEditFrame() {
+			//fills top.HEURRIST.edit.record
+
+			if (! top.HEURIST.edit.record) {
+					alert("Sorry - record not found");
+			}else{
+				var editFrame = document.getElementById("edit-frame");
+
+				var parameters = top.HEURIST.edit.record;
+				//if (parameters  &&  parameters.bibID) {
+					editFrame.src = top.HEURIST.baseURL + "records/edit/tabs/publicInfoTab.html";
+					editFrame.style.display = "block";
+				//}
+			}
+	}*/
 
 	/**
 	* Collapses the expanded row and save record structure type to server
@@ -642,9 +755,11 @@ function EditRecStructure() {
 	* @param _rst_ID record structure type ID
 	* @param isAll - not used (false always)
 	*/
-	function _fromArrayToUI(rst_ID, isAll){
+	function _fromArrayToUI(rst_ID, isAll)
+	{
 		var fieldnames = top.HEURIST.rectypes.typedefs.dtFieldNames;
 		var values = top.HEURIST.rectypes.typedefs[rty_ID].dtFields[rst_ID];
+		var rst_type = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[2];
 
 		var k;
 		for(k=0; k<fieldnames.length; k++){
@@ -652,8 +767,44 @@ function EditRecStructure() {
 			var edt = Dom.get(ed_name);
 			if( !isnull(edt) && (isAll || edt.parentNode.id.indexOf("row")<0)){
 				edt.value = values[k];
+
+			if(rst_type === "relmarker" && fieldnames[k] === "rst_DefaultValue"){
+					//hide defaulvalue
+					edt.parentNode.style.display = "none";
+					//show disable jsontree
+			}else if(fieldnames[k] === "rst_TermIDTreeNonSelectableIDs"){
+				if(rst_type === "enum"){
+					//show disable jsontree
+					edt.parentNode.style.display = "block";
+
+					var edt2 = Dom.get('ed'+rst_ID+'_rst_TermIDTreeNonSelectableIDs');
+
+					recreateTermsPreviewSelector(rst_type,
+					(isempty(edt.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[9]:edt.value),   //dty_JsonTermIDTree
+					(isempty(edt2.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[10]:edt2.value)); //dty_TermIDTreeNonSelectableIDs
+
+					//editedTermTree, editedDisabledTerms);
+
+				}else{
+					edt.parentNode.style.display = "none";
+				}
+
+			}else if(rst_type === "relationtype"){
+
+			}else if(rst_type === "resource"){
+					//show disable target pnr rectype
+
+			}else if(rst_type === "separator"  &&
+				!(fieldnames[k] === "rst_DisplayName" || fieldnames[k] === "rst_DisplayWidth")){
+					//hide all but width
+					edt.parentNode.style.display = "none";
+			}else if(rst_type === "fieldsetmarker" && !(fieldnames[k] === "rst_DisplayName" || fieldnames[k] === "rst_Status")){
+					//hide all, required - once
+					edt.parentNode.style.display = "none";
 			}
-		}
+			}
+		}//for
+
 	}
 
 
@@ -701,7 +852,7 @@ function EditRecStructure() {
 				//add new detail type
 				// 0		1		2	   3	4		 5   6   7    8?    9  10?
 				var arr_target = [arrs[0],arrs[4],arrs[1],"","optional","1","0","60","0",order,"1",
-				"1", null, null, null, "open", null, null, null];
+				null, null, null, null, "open", null, null, null];
 				// 11	12    13    14     15	 16	    17    18
 
 				recDetTypes[dty_ID] = arr_target;
@@ -1230,6 +1381,78 @@ function onUpdateStructureOnServer(needClose)
 	editStructure.saveUpdates(needClose);
 }
 
+/**
+* Listener of requirement type selector (combobox)
+*/
+function onReqtypeChange(evt){
+	var el = evt.target;
+	var name = el.id.substring(0,el.id.indexOf("_")); //. _rst_RequirementType
+
+	var el_min = Dom.get(name+"_rst_MinValues");
+	var el_max = Dom.get(name+"_rst_MaxValues");
+
+	if(el.value === "required"){
+		el_min.value = 1;
+		el_max.value = 1;
+	} else if(el.value === "recommended"){
+		el_min.value = 0;
+		el_max.value = 1;
+	} else if(el.value === "optional"){
+		el_min.value = 0;
+		el_max.value = 1;
+	} else if(el.value === "forbidden"){
+		el_min.value = 0;
+		el_max.value = 0;
+	}
+
+}
+
+/**
+*
+*/
+function showTermsTree(rst_ID, event){
+
+	if(isnull(selectTerms)){
+		selectTerms = new  SelectTerms(true, false); //filtered mode, in div
+	}
+	selectTerms.reinit(rst_ID, closeDivPopup);
+
+	var border_top = $(window).scrollTop();
+
+	var my_div = $("#termsFilter");
+
+	my_div.css( {
+			left:'5px', top:(border_top+5)+'px', width:'97%', height:'95%'
+			//width:$(window).width()-20, height:$(window).height()-20
+	});
+
+	//_showDivPopupAt(my_div, [0, border_top]);
+}
+
+/**
+*
+*/
+function closeDivPopup(_allTerms, _disTerms, _dtyID){
+
+		if(!isnull(_dtyID)){
+			//assign new values to inputs
+			var edt1 = Dom.get('ed'+_dtyID+'_rst_FilteredJsonTermIDTree');
+			var edt2 = Dom.get('ed'+_dtyID+'_rst_TermIDTreeNonSelectableIDs');
+			edt1.value = _allTerms;
+			edt2.value = _disTerms;
+
+			var rst_type = top.HEURIST.detailTypes.typedefs[_dtyID].commonFields[2];
+
+			recreateTermsPreviewSelector( rst_type, edt1.value, edt2.value );
+		}
+
+		var my_div = $("#termsFilter");
+		my_div.css( {
+			left:"-9999px"
+		});
+}
+
+
 // DEBUG
 //temp function to fill values with given rty_ID
 /*
@@ -1238,17 +1461,79 @@ editStructure.initTabDesign(document.getElementById("ed_rty_ID").value);
 }
 */
 
-/**
-* Utility function to validate that input value is as integer
+/** REMOVE
+* prevents out of border for popup div
+* @todo move to common util
 */
-function validate(evt) {
-	var theEvent = evt || window.event;
-	var key = theEvent.keyCode || theEvent.which;
-	key = String.fromCharCode( key );
-	var regex = /[0-9]|\./;
-	if( !regex.test(key) ) {
-		theEvent.returnValue = false;
-		theEvent.preventDefault();
+	function _showDivPopupAt(_tooltip, xy){
+
+		var border_top = $(window).scrollTop();
+		var border_right = $(window).width();
+		var border_height = $(window).height();
+		var left_pos;
+		var top_pos;
+		var offset = 5;
+		if(border_right - (offset *2) >= _tooltip.width() +  xy[0]) {
+			left_pos = xy[0]+offset;
+		} else {
+			left_pos = border_right-_tooltip.width()-offset;
+		}
+
+		if((border_top + offset *2) >=  xy[1] - _tooltip.height()) {
+			top_pos = border_top + offset + xy[1]; //
+		} else {
+			top_pos = border_top + xy[1] - _tooltip.height()-offset;
+		}
+		if(top_pos + _tooltip.height() > border_top+border_height){
+			top_pos	= border_top + border_height - _tooltip.height()-5;
+		}
+
+		//var lft = _tooltip.css('left');
+		_tooltip.css( {
+			left:left_pos+'px', top:top_pos+'px'
+		});
+
 	}
+
+/**
+* recreateTermsPreviewSelector
+* creates and fills selector for Terms Tree if datatype is enum, relmarker, relationtype
+* @param datatype an datatype
+* @allTerms - JSON string with terms
+* @disabledTerms  - JSON string with disabled terms
+*/
+function recreateTermsPreviewSelector(datatype, allTerms, disabledTerms ) {
+
+				allTerms = expandJsonStructure(allTerms);
+				disabledTerms = expandJsonStructure(disabledTerms);
+
+				if (typeof disabledTerms.join === "function") {
+						disabledTerms = disabledTerms.join(",");
+				}
+
+				if(allTerms !== null && allTerms!==undefined) {
+					//remove old combobox
+					var el_sel;
+					/* = Dom.get(_id);
+					var parent = el_sel.parentNode;
+					parent.removeChild( el_sel );
+					*/
+
+					var parent = document.getElementById("termsPreview"),
+						i;
+					for (i = 0; i < parent.children.length; i++) {
+						parent.removeChild(parent.childNodes[0]);
+					}
+
+					// add new select (combobox)
+					if(datatype === "enum") {
+						el_sel = top.HEURIST.util.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup['enum'], null);
+						parent.appendChild(el_sel);
+					}
+					else if(datatype === "relmarker" || datatype === "relationtype") {
+						el_sel = top.HEURIST.util.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup.relation, null);
+						parent.appendChild(el_sel);
+					}
+				}
 }
 

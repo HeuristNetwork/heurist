@@ -5,15 +5,10 @@ var selectTerms;
 var Dom = YAHOO.util.Dom;
 
 /**
-*@todo - move to separate utility file
-*/
-function isnull(obj){
-	return ((obj===null) || (obj===undefined));// old js way typeof(obj)==='undefined');
-}
-
-/**
 * SelectTerms - class for pop-up window to select terms for editing detail type
 *
+* @param _isFilterMode - either select from all terms or filtering of existing tree
+* @param _isWindowMode - true in window popup, false in div
 * public methods
 *
 * apply
@@ -22,16 +17,19 @@ function isnull(obj){
 * @author Artem Osmakov <osmakov@gmail.com>
 * @version 2011.0427
 */
-function SelectTerms() {
+function SelectTerms(_isFilterMode, _isWindowMode) {
 
-	var _datatype,
+	var _dtyID,
+		_datatype,
 		_allTerms, //all terms
-		_disTerms; //disabled terms
+		_disTerms, //disabled terms
+		_callback_func; //callback function for non-window mode
 
-	var treesByDomain, //from HEURIST
-		termsByDomainLookup, //from HEURIST
+	var treesByDomain, //from HEURIST   - tree
+		termsByDomainLookup, //from HEURIST  - list
 		existingTree = [],
 		disabledTermsList = [],	//array of disabled terms
+		disabledTermsListOriginal = [],	//array of originally disabled terms
 		_selectedTermsTree,	//tree for selected terms
 		_termTree,			//tree for all terms
 		termArray = {};		// Contains the tree structure
@@ -41,40 +39,45 @@ function SelectTerms() {
 	*
 	* Reads GET parameters, creates TabView and triggers init of first tab
 	*/
-	function _init() {
+	function _init(dtyID, _callback) {
 
-		var dtyID;
+		_callback_func = _callback;
 
 		// read parameters from GET request
 		// if ID is defined take all data from detail type record
 		// otherwise try to get these parameters from request
 		//
-		if (location.search.length > 1) {
+		if(isnull(dtyID) && (location.search.length > 1)) {
 				top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 				dtyID = top.HEURIST.parameters.detailTypeID;
+		}
 
-				if(!isnull(dtyID)){
-					var dt = top.HEURIST.detailTypes.typedefs[dtyID];
-					if (!isnull(_dt)) {
+
+		if(!isnull(dtyID)){
+
+					_dtyID = dtyID;
+					var dt = top.HEURIST.detailTypes.typedefs[dtyID].commonFields;
+					if (!isnull(dt)) {
 						_datatype = dt[2];
 						_allTerms = dt[9];
 						_disTerms = dt[10];
 
 						document.getElementById("dtyName").innerHTML = "Detailtype: " + dt[0];
 					}
-				}
-				if(isnull(_datatype)){
+		}
+		if(isnull(_datatype) && (location.search.length > 1)){
 						_datatype = top.HEURIST.parameters.datatype;
 						_allTerms = top.HEURIST.parameters.all;
 						_disTerms = top.HEURIST.parameters.dis;
-				}
+		}
 
+		if(isnull(_datatype)) {
+			document.getElementById("dtyName").innerHTML = "ERROR: Detailtype was not found";
+			// TODO: Stop page from loading
+			return;
+		}
 
-				if(isnull(_datatype)) {
-					document.getElementById("dtyName").innerHTML = "ERROR: Detailtype was not found";
-					// TODO: Stop page from loading
-					return;
-				}else if(_datatype === "enum"){
+				if(_datatype === "enum"){
 					treesByDomain = top.HEURIST.terms.treesByDomain['enum'];
 					termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup['enum'];
 
@@ -92,33 +95,17 @@ function SelectTerms() {
 				existingTree = expandJsonStructure(_allTerms);
 				disabledTermsList = expandJsonStructure(_disTerms);
 
+				///for filtered mode - to prevent enabling of originally disabled terms
+				disabledTermsListOriginal = expandJsonStructure(_disTerms);
+
 				//create trees
 				_treesInit();
 
-		}
+
 
 
 	}//end _init
 
-	/**
-	* utility function -  converts json string to array
-	* @todo - mode to separate utility file
-	*/
-	function expandJsonStructure( jsonString ) {
-		var retStruct = [];
-		if(jsonString && jsonString !== "") {
-				try {
-					retStruct = eval(jsonString);
-				} catch(e1) {
-				try {
-					retStruct = YAHOO.lang.JSON.parse(jsonString);
-				} catch(e2) {
-					retStruct = [];
-				}
-			}
-		}
-		return retStruct;
-	}
 
 	/**
 	* Clears all selection
@@ -147,7 +134,14 @@ function SelectTerms() {
 	function _clearDisables(){
 		// Reset the 'selected terms tree'
 		_selectedTermsTree.removeChildren(_selectedTermsTree.getRoot());
-		disabledTermsList = [];
+
+		if(_isFilterMode){
+			//clone
+			disabledTermsList = (disabledTermsListOriginal.join(",")).split(",");
+		}else{
+			disabledTermsList = [];
+		}
+
 		// Rebuild the 'selected terms tree'
 		_buildSelectedTermsTree(_termTree.getRoot(), _selectedTermsTree.getRoot());
 		_selectedTermsTree.render();
@@ -167,14 +161,24 @@ function SelectTerms() {
 			_setDisabledTerms();
 		}catch(e) { }
 
+		//results
 		var _allTermsNew = YAHOO.lang.JSON.stringify(termIDTree);
 		var _disTermsNew = YAHOO.lang.JSON.stringify(disabledTermsList);
 
 
 		if ((_allTerms !== _allTermsNew) || (_disTerms !== _disTermsNew)){
-			window.close(_allTermsNew, _disTermsNew);
+			if(_isWindowMode){
+				window.close(_allTermsNew, _disTermsNew, _dtyID);
+			}else if (!isnull(_callback_func) ) {
+				_callback_func(_allTermsNew, _disTermsNew, _dtyID);
+			}
 		} else {
-			window.close(null, null);
+			if(_isWindowMode){
+				window.close();
+			}else if (!isnull(_callback_func) ) {
+				_callback_func();
+			}
+
 		}
 	}
 
@@ -225,28 +229,47 @@ function SelectTerms() {
 	*
 	* Selects all children of the node clicked
 	*/
-	function _selectAllChildren(parent) { //
-			var parentNode = _termTree.getNodeByIndex(parent);
+	function _selectAllChildren(termid) { //
+			var parentNode = _findNodeById(termid); // _termTree.getNodeByIndex(parent);
 			if(parentNode.children.length > 0) {
 				var index = 0;
 				while(index < parentNode.children.length) { // While it has children, select them and look if they have children too
 					var child = parentNode.children[index];
 					child.toggleHighlight();
 					if(child.children.length > 0) {
-						_selectAllChildren(child.index);
+						_selectAllChildren(child.data.id); //index);
 					}
 					index++;
 				}
 			}
 	}
+	/**
+	* Finds node by term id
+	*/
+	function _findNodeById(termid) {
+
+		//internal
+		function __doSearchById(node){
+			return (node.data.id==termid);
+		}
+
+		var nodes = _termTree.getNodesBy(__doSearchById);
+
+		//select and expand the node
+		if(nodes){
+			var node = nodes[0];
+			return node;
+		}else{
+			return null
+		}
+	}
+
 
 	/**
 	* Gets term ID for given node
 	*/
 	function getTermIDFromNode(node) {
-		var tempTermID = node.label.split('id="');
-		var tempTermID2 = tempTermID[1].split('">'); // Use split to retrieve termID
-		var termID = tempTermID2[0];
+		var termID = node.id;
 		return termID;
 	}
 
@@ -294,6 +317,7 @@ TREE REALTED ROUTINES ---------------------------------------
 */
 	/**
 	* Creates tree for all terms
+	* @param parent - root noed of "all terms" tree
 	*/
 	function _buildTermTree(parent) { // Look up al root terms and create the nodes
 
@@ -301,38 +325,75 @@ TREE REALTED ROUTINES ---------------------------------------
 			term;
 
 		function __createChildren(parentNode, parentEntry) { // Recursively get all children
-				var child;
-				for(child in parentNode) {
+				var term_id;
+				for(term_id in parentNode) {
 					nodeIndex = _termTree.getNodeCount()+1;
 
 					term = {}; //new Object();
-					term.label = '<div id="'+child+'"><a href="javascript:void(0)" onClick="selectTerms.selectAllChildren('+
-									nodeIndex+')"> All </a> '+termsByDomainLookup[child][0]+'</div>';
+					term.id = term_id;
 					term.href = "{javascript:void(0)}"; // To make 'select all' clickable, but not leave the page when hitting enter
+					term.label = '<div id="'+term_id+'"><a href="javascript:void(0)" onClick="selectTerms.selectAllChildren(\''+
+											term_id+'\')">&nbsp;&nbsp;All</a>&nbsp;';//+termsByDomainLookup[term_id][0]+'</div>';
 
-					childNode = new YAHOO.widget.TextNode(term, parentEntry, false); // Create the node
+					if(_isFilterMode){
 
-					if(_inExistingTree(child)) {
-						childNode.highlightState = 1;
-						parentEntry.expand();
+						if(_inExistingTree(term_id)) { //selected
+							if(_isDisabledOriginally(term_id)){
+								term.label = term.label + '<b>'+termsByDomainLookup[term_id][0]+'</b></div>';
+							}else{
+								term.label = term.label + termsByDomainLookup[term_id][0]+'</div>';
+							}
+
+							childNode = new YAHOO.widget.TextNode(term, parentEntry, false); // Create the node
+							childNode.highlightState = 1;
+							parentEntry.expand();
+						}else{
+							childNode = parentEntry;
+						}
+
+					}else{
+						term.label = term.label + termsByDomainLookup[term_id][0]+'</div>';
+						childNode = new YAHOO.widget.TextNode(term, parentEntry, false); // Create the node
+
+						if(_inExistingTree(term_id)) { //selected
+							childNode.highlightState = 1;
+							parentEntry.expand();
+						}
 					}
 
-					__createChildren(parentNode[child], childNode); // __createChildren() again for every child found
+					__createChildren(parentNode[term_id], childNode); // __createChildren() again for every child found
 				}
 		}
 
 		var parentElement;
+		var topLayerParent;
 		for (parentElement in treesByDomain) {
 			nodeIndex = _termTree.getNodeCount()+1;
 
 			term = {}; //new Object();
-			term.label = '<div id="'+parentElement+'"><a href="javascript:void(0)" onClick="selectTerms.selectAllChildren('+nodeIndex+')"> All </a> '+termsByDomainLookup[parentElement][0]+'</div>';
+			term.id = parentElement;
+			term.label = '<div id="'+parentElement+'"><a href="javascript:void(0)" onClick="selectTerms.selectAllChildren(\''+
+							term.id+'\')">&nbsp;&nbsp;All</a>&nbsp;'; //+termsByDomainLookup[parentElement][0]+'</div>';
 			term.href = "{javascript:void(0)}"; // To make 'select all' clickable, but not leave the page when hitting enter
 
-			var topLayerParent = new YAHOO.widget.TextNode(term, parent, false); // Create the node
-
-			if(_inExistingTree(parentElement)) {
-				topLayerParent.highlightState = 1;
+			if(_isFilterMode){
+				if(_inExistingTree(parentElement)) {
+					if(_isDisabledOriginally(parentElement)){
+						term.label = term.label + '<b>'+termsByDomainLookup[parentElement][0]+'</b></div>';
+					}else{
+						term.label = term.label + termsByDomainLookup[parentElement][0]+'</div>';
+					}
+					topLayerParent = new YAHOO.widget.TextNode(term, parent, false); // Create the node
+					topLayerParent.highlightState = 1;
+				}else{
+					topLayerParent = parent;
+				}
+			}else{
+				term.label = term.label + termsByDomainLookup[parentElement][0]+'</div>';
+				topLayerParent = new YAHOO.widget.TextNode(term, parent, false); // Create the node
+				if(_inExistingTree(parentElement)) {
+					topLayerParent.highlightState = 1;
+				}
 			}
 
 			var parntNode = treesByDomain[parentElement];
@@ -343,6 +404,8 @@ TREE REALTED ROUTINES ---------------------------------------
 
 	/**
 	* Build a tree with all selected terms
+	* @param termNode - root node of "all terms" tree
+	* @param parentNode - root node of "selected terms" tree
 	*/
 	function _buildSelectedTermsTree(termNode, parentNode) {
 		var index = 0;
@@ -350,19 +413,18 @@ TREE REALTED ROUTINES ---------------------------------------
 		while(index < termNode.children.length) { // While term in _termTree has children
 			if(termNode.children[index].highlightState === 1) { // If the term is selected, add it to the 'selected term tree'
 
-				var tempTermName = termNode.children[index].label.split(" </a> "); // Two splits to find out the term name
-				var termName = tempTermName[1].split("</div>");
+				var term_id = termNode.children[index].data.id;
+				var termName = termsByDomainLookup[term_id][0];
 
-				childNode = new YAHOO.widget.TextNode('<div id="'+getTermIDFromNode(termNode.children[index])+'"><a href="javascript:void(0)"></a>' + termName[0] + '</div>', parentNode, true);
+				childNode = new YAHOO.widget.TextNode('<div id="'+term_id+
+									'"><a href="javascript:void(0)"></a>&nbsp;' + termName + '</div>', parentNode, true);
+				childNode.id = term_id;
 				childNode.href = "{javascript:void(0)}";
 
-				selectedIndex = 0;
-				while(selectedIndex < disabledTermsList.length) {
-					if(disabledTermsList[selectedIndex] === getTermIDFromNode(childNode)) {
-						childNode.toggleHighlight();
-					}
-					selectedIndex++;
+				if(_isDisabled(term_id)){
+					childNode.toggleHighlight();
 				}
+
 			}
 			else {
 				childNode = "";
@@ -387,16 +449,45 @@ TREE REALTED ROUTINES ---------------------------------------
 	*/
 	function _setDisabledTerms()
 	{
-		var disabledNodes = _selectedTermsTree.getNodesByProperty('highlightState',1);
-		index = 0;
-		disabledTermsList = [];
-		if(disabledNodes) {
-			while(index < disabledNodes.length) {
-				disabledTermsList.push(getTermIDFromNode(disabledNodes[index]));
-				index++;
+
+			var disabledNodes = _selectedTermsTree.getNodesByProperty('highlightState',1);
+			index = 0;
+			disabledTermsList = [];
+			if(disabledNodes) {
+				while(index < disabledNodes.length) {
+					disabledTermsList.push(getTermIDFromNode(disabledNodes[index]));
+					index++;
+				}
 			}
-		}
+
 	}
+	/**
+	* Verifies if given term is disabled
+	*/
+	function _isDisabled(term_id){
+				var index = 0;
+				while(index < disabledTermsList.length) {
+					if(disabledTermsList[index] === term_id) {
+						return true;
+					}
+					index++;
+				}
+		return false;
+	}
+	/**
+	* Verifies if given term is disabled originally
+	*/
+	function _isDisabledOriginally(term_id){
+				var index = 0;
+				while(index < disabledTermsListOriginal.length) {
+					if(disabledTermsListOriginal[index] === term_id) {
+						return true;
+					}
+					index++;
+				}
+		return false;
+	}
+
 
 	/**
 	* Fills a Select HTML object filled with an option element for each term "depth first"
@@ -470,20 +561,9 @@ TREE REALTED ROUTINES ---------------------------------------
 	*/
 	function _treesInit() {
 
-		_termTree = new YAHOO.widget.TreeView("termTree");
-		_buildTermTree(_termTree.getRoot()); // Fill the tree with all terms
-
-		// Selected terms tree
-		_selectedTermsTree = new YAHOO.widget.TreeView("selectedTermsTree");
-
-		_selectedTermsTree.subscribe("clickEvent",
-				function() { // On click, select (disable) the term, and recreate the selected terms, and disabled terms arrays
-							this.onEventToggleHighlight.apply(this,arguments);
-							_createPreview();
-				});
-		_selectedTermsTree.render();
-
-		_termTree.subscribe("clickEvent",
+		if(isnull(_termTree)){
+			 _termTree = new YAHOO.widget.TreeView("termTree");
+			 _termTree.subscribe("clickEvent",
 				function() { // On click, select the term, and add it to the selected terms tree
 					this.onEventToggleHighlight.apply(this,arguments);
 
@@ -493,7 +573,25 @@ TREE REALTED ROUTINES ---------------------------------------
 
 					_createPreview();
 				});
+		}else{
+			_termTree.removeChildren(_termTree.getRoot());
+		}
 
+		// Selected terms tree
+		if(isnull(_selectedTermsTree)){
+			_selectedTermsTree = new YAHOO.widget.TreeView("selectedTermsTree");
+
+			_selectedTermsTree.subscribe("clickEvent",
+					function() { // On click, select (disable) the term, and recreate the selected terms, and disabled terms arrays
+						var term_id = arguments[0].node.id;
+						if(!_isDisabledOriginally(term_id)) {
+							this.onEventToggleHighlight.apply(this,arguments);
+							_createPreview();
+						}
+				});
+		}else{
+			_selectedTermsTree.removeChildren(_selectedTermsTree.getRoot());
+		}
 
 		/* ??????
 		var tempIndex = 0;
@@ -503,6 +601,8 @@ TREE REALTED ROUTINES ---------------------------------------
 		}
 		top.HEURIST.terms.selectedDisabled = disabledTermsList;*/
 
+		// Fill the tree with all terms
+		_buildTermTree(_termTree.getRoot());
 		//redraw all terms tree
 		_termTree.render();
 		//create selected terms tree
@@ -523,6 +623,22 @@ END TREE REALTED ROUTINES ---------------------------------------
 	var that = {
 
 				/**
+				* Reinitialization of form for new detailtype
+				* @param dtyID - detail type id to work with
+				* @param _callback - callback function that obtain 3 parameters all terms, disabled terms and dtyID
+				*/
+				reinit : function (dtyID, _callback) {
+						_init(dtyID, _callback);
+				},
+
+				/**
+				* Defines callback function
+				*/
+				callback: function(_callback){
+					_callback_func = _callback;
+				},
+
+				/**
 				*	Apply form
 				*/
 				apply : function () {
@@ -533,7 +649,11 @@ END TREE REALTED ROUTINES ---------------------------------------
 				* Cancel form
 				*/
 				cancel : function () {
-					window.close(null, null);
+					if(_isWindowMode){
+						window.close();
+					}else if (!isnull(_callback_func) ) {
+						_callback_func();
+					}
 				},
 				clearSelection : function () {
 					_clearSelection();
@@ -541,8 +661,8 @@ END TREE REALTED ROUTINES ---------------------------------------
 				clearDisables : function () {
 					_clearDisables();
 				},
-				selectAllChildren : function (nodeIndex) {
-					_selectAllChildren(nodeIndex);
+				selectAllChildren : function (termid) {
+					_selectAllChildren(termid);
 				},
 
 				getClass: function () {
