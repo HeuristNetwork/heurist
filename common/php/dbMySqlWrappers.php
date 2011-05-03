@@ -298,11 +298,9 @@ function isZeroOrderedArray($obj){
 	$cnt = (count($keys) > 3 ? 3 : count($keys));
 	for($i = 0; $i < $cnt ; $i++){
 		if ($i !== $keys[$i]) {
-error_log(" non array index = ". print_r($keys,true));
 			return false;
 		}
 	}
-error_log("order array keys = ". print_r($keys,true));
 	return true;
 }
 

@@ -97,7 +97,7 @@
 
 		<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
 		<script src="../../common/php/loadCommonInfo.php"></script>
-		<script type="text/javascript" src="../../admin/structure/selectRecType.js"></script>
+		<script type="text/javascript" src="selectRectype.js"></script>
 
 		<div class="tooltip" id="toolTip2"><p>popup popup</p></div>
 
@@ -115,18 +115,21 @@
 				<div style="float:right; text-align:right;padding-top:5px;">
 					<label id="lblSelect1"></label>
 					<input type="button" tabindex="12" value="Cancel" onclick="selectRecordType.cancel();" />
-					<input type="button" tabindex="11" id="btnApply1" value="Insert Selection" onclick="selectRecordType.apply();" />
+					<input type="button" tabindex="11" id="btnApply1" value="Insert Selection" onclick="selectRecordType.returnSelection();" />
 				</div>
 			</div>
 
 			<div id="tabContainer">
 
 				<script  type="text/javascript">
-
+				var selectRecordType;
 						//
 				//  starts initialization on load completion of this window
 					//
-				YAHOO.util.Event.addListener(window, "load", function(){ selectRecordType = new  SelectRecordType(); });
+				function createSelectorObj(){
+					selectRecordType = new  SelectRecordType();
+				}
+				YAHOO.util.Event.addListener(window, "load", createSelectorObj);
 
 				</script>
 			</div>
@@ -136,7 +139,7 @@
 				<div style="float:right; text-align:right;padding-top:5px">
 					<label id="lblSelect2"></label>
 					<input type="button" tabindex="12" value="Cancel" onclick="selectRecordType.cancel();" />
-					<input type="button" tabindex="11" id="btnApply2" value="Insert Selection" onclick="selectRecordType.apply();" />
+					<input type="button" tabindex="11" id="btnApply2" value="Insert Selection" onclick="selectRecordType.returnSelection();" />
 				</div>
 			</div>
 

@@ -8,7 +8,7 @@ var Dom = YAHOO.util.Dom;
 *
 */
 function isnull(obj){
-	return ((obj===null) || (obj===undefined));// old js way typeof(obj)==='undefined');
+	return ( (typeof obj === "undefined")||(obj===null) );// old js way typeof(obj)==='undefined');
 }
 
 /**
@@ -16,7 +16,7 @@ function isnull(obj){
 *
 * public methods
 *
-* apply
+* save
 * cancel
 *
 * @author Artem Osmakov <osmakov@gmail.com>
@@ -436,7 +436,7 @@ function SelectRecordType() {
 				/**
 				 *	Apply form - close this window and returns comma separated list of selected detail types
 				 */
-				apply : function () {
+				returnSelection : function () {
 						var res = _arr_selection.join(",");
 						window.close(res);
 				},

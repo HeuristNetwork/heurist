@@ -1,7 +1,7 @@
 /**
 * editDetailType.js
 * A form to edit field type, or create a new field type. It is utilized as pop-up from manageDetailTypes and manageRectypes
-* it may call another pop-ups: selectTerms and selectRecType
+* it may call another pop-ups: selectTerms and selectRectype
 *
 * 28/04/2011
 * @author: Juan Adriaanse
@@ -184,41 +184,30 @@ function DetailTypeEditor() {
 	*/
 	function _recreateRecTypesPreview(type, value) {
 
-	var sel = YAHOO.util.Dom.get( (type==="fieldsetmarker")? "dty_FieldSetRecTypeIDPreview" : "dty_PtrTargetRectypeIDsPreview" );
-
-	if(sel===null) {
+		var divRecType = YAHOO.util.Dom.get( (type==="fieldsetmarker")? "dty_FieldSetRecTypeIDPreview" : "dty_PtrTargetRectypeIDsPreview" );
+		var txt = "";
+		if(divRecType===null) {
 		return;
 	}
 
-	//clear select
-	while (sel.length>0){
-		sel.remove(0);
-	}
-
-	if(value===undefined || value===null) {
-		return;
-	}
-
+		if(value) {
 	var arr = value.split(","),
-		ind;
-
+				ind, dtName;
 	for (ind in arr) {
-		if(ind!==undefined && ind!==null) {
-			var dtName = top.HEURIST.rectypes.names[arr[ind]];
-
-			var option = document.createElement("option");
-			option.text = (dtName?dtName:"unconstrained");
-			try
-			{
-				// for IE earlier than version 8
-				sel.add(option, sel.options[null]);
+				dtName = top.HEURIST.rectypes.names[arr[ind]];
+				if(!txt) {
+					txt = dtName;
+				}else{
+					txt += ", " + dtName;
 			}
-			catch (e)
-			{
-				sel.add(option,null);
+			} //for
+		}else{
+			txt = "unconstrained";
 			}
+		if (txt.length > 40){
+			txt = txt.substr(0,40) + "...";
 		}
-	} //for
+		divRecType.innerHTML = txt;
 	}
 
 	/**
@@ -273,9 +262,9 @@ function DetailTypeEditor() {
 		}
 	}
 	if(args) {
-		URL =  top.HEURIST.basePath + "admin/structure/selectRecType.html?type=" + type + "&ids=" + args;
+		URL =  top.HEURIST.basePath + "admin/structure/selectRectype.html?type=" + type + "&ids=" + args;
 	} else {
-		URL =  top.HEURIST.basePath + "admin/structure/selectRecType.html?type=" + type;
+		URL =  top.HEURIST.basePath + "admin/structure/selectRectype.html?type=" + type;
 	}
 	if(type === "relmarker" || type === "resource" || type === "fieldsetmarker") {
 		top.HEURIST.util.popupURL(top, URL, {
@@ -342,8 +331,12 @@ function DetailTypeEditor() {
 			var fname = fnames[i];
 			el = Dom.get(fname);
 			if(el !== undefined && el!==null){
+				if ( i===5 ) { // dty_ShowInLists
+					el.checked = (_detailType[5]==="1");
+				}else{
 				el.value = _detailType[i];
 			}
+		}
 		}
 
 		//to trigger setting visibilty for div with terms tree and record pointer
@@ -352,10 +345,6 @@ function DetailTypeEditor() {
 		// create preview for Terms Tree and record pointer
 		_recreateTermsPreviewSelector(_detailType[2], _detailType[9], _detailType[10]);
 		_recreateRecTypesPreview(_detailType[2], ((_detailType[2]==="fieldsetmarker")?_detailType[8]:_detailType[11]) );
-
-
-		el = Dom.get("dty_ShowInLists");
-		el.checked = (_detailType[5]===1);
 
 		if (_dtyID<0){
 			Dom.get("dty_ID").innerHTML = 'to be generated';
