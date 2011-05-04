@@ -65,6 +65,10 @@ if (@$argv) {
 	if (@$ARGV['-fc']) $_REQUEST['fc'] = '1'; // inline file content
 
 }
+
+if (!array_key_exists('fc', $_REQUEST)) {
+	$_REQUEST['fc'] = 1;	// default to expand file content
+}
 header('Content-type: text/xml; charset=utf-8');
 echo "<?xml version='1.0' encoding='UTF-8'?>\n";
 
