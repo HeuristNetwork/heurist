@@ -62,6 +62,7 @@ if (@$argv) {
 	if (@$ARGV['-rev'])$_REQUEST['rev'] = $ARGV['-rev'];
 	if (@$ARGV['-woot'])$_REQUEST['woot'] = $ARGV['-woot'];
 	if (@$ARGV['-stub']) $_REQUEST['stub'] = '1';
+	if (@$ARGV['-fc']) $_REQUEST['fc'] = '1'; // inline file content
 
 }
 header('Content-type: text/xml; charset=utf-8');
@@ -146,21 +147,21 @@ $RTN = array();	//record type name
 $RQS = array();	//record type specific detail name
 $DTN = array();	//detail type name
 $DTT = array();	//detail type base type
-$INV = array();	//detail type inverse
+$INV = array();	//relationship term inverse
 $WGN = array();	//work group name
-$TL = array();	//record detail lookup
-$TLV = array();	//record detail lookup by value
+$TL = array();	//term lookup
+$TLV = array();	//term lookup by value
 // record type labels
 $query = 'SELECT rty_ID, rty_Name FROM defRecTypes';
 $res = mysql_query($query);
 while ($row = mysql_fetch_assoc($res)) {
 	$RTN[$row['rty_ID']] = $row['rty_Name'];
-	foreach (getRectypeFields($row['rty_ID']) as $rdr_rdt_id => $rdr) {
+	foreach (getRectypeFields($row['rty_ID']) as $rst_DetailTypeID => $rdr) {
 	// type-specific names for detail types
-		$RQS[$rdr['rst_RecTypeID']][$rdr['rst_DetailTypeID']] = $rdr['rst_DisplayName'];
+		$RQS[$row['rty_ID']][$rst_DetailTypeID] = @$rdr[0];
 	}
 }
-
+//error_log(print_r($RQS,true));
 // base names, varieties for detail types
 $query = 'SELECT dty_ID, dty_Name, dty_Type FROM defDetailTypes';
 $res = mysql_query($query);
@@ -249,6 +250,7 @@ if (@$ARGV) {
 	}
 }
 
+error_log(" here hml ");
 
 //----------------------------------------------------------------------------//
 // Traversal functions
@@ -341,7 +343,7 @@ function buildTree($rec_ids, &$reverse_pointers, &$relationships) {
 function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $outputStub=false) {
 	global $RTN, $DTN, $RQS, $WGN, $MAX_DEPTH, $WOOT;
 //error_log("rec = ".$record['rec_ID']);
-//error_log(" in outputRecord record = \n".print_r($record,true));
+error_log(" in outputRecord record = \n".print_r($record,true));
 	openTag('record');
 	makeTag('id', null, $record['rec_ID']);
 	makeTag('type', array('id' => $record['rec_RecTypeID']), $RTN[$record['rec_RecTypeID']]);
@@ -411,6 +413,27 @@ function outputRecordStub($recordStub) {
 	closeTag('record');
 }
 
+function makeFileContentNode($file){
+	$filename = HEURIST_UPLOAD_PATH . $file['id'];
+	if ($file['type'] ==="application/xml" && file_exists($filename)) {
+		$xml = simplexml_load_file($filename);
+		if (!$xml){
+			$attrs = array("type" => "unknown", "error" => "invalid xml content");
+			$content = "Unable to read ". $file['origName']. " as xml file";
+			makeTag('content',$attrs,$content);
+		}else{
+			if ( count($xml->xpath('//TEI'))) {
+				$attrs = array("type" => "TEI");
+				$content = $xml->xpath('//TEI/text');
+//				$nodeName = $content->getName();
+//				$content = $content[0]->children();
+				$content = $content[0]->asXML();
+				makeTag('content',$attrs,$content);
+			}
+		}
+	}
+}
+
 function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $depth=0, $outputStub) {
 	global $DTN, $DTT, $TL, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH;
 //error_log("in outputDetail dt = $dt value = ". print_r($value,true));
@@ -422,7 +445,7 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 	if (array_key_exists($rt, $RQS)  &&  array_key_exists($dt, $RQS[$rt])) {
 		$attrs['name'] = $RQS[$rt][$dt];
 	}
-	if ($dt === 200  &&  array_key_exists($value, $INV) && array_key_exists($INV[$value], $TL)) {	//saw Enum change
+	if ($dt === 200  &&  array_key_exists($value, $INV) && $INV[$value] && array_key_exists($INV[$value], $TL)) {	//saw Enum change
 		$attrs['inverse'] = $TL[$INV[$value]]['trm_Label'];
 	}
 
@@ -454,6 +477,9 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 					makeTag('description', null, $file['description']);
 					makeTag('url', null, $file['URL']);
 					makeTag('thumbURL', null, $file['thumbURL']);
+					if ($_REQUEST['fc'] == 1) {
+						makeFileContentNode($file);
+					}
 				closeTag('file');
 			closeTag('detail');
 		} else if (array_key_exists('geo', $value)) {
@@ -476,10 +502,11 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 		openTag('detail', $attrs);
 		outputRecord(loadRecord($value), $reverse_pointers, $relationships, $depth + 1, $outputStub);
 		closeTag('detail');
-	} else if ($DTT[$dt] === 'enum' && array_key_exists($value,$TL)) {
+	} else if (($DTT[$dt] === 'enum' || $DTT[$dt] === 'relationtype' ) && array_key_exists($value,$TL)) {
 		if (@$TL[$value]['trm_ParentTermID']) {
 			$attrs['ParentTerm'] = $TL[$TL[$value]['trm_ParentTermID']]['trm_Label'];
 		}
+//		error_log("value = ".$value." label = ".$TL[$value]['trm_Label']);
 		makeTag('detail', $attrs, $TL[$value]['trm_Label']);
 	} else {
 		makeTag('detail', $attrs, replaceIllegalChars($value));
