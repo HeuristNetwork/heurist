@@ -36,6 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #rectype-edit {border-left:1px solid #D6D6D6;bottom:0;overflow:hidden;padding:10px 0;position:absolute;right:260px;text-align:center;top:0;width:210px;}
 #rectype-select {width:200px}
 #rectype-editor table tr td, #url-editor table tr td, #workgroup-editor table tr td { white-space: nowrap; font-size: 11px; }
+#workgroup-edit {display: inline-block;}
 #popup-rectype-value { padding-bottom: 1ex; }
 #new-url-value { width: 100%; }
 #record-title #rectype-img { background-position:50% 50%;background-repeat:no-repeat;height:100%;margin:0 10px 0 0;width:16px; position: absolute;top:0}
@@ -178,6 +179,14 @@ div#notes {font-size: 11px;}
 .resource.optional{background-color: rgba(255, 255, 255, 0.2);}
 .section-header-cell.optional {color:#6A7C99;padding-left: 10px;font-weight: bold;}
 .resource {width:100%}
+#relations-tbody relation {display:block}
+
+div.input-row div.input-cell div#relations-tbody {width:100% !important}
+div.input-row div.input-cell div#relations-tbody div.relation {display:block}
+div.input-row div.input-cell div#relations-tbody div {display: block;}
+div.input-row div.input-cell div#relations-tbody div.relation div{display:inline-block}
+div.input-row div.input-cell div#relations-tbody div div div.relation div.resource div.resource div.input-row div.input-cell div.resource-div {width:auto !important}
+
 
 /***** date and temporal buttons *****/
 .date-button {background: url("../images/cal.gif") no-repeat scroll center center lightgray; border: medium none; height: 13px; margin: 5px; width: 19px;}
@@ -188,7 +197,7 @@ div#notes {font-size: 11px;}
 
 /**** input rows *****/
 .input-row {border-bottom:1px solid RGBA(255,255,255,0.5); padding: 3px 0;}
-.input-row select { display: block; border: none; font-size: 2ex;padding: 0.5ex;display:inline-block}
+.input-row select { display: block; border: none; font-size: 2ex;padding: 0.5ex;display:inline-block; min-width: 40ex;}
 .input-row div { display: inline-block; }
 .input-row tr select { display: inline; }
 
@@ -200,11 +209,11 @@ div#notes {font-size: 11px;}
 .prompt { font-size: 10px;color:#999; font-weight: normal;}
 input#tags, .input-cell .in, .input-cell .resource-title, .in {font-size:2ex; background:none repeat scroll 0 0 #FFF;border:medium none;margin:2px 0;padding:3px;}
 input#tags {min-width :80ex;}
-.input-cell textarea.in  {height:9ex; line-height: 2ex;}
+.input-cell textarea.in  {height:9ex; line-height: 2ex;min-width:40ex}
 input#tags:focus, .input-cell .in:focus, .input-cell .resource-title:focus {-moz-box-shadow:0 0 4px #6A7C99; -webkit-box-shadow:0 0 4px #6A7C99; box-shadow:0 0 4px #6A7C99; }
 .input-cell .date-div * { vertical-align: middle; }
 .input-cell .date-div .in { display: inline; }
-.input-cell .resource-div { position: relative; white-space: nowrap;padding: 0; }
+.input-cell .resource-div { position: relative; white-space: nowrap;padding: 0;display:block}
 .input-row .resource-div * { vertical-align: middle; }
 .input-row .temporal-div {padding: 0;}
 .input-cell .resource-div .edit-resource {cursor: pointer;position: relative;/* left: 383px; */}
@@ -238,9 +247,8 @@ td.input-cell.readonly img.edit-resource {visibility: visible;}
 	cursor: pointer;
 }
 .input-cell .empty .delete-geo { display: none; }
-.input-cell img {
-	vertical-align: middle;
-}
+.input-cell img {vertical-align: middle;}
+.input-cell .thumbnail {display:inline-block;float:none; border:3px solid rgba(255, 255, 255, 0.5)}
 
 .input-cell span.in-progress {
 	color: gray;
@@ -377,13 +385,7 @@ hr { background-color: #660000; border: 1px solid lightgray; height: 2px; margin
 #comments .date, .moddate { font-weight: normal; color: gray; }
 
 
-#comments .editing-block textarea {
-    display: block;
-    width: 400px;
-    height: 60px;
-    border: 1px solid black;
-    padding: 1px;
-}
+#comments .editing-block textarea {display: block;width: 400px;height: 60px;border: 1px solid black;padding: 1px;}
 
 #focus_comment {background-color: #FBF9DF;}
 #comments .help { margin: 4px 2px; }
@@ -394,3 +396,6 @@ hr { background-color: #660000; border: 1px solid lightgray; height: 2px; margin
 /***** rating *****/
 #overall-rating option{border-right:1px solid #CCC}
 #overall-rating option[value="5"] {background-image:url("../images/star-yellow.png");background-repeat: repeat-x;width:100px;}
+
+/***** other ******/
+.file-size {margin:0 6px; color:#666666;}

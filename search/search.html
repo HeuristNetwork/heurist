@@ -60,9 +60,6 @@
 <link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
 <link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/calendar/assets/skins/sam/calendar.css" />
 
-<link rel=stylesheet href="../common/css/global.css" media="all">
-<link rel=stylesheet href="../common/css/search.css" media="all">
-
 <!--script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/yahoo-dom-event/yahoo-dom-event.js"></script>
 <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/element/element-min.js"></script>
 <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/tabview/tabview-min.js"></script>
@@ -71,143 +68,147 @@
 <script type="text/javascript" src="../external/yui/2.8.2r1/build/tabview/tabview-min.js"></script>
 <script type="text/javascript" src="../external/yui/2.8.2r1/build/calendar/calendar-min.js"></script>
 
-<style>
-/* Hack for IE7 betas -- :hover etc in external CSS not respected without these rules */
-a:hover{} a:active{} a:focus{}
+ <style>
+	 /* Hack for IE7 betas -- :hover etc in external CSS not respected without these rules */
+	a:hover{} a:active{} a:focus{}
+	a:hover {}
+	a:active {}
+	a:focus {}
 </style>
-
+	<!-- Combo-handled YUI CSS files: -->
+	<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/combo?2.8.2r1/build/reset-fonts-grids/reset-fonts-grids.css&2.8.2r1/build/resize/assets/skins/sam/resize.css&2.8.2r1/build/layout/assets/skins/sam/layout.css">
+	<!-- Combo-handled YUI JS files: -->
+	<script type="text/javascript" src="http://yui.yahooapis.com/combo?2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js&2.8.2r1/build/animation/animation-min.js&2.8.2r1/build/dragdrop/dragdrop-min.js&2.8.2r1/build/element/element-min.js&2.8.2r1/build/resize/resize-min.js&2.8.2r1/build/layout/layout-min.js"></script>
+	<link rel=stylesheet href="../common/css/global.css" media="all">
+	<link rel=stylesheet href="../common/css/search.css" media="all">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
 
 <body>
+	<iframe id=searchFrame frameborder=0 style="width:0;height:0;position:absolute;"></iframe>
+	<script src="../common/js/utilsLoad.js"></script>	<!-- core HEURIST functions -->
+	<script>
+		var hBase = "http://" + window.location.host + top.HEURIST.basePath;
+		var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"";
 
-<iframe id=searchFrame frameborder=0 style="width:0;height:0;position:absolute;"></iframe>
-
-<script src="../common/js/utilsLoad.js"></script>	<!-- core HEURIST functions -->
-
-<script>
-var hBase = "http://" + window.location.host + top.HEURIST.basePath;
-var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"";
-
-if (location.search.match(/[&?]q=[^&]+/)) {		//there is a search string
-	document.getElementById("searchFrame").src = top.HEURIST.basePath+"search/getResultsPageAsync.php" + location.search;
-	top.suppressAutoSearch = true;
-} else {
-	//	this is a substitute for loading the user's default saved search - it's more intuitive
-	//	and simplifies management of saved searches
-	top.HEURIST.whenLoaded("obj-user", function() {	//FIXME: need to get instance info and set it to heurist params
-		if (top.HEURIST.is_logged_in()  ) {	//FIXME: this doesn't work for installed verisons
-			document.body.className = "w-bookmark";
-			window.HEURIST.parameters["w"] = "bookmark";
-			window.HEURIST.parameters["q"] = "tag:Favourite OR tag:Favorite";
-			window.HEURIST.parameters["db"] = database;
+		if (location.search.match(/[&?]q=[^&]+/)) {		//there is a search string
+			document.getElementById("searchFrame").src = top.HEURIST.basePath+"search/getResultsPageAsync.php" + location.search;
+			top.suppressAutoSearch = true;
+		} else {
+			//	this is a substitute for loading the user's default saved search - it's more intuitive
+			//	and simplifies management of saved searches
+			top.HEURIST.whenLoaded("obj-user", function() {	//FIXME: need to get instance info and set it to heurist params
+				if (top.HEURIST.is_logged_in()  ) {	//FIXME: this doesn't work for installed verisons
+					document.body.className = "w-bookmark";
+					window.HEURIST.parameters["w"] = "bookmark";
+					window.HEURIST.parameters["q"] = "tag:Favourite OR tag:Favorite";
+					window.HEURIST.parameters["db"] = database;
+				}
+			});
 		}
-	});
-}
 
-if (! document.body.className) {
-	document.body.className = location.search.match(/w=bookmark/) ? "w-bookmark" : "w-all";
-}
-// start loading this early
-top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadUserInfo.php");		// user-specific HEURIST data
-
-top.HEURIST.whenLoaded(["search-html", "obj-common"], top.HEURIST.util.setDBName);
-top.HEURIST.whenLoaded(["search-html", "obj-common"], top.HEURIST.util.setDocumentTitle);
-
-top.HEURIST.whenLoaded(["search-html", "obj-common", "search-js"], function() {
-	var action_fr = document.getElementById("i_action");
-	action_fr.src = top.HEURIST.basePath+ "search/actions/actionHandler.php" +
-					(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
-	// if there are results waiting, render them
-	var searchFrame = document.getElementById("searchFrame");
-	if (searchFrame && searchFrame.contentWindow && searchFrame.contentWindow.results) {
-		var results = searchFrame.contentWindow.results;
-		if (! results.notified) {
-			top.HEURIST.search.searchNotify(results);
-			top.HEURIST.search.searchResultsNotify(results, 0);
+		if (! document.body.className) {
+			document.body.className = location.search.match(/w=bookmark/) ? "w-bookmark" : "w-all";
 		}
-	}
-});
-top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], function() {
-	// register handlers and render non-static elements of page
-	top.HEURIST.search.setupSearchPage();
-});
+		// start loading this early
+		top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadUserInfo.php");		// user-specific HEURIST data
+
+		top.HEURIST.whenLoaded(["search-html", "obj-common"], top.HEURIST.util.setDBName);
+		top.HEURIST.whenLoaded(["search-html", "obj-common"], top.HEURIST.util.setDocumentTitle);
+
+		top.HEURIST.whenLoaded(["search-html", "obj-common", "search-js"], function() {
+			var action_fr = document.getElementById("i_action");
+			action_fr.src = top.HEURIST.basePath+ "search/actions/actionHandler.php" +
+							(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
+			// if there are results waiting, render them
+			var searchFrame = document.getElementById("searchFrame");
+			if (searchFrame && searchFrame.contentWindow && searchFrame.contentWindow.results) {
+				var results = searchFrame.contentWindow.results;
+				if (! results.notified) {
+					top.HEURIST.search.searchNotify(results);
+					top.HEURIST.search.searchResultsNotify(results, 0);
+				}
+			}
+		});
+		top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], function() {
+			// register handlers and render non-static elements of page
+			top.HEURIST.search.setupSearchPage();
+		});
 </script>
 <script src="../common/php/displayPreferences.php"></script>	<!-- sets body css classes based on prefs in session -->
 <iframe src="../search/actions/actionHandler.php" id=i_action></iframe>	<!-- actionHandler.php is written to return a form by default or running javascript followed by reload teh default-->
 
-<a id=home-link>
-<div id=logo title="Click the logo at top left of any Heurist page to return to your Favourites"></div>
-</a>
+<div id="masthead"> <a id=home-link>
+	<div id=logo title="Click the logo at top left of any Heurist page to return to your Favourites"></div>
+	</a>
+	<div id=version></div>
+	<!-- database name -->
+	<a id=dbSearch-link>
+	<div id=dbname ></div>
+	</a>
+	<!-- message of the day -->
+	<div id="message"> Heurist 3 : Open Source <a href="../help/webhelp/index.html?ACL" target="_blank" title="Click for full information. Design: Ireneusz Golka, Ian Johnson &amp; Ingrid Mason. Programming: Steve White, Kim Jackson, Tom Murtagh &amp; Maria Shvedova. University of Sydney Digital Innovation Unit."><br>
+		<font style="font-size:11px;">Credits</font></a> </div>
 
-<div id=version></div>
-<!-- database name -->
-<div id=dbname ></div>
-<!-- message of the day -->
-<div id="message"> Heurist 3 : Open Source <a href="../help/webhelp/index.html?ACL" target="_blank" title="Click for full information. Design: Ireneusz Golka, Ian Johnson &amp; Ingrid Mason. Programming: Steve White, Kim Jackson, Tom Murtagh &amp; Maria Shvedova. University of Sydney Digital Innovation Unit."><br><font style="font-size:11px;">Credits</font></a> </div>
-<!-- quicklinks -->
-<div id="quicklinks" >
-	<div id=logged-in></div>
-	<div id=quicklink-cell class=yui-skin-sam><nobr> <span id=my-heurist-menu-link class=logged-in-only><a href="#" onClick="return false;"><img src="../common/images/blue-down-triangle.png"> <b>My Heurist</b></a> |</span>
-		<div id="my-heurist-menu" class="yuimenu" style="display: none;">
-			<div class="bd dialogBox">
-				<ul>
-					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="../admin/profile/editPreferences.html" name="auto-popup" title="Display preferences">Preferences</a></li>
-					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="../help/webhelp/index.html?GettingStarted1" target="_blank" title="Functions to set up your computer for use with Heurist">Install tools</a></li>
-
-					<li class="yuimenuitem divider"><a class="yuimenuitemlabel" href="../admin/profile/importModelUserProfile.php" name="auto-popup" title="Add useful resources to your collection from a range of academic templates">Load profiles</a></li>
-					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="../admin/profile/configureProfile.php?body_only&amp;tag_edit=1" name="auto-popup" title="Delete, combine, rename your personal tags">Manage tags</a></li>
-					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="?ver=1&amp;w=bookmark&amp;q=-tag&amp;label=Bookmarks+without+tags" title="Find bookmarks which you have not tagged">Bookmarks without tags</a></li>
-
-					<li class="yuimenuitem divider"><a class="yuimenuitemlabel" href="../admin/ugrps/showSimilarUsers.php" name="auto-popup" title="Find people with similar bookmarking patterns">Find similar users</a></li>
-					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="../admin/profile/manageReminders.php" name="auto-popup" title="View and delete automatic notification emails sent from your bookmarks">Manage reminders</a></li>
-
-					<li class="yuimenuitem divider"><a class="yuimenuitemlabel" href="../import/hyperlinks/importHyperlinks.php" name="auto-popup" title="Import web links from a browser bookmarks file or an html web page file">Import hyperlinks</a></li>
-					<li class="yuimenuitem"><a href="../admin/profile/configureProfile.php?body_only&amp;bookmark_import=1" name="auto-popup" title="Settings for web links importer">Importer settings</a></li>
-					<li class="yuimenuitem divider"><a href="../import/importerFramework.php?format=BIB" name="auto-popup" title="Import bibliographic exchange format files">Import bibliographic</a></li>
-					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="../import/importerFramework.php?format=GEO" name="auto-popup" title="Import KML files">Import geographic</a></li>
-					<li class="yuimenuitem"><a class="yuimenuitemlabel" href="../import/delimited/importRecordsFromDelimited.html" onclick="this.href = '../import/delimited/importRecordsFromDelimited.html?db=' + database;" title="Import a delimited text file of data for one record type" target="_blank">Import delimited</a></li>
-					<li class="yuimenuitem admin-only"><a class="yuimenuitemlabel" href="../import/delimited/updateDetailsFromDelimited.html" onclick="this.href = '../import/delimited/updateDetailsFromDelimited.html?db=' + database;" target="_blank" title="Update record details using delimited text">Detail updater</a></li>
-					<li class="yuimenuitem admin-only"><a class="yuimenuitemlabel" href="../export/delimited/exportDelimitedForRectype.html" onclick="this.href = '../export/delimited/exportDelimitedForRectype.html?db=' + database;" target="_blank" title="Export records as delimited text">Export delimited</a></li>
-
-					<li class="yuimenuitem divider"><a class="yuimenuitemlabel" href="http://www.timemap.net/tmissues.php" target="_blank" title="Add a bug report directly into our bug tracking system">Report a bug</a></li>
-					<li class="yuimenuitem admin-only"><a class="yuimenuitemlabel" href="../admin/structure/editStructure.php" onclick="this.href = '../admin/adminMenu.php?db=' + database;" target="_blank" title="For administrators only">Administrator tools</a></li>
+	<!-- quicklinks -->
+	<div id="quicklinks">
+		<div id=logged-in></div>
+		<ul id=quicklink-cell>
+			<li> <span id=my-heurist-menu-link class=logged-in-only><b>My Profile</b></span>
+				<ul id="my-heurist-menu">
+					<li><a href="../admin/profile/editPreferences.html" name="auto-popup" title="Display preferences">Preferences</a></li>
+					<li><a href="../help/webhelp/index.html?GettingStarted1" target="_blank" title="Functions to set up your computer for use with Heurist">Install tools</a></li>
+					<li><a href="../admin/profile/importModelUserProfile.php" name="auto-popup" title="Add useful resources to your collection from a range of academic templates">Load profiles</a></li>
+					<li><a href="../admin/profile/configureProfile.php?body_only&amp;tag_edit=1" name="auto-popup" title="Delete, combine, rename your personal tags">Manage tags</a></li>
+					<li><a href="?ver=1&amp;w=bookmark&amp;q=-tag&amp;label=Bookmarks+without+tags" title="Find bookmarks which you have not tagged">Bookmarks without tags</a></li>
+					<li><a href="../admin/ugrps/showSimilarUsers.php" name="auto-popup" title="Find people with similar bookmarking patterns">Find similar users</a></li>
+					<li><a href="../admin/profile/manageReminders.php" name="auto-popup" title="View and delete automatic notification emails sent from your bookmarks">Manage reminders</a></li>
 				</ul>
-			</div>
-		</div>
-	<a href="../help/webhelp" target=_blank title="Overview and guides to the use of Heurist plus comprehensive detailed help"><b>Help</b></a> |
-	<a id=contact-link style="display:none" title="Send us an email with bug information or feature requests" href="mailto:info@heuristscholar.org"><b>Contact us</b></a>
-	<script>
-		var html = "<a title=\"Drag the Heurist Bookmarklet link to your browser bookmarks toolbar, or right-click the link,"
-					+ " choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.\""
-					+ " href=\"javascript:(function(){h='" + document.location.href.replace(/search\/.*/,"") + "';"
-							+ "d=document;c=d.contentType;"
-							+ "if(c=='text/html'||!c){"
-								+ "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
-								+ "s=d.createElement('script');s.type='text/javascript';"
-								+ "s.src=h+'import/bookmarklet/bookmarkletPopup.php';"
-								+ "d.getElementsByTagName('head')[0].appendChild(s);}"
-							+ "else{e=encodeURIComponent;w=open(h+'records/add/addRecordPopup.php?t='+e(d.title)+'&u='+e(location.href));"
-								+ "window.setTimeout('w.focus()',200);}"
-							+ "})();\"><b>Bookmarklet</b></a>";
-				document.write(html);
-	</script>
-	</nobr></div>
+			</li>
+			<li> <span id=advanced-menu-link class=logged-in-only><b>Advanced</b></span>
+				<ul id="advanced-menu">
+					<li><a href="../import/hyperlinks/importHyperlinks.php" name="auto-popup" title="Import web links from a browser bookmarks file or an html web page file">Import hyperlinks</a></li>
+					<li><a href="../admin/profile/configureProfile.php?body_only&amp;bookmark_import=1" name="auto-popup" title="Settings for web links importer">Importer settings</a></li>
+					<li><a href="../import/importerFramework.php?format=BIB" name="auto-popup" title="Import bibliographic exchange format files">Import bibliographic</a></li>
+					<li><a href="../import/importerFramework.php?format=GEO" name="auto-popup" title="Import KML files">Import geographic</a></li>
+					<li><a href="../import/delimited/importRecordsFromDelimited.html" title="Import a delimited text file of data for one record type" target="_blank">Import delimited</a></li>
+					<li class="admin-only"><a href="../import/delimited/updateDetailsFromDelimited.html" target="_blank" title="Update record details using delimited text">Detail updater</a></li>
+					<li class="admin-only"><a href="../export/delimited/exportDelimitedForRectype.html" target="_blank" title="Export records as delimited text">Export delimited</a></li>
+					<li><a href="http://www.timemap.net/tmissues.php" target="_blank" title="Add a bug report directly into our bug tracking system">Report a bug</a></li>
+					<li class="admin-only"><a href="../admin/structure/editStructure.php" onClick="this.href = '../admin/adminMenu.php?db=' + database;" target="_blank" title="For administrators only">Administrator tools</a></li>
+				</ul>
+			</li>
+			<li> <a href="../help/webhelp" target=_blank title="Overview and guides to the use of Heurist plus comprehensive detailed help"><b>Help</b></a> </li>
+			<li> <a id=contact-link style="display:none" title="Send us an email with bug information or feature requests" href="mailto:info@heuristscholar.org"><b>Contact us</b></a>
+				<script>
+					var html = "<a title=\"Drag the Heurist Bookmarklet link to your browser bookmarks toolbar, or right-click the link,"
+								+ " choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.\""
+								+ " href=\"javascript:(function(){h='" + document.location.href.replace(/search\/.*/,"") + "';"
+										+ "d=document;c=d.contentType;"
+										+ "if(c=='text/html'||!c){"
+											+ "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
+											+ "s=d.createElement('script');s.type='text/javascript';"
+											+ "s.src=h+'import/bookmarklet/bookmarkletPopup.php';"
+											+ "d.getElementsByTagName('head')[0].appendChild(s);}"
+										+ "else{e=encodeURIComponent;w=open(h+'records/add/addRecordPopup.php?t='+e(d.title)+'&u='+e(location.href));"
+											+ "window.setTimeout('w.focus()',200);}"
+										+ "})();\"><b>Bookmarklet</b></a>";
+							document.write(html);
+				</script>
+			</li>
+		</ul>
+	</div>
 </div>
 
-<div id="add-record"><a id=add-record-link class="toolbar-large-icon-link logged-in-only" title="Add a new record to the Heurist database, setting record type and ownership" href="#" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/addRecordPopup.php'); return false;"><img src="../common/images/add-record.png"></a> </div>
-
+<!-- sidebar -->
 <div id="sidebar">
-	<div id="saved-search-heading" class="banner">
-		<!-- collection-commands -->
-	</div>
-	<div id="sidebar-inner">
 		<div id=left-panel-content class="panel-main-content">
 			<div id=saved>
 				<div id=my-records-saved-searches class=hide>
 					<div class=search-type title="Personal Saved searches which search only the records you have bookmarked (your collection)" onClick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">My bookmarks</div>
 					<div class=content>
 						<div class=saved-search-subsubheading><a href="?ver=1&amp;w=bookmark&amp;q=tag:Favourites+OR+tag:Favorites&amp;label=Favourites" onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">My Favourites</a></div>
-						<div class=saved-search-subsubheading><a href="?ver=1&amp;w=bookmark&amp;q=sortby:-m&amp;label=Recently+modified" onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">Recent changes</a></div>
+						<div class=saved-search-subsubheading><a href='?ver=1&amp;w=bookmark&amp;q=sortby:-m%20after:"yesterday"&amp;label=Recently+modified' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">Recent changes</a></div>
 						<div class=saved-search-subsubheading><a id=search-by-tag-link href="#" onClick="top.HEURIST.search.showTagSearchLinks(); return false;">My Tags</a></div>
 						<div class=saved-search-subsubheading><a id=my-blog-link target="_blank" href="#">My Blog</a></div>
 						<div class=saved-search-subsubheading>Saved searches</div>
@@ -234,123 +235,144 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 				</div>
 			</div>
 			<div id=tag-search-links></div>
-		</div>
-	</div>
+ 		</div>
+	<!--</div>-->
 </div>
-<!-- page -->
-<div id="page">
-<div class="banner">
-<div id=search>
-	<form onSubmit="top.HEURIST.search.checkSearchForm();" class="table">
+<!-- centre panel positional-->
+<div id="center-panel"></div>
+<!-- search and menu -->
+<div id=search class="banner">
+	<!--<a href="#" id="info" class="collapse"></a>-->
+	<div id="viewsButton">
+		<ul id="views" class="horizontal not-query-collected">
+			<li><span>Panels</span>
+				<ul>
+					<li><a href="#" id="sidebarButton">Hide Navigation Panel</a></li>
+					<li><a href="#" id="appPanelButton">Hide Application Panel</a></li>
+					<li><a href="#" id="resetLayout" title="Resets all panels to default width and visibility">Reset Layout</a></li>
+				</ul>
+			</li>
+	</ul>
+	</div>
+	<form onSubmit="top.HEURIST.search.checkSearchForm();" class="searchTable">
 	<input type=hidden id=w-input name=w>
 	<div class="tableCell"><!-- add record -->
-	<div class="outline roundedBoth"><b>Search</b>
+		<div class="">Search
 		<input id=q name=q type=text style="width:300px">
 		<input id=my-records-button type=button value="my bookmarks" title="Search only records which have been bookmarked into your collection" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();">
 		<input id=all-records-button type=button value="all records"  title="Search across all records in Heurist" onClick="document.getElementById('w-input').value = ''; top.HEURIST.search.submitSearchForm();">
-		<a id=web-search-link href="#" title="Search the web using Google" onClick="top.HEURIST.search.launchWebSearch(); return false;">web search</a> </div>
-		<span id="advancedSearch">
-		<a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">advanced search</a>
-		<a href="../help/advanced_search.html" title="Detailed description of the syntax for advanced search strings" target=_blank>help</a></div>
-		</span>
-	</form>
-	</div>
-
-</div>
-
-
-<div id="page-inner">
-	<div id="search-result-commands" class="not-query-collected" >
-	<div class="openTools">
-		<div id="toolbox">
-			<div id=tools-right-cell class="toolboxcolumn left">
-				<span class="toolboxheading">Search Results</span>
-				<a href="#" onClick="top.HEURIST.search.selectAllFirstPage()" title="Select All">Select All</a>
-				<a href="#" onClick="top.HEURIST.search.deselectAll()" title="Clear selection">Select None<!--<img src="../common/images/white-cross.gif">--></a>
-				<span class="toolboxheading">With selected</span>
-				<a href="#" onClick="top.HEURIST.search.addRemoveTagsPopup(false); return false;" title="Select one or more records, then click to add or remove tags">Tag (personal)</a>
-				<a href="#" onClick="top.HEURIST.search.addRemoveKeywordsPopup(); return false;" title="Select one or more records, then click to add or remove workgroup tags">Tag (workgroup)</a>
-				<a href="#" onClick="top.HEURIST.search.setRatingsPopup(); return false;" title="Select one or more records, then click to set ratings">Rate (stars)</a>
-				<a class=w-all-only href="#" onClick="top.HEURIST.search.addBookmarks(); return false;" title="Select one or more records, then click to bookmark">Bookmark</a>
-				<a class=w-bookmark-only href="#" onClick="top.HEURIST.search.deleteBookmarks(); return false;" title="Select one or more records, then click to remove bookmarks">Remove bookmarks</a>
-				<a href="#" onClick="top.HEURIST.search.notificationPopup(); return false;" title="Select one or more records, then click to send notification">Share (email notifications)</a>
-				<a href="#" onClick="top.HEURIST.search.addRelationshipsPopup(); return false;" title="Select one or more records, then click to add relationships">Relate (link records)</a>
-				<span class=admin-only>
-					<a href="#" onClick="top.HEURIST.search.setWorkgroupPopup(); return false;" title="Select one or more records, then click to set workgroup ownership and visibility">Set workgroup</a>
-				</span>
-				<span class="toolboxheading">Admin</span>
-				<span class=admin-only>
-				<a href="#" onClick="top.HEURIST.search.deleteBiblios(); return false;" title="Select one or more records, then click to delete">Delete</a>
-				<a href="#" onClick="top.HEURIST.search.fixDuplicates(); return false;" title="Select one or more records, then click to fix duplicates">Merge dupes</a>
-				<a href="#" onClick="top.HEURIST.search.collectDuplicates(); return false;" title="Click to identify possible duplicates in the current query and create collections for each set">Collect dupes</a>
-				</span>
-			</div>
-			<div class="toolboxcolumn right">
-				<span id="collection-commands" class="not-query-collected"></span>
-				<span id=collection-label title="Select records and click collect to add to a temporary collection which can later be saved as a search." >Collected:&nbsp;&nbsp;</span><span class="collected-shown"></span>
-				<a class=collected-hidden href="#" onClick="top.HEURIST.search.addToCollection();return false;" title="Select one or more records, then click to add to the collection">Add</a>
-				<span class="collected-hidden"></span>
-				<a class=collected-shown href="#" onClick="top.HEURIST.search.removeFromCollection(); return false;" title="Select one or more records, then click to remove records from the collection">Remove</a>
-				<a class=toolbar-large-icon-link-normal href=" " title="Empty records from the collection" onclick='top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/manageCollection.php?clear", top.HEURIST.search.addRemoveCollectionCB); document.getElementById("q").focus(); return false;'>Remove all</a>
-				<a class=toolbar-large-icon-link-normal href=" " title="Save current set of records in collection" onClick="top.HEURIST.util.popupURL(window, 'saved/saveCollectionPopup.html',{width:650, height:600}); return false;">Save to...</a>
-				<a class=toolbar-large-icon-link-normal href="?q=_COLLECTED_&amp;label=Collected" title="Show current set of records in collection" >Show</a>
-				<span id=active-label>Save search</span>
-				<a class=toolbar-large-icon-link-normal href=" " title="Save current results set as a Saved Search, either personal or shared with workgroup members" onClick="top.HEURIST.util.popupURL(window, 'saved/saveSearchPopup.html'); return false;">Save search to...</a>
-			</div>
 		</div>
 	</div>
-	<div id=ops-right-cell>
-		<span id=search-result-styles>
-			<a href="#" id=result-style-list-link title="View results as a list" onClick="top.HEURIST.search.setResultStyle('list'); return false;"><img src="../common/images/19x15.gif"></a>
-			<a href="#" id=result-style-two-col-link title="View results in two columns" onClick="top.HEURIST.search.setResultStyle('two-col'); return false;"><img src="../common/images/19x15.gif"></a>
-			<a href="#" id=result-style-thumbs-link title="View results as thumbnails" onClick="top.HEURIST.search.setResultStyle('thumbs'); return false;"><img src="../common/images/19x15.gif"></a>
-		</span>
-	</div>
-	<div class=selectAll>
-		<input id=select-all-checkbox style="display:none" type=checkbox title="Check/uncheck this box to select/deselect all records in the current set of results" onClick="if (this.checked) top.HEURIST.search.selectAll(); else top.HEURIST.search.deselectAll();">
-	</div>
-	<div id=publish-image-placeholder></div>
-	<div id="printingLink" onClick="top.HEURIST.search.printResultRow()" title="Print search results"></div>
-	<div><a href="#" title="Click to hide/show the legend" onClick="top.HEURIST.search.toggleLegend(); blur(); return false;" id=legend-link>legend</a></div>
+	</form>
+	<div id="tabbar">
+		<ul id="tabs" class="horizontal not-query-collected">
+			<li><a id=add-record-link class="toolbar-large-icon-link logged-in-only" title="Add a new record to the Heurist database, setting record type and ownership" href="#" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/addRecordPopup.php'); return false;">Add Record </a></li>
+			<li><span>Search</span>
+				<ul>
+					<li><a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">Advanced Search</a></li>
+					<li><a href="../help/advanced_search.html" title="Detailed description of the syntax for advanced search strings" target=_blank>Help</a></li>
+					<li><a href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members" onClick="top.HEURIST.util.popupURL(window, 'saved/saveSearchPopup.html'); return false;"><span id="active-label" style="display:none"></span>Save search to...</a></li>
+					<li><a href="#" onClick="top.HEURIST.search.printResultRow()" title="Print search results">Print</a></li>
+					<li id=publish-image-placeholder></li>
+				</ul>
+			</li>
+			<li><span>Edit</span>
+				<ul>
+					<li><a href="#" onClick="top.HEURIST.search.selectAllFirstPage()" title="Select All">Select All</a>
+					<input id=select-all-checkbox style="display:none" type=checkbox title="Check/uncheck this box to select/deselect all records in the current set of results" onClick="if (this.checked) top.HEURIST.search.selectAll(); else top.HEURIST.search.deselectAll();">
+					</li>
+					<li><a href="#" onClick="top.HEURIST.search.deselectAll()" title="Clear selection">Select None</a></li>
+					<li><a href="#" onClick="top.HEURIST.search.addRemoveTagsPopup(false); return false;" title="Select one or more records, then click to add or remove tags">Tag</a></li>
+					<li><a href="#" onClick="top.HEURIST.search.setRatingsPopup(); return false;" title="Select one or more records, then click to set ratings">Rate</a></li>
+					<li><a href="#" onClick="top.HEURIST.search.addBookmarks(); return false;" title="Select one or more records, then click to bookmark">Bookmark</a></li>
+					<li><a href="#" onClick="top.HEURIST.search.deleteBookmarks(); return false;" title="Select one or more records, then click to remove bookmarks">Remove bookmarks</a></li>
+					<li><a href="#" onClick="top.HEURIST.search.addRelationshipsPopup(); return false;" title="Select one or more records, then click to add relationships">Relate</a></li>
+				</ul>
+			</li>
+			<li><span id=collection-label title="Select records and click collect to add to a temporary collection which can later be saved as a search." >Collected&nbsp;&nbsp;</span><span class="collected-shown" style="display:inline"></span>
+				<ul>
+					<li><a class=collected-hidden href="#" onClick="top.HEURIST.search.addToCollection();return false;" title="Select one or more records, then click to add to the collection">Add</a></li>
+					<li><a class=collected-shown href="#" onClick="top.HEURIST.search.removeFromCollection(); return false;" title="Select one or more records, then click to remove records from the collection">Remove</a></li>
+					<li><a class=toolbar-large-icon-link-normal href=" " title="Empty records from the collection" onclick='top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/manageCollection.php?clear", top.HEURIST.search.addRemoveCollectionCB); document.getElementById("q").focus(); return false;'>Remove all</a></li>
+					<li><a class=toolbar-large-icon-link-normal href=" " title="Save current set of records in collection" onClick="top.HEURIST.util.popupURL(window, 'saved/saveCollectionPopup.html',{width:650, height:600}); return false;">Save to...</a></li>
+					<li><a class=toolbar-large-icon-link-normal href="?q=_COLLECTED_&amp;label=Collected" title="Show current set of records in collection" >Show</a></li>
+				</ul>
+			</li>
+			<li><span>Share</span>
+				<ul>
+					<li><a href="#" onClick="top.HEURIST.search.setWorkgroupPopup(); return false;" title="Select one or more records, then click to set workgroup ownership and visibility">Set workgroup</a></li>
+					<li><a href="#" onClick="top.HEURIST.search.addRemoveKeywordsPopup(); return false;" title="Select one or more records, then click to add or remove workgroup tags">Workgroup Tag</a></li>
+					<li><a href="#" onClick="top.HEURIST.search.notificationPopup(); return false;" title="Select one or more records, then click to send notification">Notify (email)</a></li>
+				</ul>
+			</li>
+			<li><span>View</span>
+				<ul>
+					<li><a href="#" id=result-style-list-link title="View results as a list" onClick="top.HEURIST.search.setResultStyle('list'); return false;"><!--<img src="../common/images/19x15.gif">-->1 column</a></li>
+					<li><a href="#" id=result-style-two-col-link title="View results in two columns" onClick="top.HEURIST.search.setResultStyle('two-col'); return false;"><!--<img src="../common/images/19x15.gif">-->2 column</a></li>
+					<li><a href="#" id=result-style-thumbs-link title="View results as thumbnails" onClick="top.HEURIST.search.setResultStyle('thumbs'); return false;"><!--<img src="../common/images/19x15.gif">-->Thumbnails</a></li>
+					<!--<li><a>Select</a></li>
+					<li><a>Navigate</a></li>-->
+					<li><a href="#" title="Click to hide/show the legend" onClick="top.HEURIST.search.toggleLegend(); blur(); return false;" id=legend-link>legend</a></li>
+				</ul>
+			</li>
+			<li><span>Advanced</span>
+				<ul>
+					<li><a href="#" onClick="top.HEURIST.search.deleteBiblios(); return false;" title="Select one or more records, then click to delete">Delete</a></li>
+					<li><a href="#" onClick="top.HEURIST.search.fixDuplicates(); return false;" title="Select one or more records, then click to fix duplicates">Merge dupes</a></li>
+					<li><a href="#" onClick="top.HEURIST.search.collectDuplicates(); return false;" title="Click to identify possible duplicates in the current query and create collections for each set">Collect dupes</a></li>
+				</ul>
+			</li>
+		</ul>
 
 	</div>
-	<div id=result-container>
-	<div id=results>
-		<div id=results-message></div>
-		<div id=search-status class=loading>
-			<div id=loading-search-status>
+</div>
+<!-- page -->
+<div id="page" style="position:absolute;left:0;right:0;top:0;bottom:0; background-color:#FFF">
+	<!--	<div class="banner">
+			</div>-->
+	<div id=pageNavCount> <nobr> <span id=page-nav></span> <span id=resource-count></span> </nobr></div>
+	<div id="result-container">
+		<div id="results">
+			<div id="results-message"></div>
+			<div id="search-status" class="loading">
+				<div id="loading-search-status">
 			<div><a href="#" onClick="document.getElementById('search-not-loading-message').style.display = ''; this.style.display = 'none'; return false;">Search not loading?</a></div>
-			<div id=search-not-loading-message style="display: none; color: green;">Clear the cache by shift-reloading the page. If this fails, try Tools &gt; Clear browsing data/recent history &gt; clear cache</div>
+					<div id="search-not-loading-message" style="display: none; color: green;">Clear the cache by shift-reloading the page. If this fails, try Tools &gt; Clear browsing data/recent history &gt; clear cache</div>
 			<p>Loading ...</p>
 		</div>
-		<div id=noquery-search-status class=result_thumb>
+				<div id="noquery-search-status" class="result_thumb">
 			<h2>Welcome to Heurist</h2>
 			<p>Heurist is a sophisticated eResearch tool for managing web bookmarks, references, notes, and a wide range of research data. Designed for individual or collaborative use, it may at first appear puzzling - why, for database, is the home page just a search - but it will all become clear if you persist a bit.</p>
 			<p>We strongly recommend that you click <a target="_blank" href="../help/tour.html">Take the Tour</a> to get oriented. Please also visit <a target="_blank" href="../help/webhelp">Help</a> (link at top right) - don't ignore it until you have a problem, as users generally find it quite approachable and very, very helpful. </p>
 			<p>Heurist is a stable system running several major web sites (see Example Collections once you've logged in). It is also a system in rapid development, so if you have suggestions we want to hear them. You may be surprised how quickly your suggestions pop up in the software. </p>
-			<p>We are also very happy to provide advice - from simple email assistance<br> ( <a href="mailto:info@heuristscholar.org">info@heuristscholar.org</a> ) to the design of complete eResearch systems. </p>
+					<p>We are also very happy to provide advice - from simple email assistance<br>
+						( <a href="mailto:info@heuristscholar.org">info@heuristscholar.org</a> ) to the design of complete eResearch systems. </p>
 			<p>Please <a href="../admin/ugrps/findAddUser.php?register=1">register</a> and then <a href="../common/connect/login.php">login</a> to take full advantage of the system. </p>
 		</div>
-		<div id=noresult-search-status> <b>No matching records</b>
-			<div class=not-logged-in-only>To see workgoup-owned and non-public records you may need to log in</div>
-			<div class=logged-in-only>Note: some records are only visible to members of particular workgroups</div>
-			<div id=noresult-search-status-search-all>Click <a href="#" onClick="top.HEURIST.search.searchAll(); return false;">all records</a> to search all of Heurist</div>
-			<div id=noresult-search-status-search-web>Click <a href="#" onClick="top.HEURIST.search.launchWebSearch(); return false;">web search</a> to search the web</div>
+				<div id="noresult-search-status"> <b>No matching records</b>
+					<div class="not-logged-in-only">To see workgoup-owned and non-public records you may need to log in</div>
+					<div class="logged-in-only">Note: some records are only visible to members of particular workgroups</div>
+					<div id="noresult-search-status-search-all">Click <a href="#" onClick="top.HEURIST.search.searchAll(); return false;">all records</a> to search all of Heurist</div>
+					<div id="noresult-search-status-search-web">Click <a href="#" onClick="top.HEURIST.search.launchWebSearch(); return false;">web search</a> to search the web</div>
 		</div>
 		</div>
 		<div id=result-rows></div>
 	</div>
 	</div>
-</div>
+	<!--</div>-->
 
-<!-- new application tabs -->
+	<!-- new application tabs -->
 	<div id="page-right" class=" yui-skin-sam">
 	<div id=applications class="yui-navset">
 			<ul class="yui-nav">
-				<li class="selected"><a href="#p" ><em>Print View</em></a></li>
+				<li class="selected"><a href="#r" ><em>Record View</em></a></li>
+				<li><a href="#p" ><em>Print View</em></a></li>
 				<li><a href="#m" onClick="top.HEURIST.search.mapSelected();"><em>Map View</em></a></li>
 			</ul>
 			<div class="yui-content">
+				<div id="r">
+					<iframe id="record-view-frame" class=viewers></iframe>
+				</div>
 				<div id="p">
 					<iframe id="viewer-frame" class=viewers></iframe>
 				</div>
@@ -361,16 +383,15 @@ top.HEURIST.whenLoaded(["search-html", "obj-common", "obj-user", "search-js"], f
 		</div>
 	</div>
 
-<!-- end page right -->
-<div id="record-view"></div>
+	<!-- end page right -->
+	<div id="record-view"></div>
 </div>
-
 <!-- footer -->
 <div id="footer">
-	<div id=pageNavCount> <nobr> <span id=page-nav></span> <span id=resource-count></span> </nobr></div>
+	<!--<div id=pageNavCount> <nobr> <span id=page-nav></span> <span id=resource-count></span> </nobr></div>-->
 </div>
 <div id=password>
-	<div><b>Username / password reminder:</b></div>
+	<div><b>Username / password reminder:</b></div>>
 	<div id=reminder></div>
 </div>
 <div style="position: absolute; left: 50%; top: 145px;">

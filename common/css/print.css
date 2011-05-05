@@ -1,1 +1,5 @@
-body {overflow:visible;background-image: none !IMPORTANT;}
+body {
+	overflow:visible;
+	background-image: none !IMPORTANT;
+	background-color:#FFF !important;
+	}

@@ -26,7 +26,7 @@ body {padding:0;overflow: hidden;}
 *|* {font-family: Helvetica, Arial, Verdana !important;font-size: 11px;}
 
 H1, H2, H3 {color:#6A7C99;font-size: 12px;display: inline;}
-h3 {color:#DC8501;font-size:12px;white-space:nowrap;display: block;}
+h3 {color:#DC8501;font-size:12px;display: block;}
 H4 {color:#000;font-size: 11px}
 H5 {color:#999;font-size: 10px}
 P {color:#333333;font-size:11px;line-height:21px;}

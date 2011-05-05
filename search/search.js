@@ -234,7 +234,7 @@ top.HEURIST.search = {
 		if (top.HEURIST.rectypes.names[parseInt(res[4])])
 			rectypeTitle = top.HEURIST.rectypes.names[parseInt(res[4])] + " - click to see details";
 
-		var html = "<div class=result_row title='Double-click to edit' bkmk_id='"+res[0]+"' bib_id="+res[2]+">"+
+		var html = "<div class=result_row title='Double-click to edit' bkmk_id='"+res[0]+"' bib_id="+res[2]+" rectype="+res[4]+">"+
 		"<img src=" +top.HEURIST.basePath+ "common/images/13x13.gif " + pinAttribs + ">"+
 		"<span class='wg-id-container logged-in-only'>"+
 		"<span class=wg-id title='"+linkTitle+"' " + (wgColor? wgColor: "") + ">" + (wgHTML? wgHTML.htmlEscape() : "") + "</span>"+
@@ -317,7 +317,7 @@ top.HEURIST.search = {
 			rectypeTitle = top.HEURIST.rectypes.names[parseInt(res[4])] + " - click to see details";
 
 		var html =
-		"<div class=result_thumb  title='Double-click to edit' bkmk_id='"+res[0]+"' bib_id="+res[2]+">" +
+		"<div class=result_thumb  title='Double-click to edit' bkmk_id='"+res[0]+"' bib_id="+res[2]+" rectype="+res[4]+">" +
 		"<input style='display:none' type=checkbox name=bib[] onclick=top.HEURIST.search.resultItemOnClick(this) class='logged-in-only' title='Check box to apply Actions to this record'>"+
 		   (res[11] && res[11].length ? "<div class='thumbnail' style='background-image:url("+res[11]+")' ></div>":"<div class='no-thumbnail' "+rectypeThumb+" ></div>") +
 		"<div class='rec_title'>" + (res[3].length ? "<a href='"+res[3]+"' target='_blank'>"+linkText + "</a>" : linkText ) + "</div>" +
@@ -1007,8 +1007,11 @@ top.HEURIST.search = {
 
 		//send selectionChange event
 		var viewerFrame = document.getElementById("viewer-frame");
-		var mapFrame = document.getElementById("map-frame");
-		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", "selectedIds=" + top.HEURIST.search.selectedRecordIds.join(","));
+ 		var mapFrame = document.getElementById("map-frame");
+		var recordFrame = document.getElementById("record-view-frame");
+		recordFrame.src = top.HEURIST.basePath+"records/view/viewRecord.php?bib_id="+bib_id;
+
+ 		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", "selectedIds=" + top.HEURIST.search.selectedRecordIds.join(","));
 		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange", "selectedIds=" + top.HEURIST.search.selectedRecordIds.join(","));
 		return false;
 
@@ -1877,8 +1880,10 @@ top.HEURIST.search = {
 															: "") + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
 	},
 
-	setHomeLink: function() {
-		 document.getElementById("home-link").href = top.HEURIST.basePath + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
+ 	setHomeLink: function() {
+		 document.getElementById("home-link").href = top.HEURIST.basePath + "index.html";
+//		 document.getElementById("home-link").href = top.HEURIST.basePath + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
+		 document.getElementById("dbSearch-link").href = top.HEURIST.basePath + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
 	},
 
 	writeRSSLinks: function() {
@@ -1997,7 +2002,7 @@ top.HEURIST.search = {
 //		if (top.HEURIST.database.name === "") {
 			var im_container = document.getElementById("publish-image-placeholder");
 			var a = document.createElement("a");
-				a.className = "toolbar-large-icon-link logged-in-only";
+				a.className = "logged-in-only";
 				a.title = "Publish the current search results as formatted output which can be printed, saved or generated (live) in a web page";
 				a.href = "#";
 			a.onclick = function() {
@@ -2008,15 +2013,8 @@ top.HEURIST.search = {
 				}
 				return false;
 			}
-			icon = document.createElement("img");
-			icon.src = top.HEURIST.basePath + "common/images/publish.png"
-			a.appendChild(icon);
-
-			//a.appendChild(document.createTextNode("publish"));
+			a.appendChild(document.createTextNode("Publish"));
 			im_container.appendChild(a);
-			//im_container.appendChild(document.createTextNode(" | "));
-//		}
-
 	},
 
 	showPublishPopup: function() {
@@ -2168,11 +2166,6 @@ function createCustomAlert(txt,args) {
 	// create the DIV that will be the alert
 	alertObj = mObj.appendChild(d.createElement("div"));
 	alertObj.id = "alertBox";
-	//alertObj.className = "dialogBox";
-	// MSIE doesnt treat position:fixed correctly, so this compensates for positioning the alert
-	//if(d.all && !window.opera) alertObj.style.top = document.documentElement.scrollTop + "px";
-	// center the alert box
-	//alertObj.style.left = (d.documentElement.scrollWidth - alertObj.offsetWidth)/2 + "px";
 
 	// create a paragraph element to contain the txt argument
 	msg = alertObj.appendChild(d.createElement("p"));
@@ -2195,3 +2188,140 @@ function removeCustomAlert() {
 	document.getElementsByTagName("body")[0].removeChild(document.getElementById("modalContainer"));return;
 }
 
+// layout
+
+	var Dom = YAHOO.util.Dom,
+		Event = YAHOO.util.Event;
+
+	Event.onDOMReady(function() {
+	_tabView = new YAHOO.widget.TabView('applications', { activeIndex: 0 });
+		var leftWidth = top.HEURIST.util.getDisplayPreference("leftWidth");
+		var oldLeftWidth = top.HEURIST.util.getDisplayPreference("oldLeftWidth");
+		if (!leftWidth || !oldLeftWidth) {
+			leftWidth = 180;
+			}else if (top.HEURIST.util.getDisplayPreference("sidebarPanel") == "closed"){
+			leftWidth = oldLeftWidth;
+			};
+		var appWidth = top.HEURIST.util.getDisplayPreference("appWidth");
+		var oldAppWidth = top.HEURIST.util.getDisplayPreference("oldAppWidth");
+			if (!appWidth || !oldAppWidth) {
+			appWidth = 180;
+			}else if (top.HEURIST.util.getDisplayPreference("applicationPanel") == "closed"){
+			appWidth = oldAppWidth;
+			};
+
+		var appPanelButton = document.getElementById("appPanelButton");
+		var sidebarButton = document.getElementById("sidebarButton");
+
+		var layout = new YAHOO.widget.Layout({
+			units: [
+				{ position: 'top', height: 50, body: 'masthead', header: '', gutter: '0', collapse: false, resize: false },
+				{ position: 'bottom', height: 10, resize: false, body: 'footer', gutter: '0', collapse: false },
+				{ position: 'left', width: leftWidth, resize: true, body: 'sidebar', gutter: '0 5px 0 5px', collapse: false, close: false, collapseSize: 0, scroll: false, animate: false },
+				{ position: 'center', body: 'center-panel', gutter: '0 10px 0 0', animate: false, collapse:true }
+			]
+		});
+
+		layout.on('render', function() {
+
+				var el = layout.getUnitByPosition('center').get('wrap');
+				var layout2 = new YAHOO.widget.Layout(el, {
+				parent: layout,
+				units: [
+					{ position: 'top', height: 50, body: 'search', header: '', gutter: '0', collapse: false, resize: false },
+					{ position: 'right', width: appWidth, resize: true, gutter: '0', collapse: true, scroll: true, body: 'page-right', animate: false, collapseSize: 0},
+					{ position: 'center', body: 'page', minWidth: 350,}
+					]
+				});
+
+				var setAppWidth = function() {
+					var appWidth = layout2.getSizes().right.w;
+					top.HEURIST.util.setDisplayPreference("appWidth", appWidth);
+					};
+
+				layout2.on('resize', setAppWidth);
+				layout2.render();
+
+				if (top.HEURIST.util.getDisplayPreference("applicationPanel") == "closed"){
+					layout2.getUnitByPosition('right').collapse();
+					appPanelButton.className +=" closed";
+					appPanelButton.innerHTML = "Show Application Panel";
+					};
+
+				Event.on('appPanelButton', 'click', function(ev) {
+					Event.stopEvent(ev);
+					if (top.HEURIST.util.getDisplayPreference("applicationPanel") == "open"){
+					var oldAppPanelWidth = layout2.getSizes().right.w;
+					top.HEURIST.util.setDisplayPreference("oldAppWidth",oldAppPanelWidth);
+						layout2.getUnitByPosition('right').collapse();
+						top.HEURIST.util.setDisplayPreference("applicationPanel","closed");
+						appPanelButton.className +=" closed";
+						appPanelButton.innerHTML = "Show Application Panel";
+					}else{
+						layout2.getUnitByPosition('right').expand();
+						top.HEURIST.util.setDisplayPreference("applicationPanel","open");
+						appPanelButton.className = appPanelButton.className.replace(" closed", "")
+						appPanelButton.innerHTML = "Hide Application Panel";
+					}
+			});
+
+				Event.on('resetLayout', 'click', function(ev) {
+					Event.stopEvent(ev);
+					if (top.HEURIST.util.getDisplayPreference("applicationPanel") != "open"){
+					layout2.getUnitByPosition('right').expand();
+					appPanelButton.className = appPanelButton.className.replace(" closed", "")
+					appPanelButton.innerHTML = "Hide Application Panel"
+					}
+					layout2.getUnitByPosition('right').set("width", 350);
+					layout2.getUnitByPosition('right').resize();
+					top.HEURIST.util.setDisplayPreference("appWidth", 350);
+					top.HEURIST.util.setDisplayPreference("applicationPanel","open");
+				});
+
+		});
+		var setLeftWidth = function() {
+			var leftPanelWidth = layout.getSizes().left.w;
+			top.HEURIST.util.setDisplayPreference("leftWidth", leftPanelWidth);
+		};
+
+		layout.on('resize',setLeftWidth);
+		layout.render();
+
+		if (top.HEURIST.util.getDisplayPreference("sidebarPanel") == "closed"){
+					layout.getUnitByPosition('left').collapse();
+					sidebarButton.className +=" closed";
+					sidebarButton.innerHTML = "Show Navigation Panel";
+					};
+
+		Event.on('sidebarButton', 'click', function(ev) {
+			Event.stopEvent(ev);
+			if (top.HEURIST.util.getDisplayPreference("sidebarPanel") == "open"){
+				var oldLeftPanelWidth = layout.getSizes().left.w;
+					top.HEURIST.util.setDisplayPreference("oldLeftWidth", oldLeftPanelWidth);
+				layout.getUnitByPosition('left').collapse();
+				top.HEURIST.util.setDisplayPreference("sidebarPanel","closed");
+				sidebarButton.className +=" closed";
+				sidebarButton.innerHTML = "Show Navigation Panel";
+			}else{
+				layout.getUnitByPosition('left').expand();
+				top.HEURIST.util.setDisplayPreference("sidebarPanel","open");
+				sidebarButton.className = sidebarButton.className.replace(" closed", "");
+				sidebarButton.innerHTML = "Hide Navigation Panel";
+			}
+		});
+
+		Event.on('resetLayout', 'click', function(ev) {
+			Event.stopEvent(ev);
+					if (top.HEURIST.util.getDisplayPreference("sidebarPanel") != "open"){
+						layout.getUnitByPosition('left').expand();
+						top.HEURIST.util.setDisplayPreference("sidebarPanel","open");
+						sidebarButton.className = document.getElementById("sidebarButton").className.replace(" closed", "");
+						sidebarButton.innerHTML = "Show Navigation Panel";
+						};
+					layout.getUnitByPosition('left').set("width", 180);
+					layout.getUnitByPosition('left').resize();
+					top.HEURIST.util.setDisplayPreference("leftWidth", 180);
+					top.HEURIST.util.setDisplayPreference("sidebarPanel","open");
+				});
+
+	});

@@ -53,7 +53,14 @@ $prefs = array(
 	"scratchpad-right" => 0,
 	"scratchpad-width" => 0,
 	"scratchpad-height" => 0,
-	"scratchpad" => "hide"
+	"scratchpad" => "hide",
+
+	"applicationPanel" => "closed",
+	"sidebarPanel" => "open",
+	"leftWidth" => 180,
+	"oldLeftWidth" => 180,
+	"appWidth" => 350,
+	"oldAppWidth" => 350
 );
 
 foreach (get_group_ids() as $gid) {
