@@ -166,19 +166,10 @@ function updateCachedRecord($id) {
 
 function loadRecordStub($id) {
 	$res = mysql_query(
-	    "select rec_ID,
-	            rec_RecTypeID,
-	            rec_Title,
-	            rec_URL,
-	            rec_ScratchPad,
-	            rec_OwnerUGrpID,
-	            if (rec_NonOwnerVisibility = 'hidden', 0, 1) as rec_NonOwnerVisibility,
-	            rec_URLLastVerified,
-	            rec_URLErrorMessage,
-	            rec_Added,
-	            rec_Modified,
-	            rec_AddedByUGrpID,
-	            rec_Hash
+	    "select rec_ID as id,
+	            rec_RecTypeID as type,
+	            rec_Title as title,
+	            rec_URL as url
 	       from Records
 	      where rec_ID = $id");
 	$record = mysql_fetch_assoc($res);

@@ -283,17 +283,10 @@ function slash($str) {
 	return preg_replace("/\r\n|\r|\n/", "\\n", addslashes($str));
 }
 
-function hasFirstIndexZero($obj){
-	if (!array_key_exists(0, $obj)){
+function isZeroOrderedArray($obj){
+	if(is_object($obj)){
 		return false;
 	}
-	$cnt = 0;
-	foreach($obj as $i => $obj2){
-		return $i == 0;
-	}
-}
-
-function isZeroOrderedArray($obj){
 	$keys = array_keys($obj);
 	$cnt = (count($keys) > 3 ? 3 : count($keys));
 	for($i = 0; $i < $cnt ; $i++){
@@ -306,7 +299,7 @@ function isZeroOrderedArray($obj){
 
 function json_format($obj, $purdy=false) {
 	// Return the data from $obj as a JSON format string
-	if (! is_array($obj)) {
+	if (! is_array($obj) && !is_object($obj)) {
 		// Primitive scalar types
 		if ($obj === null) return "null";
 		else if (is_bool($obj)) return $obj? "true" : "false";
@@ -340,10 +333,11 @@ function json_format($obj, $purdy=false) {
 				$json .= ",";
 				if ($purdy) $json .= "\n";
 			}
-			if (preg_match('/^\d+$/', $key))
-				$json .= $key . ":" . json_format($val);
-			else
+			if (preg_match('/^\d+$/', $key)){
+				$json .= "\"" .$key ."\"" . ":" . json_format($val);
+			}else{
 				$json .= "\"" . slash($key) . "\":" . json_format($val);
+		}
 		}
 		return "{".$json."}";
 	}

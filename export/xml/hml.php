@@ -66,9 +66,6 @@ if (@$argv) {
 
 }
 
-if (!array_key_exists('fc', $_REQUEST)) {
-	$_REQUEST['fc'] = 1;	// default to expand file content
-}
 header('Content-type: text/xml; charset=utf-8');
 echo "<?xml version='1.0' encoding='UTF-8'?>\n";
 
@@ -205,6 +202,17 @@ $MAX_DEPTH = @$_REQUEST['depth'] ? intval($_REQUEST['depth']) : 0;
 $REVERSE = @$_REQUEST['rev'] === 'no' ? false : true;
 $WOOT = @$_REQUEST['woot'] ? intval($_REQUEST['woot']) : 0;
 $OUTPUT_STUBS = @$_REQUEST['stub'] === '1'? true : false;
+$INCLUDE_FILE_CONTENT = (@$_REQUEST['fc'] && $_REQUEST['fc'] == 0? false :true);	// default to expand file content
+$SUPRESS_LOOPBACKS = (@$_REQUEST['slb'] && $_REQUEST['slb'] == 0? false :true);	// default to supress loopbacks
+
+$filterString = (@$_REQUEST['filters'] ? $_REQUEST['filters'] : null);
+if ( $filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/',$filterString)) {
+	die(" error invalid json rectype filters string");
+}
+$RECTYPE_FILTERS = ($filterString ? json_decode($filterString, true) : array());
+if (!isset($RECTYPE_FILTERS)) {
+	die(" error decoding json rectype filters string");
+}
 
 if (preg_match('/_COLLECTED_/', $_REQUEST['q'])) {
 if (!session_id()) session_start();
@@ -254,7 +262,6 @@ if (@$ARGV) {
 	}
 }
 
-error_log(" here hml ");
 
 //----------------------------------------------------------------------------//
 // Traversal functions
@@ -262,33 +269,40 @@ error_log(" here hml ");
 // into one query, rather than doing them all recursively.
 //----------------------------------------------------------------------------//
 
-function findPointers($rec_ids) {
+function findPointers($rec_ids, $rtyIDs) {
 //error_log("in findPointers");
 	$rv = array();
-	$query = 'SELECT distinct dtl_Value
-	            FROM recDetails
-	       LEFT JOIN defDetailTypes on dtl_DetailTypeID = dty_ID
-	           WHERE dtl_RecID in (' . join(',', $rec_ids) .')
-	             AND dty_Type = "resource"';
+	$query = 'SELECT distinct dtl_Value '.
+			'FROM recDetails '.
+				'LEFT JOIN defDetailTypes on dtl_DetailTypeID = dty_ID '.
+				(isset($rtyIDs) && count($rtyIDs)>0 ? 'LEFT JOIN Records on rec_ID = dtl_Value ': '').
+			'WHERE dtl_RecID in (' . join(',', $rec_ids) .') '.
+				($rtyIDs && count($rtyIDs)>0 ? 'AND rec_RecTypeID in ('.join(',', $rtyIDs).') ' : '').
+				'AND dty_Type = "resource"';
+//error_log("find pointer q = $query");
 	$res = mysql_query($query);
-	while ($row = mysql_fetch_assoc($res)) {
-		array_push($rv, $row['dtl_Value']);
+	while ($res && $row = mysql_fetch_assoc($res)) {
+//		array_push($rv, $row['dtl_Value']);
+		$rv[$row['dtl_Value']] = 1;
 	}
-	return $rv;
+	return array_keys($rv);
+//	return $rv;
 }
 
-function findReversePointers($rec_ids, &$pointers) {
+function findReversePointers($rec_ids, &$pointers, $rtyIDs) {
 //error_log("in findReversePointers");
 	$rv = array();
-	$query = 'SELECT dtl_Value, dtl_DetailTypeID, dtl_RecID
-	            FROM recDetails
-	       LEFT JOIN defDetailTypes ON dtl_DetailTypeID = dty_ID
-	       LEFT JOIN Records ON rec_ID = dtl_RecID
-	           WHERE dty_Type = "resource"
-	             AND dtl_Value IN (' . join(',', $rec_ids) .')
-	             AND rec_RecTypeID != 52';
+	$query = 'SELECT dtl_Value, dtl_DetailTypeID, dtl_RecID '.
+			'FROM recDetails '.
+				'LEFT JOIN defDetailTypes ON dtl_DetailTypeID = dty_ID '.
+				'LEFT JOIN Records ON rec_ID = dtl_RecID '.
+			'WHERE dty_Type = "resource" '.
+				'AND dtl_Value IN (' . join(',', $rec_ids) .') '.
+				($rtyIDs && count($rtyIDs)>0 ? 'AND rec_RecTypeID in ('.join(',', $rtyIDs).') ' : '').
+				'AND rec_RecTypeID != 52';
+//error_log("find reverse pointer q = $query");
 	$res = mysql_query($query);
-	while ($row = mysql_fetch_assoc($res)) {
+	while ($res && $row = mysql_fetch_assoc($res)) {
 		if (! @$pointers[$row['dtl_Value']]) {
 			$pointers[$row['dtl_Value']] = array();
 		}
@@ -298,21 +312,24 @@ function findReversePointers($rec_ids, &$pointers) {
 	return array_keys($rv);
 }
 
-function findRelatedRecords($rec_ids, &$relationships) {
+function findRelatedRecords($rec_ids, &$relationships, $rtyIDs) {
 //error_log("in findRelatedRecords");
 	$rv = array();
-	$query = 'SELECT a.dtl_Value,
-	                 rec_ID,
-	                 b.dtl_Value
-	            FROM recDetails a
-	       LEFT JOIN Records ON rec_ID = a.dtl_RecID
-	       LEFT JOIN recDetails b ON b.dtl_RecID = rec_ID
-	           WHERE a.dtl_DetailTypeID IN (202,199)
-	             AND rec_RecTypeID = 52
-	             AND a.dtl_Value IN (' . join(',', $rec_ids) . ')
-	             AND b.dtl_DetailTypeID = IF (a.dtl_DetailTypeID = 202, 199, 202)';
+	$query = 'SELECT f.dtl_Value, '. // from detail
+				'rel.rec_ID, '.	// relation record
+				't.dtl_Value '.
+			'FROM recDetails f '.
+				'LEFT JOIN Records rel ON rel.rec_ID = f.dtl_RecID '.
+				'LEFT JOIN recDetails t ON t.dtl_RecID = rel.rec_ID '.
+				($rtyIDs && count($rtyIDs)>0 ? 'LEFT JOIN Records c on c.rec_ID = t.dtl_Value ': '').
+			'WHERE f.dtl_DetailTypeID IN (202,199) '.
+				'AND rel.rec_RecTypeID = 52 '.
+				'AND f.dtl_Value IN (' . join(',', $rec_ids) . ') '.
+				($rtyIDs && count($rtyIDs)>0 ? 'AND c.rec_RecTypeID in ('.join(',', $rtyIDs).') ' : '').
+				'AND t.dtl_DetailTypeID = IF(f.dtl_DetailTypeID = 202, 199, 202)';
+//error_log("find related q = $query");
 	$res = mysql_query($query);
-	while ($row = mysql_fetch_row($res)) {
+	while ($res && $row = mysql_fetch_row($res)) {
 		if (! @$relationships[$row[0]]) {
 			$relationships[$row[0]] = array();
 		}
@@ -326,28 +343,73 @@ function findRelatedRecords($rec_ids, &$relationships) {
 
 
 function buildTree($rec_ids, &$reverse_pointers, &$relationships) {
-	global $MAX_DEPTH, $REVERSE;
-
+	global $MAX_DEPTH, $REVERSE, $RECTYPE_FILTERS;
 	$depth = 0;
-
+	$filter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth]: null );
+	if ($filter){
+		$query = 'SELECT rec_ID from Records '.
+					'WHERE rec_ID in ('.join(",",$rec_ids).') '.
+					'AND rec_RecTypeID in ('.join(",",$filter).')';
+//echo "query = $query <br/>";
+		$filteredIDs = array();
+		$res = mysql_query($query);
+		while ($res && $row = mysql_fetch_row($res)) {
+			$filteredIDs[$row[0]] =1;
+		}
+		$rec_ids = array_keys($filteredIDs);
+	}
+//echo "depth = $depth  filter = ". print_r($filter,true)."<br/>";
+//echo json_format($rec_ids).'<br/>';
 	while ($depth++ < $MAX_DEPTH  &&  count($rec_ids) > 0) {
-		$p_rec_ids = findPointers($rec_ids);
-		$rp_rec_ids = $REVERSE ? findReversePointers($rec_ids, $reverse_pointers) : array();
-		$rel_rec_ids = findRelatedRecords($rec_ids, $relationships);
+		$filter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth]: null );
+//echo "depth = $depth  filter = ". print_r($filter,true)."<br/>";
+		$p_rec_ids = findPointers($rec_ids, $filter);
+		$rp_rec_ids = $REVERSE ? findReversePointers($rec_ids, $reverse_pointers, $filter) : array();
+		$rel_rec_ids = findRelatedRecords($rec_ids, $relationships, $filter);
 		$rec_ids = array_merge($p_rec_ids, $rp_rec_ids, $rel_rec_ids); // record set for a given level
+//echo json_format($rec_ids).'<br/>';
 	}
 }
-
 
 
 //----------------------------------------------------------------------------//
 //  Output functions
 //----------------------------------------------------------------------------//
 
-function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $outputStub=false) {
-	global $RTN, $DTN, $RQS, $WGN, $MAX_DEPTH, $WOOT;
+function outputRecords($result) {
+	global $OUTPUT_STUBS;
+	$reverse_pointers = array();
+	$relationships = array();
+
+	$rec_ids = array();
+	foreach ($result['records'] as $record) {
+		array_push($rec_ids, $record['rec_ID']);
+	}
+
+	buildTree($rec_ids, $reverse_pointers, $relationships);
+
+	foreach ($result['records'] as $record) {
+		outputRecord($record, $reverse_pointers, $relationships, 0,$OUTPUT_STUBS);
+	}
+}
+
+function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $outputStub=false, $parentID = null) {
+	global $RTN, $DTN, $RQS, $WGN, $MAX_DEPTH, $WOOT, $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS;
 //error_log("rec = ".$record['rec_ID']);
-error_log(" in outputRecord record = \n".print_r($record,true));
+//error_log(" in outputRecord record = \n".print_r($record,true));
+	$filter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth]: null );
+	if ( isset($filter) && !in_array($record['rec_RecTypeID'],$filter)){
+		if ($record['rec_RecTypeID'] != 52) {
+			if ($depth > 0) {
+				if ($outputStub){
+					outputRecordStub($record);
+				}else{
+					echo $record['rec_ID'];
+				}
+			}
+			return;
+		}
+	}
 	openTag('record');
 	makeTag('id', null, $record['rec_ID']);
 	makeTag('type', array('id' => $record['rec_RecTypeID']), $RTN[$record['rec_RecTypeID']]);
@@ -365,7 +427,7 @@ error_log(" in outputRecord record = \n".print_r($record,true));
 
 	foreach ($record['details'] as $dt => $details) {
 		foreach ($details as $value) {
-			outputDetail($dt, $value, $record['rec_RecTypeID'], $reverse_pointers, $relationships, $depth, $outputStub);
+			outputDetail($dt, $value, $record['rec_RecTypeID'], $reverse_pointers, $relationships, $depth, $outputStub, $record['rec_RecTypeID'] == 52 ? $parentID: $record['rec_ID']);
 		}
 	}
 
@@ -387,9 +449,12 @@ error_log(" in outputRecord record = \n".print_r($record,true));
 	if ($depth < $MAX_DEPTH) {
 		if (array_key_exists($record['rec_ID'], $reverse_pointers)) {
 			foreach ($reverse_pointers[$record['rec_ID']] as $rec_id => $dt) {
+				if ($SUPRESS_LOOPBACKS && $rec_id == $parentID){	//pointing back to the parent so skip
+					continue;
+				}
 				$child = loadRecord($rec_id);
 				openTag('reversePointer', array('id' => $dt, 'type' => $DTN[$dt], 'name' => $RQS[$child['rec_RecTypeID']][$dt]));
-				outputRecord($child, $reverse_pointers, $relationships, $depth + 1);
+				outputRecord($child, $reverse_pointers, $relationships, $depth + 1, $outputStub,$record['rec_ID']);
 				closeTag('reversePointer');
 			}
 		}
@@ -397,8 +462,17 @@ error_log(" in outputRecord record = \n".print_r($record,true));
 			openTag('relationships');
 			foreach ($relationships[$record['rec_ID']] as $rel_id) {
 				$rel = loadRecord($rel_id);
-				outputRecord($rel, $reverse_pointers, $relationships, $depth);
+				foreach ( $rel['details'][202] as $dtID => $from){
+					$fromType = $from['type'];
+				}
+				foreach ( $rel['details'][199] as $dtID => $to){
+					$toType = $to['type'];
+				}
+				if (in_array($fromType,$filter) || in_array($toType,$filter)) {
+					outputRecord($rel, $reverse_pointers, $relationships, $depth, $outputStub,$record['rec_ID']);
 			}
+			}
+//var_dump($rel);
 			closeTag('relationships');
 		}
 	}
@@ -411,9 +485,11 @@ function outputRecordStub($recordStub) {
 //error_log( "ouput recordStub ".print_r($recordStub,true));
 
 	openTag('record',array('isStub'=> 1));
-	makeTag('id', null, $recordStub['id']);
-	makeTag('type', array('id' => $recordStub['type']), $RTN[$recordStub['type']]);
-	makeTag('title', null, $recordStub['title']);
+	makeTag('id', null, array_key_exists('id',$recordStub)?$recordStub['id']:$recordStub['rec_ID']);
+	$type = array_key_exists('type',$recordStub)?$recordStub['type']:$recordStub['rec_RecTypeID'];
+	makeTag('type', array('id' => $type), $RTN[$type]);
+	$title = array_key_exists('title',$recordStub)?$recordStub['title']:$recordStub['rec_Title'];
+	makeTag('title', null, $title);
 	closeTag('record');
 }
 
@@ -438,8 +514,8 @@ function makeFileContentNode($file){
 	}
 }
 
-function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $depth=0, $outputStub) {
-	global $DTN, $DTT, $TL, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH;
+function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $depth=0, $outputStub, $parentID) {
+	global $DTN, $DTT, $TL, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH, $INCLUDE_FILE_CONTENT, $SUPRESS_LOOPBACKS;
 //error_log("in outputDetail dt = $dt value = ". print_r($value,true));
 
 	$attrs = array('id' => $dt);
@@ -456,13 +532,38 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 	if (is_array($value)) {
 		if (array_key_exists('id', $value)) {
 			// record pointer
-			if ($depth < $MAX_DEPTH) {
+			if ($dt === 202 || $dt === 199) { // in a relationship record don't expand from side
+				if ($value['id'] == $parentID){
+					$attrs['direction'] = "from";
+					if ($dt === 199) {
+						$attrs['useInverse'] = 'true';
+					}
+					if ($SUPRESS_LOOPBACKS){
+						openTag('detail', $attrs);
+						if ($outputStub) {
+							outputRecordStub(loadRecordStub($value['id']));
+						}else{
+							echo $value['id'];
+						}
+						closeTag('detail');
+						return;
+					}
+				}else{
+					$attrs['direction'] = "to";
+					if ($dt === 202) {
+						$attrs['useInverse'] = 'true';
+					}
+				}
 				openTag('detail', $attrs);
-				outputRecord(loadRecord($value['id']), $reverse_pointers, $relationships, $depth + 1, $outputStub);
+				outputRecord(loadRecord($value['id']), $reverse_pointers, $relationships, $depth + 1, $outputStub, $parentID);
+				closeTag('detail');
+			}else if ($depth < $MAX_DEPTH) {
+				openTag('detail', $attrs);
+				outputRecord(loadRecord($value['id']), $reverse_pointers, $relationships, $depth + 1, $outputStub, $parentID);
 				closeTag('detail');
 			} else if ($outputStub) {
 				openTag('detail', $attrs);
-				outputRecordStub($value);
+				outputRecordStub(loadRecordStub($value['id']));
 				closeTag('detail');
 			} else {
 				makeTag('detail', $attrs, $value['id']);
@@ -481,7 +582,7 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 					makeTag('description', null, $file['description']);
 					makeTag('url', null, $file['URL']);
 					makeTag('thumbURL', null, $file['thumbURL']);
-					if ($_REQUEST['fc'] == 1) {
+					if ($INCLUDE_FILE_CONTENT) {
 						makeFileContentNode($file);
 					}
 				closeTag('file');
@@ -504,7 +605,7 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 		closeTag('detail');
 	} else if ($DTT[$dt] === 'resource') {
 		openTag('detail', $attrs);
-		outputRecord(loadRecord($value), $reverse_pointers, $relationships, $depth + 1, $outputStub);
+		outputRecord(loadRecord($value), $reverse_pointers, $relationships, $depth + 1, $outputStub, $parentID);
 		closeTag('detail');
 	} else if (($DTT[$dt] === 'enum' || $DTT[$dt] === 'relationtype' ) && array_key_exists($value,$TL)) {
 		if (@$TL[$value]['trm_ParentTermID']) {
@@ -708,23 +809,6 @@ function outputDurationDetail($attrs, $value) {
 	}
 }
 
-function outputRecords($result) {
-	global $OUTPUT_STUBS;
-	$reverse_pointers = array();
-	$relationships = array();
-
-	$rec_ids = array();
-	foreach ($result['records'] as $record) {
-		array_push($rec_ids, $record['rec_ID']);
-	}
-
-	buildTree($rec_ids, $reverse_pointers, $relationships);
-
-	foreach ($result['records'] as $record) {
-		outputRecord($record, $reverse_pointers, $relationships, 0,$OUTPUT_STUBS);
-	}
-}
-
 $invalidChars = array(chr(0),chr(1),chr(2),chr(3),chr(4),chr(5),chr(6),chr(7),chr(8),chr(11),chr(12),chr(14),chr(15),chr(16),chr(17),chr(18),chr(19),chr(20),chr(21),chr(22),chr(23),chr(24),chr(25),chr(26),chr(27),chr(28),chr(29),chr(30),chr(31)); // invalid chars that need to be stripped from the data.
 $replacements = array("[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]","[?]"," ","[?]","[?]","[?]","[?]","[?]");
 function replaceIllegalChars($text) {
@@ -771,7 +855,7 @@ openTag('hml', array(
 	'xsi:schemaLocation' => 'http://heuristscholar.org/heurist/hml http://heuristscholar.org/heurist/schemas/hml.xsd')
 );
 */
-$query_attrs = array_intersect_key($_REQUEST, array('q'=>1,'w'=>1,'depth'=>1,'f'=>1,'limit'=>1,'offset'=>1,'db'=>1,'stub'=>1,'woot'=>1));
+$query_attrs = array_intersect_key($_REQUEST, array('q'=>1,'w'=>1,'depth'=>1,'f'=>1,'limit'=>1,'offset'=>1,'db'=>1,'stub'=>1,'woot'=>1,'fc'=>1,'slb'=>1,'filters'=>1));
 if ($pub_id) {
 	$query_attrs['pubID'] = $pub_id;
 }
