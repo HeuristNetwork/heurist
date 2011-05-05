@@ -70,6 +70,11 @@
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
 		<!-- END DATATABLE DEFS-->
 
+		<!-- PAGINATOR -->
+		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/paginator/assets/skins/sam/paginator.css">
+		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
+		<!-- END PAGINATOR -->
+
 		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/samples/yui-dt-expandable.css"/>
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/samples/yui-dt-expandable.js"></script>
 		<!-- END YUI -->
@@ -99,6 +104,10 @@ button {
 			{
 				width: 590;
 				max-width: 590;
+			}
+			.yui-dt-highlighted {
+    			background-color: #000;
+    			color: #FFF;
 			}
 			.tooltip {
 				position:absolute;
@@ -192,8 +201,9 @@ button {
 		<script type="text/javascript" src="../../records/edit/relationshipsObjectLibrary.js"></script>
 		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
 
-		<script type="text/javascript" src="../../admin/structure/editRecStructure.js"></script>
-		<script type="text/javascript" src="../../admin/structure/selectTerms.js"></script>
+		<script type="text/javascript" src="editRecStructure.js"></script>
+		<script type="text/javascript" src="selectTerms.js"></script>
+		<script type="text/javascript" src="selectRectype.js"></script>
 
 <!-- DEBUG
 		<div style="display: none;">rty_ID:<input id="ed_rty_ID" value="1"/><input type="button" value="change" onclick="_tempFillValue()"/></div>
@@ -222,6 +232,20 @@ button {
 
 <!-- panel to filter rectype pointers -->
 		<div class="tooltip" id="pointerFilter">
+			<div id="tb_top" style="height:30">
+				<div style="display:inline-block; max-width:150;"><div id="dt_pagination_top"></div></div>
+				<div style="float:right; text-align:right;padding-top:5px;">
+					<label id="lblSelect1"></label>
+					<input type="button" tabindex="12" value="Cancel" onclick="selectRecordType.cancel();" />
+					<input type="button" tabindex="11" id="btnApply1" value="Set filter" onclick="selectRecordType.returnSelection();" />
+				</div>
+			</div>
+			<div id="tabContainer"></div>
+		</div>
+
+
+<!-- panel to filter rectype pointers -->
+		<div class="tooltip" id="pointerFilter">
 			<button onclick="closeDivPopup()">Close</button>
 		</div>
 
@@ -236,6 +260,7 @@ button {
 			</script>
 
 		</div>
+		<div style="width:600;margin:auto;text-align:left;"><input type="button" value="Define New Field Type" onclick="onDefineNewType()"/></div>
 
 	</body>
 </html>

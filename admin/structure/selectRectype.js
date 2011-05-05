@@ -14,6 +14,9 @@ function isnull(obj){
 /**
 * SelectRecordType - class for pop-up window to select record types for editing detail type
 *
+* @param _isFilterMode - either select from all rectypes or filtering of existing set of rectypes
+* @param _isWindowMode - true in window popup, false in div
+
 * public methods
 *
 * save
@@ -22,15 +25,16 @@ function isnull(obj){
 * @author Artem Osmakov <osmakov@gmail.com>
 * @version 2011.0427
 */
-function SelectRecordType() {
+function SelectRecordType(_isFilterMode, _isWindowMode) {
 
 		var _className = "SelectRecordType",
 			_myDataTable,
 			_myDataSource,
 			_arr_selection = [],
 			datatype,  // datatype of parent detailtype: relmarker,resource or fieldsetmarker
-			showTimer, hideTimer;
-
+			showTimer, hideTimer,
+			_callback_func, //callback function for non-window mode
+			_dtyID;
 		//
 		// filtering UI controls
 		//
@@ -79,11 +83,11 @@ function SelectRecordType() {
 	* 3. fill combobox(selector) with rectype groups
 	* 4. assign listeners for filter UI controls
 	*/
-	function _init()
+	function _init(dtyID, _callback)
 	{
-		if(isnull(_myDataTable)){
+		_callback_func = _callback;
 
-								if (location.search.length > 1) {
+				if (isnull(dtyID) && location.search.length > 1) {
 									//window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 									top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 									datatype = top.HEURIST.parameters.type;
@@ -100,18 +104,56 @@ function SelectRecordType() {
 										el = Dom.get('btnApply2');
 										el.style.display = "none";
 									}
-								}
+				}
 
-								//////////////////// create data table
-								var arr = [];
-								var rty_ID;
+				//////////////////// create data table
+				var arr = [];
+				var rty_ID;
+				var rectype;
+				lblSelect1 = Dom.get('lblSelect1');
 
-								//create datatable and fill it values of particular group
-								for (rty_ID in top.HEURIST.rectypes.typedefs) {
-									if(rty_ID !== "commomFieldNames" && rty_ID !== "dtFieldNames")
-									{
-										var td = top.HEURIST.rectypes.typedefs[rty_ID];
-										var rectype = td.commonFields;
+				_dtyID = dtyID;
+
+				if(_isFilterMode){
+
+
+					if(isnull(dtyID)){
+						lblSelect1.innerHTML = "ERROR: Detailtype was not found";
+						return;
+					}else{
+						lblSelect1.innerHTML = "";
+					}
+
+					//get datatype by id
+					var recsPtr = top.HEURIST.detailTypes.typedefs[dtyID].commonFields[11];
+					_arr_selection = recsPtr.split(",");
+
+					var ind;
+					for (ind in _arr_selection) {
+
+							var rty_ID = _arr_selection[ind];
+							if(isnull(rty_ID) || rty_ID === "undefined") continue;
+
+							rectype = top.HEURIST.rectypes.typedefs[rty_ID].commonFields;
+
+							arr.push([true, //selected
+											"<img src=\"../../common/images/rectype-icons/"+rty_ID+".gif\">",
+											rectype[0], //name
+											rectype[1], //descr
+											rectype[8], //status
+											rectype[9], //group
+											rty_ID
+											]);
+					} //for
+
+					datatype = top.HEURIST.detailTypes.typedefs[dtyID].commonFields[2];
+
+				}else{
+						//create datatable and fill it values of all rectypes
+						for (rty_ID in top.HEURIST.rectypes.typedefs) {
+								if(rty_ID !== "commomFieldNames" && rty_ID !== "dtFieldNames")
+								{
+										rectype = top.HEURIST.rectypes.typedefs[rty_ID].commonFields;
 
 										if(datatype!=="fieldsetmarker" || rectype[10]==="1")//??????????????SAW what is this  (flagAsFieldSet)
 										{
@@ -124,8 +166,12 @@ function SelectRecordType() {
 											rty_ID
 											]);
 										}
-									}
 								}
+						}
+				}
+
+
+				if(isnull(_myDataTable)){
 
 								_myDataSource = new YAHOO.util.LocalDataSource(arr, {
 									responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
@@ -172,7 +218,8 @@ function SelectRecordType() {
 								{ key: "status", label: "<u>Status</u>", hidden:false, sortable:false },
 								{ key: "group",   hidden:true},
 								{ key: "id", label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
-										elLiner.innerHTML = '<a href="#info"><img src="../../common/images/info_icon.png" width="16" height="16" border="0" title="Info" /><\/a>';}
+elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" height="16" border="0" title="'+
+oRecord.getData('description')+'"/>';}
 								}
 
 								];
@@ -209,9 +256,9 @@ function SelectRecordType() {
 										currentTipId = null;
 										__clearHideTimer();
 										var my_tooltip = $("#toolTip2");
-										my_tooltip.css( {
-											left:"-9999px"
-										});
+										if(my_tooltip){
+											my_tooltip.css( {left:"-9999px" });
+										}
 									}
 								}
 								function __clearHideTimer(){
@@ -221,7 +268,7 @@ function SelectRecordType() {
 									}
 								}
 
-
+/*
 								//
 								_myDataTable.on('cellMouseoutEvent', function (oArgs) {
 									hideTimer = window.setTimeout(__hideToolTip, 2000);
@@ -253,6 +300,7 @@ function SelectRecordType() {
 										needHideTip = true;
 
 										var my_tooltip = $("#toolTip2");
+										if(isnull(my_tooltip)){ return; }
 
 										my_tooltip.mouseover(function(){needHideTip = false; __clearHideTimer();});
 										my_tooltip.mouseout(function(){ needHideTip = true;});
@@ -292,7 +340,7 @@ function SelectRecordType() {
 										__hideToolTip();
 									}
 								});//end _onCellMouseOver
-
+*/
 								// Subscribe to events for row selection
 								_myDataTable.subscribe("rowMouseoverEvent", _myDataTable.onEventHighlightRow);
 								_myDataTable.subscribe("rowMouseoutEvent", _myDataTable.onEventUnhighlightRow);
@@ -315,13 +363,28 @@ function SelectRecordType() {
 
 								});//_myDataTable.onEventSelectRow);
 
-								// init Group Combo Box Filter
-								_initGroupComboBoxFilter();
+								//there are not filter and search controls
+								if(!_isFilterMode){
+									// init Group Combo Box Filter
+									_initGroupComboBoxFilter();
 
-								//init listeners for filter controls
-								_initListeners();
+									//init listeners for filter controls
+									_initListeners();
+								}
 
-		}
+				}else{
+					// all stuff is already inited, change livedata in datasource only
+					_myDataSource.liveData = arr;
+
+					//refresh table
+					_myDataSource.sendRequest("", {
+								success : _myDataTable.onDataReturnInitializeTable,
+								failure : _myDataTable.onDataReturnInitializeTable,
+								scope   : _myDataTable,
+								argument : { pagination: { recordOffset: 0 } } // to jump to page 1
+					});
+
+				}
 	}//end of initialization =====================
 
 
@@ -358,7 +421,9 @@ function SelectRecordType() {
 									}
 
 									lblSelect1.innerHTML = "<b>"+_arr_selection.length+"</b> record type"+((_arr_selection.length>1)?"s":"");
-									lblSelect2.innerHTML = lblSelect1.innerHTML;
+									if(!isnull(lblSelect2)) {
+										lblSelect2.innerHTML = lblSelect1.innerHTML;
+									}
 	}
 
 	/**
@@ -400,7 +465,7 @@ function SelectRecordType() {
 	function _clearSelection(){
 							_arr_selection = [];
 							lblSelect1.innerHTML = "";
-							lblSelect2.innerHTML = "";
+							if(!isnull(lblSelect2)) {lblSelect2.innerHTML = "";}
 							_updateFilter();
 	}
 
@@ -434,18 +499,36 @@ function SelectRecordType() {
 	var that = {
 
 				/**
+				* Reinitialization of form for new detailtype
+				* @param dtyID - detail type id to work with
+				* @param _callback - callback function that obtain 3 parameters all terms, disabled terms and dtyID
+				*/
+				reinit : function (dtyID, _callback) {
+						_init(dtyID, _callback);
+				},
+
+				/**
 				 *	Apply form - close this window and returns comma separated list of selected detail types
 				 */
 				returnSelection : function () {
 						var res = _arr_selection.join(",");
-						window.close(res);
+
+						if(_isWindowMode){
+							window.close(res, _dtyID);
+						}else if (!isnull(_callback_func) ) {
+							_callback_func(res, _dtyID);
+						}
 				},
 
 				/**
 				 * Cancel form - closes this window
 				 */
 				cancel : function () {
-					window.close(null);
+					if(_isWindowMode){
+						window.close();
+					}else if (!isnull(_callback_func) ) {
+						_callback_func();
+					}
 				},
 
 				getClass: function () {

@@ -51,7 +51,7 @@ function EditRecStructure() {
 		'<label style="width:400px;text-align:center;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Click row to edit or Drag to change the order</label>'+
 		'<div style="float:right; text-align:right;min-width:360;">'+
 		'<input style="display:none;" type="button" id="btnSaveOrder" value="Save Order" onclick="onUpdateStructureOnServer(false)"/>'+
-		'<input type="button" value="Add Field Type" onclick="onDefineNewType()"/>'+
+		''+
 		'<input type="button" value="Insert Field" onclick="onAddNewDetail()"/>'+
 		//'<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/>'+
 		'</div></div>';
@@ -285,6 +285,11 @@ function EditRecStructure() {
 					'<input id="ed'+rst_ID+'_rst_FilteredJsonTermIDTree" type="hidden"/>'+
 					'<input id="ed'+rst_ID+'_rst_TermIDTreeNonSelectableIDs" type="hidden"/>'+
 					'<input type="button" value="Filter terms" id="btnSelTerms" onclick="showTermsTree('+rst_ID+', event)"/></div>'+
+
+					'<div class="dtyField"><label class="dtyLabel">Rectype pointer:</label>'+
+					'<div id="pointerPreview" class="dtyValue"></div>'+
+					'<input id="ed'+rst_ID+'_rst_PtrFilteredIDs" type="hidden"/>'+
+					'<input type="button" value="Filter pointers" id="btnSelTerms" onclick="showPointerFilter('+rst_ID+', event)"/></div>'+
 
 					'<div class="dtyField"><label class="dtyLabel">Status:</label><select id="ed'+rst_ID+
 					'_rst_Status" style="display:inline-block">'+
@@ -773,8 +778,8 @@ function renderShowAll() {
 					edt.parentNode.style.display = "none";
 					//show disable jsontree
 			}else if(fieldnames[k] === "rst_TermIDTreeNonSelectableIDs"){
-				if(rst_type === "enum"){
-					//show disable jsontree
+				if(rst_type === "enum" || rst_type === "relmarker" || rst_type === "relationtype"){
+					//show filter jsontree
 					edt.parentNode.style.display = "block";
 
 					var edt2 = Dom.get('ed'+rst_ID+'_rst_TermIDTreeNonSelectableIDs');
@@ -785,6 +790,17 @@ function renderShowAll() {
 
 					//editedTermTree, editedDisabledTerms);
 
+				}else{
+					edt.parentNode.style.display = "none";
+				}
+
+			}else if(fieldnames[k] === "rst_PtrFilteredIDs"){
+				if(rst_type === "relmarker" || rst_type === "resource"){
+					//show filter jsontree
+					edt.parentNode.style.display = "block";
+
+					recreateRecTypesPreview(rst_type,
+					(isempty(edt.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[11]:edt.value) ); //dty_PtrTargetRectypeIDs
 				}else{
 					edt.parentNode.style.display = "none";
 				}
@@ -995,7 +1011,7 @@ function renderShowAll() {
 								(top.HEURIST.database.name?top.HEURIST.database.name:''));
 			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 			var callback = updateResult;
-			var params = "method=saveRTS&db="+db+"&data=" + str;
+			var params = "method=saveRTS&db="+db+"&data=" + encodeURIComponent(str);
 			_isServerOperationInProgress = true;
 			top.HEURIST.util.getJsonData(baseurl, callback, params);
 
@@ -1408,14 +1424,14 @@ function onReqtypeChange(evt){
 }
 
 /**
-*
+* Shows div on top with terms filter
 */
 function showTermsTree(rst_ID, event){
 
 	if(isnull(selectTerms)){
 		selectTerms = new  SelectTerms(true, false); //filtered mode, in div
 	}
-	selectTerms.reinit(rst_ID, closeDivPopup);
+	selectTerms.reinit(rst_ID, closeDivPopup1);
 
 	var border_top = $(window).scrollTop();
 
@@ -1430,9 +1446,9 @@ function showTermsTree(rst_ID, event){
 }
 
 /**
-*
+* Hides div with json tree filter
 */
-function closeDivPopup(_allTerms, _disTerms, _dtyID){
+function closeDivPopup1(_allTerms, _disTerms, _dtyID){
 
 		if(!isnull(_dtyID)){
 			//assign new values to inputs
@@ -1447,6 +1463,49 @@ function closeDivPopup(_allTerms, _disTerms, _dtyID){
 		}
 
 		var my_div = $("#termsFilter");
+		my_div.css( {
+			left:"-9999px"
+		});
+}
+
+/**
+* Shows popup div with rectype pointer filter
+*/
+function showPointerFilter(rst_ID, event){
+
+	if(isnull(selectRecordType)){
+		selectRecordType = new  SelectRecordType(true, false); //filtered mode, in div
+	}
+	selectRecordType.reinit(rst_ID, closeDivPopup2);
+
+	var border_top = $(window).scrollTop();
+
+	var my_div = $("#pointerFilter");
+
+	my_div.css( {
+			left:'5px', top:(border_top+5)+'px', width:'97%', height:'95%'
+			//width:$(window).width()-20, height:$(window).height()-20
+	});
+
+	//_showDivPopupAt(my_div, [0, border_top]);
+}
+
+/**
+* Hides div with rectype pointer filter
+*/
+function closeDivPopup2(_values, _dtyID){
+
+		if(!isnull(_dtyID)){
+			//assign new values to inputs
+			var edt = Dom.get('ed'+_dtyID+'_rst_PtrFilteredIDs');
+			edt.value = _values;
+
+			var rst_type = top.HEURIST.detailTypes.typedefs[_dtyID].commonFields[2];
+
+			recreateRecTypesPreview( rst_type, edt.value );
+		}
+
+		var my_div = $("#pointerFilter");
 		my_div.css( {
 			left:"-9999px"
 		});
@@ -1537,3 +1596,41 @@ function recreateTermsPreviewSelector(datatype, allTerms, disabledTerms ) {
 				}
 }
 
+/**
+* recreateRecTypesPreview - creates and fills selector for Record(s) pointers if datatype
+* is fieldsetmarker, relmarker, resource
+*
+* @param type an datatype
+* @value - comma separated list of rectype IDs
+*/
+function recreateRecTypesPreview(type, value) {
+
+		var divRecType = Dom.get("pointerPreview");
+		var txt = "";
+		if(divRecType===null) {
+			return;
+		}
+
+		if(value) {
+				var arr = value.split(","),
+				ind, dtName;
+				for (ind in arr) {
+					dtName = top.HEURIST.rectypes.names[arr[ind]];
+					if(!txt) {
+						txt = dtName;
+					}else{
+						txt += ", " + dtName;
+					}
+				} //for
+		}else{
+			txt = "unconstrained";
+		}
+
+		if (txt.length > 40){
+			divRecType.title = txt;
+			txt = txt.substr(0,40) + "...";
+		}else{
+			divRecType.title = "";
+		}
+		divRecType.innerHTML = txt;
+}

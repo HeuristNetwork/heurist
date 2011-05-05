@@ -127,7 +127,7 @@
 				//  starts initialization on load completion of this window
 					//
 				function createSelectorObj(){
-					selectRecordType = new  SelectRecordType();
+					selectRecordType = new  SelectRecordType(false, true); //nonfilter, in window
 				}
 				YAHOO.util.Event.addListener(window, "load", createSelectorObj);
 

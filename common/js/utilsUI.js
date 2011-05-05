@@ -1363,3 +1363,63 @@ function cloneObj(o) {
 	return newO;
 }
 
+/**
+* Returns array that contain the mouse position relative to the document
+*/
+function getMousePos(e){
+
+	var posx = 0;
+	var posy = 0;
+	if (!e) var e = window.event;
+	if (e.pageX || e.pageY) 	{
+		posx = e.pageX;
+		posy = e.pageY;
+	}
+	else if (e.clientX || e.clientY) 	{
+		posx = e.clientX + document.body.scrollLeft
+			+ document.documentElement.scrollLeft;
+		posy = e.clientY + document.body.scrollTop
+			+ document.documentElement.scrollTop;
+	}
+
+	return [posx, posy];
+}
+
+/**
+* Adjusts the position of div to prevent it out of border
+*/
+function showPopupDivAt(_div, xy, offset){
+
+		var border_top = $(window).scrollTop();
+		var border_right = $(window).width();
+		var border_height = $(window).height();
+		var div_height =  _div.height();
+		var left_pos;
+		var top_pos;
+		if(isnull(offset)){
+		 	offset = 5;
+		}
+
+		if( (border_right - offset*2) >= (xy[0] + _div.width()) ) {
+			left_pos = xy[0]+offset;
+		} else {
+			left_pos = xy[0] - _div.width() - offset*2 - 5; // border_right-_div.width()-offset-10; //out of right border
+		}
+
+		if( (xy[1] + offset + div_height) < (border_top + border_height) ){ //  (border_top + offset*2) >=  (xy[1] - _div.height())  ) {
+			top_pos = xy[1] + offset;
+		} else {
+			//out of bottom   border_top +
+			top_pos = border_top + border_height - div_height - offset;
+		}
+		/*
+		if( (top_pos + _div.height()) > (border_top+border_height) ){
+			top_pos	= border_top + border_height - _div.height() - offset;
+		}*/
+
+
+		//var lft = _div.css('left');
+		_div.css( {
+			left:left_pos+'px', top:top_pos+'px'
+		});
+}

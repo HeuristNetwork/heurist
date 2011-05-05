@@ -106,9 +106,10 @@
 			.yui-dt table {
 				width: 850px;
 			}
-
-			.ellipsis { margin-right:-10000px; }
-
+			.yui-dt-highlighted {
+    			background-color: #000000;
+    			color: #FFF;
+			}
 		</style>
 	</head>
 
@@ -141,10 +142,10 @@
 
 			<div id="modelTabs" class="yui-navset yui-navset-top">
 				<script	 type="text/javascript">
-					var RectypeManager = new RectypeManager();
-					YAHOO.util.Event.addListener(window, "load", RectypeManager.init);
+					rectypeManager = new RectypeManager();
+					YAHOO.util.Event.addListener(window, "load", rectypeManager.init());
 					window.onbeforeunload = function () {
-						var changed = RectypeManager.hasChanges();
+						var changed = rectypeManager.hasChanges();
 		if (changed) return "You have made changes.  If you continue, all changes will be lost.";
 					}
 				</script>

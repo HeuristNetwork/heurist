@@ -15,27 +15,7 @@
 * @todo
 **/
 
-/**
-* helper function. utilized in recreateTermsPreviewSelector only
-* converts json string to array
-*/
-function expandJsonStructure( jsonString ) {
-	var retStruct = "";
-	if(jsonString && jsonString !== "") {
-		try {
-			retStruct = eval(jsonString);
-		} catch(e) {
-			try {
-				retStruct = YAHOO.lang.JSON.parse(jsonString);
-			} catch(e1) {
-				retStruct = "";
-			}
-		}
-	}
-	return retStruct;
-}
-
-/**
+/**  NOT USED
 * Validates value inserted into input field. In this case, make sure it's an integer
 * used to validate order in group value (now hidden)
 * @param evt - the evt object for this keypress
@@ -53,6 +33,10 @@ function checkIfInteger(evt) {
 	}
 }
 
+//aliases
+var Dom = YAHOO.util.Dom;
+
+var detailTypeEditor;
 /**
 * DetailTypeEditor - class for pop-up edit field type window
 *
@@ -75,8 +59,6 @@ function DetailTypeEditor() {
 			_keepStatus,// Keeps current status for rollback if user decided to keep it
 			_keepType;	// Keeps current datatype for rollback
 
-		//aliases
-		var Dom = YAHOO.util.Dom;
 
 	/**
 	* Initialization of input form
@@ -95,20 +77,20 @@ function DetailTypeEditor() {
 
 				if(_dtyID){
 					var dt = top.HEURIST.detailTypes.typedefs[_dtyID];
-					if(dt!== undefined && dt !==null){
+					if(!isnull(dt)){
 						_detailType = dt.commonFields;
 					}
 				}
-				if(dtgID===undefined || dtg===null){
+				if(isnull(dtgID)){
 					dtgID = 0;
 				}
 		}
 
-		if (_dtyID && (_detailType===undefined || _detailType===null) ){
+		if (_dtyID && isnull(_detailType) ){
 			Dom.get("statusMsg").innerHTML = "<strong>Error: field type #"+_dtyID+"  not be found. Clicking 'save' button will create a new Field Type.</strong><br /><br />";
 		}
 		//creates new empty field type in case ID is not defined
-		if(_detailType===undefined  || _detailType===null){
+		if(isnull(_detailType)){
 			_dtyID =  -1;
 			_detailType = ['','','freetext',0,'',1,'open',dtgID,null,null,null,null];
 		}
@@ -158,7 +140,7 @@ function DetailTypeEditor() {
 						disabledTerms = disabledTerms.join(",");
 				}
 
-				if(allTerms !== null && allTerms!==undefined) {
+				if(!isnull(allTerms)) {
 					//remove old combobox
 					var prev = document.getElementById("termsPreview"),
 						i;
@@ -184,28 +166,31 @@ function DetailTypeEditor() {
 	*/
 	function _recreateRecTypesPreview(type, value) {
 
-		var divRecType = YAHOO.util.Dom.get( (type==="fieldsetmarker")? "dty_FieldSetRecTypeIDPreview" : "dty_PtrTargetRectypeIDsPreview" );
+		var divRecType = Dom.get( (type==="fieldsetmarker")? "dty_FieldSetRecTypeIDPreview" : "dty_PtrTargetRectypeIDsPreview" );
 		var txt = "";
 		if(divRecType===null) {
-		return;
-	}
+			return;
+		}
 
 		if(value) {
-	var arr = value.split(","),
+				var arr = value.split(","),
 				ind, dtName;
-	for (ind in arr) {
-				dtName = top.HEURIST.rectypes.names[arr[ind]];
-				if(!txt) {
-					txt = dtName;
-				}else{
-					txt += ", " + dtName;
-			}
-			} //for
+				for (ind in arr) {
+					dtName = top.HEURIST.rectypes.names[arr[ind]];
+					if(!txt) {
+						txt = dtName;
+					}else{
+						txt += ", " + dtName;
+					}
+				} //for
 		}else{
 			txt = "unconstrained";
-			}
+		}
 		if (txt.length > 40){
+			divRecType.title = txt;
 			txt = txt.substr(0,40) + "...";
+		}else{
+			divRecType.title = "";
 		}
 		divRecType.innerHTML = txt;
 	}
@@ -218,9 +203,9 @@ function DetailTypeEditor() {
 	*/
 	function _onSelectTerms(){
 
-	var type = YAHOO.util.Dom.get("dty_Type").value;
-	var allTerms = YAHOO.util.Dom.get("dty_JsonTermIDTree").value;
-	var disTerms = YAHOO.util.Dom.get("dty_TermIDTreeNonSelectableIDs").value;
+	var type = Dom.get("dty_Type").value;
+	var allTerms = Dom.get("dty_JsonTermIDTree").value;
+	var disTerms = Dom.get("dty_TermIDTreeNonSelectableIDs").value;
 	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
 	top.HEURIST.util.popupURL(top, top.HEURIST.basePath +
@@ -233,9 +218,9 @@ function DetailTypeEditor() {
 		callback: function(editedTermTree, editedDisabledTerms) {
 			if(editedTermTree || editedDisabledTerms) {
 				//update hidden fields
-				YAHOO.util.Dom.get("dty_JsonTermIDTree").value = editedTermTree;
-				YAHOO.util.Dom.get("dty_TermIDTreeNonSelectableIDs").value = editedDisabledTerms;
-					_recreateTermsPreviewSelector(YAHOO.util.Dom.get("dty_Type").value, editedTermTree, editedDisabledTerms);
+				Dom.get("dty_JsonTermIDTree").value = editedTermTree;
+				Dom.get("dty_TermIDTreeNonSelectableIDs").value = editedDisabledTerms;
+					_recreateTermsPreviewSelector(Dom.get("dty_Type").value, editedTermTree, editedDisabledTerms);
 			}
 		}
 	});
@@ -249,7 +234,7 @@ function DetailTypeEditor() {
 	* Shows a popup window where you can select record types
 	*/
 	function _onSelectRectype() {
-	var type = YAHOO.util.Dom.get("dty_Type").value;
+	var type = Dom.get("dty_Type").value;
 	var args,URL;
 	if(type === "fieldsetmarker") {
 		if(document.getElementById("dty_FieldSetRecTypeID")) {
@@ -298,7 +283,7 @@ function DetailTypeEditor() {
 			dtg_ID;
 
 		for (dtg_ID in top.HEURIST.detailTypes.groups){
-			if(dtg_ID!==undefined && dtg_ID!==null) {
+			if(!isnull(dtg_ID)) {
 				var grpName = top.HEURIST.detailTypes.groups[dtg_ID].name;
 
 				var option = document.createElement("option");
@@ -330,9 +315,9 @@ function DetailTypeEditor() {
 		for (i = 0, l = fnames.length; i < l; i++) {
 			var fname = fnames[i];
 			el = Dom.get(fname);
-			if(el !== undefined && el!==null){
+			if(!isnull(el)){
 				if ( i===5 ) { // dty_ShowInLists
-					el.checked = (_detailType[5]==="1");
+					el.checked = (Number(_detailType[5])===1);
 				}else{
 				el.value = _detailType[i];
 			}
@@ -354,7 +339,7 @@ function DetailTypeEditor() {
 			document.title = "Field Type #: " + _dtyID+" '"+_detailType[0]+"'";
 
 			var aUsage = top.HEURIST.detailTypes.rectypeUsage[_dtyID];
-			var iusage = (aUsage===undefined || aUsage===null) ? 0 : aUsage.length;
+			var iusage = (isnull(aUsage)) ? 0 : aUsage.length;
 
 			if(iusage > 0) {
 				if(iusage===1) {
@@ -395,7 +380,7 @@ function DetailTypeEditor() {
 		for (i = 0, l = fnames.length; i < l; i++){
 			var fname = fnames[i];
 			el = Dom.get(fname);
-			if(el!==undefined && el!==null){
+			if( !isnull(el) ){
 				if(_dtyID<0 || (el.value!==String(_detailType[i]) && !(el.value==="" && _detailType[i]===null)))
 				{
 					_updatedFields.push(fname);
@@ -441,7 +426,7 @@ function DetailTypeEditor() {
 				ind;
 
 			for(ind in context.result){
-				if(ind!==undefined && ind!==null){
+				if( !isnull(ind) ){
 					var item = context.result[ind];
 					if(isNaN(item)){
 						alert("An error occurred: " + item);
@@ -509,7 +494,7 @@ function DetailTypeEditor() {
 			for(val in values) {
 				oDetailType.detailtype.defs[_dtyID].common.push(values[val]);
 			}
-			str = encodeURIComponent(YAHOO.lang.JSON.stringify(oDetailType));
+			str = YAHOO.lang.JSON.stringify(oDetailType);
 		}
 
 
@@ -521,7 +506,7 @@ function DetailTypeEditor() {
 								(top.HEURIST.database.name?top.HEURIST.database.name:''));
 			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 			var callback = _updateResult;
-			var params = "method=saveDT&db="+db+"&data=" + str;
+			var params = "method=saveDT&db="+db+"&data=" + encodeURIComponent(str);
 			top.HEURIST.util.getJsonData(baseurl, callback, params);
 		} else {
 			window.close(null);
@@ -539,12 +524,12 @@ function DetailTypeEditor() {
 			 */
 	function _onChangeType(e){
 
-		var el = YAHOO.util.Dom.get("dty_Type"); //e.target;
+		var el = Dom.get("dty_Type"); //e.target;
 		var isInitialCall = (e===null);
 
-		YAHOO.util.Dom.get("pnl_relmarker").style.display = "none";
-		YAHOO.util.Dom.get("pnl_enum").style.display = "none";
-		YAHOO.util.Dom.get("pnl_fieldsetmarker").style.display = "none";
+		Dom.get("pnl_relmarker").style.display = "none";
+		Dom.get("pnl_enum").style.display = "none";
+		Dom.get("pnl_fieldsetmarker").style.display = "none";
 
 		var changeToNewType = true;
 			if( ((that.keepType==="resource") || (that.keepType==="relmarker") || (that.keepType==="enum")
@@ -558,10 +543,10 @@ function DetailTypeEditor() {
 		if(changeToNewType) {
 				//clear hidden fields
 				if (!isInitialCall){
-					YAHOO.util.Dom.get("dty_JsonTermIDTree").value = "";
-					YAHOO.util.Dom.get("dty_TermIDTreeNonSelectableIDs").value = "";
-					YAHOO.util.Dom.get("dty_PtrTargetRectypeIDs").value = "";
-					YAHOO.util.Dom.get("dty_FieldSetRecTypeID").value = "";
+					Dom.get("dty_JsonTermIDTree").value = "";
+					Dom.get("dty_TermIDTreeNonSelectableIDs").value = "";
+					Dom.get("dty_PtrTargetRectypeIDs").value = "";
+					Dom.get("dty_FieldSetRecTypeID").value = "";
 						that.keepType = el.value;
 						_recreateTermsPreviewSelector(that.keepType, null, null);
 						_recreateRecTypesPreview(that.keepType, null);
@@ -574,16 +559,16 @@ function DetailTypeEditor() {
 		switch(el.value)
 		{
 		case "resource":
-			YAHOO.util.Dom.get("pnl_relmarker").style.display = "block";
+			Dom.get("pnl_relmarker").style.display = "block";
 			break;
 		case "relmarker":
-			YAHOO.util.Dom.get("pnl_relmarker").style.display = "block";
+			Dom.get("pnl_relmarker").style.display = "block";
 		case "enum":
 		case "relationtype":
-			YAHOO.util.Dom.get("pnl_enum").style.display = "block";
+			Dom.get("pnl_enum").style.display = "block";
 			break;
 		case "fieldsetmarker":
-			YAHOO.util.Dom.get("pnl_fieldsetmarker").style.display = "block";
+			Dom.get("pnl_fieldsetmarker").style.display = "block";
 			break;
 		default:
 		}

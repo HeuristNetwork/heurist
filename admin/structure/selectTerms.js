@@ -62,7 +62,7 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 						_allTerms = dt[9];
 						_disTerms = dt[10];
 
-						document.getElementById("dtyName").innerHTML = "Detailtype: " + dt[0];
+						Dom.get("dtyName").innerHTML = "Detailtype: " + dt[0];
 					}
 		}
 		if(isnull(_datatype) && (location.search.length > 1)){
@@ -72,7 +72,7 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 		}
 
 		if(isnull(_datatype)) {
-			document.getElementById("dtyName").innerHTML = "ERROR: Detailtype was not found";
+			Dom.get("dtyName").innerHTML = "ERROR: Detailtype was not found";
 			// TODO: Stop page from loading
 			return;
 		}
@@ -87,7 +87,7 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 					termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup.relation;
 
 				}else{
-					document.getElementById("dtyName").innerHTML = "ERROR: Detailtype '" + _datatype + "' is of invalid base type";
+					Dom.get("dtyName").innerHTML = "ERROR: Detailtype '" + _datatype + "' is of invalid base type";
 					// TODO: Stop page from loading
 					return;
 				}
@@ -629,13 +629,6 @@ END TREE REALTED ROUTINES ---------------------------------------
 				*/
 				reinit : function (dtyID, _callback) {
 						_init(dtyID, _callback);
-				},
-
-				/**
-				* Defines callback function
-				*/
-				callback: function(_callback){
-					_callback_func = _callback;
 				},
 
 				/**

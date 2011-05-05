@@ -1,5 +1,9 @@
 var g_version = "1";
 
+var detailTypeManager;
+
+//aliases
+var Dom = YAHOO.util.Dom;
 
 function DetailTypeManager() {
 
@@ -35,14 +39,25 @@ function DetailTypeManager() {
 
 	//public members
 	var that = {
-		name : "App",
+
 		init: function(){
 			_init();
 		},
 		doGroupSave: function(){ _doGroupSave(); },
 		doGroupDelete: function(){ _doGroupDelete(); },
 		doGroupCancel: function(){ _doGroupCancel(); },
-		hasChanges: function(){ return  (_updatesCnt>0); }
+		hasChanges: function(){ return  (_updatesCnt>0); },
+		//showInfo: function(rectypeID, event){ _showInfoToolTip( rectypeID, event ); },
+		//hideInfo: function() { hideTimer = window.setTimeout(_hideToolTip, 1000); }
+
+		getClass: function () {
+				return _className;
+		},
+
+		isA: function (strClass) {
+				return (strClass === _className);
+		}
+
 	}
 
 	return that;
@@ -73,11 +88,11 @@ function DetailTypeManager() {
 			'<div class="dtyField"><label class="dtyLabel">Name:</label><input id="edName" style="width:300px"/></div>'+
 			'<div class="dtyField"><label class="dtyLabel">Descrption:</label><input id="edDescription" style="width:300px"/></div>'+
 			'<div style="text-align: center; margin:auto; padding-top:5;">'+
-			'<input id="btnGrpSave" style="display:inline-block" type="button" value="Save" onclick="{DetailTypeManager.doGroupSave()}" />'+
-			'<input id="btnGrpCancel" type="button" value="Cancel" onclick="{DetailTypeManager.doGroupCancel()}" />'+
+			'<input id="btnGrpSave" style="display:inline-block" type="button" value="Save" onclick="{detailTypeManager.doGroupSave()}" />'+
+			'<input id="btnGrpCancel" type="button" value="Cancel" onclick="{detailTypeManager.doGroupCancel()}" />'+
 			'</div><hr width="50%"/>'+
 			'<div style="text-align: center; margin:auto; padding-top:5;">'+
-			'Select group above for <input id="btnGrpDelete" type="button" value="Deletion" onclick="{DetailTypeManager.doGroupDelete()}" />'+
+			'Select group above for <input id="btnGrpDelete" type="button" value="Deletion" onclick="{detailTypeManager.doGroupDelete()}" />'+
 			'</div>'+
 			'</div>')
 		}));
@@ -154,7 +169,7 @@ function DetailTypeManager() {
 		var id = e.newValue.get("id");
 		if(id=="newGroup"){
 			//fill combobox on edit group form
-			var sel = YAHOO.util.Dom.get('edGroupId');
+			var sel = Dom.get('edGroupId');
 
 			//celear selection list
 			while (sel.length>0){
@@ -185,8 +200,8 @@ function DetailTypeManager() {
 				}
 			} // for
 
-			YAHOO.util.Dom.get('edName').value = "";
-			YAHOO.util.Dom.get('edDescription').value = "";
+			Dom.get('edName').value = "";
+			Dom.get('edDescription').value = "";
 
 		}else if (e.newValue!=e.prevValue)
 		{
@@ -213,7 +228,7 @@ function DetailTypeManager() {
 		var dtg_ID = tab.get('id');
 		//alert('init>>>>'+dtg_ID);
 
-		//does not work var dt = YAHOO.util.Dom.get("datatable"+dtg_ID);
+		//does not work var dt = Dom.get("datatable"+dtg_ID);
 
 		var currentTabIndex = tabView.get('activeIndex');
 		var dt = arrTables[currentTabIndex];
@@ -295,7 +310,7 @@ function DetailTypeManager() {
 			});
 
 			/*var formatterDelete = function(elLiner, oRecord, oColumn, oData) {
-			//if(oRecord.getData("field3") > 100) { YAHOO.util.Dom.replaceClass(elLiner.parentNode, "down", "up");
+			//if(oRecord.getData("field3") > 100) { Dom.replaceClass(elLiner.parentNode, "down", "up");
 			elLiner.innerHTML = ' <img src="delete_icon.png">';
 			};
 			// Add the custom formatter to the shortcuts
@@ -417,6 +432,9 @@ function DetailTypeManager() {
 
 			});
 
+			// highlight listeners
+			dt.subscribe("rowMouseoverEvent", dt.onEventHighlightRow);
+			dt.subscribe("rowMouseoutEvent", dt.onEventUnhighlightRow);
 
 			dt.subscribe('dropdownChangeEvent', function(oArgs){
 				var elDropdown = oArgs.target;
@@ -501,8 +519,8 @@ function DetailTypeManager() {
 				}
 
 				if(_lblNotice==null){
-					_lblNotice = YAHOO.util.Dom.get("lblNoticeAboutChanges");
-					_btnSave   = YAHOO.util.Dom.get("btnSave");
+					_lblNotice = Dom.get("lblNoticeAboutChanges");
+					_btnSave   = Dom.get("btnSave");
 					_btnSave.onclick = _updateDetailTypeOnServer;
 				}
 
@@ -512,90 +530,38 @@ function DetailTypeManager() {
 
 			//mouse over help colums shows the datailed description
 			dt.on('cellMouseoverEvent', function (oArgs) {
-				clearHideTimer();
 
-				var forceHideTip = true;
-				var textTip = null;
 				var target = oArgs.target;
 				var column = this.getColumn(target);
+				var dty_ID = null;
 
-				/*if (column!=null && column.key == 'help') {
-				var record = this.getRecord(target);
-				var description = record.getData('description') || 'no further description';
-				var xy = [parseInt(oArgs.event.clientX,10) + 10 ,parseInt(oArgs.event.clientY,10) - 20 ];
-				var textTip = '<p>'+description+'</p>';
+				if(!isnull(column) && column.key === 'usage') {
 
-				}else*/
-				if(column!=null && column.key == 'usage') {
 					var record = this.getRecord(target);
-					var dty_ID = description = record.getData('id');
-
-					if(currentTipId!=dty_ID){
-						currentTipId=dty_ID;
-
-						var xy = [parseInt(oArgs.event.clientX,10), parseInt(oArgs.event.clientY,10) - 20 ];
-
-						//find all records that reference this type
-						var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
-						if(aUsage != undefined){
-							var textTip = '<div style="padding-left:20px;padding-top:4px">Used in the following record types</div><ul>';
-							for (var k in aUsage) {
-								textTip = textTip + "<li><a href='editRecStructure.html?db="+db+"&rty_ID="+aUsage[k]+"'>"+top.HEURIST.rectypes.names[aUsage[k]]+"</a></li>";
-							}
-							textTip = textTip + "</ul></p>";
-						}
-					}else{
-						forceHideTip = false;
-					}
+					dty_ID = record.getData('id');
 				}
+				_showInfoToolTip(dty_ID, oArgs.event);
 
-				if(textTip!=null){
-
-					needHideTip = true;
-
-					var my_tooltip = $("#toolTip2");
-
-					my_tooltip.mouseover(clearHideTimer2);
-					my_tooltip.mouseout(hideToolTip2);
-
-					_showToolTipAt(my_tooltip, xy);
-
-					//lft = my_tooltip.css('left');
-					my_tooltip.html(textTip);
-					hideTimer = window.setTimeout(_hideToolTip, 5000);
-				}
-				else if(forceHideTip)
-				{
-					_hideToolTip();
-				}
 			});
 			dt.on('cellMouseoutEvent', function (oArgs) {
 				hideTimer = window.setTimeout(_hideToolTip, 2000);
 			});
 
-			function hideToolTip2(){
-				needHideTip = true;
-			}
-			function clearHideTimer2(){
-				needHideTip = false;
-				clearHideTimer();
-			}
-
 			arrTables[currentTabIndex] = dt;
 			arrDataSources[currentTabIndex] = myDataSource;
 
 
-			var filter = YAHOO.util.Dom.get('filter'+dtg_ID);
+			var filter = Dom.get('filter'+dtg_ID);
 			filter.onkeyup = function (e) {
 				clearTimeout(filterTimeout);
 				setTimeout(updateFilter,600);  };
 
-			var filtervis = YAHOO.util.Dom.get('filter'+dtg_ID+'vis');
+			var filtervis = Dom.get('filter'+dtg_ID+'vis');
 			filtervis.onchange = function (e) {
 				clearTimeout(filterTimeout);
 				updateFilter();  };
 
-			var btnAdd = YAHOO.util.Dom.get('btnAdd'+dtg_ID);
+			var btnAdd = Dom.get('btnAdd'+dtg_ID);
 			btnAdd.onclick = function (e) {
 				var currentTabIndex = tabView.get('activeIndex');
 				var grpID = tabView.getTab(currentTabIndex).get('id');
@@ -613,6 +579,68 @@ function DetailTypeManager() {
 		} //if(dt==undefined || dt==null)
 	}//initTabContent =============================================== END DATATABLE INIT
 
+
+	/**
+	* Show popup div with information about field types in use for given record type
+	*/
+	function _showInfoToolTip(dty_ID, event) {
+
+				//tooltip div mouse out
+				function __hideToolTip2() {
+					needHideTip = true;
+				}
+				//tooltip div mouse over
+				function __clearHideTimer2() {
+					needHideTip = false;
+					clearHideTimer();
+				}
+
+				var forceHideTip = true;
+				if(!isnull(dty_ID)){
+					if(currentTipId != dty_ID) {
+						currentTipId = dty_ID;
+
+						var detname = top.HEURIST.detailTypes.names[dty_ID];
+						if(detname.length>40) { detname = detname.substring(0,40)+"..."; }
+
+						//find all records that reference this type
+						var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
+						if(aUsage != undefined){
+
+							var textTip = '<div style="padding-left:20px;padding-top:4px"><b>'+detname+'</b><br/>'+
+							'<div style="padding-left:20px;padding-top:4px"><b>Record types:</b><br/><label style="color: #4499ff;">Click on record type to edit</label></div><ul>';
+							for (var k in aUsage) {
+								textTip = textTip + "<li><a href='editRecStructure.html?db="+db+"&rty_ID="+aUsage[k]+"'>"+top.HEURIST.rectypes.names[aUsage[k]]+"</a></li>";
+							}
+							textTip = textTip + "</ul></p>";
+						}
+
+					} else {
+						forceHideTip = false;
+					}
+				}
+				if(!isnull(textTip)) {
+					clearHideTimer();
+					needHideTip = true;
+					var my_tooltip = $("#toolTip2");
+
+					my_tooltip.mouseover(__clearHideTimer2);
+					my_tooltip.mouseout(__hideToolTip2);
+
+					var xy = getMousePos(event);
+					my_tooltip.html(textTip);  //DEBUG xy[0]+",  "+xy[1]+"<br/>"+
+
+					showPopupDivAt(my_tooltip, xy);
+
+					hideTimer = window.setTimeout(_hideToolTip, 5000);
+				}
+				else if(forceHideTip) {
+					_hideToolTip();
+				}
+
+
+	}
+
 	//
 	//
 	//
@@ -626,7 +654,7 @@ function DetailTypeManager() {
 			if(ndt!=null){
 
 				//find parent tab
-				var tab = YAHOO.util.Dom.get('tabContainer'+grpID);
+				var tab = Dom.get('tabContainer'+grpID);
 				for (var i = 0; i < tab.children.length; i++) {
 					tab.removeChild(tab.childNodes[0]);
 				}
@@ -659,7 +687,7 @@ function DetailTypeManager() {
 
 			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 			var callback = _updateResult;
-			var params = "method=saveDT&db="+db+"&data=" + str;
+			var params = "method=saveDT&db="+db+"&data=" + encodeURIComponent(str);
 			top.HEURIST.util.getJsonData(baseurl, callback, params);
 		}
 	}
@@ -758,39 +786,6 @@ function DetailTypeManager() {
 	}
 
 	//
-	// prevents out of border
-	//
-	function _showToolTipAt(_tooltip, xy){
-
-		var border_top = $(window).scrollTop();
-		var border_right = $(window).width();
-		var border_height = $(window).height();
-		var left_pos;
-		var top_pos;
-		var offset = 5;
-		if(border_right - (offset *2) >= _tooltip.width() +  xy[0]) {
-			left_pos = xy[0]+offset;
-		} else {
-			left_pos = border_right-_tooltip.width()-offset;
-		}
-
-		if((border_top + offset *2) >=  xy[1] - _tooltip.height()) {
-			top_pos = border_top + offset + xy[1]; //
-		} else {
-			top_pos = border_top + xy[1] - _tooltip.height()-offset;
-		}
-		if(top_pos + _tooltip.height() > border_top+border_height){
-			top_pos	= border_top + border_height - _tooltip.height()-5;
-		}
-
-
-		//var lft = _tooltip.css('left');
-		_tooltip.css( {
-			left:left_pos+'px', top:top_pos+'px'
-		});
-	}
-
-	//
 	// filtering by name
 	// listenter is activated along with dataTable creation
 	//
@@ -809,8 +804,8 @@ function DetailTypeManager() {
 
 		var grpID = _getGroupByIndex(currentTabIndex);
 
-		var filterval = YAHOO.util.Dom.get('filter'+grpID).value;
-		var filtervis = YAHOO.util.Dom.get('filter'+grpID+'vis').checked?1:0;
+		var filterval = Dom.get('filter'+grpID).value;
+		var filtervis = Dom.get('filter'+grpID+'vis').checked?1:0;
 
 		// Get filtered data
 		dsource.sendRequest(filterval+'|'+filtervis,{
@@ -838,8 +833,8 @@ function DetailTypeManager() {
 		top.HEURIST.util.popupURL(top, url,
 		{   "close-on-blur": false,
 			"no-resize": false,
-			height: 630,
-			width: 680,
+			height: 520,
+			width: 640,
 			callback: function(context) {
 				if(context==null){
 					// alert("Edition is cancelled");
@@ -905,9 +900,9 @@ function DetailTypeManager() {
 	{
 		if(_needToSaveFirst()) return;
 
-		var sel = YAHOO.util.Dom.get('edGroupId'),
-		name = YAHOO.util.Dom.get('edName').value,
-		description = YAHOO.util.Dom.get('edDescription').value,
+		var sel = Dom.get('edGroupId'),
+		name = Dom.get('edName').value,
+		description = Dom.get('edDescription').value,
 		grpID = sel.options[sel.selectedIndex].value,
 		grp; //object in HEURIST
 
@@ -938,7 +933,7 @@ function DetailTypeManager() {
 		if(str!=null){
 			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 			var callback = _updateOnSaveGroup;
-			var params = "method=saveDTG&db="+db+"&data=" + str;
+			var params = "method=saveDTG&db="+db+"&data=" + encodeURIComponent(str);
 
 			top.HEURIST.util.getJsonData(baseurl, callback, params)
 		}
@@ -946,11 +941,11 @@ function DetailTypeManager() {
 		//make this tab active
 		function _updateOnSaveGroup(context){
 			//for new - add new tab
-			if(context['0'].error!=undefined){
+			if(!isnull(context['0'].error)){
 				alert(context['0'].error);
 			}else{
 				var ind;
-				top.HEURIST.detailTypes = context['1'];
+				top.HEURIST.detailTypes = context.detailTypes;
 				_cloneHEU = null;
 
 				if(grpID<0){
@@ -979,7 +974,7 @@ function DetailTypeManager() {
 
 		if(_needToSaveFirst()) return;
 
-		var sel = YAHOO.util.Dom.get('edGroupId');
+		var sel = Dom.get('edGroupId');
 		var grpID = sel.options[sel.selectedIndex].value;
 
 		if(grpID<0) return;
@@ -1040,9 +1035,8 @@ function DetailTypeManager() {
 		for (ind in _groups)
 		if(ind>=0 && _groups[ind].value==grpID){
 			return ind;
-			break;
 		}
-		return ind;
+		return -1;
 	}
 	//
 	//
@@ -1058,9 +1052,9 @@ function DetailTypeManager() {
 //general functions
 //
 function onGroupChange() {
-	var sel = YAHOO.util.Dom.get('edGroupId'),
-	edName = YAHOO.util.Dom.get('edName'),
-	edDescription = YAHOO.util.Dom.get('edDescription'),
+	var sel = Dom.get('edGroupId'),
+	edName = Dom.get('edName'),
+	edDescription = Dom.get('edDescription'),
 	grpID = sel.options[sel.selectedIndex].value;
 
 	if(grpID<0){
@@ -1072,19 +1066,3 @@ function onGroupChange() {
 	}
 
 }
-
-//
-// deep cloning of object
-//
-function cloneObj(o) {
-	if(typeof(o) != "object") return o;
-
-	if(o == null) return o;
-
-	var newO = new Object();
-
-	for(var i in o) newO[i] = cloneObj(o[i]);
-
-	return newO;
-}
-
