@@ -54,7 +54,7 @@ $noclutter = array_key_exists('noclutter', $_REQUEST);
 ?>
 <html>
  <head>
-  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/info.css"> 
+  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/info.css">
 
   <script type="text/javascript">
 
@@ -110,7 +110,7 @@ function add_sid() {
 
   </script>
  </head>
- <body onload="if (top.HEURIST  &&  top.HEURIST.search) {top.HEURIST.search.hideLoading(); top.HEURIST.search.infoHeight();}" <?php if (! is_logged_in()) { print 'class=not-logged-in'; } else if ($noclutter) { print 'class=noclutter'; } ?> >
+ <body>
 
 <?php
 // get a list of workgroups the user belongs to.
@@ -226,7 +226,7 @@ function print_private_details($bib) {
 				else print '<span> - hidden to others</span></div></div>';
 				}
 			?>
-		
+
 	<?php
 			if ($kwds) {
 	?>
@@ -261,8 +261,9 @@ function print_private_details($bib) {
 		$bkm_ID = $bkmk['bkm_ID'];
 		$rec_ID = $bkmk['bkm_RecID'];
 		$tags = mysql__select_array('usrRecTagLinks, usrTags',
-		                            'tag_Text',
-		                            "rtl_TagID=tag_ID and rtl_RecID=$rec_ID and tag_UGrpID = ".$bkmk['bkm_UGrpID']." order by rtl_Order");
+									'tag_Text',
+									"rtl_TagID=tag_ID and rtl_RecID=$rec_ID and tag_UGrpID = ".
+									$bkmk['bkm_UGrpID']." order by rtl_Order");
 	?>
 	<div class=detailRow>
 	<div class=detailType>Personal Tags</div>
@@ -299,14 +300,14 @@ function print_private_details($bib) {
 
 	</div>
 	</div>
-	
+
 	<?php
 	}
-	
+
 
 	function print_public_details($bib) {
 		$bds_res = mysql_query('select dty_ID,
-		                               ifnull(rdro.rst_DisplayName, ifnull(rdr.rst_DisplayName, dty_Name)) as name,
+		                               ifnull(rdr.rst_DisplayName, dty_Name) as name,
 		                               dtl_Value as val,
 		                               dtl_UploadedFileID,
 		                               dty_Type,
@@ -340,11 +341,11 @@ function print_private_details($bib) {
 				$row = mysql_fetch_row($res);
 				$bd['val'] = '<a target="_new" href="'.HEURIST_SITE_PATH.'records/view/viewRecord.php?bib_id='.$bd['val'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row[0]).'</a>';
 			} else if ($bd['dty_Type'] == 'file'  &&  $bd['dtl_UploadedFileID']) {
-				$res = mysql_query('select * from recUploadedFiles where ulf_ID='.intval($bd['dtl_UploadedFileID']));
+				$res = mysql_query('select * from recUploadedFiles left join defFileExtToMimetype on ulf_MimeExt = fxm_Extension where ulf_ID='.intval($bd['dtl_UploadedFileID']));
 				$file = mysql_fetch_assoc($res);
 				if ($file) {
 					$img_url = HEURIST_SITE_PATH.'records/files/downloadFile.php/'.$file['ulf_OrigFileName'].'?ulf_ID='.$file['ulf_ObfuscatedFileID'];
-					if ($file['file_mimetype'] == 'image/jpeg'  ||  $file['file_mimetype'] == 'image/gif'  ||  $file['file_mimetype'] == 'image/png') {
+					if ($file['fxm_MimeType'] == 'image/jpeg'  ||  $file['fxm_MimeType'] == 'image/gif'  ||  $file['fxm_MimeType'] == 'image/png') {
 						array_push($thumbs, array(
 							'url' => HEURIST_SITE_PATH.'records/files/downloadFile.php?ulf_ID='.$file['ulf_ObfuscatedFileID'],
 							'thumb' => HEURIST_SITE_PATH.'common/php/resizeImage.php?ulf_ID='.$file['ulf_ObfuscatedFileID']
@@ -450,16 +451,16 @@ function print_relation_details($bib) {
 
 		print '<div class=detailRow>';
 //		print '<span class=label>' . htmlspecialchars($bd['RelationType']) . '</span>';	//saw Enum change
-		print '<div class=detailType>' . htmlspecialchars($bd['RelationValue']) . '</div>'; // fetch now returns the enum string also
+		print '<div class=detailType>' . htmlspecialchars($bd['RelTermID']) . '</div>'; // fetch now returns the enum string also
 		print '<div class=detail>';
-		if (@$bd['OtherResource']) {
-      			print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/viewRecord.php?bib_id='.$bd['OtherResource']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['OtherResource']['rec_Title']).'</a>';
+		if (@$bd['RelatedRecID']) {
+			print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/viewRecord.php?bib_id='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
 		} else {
 			print htmlspecialchars($bd['Title']);
 		}
 		print '&nbsp;&nbsp;';
-      		if (@$bd['StartDate']) print htmlspecialchars($bd['StartDate']);
-      		if (@$bd['EndDate']) print ' until ' . htmlspecialchars($bd['EndDate']);
+		if (@$bd['StartDate']) print htmlspecialchars($bd['StartDate']);
+		if (@$bd['EndDate']) print ' until ' . htmlspecialchars($bd['EndDate']);
 		print '</div></div>';
 	}
 	while ($reln = mysql_fetch_assoc($to_res)) {
@@ -467,16 +468,16 @@ function print_relation_details($bib) {
 
 		print '<div class=detailRow>';
 //		print '<span class=label>' . htmlspecialchars($bd['RelationType']) . '</span>';	//saw Enum change
-		print '<div class=detailType>' . htmlspecialchars($bd['RelationValue']) . '</div>';
+		print '<div class=detailType>' . htmlspecialchars($bd['RelTermID']) . '</div>';
 		print '<div class=detail>';
 		if (@$bd['OtherResource']) {
-      			print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/viewRecord.php?bib_id='.$bd['OtherResource']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['OtherResource']['rec_Title']).'</a>';
+			print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/viewRecord.php?bib_id='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
 		} else {
 			print htmlspecialchars($bd['Title']);
 		}
 		print '&nbsp;&nbsp;';
-      		if (@$bd['StartDate']) print htmlspecialchars($bd['StartDate']);
-      		if (@$bd['EndDate']) print ' until ' . htmlspecialchars($bd['EndDate']);
+		if (@$bd['StartDate']) print htmlspecialchars($bd['StartDate']);
+		if (@$bd['EndDate']) print ' until ' . htmlspecialchars($bd['EndDate']);
 		print '</div></div>';
 	}
 }
@@ -673,35 +674,6 @@ function orderComments($cmts) {
 		}
 		if (count($orderErrCmts)) $orderedCmtIds = array_merge($orderedCmtIds,$orderErrCmts);
 		return $ret;
-}
-
-
-function getAllComments($rec_id) {
-	$res = mysql_query("select cmt_ID, cmt_Deleted, cmt_Text, cmt_ParentCmtID, cmt_Added, cmt_Modified, cmt_OwnerUGrpID,  concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname from recThreadedComments left join ".USERS_DATABASE.".sysUGrps usr on cmt_OwnerUGrpID=usr.ugr_ID where cmt_RecID = $rec_id order by cmt_Added");
-	$comments = array();
-	while ($cmt = mysql_fetch_assoc($res)) {
-		if ($cmt["cmt_Deleted"]) {
-			/* indicate that the comments exists but has been deleted */
-			$comments[$cmt["cmt_ID"]] = array(
-				"id" => $cmt["cmt_ID"],
-				"owner" => $cmt["cmt_ParentCmtID"],
-				"deleted" => true
-			);
-			continue;
-		}
-
-		$comments[$cmt["cmt_ID"]] = array(
-			"id" => $cmt["cmt_ID"],
-			"text" => $cmt["cmt_Text"],
-			"owner" => $cmt["cmt_ParentCmtID"],   /* comments that owns this one (i.e. parent, just like in Dickensian times) */
-			"added" => $cmt["cmt_Added"],
-			"modified" => $cmt["cmt_Modified"],
-			"user" => $cmt["Realname"],
-			"userID" => $cmt["cmt_OwnerUGrpID"],
-			"deleted" => false
-		);
-	}
-	return $comments;
 }
 
 

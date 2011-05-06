@@ -937,51 +937,51 @@ function fetch_relation_details($recID, $i_am_primary) {
 		switch ($row['dtl_DetailTypeID']) {
 			case 200:	//saw Enum change - added RelationValue for UI
 				if ($i_am_primary) {
-					$bd['relTermID'] = $row['dtl_Value'];
+					$bd['RelTermID'] = $row['dtl_Value'];
 				}else{
-					$bd['relTermID'] = reltype_inverse($row['dtl_Value']);
+					$bd['RelTermID'] = reltype_inverse($row['dtl_Value']);
 				}
 				$relval = mysql_fetch_assoc(mysql_query('select trm_Label, trm_ParentTermID from defTerms where trm_ID = ' .  intval($bd['RelTermID'])));
-				$bd['relTerm'] = $relval['trm_Label'];
+				$bd['RelTerm'] = $relval['trm_Label'];
 				if ($relval['trm_ParentTermID'] ) {
-					$bd['parentTermID'] = $relval['trm_ParentTermID'];
+					$bd['ParentTermID'] = $relval['trm_ParentTermID'];
 				}
 				break;
 
 			case 199:	// linked resource
 				if (! $i_am_primary) break;
-				$r = mysql_query('select rec_ID as recID, rec_Title as title, rec_RecTypeID as rectype, rec_URL as URL
+				$r = mysql_query('select rec_ID, rec_Title, rec_RecTypeID, rec_URL
 				from Records where rec_ID = ' . intval($row['dtl_Value']));
-				$bd['relatedRecID'] = mysql_fetch_assoc($r);
+				$bd['RelatedRecID'] = mysql_fetch_assoc($r);
 				break;
 
 			case 202:
 				if ($i_am_primary) break;
-				$r = mysql_query('select rec_ID as recID, rec_Title as title, rec_RecTypeID as rectype, rec_URL as URL
+				$r = mysql_query('select rec_ID, rec_Title, rec_RecTypeID, rec_URL
 				from Records where rec_ID = ' . intval($row['dtl_Value']));
-				$bd['relatedRecID'] = mysql_fetch_assoc($r);
+				$bd['RelatedRecID'] = mysql_fetch_assoc($r);
 				break;
 
 			case 638:
-				$r = mysql_query('select rec_ID as recID, rec_Title as title, rec_RecTypeID as rectype, rec_URL as URL
+				$r = mysql_query('select rec_ID, rec_Title, rec_RecTypeID, rec_URL
 				from Records where rec_ID = ' . intval($row['dtl_Value']));
-				$bd['interpRecID'] = mysql_fetch_assoc($r);
+				$bd['InterpRecID'] = mysql_fetch_assoc($r);
 				break;
 
 			case 201:
-				$bd['notes'] = $row['dtl_Value'];
+				$bd['Notes'] = $row['dtl_Value'];
 				break;
 
 			case 160:
-				$bd['title'] = $row['dtl_Value'];
+				$bd['Title'] = $row['dtl_Value'];
 				break;
 
 			case 177:
-				$bd['startDate'] = $row['dtl_Value'];
+				$bd['StartDate'] = $row['dtl_Value'];
 				break;
 
 			case 178:
-				$bd['endDate'] = $row['dtl_Value'];
+				$bd['EndDate'] = $row['dtl_Value'];
 				break;
 		}
 	}
