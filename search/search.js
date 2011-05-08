@@ -108,7 +108,8 @@ top.HEURIST.search = {
 				top.HEURIST.search.renderNavigation();
 			});
 			top.HEURIST.registerEvent(window, "load", function() {
-				document.getElementById("viewer-frame").src = top.HEURIST.basePath+ "viewers/printview/";
+				document.getElementById("viewer-frame").src = top.HEURIST.basePath+ "viewers/printview/index.html" +
+									(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
 //				top.HEURIST.search.toggleResultItemSelect(top.HEURIST.search.results.records[startIndex][2]);
 //				top.HEURIST.search.toggleResultItemSelect(top.HEURIST.search.results.records[0][2]);
 			});

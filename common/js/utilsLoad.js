@@ -164,6 +164,10 @@ if (! top.HEURIST) {
 		}
 	},
 
+	resetEventFlag: function(eventType) {
+		top.HEURIST.firedEvents[eventType] = false;
+	},
+
 	loadScript: function(scriptURL, blocking) {
 		/* Load a script without blocking the load of the rest of the document */
 		/* 2007/07/12: If blocking is true, then load the script *with* blocking */

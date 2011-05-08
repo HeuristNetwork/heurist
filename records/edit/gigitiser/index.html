@@ -271,11 +271,19 @@ function load() {
 		var viewBits;
 		if (defaultViewString  &&  (viewBits = defaultViewString.match(/(.*),(.*)@(\d+)(:[mkh])?/))) {
 			map.setCenter(new GLatLng(parseFloat(viewBits[1]) || 0, parseFloat(viewBits[2]) || 0), parseInt(viewBits[3]));
-			switch (viewBits[4]) {
+			var mapTypes = {};
+			var tempTypes = map.getMapTypes(),
+			t;
+			for (t in tempTypes){
+				if (":"+tempTypes[t].getUrlArg() == viewBits[4]) {
+					map.setMapType(tempTypes[t]);
+				}
+			}
+/*			switch (viewBits[4]) {
 			    case ':m': map.setMapType(G_MAP_TYPE); break;
 			    case ':k': map.setMapType(G_SATELLITE_TYPE); break;
 			    case ':h': map.setMapType(G_HYBRID_TYPE); break;
-			}
+			}*/
 		}
 		else {
 			map.setCenter(new GLatLng(0, 0), 1);

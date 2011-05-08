@@ -421,7 +421,7 @@ function print_other_tags($bib) {
 ?>
 <div class=detailRow>
 	<div class=detailType>Tags</div>
-	<div class=detail><nobr><a target=_new href="<?=HEURIST_SITE_PATH?>records/viewrec/viewRecordTags.php?<?php print "bib_id=".$bib['rec_ID']; ?>" target=_top onclick="return link_open(this);">[Other users' tags]</a></nobr>
+	<div class=detail><nobr><a target=_new href="<?=HEURIST_SITE_PATH?>records/view/viewRecordTags.php?<?php print "bib_id=".$bib['rec_ID']; ?>" target=_top onclick="return link_open(this);">[Other users' tags]</a></nobr>
 </div></div>
 <?php
 }

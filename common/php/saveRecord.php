@@ -56,8 +56,8 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 		"rec_RecTypeID" => $type,
 		"rec_URL" => $url,
 		"rec_ScratchPad" => $notes,
-		"rec_OwnerUGrpID" => $wg,
-		"rec_NonOwnerVisibility" => $wg? ($vis? "viewable" : "hidden") : NULL,
+		"rec_OwnerUGrpID" => ($wg?$wg:get_user_id()),
+		"rec_NonOwnerVisibility" => $wg? ($vis? "viewable" : "hidden") : "viewable",
 		"rec_AddedByUGrpID" => get_user_id(),
 		"rec_Added" => $now,
 		"rec_Modified" => $now
@@ -85,7 +85,7 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 		"rec_URL" => $url,
 		"rec_ScratchPad" => $notes,
 		"rec_OwnerUGrpID" => $wg,
-		"rec_NonOwnerVisibility" => $wg? ($vis? "viewable" : "hidden") : NULL,
+		"rec_NonOwnerVisibility" => $wg? ($vis? "viewable" : "hidden") : "viewable",
 		"rec_Modified" => $now
 		));
 		if (mysql_error()) jsonError("database write error" . mysql_error());

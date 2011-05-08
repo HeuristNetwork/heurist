@@ -1098,7 +1098,8 @@ top.HEURIST.edit.createTermSelect = function(termIDTree, headerTermIDsList, term
 	}
 	function createSubTreeOptions(depth, termSubTree) {
 		for(var termID in termSubTree) { // For every term in 'term'
-			var termName = termLookup[termID];
+			var termName = (!termLookup[termID] ? "invalid term":
+								(termLookup[termID][0] ? termLookup[termID][0]:termLookup[termID]));
 			var isHeader = (headers[termID]? true:false);
 			var opt = new Option(termName,termID);
 			opt.className = "depth" + depth;
@@ -1565,8 +1566,8 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.regex = new RegExp(".")
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdValue) {
 	var termHeaderList = typeof this.recFieldlRequirements[17] == "string" ? this.recFieldlRequirements[17]: "";//get DetailType non selectables
 	termHeaderList = typeof this.recFieldlRequirements[13] == "string" ? termHeaderList.concat(",",this.recFieldlRequirements[13]): termHeaderList;
-	var newInput = top.HEURIST.edit.createTermSelect(this.recFieldlRequirements[11],
-														termHeaderList,
+	var newInput = top.HEURIST.util.createTermSelect(expandJsonStructure(this.recFieldlRequirements[11]),
+														expandJsonStructure(termHeaderList),
 														this.detailType[2] == "enum" ? top.HEURIST.terms.termsByDomainLookup['enum'] : top.HEURIST.terms.termsByDomainLookup['relation'],
 														(bdValue && bdValue.value ? bdValue.value : null));
 	this.addInputHelper.call(this, bdValue, newInput);

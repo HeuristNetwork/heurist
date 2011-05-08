@@ -57,16 +57,22 @@
 		</script>
 		<script src="editRecord.js"></script>
 		<script>
-			var queryStr = (top.HEURIST.parameters["bib_id"]? "bib_id="+top.HEURIST.parameters["bib_id"] :
+			var bibID =(top.HEURIST.parameters["bib_id"]? top.HEURIST.parameters["bib_id"] :
 							(window.location.search.match(/bib_id=(\d+).*$/)? window.location.search.match(/bib_id=(\d+).*$/)[1] : ""));
-			if  (top.HEURIST.parameters["bkmk_id"]){
+			var queryStr,
+				recordEvent = "record";
+			if (bibID){
+				queryStr = "bib_id=" + bibID;
+				recordEvent += bibID;
+			}
+			if (top.HEURIST.parameters["bkmk_id"]){
 				if (queryStr) queryStr += "&";
 				queryStr += "bkmk_id="+top.HEURIST.parameters["bkmk_id"];
 			}
 			top.HEURIST.loadScript(top.HEURIST.basePath +"common/php/loadRecordData.php?"+queryStr);
 		</script>
 		<script>
-			top.HEURIST.whenLoaded(["record","edit-html"], function() {
+			top.HEURIST.whenLoaded([recordEvent,"edit-html"], function() {
 				var rec = (top && top.HEURIST && top.HEURIST.edit && top.HEURIST.edit.record ? top.HEURIST.edit.record:null);
 				var bib_id =  ((rec?rec.bibID : 0) || (window.HEURIST ? window.HEURIST.parameters["bib_id"]:0) || (top.HEURIST ? top.HEURIST.parameters["bib_id"]:0));
 				if (! rec) {
@@ -89,7 +95,7 @@
 				document.getElementById("home-link").href = top.HEURIST.basePath + "?db=" +top.HEURIST.database.name;
 			});
 
-			top.HEURIST.whenLoaded(["record", "edit-html"], function() {
+			top.HEURIST.whenLoaded([recordEvent, "edit-html"], function() {
 				top.HEURIST.edit.showRecordProperties();
 				if (top.HEURIST.parameters["sid"]) {
 					top.HEURIST.util.getJsonData(top.HEURIST.basePath+"records/edit/setResultsNavigation.php?s="+top.HEURIST.parameters["sid"]+"&id="+top.HEURIST.edit.record.bibID, function(context) {
@@ -103,8 +109,8 @@
 					});
 				}
 			});
-			top.HEURIST.whenLoaded(["record", "edit-js", "edit-html"], top.HEURIST.edit.loadAllModules);
-			top.HEURIST.whenLoaded(["record", "edit-js", "HAPI", "edit-html"],createRectypeChanger );
+			top.HEURIST.whenLoaded([recordEvent, "edit-js", "edit-html"], top.HEURIST.edit.loadAllModules);
+			top.HEURIST.whenLoaded([recordEvent, "edit-js", "HAPI", "edit-html"],createRectypeChanger );
 			window.onbeforeunload = top.HEURIST.edit.onbeforeunload;
 
 			function createRectypeChanger() {
@@ -218,7 +224,7 @@
 
 		<script>
 			top.HEURIST.whenLoaded(["edit-html", "obj-common"], top.HEURIST.util.setDBName);
-			top.HEURIST.whenLoaded("record", function() {
+			top.HEURIST.whenLoaded(recordEvent, function() {
 				var contactLinkSubject = "HEURIST v" + top.HEURIST.VERSION + " user:"+top.HEURIST.get_user_username() + " edit";
 				if (top.HEURIST.edit.record.bibID) contactLinkSubject += " bibID:"+top.HEURIST.edit.record.bibID;
 				if (top.HEURIST.edit.record.bkmkID) contactLinkSubject += " bkmkID:"+top.HEURIST.edit.record.bkmkID;
@@ -360,7 +366,7 @@
 			<span>last accessed: <span id=moddate></span>
 			<span>cite as: <a href='#' id=cite-as-url contextmenu=enable onClick="return false;"></a></span>
 			<script>
-				top.HEURIST.whenLoaded("record", function() {
+				top.HEURIST.whenLoaded(recordEvent, function() {
 					document.getElementById("moddate").appendChild(document.createTextNode(top.HEURIST.edit.record.moddate));
 					var citeAs = document.getElementById("cite-as-url");
 					citeAs.href = "http://"+window.location.host+ top.HEURIST.basePath +"records/view/viewRecord.php?db="+ top.HEURIST.database.name +"&bib_id=" + top.HEURIST.edit.record.bibID;

@@ -116,38 +116,38 @@ while ($row = mysql_fetch_row($res)) {
 
 // detailRequirements is an array of [recordTypeID, detailTypeID, requiremence, repeatable, name, prompt, match, size, order, default] values
 $detailRequirements = array();
-$rec_types = mysql__select_array("defRecStructure left join defDetailType on dty_ID = rst_DetailTypeID",
-									"distinct rst_RecTypeID", "1 order by rst_RecTypeID");
+$rec_types = mysql__select_array("defRecTypes","distinct rty_ID", "1 order by rty_ID");
+//$rec_types = mysql__select_array("defRecStructure left join defDetailType on dty_ID = rst_DetailTypeID",
+//									"distinct rst_RecTypeID", "1 order by rst_RecTypeID");
 		// rdr = [ rst_DetailTypeID => [ rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
 		// rst_DefaultValue, rst_RequirementType, rst_MaxValues, rst_MinValues, rst_DisplayWidth, rst_RecordMatchOrder,
 		// rst_DisplayOrder, rst_DisplayDetailTypeGroupID, rst_EnumFilteredIDs, rst_PtrFilteredIDs, rst_CalcFunctionID, rst_OrderForThumbnailGeneration] ...]
-
+error_log(print_r($rec_types,true));
 foreach ($rec_types as $rec_type) {
-	foreach (getRectypeFields($rec_type) as $rdr) {
+	foreach (getRectypeFields($rec_type) as $dtyID => $rdr) {
 		array_push($detailRequirements, array(
-			$rdr["rst_RecTypeID"],
-			$rdr["rst_DetailTypeID"],
-			$rdr["rst_RequirementType"],
-			intval($rdr["rst_MaxValues"]),
-			$rdr["rst_DisplayName"],
-			$rdr["rst_DisplayHelpText"],
-			intval($rdr["rst_RecordMatchOrder"]),
-			intval($rdr["rst_DisplayWidth"]),
-			intval($rdr["rst_DisplayOrder"]),
-			$rdr["rst_DefaultValue"],
-			$rdr["rst_DisplayExtendedDescription"],
-			intval($rdr["rst_MinValues"]),
-			$rdr["rst_DisplayDetailTypeGroupID"],
-			$rdr["rst_FilteredJsonTermIDTree"],
-			$rdr["rst_TermIDTreeNonSelectableIDs"],
-			$rdr["dty_TermIDTreeNonSelectableIDs"],
-			$rdr["rst_PtrFilteredIDs"],
-			$rdr["rst_CalcFunctionID"],
-			$rdr["rst_OrderForThumbnailGeneration"]
+			$rec_type,
+			$dtyID,
+			$rdr[4],
+			intval($rdr[5]),
+			$rdr[0],
+			$rdr[1],
+			intval($rdr[8]),
+			intval($rdr[7]),
+			intval($rdr[9]),
+			$rdr[3],
+			$rdr[2],
+			intval($rdr[6]),
+			$rdr[10],
+			$rdr[11],
+			$rdr[13],
+			$rdr[17],
+			$rdr[12],
+			$rdr[14],
+			$rdr[16]
 		));
 	}
 }
-
 
 $commonData = array(
 	"users" => $users,
