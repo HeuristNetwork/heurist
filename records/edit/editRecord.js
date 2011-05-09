@@ -1266,7 +1266,11 @@ top.HEURIST.edit.inputs.BibDetailInput.prototype.getPrimaryValue = function(inpu
 top.HEURIST.edit.inputs.BibDetailInput.prototype.inputOK = function(input) {
 	// Return false only if the input doesn't match the regex for this input type
 	if (! this.regex) return true;
-	if (this.getPrimaryValue(input).match(this.regex)) return true;
+	if (this.getPrimaryValue &&
+		typeof(this.getPrimaryValue(input).match) === "function" &&
+		this.getPrimaryValue(input).match(this.regex)) {
+			return true;
+		}
 	return false;
 };
 top.HEURIST.edit.inputs.BibDetailInput.prototype.verify = function() {
@@ -1564,11 +1568,13 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.getPrimaryValue = funct
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.typeDescription = "a value from the dropdown";
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.regex = new RegExp(".");
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdValue) {
-	var termHeaderList = typeof this.recFieldlRequirements[17] == "string" ? this.recFieldlRequirements[17]: "";//get DetailType non selectables
-	termHeaderList = typeof this.recFieldlRequirements[13] == "string" ? termHeaderList.concat(",",this.recFieldlRequirements[13]): termHeaderList;
-	var newInput = top.HEURIST.util.createTermSelect(expandJsonStructure(this.recFieldlRequirements[11]),
-														expandJsonStructure(termHeaderList),
-														this.detailType[2] == "enum" ? top.HEURIST.terms.termsByDomainLookup['enum'] : top.HEURIST.terms.termsByDomainLookup['relation'],
+	var termHeaderList = typeof this.recFieldlRequirements[13] == "string" ?
+						top.HEURIST.util.expandJsonStructure(this.recFieldlRequirements[13]): [];//get DetailType non selectables
+	var newInput = top.HEURIST.util.createTermSelect(top.HEURIST.util.expandJsonStructure(this.recFieldlRequirements[11]),
+														termHeaderList,
+														this.detailType[2] == "enum" ?
+															top.HEURIST.terms.termsByDomainLookup['enum'] :
+															top.HEURIST.terms.termsByDomainLookup.relation,
 														(bdValue && bdValue.value ? bdValue.value : null));
 	this.addInputHelper.call(this, bdValue, newInput);
 	newInput.style.width = "auto";

@@ -1236,6 +1236,28 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 			helpDiv.innerHTML = "<span>Help is off</span>";
 		}
 	},
+
+/**
+* helper function. utilized in recreateTermsPreviewSelector only
+* converts json string to array
+*/
+	expandJsonStructure: function ( jsonString ) {
+		var retStruct = "";
+		if(jsonString && jsonString !== "") {
+			try {
+				retStruct = eval(jsonString);
+			} catch(e) {
+				try {
+					retStruct = YAHOO.lang.JSON.parse(jsonString);
+				} catch(e1) {
+					retStruct = "";
+				}
+			}
+		}
+		return retStruct;
+	},
+
+
 /**
 * Helper function that creates a select HTML object filled with an option element for each term "depth first"
 * tagged with class depthN and termHeader according to the terms tree depth and if it's id in in the headerList.
@@ -1248,7 +1270,10 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 **/
 	createTermSelect: function(termIDTree, headerTermIDsList, termLookup, defaultTermID) { // Creates the preview
 		var selObj = document.createElement("select");
-		var temp = (headerTermIDsList ? headerTermIDsList.split(",") : null);
+		var temp = ( headerTermIDsList instanceof(Array) ?
+						headerTermIDsList : (typeof(headerTermIDsList) === "string" && headerTermIDsList.length > 0 ?
+						headerTermIDsList.split(","):
+						[]));
 		var headers = {};
 		for (var id in temp) {
 			headers[temp[id]] = temp[id];
@@ -1326,26 +1351,6 @@ function validate(evt) {
 		theEvent.returnValue = false;
 		theEvent.preventDefault();
 	}
-}
-
-/**
-* helper function. utilized in recreateTermsPreviewSelector only
-* converts json string to array
-*/
-function expandJsonStructure( jsonString ) {
-	var retStruct = "";
-	if(jsonString && jsonString !== "") {
-		try {
-			retStruct = eval(jsonString);
-		} catch(e) {
-			try {
-				retStruct = YAHOO.lang.JSON.parse(jsonString);
-			} catch(e1) {
-				retStruct = "";
-			}
-		}
-	}
-	return retStruct;
 }
 
 /**

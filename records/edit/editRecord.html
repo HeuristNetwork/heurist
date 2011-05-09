@@ -37,6 +37,8 @@
 	</head>
 	<body>
 
+		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
+		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
 		<script src="../../common/js/utilsLoad.js"></script>
 		<script src="relationshipsObjectLibrary.js"></script>
 		<script src="../../common/php/loadUserInfo.php"></script>
@@ -59,17 +61,16 @@
 		<script>
 			var bibID =(top.HEURIST.parameters["bib_id"]? top.HEURIST.parameters["bib_id"] :
 							(window.location.search.match(/bib_id=(\d+).*$/)? window.location.search.match(/bib_id=(\d+).*$/)[1] : ""));
-			var queryStr,
+			var queryStr = "",
 				recordEvent = "record";
 			if (bibID){
 				queryStr = "bib_id=" + bibID;
-				recordEvent += bibID;
 			}
 			if (top.HEURIST.parameters["bkmk_id"]){
-				if (queryStr) queryStr += "&";
+				if (queryStr.length > 0) queryStr += "&";
 				queryStr += "bkmk_id="+top.HEURIST.parameters["bkmk_id"];
 			}
-			top.HEURIST.loadScript(top.HEURIST.basePath +"common/php/loadRecordData.php?"+queryStr);
+			top.HEURIST.loadScript(top.HEURIST.baseURL +"common/php/loadRecordData.php?"+queryStr);
 		</script>
 		<script>
 			top.HEURIST.whenLoaded([recordEvent,"edit-html"], function() {

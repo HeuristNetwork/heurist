@@ -103,12 +103,12 @@ if (! $rec_id) {
 if (! window.HEURIST) window.HEURIST = {};
 if (! window.HEURIST.edit) window.HEURIST.edit = {};
 window.HEURIST.edit.record = <?= json_format($record) ?>;
-if (top.HEURIST.fireEvent) top.HEURIST.fireEvent(window, "heurist-record<?= $rec_id ? "$rec_id":"" ?>-loaded");
+if (top.HEURIST.fireEvent) top.HEURIST.fireEvent(window, "heurist-record<?= $rec_id && !$bkm_ID ? "$rec_id":"" ?>-loaded");
 <?php } else { ?>
 if (! window.HEURIST) window.HEURIST = {};
 if (! window.HEURIST.edit) window.HEURIST.edit = {};
 window.HEURIST.edit.record = <?= json_format($record) ?>;
-if (top.HEURIST.fireEvent) top.HEURIST.fireEvent(window, "heurist-record<?= $rec_id ? "$rec_id":"" ?>-loaded");
+if (top.HEURIST.fireEvent) top.HEURIST.fireEvent(window, "heurist-record<?= $rec_id && !$bkm_ID  ? "$rec_id":"" ?>-loaded");
 <?php }
 	} else { ?>
 <?= json_format($record) ?>

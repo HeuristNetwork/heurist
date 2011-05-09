@@ -393,10 +393,6 @@ var recID;
 var rectypeID = parseInt(window.HEURIST.parameters["rectype"]);
 if (parent.HEURIST  &&  parent.HEURIST.edit && parent.HEURIST.edit.record) {
 	recID = parent.HEURIST.edit.record.recID;
-	rectypeID = parent.HEURIST.edit.record.rectypeID;
-}else if (top.HEURIST && top.HEURIST.edit && top.HEURIST.edit.record) {
-	recID = top.HEURIST.edit.record.recID;
-	rectypeID = top.HEURIST.edit.record.rectypeID;
 }else{
 	if (! parent.HEURIST) parent.HEURIST = {};
 	if (! parent.HEURIST.edit) parent.HEURIST.edit = {};

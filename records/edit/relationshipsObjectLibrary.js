@@ -189,7 +189,7 @@ var EditableRelationship = function(parentElement, relationshipRec, rectypes, dt
 
 	td = tr.appendChild(this.document.createElement("div"));
 	this.relTypeSelect = td.appendChild(
-							top.HEURIST.edit.createTermSelect(this.manager.relTerms,
+							top.HEURIST.util.createTermSelect(this.manager.relTerms,
 																(this.termHeadersList || ""),
 																top.HEURIST.terms.termsByDomainLookup.relation,
 																null));

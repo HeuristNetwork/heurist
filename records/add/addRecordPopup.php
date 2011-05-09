@@ -31,7 +31,7 @@
   <script>
 
 
-			$(document).ready(function() {
+$(document).ready(function() {
 	$("#show-adv-link").click(function() {
 		$(this).hide();
 		$('#advanced-section').show();
@@ -42,9 +42,9 @@
 
 	var matches = location.search.match(/wg_id=(\d+)/);
 	buildworkgroupTagselect(matches ? matches[1] : null);
-			});
+});
 
-			function buildworkgroupTagselect(wgID) {
+function buildworkgroupTagselect(wgID) {
 	var i, l, kwd, val;
 	$("#tag").empty();
 	$("<option value='' selected disabled>(select workgroup tag)</option>").appendTo("#tag");
@@ -56,10 +56,10 @@
 			$("<option value='" + val + "'>" + kwd[1] + "</option>").appendTo("#tag");
 		}
 	}
-			}
+}
 
 
-			function update_link() {
+function update_link() {
 	var base = "<?= HEURIST_URL_BASE?>records/add/addRecord.php?addref=1&db=<?=HEURIST_DBNAME?>";
 	var link = base + compute_args();
 
@@ -89,9 +89,9 @@
 			"../?w=all&q=tag:\"" + $("#tag").val().replace(/\\/, "") + "\"" +
 			          " -tag:\"" + $("#tag").val() + "\"";
 	}
-			}
+}
 
-			function compute_args() {
+function compute_args() {
 	var extra_parms = '';
 	if (document.getElementById('restrict_elt').checked) {
 		var wg_id = parseInt(document.getElementById('rec_OwnerUGrpID').value);
@@ -113,9 +113,9 @@
 	}
 
 	return '';
-			}
+}
 
-			function add_note(e) {
+function add_note(e) {
 	if (! e) e = window.event;
 
 	var extra_parms = '';
@@ -147,17 +147,19 @@
 		rt = "2";
 	} else {
 		rt = parseInt(document.getElementById('rectype_elt').value);
+		if (! rt) rt = "2";  //added ian 19/9/08 to re-enable notes as default
 	}
 
-    if (! rt) rt = "2";  //added ian 19/9/08 to re-enable notes as default
 
-	top.location.href = '<?= HEURIST_URL_BASE?>records/add/addRecord.php?addref=1&db=<?=HEURIST_DBNAME?>&bib_rectype='+rt + extra_parms;
+//	top.location.href = '<?= HEURIST_URL_BASE?>records/add/addRecord.php?addref=1&db=<?=HEURIST_DBNAME?>&bib_rectype='+rt + extra_parms;
+window.open('<?= HEURIST_URL_BASE?>records/add/addRecord.php?addref=1&db=<?=HEURIST_DBNAME?>&bib_rectype='+rt + extra_parms);
 
-			}
-			function note_type_click() {
+}
+
+function note_type_click() {
 	var ref_elt = document.getElementById('reference_elt');
 	document.getElementById('rectype_elt').disabled = !ref_elt.checked;
-			}
+}
 
 
   </script>
