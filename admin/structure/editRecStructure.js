@@ -1628,7 +1628,7 @@ function recreateRecTypesPreview(type, value) {
 
 		if (txt.length > 40){
 			divRecType.title = txt;
-			txt = txt.substr(0,40) + "...";
+			txt = txt.substr(0,40) + "&#8230";
 		}else{
 			divRecType.title = "";
 		}

@@ -42,7 +42,7 @@ var detailTypeEditor;
 *
 * public methods
 *
-* apply - sends data to server and closes the pop-up window in case of success
+* save - sends data to server and closes the pop-up window in case of success
 * cancel - checks if changes were made, shows warning and closes the window
 *
 * @author Artem Osmakov <osmakov@gmail.com>
@@ -112,16 +112,16 @@ function DetailTypeEditor() {
 	* keep it disabled
 	*/
 	function _toggleAll(disable, changed) {
-			document.getElementById("dty_Name").disabled = disable;
-			document.getElementById("dty_DetailTypeGroupID").disabled = disable;
-			//document.getElementById("dty_Status").disabled = disable;
-			document.getElementById("dty_OrderInGroup").disabled = disable;
-			document.getElementById("dty_ShowInLists").disabled = disable;
+			Dom.get("dty_Name").disabled = disable;
+			Dom.get("dty_DetailTypeGroupID").disabled = disable;
+			//Dom.get("dty_Status").disabled = disable;
+			Dom.get("dty_OrderInGroup").disabled = disable;
+			Dom.get("dty_ShowInLists").disabled = disable;
 
-			document.getElementById("termsPreview").disabled = disable;
-			document.getElementById("btnSelTerms").disabled = disable;
-			document.getElementById("btnSelRecType1").disabled = disable;
-			document.getElementById("btnSelRecType2").disabled = disable;
+			Dom.get("termsPreview").disabled = disable;
+			Dom.get("btnSelTerms").disabled = disable;
+			Dom.get("btnSelRecType1").disabled = disable;
+			Dom.get("btnSelRecType2").disabled = disable;
 	}
 
 	/**
@@ -142,7 +142,7 @@ function DetailTypeEditor() {
 
 				if(!isnull(allTerms)) {
 					//remove old combobox
-					var prev = document.getElementById("termsPreview"),
+					var prev = Dom.get("termsPreview"),
 						i;
 					for (i = 0; i < prev.children.length; i++) {
 						prev.removeChild(prev.childNodes[0]);
@@ -188,7 +188,7 @@ function DetailTypeEditor() {
 		}
 		if (txt.length > 40){
 			divRecType.title = txt;
-			txt = txt.substr(0,40) + "...";
+			txt = txt.substr(0,40) + "&#8230";
 		}else{
 			divRecType.title = "";
 		}
@@ -237,13 +237,13 @@ function DetailTypeEditor() {
 	var type = Dom.get("dty_Type").value;
 	var args,URL;
 	if(type === "fieldsetmarker") {
-		if(document.getElementById("dty_FieldSetRecTypeID")) {
-			args = document.getElementById("dty_FieldSetRecTypeID").value;
+		if(Dom.get("dty_FieldSetRecTypeID")) {
+			args = Dom.get("dty_FieldSetRecTypeID").value;
 		}
 	}
 	if(type === "relmarker" || type === "resource") {
-		if(document.getElementById("dty_PtrTargetRectypeIDs")) {
-			args = document.getElementById("dty_PtrTargetRectypeIDs").value;
+		if(Dom.get("dty_PtrTargetRectypeIDs")) {
+			args = Dom.get("dty_PtrTargetRectypeIDs").value;
 		}
 	}
 	if(args) {
@@ -260,9 +260,9 @@ function DetailTypeEditor() {
 			callback: function(recordTypesSelected) {
 				if(recordTypesSelected !== null) { // TODO: Test this
 					if(type === "fieldsetmarker") { // Change comma seperated list to right format
-						document.getElementById("dty_FieldSetRecTypeID").value = recordTypesSelected;
+						Dom.get("dty_FieldSetRecTypeID").value = recordTypesSelected;
 					} else {
-						document.getElementById("dty_PtrTargetRectypeIDs").value = recordTypesSelected;
+						Dom.get("dty_PtrTargetRectypeIDs").value = recordTypesSelected;
 					}
 
 						_recreateRecTypesPreview(type, recordTypesSelected);
@@ -359,7 +359,7 @@ function DetailTypeEditor() {
 	* gathers changed values from UI elements (inputs) into 2 arrays _updatedFields and _updatedDetails
 	* this function is invoked in 2 places:
 	* 1) in cancel method - to check if something was changed and show warning
-	* 2) in apply (_updateDetailTypeOnServer) - to gather the data to send to server
+	* 2) in save (_updateDetailTypeOnServer) - to gather the data to send to server
 	*
 	* @param isShowWarn - show alert about empty mandatory fields, it is false for cancel
 	* @return "mandatory" in case there are empty mandatory fields (it prevents further saving on server)
@@ -432,17 +432,17 @@ function DetailTypeEditor() {
 						alert("An error occurred: " + item);
 						error = true;
 					}else{
-						detailTypeID = Number(item);
+						_dtyID = Number(item);
 						if(report!=="") {
 							report = report + ",";
 						}
-						report = report + Math.abs(detailTypeID);
+						report = report + Math.abs(_dtyID);
 					}
 				}
 			}
 
 			if(!error){
-				var ss = (detailTypeID < 0)?"added":"updated";
+				var ss = (_dtyID < 0)?"added":"updated";
 
 				if(report.indexOf(",")>0){
 					alert("Field types with IDs :"+report+ " were succesfully "+ss);
@@ -456,7 +456,7 @@ function DetailTypeEditor() {
 
 	/**
 	* Apply form
-	* private method for public method "apply"
+	* private method for public method "save"
 	* 1. gather changed data from UI (_fromUItoArray) to _updatedFields, _updatedDetails
 	* 2. creates object to be sent to server
 	* 3. sends data to server

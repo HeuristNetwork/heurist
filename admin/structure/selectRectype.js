@@ -5,13 +5,6 @@ var selectRecordType;
 var Dom = YAHOO.util.Dom;
 
 /**
-*
-*/
-function isnull(obj){
-	return ( (typeof obj === "undefined")||(obj===null) );// old js way typeof(obj)==='undefined');
-}
-
-/**
 * SelectRecordType - class for pop-up window to select record types for editing detail type
 *
 * @param _isFilterMode - either select from all rectypes or filtering of existing set of rectypes
@@ -32,7 +25,6 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 			_myDataSource,
 			_arr_selection = [],
 			datatype,  // datatype of parent detailtype: relmarker,resource or fieldsetmarker
-			showTimer, hideTimer,
 			_callback_func, //callback function for non-window mode
 			_dtyID;
 		//
@@ -48,7 +40,8 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 
 		//for tooltip
 		var currentTipId,
-			needHideTip = true;
+			needHideTip = true,
+			hideTimer;
 
 	/**
 	* Updates filter conditions for datatable

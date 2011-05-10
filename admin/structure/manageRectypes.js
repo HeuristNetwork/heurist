@@ -22,8 +22,8 @@ var Dom = YAHOO.util.Dom;
 function RectypeManager() {
 
 	//private members
-	var _className = "RectypeManager",
-	hideTimer;
+	var _className = "RectypeManager";
+
 	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 				(top.HEURIST.database.name?top.HEURIST.database.name:''));
 
@@ -31,12 +31,13 @@ function RectypeManager() {
 	var arrTables = [],
 	arrDataSources = [];
 
-	var currentTipId;
-	var needHideTip = true;
+	var currentTipId,
+		needHideTip = true,
+		hideTimer;
 
 	var _groups = [],  //for dropdown list
-	_deleted = [], //keep removed types to exclude on filtering
-	_cloneHEU = null; //keep Heurist for rollback in case user cancels group/visibility editing
+		_deleted = [], //keep removed types to exclude on filtering
+		_cloneHEU = null; //keep Heurist for rollback in case user cancels group/visibility editing
 
 	//object to send changes (visibility and group belong) for update on server
 	var _oRecordType = {rectype:{
@@ -351,7 +352,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var str = oRecord.getData("description");
 					var tit = "";
-					if(isnull(str)){
+					if(isempty(str)){
 						str = "";
 					}else if (str.length>35) {
 						tit = str;11
@@ -364,7 +365,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 				formatter:YAHOO.widget.DataTable.formatDropdown, dropdownOptions:_groups},
 			{ key: null, label: "Del", width:20, sortable:false, formatter: function(elLiner, oRecord, oColumn, oData) {
 					elLiner.innerHTML = '<a href="#delete"><img src="../../common/images/delete_icon.png" width="16" height="16" border="0" title="Delete" /><\/a>'}
-			},
+			}
 
 			];
 
