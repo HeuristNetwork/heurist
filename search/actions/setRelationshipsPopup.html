@@ -12,8 +12,11 @@
 -->
 <html>
  <head>
-  <link rel="stylesheet" href="../common/css/heurist.css">
-  <title>Add relationships</title>
+  <link rel="stylesheet" href="../common/css/global.css">
+  <script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
+  <script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
+  <script src="../common/js/utilsLoad.js"></script>
+  <title>Add relationships to selected records</title>
 
   <style type="text/css">
 	#record-count {
@@ -45,27 +48,22 @@ function init () {
 
 	relTargetID;
 	recCountSpan = document.getElementById("record-count");
-	relTypeSelect = document.getElementById("relationship-type");
+	var relTypeSelectDiv = document.getElementById("relationship-type-div");
 	relTargetInput = document.getElementById("related-record");
 
 	recCountSpan.innerHTML = top.HEURIST.search.get_bib_ids().length;
 
-	var relTypes = top.HEURIST.vocabTermLookup[200];
-	for (var ont in relTypes) {
-		var grp = document.createElement("optgroup");
-		grp.label = top.HEURIST.vocabularyLookup[ont];
-		relTypeSelect.appendChild(grp);
-		for (var i = 0; i < relTypes[ont].length; ++i) {
-			var rdl = relTypes[ont][i];
-			relTypeSelect.options[relTypeSelect.length] = new Option(rdl[1], rdl[0]);
-			if (ont == 1 && "IsRelatedTo" === rdl[1]) {
-				relTypeSelect.value = rdl[0];
-			}
-		}
-	}
+	var relTypeTerms = top.HEURIST.util.expandJsonStructure(top.HEURIST.rectypes.typedefs[52].dtFields[200][11]);
+	var relTypeTermsDisabled = top.HEURIST.util.expandJsonStructure(top.HEURIST.rectypes.typedefs[52].dtFields[200][13]);
+
+	relTypeSelect = top.HEURIST.util.createTermSelect(relTypeTerms,
+													(relTypeTermsDisabled || ""),
+													top.HEURIST.terms.termsByDomainLookup.relation,
+													null);
+	relTypeSelectDiv.appendChild(relTypeSelect);
 
 	relTargetInput.onclick = function () {
-		top.HEURIST.util.popupURL(window, hBase + "records/pointer/selectRecordFromSearch.html?q=", {
+		top.HEURIST.util.popupURL(window, hBase + "records/pointer/selectRecordFromSearch.html?q=&db=" + database, {
 			callback: function(recID, recTitle) {
 				relTargetInput.value = recTitle || "";
 				relTargetID = recID || null;
@@ -76,7 +74,7 @@ function init () {
 
 function save () {	// xhrFormSubmit only uses the form's action and elements(name & value) properties
 	var fakeForm = {
-		action: top.HEURIST.basePath + "records/relationships/saveRelationships.php",
+		action: top.HEURIST.basePath + "records/relationships/saveRelationships.php?db=" + database,
 		elements: [
 			{ name: "recID", value: top.HEURIST.search.get_bib_ids().join(",") },
 			{ name: "save-mode", value: "new" },
@@ -117,16 +115,17 @@ function save () {	// xhrFormSubmit only uses the form's action and elements(nam
   </script>
  </head>
 
- <body onload="init();">
+ <body class="popup" onload="init();">
 
    <p><span id="record-count"></span> selected records</p>
 
-   <select id="relationship-type">
-    <option selected disabled>(select relationship type)</option>
-   </select>
+   <div id="relationship-type-div">Relationship type:
+   </div>
 
+   <div>
+    <label for="related-record">Related Record:</label>
    <input type="text" id="related-record">
-
+   </div>
    <input type="button" value="add relationships" onclick="this.disabled = true; save();">
    <input type="button" value="cancel" onclick="window.close();">
 

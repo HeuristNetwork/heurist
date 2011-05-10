@@ -1245,10 +1245,10 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		var retStruct = "";
 		if(jsonString && jsonString !== "") {
 			try {
-				retStruct = eval(jsonString);
+				retStruct = YAHOO.lang.JSON.parse(jsonString);
 			} catch(e) {
 				try {
-					retStruct = YAHOO.lang.JSON.parse(jsonString);
+					retStruct = top.HEURIST.util.evalJSON(jsonString);
 				} catch(e1) {
 					retStruct = "";
 				}
@@ -1257,6 +1257,16 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		return retStruct;
 	},
 
+	evalJSON: function() {
+		// Note that we use a different regexp from RFC 4627 --
+		// the only variables available now to malicious JSON are those made up of the characters "e" and "E".
+		// EEEEEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEeEEEEEEEEEE
+		var re1 = /"(\\.|[^"\\])*"|true|false|null/g;
+		var re2 = /[^,:{}\[\]0-9.\-+Ee \n\r\t]/;
+		return function(testString) {
+			return ! re2.test(testString.replace(re1, " "))  &&  eval("(" + testString + ")");
+		};
+	}(),
 
 /**
 * Helper function that creates a select HTML object filled with an option element for each term "depth first"

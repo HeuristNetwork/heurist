@@ -529,7 +529,8 @@ function EditRecStructure() {
 
 function renderInputs() {
 
-	var rectype = rty_ID;
+	var rectype = rty_ID
+		inputs;
 	// Clear out any existing inputs
 
 	var allInputs = document.getElementById("all-inputs");
@@ -550,7 +551,7 @@ function renderInputs() {
 			window.HEURIST.edit = top.HEURIST.edit;
 		}*/
 
-		var inputs = top.HEURIST.edit.createInputsForRectype(rectype, defaultInputValues, allInputs);
+		inputs = top.HEURIST.edit.createInputsForRectype(rectype, defaultInputValues, allInputs);
 
 		renderShowAll();
 
@@ -1563,8 +1564,8 @@ editStructure.initTabDesign(document.getElementById("ed_rty_ID").value);
 */
 function recreateTermsPreviewSelector(datatype, allTerms, disabledTerms ) {
 
-				allTerms = expandJsonStructure(allTerms);
-				disabledTerms = expandJsonStructure(disabledTerms);
+				allTerms = top.HEURIST.util.expandJsonStructure(allTerms);
+				disabledTerms = top.HEURIST.util.expandJsonStructure(disabledTerms);
 
 				if (typeof disabledTerms.join === "function") {
 						disabledTerms = disabledTerms.join(",");

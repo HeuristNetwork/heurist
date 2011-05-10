@@ -1079,52 +1079,6 @@ top.HEURIST.edit = {
 	}
 };
 
-/**
-* Helper function that creates a select HTML object filled with an option element for each term "depth first"
-* tagged with class depthN and termHeader according to the terms tree depth and if it's id in in the headerList.
-* @author Stephen White
-* @param termIDTree an array tree of term ids
-* @param headerTermIDsList a comma separated list of term ids to be markered as headers, can be empty
-* @param termLookup a lookup array of term names
-* @param defaultTermID id of term to show as selected, can be null
-* @return selObj an HTML select object node
-**/
-top.HEURIST.edit.createTermSelect = function(termIDTree, headerTermIDsList, termLookup, defaultTermID) { // Creates the preview
-	var selObj = document.createElement("select");
-	var temp = (headerTermIDsList ? headerTermIDsList.split(",") : null);
-	var headers = {};
-	for (var id in temp) {
-		headers[temp[id]] = temp[id];
-	}
-	function createSubTreeOptions(depth, termSubTree) {
-		for(var termID in termSubTree) { // For every term in 'term'
-			var termName = (!termLookup[termID] ? "invalid term":
-								(termLookup[termID][0] ? termLookup[termID][0]:termLookup[termID]));
-			var isHeader = (headers[termID]? true:false);
-			var opt = new Option(termName,termID);
-			opt.className = "depth" + depth;
-			if(isHeader) { // header term behaves like an option group
-				opt.className +=  ' termHeader';
-				opt.disabled = true;
-			}
-			if (termID == defaultTermID) {
-				opt.selected = true;
-			}
-			selObj.appendChild(opt);
-			if(typeof termSubTree[termID] == "object") {
-				if(depth == 7) { // A dept of 8 (depth starts at 0) is maximum, to keep it organised
-					createSubTreeOptions(depth, termSubTree[termID]);
-				} else {
-					createSubTreeOptions(depth+1, termSubTree[termID]);
-				}
-			}
-		}
-	}
-	createSubTreeOptions(0,termIDTree);
-	if (!defaultTermID) selObj.selectedIndex = 0;
-	return selObj;
-}
-
 top.HEURIST.edit.inputs = { };
 
 top.HEURIST.edit.inputs.BibDetailInput = function(detailType, recFieldlRequirements, fieldValues, parentElement) {

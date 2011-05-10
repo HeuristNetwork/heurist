@@ -111,13 +111,14 @@ function updateRecord($bibID) {
 		return;
 	}
 	$bib = mysql_fetch_assoc($res);
-
+error_log("save record dtls POST ".print_r($_POST,true));
 	// Upload any files submitted ... (doesn't have to take place right now, but may as well)
 	uploadFiles();
 
 	// Get the existing records details and compare them to the incoming data
 	$bibDetails = getBiblioDetails($bibID);
 	$bibDetailUpdates = array();
+error_log("save record dtls ".print_r($bibDetails,true));
 	foreach ($bibDetails as $eltName => $bds) {
 		if (! preg_match("/^type:\\d+$/", $eltName)) {
 			// element does not have a correctly-formatted name (shouldn't happen)
@@ -432,6 +433,7 @@ function getInputHandlerForType($typeID) {
 			"boolean" => new BibDetailBooleanInput(),
 			"resource" => new BibDetailResourceInput(),
 			"float" => new BibDetailFloatInput(),
+			"relationtype" => new BibDetailDropdownInput(),
 			"enum" => new BibDetailDropdownInput(),
 			"file" => new BibDetailFileInput(),
 			"geo" => new BibDetailGeographicInput(),
@@ -523,7 +525,7 @@ class BibDetailBooleanInput extends BibDetailInput {
 }
 class BibDetailDropdownInput extends BibDetailInput {
 	function inputOK($postVal) {
-		return preg_match("/\\S/", $postVal);
+		return preg_match("/\\S/", $postVal);	// has non space characters
 	}
 }
 class BibDetailFileInput extends BibDetailInput {
@@ -531,7 +533,7 @@ class BibDetailFileInput extends BibDetailInput {
 		return array("dtl_UploadedFileID" => $postVal);
 	}
 	function inputOK($postVal) {
-		return preg_match("/\\S/", $postVal);
+		return preg_match("/\\S/", $postVal);	// has non space characters
 	}
 }
 class BibDetailGeographicInput extends BibDetailInput {

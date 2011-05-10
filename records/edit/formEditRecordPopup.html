@@ -110,7 +110,7 @@ window.HEURIST.edit = {
 				return;	// submit failed ... up to the individual form handlers to display messages
 			}
 
-			window.HEURIST.registerEvent(editFrame, "load", function() {
+			top.HEURIST.registerEvent(editFrame, "load", function() {
 				window.HEURIST.edit.unchanged("public");
 				window.HEURIST.edit.save();	// will continue where we left off
 			});

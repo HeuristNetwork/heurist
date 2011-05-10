@@ -133,8 +133,8 @@ function DetailTypeEditor() {
 	*/
 	function _recreateTermsPreviewSelector( datatype, allTerms, disabledTerms ) {
 
-				allTerms = expandJsonStructure(allTerms);
-				disabledTerms = expandJsonStructure(disabledTerms);
+				allTerms = top.HEURIST.util.expandJsonStructure(allTerms);
+				disabledTerms = top.HEURIST.util.expandJsonStructure(disabledTerms);
 
 				if (typeof disabledTerms.join === "function") {
 						disabledTerms = disabledTerms.join(",");

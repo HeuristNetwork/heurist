@@ -90,22 +90,20 @@ Relationship.prototype.edit = function() {
 	top.HEURIST.util.popupURL(window, top.HEURIST.basePath + "records/edit/formEditRecordPopup.html?bib_id="+this.relationshipRec.relnID +
 		"&db="+(top.HEURIST.parameters.db?top.HEURIST.parameters.db : (top.HEURIST.database.name? top.HEURIST.database.name:"")),
 	{ callback: function(newRecTitle, newDetails) {
-			if (newRecTitle) {	//saw this gets a title from the record which does match the inital title format and mini-edit always returns a title.
-				thisRef.titleSpan.innerHTML ="";
-				var newTitle = "" +	//saw Enum change
-					(newDetails['200'][0]['enumValue'] ?newDetails['200'][0]['enumValue'] :
-						newDetails['200'][0]['value'] ? newDetails['200'][0]['value']: "" ) +
-					": "  +
-					(newDetails['199'][0]['title'] ?newDetails['199'][0]['title'] :
-						newDetails['199'][0]['value'] ? newDetails['199'][0]['value']: "" );
-				thisRef.titleSpan.appendChild(thisRef.document.createTextNode(" " + newTitle + " "));
+			if (newDetails) {
+				if (newDetails['200'] && newDetails['200'][0]) {
+					thisRef.relSpan.innerHTML = (newDetails['200'][0]['enumValue'] ?
+													newDetails['200'][0]['enumValue'] :
+													(newDetails['200'][0]['value'] ?
+														newDetails['200'][0]['value']: "" ));
+				}
+				if (newDetails['199'] && newDetails['199'][0]) {
+					thisRef.titleSpan.innerHTML = (newDetails['199'][0]['title'] ?
+													newDetails['199'][0]['title'] :
+													(newDetails['199'][0]['value'] ?
+														newDetails['199'][0]['value']: "" ));
+				}
 			}
-			/* TFM 2008/01/09 ... we don't do notes in the short view anymore
-			if (newDetails  &&  newDetails[201]) {
-			thisRef.notesDiv.innerHTML = "";
-			thisRef.notesDiv.appendChild(thisRef.document.createTextNode(newDetails[201][0]));
-			}
-			*/
 		}
 	});
 	return false;

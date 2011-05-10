@@ -145,7 +145,7 @@ function saveRelationship($recID, $relTermID, $trgRecID, $interpRecID, $title, $
 		if ($notes) $query .= ", ($relnRecID, 201, '" . addslashes($notes) . "')";
 		if ($start_date) $query .= ", ($relnRecID, 177, '" . addslashes($start_date) . "')";
 		if ($end_date) $query .= ", ($relnRecID, 178, '" . addslashes($end_date) . "')";
-
+error_log(" rel save query = $query");
 		mysql_query($query);
 	}
 
