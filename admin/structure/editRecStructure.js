@@ -529,7 +529,7 @@ function EditRecStructure() {
 
 function renderInputs() {
 
-	var rectype = rty_ID
+	var rectype = rty_ID,
 		inputs;
 	// Clear out any existing inputs
 

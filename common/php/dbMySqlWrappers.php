@@ -283,12 +283,12 @@ function slash($str) {
 	return preg_replace("/\r\n|\r|\n/", "\\n", addslashes($str));
 }
 
-function isZeroOrderedArray($obj){
+function isZeroBasedOrderedArray($obj){
 	if(is_object($obj)){
 		return false;
 	}
 	$keys = array_keys($obj);
-	$cnt = (count($keys) > 3 ? 3 : count($keys));
+	$cnt = count($keys);
 	for($i = 0; $i < $cnt ; $i++){
 		if ($i !== $keys[$i]) {
 			return false;
@@ -313,7 +313,7 @@ function json_format($obj, $purdy=false) {
 	if (count($obj) == 0) {
 		return "[]";
 	}
-	else if (isZeroOrderedArray($obj)) {
+	else if (isZeroBasedOrderedArray($obj)) {
 		// Has a "0" element ... we'll call it an array
 		$json = "";
 		foreach ($obj as $val) {
