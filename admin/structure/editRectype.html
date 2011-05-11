@@ -206,6 +206,9 @@
 
 	var _openEditStrucutreAfterClose = false;
 
+	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+				(top.HEURIST.database.name?top.HEURIST.database.name:''));
+
 	function init() {
 		var typesDropdown;
 		var groupDropdown;
@@ -439,7 +442,7 @@ alert("Stringified changes: " + str);
 			// TODO: Change base URL
 			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 			var callback = updateResult;
-			var params = "method=saveRT&data=" + encodeURIComponent(str);
+			var params = "method=saveRT&db="+db+"&data=" + encodeURIComponent(str);
 			top.HEURIST.util.getJsonData(baseurl, callback, params);
 		} else {
 
@@ -498,7 +501,7 @@ alert("Stringified changes: " + str);
 	*/
 	function editRecStructure()
 	{
-		top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "admin/structure/editRecStructure.html?rty_ID="+rectypeID, {
+		top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "admin/structure/editRecStructure.html?db="+db+"&rty_ID="+rectypeID, {
 			"close-on-blur": false,
 			"no-resize": true,
 			height: 480,

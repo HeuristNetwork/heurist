@@ -30,12 +30,15 @@ function EditTerms() {
 		_termTree2, //treeview for relation terms
 		_currTreeView,
 		_currentNode,
-		_currentDomain;
+		_currentDomain,
+		_db;
 
 	/**
 	*	Initialization of tabview with 2 tabs with treeviews
 	*/
 	function _init (){
+
+		_db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
 		_tabView.addTab(new YAHOO.widget.Tab({
 							id: 'enum',
@@ -359,7 +362,7 @@ alert("Stringified changes: " + str);
 			// TODO: Change base URL
 			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 			var callback = _updateResult;
-			var params = "method=saveTerms&data=" + encodeURIComponent(str);
+			var params = "method=saveTerms&data=" + encodeURIComponent(str)+"&db="+_db;
 			top.HEURIST.util.getJsonData(baseurl, callback, params);
 		}
 	}
@@ -393,7 +396,7 @@ alert("Stringified changes: " + str);
 
 					var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 					var callback = __updateAfterDelete;
-					var params = "method=deleteTerms&trmID=" + _currentNode.data.id;
+					var params = "method=deleteTerms&trmID=" + _currentNode.data.id+"&db="+_db;
 					top.HEURIST.util.getJsonData(baseurl, callback, params);
 			}
 		}

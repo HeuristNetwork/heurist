@@ -247,9 +247,9 @@ function DetailTypeEditor() {
 		}
 	}
 	if(args) {
-		URL =  top.HEURIST.basePath + "admin/structure/selectRectype.html?type=" + type + "&ids=" + args;
+		URL =  top.HEURIST.basePath + "admin/structure/selectRectype.html?type=" + type + "&ids=" + args+"&db="+db;
 	} else {
-		URL =  top.HEURIST.basePath + "admin/structure/selectRectype.html?type=" + type;
+		URL =  top.HEURIST.basePath + "admin/structure/selectRectype.html?type=" + type+"&db="+db;
 	}
 	if(type === "relmarker" || type === "resource" || type === "fieldsetmarker") {
 		top.HEURIST.util.popupURL(top, URL, {
