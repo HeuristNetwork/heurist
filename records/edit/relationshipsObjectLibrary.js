@@ -439,39 +439,50 @@ var RelationManager = function(parentElement, record, relatedRecords, dtIDRelmar
 		}
 
 		// get HeaderTerms list - the values from the structure can be null
-		var dtyHdr = top.HEURIST.rectypes.typedefs[this.rectypeID].dtFields[dtIDRelmarker][17];
 		var rfrHdr = top.HEURIST.rectypes.typedefs[this.rectypeID].dtFields[dtIDRelmarker][13];
-		temp = (dtyHdr? (rfrHdr? dtyHdr.concat(",",rfrHdr):dtyHdr) : rfrHdr);
 		var headerList = {};
-		if (temp) {
-			temp = temp.split(",");
-			for (var i = 0; i < temp.length; i++) {
-				headerList[temp[i]] = temp[i];
+		if (rfrHdr) {
+			rfrHdr = rfrHdr.split(",");
+			for (var i = 0; i < rfrHdr.length; i++) {
+				headerList[rfrHdr[i]] = rfrHdr[i];
 			}
 			this.termHeadersList = headerList;
 		}
 
 		// get relationship terms from relmarker definition
-		this.relTerms = eval(top.HEURIST.rectypes.typedefs[this.rectypeID].dtFields[dtIDRelmarker][11]);
+		this.relTerms = top.HEURIST.util.expandJsonStructure(top.HEURIST.rectypes.typedefs[this.rectypeID].dtFields[dtIDRelmarker][11]);
 	}
 	if (!this.relTerms) { // if no terms were setup in a relmarker then default to all relationships = unconstrained
 		this.relTerms = top.HEURIST.terms.treesByDomain.relation;
 	}
-
+	if (this.relTerms && typeof this.relTerms === "object" && dtIDRelmarker) {
+		var flatTermIDLookup = YAHOO.lang.JSON.stringify(this.relTerms);
+		flatTermIDLookup = "," + flatTermIDLookup.match(/(\d+)/g).join(",") + ",";
+		if (flatTermIDLookup === ",,"){
+			flatTermIDLookup = null;
+		}
+	}
 	// set up structure for the related records
 	if (relatedRecords) {
-		if (typeof this.trgRectypes == "object") { // need to only use related in this set
+		if (typeof this.trgRectypes === "object" || typeof flatTermIDLookup === "string") { // need to filter relationships for this relmarker
 			var found = false;
 			var relRecs = null;
 			for (relnID in relatedRecords.relationshipRecs) {
-				if (this.trgRectypes[relatedRecords.relationshipRecs[relnID].relatedRec.rectype]) {
+				if (typeof this.trgRectypes == "object" &&	//filter any rectypes not in list (null list = don't constrain
+					!this.trgRectypes[relatedRecords.relationshipRecs[relnID].relatedRec.rectype]) {
+					continue;
+				}
+				if (typeof flatTermIDLookup === "string" &&	//filter any records who's relType in not in list
+						flatTermIDLookup.indexOf("," + [relatedRecords.relationshipRecs[relnID].relTermID] + ",") === -1) {
+					continue;
+				}
 					if (!found) {
 						found = true;
 						relRecs = {'rels':{}, 'byT':{}, 'byRt':{}};
 			}
 					relRecs.rels[relnID] = relatedRecords.relationshipRecs[relnID];
 					var relRectype = relRecs.rels[relnID].relatedRec.rectype;
-					var relnType = relRecs.rels[relnID].termID;
+				var relnType = relRecs.rels[relnID].relTermID;
 					if (!relRecs.byT[relnType]) {
 						relRecs.byT[relnType] = {};
 			}
@@ -489,7 +500,6 @@ var RelationManager = function(parentElement, record, relatedRecords, dtIDRelmar
 						relRecs.byRt[relRectype][relnType].push(relnID);
 					}
 				}
-			}
 			if (found) {
 				this.relatedRecords = relRecs.rels;
 				this.relnIDs = {};

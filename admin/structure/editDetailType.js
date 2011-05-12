@@ -236,6 +236,7 @@ function DetailTypeEditor() {
 	function _onSelectRectype() {
 	var type = Dom.get("dty_Type").value;
 	var args,URL;
+	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 	if(type === "fieldsetmarker") {
 		if(Dom.get("dty_FieldSetRecTypeID")) {
 			args = Dom.get("dty_FieldSetRecTypeID").value;

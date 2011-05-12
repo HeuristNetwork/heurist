@@ -365,6 +365,7 @@ class AndLimb {
 
 		    case 'workgroup':
 		    case 'wg':
+		    case 'owner':
 			return new WorkgroupPredicate($this, $pred_val);
 
 		    case 'latitude':

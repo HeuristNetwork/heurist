@@ -528,10 +528,10 @@
 	if ($groups  &&  count($groups) > 0) {
 				?>
    <tr>
-    <td class=r>Workgroup:</td>
+    <td class=r>Owner:</td>
     <td class=l>
-     <select name="workgroup" id="workgroup" onchange="update(this);">
-      <option value="" selected="selected">(any workgroup)</option>
+     <select name="owner" id="owner" onchange="update(this);">
+      <option value="" selected="selected">(any owner or ownergroup)</option>
 						<?php	foreach ($groups as $id => $name) { ?>
       <option value="&quot;<?= htmlspecialchars($name) ?>&quot;"><?= htmlspecialchars($name) ?></option>
 							<?php	} ?>
@@ -638,7 +638,7 @@
 
    <tr>
     <td colspan=3 style="padding-left: 30px; color: #666;">
-      Use <b>tag:</b>, <b>type:</b>, <b>url:</b>, <b>notes:</b>, <b>workgroup:</b>, <b>user:</b>, <b>field:</b> and <b>all:</b> modifiers.<br>
+      Use <b>tag:</b>, <b>type:</b>, <b>url:</b>, <b>notes:</b>, <b>owner:</b>, <b>user:</b>, <b>field:</b> and <b>all:</b> modifiers.<br>
       To find records with geographic objects that contain a given point, use <b>latitude</b> and <b>longitude</b>, e.g.
        <b>latitude:10 longitude:100</b><br>
       Use e.g. <b>title=</b><i>xxx</i> to match exactly, similarly <b>&lt;</b> or <b>&gt;</b>.<br>
