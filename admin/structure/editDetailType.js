@@ -247,6 +247,8 @@ function DetailTypeEditor() {
 			args = Dom.get("dty_PtrTargetRectypeIDs").value;
 		}
 	}
+	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+						(top.HEURIST.database.name?top.HEURIST.database.name:''));
 	if(args) {
 		URL =  top.HEURIST.basePath + "admin/structure/selectRectype.html?type=" + type + "&ids=" + args+"&db="+db;
 	} else {

@@ -464,7 +464,7 @@
 			$rows = execSQL($db, $query, $parameters, true);
 
 			if ($rows==0) {
-				$ret = "error inserting into defRecTypes - ".$db->error;
+				$ret = "error inserting into defRecTypes - ".$msqli->error;
 			} else {
 				$rtyID = $db->insert_id;
 				$ret = -$rtyID;
@@ -638,7 +638,7 @@
 				if(!is_numeric($res)){
 					$ret = "error updating $rtyID in updateRectype - ".$res;
 					//}else if ($rows==0) {
-					//	$ret = "error updating $rtyID in updateRectype - ".$db->error;
+					//	$ret = "error updating $rtyID in updateRectype - ".$msqli->error;
 					} else {
 					$ret = $rtyID;
 				}
@@ -718,7 +718,7 @@
 
 					if ($rows==0) {
 						$oper = (($isInsert)?"inserting":"updating");
-						array_push($ret[$rtyID], "error ".$oper." field type ".$dtyID." for record type ".$rtyID." in updateRecStructure - ".$db->error);
+						array_push($ret[$rtyID], "error ".$oper." field type ".$dtyID." for record type ".$rtyID." in updateRecStructure - ".$msqli->error);
 					} else {
 						array_push($ret[$rtyID], $dtyID);
 					}
@@ -785,7 +785,7 @@
 			$rows = execSQL($db, $query, $parameters, true);
 
 			if ($rows==0) {
-					$ret['error'] = "error inserting into defRecTypeGroups - ".$db->error;
+					$ret['error'] = "error inserting into defRecTypeGroups - ".$msqli->error;
 			} else {
 				$rtgID = $db->insert_id;
 				$ret['result'] = $rtgID;
@@ -846,7 +846,7 @@
 
 			$rows = execSQL($db, $query, $parameters, true);
 			if ($rows==0) {
-				$ret['error'] = "error updating $colName in updateRectypeGroup - ".$db->error;
+				$ret['error'] = "error updating $colName in updateRectypeGroup - ".$msqli->error;
 			} else {
 				$ret['result'] = $rtgID;
 			}
@@ -928,7 +928,7 @@
 			$rows = execSQL($db, $query, $parameters, true);
 
 			if ($rows==0) {
-					$ret['error'] = "error inserting into defDetailTypeGroups - ".$db->error;
+					$ret['error'] = "error inserting into defDetailTypeGroups - ".$msqli->error;
 			} else {
 				$dtgID = $db->insert_id;
 				$ret['result'] = $dtgID;
@@ -989,7 +989,7 @@
 
 			$rows = execSQL($db, $query, $parameters, true);
 			if ($rows==0) {
-				$ret['error'] = "error updating $colName in updateDettypeGroup - ".$db->error;
+				$ret['error'] = "error updating $colName in updateDettypeGroup - ".$msqli->error;
 			} else {
 				$ret['result'] = $dtgID;
 			}
@@ -1070,7 +1070,7 @@
 			$rows = execSQL($db, $query, $parameters, true);
 
 			if ($rows==0) {
-				$ret = "error inserting into defDetailTypes - ".$db->error;
+				$ret = "error inserting into defDetailTypes - ".$msqli->error;
 			} else {
 				$dtyID = $db->insert_id;
 				$ret = -$dtyID;
@@ -1165,7 +1165,7 @@
 
 				$rows = execSQL($db, $query, $parameters, true);
 				if ($rows==0) {
-					$ret = "error updating $dtyID in updateDetailType - ".$db->error;
+					$ret = "error updating $dtyID in updateDetailType - ".$msqli->error;
 				} else {
 					$ret = $dtyID;
 				}
@@ -1238,7 +1238,7 @@
 
 				if ($rows==0) {
 					$oper = (($isInsert)?"inserting":"updating");
-					$ret = "error $oper term# $trmID in updateTerms - ".$db->error;
+					$ret = "error $oper term# $trmID in updateTerms - ".$msqli->error;
 			} else {
 					if($isInsert){
 						$trmID = $db->insert_id;

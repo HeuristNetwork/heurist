@@ -1,0 +1,178 @@
+<!--
+
+/**
+* editGroup.html
+* A form to edit user groups, or create a new group. It is utilized as pop-up from manageGroup
+*
+* @version 2011.0509
+* @author: Artem Osmakov
+*
+* @copyright (C) 2005-2011 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+* @todo
+**/
+
+-->
+<html>
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title></title>
+
+<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+
+<!-- YUI -->
+<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/history/history-min.js"></script>
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
+
+
+<style type="text/css">
+.dtyField {
+	display: block;
+}
+.dtyHiddenField {
+	display: none;
+}
+.dtyLabel {
+	display: inline-block;
+	width: 130px;
+	text-align: right;
+	padding-right: 3px;
+}
+.dtyValue {
+	display: inline-block;
+}
+.help1 {
+	padding-left: 133px;
+	padding-bottom: 2px;
+}
+.actionButtons {
+	float:right;
+	padding-right: 130px;
+}
+
+</style>
+
+</head>
+
+<body>
+		<!-- <script type="text/javascript" src="../../common/js/utilsLoad.js"></script> -->
+		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
+		<script src="../../common/php/displayPreferences.php"></script>
+
+		<!-- access to functions about current user -->
+		<script src="loadUserInfoShort.php"></script>
+		<script type="text/javascript" src="editGroup.js"></script>
+
+		<script type="text/javascript">
+
+			if(isnull(top.HEURIST)) { top.HEURIST = {}; }
+
+			var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+						(top.HEURIST.database.name?top.HEURIST.database.name:''));
+			var _url = top.HEURIST.basePath +'admin/ugrps/loadUserGrps.php?method=getgroup&db='+_db;
+
+			top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+			var _recID = top.HEURIST.parameters.recID;
+
+			if(isnull(_recID)) { _recID = 0; }
+			_url = _url + "&recID="+_recID;
+
+			//top.HEURIST.loadScript(_url, true);
+			loadScript(_url);
+		</script>
+
+
+<div style="width:580;margin:auto;">
+<br/>
+<div id="statusMsg"></div>
+<div id="detailTypeValues" style="padding:5px;">
+
+	<div class="dtyField">
+		<label class="dtyLabel" for="ugr_ID">Code:</label>
+		<label id="ugr_ID"></label>
+	</div>
+	<div class="dtyField">
+		<label class="dtyLabel" for="ugr_Name">Standard name:*</label>
+		<input id="ugr_Name" style="width:200;" maxlength="65" />
+		<div class="help prompt help1">
+			<label>The name the group should have</label>
+		</div>
+	</div>
+	<div class="dtyField">
+		<label class="dtyLabel" for="ugr_LongName">Long name:</label>
+		<input id="ugr_LongName" style="width:200;" maxlength="128" />
+		<div class="help prompt help1">
+			<label>The name the group may have</label>
+		</div>
+	</div>
+	<div class="dtyField">
+		<label class="dtyLabel" style="vertical-align:top" for="ugr_Description">Description:</label>
+		<textarea cols="200" id="ugr_Description" rows="3" style="width:420;"></textarea>
+		<div class="help prompt help1">
+			<label>An description, describing the group</label>
+		</div>
+	</div>
+	<div class="dtyField">
+		<label class="dtyLabel" style="vertical-align:top" for="ugr_URLs">URLs:</label>
+		<textarea cols="200" id="ugr_URLs" rows="3" style="width:420;"></textarea>
+		<div class="help prompt help1">
+			<label>References to webresources of this group</label>
+		</div>
+	</div>
+
+	<div class="dtyField">
+		<label class="dtyLabel" for="ugr_Type">Group type:</label>
+		<select class="dtyValue" id="ugr_Type" disabled="disabled">
+			<option selected="selected">workgroup</option>
+			<option>usergroup</option>
+			<option>ugradclass</option>
+		</select>
+		<div class="help prompt help1">
+			<label>The type of group</label>
+		</div>
+	</div>
+
+	<div class="dtyField">
+		<label class="dtyLabel" for="ugr_Enabled">Enabled:</label>
+		<input id="ugr_Enabled" type="checkbox"/>
+		<div class="help prompt help1">
+			<label>Whether this group is enabled</label>
+		</div>
+	</div>
+
+</div>
+<br/>
+<div id="btn_edits" class="actionButtons">
+<input type="button" style="height: 25px; width: 99px" value="Save" onclick="window.groupEditor.save();" />
+<input type="button" style="height: 25px; width: 99px" value="Cancel" onclick="window.groupEditor.cancel();" />
+</div>
+<div id="btn_view" class="actionButtons" style="display:none;padding-right: 240px">
+<input type="button" style="height: 25px; width: 99px" value="Close" onclick="window.close(null);" />
+</div>
+</div>
+
+<script type="text/javascript">
+
+	var groupEditor;
+
+	//
+	//  starts initialization on load completion of this window
+	//
+	function loadHandler(){
+		window.groupEditor = new GroupEditor();
+	}
+	YAHOO.util.Event.addListener(window, "load", loadHandler );
+	//function(){groupEditor = new GroupEditor();} );
+	//to implment window.onbeforeunload = onbeforeunload;
+
+</script>
+
+
+</body>
+</html>

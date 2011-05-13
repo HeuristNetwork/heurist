@@ -100,7 +100,7 @@ top.HEURIST.ratings = {"0": "not rated",
 	}
 	$workgroups["length"] = $workgroupsLength;
 
-	$res = mysql_query("select ugl_GroupID, concat(b.ugr_FirstName,' ',b.ugr_LastName) as name, b.ugr_eMail
+	$res = mysql_query("select ugl_GroupID, concat(b.ugr_FirstName,' ',b.ugr_LastName) as name, b.ugr_eMail, b.ugr_ID
 						  from ".USERS_DATABASE.".sysUGrps grp
 					 left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_GroupID = grp.ugr_ID
 					 left join ".USERS_DATABASE.".sysUGrps b on b.ugr_ID = ugl_UserID
@@ -117,7 +117,8 @@ top.HEURIST.ratings = {"0": "not rated",
 		$grp_id = $row["ugl_GroupID"];
 
 		if ($workgroups[$grp_id])
-			array_push($workgroups[$grp_id]["admins"], array("name" => $row["name"], "email" => $row["ugr_eMail"]));
+			array_push($workgroups[$grp_id]["admins"],
+				array("name" => $row["name"], "email" => $row["ugr_eMail"], "id" => $row["ugr_ID"]));
 	}
 
 	print "top.HEURIST.workgroups = " . json_format($workgroups) . ";\n";

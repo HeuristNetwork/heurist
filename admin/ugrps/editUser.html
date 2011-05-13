@@ -1,147 +1,213 @@
 <!--
 
 /**
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
+* editUserp.html
+* A form to edit user, or create a new user. It is utilized as pop-up from manageGroups and manageUsers
+*
+* @version 2011.0509
+* @author: Artem Osmakov
+*
+* @copyright (C) 2005-2011 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+* @todo
+**/
 
 -->
 <html>
- <head>
-  [if : approve]
-  <title>Approve user application</title>
-  [else]
-  <title>Edit user</title>
-  [end-if]
-  <link href="../../common/css/heurist.css" rel="stylesheet" type="text/css">
- <link href="../../common/css/registration.css" rel="stylesheet" type="text/css">
- <script language="JavaScript" src="../../external/jquery/jquery.js"></script>
- </head>
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title></title>
+
+<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+
+<!-- YUI -->
+<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/history/history-min.js"></script>
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
+
+
+<style type="text/css">
+.dtyField {
+	display: block;
+}
+.dtyHiddenField {
+	display: none;
+}
+.dtyLabel {
+	display: inline-block;
+	width: 130px;
+	text-align: right;
+	padding-right: 3px;
+}
+.dtyValue {
+	display: inline-block;
+}
+.help1 {
+	padding-left: 133px;
+	padding-bottom: 2px;
+}
+.actionButtons {
+	float:right;
+	padding-right: 130px;
+}
+
+</style>
+
+</head>
 
 <body>
- <form action="editUser.php?db=[dbname!]" method="post">
+<!--		<script type="text/javascript" src="../../common/js/utilsLoad.js"></script> -->
+		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
+		<script src="../../common/php/displayPreferences.php"></script>
+<!--
+		<script type="text/javascript" src="../../common/php/loadUserGrpInfo.php?userEmail=Linda.Barwick@arts.usyd.edu.au"></script>
+-->
+		<script type="text/javascript" src="../../admin/ugrps/editUser.js"></script>
 
-[update required USER user_update]
+		<script type="text/javascript">
 
-<table id="page" class="expander" border="0" cellpadding="0" cellspacing="0">
-<tr><td id="header">
+			if(isnull(top.HEURIST)) { top.HEURIST = {}; }
 
-<table border="0" cellpadding="0" cellspacing="0" class="expander">
-<tbody><tr>
-<td rowspan="2" id="logo-cell"><a href="../.."><img src="../../common/images/hlogo-small.jpg" alt="Heurist" title="Click the logo at top left of any Heurist page to return to your favourites"></a></td>
-<td rowspan="2">
-	<a href="findAddUser.php?db=[dbname!]">Add user</a> |
-	<a href="assignUsersToGroups.php?db=[dbname!]">Edit user groups</a>
-</td>
-<td align="right" style="vertical-align: baseline;">
-	<font color="#008000"><small>Logged in as: </small><tt>[logged-in-user-username]</tt></font><br>
-   [if-eq : logged-in-user-username : ""]
-   <a href="../../common/connect/login.php?db=[dbname!]"><small>Log in</small></a>
-   [else]
-   <a href="../../common/connect/login.php?logout=1&amp;db=[dbname!]"><small>Log out</small></a>
-   [end-if-eq]
-   </td>
-</tr>
-</tbody></table>
-</td></tr>
- <tr>
+			var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+						(top.HEURIST.database.name?top.HEURIST.database.name:''));
+			var _url = top.HEURIST.basePath +'admin/ugrps/loadUserGrps.php?method=getuser&db='+_db;
 
-<td height="109" id="search-cell" style="padding-left:40px; padding-right:40px; color:#FFF; font-weight:bold; font-size:1.6em;" valign="middle">
- 	[if : approve]
-		Approve user application
-  	[else]
-  		Edit user
-  	[end-if]
-</td>
-  <td></td>
-  </tr>
-<tr>
- <td colspan="3" valign="top" style="padding-left:40px; padding-right:40px;">
-<span class="red">[errors]</span>
-<div class="box" id="required" style="margin-top:10px;">
-<a>Required information </a>
-<br>
-	<label>First name</label>[textbox required : ugr_FirstName : First name : size=&quot;20&quot;]
-	<label>Last name</label>[textbox required : ugr_LastName : Last name : size=&quot;40&quot;]
-	<label>Email<br>
-	<span class="hint">This will be your User Name</span></label>
-	[textbox required : ugr_eMail : email: size=&quot;50&quot;]
-	<label>Institution/company<br>
-	<span class="hint">Enter 'None' if not affiliated with an institution or company</span></label>
-	[textbox required : ugr_Organisation : Institution/company : size=&quot;40&quot;]
-	<label>Research Interests</label>[textbox required : ugr_Interests : Research Interests : size=&quot;60&quot;]
+			top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+			var _recID = top.HEURIST.parameters.recID;
+			/* not used anymore
+			var _userEmail = top.HEURIST.parameters.user;
+			if(!isnull(_userEmail)) {
+				_url = _url + "&userEmail="+encodeURIComponent(_userEmail);
+			}else {}*/
 
-    <label>Login name</label>
-	[if : logged-in-is-admin]
-		[update USER username_update]
-			[textbox required : ugr_Name : Login name : size=&quot;20&quot;]
-	 	[end-update]
-	[else]
-		[ugr_Name]
-	[end-if]
-</div>
-<br>
-<div class="box" id="optional"><a onMouseDown="$('#options').slideToggle('fast');">Optional information</a>
-	<div id="options" style="display:none;">
-	<br>
-		<label>Department</label>[textbox : ugr_Department : Department : size=&quot;50&quot;]
-		<label>URL</label>[textbox : ugr_URLs : URLs : size=&quot;50&quot;]
-		<label>Suburb/City</label>[textbox : ugr_City : Suburb/City : size=&quot;30&quot;]
-		<label>State</label>[textbox : ugr_State : State : size=&quot;30&quot;]
-		<label>Post/zipcode</label>[textbox : ugr_Postcode : Post/zipcode : size=&quot;10&quot;]
-		<label>Change password</label>[password : ugr_Password : two matching passwords : size=&quot;20&quot;]
-		<label>Repeat password</label><input type="password" name="password2" size="20">
-		<label>Jobtrack</label>[checkbox : ugr_FlagJT : Jobtrack : style="margin-left: 0;"]&nbsp;&nbsp;
-		[if : approve]
-	[else]
-	 [if-eq : ugr_Enabled : "Y"]
-	  <label>Active</label><input type="checkbox" name="ugr_Enabled" value="1"  style="margin-left: 0;" checked>
-	 [else]
-	  <label>Active</label><input type="checkbox" name="ugr_Enabled" value="1"  style="margin-left: 0;">
-	 [end-if-eq]
-	[end-if]
+				if(isnull(_recID)) { _recID = 0; }
+				_url = _url + "&recID="+_recID;
+
+			//top.HEURIST.loadScript(_url, true);
+			loadScript(_url);
+		</script>
+
+
+<div style="width:580;margin:auto;">
+<br/>
+<div id="statusMsg"></div>
+<div id="detailTypeValues" style="padding:5px;">
+
+	<div class="dtyField">
+		<label class="dtyLabel" for="ugr_ID">Code:</label>
+		<label id="ugr_ID"></label>
 	</div>
+	<div class="dtyField">
+		<label class="dtyLabel" for="ugr_FirstName">First name:</label>
+		<input id="ugr_FirstName" style="width:200;" maxlength="40" />
+	</div>
+	<div class="dtyField">
+		<label class="dtyLabel" for="ugr_LastName">Last name:</label>
+		<input id="ugr_LastName" style="width:200;" maxlength="63" />
+	</div>
+	<div class="dtyField">
+		<label class="dtyLabel" for="ugr_eMail">Email:</label>
+		<input id="ugr_eMail" style="width:200;" maxlength="100" onkeyup="document.getElementById('ugr_Name').value=this.value;"/>
+		<div class="help prompt help1">
+			<label>This will be your User Name</label>
+		</div>
+	</div>
+	<div class="dtyField">
+		<label class="dtyLabel" for="ugr_Organisation">Institution/company:</label>
+		<input id="ugr_Organisation" style="width:200;" maxlength="120" />
+		<div class="help prompt help1">
+			<label>Enter 'None' if not affiliated with an institution or company </label>
+		</div>
+	</div>
+	<div class="dtyField">
+		<label class="dtyLabel" for="ugr_Interests">Research Interests:</label>
+		<input id="ugr_Interests" style="width:200;" maxlength="255" />
+		<div class="help prompt help1">
+			<label>To be defined????</label>
+		</div>
+	</div>
+	<div class="dtyField">
+		<label class="dtyLabel" for="ugr_Name">Login:</label>
+		<input id="ugr_Name" style="width:200;" maxlength="63" />
+	</div>
+	<div class="dtyField">
+		<label class="dtyLabel" for="ugr_Password">Password:</label>
+		<input id="ugr_Password" type="password" style="width:200;" maxlength="40" />
+	</div>
+	<div class="dtyField">
+		<label class="dtyLabel" for="ugr_Password2">Repeat password:</label>
+		<input id="ugr_Password2" type="password" style="width:200;" maxlength="40" />
+		<div class="help prompt help1" style="padding-left: 10px;">
+			<label>Warning: this is not an encrypted connection, so please don't use your institutional or banking password.</label>
+		</div>
+	</div>
+
+	<div class="dtyField">
+		<label class="dtyLabel" for="ugr_Department">Department:</label>
+		<input id="ugr_Department" style="width:200;" maxlength="120" />
+	</div>
+	<div class="dtyField">
+		<label class="dtyLabel" for="ugr_City">Suburb/City:</label>
+		<input id="ugr_City" style="width:200;" maxlength="63" />
+	</div>
+	<div class="dtyField">
+		<label class="dtyLabel" for="ugr_State">State:</label>
+		<input id="ugr_State" style="width:200;" maxlength="40" />
+	</div>
+	<div class="dtyField">
+		<label class="dtyLabel" for="ugr_Postcode">Post/zipcode:</label>
+		<input id="ugr_Postcode" style="width:200;" maxlength="20" />
+	</div>
+	<div class="dtyField">
+		<label class="dtyLabel" style="vertical-align:top" for="ugr_Description">Description:</label>
+		<textarea cols="200" id="ugr_Description" rows="2" style="width:420;"></textarea>
+	</div>
+	<div class="dtyField">
+		<label class="dtyLabel" style="vertical-align:top" for="ugr_URLs">URLs:</label>
+		<textarea cols="200" id="ugr_URLs" rows="2" style="width:420;"></textarea>
+	</div>
+
+
+	<div class="dtyField">
+		<label class="dtyLabel" for="ugr_Enabled">Enabled:</label>
+		<input id="ugr_Enabled" type="checkbox"/>
+		<div class="help prompt help1">
+			<label>Whether this user is enabled</label>
+		</div>
+	</div>
+
 </div>
-<br>
+<br/>
+<div id="btn_edits" class="actionButtons">
+<input type="button" style="height: 25px; width: 99px" value="Save" onclick="window.userEditor.save();" />
+<input type="button" style="height: 25px; width: 99px" value="Cancel" onclick="window.userEditor.cancel();" />
+</div>
+<div id="btn_view" class="actionButtons" style="display:none;padding-right: 240px">
+<input type="button" style="height: 25px; width: 99px" value="Close" onclick="window.close(null);" />
+</div>
+</div>
 
-[if : approve]
- [if-eq : ugr_Enabled : "Y"]
-  <p class="red"><b>This user has already been approved</b></p>
- [else]
-  <input type="hidden" name="approved" value="1">
-  <input type="hidden" name="ugr_Enabled" value="1">
-  &nbsp;&nbsp;&nbsp;<input type="submit" value="approve user">&nbsp;&nbsp;&nbsp;
-  <p class="red">An email will be sent to the user informing them that they have been approved</p>
- [end-if-eq]
-[else]
- &nbsp;&nbsp;&nbsp;<input type="submit" value="save">&nbsp;&nbsp;&nbsp;
-[end-if]
+<script type="text/javascript">
 
-[end-update]
+	var userEditor;
 
-[not-found]
-  <span class="normalgr"><i>User not found</i></span>
-  <p><a href="findAddUser.php?db=[dbname!]">Search for / add users</a></p>
- </body>
-[end-not-found]
+	//
+	//  starts initialization on load completion of this window
+	//
+	function loadHandler(){
+		window.userEditor = new UserEditor();
+	}
+	YAHOO.util.Event.addListener(window, "load", loadHandler );
+	//function(){userEditor = new GroupEditor();} );
+	//to implment window.onbeforeunload = onbeforeunload;
 
-<p><span class="red">[errors]</span></p>
-
-[if : edit-success]
-<p class="red">Details saved</p>
-  [if : password-not-changed]
-    <p class="red">Password not changed!</p>
-  [end-if]
-[end-if]
+</script>
 
 
-
-
-</td></tr></table>
-</form>
 </body>
 </html>

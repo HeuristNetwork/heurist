@@ -1438,3 +1438,10 @@ function showPopupDivAt(_div, xy, offset){
 			left:left_pos+'px', top:top_pos+'px'
 		});
 }
+
+/**
+* write script - should be used in top of page
+*/
+function loadScript(url){
+	this.document.write("<script src=\"" + url + "\"></script>");
+}
