@@ -34,7 +34,8 @@ function GroupEditor() {
 			_recID,     // its ID
 			_updatedFields = [], //field names which values were changed to be sent to server
 			_updatedDetails = [], //field values
-			_db;
+			_db,
+			_isAdmin = true;
 
 	/**
 	* Initialization of input form
@@ -43,7 +44,7 @@ function GroupEditor() {
 	*/
 	function _init() {
 
-		var isAdmin = true;
+		_isAdmin = true;
 
 		var typeID;
 		_db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
@@ -68,16 +69,16 @@ function GroupEditor() {
 		if(isnull(_entity)){
 			_recID =  -1;
 			//"ugr_ID", "ugr_Type", "ugr_Name", "ugr_LongName", "ugr_Description", "ugr_URLs", "ugr_Enabled");
-			_entity = [-1,'workgroup','','','','',1];
+			_entity = [-1,'workgroup','','','','','y'];
 		}else{
 			//permisssions
-			isAdmin = (top.HEURIST.is_admin() || _entity.admins.indexOf(String(top.HEURIST.get_user_id()))>=0);
+			_isAdmin = (top.HEURIST.is_admin() || _entity.admins.indexOf(String(top.HEURIST.get_user_id()))>=0);
 		}
 
 		//fills input with values from _entity array
 		_fromArrayToUI();
 
-		if(!isAdmin){
+		if(!_isAdmin){
 			//hide and rename buttons
 			Dom.get("btn_edits").style.display = "none";
 			Dom.get("btn_view").style.display = "block";
@@ -120,6 +121,7 @@ function GroupEditor() {
 				}
 
 				el.value = _entity[i];
+				el.readOnly = !_isAdmin;
 			}
 		}
 
@@ -128,14 +130,16 @@ function GroupEditor() {
 			document.title = "Create New Group";
 		}else{
 			Dom.get("ugr_ID").innerHTML =  _recID;
-			document.title = "Group #: " + _recID+" '"+_entity[3]+"'";
+			document.title = "Group #: " + _recID+" '"+_entity[2]+"'";
 
 			//var iusage = top.HEURIST.workgroups[_recID].memberCount;
 
 			Dom.get("statusMsg").innerHTML = "";
 		}
 
-		Dom.get("ugr_Enabled").onchange = _onChangeEnable;
+		if(_isAdmin){
+				Dom.get("ugr_Enabled").onchange = _onChangeEnable;
+		}
 	}
 
 

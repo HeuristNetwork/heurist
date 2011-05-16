@@ -73,7 +73,7 @@ error_log(">>>>>>>>>>>>>>> userEmail=".urldecode(@$_GET['userEmail']));*/
 		$userGrp = array();
 		$userGrp['userslist'] = array();
 
-error_log(">>>>>>>>>>>>>>> QUERY =".$query);
+//error_log(">>>>>>>>>>>>>>> QUERY =".$query);
 
 		$res = mysql_query($query);
 		while ($row = mysql_fetch_row($res)) {
@@ -91,7 +91,7 @@ error_log(">>>>>>>>>>>>>>> QUERY =".$query);
 		$filter1 = "";
 		$filter2 = "";
 
-		if($f_user!=null && f_user!=""){
+		if($f_user!=null && $f_user!=""){
 			$filter1 = ", ".USERS_DATABASE.".sysUsrGrpLinks gl2 ";
 			$filter2 = " and grp.ugr_ID=gl2.ugl_GroupID and gl2.ugl_UserID=".$f_user;
 
@@ -116,7 +116,7 @@ error_log(">>>>>>>>>>>>>>> QUERY =".$query);
 						   and b.ugr_Enabled  = 'y' $filter2
 					  group by grp.ugr_ID order by grp.ugr_Name";
 
-error_log(">>>>>>>>>>>>>>>>>>".$query);
+//error_log(">>>>>>>>>>>>>>>>>>".$query);
 
 		$res = mysql_query($query);
 
@@ -185,7 +185,7 @@ error_log(">>>>>>>>>>>>>>>>>>".$query);
 
 		$query = "select ".join(",", $colNames)." from ".USERS_DATABASE.".sysUGrps where ";
 
-		if($userID!="0"){
+		if($groupID!="0"){
 			$query = $query."ugr_ID=".$groupID;
 		}else{
 			$query = null;

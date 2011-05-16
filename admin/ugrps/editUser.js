@@ -34,7 +34,8 @@ function UserEditor() {
 			_recID,     // its ID
 			_updatedFields = [], //field names which values were changed to be sent to server
 			_updatedDetails = [], //field values
-			_db;
+			_db,
+			_isAdmin = true;
 
 	/**
 	* Initialization of input form
@@ -43,7 +44,7 @@ function UserEditor() {
 	*/
 	function _init() {
 
-		var isAdmin = true;
+		_isAdmin = true;
 
 		var groupID;
 		_db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
@@ -70,7 +71,7 @@ function UserEditor() {
 			_entity = [-1,'user','','','','','','','','','','','','','y',''];
 		}else{ //reset password
 			//permisssions
-			isAdmin = (top.HEURIST.is_admin() || _recID == top.HEURIST.get_user_id());
+			_isAdmin = (top.HEURIST.is_admin() || _recID == top.HEURIST.get_user_id());
 
 			_entity[4] = "";
 		}
@@ -79,7 +80,7 @@ function UserEditor() {
 		_fromArrayToUI();
 
 
-		if(!isAdmin){
+		if(!_isAdmin){
 			//hide and rename buttons
 			Dom.get("btn_edits").style.display = "none";
 			Dom.get("btn_view").style.display = "block";
@@ -124,11 +125,14 @@ function UserEditor() {
 			if(!isnull(el)){
 				if( fname === "ugr_Enabled" ){  // el.type === "checkbox"
 					el.checked = (_entity[i]==="y");
-					el.onchange = _onChangeEnable;
+					if(_isAdmin){
+						el.onchange = _onChangeEnable;
+					}
 
 					_toggleAll(!el.checked, true);
 				}else{
 					el.value = _entity[i];
+					el.readOnly = !_isAdmin;
 				}
 			}
 		}

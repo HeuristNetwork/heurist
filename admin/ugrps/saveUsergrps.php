@@ -137,12 +137,13 @@
 
 		$recIds	= @$_REQUEST['recIDs'];
 		$newRole = @$_REQUEST['role'];
+		$oldRole = @$_REQUEST['oldrole'];
 
 		if (!$recID || !$recIds || !$newRole) {
 			$rv = array();
 			$rv['error'] = "invalid or not IDs sent with changeRole method call to saveUsergrps.php";
 		}else{
-			$rv = changeRole($recID, $recIds, $newRole);
+			$rv = changeRole($recID, $recIds, $newRole, $oldRole, true);
 			if (!array_key_exists('error',$rv)) {
 				//$rv['rectypes'] = getAllRectypeStructures();
 			}
@@ -167,7 +168,11 @@
 	* @param mixed $recID
 	*/
 	function checkPermission( $type, $recID ) {
-				$ret = null;
+
+		global $db;
+
+		$ret = null;
+
 			if(	!is_admin() ){
 				if($type=='user'){
 					if ( $recID != get_user_id() ){
@@ -198,7 +203,7 @@
 	* @param mixed $commonNames
 	* @param mixed $rt
 	*/
-	function updateUserGroup( $type, $colNames, $recID, $values) {
+	function updateUserGroup( $type, $colNames, $recID, $values ) {
 
 		global $db, $sysUGrps_ColumnNames;
 
@@ -210,7 +215,7 @@
 
 			//check rights for update
 			if(!$isInsert){
-				$ret = checkPermission($type,$recID);
+				$ret = checkPermission($type, $recID);
 				if($ret!=null) return $ret;
 			}
 
@@ -267,8 +272,6 @@
 					$query = "update sysUGrps set ".$query." where ugr_ID = $recID";
 				}
 
-//error_log(">>>>>>>>>>>>>>>>>>>>>>>>>>> ".$query);
-
 				$rows = execSQL($db, $query, $parameters, true);
 
 				if (!is_numeric($rows) || $rows==0) {
@@ -278,8 +281,8 @@
 					if($isInsert){
 						$recID = $db->insert_id;
 
-					if($type=='user'){
-						$email_text =
+						if($type=='user'){
+							$email_text =
 "Your Heurist account registration has been approved.
 
 Login at:
@@ -293,20 +296,22 @@ also visiting the Help function, which provides comprehensive
 overviews and step-by-step instructions for using Heurist.
 
 ";
-//error_log("sending user confirmation mail: " . $ugr_FirstName.' '.$ugr_LastName.' ['.$ugr_eMail.']');
-						$rv = mail($ugr_eMail, 'Heurist User Registration: '.$ugr_FirstName.' '.
+							$rv = mail($ugr_eMail, 'Heurist User Registration: '.$ugr_FirstName.' '.
 								$ugr_LastName.' ['.$ugr_eMail.']', $email_text,
 								"From: info@acl.arts.usyd.edu.au\r\nCc: info@acl.arts.usyd.edu.au");
-						if (! $rv) {
-							error_log("mail send failed: " . $ugr_eMail);
-						}
+							if (! $rv) {
+								error_log("mail send failed: " . $ugr_eMail);
+							}
 
-					}else{//add current user as admin for new group
+							}else{//add current user as admin for new group
 
-							changeRole($recID, get_user_id(), "admin");
-					}
-						$ret = -$recID;
+								changeRole($recID, get_user_id(), "admin", null, false);
+							}
+							$ret = -$recID;
 					}//if $isInsert
+					else{
+						$ret = $recID;
+					}
 				}
 			}
 		} //if column names
@@ -339,7 +344,6 @@ overviews and step-by-step instructions for using Heurist.
 
 		$rows = execSQL($db, $query, null, true);
 
-//error_log("QQQQQQQQQQQQQQQQQQQQQQQQQQQ>>>>>".$query."   >>>".$rows);
 
 		if (!is_numeric($rows)) {
 			$ret['error'] = "error finding Records for User $recID in deleteUser - ".$rows;
@@ -347,7 +351,7 @@ overviews and step-by-step instructions for using Heurist.
 			$ret['error'] = "Error. Deleting User ($recID) with existing Records not allowed";
 		} else { // no Records belong this User -  ok to delete this User.
 
-			$checkLastAdmin = checkLastAdmin($recID);
+			$checkLastAdmin = checkLastAdmin($recID, null);
 			if($checkLastAdmin!=null){
 				$ret['error'] = $checkLastAdmin;
 				return;
@@ -393,7 +397,6 @@ overviews and step-by-step instructions for using Heurist.
 		$query = "select rec_ID from Records where rec_OwnerUGrpID=$recID limit 1";
 		$rows = execSQL($db, $query, null, true);
 
-//error_log("QQQQQQQQQQQQQQQQQQQQQQQQQQQ>>>>>".$query."   >>>".$rows);
 
 		if (!is_numeric($rows)) {
 			$ret['error'] = "error finding Records for User $recID in deleteGroup - ".$rows;
@@ -435,23 +438,32 @@ overviews and step-by-step instructions for using Heurist.
 	*
 	* @param mixed $recID - user ID
 	*/
-	function checkLastAdmin($recID){
+	function checkLastAdmin($recID, $groupID){
 			global $db;
 			$query =
 "select g1.ugl_GroupID,
-(select count(*) from sysUsrGrpLinks as g2 where g1.ugl_GroupID=g2.ugl_GroupID and g2.ugl_Role='admin') as adm,
-(select count(*) from sysUsrGrpLinks as g2 where g1.ugl_GroupID=g2.ugl_GroupID and g2.ugl_Role='member') as mem
+(select count(*) from sysUsrGrpLinks as g2 where g1.ugl_GroupID=g2.ugl_GroupID and g2.ugl_Role='admin') as adm
 from sysUsrGrpLinks as g1 where g1.ugl_UserID=$recID and g1.ugl_Role='admin'";
+
+//, (select count(*) from sysUsrGrpLinks as g3 where g1.ugl_GroupID=g3.ugl_GroupID and g3.ugl_Role='member') as mem
+
+			if($groupID){
+				$query = $query." and g1.ugl_GroupID=$groupID";
+			}
+
+error_log(">>>>>>>>>>>>>>>>>>>>	".$query);
 
 			$rows = execSQL($db, $query, null, false);
 
-error_log("QQQQQQQQQQQQQQQQQQQQQQQQQQQ>>>>>   >>>".$rows);
 			if (is_string($rows)){
 				$ret['error'] = "db error finding number of possible orphan groups for User $recID from sysUsrGrpLinks - ".$rows;
 				return $ret;
 			}
 			foreach ($rows as $row) {
-				if($row[1]<2 && $row[2]>0){
+
+error_log("ROWS   >>>".$row[1]."   <<<<<<<<<<<<"); //."  ".$row[2].
+
+				if($row[1]<2){ // && $row[2]>0){
 					return "error deleting User #$recID since it is the only admin for Group #$row[0]";
 				}
 			}
@@ -465,24 +477,29 @@ error_log("QQQQQQQQQQQQQQQQQQQQQQQQQQQ>>>>>   >>>".$rows);
 	* @param mixed $recIds - comma separated list of affected user IDs
 	* @param mixed $newRole - new role
 	*/
-	function changeRole($grpID, $recIds, $newRole){
+	function changeRole($grpID, $recIds, $newRole, $oldRole, $needCheck){
 		global $db;
 
 		$ret = array();
 
-		$ret2 = checkPermission('group', $grpID);
-		if($ret2!=null) {
-			$ret['error'] = $ret2;
-			return $ret;
+		if($needCheck){
+			$ret2 = checkPermission('group', $grpID);
+			if($ret2!=null) {
+				$ret['error'] = $ret2;
+				return $ret;
+			}
 		}
 
+error_log("QQQQQQQQQQQQQQ>>>>>>>>>>>>>>>>>>>>".$recIds."   ".is_numeric($recIds)."<<<<<<");
 
 		if(is_numeric($recIds)){
-			$arr = array($recIds);
-			//$arr[0] = $recIds;
+			$arr = array();
+			$arr[0] = $recIds;
 		}else{
 			$arr = split(",", $recIds);
 		}
+
+error_log("QQQQQQQQQQQQQQ>>>>>>>>>>>>>>>>>>>>".$arr[0]);
 
 		//remove from group
 		if($newRole=="delete"){
@@ -491,9 +508,9 @@ error_log("QQQQQQQQQQQQQQQQQQQQQQQQQQQ>>>>>   >>>".$rows);
 			$ret['errors'] = array();
 
 			foreach ($arr as $userID) {
-				$error = checkLastAdmin($userID);
+				$error = checkLastAdmin($userID, $grpID);
 				if($error==null){
-					$query = "delete from sysUsrGrpLinks where ugl_UserID=$userID";
+					$query = "delete from sysUsrGrpLinks where ugl_UserID=$userID and ugl_GroupID=$grpID";
 					$rows = execSQL($db, $query, null, true);
 					if (!is_numeric($rows) || $rows==0) {
 						// error delete reference for this user
@@ -513,24 +530,34 @@ error_log("QQQQQQQQQQQQQQQQQQQQQQQQQQQ>>>>>   >>>".$rows);
 			$query = "INSERT INTO sysUsrGrpLinks (ugl_GroupID, ugl_UserID, ugl_Role) VALUES ";
 			$nofirst = false;
 
+			$ret['errors'] = array();
+
 			foreach ($arr as $userID) {
 
-				if($nofirst) {
-					$query	= $query.", ";
+				if($oldRole==="admin" && $newRole==="member"){
+					$error = checkLastAdmin($userID, $grpID);
+					array_push($ret['errors'], array($userID=>"last admin in group"));
+				}else{
+
+					if($nofirst) {
+						$query	= $query.", ";
+					}
+					$query	= $query."($grpID, $userID, '$newRole')";
+					$nofirst = true;
 				}
-				$query	= $query."($grpID, $userID, '$newRole')";
-				$nofirst = true;
 			}
 
-			$query	= $query." ON DUPLICATE KEY UPDATE ugl_Role='$newRole'";
+			if($nofirst){
 
-error_log("CHNAGE ROLE >>>>>>>>>>".$query);
-			$rows = execSQL($db, $query, null, true);
+				$query	= $query." ON DUPLICATE KEY UPDATE ugl_Role='$newRole'";
 
-			if (!is_numeric($rows) || $rows==0) {
-				$ret['error'] = "db error changing roles in sysUsrGrpLinks - ".$rows;
-			} else {
-				$ret['result'] = $recIds;
+				$rows = execSQL($db, $query, null, true);
+
+				if (!is_numeric($rows) || $rows==0) {
+					$ret['error'] = "db error changing roles in sysUsrGrpLinks - ".$rows;
+				} else {
+					$ret['result'] = $recIds;
+				}
 			}
 
 		}

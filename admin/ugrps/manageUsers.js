@@ -415,6 +415,9 @@ elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete
 
 			//role selector handler
 			_myDataTable.subscribe('dropdownChangeEvent', function(oArgs){
+
+				if (isnull(_grpID)) { return; }
+
 				var elDropdown = oArgs.target;
 				var record = this.getRecord(elDropdown);
 				var column = this.getColumn(elDropdown);
@@ -428,9 +431,12 @@ elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete
 
 					//keep the track of changes in special object
 					//TODO _updateUser(record);
-					var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUserGrps.php";
-					var params = "method=changeRole&db="+_db+"&role=" + newValue+"&recIDs="+encodeURIComponent(data.id);
-					top.HEURIST.util.getJsonData(baseurl, _updateRole, params);
+					var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
+					var params = "method=changeRole&db="+_db+"&recID=" + _grpID +
+								"&oldrole=" + oldValue+
+								"&role=" + newValue+"&recIDs="+encodeURIComponent(data.id);
+					top.HEURIST.util.getJsonData(baseurl,
+							((newValue==="delete")?_updateRoles:_updateRole), params);
 
 				}
 			});
@@ -446,12 +452,25 @@ elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete
 	function _updateRole(context) {
 		if(isnull(context) || !context) {
 			alert("Server side error");
+		}else if(context.error){
+				alert("An error occurred trying to change role: "+context.error);
+		}else if(context.errors && context.errors.length>0){
+				alert("An error occurred trying to change role");
 		}else{
-			if(context.errors){
-				alert("An error occurred trying to change role ");
-			}
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	*
+	*/
+	function _updateRoles(context) {
+		if(_updateRole(context)){
+			_updateFilter();
 		}
 	}
+
 
 	//
 	//
@@ -562,6 +581,7 @@ elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete
 	var _updateGroupList = function (context) {
 
 		_workgroups = context.workgroups;
+		//_workgroupIDs = context.workgroupIDs;
 
 		_handlerGroupSelector();
 		_initTable([]);
@@ -587,17 +607,22 @@ elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete
 	function _handlerGroupSelector(e)
 	{
 		if(!( _isSelection || isnull(_grpID) )){
+
+			if(isnull(_workgroups[_grpID])){
+				_grpID = null;
+			}else{
 			//if group id is defined as parameter - hide filter by group div
-			var divfil = Dom.get("pnlFilterByGroup");
-			divfil.style.display = "none";
-			Dom.get("pnlGroupTitle").style.display = "block";
-			Dom.get("lblGroupTitle").innerHTML = "USERS - members of '"+_workgroups[_grpID].name+"'";
-			return;
+				var divfil = Dom.get("pnlFilterByGroup");
+				divfil.style.display = "none";
+				Dom.get("pnlGroupTitle").style.display = "block";
+				Dom.get("lblGroupTitle").innerHTML = "USERS - members of '"+_workgroups[_grpID].name+"'";
+				return;
+			}
 		}
 
 		Dom.get("pnlGroupTitle").style.display = "none";
 
-		if( _isSelection && !isnull(_grpID) ){
+		if( _isSelection && !isnull(_grpID) && _grpID!=="all"){
 			Dom.get("lblGroupTitleSelection").innerHTML = "Select and add users for group '"+_workgroups[_grpID].name+"'";
 		}
 
@@ -721,12 +746,16 @@ elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete
 			"no-resize": false,
 			height: 560,
 			width: 640,
-			callback: function(changedValues) {
-				/*if(isnull(changedValues)) {
-					// Canceled
-				} else {
-					// TODO: reload datatable
-				}*/
+			callback: function(context) {
+				if(!isnull(context)){
+
+					//update id
+					var recID = Math.abs(Number(context.result[0]));
+
+					//refresh table
+					_updateFilter();
+
+				}
 			}
 		});
 	}
@@ -737,7 +766,7 @@ elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete
 	function _findAndAddUser() {
 
 		var url = top.HEURIST.baseURL + "admin/ugrps/manageUsers.html?db=" +
-										_db + "&selection=1&grpID="+filterByGroup.value;
+										_db + "&selection=1&grpID="+(isnull(_grpID)?filterByGroup.value:_grpID);
 
 		top.HEURIST.util.popupURL(top, url,
 		{   "close-on-blur": false,
@@ -746,7 +775,14 @@ elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete
 			width: 820,
 			callback: function(usersSelected) {
 				if(!isnull(usersSelected)){
-alert(usersSelected);
+//alert(usersSelected);
+
+					var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
+					var params = "method=changeRole&db="+_db+"&recID=" + _grpID +
+								"&role=member&recIDs="+encodeURIComponent(usersSelected);
+					top.HEURIST.util.getJsonData(baseurl, _updateRoles, params);
+
+
 				}
 			}
 		});

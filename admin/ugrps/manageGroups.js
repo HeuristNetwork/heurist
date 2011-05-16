@@ -321,7 +321,7 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 				}else if(elLink.hash === "#delete_group"){
 					YAHOO.util.Event.stopEvent(oArgs.event);
 
-					if(Number(oRecord.getData('members'))<1){
+					if(true){ //Number(oRecord.getData('members'))<1){
 
 						var value = prompt("Enter \"DELETE\" if you really want to delete group '"+oRecord.getData('name')+"'");
 						if(true || value === "DELETE") {
@@ -341,7 +341,7 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 							var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
 							var callback = _updateAfterDelete;
 							var params = "method=deleteGroup&db=" + _db + "&recID=" + recID;
-							//TODO!!!! top.HEURIST.util.getJsonData(baseurl, callback, params);
+							top.HEURIST.util.getJsonData(baseurl, callback, params);
 
 						}else{
 							alert("Impossible to delele group in usage");
@@ -630,10 +630,6 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 
 					//update id
 					var recID = Math.abs(Number(context.result[0]));
-
-					//refresh the local heurist
-					//top.HEURIST.workgroupIDs = context.workgroupIDs;
-					//top.HEURIST.workgroups = context.workgroups;
 
 					//refresh table
 					_updateFilter();
