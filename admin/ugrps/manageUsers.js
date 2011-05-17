@@ -66,7 +66,7 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 		}
 
 		_initTable(arr);
-	}
+	};
 
 	/**
 	* Updates REMOTE filter conditions and loads data from server side
@@ -101,7 +101,7 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 							Dom.get("btnSelectAdd2").style.display	 = nstyle;
 							if(_myDataTable) {
 									var col = _myDataTable.getColumn("role2");
-									col.hidden = _isSelection || !isNotAdmin;
+									col.hidden = !_isSelection || !isNotAdmin;
 
 									_myDataTable.getColumn("role").hidden = _isSelection || isNotAdmin;
 									_myDataTable.getColumn("role").label = "Role";
@@ -117,7 +117,8 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 			var grpID;
 			for (grpID in _workgroups)
 			{
-				if(grpID == __grpID){
+				if(grpID === __grpID){
+					var ind;
 					var admins = _workgroups[grpID].admins;
 					for (ind in admins){
 						if(!isnull(ind) && admins[ind].id === curruser_id)
@@ -150,7 +151,7 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 								scope   : _myDataTable,
 								argument : { pagination: { recordOffset: 0 } } // to jump to page 1
 							});
-	}
+	};
 
 
 	/**
@@ -186,7 +187,10 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 				}
 
 				_grpID = grpID;
-				//////////////////// create data table
+
+
+				Dom.get('currUserInfo').innerHTML = 'DEBUG '+top.HEURIST.get_user_name();
+
 
 				//init listeners for filter controls
 				_initListeners();
@@ -309,7 +313,7 @@ elLiner.innerHTML = '<a href="#edit_user"><img src="../../common/images/edit_ico
 				}},
 			{ key: "role", label: "Role", sortable:false, hidden: true, width:70,
 				formatter:YAHOO.widget.DataTable.formatDropdown, dropdownOptions:_roles},
-			{ key: "id", label: "Delete", width:20, sortable:false, hidden:(_isSelection || top.HEURIST.is_admin()),
+			{ key: "id", label: "Delete", width:20, sortable:false, hidden:(_isSelection || !top.HEURIST.is_admin()),
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete_icon.png" width="16" height="16" border="0" title="Delete this User" /><\/a>';
 				}
@@ -363,7 +367,7 @@ elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete
 					YAHOO.util.Event.stopEvent(oArgs.event);
 
 						var value = prompt("Enter \"DELETE\" if you really want to delete user '"+oRecord.getData('fullname')+"'");
-						if(true || value === "DELETE") {
+						if(value === "DELETE") {
 
 							function _updateAfterDelete(context) {
 
@@ -424,10 +428,20 @@ elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete
 				var newValue = elDropdown.options[elDropdown.selectedIndex].value;
 				var oldValue = record.getData(column.key);
 
-				if(newValue!=="invitred" && newValue!=="request" && newValue!=oldValue)
+				if(newValue!=="invited" && newValue!=="request" && newValue!==oldValue)
 				{
 					var data = record.getData();
-					data.role = newValue;
+
+					function __onUpdateRole(context){
+						if(_updateRole(context)){
+							data.role = newValue;
+							if(newValue==="delete"){
+								_updateFilter();
+							}
+						}else{ //restore previous value in dropdown
+							elDropdown.value = oldValue;
+						}
+					}
 
 					//keep the track of changes in special object
 					//TODO _updateUser(record);
@@ -435,8 +449,7 @@ elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete
 					var params = "method=changeRole&db="+_db+"&recID=" + _grpID +
 								"&oldrole=" + oldValue+
 								"&role=" + newValue+"&recIDs="+encodeURIComponent(data.id);
-					top.HEURIST.util.getJsonData(baseurl,
-							((newValue==="delete")?_updateRoles:_updateRole), params);
+					top.HEURIST.util.getJsonData(baseurl, __onUpdateRole, params);
 
 				}
 			});
@@ -455,7 +468,15 @@ elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete
 		}else if(context.error){
 				alert("An error occurred trying to change role: "+context.error);
 		}else if(context.errors && context.errors.length>0){
-				alert("An error occurred trying to change role");
+			var ind;
+			var rep = "";
+			for (ind in context.errors){
+				if (!isnull(ind) ){
+					rep = rep + context.errors[ind]+" ";
+				}
+			}
+
+			alert(rep);
 		}else{
 			return true;
 		}
@@ -630,7 +651,7 @@ elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete
 
 		if(!isnull(e)) {
 			sfilter = e.target.value.toLowerCase();
-			if(sfilter.length<3) sfilter = null;
+			if(sfilter.length<3) { sfilter = null; }
 		}
 
 		var grpID, grpName, option;
@@ -664,7 +685,7 @@ elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete
 										// for IE earlier than version 8
 										filterByGroup.add(option, filterByGroup.options[null]);
 									}
-									catch (e)
+									catch (e2)
 									{
 										filterByGroup.add(option,null);
 									}
@@ -775,7 +796,7 @@ elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete
 			width: 820,
 			callback: function(usersSelected) {
 				if(!isnull(usersSelected)){
-//alert(usersSelected);
+//DEBUG alert(usersSelected);
 
 					var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
 					var params = "method=changeRole&db="+_db+"&recID=" + _grpID +

@@ -71,7 +71,7 @@ function UserEditor() {
 			_entity = [-1,'user','','','','','','','','','','','','','y',''];
 		}else{ //reset password
 			//permisssions
-			_isAdmin = (top.HEURIST.is_admin() || _recID == top.HEURIST.get_user_id());
+			_isAdmin = (top.HEURIST.is_admin() || _recID === top.HEURIST.get_user_id());
 
 			_entity[4] = "";
 		}
@@ -103,7 +103,7 @@ function UserEditor() {
 		for (i = 0, l = fnames.length; i < l; i++) {
 			var fname = fnames[i];
 			el = Dom.get(fname);
-			if(!(isnull(el) || fname=="ugr_Enabled")) {
+			if(!(isnull(el) || fname==="ugr_Enabled")) {
 				el.disabled = disable;
 			}
 		}
@@ -306,8 +306,7 @@ function UserEditor() {
 
 
 		if(str !== null) {
-//DEBUG
-alert("Stringified changes: " + str);
+//DEBUG alert("Stringified changes: " + str);
 
 			// 3. sends data to server
 			var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";

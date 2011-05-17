@@ -451,22 +451,23 @@ from sysUsrGrpLinks as g1 where g1.ugl_UserID=$recID and g1.ugl_Role='admin'";
 				$query = $query." and g1.ugl_GroupID=$groupID";
 			}
 
-error_log(">>>>>>>>>>>>>>>>>>>>	".$query);
+//DEBUG error_log("CHECK LAST ADMIN >>>>>>>>>>>>>>>>>>>>	".$query);
 
-			$rows = execSQL($db, $query, null, false);
+			$resquery = execSQL($db, $query, null, false);
 
-			if (is_string($rows)){
-				$ret['error'] = "db error finding number of possible orphan groups for User $recID from sysUsrGrpLinks - ".$rows;
+			if (is_string($resquery)){
+				$ret = "DB error finding number of possible orphan groups for User $recID from sysUsrGrpLinks - ".$resquery;
 				return $ret;
 			}
-			foreach ($rows as $row) {
 
-error_log("ROWS   >>>".$row[1]."   <<<<<<<<<<<<"); //."  ".$row[2].
+			while ($row = mysqli_fetch_row($resquery)) {
+//DEBUG error_log("ROWS   >>>".$row[1]."   <<<<<<<<<<<<"); //."  ".$row[2].
 
-				if($row[1]<2){ // && $row[2]>0){
-					return "error deleting User #$recID since it is the only admin for Group #$row[0]";
-				}
+					if($row[1]<2){ // && $row[2]>0){
+						return "Error change role/deleteing for User #$recID since it is the only admin for Group #$row[0]";
+					}
 			}
+
 			return null;
 	}
 
@@ -490,17 +491,12 @@ error_log("ROWS   >>>".$row[1]."   <<<<<<<<<<<<"); //."  ".$row[2].
 			}
 		}
 
-error_log("QQQQQQQQQQQQQQ>>>>>>>>>>>>>>>>>>>>".$recIds."   ".is_numeric($recIds)."<<<<<<");
-
 		if(is_numeric($recIds)){
 			$arr = array();
 			$arr[0] = $recIds;
 		}else{
 			$arr = split(",", $recIds);
 		}
-
-error_log("QQQQQQQQQQQQQQ>>>>>>>>>>>>>>>>>>>>".$arr[0]);
-
 		//remove from group
 		if($newRole=="delete"){
 
@@ -510,17 +506,18 @@ error_log("QQQQQQQQQQQQQQ>>>>>>>>>>>>>>>>>>>>".$arr[0]);
 			foreach ($arr as $userID) {
 				$error = checkLastAdmin($userID, $grpID);
 				if($error==null){
+
+//DEBUG error_log("DELETED DELETED DELETED DELETED DELETED DELETED DELETED DELETED ");
 					$query = "delete from sysUsrGrpLinks where ugl_UserID=$userID and ugl_GroupID=$grpID";
 					$rows = execSQL($db, $query, null, true);
 					if (!is_numeric($rows) || $rows==0) {
 						// error delete reference for this user
-						//$ret['error'] = "db error deleting relations for User $recID from sysUsrGrpLinks - ".$rows;
-						array_push($ret['errors'], array($userID=>"db error deleting relations"));
+						array_push($ret['errors'], "db error deleting relations for user# $userID");
 					}else{
 						array_push($ret['results'], $userID);
 					}
 				}else{
-						array_push($ret['errors'], array($userID=>"last admin in group"));
+						array_push($ret['errors'], $error);
 				}
 			}
 
@@ -531,21 +528,33 @@ error_log("QQQQQQQQQQQQQQ>>>>>>>>>>>>>>>>>>>>".$arr[0]);
 			$nofirst = false;
 
 			$ret['errors'] = array();
+			$resIDs = "";
 
 			foreach ($arr as $userID) {
 
 				if($oldRole==="admin" && $newRole==="member"){
 					$error = checkLastAdmin($userID, $grpID);
-					array_push($ret['errors'], array($userID=>"last admin in group"));
+					array_push($ret['errors'], $error);
 				}else{
 
 					if($nofirst) {
 						$query	= $query.", ";
+						$resIDs = $resIDs.", ";
 					}
 					$query	= $query."($grpID, $userID, '$newRole')";
+					$resIDs = $resIDs."$userID";
 					$nofirst = true;
 				}
 			}
+
+/* DEBUG
+			if($nofirst){
+error_log("DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO  $newRole");
+				//$nofirst = false;
+				//$ret['result'] = $resIDs;
+			}
+*/
+
 
 			if($nofirst){
 
@@ -554,9 +563,9 @@ error_log("QQQQQQQQQQQQQQ>>>>>>>>>>>>>>>>>>>>".$arr[0]);
 				$rows = execSQL($db, $query, null, true);
 
 				if (!is_numeric($rows) || $rows==0) {
-					$ret['error'] = "db error changing roles in sysUsrGrpLinks - ".$rows;
+					$ret['error'] = "DB error changing roles in sysUsrGrpLinks - ".$rows;
 				} else {
-					$ret['result'] = $recIds;
+					$ret['result'] = $resIDs;
 				}
 			}
 

@@ -150,6 +150,7 @@ function GroupManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 				}
 
+//		Dom.get('currUserInfo').innerHTML = 'DEBUG '+top.HEURIST.get_user_name();
 
 				_usrID = usrID;
 				//////////////////// create data table
@@ -321,10 +322,8 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 				}else if(elLink.hash === "#delete_group"){
 					YAHOO.util.Event.stopEvent(oArgs.event);
 
-					if(true){ //Number(oRecord.getData('members'))<1){
-
 						var value = prompt("Enter \"DELETE\" if you really want to delete group '"+oRecord.getData('name')+"'");
-						if(true || value === "DELETE") {
+						if(value === "DELETE") {
 
 							function _updateAfterDelete(context) {
 
@@ -346,7 +345,7 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 						}else{
 							alert("Impossible to delele group in usage");
 						}
-					}//iUsege<1
+
 				}
 
 		});
@@ -395,7 +394,7 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 						var admins = _workgroups[recID].admins;
 						var index;
 						for(index in admins) {
-							if(!isnull(index) && userID == admins[index].id){
+							if(!isnull(index) && userID === admins[index].id){
 								return true;
 							}
 						}
