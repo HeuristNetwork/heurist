@@ -158,31 +158,34 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		var positionDiv = newPopup.positionDiv = top.document.createElement("div");
 			positionDiv.className = "popup";
 			positionDiv.expando = true;
-		var newTable = newPopup.table = positionDiv.appendChild(top.document.createElement("table"));
-			newTable.className = "popup";
-			newTable.cellSpacing = 0;	// IE6 doesn't know about border-spacing
-		    newTable.appendChild(top.document.createElement("tbody"));
-		    newTable.lastChild.appendChild(top.document.createElement("tr"));
-		var titleCell = newPopup.titleCell = newTable.lastChild.lastChild.appendChild(top.document.createElement("td"));
-			titleCell.className = "header";
-		    newTable.lastChild.appendChild(top.document.createElement("tr"));
+		var titleDiv = positionDiv.titleDiv = positionDiv.appendChild(top.document.createElement("div"));
+			titleDiv.className = "header";
+//		var newTable = newPopup.table = positionDiv.appendChild(top.document.createElement("table"));
+//			newTable.className = "popup";
+//			newTable.cellSpacing = 0;	// IE6 doesn't know about border-spacing
+//		    newTable.appendChild(top.document.createElement("tbody"));
+//		    newTable.lastChild.appendChild(top.document.createElement("tr"));
+//		var titleCell = newPopup.titleCell = newTable.lastChild.lastChild.appendChild(top.document.createElement("td"));
+//			titleCell.className = "header";
+//		    newTable.lastChild.appendChild(top.document.createElement("tr"));
+
 		if (! options["no-close"]) {
-			var closeDiv = titleCell.appendChild(top.document.createElement("div"));
+			var closeDiv = titleDiv.appendChild(top.document.createElement("div"));
 				closeDiv.className = "close-button";
 				closeDiv.id = "close";
 				closeDiv.title = "Close this window";
 		}
 		if (! options["no-help"]) {
-			var helpDiv = titleCell.appendChild(top.document.createElement("div"));
+			var helpDiv = titleDiv.appendChild(top.document.createElement("div"));
 				helpDiv.className = "help-button";
 				helpDiv.id = "help";
 				helpDiv.innerHTML = "<span>Help is " + ((top.HEURIST.util.getDisplayPreference("help") === "hide")? "off" : "on") + "</span>";
 		}
 		if (options["title"]) {
-			titleCell.appendChild(top.document.createTextNode(options["title"]));
+			titleDiv.appendChild(top.document.createTextNode(options["title"]));
 		}
 
-		var bodyCell = newPopup.bodyCell = newTable.lastChild.lastChild.appendChild(top.document.createElement("td"));
+//		var bodyCell = newPopup.bodyCell = newTable.lastChild.lastChild.appendChild(top.document.createElement("td"));
 
 		// Put the content-iframe as 100%x100% inside a DIV; we then resize the DIV.
 		if (! options["no-resize"]) {
@@ -193,13 +196,12 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 			positionDiv.style.backgroundImage = 'none';	// get rid of resize handle indicator
 		}
 
-		var sizeDiv = newPopup.sizeDiv = bodyCell.appendChild(top.document.createElement("div"));
-			sizeDiv.className = "size-div";
+		var popupBody = positionDiv.popupBody = positionDiv.appendChild(top.document.createElement("div"));
+			popupBody.className = "popupBody";
 
 		var width = null, height = null;
 		if (options["url"]) {
-			titleCell.appendChild(top.document.createTextNode("Loading ..."));
-
+			titleDiv.appendChild(top.document.createTextNode("Loading ..."));
 			var newIframe = newPopup.iframe = top.document.createElement("iframe");
 				newIframe.HEURIST_WINDOW_ID = newHeuristID;
 				newIframe.frameBorder = 0;
@@ -213,33 +215,33 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 					top.HEURIST.util.closePopup.apply(this, newArgs);
 				};
 
-				if (options["width"]) { sizeDiv.style.width = options["width"] + "px"; width = parseInt(options["width"]); }
-				if (options["height"]) { sizeDiv.style.height = options["height"] + "px"; height = parseInt(options["height"]); }
+				if (options["width"]) { popupBody.style.width = options["width"] + "px"; width = parseInt(options["width"]); }
+				if (options["height"]) { popupBody.style.height = options["height"] + "px"; height = parseInt(options["height"]); }
 
 				var oneTimeOnload = function() {
 					// One time onload to set the position and possibly the width and height of the bodyCell
 					try {
 						if (! width  &&  newIframe.contentWindow.document.body.getAttribute("width")) {
-							sizeDiv.style.width = newIframe.contentWindow.document.body.getAttribute("width")+"px";
-							sizeDiv.style.minWidth = newIframe.contentWindow.document.body.getAttribute("minwidth")+"px";
-							width = parseInt(sizeDiv.style.width);
+							popupBody.style.width = newIframe.contentWindow.document.body.getAttribute("width")+"px";
+							popupBody.style.minWidth = newIframe.contentWindow.document.body.getAttribute("minwidth")+"px";
+							width = parseInt(popupBody.style.width);
 						}
 					} catch (e) { }
-					if (! width  &&  sizeDiv.offsetWidth) {
-						width = sizeDiv.offsetWidth;
-						sizeDiv.style.width = width + "px";
+					if (! width  &&  popupBody.offsetWidth) {
+						width = popupBody.offsetWidth;
+						popupBody.style.width = width + "px";
 					}
 
 					try {
 						if (! height  &&  newIframe.contentWindow.document.body.getAttribute("height")) {
-							sizeDiv.style.height = newIframe.contentWindow.document.body.getAttribute("height")+"px";
-							sizeDiv.style.minHeight = newIframe.contentWindow.document.body.getAttribute("minheight")+"px";
-							height = parseInt(sizeDiv.style.height);
+							popupBody.style.height = newIframe.contentWindow.document.body.getAttribute("height")+"px";
+							popupBody.style.minHeight = newIframe.contentWindow.document.body.getAttribute("minheight")+"px";
+							height = parseInt(popupBody.style.height);
 						}
 					} catch (e) { }
-					if (! height  &&  sizeDiv.offsetHeight) {
-						height = sizeDiv.offsetHeight;
-						sizeDiv.style.height = height + "px";
+					if (! height  &&  popupBody.offsetHeight) {
+						height = popupBody.offsetHeight;
+						popupBody.style.height = height + "px";
 					}
 
 					var topWindowDims = top.HEURIST.util.innerDimensions(top);
@@ -267,7 +269,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				top.HEURIST.registerEvent(newIframe, "load", function() {
 					// Multi-shot onload -- when(ever) document loads, set the title bar
 					try {
-						titleCell.replaceChild(top.document.createTextNode(newIframe.contentWindow.document.title), titleCell.lastChild);
+						titleDiv.replaceChild(top.document.createTextNode(newIframe.contentWindow.document.title), titleDiv.lastChild);
 						newIframe.contentWindow.close = newIframe.close;	// make window.close() do what we expect
 						newIframe.contentWindow.popupOpener = parentWindow;	// make a persistent reference to the popup opener
 						newIframe.contentWindow.HEURIST_WINDOW_ID = newHeuristID;
@@ -288,8 +290,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				top.HEURIST.registerEvent(helpDiv, "click", function() { top.HEURIST.util.helpToggler(helpDiv); });
 			}
 
-			sizeDiv.expando = true;
-			sizeDiv.iframe = newIframe;
+			popupBody.expando = true;
+			popupBody.iframe = newIframe;
 			positionDiv.expando = true;
 			positionDiv.iframe = newIframe;
 
@@ -317,8 +319,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				else options["height"] = 200;
 			}
 
-			if (options["width"]) { sizeDiv.style.width = options["width"] + "px"; width = parseInt(options["width"]); }
-			if (options["height"]) { sizeDiv.style.height = options["height"] + "px"; height = parseInt(options["height"]); }
+			if (options["width"]) { popupBody.style.width = options["width"] + "px"; width = parseInt(options["width"]); }
+			if (options["height"]) { popupBody.style.height = options["height"] + "px"; height = parseInt(options["height"]); }
 
 			if (! options["auto-position"]) {
 				var topWindowDims = top.HEURIST.util.innerDimensions(top);
@@ -343,18 +345,18 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				top.HEURIST.registerEvent(closeDiv, "click", function() { top.HEURIST.util.closePopup(newHeuristID); });
 			}
 
-			if (! options["title"]) titleCell.appendChild(top.document.createTextNode("Heurist"));
+			if (! options["title"]) titleDiv.appendChild(top.document.createTextNode("Heurist"));
 		}
-		if (options["min-width"]) sizeDiv.style.minWidth = parseInt(options["min-width"]);
-		if (options["min-height"]) sizeDiv.style.minHeight = parseInt(options["min-height"]);
+		if (options["min-width"]) popupBody.style.minWidth = parseInt(options["min-width"]);
+		if (options["min-height"]) popupBody.style.minHeight = parseInt(options["min-height"]);
 
 
 		if (! options["no-resize"]) {
-			top.HEURIST.registerEvent(resizeDiv, "mousedown", function(e) { top.HEURIST.util.startResize(e, sizeDiv); return false; });
+			top.HEURIST.registerEvent(resizeDiv, "mousedown", function(e) { top.HEURIST.util.startResize(e, popupBody); return false; });
 		}
 		if (options["no-titlebar"]) {
 			// remember to hide the TR containing the titlecell, not just the TD
-			titleCell.parentNode.style.display = "none";
+			titleDiv.style.display = "none";
 		}
 		if (options["close-on-blur"]) {
 			// make a click handler on the coverall to close this window
@@ -362,7 +364,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 							function() { top.HEURIST.util.closePopup(newHeuristID); });
 		}
 
-		top.HEURIST.registerEvent(titleCell, "mousedown", function(e) {
+		top.HEURIST.registerEvent(titleDiv, "mousedown", function(e) {
 			if (e && e.target && e.target.id == "close") return;
 			top.HEURIST.util.startMove(e, positionDiv);
 		});
@@ -379,7 +381,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		newPopup.originalElementStyleHeight = newPopup.element.style.height;
 		newPopup.element.style.width = "100%";
 		newPopup.element.style.height = "100%";
-		sizeDiv.appendChild(newPopup.element);
+		popupBody.appendChild(newPopup.element);
 
 		return newPopup;
 	},
@@ -514,8 +516,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		if (previousPopup) {
 			prevX = parseInt(previousPopup.positionDiv.style.left);	if (prevX < 0) prevX = -1;
 			prevY = parseInt(previousPopup.positionDiv.style.top);	if (prevY < 0) prevY = -1;
-			prevChromeW = previousPopup.table.offsetWidth - previousPopup.sizeDiv.offsetWidth;
-			prevChromeH = previousPopup.table.offsetHeight - previousPopup.sizeDiv.offsetHeight;
+			prevChromeW = previousPopup.table.offsetWidth - previousPopup.popupBody.offsetWidth;
+			prevChromeH = previousPopup.table.offsetHeight - previousPopup.popupBody.offsetHeight;
 		} else {
 			prevX = -1;
 			prevY = -1;

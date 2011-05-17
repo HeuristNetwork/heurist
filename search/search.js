@@ -223,7 +223,7 @@ top.HEURIST.search = {
 		}
 		else if (res[4] == 2) {
 			// special handling for notes rectype: link to view page if no URL
-			href = top.HEURIST.basePath+ "records/view/viewRecord.php?bib_id="+res[2] + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
+			href = top.HEURIST.basePath+ "records/view/renderRecordData.php?bib_id="+res[2] + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
 		}
 
 		var userPwd;
@@ -235,12 +235,12 @@ top.HEURIST.search = {
 		if (top.HEURIST.rectypes.names[parseInt(res[4])])
 			rectypeTitle = top.HEURIST.rectypes.names[parseInt(res[4])] + " - click to see details";
 
-		var html = "<div class=result_row title='Double-click to edit' bkmk_id='"+res[0]+"' bib_id="+res[2]+" rectype="+res[4]+">"+
-		"<img src=" +top.HEURIST.basePath+ "common/images/13x13.gif " + pinAttribs + ">"+
-		"<span class='wg-id-container logged-in-only'>"+
-		"<span class=wg-id title='"+linkTitle+"' " + (wgColor? wgColor: "") + ">" + (wgHTML? wgHTML.htmlEscape() : "") + "</span>"+
+		var html = "<div class=result_row title='Select to view, Ctrl-or Shift- for multiple select' bkmk_id='"+res[0]+"' bib_id="+res[2]+" rectype="+res[4]+">"+
+		"<img class='iconset' src=" +top.HEURIST.basePath+ "common/images/13x13.gif " + pinAttribs + ">"+
+		"<span class='iconset wg-id-container logged-in-only'>"+
+		"<span class='wg-id' title='"+linkTitle+"' " + (wgColor? wgColor: "") + ">" + (wgHTML? wgHTML.htmlEscape() : "") + "</span>"+
 		"</span>"+
-		"<img src=" +top.HEURIST.basePath+ "common/images/16x16.gif title='"+rectypeTitle.htmlEscape()+"' "+rectypeImg+" class=rft>"+
+		"<img  class='iconset rft' src=" +top.HEURIST.basePath+ "common/images/16x16.gif title='"+rectypeTitle.htmlEscape()+"' "+rectypeImg+">"+
 		"<span class='rec_title'>" + (res[3].length ? "<a href='"+res[3]+"' target='_blank'>"+linkText + "</a>" : linkText ) + "</span>" +
 		"<div class=right_margin_info>"+
 		"<span><img class='passwordIcon' onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src=" +top.HEURIST.basePath+ "common/images/lock.png " + userPwd + "></span>"+
@@ -304,7 +304,7 @@ top.HEURIST.search = {
 		}
 		else if (res[4] == 2) {
 			// special handling for notes rectype: link to view page if no URL
-			href = top.HEURIST.basePath+ "records/view/viewRecord.php?bib_id="+res[2] +(top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
+			href = top.HEURIST.basePath+ "records/view/renderRecordData.php?bib_id="+res[2] +(top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
 		}
 
 		var userPwd;
@@ -318,7 +318,7 @@ top.HEURIST.search = {
 			rectypeTitle = top.HEURIST.rectypes.names[parseInt(res[4])] + " - click to see details";
 
 		var html =
-		"<div class=result_thumb  title='Double-click to edit' bkmk_id='"+res[0]+"' bib_id="+res[2]+" rectype="+res[4]+">" +
+		"<div class=result_thumb  title='Select to view, Ctrl-or Shift- for multiple select' bkmk_id='"+res[0]+"' bib_id="+res[2]+" rectype="+res[4]+">" +
 		"<input style='display:none' type=checkbox name=bib[] onclick=top.HEURIST.search.resultItemOnClick(this) class='logged-in-only' title='Check box to apply Actions to this record'>"+
 		   (res[11] && res[11].length ? "<div class='thumbnail' style='background-image:url("+res[11]+")' ></div>":"<div class='no-thumbnail' "+rectypeThumb+" ></div>") +
 		"<div class='rec_title'>" + (res[3].length ? "<a href='"+res[3]+"' target='_blank'>"+linkText + "</a>" : linkText ) + "</div>" +
@@ -1010,7 +1010,7 @@ top.HEURIST.search = {
 		var viewerFrame = document.getElementById("viewer-frame");
  		var mapFrame = document.getElementById("map-frame");
 		var recordFrame = document.getElementById("record-view-frame");
-		recordFrame.src = top.HEURIST.basePath+"records/view/viewRecord.php?bib_id="+bib_id;
+		recordFrame.src = top.HEURIST.basePath+"records/view/renderRecordData.php?bib_id="+bib_id;
 
  		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", "selectedIds=" + top.HEURIST.search.selectedRecordIds.join(","));
 		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange", "selectedIds=" + top.HEURIST.search.selectedRecordIds.join(","));
@@ -1379,11 +1379,6 @@ top.HEURIST.search = {
 	},
 
 	mapSelected: function() {
-		if (top.HEURIST.search.selectedRecordIds.length == 0) {
-			alert("Selected a record first","map");
-			_tabView.set('activeIndex', 0);
-			return;
-		} else {
 			var p = top.HEURIST.parameters;
 			var recIds = top.HEURIST.search.selectedRecordIds.slice(0,500); // maximum number of records ids 500
 			if (top.HEURIST.search.selectedRecordIds.length >= 500) {
@@ -1395,8 +1390,6 @@ top.HEURIST.search = {
 				'&db='+(p['db'] || "");
 			query_string = encodeURI(query_string);
 			url = top.HEURIST.basePath+ "viewers/map/showGMapWithTimeline.html" + query_string;
-			// set frame source to url
-			// make frame visible
 			var mapDiv = document.createElement("div");
 			mapDiv.id = "mapDiv";
 			mapDiv.style.display = "block";
@@ -1411,9 +1404,7 @@ top.HEURIST.search = {
 			mapiFrame.style.height = "100%";
 			mapiFrame.src = url
 			mapDiv.appendChild(mapiFrame);
-			//document.getElementById("page").appendChild(mapDiv);
 			document.getElementById("map-frame").src = url;
-			}
 	},
 	closeMap: function() {
 		var mapDiv = document.getElementById("mapDiv");
@@ -2194,8 +2185,10 @@ function removeCustomAlert() {
 	var Dom = YAHOO.util.Dom,
 		Event = YAHOO.util.Event;
 
+	var viewerTabIndex = top.HEURIST.util.getDisplayPreference("viewerTab");
+
 	Event.onDOMReady(function() {
-	_tabView = new YAHOO.widget.TabView('applications', { activeIndex: 0 });
+	
 		var leftWidth = top.HEURIST.util.getDisplayPreference("leftWidth");
 		var oldLeftWidth = top.HEURIST.util.getDisplayPreference("oldLeftWidth");
 		if (!leftWidth || !oldLeftWidth) {
@@ -2203,111 +2196,133 @@ function removeCustomAlert() {
 			}else if (top.HEURIST.util.getDisplayPreference("sidebarPanel") == "closed"){
 			leftWidth = oldLeftWidth;
 			};
-		var appWidth = top.HEURIST.util.getDisplayPreference("appWidth");
-		var oldAppWidth = top.HEURIST.util.getDisplayPreference("oldAppWidth");
-			if (!appWidth || !oldAppWidth) {
-			appWidth = 180;
-			}else if (top.HEURIST.util.getDisplayPreference("applicationPanel") == "closed"){
-			appWidth = oldAppWidth;
-			};
-
+	
 		var appPanelButton = document.getElementById("appPanelButton");
-		var sidebarButton = document.getElementById("sidebarButton");
+		var navButton = document.getElementById("navButton");
 
 		var layout = new YAHOO.widget.Layout({
 			units: [
 				{ position: 'top', height: 50, body: 'masthead', header: '', gutter: '0', collapse: false, resize: false },
 				{ position: 'bottom', height: 10, resize: false, body: 'footer', gutter: '0', collapse: false },
-				{ position: 'left', width: leftWidth, resize: true, body: 'sidebar', gutter: '0 5px 0 5px', collapse: false, close: false, collapseSize: 0, scroll: false, animate: false },
+				{ position: 'left', width: leftWidth, resize: true, useShim: true, body: 'sidebar', gutter: '0 5px 0 5px', collapse: false, close: false, collapseSize: 0, scroll: false, animate: false },
 				{ position: 'center', body: 'center-panel', gutter: '0 10px 0 0', animate: false, collapse:true }
 			]
 		});
-
+		
 		layout.on('render', function() {
-
 				var el = layout.getUnitByPosition('center').get('wrap');
+				
+				var searchWidth = top.HEURIST.util.getDisplayPreference("searchWidth");
+				var oldSearchWidth = top.HEURIST.util.getDisplayPreference("oldSearchWidth");
+					if (searchWidth <= 10){searchWidth = oldSearchWidth};
+				
 				var layout2 = new YAHOO.widget.Layout(el, {
 				parent: layout,
 				units: [
 					{ position: 'top', height: 50, body: 'search', header: '', gutter: '0', collapse: false, resize: false },
-					{ position: 'right', width: appWidth, resize: true, gutter: '0', collapse: true, scroll: true, body: 'page-right', animate: false, collapseSize: 0},
-					{ position: 'center', body: 'page', minWidth: 350,}
+					{ position: 'left', width: searchWidth, resize: true, useShim: true, gutter: '0', collapse: true, scroll: true, body: 'page', animate: false, collapseSize: 0, minWidth:180},
+					{ position: 'center', body: 'page-right'}
 					]
 				});
-
-				var setAppWidth = function() {
-					var appWidth = layout2.getSizes().right.w;
-					top.HEURIST.util.setDisplayPreference("appWidth", appWidth);
+				var setSearchWidth = function() {
+					var searchWidth = layout2.getSizes().left.w;
+					var centerWidth = layout2.getSizes().center.w;
+					var pageWidth = searchWidth + centerWidth;
+					if (searchWidth < pageWidth) {
+						top.HEURIST.util.setDisplayPreference("applicationPanel","open");
+						appPanelButton.className = appPanelButton.className.replace(" closed", "");
+						appPanelButton.innerHTML = "Hide Application Panel";
+					 }else if (searchWidth >= pageWidth) {
+						layout2.getUnitByPosition('left').set("width", pageWidth); //limits page to viewable screen
+						appPanelButton.className +=" closed";
+						appPanelButton.innerHTML = "Show Application Panel";
+						top.HEURIST.util.setDisplayPreference("applicationPanel","closed");
+					 };
+					 top.HEURIST.util.setDisplayPreference("searchWidth", searchWidth);
 					};
-
-				layout2.on('resize', setAppWidth);
+					
+				layout2.on('resize', setSearchWidth);
 				layout2.render();
+				
 
 				if (top.HEURIST.util.getDisplayPreference("applicationPanel") == "closed"){
-					layout2.getUnitByPosition('right').collapse();
+					var searchWidth = layout2.getSizes().left.w;
+					var centerWidth = layout2.getSizes().center.w;
+					var pageWidth = searchWidth + centerWidth;
+					layout2.getUnitByPosition('left').set("width", pageWidth);
+					layout2.getUnitByPosition('left').resize();
 					appPanelButton.className +=" closed";
 					appPanelButton.innerHTML = "Show Application Panel";
 					};
-
+					
+				if (top.HEURIST.util.getDisplayPreference("resultsPanel") == "closed"){
+					layout2.getUnitByPosition('left').collapse();
+					appPanelButton.className +=" closed";
+					appPanelButton.innerHTML = "Show Search Results Panel";
+					};
+					
 				Event.on('appPanelButton', 'click', function(ev) {
 					Event.stopEvent(ev);
+					var searchWidth = layout2.getSizes().left.w;
+					var centerWidth = layout2.getSizes().center.w;
+					var pageWidth = searchWidth + centerWidth;
 					if (top.HEURIST.util.getDisplayPreference("applicationPanel") == "open"){
-					var oldAppPanelWidth = layout2.getSizes().right.w;
-					top.HEURIST.util.setDisplayPreference("oldAppWidth",oldAppPanelWidth);
-						layout2.getUnitByPosition('right').collapse();
-						top.HEURIST.util.setDisplayPreference("applicationPanel","closed");
-						appPanelButton.className +=" closed";
-						appPanelButton.innerHTML = "Show Application Panel";
-					}else{
-						layout2.getUnitByPosition('right').expand();
-						top.HEURIST.util.setDisplayPreference("applicationPanel","open");
-						appPanelButton.className = appPanelButton.className.replace(" closed", "")
-						appPanelButton.innerHTML = "Hide Application Panel";
-					}
-			});
+						var oldSearchWidth = layout2.getSizes().left.w;
+							top.HEURIST.util.setDisplayPreference("oldSearchWidth",oldSearchWidth);
+							layout2.getUnitByPosition('left').set("width", pageWidth);
+							layout2.getUnitByPosition('left').resize();
+						}else{
+						var oldSearchWidth = top.HEURIST.util.getDisplayPreference("oldSearchWidth");
+						layout2.getUnitByPosition('left').set("width",oldSearchWidth);
+						layout2.getUnitByPosition('left').resize();
+						};
+					});
+						
+				Event.on('resultsButton', 'click', function(ev) {
+					Event.stopEvent(ev);
+					if (top.HEURIST.util.getDisplayPreference("applicationPanel") == "closed"){ return;};
+					top.HEURIST.util.setDisplayPreference("oldSearchWidth",oldSearchWidth);
+					layout2.getUnitByPosition('left').toggle();
+					});
 
 				Event.on('resetLayout', 'click', function(ev) {
 					Event.stopEvent(ev);
 					if (top.HEURIST.util.getDisplayPreference("applicationPanel") != "open"){
-					layout2.getUnitByPosition('right').expand();
 					appPanelButton.className = appPanelButton.className.replace(" closed", "")
 					appPanelButton.innerHTML = "Hide Application Panel"
 					}
-					layout2.getUnitByPosition('right').set("width", 350);
-					layout2.getUnitByPosition('right').resize();
-					top.HEURIST.util.setDisplayPreference("appWidth", 350);
+					layout2.getUnitByPosition('left').set("width", 360);
+					layout2.getUnitByPosition('left').resize();
+					top.HEURIST.util.setDisplayPreference("searchWidth", 360);
 					top.HEURIST.util.setDisplayPreference("applicationPanel","open");
 				});
-
 		});
 		var setLeftWidth = function() {
 			var leftPanelWidth = layout.getSizes().left.w;
 			top.HEURIST.util.setDisplayPreference("leftWidth", leftPanelWidth);
 		};
-
 		layout.on('resize',setLeftWidth);
 		layout.render();
 
 		if (top.HEURIST.util.getDisplayPreference("sidebarPanel") == "closed"){
 					layout.getUnitByPosition('left').collapse();
-					sidebarButton.className +=" closed";
-					sidebarButton.innerHTML = "Show Navigation Panel";
+					navButton.className +=" closed";
+					navButton.innerHTML = "Show Navigation Panel";
 					};
-
-		Event.on('sidebarButton', 'click', function(ev) {
+		Event.on('navButton', 'click', function(ev) {
 			Event.stopEvent(ev);
 			if (top.HEURIST.util.getDisplayPreference("sidebarPanel") == "open"){
 				var oldLeftPanelWidth = layout.getSizes().left.w;
 					top.HEURIST.util.setDisplayPreference("oldLeftWidth", oldLeftPanelWidth);
 				layout.getUnitByPosition('left').collapse();
 				top.HEURIST.util.setDisplayPreference("sidebarPanel","closed");
-				sidebarButton.className +=" closed";
-				sidebarButton.innerHTML = "Show Navigation Panel";
+				navButton.className +=" closed";
+				navButton.innerHTML = "Show Navigation Panel";
 			}else{
 				layout.getUnitByPosition('left').expand();
 				top.HEURIST.util.setDisplayPreference("sidebarPanel","open");
-				sidebarButton.className = sidebarButton.className.replace(" closed", "");
-				sidebarButton.innerHTML = "Hide Navigation Panel";
+				navButton.className = navButton.className.replace(" closed", "");
+				navButton.innerHTML = "Hide Navigation Panel";
 			}
 		});
 
@@ -2316,8 +2331,8 @@ function removeCustomAlert() {
 					if (top.HEURIST.util.getDisplayPreference("sidebarPanel") != "open"){
 						layout.getUnitByPosition('left').expand();
 						top.HEURIST.util.setDisplayPreference("sidebarPanel","open");
-						sidebarButton.className = document.getElementById("sidebarButton").className.replace(" closed", "");
-						sidebarButton.innerHTML = "Show Navigation Panel";
+						navButton.className = document.getElementById("navButton").className.replace(" closed", "");
+						navButton.innerHTML = "Show Navigation Panel";
 						};
 					layout.getUnitByPosition('left').set("width", 180);
 					layout.getUnitByPosition('left').resize();
@@ -2326,3 +2341,14 @@ function removeCustomAlert() {
 				});
 
 	});
+
+	_tabView = new YAHOO.widget.TabView('applications', { activeIndex: viewerTabIndex });
+	if (viewerTabIndex == 2){top.HEURIST.search.mapSelected()}; //initialises map
+	var handleActiveTabChange = function(e) {
+		var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));
+		top.HEURIST.util.setDisplayPreference("viewerTab", currentTab);
+	};
+	_tabView.addListener('activeTabChange',handleActiveTabChange);
+	_tabView.getTab(viewerTabIndex);
+	if (viewerTabIndex == 2){top.HEURIST.search.mapSelected()}; //initialises map
+	_tabView.addListener('activeTabChange',handleActiveTabChange);

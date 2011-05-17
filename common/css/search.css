@@ -144,8 +144,7 @@ div.right_margin_info div.mini-tools:hover{-moz-border-radius:7px 7px 7px 7px;-w
 #search-status.all #noresult-search-status-search-all { display: none; }
 #search-status #noresult-search-status div { margin: 10px;}
 #noquery-search-status {height:auto;margin:5%;padding:10px 25px;width:auto;}
-#page-nav { margin-right: 20px; }
-#page-nav .nav .active { border: 1px solid #CCCCCC;font-weight: bold;padding: 0 2px;text-decoration: none;}
+
 .img-button { border: 1px solid white; cursor: pointer; padding: 2px; margin: 0 10px; background-color: white; }
 .img-button:hover { border-color: gray; }
 .img-button:active { padding: 4px 0 0 4px; background-color: #f0f0f0; }
@@ -373,10 +372,10 @@ div#layout-doc.yui-layout-doc div#yui-gen8.yui-layout-unit div#yui-gen9.yui-layo
 	}
 
 .yui-layout-unit-left .yui-layout-hd h2 {font-size: 10px;color: #BBB;}
-.yui-layout-unit-top {z-index:100000 !important}
+.yui-layout-unit-top {z-index:11}
 
 #page, #page-right, #search, #sidebar {border:none; padding:0; left:0px; right:0px; top:0; bottom:0;position:absolute; width:auto; height:auto}
-#page-right {left:5px;}
+#page {right:5px !important;}
 #sidebar {border:1px solid #6A7C99}
 #sidebar-inner {top:10px}
 
@@ -390,9 +389,11 @@ div#layout-doc.yui-layout-doc div#yui-gen8.yui-layout-unit div#yui-gen9.yui-layo
 .searchTable {display:table; float:right; padding:4px 10px 0 0;}
 .yui-layout-doc {left:0 !important;margin:0;position:absolute;right:0 !important;top:0 !important;bottom:0 !important;overflow:hidden; height:auto; background-color:transparent}
 body.yui-layout {position:absolute;}
+div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {z-index:105}
 
 
-#appPanelButton {background-image:url(../images/b_fullScreen.png) !important;}
+/*#appPanelButton {background-image:url(../images/b_fullScreen.png) !important;}
 #appPanelButton.closed{background-image:url(../images/b_splitScreen.png) !important;}
 #sidebarButton{background-image:url(../images/b_menuOff.png) !important;}
 #sidebarButton.closed{background-image:url(../images/b_menuOn.png) !important;}
+*/
