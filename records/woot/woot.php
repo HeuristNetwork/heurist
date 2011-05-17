@@ -66,12 +66,15 @@ function getReadableChunks($wootId=NULL, $restrictToCurrent=false) {
 	}
 
 	if (! $restrictToCurrent) {
-		return mysql__select_array(PERMISSION_TABLE, "wprm_ChunkID", $restriction . ($wootId? " and chunk_WootID=$wootId" : ""));
+		$result = mysql__select_array(CHUNK_TABLE . " left join " . PERMISSION_TABLE . " on chunk_ID=wprm_ChunkID", "wprm_ChunkID", $restriction . ($wootId? " and chunk_WootID=$wootId" : ""));
 	}
 	else {
-		return mysql__select_array(CHUNK_TABLE . " left join " . PERMISSION_TABLE . " on chunk_ID=wprm_ChunkID", "wprm_ChunkID",
+		$result =  mysql__select_array(CHUNK_TABLE . " left join " . PERMISSION_TABLE . " on chunk_ID=wprm_ChunkID", "wprm_ChunkID",
 		                           "$restriction and chunk_IsLatest" . ($wootId? " and chunk_WootID=$wootId" : "") . " and wprm_ChunkID is not null");
+			" on chunk_ID=wprm_ChunkID, wprm_ChunkID, $restriction and chunk_IsLatest" .
+			($wootId? " and chunk_WootID=$wootId" : "") . " and wprm_ChunkID is not null");
 	}
+	return $result;
 }
 function getWritableChunks($wootId=NULL, $restrictToCurrent=false) {
 	/* Given a wootId to which the user has write-access,
@@ -87,13 +90,14 @@ function getWritableChunks($wootId=NULL, $restrictToCurrent=false) {
 
 	$restriction = is_admin()? "1 " : "(wprm_UGrpID=".get_user_id()." or wprm_GroupID in (".join(",", get_group_ids()).",-1)) and wprm_Type='RW' ";
 	if (! $restrictToCurrent) {
-		return mysql__select_array(PERMISSION_TABLE, "wprm_ChunkID",
+		$result = mysql__select_array(CHUNK_TABLE . " left join " . PERMISSION_TABLE . " on chunk_ID=wprm_ChunkID", "wprm_ChunkID",
 		                           $restriction . ($wootId? " and chunk_WootID=$wootId" : ""));
 	}
 	else {
-		return mysql__select_array(CHUNK_TABLE . " left join " . PERMISSION_TABLE . " on chunk_ID=wprm_ChunkID", "wprm_ChunkID",
+		$result = mysql__select_array(CHUNK_TABLE . " left join " . PERMISSION_TABLE . " on chunk_ID=wprm_ChunkID", "wprm_ChunkID",
 		                           "$restriction and chunk_IsLatest" . ($wootId? " and chunk_WootID=$wootId" : "") . " and wprm_ChunkID is not null");
 	}
+	return $result;
 }
 
 
@@ -158,7 +162,7 @@ function loadWoot($args) {
 			$woot = array(
 				"woot_ID" => $wootId,
 				"woot_Title" => $wootTitle,
-				"woot_Ver" => 0,
+				"woot_Version" => 0,
 				"woot_CreatorID" => get_user_id()
 			);
 		}
@@ -190,9 +194,7 @@ function loadWoot($args) {
 		$res = mysql_query("select * from ".CHUNK_TABLE."
 									where chunk_WootID=$wootId and chunk_IsLatest and !chunk_Deleted and chunk_ID in (" . join(",", $chunkIds) . ")
 								 order by chunk_DisplayOrder");
-		$res = mysql_query("select * from ".CHUNK_TABLE."
-									where chunk_WootID=$wootId and chunk_IsLatest and !chunk_Deleted and chunk_ID in (" . join(",", $chunkIds) . ")
-								 order by chunk_DisplayOrder");
+
 		while ($chunkData = @mysql_fetch_assoc($res)) {	// the @ hides the fact that there might not be any chunks for this woot
 			$chunk = array(
 				"number" => $chunkData["chunk_InsertOrder"],
@@ -223,7 +225,7 @@ function loadWoot($args) {
 	return(array("success" => true,
 				 "woot" => array("id" => $wootId,
 								 "title" => $woot["woot_Title"],
-								 "version" => $woot["woot_Ver"],
+								 "version" => $woot["woot_Version"],
 								 "creator" => $woot["woot_CreatorID"],
 								 "permissions" => $wootPermissions,
 								 "chunks" => $chunks)));
@@ -287,7 +289,7 @@ function saveWoot($args) {
 				"woot_Title" => $wootTitle,
 				"woot_Created" => array("now()"),
 				"woot_Modified" => array("now()"),
-				"woot_Ver" => 0,
+				"woot_Version" => 0,
 				"woot_CreatorID" => get_user_id()
 			));
 			$wootId = mysql_insert_id();
@@ -308,14 +310,14 @@ function saveWoot($args) {
 				return(array("success" => false, "errorType" => "woot doesn't exist, or insufficient permissions on woot"));
 			}
 
-			mysql_query("update ".WOOT_TABLE." set woot_Ver=woot_Ver+1 where woot_ID=$wootId");
+			mysql_query("update ".WOOT_TABLE." set woot_Version=woot_Version+1 where woot_ID=$wootId");
 		}
 		$res = mysql_query("select * from ".WOOT_TABLE." where woot_ID=$wootId");
 
 	mysql_query("commit and chain");
 
 		$woot = mysql_fetch_assoc($res);
-		$version = intval($woot["woot_Ver"]);
+		$version = intval($woot["woot_Version"]);
 
 		$chunkIds = getReadableChunks($wootId, /* restrictToCurrent= */ true);
 
@@ -409,7 +411,7 @@ function saveWoot($args) {
 			mysql__insert(CHUNK_TABLE, array(
 				"chunk_WootID" => $wootId,
 				"chunk_InsertOrder" => $chunkNumber,
-				"chunk_Ver" => $version,
+				"chunk_Version" => $version,
 				"chunk_Text" => $chunk["text"],
 				"chunk_IsLatest" => 1,
 				"chunk_DisplayOrder" => $chunkOrder,
@@ -616,7 +618,7 @@ function searchWoots($args) {
 		return(array("success" => false, "errorType" => "invalid query"));
 	}
 
-	$res = mysql_query("select distinct woot_ID, woot_Title, woot_Ver
+	$res = mysql_query("select distinct woot_ID, woot_Title, woot_Version
 						  from ".WOOT_TABLE.",".CHUNK_TABLE."
 						 where woot_ID=chunk_WootID and chunk_IsLatest and !chunk_Deleted
 							   and " . $text_search . "
@@ -626,7 +628,7 @@ function searchWoots($args) {
 	while ($woot = mysql_fetch_assoc($res)) {
 		array_push($woots, array(
 			"id" => $woot["woot_ID"],
-			"version" => $woot["woot_Ver"],
+			"version" => $woot["woot_Version"],
 			"title" => $woot["woot_Title"]
 		));
 	}

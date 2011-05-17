@@ -336,7 +336,7 @@ HAPI.WOOT.GUI = function() {
 			return false;
 		};
 		this.form.oncancel = function() {
-			setTimeout(function() { that.unlockedChunk.lock(); }, 0);   // map the form.oncancel to WootEditor.unlockedChunk.lock
+			setTimeout(function() { if(that.unlockedChunk) that.unlockedChunk.lock(); }, 0);   // map the form.oncancel to WootEditor.unlockedChunk.lock
 			return false;
 		};
 
