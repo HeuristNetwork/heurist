@@ -71,8 +71,6 @@ function getReadableChunks($wootId=NULL, $restrictToCurrent=false) {
 	else {
 		$result =  mysql__select_array(CHUNK_TABLE . " left join " . PERMISSION_TABLE . " on chunk_ID=wprm_ChunkID", "wprm_ChunkID",
 		                           "$restriction and chunk_IsLatest" . ($wootId? " and chunk_WootID=$wootId" : "") . " and wprm_ChunkID is not null");
-			" on chunk_ID=wprm_ChunkID, wprm_ChunkID, $restriction and chunk_IsLatest" .
-			($wootId? " and chunk_WootID=$wootId" : "") . " and wprm_ChunkID is not null");
 	}
 	return $result;
 }

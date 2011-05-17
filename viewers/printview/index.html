@@ -371,7 +371,9 @@
 													}
 												});
 					selectedIds = newSelectionIds;
-					if (selectedIds && selectedIds.length > 0) {
+					if (selectedIds && selectedIds.length > 0 &&
+							$('div#'+selectedIds[selectedIds.length-1],
+								$('iframe[id=viewer-frame]',top.document).get(0).contentDocument).length > 0) {
 						$('div#'+selectedIds[selectedIds.length-1],$('iframe[id=viewer-frame]',top.document).get(0).contentDocument).get(0).scrollIntoView();
 					}
 				}

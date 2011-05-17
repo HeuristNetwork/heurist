@@ -59,8 +59,10 @@ $prefs = array(
 	"sidebarPanel" => "open",
 	"leftWidth" => 180,
 	"oldLeftWidth" => 180,
-	"appWidth" => 350,
-	"oldAppWidth" => 350
+	"searchWidth" => 360,
+	"oldSearchWidth" => 360,
+	"viewerTab" =>0,
+	"defaultPrintView" => "default"
 );
 
 foreach (get_group_ids() as $gid) {
