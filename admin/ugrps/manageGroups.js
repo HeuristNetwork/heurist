@@ -572,7 +572,16 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 				filterByMembership = Dom.get('inputFilterByMembership4');
 				if(filterByMembership) { filterByMembership.onchange = _updateFilter; }
 				filterByMembership = Dom.get('inputFilterByMembership1');
-				if(filterByMembership) { filterByMembership.onchange = _updateFilter; }
+				if(filterByMembership){
+					if(top.HEURIST.is_admin()){
+						Dom.get('lblForInputFilterByMembership1').style.display = "block";
+						filterByMembership.style.display = "block";;
+						filterByMembership.onchange = _updateFilter;
+					}else{
+						Dom.get('lblForInputFilterByMembership1').style.display = "none";
+						filterByMembership.style.display = "none";
+					}
+				}
 
 	} //end init listener
 

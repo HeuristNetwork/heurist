@@ -32,6 +32,7 @@ function UserEditor() {
 		var _className = "UserEditor",
 			_entity, //object (user) to edit
 			_recID,     // its ID
+			_groupID,   // new user will be added to this group
 			_updatedFields = [], //field names which values were changed to be sent to server
 			_updatedDetails = [], //field values
 			_db,
@@ -52,13 +53,10 @@ function UserEditor() {
 		if (location.search.length > 1) {
 				top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 				_recID = top.HEURIST.parameters.recID;
-				groupID = top.HEURIST.parameters.groupID;
+				_groupID = top.HEURIST.parameters.groupID;
 
 				if(_recID){
 					_entity = top.HEURIST.userGrp.users[_recID];
-				}
-				if(isnull(groupID)){
-					groupID = 0;
 				}
 		}
 
@@ -312,6 +310,10 @@ function UserEditor() {
 			var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
 			var callback = _updateResult;
 			var params = "method=saveUser&db=" + _db + "&data=" + encodeURIComponent(str);
+			if(!isnull(_groupID)){
+				params = params + "&groupID="+_groupID;
+			}
+
 			top.HEURIST.util.getJsonData(baseurl, callback, params);
 		} else {
 			window.close(null);

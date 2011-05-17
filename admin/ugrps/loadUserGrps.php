@@ -25,7 +25,7 @@ header('Content-type: text/javascript');
 
 mysql_connection_db_select(DATABASE);
 
-if (true){ //ARTEM DEBUG TEMP is_logged_in()) {
+if (is_logged_in()) {
 
 /*error_log(">>>>>>>>>>>>>>> ".$_SERVER['QUERY_STRING']);
 error_log(">>>>>>>>>>>>>>> userEmail=".urldecode(@$_REQUEST['userEmail']));
@@ -90,6 +90,15 @@ error_log(">>>>>>>>>>>>>>> userEmail=".urldecode(@$_GET['userEmail']));*/
 		$f_role  = @$_REQUEST['grpRole'];
 		$filter1 = "";
 		$filter2 = "";
+
+		//if noty admin, the list of users are limited to its own
+		if(!is_admin()){
+			$f_user =  get_user_id();
+			if (!($f_role=="admin" || $f_role=="member")){
+				$f_role="any";
+			}
+		}
+
 
 		if($f_user!=null && $f_user!=""){
 			$filter1 = ", ".USERS_DATABASE.".sysUsrGrpLinks gl2 ";

@@ -24,6 +24,7 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 			_grpID, //if group is defined as parameter - filter by this group
 			_db,
 			_isSingleSelection = false,
+			isNotAdmin = true,
 			_workgroups;
 		//
 		// filtering UI controls
@@ -93,7 +94,7 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 							Dom.get("pnlFilterByRole").style.display = (filter_group==="all")?"none":"inline-block";
 
-							var isNotAdmin = _isNotAdmin(filter_group);
+							isNotAdmin = _isNotAdmin(filter_group);
 
 							var nstyle = (isNotAdmin)?"none":"inline-block";
 
@@ -103,8 +104,13 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 									var col = _myDataTable.getColumn("role2");
 									col.hidden = !_isSelection || !isNotAdmin;
 
-									_myDataTable.getColumn("role").hidden = _isSelection || isNotAdmin;
+									_myDataTable.getColumn("role").hidden = _isSelection ||
+											filter_group==="all" || !top.HEURIST.is_admin();
 									_myDataTable.getColumn("role").label = "Role";
+
+									_myDataTable.getColumn("kickoff").hidden = _isSelection ||
+															top.HEURIST.is_admin() || isNotAdmin;
+
 							}
 	};
 
@@ -189,7 +195,7 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 				_grpID = grpID;
 
 
-				Dom.get('currUserInfo').innerHTML = 'DEBUG '+top.HEURIST.get_user_name();
+//				Dom.get('currUserInfo').innerHTML = 'DEBUG '+top.HEURIST.get_user_name();
 
 
 				//init listeners for filter controls
@@ -312,12 +318,23 @@ elLiner.innerHTML = '<a href="#edit_user"><img src="../../common/images/edit_ico
 							elLiner.innerHTML = oRecord.getData('role');
 				}},
 			{ key: "role", label: "Role", sortable:false, hidden: true, width:70,
-				formatter:YAHOO.widget.DataTable.formatDropdown, dropdownOptions:_roles},
+				formatter:YAHOO.widget.DataTable.formatDropdown,
+				dropdownOptions: _roles },
 			{ key: "id", label: "Delete", width:20, sortable:false, hidden:(_isSelection || !top.HEURIST.is_admin()),
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete_icon.png" width="16" height="16" border="0" title="Delete this User" /><\/a>';
 				}
+			},
+			{ key: "kickoff", label: "Kick Off", width:20, sortable:false, hidden:(_isSelection || top.HEURIST.is_admin() ||																						isNotAdmin ),
+				formatter: function(elLiner, oRecord, oColumn, oData) {
+					if(Number(oRecord.getData('id'))===top.HEURIST.get_user_id()){
+						elLiner.innerHTML = "";
+					}else{
+elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delete_icon.png" width="16" height="16" border="0" title="Delete this User from group" /><\/a>';
+					}
+				}
 			}
+
 								];
 
 
@@ -361,6 +378,16 @@ elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete
 				if(elLink.hash === "#edit_user") {
 					YAHOO.util.Event.stopEvent(oArgs.event);
 					_editUser(recID);
+
+				}else if(elLink.hash === "#kickoff_user"){
+					YAHOO.util.Event.stopEvent(oArgs.event);
+
+					var groupToBeUpdated = (isnull(_grpID)?filterByGroup.value:_grpID);
+
+					var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
+					var params = "method=changeRole&db="+_db+"&recID=" + groupToBeUpdated +
+								"&oldrole=member&role=delete&recIDs="+encodeURIComponent(recID);
+					top.HEURIST.util.getJsonData(baseurl, _updateRoles, params);
 
 				}else if(elLink.hash === "#delete_user"){
 
@@ -443,10 +470,11 @@ elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete
 						}
 					}
 
+					var groupToBeUpdated = (isnull(_grpID)?filterByGroup.value:_grpID);
 					//keep the track of changes in special object
 					//TODO _updateUser(record);
 					var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
-					var params = "method=changeRole&db="+_db+"&recID=" + _grpID +
+					var params = "method=changeRole&db="+_db+"&recID=" + groupToBeUpdated +
 								"&oldrole=" + oldValue+
 								"&role=" + newValue+"&recIDs="+encodeURIComponent(data.id);
 					top.HEURIST.util.getJsonData(baseurl, __onUpdateRole, params);
@@ -760,7 +788,15 @@ elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete
 			URL = top.HEURIST.basePath + "admin/ugrps/editUser.html?db=" + _db + "&recID="+userID;
 		}
 		else {
-			URL = top.HEURIST.basePath + "admin/ugrps/editUser.html?db=" + _db;
+			//add new user to specified group
+			var groupToBeUpdated = (isnull(_grpID)?filterByGroup.value:_grpID);
+			if(!isnull(groupToBeUpdated) && groupToBeUpdated!=="all") {
+				groupToBeUpdated = "&groupID="+groupToBeUpdated;
+			}else{
+				groupToBeUpdated = "";
+			}
+
+			URL = top.HEURIST.basePath + "admin/ugrps/editUser.html?db=" + _db + groupToBeUpdated;
 		}
 		top.HEURIST.util.popupURL(top, URL, {
 			"close-on-blur": false,
@@ -786,8 +822,10 @@ elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete
 	*/
 	function _findAndAddUser() {
 
+		var groupToBeUpdated = (isnull(_grpID)?filterByGroup.value:_grpID);
+
 		var url = top.HEURIST.baseURL + "admin/ugrps/manageUsers.html?db=" +
-										_db + "&selection=1&grpID="+(isnull(_grpID)?filterByGroup.value:_grpID);
+										_db + "&selection=1&grpID="+groupToBeUpdated;
 
 		top.HEURIST.util.popupURL(top, url,
 		{   "close-on-blur": false,
@@ -799,7 +837,7 @@ elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete
 //DEBUG alert(usersSelected);
 
 					var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
-					var params = "method=changeRole&db="+_db+"&recID=" + _grpID +
+					var params = "method=changeRole&db="+_db+"&recID=" + groupToBeUpdated +
 								"&role=member&recIDs="+encodeURIComponent(usersSelected);
 					top.HEURIST.util.getJsonData(baseurl, _updateRoles, params);
 

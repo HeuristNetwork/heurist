@@ -82,13 +82,16 @@
 		!array_key_exists('defs',$data['user'])) {
 			die("invalid data structure sent with saveUser method call to saveUsergrps.php");
 		}
+
+		$groupID = @$_REQUEST['groupID'];
+
 		$colNames = $data['user']['colNames'];
 
 		$rv = array();
 		$rv['result'] = array(); //result
 
 		foreach ($data['user']['defs'] as $recID => $rt) {
-			array_push($rv['result'], updateUserGroup('user', $colNames, $recID, $rt));
+			array_push($rv['result'], updateUserGroup('user', $colNames, $recID, $groupID, $rt));
 		}
 
 		break;
@@ -118,7 +121,7 @@
 		$rv['result'] = array(); //result
 
 		foreach ($data['group']['defs'] as $recID => $rt) {
-			array_push($rv['result'], updateUserGroup('group', $colNames, $recID, $rt));
+			array_push($rv['result'], updateUserGroup('group', $colNames, $recID, null, $rt));
 		}
 
 		break;
@@ -203,7 +206,7 @@
 	* @param mixed $commonNames
 	* @param mixed $rt
 	*/
-	function updateUserGroup( $type, $colNames, $recID, $values ) {
+	function updateUserGroup( $type, $colNames, $recID, $groupID, $values ) {
 
 		global $db, $sysUGrps_ColumnNames;
 
@@ -302,12 +305,19 @@ overviews and step-by-step instructions for using Heurist.
 							if (! $rv) {
 								error_log("mail send failed: " . $ugr_eMail);
 							}
+								if($groupID){
+									//add new user to specified group
+									changeRole($groupID, $recID, "member", null, false);
+								}
 
-							}else{//add current user as admin for new group
 
+							}else{
+								//add current user as admin for new group
 								changeRole($recID, get_user_id(), "admin", null, false);
 							}
 							$ret = -$recID;
+
+
 					}//if $isInsert
 					else{
 						$ret = $recID;
