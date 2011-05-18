@@ -437,8 +437,7 @@
 	 		//do not close the window
 
 		}else if(str != null) {
-//DEBUG
-			alert("Stringified changes: " + str);
+//DEBUG			alert("Stringified changes: " + str);
 
 			// TODO: Change base URL
 			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
@@ -617,20 +616,10 @@
 				fieldNameElementValue = typesDropdown.value;
 			} else if(index == 8) {
 				fieldNameElementValue = statusDropdown.value.toLowerCase();
-			}else if(index == 7) {
-				fieldNameElementValue = fieldNameElement.checked;
-				if(fieldNameElementValue) {
-					fieldNameElementValue = 1;
-				} else {
-					fieldNameElementValue = 0;
-				}
-			}else if(index == 10) {
-				fieldNameElementValue = fieldNameElement.checked;
-				if(fieldNameElementValue) {
-					fieldNameElementValue = 1;
-				} else {
-					fieldNameElementValue = 0;
-				}
+			}
+
+			if(fieldNameElement.type=="checkbox"){
+				fieldNameElementValue = fieldNameElement.checked?"1":"0";
 			}
 
 			if(rectypeValues[index] !== fieldNameElementValue || rectypeID == -1) {

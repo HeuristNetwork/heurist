@@ -608,18 +608,21 @@
 			$ret = "invalid rty_ID ($rtyID) passed in data to updateRectype";
 		}
 
+//error_log(">>>>>>>>>>>>>>> ".is_array($rt['common']));
+//error_log(">>>>>>>>>>>>>>> ".$rt['common'].length);
+
 		$query = "";
 		if (count($commonNames)) {
 
 			$parameters = array(""); //list of field date types
 			foreach ($commonNames as $colName) {
 
-				$val = array_shift($rt['common']);
-
-//error_log(">>>>>>>>>>>>>>> $colName  val=".$val);
+				$val = array_shift($rt[0]['common']);
 
 				if (array_key_exists($colName, $rtyColumnNames)) {
 					//array_push($ret['error'], "$colName is not a valid column name for defDetailTypes val= $val was not used");
+
+error_log(">>>>>>>>>>>>>>> $colName  val=".$val);
 
 					if($query!="") $query = $query.",";
 					$query = $query."$colName = ?";

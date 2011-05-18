@@ -652,7 +652,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 			arrTables[tabIndex] = null; //.addRow(record.getData(), 0);
 
 			var currIndex = tabView.get('activeIndex');
-			if(tabIndex == currIndex && needRefresh)
+			if( (Number(tabIndex) === Number(currIndex)) && needRefresh)
 			{
 				initTabContent(tabView.getTab(tabIndex));
 			}
@@ -932,7 +932,9 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 					var grpID = top.HEURIST.rectypes.typedefs[rty_ID].commonFields[9];
 
 					_removeTable(grpID, true);
-					_removeTable(grpID_old, true);
+					if(grpID_old!==grpID){
+						_removeTable(grpID_old, true);
+					}
 					/*
 					//is it current tab
 					var ind = _getIndexByGroupId(grpID);
