@@ -84,7 +84,7 @@ CREATE TABLE `Records` (
   CONSTRAINT `Records_ibfk_1` FOREIGN KEY (`rec_RecTypeID`) REFERENCES `defRecTypes` (`rty_ID`),
   CONSTRAINT `Records_ibfk_2` FOREIGN KEY (`rec_AddedByUGrpID`) REFERENCES `sysUGrps` (`ugr_ID`) ON DELETE SET NULL,
   CONSTRAINT `Records_ibfk_3` FOREIGN KEY (`rec_OwnerUGrpID`) REFERENCES `sysUGrps` (`ugr_ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=144998 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 /*!50003 SET @SAVE_SQL_MODE=@@SQL_MODE*/;
@@ -182,7 +182,7 @@ CREATE TABLE `defDetailTypeGroups` (
   `dtg_Order` tinyint(3) unsigned zerofill NOT NULL default '255' COMMENT 'Ordering of detail type groups within pulldown lists',
   `dtg_Description` varchar(255) NOT NULL COMMENT 'General description fo this group of detail (field) types',
   PRIMARY KEY  (`dtg_ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 COMMENT='Groups detail types for display in separate sections of edit';
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8 COMMENT='Groups detail types for display in separate sections of edit';
 SET character_set_client = @saved_cs_client;
 
 /*!50003 SET @SAVE_SQL_MODE=@@SQL_MODE*/;
@@ -440,9 +440,7 @@ CREATE TABLE `defRelationshipConstraints` (
   `rcs_ID` smallint(5) unsigned NOT NULL auto_increment COMMENT 'Record-detailtype constraint table primary key',
   `rcs_SourceRectypeID` smallint(5) unsigned default NULL COMMENT 'Source record type for this constraint, Null = all types',
   `rcs_TargetRectypeID` smallint(5) unsigned default NULL COMMENT 'Target record type pointed to by relationship record, Null = all types',
-  `rcon_rdl_ids` text,
   `rcs_Description` varchar(1000) default 'Please describe ...',
-  `rcs_RelationshipsLimit` tinyint(3) unsigned NOT NULL default '0' COMMENT '0= no limit; 1, 2 ... =max # of relationship records per record per detailtype/rectypes triplet',
   `rcs_Status` enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
   `rcs_OriginatingDBID` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Database where this constraint originated, 0 or local db code = locally',
   `rcs_IDInOriginatingDB` smallint(5) unsigned default '0' COMMENT 'Code used in database where this constraint originated',
@@ -489,7 +487,7 @@ CREATE TABLE `defTerms` (
   `trm_IDInOriginatingDB` mediumint(8) unsigned default NULL COMMENT 'ID used in database where this  term originated',
   `trm_AddedByImport` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Set to 1 if term added by an import, otherwise 0',
   `trm_IsLocalExtension` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flag that this value not in the externally referenced vocabulary',
-  `trm_Domain` enum('enum','reltype','reltypevocab','enumvocab') NOT NULL default 'enum' COMMENT 'Define the usage of the term',
+  `trm_Domain` enum('enum','relation') NOT NULL default 'enum' COMMENT 'Define the usage of the term',
   `trm_OntID` smallint(5) unsigned NOT NULL default '0' COMMENT 'Ontology from which this vocabulary originated, 0 = locally defined ontology',
   `trm_ChildCount` tinyint(3) NOT NULL default '0' COMMENT 'Stores the count of children, updated whenever children are added/removed',
   `trm_ParentTermID` int(10) unsigned default NULL COMMENT 'The ID of the parent/owner term in the hierarchy',
@@ -574,7 +572,7 @@ CREATE TABLE `recDetails` (
   CONSTRAINT `recDetails_ibfk_3` FOREIGN KEY (`dtl_UploadedFileID`) REFERENCES `recUploadedFiles` (`ulf_ID`),
   CONSTRAINT `recDetails_ibfk_1` FOREIGN KEY (`dtl_RecID`) REFERENCES `Records` (`rec_ID`) ON DELETE CASCADE,
   CONSTRAINT `recDetails_ibfk_2` FOREIGN KEY (`dtl_DetailTypeID`) REFERENCES `defDetailTypes` (`dty_ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=432719 DEFAULT CHARSET=utf8 COMMENT='The detail (field) values for each record - public data';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='The detail (field) values for each record - public data';
 SET character_set_client = @saved_cs_client;
 
 /*!50003 SET @SAVE_SQL_MODE=@@SQL_MODE*/;
@@ -698,7 +696,7 @@ CREATE TABLE `recThreadedComments` (
   CONSTRAINT `recThreadedComments_ibfk_3` FOREIGN KEY (`cmt_ParentCmtID`) REFERENCES `recThreadedComments` (`cmt_ID`),
   CONSTRAINT `recThreadedComments_ibfk_4` FOREIGN KEY (`cmt_RecID`) REFERENCES `Records` (`rec_ID`) ON DELETE CASCADE,
   CONSTRAINT `recThreadedComments_ibfk_1` FOREIGN KEY (`cmt_OwnerUgrpID`) REFERENCES `sysUGrps` (`ugr_ID`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=863 DEFAULT CHARSET=utf8 COMMENT='Threaded comments for each record';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Threaded comments for each record';
 SET character_set_client = @saved_cs_client;
 
 --
@@ -727,7 +725,7 @@ CREATE TABLE `recUploadedFiles` (
   CONSTRAINT `recUploadedFiles_ibfk_2` FOREIGN KEY (`ulf_MimeExt`) REFERENCES `defFileExtToMimetype` (`fxm_Extension`),
   CONSTRAINT `recUploadedFiles_ibfk_3` FOREIGN KEY (`ulf_MimeExt`) REFERENCES `defFileExtToMimetype` (`fxm_Extension`),
   CONSTRAINT `recUploadedFiles_ibfk_1` FOREIGN KEY (`ulf_UploaderUGrpID`) REFERENCES `sysUGrps` (`ugr_ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=3926 DEFAULT CHARSET=utf8 COMMENT='Index to uploaded files linked from records';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Index to uploaded files linked from records';
 SET character_set_client = @saved_cs_client;
 
 --
@@ -941,7 +939,7 @@ CREATE TABLE `usrBookmarks` (
   KEY `bkm_Modified` (`bkm_Modified`),
   CONSTRAINT `usrBookmarks_ibfk_2` FOREIGN KEY (`bkm_RecID`) REFERENCES `Records` (`rec_ID`) ON DELETE CASCADE,
   CONSTRAINT `usrBookmarks_ibfk_1` FOREIGN KEY (`bkm_UGrpID`) REFERENCES `sysUGrps` (`ugr_ID`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=143567 DEFAULT CHARSET=utf8 COMMENT='Bookmark = personal data relating to a record, one for each ';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Bookmark = personal data relating to a record, one for each ';
 SET character_set_client = @saved_cs_client;
 
 /*!50003 SET @SAVE_SQL_MODE=@@SQL_MODE*/;
@@ -987,7 +985,7 @@ CREATE TABLE `usrRecTagLinks` (
   KEY `rtl_TagIDKey` (`rtl_TagID`),
   CONSTRAINT `usrRecTagLinks_ibfk_2` FOREIGN KEY (`rtl_RecID`) REFERENCES `Records` (`rec_ID`) ON DELETE CASCADE,
   CONSTRAINT `usrRecTagLinks_ibfk_1` FOREIGN KEY (`rtl_TagID`) REFERENCES `usrTags` (`tag_ID`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=205663 DEFAULT CHARSET=utf8 COMMENT='Link table connecting tags to records';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Link table connecting tags to records';
 SET character_set_client = @saved_cs_client;
 
 --
@@ -1035,7 +1033,7 @@ CREATE TABLE `usrReminders` (
   CONSTRAINT `usrReminders_ibfk_4` FOREIGN KEY (`rem_ToUserID`) REFERENCES `sysUGrps` (`ugr_ID`) ON DELETE CASCADE,
   CONSTRAINT `usrReminders_ibfk_1` FOREIGN KEY (`rem_RecID`) REFERENCES `Records` (`rec_ID`) ON DELETE CASCADE,
   CONSTRAINT `usrReminders_ibfk_2` FOREIGN KEY (`rem_OwnerUGrpID`) REFERENCES `sysUGrps` (`ugr_ID`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=382 DEFAULT CHARSET=utf8 COMMENT='Reminders attached to records and recipients, with start dat';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Reminders attached to records and recipients, with start dat';
 SET character_set_client = @saved_cs_client;
 
 --
@@ -1073,7 +1071,7 @@ CREATE TABLE `usrSavedSearches` (
   PRIMARY KEY  (`svs_ID`),
   KEY `svs_UGrpID` (`svs_UGrpID`),
   CONSTRAINT `usrSavedSearches_ibfk_1` FOREIGN KEY (`svs_UGrpID`) REFERENCES `sysUGrps` (`ugr_ID`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6693 DEFAULT CHARSET=utf8 COMMENT='Saved searches for personal/usergroup use and for publishing';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Saved searches for personal/usergroup use and for publishing';
 SET character_set_client = @saved_cs_client;
 
 --
@@ -1094,7 +1092,7 @@ CREATE TABLE `usrTags` (
   KEY `tag_UGrpID` (`tag_UGrpID`),
   KEY `tag_Text` (`tag_Text`),
   CONSTRAINT `usrTags_ibfk_1` FOREIGN KEY (`tag_UGrpID`) REFERENCES `sysUGrps` (`ugr_ID`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=123992 DEFAULT CHARSET=utf8 COMMENT='Personal and user group tags (formerly keywords)';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Personal and user group tags (formerly keywords)';
 SET character_set_client = @saved_cs_client;
 
 --
@@ -1137,7 +1135,7 @@ CREATE TABLE `woot_Chunks` (
   PRIMARY KEY  (`chunk_ID`),
   UNIQUE KEY `chunk_composite_key` (`chunk_WootID`,`chunk_InsertOrder`,`chunk_Version`),
   KEY `chunk_is_latest_key` (`chunk_IsLatest`)
-) ENGINE=InnoDB AUTO_INCREMENT=9266 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -1174,7 +1172,7 @@ CREATE TABLE `woots` (
   `woot_CreatorID` int(11) default NULL COMMENT 'Creator (user id) of the woot',
   PRIMARY KEY  (`woot_ID`),
   UNIQUE KEY `woot_title_key` (`woot_Title`(200))
-) ENGINE=InnoDB AUTO_INCREMENT=3036 DEFAULT CHARSET=utf8 COMMENT='Woot records (entries, pages) are linked to a set of XHTML c';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Woot records (entries, pages) are linked to a set of XHTML c';
 SET character_set_client = @saved_cs_client;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -1227,6 +1225,7 @@ INSERT IGNORE INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID,ugl_Role) VALUES (2,1,
 
 -- Dummy record type used in defRecStructure to indicate details to be shown in all record types
 -- Note: this is an old method ? replaced by Fieldset Markers
+SET SESSION sql_mode='NO_AUTO_VALUE_ON_ZERO';
 INSERT INTO defRecTypes (rty_ID, rty_Name, rty_OrderInGroup, rty_Description, rty_TitleMask, 
     rty_CanonicalTitleMask, rty_Plural, rty_Status, rty_ShowInLists, 
     rty_OriginatingDBID, rty_NameInOriginatingDB, rty_IDInOriginatingDB, 
@@ -1234,50 +1233,7 @@ INSERT INTO defRecTypes (rty_ID, rty_Name, rty_OrderInGroup, rty_Description, rt
 (0, 'System: Dummy rectype, details for inclusion in all record type', 0, 
 'System: dummy rectype provides the detail specifications for shared fields across all record types ', '[title]', 
 '160', 'Details for inclusion in all record types', 'Reserved', 0, 0, '', 0, 1, NULL);
-
-
-Insert IGNORE INTO defOntologies (ont_ID,ont_ShortName,ont_FullName,ont_Description,ont_RefURI)
-   VALUES(0,'local','Null ontology','An empty ontology which can be complemented',
-     'http://heuristscholar.org/reference/getOntology.php'); 
-     -- !!! we need to supply the ability to get Vocabs, etc from Heurist Reference
-Insert into defOntologies (ont_ShortName,ont_FullName,ont_RefURI)
-   Values('DC','Dublin Core','http://www.iso.org/iso/iso_catalogue/catalogue_tc/catalogue_detail.htm?csnumber=52142');
--- !!! we need to consider to pull in dublin core vocabs and rec types.
-Insert into defOntologies (ont_ShortName,ont_FullName,ont_RefURI)
-   Values('CIDOC-CRM','CIDOC-CRM','http://www.iso.org/iso/iso_catalogue/catalogue_tc/catalogue_detail.htm?csnumber=34424');
-
-
-INSERT INTO  defRecTypeGroups (rtg_ID,rtg_Name,rtg_Order)
-   VALUES ('1','Generic','1'), 
-          ('2','Bibliographic','2'), 
-          ('3','GIS datasets','3'),
-          ('4','Annotation','4'), 
-          ('5','Excavation','5'), 
-          ('6','Inscriptions','6');
-
-INSERT INTO  defDetailTypeGroups (dtg_ID,dtg_Name,dtg_Description) 
-  VALUES 
-  ('1','Generic','All details which do not have a more specific detail type group'), 
-  ('2','Overview','General overview fields useful for display in summary list'),
-  ('3','Bibliographic', 'Common bibliographic fields shared by many types of bibliographic reference'), 
-  ('4','Location','Common location fields shared by many types of object'),
-  ('5','Files and web links',  'Media files, attached files and web links'), 
-  ('6','Classification','Classificatory pointer fields such as theme, discipline or target population');
-     
-
-
-INSERT INTO  defLanguages  (lng_Name,lng_NISOZ3953,lng_ISO639)
-VALUES
-('English','ENG','EN'),('Arabic','ARA','AR'), ('Yiddish','YID','YI'),('Hebrew','HEB','HE'),('French','FRE', 'FR'),
-('Italian','ITA','IT'),('Spanish','SPA','ES'),('Dutch','DUT','NL'),('Danish','DAN','DA'),
-('Norwegian','NOR','NO'),('Portuguese','POR','PT'),('German','GER','DE'),('Greek','GRE','EL'),
-('Turkish','TUR','TR'),('Russian','RUS','RU'),('Ukranian','UKR','UK'),('Swedish','SWE','SV'),
-('Finish','FIN','FI'),('Latvian','LAV','LV'),('Estonian','EST','ET'),('Hungarian','HUN','HU'),
-('Czech','CZE','CS'),('Polish','POL','PL'),('Slovak','SLO','SK'),('Serbian','SCR','SR'),
-('Croatian','SCC','HR'),('Swahili','SWA','SW'),('Chinese','CHI','ZH'),('Indonesian','IND','ID'),
-('Hindi','HIN','HI'),('Japanese','JPN','JA'),('Malay','MAL','MS'),('Korean','KOR','KO'),
-('Vietnamese','VIE','VI'),('Thai','THA','TH'),('Khmer','CAM','KM');
-
+SET SESSION sql_mode='';
 
 -- Languages inserted as specific set of codes for use in translation
 INSERT defTerms (trm_ID,trm_Label,trm_Description,trm_Status,trm_depth)

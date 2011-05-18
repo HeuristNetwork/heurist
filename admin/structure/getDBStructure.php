@@ -258,14 +258,14 @@
 	print "<p>&nbsp;<p>&nbsp;<p>";
 
 	// ------------------------------------------------------------------------------------------
-	// defLanguage
+	// defLanguages
 
 	print "\n\n\n-- DEF LANGUAGE";print "\n";
 	print "<p>";
 	print "-- lng_ID, lng_Name, lng_Notes, lng_ISO639, lng_NISOZ3953\n";
 	$query = "select * from defLanguages";
 	$res = mysql_query($query);
-	$fmt = 'defLanguage';
+	$fmt = 'defLanguages';
 
 	print "<p>";
 	print "\n> Start\n";
@@ -380,6 +380,7 @@
 		switch ($fmt) {  // select the output formatting according to the table
 
 			case 'defRecTypes': // Data from the defRecTypes table
+			if($row['rty_ID'] != 0) {
 			$rty_Name = mysql_real_escape_string($row['rty_Name']); // escapes RTF-8 characters
 			$rty_Description = mysql_real_escape_string($row['rty_Description']);
 			$rty_TitleMask = mysql_real_escape_string($row['rty_TitleMask']);
@@ -394,6 +395,7 @@
 			'$row[rty_OriginatingDBID]','$rty_NameInOriginatingDB','$row[rty_IDInOriginatingDB]',
 			'$row[rty_ShowInLists]','$rty_RecTypeGroupIDs','$row[rty_FlagAsFieldset]','$rty_ReferenceURL',
 			'$rty_AlternativeRecEditor','$row[rty_Type]'),";
+			}
 			break;
 
 			case 'defDetailTypes': // Data from the recDetails table
@@ -402,15 +404,14 @@
 			$dty_HelpText = mysql_real_escape_string($row['dty_HelpText']);
 			$dty_ExtendedDescription = mysql_real_escape_string($row['dty_ExtendedDescription']);
 			$dty_NameInOriginatingDB = mysql_real_escape_string($row['dty_NameInOriginatingDB']);
-			$dty_PtrTargetRectypeIDs = mysql_real_escape_string($row['dty_PtrTargetRectypeIDs']);
 			$dty_JsonTermIDTree = mysql_real_escape_string($row['dty_JsonTermIDTree']);
-			$dty_TermIDTreeNonSelectableIDs = mysql_real_escape_string($row['dty_TermIDTreeNonSelectableIDs']);
-
+			$dty_TermIDTreeNonSelectableIDs = mysql_real_escape_string($row['dty_TermIDTreeNonSelectableIDs']);			
+			$dty_PtrTargetRectypeIDs = mysql_real_escape_string($row['dty_PtrTargetRectypeIDs']);
 			print "('$row[dty_ID]','$dty_Name','$dty_Documentation','$row[dty_Type]','$dty_HelpText',
 			'$dty_ExtendedDescription','$row[dty_Status]','$row[dty_OriginatingDBID]',
 			'$dty_NameInOriginatingDB','$row[dty_IDInOriginatingDB]','$row[dty_DetailTypeGroupID]',
-			'$row[dty_OrderInGroup]','$dty_PtrTargetRectypeIDs','$dty_JsonTermIDTree',
-			'$dty_TermIDTreeNonSelectableIDs','$row[dty_FieldSetRecTypeID]','$row[dty_ShowInLists]'),";
+			'$row[dty_OrderInGroup]','$dty_JsonTermIDTree','$dty_TermIDTreeNonSelectableIDs',
+			'$dty_PtrTargetRectypeIDs','$row[dty_FieldSetRecTypeID]','$row[dty_ShowInLists]'),";
 			break;
 
 			case 'defRecStructure': // Data from the defRecStructure table
@@ -425,9 +426,9 @@
 			'$rst_DisplayHelpText','$rst_DisplayExtendedDescription','$row[rst_DisplayOrder]',
 			'$row[rst_DisplayWidth]','$rst_DefaultValue',
 			'$row[rst_RecordMatchOrder]','$row[rst_CalcFunctionID]','$row[rst_RequirementType]',
-			'$row[rst_Status]','$row[rst_OriginatingDBID]','$row[rst_IDInOriginatingDB]',
+			'$row[rst_Status]','$row[rst_MayModify]','$row[rst_OriginatingDBID]','$row[rst_IDInOriginatingDB]',
 			'$row[rst_MaxValues]','$row[rst_MinValues]','$row[rst_DisplayDetailTypeGroupID]','$rst_FilteredJsonTermIDTree',
-			'$rst_TermIDTreeNonSelectableIDs','$rst_PtrFilteredIDs','$row[rst_OrderForThumbnailGeneration]'),";
+			'$rst_PtrFilteredIDs','$row[rst_OrderForThumbnailGeneration]','$rst_TermIDTreeNonSelectableIDs'),";
 			break;
 
 			case 'defTerms': // Data from the rec_details_lookup table
@@ -435,9 +436,9 @@
 			$trm_Description = mysql_real_escape_string($row['trm_Description']);
 			$trm_NameInOriginatingDB = mysql_real_escape_string($row['trm_NameInOriginatingDB']);
 			print "('$row[trm_ID]','$trm_Label','$row[trm_InverseTermId]','$trm_Description',
-			'$row[trm_Status]','$row[trm_OriginatingDBID]','$row[trm_AddedByImport]','$row[trm_IsLocalExtension]',
-			'$trm_NameInOriginatingDB','$row[trm_IDInOriginatingDB]','$row[trm_ParentTermID]','$row[trm_Domain]',
-			'$row[trm_ChildCount]','$row[trm_Depth]','$row[trm_OntID]'),";
+			'$row[trm_Status]','$row[trm_OriginatingDBID]','$trm_NameInOriginatingDB','$row[trm_IDInOriginatingDB]',
+			'$row[trm_AddedByImport]','$row[trm_IsLocalExtension]','$row[trm_Domain]','$row[trm_OntID]',
+			'$row[trm_ChildCount]','$row[trm_ParentTermID]','$row[trm_Depth]'),";
 			break;
 
 			case 'defOntologies': // Data from Ontologies table
@@ -448,17 +449,17 @@
 			$ont_NameInOriginatingDB = mysql_real_escape_string($row['ont_NameInOriginatingDB']);
 			print "('$row[ont_ID]','$ont_ShortName','$ont_FullName','$ont_Description','$ont_RefURI',
 			'$row[ont_Status]','$row[ont_OriginatingDBID]','$ont_NameInOriginatingDB',
-			'$row[ont_IDInOriginatingDB]','$row[ont_Added]','$row[ont_Modified]'),";
+			'$row[ont_IDInOriginatingDB]','$row[ont_Order]'),";
 			break;
 
 			case 'defRelationshipConstraints': // Data from relationship constraints table
 			$rcs_Description = mysql_real_escape_string($row['rcs_Description']);
-			print "('$row[rcs_ID]','$row[rcs_TermID]','$row[rcs_SourceRectypeID]',
-			'$row[rcs_TargetRectypeID]','$rcs_Description','$row[rcs_Status]',
-			'$row[rcs_OriginatingDB]','$row[rcs_TermLimit]','$row[rcs_IDInOriginatingDB]'),";
+			print "('$row[rcs_ID]','$row[rcs_SourceRectypeID]','$row[rcs_TargetRectypeID]',
+			'$rcs_Description','$row[rcs_Status]','$row[rcs_OriginatingDB]','$row[rcs_IDInOriginatingDB]',
+			'$row[rcs_TermID]','$row[rcs_TermLimit]'),";
 			break;
 
-			case 'defFileExtToMimetype': // Data from fiel extension to mimetype table
+			case 'defFileExtToMimetype': // Data from field extension to mimetype table
 			$fxm_Extension = mysql_real_escape_string($row['fxm_Extension']);
 			$fxm_MimeType = mysql_real_escape_string($row['fxm_MimeType']);
 			$fxm_IconFileName = mysql_real_escape_string($row['fxm_IconFileName']);
@@ -477,12 +478,12 @@
 			case 'defDetailTypeGroups': // Data from detail type classes table
 			$dtg_Name = mysql_real_escape_string($row['dtg_Name']);
 			$dtg_Description = mysql_real_escape_string($row['dtg_Description']);
-			print "('$row[dtg_ID]','$row[dtg_Name]','$row[dtg_Description]','$row[dtg_Order]'),";
+			print "('$row[dtg_ID]','$row[dtg_Name]','$row[dtg_Order]','$row[dtg_Description]'),";
 			break;
 			
 			case 'defTranslations':
 			$trn_Translation = mysql_real_escape_string($row['trn_Translation']);
-			print "('$row[trn_ID]','$row[trn_Source]','$row[trn_Code]','$row[trn_LanguageCodeID]','$trn_Translation'),";
+			print "('$row[trn_ID]','$row[trn_Source]','$row[trn_Code]','$row[trn_LanguageCode3]','$trn_Translation'),";
 			break;
 			
 			case 'defCalcFunctions':
@@ -495,10 +496,10 @@
 			'$row[crw_DefType]','$row[crw_LocalCode]','$row[crw_Modified]'),";
 			break;
 			
-			case 'defLanguage':
+			case 'defLanguages':
 			$lng_Name = mysql_real_escape_string($row['lng_Name']);
 			$lng_Notes = mysql_real_escape_string($row['lng_Notes']);
-			print "('$row[lng_ID]','$lng_Name','$lng_Notes','$row[lng_ISO639]','$row[lng_NISOZ3953]'),";
+			print "('$row[NISOZ3953]','$row[lng_ISO639]','$lng_Name','$lng_Notes'),";
 			break;
 			
 			case 'defURLPrefixes':
@@ -529,7 +530,7 @@
 			'$row[ugr_IsModelUser]','$ugr_IncomingEmailAddresses','$ugr_URLs','$row[ugr_FlagJT]'),";
 			break;
 	
-			case 'sysUsrGrpLinks': // user's membershiop and role in groups'
+			case 'sysUsrGrpLinks': // user's membership and role in groups'
 			print "('$row[ugl_ID]','$row[ugl_UserID]','$row[ugl_GroupID]','$row[ugl_Role]'),";
 			break;
 	
