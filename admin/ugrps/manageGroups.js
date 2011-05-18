@@ -2,7 +2,8 @@
 var groupManager;
 
 //aliases
-var Dom = YAHOO.util.Dom;
+var Dom = YAHOO.util.Dom,
+	Hul = top.HEURIST.util;
 
 /**
 * GroupManager - class for listing and searching of groups
@@ -53,7 +54,7 @@ function GroupManager(_isFilterMode, _isSelection, _isWindowMode) {
 		_workgroups = context.workgroups;
 
 		for (grp_ID in _workgroups) {
-			if(!isnull(grp_ID) && grp_ID !== "length")
+			if(!Hul.isnull(grp_ID) && grp_ID !== "length")
 			{
 				group = _workgroups[grp_ID];
 
@@ -138,7 +139,7 @@ function GroupManager(_isFilterMode, _isSelection, _isWindowMode) {
 		_callback_func = _callback;
 		_db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-				if (isnull(usrID) && location.search.length > 1) {
+				if (Hul.isnull(usrID) && location.search.length > 1) {
 									//window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 									top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 									//datatype = top.HEURIST.parameters.type;
@@ -164,7 +165,7 @@ function GroupManager(_isFilterMode, _isSelection, _isWindowMode) {
 	{
 
 	//if datatable exists, only refill ==========================
-				if(!isnull(_myDataTable)){
+				if(!Hul.isnull(_myDataTable)){
 
 					// all stuff is already inited, change livedata in datasource only
 					_myDataSource.liveData = arr;
@@ -229,7 +230,7 @@ elLiner.innerHTML = '<a href="#edit_group"><img src="../../common/images/edit_ic
 
 			{ key: "name", label: "<u>Name</u>", sortable:true,
 				formatter: function(elLiner, oRecord, oColumn, oData){
-					if(isempty(oRecord.getData('url'))){
+					if(Hul.isempty(oRecord.getData('url'))){
 						elLiner.innerHTML = oRecord.getData('name');
 					}else{
 						elLiner.innerHTML = '<a href="'+oRecord.getData('url')+
@@ -241,7 +242,7 @@ elLiner.innerHTML = '<a href="#edit_group"><img src="../../common/images/edit_ic
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var str = oRecord.getData("description");
 					var tit = "";
-					if(isempty(str)){
+					if(Hul.isempty(str)){
 						str = "";
 					}else if (str.length>70) {
 						tit = str;
@@ -327,7 +328,7 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 
 							function _updateAfterDelete(context) {
 
-								if(isnull(context.error)){
+								if(Hul.isnull(context.error)){
 									dt.deleteRow(oRecord.getId(), -1);
 									alert("Group #"+recID+" was deleted");
 									top.HEURIST.rectypes = context.rectypes;
@@ -394,7 +395,7 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 						var admins = _workgroups[recID].admins;
 						var index;
 						for(index in admins) {
-							if(!isnull(index) && userID === admins[index].id){
+							if(!Hul.isnull(index) && userID === admins[index].id){
 								return true;
 							}
 						}
@@ -436,7 +437,7 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 
 				var textTip = null;
 				var forceHideTip = true;
-				if(!isnull(recID)){
+				if(!Hul.isnull(recID)){
 					if(currentTipId !== recID) {
 						currentTipId = recID;
 
@@ -448,7 +449,7 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 						'<div style="padding-left:20px;padding-top:4px"><b>Admins:</b><br/><label style="color: #4499ff;">Click on admin to edit</label></div><ul>';
 						var index;
 						for(index in admins) {
-							if(!isnull(index)){
+							if(!Hul.isnull(index)){
 								textTip = textTip + "<li><a href='javascript:void(0)' onClick=\"groupManager.editUser('"+
 											admins[index].id+"')\">" +
 											admins[index].name + "</a></li>";  //"+detail.email+"
@@ -459,7 +460,7 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 						forceHideTip = false;
 					}
 				}
-				if(!isnull(textTip)) {
+				if(!Hul.isnull(textTip)) {
 					clearHideTimer();
 					needHideTip = true;
 					var my_tooltip = $("#toolTip2");
@@ -467,10 +468,10 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 					my_tooltip.mouseover(__clearHideTimer2);
 					my_tooltip.mouseout(__hideToolTip2);
 
-					var xy = getMousePos(event);
+					var xy = Hul.getMousePos(event);
 					my_tooltip.html(textTip);  //DEBUG xy[0]+",  "+xy[1]+"<br/>"+
 
-					showPopupDivAt(my_tooltip, xy);
+					Hul.showPopupDivAt(my_tooltip, xy);
 					hideTimer = window.setTimeout(_hideToolTip, 5000);
 				}
 				else if(forceHideTip) {
@@ -512,7 +513,7 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 									}
 
 									lblSelect1.innerHTML = "<b>"+_arr_selection.length+"</b> record type"+((_arr_selection.length>1)?"s":"");
-									if(!isnull(lblSelect2)) {
+									if(!Hul.isnull(lblSelect2)) {
 										lblSelect2.innerHTML = lblSelect1.innerHTML;
 									}
 	}
@@ -525,7 +526,7 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 	function _initTypeComboBoxFilter()
 	{
 		filterByType = Dom.get('inputFilterByType');
-		if(!isnull(filterByType)) { filterByType.onchange = _updateFilterLocal; }
+		if(!Hul.isnull(filterByType)) { filterByType.onchange = _updateFilterLocal; }
 
 	}
 
@@ -536,7 +537,7 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 	function _clearSelection(){
 							_arr_selection = [];
 							lblSelect1.innerHTML = "";
-							if(!isnull(lblSelect2)) {lblSelect2.innerHTML = "";}
+							if(!Hul.isnull(lblSelect2)) {lblSelect2.innerHTML = "";}
 							_updateFilterLocal();
 	}
 
@@ -547,7 +548,7 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 	function _initListeners()
 	{
 				filterByName = Dom.get('inputFilterByName');
-				if(!isnull(filterByName)){
+				if(!Hul.isnull(filterByName)){
 							filterByName.onkeyup = function (e) {
 								clearTimeout(filterTimeout);
 								setTimeout(_updateFilterLocal, 600);
@@ -591,7 +592,7 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 	function _editUser(user) {
 		var URL = "";
 
-		var userID = (!isnull(user))?Number(user):0;
+		var userID = (!Hul.isnull(user))?Number(user):0;
 
 		if(userID>0) {
 			URL = top.HEURIST.basePath + "admin/ugrps/editUser.html?db=" + _db + "&recID="+userID;
@@ -599,7 +600,7 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 			URL = top.HEURIST.basePath + "admin/ugrps/editUser.html?db=" + _db; //new user
 		}else{
 			return;
-		//}else if(!isnull(user)){
+		//}else if(!Hul.isnull(user)){
 		//	URL = top.HEURIST.basePath + "admin/ugrps/editUser.html?db=" + _db + "&user="+user; //email
 		}
 		top.HEURIST.util.popupURL(top, URL, {
@@ -608,7 +609,7 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 			height: 560,
 			width: 640,
 			callback: function(changedValues) {
-				/*if(isnull(changedValues)) {
+				/*if(Hul.isnull(changedValues)) {
 					// Canceled
 				} else {
 					// TODO: reload datatable
@@ -634,7 +635,7 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 			height: 480,
 			width: 620,
 			callback: function(context) {
-				if(!isnull(context)){
+				if(!Hul.isnull(context)){
 
 					//update id
 					var recID = Math.abs(Number(context.result[0]));
@@ -669,7 +670,7 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 
 						if(_isWindowMode){
 							window.close(res, _usrID);
-						}else if (!isnull(_callback_func) ) {
+						}else if (!Hul.isnull(_callback_func) ) {
 							_callback_func(res, _usrID);
 						}
 				},
@@ -680,7 +681,7 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 				cancel : function () {
 					if(_isWindowMode){
 						window.close();
-					}else if (!isnull(_callback_func) ) {
+					}else if (!Hul.isnull(_callback_func) ) {
 						_callback_func();
 					}
 				},

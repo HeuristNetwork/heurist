@@ -1318,94 +1318,80 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		createSubTreeOptions(0,termIDTree, termLookup, defaultTermID);
 		if (!defaultTermID) selObj.selectedIndex = 0;
 		return selObj;
-	}
-
-};
-
-top.HEURIST.registerEvent(window, "contentloaded", top.HEURIST.util.setVersion);
-
-/* Invoke  autosizeAllElements()  when the window loads or is resized */
-top.HEURIST.registerEvent(window, "load", function() { setTimeout(top.HEURIST.util.autosizeAllElements, 0); }, false, 99);	// need to autosize very late
-top.HEURIST.registerEvent(window, "resize", function() {
-	if (window.resizeTimeout) {
-		window.clearTimeout(window.resizeTimeout);
-	}
-	window.resizeTimeout = window.setTimeout(function() { top.HEURIST.util.autosizeAllElements(); window.resizeTimeout = 0; }, 250);
-});
+	},
 
 
-//ARTEM added these
+	//ARTEM's addidions
 
-/**
-*
-*/
-function isnull(obj){
-	return ( (typeof obj==="undefined") || (obj===null));
-}
+	/**
+	*
+	*/
+	isnull: function(obj){
+		return ( (typeof obj==="undefined") || (obj===null));
+	},
+	/**
+	*
+	*/
+	isempty: function(obj){
+		return ( top.HEURIST.util.isnull(obj) || (obj==="") || (obj==="null") );
+	},
 
-/**
-*
-*/
-function isempty(obj){
-	return ( isnull(obj) || (obj==="") || (obj==="null") );
-}
+	/**
+	* Utility function to validate that input value is as integer
+	*/
+	validate: function(evt) {
+		var theEvent = evt || window.event;
+		var key = theEvent.keyCode || theEvent.which;
+		key = String.fromCharCode( key );
+		var regex = /[0-9]|\./;
+		if( !regex.test(key) ) {
+			theEvent.returnValue = false;
+			theEvent.preventDefault();
+		}
+	},
 
-/**
-* Utility function to validate that input value is as integer
-* @todo move to common util
-*/
-function validate(evt) {
-	var theEvent = evt || window.event;
-	var key = theEvent.keyCode || theEvent.which;
-	key = String.fromCharCode( key );
-	var regex = /[0-9]|\./;
-	if( !regex.test(key) ) {
-		theEvent.returnValue = false;
-		theEvent.preventDefault();
-	}
-}
+	/**
+	* deep cloning of object
+	*/
+	cloneObj: function(o) {
+		if(typeof(o) != "object") return o;
 
-/**
-* deep cloning of object
-*/
-function cloneObj(o) {
-	if(typeof(o) != "object") return o;
+		if(o == null) return o;
 
-	if(o == null) return o;
+		var newO = new Object();
 
-	var newO = new Object();
+		for(var i in o) newO[i] = cloneObj(o[i]);
 
-	for(var i in o) newO[i] = cloneObj(o[i]);
+		return newO;
+	},
 
-	return newO;
-}
 
-/**
-* Returns array that contain the mouse position relative to the document
-*/
-function getMousePos(e){
+	/**
+	* Returns array that contain the mouse position relative to the document
+	*/
+	getMousePos: function(e){
 
-	var posx = 0;
-	var posy = 0;
-	if (!e) var e = window.event;
-	if (e.pageX || e.pageY) 	{
-		posx = e.pageX;
-		posy = e.pageY;
-	}
-	else if (e.clientX || e.clientY) 	{
-		posx = e.clientX + document.body.scrollLeft
-			+ document.documentElement.scrollLeft;
-		posy = e.clientY + document.body.scrollTop
-			+ document.documentElement.scrollTop;
-	}
+		var posx = 0;
+		var posy = 0;
+		if (!e) var e = window.event;
+		if (e.pageX || e.pageY) 	{
+				posx = e.pageX;
+				posy = e.pageY;
+		}
+		else if (e.clientX || e.clientY) 	{
+			posx = e.clientX + document.body.scrollLeft
+				+ document.documentElement.scrollLeft;
+			posy = e.clientY + document.body.scrollTop
+				+ document.documentElement.scrollTop;
+		}
 
-	return [posx, posy];
-}
+		return [posx, posy];
+	},
 
-/**
-* Adjusts the position of div to prevent it out of border
-*/
-function showPopupDivAt(_div, xy, offset){
+	/**
+	* Adjusts the position of div to prevent it out of border
+	*/
+	showPopupDivAt: function(_div, xy, offset){
 
 		var border_top = $(window).scrollTop();
 		var border_right = $(window).width();
@@ -1413,7 +1399,7 @@ function showPopupDivAt(_div, xy, offset){
 		var div_height =  _div.height();
 		var left_pos;
 		var top_pos;
-		if(isnull(offset)){
+		if(top.HEURIST.util.isnull(offset)){
 		 	offset = 5;
 		}
 
@@ -1439,11 +1425,25 @@ function showPopupDivAt(_div, xy, offset){
 		_div.css( {
 			left:left_pos+'px', top:top_pos+'px'
 		});
-}
+	},
 
-/**
-* write script - should be used in top of page
-*/
-function loadScript(url){
-	this.document.write("<script src=\"" + url + "\"></script>");
-}
+	/**
+	* write script - should be used in top of page
+	*/
+	loadScript2: function(doc, url){
+		doc.write("<script src=\"" + url + "\"></script>");
+	}
+
+};
+
+top.HEURIST.registerEvent(window, "contentloaded", top.HEURIST.util.setVersion);
+
+/* Invoke  autosizeAllElements()  when the window loads or is resized */
+top.HEURIST.registerEvent(window, "load", function() { setTimeout(top.HEURIST.util.autosizeAllElements, 0); }, false, 99);	// need to autosize very late
+top.HEURIST.registerEvent(window, "resize", function() {
+	if (window.resizeTimeout) {
+		window.clearTimeout(window.resizeTimeout);
+	}
+	window.resizeTimeout = window.setTimeout(function() { top.HEURIST.util.autosizeAllElements(); window.resizeTimeout = 0; }, 250);
+});
+

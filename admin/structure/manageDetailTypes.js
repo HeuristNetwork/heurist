@@ -3,7 +3,8 @@ var g_version = "1";
 var detailTypeManager;
 
 //aliases
-var Dom = YAHOO.util.Dom;
+var Dom = YAHOO.util.Dom,
+	Hul = top.HEURIST.util;
 
 function DetailTypeManager() {
 
@@ -502,7 +503,7 @@ function DetailTypeManager() {
 				var newvals = [(oRecord.getData('vis')?1:0), oRecord.getData('grp_id')];
 
 				//keep copy
-				if(_cloneHEU==null) _cloneHEU = cloneObj(top.HEURIST.detailTypes);
+				if(_cloneHEU==null) _cloneHEU = Hul.cloneObj(top.HEURIST.detailTypes);
 				//update HEURIST
 				var td = top.HEURIST.detailTypes.typedefs[dty_ID];
 				var deftype = td.commonFields;
@@ -535,7 +536,7 @@ function DetailTypeManager() {
 				var column = this.getColumn(target);
 				var dty_ID = null;
 
-				if(!isnull(column) && column.key === 'usage') {
+				if(!Hul.isnull(column) && column.key === 'usage') {
 
 					var record = this.getRecord(target);
 					dty_ID = record.getData('id');
@@ -596,7 +597,7 @@ function DetailTypeManager() {
 				}
 
 				var forceHideTip = true;
-				if(!isnull(dty_ID)){
+				if(!Hul.isnull(dty_ID)){
 					if(currentTipId != dty_ID) {
 						currentTipId = dty_ID;
 
@@ -619,7 +620,7 @@ function DetailTypeManager() {
 						forceHideTip = false;
 					}
 				}
-				if(!isnull(textTip)) {
+				if(!Hul.isnull(textTip)) {
 					clearHideTimer();
 					needHideTip = true;
 					var my_tooltip = $("#toolTip2");
@@ -627,10 +628,10 @@ function DetailTypeManager() {
 					my_tooltip.mouseover(__clearHideTimer2);
 					my_tooltip.mouseout(__hideToolTip2);
 
-					var xy = getMousePos(event);
+					var xy = Hul.getMousePos(event);
 					my_tooltip.html(textTip);  //DEBUG xy[0]+",  "+xy[1]+"<br/>"+
 
-					showPopupDivAt(my_tooltip, xy);
+					Hul.showPopupDivAt(my_tooltip, xy);
 
 					hideTimer = window.setTimeout(_hideToolTip, 5000);
 				}
@@ -736,7 +737,7 @@ function DetailTypeManager() {
 		_btnSave.style.display = 'none';
 		_lblNotice.innerHTML = '';
 
-		if(_cloneHEU) top.HEURIST.detailTypes = cloneObj(_cloneHEU);
+		if(_cloneHEU) top.HEURIST.detailTypes = Hul.cloneObj(_cloneHEU);
 		_cloneHEU = null;
 
 		if(withReload){
@@ -941,7 +942,7 @@ function DetailTypeManager() {
 		//make this tab active
 		function _updateOnSaveGroup(context){
 			//for new - add new tab
-			if(!isnull(context['0'].error)){
+			if(!Hul.isnull(context['0'].error)){
 				alert(context['0'].error);
 			}else{
 				var ind;

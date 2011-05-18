@@ -290,7 +290,7 @@
 
 Login at:
 
-".HEURIST_URL_BASE."
+".HEURIST_URL_BASE."search/search.html?db=".HEURIST_DBNAME."
 
 with the username: " . $ugr_Name . ".
 

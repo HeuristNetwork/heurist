@@ -13,7 +13,8 @@
 **/
 
 //aliases
-var Dom = YAHOO.util.Dom;
+var Dom = YAHOO.util.Dom,
+	Hul = top.HEURIST.util;
 
 /**
 * GroupEditor - class for pop-up edit group
@@ -57,16 +58,16 @@ function GroupEditor() {
 				if(_recID){
 					_entity = top.HEURIST.userGrp.groups[_recID];
 				}
-				if(isnull(typeID)){
+				if(Hul.isnull(typeID)){
 					typeID = 0;
 				}
 		}
 
-		if (_recID && isnull(_entity) ){
+		if (_recID && Hul.isnull(_entity) ){
 			Dom.get("statusMsg").innerHTML = "<strong>Error: Group #"+_recID+"  not be found. Clicking 'save' button will create a new Group.</strong><br /><br />";
 		}
 		//creates new empty field type in case ID is not defined
-		if(isnull(_entity)){
+		if(Hul.isnull(_entity)){
 			_recID =  -1;
 			//"ugr_ID", "ugr_Type", "ugr_Name", "ugr_LongName", "ugr_Description", "ugr_URLs", "ugr_Enabled");
 			_entity = [-1,'workgroup','','','','','y'];
@@ -115,7 +116,7 @@ function GroupEditor() {
 		for (i = 0, l = fnames.length; i < l; i++) {
 			var fname = fnames[i];
 			el = Dom.get(fname);
-			if(!isnull(el)){
+			if(!Hul.isnull(el)){
 				if ( el.type === "checkbox") { // dty_ShowInLists
 					el.checked = (_entity[i]==="y");
 				}
@@ -168,7 +169,7 @@ function GroupEditor() {
 		for (i = 0, l = fnames.length; i < l; i++){
 			var fname = fnames[i];
 			el = Dom.get(fname);
-			if( !isnull(el) ){
+			if( !Hul.isnull(el) ){
 				if(el.type === "checkbox"){
 					el.value = el.checked?"y":"n";
 				}
@@ -210,7 +211,7 @@ function GroupEditor() {
 				ind;
 
 			for(ind in context.result){
-				if( !isnull(ind) ){
+				if( !Hul.isnull(ind) ){
 					var item = context.result[ind];
 					if(isNaN(item)){
 						alert("An error occurred: " + item);

@@ -437,7 +437,8 @@
 	 		//do not close the window
 
 		}else if(str != null) {
-alert("Stringified changes: " + str);
+//DEBUG
+			alert("Stringified changes: " + str);
 
 			// TODO: Change base URL
 			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
@@ -633,7 +634,7 @@ alert("Stringified changes: " + str);
 			}
 
 			if(rectypeValues[index] !== fieldNameElementValue || rectypeID == -1) {
-				//if(isnull(rectypeValues[index]) && !fieldNameElementValue) { // Because if database value is DOM value is NULL, it doesn't enter that in input field
+				//if(Hul.isnull(rectypeValues[index]) && !fieldNameElementValue) { // Because if database value is DOM value is NULL, it doesn't enter that in input field
 				//} else {
 					//rectypeValues[index] = fieldNameElementValue;
 					updatedFields.push(index);

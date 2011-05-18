@@ -7,7 +7,9 @@ var popupSelect = null;
 //aliases
 var Dom = YAHOO.util.Dom,
 	Event = YAHOO.util.Event,
-	DDM = YAHOO.util.DragDropMgr;
+	DDM = YAHOO.util.DragDropMgr,
+	Hul = top.HEURIST.util;
+
 
 /**
 * EditRecStructure - class for pop-up edit record type structure
@@ -114,14 +116,14 @@ function EditRecStructure() {
 	*/
 	function _initTabDesign(_rty_ID){
 
-		if(isnull(_myDataTable) || !isnull(_rty_ID)){
+		if(Hul.isnull(_myDataTable) || !Hul.isnull(_rty_ID)){
 
-			if(!isnull(_rty_ID)) { rty_ID = _rty_ID; }
-			if(isnull(rty_ID)) { return; }
+			if(!Hul.isnull(_rty_ID)) { rty_ID = _rty_ID; }
+			if(Hul.isnull(rty_ID)) { return; }
 
 			// take list of detail types from HEURIST DB
 			var typedef = top.HEURIST.rectypes.typedefs[rty_ID];
-			if(isnull(typedef)){
+			if(Hul.isnull(typedef)){
 				alert("Record type ID "+rty_ID+" is not exist");
 				rty_ID = null;
 				return;
@@ -146,7 +148,7 @@ function EditRecStructure() {
 			var _dts = typedef.dtFields;
 
 			//only for this group and visible in UI
-			if(!isnull(_dts)){
+			if(!Hul.isnull(_dts)){
 				var rst_ID;
 				for (rst_ID in _dts) {
 					var aval = _dts[rst_ID];
@@ -267,7 +269,7 @@ function EditRecStructure() {
 					'<div class="dtyField"><label class="dtyLabel">Display name/Label:</label><input id="ed'+rst_ID+'_rst_DisplayName" title="Display Name/Label"/></div>'+
 					'<div class="dtyField"><label class="dtyLabel">Help Text/Prompt:</label><input id="ed'+rst_ID+'_rst_DisplayHelpText" style="width:350px" title="Help Text"/></div>'+
 					'<div class="dtyField"><label class="dtyLabel">Default Value:</label><input id="ed'+rst_ID+'_rst_DefaultValue" title="Default Value"/></div>'+
-					'<div class="dtyField"><label class="dtyLabel">Width:</label><input id="ed'+rst_ID+'_rst_DisplayWidth" title="Visible width of field" style="width:40" size="4" onkeypress="validate(event)"/></div>'+
+					'<div class="dtyField"><label class="dtyLabel">Width:</label><input id="ed'+rst_ID+'_rst_DisplayWidth" title="Visible width of field" style="width:40" size="4" onkeypress="Hul.validate(event)"/></div>'+
 
 					'<div class="dtyField"><label class="dtyLabel">Requirement type:</label>'+
 					'<select id="ed'+rst_ID+'_rst_RequirementType" onchange="onReqtypeChange(event)">'+
@@ -276,9 +278,9 @@ function EditRecStructure() {
 					'<option value="optional">optional</option>'+
 					'<option value="forbidden">forbidden</option></select>'+
 					'&nbsp;&nbsp;repeat from&nbsp;<input id="ed'+rst_ID+
-					'_rst_MinValues" title="Min Values" style="width:20" size="2"  onkeypress="validate(event)"/>&nbsp;'+
+					'_rst_MinValues" title="Min Values" style="width:20" size="2"  onkeypress="Hul.validate(event)"/>&nbsp;'+
 					'&nbsp;to&nbsp;<input id="ed'+rst_ID+
-					'_rst_MaxValues" title="Max Values"  style="width:20" size="2"  onkeypress="validate(event)"/>&nbsp;times</div>'+
+					'_rst_MaxValues" title="Max Values"  style="width:20" size="2"  onkeypress="Hul.validate(event)"/>&nbsp;times</div>'+
 
 					'<div class="dtyField"><label class="dtyLabel">Vocabulary:</label>'+
 					'<div id="termsPreview" class="dtyValue"></div>'+
@@ -322,8 +324,8 @@ function EditRecStructure() {
 				var column = this.getColumn(oArgs.target);
 
 				//prevent any operation in case of opened popup
-				if(!isnull(popupSelect) || _isServerOperationInProgress ||
-				(!isnull(column) && column.key === 'rst_values'))
+				if(!Hul.isnull(popupSelect) || _isServerOperationInProgress ||
+				(!Hul.isnull(column) && column.key === 'rst_values'))
 				{ return; }
 
 
@@ -351,7 +353,7 @@ function EditRecStructure() {
 					}
 				}
 
-				if(!isnull(record_id)){
+				if(!Hul.isnull(record_id)){
 					oRecord = this.getRecord(record_id);
 					var rst_ID = oRecord.getData("rst_ID");
 
@@ -362,7 +364,7 @@ function EditRecStructure() {
 						_setDragEnabled(true);
 					}else{
 						//collapse and save by default
-						if(!isnull(_expandedRecord)){
+						if(!Hul.isnull(_expandedRecord)){
 							_doExpliciteCollapse(_expandedRecord, true);
 						}
 						_setDragEnabled(false);
@@ -381,11 +383,11 @@ function EditRecStructure() {
 			//
 			_myDataTable.subscribe('linkClickEvent', function(oArgs){
 
-				if(!isnull(popupSelect) || _isServerOperationInProgress) { return; }
+				if(!Hul.isnull(popupSelect) || _isServerOperationInProgress) { return; }
 
 				YAHOO.util.Event.stopEvent(oArgs.event);
 
-				if(!isnull(_updatedFields) && _updatedFields.indexOf(9)>=0){ //order was changed
+				if(!Hul.isnull(_updatedFields) && _updatedFields.indexOf(9)>=0){ //order was changed
 					alert("You have to save your changes in view order first");
 					return;
 				}
@@ -399,7 +401,7 @@ function EditRecStructure() {
 
 					if(!context){
 						alert("Unknown error on server side");
-					}else if(isnull(context.error)){
+					}else if(Hul.isnull(context.error)){
 
 						_myDataTable.deleteRow(oRecord.getId(), -1);
 
@@ -622,10 +624,10 @@ function renderShowAll() {
 	*/
 	function _doExpliciteCollapse(rst_ID, needSave){
 
-		if(isnull(rst_ID)){ //when user open select and new field type popup we have to save all changes
+		if(Hul.isnull(rst_ID)){ //when user open select and new field type popup we have to save all changes
 			rst_ID = _expandedRecord;
-			if(isnull(rst_ID)) {
-				if(!isnull(_updatedFields) && _updatedFields.indexOf(9)>=0 && needSave){ //order was changed
+			if(Hul.isnull(rst_ID)) {
+				if(!Hul.isnull(_updatedFields) && _updatedFields.indexOf(9)>=0 && needSave){ //order was changed
 					_saveUpdates(false); //global function
 				}
 				return;
@@ -634,7 +636,7 @@ function renderShowAll() {
 
 		var oRecord = _getRecordById(rst_ID).record;
 		var record_id = _myDataTable.getTdEl({record:oRecord, column:_myDataTable.getColumn("expandColumn")});
-		if(!isnull(record_id)){
+		if(!Hul.isnull(record_id)){
 			if(needSave){
 				_fromUItoArray(rst_ID); //before collapse save from UI to HEURIST
 			}
@@ -691,7 +693,7 @@ function renderShowAll() {
 
 			//find the record with given rst_ID
 			var oRecInfo = _getRecordById(__rst_ID);
-			if(isnull(oRecInfo)) {
+			if(Hul.isnull(oRecInfo)) {
 				return;
 			}
 			var row_index = oRecInfo.row_index;
@@ -702,7 +704,7 @@ function renderShowAll() {
 			for(k=0; k<fieldnames.length; k++){
 				var ed_name = 'ed'+__rst_ID+'_'+fieldnames[k];
 				var edt = Dom.get(ed_name);
-				if(!isnull(edt)){
+				if(!Hul.isnull(edt)){
 					//DEBUG if(values[k] != edt.value){
 					//	dbg.value = dbg.value + (fieldnames[k]+'='+edt.value);
 					//}
@@ -712,7 +714,7 @@ function renderShowAll() {
 
 						isChanged = true;
 						//track the changes for further save
-						if(!isnull(_updatedFields) && _updatedFields.indexOf(k)<0){
+						if(!Hul.isnull(_updatedFields) && _updatedFields.indexOf(k)<0){
 							_updatedFields.push(k);
 						}
 						if(_updatedDetails.indexOf(__rst_ID)<0){
@@ -735,11 +737,11 @@ function renderShowAll() {
 			return isChanged;
 		}//__setFor
 
-		if(isnull(_rst_ID)){ //for all
+		if(Hul.isnull(_rst_ID)){ //for all
 			//fill values from array
 			var rst_ID;
 			for (rst_ID in arrStrucuture){
-				if(!isnull(rst_ID)){
+				if(!Hul.isnull(rst_ID)){
 					__setFor(rst_ID);
 
 					/* given up attempt to gather all data with jQuery
@@ -771,7 +773,7 @@ function renderShowAll() {
 		for(k=0; k<fieldnames.length; k++){
 			var ed_name = 'ed'+rst_ID+'_'+fieldnames[k];
 			var edt = Dom.get(ed_name);
-			if( !isnull(edt) && (isAll || edt.parentNode.id.indexOf("row")<0)){
+			if( !Hul.isnull(edt) && (isAll || edt.parentNode.id.indexOf("row")<0)){
 				edt.value = values[k];
 
 			if(rst_type === "relmarker" && fieldnames[k] === "rst_DefaultValue"){
@@ -786,8 +788,8 @@ function renderShowAll() {
 					var edt2 = Dom.get('ed'+rst_ID+'_rst_TermIDTreeNonSelectableIDs');
 
 					recreateTermsPreviewSelector(rst_type,
-					(isempty(edt.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[9]:edt.value),   //dty_JsonTermIDTree
-					(isempty(edt2.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[10]:edt2.value)); //dty_TermIDTreeNonSelectableIDs
+					(Hul.isempty(edt.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[9]:edt.value),   //dty_JsonTermIDTree
+					(Hul.isempty(edt2.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[10]:edt2.value)); //dty_TermIDTreeNonSelectableIDs
 
 					//editedTermTree, editedDisabledTerms);
 
@@ -801,7 +803,7 @@ function renderShowAll() {
 					edt.parentNode.style.display = "block";
 
 					recreateRecTypesPreview(rst_type,
-					(isempty(edt.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[11]:edt.value) ); //dty_PtrTargetRectypeIDs
+					(Hul.isempty(edt.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[11]:edt.value) ); //dty_PtrTargetRectypeIDs
 				}else{
 					edt.parentNode.style.display = "none";
 				}
@@ -842,7 +844,7 @@ function renderShowAll() {
 		var recDetTypes = top.HEURIST.rectypes.typedefs[rty_ID].dtFields;
 
 		//new odetail type
-		if(isnull(recDetTypes)){
+		if(Hul.isnull(recDetTypes)){
 			recDetTypes = {}; //new Object();
 		}
 
@@ -864,7 +866,7 @@ function renderShowAll() {
 		var k;
 		for(k=0; k<arrDty_ID.length; k++){
 			var dty_ID = arrDty_ID[k];
-			if(isnull(recDetTypes[dty_ID])){
+			if(Hul.isnull(recDetTypes[dty_ID])){
 				var arrs = detTypes[dty_ID].commonFields;
 				//add new detail type
 				// 0		1		2	   3	4		 5   6   7    8?    9  10?
@@ -942,7 +944,7 @@ function renderShowAll() {
 	{
 		_fromUItoArray(null); //save all changes
 
-		if(!isnull(rty_ID) && _updatedDetails.length>0){
+		if(!Hul.isnull(rty_ID) && _updatedDetails.length>0){
 			var k;
 			//create and fill the data structure
 			var orec = {rectype:{
@@ -951,7 +953,7 @@ function renderShowAll() {
 			}};
 			//fill array of updated fieldnames
 			var fieldnames = top.HEURIST.rectypes.typedefs.dtFieldNames;
-			if(isnull(_updatedFields)){ //all fields are updated
+			if(Hul.isnull(_updatedFields)){ //all fields are updated
 				_updatedFields = [];
 				for(k=0; k<fieldnames.length; k++){
 					orec.rectype.colNames.dtFields.push(fieldnames[k]);
@@ -997,7 +999,7 @@ function renderShowAll() {
 		var btnSaveOrder = Dom.get('btnSaveOrder');
 		btnSaveOrder.style.display = "none";
 
-		if(!isnull(str)){
+		if(!Hul.isnull(str)){
 			//DEBUG  alert(str);
 			var updateResult = function(context){
 				if(context){
@@ -1128,7 +1130,7 @@ function renderShowAll() {
 
 		if(isChanged){
 			//index if field rst_DisplayOrder
-			if(!isnull(_updatedFields) && _updatedFields.indexOf(9)<0){
+			if(!Hul.isnull(_updatedFields) && _updatedFields.indexOf(9)<0){
 				_updatedFields.push(9);
 			}
 			top.HEURIST.rectypes.dtDisplayOrder[rty_ID] = neworder;
@@ -1172,7 +1174,7 @@ function renderShowAll() {
 			srcEl = this.srcEl = this.getEl();
 
 			var rec = _myDataTable.getRecord(this.srcEl);
-			if(isnull(rec)) { return; }
+			if(Hul.isnull(rec)) { return; }
 			this.srcData = rec.getData();
 			this.srcIndex = srcEl.sectionRowIndex;
 			// Make the proxy look like the source element
@@ -1218,7 +1220,7 @@ function renderShowAll() {
 				tmpIndex = this.tmpIndex;
 
 				if (destEl.nodeName.toLowerCase() === "tr") {
-					if(!isnull(tmpIndex)) {
+					if(!Hul.isnull(tmpIndex)) {
 						_myDataTable.deleteRow(tmpIndex);
 					}
 					else {
@@ -1312,7 +1314,7 @@ function renderShowAll() {
 */
 function onAddNewDetail(){
 
-	if(isnull(popupSelect))
+	if(Hul.isnull(popupSelect))
 	{
 
 		editStructure.doExpliciteCollapse(null, true);
@@ -1330,7 +1332,7 @@ function onAddNewDetail(){
 			height: 480,
 			width: 440,
 			callback: function(detailTypesToBeAdded) {
-				if(!isnull(detailTypesToBeAdded)){
+				if(!Hul.isnull(detailTypesToBeAdded)){
 					editStructure.addDetails(detailTypesToBeAdded);
 				}
 				popupSelect = null;
@@ -1347,7 +1349,7 @@ function onAddNewDetail(){
 */
 function onDefineNewType(){
 
-	if(isnull(popupSelect))
+	if(Hul.isnull(popupSelect))
 	{
 		editStructure.doExpliciteCollapse(null, true);
 
@@ -1363,7 +1365,7 @@ function onDefineNewType(){
 			width: 600,
 			callback: function(context) {
 
-				if(!isnull(context)){
+				if(!Hul.isnull(context)){
 					//refresh the local heurist
 					top.HEURIST.detailTypes = context.detailTypes;
 
@@ -1429,7 +1431,7 @@ function onReqtypeChange(evt){
 */
 function showTermsTree(rst_ID, event){
 
-	if(isnull(selectTerms)){
+	if(Hul.isnull(selectTerms)){
 		selectTerms = new  SelectTerms(true, false); //filtered mode, in div
 	}
 	selectTerms.reinit(rst_ID, closeDivPopup1);
@@ -1451,7 +1453,7 @@ function showTermsTree(rst_ID, event){
 */
 function closeDivPopup1(_allTerms, _disTerms, _dtyID){
 
-		if(!isnull(_dtyID)){
+		if(!Hul.isnull(_dtyID)){
 			//assign new values to inputs
 			var edt1 = Dom.get('ed'+_dtyID+'_rst_FilteredJsonTermIDTree');
 			var edt2 = Dom.get('ed'+_dtyID+'_rst_TermIDTreeNonSelectableIDs');
@@ -1474,7 +1476,7 @@ function closeDivPopup1(_allTerms, _disTerms, _dtyID){
 */
 function showPointerFilter(rst_ID, event){
 
-	if(isnull(selectRecordType)){
+	if(Hul.isnull(selectRecordType)){
 		selectRecordType = new  SelectRecordType(true, false); //filtered mode, in div
 	}
 	selectRecordType.reinit(rst_ID, closeDivPopup2);
@@ -1496,7 +1498,7 @@ function showPointerFilter(rst_ID, event){
 */
 function closeDivPopup2(_values, _dtyID){
 
-		if(!isnull(_dtyID)){
+		if(!Hul.isnull(_dtyID)){
 			//assign new values to inputs
 			var edt = Dom.get('ed'+_dtyID+'_rst_PtrFilteredIDs');
 			edt.value = _values;

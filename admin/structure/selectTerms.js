@@ -2,7 +2,8 @@
 var selectTerms;
 
 //aliases
-var Dom = YAHOO.util.Dom;
+var Dom = YAHOO.util.Dom,
+	Hul = top.HEURIST.util;
 
 /**
 * SelectTerms - class for pop-up window to select terms for editing detail type
@@ -47,17 +48,17 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 		// if ID is defined take all data from detail type record
 		// otherwise try to get these parameters from request
 		//
-		if(isnull(dtyID) && (location.search.length > 1)) {
+		if(Hul.isnull(dtyID) && (location.search.length > 1)) {
 				top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 				dtyID = top.HEURIST.parameters.detailTypeID;
 		}
 
 
-		if(!isnull(dtyID)){
+		if(!Hul.isnull(dtyID)){
 
 					_dtyID = dtyID;
 					var dt = top.HEURIST.detailTypes.typedefs[dtyID].commonFields;
-					if (!isnull(dt)) {
+					if (!Hul.isnull(dt)) {
 						_datatype = dt[2];
 						_allTerms = dt[9];
 						_disTerms = dt[10];
@@ -65,13 +66,13 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 						Dom.get("dtyName").innerHTML = "Detailtype: " + dt[0];
 					}
 		}
-		if(isnull(_datatype) && (location.search.length > 1)){
+		if(Hul.isnull(_datatype) && (location.search.length > 1)){
 						_datatype = top.HEURIST.parameters.datatype;
 						_allTerms = top.HEURIST.parameters.all;
 						_disTerms = top.HEURIST.parameters.dis;
 		}
 
-		if(isnull(_datatype)) {
+		if(Hul.isnull(_datatype)) {
 			Dom.get("dtyName").innerHTML = "ERROR: Detailtype was not found";
 			// TODO: Stop page from loading
 			return;
@@ -169,13 +170,13 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 		if ((_allTerms !== _allTermsNew) || (_disTerms !== _disTermsNew)){
 			if(_isWindowMode){
 				window.close(_allTermsNew, _disTermsNew, _dtyID);
-			}else if (!isnull(_callback_func) ) {
+			}else if (!Hul.isnull(_callback_func) ) {
 				_callback_func(_allTermsNew, _disTermsNew, _dtyID);
 			}
 		} else {
 			if(_isWindowMode){
 				window.close();
-			}else if (!isnull(_callback_func) ) {
+			}else if (!Hul.isnull(_callback_func) ) {
 				_callback_func();
 			}
 
@@ -561,7 +562,7 @@ TREE REALTED ROUTINES ---------------------------------------
 	*/
 	function _treesInit() {
 
-		if(isnull(_termTree)){
+		if(Hul.isnull(_termTree)){
 			 _termTree = new YAHOO.widget.TreeView("termTree");
 			 _termTree.subscribe("clickEvent",
 				function() { // On click, select the term, and add it to the selected terms tree
@@ -578,7 +579,7 @@ TREE REALTED ROUTINES ---------------------------------------
 		}
 
 		// Selected terms tree
-		if(isnull(_selectedTermsTree)){
+		if(Hul.isnull(_selectedTermsTree)){
 			_selectedTermsTree = new YAHOO.widget.TreeView("selectedTermsTree");
 
 			_selectedTermsTree.subscribe("clickEvent",
@@ -644,7 +645,7 @@ END TREE REALTED ROUTINES ---------------------------------------
 				cancel : function () {
 					if(_isWindowMode){
 						window.close();
-					}else if (!isnull(_callback_func) ) {
+					}else if (!Hul.isnull(_callback_func) ) {
 						_callback_func();
 					}
 				},

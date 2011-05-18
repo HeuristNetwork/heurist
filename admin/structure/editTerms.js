@@ -13,7 +13,8 @@ function getParentLabel(_node){
 }
 
 //aliases
-var Dom = YAHOO.util.Dom;
+var Dom = YAHOO.util.Dom,
+	Hul = top.HEURIST.util;
 
 /**
 * EditTerms - class for pop-up window to edit terms
@@ -66,7 +67,7 @@ function EditTerms() {
 			if(ind===0){
 				_currentDomain = "enum";
 
-				if(isnull(_termTree1)){
+				if(Hul.isnull(_termTree1)){
 					_termTree1 = new YAHOO.widget.TreeView("termTree1");
 					//fill treeview with content
 					_fillTreeView(_termTree1);
@@ -76,7 +77,7 @@ function EditTerms() {
 			}else if(ind===1){
 				_currentDomain = "relation";
 
-				if(isnull(_termTree2)){
+				if(Hul.isnull(_termTree2)){
 					_termTree2 = new YAHOO.widget.TreeView("termTree2");
 					//fill treeview with content
 					_fillTreeView(_termTree2);
@@ -100,7 +101,7 @@ function EditTerms() {
 		//first level terms
 		for (termid in treesByDomain)
 		{
-		if(!isnull(termid)){
+		if(!Hul.isnull(termid)){
 
 			var nodeIndex = tv.getNodeCount()+1;
 
@@ -125,12 +126,12 @@ function EditTerms() {
 
 				for(child in parentNode)
 				{
-				if(!isnull(child)){
+				if(!Hul.isnull(child)){
 					nodeIndex = tv.getNodeCount()+1;
 
 					var arTerm = termsByDomainLookup[child];
 
-					if(!isnull(arTerm)){
+					if(!Hul.isnull(arTerm)){
 
 					term = {};//new Object();
 					term.id = child;
@@ -217,12 +218,12 @@ function EditTerms() {
 
 		if(_currentNode !== node)
 		{
-			if(!isnull(_currentNode)){
+			if(!Hul.isnull(_currentNode)){
 				_doSave(true);
 			}
 			_currentNode = node;
 
-		if(!isnull(node)){
+		if(!Hul.isnull(node)){
 			Dom.get('formInverse').style.display = "block";
 			Dom.get('formEditor').style.display = "block";
 			Dom.get('formMngTree2').style.display = "block";
@@ -231,7 +232,7 @@ function EditTerms() {
 			//	alert("label was clicked"+ node.data.id+"  "+node.data.domain+"  "+node.label);
 			Dom.get('edId').value = node.data.id;
 			Dom.get('edName').value = node.label;
-			if(isnull(node.data.description)) {
+			if(Hul.isnull(node.data.description)) {
 				node.data.description="";
 			}
 			Dom.get('edDescription').value = node.data.description;
@@ -240,7 +241,7 @@ function EditTerms() {
 			if(node.data.inverseid>0){
 				node_invers = _findNodeById(node.data.inverseid, false);
 			}
-			if(!isnull(node_invers)){ //inversed term found
+			if(!Hul.isnull(node_invers)){ //inversed term found
 					Dom.get('edInverseTermId').value = node_invers.data.id;
 					Dom.get('edInverseTerm').value = getParentLabel(node_invers);
 			}else{
@@ -251,7 +252,7 @@ function EditTerms() {
 		}
 		}
 
-		if(isnull(node)){
+		if(Hul.isnull(node)){
 				Dom.get('formInverse').style.display = "none";
 				Dom.get('formEditor').style.display = "none";
 				Dom.get('formMngTree2').style.display = "none";
@@ -271,12 +272,12 @@ function EditTerms() {
 
 		var wasChanged = ((_currentNode.label !== sName) ||
 			(_currentNode.data.description !== sDesc) ||
-			( !(isempty(_currentNode.data.inverseid)&&isnull(iInverseId)) &&
+			( !(Hul.isempty(_currentNode.data.inverseid)&&Hul.isnull(iInverseId)) &&
 				Number(_currentNode.data.inverseid) !== iInverseId));
 
 		if(wasChanged){
 
-			if(isempty(sName)){
+			if(Hul.isempty(sName)){
 				if(needConfirm){
 					alert("Field 'Display Name' is mandatory");
 					Dom.get('edName').setFocus();
@@ -323,7 +324,7 @@ function EditTerms() {
 
 		var str = YAHOO.lang.JSON.stringify(oTerms);
 
-		if(!isnull(str)) {
+		if(!Hul.isnull(str)) {
 alert("Stringified changes: " + str);
 
 			var _updateResult = function(context){
@@ -338,7 +339,7 @@ alert("Stringified changes: " + str);
 
 						for(ind in context.result)
 						{
-						if(!isnull(ind)){
+						if(!Hul.isnull(ind)){
 							var item = context.result[ind];
 							if(isNaN(item)){
 								alert("An error occurred: " + item);
@@ -375,7 +376,7 @@ alert("Stringified changes: " + str);
 		var r = (!needConfirm) ||
 		confirm("Delete term '"+_currentNode.label+"'? Are you sure? All children terms will be deleted as well");
 
-		if (r && !isnull(_currTreeView)) {
+		if (r && !Hul.isnull(_currTreeView)) {
 			//_currTreeView.removeChildren(_currentNode);
 
 			if(_currentNode.data.id.indexOf("-")<0){
@@ -386,7 +387,7 @@ alert("Stringified changes: " + str);
 							if(!context){
 								alert("Unknown server side error");
 							}
-							else if(isnull(context.error)){
+							else if(Hul.isnull(context.error)){
 								_currTreeView.popNode(_currentNode);
 								_currTreeView.render();
 								_currentNode = null;
@@ -429,7 +430,7 @@ alert("Stringified changes: " + str);
 			_onNodeClick(rootNode);
 
 		}else
-		if(!isnull(_currentNode))
+		if(!Hul.isnull(_currentNode))
 		{
 			term = {}; //new Object();
 			term.id = _currentNode.data.id+"-" + (_currentNode.getNodeCount());  //correct
@@ -455,14 +456,14 @@ alert("Stringified changes: " + str);
 		if(sel.selectedIndex>=0){
 			var nodeid = sel.options[sel.selectedIndex].value;
 			var node = _findNodeById(nodeid, true);
-			if(!isnull(node)){
+			if(!Hul.isnull(node)){
 				_onNodeClick(node);
 			}
 		}
 	}
 	function _doSelectInverse(){
 		var sel = Dom.get('resSearchInverse');
-		if(sel.selectedIndex>=0 && !isnull(_currentNode) ){
+		if(sel.selectedIndex>=0 && !Hul.isnull(_currentNode) ){
 
 			var nodeid = sel.options[sel.selectedIndex].value;
 			if(_currentNode.data.id===nodeid){
@@ -537,7 +538,7 @@ function doSearch(event){
 			ind;
 		for (ind in nodes)
 		{
-		if(!isnull(ind)){
+		if(!Hul.isnull(ind)){
 			var node = nodes[ind];
 
 			var option = document.createElement("option");

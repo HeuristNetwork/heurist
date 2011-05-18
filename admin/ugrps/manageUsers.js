@@ -2,7 +2,8 @@
 var userManager;
 
 //aliases
-var Dom = YAHOO.util.Dom;
+var Dom = YAHOO.util.Dom,
+	Hul = top.HEURIST.util;
 
 /**
 * UserManager - class for listing and searching of users
@@ -58,7 +59,7 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 
 		for (ind in context.userslist) {
-		if (!isnull(ind) )
+		if (!Hul.isnull(ind) )
 		{
 			user = context.userslist[ind];
 			user[0] = false; //_arr_selection.indexOf(ind)>=0;
@@ -77,8 +78,8 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 							filterTimeout = null;
 
 							var filter_name   = filterByName.value;
-							var filter_group  = (_isSelection || isnull(_grpID)) ?filterByGroup.value:_grpID;
-							var filter_nogroup = (_isSelection && !isnull(_grpID)) ?_grpID:"all";
+							var filter_group  = (_isSelection || Hul.isnull(_grpID)) ?filterByGroup.value:_grpID;
+							var filter_nogroup = (_isSelection && !Hul.isnull(_grpID)) ?_grpID:"all";
 							var filter_role   = filterByRole.value;
 							var filter_disabled = ((filterByDisable && filterByDisable.checked)?1:0);
 
@@ -127,7 +128,7 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 					var ind;
 					var admins = _workgroups[grpID].admins;
 					for (ind in admins){
-						if(!isnull(ind) && admins[ind].id === curruser_id)
+						if(!Hul.isnull(ind) && admins[ind].id === curruser_id)
 						{
 							return false;
 						}
@@ -173,7 +174,7 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 		_callback_func = _callback;
 		_db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-				if (isnull(grpID) && location.search.length > 1) {
+				if (Hul.isnull(grpID) && location.search.length > 1) {
 									//window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 									top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 
@@ -212,7 +213,7 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 	{
 
 	//if datatable exists, only refill ==========================
-				if(!isnull(_myDataTable)){
+				if(!Hul.isnull(_myDataTable)){
 
 					// all stuff is already inited, change livedata in datasource only
 					_myDataSource.liveData = arr;
@@ -280,7 +281,7 @@ elLiner.innerHTML = '<a href="#edit_user"><img src="../../common/images/edit_ico
 			},
 			{ key: "name", label: "<u>Name</u>", sortable:true,
 				formatter: function(elLiner, oRecord, oColumn, oData){
-					if(isempty(oRecord.getData('email'))){
+					if(Hul.isempty(oRecord.getData('email'))){
 						elLiner.innerHTML = oRecord.getData('name');
 					}else{
 						elLiner.innerHTML = '<a href="mailto:'+oRecord.getData('email')+
@@ -292,7 +293,7 @@ elLiner.innerHTML = '<a href="#edit_user"><img src="../../common/images/edit_ico
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var str = oRecord.getData("fullname");
 					var tit = "";
-					if(isempty(str)){
+					if(Hul.isempty(str)){
 						str = "";
 					}else if (str.length>40) {
 						tit = str;
@@ -304,7 +305,7 @@ elLiner.innerHTML = '<a href="#edit_user"><img src="../../common/images/edit_ico
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var str = oRecord.getData("organisation");
 					var tit = "";
-					if(isempty(str)){
+					if(Hul.isempty(str)){
 						str = "";
 					}else if (str.length>35) {
 						tit = str;
@@ -382,7 +383,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 				}else if(elLink.hash === "#kickoff_user"){
 					YAHOO.util.Event.stopEvent(oArgs.event);
 
-					var groupToBeUpdated = (isnull(_grpID)?filterByGroup.value:_grpID);
+					var groupToBeUpdated = (Hul.isnull(_grpID)?filterByGroup.value:_grpID);
 
 					var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
 					var params = "method=changeRole&db="+_db+"&recID=" + groupToBeUpdated +
@@ -398,9 +399,9 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 
 							function _updateAfterDelete(context) {
 
-								if(isnull(context) || !context){
+								if(Hul.isnull(context) || !context){
 									alert("Unknown error on server side");
-								}else if(isnull(context.error)){
+								}else if(Hul.isnull(context.error)){
 									dt.deleteRow(oRecord.getId(), -1);
 									alert("User #"+recID+" was deleted");
 								} /*else {
@@ -447,7 +448,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 			//role selector handler
 			_myDataTable.subscribe('dropdownChangeEvent', function(oArgs){
 
-				if (isnull(_grpID)) { return; }
+				if (Hul.isnull(_grpID)) { return; }
 
 				var elDropdown = oArgs.target;
 				var record = this.getRecord(elDropdown);
@@ -470,7 +471,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 						}
 					}
 
-					var groupToBeUpdated = (isnull(_grpID)?filterByGroup.value:_grpID);
+					var groupToBeUpdated = (Hul.isnull(_grpID)?filterByGroup.value:_grpID);
 					//keep the track of changes in special object
 					//TODO _updateUser(record);
 					var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
@@ -491,7 +492,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 	*
 	*/
 	function _updateRole(context) {
-		if(isnull(context) || !context) {
+		if(Hul.isnull(context) || !context) {
 			alert("Server side error");
 		}else if(context.error){
 				alert("An error occurred trying to change role: "+context.error);
@@ -499,7 +500,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 			var ind;
 			var rep = "";
 			for (ind in context.errors){
-				if (!isnull(ind) ){
+				if (!Hul.isnull(ind) ){
 					rep = rep + context.errors[ind]+" ";
 				}
 			}
@@ -557,7 +558,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 
 				var textTip = null;
 				var forceHideTip = true;
-				if(!isnull(recID)){
+				if(!Hul.isnull(recID)){
 					if(currentTipId !== recID) {
 						currentTipId = recID;
 
@@ -565,7 +566,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 						forceHideTip = false;
 					}
 				}
-				if(!isnull(textTip)) {
+				if(!Hul.isnull(textTip)) {
 					clearHideTimer();
 					needHideTip = true;
 					var my_tooltip = $("#toolTip2");
@@ -573,10 +574,10 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 					my_tooltip.mouseover(__clearHideTimer2);
 					my_tooltip.mouseout(__hideToolTip2);
 
-					var xy = getMousePos(event);
+					var xy = Hul.getMousePos(event);
 					my_tooltip.html(textTip);  //DEBUG xy[0]+",  "+xy[1]+"<br/>"+
 
-					showPopupDivAt(my_tooltip, xy);
+					Hul.showPopupDivAt(my_tooltip, xy);
 					hideTimer = window.setTimeout(_hideToolTip, 5000);
 				}
 				else if(forceHideTip) {
@@ -618,7 +619,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 									}
 
 									lblSelect1.innerHTML = "<b>"+_arr_selection.length+"</b> users"+((_arr_selection.length>1)?"s":"");
-									if(!isnull(lblSelect2)) {
+									if(!Hul.isnull(lblSelect2)) {
 										lblSelect2.innerHTML = lblSelect1.innerHTML;
 									}
 	}
@@ -655,9 +656,9 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 	*/
 	function _handlerGroupSelector(e)
 	{
-		if(!( _isSelection || isnull(_grpID) )){
+		if(!( _isSelection || Hul.isnull(_grpID) )){
 
-			if(isnull(_workgroups[_grpID])){
+			if(Hul.isnull(_workgroups[_grpID])){
 				_grpID = null;
 			}else{
 			//if group id is defined as parameter - hide filter by group div
@@ -671,13 +672,13 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 
 		Dom.get("pnlGroupTitle").style.display = "none";
 
-		if( _isSelection && !isnull(_grpID) && _grpID!=="all"){
+		if( _isSelection && !Hul.isnull(_grpID) && _grpID!=="all"){
 			Dom.get("lblGroupTitleSelection").innerHTML = "Select and add users for group '"+_workgroups[_grpID].name+"'";
 		}
 
 		var sfilter;
 
-		if(!isnull(e)) {
+		if(!Hul.isnull(e)) {
 			sfilter = e.target.value.toLowerCase();
 			if(sfilter.length<3) { sfilter = null; }
 		}
@@ -692,13 +693,13 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 							// add
 							for (grpID in _workgroups)
 							{
-								if(isnull(grpID) || grpID==="length"){
+								if(Hul.isnull(grpID) || grpID==="length"){
 									continue;
 								}
 
 								grpName = _workgroups[grpID].name;
 
-								if((isnull(sfilter) || (grpName.toLowerCase().indexOf(sfilter)>=0)) )
+								if((Hul.isnull(sfilter) || (grpName.toLowerCase().indexOf(sfilter)>=0)) )
 								{
 
 									if(_isSelection && _grpID === grpID){
@@ -731,7 +732,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 	function _clearSelection(){
 							_arr_selection = [];
 							lblSelect1.innerHTML = "";
-							if(!isnull(lblSelect2)) {lblSelect2.innerHTML = "";}
+							if(!Hul.isnull(lblSelect2)) {lblSelect2.innerHTML = "";}
 							_updateFilterLocal();
 	}
 
@@ -742,7 +743,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 	function _initListeners()
 	{
 				filterByName = Dom.get('inputFilterByName');
-				if(!isnull(filterByName)){
+				if(!Hul.isnull(filterByName)){
 							filterByName.onkeyup = function (e) {
 								if(filterTimeout===null){
 									clearTimeout(filterTimeout);
@@ -768,11 +769,11 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 
 
 				filterByRole = Dom.get('inputFilterByRole');
-				if(!isnull(filterByRole)) { filterByRole.onchange = _updateFilter; }
+				if(!Hul.isnull(filterByRole)) { filterByRole.onchange = _updateFilter; }
 
 
 				var inputFilterGroup = Dom.get('inputFilterGroup');
-				if(!isnull(inputFilterGroup)) { inputFilterGroup.onkeyup = _handlerGroupSelector; }
+				if(!Hul.isnull(inputFilterGroup)) { inputFilterGroup.onkeyup = _handlerGroupSelector; }
 
 	} //end init listener
 
@@ -782,15 +783,15 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 	function _editUser(user) {
 		var URL = "";
 
-		var userID = (!isnull(user))?Number(user):0;
+		var userID = (!Hul.isnull(user))?Number(user):0;
 
 		if(userID>0) {
 			URL = top.HEURIST.basePath + "admin/ugrps/editUser.html?db=" + _db + "&recID="+userID;
 		}
 		else {
 			//add new user to specified group
-			var groupToBeUpdated = (isnull(_grpID)?filterByGroup.value:_grpID);
-			if(!isnull(groupToBeUpdated) && groupToBeUpdated!=="all") {
+			var groupToBeUpdated = (Hul.isnull(_grpID)?filterByGroup.value:_grpID);
+			if(!Hul.isnull(groupToBeUpdated) && groupToBeUpdated!=="all") {
 				groupToBeUpdated = "&groupID="+groupToBeUpdated;
 			}else{
 				groupToBeUpdated = "";
@@ -804,7 +805,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 			height: 560,
 			width: 640,
 			callback: function(context) {
-				if(!isnull(context)){
+				if(!Hul.isnull(context)){
 
 					//update id
 					var recID = Math.abs(Number(context.result[0]));
@@ -822,7 +823,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 	*/
 	function _findAndAddUser() {
 
-		var groupToBeUpdated = (isnull(_grpID)?filterByGroup.value:_grpID);
+		var groupToBeUpdated = (Hul.isnull(_grpID)?filterByGroup.value:_grpID);
 
 		var url = top.HEURIST.baseURL + "admin/ugrps/manageUsers.html?db=" +
 										_db + "&selection=1&grpID="+groupToBeUpdated;
@@ -833,7 +834,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 			height: 600,
 			width: 820,
 			callback: function(usersSelected) {
-				if(!isnull(usersSelected)){
+				if(!Hul.isnull(usersSelected)){
 //DEBUG alert(usersSelected);
 
 					var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
@@ -880,7 +881,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 
 						if(_isWindowMode){
 							window.close(res, _grpID);
-						}else if (!isnull(_callback_func) ) {
+						}else if (!Hul.isnull(_callback_func) ) {
 							_callback_func(res, _grpID);
 						}
 				},
@@ -891,7 +892,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 				cancel : function () {
 					if(_isWindowMode){
 						window.close();
-					}else if (!isnull(_callback_func) ) {
+					}else if (!Hul.isnull(_callback_func) ) {
 						_callback_func();
 					}
 				},

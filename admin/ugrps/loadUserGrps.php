@@ -248,7 +248,7 @@ error_log(">>>>>>>>>>>>>>> userEmail=".urldecode(@$_GET['userEmail']));*/
 			$query = null;
 		}
 
-//error_log(">>>>>>>>>>>>>>> QUERY =".$query);
+error_log(">>>>>>>>>>>>>>> QUERY =".$query);
 		if($query){
 			$res = mysql_query($query);
 			while ($row = mysql_fetch_row($res)) {

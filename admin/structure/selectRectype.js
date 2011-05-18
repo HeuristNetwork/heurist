@@ -2,7 +2,8 @@
 var selectRecordType;
 
 //aliases
-var Dom = YAHOO.util.Dom;
+var Dom = YAHOO.util.Dom,
+	Hul = top.HEURIST.util;
 
 /**
 * SelectRecordType - class for pop-up window to select record types for editing detail type
@@ -80,7 +81,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 	{
 		_callback_func = _callback;
 
-				if (isnull(dtyID) && location.search.length > 1) {
+				if (Hul.isnull(dtyID) && location.search.length > 1) {
 									//window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 									top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 									datatype = top.HEURIST.parameters.type;
@@ -110,7 +111,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 				if(_isFilterMode){
 
 
-					if(isnull(dtyID)){
+					if(Hul.isnull(dtyID)){
 						lblSelect1.innerHTML = "ERROR: Detailtype was not found";
 						return;
 					}else{
@@ -125,7 +126,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 					for (ind in _arr_selection) {
 
 							var rty_ID = _arr_selection[ind];
-							if(isnull(rty_ID) || rty_ID === "undefined") continue;
+							if(Hul.isnull(rty_ID) || rty_ID === "undefined") continue;
 
 							rectype = top.HEURIST.rectypes.typedefs[rty_ID].commonFields;
 
@@ -164,7 +165,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 				}
 
 
-				if(isnull(_myDataTable)){
+				if(Hul.isnull(_myDataTable)){
 
 								_myDataSource = new YAHOO.util.LocalDataSource(arr, {
 									responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
@@ -281,19 +282,19 @@ oRecord.getData('description')+'"/>';}
 										record = this.getRecord(target),
 										xy;
 
-									if (!isnull(column) && column.key === 'id') {
+									if (!Hul.isnull(column) && column.key === 'id') {
 
 										var description = record.getData('description') || 'no further description';
 										xy = [parseInt(oArgs.event.clientX,10) + 10 ,parseInt(oArgs.event.clientY,10) + 10 ];
 										textTip = '<p>'+description+'</p>';
 									}
 
-									if(!isnull(textTip)){
+									if(!Hul.isnull(textTip)){
 
 										needHideTip = true;
 
 										var my_tooltip = $("#toolTip2");
-										if(isnull(my_tooltip)){ return; }
+										if(Hul.isnull(my_tooltip)){ return; }
 
 										my_tooltip.mouseover(function(){needHideTip = false; __clearHideTimer();});
 										my_tooltip.mouseout(function(){ needHideTip = true;});
@@ -414,7 +415,7 @@ oRecord.getData('description')+'"/>';}
 									}
 
 									lblSelect1.innerHTML = "<b>"+_arr_selection.length+"</b> record type"+((_arr_selection.length>1)?"s":"");
-									if(!isnull(lblSelect2)) {
+									if(!Hul.isnull(lblSelect2)) {
 										lblSelect2.innerHTML = lblSelect1.innerHTML;
 									}
 	}
@@ -458,7 +459,7 @@ oRecord.getData('description')+'"/>';}
 	function _clearSelection(){
 							_arr_selection = [];
 							lblSelect1.innerHTML = "";
-							if(!isnull(lblSelect2)) {lblSelect2.innerHTML = "";}
+							if(!Hul.isnull(lblSelect2)) {lblSelect2.innerHTML = "";}
 							_updateFilter();
 	}
 
@@ -508,7 +509,7 @@ oRecord.getData('description')+'"/>';}
 
 						if(_isWindowMode){
 							window.close(res, _dtyID);
-						}else if (!isnull(_callback_func) ) {
+						}else if (!Hul.isnull(_callback_func) ) {
 							_callback_func(res, _dtyID);
 						}
 				},
@@ -519,7 +520,7 @@ oRecord.getData('description')+'"/>';}
 				cancel : function () {
 					if(_isWindowMode){
 						window.close();
-					}else if (!isnull(_callback_func) ) {
+					}else if (!Hul.isnull(_callback_func) ) {
 						_callback_func();
 					}
 				},

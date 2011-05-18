@@ -17,7 +17,7 @@
 
 /**  NOT USED
 * Validates value inserted into input field. In this case, make sure it's an integer
-* used to validate order in group value (now hidden)
+* used to Hul.validate order in group value (now hidden)
 * @param evt - the evt object for this keypress
 */
 function checkIfInteger(evt) {
@@ -34,7 +34,9 @@ function checkIfInteger(evt) {
 }
 
 //aliases
-var Dom = YAHOO.util.Dom;
+var Dom = YAHOO.util.Dom,
+	Hul = top.HEURIST.util;
+
 
 var detailTypeEditor;
 /**
@@ -77,20 +79,20 @@ function DetailTypeEditor() {
 
 				if(_dtyID){
 					var dt = top.HEURIST.detailTypes.typedefs[_dtyID];
-					if(!isnull(dt)){
+					if(!Hul.isnull(dt)){
 						_detailType = dt.commonFields;
 					}
 				}
-				if(isnull(dtgID)){
+				if(Hul.isnull(dtgID)){
 					dtgID = 0;
 				}
 		}
 
-		if (_dtyID && isnull(_detailType) ){
+		if (_dtyID && Hul.isnull(_detailType) ){
 			Dom.get("statusMsg").innerHTML = "<strong>Error: field type #"+_dtyID+"  not be found. Clicking 'save' button will create a new Field Type.</strong><br /><br />";
 		}
 		//creates new empty field type in case ID is not defined
-		if(isnull(_detailType)){
+		if(Hul.isnull(_detailType)){
 			_dtyID =  -1;
 			_detailType = ['','','freetext',0,'',1,'open',dtgID,null,null,null,null];
 		}
@@ -140,7 +142,7 @@ function DetailTypeEditor() {
 						disabledTerms = disabledTerms.join(",");
 				}
 
-				if(!isnull(allTerms)) {
+				if(!Hul.isnull(allTerms)) {
 					//remove old combobox
 					var prev = Dom.get("termsPreview"),
 						i;
@@ -286,7 +288,7 @@ function DetailTypeEditor() {
 			dtg_ID;
 
 		for (dtg_ID in top.HEURIST.detailTypes.groups){
-			if(!isnull(dtg_ID)) {
+			if(!Hul.isnull(dtg_ID)) {
 				var grpName = top.HEURIST.detailTypes.groups[dtg_ID].name;
 
 				var option = document.createElement("option");
@@ -318,7 +320,7 @@ function DetailTypeEditor() {
 		for (i = 0, l = fnames.length; i < l; i++) {
 			var fname = fnames[i];
 			el = Dom.get(fname);
-			if(!isnull(el)){
+			if(!Hul.isnull(el)){
 				if ( i===5 ) { // dty_ShowInLists
 					el.checked = (Number(_detailType[5])===1);
 				}else{
@@ -342,7 +344,7 @@ function DetailTypeEditor() {
 			document.title = "Field Type #: " + _dtyID+" '"+_detailType[0]+"'";
 
 			var aUsage = top.HEURIST.detailTypes.rectypeUsage[_dtyID];
-			var iusage = (isnull(aUsage)) ? 0 : aUsage.length;
+			var iusage = (Hul.isnull(aUsage)) ? 0 : aUsage.length;
 
 			if(iusage > 0) {
 				if(iusage===1) {
@@ -383,7 +385,7 @@ function DetailTypeEditor() {
 		for (i = 0, l = fnames.length; i < l; i++){
 			var fname = fnames[i];
 			el = Dom.get(fname);
-			if( !isnull(el) ){
+			if( !Hul.isnull(el) ){
 				if(_dtyID<0 || (el.value!==String(_detailType[i]) && !(el.value==="" && _detailType[i]===null)))
 				{
 					_updatedFields.push(fname);
@@ -429,7 +431,7 @@ function DetailTypeEditor() {
 				ind;
 
 			for(ind in context.result){
-				if( !isnull(ind) ){
+				if( !Hul.isnull(ind) ){
 					var item = context.result[ind];
 					if(isNaN(item)){
 						alert("An error occurred: " + item);

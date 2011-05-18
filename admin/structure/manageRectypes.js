@@ -17,7 +17,8 @@
 var rectypeManager;
 
 //aliases
-var Dom = YAHOO.util.Dom;
+var Dom = YAHOO.util.Dom,
+	Hul = top.HEURIST.util;
 
 function RectypeManager() {
 
@@ -146,7 +147,7 @@ function RectypeManager() {
 	//
 	function _addNewTab(ind, grpID, grpName, grpDescription)
 	{
-		if(!isempty(grpDescription)){
+		if(!Hul.isempty(grpDescription)){
 			grpDescription = "Describe this group!";
 		}
 
@@ -202,7 +203,7 @@ function RectypeManager() {
 
 
 			for (var i in _groups)
-			if(!isnull(i)){
+			if(!Hul.isnull(i)){
 
 
 				var option = document.createElement("option");
@@ -249,7 +250,7 @@ function RectypeManager() {
 
 		var dt = arrTables[_currentTabIndex];
 
-		if(isnull(dt)) {
+		if(Hul.isnull(dt)) {
 
 			var arr = [];
 			//create datatable and fill it values of particular group
@@ -298,7 +299,7 @@ function RectypeManager() {
 							//thus we need to update visibility manually
 							var rec_ID = data[i].id;
 							var df = _oRecordType.rectype.defs[rec_ID];
-							if(!isnull(df)){
+							if(!Hul.isnull(df)){
 								data[i].active  = df.common[0];
 								data[i].grp_id = df.common[1];
 							}
@@ -352,7 +353,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var str = oRecord.getData("description");
 					var tit = "";
-					if(isempty(str)){
+					if(Hul.isempty(str)){
 						str = "";
 					}else if (str.length>35) {
 						tit = str;11
@@ -414,7 +415,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 
 							function _updateAfterDelete(context) {
 
-								if(isnull(context.error)){
+								if(Hul.isnull(context.error)){
 									dt.deleteRow(oRecord.getId(), -1);
 									alert("Record type #"+rectypeID+" was deleted");
 									top.HEURIST.rectypes = context.rectypes;
@@ -430,7 +431,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 							var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 							var callback = _updateAfterDelete;
 							var params = "method=deleteRT&db=" + db + "&rtyID=" + rectypeID;
-							top.HEURIST.util.getJsonData(baseurl, callback, params);
+							Hul.getJsonData(baseurl, callback, params);
 
 						}else{
 							alert("Impossible to delele record type in usage");
@@ -493,7 +494,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 				var newvals = [(oRecord.getData('active')?1:0), oRecord.getData('grp_id')];
 
 				//keep copy
-				if(isnull(_cloneHEU)) _cloneHEU = cloneObj(top.HEURIST.rectypes);
+				if(Hul.isnull(_cloneHEU)) _cloneHEU = Hul.cloneObj(top.HEURIST.rectypes);
 				//update HEURIST
 				var td = top.HEURIST.rectypes.typedefs[rty_ID];
 				var deftype = td.commonFields;
@@ -502,14 +503,14 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 
 				//update keep object
 				var dt_def = _oRecordType.rectype.defs[rty_ID];
-				if(isnull(dt_def)){
+				if(Hul.isnull(dt_def)){
 					_oRecordType.rectype.defs[rty_ID] = {common:newvals};
 					_updatesCnt++;
 				}else{
 					_oRecordType.rectype.defs[rty_ID].common = newvals;
 				}
 
-				if(isnull(_lblNotice)){
+				if(Hul.isnull(_lblNotice)){
 					_lblNotice = Dom.get("lblNoticeAboutChanges");
 					_btnSave   = Dom.get("btnSave");
 					_btnSave.onclick = _updateRecordTypeOnServer
@@ -527,7 +528,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 				var column = this.getColumn(target);
 				var rectypeID = null;
 
-				if(!isnull(column) && column.key === 'info') {
+				if(!Hul.isnull(column) && column.key === 'info') {
 
 					var record = this.getRecord(target);
 					rectypeID = record.getData('id');
@@ -591,7 +592,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 				}
 
 				var forceHideTip = true;
-				if(!isnull(rectypeID)){
+				if(!Hul.isnull(rectypeID)){
 					if(currentTipId != rectypeID) {
 						currentTipId = rectypeID;
 
@@ -610,7 +611,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 						forceHideTip = false;
 					}
 				}
-				if(!isnull(textTip)) {
+				if(!Hul.isnull(textTip)) {
 					clearHideTimer();
 					needHideTip = true;
 					var my_tooltip = $("#toolTip2");
@@ -618,10 +619,10 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 					my_tooltip.mouseover(__clearHideTimer2);
 					my_tooltip.mouseout(__hideToolTip2);
 
-					var xy = getMousePos(event);
+					var xy = Hul.getMousePos(event);
 					my_tooltip.html(textTip);  //DEBUG xy[0]+",  "+xy[1]+"<br/>"+
 
-					showPopupDivAt(my_tooltip, xy);
+					Hul.showPopupDivAt(my_tooltip, xy);
 					hideTimer = window.setTimeout(_hideToolTip, 5000);
 				}
 				else if(forceHideTip) {
@@ -639,7 +640,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 		var tabIndex = _getIndexByGroupId(grpID);
 
 		var ndt = arrTables[tabIndex];
-		if(!isnull(ndt)){
+		if(!Hul.isnull(ndt)){
 
 			//find parent tab
 			var tab = Dom.get('tabContainer'+grpID);
@@ -667,14 +668,14 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 		var str = YAHOO.lang.JSON.stringify(_oRecordType);
 		alert("Stringified changes: " + str);
 
-		if(!isnull(str)) {
+		if(!Hul.isnull(str)) {
 			//_updateResult(""); //debug
 			//return;//debug
 
 			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 			var callback = _updateResult;
 			var params = "method=saveRT&db="+db+"&data=" + encodeURIComponent(str);
-			top.HEURIST.util.getJsonData(baseurl, callback, params);
+			Hul.getJsonData(baseurl, callback, params);
 		}
 	}
 	//
@@ -688,7 +689,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 			var report = "";
 
 			for(var ind in context.result)
-			if(!isnull(ind)){
+			if(!Hul.isnull(ind)){
 				var item = context.result[ind];
 				if(isNaN(item)){
 					alert("An error occurred: " + item);
@@ -722,12 +723,12 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 		_btnSave.style.display = 'none';
 		_lblNotice.innerHTML = '';
 
-		if(_cloneHEU) top.HEURIST.rectypes = cloneObj(_cloneHEU);
+		if(_cloneHEU) top.HEURIST.rectypes = Hul.cloneObj(_cloneHEU);
 		_cloneHEU = null;
 
 		if(withReload){
 			for(var ind in arrTables)
-			if(!isnull(ind)){
+			if(!Hul.isnull(ind)){
 				_removeTable( _getGroupByIndex(ind), true);
 			}
 		}
@@ -813,13 +814,13 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 		else {
 			URL = top.HEURIST.basePath + "admin/structure/editDetailType.html?db="+db;
 		}
-		top.HEURIST.util.popupURL(top, URL, {
+		Hul.popupURL(top, URL, {
 			"close-on-blur": false,
 			"no-resize": false,
 			height: 600,
 			width: 640,
 			callback: function(changedValues) {
-				if(isnull(changedValues)) {
+				if(Hul.isnull(changedValues)) {
 					// Canceled
 				} else {
 					// TODO: reload datatable
@@ -832,13 +833,13 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 	// edit strcuture (from image link in table)
 	//
 	function _editRecStructure(rty_ID) {
-		top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "admin/structure/editRecStructure.html?db="+db+"&rty_ID="+rty_ID, {
+		Hul.popupURL(top, top.HEURIST.basePath + "admin/structure/editRecStructure.html?db="+db+"&rty_ID="+rty_ID, {
 			"close-on-blur": false,
 			"no-resize": false,
 			height: 480,
 			width: 640,
 			callback: function(context) {
-				if(isnull(context)) {
+				if(Hul.isnull(context)) {
 					// Canceled
 				} else {
 					// alert("Structure is saved");
@@ -853,7 +854,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 	function _onAddFieldType(){
 		var url = top.HEURIST.basePath + "admin/structure/editDetailType.html?db="+db;
 
-		top.HEURIST.util.popupURL(top, url,
+		Hul.popupURL(top, url,
 		{   "close-on-blur": false,
 			"no-resize": false,
 			height: 430,
@@ -904,13 +905,13 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 			url = url + "&groupID="+rtg_ID; //new one
 		}
 
-		top.HEURIST.util.popupURL(top, url,
+		Hul.popupURL(top, url,
 		{   "close-on-blur": false,
 			"no-resize": false,
 			height: 620,
 			width: 620,
 			callback: function(context) {
-				if(isnull(context)){
+				if(Hul.isnull(context)){
 					// alert("Edition is cancelled");
 				}else{
 
@@ -1003,19 +1004,19 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 
 		//alert(str);
 
-		if(!isnull(str)){
+		if(!Hul.isnull(str)){
 
 			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 			var callback = _updateOnSaveGroup;
 			var params = "method=saveRTG&db="+db+"&data=" + encodeURIComponent(str);
 
-			top.HEURIST.util.getJsonData(baseurl, callback, params)
+			Hul.getJsonData(baseurl, callback, params)
 		}
 
 		//make this tab active
 		function _updateOnSaveGroup(context){
 			//for new - add new tab
-			if(!isnull(context['0'].error)){
+			if(!Hul.isnull(context['0'].error)){
 				alert(context['0'].error);
 			}else{
 				var ind;
@@ -1029,7 +1030,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 				}else{
 					//update label
 					for (ind in _groups)
-					if(!isnull(ind) && _groups[ind].value==grpID){
+					if(!Hul.isnull(ind) && _groups[ind].value==grpID){
 						var tab = tabView.getTab(ind);
 						var el = tab._getLabelEl();
 						el.innerHTML = "<label title='"+description+"'>"+name+"</label>";
@@ -1055,7 +1056,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 
 		var grp = top.HEURIST.rectypes.groups[grpID]
 
-		if(!isnull(grp.types))
+		if(!Hul.isnull(grp.types))
 		{
 			alert("There are types that belong to this group. Impossible to delete such group");
 		}else{
@@ -1064,7 +1065,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 				var ind;
 				//
 				function _updateAfterDeleteGroup(context) {
-					if(!isnull(context.error)){
+					if(!Hul.isnull(context.error)){
 						// alert(context.error);
 					}else{
 						//remove tab from tab view and select 0 index
@@ -1082,12 +1083,12 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 
 				//1. find index of tab to be removed
 				for (ind in _groups)
-				if(!isnull(ind) && _groups[ind].value==grpID){
+				if(!Hul.isnull(ind) && _groups[ind].value==grpID){
 
 					var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 					var callback = _updateAfterDeleteGroup;
 					var params = "method=deleteRTG&db="+db+"&rtgID=" + grpID;
-					top.HEURIST.util.getJsonData(baseurl, callback, params);
+					Hul.getJsonData(baseurl, callback, params);
 
 					break;
 				}
@@ -1109,7 +1110,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 	function _getIndexByGroupId(grpID){
 		var ind;
 		for (ind in _groups)
-		if(!isnull(ind) && _groups[ind].value===grpID){
+		if(!Hul.isnull(ind) && _groups[ind].value===grpID){
 			return ind;
 		}
 		return -1;

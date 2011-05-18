@@ -13,7 +13,8 @@
 **/
 
 //aliases
-var Dom = YAHOO.util.Dom;
+var Dom = YAHOO.util.Dom,
+	Hul = top.HEURIST.util;
 
 /**
 * UserEditor - class for pop-up edit group
@@ -60,11 +61,11 @@ function UserEditor() {
 				}
 		}
 
-		if (_recID && isnull(_entity) ){
+		if (_recID && Hul.isnull(_entity) ){
 			Dom.get("statusMsg").innerHTML = "<strong>Error: User #"+_recID+"  not be found. Clicking 'save' button will create a new User.</strong><br /><br />";
 		}
 		//creates new empty field type in case ID is not defined
-		if(isnull(_entity)){
+		if(Hul.isnull(_entity)){
 			_recID =  -1;
 			_entity = [-1,'user','','','','','','','','','','','','','y',''];
 		}else{ //reset password
@@ -101,7 +102,7 @@ function UserEditor() {
 		for (i = 0, l = fnames.length; i < l; i++) {
 			var fname = fnames[i];
 			el = Dom.get(fname);
-			if(!(isnull(el) || fname==="ugr_Enabled")) {
+			if(!(Hul.isnull(el) || fname==="ugr_Enabled")) {
 				el.disabled = disable;
 			}
 		}
@@ -120,7 +121,7 @@ function UserEditor() {
 		for (i = 1, l = fnames.length; i < l; i++) {
 			var fname = fnames[i];
 			el = Dom.get(fname);
-			if(!isnull(el)){
+			if(!Hul.isnull(el)){
 				if( fname === "ugr_Enabled" ){  // el.type === "checkbox"
 					el.checked = (_entity[i]==="y");
 					if(_isAdmin){
@@ -173,7 +174,7 @@ function UserEditor() {
 		for (i = 1, l = fnames.length; i < l; i++){
 			var fname = fnames[i];
 			el = Dom.get(fname);
-			if( !isnull(el) ){
+			if( !Hul.isnull(el) ){
 				if(el.type === "checkbox"){
 					el.value = el.checked?1:0;
 				}
@@ -239,7 +240,7 @@ function UserEditor() {
 				ind;
 
 			for(ind in context.result){
-				if( !isnull(ind) ){
+				if( !Hul.isnull(ind) ){
 					var item = context.result[ind];
 					if(isNaN(item)){
 						alert("An error occurred: " + item);
@@ -310,7 +311,7 @@ function UserEditor() {
 			var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
 			var callback = _updateResult;
 			var params = "method=saveUser&db=" + _db + "&data=" + encodeURIComponent(str);
-			if(!isnull(_groupID)){
+			if(!Hul.isnull(_groupID)){
 				params = params + "&groupID="+_groupID;
 			}
 

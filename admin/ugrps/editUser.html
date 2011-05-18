@@ -71,7 +71,7 @@
 
 		<script type="text/javascript">
 
-			if(isnull(top.HEURIST)) { top.HEURIST = {}; }
+			if(Hul.isnull(top.HEURIST)) { top.HEURIST = {}; }
 
 			var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 						(top.HEURIST.database.name?top.HEURIST.database.name:''));
@@ -81,15 +81,16 @@
 			var _recID = top.HEURIST.parameters.recID;
 			/* not used anymore
 			var _userEmail = top.HEURIST.parameters.user;
-			if(!isnull(_userEmail)) {
+			if(!Hul.isnull(_userEmail)) {
 				_url = _url + "&userEmail="+encodeURIComponent(_userEmail);
 			}else {}*/
 
-				if(isnull(_recID)) { _recID = 0; }
+				if(Hul.isnull(_recID)) { _recID = 0; }
 				_url = _url + "&recID="+_recID;
 
 			//top.HEURIST.loadScript(_url, true);
-			loadScript(_url);
+
+			Hul.loadScript2(this.document, _url);
 		</script>
 
 
