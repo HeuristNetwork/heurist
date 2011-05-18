@@ -87,8 +87,8 @@ if (!@$_REQUEST['method']) $method = preg_replace('!.*/([-a-z]+)$!', '$1', $_SER
 //$key = @$_REQUEST["key"];
 //error_log("hapi dispatch method = ".$method." Heurist base = ".HEURIST_URL_BASE);
 
-require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
+require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 //require_once("validateKeyedAccess.php");
 
 /*if (! ($auth = get_location($key))) {

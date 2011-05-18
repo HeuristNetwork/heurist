@@ -45,7 +45,7 @@ if (! top.HEURIST) {
 
 		basePath: installDir,
 	// TODO:  needs to change to be perminent heuristscholar or relative to the installed version's INSTALL_DIR  can use basePath
-	bookmarkletCode: "(function(){h='http://"+top.location.host+installDir+"';d=document;c=d.contentType;if(c=='text/html'||!c){if(d.getElementById('__heurist_bookmarklet_div'))return Heurist.init();s=d.createElement('script');s.type='text/javascript';s.src=(h+'import/bookmarklet/bookmarkletPopup.js?'+new Date().getTime()).slice(0,-8);d.getElementsByTagName('head')[0].appendChild(s);}else{e=encodeURIComponent;w=open(h +'records/add/addRecord.php?t='+e(d.title)+'&amp;u='+e(location.href));window.setTimeout('w.focus()',200);}})();",
+	bookmarkletCode: "(function(){h='" + document.location.href.replace(/search\/.*/,"") + "';d=document;c=d.contentType;if(c=='text/html'||!c){if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();s=d.createElement('script');s.type='text/javascript';s.src=h+'import/bookmarklet/bookmarkletPopup.php?db=;d.getElementsByTagName('head')[0].appendChild(s);}else{e=encodeURIComponent;w=open(h+'records/add/addRecord.php?db=&t='+e(d.title)+'&u='+e(location.href));window.setTimeout('w.focus()',200);}})();",
 
 	createHeuristWindowID: function(url) {
 		return ((Math.random() + "").substring(2) + "-" + url).substring(0, 255);

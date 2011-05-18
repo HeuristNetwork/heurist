@@ -56,9 +56,9 @@ $noclutter = array_key_exists('noclutter', $_REQUEST);
 <head>
 	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
 	<script type="text/javascript">
-	function start_roll_open() {
+function start_roll_open() {
 		window.roll_open_id = setInterval(roll_open, 100);
-	}
+}
 
 function roll_open() {
 	var wfe = window.frameElement;
@@ -79,12 +79,14 @@ function roll_open() {
 
 		clearInterval(window.roll_open_id);
 	}
+}
 
 function sane_link_opener(link) {
 	if (window.frameElement  &&  window.frameElement.name == 'viewer') {
 		top.location.href = link.href;
 		return false;
 	}
+}
 
 function link_open(link) {
 	if (top.HEURIST  &&  top.HEURIST.util  &&  top.HEURIST.util.popupURL) {
@@ -98,14 +100,14 @@ function add_sid() {
 	if (top.HEURIST  &&  top.HEURIST.search  &&  top.HEURIST.search.sid) {
 		var e = document.getElementById("edit-link");
 		if (e) {
-			e.href = e.href.replace(/edit\.php\?/, "edit.php?sid="+top.HEURIST.search.sid+"&");
+			e.href = e.href.replace(/editRecord\.html\?/, "editRecord.html?sid="+top.HEURIST.search.sid+"&");
 		}
 	}
 }
 
 	</script>
 </head>
-<body class="popup">
+<body class="popup" onload="add_sid();">
 
 <?php
 // get a list of workgroups the user belongs to.
@@ -418,7 +420,7 @@ function print_other_tags($bib) {
 ?>
 <div class=detailRow>
 	<div class=detailType>Tags</div>
-	<div class=detail><nobr><a target=_new href="<?=HEURIST_SITE_PATH?>records/view/viewRecordTags.php?<?php print "bib_id=".$bib['rec_ID']; ?>" target=_top onclick="return link_open(this);">[Other users' tags]</a></nobr>
+	<div class=detail><nobr><a target=_new href="<?=HEURIST_SITE_PATH?>records/view/viewRecordTags.php?db=<?=HEURIST_DBNAME?>&bib_id=<?=$bib['rec_ID']?>" target=_top onclick="return link_open(this);">[Other users' tags]</a></nobr>
 </div></div>
 <?php
 }
@@ -451,7 +453,7 @@ function print_relation_details($bib) {
 		print '<div class=detailType>' . htmlspecialchars($bd['RelTermID']) . '</div>'; // fetch now returns the enum string also
 		print '<div class=detail>';
 		if (@$bd['RelatedRecID']) {
-			print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/renderRecordData.php?bib_id='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
+			print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&bib_id='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
 		} else {
 			print htmlspecialchars($bd['Title']);
 		}
@@ -468,7 +470,7 @@ function print_relation_details($bib) {
 		print '<div class=detailType>' . htmlspecialchars($bd['RelTermID']) . '</div>';
 		print '<div class=detail>';
 		if (@$bd['OtherResource']) {
-			print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/renderRecordData.php?bib_id='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
+			print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&bib_id='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
 		} else {
 			print htmlspecialchars($bd['Title']);
 		}
@@ -494,14 +496,14 @@ function print_linked_details($bib) {
 ?>
 <div class=detailRow>
 <div class=detailType>Linked From</div>
-<div class=detail><a href="<?=HEURIST_SITE_PATH?>search/search.html?w=all&q=linkto:<?=$bib['rec_ID']?>" onclick="top.location.href = this.href; return false;"><b>Show list below as search results</b></a> <b>(linkto:<?=$bib['rec_ID']?> = records pointing TO this record)</b></div></div>
+<div class=detail><a href="<?=HEURIST_SITE_PATH?>search/search.html?db=<?=HEURIST_DBNAME?>&w=all&q=linkto:<?=$bib['rec_ID']?>" onclick="top.location.href = this.href; return false;"><b>Show list below as search results</b></a> <b>(linkto:<?=$bib['rec_ID']?> = records pointing TO this record)</b></div></div>
 <?php
 	while ($row = mysql_fetch_assoc($res)) {
 
 		print '<div class=detailRow>';
 		print '<div class=detailType></div>';
 		print '<div class=detail>';
-		print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/renderRecordData.php?bib_id='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a>';
+		print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&bib_id='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a>';
 		print '</div></div>';
 	}
 }
@@ -596,7 +598,7 @@ function print_woot_precis($woot,$bib) {
 	}
 ?>
 
-  <div><a target=_blank href="<?=HEURIST_SITE_PATH?>records/woot/woot.html?w=record:<?= $bib['rec_ID'] ?>&t=<?= $bib['rec_Title'] ?>">Click here to edit</a></div>
+  <div><a target=_blank href="<?=HEURIST_SITE_PATH?>records/woot/woot.html?db=<?=HEURIST_DBNAME?>w=record:<?= $bib['rec_ID'] ?>&t=<?= $bib['rec_Title'] ?>">Click here to edit</a></div>
 </div>
 </div>
 <?php

@@ -109,7 +109,7 @@
 		}
 		// start loading this early
 		top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadUserInfo.php" +	// user-specific HEURIST data
-							(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : ""));
+							(database ? "?db=" + database : ""));
 
 		top.HEURIST.whenLoaded(["search-html", "obj-common"], top.HEURIST.util.setDBName);
 		top.HEURIST.whenLoaded(["search-html", "obj-common"], top.HEURIST.util.setDocumentTitle);
@@ -187,11 +187,11 @@
 										+ "if(c=='text/html'||!c){"
 											+ "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
 											+ "s=d.createElement('script');s.type='text/javascript';"
-											+ "s.src=h+'import/bookmarklet/bookmarkletPopup.php';"
+											+ "s.src=h+'import/bookmarklet/bookmarkletPopup.php?db="+database+"';"
 											+ "d.getElementsByTagName('head')[0].appendChild(s);}"
-										+ "else{e=encodeURIComponent;w=open(h+'records/add/addRecordPopup.php?t='+e(d.title)+'&u='+e(location.href));"
+										+ "else{e=encodeURIComponent;w=open(h+'records/add/addRecordPopup.php?db="+database+"&t='+e(d.title)+'&u='+e(location.href));"
 											+ "window.setTimeout('w.focus()',200);}"
-										+ "})();\"><b>Bookmarklet</b></a>";
+										+ "})();\"><b>Bookmarklet "+ database+"</b></a>";
 							document.write(html);
 				</script>
 			</li>

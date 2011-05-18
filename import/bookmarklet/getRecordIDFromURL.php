@@ -52,7 +52,7 @@ $res = mysql_query("select bkm_ID
 					 where bkm_UGrpID=".get_user_id()."
 					   and (rec_url='".addslashes($url)."' or rec_url='".addslashes($url)."/')
 					 limit 1");
-if ($row = mysql_fetch_assoc($res)) {
+if ($res && $row = mysql_fetch_assoc($res)) {
 	print "HEURIST_url_bkmk_id = ".$row["bkm_ID"].";\n\n";
 } else {
 	print "HEURIST_url_bkmk_id = null;\n\n";

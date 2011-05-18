@@ -39,8 +39,9 @@ function hasWootWritePermission($wootId) {
 	if (is_admin()) { return true; }
 
 	if (is_logged_in()) {
-		$res = mysql_query("select * from " . WOOT_PERMISSION_TABLE . " where wrprm_WootID=$wootId and
-		                   (wrprm_UGrpID=".get_user_id()." or wrprm_GroupID in (".join(",", get_group_ids()).",-1)) and wrprm_Type='RW'");
+		$res = mysql_query("select * from " . WOOT_PERMISSION_TABLE . " where wrprm_WootID=$wootId and ".
+					"(wrprm_UGrpID=".get_user_id()." or wrprm_GroupID in (".join(",", get_group_ids()).",-1))".
+						" and wrprm_Type='RW'");
 		return (mysql_num_rows($res) > 0);
 	} else {
 		// non-logged-in users can't edit woots!
@@ -88,12 +89,16 @@ function getWritableChunks($wootId=NULL, $restrictToCurrent=false) {
 
 	$restriction = is_admin()? "1 " : "(wprm_UGrpID=".get_user_id()." or wprm_GroupID in (".join(",", get_group_ids()).",-1)) and wprm_Type='RW' ";
 	if (! $restrictToCurrent) {
-		$result = mysql__select_array(CHUNK_TABLE . " left join " . PERMISSION_TABLE . " on chunk_ID=wprm_ChunkID", "wprm_ChunkID",
+		$result = mysql__select_array(CHUNK_TABLE . " left join " . PERMISSION_TABLE . " on chunk_ID=wprm_ChunkID",
+										"wprm_ChunkID",
 		                           $restriction . ($wootId? " and chunk_WootID=$wootId" : ""));
 	}
 	else {
-		$result = mysql__select_array(CHUNK_TABLE . " left join " . PERMISSION_TABLE . " on chunk_ID=wprm_ChunkID", "wprm_ChunkID",
-		                           "$restriction and chunk_IsLatest" . ($wootId? " and chunk_WootID=$wootId" : "") . " and wprm_ChunkID is not null");
+		$result = mysql__select_array(CHUNK_TABLE . " left join " . PERMISSION_TABLE . " on chunk_ID=wprm_ChunkID",
+										"wprm_ChunkID",
+										"$restriction and chunk_IsLatest" .
+											($wootId? " and chunk_WootID=$wootId" : "") .
+											" and wprm_ChunkID is not null");
 	}
 	return $result;
 }

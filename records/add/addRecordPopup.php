@@ -134,7 +134,7 @@ function add_note(e) {
 			return;
 		}
 	}
-	if (<?= @$_REQUEST['related'] ? '1' : '0' ?>) {
+	if ( <?= @$_REQUEST['related'] ? '1' : '0' ?> ) {
 		extra_parms += '&related=<?= @$_REQUEST['related'] ?>';
 		if (<?= @$_REQUEST['reltype'] ? '1' : '0' ?>) {
 			extra_parms += '&reltype=<?= @$_REQUEST['reltype'] ?>';
@@ -151,7 +151,6 @@ function add_note(e) {
 	}
 
 
-//	top.location.href = '<?= HEURIST_URL_BASE?>records/add/addRecord.php?addref=1&db=<?=HEURIST_DBNAME?>&bib_rectype='+rt + extra_parms;
 window.open('<?= HEURIST_URL_BASE?>records/add/addRecord.php?addref=1&db=<?=HEURIST_DBNAME?>&bib_rectype='+rt + extra_parms);
 
 }

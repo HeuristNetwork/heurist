@@ -3132,7 +3132,7 @@ var HeuristScholarDB = new HStorageManager();
 		var notifications, comments, commentsMap, newComment, processedComments, user;
 		var args, recipient, text, date, modDate, freq;
 
-		var record;
+		var record,recCount;
 
 		if (! response) {
 			errorString = "internal Heurist error";
@@ -3144,7 +3144,8 @@ var HeuristScholarDB = new HStorageManager();
 		}
 		else {
 			results = [];
-			for (i=0; i < response.records.length; ++i) {
+			recCount = response.records ? response.records.length:0;
+			for (i=0; i < recCount; ++i) {
 				// first sweep: create place-holder records
 				id = parseInt(response.records[i][0]);
 				if (! (record = that.getRecord(id))) {
@@ -3158,7 +3159,7 @@ var HeuristScholarDB = new HStorageManager();
 				}
 				results.push(record);
 			}
-			for (i=0; i < response.records.length; ++i) {
+			for (i=0; i < recCount; ++i) {
 				// FIXME: doesn't work for private notes
 				recordDetails = response.records[i];
 				id = parseInt(recordDetails[0]);

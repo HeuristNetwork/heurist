@@ -21,7 +21,7 @@ if (!is_logged_in()) {
         return;
 }
 
-error_log(print_r($LOOKUPS, 1));
+//error_log(print_r($LOOKUPS, 1));
 
 mysql_connection_db_overwrite(DATABASE);
 $template = file_get_contents('viewRecordTags.html');

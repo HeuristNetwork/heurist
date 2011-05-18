@@ -18,12 +18,12 @@ require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 require_once(dirname(__FILE__).'/../disambig/testSimilarURLs.php');
 
 if (! is_logged_in()) {
-        header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
+        header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
         return;
 }
 
 if (! $_REQUEST['bkmk_url']) {
-	header('Location: '.HEURIST_URL_BASE.'records/add/addRecordPopup.php');
+	header('Location: '.HEURIST_URL_BASE.'records/add/addRecordPopup.php?db='.HEURIST_DBNAME);
 	return;
 }
 
@@ -55,12 +55,12 @@ $use_site_hierarchy = array_key_exists('site_hierarchy', $_REQUEST);
 
 <div id="main">
 
-<form action="addRecordPopup.php" method="get" onsubmit="var bid = elements['bib_id']; for (i=0; i < bid.length; ++i) { if (bid[i].checked) return true; } alert('Please select one of the options'); return false;">
+<form action="addRecord.php?db="<?=HEURIST_DBNAME?> method="get" onsubmit="var bid = elements['bib_id']; for (i=0; i < bid.length; ++i) { if (bid[i].checked) return true; } alert('Please select one of the options'); return false;">
 <input type="hidden" name="bkmrk_bkmk_title" value="<?= htmlspecialchars($_REQUEST['bkmk_title']) ?>">
 <input type="hidden" name="bkmrk_bkmk_url" value="<?= htmlspecialchars($_REQUEST['bkmk_url']) ?>">
 <input type="hidden" name="bkmrk_bkmk_description" value="<?= htmlspecialchars($_REQUEST['bkmk_description']) ?>">
-<input type="hidden" name="f" value="<?= htmlspecialchars($_REQUEST['f']) ?>">
-<input type="hidden" name="tag" value="<?= htmlspecialchars($_REQUEST['tag']) ?>">
+<input type="hidden" name="f" value="<?= @$_REQUEST['f']?htmlspecialchars($_REQUEST['f']):'' ?>">
+<input type="hidden" name="tag" value="<?= @$_REQUEST['tag']?htmlspecialchars($_REQUEST['tag']):'' ?>">
 <input type="hidden" name="bib_rectype" value="<?= htmlspecialchars(@$_REQUEST['bib_rectype']) ?>">
 
 <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse;" width="100%" class="normal">
@@ -93,7 +93,7 @@ $use_site_hierarchy = array_key_exists('site_hierarchy', $_REQUEST);
 <tr><td colspan="5"><b>No similar URLs have been bookmarked, but there are other URLs on <tt><?= htmlspecialchars($noproto_url) ?></tt>.</b></td></tr>
 <tr><td colspan="5">&nbsp;</td></tr>
 <tr><td colspan="5">You may look at <a href="<?= htmlspecialchars($base_url . '&site_hierarchy') ?>">all known URLs from the same site</a>,<br>
-or <a href="addRecordPopup.php?bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST['bkmk_url']) ?>&bkmrk_bkmk_title=<?= urlencode($_REQUEST['bkmk_title']) ?>&bkmrk_bkmk_description=<?= urlencode($_REQUEST['bkmk_description']) ?>">add a bookmark</a> for <b><tt><?= htmlspecialchars($_REQUEST['bkmk_url']) ?></tt></b>.</td></tr>
+or <a href="addRecordPopup.php?db=<?=HEURIST_DBNAME?>&bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST['bkmk_url']) ?>&bkmrk_bkmk_title=<?= urlencode($_REQUEST['bkmk_title']) ?>&bkmrk_bkmk_description=<?= urlencode($_REQUEST['bkmk_description']) ?>">add a bookmark</a> for <b><tt><?= htmlspecialchars($_REQUEST['bkmk_url']) ?></tt></b>.</td></tr>
 
 
 
@@ -116,7 +116,7 @@ or <a href="addRecordPopup.php?bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST[
 
 <tr>
  <td colspan="5">
- 
+
 
   </td>
 </tr>
@@ -277,7 +277,7 @@ or <a href="addRecordPopup.php?bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST[
 </form>
 
 </div>
- 
+
 <div style="position: absolute; display: none; background: url('<?=HEURIST_SITE_PATH?>common/images/100x100.gif');" id="popupProtector"></div>
 
 <div style="background-color: #600000; border: 0px; margin: 0px; padding: 10px; overflow: hidden; display: none; position: absolute; text-align: center;" id="url_checker">

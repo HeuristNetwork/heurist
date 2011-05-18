@@ -62,6 +62,7 @@ window.HEURIST.edit = {
 window.HEURIST.parameters = top.HEURIST.parseParams(window.location.search);
 var rectype = parseInt(window.HEURIST.parameters["rectype"]);
 var titleBits = (window.HEURIST.parameters["title"] || "").split(/\s+/);
+var db = (window.HEURIST.parameters["db"] || "");
 for (var i=0; i < titleBits.length; ++i) {
 	titleBits[i] = titleBits[i].charAt(0).toUpperCase() + titleBits[i].substring(1);
 }
@@ -73,7 +74,7 @@ if (! rectype) {
 		var rectype = rectypeDropdown.options[rectypeDropdown.selectedIndex].value;
 
 		var editFrame = document.getElementById("edit-frame");
-		editFrame.src = "../edit/tabs/publicInfoTab.html?rectype="+rectype;
+		editFrame.src = "../edit/tabs/publicInfoTab.html?db="+db+"&rectype="+rectype;
 		editFrame.style.display = "block";
 
 		rectypeDropdown.onchange = setrectype;
@@ -116,7 +117,7 @@ if (! rectype) {
 
 } else {
 	var editFrame = document.getElementById("edit-frame");
-	editFrame.src = "../edit/tabs/publicInfoTab.html?rectype="+rectype+"&title="+encodeURIComponent(title);
+	editFrame.src = "../edit/tabs/publicInfoTab.html?db="+db+"&rectype="+rectype+"&title="+encodeURIComponent(title);
 	editFrame.style.display = "block";
 
 	document.getElementById("rectype-val").appendChild(document.createTextNode(top.HEURIST.rectypes.names[rectype]));

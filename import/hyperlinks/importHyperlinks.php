@@ -22,7 +22,7 @@ require_once(dirname(__FILE__).'/../../records/disambig/testSimilarURLs.php');
 require_once(dirname(__FILE__).'/../../common/t1000/.ht_stdefs');
 
 if (! is_logged_in()) {
-	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
+	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
 	return;
 }
 
@@ -319,7 +319,7 @@ function unCheckAll() {
   </tr>
 </table>-->
 
-<form action="importHyperlinks.php" method="post" enctype="multipart/form-data" name="mainform" style="margin: 0px 3px;">
+<form action="importHyperlinks.php?db=<?=HEURIST_DBNAME?>" method="post" enctype="multipart/form-data" name="mainform" style="margin: 0px 3px;">
 
 <input type="hidden" name="wgTags" id="wgTags">
 <input type="hidden" name="adding_tags" value="0" id="adding_tags_elt">
@@ -382,7 +382,7 @@ Note: the list only shows links which you have not already bookmarked.<br>
 <?php } else { ?>Common<?php } ?>
   hyperlink texts are ignored.
   &nbsp;&nbsp;
-  <input type="button" onclick="top.HEURIST.util.popupURL(top, '<?=HEURIST_SITE_PATH?>admin/profile/configureProfile.php?body_only&bookmark_import=1&section=bookmarkimport', { callback: function() { document.forms[0].submit(); } });" value="Change settings">
+  <input type="button" onclick="top.HEURIST.util.popupURL(top, '<?=HEURIST_SITE_PATH?>admin/profile/configureProfile.php?body_only&db=<?=HEURIST_DBNAME?>&bookmark_import=1&section=bookmarkimport', { callback: function() { document.forms[0].submit(); } });" value="Change settings">
 </p>
 
 <p style="margin-left: 20px;" class="normal">

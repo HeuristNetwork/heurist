@@ -182,7 +182,7 @@ $new_rec_id = false;
 /* arrive with a new (un-bookmarked) URL to process */
 if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 
-	if (! $rec_id  &&  ! $force_new) {
+	if (! @$rec_id  &&  ! @$force_new) {
 		/* look up the records table, see if the requested URL is already in the database; if not, add it */
 
 		$res = mysql_query('select * from Records where rec_URL = "'.addslashes($url).'" and (rec_OwnerUGrpID=0 or rec_NonOwnerVisibility="viewable")');
@@ -209,16 +209,16 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 		}
 	}
 //if no record found check for similar url's
-	if (! $rec_id  &&  ! $force_new) {
+	if (! @$rec_id  &&  ! @$force_new) {
 		if (exist_similar($url)) {
 			/* there is/are at least one: redirect to a disambiguation page */
 			header('Location: ' . HEURIST_URL_BASE . 'records/add/disambiguateRecordURLs.php'
 								. '?db='.HEURIST_DBNAME
 								. '&bkmk_title=' . urlencode($_REQUEST['bkmrk_bkmk_title'])
-								. '&f=' . urlencode($_REQUEST["f"])
+								. (@$_REQUEST['f'] ?'&f=' . urlencode($_REQUEST["f"]) : '')
 								. '&bkmk_url=' . urlencode($url)
 								. '&bkmk_description=' . urlencode($description)
-								. '&tag=' . urlencode($_REQUEST['tag'])
+								. (@$_REQUEST['tag'] ?'&tag=' . urlencode($_REQUEST['tag']) : '')
 								. (@$_REQUEST['bib_rectype'] ? '&bib_rectype=' . urlencode($_REQUEST['bib_rectype']) : ''));
 			return;
 		}
@@ -228,8 +228,8 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 		$new_rec_id = true;
 		$rt = intval($_REQUEST['bib_rectype']);
 		if (! $rt) {
-			if ($url) $_REQUEST['bib_rectype'] = 1;	/* Internet bookmark */
-			else $_REQUEST['bib_rectype'] = 2;	/* Floating note */
+			if ($url) $_REQUEST['bib_rectype']= $rt = 1;	/* Internet bookmark */
+			else $_REQUEST['bib_rectype'] = $rt = 2;	/* Floating note */
 		} else if (!check_rectype_exist($rt)) {
 			// the rectype passed in is not available on this instance  send them to the  add resource popup
 			header('Location: ' . BASE_PATH . 'records/add/addRecord.php'
@@ -246,9 +246,9 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 		                              'rec_Added' => date('Y-m-d H:i:s'),
 		                              'rec_Modified' => date('Y-m-d H:i:s'),
 		                              'rec_AddedByUGrpID' => intval($usrID),
-		                              'rec_RecTypeID' => $_REQUEST['bib_rectype'],
-		                              'rec_OwnerUGrpID' => intval($_REQUEST['bib_workgroup']),
-		                              'rec_NonOwnerVisibility' => (intval($_REQUEST['bib_workgroup'])? ((strtolower($_REQUEST['bib_visibility']) == 'hidden')? 'hidden' : 'viewable') : 'viewable'),
+				                      'rec_RecTypeID' => $rt? $rt : 1,
+				                      'rec_OwnerUGrpID' => (intval(@$_REQUEST['bib_workgroup'])?intval(@$_REQUEST['bib_workgroup']): intval($usrID)),
+		                              'rec_NonOwnerVisibility' => (intval(@$_REQUEST['bib_workgroup'])? ((strtolower($_REQUEST['bib_visibility']) == 'hidden')? 'hidden' : 'viewable') : 'viewable'),
 		                              'rec_FlagTemporary' => ! ($url  ||  $_REQUEST['bkmrk_bkmk_title'])));
 		$rec_id = mysql_insert_id();
 
@@ -270,7 +270,7 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 // no bib_id or url passed in so create a new record
 if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 	/* create a new public note */
-error_log("in add making new records");
+//error_log("in add making new records");
 	$new_rec_id = true;
 	$rt = intval($_REQUEST['bib_rectype']);
 	if (!check_rectype_exist($rt)) {
@@ -287,7 +287,7 @@ error_log("in add making new records");
 	                              'rec_Added' => date('Y-m-d H:i:s'),
 	                              'rec_Modified' => date('Y-m-d H:i:s'),
 	                              'rec_AddedByUGrpID' => intval($usrID),
-		                      'rec_RecTypeID' => ($_REQUEST['bib_rectype']? intval(@$_REQUEST['bib_rectype']) : NULL),
+		                      'rec_RecTypeID' => $rt? $rt : 1,
 		                      'rec_OwnerUGrpID' => (intval(@$_REQUEST['bib_workgroup'])?intval(@$_REQUEST['bib_workgroup']): intval($usrID)),
 		                      'rec_NonOwnerVisibility' => (intval(@$_REQUEST['bib_workgroup'])? ((strtolower(@$_REQUEST['bib_visibility']) == 'hidden')? 'hidden' : 'viewable') : 'viewable'),
 	                              'rec_FlagTemporary' => ! $_REQUEST['bkmrk_bkmk_title'])); // saw BUG???
@@ -466,7 +466,7 @@ function insert_woot_content($rec_id, $content) {
 
 function check_rectype_exist($rt) {
 	$res = mysql_query("select distinct rty_ID,rty_Name from defRecTypes
-	                  where rty_ID");
+	                  where rty_ID = $rt");
 	while ($row = mysql_fetch_assoc($res)) {
 		if ($row["rty_ID"] == $rt) {
 			return true;

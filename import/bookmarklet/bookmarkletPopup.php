@@ -17,9 +17,9 @@ var Heurist = {
 w: 370,
 h: 240,
 
-uriBase: "<?= HEURIST_URL_BASE ?>",
+uriBase: "<?= HEURIST_BASE_URL ?>",
 uriHost: "http://<?= HEURIST_HOST_NAME ?>/",
-
+database:"<?=HEURIST_DBNAME?>",
 init: function () {
 	// toggle display if our div is already present in the DOM
 	var e = document.getElementById('__heurist_bookmarklet_div');
@@ -49,15 +49,13 @@ init: function () {
 	// get record types
 	var scr = document.createElement('script');
 	scr.type = 'text/javascript';
-	scr.src = Heurist.uriBase +'import/bookmarklet/getRectypesAsJSON.php';
-//	scr.src = Heurist.uriHost +'h3h2/import/bookmarklet/rectypes.php'; //saw FIXME: temp, remove when getRectypesAsJSON.php works
+	scr.src = Heurist.uriBase +'import/bookmarklet/getRectypesAsJSON.php?db=' + Heurist.database;
 	document.getElementsByTagName('head')[0].appendChild(scr);
 
 	// get bkmk id if already bookmarked
 	scr = document.createElement('script');
 	scr.type = 'text/javascript';
-	scr.src = Heurist.uriBase +'import/bookmarklet/getRecordIDFromURL.php?url=' + Heurist.urlcleaner(encodeURIComponent(location.href));
-//	scr.src = Heurist.uriHost +'h3h2/import/bookmarklet/url-bookmarked.php?url=' + Heurist.urlcleaner(encodeURIComponent(location.href));//saw FIXME: temp, remove when getRecordIDFromURL.php works
+	scr.src = Heurist.uriBase +'import/bookmarklet/getRecordIDFromURL.php?db='+Heurist.database+'&url=' + Heurist.urlcleaner(encodeURIComponent(location.href));
 	document.getElementsByTagName('head')[0].appendChild(scr);
 },
 
@@ -134,7 +132,7 @@ render: function() {
 
 		a = td.appendChild(document.createElement("a"));
 		a.target = "_blank";
-		a.href= Heurist.uriBase +'records/edit/editRecord.html?bkmk_id=' + HEURIST_url_bkmk_id;
+		a.href= Heurist.uriBase +'records/edit/editRecord.html?db='+Heurist.database+'&bkmk_id=' + HEURIST_url_bkmk_id;
 		a.onclick = function() { Heurist.close() };
 		a.innerHTML = "edit record";
 
@@ -212,7 +210,7 @@ render: function() {
 	button.style.marginLeft = "5px";
 	button.onclick = function() {
 		Heurist.close();
-		var w = open(Heurist.uriBase +'import/hyperlinks/importHyperlinks?shortcut=' + encodeURIComponent(location.href));
+		var w = open(Heurist.uriBase +'import/hyperlinks/importHyperlinks.php?db='+Heurist.database+'&shortcut=' + encodeURIComponent(location.href));
 		void(window.setTimeout("w.focus()",200));
 		return false;
 	}
@@ -351,9 +349,9 @@ bookmark: function(rectype) {
 	}
 	var favicon = Heurist.findFavicon();
 
-	var w = open(Heurist.uriBase +'records/add/addRecordPopup.php?t=' + Heurist.urlcleaner(encodeURIComponent(titl)) +
+	var w = open(Heurist.uriBase +'records/add/addRecord.php?db='+Heurist.database+'&t=' + Heurist.urlcleaner(encodeURIComponent(titl)) +
 				 '&u=' + Heurist.urlcleaner(encodeURIComponent(url)) +
-				 '&d=' + Heurist.urlcleaner(encodeURIComponent(sel)) +
+				 (sel?('&d=' + Heurist.urlcleaner(encodeURIComponent(sel))) : '') +
 				 (favicon? ('&f=' + encodeURIComponent(favicon)) : '') +
 				 (rectype ? '&bib_rectype=' + rectype : '') +
 				 '&version=' + version);
@@ -363,6 +361,7 @@ bookmark: function(rectype) {
 
 renderrectypeSelect: function(sel) {
 	var sel = document.createElement('select');
+	var i,grpID;
 	sel.id = 'rectype-select';
 	sel.onchange = function() {
 		document.getElementById("add-as-type-button").disabled = ! this.value;
@@ -371,17 +370,15 @@ renderrectypeSelect: function(sel) {
 	sel.options[0].selected = true;
 	sel.options[0].disabled = true;
 
-	for (var grpID in HEURIST_rectypes.groups){
+	for (grpID in HEURIST_rectypes.groups){
 	var grp = document.createElement("optgroup");
 		grp.label = HEURIST_rectypes.groups[grpID].name;
 	sel.appendChild(grp);
-		for (var i=0; i < HEURIST_rectypes.groups[grpID].types.length; ++i) {
-			var value = HEURIST_rectypes.groups[grpID].types[i];
-			var name = HEURIST_rectypes.names[value];
-			sel.appendChild( new Option(name, value));
+		for (i in HEURIST_rectypes.groups[grpID].types) {
+			var name = HEURIST_rectypes.names[i];
+			sel.appendChild( new Option(name, i));
 	}
 	}
-
 	return sel;
 }
 

@@ -26,6 +26,7 @@ ini_set("zlib.output_compression_level", 5);
 
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
+require_once(dirname(__FILE__)."/../../common/php/getRecordInfoLibrary.php");
 
 mysql_connection_db_select(DATABASE);
 
