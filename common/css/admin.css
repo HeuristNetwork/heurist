@@ -1,0 +1,28 @@
+
+.banner h2 {line-height: 7px;padding: 0 6px;}
+#page {left:315px;position:absolute}
+#page-inner {right:0px;left:0px; top:0;}
+body.popup #page-inner{top:30px; right:0; left:10px}
+#sidebar {border:1px solid #6A7C99; width:300px}
+#sidebar-inner {top:10px}
+
+#sidebar ul li a{color: #515151;text-decoration: none;}
+#sidebar ul li a:hover{text-decoration: underline;}
+#sidebar ul li { list-style:none}
+#sidebar ul{padding:0 0 0 6px}
+#sidebar ul h3 {font-size: 11px;line-height: 2ex;color:#6A7C99}
+
+
+
+.yui-skin-sam .yui-dt table {width:100%}
+.yui-navset {width: 100%;}
+tr.yui-dt-odd, tr.yui-dt-even {height:30px}
+
+.yui-dt-col-yui-dt-col23, .yui-dt1-col-info, .yui-dt-col-active {width:20px}
+
+.yui-dt-col-icon .yui-dt-liner, 
+.yui-dt-col-yui-dt-col23 .yui-dt-liner, 
+.yui-dt-col-info .yui-dt-liner, 
+.yui-dt-col-active .yui-dt-liner {text-align:center}
+
+

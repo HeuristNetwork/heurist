@@ -261,7 +261,7 @@ function RectypeManager() {
 					var rectype = td.commonFields;
 					if(rectype[9].indexOf(grpID)>-1) {
 						arr.push([rectypeID, (rectype[7]==1),
-						"<img src=\"../../common/images/rectype-icons/"+rectypeID+".gif\">",
+						"<img src=\"../../common/images/16x16.gif\" style=\"background-image:url(../../common/images/rectype-icons/"+rectypeID+".png)\">",
 						rectype[0], rectype[1], rectype[8], rectype[9], null]);
 
 						/*TODO: top.HEURIST.rectype.rectypeUsage[rectypeID].length*/
@@ -365,7 +365,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 			{ key: "grp_id", label: "Group", sortable:false, width:70,
 				formatter:YAHOO.widget.DataTable.formatDropdown, dropdownOptions:_groups},
 			{ key: null, label: "Del", width:20, sortable:false, formatter: function(elLiner, oRecord, oColumn, oData) {
-					elLiner.innerHTML = '<a href="#delete"><img src="../../common/images/delete_icon.png" width="16" height="16" border="0" title="Delete" /><\/a>'}
+					elLiner.innerHTML = '<a href="#delete"><img src="../../common/images/cross.png" border="0" title="Delete" /><\/a>'}
 			}
 
 			];

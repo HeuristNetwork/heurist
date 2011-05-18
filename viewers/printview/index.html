@@ -72,7 +72,7 @@
 			var loadingPage;
 			var loadCount;	// to restict the number of pages that are loaded. Some queries gives all records.
 			var maxLoadPages = 10;
-			var curStyle = "default";
+			var curStyle = top.HEURIST.util.getDisplayPreference("defaultPrintView"); //saved default stylesheet
 			var currentPage = 1;
 			var totalRecordCount = 0;
 			var resultsPerPage = 50;

@@ -67,23 +67,19 @@ $rec_title = $row['rec_Title'];
 <html>
 
 <head>
-  <title>HEURIST - View record</title>
+	<title>HEURIST - View record</title>
+	<link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
+	<link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
 
-  <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
-  <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
-
-  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/heurist.css">
+	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
 </head>
 
-<body <?php if (@$_REQUEST['popup']) { ?>style="width: 480px; height: 600px; background-color: transparent;" <?php } ?>>
-
-<div style="background-color: black; color: white; font-weight: bold; padding: 7px 10px;">Record details</div>
-
-<div style="padding: 10px;">
- <p style="font-weight: bold;"><?= htmlspecialchars($rec_title) ?></p>
- <iframe name="viewer" frameborder="0" style="width: 100%;height: 100%;" src="<?=HEURIST_SITE_PATH?>records/view/renderRecordData.php?<?= ($bkm_ID ? ('bkmk_id='.$bkm_ID) : ('bib_id='.$rec_id)) ?><?= $noclutter ?>"></iframe>
-</div>
-
+<body <?php if (@$_REQUEST['popup']) { ?>style="width: 480px; height: 600px; background-color: transparent;" <?php } ?> class="popup">
+	<div><h2>Record details</h2></div>
+	<div>
+	<h3><?= htmlspecialchars($rec_title) ?></h3>
+	<iframe name="viewer" frameborder="0" style="width: 100%;height: 100%;" src="<?=HEURIST_SITE_PATH?>records/view/renderRecordData.php?<?= ($bkm_ID ? ('bkmk_id='.$bkm_ID) : ('bib_id='.$rec_id)) ?><?= $noclutter ?>"></iframe>
+	</div>
 </body>
 </html>
 

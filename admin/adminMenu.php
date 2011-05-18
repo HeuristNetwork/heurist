@@ -22,7 +22,6 @@ if (! is_logged_in()) {
 // if (is_admin()) {
 //	}
 
-$body->global_vars['dbname'] = HEURIST_DBNAME;
 
 $template = file_get_contents('adminMenu.html');
 $template = str_replace('{PageHeader}', '[literal]'.file_get_contents(dirname(__FILE__).'/../common/html/simpleHeader.html').'[end-literal]', $template);

@@ -15,104 +15,105 @@
 
 	<link rel="icon" href="../favicon.ico" type="image/x-icon">
 	<link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
-	<script type="text/javascript" src="../common/js/utilsForPopups.js"></script>
 	<link rel="stylesheet" type="text/css" href="../common/css/global.css">
+    <link rel="stylesheet" type="text/css" href="../common/css/admin.css">
 
-	<style type="text/css">
-		body.wg .base-only { display: none; }
-		.banner h2{padding:0 10px; display: table-cell; vertical-align: middle;}
-		.banner a, .banner a:hover {display: table-cell;padding:0 10px;height:23px; vertical-align: middle;border-left:1px solid #D6D6D6;}
-		#page-inner, #page-right {padding:0 20px}
-		ul {padding:0}
-		li {list-style: none;padding: 5px 10px;}
-		.nw {font-weight: bold;color: red;display: inline;}
-		.separator_row {margin-top: 20px;}
-	</style>
-
-	<base target="_blank">
 
 </head>
 
 <body>
-<a id=home-link>
+	<script src="../common/js/utilsLoad.js"></script>	<!-- core HEURIST functions -->
+	<script src="../common/js/utilsUI.js"></script>	<!-- core HEURIST functions -->
+<a id=home-link href="../index.php?db=[dbname!]">
 <div id=logo title="Click the logo at top left of any Heurist page to return to your Favourites"></div>
 </a>
 
 <div id=version></div>
 <!-- database name -->
-<div id=dbname >[dbname!]</div>
-<div id="page" style="left:10px">
-	<div class="banner">
-		<div style="display:table; height:25px">
-			<h2>Heurist System Administration</h2>
-			<a href="../index.php?db=[dbname!]">return to search page</a>
-		</div>
-</div>
+<a id="dbSearch-link">
+	<div id="dbname" >[dbname!] Heurist Database System Administration</div>
 
-<div id="page-inner">
-<h3>User admin</h3>
-<ul>
-	<li><a href="ugrps/manageUsers.html?db=[dbname!]">Manage Users</a></li>
-	<li><a href="ugrps/manageGroups.html?db=[dbname!]">Manage user groups</a></li>
-	<li><a href="ugrps/editGroupTags.php?db=[dbname!]">Manage group tags</a></li>
-	<li><a href="ugrps/quitGroupForSession.php?db=[dbname!]">Quit group for session</a></li>
+</a>
+<div id="sidebar">
+
+<div id="sidebar-inner">
+
+<ul><h3>User admin</h3>
+	<li><a href="ugrps/manageUsers.html?db=[dbname!]" target="adminFrame">Manage Users</a></li>
+	<li><a href="ugrps/manageGroups.html?db=[dbname!]" target="adminFrame">Manage user groups</a></li>
+	<li><a href="ugrps/editGroupTags.php?db=[dbname!]" target="adminFrame">Manage group tags</a></li>
+	<li><a href="ugrps/quitGroupForSession.php?db=[dbname!]" target="adminFrame">Quit group for session</a></li>
 </UL>
 <div class="separator_row"></div>
 
-<h3>Database definitions</h3>
-<ul>
+
+<ul><h3>Database definitions</h3>
 	<!-- largely done but <span class="nw"> NOT WORKING</span> yet asked Steve to debug-->
-	<li><a target="_blank" href="setup/createNewDB.php">New database</a> <span class="nw"> NOT WORKING</span></li>
+	<!--<li><a target="_blank" href="setup/createNewDB.php">New database</a> <span class="nw"> NOT WORKING</span></li>-->
 	<!-- NEEDS TO GO DIRECT TO EDIT FORM -->
-	<li><a href="setup/editSysIdentification.php?db=[dbname!]">Edit identification info</a></li>
+	<li><a href="setup/editSysIdentification.php?db=[dbname!]" target="adminFrame">Edit identification info</a></li>
 	<!-- <span class="nw"> NOT WORKING</span>, problem with success checks anbd need to fix up fcall to next registration #-->
 	<!-- to do: should be disabed if alrteady registered and show registration # -->
-	<li><a href="setup/registerDB.php?db=[dbname!]">Register with HeuristScholar.org</a> <span class="nw"> NOT WORKING</span></li>
+	<!--<li><a href="setup/registerDB.php?db=[dbname!]">Register with HeuristScholar.org</a> <span class="nw"> NOT WORKING</span></li>-->
 	<!-- WE REALLY NEED TO SPLIT THESE UP INTO SEPARATE FUCNTIONS -->
-	<li><a href="describe/listRectypeDescriptions.php?db=[dbname!]">Print-friendly Rectype list</a></li>
-	<li><a href="structure/manageRectypes.html?db=[dbname!]">Manage record types and details (fields)</a></li>
-	<li><a href="structure/manageDetailTypes.html?db=[dbname!]">Manage detail types (field templates)</a></li>
-	<li><a href="structure/editTerms.html?db=[dbname!]">Manage terms</a></li>
+	<li><a href="describe/listRectypeDescriptions.php?db=[dbname!]" target="adminFrame">Print-friendly Rectype list</a></li>
+	<li><a href="structure/manageRectypes.html?db=[dbname!]" target="adminFrame">Manage record types and details (fields)</a></li>
+	<li><a href="structure/manageDetailTypes.html?db=[dbname!]" target="adminFrame">Manage detail types (field templates)</a></li>
+	<li><a href="structure/editTerms.html?db=[dbname!]" target="adminFrame">Manage terms</a></li>
 	<!-- <span class="nw"> NOT WORKING</span> YET-->
-	<li><a href="structure/editRectypeConstraints.php?db=[dbname!]">Manage record relationship constraints</a> <span class="nw"> NOT WORKING</span></li>
+	<!--<li><a href="structure/editRectypeConstraints.php?db=[dbname!]">Manage record relationship constraints</a> <span class="nw"> NOT WORKING</span></li>-->
 	<!-- <span class="nw"> NOT WORKING</span> YET -->
-	<li><a href="describe/buildCrosswalks.php?db=[dbname!]">Import/synchronise database definitions</a> <span class="nw"> NOT WORKING</span></li>
-	<li><a href="setup/editMimetypes.php?db=[dbname!]">Manage file mime types</a></li>
+	<!--<li><a href="describe/buildCrosswalks.php?db=[dbname!]">Import/synchronise database definitions</a> <span class="nw"> NOT WORKING</span></li>-->
+	<li><a href="setup/editMimetypes.php?db=[dbname!]" target="adminFrame">Manage file mime types</a></li>
 </ul>
 
-</div>
-<div id=page-right>
-<h3>Checking and fixes</h3>
-<ul>
-	<li><a href="verification/recalcTitlesAllRecords.php?db=[dbname!]">Rebuild constructed titles (all records)</a></li>
+
+
+
+<ul><h3>Checking and fixes</h3>
+	<li><a href="verification/recalcTitlesAllRecords.php?db=[dbname!]" target="adminFrame">Rebuild constructed titles (all records)</a></li>
 	<!-- : Also have capabuility for specific records and rectypes</p> -->
-	<li><a href="verification/listRecordPointerErrors.php?db=[dbname!]">Check for invalid record pointers</a></li>
-	<li><a href="verification/listDuplicateRecords.php?fuzziness=10&amp;db=[dbname!]">Find/eliminate duplicate records (fuzziness 10, change in URL))</a></li>
-	<li><a href="../search/search.html?q=_BROKEN_&amp;w=all&amp;db=[dbname!]">Find records with broken URLs (in the main URL pointer) RETRIEVES 18k RECORDS, MANY OK</a></li>
+	<li><a href="verification/listRecordPointerErrors.php?db=[dbname!]" target="adminFrame">Check for invalid record pointers</a></li>
+	<li><a href="verification/listDuplicateRecords.php?fuzziness=10&amp;db=[dbname!]" target="adminFrame">Find/eliminate duplicate records (fuzziness 10, change in URL))</a></li>
+	<li><a href="../search/search.html?q=_BROKEN_&amp;w=all&amp;db=[dbname!]" target="adminFrame">Find records with broken URLs (in the main URL pointer) RETRIEVES 18k RECORDS, MANY OK</a></li>
 	<!-- <span class="nw"> NOT WORKING</span> YET-->
-	<li><a href="structure/editRectypeConstraints.php?db=[dbname!]">Manage record relationship constraints</a> <span class="nw"> NOT WORKING</span></li>
+	<!--<li><a href="structure/editRectypeConstraints.php?db=[dbname!]">Manage record relationship constraints</a> <span class="nw"> NOT WORKING</span></li>-->
 	<!-- <span class="nw"> NOT WORKING</span> YET -->
-	<li><a href="describe/buildCrosswalks.php?db=[dbname!]">Import/synchronise database definitions</a> <span class="nw"> NOT WORKING</span></li>
-	<li><a href="describe/getDBStructure.php?db=[dbname!]">Return database definitions</a></li>
+	<!--<li><a href="describe/buildCrosswalks.php?db=[dbname!]">Import/synchronise database definitions</a> <span class="nw"> NOT WORKING</span></li>-->
+	<li><a href="describe/getDBStructure.php?db=[dbname!]" target="adminFrame">Return database definitions</a></li>
 	<!-- gives a blank form box??
 	<p><a href="structure/editVocab.php?db=[dbname!]">Add/edit vocabularies</a>
 	THIS NEEDS REDOING, CURRENTLY TRIES TO EDIT TERMS USING T1000</p>
 	-->
-	<li><a href="setup/editMimetypes.php?db=[dbname!]">Manage file mime types</a></li>
+	<li><a href="setup/editMimetypes.php?db=[dbname!]" target="adminFrame">Manage file mime types</a></li>
 </ul>
 <div class="separator_row"></div>
-<h3>Wysiwyg text (XHTML)</h3>
-	<li><a href="verification/checkXHTML.php?db=[dbname!]">General health check</a></li>
-	<li><a href="verification/checkInvalidChars.php?db=[dbname!]" >Invalid characters</a></li>
-	<li><a href="verification/cleanInvalidChars.php?db=[dbname!]">Clean invalid characters</a></li>
-
+<ul><h3>Wysiwyg text (XHTML)</h3>
+	<li><a href="verification/checkXHTML.php?db=[dbname!]" target="adminFrame">General health check</a></li>
+	<li><a href="verification/checkInvalidChars.php?db=[dbname!]"  target="adminFrame">Invalid characters</a></li>
+	<li><a href="verification/cleanInvalidChars.php?db=[dbname!]" target="adminFrame">Clean invalid characters</a></li>
+</ul>
 <div class="separator_row"></div>
 
-<h3>Admin</h3>
-<ul>
-	<li><a href="rollback/rollbackRecords.php?db=[dbname!]">Record rollback</a> <span class="nw"> NOT WORKING</span></li>
+
+<ul><h3>Admin</h3>
+	<!--<li><a href="rollback/rollbackRecords.php?db=[dbname!]">Record rollback</a> <span class="nw"> NOT WORKING</span></li>-->
 </ul>
+
 </div>
+</div>
+<div id="page">
+	<!--<div class="banner">
+		<div style="display:table; height:25px">
+
+		</div>
+	</div>-->
+	<div id="page-inner">
+	<!-- admin content -->
+    <iframe width="100%" height="100%" id="adminFrame" name="adminFrame" frameborder="0">
+            </iframe>
+
+	</div>
 </div>
 </body>
 </html>

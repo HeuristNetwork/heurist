@@ -53,15 +53,12 @@ $noclutter = array_key_exists('noclutter', $_REQUEST);
 
 ?>
 <html>
- <head>
-  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/info.css">
-
-  <script type="text/javascript">
-
-
-function start_roll_open() {
-	window.roll_open_id = setInterval(roll_open, 100);
-}
+<head>
+	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+	<script type="text/javascript">
+	function start_roll_open() {
+		window.roll_open_id = setInterval(roll_open, 100);
+	}
 
 function roll_open() {
 	var wfe = window.frameElement;
@@ -82,14 +79,12 @@ function roll_open() {
 
 		clearInterval(window.roll_open_id);
 	}
-}
 
 function sane_link_opener(link) {
 	if (window.frameElement  &&  window.frameElement.name == 'viewer') {
 		top.location.href = link.href;
 		return false;
 	}
-}
 
 function link_open(link) {
 	if (top.HEURIST  &&  top.HEURIST.util  &&  top.HEURIST.util.popupURL) {
@@ -108,9 +103,9 @@ function add_sid() {
 	}
 }
 
-  </script>
- </head>
- <body>
+	</script>
+</head>
+<body class="popup">
 
 <?php
 // get a list of workgroups the user belongs to.
@@ -140,10 +135,10 @@ if ($bkm_ID) {
 }
 ?>
 
-<div class=detailRow>
+<!--<div class=detailRow>
  <div class=detailType></div>
  <dic class=detail><br><a href="#" onclick="document.body.className=''; return false;">Show additional detail</a></div>
-</div>
+</div>-->
 
 <div id=bottom><div></div></div>
 
@@ -174,24 +169,26 @@ function print_header_line($bib) {
 	$webIcon = @mysql_fetch_row(mysql_query("select dtl_Value from recDetails where dtl_RecID=" . $bib['rec_ID'] . " and dtl_DetailTypeID=347"));
 	$webIcon = @$webIcon[0];
 ?>
-<div class=HeaderRow><h2><?= htmlspecialchars($bib['rec_Title']) ?></h2>
-<div id=footer>
-<h3><?= htmlspecialchars($bib['rty_Name']) ?></h3>
-<div id=recID>Record ID:<?= htmlspecialchars($rec_id) ?><nobr><span class="link"><a id=edit-link class=normal target=_self href="../edit/editRecord.html?bib_id=<?= $rec_id ?>" onclick="return sane_link_opener(this);"><img src="../../common/images/edit-pencil.png" title="Edit Record"></a></span></nobr></div>
+<div class=HeaderRow style="margin-bottom:20px"><h2><?= htmlspecialchars($bib['rec_Title']) ?></h2>
+	<div id=footer>
+	<h3><?= htmlspecialchars($bib['rty_Name']) ?></h3>
+	<?php if (@$url) { ?>
+	<!-- <span class="link"><a target=_new href="http://web.archive.org/web/*/<?= htmlspecialchars($url) ?>"><img src="../../common/images/external_link_16x16.gif">page history</a></span>
+	--> <span class="link"><a target=_new href="<?= htmlspecialchars($url) ?>"><!--<img src="../../common/images/external_link_16x16.gif">--><?= output_chunker($url) ?></a>
+	<?php if ($webIcon) print "<img id=website-icon src='" . $webIcon . "'>"; ?>
+	 </span>
+	<?php } ?>
+	<div id=recID>Record ID:<?= htmlspecialchars($rec_id) ?><nobr><span class="link"><a id=edit-link class=normal target=_new href="../edit/editRecord.html?bib_id=<?= $rec_id ?>" onclick="return sane_link_opener(this);"><img src="../../common/images/edit-pencil.png" title="Edit Record"></a></span></nobr></div>
+	</div>
 </div>
-</div>
-<div class=detailRowHeader>
 
 <?php if (defined('EXPLORE_URL')  &&  $bib['rec_NonOwnerVisibility'] != 'hidden') { ?>
- <span class="link"><a target=_blank href="<?= EXPLORE_URL . $rec_id ?>"><img src="../../common/images/follow_links_16x16.gif">explore</a></span>
+<!--
+<div class=detailRowHeader>
+<span class="link"><a target=_blank href="<?= EXPLORE_URL . $rec_id ?>"><img src="../../common/images/follow_links_16x16.gif">explore</a></span>
+</div>
+-->
 <?php } ?>
-<?php if (@$url) { ?>
- <span class="link"><a target=_new href="http://web.archive.org/web/*/<?= htmlspecialchars($url) ?>"><img src="../../common/images/external_link_16x16.gif">page history</a></span>
- <span class="link"><a target=_new href="<?= htmlspecialchars($url) ?>"><img src="../../common/images/external_link_16x16.gif"><?= output_chunker($url) ?></a>
-<?php if ($webIcon) print "<img id=website-icon src='" . $webIcon . "'>"; ?>
- </span>
-<?php } ?>
- </div>
 </div>
 <?php
 }
@@ -339,7 +336,7 @@ function print_private_details($bib) {
 
 				$res = mysql_query('select rec_Title from Records where rec_ID='.intval($bd['val']));
 				$row = mysql_fetch_row($res);
-				$bd['val'] = '<a target="_new" href="'.HEURIST_SITE_PATH.'records/view/viewRecord.php?bib_id='.$bd['val'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row[0]).'</a>';
+				$bd['val'] = '<a target="_new" href="'.HEURIST_SITE_PATH.'records/view/renderRecordData.php?bib_id='.$bd['val'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row[0]).'</a>';
 			} else if ($bd['dty_Type'] == 'file'  &&  $bd['dtl_UploadedFileID']) {
 				$res = mysql_query('select * from recUploadedFiles left join defFileExtToMimetype on ulf_MimeExt = fxm_Extension where ulf_ID='.intval($bd['dtl_UploadedFileID']));
 				$file = mysql_fetch_assoc($res);
@@ -454,7 +451,7 @@ function print_relation_details($bib) {
 		print '<div class=detailType>' . htmlspecialchars($bd['RelTermID']) . '</div>'; // fetch now returns the enum string also
 		print '<div class=detail>';
 		if (@$bd['RelatedRecID']) {
-			print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/viewRecord.php?bib_id='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
+			print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/renderRecordData.php?bib_id='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
 		} else {
 			print htmlspecialchars($bd['Title']);
 		}
@@ -471,7 +468,7 @@ function print_relation_details($bib) {
 		print '<div class=detailType>' . htmlspecialchars($bd['RelTermID']) . '</div>';
 		print '<div class=detail>';
 		if (@$bd['OtherResource']) {
-			print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/viewRecord.php?bib_id='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
+			print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/renderRecordData.php?bib_id='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
 		} else {
 			print htmlspecialchars($bd['Title']);
 		}
@@ -504,7 +501,7 @@ function print_linked_details($bib) {
 		print '<div class=detailRow>';
 		print '<div class=detailType></div>';
 		print '<div class=detail>';
-		print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/viewRecord.php?bib_id='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a>';
+		print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/renderRecordData.php?bib_id='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a>';
 		print '</div></div>';
 	}
 }
