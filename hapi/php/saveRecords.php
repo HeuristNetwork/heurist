@@ -35,7 +35,7 @@ $retitleRecs = array();
 
 foreach ($_REQUEST["records"] as $nonce => $record) {
 	if (! $record["id"]) {
-		mysql__insert("Records", array("rec_AddedByUGrpID" => get_user_id(), "rec_Added" => date('Y-m-d H:i:s')));
+		mysql__insert("Records", array("rec_AddedByUGrpID" => get_user_id(),"rec_OwnerUGrpID"=> get_user_id(), "rec_Added" => date('Y-m-d H:i:s')));
 		$id = mysql_insert_id();
 		$_REQUEST["records"][$nonce]["id"] = $id;
 	}

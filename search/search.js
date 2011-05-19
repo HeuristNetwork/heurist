@@ -1761,7 +1761,7 @@ top.HEURIST.search = {
 		}
 		document.getElementById("collection-label").innerHTML = "Collected: " + top.HEURIST.search.collectCount;
 // error collection-info
-		document.getElementById("collection-info").innerHTML = "<a href='?q=_COLLECTED_&amp;label=Collected'>Collected: " + top.HEURIST.search.collectCount + "</a>";
+//		document.getElementById("collection-info").innerHTML = "<a href='?q=_COLLECTED_&amp;label=Collected'>Collected: " + top.HEURIST.search.collectCount + "</a>";
 	},
 
 	addRemoveCollectionCB: function(results) {

@@ -150,6 +150,7 @@ $DTN = array();	//detail type name
 $DTT = array();	//detail type base type
 $INV = array();	//relationship term inverse
 $WGN = array();	//work group name
+$UGN = array();	//User name
 $TL = array();	//term lookup
 $TLV = array();	//term lookup by value
 // record type labels
@@ -186,7 +187,8 @@ while ($row = mysql_fetch_assoc($res)) {
 
 /// group names
 mysql_connection_db_select(USERS_DATABASE) or die(mysql_error());
-$WGN = mysql__select_assoc('sysUGrps grp', 'grp.ugr_ID', 'grp.ugr_Name', "ugr_Type in ('Workgroup','Ugradclass')");
+$WGN = mysql__select_assoc('sysUGrps grp', 'grp.ugr_ID', 'grp.ugr_Name', "ugr_Type in ('workgroup','ugradclass')");
+$UGN = mysql__select_assoc('sysUGrps grp', 'grp.ugr_ID', 'grp.ugr_Name', "ugr_Type ='user'");
 mysql_connection_db_select(DATABASE) or die(mysql_error());
 
 
@@ -423,7 +425,15 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $o
 	makeTag('added', null, $record['rec_Added']);
 	makeTag('modified', null, $record['rec_Modified']);
 	// saw FIXME  - need to output groups only
-	makeTag('workgroup', array('id' => $record['rec_OwnerUGrpID']), $record['rec_OwnerUGrpID'] > 0 ? $WGN[$record['rec_OwnerUGrpID']] : 'public');
+	if (array_key_exists($record[''],$WGN)) {
+		makeTag('workgroup', array('id' => $record['rec_OwnerUGrpID']),
+							$record['rec_OwnerUGrpID'] > 0 ?
+								(array_key_exists($record['rec_OwnerUGrpID'],$WGN)?
+									$WGN[$record['rec_OwnerUGrpID']]
+									: (array_key_exists($record['rec_OwnerUGrpID'],$UGN)?
+										$UGN[$record['rec_OwnerUGrpID']]:'Unknown'))
+								: 'public');
+	}
 
 	foreach ($record['details'] as $dt => $details) {
 		foreach ($details as $value) {

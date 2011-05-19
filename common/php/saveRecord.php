@@ -69,7 +69,7 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 		$res = mysql_query("select * from Records left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_GroupID=rec_OwnerUGrpID and ugl_UserID=".get_user_id()." where rec_ID=$recordID");
 		$record = mysql_fetch_assoc($res);
 
-		if ($wg != $record["rec_OwnerUGrpID"]) {
+		if ($wg != $record["rec_OwnerUGrpID"] && $record["rec_OwnerUGrpID"] != get_user_id() ) {
 			if ($record["rec_OwnerUGrpID"] > 0  &&  $record["ugl_Role"] != "admin") {
 				// user is trying to change the workgroup when they are not an admin
 				jsonError("user is not a workgroup admin");
@@ -84,7 +84,7 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 		"rec_RecTypeID" => $type,
 		"rec_URL" => $url,
 		"rec_ScratchPad" => $notes,
-		"rec_OwnerUGrpID" => $wg,
+		"rec_OwnerUGrpID" => $wg?$wg:get_user_id(),
 		"rec_NonOwnerVisibility" => $wg? ($vis? "viewable" : "hidden") : "viewable",
 		"rec_Modified" => $now
 		));

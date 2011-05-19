@@ -894,7 +894,10 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				}
 			}
 			top.HEURIST.displayPreferences[prefName] = val;
-			top.HEURIST.loadScript(top.HEURIST.basePath+'common/php/displayPreferences.php?db='+ (top.HEURIST.database.name ? top.HEURIST.database.name: "")+'&' + encodeURIComponent(prefName) + '=' + encodeURIComponent(val));
+			top.HEURIST.loadScript(top.HEURIST.basePath+'common/php/displayPreferences.php?'+
+									'db='+ (top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name
+												: top.HEURIST.parameters.db ? top.HEURIST.parameters.db:"")+
+									'&' + encodeURIComponent(prefName) + '=' + encodeURIComponent(val));
 
 			win = top;
 		}
