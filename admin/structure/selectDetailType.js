@@ -1,14 +1,11 @@
-// SelectDetailType object
-var selectDetailType;
 
 //aliases
-var Dom = YAHOO.util.Dom,
-	Hul = top.HEURIST.util;
+var Dom = YAHOO.util.Dom;
 
 /**
 *
 */
-function Hul.isnull(obj){
+function isnull(obj){
 	return ((obj===null) || (obj===undefined));// old js way typeof(obj)==='undefined');
 }
 
@@ -82,7 +79,7 @@ function SelectDetailType() {
 	*/
 	function _init() {
 
-		if(Hul.isnull(_myDataTable)){
+		if(isnull(_myDataTable)){
 
 								// 1. Reads GET parameters
 								if (location.search.length > 1) {
@@ -105,9 +102,9 @@ function SelectDetailType() {
 
 										var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
 
-										if(Hul.isnull(aUsage) || aUsage.indexOf(rty_ID)<0){
+										if(isnull(aUsage) || aUsage.indexOf(rty_ID)<0){
 
-											var iusage = Hul.isnull(aUsage) ? 0 : aUsage.length;
+											var iusage = isnull(aUsage) ? 0 : aUsage.length;
 											// add order in group, name, help, type and status,
 											// doc will be hidden (for pop-up)
 											arr.push([0, deftype[3],deftype[0],deftype[4],deftype[2],deftype[6],deftype[1],deftype[7],dty_ID,iusage]);
@@ -233,12 +230,12 @@ function SelectDetailType() {
 										record = this.getRecord(target),
 										xy;
 
-									if (!Hul.isnull(column) && column.key === 'help') {
+									if (!isnull(column) && column.key === 'help') {
 										var description = record.getData('description') || 'no further description';
 										xy = [parseInt(oArgs.event.clientX,10) + 10 ,parseInt(oArgs.event.clientY,10) + 10 ];
 										textTip = '<p>'+description+'</p>';
 
-									}else if(!Hul.isnull(column) && column.key === 'usage') {
+									}else if(!isnull(column) && column.key === 'usage') {
 										var dty_ID = record.getData('info');
 
 										if(currentTipId!==dty_ID){
@@ -248,7 +245,7 @@ function SelectDetailType() {
 
 											//find all records that reference this type
 											var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
-											if(!Hul.isnull(aUsage)){
+											if(!isnull(aUsage)){
 												textTip = "<p><ul>";
 												var k;
 												for (k in aUsage) {   //<a href='editRecordType.html'></a>
@@ -261,7 +258,7 @@ function SelectDetailType() {
 										}
 									}
 
-									if(!Hul.isnull(textTip)){
+									if(!isnull(textTip)){
 
 										needHideTip = true;
 
@@ -336,7 +333,7 @@ function SelectDetailType() {
 								//4. init listeners for filter controls
 								_initListeners();
 
-		} //Hul.isnull(_myDataTable)
+		} //isnull(_myDataTable)
 	}//end of initialization ==============================
 
 	/**

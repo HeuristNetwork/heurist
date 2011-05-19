@@ -631,7 +631,7 @@ function DetailTypeManager() {
 					var xy = Hul.getMousePos(event);
 					my_tooltip.html(textTip);  //DEBUG xy[0]+",  "+xy[1]+"<br/>"+
 
-					Hul.showPopupDivAt(my_tooltip, xy);
+					Hul.showPopupDivAt(my_tooltip, xy, $(window).scrollTop(), $(window).width(), $(window).height());
 
 					hideTimer = window.setTimeout(_hideToolTip, 5000);
 				}

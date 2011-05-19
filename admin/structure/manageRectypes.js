@@ -622,7 +622,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 					var xy = Hul.getMousePos(event);
 					my_tooltip.html(textTip);  //DEBUG xy[0]+",  "+xy[1]+"<br/>"+
 
-					Hul.showPopupDivAt(my_tooltip, xy);
+					Hul.showPopupDivAt(my_tooltip, xy, $(window).scrollTop(), $(window).width(), $(window).height());
 					hideTimer = window.setTimeout(_hideToolTip, 5000);
 				}
 				else if(forceHideTip) {
@@ -807,6 +807,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 	// call new popup - to edit detail type
 	//
 	function _editDetailType(detailTypeID) {
+
 		var URL = "";
 		if(detailTypeID) {
 			URL = top.HEURIST.basePath + "admin/structure/editDetailType.html?db="+db+"&detailTypeID="+detailTypeID;
@@ -814,6 +815,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 		else {
 			URL = top.HEURIST.basePath + "admin/structure/editDetailType.html?db="+db;
 		}
+
 		Hul.popupURL(top, URL, {
 			"close-on-blur": false,
 			"no-resize": false,
@@ -833,7 +835,12 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 	// edit strcuture (from image link in table)
 	//
 	function _editRecStructure(rty_ID) {
-		Hul.popupURL(top, top.HEURIST.basePath + "admin/structure/editRecStructure.html?db="+db+"&rty_ID="+rty_ID, {
+
+		var URL = top.HEURIST.basePath + "admin/structure/editRecStructure.html?db="+db+"&rty_ID="+rty_ID;
+		this.location.replace(URL);
+
+		/*
+		Hul.popupURL(top, URL, {
 			"close-on-blur": false,
 			"no-resize": false,
 			height: 480,
@@ -845,7 +852,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 					// alert("Structure is saved");
 				}
 			}
-		});
+		});*/
 	}
 
 	//

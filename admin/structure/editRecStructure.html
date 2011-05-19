@@ -248,19 +248,22 @@ button {
 		<div class="tooltip" id="pointerFilter">
 			<button onclick="closeDivPopup()">Close</button>
 		</div>
-
-		<div id="modelTabs" class="yui-navset yui-navset-top" style="width:600;margin:auto;text-align:left">
+<!-- width:600; -->
+		<div id="modelTabs" class="yui-navset yui-navset-top" style="margin:auto;text-align:left">
 
 			<script  type="text/javascript">
-							//
+				//
 				//  starts initialization on load completion of this window
-							//
+				//
 				YAHOO.util.Event.addListener(window, "load", function(){  editStructure = new  EditRecStructure(); });
 
 			</script>
 
 		</div>
-		<div style="width:600;margin:auto;text-align:left;"><input type="button" value="Define New Field Type" onclick="onDefineNewType()"/></div>
+		<div style="width:600;margin:auto;text-align:left;">
+			<input type="button" value="Back to list of record types" onclick="{window.history.back();}"/>
+			<input type="button" value="Define New Field Type" onclick="onDefineNewType()"/>
+		</div>
 
 	</body>
 </html>

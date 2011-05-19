@@ -1363,7 +1363,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
 		var newO = new Object();
 
-		for(var i in o) newO[i] = cloneObj(o[i]);
+		for(var i in o) newO[i] = top.HEURIST.util.cloneObj(o[i]);
 
 		return newO;
 	},
@@ -1394,11 +1394,15 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 	/**
 	* Adjusts the position of div to prevent it out of border
 	*/
-	showPopupDivAt: function(_div, xy, offset){
+	showPopupDivAt: function(_div, xy, border_top, border_right, border_height, offset){
 
-		var border_top = $(window).scrollTop();
+		/*var border_top = $(window).scrollTop();
 		var border_right = $(window).width();
 		var border_height = $(window).height();
+		border_top = document.body.scrollTop;
+		border_right = document.body.width;
+		border_height =  document.body.height;*/
+
 		var div_height =  _div.height();
 		var left_pos;
 		var top_pos;

@@ -63,7 +63,7 @@ function EditRecStructure() {
 		_tabView.addTab(new YAHOO.widget.Tab({
 			id: 'design',
 			label: 'Design',
-			content: '<div id="tabDesign">'+hToolBar+'<div id="tableContainer"></div>'+hToolBar+'</div>'
+			content: '<div id="tabDesign" style="width:600;margin:auto;">'+hToolBar+'<div id="tableContainer"></div>'+hToolBar+'</div>'
 		}));
 		_tabView.addTab(new YAHOO.widget.Tab({
 			id: 'preview',
