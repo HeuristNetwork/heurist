@@ -32,46 +32,23 @@ function DetailTypeManager() {
 			defs: {}
 	}};
 
-	var _lblNotice, //label that notify that some thing was changed - visibility of group
-	_btnSave,   //button to send changes to server side
-	_updatesCnt = 0; //number of affected field types
+	var _updatesCnt = 0, //number of affected field types
+		_filterForAll = false,
+		_filterText = "",
+		_filterVisible = 0;
 
 	var tabView = new YAHOO.widget.TabView();
-
-	//public members
-	var that = {
-
-		init: function(){
-			_init();
-		},
-		doGroupSave: function(){ _doGroupSave(); },
-		doGroupDelete: function(){ _doGroupDelete(); },
-		doGroupCancel: function(){ _doGroupCancel(); },
-		hasChanges: function(){ return  (_updatesCnt>0); },
-		//showInfo: function(rectypeID, event){ _showInfoToolTip( rectypeID, event ); },
-		//hideInfo: function() { hideTimer = window.setTimeout(_hideToolTip, 1000); }
-
-		getClass: function () {
-				return _className;
-		},
-
-		isA: function (strClass) {
-				return (strClass === _className);
-		}
-
-	}
-
-	return that;
 
 	//
 	//
 	//
 	function _init()
 	{
-		var ind = 0;
+		var ind = 0,
+			dtg_ID;
 		//
 		// init tabview with names of group
-		for (var dtg_ID in top.HEURIST.detailTypes.groups) {
+		for (dtg_ID in top.HEURIST.detailTypes.groups) {
 
 			var grpName = top.HEURIST.detailTypes.groups[dtg_ID].name;
 			var grpDescription = top.HEURIST.detailTypes.groups[dtg_ID].description;
@@ -133,7 +110,7 @@ function DetailTypeManager() {
 	//
 	function _addNewTab(ind, grpID, grpName, grpDescription)
 	{
-		if(grpDescription==undefined || grpDescription==""){
+		if(Hul.isempty(grpDescription)){
 			grpDescription = "Describe this group!";
 		}
 
@@ -146,13 +123,24 @@ function DetailTypeManager() {
 			('<div>'+                   //for="filter"
 			'<div style="display:inline-block;"><label>Filter by name:</label>'+
 			'<input type="text" id="filter'+grpID+'" value="">'+
-			'&nbsp;&nbsp;<input type="checkbox" id="filter'+grpID+'vis" value="1" style="padding-top:5px;">&nbsp;Show active only</div>'+
+			'&nbsp;&nbsp;'+
+			'<input type="checkbox" id="filter'+grpID+'vis" value="1" style="padding-top:5px;">&nbsp;Show active only&nbsp;&nbsp;'+
+			'<input type="checkbox" id="filter_forall'+grpID+'" value="1" style="padding-top:5px;">&nbsp;Apply for all groups'+
+			'</div>'+
 			'<div style="float:right; text-align:right">'+
-			'<input type="button" id="btnAdd'+grpID+'" value="Add Field Type"/>'+
+				'<label id="lblNoticeAboutChanges'+grpID+'" '+
+					'style="padding-left:3px; padding-right:3px; background-color:white; color:red; display: inline-block;"></label>'+
+					'&nbsp;&nbsp;&nbsp;'+
+				'<input id="btnSave'+grpID+'" type="button" value="Save Changes" '+
+							'style="color:red; display: inline-block;"/>'+
+
+				'<input type="button" id="btnAdd'+grpID+'" value="Add Field Type" style="float:right;"/>'+
 			'</div></div>'+
 			'<div id="tabContainer'+grpID+'"></div></div>')
 
 		}), ind);
+
+		// style="float:right; text-align:right"
 
 		arrTables.push(null);
 		arrDataSources.push(null);
@@ -167,8 +155,9 @@ function DetailTypeManager() {
 		needHideTip = true;
 		_hideToolTip();
 
+		var option;
 		var id = e.newValue.get("id");
-		if(id=="newGroup"){
+		if(id==="newGroup"){
 			//fill combobox on edit group form
 			var sel = Dom.get('edGroupId');
 
@@ -176,35 +165,36 @@ function DetailTypeManager() {
 			while (sel.length>0){
 				sel.remove(0);
 			}
-			var option = document.createElement("option");
+			option = document.createElement("option");
 			option.text = "new group";
 			option.value = "-1";
 			try {
 				// for IE earlier than version 8
 				sel.add(option, sel.options[null]);
-			}catch (e){
+			}catch (ex1){
 				sel.add(option,null);
 			}
 
+			var i;
+			for (i in _groups){
+			if(i!==undefined){
 
-			for (var i in _groups)
-			if(i!=undefined){
-
-				var option = document.createElement("option");
+				option = document.createElement("option");
 				option.text = _groups[i].text;
 				option.value = _groups[i].value;
 				try {
 					// for IE earlier than version 8
 					sel.add(option, sel.options[null]);
-				}catch (e){
+				}catch (ex2){
 					sel.add(option,null);
 				}
+			}
 			} // for
 
 			Dom.get('edName').value = "";
 			Dom.get('edDescription').value = "";
 
-		}else if (e.newValue!=e.prevValue)
+		}else if (e.newValue!==e.prevValue)
 		{
 			initTabContent(e.newValue);
 		}
@@ -229,29 +219,47 @@ function DetailTypeManager() {
 		var dtg_ID = tab.get('id');
 		//alert('init>>>>'+dtg_ID);
 
+		_updateSaveNotice(dtg_ID);
+
+		var needFilterUpdate = false;
+		var el1 = Dom.get('filter'+dtg_ID)
+		var el2 = Dom.get('filter'+dtg_ID+'vis')
+
+		if(_filterForAll){
+			var newval = (_filterVisible === 1);
+			needFilterUpdate = ((el1.value !== _filterText) || (el2.checked !== newval));
+			el1.value = _filterText;
+			el2.checked = (_filterVisible === 1);
+		}else{
+			_filterText = el1.value
+			_filterVisible = el2.checked?1:0;
+		}
+		Dom.get('filter_forall'+dtg_ID).checked = _filterForAll;
+
 		//does not work var dt = Dom.get("datatable"+dtg_ID);
 
 		var currentTabIndex = tabView.get('activeIndex');
 		var dt = arrTables[currentTabIndex];
 
-		if(dt==undefined || dt==null){
+		if(Hul.isnull(dt)){
 
-			var arr = [];
+			var arr = [],
+				dty_ID;
 
 			//create datatable and fill it valurs of particular group
-			for (var dty_ID in top.HEURIST.detailTypes.typedefs) {
-				if(dty_ID!="commomFieldNames")
+			for (dty_ID in top.HEURIST.detailTypes.typedefs) {
+				if(dty_ID!=="commomFieldNames")
 				{
 					var td = top.HEURIST.detailTypes.typedefs[dty_ID];
 					var deftype = td.commonFields;
 					//only for this group and  visible in UI
-					if(deftype[7]==dtg_ID){
+					if(Number(deftype[7])===Number(dtg_ID)){
 						var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
-						var iusage = aUsage == undefined ? 0 : aUsage.length;
+						var iusage = (Hul.isnull(aUsage)) ? 0 : aUsage.length;
 						// add order in group, name, help, type and status,
 						// doc will be hidden (for pop-up)
 						// last 3 columns for actions
-						arr.push([dty_ID, (deftype[5]==1),
+						arr.push([dty_ID, (Number(deftype[5])===1),
 						deftype[3],deftype[0],deftype[4],deftype[2],deftype[6],deftype[1],
 						dtg_ID, iusage]);
 					}
@@ -271,12 +279,12 @@ function DetailTypeManager() {
 					filtered = [],
 					i,l;
 
-					if (req) {
+					if (!Hul.isempty(_filterText) || _filterVisible===1) {
 
-						var fvals = req.split("|");
+						//var fvals = req.split("|");
 
-						var sByName   = fvals[0].toLowerCase();
-						var iByVisibility = fvals[1];
+						var sByName   = _filterText; //fvals[0].toLowerCase();
+						var iByVisibility = _filterVisible; //fvals[1];
 
 						// when we change the table, the datasource is not changed
 						// thus we need an additional filter to filter out the deleted rows
@@ -290,15 +298,15 @@ function DetailTypeManager() {
 							//thus we need to update visibility manually
 							var dty_ID = data[i].id;
 							var df = _oDetailType.detailtype.defs[dty_ID];
-							if(df!=undefined){
+							if(!Hul.isnull(df)){
 								data[i].vis = df.common[0];
 								data[i].grp_id = df.common[1];
 							}
 
 							if ((data[i].name.toLowerCase().indexOf(sByName)>-1)
-							&& (dtg_ID == data[i].grp_id)
+							&& (Number(dtg_ID) === Number(data[i].grp_id))
 							&& (_deleted.indexOf(dty_ID)<0)
-							&& (iByVisibility==0 || data[i].vis==iByVisibility))
+							&& (iByVisibility===0 || Number(data[i].vis)===iByVisibility))
 							{
 								filtered.push(data[i]);
 							}
@@ -335,7 +343,7 @@ function DetailTypeManager() {
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var str = oRecord.getData("description");
 					var tit = "";
-					if(str == null){
+					if(Hul.isnull(str)){
 						str = "";
 					}else if (str.length>30) {
 						tit = str;
@@ -349,9 +357,9 @@ function DetailTypeManager() {
 			{ key: "grp_id", label: "Group", sortable:false, width:90,
 				formatter:YAHOO.widget.DataTable.formatDropdown, dropdownOptions:_groups},
 			{ key: null, label: "Edit", sortable:false, width:20, formatter: function(elLiner, oRecord, oColumn, oData){
-					elLiner.innerHTML = '<a href="#edit"><img src="../../common/images/edit_icon.png" width="16" height="16" border="0" title="Edit" /><\/a>'} },
+					elLiner.innerHTML = '<a href="#edit"><img src="../../common/images/edit_icon.png" width="16" height="16" border="0" title="Edit" /><\/a>'; } },
 			{ key: null, label: "Del", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
-					elLiner.innerHTML = '<a href="#delete"><img src="../../common/images/delete_icon.png" width="16" height="16" border="0" title="Delete" /><\/a>'} },
+					elLiner.innerHTML = '<a href="#delete"><img src="../../common/images/delete_icon.png" width="16" height="16" border="0" title="Delete" /><\/a>'; } },
 			//{ key: "info", label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
 			//	elLiner.innerHTML = '<a href="#info"><img src="../../common/images/info_icon.png" width="16" height="16" border="0" title="Info" /><\/a>'} },
 			{ key: "usage", label: "<u>Usage</u>", sortable:true, width:20 }
@@ -393,31 +401,33 @@ function DetailTypeManager() {
 				var dty_ID = oRecord.getData("id");
 
 				//                 alert("Action "+elLink.hash+" for:"+dty_ID);
-				if(elLink.hash == "#edit"){
+				if(elLink.hash === "#edit"){
 
 					_onAddEditFieldType(dty_ID, 0);
 
-				}else if(elLink.hash == "#delete"){
+				}else if(elLink.hash === "#delete"){
 
 					var iUsage = oRecord.getData('usage');
 					if(iUsage<1){
-						if(_needToSaveFirst()) return;
+						if(_needToSaveFirst()) {
+							return;
+						}
 
 						var r=confirm("Delete field type#"+dty_ID+" '"+oRecord.getData('name')+"?");
-						if (r==true) {
+						if (r) {
 
 							function _updateAfterDelete(context) {
 
-								if(context.error == undefined){
+								if(Hul.isnull(context.error)){
 									dt.deleteRow(oRecord.getId(), -1);
 									_deleted.push( dty_ID );
 									alert("Field type #"+dty_ID+" was deleted");
 									top.HEURIST.detailTypes = context.detailTypes;
 									_cloneHEU = null;
-								} else {
+								} /*else {
 									// if error is property of context it will be shown by getJsonData
 									//alert("Deletion failed. "+context.error);
-								}
+								}*/
 							}
 
 							var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
@@ -445,10 +455,10 @@ function DetailTypeManager() {
 				var oldValue = record.getData(column.key);
 				var recordIndex = this.getRecordIndex(record);
 				var recordKey = record.getData('recordKey');
-				if(newValue!=oldValue){
+				if(newValue!==oldValue){
 					//this.deleteRow(recordIndex);
 					var data = record.getData();
-					data['grp_id'] = newValue;
+					data.grp_id = newValue;
 
 					///var newTabIndex = elDropdown.selectedIndex; //getTabIndexByGroup(newValue);
 
@@ -485,7 +495,7 @@ function DetailTypeManager() {
 				var elCheckbox = oArgs.target;
 				var oRecord = dt.getRecord(elCheckbox);
 				var data = oRecord.getData();
-				data['vis'] = elCheckbox.checked;//?1:0;
+				data.vis = elCheckbox.checked;//?1:0;
 
 				//var recindex = dt.getRecordIndex(oRecord);
 				//dt.updateRow(recindex, data);
@@ -499,11 +509,14 @@ function DetailTypeManager() {
 			//
 			function _updateDetailType(oRecord)
 			{
-				var dty_ID = oRecord.getData('id');
-				var newvals = [(oRecord.getData('vis')?1:0), oRecord.getData('grp_id')];
+				var dty_ID = oRecord.getData('id'),
+					grp_id = oRecord.getData('grp_id'),
+					newvals = [(oRecord.getData('vis')?1:0), grp_id];
 
 				//keep copy
-				if(_cloneHEU==null) _cloneHEU = Hul.cloneObj(top.HEURIST.detailTypes);
+				if(Hul.isnull(_cloneHEU)) {
+					_cloneHEU = Hul.cloneObj(top.HEURIST.detailTypes);
+				}
 				//update HEURIST
 				var td = top.HEURIST.detailTypes.typedefs[dty_ID];
 				var deftype = td.commonFields;
@@ -512,21 +525,14 @@ function DetailTypeManager() {
 
 				//update keep object
 				var dt_def = _oDetailType.detailtype.defs[dty_ID];
-				if(dt_def==undefined){
+				if(Hul.isnull(dt_def)){
 					_oDetailType.detailtype.defs[dty_ID] = {common:newvals};
 					_updatesCnt++;
 				}else{
 					_oDetailType.detailtype.defs[dty_ID].common = newvals;
 				}
 
-				if(_lblNotice==null){
-					_lblNotice = Dom.get("lblNoticeAboutChanges");
-					_btnSave   = Dom.get("btnSave");
-					_btnSave.onclick = _updateDetailTypeOnServer;
-				}
-
-				_lblNotice.innerHTML = 'You have changed <b>'+_updatesCnt+'</b> field type'+((_updatesCnt>1)?'s':'');
-				_btnSave.style.display = 'block';
+				_updateSaveNotice(grp_id);
 			}
 
 			//mouse over help colums shows the datailed description
@@ -551,6 +557,10 @@ function DetailTypeManager() {
 			arrTables[currentTabIndex] = dt;
 			arrDataSources[currentTabIndex] = myDataSource;
 
+			var filter_forall = Dom.get('filter_forall'+dtg_ID);
+			filter_forall.onchange = function (e) {
+				_filterForAll = filter_forall.checked;
+				};
 
 			var filter = Dom.get('filter'+dtg_ID);
 			filter.onkeyup = function (e) {
@@ -578,6 +588,9 @@ function DetailTypeManager() {
 
 
 		} //if(dt==undefined || dt==null)
+		else if (needFilterUpdate) {
+			updateFilter();
+		}
 	}//initTabContent =============================================== END DATATABLE INIT
 
 
@@ -597,8 +610,10 @@ function DetailTypeManager() {
 				}
 
 				var forceHideTip = true;
+				var textTip;
+
 				if(!Hul.isnull(dty_ID)){
-					if(currentTipId != dty_ID) {
+					if(currentTipId !== dty_ID) {
 						currentTipId = dty_ID;
 
 						var detname = top.HEURIST.detailTypes.names[dty_ID];
@@ -606,11 +621,13 @@ function DetailTypeManager() {
 
 						//find all records that reference this type
 						var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
-						if(aUsage != undefined){
+						if(!Hul.isnull(aUsage)){
 
-							var textTip = '<div style="padding-left:20px;padding-top:4px"><b>'+detname+'</b><br/>'+
+							textTip = '<div style="padding-left:20px;padding-top:4px"><b>'+detname+'</b><br/>'+
 							'<div style="padding-left:20px;padding-top:4px"><b>Record types:</b><br/><label style="color: #4499ff;">Click on record type to edit</label></div><ul>';
-							for (var k in aUsage) {
+
+							var k;
+							for (k in aUsage) {
 								textTip = textTip + "<li><a href='editRecStructure.html?db="+db+"&rty_ID="+aUsage[k]+"'>"+top.HEURIST.rectypes.names[aUsage[k]]+"</a></li>";
 							}
 							textTip = textTip + "</ul></p>";
@@ -647,16 +664,17 @@ function DetailTypeManager() {
 	//
 	function _removeTable(grpID, needRefresh){
 
-		if(grpID!=undefined && grpID>0)
+		if(!Hul.isnull(grpID) && grpID>0)
 		{
 			var tabIndex = _getIndexByGroupId(grpID);
 
 			var ndt = arrTables[tabIndex];
-			if(ndt!=null){
+			if(!Hul.isnull(ndt)){
 
 				//find parent tab
 				var tab = Dom.get('tabContainer'+grpID);
-				for (var i = 0; i < tab.children.length; i++) {
+				var i;
+				for (i = 0; i < tab.children.length; i++) {
 					tab.removeChild(tab.childNodes[0]);
 				}
 				// need to refill the destionation table,
@@ -664,7 +682,7 @@ function DetailTypeManager() {
 				arrTables[tabIndex] = null; //.addRow(record.getData(), 0);
 
 				var currIndex = tabView.get('activeIndex');
-				if(tabIndex == currIndex && needRefresh)
+				if(tabIndex === currIndex && needRefresh)
 				{
 					initTabContent(tabView.getTab(tabIndex));
 				}
@@ -680,9 +698,9 @@ function DetailTypeManager() {
 	//
 	function _updateDetailTypeOnServer(event) {
 		var str = YAHOO.lang.JSON.stringify(_oDetailType);
-		//alert("Stringified changes: " + str);
+//DEBUG alert("Stringified changes: " + str);
 
-		if(str != null) {
+		if(!Hul.isnull(str)) {
 			//_updateResult(""); //debug
 			//return;//debug
 
@@ -699,20 +717,23 @@ function DetailTypeManager() {
 		if(!context) {
 			alert("An error occurred trying to contact the database");
 		}else{
-			var error = false;
-			var report = "";
+			var error = false,
+				report = "",
+				ind;
 
-			for(var ind in context.result)
-			if(ind!=undefined){
+			for(ind in context.result)
+			{
+			if(!Hul.isnull(ind)){
 				var item = context.result[ind];
 				if(isNaN(item)){
 					alert("An error occurred: " + item);
 					error = true;
 				}else{
 					detailTypeID = Number(item);
-					if(report!="") report = report + ",";
+					if(!Hul.isempty(report)) { report = report + ","; }
 					report = report + detailTypeID;
 				}
+			}
 			}
 
 			if(!error) {
@@ -727,6 +748,25 @@ function DetailTypeManager() {
 			_cloneHEU = null;
 		}
 	}
+
+	/**
+	* Show/hide information about number of fieldtypes with changed activity
+	*/
+	function _updateSaveNotice(grp_id){
+
+		var _lblNotice = Dom.get("lblNoticeAboutChanges"+grp_id);
+		var _btnSave   = Dom.get("btnSave"+grp_id);
+
+		if(_updatesCnt>0){
+			_lblNotice.innerHTML = 'You have changed <b>'+_updatesCnt+'</b> field type'+((_updatesCnt>1)?'s':'');
+			_btnSave.style.display = 'inline-block';
+			_btnSave.onclick = _updateDetailTypeOnServer;
+		}else{
+			_btnSave.style.display = 'none';
+			_lblNotice.innerHTML = '';
+		}
+	}
+
 	//
 	// clear all changes with visibility and groups
 	//
@@ -734,16 +774,21 @@ function DetailTypeManager() {
 
 		_updatesCnt = 0;
 		_oDetailType.detailtype.defs = {}; //clear keeptrack
-		_btnSave.style.display = 'none';
-		_lblNotice.innerHTML = '';
 
-		if(_cloneHEU) top.HEURIST.detailTypes = Hul.cloneObj(_cloneHEU);
+		_updateSaveNotice(_getGroupByIndex(tabView.get('activeIndex')));
+
+		if(_cloneHEU) {
+			top.HEURIST.detailTypes = Hul.cloneObj(_cloneHEU);
+		}
 		_cloneHEU = null;
 
 		if(withReload){
-			for(var ind in arrTables)
-			if(ind!=undefined){
-				_removeTable( _getGroupByIndex(ind), true);
+			var ind;
+			for(ind in arrTables)
+			{
+				if(!Hul.isnull(ind)){
+					_removeTable( _getGroupByIndex(ind), true);
+				}
 			}
 		}
 	}
@@ -791,6 +836,7 @@ function DetailTypeManager() {
 	// listenter is activated along with dataTable creation
 	//
 	var filterTimeout = null;
+	//
 	function updateFilter() {
 		// Reset timeout
 		filterTimeout = null;
@@ -805,11 +851,11 @@ function DetailTypeManager() {
 
 		var grpID = _getGroupByIndex(currentTabIndex);
 
-		var filterval = Dom.get('filter'+grpID).value;
-		var filtervis = Dom.get('filter'+grpID+'vis').checked?1:0;
+		_filterText = Dom.get('filter'+grpID).value;
+		_filterVisible = Dom.get('filter'+grpID+'vis').checked?1:0;
 
 		// Get filtered data
-		dsource.sendRequest(filterval+'|'+filtervis,{
+		dsource.sendRequest(_filterText+'|'+_filterVisible,{
 			success : dtable.onDataReturnInitializeTable,
 			failure : dtable.onDataReturnInitializeTable,
 			scope   : dtable,
@@ -822,7 +868,7 @@ function DetailTypeManager() {
 	//
 	function _onAddEditFieldType(dty_ID, dtg_ID){
 
-		if(_needToSaveFirst()) return;
+		if(_needToSaveFirst()) { return; }
 
 		var url = top.HEURIST.basePath + "admin/structure/editDetailType.html?db="+db;
 		if(dty_ID>0){
@@ -837,9 +883,7 @@ function DetailTypeManager() {
 			height: 520,
 			width: 640,
 			callback: function(context) {
-				if(context==null){
-					// alert("Edition is cancelled");
-				}else{
+				if(!Hul.isnull(context)){
 
 					//update id
 					var dty_ID = Math.abs(Number(context.result[0]));
@@ -858,8 +902,9 @@ function DetailTypeManager() {
 					var grpID = top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[7];
 
 					_removeTable(grpID, true);
-					if(grpID_old!=grpID)
-					_removeTable(grpID_old, true);
+					if(grpID_old!==grpID){
+						_removeTable(grpID_old, true);
+					}
 					/*
 					//is it current tab
 					var ind = _getIndexByGroupId(grpID);
@@ -899,7 +944,7 @@ function DetailTypeManager() {
 	//
 	function _doGroupSave()
 	{
-		if(_needToSaveFirst()) return;
+		if(_needToSaveFirst()) { return; }
 
 		var sel = Dom.get('edGroupId'),
 		name = Dom.get('edName').value,
@@ -926,19 +971,6 @@ function DetailTypeManager() {
 			orec.dettypegroups.defs[grpID] = [name, description];
 		}
 
-		//top.HEURIST.detailTypes.groups[grpID] = grp;
-		var str = YAHOO.lang.JSON.stringify(orec);
-
-		//alert(str);
-
-		if(str!=null){
-			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
-			var callback = _updateOnSaveGroup;
-			var params = "method=saveDTG&db="+db+"&data=" + encodeURIComponent(str);
-
-			top.HEURIST.util.getJsonData(baseurl, callback, params)
-		}
-
 		//make this tab active
 		function _updateOnSaveGroup(context){
 			//for new - add new tab
@@ -952,10 +984,10 @@ function DetailTypeManager() {
 				if(grpID<0){
 					grpID = context['0'].result;
 					ind = _groups.length;
-					_addNewTab(ind, grpID, name, description)
+					_addNewTab(ind, grpID, name, description);
 				}else{
 					//update label
-					var ind = _getIndexByGroupId(grpID);
+					ind = _getIndexByGroupId(grpID);
 					if(ind>=0){
 						var tab = tabView.getTab(ind);
 						var el = tab._getLabelEl();
@@ -966,6 +998,20 @@ function DetailTypeManager() {
 				tabView.set("activeIndex", ind);
 			}
 		}
+
+		//top.HEURIST.detailTypes.groups[grpID] = grp;
+		var str = YAHOO.lang.JSON.stringify(orec);
+
+		//alert(str);
+
+		if(!Hul.isnull(str)) {
+			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+			var callback = _updateOnSaveGroup;
+			var params = "method=saveDTG&db="+db+"&data=" + encodeURIComponent(str);
+
+			top.HEURIST.util.getJsonData(baseurl, callback, params);
+		}
+
 	}
 
 	//
@@ -973,16 +1019,16 @@ function DetailTypeManager() {
 	//
 	function _doGroupDelete(){
 
-		if(_needToSaveFirst()) return;
+		if(_needToSaveFirst()) { return; }
 
 		var sel = Dom.get('edGroupId');
 		var grpID = sel.options[sel.selectedIndex].value;
 
-		if(grpID<0) return;
+		if(grpID<0) { return; }
 
-		var grp = top.HEURIST.detailTypes.groups[grpID]
+		var grp = top.HEURIST.detailTypes.groups[grpID];
 
-		if(grp.types!=undefined)
+		if(!Hul.isnull(grp.types))
 		{
 			alert("There are types that belong to this group. Impossible to delete such group");
 		}else{
@@ -991,9 +1037,7 @@ function DetailTypeManager() {
 				var ind;
 				//
 				function _updateAfterDeleteGroup(context) {
-					if(context.error!=undefined){
-						// alert(context.error);
-					}else{
+					if(Hul.isnull(context.error)){
 						//remove tab from tab view and select 0 index
 						_groups.splice(ind, 1);
 						arrTables.splice(ind, 1);
@@ -1034,8 +1078,10 @@ function DetailTypeManager() {
 	function _getIndexByGroupId(grpID){
 		var ind = -1;
 		for (ind in _groups)
-		if(ind>=0 && _groups[ind].value==grpID){
-			return ind;
+		{
+			if(ind>=0 && _groups[ind].value===grpID){
+				return ind;
+			}
 		}
 		return -1;
 	}
@@ -1046,8 +1092,33 @@ function DetailTypeManager() {
 		return _groups[ind].value;
 	}
 
+	//
+	// public members
+	//
+	var that = {
 
-};
+		init: function(){
+			_init();
+		},
+		doGroupSave: function(){ _doGroupSave(); },
+		doGroupDelete: function(){ _doGroupDelete(); },
+		doGroupCancel: function(){ _doGroupCancel(); },
+		hasChanges: function(){ return  (_updatesCnt>0); },
+		//showInfo: function(rectypeID, event){ _showInfoToolTip( rectypeID, event ); },
+		//hideInfo: function() { hideTimer = window.setTimeout(_hideToolTip, 1000); }
+
+		getClass: function () {
+				return _className;
+		},
+
+		isA: function (strClass) {
+				return (strClass === _className);
+		}
+
+	};
+
+	return that;
+}
 
 //
 //general functions

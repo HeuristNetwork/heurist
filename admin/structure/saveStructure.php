@@ -622,7 +622,7 @@
 				if (array_key_exists($colName, $rtyColumnNames)) {
 					//array_push($ret['error'], "$colName is not a valid column name for defDetailTypes val= $val was not used");
 
-error_log(">>>>>>>>>>>>>>> $colName  val=".$val);
+//error_log(">>>>>>>>>>>>>>> $colName  val=".$val);
 
 					if($query!="") $query = $query.",";
 					$query = $query."$colName = ?";
@@ -635,7 +635,7 @@ error_log(">>>>>>>>>>>>>>> $colName  val=".$val);
 			if($query!=""){
 				$query = "update defRecTypes set ".$query." where rty_ID = $rtyID";
 
-error_log(">>>>>>>>>>>>>>>".$query."   params=".join(",",$parameters)."<<<<<<<<<<<<<<<");
+//error_log(">>>>>>>>>>>>>>>".$query."   params=".join(",",$parameters)."<<<<<<<<<<<<<<<");
 
 				$res = execSQL($db, $query, $parameters, true);
 				if(!is_numeric($res)){

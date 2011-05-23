@@ -42,13 +42,15 @@ function RectypeManager() {
 
 	//object to send changes (visibility and group belong) for update on server
 	var _oRecordType = {rectype:{
-			colNames:{common:['rty_ShowInLists','rty_RecTypeGroupIDs']},
+			colNames:{common:['rty_ShowInLists','rty_RecTypeGroupIDs'], dtFields:[]},
 			defs: {}
 	}};
 
-	var _lblNotice, //label that notify that some thing was changed - visibility of group
-	_btnSave,   //button to send changes to server side
-	_updatesCnt = 0; //number of affected rec types (visibility, group belong)
+
+	var _updatesCnt = 0, //number of affected rec types (visibility, group belong)
+		_filterForAll = false,
+		_filterText = "",
+		_filterVisible = 0;
 
 	var tabView = new YAHOO.widget.TabView();
 
@@ -159,11 +161,18 @@ function RectypeManager() {
 			content:
 			('<div>'+                   //for="filter"
 			'<div style="display:inline-block;"><label>Filter by name:</label>'+
-			'<input type="text" id="filter'+grpID+'" value="">'+
-			'&nbsp;&nbsp;<input type="checkbox" id="filter'+grpID+'vis" value="1" style="padding-top:5px;">&nbsp;Show active only</div>'+
+			'<input type="text" id="filter'+grpID+'" value="">&nbsp;&nbsp;'+
+			'<input type="checkbox" id="filter'+grpID+'vis" value="1" style="padding-top:5px;">&nbsp;Show active only&nbsp;&nbsp;'+
+			'<input type="checkbox" id="filter_forall'+grpID+'" value="1" style="padding-top:5px;">&nbsp;Apply for all groups'+
+			'</div>'+
 			'<div style="float:right; text-align:right">'+
-			'<input type="button" id="btnAddRecordType'+grpID+'" value="Add Record Type"/>'+
-			'<input type="button" id="btnAddFieldType'+grpID+'" value="Add Field Type"/>'+
+				'<label id="lblNoticeAboutChanges'+grpID+'" '+
+					'style="padding-left:3px; padding-right:3px; background-color:white; color:red; display: inline-block;"></label>'+
+					'&nbsp;&nbsp;&nbsp;'+
+				'<input id="btnSave'+grpID+'" type="button" value="Save Changes" '+
+							'style="color:red; display: inline-block;"/>'+
+				'<input type="button" id="btnAddRecordType'+grpID+'" value="Add Record Type" style="float:right;"/>'+
+				'<input type="button" id="btnAddFieldType'+grpID+'" value="Add Field Type" style="float:right;"/>'+
 			'</div></div>'+
 			'<div id="tabContainer'+grpID+'"></div></div>')
 
@@ -244,7 +253,22 @@ function RectypeManager() {
 
 		var grpID = tab.get('id');
 
-		//does not work var dt = Dom.get("datatable"+grpID);
+		_updateSaveNotice(grpID);
+
+		var needFilterUpdate = false;
+		var el1 = Dom.get('filter'+grpID)
+		var el2 = Dom.get('filter'+grpID+'vis')
+
+		if(_filterForAll){
+			var newval = (_filterVisible === 1);
+			needFilterUpdate = ((el1.value !== _filterText) || (el2.checked !== newval));
+			el1.value = _filterText;
+			el2.checked = (_filterVisible === 1);
+		}else{
+			_filterText = el1.value
+			_filterVisible = el2.checked?1:0;
+		}
+		Dom.get('filter_forall'+grpID).checked = _filterForAll;
 
 		var _currentTabIndex = tabView.get('activeIndex');
 
@@ -280,12 +304,12 @@ function RectypeManager() {
 					filtered = [],
 					i,l;
 
-					if (req) {
+					if (!Hul.isempty(_filterText) || _filterVisible===1) {
 
-						var fvals = req.split("|");
+						//var fvals = req.split("|");
 
-						var sByName   = fvals[0].toLowerCase();
-						var iByVisibility = fvals[1];
+						var sByName   = _filterText; //fvals[0].toLowerCase();
+						var iByVisibility = _filterVisible; //fvals[1];
 
 						// when we change the table, the datasource is not changed
 						// thus we need an additional filter to filter out the deleted rows
@@ -307,7 +331,7 @@ function RectypeManager() {
 							if ((data[i].name.toLowerCase().indexOf(sByName)>-1)
 							&& (data[i].grp_id.indexOf(grpID)>-1)
 							&& (_deleted.indexOf(rec_ID)<0)
-							&& (iByVisibility==0 || data[i].active==iByVisibility))
+							&& (iByVisibility===0 || Number(data[i].active)===iByVisibility))
 							{
 								filtered.push(data[i]);
 							}
@@ -490,8 +514,10 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 			//
 			function _updateRecordType(oRecord)
 			{
-				var rty_ID = oRecord.getData('id');
-				var newvals = [(oRecord.getData('active')?1:0), oRecord.getData('grp_id')];
+				var rty_ID = oRecord.getData('id'),
+					grp_id = oRecord.getData('grp_id');
+
+				var newvals = [(oRecord.getData('active')?1:0), grp_id];
 
 				//keep copy
 				if(Hul.isnull(_cloneHEU)) _cloneHEU = Hul.cloneObj(top.HEURIST.rectypes);
@@ -502,22 +528,18 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 				deftype[9] = newvals[1]; //group
 
 				//update keep object
-				var dt_def = _oRecordType.rectype.defs[rty_ID];
-				if(Hul.isnull(dt_def)){
-					_oRecordType.rectype.defs[rty_ID] = {common:newvals};
+				//var dt_def = _oRecordType.rectype.defs[rty_ID];
+
+				if(Hul.isnull(_oRecordType.rectype.defs[rty_ID])){
+					_oRecordType.rectype.defs[rty_ID] = [];
+					_oRecordType.rectype.defs[rty_ID].push({common:newvals,dtFields:[]});
 					_updatesCnt++;
 				}else{
-					_oRecordType.rectype.defs[rty_ID].common = newvals;
+					_oRecordType.rectype.defs[rty_ID][0].common = newvals;
 				}
 
-				if(Hul.isnull(_lblNotice)){
-					_lblNotice = Dom.get("lblNoticeAboutChanges");
-					_btnSave   = Dom.get("btnSave");
-					_btnSave.onclick = _updateRecordTypeOnServer
-				}
+				_updateSaveNotice(grp_id);
 
-				_lblNotice.innerHTML = 'You have changed <b>'+_updatesCnt+'</b> record type'+((_updatesCnt>1)?'s':'');
-				_btnSave.style.display = 'block';
 			}
 
 			/* MOVED TO LISTENERS OF INFO IMAGE
@@ -546,6 +568,11 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 			arrDataSources[_currentTabIndex] = myDataSource;
 
 			// add listeners
+			var filter_forall = Dom.get('filter_forall'+grpID);
+			filter_forall.onchange = function (e) {
+				_filterForAll = filter_forall.checked;
+				};
+
 			var filter = Dom.get('filter'+grpID);
 			filter.onkeyup = function (e) {
 				clearTimeout(filterTimeout);
@@ -573,6 +600,9 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 			//$$('.ellipsis').each(ellipsis);
 
 		}//if(dt==undefined || dt==null)
+		else if (needFilterUpdate){
+			updateFilter();
+		}
 	}//initTabContent =============================================== END DATATABLE INIT
 
 
@@ -714,16 +744,35 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 		}
 
 	}
+
+	/**
+	* Show/hide information about number of fieldtypes with changed activity
+	*/
+	function _updateSaveNotice(grp_id){
+
+		var _lblNotice = Dom.get("lblNoticeAboutChanges"+grp_id);
+		var _btnSave   = Dom.get("btnSave"+grp_id);
+
+		if(_updatesCnt>0){
+			_lblNotice.innerHTML = 'You have changed <b>'+_updatesCnt+'</b> record type'+((_updatesCnt>1)?'s':'');
+			_btnSave.style.display = 'inline-block';
+			_btnSave.onclick = _updateRecordTypeOnServer;
+		}else{
+			_btnSave.style.display = 'none';
+			_lblNotice.innerHTML = '';
+		}
+	}
+
 	//
 	// clear all changes with visibility and groups
 	//
 	function _clearGroupAndVisibilityChanges(withReload){
 		_updatesCnt = 0;
 		_oRecordType.rectype.defs = {}; //clear keeptrack
-		_btnSave.style.display = 'none';
-		_lblNotice.innerHTML = '';
 
-		if(_cloneHEU) top.HEURIST.rectypes = Hul.cloneObj(_cloneHEU);
+		_updateSaveNotice(_getGroupByIndex(tabView.get('activeIndex')));
+
+		if(_cloneHEU) { top.HEURIST.rectypes = Hul.cloneObj(_cloneHEU); }
 		_cloneHEU = null;
 
 		if(withReload){
@@ -791,11 +840,11 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 
 		var grpID = _getGroupByIndex(tabIndex);
 
-		var filterval = Dom.get('filter'+grpID).value;
-		var filtervis = Dom.get('filter'+grpID+'vis').checked?1:0;
+		_filterText = Dom.get('filter'+grpID).value;
+		_filterVisible = Dom.get('filter'+grpID+'vis').checked?1:0;
 
 		// Get filtered data
-		dsource.sendRequest(filterval+'|'+filtervis, {
+		dsource.sendRequest(_filterText+'|'+_filterVisible, {
 			success : dtable.onDataReturnInitializeTable,
 			failure : dtable.onDataReturnInitializeTable,
 			scope	  : dtable,
