@@ -390,10 +390,11 @@ function printAllComments() {
 	for (var cmtID in commentDetails) {
 		var commentDetail = commentDetails[cmtID];
 
-		if (comments[commentDetail.owner]) {
+		if (!commentDetail.owner) {
+			comments[cmtID] = new Comment(topLevelComment, commentDetail);
+		}else if (comments[commentDetail.owner]) {
 			comments[cmtID] = new Comment(comments[commentDetail.owner], commentDetail);
-		}
-		else {	/* ownerless comment is just a stub for grouping -- deprecated */
+		}else {	/* ownerless comment is just a stub for grouping -- deprecated */
 			comments[cmtID] = topLevelComment;
 		}
 	}

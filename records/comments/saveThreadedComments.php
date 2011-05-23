@@ -41,7 +41,10 @@ if ($cmt_id) {
 	$cmt = mysql_fetch_assoc($res);
 }
 else if ($rec_id) {
-	$inserts = array("cmt_Text" => $_POST["text"], "cmt_ParentCmtID" => $owner, "cmt_Added" => array("now()"), "cmt_OwnerUGrpID" => get_user_id(), "cmt_RecID" => $rec_id);
+	$inserts = array("cmt_Text" => $_POST["text"], "cmt_Added" => array("now()"), "cmt_OwnerUGrpID" => get_user_id(), "cmt_RecID" => $rec_id);
+	if ($owner) {
+		$inserts["cmt_ParentCmtID"] = $owner;
+	}
 
 	mysql__insert("recThreadedComments", $inserts);
 	if (mysql_error()) $error = mysql_error();
