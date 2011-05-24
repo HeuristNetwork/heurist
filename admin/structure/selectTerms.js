@@ -93,11 +93,11 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 					return;
 				}
 
-				existingTree = top.HEURIST.util.expandJsonStructure(_allTerms);
-				disabledTermsList = top.HEURIST.util.expandJsonStructure(_disTerms);
+				existingTree = Hul.expandJsonStructure(_allTerms);
+				disabledTermsList = Hul.expandJsonStructure(_disTerms);
 
 				///for filtered mode - to prevent enabling of originally disabled terms
-				disabledTermsListOriginal = top.HEURIST.util.expandJsonStructure(_disTerms);
+				disabledTermsListOriginal = Hul.expandJsonStructure(_disTerms);
 
 				//create trees
 				_treesInit();

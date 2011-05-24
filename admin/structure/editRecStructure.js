@@ -53,7 +53,6 @@ function EditRecStructure() {
 		'<label style="width:400px;text-align:center;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Click row to edit or Drag to change the order</label>'+
 		'<div style="float:right; text-align:right;min-width:360;">'+
 		'<input style="display:none;" type="button" id="btnSaveOrder" value="Save Order" onclick="onUpdateStructureOnServer(false)"/>'+
-		''+
 		'<input type="button" value="Insert Field" onclick="onAddNewDetail()"/>'+
 		//'<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/>'+
 		'</div></div>';
@@ -78,7 +77,7 @@ function EditRecStructure() {
 		_tabView.set("activeIndex", 0);
 /*
 			'<div id="previewpage">'+
-				'<input type=checkbox id=input-visibility onClick="top.HEURIST.util.setDisplayPreference(\'input-visibility\', this.checked? \'all\' : \'recommended\')" class=minimal>'+
+				'<input type=checkbox id=input-visibility onClick="Hul.setDisplayPreference(\'input-visibility\', this.checked? \'all\' : \'recommended\')" class=minimal>'+
 				'<label for=input-visibility>show optional fields</label>'+
 			'</div>'+
 				'<script>'+
@@ -428,7 +427,7 @@ function EditRecStructure() {
 						var callback = __updateAfterDelete;
 						var params = "method=deleteRTS&db="+db+"&rtyID="+rty_ID+"&dtyID="+dty_ID;
 						_isServerOperationInProgress = true;
-						top.HEURIST.util.getJsonData(baseurl, callback, params);
+						Hul.getJsonData(baseurl, callback, params);
 
 
 					}
@@ -536,14 +535,16 @@ function renderInputs() {
 	// Clear out any existing inputs
 
 	var allInputs = document.getElementById("all-inputs");
-	while (allInputs.childNodes.length > 0)
+	while (allInputs.childNodes.length > 0){
 		allInputs.removeChild(allInputs.childNodes[0]);
+	}
 
 	var showAllDiv = document.getElementById("show-all-div");
-	if (showAllDiv)
+	if (showAllDiv){
 		showAllDiv.parentNode.removeChild(showAllDiv);
+	}
 
-	var innerDims = top.HEURIST.util.innerDimensions(window);
+	var innerDims = Hul.innerDimensions(window);
 
 	if (rectype) {
 
@@ -578,7 +579,7 @@ function renderShowAll() {
 		showLink.href = "#";
 		showLink.appendChild(document.createTextNode("Show all fields"));
 		showLink.onclick = function() {
-			top.HEURIST.util.setDisplayPreference("input-visibility", "all");
+			Hul.setDisplayPreference("input-visibility", "all");
 			//Dom.get("input-visibility").checked = true;
 			return false;
 		};
@@ -785,11 +786,11 @@ function renderShowAll() {
 					//show filter jsontree
 					edt.parentNode.style.display = "block";
 
-					var edt2 = Dom.get('ed'+rst_ID+'_rst_TermIDTreeNonSelectableIDs');
+					var edt2 = Dom.get('ed'+rst_ID+'_rst_FilteredJsonTermIDTree');
 
 					recreateTermsPreviewSelector(rst_type,
-					(Hul.isempty(edt.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[9]:edt.value),   //dty_JsonTermIDTree
-					(Hul.isempty(edt2.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[10]:edt2.value)); //dty_TermIDTreeNonSelectableIDs
+					(Hul.isempty(edt2.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[9]:edt2.value),   //dty_JsonTermIDTree
+					(Hul.isempty(edt.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[10]:edt.value)); //dty_TermIDTreeNonSelectableIDs
 
 					//editedTermTree, editedDisabledTerms);
 
@@ -972,7 +973,7 @@ function renderShowAll() {
 				var vals = [];
 				var l;
 				for(l=0; l<_updatedFields.length; l++){
-					vals.push(encodeURIComponent(typedefs[dt_id][_updatedFields[l]]));
+					vals.push(typedefs[dt_id][_updatedFields[l]]);
 				}
 				orec.rectype.defs[rty_ID].dtFields[_updatedDetails[k]] = vals;
 			}
@@ -1009,14 +1010,14 @@ function renderShowAll() {
 				}
 				_isServerOperationInProgress = false;
 			};
-
+//DEBUG alert(str);
 			var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 								(top.HEURIST.database.name?top.HEURIST.database.name:''));
 			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 			var callback = updateResult;
 			var params = "method=saveRTS&db="+db+"&data=" + encodeURIComponent(str);
 			_isServerOperationInProgress = true;
-			top.HEURIST.util.getJsonData(baseurl, callback, params);
+			Hul.getJsonData(baseurl, callback, params);
 
 			if(needClose){
 				window.close();
@@ -1325,7 +1326,7 @@ function onAddNewDetail(){
 
 		var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 							(top.HEURIST.database.name?top.HEURIST.database.name:''));
-		popupSelect = top.HEURIST.util.popupURL(top, top.HEURIST.basePath +
+		popupSelect = Hul.popupURL(top, top.HEURIST.basePath +
 		"admin/structure/selectDetailType.html?rty_ID="+editStructure.getRty_ID()+"&db="+db,
 		{	"close-on-blur": false,
 			"no-resize": false,
@@ -1357,7 +1358,7 @@ function onDefineNewType(){
 							(top.HEURIST.database.name?top.HEURIST.database.name:''));
 		var url = top.HEURIST.basePath + "admin/structure/editDetailType.html?db="+db;
 
-		popupSelect = top.HEURIST.util.popupURL(top, url,
+		popupSelect = Hul.popupURL(top, url,
 		{	"close-on-blur": false,
 			"no-resize": false,
 			height: 430,
@@ -1427,28 +1428,6 @@ function onReqtypeChange(evt){
 }
 
 /**
-* Shows div on top with terms filter
-*/
-function showTermsTree(rst_ID, event){
-
-	if(Hul.isnull(selectTerms)){
-		selectTerms = new  SelectTerms(true, false); //filtered mode, in div
-	}
-	selectTerms.reinit(rst_ID, closeDivPopup1);
-
-	var border_top = $(window).scrollTop();
-
-	var my_div = $("#termsFilter");
-
-	my_div.css( {
-			left:'5px', top:(border_top+5)+'px', width:'97%', height:'95%'
-			//width:$(window).width()-20, height:$(window).height()-20
-	});
-
-	//_showDivPopupAt(my_div, [0, border_top]);
-}
-
-/**
 * Hides div with json tree filter
 */
 function closeDivPopup1(_allTerms, _disTerms, _dtyID){
@@ -1472,18 +1451,18 @@ function closeDivPopup1(_allTerms, _disTerms, _dtyID){
 }
 
 /**
-* Shows popup div with rectype pointer filter
+* Shows div on top with terms filter
 */
-function showPointerFilter(rst_ID, event){
+function showTermsTree(rst_ID, event){
 
-	if(Hul.isnull(selectRecordType)){
-		selectRecordType = new  SelectRecordType(true, false); //filtered mode, in div
+	if(Hul.isnull(selectTerms)){
+		selectTerms = new  SelectTerms(true, false); //filtered mode, in div
 	}
-	selectRecordType.reinit(rst_ID, closeDivPopup2);
+	selectTerms.reinit(rst_ID, closeDivPopup1);
 
 	var border_top = $(window).scrollTop();
 
-	var my_div = $("#pointerFilter");
+	var my_div = $("#termsFilter");
 
 	my_div.css( {
 			left:'5px', top:(border_top+5)+'px', width:'97%', height:'95%'
@@ -1513,6 +1492,29 @@ function closeDivPopup2(_values, _dtyID){
 			left:"-9999px"
 		});
 }
+
+/**
+* Shows popup div with rectype pointer filter
+*/
+function showPointerFilter(rst_ID, event){
+
+	if(Hul.isnull(selectRecordType)){
+		selectRecordType = new  SelectRecordType(true, false); //filtered mode, in div
+	}
+	selectRecordType.reinit(rst_ID, closeDivPopup2);
+
+	var border_top = $(window).scrollTop();
+
+	var my_div = $("#pointerFilter");
+
+	my_div.css( {
+			left:'5px', top:(border_top+5)+'px', width:'97%', height:'95%'
+			//width:$(window).width()-20, height:$(window).height()-20
+	});
+
+	//_showDivPopupAt(my_div, [0, border_top]);
+}
+
 
 
 // DEBUG
@@ -1566,14 +1568,14 @@ editStructure.initTabDesign(document.getElementById("ed_rty_ID").value);
 */
 function recreateTermsPreviewSelector(datatype, allTerms, disabledTerms ) {
 
-				allTerms = top.HEURIST.util.expandJsonStructure(allTerms);
-				disabledTerms = top.HEURIST.util.expandJsonStructure(disabledTerms);
+				allTerms = Hul.expandJsonStructure(allTerms);
+				disabledTerms = Hul.expandJsonStructure(disabledTerms);
 
 				if (typeof disabledTerms.join === "function") {
 						disabledTerms = disabledTerms.join(",");
 				}
 
-				if(allTerms !== null && allTerms!==undefined) {
+				if(!Hul.isnull(allTerms)) {
 					//remove old combobox
 					var el_sel;
 					/* = Dom.get(_id);
@@ -1589,11 +1591,11 @@ function recreateTermsPreviewSelector(datatype, allTerms, disabledTerms ) {
 
 					// add new select (combobox)
 					if(datatype === "enum") {
-						el_sel = top.HEURIST.util.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup['enum'], null);
+						el_sel = Hul.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup['enum'], null);
 						parent.appendChild(el_sel);
 					}
 					else if(datatype === "relmarker" || datatype === "relationtype") {
-						el_sel = top.HEURIST.util.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup.relation, null);
+						el_sel = Hul.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup.relation, null);
 						parent.appendChild(el_sel);
 					}
 				}

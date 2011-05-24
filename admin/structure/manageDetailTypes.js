@@ -222,8 +222,8 @@ function DetailTypeManager() {
 		_updateSaveNotice(dtg_ID);
 
 		var needFilterUpdate = false;
-		var el1 = Dom.get('filter'+dtg_ID)
-		var el2 = Dom.get('filter'+dtg_ID+'vis')
+		var el1 = Dom.get('filter'+dtg_ID);
+		var el2 = Dom.get('filter'+dtg_ID+'vis');
 
 		if(_filterForAll){
 			var newval = (_filterVisible === 1);
@@ -231,7 +231,7 @@ function DetailTypeManager() {
 			el1.value = _filterText;
 			el2.checked = (_filterVisible === 1);
 		}else{
-			_filterText = el1.value
+			_filterText = el1.value;
 			_filterVisible = el2.checked?1:0;
 		}
 		Dom.get('filter_forall'+dtg_ID).checked = _filterForAll;

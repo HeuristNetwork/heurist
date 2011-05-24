@@ -516,8 +516,14 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		if (previousPopup) {
 			prevX = parseInt(previousPopup.positionDiv.style.left);	if (prevX < 0) prevX = -1;
 			prevY = parseInt(previousPopup.positionDiv.style.top);	if (prevY < 0) prevY = -1;
-			prevChromeW = previousPopup.table.offsetWidth - previousPopup.popupBody.offsetWidth;
-			prevChromeH = previousPopup.table.offsetHeight - previousPopup.popupBody.offsetHeight;
+			if(previousPopup.table && previousPopup.popupBody){
+				prevChromeW = previousPopup.table.offsetWidth - previousPopup.popupBody.offsetWidth;
+				prevChromeH = previousPopup.table.offsetHeight - previousPopup.popupBody.offsetHeight;
+			}else{
+				prevChromeW = 6;	// 6px of handles
+				prevChromeH = 25;	// titlebar plus handles ... give or take
+			}
+
 		} else {
 			prevX = -1;
 			prevY = -1;
@@ -1453,4 +1459,3 @@ top.HEURIST.registerEvent(window, "resize", function() {
 	}
 	window.resizeTimeout = window.setTimeout(function() { top.HEURIST.util.autosizeAllElements(); window.resizeTimeout = 0; }, 250);
 });
-

@@ -33,6 +33,8 @@ function checkIfInteger(evt) {
 	}
 }
 
+
+
 //aliases
 var Dom = YAHOO.util.Dom,
 	Hul = top.HEURIST.util;
@@ -135,8 +137,8 @@ function DetailTypeEditor() {
 	*/
 	function _recreateTermsPreviewSelector( datatype, allTerms, disabledTerms ) {
 
-				allTerms = top.HEURIST.util.expandJsonStructure(allTerms);
-				disabledTerms = top.HEURIST.util.expandJsonStructure(disabledTerms);
+				allTerms = Hul.expandJsonStructure(allTerms);
+				disabledTerms = Hul.expandJsonStructure(disabledTerms);
 
 				if (typeof disabledTerms.join === "function") {
 						disabledTerms = disabledTerms.join(",");
@@ -151,10 +153,10 @@ function DetailTypeEditor() {
 					}
 					// add new select (combobox)
 					if(datatype === "enum") {
-						prev.appendChild(top.HEURIST.util.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup['enum'], null));
+						prev.appendChild(Hul.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup['enum'], null));
 					}
 					else if(datatype === "relmarker" || datatype === "relationtype") {
-						prev.appendChild(top.HEURIST.util.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup.relation, null));
+						prev.appendChild(Hul.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup.relation, null));
 					}
 				}
 	}
@@ -210,7 +212,7 @@ function DetailTypeEditor() {
 	var disTerms = Dom.get("dty_TermIDTreeNonSelectableIDs").value;
 	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-	top.HEURIST.util.popupURL(top, top.HEURIST.basePath +
+	Hul.popupURL(top, top.HEURIST.basePath +
 		"admin/structure/selectTerms.html?datatype="+type+"&all="+allTerms+"&dis="+disTerms+"&db="+db,
 		{
 		"close-on-blur": false,
@@ -257,7 +259,7 @@ function DetailTypeEditor() {
 		URL =  top.HEURIST.basePath + "admin/structure/selectRectype.html?type=" + type+"&db="+db;
 	}
 	if(type === "relmarker" || type === "resource" || type === "fieldsetmarker") {
-		top.HEURIST.util.popupURL(top, URL, {
+		Hul.popupURL(top, URL, {
 			"close-on-blur": false,
 			"no-resize": true,
 			height: 480,
@@ -512,7 +514,7 @@ function DetailTypeEditor() {
 			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 			var callback = _updateResult;
 			var params = "method=saveDT&db="+db+"&data=" + encodeURIComponent(str);
-			top.HEURIST.util.getJsonData(baseurl, callback, params);
+			Hul.getJsonData(baseurl, callback, params);
 		} else {
 			window.close(null);
 		}

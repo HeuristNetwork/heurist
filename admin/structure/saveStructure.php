@@ -181,11 +181,14 @@
 
 		case 'saveRTS':
 
+
+//DEBUG error_log(">>>>>>>".print_r($data,true));
+
 		if (!array_key_exists('rectype',$data) ||
 		!array_key_exists('colNames',$data['rectype']) ||
 		!array_key_exists('defs',$data['rectype']))
 		{
-			die("invalid data structure sent with saveRectype method call to saveStructure.php");
+			die("invalid data structure sent with updateRecStructure method call to saveStructure.php");
 		}
 
 		//$commonNames = $rtData['rectype']['colNames']['common'];

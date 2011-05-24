@@ -55,41 +55,16 @@ function RectypeManager() {
 	var tabView = new YAHOO.widget.TabView();
 
 
-	//public members
-	var that = {
-
-		init: function(){
-			_init();
-		},
-		editDetailType: _editDetailType,
-		doGroupSave: function(){ _doGroupSave(); },
-		doGroupDelete: function(){ _doGroupDelete(); },
-		doGroupCancel: function(){ _doGroupCancel(); },
-		hasChanges: function(){ return  (_updatesCnt>0); },
-		showInfo: function(rectypeID, event){ _showInfoToolTip( rectypeID, event ); },
-		hideInfo: function() { hideTimer = window.setTimeout(_hideToolTip, 1000); },
-
-		getClass: function () {
-			return _className;
-		},
-
-		isA: function (strClass) {
-			return (strClass === _className);
-		}
-
-	}
-
-	return that;
-
 	//
 	//
 	//
 	function _init()
 	{
-		var ind = 0;
+		var grpID,
+			ind = 0;
 		//
 		// init tabview with names of group
-		for (var grpID in top.HEURIST.rectypes.groups) {
+		for (grpID in top.HEURIST.rectypes.groups) {
 
 			var grpName = top.HEURIST.rectypes.groups[grpID].name;
 			var grpDescription = top.HEURIST.rectypes.groups[grpID].description;
@@ -191,8 +166,10 @@ function RectypeManager() {
 		needHideTip = true;
 		_hideToolTip();
 
+		var option;
+
 		var id = e.newValue.get("id");
-		if(id=="newGroup"){
+		if(id==="newGroup"){
 			//fill combobox on edit group form
 			var sel = Dom.get('edGroupId');
 
@@ -200,36 +177,38 @@ function RectypeManager() {
 			while (sel.length>0){
 				sel.remove(0);
 			}
-			var option = document.createElement("option");
+			option = document.createElement("option");
 			option.text = "new group";
 			option.value = "-1";
 			try {
 				// for IE earlier than version 8
 				sel.add(option, sel.options[null]);
-			}catch (e){
+			}catch (ex1){
 				sel.add(option,null);
 			}
 
 
-			for (var i in _groups)
+			var i;
+			for (i in _groups){
 			if(!Hul.isnull(i)){
 
 
-				var option = document.createElement("option");
+				option = document.createElement("option");
 				option.text = _groups[i].text;
 				option.value = _groups[i].value;
 				try {
 					// for IE earlier than version 8
 					sel.add(option, sel.options[null]);
-				}catch (e){
+				}catch (ex2){
 					sel.add(option,null);
 				}
+			}
 			} // for
 
 			Dom.get('edName').value = "";
 			Dom.get('edDescription').value = "";
 
-		}else if (e.newValue!=e.prevValue)
+		}else if (e.newValue!==e.prevValue)
 		{
 			initTabContent(e.newValue);
 		}
@@ -256,8 +235,8 @@ function RectypeManager() {
 		_updateSaveNotice(grpID);
 
 		var needFilterUpdate = false;
-		var el1 = Dom.get('filter'+grpID)
-		var el2 = Dom.get('filter'+grpID+'vis')
+		var el1 = Dom.get('filter'+grpID);
+		var el2 = Dom.get('filter'+grpID+'vis');
 
 		if(_filterForAll){
 			var newval = (_filterVisible === 1);
@@ -265,7 +244,7 @@ function RectypeManager() {
 			el1.value = _filterText;
 			el2.checked = (_filterVisible === 1);
 		}else{
-			_filterText = el1.value
+			_filterText = el1.value;
 			_filterVisible = el2.checked?1:0;
 		}
 		Dom.get('filter_forall'+grpID).checked = _filterForAll;
@@ -276,15 +255,16 @@ function RectypeManager() {
 
 		if(Hul.isnull(dt)) {
 
-			var arr = [];
+			var arr = [],
+				rectypeID;
 			//create datatable and fill it values of particular group
-			for (var rectypeID in top.HEURIST.rectypes.typedefs)
+			for (rectypeID in top.HEURIST.rectypes.typedefs)
 			{
-				if(rectypeID != "commomFieldNames" && rectypeID != "dtFieldNames") {
+				if(rectypeID !== "commomFieldNames" && rectypeID !== "dtFieldNames") {
 					var td = top.HEURIST.rectypes.typedefs[rectypeID];
 					var rectype = td.commonFields;
 					if(rectype[9].indexOf(grpID)>-1) {
-						arr.push([rectypeID, (rectype[7]==1),
+						arr.push([rectypeID, (Number(rectype[7])===1),
 						"<img src=\"../../common/images/16x16.gif\" style=\"background-image:url(../../common/images/rectype-icons/"+rectypeID+".png)\">",
 						rectype[0], rectype[1], rectype[8], rectype[9], null]);
 
@@ -348,10 +328,10 @@ function RectypeManager() {
 			{ key: "id", label: "<u>Code</u>", sortable:true, width:20, className:'left' },
 			{ key: "active", label: "Active", sortable:false, width:20, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
 			{ key: null, label: "Edit", sortable:false, width:20, formatter: function(elLiner, oRecord, oColumn, oData) {
-					elLiner.innerHTML = '<a href="#edit_rectype"><img src="../../common/images/edit_icon.png" width="16" height="16" border="0" title="Edit record type" /><\/a>'}
+					elLiner.innerHTML = '<a href="#edit_rectype"><img src="../../common/images/edit_icon.png" width="16" height="16" border="0" title="Edit record type" /><\/a>'; }
 			},
 			{ key: null, label: "Struc", sortable:false, width:20, formatter: function(elLiner, oRecord, oColumn, oData) {
-					elLiner.innerHTML = '<a href="#edit_sctructure"><img src="../../common/images/edit_icon.png" width="16" height="16" border="0" title="Edit record strcuture" /><\/a>'}
+					elLiner.innerHTML = '<a href="#edit_sctructure"><img src="../../common/images/edit_icon.png" width="16" height="16" border="0" title="Edit record strcuture" /><\/a>'; }
 			},
 			{ key: "info", label: "Info", sortable:false, width:20, formatter: function(elLiner, oRecord, oColumn, oData) {
 				var rectypeID = oRecord.getData('id');
@@ -380,7 +360,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 					if(Hul.isempty(str)){
 						str = "";
 					}else if (str.length>35) {
-						tit = str;11
+						tit = str;
 						str = str.substr(0,35)+"&#8230";
 					}
 					elLiner.innerHTML = '<label title="'+tit+'">'+str+'</label>';
@@ -389,7 +369,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 			{ key: "grp_id", label: "Group", sortable:false, width:70,
 				formatter:YAHOO.widget.DataTable.formatDropdown, dropdownOptions:_groups},
 			{ key: null, label: "Del", width:20, sortable:false, formatter: function(elLiner, oRecord, oColumn, oData) {
-					elLiner.innerHTML = '<a href="#delete"><img src="../../common/images/cross.png" border="0" title="Delete" /><\/a>'}
+					elLiner.innerHTML = '<a href="#delete"><img src="../../common/images/cross.png" border="0" title="Delete" /><\/a>'; }
 			}
 
 			];
@@ -423,19 +403,19 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 				var oRecord = dt.getRecord(elLink);
 				var rectypeID = oRecord.getData("id");
 
-				if(elLink.hash == "#edit_rectype") {
+				if(elLink.hash === "#edit_rectype") {
 					_onAddEditRecordType(rectypeID, 0);
 					// TO REMOVE editRectypeWindow(rectypeID);
-				} else if(elLink.hash == "#edit_sctructure") {
+				} else if(elLink.hash === "#edit_sctructure") {
 					_editRecStructure(rectypeID);
 
-				}else if(elLink.hash == "#delete"){
+				}else if(elLink.hash === "#delete"){
 					var iUsage = 0; //@todo oRecord.getData('usage');
 					if(iUsage<1){
-						if(_needToSaveFirst()) return;
+						if(_needToSaveFirst()) { return; }
 
 						var value = prompt("Enter \"DELETE\" if you really want to delete record type#"+rectypeID+"'"+oRecord.getData('name')+"'");
-						if(value == "DELETE") {
+						if(value === "DELETE") {
 
 							function _updateAfterDelete(context) {
 
@@ -444,9 +424,6 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 									alert("Record type #"+rectypeID+" was deleted");
 									top.HEURIST.rectypes = context.rectypes;
 									_cloneHEU = null;
-								} else {
-									// if error is property of context it will be shown by getJsonData
-									//alert("Deletion failed. "+context.error);
 								}
 							}
 
@@ -477,10 +454,10 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 				var oldValue = record.getData(column.key);
 				var recordIndex = this.getRecordIndex(record);
 				var recordKey = record.getData('recordKey');
-				if(newValue!=oldValue){
+				if(newValue!==oldValue){
 					//this.deleteRow(recordIndex);
 					var data = record.getData();
-					data['grp_id'] = newValue;
+					data.grp_id = newValue;
 
 					//remove destination table
 					_removeTable(newValue, false);
@@ -500,7 +477,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 				var elCheckbox = oArgs.target;
 				var oRecord = dt.getRecord(elCheckbox);
 				var data = oRecord.getData();
-				data['active'] = elCheckbox.checked;//?1:0;
+				data.active = elCheckbox.checked;//?1:0;
 
 				//var recindex = dt.getRecordIndex(oRecord);
 				//dt.updateRow(recindex, data);
@@ -520,7 +497,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 				var newvals = [(oRecord.getData('active')?1:0), grp_id];
 
 				//keep copy
-				if(Hul.isnull(_cloneHEU)) _cloneHEU = Hul.cloneObj(top.HEURIST.rectypes);
+				if(Hul.isnull(_cloneHEU)) { _cloneHEU = Hul.cloneObj(top.HEURIST.rectypes); }
 				//update HEURIST
 				var td = top.HEURIST.rectypes.typedefs[rty_ID];
 				var deftype = td.commonFields;
@@ -622,18 +599,21 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 				}
 
 				var forceHideTip = true;
+				var textTip;
+
 				if(!Hul.isnull(rectypeID)){
-					if(currentTipId != rectypeID) {
+					if(currentTipId !== rectypeID) {
 						currentTipId = rectypeID;
 
 						var recname = top.HEURIST.rectypes.names[rectypeID];
 						if(recname.length>40) { recname = recname.substring(0,40)+"..."; }
 						//find all records that reference this type
 						var details = top.HEURIST.rectypes.typedefs[rectypeID].dtFields;
-						var textTip = '<div style="padding-left:20px;padding-top:4px"><b>'+recname+'</b><br/>'+
+						textTip = '<div style="padding-left:20px;padding-top:4px"><b>'+recname+'</b><br/>'+
 						'<div style="padding-left:20px;padding-top:4px"><b>Fields:</b><br/><label style="color: #4499ff;">Click on field type to edit</label></div><ul>';
 
-						for(var detail in details) {
+						var detail;
+						for(detail in details) {
 							textTip = textTip + "<li><a href='javascript:void(0)' onClick=\"rectypeManager.editDetailType("+detail+")\">" + details[detail][0] + "</a></li>";
 						}
 						textTip = textTip + "</ul>";
@@ -673,8 +653,9 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 		if(!Hul.isnull(ndt)){
 
 			//find parent tab
+			var i;
 			var tab = Dom.get('tabContainer'+grpID);
-			for (var i = 0; i < tab.children.length; i++) {
+			for (i = 0; i < tab.children.length; i++) {
 				tab.removeChild(tab.childNodes[0]);
 			}
 			// need to refill the destionation table,
@@ -715,10 +696,12 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 		if(!context) {
 			alert("An error occurred trying to contact the database");
 		}else{
-			var error = false;
-			var report = "";
+			var error = false,
+				report = "",
+				ind;
 
-			for(var ind in context.result)
+			for(ind in context.result)
+			{
 			if(!Hul.isnull(ind)){
 				var item = context.result[ind];
 				if(isNaN(item)){
@@ -726,9 +709,10 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 					error = true;
 				}else{
 					recTypeID = Number(item);
-					if(report!="") report = report + ",";
+					if(!Null.isempty(report)) { report = report + ","; }
 					report = report + recTypeID;
 				}
+			}
 			}
 
 			if(!error) {
@@ -776,9 +760,11 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 		_cloneHEU = null;
 
 		if(withReload){
-			for(var ind in arrTables)
-			if(!Hul.isnull(ind)){
-				_removeTable( _getGroupByIndex(ind), true);
+			var ind;
+			for(ind in arrTables){
+				if(!Hul.isnull(ind)){
+					_removeTable( _getGroupByIndex(ind), true);
+				}
 			}
 		}
 	}
@@ -916,33 +902,8 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 			height: 430,
 			width: 650,
 			callback: function(context) {
-				/* NO ACTION REQUIRED HERE
-				if(context==null){
-				// alert("Edition is cancelled");
-				}else{
-				//refresh the local heurist
-				top.HEURIST.detailTypes = context.detailTypes;
-				_cloneHEU = null;
-
-				//update id
-				var dty_ID = Math.abs(Number(context.result[0]));
-
-				//detect what group
-				var grpID = top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[7];
-
-				//is it current tab
-				var ind = _getIndexByGroupId(grpID);
-
-				//refresh table
-				var ndt = arrTables[ind];
-				if(ndt!=null){
-				arrTables[ind] = null;
-				//if it is current tab force datatable refresh
-				if(tabView.get('activeIndex') == ind){
-				initTabContent(tabView.getTab(ind));
-				}
-				}
-				}
+				/*
+				NO ACTION REQUIRED HERE
 				*/
 			}
 		});
@@ -952,7 +913,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 	//
 	function _onAddEditRecordType(rty_ID, rtg_ID){
 
-		if(_needToSaveFirst()) return;
+		if(_needToSaveFirst()) { return; }
 
 		var url = top.HEURIST.basePath + "admin/structure/editRectype.html?db="+db;
 		if(rty_ID>0){
@@ -967,9 +928,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 			height: 620,
 			width: 620,
 			callback: function(context) {
-				if(Hul.isnull(context)){
-					// alert("Edition is cancelled");
-				}else{
+				if(!Hul.isnull(context)){
 
 					//update id
 					var rty_ID = Math.abs(Number(context.result[0]));
@@ -1030,7 +989,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 	//
 	function _doGroupSave()
 	{
-		if(_needToSaveFirst()) return;
+		if(_needToSaveFirst()) { return; }
 
 		var sel = Dom.get('edGroupId'),
 		name = Dom.get('edName').value,
@@ -1060,16 +1019,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 		//top.HEURIST.rectypes.groups[grpID] = grp;
 		var str = YAHOO.lang.JSON.stringify(orec);
 
-		//alert(str);
-
-		if(!Hul.isnull(str)){
-
-			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
-			var callback = _updateOnSaveGroup;
-			var params = "method=saveRTG&db="+db+"&data=" + encodeURIComponent(str);
-
-			Hul.getJsonData(baseurl, callback, params)
-		}
+		//DEBUG alert(str);
 
 		//make this tab active
 		function _updateOnSaveGroup(context){
@@ -1084,35 +1034,47 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 				if(grpID<0){
 					grpID = context['0'].result;
 					ind = _groups.length;
-					_addNewTab(ind, grpID, name, description)
+					_addNewTab(ind, grpID, name, description);
 				}else{
 					//update label
-					for (ind in _groups)
-					if(!Hul.isnull(ind) && _groups[ind].value==grpID){
+					for (ind in _groups){
+					if(!Hul.isnull(ind) && Number(_groups[ind].value)===Number(grpID)){
 						var tab = tabView.getTab(ind);
 						var el = tab._getLabelEl();
 						el.innerHTML = "<label title='"+description+"'>"+name+"</label>";
 						_groups[ind].text = name;
 						break;
-					}
+					}}
 				}
 				tabView.set("activeIndex", ind);
 			}
 		}
+
+
+		if(!Hul.isnull(str)){
+
+			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+			var callback = _updateOnSaveGroup;
+			var params = "method=saveRTG&db="+db+"&data=" + encodeURIComponent(str);
+
+			Hul.getJsonData(baseurl, callback, params);
+		}
+
+
 	}
 	//
 	//
 	//
 	function _doGroupDelete(){
 
-		if(_needToSaveFirst()) return;
+		if(_needToSaveFirst()) { return; }
 
 		var sel = Dom.get('edGroupId');
 		var grpID = sel.options[sel.selectedIndex].value;
 
-		if(grpID<0) return;
+		if(grpID<0) { return; }
 
-		var grp = top.HEURIST.rectypes.groups[grpID]
+		var grp = top.HEURIST.rectypes.groups[grpID];
 
 		if(!Hul.isnull(grp.types))
 		{
@@ -1123,9 +1085,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 				var ind;
 				//
 				function _updateAfterDeleteGroup(context) {
-					if(!Hul.isnull(context.error)){
-						// alert(context.error);
-					}else{
+					if(Hul.isnull(context.error)){
 						//remove tab from tab view and select 0 index
 						_groups.splice(ind, 1);
 						arrTables.splice(ind, 1);
@@ -1140,8 +1100,8 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 
 
 				//1. find index of tab to be removed
-				for (ind in _groups)
-				if(!Hul.isnull(ind) && _groups[ind].value==grpID){
+				for (ind in _groups){
+				if(!Hul.isnull(ind) && Number(_groups[ind].value)===Number(grpID)){
 
 					var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 					var callback = _updateAfterDeleteGroup;
@@ -1149,7 +1109,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 					Hul.getJsonData(baseurl, callback, params);
 
 					break;
-				}
+				}}
 
 			}
 		}
@@ -1167,9 +1127,10 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 	//
 	function _getIndexByGroupId(grpID){
 		var ind;
-		for (ind in _groups)
-		if(!Hul.isnull(ind) && _groups[ind].value===grpID){
-			return ind;
+		for (ind in _groups){
+			if(!Hul.isnull(ind) && _groups[ind].value===grpID){
+				return ind;
+			}
 		}
 		return -1;
 	}
@@ -1180,7 +1141,33 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 		return _groups[ind].value;
 	}
 
-};
+
+	//public members
+	var that = {
+
+		init: function(){
+			_init();
+		},
+		editDetailType: _editDetailType,
+		doGroupSave: function(){ _doGroupSave(); },
+		doGroupDelete: function(){ _doGroupDelete(); },
+		doGroupCancel: function(){ _doGroupCancel(); },
+		hasChanges: function(){ return  (_updatesCnt>0); },
+		showInfo: function(rectypeID, event){ _showInfoToolTip( rectypeID, event ); },
+		hideInfo: function() { hideTimer = window.setTimeout(_hideToolTip, 1000); },
+
+		getClass: function () {
+			return _className;
+		},
+
+		isA: function (strClass) {
+			return (strClass === _className);
+		}
+
+	};
+
+	return that;
+}
 
 //
 //
