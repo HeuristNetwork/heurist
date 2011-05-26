@@ -171,10 +171,12 @@
 					<li><a href="../import/importerFramework.php?format=BIB" name="auto-popup" title="Import bibliographic exchange format files">Import bibliographic</a></li>
 					<li><a href="../import/importerFramework.php?format=GEO" name="auto-popup" title="Import KML files">Import geographic</a></li>
 					<li><a href="../import/delimited/importRecordsFromDelimited.html" onClick="this.href = top.HEURIST.baseURL +'import/delimited/importRecordsFromDelimited.html?db=' + database;" title="Import a delimited text file of data for one record type" target="_blank">Import delimited</a></li>
-					<li class="admin-only"><a href="../import/delimited/updateDetailsFromDelimited.html" onClick="this.href = top.HEURIST.baseURL +'import/delimited/updateDetailsFromDelimited.html?db=' + database;" target="_blank" title="Update record details using delimited text">Detail updater</a></li>
-					<li class="admin-only"><a href="../export/delimited/exportDelimitedForRectype.html" target="_blank" onClick="this.href = top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database;" title="Export records as delimited text">Export delimited</a></li>
+                    <!-- separator-->
+					<li class="admin-only"><a href="../import/delimited/updateDetailsFromDelimited.html" onClick="this.href = top.HEURIST.baseURL +'import/delimited/updateDetailsFromDelimited.html?db=' + database;" target="_blank" title="Update record details using delimited text" class="seperator">Detail updater</a></li>
+                    <li class="admin-only"><a href="../export/delimited/exportDelimitedForRectype.html" target="_blank" onClick="this.href = top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database;" title="Export records as delimited text">Export delimited</a></li>
 					<li><a href="http://www.timemap.net/tmissues.php" target="_blank" title="Add a bug report directly into our bug tracking system">Report a bug</a></li>
-					<li class="admin-only"><a href="../admin/structure/editStructure.php" onClick="this.href = '../admin/adminMenu.php?db=' + database;" target="_blank" title="For administrators only" class="seperator">Administrator tools</a></li>
+					<!-- separator-->
+                    <li class="admin-only"><a href="../admin/structure/editStructure.php" onClick="this.href = '../admin/adminMenu.php?db=' + database;" target="_blank" title="For administrators only" class="seperator">Administrator tools</a></li>
 				</ul>
 			</li>
 			<li> <a href="../help/webhelp" target=_blank title="Overview and guides to the use of Heurist plus comprehensive detailed help"><b>Help</b></a> </li>
@@ -303,9 +305,14 @@
 			</li>
 			<li><span>View</span>
 				<ul>
-					<li><a href="#" id=result-style-list-link title="View results as a list" onClick="top.HEURIST.search.setResultStyle('list'); return false;">1 column</a></li>
+					<!--<li><a href="#" id=result-style-list-link title="View results as a list" onClick="top.HEURIST.search.setResultStyle('list'); return false;">1 column</a></li>
 					<li><a href="#" id=result-style-two-col-link title="View results in two columns" onClick="top.HEURIST.search.setResultStyle('two-col'); return false;">2 column</a></li>
-					<li><a href="#" id=result-style-thumbs-link title="View results as thumbnails" onClick="top.HEURIST.search.setResultStyle('thumbs'); return false;">Thumbnails</a></li>
+					<li><a href="#" id=result-style-thumbs-link title="View results as thumbnails" onClick="top.HEURIST.search.setResultStyle('thumbs'); return false;">Thumbnails-old</a></li>-->
+                    <li><a href="#" id=result-style-list-link-new title="View results as a list" onClick="top.HEURIST.search.setResultStyle('list');">List</a></li>
+                    <li><a href="#" id=result-style-list-link-new title="View results as a list" onClick="top.HEURIST.search.setResultStyle('two-col');">2 Column List</a></li>
+                    <li><a href="#" id=result-style-icons-link title="View results as icons" onClick="top.HEURIST.search.setResultStyle('icons');">Icons</a></li>
+                    <li><a href="#" id=result-style-thumbs-link-new title="View results as icons" onClick="top.HEURIST.search.setResultStyle('thumbnails');">Thumbnails</a></li>
+                    
 					<li><a href="#" title="Click to hide/show the legend" onClick="top.HEURIST.search.toggleLegend(); blur(); return false;" id="legend-link" class="seperator">legend</a></li>
 				</ul>
 			</li>
@@ -317,7 +324,7 @@
 				</ul>
 			</li>
 		</ul>
-	<div id=pageNavCount style="float:right"> <nobr> <span id=page-nav></span> <span id=resource-count></span> </nobr></div>
+	<div id=pageNavCount><div id=page-nav></div> <div id=resource-count></div></div>
 	</div>
 </div>
 <!-- page -->
@@ -348,7 +355,7 @@
 					<div id="noresult-search-status-search-web">Click <a href="#" onClick="top.HEURIST.search.launchWebSearch(); return false;">web search</a> to search the web</div>
 		</div>
 		</div>
-		<div id=result-rows></div>
+		<div id=result-rows class="icons"></div>
 	</div>
 	</div>
 	<!--</div>-->

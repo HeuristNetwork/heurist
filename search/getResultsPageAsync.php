@@ -218,7 +218,6 @@ function print_result($row) {
 		if ($i > 0) print ',';
 		print "'".str_replace("\n", '\\n', str_replace("\r", '', addslashes($val)))."'";
 	}
-	if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['display-preferences']['search-result-style'] == "thumbs") {
 		$thumb_url = "";
 		// 223  Thumbnail
 		// 222  Logo image
@@ -259,7 +258,7 @@ function print_result($row) {
 			}
 		}
 		print ",'$thumb_url'";
-	}
+	
 	print "]";
 
 	++$num;

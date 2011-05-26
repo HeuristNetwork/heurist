@@ -1,18 +1,20 @@
 
+
+
 .banner h2 {line-height: 7px;padding: 0 6px;}
 #page {left:315px;position:absolute}
-#page-inner {right:0px;left:0px; top:0;}
-body.popup #page-inner{top:30px; right:0; left:10px}
+#page-inner {right:0px;left:0px; top:0;overflow-y:auto}
+body.popup #page-inner{top:40px; right:5px; left:10px}
 #sidebar {border:1px solid #6A7C99; width:300px}
 #sidebar-inner {top:10px}
 
 #sidebar ul li a{color: #515151;text-decoration: none;}
 #sidebar ul li a:hover{text-decoration: underline;}
-#sidebar ul li { list-style:none}
+#sidebar ul li { list-style: none outside none; padding: 0 0 3px 1em;}
 #sidebar ul{padding:0 0 0 6px}
 #sidebar ul h3 {font-size: 11px;line-height: 2ex;color:#6A7C99}
 
-
+.yui-dt-liner {text-align:cente; padding:0}
 
 .yui-skin-sam .yui-dt table {width:100%}
 .yui-navset {width: 100%;}
@@ -25,4 +27,55 @@ tr.yui-dt-odd, tr.yui-dt-even {height:30px}
 .yui-dt-col-info .yui-dt-liner, 
 .yui-dt-col-active .yui-dt-liner {text-align:center}
 
+.yui-skin-sam .yui-dt table {
+    border: 1px solid #A4B4CB;
+}
 
+
+.yui-dt1-col-id,
+.yui-dt1-col-active,
+.yui-dt1-col-yui-dt-col14,
+.yui-dt1-col-yui-dt-col15 {width:40px}
+
+.yui-dt0-col-active .yui-dt-liner {width:40px}
+
+html body.popup div div#page-inner div#modelTabs.yui-navset div.yui-navset div.yui-content div div#tabContainer1.yui-dt table thead tr.yui-dt-first th#yui-dt1-th-active.center div#yui-dt1-th-active-liner.yui-dt-liner span.yui-dt-label {text-align:center}
+
+/*
+<td class="yui-dt1-col-info yui-dt-col-info" headers="yui-dt1-th-info ">
+<td class="yui-dt1-col-usage yui-dt-col-usage yui-dt-hidden" headers="yui-dt1-th-usage ">
+<td class="yui-dt1-col-icon yui-dt-col-icon" headers="yui-dt1-th-icon ">
+<td class="bold_column yui-dt1-col-name yui-dt-col-name yui-dt-sortable" headers="yui-dt1-th-name ">
+<td class="yui-dt1-col-description yui-dt-col-description" headers="yui-dt1-th-description ">
+<td class="yui-dt1-col-status yui-dt-col-status yui-dt-sortable" headers="yui-dt1-th-status ">
+<td class="yui-dt1-col-grp_id yui-dt-col-grp_id" headers="yui-dt1-th-grp_id ">
+<td class="yui-dt1-col-yui-dt-col23 yui-dt-col-yui-dt-col23 yui-dt-last" headers="yui-dt1-th-yui-dt-col23 ">*/
+
+		.tooltip {
+				position:absolute;
+				z-index:999;
+				left:-9999px;
+				top:0px;
+				background-color:#dedede;
+				padding:5px;
+				border:1px solid #fff;
+				min-width:200;
+			}
+
+			.yui-skin-sam .yui-dt td {
+				margin:0;padding:0;
+				border:none;
+				text-align:left;
+			}
+			.yui-skin-sam .yui-dt-list td {
+				border-right:none; /* disable inner column border in list mode */
+			}
+			.labeldiv{
+				display: inline-block;
+				width: 60px;
+				text-align: right;
+			}
+			.yui-dt table {
+    				width: 800;
+			}
+	

@@ -75,8 +75,8 @@
 	<li><a href="verification/recalcTitlesAllRecords.php?db=[dbname!]" target="adminFrame">Rebuild constructed titles (all records)</a></li>
 	<!-- : Also have capabuility for specific records and rectypes</p> -->
 	<li><a href="verification/listRecordPointerErrors.php?db=[dbname!]" target="adminFrame">Check for invalid record pointers</a></li>
-	<li><a href="verification/listDuplicateRecords.php?fuzziness=10&amp;db=[dbname!]" target="adminFrame">Find/eliminate duplicate records (fuzziness 10, change in URL))</a></li>
-	<li><a href="../search/search.html?q=_BROKEN_&amp;w=all&amp;db=[dbname!]" target="adminFrame">Find records with broken URLs (in the main URL pointer) RETRIEVES 18k RECORDS, MANY OK</a></li>
+	<li><a href="verification/listDuplicateRecords.php?fuzziness=10&amp;db=[dbname!]" target="adminFrame">Find/eliminate duplicate records</a></li>
+	<li><a href="../search/search.html?q=_BROKEN_&amp;w=all&amp;db=[dbname!]" target="_blank">Find records with broken URLs (in the main URL pointer)</a></li>
 	<!-- <span class="nw"> NOT WORKING</span> YET-->
 	<!--<li><a href="structure/editRectypeConstraints.php?db=[dbname!]">Manage record relationship constraints</a> <span class="nw"> NOT WORKING</span></li>-->
 	<!-- <span class="nw"> NOT WORKING</span> YET -->
@@ -104,16 +104,9 @@
 </div>
 </div>
 <div id="page">
-	<!--<div class="banner">
-		<div style="display:table; height:25px">
-
-		</div>
-	</div>-->
 	<div id="page-inner">
 	<!-- admin content -->
-    <iframe width="100%" height="100%" id="adminFrame" name="adminFrame" frameborder="0">
-            </iframe>
-
+    <iframe width="100%" height="100%" id="adminFrame" name="adminFrame" frameborder="0"></iframe>
 	</div>
 </div>
 </body>

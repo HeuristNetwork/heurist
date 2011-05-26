@@ -168,11 +168,12 @@ top.HEURIST.search = {
 	},
 
 	renderResult: function(style, res) {
-		if (style == "list"  ||  style == "two-col") {
-			return top.HEURIST.search.renderResultRow(res);
-		} else if (style == "thumbs") {
-			return top.HEURIST.search.renderResultThumb(res);
-		}
+		document.getElementById("result-rows").className = style;
+		//if (style == "list"  ||  style == "two-col") {
+			return top.HEURIST.search.renderResultRecord(res);
+		//} else if (style == "thumbs") {
+		//	return top.HEURIST.search.renderResultRecord(res);
+		//}
 	},
 
 	renderResultRow: function(res) {
@@ -350,6 +351,94 @@ top.HEURIST.search = {
 		"</div>";
 		return html;
 	},
+	
+	// new render common result record
+	renderResultRecord: function(res) {
+
+		/* res[0]   res[1]        res[2]  res[3]   res[4]       res[5]     res[6]        */
+		/* bkm_ID, bkm_UGrpID, rec_ID, rec_URL, rec_RecTypeID, rec_Title, rec_OwnerUGrpID */
+
+		/* res[7]          res[8]                 res[9]         res[10]        res[11]   */
+		/* rec_NonOwnerVisibility, rec_URLLastVerified, rec_URLErrorMessage, bkm_PwdReminder, thumbnailURL */
+
+		var pinAttribs = res[0]? "class='logged-in-only bookmarked' title='Bookmarked - click to see details'"
+		                       : "class='logged-in-only unbookmarked' title='Bookmark this record'";
+
+		var href = res[3];
+		var linkText = res[5] + " ";
+		var wgID = parseInt(res[6]);
+
+		var linkTitle = "";
+		var wgHTML = "";
+		var wgColor = "";
+		if (res[6]  &&  res[6] != "0" && res[6] != res[1]) {	// check if this is a usergroup owned record
+			linkTitle = "Owned by " + (top.HEURIST.workgroups[wgID] ? "workgroup " + top.HEURIST.workgroups[wgID].name:top.HEURIST.allUsers[wgID][0]) + " - " + (res[7]==1? "hidden" : "read-only") + " to others";
+			wgHTML = res[6];
+			wgColor = " style='color:" + ((res[7]==1)? "red" : "green") + "'";
+		}
+
+		var verified_date = null;
+		if (res[8]) {
+			// locale-independent date parsing (early Webkit uses the local format)
+			var dateBits = res[8].match(/^([^-]+)-([^-]+)-([^-]+) ([^:]+):([^:]+):([^.]*)/);
+			verified_date = new Date();
+			verified_date.setFullYear(dateBits[1], dateBits[2], dateBits[3]);
+			verified_date.setHours(dateBits[4], dateBits[5], dateBits[6], 0);
+		}
+
+		if (href) {
+			if (! href.match(/^[^\/\\]*:/))
+				href = "http://" + href;
+			href = href.htmlEscape();
+		}
+		else if (res[4] == 2) {
+			// special handling for notes rectype: link to view page if no URL
+			href = top.HEURIST.basePath+ "records/view/renderRecordData.php?bib_id="+res[2] +(top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
+		}
+
+		var userPwd;
+		if (res[10]) userPwd = "style='display:inline;cursor:pointer;' user_pwd='"+res[10].htmlEscape()+"'";
+		else userPwd = "style='display:none;'";
+
+		var rectypeImg = "style='background-image:url("+ top.HEURIST.basePath+"common/images/rectype-icons/" + (res[4]? res[4] : "blank") + ".png)'";
+		var rectypeThumb = "style='background-image:url("+ top.HEURIST.basePath+"common/images/rectype-icons/thumb/th_" + (res[4]? res[4] : "blank") + ".png)'";
+		var rectypeTitle = "Click to see details";
+		if (top.HEURIST.rectypes.names[parseInt(res[4])])
+			rectypeTitle = top.HEURIST.rectypes.names[parseInt(res[4])] + " - click to see details";
+
+		var html =
+		"<div class=recordDiv title='Select to view, Ctrl-or Shift- for multiple select' bkmk_id='"+res[0]+"' bib_id="+res[2]+" rectype="+res[4]+">" +
+		"<input style='display:none' type=checkbox name=bib[] onclick=top.HEURIST.search.resultItemOnClick(this) class='logged-in-only' title='Check box to apply Actions to this record'>"+
+		"<div class='recTypeThumb' "+rectypeThumb+" ></div>" +
+		(res[11] && res[11].length ? "<div class='thumbnail' style='background-image:url("+res[11]+")' ></div>":"") +
+		   "<div class=recordIcons  bkmk_id='"+res[0]+"' bib_id="+res[2]+">" +
+		   "<img src='"+ top.HEURIST.basePath+"common/images/16x16.gif' title='"+rectypeTitle.htmlEscape()+"' "+rectypeImg+" class='rft'>"+
+		   "<img src='"+ top.HEURIST.basePath+"common/images/13x13.gif' " + pinAttribs + ">"+
+		   "<span class='wg-id-container logged-in-only'>"+
+		   "<span class=wg-id title='"+linkTitle.htmlEscape()+"' " + (wgColor? wgColor: "") + ">" + (wgHTML? wgHTML.htmlEscape() : "") + "</span>"+
+		   "</span>"+
+		   "<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/lock.png' " + userPwd + ">"+
+		    "</div>" +
+			"<div class='recordTitle' title='"+linkText+"'>" + (res[3].length ? "<a href='"+res[3]+"' target='_blank'>"+linkText + "</a>" : linkText ) + "</div>" +
+		    "<div class=mini-tools >" +
+		    	"<div id='links'>" +
+				"<span id='rec_edit_link' title='Click to edit'><a href='"+
+			top.HEURIST.basePath+ "records/edit/editRecord.html?sid=" +
+			top.HEURIST.search.sid + "&bib_id="+ res[2] +
+			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
+			"' target='_blank'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png'/>edit</a></span>" +
+				(res[3].length ? "<span><a href='"+res[3]+"' target='_blank'><img src='"+ top.HEURIST.basePath+"common/images/external_link_16x16.gif' title='go to link'>visit</a></span>" : "") +
+						"<span id='rec_explore_link' title='Click to explore'><a href='/cocoon" +top.HEURIST.basePath +'relbrowser/main/item/' + res[2] +
+					(top.HEURIST.database && top.HEURIST.database.name ? '/?db=' + top.HEURIST.database.name : '') +
+					"' target='_blank'><img src='"+	top.HEURIST.basePath + "common/images/explore.png'/>explore</a></span>" +
+				"<span id='spacer'><img src='"+	top.HEURIST.basePath + "common/images/16x16.gif'/></span>" +
+				"</div>" +
+		   "</div>" +
+
+		"</div>";
+		return html;
+	},
+	
 
 	displaySearchParameters: function() {
 		// Transfer query components to their form elements
@@ -523,7 +612,7 @@ top.HEURIST.search = {
 
 		var resultsDiv = document.getElementById("result-rows");
 
-		if (style == "list"  ||  style == "thumbs") {
+		if (style == "list"  ||  style == "thumbnails" || style =="icons") {
 			resultsDiv.innerHTML = innerHTML;
 		} else if (style = "two-col") {
 			resultsDiv.innerHTML = "<div class=two-col-cell><div class=two-col-inner-cell-left>" + leftHTML + "</div></div><div class=two-col-cell><div class=two-col-inner-cell-right>" + rightHTML + "</div></div>";
@@ -547,12 +636,12 @@ top.HEURIST.search = {
 			top.HEURIST.registerEvent(result, "dblclick", (top.HEURIST.util.getDisplayPreference("double-click-action") == "edit") ? top.HEURIST.search.edit : top.HEURIST.search.resultItemOnClick);
 		}
 
-		var thumbs = $(".result_thumb", resultsDiv).get();
+		var thumbs = $(".recordDiv", resultsDiv).get();
 		for (var i=0; i < thumbs.length; ++i) {
 			var result = thumbs[i];
 			var pin_img = $(".unbookmarked", result)[0];
 			var thumb_img = $(".thumbnail, .no-thumbnail, .rec_title", result)[0];
-			var rec_title = $(".rec_title", result)[0];
+			var rec_title = $(".recordTitle", result)[0];
 
 			top.HEURIST.registerEvent(result, "click", top.HEURIST.search.resultItemOnClick);
 
@@ -579,23 +668,15 @@ top.HEURIST.search = {
 	},
 
 	setResultStyle: function(style) {
+		top.HEURIST.util.setDisplayPreference("search-result-style", style);
+		document.getElementById("result-rows").className = style;
+		top.HEURIST.search.gotoResultPage(top.HEURIST.search.currentPage);
 		for (var i in top.HEURIST.search.infos) {  //closes all infos
 		var info = top.HEURIST.search.infos[i];
   		info.parentNode.removeChild(info);
 		delete top.HEURIST.search.infos[i];
 		}
-		var current_style = top.HEURIST.util.getDisplayPreference("search-result-style");
-		if (style !== current_style) {
-			top.HEURIST.util.setDisplayPreference("search-result-style", style);
-			if (top.HEURIST.search.results.totalRecordCount) {
-				if (style == "thumbs") {
-					top.HEURIST.search.loadSearch();
-				} else {
-					top.HEURIST.search.gotoResultPage(top.HEURIST.search.currentPage);
-				}
-			};
-		}
-	},
+},
 
 	trimLinkText: function(link_elt, offset_width) {
 		// If the link text is too long, it wraps onto another line.  Abbreviate it.
@@ -674,35 +755,32 @@ top.HEURIST.search = {
 			start = 1; finish = pageCount;
 		}
 
-		innerHTML = "<span class=nav>";
 		if (firstRes > 1) {
-			innerHTML += "<a id=prev_page href=# onclick=\"top.HEURIST.search.gotoPage('prev'); return false;\">previous&nbsp;page</a>&nbsp;&nbsp;";
+			innerHTML += "<a id=prev_page href=# onclick=\"top.HEURIST.search.gotoPage('prev'); return false;\"><img src=\'../common/images/previous_page.png\'></a>";
 		} else if (pageCount > 1) {	// don't display this, but let it affect the layout
-			innerHTML += "<a id=prev_page href=# style=\"visibility: hidden;\">previous&nbsp;page</a>&nbsp;&nbsp;";
+			innerHTML += "<a id=prev_page href=# style=\"visibility: hidden;\"><img src=\'../common/images/previous_page.png\'></a>";
 		}
 
 		if (start != 1) {
-			innerHTML += " <a href=# id=p0 onclick=\"top.HEURIST.search.gotoPage(0); return false;\">1</a> ... ";
+			innerHTML += "<a href=# id=p0 onclick=\"top.HEURIST.search.gotoPage(0); return false;\">1</a> ... ";
 		}
 		for (i=start; i <= finish; ++i) {
 			var cstring = (i == currentPage+1)? "class=active " : "";
-			innerHTML += " <a href=# id=p"+(i-1)+" "+cstring+"onclick=\"top.HEURIST.search.gotoPage("+(i-1)+"); return false;\">"+i+"</a> ";
+			innerHTML += "<a href=# id=p"+(i-1)+" "+cstring+"onclick=\"top.HEURIST.search.gotoPage("+(i-1)+"); return false;\">"+i+"</a>";
 		}
 		if (finish != pageCount) {
-			innerHTML += " ... <a href=# id=p"+(pageCount-1)+" onclick=\"top.HEURIST.search.gotoPage("+(pageCount-1)+"); return false;\">"+pageCount+"</a> ";
+			innerHTML += " ... <a href=# id=p"+(pageCount-1)+" onclick=\"top.HEURIST.search.gotoPage("+(pageCount-1)+"); return false;\">"+pageCount+"</a>";
 		}
 		if (lastRes < totalRecordCount) {
-			innerHTML += "&nbsp;&nbsp;<a id=next_page href=# onclick=\"top.HEURIST.search.gotoPage('next'); return false;\">next&nbsp;page</a>";
+			innerHTML += "<a id=next_page href=# onclick=\"top.HEURIST.search.gotoPage('next'); return false;\"><img src=\'../common/images/next_page.png\'></a>";
 		} else if (pageCount > 1) {
-			innerHTML += "&nbsp;&nbsp;<a id=next_page href=# style=\"visibility: hidden;\">next&nbsp;page</a>";
+			innerHTML += "<a id=next_page href=# style=\"visibility: hidden;\"><img src=\'../common/images/next_page.png\'></a>";
 			// innerHTML += "&nbsp;&nbsp;<span id=next_page>next&nbsp;page</span>";
 		}
 
 		if (pageCount > 1  &&  totalRecordCount < top.HEURIST.search.pageLimit) {
-			innerHTML += "&nbsp;&nbsp;<a href=# onclick=\"top.HEURIST.search.showAll(); return false;\">show&nbsp;all</a>";
+			innerHTML += "<a href=# onclick=\"top.HEURIST.search.showAll(); return false;\">show&nbsp;all</a>";
 		}
-
-		innerHTML += "</span>";
 
 		if (document.getElementById("page-nav"))
 			document.getElementById("page-nav").innerHTML = innerHTML;
@@ -885,7 +963,7 @@ top.HEURIST.search = {
 			top.HEURIST.search.deselectResultItem(bib_id);
 		}else if (bib_id) {
 			if (!resultDiv) {
-				resultDiv = $('div[class~=result_thumb] , div[class~=result_row]').filter('div[bib_id='+ bib_id +']').get(0);
+				resultDiv = $('div[class~=recordDiv]').filter('div[bib_id='+ bib_id +']').get(0);
 			}
 			var cb = resultDiv.getElementsByTagName("INPUT");
 			if (cb[0] && cb[0].name == "bib[]") {
@@ -1438,7 +1516,7 @@ top.HEURIST.search = {
 	},
 
 	selectItem: function(bib_id) {
-		resultDiv = $('div[class~=result_thumb] , div[class~=result_row]').filter('div[bib_id='+ bib_id +']').get(0);
+		resultDiv = $('div[class~=recordDiv]').filter('div[bib_id='+ bib_id +']').get(0);
 		var cb = resultDiv.getElementsByTagName("INPUT");
 		if (cb[0] && cb[0].name == "bib[]") {
 			cb = cb[0];
@@ -2204,7 +2282,7 @@ function removeCustomAlert() {
 			units: [
 				{ position: 'top', height: 50, body: 'masthead', header: '', gutter: '0', collapse: false, resize: false },
 				{ position: 'bottom', height: 10, resize: false, body: 'footer', gutter: '0', collapse: false },
-				{ position: 'left', width: leftWidth, resize: true, useShim: true, body: 'sidebar', gutter: '0 5px 0 5px', collapse: false, close: false, collapseSize: 0, scroll: false, animate: false },
+				{ position: 'left', width: leftWidth, resize: true, useShim: true, body: 'sidebar', gutter: '0 5px 5px 5px', collapse: false, close: false, collapseSize: 0, scroll: false, animate: false },
 				{ position: 'center', body: 'center-panel', gutter: '0 10px 0 0', animate: false, collapse:true }
 			]
 		});
@@ -2339,7 +2417,7 @@ function removeCustomAlert() {
 					top.HEURIST.util.setDisplayPreference("leftWidth", 180);
 					top.HEURIST.util.setDisplayPreference("sidebarPanel","open");
 				});
-
+	
 	});
 
 	_tabView = new YAHOO.widget.TabView('applications', { activeIndex: viewerTabIndex });
@@ -2352,3 +2430,5 @@ function removeCustomAlert() {
 	_tabView.getTab(viewerTabIndex);
 	if (viewerTabIndex == 2){top.HEURIST.search.mapSelected()}; //initialises map
 	_tabView.addListener('activeTabChange',handleActiveTabChange);
+	
+	
