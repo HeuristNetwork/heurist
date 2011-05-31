@@ -111,14 +111,14 @@ function updateRecord($bibID) {
 		return;
 	}
 	$bib = mysql_fetch_assoc($res);
-error_log("save record dtls POST ".print_r($_POST,true));
+//error_log("save record dtls POST ".print_r($_POST,true));
 	// Upload any files submitted ... (doesn't have to take place right now, but may as well)
 	uploadFiles();
 
 	// Get the existing records details and compare them to the incoming data
 	$bibDetails = getBiblioDetails($bibID);
 	$bibDetailUpdates = array();
-error_log("save record dtls ".print_r($bibDetails,true));
+//error_log("save record dtls ".print_r($bibDetails,true));
 	foreach ($bibDetails as $eltName => $bds) {
 		if (! preg_match("/^type:\\d+$/", $eltName)) {
 			// element does not have a correctly-formatted name (shouldn't happen)

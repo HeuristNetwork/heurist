@@ -258,7 +258,6 @@ function print_result($row) {
 			}
 		}
 		print ",'$thumb_url'";
-	
 	print "]";
 
 	++$num;

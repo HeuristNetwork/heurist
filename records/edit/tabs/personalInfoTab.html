@@ -96,6 +96,7 @@
 		<script>
 
 
+			var db = (top.HAPI.database || top.HEURIST.database.name || top.HEURIST.parameters.db);
 			var tags = document.getElementById("tags");
 			tags.value = tags.defaultValue = top.HEURIST.edit.record.tagString  ||  "";
 

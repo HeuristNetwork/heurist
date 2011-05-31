@@ -665,7 +665,7 @@ option {padding-left:15px;background-color: #FFF;}
 div#tabbar {z-index:9;clear:left;margin:0;vertical-align:bottom;position:relative;display:block;}
 div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../images/black_gradient.png);background-repeat: repeat-x;top:5px;clear:both}
 #viewsButton {position:absolute; top:3px; left:0px; z-index:1000;}
-#tabs, #quicklink-cell, #views {
+#tabs, #quicklink-cell, #views, ul.menu {
 	list-style:none;
 	list-style-image:none;
 	padding-top:0px;
@@ -674,7 +674,7 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 	display:block;
 	height:20px;
 }
-#tabs li, #quicklink-cell li, #views li {
+#tabs li, #quicklink-cell li, #views li, ul.menu li {
 	display:block;
 	float:left;
 	height:15px;
@@ -688,7 +688,7 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 }
 
 #quicklink-cell li {color:#6A7C99; z-index:20000}
-#tabs>li:hover{
+#tabs>li:hover, ul.menu>li:hover{
 	background-color:RGBA(0,0,0,0.2);
 	color:#FFF;
 	border-color:#ccc;
@@ -700,21 +700,21 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 	color:#FFF;
 	/*border:1px solid #ccc;*/
 }
-#tabs li a{color:#CCC; font-weight:normal}
-#tabs li a:hover, #quicklink-cell li:hover a, #views li:hover a {color:#FFF; text-decoration:none; font-weight:normal}
+#tabs li a, ul.menu li a{color:#CCC; font-weight:normal}
+#tabs li a:hover, ul.menu li a:hover,#quicklink-cell li:hover a, #views li:hover a {color:#FFF; text-decoration:none; font-weight:normal}
 #quicklink-cell li:hover ul li a, #views li:hover ul li a {color:#CCC}
 #quicklink-cell li a:hover, #views li a:hover { text-decoration:none}
-#tabs li span, #quicklink-cell li span {
+#tabs li span, ul.menu li span, #quicklink-cell li span {
 	display:block;
 	height:15px;
 	background:none;
 	padding:0;
 }
 #views li span {background-image:url(../images/b_menuOff.png); background-repeat:no-repeat; background-position:left;padding:0 0 0 22px; display:block;	height:15px;line-height:15px}
-#tabs li:hover span, #quicklink-cell li:hover span, #views li:hover span {
+#tabs li:hover span, ul.menu li:hover span, #quicklink-cell li:hover span, #views li:hover span {
 	height:15px;
 }
-#tabs li ul, #quicklink-cell li ul, #views li ul {
+#tabs li ul, ul.menu li ul, #quicklink-cell li ul, #views li ul {
 	-webkit-transition: opacity 0.15s linear, visibility 0.15s linear;
 	-moz-transition: opacity 0.15s linear, visibility 0.15s linear;
 	-o-transition: opacity 0.15s linear, visibility 0.15s linear;
@@ -737,7 +737,7 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 	visibility:hidden;
 }
 
-#tabs li:hover>ul, #quicklink-cell li:hover>ul, #views li:hover>ul {
+#tabs li:hover>ul, ul.menu li:hover>ul, #quicklink-cell li:hover>ul, #views li:hover>ul {
 	/*display:block;*/
 	opacity: 1;
 	visibility: visible;
@@ -746,7 +746,7 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 #quicklink-cell li ul {
 	text-align:center:
 }
-#tabs li ul li, #quicklink-cell li ul li, #views li ul li {
+#tabs li ul li, ul.menu li ul li, #quicklink-cell li ul li, #views li ul li {
 	margin:0;
 	padding:0;
 	list-style:none;
@@ -758,7 +758,7 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 	font-size: 10px;
 	color:#CCC;
 }
-#tabs li ul li a, #tabs li.active ul li a, #quicklink-cell li ul li a, #views li ul li a {
+#tabs li ul li a, #tabs li.active ul li a, ul.menu li ul li a, ul.menu li.active ul li a, #quicklink-cell li ul li a, #views li ul li a {
 	font-size:1.1em;
 	color:#CCC;
 	display:block;
@@ -769,7 +769,7 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 	height:auto;
 	border:none;
 }
-#tabs li ul li a:hover, #tabs li.active ul li a:hover, #quicklink-cell li ul li a:hover, #views li ul li a:hover {
+#tabs li ul li a:hover, #tabs li.active ul li a:hover, ul.menu li ul li a:hover, ul.menu li.active ul li a:hover, #quicklink-cell li ul li a:hover, #views li ul li a:hover {
 	background-color:#000;
 	text-decoration:none;
 	color:#FFF;
@@ -778,4 +778,12 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 #views ul li a{background-repeat:no-repeat !important; background-position:5px 3px !important; padding-left:28px !important}
 
 #tabs li ul li a.seperator, #tabs li.active ul li a.seperator, #quicklink-cell li ul li a.seperator, #views li ul li a.seperator {border-top:1px solid #666;}
-
+#results div.collapsed{height:20px;overflow:hidden;}
+ul.menu li ul li.disabled{display:none;}
+ul.menu li ul li a{color:#444;}
+ul.menu li ul li.checked a{color:#CCC;}
+.recordDiv {display:none !important ;}
+.recordDiv.lnk{display:inline-block !important;}
+#results-level0 .recordDiv{display:inline-block !important;}
+.recordDiv.filtered{display:none !important;}
+#results-level0 .recordDiv.filtered{display:none !important;}
