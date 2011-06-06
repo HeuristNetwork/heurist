@@ -455,17 +455,13 @@ top.HEURIST.edit = {
 	},
 
 
-	getRecFieldRequirements: function(rectypeID) {
-			return top.HEURIST.rectypes.typedefs[rectypeID].dtFields;
-	},
-
 	getDetailTypeBasetype: function(detailTypeID) {
 			return top.HEURIST.detailTypes.typedefs[detailTypeID].commonFields[2];
 	},
 
 	getNonRecDetailTypedefs: function(rectypeID) {
 		var non_recDTs = {};
-		var rfrs = top.HEURIST.edit.getRecFieldRequirements(rectypeID);
+		var rfrs = top.HEURIST.rectypes.typedefs[rectypeID].dtFields;
 		for (var dt_id in top.HEURIST.detailTypes.typedefs) {
 			if (dt_id == "commomFieldNames") continue;
 			var skip = false;
@@ -705,7 +701,7 @@ top.HEURIST.edit = {
 	},
 
 	createInputsForRectype: function(rectypeID, fieldValues, container) {
-		var rfrs = top.HEURIST.edit.getRecFieldRequirements(rectypeID);
+		var rfrs = top.HEURIST.rectypes.typedefs[rectypeID].dtFields;
 		if (! container.ownerDocument) {
 			var elt = container;
 			do { elt = elt.parentNode; } while (elt.nodeType != 9 /* DOCUMENT_NODE */);
@@ -738,7 +734,7 @@ top.HEURIST.edit = {
 	},
 
 	createInputsNotForRectype: function(rectypeID, fieldValues, container) {
-		var rfrs = top.HEURIST.edit.getRecFieldRequirements(rectypeID);
+		var rfrs = top.HEURIST.rectypes.typedefs[rectypeID].dtFields;
 
 		var inputs = [];
 		for (var dtID in fieldValues) {

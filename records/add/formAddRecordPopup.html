@@ -47,7 +47,10 @@ window.HEURIST.edit = {
 				return;	// submit failed ... up to the individual form handlers to display messages
 			}
 			top.HEURIST.registerEvent(editFrame, "load", function() {
-				window.close(window.HEURIST.record.title, window.HEURIST.record.bdValuesByType, window.HEURIST.record.bibID);
+				var record = (window.HEURIST.record ? window.HEURIST.record :
+								(window.HEURIST.edit.record ? window.HEURIST.edit.record : null));
+				if (!record) return;
+				window.close(record.title, record.bdValuesByType, record.bibID);
 			});
 
 			(form.heuristSubmit || form.submit)();

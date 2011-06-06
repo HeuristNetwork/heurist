@@ -89,7 +89,6 @@ function fill_title_mask($mask, $rec_id, $rt) {
 	}
 	$replacements['[['] = '[';
 	$replacements[']]'] = ']';
-// error_log(print_r($replacements, 1));
 
 	$title = array_str_replace(array_keys($replacements), array_values($replacements), $mask);
 	if (! preg_match('/^\\s*[0-9a-z]+:\\S+\\s*$/i', $title)) {	// not a URI
@@ -144,7 +143,7 @@ function _title_mask__check_field_name($field_name, $rt) {
 
 	if ($dot_pos == 0  ||  $dot_pos == strlen($field_name)-1)
 		return 'Illegal field name (superfluous dot)';
-
+		//find any starting numbers stripping following charaters upto a fullstop
 	if (preg_match('/^(\\d+)\\s*(?:-[^.]*?)?\\.\\s*(.+)$/', $field_name, $matches)) {
 		// field number has been supplied
 		if (! array_key_exists($matches[1], $rdr[$rt])) {
@@ -153,7 +152,7 @@ function _title_mask__check_field_name($field_name, $rt) {
 
 		$inner_rec_type = $rdr[$rt][$matches[1]];
 		$inner_field_name = $matches[2];
-	} else {
+	} else {	// match all characters before and after a fullstop
 		preg_match('/^([^.]+?)\\s*\\.\\s*(.+)$/', $field_name, $matches);
 		if (! array_key_exists(strtolower($matches[1]), $rdr[$rt])) {
 			return 'Type "' . $rct[$rt] . '" does not have "' . $matches[1] . '" field';
@@ -184,38 +183,66 @@ function _title_mask__check_field_name($field_name, $rt) {
 
 
 function _title_mask__get_field_value($field_name, $rec_id, $rt) {
-// error_log("[$field_name]   [$rec_id]   [$rt]");
+//error_log("[$field_name]   [$rec_id]   [$rt]");
+
+	if (!$rec_id) { // return blank can't lookup values without a recID
+		return '';
+	}
+	if (!$rt) { // lookup the rectype of this
+		$resRec = mysql_query("select rec_RecTypeID from Records where rec_ID=$rec_id");
+		if (mysql_error($resRec)) {
+			return '';
+		}
+		$rt = mysql_fetch_row($resRec);
+		$rt = $rt[0];
+	}
 	/* Return the value for the given field in the given records record */
 	if (strpos($field_name, '.') === FALSE) {	/* direct field-name lookup */
-		if (preg_match('/^(\\d+)/', $field_name, $matches)) {
+		if (preg_match('/^(\\d+)/', $field_name, $matches)) {	// field is dtyID
 			$rdt_id = $matches[1];
-		} else {
-			$rdt = _title_mask__get_rec_detail_types();
-			$rdt_id = $rdt[strtolower($field_name)]['dty_ID'];
+		} else {	// do a field name lookup
+			$rdr = _title_mask__get_rec_detail_requirements();
+			$rdt_id = @$rdr[$rt][strtolower($field_name)]['dty_ID'];
+			if (strtolower($field_name === "rectitle") ||
+				(!@$rtd_id && strtolower($field_name) === "title")) {
+				$resRec = mysql_query("select rec_Title from Records where rec_ID=$rec_id");
+				if (mysql_error($resRec)) {
+					return '';
+				}
+				$title = mysql_fetch_row($resRec);
+				$title = $title[0];
+				return $title;
+			}
 		}
 
 		return _title_mask__get_rec_detail($rec_id, $rdt_id);
 	}
 
-	if (! @$rdt) $rdt = _title_mask__get_rec_detail_types();
+//	if (! @$rdt) $rdt = _title_mask__get_rec_detail_types();
+	if (! @$rdr) $rdr = _title_mask__get_rec_detail_requirements();
 
+	//find any starting numbers stripping following charaters upto a fullstop
 	if (preg_match('/^(\\d+)\\s*(?:-[^.]*?)?\\.\\s*(.+)$/', $field_name, $matches)) {
 		$rdt_id = $matches[1];
 		$inner_field_name = $matches[2];
+	// match all characters before and after a fullstop
 	} else if (preg_match('/^([^.]+?)\\s*\\.\\s*(.+)$/', $field_name, $matches)) {
-		$rdt_id = $rdt[strtolower($matches[1])]['dty_ID'];
+		$rdt_id = @$rdr[$rt][strtolower($matches[1])]['dty_ID'];
 		$inner_field_name = $matches[2];
-	} else {
+	} else {	// doesn't match a title mask pattern so return an empty string so nothing is added to title
 		return '';
 	}
+	$rt_id = @$rdr[$rt][$rdt_id]['dty_PtrTargetRectypeIDs'];
+	$rt_id = $rt_id ? explode(",",$rt_id) : 0;
 
-	$rt_id = $rdt[$rdt_id]['dty_PtrTargetRectypeIDs'];
 
-	$res = mysql_query('select dtl_Value from recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID where dtl_RecID='.$rec_id.' and dty_ID='.$rdt_id.' order by dtl_ID asc');
+	$res = mysql_query('select dtl_Value from recDetails
+							left join defDetailTypes on dty_ID=dtl_DetailTypeID
+							where dtl_RecID='.$rec_id.' and dty_ID='.$rdt_id.' order by dtl_ID asc');
+	$value = '';
 
-	if ($rt_id != 0  &&  $inner_field_name) {
+	if ($rt_id != 0 &&  $inner_field_name) {
 		if ($rt_id != 75) {	// not an AuthorEditor
-			$value = '';
 			while ($inner_rec_id = mysql_fetch_row($res)) {
 				$inner_rec_id = $inner_rec_id[0];
 				$new_value = _title_mask__get_field_value($inner_field_name, $inner_rec_id, $rt_id);
@@ -272,8 +299,8 @@ function _title_mask__get_rec_detail($rec_id, $rdt_id) {
 	if (! $rec_details) $rec_details = array();
 
 	if (array_key_exists($rec_id, $rec_details)  &&
-	    array_key_exists($rdt_id, $rec_details[$rec_id])  &&
-	    $rec_details[$rec_id][$rdt_id] != "") {
+		array_key_exists($rdt_id, $rec_details[$rec_id])  &&
+		$rec_details[$rec_id][$rdt_id] != "") {
 		return $rec_details[$rec_id][$rdt_id];
 	}
 
@@ -282,8 +309,8 @@ function _title_mask__get_rec_detail($rec_id, $rdt_id) {
 
 	$rec_details[$rec_id] = array();
 
-	$res = mysql_query('select recDetails.* from recDetails'
-	                  .' where dtl_RecID = ' . intval($rec_id) . ' order by dtl_ID asc');
+	$res = mysql_query('select recDetails.* from recDetails'.
+						' where dtl_RecID = ' . intval($rec_id) . ' order by dtl_ID asc');
 	while ($rd = mysql_fetch_assoc($res)) {
 		$rdt_type = $rdt[$rd['dtl_DetailTypeID']]['dty_Type'];
 
@@ -324,9 +351,9 @@ function _title_mask__get_rec_detail($rec_id, $rdt_id) {
 						break;
 					case 'c': //c14 date
 						preg_match("/BCE=([^\|]+)/",$str,$bce);
-						$bce = $bce[1] ? $bce[1] : null;
+						$bce = @$bce[1] ? $bce[1] : null;
 						preg_match("/BPD=([^\|]+)/",$str,$c14);
-						$c14 = $c14[1] ? $c14[1] :($bce ? $bce:" c14 temporal");
+						$c14 = @$c14[1] ? $c14[1] :(@$bce ? $bce:" c14 temporal");
 						$suff = preg_match("/CAL=/",$str) ? " Cal" : "";
 						$suff .= $bce ? " BCE" : " BP";
 						preg_match("/DVP=P(\d+)Y/",$str,$dvp);
@@ -385,22 +412,25 @@ function _title_mask__get_rec_detail_requirements() {
 	if (! $rdr) {
 		$rdr = array();
 
-		$res = mysql_query('select rst_RecTypeID, dty_ID, lower(dty_Name) as dty_Name, dty_PtrTargetRectypeIDs
-		                      from defRecStructure left join defDetailTypes on rst_DetailTypeID=dty_ID
-		                     where rst_RequirementType in ("required", "recommended", "optional")');
+		$res = mysql_query('select rst_RecTypeID, dty_ID, lower(dty_Name) as dty_Name, lower(rst_DisplayName) as rst_DisplayName,
+									rst_PtrFilteredIDs, dty_PtrTargetRectypeIDs
+								from defRecStructure left join defDetailTypes on rst_DetailTypeID=dty_ID
+								where rst_RequirementType in ("required", "recommended", "optional")');
 		while ($row = mysql_fetch_assoc($res)) {
 			if (@$rdr[$row['rst_RecTypeID']]) {
-				$rdr[$row['rst_RecTypeID']][$row['dty_ID']] = $row['dty_PtrTargetRectypeIDs'];
-				$rdr[$row['rst_RecTypeID']][$row['dty_Name']] = $row['dty_PtrTargetRectypeIDs'];
+				$rdr[$row['rst_RecTypeID']][$row['dty_ID']] = $row;
+				$rdr[$row['rst_RecTypeID']][$row['dty_Name']] = $row;
 			} else {
 				$rdr[$row['rst_RecTypeID']] = array(
-					$row['dty_ID'] => $row['dty_PtrTargetRectypeIDs'],
-					$row['dty_Name'] => $row['dty_PtrTargetRectypeIDs']
+					$row['dty_ID'] => $row,
+					$row['dty_Name'] => $row
 				);
+			}
+			if (!@$rdr[$row['rst_RecTypeID']][$row['rst_DisplayName']]) {
+				$rdr[$row['rst_RecTypeID']][$row['rst_DisplayName']] = $row;
 			}
 		}
 	}
-
 	return $rdr;
 }
 
