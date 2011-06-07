@@ -230,6 +230,14 @@ top.HEURIST.search = {
 			var levelRelTypes = (level <= maxDepth && relatedInfo.infoByDepth[level].reltypes? relatedInfo.infoByDepth[level].reltypes : null);
 		}
 		//create rectype filter menu
+		if(level>0){
+			var showRelatedMenuItem = document.createElement("li");
+			showRelatedMenuItem.innerHTML = "<a href='#' onclick=top.HEURIST.search.toggleRelated("+level+")>Show Related Records</a>";
+			showRelatedMenuItem.id = "showrelated"+level;
+			showRelatedMenuItem.className = "showrelated level" + level;
+			filterMenu.appendChild(showRelatedMenuItem);
+		}
+		
 		if (levelRecTypes){
 			var j;
 			var rtNames = $.map(levelRecTypes, function(recIDs,rtID) {
@@ -296,22 +304,22 @@ top.HEURIST.search = {
 			reltypeMenuItem.appendChild(reltypeList);
 			filterMenu.appendChild(reltypeMenuItem);
 		}
-		if(level>0){
-			var showRelatedMenuItem = document.createElement("li");
-			showRelatedMenuItem.innerHTML = "<a href='#' onclick=top.HEURIST.search.toggleRelated("+level+")>Show Related Records</a>";
-			showRelatedMenuItem.id = "showrelated"+level;
-			showRelatedMenuItem.className = "showrelated level" + level;
-			filterMenu.appendChild(showRelatedMenuItem);
-		}
+		
 	},
 
 	toggleRelated: function(level){
 		var className =  document.getElementById("showrelated" + level).className;
 		if (className !== "showrelated level" + level) {
 			$("#results-level" + level).toggleClass("collapsed");
+			if ($("#results-level" + level).hasClass("collapsed")) {
+				$("#showrelated" + level).html("<a onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Show Related Records</a>");
+				}else{
+				$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Hide Related Records</a>");
+				};
 		}else{
 			top.HEURIST.search.loadRelatedLevel(level);
 			document.getElementById("showrelated" + level).className = className + " loaded";
+			$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Hide Related Records</a>");
 			top.HEURIST.search.filterRelated(level);
 		}
 	},
@@ -434,19 +442,12 @@ top.HEURIST.search = {
 		   "<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/lock.png' " + userPwd + ">"+
 		    "</div>" +
 			"<div class='recordTitle' title='"+linkText+"'>" + (res[3].length ? "<a href='"+res[3]+"' target='_blank'>"+linkText + "</a>" : linkText ) + "</div>" +
-		    "<div class=mini-tools >" +
-		    	"<div id='links'>" +
-				"<span id='rec_edit_link' title='Click to edit'><a href='"+
+			"<div id='recordID'>Record ID: " + res[2] + "</div>" +
+			"<div id='rec_edit_link' class='logged-in-only' title='Click to edit'><a href='"+
 			top.HEURIST.basePath+ "records/edit/editRecord.html?sid=" +
 			top.HEURIST.search.sid + "&bib_id="+ res[2] +
 			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
-			"' target='_blank'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png'/>edit</a></span>" +
-				(res[3].length ? "<span><a href='"+res[3]+"' target='_blank'><img src='"+ top.HEURIST.basePath+"common/images/external_link_16x16.gif' title='go to link'>visit</a></span>" : "") +
-						"<span id='rec_explore_link' title='Click to explore'><a href='/cocoon" +top.HEURIST.basePath +'relbrowser/main/item/' + res[2] +
-					(top.HEURIST.database && top.HEURIST.database.name ? '/?db=' + top.HEURIST.database.name : '') +
-					"' target='_blank'><img src='"+	top.HEURIST.basePath + "common/images/explore.png'/>explore</a></span>" +
-				"<span id='spacer'><img src='"+	top.HEURIST.basePath + "common/images/16x16.gif'/></span>" +
-				"</div>" +
+			"' target='_blank'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png'/></a></div>" +
 		   "</div>" +
 
 		"</div>";
@@ -877,7 +878,7 @@ top.HEURIST.search = {
 	setResultStyle: function(style) {
 		top.HEURIST.util.setDisplayPreference("search-result-style", style);
 		document.getElementById("results-level0").className = style;
-		top.HEURIST.search.gotoResultPage(top.HEURIST.search.currentPage);
+		//top.HEURIST.search.gotoResultPage(top.HEURIST.search.currentPage);
 		for (var i in top.HEURIST.search.infos) {  //closes all infos
 		var info = top.HEURIST.search.infos[i];
   		info.parentNode.removeChild(info);

@@ -261,11 +261,24 @@ body.w-bookmark .bookmarked {
 	position: absolute;
 }
 .wg-id {
-	font-size: 8px;
-	font-weight: bold;
-	position: relative;
-	left: -1px;
-	top: 0.7em;
+    display: block;
+    font-size: 8px;
+    font-weight: bold;
+    left: -13px;
+    position: relative;
+    text-align: center;
+    top: 15px;
+    width: 13px;
+}
+.thumbnails .wg-id {
+    display: block;
+    font-size: 8px;
+    font-weight: bold;
+    left: 1px;
+    position: relative;
+    text-align: left;
+    top: 6px;
+    width: 13px;
 }
 .info a {
 	padding: 0 10px;
@@ -437,7 +450,11 @@ body.w-bookmark .bookmarked {
 	text-align: left;
 }
 #rec_edit_link {
-	cursor:pointer;
+	cursor: pointer;
+	position: absolute;
+	right: -1px;
+	top: -2px;
+	display: none
 }
 #rec_view_link {
 	cursor:pointer;
@@ -527,10 +544,11 @@ div.right_margin_info div.mini-tools a {
 }
 #search-status {
 	display: block;
+	padding: 0 !important;
 }
 #loading-search-status, #noquery-search-status, #noresult-search-status {
 	display: none;
-	margin: 10px 20px;
+	margin: 0px;
 }
 #search-status.loading #loading-search-status {
 	display: block;
@@ -550,7 +568,6 @@ div.right_margin_info div.mini-tools a {
 }
 #noquery-search-status {
 	height:auto;
-	margin:5%;
 	padding:10px 25px;
 	width:auto;
 }
@@ -697,7 +714,7 @@ nobr#activesaved a {
 #activesaved .wg-id {
 	display: none;
 }
-#saved .search-type, #ResultsFilter .search-type {
+#saved .search-type, #ResultsFilter .search-type{
 	color: #6A7C99;
 	font-weight:bold;
 	cursor: pointer;
@@ -1187,11 +1204,12 @@ body.is-not-logged-in #search-result-commands div.openTools div#toolbox .toolbox
 #result-container {
 	bottom:0;
 	left:0;
-	overflow:auto;
+	overflow-y:auto;
 	position:absolute;
 	right:0;
 	top:0px;
 	border-right:1px solid RGBA(100,100,100,0.5);
+	overflow-x: hidden
 }
 .openTools {
 	left:8px;
@@ -1566,7 +1584,7 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
     height: 20px;
     left: 0;
     margin: 0;
-    padding: 4px 16px;
+    padding: 4px 8px;
     position: relative;
     text-align: left;
 	overflow:hidden;
@@ -1588,22 +1606,19 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	min-width:50px;
 	}
 	
-.icons div.recordDiv:hover {-moz-transform:scale(1.25,1.25);-webkit-transform:scale(1.25,1.25);transform:scale(1.25,1.25); z-index:10; -moz-box-shadow:0px 3px 8px #666;-webkit-box-shadow:0px 3px 8px #666;box-shadow:0px 3px 8px #666;}
+.icons div.recordDiv:hover, .thumbnails div.recordDiv:hover  {-moz-transform:scale(1.1,1.1);-webkit-transform:scale(1.1,1.1);transform:scale(1.1,1.1); z-index:10; -moz-box-shadow:0px 3px 8px #666;-webkit-box-shadow:0px 3px 8px #666;box-shadow:0px 3px 8px #666;}
+
 .icons .recordDiv {
-	width:64px; 
-	height:64px; 
-	display:inline-block; 
-	margin:1ex;  
-	-moz-border-radius:3px;
-	-moz-box-shadow:0 1px 2px #BBB;
-	border-radius:3px;
-	box-shadow:0 1px 2px #BBB;
-	-webkit-border-radius:3px;
-	-webkit-box-shadow:0 1px 2px #BBB; 
-	border:2px solid #FFF;
-	border-collapse:collapse;
-	display:inline-block; 
-	position:relative;
+	border: 2px solid #FFFFFF;
+    border-collapse: collapse;
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 0 1px 2px #BBBBBB;
+    display: inline-block;
+    font-size: 6px !important;
+    height: 32px;
+    margin: 6px;
+    position: relative;
+    width: 128px;
 	font-size:6px !important
 	}
 .thumbnails .recordDiv .thumbnail, .thumbnails .recordDiv .recTypeThumb {
@@ -1622,20 +1637,36 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 .thumbnails .recordDiv .recTypeThumb {opacity:0.3}
 
 .icons .recordDiv .thumbnail, .icons .recordDiv .recTypeThumb{background-position: center center;
+    background-position: center center;
     background-repeat: no-repeat;
-    background-size: 100% auto;
-    height: 36px;
+    background-size: auto 100%;
+    height: 32px;
     left: 0;
     margin: 0;
     position: absolute;
     right: 0;
     text-align: center;
-    top: 16px;}
+    top: 0;
+    width: 51px;}
 .icons .recordDiv .thumbnail {display:none}
 .icons div.recordDiv:hover .thumbnail{display:block !important}
-
-.list .recordDiv .thumbnail,.two-col .recordDiv .thumbnail{display:none}
-.icons .recordTitle {height: 1em;left: 2px;overflow: hidden;position: absolute;right: 2px;text-align: left;top: 2px;white-space:nowrap;text-overflow:ellipsis;}
+.icons div.recordDiv:hover a{text-decoration: none}
+#results-level0.icons div.recordDiv:hover .recTypeThumb {display:none} /* once all levels have thumbs we can remove results-level0 declaration */
+.list .recordDiv .thumbnail,.two-col .recordDiv .thumbnail{
+	display:none
+	}
+.icons .recordTitle {
+	height: 26px;
+	left: 53px;
+	line-height: 13px;
+	overflow: hidden;
+	position: absolute;
+	right: 2px;
+	text-align: left;
+	top: 3px;
+	white-space: normal;
+	}
+.icons .recordTitle a{line-height: 13px;}
 .icons .recordIcons {display:none}
 .icons .recTypeThumb {opacity:0.6;}	
 .1col .recordDiv .thumbnail, .2col .recordDiv .thumbnail {display:none}
@@ -1650,12 +1681,12 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	border:3px solid #FFF;
 	border-collapse:collapse;
 	display:inline-block;
-	height:140px;
-	margin:7px;
+	height:128px;
+	margin:6px;
 	overflow:visible;
 	padding:0;
 	position:relative;
-	width:140px;
+	width:128px;
 	user-select: none; 
 	-moz-user-select: none; 
 	-khtml-user-select:none; 
@@ -1664,23 +1695,207 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 .result_thumb_inner {position: absolute;top:0;bottom: 0;right:0;left: 0;overflow: hidden;padding: 6px;}
 .result_thumb .thumbnail, .result_thumb .rec_title, .result_thumb .icons, .links {left:2px;overflow:hidden;position:absolute;z-index:1;text-align: left;padding-left:0px;}
 .result_thumb .icons {overflow: visible;}
-.thumbnails .recordDiv .thumbnail {-moz-background-size:100% auto;background-size:100% auto;background-position:center center;background-repeat:no-repeat;height:75px;left:0;position:absolute;right:0;text-align:center;top:10px;margin:0}
+.thumbnails .recordDiv .thumbnail, .thumbnails .recordDiv .recTypeThumb {-moz-background-size:100% auto;background-size:100% auto;background-position:center center;background-repeat:no-repeat;height:84px;left:0;position:absolute;right:0;text-align:center;top:0px;margin:0}
 .thumbnails .recordDiv .thumbnail img {bottom:0;left:0;position:absolute;right:0;top:0;margin:auto;background-position: center center;}
 .thumbnails .recordDiv .thumbnail .no-thumbnail, .no-thumbnail{opacity:0.3;}
-.thumbnails .recordDiv .recordTitle {left:3px; right:3px;height:25px;line-height:12px;text-align:left;top:90px;color:#666;width:135px;overflow: hidden;position:absolute}
+.thumbnails .recordDiv .recordTitle {left:3px; right:3px;height:25px;line-height:12px;text-align:left;top:86px;color:#666;width:125px;overflow: hidden;position:absolute}
 .thumbnails .recordDiv .recordTitle a{line-height: 12px;text-decoration: none;}
 .thumbnails .recordDiv .recordTitle a:hover{text-decoration: underline;}
 .thumbnails .recordDiv .unbookmarked {margin-bottom: 2px;}
 .thumbnails .recordDiv .bookmarked {margin-bottom: 2px;}
-.thumbnails .recordDiv .recordIcons, .info_button, .done_button, .rec_links {position:absolute; left:3px;bottom:3px;}
+.thumbnails .recordDiv .recordIcons, .info_button, .done_button, .rec_links {position:absolute; left:3px;bottom:1px;}
 .thumbnails .recordDiv .recordIcons img {vertical-align: text-bottom; margin-left: 0px;}
 .thumbnails .recordDiv .recordIcons input {vertical-align: text-bottom;}
 
 
 .recorddiv.selected{
-	background:#9CC;
+	border-color:#62A7F8;
 	background:#EEE;
 	background:-moz-linear-gradient(center top , #e6f8fd, #bee4f8) repeat scroll 0 0 transparent;
 	background:-webkit-gradient(linear, left top, left bottom, from(#e6f8fd), to(#bee4f8)); 
 	}
-	
+div.recorddiv:hover{
+	-moz-box-shadow:0 1px 4px #000;
+	-webkit-box-shadow:0 1px 4px #000;
+	box-shadow:0 1px 4px #000;
+	z-index: 20;
+	background:-moz-linear-gradient(center top , #EFEFEF, #DDDDDD) repeat scroll 0 0 transparent;
+	background:-webkit-gradient(linear, left top, left bottom, from(#EFEFEF), to(#DDD));
+	}
+
+.filter{border-top:1px solid #BBB;
+		background-color: #DDD;
+		background:-moz-linear-gradient(center top , #DBDFE6, #FFF) repeat scroll 0 0 transparent;
+		background:-webkit-gradient(linear, left top, left bottom, from(#DBDFE6), to(#FFF)); 
+		color: #999999;
+		position: relative;
+		min-height:20px;
+		margin-bottom: 5px;
+		border-bottom:1px solid #DDD;
+	}
+.filter ul li ul{
+	margin-left: 10px}
+.filter ul.menu li, .filter ul.menu li a{
+		color: #999;
+	}
+
+.filter ul li ul li a{
+	background-image: none);
+	background-repeat: no-repeat;
+	background-position: left;
+	padding-left:16px;
+	}
+.filter ul li ul li.checked a{
+	background-image: url(../images/tick-white.gif);
+	}
+
+.filter ul.menu li:hover, .filter ul.menu li a:hover{
+		color: white;
+	}
+#results > div {
+	text-align: center;
+	position: relative;
+	background-color: #DDD;
+	background:-moz-linear-gradient(center top , #F0F0F0, #FFF) repeat scroll 0 0 transparent;
+	background:-webkit-gradient(linear, left top, left bottom, from(#F0F0F0), to(#FFF));
+	}
+div.filter .showrelated {padding-left:0}	
+div.filter .showrelated a {
+    background-image: url("../images/heading_saved_search-hidden.png");
+    background-position: 0 -7px;
+    background-repeat: no-repeat;
+    color: #6A7C99 !important;
+    font-weight: bold !important;
+    padding-left: 20px;
+}
+#results div.collapsed{height:20px;overflow:visible;}
+#results div.collapsed div.recordDiv{display: none !important;}
+ul.menu li ul li.disabled{display:none;}
+ul.menu li ul li a{color:#444;}
+ul.menu li ul li.checked a{color:#CCC;}
+.recordDiv {display:none !important ;}
+.recordDiv.lnk{display:inline-block !important;}
+.is-not-logged-in #results-level0 {padding:15px 0}
+#results-level0 .recordDiv{display:inline-block !important;}
+#results-level0.list .recordDiv{display:block !important;}
+.recordDiv.filtered{display:none !important;}
+#results-level0 .recordDiv.filtered{display:none !important;}
+.filter ul li ul {max-height:100px;overflow-y: auto}
+div.recorddiv:hover > #rec_edit_link {
+	display: block;
+	}
+#recordID {
+	background-color: rgba(0, 0, 0, 0.589844);
+	border-bottom-left-radius: 3px 3px;
+	border-bottom-right-radius: 3px 3px;
+	border-top-left-radius: 3px 3px;
+	border-top-right-radius: 3px 3px;
+	color: #CCC;
+	display: none;
+	float: left;
+	font-size: 10px;
+	height: 9px;
+	line-height: 7px;
+	padding: 3px;
+	position: absolute;
+	top: -12px;
+	}
+.list #recordID {
+	background: none;
+	right:3px;
+	top:20px;
+	padding: 0;
+	color: #666
+	}
+div.recorddiv:hover > #recordID {
+	display: block}
+
+
+
+/* Turn on a 10x10 scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+ 
+::-webkit-scrollbar-button:vertical {
+    background-color: transparent;
+    border: 1px none blue;
+}
+ 
+/* Turn on single button up on top, and down on bottom */
+::-webkit-scrollbar-button:start:decrement,
+::-webkit-scrollbar-button:end:increment {
+    display: none;
+}
+ 
+/* Turn off the down area up on top, and up area on bottom */
+::-webkit-scrollbar-button:vertical:start:increment,
+::-webkit-scrollbar-button:vertical:end:decrement {
+    display: none;
+}
+ 
+/* Place The scroll down button at the bottom */
+::-webkit-scrollbar-button:vertical:increment {
+    background-color: black;
+    border: 1px dashed blue;
+}
+ 
+/* Place The scroll up button at the up */
+::-webkit-scrollbar-button:vertical:decrement {
+    background-color: purple;
+    border: 1px none blue;
+}
+ 
+::-webkit-scrollbar-track:vertical {
+    background-color: transparent;
+    border: 1px none pink;
+}
+ 
+/* Top area above thumb and below up button */
+::-webkit-scrollbar-track-piece:vertical:start {
+    border: 1px none #000;
+}
+ 
+/* Bottom area below thumb and down button */
+::-webkit-scrollbar-track-piece:vertical:end {
+    border: 1px none pink;
+}
+ 
+/* Track below and above */
+::-webkit-scrollbar-track-piece {
+	background:transparent;
+	-webkit-border-radius: 4px;
+	-webkit-box-shadow:inset 0px 2px 4px rgba(0,0,0,1);
+}
+#result-container::-webkit-scrollbar-track-piece {
+	background:-webkit-gradient(linear, left top, left bottom, from(#B9C8CE), to(#8F9BAB))transparentder-radius: 4px;
+    -webkit-box-shadow:inset 0px 0px 6px rgba(0,0,0,0.5);
+}
+ 
+/* The thumb itself */
+::-webkit-scrollbar-thumb:vertical {
+    height: 25px;
+	background:-webkit-gradient(linear, left top, left bottom, from(#BBB), to(#888));
+	-webkit-border-radius: 4px;
+	border: 1px solid #000;
+	-webkit-box-shadow:inset 0px 0px 6px rgba(0,0,0,0.5);
+	}
+#result-container::-webkit-scrollbar-thumb:vertical {
+    height: 25px;
+	background-color:#A5B3C8;
+	/* background:-webkit-gradient(linear, left top, left bottom, from(#A5B3C8), to(#8798B3)); */
+	-webkit-border-radius: 4px;
+	border: 1px solid #8C989E;
+	-webkit-box-shadow:inset 0px -2px 4px #8798B3;
+}
+ 
+/* Corner */
+::-webkit-scrollbar-corner:vertical {
+    background-color: black;
+}
+ 
+/* Resizer */
+::-webkit-scrollbar-resizer:vertical {
+    background-color: gray;
+}

@@ -672,11 +672,12 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 	padding-left:5px;
 	margin:0;
 	display:block;
-	height:20px;
+	min-height:20px;
+	text-align: left;
 }
 #tabs li, #quicklink-cell li, #views li, ul.menu li {
-	display:block;
-	float:left;
+	display:inline-block;
+	/* float:left; */
 	height:15px;
 	padding:5px 10px 0 5px;
 	white-space:nowrap;
@@ -728,7 +729,7 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 	position:absolute;
 	text-align:left!important;
 	padding-bottom:0;
-	width:16em;
+	width:12em;
 	border:none;
 	padding-left:0;
 	margin-left:-6px;
@@ -757,6 +758,7 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 	white-space:normal;
 	font-size: 10px;
 	color:#CCC;
+	display: block
 }
 #tabs li ul li a, #tabs li.active ul li a, ul.menu li ul li a, ul.menu li.active ul li a, #quicklink-cell li ul li a, #views li ul li a {
 	font-size:1.1em;
@@ -778,12 +780,4 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 #views ul li a{background-repeat:no-repeat !important; background-position:5px 3px !important; padding-left:28px !important}
 
 #tabs li ul li a.seperator, #tabs li.active ul li a.seperator, #quicklink-cell li ul li a.seperator, #views li ul li a.seperator {border-top:1px solid #666;}
-#results div.collapsed{height:20px;overflow:hidden;}
-ul.menu li ul li.disabled{display:none;}
-ul.menu li ul li a{color:#444;}
-ul.menu li ul li.checked a{color:#CCC;}
-.recordDiv {display:none !important ;}
-.recordDiv.lnk{display:inline-block !important;}
-#results-level0 .recordDiv{display:inline-block !important;}
-.recordDiv.filtered{display:none !important;}
-#results-level0 .recordDiv.filtered{display:none !important;}
+
