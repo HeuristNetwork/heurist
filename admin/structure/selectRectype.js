@@ -86,8 +86,10 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 									top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 									datatype = top.HEURIST.parameters.type;
 									var sIDs = top.HEURIST.parameters.ids;
-									if (sIDs) {
+									if (!Hul.isempty(sIDs)) {
 										_arr_selection = sIDs.split(',');
+									}else{
+										_arr_selection = [];
 									}
 
 									if(datatype==="fieldsetmarker"){
@@ -120,13 +122,19 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 
 					//get datatype by id
 					var recsPtr = top.HEURIST.detailTypes.typedefs[dtyID].commonFields[11];
-					_arr_selection = recsPtr.split(",");
+					if(Hul.isempty(recsPtr)){
+						_arr_selection = [];
+					}else{
+						_arr_selection = recsPtr.split(",");
+					}
+
+
 
 					var ind;
 					for (ind in _arr_selection) {
 
-							var rty_ID = _arr_selection[ind];
-							if(Hul.isnull(rty_ID) || rty_ID === "undefined") continue;
+							rty_ID = _arr_selection[ind];
+							if(Hul.isempty(rty_ID) || rty_ID === "undefined") continue;
 
 							rectype = top.HEURIST.rectypes.typedefs[rty_ID].commonFields;
 
@@ -140,9 +148,20 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 											]);
 					} //for
 
+					if(arr.length<1){
+						_isFilterMode = false;
+						_init(_dtyID, _callback);
+						return;
+					}
+
 					datatype = top.HEURIST.detailTypes.typedefs[dtyID].commonFields[2];
 
+						Dom.get('toolbar').style.display = 'none';
+
+
 				}else{
+						Dom.get('toolbar').style.display = 'block';
+
 						//create datatable and fill it values of all rectypes
 						for (rty_ID in top.HEURIST.rectypes.typedefs) {
 								if(rty_ID !== "commomFieldNames" && rty_ID !== "dtFieldNames")
@@ -357,15 +376,6 @@ oRecord.getData('description')+'"/>';}
 
 								});//_myDataTable.onEventSelectRow);
 
-								//there are not filter and search controls
-								if(!_isFilterMode){
-									// init Group Combo Box Filter
-									_initGroupComboBoxFilter();
-
-									//init listeners for filter controls
-									_initListeners();
-								}
-
 				}else{
 					// all stuff is already inited, change livedata in datasource only
 					_myDataSource.liveData = arr;
@@ -379,6 +389,16 @@ oRecord.getData('description')+'"/>';}
 					});
 
 				}
+
+				//there are not filter and search controls
+				if(!_isFilterMode){
+					// init Group Combo Box Filter
+					_initGroupComboBoxFilter();
+
+									//init listeners for filter controls
+					_initListeners();
+				}
+
 	}//end of initialization =====================
 
 
@@ -512,6 +532,9 @@ oRecord.getData('description')+'"/>';}
 						}else if (!Hul.isnull(_callback_func) ) {
 							_callback_func(res, _dtyID);
 						}
+				},
+				setFilterMode : function (val) {
+					_isFilterMode = val;
 				},
 
 				/**

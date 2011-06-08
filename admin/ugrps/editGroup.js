@@ -183,7 +183,7 @@ function GroupEditor() {
 		}
 
 		// check mandatory fields
-		if(Dom.get("ugr_Name").value==="") {
+		if(Hul.isempty(Dom.get("ugr_Name").value)) {
 				if(isShowWarn) {
 					alert("Name is mandatory field");
 				}
@@ -280,7 +280,7 @@ function GroupEditor() {
 		}
 
 
-		if(str !== null) {
+		if(!Hul.isempty(str)) {
 //DEBUG alert("Stringified changes: " + str);
 
 			// 3. sends data to server

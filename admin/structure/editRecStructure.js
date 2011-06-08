@@ -1457,6 +1457,8 @@ function showTermsTree(rst_ID, event){
 
 	if(Hul.isnull(selectTerms)){
 		selectTerms = new  SelectTerms(true, false); //filtered mode, in div
+	}else{
+		selectTerms.setFilterMode(true);
 	}
 	selectTerms.reinit(rst_ID, closeDivPopup1);
 
@@ -1500,6 +1502,8 @@ function showPointerFilter(rst_ID, event){
 
 	if(Hul.isnull(selectRecordType)){
 		selectRecordType = new  SelectRecordType(true, false); //filtered mode, in div
+	}else{
+		selectRecordType.setFilterMode(true);
 	}
 	selectRecordType.reinit(rst_ID, closeDivPopup2);
 

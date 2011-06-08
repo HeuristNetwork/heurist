@@ -84,7 +84,11 @@
 
 <body>
 	<iframe id=searchFrame frameborder=0 style="width:0;height:0;position:absolute;"></iframe>
-	<script src="../common/js/utilsLoad.js"></script>	<!-- core HEURIST functions -->
+
+  <script src="../common/php/loadHAPI.php"></script>
+  <script src="../common/js/utilsLoad.js"></script>
+  <script src="../records/edit/editRecord.js"></script>
+
 	<script>
 		var hBase = "http://" + window.location.host + top.HEURIST.basePath;
 		var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"";

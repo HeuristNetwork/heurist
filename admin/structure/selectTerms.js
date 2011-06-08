@@ -65,6 +65,9 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 
 						Dom.get("dtyName").innerHTML = "Detailtype: " + dt[0];
 					}
+					if(Hul.isempty(_allTerms)){
+						_isFilterMode = false;
+					}
 		}
 		if(Hul.isnull(_datatype) && (location.search.length > 1)){
 						_datatype = top.HEURIST.parameters.datatype;
@@ -657,6 +660,9 @@ END TREE REALTED ROUTINES ---------------------------------------
 				},
 				selectAllChildren : function (termid) {
 					_selectAllChildren(termid);
+				},
+				setFilterMode : function (val) {
+					_isFilterMode = val;
 				},
 
 				getClass: function () {

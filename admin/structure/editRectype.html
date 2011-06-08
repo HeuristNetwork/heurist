@@ -446,10 +446,13 @@
 			top.HEURIST.util.getJsonData(baseurl, callback, params);
 		} else {
 
+			var context = null;
 			if(_openEditStrucutreAfterClose){
-				editRecStructure();
+				//editRecStructure();
+				context = {rty_ID:rectypeID, isOpenEditStructure:true};
 			}
-			window.close(null);
+
+			window.close(context);
 		}
 	}
 
@@ -487,7 +490,8 @@
 					rectypeID = Math.abs(rectypeID);
 
 					if(_openEditStrucutreAfterClose){
-						editRecStructure();
+						//editRecStructure();
+						context.isOpenEditStructure = true;
 					}
 
 					window.close(context); //send back new HEURIST strcuture

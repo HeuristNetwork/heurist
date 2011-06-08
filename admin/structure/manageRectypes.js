@@ -930,8 +930,11 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 			callback: function(context) {
 				if(!Hul.isnull(context)){
 
+					var rty_ID;
+
+					if(context.result){
 					//update id
-					var rty_ID = Math.abs(Number(context.result[0]));
+					rty_ID = Math.abs(Number(context.result[0]));
 
 					//if user changes group in popup need update both  old and new group tabs
 					var grpID_old = -1;
@@ -950,6 +953,17 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 					if(grpID_old!==grpID){
 						_removeTable(grpID_old, true);
 					}
+
+					}//context.result
+					else{
+						rty_ID = context.rty_ID;
+					}
+
+					if(context.isOpenEditStructure){
+						_editRecStructure(rty_ID);
+						//alert("open edit strcutre");
+					}
+
 					/*
 					//is it current tab
 					var ind = _getIndexByGroupId(grpID);

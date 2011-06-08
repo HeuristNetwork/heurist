@@ -232,7 +232,18 @@ button {
 
 <!-- panel to filter rectype pointers -->
 		<div class="tooltip" id="pointerFilter">
-			<div id="tb_top" style="height:30">
+
+			<div id="toolbar" style="height:40;width:550;display:block;text-align:left;">
+				<label>Filter by group:</label>
+				<select id="inputFilterByGroup" name="inputFilterByGroup" size="1" style="width:138px;height:16">
+					<option value="all">all groups</option></select>
+				<label>&nbsp;&nbsp;by name:</label>
+				<input type="text" id="inputFilterByName" name="inputFilterByName" style="width:140px;" value=""/>
+				<div id="divFilterBySelection"><label>show:</label><input type="radio" id="inputFilterBySelection1" name="inputFilterBySelection" value="all" checked="checked"/>&nbsp;All <input type="radio" id="inputFilterBySelection2" name="inputFilterBySelection" value="selonly"/> Selected&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" id="btnClearSelection" value="clear" title="clear selection"/>
+				</div>
+			</div>
+
+			<div id="tb_top" style="height:30;width:550;text-align:left;">
 				<div style="display:inline-block; max-width:150;"><div id="dt_pagination_top"></div></div>
 				<div style="float:right; text-align:right;padding-top:5px;">
 					<label id="lblSelect1"></label>
