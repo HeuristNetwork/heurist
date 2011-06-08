@@ -414,7 +414,7 @@ CREATE TABLE `defRecTypes` (
   `rty_Type` enum('normal','relationship','dummy') NOT NULL default 'normal' COMMENT 'Use to flag special record types to trigger special functions',
   PRIMARY KEY  (`rty_ID`),
   UNIQUE KEY `rty_Name` (`rty_Name`)
-) ENGINE=InnoDB AUTO_INCREMENT=215 DEFAULT CHARSET=utf8 COMMENT='Defines record types, which corresponds with a set of detail';
+) ENGINE=InnoDB AUTO_INCREMENT=2000 DEFAULT CHARSET=utf8 COMMENT='Defines record types, which corresponds with a set of detail';
 SET character_set_client = @saved_cs_client;
 
 /*!50003 SET @SAVE_SQL_MODE=@@SQL_MODE*/;

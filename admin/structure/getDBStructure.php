@@ -478,7 +478,7 @@
 			case 'defDetailTypeGroups': // Data from detail type classes table
 			$dtg_Name = mysql_real_escape_string($row['dtg_Name']);
 			$dtg_Description = mysql_real_escape_string($row['dtg_Description']);
-			print "('$row[dtg_ID]','$row[dtg_Name]','$row[dtg_Order]','$row[dtg_Description]'),";
+			print "('$row[dtg_ID]','$dtg_Name','$row[dtg_Order]','$dtg_Description'),";
 			break;
 			
 			case 'defTranslations':

@@ -23,18 +23,19 @@
 		return;
 	}
 ?>
+<link rel=stylesheet href="../../common/css/global.css">
 
 <html>
 	<head>
 		<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
 		<title>Create New Heurist Database</title>
 	</head>
+	<div class="banner"><h2>Create new Heurist database</h2></div>
+	<div id="page-inner" style="overflow:auto">
 
-	<body>
+	<body class="popup">
 		<div id="createDBForm">
 		<form action="createNewDB.php" method="POST" name="NewDBName">
-			<h3>Create new Heurist database</h3>
-			<br>
 			Enter a name for the new database. The prefix "<?= HEURIST_DB_PREFIX ?>" will be prepended before creating the database.<br /><br />
 			<input type="text" maxlength="64" size="25" name="dbname">
 
@@ -173,3 +174,4 @@ function makeDatabase() {
 		<?php makeDatabase(); ?>
 	}
 </script>
+</div>

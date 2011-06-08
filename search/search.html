@@ -88,6 +88,7 @@
 	<script>
 		var hBase = "http://" + window.location.host + top.HEURIST.basePath;
 		var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"";
+		var bugReportURL = top.HEURIST.basePath + 'export/email/formEmailRecordPopup.html?rectype=253&db='+database;
 
 		if (location.search.match(/[&?]q=[^&]+/)) {		//there is a search string
 			document.getElementById("searchFrame").src = top.HEURIST.basePath+"search/getResultsPageAsync.php" + location.search;
@@ -133,6 +134,14 @@
 			// register handlers and render non-static elements of page
 			top.HEURIST.search.setupSearchPage();
 		});
+
+		function _bugReportCallback(title, bd, bibID) {
+			if (bibID) {
+				window.close(bibID, title);
+			} else {
+				//document.forms[0].submit();
+			}
+		}
 </script>
 <script src="../common/php/displayPreferences.php"></script>	<!-- sets body css classes based on prefs in session -->
 <iframe src="../search/actions/actionHandler.php" id=i_action></iframe>	<!-- actionHandler.php is written to return a form by default or running javascript followed by reload teh default-->
@@ -322,6 +331,14 @@
 					<li><a href="#" onClick="top.HEURIST.search.deleteBiblios(); return false;" title="Select one or more records, then click to delete">Delete</a></li>
 					<li><a href="#" onClick="top.HEURIST.search.fixDuplicates(); return false;" title="Select one or more records, then click to fix duplicates">Merge dupes</a></li>
 					<li><a href="#" onClick="top.HEURIST.search.collectDuplicates(); return false;" title="Click to identify possible duplicates in the current query and create collections for each set">Collect dupes</a></li>
+					<li><a href="#" onclick="top.HEURIST.util.popupURL(top, bugReportURL,
+						{	'close-on-blur': false,
+							'no-resize': false,
+							height: 520,
+							width: 740,
+							callback: _bugReportCallback
+						});
+						return false;" title="Click to send a bug report">Report bug</a></li>
 				</ul>
 			</li>
 		</ul>

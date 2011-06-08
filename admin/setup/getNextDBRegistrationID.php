@@ -14,90 +14,83 @@
 
 	// We may need to hobble/delete some of the functionality on HeuristIndex to avoid people
 	// creating unwanted records or importing random crap into it
-
-    function random_string($l = 8){ // creates a random password
-        $c = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxwz0123456789";
-        for(;$l > 0;$l--) $s .= $c{rand(0,strlen($c))};
-        return str_shuffle($s);
-    };
-
+	$dbID = 0;
+	$error = "";
 	require_once(dirname(__FILE__)."/../../common/config/initialise.php");
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+    mysql_connection_db_insert("HeuristSystem_Index");
 
-    mysql_connection_db_select(DATABASE);
-
-    $ownerGrpID=0; // Flags problem if not reset
-    $returnData=''; // string returned to caller, contains dbID or 0, and error message (if any)
+    $ownerGrpID = 0; // Flags problem if not reset
+    $returnData = ''; // String returned to caller, contains dbID or 0, and error message (if any)
     
     // Get parameters passed from registration request
     // @ preceding $_REQUEST avoids errors, sets Null if parameter missing
-	$serverURL=@$_REQUEST["serverURL"];   
-	$dbReg=@$_REQUEST["dbReg"];
-	$dbTitle=@$_REQUEST["dbTitle"];
-	$ownerGrpEmail=@$_REQUEST["ownerGrpEmail"];
+	$serverURL = $_REQUEST["serverURL"];
+	$dbReg = $_REQUEST["dbReg"];
+	$dbTitle = $_REQUEST["dbTitle"];
+	$ownerGrpEmail = $_REQUEST["ownerGrpEmail"];
 
     // $var is null, blank, 0 or false --> false
-    if (!$serverURL || !$dbReg || $dbTitle || $ownerGrpEmail) { // error in one or more parameters
-        $returnData='0,Bad parameters passed';
-        return $returnData
+	if (!$serverURL || !$dbReg || !$dbTitle || !$ownerGrpEmail) { // error in one or more parameters
+        $returnData = '0,Bad parameters passed';
+        echo $returnData;
     }
+
+	function genRandomString() {
+		$length = 8;
+		$characters = "0123456789abcdefghijklmnopqrstuvwxyz";
+		for ($p = 0; $p < $length; $p++) {
+			$string .= $characters[mt_rand(0, strlen($characters))];
+		}
+		return $string;
+	}
 
     $callingServer = $_SERVER['REMOTE_ADDR'];
     // TO DO: we need to check that the script is not being called repeatedly from the same server
  
-    define(HEURIST_DB_DESCRIPTOR_RECTYPE, 209); // the record type for database descriptor records
+    define("HEURIST_DB_DESCRIPTOR_RECTYPE", 209); // the record type for database descriptor records
 	
 	// allocate a new user for this database unless the sysadmin password is recognised
 	// If a new user, log the user in and assign the record ownership to that user
 	// If an existing user, get them to login otherwise someone could gain access to their records
 
-	$ownerGrpEmail=strtolower(trim($ownerGrpEmail));
-	$res = mysql_query("select ugr_ID from sysUGrps Where lower(ugr_email)=$ownerGrpEmail");
-	if ($res) { // query OK
-		if (mysql_num_rows()=0) { // did not find the user, create a new one and pass back login info
-			$pwd = random_string();
-			$res = mysql_query("insert into sysUGrps (ugr_Name, ugr_Password, ugr_eMail, ugr_Enabled)
-						VALUES  ($ownerGrpEmail,$pwd,$ownerGrpEmail,'Yes')");
-			if ($res) {
-				$ownerGrpID= mysql_insert_id();
-                header('Location: ' . HEURIST_MASTER_INDEX_URL . '/common/connect/login.php?db='
-                        .HEURIST_DBNAME . ($last_uri ? '&last_uri=' . urlencode($last_uri) : ''));
+	$ownerGrpEmail = strtolower(trim($ownerGrpEmail));
+	$res = mysql_query("select ugr_ID from sysUGrps where lower(ugr_eMail)='".$ownerGrpEmail."'");
+	if($res) { // query OK
+		if(mysql_num_rows($res) == 0) { // did not find the user, create a new one and pass back login info
+			$pwd = genRandomString();
+			$res = mysql_query("insert into sysUGrps (`ugr_Name`, `ugr_Password`, `ugr_eMail`, `ugr_Enabled`) VALUES  ('$ownerGrpEmail','$pwd','$ownerGrpEmail','Yes')");
+			if($res) {
+				$ownerGrpID = mysql_insert_id();
+                header('Location: ' . HEURIST_BASE_URL . '/common/connect/login.php?db=' . HEURIST_DBNAME . (isset($last_uri) ? '&last_uri=' . urlencode($last_uri) : '')); // TODO: Change to HEURIST_BASE_URL
 			} else { // Unable to create the new user
-                $error="Unable to write new user in Heurist master index database\n" .
-                        "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
-                $returnData=$dbID . "," . $error; 
-                return $returnData // if you can't set up user it isn't worth trying to register the database''
-			};
-		} 
+                $error = "Unable to write new user in Heurist master index database\n" . "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
+                $returnData = $dbID . "," . $error;
+                echo $returnData; // if you can't set up user it isn't worth trying to register the database''
+			}
+		}
 	} else {// error trying to find usergroup in UGrps table
-		$error="Unable to execute search for user in Heurist master index database\n" .
-                "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
-        $returnData=$dbID . "," . $error;
-        return $returnData // if you can't set up user it isn't worth trying to register the database''
-	};
+		$error = "Unable to execute search for user in Heurist master index database\n" . "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
+        $returnData = $dbID . "," . $error;
+        echo $returnData; // if you can't set up user it isn't worth trying to register the database''
+	}
 
 	// write the core database record describing the database to be registered and allocate registration ID
+	$res = mysql_query("select rec_ID from Records where `rec_URL`='$serverURL' AND `rec_Title`='$dbTitle'");
+	if(mysql_num_rows($res) == 0) {
+		$res = mysql_query("insert into Records (rec_URL, rec_Added, rec_Title, rec_RecTypeID, rec_AddedByImport, rec_OwnerUGrpID, rec_NonOwnerVisibility) VALUES  ('$serverURL', now(), '$dbTitle', " . HEURIST_DB_DESCRIPTOR_RECTYPE . ", 0, 1, 'Visible')");
+	    if (!$res) { // Unable to allocate a new ID
+	        $error = "Unable to execute search for user in Heurist master index database\n" . "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
+	        $returnData = $dbID . "," . $error;
+	        echo $returnData;
+		} else { // core database record created OK
+	        $dbID = mysql_insert_id();
+	        $returnData = $dbID;
+	    }
+    } else {
+		$row = mysql_fetch_row($res);
+		$returnData = $row[0] . "," . "Database was already registered";
+    }
 
-	$fullURL="$serverURL?db=$dbReg";
-	$res = mysql_query("insert into Records
-				(rec_URL, rec_Added, rec_Title, rec_RecTypeID, rec_AddedByImport, rec_OwnerUGrpID, rec_NonOwnerVisibility)
-				VALUES  ($fullURL, now(), $dbTitle, " . HEURIST_DB_DESCRIPTOR_RECTYPE . ", 1, $ownerGrpID, 'Visible')");
-    if (!$res) { // Unable to allocate a new ID
-        $error="Unable to execute search for user in Heurist master index database\n" .
-                "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
-        $returnData=$dbID . "," . $error;
-        return $returnData
-	} else { // core database record created OK
-        $dbID= mysql_insert_id();
-        $returnData="$dbID , $error , $editRecURL";
-    } 
-
-	// write the new database metadata as record details
-
-	// TO DO: write out detail records for any metadata we want to store
-
-	// pass back string of results  to be parsed on the other end
-
-	return $returnData;
-
+	echo $returnData;
 ?>

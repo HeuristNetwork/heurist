@@ -1,5 +1,4 @@
 <?php
-
 	/*<!--
 	* buildCrosswalks.php, Gets definitions from a specified installation of Heurist and writes them either to a new DB, or temp DB, 18-02-2011, by Juan Adriaanse
 	* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
@@ -129,9 +128,15 @@
 
 // TODO: Change three fields below to information about the database you will be importing from
 	global $source_db_id;
-	$source_db_id = '1';
-	$source_db_name = 'HeuristScholar Reference Database';
-	$source_url = "http://heuristscholar.org/h3-ja/admin/structure/getDBStructure.php?db=TestReferenceDB"; // TODO: RESET
+	if(!isset($_REQUEST["dbID"]) || $_REQUEST["dbID"] == 0) {
+		$source_db_id = '1';
+		$source_db_name = 'HeuristScholar Reference Database';
+		$source_url = "http://heuristscholar.org/h3-ja/admin/structure/getDBStructure.php?db=Reference2B";
+	} else {
+		$source_db_id = $_REQUEST["dbID"];
+		$source_db_name = $_REQUEST["dbName"];
+		$source_url = $_REQUEST["dbURL"]."admin/structure/getDBStructure.php?db=".$source_db_name;
+	}
 
 // Request data from source database
 	$ch = curl_init();
@@ -164,12 +169,10 @@
 			echo "Heurist reference database could not be accessed. Using 'fallbackDefinitionsIfOffline.txt' to create database instead.<br /><br />";
 		}
 		else { // Cancel buildCrosswalk process as no data can be received
-			echo "Source database could not be accessed.";
 			die("Source database could not be accessed.");
 		}
 	}
-	else {
-		echo "Data succesfully retrieved from Heurist references database.<br /><br />";
+	else { // Data successfully retrieved from remote server
 	}
 
 // Splits receiver data into data sets for one table
@@ -566,7 +569,7 @@
 			$query = "INSERT INTO `defDetailTypeGroups` (`dtg_ID`,`dtg_Name`,`dtg_Order`,`dtg_Description`) VALUES " . $resultSet;
 			mysql_query($query);
 			if(mysql_error()) {
-				echo "DETAILTYPEGROUPS Error inserting data: " . mysql_error() . "<br />";
+				echo "DETAILTYPEGROUPS Error inserting data: " . mysql_error() . "<br /><br />" . $resultSet . "<br />";
 				$errorCreatingTables = TRUE;
 			}
 		}
