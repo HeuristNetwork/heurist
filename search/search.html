@@ -37,24 +37,24 @@
 
 <head>
 	<title>Heurist Reference Database - &copy; 2005-2010 The University of Sydney</title>
-	
+
 	<link rel="stylesheet" media="screen and (max-device-width: 800px)" href="../common/css/smallscreen.css"/>
 	<link rel=icon href="../favicon.ico" type="image/x-icon">
 	<link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
 	<link id=httprsslink rel=alternate type="application/rss+xml" title="HTTP RSS feed" href="../export/feeds/searchRSS.php?q=tag:Favourite+OR+tag:Favorite">
-	
+
 	<link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/menu/assets/skins/sam/menu.css">
 	<script type="text/javascript" src="../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
 	<script type="text/javascript" src="../external/yui/2.8.2r1/build/json/json-min.js"></script>
 	<script type="text/javascript" src="../external/yui/2.8.2r1/build/container/container_core-min.js"></script>
 	<script type="text/javascript" src="../external/yui/2.8.2r1/build/menu/menu-min.js"></script>
-	
+
 	<script src="../external/jquery/jquery-1.6.min.js"></script>
-	
+
 	<link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
 	<link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
 	<link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/calendar/assets/skins/sam/calendar.css" />
-	
+
 	<script type="text/javascript" src="../external/yui/2.8.2r1/build/element/element-min.js"></script>
 	<script type="text/javascript" src="../external/yui/2.8.2r1/build/tabview/tabview-min.js"></script>
 	<script type="text/javascript" src="../external/yui/2.8.2r1/build/calendar/calendar-min.js"></script>
@@ -72,7 +72,7 @@
 	<link rel=stylesheet href="../common/css/global.css" media="all">
 	<link rel=stylesheet href="../common/css/search.css" media="all">
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	
+
 	<style>
 		 /* Hack for IE7 betas -- :hover etc in external CSS not respected without these rules */
 		a:hover{} a:active{} a:focus{}
@@ -85,10 +85,9 @@
 <body>
 	<iframe id=searchFrame frameborder=0 style="width:0;height:0;position:absolute;"></iframe>
 
-  <script src="../common/php/loadHAPI.php"></script>
-  <script src="../common/js/utilsLoad.js"></script>
-  <script src="../records/edit/editRecord.js"></script>
-
+	<script src="../common/php/loadHAPI.php"></script>
+	<script src="../common/js/utilsLoad.js"></script>	<!-- core HEURIST functions -->
+	<script src="../records/edit/editRecord.js"></script>
 	<script>
 		var hBase = "http://" + window.location.host + top.HEURIST.basePath;
 		var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"";
@@ -188,7 +187,15 @@
                     <!-- separator-->
 					<li class="admin-only"><a href="../import/delimited/updateDetailsFromDelimited.html" onClick="this.href = top.HEURIST.baseURL +'import/delimited/updateDetailsFromDelimited.html?db=' + database;" target="_blank" title="Update record details using delimited text" class="seperator">Detail updater</a></li>
                     <li class="admin-only"><a href="../export/delimited/exportDelimitedForRectype.html" target="_blank" onClick="this.href = top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database;" title="Export records as delimited text">Export delimited</a></li>
-					<li><a href="http://www.timemap.net/tmissues.php" target="_blank" title="Add a bug report directly into our bug tracking system">Report a bug</a></li>
+					<li><a href="#" onclick="top.HEURIST.util.popupURL(top, bugReportURL,
+						{	'close-on-blur': false,
+							'no-resize': false,
+							height: 520,
+							width: 740,
+							callback: _bugReportCallback
+						});
+						return false;" title="Click to send a bug report">Report bug</a>
+					</li>
 					<!-- separator-->
                     <li class="admin-only"><a href="../admin/structure/editStructure.php" onClick="this.href = '../admin/adminMenu.php?db=' + database;" target="_blank" title="For administrators only" class="seperator">Administrator tools</a></li>
 				</ul>
@@ -257,7 +264,7 @@
 <div id="center-panel"></div>
 <!-- search and menu -->
 <div id=search class="banner">
-	
+
 	<form onSubmit="top.HEURIST.search.checkSearchForm();" class="searchTable">
 	<input type=hidden id=w-input name=w>
 	<div class="tableCell"><!-- add record -->
@@ -326,7 +333,7 @@
                     <!-- <li><a href="#" id=result-style-list-link-new title="View results as a list" onClick="top.HEURIST.search.setResultStyle('two-col');">2 Column List</a></li> -->
                     <li><a href="#" id=result-style-icons-link title="View results as icons" onClick="top.HEURIST.search.setResultStyle('icons');">Icons</a></li>
                     <li><a href="#" id=result-style-thumbs-link-new title="View results as icons" onClick="top.HEURIST.search.setResultStyle('thumbnails');">Thumbnails</a></li>
-                    
+
 					<li><a href="#" title="Click to hide/show the legend" onClick="top.HEURIST.search.toggleLegend(); blur(); return false;" id="legend-link" class="seperator">legend</a></li>
 				</ul>
 			</li>
@@ -335,14 +342,6 @@
 					<li><a href="#" onClick="top.HEURIST.search.deleteBiblios(); return false;" title="Select one or more records, then click to delete">Delete</a></li>
 					<li><a href="#" onClick="top.HEURIST.search.fixDuplicates(); return false;" title="Select one or more records, then click to fix duplicates">Merge dupes</a></li>
 					<li><a href="#" onClick="top.HEURIST.search.collectDuplicates(); return false;" title="Click to identify possible duplicates in the current query and create collections for each set">Collect dupes</a></li>
-					<li><a href="#" onclick="top.HEURIST.util.popupURL(top, bugReportURL,
-						{	'close-on-blur': false,
-							'no-resize': false,
-							height: 520,
-							width: 740,
-							callback: _bugReportCallback
-						});
-						return false;" title="Click to send a bug report">Report bug</a></li>
 				</ul>
 			</li>
 		</ul>
@@ -413,7 +412,7 @@
 	<!--<div id=pageNavCount> <nobr> <span id=page-nav></span> <span id=resource-count></span> </nobr></div>-->
 </div>
 <div id=password>
-	<div><b>Username / password reminder:</b></div>>
+	<div><b>Username / password reminder:</b></div>
 	<div id=reminder></div>
 </div>
 <div style="position: absolute; left: 50%; top: 145px;">
