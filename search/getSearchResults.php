@@ -38,6 +38,8 @@ if (! defined('SEARCH_VERSION')) {
 }
 if (!defined('MEMCACHED_PORT')) define('MEMCACHED_PORT', 11211);
 
+require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/parseQueryToSQL.php');
 
 $memcache = null;
@@ -130,7 +132,7 @@ function loadRecord($id, $fresh = false, $bare = false) {
 			return array("error" => "couldn't connect to memcached");
 		}
 	}
-	$key = HEURIST_DBNAME . ":record:" . $id;
+	$key = DATABASE . ":record:" . $id;
 	$record = null;
 	if (! $fresh) {
 		$record = $memcache->get($key);
@@ -156,7 +158,7 @@ function updateCachedRecord($id) {
 			return array("error" => "couldn't connect to memcached");
 		}
 	}
-	$key = HEURIST_DBNAME . ":record:" . $id;
+	$key = DATABASE . ":record:" . $id;
 	$record = $memcache->get($key);
 	if ($record) {	// will only update if previously cached
 		$record = loadBareRecordFromDB($id);

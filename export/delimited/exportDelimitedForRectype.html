@@ -28,7 +28,9 @@
 
   <script src="../../common/php/loadHAPI.php"></script>
   <script>
-      if (!(HCurrentUser.isLoggedIn()&& HCurrentUser.isAdministrator())) window.location =  HAPI.HeuristBaseURL + "common/connect/login.php"; // saw TODO: add instance code here
+      if (!(HCurrentUser.isLoggedIn()&& HCurrentUser.isAdministrator())) {
+//	   window.location =  HAPI.HeuristBaseURL + "common/connect/login.php"; // saw TODO: add instance code here
+	   }
   </script>
 
   <script src="exportDelimitedForRectype.js"></script>
