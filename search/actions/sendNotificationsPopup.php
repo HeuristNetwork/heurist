@@ -48,7 +48,7 @@ if ($_REQUEST['send_notification']) {
 function fill_bib_ids() {
 	var bib_ids_elt = document.getElementById('bib_ids');
 	if (! bib_ids_elt.value) {
-		var bib_ids_list = top.HEURIST.search.get_bib_ids();
+		var bib_ids_list = top.HEURIST.search.getSelectedRecIDs();
 		bib_ids_elt.value = bib_ids_list.join(',');
 	}
 }

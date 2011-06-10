@@ -326,7 +326,7 @@ function getHtmlMarker(y,x,arrayRecsByTypeObjs,numMarkers, options) {
 			default:
 				markerHTML += "style=\"width:24px;\">"
 							+ "<div class=\"icon\" style=\"background-image:url("+HEURIST.baseURL+"common/images/rectype-icons/map-icons/map_multiRecords.png\")\">"
-							+ "<div class=\"refCount\"> " + Records.length + "</div></div>"
+							+ "<div class=\"refCount\"> " + recIDs.length + "</div></div>"
 				+ "</div>"
 				+ indicatorHTML;
 				markerIcon.iconSize = new GSize(24, markerHeight);

@@ -98,8 +98,8 @@
 						if (selectedIds) {
 							selectedIds = selectedIds.split(",");
 						}
-					}else if (top.HEURIST.search.selectedRecordIds) {
-						selectedIds = top.HEURIST.search.selectedRecordIds;
+					}else if (top.HEURIST.search.getSelectedRecIDs().get().length > 0) {
+						selectedIds = top.HEURIST.search.getSelectedRecIDs().get();
 					}
 				//query
 					query = location.search.replace(/&?selectedIds=([0-9,]*)/,"");
@@ -338,11 +338,11 @@
 			function onSelectionChange(eventType, argList) {
 				if (eventType == "heurist-selectionchange"){
 					newSelectionIds = [];
-					if (argList && argList.match("selectedIds")) {
+					if (top.HEURIST.search.getSelectedRecIDs().get().length > 0) {
+						newSelectionIds = top.HEURIST.search.getSelectedRecIDs().get();
+					}else if (argList && argList.match("selectedIds")) {
 						var ids = argList.match("selectedIds=(\\d+(?:,\\d+)*)");
 						if (ids && ids[1]) newSelectionIds = ids[1].split(",");
-					}else if (top.HEURIST.search.selectedRecordIds) {
-						newSelectionIds = top.HEURIST.search.selectedRecordIds;
 					}
 					newSelectionMap = objFromArr(newSelectionIds);
 					alreadySelectedMap = {};
@@ -380,8 +380,10 @@
 			}
 
 			function updateSelection(){
-				for (var i = 0; i < selectedIds.length; i++) {
-					$('div[class~=record]').filter('div[id='+ selectedIds[i] +']').addClass("selected");
+				if(selectedIds && selectedIds.length>0) {
+					for (var i = 0; i < selectedIds.length; i++) {
+						$('div[class~=record]').filter('div[id='+ selectedIds[i] +']').addClass("selected");
+					}
 				}
 			}
 

@@ -44,14 +44,13 @@ var hBase = "http://" + window.location.host +
 var database = (top && top.HEURIST && top.HEURIST.database? top.HEURIST.database.name : location.search.match(/db=([^&]+)/)[1]);
 
 function init () {
-	//document.body.innerHTML = top.HEURIST.search.get_bib_ids().join();
 
 	relTargetID;
 	recCountSpan = document.getElementById("record-count");
 	var relTypeSelectDiv = document.getElementById("relationship-type-div");
 	relTargetInput = document.getElementById("related-record");
 
-	recCountSpan.innerHTML = top.HEURIST.search.get_bib_ids().length;
+	recCountSpan.innerHTML = top.HEURIST.search.getSelectedRecIDs().length;
 
 	var relTypeTerms = top.HEURIST.util.expandJsonStructure(top.HEURIST.rectypes.typedefs[52].dtFields[200][11]);
 	var relTypeTermsDisabled = top.HEURIST.util.expandJsonStructure(top.HEURIST.rectypes.typedefs[52].dtFields[200][13]);
@@ -76,7 +75,7 @@ function save () {	// xhrFormSubmit only uses the form's action and elements(nam
 	var fakeForm = {
 		action: top.HEURIST.basePath + "records/relationships/saveRelationships.php?db=" + database,
 		elements: [
-			{ name: "recID", value: top.HEURIST.search.get_bib_ids().join(",") },
+			{ name: "recID", value: top.HEURIST.search.getSelectedRecIDs().join(",") },
 			{ name: "save-mode", value: "new" },
 			{ name: "RelTermID", value: relTypeSelect.value },
 			{ name: "RelatedRecID", value: relTargetID }
