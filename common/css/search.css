@@ -1496,10 +1496,10 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	-moz-user-select: none; user-select: none; -webkit-user-select: none;
 	background:#EEE;
 	background:-moz-linear-gradient(center top , #FFFFFF, #EEEEEE) repeat scroll 0 0 transparent;
-	background:-webkit-gradient(linear, left top, left bottom, from(#FFFFFF), to(#EEEEEE)); 
+	background:-webkit-gradient(linear, left top, left bottom, from(#FFFFFF), to(#EEEEEE));
 	}
 
-.list .recordDiv, .two-col .recordDiv { 
+.list .recordDiv, .two-col .recordDiv {
 	border-bottom: 1px solid #CCCCCC;
     border-collapse: collapse;
     border-radius: 0;
@@ -1513,7 +1513,7 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
     text-align: left;
 	overflow:hidden;
 	}
-.list .recordDiv .recordTitle, .two-col .recordDiv .recordTitle { 
+.list .recordDiv .recordTitle, .two-col .recordDiv .recordTitle {
 	display: block;
 	height: 1.1em;
 	left: 60px;
@@ -1525,11 +1525,11 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	vertical-align: middle;
 	white-space: nowrap;
 	}
-.list .recordDiv .recordIcons, .two-col .recordDiv .recordIcons,{ 
+.list .recordDiv .recordIcons, .two-col .recordDiv .recordIcons,{
 	display:table-cell;
 	min-width:50px;
 	}
-	
+
 .icons div.recordDiv:hover, .thumbnails div.recordDiv:hover  {-moz-transform:scale(1.1,1.1);-webkit-transform:scale(1.1,1.1);transform:scale(1.1,1.1); z-index:10; -moz-box-shadow:0px 3px 8px #666;-webkit-box-shadow:0px 3px 8px #666;box-shadow:0px 3px 8px #666;}
 
 .icons .recordDiv {
@@ -1592,7 +1592,7 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	}
 .icons .recordTitle a{line-height: 13px;}
 .icons .recordIcons {display:none}
-.icons .recTypeThumb {opacity:0.6;}	
+.icons .recTypeThumb {opacity:0.6;}
 .1col .recordDiv .thumbnail, .2col .recordDiv .thumbnail {display:none}
 
 .thumbnails .recordDiv {
@@ -1611,9 +1611,9 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	padding:0;
 	position:relative;
 	width:128px;
-	user-select: none; 
-	-moz-user-select: none; 
-	-khtml-user-select:none; 
+	user-select: none;
+	-moz-user-select: none;
+	-khtml-user-select:none;
 	user-select: none;}
 
 .result_thumb_inner {position: absolute;top:0;bottom: 0;right:0;left: 0;overflow: hidden;padding: 6px;}
@@ -1632,11 +1632,25 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 .thumbnails .recordDiv .recordIcons input {vertical-align: text-bottom;}
 
 
+.recorddiv.linkselected{
+	border-color:#62FFF8;
+	background:#EEE;
+	}
+.recorddiv.linkhilited{
+	border-color:#FFA7F8;
+	background:#EEE;
+	}
 .recorddiv.selected{
 	border-color:#62A7F8;
 	background:#EEE;
 	background:-moz-linear-gradient(center top , #e6f8fd, #bee4f8) repeat scroll 0 0 transparent;
-	background:-webkit-gradient(linear, left top, left bottom, from(#e6f8fd), to(#bee4f8)); 
+	background:-webkit-gradient(linear, left top, left bottom, from(#e6f8fd), to(#bee4f8));
+	}
+.recorddiv.selected.linkselected{
+	border-color:#62FFF8;
+	background:#EEE;
+	background:-moz-linear-gradient(center top , #e6f8fd, #bee4f8) repeat scroll 0 0 transparent;
+	background:-webkit-gradient(linear, left top, left bottom, from(#e6f8fd), to(#bee4f8));
 	}
 div.recorddiv:hover{
 	-moz-box-shadow:0 1px 4px #000;
@@ -1650,7 +1664,7 @@ div.recorddiv:hover{
 .filter{border-top:1px solid #BBB;
 		background-color: #DDD;
 		background:-moz-linear-gradient(center top , #DBDFE6, #FFF) repeat scroll 0 0 transparent;
-		background:-webkit-gradient(linear, left top, left bottom, from(#DBDFE6), to(#FFF)); 
+		background:-webkit-gradient(linear, left top, left bottom, from(#DBDFE6), to(#FFF));
 		color: #999999;
 		position: relative;
 		min-height:20px;
@@ -1683,7 +1697,7 @@ div.recorddiv:hover{
 	background:-moz-linear-gradient(center top , #F0F0F0, #FFF) repeat scroll 0 0 transparent;
 	background:-webkit-gradient(linear, left top, left bottom, from(#F0F0F0), to(#FFF));
 	}
-div.filter .showrelated {padding-left:0}	
+div.filter .showrelated {padding-left:0}
 div.filter .showrelated a {
     background-image: url("../images/heading_saved_search-hidden.png");
     background-position: 0 -7px;
@@ -1741,51 +1755,51 @@ div.recorddiv:hover > #recordID {
     width: 8px;
     height: 8px;
 }
- 
+
 ::-webkit-scrollbar-button:vertical {
     background-color: transparent;
     border: 1px none blue;
 }
- 
+
 /* Turn on single button up on top, and down on bottom */
 ::-webkit-scrollbar-button:start:decrement,
 ::-webkit-scrollbar-button:end:increment {
     display: none;
 }
- 
+
 /* Turn off the down area up on top, and up area on bottom */
 ::-webkit-scrollbar-button:vertical:start:increment,
 ::-webkit-scrollbar-button:vertical:end:decrement {
     display: none;
 }
- 
+
 /* Place The scroll down button at the bottom */
 ::-webkit-scrollbar-button:vertical:increment {
     background-color: black;
     border: 1px dashed blue;
 }
- 
+
 /* Place The scroll up button at the up */
 ::-webkit-scrollbar-button:vertical:decrement {
     background-color: purple;
     border: 1px none blue;
 }
- 
+
 ::-webkit-scrollbar-track:vertical {
     background-color: transparent;
     border: 1px none pink;
 }
- 
+
 /* Top area above thumb and below up button */
 ::-webkit-scrollbar-track-piece:vertical:start {
     border: 1px none #000;
 }
- 
+
 /* Bottom area below thumb and down button */
 ::-webkit-scrollbar-track-piece:vertical:end {
     border: 1px none pink;
 }
- 
+
 /* Track below and above */
 ::-webkit-scrollbar-track-piece {
 	background:transparent;
@@ -1796,7 +1810,7 @@ div.recorddiv:hover > #recordID {
 	background:-webkit-gradient(linear, left top, left bottom, from(#B9C8CE), to(#8F9BAB))transparentder-radius: 4px;
     -webkit-box-shadow:inset 0px 0px 6px rgba(0,0,0,0.5);
 }
- 
+
 /* The thumb itself */
 ::-webkit-scrollbar-thumb:vertical {
     height: 25px;
@@ -1813,12 +1827,12 @@ div.recorddiv:hover > #recordID {
 	border: 1px solid #8C989E;
 	-webkit-box-shadow:inset 0px -2px 4px #8798B3;
 }
- 
+
 /* Corner */
 ::-webkit-scrollbar-corner:vertical {
     background-color: black;
 }
- 
+
 /* Resizer */
 ::-webkit-scrollbar-resizer:vertical {
     background-color: gray;

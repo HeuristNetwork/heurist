@@ -88,38 +88,40 @@ function load(){
 
 	var resizerCell = document.getElementById("resizer");
 	var timelineCell = document.getElementById("timeline-cell");
-	resizerCell.onmousedown = function(e) {
-		if (! e) e = window.event;
-
-		var downY = e.pageY || e.clientY;
-		var downHeight = timelineCell.offsetHeight;
-
-		resizerCell.document_mouseup = function(e) {
+	if (resizerCell) {
+		resizerCell.onmousedown = function(e) {
 			if (! e) e = window.event;
 
-			var upY = e.pageY || e.clientY;
-			var upHeight = downHeight + (downY - upY);
+			var downY = e.pageY || e.clientY;
+			var downHeight = timelineCell.offsetHeight;
 
-			timelineCell.style.height = upHeight + "px";
-			timeline.layout();
+			resizerCell.document_mouseup = function(e) {
+				if (! e) e = window.event;
 
-			if (top.HEURIST.deregisterEvent) {
-				top.HEURIST.deregisterEvent(document, "mouseup", resizerCell.document_mouseup);
-			}else if (window.removeEventListener) {
-				document.removeEventListener("mouseup", resizerCell.document_mouseup,true);
-			} else if (window.detachEvent) {
-				document.detachEvent("onmouseup", resizerCell.document_mouseup);
+				var upY = e.pageY || e.clientY;
+				var upHeight = downHeight + (downY - upY);
+
+				timelineCell.style.height = upHeight + "px";
+				timeline.layout();
+
+				if (top.HEURIST.deregisterEvent) {
+					top.HEURIST.deregisterEvent(document, "mouseup", resizerCell.document_mouseup);
+				}else if (window.removeEventListener) {
+					document.removeEventListener("mouseup", resizerCell.document_mouseup,true);
+				} else if (window.detachEvent) {
+					document.detachEvent("onmouseup", resizerCell.document_mouseup);
+				}
+			};
+
+			if (top.HEURIST.registerEvent){
+				top.HEURIST.registerEvent(document, "mouseup", resizerCell.document_mouseup);
+			}else if (window.addEventListener) {
+				document.addEventListener("mouseup", resizerCell.document_mouseup,true);
+			} else if (window.attachEvent) {
+				document.attachEvent("onmouseup", resizerCell.document_mouseup);
 			}
 		};
-
-		if (top.HEURIST.registerEvent){
-			top.HEURIST.registerEvent(document, "mouseup", resizerCell.document_mouseup);
-		}else if (window.addEventListener) {
-			document.addEventListener("mouseup", resizerCell.document_mouseup,true);
-		} else if (window.attachEvent) {
-			document.attachEvent("onmouseup", resizerCell.document_mouseup);
-		}
-	};
+	}
 }
 
 function onSelectionChange(eventType, argList) {

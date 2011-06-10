@@ -284,7 +284,7 @@ top.HEURIST.search = {
 			showRelatedMenuItem.className = "showrelated level" + level;
 			filterMenu.appendChild(showRelatedMenuItem);
 		}
-		
+
 		if (levelRecTypes){
 			var j;
 			var rtNames = $.map(levelRecTypes, function(recIDs,rtID) {
@@ -662,7 +662,7 @@ top.HEURIST.search = {
 				html += top.HEURIST.search.renderResultRecord(recSet[recID].record);
 			});
 		resultsDiv.innerHTML += html;
-		top.HEURIST.search.addResultLevelClickHandlers(level);
+		top.HEURIST.search.addResultLevelEventHandlers(level);
 		//apply classes for linked recordIDs
 		$('.recordDiv',resultsDiv).each(function(i, recDiv){
 				var recInfo = recSet[$(recDiv).attr("bib_id")];
@@ -877,7 +877,7 @@ top.HEURIST.search = {
 		}
 
 		// add click handlers
-		top.HEURIST.search.addResultLevelClickHandlers(0);
+		top.HEURIST.search.addResultLevelEventHandlers(0);
 /*		var thumbs = $(".recordDiv", resultsDiv).get();
 		for (var i=0; i < thumbs.length; ++i) {
 			var result = thumbs[i];
@@ -910,7 +910,7 @@ top.HEURIST.search = {
 		});
 	},
 
-	addResultLevelClickHandlers: function(level) {
+	addResultLevelEventHandlers: function(level) {
 		// add click handlers
 		var recDivs = $(".recordDiv", $("#results-level"+level)).get();
 		for (var i=0; i < recDivs.length; ++i) {
@@ -920,6 +920,8 @@ top.HEURIST.search = {
 			var rec_title = $(".recordTitle", recDiv)[0];
 
 			top.HEURIST.registerEvent(recDiv, "click", top.HEURIST.search.resultItemOnClick);
+			top.HEURIST.registerEvent(recDiv, "mouseover", top.HEURIST.search.resultItemMouseOver);
+			top.HEURIST.registerEvent(recDiv, "mouseout", top.HEURIST.search.resultItemMouseOut);
 
 			if (pin_img) {
 				top.HEURIST.registerEvent(pin_img, "click", recDiv.getAttribute("bkmk_id") ? function(){} : top.HEURIST.search.addBookmark);
@@ -1157,18 +1159,8 @@ top.HEURIST.search = {
 			if (!resultDiv) {
 				resultDiv = $('div[class~=recordDiv]',$("#results-level"+level)).filter('div[bib_id='+ bib_id +']').get(0);
 			}
-			var cb = resultDiv.getElementsByTagName("INPUT");
-			if (cb[0] && cb[0].name == "bib[]") {
-				cb = cb[0];
-			}else{
-				cb = null;
-			}
-			top.HEURIST.search.bib_ids[bib_id] = true;	//deprecated
-			if (cb) cb.checked = true;					//deprecated
-			var bkmk_id = cb.parentNode.getAttribute("bkmk_id");
-			if (bkmk_id)
-				top.HEURIST.search.bkmk_ids[bkmk_id] =  true;
-			resultDiv.className += " selected";
+			$(resultDiv).toggleClass("selected");
+			$(".link"+bib_id,$("#results")).addClass("linkSelected");
 			if (!top.HEURIST.search.selectedRecordDivs[level]) {
 				top.HEURIST.search.selectedRecordDivs[level] = {};
 			}
@@ -1184,24 +1176,89 @@ top.HEURIST.search = {
 		var resultDiv = top.HEURIST.search.selectedRecordDivs[level][bib_id];
 		if (resultDiv) {
 			delete top.HEURIST.search.selectedRecordDivs[level][bib_id];
-			var cb = resultDiv.getElementsByTagName("INPUT");
-			if (cb[0] && cb[0].name == "bib[]") {
-				cb = cb[0];
-			}else{
-				cb = null;
-			}
-			top.HEURIST.search.bib_ids[bib_id] = null;
-			if (cb) cb.checked = false;
-			var bkmk_id = cb.parentNode.getAttribute("bkmk_id");
-			if (bkmk_id)
-				top.HEURIST.search.bkmk_ids[bkmk_id] =  false;
-			resultDiv.className = resultDiv.className.replace(" selected", "");
+			$(resultDiv).toggleClass("selected");
+			$(".link"+bib_id,$("#results")).removeClass("linkSelected");
+//			resultDiv.className = resultDiv.className.replace(" selected", "");
 			for(var i = 0; i < top.HEURIST.search.selectedRecordIds[level].length; i++){
 				if (top.HEURIST.search.selectedRecordIds[level][i] == bib_id) {
 					top.HEURIST.search.selectedRecordIds[level].splice(i,1);
 					break;
 				}
 			}
+		}
+	},
+
+	resultItemMouseOver: function(e, targ) {
+		//find the event and target element
+		if (! e) e = window.event;
+
+		if (e) {
+			e.cancelBubble = true;
+			if (e.stopPropagation) {
+				e.stopPropagation();
+			}
+		}
+
+		if (! targ) {
+			if (e.target) {
+				targ = e.target;
+			}else if (e.srcElement) {
+				targ = e.srcElement;
+			}
+			if (targ.nodeType == 3) {
+				targ = targ.parentNode;
+			}
+		}
+
+		if (targ.getAttribute("bib_id")) {
+			var resultDiv = targ;
+		}else if (targ.parentNode  &&  targ.parentNode.getAttribute("bib_id")) {
+			var resultDiv = targ.parentNode;
+		}else{
+			return;  // no target so we can't do anything
+		}
+
+		var bib_id = $(resultDiv).attr("bib_id");
+		if(parseInt(bib_id)>=0) {
+			$(resultDiv).toggleClass("hilited");
+			$(".link"+bib_id,$("#results")).addClass("linkHilited");
+		}
+	},
+
+	resultItemMouseOut: function(e, targ) {
+		//find the event and target element
+		if (! e) e = window.event;
+
+		if (e) {
+			e.cancelBubble = true;
+			if (e.stopPropagation) {
+				e.stopPropagation();
+			}
+		}
+
+		if (! targ) {
+			if (e.target) {
+				targ = e.target;
+			}else if (e.srcElement) {
+				targ = e.srcElement;
+			}
+			if (targ.nodeType == 3) {
+				targ = targ.parentNode;
+			}
+		}
+
+		if (targ.getAttribute("bib_id")) {
+			var resultDiv = targ;
+		}else if (targ.parentNode  &&  targ.parentNode.getAttribute("bib_id")) {
+			var resultDiv = targ.parentNode;
+		}else{
+			return;  // no target so we can't do anything
+		}
+
+		var bib_id = $(resultDiv).attr("bib_id");
+		if(parseInt(bib_id)>=0) {
+			$(resultDiv).toggleClass("hilited");
+			$(".link"+bib_id,$("#results")).removeClass("linkHilited");
 		}
 	},
 
@@ -1598,16 +1655,6 @@ top.HEURIST.search = {
 		e.cancelBubble = true;
 		if (e.stopPropagation) e.stopPropagation();
 		return false;
-	},
-
-	cb_onclick: function(cb) {
-		if (cb  &&  cb.name == "bib[]") {
-			var bib_id = cb.parentNode.getAttribute("bib_id");
-			top.HEURIST.search.bib_ids[bib_id] = cb.checked ? true : null;
-			var bkmk_id = cb.parentNode.getAttribute("bkmk_id");
-			if (bkmk_id)
-				top.HEURIST.search.bkmk_ids[bkmk_id] = cb.checked ? true : null;
-		}
 	},
 
 	mapSelected: function() {
