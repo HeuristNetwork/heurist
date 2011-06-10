@@ -184,9 +184,9 @@
 					<li><a href="../import/importerFramework.php?format=BIB" name="auto-popup" title="Import bibliographic exchange format files">Import bibliographic</a></li>
 					<li><a href="../import/importerFramework.php?format=GEO" name="auto-popup" title="Import KML files">Import geographic</a></li>
 					<li><a href="../import/delimited/importRecordsFromDelimited.html" onClick="this.href = top.HEURIST.baseURL +'import/delimited/importRecordsFromDelimited.html?db=' + database;" title="Import a delimited text file of data for one record type" target="_blank">Import delimited</a></li>
-                    <!-- separator-->
+					<!-- separator-->
 					<li class="admin-only"><a href="../import/delimited/updateDetailsFromDelimited.html" onClick="this.href = top.HEURIST.baseURL +'import/delimited/updateDetailsFromDelimited.html?db=' + database;" target="_blank" title="Update record details using delimited text" class="seperator">Detail updater</a></li>
-                    <li class="admin-only"><a href="../export/delimited/exportDelimitedForRectype.html" target="_blank" onClick="this.href = top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database;" title="Export records as delimited text">Export delimited</a></li>
+					<li class="admin-only"><a href="../export/delimited/exportDelimitedForRectype.html" target="_blank" onClick="this.href = top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database;" title="Export records as delimited text">Export delimited</a></li>
 					<li><a href="#" onclick="top.HEURIST.util.popupURL(top, bugReportURL,
 						{	'close-on-blur': false,
 							'no-resize': false,
@@ -376,8 +376,8 @@
 					<div id="noresult-search-status-search-web">Click <a href="#" onClick="top.HEURIST.search.launchWebSearch(); return false;">web search</a> to search the web</div>
 		</div>
 		</div>
-		<div id=results-level0 class="icons"></div>
-		<div id=results-level1 class="icons"></div>
+		<div id=results-level0 class="icons" level="0"></div>
+		<div id=results-level1 class="icons" level="1"></div>
 	</div>
 	</div>
 	<!--</div>-->

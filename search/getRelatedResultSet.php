@@ -236,8 +236,8 @@ global $ACCESSABLE_OWNER_IDS;
 		} else if ( !in_array($row['trgRecID'],$recSet['infoByDepth'][$depth]['ptrtypes'][$row['ptrDetailTypeID']])){
 			array_push($recSet['infoByDepth'][$depth]['ptrtypes'][$row['ptrDetailTypeID']],$row['trgRecID']);
 		}
-		if ( !in_array($row['trgRecID'],$recSet['infoByDepth'][$depth]['recs'])){
-			array_push($recSet['infoByDepth'][$depth]['recs'],$row['trgRecID']);
+		if ( !in_array($row['trgRecID'],$recSet['infoByDepth'][$depth]['recIDs'])){
+			array_push($recSet['infoByDepth'][$depth]['recIDs'],$row['trgRecID']);
 		}
 		if (!@$recSet['infoByDepth'][$depth]['rectypes'][$row['trgType']]) {
 			$recSet['infoByDepth'][$depth]['rectypes'][$row['trgType']] = array($row['trgRecID']);
@@ -323,8 +323,8 @@ global $REVERSE, $ACCESSABLE_OWNER_IDS;
 		} else if ( !in_array($row['trgRecID'],$recSet['infoByDepth'][$depth]['ptrtypes'][$row['ptrDetailTypeID']])){
 			array_push($recSet['infoByDepth'][$depth]['ptrtypes'][$row['ptrDetailTypeID']],$row['trgRecID']);
 		}
-		if ( !in_array($row['trgRecID'],$recSet['infoByDepth'][$depth]['recs'])){
-			array_push($recSet['infoByDepth'][$depth]['recs'],$row['trgRecID']);
+		if ( !in_array($row['trgRecID'],$recSet['infoByDepth'][$depth]['recIDs'])){
+			array_push($recSet['infoByDepth'][$depth]['recIDs'],$row['trgRecID']);
 		}
 		if (!@$recSet['infoByDepth'][$depth]['rectypes'][$row['trgType']]) {
 			$recSet['infoByDepth'][$depth]['rectypes'][$row['trgType']] = array($row['trgRecID']);
@@ -415,8 +415,8 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 		}
 		if ( !$row['srcIsFrom']) {//inverse relation
 			$nlrIDs[$row['srcRecID']] = 1;	//save it for next level query
-			if ( !in_array($row['srcRecID'],$recSet['infoByDepth'][$depth]['recs'])){
-				array_push($recSet['infoByDepth'][$depth]['recs'],$row['srcRecID']);
+			if ( !in_array($row['srcRecID'],$recSet['infoByDepth'][$depth]['recIDs'])){
+				array_push($recSet['infoByDepth'][$depth]['recIDs'],$row['srcRecID']);
 			}
 			if (!@$recSet['infoByDepth'][$depth]['rectypes'][$row['srcType']]) {
 				$recSet['infoByDepth'][$depth]['rectypes'][$row['srcType']] = array($row['srcRecID']);
@@ -430,8 +430,8 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 			}
 		}else{
 			$nlrIDs[$row['trgRecID']] = 1;	//save it for next level query
-			if ( !in_array($row['trgRecID'],$recSet['infoByDepth'][$depth]['recs'])){
-				array_push($recSet['infoByDepth'][$depth]['recs'],$row['trgRecID']);
+			if ( !in_array($row['trgRecID'],$recSet['infoByDepth'][$depth]['recIDs'])){
+				array_push($recSet['infoByDepth'][$depth]['recIDs'],$row['trgRecID']);
 			}
 			if (!@$recSet['infoByDepth'][$depth]['rectypes'][$row['trgType']]) {
 				$recSet['infoByDepth'][$depth]['rectypes'][$row['trgType']] = array($row['trgRecID']);
@@ -533,7 +533,7 @@ function buildGraphStructure($rec_ids, &$recSet) {
 //echo "depth = $depth  ptrfilter = ". print_r($ptrfilter,true)."\n<br/>";
 //echo "depth = $depth  relfilter = ". print_r($relfilter,true)."\n<br/>";
 	if (!@$recSet['infoByDepth'][$depth]) {
-		$recSet['infoByDepth'][$depth] = array('recs'=>array(),'rectypes'=>array());
+		$recSet['infoByDepth'][$depth] = array('recIDs'=>array(),'rectypes'=>array());
 	}
 		$p_rec_ids = findPointers($rec_ids,$recSet, $depth, $rtfilter, $ptrfilter);
 //echo "depth = $depth  new ptr recID = ". json_format($p_rec_ids)."\n";
@@ -554,7 +554,7 @@ function getRelationStructure($queryResult) {
 	$recSet = array('count'=> 0,
 					'relatedSet'=>array(),
 					'params'=> array_intersect_key($_REQUEST, array('q'=>1,'w'=>1,'depth'=>1,'f'=>1,'limit'=>1,'offset'=>1,'rev'=>1,'revexpand'=>1,'db'=>1,'stub'=>1,'woot'=>1,'fc'=>1,'slb'=>1,'rtfilters'=>1,'relfilters'=>1,'ptrfilters'=>1)),
-					'infoByDepth'=>array(array('recs'=>array(),'rectypes'=>array())));
+					'infoByDepth'=>array(array('recIDs'=>array(),'rectypes'=>array())));
 //echo "query reults = ".json_format($result,true);
 	$rec_ids = array();
 	foreach ($queryResult['records'] as $record) {
@@ -570,7 +570,7 @@ function getRelationStructure($queryResult) {
 									null,
 									null,
 									null,null));
-		array_push($recSet['infoByDepth'][0]['recs'],$record['rec_ID']);
+		array_push($recSet['infoByDepth'][0]['recIDs'],$record['rec_ID']);
 		if (!@$recSet['infoByDepth'][0]['rectypes'][$record['rec_RecTypeID']]) {
 			$recSet['infoByDepth'][0]['rectypes'][$record['rec_RecTypeID']] = array($record['rec_ID']);
 		} else if ( !in_array($record['rec_ID'],$recSet['infoByDepth'][0]['rectypes'][$record['rec_RecTypeID']])){
@@ -584,9 +584,9 @@ function getRelationStructure($queryResult) {
 	$recSet['count'] = count($recSet['relatedSet']);
 /*	foreach ($relationships as $recID => $linkInfo) {
 		if (!@$recSet['infoByDepth'][$linkInfo['depth']]) {
-			$recSet['infoByDepth'][$linkInfo['depth']] = array('recs'=>array(),'rectypes'=>array());
+			$recSet['infoByDepth'][$linkInfo['depth']] = array('recIDs'=>array(),'rectypes'=>array());
 		}
-		array_push($recSet['infoByDepth'][$linkInfo['depth']]['recs'],$recID);
+		array_push($recSet['infoByDepth'][$linkInfo['depth']]['recIDs'],$recID);
 			array_push($recSet['infoByDepth'][$linkInfo['depth']]['rectypes'],$linkInfo['record'][4]);
 		}
 		if (!array_key_exists('ptrtypes',$recSet['infoByDepth'][$linkInfo['depth']]) &&

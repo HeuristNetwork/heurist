@@ -402,7 +402,7 @@ function getTermTree($termDomain, $matching = 'exact') {	// vocabDomain can be e
 }
 
 function getTerms($useCachedData = false) {	// vocabDomain can be empty, 'reltype' or 'enum' or any future term use domain defined in trm_Domain enum
-	$cacheKey = HEURIST_DBNAME.":getTerms";
+	$cacheKey = DATABASE.":getTerms";
 	if ($useCachedData) {
 		$terms = getCachedData($cacheKey);
 		if ($terms) {
@@ -674,7 +674,7 @@ function getRectypeStructures($rt_ids) {
 
 // returns an array of RecType Structures for all RecTypes
 function getAllRectypeStructures($useCachedData = false) {
-	$cacheKey = HEURIST_DBNAME.":AllRecTypeInfo";
+	$cacheKey = DATABASE.":AllRecTypeInfo";
 	if ($useCachedData) {
 		$rtStructs = getCachedData($cacheKey);
 		if ($rtStructs) {
@@ -829,7 +829,7 @@ function getDetailTypeColNames() {
 
 // returns an array of RecType Structures for all RecTypes
 function getAllDetailTypeStructures($useCachedData = false) {
-	$cacheKey = HEURIST_DBNAME.":AllDetailTypeInfo";
+	$cacheKey = DATABASE.":AllDetailTypeInfo";
 	if ($useCachedData) {
 		$dtStructs = getCachedData($cacheKey);
 		if ($dtStructs) {

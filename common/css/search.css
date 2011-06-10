@@ -197,21 +197,6 @@ body.w-bookmark #results {
 	display: inline-block;
 }
 /***** view buttons *****/
-/*#result-style-list-link { width:19px; height:15px;background: url(../images/b_list.png) no-repeat scroll center -1px;}
-#result-style-two-col-link {background: url(../images/b_2col.png) no-repeat scroll center -1px; vertical-align: middle;border:medium none;padding:1px;}
-#result-style-thumbs-link {background: url(../images/b_thumb.png) no-repeat scroll center -1px; vertical-align: middle;border:medium none;padding:1px;}
-#result-style-blog-link { padding-bottom: 1px; background: url(../images/b_blog.png) no-repeat scroll 0 -px; vertical-align: middle;display: none;border:medium none;padding:1px;}
-body.search-result-style-list #result-style-list-link { background-image: url(../images/b_list_down.png); }
-body.search-result-style-two-col #result-style-two-col-link { background-image: url(../images/b_2col_down.png); }
-body.search-result-style-thumbs #result-style-thumbs-link { background-image: url(../images/b_thumb_down.png); }
-body.search-result-style-blog #result-style-blog-link { background-image: url(../images/b_blog_down.png); }
-
-#ops-record-cell { text-align: left; line-height: 15px; position:absolute; top:2px; left:10px}
-#map_link { vertical-align: text-bottom ;border:medium none;}
-#record-style-full-link {padding-bottom: 1px; background: url(../images/b_FullRecord.png) no-repeat scroll center 5px transparent; vertical-align: middle;border:medium none;padding:1px;}
-#record-style-summary-link { padding-bottom: 1px; background: url(../images/b_Summary.png) no-repeat scroll center 5px transparent; vertical-align: middle;border:medium none;padding:1px;}
-#record-style-full-link.pressed { background: url("../images/b_FullRecordPressed.png") no-repeat scroll center 5px transparent}
-#record-style-summary-link.pressed { background: url(../images/b_SummaryPressed.png) no-repeat scroll center 5px;}*/
 
 body.search-result-style-list #result-style-list-link, body.search-result-style-two-col #result-style-two-col-link, body.search-result-style-thumbs #result-style-thumbs-link, body.search-result-style-blog #result-style-blog-link {
 	background-image: url(../images/tick-white.gif);
@@ -279,13 +264,6 @@ body.w-bookmark .bookmarked {
     text-align: left;
     top: 6px;
     width: 13px;
-}
-.info a {
-	padding: 0 10px;
-}
-.info img {
-	height: 16px;
-	width: 16px;
 }
 .viewers {
 	border:0;
@@ -1164,31 +1142,7 @@ body.is-not-logged-in #search-result-commands div.openTools div#toolbox .toolbox
 	border-top-left-radius:0;
 	border-top-right-radius:10px;
 }
-#application_links {
-	display: table;
-	width:100%;
-	text-align: center;
-	padding: 0;
-}
-#application_links a {
-	display:table-cell;
-	vertical-align:middle;
-	padding:0 5px;
-	white-space: nowrap;
-	border-RIGHT:1px solid rgba(0, 0, 0, 0.1);
-	width:40px;
-}
-#application_links a.pressed {
-	background-color: rgba(150, 150, 150, 0.1)
-}
-#applications_window {
-	bottom:0;
-	display:block;
-	left:0;
-	position:absolute;
-	right:0;
-	top:0px;
-}
+
 .tableCell {
 	border-right:none;
 	display:table-cell;
@@ -1239,16 +1193,6 @@ body.is-not-logged-in #search-result-commands div.openTools div#toolbox .toolbox
 	display:inline-block;
 	padding:3px 30px;
 }
-iframe.info.summary {
-	position:relative;
-	display:inline-block;
-	height:100px;
-	overflow:hidden;
-	background:url("../images/backgrounds/thumbnail_bg.png") repeat-x scroll 0 bottom #F6F6F6 !important;
-}
-iframe.info html body {
-	font-size: 12px;
-}
 .right_margin_info {
 	background-image:url("../images/white_fade.png");
 	background-position:0px 50%;
@@ -1264,26 +1208,6 @@ iframe.info html body {
 	width:48px;
 	z-index:1;
 	text-align: right;
-}
-#loadingDiv {
-	background-image: url("../images/loading-animation.gif");
-	background-position: 50%;
-	background-repeat: no-repeat;
-}
-#loadingDiv.summary {
-	position:absolute;
-	display:block;
-	height:100px;
-	width:100%;
-	overflow:hidden;
-	z-index: 100;
-}
-#loadingDiv.full {
-	position:absolute;
-	display:inline-block;
-	height:100%;
-	width:100%;
-	z-index: 100;
 }
 input[type=checkbox] {
 	display: none;
