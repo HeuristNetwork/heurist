@@ -139,10 +139,12 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 		doTagInsertion($recordID, $bkm_ID, $tags);
 	} else if ($bkm_ID) {
 		// Record is bookmarked, but the user doesn't want it to be
-		mysql_query("delete usrBookmarks, usrRecTagLinks ".
+		$query = "delete usrBookmarks, usrRecTagLinks ".
 					"from usrBookmarks left join usrRecTagLinks on rtl_RecID = bkm_recID ".
-					"left join usrTags tag_ID = rtl_TagID ".
-					"where bkm_ID=$bkm_ID and bkm_recID=$recordID and bkm_UGrpID = tag_UGrpID and bkm_UGrpID=" . get_user_id());
+					"left join usrTags on tag_ID = rtl_TagID ".
+					"where bkm_ID=$bkm_ID and bkm_recID=$recordID and bkm_UGrpID = tag_UGrpID and bkm_UGrpID=" . get_user_id();
+//error_log("saveRecord delete bkmk - q = $query");
+		mysql_query($query);
 		if (mysql_error()) jsonError("database error while removing bookmark- " . mysql_error());
 		//saw TODO: add code to remove other personal data reminders, personal notes (woots), etc.
 	}
@@ -205,13 +207,14 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 		array_push($types, $bdtID);
 	}
 	$typeVarieties = mysql__select_assoc("defDetailTypes", "dty_ID", "dty_Type", "dty_ID in (" . join($types, ",") . ")");
+	//TODO saw: need to change this to include min value or perhaps we let it go and allow saving the min across multiple saves.
 	$repeats = mysql__select_assoc("defRecStructure", "rst_DetailTypeID", "rst_MaxValues", "rst_DetailTypeID in (" . join($types, ",") . ") and rst_RecTypeID=" . $recordType);
 
 	$updates = array();
 	$inserts = array();
 	$dontDeletes = array();
 	foreach ($details as $type => $pairs) {
-		if (substr($type, 0, 2) != "t:") continue;
+		if (substr($type, 0, 2) != "t:") continue;	// skip any non t: or type designators
 		if (! ($bdtID = intval(substr($type, 2)))) continue;	// invalid type id so skip it
 
 		foreach ($pairs as $bdID => $val) {
@@ -278,9 +281,10 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 							jsonError("invalid resource reference '".$val."'");
 						}
 					}
-
-					if (mysql_num_rows(mysql_query("select rec_ID from Records where (! rec_OwnerUGrpID or rec_OwnerUGrpID=$wg) and rec_ID=".intval($val))) <= 0)
-					jsonError("invalid resource #".intval($val));
+					//FIXME :saw  change this to check for superuser adn valid recID or valid and viewable record for current user.
+					if (mysql_num_rows(mysql_query("select rec_ID from Records where (! rec_OwnerUGrpID or rec_OwnerUGrpID=$wg) and rec_ID=".intval($val))) <= 0) {
+					//	jsonError("invalid resource #".intval($val));
+					}
 					$bdVal = intval($val);
 					break;
 

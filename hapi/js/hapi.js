@@ -2476,7 +2476,9 @@ HAPI.XHR = {
 		if (! req) { return; }
 
 		if (url.match(/^[-a-zA-Z]+$/)) { /* only the HAPI method was supplied, not an absolute URL */
-			url = HAPI.XHR.defaultURLPrefix + "hapi/php/" + url + ".php"; //saw FIXME: add instance code.
+			url = HAPI.XHR.defaultURLPrefix + "hapi/php/" + url + ".php?db=" +
+				(HAPI.database?HAPI.database:(HeuristInstance?HeuristInstance:
+					(location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]: ""))); //saw FIXME: add instance code.
 		}
 
 		var method = jso? "POST" : "GET";

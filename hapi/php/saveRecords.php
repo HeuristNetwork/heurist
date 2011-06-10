@@ -39,7 +39,7 @@ foreach ($_REQUEST["records"] as $nonce => $record) {
 		$id = mysql_insert_id();
 		$_REQUEST["records"][$nonce]["id"] = $id;
 	}
-	$nonces[$nonce] = $id;
+	$nonces[$nonce] = $_REQUEST["records"][$nonce]["id"];
 }
 
 /* go for the regular update/insert on all records */

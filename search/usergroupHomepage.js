@@ -108,7 +108,6 @@ top.HEURIST.workgroup = {
 			  + (kwd ? " tag:\"" + kwd + "\"" : "tag:\"" + top.HEURIST.workgroup.kwds.join(",") + "\"")
 			  + " sortby:" + sortby;
 		window.HEURIST.parameters["q"] = q;
-		top.HEURIST.search.closeInfos();
 		top.HEURIST.search.currentPage = 0;
 		top.HEURIST.search.loadSearchParameters();
 	},
