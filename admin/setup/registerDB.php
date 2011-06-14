@@ -22,16 +22,32 @@ if (!is_admin()) {
         "'>Log out</a></p></body></html>";
     return;
 }
+?>
+<link rel=stylesheet href="../../common/css/global.css">
 
+<html>
+	<head>
+		<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+		<title>Register DB to Heurist Index Server</title>
+	</head>
+	<div class="banner"><h2>Database registration</h2></div>
+	<div id="page-inner" style="overflow:auto">
+
+	<body class="popup">
+		<div id="registerDBForm">
+		<form action="registerDB.php" method="POST" name="NewDBRegistration">
+			Enter a short description for your database.<br /><br />
+			<input type="text" maxlength="64" size="25" name="dbDescription">
+			<input type="submit" name="submit" value="Register" style="font-weight: bold;" onClick="registerDB()" >
+		</form>
+		</div>
+<?php
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+
 mysql_connection_db_insert(DATABASE); // Connect to the current database
 
-echo '<link rel=stylesheet href="../../common/css/global.css">';
-echo '<html><body class="popup">';
-echo '<div class="banner"><h2>Database registration</h2></div>';
-echo '<div id="page-inner" style="overflow:auto">';
-
 // Check if already registered and exit if so, otherwise request registration from Heurist Index database
+
 $res = mysql_query("select sys_dbRegisteredID, sys_dbName, sys_dbDescription, sys_OwnerGroupID from sysIdentification where `sys_ID`='1'");
 
 if (!$res) { // Problem reading current registration ID
@@ -59,10 +75,22 @@ $ownerGrpEmail = $row[0]; // Get owner group email address from UGrps table
 
 // Check if database has already been registered
 if (isset($DBID) && ($DBID != 0)) { // already registered
-    $msg = "Your database is already registered with ID: " . $DBID;
-    echo $msg . "<br />";
-    return;
+	echo '<script type="text/javascript">';
+	echo 'document.getElementById("registerDBForm").style.display = "none";';
+	echo '</script>';
+    echo "Your database is already registered with ID: " . $DBID . "<br />";
+    echo "The database description is: ". $dbDescription . "<br /><br />";
 } else {
+	echo '<script type="text/javascript">';
+	echo 'document.getElementById("registerDBForm").style.display = "block";';
+	echo '</script>';
+}
+
+function registerDatabase() {
+	$heuristDBname = rawurlencode(HEURIST_DBNAME);
+	global $DBID, $dbName, $ownerGrpID, $ownerGrpEmail, $dbDescription;
+	$serverURL = HEURIST_BASE_URL . "?db=" . $heuristDBname;
+
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);    //return curl_exec output as string
@@ -73,11 +101,11 @@ if (isset($DBID) && ($DBID != 0)) { // already registered
 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);    // don't verify peer cert
 	curl_setopt($ch, CURLOPT_TIMEOUT, 10);    // timeout after ten seconds
 	curl_setopt($ch, CURLOPT_MAXREDIRS, 5);    // no more than 5 redirections
-	$heuristDBname = rawurlencode(HEURIST_DBNAME);
 	$ownerGrpEmail = rawurlencode($ownerGrpEmail);
+	$dbDescriptionEncoded = rawurlencode($dbDescription);
 	$reg_url =  HEURIST_BASE_URL . "admin/setup/getNextDBRegistrationID.php" . // TODO: Change to HEURIST_INDEX_BASE_URL
-				"?serverURL=" . HEURIST_BASE_URL . "&dbReg=" . $heuristDBname . 
-				"&dbTitle=" . $heuristDBname . "&ownerGrpEmail=".$ownerGrpEmail;
+				"?serverURL=" . $serverURL . "&dbReg=" . $heuristDBname . 
+				"&dbTitle=" . $dbDescriptionEncoded . "&ownerGrpEmail=".$ownerGrpEmail;
 	curl_setopt($ch, CURLOPT_URL,$reg_url);
 	$data = curl_exec($ch);
 	$error = curl_error($ch);
@@ -92,20 +120,60 @@ if (isset($DBID) && ($DBID != 0)) { // already registered
 		$errorMsg = $decodedData[0];
         $msg = "Problem allocating a database identifier from the Heurist index.\n" .
         "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
-		echo $msg . "<br /><br />(" . $errorMsg . ")";
         return;
+    } else if($DBID == -1) {
+	    $res = mysql_query("update sysIdentification set `sys_dbDescription`='$dbDescription' where `sys_ID`='1'");
+		echo "Database description succesfully changed to: " . $dbDescription;
     } else { // We have got a new dbID, set the assigned dbID in sysIdentification
-		$res = mysql_query("update sysIdentification set `sys_dbRegisteredID`='$DBID' where `sys_ID`='1'");
+		$res = mysql_query("update sysIdentification set `sys_dbRegisteredID`='$DBID', `sys_dbDescription`='$dbDescription' where `sys_ID`='1'");
 		if($res) {
-			echo "Registration successful, database ID allocated is " . $DBID;
+			echo "Registration successful, database ID allocated is " . $DBID . "<br /><br />";
+			echo "Your database description is: " . $dbDescription . "<br />";
+			echo "If you want to change the description, you can go back to the registration page to do so.";
 		} else {
 			$msg = "Unable to write database identification record, your database might be incorrectly set up<br />Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
+			echo '<script type="text/javascript">';
+			echo 'document.getElementById("changeDescriptionForm").style.display = "none";';
+			echo '</script>';
 			echo $msg;
 			return;
 		}
     }
 }
 ?>
+<div id="changeDescriptionForm">
+	<form action="registerDB.php" method="POST" name="NewDBRegistration">
+		<input type="text" maxlength="64" size="25" name="dbDescription">
+		<input type="submit" name="submitDescriptionChange" value="Change description" style="font-weight: bold;" onClick="changeDescription()" >
+	</form>
 </div>
+
+<script type="text/javascript">
+	function registerDB() {
+		document.getElementById("registerDBForm").style.display = "none";
+	}
+	function changeDescription() {
+		document.getElementById("changeDescriptionForm").style.display = "none";
+	}
+	document.getElementById("changeDescriptionForm").style.display = "none";
+</script>
+<?php
+if(isset($_POST['dbDescription'])) {
+	if(strlen($_POST['dbDescription']) > 3 && strlen($_POST['dbDescription']) < 1022) {
+		$dbDescription = $_POST['dbDescription'];
+		echo '<script type="text/javascript">';
+		echo 'document.getElementById("registerDBForm").style.display = "none";';
+		echo '</script>';
+		registerDatabase();
+	} else {
+		echo "The database description should be at least 4 characters, and at most 1021 characters long.";
+	}
+}
+if (isset($DBID) && ($DBID != 0) && !isset($_POST['dbDescription'])) {
+	echo '<script type="text/javascript">';
+	echo 'document.getElementById("changeDescriptionForm").style.display = "block";';
+	echo '</script>';
+}
+?>
 </body>
 </html>

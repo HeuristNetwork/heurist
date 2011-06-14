@@ -14,7 +14,7 @@
     mysql_connection_db_insert("HeuristSystem_Index");
 
     // Return all registered databases as a json string
-    $res = mysql_query("select rec_ID, rec_URL, rec_Title from Records where `rec_RecTypeID`='209'");
+    $res = mysql_query("select rec_ID, rec_URL, rec_Title, rec_Popularity from Records where `rec_RecTypeID`='209'");
     $registeredDBs = Array();
     while($registeredDB = mysql_fetch_array($res, MYSQL_ASSOC)) {
 		array_push($registeredDBs, $registeredDB);

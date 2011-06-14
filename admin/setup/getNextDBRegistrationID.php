@@ -76,7 +76,7 @@
 	}
 
 	// write the core database record describing the database to be registered and allocate registration ID
-	$res = mysql_query("select rec_ID from Records where `rec_URL`='$serverURL' AND `rec_Title`='$dbTitle'");
+	$res = mysql_query("select rec_ID, rec_Title from Records where `rec_URL`='$serverURL'");
 	if(mysql_num_rows($res) == 0) {
 		$res = mysql_query("insert into Records (rec_URL, rec_Added, rec_Title, rec_RecTypeID, rec_AddedByImport, rec_OwnerUGrpID, rec_NonOwnerVisibility) VALUES  ('$serverURL', now(), '$dbTitle', " . HEURIST_DB_DESCRIPTOR_RECTYPE . ", 0, 1, 'Visible')");
 	    if (!$res) { // Unable to allocate a new ID
@@ -88,9 +88,15 @@
 	        $returnData = $dbID;
 	    }
     } else {
-		$row = mysql_fetch_row($res);
-		$returnData = $row[0] . "," . "Database was already registered";
-    }
+	    $row = mysql_fetch_row($res);
+		$res = mysql_query("update Records set `rec_Title`='$dbTitle' where `rec_ID`='".$row[0]."'");
+		if(!mysql_error()) {
+			$returnData = -1 . ", Description succesfully changed";
+		} else {
+			error_log('ERROR: '.mysql_error()); // TODO: Fix database not to give this error
+			$returnData = 0 . ", An error occurred while trying to change the database description";
+		}
+	}
 
 	echo $returnData;
 ?>
