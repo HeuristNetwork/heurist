@@ -307,7 +307,7 @@ global $REVERSE, $ACCESSABLE_OWNER_IDS;
 				'AND dtl_Value IN (' . join(',', $qrec_ids) .') '.
 				($rtyIDs && count($rtyIDs)>0 ? 'AND trg.rec_RecTypeID in ('.join(',', $rtyIDs).') ' : '').
 				($dtyIDs && count($dtyIDs)>0 ? 'AND dty_ID in ('.join(',', $dtyIDs).') ' : '').
-				'AND trg.rec_RecTypeID != 52'.
+				'AND trg.rec_RecTypeID != 52 '.
 				'AND (trg.rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR NOT trg.rec_NonOwnerVisibility = "hidden")';
 
 //error_log("find  d $depth rev pointer q = $query");
