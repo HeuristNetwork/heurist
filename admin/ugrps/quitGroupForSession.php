@@ -21,7 +21,7 @@ if (! is_logged_in()) {
 	return;
 }
 if (! is_admin()) {
-	print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href='".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME."'>Log out</a></p></body></html>";
+	print "<html><head><link rel='stylesheet' type='text/css' href='../../common/css/global.css'><link rel='stylesheet' type='text/css' href='../../common/css/admin.css'></head><body class='popup'><p>You do not have sufficient privileges to access this page</p><p><a href='".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME."'>Log out</a></p></body></html>";
 	return;
 }
 

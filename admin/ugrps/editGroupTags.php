@@ -21,7 +21,7 @@ if (! is_logged_in()) {
 	header('Location: ' . BASE_PATH);
 	return;
 } else if (! is_admin()) {
-	print '<html><body>Workgroup tag administration is restricted to administrators only</body></html>';
+	print "<html><head><link rel='stylesheet' type='text/css' href='../../common/css/global.css'><link rel='stylesheet' type='text/css' href='../../common/css/admin.css'></head><body class='popup'>Workgroup tag administration is restricted to administrators only</body></html>";
 	return;
 }
 
@@ -91,7 +91,7 @@ function delete_tag(tag_ID) {
 			if ($tag['tgi_count'] == 0) $used = '';
 			else $used = '<i>(<a target=_blank href="'.$searchlink.'">used '.($tag['tgi_count'] == 1 ? 'once' : $tag['tgi_count'].' times').'</a>)</i>';
 ?>
- <li><b><?= htmlspecialchars($tag['tag_Text']) ?></b> <?= $used ?> [<a href="#" onclick="delete_tag(<?= $tag['tag_ID'] ?>); return false;">delete</a>]</li>
+ <li><b><?= htmlspecialchars($tag['tag_Text']) ?></b> <?= $used ?> [<a href="#" onClick="delete_tag(<?= $tag['tag_ID'] ?>); return false;">delete</a>]</li>
 <?php
 		}
 		print ' <li><input type="text" class="tbox" name="new[' . htmlspecialchars($grp['ugr_ID']) . ']" onkeypress="return (event.which != 92  &&  event.keyCode != 92);" value="' . htmlspecialchars($_REQUEST['new'][$grp['ugr_ID']]) . '"></li>';

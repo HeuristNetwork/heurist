@@ -226,9 +226,9 @@
 	</xsl:if>
 	</div>
 
-	<!-- related records div -->
+	<!-- related records div 
 	<div class="related-records"><div class="show-related" onClick="displayRelatedRecords({id},this.parentNode)">Show related records</div>
-	</div>
+	</div>-->
 
 	<!-- record separator div -->
 	<div class="separator_row"></div>

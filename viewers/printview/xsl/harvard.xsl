@@ -770,7 +770,7 @@
 
       <xsl:template name="creator" match="detail/record" mode="creator">
       <xsl:param name="auth" select="count"/>
-      <xsl:value-of select="$auth"/>COUNT
+      <xsl:value-of select="$auth"/>
         <xsl:choose>
             <xsl:when test="contains(title,',') ">
                 <!-- display initials instead of a full first name, if applicable-->
