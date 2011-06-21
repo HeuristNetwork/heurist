@@ -478,9 +478,9 @@ img a:link {border: none;}
 a#dbSearch-link div#dbname {font-size:14px;font-weight:bold;color: #FFF;text-shadow: 1px 1px 3px RGBA(0, 0, 0, 0.5);text-transform: uppercase;font-style: italic;left:221px;position:absolute;top:20px; background-image:url(../images/b_database.png); background-repeat:no-repeat; background-position:center left; padding:2px 0 0 24px}
 a#dbSearch-link div#dbname a {font-size:14px;color: #FFF;}
 a#dbSearch-link div#dbname:hover, a#dbsearch-link:hover {text-decoration:none;}
-/*a#dbSearch-link div#dbname:hover {padding-right:10px; background-color:RGBA(100,100,100,0.6);*/
+/*a#dbSearch-link div#dbname:hover {padding-right:10px; background-color:RGBA(100,100,100,0.6);
 	-moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;
-	-webkit-box-shadow:inset 0 2px 4px #333;-moz-box-shadow:inset 0 2px 4px #333;box-shadow:inset 0 2px 4px #333;}
+	-webkit-box-shadow:inset 0 2px 4px #333;-moz-box-shadow:inset 0 2px 4px #333;box-shadow:inset 0 2px 4px #333;}*/
 
 .banner A, .banner A:hover, .banner input {background-position:2px 5px;background-repeat:no-repeat;border-right:1px solid #D6D6D6;display:inline-block;font-size:10px;font-weight:bold;height:19px;padding:6px 13px 0 0;text-decoration:none;}
 .banner A:hover {background-color: RGBA(150, 150, 150, 0.1);}
@@ -610,11 +610,17 @@ input[type="radio"] {vertical-align: text-top;}
 .detailRowHeader span.link{text-transform: none; font-size: 9px;}
 
 .personPhoto {max-width: 150px;padding:0 16px 0 0;}
-.thumbnail {float:right;margin-right: 10px;}
+.thumb_image {float:right;margin-right: 10px; clear:both; margin:5px; cursor: url(../images/zoom-in.png),pointer;}
+.thumb_image .download_link{text-align:right; padding-right:3px}
+.fullSize {width:100%; padding:5px;text-align:center}
+div.thumbnail .fullSize img {width:auto; max-width:100%; cursor: url(../images/zoom-out.png),pointer;}
 div.thumbnail img{width:80px;border: 2px solid #FFF;-moz-box-shadow:0 2px 4px #BBB;-webkit-box-shadow:0 2px 4px #BBB;box-shadow:0 2px 4px #BBB;}
 img {border:0 none;vertical-align:middle;}
 #recID {float:right}
 .HeaderRow {width:100%; min-height:80px; overflow:hidden}
+.download_link {padding-top:3px}
+.download_link a{font-size:9px}
+
 
 /**** table styling *****/
 table.reminder td {border-bottom:1px solid #A4B4CB;border-top:1px solid #A4B4CB; padding:5px 3px;}
@@ -687,7 +693,13 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 	border-style:solid;
 	border-color:transparent;
 }
-
+#tabs li a.disabled, #quicklink-cell li a.disabled, #views li a.disabled, ul.menu li a.disabled {
+	color:#666;
+	}
+#tabs li a.disabled:hover, #quicklink-cell li a.disabled:hover, #views li a.disabled:hover, ul.menu li a.disabled:hover{
+	color:#666;
+	background-color:transparent;
+	}
 #quicklink-cell li {color:#6A7C99; z-index:20000}
 #tabs>li:hover, ul.menu>li:hover{
 	background-color:RGBA(0,0,0,0.2);
@@ -781,3 +793,90 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 
 #tabs li ul li a.seperator, #tabs li.active ul li a.seperator, #quicklink-cell li ul li a.seperator, #views li ul li a.seperator {border-top:1px solid #666;}
 
+/* Turn on a 10x10 scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-button:vertical {
+    background-color: transparent;
+    border: 1px none blue;
+}
+
+/* Turn on single button up on top, and down on bottom */
+::-webkit-scrollbar-button:start:decrement,
+::-webkit-scrollbar-button:end:increment {
+    display: none;
+}
+
+/* Turn off the down area up on top, and up area on bottom */
+::-webkit-scrollbar-button:vertical:start:increment,
+::-webkit-scrollbar-button:vertical:end:decrement {
+    display: none;
+}
+
+/* Place The scroll down button at the bottom */
+::-webkit-scrollbar-button:vertical:increment {
+    background-color: black;
+    border: 1px dashed blue;
+}
+
+/* Place The scroll up button at the up */
+::-webkit-scrollbar-button:vertical:decrement {
+    background-color: purple;
+    border: 1px none blue;
+}
+
+::-webkit-scrollbar-track:vertical {
+    background-color: transparent;
+    border: 1px none pink;
+}
+
+/* Top area above thumb and below up button */
+::-webkit-scrollbar-track-piece:vertical:start {
+    border: 1px none #000;
+}
+
+/* Bottom area below thumb and down button */
+::-webkit-scrollbar-track-piece:vertical:end {
+    border: 1px none pink;
+}
+
+/* Track below and above */
+::-webkit-scrollbar-track-piece {
+	background:transparent;
+	-webkit-border-radius: 4px;
+	-webkit-box-shadow:inset 0px 2px 4px rgba(0,0,0,1);
+}
+#result-container::-webkit-scrollbar-track-piece {
+	background:-webkit-gradient(linear, left top, right top, from(#B9C8CE), to(#8F9BAB))transparentder-radius: 4px;
+    -webkit-box-shadow:inset 0px 0px 6px rgba(0,0,0,0.5);
+}
+
+/* The thumb itself */
+::-webkit-scrollbar-thumb:vertical {
+    height: 25px;
+	background:-webkit-gradient(linear, left top, right top, from(#BBB), to(#888));
+	-webkit-border-radius: 4px;
+	/*border: 1px solid #000;*/
+	-webkit-box-shadow:inset 0px 0px 6px rgba(0,0,0,0.5);
+	}
+#result-container::-webkit-scrollbar-thumb:vertical {
+    height: 25px;
+	background-color:#A5B3C8;
+	/* background:-webkit-gradient(linear, left top, left bottom, from(#A5B3C8), to(#8798B3)); */
+	-webkit-border-radius: 4px;
+	/*border: 1px solid #8C989E;*/
+	-webkit-box-shadow:inset 0px -2px 4px #8798B3;
+}
+
+/* Corner */
+::-webkit-scrollbar-corner:vertical {
+    background-color: black;
+}
+
+/* Resizer */
+::-webkit-scrollbar-resizer:vertical {
+    background-color: gray;
+}

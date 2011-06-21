@@ -677,7 +677,7 @@ div.right_margin_info div.mini-tools a {
 }
 nobr#activesaved div {
 	overflow: hidden;
-	width: 138px;
+	/*width: 138px;*/
 }
 nobr.bkmk#activesaved, nobr#activesaved {
 	background-color:RGBA(0,0,0,0.1);
@@ -994,7 +994,7 @@ div.hide .saved-search-subheading {
 	bottom: 0;
 	left: 10px !important;
 	position: absolute;
-	right: 0px !important;
+	right: 5px !important;
 	top: 0px !important;
 	width: auto;
 }
@@ -1498,8 +1498,8 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	background:-moz-linear-gradient(center top , #FFFFFF, #EEEEEE) repeat scroll 0 0 transparent;
 	background:-webkit-gradient(linear, left top, left bottom, from(#FFFFFF), to(#EEEEEE));
 	}
-
-.list .recordDiv, .two-col .recordDiv {
+.two-col {text-align:left !important}
+.list .recordDiv, .two-col .recordDiv { 
 	border-bottom: 1px solid #CCCCCC;
     border-collapse: collapse;
     border-radius: 0;
@@ -1513,7 +1513,12 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
     text-align: left;
 	overflow:hidden;
 	}
-.list .recordDiv .recordTitle, .two-col .recordDiv .recordTitle {
+.two-col .recorddiv {margin: 0;
+    max-width: 50%;
+    padding-left: 0;
+    padding-right: 0;
+    width: 50%;}
+.list .recordDiv .recordTitle, .two-col .recordDiv .recordTitle { 
 	display: block;
 	height: 1.1em;
 	left: 60px;
@@ -1530,7 +1535,7 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	min-width:50px;
 	}
 
-.icons div.recordDiv:hover, .thumbnails div.recordDiv:hover  {-moz-transform:scale(1.1,1.1);-webkit-transform:scale(1.1,1.1);transform:scale(1.1,1.1); z-index:10; -moz-box-shadow:0px 3px 8px #666;-webkit-box-shadow:0px 3px 8px #666;box-shadow:0px 3px 8px #666;}
+.icons div.recordDiv:hover, .thumbnails div.recordDiv:hover, .thumbs div.recordDiv:hover {-moz-transform:scale(1.1,1.1);-webkit-transform:scale(1.1,1.1);transform:scale(1.1,1.1); z-index:10; -moz-box-shadow:0px 3px 8px #666;-webkit-box-shadow:0px 3px 8px #666;box-shadow:0px 3px 8px #666;}
 
 .icons .recordDiv {
 	border: 2px solid #FFFFFF;
@@ -1545,7 +1550,7 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
     width: 128px;
 	font-size:6px !important
 	}
-.thumbnails .recordDiv .thumbnail, .thumbnails .recordDiv .recTypeThumb {
+.thumbnails .recordDiv .thumbnail,.thumbs .recordDiv .thumbnail, .thumbnails .recordDiv .recTypeThumb, .thumbs .recordDiv .recTypeThumb {
     background-position: center center;
     background-repeat: no-repeat;
     background-size: 100% auto;
@@ -1557,8 +1562,8 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
     text-align: center;
     top: 10px;
 }
-.thumbnails .recordDiv .thumbnail{background-color:#FFF}
-.thumbnails .recordDiv .recTypeThumb {opacity:0.3}
+.thumbnails .recordDiv .thumbnail, .thumbs .recordDiv .thumbnail{background-color:#FFF}
+.thumbnails .recordDiv .recTypeThumb, .thumbs .recordDiv .recTypeThumb {opacity:0.3}
 
 .icons .recordDiv .thumbnail, .icons .recordDiv .recTypeThumb{background-position: center center;
     background-position: center center;
@@ -1633,12 +1638,14 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 
 
 .recorddiv.linkselected{
-	border-color:#62FFF8;
-	background:#EEE;
+	border-color:#B0D3FB;
 	}
 .recorddiv.linkhilited{
-	border-color:#FFA7F8;
-	background:#EEE;
+	/*border-color:#FFA7F8;*/
+	-moz-box-shadow:0 0 3px 1px #DC8501;
+	-webkit-box-shadow:0 0 3px 1px #DC8501;
+	box-shadow:0 0 3px 1px #DC8501;
+	
 	}
 .recorddiv.selected{
 	border-color:#62A7F8;
@@ -1647,10 +1654,22 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	background:-webkit-gradient(linear, left top, left bottom, from(#e6f8fd), to(#bee4f8));
 	}
 .recorddiv.selected.linkselected{
-	border-color:#62FFF8;
+	border-color:#62A7F8;
 	background:#EEE;
 	background:-moz-linear-gradient(center top , #e6f8fd, #bee4f8) repeat scroll 0 0 transparent;
 	background:-webkit-gradient(linear, left top, left bottom, from(#e6f8fd), to(#bee4f8));
+	}
+.two-col .recorddiv.selected {border-left: 1px solid #62A7F8;
+    border-right: 1px solid #62A7F8;
+    margin: 0 -1px;
+    z-index: 1;}
+.two-col .recorddiv .recordIcons {
+	border-left: 1px solid #AAA;
+    bottom: 0;
+    height: auto;
+    padding: 5px 0 0 5px;
+    position: absolute;
+    top: 0;
 	}
 div.recorddiv:hover{
 	-moz-box-shadow:0 1px 4px #000;
@@ -1738,102 +1757,20 @@ div.recorddiv:hover > #rec_edit_link {
 	position: absolute;
 	top: -12px;
 	}
-.list #recordID {
+#recordID a{color:#CCC}
+.list #recordID a,.two-col #recordID a{color:#666}
+.list #recordID a:hover,.two-col #recordID a:hover{color:#000}
+#recordID a:hover{color:#FFF; text-decoration:none}
+.list #recordID,.two-col #recordID{
 	background: none;
 	right:3px;
-	top:20px;
+	top:18px;
 	padding: 0;
-	color: #666
+	color: #666;
+	font-size:8px
 	}
 div.recorddiv:hover > #recordID {
 	display: block}
 
 
 
-/* Turn on a 10x10 scrollbar */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-button:vertical {
-    background-color: transparent;
-    border: 1px none blue;
-}
-
-/* Turn on single button up on top, and down on bottom */
-::-webkit-scrollbar-button:start:decrement,
-::-webkit-scrollbar-button:end:increment {
-    display: none;
-}
-
-/* Turn off the down area up on top, and up area on bottom */
-::-webkit-scrollbar-button:vertical:start:increment,
-::-webkit-scrollbar-button:vertical:end:decrement {
-    display: none;
-}
-
-/* Place The scroll down button at the bottom */
-::-webkit-scrollbar-button:vertical:increment {
-    background-color: black;
-    border: 1px dashed blue;
-}
-
-/* Place The scroll up button at the up */
-::-webkit-scrollbar-button:vertical:decrement {
-    background-color: purple;
-    border: 1px none blue;
-}
-
-::-webkit-scrollbar-track:vertical {
-    background-color: transparent;
-    border: 1px none pink;
-}
-
-/* Top area above thumb and below up button */
-::-webkit-scrollbar-track-piece:vertical:start {
-    border: 1px none #000;
-}
-
-/* Bottom area below thumb and down button */
-::-webkit-scrollbar-track-piece:vertical:end {
-    border: 1px none pink;
-}
-
-/* Track below and above */
-::-webkit-scrollbar-track-piece {
-	background:transparent;
-	-webkit-border-radius: 4px;
-	-webkit-box-shadow:inset 0px 2px 4px rgba(0,0,0,1);
-}
-#result-container::-webkit-scrollbar-track-piece {
-	background:-webkit-gradient(linear, left top, left bottom, from(#B9C8CE), to(#8F9BAB))transparentder-radius: 4px;
-    -webkit-box-shadow:inset 0px 0px 6px rgba(0,0,0,0.5);
-}
-
-/* The thumb itself */
-::-webkit-scrollbar-thumb:vertical {
-    height: 25px;
-	background:-webkit-gradient(linear, left top, left bottom, from(#BBB), to(#888));
-	-webkit-border-radius: 4px;
-	border: 1px solid #000;
-	-webkit-box-shadow:inset 0px 0px 6px rgba(0,0,0,0.5);
-	}
-#result-container::-webkit-scrollbar-thumb:vertical {
-    height: 25px;
-	background-color:#A5B3C8;
-	/* background:-webkit-gradient(linear, left top, left bottom, from(#A5B3C8), to(#8798B3)); */
-	-webkit-border-radius: 4px;
-	border: 1px solid #8C989E;
-	-webkit-box-shadow:inset 0px -2px 4px #8798B3;
-}
-
-/* Corner */
-::-webkit-scrollbar-corner:vertical {
-    background-color: black;
-}
-
-/* Resizer */
-::-webkit-scrollbar-resizer:vertical {
-    background-color: gray;
-}

@@ -492,7 +492,9 @@ top.HEURIST.search = {
 		   "<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/lock.png' " + userPwd + ">"+
 		    "</div>" +
 			"<div class='recordTitle' title='"+linkText+"'>" + (res[3].length ? "<a href='"+res[3]+"' target='_blank'>"+linkText + "</a>" : linkText ) + "</div>" +
-			"<div id='recordID'>Record ID: " + res[2] + "</div>" +
+			"<div id='recordID'><a href='"+top.HEURIST.basePath+"search/search.html?q=ids:"+res[2]+
+			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
+			"' target='_blank' title='Open in new window'>Record ID: "+res[2]+"</a></div>" +
 			"<div id='rec_edit_link' class='logged-in-only' title='Click to edit'><a href='"+
 			top.HEURIST.basePath+ "records/edit/editRecord.html?sid=" +
 			top.HEURIST.search.sid + "&bib_id="+ res[2] +
@@ -854,8 +856,17 @@ top.HEURIST.search = {
 		top.HEURIST.search.clearResultRows();
 
 		var style = top.HEURIST.util.getDisplayPreference("search-result-style");
+		if (style != "list"  ||  style != "thumbnails" || style !="icons") {
+			style = "thumbnails"; // fall back for old styles
+			top.HEURIST.util.setDisplayPreference("search-result-style", style);
+		}
 		var resultsDiv = document.getElementById("results-level0");
-		resultsDiv.className = style;
+		var pageWidth = document.getElementById('page').offsetWidth;
+		if (pageWidth < 390 && style == "two-col") {
+			resultsDiv.className = "list";
+		}else{
+			resultsDiv.className = style;
+		};
 
 		var recSet = top.HEURIST.search.results.recSet;
 		var recInfo = top.HEURIST.search.results.infoByDepth[0];
@@ -876,11 +887,11 @@ top.HEURIST.search = {
 			}
 		}
 
-		if (style == "list"  ||  style == "thumbnails" || style =="icons") {
+		//if (style == "list"  ||  style == "thumbnails" || style =="icons") {
 			resultsDiv.innerHTML = innerHTML;
-		} else if (style = "two-col") {
-			resultsDiv.innerHTML = "<div class=two-col-cell><div class=two-col-inner-cell-left>" + leftHTML + "</div></div><div class=two-col-cell><div class=two-col-inner-cell-right>" + rightHTML + "</div></div>";
-		}
+		//} else if (style = "two-col") {
+		//	resultsDiv.innerHTML = "<div class=two-col-cell><div class=two-col-inner-cell-left>" + leftHTML + "</div></div><div class=two-col-cell><div class=two-col-inner-cell-right>" + rightHTML + "</div></div>";
+		//}
 
 		// add click handlers
 		top.HEURIST.search.addResultLevelEventHandlers(0);
@@ -924,6 +935,9 @@ top.HEURIST.search = {
 				var classLinkedRecIDs = $.map(linkedRecIDs,function(i,recID){
 																return "link" + recID;
 															});
+				if (level == 0) {
+					classLinkedRecIDs.push("lnk");
+				}
 				$(recDiv).addClass(classLinkedRecIDs.join(" "));
 			});
 	},
@@ -958,6 +972,8 @@ top.HEURIST.search = {
 	},
 
 	setResultStyle: function(style) {
+		var searchWidth = top.HEURIST.util.getDisplayPreference("searchWidth");
+		if (style == "two-col" && searchWidth < 390) {return;}
 		top.HEURIST.util.setDisplayPreference("search-result-style", style);
 		document.getElementById("results-level0").className = style;
 	},
@@ -1373,6 +1389,8 @@ top.HEURIST.search = {
 		var mapFrame = document.getElementById("map-frame");
 		var recordFrame = document.getElementById("record-view-frame");
 		recordFrame.src = top.HEURIST.basePath+"records/view/renderRecordData.php?bib_id="+bib_id;
+		var sidebysideFrame = document.getElementById("sidebyside-frame");
+		sidebysideFrame.src = top.HEURIST.basePath+"viewers/sidebyside/sidebyside.html";
 
 		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", "selectedIds=" + top.HEURIST.search.getSelectedRecIDs().get().join(","));
 		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange", "selectedIds=" + top.HEURIST.search.getSelectedRecIDs().get().join(","));
@@ -1675,6 +1693,20 @@ top.HEURIST.search = {
 		return false;
 	},
 
+	openSelected: function() {
+			var p = top.HEURIST.parameters;
+			var recIDs = top.HEURIST.search.getSelectedRecIDs().get();
+			if (recIDs.length >= 500) {// maximum number of records ids 500
+				alert("Selected record count is great than 500, opening the first 500 records!");
+				recIDs = recIDs.slice(0,500);
+			}
+			var query_string = '?ver='+(p['ver'] || "") + '&w=all&q=ids:' +
+				recIDs.join(",") +
+				'&stype='+(p['stype'] || "") +
+				'&db='+(p['db'] || "");
+			window.open(top.HEURIST.basePath+'search/search.html'+query_string,"_blank");
+	},
+
 	mapSelected: function() {
 			var p = top.HEURIST.parameters;
 			var recIDs = top.HEURIST.search.getSelectedRecIDs().get();
@@ -1825,7 +1857,7 @@ top.HEURIST.search = {
 
 	getSelectedRecIDs: function() {
 		var recIDs = {};
-		var selectedRecIDs = $(".recordDiv.selected:not(.filtered) ",$("#results")).map(function(i,recdiv){
+		var selectedRecIDs = $(".recordDiv.selected.lnk:not(.filtered) ",$("#results")).map(function(i,recdiv){
 					var recID = $(recdiv).attr("bib_id");
 					if (!recIDs[recID] && parseInt(recID)>=0) {
 						recIDs[recID] = true;
@@ -2504,7 +2536,7 @@ function removeCustomAlert() {
 			units: [
 				{ position: 'top', height: 50, body: 'masthead', header: '', gutter: '0', collapse: false, resize: false },
 				{ position: 'bottom', height: 10, resize: false, body: 'footer', gutter: '0', collapse: false },
-				{ position: 'left', width: leftWidth, resize: true, useShim: true, body: 'sidebar', gutter: '0 5px 5px 5px', collapse: false, close: false, collapseSize: 0, scroll: false, animate: false },
+				{ position: 'left', width: leftWidth, resize: true, useShim: true, body: 'sidebar', gutter: '0', collapse: false, close: false, collapseSize: 0, scroll: false, animate: false },
 				{ position: 'center', body: 'center-panel', gutter: '0 10px 0 0', animate: false, collapse:true }
 			]
 		});
@@ -2524,10 +2556,13 @@ function removeCustomAlert() {
 					{ position: 'center', body: 'page-right'}
 					]
 				});
+
 				var setSearchWidth = function() {
 					var searchWidth = layout2.getSizes().left.w;
 					var centerWidth = layout2.getSizes().center.w;
 					var pageWidth = searchWidth + centerWidth;
+					var currentStyle = top.HEURIST.util.getDisplayPreference("search-result-style");
+					var twocollink = document.getElementById("result-style-twoCol");
 					if (searchWidth < pageWidth) {
 						top.HEURIST.util.setDisplayPreference("applicationPanel","open");
 						appPanelButton.className = appPanelButton.className.replace(" closed", "");
@@ -2539,11 +2574,33 @@ function removeCustomAlert() {
 						top.HEURIST.util.setDisplayPreference("applicationPanel","closed");
 					 };
 					 top.HEURIST.util.setDisplayPreference("searchWidth", searchWidth);
+					if (searchWidth < 390 && currentStyle == "two-col") {
+						 document.getElementById("results-level0").className = "list"; //temporarliy changes 2-col to list
+						 };
+					if (searchWidth > 390) {
+						 twocollink.className = twocollink.className.replace(" disabled","");
+						 document.getElementById("results-level0").className = currentStyle;
+						 };
+					if (searchWidth < 390 && twocollink.className !== " disabled") {
+						 twocollink.className += " disabled";
+						 };
 					};
 
 				layout2.on('resize', setSearchWidth);
 				layout2.render();
 
+				var currentStyle = top.HEURIST.util.getDisplayPreference("search-result-style");
+				var twocollink = document.getElementById("result-style-twoCol");
+				if (searchWidth < 390 && currentStyle == "two-col") {
+						 document.getElementById("results-level0").className = "list"; //temporarliy changes 2-col to list
+						 };
+					if (searchWidth > 390) {
+						 twocollink.className = twocollink.className.replace(" disabled","");
+						 document.getElementById("results-level0").className = currentStyle;
+						 };
+					if (searchWidth < 390 && twocollink.className !== " disabled") {
+						 twocollink.className += " disabled";
+						 };
 
 				if (top.HEURIST.util.getDisplayPreference("applicationPanel") == "closed"){
 					var searchWidth = layout2.getSizes().left.w;

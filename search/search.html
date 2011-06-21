@@ -165,7 +165,7 @@
 	<div id="quicklinks">
 		<div id=logged-in></div>
 		<ul id=quicklink-cell>
-			<li> <span id=my-heurist-menu-link class=logged-in-only><b>My Profile</b></span>
+			<li class="logged-in-only"> <span id=my-heurist-menu-link class=logged-in-only><b>My Profile</b></span>
 				<ul id="my-heurist-menu">
 					<li><a href="../admin/profile/editPreferences.html" name="auto-popup" title="Display preferences">Preferences</a></li>
 					<li><a href="../help/webhelp/index.html?GettingStarted1" target="_blank" title="Functions to set up your computer for use with Heurist">Install tools</a></li>
@@ -177,7 +177,7 @@
 					<li><a href="../admin/profile/manageReminders.php" name="auto-popup" title="View and delete automatic notification emails sent from your bookmarks">Manage reminders</a></li>
 				</ul>
 			</li>
-			<li> <span id=advanced-menu-link class=logged-in-only><b>Advanced</b></span>
+			<li class="logged-in-only"> <span id=advanced-menu-link class="logged-in-only"><b>Advanced</b></span>
 				<ul id="advanced-menu">
 					<li><a href="../import/hyperlinks/importHyperlinks.php" name="auto-popup" title="Import web links from a browser bookmarks file or an html web page file">Import hyperlinks</a></li>
 					<li><a href="../admin/profile/configureProfile.php?body_only&amp;bookmark_import=1" name="auto-popup" title="Settings for web links importer">Importer settings</a></li>
@@ -187,7 +187,7 @@
 					<!-- separator-->
 					<li class="admin-only"><a href="../import/delimited/updateDetailsFromDelimited.html" onClick="this.href = top.HEURIST.baseURL +'import/delimited/updateDetailsFromDelimited.html?db=' + database;" target="_blank" title="Update record details using delimited text" class="seperator">Detail updater</a></li>
 					<li class="admin-only"><a href="../export/delimited/exportDelimitedForRectype.html" target="_blank" onClick="this.href = top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database;" title="Export records as delimited text">Export delimited</a></li>
-					<li><a href="#" onclick="top.HEURIST.util.popupURL(top, bugReportURL,
+					<li><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,
 						{	'close-on-blur': false,
 							'no-resize': false,
 							height: 520,
@@ -285,7 +285,7 @@
 					<li><a href="#" id="resetLayout" title="Resets all panels to default width and visibility" class="seperator">Reset Layout</a></li>
 				</ul>
 			</li>
-			<li><a id=add-record-link class="toolbar-large-icon-link logged-in-only" title="Add a new record to the Heurist database, setting record type and ownership" href="#" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/addRecordPopup.php'); return false;">Add Record </a></li>
+			<li class="logged-in-only"><a id=add-record-link class="toolbar-large-icon-link logged-in-only" title="Add a new record to the Heurist database, setting record type and ownership" href="#" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/addRecordPopup.php'); return false;">Add Record </a></li>
 			<li><span>Search</span>
 				<ul>
 					<li><a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">Advanced Search</a></li>
@@ -293,6 +293,7 @@
 					<li><a href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members" onClick="top.HEURIST.util.popupURL(window, 'saved/saveSearchPopup.html'); return false;"><span id="active-label" style="display:none"></span>Save search to...</a></li>
 					<li><a href="#" onClick="top.HEURIST.search.printResultRow()" title="Print search results">Print</a></li>
 					<li id=publish-image-placeholder></li>
+					<li><a href="#" onClick="top.HEURIST.search.openSelected()" title="Launch selected records in a new search window">New search window</a></li>
 				</ul>
 			</li>
 			<li><span>Edit</span>
@@ -329,12 +330,12 @@
 					<!--<li><a href="#" id=result-style-list-link title="View results as a list" onClick="top.HEURIST.search.setResultStyle('list'); return false;">1 column</a></li>
 					<li><a href="#" id=result-style-two-col-link title="View results in two columns" onClick="top.HEURIST.search.setResultStyle('two-col'); return false;">2 column</a></li>
 					<li><a href="#" id=result-style-thumbs-link title="View results as thumbnails" onClick="top.HEURIST.search.setResultStyle('thumbs'); return false;">Thumbnails-old</a></li>-->
-                    <li><a href="#" id=result-style-list-link-new title="View results as a list" onClick="top.HEURIST.search.setResultStyle('list');">List</a></li>
-                    <!-- <li><a href="#" id=result-style-list-link-new title="View results as a list" onClick="top.HEURIST.search.setResultStyle('two-col');">2 Column List</a></li> -->
+                    <li><a href="#" id=result-style-oneCol title="View results as a list" onClick="top.HEURIST.search.setResultStyle('list');">1 column</a></li>
+                    <li><a href="#" id=result-style-twoCol title="View results as a list" onClick="top.HEURIST.search.setResultStyle('two-col');">2 columns</a></li>
                     <li><a href="#" id=result-style-icons-link title="View results as icons" onClick="top.HEURIST.search.setResultStyle('icons');">Icons</a></li>
                     <li><a href="#" id=result-style-thumbs-link-new title="View results as icons" onClick="top.HEURIST.search.setResultStyle('thumbnails');">Thumbnails</a></li>
 
-					<li><a href="#" title="Click to hide/show the legend" onClick="top.HEURIST.search.toggleLegend(); blur(); return false;" id="legend-link" class="seperator">legend</a></li>
+					<li><a href="#" title="Click to hide/show the legend" onClick="top.HEURIST.search.toggleLegend(); blur(); return false;" id="legend-link" class="seperator">SHow legend</a></li>
 				</ul>
 			</li>
 			<li><span>Advanced</span>
@@ -389,6 +390,7 @@
 				<li class="selected"><a href="#r" ><em>Record View</em></a></li>
 				<li><a href="#p" ><em>Print View</em></a></li>
 				<li><a href="#m" onClick="top.HEURIST.search.mapSelected();"><em>Map View</em></a></li>
+				<li><a href="#c" ><em>Side-By-Side</em></a></li>
 			</ul>
 			<div class="yui-content">
 				<div id="r">
@@ -399,6 +401,9 @@
 				</div>
 				<div id="m">
 					<iframe id="map-frame" class=viewers></iframe>
+				</div>
+				<div id="c">
+					<iframe id="sidebyside-frame" class=viewers></iframe>
 				</div>
 			</div>
 		</div>
@@ -447,3 +452,4 @@ top.HEURIST.contentLoaded();
 <iframe id="printingFrame" style="height: 0px; width: 0px; position: absolute; visibility:hidden" src="printresults.html"></iframe>
 </body>
 </html>
+

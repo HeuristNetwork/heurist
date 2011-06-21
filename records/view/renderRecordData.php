@@ -55,7 +55,22 @@ $noclutter = array_key_exists('noclutter', $_REQUEST);
 <html>
 <head>
 	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+    <script src="../../external/jquery/jquery-1.6.min.js"></script>
 	<script type="text/javascript">
+	
+function zoomInOut(obj,thumb,url) {
+	var thumb = thumb;
+	var url = url;
+	var currentImg = obj;
+	if (currentImg.parentNode.className != "fullSize"){
+		currentImg.src = url;
+		currentImg.parentNode.className = "fullSize";
+		
+	}else{
+		currentImg.src = thumb;
+		currentImg.parentNode.className = "thumb_image";
+	}
+}
 function start_roll_open() {
 		window.roll_open_id = setInterval(roll_open, 100);
 }
@@ -107,7 +122,7 @@ function add_sid() {
 
 	</script>
 </head>
-<body class="popup" onload="add_sid();">
+<body class="popup" onLoad="add_sid();">
 
 <?php
 // get a list of workgroups the user belongs to.
@@ -136,11 +151,6 @@ if ($bkm_ID) {
 	print 'No details found';
 }
 ?>
-
-<!--<div class=detailRow>
- <div class=detailType></div>
- <dic class=detail><br><a href="#" onclick="document.body.className=''; return false;">Show additional detail</a></div>
-</div>-->
 
 <div id=bottom><div></div></div>
 
@@ -173,24 +183,14 @@ function print_header_line($bib) {
 ?>
 <div class=HeaderRow style="margin-bottom:20px"><h2><?= htmlspecialchars($bib['rec_Title']) ?></h2>
 	<div id=footer>
-	<h3><?= htmlspecialchars($bib['rty_Name']) ?></h3>
-	<?php if (@$url) { ?>
-	<!-- <span class="link"><a target=_new href="http://web.archive.org/web/*/<?= htmlspecialchars($url) ?>"><img src="../../common/images/external_link_16x16.gif">page history</a></span>
-	--> <span class="link"><a target=_new href="<?= htmlspecialchars($url) ?>"><!--<img src="../../common/images/external_link_16x16.gif">--><?= output_chunker($url) ?></a>
-	<?php if ($webIcon) print "<img id=website-icon src='" . $webIcon . "'>"; ?>
-	 </span>
-	<?php } ?>
-	<div id=recID>Record ID:<?= htmlspecialchars($rec_id) ?><nobr><span class="link"><a id=edit-link class=normal target=_new href="../edit/editRecord.html?bib_id=<?= $rec_id ?>" onclick="return sane_link_opener(this);"><img src="../../common/images/edit-pencil.png" title="Edit Record"></a></span></nobr></div>
+        <h3><?= htmlspecialchars($bib['rty_Name']) ?></h3>
+        <?php if (@$url) { ?>
+        <?= htmlspecialchars($url) ?><span class="link"><a target=_new href="<?= htmlspecialchars($url) ?>"><?= output_chunker($url) ?></a>
+        <?php if ($webIcon) print "<img id=website-icon src='" . $webIcon . "'>"; ?>
+         </span>
+        <?php } ?>
+        <div id=recID>Record ID:<?= htmlspecialchars($rec_id) ?><nobr><span class="link"><a id=edit-link class=normal target=_new href="../edit/editRecord.html?bib_id=<?= $rec_id ?>" onClick="return sane_link_opener(this);"><img src="../../common/images/edit-pencil.png" title="Edit Record"></a></span></nobr></div>
 	</div>
-</div>
-
-<?php if (defined('EXPLORE_URL')  &&  $bib['rec_NonOwnerVisibility'] != 'hidden') { ?>
-<!--
-<div class=detailRowHeader>
-<span class="link"><a target=_blank href="<?= EXPLORE_URL . $rec_id ?>"><img src="../../common/images/follow_links_16x16.gif">explore</a></span>
-</div>
--->
-<?php } ?>
 </div>
 <?php
 }
@@ -395,12 +395,13 @@ function print_private_details($bib) {
 
 
 <div class=detailRowHeader>Public info
-<div class=thumbnail>
+<div  class=thumbnail>
 <?php
 	foreach ($thumbs as $thumb) {
-		print '<a href="' . htmlspecialchars($thumb['url']) . '" target=_surf>';
-		print '<img src="'.htmlspecialchars($thumb['thumb']).'">';
-		print '</a>';
+		print '<div class=thumb_image>';
+		print '<img src="'.htmlspecialchars($thumb['thumb']).'" onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($thumb['url']) .'\')">';
+		print '<br/><div class=download_link><a href="' . htmlspecialchars($thumb['url']) . '" target=_surf class="image_tool">DOWNLOAD</a></div>';
+		print '</div>';
 	};
 ?>
 </div>
@@ -496,7 +497,7 @@ function print_linked_details($bib) {
 ?>
 <div class=detailRow>
 <div class=detailType>Linked From</div>
-<div class=detail><a href="<?=HEURIST_SITE_PATH?>search/search.html?db=<?=HEURIST_DBNAME?>&w=all&q=linkto:<?=$bib['rec_ID']?>" onclick="top.location.href = this.href; return false;"><b>Show list below as search results</b></a> <b>(linkto:<?=$bib['rec_ID']?> = records pointing TO this record)</b></div></div>
+<div class=detail><a href="<?=HEURIST_SITE_PATH?>search/search.html?db=<?=HEURIST_DBNAME?>&w=all&q=linkto:<?=$bib['rec_ID']?>" onClick="top.location.href = this.href; return false;"><b>Show list below as search results</b></a> <b>(linkto:<?=$bib['rec_ID']?> = records pointing TO this record)</b></div></div>
 <?php
 	while ($row = mysql_fetch_assoc($res)) {
 
