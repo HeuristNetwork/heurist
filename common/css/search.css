@@ -255,7 +255,7 @@ body.w-bookmark .bookmarked {
     top: 15px;
     width: 13px;
 }
-.thumbnails .wg-id {
+.thumbnails .wg-id , .thumbs .wg-id {
     display: block;
     font-size: 8px;
     font-weight: bold;
@@ -496,7 +496,7 @@ div.right_margin_info div.mini-tools a {
 	position: absolute;
 	bottom: 0px;
 }
-.icons div.mini-tools div#links, .thumbnails div.mini-tools div#links {
+.icons div.mini-tools div#links, .thumbnails div.mini-tools div#links, .thumbs div.mini-tools div#links {
 	-moz-border-radius:5px;
 	-webkit-border-radius:5px;
 	border-radius:5px;
@@ -511,9 +511,9 @@ div.right_margin_info div.mini-tools a {
 }
 .icons div.mini-tools div#links span a{font-size:9px; font-weight:normal; color:#CCC}
 .icons div.mini-tools div#links span a:hover{color:#FFF; text-decoration:none}
-.icons div.mini-tools div#links span, .thumbnails div.mini-tools div#links span{display:block}
+.icons div.mini-tools div#links span, .thumbnails div.mini-tools div#links span, .thumbs div.mini-tools div#links span{display:block}
 .icons div.mini-tools:hover div#links {display:block}
-.thumbnails div.mini-tools:hover div#links {display:block !important}
+.thumbnails div.mini-tools:hover div#links, .thumbs div.mini-tools:hover div#links {display:block !important}
 
 
 .rec_links {
@@ -1162,7 +1162,7 @@ body.is-not-logged-in #search-result-commands div.openTools div#toolbox .toolbox
 	position:absolute;
 	right:0;
 	top:0px;
-	border-right:1px solid RGBA(100,100,100,0.5);
+	border-right:1px solid #666;
 	overflow-x: hidden
 }
 .openTools {
@@ -1285,7 +1285,7 @@ input[type=checkbox] {
 	right:0;
 	bottom:0;
 	left:0;
-	top:30px;
+	top:31px;
 	background-color: #FFF;
 	-moz-border-radius-bottomleft:0;
 	-moz-border-radius-bottomright:10px;
@@ -1299,7 +1299,7 @@ input[type=checkbox] {
 	border-bottom-right-radius:10px;
 	border-top-left-radius:0;
 	border-top-right-radius:0;
-	border-left:1px solid RGBA(100,100,100,0.5)
+	border-left:NONE;
 }
 .yui-skin-sam .yui-navset .yui-nav .selected a, .yui-skin-sam .yui-navset .yui-nav .selected a em {/*border-color:rgba(0, 0, 0, 0.2)*/
 	border:none;
@@ -1448,9 +1448,10 @@ div#layout-doc.yui-layout-doc div#yui-gen8.yui-layout-unit div#yui-gen9.yui-layo
 	width:auto;
 	height:auto
 }
-#page {
+/*#page {
 	right:5px !important;
 }
+*/
 #sidebar {
 	border:1px solid #6A7C99
 }
@@ -1458,10 +1459,11 @@ div#layout-doc.yui-layout-doc div#yui-gen8.yui-layout-unit div#yui-gen9.yui-layo
 	top:10px
 }
 .yui-resize-handle, yui-layout-handle-r {
-	background-image: url(../images/resize-dot.png);
+	/*background-image: url(../images/resize-dot.png);*/
 	background-position: 50% 50%;
 	background-repeat: no-repeat;
-	cursor:ew-resize
+	cursor:ew-resize;
+	width:3px !important;
 }
 .yui-layout .yui-layout-noscroll div.yui-layout-bd {
 	overflow: visible;
@@ -1600,7 +1602,7 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 .icons .recTypeThumb {opacity:0.6;}
 .1col .recordDiv .thumbnail, .2col .recordDiv .thumbnail {display:none}
 
-.thumbnails .recordDiv {
+.thumbnails .recordDiv, .thumbs .recordDiv {
 	-moz-border-radius:6px;
 	-moz-box-shadow:0 2px 4px #BBB;
 	border-radius:6px;
@@ -1624,17 +1626,17 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 .result_thumb_inner {position: absolute;top:0;bottom: 0;right:0;left: 0;overflow: hidden;padding: 6px;}
 .result_thumb .thumbnail, .result_thumb .rec_title, .result_thumb .icons, .links {left:2px;overflow:hidden;position:absolute;z-index:1;text-align: left;padding-left:0px;}
 .result_thumb .icons {overflow: visible;}
-.thumbnails .recordDiv .thumbnail, .thumbnails .recordDiv .recTypeThumb {-moz-background-size:100% auto;background-size:100% auto;background-position:center center;background-repeat:no-repeat;height:84px;left:0;position:absolute;right:0;text-align:center;top:0px;margin:0}
-.thumbnails .recordDiv .thumbnail img {bottom:0;left:0;position:absolute;right:0;top:0;margin:auto;background-position: center center;}
-.thumbnails .recordDiv .thumbnail .no-thumbnail, .no-thumbnail{opacity:0.3;}
-.thumbnails .recordDiv .recordTitle {left:3px; right:3px;height:25px;line-height:12px;text-align:left;top:86px;color:#666;width:125px;overflow: hidden;position:absolute}
-.thumbnails .recordDiv .recordTitle a{line-height: 12px;text-decoration: none;}
-.thumbnails .recordDiv .recordTitle a:hover{text-decoration: underline;}
-.thumbnails .recordDiv .unbookmarked {margin-bottom: 2px;}
-.thumbnails .recordDiv .bookmarked {margin-bottom: 2px;}
+.thumbnails .recordDiv .thumbnail,.thumbs .recordDiv .thumbnail, .thumbnails .recordDiv .recTypeThumb,  .thumbs .recordDiv .recTypeThumb {-moz-background-size:100% auto;background-size:100% auto;background-position:center center;background-repeat:no-repeat;height:84px;left:0;position:absolute;right:0;text-align:center;top:0px;margin:0}
+.thumbnails .recordDiv .thumbnail img, .thumbs .recordDiv .thumbnail img {bottom:0;left:0;position:absolute;right:0;top:0;margin:auto;background-position: center center;}
+.thumbnails .recordDiv .thumbnail .no-thumbnail,.thumbs .recordDiv .thumbnail .no-thumbnail, .no-thumbnail{opacity:0.3;}
+.thumbnails .recordDiv .recordTitle, .thumbs .recordDiv .recordTitle {left:3px; right:3px;height:25px;line-height:12px;text-align:left;top:86px;color:#666;width:125px;overflow: hidden;position:absolute}
+.thumbnails .recordDiv .recordTitle a, .thumbs .recordDiv .recordTitle a{line-height: 12px;text-decoration: none;}
+.thumbnails .recordDiv .recordTitle a:hover, .thumbs .recordDiv .recordTitle a:hover{text-decoration: underline;}
+.thumbnails .recordDiv .unbookmarked, .thumbs .recordDiv .unbookmarked {margin-bottom: 2px;}
+.thumbnails .recordDiv .bookmarked, .thumbs .recordDiv .bookmarked {margin-bottom: 2px;}
 .thumbnails .recordDiv .recordIcons, .info_button, .done_button, .rec_links {position:absolute; left:3px;bottom:1px;}
-.thumbnails .recordDiv .recordIcons img {vertical-align: text-bottom; margin-left: 0px;}
-.thumbnails .recordDiv .recordIcons input {vertical-align: text-bottom;}
+.thumbnails .recordDiv .recordIcons img, .thumbs .recordDiv .recordIcons img {vertical-align: text-bottom; margin-left: 0px;}
+.thumbnails .recordDiv .recordIcons input, .thumbs .recordDiv .recordIcons input {vertical-align: text-bottom;}
 
 
 .recorddiv.linkselected{
@@ -1689,7 +1691,8 @@ div.recorddiv:hover{
 		min-height:20px;
 		margin-bottom: 5px;
 		border-bottom:1px solid #DDD;
-	}
+		margin-top:-1px;
+			}
 .filter ul li ul{
 	margin-left: 10px}
 .filter ul.menu li, .filter ul.menu li a{
