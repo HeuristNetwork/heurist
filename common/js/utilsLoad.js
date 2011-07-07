@@ -144,23 +144,25 @@ if (! top.HEURIST) {
 
 	firedEvents: {},
 	fireEvent: function(element, eventType, arglist) {
-		eventType = eventType.toLowerCase();
-		top.HEURIST.firedEvents[eventType] = true;
+		if(element){
+			eventType = eventType.toLowerCase();
+			top.HEURIST.firedEvents[eventType] = true;
 
-		if (eventType.match(/^heurist-/)) {
-			// custom event
-			if (! element.heuristListeners) return;	// nothing to do here
-			if (! element.heuristListeners[eventType]) return;
+			if (eventType.match(/^heurist-/)) {
+				// custom event
+				if (! element.heuristListeners) return;	// nothing to do here
+				if (! element.heuristListeners[eventType]) return;
 
-			var listeners = element.heuristListeners[eventType];
-			for (var i=0; i < listeners.length; ++i)
-				listeners[i].call(element, eventType, arglist);
-		}
-		else {
-			// regular event ... make no promises!
-			try {
-				element[eventType]();
-			} catch (e) {}
+				var listeners = element.heuristListeners[eventType];
+				for (var i=0; i < listeners.length; ++i)
+					listeners[i].call(element, eventType, arglist);
+			}
+			else {
+				// regular event ... make no promises!
+				try {
+					element[eventType]();
+				} catch (e) {}
+			}
 		}
 	},
 

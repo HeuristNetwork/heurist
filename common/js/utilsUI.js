@@ -1363,15 +1363,26 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 	* deep cloning of object
 	*/
 	cloneObj: function(o) {
+		//return eval($.toJSON(o));
+
+		function isArray(a)
+		{
+    		return Object.prototype.toString.apply(a) === '[object Array]';
+		}
+
 		if(typeof(o) != "object") return o;
 
 		if(o == null) return o;
 
-		var newO = new Object();
-
-		for(var i in o) newO[i] = top.HEURIST.util.cloneObj(o[i]);
-
-		return newO;
+		if(isArray(o)){
+			var new2 = [];
+			for(var i in o) new2.push(top.HEURIST.util.cloneObj(o[i]));
+			return new2;
+		}else{
+			var newO = new Object();
+			for(var i in o) newO[i] = top.HEURIST.util.cloneObj(o[i]);
+			return newO;
+		}
 	},
 
 

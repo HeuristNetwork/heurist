@@ -575,8 +575,8 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 				filterByMembership = Dom.get('inputFilterByMembership1');
 				if(filterByMembership){
 					if(top.HEURIST.is_admin()){
-						Dom.get('lblForInputFilterByMembership1').style.display = "block";
-						filterByMembership.style.display = "block";;
+						Dom.get('lblForInputFilterByMembership1').style.display = "inline-block";
+						filterByMembership.style.display = "inline-block";;
 						filterByMembership.onchange = _updateFilter;
 					}else{
 						Dom.get('lblForInputFilterByMembership1').style.display = "none";
