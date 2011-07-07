@@ -81,6 +81,7 @@ function Temporal (strInitTemporal) {
 		},
 
 		getTDate: function (code) {
+			var a = _dates;
 			if ( _dates[code] ) {
 				return _dates[code];
 			} else {
@@ -270,11 +271,15 @@ Temporal.parse = function () {
 		// if not a valid temporal string try to see if this is a recognisable date string
 		var fieldType;
 		if ( !Temporal.isValidFormat(str)) {
-			try {
-				var tDate = TDate.parse(str);
-				fieldType = "DAT";	// save string as a TDate object
+			if(!(str.indexOf("VER=")>=0 || str.indexOf("TYP=")>=0)){
+				try {
+					var tDate = TDate.parse(str);
+					if(tDate) { fieldType = "DAT"; }	// save string as a TDate object
+				}
+				catch(e) {	// save string in COM field and keep an empty simple date temporal
+				}
 			}
-			catch(e) {	// save string in COM field and keep an empty simple date temporal
+			if(fieldType !== "DAT"){
 				if(str.replace(/\|VER=(\d)*\|TYP=./,'')==="") {
 					return; //empty temporal string
 				}
@@ -363,10 +368,10 @@ Temporal.tDurationDict = {	"DUR"	:	"Simple Duration",
 							"ERR"	:	"Error Margin"
 };
 
-Temporal.typeFieldMap = {	s : {
+Temporal._typeFieldMap = {	s : {
 									req : [["DAT"]],
 //											[]],		// empty date allows to capture ill-formed date strings
-									opt : ["COM"],
+									opt : ["COM","DET"],
 									hdr : ["DAT"]
 								},
 							c :	{
@@ -378,8 +383,7 @@ Temporal.typeFieldMap = {	s : {
 									hdr : ["DVP","DVN","BCE","BPD","COD","DEV","DAT"]
 								},
 							p :	{
-									req : [["PDB","PDE","TPQ","TAQ"],
-											["TPQ","TAQ"]],
+									req : [["TPQ","TAQ"], ["PDB","PDE","TPQ","TAQ"]],
 									opt : ["DET","SPF","EPF","COM","SRT"],
 									hdr : ["PDB","PDE","TPQ","TAQ"]
 								},
@@ -393,6 +397,34 @@ Temporal.typeFieldMap = {	s : {
 									opt : ["DET","ERR","COM"],
 									hdr : ["DUR"]
 								}
+};
+
+Temporal.cloneObj = function(o) {
+
+		function isArray(a)
+		{
+    		return Object.prototype.toString.apply(a) === '[object Array]';
+		}
+
+		//return eval($.toJSON(o));
+		if(typeof(o) != "object") return o;
+
+		if(o == null) return o;
+
+		if(isArray(o)){
+			var new2 = [];
+			for(var i in o) new2.push(Temporal.cloneObj(o[i]));
+			return new2;
+		}else{
+			var newO = new Object();
+			for(var i in o) newO[i] = Temporal.cloneObj(o[i]);
+			return newO;
+		}
+
+};
+
+Temporal.typeFieldMap = function (type) {
+	return Temporal.cloneObj(Temporal._typeFieldMap[type]);
 };
 
 /**
@@ -410,7 +442,7 @@ Temporal.isValidFormat = function ( str ) {
 		return false;
 	}
 	var type = str.match(/TYP=(.)/)[1],
-		map = Temporal.typeFieldMap[type],
+		map = Temporal.typeFieldMap(type),
 		headers = str.match(/\D\D\D=/g).join(""),
 		i,j;
 	if (headers.search("VER=") !== -1) { // must have a version number
@@ -419,10 +451,11 @@ Temporal.isValidFormat = function ( str ) {
 			headers = headers.replace("TYP=","");
 			for (i=0; i < map.req.length; i++) { // for each required fields pattern
 				var temp = headers,
-					valid = true;
-				for (j=0; j < map.req[i].length; j++) { // must have all require fields
-					if (temp.search(map.req[i][j] + "=") !== -1) {
-						temp = temp.replace(map.req[i][j] + "=","");
+					valid = true,
+					r1 = map.req[i];
+				for (j=0; j < r1.length; j++) { // must have all require fields
+					if (temp.search(r1[j] + "=") !== -1) {
+						temp = temp.replace(r1[j] + "=","");
 					} else {
 						valid = false;
 						break;
@@ -447,7 +480,7 @@ Temporal.checkValidity = function ( temporal ) {
 		return false;
 	}
 	var type = temporal.getType();
-	var map = Temporal.typeFieldMap[type];
+	var map = Temporal.typeFieldMap(type);
 	var ret = [false,[],[],""];
 	var headers = temporal.toString().match(/\D\D\D=/g).join("");
 	var i,j;
@@ -505,24 +538,24 @@ Temporal.checkValidity = function ( temporal ) {
 }
 
 Temporal.getTypeReq = function (type) {
-	if ( type && typeof type === "string" && typeof Temporal.typeFieldMap[type] === "object") {
-		return Temporal.typeFieldMap[type].req;
+	if ( type && typeof type === "string" && typeof Temporal.typeFieldMap(type) === "object") {
+		return Temporal.typeFieldMap(type).req;
 	} else {
 		throw "Temporal Exception - invalid temporal type passed to getTypeReq - " + type;
 	}
 }
 
 Temporal.getTypeOpt = function (type) {
-	if ( type && typeof type === "string" && typeof Temporal.typeFieldMap[type] === "object") {
-		return Temporal.typeFieldMap[type].opt;
+	if ( type && typeof type === "string" && typeof Temporal.typeFieldMap(type) === "object") {
+		return Temporal.typeFieldMap(type).opt;
 	} else {
 		throw "Temporal Exception - invalid temporal type passed to getTypeOpt - " + type;
 	}
 }
 
 Temporal.getFieldsForType = function (type) {
-	if ( type && typeof type === "string" && typeof Temporal.typeFieldMap[type] === "object") {
-		return 	Temporal.typeFieldMap[type].hdr.concat(Temporal.typeFieldMap[type].opt);
+	if ( type && typeof type === "string" && typeof Temporal.typeFieldMap(type) === "object") {
+		return 	Temporal.typeFieldMap(type).hdr.concat(Temporal.typeFieldMap(type).opt);
 	} else {
 		throw "Temporal Exception - invalid temporal type passed to getFieldsForType - " + type;
 	}
@@ -545,9 +578,9 @@ Temporal.getFieldsForString = function (type,str) {
 	if (!str) {
 		return "";
 	}
-	if ( type && typeof type === "string" && typeof Temporal.typeFieldMap[type] === "object") {
+	if ( type && typeof type === "string" && typeof Temporal.typeFieldMap(type) === "object") {
 		var fields;
-		var map = Temporal.typeFieldMap[type];
+		var map = Temporal.typeFieldMap(type);
 		var headers = str.match(/[A-Za-z][A-Za-z][A-Za-z]=/g).join("");
 		if (!headers) {  // no valid headers - requires 3 letter
 			return "";

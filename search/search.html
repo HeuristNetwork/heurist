@@ -281,7 +281,7 @@
 				<ul>
 					<li><a href="#" id="navButton" title="Toggle navigation panel">Hide Navigation Panel</a></li>
 					<li><a href="#" id="appPanelButton" title="Toggle search applications panel">Hide Application Panel</a></li>
-                    <li><a href="#" id="resultsButton" title="Toggle search results panel">Toggle Search Results</a></li>
+					<li><a href="#" id="resultsButton" title="Toggle search results panel">Toggle Search Results</a></li>
 					<li><a href="#" id="resetLayout" title="Resets all panels to default width and visibility" class="seperator">Reset Layout</a></li>
 				</ul>
 			</li>
@@ -315,7 +315,7 @@
 					<li><a class=collected-shown href="#" onClick="top.HEURIST.search.removeFromCollection(); return false;" title="Select one or more records, then click to remove records from the collection">Remove</a></li>
 					<li><a class=toolbar-large-icon-link-normal href=" " title="Empty records from the collection" onclick='top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/manageCollection.php?clear", top.HEURIST.search.addRemoveCollectionCB); document.getElementById("q").focus(); return false;'>Remove all</a></li>
 					<li><a class=toolbar-large-icon-link-normal href=" " title="Save current set of records in collection" onClick="top.HEURIST.util.popupURL(window, 'saved/saveCollectionPopup.html',{width:650, height:600}); return false;">Save to...</a></li>
-					<li><a class=toolbar-large-icon-link-normal href="?q=_COLLECTED_&amp;label=Collected" title="Show current set of records in collection" >Show</a></li>
+					<li><a class=toolbar-large-icon-link-normal href=" " onClick="top.HEURIST.search.loadSearchLocation('?q=_COLLECTED_&amp;label=Collected');return false;" title="Show current set of records in collection" >Show</a></li>
 				</ul>
 			</li>
 			<li><span>Share</span>
@@ -330,10 +330,10 @@
 					<!--<li><a href="#" id=result-style-list-link title="View results as a list" onClick="top.HEURIST.search.setResultStyle('list'); return false;">1 column</a></li>
 					<li><a href="#" id=result-style-two-col-link title="View results in two columns" onClick="top.HEURIST.search.setResultStyle('two-col'); return false;">2 column</a></li>
 					<li><a href="#" id=result-style-thumbs-link title="View results as thumbnails" onClick="top.HEURIST.search.setResultStyle('thumbs'); return false;">Thumbnails-old</a></li>-->
-                    <li><a href="#" id=result-style-oneCol title="View results as a list" onClick="top.HEURIST.search.setResultStyle('list');">1 column</a></li>
-                    <li><a href="#" id=result-style-twoCol title="View results as a list" onClick="top.HEURIST.search.setResultStyle('two-col');">2 columns</a></li>
-                    <li><a href="#" id=result-style-icons-link title="View results as icons" onClick="top.HEURIST.search.setResultStyle('icons');">Icons</a></li>
-                    <li><a href="#" id=result-style-thumbs-link-new title="View results as icons" onClick="top.HEURIST.search.setResultStyle('thumbnails');">Thumbnails</a></li>
+					<li><a href="#" id=result-style-oneCol title="View results as a list" onClick="top.HEURIST.search.setResultStyle('list');">1 column</a></li>
+					<li><a href="#" id=result-style-twoCol title="View results as a list" onClick="top.HEURIST.search.setResultStyle('two-col');">2 columns</a></li>
+					<li><a href="#" id=result-style-icons-link title="View results as icons" onClick="top.HEURIST.search.setResultStyle('icons');">Icons</a></li>
+					<li><a href="#" id=result-style-thumbs-link-new title="View results as icons" onClick="top.HEURIST.search.setResultStyle('thumbnails');">Thumbnails</a></li>
 
 					<li><a href="#" title="Click to hide/show the legend" onClick="top.HEURIST.search.toggleLegend(); blur(); return false;" id="legend-link" class="seperator">SHow legend</a></li>
 				</ul>
@@ -391,6 +391,7 @@
 				<li><a href="#p" ><em>Print View</em></a></li>
 				<li><a href="#m" onClick="top.HEURIST.search.mapSelected();"><em>Map View</em></a></li>
 				<li><a href="#c" ><em>Side-By-Side</em></a></li>
+				<li><a href="#m3" onClick="top.HEURIST.search.mapSelected3();"><em>Map View v3</em></a></li>
 			</ul>
 			<div class="yui-content">
 				<div id="r">
@@ -404,6 +405,9 @@
 				</div>
 				<div id="c">
 					<iframe id="sidebyside-frame" class=viewers></iframe>
+				</div>
+				<div id="m3">
+					<iframe id="map-frame3" class=viewers></iframe>
 				</div>
 			</div>
 		</div>

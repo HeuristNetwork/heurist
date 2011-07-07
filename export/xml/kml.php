@@ -1,13 +1,14 @@
 <?php
 
 /**
- * filename, brief description, date of creation, by whom
+ * Returns kml for given record id. It searches detail with type 221 or 551
+ *
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
- * @todo
- **/
+ * @todo - only one kml per record, perhaps need to return the combination of kml
+ * **/
 
 ?>
 

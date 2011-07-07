@@ -1,0 +1,45 @@
+<?php
+
+/*<!--
+ * getKMLfromRecord.php
+ *
+ *
+ * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+ * @link: http://HeuristScholar.org
+ * @license http://www.gnu.org/licenses/gpl-3.0.txt
+ * @package Heurist academic knowledge management system
+ * @todo
+ -->*/
+
+
+require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
+require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
+
+mysql_connection_db_select(DATABASE);
+
+if (! @$_REQUEST['rec_ID']) return;
+
+$query = "SELECT dtl_Value FROM recDetails WHERE dtl_DetailTypeID=551 and dtl_RecID=".$_REQUEST['rec_ID'];
+
+//error_log(">>>>>>>>>>>".$query);
+
+$res = mysql_query($query);
+//"'.addslashes($_REQUEST['rec_ID']).'"');
+
+if (mysql_num_rows($res) != 1) return;
+
+$mres = mysql_query("select * from defFileExtToMimetype where fxm_Extension = 'kml'");
+$mimeType = mysql_fetch_assoc($mres);
+
+if (@$mimeType['fxm_MimeType']) {
+	header('Content-type: ' .$mimeType['fxm_MimeType']);
+}else{
+	header('Content-type: binary/download');
+}
+
+$row = mysql_fetch_row($res);
+
+//error_log(">>>>>>>>>>>".$row[0]);
+
+print $row[0];
+?>
