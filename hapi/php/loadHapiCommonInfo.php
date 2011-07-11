@@ -128,16 +128,16 @@ foreach ($rec_types as $rec_type) {
 		array_push($detailRequirements, array(
 			$rec_type,
 			$dtyID,
-			$rdr[4],
-			intval($rdr[5]),
-			$rdr[0],
-			$rdr[1],
+			$rdr[4],			//RequirementType
+			intval($rdr[5]),	//MaxValue
+			$rdr[0],			//Name
+			$rdr[1],			//HelpText
 			intval($rdr[8]),
 			intval($rdr[7]),
 			intval($rdr[9]),
 			$rdr[3],
 			$rdr[2],
-			intval($rdr[6]),
+			intval($rdr[6]),	//MinValue
 			$rdr[10],
 			$rdr[11],
 			$rdr[13],

@@ -299,7 +299,7 @@ function loadUserDependentData(&$record) {
 	$recID = $record["rec_ID"];
 	$res = mysql_query(
 	    "select bkm_ID,
-	            bkm_Rating,
+	            bkm_Rating
 	       from usrBookmarks
 	      where bkm_recID = $recID
 	        and bkm_UGrpID = ".get_user_id());
