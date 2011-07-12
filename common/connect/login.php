@@ -166,10 +166,20 @@ if (@$_REQUEST['logout']) {
 			echo "<p style=\"margin-left: 100px; color: red;\">".$LOGIN_ERROR."</p>";
 ?>
 <table cellpadding=3 id="login-table">
-   <tr class="input-row">
-    <td class="input-header-cell">Username</td>
-    <td class="input-cell"><input type="text" name="username" id="username" size="20" class="in"></td>
-   </tr>
+	<tr class="input-row">
+	<td class="input-header-cell">Database name</td>
+	<td class="input-cell"><?php echo HEURIST_DBNAME; ?></td>
+	</tr>
+
+	<tr class="input-row">
+	<td class="input-header-cell">Prefix</td>
+	<td class="input-cell"><?php echo HEURIST_DB_PREFIX; ?></td>
+	</tr>
+
+	<tr class="input-row">
+	<td class="input-header-cell">Username</td>
+	<td class="input-cell"><input type="text" name="username" id="username" size="20" class="in"></td>
+	</tr>
 
    <tr class="input-row">
     <td class="input-header-cell">Password</td>
