@@ -50,13 +50,16 @@
 $newDBName = "";
 $isNewDB = false; // Used by buildCrosswalks
 global $errorCreatingTables; // Set to true by buildCrosswalks if error occurred
+global $done; // Prevents the makeDatabase() script from running twice
+$done = false;
 
 if(isset($_POST['dbname'])) {
 	makeDatabase();
 }
 
 function makeDatabase() {
-	global $newDBName, $isNewDB;
+	global $newDBName, $isNewDB, $done;
+	if(!$done) {
 	$error = false;
 	if(isset($_POST['dbname'])) {
 		if(ADMIN_DBUSERNAME == "") {
@@ -74,9 +77,16 @@ function makeDatabase() {
 			echo '<script type="javascript/text">document.getElementById("loading").style.display = "none";</script>';
 			return;
 		}
+
 		// Create the new blank database
 		$newDBName = $_POST['dbname'];
 		$newname = HEURIST_DB_PREFIX . $newDBName; // all databases have common prefix
+
+		$hasDash = strpos($newname, "-");
+		if($hasDash) {
+			echo "<strong>Only letters, numbers and underscores (_) are allowed in the database name.</strong>";
+			return false;
+		}
 
 		$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'create database `$newname`'";
 		$output1 = exec($cmdline . ' 2>&1', $output, $res1);
@@ -95,15 +105,37 @@ function makeDatabase() {
 				// errorCreatingTables is set to true by buildCrosswalks if an error occurred
 				if(!$errorCreatingTables) {
 					// Add procedures and triggers
-					$cmdline="mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D$newname < addProceduresTriggers.sql";
+					$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D$newname < addProceduresTriggers.sql";
 					$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 					
 					// No errors occurred, show succes message
 					if($res2 == 0) {
+						$cmdline = "mkdir -m a=rwx ../../../uploaded-heurist-files/".$newDBName;
+						$output2 = exec($cmdline . ' 2>&1', $output, $res2);
+						if($res2 != 0) {
+							echo "<strong>An error occurred creating the uploaded files folder. Please manually create a folder in /uploaded-heurist-files/ with the name '".$newDBName."', and give it full read, write and execute rights:</strong><br />";
+							echo($output2);
+							echo "<br /><br /><hr /><br />";
+						}
+						mysql_connection_db_insert(DATABASE);
+						$query = mysql_query("SELECT ugr_LongName, ugr_FirstName, ugr_LastName, ugr_eMail FROM sysUGrps WHERE ugr_ID=2");
+						error_log("1o".mysql_error()."1o");
+						$details = mysql_fetch_row($query);
+						$longName = mysql_escape_string($details[0]);
+						$firstName = mysql_escape_string($details[1]);
+						$lastName = mysql_escape_string($details[2]);
+						$eMail = mysql_escape_string($details[3]);
+						mysql_connection_db_insert($newname);
+						mysql_query('UPDATE sysUGrps SET ugr_LongName="'.$longName.'", ugr_FirstName="'.$firstName.'", ugr_LastName="'.$lastName.'", ugr_eMail="'.$eMail.'" WHERE ugr_ID=2');
+						error_log("__ ".$longName." - ".$firstName." - ".$lastName." - ".$eMail." __");
+						error_log("o".mysql_error()."o");
+
 						echo "New database '" . $newname . "' was created successfully. It is accessible at this URL: <a href=\"".HEURIST_URL_BASE."?db=".$newDBName."\" title=\"\">".HEURIST_URL_BASE."?db=".$newDBName."</a>.<br /><br />";
 						echo "A default administrative user '<strong>dbAdmin</strong>' with password '<strong>none</strong>' has been created.<br /><br />";
-						echo "You should change the password for this user immediately to something more secure, and add personal logins. Please visit the <a href='".HEURIST_URL_BASE."admin/adminMenu.php?db=".$newDBName."' title=''>user administration page</a>.";
+						echo "You should change the password for this user immediately to something more secure, and add personal logins. Please visit the <a href='".HEURIST_URL_BASE."admin/adminMenu.php?db=".$newDBName."' title=''>user administration page</a>, and go to 'Database > Manage Users'.<br /><br />";
+						echo "<strong>Note:</strong> Your personal details have been added to the user dbAdmin. The account's name and e-mail address will be shown as feedback details accross Heurist. If you do not wish to get e-mails on that address, change it along with the password and possibly other details.";
 						echo '<script type="text/javascript">document.getElementById("createDBForm").style.display = "none";</script>';
+						return false;
 					}
 				}
 			}
@@ -122,12 +154,21 @@ function makeDatabase() {
 						
 						// No errors occurred, one or more warnings did. Show succes message
 						if($res2 == 0) {
+							$cmdline = "mkdir -m a=rwx ../../../uploaded-heurist-files/".$newDBName;
+							$output2 = exec($cmdline . ' 2>&1', $output, $res2);
+							if($res2 != 0) {
+								echo "<strong>An error occurred creating the uploaded files folder. Please manually create a folder in /uploaded-heurist-files/ with the name '".$newDBName."', and give it full read, write and execute rights:</strong><br />";
+								echo($output2);
+								echo "<br /><br /><hr /><br />";
+							}
 							echo "New database '" . $newname . "' was created, but a warning was given:<br />";
 							echo $output2 . "<br /><br />";
 							echo "The new database is accessible at this URL: <a href=\"".HEURIST_URL_BASE."?db=".$newDBName."\" title=\"\">".HEURIST_URL_BASE."?db=".$newDBName."</a>.<br /><br />";
 							echo "A default administrative user '<strong>dbAdmin</strong>' with password '<strong>none</strong>' has been created.<br /><br />";
-							echo "You should change the password for this user immediately to something more secure, and add personal logins. Please visit the <a href='".HEURIST_URL_BASE."admin/adminMenu.php?db=".$newDBName."' title=''>user administration page</a>.";
+							echo "You should change the password for this user immediately to something more secure, and add personal logins. Please visit the <a href='".HEURIST_URL_BASE."admin/adminMenu.php?db=".$newDBName."' title=''>user administration page</a>, and go to 'Database > Manage Users'.<br /><br />";
+							echo "<strong>Note:</strong> Your personal details have been added to the user dbAdmin. The account's name and e-mail address will be shown as feedback details accross Heurist. If you do not wish to get e-mails on that address, change it along with the password and possibly other details.";
 							echo '<script type="text/javascript">document.getElementById("createDBForm").style.display = "none";</script>';
+							return false;
 						} else {
 							$error = true;
 						}
@@ -143,12 +184,13 @@ function makeDatabase() {
 				echo "<strong>The database was not created. An error occurred during the creation process:</strong><br />";
 				// Doesn't give output when errorcode is 2, so print general message.
 				if($res2 == 2) {
-					echo "Misuse of shell builtins (according to Bash documentation). Could be due to invalid DB name.";
+					echo "Misuse of shell builtins (according to Bash documentation). Could be due to invalid DB name. Only letters, numbers, and underscores (_) are allowed.";
 				} else {
 					echo $output2;
 				}
 				$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'drop database `$newname`'";
 				exec($cmdline . ' 2>&1', $output, $res2);
+				$done = true;
 			}
 		} else { // An error occurred when creating the database (first step). Catch existing name error for more user friendly feedback, else, show error message
 			$sqlErrorCode = split(" ", $output1);
@@ -165,6 +207,7 @@ function makeDatabase() {
 				echo '<script type="javascript/text">document.getElementById("loading").style.display = "none";</script>';
 			}
 		}
+	}
 	}
 }
 ?>
