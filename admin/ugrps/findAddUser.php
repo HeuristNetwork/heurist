@@ -23,6 +23,16 @@ $recaptcha_public_key = "6LdOkgQAAAAAAJA5_pdkrwcKA-VFPPdihgoLiWmT";
 $recaptcha_private_key = "6LdOkgQAAAAAALRx8NbUn9HL50ykaTjf1dv5G3oq";
 
 mysql_connection_overwrite(DATABASE);
+
+$query = mysql_query("SELECT ugr_FirstName, ugr_LastName, ugr_eMail FROM sysUGrps WHERE ugr_ID=2");
+error_log("--- ".mysql_error());
+$details = mysql_fetch_row($query);
+$fullName = $details[0] . " " . $details[1];
+$eMail = $details[2];
+echo '<script type="text/javascript">';
+echo 'var adminDetails = "Email: <a href=\'mailto:'.$eMail.'\'>'.$fullName.' &lt;'.$eMail.'&gt;</a>";';
+echo '</script>';
+
 $template = file_get_contents('findAddUser.html');
 
 $lexer = new Lexer($template);
@@ -78,7 +88,7 @@ if (@$_REQUEST['_submit']) {
 										$_SERVER["REMOTE_ADDR"],
 										$_POST["recaptcha_challenge_field"],
 										$_POST["recaptcha_response_field"]);
-		if (!$resp->is_valid) {
+		if (!$resp->is_valid && $resp->error != "true") {
 			$body->global_vars['-ERRORS'][] = "The reCAPTCHA wasn't entered correctly. Go back and try it again. " .
 			                                  "(reCAPTCHA said: " . $resp->error . ")";
 			$dup_check_ok = false;
@@ -216,6 +226,7 @@ if (@$_REQUEST['_submit']  &&  $dup_check_ok) {
 
 The user details submitted are:
 
+Database name: ".DATABASE."
 First name:    $firstname
 Last name:     $lastname
 Email address: $email
@@ -248,5 +259,4 @@ Go to the address below to review further details and approve the registration:
 	}
 }
 $body->render();
-
 ?>
