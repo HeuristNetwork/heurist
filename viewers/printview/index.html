@@ -183,7 +183,7 @@
 					showRelatedLink.innerHTML = "Loading related records";
 					parentDiv.className += " show";
 
-					var xmlRecDepth1 = loadXMLDocFromFile("http://heuristscholar.org"+ top.HEURIST.basePath+
+					var xmlRecDepth1 = loadXMLDocFromFile(top.HEURIST.baseURL+
 										"export/xml/hml.php?q=ids:"+recID+"&depth=1&woot=1"+
 										(top.HEURIST.database.name? "&db=" + top.HEURIST.database.name:""));
 					if (!xmlRecDepth1) return;
@@ -300,7 +300,7 @@
 						if (!pageXMLs[page]){ //load pageXML now
 							var pageQuery = query;
 							pageQuery = pageQuery.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"&offset=" + (page-1)*resultsPerPage);
-							var url = "http://heuristscholar.org" + top.HEURIST.basePath+ "export/xml/hml.php" + pageQuery;
+							var url = top.HEURIST.baseURL+ "export/xml/hml.php" + pageQuery;
 							var errorMsg = "Error loading " + url + " using XMLHttpRequest";
 							pageXMLs[page] = loadXMLDocFromFile(url);
 						}
@@ -320,7 +320,7 @@
 						if (!pageXMLs[page]){ //load pageXML now
 							var pageQuery = query;
 							pageQuery = pageQuery.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"&offset=" + (page-1)*resultsPerPage);
-							var url = "http://heuristscholar.org" + top.HEURIST.basePath+ "export/xml/hml.php" + pageQuery;
+							var url = top.HEURIST.baseURL+ "export/xml/hml.php" + pageQuery;
 							var errorMsg = "Error loading " + url + " using XMLHttpRequest";
 							pageXMLs[page] = loadXMLDocFromFile(url);
 						}
@@ -350,7 +350,7 @@
 						clearAndDisplayLoading();
 						var pageQuery = query;
 						pageQuery = pageQuery.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"&offset=" + (currentPage-1)*resultsPerPage);
-						var url = "http://heuristscholar.org" + top.HEURIST.basePath+ "export/xml/hml.php" + pageQuery;
+						var url = top.HEURIST.baseURL+ "export/xml/hml.php" + pageQuery;
 						var errorMsg = "Error loading " + url + " using XMLHttpRequest";
 						pageXMLs[currentPage] = loadXMLDocFromFile(url);
 						xml = pageXMLs[currentPage];

@@ -57,7 +57,7 @@ $noclutter = array_key_exists('noclutter', $_REQUEST);
 	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
     <script src="../../external/jquery/jquery-1.6.min.js"></script>
 	<script type="text/javascript">
-	
+
 function zoomInOut(obj,thumb,url) {
 	var thumb = thumb;
 	var url = url;
@@ -65,7 +65,7 @@ function zoomInOut(obj,thumb,url) {
 	if (currentImg.parentNode.className != "fullSize"){
 		currentImg.src = url;
 		currentImg.parentNode.className = "fullSize";
-		
+
 	}else{
 		currentImg.src = thumb;
 		currentImg.parentNode.className = "thumb_image";
@@ -451,10 +451,10 @@ function print_relation_details($bib) {
 
 		print '<div class=detailRow>';
 //		print '<span class=label>' . htmlspecialchars($bd['RelationType']) . '</span>';	//saw Enum change
-		print '<div class=detailType>' . htmlspecialchars($bd['RelTermID']) . '</div>'; // fetch now returns the enum string also
+		print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . '</div>'; // fetch now returns the enum string also
 		print '<div class=detail>';
 		if (@$bd['RelatedRecID']) {
-			print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&bib_id='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
+			print '<a target=_new href="'.HEURIST_URL_BASE.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&bib_id='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
 		} else {
 			print htmlspecialchars($bd['Title']);
 		}
@@ -468,10 +468,10 @@ function print_relation_details($bib) {
 
 		print '<div class=detailRow>';
 //		print '<span class=label>' . htmlspecialchars($bd['RelationType']) . '</span>';	//saw Enum change
-		print '<div class=detailType>' . htmlspecialchars($bd['RelTermID']) . '</div>';
+		print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . '</div>';
 		print '<div class=detail>';
-		if (@$bd['OtherResource']) {
-			print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&bib_id='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
+		if (@$bd['RelatedRecID']) {
+			print '<a target=_new href="'.HEURIST_URL_BASE.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&bib_id='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
 		} else {
 			print htmlspecialchars($bd['Title']);
 		}
