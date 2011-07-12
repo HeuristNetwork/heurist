@@ -76,7 +76,7 @@
 		$tempDBName = "hdb_temp_" . $dateAndTime;
 		mysql_query("CREATE DATABASE `" . $tempDBName . "`");
 	} else {
-		$tempDBName = $newname;
+		$tempDBName = "`".$newname."`";
 		$dbname = $newname;
 	}
 	mysql_connection_db_insert($tempDBName); // Use new database

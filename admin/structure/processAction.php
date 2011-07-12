@@ -53,9 +53,9 @@ function import() {
 	$entity = mysql_fetch_array(mysql_query("select * from ".$tempDBName.".defRecTypes where rty_ID = ".$_GET["crwSourceCode"]), MYSQL_ASSOC);
 
 	// Create new group with todays date, which the recordtype will be added to
-	$rtyGroup = mysql_query("select rtg_ID from ".$importingDB.".defRecTypeGroups where rtg_Name = 'Imported (".$currentDate.")'");
+	$rtyGroup = mysql_query("select rtg_ID from ".$importingDB.".defRecTypeGroups where rtg_Name = 'Imported'");
 	if(mysql_num_rows($rtyGroup) == 0) {
-		mysql_query("INSERT INTO ".$importingDB.".defRecTypeGroups VALUES ('','Imported (".$currentDate.")','functionalgroup' , '', 'This group contains all record types that were imported from an external database on ".$currentDate."')");
+		mysql_query("INSERT INTO ".$importingDB.".defRecTypeGroups VALUES ('','Imported','functionalgroup' , '999', 'This group contains all record types that were imported from external databases')");
 		// Write the insert action to $logEntry, and set $error to true if one occurred
 		if(mysql_error()) {
 			$error = true;
@@ -103,9 +103,9 @@ function import() {
 
 		if(!$error) {
 			// Create new group with todays date, which all detailtypes that the recordtype uses will be added to
-			$dtyGroup = mysql_query("select dtg_ID from ".$importingDB.".defDetailTypeGroups where dtg_Name = 'Imported (".$currentDate.")'");
+			$dtyGroup = mysql_query("select dtg_ID from ".$importingDB.".defDetailTypeGroups where dtg_Name = 'Imported'");
 			if(mysql_num_rows($dtyGroup) == 0) {
-				mysql_query("INSERT INTO ".$importingDB.".defDetailTypeGroups VALUES ('','Imported (".$currentDate.")', '255', 'This group contains all detailtypes that were imported from an external database on ".$currentDate."')");
+				mysql_query("INSERT INTO ".$importingDB.".defDetailTypeGroups VALUES ('','Imported', '999', 'This group contains all detailtypes that were imported from external databases')");
 				// Write the insert action to $logEntry, and set $error to true if one occurred
 				if(mysql_error()) {
 					$error = true;
