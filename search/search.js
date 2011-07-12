@@ -1930,7 +1930,7 @@ top.HEURIST.search = {
 	addTagsPopup: function(reload) {
 		if (top.HEURIST.parameters["w"] == "all") {
 			var bib_ids_list = top.HEURIST.search.getSelectedRecIDs().get();
-			var bkmk_ids_list = top.HEURIST.search.getSelectedBkmIDs();
+			var bkmk_ids_list = top.HEURIST.search.getSelectedBkmIDs().get();
 			if (bib_ids_list.length == 0  &&  bkmk_ids_list.length == 0) {
 				//nothing selected
 				alert("Select at least one record to add tags");
@@ -1949,7 +1949,7 @@ top.HEURIST.search = {
 		top.HEURIST.search.addRemoveTagsPopup(reload);
 	},
 	addRemoveTagsPopup: function(reload) {
-		var bkmk_ids_list = top.HEURIST.search.getSelectedBkmIDs();
+		var bkmk_ids_list = top.HEURIST.search.getSelectedBkmIDs().get();
 		if (bkmk_ids_list.length == 0) {
 			top.HEURIST.search.selectBookmarkMessage("to add / remove tags");
 			return;
@@ -1973,7 +1973,7 @@ top.HEURIST.search = {
 
 			action_elt.value = (add ? "add" : "remove") + "_tags";
 			tagString_elt.value = tags;
-			var bkmk_ids_list = top.HEURIST.search.getSelectedBkmIDs();
+			var bkmk_ids_list = top.HEURIST.search.getSelectedBkmIDs().get();
 			bkmk_ids_elt.value = bkmk_ids_list.join(',');
 			reload_elt.value = reload ? "1" : "";
 
@@ -2008,7 +2008,7 @@ top.HEURIST.search = {
 	},
 
 	setRatingsPopup: function() {
-		var bkmk_ids_list = top.HEURIST.search.getSelectedBkmIDs();
+		var bkmk_ids_list = top.HEURIST.search.getSelectedBkmIDs().get();
 		if (bkmk_ids_list.length == 0) {
 			top.HEURIST.search.selectBookmarkMessage("to set ratings");
 			return;
@@ -2084,7 +2084,7 @@ top.HEURIST.search = {
 	},
 
 	deleteBookmarks: function() {
-		var bkmk_ids_list = top.HEURIST.search.getSelectedBkmIDs();
+		var bkmk_ids_list = top.HEURIST.search.getSelectedBkmIDs().get();
 		if (bkmk_ids_list.length == 0) {
 			alert("Select at least one bookmark to delete");
 			return;

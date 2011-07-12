@@ -50,7 +50,7 @@ function set_ratings() {
 
 	updateRatingElt.value = ratingSelect.value;
 
-	var bkmk_ids_list = top.HEURIST.search.getSelectedBkmIDs();
+	var bkmk_ids_list = top.HEURIST.search.getSelectedBkmIDs().get();
 	bkmk_ids_elt.value = bkmk_ids_list.join(',');
 	action_elt.value = 'set_ratings';
 
