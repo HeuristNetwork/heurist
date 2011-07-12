@@ -12,11 +12,14 @@
 ?>
 
 <?php
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 
-mysql_connection_select("heuristdb");	//FIXME:  need to use a configured value
+/* mysql_connection_select("heuristdb");	//FIXME:  need to use a configured value */
+mysql_connection_db_select(DATABASE);
 
 $woots = array();
 $res = mysql_query("select * from woots");// where woot_Title='record:96990'");
