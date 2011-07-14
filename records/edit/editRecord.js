@@ -387,11 +387,6 @@ top.HEURIST.edit = {
 				if (topOpener) topOpener.focus();
 			} catch (e) { }
 		}
-		else if (document.getElementById("act-recent").checked) {
-			setTimeout(function() {
-				top.location.href = top.HEURIST.basePath + "search/search.html?q=sortby:-m&db=" + HAPI.database;
-			}, 0);
-		}
 	},
 
 	changed: function(moduleName) {

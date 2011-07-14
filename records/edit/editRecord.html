@@ -48,7 +48,7 @@
 					top.HEURIST.baseURL = "http://"+ location.hostname + top.HEURIST.basePath;
 				}
 				if (! top.HEURIST.is_logged_in()) {
-					top.location.replace(top.HEURIST.basePath + "common/connect/login.php?last_uri=" +escape(top.HEURIST.baseURL + "records/edit/editRecord.html" + top.location.search));
+					top.location.replace(top.HEURIST.baseURL + "common/connect/login.php?last_uri=" +escape(top.HEURIST.baseURL + "records/edit/editRecord.html" + top.location.search ));//saw TODO add db=
 				}
 			});
 		</script>
@@ -61,6 +61,8 @@
 		<script>
 			var bibID =(top.HEURIST.parameters["bib_id"]? top.HEURIST.parameters["bib_id"] :
 							(window.location.search.match(/bib_id=(\d+).*$/)? window.location.search.match(/bib_id=(\d+).*$/)[1] : ""));
+			var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:
+							(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name: "");
 			var queryStr = "",
 				recordEvent = "record";
 			if (bibID){
@@ -70,7 +72,9 @@
 				if (queryStr.length > 0) queryStr += "&";
 				queryStr += "bkmk_id="+top.HEURIST.parameters["bkmk_id"];
 			}
-			top.HEURIST.loadScript(top.HEURIST.baseURL +"common/php/loadRecordData.php?"+queryStr);
+			if ( queryStr) {
+				top.HEURIST.loadScript(top.HEURIST.baseURL +"common/php/loadRecordData.php?db="+database+"&"+queryStr);
+			}
 		</script>
 		<script>
 			top.HEURIST.whenLoaded([recordEvent,"edit-html"], function() {
@@ -85,7 +89,7 @@
 				if (rec.replacedBy) {
 					// This record has been deprecated in favour of another ...
 					// Load that page (and make a best effort to stop this one from continuing)
-					window.location.replace("?bib_id=" + rec.replacedBy);
+					window.location.replace("?bib_id=" + rec.replacedBy +"&db="+database);
 				}
 			});
 		</script>
@@ -99,13 +103,13 @@
 			top.HEURIST.whenLoaded([recordEvent, "edit-html"], function() {
 				top.HEURIST.edit.showRecordProperties();
 				if (top.HEURIST.parameters["sid"]) {
-					top.HEURIST.util.getJsonData(top.HEURIST.basePath+"records/edit/setResultsNavigation.php?s="+top.HEURIST.parameters["sid"]+"&id="+top.HEURIST.edit.record.bibID, function(context) {
+					top.HEURIST.util.getJsonData(top.HEURIST.basePath+"records/edit/setResultsNavigation.php?db="+database+"&s="+top.HEURIST.parameters["sid"]+"&id="+top.HEURIST.edit.record.bibID, function(context) {
 						if (! context) return;
 						document.getElementById("search-nav").innerHTML =
 						"<p>Record "+context.pos+" of "+context.count+" search results</p>" +
 						"<p>" +
-						(context.prev ? "<a style=\"padding-right: 10px;\" href=?sid="+top.HEURIST.parameters["sid"]+"&bib_id="+context.prev+">previous</a>" : "") +
-						(context.next ? "<a href=?sid="+top.HEURIST.parameters["sid"]+"&bib_id="+context.next+">next</a>" : "") +
+						(context.prev ? "<a style=\"padding-right: 10px;\" href=?db="+database+"&sid="+top.HEURIST.parameters["sid"]+"&bib_id="+context.prev+">previous</a>" : "") +
+						(context.next ? "<a href=?db="+database+"&sid="+top.HEURIST.parameters["sid"]+"&bib_id="+context.next+">next</a>" : "") +
 						"</p>";
 					});
 				}
@@ -221,7 +225,7 @@
   <div id=quicklink-cell class=yui-skin-sam>
   	<nobr><b>
 		<a href="../../help/about.html" onClick="top.HEURIST.util.popupURL(window, href); return false;">About</a> |
-		<a href="http://www.timemap.net/tmissues.php" target=_blank>Report a bug</a> |
+		<a href="http://www.timemap.net/tmissues.php" target=_blank>Report a bug</a> | <!-- //saw TODO change to debug form -->
 		<a id=contact-link href="mailto:info@heuristscholar.org">Contact us</a> |
 		<a id=help-link href='#' onClick="top.HEURIST.util.helpToggler(this)"></a>
 
@@ -300,8 +304,6 @@
 		<input type=button name=save-button value=Save style="font-weight: bold;" onClick="top.HEURIST.edit.save();">
 	</div>
 	<div style="padding: 0 30px;">
-		<div style="padding: 3px 0;"><label for=act-recent><input type=radio name=act id=act-recent value=search
-			onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)"> show recent edits</label></div>
 		<div style="padding: 3px 0;"><label for=act-stay><input type=radio name=act id=act-stay value=stay
 			onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)"> stay on page</label></div>
 		<div style="padding: 3px 0;" id=close-window-option><label for=act-close><input type=radio name=act id=act-close value=close
@@ -322,9 +324,6 @@
 			}
 
 			switch (top.HEURIST.displayPreferences["action-on-save"]) {
-				case "search":
-				document.getElementById("act-recent").checked = true;
-				break;
 				case "close":
 				if (canCloseWindow) {
 					document.getElementById("act-close").checked = true;
@@ -455,7 +454,7 @@
 					top.HEURIST.edit.unchanged(eachName);
 				}
 
-				top.location.replace(top.HEURIST.basePath+"records/edit/editRecord.html?bib_id="+choice.details.id);
+				top.location.replace(top.HEURIST.baseURL+"records/edit/editRecord.html?db="+database+"&bib_id="+choice.details.id);
 			}
 		});
 	}
