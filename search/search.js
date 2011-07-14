@@ -251,7 +251,7 @@ top.HEURIST.search = {
 		var resultsDiv =  $("#results-level" + level);
 		if (resultsDiv.length == 0) {
 			resultsDiv = document.createElement("div");
-			resultsDiv.id = "results-level" + level;
+			resultsDiv.id = "results-level" + level + "test";
 			$(resultsDiv).attr("level",level);
 			resultsDiv.className = "icons"; //saw TODO: change this to get preference
 			document.getElementById("results").appendChild(resultsDiv);
@@ -271,6 +271,16 @@ top.HEURIST.search = {
 			filterDiv = filterDiv.get(0);
 			filterDiv.innerHTML = "";
 		}
+		
+		if(level>0){
+			var showRelatedMenuItem = document.createElement("div");
+			showRelatedMenuItem.innerHTML = "<a href='#' onclick=top.HEURIST.search.toggleRelated("+level+")>Show Related Records</a>";
+			showRelatedMenuItem.id = "showrelated"+level;
+			showRelatedMenuItem.className = "showrelated level" + level;
+			filterDiv.appendChild(showRelatedMenuItem);
+			resultsDiv.className += " collapsed"; //saw TODO: change this to get preference
+		}
+		
 		var filterMenu = document.createElement("ul");
 		filterMenu.id = "filter" + level;
 		filterMenu.className = "horizontal menu level"+level;
@@ -281,13 +291,7 @@ top.HEURIST.search = {
 			var levelRelTypes = (level <= maxDepth && depthInfo.reltypes? depthInfo.reltypes : null);
 		}
 		//create rectype filter menu
-		if(level>0){
-			var showRelatedMenuItem = document.createElement("li");
-			showRelatedMenuItem.innerHTML = "<a href='#' onclick=top.HEURIST.search.toggleRelated("+level+")>Show Related Records</a>";
-			showRelatedMenuItem.id = "showrelated"+level;
-			showRelatedMenuItem.className = "showrelated level" + level;
-			filterMenu.appendChild(showRelatedMenuItem);
-		}
+		
 
 		if (levelRecTypes){
 			var j;
@@ -360,8 +364,9 @@ top.HEURIST.search = {
 
 	toggleRelated: function(level){
 		var className =  document.getElementById("showrelated" + level).className;
+		$("#results-level" + level).toggleClass("collapsed");
 		if (className.match(/loaded/)) {
-			$("#results-level" + level).toggleClass("collapsed");
+			
 			if ($("#results-level" + level).hasClass("collapsed")) {
 				$("#showrelated" + level).html("<a onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Show Related Records</a>");
 				}else{
@@ -458,6 +463,21 @@ top.HEURIST.search = {
 			verified_date.setFullYear(dateBits[1], dateBits[2], dateBits[3]);
 			verified_date.setHours(dateBits[4], dateBits[5], dateBits[6], 0);
 		}
+		
+		
+		var daysBad = "";
+		if (href) {
+			if (! href.match(/^[^\/\\]*:/))
+				href = "http://" + href;
+			if (href.substring(0, 5).toLowerCase() != "file:") {
+				var err = top.HEURIST.search.format_web_error(res[9], verified_date, href);
+				if (err) daysBad = err;
+			}
+			else {
+				daysBad = "[local file]";
+			}
+			href = href.htmlEscape();
+		}
 
 		if (href) {
 			if (! href.match(/^[^\/\\]*:/))
@@ -470,7 +490,7 @@ top.HEURIST.search = {
 		}
 
 		var userPwd;
-		if (res[10]) userPwd = "style='display:inline;cursor:pointer;' user_pwd='"+res[10].htmlEscape()+"'";
+		if (res[10]) userPwd = "style='display:inline;cursor:pointer;margin-left:8px' user_pwd='"+res[10].htmlEscape()+"'";
 		else userPwd = "style='display:none;'";
 
 		var rectypeImg = "style='background-image:url("+ top.HEURIST.basePath+"common/images/rectype-icons/" + (res[4]? res[4] : "blank") + ".png)'";
@@ -478,7 +498,6 @@ top.HEURIST.search = {
 		var rectypeTitle = "Click to see details";
 		if (top.HEURIST.rectypes.names[parseInt(res[4])])
 			rectypeTitle = top.HEURIST.rectypes.names[parseInt(res[4])] + " - click to see details";
-
 		var html =
 		"<div class='recordDiv' title='Select to view, Ctrl-or Shift- for multiple select' bkmk_id='"+res[0]+"' bib_id="+res[2]+" rectype="+res[4]+">" +
 		"<input style='display:none' type=checkbox name=bib[] onclick=top.HEURIST.search.resultItemOnClick(this) class='logged-in-only' title='Check box to apply Actions to this record'>"+
@@ -490,9 +509,10 @@ top.HEURIST.search = {
 		   "<span class='wg-id-container logged-in-only'>"+
 		   "<span class=wg-id title='"+linkTitle.htmlEscape()+"' " + (wgColor? wgColor: "") + ">" + (wgHTML? wgHTML.htmlEscape() : "") + "</span>"+
 		   "</span>"+
-		   "<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/lock.png' " + userPwd + ">"+
-		    "</div>" +
-			"<div class='recordTitle' title='"+linkText+"'>" + (res[3].length ? "<a href='"+res[3]+"' target='_blank'>"+linkText + "</a>" : linkText ) + "</div>" +
+		   "<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/lock.png' " + userPwd + ">" + 
+		    "</div>" +  
+			"<div class='recordTitle' title='"+linkText+"'>" + (res[3].length ? "<a href='"+res[3]+"' target='_blank'>"+daysBad+linkText + "</a>"			 : linkText ) + "</div>" +
+			
 			"<div id='recordID'><a href='"+top.HEURIST.basePath+"search/search.html?q=ids:"+res[2]+
 			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
 			"' target='_blank' title='Open in new window'>Record ID: "+res[2]+"</a></div>" +
@@ -584,7 +604,8 @@ top.HEURIST.search = {
 
 	format_web_error: function(err, ver_date, href) {
 		if (! err  &&  ! ver_date)
-			return "[URL not yet tested]";
+			//return "<div class=\"daysbad notTested\"><div>URL not yet tested</div></div>";
+			return "<img src=\"../common/images/url_warning.png\" class=\"daysbad\" title=\"URL not yet tested\">";
 
 		var err_string;
 
@@ -610,7 +631,8 @@ top.HEURIST.search = {
 		else
 			return "";
 
-		return "[" + err_string + " - <a target=_blank href=http://web.archive.org/web/*/" + href + ">page history</a>]";
+		//return "<div class=\"daysbad error\"><div>" + err_string + "<br><a target=_blank href=http://web.archive.org/web/*/" + href + ">page history</a></div></div>";
+		return "<img src=\"../common/images/url_error.png\" class=\"daysbad\" title=\"" + err_string +" \">";
 	},
 
 	renderLoginDependentContent: function() {
@@ -857,10 +879,10 @@ top.HEURIST.search = {
 		top.HEURIST.search.clearResultRows();
 
 		var style = top.HEURIST.util.getDisplayPreference("search-result-style");
-		if (style != "list"  ||  style != "thumbnails" || style !="icons") {
-			style = "thumbnails"; // fall back for old styles
+		//if (style != "list"  ||  style != "thumbnails" || style !="icons") {
+		//	style = "thumbnails"; // fall back for old styles
 			top.HEURIST.util.setDisplayPreference("search-result-style", style);
-		}
+		//}
 		var resultsDiv = document.getElementById("results-level0");
 		var pageWidth = document.getElementById('page').offsetWidth;
 		if (pageWidth < 390 && style == "two-col") {
@@ -2262,6 +2284,7 @@ top.HEURIST.search = {
 		 document.getElementById("home-link").href = top.HEURIST.basePath + "index.html";
 //		 document.getElementById("home-link").href = top.HEURIST.basePath + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
 		 document.getElementById("dbSearch-link").href = top.HEURIST.basePath + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
+		 document.getElementById("bookmarklet-link").innerHTML = (top.HEURIST.database && top.HEURIST.database.name ? "<b>"+top.HEURIST.database.name + " Bookmarklet </b>" : "<b>Bookmarklet</b>");
 	},
 
 	writeRSSLinks: function() {
@@ -2588,7 +2611,7 @@ function removeCustomAlert() {
 				{ position: 'top', height: 50, body: 'masthead', header: '', gutter: '0', collapse: false, resize: false },
 				{ position: 'bottom', height: 10, resize: false, body: 'footer', gutter: '0', collapse: false },
 				{ position: 'left', width: leftWidth, resize: true, useShim: true, body: 'sidebar', gutter: '0', collapse: false, close: false, collapseSize: 0, scroll: false, animate: false },
-				{ position: 'center', body: 'center-panel', gutter: '0 10px 0 0', animate: false, collapse:true }
+				{ position: 'center', body: 'center-panel', gutter: '0 10 0 10', animate: false, collapse:true }
 			]
 		});
 
@@ -2762,4 +2785,5 @@ function removeCustomAlert() {
 	if (viewerTabIndex == 2){top.HEURIST.search.mapSelected()} //initialises map
 	else if (viewerTabIndex == 3){top.HEURIST.search.mapSelected3()}; //initialises new map
 	_tabView.addListener('activeTabChange',handleActiveTabChange);
+
 

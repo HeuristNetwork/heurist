@@ -80,6 +80,7 @@
 		a:active {}
 		a:focus {}
 	</style>
+
 </head>
 
 <body>
@@ -202,8 +203,9 @@
 			</li>
 			<li> <a href="../help/webhelp" target=_blank title="Overview and guides to the use of Heurist plus comprehensive detailed help"><b>Help</b></a> </li>
 			<li> <a id=contact-link style="display:none" title="Send us an email with bug information or feature requests" href="mailto:info@heuristscholar.org"><b>Contact us</b></a>
-				<script>
-					var html = "<a title=\"Drag the Heurist Bookmarklet link to your browser bookmarks toolbar, or right-click the link,"
+            <script>
+					var bookmarkletname = top.HEURIST.VERSION;
+					var html = "<a id=\"bookmarklet-link\" onclick=\"alert('Drag the Heurist Bookmarklet link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;\" title=\"Drag the Heurist Bookmarklet link to your browser bookmarks toolbar, or right-click the link,"
 								+ " choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.\""
 								+ " href=\"javascript:(function(){h='" + document.location.href.replace(/search\/.*/,"") + "';"
 										+ "d=document;c=d.contentType;"
@@ -214,7 +216,7 @@
 											+ "d.getElementsByTagName('head')[0].appendChild(s);}"
 										+ "else{e=encodeURIComponent;w=open(h+'records/add/addRecordPopup.php?db="+database+"&t='+e(d.title)+'&u='+e(location.href));"
 											+ "window.setTimeout('w.focus()',200);}"
-										+ "})();\"><b>Bookmarklet "+ database+"</b></a>";
+										+ "})();\"><b>"+database+" Bookmarklet</b></a>";
 							document.write(html);
 				</script>
 			</li>
@@ -264,7 +266,7 @@
 <div id="center-panel"></div>
 <!-- search and menu -->
 <div id=search class="banner">
-
+	
 	<form onSubmit="top.HEURIST.search.checkSearchForm();" class="searchTable">
 	<input type=hidden id=w-input name=w>
 	<div class="tableCell"><!-- add record -->
@@ -290,7 +292,7 @@
 				<ul>
 					<li><a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">Advanced Search</a></li>
 					<li><a href="../help/advanced_search.html" title="Detailed description of the syntax for advanced search strings" target=_blank>Help</a></li>
-					<li><a href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members" onClick="top.HEURIST.util.popupURL(window, 'saved/saveSearchPopup.html'); return false;"><span id="active-label" style="display:none"></span>Save search to...</a></li>
+					<li><a href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members" onClick="top.HEURIST.util.popupURL(window, 'saved/saveSearchPopup.html'); return false;"></span>Save search to...</a></li>
 					<li><a href="#" onClick="top.HEURIST.search.printResultRow()" title="Print search results">Print</a></li>
 					<li id=publish-image-placeholder></li>
 					<li><a href="#" onClick="top.HEURIST.search.openSelected()" title="Launch selected records in a new search window">New search window</a></li>
@@ -354,6 +356,7 @@
 	<!--<div id=pageNavCount> <nobr> <span id=page-nav></span> <span id=resource-count></span> </nobr></div>-->
 	<div id="result-container">
 		<div id="results">
+        <div id="active-label"></div>
 			<div id="results-message"></div>
 			<div id="search-status" class="loading">
 				<div id="loading-search-status">
@@ -451,6 +454,7 @@ top.HEURIST.loadScript("search.js");				// search-specific HEURIST functions
 //top.HEURIST.loadScript(top.HEURIST.basePath+"records/edit/editRecord.js");				// edit-specific HEURIST functions
 top.HEURIST.fireEvent(window, "heurist-search-html-loaded");
 top.HEURIST.contentLoaded();
+
 </script>
 <!-- hidden iFrame for printing -->
 <iframe id="printingFrame" style="height: 0px; width: 0px; position: absolute; visibility:hidden" src="printresults.html"></iframe>

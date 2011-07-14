@@ -203,9 +203,10 @@ div.input-row div.input-cell div#relations-tbody div div div.relation div.resour
 
 .input-row div.input-header-cell {width: 150px;padding-right: 10px;text-align: right;color: #6A7C99;}
 .input-row div, .input-header-cell {padding-bottom:0px; vertical-align: top;display:table-cell}
-.input-row.required div.input-header-cell { color: red; }
+.input-row.required div.input-header-cell { color: red;font-weight: bold;}
 .input-row.required div.input-header-cell:before { content: "* "; }
-.input-row.optional div.input-header-cell { color: #6A7C99; }
+.input-row.recommended div.input-header-cell { color: #6A7C99;font-weight: bold; }
+.input-row.optional div.input-header-cell { color: #6A7C99;font-weight: normal; }
 .prompt { font-size: 10px;color:#999; font-weight: normal;}
 input#tags, .input-cell .in, .input-cell .resource-title, .in {font-size:2ex; background:none repeat scroll 0 0 #FFF;border:medium none;margin:2px 0;padding:3px;}
 input#tags {min-width :80ex;}
