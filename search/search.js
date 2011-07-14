@@ -248,10 +248,13 @@ top.HEURIST.search = {
 			return;
 		}
 		var depthInfo = results.infoByDepth[level];
+		if (depthInfo.count == 0) {
+			return;
+		}
 		var resultsDiv =  $("#results-level" + level);
 		if (resultsDiv.length == 0) {
 			resultsDiv = document.createElement("div");
-			resultsDiv.id = "results-level" + level + "test";
+			resultsDiv.id = "results-level" + level;
 			$(resultsDiv).attr("level",level);
 			resultsDiv.className = "icons"; //saw TODO: change this to get preference
 			document.getElementById("results").appendChild(resultsDiv);
@@ -271,16 +274,17 @@ top.HEURIST.search = {
 			filterDiv = filterDiv.get(0);
 			filterDiv.innerHTML = "";
 		}
-		
+
 		if(level>0){
 			var showRelatedMenuItem = document.createElement("div");
 			showRelatedMenuItem.innerHTML = "<a href='#' onclick=top.HEURIST.search.toggleRelated("+level+")>Show Related Records</a>";
+			showRelatedMenuItem.innerHTML = "<a href='#' onclick=top.HEURIST.search.toggleRelated("+level+")>Show Related Records("+depthInfo.count+") </a>";
 			showRelatedMenuItem.id = "showrelated"+level;
 			showRelatedMenuItem.className = "showrelated level" + level;
 			filterDiv.appendChild(showRelatedMenuItem);
 			resultsDiv.className += " collapsed"; //saw TODO: change this to get preference
 		}
-		
+
 		var filterMenu = document.createElement("ul");
 		filterMenu.id = "filter" + level;
 		filterMenu.className = "horizontal menu level"+level;
@@ -291,7 +295,6 @@ top.HEURIST.search = {
 			var levelRelTypes = (level <= maxDepth && depthInfo.reltypes? depthInfo.reltypes : null);
 		}
 		//create rectype filter menu
-		
 
 		if (levelRecTypes){
 			var j;
@@ -303,9 +306,17 @@ top.HEURIST.search = {
 			rectypeMenuItem.innerHTML = "<span>Filter by Rectype</span>";
 			var rectypeList = document.createElement("ul");
 			rectypeList.className = "rectype level"+level;
+			var li = document.createElement("li");
+			li.innerHTML = "<a href='#' onclick=top.HEURIST.search.setAllFilterItems(this.parentNode.parentNode," +level + ",true)>Select All</a>";
+			li.className = "cmd";
+			rectypeList.appendChild(li);
+			li = document.createElement("li");
+			li.innerHTML = "<a href='#' onclick=top.HEURIST.search.setAllFilterItems(this.parentNode.parentNode," +level + ",false)>Select None</a>";
+			li.className = "cmd";
+			rectypeList.appendChild(li);
 			for (j=0; j< rtNames.length; j++) {
 				var rtInfo = rtNames[j].split(":");
-				var li = document.createElement("li");
+				li = document.createElement("li");
 				li.rectype = rtInfo[1];
 				$(li).attr("rectype", rtInfo[1]);
 				li.innerHTML = "<a href='#' onclick=top.HEURIST.search.toggleRectypeFilter(this.parentNode,"+level+","+rtInfo[1]+")>" + rtInfo[0] + "</a>";
@@ -325,9 +336,17 @@ top.HEURIST.search = {
 			ptrtypeMenuItem.innerHTML = "<span>Filter by Pointer Type</span>";
 			var ptrtypeList = document.createElement("ul");
 			ptrtypeList.className = "ptrtype level"+level;
+			var li = document.createElement("li");
+			li.innerHTML = "<a href='#' onclick=top.HEURIST.search.setAllFilterItems(this.parentNode.parentNode," +level + ",true)>Select All</a>";
+			li.className = "cmd";
+			ptrtypeList.appendChild(li);
+			li = document.createElement("li");
+			li.innerHTML = "<a href='#' onclick=top.HEURIST.search.setAllFilterItems(this.parentNode.parentNode," +level + ",false)>Select None</a>";
+			li.className = "cmd";
+			ptrtypeList.appendChild(li);
 			for (j=0; j< ptrNames.length; j++) {
 				var ptrInfo = ptrNames[j].split(":");
-				var li = document.createElement("li");
+				li = document.createElement("li");
 				li.ptrtype = ptrInfo[1];
 				$(li).attr("ptrtype", ptrInfo[1]);
 				li.innerHTML = "<a href='#' onclick=top.HEURIST.search.togglePtrtypeFilter(this.parentNode,"+level+","+ptrInfo[1]+")>" + ptrInfo[0] + "</a>";
@@ -347,6 +366,14 @@ top.HEURIST.search = {
 			reltypeMenuItem.innerHTML = "<span>Filter by Relation Type</span>";
 			var reltypeList = document.createElement("ul");
 			reltypeList.className = "reltype level"+level;
+			var li = document.createElement("li");
+			li.innerHTML = "<a href='#' onclick=top.HEURIST.search.setAllFilterItems(this.parentNode.parentNode," +level + ",true)>Select All</a>";
+			li.className = "cmd";
+			reltypeList.appendChild(li);
+			li = document.createElement("li");
+			li.innerHTML = "<a href='#' onclick=top.HEURIST.search.setAllFilterItems(this.parentNode.parentNode," +level + ",false)>Select None</a>";
+			li.className = "cmd";
+			reltypeList.appendChild(li);
 			for (j=0; j< relNames.length; j++) {
 				var relInfo = relNames[j].split(":");
 				var li = document.createElement("li");
@@ -366,7 +393,6 @@ top.HEURIST.search = {
 		var className =  document.getElementById("showrelated" + level).className;
 		$("#results-level" + level).toggleClass("collapsed");
 		if (className.match(/loaded/)) {
-			
 			if ($("#results-level" + level).hasClass("collapsed")) {
 				$("#showrelated" + level).html("<a onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Show Related Records</a>");
 				}else{
@@ -378,6 +404,15 @@ top.HEURIST.search = {
 			$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Hide Related Records</a>");
 			top.HEURIST.search.filterRelated(level);
 		}
+	},
+
+	setAllFilterItems: function(filterMenu, level, toChecked){
+		var selector = "li:not(.checked,.cmd)";
+		if (!toChecked){
+			selector = "li:not(.cmd).checked"
+		}
+		$(selector,filterMenu).toggleClass('checked');
+		top.HEURIST.search.filterRelated(level);
 	},
 
 	toggleRectypeFilter: function(menuItem, level, rtID){
@@ -405,9 +440,9 @@ top.HEURIST.search = {
 				});
 		}
 		$(menuItem).toggleClass('checked');
-		if (recalcFilters) {
+//		if (recalcFilters) {
 			top.HEURIST.search.filterRelated(level+1);
-		}
+//		}
 	},
 
 	toggleReltypeFilter: function(menuItem, level, trmID){
@@ -425,9 +460,9 @@ top.HEURIST.search = {
 				});
 		}
 		$(menuItem).toggleClass('checked')
-		if (recalcFilters) {
+//		if (recalcFilters) {
 			top.HEURIST.search.filterRelated(level+1);
-		}
+//		}
 	},
 
 	// new render common result record
@@ -463,8 +498,8 @@ top.HEURIST.search = {
 			verified_date.setFullYear(dateBits[1], dateBits[2], dateBits[3]);
 			verified_date.setHours(dateBits[4], dateBits[5], dateBits[6], 0);
 		}
-		
-		
+
+
 		var daysBad = "";
 		if (href) {
 			if (! href.match(/^[^\/\\]*:/))
@@ -509,10 +544,9 @@ top.HEURIST.search = {
 		   "<span class='wg-id-container logged-in-only'>"+
 		   "<span class=wg-id title='"+linkTitle.htmlEscape()+"' " + (wgColor? wgColor: "") + ">" + (wgHTML? wgHTML.htmlEscape() : "") + "</span>"+
 		   "</span>"+
-		   "<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/lock.png' " + userPwd + ">" + 
-		    "</div>" +  
-			"<div class='recordTitle' title='"+linkText+"'>" + (res[3].length ? "<a href='"+res[3]+"' target='_blank'>"+daysBad+linkText + "</a>"			 : linkText ) + "</div>" +
-			
+		   "<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/lock.png' " + userPwd + ">"+
+		    "</div>" +
+			"<div class='recordTitle' title='"+linkText+"'>" + (res[3] && res[3].length ? "<a href='"+res[3]+"' target='_blank'>"+linkText + "</a>" : linkText ) + "</div>" +
 			"<div id='recordID'><a href='"+top.HEURIST.basePath+"search/search.html?q=ids:"+res[2]+
 			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
 			"' target='_blank' title='Open in new window'>Record ID: "+res[2]+"</a></div>" +
@@ -692,36 +726,6 @@ top.HEURIST.search = {
 		resultsDiv.innerHTML += html;
 		top.HEURIST.search.addResultLevelEventHandlers(level);
 		top.HEURIST.search.addResultLevelLinks(level);
-		//apply classes for linked recordIDs
-/*		$('.recordDiv',resultsDiv).each(function(i, recDiv){
-				var recInfo = recSet[$(recDiv).attr("bib_id")];
-				var linkedRecIDs = {};
-				if (recInfo.ptrLinks){
-					for (recID in recInfo.ptrLinks.byRecIDs){
-						linkedRecIDs[recID] = 1;
-					}
-				}
-				if (recInfo.revPtrLinks){
-					for (recID in recInfo.revPtrLinks.byRecIDs){
-						linkedRecIDs[recID] = 1;
-					}
-				}
-				if (recInfo.relLinks){
-					for (recID in recInfo.relLinks.byRecIDs){
-						linkedRecIDs[recID] = 1;
-					}
-				}
-				if (recInfo.revRelLinks){
-					for (recID in recInfo.revRelLinks.byRecIDs){
-						linkedRecIDs[recID] = 1;
-					}
-				}
-				var classLinkedRecIDs = $.map(linkedRecIDs,function(i,recID){
-																return "link" + recID;
-															});
-				$(recDiv).addClass(classLinkedRecIDs.join(" "));
-			});
-*/
 		//for each link type add lnkrel or lnkptr  to the recordDiv's class for next level records
 		//when all links are filtered (removed) the record is hidden. This is how we get multivalued filtering
 		$('ul.ptrtype>li.checked',resultsDiv).each( function(i,li){
@@ -758,6 +762,7 @@ top.HEURIST.search = {
 		var depthInfo = top.HEURIST.search.results.infoByDepth[level];
 		var recordIDs = {};
 		$('.recordDiv',parentLevelResultDiv).each(function(i,recDiv){
+				// for all parentlevel records that are not filtered or without links
 				if ($(recDiv).hasClass('filtered') || (!$(recDiv).hasClass('lnk') && (level-1 > 0))){
 					return;
 				}
@@ -812,9 +817,9 @@ top.HEURIST.search = {
 				}
 			});
 		//un check all filter menu items
-		$('ul>li.checked',resultsDiv).each( function(i,li){
-				$(li).toggleClass('checked');
-			});
+//		$('ul>li.checked',resultsDiv).each( function(i,li){
+//				$(li).toggleClass('checked');
+//			});
 		//enable all filter menu items
 		$('ul>li.disabled',resultsDiv).each( function(i,li){
 				$(li).toggleClass('disabled');
@@ -824,42 +829,59 @@ top.HEURIST.search = {
 				while($(recDiv).hasClass('lnk')){
 					$(recDiv).toggleClass('lnk');
 				}
-				if($(recDiv).hasClass('filtered')){
-					$(recDiv).toggleClass('filtered');
+				var recID = $(recDiv).attr('bib_id');
+				if (recordIDs[recID] == 1) {//record related to upper level unfiltered record
+					if($(recDiv).hasClass('filtered')){
+						$(recDiv).toggleClass('filtered');
+					}
+				}else{
+					if(!$(recDiv).hasClass('filtered')){
+						$(recDiv).toggleClass('filtered');
+					}
 				}
 			});
-		//for each of the menus diable types not in the typeset and check those that are
-		$('ul.reltype>li',resultsDiv).each( function(i,li){
+		//for each of the menus disable reltype menu items not in the reltype set and lnk records for those that are checked
+		$('ul.reltype>li:not(.cmd)',resultsDiv).each( function(i,li){
 				var trmID = $(li).attr('reltype');
 				if (reltypes[trmID] === 1) {
-					$(li).toggleClass('checked');
-				$.each(depthInfo.reltypes[trmID],function(i,recID){
-						if (recordIDs[recID] === 1) {
-							$('.recordDiv[bib_id='+recID+']',resultsDiv).get(0).className += ' lnk';
-						}
-					});
+					if ($(li).hasClass('checked')) {
+						$.each(depthInfo.reltypes[trmID],function(i,recID){
+								if (recordIDs[recID] === 1) {
+									$('.recordDiv[bib_id='+recID+']',resultsDiv).get(0).className += ' lnk';
+								}
+							});
+					}
 				}else{
 					$(li).toggleClass('disabled');
 				}
 			});
-		//for each of the menus diable types not in the typeset and check those that are
-		$('ul.ptrtype>li',resultsDiv).each( function(i,li){
+		//for each of the menus disable ptrtype menu items not in the ptrtype set and lnk records for those that are checked
+		$('ul.ptrtype>li:not(.cmd)',resultsDiv).each( function(i,li){
 				var dtyID = $(li).attr('ptrtype');
 				if (ptrtypes[dtyID] === 1) {
-					$(li).toggleClass('checked');
-					$.each(depthInfo.ptrtypes[dtyID],function(i,recID){
-							if (recordIDs[recID] === 1) {
-								$('.recordDiv[bib_id='+recID+']',resultsDiv).get(0).className += ' lnk';
-							}
-						});
+					if ($(li).hasClass('checked')) {
+						$.each(depthInfo.ptrtypes[dtyID],function(i,recID){
+								if (recordIDs[recID] === 1) {
+									$('.recordDiv[bib_id='+recID+']',resultsDiv).get(0).className += ' lnk';
+								}
+							});
+					}
 				}else{
 					$(li).toggleClass('disabled');
 				}
 			});
-		//for each of the menus diable types not in the typeset and check those that are
-		$('ul.rectype>li',resultsDiv).each( function(i,li){
-				if (rectypes[$(li).attr('rectype')] === 1) {
-					$(li).toggleClass('checked');
+		//for each of the menus disable rectype menu items not in the rectype set and filter records of those that are not checked
+		$('ul.rectype>li:not(.cmd)',resultsDiv).each( function(i,li){
+				var rtID = $(li).attr('rectype');
+				if (rectypes[rtID] === 1) { //rectype menu is in the related set
+					if (!$(li).hasClass('checked')) { // if it's not checked then filter all records of this type
+						$.each(depthInfo.rectypes[rtID],function(i,recID){
+								var recDiv = $('.recordDiv[bib_id='+recID+']',resultsDiv);
+								if (!recDiv.hasClass('filtered')) {
+									recDiv.toggleClass('filtered');
+								}
+							});
+					}
 				}else{
 					$(li).toggleClass('disabled');
 				}
@@ -1465,11 +1487,10 @@ top.HEURIST.search = {
 			if (active) {
 
 				innerHTML += "<img class=\"saved-search-edit\" title=\"rename\" src=\"" +top.HEURIST.basePath+ "common/images/edit_pencil_9x11.gif\" align=absmiddle onclick=\"top.HEURIST.util.popupURL(window, '" +top.HEURIST.basePath+ "search/saved/saveSearchPopup.html?mode=rename&slabel=" + encodeURIComponent(cmb[0]) + "&sid="+sid+"&wg="+ (wg ? wg : 0) +(top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "")+"');\">";
-				innerHTML += "<img class=\"saved-search-edit\" title=\"delete\" src=\"" +top.HEURIST.basePath+ "common/images/delete6x7.gif\" align=absmiddle onclick=\"top.HEURIST.search.deleteSearch('"+ cmb[0] +"',"+ (wg ? wg : 0) + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "") +");\">";
+				innerHTML += "<img class=\"saved-search-edit\" title=\"delete\" src=\"" +top.HEURIST.basePath+ "common/images/delete6x7.gif\" align=absmiddle onclick=\"top.HEURIST.search.deleteSearch('"+ cmb[0] +"',"+ (wg ? wg : 0) +");\">";
 			}
 			innerHTML += "<div><a id='ss" + sid + "' href='" + (wg ? top.HEURIST.basePath : "")
 					  + cmb[1] + "&amp;label=" + encodeURIComponent(cmb[0]) + "&amp;sid=" + sid + (top.HEURIST.database && top.HEURIST.database.name ? "&amp;db=" + top.HEURIST.database.name : "") + "'>" + cmb[0] + "</a></div>";
-
 
 			innerHTML += "</nobr>";
 			innerHTML += " ";

@@ -426,7 +426,7 @@ function save_search() {
 	$row = mysql_fetch_row($res);
 
 	if ($row || $ss) {
-		if ($row && $row[1] == $wg) {
+		if ($row ) {
 		 	$ss = intval($row[0]);
 		}
 		mysql__update('usrSavedSearches', 'svs_ID='.$ss, $cmb);
