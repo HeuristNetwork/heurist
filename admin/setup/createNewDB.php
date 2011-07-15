@@ -101,6 +101,21 @@ function makeDatabase() {
 				// Run buildCrosswalks to import all references data into the new DB, with newDB as true so it will skip the actual crosswalking
 				$isNewDB = true;
 				require_once('../structure/buildCrosswalks.php');
+				mysql_connection_db_insert(DATABASE);
+				$query = mysql_query("SELECT ugr_LongName, ugr_FirstName, ugr_LastName, ugr_eMail, ugr_Name, ugr_Password, ugr_Department, ugr_Organisation, ugr_City, ugr_State, ugr_Postcode, ugr_Interests FROM sysUGrps WHERE ugr_ID=".get_user_id());
+				$details = mysql_fetch_row($query);
+				$longName = mysql_escape_string($details[0]);
+				$firstName = mysql_escape_string($details[1]);
+				$lastName = mysql_escape_string($details[2]);
+				$eMail = mysql_escape_string($details[3]);
+				$name = mysql_escape_string($details[4]);
+				$password = mysql_escape_string($details[5]);
+				$department = mysql_escape_string($details[6]);
+				$organisation = mysql_escape_string($details[7]);
+				$city = mysql_escape_string($details[8]);
+				$state = mysql_escape_string($details[9]);
+				$postcode = mysql_escape_string($details[10]);
+				$interests = mysql_escape_string($details[11]);
 				
 				// errorCreatingTables is set to true by buildCrosswalks if an error occurred
 				if(!$errorCreatingTables) {
@@ -117,23 +132,13 @@ function makeDatabase() {
 							echo($output2);
 							echo "<br /><br /><hr /><br />";
 						}
-						mysql_connection_db_insert(DATABASE);
-						$query = mysql_query("SELECT ugr_LongName, ugr_FirstName, ugr_LastName, ugr_eMail FROM sysUGrps WHERE ugr_ID=2");
-						error_log("1o".mysql_error()."1o");
-						$details = mysql_fetch_row($query);
-						$longName = mysql_escape_string($details[0]);
-						$firstName = mysql_escape_string($details[1]);
-						$lastName = mysql_escape_string($details[2]);
-						$eMail = mysql_escape_string($details[3]);
 						mysql_connection_db_insert($newname);
-						mysql_query('UPDATE sysUGrps SET ugr_LongName="'.$longName.'", ugr_FirstName="'.$firstName.'", ugr_LastName="'.$lastName.'", ugr_eMail="'.$eMail.'" WHERE ugr_ID=2');
-						error_log("__ ".$longName." - ".$firstName." - ".$lastName." - ".$eMail." __");
-						error_log("o".mysql_error()."o");
-
-						echo "New database '" . $newname . "' was created successfully. It is accessible at this URL: <a href=\"".HEURIST_URL_BASE."?db=".$newDBName."\" title=\"\">".HEURIST_URL_BASE."?db=".$newDBName."</a>.<br /><br />";
-						echo "A default administrative user '<strong>dbAdmin</strong>' with password '<strong>none</strong>' has been created.<br /><br />";
-						echo "You should change the password for this user immediately to something more secure, and add personal logins. Please visit the <a href='".HEURIST_URL_BASE."admin/adminMenu.php?db=".$newDBName."' title=''>user administration page</a>, and go to 'Database > Manage Users'.<br /><br />";
-						echo "<strong>Note:</strong> Your personal details have been added to the user dbAdmin. The account's name and e-mail address will be shown as feedback details accross Heurist. If you do not wish to get e-mails on that address, change it along with the password and possibly other details.";
+						mysql_query('UPDATE sysUGrps SET ugr_LongName="'.$longName.'", ugr_FirstName="'.$firstName.'", ugr_LastName="'.$lastName.'", ugr_eMail="'.$eMail.'", ugr_Name="'.$name.'", ugr_Password="'.$password.'", ugr_Department="'.$department.'", ugr_Organisation="'.$organisation.'", ugr_City="'.$city.'", ugr_State="'.$state.'", ugr_Postcode="'.$postcode.'", ugr_interests="'.$interests.'" WHERE ugr_ID=2');
+						echo "New database '<strong>" . $newname . "</strong>' was created successfully. It is accessible at this URL: <a href=\"".HEURIST_URL_BASE."?db=".$newDBName."\" title=\"\" target=\"_new\">".HEURIST_URL_BASE."?db=".$newDBName."</a>.<br /><br />";
+						echo "Please visit the <a href='".HEURIST_URL_BASE."admin/adminMenu.php?db=".$newDBName."' title='' target=\"_new\">administration page</a>, to set up your new database.<br /><br />";
+						echo "<strong>Note:</strong> The account you are logged in with at this moment, has been copied to your new database. This account's name and e-mail address will be shown as feedback details accross Heurist. If you do not wish to get e-mails on that address, you can change this and more by going to 'Access > Manage users/groups' on the administration page.<br /><br />";
+						echo "<strong>Admin username:</strong> ".$name."<br />";
+						echo "<strong>Admin password:</strong> &#60;<i>same as account currently logged in to</i>&#62;";
 						echo '<script type="text/javascript">document.getElementById("createDBForm").style.display = "none";</script>';
 						return false;
 					}
@@ -161,12 +166,15 @@ function makeDatabase() {
 								echo($output2);
 								echo "<br /><br /><hr /><br />";
 							}
+							mysql_connection_db_insert($newname);
+							mysql_query('UPDATE sysUGrps SET ugr_LongName="'.$longName.'", ugr_FirstName="'.$firstName.'", ugr_LastName="'.$lastName.'", ugr_eMail="'.$eMail.'", ugr_Name="'.$name.'", ugr_Password="'.$password.'", ugr_Department="'.$department.'", ugr_Organisation="'.$organisation.'", ugr_City="'.$city.'", ugr_State="'.$state.'", ugr_Postcode="'.$postcode.'", ugr_interests="'.$interests.'" WHERE ugr_ID=2');
 							echo "New database '" . $newname . "' was created, but a warning was given:<br />";
 							echo $output2 . "<br /><br />";
-							echo "The new database is accessible at this URL: <a href=\"".HEURIST_URL_BASE."?db=".$newDBName."\" title=\"\">".HEURIST_URL_BASE."?db=".$newDBName."</a>.<br /><br />";
-							echo "A default administrative user '<strong>dbAdmin</strong>' with password '<strong>none</strong>' has been created.<br /><br />";
-							echo "You should change the password for this user immediately to something more secure, and add personal logins. Please visit the <a href='".HEURIST_URL_BASE."admin/adminMenu.php?db=".$newDBName."' title=''>user administration page</a>, and go to 'Database > Manage Users'.<br /><br />";
-							echo "<strong>Note:</strong> Your personal details have been added to the user dbAdmin. The account's name and e-mail address will be shown as feedback details accross Heurist. If you do not wish to get e-mails on that address, change it along with the password and possibly other details.";
+							echo "The new database is accessible at this URL: <a href=\"".HEURIST_URL_BASE."?db=".$newDBName."\" title=\"\" target=\"_new\">".HEURIST_URL_BASE."?db=".$newDBName."</a>.<br /><br />";
+							echo "Please visit the <a href='".HEURIST_URL_BASE."admin/adminMenu.php?db=".$newDBName."' title='' target=\"_new\">administration page</a>, to set up your new database.<br /><br />";
+							echo "<strong>Note:</strong> The account you are logged in with at this moment, has been copied to your new database. This account's name and e-mail address will be shown as feedback details accross Heurist. If you do not wish to get e-mails on that address, you can change this and more by going to 'Access > Manage users/groups' on the administration page.<br /><br />";
+							echo "<strong>Admin username:</strong> ".$name."<br />";
+							echo "<strong>Admin password:</strong> &#60;<i>same as account currently logged in to</i>&#62;";
 							echo '<script type="text/javascript">document.getElementById("createDBForm").style.display = "none";</script>';
 							return false;
 						} else {

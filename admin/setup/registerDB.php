@@ -36,7 +36,7 @@ if (!is_admin()) {
 	<body class="popup">
 		<div id="registerDBForm">
 		<form action="registerDB.php" method="POST" name="NewDBRegistration">
-			Enter a short description for your database.<br /><br />
+			Enter a short description for this database.<br /><br />
 			<input type="text" maxlength="64" size="25" name="dbDescription">
 			<input type="submit" name="submit" value="Register" style="font-weight: bold;" onClick="registerDB()" >
 		</form>
@@ -51,7 +51,7 @@ mysql_connection_db_insert(DATABASE); // Connect to the current database
 $res = mysql_query("select sys_dbRegisteredID, sys_dbName, sys_dbDescription, sys_OwnerGroupID from sysIdentification where `sys_ID`='1'");
 
 if (!$res) { // Problem reading current registration ID
-    $msg = "Unable to read database identification record, your database might be incorrectly set up. \n" .
+    $msg = "Unable to read database identification record, this database might be incorrectly set up. \n" .
     "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice.";
     echo $msg . "<br />";
     return;
@@ -78,7 +78,8 @@ if (isset($DBID) && ($DBID != 0)) { // already registered
 	echo '<script type="text/javascript">';
 	echo 'document.getElementById("registerDBForm").style.display = "none";';
 	echo '</script>';
-    echo "Your database is already registered with ID: " . $DBID . "<br />";
+	echo "Database: ".DATABASE."<br /><br />";
+    echo "This database is already registered with ID: " . $DBID . "<br />";
     echo "The database description is: ". $dbDescription . "<br /><br />";
 } else {
 	echo '<script type="text/javascript">';
@@ -127,11 +128,12 @@ function registerDatabase() {
     } else { // We have got a new dbID, set the assigned dbID in sysIdentification
 		$res = mysql_query("update sysIdentification set `sys_dbRegisteredID`='$DBID', `sys_dbDescription`='$dbDescription' where `sys_ID`='1'");
 		if($res) {
+			echo "Database: ".DATABASE."<br /><br />";
 			echo "Registration successful, database ID allocated is " . $DBID . "<br /><br />";
-			echo "Your database description is: " . $dbDescription . "<br />";
+			echo "This database description is: " . $dbDescription . "<br />";
 			echo "If you want to change the description, you can go back to the registration page to do so.";
 		} else {
-			$msg = "Unable to write database identification record, your database might be incorrectly set up<br />Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
+			$msg = "Unable to write database identification record, this database might be incorrectly set up<br />Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
 			echo '<script type="text/javascript">';
 			echo 'document.getElementById("changeDescriptionForm").style.display = "none";';
 			echo '</script>';
