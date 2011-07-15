@@ -323,8 +323,8 @@ elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delet
 				}else if(elLink.hash === "#delete_group"){
 					YAHOO.util.Event.stopEvent(oArgs.event);
 
-						var value = prompt("Enter \"DELETE\" if you really want to delete group '"+oRecord.getData('name')+"'");
-						if(value === "DELETE") {
+						var value = confirm("Do you really want to delete group '"+oRecord.getData('name')+"'?");
+						if(value) {
 
 							function _updateAfterDelete(context) {
 

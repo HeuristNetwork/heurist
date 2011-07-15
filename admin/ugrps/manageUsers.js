@@ -394,8 +394,8 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 
 					YAHOO.util.Event.stopEvent(oArgs.event);
 
-						var value = prompt("Enter \"DELETE\" if you really want to delete user '"+oRecord.getData('fullname')+"'");
-						if(value === "DELETE") {
+						var value = confirm("Do you really want to delete user '"+oRecord.getData('fullname')+"'?");
+						if(value) {
 
 							function _updateAfterDelete(context) {
 

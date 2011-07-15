@@ -41,18 +41,19 @@ function hash_it ($passwd) {
 	return crypt($passwd, $salt);
 }
 
-function email_user ($user_id, $firstname, $email, $passwd) {
+function email_user ($user_id, $firstname, $email, $passwd, $username) {
 	$msg =
 'Dear '.$firstname.',
 
 Your Heurist password has been reset.
 
+Your username is: '.$username.'
 Your new password is: '.$passwd.'
 
 To change your password, go to:
 '.HEURIST_URL_BASE.'admin/ugrps/editUser.php?db='.HEURIST_DBNAME.'&Id='.$user_id.'
 
-(you will first be asked to log in with the new password above)
+You will first be asked to log in with the new password above.
 ';
 	mail($email, 'Heurist password reset', $msg, 'From: info@heuristscholar.org');
 }
@@ -63,8 +64,9 @@ if (@$_REQUEST['username']) {
 
 	$username = addslashes($_REQUEST['username']);
 
-	$res = mysql_query('select ugr_ID,ugr_eMail,ugr_FirstName from sysUGrps usr where usr.ugr_Name = "'.$username.'" or ugr_eMail = "'.$username.'"');
+	$res = mysql_query('select ugr_ID,ugr_eMail,ugr_FirstName,ugr_Name from sysUGrps usr where usr.ugr_Name = "'.$username.'" or ugr_eMail = "'.$username.'"');
 	$row = mysql_fetch_assoc($res);
+	$username = $row['ugr_Name'];
 	$user_id = $row['ugr_ID'];
 	$email = $row['ugr_eMail'];
 	$firstname = $row['ugr_FirstName'];
@@ -73,7 +75,7 @@ if (@$_REQUEST['username']) {
 		$new_passwd = generate_passwd();
 		mysql_query('update sysUGrps usr set ugr_Password = "'.hash_it($new_passwd).'" where ugr_ID = ' . $user_id);
 
-		email_user($user_id, $firstname, $email, $new_passwd);
+		email_user($user_id, $firstname, $email, $new_passwd, $username);
 
 		print '<p>Your password has been reset.  You should receive an email shortly with your new password.</p>'."\n";
 

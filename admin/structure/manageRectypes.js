@@ -414,8 +414,8 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 					if(iUsage<1){
 						if(_needToSaveFirst()) { return; }
 
-						var value = prompt("Enter \"DELETE\" if you really want to delete record type#"+rectypeID+"'"+oRecord.getData('name')+"'");
-						if(value === "DELETE") {
+						var value = confirm("Do you really want to delete record type#"+rectypeID+"'"+oRecord.getData('name')+"'?");
+						if(value) {
 
 							function _updateAfterDelete(context) {
 
