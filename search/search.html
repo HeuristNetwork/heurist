@@ -254,7 +254,7 @@
 					</div>
 				</div>
 				<div id=curated-collections>
-					<div><a href='?ver=1&amp;w=all&amp;q=tag:"Heurist+System\Featured+Subsets"&amp;label=Featured+subsets&amp;description=The+links+below+retrieve+curated+subsets+of+Heurist+records+of+general+interest+assembled+by+special+bibliographic+and+data+collection+projects.+If+you+would+like+to+add+a+collecion+here,+email+admin@heuristscholar.org+for+instructions.' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">Example collections</a></div>
+					<div><a href="?ver=1&w=all&q=tag:%22Heurist+System\Featured+Subsets%22&label=Featured+subsets&description=The+links+below+retrieve+curated+subsets+of+Heurist+records+of+general+interest+assembled+by+special+bibliographic+and+data+collection+projects.+If+you+would+like+to+add+a+collection+here,+email+admin@heuristscholar.org+for+instructions">Example collections</a></div>
 					<div id=collection-info></div>
 				</div>
 			</div>
@@ -295,7 +295,7 @@
 					<li><a href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members" onClick="top.HEURIST.util.popupURL(window, 'saved/saveSearchPopup.html'); return false;"></span>Save search to...</a></li>
 					<li><a href="#" onClick="top.HEURIST.search.printResultRow()" title="Print search results">Print</a></li>
 					<li id=publish-image-placeholder></li>
-					<li><a href="#" onClick="top.HEURIST.search.openSelected()" title="Launch selected records in a new search window">New search window</a></li>
+					<li><a href="#" onClick="top.HEURIST.search.openSelected()" title="Launch selected records in a new search window">Selected to new window</a></li>
 				</ul>
 			</li>
 			<li><span>Edit</span>
@@ -311,7 +311,7 @@
 					<li><a href="#" onClick="top.HEURIST.search.addRelationshipsPopup(); return false;" title="Select one or more records, then click to add relationships">Relate</a></li>
 				</ul>
 			</li>
-			<li><span id=collection-label title="Select records and click collect to add to a temporary collection which can later be saved as a search." >Collected&nbsp;&nbsp;</span><span class="collected-shown" style="display:inline"></span>
+			<li><span id=collection-label title="Select records and click collect to add to a temporary collection which can later be saved as a search." >Collect&nbsp;&nbsp;</span><span class="collected-shown" style="display:inline"></span>
 				<ul>
 					<li><a class=collected-hidden href="#" onClick="top.HEURIST.search.addToCollection();return false;" title="Select one or more records, then click to add to the collection">Add</a></li>
 					<li><a class=collected-shown href="#" onClick="top.HEURIST.search.removeFromCollection(); return false;" title="Select one or more records, then click to remove records from the collection">Remove</a></li>
@@ -348,7 +348,7 @@
 				</ul>
 			</li>
 		</ul>
-	<div id=pageNavCount><div id=page-nav></div> <div id=resource-count></div></div>
+	
 	</div>
 </div>
 <!-- page -->
@@ -356,7 +356,9 @@
 	<!--<div id=pageNavCount> <nobr> <span id=page-nav></span> <span id=resource-count></span> </nobr></div>-->
 	<div id="result-container">
 		<div id="results">
+        <div id=pageNavCount><div id=page-nav></div> <div id=resource-count></div></div>
         <div id="active-label"></div>
+        <div id="search-description"></div>
 			<div id="results-message"></div>
 			<div id="search-status" class="loading">
 				<div id="loading-search-status">

@@ -545,8 +545,8 @@ top.HEURIST.search = {
 		   "<span class=wg-id title='"+linkTitle.htmlEscape()+"' " + (wgColor? wgColor: "") + ">" + (wgHTML? wgHTML.htmlEscape() : "") + "</span>"+
 		   "</span>"+
 		   "<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/lock.png' " + userPwd + ">"+
-		    "</div>" +
-			"<div class='recordTitle' title='"+linkText+"'>" + (res[3] && res[3].length ? "<a href='"+res[3]+"' target='_blank'>"+linkText + "</a>" : linkText ) + "</div>" +
+		    "</div>" +  
+			"<div class='recordTitle' title='"+linkText+"'>" + (res[3] && res[3].length ? daysBad +"<a href='"+res[3]+"' target='_blank'>"+linkText + "</a>" : linkText ) + "</div>" +
 			"<div id='recordID'><a href='"+top.HEURIST.basePath+"search/search.html?q=ids:"+res[2]+
 			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
 			"' target='_blank' title='Open in new window'>Record ID: "+res[2]+"</a></div>" +
@@ -602,7 +602,7 @@ top.HEURIST.search = {
 		}
 		if (params["description"]) {
 			document.getElementById("search-description").innerHTML = params["description"];
-			document.getElementById("search-description-row").style.display = "";
+			document.getElementById("search-description").style.display = "block";
 		}
 
 		var msg = "";
@@ -639,7 +639,7 @@ top.HEURIST.search = {
 	format_web_error: function(err, ver_date, href) {
 		if (! err  &&  ! ver_date)
 			//return "<div class=\"daysbad notTested\"><div>URL not yet tested</div></div>";
-			return "<img src=\"../common/images/url_warning.png\" class=\"daysbad\" title=\"URL not yet tested\">";
+			return "<img src=\"../common/images/url_warning.png\" class=\"daysbad admin-only\" title=\"URL not yet tested\">";
 
 		var err_string;
 
@@ -666,7 +666,7 @@ top.HEURIST.search = {
 			return "";
 
 		//return "<div class=\"daysbad error\"><div>" + err_string + "<br><a target=_blank href=http://web.archive.org/web/*/" + href + ">page history</a></div></div>";
-		return "<img src=\"../common/images/url_error.png\" class=\"daysbad\" title=\"" + err_string +" \">";
+		return "<img src=\"../common/images/url_error.png\" class=\"daysbad admin-only\" title=\"" + err_string +" \">";
 	},
 
 	renderLoginDependentContent: function() {
@@ -1079,7 +1079,7 @@ top.HEURIST.search = {
 		if (totalRecordCount == 1) {
 			document.getElementById("resource-count").innerHTML = "1 record";
 		} else {
-			document.getElementById("resource-count").innerHTML = firstRes + " - " + lastRes + " [ of " + totalRecordCount + " ]";
+			document.getElementById("resource-count").innerHTML = firstRes + " - " + lastRes + " / " + totalRecordCount;
 		}
 
 		var innerHTML = "";

@@ -139,13 +139,15 @@ a {
 .operations a:focus img {
 	outline: none;
 }
-#search-description {
+#search-description, #results-message {
 	border-bottom: 1px solid #bfbfbf;
+	text-align:left !important;
+	color:#7D9AAA;
+	height: auto;
+	padding: 10px;
+	display:none;
 }
-#search-description {
-	height: 38px;
-	padding: 0 20px;
-}
+
 body.w-bookmark #results {
 	background-color: none;
 	-moz-border-radius-bottomleft:10px;
@@ -219,11 +221,7 @@ body.search-result-style-list #result-style-list-link, body.search-result-style-
 #results-top-spacer {
 	height: 10px;
 }
-#results-message {
-	color: green;
-	padding: 5px;
-	display: none;
-}
+
 #result-rows {
 	padding: 10px 0;
 	text-align:center;
@@ -540,6 +538,7 @@ div.right_margin_info div.mini-tools a {
 #loading-search-status, #noquery-search-status, #noresult-search-status {
 	display: none;
 	margin: 0px;
+	text-align:left
 }
 #search-status.loading #loading-search-status {
 	display: block;
@@ -1697,18 +1696,16 @@ div.recorddiv:hover{
 
 .filter{
 	border-top:1px solid #BBB;
-	/*background-color: #DDD;
-	background:-moz-linear-gradient(center top , #DBDFE6, #FFF) repeat scroll 0 0 transparent;
-	background:-webkit-gradient(linear, left top, left bottom, from(#DBDFE6), to(#FFF));*/
 	color: #999999;
 	position: relative;
 	min-height:20px;
-	margin-bottom: 5px;
+	margin-bottom: 0;
 	border-bottom:1px solid #DDD;
 	margin-top:-1px;
 			}
 .filter ul li ul{
-	margin-left: -6px
+	position:absolute;
+	right:0;
 	}
 .filter ul.menu li, .filter ul.menu li a{
 	color: #999;
@@ -1727,6 +1724,7 @@ div.recorddiv:hover{
 .filter ul.menu li:hover, .filter ul.menu li a:hover{
 		color: white;
 	}
+.filter ul.menu {text-align:right}
 #results > div {
 	text-align: center;
 	position: relative;
@@ -1734,7 +1732,7 @@ div.recorddiv:hover{
 	background:-moz-linear-gradient(center top , #F0F0F0, #FFF) repeat scroll 0 0 transparent;
 	background:-webkit-gradient(linear, left top, left bottom, from(#F0F0F0), to(#FFF));
 	}
-div.filter .showrelated {padding-left:0; text-align:left;padding:6px 0; height:20px}
+div.filter .showrelated {padding-left:0; text-align:left;padding:6px 0 0 0; height:13px}
 div.filter .showrelated a {
     background-image: url("../images/heading_saved_search-hidden.png");
     background-position: 0 -7px;
@@ -1795,3 +1793,12 @@ div.recorddiv:hover > #recordID {
 	}
 
 
+#pageNavCount {height: 7px;padding: 4px 0px 8px; position: absolute !important;right: 10px;text-align: right;top: 1px;z-index: 10;float:right; background:none !important}
+#pageNavCount span.nav a, #pageNavCount span.nav{color:#2D2D2D; font-weight:normal}
+#page-nav { margin-right: 20px;display:inline-block }
+
+#pageNavCount #resource-count {color:#666;display:inline-block}
+#pageNavCount #page-nav a, #pageNavCount #page-nav {color:#2D2D2D; font-weight:normal;margin:0 0.5ex}
+#pageNavCount #page-nav {margin:0 1em}
+#pageNavCount #page-nav a.active { border: 1px solid #999;font-weight: bold;padding: 1px 1px 0;text-decoration: none;color:#000}
+#prev_page a img, #next_page a img { vertical-align:top}

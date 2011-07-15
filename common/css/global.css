@@ -507,15 +507,7 @@ body.w-all #all-records-button, body.w-bookmark #my-records-button {color:#000;}
 #my-records-saved-searches, #all-records-saved-searches, #workgroup-saved-searches, .relType {padding: 0 0px 0px 0px;background-color: none;background-image:url(../images/heading_saved_search.png);background-position:left top;background-repeat:no-repeat;}
 #my-records-saved-searches.hide, #all-records-saved-searches.hide, #workgroup-saved-searches.hide, .relType.hide {background-image:url(../images/heading_saved_search-hidden.png);}
 #saved .search-type, .relTypeHeading  {color: #6A7C99;font-weight:bold;cursor: pointer;padding-top: 5px;padding-right: 6px;padding-bottom: 4px;padding-left: 18px;background-position: bottom;border: 1px none #999;}
-#pageNavCount {height: 7px;padding: 2px 10px 8px;position: absolute;right: 10px;text-align: right;top: 1px;z-index: 10;float:right}
-#pageNavCount span.nav a, #pageNavCount span.nav{color:#CCC; font-weight:normal}
-#page-nav { margin-right: 20px;display:inline-block }
 
-#pageNavCount #resource-count {color:#CDDCF3;display:inline-block}
-#pageNavCount #page-nav a, #pageNavCount #page-nav {color:#CCC; font-weight:normal;margin:0 0.5ex}
-#pageNavCount #page-nav {margin:0 1em}
-#pageNavCount #page-nav a.active { border: 1px solid #CCCCCC;font-weight: bold;padding: 2px 2px 0;text-decoration: none;color:#FFF}
-#prev_page a img, #next_page a img { vertical-align:top}
 
 .relItemList {display:block;background-image:url(../images/backgrounds/light_bg.png);}
 #advancedSearch a {padding:0 5px;}
@@ -694,6 +686,7 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 	border-width:0 1px 0 1px;
 	border-style:solid;
 	border-color:transparent;
+	position:relative;
 }
 #tabs li a.disabled, #quicklink-cell li a.disabled, #views li a.disabled, ul.menu li a.disabled {
 	color:#666;
