@@ -97,7 +97,7 @@ function import() {
 			array_push($importLog, $logEntry);
 		} else {
 			$importedRecTypeID = mysql_insert_id();
-			$logEntry = array("rectype", $importedRecTypeID, "New rectype imported");
+			$logEntry = array("rectype", $importedRecTypeID, "Successfully imported recordtype with name: \"".$entity["rty_Name"]."\"");
 			array_push($importLog, $logEntry);
 		}
 
@@ -335,15 +335,16 @@ function import() {
 		// Give user feedback
 		if(!$error) {
 			$statusMsg = "";
-/* 			TODO: Can be used as import log
+/* 			TODO: Can be used as import log */
 			if(sizeof($importLog) > 0) {
 				foreach($importLog as $logLine) {
-					$statusMsg = $statusMsg . $logLine[2] . ". Local ID is: " . $logLine[1] . " <br /> ";
+/* 					$statusMsg += $statusMsg . $logLine[2] . ". Local ID is: " . $logLine[1] . " <br /> "; */
+					echo $statusMsg . $logLine[2] . ". Local ID is: " . $logLine[1] . "<br />";
 				}
 			}
-*/
-			$statusMsg = $statusMsg . "Imported successfully (" . $importedRecTypeID . ") (Local name: " . $entity["rty_Name"] . ")";
-			echo $statusMsg;
+			echo "<br />";
+/* 			$statusMsg = $statusMsg . "Imported successfully (" . $importedRecTypeID . ") (Local name: " . $entity["rty_Name"] . ")"; */
+/* 			echo $statusMsg; */
 		} else if (substr(mysql_error(), 0, 9) == "Duplicate") {
 			echo "prompt";
 		} else {

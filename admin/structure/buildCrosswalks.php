@@ -135,6 +135,7 @@
 	} else {
 		$source_db_id = $_REQUEST["dbID"];
 		$source_db_name = $_REQUEST["dbName"];
+		error_log($source_db_name);
 		$source_url = $_REQUEST["dbURL"]."admin/structure/getDBStructure.php?db=".$source_db_name;
 	}
 

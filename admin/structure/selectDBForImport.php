@@ -141,7 +141,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
 		dataArray = [];
 		for(dbID in registeredDBs) {
 			db = registeredDBs[dbID];
-			dataArray.push([db[0][0],db[0][2],db[0][3],db[0][4],'<a href="#" onClick="doCrosswalk(dbID)"><img src="crosswalk_icon.png" width="25" height="16" /></a>']);
+			dataArray.push([db[0][0],db[0][2],db[0][3],db[0][4],'<a href="#" onClick="doCrosswalk('+dbID+')"><img src="crosswalk_icon.png" width="25" height="16" /></a>']);
 		}
 
 		var myDataSource = new YAHOO.util.LocalDataSource(dataArray,{

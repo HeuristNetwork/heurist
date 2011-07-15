@@ -37,7 +37,6 @@
 <script type="text/javascript" src="../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
 <script type="text/javascript" src="../../external/yui/2.8.2r1/samples/yui-dt-expandable.js"></script>
 <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
-
 <style type="text/css">
 .yui-skin-sam .yui-dt-liner {
 	white-space:nowrap;
@@ -60,8 +59,13 @@
 .yui-dt0-col-matches .yui-dt-liner, .yui-dt0-col-import .yui-dt-liner {
 	text-align: center;
 }
+#popup-saved {text-align :center; color:#FFF; font-size: 18px; background-color: RGBA(0,0,0,0.8);padding: 0; width: 200px; height: 75px; top: 50%; left:50%; margin :-50px -100px; position: absolute;overflow: visible;-moz-border-radius-bottomleft:10px;-moz-border-radius-bottomright:10px;-moz-border-radius-topleft:10px;-moz-border-radius-topright:10px;-webkit-border-bottom-left-radius:10px;-webkit-border-bottom-right-radius:10px;-webkit-border-top-left-radius:10px;-webkit-border-top-right-radius:10px;border-bottom-left-radius:10px;border-bottom-right-radius:10px;border-top-left-radius:10px;border-top-right-radius:10px;border :2px solid #FFF;-webkit-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);-moz-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);z-index: 100;}
+#popup-saved b {font-size: 16px;line-height:75px;}
 </style>
 
+<div id=popup-saved style="display: none">
+	<b>Import succesfull</b>
+</div>
 
 <script type="text/javascript">
 var crwSourceDBID = "1";
@@ -152,7 +156,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
 		var myDataSource = new YAHOO.util.DataSource();
 		myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSARRAY;
 		myDataSource.responseSchema = { fields: ["arrow","rtyID","rectype","matches","import"] };
-
+		YAHOO.widget.DataTable.MSG_EMPTY = "There are no new record types to import from this database (all types already exist in the target)";
 		// Create the RowExpansionDataTable
 		myDataTable = new YAHOO.widget.RowExpansionDataTable(
 			"crosswalkTable",
@@ -183,7 +187,6 @@ YAHOO.util.Event.addListener(window, "load", function() {
                 sortedBy: { key:'rectype' }
 			}
 		);
-
 		insertData();
 
 		myDataTable.subscribe("rowMouseoverEvent", myDataTable.onEventHighlightRow);
@@ -324,7 +327,10 @@ function _hideToolTip(){
 <script src="../../common/js/utilsUI.js"></script>
 <!-- <div id="page-inner" style="overflow:auto"> -->
 <br /><br />
-<div id="statusText"></div><br />
+<a id="shortLog" onclick="showShortLog()" href="#">Show short log</a><br />
+<a id="detailedLog" onclick="showDetailedLog()" href="#">Show detailed log</a><br /><br />
+<div id="log"></div><br />
+<div id="log"></div>
 <button id="finish1" onclick="dropTempDB(true)">Finish crosswalk</button>
 <div id="crosswalk" style="width:100%;margin:auto;">
 	<div id="topPagination"></div>
@@ -336,6 +342,9 @@ function _hideToolTip(){
 
 <script type="text/javascript">
 
+var detailedImportLog = "";
+var shortImportLog = "";
+var result = "";
 var importedRowID;
 var importPending = false;
 // Start an asynchronous call, sending the recordtypeID and action
@@ -347,7 +356,7 @@ function processAction(rtyID, action) {
 	}
 	var xmlhttp;
 	if (action.length == 0) {
-		document.getElementById("statusText").innerHTML="";
+		document.getElementById("log").innerHTML="";
 		return;
 	}
 	if (window.XMLHttpRequest) { // code for IE7+, Firefox, Chrome, Opera, Safari
@@ -367,12 +376,41 @@ function processAction(rtyID, action) {
 			}
 			else if(response.substring(0,5) == "Error") {
 				document.getElementById("importIcon"+rtyID).src = "import_icon.png";
-				document.getElementById("statusText").style.color = "red";
-				document.getElementById("statusText").innerHTML=response;
+
+				shortImportLog += '<p style="color:red">'+response+"</p>";
+				result += response+"\n\n";
+				detailedImportLog += '<p style="color:red">'+response+"</p>";
+
+				document.getElementById("popup-saved").innerHTML = "<b>Error. Check log for details</b>";
+				setTimeout(function() {
+					document.getElementById("popup-saved").style.display = "block";
+					setTimeout(function() {
+						document.getElementById("popup-saved").style.display = "none";
+					}, 1000);
+				}, 0);
+				document.getElementById("log").style.color = "red";
+				document.getElementById("log").innerHTML=response;
+				document.getElementById("popup-saved").innerHTML = "<b>Import succesfull</b>";
 			}
 			else {
-				document.getElementById("statusText").style.color = "green";
-				document.getElementById("statusText").innerHTML=response;
+				detailedImportLog += response;
+				response = response.split("<br />");
+				result += response[0]+"\n\n";
+				shortImportLog += response[0]+"<br />";
+
+				setTimeout(function() {
+					document.getElementById("popup-saved").style.display = "block";
+					setTimeout(function() {
+						document.getElementById("popup-saved").style.display = "none";
+					}, 1000);
+				}, 0);
+				if(document.getElementById("detailedLog").innerHTML == "Hide detailed log") {
+					document.getElementById("log").innerHTML = detailedImportLog;
+				} else if(document.getElementById("shortLog").innerHTML == "Hide short log") {
+					document.getElementById("log").innerHTML = shortImportLog;
+				}
+
+				document.getElementById("log").style.color = "green";
 				myDataTable.deleteRow(importedRowID, -1);
 			}
 		}
@@ -383,13 +421,49 @@ function processAction(rtyID, action) {
 	xmlhttp.send();
 }
 
+function showShortLog() {
+	if(document.getElementById("detailedLog").innerHTML == "Hide detailed log") {
+		document.getElementById("detailedLog").innerHTML = "Show detailed log";
+	}
+	if(document.getElementById("shortLog").innerHTML == "Show short log") {
+		document.getElementById("shortLog").innerHTML = "Hide short log";
+		if(shortImportLog == "") {
+			document.getElementById("log").innerHTML = "Nothing has been imported yet";
+		} else {
+			document.getElementById("log").innerHTML = shortImportLog;
+		}
+	} else {
+		document.getElementById("shortLog").innerHTML = "Show short log";
+		document.getElementById("log").innerHTML = "";
+	}
+}
+
+function showDetailedLog() {
+	if(document.getElementById("shortLog").innerHTML == "Hide short log") {
+		document.getElementById("shortLog").innerHTML = "Show short log";
+	}
+	document.getElementById("log").innerHTML = detailedImportLog;
+	if(document.getElementById("detailedLog").innerHTML == "Show detailed log") {
+		document.getElementById("detailedLog").innerHTML = "Hide detailed log";
+		if(shortImportLog == "") {
+			document.getElementById("log").innerHTML = "Nothing has been imported yet";
+		} else {
+			document.getElementById("log").innerHTML = detailedImportLog;
+		}
+	} else {
+		document.getElementById("detailedLog").innerHTML = "Show detailed log";
+		document.getElementById("log").innerHTML = "";
+	}
+}
+
 // If after trying an import the response says that the rectype name already exists, ask user to enter a new one
 var replaceRecTypeName = "";
 function changeDuplicateEntryName(rtyID) {
 	var newRecTypeName = prompt("An entry with the exact same name already exist.\n\nPlease enter a new name for this rectype, or cancel to stop importing it.","");
 	if(newRecTypeName == null || newRecTypeName == "") {
-		document.getElementById("statusText").style.color = "red";
-		document.getElementById("statusText").innerHTML="You have to enter a valid new name to import a new rectype with an existing name.";
+		document.getElementById("log").style.color = "red";
+		document.getElementById("log").innerHTML="You have to enter a valid new name to import a new rectype with an existing name.";
+		alert("You have to enter a valid new name to import a new rectype with an existing name.");
 	}
 	else {
 		replaceRecTypeName = newRecTypeName;
@@ -407,7 +481,11 @@ function dropTempDB(redirect) {
 	if(redirect) {
 		window.location = "about:blank";
 	} else {
-		alert('Temporary database has been dropped');
+		if(result == "") {
+			alert("Nothing was imported");
+		} else {
+			alert(result);
+		}
 	}
 }
 </script>
