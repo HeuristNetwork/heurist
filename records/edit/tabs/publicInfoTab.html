@@ -148,9 +148,7 @@ function renderInputs(bibID, rectype) {
 
 		var inputs = top.HEURIST.edit.createInputsForRectype(record.rectypeID, record.bdValuesByType, allInputs);
 
-		renderShowAll();
-
-		renderAdditionalDataSection(allInputs, record.rectypeID, record.bdValuesByType);
+		renderExtraDataHeader(allInputs);
 
 		var extraInputs = top.HEURIST.edit.createInputsNotForRectype(record.rectypeID, record.bdValuesByType, allInputs);
 		if (extraInputs.length > 0) {
@@ -158,6 +156,8 @@ function renderInputs(bibID, rectype) {
 				inputs.push(extraInputs[i]);
 			}
 		}
+
+		renderAdditionalDataSection(allInputs, record.rectypeID, record.bdValuesByType);
 
 		if (! top.document.getElementById("notes")) {
 			var width = 400;
@@ -186,11 +186,15 @@ function renderInputs(bibID, rectype) {
 
 			if (! top.HEURIST.util.parentWindow(window)) {
 				var notes = top.HEURIST.edit.createDraggableTextarea("notes", noteText, parent.document.getElementById("notes-container"),
-				                                                     { description: "<b>Scratchpad</b> &nbsp;&nbsp; Highlight text, drag and drop to fields",
-				                                                       minimisedDescription: "<b>Scratchpad</b>",
-			                                                               style: { bottom: bottom+"px", right: right+"px", width: width+"px", height: height+"px", minWidth: "300px" },
-				                                                       scratchpad: true });
-				notes.onchange = function() { document.getElementById("notes").value = notes.value; window.changed(); };
+					{ description: "<b>Scratchpad</b> &nbsp;&nbsp; Highlight text, drag and drop to fields",
+						minimisedDescription: "<b>Scratchpad</b>",
+						style: { bottom: bottom+"px", right: right+"px", width: width+"px", height: height+"px", minWidth: "300px" },
+						scratchpad: true
+					});
+				notes.onchange = function() {
+												document.getElementById("notes").value = notes.value;
+												window.changed();
+											};
 			}
 		} else {
 			notes = top.document.getElementById("notes");
@@ -206,8 +210,7 @@ function renderInputs(bibID, rectype) {
 
 		window.HEURIST.inputs = inputs;
 
-	}
-	else if (rectype) {
+	}else if (rectype) {
 
 		var defaultInputValues = {};
 		if (window.HEURIST.parameters["title"]) {
@@ -221,7 +224,7 @@ function renderInputs(bibID, rectype) {
 
 		var inputs = top.HEURIST.edit.createInputsForRectype(rectype, defaultInputValues, allInputs);
 
-		renderShowAll();
+		renderExtraDataHeader(allInputs);
 
 		renderAdditionalDataSection(allInputs, rectype);
 
@@ -279,21 +282,21 @@ function renderInputs(bibID, rectype) {
 
 function renderAdditionalDataSection(container, rectypeID, bdValues) {
 
-	var explainRow = container.appendChild(document.createElement("div"));
-		explainRow.className = "title-row optional";
-	var hrCell = explainRow.appendChild(document.createElement("div"));
-		hrCell.innerHTML = "<b>Additional data</b>";
-		hrCell.className = "additional-header-cell";
-	var explainCell = explainRow.appendChild(document.createElement("div"));
-		explainCell.innerHTML = "Non-standard fields for this record type";
-		explainCell.className = "input-cell";
 	var addRow = container.appendChild(document.createElement("div"));
-		addRow.className = "input-row optional";
+		addRow.className = "input-row extradata";
 	var addHeaderCell = addRow.appendChild(document.createElement("div"));
 		addHeaderCell.className = "input-header-cell";
-		addHeaderCell.innerHTML = "<b>Add field:</b>";
+	var moreLink = addHeaderCell.appendChild(document.createElement("a"));
+		moreLink.innerHTML = "more...";
 	var addCell = addRow.appendChild(document.createElement("div"));
 		addCell.className = "input-cell";
+		addCell.style.display = "none";
+
+		moreLink.onclick = function() {
+//			moreLink.parentNode.removeChild(moreLink);
+			addHeaderCell.innerHTML = "Add field:";
+			addCell.style.display = "table-cell";
+		}
 
 	var dts = top.HEURIST.edit.getNonRecDetailTypedefs(rectypeID);
 	if (bdValues) {
@@ -330,14 +333,25 @@ function renderAdditionalDataSection(container, rectypeID, bdValues) {
 			dtSelect.selectedIndex = 0;
 		};
 	addCell.appendChild(button);
+	var promptDiv = addCell.appendChild(document.createElement("div"));
+		promptDiv.className = "help prompt";
+		promptDiv.innerHTML = "Advanced users only; additional fields may not be rendered by standard reporting formats";
 }
 
 
-function renderShowAll() {
-	var hrRow = document.getElementById("all-inputs").appendChild(document.createElement("div"));
-		hrRow.className = "separator_row";
-		hrRow.style.margin = "20px 0 0 0";
+function renderExtraDataHeader(container) {
 
+	var sepRow = container.appendChild(document.createElement("div"));
+		sepRow.className = "separator_row";
+		sepRow.style.margin = "20px 0 0 0";
+
+	var explainRow = container.appendChild(document.createElement("div"));
+		explainRow.className = "title-row extradata";
+	var hrCell = explainRow.appendChild(document.createElement("div"));
+		hrCell.innerHTML = "<b>Non-standard rectype fields for this record</b>";
+		hrCell.className = "additional-header-cell";
+
+		return;
 	var showDiv = document.getElementById("all-inputs").appendChild(document.createElement("div"));
 		showDiv.id = "show-all-div";
 		showDiv.className = "title-row not-optional-fields";

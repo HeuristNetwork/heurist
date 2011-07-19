@@ -198,7 +198,10 @@ top.HEURIST.search = {
 									function (evt) {
 													top.HEURIST.search.loadLevelFilter(0);
 													top.HEURIST.search.addResultLevelLinks(0);
-													top.HEURIST.search.loadLevelFilter(1);
+													if (top.HEURIST.search.infoByDepth.length >1 &&
+															top.HEURIST.search.infoByDepth[1].count > 0) {
+														top.HEURIST.search.loadLevelFilter(1);
+													}
 									});
 		top.HEURIST.util.getJsonData(URL,
 				function(related) {
@@ -545,7 +548,7 @@ top.HEURIST.search = {
 		   "<span class=wg-id title='"+linkTitle.htmlEscape()+"' " + (wgColor? wgColor: "") + ">" + (wgHTML? wgHTML.htmlEscape() : "") + "</span>"+
 		   "</span>"+
 		   "<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/lock.png' " + userPwd + ">"+
-		    "</div>" +  
+		    "</div>" +
 			"<div class='recordTitle' title='"+linkText+"'>" + (res[3] && res[3].length ? daysBad +"<a href='"+res[3]+"' target='_blank'>"+linkText + "</a>" : linkText ) + "</div>" +
 			"<div id='recordID'><a href='"+top.HEURIST.basePath+"search/search.html?q=ids:"+res[2]+
 			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
