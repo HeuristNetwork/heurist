@@ -493,7 +493,7 @@ top.HEURIST.edit = {
 		if (!rfr) {
 			// fake low-rent rfr if rectype isn't specified
 			// name, prompt,default, required, repeatable, size, match
-			rfr = [ dt[0], "", "", 'optional', 0, 0, 0 ];
+			rfr = [ dt[0], "", "", 'optional', 0, 0, 0 ];	// saw TODO need to get defaults for enum list from dt
 		}
 
 		var newInput;

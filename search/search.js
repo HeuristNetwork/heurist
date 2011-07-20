@@ -198,8 +198,8 @@ top.HEURIST.search = {
 									function (evt) {
 													top.HEURIST.search.loadLevelFilter(0);
 													top.HEURIST.search.addResultLevelLinks(0);
-													if (top.HEURIST.search.infoByDepth.length >1 &&
-															top.HEURIST.search.infoByDepth[1].count > 0) {
+													if (top.HEURIST.search.results.infoByDepth.length >1 &&
+															top.HEURIST.search.results.infoByDepth[1].count > 0) {
 														top.HEURIST.search.loadLevelFilter(1);
 													}
 									});

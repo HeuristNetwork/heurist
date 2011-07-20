@@ -599,7 +599,7 @@ function print_woot_precis($woot,$bib) {
 	}
 ?>
 
-  <div><a target=_blank href="<?=HEURIST_SITE_PATH?>records/woot/woot.html?db=<?=HEURIST_DBNAME?>w=record:<?= $bib['rec_ID'] ?>&t=<?= $bib['rec_Title'] ?>">Click here to edit</a></div>
+  <div><a target=_blank href="<?=HEURIST_SITE_PATH?>records/woot/woot.html?db=<?=HEURIST_DBNAME?>&w=record:<?= $bib['rec_ID'] ?>&t=<?= $bib['rec_Title'] ?>">Click here to edit</a></div>
 </div>
 </div>
 <?php
