@@ -399,28 +399,27 @@ Temporal._typeFieldMap = {	s : {
 								}
 };
 
-Temporal.cloneObj = function(o) {
+Temporal.cloneObj = function(obj) {
 
 		function isArray(a)
 		{
-    		return Object.prototype.toString.apply(a) === '[object Array]';
+		return Object.prototype.toString.apply(a) === '[object Array]';
 		}
 
 		//return eval($.toJSON(o));
-		if(typeof(o) != "object") return o;
+		if(typeof(obj) !== "object") return obj;
 
-		if(o == null) return o;
+		if(obj === null) return obj;
 
-		if(isArray(o)){
-			var new2 = [];
-			for(var i in o) new2.push(Temporal.cloneObj(o[i]));
-			return new2;
+		if(isArray(obj)){
+			var newA = [];
+			for(var i in obj) newA.push(Temporal.cloneObj(obj[i]));
+			return newA;
 		}else{
-			var newO = new Object();
-			for(var i in o) newO[i] = Temporal.cloneObj(o[i]);
+			var newO = {};
+			for(var i in obj) newO[i] = Temporal.cloneObj(obj[i]);
 			return newO;
 		}
-
 };
 
 Temporal.typeFieldMap = function (type) {

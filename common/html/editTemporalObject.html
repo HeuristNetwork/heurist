@@ -486,7 +486,7 @@
 					}
 					// set current temporal to original
 					try {
-						that.curTemporal = new Temporal(that.origTemporal.toString());  //FIXME should add a clone function to the temporal library
+						that.curTemporal = Temporal.cloneObj(that.origTemporal);
 					}
 					catch(e) {
 						that.curTemporal = new Temporal();

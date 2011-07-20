@@ -442,8 +442,8 @@ HAPI.WOOT.GUI = function() {
 		var that = this;
 
 		this.edit = true;
-
-		var editLink = document.createElement("a");
+		this.div.className += " edit";
+/*		var editLink = document.createElement("a");
 			editLink.className = "woot-mode-edit-link";
 			editLink.href = "#";
 			editLink.onclick = function() {
@@ -474,6 +474,7 @@ HAPI.WOOT.GUI = function() {
 		this.modeDiv.appendChild(msg);
 		this.modeDiv.appendChild(editLink);
 		this.modeDiv.appendChild(viewLink);
+*/
 	};
 
 	WootEditor.prototype.clearChunks = function() {
@@ -557,7 +558,7 @@ HAPI.WOOT.GUI = function() {
 			this.addButton = addButton;
 
 		var ownerText = document.createElement("div");
-		    ownerText.className = "owner-text";
+			ownerText.className = "owner-text";
 			ownerText.innerHTML = "Author: "+ this.chunk.getOwnerRealName();
 			this.ownerText = ownerText;
 
@@ -570,7 +571,7 @@ HAPI.WOOT.GUI = function() {
 				this.div.className += " empty";
 			}
 
-			if (! this.chunk.isReadOnly()) {
+/*			if (! this.chunk.isReadOnly()) {
 				chunkText.onclick = function() {
 					if (that.wootEditor.edit) {
 						that.unlock();
@@ -580,8 +581,12 @@ HAPI.WOOT.GUI = function() {
 					}
 				};
 			}
+*/
 			this.chunkText = chunkText;
 
+			if (this.editButton) {
+				this.div.appendChild(this.editButton);
+			}
 			this.div.appendChild(chunkText);
 			if (ownerText)  { this.div.insertBefore(this.ownerText, this.div.firstChild); }
 			this.div.insertBefore(this.addButton, this.div.firstChild);
@@ -635,6 +640,7 @@ HAPI.WOOT.GUI = function() {
 		}
 		this.chunkText.innerHTML = this.div.innerHTML; //re-render chunk text in a div to avoid onclick conflict
 		this.div.innerHTML  = "";
+		this.div.appendChild(this.editButton);
 		this.div.appendChild(this.chunkText);
 
 		this.div.insertBefore(this.ownerText, this.div.firstChild);
@@ -686,7 +692,7 @@ HAPI.WOOT.GUI = function() {
 				theme_advanced_toolbar_location: "top",
 				theme_advanced_toolbar_align: "left",
 
-				height: "800",
+				height: "400",	// saw TODO calculate from text length/line count
 
 				hidden_input: 0,
 				valid_elements: "+a[href|target=_blank],-b,-i,br,-p,img[src|align|width|height|border|vspace|hspace|alt],-h1,-h2,-h3,hr,-ul,-ol"
@@ -694,12 +700,12 @@ HAPI.WOOT.GUI = function() {
 			editorInited = true;
 		}
 		editableChunk.div.parentNode.className += " mce-loading";
-        //create a new editor  and pass in eventHandlers if available
-        if (editableChunk.wootEditor.events) {
-            tinyMCE.execCommand("mceAddControl", false, editableChunk.div.id,editableChunk.wootEditor.events);
-        }else{
-            tinyMCE.execCommand("mceAddControl", false, editableChunk.div.id);
-        }
+		//create a new editor  and pass in eventHandlers if available
+		if (editableChunk.wootEditor.events) {
+			tinyMCE.execCommand("mceAddControl", false, editableChunk.div.id,editableChunk.wootEditor.events);
+		}else{
+			tinyMCE.execCommand("mceAddControl", false, editableChunk.div.id);
+		}
 		tinyMCE.settings.auto_focus = editableChunk.div.id;	// Set the new editor as auto-focused
 		tinyMCE.activeChunk = editableChunk;
 
