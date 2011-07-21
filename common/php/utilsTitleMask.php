@@ -44,7 +44,7 @@
  */
 
 
-mysql_connection_db_select(DATABASE);
+//mysql_connection_db_select(DATABASE);
 
 
 function check_title_mask($mask, $rt) {
@@ -190,7 +190,7 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt) {
 	}
 	if (!$rt) { // lookup the rectype of this
 		$resRec = mysql_query("select rec_RecTypeID from Records where rec_ID=$rec_id");
-		if (mysql_error($resRec)) {
+		if (mysql_error()) {
 			return '';
 		}
 		$rt = mysql_fetch_row($resRec);
@@ -206,7 +206,7 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt) {
 			if (strtolower($field_name === "rectitle") ||
 				(!@$rtd_id && strtolower($field_name) === "title")) {
 				$resRec = mysql_query("select rec_Title from Records where rec_ID=$rec_id");
-				if (mysql_error($resRec)) {
+				if (mysql_error()) {
 					return '';
 				}
 				$title = mysql_fetch_row($resRec);
@@ -280,7 +280,7 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt) {
 			}
 		}
 
-	} else {
+	} else if(!mysql_error()){
 		// an unconstrained pointer - don't do any of the craziness above.
 		while ($inner_rec_id = mysql_fetch_row($res)) {
 			$inner_rec_id = $inner_rec_id[0];
@@ -333,31 +333,31 @@ function _title_mask__get_rec_detail($rec_id, $rdt_id) {
 				switch  ($typ[1]) {
 					case 's': // simple date
 						preg_match("/DAT=([^\|]+)/",$str,$dat);
-						$dat = $dat[1] ? $dat[1] : null;
+						$dat = (count($dat)>1 && $dat[1]) ? $dat[1] : null;
 						preg_match("/COM=([^\|]+)/",$str,$com);
-						$com = $com[1] ? $com[1] : null;
+						$com = (count($com)>1 && $com[1]) ? $com[1] : null;
 						$str = $dat ? $dat :($com ? $com:"temporal simple date");
 						break;
 					case 'p': // probable date
 						preg_match("/TPQ=([^\|]+)/",$str,$tpq);
-						$tpq = $tpq[1] ? $tpq[1] : null;
+						$tpq = (count($tpq)>1 && $tpq[1]) ? $tpq[1] : null;
 						preg_match("/TAQ=([^\|]+)/",$str,$taq);
-						$taq = $taq[1] ? $taq[1] : null;
+						$taq = (count($taq)>1 && $taq[1]) ? $taq[1] : null;
 						preg_match("/PDB=([^\|]+)/",$str,$pdb);
-						$pdb = $pdb[1] ? $pdb[1] :($tpq ? $tpq:"");
+						$pdb = (count($pdb)>1 && $pdb[1]) ? $pdb[1] :($tpq ? $tpq:"");
 						preg_match("/PDE=([^\|]+)/",$str,$pde);
-						$pde = $pde[1] ? $pde[1] :($taq ? $taq:"");
+						$pde = (count($pde)>1 && $pde[1]) ? $pde[1] :($taq ? $taq:"");
 						$str = "(" . $pdb . " – " . $pde . ")";
 						break;
 					case 'c': //c14 date
 						preg_match("/BCE=([^\|]+)/",$str,$bce);
-						$bce = @$bce[1] ? $bce[1] : null;
+						$bce = (count($bce)>1 && @$bce[1]) ? $bce[1] : null;
 						preg_match("/BPD=([^\|]+)/",$str,$c14);
 						$c14 = @$c14[1] ? $c14[1] :(@$bce ? $bce:" c14 temporal");
 						$suff = preg_match("/CAL=/",$str) ? " Cal" : "";
 						$suff .= $bce ? " BCE" : " BP";
 						preg_match("/DVP=P(\d+)Y/",$str,$dvp);
-						$dvp = $dvp[1] ? $dvp[1] : null;
+						$dvp = (count($dvp)>1 && $dvp[1]) ? $dvp[1] : null;
 						preg_match("/DEV=P(\d+)Y/",$str,$dev);
 						$dev = $dev ? " ±" . $dev[1]. " yr". ($dev[1]>1?"s":""):($dvp ? " +" . $dvp . " yr" . ($dvp>1?"s":""):" + ??");
 						preg_match("/DVN=P(\d+)Y/",$str,$dvn);
@@ -366,7 +366,7 @@ function _title_mask__get_rec_detail($rec_id, $rdt_id) {
 						break;
 					case 'f': //fuzzy date
 						preg_match("/DAT=([^\|]+)/",$str,$dat);
-						$dat = $dat[1] ? $dat[1] : null;
+						$dat = (count($dat)>1 && $dat[1]) ? $dat[1] : null;
 						preg_match("/RNG=P(\d*)(Y|M|D)/",$str,$rng);
 						$units = $rng[2] ? ($rng[2]=="Y" ? "year" : $rng[2]=="M" ? "month" :$rng[2]=="D" ? "day" :""): "";
 						$rng = $rng && $rng[1] ? " ± " . $rng[1] . " " . $units . ($rng[1]>1 ? "s":""): "";
@@ -383,8 +383,11 @@ function _title_mask__get_rec_detail($rec_id, $rdt_id) {
 				$rec_details[$rec_id][$rd['dtl_DetailTypeID']] = $str;
 		} else {
 			if ($rdt_type == 'enum' || $rdt_type == 'relationtype'){ //substitute term for it's id
-				$relval = mysql_fetch_assoc(mysql_query("select trm_Label from defTerms where trm_ID = ".$rd['dtl_Value']));
-				$rd['dtl_Value'] = $relval['trm_Label'];
+				$ress = mysql_query("select trm_Label from defTerms where trm_ID = ".$rd['dtl_Value']);
+				if(!mysql_error()){
+					$relval = mysql_fetch_assoc($ress);
+					$rd['dtl_Value'] = $relval['trm_Label'];
+				}
 			}
 			if (@$rec_details[$rec_id][$rd['dtl_DetailTypeID']])// repeated values
 				$rec_details[$rec_id][$rd['dtl_DetailTypeID']] .= ', ' . $rd['dtl_Value'];
@@ -536,6 +539,8 @@ function array_str_replace($search, $replace, $subject) {
 		$match_idx = -1;
 		$match_offset = -1;
 		for ($i=0; $i < count($search); ++$i) {
+//error_log(">>>>".$subject." IN ".$search[$i]);
+			if($search[$i]==null || $search[$i]=='') continue;
 			$offset = strpos($subject, $search[$i]);
 			if ($offset === FALSE) continue;
 			if ($match_offset == -1  ||  $offset < $match_offset) {

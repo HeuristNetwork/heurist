@@ -113,7 +113,7 @@ function GroupManager(_isFilterMode, _isSelection, _isWindowMode) {
 							state.sortedBy = {key:'name', dir:YAHOO.widget.DataTable.CLASS_ASC};
 
 							var filter_name   = filterByName.value;
-							var filter_type   = filterByType.value;
+							var filter_type   = "all";//filterByType.value;
 							var filter_select = ((filterBySelection2 && filterBySelection2.checked)?1:0);
 
 							// Get filtered data
@@ -228,7 +228,7 @@ function GroupManager(_isFilterMode, _isSelection, _isWindowMode) {
 elLiner.innerHTML = '<a href="#edit_group"><img src="../../common/images/edit_icon.png" width="16" height="16" border="0" title="Edit group" /><\/a>';}
 			},
 
-			{ key: "name", label: "<u>Name</u>", sortable:true,
+			{ key: "name", label: "<div align='left'><u>Name</u></div>", sortable:true,
 				formatter: function(elLiner, oRecord, oColumn, oData){
 					if(Hul.isempty(oRecord.getData('url'))){
 						elLiner.innerHTML = oRecord.getData('name');
@@ -238,7 +238,7 @@ elLiner.innerHTML = '<a href="#edit_group"><img src="../../common/images/edit_ic
 						oRecord.getData('name')+'</a>';
 					}
 					}},
-			{ key: "description", label: "Description", sortable:false,
+			{ key: "description", label: "<div align='left'>Description</div>", sortable:false,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var str = oRecord.getData("description");
 					var tit = "";
@@ -253,14 +253,14 @@ elLiner.innerHTML = '<a href="#edit_group"><img src="../../common/images/edit_ic
 			{ key: "type", hidden:true},
 			{ key: "members", label: "Members", sortable:false,
 				formatter: function(elLiner, oRecord, oColumn, oData){
-elLiner.innerHTML = '<a href="'+top.HEURIST.baseURL + "admin/ugrps/manageUsers.html?db=" +
+elLiner.innerHTML = '<div align="center"><a href="'+top.HEURIST.baseURL + "admin/ugrps/manageUsers.html?db=" +
 								_db + "&grpID="+oRecord.getData("id")+
-								'" title="Show listing of members">'+oRecord.getData('members')+'</a>';}},
+								'" title="Show listing of members">'+oRecord.getData('members')+'</a></div>';}},
 			{ key: "id", label: "Admins", sortable:false,
 				formatter: function(elLiner, oRecord, oColumn, oData){
 					var recID = oRecord.getData('id');
-elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" height="16" border="0" '+
-'onmouseover="groupManager.showInfo('+recID+', event)" onmouseout="groupManager.hideInfo()"/>';}
+elLiner.innerHTML = '<div align="center"><img src="../../common/images/info_icon.png" width="16" height="16" border="0" '+
+'onmouseover="groupManager.showInfo('+recID+', event)" onmouseout="groupManager.hideInfo()"/></div>';}
 			},
 			{ key: null, label: "Del", width:20, sortable:false,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
@@ -270,7 +270,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 					}else{}*/
 					var recID = oRecord.getData('id');
 					if(top.HEURIST.is_admin() || _isGroupAdmin(top.HEURIST.get_user_id(), recID) ){
-elLiner.innerHTML = '<a href="#delete_group"><img src="../../common/images/delete_icon.png" width="16" height="16" border="0" title="Delete this Group" /><\/a>';
+elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../../common/images/delete_icon.png" width="16" height="16" border="0" title="Delete this Group" /></a></div>';
 					}else{
 						elLiner.innerHTML = "";
 					}

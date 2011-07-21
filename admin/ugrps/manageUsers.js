@@ -47,7 +47,7 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 		var _roles = [{value:"admin", text:"admin"},{value:"member", text:"member"},
 		//{value:"invited", text:"invited", enabled:false},{value:"request", text:"request", disabled:true },
-		{value:"delete", text:"kick off"} ];
+		{value:"delete", text:"remove"} ];
 
 	/**
 	* Result handler for search on server
@@ -271,15 +271,16 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 								var myColumnDefs = [
 			{ key: "selection", label: "Sel", hidden:(!_isSelection), sortable:true, width:20,
 				formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
-			{ key: null, label: "Dis", sortable:false,  hidden:(_isSelection), width:20,
+			{ key: null, label: "Inactive", sortable:false,  hidden:(_isSelection), width:20,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
-					elLiner.innerHTML = (oRecord.getData('enabled')==="y")?"":"X";
+					var isenabled = (oRecord.getData('enabled')==="y");
+					elLiner.innerHTML = (isenabled)?"":"X";
 			}},
 			{ key: null, label: "Edit", sortable:false,  hidden:(_isSelection), width:20,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 elLiner.innerHTML = '<a href="#edit_user"><img src="../../common/images/edit_icon.png" width="16" height="16" border="0" title="Edit group" /><\/a>';}
 			},
-			{ key: "name", label: "<u>Name</u>", sortable:true,
+			{ key: "name", label: "<div align='left'><u>Name</u></div>", sortable:true,
 				formatter: function(elLiner, oRecord, oColumn, oData){
 					if(Hul.isempty(oRecord.getData('email'))){
 						elLiner.innerHTML = oRecord.getData('name');
@@ -289,7 +290,7 @@ elLiner.innerHTML = '<a href="#edit_user"><img src="../../common/images/edit_ico
 						oRecord.getData('name')+'</a>';
 					}
 					}},
-			{ key: "fullname", label: "Full name", sortable:false,
+			{ key: "fullname", label: "<div align='left'>Full name</div>", sortable:false,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var str = oRecord.getData("fullname");
 					var tit = "";
@@ -301,7 +302,8 @@ elLiner.innerHTML = '<a href="#edit_user"><img src="../../common/images/edit_ico
 					}
 					elLiner.innerHTML = '<label title="'+tit+'">'+str+'</label>';
 			}},
-			{ key: "organisation", label: "Institution/Organisation", hidden:(_isSelection), sortable:true, width:200,
+			{ key: "organisation", label: "<div align='left'>Institution/Organisation</div>",
+				hidden:(_isSelection), sortable:true, width:200,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var str = oRecord.getData("organisation");
 					var tit = "";
@@ -326,7 +328,7 @@ elLiner.innerHTML = '<a href="#edit_user"><img src="../../common/images/edit_ico
 elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete_icon.png" width="16" height="16" border="0" title="Delete this User" /><\/a>';
 				}
 			},
-			{ key: "kickoff", label: "Kick Off", width:20, sortable:false, hidden:(_isSelection || top.HEURIST.is_admin() ||																						isNotAdmin ),
+			{ key: "kickoff", label: "Remove", width:20, sortable:false, hidden:(_isSelection || top.HEURIST.is_admin() ||																						isNotAdmin ),
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					if(Number(oRecord.getData('id'))===top.HEURIST.get_user_id()){
 						elLiner.innerHTML = "";
@@ -338,6 +340,13 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 
 								];
 
+		// Define a custom row formatter function
+		var myRowFormatter = function(elTr, oRecord) {
+	    	if (oRecord.getData('enabled')!=="y") {
+	        	Dom.addClass(elTr, 'inactive');
+	    	}
+	    	return true;
+		};
 
 		var myConfigs = {
 									//selectionMode: "singlecell",
@@ -351,8 +360,10 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 										pageLinks: YAHOO.widget.Paginator.VALUE_UNLIMITED
 										// use these in the rows-per-page dropdown
 										//, rowsPerPageOptions: [100]
-									})
+									}),
+									formatRow: myRowFormatter
 		};
+
 
 		_myDataTable = new YAHOO.widget.DataTable('tabContainer', myColumnDefs, _myDataSource, myConfigs);
 

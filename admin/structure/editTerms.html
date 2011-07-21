@@ -67,11 +67,14 @@
 	<script src="../../common/php/loadCommonInfo.php"></script>
 
 	<script type="text/javascript" src="editTerms.js"></script>
-    	<div class="banner"><h2>Edit Term</h2></div>
-<div id="page-inner">	<div id="pnlLeft" style="height:100%; width:300; max-width:300; float: left; padding:5px; overflow: hidden;">
+
+    <div class="banner"><h2>Edit Terms</h2></div>
+	<div id="page-inner">
+
+	<div id="pnlLeft" style="height:100%; width:300; max-width:300; float: left; padding-right:5px; overflow: hidden;">
 
 		<div id="formSearch" style="display:block;height:136px;">
-			<h3>Search</h3>
+			<h3 style="border-style: none;">Search</h3>
 			<div class="dtyField"><label class="dtyLabel" style="width:30px;">Find:</label>
 				<input id="edSearch" style="width:70px"  onkeyup="{doSearch(event)}"/>
 				<label>type 3 or more letters</label>
@@ -108,7 +111,7 @@
 
 
 		<div id="formEditor" style="display:none;">
-			<h3>Edit Term</h3>
+			<h3 style="border-style: none;">Edit Selected Term</h3>
 			<div style="border: black; border-style: solid; border-width:thin; padding:20px;">
 
 			<div class="dtyField"><label class="dtyLabel">ID:</label><input id="edId" readonly="readonly" style="width:50px"/></div>
@@ -125,7 +128,7 @@
 
 		<div id="formInverse" style="display:none;">
 
-			<h3>Select Inverse Term</h3>
+			<h3 style="border-style: none;">Select Inverse Term</h3>
 			<div style="border: black; border-style: solid; border-width:thin; padding:20px;">
 
 			<div class="dtyField"><label class="dtyLabel">Find inverse:</label>
@@ -142,7 +145,6 @@
 				</div>
 			</div>
 		</div>
-	</div></div>
 	</div>
 	</div>
 

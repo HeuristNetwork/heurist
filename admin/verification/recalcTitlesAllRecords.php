@@ -1,7 +1,10 @@
 <?php
 
 /**
- * filename, brief description, date of creation, by whom
+ * recalcTitlesAllRecords.php
+ *
+ * Rebuilds the constructed record titles listed in search results, for all records
+ *
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
@@ -10,29 +13,23 @@
  **/
 
 ?>
-
 <?php
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
-if (! is_logged_in()) {
-	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
-	return;
-}
-
-if (! is_admin()) {
-?>
-You must be a SHSSERI administrator to use this page.
-<?php
-	return;
-}
-
-require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
-
+	if (! is_logged_in()) {
+		header("Location: " . HEURIST_URL_BASE . "common/connect/login.php?db=".HEURIST_DBNAME);
+		return;
+	}
+	if (! is_admin()) {
+		print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href='".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME."'>Log out</a></p></body></html>";
+		return;
+	}
 
 mysql_connection_db_overwrite(DATABASE);
 
+require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php'); //?db='.HEURIST_DBNAME);
 
 $res = mysql_query('select rec_ID, rec_Title, rec_RecTypeID from Records where ! rec_FlagTemporary order by rand()');
 $bibs = array();
@@ -52,17 +49,8 @@ $processed_count = 0;
 //print '<ul>';
 
 ?>
-<h2>COMPOSITE RECORD RECALCULATION</h2>
-
-<p>
-   This function recalculates all the constructed record titles, compares
-   them with the existing title and updates the title where the title has
-   changed. At the end of the process it will display a list of records
-   for which the titles were changed and a list of records for which the
-   new title would be blank (an error condition).
-</p>
-
-
+<html>
+<head>
 <script type="text/javascript">
 function update_counts(processed, blank, repair, changed) {
 	document.getElementById('processed_count').innerHTML = processed;
@@ -78,28 +66,51 @@ function update_counts2(processed, total) {
 	document.getElementById('percent2').innerHTML = Math.round(1000 * processed / total) / 10;
 }
 </script>
-<?php
+</head>
+<body>
+<h2>COMPOSITE RECORD RECALCULATION</h2>
 
+<p>
+   This function recalculates all the constructed record titles, compares
+   them with the existing title and updates the title where the title has
+   changed. At the end of the process it will display a list of records
+   for which the titles were changed and a list of records for which the
+   new title would be blank (an error condition).
+</p>
+
+<div><span id=total_count><?=count($bibs)?></span> records in total</div>
+<div><span id=processed_count>0</span> processed so far (<span id=percent>0</span>)</div>
+<div><span id=changed_count>0</span> to be updated</div>
+<div><span id=same_count>0</span> are the same</div>
+<div><span id=repair_count>0</span> are internet bookmarks that are reparable</div>
+<div><span id=blank_count>0</span> to be left as is (missing fields etc)</div>
+
+<?php
+/*
 print '<div><span id=total_count>'.count($bibs).'</span> records in total</div>';
 print '<div><span id=processed_count>0</span> processed so far (<span id=percent>0</span>% done)</div>';
 print '<div><span id=changed_count>0</span> to be updated</div>';
 print '<div><span id=same_count>0</span> are the same</div>';
 print '<div><span id=repair_count>0</span> are internet bookmarks that are reparable</div>';
 print '<div><span id=blank_count>0</span> to be left as is (missing fields etc)</div>';
-
+		ob_flush();
+		flush();
+*/
 $blanks = array();
 $reparables = array();
-foreach ($bibs as $rec_id => $bib) {
+foreach ($bibs as $rec_id => $rec) {
 	if ($rec_id % 10 == 0) {
+//error_log(">>>>".$processed_count.','.$blank_count.','.$repair_count.','.count($updates));
+
 		print '<script type="text/javascript">update_counts('.$processed_count.','.$blank_count.','.$repair_count.','.count($updates).')</script>'."\n";
 		ob_flush();
 		flush();
 	}
 
-	$mask = $masks[$bib['rec_RecTypeID']];
-	$new_title = trim(fill_title_mask($mask, $rec_id, $bib['rec_RecTypeID']));
+	$mask = $masks[$rec['rec_RecTypeID']];
+	$new_title = trim(fill_title_mask($mask, $rec_id, $rec['rec_RecTypeID']));
 	++$processed_count;
-	$bib_title = trim($bib['rec_Title']);
+	$bib_title = trim($rec['rec_Title']);
 	if ($new_title && $bib_title && $new_title == $bib_title && strstr($new_title, $bib_title) )  continue;
 
 	if (! preg_match('/^\\s*$/', $new_title)) {	// if new title is blank, leave the existing title
@@ -116,15 +127,15 @@ foreach ($bibs as $rec_id => $bib) {
 	continue;
 
 /*
-	if (substr($new_title, 0, strlen($bib['rec_Title']) == $bib['rec_Title']))
-		print '<li><b>' . htmlspecialchars($bib['rec_Title']) . '<span>' . htmlspecialchars(substr($new_title, strlen($bib['rec_Title']))) . '</span>' . '</b> [' . $rec_id . ': ' . htmlspecialchars($bib['rec_Title']) . ']';
+	if (substr($new_title, 0, strlen($rec['rec_Title']) == $rec['rec_Title']))
+		print '<li><b>' . htmlspecialchars($rec['rec_Title']) . '<span>' . htmlspecialchars(substr($new_title, strlen($rec['rec_Title']))) . '</span>' . '</b> [' . $rec_id . ': ' . htmlspecialchars($rec['rec_Title']) . ']';
 	else
-		print '<li><b>' . htmlspecialchars($new_title) . '</b> [' . $rec_id . ': ' . htmlspecialchars($bib['rec_Title']) . ']';
+		print '<li><b>' . htmlspecialchars($new_title) . '</b> [' . $rec_id . ': ' . htmlspecialchars($rec['rec_Title']) . ']';
 */
-	if ($new_title == preg_replace('/\\s+/', ' ', $bib['rec_Title']))
-		print '<li class=same>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($bib['rec_Title']) . '';
+	if ($new_title == preg_replace('/\\s+/', ' ', $rec['rec_Title']))
+		print '<li class=same>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($rec['rec_Title']) . '';
 	else
-		print '<li>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($bib['rec_Title']) . '';
+		print '<li>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($rec['rec_Title']) . '';
 
 	print ' <a target=_blank href="'.HEURIST_URL_BASE.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bib_id='.$rec_id.'">*</a> <br> <br>';
 
@@ -132,7 +143,7 @@ foreach ($bibs as $rec_id => $bib) {
 		ob_flush();
 		flush();
 	}
-}
+}//for
 //print '</ul>';
 
 
@@ -182,3 +193,5 @@ ob_flush();
 flush();
 
 ?>
+</body>
+</html>

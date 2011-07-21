@@ -25,32 +25,33 @@
 </head>
 
 <body>
-<script type="text/javascript" src="../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script> 
-<script type="text/javascript" src="../external/yui/2.8.2r1/build/json/json-min.js"></script> 
-<script src="../common/js/utilsLoad.js"></script> <!-- core HEURIST functions --> 
-<script src="../common/js/utilsUI.js"></script> <!-- core HEURIST functions --> 
+<script type="text/javascript" src="../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
+<script type="text/javascript" src="../external/yui/2.8.2r1/build/json/json-min.js"></script>
+<script src="../common/js/utilsLoad.js"></script> <!-- core HEURIST functions -->
+<script src="../common/js/utilsUI.js"></script> <!-- core HEURIST functions -->
 <script>
 		$(function() {
-			
+
 			var icons = {
 			header: "header",
 			headerSelected: "headerselected"
-			};			
+			};
 			$( "#page-inner" ).accordion({
 				fillSpace: true,
 				collapsible: true,
 				active:false,
 				icons: icons
 				});
-			
+
+			$("iframe")	.attr('src','');
 		});
-		
-	</script> 
+
+	</script>
 <a id=home-link href="../index.php?db=[dbname!]">
 <div id=logo title="Click the logo at top left of any Heurist page to return to your Favourites"></div>
 </a>
 <div id=version></div>
-<!-- database name --> 
+<!-- database name -->
 <a id="dbSearch-link">
 <div id="dbname" >[dbname!] Heurist Database System Administration</div>
 </a>
@@ -63,8 +64,8 @@
           <li><a href="setup/createNewDB.php" target="databaseframe" title="Create a new database with essential structure elements">New</a></li>
           <li><a href="setup/registerDB.php?db=[dbname!]" target="databaseframe" title="Register this database with the Heurist Index">Register</a></li>
 <!--           <li><a href="rollback/rollbackRecords.php?db=[dbname!]" target="databaseframe">Rollback (NYA) (Selectively roll back the data in the database to a specific date and time) </a></li> -->
-          <li><a href="javascript:window.alert('This feature has not been implemented yet');" target="databaseframe" title="Selectively roll back the data in the database to a specific date and time">Rollback (NYA)</a></li>
-          <li>---------</li>
+          <li><a href="javascript:window.alert('Sorry, this feature has not been implemented yet');" target="databaseframe" title="Selectively roll back the data in the database to a specific date and time">Rollback</a></li>
+          <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
           <li><a href="setup/editSysIdentification.php?db=[dbname!]" target="databaseframe" title="Edit the internal metadata describing the database and set some global behaviours">Properties</a></li>
         </ul>
         <div class="contentframe">
@@ -77,13 +78,13 @@
           <li><a href="structure/manageRectypes.html?db=[dbname!]" target="structureframe" title="Add new / modify existing record types and their use of globally defined fields">Record types</a></li>
           <li><a href="structure/manageDetailTypes.html?db=[dbname!]" target="structureframe" title="Direct access to the global field definitions">Field types</a></li>
 <!--           <li><a href="structure/editRectypeConstraints.php?db=[dbname!]" target="structureframe">Constraints (NYA)<!--  (Define constraints on the record types which can be related, and allowable relationship types)</a></li> -->
-		  <li><a href="javascript:window.alert('This feature has not been implemented yet');" target="structureframe" title="Define constraints on the record types which can be related, and allowable relationship types">Constraints (NYA)</a></li>
+		  <li><a href="javascript:window.alert('Sorry, this feature has not been implemented yet');" target="structureframe" title="Define constraints on the record types which can be related, and allowable relationship types">Constraints</a></li>
           <li><a href="structure/editTerms.html?db=[dbname!]" target="structureframe" title="Define terms used for relationship types and for other enumerated fields">Terms</a></li>
           <li><a href="setup/editMimetypes.php?db=[dbname!]" target="structureframe" title="Define the relationship between file extensions and mime type">Mime types</a></li>
-          <li>---------</li>
-          <li><a href="structure/selectDBForImport.php?db=[dbname!]" target="structureframe" title="Selectively import structural elements from other Heurist databases">Import</a></li>
-          <li><a href="structure/getDBStructure.php?db=[dbname!]" target="accessframe" title="Lists the record type and field definitions in a computer-readable form">Return database definitions</a></li>
-          <li><a href="describe/listRectypeDescriptions.php?db=[dbname!]" target="structureframe" title="Display/print a formatted view of the database structure">Print structure</a></li>
+          <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
+          <li><a href="structure/selectDBForImport.php?db=[dbname!]" target="structureframe" title="Selectively import structural elements from other Heurist databases">Import defenitions</a></li>
+          <li><a href="structure/getDBStructure.php?db=[dbname!]" target="structureframe" title="Lists the record type and field definitions in a computer-readable form">Return as excahange format</a></li>
+          <li><a href="describe/listRectypeDescriptions.php?db=[dbname!]" target="structureframe" title="Display/print a formatted view of the database structure">Show structure</a></li>
         </ul>
         <div class="contentframe">
         <iframe width="100%" height="100%" id="structureframe" name="structureframe" frameborder="0"></iframe>
@@ -105,12 +106,12 @@
       <h3><a href="#">VERIFICATION: </a>Verification of the integrity of the database and various data-cleaning functions and utilities</h3>
       <div class="adminSection">
         <ul class="menu">
-          <li><a href="verification/recalcTitlesAllRecords.php?db=[dbname!]" target="accessframe" title="Rebuilds the constructed record titles listed in search results, for all records">Rebuild titles</a></li>
+          <li><a href="verification/recalcTitlesAllRecords.php?db=[dbname!]" target="verificationframe" title="Rebuilds the constructed record titles listed in search results, for all records">Rebuild titles</a></li>
           <!-- : Also have capabuility for specific records and rectypes</p> -->
-          <li><a href="verification/listRecordPointerErrors.php?db=[dbname!]" target="accessframe" title="Find record pointer which point to an incorrect record type or to nothing at all">Invalid pointers</a></li>
-          <li><a href="verification/listDuplicateRecords.php?fuzziness=10&amp;db=[dbname!]" target="accessframe" title="Fuzzy search to identify records which might contain duplicate data">Duplicate records</a></li>
+          <li><a href="verification/listRecordPointerErrors.php?db=[dbname!]" target="verificationframe" title="Find record pointer which point to an incorrect record type or to nothing at all">Invalid pointers</a></li>
+          <li><a href="verification/listDuplicateRecords.php?fuzziness=10&amp;db=[dbname!]" target="verificationframe" title="Fuzzy search to identify records which might contain duplicate data">Duplicate records</a></li>
           <li><a href="../search/search.html?q=_BROKEN_&amp;w=all&amp;db=[dbname!]" target="_blank" title="Show records with URLs which point to a non-existant or otherwise faulty address">Broken URLs</a></li>
-          <li>---------</li>
+          <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
           <li><a href="verification/checkXHTML.php?db=[dbname!]" target="verificationframe" title="Check the wysiwyg text fields in records and blog entries for structural errors">Wysiwyg text check</a></li>
           <li><a href="verification/checkInvalidChars.php?db=[dbname!]"  target="verificationframe" title="Check the wysiwyg text fields for invalid characters">Invalid characters</a></li>
           <li><a href="verification/cleanInvalidChars.php?db=[dbname!]" target="verificationframe" title="Attempt to clean up invalid characters in the wysiwyg text fields">Clean invalid characters</a></li>
@@ -120,7 +121,7 @@
         </div>
       </div>
     <!--</div>-->
-    <!-- end accordion --> 
+    <!-- end accordion -->
   </div>
 </div>
 </body>

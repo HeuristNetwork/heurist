@@ -7,7 +7,7 @@
 
     // TO DO: This fucntion needs to go directly to edit mode ('u') by passing the dispaly of the (single)
     // database record in this table.
-    
+
 	require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 	require_once(dirname(__FILE__)."/../../external/nusphere/config.inc.php");
 	require_once(dirname(__FILE__)."/../../external/nusphere/db_utils.inc");
@@ -36,7 +36,7 @@
 
 	define('MSG_UPDATED', "<h3>\ndone ...</h3><p>\n\nHeurist System Identification Record has been updated successfully.
 		Click <a href=\"?mode=s&amp;start=%d\">here</a> to return to Heurist home page.</p>");
-        
+
 	define('MSG_INSERTED', 'Record has been added successfully.
 		Click <a href="?mode=s&amp;start=-1">here</a> to return to main page.');
 	define('MSG_DELETED', "Record has been deleted successfully.
@@ -209,9 +209,9 @@
 	if (!$keys) {
 		dbu_handle_error(ERR_NO_KEY);
 	}
-    
+
 	$idx = 0;
-    
+
 	foreach($fielddef as $fkey=>$fld) {
 		if ($fld[FLD_INPUT]) {
 			if ($fld[FLD_INPUT_NOTEMPTY]) {
@@ -258,7 +258,7 @@
 		$dbconn->db_close();
 		$nextmode = 's';
 		break;
-		/* 
+		/*
         case 'd':
 		$rslt = dbu_handle_delete($fielddef, $scheme, $table, $dbconn, $_POST, $keys);
 		if ($rslt) {
@@ -269,8 +269,8 @@
 		}
 		$dbconn->db_close();
 		$nextmode = 's';
-		break; 
-        */                    
+		break;
+        */
 	}
 
 ?>
@@ -409,11 +409,16 @@
 				CheckTime(theForm<?php echo isset($fld_indices_Time) ? ", " . $fld_indices_Time: "" ?>)
 				)
 			}
+
+			function onFormSubmit(){
+				document.forms.ActionForm.action='?mode=u';
+				document.forms.ActionForm.submit();
+			}
 			//-->
 		</script>
 	</head>
-	
-    
+
+
     <body>
 		<?php
 			if ($show_message) {
@@ -432,7 +437,7 @@
 			<form name="InputForm" method="post" enctype="multipart-form-data"
 				onsubmit="return CheckForm(this)"
 				action="">
-				<table border="0"> 
+				<table border="0">
                 	<?php  // INPUT
 				    echo "<tr><td><h3>Heurist System Identification Record for db = $temp</h3></td></tr>";
                 		foreach($fielddef as $fkey=>$fld) {
@@ -529,12 +534,17 @@
 				<br />
 				<table cellpadding="1" cellspacing="0" border="0" bgcolor="#ababab"><tr><td>
 							<table cellpadding="1" cellspacing="0" border="0" bgcolor="#fcfcfc"><tr><td>
-							<input type="button" value="Edit" onclick="document.forms.ActionForm.action='?mode=u'; document.forms.ActionForm.submit()" />&nbsp;
+							<input type="button" value="Edit" onclick="onFormSubmit()" />&nbsp;
 							</td></tr>
 							</table>
 					</td></tr>
 				</table>
 			</form>
-			<?php } ?>
+			<?php
+				if(count($rows)==1){
+					print "<script>onFormSubmit();</script>";
+				}
+			}
+			?>
 	</body>
 </html>

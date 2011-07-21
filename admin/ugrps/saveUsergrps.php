@@ -288,6 +288,8 @@
 							$email_text =
 "Your Heurist account registration has been approved.
 
+Heurist database: ".HEURIST_DBNAME."
+
 Login at:
 
 ".HEURIST_URL_BASE."search/search.html?db=".HEURIST_DBNAME."
