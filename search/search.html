@@ -302,7 +302,7 @@
 				<ul>
 					<li><a href="#" onClick="top.HEURIST.search.selectAll()" title="Select All">Select All</a></li>
 					<li><a href="#" onClick="top.HEURIST.search.deselectAll()" title="Clear selection">Select None</a></li>
-					<li><a href="#" onClick="top.HEURIST.search.addRemoveTagsPopup(false); return false;" title="Select one or more records, then click to add or remove tags">Tag</a></li>
+					<li><a href="#" onClick="top.HEURIST.search.addRemoveTagsPopup(true); return false;" title="Select one or more records, then click to add or remove tags">Tag</a></li>
 					<li><a href="#" onClick="top.HEURIST.search.setRatingsPopup(); return false;" title="Select one or more records, then click to set ratings">Rate</a></li>
 					<li><a href="#" onClick="top.HEURIST.search.addBookmarks(); return false;" title="Select one or more records, then click to bookmark">Bookmark</a></li>
 					<li><a href="#" onClick="top.HEURIST.search.deleteBookmarks(); return false;" title="Select one or more records, then click to remove bookmarks">Remove bookmarks</a></li>
@@ -428,7 +428,7 @@
 	<div id=reminder></div>
 </div>
 <div style="position: absolute; left: 50%; top: 145px;">
-	<div id=popup-notice style="display: none; position: relative; left: -100px; width: 200px; height: 50px; border: 1px solid gray;">
+	<div id=popup-notice style="display: none; position: relative; left: -100px; width: 200px; height: 50px; border: 2px solid gray;">
 		<table border=0 cellspacing=0 cellpadding=0 style="background-color: light-blue; width: 100%; height: 100%;">
 			<tr>
 				<td style="vertical-align: middle; text-align: center;"><b id=popup-notice-content></b></td>

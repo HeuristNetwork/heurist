@@ -22,7 +22,7 @@ var database = (top && top.HEURIST && top.HEURIST.database? top.HEURIST.database
 
 var Blog = {
 
-blogEntryRecordType: HRecordTypeManager.getRecordTypeById(137),
+blogEntryRecordType: HRecordTypeManager.getRecordTypeById(137),	// magic numbers
 websiteRecordType: HRecordTypeManager.getRecordTypeById(1),
 mediaRecordType: HRecordTypeManager.getRecordTypeById(74),
 
@@ -162,7 +162,7 @@ BlogEntry: function(record, parentElement, isNew) {
 
 	this.renderFields = function() {
 		var content = "<table><tbody>" +
-			"<tr><td><h2>" + this.record.getDetail(Blog.titleDetailType) + "</h2></td></tr>";
+			"<tr><td><h2 class='entry-title'>" + this.record.getDetail(Blog.titleDetailType) + "</h2></td></tr>";
 
 		if (Blog.group) {
 			content += "<tr class='entry-wg-tags-row'><td>Workgroup tags: <span class='entry-wg-tags-span'/></td></tr>";
@@ -340,7 +340,7 @@ BlogEntry: function(record, parentElement, isNew) {
 
 
 	this.renderAdditionalData = function () {
-		$(".entry-left", this.$outerTbody).empty();
+		$(".entry-left", this.$outerTbody).empty();	//blog image
 		var thumb = this.record.getDetail(Blog.thumbnailDetailType);
 		if (thumb) {
 			$(".entry-left", this.$outerTbody).append("<a href='" + thumb.getURL() + "' target='_blank'><img src='" + thumb.getThumbnailURL() + "&w=170&h=170'/></a>");
