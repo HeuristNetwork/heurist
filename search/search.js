@@ -207,7 +207,7 @@ top.HEURIST.search = {
 				function(related) {
 					var results = top.HEURIST.search.results,
 						recID,i,j;
-					if (related.count >= results.totalQueryResultRecordCount) {
+					if (related && related.count >= results.totalQueryResultRecordCount) {
 						results.recSetCount = related.count;
 						results.params = related.params;
 						for (recID in related.relatedSet){
@@ -239,14 +239,14 @@ top.HEURIST.search = {
 								}
 							}
 						}
-						top.HEURIST.fireEvent(window, "heurist-related-recordset-loaded");
 					}
+					top.HEURIST.fireEvent(window, "heurist-related-recordset-loaded");
 				});
 	},
 
 	loadLevelFilter: function(level){
 		var results = top.HEURIST.search.results;
-		var maxDepth = Math.min(results.params.depth, results.infoByDepth.length - 1);
+		var maxDepth = Math.min((results.params ? results.params.depth : 4), results.infoByDepth.length - 1);
 		if (level > maxDepth) {
 			return;
 		}
