@@ -270,13 +270,18 @@
 	<form onSubmit="top.HEURIST.search.checkSearchForm();" class="searchTable">
 	<input type=hidden id=w-input name=w>
 	<div class="tableCell"><!-- add record -->
+    	
 		<div class="">Search
 		<input id=q name=q type=text style="width:300px">
 		<input id=my-records-button type=button value="my bookmarks" title="Search only records which have been bookmarked into your collection" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();">
 		<input id=all-records-button type=button value="all records"  title="Search across all records in Heurist" onClick="document.getElementById('w-input').value = ''; top.HEURIST.search.submitSearchForm();">
+        
+       <div id=add-record> <a id=add-record-link class="toolbar-large-icon-link logged-in-only" title="Add a new record to the Heurist database, setting record type and ownership" href="#" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/addRecordPopup.php'); return false;">Add New Record </a></div>
 		</div>
-	</div>
-	</form>
+        
+	</div></form>
+    
+	
 	<div id="tabbar">
 		<ul id="tabs" class="horizontal not-query-collected">
 			<li style="padding: 3px 3px 2px 3px"><span><img src="../common/images/b_splitScreen.png"></span>
@@ -287,7 +292,7 @@
 					<li><a href="#" id="resetLayout" title="Resets all panels to default width and visibility" class="seperator">Reset Layout</a></li>
 				</ul>
 			</li>
-			<li class="logged-in-only"><a id=add-record-link class="toolbar-large-icon-link logged-in-only" title="Add a new record to the Heurist database, setting record type and ownership" href="#" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/addRecordPopup.php'); return false;">Add Record </a></li>
+			
 			<li><span>Search</span>
 				<ul>
 					<li><a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">Advanced Search</a></li>
@@ -300,13 +305,19 @@
 			</li>
 			<li><span>Edit</span>
 				<ul>
+
 					<li><a href="#" onClick="top.HEURIST.search.selectAll()" title="Select All">Select All</a></li>
 					<li><a href="#" onClick="top.HEURIST.search.deselectAll()" title="Clear selection">Select None</a></li>
 					<li><a href="#" onClick="top.HEURIST.search.addRemoveTagsPopup(true); return false;" title="Select one or more records, then click to add or remove tags">Tag</a></li>
+
 					<li><a href="#" onClick="top.HEURIST.search.setRatingsPopup(); return false;" title="Select one or more records, then click to set ratings">Rate</a></li>
+                    <li><a href="#" onClick="top.HEURIST.search.addRelationshipsPopup(); return false;" title="Select one or more records, then click to add relationships">Relate</a></li>
 					<li><a href="#" onClick="top.HEURIST.search.addBookmarks(); return false;" title="Select one or more records, then click to bookmark">Bookmark</a></li>
 					<li><a href="#" onClick="top.HEURIST.search.deleteBookmarks(); return false;" title="Select one or more records, then click to remove bookmarks">Remove bookmarks</a></li>
-					<li><a href="#" onClick="top.HEURIST.search.addRelationshipsPopup(); return false;" title="Select one or more records, then click to add relationships">Relate</a></li>
+					
+                    <li><a href="#" onClick="top.HEURIST.search.deleteBiblios(); return false;" title="Select one or more records, then click to delete" class="seperator">Delete</a></li>
+					<li><a href="#" onClick="top.HEURIST.search.fixDuplicates(); return false;" title="Select one or more records, then click to fix duplicates">Merge</a></li>
+					<li><a href="#" onClick="top.HEURIST.search.collectDuplicates(); return false;" title="Click to identify possible duplicates in the current query and create collections for each set">Find duplicates</a></li>
 				</ul>
 			</li>
 			<li><span id=collection-label title="Select records and click collect to add to a temporary collection which can later be saved as a search." >Collect&nbsp;&nbsp;</span><span class="collected-shown" style="display:inline"></span>
@@ -327,22 +338,12 @@
 			</li>
 			<li><span>View</span>
 				<ul>
-					<!--<li><a href="#" id=result-style-list-link title="View results as a list" onClick="top.HEURIST.search.setResultStyle('list'); return false;">1 column</a></li>
-					<li><a href="#" id=result-style-two-col-link title="View results in two columns" onClick="top.HEURIST.search.setResultStyle('two-col'); return false;">2 column</a></li>
-					<li><a href="#" id=result-style-thumbs-link title="View results as thumbnails" onClick="top.HEURIST.search.setResultStyle('thumbs'); return false;">Thumbnails-old</a></li>-->
 					<li><a href="#" id=result-style-oneCol title="View results as a list" onClick="top.HEURIST.search.setResultStyle('list');">1 column</a></li>
 					<li><a href="#" id=result-style-twoCol title="View results as a list" onClick="top.HEURIST.search.setResultStyle('two-col');">2 columns</a></li>
 					<li><a href="#" id=result-style-icons-link title="View results as icons" onClick="top.HEURIST.search.setResultStyle('icons');">Icons</a></li>
 					<li><a href="#" id=result-style-thumbs-link-new title="View results as icons" onClick="top.HEURIST.search.setResultStyle('thumbnails');">Thumbnails</a></li>
 
-					<li><a href="#" title="Click to hide/show the legend" onClick="top.HEURIST.search.toggleLegend(); blur(); return false;" id="legend-link" class="seperator">SHow legend</a></li>
-				</ul>
-			</li>
-			<li><span>Advanced</span>
-				<ul>
-					<li><a href="#" onClick="top.HEURIST.search.deleteBiblios(); return false;" title="Select one or more records, then click to delete">Delete</a></li>
-					<li><a href="#" onClick="top.HEURIST.search.fixDuplicates(); return false;" title="Select one or more records, then click to fix duplicates">Merge dupes</a></li>
-					<li><a href="#" onClick="top.HEURIST.search.collectDuplicates(); return false;" title="Click to identify possible duplicates in the current query and create collections for each set">Collect dupes</a></li>
+					<li><a href="#" title="Click to hide/show the legend" onClick="top.HEURIST.search.toggleLegend(); blur(); return false;" id="legend-link" class="seperator">Show legend</a></li>
 				</ul>
 			</li>
 		</ul>
@@ -398,7 +399,7 @@
 			</ul>
 			<div class="yui-content">
 				<div id="r">
-					<iframe id="record-view-frame" class=viewers></iframe>
+					<iframe id="record-view-frame" class=viewers src="../common/html/msgNoRecordsSelected.html"></iframe>
 				</div>
 				<div id="p">
 					<iframe id="viewer-frame" class=viewers></iframe>

@@ -443,7 +443,7 @@ body.w-bookmark .bookmarked {
 	position: absolute;
 	right: -1px;
 	top: -2px;
-	display: none
+	display: block
 }
 #rec_view_link {
 	cursor:pointer;
@@ -1062,11 +1062,23 @@ div.hide .saved-search-subheading {
 	height:auto;
 	padding:0;
 }
-/*#add-record-link img{margin:-6px -4px;padding:0;}*/
+
+
 #add-record-link {
-	white-space: nowrap;
+	background-image: url("../images/add-record-small.png");
+    background-position: 2px 3px;
+    background-repeat: no-repeat;
+    padding: 5px 5px 5px 20px;
+    padding: 5px 5px 5px 20px;
+    white-space: nowrap;
+    margin: 0 0 0 20px;
 }
-/*#add-record {height:23px;margin:0;padding:0;position:absolute;left:25px;top:64px;width:76px;z-index: 1;}*/
+#add-record-link:hover {text-decoration:none}
+#add-record {
+    border-left: 1px solid rgba(150, 150, 150, 0.3);
+    display: inline-block;
+    height: 100%;
+    }
 .shadow {
 	-webkit-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
 	-moz-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
@@ -1084,7 +1096,7 @@ div.hide .saved-search-subheading {
 	text-align: left;
 	vertical-align: middle
 }
-#search-result-commands div#add-record {
+#search-result-commands div#add-record-link {
 	border-left :1px solid rgba(0, 0, 0, 0.1)
 }
 #search-result-commands div.selectAll, #search-result-commands div#publish-image-placeholder {
@@ -1230,7 +1242,8 @@ input[type=checkbox] {
 	display: inline;
 }
 .banner a:hover {
-	background: none;
+	background: none;\
+    background-repeat: no-repeat;
 	text-decoration: underline;
 }
 .passwordIcon {
@@ -1758,32 +1771,40 @@ div.recorddiv:hover > #rec_edit_link {
 	display: block;
 	}
 #recordID {
-	background-color: rgba(0, 0, 0, 0.589844);
+	background-color: rgba(0, 0, 0, 0.6);
 	border-bottom-left-radius: 3px 3px;
 	border-bottom-right-radius: 3px 3px;
 	border-top-left-radius: 3px 3px;
 	border-top-right-radius: 3px 3px;
 	color: #CCC;
 	display: none;
-	float: left;
+    text-align:left;
 	font-size: 10px;
 	height: 9px;
-	line-height: 7px;
+	line-height: 8px;
 	padding: 3px;
 	position: absolute;
 	top: -12px;
+    right:0;
+    left:0;
+    height:auto;
+    box-shadow: 0 1px 3px #000000 inset;
 	}
 #recordID a{color:#CCC}
-.list #recordID a,.two-col #recordID a{color:#666}
-.list #recordID a:hover,.two-col #recordID a:hover{color:#000}
+.thumbnails #recordID {top: 0px;}
+.icons #recordID {top: 32px;}
+/*.list #recordID a:hover,.two-col #recordID a:hover{color:#000}*/
 #recordID a:hover{color:#FFF; text-decoration:none}
 .list #recordID,.two-col #recordID{
-	background: none;
-	right:3px;
-	top:18px;
-	padding: 0;
-	color: #666;
-	font-size:8px
+    bottom: 0;
+    font-size: 9px;
+    line-height:9px;
+    height: auto;
+    left: auto;
+    padding: 2px 19px 2px 3px;
+    right: 3px;
+    top: 0;
+    width: auto;
 	}
 div.recorddiv:hover > #recordID {
 	display: block}

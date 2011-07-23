@@ -306,7 +306,7 @@ top.HEURIST.search = {
 							});
 			rtNames.sort();
 			var rectypeMenuItem = document.createElement("li");
-			rectypeMenuItem.innerHTML = "<span>Filter by Rectype</span>";
+			(level == 0 ? rectypeMenuItem.innerHTML = "<span>Filter</span>" :  rectypeMenuItem.innerHTML = "<span>Filter by Rectype</span>") ;
 			var rectypeList = document.createElement("ul");
 			rectypeList.className = "rectype level"+level;
 			var li = document.createElement("li");
@@ -550,15 +550,16 @@ top.HEURIST.search = {
 		   "<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/lock.png' " + userPwd + ">"+
 		    "</div>" +
 			"<div class='recordTitle' title='"+linkText+"'>" + (res[3] && res[3].length ? daysBad +"<a href='"+res[3]+"' target='_blank'>"+linkText + "</a>" : linkText ) + "</div>" +
-			"<div id='recordID'><a href='"+top.HEURIST.basePath+"search/search.html?q=ids:"+res[2]+
+			"<div id='recordID'>"+top.HEURIST.rectypes.names[parseInt(res[4])]+"<br><a href='"+top.HEURIST.basePath+"search/search.html?q=ids:"+res[2]+
 			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
-			"' target='_blank' title='Open in new window'>Record ID: "+res[2]+"</a></div>" +
+			"' target='_blank' title='Open in new window'>ID: "+res[2]+"</a>"+
 			"<div id='rec_edit_link' class='logged-in-only' title='Click to edit'><a href='"+
 			top.HEURIST.basePath+ "records/edit/editRecord.html?sid=" +
 			top.HEURIST.search.sid + "&bib_id="+ res[2] +
 			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
 			"' target='_blank'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png'/></a></div>" +
 		   "</div>" +
+           "</div>" +
 		"</div>";
 		return html;
 	},
@@ -1436,23 +1437,30 @@ top.HEURIST.search = {
 		}
 
 		//send selectionChange event
+        var recordFrame = document.getElementById("record-view-frame");
+        if (!top.HEURIST.search.selectedRecordIds[0].length){
+            recordFrame.src = top.HEURIST.basePath+"common/html/msgNoRecordsSelected.html";
+            }else{
+			recordFrame.src = top.HEURIST.basePath+"common/html/msgLoading.html";
+			setTimeout(function(){recordFrame.src = top.HEURIST.basePath+"records/view/renderRecordData.php?bib_id="+bib_id+
+							("&db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
+							(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")));},
+							50);
+            };
 		var viewerFrame = document.getElementById("viewer-frame");
 		var mapFrame = document.getElementById("map-frame");
 		var mapFrame3 = document.getElementById("map-frame3");
-		var recordFrame = document.getElementById("record-view-frame");
-		recordFrame.src = top.HEURIST.basePath+"records/view/renderRecordData.php?bib_id="+bib_id+
-		("&db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
-						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")));
-		var sidebysideFrame = document.getElementById("sidebyside-frame");
+		
+        
+        var sidebysideFrame = document.getElementById("sidebyside-frame");
 		sidebysideFrame.src = top.HEURIST.basePath+"viewers/sidebyside/sidebyside.html"+
 		("?db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
 						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")));
-
 		var ssel = "selectedIds=" + top.HEURIST.search.getSelectedRecIDs().get().join(",");
-
-		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
+        top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
 		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);
 		top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap,"heurist-selectionchange",  ssel);
+        
 		return false;
 
 	},
@@ -1950,6 +1958,8 @@ top.HEURIST.search = {
 		var mapFrame = document.getElementById("map-frame");
 		var mapFrame3 = document.getElementById("map-frame3");
 		mapFrame.src = "";
+        var recordFrame = document.getElementById("record-view-frame");
+        recordFrame.src = top.HEURIST.basePath+"common/html/msgNoRecordsSelected.html";
 		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", "selectedIds=");
 		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange", "selectedIds=");
 		top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap, "heurist-selectionchange", "selectedIds=");

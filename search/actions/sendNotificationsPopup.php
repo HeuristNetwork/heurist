@@ -28,7 +28,7 @@ if ($_REQUEST['send_notification']) {
 	if ($success) {
 ?>
 <html>
- <body width=700 height=160 style="font-size: 11px;" onload="setTimeout(function() { window.close(); }, 10); var my_alert = top.alert; top.setTimeout(function() { my_alert('<?= $notification_sent_message ?>'); }, 10);">
+ <body class="popup" width=700 height=160 style="font-size: 11px;" onload="setTimeout(function() { window.close(); }, 10); var my_alert = top.alert; top.setTimeout(function() { my_alert('<?= $notification_sent_message ?>'); }, 10);">
  </body>
 </html>
 <?php
@@ -88,7 +88,7 @@ function reset_group() {
 
  </head>
 
- <body width=700 height=160 style="font-size: 11px;" onload="fill_bib_ids();">
+ <body class="popup" width=700 height=160 style="font-size: 11px;" onload="fill_bib_ids();">
 
   <?= $notification_sent_message ?>
 
