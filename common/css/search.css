@@ -1754,6 +1754,18 @@ div.filter .showrelated a {
     font-weight: bold !important;
     padding-left: 20px;
 }
+div.filter .showrelated .relatedCount {
+	background-color: #999999;
+    color: #FFFFFF;
+    display: inline-block;
+    font-size: 10px;
+    font-weight: normal;
+    padding: 0 2px;
+	-moz-border-radius:3px;
+	-webkit-border-radius:3px;
+	border-radius:3px;
+	line-height:12px;
+}
 #results div.collapsed{height:23px;overflow:hidden;padding-top:1px}
 #results div.collapsed div.recordDiv{display: none !important;}
 ul.menu li ul li.disabled{display:none;}

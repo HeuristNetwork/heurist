@@ -280,8 +280,8 @@ top.HEURIST.search = {
 
 		if(level>0){
 			var showRelatedMenuItem = document.createElement("div");
-			showRelatedMenuItem.innerHTML = "<a href='#' onclick=top.HEURIST.search.toggleRelated("+level+")>Show Related Records</a>";
-			showRelatedMenuItem.innerHTML = "<a href='#' onclick=top.HEURIST.search.toggleRelated("+level+")>Show Related Records("+depthInfo.count+") </a>";
+			<!--showRelatedMenuItem.innerHTML = "<a title=\"Click to show records related to the records listed above\" href='#' onclick=top.HEURIST.search.toggleRelated("+level+")>Show Related Records</a>";-->
+			showRelatedMenuItem.innerHTML = "<a title=\"Click to show "+depthInfo.count+" records related to the records listed above\" href='#' onclick=top.HEURIST.search.toggleRelated("+level+")>Show Level "+level+" Related Records <span class=\"relatedCount\">"+depthInfo.count+"</span></a>";
 			showRelatedMenuItem.id = "showrelated"+level;
 			showRelatedMenuItem.className = "showrelated level" + level;
 			filterDiv.appendChild(showRelatedMenuItem);
@@ -397,14 +397,14 @@ top.HEURIST.search = {
 		$("#results-level" + level).toggleClass("collapsed");
 		if (className.match(/loaded/)) {
 			if ($("#results-level" + level).hasClass("collapsed")) {
-				$("#showrelated" + level).html("<a onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Show Related Records</a>");
+				$("#showrelated" + level).html("<a onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Show Level "+level+" Related Records</a>");
 				}else{
-				$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Hide Related Records</a>");
+				$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Hide Level "+level+" Related Records</a>");
 				};
 		}else{
 			top.HEURIST.search.loadRelatedLevel(level);
 			document.getElementById("showrelated" + level).className = className + " loaded";
-			$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Hide Related Records</a>");
+			$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Hide Level "+level+" Related Records</a>");
 			top.HEURIST.search.filterRelated(level);
 		}
 	},
@@ -641,8 +641,7 @@ top.HEURIST.search = {
 
 	format_web_error: function(err, ver_date, href) {
 		if (! err  &&  ! ver_date)
-			//return "<div class=\"daysbad notTested\"><div>URL not yet tested</div></div>";
-			return "<img src=\"../common/images/url_warning.png\" class=\"daysbad admin-only\" title=\"URL not yet tested\">";
+			return "<img src=\"../common/images/url_warning.png\" class=\"daysbad\" title=\"URL not yet tested\">";
 
 		var err_string;
 
@@ -668,8 +667,7 @@ top.HEURIST.search = {
 		else
 			return "";
 
-		//return "<div class=\"daysbad error\"><div>" + err_string + "<br><a target=_blank href=http://web.archive.org/web/*/" + href + ">page history</a></div></div>";
-		return "<img src=\"../common/images/url_error.png\" class=\"daysbad admin-only\" title=\"" + err_string +" \">";
+		return "<img src=\"../common/images/url_error.png\" class=\"daysbad\" title=\"" + err_string +" \">";
 	},
 
 	renderLoginDependentContent: function() {
@@ -683,7 +681,6 @@ top.HEURIST.search = {
 				"<div style=\"padding: 10px;\">\n" +
 				" Existing users:\n" +
 				" <div id=login-button><a href=" +top.HEURIST.basePath+ "common/connect/login.php"+(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "")+" title=\"Log in to use Heurist - new users please register first\"><img src=../common/images/111x30.gif></a></div>\n" +
-				" <p style=\"text-align: center;\"><a onclick=\"InstallTrigger.install({'Heurist Toolbar':this.href}); return false;\" href=" +top.HEURIST.basePath+ "tools/toolbar/HeuristToolbar.xpi title=\"Get Firefox toolbar - rapid access to bookmark web pages, import hyperlinks, view and edit data for the current web page, and synchronise Heurist with Zotero\">Get toolbar</a><br>(Firefox)</p>\n" +
 				" <p style=\"text-align: center;\"><a href=\"javascript:" + top.HEURIST.bookmarkletCode + "\" onclick=\"alert('Drag the Heurist Bookmarklet link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;\" title=\"Get Bookmarklet - bookmarks web pages and harvests web links \(we recommend Firefox and the Firefox toolbar - it has more features\)\">Heurist Bookmarklet</a><br>(other browsers)</p>" +
 				" New users:\n" +
 				" <div id=tour-button><a href=" +top.HEURIST.basePath+ "help/tour.html title=\"Take a quick tour of Heurist's major features\" target=\"_blank\"><img src=../common/images/111x30.gif></a></div>\n" +
