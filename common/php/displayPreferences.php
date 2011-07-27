@@ -55,6 +55,7 @@ $prefs = array(
 	"scratchpad-height" => 0,
 	"scratchpad" => "hide",
 
+	"addRecordDefaults" => "",
 	"applicationPanel" => "closed",
 	"sidebarPanel" => "open",
 	"leftWidth" => 180,
