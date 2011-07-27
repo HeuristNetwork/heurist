@@ -1,7 +1,7 @@
 <!--
 
 /**
- * filename, brief description, date of creation, by whom
+ * findAddUser.html, Template new user registration form (find function no longer relevant)
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
@@ -99,7 +99,7 @@ strings</span></i></p>
 [foreach USER searchrecordloop]
 	<tr>
 		<td style="padding-right: 20px;"><b>[ugr_ID]</b></td>
-		<td style="padding-right: 20px;"><b><a href="editUser.php?db=[dbname!]&amp;Id=[ugr_ID]">[ugr_FirstName] [ugr_LastName]</a></b></td>
+        <td style="padding-right: 20px;"><b><a href="editUser.php?db=[dbname!]&amp;Id=[ugr_ID]">[ugr_FirstName] [ugr_LastName]</a></b></td>
 		<td><a href="assignUsersToGroups.php?db=[dbname!]&amp;filterId=[ugr_ID]">edit groups</a></td>
 	</tr>
 [end-foreach]
@@ -190,8 +190,8 @@ I have read and agree to the Terms and Conditions of Use below<br>
 <a onMouseDown="$('#conditionstext').slideToggle('fast'); $('#conditions').toggleClass('hide');">Conditions</a>
 <div id="conditionstext" style="display:none; height:440px; margin: 12px; border-top:solid; border-width:1px; border-color:#CCC;">
 <p>HEURIST is an experimental system maintained by the University of Sydney,
- Department of Archaeology and our funding is modest. By using the HEURIST
- system and other ACL applications you acknowledge the following and
+Arts eResearch and our funding is modest. By using the HEURIST
+ system and other AeR applications you acknowledge the following and
  agree to license these systems on the following terms and conditions:</p>
 <ul>
 
