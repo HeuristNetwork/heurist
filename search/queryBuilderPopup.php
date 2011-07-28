@@ -481,7 +481,7 @@
 			?>
 
    <tr>
-    <td class=r>Resource&nbsp;type:</td>
+    <td class=r>Record&nbsp;type:</td>
     <td>
 					<?php
 						$res = mysql_query("select distinct rty_ID,rty_Name,rty_Description, rtg_Name

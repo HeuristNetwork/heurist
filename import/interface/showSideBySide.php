@@ -72,7 +72,7 @@ body { margin: 0; }
 * { font-size: 11px; }
  </style>
 
- <div style="width: 100%; padding: 3px 0; background-color: #C00000; font-weight: bold;">&nbsp;Resource comparison</div>
+ <div style="width: 100%; padding: 3px 0; background-color: #C00000; font-weight: bold;">&nbsp;Record comparison</div>
 
  <table border=0 cellpadding=3 cellspacing=2 style="width: 100%;"><tbody>
   <tr>

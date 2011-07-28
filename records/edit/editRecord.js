@@ -1380,7 +1380,7 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 	var removeImg = newDiv.appendChild(this.document.createElement("img"));
 		removeImg.src = top.HEURIST.basePath+"common/images/12x12.gif";
 		removeImg.className = "delete-resource";
-		removeImg.title = "Remove this resource reference";
+		removeImg.title = "Remove this record reference";
 		var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 		top.HEURIST.registerEvent(removeImg, "click", function() {
 			if (! newDiv.readOnly) {
@@ -1392,7 +1392,7 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 	var editImg = newDiv.appendChild(this.document.createElement("img"));
 		editImg.src = top.HEURIST.basePath +"common/images/edit-pencil.png";
 		editImg.className = "edit-resource";
-		editImg.title = "Edit this resource";
+		editImg.title = "Edit this record";
 
 	top.HEURIST.registerEvent(editImg, "click", function() {
 		top.HEURIST.util.popupURL(window,top.HEURIST.basePath +"records/edit/formEditRecordPopup.html?bib_id=" + hiddenElt.value, {

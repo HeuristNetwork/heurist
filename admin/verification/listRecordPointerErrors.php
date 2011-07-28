@@ -67,7 +67,7 @@ while ($row = mysql_fetch_assoc($res))
 
 ?>
 <div>
-    <h3>Records with resource pointers to the wrong rec_RecTypeID</h3>
+    <h3>Records with record pointers to the wrong rec_RecTypeID</h3>
     <span><a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>(show all in search)</a></span>
 </div>
 <table>
@@ -102,7 +102,7 @@ while ($row = mysql_fetch_assoc($res))
 
 ?>
 <div>
-	<h3>Records with resource pointers to non-existent records</h3>
+	<h3>Records with record pointers to non-existent records</h3>
     <span>
     	<a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>(show all in search)</a>
  		<a target=_new href='#' id=selected_link onClick="return open_selected();">(show selected in search)</a>

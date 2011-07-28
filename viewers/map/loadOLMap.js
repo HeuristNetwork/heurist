@@ -214,7 +214,7 @@ function markerClick() {
 	} else {
 		var html = "<b>" + record.title + "&nbsp;&nbsp;&nbsp;</b>";
 		if (record.description) html += "<p style='height: 128px; overflow: auto;'>" + record.description + "</p>";
-		html += "<p><a target=_new href='../../records/view/viewRecord.php?bib_id=" + record.bibID + "'>heurist resource #" + record.bibID + "</a></p>";
+		html += "<p><a target=_new href='../../records/view/viewRecord.php?bib_id=" + record.bibID + "'>heurist record #" + record.bibID + "</a></p>";
 		this.openInfoWindowHtml(html);
 	}
 }
@@ -226,7 +226,7 @@ function polygonClick(point) {
 	} else {
 		var html = "<b>" + record.title + "&nbsp;&nbsp;&nbsp;</b>";
 		if (record.description) html += "<p style='height: 128px; overflow: auto;'>" + record.description + "</p>";
-		html += "<p><a target=_new href='../../records/view/viewRecord.php?bib_id=" + record.bibID + "'>heurist resource #" + record.bibID + "</a></p>";
+		html += "<p><a target=_new href='../../records/view/viewRecord.php?bib_id=" + record.bibID + "'>heurist record #" + record.bibID + "</a></p>";
 		map.openInfoWindowHtml(point, html);
 	}
 }

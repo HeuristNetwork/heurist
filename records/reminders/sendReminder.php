@@ -77,7 +77,7 @@ function sendReminderEmail($reminder, $USERS_DATABASE, $HOST, $BASE_URL) {
 					. 'URL: http://'.$BASE_URL.'?w=all&q=ids:'.$reminder['rem_RecID'] . "\n\n";
 					
 		if ($bib['rec_OwnerUGrpID'] && $bib['rec_NonOwnerVisibility'] == 'hidden') {
-			$email_text .= "Note: Resource belongs to workgroup ".$bib['ugr_Name'] . "\n"
+			$email_text .= "Note: Record belongs to workgroup ".$bib['ugr_Name'] . "\n"
          				.	"You must be logged in to Heurist and a member of this workgroup to view it". "\n\n";
 		}
 		
