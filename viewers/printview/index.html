@@ -127,7 +127,7 @@
 							query += "&limit=" + resultsPerPage;
 						}
 						if (query.search("offset")>-1) {
-							query = query.replace(/offset=[^#&=]*/,"&offset=" + offset);
+							query = query.replace(/offset=[^#&=]*/,"offset=" + offset);
 						}else{
 							query += "&offset=" + offset;
 						}
@@ -226,7 +226,7 @@
 					return;
 				}
 				//set query limits
-				aquery = query.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"&offset=" + (loadingPage-1)*resultsPerPage);
+				aquery = query.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"offset=" + (loadingPage-1)*resultsPerPage);
 				var url = hBase + "export/xml/hml.php"+aquery;
 				var errorMsg = "Error loading " + url + " using XMLHttpRequest";
 				try {
@@ -299,7 +299,7 @@
 						currentPage = page;
 						if (!pageXMLs[page]){ //load pageXML now
 							var pageQuery = query;
-							pageQuery = pageQuery.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"&offset=" + (page-1)*resultsPerPage);
+							pageQuery = pageQuery.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"offset=" + (page-1)*resultsPerPage);
 							var url = top.HEURIST.baseURL+ "export/xml/hml.php" + pageQuery;
 							var errorMsg = "Error loading " + url + " using XMLHttpRequest";
 							pageXMLs[page] = loadXMLDocFromFile(url);
@@ -319,7 +319,7 @@
 					for (var page = 1; page <= pageCount; page++){
 						if (!pageXMLs[page]){ //load pageXML now
 							var pageQuery = query;
-							pageQuery = pageQuery.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"&offset=" + (page-1)*resultsPerPage);
+							pageQuery = pageQuery.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"offset=" + (page-1)*resultsPerPage);
 							var url = top.HEURIST.baseURL+ "export/xml/hml.php" + pageQuery;
 							var errorMsg = "Error loading " + url + " using XMLHttpRequest";
 							pageXMLs[page] = loadXMLDocFromFile(url);
@@ -349,7 +349,7 @@
 					if (!pageXMLs[currentPage]){ //load pageXML now
 						clearAndDisplayLoading();
 						var pageQuery = query;
-						pageQuery = pageQuery.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"&offset=" + (currentPage-1)*resultsPerPage);
+						pageQuery = pageQuery.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"offset=" + (currentPage-1)*resultsPerPage);
 						var url = top.HEURIST.baseURL+ "export/xml/hml.php" + pageQuery;
 						var errorMsg = "Error loading " + url + " using XMLHttpRequest";
 						pageXMLs[currentPage] = loadXMLDocFromFile(url);

@@ -449,7 +449,8 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $o
 			openTag('woot', array('title' => 'record:'.$record['rec_ID']));
 //			openCDATA();
 			foreach ($result['woot']['chunks'] as $chunk) {
-				echo replaceIllegalChars($chunk['text']) . "\n";
+				$text = preg_replace("/&nbsp;/g"," ",$chunk['text']);
+				echo replaceIllegalChars($text) . "\n";
 			}
 //			closeCDATA();
 			closeTag('woot');
