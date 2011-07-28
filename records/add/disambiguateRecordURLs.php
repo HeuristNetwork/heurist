@@ -93,7 +93,7 @@ $use_site_hierarchy = array_key_exists('site_hierarchy', $_REQUEST);
 <tr><td colspan="5"><b>No similar URLs have been bookmarked, but there are other URLs on <tt><?= htmlspecialchars($noproto_url) ?></tt>.</b></td></tr>
 <tr><td colspan="5">&nbsp;</td></tr>
 <tr><td colspan="5">You may look at <a href="<?= htmlspecialchars($base_url . '&site_hierarchy') ?>">all known URLs from the same site</a>,<br>
-or <a href="addRecordPopup.php?db=<?=HEURIST_DBNAME?>&bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST['bkmk_url']) ?>&bkmrk_bkmk_title=<?= urlencode($_REQUEST['bkmk_title']) ?>&bkmrk_bkmk_description=<?= urlencode($_REQUEST['bkmk_description']) ?>">add a bookmark</a> for <b><tt><?= htmlspecialchars($_REQUEST['bkmk_url']) ?></tt></b>.</td></tr>
+or <a href="addRecord.php?db=<?=HEURIST_DBNAME?>&bib_id=-1&bkmrk_bkmk_url=<?= urlencode($_REQUEST['bkmk_url']) ?>&bkmrk_bkmk_title=<?= urlencode($_REQUEST['bkmk_title']) ?>&bkmrk_bkmk_description=<?= urlencode($_REQUEST['bkmk_description']) ?>">add a bookmark</a> for <b><tt><?= htmlspecialchars($_REQUEST['bkmk_url']) ?></tt></b>.</td></tr>
 
 
 

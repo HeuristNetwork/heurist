@@ -13,6 +13,7 @@
 
 <?php
 
+// translate variable names
 if (@$_REQUEST['t']) $_REQUEST['bkmrk_bkmk_title'] = $_REQUEST['t'];
 if (@$_REQUEST['u']) $_REQUEST['bkmrk_bkmk_url'] = $_REQUEST['u'];
 if (@$_REQUEST['d']) $_REQUEST['bkmrk_bkmk_description'] = $_REQUEST['d'];
@@ -22,11 +23,12 @@ if (@$_REQUEST['k']) $_REQUEST['tag'] = $_REQUEST['k'];
 
 if (! @$_REQUEST['bkmrk_bkmk_title']) $_REQUEST['bkmrk_bkmk_title'] = '';
 
-error_log("in add record request - ".print_r($_REQUEST,true));
+//error_log("in add record request - ".print_r($_REQUEST,true));
 
 
-define('LATEST_BOOKMARKLET_VERSION', '20060713');	//saw FIXME  update this, what is the latest date
-if (@$_REQUEST['addref']) {
+define('LATEST_BOOKMARKLET_VERSION', '20060713');	//note! this must be in synch with import/bookmarklet/bookmarkletPopup.php
+// setup parameters for call to editRecord
+if (@$_REQUEST['addref']) {	// add a record		//saw TODO: change this to addrec
 	if (@$_REQUEST['bib_type'])
 		$outdate = '&edit_type=records';
 	else if (@$_REQUEST['edit_type'])
@@ -41,9 +43,9 @@ if (@$_REQUEST['addref']) {
 	else
 		$outdate = '';
 }
-// url with no type specified gets treated as an internet bookmark
+// url with no rectype specified gets treated as an internet bookmark
 if (@$_REQUEST['bkmrk_bkmk_url']  &&  ! @$_REQUEST['bib_rectype'])
-	$_REQUEST['bib_rectype'] = 1;
+	$_REQUEST['bib_rectype'] = 1;	//saw MAGIC NUMBER
 
 
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
@@ -60,7 +62,7 @@ if (!is_logged_in()) {
 }
 $usrID = get_user_id();
 mysql_connection_db_overwrite(DATABASE);
-mysql_query("set @logged_in_user_id = $usrID");
+mysql_query("set @logged_in_user_id = $usrID");	//saw TODO: check where else this needs to be used
 
 /* preprocess any description */
 if (@$_REQUEST['bkmrk_bkmk_description']) {
@@ -95,7 +97,7 @@ if (preg_match_all('!DOI:\s*(10\.[-a-zA-Z.0-9]+/\S+)!i', $description, $matches,
 $isbns = array();
 if (preg_match_all('!ISBN(?:-?1[03])?[^a-z]*?(97[89][-0-9]{9,13}[0-9]|[0-9][-0-9]{7,10}[0-9X])\\b!i', $description, $matches, PREG_PATTERN_ORDER)) {
 	$isbns = array_unique($matches[1]);
-	if (! @$_REQUEST['bib_rectype']) $_REQUEST['bib_rectype'] = 5;
+	if (! @$_REQUEST['bib_rectype']) $_REQUEST['bib_rectype'] = 5; //saw MAGIC NUMBER
 }
 
 $issns = array();
@@ -126,7 +128,7 @@ if (@$_REQUEST['bkmrk_bkmk_url']) {
 	$url = $_REQUEST['bkmrk_bkmk_url'];
 }
 
-if (@$_REQUEST['bib_id'] == -1) {
+if (@$_REQUEST['bib_id'] == -1) { // signalled to create a new record
 	$rec_id = NULL;
 	$force_new = 1;
 } else if (@$_REQUEST['bib_id'] > 0){
@@ -135,16 +137,15 @@ if (@$_REQUEST['bib_id'] == -1) {
 }
 
 // check workgroup permissions
-if (@$_REQUEST['bib_workgroup']) {
+if (@$_REQUEST['bib_workgroup'] && $_REQUEST['bib_workgroup'] != $userID) {
 	$res = mysql_query("select ugl_GroupID from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_GroupID=".intval($_REQUEST['bib_workgroup'])." and ugl_UserID=$usrID");
-	if (mysql_num_rows($res) == 0) {
+	if (mysql_num_rows($res) == 0) { // user not a member so add wg to parameters for editRecord
 		$wg = '&wg=' . intval($_REQUEST['bib_workgroup']);
-		unset($_REQUEST['bib_workgroup']);
-		// print "You are not a member of workgroup ".$_REQUEST['bib_workgroup'].".  You may not add records to that workgroup.";
-		// return;
+		unset($_REQUEST['bib_workgroup']); //remove wg request
 	}
 }
-//  Process tags for workgroups ensuring that the user is a memeber of the workgroup
+
+//  Preprocess tags for workgroups ensuring that the user is a member of the workgroup
 if (@$_REQUEST['tag']  &&  strpos($_REQUEST['tag'], "\\")) {
 	// workgroup tag
 	// workgroup is ...
@@ -153,15 +154,12 @@ if (@$_REQUEST['tag']  &&  strpos($_REQUEST['tag'], "\\")) {
 	foreach ($tags as $tag) {
 		$pos = strpos($tag, "\\");
 		if ($pos !== false) {
-			$grpName = substr($tag, 0, $pos);
+			$grpName = substr($tag, 0, $pos);	//extract the name of the workgroup
 			$res = mysql_query("select grp.ugr_ID from ".USERS_DATABASE.".sysUGrps grp, ".USERS_DATABASE.".sysUsrGrpLinks where grp.ugr_Name='".addslashes($grpName)."' and ugl_GroupID=grp.ugr_ID and ugl_UserID=$usrID");
-			if (mysql_num_rows($res) == 0) {
+			if (mysql_num_rows($res) == 0) { //if the user is not a member
 				$wg .= '&wgkwd=' . urlencode($tag);
-				array_push($outTags, str_replace("\\", "", $tag));
-				// print "You are not a member of workgroup ".$grpName.".  You may not use tags belonging to that workgroup.";
-				// return;
-			}
-			else {
+				array_push($outTags, str_replace("\\", "", $tag));	//this removes the \ from wgname\tagname to create a personal tag of wgnametagname
+			}else { // put the workgroup tag as is into the output tags
 				array_push($outTags, $tag);
 			}
 		}
@@ -169,7 +167,7 @@ if (@$_REQUEST['tag']  &&  strpos($_REQUEST['tag'], "\\")) {
 			array_push($outTags, $tag);
 		}
 	}
-	if (count($outTags)) {
+	if (count($outTags)) { //reset tag request param
 		$_REQUEST['tag'] = join(',', $outTags);
 	}
 	else {
@@ -177,26 +175,26 @@ if (@$_REQUEST['tag']  &&  strpos($_REQUEST['tag'], "\\")) {
 	}
 }
 
-$new_rec_id = false;
+$isNewRecID = false;
 
 /* arrive with a new (un-bookmarked) URL to process */
 if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 
 	if (! @$rec_id  &&  ! @$force_new) {
-		/* look up the records table, see if the requested URL is already in the database; if not, add it */
 
+		/* look up the records table, see if the requested URL is already in the database; if not, add it */
 		$res = mysql_query('select * from Records where rec_URL = "'.addslashes($url).'" and (rec_OwnerUGrpID=0 or rec_NonOwnerVisibility="viewable")');
-		if (($row = mysql_fetch_assoc($res))) {
+		if (($row = mysql_fetch_assoc($res))) { // found record
 			$rec_id = intval($row['rec_ID']);
 			$fav = $_REQUEST["f"];
 
-			$bd = mysql__select_assoc('recDetails', 'concat(dtl_DetailTypeID, ".", dtl_Value)', '1',
+			$bd = mysql__select_assoc('recDetails', 'concat(dtl_DetailTypeID, ".", dtl_Value)', '1', // saw MAGIC NUMBERS
 				'dtl_RecID='.$rec_id.' and ((dtl_DetailTypeID = 198 and dtl_Value in ("'.join('","', array_map("addslashes", $dois)).'"))
 				                        or  (dtl_DetailTypeID = 347 and dtl_Value = "'.addslashes($fav).'"))
 				                        or  (dtl_DetailTypeID = 188 and dtl_Value in ("'.join('","', array_map("addslashes", $issns)).'"))
 				                        or  (dtl_DetailTypeID = 187 and dtl_Value in ("'.join('","', array_map("addslashes", $isbns)).'")))');
 
-			$inserts = array();
+			$inserts = array();			//saw  MAGIC NUMBERS
 			foreach ($dois as $doi) if (! $bd["198.$doi"]) array_push($inserts, "($rec_id, 198, '" . addslashes($doi) . "')");
 			if ($fav  &&  ! $bd["347.$fav"]) array_push($inserts, "($rec_id, 347, '" . addslashes($fav) . "')");
 			foreach ($isbns as $isbn) if (! $bd["187.$isbn"]) array_push($inserts, "($rec_id, 187, '" . addslashes($isbn) . "')");
@@ -211,7 +209,7 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 //if no record found check for similar url's
 	if (! @$rec_id  &&  ! @$force_new) {
 		if (exist_similar($url)) {
-			/* there is/are at least one: redirect to a disambiguation page */
+			/* there is/are at least one so redirect to a disambiguation page */
 			header('Location: ' . HEURIST_URL_BASE . 'records/add/disambiguateRecordURLs.php'
 								. '?db='.HEURIST_DBNAME
 								. '&bkmk_title=' . urlencode($_REQUEST['bkmrk_bkmk_title'])
@@ -225,14 +223,14 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 	}
 //if no similar url's and bib_id was -1 then force a new record of bib_rectype supplied
 	if (! $rec_id  ||  $force_new) {
-		$new_rec_id = true;
+		$isNewRecID = true;
 		$rt = intval($_REQUEST['bib_rectype']);
 		if (! $rt) {
 			if ($url) $_REQUEST['bib_rectype']= $rt = 1;	/* Internet bookmark */
 			else $_REQUEST['bib_rectype'] = $rt = 2;	/* Floating note */
 		} else if (!check_rectype_exist($rt)) {
 			// the rectype passed in is not available on this instance  send them to the  add resource popup
-			header('Location: ' . BASE_PATH . 'records/add/addRecord.php'
+			header('Location: ' . HEURIST_URL_BASE . 'records/add/addRecord.php'
 								. '?db='.HEURIST_DBNAME
 								. '&t=' . urlencode($_REQUEST['t'])
 								. '&error_msg=' . urlencode('Record Type #'. $rt . ' does not exist in this Heurist database'
@@ -247,8 +245,11 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 		                              'rec_Modified' => date('Y-m-d H:i:s'),
 		                              'rec_AddedByUGrpID' => intval($usrID),
 				                      'rec_RecTypeID' => $rt? $rt : 1,
-				                      'rec_OwnerUGrpID' => (intval(@$_REQUEST['bib_workgroup'])?intval(@$_REQUEST['bib_workgroup']): intval($usrID)),
-		                              'rec_NonOwnerVisibility' => (intval(@$_REQUEST['bib_workgroup'])? ((strtolower($_REQUEST['bib_visibility']) == 'hidden')? 'hidden' : 'viewable') : 'viewable'),
+				'rec_OwnerUGrpID' => (intval(@$_REQUEST['bib_workgroup'])?
+									intval(@$_REQUEST['bib_workgroup']): intval($usrID)),
+				'rec_NonOwnerVisibility' => (@$_REQUEST['bib_visibility']?
+									(strtolower($_REQUEST['bib_visibility']) == 'viewable'? 'viewable':'hidden')
+									: (@$_REQUEST['bib_workgroup'] && intval(@$_REQUEST['bib_workgroup'] !== $userID)? 'hidden' : 'viewable')),
 		                              'rec_FlagTemporary' => ! ($url  ||  $_REQUEST['bkmrk_bkmk_title'])));
 		$rec_id = mysql_insert_id();
 
@@ -256,7 +257,7 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 		if (@$_REQUEST['bkmrk_bkmk_title']) {
 			mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id.',160,"'.addslashes($_REQUEST['bkmrk_bkmk_title']).'")');
 		}
-		$inserts = array();
+		$inserts = array(); // saw MAGIC NUMBERS below
 		foreach ($dois as $doi) array_push($inserts, "($rec_id, 198, '" . addslashes($doi) . "')");
 		if (@$_REQUEST["f"]) array_push($inserts, "($rec_id, 347, '" . addslashes($_REQUEST["f"]) . "')");
 		foreach ($isbns as $isbn) array_push($inserts, "($rec_id, 187, '" . addslashes($isbn) . "')");
@@ -271,7 +272,7 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 	/* create a new public note */
 //error_log("in add making new records");
-	$new_rec_id = true;
+	$isNewRecID = true;
 	$rt = intval($_REQUEST['bib_rectype']);
 	if (!check_rectype_exist($rt)) {
 		// the rectype passed in is not available on this instance  send them to the  add resource popup
@@ -288,13 +289,19 @@ if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 	                              'rec_Modified' => date('Y-m-d H:i:s'),
 	                              'rec_AddedByUGrpID' => intval($usrID),
 		                      'rec_RecTypeID' => $rt? $rt : 1,
-		                      'rec_OwnerUGrpID' => (intval(@$_REQUEST['bib_workgroup'])?intval(@$_REQUEST['bib_workgroup']): intval($usrID)),
-		                      'rec_NonOwnerVisibility' => (intval(@$_REQUEST['bib_workgroup'])? ((strtolower(@$_REQUEST['bib_visibility']) == 'hidden')? 'hidden' : 'viewable') : 'viewable'),
+					'rec_OwnerUGrpID' => (intval(@$_REQUEST['bib_workgroup'])?
+									intval(@$_REQUEST['bib_workgroup']): intval($usrID)),
+					'rec_NonOwnerVisibility' => (@$_REQUEST['bib_visibility']?
+									(strtolower($_REQUEST['bib_visibility']) == 'viewable'? 'viewable':'hidden')
+									: (@$_REQUEST['bib_workgroup'] && intval(@$_REQUEST['bib_workgroup'] !== $userID)? 'hidden' : 'viewable')),
 	                              'rec_FlagTemporary' => ! $_REQUEST['bkmrk_bkmk_title'])); // saw BUG???
-	error_log(mysql_error());
+//	error_log(mysql_error());
 	$rec_id = mysql_insert_id();
-	if (@$_REQUEST['bkmrk_bkmk_title']) mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id.',160,"'.addslashes($_REQUEST['bkmrk_bkmk_title']).'")');
-	$inserts = array();
+	if (@$_REQUEST['bkmrk_bkmk_title']) {
+		mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.
+						$rec_id.',160,"'.addslashes($_REQUEST['bkmrk_bkmk_title']).'")');
+	}
+	$inserts = array(); // saw MAGIC NUMBERS
 	foreach ($dois as $doi) array_push($inserts, "($rec_id, 198, '" . addslashes($doi) . "')");
 	if (@$_REQUEST["f"]) array_push($inserts, "($rec_id, 347, '" . addslashes($_REQUEST["f"]) . "')");
 	foreach ($isbns as $isbn) array_push($inserts, "($rec_id, 187, '" . addslashes($isbn) . "')");
@@ -307,7 +314,7 @@ if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 // there is a record and it wasn't forced directly   //SAW shouldn't this test rfw_NewRecID
 if ($rec_id  &&  ! @$_REQUEST['force_new']) {
 	/* user has selected a bookmark that they may or may not have bookmarked already. FFSI!
-	 * If they do in fact have it bookmarked, redirect to the edit bookmark page
+	 * If they do in fact have it bookmarked, redirect to the edit page
 	 * and add the new notes to the end of their existing notes.  FMS
 	 */
 	$res = mysql_query("select * from usrBookmarks where bkm_UGrpID=$usrID and bkm_recID = $rec_id");
@@ -339,20 +346,18 @@ if ($rec_id  &&  ! @$_REQUEST['force_new']) {
 	}
 }
 
+// POST RecordCreation/Find infomation add/update
 // if there is a record now then add any extras that have been passed in - tags or related records
 if ($rec_id) {
-	if ($rec_id  &&  ! $url) {
-		$res = mysql_query('select * from Records where rec_ID = "'.addslashes($rec_id).'" and (rec_OwnerUGrpID=0 or rec_NonOwnerVisibility="viewable")');
-		$row = mysql_fetch_assoc($res);
-		$url = $row['rec_URL'];
-	}
 
+	if ($usrID && !@$bkmk) {
 	mysql__insert('usrBookmarks', array(
 		'bkm_recID' => $rec_id,
 		'bkm_Added' => date('Y-m-d H:i:s'),
 		'bkm_Modified' => date('Y-m-d H:i:s'),
 		'bkm_UGrpID' => $usrID
 	));
+	}
 
 	$bkm_ID = mysql_insert_id();
 
@@ -392,7 +397,7 @@ if ($rec_id) {
 			}
 		}
 	}
-
+	// handle request for relationship records
 	if (@$_REQUEST["related"]) {
 		$other_bib_id = $_REQUEST["related"];
 		$reln_type = "IsRelatedTo";
@@ -401,10 +406,11 @@ if ($rec_id) {
 			if (mysql_num_rows($res) > 0) {
 				$row = mysql_fetch_assoc($res);
 				$reln_type = $row["trm_ID"];	// saw TODO: check that this is aligned with the enum value change
+				// saw TODO check if CONSTRAINTS are fine else give constraint error
 			}
 		}
 		mysql__insert("Records", array(
-			"rec_Title" => "Relationship ($rec_id $reln_type $other_bib_id)",	// saw TODO: do we want to create a human readable string here??
+			"rec_Title" => "Relationship ($rec_id $reln_type $other_bib_id)",	// saw TODO: change this to RecTitle Type RecTitle
 					"rec_Added"     => date('Y-m-d H:i:s'),
 					"rec_Modified"  => date('Y-m-d H:i:s'),
 					"rec_RecTypeID"   => 52,
@@ -412,7 +418,7 @@ if ($rec_id) {
 		));
 		$relnBibID = mysql_insert_id();
 
-		if ($relnBibID > 0) {
+		if ($relnBibID > 0) { // saw MAGIC NUMBERS below
 			$query = "insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ";
 			$query .=   "($relnBibID, 160, 'Relationship')";
 			$query .= ", ($relnBibID, 202, $rec_id)";
@@ -424,7 +430,7 @@ if ($rec_id) {
 
 
 	if ($bkm_ID) {
-		if ($new_rec_id) {
+		if ($isNewRecID) {
 			header('Location: ' . HEURIST_URL_BASE . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id=' . $bkm_ID . '&fromadd=new_bib' . $outdate . $wg);
 		} else {
 			header('Location: ' . HEURIST_URL_BASE . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id=' . $bkm_ID . '&fromadd=new_bkmk' . $outdate . $wg);

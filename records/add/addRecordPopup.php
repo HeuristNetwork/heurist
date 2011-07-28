@@ -91,7 +91,7 @@ function update_link() {
 	var tags = $("#add-link-tags").val();
 	var title = $("#add-link-title").val();
 
-				if (tags) {	// saw BUGGY but works, assumes that tag= is on eol if it exist appends new tags top the end
+	if (tags) {
 		link += (link.match(/&tag=/))  ?  "," + tags  :  "&tag=" + tags;
 	}
 
@@ -109,9 +109,10 @@ function update_link() {
 	$("#add-link-input").val(link);
 
 	$("#broken-kwd-link").hide();
+	//setup link to search for records add to a workgroup with tag by a non-member
 	if ($("#tag").val()) {
 		$("#broken-kwd-link").show()[0].href =
-			"../?w=all&q=tag:\"" + $("#tag").val().replace(/\\/, "") + "\"" +
+			"../../search/search.html?w=all&q=tag:\"" + $("#tag").val().replace(/\\/, "") + "\"" +
 			          " -tag:\"" + $("#tag").val() + "\"";
 	}
 }
@@ -121,15 +122,15 @@ function compute_args() {
 	if (document.getElementById('restrict_elt').checked) {
 		var wg_id = parseInt(document.getElementById('rec_OwnerUGrpID').value);
 		if (wg_id) {
+			if ( wg_id != usrID) {
 			extra_parms = '&bib_workgroup=' + wg_id;
+			}
 			extra_parms += '&bib_visibility=' + document.getElementById('rec_NonOwnerVisibility').value;
 
 			var kwdList = document.getElementById('tag');
 			var tags = $("#add-link-tags").val();
 			if (wg_id != usrID && kwdList.selectedIndex > 0) {
 							extra_parms += "&tag=" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value);
-			}else if (tags) {
-				extra_parms += "&tag=" + encodeURIComponent(tags);
 						}
 		}
 	}
@@ -154,19 +155,22 @@ function add_note(e) {
 	var tags = $("#add-link-tags").val();
 	if (document.getElementById('restrict_elt').checked) {
 		if (wg_id) {
+			if ( wg_id != usrID) {
 			extra_parms = '&bib_workgroup=' + wg_id;
+			}
 			extra_parms += '&bib_visibility=' + vis;
 
 			if (wg_id != usrID && kwdList.selectedIndex > 0) {
 				extra_parms += "&tag=" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value);
-			}else if (tags) {
-				extra_parms += "&tag=" + encodeURIComponent(tags);
 		}
 		}else {
 			alert('Please select a group to which this record shall be restricted');
 			document.getElementById('rec_OwnerUGrpID').focus();
 			return;
 		}
+	}
+	if (tags) {
+		extra_parms += (extra_parms.match(/&tag=/))  ?  "," + tags  :  "&tag=" + tags; // warning! code assumes that &tag= is at the end of string
 	}
 	if ( <?= @$_REQUEST['related'] ? '1' : '0' ?> ) {
 		extra_parms += '&related=<?= @$_REQUEST['related'] ?>';
@@ -181,7 +185,8 @@ function add_note(e) {
 		if (! rt) rt = "2";  //added ian 19/9/08 to re-enable notes as default
 
 	if (document.getElementById('defaults_elt').checked) {
-		defaults = [ rt, wg_id,"\"" + vis +"\"", "\"" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value) + "\"","\"" + tags + "\"", document.getElementById('restrict_elt').checked?1:0];
+		defaults = [ rt, wg_id,"\"" + vis +"\"", "\"" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value) +"\"",
+						"\"" + tags + "\"", document.getElementById('restrict_elt').checked?1:0];
 		top.HEURIST.util.setDisplayPreference('addRecordDefaults', defaults.join(","));
 	}else{
 		top.HEURIST.util.setDisplayPreference('addRecordDefaults', "");
@@ -192,6 +197,23 @@ function add_note(e) {
 
 }
 
+function cancelAdd(e) {
+	if (! e) e = window.event;
+	if (document.getElementById('defaults_elt').checked) {//save settings
+		var rt = parseInt(document.getElementById('rectype_elt').value);
+		var wg_id = parseInt(document.getElementById('rec_OwnerUGrpID').value);
+		var vis = document.getElementById('rec_NonOwnerVisibility').value;
+		var kwdList = document.getElementById('tag');
+		var tags = $("#add-link-tags").val();
+		defaults = [ rt, wg_id,"\"" + vis +"\"", "\"" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value) +"\"",
+						"\"" + tags + "\"", document.getElementById('restrict_elt').checked?1:0];
+		top.HEURIST.util.setDisplayPreference('addRecordDefaults', defaults.join(","));
+	}else{ //reset saved setting
+		top.HEURIST.util.setDisplayPreference('addRecordDefaults', "");
+	}
+	window.close();
+
+}
   </script>
 
   <style type=text/css>
@@ -240,7 +262,7 @@ function add_note(e) {
 
 	<div>
 		<div>
-			<input type="checkbox" name="bib_workgroup_restrict" id="restrict_elt" value="1" onclick="document.getElementById('maintable').className = this.checked? '' : 'hide_workgroup';" style="margin: 0; padding: 0;"<?= @$_REQUEST['wg_id'] > 0 ? " checked" : ""?>>
+			<input type="checkbox" name="bib_workgroup_restrict" id="restrict_elt" value="1" style="vertical-align: middle" onclick="document.getElementById('maintable').className = this.checked? '' : 'hide_workgroup';" style="margin: 0; padding: 0;"<?= @$_REQUEST['wg_id'] > 0 ? " checked" : ""?>>
 			<label for=restrict_elt>Restrict access</label>
 		</div>
 		<div class="resource workgroup" style="margin:10px 0">
@@ -295,13 +317,13 @@ function add_note(e) {
 	<div class="separator_row" style="margin:20px 0"></div>
 
 	<div>
-		<input type="checkbox" name="use_as_defaults" id="defaults_elt" value="1" style="margin: 0; padding: 0;"<?= $addRecDefaults ? " checked" : ""?>>
-		<label for=restrict_elt>Set as defaults</label>
+		<input type="checkbox" name="use_as_defaults" id="defaults_elt" value="1" style="margin: 0; padding: 0; vertical-align: middle;"<?= $addRecDefaults ? " checked" : ""?>>
+		<label for=restrict_elt title="Default to these values for future additions (until changed)">Set as defaults</label>
 	</div>
 	<div>
 		<input type="button" style="font-weight: bold;" value="Add" onclick="add_note(event);">
 		&nbsp;&nbsp;
-		<input type="button" value="Cancel" onclick="window.close();" id="note_cancel">
+		<input type="button" value="Cancel" onclick="cancelAdd(event);" id="note_cancel">
 	</div
 
 </body>
