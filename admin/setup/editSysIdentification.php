@@ -1,13 +1,12 @@
 <?php
 
 	// Edit the Heurist database identification record in sysIdentification table
-	// Ian Johnson 11 Jan 2010
+	// Ian Johnson 11 Jan 2010, rev. July 2011
 	// Copyright (C) 2010 University of Sydney, Digital Innovation Unit
 	// Coded with NuSphere PHP-Ed
 
-    // TO DO: This fucntion needs to go directly to edit mode ('u') by passing the dispaly of the (single)
-    // database record in this table.
-
+    // TO DO: Replace this function with a form based on our Javascript libraries, remove Nusphere dependancy
+    
 	require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 	require_once(dirname(__FILE__)."/../../external/nusphere/config.inc.php");
 	require_once(dirname(__FILE__)."/../../external/nusphere/db_utils.inc");
@@ -52,21 +51,25 @@
 	FLD_INPUT_SZ => 7, FLD_INPUT_MAXLEN => 5, FLD_INPUT_DFLT => '',
 	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'Numeric',
 	FLD_DATABASE => 'sys_ID'),
+    
 	'f1' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Database Registration ID (0=unreg.)', FLD_DISPLAY_SZ => 7,
 	FLD_INPUT => False, FLD_INPUT_TYPE => 'text',
 	FLD_INPUT_SZ => 7, FLD_INPUT_MAXLEN => 10, FLD_INPUT_DFLT => '',
 	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'Numeric',
 	FLD_DATABASE => 'sys_dbRegisteredID'),
+    
 	'f2' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Database Version', FLD_DISPLAY_SZ => 7,
 	FLD_INPUT => False, FLD_INPUT_TYPE => 'text',
 	FLD_INPUT_SZ => 7, FLD_INPUT_MAXLEN => 5, FLD_INPUT_DFLT => '',
 	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'Numeric',
 	FLD_DATABASE => 'sys_dbVersion'),
+    
 	'f3' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Database Subversion', FLD_DISPLAY_SZ => 7,
 	FLD_INPUT => False, FLD_INPUT_TYPE => 'text',
 	FLD_INPUT_SZ => 7, FLD_INPUT_MAXLEN => 5, FLD_INPUT_DFLT => '',
 	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'Numeric',
 	FLD_DATABASE => 'sys_dbSubVersion'),
+    
 	'f4' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Database Sub-SubVersion', FLD_DISPLAY_SZ => 7,
 	FLD_INPUT => False, FLD_INPUT_TYPE => 'text',
 	FLD_INPUT_SZ => 7, FLD_INPUT_MAXLEN => 5, FLD_INPUT_DFLT => '',
@@ -74,104 +77,125 @@
 	FLD_DATABASE => 'sys_dbSubSubVersion'),
 
 	// These fields are editable by adminstrator, FLD_INPUT => True
-	'f5' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'IMap Server for incoming emails to be archived', FLD_DISPLAY_SZ => 100,
+    'f5' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Display name (more informative than DB name at top of page)', FLD_DISPLAY_SZ => 50,
+    FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
+    FLD_INPUT_SZ => 30, FLD_INPUT_MAXLEN => 193, FLD_INPUT_DFLT => '',
+    FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
+    FLD_DATABASE => 'sys_dbName'),
+    
+    'f6' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Name/insitution of owner (or URL to owner information)', FLD_DISPLAY_SZ => 100,
+    FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
+    FLD_INPUT_SZ => 50, FLD_INPUT_MAXLEN => 751, FLD_INPUT_DFLT => '',
+    FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
+    FLD_DATABASE => 'sys_dbOwner'),
+    
+    'f7' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Database rights statement (or URL to rights statement)', FLD_DISPLAY_SZ => 100,
+    FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
+    FLD_INPUT_SZ => 80, FLD_INPUT_MAXLEN => 1000, FLD_INPUT_DFLT => 'Creative Commons Share Alike',
+    FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
+    FLD_DATABASE => 'sys_dbRights'),
+    
+    'f8' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Description of the database/content up to 1Kb (may reference a URL)', FLD_DISPLAY_SZ => 100,
+    FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
+    FLD_INPUT_SZ => 100, FLD_INPUT_MAXLEN => 1000, FLD_INPUT_DFLT => 'Please enter a description here ...',
+    FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
+    FLD_DATABASE => 'sys_dbDescription'),
+    
+    'f9' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'ID of Group owning database (>0, default 1)', FLD_DISPLAY_SZ => 7,
+    FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
+    FLD_INPUT_SZ => 3, FLD_INPUT_MAXLEN => 10, FLD_INPUT_DFLT => '1',
+    FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'Numeric',
+    FLD_DATABASE => 'sys_OwnerGroupId'),
+    
+    'f10' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Set 1 to restrict access to group owning database', FLD_DISPLAY_SZ => 7,
+    FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
+    FLD_INPUT_SZ => 1, FLD_INPUT_MAXLEN => 1, FLD_INPUT_DFLT => '0',
+    FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'Numeric',
+    FLD_DATABASE => 'sys_RestrictAccessToOwnerGroup'),
+    
+    'f11' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Allow online registration as user (confirmed by SysAdmin) 0=no, 1=allow', FLD_DISPLAY_SZ => 7,
+    FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
+    FLD_INPUT_SZ => 1, FLD_INPUT_MAXLEN => 1, FLD_INPUT_DFLT => '',
+    FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'Numeric',
+    FLD_DATABASE => 'sys_AllowRegistration'),
+    
+    'f12' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Default owner group # for new records', FLD_DISPLAY_SZ => 7,
+    FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
+    FLD_INPUT_SZ => 3, FLD_INPUT_MAXLEN => 4, FLD_INPUT_DFLT => '0',
+    FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'Numeric',
+    FLD_DATABASE => 'sys_NewRecOwnerGrpID'),
+    
+    'f13' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Non-owner default new record visibility - viewable, hidden', FLD_DISPLAY_SZ => 100,
+    FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
+    FLD_INPUT_SZ => 8, FLD_INPUT_MAXLEN => 25, FLD_INPUT_DFLT => '',
+    FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'viewable, hidden',
+    FLD_DATABASE => 'sys_NewRecAccess'),
+
+    'f14' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Directory for uploaded files (full path, overrides default if non-blank)', FLD_DISPLAY_SZ => 100,
+    FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
+    FLD_INPUT_SZ => 50, FLD_INPUT_MAXLEN => 385, FLD_INPUT_DFLT => '',
+    FLD_INPUT_NOTEMPTY => false, FLD_INPUT_VALIDATION => '',
+    FLD_DATABASE => 'sys_UploadDirectory'),     // THIS ONE NOT ALLOWING BLANK  ????? 
+    
+    'f15' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Additional folders containing files for indexing (FieldHelper compatibility)', FLD_DISPLAY_SZ => 100,
+    FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
+    FLD_INPUT_SZ => 100, FLD_INPUT_MAXLEN => 1000, FLD_INPUT_DFLT => '',
+    FLD_INPUT_NOTEMPTY => false, FLD_INPUT_VALIDATION => '',
+    FLD_DATABASE => 'sys_MediaFolders'),  // THIS ONE NOT ALLOWING BLANK  ?????
+
+    'f16' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Carry out nightly URL validation (can overload targets), 0=no, 1=yes', FLD_DISPLAY_SZ => 7,
+    FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
+    FLD_INPUT_SZ => 2, FLD_INPUT_MAXLEN => 5, FLD_INPUT_DFLT => '1',
+    FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'Numeric',
+    FLD_DATABASE => 'sys_URLCheckFlag'),
+    
+    'f17' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'IMap Server for incoming emails to be archived', FLD_DISPLAY_SZ => 100,
+    FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
+    FLD_INPUT_SZ => 30, FLD_INPUT_MAXLEN => 301, FLD_INPUT_DFLT => '',
+    FLD_INPUT_NOTEMPTY => False, FLD_INPUT_VALIDATION => '',
+    FLD_DATABASE => 'sys_eMailImapServer'),      // THIS ONE NOT ALLOWING BLANK  ????? 
+    
+    'f18' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Port for incoming mail', FLD_DISPLAY_SZ => 100,
+    FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
+    FLD_INPUT_SZ => 6, FLD_INPUT_MAXLEN => 16, FLD_INPUT_DFLT => '',
+    FLD_INPUT_NOTEMPTY => False, FLD_INPUT_VALIDATION => '',
+    FLD_DATABASE => 'sys_eMailImapPort'),   // THIS ONE NOT ALLOWING BLANK  ????? 
+    
+    'f19' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Protocol for incoming mail', FLD_DISPLAY_SZ => 100,
 	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 60, FLD_INPUT_MAXLEN => 301, FLD_INPUT_DFLT => '',
+	FLD_INPUT_SZ => 6, FLD_INPUT_MAXLEN => 16, FLD_INPUT_DFLT => '',
 	FLD_INPUT_NOTEMPTY => False, FLD_INPUT_VALIDATION => '',
-	FLD_DATABASE => 'sys_eMailImapServer'),
-	'f6' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Port for incoming mail', FLD_DISPLAY_SZ => 100,
+	FLD_DATABASE => 'sys_eMailImapProtocol'),   // THIS ONE NOT ALLOWING BLANK  ????? 
+    
+	'f20' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'IMap Username for incoming mail', FLD_DISPLAY_SZ => 100,
 	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 16, FLD_INPUT_MAXLEN => 16, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => False, FLD_INPUT_VALIDATION => '',
-	FLD_DATABASE => 'sys_eMailImapPort'),
-	'f7' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Protocol for incoming mail', FLD_DISPLAY_SZ => 100,
-	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 16, FLD_INPUT_MAXLEN => 16, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => False, FLD_INPUT_VALIDATION => '',
-	FLD_DATABASE => 'sys_eMailImapProtocol'),
-	'f8' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'IMap Username for incoming mail', FLD_DISPLAY_SZ => 100,
-	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 20, FLD_INPUT_MAXLEN => 151, FLD_INPUT_DFLT => '',
+	FLD_INPUT_SZ => 10, FLD_INPUT_MAXLEN => 151, FLD_INPUT_DFLT => '',
 	FLD_INPUT_NOTEMPTY => False, FLD_INPUT_VALIDATION => '',
 	FLD_DATABASE => 'sys_eMailImapUsername'),
-	'f9' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'IMap Password for incoming mail', FLD_DISPLAY_SZ => 100,
+    
+	'f21' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'IMap Password for incoming mail', FLD_DISPLAY_SZ => 100,
 	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 20, FLD_INPUT_MAXLEN => 61, FLD_INPUT_DFLT => '',
+	FLD_INPUT_SZ => 10, FLD_INPUT_MAXLEN => 61, FLD_INPUT_DFLT => '',
 	FLD_INPUT_NOTEMPTY => False, FLD_INPUT_VALIDATION => '',
-	FLD_DATABASE => 'sys_eMailImapPassword'),
-	'f10' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Database for access control tables (blank = self)', FLD_DISPLAY_SZ => 100,
+	FLD_DATABASE => 'sys_eMailImapPassword'),  // THIS ONE NOT ALLOWING BLANK  ????? 
+    
+	'f22' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Database for access control tables (blank = sysUGrps table in this database)', FLD_DISPLAY_SZ => 100,
 	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 40, FLD_INPUT_MAXLEN => 193, FLD_INPUT_DFLT => '',
+	FLD_INPUT_SZ => 20, FLD_INPUT_MAXLEN => 193, FLD_INPUT_DFLT => '',
 	FLD_INPUT_NOTEMPTY => False, FLD_INPUT_VALIDATION => '',
 	FLD_DATABASE => 'sys_UGrpsDatabase'),
-	'f11' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'ID of Group owning database (>0, default 1)', FLD_DISPLAY_SZ => 7,
-	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 3, FLD_INPUT_MAXLEN => 10, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'Numeric',
-	FLD_DATABASE => 'sys_OwnerGroupId'),
-	'f12' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Set 1 to restrict access to group owning database', FLD_DISPLAY_SZ => 7,
-	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 2, FLD_INPUT_MAXLEN => 5, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'Numeric',
-	FLD_DATABASE => 'sys_RestrictAccessToOwnerGroup'),
-	'f13' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Display name for the database (generally longer than DB name)', FLD_DISPLAY_SZ => 50,
-	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 50, FLD_INPUT_MAXLEN => 193, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
-	FLD_DATABASE => 'sys_dbName'),
-	'f14' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Name/insitution of owner (or URL to owner information)', FLD_DISPLAY_SZ => 100,
-	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 50, FLD_INPUT_MAXLEN => 751, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
-	FLD_DATABASE => 'sys_dbOwner'),
-	'f15' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Database rights statement (or URL to rights statement)', FLD_DISPLAY_SZ => 100,
-	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 50, FLD_INPUT_MAXLEN => 1000, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
-	FLD_DATABASE => 'sys_dbRights'),
-	'f16' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Description of the database/content up to 1Kb (may reference a URL)', FLD_DISPLAY_SZ => 100,
-	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 100, FLD_INPUT_MAXLEN => 1000, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
-	FLD_DATABASE => 'sys_dbDescription'),
-	'f17' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Database with which defintions are to be kept in sync (not yet impl.)', FLD_DISPLAY_SZ => 100,
-	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
+    
+    // Not displayed, not yet implemented
+	'f23' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Database with which defintions are to be kept in sync (not yet impl.)', FLD_DISPLAY_SZ => 100,
+	FLD_INPUT => false, FLD_INPUT_TYPE => 'text',
 	FLD_INPUT_SZ => 2, FLD_INPUT_MAXLEN => 193, FLD_INPUT_DFLT => '',
 	FLD_INPUT_NOTEMPTY => False, FLD_INPUT_VALIDATION => '',
-	FLD_DATABASE => 'sys_SyncDefsWithDb'),  // THIS ONE NOT ALLOWING BLANK ?????
-	'f18' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => '0 = no, 1 = carry out nightly URL validity verification (can overload targets)', FLD_DISPLAY_SZ => 7,
-	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 2, FLD_INPUT_MAXLEN => 5, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'Numeric',
-	FLD_DATABASE => 'sys_URLCheckFlag'),
-	'f19' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Directory for uploaded files (full path, overrides default)', FLD_DISPLAY_SZ => 100,
-	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 50, FLD_INPUT_MAXLEN => 385, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => false, FLD_INPUT_VALIDATION => '',
-	FLD_DATABASE => 'sys_UploadDirectory'),
-	'f20' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Additional folders containing files for indexing (FieldHelper compatibility)', FLD_DISPLAY_SZ => 100,
-	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 100, FLD_INPUT_MAXLEN => 1000, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => false, FLD_INPUT_VALIDATION => '',
-	FLD_DATABASE => 'sys_MediaFolders'),  // THIS ONE NOT ALLOWING BLANK  ?????
-	'f21' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => '0 = no, 1 = allow online registration as user (confirmed by SysAdmin)', FLD_DISPLAY_SZ => 7,
-	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 2, FLD_INPUT_MAXLEN => 5, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'Numeric',
-	FLD_DATABASE => 'sys_AllowRegistration'),
-	'f22' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Default owner group # for new records', FLD_DISPLAY_SZ => 7,
-	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 3, FLD_INPUT_MAXLEN => 5, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'Numeric',
-	FLD_DATABASE => 'sys_NewRecOwnerGrpID'),
-	'f23' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Non-owner default new record visibility (viewable, hidden)', FLD_DISPLAY_SZ => 100,
-	FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
-	FLD_INPUT_SZ => 10, FLD_INPUT_MAXLEN => 25, FLD_INPUT_DFLT => '',
-	FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'viewable, hidden',
-	FLD_DATABASE => 'sys_NewRecAccess')
+	FLD_DATABASE => 'sys_SyncDefsWithDb')  // THIS ONE NOT ALLOWING BLANK ?????
+                                         
 	);
 
-
+    $f13_values = array('0' => 'viewable', '1' => 'hidden'); 
+    
 	$show_data = false;
 	$show_input = false;
 	$show_message = false;
@@ -387,7 +411,7 @@
 
 			function CheckRequiredFields(theForm) {
 				for (var i = 1; i < arguments.length; i++) {
-					var el = theForm.elements[arguments[i]];
+					var el = theForm.elements[arguments[i]-1]; //note: -1 added here by Ian based on forum post
 					if (el.value=="") {
 						alert("This field may not be empty");
 						el.focus();
@@ -399,11 +423,13 @@
 
 			function CheckForm(theForm) {
 				return (
-				CheckRequiredFields(theForm<?php echo isset($fld_indices_notempty) ? ", " . $fld_indices_notempty : "" ?>) &&
+				// removed to get this form to save - it complains about non-required fields being empty
+                // CheckRequiredFields(theForm<?php echo isset($fld_indices_notempty) ? ", " . $fld_indices_notempty : "" ?>) &&
 				CheckEmail(theForm<?php echo isset($fld_indices_Email) ? ", " . $fld_indices_Email : "" ?>) &&
 				CheckAlpha(theForm<?php echo isset($fld_indices_Alpha) ? ", " . $fld_indices_Alpha : "" ?>) &&
 				CheckAlphaNum(theForm<?php echo isset($fld_indices_AlphaNum) ? ", " . $fld_indices_AlphaNum : "" ?>) &&
-				CheckNumeric(theForm<?php echo isset($fld_indices_Numeric) ? ", " . $fld_indices_Numeric : "" ?>) &&
+                // removed to get this form to save - it complains about non-numeric fields not being numeric
+                // CheckNumeric(theForm<?php echo isset($fld_indices_Numeric) ? ", " . $fld_indices_Numeric : "" ?>) &&
 				CheckFloat(theForm<?php echo isset($fld_indices_Float) ? ", " . $fld_indices_Float : "" ?>) &&
 				CheckDate(theForm<?php echo isset($fld_indices_Date) ? ", " . $fld_indices_Date : "" ?>) &&
 				CheckTime(theForm<?php echo isset($fld_indices_Time) ? ", " . $fld_indices_Time: "" ?>)
@@ -439,7 +465,7 @@
 				action="">
 				<table border="0">
                 	<?php  // INPUT
-				    echo "<tr><td><h3>Heurist System Identification Record for db = $temp</h3></td></tr>";
+				    echo "<tr><td><h3>$temp : Properties</h3></td></tr>";
                 		foreach($fielddef as $fkey=>$fld) {
 							if ($fld[FLD_INPUT]) {
 								echo "<tr><td>$fld[FLD_DISPLAY]</td>";
