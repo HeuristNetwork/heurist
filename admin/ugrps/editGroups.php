@@ -87,8 +87,7 @@ $fielddef = array(
         FLD_INPUT_NOTEMPTY => false, FLD_INPUT_VALIDATION => '',
         FLD_DATABASE => 'ugr_URLs')
 );
-//$f3_values = array('0' => 'Usergroup', '1' => 'Workgroup', '2' => 'Ugradclass');
-$f3_values = array('Usergroup' => 'Usergroup', 'Workgroup' => 'Workgroup', 'Ugradclass' => 'Ugradclass');
+$f3_values = array('Workgroup' => 'Workgroup');
 
 $show_data = false;
 $show_input = false;
