@@ -31,9 +31,21 @@
 	return true;
   }
  </script>
+ 
+<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+<style type="text/css">
+h3, h3 span {
+	display: inline-block;
+	padding:0 0 10px 0;
+}
+Table tr td {
+	line-height:2em;
+}
+</style>
 </head>
 
-<body>
+<body class="popup">
 <?php
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
@@ -54,10 +66,9 @@ while ($row = mysql_fetch_assoc($res))
 	$bibs[$row['dtl_RecID']] = $row;
 
 ?>
-<div style="font-weight: bold;">
- Records with resource pointers to the wrong rec_RecTypeID
- &nbsp;&nbsp;
- <a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>(show all in search)</a>
+<div>
+    <h3>Records with resource pointers to the wrong rec_RecTypeID</h3>
+    <span><a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>(show all in search)</a></span>
 </div>
 <table>
 <?php
@@ -90,12 +101,12 @@ while ($row = mysql_fetch_assoc($res))
 	$bibs[$row['dtl_RecID']] = $row;
 
 ?>
-<div style="font-weight: bold;">
- Records with resource pointers to non-existent records
- &nbsp;&nbsp;
- <a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>(show all in search)</a>
- &nbsp;&nbsp;
- <a target=_new href='#' id=selected_link onclick="return open_selected();">(show selected in search)</a>
+<div>
+	<h3>Records with resource pointers to non-existent records</h3>
+    <span>
+    	<a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>(show all in search)</a>
+ 		<a target=_new href='#' id=selected_link onClick="return open_selected();">(show selected in search)</a>
+    </span>
 </div>
 <table>
 <?php

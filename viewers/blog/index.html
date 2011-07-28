@@ -129,7 +129,7 @@ $(document).ready(function() {
 		(group  &&  HCurrentUser.isInWorkgroup(group))) {
 		$("<input type='button' id='new-entry-button' value='New " + record_type.getName() + "'/>")
 			.click(function() { Blog.newEntry(); })
-			.insertBefore("#blog-owner");
+			.insertAfter("#blog-owner");
 	}
 
 	$("#spiel,#hide-spiel-link").hide();
@@ -185,30 +185,25 @@ function reload() {
 <div id=dbname ></div>
 <div id=sidebar>
 	<div class=banner>
-		<div id=add-fav><a id=add-fav-link href="../../records/add/addRecordPopup.php?addref=1&amp;k=Favourites">Add page to favourites</a></div>
+		<div id="add-fav"><a id=add-fav-link href="../../records/add/addRecordPopup.php?addref=1&amp;k=Favourites">Add page to favourites</a></div>
 	</div>
 
 	<div id="sidebar-inner">
-	<div id=right>
+	<div id="right">
 		<div class=detailRow>
 		Show<select id=record-type><option value=0 disabled>(search results)</option></select>
-		<input type="button" value="&lt;&lt; Back" onclick="history.go(-1);">
+		<input type="button" value="&lt;&lt; Back" onClick="history.go(-1);">
 		</div>
-		<div class=detailRow>
-			<div id=tags></div>
+		<div class="detailRow">
+			<div id="tags"></div>
 		</div>
-		<div class=detailRow>
-			<div id=archives><h4>Archives</h4></div>
+		<div class="detailRow">
+			<div id="archives"><h4>Archives</h4></div>
 		</div>
 	</div></div>
 </div>
-
-<div id=page>
-<div id=header></div>
-<div class=banner>
-	<h1 id=blog-owner></h1><div id=blog-selector>Other blogs <select id=blog-select><option selected>select...</option></select></div>
-	<div id=spiel-leader><strong>Heurist Blog: the blog with more ...</strong> <a id=show-spiel-link href="#">tell me</a><a id=hide-spiel-link href="#">hide</a></div>
-		 <div id=spiel title="click to hide">
+<div id=spiel-leader><strong>Heurist Blog: the blog with more ...</strong> <a id=show-spiel-link href="#">tell me</a><a id=hide-spiel-link href="#">hide</a>
+	<div id=spiel title="click to hide">
 		  <br>
 		  In most blogs a blog entry is just that - a blog entry, nothing more. In
 		  Heurist, a blog entry is a fully-fledged record in a Heurist database.
@@ -257,6 +252,18 @@ function reload() {
 		   For maximum control of a blog entry, click on 'Edit full record' link
 		  </p>
 		 </div>
+       </div>
+		 
+<div id=page>
+<div id=header></div>
+
+<div class=banner>
+	<div style="display:table">
+        <h1 id="blog-owner" class="tableCell"></h1>
+    </div>
+    <div id=blog-selector>Other blogs <select id=blog-select><option selected>select...</option></select></div>
+    
+	
 
 	</div>
 	<div id=page-inner>

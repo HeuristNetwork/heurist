@@ -36,16 +36,20 @@
 			header: "header",
 			headerSelected: "headerselected"
 			};
-			$( "#page-inner" ).accordion({
-				fillSpace: true,
+			$( "#sidebar-inner" ).accordion({
 				collapsible: true,
 				active:false,
 				icons: icons
 				});
-
-			$("iframe")	.attr('src','');
 		});
 
+	</script>
+    <script type="text/javascript">
+		function loadContent(url){
+			var recordFrame = document.getElementById("adminFrame"); 
+			recordFrame.src = top.HEURIST.basePath+"common/html/msgLoading.html";
+			setTimeout(function(){recordFrame.src = top.HEURIST.basePath+"admin/"+url;},500);
+		};
 	</script>
 <a id=home-link href="../index.php?db=[dbname!]">
 <div id=logo title="Click the logo at top left of any Heurist page to return to your Favourites"></div>
@@ -53,75 +57,74 @@
 <div id=version></div>
 <!-- database name -->
 <a id="dbSearch-link">
-<div id="dbname" >[dbname!] Heurist Database System Administration</div>
+<div id="dbname" >[dbname!] <span>Database Administration</span></div>
 </a>
-<div id="page">
-  <div id="page-inner" style="padding:0; position:absolute;top:5px; bottom:0px; left:10px;right:10px; overflow-y:hidden">
-   <!-- <div id="accordion">-->
-      <h3><a href="#">DATABASE: </a>Overall management of the database and its relation with other Heurist databases registered in the Heurist index at HeuristScholar.org</h3>
-      <div class="adminSection">
-        <ul class="menu">
-          <li><a href="setup/createNewDB.php" target="databaseframe" title="Create a new database with essential structure elements">New</a></li>
-          <li><a href="setup/registerDB.php?db=[dbname!]" target="databaseframe" title="Register this database with the Heurist Index">Register</a></li>
-<!--           <li><a href="rollback/rollbackRecords.php?db=[dbname!]" target="databaseframe">Rollback (NYA) (Selectively roll back the data in the database to a specific date and time) </a></li> -->
-          <li><a href="javascript:window.alert('Sorry, this feature has not been implemented yet');" target="databaseframe" title="Selectively roll back the data in the database to a specific date and time">Rollback</a></li>
-          <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
-          <li><a href="setup/editSysIdentification.php?db=[dbname!]" target="databaseframe" title="Edit the internal metadata describing the database and set some global behaviours">Properties</a></li>
-        </ul>
-        <div class="contentframe">
-          <iframe width="100%" height="100%" id="databaseframe" name="databaseframe" frameborder="0"></iframe>
-        </div>
-      </div>
-      <h3><a href="#">STRUCTURE: </a>Management of the database model which defines the types of data which can be recorded and the layout of data entry</h3>
-      <div class="adminSection">
-        <ul class="menu">
-          <li><a href="structure/manageRectypes.html?db=[dbname!]" target="structureframe" title="Add new / modify existing record types and their use of globally defined fields">Record types</a></li>
-          <li><a href="structure/manageDetailTypes.html?db=[dbname!]" target="structureframe" title="Direct access to the global field definitions">Field types</a></li>
-<!--           <li><a href="structure/editRectypeConstraints.php?db=[dbname!]" target="structureframe">Constraints (NYA)<!--  (Define constraints on the record types which can be related, and allowable relationship types)</a></li> -->
-		  <li><a href="javascript:window.alert('Sorry, this feature has not been implemented yet');" target="structureframe" title="Define constraints on the record types which can be related, and allowable relationship types">Constraints</a></li>
-          <li><a href="structure/editTerms.html?db=[dbname!]" target="structureframe" title="Define terms used for relationship types and for other enumerated fields">Terms</a></li>
-          <li><a href="setup/editMimetypes.php?db=[dbname!]" target="structureframe" title="Define the relationship between file extensions and mime type">Mime types</a></li>
-          <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
-          <li><a href="structure/selectDBForImport.php?db=[dbname!]" target="structureframe" title="Selectively import structural elements from other Heurist databases">Import defenitions</a></li>
-          <li><a href="structure/getDBStructure.php?db=[dbname!]" target="structureframe" title="Lists the record type and field definitions in a computer-readable form">Return as excahange format</a></li>
-          <li><a href="describe/listRectypeDescriptions.php?db=[dbname!]" target="structureframe" title="Display/print a formatted view of the database structure">Show structure</a></li>
-        </ul>
-        <div class="contentframe">
-        <iframe width="100%" height="100%" id="structureframe" name="structureframe" frameborder="0"></iframe>
-        </div>
-      </div>
-      <h3><a href="#">ACCESS: </a>Management of users and groups, the assignment of users to group and the assignment of group tags</h3>
-      <div class="adminSection">
-        <ul class="menu">
 
-          <li><a href="ugrps/manageUsers.html?db=[dbname!]" target="accessframe" title="Add and edit database users and usergroups, including authorization of new users">Manage users</a></li>
-          <li><a href="ugrps/manageGroups.html?db=[dbname!]" target="accessframe" title="Assign users to usergroups and set their roles">Manage groups</a></li>
-          <li><a href="ugrps/editGroupTags.php?db=[dbname!]" target="accessframe" title="Add and remove usergroup tags">Usergroup tags</a></li>
-          <li><a href="ugrps/quitGroupForSession.php?db=[dbname!]" target="accessframe" title="Exit a usergroup for this session to allow testing of non-group-members view">Exit usergroup</a></li>
-        </ul>
-        <div class="contentframe">
-        <iframe width="100%" height="100%" id="accessframe" name="accessframe" frameborder="0"></iframe>
-        </div>
-      </div>
-      <h3><a href="#">VERIFICATION: </a>Verification of the integrity of the database and various data-cleaning functions and utilities</h3>
+
+<!-- sidebar -->
+<div id="sidebar">
+	<div id="sidebar-inner">
+	<!-- <div id="accordion">-->
+      <h3><a href="#">DATABASE: </a>
+      <span class="description">Overall management of the database and its relation with other Heurist databases registered in the Heurist index at HeuristScholar.org</span></h3>
       <div class="adminSection">
-        <ul class="menu">
-          <li><a href="verification/recalcTitlesAllRecords.php?db=[dbname!]" target="verificationframe" title="Rebuilds the constructed record titles listed in search results, for all records">Rebuild titles</a></li>
-          <!-- : Also have capabuility for specific records and rectypes</p> -->
-          <li><a href="verification/listRecordPointerErrors.php?db=[dbname!]" target="verificationframe" title="Find record pointer which point to an incorrect record type or to nothing at all">Invalid pointers</a></li>
-          <li><a href="verification/listDuplicateRecords.php?fuzziness=10&amp;db=[dbname!]" target="verificationframe" title="Fuzzy search to identify records which might contain duplicate data">Duplicate records</a></li>
-          <li><a href="../search/search.html?q=_BROKEN_&amp;w=all&amp;db=[dbname!]" target="_blank" title="Show records with URLs which point to a non-existant or otherwise faulty address">Broken URLs</a></li>
-          <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
-          <li><a href="verification/checkXHTML.php?db=[dbname!]" target="verificationframe" title="Check the wysiwyg text fields in records and blog entries for structural errors">Wysiwyg text check</a></li>
-          <li><a href="verification/checkInvalidChars.php?db=[dbname!]"  target="verificationframe" title="Check the wysiwyg text fields for invalid characters">Invalid characters</a></li>
-          <li><a href="verification/cleanInvalidChars.php?db=[dbname!]" target="verificationframe" title="Attempt to clean up invalid characters in the wysiwyg text fields">Clean invalid characters</a></li>
+        <ul>
+          <li><a href="#" onClick="loadContent('setup/createNewDB.php')" title="Create a new database with essential structure elements">New Database</a></li>
+          <li><a href="#" onClick="loadContent('setup/registerDB.php?db=[dbname!]')" title="Register this database with the Heurist Index">Register</a></li>
+<!--           <li><a href="rollback/rollbackRecords.php?db=[dbname!]" target="databaseframe">Rollback (NYA) (Selectively roll back the data in the database to a specific date and time) </a></li> -->
+          <li><a href="javascript:window.alert('Sorry, this feature has not been implemented yet');" title="Selectively roll back the data in the database to a specific date and time">Rollback</a></li>
+          <li class="seperator"><a href="#" onClick="loadContent('setup/editSysIdentification.php?db=[dbname!]')" title="Edit the internal metadata describing the database and set some global behaviours">Properties</a></li>
         </ul>
-        <div class="contentframe">
-        <iframe width="100%" height="100%" id="verificationframe" name="verificationframe" frameborder="0"></iframe>
-        </div>
+      </div>
+      <h3><a href="#">STRUCTURE: </a>
+      <span class="description">Management of the database model which defines the types of data which can be recorded and the layout of data entry</span></h3>
+      <div class="adminSection">
+        <ul>
+          <li><a href="#" onClick="loadContent('structure/manageRectypes.html?db=[dbname!]')" title="Add new / modify existing record types and their use of globally defined fields">Record types</a></li>
+          <li><a href="#" onClick="loadContent('structure/manageDetailTypes.html?db=[dbname!]')" title="Direct access to the global field definitions">Field types</a></li>
+<!--           <li><a href="structure/editRectypeConstraints.php?db=[dbname!]" target="structureframe">Constraints (NYA)<!--  (Define constraints on the record types which can be related, and allowable relationship types)</a></li> -->
+		  <li><a href="javascript:window.alert('Sorry, this feature has not been implemented yet');" title="Define constraints on the record types which can be related, and allowable relationship types">Constraints</a></li>
+          <li><a href="#" onClick="loadContent('structure/editTerms.html?db=[dbname!]')" title="Define terms used for relationship types and for other enumerated fields">Terms</a></li>
+          <li><a href="#" onClick="loadContent('setup/editMimetypes.php?db=[dbname!]')" title="Define the relationship between file extensions and mime type">Mime types</a></li>
+          <li class="seperator"><a href="#" onClick="loadContent('structure/selectDBForImport.php?db=[dbname!]')" title="Selectively import structural elements from other Heurist databases">Import defenitions</a></li>
+          <li><a href="#" onClick="loadContent('structure/getDBStructure.php?db=[dbname!]')" title="Lists the record type and field definitions in a computer-readable form">Return as excahange format</a></li>
+          <li><a href="#" onClick="loadContent('describe/listRectypeDescriptions.php?db=[dbname!]')" title="Display/print a formatted view of the database structure">Show structure</a></li>
+        </ul>
+      </div>
+      <h3><a href="#">ACCESS: </a><span class="description">Management of users and groups, the assignment of users to group and the assignment of group tags</span></h3>
+      <div class="adminSection">
+        <ul>
+          <li><a href="#" onClick="loadContent('ugrps/manageUsers.html?db=[dbname!]')" title="Add and edit database users and usergroups, including authorization of new users">Manage users</a></li>
+          <li><a href="#" onClick="loadContent('ugrps/manageGroups.html?db=[dbname!]')" title="Assign users to usergroups and set their roles">Manage groups</a></li>
+          <li><a href="#" onClick="loadContent('ugrps/editGroupTags.php?db=[dbname!]')" title="Add and remove usergroup tags">Usergroup tags</a></li>
+          <li><a href="#" onClick="loadContent('ugrps/quitGroupForSession.php?db=[dbname!]')" title="Exit a usergroup for this session to allow testing of non-group-members view">Exit usergroup</a></li>
+        </ul>
+      </div>
+      <h3><a href="#">VERIFICATION: </a><span class="description">Verification of the integrity of the database and various data-cleaning functions and utilities</span></h3>
+      <div class="adminSection">
+        <ul>
+          <li><a href="#" onClick="loadContent('verification/recalcTitlesAllRecords.php?db=[dbname!]')" title="Rebuilds the constructed record titles listed in search results, for all records">Rebuild titles</a></li>
+          <!-- : Also have capabuility for specific records and rectypes</p> -->
+          <li><a href="#" onClick="loadContent('verification/listRecordPointerErrors.php?db=[dbname!]')" title="Find record pointer which point to an incorrect record type or to nothing at all">Invalid pointers</a></li>
+          <li><a href="#" onClick="loadContent('verification/listDuplicateRecords.php?fuzziness=10&amp;db=[dbname!]')" title="Fuzzy search to identify records which might contain duplicate data">Duplicate records</a></li>
+          <li><a href="../search/search.html?q=_BROKEN_&amp;w=all&amp;db=[dbname!]" target="_blank" title="Show records with URLs which point to a non-existant or otherwise faulty address">Broken URLs</a></li>
+          <li class="seperator"><a href="#" onClick="loadContent('verification/checkXHTML.php?db=[dbname!]')" title="Check the wysiwyg text fields in records and blog entries for structural errors">Wysiwyg text check</a></li>
+          <li><a href="#" onClick="loadContent('verification/checkInvalidChars.php?db=[dbname!]')"  title="Check the wysiwyg text fields for invalid characters">Invalid characters</a></li>
+          <li><a href="#" onClick="loadContent('verification/cleanInvalidChars.php?db=[dbname!]')" title="Attempt to clean up invalid characters in the wysiwyg text fields">Clean invalid characters</a></li>
+        </ul>
       </div>
     <!--</div>-->
     <!-- end accordion -->
+	</div>
+</div>
+<!-- end sidebar -->
+
+
+<div id="page">
+  <div id="page-inner">
+        <div class="contentframe">
+        <iframe width="100%" height="100%" id="adminFrame" name="adminFrame" frameborder="0" src="../common/html/msgWelcomeAdmin.html"></iframe>
+        </div>
   </div>
 </div>
 </body>

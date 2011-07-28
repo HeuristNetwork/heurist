@@ -21,7 +21,7 @@ if (! is_logged_in()) {
 	header('Location: ' . BASE_PATH);
 	return;
 } else if (! is_admin()) {
-	print "<html><head><link rel='stylesheet' type='text/css' href='../../common/css/global.css'><link rel='stylesheet' type='text/css' href='../../common/css/admin.css'></head><body class='popup'>Workgroup tag administration is restricted to administrators only</body></html>";
+	print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>Workgroup tag administration is restricted to administrators only</span></div></div></body></html>";
 	return;
 }
 

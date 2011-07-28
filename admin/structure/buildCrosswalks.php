@@ -48,8 +48,8 @@
 
 
 	// Requires admin user, access to definitions though get_definitions is open
-	if (!is_admin()) {
-		print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME."'>Log out</a></p></body></html>";
+	if (! is_admin()) {
+		 print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You do not have sufficient privileges to access this page</span><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
 		return;
 	}
 

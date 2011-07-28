@@ -1064,7 +1064,7 @@ div.hide .saved-search-subheading {
 }
 
 
-#add-record-link {
+#add-record-link, #new-entry-button {
 	background-image: url("../images/add-record-small.png");
     background-position: 2px 3px;
     background-repeat: no-repeat;
@@ -1073,7 +1073,7 @@ div.hide .saved-search-subheading {
     white-space: nowrap;
     margin: 0 0 0 20px;
 }
-#add-record-link:hover {text-decoration:none}
+#add-record-link:hover, #new-entry-button:hover {text-decoration:none}
 #add-record {
     border-left: 1px solid rgba(150, 150, 150, 0.3);
     display: inline-block;

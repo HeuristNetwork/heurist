@@ -3,14 +3,23 @@
 	padding: 0 6px;
 }
 h3 {
-	height:10px;
-	border-top:1px solid #6A7C99;
-	padding-top:10px
+	height:auto;
+	padding-bottom:10px;
+	padding-top:10px;
+	margin:10px 0 0 0;
 }
-#page {
-	left:10px;
-	position:absolute;
-	background-color:#DBDFE6 !important
+h3:hover, .ui-state-active, .ui-accordion-content-active {
+	background-color:RGBA(255,255,255,0.25)
+}
+
+h3 .description {
+	white-space: normal;
+	clear: both;
+	font-size: 10px;
+	font-weight: normal;
+	color: #999;
+	display: block;
+	padding: 2px 16px;
 }
 #page-inner {
 	right:0px;
@@ -18,7 +27,15 @@ h3 {
 	top:0;
 	overflow-y:auto;
 	bottom:0;
-	position:relative
+	position:absolute;
+	-webkit-border-radius:10px;
+	-moz-border-radius:10px;
+	border-radius:10px;
+}
+#adminFrame {
+	-webkit-border-radius:10px;
+	-moz-border-radius:10px;
+	border-radius:10px;
 }
 body.popup #page-inner {
 	top:40px;
@@ -26,14 +43,17 @@ body.popup #page-inner {
 	left:10px
 }
 #sidebar {
-	border:1px solid #6A7C99;
-	width:300px
+	width:170px
+}
+#page {
+	left:190px
 }
 #sidebar-inner {
 	top:10px
 }
 .adminSection {
 	position:relative;
+	margin-bottom:20px
 }
 .adminSection ul.menu li a {
 	color:#666;
@@ -51,13 +71,15 @@ body.popup #page-inner {
 	background-image:url(../images/sub_heading_saved_search.png);
 }
 .contentframe {
-	border: 1px solid #CCC;
-	background-color:#FFF;
+	border: none;
 	bottom: 0px;
 	left: 0px;
 	position: absolute;
 	right: 0px;
-	top: 25px;
+	top: 0;
+	-moz-border-radius:10px;
+	-webkit-border-radius:10px;
+	border-radius:10px;
 }
 #sidebar ul li a {
 	color: #515151;
@@ -71,7 +93,8 @@ body.popup #page-inner {
 	padding: 0 0 3px 1em;
 }
 #sidebar ul {
-	padding:0 0 0 6px
+	padding:0 0 20px 6px;
+	margin:0;
 }
 #sidebar ul h3 {
 	font-size: 11px;
@@ -119,7 +142,7 @@ html body.popup div div#page-inner div#modelTabs.yui-navset div.yui-navset div.y
 <td class="yui-dt1-col-grp_id yui-dt-col-grp_id" headers="yui-dt1-th-grp_id ">
 <td class="yui-dt1-col-yui-dt-col23 yui-dt-col-yui-dt-col23 yui-dt-last" headers="yui-dt1-th-yui-dt-col23 ">*/
 
-		.tooltip {
+.tooltip {
 	position:absolute;
 	z-index:999;
 	left:-9999px;
@@ -145,4 +168,27 @@ html body.popup div div#page-inner div#modelTabs.yui-navset div.yui-navset div.y
 }
 .yui-dt table {
 	width: 800;
+}
+.seperator {
+	margin-top:10px;
+}
+#dbname span {
+	margin:0 0 0 2em;
+}
+a#dbSearch-link div#dbname:hover {
+    background-color: transparent;
+    background-image: url("../images/b_database.png");
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: none;
+    padding-right: 10px;
+}
+.wysiwygCheckTable {
+	width:100%;
+	border-collapse:collapse;
+	
+}
+.wysiwygCheckTable td{
+	border-top:1px solid #CCC;
+	border-bottom:1px solid #CCC;
+	vertical-align:top;
 }

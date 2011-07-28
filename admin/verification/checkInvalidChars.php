@@ -29,24 +29,25 @@ $res = mysql_query("SELECT dtl_ID,dtl_RecID,dtl_Value,dty_Name ".
 while ($row = mysql_fetch_assoc($res)) {
 	array_push($textDetails, $row);
 }
-
-print "<table>\n<tr><td> checking details for invalid characters </td></tr>\n";
+print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body class='popup'><h2> checking details for invalid characters </h2>";
+print "<table>";
 
 $prevInvalidRecId = 0;
 foreach ($textDetails as $textDetail) {
 	if (! check($textDetail['dtl_Value'])){
 		if ($prevInvalidRecId < $textDetail['dtl_RecID']) {
-			print "<tr><td><a target=_blank href='".HEURIST_URL_BASE."records/edit/editRecord.html?bib_id=".
-					$textDetail['dtl_RecID'] . "&db=".HEURIST_DBNAME. "'> " . $textDetail['dtl_RecID']. "</a></td></tr>\n";
+			print "<tr><td style='padding-top:16px'><a target=_blank href='".HEURIST_URL_BASE."records/edit/editRecord.html?bib_id=".
+					$textDetail['dtl_RecID'] . "&db=".HEURIST_DBNAME. "'>Record ID:" . $textDetail['dtl_RecID']. "</a></td></tr>\n";
 			$prevInvalidRecId = $textDetail['dtl_RecID'];
 		}
-		print "<tr><td><pre>" . "Invalid characters found in ".$textDetail['dty_Name'] . " field :</pre></td></tr>\n";
-		print "<tr><td><pre>" . "Corrected text : ".htmlspecialchars( str_replace($invalidChars ,$replacements,$textDetail['dtl_Value'])) . "</pre></td></tr>\n";
-		print "<tr><td><pre>" . "Invalid text : ". htmlspecialchars($textDetail['dtl_Value']) . "</pre></td></tr>\n";
+		print "<tr><td>" . "Invalid characters found in ".$textDetail['dty_Name'] . " field :</td></tr>\n";
+		print "<tr><td>" . "<b>Corrected text : </b>".htmlspecialchars( str_replace($invalidChars ,$replacements,$textDetail['dtl_Value'])) . "</td></tr>\n";
+		print "<tr><td>" . "<b>Invalid text : </b>". htmlspecialchars($textDetail['dtl_Value']) . "</td></tr>\n";
 	}
 }
-print "<tr><td>finished</td></tr></table>\n";
-
+print "</table>\n";
+print "</body>";
+print "</html>";
 // END of OUTPUT
 
 

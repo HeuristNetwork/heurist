@@ -19,7 +19,7 @@
 		return;
 	}
 	if(!is_admin()) {
-		print "<html><body><p>You need to be a system administrator to create a new database</p><p><a href=".HEURIST_URL_BASE.">Return to Heurist</a></p></body></html>";
+		print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You need to be a system administrator to create a new database</span><p><a href=".HEURIST_URL_BASE." target='_top'>Return to Heurist</a></p></div></div></body></html>";
 		return;
 	}
 ?>

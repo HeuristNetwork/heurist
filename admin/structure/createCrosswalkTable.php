@@ -11,8 +11,8 @@
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	// Requires admin user, access to definitions though get_definitions is open
-	if (!is_admin()) {
-		print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME."'>Log out</a></p></body></html>";
+	if (! is_admin()) {
+		 print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You do not have sufficient privileges to access this page</span><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
 		return;
 	}
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
@@ -327,17 +327,17 @@ function _hideToolTip(){
 <script src="../../common/js/utilsUI.js"></script>
 <!-- <div id="page-inner" style="overflow:auto"> -->
 <br /><br />
-<a id="shortLog" onclick="showShortLog()" href="#">Show short log</a><br />
-<a id="detailedLog" onclick="showDetailedLog()" href="#">Show detailed log</a><br /><br />
+<a id="shortLog" onClick="showShortLog()" href="#">Show short log</a><br />
+<a id="detailedLog" onClick="showDetailedLog()" href="#">Show detailed log</a><br /><br />
 <div id="log"></div><br />
 <div id="log"></div>
-<button id="finish1" onclick="dropTempDB(true)">Finish crosswalk</button>
+<button id="finish1" onClick="dropTempDB(true)">Finish crosswalk</button>
 <div id="crosswalk" style="width:100%;margin:auto;">
 	<div id="topPagination"></div>
 	<div id="crosswalkTable"></div>
 	<div id="bottomPagination"></div>
 </div>
-<button id="finish2" onclick="dropTempDB(true)">Finish crosswalk</button>
+<button id="finish2" onClick="dropTempDB(true)">Finish crosswalk</button>
 <div class="tooltip" id="toolTip"><p>tooltip</p></div>
 
 <script type="text/javascript">

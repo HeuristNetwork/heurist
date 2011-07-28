@@ -27,7 +27,8 @@ while ($row = mysql_fetch_assoc($res)) {
 	array_push($woots, $row);
 }
 
-print "<table>\n";
+print "<head><link rel=stylesheet href='../../common/css/global.css'><link rel=stylesheet href='../../common/css/admin.css'></head><body class='popup'><h2>WYSIWYG text check</h2>";
+print "<table class='wysiwygCheckTable'>";
 
 foreach ($woots as $woot) {
 	$valid = true;
@@ -52,7 +53,7 @@ foreach ($woots as $woot) {
         print $woot["woot_Title"];
         print "</a></td>\n";
 
-		print "<td><pre>" . htmlspecialchars(join("\n", $errs)) . "</pre></td></tr>\n";
+		print "<td>" . htmlspecialchars(join("\n", $errs)) . "s</td></tr>\n";
 	}
 }
 
