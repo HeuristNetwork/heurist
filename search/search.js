@@ -1992,8 +1992,10 @@ top.HEURIST.search = {
 		if (recIDs_list.length == 0) {
 			top.HEURIST.search.selectBookmarkMessage("for notification");
 			return;
+		}else{
+			recIDs_list = recIDs_list.join(",");
 		}
-		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "search/actions/sendNotificationsPopup.php" + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : ""));
+		top.HEURIST.util.popupURL(window, top.HEURIST.baseURL+ "search/actions/sendNotificationsPopup.php?bib_ids=\""+recIDs_list+"\"" + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""));
 	},
 
 	addTagsPopup: function(reload) {
