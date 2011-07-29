@@ -1,7 +1,7 @@
 <?php
 
 /**
- * email_processing.php
+ * emailProcessor.php
  *
  * main script for scraping and parsing email import
  *
@@ -14,6 +14,11 @@
  * @package Heurist academic knowledge management system
  *
  **/
+
+ 
+// TODO: Needs a progress bar or counter as it takes soem time to complete
+
+// TO DO: Needs to use global concept nubmers in place of local codes for rectype/fields
 
 set_time_limit(0);
 
@@ -28,7 +33,7 @@ require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 $_POST["save-mode"] = "none";
 require_once(dirname(__FILE__).'/../../records/edit/saveRecordDetails.php');
 
-include_once 'emailprocessor.php';
+include_once 'classEmailProcessor.php';
 
 mysql_connection_db_overwrite(DATABASE);
 
@@ -50,6 +55,8 @@ if($email){
 //$senders.=',maxim.nikitin.work@gmail.com';
 //$senders='';
 */
+
+// TODO: This needs to be configred from data in the database
 
 $params = array();
 $params['sys_email_imap_server'] = 'imap.gmail.com';

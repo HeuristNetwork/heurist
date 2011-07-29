@@ -1,7 +1,7 @@
 <?php
 
 /**
- * emailprocessor.php
+ * classEmailProcessor.php
  *
  * EmailProcessor class, used to process emails by external callback procedure.
  *
@@ -15,7 +15,7 @@
  *
  **/
 
-include_once 'email.php';
+include_once 'classEmail.php';
 
 class EmailProcessor{
 

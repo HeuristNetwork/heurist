@@ -1,7 +1,7 @@
 <?php
 
 /**
- * emailattachement.php
+ * classEmailAttachement.php
  *
  * EmailAttachement class, used to store email attachement data.
  *

@@ -15,7 +15,7 @@
  *
  **/
 
-include_once 'emailattachment.php';
+include_once 'classEmailAttachment.php';
 
 class Email{
 

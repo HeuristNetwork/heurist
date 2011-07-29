@@ -180,10 +180,11 @@
 			</li>
 			<li class="logged-in-only"> <span id=advanced-menu-link class="logged-in-only"><b>Advanced</b></span>
 				<ul id="advanced-menu">
+                    <li><a href="../import/email/emailProcessingSetup.php?db=".HEURIST_DBNAME name="auto-popup" title="Harvest email from a designated IMAP email server (set in configuration)">Harvest email</a></li>
 					<li><a href="../import/hyperlinks/importHyperlinks.php" name="auto-popup" title="Import web links from a browser bookmarks file or an html web page file">Import hyperlinks</a></li>
 					<li><a href="../admin/profile/configureProfile.php?body_only&amp;bookmark_import=1" name="auto-popup" title="Settings for web links importer">Importer settings</a></li>
 					<li><a href="../import/importerFramework.php?format=BIB" name="auto-popup" title="Import bibliographic exchange format files">Import bibliographic</a></li>
-					<li><a href="../import/importerFramework.php?format=GEO" name="auto-popup" title="Import KML files">Import geographic</a></li>
+                    <li><a href="../import/importerFramework.php?format=GEO" name="auto-popup" title="Import KML files">Import geographic</a></li>
 					<li><a href="../import/delimited/importRecordsFromDelimited.html" onClick="this.href = top.HEURIST.baseURL +'import/delimited/importRecordsFromDelimited.html?db=' + database;" title="Import a delimited text file of data for one record type" target="_blank">Import delimited</a></li>
 					<!-- separator-->
 					<li class="admin-only"><a href="../import/delimited/updateDetailsFromDelimited.html" onClick="this.href = top.HEURIST.baseURL +'import/delimited/updateDetailsFromDelimited.html?db=' + database;" target="_blank" title="Update record details using delimited text" class="seperator">Detail updater</a></li>
@@ -232,7 +233,7 @@
 					<div class=search-type title="Personal Saved searches which search only the records you have bookmarked (your collection)" onClick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">My bookmarks</div>
 					<div class=content>
 						<div class=saved-search-subsubheading><a href="?ver=1&amp;w=bookmark&amp;q=tag:Favourites+OR+tag:Favorites&amp;label=Favourites" onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">My Favourites</a></div>
-						<div class=saved-search-subsubheading><a href='?ver=1&amp;w=bookmark&amp;q=sortby:-m%20after:"yesterday"&amp;label=Recently+modified' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">Recent changes</a></div>
+						<div class=saved-search-subsubheading><a href='?ver=1&amp;w=bookmark&amp;q=sortby:-m%20after:"1 week ago"&amp;label=Recently+modified' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">Recent changes</a></div>
 						<div class=saved-search-subsubheading><a id=search-by-tag-link href="#" onClick="top.HEURIST.search.showTagSearchLinks(); return false;">My Tags</a></div>
 						<div class=saved-search-subsubheading><a id=my-blog-link target="_blank" href="#">My Blog</a></div>
 						<div class=saved-search-subsubheading>Saved searches</div>
@@ -242,7 +243,7 @@
 				<div id=all-records-saved-searches class=hide>
 					<div class=search-type title="Personal Saved searches which search across all records in Heurist" onClick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">All records</div>
 					<div class=content>
-						<div class=saved-search-subsubheading><a href="?ver=1&amp;w=all&amp;q=sortby:-m&amp;label=Recently+modified" onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">Recent changes</a></div>
+						<div class=saved-search-subsubheading><a href="?ver=1&amp;w=all&amp;q=sortby:-m%20after:"1 week ago"&amp;label=Recently+modified" onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">Recent changes</a></div>
 						<div class=saved-search-subsubheading>Saved searches</div>
 						<div id=all-records-saved-searches-searches></div>
 					</div>
