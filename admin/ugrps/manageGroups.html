@@ -68,18 +68,23 @@
 
 		<div class="tooltip" id="toolTip2"><p>popup popup</p></div>
 
-	<div id="page-inner">			<div id="currUserInfo"></div>
-			<div id="toolbar" style="height:22px;">
-				<div id="divFilterByMembership" style="display: inline-block;">Show:<input type="radio" id="inputFilterByMembership1" name="inputFilterByMembership" value="all" style="display: inline-block;"><label id="lblForInputFilterByMembership1" style="display: inline-block;">&nbsp;All&nbsp;</label>
-<input type="radio" id="inputFilterByMembership2" name="inputFilterByMembership" value="any" checked="checked">&nbsp;My Groups&nbsp;
-<input type="radio" id="inputFilterByMembership3" name="inputFilterByMembership" value="admin">&nbsp;Admin&nbsp;
-<input type="radio" id="inputFilterByMembership4" name="inputFilterByMembership" value="member">&nbsp;Member&nbsp;&nbsp;&nbsp;
+	<div id="page-inner">			
+
+<p>To view users in a group or assign users to a group, click on the member count.</p>
+
+    <div id="currUserInfo"></div>
+	<div id="toolbar" style="height:22px;">
+
+<div id="divFilterByMembership" style="display: inline-block;">
+Show:&nbsp;&nbsp;&nbsp;<input type="radio" id="inputFilterByMembership1" name="inputFilterByMembership" value="all" style="display: inline-block;"><label id="lblForInputFilterByMembership1" style="display: inline-block;">&nbsp;All groups&nbsp;</label>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="radio" id="inputFilterByMembership2" name="inputFilterByMembership" value="any" checked="checked">&nbsp;My groups&nbsp;
+<input type="radio" id="inputFilterByMembership3" name="inputFilterByMembership" value="admin">&nbsp;Admin. only&nbsp;
+<input type="radio" id="inputFilterByMembership4" name="inputFilterByMembership" value="member">&nbsp;Member only&nbsp;&nbsp;
 				</div>
 				<div style="display: inline-block;">
-
-
-				<label>Filter by name:</label>
-				<input type="text" id="inputFilterByName" name="inputFilterByName" style="width:140px;" value=""/>
+				<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Filter by name:</label>
+				<input type="text" id="inputFilterByName" name="inputFilterByName" style="width:140px;padding-left: 20px;" value=""/>
 				</div>
 <!--
 				<div id="divFilterBySelection"><div class="labeldiv"><label>show:</label></div><input type="radio" id="inputFilterBySelection1" name="inputFilterBySelection" value="all" checked="checked"> All <input type="radio" id="inputFilterBySelection2" name="inputFilterBySelection" value="selonly"> Selected&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" id="btnClearSelection" value="clear" title="clear selection"/></div>

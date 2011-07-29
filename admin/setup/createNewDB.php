@@ -36,14 +36,20 @@
 	<body class="popup">
 		<div id="createDBForm">
 		<form action="createNewDB.php" method="POST" name="NewDBName">
-			Enter a name for the new database. The prefix "<?= HEURIST_DB_PREFIX ?>" will be prepended before creating the database.<br /><br />
-			<input type="text" maxlength="64" size="25" name="dbname">
-
-			<input type="submit" name="submit" value="Create database" style="font-weight: bold;" onClick="makeDB()" >
-			<br /><br /><div id="loading" style="display:none"><img src="loading.gif" width="16" height="16" /> <strong>&nbspCreating database, please wait...</strong></div>
+            <p>New databases are created on the current server. You will become the owner and administrator of the new database.
+             The database will be created with the prefix "<?= HEURIST_DB_PREFIX ?>" 
+            (all databases created by this installation of the software will have the same prefix).
+			<p>Enter a name for the new database:
+            <div style="margin-left: 40px;">
+                <input type="text" maxlength="64" size="25" name="dbname">
+			    <input type="submit" name="submit" value="Create database" style="font-weight: bold;" onClick="makeDB()" >
+			    </div>
+            <br /><br /><div id="loading" style="display:none"><img src="loading.gif" width="16" height="16" /> <strong>&nbspCreating database, please wait...</strong></div>
 		</form>
 		</div>
-	</body>
+     <br>&nbsp;<hr><br>&nbsp;<b>Suggested workflow for new databases:</b>
+     <?php include("includeNewDatabaseWorkflow.html"); ?>    
+    </body>
 </html>
 
 <?php

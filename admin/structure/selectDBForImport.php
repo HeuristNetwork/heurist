@@ -36,6 +36,11 @@ after selection, 26-05-2011, by Juan Adriaanse
 <div id="page-inner" style="overflow:auto">
 
 <div id="statusMsg"><img src="../setup/loading.gif" width="16" height="16" /> &nbspDownloading database list...</div>
+
+The list below shows all databases registered with the HeuristScholar.org Index database. 
+Use the filter to locate a specific term in the name or title. <br>
+Click the Crosswalk icon on the right to view available record types in that database. 
+If none are shown, you already have all the record types in that database.<br><br>
 <div class="markup" id="filterDiv" style="display:none">
 	<label for="filter">Filter:</label> <input type="text" id="filter" value="">
 	<div id="tbl"></div>

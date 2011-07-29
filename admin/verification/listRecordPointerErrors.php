@@ -66,9 +66,16 @@ while ($row = mysql_fetch_assoc($res))
 	$bibs[$row['dtl_RecID']] = $row;
 
 ?>
+<h2>Invalid pointer check</h2>
+
+These checks look for invalid record pointers within the Heurist database. These should arise rarely.
+<p> Click the hyperlinked number at the start of each row to open an edit form on that record. Look for pointer fields which do not display data or dispaly a warning.
+
+<hr>
+
 <div>
     <h3>Records with record pointers to the wrong rec_RecTypeID</h3>
-    <span><a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>(show all in search)</a></span>
+    <span><a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>(show results as search)</a></span>
 </div>
 <table>
 <?php
@@ -84,6 +91,8 @@ foreach ($bibs as $row) {
 }
 ?>
 </table>
+[end of list]
+<p>
 
 <hr>
 
@@ -104,8 +113,8 @@ while ($row = mysql_fetch_assoc($res))
 <div>
 	<h3>Records with record pointers to non-existent records</h3>
     <span>
-    	<a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>(show all in search)</a>
- 		<a target=_new href='#' id=selected_link onClick="return open_selected();">(show selected in search)</a>
+    	<a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>(show results as search)</a>
+ 		<a target=_new href='#' id=selected_link onClick="return open_selected();">(show selected as search)</a>
     </span>
 </div>
 <table>
@@ -121,10 +130,8 @@ foreach ($bibs as $row) {
 <?php
 }
 print "</table>\n";
-
-
-
 ?>
-</body>
+[end of list]
+<p><hr></body>
 </html>
 

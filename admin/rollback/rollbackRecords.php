@@ -31,7 +31,9 @@
 		$(".record .detail-row:even").addClass("shade");
 	});
  </script>
- <h1>Record rollback</h1>
+ <h3>Record rollback</h3>
+ 
+<h2>Warning! This function not yet debugged</h2>
 <?php
 
 define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant

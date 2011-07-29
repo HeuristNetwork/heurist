@@ -118,44 +118,57 @@
 
 			<div>
 				<div id="pnlFilterByGroup">
-						<label>Enter 3+ chars to filter group list:</label>
-							<input type="text" id="inputFilterGroup" style="width:40px;" value=""/>
-						<label>Filter users by group:</label>
-							<select id="inputFilterByGroup" size="1" style="width:138px">
-								<option value="all">all groups</option>
-							</select>
+                        <label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Filter by group:</label>
+                            <select id="inputFilterByGroup" size="1" style="width:138px">
+                                <option value="all">all groups</option>
+                            </select>
+						<!-- Too many bells and whistles, really confusing, will never have more than a few groups
+                        <label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Filter pulldown:</label>
+						<input type="text" id="inputFilterGroup"  style="width:40px;" value=""/> (3+ characters)
+                        -->
 				</div>
+                
 				<div id="pnlGroupTitle" style="display:none;">
 					<h2 id="lblGroupTitle"></h2>
 				</div>
-				<div  id="pnlFilterByRole" style="display:none;">
-					<label style="width:120px;display:inline-block;text-align:right">Filter users by role:</label>
+                
+                <div  id="pnlFilterByRole" style="display:none;">
+					<br>
+                    <label style="width:120px;display:inline-block;text-align:right">Filter by role:</label>
 					<select id="inputFilterByRole" name="inputFilterByRole" size="1" style="width:75px">
 						<option value="all">all roles</option>
 						<option value="admin">admin</option>
 						<option value="member">member</option>
 						<!-- <option value="invited">invited</option>
 						<option value="request">request</option> -->
-					</select>
+                	</select>
 				</div>
+               
 			</div>
-
+            
+            <p>
+            
 			<div id="toolbar2">
 
-				<label style="width:120px;display:inline-block;text-align:right">Filter users by name:</label>
+				<label style="width:120px;display:inline-block;text-align:right">Filter by name:</label>
 					<input type="text" id="inputFilterByName" style="width:140px;" value=""/>
 
 				<div id="divFilterByEnable" class="listing">
-					<label>Show:</label>
-<input type="radio" id="inputFilterByEnable1" name="inputFilterByDisbale" value="all" checked="checked"/>&nbsp;All&nbsp;
-<input type="radio" id="inputFilterByEnable2" name="inputFilterByDisbale" value="disbledonly"/> Disabled
+					<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                    <input type="radio" id="inputFilterByEnable1" name="inputFilterByDisbale" 
+                            value="all" checked="checked"/>&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;
+                    <input type="radio" id="inputFilterByEnable2" name="inputFilterByDisbale" 
+                            value="disbledonly"/> &nbsp;&nbsp;Inactive
 				</div>
 
 				<div id="divFilterBySelection" class="selection">
 					<label>Show:</label>
-<input type="radio" id="inputFilterBySelection1" name="inputFilterBySelection" value="all" checked="checked"/>&nbsp;All&nbsp;
-<input type="radio" id="inputFilterBySelection2" name="inputFilterBySelection" value="selonly"/> Selected
-<!--&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" id="btnClearSelection" value="clear" title="clear selection"/> -->
+                    <input type="radio" id="inputFilterBySelection1" 
+                            name="inputFilterBySelection" value="all" checked="checked"/>&nbsp;All&nbsp;
+                    <input type="radio" id="inputFilterBySelection2" 
+                            name="inputFilterBySelection" value="selonly"/> Selected
+
+                <!--&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" id="btnClearSelection" value="clear" title="clear selection"/> -->
 				</div>
 
 			</div>

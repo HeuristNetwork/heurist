@@ -106,7 +106,9 @@ foreach ($dupes as $typekey => $subarr) {
 }
 
 ?><html>
-<body>
+<body>    
+<h3>DUPLICATE RECORDS SEARCH</h3>
+
 <form>
 Select fuzziness: <select name="fuzziness" id="fuzziness" onchange="form.submit();">
 <option value=3>3</option>
@@ -136,7 +138,7 @@ characters of metaphone must match
 <?php
   unset($_REQUEST['personmatch']);
 
-print '<div>' . count($dupes) . ' potential groups of duplicates</div><hr>';
+print '<p><hr><div><p>There are <b>' . count($dupes) . '</b> potential groups of duplicates</div>';
 
 foreach ($dupes as $rectype => $subarr) {
     foreach ($subarr as $index => $key) {

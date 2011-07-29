@@ -65,53 +65,76 @@
 <div id="sidebar">
 	<div id="sidebar-inner">
 	<!-- <div id="accordion">-->
+
       <h3><a href="#">DATABASE: </a>
       <span class="description">Overall management of the database and its relation with other Heurist databases registered in the Heurist index at HeuristScholar.org</span></h3>
       <div class="adminSection">
         <ul>
-          <li><a href="#" onClick="loadContent('setup/createNewDB.php')" title="Create a new database with essential structure elements">New Database</a></li>
-          <li><a href="#" onClick="loadContent('setup/registerDB.php?db=[dbname!]')" title="Register this database with the Heurist Index">Register</a></li>
-<!--           <li><a href="rollback/rollbackRecords.php?db=[dbname!]" target="databaseframe">Rollback (NYA) (Selectively roll back the data in the database to a specific date and time) </a></li> -->
-          <li><a href="javascript:window.alert('Sorry, this feature has not been implemented yet');" title="Selectively roll back the data in the database to a specific date and time">Rollback</a></li>
-          <li class="seperator"><a href="#" onClick="loadContent('setup/editSysIdentification.php?db=[dbname!]')" title="Edit the internal metadata describing the database and set some global behaviours">Properties</a></li>
+          <li><a href="#" onClick="loadContent('setup/createNewDB.php')" 
+            type="Create a new database with essential structure elements">New Database</a></li>
+          <li class="seperator"><a href="#" onClick="loadContent('setup/editSysIdentification.php?db=[dbname!]')" 
+            title="Edit the internal metadata describing the database and set some global behaviours">Properties</a></li>
+          <li class="seperator"><a href="#" onClick="loadContent('setup/registerDB.php?db=[dbname!]')" 
+            title="Register this database with the Heurist Index">Register</a></li>
+          <li class="seperator"><a href="#" onClick="loadContent('rollback/rollbackRecords.php?db=[dbname!]')" 
+            title="Selectively roll back the data in the database to a specific date and time)">Rollback</a></li> 
         </ul>
       </div>
+      
       <h3><a href="#">STRUCTURE: </a>
       <span class="description">Management of the database model which defines the types of data which can be recorded and the layout of data entry</span></h3>
       <div class="adminSection">
         <ul>
-          <li><a href="#" onClick="loadContent('structure/manageRectypes.html?db=[dbname!]')" title="Add new / modify existing record types and their use of globally defined fields">Record types</a></li>
-          <li><a href="#" onClick="loadContent('structure/manageDetailTypes.html?db=[dbname!]')" title="Direct access to the global field definitions">Field types</a></li>
-<!--           <li><a href="structure/editRectypeConstraints.php?db=[dbname!]" target="structureframe">Constraints (NYA)<!--  (Define constraints on the record types which can be related, and allowable relationship types)</a></li> -->
-		  <li><a href="javascript:window.alert('Sorry, this feature has not been implemented yet');" title="Define constraints on the record types which can be related, and allowable relationship types">Constraints</a></li>
-          <li><a href="#" onClick="loadContent('structure/editTerms.html?db=[dbname!]')" title="Define terms used for relationship types and for other enumerated fields">Terms</a></li>
-          <li><a href="#" onClick="loadContent('setup/editMimetypes.php?db=[dbname!]')" title="Define the relationship between file extensions and mime type">Mime types</a></li>
-          <li class="seperator"><a href="#" onClick="loadContent('structure/selectDBForImport.php?db=[dbname!]')" title="Selectively import structural elements from other Heurist databases">Import defenitions</a></li>
-          <li><a href="#" onClick="loadContent('structure/getDBStructure.php?db=[dbname!]')" title="Lists the record type and field definitions in a computer-readable form">Return as excahange format</a></li>
-          <li><a href="#" onClick="loadContent('describe/listRectypeDescriptions.php?db=[dbname!]')" title="Display/print a formatted view of the database structure">Show structure</a></li>
-        </ul>
+          <li><a href="#" 
+            onClick="loadContent('structure/selectDBForImport.php?db=[dbname!]')" title="Selectively import structural elements from other Heurist databases">Import record types</a></li>
+          <li class="seperator"><a href="#" onClick="loadContent('structure/manageRectypes.html?db=[dbname!]')" title="Add new / modify existing record types and their use of globally defined fields">Record types</a></li>
+          <li class="seperator"><a href="#" 
+            onClick="loadContent('structure/manageDetailTypes.html?db=[dbname!]')" title="Direct access to the global field definitions">Field types</a></li>
+         <li class="seperator"><a href="#" 
+            onClick="loadContent('structure/editTerms.html?db=[dbname!]')" title="Define terms used for relationship types and for other enumerated fields">Terms</a></li>
+          <li  class="seperator"><a href="#"
+            onClick="loadContent('structure/editRectypeConstraints.html?db=[dbname!]')" title="Define constraints on the record types which can be related, and allowable relationship types">Constraints</a></li>
+          <li class="seperator"><a href="#" 
+            onClick="loadContent('describe/listRectypeDescriptions.php?db=[dbname!]')" title="Display/print a formatted view of the database structure">Structure (human readable)</a></li>
+          <li class="seperator"><a href="#" 
+            onClick="loadContent('structure/getDBStructure.php?db=[dbname!]')" title="Lists the record type and field definitions in a computer-readable form">Structure (exchange format)</a></li>
+          <li class="seperator"><a href="#" 
+            onClick="loadContent('setup/editMimetypes.php?db=[dbname!]')" title="Define the relationship between file extensions and mime type">Mime types</a></li>
+          </ul>
       </div>
+      
+      
       <h3><a href="#">ACCESS: </a><span class="description">Management of users and groups, the assignment of users to group and the assignment of group tags</span></h3>
       <div class="adminSection">
         <ul>
           <li><a href="#" onClick="loadContent('ugrps/manageUsers.html?db=[dbname!]')" title="Add and edit database users and usergroups, including authorization of new users">Manage users</a></li>
-          <li><a href="#" onClick="loadContent('ugrps/manageGroups.html?db=[dbname!]')" title="Assign users to usergroups and set their roles">Manage groups</a></li>
-          <li><a href="#" onClick="loadContent('ugrps/editGroupTags.php?db=[dbname!]')" title="Add and remove usergroup tags">Usergroup tags</a></li>
-          <li><a href="#" onClick="loadContent('ugrps/quitGroupForSession.php?db=[dbname!]')" title="Exit a usergroup for this session to allow testing of non-group-members view">Exit usergroup</a></li>
+          <li class="seperator"><a href="#" 
+            onClick="loadContent('ugrps/manageGroups.html?db=[dbname!]')" title="Assign users to usergroups and set their roles">Manage groups</a></li>
+          <li class="seperator"><a href="#" 
+            onClick="loadContent('ugrps/editGroupTags.php?db=[dbname!]')" title="Add and remove workgroup tags">Workgroup tags</a></li>
+          <li class="seperator"><a href="#" 
+            onClick="loadContent('ugrps/quitGroupForSession.php?db=[dbname!]')" title="Quit a workgroup for this session to allow testing of non-group-members view">Quit workgroup temporarily</a></li>
         </ul>
       </div>
+      
+      
       <h3><a href="#">VERIFICATION: </a><span class="description">Verification of the integrity of the database and various data-cleaning functions and utilities</span></h3>
       <div class="adminSection">
         <ul>
           <li><a href="#" onClick="loadContent('verification/recalcTitlesAllRecords.php?db=[dbname!]')" title="Rebuilds the constructed record titles listed in search results, for all records">Rebuild titles</a></li>
           <!-- : Also have capabuility for specific records and rectypes</p> -->
-          <li><a href="#" onClick="loadContent('verification/listRecordPointerErrors.php?db=[dbname!]')" title="Find record pointer which point to an incorrect record type or to nothing at all">Invalid pointers</a></li>
-          <li><a href="#" onClick="loadContent('verification/listDuplicateRecords.php?fuzziness=10&amp;db=[dbname!]')" title="Fuzzy search to identify records which might contain duplicate data">Duplicate records</a></li>
-          <li><a href="../search/search.html?q=_BROKEN_&amp;w=all&amp;db=[dbname!]" target="_blank" title="Show records with URLs which point to a non-existant or otherwise faulty address">Broken URLs</a></li>
-          <li class="seperator"><a href="#" onClick="loadContent('verification/checkXHTML.php?db=[dbname!]')" title="Check the wysiwyg text fields in records and blog entries for structural errors">Wysiwyg text check</a></li>
-          <li><a href="#" onClick="loadContent('verification/checkInvalidChars.php?db=[dbname!]')"  title="Check the wysiwyg text fields for invalid characters">Invalid characters</a></li>
-          <li><a href="#" onClick="loadContent('verification/cleanInvalidChars.php?db=[dbname!]')" title="Attempt to clean up invalid characters in the wysiwyg text fields">Clean invalid characters</a></li>
-        </ul>
+          <li class="seperator"><a href="#" 
+                onClick="loadContent('verification/listRecordPointerErrors.php?db=[dbname!]')" title="Find record pointer which point to an incorrect record type or to nothing at all">Invalid pointer check</a></li>
+          <li class="seperator"><a href="#" 
+                onClick="loadContent('verification/listDuplicateRecords.php?fuzziness=10&amp;db=[dbname!]')" title="Fuzzy search to identify records which might contain duplicate data">Find duplicate records</a></li>
+          <li class="seperator"><a href="#" 
+                onClick="loadContent('verification/checkXHTML.php?db=[dbname!]')" title="Check the wysiwyg text fields in records and blog entries for structural errors">Wysiwyg text check</a></li>
+          <li class="seperator"><a href="#" 
+                onClick="loadContent('verification/checkInvalidChars.php?db=[dbname!]')"  title="Check the wysiwyg text fields for invalid characters">Invalid characters check</a></li>
+          <li class="seperator"><a href="#" 
+                onClick="loadContent('verification/cleanInvalidChars.php?db=[dbname!]')" title="Attempt to clean up invalid characters in the wysiwyg text fields">Clean invalid characters</a></li>
+         <li class="seperator"><a href="../search/search.html?q=_BROKEN_&amp;w=all&amp;db=[dbname!]" target="_blank" title="Show records with URLs which point to a non-existant or otherwise faulty address">Broken URL search</a></li>
+          </ul>
       </div>
     <!--</div>-->
     <!-- end accordion -->

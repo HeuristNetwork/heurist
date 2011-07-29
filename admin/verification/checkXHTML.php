@@ -27,7 +27,11 @@ while ($row = mysql_fetch_assoc($res)) {
 	array_push($woots, $row);
 }
 
-print "<head><link rel=stylesheet href='../../common/css/global.css'><link rel=stylesheet href='../../common/css/admin.css'></head><body class='popup'><h2>WYSIWYG text check</h2>";
+print "<head><link rel=stylesheet href='../../common/css/global.css'><link rel=stylesheet href='../../common/css/admin.css'></head><body class='popup'>
+<h2>WYSIWYG text check</h2>
+This function checks the WYSIWYG text data (personal and public notes, blog posts) for invalid XHTML<br>&nbsp;<p><hr>";
+
+
 print "<table class='wysiwygCheckTable'>";
 
 foreach ($woots as $woot) {
@@ -83,3 +87,9 @@ function check($html) {
 }
 
 ?>
+
+<p>
+&nbsp;
+<p>
+[end of check]
+</body>

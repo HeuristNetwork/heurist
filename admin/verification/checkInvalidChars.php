@@ -29,7 +29,10 @@ $res = mysql_query("SELECT dtl_ID,dtl_RecID,dtl_Value,dty_Name ".
 while ($row = mysql_fetch_assoc($res)) {
 	array_push($textDetails, $row);
 }
-print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body class='popup'><h2> checking details for invalid characters </h2>";
+print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body class='popup'>
+<h2> Checking field values for invalid characters </h2>
+This function checks for invalid characters in the data fields in the database records.<br>
+Use the following function to remove/clean up these characters, if found<br>&nbsp;<hr>";
 print "<table>";
 
 $prevInvalidRecId = 0;
@@ -46,6 +49,7 @@ foreach ($textDetails as $textDetail) {
 	}
 }
 print "</table>\n";
+print "<p>[end of check]";
 print "</body>";
 print "</html>";
 // END of OUTPUT

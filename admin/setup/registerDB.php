@@ -71,14 +71,14 @@ if(mysql_num_rows($res) == 0) {
 $row = mysql_fetch_row($res);
 $ownerGrpEmail = $row[0]; // Get owner group email address from UGrps table
 
+          
 // Check if database has already been registered
 if (isset($DBID) && ($DBID != 0)) { // already registered
 	echo '<script type="text/javascript">';
 	echo 'document.getElementById("registerDBForm").style.display = "none";';
 	echo '</script>';
-	echo "Database: ".DATABASE."<br /><br />";
-    echo "This database is already registered with ID: " . $DBID . "<br />";
-    echo "The database description is: ". $dbDescription . "<br /><br />";
+	echo "Database: <b>".DATABASE." </b><br><br>Already registered with <b>ID: " . $DBID . "</b>";
+    echo "<br><br>Description: \"<i>". $dbDescription . "</i>\"<br /><br />";
 } else {
 	echo '<script type="text/javascript">';
 	echo 'document.getElementById("registerDBForm").style.display = "block";';
@@ -143,7 +143,7 @@ function registerDatabase() {
 ?>
 <div id="changeDescriptionForm">
 	<form action="registerDB.php" method="POST" name="NewDBRegistration">
-		<input type="text" maxlength="64" size="25" name="dbDescription">
+		New description: <input type="text" maxlength="100" size="50" name="dbDescription">
 		<input type="submit" name="submitDescriptionChange" value="Change description" style="font-weight: bold;" onClick="changeDescription()" >
 	</form>
 </div>
@@ -175,5 +175,10 @@ if (isset($DBID) && ($DBID != 0) && !isset($_POST['dbDescription'])) {
 	echo '</script>';
 }
 ?>
+
+<br>&nbsp;<br>&nbsp;<br>&nbsp;<hr><br>&nbsp;<b>Suggested workflow for new databases:</b>
+
+<?php include("includeNewDatabaseWorkflow.html");  ?>
+
 </body>
 </html>

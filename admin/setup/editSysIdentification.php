@@ -465,7 +465,7 @@
 				action="">
 				<table border="0">
                 	<?php  // INPUT
-				    echo "<tr><td><h3>$temp : Properties</h3></td></tr>";
+				    echo "<tr><td><h3>Database properties:&nbsp;&nbsp;&nbsp;<i> $temp </i></h3></td></tr>";
                 		foreach($fielddef as $fkey=>$fld) {
 							if ($fld[FLD_INPUT]) {
 								echo "<tr><td>$fld[FLD_DISPLAY]</td>";
@@ -572,5 +572,9 @@
 				}
 			}
 			?>
+
+<hr><br>&nbsp;<b>Suggested workflow for new databases:</b>
+
+<?php include("includeNewDatabaseWorkflow.html");  ?>
 	</body>
 </html>

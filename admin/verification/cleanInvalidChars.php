@@ -13,8 +13,10 @@
 
 <?php
 
-define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
-require_once(dirname(__FILE__)."/../../common/config/initialise.php");
+define('dirname(__FILE__)', dirname(__FILE__));    // this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
+/* require_once(dirname(__FILE__)."/../../common/config/initialise.php"); */
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 mysql_connection_select(DATABASE);
 
@@ -28,7 +30,10 @@ while ($row = mysql_fetch_assoc($res)) {
 	array_push($textDetails, $row);
 }
 
-print "<table>\n<tr><td> checking details for invalid characters </td></tr>\n";
+print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body class='popup'>
+<h2> Cleaning invalid characters from field values</h2>
+This function removes invalid characters in the data fields in the database records.<br>
+&nbsp;<hr>";
 
 mysql_connection_overwrite(DATABASE);
 
@@ -51,10 +56,16 @@ foreach ($textDetails as $textDetail) {
 		}
 	}
 }
-print "<tr><td>finished</td></tr></table>\n";
 
-// END of OUTPUT
+?>
 
+<tr><td><p>[end of check]
+</table>
+</body>
+</html>
+
+
+<?php
 
 function check($text) {
 	global $invalidChars;

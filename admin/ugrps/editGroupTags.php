@@ -9,6 +9,7 @@
  * @todo
  **/
 
+ // TODO: Needs styling with title bar same as other pages in the admin menu - Irek
 ?>
 
 <?php
@@ -30,7 +31,7 @@ mysql_connection_db_select(DATABASE);
 ?>
 <html>
 <head>
- <title>Workgroup tags</title>
+ <title>Heurist workgroup tags addition/deletion/statistics</title>
 
  <link rel="stylesheet" href="<?=HEURIST_SITE_PATH?>common/css/lite.css">
  <style type="text/css">
@@ -56,18 +57,25 @@ function delete_tag(tag_ID) {
 <?php echo file_get_contents('menu.html'); ?>
 
 <div style="margin: 5px;">
-<h2>Workgroup tags</h2>
+<h2>Manage workgroup tags</h2>
 
+Unlike personal tags, which can be freely added by individual users while editing data and apply only to that user, 
+workgroup tags are a controlled list of shared tags established by a workgroup administrator.
+<br>The list below only shows workgroups of which you are an administrator. <br>
 <?php
 	if ($_REQUEST['deleting']) delete_tag();
 	else if ($_REQUEST['adding']) add_tags();
 ?>
 
-<div>To add new tags, type in boxes below and hit Enter.</div>
-<div>Deleting a tag deletes all references to that tag.</div>
-
-
 <form method="post">
+
+<br>Note: Deleting a tag deletes all references to that tag.
+<p>To add new tags, type a tag into the blank field at the end of a workgroup and hit [enter] or click 
+
+
+<input type="submit" value="Add workgroup tag(s)">
+<input type="hidden" name="adding" value="1">
+<input type="hidden" name="deleting" value="0" id="kwd_delete">
 
 <?php
 	$adminGroupList = array();
@@ -99,10 +107,6 @@ function delete_tag(tag_ID) {
 		print '</div>';
 	}
 ?>
-
-<input type="submit" value="Add workgroup tag(s)">
-<input type="hidden" name="adding" value="1">
-<input type="hidden" name="deleting" value="0" id="kwd_delete">
 
 </form>
 </div>
