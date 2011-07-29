@@ -12,14 +12,11 @@
  * @todo
  **/
 
-// TODO:  Irek -  NEEDS STYLING TO APPEAR IN POPUP
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
-/*
- require_once('../../php/modules/cred.php');
-
-if(!is_logged_in()){
-    header('Location: '.BASE_PATH.'login.php');
-    exit;
+if (! is_logged_in()) {
+    header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
+    return;
 }
         
 if(!is_admin()){
@@ -27,22 +24,18 @@ if(!is_admin()){
     exit;
 }
 
-require_once('../../php/modules/db.php');
-require_once('../../legacy/.ht_stdefs');
-*/
-
 ?>
 
 <html>
 
 <head>
  <style type="text/css"> </style>
- <title>Heurist Email harvester setup/launch</title>
+ <title>Heurist Email harvester</title>
 </head>
 
-<body>
+<body class="popup" width=600 height=500 style="font-size: 11px;">
 
-<h3>Heurist Email harvester setup/launch</h3>
+<h3>Heurist Email harvester</h3>
 
 <p>Heurist will connect to an email server using the login details stored in the 
    database properties (sysIdentification table) and retrieve emails received from 
@@ -55,7 +48,7 @@ require_once('../../legacy/.ht_stdefs');
    emails that they send, in order to have them archived in the Heurist database. 
 
 <p>The default behaviour is to create a record of type Email, but in future this may be 
-   overriden with commands at the start of the email, which will also allow tags 
+   overriden with commands at the start of the email to create any specifid type, which will also allow tags 
    and other information to be added to the record.</p>
 
    
@@ -65,13 +58,12 @@ require_once('../../legacy/.ht_stdefs');
    
 
 <p> <img src="../../common/images/external_link_16x16.gif"/>
-   <a href="../../admin/ugrps/editUser.html" target=_blank>
+   <a href="../../admin/ugrps/editUser.html?db=<?=HEURIST_DBNAME?>&recID=<?=get_user_id()?>" target=_blank>
    Configure email addresses to be harvested</a>   
    
    
-<p> <b><a href="../../import/email/emailProcessor.php">
+<p> <b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="../../import/email/emailProcessor.php">
    Harvest email from IMAP server</a>   </b> <br>
-   (creates Heurist records)
    
    
    
