@@ -92,7 +92,7 @@
 	<script>
 		var hBase = "http://" + window.location.host + top.HEURIST.basePath;
 		var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"";
-		var bugReportURL = hBase + 'export/email/formEmailRecordPopup.html?rectype=253&db='+database;
+		var bugReportURL = hBase + 'export/email/formEmailRecordPopup.html?rectype=777&db='+database; // was 253
 
 		if (location.search.match(/[&?]q=[^&]+/)) {		//there is a search string
 			document.getElementById("searchFrame").src = top.HEURIST.basePath+"search/getResultsPageAsync.php" + location.search;

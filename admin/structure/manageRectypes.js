@@ -147,7 +147,7 @@ function RectypeManager() {
 				'<input id="btnSave'+grpID+'" type="button" value="Save Changes" '+
 							'style="color:red; display: inline-block;"/>'+
 				'<input type="button" id="btnAddRecordType'+grpID+'" value="Add Record Type" style="float:right;"/>'+
-				'<input type="button" id="btnAddFieldType'+grpID+'" value="Add Field Type" style="float:right;"/>'+
+				//'<input type="button" id="btnAddFieldType'+grpID+'" value="Add Field Type" style="float:right;"/>'+
 			'</div></div>'+
 			'<div id="tabContainer'+grpID+'"></div></div>')
 
@@ -265,7 +265,7 @@ function RectypeManager() {
 					var rectype = td.commonFields;
 					if(rectype[9].indexOf(grpID)>-1) {
 						arr.push([rectypeID, (Number(rectype[7])===1),
-						"<img src=\"../../common/images/16x16.gif\" style=\"background-image:url(../../common/images/rectype-icons/"+rectypeID+".png)\">",
+						"<img src=\"../../common/images/16x16.gif\" style=\"background-image:url(../../common/images/rectype-icons/"+rectypeID+".gif)\">",
 						rectype[0], rectype[1], rectype[8], rectype[9], null]);
 
 						/*TODO: top.HEURIST.rectype.rectypeUsage[rectypeID].length*/
@@ -333,14 +333,6 @@ function RectypeManager() {
 			{ key: null, label: "Struc", sortable:false, width:20, formatter: function(elLiner, oRecord, oColumn, oData) {
 					elLiner.innerHTML = '<a href="#edit_sctructure"><img src="../../common/images/edit_icon.png" width="16" height="16" border="0" title="Edit record strcuture" /><\/a>'; }
 			},
-			{ key: "info", label: "Info", sortable:false, width:20, formatter: function(elLiner, oRecord, oColumn, oData) {
-				var rectypeID = oRecord.getData('id');
-elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" height="16" border="0" '+
-'onmouseover="rectypeManager.showInfo('+rectypeID+', event)" onmouseout="rectypeManager.hideInfo()"/>'; }
-
-//elLiner.innerHTML = '<a href="#info"><img src="../../common/images/info_icon.png" width="16" height="16" border="0"/><\/a>'}
-
-			},
 			{ key: "usage", label: "Usage", hidden:true },
 			{ key: "icon", label: "Icon", sortable:false },
 			{ key: "name", label: "<u>Name</u>", sortable:true, className: 'bold_column', width:160,
@@ -370,6 +362,14 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 				formatter:YAHOO.widget.DataTable.formatDropdown, dropdownOptions:_groups},
 			{ key: null, label: "Del", width:20, sortable:false, formatter: function(elLiner, oRecord, oColumn, oData) {
 					elLiner.innerHTML = '<a href="#delete"><img src="../../common/images/cross.png" border="0" title="Delete" /><\/a>'; }
+			},
+			{ key: "info", label: "Info", sortable:false, width:20, formatter: function(elLiner, oRecord, oColumn, oData) {
+				var rectypeID = oRecord.getData('id');
+elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" height="16" border="0" '+
+'onmouseover="rectypeManager.showInfo('+rectypeID+', event)" onmouseout="rectypeManager.hideInfo()"/>'; }
+
+//elLiner.innerHTML = '<a href="#info"><img src="../../common/images/info_icon.png" width="16" height="16" border="0"/><\/a>'}
+
 			}
 
 			];
@@ -434,8 +434,6 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 							var params = "method=deleteRT&db=" + db + "&rtyID=" + rectypeID;
 							Hul.getJsonData(baseurl, callback, params);
 
-						}else{
-							alert("Impossible to delele record type in usage");
 						}
 					}//iUsege<1
 				}
@@ -469,6 +467,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 
 					//keep the track of changes in special object
 					_updateRecordType(record);
+					_updateSaveNotice(oldValue);
 				}
 			});
 
@@ -566,12 +565,12 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 				var grpID = tabView.getTab(currentTabIndex).get('id');
 				_onAddEditRecordType(0, grpID);
 			};
-			var btnAddFieldType = Dom.get('btnAddFieldType'+grpID);
+			/*var btnAddFieldType = Dom.get('btnAddFieldType'+grpID);
 			btnAddFieldType.onclick = function (e) {
 				var currentTabIndex = tabView.get('activeIndex');
 				var grpID = tabView.getTab(currentTabIndex).get('id');
 				_onAddFieldType(0, 0);
-			};
+			};*/
 
 
 			//$$('.ellipsis').each(ellipsis);
@@ -591,6 +590,8 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 				//tooltip div mouse out
 				function __hideToolTip2() {
 					needHideTip = true;
+					//_hideToolTip();
+					hideTimer = window.setTimeout(_hideToolTip, 500);
 				}
 				//tooltip div mouse over
 				function __clearHideTimer2() {
@@ -677,7 +678,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 	//
 	function _updateRecordTypeOnServer(event) {
 		var str = YAHOO.lang.JSON.stringify(_oRecordType);
-		alert("Stringified changes: " + str);
+//DEBUG alert("Stringified changes: " + str);
 
 		if(!Hul.isnull(str)) {
 			//_updateResult(""); //debug
@@ -709,7 +710,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 					error = true;
 				}else{
 					recTypeID = Number(item);
-					if(!Null.isempty(report)) { report = report + ","; }
+					if(!Hul.isempty(report)) { report = report + ","; }
 					report = report + recTypeID;
 				}
 			}
@@ -890,7 +891,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 		});*/
 	}
 
-	//
+	/*  THIS feature is removed by Ian's request
 	// listener of add button
 	//
 	function _onAddFieldType(){
@@ -902,12 +903,11 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 			height: 430,
 			width: 650,
 			callback: function(context) {
-				/*
-				NO ACTION REQUIRED HERE
-				*/
+				// NO ACTION REQUIRED HERE
 			}
 		});
-	}
+	}*/
+
 	//
 	// listener of add button
 	//

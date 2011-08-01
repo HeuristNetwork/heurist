@@ -414,6 +414,17 @@ function DetailTypeEditor() {
 				return "mandatory";
 		}
 
+		if(Dom.get("dty_Type").value==="enum"){
+			var dd = Dom.get("dty_JsonTermIDTree").value;
+			if( dd==="" || dd==="{}" ) {
+				if(isShowWarn) {
+					alert("For enum type you have to select at least one term. Click button 'Change vocabulary'");
+				}
+				_updatedFields = [];
+				return "mandatory";
+			}
+		}
+
 		return "ok";
 	}
 

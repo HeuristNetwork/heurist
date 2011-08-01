@@ -136,6 +136,8 @@ function ShowMap() {
 
 					}else{
 
+						var hastime = false;
+
 						// parse temporal object
 						if(true){ //Temporal.isValidFormat(record.start)){
 							try  {
@@ -153,7 +155,8 @@ function ShowMap() {
 								if(!dt) dt = temporal.getTDate('TAQ');
 								record.end = (dt)?dt.toString():record.end;
 
-									if(record.start!==""){
+									hastime = (record.start!=="");
+									if(hastime){
 										rec_withtime++;
 									}
 								}
@@ -162,27 +165,29 @@ function ShowMap() {
 
 						}
 
+						if(!isempty || hastime){
 
-						item = {
-						start: record.start,
-						title: record.title,
-						options:{
-							description: record.description,
-							theme: "purple",
-							url: record.URL,
-							recid: record.bibID,
-							rectype: record.rectype,
-							thumb:  record.thumb_file_id
+							item = {
+							start: record.start,
+							title: record.title,
+							options:{
+								description: record.description,
+								theme: "purple",
+								url: record.URL,
+								recid: record.bibID,
+								rectype: record.rectype,
+								thumb:  record.thumb_file_id
+								}
+							};
+
+							if(!Hul.isnull(record.end)){
+								item.end = record.end;
 							}
-						};
 
-						if(!Hul.isnull(record.end)){
-							item.end = record.end;
+							item.placemarks = [];
+							record.geoindex = items.length;
+							items.push(item);
 						}
-
-						item.placemarks = [];
-						record.geoindex = items.length;
-						items.push(item);
 					}
 
 					if(!isempty){

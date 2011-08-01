@@ -162,17 +162,19 @@ button {
 }
 .termTreeText {
 	width: 33%;
-	padding:2px;
+	padding-left:20px;
 	float: left;
 	vertical-align: bottom;
+	text-align: left;
 }
 .selectedTermsText {
 	width: 33%;
-	padding:2px;
+	padding-left:20px;
 	float: left;
+	text-align: left;
 }
 .previewListText {
-	padding:2px;
+	text-align: left;
 	float: left;
 }
 .previewList {
@@ -184,8 +186,11 @@ button {
 	color: black;
 }
 .dtyName {
+	text-align:left;
+	padding-left: 10px;
 	padding-bottom: 3px;
 	padding-top: 3px;
+	font-weight: 200;
 }
 
 		</style>
@@ -224,7 +229,7 @@ button {
 				</div>
 				<div><select id="previewList" class="previewList"></select></div>
 				<div>
-					<button title="Clear selection" onclick="selectTerms.apply();">Select</button>
+					<button title="Clear selection" onclick="selectTerms.apply();">Save</button>
 					<button title="Clear disbales" onclick="selectTerms.cancel()">Cancel</button>
 				</div>
 			</div>

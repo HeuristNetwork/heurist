@@ -20,13 +20,13 @@
 
 
 	if (! is_logged_in()) {
-	//ARTEM header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
-	//ARTEM return;
+		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
+		return;
 	}
 
 	if (! is_admin()) {
-	//ARTEM print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href=".HEURIST_URL_BASE.">Return to Heurist</a></p></body></html>";
-	//ARTEM return;
+	print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href=".HEURIST_URL_BASE.">Return to Heurist</a></p></body></html>";
+	return;
 	}
 
 	header('Content-type: text/javascript');
@@ -496,15 +496,15 @@
 	if (mysql_error()) {
 			$ret['error'] = "Error finding records of type $rtyID from Records - ".mysql_error();
 	} else {
-			$dtCount = mysql_num_rows($res);
+		$recCount = mysql_num_rows($res);
 		if ($recCount) { // there are records existing of this rectype, need to return error and the recIDs
-				$ret['error'] = "Error deleting Rectype($rtyID) with existing data Records ($dtCount) not allowed";
+			$ret['error'] = "Error deleting Rectype($rtyID) with existing data Records ($recCount) not allowed";
 			$ret['recIDs'] = array();
 			while ($row = mysql_fetch_row($res)) {
 				array_push($ret['recIDs'], $row[0]);
 			}
 		} else { // no records ok to delete this rectype. Not that this should cascade for all dependent definitions
-				$query = "delete from defRecTypes where rty_ID = $rtyID";
+			$query = "delete from defRecTypes where rty_ID = $rtyID";
 			$res = mysql_query($query);
 			if (mysql_error()) {
 					$ret['error'] = "DB error deleting of rectype $rtyID from defRecTypes - ".mysql_error();
@@ -1287,7 +1287,7 @@
 	*/
 	function deleteTerms($trmID) {
 
-		error_log(">>>>>>>>>>>>>>>>>HERE ");
+//		error_log(">>>>>>>>>>>>>>>>>HERE ");
 
 		$ret = array();
 
@@ -1296,7 +1296,7 @@
 		$children = getTermsChilds($children, $trmID);
 		array_push($children, $trmID);
 
-		error_log(">>>>>>>>>>>>>>>>>".join(",",$children));
+//		error_log(">>>>>>>>>>>>>>>>>".join(",",$children));
 
 		//find possible entries in defDetailTypes dty_JsonTermIDTree
 		foreach ($children as $termID) {
@@ -1329,6 +1329,7 @@
 			foreach ($children as $termID) {
 				$query = "delete from defTerms where trm_ID = $termID";
 				$res = mysql_query($query);
+//error_log(">>>>>>>>>>>>>>>>>".$res."   ".mysql_error());
 				if (mysql_error()) {
 					$ret['error'] = "DB error deleting of term $termID from defTerms - ".mysql_error();
 					break;

@@ -1,3 +1,19 @@
+/**
+* editTerms.js
+* Support file for editTerms.html
+*
+* 28/04/2011
+* @author: Juan Adriaanse
+* @author: Artem Osmakov
+* @author: Stephen White
+*
+* @copyright (C) 2005-2011 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+* @todo
+**/
+
 // EditTerms object
 var editTerms;
 
@@ -31,6 +47,7 @@ function EditTerms() {
 		_termTree2, //treeview for relation terms
 		_currTreeView,
 		_currentNode,
+		_parentNode,
 		_currentDomain,
 		_db;
 
@@ -191,6 +208,8 @@ function EditTerms() {
 	//
 	function _findNodeById(nodeid, needExpand) {
 
+		nodeid = ""+nodeid;
+
 		function __doSearchById(node){
 			return (node.data.id===nodeid);
 		}
@@ -216,6 +235,8 @@ function EditTerms() {
 	*/
 	function _onNodeClick(node){
 
+		_parentNode = null;
+
 		if(_currentNode !== node)
 		{
 			if(!Hul.isnull(_currentNode)){
@@ -224,14 +245,13 @@ function EditTerms() {
 			_currentNode = node;
 
 		if(!Hul.isnull(node)){
-			Dom.get('formInverse').style.display = "block";
+			Dom.get('formMessage').style.display = "none";
 			Dom.get('formEditor').style.display = "block";
-			Dom.get('formMngTree2').style.display = "block";
 
-			Dom.get('edName2').value = node.label;
 			//	alert("label was clicked"+ node.data.id+"  "+node.data.domain+"  "+node.label);
 			Dom.get('edId').value = node.data.id;
 			Dom.get('edName').value = node.label;
+			Dom.get('edName').focus();
 			if(Hul.isnull(node.data.description)) {
 				node.data.description="";
 			}
@@ -244,18 +264,31 @@ function EditTerms() {
 			if(!Hul.isnull(node_invers)){ //inversed term found
 					Dom.get('edInverseTermId').value = node_invers.data.id;
 					Dom.get('edInverseTerm').value = getParentLabel(node_invers);
+					Dom.get('btnInverseSetClear').value = 'clear';
 			}else{
 					node.data.inverseid = null;
 					Dom.get('edInverseTermId').value = '0';
 					Dom.get('edInverseTerm').value = '';
+					Dom.get('btnInverseSetClear').value = 'set';
 			}
+
+			if(isExistingNode(node)){
+					Dom.get('div_btnAddChild').style.display = "inline-block";
+					Dom.get('btnDelete').value = "Delete Term";
+			}else{//new term
+					Dom.get('div_btnAddChild').style.display = "none";
+					Dom.get('btnDelete').value = "Cancel Add";
+			}
+
+			Dom.get('divInverse').style.display = (_currTreeView === _termTree2)?"block":"none";
+
 		}
 		}
 
+		Dom.get('formInverse').style.display = "none";
 		if(Hul.isnull(node)){
-				Dom.get('formInverse').style.display = "none";
-				Dom.get('formEditor').style.display = "none";
-				Dom.get('formMngTree2').style.display = "none";
+			Dom.get('formEditor').style.display = "none";
+			Dom.get('formMessage').style.display = "block";
 		}
 
 	}
@@ -275,7 +308,7 @@ function EditTerms() {
 			( !(Hul.isempty(_currentNode.data.inverseid)&&Hul.isnull(iInverseId)) &&
 				Number(_currentNode.data.inverseid) !== iInverseId));
 
-		if(wasChanged){
+		if(wasChanged || !isExistingNode(_currentNode) ){
 
 			if(Hul.isempty(sName)){
 				if(needConfirm){
@@ -325,7 +358,7 @@ function EditTerms() {
 		var str = YAHOO.lang.JSON.stringify(oTerms);
 
 		if(!Hul.isnull(str)) {
-alert("Stringified changes: " + str);
+//DEBUG alert("Stringified changes: " + str);
 
 			var _updateResult = function(context){
 
@@ -350,17 +383,24 @@ alert("Stringified changes: " + str);
 								if(_currentNode ===  node){
 									Dom.get('edId').value = item;
 								}
+								if(_parentNode){
+									_onNodeClick(_parentNode);
+								}
 							}
 						}
 						}//for
 
 						if(!error) {
-								alert("Term was succesfully saved");
+								Dom.get('div_btnAddChild').style.display = "inline-block";
+								Dom.get('btnDelete').value = "Delete Term";
+								Dom.get('div_SaveMessage').style.display = "inline-block";
+								setTimeout(function(){Dom.get('div_SaveMessage').style.display = "none";}, 2000);
+								//alert("Term was succesfully saved");
 						}
 					}
 			};
 
-			// TODO: Change base URL
+			//
 			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 			var callback = _updateResult;
 			var params = "method=saveTerms&data=" + encodeURIComponent(str)+"&db="+_db;
@@ -368,18 +408,29 @@ alert("Stringified changes: " + str);
 		}
 	}
 
+	/**
+	* new of existing node
+	*/
+	function isExistingNode(node){
+			return ((typeof node.data.id === "number") || node.data.id.indexOf("-")<0);
+	}
 
 	/**
 	* Deletes current term
 	*/
 	function _doDelete(needConfirm){
+		if(_currentNode===null) return;
+		var isExistingTerm = isExistingNode(_currentNode);
+
 		var r = (!needConfirm) ||
-		confirm("Delete term '"+_currentNode.label+"'? Are you sure? All children terms will be deleted as well");
+		confirm(isExistingTerm
+		?("Delete term '"+_currentNode.label+"'? Are you sure? All children terms will be deleted as well")
+		:"Cancel the addition of new term?");
 
 		if (r && !Hul.isnull(_currTreeView)) {
 			//_currTreeView.removeChildren(_currentNode);
 
-			if(_currentNode.data.id.indexOf("-")<0){
+			if(isExistingTerm){
 				//this term exists in database - delete it
 
 					function __updateAfterDelete(context) {
@@ -399,6 +450,11 @@ alert("Stringified changes: " + str);
 					var callback = __updateAfterDelete;
 					var params = "method=deleteTerms&trmID=" + _currentNode.data.id+"&db="+_db;
 					top.HEURIST.util.getJsonData(baseurl, callback, params);
+			}else{
+				_currTreeView.popNode(_currentNode);
+				_currTreeView.render();
+				_currentNode = null;
+				_onNodeClick(null);
 			}
 		}
 	}
@@ -429,8 +485,7 @@ alert("Stringified changes: " + str);
 
 			_onNodeClick(rootNode);
 
-		}else
-		if(!Hul.isnull(_currentNode))
+		}else if(!Hul.isnull(_currentNode))
 		{
 			term = {}; //new Object();
 			term.id = _currentNode.data.id+"-" + (_currentNode.getNodeCount());  //correct
@@ -442,9 +497,13 @@ alert("Stringified changes: " + str);
 			var newNode = new YAHOO.widget.TextNode(term, _currentNode, false);
 			_currTreeView.render();
 
+			var _temp = _currentNode;
+
 			newNode.focus(); //expand
 
 			_onNodeClick(newNode);
+
+			_parentNode = _temp;
 		}
 	}
 
@@ -471,6 +530,8 @@ alert("Stringified changes: " + str);
 			}else{
 				Dom.get('edInverseTerm').value = sel.options[sel.selectedIndex].text;
 				Dom.get('edInverseTermId').value = nodeid;
+				Dom.get('btnInverseSetClear').value = 'clear';
+				Dom.get('formInverse').style.display = "none";
 			}
 		}
 	}
@@ -512,9 +573,19 @@ alert("Stringified changes: " + str);
 /**
 * Clear button listener
 */
-function clearInverseTermId(){
-	Dom.get('edInverseTerm').value = "";
-	Dom.get('edInverseTermId').value = "0";
+function setOrclearInverseTermId(){
+	if(Dom.get('btnInverseSetClear').value==='cancel'){
+		Dom.get('btnInverseSetClear').value = (Dom.get('edInverseTermId').value!=="0")?'clear':'set';
+		Dom.get('formInverse').style.display = "none";
+	}else if(Dom.get('edInverseTermId').value==="0"){
+		//show inverse div
+		Dom.get('btnInverseSetClear').value = 'cancel';
+		Dom.get('formInverse').style.display = "block";
+	}else{
+		Dom.get('btnInverseSetClear').value = 'set';
+		Dom.get('edInverseTerm').value = "";
+		Dom.get('edInverseTermId').value = "0";
+	}
 }
 
 /**

@@ -23,12 +23,20 @@
   <title>Email record</title>
 
   <link rel=stylesheet href="../../common/css/global.css">
+
+ <!--
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script> -->
+
+
  </head>
 
  <body class="popup" width=600 height=400>
   <script src="../../common/js/utilsLoad.js"></script>
   <script src="../../common/php/displayPreferences.php"></script>
-<!--  <script src="../../common/php/loadHAPI.php"></script> -->
+
+<!-- <script src="../../common/php/loadCommonInfo.php"></script>
+<script src="../../common/php/loadHAPI.php"></script> -->
 
 <div class="header"><b><span id=rectype-val></span></b><span id=title-val></span></div>
 <div id="results"><iframe frameborder=0 class=tab id=edit-frame style="width: 100%; height: 100%;"></iframe></div>
@@ -79,12 +87,28 @@ window.HEURIST.edit = {
 	}
 };
 
+
 	//
 	// detect what rectype user has to fill and send by email
 	//
 	window.HEURIST.parameters = top.HEURIST.parseParams(window.location.search);
 
 	var rectype = parseInt(window.HEURIST.parameters["rectype"]);
+
+	if(rectype==="bugreport" || rectype===253){
+
+		rectype = 253; // MAGIC
+		if(!top.HEURIST.rectypes.typedefs[rectype]){
+
+var rectype_bugreport = {"dtFields":{"179":["Name","Name",null,"","required","1","1","60","0","000","1",null,null,"",null,"open",null,null,null],"191":["Extended description","Extended description",null,"","optional","1","0","60","0","001","1",null,null,null,null,"open",null,null,null],"259":["Outcomes description","Outcomes description",null,"","optional","1","0","60","0","002","1",null,null,null,null,"open",null,null,null],"559":["Category-for-documentation","Category-for-documentation",null,"","optional","1","0","60","0","003","1","{\"631\":{},\"633\":{},\"634\":{},\"635\":{},\"636\":{},\"637\":{},\"638\":{}}",null,"[]",null,"open",null,null,null],"221":["AssociatedFile","AssociatedFile",null,"","optional","5","0","60","0","004","1",null,null,"",null,"open",null,null,null]},"commonFields":["Bug submit","bug report","normal","0","[Title / Name]","","Bug submits","1","open","7","0","",""]};
+
+top.HEURIST.rectypes.typedefs[rectype] = rectype_bugreport;
+top.HEURIST.rectypes.names[rectype] = 'Bug report';
+top.HEURIST.rectypes.pluralNames[rectype] = 'Bug reportS';
+top.HEURIST.rectypes.dtDisplayOrder[rectype] = ["179","191","259","559","221"];
+		}
+	}
+
 
 	var titleBits = (window.HEURIST.parameters["title"] || "").split(/\s+/);
 	var db = (window.HEURIST.parameters["db"] || "");

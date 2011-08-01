@@ -73,8 +73,14 @@
 
 	<div id="pnlLeft" style="height:100%; width:300; max-width:300; float: left; padding-right:5px; overflow: hidden;">
 
-		<div id="formSearch" style="display:block;height:136px;">
-			<h3 style="border-style: none;">Search</h3>
+		<div style="padding-left:190px"><input id="btnAddChild" type="button" value="Add First Level Term" onClick="{editTerms.doAddChild(true)}"/>
+		</div>
+
+		<!-- Container for tab control component, each tab contains tree view, one for enums, one for relationship types-->
+        <div id="tabContainer" class="yui-navset yui-navset-top" style="y:138; height:70%; width:400; max-width:300; float: left; overflow: hidden;"></div><br/>
+
+		<!-- Navigation: Search form to do partial match search on terms in the tree -->
+        <div id="formSearch" style="display:block;height:136px;">
 			<div class="dtyField"><label class="dtyLabel" style="width:30px;">Find:</label>
 				<input id="edSearch" style="width:70px"  onkeyup="{doSearch(event)}"/>
 				<label>type 3 or more letters</label>
@@ -84,70 +90,63 @@
 			</div>
 		</div>
 
-		<div id="tabContainer" class="yui-navset yui-navset-top" style="y:138; height:500px; width:400; max-width:300; float: left; overflow: hidden;"></div>
 	</div>
 
-	<div id="formContainer" style="float: left; padding-bottom:5px; padding-top:5px; padding-left: 20px;">
+	<div id="formContainer" style="float: left; padding-bottom:5px; padding-left: 10px;">
 
-		<div id="formMngTree" style="width:500px">
-			<h3>Manage tree</h3>
-			<div style="border: black; border-style: solid; border-width:thin; padding:20px;">
-				<div style="padding-left:156px"><input id="btnAddChild" type="button" value="Add First Level Term" onClick="{editTerms.doAddChild(true)}"/></div>
+		<h3 id="formMessage" style="border-style: none;display:block;text-align:center;width:300px;">
+			Select term in the tree or add new first level term
+		</h3>
 
-			<div id="formMngTree2" style="display:none;">
-				<div class="dtyField"><label class="dtyLabel">Display name:</label>
-					<input id="edName2" style="width:300px" readonly="readonly"/>
-				</div>
-				<label style="padding-left: 156px;">Select term on the left</label>
-
-				<div style="text-align: center; margin:auto; padding-top:5;">
-					<input id="btnAddChild" type="button" value="Add Child Term" onClick="{editTerms.doAddChild(false)}" />
-					<input id="btnDelete" type="button" value="Delete Term" onClick="{editTerms.doDelete()}" />
-				</div>
-
-			</div>
-			</div>
-		</div>
-
-
-		<div id="formEditor" style="display:none;">
+	    <!-- Edit form for modifying characteristics of terms, including insertion of child terms and deletion -->
+        <div id="formEditor" style="display:none;">
 			<h3 style="border-style: none;">Edit Selected Term</h3>
-			<div style="border: black; border-style: solid; border-width:thin; padding:20px;">
+			<div style="border: black; border-style: solid; border-width:thin; padding:10px;">
 
 			<div class="dtyField"><label class="dtyLabel">ID:</label><input id="edId" readonly="readonly" style="width:50px"/></div>
 			<div class="dtyField"><label class="dtyLabel">Display name:</label><input id="edName" style="width:300px"/></div>
-			<div class="dtyField"><label class="dtyLabel">Descrption:</label><input id="edDescription" style="width:300px"/></div>
-			<div class="dtyField"><label class="dtyLabel">Inverse Term:</label><input id="edInverseTerm" readonly="readonly" style="width:260px"/>
-				<input id="btnDelete" type="button" value="clear" onClick="{clearInverseTermId()}" />
-				<input id="edInverseTermId" type="hidden"/></div>
-				<div style="text-align: center; margin:auto; padding-top:5;">
-					<input id="btnSave" style="display:inline-block" type="button" value="Save Changes" onClick="{editTerms.doSave()}" />
+			<div class="dtyField"><label class="dtyLabel">Description:</label><input id="edDescription" style="width:300px"/></div>
+			<div id="divInverse" class="dtyField"><label class="dtyLabel">Inverse Term:</label><input id="edInverseTerm" readonly="readonly" style="width:250px"/>
+				<input id="btnInverseSetClear" type="button" value="clear" style="width:45px" onClick="{setOrclearInverseTermId()}" />
+				<input id="edInverseTermId" type="hidden"/>
+			</div>
+				<div style="padding-top:5;">
+
+				<div id='div_btnAddChild' style="text-align: left; display:inline-block;">
+					<input id="btnAddChild" type="button" value="Add Child Term" onClick="{editTerms.doAddChild(false)}"/>
+				</div>
+					<input id="btnDelete" type="button" value="Delete Term" onClick="{editTerms.doDelete()}" />
+
+				<div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
+					<b>Terms was saved</b>
+				</div>
+
+
+				<input id="btnSave" style="float:right;" type="button" value="Save Changes" onClick="{editTerms.doSave()}" />
 				</div>
 			</div>
 		</div>
 
+        <!-- search for and set inmverse terms, only for relationship types -->
 		<div id="formInverse" style="display:none;">
 
 			<h3 style="border-style: none;">Select Inverse Term</h3>
-			<div style="border: black; border-style: solid; border-width:thin; padding:20px;">
+			<div style="border: black; border-style: solid; border-width:thin; padding:10px;">
 
-			<div class="dtyField"><label class="dtyLabel">Find inverse:</label>
-				<input id="edSearchInverse" style="width:70px"  onkeyup="{doSearch(event)}"/>
-				<label>type 3 or more letters</label>
+			<div style="display:inline-block;vertical-align: top; width:110px;">
+				<label class="dtyLabel" style="width:30px;">Find:</label>
+				<input id="edSearchInverse" style="width:70px" onkeyup="{doSearch(event)}"/><br/>
+				type 3 or more letters<br/><br/>select inverse from list
+				<input id="btnSelect2" type="button" value="and Set As Inversed" onClick="{editTerms.doSelectInverse()}" />
 			</div>
-			<div class="dtyField"><label class="dtyLabel" style="vertical-align:top;width:70px">Found:</label>
-				<select id="resSearchInverse" size="5" style="width:380px" ondblclick="{editTerms.doSelectInverse()}"></select>
-			</div>
-			<label style="padding-left:76px;">Select inverse from list</label>
-
-				<div style="text-align: center; margin:auto; padding-top: 5;">
-					<input id="btnSelect2" type="button" value="Set As Inversed" onClick="{editTerms.doSelectInverse()}" />
-				</div>
+			<div style="display:inline-block;">
+				<select id="resSearchInverse" size="5" style="width:340px" ondblclick="{editTerms.doSelectInverse()}"></select>
 			</div>
 		</div>
 	</div>
 	</div>
 
+	</div>
 	<script  type="text/javascript">
 
 		YAHOO.util.Event.addListener(window, "load", function(){ editTerms = new EditTerms();} );

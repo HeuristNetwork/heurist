@@ -277,15 +277,18 @@ function EditRecStructure() {
 					'<option value="optional">optional</option>'+
 					'<option value="forbidden">forbidden</option></select>'+
 					'&nbsp;&nbsp;repeat from&nbsp;<input id="ed'+rst_ID+
-					'_rst_MinValues" title="Min Values" style="width:20" size="2"  onkeypress="Hul.validate(event)"/>&nbsp;'+
+					'_rst_MinValues" title="Min Values" style="width:20" size="2" '+
+					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/>&nbsp;'+
 					'&nbsp;to&nbsp;<input id="ed'+rst_ID+
-					'_rst_MaxValues" title="Max Values"  style="width:20" size="2"  onkeypress="Hul.validate(event)"/>&nbsp;times</div>'+
+					'_rst_MaxValues" title="Max Values"  style="width:20" size="2"  '+
+					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/>&nbsp;times</div>'+
 
-					'<div class="dtyField"><label class="dtyLabel">Vocabulary:</label>'+
-					'<div id="termsPreview" class="dtyValue"></div>'+
+					'<div class="dtyField"><label class="dtyLabel">Terms list:</label>'+
 					'<input id="ed'+rst_ID+'_rst_FilteredJsonTermIDTree" type="hidden"/>'+
 					'<input id="ed'+rst_ID+'_rst_TermIDTreeNonSelectableIDs" type="hidden"/>'+
-					'<input type="button" value="Filter terms" id="btnSelTerms" onclick="showTermsTree('+rst_ID+', event)"/></div>'+
+					'<input type="button" value="Filter terms" id="btnSelTerms" onclick="showTermsTree('+rst_ID+', event)"/>'+
+					'<div id="termsPreview" class="dtyValue"></div>'+
+					'</div>'+
 
 					'<div class="dtyField"><label class="dtyLabel">Rectype pointer:</label>'+
 					'<div id="pointerPreview" class="dtyValue"></div>'+
@@ -1424,7 +1427,18 @@ function onReqtypeChange(evt){
 		el_min.value = 0;
 		el_max.value = 0;
 	}
-
+}
+/**
+* Max repeat value must be >= then min value
+*/
+function onRepeatValueChange(evt){
+	var el = evt.target;
+	var name = el.id.substring(0,el.id.indexOf("_")); //. _rst_RequirementType
+	var el_min = Dom.get(name+"_rst_MinValues");
+	var el_max = Dom.get(name+"_rst_MaxValues");
+	if(el_max.value<el_min.value){
+		el_max.value=el_min.value;
+	}
 }
 
 /**
@@ -1563,6 +1577,10 @@ editStructure.initTabDesign(document.getElementById("ed_rty_ID").value);
 
 	}
 
+
+function _preventSel(event){
+		event.target.selectedIndex=0;
+}
 /**
 * recreateTermsPreviewSelector
 * creates and fills selector for Terms Tree if datatype is enum, relmarker, relationtype
@@ -1596,10 +1614,14 @@ function recreateTermsPreviewSelector(datatype, allTerms, disabledTerms ) {
 					// add new select (combobox)
 					if(datatype === "enum") {
 						el_sel = Hul.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup['enum'], null);
+						el_sel.style.backgroundColor = "#cccccc";
+						el_sel.onchange =  _preventSel;
 						parent.appendChild(el_sel);
 					}
 					else if(datatype === "relmarker" || datatype === "relationtype") {
 						el_sel = Hul.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup.relation, null);
+						el_sel.style.backgroundColor = "#cccccc";
+						el_sel.onchange =  _preventSel;
 						parent.appendChild(el_sel);
 					}
 				}

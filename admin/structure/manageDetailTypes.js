@@ -487,6 +487,7 @@ function DetailTypeManager() {
 
 					//keep the track of changes in special object
 					_updateDetailType(record);
+					_updateSaveNotice(oldValue);
 				}
 			});
 
@@ -905,34 +906,6 @@ function DetailTypeManager() {
 					if(grpID_old!==grpID){
 						_removeTable(grpID_old, true);
 					}
-					/*
-					//is it current tab
-					var ind = _getIndexByGroupId(grpID);
-					var ind_old = _getIndexByGroupId(grpID_old);
-
-					//refresh tables
-					var tabIndex = tabView.get('activeIndex');
-
-					var ndt = arrTables[ind];
-					if(ndt!=null){
-					arrTables[ind] = null;
-					//if it is current tab force datatable refresh
-					if(tabIndex == ind)
-					{
-					initTabContent(tabView.getTab(tabIndex));
-					}
-					}
-					if(ind_old>=0){
-					ndt = arrTables[ind_old];
-					if(ndt!=null){
-					arrTables[ind_old] = null;
-					if (tabIndex == ind_old)
-					{
-					initTabContent(tabView.getTab(tabIndex));
-					}
-					}
-					}*/
-
 				}
 			}
 		});

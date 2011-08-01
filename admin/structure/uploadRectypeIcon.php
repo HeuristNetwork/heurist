@@ -16,11 +16,13 @@
 
 	define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-	require_once(dirname(__FILE__).'/../../common/T1000/.ht_stdefs');
-	define('rectype_DIRECTORY', HEURIST_SITE_PATH.'common/images/rectype-icons/');
-	if (! (is_logged_in()  &&  is_admin()  &&  HEURIST_SESSION_DB_PREFIX == "")) return;
+	//require_once(dirname(__FILE__).'/../../common/T1000/.ht_stdefs');
+	define('rectype_DIRECTORY', HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'common/images/rectype-icons/');
+
+	if (! (is_logged_in()  &&  is_admin()  &&  HEURIST_SESSION_DB_PREFIX != "")) return;
 
 	$rt_id = intval($_REQUEST['rty_ID']);
+
 	if (! $rt_id) return;
 
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
@@ -39,15 +41,24 @@
   <style type="text/css">
 .success { font-weight: bold; color: green; margin-left: 3px; }
 .failure { font-weight: bold; color: red; margin-left: 3px; }
+.rtyLabel {
+	display: inline-block;
+	width: 120px;
+	text-align: right;
+	padding-right: 3px;
+}
+.rtyField {
+	padding-top: 10px;
+    display: block;
+}
   </style>
  </head>
 
- <body style="background-color: transparent; width: 320px; height: 160px;">
-  <div class="headline">Upload icon for reference type <?= htmlspecialchars($rt['rty_Name']) ?></div>
+ <body style="background-color: transparent; width: 320px; height: 120px;">
+  <!-- div class="headline">Record type: <?= htmlspecialchars($rt['rty_Name']) ?></div -->
 
-  <div style="line-height: 30px;">
-   Current icon:
-   <img src="../../common/images/rectype-icons/<?= $rt_id ?>.gif?<?= time() ?>" style="vertical-align: middle; width: 16px; height: 16px;">
+   <div class="rtyField">
+   <label class="rtyLabel">Current icon:</label><img src="../../common/images/rectype-icons/<?= $rt_id ?>.gif?<?= time() ?>" style="vertical-align: middle; width: 16px; height: 16px;">
   </div>
 
 <?php	if ($success_msg) { ?>
@@ -56,20 +67,17 @@
   <div class="failure"><?= $failure_msg ?></div>
 <?php	} ?>
 
-  <form action="uploadrectypeIcon.php?db=<?= HEURIST_DBNAME?>" method="post" enctype="multipart/form-data">
+  <form action="uploadRectypeIcon.php?db=<?= HEURIST_DBNAME?>" method="post" enctype="multipart/form-data" border="1">
    <input type="hidden" name="rty_ID" value="<?= $rt_id ?>">
    <input type="hidden" name="uploading" value="1">
 
-
-
-   <div style="line-height: 30px;">
-    <b>Select new icon: </b>
-    <input type="file" name="new_icon">
+   <div class="rtyField">
+    	<label class="rtyLabel">Select new icon</label><input type="file" name="new_icon" style="display:inline-block;">
    </div>
-
-   <input type="submit" value="Upload" style="font-weight: bold; line-height: 20px;">
-
-   <input type="button" value="Close window" onclick="top.icon_refresh(<?= $rt_id ?>); top.close_popup();">
+   <div style="line-height: 40px;text-align:center;width:100%;">
+   		<input type="submit" value="Upload" style="font-weight: bold; line-height: 20px;">
+   		<input type="button" value="Close window" onclick="window.close(null);">
+   </div>
   </form>
  </body>
 </html>
@@ -83,13 +91,16 @@ function upload_file($rt_id) {
 
 	$im = @imagecreatefromgif($_FILES['new_icon']['tmp_name']);
 	if (! $im) return array('', 'Uploaded file is not a GIF');
-	if (imagesx($im) != 16  ||  imagesy($im) != 16) return array('', 'Uploaded file must be 16x16 pixels');
+	if (imagesx($im) > 16  ||  imagesy($im) > 16) return array('','Uploaded file must be 16x16 pixels');
 
 	$imstring = @file_get_contents($_FILES['new_icon']['tmp_name']);
 	if (! test_transparency($imstring))
 		$warning = '<div style="font-weight: bold; color: orange;">but the icon has no transparency defined - it may look dodgy</div>';
 	else	$warning = '';
 
+//error_log(">>>>>>>>>>>>>>".HEURIST_UPLOAD_PATH);
+//error_log(">>>>>>>>>>>>>>".rectype_DIRECTORY . $rt_id . '.gif');
+//rectype_DIRECTORY
 	if (move_uploaded_file($_FILES['new_icon']['tmp_name'], rectype_DIRECTORY . $rt_id . '.gif'))
 		return array('File has been uploaded successfully' . $warning, '');
 	else

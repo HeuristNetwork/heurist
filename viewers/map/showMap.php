@@ -200,11 +200,12 @@ while ($val = mysql_fetch_row($res)) {
 
 	}
 	$geoBibIDs[$val[0]] = $val[0];
+/*DEBUG
 error_log("ADDED1:".is_string($val[0])."    ".$geoBibIDs[$val[0]]);
 error_log("1>>>>>>".$geoBibIDs[$val[0]]);
 error_log("2>>>>>>".$geoBibIDs["97025"]);
 error_log("3>>>>>>".$geoBibIDs[$bibID]);
-
+*/
 }
 }
 

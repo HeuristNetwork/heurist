@@ -487,14 +487,18 @@ ether_zoom = function(_band, ether, zoomIn) {
 							return res;
 						};
 					} else if (layer.type === "maptiler") {
+						if(layer.url.charAt(layer.url.length-1)!=="/"){
+							layer.url = layer.url + "/";
+						}
 						tile_url =	function(tile,zoom) {
-			              if ((zoom < 12) || (zoom > 19)) {
+			              if ((zoom < 1) || (zoom > 19)) {
 			                  return "http://www.maptiler.org/img/none.png";
 			              }
 			              var ymax = 1 << zoom;
 			              var y = ymax - tile.y -1;
 			              if (true) { //(mapBounds.intersects(tileBounds)) {
-			                  return layer.url+zoom+"/"+tile.x+"/"+y+".png";
+			              		var surl = layer.url+zoom+"/"+tile.x+"/"+y+".png";
+			                  return surl;
 			              } else {
 			                  return "http://www.maptiler.org/img/none.png";
 			              }
