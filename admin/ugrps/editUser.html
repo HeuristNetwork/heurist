@@ -1,8 +1,9 @@
 <!--
 
 /**
-* editUserp.html
-* A form to edit user, or create a new user. It is utilized as pop-up from manageGroups and manageUsers
+* editUser.html
+* A form to edit a user, or create a new user. 
+* It is utilized as pop-up from manageGroups and manageUsers
 *
 * @version 2011.0509
 * @author: Artem Osmakov
@@ -98,89 +99,123 @@
 <div id="statusMsg"></div>
 <div id="detailTypeValues" style="padding:5px;">
 
-	<div class="dtyField">
-		<label class="dtyLabel" for="ugr_ID">Code:</label>
+   <div class="dtyField">
+		<label class="dtyLabel" for="ugr_ID">User ID</label>
 		<label id="ugr_ID"></label>
 	</div>
-	<div class="dtyField">
-		<label class="dtyLabel" for="ugr_FirstName">First name:</label>
-		<input id="ugr_FirstName" style="width:200;" maxlength="40" />
+       
+    <div class="dtyField">
+		<label class="dtyLabel" for="ugr_FirstName">Given name *</label>
+		<input id="ugr_FirstName" style="width:100;" maxlength="40" />
 	</div>
+
 	<div class="dtyField">
-		<label class="dtyLabel" for="ugr_LastName">Last name:</label>
-		<input id="ugr_LastName" style="width:200;" maxlength="63" />
+		<label class="dtyLabel" for="ugr_LastName">Family name *</label>
+		<input id="ugr_LastName" style="width:150;" maxlength="63" />
+	</div>  
+	<div class="dtyField">
+		<label class="dtyLabel" for="ugr_eMail">Email *</label>
+		<input id="ugr_eMail" style="width:300;" maxlength="100" onkeyup="document.getElementById('ugr_Name').value=this.value;"/>
 	</div>
+    <div class="dtyField">
+        <label class="dtyLabel" for="ugr_Name">Login name *</label>
+        <input id="ugr_Name" style="width:200;" maxlength="63" />
+    </div>
+    <div class="dtyField">
+        <label class="dtyLabel" for="ugr_Password">Password *</label>
+        <input id="ugr_Password" type="password" style="width:100;" maxlength="40" />
+        If editing, blank = no change
+    </div>
+    <div class="dtyField">
+        <label class="dtyLabel" for="ugr_Password2">Repeat password *</label>
+        <input id="ugr_Password2" type="password" style="width:100;" maxlength="40" />
+        <div class="help prompt help1" >
+            <label>Warning: non-encrypted, please don't use institutional or banking password</label>
+        </div>
+    </div>
 	<div class="dtyField">
-		<label class="dtyLabel" for="ugr_eMail">Email:</label>
-		<input id="ugr_eMail" style="width:200;" maxlength="100" onkeyup="document.getElementById('ugr_Name').value=this.value;"/>
-		<div class="help prompt help1">
-			<label>This will be your User Name</label>
-		</div>
-	</div>
-	<div class="dtyField">
-		<label class="dtyLabel" for="ugr_Organisation">Institution/company:</label>
+		<label class="dtyLabel" for="ugr_Organisation">Institution/company *</label>
 		<input id="ugr_Organisation" style="width:200;" maxlength="120" />
 		<div class="help prompt help1">
 			<label>Enter 'None' if not affiliated with an institution or company </label>
 		</div>
 	</div>
 	<div class="dtyField">
-		<label class="dtyLabel" for="ugr_Interests">Research Interests:</label>
-		<input id="ugr_Interests" style="width:200;" maxlength="255" />
+		<label class="dtyLabel"  style="vertical-align:top" for="ugr_Interests">Research Interests *</label>
+		<textarea id="ugr_Interests" rows="2" style="width:420;" maxlength="255"></textarea>
 		<div class="help prompt help1">
-			<label>To be defined????</label>
-		</div>
-	</div>
-	<div class="dtyField">
-		<label class="dtyLabel" for="ugr_Name">Login:</label>
-		<input id="ugr_Name" style="width:200;" maxlength="63" />
-	</div>
-	<div class="dtyField">
-		<label class="dtyLabel" for="ugr_Password">Password:</label>
-		<input id="ugr_Password" type="password" style="width:200;" maxlength="40" />
-	</div>
-	<div class="dtyField">
-		<label class="dtyLabel" for="ugr_Password2">Repeat password:</label>
-		<input id="ugr_Password2" type="password" style="width:200;" maxlength="40" />
-		<div class="help prompt help1" style="padding-left: 10px;">
-			<label>Warning: this is not an encrypted connection, so please don't use your institutional or banking password.</label>
+			<label>Enter a concise description (up to 250 characters) of your research interests</label>
 		</div>
 	</div>
 
+
+    <!-- OPTIONAL FIELDS -->
+
+    <div class="dtyField">
+        <label class="dtyLabel" style="vertical-align:top" for="ugr_IncomingEmailAddresses">Incoming email</label>
+        <textarea cols="200" id="ugr_IncomingEmailAddresses" rows="2" style="width:420;"></textarea>
+        <div class="help prompt help1">
+            <label>Comma-separated list of email addresses you may use to send email to the database<br>
+            Email sent from these addresses may be harvested into database records</label>
+        </div>
+    </div>            
+
 	<div class="dtyField">
-		<label class="dtyLabel" for="ugr_Department">Department:</label>
+		<label class="dtyLabel" for="ugr_Department">Department</label>
 		<input id="ugr_Department" style="width:200;" maxlength="120" />
 	</div>
 	<div class="dtyField">
-		<label class="dtyLabel" for="ugr_City">Suburb/City:</label>
-		<input id="ugr_City" style="width:200;" maxlength="63" />
+		<label class="dtyLabel" for="ugr_City">Suburb/City</label>
+		<input id="ugr_City" style="width:100;" maxlength="63" />
+        State
+        <input id="ugr_State" style="width:50;" maxlength="40" /> 
+       Zip/postcode
+        <input id="ugr_Postcode" style="width:50;" maxlength="20" />   
 	</div>
-	<div class="dtyField">
-		<label class="dtyLabel" for="ugr_State">State:</label>
-		<input id="ugr_State" style="width:200;" maxlength="40" />
+    
+    <!--
+    <div class="dtyField">
+		<label class="dtyLabel" for="ugr_State">State</label>
+		<input id="ugr_State" style="width:50;" maxlength="40" /> 
+    </div>
+    <div class="dtyField">
+		<label class="dtyLabel" for="ugr_Postcode">Post/zipcode</label>
+		<input id="ugr_Postcode" style="width:50;" maxlength="20" />   
+    </div>
+    -->
+    
+	 <!-- This field is really intended more for user groups-->
+     <div class="dtyField" style="display: none;">
+		<label class="dtyLabel" style="vertical-align:top" for="ugr_Description">Description</label>
+		<textarea cols="200" id="ugr_Description" rows="4" style="width:420;"></textarea>
+        <div class="help prompt help1">
+            <label>Description of a workgroup, used in workgroup homepage<br>&nbsp;</label>
+        </div>
 	</div>
+    
 	<div class="dtyField">
-		<label class="dtyLabel" for="ugr_Postcode">Post/zipcode:</label>
-		<input id="ugr_Postcode" style="width:200;" maxlength="20" />
-	</div>
-	<div class="dtyField">
-		<label class="dtyLabel" style="vertical-align:top" for="ugr_Description">Description:</label>
-		<textarea cols="200" id="ugr_Description" rows="2" style="width:420;"></textarea>
-	</div>
-	<div class="dtyField">
-		<label class="dtyLabel" style="vertical-align:top" for="ugr_URLs">URLs:</label>
-		<textarea cols="200" id="ugr_URLs" rows="2" style="width:420;"></textarea>
+		<label class="dtyLabel" style="vertical-align:top" for="ugr_URLs">Personal Website URLs</label>
+		<textarea cols="200" id="ugr_URLs" rows="1" style="width:420;"></textarea>
 	</div>
 
+<!-- TODO: THESE FIELDS NEED TO BE ACCESSIBLE ONLY TO DATABASE ADMINS -->
 
-	<div class="dtyField">
-		<label class="dtyLabel" for="ugr_Enabled">Enabled:</label>
-		<input id="ugr_Enabled" type="checkbox"/>
-		<div class="help prompt help1">
-			<label>Whether this user is enabled</label>
-		</div>
-	</div>
-
+    <div class="dtyField">
+        <label class="dtyLabel" for="ugr_Enabled">Enabled:</label>
+        <input id="ugr_Enabled" type="checkbox"/>
+        <div class="help prompt help1">
+            <label>Check to enable the user, unchecked users will not be able to log in</label>
+        </div>
+    </div>
+    
+    <div class="dtyField">
+        <label class="dtyLabel" for="ugr_IsModelUser">Model user</label>
+        <input id="ugr_IsModelUser" type="checkbox"/>
+        <div class="help prompt help1">
+            <label>If checked, user's tags, searches and bookmarks will appear in My Profile > Load Profiles</label>
+        </div>
+    </div>
+    
 </div>
 <br/>
 <div id="btn_edits" class="actionButtons">
