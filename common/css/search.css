@@ -1766,6 +1766,22 @@ div.filter .showrelated .relatedCount {
 	border-radius:3px;
 	line-height:12px;
 }
+#result-header div.collapsed{display: none !important;}
+#simple-search {padding-left:0; text-align:left;padding:6px 0 0 0; height:auto; margin:5px 0;}
+div.simplesearch {display:block; width:100px;position:absolute; top:30px; left:300px; padding-left:0; padding:6px 0 0 0; height:13px}
+div.simplesearch.collapsed {
+    background-image: url("../images/heading_saved_search-hidden.png");
+    background-position: 0 -7px;
+    background-repeat: no-repeat;
+    padding-left: 20px;
+}
+div.simplesearch {
+    background-image: url("../images/heading_saved_search.png");
+    background-position: 0 -7px;
+    background-repeat: no-repeat;
+    padding-left: 20px;
+}
+
 #results div.collapsed{height:23px;overflow:hidden;padding-top:1px}
 #results div.collapsed div.recordDiv{display: none !important;}
 ul.menu li ul li.disabled{display:none;}
@@ -1826,7 +1842,7 @@ div.recorddiv:hover > #recordID {
 	}
 
 
-#pageNavCount {height: 7px;padding: 4px 0px 8px; position: absolute !important;right: 10px;text-align: right;top: 1px;z-index: 10;float:right; background:none !important}
+#pageNavCount {height: 7px;padding: 4px 0px 8px; right: 10px;text-align: right;top: 1px;z-index: 10;float:right; background:none !important}
 #pageNavCount span.nav a, #pageNavCount span.nav{color:#2D2D2D; font-weight:normal}
 #page-nav { margin-right: 20px;display:inline-block }
 

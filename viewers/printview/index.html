@@ -314,8 +314,7 @@
 			function onSelectAll(eventType, argList) {
 				//if page xml not loaded then load sync
 				if (eventType == "heurist-selectall"){
-					var tempXML = pageXMLs[1];
-					var recordsNode = tempXML.getElementsByTagName("records")[0];
+					var tempXML, recordsNode;
 					for (var page = 1; page <= pageCount; page++){
 						if (!pageXMLs[page]){ //load pageXML now
 							var pageQuery = query;
@@ -324,10 +323,15 @@
 							var errorMsg = "Error loading " + url + " using XMLHttpRequest";
 							pageXMLs[page] = loadXMLDocFromFile(url);
 						}
+						if (page == 1){
+							tempXML = pageXMLs[page].cloneNode(true); //saw TODO  check if this clones or not
+							recordsNode = tempXML.getElementsByTagName("records")[0];
+						}else{
 						var recordNodes = pageXMLs[page].getElementsByTagName("records")[0].childNodes;
-						for (var i =0; i<recordNodes.length; i++) {
+							for (var i =1; i<recordNodes.length; i++) {
 							recordsNode.appendChild(recordNodes[i].cloneNode(true));
 						}
+					}
 					}
 					pageXMLs[0] = tempXML;
 					selectedIds = [];

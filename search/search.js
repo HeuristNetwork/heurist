@@ -194,6 +194,8 @@ top.HEURIST.search = {
 			("&db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
 						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : ""))) +
 			"&depth=3&limit=1000";
+		top.HEURIST.search.createUsedRectypeSelector(true);
+		top.HEURIST.search.createUsedDetailTypeSelector(true);
 		top.HEURIST.registerEvent(window, "heurist-related-recordset-loaded",
 									function (evt) {
 													top.HEURIST.search.loadLevelFilter(0);
@@ -1156,6 +1158,98 @@ top.HEURIST.search = {
 			return;
 		}
 		top.HEURIST.search.gotoResultPage(0, true);
+	},
+
+	calcShowSimpleSearch: function () {
+		var q = $("#rectype-select").val();
+		var fld = $("#field-select").val();
+		var ctn = $("#input-contains").val();
+		q = (q? (fld?q+" ": q ):"") + (fld?fld + (ctn?'"'+ctn+'"':""):"");
+		if (q) {
+			$("#q").val(q);
+		}
+	},
+
+	createUsedRectypeSelector: function (useIDs) {
+		var rectypes = top.HEURIST.rectypes;
+		var rectypeValSelect = document.getElementById("rectype-select");
+		rectypeValSelect.innerHTML = '<option value="" selected>Any rectype</option>';
+		rectypeValSelect.onchange = function(){
+			if (this.selectedIndex) {
+				var rtID = $(this.options[this.selectedIndex]).attr("rectype");
+				top.HEURIST.search.createRectypeFieldSelector(rtID,true);
+			}else{
+				top.HEURIST.search.createUsedDetailTypeSelector(true);
+			}
+			top.HEURIST.search.calcShowSimpleSearch();
+		}
+		// rectypes displayed in Groups by group display order then by display order within group
+		for (var grpID in rectypes.groups){
+			var grp = document.createElement("optgroup");
+			var firstInGroup = true;
+			grp.label = rectypes.groups[grpID].name;
+			for (var recTypeID in rectypes.groups[grpID].types) {
+				if (rectypes.groups[grpID].types[recTypeID] && rectypes.usageCount[recTypeID]) {
+					if (firstInGroup){
+						rectypeValSelect.appendChild(grp);
+						firstInGroup = false;
+					}
+					var name = rectypes.names[recTypeID];
+					var value =  "t:" + (useIDs ? recTypeID : '"'+name+'"');
+					var opt = new Option(name,value);
+					$(opt).attr("rectype",recTypeID);
+					rectypeValSelect.appendChild(opt);
+//					if (name == top.HEURIST.edit.record.rectype) {
+//						rectypeValSelect.selectedIndex = rectypeValSelect.options.length-1;
+//					}
+				}
+			}
+		}
+	},
+
+	createUsedDetailTypeSelector: function (useIDs) {
+		var detailTypes = top.HEURIST.detailTypes;
+		var fieldValSelect = document.getElementById("field-select");
+		fieldValSelect.innerHTML = '<option value="" selected>Any field</option>';
+		fieldValSelect.onchange =  top.HEURIST.search.calcShowSimpleSearch;
+
+		// rectypes displayed in Groups by group display order then by display order within group
+		for (var grpID in detailTypes.groups){
+			var grp = document.createElement("optgroup");
+			var firstInGroup = true;
+			grp.label = detailTypes.groups[grpID].name;
+			for (var detailTypeID in detailTypes.groups[grpID].types) {
+				if (detailTypes.groups[grpID].types[detailTypeID] && detailTypes.usageCount[detailTypeID]) {
+					if (firstInGroup){
+						fieldValSelect.appendChild(grp);
+						firstInGroup = false;
+					}
+					var name = detailTypes.names[detailTypeID];
+					var value =  "f:" + (useIDs ? detailTypeID : '"'+name+'"') + ":";
+					fieldValSelect.appendChild(new Option(name,value));
+//					if (name == top.HEURIST.edit.record.rectype) {
+//						rectypeValSelect.selectedIndex = rectypeValSelect.options.length-1;
+//					}
+				}
+			}
+		}
+	},
+
+
+	createRectypeFieldSelector: function (rt,useIDs) {
+		var fields = top.HEURIST.rectypes.typedefs[rt].dtFields;
+		var fieldValSelect = document.getElementById("field-select");
+		fieldValSelect.innerHTML = '<option value="" selected>Any field</option>';
+		fieldValSelect.onchange =  top.HEURIST.search.calcShowSimpleSearch;
+		// rectypes displayed in Groups by group display order then by display order within group
+		for (var dtID in fields){
+			var name = fields[dtID][0];
+			var value =  "f:" + (useIDs ? dtID : '"'+name+'"') + ":";
+			fieldValSelect.appendChild(new Option(name,value));
+//			if (name == top.HEURIST.edit.record.rectype) {
+//				rectypeValSelect.selectedIndex = rectypeValSelect.options.length-1;
+//			}
+		}
 	},
 
 	gotoResultPage: function(pageNumber, all) {

@@ -1,6 +1,6 @@
 <?php
 
-/*<!--
+	/*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
@@ -160,13 +160,11 @@
 		   or we can introduce top-top-level AND.
 		   Guess which is easier and more flexible? (and more likely to DWIM?)
 		 */
-
 		new_q_val = new_q_val.replace(snippet, 'AND '+snippet);
 	}
 
 	last_vals[elt.name] = snippet;
 	if (elt.name == 'fieldtype') last_vals['field'] = '';
-
 	q_elt.value = new_q_val.replace(/^\s*AND\b|\bAND\s*$|\bAND\s+(?=AND\b)/g, '').replace(/^\s+|\s+$/g, '');
 			}
 

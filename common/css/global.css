@@ -663,7 +663,7 @@ option {padding-left:15px;background-color: #FFF;}
 #quicklinks {position: absolute;right: 5px;top: 0;z-index: 200000;}
 #quicklink-cell {vertical-align: top;text-align: right;color: #666;font-size:3ex;clear:both;right:10px;top:20px;}
 div#tabbar {z-index:9;clear:left;margin:0;vertical-align:bottom;position:relative;display:block;}
-div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../images/black_gradient.png);background-repeat: repeat-x;top:5px;clear:both}
+div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../images/black_gradient.png);background-repeat: repeat-x;clear:both}
 #viewsButton {position:absolute; top:3px; left:0px; z-index:1000;}
 #tabs, #quicklink-cell, #views, ul.menu {
 	list-style:none;

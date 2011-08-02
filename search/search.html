@@ -92,7 +92,7 @@
 	<script>
 		var hBase = "http://" + window.location.host + top.HEURIST.basePath;
 		var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"";
-		var bugReportURL = hBase + 'export/email/formEmailRecordPopup.html?rectype=777&db='+database; // was 253
+		var bugReportURL = hBase + 'export/email/formEmailRecordPopup.html?rectype=253&db='+database;
 
 		if (location.search.match(/[&?]q=[^&]+/)) {		//there is a search string
 			document.getElementById("searchFrame").src = top.HEURIST.basePath+"search/getResultsPageAsync.php" + location.search;
@@ -174,22 +174,13 @@
 					<li><a href="../admin/ugrps/showSimilarUsers.php" name="auto-popup" title="Find people with similar bookmarking patterns">Find similar users</a></li>
 					<li><a href="../admin/ugrps/manageGroups.html" name="auto-popup" title="Find people with similar bookmarking patterns">My User Groups</a></li>
 					<li><a href="../admin/profile/manageReminders.php" name="auto-popup" title="View and delete automatic notification emails sent from your bookmarks">Manage reminders</a></li>
-                    <li><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,
-                        {    'close-on-blur': false,
-                            'no-resize': false,
-                            height: 520,
-                            width: 740,
-                            callback: _bugReportCallback
-                        });
-                        return false;" title="Click to send a bug report">Report bug</a>
-                    </li>
+					<li><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 520,width: 740,callback: _bugReportCallback});return false;" title="Click to send a bug report">Report bug</a></li>
 				</ul>
 			</li>
 			<li class="logged-in-only"> <span id=advanced-menu-link class="logged-in-only"><b>Advanced</b></span>
 				<ul id="advanced-menu">
                     <li class="admin-only"><a href="../admin/structure/editStructure.php" onClick="this.href = '../admin/adminMenu.php?db=' + database;" target="_blank" title="For administrators only" class="seperator">Database Administration</a></li>
-
-                    <li><a href="../import/email/emailProcessingSetup.php?db=".HEURIST_DBNAME name="auto-popup" class='seperator' title="Harvest email from a designated IMAP email server (set in configuration)">Harvest email</a></li>
+					<li><a href="../import/email/emailProcessingSetup.php" name="auto-popup" class='seperator' title="Harvest email from a designated IMAP email server (set in configuration)">Harvest email</a></li>
 					<li><a href="../import/hyperlinks/importHyperlinks.php" name="auto-popup" title="Import web links from a browser bookmarks file or an html web page file">Import hyperlinks</a></li>
 					<li><a href="../admin/profile/configureProfile.php?body_only&amp;bookmark_import=1" name="auto-popup" title="Settings for web links importer">Importer settings</a></li>
 					
@@ -276,15 +267,34 @@
     	
 		<div class="">Search
 		<input id=q name=q type=text style="width:300px">
-		<input id=my-records-button type=button value="my bookmarks" title="Search only records which have been bookmarked into your collection" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();">
+			<input id=my-records-button type=button value="my bookmarks" title="Search only records which have been bookmarked by you" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();">
 		<input id=all-records-button type=button value="all records"  title="Search across all records in Heurist" onClick="document.getElementById('w-input').value = ''; top.HEURIST.search.submitSearchForm();">
-        
        <div id=add-record> <a id=add-record-link class="toolbar-large-icon-link logged-in-only" title="Add a new record to the Heurist database, setting record type and ownership" href="#" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/addRecordPopup.php'); return false;">Add New Record </a></div>
 		</div>
-        
 	</div></form>
-    
-	
+	<div class="simplesearch" title="Click to show simple search builder panel" onclick='$("#simple-search").toggleClass("collapsed");$(this).toggleClass("collapsed");'></div>
+</div>
+<!-- page -->
+<div id="page" style="position:absolute;left:0;right:0;top:0;bottom:0; background-color:#FFF">
+	<!--<div id=pageNavCount> <nobr> <span id=page-nav></span> <span id=resource-count></span> </nobr></div>-->
+	<div id="result-container">
+	<div id="result-header">
+		<div id="simple-search" class="collapsed">
+			<div class="simple-search-row">
+				<a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">Advanced Search</a>
+				<input type="button" value="Search" onclick="top.HEURIST.search.loadSearch();" />
+			</div>
+			<div class="simple-search-row">
+				<label for="rectype-select">Record type:</label>
+				<select id="rectype-select" ></select>
+			</div>
+			<div class="simple-search-row">
+				<label for="field-select">Field:</label>
+				<select id="field-select" ></select>
+				<label for="input-contains">contains</label>
+				<input type="text" id="input-contains" onkeypress="setTimeout(top.HEURIST.search.calcShowSimpleSearch,0);"/>
+			</div>
+		</div>
 	<div id="tabbar">
 		<ul id="tabs" class="horizontal not-query-collected">
 			<li style="padding: 3px 3px 2px 3px"><span><img src="../common/images/b_splitScreen.png"></span>
@@ -352,11 +362,8 @@
 		</ul>
 
 	</div>
-</div>
-<!-- page -->
-<div id="page" style="position:absolute;left:0;right:0;top:0;bottom:0; background-color:#FFF">
-	<!--<div id=pageNavCount> <nobr> <span id=page-nav></span> <span id=resource-count></span> </nobr></div>-->
-	<div id="result-container">
+
+	</div>
 		<div id="results">
         <div id=pageNavCount><div id=page-nav></div> <div id=resource-count></div></div>
         <div id="active-label"></div>
