@@ -308,7 +308,7 @@
 			
 			<li><span>Search</span>
 				<ul>
-					<li><a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">Advanced Search</a></li>
+                    <li><a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">Advanced Search</a></li>
 					<li><a href="../help/advanced_search.html" title="Detailed description of the syntax for advanced search strings" target=_blank>Help</a></li>
 					<li><a href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members" onClick="top.HEURIST.util.popupURL(window, 'saved/saveSearchPopup.html'); return false;"></span>Save search to...</a></li>
 					<li><a href="#" onClick="top.HEURIST.search.printResultRow()" title="Print search results">Print</a></li>
@@ -344,9 +344,10 @@
 			</li>
 			<li><span>Share</span>
 				<ul>
-					<li><a href="#" onClick="top.HEURIST.search.setWorkgroupPopup(); return false;" title="Select one or more records, then click to set workgroup ownership and visibility">Set workgroup</a></li>
+					<li><a href="#" onClick="top.HEURIST.search.setWorkgroupPopup(); return false;" title="Select one or more records, then click to set workgroup ownership and visibility">Set workgroup/visibility</a></li>
 					<li><a href="#" onClick="top.HEURIST.search.addRemoveKeywordsPopup(); return false;" title="Select one or more records, then click to add or remove workgroup tags">Workgroup Tag</a></li>
-					<li><a href="#" onClick="top.HEURIST.search.notificationPopup(); return false;" title="Select one or more records, then click to send notification">Notify (email)</a></li>
+					<li><a href="#" onClick="top.HEURIST.search.notificationPopup(); return false;" title="Select one or more records, then click to send notification">Email to user(s)</a></li>
+                    <li><a href="#" onClick="top.HEURIST.search.emailToDatabasePopup(); return false;" title="Select one or more records, then click to email data to another Heurist database">Email to database</a></li>
 				</ul>
 			</li>
 			<li><span>View</span>

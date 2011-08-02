@@ -1,7 +1,7 @@
 <!--
 
 /**
- * filename, brief description, date of creation, by whom
+ * setRecordOwnership.html, Bulk setting of ownership adn visibility on selected set of records
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
@@ -13,7 +13,7 @@
 <html>
  <head>
   <link rel=stylesheet href="../../common/css/heurist.css">
-  <title>Set workgroup ownership and visbility</title>
+  <title>Set workgroup ownership/visibility</title>
 
   <style>
 	body { font-size: 11px; }
@@ -33,24 +33,26 @@
 
  </head>
 
- <body width=400 height=250>
+ <body width=500 height=200>
 
 <table cellspacing=10>
  <tr>
   <td><nobr>Records are editable by:</nobr></td>
   <td>
    <select id=wg-select>
-    <option value=0>Anybody (no restriction)</option>
+    <option value=0>Any logged-in user (no restriction)</option>
    </select>
   </td>
  </tr>
 
  <tr>
-  <td>Other Heurist users:</td>
+  <td>Record is visible to:</td>
   <td>
-   <label for=non-wg-view><input type=radio name=non-wg-vis id=non-wg-view checked> cannot edit the record</label>
-   <br>
-   <label for=non-wg-hide><input type=radio name=non-wg-vis id=non-wg-hide> cannot view or edit the record</label>
+   <label for=non-wg-pub><input type=radio name=non-wg-vis id=non-wg-pub> Anyone (public, except restricted fields)</label>
+   <br>&nbsp;<br>
+   <label for=non-wg-view><input type=radio name=non-wg-vis id=non-wg-view checked> Logged in users</label>
+   <br>&nbsp;<br> 
+   <label for=non-wg-hide><input type=radio name=non-wg-vis id=non-wg-hide> This user / members of this group</label>
   </td>
  </tr>
 
@@ -58,7 +60,7 @@
 
  <tr>
   <td colspan=2 style="width: 100%; text-align: right;">
-   <input type=submit value=save onclick="window.close($('#wg-select').val(), $('#non-wg-hide')[0].checked);">
+   <input type=submit value=save onclick="window.close($('#wg-select').val(), $('#non-wg-view')[0].checked, $('#non-wg-hide')[0].checked);">
    <input type=submit value=cancel onclick="window.close();">
   </td>
  </tr>
