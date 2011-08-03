@@ -36,7 +36,8 @@
 //		rt, wg_id,vis, kwd, tags, restrict Access;
 var defaults = [ <?= ($addRecDefaults ? $addRecDefaults :'') ?>];
 var usrID = <?= get_user_id() ?> ;
-
+var defAccess = '<?= HEURIST_NEWREC_ACCESS?HEURIST_NEWREC_ACCESS:"viewable"?>';
+var defOwnerID = <?=in_array(HEURIST_NEWREC_OWNER_ID,get_group_ids())?HEURIST_NEWREC_OWNER_ID:0?>;
 $(document).ready(function() {
 	$("#show-adv-link").click(function() {
 		$(this).hide();
@@ -65,6 +66,8 @@ $(document).ready(function() {
 	}else{
 	var matches = location.search.match(/wg_id=(\d+)/);
 	buildworkgroupTagselect(matches ? matches[1] : null);
+		$("#rec_NonOwnerVisibility").val(defAccess);
+		$("#rec_OwnerUGrpID").val(parseInt(defOwnerID));
 	}
 	update_link();
 });
@@ -293,7 +296,8 @@ function cancelAdd(e) {
 				<div class="input-header-cell">Outside this group:</div>
 				<div class="input-cell">
 					<select name="rec_NonOwnerVisibility" id="rec_NonOwnerVisibility" style="width: 200px;">
-						<option value="viewable">record is read-only</option>
+						<option value="public">record is public</option>
+						<option value="viewable">record is viewable</option>
 						<option value="hidden">record is hidden</option>
 					</select>
 				</div>

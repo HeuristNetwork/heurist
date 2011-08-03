@@ -194,7 +194,7 @@ top.HEURIST.search = {
 			("&db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
 						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : ""))) +
 			"&depth=3&limit=1000";
-		top.HEURIST.search.createUsedRectypeSelector(true);
+		top.HEURIST.search.createUsedRectypeSelector(false);
 		top.HEURIST.search.createUsedDetailTypeSelector(true);
 		top.HEURIST.registerEvent(window, "heurist-related-recordset-loaded",
 									function (evt) {
@@ -1198,6 +1198,7 @@ top.HEURIST.search = {
 					var value =  "t:" + (useIDs ? recTypeID : '"'+name+'"');
 					var opt = new Option(name,value);
 					$(opt).attr("rectype",recTypeID);
+					$(opt).attr("title","" + rectypes.usageCount[recTypeID] + " records");
 					rectypeValSelect.appendChild(opt);
 //					if (name == top.HEURIST.edit.record.rectype) {
 //						rectypeValSelect.selectedIndex = rectypeValSelect.options.length-1;
@@ -1224,7 +1225,7 @@ top.HEURIST.search = {
 						fieldValSelect.appendChild(grp);
 						firstInGroup = false;
 					}
-					var name = detailTypes.names[detailTypeID];
+					var name = detailTypes.names[detailTypeID] +" (" + detailTypeID + ")";
 					var value =  "f:" + (useIDs ? detailTypeID : '"'+name+'"') + ":";
 					fieldValSelect.appendChild(new Option(name,value));
 //					if (name == top.HEURIST.edit.record.rectype) {
@@ -1243,7 +1244,7 @@ top.HEURIST.search = {
 		fieldValSelect.onchange =  top.HEURIST.search.calcShowSimpleSearch;
 		// rectypes displayed in Groups by group display order then by display order within group
 		for (var dtID in fields){
-			var name = fields[dtID][0];
+			var name = fields[dtID][0] +" (" + dtID + ")";
 			var value =  "f:" + (useIDs ? dtID : '"'+name+'"') + ":";
 			fieldValSelect.appendChild(new Option(name,value));
 //			if (name == top.HEURIST.edit.record.rectype) {

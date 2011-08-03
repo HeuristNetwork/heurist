@@ -159,8 +159,10 @@
 			function openWorkgroupChanger() {
 				if (top.HEURIST.edit.record.workgroupVisibility == "hidden") {
 					document.getElementById("non-wg-hide").checked = true;
-				} else {
+				} else if (top.HEURIST.edit.record.workgroupVisibility == "viewable"){
 					document.getElementById("non-wg-view").checked = true;
+				} else {
+					document.getElementById("non-wg-public").checked = true;
 				}
 
 				var wgVal = document.getElementById("new-workgroup-value");
@@ -168,14 +170,16 @@
 					wgVal.removeChild(wgVal.lastChild);
 				}
 				wgVal.options[0] = new Option("Anybody (no restriction)", "");
+				wgVal.options[1] = new Option(top.HEURIST.get_user_name(), top.HEURIST.get_user_id());
 				wgVal.selectedIndex = 0;
 				for (var i=0; i < top.HEURIST.user.workgroups.length; ++i) {
 					var wgID = top.HEURIST.user.workgroups[i];
 					var wgName = top.HEURIST.workgroups[wgID].name;
-					wgVal.options[i+1] = new Option(wgName, wgID);
+					wgVal.options[i+2] = new Option(wgName, wgID);
 
-					if (wgName == top.HEURIST.edit.record.workgroup)
-					wgVal.selectedIndex = i+1;
+					if (wgName == top.HEURIST.edit.record.workgroup){
+						wgVal.selectedIndex = i+2;
+					}
 				}
 
 
@@ -191,9 +195,9 @@
 			function closeWorkgroupChanger(cancel) {
 				if (! cancel) {
 					var wgValue = document.getElementById("new-workgroup-value").value;
-					var wgVisValue = document.getElementById("non-wg-hide").checked? "hidden" : "viewable";
+					var wgVisValue = document.getElementById("non-wg-hide").checked? "hidden" : (document.getElementById("non-wg-view").checked?"viewable":"public");
 					if (top.HEURIST.edit.record.workgroup != wgValue  ||  top.HEURIST.edit.record.workgroupVisibility != wgVisValue) {
-						top.HEURIST.edit.record.workgroup = wgValue? top.HEURIST.workgroups[wgValue].name : null;
+						top.HEURIST.edit.record.workgroup = wgValue? (wgValue == top.HEURIST.get_user_id() ? top.HEURIST.get_user_name() : top.HEURIST.workgroups[wgValue].name) : null;
 						top.HEURIST.edit.record.workgroupVisibility = wgVisValue;
 
 						top.HEURIST.edit.modules["public"].frame.contentWindow.setWorkgroupProperties(wgValue, wgVisValue);
@@ -380,18 +384,19 @@
 <!-- end footer -->
 <div style="position: absolute;"><div id=workgroup-editor style="display: none;">
 		<table id=workgroupTable border=0 cellspacing=4><tbody>
-				<tr><td colspan=2><b>Change workgroup access:</b></td></tr>
+				<tr><td colspan=2><b>Change record access:</b></td></tr>
 				<tr>
 					<td>Record is editable by</td>
 					<td><select id=new-workgroup-value class=in></select></td>
 				</tr>
 				<tr>
-					<td><span style="position: relative; top: 1.2ex;">Other Heurist users</span></td>
-					<td><label for=non-wg-view><input type=radio name=new-non-workgroup value=viewable id=non-wg-view> cannot edit the record</label></td>
+					<td colspan=2><label for=non-wg-public><input type=radio name=new-non-workgroup value=public id=non-wg-public>Anyone can view the record (published)</label><div style="margin-left: 20px;">(except fields marked as restricted)</div></td>
 				</tr>
 				<tr>
-					<td>&nbsp;</td>
-					<td><label for=non-wg-hide><input type=radio name=new-non-workgroup value=hidden id=non-wg-hide> cannot view or edit the record</label></td>
+					<td colspan=2><label for=non-wg-view><input type=radio name=new-non-workgroup value=viewable id=non-wg-view>Logged in users can view the record</label></td>
+				</tr>
+				<tr>
+					<td colspan=2><label for=non-wg-hide><input type=radio name=new-non-workgroup value=hidden id=non-wg-hide>Only members of this groups can view the record</label></td>
 				</tr>
 				<tr><td style="text-align: right; padding: 2px;" colspan=2>
 						<input type=button value="Change" style="font-weight: bold;" onClick="closeWorkgroupChanger();">

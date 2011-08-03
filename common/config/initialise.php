@@ -190,6 +190,7 @@
 	}
 
 	define ('HEURIST_NEWREC_OWNER_ID', $sysValues['sys_NewRecOwnerGrpID']);
+	define ('HEURIST_NEWREC_ACCESS', $sysValues['sys_NewRecAccess']);
 
 	// set up email defines
 	if ($infoEmail) {
