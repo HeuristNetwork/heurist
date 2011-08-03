@@ -28,9 +28,9 @@ function getCachedData($key) {
 			return array("error" => "couldn't connect to memcached");
 		}
 	}
-	if (!$lastModified) {
+//	if (!$lastModified) {
 		setLastModified();
-	}
+//	}
 //error_log("key = $key lastMod = $lastModified and cached = ".$memcache->get('lastUpdate:'.$key));
 	if ($lastModified > $memcache->get('lastUpdate:'.$key)) {
 		// check the cached lastupdate value and return false on not equal meaning recreate data
@@ -48,9 +48,9 @@ function setCachedData($key, $var) {
 			return array("error" => "couldn't connect to memcached");
 		}
 	}
-	if (!$lastModified) {
+//	if (!$lastModified) {
 		setLastModified();
-	}
+//	}
 	$memcache->set('lastUpdate:'.$key,$lastModified);
 	return $memcache->set($key,$var);
 }

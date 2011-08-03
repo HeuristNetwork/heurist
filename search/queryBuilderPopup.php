@@ -64,7 +64,7 @@
 
 	if (elt.name === "type") {
 		// update the list of record-type-specific bib-detail-types
-		var typeOptgroup = document.getElementById("rec_RecTypeID-specific-fields");
+		var typeOptgroup = document.getElementById("rectype-specific-fields");
 		var typeSelect = document.getElementById("fieldtype");
 		var prevValue = typeSelect.options[typeSelect.selectedIndex].value;
 
@@ -407,77 +407,102 @@
 	</head>
 	<body class="popup" width=700 height=600 style="overflow: hidden;" onload="load_query();">
 
-		<div style="float: right;"><a href="#" onclick="clear_fields(); return false;">Clear search string</a></div>
-		<div>Build search using fields below, or edit the search string directly, here or on the main page</div>
+
+		<table style="width: 100%;">
+
+			<tr>
+				<td style="padding-left: 30px;">
+					<strong>Search&nbsp;string</strong>
+				</td>
+			</tr>
+			<tr>
+				<td style="padding-left: 30px;">
+					<input style="width: 100%; padding:0 3px" name=q id=q >
+				</td>
+				<td style="padding-left: 30px;">
+					<button type="button" onclick="clear_fields(); return false;" style="margin-right:10px">Clear</button>
+					<button type="button" onclick="do_search();">Search</button>
+				</td>
+			</tr>
+			<tr>
+				<td  style="padding-left: 30px;">Build search using fields below, or edit the search string directly, here or on the main page</td>
+			</tr>
+		</table>
 
 		<div class="separator_row" style="margin:10px 0"></div>
+		<div style="padding-left: 30px; color: #666;">
+			See also <a href="#" onclick="top.HEURIST.util.popupURL(window, '<?=HEURIST_URL_BASE?>help/advanced_search.html'); return false;">help for advanced search</a>.
+		</div>
+		<div style="padding-left: 30px; color: #666;">
+			Use <b>tag:</b>, <b>type:</b>, <b>url:</b>, <b>notes:</b>, <b>owner:</b>, <b>user:</b>, <b>field:</b> and <b>all:</b> modifiers.<br>
+			To find records with geographic objects that contain a given point, use <b>latitude</b> and <b>longitude</b>, e.g.
+			<b>latitude:10 longitude:100</b><br>
+			Use e.g. <b>title=</b><i>xxx</i> to match exactly, similarly <b>&lt;</b> or <b>&gt;</b>.<br>
+			To find records that include either of two search terms, use an uppercase OR. e.g. <b>timemap OR &quot;time map&quot;</b><br>
+			To omit records that include a search term, precede the term with a single dash. e.g. <b>-maps -tag:timelines</b><br>
+		</div>
 
-  <table border=0 cellspacing=0 style="font-size: 10px; width: 620px; padding-right: 8px;">
-   <tr><td colspan=3><h3>Selection:</h3></td></tr>
+	<div class="separator_row" style="margin:10px 0"></div>
 
+	<table>
    <tr>
-    <td class=r>Tags:</td>
-    <td><input name=tag id=tag onchange="update(this);" onkeypress="return keypress(event);"></td>
-    <td rowspan=6 style="vertical-align: top;">
+			<td class=r>Sort&nbsp;by:</td>
+			<td>
+				<script>
+					function setAscDescLabels(sortbyValue) {
+						var ascLabel = document.getElementById("asc-label");
+						var descLabel = document.getElementById("desc-label");
 
-     <fieldset style="padding: 4px;">
-      <legend>Bibliographic/public data fields</legend>
-      <div style="float: right;">
-      <nobr>
-								<select name=fieldtype id=fieldtype onchange="update(this);" style="width: 200px;">
- <option value="" style="font-weight: bold;">Any field</option>
- <optgroup id=rec_type-specific-fields label="rectype specific fields" style="display: none;"></optgroup>
- <optgroup label="Generic fields">
+						if (sortbyValue === "r"  ||  sortbyValue === "p") {
+							// ratings should have best first,
+							// popularity should have most-popular first
+							ascLabel.text = "decreasing";
+							descLabel.text = "increasing";
+						}
+						else {
+							ascLabel.text = "ascending";
+							descLabel.text = "descending";
+						}
+					}
+				</script>
+				<select name=sortby id=sortby onchange="setAscDescLabels(options[selectedIndex].value); update(this);" style="width: 200px;">
+					<option value=t>record title</option>
+					<option value=u>record URL</option>
+					<option value=m>date modified</option>
+					<option value=a>date added</option>
+					<option value=r>personal rating</option>
+					<option value=p>popularity</option>
+					<optgroup label="Detail fields">
 										<?php
 	$res = mysql_query('select dty_ID, dty_Name from '.DATABASE.'.defDetailTypes order by dty_Name');
 	while ($row = mysql_fetch_assoc($res)) {
-											?>          <option value="&quot;<?= htmlspecialchars($row['dty_Name']) ?>&quot;"><?= htmlspecialchars($row['dty_Name']) ?></option>
+							?>          <option value="f:&quot;<?= $row['dty_Name'] ?>&quot;"><?= htmlspecialchars($row['dty_Name']) ?></option>
 											<?php	}	?>
  </optgroup>
 								</select>
-      </nobr>
-      </div>
-      <br clear=all>
+			</td>
+			<td>
       <div style="float: right;">
-      <nobr>
-     contains
-     <input id=field name=field onchange="update(this);" onkeypress="return keypress(event);" style="width: 200px;">
-      </nobr>
+					<input type=checkbox id=sortby_multiple style="margin: 0; padding: 0; height: auto; width: auto; vertical-align: middle;" disabled onclick="update(document.getElementById('sortby'));">
+					<label for=sortby_multiple id=sortby_multiple_label style="color: gray;">Bibliographic<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(sort by first value only)</label>
       </div>
-      <br clear=all>
-      <div style="float: right;">
-      <nobr>
-     <input type="button" value="Add to search" style="width: 120px;">
-      </nobr>
-      </div>
-     </fieldset>
 
-				</td>
-			</tr>
 
-			<?php
-	$res = mysql_query('select concat('.GROUPS_NAME_FIELD.', "\\\\", tag_Text) from '.DATABASE.'.usrTags, '.USER_GROUPS_TABLE.', '.GROUPS_TABLE.' where tag_UGrpID='.USER_GROUPS_GROUP_ID_FIELD.' and '.USER_GROUPS_GROUP_ID_FIELD.'='.GROUPS_ID_FIELD.' and '.USER_GROUPS_USER_ID_FIELD.'=' . get_user_id() . ' order by '.GROUPS_NAME_FIELD.', tag_Text');
-	if (mysql_num_rows($res) > 0) {
-				?>
-   <tr>
-    <td class=r>Workgroup&nbsp;tags:</td>
-    <td style="padding-top: 6px; padding-bottom: 6px; text-align: left;" colspan=2>
-     <select onchange="if (selectedIndex) add_tag(options[selectedIndex].value);">
-      <option value="" selected disabled>(select...)</option>
-							<?php		while ($row = mysql_fetch_row($res)) {	?>
-      <option value="<?= htmlspecialchars($row[0]) ?>"><?= htmlspecialchars($row[0]) ?></option>
-								<?php		}	?>
+				<select id=ascdesc style="width: 100px;" onchange="update(document.getElementById('sortby'));">
+					<option value="" selected id=asc-label>ascending</option>
+					<option value="-" id=desc-label>descending</option>
      </select>
+				&nbsp;&nbsp;
+
+
     </td>
    </tr>
-				<?php
-	} else {
-				?>
-    <td><td colspan=2></td></tr>
-				<?php
-	}
-			?>
 
+	</table>
+	<div class="separator_row" style="margin:10px 0"></div>
+
+
+		<table border=0 cellspacing=0 style="font-size: 10px; width: 620px; padding-right: 8px;">
    <tr>
     <td class=r>Record&nbsp;type:</td>
     <td>
@@ -507,6 +532,40 @@
    </tr>
 
    <tr>
+				<td class=r>Fields:</td>
+				<td  style="vertical-align: top;">
+
+					<select name=fieldtype id=fieldtype onchange="update(this);" style="width: 200px;">
+						<option value="" style="font-weight: bold;">Any field</option>
+						<optgroup id="rectype-specific-fields" label="rectype specific fields" style="display: none;"></optgroup>
+						<optgroup label="Generic fields">
+							<?php
+								$res = mysql_query('select dty_ID, dty_Name from '.DATABASE.'.defDetailTypes order by dty_Name');
+								while ($row = mysql_fetch_assoc($res)) {
+								?>          <option value="&quot;<?= htmlspecialchars($row['dty_Name']) ?>&quot;"><?= htmlspecialchars($row['dty_Name']) ?></option>
+								<?php	}	?>
+						</optgroup>
+					</select>
+					</nobr>
+					</div>
+					<br clear=all>
+					<div style="float: right;">
+						<nobr>
+							contains
+							<input id=field name=field onchange="update(this);" onkeypress="return keypress(event);" style="width: 200px;">
+						</nobr>
+					</div>
+					<br clear=all>
+					<div style="float: right;">
+						<nobr>
+							<input type="button" value="Add to search" style="width: 120px;">
+						</nobr>
+					</div>
+				</td>
+			</tr>
+
+
+			<tr>
     <td class=r>Title:</td>
     <td><input name=title id=title onchange="update(this);" onkeypress="return keypress(event);"></td>
    </tr>
@@ -521,12 +580,36 @@
     <td class=l><input id=notes name=notes onchange="update(this);" onkeypress="return keypress(event);"></td>
    </tr>
 
+			<tr>
+				<td class=r>Tags:</td>
+				<td><input name=tag id=tag onchange="update(this);" onkeypress="return keypress(event);"></td>
+			<?php
+				$res = mysql_query('select concat('.GROUPS_NAME_FIELD.', "\\\\", tag_Text) from '.DATABASE.'.usrTags, '.USER_GROUPS_TABLE.', '.GROUPS_TABLE.' where tag_UGrpID='.USER_GROUPS_GROUP_ID_FIELD.' and '.USER_GROUPS_GROUP_ID_FIELD.'='.GROUPS_ID_FIELD.' and '.USER_GROUPS_USER_ID_FIELD.'=' . get_user_id() . ' order by '.GROUPS_NAME_FIELD.', tag_Text');
+				if (mysql_num_rows($res) > 0) {
+				?>
+					<td class=r> or </td>
+					<td style="padding-top: 6px; padding-bottom: 6px; text-align: left;" colspan=2>
+						<select onchange="if (selectedIndex) add_tag(options[selectedIndex].value);">
+							<option value="" selected disabled>(select...)</option>
+							<?php		while ($row = mysql_fetch_row($res)) {	?>
+								<option value="<?= htmlspecialchars($row[0]) ?>"><?= htmlspecialchars($row[0]) ?></option>
+								<?php		}	?>
+						</select>
+					</td>
+				<?php
+					} else {
+				?>
+					<td colspan=2></td>
+				<?php
+					}
+			?>
+			</tr>
 			<?php
 				$groups = mysql__select_assoc(USERS_DATABASE.".".USER_GROUPS_TABLE." left join ".USERS_DATABASE.".".GROUPS_TABLE." on ".USER_GROUPS_GROUP_ID_FIELD."=".GROUPS_ID_FIELD, GROUPS_ID_FIELD, GROUPS_NAME_FIELD, USER_GROUPS_USER_ID_FIELD."=".get_user_id()." and ".GROUPS_TYPE_FIELD."='workgroup' order by ".GROUPS_NAME_FIELD);
 	if ($groups  &&  count($groups) > 0) {
 				?>
    <tr>
-    <td class=r>Owner:</td>
+				<td class=r>Owned&nbsp;by:</td>
     <td class=l>
      <select name="owner" id="owner" onchange="update(this);">
       <option value="" selected="selected">(any owner or ownergroup)</option>
@@ -568,101 +651,7 @@
 
 		</table>
 
-	<div class="separator_row" style="margin:10px 0"></div>
 
-		<table>
-   <tr><td colspan=3><h3>Ordering:</h3></td></tr>
-
-   <tr>
-    <td class=r>Sort&nbsp;by</td>
-    <td>
-					<script>
-						function setAscDescLabels(sortbyValue) {
-	var ascLabel = document.getElementById("asc-label");
-	var descLabel = document.getElementById("desc-label");
-
-	if (sortbyValue === "r"  ||  sortbyValue === "p") {
-		// ratings should have best first,
-		// popularity should have most-popular first
-		ascLabel.text = "decreasing";
-		descLabel.text = "increasing";
-	}
-	else {
-		ascLabel.text = "ascending";
-		descLabel.text = "descending";
-	}
-						}
-					</script>
-					<select name=sortby id=sortby onchange="setAscDescLabels(options[selectedIndex].value); update(this);" style="width: 200px;">
- <option value=t>record title</option>
- <option value=u>record URL</option>
- <option value=m>date modified</option>
- <option value=a>date added</option>
- <option value=r>personal rating</option>
- <option value=p>popularity</option>
-						<optgroup label="Detail fields">
-							<?php
-	$res = mysql_query('select dty_ID, dty_Name from '.DATABASE.'.defDetailTypes order by dty_Name');
-	while ($row = mysql_fetch_assoc($res)) {
-								?>          <option value="f:&quot;<?= $row['dty_Name'] ?>&quot;"><?= htmlspecialchars($row['dty_Name']) ?></option>
-								<?php	}	?>
-						</optgroup>
-					</select>
-    </td>
-    <td>
-					<div style="float: right;">
-						<input type=checkbox id=sortby_multiple style="margin: 0; padding: 0; height: auto; width: auto; vertical-align: middle;" disabled onclick="update(document.getElementById('sortby'));">
-						<label for=sortby_multiple id=sortby_multiple_label style="color: gray;">Bibliographic<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(sort by first value only)</label>
-					</div>
-
-
-					<select id=ascdesc style="width: 100px;" onchange="update(document.getElementById('sortby'));">
-						<option value="" selected id=asc-label>ascending</option>
-						<option value="-" id=desc-label>descending</option>
-					</select>
-					&nbsp;&nbsp;
-
-
-    </td>
-   </tr>
-
-		</table>
-
-	<div class="separator_row" style="margin:10px 0"></div>
-
-		<table>
-
-   <tr><td colspan=3><h3>Search:</h3></td></tr>
-
-   <tr>
-    <td colspan=3 style="padding-left: 30px; color: #666;">
-      Use <b>tag:</b>, <b>type:</b>, <b>url:</b>, <b>notes:</b>, <b>owner:</b>, <b>user:</b>, <b>field:</b> and <b>all:</b> modifiers.<br>
-      To find records with geographic objects that contain a given point, use <b>latitude</b> and <b>longitude</b>, e.g.
-       <b>latitude:10 longitude:100</b><br>
-      Use e.g. <b>title=</b><i>xxx</i> to match exactly, similarly <b>&lt;</b> or <b>&gt;</b>.<br>
-      To find records that include either of two search terms, use an uppercase OR. e.g. <b>timemap OR &quot;time map&quot;</b><br>
-      To omit records that include a search term, precede the term with a single dash. e.g. <b>-maps -tag:timelines</b><br>
-      See also <a href="#" onclick="top.HEURIST.util.popupURL(window, '<?=HEURIST_URL_BASE?>help/advanced_search.html'); return false;">help for advanced search</a>.
-    </td>
-   </tr>
-
-	<tr>
-	<td colspan="2" style="padding-left: 30px;">
-	<strong>Search&nbsp;string</strong>
-	</td>
-			</tr>
-			<tr>
-	<td colspan=2 style="padding-left: 30px;">
-	<input style="width: 100%; padding:0 3px" name=q id=q >
-	</td>
-			</tr>
-			<tr>
-	<td colspan=2 style="padding-left: 30px;">
-		<button type="button" onclick="clear_fields(); return false;" style="margin-right:10px">Clear</button>
-		<button type="button" onclick="do_search();">Search</button>
-	</td>
-			</tr>
-		</table>
 
  </body>
 </html>

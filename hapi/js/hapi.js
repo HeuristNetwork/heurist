@@ -635,7 +635,7 @@ var HRecord = function() {
 			if (HAPI.isA(values[i], "HRecord")) {
 				record = values[i];
 			} else if (HAPI.isA(values[i], "HRecordStub")) {
-				record = values[1].getRecord();
+				record = values[i].getRecord();
 				if (! record) {
 					throw new HRecordStubException("Record contains references to unloaded records");
 				}
@@ -663,16 +663,16 @@ var HRecord = function() {
 		var detailID = bits.pop();
 		var refID = bits.pop();
 
-		if (refID === 158) {
+		if (refID === 158) {	//MAGIC NUMBER
 			// an AuthorEditor
 			if (values.length === 1) {
-				if (! values[0]) { return (detailID === 291)? "Anonymous" : ""; }
+				if (! values[0]) { return (detailID === 291)? "Anonymous" : ""; }	//MAGIC NUMBER
 				else { return values[0]; }
 			}
 			else {
-				if (! values[0]) { return (detailID === 291)? "multiple anonymous authors" : ""; }
+				if (! values[0]) { return (detailID === 291)? "multiple anonymous authors" : ""; }	//MAGIC NUMBER
 				else {
-					if (detailID === 291) { return values[0] + " et al."; }
+					if (detailID === 291) { return values[0] + " et al."; }	//MAGIC NUMBER
 					else { return values[0]; }
 				}
 			}

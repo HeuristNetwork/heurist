@@ -173,23 +173,6 @@ function add_email_as_record($email){
     		$email->setRecId($rec_id);
 	}
 
-	/*
-    mysql__insert('records', array('rec_url'=>'',
-                                   'rec_title'=>$email->getSubject(),
-                                   'rec_scratchpad'=>$description,
-                                   'rec_added'=>date('Y-m-d H:i:s'),
-                                   'rec_modified'=>date('Y-m-d H:i:s'),
-                                   'rec_added_by_usr_id'=>intval(get_user_id()),
-                                   'rec_type'=>183, // email
-                                   'rec_wg_id'=>0,
-                                   'rec_visibility'=>1,
-                                   'rec_temporary'=>0));
-    $rec_id=mysql_insert_id();
-
-    if($rec_id){
-        $email->setRecId($rec_id);
-
-    }*/
 
     printEmail($email);
 

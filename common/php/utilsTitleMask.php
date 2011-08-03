@@ -137,7 +137,7 @@ function _title_mask__check_field_name($field_name, $rt) {
 			return '';
 		} else {
 			return $rdt_name . ' in type "' . $rct[$rt] . '" is a resource identifier - that is definitely not what you want.  ' .
-					'Try "' . $field_name . '.Title", for example';
+					'Try "' . $field_name . '.RecTitle", for example';
 		}
 	}
 
@@ -203,11 +203,14 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt) {
 		} else {	// do a field name lookup
 			$rdr = _title_mask__get_rec_detail_requirements();
 			$rdt_id = @$rdr[$rt][strtolower($field_name)]['dty_ID'];
-			if (strtolower($field_name === "rectitle") ||
-				(!@$rtd_id && strtolower($field_name) === "title")) {
+			if (!@$rtd_id && strtolower($field_name) === "title") {
+				return '"title" field not defined for rectype '.$rt;
+			}else if (!@$rtd_id || strtolower($field_name) === "rectitle") {
 				$resRec = mysql_query("select rec_Title from Records where rec_ID=$rec_id");
 				if (mysql_error()) {
 					return '';
+				}else if (@$rtd_id) {
+					return 'error - reserved word "rectitle" used as field name in rectype '.$rt;
 				}
 				$title = mysql_fetch_row($resRec);
 				$title = $title[0];

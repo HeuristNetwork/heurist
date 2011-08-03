@@ -185,7 +185,7 @@ function print_header_line($bib) {
 	<div id=footer>
         <h3><?= htmlspecialchars($bib['rty_Name']) ?></h3>
         <?php if (@$url) { ?>
-        <?= htmlspecialchars($url) ?><span class="link"><a target=_new href="<?= htmlspecialchars($url) ?>"><?= output_chunker($url) ?></a>
+        <span class="link"><a target=_new href="<?= htmlspecialchars($url) ?>"><?= output_chunker($url) ?></a>
         <?php if ($webIcon) print "<img id=website-icon src='" . $webIcon . "'>"; ?>
          </span>
         <?php } ?>
