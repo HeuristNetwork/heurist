@@ -2772,7 +2772,7 @@ function removeCustomAlert() {
 				var layout2 = new YAHOO.widget.Layout(el, {
 				parent: layout,
 				units: [
-					{ position: 'top', height: 50, body: 'search', header: '', gutter: '0', collapse: false, resize: false },
+					{ position: 'top', height: 28, body: 'search', header: '', gutter: '0', collapse: false, resize: false },
 					{ position: 'left', width: searchWidth, resize: true, useShim: true, gutter: '0', collapse: true, scroll: true, body: 'page', animate: false, collapseSize: 0, minWidth:180},
 					{ position: 'center', body: 'page-right'}
 					]

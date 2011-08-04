@@ -80,7 +80,8 @@ a {
 	width: 300px;
 }
 #q {
-	width: 100%;
+	margin: 4px;
+	padding: 0;
 }
 #toolbar select {
 	width: 150px;
@@ -167,7 +168,7 @@ body.w-bookmark #results {
 	margin-left: 10px;
 }
 #all-records-button {
-	margin-right: 20px;
+	margin-right: 5px;
 }
 #main {
 	padding-top: 20px;
@@ -1066,17 +1067,14 @@ div.hide .saved-search-subheading {
 
 #add-record-link, #new-entry-button {
 	background-image: url("../images/add-record-small.png");
-    background-position: 2px 3px;
+    background-position: 2px 2px;
     background-repeat: no-repeat;
-    padding: 5px 5px 5px 20px;
-    padding: 5px 5px 5px 20px;
+    padding: 4px 20px;
     white-space: nowrap;
-    margin: 0 0 0 20px;
 }
 #add-record-link:hover, #new-entry-button:hover {text-decoration:none}
 #add-record {
     border-left: 1px solid rgba(150, 150, 150, 0.3);
-    display: inline-block;
     height: 100%;
     }
 .shadow {
@@ -1496,7 +1494,7 @@ div#layout-doc.yui-layout-doc div#yui-gen8.yui-layout-unit div#yui-gen9.yui-layo
 .searchTable {
 	display:table;
 	float:left;
-	padding:4px 10px 0 0;
+	padding:4px 10px 4px 0;
 }
 .yui-layout-doc {
 	left:0 !important;
@@ -1766,20 +1764,63 @@ div.filter .showrelated .relatedCount {
 	border-radius:3px;
 	line-height:12px;
 }
-#result-header div.collapsed{display: none !important;}
-#simple-search {padding-left:0; text-align:left;padding:6px 0 0 0; height:auto; margin:5px 0;}
-div.simplesearch {display:block; width:100px;position:absolute; top:30px; left:300px; padding-left:0; padding:6px 0 0 0; height:13px}
-div.simplesearch.collapsed {
-    background-image: url("../images/heading_saved_search-hidden.png");
-    background-position: 0 -7px;
-    background-repeat: no-repeat;
-    padding-left: 20px;
+#result-header {
+	min-height:25px;
 }
-div.simplesearch {
-    background-image: url("../images/heading_saved_search.png");
-    background-position: 0 -7px;
+div.collapsed{display: none !important;}
+#simple-search {
+	text-align: left;
+	padding: 6px;
+	height: auto;
+	margin: 0 0 13px 0;
+	position: absolute;
+	z-index: 10000;
+	background: RGBA(0,0,0,0.7);
+	top: 100%;
+	left: 5px;
+	right: 5px;
+	border-radius: 0 0 5px 5px;
+	box-shadow: 0 1px 3px RGBA(0,0,0,0.5);
+	}
+.simplesearch.collapsed {
+    background-image: url("../images/blue-up-triangle.png");
+	display:inline-block !important;		
+}
+ .simplesearch {
+    background-image: url("../images/blue-down-triangle.png");
+    background-position: 0;
     background-repeat: no-repeat;
-    padding-left: 20px;
+	width:16px;
+	height:9px;
+	overflow:hidden;
+	color:#AAA;
+	display:inline-block;
+}
+.simple-search-row {
+	border-top:1px solid #666;
+	padding:3px
+	}
+.banner DIV#simple-search .simple-search-row a {
+	border:1px solid #999;
+	color:#CCC;
+	margin:6px;
+	line-height:20px;
+	padding:0 4px;
+}
+.banner DIV#simple-search .simple-search-row a:hover {
+	color:#FFF;
+	text-decoration:none;
+	background-color:#666;
+}
+.simple-search-row label {
+	color:#CCC;
+	width:100px;
+	text-align:right;
+	margin:0 5px;
+	display:inline-block;
+}
+.simple-search-row select {
+	width:10em;
 }
 
 #results div.collapsed{height:23px;overflow:hidden;padding-top:1px}
@@ -1842,7 +1883,7 @@ div.recorddiv:hover > #recordID {
 	}
 
 
-#pageNavCount {height: 7px;padding: 4px 0px 8px; right: 10px;text-align: right;top: 1px;z-index: 10;float:right; background:none !important}
+#pageNavCount {height: 7px;padding: 4px 0px 8px; right: 10px;text-align: right;top: 1px;z-index: 1;float:right; background:none !important}
 #pageNavCount span.nav a, #pageNavCount span.nav{color:#2D2D2D; font-weight:normal}
 #page-nav { margin-right: 20px;display:inline-block }
 
@@ -1851,3 +1892,15 @@ div.recorddiv:hover > #recordID {
 #pageNavCount #page-nav {margin:0 1em}
 #pageNavCount #page-nav a.active { border: 1px solid #999;font-weight: bold;padding: 1px 1px 0;text-decoration: none;color:#000}
 #prev_page a img, #next_page a img { vertical-align:top}
+.searchButtons {
+	display:inline-block;
+	white-space:nowrap;
+	text-align:right;
+}
+#result-header {
+	position:relative;
+	background:none repeat scroll 0 0 #DCDFE6 !important;
+}
+#result-header div#tabbar{
+	clear:none;
+}
