@@ -105,9 +105,11 @@ function SelectDetailType() {
 										if(isnull(aUsage) || aUsage.indexOf(rty_ID)<0){
 
 											var iusage = isnull(aUsage) ? 0 : aUsage.length;
+											var ptr_1 = isnull(deftype[8])?'':deftype[8];
+											var ptr_2 = isnull(deftype[11])?'':deftype[11];
 											// add order in group, name, help, type and status,
 											// doc will be hidden (for pop-up)
-											arr.push([0, deftype[3],deftype[0],deftype[4],deftype[2],deftype[6],deftype[1],deftype[7],dty_ID,iusage]);
+											arr.push([0, deftype[3],deftype[0],deftype[4],deftype[2],deftype[6],deftype[1],deftype[7],dty_ID,iusage,ptr_1,ptr_2]);
 
 										}
 									}
@@ -116,7 +118,7 @@ function SelectDetailType() {
 								_myDataSource = new YAHOO.util.LocalDataSource(arr, {
 									responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
 									responseSchema : {
-										fields: ["selection", "order", "name", "help",  "type", "status", "description", "group", "info", "usage"]
+										fields: ["selection", "order", "name", "help",  "type", "status", "description", "group", "info", "usage", "fieldset_rectypeid", "ptrtarget_rectypeids"]
 									},
 									doBeforeCallback : function (req, raw, res, cb) {
 										// This is the filter function
@@ -161,7 +163,9 @@ function SelectDetailType() {
 								{ key: "group",   hidden:true},
 								{ key: "info", hidden:true, label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
 										elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" height="16" border="0" title="Info"/>';} },
-								{ key: "usage", label: "Usage", sortable:true }
+								{ key: "usage", label: "Usage", sortable:true },
+								{ key: "fieldset_rectypeid",   hidden:true},
+								{ key: "ptrtarget_rectypeids",   hidden:true}
 								];
 
 								var myConfigs = {
@@ -234,6 +238,18 @@ function SelectDetailType() {
 										var description = record.getData('description') || 'no further description';
 										xy = [parseInt(oArgs.event.clientX,10) + 10 ,parseInt(oArgs.event.clientY,10) + 10 ];
 										textTip = '<p>'+description+'</p>';
+
+									}else if(!isnull(column) && column.key === 'type') {
+
+										var dttype = record.getData('type');
+										var value;
+										if(dttype === "fieldsetmarker") {
+											value = record.getData('fieldset_rectypeid');
+										} else {
+											value = record.getData('ptrtarget_rectypeids');
+										}
+
+										textTip = _getRecPointers(dttype, value);
 
 									}else if(!isnull(column) && column.key === 'usage') {
 										var dty_ID = record.getData('info');
@@ -335,6 +351,40 @@ function SelectDetailType() {
 
 		} //isnull(_myDataTable)
 	}//end of initialization ==============================
+
+	/**
+	* recreateRecTypesPreview - creates and fills selector for Record(s) pointers if datatype
+	* is relmarker or resource
+	*
+	* @param type an datatype
+	* @value - comma separated list of rectype IDs
+	*
+	* @returns div for popup tooltip
+	*/
+	function _getRecPointers(type, value) {
+
+		var txt = "";
+		if(type === "relmarker" || type === "resource" || type === "fieldsetmarker")
+		{
+
+			if(value) {
+					var arr = value.split(","),
+					ind, dtName;
+					for (ind in arr) {
+						dtName = top.HEURIST.rectypes.names[arr[ind]];
+						txt = txt + "<li>"+dtName+"</li>";
+					} //for
+			}else{
+				txt = "";
+			}
+
+			if (txt.length > 0){
+				txt = "<p><ul>"+txt+"</ul></p>";
+			}
+		}
+		return txt;
+	}
+
 
 	/**
 	* Listener of checkbox in datatable

@@ -125,10 +125,6 @@ function add_email_as_record($email){
 	if(is_array($arr) && count($arr)>2){
 		//this is from export record from another heurist instance
 
-		if($arr["rectype"]=="777"){
-			$arr["rectype"]="253"; //bug report
-		}
-
 		//assosiated files
 		$files_arr = $arr['type:221'];
 
@@ -156,7 +152,7 @@ function add_email_as_record($email){
 		//consider this message as usual email and
 		$_POST["save-mode"]="new";
 		$_POST["notes"]="";
-		$_POST["url"]="";
+		$_POST["rec_url"]="";
 
 		/* FOR EMAIL RECORD TYPE  - BUT IAN REQUIRES POST "NOTE" RECORDTYPE
 		$_POST["type:160"] = array($email->getSubject());
