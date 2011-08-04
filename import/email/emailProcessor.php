@@ -15,7 +15,7 @@
  *
  **/
 
- 
+
 // TODO: Needs a progress bar or counter as it takes soem time to complete
 
 // TO DO: Needs to use global concept nubmers in place of local codes for rectype/fields
@@ -37,39 +37,49 @@ include_once 'classEmailProcessor.php';
 
 mysql_connection_db_overwrite(DATABASE);
 
-/* get mail server options
+// get mail server options from database
+$res = mysql_query('select * from sysIdentification');
+if (!$res) returnErrorMsgPage("unable to retrieve db sys information -".mysql_error());
+$sysValues = mysql_fetch_assoc($res);
+$server   = $sysValues['sys_eMailImapServer'];
+$port     = $sysValues['sys_eMailImapPort'];
+$username = $sysValues['sys_eMailImapUsername'];
+$password = $sysValues['sys_eMailImapPassword'];
+$protocol = $sysValues['sys_eMailImapProtocol'];
 
-$query=mysql_query("select `sys_email_imap_server`, `sys_email_imap_port`, `sys_email_imap_protocol`, `sys_email_imap_username`, `sys_email_imap_password` from `system`");
-$params=mysql_fetch_assoc($query);
-//print_r($params);
-
-// get emails
-$query=mysql_query("select `EMail` from `ACLAdmin`.`Users` where `id`='".get_user_id()."'");
-$email=mysql_fetch_assoc($query);
-$senders=$email['EMail'];
-$query=mysql_query("select `email_addresses` from `ACLAdmin`.`Users` where `id`='".get_user_id()."'");
-$email=mysql_fetch_assoc($query);
-if($email){
-    $senders.=','.$email['email_addresses'];
+$senders = null;
+$ownership = 0;
+$sys_sender = null;
+if(is_admin()){
+	$sys_sender = $sysValues['sys_IncomingEmailAddresses'];
+	if($sys_sender) $sys_sender=split(",", $sys_sender);
+	$senders = $sysValues['sys_IncomingEmailAddresses'];
+	$ownership = $sysValues['sys_OwnerGroupID'];
 }
-//$senders.=',maxim.nikitin.work@gmail.com';
-//$senders='';
+
+/* hardcoded
+$server   = 'imap.gmail.com';
+$port     = '993';
+$username = 'prime.heurist@gmail.com';
+$password = 'sydarb43';
+$protocol = '';
 */
 
-// TODO: This needs to be configred from data in the database
+// get list of emails addresses - messages from them will be processed
+$res=mysql_query("select ugr_IncomingEmailAddresses from sysUGrps where ugr_ID=".get_user_id());
+if (!$res) returnErrorMsgPage("unable to retrieve user incoming email information -".mysql_error());
+$email = mysql_fetch_assoc($res);
+if($email && $email['ugr_IncomingEmailAddresses']){
+	if($senders){
+		$senders = $senders.',';
+	}
+	$senders = $senders.$email['ugr_IncomingEmailAddresses'];
+}
+//hardcoded $senders='bugs@acl.arts.usyd.edu.au, osmakov@gmail.com, steven.hayes@sydney.edu.au, stephenawhite@hotmail.com';
 
-$params = array();
-$params['sys_email_imap_server'] = 'imap.gmail.com';
-$params['sys_email_imap_port'] = '993';
-$params['sys_email_imap_username'] = 'prime.heurist@gmail.com';
-$params['sys_email_imap_password'] = 'sydarb43';
-$params['sys_email_imap_protocol'] = '';
-
-$senders='bugs@acl.arts.usyd.edu.au, osmakov@gmail.com, steven.hayes@sydney.edu.au, stephenawhite@hotmail.com';
-//ianjohnson@usyd.edu.au, ijohnson222@gmail.com
-$use_ssl=true;
+$use_ssl = ($protocol!='noprotocol');
 // delete processed mails from mail server
-$delete_processed=false;
+$delete_processed=true;
 
 // path to attachments directory
 //$attachments_save_path='/home/maxim/mail_attachments/';
@@ -77,22 +87,21 @@ $delete_processed=false;
 // maximum size of attachment, in bytes
 $attachment_size_max=8*1024*1024;
 
-$server   = $params['sys_email_imap_server'];
-$port     = $params['sys_email_imap_port'];
-$username = $params['sys_email_imap_username'];
-$password = $params['sys_email_imap_password'];
-if($params['sys_email_imap_protocol']!='noprotocol'){
-    $use_ssl=true;
-}else{
-    $use_ssl=false;
-}
 
 // count of emails processed
 $emails_processed=0;
+$emails_failed=0;
+$emails_processed_ids="";
 
+/**
+* call back function of classEmailProcessor
+*
+* @param mixed $email
+* @return true - then classEmailProcessor may remove this email
+*/
 function add_email_as_record($email){
 
-    global $emails_processed, $attachment_size_max;
+    global $emails_processed, $emails_failed, $attachment_size_max, $sys_sender, $ownership;
     $emails_processed++;
 
     $description=$email->getBody();
@@ -102,22 +111,26 @@ function add_email_as_record($email){
 	$description=str_replace("\r", "\n", $description);
 	*/
 
-//error_log(">>>desc:".$description);
+//DEBUG error_log(">>>desc:".$description);
 
 	$description=str_replace("\r\n", "", $description);
 	$description=str_replace("\r", "", $description);
 
     $arr = json_decode($description, true);
 
-//error_log(">>>>".is_array($arr)."  ".count($arr)); //print_r($_POST, true));
+//DEBUG error_log(">>>>".is_array($arr)."  ".count($arr)); //print_r($_POST, true));
 
 	if(is_array($arr) && count($arr)>2){
 		//this is from export record from another heurist instance
 
+		if($arr["rectype"]=="777"){
+			$arr["rectype"]="253"; //bug report
+		}
+
 		//assosiated files
 		$files_arr = $arr['type:221'];
 
-//error_log(">>>>files_arr=".print_r($files_arr, true));
+//DEBUG error_log(">>>>files_arr=".print_r($files_arr, true));
 		if($files_arr){
 			$arr['type:221'] = saveAttachments($files_arr, $email);
 			if($arr['type:221']==0) return false;
@@ -141,7 +154,9 @@ function add_email_as_record($email){
 		//consider this message as usual email and
 		$_POST["save-mode"]="new";
 		$_POST["notes"]="";
-		$_POST["bib_url"]="";
+		$_POST["url"]="";
+
+		/* FOR EMAIL RECORD TYPE  - BUT IAN REQUIRES POST "NOTE" RECORDTYPE
 		$_POST["type:160"] = array($email->getSubject());
 		$_POST["type:166"] = array(date('Y-m-d H:i:s')); //date sent
 		$_POST["type:521"] = array($email->getFrom()); //email owner
@@ -150,7 +165,17 @@ function add_email_as_record($email){
 		//$_POST["type:221"] = array(); //attachments
 		$_POST["type:560"] = array($description);
 
-		$_POST["rectype"]="183";
+		$_POST["rectype"]="183";  //EMAIL
+		*/
+
+		$_POST["type:160"] = array($email->getSubject()); //title
+		//$_POST["type:158"] = array("email harvesting"); //creator (recommended)
+		$_POST["type:166"] = array(date('Y-m-d H:i:s')); //specific date
+		$_POST["type:191"] = array($email->getFrom()." ".$description); //notes
+
+		$_POST["rectype"]="2";  //NOTE
+
+
 		$_POST["check-similar"]="1";
 
 		$arr = saveAttachments(null, $email);
@@ -164,6 +189,20 @@ function add_email_as_record($email){
 
 //error_log(">>>>>>>>>HERE>>>>>>".print_r($_POST['type:221'],true));
 	}
+
+
+	$_POST["owner"] = get_user_id();
+	$sss = $email->getFrom();
+	if(is_array($sys_sender)){
+            foreach($sys_sender as $sys_sender_email){
+                if($sys_sender_email==$sss || strpos($sss,"<"+$sys_sender_email+">")>=0){
+                    $_POST["owner"] = $ownership;
+                    break;
+                }
+            }
+	}
+
+	$_POST["visibility"] = 'hidden';
 
     $updated = insertRecord();
     $rec_id = null;
@@ -179,6 +218,7 @@ function add_email_as_record($email){
     if($rec_id){ //($rec_id){
         return true;
     }else{
+    	$emails_failed++;
         return false;
     }
 }
@@ -295,17 +335,20 @@ function saveAttachments($files_arr, $email){
 //callback function for processing of email. Takes object of class Email as parameter, returns boolean.
 function printEmail($email){
 
-    echo '<tr><td width="30%" valign="top" style="border: 1px solid black;">';
+	global $emails_processed_ids;
+
+    echo '<tr><td width="30%" valign="top">';
     echo '<b>From:</b> '.htmlentities($email->getFrom()).'<br>';
     echo '<b>Subject:</b> '.htmlentities($email->getSubject()).'<br>';
 
     if($email->getRecId()){
         echo '<b>Status:</b> inserted as record with id '.htmlentities($email->getRecId()).'<br>';
+        $emails_processed_ids = $emails_processed_ids.($email->getRecId()).",";
     }else{
-        echo '<b>Status:</b> adding to Heurist failed <br>';
+        echo '<div style="color:#ff0000;"><b>Status:</b> adding to Heurist failed </div>';
     }
 
-    echo '</td><td style="border: 1px solid black;">';
+    echo '</td><td>';
 
     $body=ereg_replace('<script.*.</script>', ' ', $email->getBody());
     $body=ereg_replace('<style.*.</style>', ' ', $body);
@@ -328,21 +371,24 @@ function printEmail($email){
     }
 
     echo '</td></tr>';
+    flush();
 }
 ?>
 <html>
     <head>
+		<title>Heurist Email harvester</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
     </head>
-    <body>
+    <body style="font-size: 10px;overflow:auto;">
 
 <?php
 try{
     if(!isset($_REQUEST['p'])){
         if($senders){
-            echo '<b>Please wait. Processing incoming emails from '.$senders.' ...</b><br><br>';
+            echo '<div><b>Processing incoming emails from '.$senders.' ...</b></div>';
         }else{
-            echo '<b>Please wait. Processing incoming emails ...</b><br><br>';
+            echo '<div><b>Processing incoming emails ...</b></div>';
         }
 ?>
         <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" id="process_form">
@@ -359,16 +405,25 @@ try{
 <?php
     }else{
         if($senders){
-            echo '<b>Processed incoming emails from '.$senders.':</b><br><br>';
+            echo '<b>Processing incoming emails from '.$senders.':</b><br><br>';
         }else{
-            echo '<b>Processed incoming emails:</b><br><br>';
+            echo '<b>Processing incoming emails:</b><br><br>';
         }
         $mail_processor=new EmailProcessor($server, $port, $username, $password, $use_ssl);
         echo '<table style="border: 1px solid black;">';
         $mail_processor->process('add_email_as_record', $senders, $delete_processed);
         echo '</table><br>';
 
-        echo '<b>Total emails processed: '.$emails_processed.'</b>';
+        echo '<div><b>Total emails processed: '.$emails_processed.'</b></div>';
+        echo '<div style="padding-left:20px"><b>Failed: '.$emails_failed.'</b></div>';
+        echo '<div style="padding-left:20px"><b>Addedd: '.($emails_processed-$emails_failed).'</b></div>';
+
+        if(($emails_processed-$emails_failed)>0){
+        	echo '<div>You may look at the added records:
+        	<a href="../../search/search.html?db='.HEURIST_DBNAME.'&q=ids:'.$emails_processed_ids.'" target="_blank">
+			<img src="../../common/images/external_link_16x16.gif"/>HERE</a></div>';
+		}
+
     }
 }catch(Exception $e){
     echo '<b>An error occured: '.$e->getMessage().'</b>';

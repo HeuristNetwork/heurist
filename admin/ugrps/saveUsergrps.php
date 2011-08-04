@@ -52,7 +52,8 @@
 	"ugr_Postcode"=>"s",
 	"ugr_Interests"=>"s",
 	"ugr_Enabled"=>"s",
-	"ugr_URLs"=>"s"
+	"ugr_URLs"=>"s",
+	"ugr_IncomingEmailAddresses"=>"s"
 	);
 
 	$sysUsrGrpLinks_ColumnNames = array(

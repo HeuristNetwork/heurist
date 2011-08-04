@@ -37,7 +37,29 @@ $geekMail->subject('Bug Report');
 
   $ids = "";
 
-  // find file fieldtype in POST
+  if($_POST["rectype"] == "253"){ //MAGIC BUG REPORTER
+
+  	//category for documentation
+	$_POST["type:559"] = array("631");
+
+	$ext_desc = $_POST["type:191"];
+	if(!is_array($ext_desc)) {
+		$ext_desc = array();
+		if($_POST["type:191"]!="" && $_POST["type:191"]!=null){
+			array_push($ext_desc, $_POST["type:191"]);
+		}
+	}
+  	//add current system information into message
+	array_push($ext_desc, "some system information: browser, os, resolution");
+  	//add current heurist information into message
+	array_push($ext_desc, "some heursit information: user of instance, db, paths");
+
+	$_POST["type:191"] = $ext_desc;
+
+  }
+
+
+  // ATTACHMENTS - find file fieldtype in POST
   foreach ($_POST as $key => $value)
   {
     if (is_array($value) && $key == "type:221" ) {

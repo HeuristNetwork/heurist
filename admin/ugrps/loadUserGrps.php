@@ -233,7 +233,7 @@ error_log(">>>>>>>>>>>>>>> userEmail=".urldecode(@$_GET['userEmail']));*/
 		$colNames = array("ugr_ID", "ugr_Type", "ugr_Name", "ugr_Description",
 		"ugr_Password", "ugr_eMail", "ugr_FirstName", "ugr_LastName",
 		"ugr_Department", "ugr_Organisation", "ugr_City", "ugr_State", "ugr_Postcode", "ugr_Interests",
-		"ugr_Enabled" , "ugr_URLs");
+		"ugr_Enabled" , "ugr_URLs", "ugr_IncomingEmailAddresses");
 
 		$userGrp = array();
 		$userGrp['users'] = array('fieldNames' => $colNames);

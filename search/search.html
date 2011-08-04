@@ -92,7 +92,7 @@
 	<script>
 		var hBase = "http://" + window.location.host + top.HEURIST.basePath;
 		var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"";
-		var bugReportURL = hBase + 'export/email/formEmailRecordPopup.html?rectype=253&db='+database;
+		var bugReportURL = hBase + 'export/email/formEmailRecordPopup.html?rectype=bugreport&db='+database;
 
 		if (location.search.match(/[&?]q=[^&]+/)) {		//there is a search string
 			document.getElementById("searchFrame").src = top.HEURIST.basePath+"search/getResultsPageAsync.php" + location.search;
@@ -183,7 +183,7 @@
 					<li><a href="../import/email/emailProcessingSetup.php" name="auto-popup" class='seperator' title="Harvest email from a designated IMAP email server (set in configuration)">Harvest email</a></li>
 					<li><a href="../import/hyperlinks/importHyperlinks.php" name="auto-popup" title="Import web links from a browser bookmarks file or an html web page file">Import hyperlinks</a></li>
 					<li><a href="../admin/profile/configureProfile.php?body_only&amp;bookmark_import=1" name="auto-popup" title="Settings for web links importer">Importer settings</a></li>
-					
+
                     <li><a href="../import/importerFramework.php?format=BIB" name="auto-popup"  class="seperator" title="Import bibliographic exchange format files">Import bibliographic</a></li>
                     <li><a href="../import/importerFramework.php?format=GEO" name="auto-popup" title="Import KML files">Import geographic</a></li>
 					<li><a href="../import/delimited/importRecordsFromDelimited.html" onClick="this.href = top.HEURIST.baseURL +'import/delimited/importRecordsFromDelimited.html?db=' + database;" title="Import a delimited text file of data for one record type" target="_blank">Import delimited</a></li>
@@ -264,7 +264,7 @@
 	<form onSubmit="top.HEURIST.search.checkSearchForm();" class="searchTable">
 	<input type=hidden id=w-input name=w>
 	<div class="tableCell"><!-- add record -->
-    	
+
 		<div class="">Search
 		<input id=q name=q type=text style="width:300px">
 			<input id=my-records-button type=button value="my bookmarks" title="Search only records which have been bookmarked by you" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();">
@@ -305,7 +305,7 @@
 					<li><a href="#" id="resetLayout" title="Resets all panels to default width and visibility" class="seperator">Reset Layout</a></li>
 				</ul>
 			</li>
-			
+
 			<li><span>Search</span>
 				<ul>
                     <li><a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">Advanced Search</a></li>
@@ -327,7 +327,7 @@
                     <li><a href="#" onClick="top.HEURIST.search.addRelationshipsPopup(); return false;" title="Select one or more records, then click to add relationships">Relate</a></li>
 					<li><a href="#" onClick="top.HEURIST.search.addBookmarks(); return false;" title="Select one or more records, then click to bookmark">Bookmark</a></li>
 					<li><a href="#" onClick="top.HEURIST.search.deleteBookmarks(); return false;" title="Select one or more records, then click to remove bookmarks">Remove bookmarks</a></li>
-					
+
                     <li><a href="#" onClick="top.HEURIST.search.deleteBiblios(); return false;" title="Select one or more records, then click to delete" class="seperator">Delete</a></li>
 					<li><a href="#" onClick="top.HEURIST.search.fixDuplicates(); return false;" title="Select one or more records, then click to fix duplicates">Merge</a></li>
 					<li><a href="#" onClick="top.HEURIST.search.collectDuplicates(); return false;" title="Click to identify possible duplicates in the current query and create collections for each set">Find duplicates</a></li>
@@ -379,7 +379,7 @@
 				<div id="noquery-search-status">
 			<br><h2>Welcome to Heurist</h2><br>
 			<p>Heurist is a sophisticated eResearch tool for managing web bookmarks, references, notes, and a wide range of research data. Designed for individual or collaborative use, it may at first appear puzzling - why, for database, is the home page just a search - but it will all become clear if you persist a bit.</p><br>
-			<p>We strongly recommend that you click <a target="_blank" href="../help/tour.html">Take the Tour</a> to get oriented. Please also visit <a target="_blank" href="../help/webhelp">Help</a> (link at top right) - don't ignore it until you have a problem, as users generally find it quite approachable and very, very helpful.</p><br> 
+			<p>We strongly recommend that you click <a target="_blank" href="../help/tour.html">Take the Tour</a> to get oriented. Please also visit <a target="_blank" href="../help/webhelp">Help</a> (link at top right) - don't ignore it until you have a problem, as users generally find it quite approachable and very, very helpful.</p><br>
             <p>You may also wish to visit some <a target="_blank" href="http://heuristscholar.org/?ver=1&w=all&q=tag:%22Heurist+System\Featured+Subsets%22&label=Featured+subsets&description=The+links+below+retrieve+curated+subsets+of+Heurist+records+of+general+interest+assembled+by+special+bibliographic+and+data+collection+projects.+If+you+would+like+to+add+a+collection+here,+email+admin@heuristscholar.org+for+instructions">Example collections on the HeuristScholar.org server</a>  </p><br>
 			<p>Heurist is a stable system running several major web sites (see Example Collections once you've logged in). It is also a system in rapid development, so if you have suggestions we want to hear them. You may be surprised how quickly your suggestions pop up in the software. </p><br>
 					<p>We are also very happy to provide advice - from simple email assistance

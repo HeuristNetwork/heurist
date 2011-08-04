@@ -176,9 +176,10 @@ function UserEditor() {
 			el = Dom.get(fname);
 			if( !Hul.isnull(el) ){
 				if(el.type === "checkbox"){
-					el.value = el.checked?1:0;
+					el.value = el.checked?'y':'n';
 				}
-				if(_recID<0 || (el.value!==String(_entity[i]) && !(el.value==="" && _entity[i]===null)))
+				var old_val = String(_entity[i]);
+				if(_recID<0 || (el.value!==old_val && !(el.value==="" && _entity[i]===null)))
 				{
 					_updatedFields.push(fname);
 					_updatedDetails.push(el.value);
@@ -208,7 +209,7 @@ function UserEditor() {
 			__checkMandatory("ugr_Organisation","Institution/company") ||
 			__checkMandatory("ugr_Interests","Research Interests") ||
 			__checkMandatory("ugr_Name","Login") ||
-			__checkMandatory("ugr_Password","Password")
+			(_recID<0 && __checkMandatory("ugr_Password","Password"))
 		){
 				return "mandatory";
 		}
