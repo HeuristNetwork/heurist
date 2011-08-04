@@ -50,9 +50,9 @@ $geekMail->subject('Bug Report');
 		}
 	}
   	//add current system information into message
-	array_push($ext_desc, "some system information: browser, os, resolution");
-  	//add current heurist information into message
-	array_push($ext_desc, "some heursit information: user of instance, db, paths");
+	array_push($ext_desc, "Browser information: ".$_SERVER['HTTP_USER_AGENT']);
+  	//add current heurist information into message     ".HEURIST_DBVERSION."
+	array_push($ext_desc, "Heurist information. codebase: ".HEURIST_BASE_URL." version: 3  database: ". DATABASE."  user: ".get_user_name());
 
 	$_POST["type:191"] = $ext_desc;
 

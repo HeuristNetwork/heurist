@@ -61,7 +61,7 @@ if(!is_admin()){
    specific email addresses (set in each user's profile). The emails are dissected
    and used to create Heurist records owned by that user.
    The email server must support IMAP.</p>
-<p><a href="../../admin/setup/editSysIdentification.php" target="_blank">
+<p><a href="../../admin/setup/editSysIdentification.php?db=<?=HEURIST_DBNAME?>" target="_blank">
 	<img src="../../common/images/external_link_16x16.gif"/>
    Configure connection to IMAP mail server</a></p>
 
@@ -76,7 +76,7 @@ if(!is_admin()){
    and other information to be added to the record.</p>
 
 <div style="width:100%; text-align: center;">
-	<button onclick="window.open('../../import/email/emailProcessor.php', '_self')">
+	<button onclick="window.open('../../import/email/emailProcessor.php?db='<?=HEURIST_DBNAME?>, '_self')">
    		<b>Harvest email from IMAP server</b>
    	</button>
 </div>

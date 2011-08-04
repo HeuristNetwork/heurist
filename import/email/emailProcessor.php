@@ -37,6 +37,8 @@ include_once 'classEmailProcessor.php';
 
 mysql_connection_db_overwrite(DATABASE);
 
+//error_log(HEURIST_DBNAME."         ".HEURIST_URL_BASE.'            '.DATABASE);
+
 // get mail server options from database
 $res = mysql_query('select * from sysIdentification');
 if (!$res) returnErrorMsgPage("unable to retrieve db sys information -".mysql_error());
