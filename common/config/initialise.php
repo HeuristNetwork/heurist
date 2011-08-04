@@ -191,6 +191,7 @@
 
 	define ('HEURIST_NEWREC_OWNER_ID', $sysValues['sys_NewRecOwnerGrpID']);
 	define ('HEURIST_NEWREC_ACCESS', $sysValues['sys_NewRecAccess']);
+	define ('HEURIST_DBVERSION', "".$sysValues['sys_dbVersion']."".$sysValues['sys_dbSubVersion']."".$sysValues['sys_dbSubSubVersion']);
 
 	// set up email defines
 	if ($infoEmail) {
