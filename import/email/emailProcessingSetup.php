@@ -76,7 +76,7 @@ if(!is_admin()){
    and other information to be added to the record.</p>
 
 <div style="width:100%; text-align: center;">
-	<button onclick="window.open('../../import/email/emailProcessor.php?db='<?=HEURIST_DBNAME?>, '_self')">
+	<button onclick="window.open('../../import/email/emailProcessor.php?db=<?=HEURIST_DBNAME?>', '_self')">
    		<b>Harvest email from IMAP server</b>
    	</button>
 </div>

@@ -40,7 +40,7 @@ $geekMail->subject('Bug Report');
   if($_POST["rectype"] == "253"){ //MAGIC BUG REPORTER
 
   	//category for documentation
-	$_POST["type:559"] = array("631");
+	//$_POST["type:559"] = array("631");
 
 	$ext_desc = $_POST["type:191"];
 	if(!is_array($ext_desc)) {
@@ -51,8 +51,8 @@ $geekMail->subject('Bug Report');
 	}
   	//add current system information into message
 	array_push($ext_desc, "Browser information: ".$_SERVER['HTTP_USER_AGENT']);
-  	//add current heurist information into message     ".HEURIST_DBVERSION."
-	array_push($ext_desc, "Heurist information. codebase: ".HEURIST_BASE_URL." version: 3  database: ". DATABASE."  user: ".get_user_name());
+  	//add current heurist information into message
+	array_push($ext_desc, "Heurist information. codebase: ".HEURIST_BASE_URL." version: ".HEURIST_DBVERSION."  database: ". DATABASE."  user: ".get_user_name());
 
 	$_POST["type:191"] = $ext_desc;
 
