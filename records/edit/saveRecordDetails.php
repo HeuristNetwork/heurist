@@ -200,8 +200,8 @@ function updateRecord($bibID) {
 	if (intval(@$_POST["rectype"])) {
 		$bibUpdates["rec_RecTypeID"] = intval($_POST["rectype"]);
 	}
-	if (array_key_exists("url", $_POST)) {
-		$bibUpdates["rec_URL"] = $_POST["url"];
+	if (array_key_exists("rec_url", $_POST)) {
+		$bibUpdates["rec_URL"] = $_POST["rec_url"];
 	}
 	if (is_admin()) {
 		if (array_key_exists("bib_workgroup", $_POST)) {
@@ -287,7 +287,7 @@ function insertRecord() {
 		"rec_ScratchPad" => $_POST["notes"],
 		"rec_OwnerUGrpID" => $_POST["owner"]?$_POST["owner"]:'0',
 		"rec_NonOwnerVisibility" => $_POST["visibility"]?$_POST["visibility"]:'viewable',
-		"rec_URL" => $_POST["url"]? $_POST["url"] : ""));
+		"rec_URL" => $_POST["rec_url"]? $_POST["rec_url"] : ""));
 
 	$_REQUEST["rec_ID"] = $bibID = mysql_insert_id();
 	if($bibID){

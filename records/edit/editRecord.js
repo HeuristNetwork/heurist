@@ -2211,8 +2211,8 @@ top.HEURIST.edit.inputs.BibURLInput = function(parentElement, defaultValue, requ
 		this.inputs[0].className = "in";
 		//this.inputs[0].style.width = "75ex";
 		//this.inputs[0].style.maxWidth = "90%";
-		this.inputs[0].name = "bib_url";
-		this.inputs[0].id = "bib_url";
+		this.inputs[0].name = "rec_url";
+		this.inputs[0].id = "rec_url";
 		this.inputs[0].value = defaultValue  ||  "";
 
 	if (defaultValue) {
