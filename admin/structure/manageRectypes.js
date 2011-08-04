@@ -328,10 +328,10 @@ function RectypeManager() {
 			{ key: "id", label: "<u>Code</u>", sortable:true, width:20, className:'left' },
 			{ key: "active", label: "Active", sortable:false, width:20, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
 			{ key: null, label: "Edit", sortable:false, width:20, formatter: function(elLiner, oRecord, oColumn, oData) {
-					elLiner.innerHTML = '<a href="#edit_rectype"><img src="../../common/images/edit_icon.png" width="16" height="16" border="0" title="Edit record type" /><\/a>'; }
+					elLiner.innerHTML = '<a href="#edit_rectype"><img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit record type" /><\/a>'; }
 			},
 			{ key: null, label: "Struc", sortable:false, width:20, formatter: function(elLiner, oRecord, oColumn, oData) {
-					elLiner.innerHTML = '<a href="#edit_sctructure"><img src="../../common/images/edit_icon.png" width="16" height="16" border="0" title="Edit record strcuture" /><\/a>'; }
+					elLiner.innerHTML = '<a href="#edit_sctructure"><img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit record strcuture" /><\/a>'; }
 			},
 			{ key: "usage", label: "Usage", hidden:true },
 			{ key: "icon", label: "Icon", sortable:false },
@@ -610,8 +610,8 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 						if(recname.length>40) { recname = recname.substring(0,40)+"..."; }
 						//find all records that reference this type
 						var details = top.HEURIST.rectypes.typedefs[rectypeID].dtFields;
-						textTip = '<div style="padding-left:20px;padding-top:4px"><b>'+recname+'</b><br/>'+
-						'<div style="padding-left:20px;padding-top:4px"><b>Fields:</b><br/><label style="color: #4499ff;">Click on field type to edit</label></div><ul>';
+						textTip = '<h3>'+recname+'</h3>'+
+						'<b>Fields:</b><label style="color: #999;margin-left:5px">Click on field type to edit</label><ul>';
 
 						var detail;
 						for(detail in details) {

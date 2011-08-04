@@ -1111,13 +1111,16 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
 		var confirmImg = this.confirmImg = this.document.createElement("div");
 			confirmImg.className = "confirmImg";
-		var confirmOption = confirmImg.appendChild(this.document.createElement("div"));
+			confirmList = confirmImg.appendChild(this.document.createElement("ul"));
+		var confirmOption = confirmList.appendChild(this.document.createElement("li"));
 			confirmOption.className = "option";
-			confirmOption.style.top = "2px";
+//			confirmOption.style.top = "2px";
+			confirmOption.innerHTML = "<div><img src='"+top.HEURIST.baseURL+"common/images/tick-white.gif'></div>Confirm New Tag";
 			confirmOption.onmousedown = function() { top.HEURIST.util.autocompleteConfirm.call(that); return false; };
-		var changeOption = confirmImg.appendChild(this.document.createElement("div"));
+		var changeOption = confirmList.appendChild(this.document.createElement("li"));
 			changeOption.className = "option";
-			changeOption.style.top = "14px";
+//			changeOption.style.top = "14px";
+			changeOption.innerHTML = "<div><img src='"+top.HEURIST.baseURL+"common/images/black-cross.gif'></div>Change Tag";
 			changeOption.onmousedown = function() { top.HEURIST.util.autocompleteChange.call(that); return false; };
 
 

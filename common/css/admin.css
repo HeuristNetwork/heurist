@@ -1,6 +1,6 @@
 .banner h2 {
-	line-height: 7px;
 	padding: 0 6px;
+	font-weight:bold;
 }
 h3 {
 	height:auto;
@@ -147,11 +147,23 @@ html body.popup div div#page-inner div#modelTabs.yui-navset div.yui-navset div.y
 	z-index:999;
 	left:-9999px;
 	top:0px;
-	background-color:#dedede;
+	background-color:RGBA(0,0,0,0.75);
 	padding:5px;
 	border:1px solid #fff;
 	min-width:200;
+	color:#EDEDED;
+	border-radius:5px;
+	-moz-border-radius:5px;
+	-webkit-border-radius:5px;
+	box-shadow:0px 1px 5px RGBA(0,0,0,0.5);
 }
+.tooltip a{color:#E6EDF7}
+.tooltip h3{display:block; padding-top:10px; border-bottom:1px solid RGBA(150,150,150,0.75);margin:0 0 10px 0}
+.tooltip h3:hover{background-color:transparent}
+.tooltip li{
+	list-style:none;
+	line-height:14px;
+	}
 .yui-skin-sam .yui-dt td {
 	margin:0;
 	padding:0;
@@ -175,13 +187,7 @@ html body.popup div div#page-inner div#modelTabs.yui-navset div.yui-navset div.y
 #dbname span {
 	margin:0 0 0 2em;
 }
-a#dbSearch-link div#dbname:hover {
-    background-color: transparent;
-    background-image: url("../images/b_database.png");
-    border-radius: 3px 3px 3px 3px;
-    box-shadow: none;
-    padding-right: 10px;
-}
+
 .wysiwygCheckTable {
 	width:100%;
 	border-collapse:collapse;

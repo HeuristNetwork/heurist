@@ -11,26 +11,30 @@
 	position: absolute;
 	min-width: 10em;
 	max-width: 20em;
-	border: 1px solid gray;
-	background-color: white;
+/*	border: 1px solid gray;
+*/	background-color: RGBA(0,0,0,0.7);
 	padding: 1px;
 	cursor: default;
+	border-radius: 5px;
+	box-shadow:0px 1px 3px RGBA(0,0,0,0.5);
 }
 
 .autocomplete .option {
 	white-space: nowrap;
 	overflow: hidden;
-
+	display:block;
 	line-height: 1.2em;
 	vertical-align: middle;
 	padding: 2px;
-
 	cursor: pointer;
+	color:#CCC;
 }
+
 
 /* This is the colour that the "selected" option will be (the one selected by up/down arrow keys) */
 div.autocomplete .option.selected {
-	background-color: #aa7f7f;
+	background-color: #000;
+	color:#FFF;
 }
 
 /* This is the colour that the "hovered" option will be (the one selected by the mouse).
@@ -53,8 +57,9 @@ div.autocomplete .option.selected {
  */
 
 .autocomplete div.option:hover {
-	/* background-color: #d4bfbf;    see also div.autocomplete:hover div.option.selected:hover */
-	background-color: inherit;
+	background-color: #000;    /* see also div.autocomplete:hover div.option.selected:hover */
+	/*background-color: inherit;*/
+	color:#FFF;
 }
 
 /* very confusing if the selected option (keyboard input) and the hovered option (mouse input)
@@ -83,19 +88,31 @@ div.confirmImg {
 	position: absolute;
 	cursor: default;
 	width: 136px;
-	height: 29px;
-
-	background-image: url(../images/confirm-change.png);
+	background-color: RGBA(0,0,0,0.7);
+	padding: 1px;
+	cursor: default;
+	border-radius: 5px;
+	box-shadow:0px 1px 3px RGBA(0,0,0,0.5);
+/*	background-image: url(../images/confirm-change.png);
+*/}
+div.confirmImg ul{
+	padding:0;
+	margin:0;
 }
-
-div.confirmImg div.option {
-	position: absolute;
-	width: 97px;
-	height: 10px;
-	opacity: 0.3;
-	left: 3px;
+div.confirmImg li.option div{
+	display: inline-block;
+    text-align: center;
+    width: 25px;
+}
+div.confirmImg li.option {
 	cursor: pointer;
+	color:#CCC;
+	display:block;
+	line-height:14px;
+	list-style:none;
+	padding:0 5px;
 }
-div.confirmImg div.option:hover {
-	border: 1px dotted black;
-}
+div.confirmImg li.option:hover {
+	background-color:#000;
+	color:#FFF;
+	}

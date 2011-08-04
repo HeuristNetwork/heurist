@@ -44,7 +44,9 @@ function EditRecStructure() {
 			rty_ID = window.HEURIST.parameters.rty_ID;
 			//DEBUG Dom.get("ed_rty_ID").value = rty_ID;
 			document.title = "Record Type: " + rty_ID+" : " + top.HEURIST.rectypes.names[rty_ID];
+			document.getElementById("recordTitle").innerHTML = "Editing Record Type: "+ top.HEURIST.rectypes.names[rty_ID] + "("+rty_ID+")";
 		}
+		
 
 		// buttons on top and bottom of design tab
 		var hToolBar = '<div style="width:600px"><div style="display:inline-block; text-align:left">'+
@@ -245,7 +247,7 @@ function EditRecStructure() {
 				sortable: false,
 				formatter: function(elLiner, oRecord, oColumn, oData){
 					elLiner.innerHTML =
-					'<a href="#delete"><img src="../../common/images/delete_icon.png" width="16" height="16" border="0" title="Remove detail" /><\/a>';
+					'<a href="#delete"><img src="../../common/images/cross.png" width="12" height="12" border="0" title="Remove detail" /><\/a>';
 				}
 			}
 			];
@@ -530,7 +532,8 @@ function EditRecStructure() {
 		//setTimeout(renderInputs, 500);
 		renderInputs();
 	}
-
+	
+	
 function renderInputs() {
 
 	var rectype = rty_ID,
