@@ -30,6 +30,8 @@
 	*/
 
 	//set up system path defines
+	define('HEURIST_VERSION',"3.1");
+	define('HEURIST_MIN_DBVERSION',"3.1.0");
 
 	define('HEURIST_TOP_DIRS',"admin|common|export|external|hapi|help|import|records|search|viewers");	// this is the path from the heurist code base root. Only change if file moves.
 	define('HEURIST_SERVER_NAME', @$_SERVER["SERVER_NAME"]);	// this will read the server host name for the configured name.
@@ -191,8 +193,11 @@
 
 	define ('HEURIST_NEWREC_OWNER_ID', $sysValues['sys_NewRecOwnerGrpID']);
 	define ('HEURIST_NEWREC_ACCESS', $sysValues['sys_NewRecAccess']);
-	define ('HEURIST_DBVERSION', "".$sysValues['sys_dbVersion']."".$sysValues['sys_dbSubVersion']."".$sysValues['sys_dbSubSubVersion']);
-
+	define ('HEURIST_DBVERSION', "".$sysValues['sys_dbVersion'].".".$sysValues['sys_dbSubVersion'].".".$sysValues['sys_dbSubSubVersion']);
+	if ( HEURIST_MIN_DBVERSION > HEURIST_DBVERSION ) {
+		returnErrorMsgPage("Heurist Code Version ".HEURIST_VERSION." require database schema version of ".HEURIST_MIN_DBVERSION." or higher. ".
+			HEURIST_DBNAME." has a version of ". HEURIST_DBVERSION.", please update the schema.");
+	}
 	// set up email defines
 	if ($infoEmail) {
 		define('HEURIST_MAIL_TO_INFO', $infoEmail);	//mailto string for heurist installation issues
