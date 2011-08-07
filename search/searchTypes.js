@@ -29,7 +29,7 @@ function init_stype() {
 	stype_div_child.appendChild(stype_anchor);
 
 	var q_elt = document.getElementById('q');
-		q_elt.style.paddingLeft = '31px';
+		q_elt.style.padding = '0 20px 0 31px';
 		q_elt.style.backgroundRepeat = 'no-repeat';
 		q_elt.style.backgroundPosition = '3px 3px';
 		if (q_elt.attachEvent) q_elt.attachEvent('onmousemove', function(e) {

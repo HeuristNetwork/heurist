@@ -20,17 +20,7 @@
   <title>Advanced search</title>
 
 	<link rel="stylesheet" type="text/css" href="../common/css/global.css">
-
-	<style type="text/css">
-		input, select { width: 180px; margin: 2px 0;}
-		* { font-family: Arial, Helvetica, sans-serif; font-size: 11px; }
-		td.l { text-align: left; }
-		td.r { text-align: right;width:90px }
-		td.h { padding-left: 20px; font-weight: bold; font-size: 14px; }
-		select#user option { color: black; }
-		td {vertical-align: top;}
-		#q {border-radius:0; -webkit-border-radius:0; -moz-border-radius:0; border:1px solid #A4B4CB}
-	</style>
+    <link rel="stylesheet" type="text/css" href="../common/css/search.css">
 
 		<script src='queryBuilder.js'></script>
 
@@ -405,49 +395,28 @@
 		</script>
 
 	</head>
-	<body class="popup" width=700 height=600 style="overflow: hidden;" onload="load_query();">
+	<body class="popup" width=700 height=530 style="overflow: hidden;" onLoad="load_query();">
 
-
-		<table style="width: 100%;">
-
-			<tr>
-				<td style="padding-left: 30px;">
-					<strong>Search&nbsp;string</strong>
-				</td>
-			</tr>
-			<tr>
-				<td style="padding-left: 30px;">
-					<input style="width: 100%; padding:0 3px" name=q id=q >
-				</td>
-				<td style="padding-left: 30px;">
-					<button type="button" onclick="clear_fields(); return false;" style="margin-right:10px">Clear</button>
-					<button type="button" onclick="do_search();">Search</button>
-				</td>
-			</tr>
-			<tr>
-				<td  style="padding-left: 30px;">Build search using fields below, or edit the search string directly, here or on the main page</td>
-			</tr>
-		</table>
-
-		<div class="separator_row" style="margin:10px 0"></div>
-		<div style="padding-left: 30px; color: #666;">
-			See also <a href="#" onclick="top.HEURIST.util.popupURL(window, '<?=HEURIST_URL_BASE?>help/advanced_search.html'); return false;">help for advanced search</a>.
+		<div>
+			<h2>Search&nbsp;string</h2>
+            <div class="searchInput" style="position:relative; display:block;"><input id=q name=q type=text style="width:100%; clear:both;"></div>
 		</div>
 		<div style="padding-left: 30px; color: #666;">
-			Use <b>tag:</b>, <b>type:</b>, <b>url:</b>, <b>notes:</b>, <b>owner:</b>, <b>user:</b>, <b>field:</b> and <b>all:</b> modifiers.<br>
+			<p>See also <a href="#" onClick="top.HEURIST.util.popupURL(window, '<?=HEURIST_URL_BASE?>help/advanced_search.html'); return false;">help for advanced search</a>.</p>
+            <p style="line-height:14px">Use <b>tag:</b>, <b>type:</b>, <b>url:</b>, <b>notes:</b>, <b>owner:</b>, <b>user:</b>, <b>field:</b> and <b>all:</b> modifiers.<br>
 			To find records with geographic objects that contain a given point, use <b>latitude</b> and <b>longitude</b>, e.g.
 			<b>latitude:10 longitude:100</b><br>
 			Use e.g. <b>title=</b><i>xxx</i> to match exactly, similarly <b>&lt;</b> or <b>&gt;</b>.<br>
 			To find records that include either of two search terms, use an uppercase OR. e.g. <b>timemap OR &quot;time map&quot;</b><br>
-			To omit records that include a search term, precede the term with a single dash. e.g. <b>-maps -tag:timelines</b><br>
+			To omit records that include a search term, precede the term with a single dash. e.g. <b>-maps -tag:timelines</b></p>
+		</div>
+		<div style="padding-left: 30px; color: #666;">
+			
 		</div>
 
-	<div class="separator_row" style="margin:10px 0"></div>
 
-	<table>
-   <tr>
-			<td class=r>Sort&nbsp;by:</td>
-			<td>
+   <div class="advanced-search-row">
+			<label for="sortby">Sort by:</label>
 				<script>
 					function setAscDescLabels(sortbyValue) {
 						var ascLabel = document.getElementById("asc-label");
@@ -465,7 +434,7 @@
 						}
 					}
 				</script>
-				<select name=sortby id=sortby onchange="setAscDescLabels(options[selectedIndex].value); update(this);" style="width: 200px;">
+				<select name=sortby id=sortby onChange="setAscDescLabels(options[selectedIndex].value); update(this);">
 					<option value=t>record title</option>
 					<option value=u>record URL</option>
 					<option value=m>date modified</option>
@@ -480,38 +449,27 @@
 											<?php	}	?>
  </optgroup>
 								</select>
-			</td>
-			<td>
-      <div style="float: right;">
-					<input type=checkbox id=sortby_multiple style="margin: 0; padding: 0; height: auto; width: auto; vertical-align: middle;" disabled onclick="update(document.getElementById('sortby'));">
-					<label for=sortby_multiple id=sortby_multiple_label style="color: gray;">Bibliographic<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(sort by first value only)</label>
-      </div>
+	
+					<input type=checkbox id=sortby_multiple disabled onClick="update(document.getElementById('sortby'));">
+					
 
 
-				<select id=ascdesc style="width: 100px;" onchange="update(document.getElementById('sortby'));">
+				<select id=ascdesc style="width: 100px;" onChange="update(document.getElementById('sortby'));">
 					<option value="" selected id=asc-label>ascending</option>
 					<option value="-" id=desc-label>descending</option>
-     </select>
-				&nbsp;&nbsp;
+     </select><span>Bibliographic (sort by first value only)</span>
+
+</div>
 
 
-    </td>
-   </tr>
-
-	</table>
-	<div class="separator_row" style="margin:10px 0"></div>
-
-
-		<table border=0 cellspacing=0 style="font-size: 10px; width: 620px; padding-right: 8px;">
-   <tr>
-    <td class=r>Record&nbsp;type:</td>
-    <td>
+<div class="advanced-search-row">
+<label for="type">Record type:</label>
 					<?php
 						$res = mysql_query("select distinct rty_ID,rty_Name,rty_Description, rtg_Name
 						from defRecTypes left join defRecTypeGroups on rtg_ID = (select substring_index(rty_RecTypeGroupIDs,',',1))
 						where rty_ShowInLists = 1 order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
 					?>
-          <select name="type" id="type" onchange="update(this);">
+          <select name="type" id="type" onChange="update(this);">
 						<option selected="selected" value="">(select record type)</option>
 						<?php
 							$section = "";
@@ -528,14 +486,10 @@
 						?>
            </optgroup>
           </select>
-    </td>
-   </tr>
-
-   <tr>
-				<td class=r>Fields:</td>
-				<td  style="vertical-align: top;">
-
-					<select name=fieldtype id=fieldtype onchange="update(this);" style="width: 200px;">
+</div>
+<div class="advanced-search-row">
+<label for="fieldtype">Fields:</label>
+					<select name=fieldtype id=fieldtype onChange="update(this);">
 						<option value="" style="font-weight: bold;">Any field</option>
 						<optgroup id="rectype-specific-fields" label="rectype specific fields" style="display: none;"></optgroup>
 						<optgroup label="Generic fields">
@@ -546,87 +500,60 @@
 								<?php	}	?>
 						</optgroup>
 					</select>
-					</nobr>
-					</div>
-					<br clear=all>
-					<div style="float: right;">
-						<nobr>
-							contains
-							<input id=field name=field onchange="update(this);" onkeypress="return keypress(event);" style="width: 200px;">
-						</nobr>
-					</div>
-					<br clear=all>
-					<div style="float: right;">
-						<nobr>
-							<input type="button" value="Add to search" style="width: 120px;">
-						</nobr>
-					</div>
-				</td>
-			</tr>
+					<span>contains</span><input id=field name=field onChange="update(this);" onKeyPress="return keypress(event);" style="width: 200px;">
+					
+					
+</div>
 
-
-			<tr>
-    <td class=r>Title:</td>
-    <td><input name=title id=title onchange="update(this);" onkeypress="return keypress(event);"></td>
-   </tr>
-
-   <tr>
-    <td class=r>URL:</td>
-    <td><input name=url id=url onchange="update(this);" onkeypress="return keypress(event);"></td>
-   </tr>
-
-   <tr>
-    <td class=r>Notes:</td>
-    <td class=l><input id=notes name=notes onchange="update(this);" onkeypress="return keypress(event);"></td>
-   </tr>
-
-			<tr>
-				<td class=r>Tags:</td>
-				<td><input name=tag id=tag onchange="update(this);" onkeypress="return keypress(event);"></td>
+<div class="advanced-search-row">
+<label for="title">Title:</label>
+<input name=title id=title onChange="update(this);" onKeyPress="return keypress(event);">
+</div>
+<div class="advanced-search-row">
+<label for="url">URL:</label>
+<input name=url id=url onChange="update(this);" onKeyPress="return keypress(event);">
+</div>
+<div class="advanced-search-row">
+<label for="notes">Notes:</label>
+<input id=notes name=notes onChange="update(this);" onKeyPress="return keypress(event);">
+</div>
+<div class="advanced-search-row">
+<label for="tag">Tags:</label>
+<input name=tag id=tag onChange="update(this);" onKeyPress="return keypress(event);">
 			<?php
 				$res = mysql_query('select concat('.GROUPS_NAME_FIELD.', "\\\\", tag_Text) from '.DATABASE.'.usrTags, '.USER_GROUPS_TABLE.', '.GROUPS_TABLE.' where tag_UGrpID='.USER_GROUPS_GROUP_ID_FIELD.' and '.USER_GROUPS_GROUP_ID_FIELD.'='.GROUPS_ID_FIELD.' and '.USER_GROUPS_USER_ID_FIELD.'=' . get_user_id() . ' order by '.GROUPS_NAME_FIELD.', tag_Text');
 				if (mysql_num_rows($res) > 0) {
 				?>
-					<td class=r> or </td>
-					<td style="padding-top: 6px; padding-bottom: 6px; text-align: left;" colspan=2>
-						<select onchange="if (selectedIndex) add_tag(options[selectedIndex].value);">
+				<span>or</span>
+                <select onChange="if (selectedIndex) add_tag(options[selectedIndex].value);" style="width: 100px;">
 							<option value="" selected disabled>(select...)</option>
 							<?php		while ($row = mysql_fetch_row($res)) {	?>
 								<option value="<?= htmlspecialchars($row[0]) ?>"><?= htmlspecialchars($row[0]) ?></option>
 								<?php		}	?>
 						</select>
-					</td>
 				<?php
 					} else {
 				?>
-					<td colspan=2></td>
 				<?php
 					}
 			?>
-			</tr>
 			<?php
 				$groups = mysql__select_assoc(USERS_DATABASE.".".USER_GROUPS_TABLE." left join ".USERS_DATABASE.".".GROUPS_TABLE." on ".USER_GROUPS_GROUP_ID_FIELD."=".GROUPS_ID_FIELD, GROUPS_ID_FIELD, GROUPS_NAME_FIELD, USER_GROUPS_USER_ID_FIELD."=".get_user_id()." and ".GROUPS_TYPE_FIELD."='workgroup' order by ".GROUPS_NAME_FIELD);
 	if ($groups  &&  count($groups) > 0) {
 				?>
-   <tr>
-				<td class=r>Owned&nbsp;by:</td>
-    <td class=l>
-     <select name="owner" id="owner" onchange="update(this);">
+   <span>Owned&nbsp;by:</span><select name="owner" id="owner" onChange="update(this);" style="width: 100px;">
       <option value="" selected="selected">(any owner or ownergroup)</option>
 						<?php	foreach ($groups as $id => $name) { ?>
       <option value="&quot;<?= htmlspecialchars($name) ?>&quot;"><?= htmlspecialchars($name) ?></option>
 							<?php	} ?>
      </select>
-   </tr>
 				<?php
 	}
 			?>
-
-   <tr>
-    <td class=r>Bookmarked&nbsp;by:</td>
-    <td>
-					<nobr>
-     <select name="user" id="user" onchange="style.color = 'black'; update(this);" onkeypress="return keypressRedirector(event)">
+</div>
+<div class="advanced-search-row">
+<label for="user">Bookmarked&nbsp;by:</label>
+<select name="user" id="user" onChange="style.color = 'black'; update(this);" onkeypress="return keypressRedirector(event)">
        <option value="" selected="selected">(matching users)</option>
      </select>
      <select name="users_all" id="users_all" style="display: none;">
@@ -637,21 +564,15 @@
 	}
 							?>
      </select>
-    &nbsp;&nbsp;&nbsp;&nbsp;<img src=<?=HEURIST_URL_BASE?>common/images/leftarrow.gif>
-					</nobr>
-    </td>
-    <td>
-     <input onchange="refilter_usernames()" onkeypress="invoke_refilter()" value="(search for a user)" id=user_search onfocus="if (value == defaultValue) { value = ''; }">
-    </td>
-   </tr>
-   <tr>
-    <td colspan=2>
-    <td><span style="color: green;">Type name to find users</td>
-   </tr>
+	<img src=<?=HEURIST_URL_BASE?>common/images/leftarrow.gif>
+	<input onChange="refilter_usernames()" onKeyPress="invoke_refilter()" value="(search for a user)" id=user_search onFocus="if (value == defaultValue) { value = ''; }">
+ 	<span style="color: green;">Type name to find users</span>
+</div>
 
-		</table>
+<div class="advanced-search-row" style="text-align:right; padding:20px 0 0 0">
+     <button type="button" onClick="clear_fields(); return false;" style="margin-right:10px" class="button">Clear</button>
+     <button type="button" onClick="do_search();" class="button">Search</button>
+</div>
 
-
-
- </body>
+</body>
 </html>

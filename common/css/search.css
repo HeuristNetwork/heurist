@@ -80,7 +80,7 @@ a {
 	width: 300px;
 }
 #q {
-	margin: 4px;
+	margin: 0;
 	padding: 0;
 }
 #toolbar select {
@@ -535,6 +535,14 @@ div.right_margin_info div.mini-tools a {
 #search-status {
 	display: block;
 	padding: 0 !important;
+	background: none repeat scroll 0 0 transparent !important;
+    bottom: 0;
+    display: block;
+    left: 0;
+    padding: 0 !important;
+    position: absolute !important;
+    right: 0;
+    top: 47px;
 }
 #loading-search-status, #noquery-search-status, #noresult-search-status {
 	display: none;
@@ -1069,13 +1077,14 @@ div.hide .saved-search-subheading {
 	background-image: url("../images/add-record-small.png");
     background-position: 2px 2px;
     background-repeat: no-repeat;
-    padding: 4px 20px;
+    padding: 0 0 0 20px;
     white-space: nowrap;
 }
 #add-record-link:hover, #new-entry-button:hover {text-decoration:none}
 #add-record {
     border-left: 1px solid rgba(150, 150, 150, 0.3);
-    height: 100%;
+    display: inline-block;
+    padding: 0 0 0 8px;
     }
 .shadow {
 	-webkit-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
@@ -1777,8 +1786,8 @@ div.collapsed{display: none !important;}
 	z-index: 10000;
 	background: RGBA(0,0,0,0.7);
 	top: 100%;
-	left: 5px;
-	right: 5px;
+	left: 9px;
+	right:9px;
 	border-radius: 0 0 5px 5px;
 	box-shadow: 0 1px 3px RGBA(0,0,0,0.5);
 	}
@@ -1788,29 +1797,43 @@ div.collapsed{display: none !important;}
 }
  .simplesearch {
     background-image: url("../images/blue-down-triangle.png");
-    background-position: 0;
-    background-repeat: no-repeat;
-	width:16px;
-	height:9px;
-	overflow:hidden;
-	color:#AAA;
-	display:inline-block;
+	background-position: 50%;
+	background-repeat: no-repeat;
+	width: 19px;
+	height: 22px;
+	overflow: hidden;
+	color: #AAA;
+	display: block;
+	position: absolute;
+	right: 5px;
+	top: 0;
+	border-left: 1px solid #CCC;
 }
 .simple-search-row {
 	border-top:1px solid #666;
 	padding:3px
 	}
-.banner DIV#simple-search .simple-search-row a {
-	border:1px solid #999;
+#simple-search .simple-search-row .button {
+	background-color: rgba(100, 100, 100, 0.6);
+	background:-moz-linear-gradient(center top , #666, #333) repeat scroll 0 0 transparent;
+	background:-webkit-gradient(linear, left top, left bottom, from(#666), to(#333));
+	border: 1px solid #333;
+	-moz-border-radius:3px;
+	-webkit-border-radius:3px;
+	border-radius:3px;
+	padding:3px;
+	font-size:10px;
 	color:#CCC;
-	margin:6px;
-	line-height:20px;
-	padding:0 4px;
+	width:150px;
+	margin:3px;
+	height:18px;
+	line-height:18px;
 }
-.banner DIV#simple-search .simple-search-row a:hover {
+
+#simple-search .simple-search-row .button:hover {
 	color:#FFF;
-	text-decoration:none;
-	background-color:#666;
+	border-color:#666;
+	text-decoration:none
 }
 .simple-search-row label {
 	color:#CCC;
@@ -1820,8 +1843,59 @@ div.collapsed{display: none !important;}
 	display:inline-block;
 }
 .simple-search-row select {
-	width:10em;
+	height:18px;
+	width:100px;
 }
+.simple-search-row type[button] {
+	background-color:#CCC;
+	display:block;
+}
+.simple-search-row input{
+	height:18px;
+	border-radius:3px;
+	width:100px;
+}
+.advanced-search-row {
+/*	border-top:1px solid #A4B4CB;
+*/	border-top:1px solid #FFF;
+	padding:6px 3px;
+	}
+.advanced-search-row .button {
+	background-color:#CCC;
+	background:-moz-linear-gradient(center top , #EEE, #CCC) repeat scroll 0 0 transparent;
+	background:-webkit-gradient(linear, left top, left bottom, from(#EEE), to(#CCC));
+	border: 1px solid #999;
+	-moz-border-radius:3px;
+	-webkit-border-radius:3px;
+	border-radius:3px;
+	padding:0 3px;
+	font-size:11px;
+	color:#666;
+	margin:3px;
+	height:20px;
+	line-height:18px;
+	display:inline-block;
+}
+.advanced-search-row .button:hover {
+	color:#333;
+    box-shadow: 0 1px 3px #666 inset;
+}
+.advanced-search-row label {
+	color:#4C5F76;
+	width:100px;
+	text-align:right;
+	margin:0 5px;
+	display:inline-block;
+}
+.advanced-search-row span {
+	color:#4C5F76;
+	margin:0 3px 0 18px;
+}
+.advanced-search-row select, .advanced-search-row input {
+	height:18px;
+	width:200px;
+}
+
 
 #results div.collapsed{height:23px;overflow:hidden;padding-top:1px}
 #results div.collapsed div.recordDiv{display: none !important;}
@@ -1903,4 +1977,13 @@ div.recorddiv:hover > #recordID {
 }
 #result-header div#tabbar{
 	clear:none;
+}
+.searchInput {
+	background: none repeat scroll 0 0 white;
+    border: 1px solid #999999;
+    border-radius: 15px 15px 15px 15px;
+    display: inline-block;
+    height: 22px;
+    margin: 3px 0 0;
+    padding: 0 3px;
 }
