@@ -468,7 +468,7 @@ function getDetailTypeConceptID($lclDtyID){
 	return getConceptID($lclDtyID,"defDetailTypes","dty_");
 }
 
-function getTermConceptID($lclRecTypeID){
+function getRecTypeConceptID($lclRecTypeID){
 	return getConceptID($lclRecTypeID,"defRecTypes","rty_");
 }
 
@@ -502,7 +502,7 @@ function getDetailTypeLocalID($dtyConceptID){
 	return getLocalID($dtyConceptID,"defDetailTypes","dty_");
 }
 
-function getTermLocalID($rtyConceptID){
+function getRecTypeLocalID($rtyConceptID){
 	return getLocalID($rtyConceptID,"defRecTypes","rty_");
 }
 
