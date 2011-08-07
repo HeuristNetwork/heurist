@@ -74,7 +74,7 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['action-message']) {
 	$msg = $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['action-message'];
 	unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['action-message']);
 	session_write_close();
-	print "<script> if(confirm(\"" . $msg . "\\n\\nInformation changes will be visible on relaod of this page!\\nReloading will reset filters and selection!\\n\\nWould you like to reload now?\")) { top.location.reload(); }else{ location.replace('actionHandler.php');}</script>\n";
+	print "<script> if(confirm(\"" . $msg . "\\n\\nInformation changes will be visible on relaod of this page!\\nReloading will reset filters and selection!\\n\\nWould you like to reload now?\")) { top.location.reload(); }else{ location.replace('actionHandler.php?db=".HEURIST_DBNAME."');}</script>\n";
 } else {
 	print_input_form();
 }
@@ -399,9 +399,9 @@ function bookmark_tag_and_save_seach() {
 	} else {
 		$onload = 'location.replace(\'actionHandler.php?db='.HEURIST_DBNAME.'\');'.
 					'top.HEURIST.search.insertSavedSearch(\''.slash($_REQUEST['svs_Name']).'\', \''.slash($_REQUEST['svs_Query']).'\', '.$wg.', '.$ss.');'.
-					'top.HEURIST.util.getJsonData("'. BASE_PATH.'search/saved/manageCollection.php?clear", top.HEURIST.search.addRemoveCollectionCB);'.
+					'top.HEURIST.util.getJsonData("'. BASE_PATH.'search/saved/manageCollection.php?clear&db='.HEURIST_DBNAME.'", top.HEURIST.search.addRemoveCollectionCB);'.
 					'top.HEURIST.search.popupNotice(\' Search \"'.$_REQUEST['svs_Name'].'\" saved. '. $message.'\');' .
-					'top.location.href = top.location.href + (top.location.href.match(/\?/) ? \'&\' : \'?\') + \'sid='.$ss.'\';';
+					'top.location.href = top.location.href + (top.location.href.match(/\?/) ? \'&\' : \'?\') + \'sid='.$ss.'\'+(top.location.href.match(/db=/) ? \'\' : &db='.HEURIST_DBNAME.');';
 	}
 	return $onload;
 }
@@ -447,9 +447,9 @@ function save_search() {
 	} else {
 		$onload = 'location.replace(\'actionHandler.php?db='.HEURIST_DBNAME.'\'); top.HEURIST.search.insertSavedSearch(\''.slash($_REQUEST['svs_Name']).'\', \''.slash($_REQUEST['svs_Query']).'\', '.$wg.', '.$ss.');';
 		if ($publish) {
-			$onload .= ' top.location.href = top.location.href + (top.location.href.match(/\?/) ? \'&\' : \'?\') + \'pub=1&label='.$label.'&sid='.$ss.'\'(top.location.href.match(/db=/) ? \'\' : &db='.HEURIST_DBNAME.');';
+			$onload .= ' top.location.href = top.location.href + (top.location.href.match(/\?/) ? \'&\' : \'?\') + \'pub=1&label='.$label.'&sid='.$ss.'\'+(top.location.href.match(/db=/) ? \'\' : &db='.HEURIST_DBNAME.');';
 		}else{
-			$onload .= ' top.location.href = top.location.href + (top.location.href.match(/\?/) ? \'&\' : \'?\') + \'label='.$label.'&sid='.$ss.'\'(top.location.href.match(/db=/) ? \'\' : &db='.HEURIST_DBNAME.');';
+			$onload .= ' top.location.href = top.location.href + (top.location.href.match(/\?/) ? \'&\' : \'?\') + \'label='.$label.'&sid='.$ss.'\'+(top.location.href.match(/db=/) ? \'\' : &db='.HEURIST_DBNAME.');';
 		}
 	}
 	return $onload;

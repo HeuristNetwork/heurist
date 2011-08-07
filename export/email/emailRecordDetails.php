@@ -1,6 +1,6 @@
 <?php
 
-/**
+	/**
  * emailRecordDetailsphp
  *
  * Accept POST from
@@ -17,30 +17,25 @@
  * @todo - remove files from database and folder after sending
  **/
 
-define('SAVE_URI', 'disabled');
+	define('SAVE_URI', 'disabled');
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 	require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 
-require 'geekMail-1.0.php';
+	require_once(dirname(__FILE__).'/../../external/php/geekMail-1.0.php');
 
-//send an email
-$geekMail = new geekMail();
-$geekMail->setMailType('html');
-$geekMail->from("bugs@acl.arts.usyd.edu.au", "Bug reporter"); //'noreply@heuristscholar.org', 'Bug Report');
-$geekMail->to('prime.heurist@gmail.com');
-//$geekMail->cc('osmakov@gmail.com');
-//$geekMail->bcc('willem@geekology.co.za');
-
-$geekMail->subject('Bug Report');
+	//send an email
+	$geekMail = new geekMail();
+	$geekMail->setMailType('html');
+	$geekMail->from("bugs@acl.arts.usyd.edu.au", "Bug reporter"); //'noreply@heuristscholar.org', 'Bug Report');
+	$geekMail->to('prime.heurist@gmail.com');
+	$geekMail->subject('Bug Report');
 
   $ids = "";
 
-  if($_POST["rectype"] == "253"){ //MAGIC BUG REPORTER
+	if($_POST["rectype"] == "2-253"){ //MAGIC BUG REPORTER
 
-  	//category for documentation
-	//$_POST["type:559"] = array("631");
 
 	$ext_desc = $_POST["type:191"];
 	if(!is_array($ext_desc)) {
@@ -80,13 +75,13 @@ $geekMail->subject('Bug Report');
 
 		$query = "select ulf_ID, ulf_OrigFileName, ulf_Added, ulf_MimeExt, ulf_FileSizeKB from recUploadedFiles where ulf_ID in ".$ids.")";
 
-//DEBUG error_log(">>>> ".$query);
+		//DEBUG error_log(">>>> ".$query);
 
 		$files_arr = array();
 
 		$res = mysql_query($query);
   		while ($row = mysql_fetch_row($res)) {
-//DEBUG error_log(">>>> ".HEURIST_UPLOAD_PATH.$row[0]);
+			//DEBUG error_log(">>>> ".HEURIST_UPLOAD_PATH.$row[0]);
 			$geekMail->attach(HEURIST_UPLOAD_PATH.$row[0]);
 			array_push($files_arr, $row);
 		}
@@ -107,7 +102,7 @@ $geekMail->subject('Bug Report');
 		foreach ($upload["size"] as $eltID => $size) {
 			if ($size <= 0) continue;
 
-error_log(">>>>>>".$tmp_name);
+	error_log(">>>>>>".$tmp_name);
 
 			$geekMail->attach($tmp_name);
 
@@ -137,16 +132,16 @@ error_log(">>>>>>".$tmp_name);
   //$message = json_format($_POST);
   $message =  json_encode($_POST);
 
-//DEBUG error_log(">>>> ".$message);
-$geekMail->message($message);
+	//DEBUG error_log(">>>> ".$message);
+	$geekMail->message($message);
 
-/**/
-if (!$geekMail->send())
-{
+	/**/
+	if (!$geekMail->send())
+	{
 	$errors = $geekMail->getDebugger();
   	print_r($errors);
-}else{
+	}else{
 	print '({"result":"ok"})';
-}
+	}
 
 ?>

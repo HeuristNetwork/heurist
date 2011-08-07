@@ -34,11 +34,11 @@ $scripts = array(
 //	HAPI_HOME . "php/loadHapiUserInfo.php?key=" . addslashes($_REQUEST["key"])."&db=".$instance,
 	HAPI_HOME . "php/loadHapiCommonInfo.php?db=".$instance,
 	HAPI_HOME . "php/loadHapiUserInfo.php?db=".$instance,
-	HAPI_HOME . "js/hapi.js?db=".$instance
+	HAPI_HOME . "js/hapi.js"
 );
 
 if (@$_REQUEST["inclGeo"]) {
-	array_push($scripts,HAPI_HOME."js/geo.js?db=".$instance);
+	array_push($scripts,HAPI_HOME."js/geo.js");
 }
 
 ?>

@@ -230,7 +230,7 @@ while ($row = mysql_fetch_row($res)) {
  <td class="u-cell">
   <div class="u" title="' . $row[2] . ' records"><div style="width: ' . (intval($row[2]) / $max_cnt * 100) . '%;"></div></div>
  </td>
- <td class=search>'.($row[2] ? '<a target=_blank href="'.HEURIST_URL_BASE.'search/search.html?w=bookmark&q=tag:%22'.$row[1].'%22">view...</a>': '').'</td>
+ <td class=search>'.($row[2] ? '<a target=_blank href="'.HEURIST_URL_BASE.'search/search.html?w=bookmark&db='.HEURIST_DBNAME.'&q=tag:%22'.$row[1].'%22">view...</a>': '').'</td>
  <td class=replace>'.($row[2] ? '<a href=# onclick="show_replace_list(this, '.$row[0].'); return false;">replace...</a>': '').'</td>
 </tr>';
 
