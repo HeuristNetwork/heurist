@@ -331,13 +331,18 @@ function _hideToolTip(){
 <a id="detailedLog" onClick="showDetailedLog()" href="#">Show detailed log</a><br /><br />
 <div id="log"></div><br />
 <div id="log"></div>
-<button id="finish1" onClick="dropTempDB(true)">Finish crosswalk</button>
+<button id="finish1" onClick="dropTempDB(true)">Finished</button>
 <div id="crosswalk" style="width:100%;margin:auto;">
 	<div id="topPagination"></div>
 	<div id="crosswalkTable"></div>
 	<div id="bottomPagination"></div>
 </div>
-<button id="finish2" onClick="dropTempDB(true)">Finish crosswalk</button>
+<i>Note: If this function reports 'No records found' this normally means that there are no 
+definitions in the selected database which are not already in the current database. 
+</i>
+<br>&nbsp;<br>
+
+<button id="finish2" onClick="dropTempDB(true)">Finished</button>
 <div class="tooltip" id="toolTip"><p>tooltip</p></div>
 
 <script type="text/javascript">
@@ -352,7 +357,7 @@ function processAction(rtyID, action) {
 	// Lock import, and set import icon to loading icon
 	if(action == "import") {
 		importPending = true;
-		document.getElementById("importIcon"+rtyID).src = "../setup/loading.gif";
+		document.getElementById("importIcon"+rtyID).src = "../../common/images/mini-loading.gif";
 	}
 	var xmlhttp;
 	if (action.length == 0) {
@@ -482,7 +487,7 @@ function dropTempDB(redirect) {
 		window.location = "about:blank";
 	} else {
 		if(result == "") {
-			alert("Nothing was imported");
+			// This is jsut a nuisance: alert("Nothing was imported");
 		} else {
 			alert(result);
 		}

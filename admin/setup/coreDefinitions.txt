@@ -1,0 +1,173 @@
+
+ -- fallbackDefinitionsIfOffline.txt: minimal set of database definitions for a new database
+ -- @author Ian Johnson 11/1/2011
+ -- @copyright 2005-2010 University of Sydney Digital Innovation Unit.
+ -- @link: http://HeuristScholar.org
+ -- @license http://www.gnu.org/licenses/gpl-3.0.txt
+ -- @package Heurist academic knowledge management system
+ -- @todo
+ 
+ -- THIS FILE IS USED TO CREATE MINIMUM RECORD/DETAIL/TERM ETC. DEFINITIONS FOR A NEW DATABASE
+ -- AND NEEDS TO BE FILLED WITH THE RESULTS FROM
+ -- http://heuristscholar.org/h3/admin/structure/getDBStructure.php?db=reference
+ -- TRIMMED DOWN TO THE MINIMUM SET (CURRENTLY THERE IS NO AUTOMATIC WAY OF DOING THIS,
+ -- THE TRIMMING HAS TO BE DONE MANUALLY)
+
+-- -----------------------------------------------------------------------------------------------------
+ -- OUTPUT FROM getDBStructure.php STARTS HERE
+-- -----------------------------------------------------------------------------------------------------
+
+
+-- This file is used, through the buildCrosswalks function, to populate a blank Heurist
+-- database structure with a minimal set of essential record type, detail type etc. definitions
+
+
+-- 2/8/11 In fact, what we need to export here is the definitons from a new database
+-- which I am about to create, called HeuristSystem_Minimal, which will be built by 
+-- grabbing critical record types - relation, intenet bookmark, notes and multimedia item -
+-- from sandpit5
+
+
+-- Heurist Definitions Exchange File Vsn 3.1 - Full export
+-- Installation = http://heuristscholar.org/h3-ij/; db = scratch_core_definitions ; Format Version = 3.1
+
+-- RECORD TYPES
+
+-- rty_ID, rty_Name, rty_OrderInGroup, rty_Description, rty_TitleMask, rty_CanonicalTitleMask, rty_Plural, rty_Status, rty_OriginatingDBID, rty_NameInOriginatingDB, rty_IDInOriginatingDB, rty_BlockFromPublicView, rty_ShowInLists, rty_RecTypeGroupIDs, rty_FlagAsFieldset, rty_ReferenceURL, rty_AlternativeRecEditor, rty_Type
+
+> Start > End
+
+ 
+
+ 
+
+-- DETAIL TYPES
+
+-- dty_ID, dty_Name, dty_Documentation, dty_Type, dty_HelpText, dty_ExtendedDescription, dty_Status, dty_OriginatingDBID, dty_NameInOriginatingDB, dty_IDInOriginatingDB, dty_DetailTypeGroupID, dty_OrderInGroup, dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, dty_PtrTargetRectypeIDs, dty_FieldSetRecTypeID, dty_ShowInLists,
+
+> Start > End
+
+ 
+
+ 
+
+-- RECORD STRUCTURE
+
+-- rst_ID, rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription, rst_DisplayOrder, rst_DisplayWidth, rst_DefaultValue, rst_RecordMatchOrder, rst_CalcFunctionID, rst_RequirementType, rst_VisibleOutsideGroup, rst_Status, rst_MayModify, rst_OriginatingDBID, rst_IDInOriginatingDBID, rst_IDInOriginatingDB, rst_MaxValues, rst_MinValues, rst_DisplayDetailTypeGroupID, rst_FilteredJsonTermIDTree, rst_PtrFilteredIDs, rst_OrderForThumbnailGeneration, rst_TermIDTreeNonSelectableIDs
+
+> Start > End
+
+ 
+
+ 
+
+-- TERMS
+
+-- trm_ID, trm_Label, trm_InverseTermId, trm_Description, trm_Status, trm_OriginatingDBID, trm_NameInOriginatingDB, trm_IDInOriginatingDB, trm_AddedByImport, trm_IsLocalExtension, trm_Domain, trm_OntID, trm_ChildCount, trm_ParentTermID, trm_Depth
+
+> Start > End
+
+ 
+
+ 
+
+-- ONTOLOGIES
+
+-- ont_ID, ont_ShortName, ont_FullName, ont_Description, ont_RefURI, ont_Status, ont_OriginatingDBID, ont_NameInOriginatingDB, ont_IDInOriginatingDB, ont_Order
+
+> Start > End
+
+ 
+
+ 
+
+-- RELATIONSHIP CONSTRAINTS
+
+-- rcs_ID, rcs_SourceRectypeID, rcs_TargetRectypeID, rcs_Description, rcs_RelationshipsLimit, rcs_Status, rcs_OriginatingDBID, rcs_IDInOriginatingDB, rcs_TermID, rcs_TermLimit
+
+> Start > End
+
+ 
+
+ 
+
+-- FILE EXTENSIONS TO MIME TYPES
+
+-- fxm_Extension, fxm_MimeType, fxm_OpenNewWindow, fxm_IconFileName, fxm_FiletypeName, fxm_ImagePlaceholder
+
+> Start > End
+
+ 
+
+ 
+
+-- RECORD TYPE GROUPS
+
+-- rtg_ID, rtg_Name, rtg_Domain, rtg_Order, rtg_Description
+
+> Start > End
+
+ 
+
+ 
+
+-- DETAIL TYPE GROUPS
+
+-- dtg_ID, dtg_Name, dtg_Description, dtg_Order
+
+> Start > End
+
+ 
+
+ 
+
+-- Definitions translations
+
+-- trn_ID , trn_Source, trn_Code, trn_LanguageCode3, trn_Translation
+
+> Start > End
+
+ 
+
+ 
+
+-- DEF CALC FUNCTIONS
+
+-- cfn_ID, cfn_Domain, cfn_FunctionSpecification
+
+> Start > End
+
+ 
+
+ 
+
+-- DEF CROSSWALK
+
+-- crw_ID, crw_SourcedbID, crw_SourceCode, crw_DefType, crw_LocalCode, crw_Modified
+
+> Start > End
+
+ 
+
+ 
+
+-- DEF LANGUAGE
+
+-- lng_NISOZ3953, lng_ISO639, lng_Name, lng_Notes
+
+> Start > End
+
+ 
+
+ 
+
+-- DEF URL PREFIXES
+
+-- urp_ID, urp_Prefix
+
+> Start > End
+
+ 
+
+ 
+

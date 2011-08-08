@@ -32,15 +32,15 @@ after selection, 26-05-2011, by Juan Adriaanse
 </head>
 <body class="popup yui-skin-sam" style="overflow: auto;">
 
-<div class="banner"><h2>Select a database for import</h2></div>
+<div class="banner"><h2>Registered databases</h2></div>
 <div id="page-inner" style="overflow:auto">
 
-<div id="statusMsg"><img src="../setup/loading.gif" width="16" height="16" /> &nbspDownloading database list...</div>
+<div id="statusMsg"><img src="../../common/images/mini-loading.gif" width="16" height="16" /> &nbspDownloading database list...</div>
 
 The list below shows all databases registered with the HeuristScholar.org Index database. 
 Use the filter to locate a specific term in the name or title. <br>
 Click the Crosswalk icon on the right to view available record types in that database. 
-If none are shown, you already have all the record types in that database.<br><br>
+<br><br>
 <div class="markup" id="filterDiv" style="display:none">
 	<label for="filter">Filter:</label> <input type="text" id="filter" value="">
 	<div id="tbl"></div>
@@ -54,6 +54,7 @@ If none are shown, you already have all the record types in that database.<br><b
 <input id="dbURL" name="dbURL" type="hidden">
 <input id="dbName" name="dbName" type="hidden">
 <input id="dbTitle" name="dbTitle" type="hidden">
+<input id="dbPrefix" name="dbPrefix" type="hidden">
 </form>
 </div>
 <script type="text/javascript">
@@ -107,11 +108,14 @@ var registeredDBs = [];
 			if($ownDBID != $registeredDB->rec_ID) {
 
 				$rawURL = $registeredDB->rec_URL;
-				$splittedURL = explode("?db=", $rawURL);
+				$splittedURL = explode("?", $rawURL);
 
 				$dbID = $registeredDB->rec_ID;
 				$dbURL = $splittedURL[0];
-				$dbName = $splittedURL[1];
+                preg_match("/db=([^&]*).*$/", $rawURL,$match);
+                $dbName = $match[1];
+                preg_match("/prefix=([^&]*).*$/", $rawURL,$match);
+                $dbPrefix = $match[1];
 				$dbTitle = $registeredDB->rec_Title;
 				$dbPopularity = $registeredDB->rec_Popularity;
 
@@ -124,7 +128,8 @@ var registeredDBs = [];
 				echo 'registeredDB[2] = "'.$dbName.'";' . "\n";
 				echo 'registeredDB[3] = "'.$dbTitle.'";' . "\n";
 				echo 'registeredDB[4] = "'.$dbPopularity.'";' . "\n";
-				echo 'registeredDBs['.$dbID.'].push(registeredDB);' . "\n";
+                echo 'registeredDB[5] = "'.$dbPrefix.'";' . "\n";
+                echo 'registeredDBs['.$dbID.'].push(registeredDB);' . "\n";
 			}
 		}
 	}
@@ -136,17 +141,23 @@ YAHOO.util.Event.addListener(window, "load", function() {
 	YAHOO.example.Basic = function() {
 		var myColumnDefs = [
 			{key:"id", label:"ID" , formatter:YAHOO.widget.DataTable.formatNumber, sortable:true, resizeable:true},
-			{key:"name", label:"Name" , sortable:true, resizeable:true},
+			{key:"name", label:"DB Name" , sortable:true, resizeable:true},
 			{key:"description", label:"Description", sortable:true, resizeable:true},
-			{key:"popularity", label:"Popularity", formatter:YAHOO.widget.DataTable.formatNumber, sortable:true, resizeable:true},
+			// Currently no useful data in popularuity value
+            {key:"popularity", label:"Popularity", formatter:YAHOO.widget.DataTable.formatNumber, 
+                sortable:true, resizeable:true, hidden:true },
 			{key:"crosswalk", label:"Crosswalk", resizeable:true}
 		];
 
+        //TODO: Add the URL as a hyperlink so that one can got to a search of the database
+        //      Also add as a filter criteria so you can find databases by server, for example
+        
 		// Add databases to an array that YUI DataTable can use. Do not show URL for safety
 		dataArray = [];
 		for(dbID in registeredDBs) {
 			db = registeredDBs[dbID];
-			dataArray.push([db[0][0],db[0][2],db[0][3],db[0][4],'<a href="#" onClick="doCrosswalk('+dbID+')"><img src="crosswalk_icon.png" width="25" height="16" /></a>']);
+			dataArray.push([db[0][0],db[0][2],db[0][3],db[0][4],
+            '<a href="#" onClick="doCrosswalk('+dbID+')"><img src="crosswalk_icon.png" width="25" height="16" /></a>']);
 		}
 
 		var myDataSource = new YAHOO.util.LocalDataSource(dataArray,{
@@ -168,8 +179,6 @@ YAHOO.util.Event.addListener(window, "load", function() {
 				// Do a wildcard search for both name and description
 				for (i = 0, l = data.length; i < l; ++i) {
 						if (data[i].description.toLowerCase().indexOf(req) >= 0) {
-							filtered.push(data[i]);
-						} else if (data[i].name.toLowerCase().indexOf(req) >= 0) {
 							filtered.push(data[i]);
 						}
 					}
@@ -230,7 +239,8 @@ function doCrosswalk(dbID) {
 	document.getElementById("dbID").value = db[0][0];
 	document.getElementById("dbURL").value = db[0][1];
 	document.getElementById("dbName").value = db[0][2];
-	document.getElementById("dbTitle").value = db[0][3];
+    document.getElementById("dbTitle").value = db[0][3];
+    document.getElementById("dbPrefix").value = db[0][5]?db[0][5]:"";
 	document.forms["crosswalkInfo"].submit();
 }
 </script>

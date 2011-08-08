@@ -1,9 +1,8 @@
 <?php
 
-	/*,!--
-	* getDBStructure.php - returns database definitions (rectypes, details etc.)
-	*						as SQL statements ready for INSERT processing
-	* Ian Johnson 2 March 2010 updated to Vsn 3 13/1/2011
+/* getDBStructure.php - returns database definitions (rectypes, details etc.)
+ *						as SQL statements ready for INSERT processing
+ * Ian Johnson 2 March 2010 updated to Vsn 3 13/1/2011
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
@@ -11,7 +10,10 @@
 	* @param includeUgrps=1 will output user and group information in addition to definitions	 
 	* @param approvedDefsOnly=1 will only output Reserved and Approved definitions
  * @todo
-	-->*/
+ * 
+ * IJ Updated to database format 3.1.0 2/8/11
+ * 
+	-->*/       
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
@@ -32,20 +34,38 @@
 		die("Could not get database structure from given database source.");
 	}
 
-	$version = 1.0; // Output format version number. This will be read by the crosswalk generator
+	$dbVersion = 3.1; // Output format version number. This will be read by the crosswalk generator
+    
+// TODO: use HEURIST_DBVERSION TO SET THE VERSION HERE
+
+    // * IMPORTANT * 
+    // UPDATE THE FOLLOWING WHEN DATABASE FORMAT IS CHANGED:
+    // List of fields for data (below) - this is doco not functional data
+    // Version info in buildCrosswalks.php
+    // insert queries in buildCrosswalks.php
+    // /admin/setup/createDefinitionTablesOnly.sql
+    // /admin/setup/PopulateBlankDatabase.sql
 
 	// TO DO: Remove HTML tags, this is a fudge to make it readable in a browser fro debuggging
 
 	// File headers to explain what the listing represents
 
-	print "<html><head></head><body><h3>";
+	print "<html><head></head><body>\n";
 
-	print "-- Heurist Definitions Exchange File Vsn $version - Full export\n";
+	print "-- Heurist Definitions Exchange File, Format Vsn $dbVersion - Full export\n";
 	print "<br>";	// TO DO: This is a fudge to make it readable in a browser
 
-	print "-- Installation = " . HEURIST_BASE_URL . ";	 db = " . HEURIST_DBNAME . " ;		 Format Version = $version";print "\n";
-	print "<br><br></h3>";
+	print "-- Installation = " . HEURIST_BASE_URL . ";	 db = " . HEURIST_DBNAME . " ;<br><br>\n";
+    print "-- Vsn: $dbVersion";
+    print "\n";
+	print "<br><br>";
 
+    
+    // LAST UPDATED 2/8/11 DBVsn 3.1.0
+    // At this time (2 Aug 2011) all definitional data including users and tags are output.
+    // Only defURLPrefixes and sysIdentification information are not output. 
+    // All def tables plus ugrp and user to group links, and user tags are output
+       
 	// ------------------------------------------------------------------------------------------
 	// RECORD TYPES (this will be repeated for each of the tables)
 
@@ -53,7 +73,7 @@
 	print "<p>";
 	print "-- rty_ID, rty_Name, rty_OrderInGroup, rty_Description, rty_TitleMask,
 			rty_CanonicalTitleMask, rty_Plural, rty_Status, rty_OriginatingDBID, rty_NameInOriginatingDB,
-			rty_IDInOriginatingDB, rty_ShowInLists, rty_RecTypeGroupIDs, rty_FlagAsFieldset, rty_ReferenceURL,
+			rty_IDInOriginatingDB, rty_BlockFromPublicView, rty_ShowInLists, rty_RecTypeGroupIDs, rty_FlagAsFieldset, rty_ReferenceURL,
 			rty_AlternativeRecEditor, rty_Type\n";
 	$query = "select * from defRecTypes";
 	$res = mysql_query($query);
@@ -73,7 +93,7 @@
 	print "<p>";
 	print "-- dty_ID, dty_Name, dty_Documentation, dty_Type, dty_HelpText, dty_ExtendedDescription, dty_Status,
 			dty_OriginatingDBID, dty_NameInOriginatingDB, dty_IDInOriginatingDB, dty_DetailTypeGroupID,
-			dty_OrderInGroup, dty_PtrTargetRectypeIDs, dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs,
+			dty_OrderInGroup, dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, dty_PtrTargetRectypeIDs, 
 			dty_FieldSetRecTypeID, dty_ShowInLists,\n";
 	$query = "select * from defDetailTypes";
 	$res = mysql_query($query);
@@ -93,8 +113,9 @@
 	print "<p>";
 	print "-- rst_ID, rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
 			rst_DisplayOrder, rst_DisplayWidth, rst_DefaultValue, rst_RecordMatchOrder, rst_CalcFunctionID,
-			rst_RequirementType, rst_Status, rst_OriginatingDBID, rst_IDInOriginatingDB, rst_MaxValues, rst_MinValues,
-			rst_DisplayDetailTypeGroupID, rst_FilteredJsonTermIDTree, rst_TermIDTreeNonSelectableIDs, rst_PtrFilteredIDs, rst_OrderForThumbnailGeneration\n";
+			rst_RequirementType, rst_VisibleOutsideGroup, rst_Status, rst_MayModify, rst_OriginatingDBID, rst_IDInOriginatingDBID, 
+            rst_IDInOriginatingDB, rst_MaxValues, rst_MinValues,
+			rst_DisplayDetailTypeGroupID, rst_FilteredJsonTermIDTree, rst_PtrFilteredIDs, rst_OrderForThumbnailGeneration, rst_TermIDTreeNonSelectableIDs \n";
 	$query = "select * from defRecStructure";
 	$res = mysql_query($query);
 	$fmt = 'defRecStructure';
@@ -111,9 +132,10 @@
 
 	print "\n\n\n-- TERMS";print "\n";
 	print "<p>";
-	print "-- trm_ID, trm_Label, trm_InverseTermId, trm_Description, trm_Status, trm_OriginatingDBID,
-			trm_AddedByImport, trm_IsLocalExtension, trm_NameInOriginatingDB, trm_IDInOriginatingDB,
-			trm_ParentTermID, trm_Domain, trm_ChildCount, trm_Depth, trm_OntID\n";
+	print "-- trm_ID, trm_Label, trm_InverseTermId, trm_Description, trm_Status, 
+            trm_OriginatingDBID, trm_NameInOriginatingDB, trm_IDInOriginatingDB, 
+            trm_AddedByImport, trm_IsLocalExtension, trm_Domain, trm_OntID,
+			trm_ChildCount, trm_ParentTermID,  trm_Depth \n";
 	$query = "select * from defTerms";
 	$res = mysql_query($query);
 	$fmt = 'defTerms';
@@ -130,7 +152,7 @@
 	print "\n\n\n-- ONTOLOGIES";print "\n";
 	print "<p>";
 	print "-- ont_ID, ont_ShortName, ont_FullName, ont_Description, ont_RefURI, ont_Status, 
-	ont_OriginatingDBID, ont_NameInOriginatingDB, ont_IDInOriginatingDB, ont_Added, ont_Modified\n";
+	ont_OriginatingDBID, ont_NameInOriginatingDB, ont_IDInOriginatingDB, ont_Order\n";
 	$query = "select * from defOntologies";
 	$res = mysql_query($query);
 	$fmt = 'defOntologies';
@@ -146,8 +168,8 @@
 
 	print "\n\n\n-- RELATIONSHIP CONSTRAINTS";print "\n";
 	print "<p>";
-	print "-- rcs_ID, rcs_TermID, rcs_SourceRectypeID, rcs_TargetRectypeID, rcs_Description, rcs_Status,
-			rcs_OriginatingDBID, rcs_TermLimit, rcs_IDInOriginatingDB\n";
+	print "-- rcs_ID, rcs_SourceRectypeID, rcs_TargetRectypeID, rcs_Description, rcs_RelationshipsLimit, rcs_Status,
+			rcs_OriginatingDBID, rcs_IDInOriginatingDB, rcs_TermID, rcs_TermLimit\n";
 	$query = "select * from defRelationshipConstraints";
 	$res = mysql_query($query);
 	$fmt = 'defRelationshipConstraints';
@@ -212,7 +234,7 @@
 
 	print "\n\n\n-- Definitions translations";print "\n";
 	print "<p>";
-	print "-- trn_ID , trn_Source, trn_Code, trn_LanguageID, trn_Translation\n";
+	print "-- trn_ID , trn_Source, trn_Code, trn_LanguageCode3, trn_Translation\n";
 	$query = "select * from defTranslations where trn_Source in 
 	('rty_Name', 'dty_Name', 'ont_ShortName', 'vcb_Name', 'trm_Label', 'rst_DisplayName', 'rtg_Name')";
 	// filters to only definition (not data) translations - add others as required
@@ -262,7 +284,7 @@
 
 	print "\n\n\n-- DEF LANGUAGE";print "\n";
 	print "<p>";
-	print "-- lng_ID, lng_Name, lng_Notes, lng_ISO639, lng_NISOZ3953\n";
+	print "-- lng_NISOZ3953, lng_ISO639, lng_Name, lng_Notes\n";
 	$query = "select * from defLanguages";
 	$res = mysql_query($query);
 	$fmt = 'defLanguages';
@@ -303,10 +325,11 @@
 
 	print "\n\n\n-- Users and Groups";print "\n";
 	print "<p>";
-	print "-- ugr_ID, ugr_Type, ugr_Name, ugr_LongName, ugr_Description, ugr_Password, ugr_eMail, 
-		ugr_FirstName, ugr_LastName, ugr_Department, ugr_Organisation, ugr_City, ugr_State, ugr_Postcode, 
+	print "-- ugr_ID, ugr_Type, ugr_Name, ugr_LongName, ugr_Description, 
+        ugr_Password, ugr_eMail, ugr_FirstName, ugr_LastName, 
+        ugr_Department, ugr_Organisation, ugr_City, ugr_State, ugr_Postcode, 
 		ugr_Interests, ugr_Enabled, ugr_LastLoginTime, ugr_MinHyperlinkWords, ugr_LoginCount, ugr_IsModelUser, 
-		ugr_IncomingEmailAddresses, ugr_URLs, ugr_FlagJT\n";
+		ugr_IncomingEmailAddresses, ugr_TargetEmailAddresses, ugr_URLs, ugr_FlagJT\n";
 	$query = "select * from sysUGrps";
 	$res = mysql_query($query);
 	$fmt = 'sysUGrps';
@@ -393,7 +416,7 @@
 			print "('$row[rty_ID]','$rty_Name','$row[rty_OrderInGroup]','$rty_Description','$rty_TitleMask',
 			'$rty_CanonicalTitleMask','$rty_Plural','$row[rty_Status]',
 			'$row[rty_OriginatingDBID]','$rty_NameInOriginatingDB','$row[rty_IDInOriginatingDB]',
-			'$row[rty_ShowInLists]','$rty_RecTypeGroupIDs','$row[rty_FlagAsFieldset]','$rty_ReferenceURL',
+			'$row[rty_BlockFromPublicView]','$row[rty_ShowInLists]','$rty_RecTypeGroupIDs','$row[rty_FlagAsFieldset]','$rty_ReferenceURL',
 			'$rty_AlternativeRecEditor','$row[rty_Type]'),";
 			}
 			break;
@@ -425,7 +448,7 @@
 			print "('$row[rst_ID]','$row[rst_RecTypeID]','$row[rst_DetailTypeID]','$rst_DisplayName',
 			'$rst_DisplayHelpText','$rst_DisplayExtendedDescription','$row[rst_DisplayOrder]',
 			'$row[rst_DisplayWidth]','$rst_DefaultValue',
-			'$row[rst_RecordMatchOrder]','$row[rst_CalcFunctionID]','$row[rst_RequirementType]',
+			'$row[rst_RecordMatchOrder]','$row[rst_CalcFunctionID]','$row[rst_RequirementType]','$row[rst_VisibleOutsideGroup]',
 			'$row[rst_Status]','$row[rst_MayModify]','$row[rst_OriginatingDBID]','$row[rst_IDInOriginatingDB]',
 			'$row[rst_MaxValues]','$row[rst_MinValues]','$row[rst_DisplayDetailTypeGroupID]','$rst_FilteredJsonTermIDTree',
 			'$rst_PtrFilteredIDs','$row[rst_OrderForThumbnailGeneration]','$rst_TermIDTreeNonSelectableIDs'),";
@@ -435,11 +458,11 @@
 			$trm_Label = mysql_real_escape_string($row['trm_Label']);
 			$trm_Description = mysql_real_escape_string($row['trm_Description']);
 			$trm_NameInOriginatingDB = mysql_real_escape_string($row['trm_NameInOriginatingDB']);
-			print "('$row[trm_ID]','$trm_Label','$row[trm_InverseTermId]','$trm_Description',
-			'$row[trm_Status]','$row[trm_OriginatingDBID]','$trm_NameInOriginatingDB','$row[trm_IDInOriginatingDB]',
+			print "('$row[trm_ID]','$trm_Label','$row[trm_InverseTermId]','$trm_Description','$row[trm_Status]',
+            '$row[trm_OriginatingDBID]','$trm_NameInOriginatingDB','$row[trm_IDInOriginatingDB]',
 			'$row[trm_AddedByImport]','$row[trm_IsLocalExtension]','$row[trm_Domain]','$row[trm_OntID]',
 			'$row[trm_ChildCount]','$row[trm_ParentTermID]','$row[trm_Depth]'),";
-			break;
+			break;       
 
 			case 'defOntologies': // Data from Ontologies table
 			$ont_ShortName = mysql_real_escape_string($row['ont_ShortName']);
@@ -455,10 +478,11 @@
 			case 'defRelationshipConstraints': // Data from relationship constraints table
 			$rcs_Description = mysql_real_escape_string($row['rcs_Description']);
 			print "('$row[rcs_ID]','$row[rcs_SourceRectypeID]','$row[rcs_TargetRectypeID]',
-			'$rcs_Description','$row[rcs_Status]','$row[rcs_OriginatingDB]','$row[rcs_IDInOriginatingDB]',
+			'$rcs_Description','$row[rcs_RelationshipsLimit]','$row[rcs_Status]',
+            '$row[rcs_OriginatingDB]','$row[rcs_IDInOriginatingDB]',
 			'$row[rcs_TermID]','$row[rcs_TermLimit]'),";
 			break;
-
+            
 			case 'defFileExtToMimetype': // Data from field extension to mimetype table
 			$fxm_Extension = mysql_real_escape_string($row['fxm_Extension']);
 			$fxm_MimeType = mysql_real_escape_string($row['fxm_MimeType']);
@@ -521,13 +545,14 @@
 			$ugr_State = mysql_real_escape_string($row['ugr_State']);
 			$ugr_Postcode = mysql_real_escape_string($row['ugr_Postcode']);
 			$ugr_Interests = mysql_real_escape_string($row['ugr_Interests']);
-			$ugr_IncomingEmailAddresses = mysql_real_escape_string($row['ugr_IncomingEmailAddresses']);
+            $ugr_IncomingEmailAddresses = mysql_real_escape_string($row['ugr_IncomingEmailAddresses']);
+            $ugr_TargetEmailAddresses = mysql_real_escape_string($row['ugr_TargetEmailAddresses']);
 			$ugr_URLs = mysql_real_escape_string($row['ugr_URLs']);
 			print "('$row[ugr_ID]','$row[ugr_Type]','$ugr_Name','$ugr_LongName','$ugr_Description',
 			'$ugr_Password','$ugr_eMail','$ugr_FirstName','$ugr_LastName','$ugr_Department',
 			'$ugr_Organisation','$ugr_City','$ugr_State','$ugr_Postcode','$ugr_Interests',
 			'$row[ugr_Enabled]','$row[ugr_LastLoginTime]','$row[ugr_MinHyperlinkWords]','$row[ugr_LoginCount]',
-			'$row[ugr_IsModelUser]','$ugr_IncomingEmailAddresses','$ugr_URLs','$row[ugr_FlagJT]'),";
+			'$row[ugr_IsModelUser]','$ugr_IncomingEmailAddresses','$ugr_TargetEmailAddresses','$ugr_URLs','$row[ugr_FlagJT]'),";
 			break;
 	
 			case 'sysUsrGrpLinks': // user's membership and role in groups'
