@@ -1533,7 +1533,7 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	background:-webkit-gradient(linear, left top, left bottom, from(#FFFFFF), to(#EEEEEE));
 	}
 .two-col {text-align:left !important}
-.list .recordDiv, .two-col .recordDiv { 
+.list .recordDiv, .two-col .recordDiv {
 	border-bottom: 1px solid #CCCCCC;
     border-collapse: collapse;
     border-radius: 0;
@@ -1552,7 +1552,7 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
     padding-left: 0;
     padding-right: 0;
     width: 50%;}
-.list .recordDiv .recordTitle, .two-col .recordDiv .recordTitle { 
+.list .recordDiv .recordTitle, .two-col .recordDiv .recordTitle {
 	display: block;
 	height: 1.1em;
 	left: 64px;
@@ -1679,7 +1679,7 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	-moz-box-shadow:0 0 3px 1px #DC8501;
 	-webkit-box-shadow:0 0 3px 1px #DC8501;
 	box-shadow:0 0 3px 1px #DC8501;
-	
+
 	}
 .recorddiv.selected{
 	border-color:#62A7F8;
@@ -1776,7 +1776,7 @@ div.filter .showrelated .relatedCount {
 #result-header {
 	min-height:25px;
 }
-div.collapsed{display: none !important;}
+div.searchInput >  div.collapsed{display: none !important;}
 #simple-search {
 	text-align: left;
 	padding: 6px;
@@ -1791,9 +1791,9 @@ div.collapsed{display: none !important;}
 	border-radius: 0 0 5px 5px;
 	box-shadow: 0 1px 3px RGBA(0,0,0,0.5);
 	}
-.simplesearch.collapsed {
+div.searchInput > .simplesearch.collapsed {
     background-image: url("../images/blue-up-triangle.png");
-	display:inline-block !important;		
+	display:inline-block !important;
 }
  .simplesearch {
     background-image: url("../images/blue-down-triangle.png");
@@ -1951,7 +1951,7 @@ div.recorddiv:hover > #rec_edit_link {
 	}
 div.recorddiv:hover > #recordID {
 	display: block}
-	
+
 .recordTitle a.daysbad {
 	color:#900;
 	}
