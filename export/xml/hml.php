@@ -82,7 +82,7 @@ mysql_connection_db_select(DATABASE);
 //  Tag construction helpers
 //----------------------------------------------------------------------------//
 
-function makeTag($name, $attributes=null, $textContent=null, $close=true) {
+function makeTag($name, $attributes=null, $textContent=null, $close=true,$encodeContent=true) {
 	$tag = "<$name";
 	if (is_array($attributes)) {
 		foreach ($attributes as $attr => $value) {
@@ -95,7 +95,11 @@ function makeTag($name, $attributes=null, $textContent=null, $close=true) {
 		$tag .= '>';
 	}
 	if ($textContent) {
-		$tag .= htmlspecialchars($textContent);
+		if ($encodeContent) {
+			$tag .= htmlspecialchars($textContent);
+		}else{
+			$tag .= $textContent;
+		}
 		$tag .= "</$name>";
 	}
 	echo $tag . "\n";
@@ -508,6 +512,7 @@ function makeFileContentNode($file){
 	$filename = HEURIST_UPLOAD_PATH . $file['id'];
 	if ($file['type'] ==="application/xml" && file_exists($filename)) {
 		$xml = simplexml_load_file($filename);
+//error_log(" xml = ". print_r($xml,true));
 		if (!$xml){
 			$attrs = array("type" => "unknown", "error" => "invalid xml content");
 			$content = "Unable to read ". $file['origName']. " as xml file";
@@ -515,12 +520,15 @@ function makeFileContentNode($file){
 		}else{
 			if ( count($xml->xpath('//TEI'))) {
 				$attrs = array("type" => "TEI");
+				$teiHeader = $xml->xpath('//TEI.2/teiHeader');
 				$content = $xml->xpath('//TEI/text');
-//				$nodeName = $content->getName();
-//				$content = $content[0]->children();
-				$content = $content[0]->asXML();
-				makeTag('content',$attrs,$content);
+			}else if ( count($xml->xpath('//TEI.2'))) {
+				$attrs = array("type" => "TEI.2");
+				$teiHeader = $xml->xpath('//TEI.2/teiHeader');
+				$content = $xml->xpath('//TEI.2/text');
 			}
+			$content = $teiHeader[0]->asXML().$content[0]->asXML();
+			makeTag('content',$attrs,$content,true,false);
 		}
 	}
 }
