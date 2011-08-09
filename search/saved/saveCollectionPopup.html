@@ -91,7 +91,7 @@
 
 				var currWgTagsElt = document.getElementById("current-workgroup-tags");
 				var allWgTagsElt = document.getElementById("all-workgroup-tags");
-				top.HEURIST.wgTagEditor.WgTagEditor(currWgTagsElt, allWgTagsElt, addButton, removeButton);
+				HEURIST.wgTagEditor.WgTagEditor(currWgTagsElt, allWgTagsElt, addButton, removeButton);
 
 			}
 
@@ -267,8 +267,8 @@
 								</td>
 								<td>
 								<div id=button-box style="text-align:center; padding:0">
-									<div style="padding:5px"><input type=button value="&gt;" title="Add a tag" onmousedown="top.HEURIST.wgTagEditor.addWgTag(window.selectedRow)" disabled id=add-button></div>
-									<div style="padding:5px"><input type=button value="&lt;" title="Remove a tag" onmousedown="top.HEURIST.wgTagEditor.removeWgTag(window.selectedRow)" disabled id=remove-button></div>
+									<div style="padding:5px"><input type=button value="&gt;" title="Add a tag" onmousedown="HEURIST.wgTagEditor.addWgTag(window.selectedRow)" disabled id=add-button></div>
+									<div style="padding:5px"><input type=button value="&lt;" title="Remove a tag" onmousedown="HEURIST.wgTagEditor.removeWgTag(window.selectedRow)" disabled id=remove-button></div>
 									</div>
 								</td>
 								<td>

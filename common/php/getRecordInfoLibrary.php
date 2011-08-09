@@ -451,7 +451,7 @@ function getTermSets($termDomain) {	// termDomain can be empty, 'reltype' or 'en
 }
 */
 function getConceptID($lclID,$tableName,$fieldNamePrefix){
-	$res = mysql_query("select ".$fieldNamePrefix."OriginatingDBID,".$fieldNamePrefix."IDInOriginatingDB from $tableName where".$fieldNamePrefix."ID = $lclID");
+	$res = mysql_query("select ".$fieldNamePrefix."OriginatingDBID,".$fieldNamePrefix."IDInOriginatingDB from $tableName where ".$fieldNamePrefix."ID = $lclID");
 	$ids = mysql_fetch_array($res);
 	if ($ids && count($ids) == 2 && is_numeric($ids[0]) && is_numeric($ids[1])) {
 		return "".$ids[0]."-".$ids[1];
@@ -479,7 +479,7 @@ function getOntologyConceptID($lclOntID){
 function getLocalID($conceptID,$tableName,$fieldNamePrefix){
 	$ids = split("-",$conceptID);
 	if ($ids && count($ids) == 2 && is_numeric($ids[0]) && is_numeric($ids[1])) {
-		$res = mysql_query("select ".$fieldNamePrefix."ID from $tableName where".$fieldNamePrefix."OriginatingDBID=".$ids[0]." and ".$fieldNamePrefix."IDInOriginatingDB=".$ids[1]);
+		$res = mysql_query("select ".$fieldNamePrefix."ID from $tableName where ".$fieldNamePrefix."OriginatingDBID=".$ids[0]." and ".$fieldNamePrefix."IDInOriginatingDB=".$ids[1]);
 		$id = mysql_fetch_array($res);
 		if ($id && count($id) > 0 && is_numeric($id[0])){
 			return $id[0];

@@ -204,24 +204,28 @@ $GEO_TYPES = array(
 	'p' => 'point'
 );
 
-$MAX_DEPTH = @$_REQUEST['depth'] ? intval($_REQUEST['depth']) : 0;
-$REVERSE = @$_REQUEST['rev'] === 'no' ? false : true;
-$WOOT = @$_REQUEST['woot'] ? intval($_REQUEST['woot']) : 0;
-$OUTPUT_STUBS = @$_REQUEST['stub'] === '1'? true : false;
-$INCLUDE_FILE_CONTENT = (@$_REQUEST['fc'] && $_REQUEST['fc'] == 0? false :true);	// default to expand file content
+// set parameter defaults
+$MAX_DEPTH = @$_REQUEST['depth'] ? intval($_REQUEST['depth']) : 0;	// default to only one level
+$REVERSE = @$_REQUEST['rev'] === 'no' ? false : true;	//default to including reverse pointers
+$WOOT = @$_REQUEST['woot'] ? intval($_REQUEST['woot']) : 0;	//default to not output text content
+$OUTPUT_STUBS = @$_REQUEST['stub'] === '1'? true : false;	//default to not output stubs
+$INCLUDE_FILE_CONTENT = (@$_REQUEST['fc'] && $_REQUEST['fc'] == 0? false :true);	// default to expand xml file content
 $SUPRESS_LOOPBACKS = (@$_REQUEST['slb'] && $_REQUEST['slb'] == 0? false :true);	// default to supress loopbacks
 
+// check filter string has restricted characters only
 $filterString = (@$_REQUEST['filters'] ? $_REQUEST['filters'] : null);
 if ( $filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/',$filterString)) {
 	die(" error invalid json rectype filters string");
 }
+//decode the json string to convert it to an array of rectypes for each level
 $RECTYPE_FILTERS = ($filterString ? json_decode($filterString, true) : array());
 if (!isset($RECTYPE_FILTERS)) {
 	die(" error decoding json rectype filters string");
 }
 
+// handle special case for collection where ids are stored in teh session.
 if (preg_match('/_COLLECTED_/', $_REQUEST['q'])) {
-if (!session_id()) session_start();
+	if (!session_id()) session_start();
 	$collection = &$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['record-collection'];
 	if (count($collection) > 0) {
 		$_REQUEST['q'] = 'ids:' . join(',', array_keys($collection));
@@ -235,7 +239,7 @@ if (!session_id()) session_start();
 //  Authentication
 //----------------------------------------------------------------------------//
 
-if (@$ARGV) {
+if (@$ARGV) {	// commandline actuation
 	function get_user_id() { return 0; }
 	function get_user_name() { return ''; }
 	function get_user_username() { return ''; }
@@ -244,7 +248,7 @@ if (@$ARGV) {
 	function is_logged_in() { return true; }
 	$pub_id = 0;
 
-} else if (@$_REQUEST['pub_id']) {
+} else if (@$_REQUEST['pub_id']) {	//published save query call.
 	$pub_id = intval($_REQUEST['pub_id']);
 	require_once(dirname(__FILE__).'/../../common/connect/bypassCredentialsForPublished.php');
 
@@ -256,8 +260,7 @@ if (@$ARGV) {
 	function is_admin() { return false; }
 	function is_logged_in() { return true; }
 	$pub_id = 0;
-
-} else {
+} else {	// loggin required entry
 	$pub_id = 0;
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	if (!is_logged_in()) { // check if the record being retrieved is a single non-protected record
@@ -275,9 +278,20 @@ if (@$ARGV) {
 // into one query, rather than doing them all recursively.
 //----------------------------------------------------------------------------//
 
+/**
+* findPointers - Helper function that finds recIDs of record pointer details for all records in a given set of recIDs
+* which can be filtered to a set of rectypes
+* @author Kim Jackson
+* @author Stephen White
+* @param $rec_ids an array of recIDs from the Records table for which to search from details
+* @param $rtyIDs an array of rectypeIDs valid in the defRecTypes table
+* @return $ret a comma separated list of recIDs
+**/
 function findPointers($rec_ids, $rtyIDs) {
-//error_log("in findPointers");
 	$rv = array();
+	//saw TODO add error checking for numeric values in $rtyIDs
+	// find all detail values for resource type details which exist for any record with an id in $rec_ids
+	// and also is of a type in rtyIDs if rtyIDs is set to non null
 	$query = 'SELECT distinct dtl_Value '.
 			'FROM recDetails '.
 				'LEFT JOIN defDetailTypes on dtl_DetailTypeID = dty_ID '.
@@ -285,19 +299,29 @@ function findPointers($rec_ids, $rtyIDs) {
 			'WHERE dtl_RecID in (' . join(',', $rec_ids) .') '.
 				($rtyIDs && count($rtyIDs)>0 ? 'AND rec_RecTypeID in ('.join(',', $rtyIDs).') ' : '').
 				'AND dty_Type = "resource"';
-//error_log("find pointer q = $query");
 	$res = mysql_query($query);
 	while ($res && $row = mysql_fetch_assoc($res)) {
-//		array_push($rv, $row['dtl_Value']);
 		$rv[$row['dtl_Value']] = 1;
 	}
 	return array_keys($rv);
-//	return $rv;
 }
 
+/**
+* findReversePointers - Helper function that finds recIDs of all records excluding relationShip records
+* that have a pointer detail value that is in a given set of recIDs which can be filtered to a set of rectypes
+* @author Kim Jackson
+* @author Stephen White
+* @param $rec_ids an array of recIDs from the Records table for which to search from details
+* @param $pointers an out array of recIDs to store look up detailTypeID by pointed_to recID by pointed_to_by recID
+* @param $rtyIDs an array of rectypeIDs valid in the defRecTypes table
+* @return $ret a comma separated list of recIDs of pointed_to_by records
+**/
 function findReversePointers($rec_ids, &$pointers, $rtyIDs) {
-//error_log("in findReversePointers");
 	$rv = array();
+	//saw TODO add error checking for numeric values in $rtyIDs
+	// find all detail values, detailTypeID and source recID for resource type details
+	// which exist for any record with an id in $rec_ids
+	// and also is of a type in rtyIDs if rtyIDs is set to non null
 	$query = 'SELECT dtl_Value, dtl_DetailTypeID, dtl_RecID '.
 			'FROM recDetails '.
 				'LEFT JOIN defDetailTypes ON dtl_DetailTypeID = dty_ID '.
@@ -306,21 +330,35 @@ function findReversePointers($rec_ids, &$pointers, $rtyIDs) {
 				'AND dtl_Value IN (' . join(',', $rec_ids) .') '.
 				($rtyIDs && count($rtyIDs)>0 ? 'AND rec_RecTypeID in ('.join(',', $rtyIDs).') ' : '').
 				'AND rec_RecTypeID != 52';
-//error_log("find reverse pointer q = $query");
 	$res = mysql_query($query);
 	while ($res && $row = mysql_fetch_assoc($res)) {
 		if (! @$pointers[$row['dtl_Value']]) {
 			$pointers[$row['dtl_Value']] = array();
 		}
+		// [targetRecID][sourceRecID] => detailTypeID
+		//saw TODO: change this to 3d lookup to allow for multiple detailType pointers
 		$pointers[$row['dtl_Value']][$row['dtl_RecID']] = $row['dtl_DetailTypeID'];
 		$rv[$row['dtl_RecID']] = 1;
 	}
 	return array_keys($rv);
 }
 
+/**
+* findRelatedRecords - Helper function that finds recIDs of all related records using relationShip records
+* that have a pointer detail value that is in a given set of recIDs which can be filtered to a set of rectypes
+* @author Kim Jackson
+* @author Stephen White
+* @param $rec_ids an array of recIDs from the Records table for which to search related records
+* @param $relationships an out array of recIDs to store look up relationRecID by supplied target/source recIDs
+* @param $rtyIDs an array of rectypeIDs valid in the defRecTypes table
+* @return $ret a comma separated list of recIDs of other record recIDs
+**/
 function findRelatedRecords($rec_ids, &$relationships, $rtyIDs) {
-//error_log("in findRelatedRecords");
 	$rv = array();
+	//saw TODO add error checking for numeric values in $rtyIDs
+	// find all from recID, relRecID and toRecID triples
+	// which exist for any from record with an id in $rec_ids
+	// and also is of a type in rtyIDs if rtyIDs is set to non null
 	$query = 'SELECT f.dtl_Value, '. // from detail
 				'rel.rec_ID, '.	// relation record
 				't.dtl_Value '.
@@ -328,18 +366,20 @@ function findRelatedRecords($rec_ids, &$relationships, $rtyIDs) {
 				'LEFT JOIN Records rel ON rel.rec_ID = f.dtl_RecID '.
 				'LEFT JOIN recDetails t ON t.dtl_RecID = rel.rec_ID '.
 				($rtyIDs && count($rtyIDs)>0 ? 'LEFT JOIN Records c on c.rec_ID = t.dtl_Value ': '').
-			'WHERE f.dtl_DetailTypeID IN (202,199) '.
+			'WHERE f.dtl_DetailTypeID IN (202,199) './/MAGIC NUMBERS
 				'AND rel.rec_RecTypeID = 52 '.
 				'AND f.dtl_Value IN (' . join(',', $rec_ids) . ') '.
 				($rtyIDs && count($rtyIDs)>0 ? 'AND c.rec_RecTypeID in ('.join(',', $rtyIDs).') ' : '').
 				'AND t.dtl_DetailTypeID = IF(f.dtl_DetailTypeID = 202, 199, 202)';
-//error_log("find related q = $query");
 	$res = mysql_query($query);
 	while ($res && $row = mysql_fetch_row($res)) {
 		if (! @$relationships[$row[0]]) {
 			$relationships[$row[0]] = array();
 		}
-		array_push($relationships[$row[0]], $row[1]);
+		// check for duplicates saw TODO: optimize to lookup [fromRecID][relRecID] => 1
+		if (!in_array($row[1],$relationships[$row[0]])) {
+			array_push($relationships[$row[0]], $row[1]);
+		}
 		if ($row[2]) {
 			$rv[$row[2]] = 1;
 		}
@@ -348,6 +388,14 @@ function findRelatedRecords($rec_ids, &$relationships, $rtyIDs) {
 }
 
 
+/**
+* buildTree - Function to build the structure for a set of records and all there related(linked) records
+* @author Kim Jackson
+* @author Stephen White
+* @param $rec_ids an array of recIDs from the Records table for which to build the tree
+* @param $reverse_pointers an out array of recIDs to store look up detailTypeID by pointed_to recID by pointed_to_by recID
+* @param $relationships an out array of recIDs to store look up relationRecID by supplied target/source recIDs
+**/
 function buildTree($rec_ids, &$reverse_pointers, &$relationships) {
 	global $MAX_DEPTH, $REVERSE, $RECTYPE_FILTERS;
 	$depth = 0;
@@ -388,7 +436,7 @@ function outputRecords($result) {
 	$relationships = array();
 
 	$rec_ids = array();
-	foreach ($result['records'] as $record) {
+	foreach ($result['records'] as $record) {	// place query result recIDs into rec
 		array_push($rec_ids, $record['rec_ID']);
 	}
 
@@ -429,7 +477,7 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $o
 	makeTag('added', null, $record['rec_Added']);
 	makeTag('modified', null, $record['rec_Modified']);
 	// saw FIXME  - need to output groups only
-	if (array_key_exists($record[''],$WGN)) {
+	if (array_key_exists($record['rec_OwnerUGrpID'],$WGN) || array_key_exists($record['rec_OwnerUGrpID'],$UGN)) {
 		makeTag('workgroup', array('id' => $record['rec_OwnerUGrpID']),
 							$record['rec_OwnerUGrpID'] > 0 ?
 								(array_key_exists($record['rec_OwnerUGrpID'],$WGN)?
@@ -487,11 +535,9 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $o
 					outputRecord($rel, $reverse_pointers, $relationships, $depth, $outputStub,$record['rec_ID']);
 			}
 			}
-//var_dump($rel);
 			closeTag('relationships');
 		}
 	}
-//error_log(" leaving outputRecord ");
 	closeTag('record');
 }
 
@@ -512,7 +558,12 @@ function makeFileContentNode($file){
 	$filename = HEURIST_UPLOAD_PATH . $file['id'];
 	if ($file['type'] ==="application/xml" && file_exists($filename)) {
 		$xml = simplexml_load_file($filename);
+		// convert to xml
+		$xml = $xml->asXML();
+		// remove the name space
+		$xml = preg_replace("/\s*xmlns=(?:\"[^\"]*\"|\'[^\']*\'|\S+)\s*/","",$xml);
 //error_log(" xml = ". print_r($xml,true));
+		$xml = simplexml_load_string($xml);
 		if (!$xml){
 			$attrs = array("type" => "unknown", "error" => "invalid xml content");
 			$content = "Unable to read ". $file['origName']. " as xml file";
@@ -520,7 +571,7 @@ function makeFileContentNode($file){
 		}else{
 			if ( count($xml->xpath('//TEI'))) {
 				$attrs = array("type" => "TEI");
-				$teiHeader = $xml->xpath('//TEI.2/teiHeader');
+				$teiHeader = $xml->xpath('//TEI/teiHeader');
 				$content = $xml->xpath('//TEI/text');
 			}else if ( count($xml->xpath('//TEI.2'))) {
 				$attrs = array("type" => "TEI.2");
@@ -528,6 +579,7 @@ function makeFileContentNode($file){
 				$content = $xml->xpath('//TEI.2/text');
 			}
 			$content = $teiHeader[0]->asXML().$content[0]->asXML();
+//error_log(" content = ". print_r($content,true));
 			makeTag('content',$attrs,$content,true,false);
 		}
 	}
