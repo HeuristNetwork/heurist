@@ -188,7 +188,7 @@
 
 				var linkPos = top.HEURIST.getPosition(document.getElementById("workgroup-edit"));
 				top.HEURIST.util.popupElement(window, wgEditor,
-				{ width: wgEditor.offsetWidth, height: wgEditor.offsetHeight, x: linkPos.x-150, y: linkPos.y+8, "no-titlebar": true, "no-resize": true });
+				{ width: wgEditor.offsetWidth, height: wgEditor.offsetHeight, x: linkPos.x-200, y: linkPos.y+20, "no-titlebar": true, "no-resize": true });
 				setTimeout(function() { wgVal.focus(); }, 0);
 			}
 
@@ -257,7 +257,7 @@
 		<div id=workgroup-val-div title="Restrict access by workgroup">
 			<nobr>
 			<b><span id=workgroup-val></span></b>
-			<span id=workgroup-edit class="edit admin-only" onClick="openWorkgroupChanger();"><img src="../../common/images/edit-pencil.png">change</span>
+			<div id=workgroup-edit class="edit admin-only" onClick="openWorkgroupChanger();"><img src="../../common/images/edit-pencil.png"></div>
 		</nobr>
 		</div>
 		<div id=workgroup-access title="Access for users not in this workgroup"></div>
@@ -382,28 +382,34 @@
 			</span>
 	</div>
 <!-- end footer -->
-<div style="position: absolute;"><div id=workgroup-editor style="display: none;">
-		<table id=workgroupTable border=0 cellspacing=4><tbody>
-				<tr><td colspan=2><b>Change record access:</b></td></tr>
-				<tr>
-					<td>Record is editable by</td>
-					<td><select id=new-workgroup-value class=in></select></td>
-				</tr>
-				<tr>
-					<td colspan=2><label for=non-wg-public><input type=radio name=new-non-workgroup value=public id=non-wg-public>Anyone can view the record (published)</label><div style="margin-left: 20px;">(except fields marked as restricted)</div></td>
-				</tr>
-				<tr>
-					<td colspan=2><label for=non-wg-view><input type=radio name=new-non-workgroup value=viewable id=non-wg-view>Logged in users can view the record</label></td>
-				</tr>
-				<tr>
-					<td colspan=2><label for=non-wg-hide><input type=radio name=new-non-workgroup value=hidden id=non-wg-hide>Only members of this groups can view the record</label></td>
-				</tr>
-				<tr><td style="text-align: right; padding: 2px;" colspan=2>
-						<input type=button value="Change" style="font-weight: bold;" onClick="closeWorkgroupChanger();">
-						<input type=button value="Cancel" onClick="closeWorkgroupChanger(true);">
-				</td></tr>
-		</tbody></table>
-</div></div>
+<div style="position: absolute;">
+	<div id="workgroup-editor" style="display: none;">
+        <div>
+        	<h2>Change record access:</h2>
+            </div>
+        <div class="detailRow">
+            <label for=new-workgroup-value>Record is editable by</label>
+            <select id=new-workgroup-value class=in></select>
+            </div>
+        <div class="detailRow">
+            <input type=radio name=new-non-workgroup value=public id=non-wg-public>
+            <label for=non-wg-public>Anyone can view the record (published)</label>
+            <div style="margin-left: 20px;">(except fields marked as restricted)</div>
+            </div>
+        <div class="detailRow">
+            <input type=radio name=new-non-workgroup value=viewable id=non-wg-view>
+            <label for=non-wg-view>Logged in users can view the record</label>
+            </div>
+        <div class="detailRow">
+            <input type=radio name=new-non-workgroup value=hidden id=non-wg-hide>
+            <label for=non-wg-hide>Only members of this groups can view the record</label>
+            </div>
+        <div class="detailRow" style="text-align:right; padding-top:15px">
+            <input type=button value="Change" style="font-weight: bold;" onClick="closeWorkgroupChanger();">
+            <input type=button value="Cancel" onClick="closeWorkgroupChanger(true);">
+            </div>
+	</div>
+</div>
 
 <div id=workgroup-message style="display: none;">
 	<div style="padding: 5px;">

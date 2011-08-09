@@ -42,6 +42,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	right:135px;
 	top:0;
 	width: 130px;
+	overflow:hidden;
 }
 #record-title {
 	bottom:0;
@@ -103,6 +104,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	white-space: nowrap;
 	padding-left: 20px;
 	background: transparent url(../images/workgroup_icon-small.gif) scroll top left no-repeat;
+	max-width:90px;
+	overflow:hidden;
 }
 #workgroup-access {
 	padding-left: 20px;
@@ -122,12 +125,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #rectype-select {
 	width:200px
 }
-#rectype-editor table tr td, #url-editor table tr td, #workgroup-editor table tr td {
+#workgroup-editor {
+	width:320px !important;
+	height:200px !important;
+	padding:10px;
+}
+#workgroup-editor .detailRow {
+	padding:5px 0;
+	border-top: 1px solid white;
+	border-bottom:none
+}
+#workgroup-editor .detailRow input, #workgroup-editor .detailRow label {
+	margin-right:10px;
+}
+#rectype-editor table tr td, #url-editor table tr td{
 	white-space: nowrap;
 	font-size: 11px;
 }
 #workgroup-edit {
-	display: inline-block;
+	display: block;
+	position:absolute;
+	top:6px;
+	right:-3px;
 }
 #popup-rectype-value {
 	padding-bottom: 1ex;
