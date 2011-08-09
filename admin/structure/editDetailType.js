@@ -463,9 +463,9 @@ function DetailTypeEditor() {
 				var ss = (_dtyID < 0)?"added":"updated";
 
 				if(report.indexOf(",")>0){
-					alert("Field types with IDs :"+report+ " were succesfully "+ss);
+					// this alert is a pain: alert("Field types with IDs :"+report+ " were succesfully "+ss);
 				}else{
-					alert("Field type with ID " + report + " was succesfully "+ss);
+					// this alert is a pain: alert("Field type with ID " + report + " was succesfully "+ss);
 				}
 				window.close(context); //send back new HEURIST strcuture
 			}

@@ -718,7 +718,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 
 			if(!error) {
 				if(report.indexOf(",")>0){
-					alert("Record types with IDs :"+report+ " were succesfully updated");
+					// this alert is a pain  alert("Record types with IDs :"+report+ " were succesfully updated");
 				}else{
 					alert("Record type with ID " + report + " was succesfully  updated");
 				}
@@ -1092,7 +1092,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 
 		if(!Hul.isnull(grp.types))
 		{
-			alert("There are types that belong to this group. Impossible to delete such group");
+			alert("This group cannot be deleted as it contains record types - please move them first");
 		}else{
 			var r=confirm("Confirm the deletion of group '"+grp.name+"'");
 			if (r) {

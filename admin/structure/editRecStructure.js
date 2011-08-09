@@ -409,7 +409,7 @@ function EditRecStructure() {
 
 						_myDataTable.deleteRow(oRecord.getId(), -1);
 
-						alert("Field type #"+dty_ID+" was deleted from record #"+rty_ID);
+						// pain in the ... alert("Field type #"+dty_ID+" was deleted from record #"+rty_ID);
 						top.HEURIST.rectypes = context.rectypes;
 					}
 					//else {
