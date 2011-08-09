@@ -291,7 +291,7 @@ a:focus {
            
            </div>
           <div class="searchButtons">
-            <input id=my-records-button type=button value="my bookmarks" title="Search only records which have been bookmarked by you" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();">
+            <input id=my-records-button type=button value="my bookmarks" title="Search only records which have been bookmarked by you" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();" class="logged-in-only">
             <input id=all-records-button type=button value="all records"  title="Search across all records in Heurist" onClick="document.getElementById('w-input').value = ''; top.HEURIST.search.submitSearchForm();">
             <span id="add-record"><input id=add-record-link value="Add New Record" title="Add a new record to the Heurist database, setting record type and ownership" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/addRecordPopup.php'); return false;" class="logged-in-only" >
             </span></div>
@@ -397,7 +397,7 @@ a:focus {
           <br>
           <p>Please <a href="../admin/ugrps/findAddUser.php?register=1">register</a> and then <a href="../common/connect/login.php">login</a> to take full advantage of the system. </p>
         </div>
-        <div id="noresult-search-status"> <b>No matching records</b>
+        <div id="noresult-search-status" class="errorMsg"> <span>No matching records</span>
           <div class="not-logged-in-only">To see workgoup-owned and non-public records you may need to log in</div>
           <div class="logged-in-only">Note: some records are only visible to members of particular workgroups</div>
           <div id="noresult-search-status-search-all">Click <a href="#" onClick="top.HEURIST.search.searchAll(); return false;">all records</a> to search all of Heurist</div>

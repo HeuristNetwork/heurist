@@ -141,7 +141,6 @@ a {
 	outline: none;
 }
 #search-description, #results-message {
-	border-bottom: 1px solid #bfbfbf;
 	text-align:left !important;
 	color:#7D9AAA;
 	height: auto;
@@ -543,11 +542,15 @@ div.right_margin_info div.mini-tools a {
     position: absolute !important;
     right: 0;
     top: 47px;
+	text-align:left !important;
 }
 #loading-search-status, #noquery-search-status, #noresult-search-status {
 	display: none;
-	margin: 0px;
+	margin: 10px;
 	text-align:left
+	margin: 20px 10px;
+	top: 20px;
+	position: absolute;
 }
 #search-status.loading #loading-search-status {
 	display: block;
@@ -558,17 +561,24 @@ div.right_margin_info div.mini-tools a {
 }
 #search-status.noresult #noresult-search-status {
 	display: block;
+	margin: 20px 10px;
+	top: 20px;
+	position: absolute;
+	width:100%;
+	text-align:left;
 }
 #search-status.all #noresult-search-status-search-all {
 	display: none;
 }
 #search-status #noresult-search-status div {
-	margin: 10px;
+	margin: 20px 0;
 }
 #noquery-search-status {
 	height:auto;
 	padding:10px 25px;
 	width:auto;
+	position:absolute;
+	top:10px;
 }
 .img-button {
 	border: 1px solid white;
@@ -1721,7 +1731,6 @@ div.recorddiv:hover{
 	min-height:20px;
 	margin-bottom: 0;
 	border-bottom:1px solid #DDD;
-	margin-top:-1px;
 			}
 .filter ul li ul{
 	position:absolute;
@@ -1776,7 +1785,8 @@ div.filter .showrelated .relatedCount {
 #result-header {
 	min-height:25px;
 }
-div.searchInput >  div.collapsed{display: none !important;}
+div.searchInput >  div.collapsed {display: none !important;}
+
 #simple-search {
 	text-align: left;
 	padding: 6px;
@@ -1897,15 +1907,15 @@ div.searchInput > .simplesearch.collapsed {
 }
 
 
-#results div.collapsed{height:23px;overflow:hidden;padding-top:1px}
+#results div.collapsed{height:23px;overflow:hidden;}
 #results div.collapsed div.recordDiv{display: none !important;}
 ul.menu li ul li.disabled{display:none;}
 ul.menu li ul li a{color:#444;}
 ul.menu li ul li.checked a{color:#CCC;}
 .recordDiv {display:none !important ;}
 .recordDiv.lnk{display:inline-block !important;}
-.is-not-logged-in #results-level0 {padding:15px 0}
-#results-level0 .recordDiv{display:inline-block !important;}
+/*.is-not-logged-in #results-level0 {padding:15px 0}
+*/#results-level0 .recordDiv{display:inline-block !important;}
 #results-level0.list .recordDiv{display:block !important;}
 .recordDiv.filtered{display:none !important;}
 #results-level0 .recordDiv.filtered{display:none !important;}
