@@ -1225,7 +1225,7 @@ top.HEURIST.search = {
 						fieldValSelect.appendChild(grp);
 						firstInGroup = false;
 					}
-					var name = detailTypes.names[detailTypeID] +" (" + detailTypeID + ")";
+					var name = detailTypes.names[detailTypeID] +" (detail:" + detailTypeID + ")";
 					var value =  "f:" + (useIDs ? detailTypeID : '"'+name+'"') + ":";
 					fieldValSelect.appendChild(new Option(name,value));
 //					if (name == top.HEURIST.edit.record.rectype) {
