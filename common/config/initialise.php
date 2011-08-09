@@ -193,6 +193,7 @@
 
 	define ('HEURIST_NEWREC_OWNER_ID', $sysValues['sys_NewRecOwnerGrpID']);
 	define ('HEURIST_NEWREC_ACCESS', $sysValues['sys_NewRecAccess']);
+	define ('HEURIST_DBID', $sysValues['sys_RegisteredID']);
 	define ('HEURIST_DBVERSION', "".$sysValues['sys_dbVersion'].".".$sysValues['sys_dbSubVersion'].".".$sysValues['sys_dbSubSubVersion']);
 	if ( HEURIST_MIN_DBVERSION > HEURIST_DBVERSION ) {
 		returnErrorMsgPage("Heurist Code Version ".HEURIST_VERSION." require database schema version of ".HEURIST_MIN_DBVERSION." or higher. ".

@@ -466,7 +466,7 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $o
 	}
 	openTag('record');
 	makeTag('id', null, $record['rec_ID']);
-	makeTag('type', array('id' => $record['rec_RecTypeID']), $RTN[$record['rec_RecTypeID']]);
+	makeTag('type', array('id' => $record['rec_RecTypeID'], 'conceptID'=>getRecTypeConceptID($record['rec_RecTypeID'])), $RTN[$record['rec_RecTypeID']]);
 	makeTag('title', null, $record['rec_Title']);
 	if ($record['rec_URL']) {
 		makeTag('url', null, $record['rec_URL']);
@@ -516,7 +516,7 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $o
 					continue;
 				}
 				$child = loadRecord($rec_id);
-				openTag('reversePointer', array('id' => $dt, 'type' => $DTN[$dt], 'name' => $RQS[$child['rec_RecTypeID']][$dt]));
+				openTag('reversePointer', array('id' => $dt, 'conceptID'=>getDetailTypeConceptID($dt), 'type' => $DTN[$dt], 'name' => $RQS[$child['rec_RecTypeID']][$dt]));
 				outputRecord($child, $reverse_pointers, $relationships, $depth + 1, $outputStub,$record['rec_ID']);
 				closeTag('reversePointer');
 			}
@@ -548,7 +548,7 @@ function outputRecordStub($recordStub) {
 	openTag('record',array('isStub'=> 1));
 	makeTag('id', null, array_key_exists('id',$recordStub)?$recordStub['id']:$recordStub['rec_ID']);
 	$type = array_key_exists('type',$recordStub)?$recordStub['type']:$recordStub['rec_RecTypeID'];
-	makeTag('type', array('id' => $type), $RTN[$type]);
+	makeTag('type', array('id' => $type, 'conceptID'=>getRecTypeConceptID($type)), $RTN[$type]);
 	$title = array_key_exists('title',$recordStub)?$recordStub['title']:$recordStub['rec_Title'];
 	makeTag('title', null, $title);
 	closeTag('record');
@@ -589,7 +589,7 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 	global $DTN, $DTT, $TL, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH, $INCLUDE_FILE_CONTENT, $SUPRESS_LOOPBACKS;
 //error_log("in outputDetail dt = $dt value = ". print_r($value,true));
 
-	$attrs = array('id' => $dt);
+	$attrs = array('id' => $dt, 'conceptID'=>getDetailTypeConceptID($dt));
 	if (array_key_exists($dt, $DTN)) {
 		$attrs['type'] = $DTN[$dt];
 	}
@@ -598,6 +598,7 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 	}
 	if ($dt === 200  &&  array_key_exists($value, $INV) && $INV[$value] && array_key_exists($INV[$value], $TL)) {	//saw Enum change
 		$attrs['inverse'] = $TL[$INV[$value]]['trm_Label'];
+		$attrs['invTermConceptID'] = getTermConceptID($INV[$value]);
 	}
 
 	if (is_array($value)) {
@@ -679,6 +680,7 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 		outputRecord(loadRecord($value), $reverse_pointers, $relationships, $depth + 1, $outputStub, $parentID);
 		closeTag('detail');
 	} else if (($DTT[$dt] === 'enum' || $DTT[$dt] === 'relationtype' ) && array_key_exists($value,$TL)) {
+		$attrs['termConceptID'] = getTermConceptID($value);
 		if (@$TL[$value]['trm_ParentTermID']) {
 			$attrs['ParentTerm'] = $TL[$TL[$value]['trm_ParentTermID']]['trm_Label'];
 		}
@@ -688,6 +690,7 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 		makeTag('detail', $attrs, replaceIllegalChars($value));
 	}
 }
+
 $typeDict = array(	"s" =>	"Simple Date",
 					"c" =>	"C14 Date",
 					"f" =>	"Aproximate Date",
@@ -736,6 +739,7 @@ $tDurationDict = array(	"DUR" =>	"Simple Duration",
 						"DVN" =>	"Deviation Negative",
 						"ERR" =>	"Error Margin"
 						);
+
 function outputTemporalDetail($attrs, $value) {
 	global $typeDict,$fieldsDict,$determinationCodes,$profileCodes,$tDateDict,$tDurationDict;
 	$temporalStr = substr_replace($value,"",0,1);

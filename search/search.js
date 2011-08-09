@@ -194,8 +194,6 @@ top.HEURIST.search = {
 			("&db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
 						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : ""))) +
 			"&depth=3&limit=1000";
-		top.HEURIST.search.createUsedRectypeSelector(false);
-		top.HEURIST.search.createUsedDetailTypeSelector(true);
 		top.HEURIST.registerEvent(window, "heurist-related-recordset-loaded",
 									function (evt) {
 													top.HEURIST.search.loadLevelFilter(0);

@@ -124,6 +124,9 @@ a:focus {
 			var action_fr = document.getElementById("i_action");
 			action_fr.src = top.HEURIST.basePath+ "search/actions/actionHandler.php" +
 							(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
+
+			top.HEURIST.search.createUsedRectypeSelector(false);
+			top.HEURIST.search.createUsedDetailTypeSelector(true);
 			// if there are results waiting, render them
 			var searchFrame = document.getElementById("searchFrame");
 			if (searchFrame && searchFrame.contentWindow && searchFrame.contentWindow.results) {

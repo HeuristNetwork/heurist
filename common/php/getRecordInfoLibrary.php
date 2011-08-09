@@ -453,8 +453,10 @@ function getTermSets($termDomain) {	// termDomain can be empty, 'reltype' or 'en
 function getConceptID($lclID,$tableName,$fieldNamePrefix){
 	$res = mysql_query("select ".$fieldNamePrefix."OriginatingDBID,".$fieldNamePrefix."IDInOriginatingDB from $tableName where ".$fieldNamePrefix."ID = $lclID");
 	$ids = mysql_fetch_array($res);
-	if ($ids && count($ids) == 2 && is_numeric($ids[0]) && is_numeric($ids[1])) {
+	if ($ids && count($ids) == 4 && is_numeric($ids[0]) && is_numeric($ids[1])) {
 		return "".$ids[0]."-".$ids[1];
+	}else if (HEURIST_DBID) {
+		return "".HEURIST_DBID."-".$lclID;
 	}else{
 		return null;
 	}
