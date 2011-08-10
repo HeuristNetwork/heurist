@@ -46,7 +46,7 @@ function EditRecStructure() {
 			document.title = "Record Type: " + rty_ID+" : " + top.HEURIST.rectypes.names[rty_ID];
 			document.getElementById("recordTitle").innerHTML = "Editing Record Type: "+ top.HEURIST.rectypes.names[rty_ID] + "("+rty_ID+")";
 		}
-		
+
 
 		// buttons on top and bottom of design tab
 		var hToolBar = '<div style="width:600px"><div style="display:inline-block; text-align:left">'+
@@ -289,7 +289,7 @@ function EditRecStructure() {
 					'<input id="ed'+rst_ID+'_rst_FilteredJsonTermIDTree" type="hidden"/>'+
 					'<input id="ed'+rst_ID+'_rst_TermIDTreeNonSelectableIDs" type="hidden"/>'+
 					'<input type="button" value="Filter terms" id="btnSelTerms" onclick="showTermsTree('+rst_ID+', event)"/>'+
-					'<div id="termsPreview" class="dtyValue"></div>'+
+					'<div id="termsPreview" class="dtyValue"><label>preview:</label></div>'+
 					'</div>'+
 
 					'<div class="dtyField"><label class="dtyLabel">Rectype pointer:</label>'+
@@ -532,8 +532,8 @@ function EditRecStructure() {
 		//setTimeout(renderInputs, 500);
 		renderInputs();
 	}
-	
-	
+
+
 function renderInputs() {
 
 	var rectype = rty_ID,
@@ -1610,7 +1610,7 @@ function recreateTermsPreviewSelector(datatype, allTerms, disabledTerms ) {
 
 					var parent = document.getElementById("termsPreview"),
 						i;
-					for (i = 0; i < parent.children.length; i++) {
+					for (i = 1; i < parent.children.length; i++) {
 						parent.removeChild(parent.childNodes[0]);
 					}
 

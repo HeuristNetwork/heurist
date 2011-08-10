@@ -360,8 +360,9 @@ TREE REALTED ROUTINES ---------------------------------------
 							if(_isDisabledOriginally(term_id)){
 								term.label = term.label + '<b>'+termsByDomainLookup[term_id][0]+'</b></div>';
 							}else{
-								term.label = term.label + termsByDomainLookup[term_id][0]+'</div>';
+								term.label = term.label + termsByDomainLookup[term_id][0];
 							}
+							term.label = term.label + '</div>';
 
 							childNode = new YAHOO.widget.TextNode(term, parentEntry, false); // Create the node
 							childNode.highlightState = 1;
@@ -371,8 +372,10 @@ TREE REALTED ROUTINES ---------------------------------------
 						}
 
 					}else{
-						term.label = term.label + '&nbsp;&nbsp;' + termsByDomainLookup[term_id][0]+
-								((cnt_children>0)?' ('+cnt_children+')':'')+'</div>';
+						term.label = term.label + '&nbsp;&nbsp;' +
+								((cnt_children>0)?'<b>':'')+
+								termsByDomainLookup[term_id][0]+
+								((cnt_children>0)?'</b> ('+cnt_children+')':'')+'</div>';
 						childNode = new YAHOO.widget.TextNode(term, parentEntry, false); // Create the node
 
 						if(_inExistingTree(term_id)) { //selected
@@ -415,8 +418,10 @@ TREE REALTED ROUTINES ---------------------------------------
 					topLayerParent = parent;
 				}
 			}else{
-				term.label = term.label + '&nbsp;&nbsp;'+termsByDomainLookup[parentElement][0]+
-								((cnt_children>0)?' ('+cnt_children+')':'')+'</div>';
+				term.label = term.label + '&nbsp;&nbsp;'+
+								((cnt_children>0)?'<b>':'')+
+								termsByDomainLookup[parentElement][0]+
+								((cnt_children>0)?'</b> ('+cnt_children+')':'')+'</div>';
 				topLayerParent = new YAHOO.widget.TextNode(term, parent, false); // Create the node
 				if(_inExistingTree(parentElement)) {
 					topLayerParent.highlightState = 1;

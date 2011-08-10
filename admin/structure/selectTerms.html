@@ -50,13 +50,13 @@ button {
 }
 .termTreeText {
 	width: 33%;
-	padding-left:20px;
+	padding-left:16px;
 	float: left;
 	vertical-align: bottom;
 }
 .selectedTermsText {
 	width: 33%;
-	padding-left:20px;
+	padding-left:16px;
 	float: left;
 }
 .previewListText {
@@ -120,20 +120,22 @@ button {
 <script type="text/javascript" src="../../admin/structure/selectTerms.js"></script>
 
 <h2 class="dtyName" id="dtyName">ddd</h2>
-<div id="termTreeText" class="termTreeText"><h3>Select the terms you want</h3></div>
-<div id="termTreeText" class="selectedTermsText"><h3>Unselect the terms to be disabled</h3></div>
+<div id="termTreeText" class="termTreeText">
+	<h3>Select the terms you want</h3>
+	<div style="float:right;padding-top:8px;padding-right:10px;"><button title="Clear selection" onclick="selectTerms.clearSelection()">Clear</button></div>
+</div>
+<div id="termTreeText" class="selectedTermsText">
+	<h3>Unselect to be disabled</h3>
+	<div style="float:right;padding-top:8px;padding-right:20px;"><button title="Clear disbales" onclick="selectTerms.clearDisables()">Enable All</button></div>
+</div>
 <div id="termTreeText" class="previewListText"><h3>Preview the result</h3></div>
 
 <div id="termTree" class="termTree ygtv-checkbox"></div>
 <div id="selectedTermsTree" class="selectedTerms ygtv-checkbox"></div>
 <div id="termTreeText" class="previewListText">
-	<div>
-		<button title="Clear selection" onclick="selectTerms.clearSelection()">Clear</button>
-		<button title="Clear disbales" onclick="selectTerms.clearDisables()">Enable All</button>
-	</div>
 	<div><select id="previewList" class="previewList"></select></div>
-	<div>
-		<button title="Save selection" onclick="selectTerms.apply();">Save</button>
+	<div style="padding-top:50px;text-align:center;'">
+		<button title="Save selection" onclick="selectTerms.apply();">Save</button><br/>
 		<button title="Cancel changes" onclick="selectTerms.cancel();">Cancel</button>
 	</div>
 </div>

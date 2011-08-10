@@ -61,7 +61,7 @@
 	"rty_NameInOriginatingDB"=>"s",
 	"rty_IDInOriginatingDB"=>"i",
 	"rty_ShowInLists"=>"i",
-	"rty_RecTypeGroupIDs"=>"s",
+	"rty_RecTypeGroupID"=>"i",
 	"rty_FlagAsFieldset"=>"i",
 	"rty_ReferenceURL"=>"s",
 	"rty_AlternativeRecEditor"=>"s",
@@ -1151,9 +1151,10 @@
 
 			$vals = $dt['common'];
 			$parameters = array(""); //list of field date types
-		foreach ($commonNames as $colName) {
+		foreach ($commonNames as $colName)
+		{
 
-			$val = array_shift($vals);
+			$val = array_shift($vals); //take next value
 
 				if (array_key_exists($colName, $dtyColumnNames)) {
 					//array_push($ret['error'], "$colName is not a valid column name for defDetailTypes val= $val was not used");
@@ -1164,14 +1165,14 @@
 					$parameters[0] = $parameters[0].$dtyColumnNames[$colName]; //take datatype from array
 					array_push($parameters, $val);
 				}
-			}
+		}//for
 			//
 			if($query!=""){
 				$query = "update defDetailTypes set ".$query." where dty_ID = $dtyID";
 
 				$rows = execSQL($db, $query, $parameters, true);
 				if ($rows==0) {
-					$ret = "error updating $dtyID in updateDetailType - ".$msqli->error;
+					$ret = "error updating $dtyID in updateDetailType - ".$query."  ".$parameters[1]."  ".$parameters[2]; //$msqli->error;
 				} else {
 					$ret = $dtyID;
 				}

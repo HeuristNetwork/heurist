@@ -132,7 +132,7 @@ function DetailTypeManager() {
 					'style="padding-left:3px; padding-right:3px; background-color:white; color:red; display: inline-block;"></label>'+
 					'&nbsp;&nbsp;&nbsp;'+
 				'<input id="btnSave'+grpID+'" type="button" value="Save Changes" '+
-							'style="color:red; display: inline-block;"/>'+
+							'style="color:red; display: none;"/>'+ //inline-block
 
 				'<input type="button" id="btnAdd'+grpID+'" value="Add Field Type" style="float:right;"/>'+
 			'</div></div>'+
@@ -738,11 +738,13 @@ function DetailTypeManager() {
 			}
 
 			if(!error) {
+
 				if(report.indexOf(",")>0){
 					alert("Field types with IDs :"+report+ " were succesfully updated");
 				}else{
 					alert("Field type with ID " + report + " was succesfully  updated");
 				}
+				//window.setTimeout(function(){alwin.hide();}, 1000);
 				_clearGroupAndVisibilityChanges(false);
 			}
 			top.HEURIST.detailTypes = context.detailTypes;
@@ -755,16 +757,19 @@ function DetailTypeManager() {
 	*/
 	function _updateSaveNotice(grp_id){
 
-		var _lblNotice = Dom.get("lblNoticeAboutChanges"+grp_id);
-		var _btnSave   = Dom.get("btnSave"+grp_id);
+		//var _lblNotice = Dom.get("lblNoticeAboutChanges"+grp_id);
+		//var _btnSave   = Dom.get("btnSave"+grp_id);
 
 		if(_updatesCnt>0){
+			_updatesCnt = 0;
+			_updateDetailTypeOnServer();
+			/* Ian's request to apply changes immediately
 			_lblNotice.innerHTML = 'You have changed <b>'+_updatesCnt+'</b> field type'+((_updatesCnt>1)?'s':'');
 			_btnSave.style.display = 'inline-block';
-			_btnSave.onclick = _updateDetailTypeOnServer;
+			_btnSave.onclick = _updateDetailTypeOnServer;*/
 		}else{
-			_btnSave.style.display = 'none';
-			_lblNotice.innerHTML = '';
+			//_btnSave.style.display = 'none';
+			//_lblNotice.innerHTML = '';
 		}
 	}
 

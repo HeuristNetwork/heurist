@@ -118,6 +118,30 @@
 		<label id="dty_ID"></label>
 	</div>
 	<div class="dtyField">
+		<label class="dtyLabel" for="dty_Type">Data type:</label>
+		<select class="dtyValue" id="dty_Type" onchange="window.detailTypeEditor.onChangeType(event)">
+			<option>freetext</option>
+			<option>blocktext</option>
+			<option>integer</option>
+			<option>date</option>
+			<option>year</option>
+			<option>relmarker</option>
+			<option>boolean</option>
+			<option>enum</option>
+			<option>relationtype</option>
+			<option>resource</option>
+			<option>float</option>
+			<option>file</option>
+			<option>geo</option>
+			<option>separator</option>
+			<option>calculated</option>
+			<option>fieldsetmarker</option>
+		</select>
+		<div class="help prompt help1">
+			<label>The type of data this rectype accepts</label>
+		</div>
+	</div>
+	<div class="dtyField">
 		<label class="dtyLabel" for="dty_Name">Standard name:*</label>
 		<input id="dty_Name" style="width:200;" maxlength="255" />
 		<div class="help prompt help1">
@@ -173,31 +197,6 @@
 			<label>Whether the user should be able to see this field</label>
 		</div>
 	</div>
-	<div class="dtyField">
-		<label class="dtyLabel" for="dty_Type">Data type:</label>
-		<select class="dtyValue" id="dty_Type" onchange="window.detailTypeEditor.onChangeType(event)">
-			<option>freetext</option>
-			<option>blocktext</option>
-			<option>integer</option>
-			<option>date</option>
-			<option>year</option>
-			<option>relmarker</option>
-			<option>boolean</option>
-			<option>enum</option>
-			<option>relationtype</option>
-			<option>resource</option>
-			<option>float</option>
-			<option>file</option>
-			<option>geo</option>
-			<option>separator</option>
-			<option>calculated</option>
-			<option>fieldsetmarker</option>
-		</select>
-		<div class="help prompt help1">
-			<label>The type of data this rectype accepts</label>
-		</div>
-	</div>
-
 
 	<div id="pnl_fieldsetmarker" style="display:none;">
 		<label class="dtyLabel" for="dty_FieldSetRecTypeIDPreview">Fieldset rectype:</label>
@@ -210,8 +209,8 @@
 
 	<div id="pnl_enum"  style="display:none;">
 		<label class="dtyLabel" for="termsPreview">Vocabulary:</label>
-		<div class="dtyValue" id="termsPreview"></div>
 		<input type="button" value="Change vocabulary" id="btnSelTerms" onclick="window.detailTypeEditor.onSelectTerms()"/>
+		<div class="dtyValue" id="termsPreview"><label>preview:</label></div>
 		<div class="help prompt help1">
 			<label>The terms which define this enum/relationtype/relmarker</label>
 		</div>

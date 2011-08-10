@@ -145,7 +145,7 @@ function RectypeManager() {
 					'style="padding-left:3px; padding-right:3px; background-color:white; color:red; display: inline-block;"></label>'+
 					'&nbsp;&nbsp;&nbsp;'+
 				'<input id="btnSave'+grpID+'" type="button" value="Save Changes" '+
-							'style="color:red; display: inline-block;"/>'+
+							'style="color:red; display: none;"/>'+ //inline-block
 				'<input type="button" id="btnAddRecordType'+grpID+'" value="Add Record Type" style="float:right;"/>'+
 				//'<input type="button" id="btnAddFieldType'+grpID+'" value="Add Field Type" style="float:right;"/>'+
 			'</div></div>'+
@@ -735,16 +735,18 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 	*/
 	function _updateSaveNotice(grp_id){
 
-		var _lblNotice = Dom.get("lblNoticeAboutChanges"+grp_id);
-		var _btnSave   = Dom.get("btnSave"+grp_id);
+		//var _lblNotice = Dom.get("lblNoticeAboutChanges"+grp_id);
+		//var _btnSave   = Dom.get("btnSave"+grp_id);
 
 		if(_updatesCnt>0){
+			_updateRecordTypeOnServer();
+			/*
 			_lblNotice.innerHTML = 'You have changed <b>'+_updatesCnt+'</b> record type'+((_updatesCnt>1)?'s':'');
 			_btnSave.style.display = 'inline-block';
-			_btnSave.onclick = _updateRecordTypeOnServer;
+			_btnSave.onclick = _updateRecordTypeOnServer;*/
 		}else{
-			_btnSave.style.display = 'none';
-			_lblNotice.innerHTML = '';
+			//_btnSave.style.display = 'none';
+			//_lblNotice.innerHTML = '';
 		}
 	}
 

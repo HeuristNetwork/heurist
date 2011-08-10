@@ -97,6 +97,9 @@ function DetailTypeEditor() {
 		if(Hul.isnull(_detailType)){
 			_dtyID =  -1;
 			_detailType = ['','','freetext',0,'',1,'open',dtgID,null,null,null,null];
+			Dom.get("dty_Type").disabled = false;
+		}else{
+			Dom.get("dty_Type").disabled = true;
 		}
 
 		_keepStatus = _detailType[6]; // Keeps current status for rollback
@@ -128,6 +131,10 @@ function DetailTypeEditor() {
 			Dom.get("btnSelRecType2").disabled = disable;
 	}
 
+	function _preventSel(event){
+		event.target.selectedIndex=0;
+	}
+
 	/**
 	* recreateTermsPreviewSelector
 	* creates and fills selector for Terms Tree if datatype is enum, relmarker, relationtype
@@ -148,15 +155,24 @@ function DetailTypeEditor() {
 					//remove old combobox
 					var prev = Dom.get("termsPreview"),
 						i;
-					for (i = 0; i < prev.children.length; i++) {
-						prev.removeChild(prev.childNodes[0]);
+					for (i = 1; i < prev.children.length; i++) {
+						prev.removeChild(prev.childNodes[1]);
 					}
+					var el_sel;
 					// add new select (combobox)
 					if(datatype === "enum") {
-						prev.appendChild(Hul.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup['enum'], null));
+
+						el_sel = Hul.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup['enum'], null);
+						el_sel.style.backgroundColor = "#cccccc";
+						el_sel.onchange =  _preventSel;
+						prev.appendChild(el_sel);
+
 					}
 					else if(datatype === "relmarker" || datatype === "relationtype") {
-						prev.appendChild(Hul.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup.relation, null));
+						el_sel = Hul.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup.relation, null);
+						el_sel.style.backgroundColor = "#cccccc";
+						el_sel.onchange =  _preventSel;
+						prev.appendChild(el_sel);
 					}
 				}
 	}
