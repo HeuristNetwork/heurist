@@ -193,12 +193,13 @@
 
 	define ('HEURIST_NEWREC_OWNER_ID', $sysValues['sys_NewRecOwnerGrpID']);
 	define ('HEURIST_NEWREC_ACCESS', $sysValues['sys_NewRecAccess']);
-	define ('HEURIST_DBID', $sysValues['sys_RegisteredID']);
+	define ('HEURIST_DBID', $sysValues['sys_dbRegisteredID']);
 	define ('HEURIST_DBVERSION', "".$sysValues['sys_dbVersion'].".".$sysValues['sys_dbSubVersion'].".".$sysValues['sys_dbSubSubVersion']);
 	if ( HEURIST_MIN_DBVERSION > HEURIST_DBVERSION ) {
 		returnErrorMsgPage("Heurist Code Version ".HEURIST_VERSION." require database schema version of ".HEURIST_MIN_DBVERSION." or higher. ".
 			HEURIST_DBNAME." has a version of ". HEURIST_DBVERSION.", please update the schema.");
 	}
+
 	// set up email defines
 	if ($infoEmail) {
 		define('HEURIST_MAIL_TO_INFO', $infoEmail);	//mailto string for heurist installation issues
@@ -206,9 +207,28 @@
 
 	if ($sysAdminEmail) {
 		define('HEURIST_MAIL_TO_ADMIN', $sysAdminEmail);	//mailto string for heurist installation issues
-		}else if ($infoEmail){
+	}else if ($infoEmail){
 		define('HEURIST_MAIL_TO_ADMIN', $infoEmail);	//mailto string for heurist installation issues
-		}
+	}
+
+	// MAGIC CONSTANTS for limited set of common rectypes and their detail types
+	// they refer to global definition DB and IDs of rectypes/detailtypes there
+	define('RT_BUG_REPORT',"68-216");
+	define('DT_BUG_REPORT_NAME',"68-179");
+	define('DT_BUG_REPORT_FILE',"68-221");
+	define('DT_BUG_REPORT_DESCRIPTION',"68-303");
+	define('DT_BUG_REPORT_ABSTRACT',"68-560");
+	define('DT_BUG_REPORT_STATUS',"68-725");
+
+	define('RT_NOTE',"68-2");
+	define('DT_NOTE_TITLE',"68-160");
+	define('DT_NOTE_DESCRIPTION',"68-303");
+	define('DT_NOTE_DATE',"68-166");
+	define('DT_NOTE_FILE','68-221');
+
+	define('DT_ALL_ASSOC_FILE','68-221');
+
+
 function returnErrorMsgPage($msg) {
 		echo "location.replace(\"".HEURIST_BASE_URL."common/html/msgErrorMsg.html?msg=$msg\");";
 		exit();

@@ -24,6 +24,7 @@
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+	require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 
 	if (! is_logged_in()) {
 		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
@@ -87,7 +88,7 @@
 	//$attachments_save_path='/home/maxim/mail_attachments/';
 
 	// maximum size of attachment, in bytes
-	$attachment_size_max=8*1024*1024;
+	$attachment_size_max=8388608; //8*1024*1024;
 
 
 	// count of emails processed
@@ -107,6 +108,7 @@
     $emails_processed++;
 
     $description=$email->getBody();
+	$rec_id = null;
 
     /* use UNIX-style lines
 	$description=str_replace("\r\n", "\n", $description);
@@ -120,7 +122,9 @@
 
     $arr = json_decode($description, true);
 
-error_log(">>>>".is_array($arr)."  ".count($arr)."  ".print_r($arr, true));
+
+//DEBUG error_log(">>>>".is_array($arr)."  ".count($arr)."  ".print_r($arr, true));
+
 // assume all id (rtID, dtID, trmID and ontID) are all concept ids (dbID - ID)
 // get rectype concept id and  convert to local id or notes
 // for each detail type: convert to local ids
@@ -130,22 +134,74 @@ error_log(">>>>".is_array($arr)."  ".count($arr)."  ".print_r($arr, true));
 	if(is_array($arr) && count($arr)>2){
 		//this is from export record from another heurist instance
 
-			if($arr["rectype"]=="777"){
-				$arr["rectype"]="253"; //bug report
-				}
+		$key_file = null; //id of field type for assoc files (attachments)
+		$arrnew = array();
 
-		//assosiated files
-		$files_arr = $arr['type:221'];
+		//convert all global id to local id
+  		foreach ($arr as $key => $value)
+		{
+			$pos = strpos($key, "type:");
+//DEBUG error_log(">>>> ".(is_numeric($pos) && $pos == 0)."    ".$pos);
 
-			if($files_arr && count($files_arr) > 0  && preg_match("/\S+/",$files_arr[0])){
-// debug error_log(">>>>files_arr=".print_r($files_arr[0], true));
-			$arr['type:221'] = saveAttachments($files_arr, $email);
-			if($arr['type:221']==0) return false;
+		    if (is_numeric($pos) && $pos == 0)
+		    {
+
+
+    			//@todo we have to convert the content of fields as well -
+    			// since it may contain terms and references to other rectypes !!!1
+    				$typeid = substr($key, 5);
+
+					$newkey = getDetailTypeLocalID($typeid);
+
+//error_log(">>>> ".$newkey."  dettype=".$typeid);
+
+					if($newkey){
+			    		$arrnew["type:".$newkey] = $value;
+
+			    		if($typeid == DT_ALL_ASSOC_FILE){
+			    			$key_file = "type:".$newkey;
+						}
+					}else{
+						$email->setErrorMessage("Can't find the local id for fieldtype #".$typeid);
+						$key_file = null; //avoid processing attachments
+						break;
+					}
 			}else{
-				unset($arr['type:221']);
+			    	$arrnew[$key] = $value;
+			}
+		}//for
+
+		$newrectype = getRecTypeLocalID($arr["rectype"]);
+		if($newrectype)
+		{
+  			$arrnew["rectype"] = $newrectype;
+		}else{
+			$email->setErrorMessage("Can't find the local id for rectype #".$_POST["rectype"]);
+			$key_file = null; //avoid processing attachments
+			exit();
 		}
 
-		$_POST = $arr;
+
+		//assosiated files
+		if($key_file){
+			$files_arr = $arr[$key_file];
+
+			if($files_arr && count($files_arr) > 0  && preg_match("/\S+/",$files_arr[0]))
+			{
+// debug error_log(">>>>files_arr=".print_r($files_arr[0], true));
+				$arrnew[$key_file] = saveAttachments($files_arr, $email);
+				if($arrnew[$key_file]==0) return false;
+			}
+			else
+			{
+				unset($arrnew[$key_file]);
+			}
+		}
+
+
+//DEBUG error_log(">>>>ARRAY=".print_r($arrnew, true));
+
+		$_POST = $arrnew;
 
 	}else{
 		// this is from usual email - we will add email rectype
@@ -163,7 +219,7 @@ error_log(">>>>".is_array($arr)."  ".count($arr)."  ".print_r($arr, true));
 		//consider this message as usual email and
 		$_POST["save-mode"]="new";
 		$_POST["notes"]="";
-			$_POST["url"]="";
+		$_POST["rec_url"]="";
 
 		/* FOR EMAIL RECORD TYPE  - BUT IAN REQUIRES POST "NOTE" RECORDTYPE
 		$_POST["type:160"] = array($email->getSubject());
@@ -177,12 +233,12 @@ error_log(">>>>".is_array($arr)."  ".count($arr)."  ".print_r($arr, true));
 		$_POST["rectype"]="183";  //EMAIL
 		*/
 
-		$_POST["type:160"] = array($email->getSubject()); //title
+		$_POST["type:".getDetailTypeLocalID(DT_NOTE_TITLE)] = array($email->getSubject()); //title
 		//$_POST["type:158"] = array("email harvesting"); //creator (recommended)
-		$_POST["type:166"] = array(date('Y-m-d H:i:s')); //specific date
-		$_POST["type:191"] = array($email->getFrom()." ".$description); //notes
+		$_POST["type:".getDetailTypeLocalID(DT_NOTE_DATE)] = array(date('Y-m-d H:i:s')); //specific date
+		$_POST["type:".getDetailTypeLocalID(DT_NOTE_DESCRIPTION)] = array($email->getFrom()." ".$description); //notes
 
-		$_POST["rectype"]="2";  //NOTE
+		$_POST["rectype"] = getRecTypeLocalID(RT_NOTE);  //NOTE
 
 
 		$_POST["check-similar"]="1";
@@ -191,7 +247,7 @@ error_log(">>>>".is_array($arr)."  ".count($arr)."  ".print_r($arr, true));
 		if($arr==0){
 			return false;
 		}else if(count($arr)>0){
-			$_POST['type:221'] = $arr;
+			$_POST['type:'.getRecTypeLocalID(DT_NOTE_FILE)] = $arr;
 			//array_push($_POST['type:221'], $arr);
 				//error_log(">>>>>>>>>ARRAY>>".print_r($arr, true));
 		}
@@ -199,30 +255,32 @@ error_log(">>>>".is_array($arr)."  ".count($arr)."  ".print_r($arr, true));
 			//error_log(">>>>>>>>>HERE>>>>>>".print_r($_POST['type:221'],true));
 	}
 
+	if($email->getErrorMessage() == null)
+	{
 
-	$_POST["owner"] = get_user_id();
-	$sss = $email->getFrom();
-	if(is_array($sys_sender)){
+		$_POST["owner"] = get_user_id();
+		$sss = $email->getFrom();
+		if(is_array($sys_sender)){
             foreach($sys_sender as $sys_sender_email){
                 if($sys_sender_email==$sss || strpos($sss,"<"+$sys_sender_email+">")>=0){
                     $_POST["owner"] = $ownership;
                     break;
                 }
             }
-	}
+		}
 
-	$_POST["visibility"] = 'hidden';
+		$_POST["visibility"] = 'hidden';
 error_log(">>>>before insert POST=".print_r($_POST, true));
 
-    $updated = insertRecord();
-    $rec_id = null;
-
-    if ($updated) {
+    	$updated = insertRecord();
+    	if ($updated) {
     		$rec_id = $_REQUEST["rec_ID"];
     		$email->setRecId($rec_id);
+		}
+
+//error_log("updated = $updated  recID = $rec_id ");
 	}
 
-error_log("updated = $updated  recID = $rec_id ");
     printEmail($email);
 
     if($rec_id){ //($rec_id){
@@ -355,7 +413,7 @@ error_log("updated = $updated  recID = $rec_id ");
         echo '<b>Status:</b> inserted as record with id '.htmlentities($email->getRecId()).'<br>';
         $emails_processed_ids = $emails_processed_ids.($email->getRecId()).",";
     }else{
-        echo '<div style="color:#ff0000;"><b>Status:</b> adding to Heurist failed </div>';
+        echo '<div style="color:#ff0000;"><b>Status:</b> adding to Heurist failed '.$email->getErrorMessage().'</div>';
     }
 
     echo '</td><td>';

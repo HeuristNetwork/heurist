@@ -19,7 +19,7 @@ include_once 'classEmailAttachment.php';
 
 class Email{
 
-    private $from, $subject, $body, $attachments, $rec_id;
+    private $from, $subject, $body, $attachments, $rec_id, $err_message;
 
     public function __construct($from, $subject, $body, $attachments){
 
@@ -28,6 +28,7 @@ class Email{
         $this->body=$body;
         $this->attachments=$attachments;
         $this->rec_id=false;
+        $this->err_message = null;
     }
 
     public function getFrom(){
@@ -79,4 +80,15 @@ class Email{
 
         $this->rec_id=$rec_id;
     }
+
+    public function getErrorMessage(){
+
+        return $this->err_message;
+    }
+
+    public function setErrorMessage($message){
+
+        $this->err_message=$message;
+    }
+
 }

@@ -1,5 +1,4 @@
 <!--
-
 /**
  * formEmailRecordPopup.html
  *
@@ -44,7 +43,7 @@
 	<input id="btnSubmit" type=button onClick="window.HEURIST.edit.save();" value="Email record">
 </div>
 
-  <script>
+  <script type="text/javascript">
 
 // object to manage this popup form
 window.HEURIST.edit = {
@@ -67,12 +66,12 @@ window.HEURIST.edit = {
 		var contentWindow = editFrame.contentWindow;
 		if (contentWindow) {
 			var form = contentWindow.document.forms[0];
+			var db = (window.HEURIST.parameters["db"] || "");
 
 			if(form.setAttribute){
-			 	form.setAttribute("jsonAction", top.HEURIST.basePath+'export/email/emailRecordDetails.php');
-			}else{
-				form.action = top.HEURIST.basePath+'export/email/emailRecordDetails.php';
+			 	form.setAttribute("jsonAction", top.HEURIST.basePath+'export/email/emailRecordDetails.php?db='+db);
 			}
+			form.action = top.HEURIST.basePath+'export/email/emailRecordDetails.php?db='+db;
 
 			if (form.onsubmit  &&  ! form.onsubmit()) {
 				return;	// submit failed ... up to the individual form handlers to display messages
@@ -83,7 +82,9 @@ window.HEURIST.edit = {
 				//window.close(parent.HEURIST.record.title, parent.HEURIST.record.bdValuesByType, parent.HEURIST.record.bibID);
 			});
 
+
 			(form.heuristSubmit || form.submit)();
+			//form.submit();
 			return;
 		}
 	}
@@ -95,6 +96,9 @@ window.HEURIST.edit = {
 	//
 	window.HEURIST.parameters = top.HEURIST.parseParams(window.location.search);
 
+	var editFrame = document.getElementById("edit-frame");
+	var db = (window.HEURIST.parameters["db"] || "");
+
 	var sparam = window.HEURIST.parameters["rectype"];
 	//var rectype = parseInt(sparam);
 
@@ -103,6 +107,7 @@ window.HEURIST.edit = {
 		document.title = "Bug report";
 		document.getElementById("btnSubmit").value = "Send bug report";
 
+/*
 		var rectype = 253; //253 MAGIC
 
 var rectype_bugreport = {"dtFields":{"179":["Bug Title","Specify short name for bug",null,"","required","1","1","60","0","000","1",null,null,"",null,"open",null,null,null],"191":["Bug description","Detail description of bug",null,"","optional","1","0","60","0","001","1",null,null,null,null,"open",null,null,null],"259":["Steps to reproduce","Describe what actions you took to obtain the bug",null,"","optional","1","0","60","0","002","1",null,null,null,null,"open",null,null,null],"221":["Screenshot","Make a screenshot of bug and browser this image file",null,"","optional","5","0","60","0","004","1",null,null,"",null,"open",null,null,null]},"commonFields":["Bug submit","bug report","normal","0","[Title / Name]","","Bug submits","1","open","7","0","",""]};
@@ -113,12 +118,13 @@ top.HEURIST.rectypes.typedefs[rectype] = rectype_bugreport;
 top.HEURIST.rectypes.names[rectype] = 'Bug report';
 top.HEURIST.rectypes.pluralNames[rectype] = 'Bug reportS';
 top.HEURIST.rectypes.dtDisplayOrder[rectype] = ["179","191","259","221"]; //"559",
-		
-	}
+*/
+	editFrame.src = "../../export/email/formBugReport.php?db="+db;
+	editFrame.style.display = "block";
 
+	}else{
 
 	var titleBits = (window.HEURIST.parameters["title"] || "").split(/\s+/);
-	var db = (window.HEURIST.parameters["db"] || "");
 	for (var i=0; i < titleBits.length; ++i) {
 		titleBits[i] = titleBits[i].charAt(0).toUpperCase() + titleBits[i].substring(1);
 	}
@@ -126,12 +132,13 @@ top.HEURIST.rectypes.dtDisplayOrder[rectype] = ["179","191","259","221"]; //"559
 	document.getElementById("title-val").appendChild(document.createTextNode(title || ""));
 	var url = window.HEURIST.parameters["url"];
 
-	var editFrame = document.getElementById("edit-frame");
 	editFrame.src = "../../records/edit/tabs/publicInfoTab.html?db="+db+"&rectype="+rectype+"&title="+encodeURIComponent(title);
 	editFrame.style.display = "block";
 
+	//name of record type in the header of form
 	document.getElementById("rectype-val").appendChild(document.createTextNode(top.HEURIST.rectypes.names[rectype]));
 
+	}
 
 </script>
 <!--

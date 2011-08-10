@@ -1,6 +1,6 @@
 <?php
 
-	/**
+/**
  * emailRecordDetailsphp
  *
  * Accept POST from
@@ -34,30 +34,34 @@
 
   $ids = "";
 
-	if($_POST["rectype"] == "2-253"){ //MAGIC BUG REPORTER
+	if($_POST["rectype"] == RT_BUG_REPORT){ //MAGIC BUG REPORTER
 
-
-	$ext_desc = $_POST["type:191"];
+	$key_abs = "type:".DT_BUG_REPORT_ABSTRACT;
+	$ext_desc = $_POST[$key_abs];
 	if(!is_array($ext_desc)) {
 		$ext_desc = array();
-		if($_POST["type:191"]!="" && $_POST["type:191"]!=null){
-			array_push($ext_desc, $_POST["type:191"]);
+		if($_POST[$key_abs]!="" && $_POST[$key_abs]!=null){
+			array_push($ext_desc, $_POST[$key_abs]);
 		}
 	}
   	//add current system information into message
 	array_push($ext_desc, "Browser information: ".$_SERVER['HTTP_USER_AGENT']);
   	//add current heurist information into message
-	array_push($ext_desc, "Heurist information. codebase: ".HEURIST_BASE_URL." version: ".HEURIST_DBVERSION."  database: ". DATABASE."  user: ".get_user_name());
+  	//add current heurist information into message
+	array_push($ext_desc, "Heurist codebase: ".HEURIST_BASE_URL);
+	array_push($ext_desc, "Heurist version: ".HEURIST_DBVERSION);
+	array_push($ext_desc, "Heurist database: ". DATABASE);
+	array_push($ext_desc, "Heurist user: ".get_user_name());
 
-	$_POST["type:191"] = $ext_desc;
+	$_POST[$key_abs] = $ext_desc;
 
   }
 
-
   // ATTACHMENTS - find file fieldtype in POST
+  $key_file = "type:".DT_BUG_REPORT_FILE;
   foreach ($_POST as $key => $value)
   {
-    if (is_array($value) && $key == "type:221" ) {
+    if (is_array($value) && $key == $key_file ) {
       foreach ($value as $subvalue) {
       	  if($subvalue){
 	  	  		if($ids==""){
@@ -86,7 +90,7 @@
 			array_push($files_arr, $row);
 		}
 
-		$_POST["type:221"] = $files_arr;
+		$_POST[$key_file] = $files_arr;
 
 		//@todo delete from database and remove files (after send an email)
 
@@ -128,20 +132,65 @@
   }
   */
 
+  // Converts all record and type codes into Concept
+  $arr = array();
+  if($_POST["rectype"] == RT_BUG_REPORT){ //MAGIC BUG REPORTER
+  		//bug reporting already codes in global
+  		$arr = $_POST;
+  }else{
+
+  		foreach ($_POST as $key => $value)
+		{
+			$pos = strpos($key, "type:");
+error_log(">>>> ".(is_numeric($pos) && $pos == 0)."    ".$pos);
+
+		    if (is_numeric($pos) && $pos == 0)
+		    {
+    			//@todo we have to convert the content of fields as well -
+			    // since it may contain terms and references to other rectypes !!!1
+    				$typeid = substr($key, 5); //, $top-5);
+error_log(">>>> ".strpos($key, "type:")."  dettype=".$typeid);
+					$newkey = getDetailTypeConceptID($typeid);
+					if($newkey){
+			    		$arr["type:".$newkey] = $value;
+					}else{
+						print '({"error":"Can\'t find the global concept for fieldtype #"'.$typeid.'"})';
+						exit();
+					}
+			}else{
+			    	$arr[$key] = $value;
+			}
+		}//for
+
+error_log(">>>> rectype=".$_POST["rectype"]);
+error_log(">>>>".getRecTypeConceptID($_POST["rectype"]));
+
+		$newrectype = getRecTypeConceptID($_POST["rectype"]);
+		if($newrectype){
+  			$arr["rectype"] = $newrectype;
+		}else{
+			print '({"error":"Can\'t find the global concept for rectype #"'.$_POST["rectype"].'"})';
+			exit();
+		}
+
+  }
+
   // converts _POST array into string
   //$message = json_format($_POST);
-  $message =  json_encode($_POST);
+  $message =  json_encode($arr);
 
-	//DEBUG error_log(">>>> ".$message);
+  // DEBUG
+  error_log(">>>> ".$message);
+ /**/
 	$geekMail->message($message);
 
-	/**/
 	if (!$geekMail->send())
 	{
-	$errors = $geekMail->getDebugger();
-  	print_r($errors);
+		$errors = $geekMail->getDebugger();
+  		print_r($errors);
 	}else{
-	print '({"result":"ok"})';
+		print '({"result":"ok"})';
 	}
 
+//print '({"result":"ok"})';
 ?>

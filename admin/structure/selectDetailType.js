@@ -1,6 +1,7 @@
 
 //aliases
-var Dom = YAHOO.util.Dom;
+var Dom = YAHOO.util.Dom,
+	Hul = top.HEURIST.util;
 
 /**
 *
@@ -234,12 +235,13 @@ function SelectDetailType() {
 										record = this.getRecord(target),
 										xy;
 
-									if (!isnull(column) && column.key === 'help') {
+									/*if (!isnull(column) && column.key === 'help') {
 										var description = record.getData('description') || 'no further description';
 										xy = [parseInt(oArgs.event.clientX,10) + 10 ,parseInt(oArgs.event.clientY,10) + 10 ];
 										textTip = '<p>'+description+'</p>';
 
-									}else if(!isnull(column) && column.key === 'type') {
+									}else*/
+									if(!isnull(column) && column.key === 'type') {
 
 										var dttype = record.getData('type');
 										var value;
@@ -250,6 +252,8 @@ function SelectDetailType() {
 										}
 
 										textTip = _getRecPointers(dttype, value);
+										currentTipId=record.getData('info');
+										xy = [parseInt(oArgs.event.clientX,10), parseInt(oArgs.event.clientY,10) - 20 ];
 
 									}else if(!isnull(column) && column.key === 'usage') {
 										var dty_ID = record.getData('info');
@@ -274,7 +278,7 @@ function SelectDetailType() {
 										}
 									}
 
-									if(!isnull(textTip)){
+									if(!isnull(textTip) && textTip.length>0){
 
 										needHideTip = true;
 
@@ -283,6 +287,13 @@ function SelectDetailType() {
 										my_tooltip.mouseover(function(){needHideTip = false; __clearHideTimer();});
 										my_tooltip.mouseout(function(){ needHideTip = true;});
 
+					my_tooltip.html(textTip);  //DEBUG xy[0]+",  "+xy[1]+"<br/>"+
+
+//					var xy = Hul.getMousePos(oArgs);
+					xy[1] = xy[1] + $(window).scrollTop();
+					Hul.showPopupDivAt(my_tooltip, xy, $(window).scrollTop(), $(window).width(), $(window).height());
+
+/*
 										var border_top = $(window).scrollTop();
 										var border_right = $(window).width();
 										var border_height = $(window).height();
@@ -310,7 +321,7 @@ function SelectDetailType() {
 											left:left_pos+'px', top:top_pos+'px'
 										});//.fideIn(500).fideOut(5000);
 										//lft = my_tooltip.css('left');
-										my_tooltip.html(textTip);
+*/
 										hideTimer = window.setTimeout(__hideToolTip, 5000);
 									}
 									else if(forceHideTip)

@@ -451,8 +451,13 @@ function getTermSets($termDomain) {	// termDomain can be empty, 'reltype' or 'en
 }
 */
 function getConceptID($lclID,$tableName,$fieldNamePrefix){
-	$res = mysql_query("select ".$fieldNamePrefix."OriginatingDBID,".$fieldNamePrefix."IDInOriginatingDB from $tableName where ".$fieldNamePrefix."ID = $lclID");
+	$query = "select ".$fieldNamePrefix."OriginatingDBID,".$fieldNamePrefix."IDInOriginatingDB from $tableName where ".$fieldNamePrefix."ID = $lclID";
+//error_log("SQL=".$query);
+	$res = mysql_query($query);
 	$ids = mysql_fetch_array($res);
+//error_log(print_r($ids, true));
+//error_log("RES=".count($ids)."    ".$ids[0]."    ".$ids[1]);
+//return "".$ids[0]."-".$ids[1];
 	if ($ids && count($ids) == 4 && is_numeric($ids[0]) && is_numeric($ids[1])) {
 		return "".$ids[0]."-".$ids[1];
 	}else if (HEURIST_DBID) {
@@ -480,20 +485,36 @@ function getOntologyConceptID($lclOntID){
 
 function getLocalID($conceptID,$tableName,$fieldNamePrefix){
 	$ids = split("-",$conceptID);
-	if ($ids && count($ids) == 2 && is_numeric($ids[0]) && is_numeric($ids[1])) {
-		$res = mysql_query("select ".$fieldNamePrefix."ID from $tableName where ".$fieldNamePrefix."OriginatingDBID=".$ids[0]." and ".$fieldNamePrefix."IDInOriginatingDB=".$ids[1]);
-		$id = mysql_fetch_array($res);
-		if ($id && count($id) > 0 && is_numeric($id[0])){
-			return $id[0];
+	$res_id = null;
+
+	if ( $ids &&
+		(count($ids) == 1 && is_numeric($ids[0])) ||
+		(count($ids) == 2 && is_numeric($ids[1]) && $ids[0]==HEURIST_DBID) ){
+
+		if(count($ids) == 2){
+			$res_id = $ids[1]; //this code is already local
+		}else{
+			$res_id = $ids[0];
 		}
-	}else if ($ids && count($ids) == 1 && is_numeric($ids[0])) {
-		$res = mysql_query("select ".$fieldNamePrefix."ID from $tableName where".$fieldNamePrefix."ID=".$ids[0]);
+
+		$res = mysql_query("select ".$fieldNamePrefix."ID from $tableName where ".$fieldNamePrefix."ID=".$res_id);
 		$id = mysql_fetch_array($res);
 		if ($id && count($id) > 0 && is_numeric($id[0])){
-			return $id[0];
+			$res_id = $id[0];
+		}else{
+			$res_id = null;
+		}
+
+	}else if ($ids && count($ids) == 2 && is_numeric($ids[0]) && is_numeric($ids[1])){
+		$query = "select ".$fieldNamePrefix."ID from $tableName where ".$fieldNamePrefix."OriginatingDBID=".$ids[0]." and ".$fieldNamePrefix."IDInOriginatingDB=".$ids[1];
+		$res = mysql_query($query);
+		$id = mysql_fetch_array($res);
+		if ($id && count($id) > 0 && is_numeric($id[0])){
+			$res_id = $id[0];
 		}
 	}
-	return null;
+
+	return $res_id;
 }
 
 function getTermLocalID($trmConceptID){
