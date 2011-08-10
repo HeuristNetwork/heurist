@@ -436,7 +436,7 @@ function outputRecords($result) {
 	$relationships = array();
 
 	$rec_ids = array();
-	foreach ($result['records'] as $record) {	// place query result recIDs into rec
+	foreach ($result['records'] as $record) {	// get all the result recIDs
 		array_push($rec_ids, $record['rec_ID']);
 	}
 
@@ -555,9 +555,11 @@ function outputRecordStub($recordStub) {
 }
 
 function makeFileContentNode($file){
-	$filename = HEURIST_UPLOAD_PATH . $file['id'];
-	if ($file['type'] ==="application/xml" && file_exists($filename)) {
+//	$filename = HEURIST_UPLOAD_PATH . $file['id'];
+	$filename = $file['URL'];
+	if ($file['type'] ==="application/xml"){// && file_exists($filename)) {
 		$xml = simplexml_load_file($filename);
+//error_log(" xml = ". print_r($xml,true));
 		// convert to xml
 		$xml = $xml->asXML();
 		// remove the name space
@@ -649,7 +651,7 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 					makeTag('nonce', null, $file['nonce']);
 					makeTag('origName', null, $file['origName']);
 					makeTag('type', null, $file['type']);
-					makeTag('size', null, $file['size']);
+					makeTag('size', array('units' => 'kB'), $file['size']);
 					makeTag('date', null, $file['date']);
 					makeTag('description', null, $file['description']);
 					makeTag('url', null, $file['URL']);

@@ -532,9 +532,9 @@ function buildGraphStructure($rec_ids, &$recSet) {
 //echo "depth = $depth  rtfilter = ". print_r($rtfilter,true)."\n<br/>";
 //echo "depth = $depth  ptrfilter = ". print_r($ptrfilter,true)."\n<br/>";
 //echo "depth = $depth  relfilter = ". print_r($relfilter,true)."\n<br/>";
-	if (!@$recSet['infoByDepth'][$depth]) {
-		$recSet['infoByDepth'][$depth] = array('recIDs'=>array(),'rectypes'=>array());
-	}
+		if (!@$recSet['infoByDepth'][$depth]) {
+			$recSet['infoByDepth'][$depth] = array('recIDs'=>array(),'rectypes'=>array());
+		}
 		$p_rec_ids = findPointers($rec_ids,$recSet, $depth, $rtfilter, $ptrfilter);
 //echo "depth = $depth  new ptr recID = ". json_format($p_rec_ids)."\n";
 		$rp_rec_ids = $REVERSE ? findReversePointers($rec_ids, $recSet, $depth, $rtfilter, $ptrfilter) : array();
