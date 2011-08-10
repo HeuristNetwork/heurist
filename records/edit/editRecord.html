@@ -63,6 +63,9 @@
 							(window.location.search.match(/bib_id=(\d+).*$/)? window.location.search.match(/bib_id=(\d+).*$/)[1] : ""));
 			var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:
 							(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name: "");
+
+			var bugReportURL = hBase + 'export/email/formEmailRecordPopup.html?rectype=bugreport&db='+database;
+
 			var queryStr = "",
 				recordEvent = "record";
 			if (bibID){
@@ -229,7 +232,7 @@
   <div id=quicklink-cell class=yui-skin-sam>
   	<nobr><b>
 		<a href="../../help/about.html" onClick="top.HEURIST.util.popupURL(window, href); return false;">About</a> |
-		<a href="http://www.timemap.net/tmissues.php" target=_blank>Report a bug</a> | <!-- //saw TODO change to debug form -->
+		<a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 320,width: 740,callback: function (title, bd, bibID) {if (bibID) {window.close(bibID, title);}} });return false;" title="Click to send a bug report">Report bug</a> |
 		<a id=contact-link href="mailto:info@heuristscholar.org">Contact us</a> |
 		<a id=help-link href='#' onClick="top.HEURIST.util.helpToggler(this)"></a>
 

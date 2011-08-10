@@ -28,13 +28,16 @@
 	//send an email
 	$geekMail = new geekMail();
 	$geekMail->setMailType('html');
-	$geekMail->from("bugs@acl.arts.usyd.edu.au", "Bug reporter"); //'noreply@heuristscholar.org', 'Bug Report');
 	$geekMail->to('prime.heurist@gmail.com');
-	$geekMail->subject('Bug Report');
 
   $ids = "";
 
 	if($_POST["rectype"] == RT_BUG_REPORT){ //MAGIC BUG REPORTER
+
+	$bug_title = $_POST["type:".DT_BUG_REPORT_NAME];
+
+	$geekMail->from("bugs@heuristscholar.org", "Bug reporter"); //'noreply@heuristscholar.org', 'Bug Report');
+	$geekMail->subject('Bug Report: '.$bug_title[0]);
 
 	$key_abs = "type:".DT_BUG_REPORT_ABSTRACT;
 	$ext_desc = $_POST[$key_abs];
@@ -54,6 +57,11 @@
 	array_push($ext_desc, "Heurist user: ".get_user_name());
 
 	$_POST[$key_abs] = $ext_desc;
+
+  }else{
+
+	$geekMail->from("bugs@heuristscholar.org", "Record sender"); //'noreply@heuristscholar.org', 'Bug Report');
+	$geekMail->subject('Record from '.DATABASE);
 
   }
 
@@ -142,14 +150,14 @@
   		foreach ($_POST as $key => $value)
 		{
 			$pos = strpos($key, "type:");
-error_log(">>>> ".(is_numeric($pos) && $pos == 0)."    ".$pos);
+//DEBUG error_log(">>>> ".(is_numeric($pos) && $pos == 0)."    ".$pos);
 
 		    if (is_numeric($pos) && $pos == 0)
 		    {
     			//@todo we have to convert the content of fields as well -
 			    // since it may contain terms and references to other rectypes !!!1
     				$typeid = substr($key, 5); //, $top-5);
-error_log(">>>> ".strpos($key, "type:")."  dettype=".$typeid);
+//DEBUG error_log(">>>> ".strpos($key, "type:")."  dettype=".$typeid);
 					$newkey = getDetailTypeConceptID($typeid);
 					if($newkey){
 			    		$arr["type:".$newkey] = $value;
@@ -162,8 +170,8 @@ error_log(">>>> ".strpos($key, "type:")."  dettype=".$typeid);
 			}
 		}//for
 
-error_log(">>>> rectype=".$_POST["rectype"]);
-error_log(">>>>".getRecTypeConceptID($_POST["rectype"]));
+//DEBUG error_log(">>>> rectype=".$_POST["rectype"]);
+//DEBUG error_log(">>>>".getRecTypeConceptID($_POST["rectype"]));
 
 		$newrectype = getRecTypeConceptID($_POST["rectype"]);
 		if($newrectype){
@@ -179,8 +187,7 @@ error_log(">>>>".getRecTypeConceptID($_POST["rectype"]));
   //$message = json_format($_POST);
   $message =  json_encode($arr);
 
-  // DEBUG
-  error_log(">>>> ".$message);
+// DEBUG error_log(">>>> ".$message);
  /**/
 	$geekMail->message($message);
 

@@ -75,11 +75,77 @@ function doUploadFile(event)
 	top.HEURIST.edit.uploadFileInput.call(window, event.target);
 };
 
+//
+var uploadCompleted = function(inputDiv, bdValue) {
+	//var thisRef = this;	// for great closure
+	//var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
+
+	if (bdValue  &&  bdValue.file) {
+		// A pre-existing file: just display details and a remove button
+		var hiddenElt = inputDiv.hiddenElt = window.document.createElement("input");
+			hiddenElt.name = "type:<?=DT_BUG_REPORT_FILE?>[]";//inputDiv.name;
+			hiddenElt.value = hiddenElt.defaultValue = (bdValue && bdValue.file)? bdValue.file.id : "0";
+			hiddenElt.type = "hidden";
+			inputDiv.appendChild(hiddenElt);
+
+		var link = inputDiv.appendChild(window.document.createElement("a"));
+			if (bdValue.file.nonce) {
+				link.href = top.HEURIST.basePath+"records/files/downloadFile.php/" + /*encodeURIComponent(bdValue.file.origName)*/
+								"?ulf_ID=" + encodeURIComponent(bdValue.file.nonce);
+			} else if (bdValue.file.url) {
+				link.href = bdValue.file.url;
+			}
+			link.target = "_surf";
+			link.onclick = function() { top.open(link.href, "", "width=300,height=200,resizable=yes"); return false; };
+
+		link.appendChild(window.document.createTextNode(bdValue.file.origName));	//saw TODO: add a title to this which is the bdValue.file.description
+
+		var linkImg = link.appendChild(window.document.createElement("img"));
+			linkImg.src = top.HEURIST.basePath+"common/images/external_link_16x16.gif";
+			linkImg.className = "link-image";
+
+		var fileSizeSpan = inputDiv.appendChild(window.document.createElement("span"));
+			fileSizeSpan.className = "file-size";
+			fileSizeSpan.appendChild(window.document.createTextNode("[" + bdValue.file.fileSize + "]"));
+/*
+		var removeImg = inputDiv.appendChild(window.document.createElement("img"));
+			removeImg.src = top.HEURIST.basePath+"common/images/12x12.gif";
+			removeImg.className = "delete-file";
+			removeImg.title = "Remove this file";
+			var windowRef = window.document.parentWindow  ||  window.document.defaultView  ||  window.document._parentWindow;
+			top.HEURIST.registerEvent(removeImg, "click", function() {
+				thisRef.removeFile(inputDiv);
+				windowRef.changed();
+			});
+*/
+		inputDiv.valueElt = hiddenElt;
+		inputDiv.className = "file-div";
+	}
+}
+
+
+function addFileUploadInput()
+{
+	//var dt = ["AssociatedFile",null,"file","0",	"AssociatedFile","1","open","1",null,null,null,null,"221"];
+	//var rfr =
+	//var newInput = new top.HEURIST.edit.inputs.BibDetailFileInput(dt, rfr, fieldValues, container);
+
+	var el = window.document.getElementById("fileUploadInput");
+	var el_div = window.document.getElementById("fileUploadDiv");
+
+	el_div.input = el;
+	el.constructInput = uploadCompleted;
+	el.replaceInput = function(inputDiv, bdValue) {
+		inputDiv.innerHTML = "";
+		this.constructInput(inputDiv, bdValue);
+	};
+}
+
 //		jsonAction="stub"
   </script>
 
  </head>
- <body class="editTab">
+ <body class="editTab" onload="addFileUploadInput()">
   <script src="../../common/js/utilsLoad.js"></script>
   <script src="../../common/php/displayPreferences.php"></script>
 
@@ -119,8 +185,10 @@ function doUploadFile(event)
 		<img alt="Add another Screenshot field" title="Add another Screenshot field" class="duplicator" src="/h3-ao/common/images/duplicate.gif">
 	</div>
 	<div class="input-cell">
-		<div class="file-div empty" style="width: 80ex;" title="Screenshot">
-			<input class="file-select" name="type:<?=DT_BUG_REPORT_FILE?>[]" type="file" onchange="doUploadFile(event)"></div>
+		<div id="fileUploadDiv" class="file-div empty"
+				style="width: 80ex;" title="Screenshot">
+			<input class="file-select" id="fileUploadInput"
+				name="type:<?=DT_BUG_REPORT_FILE?>[]" type="file" onchange="doUploadFile(event)"></div>
 			<div class="help prompt">Make a screenshot of bug and browser this image file</div>
 	</div>
 </div>

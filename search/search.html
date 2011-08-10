@@ -86,9 +86,9 @@ a:focus {
 
 <body>
 <iframe id=searchFrame frameborder=0 style="width:0;height:0;position:absolute;"></iframe>
-<script src="../common/php/loadHAPI.php"></script> 
-<script src="../common/js/utilsLoad.js"></script> <!-- core HEURIST functions --> 
-<script src="../records/edit/editRecord.js"></script> 
+<script src="../common/php/loadHAPI.php"></script>
+<script src="../common/js/utilsLoad.js"></script> <!-- core HEURIST functions -->
+<script src="../records/edit/editRecord.js"></script>
 <script>
 		var hBase = "http://" + window.location.host + top.HEURIST.basePath;
 		var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"";
@@ -149,7 +149,7 @@ a:focus {
 				//document.forms[0].submit();
 			}
 		}
-</script> 
+</script>
 <script src="../common/php/displayPreferences.php"></script> <!-- sets body css classes based on prefs in session -->
 <iframe src="../search/actions/actionHandler.php" id=i_action></iframe>
 <!-- actionHandler.php is written to return a form by default or running javascript followed by reload teh default-->
@@ -179,7 +179,7 @@ a:focus {
 					<li><a href="../admin/ugrps/showSimilarUsers.php" name="auto-popup" title="Find people with similar bookmarking patterns">Find similar users</a></li>
 					<li><a href="../admin/ugrps/manageGroups.html" name="auto-popup" title="Find people with similar bookmarking patterns">My User Groups</a></li>
 					<li><a href="../admin/profile/manageReminders.php" name="auto-popup" title="View and delete automatic notification emails sent from your bookmarks">Manage reminders</a></li>
-					<li><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 520,width: 740,callback: _bugReportCallback});return false;" title="Click to send a bug report">Report bug</a></li>
+					<li><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 320,width: 740,callback: _bugReportCallback});return false;" title="Click to send a bug report">Report bug</a></li>
 				</ul>
 			</li>
 			<li class="logged-in-only"> <span id=advanced-menu-link class="logged-in-only"><b>Advanced</b></span>
@@ -218,7 +218,7 @@ a:focus {
 											+ "window.setTimeout('w.focus()',200);}"
 										+ "})();\"><b>"+database+" Bookmarklet</b></a>";
 							document.write(html);
-				</script> 
+				</script>
       </li>
     </ul>
   </div>
@@ -260,7 +260,7 @@ a:focus {
     </div>
     <div id=tag-search-links></div>
   </div>
-  <!--</div>--> 
+  <!--</div>-->
 </div>
 <!-- centre panel positional-->
 <div id="center-panel"></div>
@@ -270,7 +270,7 @@ a:focus {
            SEARCH:
           <div class="searchInput" style="position:relative"><input id=q name=q type=text style="width:300px; clear:both">
           	<div class="simplesearch" title="Click to show simple search builder panel" onclick='$("#simple-search").toggleClass("collapsed");$(this).toggleClass("collapsed");'></div>
-           
+
            <div id="simple-search" class="collapsed">
                 <div class="simple-search-row">
                   <label for="rectype-select">Record type:</label>
@@ -285,29 +285,29 @@ a:focus {
                   <input type="text" id="input-contains" onKeyPress="setTimeout(top.HEURIST.search.calcShowSimpleSearch,0);"/>
              	</div>
              	<div class="simple-search-row" style="text-align:center;">
-            	<a href="#" title="Search only records which have been bookmarked by you" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();" class="button">search my bookmarks</a> 
+            	<a href="#" title="Search only records which have been bookmarked by you" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();" class="button">search my bookmarks</a>
             	<a href="#" title="Search across all records in Heurist" onClick="document.getElementById('w-input').value = ''; top.HEURIST.search.submitSearchForm();" class="button">search all records</a>
                	<a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">Go to <b>Advanced Search</b></a>
 
                 </div>
             </div>
-           
+
            </div>
           <div class="searchButtons">
             <input id=my-records-button type=button value="my bookmarks" title="Search only records which have been bookmarked by you" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();" class="logged-in-only">
             <input id=all-records-button type=button value="all records"  title="Search across all records in Heurist" onClick="document.getElementById('w-input').value = ''; top.HEURIST.search.submitSearchForm();">
             <span id="add-record"><input id=add-record-link value="Add New Record" title="Add a new record to the Heurist database, setting record type and ownership" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/addRecordPopup.php'); return false;" class="logged-in-only" >
             </span></div>
-              
-          
+
+
         </form>
 </div>
 <!-- page -->
-<div id="page" style="position:absolute;left:0;right:0;top:0;bottom:0; background-color:#FFF"> 
+<div id="page" style="position:absolute;left:0;right:0;top:0;bottom:0; background-color:#FFF">
   <!--<div id=pageNavCount> <nobr> <span id=page-nav></span> <span id=resource-count></span> </nobr></div>-->
   <div id="result-container">
     <div id="result-header">
-      
+
       <div id="tabbar">
         <ul id="tabs" class="horizontal not-query-collected">
           <li style="padding: 3px 3px 2px 3px"><span><img src="../common/images/b_splitScreen.png"></span>
@@ -411,8 +411,8 @@ a:focus {
       <div id=results-level1 class="icons" level="1"></div>
     </div>
   </div>
-  <!--</div>--> 
-  
+  <!--</div>-->
+
   <!-- new application tabs -->
   <div id="page-right" class=" yui-skin-sam">
     <div id=applications class="yui-navset">
@@ -442,13 +442,13 @@ a:focus {
       </div>
     </div>
   </div>
-  
+
   <!-- end page right -->
   <div id="record-view"></div>
 </div>
 <!-- footer -->
-<div id="footer"> 
-  <!--<div id=pageNavCount> <nobr> <span id=page-nav></span> <span id=resource-count></span> </nobr></div>--> 
+<div id="footer">
+  <!--<div id=pageNavCount> <nobr> <span id=page-nav></span> <span id=resource-count></span> </nobr></div>-->
 </div>
 <div id=password>
   <div><b>Username / password reminder:</b></div>
@@ -482,7 +482,7 @@ top.HEURIST.loadScript("search.js");				// search-specific HEURIST functions
 top.HEURIST.fireEvent(window, "heurist-search-html-loaded");
 top.HEURIST.contentLoaded();
 
-</script> 
+</script>
 <!-- hidden iFrame for printing -->
 <iframe id="printingFrame" style="height: 0px; width: 0px; position: absolute; visibility:hidden" src="printresults.html"></iframe>
 </body>
