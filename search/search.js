@@ -1223,7 +1223,8 @@ top.HEURIST.search = {
 						fieldValSelect.appendChild(grp);
 						firstInGroup = false;
 					}
-					var name = detailTypes.names[detailTypeID] +" (detail:" + detailTypeID + ")";
+					var name = detailTypes.names[detailTypeID];
+//					var name = detailTypes.names[detailTypeID] +" (detail:" + detailTypeID + ")";
 					var value =  "f:" + (useIDs ? detailTypeID : '"'+name+'"') + ":";
 					fieldValSelect.appendChild(new Option(name,value));
 //					if (name == top.HEURIST.edit.record.rectype) {
@@ -1538,17 +1539,17 @@ top.HEURIST.search = {
 							50);
             };
 		var viewerFrame = document.getElementById("viewer-frame");
-		var mapFrame = document.getElementById("map-frame");
+//		var mapFrame = document.getElementById("map-frame");
 		var mapFrame3 = document.getElementById("map-frame3");
 		
         
-        var sidebysideFrame = document.getElementById("sidebyside-frame");
-		sidebysideFrame.src = top.HEURIST.basePath+"viewers/sidebyside/sidebyside.html"+
-		("?db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
-						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")));
+//        var sidebysideFrame = document.getElementById("sidebyside-frame");
+//		sidebysideFrame.src = top.HEURIST.basePath+"viewers/sidebyside/sidebyside.html"+
+//		("?db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
+//						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")));
 		var ssel = "selectedIds=" + top.HEURIST.search.getSelectedRecIDs().get().join(",");
         top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
-		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);
+//		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);
 		top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap,"heurist-selectionchange",  ssel);
         
 		return false;
@@ -1942,12 +1943,12 @@ top.HEURIST.search = {
 			});
 
 		var viewerFrame = document.getElementById("viewer-frame");
-		var mapFrame = document.getElementById("map-frame");
+//		var mapFrame = document.getElementById("map-frame");
 		var mapFrame3 = document.getElementById("map-frame3");
 		var ssel = "selectedIds=" + top.HEURIST.search.getSelectedRecIDs().get().join(",");
 
 		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
-		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);
+//		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);
 		top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap,"heurist-selectionchange",  ssel);
 		return false;
 	},
@@ -1962,12 +1963,12 @@ top.HEURIST.search = {
 			var bkmk_id = bibs[i].parentNode.getAttribute("bkmk_id");
 		}
 		var viewerFrame = document.getElementById("viewer-frame");
-		var mapFrame = document.getElementById("map-frame");
+//		var mapFrame = document.getElementById("map-frame");
 		var mapFrame3 = document.getElementById("map-frame3");
 		var ssel = "selectedIds=" + top.HEURIST.search.getSelectedRecIDs().get().join(",");
 
 		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
-		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);
+//		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);
 		top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap,"heurist-selectionchange",  ssel);
 		return false;
 	},
@@ -2046,13 +2047,13 @@ top.HEURIST.search = {
 			}
 		}
 		var viewerFrame = document.getElementById("viewer-frame");
-		var mapFrame = document.getElementById("map-frame");
+//		var mapFrame = document.getElementById("map-frame");
 		var mapFrame3 = document.getElementById("map-frame3");
 		mapFrame.src = "";
         var recordFrame = document.getElementById("record-view-frame");
         recordFrame.src = top.HEURIST.basePath+"common/html/msgNoRecordsSelected.html";
 		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", "selectedIds=");
-		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange", "selectedIds=");
+//		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange", "selectedIds=");
 		top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap, "heurist-selectionchange", "selectedIds=");
 		return;
 	},
