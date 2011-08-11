@@ -64,7 +64,7 @@
 			var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:
 							(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name: "");
 
-			var bugReportURL = hBase + 'export/email/formEmailRecordPopup.html?rectype=bugreport&db='+database;
+			var bugReportURL = top.HEURIST.baseURL + 'export/email/formEmailRecordPopup.html?rectype=bugreport&db='+database;
 
 			var queryStr = "",
 				recordEvent = "record";
