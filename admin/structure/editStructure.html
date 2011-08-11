@@ -294,7 +294,7 @@
      <img src="../../common/images/rectype-icons/[rty_ID].png" style="vertical-align: middle;" class="rft_icon" onClick="upload_icon([rty_ID]);">
      &nbsp;&nbsp;&nbsp;&nbsp;
      <span style="font-weight: bold; text-align: right;">Bibliographic record types</span>
-     [checkbox : rty_RecTypeGroupIDs : primary record type : style="margin: 0px;"]
+     [checkbox : rty_RecTypeGroupID : primary record type : style="margin: 0px;"]
     </td>
    </tr>
 
@@ -416,7 +416,7 @@
 
  <div style="width: 300px; height: 500px; overflow: auto; padding: 3px;" class="friendly_border">
   <table border="0">
-   [foreach rectype rtf : rty_ShowInLists = 1 order by ((select substring_index(rty_RecTypeGroupIDs,',',1)) > 1), rty_Name]
+   [foreach rectype rtf : rty_ShowInLists = 1 order by (rty_RecTypeGroupID > 1), rty_Name]
     <tr><td style="text-align: right;">[rty_ID]</td><td><img src="../../common/images/rectype-icons/[rty_ID].png" id="rt[rty_ID]" class="rft_icon" onClick="upload_icon([rty_ID]);"><a href="?rty_ID=[rty_ID]">[rty_Name]</a></td></tr>
    [end-foreach]
    [not-found][end-not-found]

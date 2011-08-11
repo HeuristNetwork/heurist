@@ -445,7 +445,8 @@
 										<?php
 	$res = mysql_query('select dty_ID, dty_Name from '.DATABASE.'.defDetailTypes order by dty_Name');
 	while ($row = mysql_fetch_assoc($res)) {
-							?>          <option value="f:&quot;<?= $row['dty_Name'] ?>&quot;"><?= htmlspecialchars($row['dty_Name']) ?></option>
+							?>
+							<option value="f:&quot;<?= $row['dty_Name'] ?>&quot;"><?= htmlspecialchars($row['dty_Name']) ?></option>
 											<?php	}	?>
  </optgroup>
 								</select>
@@ -466,7 +467,7 @@
 <label for="type">Record type:</label>
 					<?php
 						$res = mysql_query("select distinct rty_ID,rty_Name,rty_Description, rtg_Name
-						from defRecTypes left join defRecTypeGroups on rtg_ID = (select substring_index(rty_RecTypeGroupIDs,',',1))
+						from defRecTypes left join defRecTypeGroups on rtg_ID = rty_RecTypeGroupID
 						where rty_ShowInLists = 1 order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
 					?>
           <select name="type" id="type" onChange="update(this);">

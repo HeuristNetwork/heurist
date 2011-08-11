@@ -73,7 +73,7 @@
 	print "<p>";
 	print "-- rty_ID, rty_Name, rty_OrderInGroup, rty_Description, rty_TitleMask,
 			rty_CanonicalTitleMask, rty_Plural, rty_Status, rty_OriginatingDBID, rty_NameInOriginatingDB,
-			rty_IDInOriginatingDB, rty_BlockFromPublicView, rty_ShowInLists, rty_RecTypeGroupIDs, rty_FlagAsFieldset, rty_ReferenceURL,
+			rty_IDInOriginatingDB, rty_BlockFromPublicView, rty_ShowInLists, rty_RecTypeGroupID, rty_FlagAsFieldset, rty_ReferenceURL,
 			rty_AlternativeRecEditor, rty_Type\n";
 	$query = "select * from defRecTypes";
 	$res = mysql_query($query);
@@ -410,13 +410,13 @@
 			$rty_CanonicalTitleMask = mysql_real_escape_string($row['rty_CanonicalTitleMask']);
 			$rty_Plural = mysql_real_escape_string($row['rty_Plural']);
 			$rty_NameInOriginatingDB = mysql_real_escape_string($row['rty_NameInOriginatingDB']);
-			$rty_RecTypeGroupIDs = mysql_real_escape_string($row['rty_RecTypeGroupIDs']);
+			$rty_RecTypeGroupID = mysql_real_escape_string($row['rty_RecTypeGroupID']);
 			$rty_ReferenceURL = mysql_real_escape_string($row['rty_ReferenceURL']);
 			$rty_AlternativeRecEditor = mysql_real_escape_string($row['rty_AlternativeRecEditor']);
 			print "('$row[rty_ID]','$rty_Name','$row[rty_OrderInGroup]','$rty_Description','$rty_TitleMask',
 			'$rty_CanonicalTitleMask','$rty_Plural','$row[rty_Status]',
 			'$row[rty_OriginatingDBID]','$rty_NameInOriginatingDB','$row[rty_IDInOriginatingDB]',
-			'$row[rty_BlockFromPublicView]','$row[rty_ShowInLists]','$rty_RecTypeGroupIDs','$row[rty_FlagAsFieldset]','$rty_ReferenceURL',
+			'$row[rty_BlockFromPublicView]','$row[rty_ShowInLists]','$rty_RecTypeGroupID','$row[rty_FlagAsFieldset]','$rty_ReferenceURL',
 			'$rty_AlternativeRecEditor','$row[rty_Type]'),";
 			}
 			break;

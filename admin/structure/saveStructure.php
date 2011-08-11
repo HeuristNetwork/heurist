@@ -874,7 +874,7 @@
 	function deleteRectypeGroup($rtgID) {
 
 	$ret = array();
-	$query = "select rty_ID from defRecTypes where rty_RecTypeGroupIDs =$rtgID";
+	$query = "select rty_ID from defRecTypes where rty_RecTypeGroupID =$rtgID";
 	$res = mysql_query($query);
 	if (mysql_error()) {
 		$ret['error'] = "error finding record type of group $rtgID from defRecTypes - ".mysql_error();

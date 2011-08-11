@@ -667,7 +667,7 @@ function getRectypeColNames(){
 					"rty_Plural",
 					"rty_ShowInLists",
 					"rty_Status",
-					"rty_RecTypeGroupIDs",
+					"rty_RecTypeGroupID",
 					"rty_FlagAsFieldset",
 					"rty_ReferenceURL",
 					"rty_AlternativeRecEditor");
@@ -677,7 +677,7 @@ function getRectypeDef($rt_id) {
 	$rtDef = array();
 	// get rec Structure info ordered by the detailType Group order, then by recStruct display order and then by ID in recStruct incase 2 have the same order
 	$res = mysql_query("select ".join(",", getRectypeColNames())." from defRecTypes
-							left join defRecTypeGroups  on rtg_ID = (select substring_index(rty_RecTypeGroupIDs,',',1))
+							left join defRecTypeGroups  on rtg_ID = rty_RecTypeGroupID
 							where rty_ID=$rt_id
 							order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
 	$rtDef = mysql_fetch_row($res);
@@ -816,7 +816,7 @@ function getAllRectypeStructures($useCachedData = false) {
 
 	// get rec Structure info ordered by the detailType Group order, then by recStruct display order and then by ID in recStruct incase 2 have the same order
 	$res = mysql_query("select rty_ID, rtg_ID, rtg_Name, ".join(",", getRectypeColNames())." from defRecTypes
-							left join defRecTypeGroups  on rtg_ID = substring_index(rty_RecTypeGroupIDs,',',1)
+							left join defRecTypeGroups  on rtg_ID = rty_RecTypeGroupID
 							order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
 
 	while ($row = mysql_fetch_row($res)) {
@@ -847,7 +847,7 @@ function getRecTypesByGroup() {
 	$rectypesByGroup = array();
 	// query assumes rty_RecTypeGroupID is ordered isngle functional group ID followed by zero or more model group ids
 	$res = mysql_query("select rtg_ID,rtg_Name,rty_ID, rty_ShowInLists
-							from defRecTypes left join defRecTypeGroups  on rtg_ID = substring_index(rty_RecTypeGroupIDs,',',1)
+							from defRecTypes left join defRecTypeGroups  on rtg_ID = rty_RecTypeGroupID
 							where 1 order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
 	while ($row = mysql_fetch_assoc($res)) {
 		if (!array_key_exists($row['rtg_ID'],$rectypesByGroup)){

@@ -124,8 +124,8 @@
 	</div>
 
     <div class="rtyField">
-        <label class="rtyLabel" for="rty_RecTypeGroupIDs">Functional group:</label>
-        <div class="rtyValue" id="rty_RecTypeGroupIDs"></div>
+        <label class="rtyLabel" for="rty_RecTypeGroupID">Functional group:</label>
+        <div class="rtyValue" id="rty_RecTypeGroupID"></div>
         <div class="help prompt help1">
             <label>Record types are grouped together into related types for easier management</label>
         </div>
@@ -204,7 +204,7 @@
 	</div>
 
 	<div class="rtyHiddenField"><input id="rty_CanonicalTitleMask" /></div>
-	<div class="rtyHiddenField"><input id="rty_RecTypeGroupIDs" /></div>
+	<div class="rtyHiddenField"><input id="rty_RecTypeGroupID" /></div>
 
 <div class="actionButtons">
 		<input type="button" style="height: 25px; width: 99px" value="Save" onclick="EditPopup.save(false);" />
@@ -312,7 +312,7 @@
 			document.getElementById("rty_AlternativeRecEditor").value = rectype[12];
 
 			document.getElementById("rty_CanonicalTitleMask").value = rectype[5];
-			document.getElementById("rty_RecTypeGroupIDs").value = rectype[9];
+			document.getElementById("rty_RecTypeGroupID").value = rectype[9];
 		}
 		getStatus();
 	}
@@ -428,7 +428,7 @@
 		if(existingGroup) {
 			groupDropdown[selectedIndex].selected = 1;
 		}
-		document.getElementById("rty_RecTypeGroupIDs").appendChild(groupDropdown);
+		document.getElementById("rty_RecTypeGroupID").appendChild(groupDropdown);
 	}
 
 	// Toggle fields to disable. Is called when status is set to 'Reserved'. If changed = true, it means that the status is manually changed to reserved, so untill it is saved, it can be changed back. If it was reserved when starting the editRectype, keep it disabled
@@ -657,7 +657,7 @@
   				document.getElementById("rty_TitleMask").focus();
   				updatedFields = [];
   				return "mandatory";
-			}else if(fieldName=="rty_RecTypeGroupIDs") {
+			}else if(fieldName=="rty_RecTypeGroupID") {
 
 				fieldNameElementValue = groupDropdown.value;
 

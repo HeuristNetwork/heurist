@@ -241,7 +241,7 @@ function cancelAdd(e) {
 		<label> Record type:</label>
 					<?php
 						$res = mysql_query("select distinct rty_ID,rty_Name,rty_Description, rtg_Name
-						from defRecTypes left join defRecTypeGroups on rtg_ID = (select substring_index(rty_RecTypeGroupIDs,',',1))
+						from defRecTypes left join defRecTypeGroups on rtg_ID = rty_RecTypeGroupID
 						where rty_ShowInLists = 1 order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
 					?>
 		<select name="ref_type"  title="New record type" style="margin: 3px;" id="rectype_elt">

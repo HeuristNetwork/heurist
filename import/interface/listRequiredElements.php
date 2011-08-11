@@ -24,7 +24,7 @@
 	$bdt = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '1');
 	$rft = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', '1');
 	$res = mysql_query('select * from defRecTypes left join defRecStructure on rst_RecTypeID=rty_ID
-								left join defRecTypeGroups on rtg_ID = (select substring_index(rty_RecTypeGroupIDs,',',1))
+								left join defRecTypeGroups on rtg_ID = rty_RecTypeGroupID
 								order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name');
 	$bdr = array();
 	while ($row = mysql_fetch_assoc($res)) {

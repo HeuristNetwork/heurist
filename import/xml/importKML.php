@@ -133,7 +133,7 @@ class HeuristKMLParser extends HeuristForeignParser {
 		if (HeuristKMLParser::$_referenceTypes) return array_keys($this->_referenceTypes);
 
 		mysql_connection_db_select(DATABASE);	// saw TODO check that this is correct seems that it is trying order on non bib types.
-		HeuristKMLParser::$_referenceTypes = mysql__select_assoc("defRecTypes ", "rty_Name", "rty_ID", "rty_ShowInLists = 1 order by (select substring_index(rty_RecTypeGroupIDs,',',1)) = 2, rty_Name");
+		HeuristKMLParser::$_referenceTypes = mysql__select_assoc("defRecTypes ", "rty_Name", "rty_ID", "rty_ShowInLists = 1 order by rty_RecTypeGroupID = 2, rty_Name");
 
 		return array_keys(HeuristKMLParser::$_referenceTypes);
 	}

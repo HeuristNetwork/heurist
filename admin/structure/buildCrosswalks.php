@@ -274,7 +274,7 @@ error_log(" dt = $detailTypes");
             $query = "INSERT INTO `defRecTypes` (`rty_ID`, `rty_Name`, `rty_OrderInGroup`,
             `rty_Description`, `rty_TitleMask`, `rty_CanonicalTitleMask`, `rty_Plural`,
             `rty_Status`, `rty_OriginatingDBID`, `rty_NameInOriginatingDB`, `rty_IDInOriginatingDB`,
-            `rty_BlockFromPublicView`,`rty_ShowInLists`, `rty_RecTypeGroupIDs`, `rty_FlagAsFieldset`, `rty_ReferenceURL`,
+            `rty_BlockFromPublicView`,`rty_ShowInLists`, `rty_RecTypeGroupID`, `rty_FlagAsFieldset`, `rty_ReferenceURL`,
             `rty_AlternativeRecEditor`, `rty_Type`) VALUES" . $dataSet;
             mysql_query($query);
             if(mysql_error()) {

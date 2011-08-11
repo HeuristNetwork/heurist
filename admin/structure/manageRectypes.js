@@ -42,7 +42,7 @@ function RectypeManager() {
 
 	//object to send changes (visibility and group belong) for update on server
 	var _oRecordType = {rectype:{
-			colNames:{common:['rty_ShowInLists','rty_RecTypeGroupIDs'], dtFields:[]},
+			colNames:{common:['rty_ShowInLists','rty_RecTypeGroupID'], dtFields:[]},
 			defs: {}
 	}};
 

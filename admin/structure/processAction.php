@@ -81,7 +81,7 @@ function import() {
 			$entity["rty_OriginatingDBID"] = $_GET["crwSourceDBID"];
 			$entity["rty_IDInOriginatingDB"] = $_GET["crwSourceCode"];
 		}
-		$entity["rty_RecTypeGroupIDs"] = $newRtyGroupID;
+		$entity["rty_RecTypeGroupID"] = $newRtyGroupID;
 		// Insert recordtype
 		$entity["rty_Name"] = mysql_escape_string($entity["rty_Name"]);
 		$entity["rty_Description"] = mysql_escape_string($entity["rty_Description"]);
