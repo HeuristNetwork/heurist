@@ -149,13 +149,19 @@ function makeDatabase() { // Creates a new database and populates it with trigge
             cleanupNewDB($newname);
             return false;
         }
-	
-       
-     
-       // *** NEED TO ADD IN REFERENTIAL INTEGRITY ***
-       
-       
-          
+	         
+        // Add referential constraints
+        $cmdline="mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D$newname < addReferentialConstraints.sql";
+        $output2 = exec($cmdline . ' 2>&1', $output, $res2);
+
+             if ($res2 != 0 ) {             
+            echo ("Error $res2 on MySQL exec: Unable to load addReferentialConstraints.sql into database $newname<br>");
+            echo ("Please check whether this file is valid; consult Heurist helpdesk if needed<br>&nbsp;<br>");
+            echo($output2);
+            cleanupNewDB($newname);
+            return false;
+        }
+  
         // Add procedures and triggers
         $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D$newname < addProceduresTriggers.sql";
         $output2 = exec($cmdline . ' 2>&1', $output, $res2);

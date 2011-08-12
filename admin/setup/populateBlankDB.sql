@@ -15,31 +15,26 @@
 --        1. create referential constraints with AddReferentialConstraints.sql
 --           (now already done by this file as part of the mysqldump output)
 --        2. add stored procedures from AddProceduresTriggers.sql
---           ()riggers are included in the mysqldump, procedures are not)
---           TO DO: review these files to make sure they run cleanly on new DB
 --        3. import core content (minimal database definitions) from
 --           admin/setup/coreDefinitions.txt
 
--- The next section of this file is a MySQLDump of H3 database structure
--- mysqldump -u root -ppassword -d hdb_dbname > dbnameStructure.sql
+-- The next section of this file is a PHPMyAdmin dump of H3 database structure
+-- DO NOT include referential integrity or triggers/procedures
 
 -- ***************************************************************************
 
--- ***** BEWARE ***** 
-
---       THE INSERTION STATEMENTS AT THE END ARE * NOT * PART OF THE DUMP
---       DO NOT DELETE THEM!!!!!
-
---       REMOVE ALL REFERENTIAL INTEGRITY CONSTRAINTS AND TRIGGERS
+--       !!!!!!!!!  THE INSERTION STATEMENTS AT THE END ARE * NOT * PART OF THE DUMP
+--       !!!!!!!!!  DO NOT DELETE THEM
 
 -- ***************************************************************************
+
 
 -- phpMyAdmin SQL Dump
 -- version 2.9.0.2
 -- http://www.phpmyadmin.net
 -- 
 -- Host: localhost
--- Generation Time: Aug 04, 2011 at 05:27 PM
+-- Generation Time: Aug 11, 2011 at 03:19 PM
 -- Server version: 5.0.51
 -- PHP Version: 5.2.3
 -- 
@@ -148,6 +143,7 @@ CREATE TABLE defDetailTypes (
   dty_PtrTargetRectypeIDs varchar(63) default NULL COMMENT 'CSVlist of target Rectype IDs, null = any',
   dty_FieldSetRectypeID smallint(5) unsigned default NULL COMMENT 'For a FieldSetMarker, the record type to be inserted as a fieldset',
   dty_ShowInLists tinyint(1) unsigned NOT NULL default '1' COMMENT 'Flags if detail type is to be shown in end-user interface, 1=yes',
+  dty_NonOwnerVisibility enum('hidden','viewable','public') NOT NULL default 'viewable' COMMENT 'Allows restriction of visibility of a particular field in ALL record types (overrides rst_VisibleOutsideGroup)',
   PRIMARY KEY  (dty_ID),
   UNIQUE KEY dty_Name (dty_Name),
   KEY dty_Type (dty_Type),
@@ -224,7 +220,7 @@ CREATE TABLE defRecStructure (
   rst_RecordMatchOrder tinyint(1) unsigned NOT NULL default '0' COMMENT 'Indicates order of significance in detecting duplicate records, 1 = highest',
   rst_CalcFunctionID tinyint(3) unsigned default NULL COMMENT 'FK to table of function specifications for calculating string values',
   rst_RequirementType enum('required','recommended','optional','forbidden') NOT NULL default 'optional',
-  rst_VisibleOutsideGroup enum('hidden','viewable','public') NOT NULL default 'viewable' COMMENT 'Allows restriction of visibility of a particular field in a specified record type',
+  rst_NonOwnerVisibility enum('hidden','viewable','public') NOT NULL default 'viewable' COMMENT 'Allows restriction of visibility of a particular field in a specified record type',
   rst_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
   rst_MayModify enum('locked','discouraged','open') NOT NULL default 'open' COMMENT 'Extent to which detail may be modified within this record structure',
   rst_OriginatingDBID mediumint(8) unsigned default NULL COMMENT 'Database where this record structure element originated, 0 = locally',
@@ -275,15 +271,17 @@ CREATE TABLE defRecTypes (
   rty_OriginatingDBID mediumint(8) unsigned default NULL COMMENT 'Database where this record type originated, 0 = locally',
   rty_NameInOriginatingDB varchar(63) default NULL COMMENT 'Name used in database where this record type originated',
   rty_IDInOriginatingDB smallint(5) unsigned default NULL COMMENT 'ID in database where this record type originated',
-  rty_BlockFromPublicView tinyint(1) unsigned NOT NULL default '0' COMMENT 'If set to 1, this record type is only accessible to logged in users. Overrides record visibility setting.',
+  rty_NonOwnerVisibility enum('hidden','viewable','public') NOT NULL default 'viewable' COMMENT 'Allows blanket restriction of visibility of a particular record type',
   rty_ShowInLists tinyint(1) unsigned NOT NULL default '1' COMMENT 'Flags if record type is to be shown in end-user interface, 1=yes',
-  rty_RecTypeGroupIDs varchar(63) NOT NULL default '1' COMMENT 'Record type groups, first = functional group, remainder = models',
+  rty_RecTypeGroupID tinyint(3) unsigned NOT NULL default '1' COMMENT 'Record type group to which this record type belongs',
+  rty_RecTypeModelIDs varchar(63) default NULL COMMENT 'The model group(s) to which this rectype belongs, comma sep. list',
   rty_FlagAsFieldset tinyint(1) unsigned NOT NULL default '0' COMMENT '0 = full record type, 1 = Fieldset = set of fields to include in other rectypes',
   rty_ReferenceURL varchar(250) default NULL COMMENT 'A reference URL describing/defining the record type',
   rty_AlternativeRecEditor varchar(63) default NULL COMMENT 'Name or URL of alternative record editor function to be used for this rectype',
   rty_Type enum('normal','relationship','dummy') NOT NULL default 'normal' COMMENT 'Use to flag special record types to trigger special functions',
   PRIMARY KEY  (rty_ID),
-  UNIQUE KEY rty_Name (rty_Name)
+  UNIQUE KEY rty_Name (rty_Name),
+  KEY rty_RecTypeGroupID (rty_RecTypeGroupID)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Defines record types, which corresponds with a set of detail';
 
 -- --------------------------------------------------------
@@ -297,14 +295,14 @@ CREATE TABLE defRelationshipConstraints (
   rcs_SourceRectypeID smallint(5) unsigned default NULL COMMENT 'Source record type for this constraint, Null = all types',
   rcs_TargetRectypeID smallint(5) unsigned default NULL COMMENT 'Target record type pointed to by relationship record, Null = all types',
   rcs_Description varchar(1000) default 'Please describe ...',
-  rcs_RelationshipsLimit tinyint(3) unsigned NOT NULL default '0' COMMENT '0= no limit; 1, 2 ... =max # of relationship records per record per detailtype/rectypes triplet',
+  rcs_RelationshipsLimit tinyint(3) unsigned default NULL COMMENT 'Deprecated: Null= no limit; 0=forbidden, 1, 2 ... =max # of relationship records per record per detailtype/rectypes triplet',
   rcs_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
   rcs_OriginatingDBID mediumint(8) unsigned NOT NULL default '0' COMMENT 'Database where this constraint originated, 0 or local db code = locally',
   rcs_IDInOriginatingDB smallint(5) unsigned default '0' COMMENT 'Code used in database where this constraint originated',
   rcs_TermID int(10) unsigned default NULL COMMENT 'The ID of a term to be constrained, applies to descendants unless they have more specific',
-  rcs_TermLimit tinyint(2) unsigned NOT NULL default '0' COMMENT 'Null=none 0=not allowed 1,2..=max # times a term from termSet ident. by termID can be used',
+  rcs_TermLimit tinyint(2) unsigned default NULL COMMENT 'Null=none 0=not allowed 1,2..=max # times a term from termSet ident. by termID can be used',
   PRIMARY KEY  (rcs_ID),
-  KEY rcs_CompositeKey (rcs_SourceRectypeID,rcs_TargetRectypeID,rcs_TermID),
+  UNIQUE KEY rcs_CompositeKey (rcs_SourceRectypeID,rcs_TargetRectypeID,rcs_TermID),
   KEY rcs_TermID (rcs_TermID),
   KEY rcs_TargetRectypeID (rcs_TargetRectypeID)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Constrain target-rectype/vocabularies/values for a pointer d';
@@ -461,6 +459,8 @@ CREATE TABLE recUploadedFiles (
   ulf_UploaderUGrpID smallint(5) unsigned NOT NULL COMMENT 'The user who uploaded the file',
   ulf_Added datetime NOT NULL default '0000-00-00 00:00:00' COMMENT 'The date and time the file was uploaded',
   ulf_ObfuscatedFileID varchar(40) default NULL COMMENT 'SHA-1 hash of ulf_ID and random number to block sequential file harvesting',
+  ulf_ExternalFileReference varchar(1000) default NULL COMMENT 'URI of an external file, which may or may not be cached locally',
+  ulf_PreferredSource enum('local','external') NOT NULL default 'local' COMMENT 'Preferred source of file if both local file and external reference set',
   ulf_Thumbnail blob COMMENT 'Cached autogenerated thumbnail for common image formats',
   ulf_Description text COMMENT 'A user-entered textual description of the file or image contents',
   ulf_MimeExt varchar(10) default NULL COMMENT 'Extension of the file, used to look up in mimetype table',
@@ -849,6 +849,7 @@ CREATE TABLE woots (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Woot records (entries, pages) are linked to a set of XHTML c';
 
 
+
 -- ------------------------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
@@ -858,6 +859,14 @@ CREATE TABLE woots (
 -- STANDARD DATA FOR A NEW DATABASE
 -- This is run BEFORE triggers and referential constraints
 
+-- Insert a single row in sysIdentification table = the DB identification record
+ DELETE FROM sysIdentification where sys_ID=1;
+ INSERT INTO sysIdentification(sys_ID,sys_dbRegisteredID,sys_dbVersion,sys_dbSubVersion,
+  sys_dbSubSubVersion,sys_eMailImapServer,sys_eMailImapPort,
+  sys_eMailImapProtocol,sys_eMailImapUsername,sys_eMailImapPassword,
+  sys_UGrpsdatabase,sys_OwnerGroupID)
+  VALUES (1,0,3,1,0,NULL,NULL,NULL,NULL,NULL,NULL,1);
+  -- 0 is everyone, 1 is the owning admins group, 2 is default dbAdmin user
 
 -- These are critical to the working of the definitions caching system, without these
 -- the system will not 'see' stuff which is addded to the definitions''
@@ -882,14 +891,6 @@ INSERT INTO `sysTableLastUpdated` VALUES ('sysUsrGrpLinks', '0000-00-00 00:00:00
 INSERT INTO `sysTableLastUpdated` VALUES ('usrHyperlinkFilters', '0000-00-00 00:00:00', 1);
 INSERT INTO `sysTableLastUpdated` VALUES ('usrTags', '0000-00-00 00:00:00', 1);
 
--- Insert a single row in sysIdentification table = the DB identification record
- DELETE FROM sysIdentification where sys_ID=1;
- INSERT INTO sysIdentification(sys_ID,sys_dbRegisteredID,sys_dbVersion,sys_dbSubVersion,
-  sys_dbSubSubVersion,sys_eMailImapServer,sys_eMailImapPort,
-  sys_eMailImapProtocol,sys_eMailImapUsername,sys_eMailImapPassword,
-  sys_UGrpsdatabase,sys_OwnerGroupID)
-  VALUES (1,0,3,1,0,NULL,NULL,NULL,NULL,NULL,NULL,1);
-  -- 0 is everyone, 1 is the owning admins group, 2 is default dbAdmin user
 
 INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMail,ugr_Enabled,ugr_FirstName,ugr_LastName)
  VALUES (1,'Database owners',
@@ -912,6 +913,45 @@ INSERT INTO defRecTypeGroups VALUES (1, 'Common record types', 'functionalgroup'
 
 INSERT INTO defDetailTypeGroups VALUES (1, 'Common fields', 255, 
 'The commonest details (fields) shared across many record types');
+
+INSERT INTO defLanguages (lng_NISOZ3953, lng_ISO639, lng_Name, lng_Notes) 
+VALUES 
+('ARA', 'AR', 'Arabic', NULL),
+('CAM', 'KM', 'Khmer', NULL),
+('CHI', 'ZH', 'Chinese', NULL),
+('CZE', 'CS', 'Czech', NULL),
+('DAN', 'DA', 'Danish', NULL),
+('DUT', 'NL', 'Dutch', NULL),
+('ENG', 'EN', 'English', NULL),
+('EST', 'ET', 'Estonian', NULL),
+('FIN', 'FI', 'Finish', NULL),
+('FRE', 'FR', 'French', NULL),
+('GER', 'DE', 'German', NULL),
+('GRE', 'EL', 'Greek', NULL),
+('HEB', 'HE', 'Hebrew', NULL),
+('HIN', 'HI', 'Hindi', NULL),
+('HUN', 'HU', 'Hungarian', NULL),
+('IND', 'ID', 'Indonesian', NULL),
+('ITA', 'IT', 'Italian', NULL),
+('JPN', 'JA', 'Japanese', NULL),
+('KOR', 'KO', 'Korean', NULL),
+('LAV', 'LV', 'Latvian', NULL),
+('MAL', 'MS', 'Malay', NULL),
+('NOR', 'NO', 'Norwegian', NULL),
+('POL', 'PL', 'Polish', NULL),
+('POR', 'PT', 'Portuguese', NULL),
+('RUS', 'RU', 'Russian', NULL),
+('SCC', 'HR', 'Croatian', NULL),
+('SCR', 'SR', 'Serbian', NULL),
+('SLO', 'SK', 'Slovak', NULL),
+('SPA', 'ES', 'Spanish', NULL),
+('SWA', 'SW', 'Swahili', NULL),
+('SWE', 'SV', 'Swedish', NULL),
+('THA', 'TH', 'Thai', NULL),
+('TUR', 'TR', 'Turkish', NULL),
+('UKR', 'UK', 'Ukranian', NULL),
+('VIE', 'VI', 'Vietnamese', NULL),
+('YID', 'YI', 'Yiddish', NULL);
 
 -- Languages inserted as specific set of codes for use in translation
 INSERT defTerms (trm_ID,trm_Label,trm_Description,trm_Status,trm_depth)
@@ -967,7 +1007,215 @@ ALTER TABLE defRelationshipConstraints
  CHANGE rcs_ID rcs_ID smallint unsigned NOT NULL auto_increment
         comment "Record-detailtype constraint table primary key";
 
-
+INSERT INTO `defOntologies` (`ont_ID`, `ont_ShortName`, `ont_FullName`, `ont_Description`, `ont_RefURI`, `ont_Status`, `ont_OriginatingDBID`, `ont_NameInOriginatingDB`, `ont_IDInOriginatingDB`, `ont_Order`) VALUES 
+(1, 'local', 'Null ontology', 'An empty ontology which can be complemented', 
+  '', 'open', NULL, NULL, NULL, 255),
+(2, 'DC', 'Dublin Core', NULL, 'http://www.iso.org/iso/iso_catalogue/catalogue_tc/catalogue_detail.htm?csnumber=52142', 
+  'open', NULL, NULL, NULL, 255),
+(3, 'CIDOC-CRM', 'CIDOC-CRM', NULL, 'http://www.iso.org/iso/iso_catalogue/catalogue_tc/catalogue_detail.htm?csnumber=34424', 
+  'open', NULL, NULL, NULL, 255);
+  
+  
+INSERT INTO defFileExtToMimetype (fxm_Extension, fxm_MimeType, fxm_OpenNewWindow, fxm_IconFileName, fxm_FiletypeName, fxm_ImagePlaceholder) VALUES 
+('16', '', 0, NULL, NULL, NULL),
+('183', '', 0, NULL, NULL, NULL),
+('ai', 'application/postscript', 0, NULL, NULL, NULL),
+('aif', 'audio/x-aiff', 0, 'movie.gif', 'AIFF audio', NULL),
+('aifc', 'audio/x-aiff', 0, 'movie.gif', 'AIFF audio', NULL),
+('aiff', 'audio/x-aiff', 0, 'movie.gif', 'AIFF audio', NULL),
+('ama', '', 0, NULL, NULL, NULL),
+('asc', 'text/plain', 1, 'txt.gif', 'Plain text', NULL),
+('au', 'audio/basic', 0, 'movie.gif', 'AU audio', NULL),
+('avi', 'video/x-msvideo', 0, 'movie.gif', 'AVI video', NULL),
+('bcpio', 'application/x-bcpio', 0, NULL, NULL, NULL),
+('bin', 'application/octet-stream', 0, NULL, 'BinHex', NULL),
+('bmp', 'image/bmp', 1, 'image.gif', 'BMP image', NULL),
+('c', '', 0, NULL, NULL, NULL),
+('cda', '', 0, NULL, NULL, NULL),
+('cdf', 'application/x-netcdf', 0, NULL, NULL, NULL),
+('cgm', 'image/cgm', 0, 'image.gif', NULL, NULL),
+('class', 'application/octet-stream', 0, NULL, 'Java', NULL),
+('cpio', 'application/x-cpio', 0, NULL, NULL, NULL),
+('cpt', 'application/mac-compactpro', 0, NULL, NULL, NULL),
+('csh', 'application/x-csh', 0, NULL, NULL, NULL),
+('css', 'text/css', 1, NULL, 'CSS stylesheet', NULL),
+('csv', '', 0, NULL, NULL, NULL),
+('dat', '', 0, NULL, NULL, NULL),
+('db', '', 0, NULL, NULL, NULL),
+('dcr', 'application/x-director', 0, NULL, NULL, NULL),
+('dir', 'application/x-director', 0, NULL, NULL, NULL),
+('djv', 'image/vnd.djvu', 1, 'image.gif', NULL, NULL),
+('djvu', 'image/vnd.djvu', 1, 'image.gif', NULL, NULL),
+('dll', 'application/octet-stream', 0, NULL, 'Windows system', NULL),
+('dmg', 'application/octet-stream', 0, NULL, NULL, NULL),
+('dms', 'application/octet-stream', 0, NULL, NULL, NULL),
+('doc', 'application/msword', 0, 'doc.gif', 'MS Word', NULL),
+('docx', '', 0, NULL, NULL, NULL),
+('dot', '', 0, NULL, NULL, NULL),
+('Dr_Elaine_', '', 0, NULL, NULL, NULL),
+('dtd', 'application/xml-dtd', 1, NULL, NULL, NULL),
+('dvi', 'application/x-dvi', 0, NULL, NULL, NULL),
+('dxr', 'application/x-director', 0, NULL, NULL, NULL),
+('eml', '', 0, NULL, NULL, NULL),
+('enz', '', 0, NULL, NULL, NULL),
+('eps', 'application/postscript', 0, NULL, 'PostScript', NULL),
+('etx', 'text/x-setext', 0, NULL, NULL, NULL),
+('exe', 'application/octet-stream', 0, NULL, 'Windows executable', NULL),
+('ez', 'application/andrew-inset', 0, NULL, NULL, NULL),
+('flv', '', 0, NULL, NULL, NULL),
+('gif', 'image/gif', 1, 'image.gif', 'GIF image', NULL),
+('gra', '', 0, NULL, NULL, NULL),
+('gram', 'application/srgs', 0, NULL, NULL, NULL),
+('grxml', 'application/srgs+xml', 1, NULL, NULL, NULL),
+('gtar', 'application/x-gtar', 0, NULL, NULL, NULL),
+('hdf', 'application/x-hdf', 0, NULL, NULL, NULL),
+('hqx', 'application/mac-binhex40', 0, NULL, 'BinHex compressed', NULL),
+('htm', 'text/html', 1, 'html.gif', 'HTML source', NULL),
+('html', 'text/html', 1, 'html.gif', 'HTML source', NULL),
+('ice', 'x-conference/x-cooltalk', 0, NULL, NULL, NULL),
+('ico', 'image/x-icon', 0, 'image.gif', NULL, NULL),
+('ics', 'text/calendar', 0, NULL, NULL, NULL),
+('ief', 'image/ief', 0, 'image.gif', NULL, NULL),
+('ifb', 'text/calendar', 0, NULL, NULL, NULL),
+('iges', 'model/iges', 0, NULL, NULL, NULL),
+('igs', 'model/iges', 0, NULL, NULL, NULL),
+('ini', '', 0, NULL, NULL, NULL),
+('jar', '', 0, NULL, NULL, NULL),
+('jpe', 'image/jpeg', 1, 'image.gif', 'JPEG image', NULL),
+('jpeg', 'image/jpeg', 1, 'image.gif', 'JPEG image', NULL),
+('jpg', 'image/jpeg', 1, 'image.gif', 'JPEG image', NULL),
+('js', 'application/x-javascript', 0, NULL, 'JavaScript', NULL),
+('kar', 'audio/midi', 0, 'movie.gif', NULL, NULL),
+('kml', '', 0, NULL, NULL, NULL),
+('kmz', '', 0, NULL, NULL, NULL),
+('latex', 'application/x-latex', 0, NULL, 'LaTeX source', NULL),
+('lha', 'application/octet-stream', 0, NULL, 'LHA compressed', NULL),
+('lnk', '', 0, NULL, NULL, NULL),
+('lzh', 'application/octet-stream', 0, NULL, 'LZH compressed', NULL),
+('m3u', 'audio/x-mpegurl', 0, 'movie.gif', NULL, NULL),
+('m4u', 'video/vnd.mpegurl', 0, 'movie.gif', NULL, NULL),
+('man', 'application/x-troff-man', 0, NULL, NULL, NULL),
+('mathml', 'application/mathml+xml', 1, NULL, 'MathML', NULL),
+('me', 'application/x-troff-me', 0, NULL, NULL, NULL),
+('mesh', 'model/mesh', 0, NULL, NULL, NULL),
+('mid', 'audio/midi', 0, 'movie.gif', 'MIDI audio', NULL),
+('midi', 'audio/midi', 0, 'movie.gif', 'MIDI audio', NULL),
+('mif', 'application/vnd.mif', 0, NULL, NULL, NULL),
+('mov', 'video/quicktime', 0, 'movie.gif', 'QuickTime video', NULL),
+('movie', 'video/x-sgi-movie', 0, 'movie.gif', NULL, NULL),
+('mp2', 'audio/mpeg', 0, 'movie.gif', 'MPEG audio', NULL),
+('mp3', 'audio/mpeg', 0, 'movie.gif', 'MP3 audio', NULL),
+('mpe', 'video/mpeg', 0, 'movie.gif', 'MPEG video', NULL),
+('mpeg', 'video/mpeg', 0, 'movie.gif', 'MPEG video', NULL),
+('mpg', 'video/mpeg', 0, 'movie.gif', 'MPEG video', NULL),
+('mpga', 'audio/mpeg', 0, 'movie.gif', 'MPEG audio', NULL),
+('ms', 'application/x-troff-ms', 0, NULL, NULL, NULL),
+('msh', 'model/mesh', 0, NULL, NULL, NULL),
+('mxd', '', 0, NULL, NULL, NULL),
+('mxu', 'video/vnd.mpegurl', 0, 'movie.gif', NULL, NULL),
+('nc', 'application/x-netcdf', 0, NULL, NULL, NULL),
+('oda', 'application/oda', 0, NULL, NULL, NULL),
+('odt', '', 0, NULL, NULL, NULL),
+('ogg', 'application/ogg', 0, NULL, 'Ogg Vorbis', NULL),
+('one', '', 0, NULL, NULL, NULL),
+('owl', '', 0, NULL, NULL, NULL),
+('ozf2', '', 0, NULL, NULL, NULL),
+('pbm', 'image/x-portable-bitmap', 1, 'image.gif', NULL, NULL),
+('pdb', 'chemical/x-pdb', 0, NULL, NULL, NULL),
+('pdf', 'application/pdf', 1, 'pdf.gif', 'Adobe Acrobat', NULL),
+('pgm', 'image/x-portable-graymap', 1, 'image.gif', NULL, NULL),
+('pgn', 'application/x-chess-pgn', 0, NULL, NULL, NULL),
+('Photos Mas', '', 0, NULL, NULL, NULL),
+('pl', '', 0, NULL, NULL, NULL),
+('png', 'image/png', 1, 'image.gif', 'PNG image', NULL),
+('pnm', 'image/x-portable-anymap', 1, 'image.gif', NULL, NULL),
+('ppm', 'image/x-portable-pixmap', 1, 'image.gif', NULL, NULL),
+('pps', '', 0, NULL, NULL, NULL),
+('ppt', 'application/vnd.ms-powerpoint', 0, NULL, 'MS Powerpoint', NULL),
+('pptx', '', 0, NULL, NULL, NULL),
+('ps', 'application/postscript', 0, NULL, 'PostScript', NULL),
+('psd', '', 0, NULL, NULL, NULL),
+('pyramid to', '', 0, NULL, NULL, NULL),
+('qt', 'video/quicktime', 0, 'movie.gif', 'QuickTime video', NULL),
+('ra', 'audio/x-pn-realaudio', 0, 'movie.gif', 'RealAudio', NULL),
+('ram', 'audio/x-pn-realaudio', 0, 'movie.gif', 'RealAudio', NULL),
+('ras', 'image/x-cmu-raster', 1, 'image.gif', NULL, NULL),
+('rdf', 'application/rdf+xml', 1, NULL, 'Mozilla extension', NULL),
+('References', '', 0, NULL, NULL, NULL),
+('rgb', 'image/x-rgb', 0, 'image.gif', NULL, NULL),
+('rm', 'application/vnd.rn-realmedia', 0, NULL, 'RealAudio', NULL),
+('roff', 'application/x-troff', 0, NULL, NULL, NULL),
+('rtf', 'text/rtf', 1, NULL, 'Rich text', NULL),
+('rtx', 'text/richtext', 1, NULL, NULL, NULL),
+('sgm', 'text/sgml', 1, NULL, 'SGML source', NULL),
+('sgml', 'text/sgml', 1, NULL, 'SGML source', NULL),
+('sh', 'application/x-sh', 0, NULL, NULL, NULL),
+('shar', 'application/x-shar', 0, NULL, NULL, NULL),
+('shp', '', 0, NULL, NULL, NULL),
+('shs', '', 0, NULL, NULL, NULL),
+('silo', 'model/mesh', 0, NULL, NULL, NULL),
+('sit', 'application/x-stuffit', 0, NULL, 'StuffIt compressed', NULL),
+('skd', 'application/x-koan', 0, NULL, NULL, NULL),
+('skm', 'application/x-koan', 0, NULL, NULL, NULL),
+('skp', 'application/x-koan', 0, NULL, NULL, NULL),
+('skt', 'application/x-koan', 0, NULL, NULL, NULL),
+('smi', 'application/smil', 0, NULL, NULL, NULL),
+('smil', 'application/smil', 0, NULL, NULL, NULL),
+('snd', 'audio/basic', 0, 'movie.gif', 'SND audio', NULL),
+('so', 'application/octet-stream', 0, NULL, NULL, NULL),
+('spl', 'application/x-futuresplash', 0, NULL, NULL, NULL),
+('sql', '', 0, NULL, NULL, NULL),
+('src', 'application/x-wais-source', 0, NULL, NULL, NULL),
+('sv4cpio', 'application/x-sv4cpio', 0, NULL, NULL, NULL),
+('sv4crc', 'application/x-sv4crc', 0, NULL, NULL, NULL),
+('svg', 'image/svg+xml', 1, 'image.gif', 'SVG graphics', NULL),
+('swf', 'application/x-shockwave-flash', 0, NULL, 'Adobe Shockwave', NULL),
+('t', 'application/x-troff', 0, NULL, NULL, NULL),
+('tar', 'application/x-tar', 0, NULL, 'TAR archive', NULL),
+('tcl', 'application/x-tcl', 0, NULL, NULL, NULL),
+('Teotihuaca', '', 0, NULL, NULL, NULL),
+('tex', 'application/x-tex', 0, NULL, 'TeX source', NULL),
+('texi', 'application/x-texinfo', 0, NULL, NULL, NULL),
+('texinfo', 'application/x-texinfo', 0, NULL, NULL, NULL),
+('the rocks ', '', 0, NULL, NULL, NULL),
+('tif', 'image/tiff', 0, 'image.gif', 'TIFF image', NULL),
+('tiff', 'image/tiff', 0, 'image.gif', 'TIFF image', NULL),
+('tr', 'application/x-troff', 0, NULL, NULL, NULL),
+('tsv', 'text/tab-separated-values', 1, NULL, NULL, NULL),
+('ttf', '', 0, NULL, NULL, NULL),
+('txt', 'text/plain', 1, 'txt.gif', 'Plain text', NULL),
+('ustar', 'application/x-ustar', 0, NULL, NULL, NULL),
+('vcd', 'application/x-cdlink', 0, NULL, NULL, NULL),
+('VOB', '', 0, NULL, NULL, NULL),
+('vrml', 'model/vrml', 1, NULL, NULL, NULL),
+('vsd', '', 0, NULL, NULL, NULL),
+('vxml', 'application/voicexml+xml', 1, NULL, NULL, NULL),
+('wav', 'audio/x-wav', 0, 'movie.gif', 'WAV audio', NULL),
+('wbmp', 'image/vnd.wap.wbmp', 1, 'image.gif', NULL, NULL),
+('wbxml', 'application/vnd.wap.wbxml', 1, NULL, NULL, NULL),
+('wma', '', 0, NULL, NULL, NULL),
+('WMF', '', 0, NULL, NULL, NULL),
+('wml', 'text/vnd.wap.wml', 0, NULL, NULL, NULL),
+('wmlc', 'application/vnd.wap.wmlc', 0, NULL, NULL, NULL),
+('wmls', 'text/vnd.wap.wmlscript', 0, NULL, NULL, NULL),
+('wmlsc', 'application/vnd.wap.wmlscriptc', 0, NULL, NULL, NULL),
+('wmv', '', 0, NULL, NULL, NULL),
+('wrl', 'model/vrml', 1, NULL, NULL, NULL),
+('xbm', 'image/x-xbitmap', 0, 'image.gif', NULL, NULL),
+('xht', 'application/xhtml+xml', 1, NULL, NULL, NULL),
+('xhtml', 'application/xhtml+xml', 1, NULL, 'XHTML', NULL),
+('xls', 'application/vnd.ms-excel', 0, NULL, 'MS Excel spreadsheet', NULL),
+('xlsx', '', 0, NULL, NULL, NULL),
+('xml', 'application/xml', 1, NULL, 'XML', NULL),
+('xpm', 'image/x-xpixmap', 0, 'image.gif', NULL, NULL),
+('xsl', 'application/xml', 1, NULL, 'XSL stylesheet', NULL),
+('xslt', 'application/xslt+xml', 1, NULL, NULL, NULL),
+('xul', 'application/vnd.mozilla.xul+xml', 1, NULL, NULL, NULL),
+('xwd', 'image/x-xwindowdump', 0, 'image.gif', NULL, NULL),
+('xyz', 'chemical/x-xyz', 0, NULL, NULL, NULL),
+('zip', 'application/zip', 0, 'zip.gif', 'ZIP compressed', NULL);
+        
+        
 -- ------------------------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------

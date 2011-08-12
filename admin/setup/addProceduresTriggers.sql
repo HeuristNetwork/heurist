@@ -498,8 +498,8 @@ DELIMITER $$
 		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms"$$
         
 DELIMITER ;
-DELIMITER $$
 
+DELIMITER $$
 	DROP TRIGGER IF EXISTS defTerms_last_update$$
 
 	CREATE
@@ -508,8 +508,17 @@ DELIMITER $$
 	AFTER UPDATE ON `defTerms`
 	FOR EACH ROW
 		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms"$$
-
 DELIMITER ;
+
+DELIMITER $$
+    DROP TRIGGER IF EXISTS defTerms_last_delete$$
+    CREATE
+    DEFINER=`root`@`localhost`
+    TRIGGER `defTerms_last_delete`
+    AFTER DELETE ON `defTerms`
+    FOR EACH ROW
+        update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms"$$
+DELIMITER ;   
 
 -- ------------------------------------------------------------------------------
 
@@ -542,7 +551,6 @@ DELIMITER ;
 
 -- ** New triggers from Artem 5/4/2011
 
-use hdb_sandpit2;
 DROP TRIGGER IF EXISTS defRecTypeGroups_update;
 
 	CREATE
