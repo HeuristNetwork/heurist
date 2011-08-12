@@ -267,7 +267,7 @@ a:focus {
 <div id="center-panel"></div>
 <!-- search and menu -->
 <div id=search class="banner searchTable" style="border-bottom:1px solid #696969; height:29px;padding:0 0 0 5px">
-        <form onSubmit="top.HEURIST.search.checkSearchForm();"><input type=hidden id=w-input name=w>
+        <form onSubmit="top.HEURIST.search.checkSearchForm();return false;"><input type=hidden id=w-input name=w>
            SEARCH:
           <div class="searchInput" style="position:relative"><input id=q name=q type=text style="width:300px; clear:both">
           	<div class="simplesearch" title="Click to show simple search builder panel" onclick='$("#simple-search").toggleClass("collapsed");$(this).toggleClass("collapsed");'></div>

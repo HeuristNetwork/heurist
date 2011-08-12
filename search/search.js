@@ -64,13 +64,15 @@ top.HEURIST.search = {
 		}
 		e = document.getElementById('w-input');
 		if (! e.value || e.value == '') {
-			e.parentNode.removeChild(e);
+//			e.parentNode.removeChild(e);
 		}
 	},
 
 	submitSearchForm: function() {
-		top.HEURIST.search.checkSearchForm();
-		document.forms[0].submit();
+//		top.HEURIST.search.checkSearchForm();
+//		document.forms[0].submit();
+		top.HEURIST.search.clearResultRows();
+		top.HEURIST.search.reloadSearch();
 	},
 
 	searchNotify: function(results) {
@@ -140,6 +142,14 @@ top.HEURIST.search = {
 		window.location.href = temp;
 	},
 
+	reloadSearch: function() {
+		window.HEURIST.parameters["q"] = document.getElementById("q").value;
+		window.HEURIST.parameters["w"] = document.getElementById("w-input").value;
+		$("#simple-search").toggleClass("collapsed");
+		$("div.simplesearch").toggleClass("collapsed");
+		top.HEURIST.search.loadSearch();
+	},
+
 	loadSearch: function() {
 		if (! window.HEURIST.parameters["q"]) {
 			top.HEURIST.registerEvent(window, "contentloaded",
@@ -157,7 +167,7 @@ top.HEURIST.search = {
 			("stype=" + (window.HEURIST.parameters["stype"] ? encodeURIComponent(window.HEURIST.parameters["stype"]) : "")) + "&" +
 			("ver=" + top.HEURIST.search.VERSION) + "&" +
 			("q=" + encodeURIComponent(window.HEURIST.parameters["q"])+
-			(top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""));
+			(window.HEURIST.database && window.HEURIST.database.name ? "&db=" + window.HEURIST.database.name : ""));
 		document.body.appendChild(iframeElt);
 	},
 
@@ -683,9 +693,9 @@ top.HEURIST.search = {
 				" <div id=login-button><a href=" +top.HEURIST.basePath+ "common/connect/login.php"+(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "")+" title=\"Log in to use Heurist - new users please register first\"><img src=../common/images/111x30.gif></a></div>\n" +
 				" <p style=\"text-align: center;\"><a href=\"javascript:" + top.HEURIST.bookmarkletCode + "\" onclick=\"alert('Drag the Heurist Bookmarklet link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;\" title=\"Get Bookmarklet - bookmarks web pages and harvests web links \(we recommend Firefox and the Firefox toolbar - it has more features\)\">Heurist Bookmarklet</a><br></p>" +
 				" <br><br>New users:\n" +
-                " <div id=tour-button><a href=" +top.HEURIST.basePath+ "help/tour.html title=\"Take a quick tour of Heurist's major features\" target=\"_blank\"><img src=../common/images/111x30.gif></a></div>\n" +
+				" <div id=tour-button><a href=" +top.HEURIST.basePath+ "help/tour.html title=\"Take a quick tour of Heurist's major features\" target=\"_blank\"><img src=../common/images/111x30.gif></a></div>\n" +
 				" <div id=register-button><a href=" +top.HEURIST.basePath+ "admin/ugrps/findAddUser.php?register=1"+(top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "")+" target=\"_blank\" title=\"Register to use Heurist - takes only a couple of minutes\"><img src=../common/images/111x30.gif></a></div>\n" +
-                "</div>";
+				"</div>";
 
 			document.getElementById("my-records-button").disabled = true;
 			/*
@@ -701,6 +711,7 @@ top.HEURIST.search = {
 	clearResultRows: function() {
 		var resultsPerPage = top.HEURIST.search.resultsPerPage;
 		document.getElementById("results-level0").innerHTML = "";
+		$("div[id!=results-level0][id*=results-level]").remove();
 		top.HEURIST.search.selectedRecordIds = [];
 		top.HEURIST.search.selectedRecordDivs = [];
 	},
@@ -1541,8 +1552,8 @@ top.HEURIST.search = {
 		var viewerFrame = document.getElementById("viewer-frame");
 //		var mapFrame = document.getElementById("map-frame");
 		var mapFrame3 = document.getElementById("map-frame3");
-		
-        
+
+
 //        var sidebysideFrame = document.getElementById("sidebyside-frame");
 //		sidebysideFrame.src = top.HEURIST.basePath+"viewers/sidebyside/sidebyside.html"+
 //		("?db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
@@ -1551,7 +1562,7 @@ top.HEURIST.search = {
         top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
 //		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);
 		top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap,"heurist-selectionchange",  ssel);
-        
+
 		return false;
 
 	},
