@@ -145,8 +145,10 @@ top.HEURIST.search = {
 	reloadSearch: function() {
 		window.HEURIST.parameters["q"] = document.getElementById("q").value;
 		window.HEURIST.parameters["w"] = document.getElementById("w-input").value;
-		$("#simple-search").toggleClass("collapsed");
-		$("div.simplesearch").toggleClass("collapsed");
+		if (!$("#simple-search").hasClass("collapsed")) {
+			$("#simple-search").toggleClass("collapsed");
+			$("div.simplesearch").toggleClass("collapsed");
+		}
 		top.HEURIST.search.loadSearch();
 	},
 
