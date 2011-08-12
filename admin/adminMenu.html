@@ -16,15 +16,17 @@
 <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
 <link rel="stylesheet" type="text/css" href="../common/css/global.css">
 <link rel="stylesheet" type="text/css" href="../common/css/admin.css">
+</head> 
+<body>
 <script src="../external/jquery/jquery-1.5.1.min.js"></script>
 <script src="../external/jquery/jquery-ui-1.8.13.custom.min.js"></script>
 <script type="text/javascript" src="../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
 <script type="text/javascript" src="../external/yui/2.8.2r1/build/json/json-min.js"></script>
 <script src="../common/js/utilsLoad.js"></script><!-- core HEURIST functions -->
 <script src="../common/js/utilsUI.js"></script><!-- core HEURIST functions -->
-</head>
 
-<body>
+
+
 <script type="text/javascript" src="../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
 <script type="text/javascript" src="../external/yui/2.8.2r1/build/json/json-min.js"></script>
 <script src="../common/js/utilsLoad.js"></script> <!-- core HEURIST functions -->
@@ -70,7 +72,9 @@
       <span class="description">Overall management of the database and its relation with other Heurist databases registered in the Heurist index at HeuristScholar.org</span></h3>
       <div class="adminSection">
         <ul>
-          <li><a href="#" onClick="loadContent('setup/createNewDB.php')" 
+          <li><a href="#" onClick="loadContent('structure/getListOfDatabases.php')" 
+            type="List the databases on the current server">List databases</a></li>
+          <li class="seperator"><a href="#" onClick="loadContent('setup/createNewDB.php')" 
             type="Create a new database with essential structure elements">New Database</a></li>
           <li class="seperator"><a href="#" onClick="loadContent('setup/editSysIdentification.php?db=[dbname!]')" 
             title="Edit the internal metadata describing the database and set some global behaviours">Properties</a></li>
