@@ -42,11 +42,11 @@ mysql_connection_db_overwrite(DATABASE);
 
 
 $res = mysql_query("select rec_ID, rec_Title, rec_RecTypeID from Records where ! rec_FlagTemporary and rec_ID in ($recids) order by rand()");
-$bibs = array();
+$recs = array();
 while ($row = mysql_fetch_assoc($res)) {
-	$bibs[$row['rec_ID']] = $row;
+	$recs[$row['rec_ID']] = $row;
 }
-
+error_log(print_r($recs,true));
 $masks = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_TitleMask', '1');
 $updates = array();
 $blank_count = 0;
@@ -76,7 +76,7 @@ function update_counts(processed, blank, repair, changed) {
 	document.getElementById('same_count').innerHTML = processed - (changed + blank);
 	document.getElementById('repair_count').innerHTML = repair;
 	document.getElementById('blank_count').innerHTML = blank;
-	document.getElementById('percent').innerHTML = Math.round(1000 * processed / <?= count($bibs) ?>) / 10;
+	document.getElementById('percent').innerHTML = Math.round(1000 * processed / <?= count($recs) ?>) / 10;
 }
 
 function update_counts2(processed, total) {
@@ -86,7 +86,7 @@ function update_counts2(processed, total) {
 </script>
 <?php
 
-print '<div><span id=total_count>'.count($bibs).'</span> records in total</div>';
+print '<div><span id=total_count>'.count($recs).'</span> records in total</div>';
 print '<div><span id=processed_count>0</span> processed so far (<span id=percent>0</span>% done)</div>';
 print '<div><span id=changed_count>0</span> to be updated</div>';
 print '<div><span id=same_count>0</span> are the same</div>';
@@ -95,18 +95,19 @@ print '<div><span id=blank_count>0</span> to be left as is (missing fields etc)<
 
 $blanks = array();
 $reparables = array();
-foreach ($bibs as $rec_id => $bib) {
+foreach ($recs as $rec_id => $rec) {
 	if ($rec_id % 10 == 0) {
 		print '<script type="text/javascript">update_counts('.$processed_count.','.$blank_count.','.$repair_count.','.count($updates).')</script>'."\n";
 		ob_flush();
 		flush();
 	}
 
-	$mask = $masks[$bib['rec_RecTypeID']];
-	$new_title = trim(fill_title_mask($mask, $rec_id, $bib['rec_RecTypeID']));
+	$mask = $masks[$rec['rec_RecTypeID']];
+//error_log("mask = $mask");
+	$new_title = trim(fill_title_mask($mask, $rec_id, $rec['rec_RecTypeID']));
 	++$processed_count;
-	$bib_title = trim($bib['rec_Title']);
-	if ($new_title && $bib_title && $new_title == $bib_title && strstr($new_title, $bib_title) )  continue;
+	$rec_title = trim($rec['rec_Title']);
+	if ($new_title && $rec_title && $new_title == $rec_title && strstr($new_title, $rec_title) )  continue;
 
 	if (! preg_match('/^\\s*$/', $new_title)) {	// if new title is blank, leave the existing title
 		$updates[$rec_id] = $new_title;
@@ -121,15 +122,15 @@ foreach ($bibs as $rec_id => $bib) {
 	}
 
 /*
-	if (substr($new_title, 0, strlen($bib['rec_Title']) == $bib['rec_Title']))
-		print '<li><b>' . htmlspecialchars($bib['rec_Title']) . '<span>' . htmlspecialchars(substr($new_title, strlen($bib['rec_Title']))) . '</span>' . '</b> [' . $rec_id . ': ' . htmlspecialchars($bib['rec_Title']) . ']';
+	if (substr($new_title, 0, strlen($rec['rec_Title']) == $rec['rec_Title']))
+		print '<li><b>' . htmlspecialchars($rec['rec_Title']) . '<span>' . htmlspecialchars(substr($new_title, strlen($rec['rec_Title']))) . '</span>' . '</b> [' . $rec_id . ': ' . htmlspecialchars($rec['rec_Title']) . ']';
 	else
-		print '<li><b>' . htmlspecialchars($new_title) . '</b> [' . $rec_id . ': ' . htmlspecialchars($bib['rec_Title']) . ']';
+		print '<li><b>' . htmlspecialchars($new_title) . '</b> [' . $rec_id . ': ' . htmlspecialchars($rec['rec_Title']) . ']';
 */
-	if ($new_title == preg_replace('/\\s+/', ' ', $bib['rec_Title']))
-		print '<li class=same>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($bib['rec_Title']) . '';
+	if ($new_title == preg_replace('/\\s+/', ' ', $rec['rec_Title']))
+		print '<li class=same>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($rec['rec_Title']) . '';
 	else
-		print '<li>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($bib['rec_Title']) . '';
+		print '<li>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($rec['rec_Title']) . '';
 
 	print ' <a target=_blank href="'.HEURIST_URL_BASE.'records/edit/editRecord.html?bib_id='.$rec_id.'&db='.HEURIST_DBNAME.'">*</a> <br> <br>';
 
@@ -163,7 +164,7 @@ if (count($updates) > 0) {
 		}
 	}
 	foreach ($reparables as $rec_id) {
-		$rec = $bibs[$rec_id];
+		$rec = $recs[$rec_id];
 		if ( $rec['rec_RecTypeID'] == 1 && $rec['rec_Title']) {
 			$has_detail_160 = (mysql_num_rows(mysql_query('select dtl_ID from recDetails where dtl_DetailTypeID = 160 and dtl_RecID ='. $rec_id)) > 0);
 			//touch the record so we can update it  (required by the heuristdb triggers)

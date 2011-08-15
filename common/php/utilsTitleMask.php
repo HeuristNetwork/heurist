@@ -71,7 +71,7 @@ function fill_title_mask($mask, $rec_id, $rt) {
 
 	if (! preg_match_all('/\s*\\[\\[|\s*\\]\\]|(\\s*(\\[\\s*([^]]+)\\s*\\]))/s', $mask, $matches))
 		return $mask;	// nothing to do -- no substitutions
-
+//error_log("fill mask matches = ".print_r($matches,true));
 	$replacements = array();
 	for ($i=0; $i < count($matches[1]); ++$i) {
 		/*
@@ -203,9 +203,9 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt) {
 		} else {	// do a field name lookup
 			$rdr = _title_mask__get_rec_detail_requirements();
 			$rdt_id = @$rdr[$rt][strtolower($field_name)]['dty_ID'];
-			if (!@$rtd_id && strtolower($field_name) === "title") {
+			if (!@$rdt_id && strtolower($field_name) === "title") {
 				return '"title" field not defined for rectype '.$rt;
-			}else if (!@$rtd_id || strtolower($field_name) === "rectitle") {
+			}else if (!@$rdt_id || strtolower($field_name) === "rectitle") {
 				$resRec = mysql_query("select rec_Title from Records where rec_ID=$rec_id");
 				if (mysql_error()) {
 					return '';

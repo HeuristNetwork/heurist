@@ -33,9 +33,9 @@ mysql_connection_db_overwrite(DATABASE);
 require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php'); //?db='.HEURIST_DBNAME);
 
 $res = mysql_query('select rec_ID, rec_Title, rec_RecTypeID from Records where ! rec_FlagTemporary order by rand()');
-$bibs = array();
+$recs = array();
 while ($row = mysql_fetch_assoc($res)) {
-	$bibs[$row['rec_ID']] = $row;
+	$recs[$row['rec_ID']] = $row;
 }
 
 
@@ -59,7 +59,7 @@ function update_counts(processed, blank, repair, changed) {
 	document.getElementById('same_count').innerHTML = processed - (changed + blank);
 	document.getElementById('repair_count').innerHTML = repair;
 	document.getElementById('blank_count').innerHTML = blank;
-	document.getElementById('percent').innerHTML = Math.round(1000 * processed / <?= count($bibs) ?>) / 10;
+	document.getElementById('percent').innerHTML = Math.round(1000 * processed / <?= count($recs) ?>) / 10;
 }
 
 function update_counts2(processed, total) {
@@ -79,7 +79,7 @@ function update_counts2(processed, total) {
    new title would be blank (an error condition).
 </p>
 
-<div><span id=total_count><?=count($bibs)?></span> records in total</div>
+<div><span id=total_count><?=count($recs)?></span> records in total</div>
 <div><span id=processed_count>0</span> processed so far (<span id=percent>0</span>)</div>
 <div><span id=changed_count>0</span> to be updated</div>
 <div><span id=same_count>0</span> are the same</div>
@@ -88,7 +88,7 @@ function update_counts2(processed, total) {
 
 <?php
 /*
-print '<div><span id=total_count>'.count($bibs).'</span> records in total</div>';
+print '<div><span id=total_count>'.count($recs).'</span> records in total</div>';
 print '<div><span id=processed_count>0</span> processed so far (<span id=percent>0</span>% done)</div>';
 print '<div><span id=changed_count>0</span> to be updated</div>';
 print '<div><span id=same_count>0</span> are the same</div>';
@@ -99,7 +99,7 @@ print '<div><span id=blank_count>0</span> to be left as is (missing fields etc)<
 */
 $blanks = array();
 $reparables = array();
-foreach ($bibs as $rec_id => $rec) {
+foreach ($recs as $rec_id => $rec) {
 	if ($rec_id % 10 == 0) {
 //error_log(">>>>".$processed_count.','.$blank_count.','.$repair_count.','.count($updates));
 
@@ -111,8 +111,8 @@ foreach ($bibs as $rec_id => $rec) {
 	$mask = $masks[$rec['rec_RecTypeID']];
 	$new_title = trim(fill_title_mask($mask, $rec_id, $rec['rec_RecTypeID']));
 	++$processed_count;
-	$bib_title = trim($rec['rec_Title']);
-	if ($new_title && $bib_title && $new_title == $bib_title && strstr($new_title, $bib_title) )  continue;
+	$rec_title = trim($rec['rec_Title']);
+	if ($new_title && $rec_title && $new_title == $rec_title && strstr($new_title, $rec_title) )  continue;
 
 	if (! preg_match('/^\\s*$/', $new_title)) {	// if new title is blank, leave the existing title
 		$updates[$rec_id] = $new_title;
@@ -170,7 +170,7 @@ if (count($updates) > 0) {
 		}
 	}
 	foreach ($reparables as $rec_id) {
-		$rec = $bibs[$rec_id];
+		$rec = $recs[$rec_id];
 		if ( $rec['rec_RecTypeID'] == 1 && $rec['rec_Title']) {
 			$has_detail_160 = (mysql_num_rows(mysql_query('select dtl_ID from recDetails where dtl_DetailTypeID = 160 and dtl_RecID ='. $rec_id)) > 0);
 			//touch the record so we can update it  (required by the heuristdb triggers)

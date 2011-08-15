@@ -114,8 +114,11 @@ var registeredDBs = [];
 				$dbURL = $splittedURL[0];
                 preg_match("/db=([^&]*).*$/", $rawURL,$match);
                 $dbName = $match[1];
-                preg_match("/prefix=([^&]*).*$/", $rawURL,$match);
+				if (preg_match("/prefix=([^&]*).*$/", $rawURL,$match)){
                 $dbPrefix = $match[1];
+				}else{
+					unset($dbPrefix);
+				}
 				$dbTitle = $registeredDB->rec_Title;
 				$dbPopularity = $registeredDB->rec_Popularity;
 
@@ -128,7 +131,7 @@ var registeredDBs = [];
 				echo 'registeredDB[2] = "'.$dbName.'";' . "\n";
 				echo 'registeredDB[3] = "'.$dbTitle.'";' . "\n";
 				echo 'registeredDB[4] = "'.$dbPopularity.'";' . "\n";
-                echo 'registeredDB[5] = "'.$dbPrefix.'";' . "\n";
+				echo 'registeredDB[5] = "'.($dbPrefix?$dbPrefix:"").'";' . "\n";
                 echo 'registeredDBs['.$dbID.'].push(registeredDB);' . "\n";
 			}
 		}
