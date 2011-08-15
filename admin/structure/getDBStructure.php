@@ -51,6 +51,198 @@
 
 	// File headers to explain what the listing represents
 
+
+// --------------------------------------------------------------------------------------
+//
+// IMPORTANT: Any change in table structure will need correction in this function AND in the
+//            corresponding include files in .../admin/structure/crosswalk
+//
+// --------------------------------------------------------------------------------------
+    
+    function print_row($row,$fmt) {
+
+        // Prints a formatted representation of the data retreived for one row in the query
+        // Make sure that the query you passed in generates the fields you want to print
+        // Specify fields with $row[fieldname] or $row['fieldname'] (in most cases the quotes
+        // are unecessary although perhaps syntactically proper)
+
+        switch ($fmt) {  // select the output formatting according to the table
+
+            case 'defRecTypes': // Data from the defRecTypes table
+            if($row['rty_ID'] != 0) {
+            $rty_Name = mysql_real_escape_string($row['rty_Name']); // escapes RTF-8 characters
+            $rty_Description = mysql_real_escape_string($row['rty_Description']);
+            $rty_TitleMask = mysql_real_escape_string($row['rty_TitleMask']);
+            $rty_CanonicalTitleMask = mysql_real_escape_string($row['rty_CanonicalTitleMask']);
+            $rty_Plural = mysql_real_escape_string($row['rty_Plural']);
+            $rty_NameInOriginatingDB = mysql_real_escape_string($row['rty_NameInOriginatingDB']);
+            $rty_RecTypeGroupID = mysql_real_escape_string($row['rty_RecTypeGroupID']);
+            $rty_ReferenceURL = mysql_real_escape_string($row['rty_ReferenceURL']);
+            $rty_AlternativeRecEditor = mysql_real_escape_string($row['rty_AlternativeRecEditor']);
+            print "('$row[rty_ID]','$rty_Name','$row[rty_OrderInGroup]','$rty_Description','$rty_TitleMask',
+            '$rty_CanonicalTitleMask','$rty_Plural','$row[rty_Status]',
+            '$row[rty_OriginatingDBID]','$rty_NameInOriginatingDB','$row[rty_IDInOriginatingDB]',
+            '$row[rty_NonOwnerVisibility]','$row[rty_ShowInLists]','$rty_RecTypeGroupID','$rty_RecModelIDs',
+            '$row[rty_FlagAsFieldset]','$rty_ReferenceURL',
+            '$rty_AlternativeRecEditor','$row[rty_Type]'),";
+            }
+            break;
+
+            case 'defDetailTypes': // Data from the recDetails table
+            $dty_Name = mysql_real_escape_string($row['dty_Name']);
+            $dty_Documentation = mysql_real_escape_string($row['dty_Documentation']);
+            $dty_HelpText = mysql_real_escape_string($row['dty_HelpText']);
+            $dty_ExtendedDescription = mysql_real_escape_string($row['dty_ExtendedDescription']);
+            $dty_NameInOriginatingDB = mysql_real_escape_string($row['dty_NameInOriginatingDB']);
+            $dty_JsonTermIDTree = mysql_real_escape_string($row['dty_JsonTermIDTree']);
+            $dty_TermIDTreeNonSelectableIDs = mysql_real_escape_string($row['dty_TermIDTreeNonSelectableIDs']);            
+            $dty_PtrTargetRectypeIDs = mysql_real_escape_string($row['dty_PtrTargetRectypeIDs']);
+            print "('$row[dty_ID]','$dty_Name','$dty_Documentation','$row[dty_Type]','$dty_HelpText',
+            '$dty_ExtendedDescription','$row[dty_Status]','$row[dty_OriginatingDBID]',
+            '$dty_NameInOriginatingDB','$row[dty_IDInOriginatingDB]','$row[dty_DetailTypeGroupID]',
+            '$row[dty_OrderInGroup]','$dty_JsonTermIDTree','$dty_TermIDTreeNonSelectableIDs',
+            '$dty_PtrTargetRectypeIDs','$row[dty_FieldSetRecTypeID]','$row[dty_ShowInLists]','$dty_NonOwnerVisibility'),";
+            break;
+
+            case 'defRecStructure': // Data from the defRecStructure table
+            $rst_DisplayName = mysql_real_escape_string($row['rst_DisplayName']);
+            $rst_DisplayHelpText = mysql_real_escape_string($row['rst_DisplayHelpText']);
+            $rst_DisplayExtendedDescription = mysql_real_escape_string($row['rst_DisplayExtendedDescription']);
+            $rst_DefaultValue = mysql_real_escape_string($row['rst_DefaultValue']);
+            $rst_FilteredJsonTermIDTree = mysql_real_escape_string($row['rst_FilteredJsonTermIDTree']);
+            $rst_TermIDTreeNonSelectableIDs = mysql_real_escape_string($row['rst_TermIDTreeNonSelectableIDs']);
+            $rst_PtrFilteredIDs = mysql_real_escape_string($row['rst_PtrFilteredIDs']);
+            print "('$row[rst_ID]','$row[rst_RecTypeID]','$row[rst_DetailTypeID]','$rst_DisplayName',
+            '$rst_DisplayHelpText','$rst_DisplayExtendedDescription','$row[rst_DisplayOrder]',
+            '$row[rst_DisplayWidth]','$rst_DefaultValue',
+            '$row[rst_RecordMatchOrder]','$row[rst_CalcFunctionID]','$row[rst_RequirementType]','$row[rst_VisibleOutsideGroup]',
+            '$row[rst_Status]','$row[rst_MayModify]','$row[rst_OriginatingDBID]','$row[rst_IDInOriginatingDB]',
+            '$row[rst_MaxValues]','$row[rst_MinValues]','$row[rst_DisplayDetailTypeGroupID]','$rst_FilteredJsonTermIDTree',
+            '$rst_PtrFilteredIDs','$row[rst_OrderForThumbnailGeneration]','$rst_TermIDTreeNonSelectableIDs'),";
+            break;
+
+            case 'defTerms': // Data from the rec_details_lookup table
+            $trm_Label = mysql_real_escape_string($row['trm_Label']);
+            $trm_Description = mysql_real_escape_string($row['trm_Description']);
+            $trm_NameInOriginatingDB = mysql_real_escape_string($row['trm_NameInOriginatingDB']);
+            print "('$row[trm_ID]','$trm_Label','$row[trm_InverseTermId]','$trm_Description','$row[trm_Status]',
+            '$row[trm_OriginatingDBID]','$trm_NameInOriginatingDB','$row[trm_IDInOriginatingDB]',
+            '$row[trm_AddedByImport]','$row[trm_IsLocalExtension]','$row[trm_Domain]','$row[trm_OntID]',
+            '$row[trm_ChildCount]','$row[trm_ParentTermID]','$row[trm_Depth]'),";
+            break;       
+
+            case 'defOntologies': // Data from Ontologies table
+            $ont_ShortName = mysql_real_escape_string($row['ont_ShortName']);
+            $ont_FullName = mysql_real_escape_string($row['ont_FullName']);
+            $ont_Description = mysql_real_escape_string($row['ont_Description']);
+            $ont_RefURI = mysql_real_escape_string($row['ont_RefURI']);
+            $ont_NameInOriginatingDB = mysql_real_escape_string($row['ont_NameInOriginatingDB']);
+            print "('$row[ont_ID]','$ont_ShortName','$ont_FullName','$ont_Description','$ont_RefURI',
+            '$row[ont_Status]','$row[ont_OriginatingDBID]','$ont_NameInOriginatingDB',
+            '$row[ont_IDInOriginatingDB]','$row[ont_Order]'),";
+            break;
+
+            case 'defRelationshipConstraints': // Data from relationship constraints table
+            $rcs_Description = mysql_real_escape_string($row['rcs_Description']);
+            print "('$row[rcs_ID]','$row[rcs_SourceRectypeID]','$row[rcs_TargetRectypeID]',
+            '$rcs_Description','$row[rcs_RelationshipsLimit]','$row[rcs_Status]',
+            '$row[rcs_OriginatingDB]','$row[rcs_IDInOriginatingDB]',
+            '$row[rcs_TermID]','$row[rcs_TermLimit]'),";
+            break;
+            
+            case 'defFileExtToMimetype': // Data from field extension to mimetype table
+            $fxm_Extension = mysql_real_escape_string($row['fxm_Extension']);
+            $fxm_MimeType = mysql_real_escape_string($row['fxm_MimeType']);
+            $fxm_IconFileName = mysql_real_escape_string($row['fxm_IconFileName']);
+            $fxm_FiletypeName = mysql_real_escape_string($row['fxm_FiletypeName']);
+            $fxm_ImagePlaceholder = mysql_real_escape_string($row['fxm_ImagePlaceholder']);
+            print "('$fxm_Extension','$fxm_MimeType','$row[fxm_OpenNewWindow]',
+            '$fxm_IconFileName','$fxm_FiletypeName','$fxm_ImagePlaceholder'),";
+            break;
+
+            case 'defRecTypeGroups': // Data from record type classes table
+            $rtg_Name = mysql_real_escape_string($row['rtg_Name']);
+            $rtg_Description = mysql_real_escape_string($row['rtg_Description']);
+            print "('$row[rtg_ID]','$rtg_Name','$row[rtg_Domain]','$row[rtg_Order]','$rtg_Description'),";
+            break;
+
+            case 'defDetailTypeGroups': // Data from detail type classes table
+            $dtg_Name = mysql_real_escape_string($row['dtg_Name']);
+            $dtg_Description = mysql_real_escape_string($row['dtg_Description']);
+            print "('$row[dtg_ID]','$dtg_Name','$row[dtg_Order]','$dtg_Description'),";
+            break;
+            
+            case 'defTranslations':
+            $trn_Translation = mysql_real_escape_string($row['trn_Translation']);
+            print "('$row[trn_ID]','$row[trn_Source]','$row[trn_Code]','$row[trn_LanguageCode3]','$trn_Translation'),";
+            break;
+            
+            case 'defCalcFunctions':
+            $cfn_FunctionSpecification = mysql_real_escape_string($row['cfn_FunctionSpecification']);
+            print "('$row[cfn_ID]','$row[cfn_Domain]','$cfn_FunctionSpecification'),";
+            break;
+            
+            case 'defCrosswalk':
+            print "('$row[crw_ID]','$row[crw_SourcedbID]','$row[crw_SourceCode]',
+            '$row[crw_DefType]','$row[crw_LocalCode]','$row[crw_Modified]'),";
+            break;
+            
+            case 'defLanguages':
+            $lng_Name = mysql_real_escape_string($row['lng_Name']);
+            $lng_Notes = mysql_real_escape_string($row['lng_Notes']);
+            print "('$row[NISOZ3953]','$row[lng_ISO639]','$lng_Name','$lng_Notes'),";
+            break;
+            
+            case 'defURLPrefixes':
+            $urp_Prefix = mysql_real_escape_string($row['urp_Prefix']);
+            print "('$row[urp_ID]','$urp_Prefix'),";
+            break;
+
+            case 'sysUGrps': // User details - data from sysUGrps table
+            $ugr_Name = mysql_real_escape_string($row['ugr_Name']);
+            $ugr_LongName = mysql_real_escape_string($row['ugr_LongName']);
+            $ugr_Description = mysql_real_escape_string($row['ugr_Description']);
+            $ugr_Password = mysql_real_escape_string($row['ugr_Password']);
+            $ugr_eMail = mysql_real_escape_string($row['ugr_eMail']);
+            $ugr_FirstName = mysql_real_escape_string($row['ugr_FirstName']);
+            $ugr_LastName = mysql_real_escape_string($row['ugr_LastName']);
+            $ugr_Departement = mysql_real_escape_string($row['ugr_Departement']);
+            $ugr_Organisation = mysql_real_escape_string($row['ugr_Organisation']);
+            $ugr_City = mysql_real_escape_string($row['ugr_City']);
+            $ugr_State = mysql_real_escape_string($row['ugr_State']);
+            $ugr_Postcode = mysql_real_escape_string($row['ugr_Postcode']);
+            $ugr_Interests = mysql_real_escape_string($row['ugr_Interests']);
+            $ugr_IncomingEmailAddresses = mysql_real_escape_string($row['ugr_IncomingEmailAddresses']);
+            $ugr_TargetEmailAddresses = mysql_real_escape_string($row['ugr_TargetEmailAddresses']);
+            $ugr_URLs = mysql_real_escape_string($row['ugr_URLs']);
+            print "('$row[ugr_ID]','$row[ugr_Type]','$ugr_Name','$ugr_LongName','$ugr_Description',
+            '$ugr_Password','$ugr_eMail','$ugr_FirstName','$ugr_LastName','$ugr_Department',
+            '$ugr_Organisation','$ugr_City','$ugr_State','$ugr_Postcode','$ugr_Interests',
+            '$row[ugr_Enabled]','$row[ugr_LastLoginTime]','$row[ugr_MinHyperlinkWords]','$row[ugr_LoginCount]',
+            '$row[ugr_IsModelUser]','$ugr_IncomingEmailAddresses','$ugr_TargetEmailAddresses','$ugr_URLs','$row[ugr_FlagJT]'),";
+            break;
+    
+            case 'sysUsrGrpLinks': // user's membership and role in groups'
+            print "('$row[ugl_ID]','$row[ugl_UserID]','$row[ugl_GroupID]','$row[ugl_Role]'),";
+            break;
+    
+            case 'usrHyperlinkFilters': // User's hyperlink filter strings'
+            $hyf_String = mysql_real_escape_string($row['hyf_String']);
+            print "('$hyf_String','$row[hyf_UGrpID]'),";
+            break;
+    
+            case 'UsrTags': // User's tagging values'
+            $tag_Text = mysql_real_escape_string($row['tag_Text']);
+            $tag_Description = mysql_real_escape_string($row['tag_Description']);
+            print "('$row[tag_ID]','$row[tag_UGrpID]','$tag_Text','$tag_Description','$row[tag_AddedByImport]'),";
+            break;
+
+            // Additional case statements here for additional tables if required
+
+        } // end Switch
+
+    } // end function print_row
+
 	print "<html><head></head><body>\n";
 
 	print "-- Heurist Definitions Exchange File, Format Vsn $dbVersion - Full export\n";
@@ -74,13 +266,12 @@
 	print "<p>";
 	include 'crosswalk/defRecTypesFields.inc'; // sets value of $flds
     print "-- $flds \n";
-    $query = "select $flds from defRecTypes";
+     $query = "select $flds from defRecTypes";
 	$res = mysql_query($query);
 	$fmt = 'defRecTypes';
-
-	print "<p>";
+   	print "<p>";
 	print "\n> Start\n";
-	while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
+	while ($row = mysql_fetch_assoc($res)) {@print_row($row, $fmt); }
 	print "> End\n";
 	print "<p>&nbsp;<p>&nbsp;<p>";
 
@@ -405,188 +596,5 @@
 
 
 
-	// --------------------------------------------------------------------------------------
 
-	function print_row($row,$fmt) {
-
-		// Prints a formatted representation of the data retreived for one row in the query
-		// Make sure that the query you passed in generates the fields you want to print
-		// Specify fields with $row[fieldname] or $row['fieldname'] (in most cases the quotes
-		// are unecessary although perhaps syntactically proper)
-
-		switch ($fmt) {  // select the output formatting according to the table
-
-			case 'defRecTypes': // Data from the defRecTypes table
-			if($row['rty_ID'] != 0) {
-			$rty_Name = mysql_real_escape_string($row['rty_Name']); // escapes RTF-8 characters
-			$rty_Description = mysql_real_escape_string($row['rty_Description']);
-			$rty_TitleMask = mysql_real_escape_string($row['rty_TitleMask']);
-			$rty_CanonicalTitleMask = mysql_real_escape_string($row['rty_CanonicalTitleMask']);
-			$rty_Plural = mysql_real_escape_string($row['rty_Plural']);
-			$rty_NameInOriginatingDB = mysql_real_escape_string($row['rty_NameInOriginatingDB']);
-			$rty_RecTypeGroupID = mysql_real_escape_string($row['rty_RecTypeGroupID']);
-			$rty_ReferenceURL = mysql_real_escape_string($row['rty_ReferenceURL']);
-			$rty_AlternativeRecEditor = mysql_real_escape_string($row['rty_AlternativeRecEditor']);
-			print "('$row[rty_ID]','$rty_Name','$row[rty_OrderInGroup]','$rty_Description','$rty_TitleMask',
-			'$rty_CanonicalTitleMask','$rty_Plural','$row[rty_Status]',
-			'$row[rty_OriginatingDBID]','$rty_NameInOriginatingDB','$row[rty_IDInOriginatingDB]',
-			'$row[rty_BlockFromPublicView]','$row[rty_ShowInLists]','$rty_RecTypeGroupID','$row[rty_FlagAsFieldset]','$rty_ReferenceURL',
-			'$rty_AlternativeRecEditor','$row[rty_Type]'),";
-			}
-			break;
-
-			case 'defDetailTypes': // Data from the recDetails table
-			$dty_Name = mysql_real_escape_string($row['dty_Name']);
-			$dty_Documentation = mysql_real_escape_string($row['dty_Documentation']);
-			$dty_HelpText = mysql_real_escape_string($row['dty_HelpText']);
-			$dty_ExtendedDescription = mysql_real_escape_string($row['dty_ExtendedDescription']);
-			$dty_NameInOriginatingDB = mysql_real_escape_string($row['dty_NameInOriginatingDB']);
-			$dty_JsonTermIDTree = mysql_real_escape_string($row['dty_JsonTermIDTree']);
-			$dty_TermIDTreeNonSelectableIDs = mysql_real_escape_string($row['dty_TermIDTreeNonSelectableIDs']);			
-			$dty_PtrTargetRectypeIDs = mysql_real_escape_string($row['dty_PtrTargetRectypeIDs']);
-			print "('$row[dty_ID]','$dty_Name','$dty_Documentation','$row[dty_Type]','$dty_HelpText',
-			'$dty_ExtendedDescription','$row[dty_Status]','$row[dty_OriginatingDBID]',
-			'$dty_NameInOriginatingDB','$row[dty_IDInOriginatingDB]','$row[dty_DetailTypeGroupID]',
-			'$row[dty_OrderInGroup]','$dty_JsonTermIDTree','$dty_TermIDTreeNonSelectableIDs',
-			'$dty_PtrTargetRectypeIDs','$row[dty_FieldSetRecTypeID]','$row[dty_ShowInLists]'),";
-			break;
-
-			case 'defRecStructure': // Data from the defRecStructure table
-			$rst_DisplayName = mysql_real_escape_string($row['rst_DisplayName']);
-			$rst_DisplayHelpText = mysql_real_escape_string($row['rst_DisplayHelpText']);
-			$rst_DisplayExtendedDescription = mysql_real_escape_string($row['rst_DisplayExtendedDescription']);
-			$rst_DefaultValue = mysql_real_escape_string($row['rst_DefaultValue']);
-			$rst_FilteredJsonTermIDTree = mysql_real_escape_string($row['rst_FilteredJsonTermIDTree']);
-			$rst_TermIDTreeNonSelectableIDs = mysql_real_escape_string($row['rst_TermIDTreeNonSelectableIDs']);
-			$rst_PtrFilteredIDs = mysql_real_escape_string($row['rst_PtrFilteredIDs']);
-			print "('$row[rst_ID]','$row[rst_RecTypeID]','$row[rst_DetailTypeID]','$rst_DisplayName',
-			'$rst_DisplayHelpText','$rst_DisplayExtendedDescription','$row[rst_DisplayOrder]',
-			'$row[rst_DisplayWidth]','$rst_DefaultValue',
-			'$row[rst_RecordMatchOrder]','$row[rst_CalcFunctionID]','$row[rst_RequirementType]','$row[rst_VisibleOutsideGroup]',
-			'$row[rst_Status]','$row[rst_MayModify]','$row[rst_OriginatingDBID]','$row[rst_IDInOriginatingDB]',
-			'$row[rst_MaxValues]','$row[rst_MinValues]','$row[rst_DisplayDetailTypeGroupID]','$rst_FilteredJsonTermIDTree',
-			'$rst_PtrFilteredIDs','$row[rst_OrderForThumbnailGeneration]','$rst_TermIDTreeNonSelectableIDs'),";
-			break;
-
-			case 'defTerms': // Data from the rec_details_lookup table
-			$trm_Label = mysql_real_escape_string($row['trm_Label']);
-			$trm_Description = mysql_real_escape_string($row['trm_Description']);
-			$trm_NameInOriginatingDB = mysql_real_escape_string($row['trm_NameInOriginatingDB']);
-			print "('$row[trm_ID]','$trm_Label','$row[trm_InverseTermId]','$trm_Description','$row[trm_Status]',
-            '$row[trm_OriginatingDBID]','$trm_NameInOriginatingDB','$row[trm_IDInOriginatingDB]',
-			'$row[trm_AddedByImport]','$row[trm_IsLocalExtension]','$row[trm_Domain]','$row[trm_OntID]',
-			'$row[trm_ChildCount]','$row[trm_ParentTermID]','$row[trm_Depth]'),";
-			break;       
-
-			case 'defOntologies': // Data from Ontologies table
-			$ont_ShortName = mysql_real_escape_string($row['ont_ShortName']);
-			$ont_FullName = mysql_real_escape_string($row['ont_FullName']);
-			$ont_Description = mysql_real_escape_string($row['ont_Description']);
-			$ont_RefURI = mysql_real_escape_string($row['ont_RefURI']);
-			$ont_NameInOriginatingDB = mysql_real_escape_string($row['ont_NameInOriginatingDB']);
-			print "('$row[ont_ID]','$ont_ShortName','$ont_FullName','$ont_Description','$ont_RefURI',
-			'$row[ont_Status]','$row[ont_OriginatingDBID]','$ont_NameInOriginatingDB',
-			'$row[ont_IDInOriginatingDB]','$row[ont_Order]'),";
-			break;
-
-			case 'defRelationshipConstraints': // Data from relationship constraints table
-			$rcs_Description = mysql_real_escape_string($row['rcs_Description']);
-			print "('$row[rcs_ID]','$row[rcs_SourceRectypeID]','$row[rcs_TargetRectypeID]',
-			'$rcs_Description','$row[rcs_RelationshipsLimit]','$row[rcs_Status]',
-            '$row[rcs_OriginatingDB]','$row[rcs_IDInOriginatingDB]',
-			'$row[rcs_TermID]','$row[rcs_TermLimit]'),";
-			break;
-            
-			case 'defFileExtToMimetype': // Data from field extension to mimetype table
-			$fxm_Extension = mysql_real_escape_string($row['fxm_Extension']);
-			$fxm_MimeType = mysql_real_escape_string($row['fxm_MimeType']);
-			$fxm_IconFileName = mysql_real_escape_string($row['fxm_IconFileName']);
-			$fxm_FiletypeName = mysql_real_escape_string($row['fxm_FiletypeName']);
-			$fxm_ImagePlaceholder = mysql_real_escape_string($row['fxm_ImagePlaceholder']);
-			print "('$fxm_Extension','$fxm_MimeType','$row[fxm_OpenNewWindow]',
-			'$fxm_IconFileName','$fxm_FiletypeName','$fxm_ImagePlaceholder'),";
-			break;
-
-			case 'defRecTypeGroups': // Data from record type classes table
-			$rtg_Name = mysql_real_escape_string($row['rtg_Name']);
-			$rtg_Description = mysql_real_escape_string($row['rtg_Description']);
-			print "('$row[rtg_ID]','$rtg_Name','$row[rtg_Domain]','$row[rtg_Order]','$rtg_Description'),";
-			break;
-
-			case 'defDetailTypeGroups': // Data from detail type classes table
-			$dtg_Name = mysql_real_escape_string($row['dtg_Name']);
-			$dtg_Description = mysql_real_escape_string($row['dtg_Description']);
-			print "('$row[dtg_ID]','$dtg_Name','$row[dtg_Order]','$dtg_Description'),";
-			break;
-			
-			case 'defTranslations':
-			$trn_Translation = mysql_real_escape_string($row['trn_Translation']);
-			print "('$row[trn_ID]','$row[trn_Source]','$row[trn_Code]','$row[trn_LanguageCode3]','$trn_Translation'),";
-			break;
-			
-			case 'defCalcFunctions':
-			$cfn_FunctionSpecification = mysql_real_escape_string($row['cfn_FunctionSpecification']);
-			print "('$row[cfn_ID]','$row[cfn_Domain]','$cfn_FunctionSpecification'),";
-			break;
-			
-			case 'defCrosswalk':
-			print "('$row[crw_ID]','$row[crw_SourcedbID]','$row[crw_SourceCode]',
-			'$row[crw_DefType]','$row[crw_LocalCode]','$row[crw_Modified]'),";
-			break;
-			
-			case 'defLanguages':
-			$lng_Name = mysql_real_escape_string($row['lng_Name']);
-			$lng_Notes = mysql_real_escape_string($row['lng_Notes']);
-			print "('$row[NISOZ3953]','$row[lng_ISO639]','$lng_Name','$lng_Notes'),";
-			break;
-			
-			case 'defURLPrefixes':
-			$urp_Prefix = mysql_real_escape_string($row['urp_Prefix']);
-			print "('$row[urp_ID]','$urp_Prefix'),";
-			break;
-
-			case 'sysUGrps': // User details - data from sysUGrps table
-			$ugr_Name = mysql_real_escape_string($row['ugr_Name']);
-			$ugr_LongName = mysql_real_escape_string($row['ugr_LongName']);
-			$ugr_Description = mysql_real_escape_string($row['ugr_Description']);
-			$ugr_Password = mysql_real_escape_string($row['ugr_Password']);
-			$ugr_eMail = mysql_real_escape_string($row['ugr_eMail']);
-			$ugr_FirstName = mysql_real_escape_string($row['ugr_FirstName']);
-			$ugr_LastName = mysql_real_escape_string($row['ugr_LastName']);
-			$ugr_Departement = mysql_real_escape_string($row['ugr_Departement']);
-			$ugr_Organisation = mysql_real_escape_string($row['ugr_Organisation']);
-			$ugr_City = mysql_real_escape_string($row['ugr_City']);
-			$ugr_State = mysql_real_escape_string($row['ugr_State']);
-			$ugr_Postcode = mysql_real_escape_string($row['ugr_Postcode']);
-			$ugr_Interests = mysql_real_escape_string($row['ugr_Interests']);
-            $ugr_IncomingEmailAddresses = mysql_real_escape_string($row['ugr_IncomingEmailAddresses']);
-            $ugr_TargetEmailAddresses = mysql_real_escape_string($row['ugr_TargetEmailAddresses']);
-			$ugr_URLs = mysql_real_escape_string($row['ugr_URLs']);
-			print "('$row[ugr_ID]','$row[ugr_Type]','$ugr_Name','$ugr_LongName','$ugr_Description',
-			'$ugr_Password','$ugr_eMail','$ugr_FirstName','$ugr_LastName','$ugr_Department',
-			'$ugr_Organisation','$ugr_City','$ugr_State','$ugr_Postcode','$ugr_Interests',
-			'$row[ugr_Enabled]','$row[ugr_LastLoginTime]','$row[ugr_MinHyperlinkWords]','$row[ugr_LoginCount]',
-			'$row[ugr_IsModelUser]','$ugr_IncomingEmailAddresses','$ugr_TargetEmailAddresses','$ugr_URLs','$row[ugr_FlagJT]'),";
-			break;
-	
-			case 'sysUsrGrpLinks': // user's membership and role in groups'
-			print "('$row[ugl_ID]','$row[ugl_UserID]','$row[ugl_GroupID]','$row[ugl_Role]'),";
-			break;
-	
-			case 'usrHyperlinkFilters': // User's hyperlink filter strings'
-			$hyf_String = mysql_real_escape_string($row['hyf_String']);
-			print "('$hyf_String','$row[hyf_UGrpID]'),";
-			break;
-	
-			case 'UsrTags': // User's tagging values'
-			$tag_Text = mysql_real_escape_string($row['tag_Text']);
-			$tag_Description = mysql_real_escape_string($row['tag_Description']);
-			print "('$row[tag_ID]','$row[tag_UGrpID]','$tag_Text','$tag_Description','$row[tag_AddedByImport]'),";
-			break;
-
-			// Additional case statements here for additional tables if required
-
-		} // end Switch
-
-	} // end function print_row
 ?>
