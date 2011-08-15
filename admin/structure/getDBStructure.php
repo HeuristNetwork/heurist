@@ -1,3 +1,4 @@
+
 <?php
 
 /* getDBStructure.php - returns database definitions (rectypes, details etc.)
@@ -71,11 +72,9 @@
 
 	print "\n-- RECORD TYPES";print "\n";
 	print "<p>";
-	print "-- rty_ID, rty_Name, rty_OrderInGroup, rty_Description, rty_TitleMask,
-			rty_CanonicalTitleMask, rty_Plural, rty_Status, rty_OriginatingDBID, rty_NameInOriginatingDB,
-			rty_IDInOriginatingDB, rty_BlockFromPublicView, rty_ShowInLists, rty_RecTypeGroupID, rty_FlagAsFieldset, rty_ReferenceURL,
-			rty_AlternativeRecEditor, rty_Type\n";
-	$query = "select * from defRecTypes";
+	include 'crosswalk/defRecTypesFields.inc'; // sets value of $flds
+    print "-- $flds \n";
+    $query = "select $flds from defRecTypes";
 	$res = mysql_query($query);
 	$fmt = 'defRecTypes';
 
@@ -91,11 +90,9 @@
 
 	print "\n\n\n-- DETAIL TYPES";print "\n";
 	print "<p>";
-	print "-- dty_ID, dty_Name, dty_Documentation, dty_Type, dty_HelpText, dty_ExtendedDescription, dty_Status,
-			dty_OriginatingDBID, dty_NameInOriginatingDB, dty_IDInOriginatingDB, dty_DetailTypeGroupID,
-			dty_OrderInGroup, dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, dty_PtrTargetRectypeIDs, 
-			dty_FieldSetRecTypeID, dty_ShowInLists,\n";
-	$query = "select * from defDetailTypes";
+	include 'crosswalk/defDetailTypesFields.inc'; // sets value of $flds
+    print "-- $flds \n";
+	$query = "select $flds from defDetailTypes";
 	$res = mysql_query($query);
 	$fmt = 'defDetailTypes';
 
@@ -111,12 +108,9 @@
 
 	print "\n\n\n-- RECORD STRUCTURE";print "\n";
 	print "<p>";
-	print "-- rst_ID, rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
-			rst_DisplayOrder, rst_DisplayWidth, rst_DefaultValue, rst_RecordMatchOrder, rst_CalcFunctionID,
-			rst_RequirementType, rst_VisibleOutsideGroup, rst_Status, rst_MayModify, rst_OriginatingDBID, rst_IDInOriginatingDBID, 
-            rst_IDInOriginatingDB, rst_MaxValues, rst_MinValues,
-			rst_DisplayDetailTypeGroupID, rst_FilteredJsonTermIDTree, rst_PtrFilteredIDs, rst_OrderForThumbnailGeneration, rst_TermIDTreeNonSelectableIDs \n";
-	$query = "select * from defRecStructure";
+    include 'crosswalk/defRecStructureFields.inc'; // sets value of $flds
+    print "-- $flds \n";
+	$query = "select $flds from defRecStructure";
 	$res = mysql_query($query);
 	$fmt = 'defRecStructure';
 
@@ -132,11 +126,9 @@
 
 	print "\n\n\n-- TERMS";print "\n";
 	print "<p>";
-	print "-- trm_ID, trm_Label, trm_InverseTermId, trm_Description, trm_Status, 
-            trm_OriginatingDBID, trm_NameInOriginatingDB, trm_IDInOriginatingDB, 
-            trm_AddedByImport, trm_IsLocalExtension, trm_Domain, trm_OntID,
-			trm_ChildCount, trm_ParentTermID,  trm_Depth \n";
-	$query = "select * from defTerms";
+    include 'crosswalk/defTermsFields.inc'; // sets value of $flds
+    print "-- $flds \n";
+    $query = "select $flds from defTerms";
 	$res = mysql_query($query);
 	$fmt = 'defTerms';
 
@@ -151,9 +143,9 @@
 
 	print "\n\n\n-- ONTOLOGIES";print "\n";
 	print "<p>";
-	print "-- ont_ID, ont_ShortName, ont_FullName, ont_Description, ont_RefURI, ont_Status, 
-	ont_OriginatingDBID, ont_NameInOriginatingDB, ont_IDInOriginatingDB, ont_Order\n";
-	$query = "select * from defOntologies";
+    include 'crosswalk/defOntologiesFields.inc'; // sets value of $flds
+    print "-- $flds \n";
+    $query = "select $flds from defOntologies";
 	$res = mysql_query($query);
 	$fmt = 'defOntologies';
 
@@ -168,9 +160,9 @@
 
 	print "\n\n\n-- RELATIONSHIP CONSTRAINTS";print "\n";
 	print "<p>";
-	print "-- rcs_ID, rcs_SourceRectypeID, rcs_TargetRectypeID, rcs_Description, rcs_RelationshipsLimit, rcs_Status,
-			rcs_OriginatingDBID, rcs_IDInOriginatingDB, rcs_TermID, rcs_TermLimit\n";
-	$query = "select * from defRelationshipConstraints";
+	include 'crosswalk/defRelationshipConstraintsFields.inc'; // sets value of $flds
+    print "-- $flds \n";
+    $query = "select $flds from defRelationshipConstraints";
 	$res = mysql_query($query);
 	$fmt = 'defRelationshipConstraints';
 
@@ -185,8 +177,9 @@
 
 	print "\n\n\n-- FILE EXTENSIONS TO MIME TYPES";print "\n";
 	print "<p>";
-	print "-- fxm_Extension, fxm_MimeType, fxm_OpenNewWindow, fxm_IconFileName, fxm_FiletypeName, fxm_ImagePlaceholder\n";
-	$query = "select * from defFileExtToMimetype";
+	include 'crosswalk/defFileExtToMimetypeFields.inc'; // sets value of $flds
+    print "-- $flds \n";
+    $query = "select $flds from defFileExtToMimetype";
 	$res = mysql_query($query);
 	$fmt = 'defFileExtToMimetype';
 
@@ -201,8 +194,9 @@
 	
 	print "\n\n\n-- RECORD TYPE GROUPS";print "\n";
 	print "<p>";
-	print "-- rtg_ID, rtg_Name, rtg_Domain, rtg_Order, rtg_Description\n";
-	$query = "select * from defRecTypeGroups";
+	include 'crosswalk/defRecTypeGroupsFields.inc'; // sets value of $flds
+    print "-- $flds \n";
+    $query = "select $flds from defRecTypeGroups";
 	$res = mysql_query($query);
 	$fmt = 'defRecTypeGroups';
 
@@ -217,8 +211,9 @@
 
 	print "\n\n\n-- DETAIL TYPE GROUPS";print "\n";
 	print "<p>";
-	print "-- dtg_ID, dtg_Name, dtg_Description, dtg_Order\n";
-	$query = "select * from defDetailTypeGroups";
+	include 'crosswalk/defDetailTypeGroupsFields.inc'; // sets value of $flds
+    print "-- $flds \n";
+    $query = "select $flds from defDetailTypeGroups";
 	$res = mysql_query($query);
 	$fmt = 'defDetailTypeGroups';
 
@@ -234,10 +229,11 @@
 
 	print "\n\n\n-- Definitions translations";print "\n";
 	print "<p>";
-	print "-- trn_ID , trn_Source, trn_Code, trn_LanguageCode3, trn_Translation\n";
-	$query = "select * from defTranslations where trn_Source in 
+	include 'crosswalk/defTranslationsFields.inc'; // sets value of $flds
+    print "-- $flds \n";
+    $query = "select $flds from defTranslations where trn_Source in 
 	('rty_Name', 'dty_Name', 'ont_ShortName', 'vcb_Name', 'trm_Label', 'rst_DisplayName', 'rtg_Name')";
-	// filters to only definition (not data) translations - add others as required
+	// filters to only definition (not data eg. dtl_Value) translations - add others as required
 	$res = mysql_query($query);
 	$fmt = 'defTranslations';
 
@@ -252,8 +248,9 @@
 
 	print "\n\n\n-- DEF CALC FUNCTIONS";print "\n";
 	print "<p>";
-	print "-- cfn_ID, cfn_Domain, cfn_FunctionSpecification\n";
-	$query = "select * from defCalcFunctions";
+	include 'crosswalk/defCalcFunctionsFields.inc'; // sets value of $flds
+    print "-- $flds \n";    
+    $query = "select $flds from defCalcFunctions";
 	$res = mysql_query($query);
 	$fmt = 'defCalcFunctions';
 
@@ -264,12 +261,19 @@
 	print "<p>&nbsp;<p>&nbsp;<p>";
 
 	// ------------------------------------------------------------------------------------------
+
+
+// 12/8/11 TODO: NEITHER OF THE NEXT TWO ARE WORKING, THEY SIMPLY PRINT THE LSIT OF FIELDS 
+// REPEATEDLY IN PLACE OF THE DATA
+
+
 	// defCrosswalk
 
 	print "\n\n\n-- DEF CROSSWALK";print "\n";
 	print "<p>";
-	print "-- crw_ID, crw_SourcedbID, crw_SourceCode, crw_DefType, crw_LocalCode, crw_Modified\n";
-	$query = "select * from defCrosswalk";
+	include 'crosswalk/defCrosswalkFields.inc'; // sets value of $flds
+    print "-- $flds \n";
+    $query = "select $flds from defCrosswalk";
 	$res = mysql_query($query);
 	$fmt = 'defCrosswalk';
 
@@ -284,8 +288,9 @@
 
 	print "\n\n\n-- DEF LANGUAGE";print "\n";
 	print "<p>";
-	print "-- lng_NISOZ3953, lng_ISO639, lng_Name, lng_Notes\n";
-	$query = "select * from defLanguages";
+    include 'crosswalk/defLanguagesFields.inc'; // sets value of $flds
+    print "-- $flds \n";
+    $query = "select $flds from defLanguages";
 	$res = mysql_query($query);
 	$fmt = 'defLanguages';
 
@@ -300,8 +305,9 @@
 
 	print "\n\n\n-- DEF URL PREFIXES";print "\n";
 	print "<p>";
-	print "-- urp_ID, urp_Prefix\n";
-	$query = "select * from defURLPrefixes";
+	include 'crosswalk/defURLPrefixesFields.inc'; // sets value of $flds
+    print "-- $flds \n";
+    $query = "select $flds from defURLPrefixes";
 	$res = mysql_query($query);
 	$fmt = 'defURLPrefixes';
 
@@ -320,7 +326,14 @@
 		print "<html><body><p>You do not have sufficient privileges to list users</p><p><a href=".HEURIST_URL_BASE.">Return to Heurist</a></p></body></html>";
 		return;	 
 	}
+
 	// ------------------------------------------------------------------------------------------
+
+
+// TODO: The following queries should use an INCLUDE of fthe field definitions so the same insert can
+// happen on the other side without risk of field conflicts, as per the method in all the previosu queries (above)
+
+
 	// sysUGrps
 
 	print "\n\n\n-- Users and Groups";print "\n";
@@ -330,7 +343,8 @@
         ugr_Department, ugr_Organisation, ugr_City, ugr_State, ugr_Postcode, 
 		ugr_Interests, ugr_Enabled, ugr_LastLoginTime, ugr_MinHyperlinkWords, ugr_LoginCount, ugr_IsModelUser, 
 		ugr_IncomingEmailAddresses, ugr_TargetEmailAddresses, ugr_URLs, ugr_FlagJT\n";
-	$query = "select * from sysUGrps";
+
+    $query = "select * from sysUGrps";
 	$res = mysql_query($query);
 	$fmt = 'sysUGrps';
 

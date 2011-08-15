@@ -266,16 +266,17 @@ error_log(" dt = $detailTypes");
 
     // ------ Functions to write source DB definitions to local tables ---------------------------------------------------
 
-    // These insert statements updated by Ian ~5/8/11
+    // These insert statements updated by Ian ~12/8/11
+    
+    // NOTE: It is ESSENTIAL that the insert statemetn here correspond in fields and in order with the
+    //       tables being written out by getDBStructure
+
 
     function processRecTypes($dataSet) {
         global $errorCreatingTables;
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-            $query = "INSERT INTO `defRecTypes` (`rty_ID`, `rty_Name`, `rty_OrderInGroup`,
-            `rty_Description`, `rty_TitleMask`, `rty_CanonicalTitleMask`, `rty_Plural`,
-            `rty_Status`, `rty_OriginatingDBID`, `rty_NameInOriginatingDB`, `rty_IDInOriginatingDB`,
-            `rty_BlockFromPublicView`,`rty_ShowInLists`, `rty_RecTypeGroupID`, `rty_FlagAsFieldset`, `rty_ReferenceURL`,
-            `rty_AlternativeRecEditor`, `rty_Type`) VALUES" . $dataSet;
+            include "defRecTypesFields.inc";         
+            $query = "INSERT INTO `defRecTypes` ($flds) VALUES" . $dataSet;
             mysql_query($query);
             if(mysql_error()) {
                 echo "RECTYPES Error inserting data: " . mysql_error() . "<br />";
@@ -288,12 +289,8 @@ error_log(" dt = $detailTypes");
     function processDetailTypes($dataSet) {
         global $errorCreatingTables;
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-            $query = "INSERT INTO `defDetailTypes` (`dty_ID`, `dty_Name`, `dty_Documentation`,
-            `dty_Type`, `dty_HelpText`, `dty_ExtendedDescription`, `dty_Status`,
-            `dty_OriginatingDBID`, `dty_NameInOriginatingDB`, `dty_IDInOriginatingDB`,
-            `dty_DetailTypeGroupID`, `dty_OrderInGroup`,
-            `dty_JsonTermIDTree`, `dty_TermIDTreeNonSelectableIDs`, `dty_PtrTargetRectypeIDs`,
-            `dty_FieldSetRecTypeID`, `dty_ShowInLists`) VALUES" . $dataSet;
+            include "defDetailTypesFields.inc";         
+            $query = "INSERT INTO `defDetailTypes` ($flds) VALUES" . $dataSet;
             mysql_query($query);
             if(mysql_error()) {
                 echo "DETAILTYPES Error inserting data: " . mysql_error() . "<br />";
@@ -307,15 +304,7 @@ error_log(" dt = $detailTypes");
     function processRecStructure($dataSet) {
         global $errorCreatingTables;
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-            $query = "INSERT INTO `defRecStructure` (`rst_ID`, `rst_RecTypeID`,
-            `rst_DetailTypeID`, `rst_DisplayName`, `rst_DisplayHelpText`,
-            `rst_DisplayExtendedDescription`, `rst_DisplayOrder`, `rst_DisplayWidth`,
-            `rst_DefaultValue`, `rst_RecordMatchOrder`, `rst_CalcFunctionID`,
-            `rst_RequirementType`, `rst_VisibleOutsideGroup`, `rst_Status`, `rst_MayModify`,
-            `rst_OriginatingDBID`, `rst_IDInOriginatingDB`,
-            `rst_MaxValues`, `rst_MinValues`, `rst_DisplayDetailTypeGroupID`,
-            `rst_FilteredJsonTermIDTree`, `rst_PtrFilteredIDs`,
-            `rst_OrderForThumbnailGeneration`, `rst_TermIDTreeNonSelectableIDs`) VALUES " . $dataSet;
+            $query = "INSERT INTO `defRecStructure` ($flds) VALUES " . $dataSet;
             mysql_query($query);
             if(mysql_error()) {
                 echo "RECSTRUCTURE Error inserting data: " . mysql_error() . "<br />";
@@ -331,11 +320,7 @@ error_log(" dt = $detailTypes");
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
             $query = "SET FOREIGN_KEY_CHECKS = 0;";
             mysql_query($query);
-            $query = "INSERT INTO `defTerms` (`trm_ID`, `trm_Label`, `trm_InverseTermId`,
-            `trm_Description`, `trm_Status`, `trm_OriginatingDBID`,
-            `trm_NameInOriginatingDB`, `trm_IDInOriginatingDB`, `trm_AddedByImport`,
-            `trm_IsLocalExtension`, `trm_Domain`, `trm_OntID`,
-            `trm_ChildCount`, `trm_ParentTermID`, `trm_Depth`) VALUES " . $dataSet;
+            $query = "INSERT INTO `defTerms` ($flds) VALUES " . $dataSet;
             mysql_query($query);
             if(mysql_error()) {
                 echo "TERMS Error inserting data: " . mysql_error() . "<br />";
@@ -351,9 +336,7 @@ error_log(" dt = $detailTypes");
     function processOntologies($dataSet) {
         global $errorCreatingTables;
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-            $query = "INSERT INTO `defOntologies` (`ont_ID`,`ont_ShortName`,`ont_FullName`,
-            `ont_Description`,`ont_RefURI`,`ont_Status`,
-            `ont_OriginatingDBID`,`ont_NameInOriginatingDB`,`ont_IDInOriginatingDB`,`ont_Order`) VALUES " . $dataSet;
+            $query = "INSERT INTO `defOntologies` ($flds) VALUES " . $dataSet;
             mysql_query($query);
             if(mysql_error()) {
                 echo "ONTOLOGIES Error inserting data: " . mysql_error() . "<br />";
@@ -367,10 +350,7 @@ error_log(" dt = $detailTypes");
     function processRelationshipConstraints($dataSet) {
         global $errorCreatingTables;
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-            $query = "INSERT INTO `defRelationshipConstraints` (`rcs_ID`,
-            `rcs_SourceRectypeID`,`rcs_TargetRectypeID`,`rcs_Description`,
-            `rcs_RelationshipsLimit`,`rcs_Status`,
-            `rcs_OriginatingDBID`,`rcs_IDInOriginatingDB`,`rcs_TermID`,`rcs_TermLimit`) VALUES " . $dataSet;
+            $query = "INSERT INTO `defRelationshipConstraints` ($flds) VALUES " . $dataSet;
             mysql_query($query);
             if(mysql_error()) {
                 echo "RELATIONSHIPCONSTRAINTS Error inserting data: " . mysql_error() . "<br />";
@@ -384,8 +364,7 @@ error_log(" dt = $detailTypes");
     function processFileExtToMimetype($dataSet) {
         global $errorCreatingTables;
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-            $query = "INSERT INTO `defFileExtToMimetype` (`fxm_Extension`,`fxm_MimeType`,
-            `fxm_OpenNewWindow`,`fxm_IconFileName`,`fxm_FiletypeName`,`fxm_ImagePlaceholder`) VALUES " . $dataSet;
+            $query = "INSERT INTO `defFileExtToMimetype` ($flds) VALUES " . $dataSet;
             mysql_query($query);
             if(mysql_error()) {
                 echo "FILEEXTTOMIMETYPE Error inserting data: " . mysql_error() . "<br />";
@@ -399,8 +378,7 @@ error_log(" dt = $detailTypes");
     function processRecTypeGroups($dataSet) {
         global $errorCreatingTables;
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-            $query = "INSERT INTO `defRecTypeGroups` (`rtg_ID`,`rtg_Name`,`rtg_Domain`,
-            `rtg_Order`,`rtg_Description`) VALUES " . $dataSet;
+            $query = "INSERT INTO `defRecTypeGroups` ($flds) VALUES " . $dataSet;
             mysql_query($query);
             if(mysql_error()) {
                 echo "RECTYPEGROUPS Error inserting data: " . mysql_error() . "<br />";
@@ -414,8 +392,7 @@ error_log(" dt = $detailTypes");
     function processDetailTypeGroups($dataSet) {
         global $errorCreatingTables;
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-            $query = "INSERT INTO `defDetailTypeGroups` (`dtg_ID`,`dtg_Name`,`dtg_Order`,
-            `dtg_Description`) VALUES " . $dataSet;
+            $query = "INSERT INTO `defDetailTypeGroups` ($flds) VALUES " . $dataSet;
             mysql_query($query);
             if(mysql_error()) {
                 echo "DETAILTYPEGROUPS Error inserting data: " . mysql_error() . "<br /><br />" . $dataSet . "<br />";
@@ -429,8 +406,7 @@ error_log(" dt = $detailTypes");
     function processTranslations($dataSet) {
         global $errorCreatingTables;
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-            $query = "INSERT INTO `defTranslations` (`trn_ID`,`trn_Source`,`trn_Code`,
-            `trn_LanguageCode3`,`trn_Translation`) VALUES " . $dataSet;
+            $query = "INSERT INTO `defTranslations` ($flds) VALUES " . $dataSet;
             mysql_query($query);
             if(mysql_error()) {
                 echo "TRANSLATIONS Error inserting data: " . mysql_error() . "<br />";
