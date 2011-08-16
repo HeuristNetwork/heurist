@@ -525,15 +525,16 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $o
 			openTag('relationships');
 			foreach ($relationships[$record['rec_ID']] as $rel_id) {
 				$rel = loadRecord($rel_id);
+error_log(" relRec = ".print_r($rel,true));
 				foreach ( $rel['details'][202] as $dtID => $from){
 					$fromType = $from['type'];
 				}
 				foreach ( $rel['details'][199] as $dtID => $to){
 					$toType = $to['type'];
 				}
-				if (in_array($fromType,$filter) || in_array($toType,$filter)) {
+				if (!isset($filter) || (in_array($fromType,$filter) || in_array($toType,$filter))) {
 					outputRecord($rel, $reverse_pointers, $relationships, $depth, $outputStub,$record['rec_ID']);
-			}
+				}
 			}
 			closeTag('relationships');
 		}
