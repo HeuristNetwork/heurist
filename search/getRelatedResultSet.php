@@ -139,7 +139,7 @@ $GEO_TYPES = array(
 
 $MAX_DEPTH = @$_REQUEST['depth'] ? intval($_REQUEST['depth']) : 1;
 $REVERSE = @$_REQUEST['rev'] === 'no' ? false : true;
-$EXPAND_REV_PTR = @$_REQUEST['revexpand'] === 'no' ? false : true;
+$EXPAND_REV_PTR = @$_REQUEST['revexpand'] === 'no' ? false : true;	//default to expand reverse pointers
 
 $filterString = (@$_REQUEST['rtfilters'] ? $_REQUEST['rtfilters'] : null);
 if ( $filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/',$filterString)) {
@@ -191,8 +191,9 @@ if (!is_logged_in()) { // check if the record being retrieved is a single non-pr
 	return;
 }
 $ACCESSABLE_OWNER_IDS = mysql__select_array('sysUsrGrpLinks left join sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID',
-								'ugl_UserID='.get_user_id().' and grp.ugr_Type != "User" order by ugl_GroupID');
+								'ugl_UserID='.get_user_id().' and grp.ugr_Type != "user" order by ugl_GroupID');
 array_push($ACCESSABLE_OWNER_IDS,get_user_id());
+array_push($ACCESSABLE_OWNER_IDS,0);	// 0 = belong to everyone
 
 //----------------------------------------------------------------------------//
 // Traversal functions
