@@ -8,13 +8,13 @@
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
-	* @param includeUgrps=1 will output user and group information in addition to definitions	 
+	* @param includeUgrps=1 will output user and group information in addition to definitions
 	* @param approvedDefsOnly=1 will only output Reserved and Approved definitions
  * @todo
- * 
+ *
  * IJ Updated to database format 3.1.0 2/8/11
- * 
-	-->*/       
+ *
+	-->*/
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
@@ -36,10 +36,10 @@
 	}
 
 	$dbVersion = 3.1; // Output format version number. This will be read by the crosswalk generator
-    
+
 // TODO: use HEURIST_DBVERSION TO SET THE VERSION HERE
 
-    // * IMPORTANT * 
+    // * IMPORTANT *
     // UPDATE THE FOLLOWING WHEN DATABASE FORMAT IS CHANGED:
     // List of fields for data (below) - this is doco not functional data
     // Version info in buildCrosswalks.php
@@ -58,7 +58,7 @@
 //            corresponding include files in .../admin/structure/crosswalk
 //
 // --------------------------------------------------------------------------------------
-    
+
     function print_row($row,$fmt) {
 
         // Prints a formatted representation of the data retreived for one row in the query
@@ -95,7 +95,7 @@
             $dty_ExtendedDescription = mysql_real_escape_string($row['dty_ExtendedDescription']);
             $dty_NameInOriginatingDB = mysql_real_escape_string($row['dty_NameInOriginatingDB']);
             $dty_JsonTermIDTree = mysql_real_escape_string($row['dty_JsonTermIDTree']);
-            $dty_TermIDTreeNonSelectableIDs = mysql_real_escape_string($row['dty_TermIDTreeNonSelectableIDs']);            
+            $dty_TermIDTreeNonSelectableIDs = mysql_real_escape_string($row['dty_TermIDTreeNonSelectableIDs']);
             $dty_PtrTargetRectypeIDs = mysql_real_escape_string($row['dty_PtrTargetRectypeIDs']);
             print "('$row[dty_ID]','$dty_Name','$dty_Documentation','$row[dty_Type]','$dty_HelpText',
             '$dty_ExtendedDescription','$row[dty_Status]','$row[dty_OriginatingDBID]',
@@ -129,7 +129,7 @@
             '$row[trm_OriginatingDBID]','$trm_NameInOriginatingDB','$row[trm_IDInOriginatingDB]',
             '$row[trm_AddedByImport]','$row[trm_IsLocalExtension]','$row[trm_Domain]','$row[trm_OntID]',
             '$row[trm_ChildCount]','$row[trm_ParentTermID]','$row[trm_Depth]'),";
-            break;       
+            break;
 
             case 'defOntologies': // Data from Ontologies table
             $ont_ShortName = mysql_real_escape_string($row['ont_ShortName']);
@@ -149,7 +149,7 @@
             '$row[rcs_OriginatingDB]','$row[rcs_IDInOriginatingDB]',
             '$row[rcs_TermID]','$row[rcs_TermLimit]'),";
             break;
-            
+
             case 'defFileExtToMimetype': // Data from field extension to mimetype table
             $fxm_Extension = mysql_real_escape_string($row['fxm_Extension']);
             $fxm_MimeType = mysql_real_escape_string($row['fxm_MimeType']);
@@ -171,28 +171,28 @@
             $dtg_Description = mysql_real_escape_string($row['dtg_Description']);
             print "('$row[dtg_ID]','$dtg_Name','$row[dtg_Order]','$dtg_Description'),";
             break;
-            
+
             case 'defTranslations':
             $trn_Translation = mysql_real_escape_string($row['trn_Translation']);
             print "('$row[trn_ID]','$row[trn_Source]','$row[trn_Code]','$row[trn_LanguageCode3]','$trn_Translation'),";
             break;
-            
+
             case 'defCalcFunctions':
             $cfn_FunctionSpecification = mysql_real_escape_string($row['cfn_FunctionSpecification']);
             print "('$row[cfn_ID]','$row[cfn_Domain]','$cfn_FunctionSpecification'),";
             break;
-            
+
             case 'defCrosswalk':
             print "('$row[crw_ID]','$row[crw_SourcedbID]','$row[crw_SourceCode]',
             '$row[crw_DefType]','$row[crw_LocalCode]','$row[crw_Modified]'),";
             break;
-            
+
             case 'defLanguages':
             $lng_Name = mysql_real_escape_string($row['lng_Name']);
             $lng_Notes = mysql_real_escape_string($row['lng_Notes']);
             print "('$row[NISOZ3953]','$row[lng_ISO639]','$lng_Name','$lng_Notes'),";
             break;
-            
+
             case 'defURLPrefixes':
             $urp_Prefix = mysql_real_escape_string($row['urp_Prefix']);
             print "('$row[urp_ID]','$urp_Prefix'),";
@@ -221,16 +221,16 @@
             '$row[ugr_Enabled]','$row[ugr_LastLoginTime]','$row[ugr_MinHyperlinkWords]','$row[ugr_LoginCount]',
             '$row[ugr_IsModelUser]','$ugr_IncomingEmailAddresses','$ugr_TargetEmailAddresses','$ugr_URLs','$row[ugr_FlagJT]'),";
             break;
-    
+
             case 'sysUsrGrpLinks': // user's membership and role in groups'
             print "('$row[ugl_ID]','$row[ugl_UserID]','$row[ugl_GroupID]','$row[ugl_Role]'),";
             break;
-    
+
             case 'usrHyperlinkFilters': // User's hyperlink filter strings'
             $hyf_String = mysql_real_escape_string($row['hyf_String']);
             print "('$hyf_String','$row[hyf_UGrpID]'),";
             break;
-    
+
             case 'UsrTags': // User's tagging values'
             $tag_Text = mysql_real_escape_string($row['tag_Text']);
             $tag_Description = mysql_real_escape_string($row['tag_Description']);
@@ -253,12 +253,12 @@
     print "\n";
 	print "<br><br>";
 
-    
+
     // LAST UPDATED 2/8/11 DBVsn 3.1.0
     // At this time (2 Aug 2011) all definitional data including users and tags are output.
-    // Only defURLPrefixes and sysIdentification information are not output. 
+    // Only defURLPrefixes and sysIdentification information are not output.
     // All def tables plus ugrp and user to group links, and user tags are output
-       
+
 	// ------------------------------------------------------------------------------------------
 	// RECORD TYPES (this will be repeated for each of the tables)
 
@@ -270,9 +270,9 @@
 	$res = mysql_query($query);
 	$fmt = 'defRecTypes';
    	print "<p>";
-	print "\n> Start\n";
+	print "\n>>StartData>>\n";
 	while ($row = mysql_fetch_assoc($res)) {@print_row($row, $fmt); }
-	print "> End\n";
+	print ">>EndData>>\n";
 	print "<p>&nbsp;<p>&nbsp;<p>";
 
 
@@ -288,9 +288,9 @@
 	$fmt = 'defDetailTypes';
 
 	print "<p>";
-	print "\n> Start\n";
+	print "\n>>StartData>>\n";
 	while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
-	print "> End\n";
+	print ">>EndData>>\n";
 	print "<p>&nbsp;<p>&nbsp;<p>";
 
 
@@ -306,9 +306,9 @@
 	$fmt = 'defRecStructure';
 
 	print "<p>";
-	print "\n> Start\n";
+	print "\n>>StartData>>\n";
 	while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
-	print "> End\n";
+	print ">>EndData>>\n";
 	print "<p>&nbsp;<p>&nbsp;<p>";
 
 
@@ -324,9 +324,9 @@
 	$fmt = 'defTerms';
 
 	print "<p>";
-	print "\n> Start\n";
+	print "\n>>StartData>>\n";
 	while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
-	print "> End\n";
+	print ">>EndData>>\n";
 	print "<p>&nbsp;<p>&nbsp;<p>";
 
 	// ------------------------------------------------------------------------------------------
@@ -341,9 +341,9 @@
 	$fmt = 'defOntologies';
 
 	print "<p>";
-	print "\n> Start\n";
+	print "\n>>StartData>>\n";
 	while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
-	print "> End\n";
+	print ">>EndData>>\n";
 	print "<p>&nbsp;<p>&nbsp;<p>";
 
 	// ------------------------------------------------------------------------------------------
@@ -358,9 +358,9 @@
 	$fmt = 'defRelationshipConstraints';
 
 	print "<p>";
-	print "\n> Start\n";
+	print "\n>>StartData>>\n";
 	while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
-	print "> End\n";
+	print ">>EndData>>\n";
 	print "<p>&nbsp;<p>&nbsp;<p>";
 
 	// ------------------------------------------------------------------------------------------
@@ -375,14 +375,14 @@
 	$fmt = 'defFileExtToMimetype';
 
 	print "<p>";
-	print "\n> Start\n";
+	print "\n>>StartData>>\n";
 	while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
-	print "> End\n";
+	print ">>EndData>>\n";
 	print "<p>&nbsp;<p>&nbsp;<p>";
 
 	// ------------------------------------------------------------------------------------------
 	// defRecTypeGroups
-	
+
 	print "\n\n\n-- RECORD TYPE GROUPS";print "\n";
 	print "<p>";
 	include 'crosswalk/defRecTypeGroupsFields.inc'; // sets value of $flds
@@ -392,9 +392,9 @@
 	$fmt = 'defRecTypeGroups';
 
 	print "<p>";
-	print "\n> Start\n";
+	print "\n>>StartData>>\n";
 	while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
-	print "> End\n";
+	print ">>EndData>>\n";
 	print "<p>&nbsp;<p>&nbsp;<p>";
 
 	// ------------------------------------------------------------------------------------------
@@ -409,9 +409,9 @@
 	$fmt = 'defDetailTypeGroups';
 
 	print "<p>";
-	print "\n> Start\n";
+	print "\n>>StartData>>\n";
 	while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
-	print "> End\n";
+	print ">>EndData>>\n";
 	print "<p>&nbsp;<p>&nbsp;<p>";
 
 
@@ -422,16 +422,16 @@
 	print "<p>";
 	include 'crosswalk/defTranslationsFields.inc'; // sets value of $flds
     print "-- $flds \n";
-    $query = "select $flds from defTranslations where trn_Source in 
+    $query = "select $flds from defTranslations where trn_Source in
 	('rty_Name', 'dty_Name', 'ont_ShortName', 'vcb_Name', 'trm_Label', 'rst_DisplayName', 'rtg_Name')";
 	// filters to only definition (not data eg. dtl_Value) translations - add others as required
 	$res = mysql_query($query);
 	$fmt = 'defTranslations';
 
 	print "<p>";
-	print "\n> Start\n";
+	print "\n>>StartData>>\n";
 	while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
-	print "> End\n";
+	print ">>EndData>>\n";
 	print "<p>&nbsp;<p>&nbsp;<p>";
 
 	// ------------------------------------------------------------------------------------------
@@ -440,21 +440,21 @@
 	print "\n\n\n-- DEF CALC FUNCTIONS";print "\n";
 	print "<p>";
 	include 'crosswalk/defCalcFunctionsFields.inc'; // sets value of $flds
-    print "-- $flds \n";    
+    print "-- $flds \n";
     $query = "select $flds from defCalcFunctions";
 	$res = mysql_query($query);
 	$fmt = 'defCalcFunctions';
 
 	print "<p>";
-	print "\n> Start\n";
+	print "\n>>StartData>>\n";
 	while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
-	print "> End\n";
+	print ">>EndData>>\n";
 	print "<p>&nbsp;<p>&nbsp;<p>";
 
 	// ------------------------------------------------------------------------------------------
 
 
-// 12/8/11 TODO: NEITHER OF THE NEXT TWO ARE WORKING, THEY SIMPLY PRINT THE LSIT OF FIELDS 
+// 12/8/11 TODO: NEITHER OF THE NEXT TWO ARE WORKING, THEY SIMPLY PRINT THE LSIT OF FIELDS
 // REPEATEDLY IN PLACE OF THE DATA
 
 
@@ -469,9 +469,9 @@
 	$fmt = 'defCrosswalk';
 
 	print "<p>";
-	print "\n> Start\n";
+	print "\n>>StartData>>\n";
 	while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
-	print "> End\n";
+	print ">>EndData>>\n";
 	print "<p>&nbsp;<p>&nbsp;<p>";
 
 	// ------------------------------------------------------------------------------------------
@@ -486,9 +486,9 @@
 	$fmt = 'defLanguages';
 
 	print "<p>";
-	print "\n> Start\n";
+	print "\n>>StartData>>\n";
 	while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
-	print "> End\n";
+	print ">>EndData>>\n";
 	print "<p>&nbsp;<p>&nbsp;<p>";
 
 	// ------------------------------------------------------------------------------------------
@@ -503,9 +503,9 @@
 	$fmt = 'defURLPrefixes';
 
 	print "<p>";
-	print "\n> Start\n";
+	print "\n>>StartData>>\n";
 	while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
-	print "> End\n";
+	print ">>EndData>>\n";
 	print "<p>&nbsp;<p>&nbsp;<p>";
 
 	// ------------------------------------------------------------------------------------------
@@ -515,7 +515,7 @@
 
 	if (! is_admin()) {
 		print "<html><body><p>You do not have sufficient privileges to list users</p><p><a href=".HEURIST_URL_BASE.">Return to Heurist</a></p></body></html>";
-		return;	 
+		return;
 	}
 
 	// ------------------------------------------------------------------------------------------
@@ -529,10 +529,10 @@
 
 	print "\n\n\n-- Users and Groups";print "\n";
 	print "<p>";
-	print "-- ugr_ID, ugr_Type, ugr_Name, ugr_LongName, ugr_Description, 
-        ugr_Password, ugr_eMail, ugr_FirstName, ugr_LastName, 
-        ugr_Department, ugr_Organisation, ugr_City, ugr_State, ugr_Postcode, 
-		ugr_Interests, ugr_Enabled, ugr_LastLoginTime, ugr_MinHyperlinkWords, ugr_LoginCount, ugr_IsModelUser, 
+	print "-- ugr_ID, ugr_Type, ugr_Name, ugr_LongName, ugr_Description,
+        ugr_Password, ugr_eMail, ugr_FirstName, ugr_LastName,
+        ugr_Department, ugr_Organisation, ugr_City, ugr_State, ugr_Postcode,
+		ugr_Interests, ugr_Enabled, ugr_LastLoginTime, ugr_MinHyperlinkWords, ugr_LoginCount, ugr_IsModelUser,
 		ugr_IncomingEmailAddresses, ugr_TargetEmailAddresses, ugr_URLs, ugr_FlagJT\n";
 
     $query = "select * from sysUGrps";
@@ -540,9 +540,9 @@
 	$fmt = 'sysUGrps';
 
 	print "<p>";
-	print "\n> Start\n";
+	print "\n>>StartData>>\n";
 	while ($row = mysql_fetch_assoc($res)) { print_row($row, $fmt); }
-	print "> End\n";
+	print ">>EndData>>\n";
 	print "<p>&nbsp;<p>&nbsp;<p>";
 
 	// ------------------------------------------------------------------------------------------
@@ -556,9 +556,9 @@
 	$fmt = 'sysUsrGrpLinks';
 
 	print "<p>";
-	print "\n> Start\n";
+	print "\n>>StartData>>\n";
 	while ($row = mysql_fetch_assoc($res)) { print_row($row, $fmt); }
-	print "> End\n";
+	print ">>EndData>>\n";
 	print "<p>&nbsp;<p>&nbsp;<p>";
 
 	// ------------------------------------------------------------------------------------------
@@ -572,9 +572,9 @@
 	$fmt = 'usrHyperlinkFilters';
 
 	print "<p>";
-	print "\n> Start\n";
+	print "\n>>StartData>>\n";
 	while ($row = mysql_fetch_assoc($res)) { print_row($row, $fmt); }
-	print "> End\n";
+	print ">>EndData>>\n";
 	print "<p>&nbsp;<p>&nbsp;<p>";
 
 	// ------------------------------------------------------------------------------------------
@@ -588,9 +588,9 @@
 	$fmt = 'UsrTags';
 
 	print "<p>";
-	print "\n> Start\n";
+	print "\n>>StartData>>\n";
 	while ($row = mysql_fetch_assoc($res)) { print_row($row, $fmt); }
-	print "> End\n";
+	print ">>EndData>>\n";
 	print "<p>&nbsp;<p>&nbsp;<p>";
 
 

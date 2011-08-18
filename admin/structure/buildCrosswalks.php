@@ -199,9 +199,9 @@
         die("Source database $source_db_id:$source_db_prefix$source_db_name could not be accessed at $source_url, server may be offline");
     }
 
-    // Split received data into data sets for one table defined by >Start and > End markers.
+    // Split received data into data sets for one table defined by >>StartData>> and >>EndData>> markers.
 
-    $splittedData = split("> Start", $data);
+    $splittedData = split(">>StartData>>", $data);
     $tableNumber;
 
     function getNextDataSet($splittedData) {
@@ -210,7 +210,7 @@
             $tableNumber = 1;
         }
         if(sizeof($splittedData) > $tableNumber) {
-            $splittedData2 = split("> End", $splittedData[$tableNumber]);
+            $splittedData2 = split(">>EndData>>", $splittedData[$tableNumber]);
             $i = 1;
             $size = strlen($splittedData2[0]);
             $testData = $splittedData2[0];
