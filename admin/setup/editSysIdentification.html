@@ -1,0 +1,125 @@
+<!--
+
+/**
+ * editSysIdentification.html, T1000 template for editing the system identification record which provides core settigns for the database
+ * Ian Johnson 12 aug 2011
+ * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+ * @link: http://HeuristScholar.org
+ * @license http://www.gnu.org/licenses/gpl-3.0.txt
+ * @package Heurist academic knowledge management system
+ * @todo
+ **/
+
+-->
+<html>
+ <head>
+  <title>System settings editor</title>
+
+  <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+
+  <link rel="stylesheet" type="text/css" href="../../common/css/newshsseri.css">
+  <style type="text/css">
+	a img {
+		border: 0;
+	}
+	thead {
+		text-align: left;
+	}
+	table table td, table table th {
+		padding-right: 10px;
+	}
+	tr {
+		vertical-align: top;
+	}
+	.rft_icon {
+		margin-right: 5px;
+		vertical-align: middle;
+	}
+	.rty_Name {
+		font-weight: bold;
+	}
+  </style>
+
+ </head>
+
+ <body>
+
+  <!--{PageHeader} -->
+
+  <div style="padding: 10px;">
+  
+ <p><span class="red">[errors]</span></p>     
+  
+
+[foreach SYSID sys]
+
+<form action="editSysIdentification.php?db=[dbname!]" method="post">
+
+[update required SYSID sysid_update]
+
+<table>
+
+<tr><td><p><b>General information</b> </td><td></td></tr>
+
+<tr><td><br>Heurist registration number (0 = not registered) and database version</td>
+<td>Registration number <b>[sys_dbRegisteredID]</b>&nbsp;&nbsp;&nbsp;
+DB version <b>[sys_dbVersion].[sys_dbSubVersion].[sys_dbSubSubVersion]</b></td></tr>
+<tr><td><br>Display name (more informative than DB name at top of page) </td>
+<td>* [textbox required : sys_dbName : : size=40] </td></tr>
+<tr><td><br>Database rights statement (or URL to rights statement) </td>
+<td>* [textbox : sys_dbRights : : size=60]</td></tr>
+<tr><td><br>Name/institution of owner (or URL to owner information)</td>
+<td>[textbox : sys_dbOwner : : size=60]         </td></tr>
+<tr><td><br>Description of the database/content up to 1Kb (may reference a URL) </td>
+<td>[textbox : sys_dbDescription : : size=60] </td></tr>
+
+<!--
+<tr><td><br>[sys_SyncDefsWithDB] </td>
+<td></td></tr>
+<tr><td><br>[sys_AutoIncludeFieldSetIDs] </td>
+<td></td></tr>
+-->
+
+<tr><td><p><b><br>Behaviours / ownership</b>  </td>
+<td></td></tr>
+
+<tr><td><br>Owner group for new records ('0' indicates 'everyone') </td>
+
+<td>* [textbox required : sys_NewRecOwnerGrpID : : size=3] BUG: If 0, this MUST be enclosed in ' ' otherwise the form data will not be saved </td></tr>  
+
+<tr><td><br>Default access outside owner group (only owners can edit)</td>
+<td>[dropdown : sys_NewRecAccess : Default access outside owner group : enum( "viewable", "hidden", "public") : size="3" ]</td></tr>
+<tr><td><br>User group which owns the current database  </td>
+<td>* [textbox required :sys_OwnerGroupID  : : size=3] BUG: If 0, this MUST be enclosed in ' ' otherwise the form data will not be saved </td></tr>  </td></tr>
+
+<tr><td><br>Restrict database access to members of the owners group  </td>
+<td>[checkbox : sys_RestrictAccessToOwnerGroup  : : size=20]</td></tr>
+<tr><td><br>Allow online registration as user (confirmed by SysAdmin)  </td>
+<td>[checkbox : sys_AllowRegistration : : size=20] </td></tr>
+<tr><td><br>Carry out nightly URL validation (can overload targets)  </td>
+<td>[checkbox : sys_URLCheckFlag  : : size=20]</td></tr>
+
+<tr><td><p><b><br>Locations</b>  </td>
+<td></td></tr>
+<tr><td><br>Directory for uploaded files (full path, overrides default if non-blank)  </td>
+<td>[textbox : sys_UploadDirectory : : size=30]        </td></tr>
+
+</table>
+ [end-update]
+
+<br>&nbsp;<p>
+
+<p><span class="red">[errors]</span></p>
+                        
+<input type="submit" value="save">
+
+</form>
+
+[end-foreach]
+
+ </body>
+</html>
+
+
+

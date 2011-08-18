@@ -1,0 +1,112 @@
+<!--
+
+/**
+ * editSysIdentificationEmail.html, T1000 template for editing the email section of the system identification record 
+ * defining email server and addresses for incoming and outgoing mail
+ * Ian Johnson 12 aug 2011
+ * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+ * @link: http://HeuristScholar.org
+ * @license http://www.gnu.org/licenses/gpl-3.0.txt
+ * @package Heurist academic knowledge management system
+ * @todo
+ **/
+
+-->
+<html>
+ <head>
+  <title>System settings editor</title>
+
+  <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+
+  <link rel="stylesheet" type="text/css" href="../../common/css/newshsseri.css">
+  <style type="text/css">
+	a img {
+		border: 0;
+	}
+	thead {
+		text-align: left;
+	}
+	table table td, table table th {
+		padding-right: 10px;
+	}
+	tr {
+		vertical-align: top;
+	}
+	.rft_icon {
+		margin-right: 5px;
+		vertical-align: middle;
+	}
+	.rty_Name {
+		font-weight: bold;
+	}
+  </style>
+
+ </head>
+
+ <body>
+
+  <!--{PageHeader} -->
+
+  <div style="padding: 10px;">
+  
+ <p><span class="red">[errors]</span></p>     
+  
+
+[foreach SYSID sys]
+
+<form action="editSysIdentificationAdvanced.php?db=[dbname!]" method="post">
+
+[update SYSID sysid_update]
+
+<table>
+
+<tr><td><p><b>Advanced Properties</b> </td><td></td></tr>
+
+<tr><td><br>Registration number <b>[sys_dbRegisteredID]</b>&nbsp;&nbsp;&nbsp;
+DB version <b>[sys_dbVersion].[sys_dbSubVersion].[sys_dbSubSubVersion]</b></td>
+<td></td></tr>
+
+<tr><td><p><b><br>Incoming / outgoing email</b> </td><td></td></tr>
+<tr><td><br>IMAP server for server receiving emails which can be harvested</td>
+<td>[textbox : sys_eMailImapServer : : size=30]
+Port [textbox : sys_eMailImapPort : : size=4] Protocol [textbox : sys_eMailImapProtocol : : size=10]</td></tr>
+<tr><td><br>IMAP user name / password for incoming mail  </td>
+<td>[textbox : sys_eMailImapUsername : : size=30] / [textbox : sys_eMailImapPassword : : size=30]</td></tr>
+<tr><td><br>Addresses from which incoming mail to be harvested may be received  </td>
+<td>[textbox : sys_IncomingEmailAddresses : : size=60] (other addresses are ignored)</td></tr>
+<tr><td><br>Potential email addresses to which database records may be sent  </td>
+<td>[textbox : sys_TargetEmailAddresses : : size=60] (shared list, will appear for every user)</td></tr>
+   
+<tr><td><p><b><br>Locations</b>  </td>
+<td></td></tr>
+<tr><td><br>Database containing the sysUGrps table - blank = current database  </td>
+<td>[textbox : sys_UGrpsDatabase : : size=30]        </td></tr>
+
+<tr><td><br>Directory in which to write html representation of published records  </td>
+<td>[textbox : sys_hmlOutputDirectory : : size=30] </td></tr>
+<tr><td><br>Directory in which to write HML representation of published records  </td>
+<td>[textbox : sys_htmlOutputDirectory : : size=30]  </td></tr>
+<tr><td><br>Additional folders containing files for indexing (FieldHelper compatibility)  </td>
+<td>[textbox : sys_MediaFolders : : size=30](comma separated)</td></tr>
+
+<tr><td><br>Default contsraints behaviour  </td>
+<td>[dropdown : sys_ConstraintDefaultBehavior : Default access outside owner group : enum("locktypetotype", "unconstrainedbydefault", "allownullwildcards") : size="3" ]
+              
+</table>
+ [end-update]
+
+ 
+<p><span class="red">[errors]</span></p>
+                        
+<input type="submit" value="save">
+
+</form>
+
+[end-foreach]
+
+ </body>
+</html>
+
+
+

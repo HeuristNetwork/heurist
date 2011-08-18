@@ -1,7 +1,8 @@
 <?php
 
 /**
- * editSysIdentification.php, edits the system identification record which provides core settigns for the database
+ * editSysIdentificationEmail.php, edits the email section of the system identification record
+ * defining email server and addresses for incoming and outgoing mail
  * Ian Johnson 12 aug 2011
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
@@ -26,7 +27,7 @@ if (! is_admin()) return;
 
 mysql_connection_overwrite(DATABASE);
 
-$template = file_get_contents('editSysIdentification.html');
+$template = file_get_contents('editSysIdentificationAdvanced.html');
 // $template = str_replace('{PageHeader}', '[literal]'.file_get_contents('menu.html').'[end-literal]', $template);
 $lexer = new Lexer($template);
 

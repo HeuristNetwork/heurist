@@ -33,6 +33,23 @@ $MAINTABLES['LINKED_BIBLIO'] = 'Records';
 
 if (function_exists('get_user_id')) {
       $LOOKUPS['LINKED_BIBLIO'] = array( 'usrBookmarks' => 'rec_ID=bkm_recID and bkm_UGrpID='.get_user_id() );
+      
+      
+
+// Added by Ian 12/8/11      
+$MAINTABLES['SYSID'] = 'sysIdentification';
+    $PKEY['SYSID'] = 'sys_ID';
+    
+ $MAINTABLES['UGRP'] = 'sysUGrps';
+    $PKEY['UGRP'] = 'ugr_ID';
+    
+/*
+ $LOOKUPS['SYSID'] =
+        array (
+            'sysUGrps' => 'sys_OwnerGroupID=sys_ID',
+            'sysUGrps' => 'sys_NewRecOwnerGrpID=sys_ID');          
+*/
+
 }
 
 /*
