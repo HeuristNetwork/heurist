@@ -16,9 +16,9 @@
 -- ------------------------------------------------------------------------------
 
 
-DROP function IF EXISTS `hhash`;
-
 DELIMITER $$
+
+DROP function IF EXISTS `hhash`$$
 
 CREATE DEFINER=`root`@`localhost` FUNCTION `hhash`(recID int) RETURNS varchar(4095) CHARSET utf8
 	READS SQL DATA
@@ -66,9 +66,9 @@ DELIMITER ;
 
 -- ------------------------------------------------------------------------------
 
-DROP function IF EXISTS `simple_hash`;
-
 DELIMITER $$
+
+DROP function IF EXISTS `simple_hash`$$
 
 	CREATE DEFINER=`root`@`localhost` FUNCTION `simple_hash`(recID int) RETURNS varchar(4095) CHARSET utf8
 	READS SQL DATA
@@ -97,9 +97,9 @@ DELIMITER ;
 
 -- ------------------------------------------------------------------------------
 
-DROP procedure IF EXISTS `set_all_hhash`;
-
 DELIMITER $$
+
+DROP procedure IF EXISTS `set_all_hhash`$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `set_all_hhash`()
 
@@ -129,16 +129,15 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `set_all_hhash`()
 			until @tcount = 0
 		end repeat;
 		drop table t;
-	end
-	$$
+	end$$
 
 DELIMITER ;
 
-
---  Triggers
+--  **********************   Triggers   ***************************
 -- ------------------------------------------------------------------------------
 
 -- ------------------------------------------------------------------------------
+-- --------recDetails
 
 
 DELIMITER $$
@@ -222,6 +221,7 @@ DELIMITER $$
 DELIMITER ;
 
 -- ------------------------------------------------------------------------------
+-- --------Records
 
 DELIMITER $$
 
@@ -337,6 +337,7 @@ DELIMITER $$
 DELIMITER ;
 
 -- ------------------------------------------------------------------------------
+-- --------usrBookmarks
 
 DELIMITER $$
 
@@ -352,9 +353,11 @@ DELIMITER $$
 DELIMITER ;
 
 -- ------------------------------------------------------------------------------
+-- --------sysUGrps
 
 DELIMITER $$
 
+--  			insert
 	DROP TRIGGER IF EXISTS sysUGrps_last_insert$$
 
 	CREATE
@@ -367,6 +370,7 @@ DELIMITER $$
 DELIMITER ;
 DELIMITER $$
 
+--  			update
 	DROP TRIGGER IF EXISTS sysUGrps_last_update$$
 
 	CREATE
@@ -377,11 +381,26 @@ DELIMITER $$
 		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="sysUGrps"$$
 
 DELIMITER ;
+DELIMITER $$
+
+--  			delete
+	DROP TRIGGER IF EXISTS sysUGrps_last_delete$$
+
+	CREATE
+	DEFINER=`root`@`localhost`
+	TRIGGER `sysUGrps_last_delete$$`
+	AFTER DELETE ON `sysUGrps`
+	FOR EACH ROW
+		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="sysUGrps"$$
+
+DELIMITER ;
 
 -- ------------------------------------------------------------------------------
+-- --------sysUsrGrpLinks
 
 DELIMITER $$
 
+--  			insert
 	DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_insert$$
 
 	CREATE
@@ -394,6 +413,7 @@ DELIMITER $$
 DELIMITER ;
 DELIMITER $$
 
+--  			update
 	DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_update$$
 
 	CREATE
@@ -404,11 +424,26 @@ DELIMITER $$
 		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="sysUsrGrpLinks"$$
 
 DELIMITER ;
+DELIMITER $$
+
+--  			delete
+	DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_delete$$
+
+	CREATE
+	DEFINER=`root`@`localhost`
+	TRIGGER `sysUsrGrpLinks_last_delete$$`
+	AFTER DELETE ON `sysUsrGrpLinks`
+	FOR EACH ROW
+		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="sysUsrGrpLinks"$$
+
+DELIMITER ;
 
 -- ------------------------------------------------------------------------------
+-- --------defDetailTypes
 
 DELIMITER $$
 
+--  			insert
 	DROP TRIGGER IF EXISTS defDetailTypes_last_insert$$
 
 	CREATE
@@ -421,6 +456,7 @@ DELIMITER $$
 DELIMITER ;
 DELIMITER $$
 
+--  			update
 	DROP TRIGGER IF EXISTS defDetailTypes_last_update$$
 
 	CREATE
@@ -431,11 +467,26 @@ DELIMITER $$
 		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defDetailTypes"$$
 
 DELIMITER ;
+DELIMITER $$
+
+--  			delete
+	DROP TRIGGER IF EXISTS defDetailTypes_delete;
+
+	CREATE
+	DEFINER=`root`@`localhost`
+	TRIGGER `defDetailTypes_delete`
+	AFTER DELETE ON `defDetailTypes`
+	FOR EACH ROW
+			update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defDetailTypes"$$
+
+DELIMITER ;
 
 -- ------------------------------------------------------------------------------
+-- --------defRecTypes
 
 DELIMITER $$
 
+--  			insert
 	DROP TRIGGER IF EXISTS defRecTypes_last_insert$$
 
 	CREATE
@@ -448,6 +499,7 @@ DELIMITER $$
 DELIMITER ;
 DELIMITER $$
 
+--  			update
 	DROP TRIGGER IF EXISTS defRecTypes_last_update$$
 
 	CREATE
@@ -458,11 +510,24 @@ DELIMITER $$
 		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecTypes"$$
 
 DELIMITER ;
-
--- ------------------------------------------------------------------------------
-
 DELIMITER $$
 
+--  			delete
+	DROP TRIGGER IF EXISTS defRecTypes_delete;
+
+	CREATE
+	DEFINER=`root`@`localhost`
+	TRIGGER `defRecTypes_delete`
+	AFTER DELETE ON `defRecTypes`
+	FOR EACH ROW
+			update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecTypes"$$
+
+DELIMITER ;
+-- ------------------------------------------------------------------------------
+-- --------defRecStructure
+DELIMITER $$
+
+--  			insert
 	DROP TRIGGER IF EXISTS defRecStructure_last_insert$$
 
 	CREATE DEFINER=`root`@`localhost`
@@ -474,6 +539,7 @@ DELIMITER $$
 DELIMITER ;
 DELIMITER $$
 
+--  			update
 	DROP TRIGGER IF EXISTS defRecStructure_last_update$$
 
 	CREATE DEFINER=`root`@`localhost`
@@ -483,11 +549,25 @@ DELIMITER $$
 		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecStructure"$$
 
 DELIMITER ;
+DELIMITER $$
+
+--  			delete
+	DROP TRIGGER IF EXISTS defRecStructure_last_delete$$
+
+	CREATE DEFINER=`root`@`localhost`
+	TRIGGER `defRecStructure_last_delete$$`
+	AFTER DELETE ON `defRecStructure`
+	FOR EACH ROW
+		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecStructure"$$
+
+DELIMITER ;
 
 -- ------------------------------------------------------------------------------
+-- --------defTerms
 
 DELIMITER $$
 
+--  			insert
 	DROP TRIGGER IF EXISTS defTerms_last_insert$$
 
 	CREATE
@@ -498,8 +578,9 @@ DELIMITER $$
 		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms"$$
         
 DELIMITER ;
-
 DELIMITER $$
+
+--  			update
 	DROP TRIGGER IF EXISTS defTerms_last_update$$
 
 	CREATE
@@ -508,23 +589,29 @@ DELIMITER $$
 	AFTER UPDATE ON `defTerms`
 	FOR EACH ROW
 		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms"$$
-DELIMITER ;
 
+DELIMITER ;
 DELIMITER $$
+
+--  			delete
     DROP TRIGGER IF EXISTS defTerms_last_delete$$
+
     CREATE
     DEFINER=`root`@`localhost`
     TRIGGER `defTerms_last_delete`
     AFTER DELETE ON `defTerms`
     FOR EACH ROW
         update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms"$$
+
 DELIMITER ;   
 
 -- ------------------------------------------------------------------------------
+-- --------defRelationshipConstraints
 
 DELIMITER $$
 
-	DROP TRIGGER IF EXISTS defRelationshipConstraints_last_insert$$
+--  			insert
+	DROP TRIGGER IF EXISTS defRelationshipConstraints_last_insert;
 
 	CREATE
 	DEFINER=`root`@`localhost`
@@ -536,7 +623,8 @@ DELIMITER $$
 DELIMITER ;
 DELIMITER $$
 
-	DROP TRIGGER IF EXISTS defRelationshipConstraints_last_update$$
+--  			update
+	DROP TRIGGER IF EXISTS defRelationshipConstraints_last_update;
 
 	CREATE
 	DEFINER=`root`@`localhost`
@@ -546,88 +634,103 @@ DELIMITER $$
 		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRelationshipConstraints"$$
 
 DELIMITER ;
+DELIMITER $$
 
--- --------------------------------------------------------------------------------
-
--- ** New triggers from Artem 5/4/2011
-
-DROP TRIGGER IF EXISTS defRecTypeGroups_update;
+--  			delete
+	DROP TRIGGER IF EXISTS defRelationshipConstraints_last_delete;
 
 	CREATE
 	DEFINER=`root`@`localhost`
-	TRIGGER `defRecTypeGroups_update`
-	AFTER UPDATE ON `defRecTypeGroups`
+	TRIGGER `defRelationshipConstraints_last_delete`
+	AFTER DELETE ON `defRelationshipConstraints`
 	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecTypeGroups";
+		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRelationshipConstraints"$$
 
+DELIMITER ;
 
-DROP TRIGGER IF EXISTS defRecTypeGroups_insert;
+-- --------------------------------------------------------------------------------
+-- --------defRecTypeGroups
+
+-- ** New triggers from Artem 5/4/2011
+DELIMITER $$
+
+--  			insert
+	DROP TRIGGER IF EXISTS defRecTypeGroups_insert$$
 
 	CREATE
 	DEFINER=`root`@`localhost`
 	TRIGGER `defRecTypeGroups_insert`
 	AFTER INSERT ON `defRecTypeGroups`
 	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecTypeGroups";
+		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecTypeGroups"$$
 
+DELIMITER ;
+DELIMITER $$
 
-DROP TRIGGER IF EXISTS defRecTypeGroups_delete;
+--  			update
+	DROP TRIGGER IF EXISTS defRecTypeGroups_update$$
+
+	CREATE
+	DEFINER=`root`@`localhost`
+	TRIGGER `defRecTypeGroups_update`
+	AFTER UPDATE ON `defRecTypeGroups`
+	FOR EACH ROW
+		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecTypeGroups"$$
+
+DELIMITER ;
+DELIMITER $$
+
+--  			delete
+	DROP TRIGGER IF EXISTS defRecTypeGroups_delete$$
 
 	CREATE
 	DEFINER=`root`@`localhost`
 	TRIGGER `defRecTypeGroups_delete`
 	AFTER DELETE ON `defRecTypeGroups`
 	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecTypeGroups";
+		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecTypeGroups"$$
 
+DELIMITER ;
 
-DROP TRIGGER IF EXISTS defDetailTypeGroups_update;
+-- --------------------------------------------------------------------------------
+-- --------defDetailTypeGroups
 
-	CREATE
-	DEFINER=`root`@`localhost`
-	TRIGGER `defDetailTypeGroups_update`
-	AFTER UPDATE ON `defDetailTypeGroups`
-	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defDetailTypeGroups";
+DELIMITER $$
 
-
-DROP TRIGGER IF EXISTS defDetailTypeGroups_insert;
+--  			insert
+	DROP TRIGGER IF EXISTS defDetailTypeGroups_insert$$
 
 	CREATE
 	DEFINER=`root`@`localhost`
 	TRIGGER `defDetailTypeGroups_insert`
 	AFTER INSERT ON `defDetailTypeGroups`
 	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defDetailTypeGroups";
+		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defDetailTypeGroups"$$
 
+DELIMITER ;
+DELIMITER $$
 
-DROP TRIGGER IF EXISTS defDetailTypeGroups_delete;
+--  			update
+	DROP TRIGGER IF EXISTS defDetailTypeGroups_update$$
 
 	CREATE
 	DEFINER=`root`@`localhost`
+	TRIGGER `defDetailTypeGroups_update`
+	AFTER UPDATE ON `defDetailTypeGroups`
+	FOR EACH ROW
+		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defDetailTypeGroups"$$
+
+DELIMITER ;
+DELIMITER $$
+
+--  			delete
+	DROP TRIGGER IF EXISTS defDetailTypeGroups_delete;
+
+        CREATE
+        DEFINER=`root`@`localhost`
 	TRIGGER `defDetailTypeGroups_delete`
 	AFTER DELETE ON `defDetailTypeGroups`
-	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defDetailTypeGroups";
-
--- New triggers from Artem 8/4/11
-
-DROP TRIGGER IF EXISTS defDetailTypes_delete;
-
-        CREATE
-        DEFINER=`root`@`localhost`
-        TRIGGER `defDetailTypes_delete`
-        AFTER DELETE ON `defDetailTypes`
         FOR EACH ROW
-                update sysTableLastUpdated set tlu_DateStamp=now() where
-tlu_TableName="defDetailTypes";
+		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defDetailTypeGroups"$$
 
-DROP TRIGGER IF EXISTS defRecTypes_delete;
-
-        CREATE
-        DEFINER=`root`@`localhost`
-        TRIGGER `defRecTypes_delete`
-        AFTER DELETE ON `defRecTypes`
-        FOR EACH ROW
-                update sysTableLastUpdated set tlu_DateStamp=now() where
-tlu_TableName="defRecTypes";
+DELIMITER ;
