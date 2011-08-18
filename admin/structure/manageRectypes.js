@@ -720,7 +720,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 				if(report.indexOf(",")>0){
 					// this alert is a pain  alert("Record types with IDs :"+report+ " were succesfully updated");
 				}else{
-					alert("Record type with ID " + report + " was succesfully  updated");
+					// this alert is a pain  alert("Record type with ID " + report + " was succesfully  updated");
 				}
 				_clearGroupAndVisibilityChanges(false);
 			}

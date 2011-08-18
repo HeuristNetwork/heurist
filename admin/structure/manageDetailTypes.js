@@ -437,7 +437,7 @@ function DetailTypeManager() {
 
 						}
 					}else{
-						alert("Impossible to delele field type in usage");
+						alert("Impossible to delele field type, in use by a record type");
 					}
 				}
 
@@ -740,9 +740,9 @@ function DetailTypeManager() {
 			if(!error) {
 
 				if(report.indexOf(",")>0){
-					alert("Field types with IDs :"+report+ " were succesfully updated");
+					// this alert is a pain  alert("Field types with IDs :"+report+ " were succesfully updated");
 				}else{
-					alert("Field type with ID " + report + " was succesfully  updated");
+					// this alert is a pain  alert("Field type with ID " + report + " was succesfully  updated");
 				}
 				//window.setTimeout(function(){alwin.hide();}, 1000);
 				_clearGroupAndVisibilityChanges(false);
@@ -1008,7 +1008,7 @@ function DetailTypeManager() {
 
 		if(!Hul.isnull(grp.types))
 		{
-			alert("There are types that belong to this group. Impossible to delete such group");
+			alert("This group cannot be deleted as it contains field types - please move them first");
 		}else{
 			var r=confirm("Confirm the deletion of group '"+grp.name+"'");
 			if (r) {

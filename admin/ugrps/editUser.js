@@ -259,7 +259,7 @@ function UserEditor() {
 			if(!error){
 				var ss = (_recID < 0)?"added":"updated";
 
-				alert("User with ID " + report + " was succesfully "+ss);
+				// this alert is a pain  alert("User with ID " + report + " was succesfully "+ss);
 				window.close(context); //send back new HEURIST strcuture
 			}
 		}
