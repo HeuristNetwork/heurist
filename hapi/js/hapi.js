@@ -1776,7 +1776,7 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
 
 	var i;
 	if (enums) {
-		if (typeof(enums[0]) === "string") {
+		if (typeof(enums[0]) === "string") {	// saw TODO Urgent for ENUMS   pass in termtree id and decode here.
 			// simple case, no related values; enums is an array of strings
 			_enums = enums;
 		}
@@ -1803,7 +1803,7 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
 	this.getPrompt = function() { return _prompt; };
 	this.getVariety = function() { return _variety; };
 	this.getEnumerationValues = function() { return (_enums  ||  null); };
-	this.getConstrainedRecordType = function() { return _constraint; };
+	this.getConstrainedRecordType = function() { return _constraint; }; // saw TODO  Urgent this have changed to multi value
 	this.getRelatedEnumerationValues = function() { return _relatedEnums; };
 
 	this.checkValue = function(value) {

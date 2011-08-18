@@ -790,7 +790,11 @@ function makeFileContentNode($file){
 	if ($file['type'] ==="application/xml"){// && file_exists($filename)) {
 		$xml = simplexml_load_file($filename);
 		// convert to xml
-		$xml = $xml->asXML();
+		if (!$xml) {
+			return;
+		}else{
+			$xml = $xml->asXML();
+		}
 		// remove the name space
 		$xml = preg_replace("/\s*xmlns=(?:\"[^\"]*\"|\'[^\']*\'|\S+)\s*/","",$xml);
 		$xml = simplexml_load_string($xml);
@@ -1135,6 +1139,8 @@ makeTag('dateStamp', null, date('c'));
 if (array_key_exists('error', $result)) {
 	makeTag('error', null, $result['error']);
 } else {
+	makeTag('resultCount', null, $result['resultCount']);
+	makeTag('recordCount', null, $result['recordCount']);
 	outputRecords($result);
 }
 

@@ -72,6 +72,7 @@ top.HEURIST.search = {
 //		top.HEURIST.search.checkSearchForm();
 //		document.forms[0].submit();
 		top.HEURIST.search.clearResultRows();
+		top.HEURIST.search.clearRelatesRows();
 		top.HEURIST.search.reloadSearch();
 	},
 
@@ -91,6 +92,7 @@ top.HEURIST.search = {
 
 		if (top.HEURIST.search.results.totalQueryResultRecordCount == 0)
 			top.HEURIST.registerEvent(window, "load", top.HEURIST.search.clearResultRows);
+			top.HEURIST.registerEvent(window, "load", top.HEURIST.search.clearRelatesRows);
 
 		top.HEURIST.registerEvent(window, "load", top.HEURIST.search.renderNavigation);
 
@@ -712,7 +714,10 @@ top.HEURIST.search = {
 
 	clearResultRows: function() {
 		var resultsPerPage = top.HEURIST.search.resultsPerPage;
-		document.getElementById("results-level0").innerHTML = "";
+		$("#results-level0 div.recordDiv").remove();
+	},
+
+	clearRelatesRows: function() {
 		$("div[id!=results-level0][id*=results-level]").remove();
 		top.HEURIST.search.selectedRecordIds = [];
 		top.HEURIST.search.selectedRecordDivs = [];
@@ -946,13 +951,15 @@ top.HEURIST.search = {
 		}
 
 		//if (style == "list"  ||  style == "thumbnails" || style =="icons") {
-			resultsDiv.innerHTML = innerHTML;
+			resultsDiv.innerHTML += innerHTML;
 		//} else if (style = "two-col") {
 		//	resultsDiv.innerHTML = "<div class=two-col-cell><div class=two-col-inner-cell-left>" + leftHTML + "</div></div><div class=two-col-cell><div class=two-col-inner-cell-right>" + rightHTML + "</div></div>";
 		//}
 
 		// add click handlers
 		top.HEURIST.search.addResultLevelEventHandlers(0);
+		top.HEURIST.search.addResultLevelLinks(0);
+		top.HEURIST.search.filterRelated(1);
 
 		top.HEURIST.registerEvent(window, "load", function() {top.HEURIST.search.trimAllLinkTexts(0);});
 		top.HEURIST.registerEvent(window, "load", function() {
@@ -1296,11 +1303,12 @@ top.HEURIST.search = {
 				top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-pagechange", "pageNum=" + (pageNumber +1));
 			}
 			top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange");
-		} else {
+		}
+		/*else {
 			// Have to wait for the data to load
 			document.getElementById("results-level0").innerHTML = "";
 			document.getElementById("search-status").className = "loading";
-		}
+		}*/
 
 		top.HEURIST.search.renderNavigation();
 	},
@@ -1496,16 +1504,24 @@ top.HEURIST.search = {
 			var clickedIndex = recIdToIndexMap[bib_id];
 			var newSelectedRecIdMap = {};
 			var newSelectedRecIds = [];
+			var recIDs = results.infoByDepth[level].recIDs,
+				recID;
 			// order this object so lasted selected remains last.
 			if (clickedIndex < lastSelectedIndex){
 				for(var i = clickedIndex; i <= lastSelectedIndex; i++) {
-					newSelectedRecIdMap[results.infoByDepth[level].recIDs[i]] = true;
-					newSelectedRecIds.push(results.infoByDepth[level].recIDs[i]);
+					recID = recIDs[i];
+					if (!$(".recordDiv[bib_id="+recID,$("#results-level"+level)).hasClass("filtered")){
+						newSelectedRecIdMap[recID] = true;
+						newSelectedRecIds.push(recID);
+					}
 				}
 			}else{
 				for(var i = clickedIndex; i >= lastSelectedIndex; i--) {
-					newSelectedRecIdMap[results.infoByDepth[level].recIDs[i]] = true;
-					newSelectedRecIds.push(results.infoByDepth[level].recIDs[i]);
+					recID = recIDs[i];
+					if (!$(".recordDiv[bib_id="+recID,$("#results-level"+level)).hasClass("filtered")){
+						newSelectedRecIdMap[recID] = true;
+						newSelectedRecIds.push(recID);
+					}
 				}
 			}
 		// for all selectedBibIds items not in new selection set, deselect item (which also removes it from selectedBibIds)
@@ -2062,9 +2078,9 @@ top.HEURIST.search = {
 		var viewerFrame = document.getElementById("viewer-frame");
 //		var mapFrame = document.getElementById("map-frame");
 		var mapFrame3 = document.getElementById("map-frame3");
-		mapFrame.src = "";
-        var recordFrame = document.getElementById("record-view-frame");
-        recordFrame.src = top.HEURIST.basePath+"common/html/msgNoRecordsSelected.html";
+//		mapFrame.src = "";
+		var recordFrame = document.getElementById("record-view-frame");
+		recordFrame.src = top.HEURIST.basePath+"common/html/msgNoRecordsSelected.html";
 		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", "selectedIds=");
 //		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange", "selectedIds=");
 		top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap, "heurist-selectionchange", "selectedIds=");
