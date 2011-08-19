@@ -145,7 +145,7 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 		_selectedTermsTree.removeChildren(_selectedTermsTree.getRoot());
 
 		if(_isFilterMode){
-			//clone
+			//clone - restore originally selected
 			disabledTermsList = (disabledTermsListOriginal.join(",")).split(",");
 		}else{
 			disabledTermsList = [];
@@ -244,7 +244,7 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 				var index = 0;
 				while(index < parentNode.children.length) { // While it has children, select them and look if they have children too
 					var child = parentNode.children[index];
-					child.toggleHighlight();
+					child.toggleHighlight(); //mark the checkbox
 					if(child.children.length > 0) {
 						_selectAllChildren(child.data.id); //index);
 					}
@@ -283,7 +283,7 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 	}
 
 	/**
-	* Creates an array (in var termArray) with all selected terms
+	* Creates an array (in var termArray) with all selected terms (from selectedTermsTree (that is in the middle))
 	*/
 	function _createTermArray(parent, parentsArray) { //
 
@@ -354,15 +354,19 @@ TREE REALTED ROUTINES ---------------------------------------
 						term.label = term.label + '&nbsp;&nbsp;';
 					}
 
-					if(_isFilterMode){
+					if(_isFilterMode){//form recstructure edit
 
 						if(_inExistingTree(term_id)) { //selected
+
+							term.label = term.label + ((cnt_children>0)?'<b>':'');
+
 							if(_isDisabledOriginally(term_id)){
-								term.label = term.label + '<b>'+termsByDomainLookup[term_id][0]+'</b></div>';
+								term.label = term.label + '<font color="#cccccc">'+termsByDomainLookup[term_id][0]+'</font>';
 							}else{
 								term.label = term.label + termsByDomainLookup[term_id][0];
 							}
-							term.label = term.label + '</div>';
+
+							term.label = term.label + ((cnt_children>0)?'</b>':'') + '</div>';
 
 							childNode = new YAHOO.widget.TextNode(term, parentEntry, false); // Create the node
 							childNode.highlightState = 1;
@@ -407,11 +411,17 @@ TREE REALTED ROUTINES ---------------------------------------
 
 			if(_isFilterMode){
 				if(_inExistingTree(parentElement)) {
-					if(_isDisabledOriginally(parentElement)){
-						term.label = term.label + '<b>'+ termsByDomainLookup[parentElement][0]+'</b></div>';
-					}else{
-						term.label = term.label + termsByDomainLookup[parentElement][0]+'</div>';
-					}
+
+							term.label = term.label + ((cnt_children>0)?'<b>':'');
+
+							if(_isDisabledOriginally(parentElement)){
+								term.label = term.label + '<font color="#cccccc">'+termsByDomainLookup[parentElement][0]+'</font>';
+							}else{
+								term.label = term.label + termsByDomainLookup[parentElement][0];
+							}
+
+							term.label = term.label + ((cnt_children>0)?'</b>':'') + '</div>';
+
 					topLayerParent = new YAHOO.widget.TextNode(term, parent, false); // Create the node
 					topLayerParent.highlightState = 1;
 				}else{
@@ -435,7 +445,7 @@ TREE REALTED ROUTINES ---------------------------------------
 	}
 
 	/**
-	* Build a tree with all selected terms
+	* Build a tree with all selected terms (it is in the middle of window)
 	* @param termNode - root node of "all terms" tree
 	* @param parentNode - root node of "selected terms" tree
 	*/
@@ -453,9 +463,23 @@ TREE REALTED ROUTINES ---------------------------------------
 				childNode.href = "{javascript:void(0)}";
 
 				if(!_isDisabled(term_id)){
-					childNode.toggleHighlight();
+					childNode.highlightState = 1;
+					//childNode.toggleHighlight();
 				}
 
+				//now parentNode has childrens 1) add it to disables 2) make font bold
+				if(parentNode!=_selectedTermsTree.getRoot()){
+
+					if(parentNode.children.length == 1){ //do it only once
+						//1. add to disabled
+						parentNode.highlightState = 0;
+
+						//2. make bold label
+						var termName2 = termsByDomainLookup[parentNode.id][0];
+						parentNode.label =
+						'<div id="'+parentNode.id+'"><a href="javascript:void(0)"></a>&nbsp;<b>' + termName2 + '</b></div>'
+					}
+				}
 			}
 			else {
 				childNode = "";
@@ -473,7 +497,7 @@ TREE REALTED ROUTINES ---------------------------------------
 				childNode = "";
 			}
 			index++;
-		}
+		}//while
 	}
 
 	/**
@@ -553,7 +577,8 @@ TREE REALTED ROUTINES ---------------------------------------
 			for( termID in termSubTree)
 			{ // For every term in 'term'
 				var termName = termsByDomainLookup[termID][0];
-				var isHeader = (headers[termID]? true:false);
+				var isDisabled = (headers[termID]? true:false);
+				var isHeader = (Object.keys(termSubTree[termID]).length>0);
 				var opt = new Option(termName,termID);
 
 				var option = document.createElement("option");
@@ -561,8 +586,11 @@ TREE REALTED ROUTINES ---------------------------------------
 				option.value = termID;
 				option.className = "depth" + depth;
 
-				if(isHeader) { // header term behaves like an option group
+				if(isHeader){
 					option.className +=  ' termHeader';
+					option.disabled = true;
+				}else if(isDisabled) { // header term behaves like an option group
+					option.className +=  ' termDisabled';
 					option.disabled = true;
 				}
 				// not used if (termID == defaultTermID) {option.selected = true;}
@@ -573,7 +601,7 @@ TREE REALTED ROUTINES ---------------------------------------
 					sel.add(option,null);
 				}
 
-				if(typeof termSubTree[termID] === "object") {
+				if(typeof termSubTree[termID] === "object" && isHeader) {
 					if(depth === 7) { // A dept of 8 (depth starts at 0) is maximum, to keep it organised
 						__createSubTreeOptions(depth, termSubTree[termID]);
 					} else {
@@ -617,8 +645,10 @@ TREE REALTED ROUTINES ---------------------------------------
 					function() { // On click, select (disable) the term, and recreate the selected terms, and disabled terms arrays
 						var term_id = arguments[0].node.id;
 						if(!_isDisabledOriginally(term_id)) {
-							this.onEventToggleHighlight.apply(this,arguments);
-							_createPreview();
+							if(arguments[0].node.children.length==0){ //parent notes are always disabled
+								this.onEventToggleHighlight.apply(this,arguments); //original event
+								_createPreview();
+							}
 						}
 				});
 		}else{
