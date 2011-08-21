@@ -284,7 +284,8 @@
 
 			var newSelectionIds, newSelectionMap, alreadySelectedMap;
 
-			function onPageChange(eventType, argList) {
+			function onPageChange(eventType, argList) {// saw TODO change this to update the selection for levels
+																// if a level is not loaded then load synch
 				clearAndDisplayLoading();
 				//if page xml not loaded then load sync
 				if (eventType == "heurist-pagechange"){
@@ -340,7 +341,8 @@
 			}
 
 			function onSelectionChange(eventType, argList) {
-				if (eventType == "heurist-selectionchange"){
+				if (eventType == "heurist-selectionchange"){	// saw TODO change this to update the selection for levels
+																// if a level is not loaded then load synch
 					newSelectionIds = [];
 					if (top.HEURIST.search.getSelectedRecIDs().get().length > 0) {
 						newSelectionIds = top.HEURIST.search.getSelectedRecIDs().get();
@@ -383,7 +385,7 @@
 				}
 			}
 
-			function updateSelection(){
+			function updateSelection(){// saw TODO change this to update the selection for levels
 				if(selectedIds && selectedIds.length>0) {
 					for (var i = 0; i < selectedIds.length; i++) {
 						$('div[class~=record]').filter('div[id='+ selectedIds[i] +']').addClass("selected");
@@ -422,14 +424,14 @@
 						return;
 					}
 					// code for IE
-					if (window.ActiveXObject){
+					if (window.ActiveXObject){// saw TODO change this transform a combined document for related results
 						var xmlResultStr = pageXMLs[page].transformNode(xsls[style]);
 						xhtmlResultDoc=new ActiveXObject("Microsoft.XMLDOM");
 						xhtmlResultDoc.async="false";
 						xhtmlResultDoc.loadXML(xmlResultStr);
 					// code for Mozilla, Firefox, Opera, etc.
 					}else {
-						var xsltProcessor=new XSLTProcessor();
+						var xsltProcessor=new XSLTProcessor();// saw TODO change this transform a combined document for related results
 						xsltProcessor.importStylesheet(xsls[style]);
 						xhtmlResultDoc = xsltProcessor.transformToFragment(pageXMLs[page],document);
 					}

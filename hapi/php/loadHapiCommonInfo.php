@@ -73,27 +73,63 @@ while ($row = mysql_fetch_row($res)) {
 		break;
 
 	    case "enum":
-		$row[3] = "enumeration";	//sawTODO not needed since the field has teh termTree definition
-/*
-		$whereClause = $row[6]?"A.trm_VocabID in(" . $row[6].")" : ""; // get all terms in vocab
-		$whereClause .= $row[7] && $whereClause ?" or " : "";
-		$whereClause .= $row[7] ? "A.trm_ID in(" . $row[7].")" : "";// get all listed terms
-
-		$lres = mysql_query("select vcb_Name,A.trm_Label, B.trm_Label
-								from defTerms A left join defTerms B on A.trm_ID=B.trm_InverseTermID
-									left join defVocabularies on A.trm_VocabID = vcb_ID
-								where (" . $whereClause.") and A.trm_Label is not null
-								order by vcb_Name, A.trm_Label");
-*/
+		$row[3] = "enumeration";
+		//calculate the list of terms for this detail type
+		if (!$row[6]){
+			$row[4] = array( array("0","No Terms for $row[1]"));
+		}else{
+			preg_match_all("/\d+/",$row[6],$matches);
+			$trmIDs = $matches[0];
+			if ($row[7]){
+				preg_match_all("/\d+/",$row[7],$hdrTermIDs);
+				if ($hdrTermIDs[0] && is_array($hdrTermIDs[0])) {
+					$trmIDS = array_diff($trmIDs,$hdrTermIDs[0]);	//remove disabled Terms
+				}
+			}
+			$trmIDs = join(",",$trmIDs);
+			if ($trmIDs) {
+				$resTerm = mysql_query("select trm_ID,trm_Label from defTerms ".
+										"where trm_ID in ($trmIDs) and trm_Domain = 'enum'");
+				if (mysql_num_rows($resTerm) != count($matches[0])){
+					$row[4] = array( array("0","Invalid Terms for $row[1]"));
+				}else{
 		$row[4] = array();
-/*
-		while ($trm = mysql_fetch_row($lres)){
-			if (! array_key_exists($trm[0],$row[4])) { // create vocab array
-				$row[4][$trm[0]] = array();
+					while($trmSet = mysql_fetch_row($resTerm)) {
+						array_push($row[4],$trmSet);
+					}
+				}
+			}
 		}
-			array_push($row[4][$trm[0]], array("".$trm[1].($trm[2]?",".$trm[2]:"")));
+		break;
+
+		case "relationtype":
+		//calculate the list of terms for this detail type
+		if (!$row[6]){
+			$row[4] = array( array("0","No Terms for $row[1]"));
+		}else{
+			preg_match_all("/\d+/",$row[6],$matches);
+			$trmIDs = $matches[0];
+			if ($row[7]){
+				preg_match_all("/\d+/",$row[7],$hdrTermIDs);
+				if ($hdrTermIDs[0] && is_array($hdrTermIDs[0])) {
+					$trmIDS = array_diff($trmIDs,$hdrTermIDs[0]);	//remove disabled Terms
+				}
+			}
+			$trmIDs = join(",",$trmIDs);
+			if ($trmIDs) {
+				$resTerm = mysql_query("select trm.trm_ID,trm.trm_Label,inv.trm_ID as invID, inv.trm_Label as invLabel ".
+										"from defTerms trm left join defTerms inv on trm.trm_InverseTermID = inv.trm_ID ".
+										"where trm.trm_ID in ($trmIDs) and trm.trm_Domain = 'relation' ");
+				if (mysql_num_rows($resTerm) != count($matches[0])){
+					$row[4] = array( array("0","Invalid Terms for $row[1]"));
+				}else{
+					$row[4] = array();
+					while($trmSet = mysql_fetch_row($resTerm)) {
+						array_push($row[4],$trmSet);
+					}
+				}
 		}
-*/
+		}
 		break;
 
 	    case "geo":
@@ -119,32 +155,59 @@ $detailRequirements = array();
 $rec_types = mysql__select_array("defRecTypes","distinct rty_ID", "1 order by rty_ID");
 //$rec_types = mysql__select_array("defRecStructure left join defDetailType on dty_ID = rst_DetailTypeID",
 //									"distinct rst_RecTypeID", "1 order by rst_RecTypeID");
-		// rdr = [ rst_DetailTypeID => [ rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
+		// rdr = [ rst_DetailTypeID => [
+			// 0-rst_DisplayName
+			// 1-rst_DisplayHelpText
+			// 2-rst_DisplayExtendedDescription
+			// 3-rst_DefaultValue
+			// 4-rst_RequirementType
+			// 5-rst_MaxValues
+			// 6-rst_MinValues
+			// 7-rst_DisplayWidth
+			// 8-rst_RecordMatchOrder
+			// 9-rst_DisplayOrder
+			//10-rst_DisplayDetailTypeGroupID
+			//11-rst_FilteredJsonTermIDTree
+			//12-rst_PtrFilteredIDs
+			//13-rst_TermIDTreeNonSelectableIDs
+			//14-rst_CalcFunctionID
+			//15-rst_Status
+			//16-rst_OrderForThumbnailGeneration
+			//17-dty_TermIDTreeNonSelectableIDs
+			//18-dty_FieldSetRectypeID
+			//19-dty_Type]....]
+
+
+
+		//rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
 		// rst_DefaultValue, rst_RequirementType, rst_MaxValues, rst_MinValues, rst_DisplayWidth, rst_RecordMatchOrder,
-		// rst_DisplayOrder, rst_DisplayDetailTypeGroupID, rst_EnumFilteredIDs, rst_PtrFilteredIDs, rst_CalcFunctionID, rst_OrderForThumbnailGeneration] ...]
+		// rst_DisplayOrder, rst_DisplayDetailTypeGroupID, rst_FilteredJsonTermIDTree, rst_PtrFilteredIDs,
+		// rst_TermIDTreeNonSelectableIDs, rst_CalcFunctionID, rst_Status, rst_OrderForThumbnailGeneration,
+		// dty_TermIDTreeNonSelectableIDs, dty_FieldSetRectypeID, dty_Type] ...]
 //error_log(print_r($rec_types,true));
 foreach ($rec_types as $rec_type) {
 	foreach (getRectypeFields($rec_type) as $dtyID => $rdr) {
+		// saw TODO need to represent the trm ids  and rectype pointer ids that are valid for this rectype.detailtype.
 		array_push($detailRequirements, array(
-			$rec_type,
-			$dtyID,
-			$rdr[4],			//RequirementType
-			intval($rdr[5]),	//MaxValue
-			$rdr[0],			//Name
-			$rdr[1],			//HelpText
-			intval($rdr[8]),
-			intval($rdr[7]),
-			intval($rdr[9]),
-			$rdr[3],
-			$rdr[2],
-			intval($rdr[6]),	//MinValue
-			$rdr[10],
-			$rdr[11],
-			$rdr[13],
-			$rdr[17],
-			$rdr[12],
-			$rdr[14],
-			$rdr[16]
+			$rec_type,			// 0-recTypeID
+			$dtyID,				// 1-detailTypeID
+			$rdr[4],			// 2-RequirementType
+			intval($rdr[5]),	// 3-MaxValue
+			$rdr[0],			// 4-Name
+			$rdr[1],			// 5-HelpText
+			intval($rdr[8]),	// 6-Match Order
+			intval($rdr[7]),	// 7-DisplayWidth
+			intval($rdr[9]),	// 8-Display Order
+			$rdr[3],			// 9-Extended Description
+			$rdr[2],			//10-Default Value
+			intval($rdr[6]),	//11-MinValue
+			$rdr[10],			//12-DetailGroupID
+			$rdr[11],			//13-Filtered Enum Term IDs
+			$rdr[13],			//14-Extended Disabled Term IDs
+			$rdr[17],			//15-Detail Type Disabled Term IDs
+			$rdr[12],			//16-Filtered Pointer Constraint Rectype IDs
+			$rdr[14],			//17-Calc Function ID
+			$rdr[16]			//18-Thumbnail selection Order
 		));
 	}
 }

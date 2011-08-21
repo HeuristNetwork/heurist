@@ -1019,7 +1019,14 @@ top.HEURIST.search = {
 			top.HEURIST.registerEvent(recDiv, "click", top.HEURIST.search.resultItemOnClick);
 			top.HEURIST.registerEvent(recDiv, "mouseover", top.HEURIST.search.resultItemMouseOver);
 			top.HEURIST.registerEvent(recDiv, "mouseout", top.HEURIST.search.resultItemMouseOut);
-
+			$("a",recDiv).mouseover(function(e){
+										top.HEURIST.search.resultItemMouseOver(e,this.parentNode);
+										return true;
+									});
+			$("a",recDiv).mouseout(function(e){
+										top.HEURIST.search.resultItemMouseOut(e,this.parentNode);
+										return true;
+									});
 			if (pin_img) {
 				top.HEURIST.registerEvent(pin_img, "click", recDiv.getAttribute("bkmk_id") ? function(){} : top.HEURIST.search.addBookmark);
 			}
@@ -1418,8 +1425,9 @@ top.HEURIST.search = {
 
 		var bib_id = $(resultDiv).attr("bib_id");
 		if(parseInt(bib_id)>=0) {
-			$(resultDiv).toggleClass("hilited");
-			$(".link"+bib_id,$("#results")).addClass("linkHilited");
+			if ($(resultDiv).hasClass("hilited")) return;
+			$(resultDiv).addClass("hilited");
+			$(".link"+bib_id,$("#results")).toggleClass("linkHilited");
 		}
 	},
 
@@ -1455,8 +1463,8 @@ top.HEURIST.search = {
 
 		var bib_id = $(resultDiv).attr("bib_id");
 		if(parseInt(bib_id)>=0) {
-			$(resultDiv).toggleClass("hilited");
-			$(".link"+bib_id,$("#results")).removeClass("linkHilited");
+			$(resultDiv).removeClass("hilited");
+			$(".link"+bib_id,$("#results")).toggleClass("linkHilited");
 		}
 	},
 
@@ -1557,8 +1565,9 @@ top.HEURIST.search = {
 		}
 
 		//send selectionChange event
+		var selectedRecIDs = top.HEURIST.search.getSelectedRecIDs().get();
         var recordFrame = document.getElementById("record-view-frame");
-        if (!top.HEURIST.search.selectedRecordIds[0].length){
+		if (!selectedRecIDs.length){
             recordFrame.src = top.HEURIST.basePath+"common/html/msgNoRecordsSelected.html";
             }else{
 			recordFrame.src = top.HEURIST.basePath+"common/html/msgLoading.html";
@@ -1571,12 +1580,11 @@ top.HEURIST.search = {
 //		var mapFrame = document.getElementById("map-frame");
 		var mapFrame3 = document.getElementById("map-frame3");
 
-
 //        var sidebysideFrame = document.getElementById("sidebyside-frame");
 //		sidebysideFrame.src = top.HEURIST.basePath+"viewers/sidebyside/sidebyside.html"+
 //		("?db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
 //						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")));
-		var ssel = "selectedIds=" + top.HEURIST.search.getSelectedRecIDs().get().join(",");
+		var ssel = "selectedIds=" + selectedRecIDs.join(",");
         top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
 //		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);
 		top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap,"heurist-selectionchange",  ssel);
@@ -2067,7 +2075,7 @@ top.HEURIST.search = {
 
 	deselectAll: function() {
 //		_tabView.set('activeIndex', 0); //set printView tab before deselecting to avoid mapping error
-		if (top.HEURIST.search.selectedRecordIds.length == 0) return false;
+		if (!top.HEURIST.search.selectedRecordIds || top.HEURIST.search.selectedRecordIds.length == 0) return false;
 		var level = 0;
 		for (level; level < top.HEURIST.search.selectedRecordIds.length; level++) {
 			while (top.HEURIST.search.selectedRecordIds[level].length != 0 ) {

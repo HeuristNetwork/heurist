@@ -807,8 +807,9 @@ var HRecord = function() {
 		// Don't add meaningless non-truthy values
 		if (! detailValue  &&  (detailValue !== 0  &&  detailValue !== false)) { return; }
 
-		if (! detailType.checkValue(detailValue)) {
-			throw new HDetailVarietyMismatchException("Expected " + detailType.getVariety() + " value");
+		// check validity of value
+		if (_type  &&  ! HDetailManager.isValidDetailValue(_type, detailType, detailValue)) {
+			throw new HValueException("in valid value ("+detailValue+") for field "+ detailType.getName()+" in " +_type.getName()+' record');
 		}
 
 		// check repeatability, if we can (if the record type isn't set yet, there's nothing we can do)
@@ -818,6 +819,7 @@ var HRecord = function() {
 			}
 		}
 
+		//check if enum or relationtype variety translate values to id
 		if (! _details[detailType.getID()]) {
 			_details[detailType.getID()] = [ detailValue ];
 		}
@@ -830,8 +832,9 @@ var HRecord = function() {
 		if (_readonly) { throw new HPermissionException("Record is read-only"); }
 		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object required"); }
 
-		if (! detailType.checkValue(newValue)) {
-			throw new HDetailVarietyMismatchException("Expected " + detailType.getVariety() + " value");
+		// check validity of value
+		if (_type  &&  ! HDetailManager.isValidDetailValue(_type, detailType, newValue)) {
+			throw new HValueException("invalid new value ("+newValue+") for field "+ detailType.getName()+" in " +_type.getName()+' record');
 		}
 
 		// reduce records to stubs for comparison
@@ -890,9 +893,11 @@ var HRecord = function() {
 		for (var i=0; i < detailValues.length; ++i) {
 			detailValue = detailValues[i];
 			if (! detailValue  &&  (detailValue !== 0  &&  detailValue !== false)) { continue; }
-			if (! detailType.checkValue(detailValue)) {
-				throw new HDetailVarietyMismatchException("Expected " + detailType.getVariety() + " value");
+			// check validity of value
+			if (_type  &&  ! HDetailManager.isValidDetailValue(_type, detailType, detailValue)) {
+				throw new HValueException("in valid value ("+detailValue+") for field "+ detailType.getName()+" in " +_type.getName()+' record');
 			}
+
 			newDetails.push(detailValue);
 		}
 		if (newDetails) {
@@ -1767,33 +1772,39 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
 	var _variety = variety;
 	var _enums = [];
 	var _enumsMap = {};
+	var _termsMap = {};
 	var _relatedEnums = {};
-	var _constraint = (constraint? HRecordTypeManager.getRecordTypeById(constraint) : null) || null;
+	var _constraint = null;
+	var i;
+
+	if (constraint) {
+		if (typeof constraint == "string") {
+			constraint = constraint.split(",");
+		}
+		if( constraint instanceof Array) {
+			_constraint = [];
+			for (i=0; i<constraint.length; i++) {
+				_constraint.push(HRecordTypeManager.getRecordTypeById(constraint[i]));
+			}
+		}
+	}
 
 	if (HAPI.DetailManager) {
 		throw "Cannot construct new HDetailType objects";
 	}
 
 	var i;
-	if (enums) {
-		if (typeof(enums[0]) === "string") {	// saw TODO Urgent for ENUMS   pass in termtree id and decode here.
-			// simple case, no related values; enums is an array of strings
-			_enums = enums;
-		}
-		else {
+	if (enums && enums instanceof Array) {
 			// related values are given as well; enums is an array of string-string pairs
 			for (i=0; i < enums.length; ++i) {
-				_enums.push(enums[i][0]);
-				_relatedEnums[enums[i][0]] = enums[i][1];
-			}
-		}
-
-		// For enumeration types, store a mapping of the canonical form of each value to its actual value
-		for (i=0; i < enums.length; ++i) {
-			if (typeof(enums[0]) === "string") {
-				_enumsMap[("" + enums[i]).toLowerCase()] = enums[i];
-			} else {
-				_enumsMap[("" + enums[i][0]).toLowerCase()] = enums[i][0];
+			_enums.push(enums[i][1]);
+			_enumsMap[("" + enums[i][1]).toLowerCase()] = enums[i][1];
+			_enumsMap["" + enums[i][0]] = enums[i][1];
+			_termsMap[("" + enums[i][1]).toLowerCase()] = enums[i][0];
+			if (variety === "relationtype" && enums[i][2] && enums[i][3]){ // there is an inverse term
+				_relatedEnums[enums[i][0]] = enums[i][2];
+				_relatedEnums[enums[i][1]] = enums[i][3];
+				_termsMap[("" + enums[i][3]).toLowerCase()] = enums[i][2];
 			}
 		}
 	}
@@ -1803,7 +1814,8 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
 	this.getPrompt = function() { return _prompt; };
 	this.getVariety = function() { return _variety; };
 	this.getEnumerationValues = function() { return (_enums  ||  null); };
-	this.getConstrainedRecordType = function() { return _constraint; }; // saw TODO  Urgent this have changed to multi value
+	this.getConstrainedRecordType = function() { return _constraint[0]; };
+	this.getConstrainedRecordTypes = function() { return _constraint; };
 	this.getRelatedEnumerationValues = function() { return _relatedEnums; };
 
 	this.checkValue = function(value) {
@@ -1825,10 +1837,11 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
 					||  valueType === "number"  ||  valueType === "string");
 
 		    case HVariety.ENUMERATION:
+			case HVariety.RELATIONTYPE:
 			// Check that we were passed a literal ...
 			if (valueType !== "boolean"  &&  valueType !== "number"  &&  valueType !== "string") { return false; }
 			// ... now check that it is one of the legitimate enumeration values for this type.
-			return (_enumsMap[("" + value).toLowerCase()] !== undefined);
+			return (_enumsMap[("" + value).toLowerCase()] !== undefined);	// saw TODO it's necessary to check enums by recType
 
 		    case HVariety.REFERENCE:
 			return (HAPI.isA(value, "HRecordStub")  ||  (HAPI.isA(value, "HRecord")  &&  ! HAPI.isA(value, "HNotes")));
@@ -1853,6 +1866,7 @@ var HVariety = {
 	LITERAL: "literal",
 	DATE: "date",
 	ENUMERATION: "enumeration",
+	RELATIONTYPE: "relationtype",
 	REFERENCE: "reference",
 	FILE: "file",
 	GEOGRAPHIC: "geographic",
@@ -2283,13 +2297,42 @@ HAPI.RecordTypeManager = HRecordTypeManager;
 
 
 var HDetailManager = new function(detailTypes, detailRequirements) {
-    // detailTypes is an array of [id, name, prompt, variety, enums, contraint] values
+	// detailTypes is an array of  OLD VALUES[id, name, prompt, variety, enums, contraint] values
+		// 0-dty_ID
+		// 1-dty_Name
+		// 2-dty_HelpText
+		// 3-dty_Type
+		// 4-enums [trmID, trmLabel [, invID, invLabel]]
+		// 5-dty_PtrTargetRectypeIDs
+		// 6-dty_JsonTermIDTree
+		// 7-dty_TermIDTreeNonSelectableIDs
+		// 8-dty_ExtendedDescription
+		// 9-dty_DetailTypeGroupID,
+		//10-dty_FieldSetRecTypeID
+		//11-dty_ShowInLists
 	// detailRequirements is an array of
 		// OLD VALUES [recordTypeID, detailTypeID, requiremence, repeatable, name, prompt, match, size, order, default] values
-		//[ rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
-		// rst_DefaultValue, rst_RequirementType, rst_MaxValues, rst_MinValues, rst_DisplayWidth, rst_RecordMatchOrder,
-		// rst_DisplayOrder, rst_DisplayDetailTypeGroupID, rst_EnumFilteredIDs, rst_PtrFilteredIDs, rst_CalcFunctionID,
-		// rst_PriorityForThumbnail] values
+		// 0-recTypeID
+		// 1-detailTypeID
+		// 2-RequirementType
+		// 3-MaxValue
+		// 4-Name
+		// 5-HelpText
+		// 6-Match Order
+		// 7-DisplayWidth
+		// 8-Display Order
+		// 9-Extended Description
+		//10-Default Value
+		//11-MinValue
+		//12-DetailGroupID
+		//13-Filtered Enum Term IDs
+		//14-Extended Disabled Term IDs
+		//15-Detail Type Disabled Term IDs
+		//16-Filtered Pointer Constraint Rectype IDs
+		//17-Calc Function ID
+		//18-Thumbnail selection Order
+		//19-Detail base type
+
     var _typesById = {};
     var _typesByName = {};
     var _detailTypesByRecordType = {};
@@ -2313,20 +2356,20 @@ var HDetailManager = new function(detailTypes, detailRequirements) {
         dr = detailRequirements[i];
         _recordPlusTypeDetails[dr[0]+"."+dr[1]] = dr.slice(2);
 		type = null;
-        if (dr[2] !== 'forbidden') {    // non-excluded detail
+		if (dr[2] !== 'forbidden') {// non-excluded detail
             type = _typesById[dr[1]];
             if (_detailTypesByRecordType[dr[0]]) { _detailTypesByRecordType[dr[0]].push(type); }
             else { _detailTypesByRecordType[dr[0]] = [type]; }
 
-            if (dr[2] === 'required') {    // required detail
+			if (dr[2] === 'required') {// required detail
                 if (_requiredDetailTypesByRecordType[dr[0]]) { _requiredDetailTypesByRecordType[dr[0]].push(type); }
                 else { _requiredDetailTypesByRecordType[dr[0]] = [type]; }
             }
-            else if (dr[2] === 'recommended') {    // recommended detail
+			else if (dr[2] === 'recommended') {// recommended detail
                 if (_recommendedDetailTypesByRecordType[dr[0]]) { _recommendedDetailTypesByRecordType[dr[0]].push(type); }
                 else { _recommendedDetailTypesByRecordType[dr[0]] = [type]; }
             }
-            else {    // optional detail
+			else {// optional detail
                 if (_optionalDetailTypesByRecordType[dr[0]]) { _optionalDetailTypesByRecordType[dr[0]].push(type); }
                 else { _optionalDetailTypesByRecordType[dr[0]] = [type]; }
             }
@@ -2372,7 +2415,19 @@ var HDetailManager = new function(detailTypes, detailRequirements) {
 		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
 		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object expected for argument #2"); }
 		var details = _recordPlusTypeDetails[recordType.getID()+"."+detailType.getID()];
-		return (details  &&  details[1]>1)? true : false;
+		return (details  &&  details[1] != 1)? true : false;
+	};
+	this.getDetailMaxRepeat = function(recordType, detailType) {
+		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
+		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object expected for argument #2"); }
+		var details = _recordPlusTypeDetails[recordType.getID()+"."+detailType.getID()];
+		return (details  &&  details[1] > 0)? details[1] : 0;
+	};
+	this.getDetailMinRequired = function(recordType, detailType) {
+		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
+		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object expected for argument #2"); }
+		var details = _recordPlusTypeDetails[recordType.getID()+"."+detailType.getID()];
+		return (details  &&  details[9]>0)? details[9] : 0;
 	};
 	this.getDetailNameForRecordType = function(recordType, detailType) {
 		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
@@ -2392,6 +2447,12 @@ var HDetailManager = new function(detailTypes, detailRequirements) {
 		var details = _recordPlusTypeDetails[recordType.getID()+"."+detailType.getID()];
 		return (details  &&  details[4])? true : false;
 	};
+	this.getDetailMatchingOrder = function(recordType, detailType) {
+		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
+		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object expected for argument #2"); }
+		var details = _recordPlusTypeDetails[recordType.getID()+"."+detailType.getID()];
+		return (details  &&  details[4])? details[4] : null;
+	};
 	this.getDetailInputSize = function(recordType, detailType) {
 		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
 		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object expected for argument #2"); }
@@ -2410,6 +2471,17 @@ var HDetailManager = new function(detailTypes, detailRequirements) {
 		var details = _recordPlusTypeDetails[recordType.getID()+"."+detailType.getID()];
 		return (details  &&  details[7])? details[7] : null;
 	};
+	this.isValidDetailValue = function(recordType, detailType, detailValue) {
+		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
+		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object expected for argument #2"); }
+		if (! detailType.checkValue(detailValue)) {
+			throw new HDetailVarietyMismatchException("Expected " + detailType.getVariety() + " value");
+		}
+		var details = _recordPlusTypeDetails[recordType.getID()+"."+detailType.getID()];
+		//saw TODO for enum or relationtype check recstructure values
+		return true;
+	};
+
 }(HAPI_commonData.detailTypes, HAPI_commonData.detailRequirements);
 HDetailManager.prototype = new HObject();
 HAPI.DetailManager = HDetailManager;
