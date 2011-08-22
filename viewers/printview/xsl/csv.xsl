@@ -54,7 +54,7 @@
 
 <!-- main template -->
 	<xsl:template match="/hml/records/record">
-		<div id="{id}" class="record">
+		<div id="{id}" class="record  L{@depth}">
 			<xsl:value-of select="id"/>,
 			<xsl:value-of select="title"/>,
 			<xsl:value-of select="url"/>,

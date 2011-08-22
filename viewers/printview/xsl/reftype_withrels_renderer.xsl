@@ -62,7 +62,7 @@
 
 	<!-- detail output template -->
 	<xsl:template match="record">
-	<div id="{id}" class="record">
+	<div id="{id}" class="record  L{@depth}">
 	<table>
 		<tr>
 			<td class="detailType">

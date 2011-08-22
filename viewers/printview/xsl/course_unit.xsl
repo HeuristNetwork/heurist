@@ -2,7 +2,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 	<xsl:template name="course_unit" match="record[type/@id=70]">
 		<xsl:param name="style"/>
-		<div id="{id}" class="record">
+		<div id="{id}" class="record  L{@depth}">
 			<xsl:if test="detail[@id=223]"><!-- thumbnail -->
 				<img src="{detail[@id=223]/file/thumbURL}" class="thumbnail"/>
 			</xsl:if>

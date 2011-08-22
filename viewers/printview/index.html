@@ -351,18 +351,19 @@
 						if (ids && ids[1]) newSelectionIds = ids[1].split(",");
 					}
 					newSelectionMap = objFromArr(newSelectionIds);
-					alreadySelectedMap = {};
-					if (!pageXMLs[currentPage]){ //load pageXML now
-						clearAndDisplayLoading();
-						var pageQuery = query;
-						pageQuery = pageQuery.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"offset=" + (currentPage-1)*resultsPerPage);
-						var url = top.HEURIST.baseURL+ "export/xml/hml.php" + pageQuery;
-						var errorMsg = "Error loading " + url + " using XMLHttpRequest";
-						pageXMLs[currentPage] = loadXMLDocFromFile(url);
-						xml = pageXMLs[currentPage];
-						displayResultPage(curStyle,currentPage);
+					var limit = newSelectionIds.length;
+					if (!limit) {
+						// todo clear and display no records selected
+						return;
 					}
-
+						clearAndDisplayLoading();
+					var pageQuery = "?w=all&a=1&depth=1&q=ids:"+ newSelectionIds.join(",")+"&limit=" + limit;
+					var url = top.HEURIST.baseURL+ "export/xml/flathml.php" + pageQuery;
+						var errorMsg = "Error loading " + url + " using XMLHttpRequest";
+					xml = loadXMLDocFromFile(url);
+					selectedIds = newSelectionIds;
+					displayResultDoc(curStyle,xml);
+/*
 					var selDivs = $('div[class~=selected]');
 					if (selDivs) selDivs.map(function(a){ return this.id;}).map(function(i){
 																						if (newSelectionMap[this]) {
@@ -376,13 +377,12 @@
 														$('div#'+ this).addClass("selected");
 													}
 												});
-					selectedIds = newSelectionIds;
 					if (selectedIds && selectedIds.length > 0 &&
 							$('div#'+selectedIds[selectedIds.length-1],
 								$('iframe[id=viewer-frame]',top.document).get(0).contentDocument).length > 0) {
 						$('div#'+selectedIds[selectedIds.length-1],$('iframe[id=viewer-frame]',top.document).get(0).contentDocument).get(0).scrollIntoView();
 					}
-				}
+*/				}
 			}
 
 			function updateSelection(){// saw TODO change this to update the selection for levels
@@ -403,7 +403,43 @@
 
 			function displayResult(style){
 				curStyle = style;
-				displayResultPage(style,currentPage);
+				displayResultDoc(style,xml);
+			}
+
+			function displayResultDoc(style,xmlDoc){
+				var resultDiv =document.getElementById("displayResult");
+				var xhtmlResultDoc = "";
+				function clearResult(resultDiv) {
+					while (resultDiv.childNodes[0]) resultDiv.removeChild(resultDiv.childNodes[0]);
+				}
+
+				if (style == "genericXML") {
+					var genXML = $("<xml>").append(xmlDoc.documentElement).html();
+					xhtmlResultDoc = document.createTextNode(genXML);
+				}else{
+					if (!xsls[style]){
+						xsls[style]=loadXMLDocFromFile("xsl/" +style +".xsl");
+					}
+					if (!xsls[style]) {
+						alert("Unable to read .xsl file, check to see if this style sheet is readable in your browser or another browser.");
+						return;
+					}
+					// code for IE
+					if (window.ActiveXObject){// saw TODO change this transform a combined document for related results
+						var xmlResultStr = xmlDoc.transformNode(xsls[style]);
+						xhtmlResultDoc=new ActiveXObject("Microsoft.XMLDOM");
+						xhtmlResultDoc.async="false";
+						xhtmlResultDoc.loadXML(xmlResultStr);
+					// code for Mozilla, Firefox, Opera, etc.
+					}else {
+						var xsltProcessor=new XSLTProcessor();// saw TODO change this transform a combined document for related results
+						xsltProcessor.importStylesheet(xsls[style]);
+						xhtmlResultDoc = xsltProcessor.transformToFragment(xmlDoc,document);
+					}
+				}
+				clearResult(resultDiv);
+				resultDiv.appendChild(xhtmlResultDoc);
+				updateSelection();
 			}
 
 			function displayResultPage(style,page){

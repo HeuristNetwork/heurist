@@ -108,7 +108,7 @@
 
 <!-- url  rectype only -->
 <xsl:template match="record[type/@id=1]">
-<div id="{id}" class="record">
+<div id="{id}" class="record  L{@depth}">
 	<xsl:call-template name="header"/>
 	<div style="padding-bottom: 7px;">
 		<xsl:call-template name="body-detail-1"/>
@@ -120,7 +120,7 @@
 
 <!-- all rectypes template -->
 <xsl:template match="record">
-<div id="{id}" class="record">
+<div id="{id}" class="record  L{@depth}">
 	<xsl:call-template name="header"/>
 	<div style="padding-bottom: 7px;">
 		<xsl:call-template name="body-detail"/>

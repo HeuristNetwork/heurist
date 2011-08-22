@@ -2,7 +2,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 <xsl:template name="conference" match="record[type/@id=49]">
 <xsl:param name="style"/>
-	<div id="{id}" class="record">
+	<div id="{id}" class="record L{@depth}">
 		<span><h2><xsl:value-of select="detail[@id=160]"/></h2></span><br/>
 		<!-- Title -->
 		<xsl:choose>

@@ -21,7 +21,7 @@
 	</xsl:template>
 
 	<xsl:template match="record">
-		<div id="{id}" class="record">
+		<div id="{id}" class="record  L{@depth}">
 				<xsl:if test="detail[@id='160']">
 					<b>
 						<xsl:choose>

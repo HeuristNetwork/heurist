@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 <xsl:template name="organisation" match="record[type/@id=53]">
-<div id="{id}" class="record">
+<div id="{id}" class="record  L{@depth}">
                 <a target="_new">
                     <xsl:attribute name="href">rectype_renderer/<xsl:value-of select="id"/></xsl:attribute>
                     <xsl:value-of select="title"/>

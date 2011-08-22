@@ -51,7 +51,7 @@
 
 	<!-- main template -->
 	<xsl:template match="/hml/records/record">
-		<div id="{id}" class="record">
+		<div id="{id}" class="record  L{@depth}">
 		<!-- HEADER  -->
 		<table class="record-table">
 			<tr>

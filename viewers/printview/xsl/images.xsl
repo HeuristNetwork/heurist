@@ -50,7 +50,7 @@
 <!-- main template -->
 <xsl:template match="/hml/records/record">
 	<!-- HEADER  -->
-	<div id="{id}" class="record">
+	<div id="{id}" class="record  L{@depth}">
 		<div class="headerRow">
 			<div id="recID">Record ID: <xsl:value-of select="id"/></div>
 			<h2><xsl:value-of select="title"/></h2><br/>

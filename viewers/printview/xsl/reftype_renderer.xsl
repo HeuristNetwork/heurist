@@ -44,7 +44,7 @@
                 <xsl:attribute name="pub_query">
                     <xsl:value-of select="/hml/query[@q]"/>
                 </xsl:attribute>
-				<div id="{id}" class="record">
+				<div id="{id}" class="record  L{@depth}">
 					<table>
 					<xsl:choose>
 						<xsl:when test="number($arg) > 0">

@@ -59,7 +59,7 @@
 	<!-- main template -->
 	<xsl:template match="/hml/records/record">
 		<!-- HEADER  -->
-		<div id="{id}" class="record">
+		<div id="{id}" class="record L{@depth}">
 			<p style="margin-bottom: 5px; ">
 				<!--output the author(s)-->
 				<xsl:for-each select="detail">

@@ -52,7 +52,7 @@
 <!-- main template -->
 <xsl:template match="/hml/records/record">
 	<!-- HEADER  -->
-	<div id="{id}" class="record result_thumb">
+	<div id="{id}" class="record L{@depth} result_thumb">
 		<div id="recID"><nobr><span class="greyType">Record ID: </span><xsl:value-of select="id"/></nobr></div>
 
 			<div class="rec_title"><xsl:value-of select="title"/></div>

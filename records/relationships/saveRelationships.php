@@ -90,8 +90,8 @@ else if (@$_REQUEST["save-mode"] == "new") {
 		print "(" . json_format(saveRelationship(
 			$recID,
 			intval(@$_REQUEST["RelTermID"]),
-			intval($_REQUEST["RelatedRecID"]),
-			intval($_REQUEST["InterpRecID"]),
+			intval(@$_REQUEST["RelatedRecID"]),
+			intval(@$_REQUEST["InterpRecID"]),
 			@$_REQUEST["Title"],
 			@$_REQUEST["Notes"],
 			@$_REQUEST["StartDate"],
@@ -103,8 +103,8 @@ else if (@$_REQUEST["save-mode"] == "new") {
 			array_push($rv, saveRelationship(
 				$recID,
 				intval(@$_REQUEST["RelTermID"]),
-				intval($_REQUEST["RelatedRecID"]),
-				intval($_REQUEST["InterpRecID"]),
+				intval(@$_REQUEST["RelatedRecID"]),
+				intval(@$_REQUEST["InterpRecID"]),
 				@$_REQUEST["Title"],
 				@$_REQUEST["Notes"],
 				@$_REQUEST["StartDate"],
@@ -127,6 +127,7 @@ function saveRelationship($recID, $relTermID, $trgRecID, $interpRecID, $title, $
                 "rec_Added"     => date('Y-m-d H:i:s'),
                 "rec_Modified"  => date('Y-m-d H:i:s'),
                 "rec_RecTypeID"   => 52,
+					"rec_OwnerUGrpID" => get_user_id(),
 									"rec_AddedByUGrpID" => get_user_id()));
 
 	if (mysql_error()) {

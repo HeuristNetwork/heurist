@@ -60,7 +60,7 @@
 	<xsl:template match="/hml/records/record">
 
 		<!-- HEADER  -->
-		<div id="{id}" class="record">
+		<div id="{id}" class="record L{@depth}">
 				<div >
 				<b>
 					<xsl:value-of select="title"/>

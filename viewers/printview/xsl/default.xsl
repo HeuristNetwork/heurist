@@ -1,4 +1,5 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+	<xsl:output method="html"/>
 <!--
  this style renders standard html
  author  Maria Shvedova
@@ -52,7 +53,8 @@
 <!-- main template -->
 <xsl:template match="/hml/records/record">
 
-	<div id="{id}" class="record">
+	
+	<div id="{id}" class="record L{@depth}">
 		<div class="headerRow">
 			<div id="recID">Record ID: <xsl:value-of select="id"/></div>
 			<h2><xsl:value-of select="title"/></h2><br/>
@@ -174,9 +176,9 @@
 		  </xsl:for-each>
 
 	<!-- RELATED LISTING -->
-	<xsl:variable name="relation" select="relationships"/>
+	<xsl:variable name="relation" select="relationship"/>
 	<!--walk through the variable-->
-	<xsl:for-each select="relationships">
+	<xsl:for-each select="relationship">
 
 	  <!--act on the first in document order-->
 	  <xsl:if test="generate-id(.)=

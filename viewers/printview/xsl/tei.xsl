@@ -21,13 +21,49 @@
 		<div id="content">
 			
 		
+			[<xsl:apply-templates select="reversePointer"/>]
+					
 			<xsl:apply-templates select="detail/file/content/text"/>
 			
 			
 		</div> 
 	</xsl:template>
 
-	
+	<xsl:template match="reversePointer">
+		<p><em>rp: <xsl:value-of select="."/></em></p>
+		
+	</xsl:template>
+
+	<xsl:template name="addRef">
+		<xsl:param name="ref"/>
+		<xsl:param name="hide"/>
+		<script type="text/javascript">
+			if (window["refs"]) {
+				refs.push( {
+					startElems : [ <xsl:value-of select="detail[@id=539]"/> ],
+					endElems : [ <xsl:value-of select="detail[@id=540]"/> ],
+					startWord :
+						<xsl:choose>
+							<xsl:when test="detail[@id=329]"><xsl:value-of select="detail[@id=329]"/></xsl:when>
+							<xsl:otherwise>null</xsl:otherwise>
+						</xsl:choose>,
+					endWord :
+						<xsl:choose>
+							<xsl:when test="detail[@id=330]"><xsl:value-of select="detail[@id=330]"/></xsl:when>
+							<xsl:otherwise>null</xsl:otherwise>
+						</xsl:choose>,
+					<xsl:if test="$hide='true'">
+					hide : true,
+					</xsl:if>
+					<xsl:if test="detail[@id=199]/record">
+					targetID : <xsl:value-of select="detail[@id=199]/record/id"/>,
+					<!-- href : "../<xsl:call-template name="getPath"><xsl:with-param name="id" select="detail[@id=199]/record/id"/></xsl:call-template>", -->
+					</xsl:if>
+					recordID : "<xsl:value-of select="id"/>"
+				} );
+			}
+		</script>
+	</xsl:template>
 		
 
 	<xsl:template match="detail/file/content/text">

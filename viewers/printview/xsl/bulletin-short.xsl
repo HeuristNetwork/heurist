@@ -54,7 +54,7 @@ last updated 10/09/2007 ms
 <!-- main template -->
 <xsl:template match="/hml/records/record">
 	<!-- HEADER  -->
-	<div id="{id}" class="record">
+	<div id="{id}" class="record L{@depth}">
 	<table style="margin-bottom: 10px; ">
 		<tr>
 			<td>

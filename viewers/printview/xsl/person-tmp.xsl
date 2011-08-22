@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 <xsl:template name="person" match="record[type/@id=55]">
-<div id="{id}" class="record">
+<div id="{id}" class="record  L{@depth}">
 	<xsl:if test="detail[@id=223]"><!-- thumbnail -->
 		<div hrecord="{id}" hdetail="223" class="thumbnail">
 			<xsl:for-each select="detail[@id=223]">

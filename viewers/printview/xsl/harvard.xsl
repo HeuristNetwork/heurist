@@ -67,7 +67,7 @@
 
   <!-- =================  42: ARCHIVE RECORD =============================== -->
   <xsl:template name="archive" match="record[type/@id=42]">
-   <div id="{id}" class="record">
+   <div id="{id}" class="record  L{@depth}">
         <!-- if Title are missing, don't print -->
         <xsl:if test="detail[@id=160]">
           <!-- author(s), year and title -->
@@ -93,7 +93,7 @@
 
 <!-- =================  5: BOOK =============================== -->
 <xsl:template name="publications" match="record[type/@id=5]">
-	<div id="{id}" class="record" title="{title}">
+	<div id="{id}" class="record  L{@depth}" title="{title}">
 		<!-- if Title are missing, don't print -->
 		<xsl:if test="detail[@id=160]">
 		<!-- author(s), year and title -->
@@ -129,7 +129,7 @@
 
   <!-- =================  4: BOOK CHAPTER  =============================== -->
   <xsl:template name="book_chap" match="record[type/@id=4]">
-    <div id="{id}" class="record">
+    <div id="{id}" class="record  L{@depth}">
     <table>
     <tr>
       <td>
@@ -174,7 +174,7 @@
 
   <!-- =================  1: HYPERLINK  =============================== -->
   <xsl:template name="hyperlink" match="record[type/@id=1]">
-   <div id="{id}" class="record">
+   <div id="{id}" class="record  L{@depth}">
    <table>
     <tr>
       <td>
@@ -203,7 +203,7 @@
   </xsl:template>
   <!-- =================  29: JOURNAL | 68: MAGAZINE | 69: NEWSPAPER =============================== -->
   <xsl:template name="journal" match="record[type/@id=29 or type/@id=68 or type/@id=69]">
-  <div id="{id}" class="record">
+  <div id="{id}" class="record  L{@depth}">
   <table>
     <tr>
       <td>
@@ -229,7 +229,7 @@
   </xsl:template>
   <!-- =================  31: CONFERENCE PAPER =============================== -->
   <xsl:template name="conf-paper" match="record[type/@id=31]">
-  <div id="{id}" class="record">
+  <div id="{id}" class="record  L{@depth}">
     <table>
     <tr>
       <td>
@@ -268,7 +268,7 @@
   <!-- =================  7: CONFERENCE PROCEEDINGS =============================== -->
 
   <xsl:template name="conference_proceedings" match="record[type/@id=7 ]">
-  <div id="{id}" class="record">
+  <div id="{id}" class="record  L{@depth}">
   <table>
     <tr>
       <td>
@@ -318,7 +318,7 @@
   <!-- =================  9: NEWSPAPER ARTICLE && 10: MAGAZINE  ARTICLE =============================== -->
 
   <xsl:template name="article" match="record[type/@id=9 or type/@id=10]">
-    <div id="{id}" class="record">
+    <div id="{id}" class="record  L{@depth}">
     <table>
     <tr>
       <td>
@@ -361,7 +361,7 @@
   <!-- =================  DEFAULT =============================== -->
 
   <xsl:template name="default" match="record">
-  <div id="{id}" class="record">
+  <div id="{id}" class="record  L{@depth}">
   <table>
     <tr>
       <td>
@@ -393,7 +393,7 @@
 
   <!-- =================  28: JOURNAL VOLUME  =============================== -->
   <xsl:template name="journal_volume" match="record[type/@id=28 ] ">
-  <div id="{id}" class="record">
+  <div id="{id}" class="record  L{@depth}">
   <table>
     <tr>
       <td>
@@ -431,7 +431,7 @@
   </xsl:template>
   <!-- =================  30: PUBLISHER  =============================== -->
   <xsl:template name="publisher" match="record[type/@id=30 ] ">
-  <div id="{id}" class="record">
+  <div id="{id}" class="record  L{@depth}">
   <table>
     <tr>
       <td>
@@ -466,7 +466,7 @@
       <!-- only display series if series title exists -->
       <xsl:when
         test="detail[@id=160] and detail[@id=160] != 'Unknown Series' and detail[@id =160] != 000">
-      <div id="{id}" class="record">
+      <div id="{id}" class="record  L{@depth}">
   	  <table>
         <tr>
           <td>
@@ -513,7 +513,7 @@
 
   <!-- =================  3: JOURNAL ARTICLE  && 10: MAGAZINE ARTICLE =============================== -->
   <xsl:template name="jour_article" match="record[type/@id=3 or type/@id=10 ]">
-  <div id="{id}" class="record">
+  <div id="{id}" class="record  L{@depth}">
   <table>
     <tr>
       <td>
@@ -572,7 +572,7 @@
   </xsl:template>
   <!-- =================  12: REPORT =============================== -->
   <xsl:template name="report" match="record[type/@id=12 ]">
-  <div id="{id}" class="record">
+  <div id="{id}" class="record  L{@depth}">
   <table>
     <tr>
       <td>
@@ -608,7 +608,7 @@
 
   <!-- =================  13: THESIS =============================== -->
   <xsl:template name="thesis" match="record[type/@id=13 ]">
-  <div id="{id}" class="record">
+  <div id="{id}" class="record  L{@depth}">
   <table>
     <tr>
       <td>

@@ -812,9 +812,12 @@ function makeFileContentNode($file){
 				$teiHeader = $xml->xpath('//TEI.2/teiHeader');
 				$content = $xml->xpath('//TEI.2/text');
 			}
-			$content = $teiHeader[0]->asXML().$content[0]->asXML();
+			$content = ($teiHeader && $teiHeader[0]? $teiHeader[0]->asXML():"").
+						($content && $content[0]? $content[0]->asXML():"");
+			if ($content) {
 			makeTag('content',$attrs,$content,true,false);
 		}
+	}
 	}
 }
 
