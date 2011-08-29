@@ -365,6 +365,7 @@ TREE REALTED ROUTINES ---------------------------------------
 							}else{
 								term.label = term.label + termsByDomainLookup[term_id][0];
 							}
+							term.label = term.label + '</div>';
 
 							term.label = term.label + ((cnt_children>0)?'</b>':'') + '</div>';
 

@@ -72,7 +72,6 @@ top.HEURIST.search = {
 //		top.HEURIST.search.checkSearchForm();
 //		document.forms[0].submit();
 		top.HEURIST.search.clearResultRows();
-		top.HEURIST.search.clearRelatesRows();
 		top.HEURIST.search.reloadSearch();
 	},
 
@@ -1584,7 +1583,7 @@ top.HEURIST.search = {
 //		sidebysideFrame.src = top.HEURIST.basePath+"viewers/sidebyside/sidebyside.html"+
 //		("?db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
 //						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")));
-		var ssel = "selectedIds=" + selectedRecIDs.join(",");
+		var ssel = "selectedIds=" + top.HEURIST.search.getSelectedRecIDs().get().join(",");
         top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
 //		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);
 		top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap,"heurist-selectionchange",  ssel);
