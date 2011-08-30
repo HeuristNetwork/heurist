@@ -254,11 +254,82 @@
 	print "<br><br>";
 
 
-    // LAST UPDATED 2/8/11 DBVsn 3.1.0
+    // LAST UPDATED 230/8/11 DBVsn 3.1.0
     // At this time (2 Aug 2011) all definitional data including users and tags are output.
     // Only defURLPrefixes and sysIdentification information are not output.
     // All def tables plus ugrp and user to group links, and user tags are output
 
+    // ------------------------------------------------------------------------------------------
+    // defRecTypeGroups
+
+    print "\n\n\n-- RECORD TYPE GROUPS";print "\n";
+    print "<p>";
+    include 'crosswalk/defRecTypeGroupsFields.inc'; // sets value of $flds
+    print "-- $flds \n";
+    $query = "select $flds from defRecTypeGroups";
+    $res = mysql_query($query);
+    $fmt = 'defRecTypeGroups';
+
+    print "<p>";
+    print "\n>>StartData>>\n";
+    while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
+    print ">>EndData>>\n";
+    print "<p>&nbsp;<p>&nbsp;<p>";
+
+    // ------------------------------------------------------------------------------------------
+    // defDetailTypeGroups
+
+    print "\n\n\n-- DETAIL TYPE GROUPS";print "\n";
+    print "<p>";
+    include 'crosswalk/defDetailTypeGroupsFields.inc'; // sets value of $flds
+    print "-- $flds \n";
+    $query = "select $flds from defDetailTypeGroups";
+    $res = mysql_query($query);
+    $fmt = 'defDetailTypeGroups';
+
+    print "<p>";
+    print "\n>>StartData>>\n";
+    while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
+    print ">>EndData>>\n";
+    print "<p>&nbsp;<p>&nbsp;<p>";
+
+    // ------------------------------------------------------------------------------------------
+    // Detail Type ONTOLOGIES
+
+    print "\n\n\n-- ONTOLOGIES";print "\n";
+    print "<p>";
+    include 'crosswalk/defOntologiesFields.inc'; // sets value of $flds
+    print "-- $flds \n";
+    $query = "select $flds from defOntologies";
+    $res = mysql_query($query);
+    $fmt = 'defOntologies';
+
+    print "<p>";
+    print "\n>>StartData>>\n";
+    while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
+    print ">>EndData>>\n";
+    print "<p>&nbsp;<p>&nbsp;<p>";
+
+
+    // ------------------------------------------------------------------------------------------
+    // Detail Type TERMS
+
+    print "\n\n\n-- TERMS";print "\n";
+    print "<p>";
+    include 'crosswalk/defTermsFields.inc'; // sets value of $flds
+    print "-- $flds \n";
+    $query = "select $flds from defTerms";
+    $res = mysql_query($query);
+    $fmt = 'defTerms';
+
+    print "<p>";
+    print "\n>>StartData>>\n";
+    while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
+    print ">>EndData>>\n";
+    print "<p>&nbsp;<p>&nbsp;<p>";
+
+        
+    
 	// ------------------------------------------------------------------------------------------
 	// RECORD TYPES (this will be repeated for each of the tables)
 
@@ -311,42 +382,7 @@
 	print ">>EndData>>\n";
 	print "<p>&nbsp;<p>&nbsp;<p>";
 
-
-	// ------------------------------------------------------------------------------------------
-	// Detail Type TERMS
-
-	print "\n\n\n-- TERMS";print "\n";
-	print "<p>";
-    include 'crosswalk/defTermsFields.inc'; // sets value of $flds
-    print "-- $flds \n";
-    $query = "select $flds from defTerms";
-	$res = mysql_query($query);
-	$fmt = 'defTerms';
-
-	print "<p>";
-	print "\n>>StartData>>\n";
-	while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
-	print ">>EndData>>\n";
-	print "<p>&nbsp;<p>&nbsp;<p>";
-
-	// ------------------------------------------------------------------------------------------
-	// Detail Type ONTOLOGIES
-
-	print "\n\n\n-- ONTOLOGIES";print "\n";
-	print "<p>";
-    include 'crosswalk/defOntologiesFields.inc'; // sets value of $flds
-    print "-- $flds \n";
-    $query = "select $flds from defOntologies";
-	$res = mysql_query($query);
-	$fmt = 'defOntologies';
-
-	print "<p>";
-	print "\n>>StartData>>\n";
-	while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
-	print ">>EndData>>\n";
-	print "<p>&nbsp;<p>&nbsp;<p>";
-
-	// ------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------
 	// RELATIONSHIP CONSTRAINTS
 
 	print "\n\n\n-- RELATIONSHIP CONSTRAINTS";print "\n";
@@ -373,40 +409,6 @@
     $query = "select $flds from defFileExtToMimetype";
 	$res = mysql_query($query);
 	$fmt = 'defFileExtToMimetype';
-
-	print "<p>";
-	print "\n>>StartData>>\n";
-	while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
-	print ">>EndData>>\n";
-	print "<p>&nbsp;<p>&nbsp;<p>";
-
-	// ------------------------------------------------------------------------------------------
-	// defRecTypeGroups
-
-	print "\n\n\n-- RECORD TYPE GROUPS";print "\n";
-	print "<p>";
-	include 'crosswalk/defRecTypeGroupsFields.inc'; // sets value of $flds
-    print "-- $flds \n";
-    $query = "select $flds from defRecTypeGroups";
-	$res = mysql_query($query);
-	$fmt = 'defRecTypeGroups';
-
-	print "<p>";
-	print "\n>>StartData>>\n";
-	while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
-	print ">>EndData>>\n";
-	print "<p>&nbsp;<p>&nbsp;<p>";
-
-	// ------------------------------------------------------------------------------------------
-	// defDetailTypeGroups
-
-	print "\n\n\n-- DETAIL TYPE GROUPS";print "\n";
-	print "<p>";
-	include 'crosswalk/defDetailTypeGroupsFields.inc'; // sets value of $flds
-    print "-- $flds \n";
-    $query = "select $flds from defDetailTypeGroups";
-	$res = mysql_query($query);
-	$fmt = 'defDetailTypeGroups';
 
 	print "<p>";
 	print "\n>>StartData>>\n";

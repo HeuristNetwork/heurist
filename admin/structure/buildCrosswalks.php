@@ -235,29 +235,32 @@
     } // getNextDataSet
 
     // Do the splits and place in arrays
+    // Note, these MUST be in the same order as getDBStructure
+    $recTypeGroups = getNextDataSet($splittedData);
+    $detailTypeGroups = getNextDataSet($splittedData);
+    $ontologies = getNextDataSet($splittedData);
+    $terms = getNextDataSet($splittedData);
     $recTypes = getNextDataSet($splittedData);
     $detailTypes = getNextDataSet($splittedData);
     $recStructure = getNextDataSet($splittedData);
-    $terms = getNextDataSet($splittedData);
-    $ontologies = getNextDataSet($splittedData);
     $relationshipConstraints = getNextDataSet($splittedData);
     $fileExtToMimetype = getNextDataSet($splittedData);
-    $recTypeGroups = getNextDataSet($splittedData);
-    $detailTypeGroups = getNextDataSet($splittedData);
     $translations = getNextDataSet($splittedData);
-error_log(" dt = $detailTypes");
-    // insert the arrays into the corresonding tables 9new db) or temp tables (existing)
+    // not extracting defCalcFunctions, users, groups and tags
+    error_log(" dt = $detailTypes");
+    
+    // insert the arrays into the corresonding tables (new db) or temp tables (existing)
     $query = "SET SESSION sql_mode='NO_AUTO_VALUE_ON_ZERO'";
     mysql_query($query);
-    processRecTypes($recTypes);
-    processTerms($terms);
-    processOntologies($ontologies);
-    processRelationshipConstraints($relationshipConstraints);
-    processFileExtToMimetype($fileExtToMimetype);
     processRecTypeGroups($recTypeGroups);
     processDetailTypeGroups($detailTypeGroups);
+    processOntologies($ontologies);
+    processTerms($terms);
+    processRecTypes($recTypes);
     processDetailTypes($detailTypes);
     processRecStructure($recStructure);
+    processRelationshipConstraints($relationshipConstraints);
+    processFileExtToMimetype($fileExtToMimetype);
     processTranslations($translations);
     $query = "SET SESSION sql_mode=''";
     mysql_query($query);
@@ -279,7 +282,7 @@ error_log(" dt = $detailTypes");
             $query = "INSERT INTO `defRecTypes` ($flds) VALUES" . $dataSet;
             mysql_query($query);
             if(mysql_error()) {
-                echo "RECTYPES Error inserting data: " . mysql_error() . "<br />";
+                echo "RECTYPES Error inserting data: " . mysql_error() . "<p>FIELDS:$flds<br /><p>VALUES:$dataset<p>";
                 $errorCreatingTables = TRUE;
             }
         } // END Imported first set of data to temp table: defRectypes
