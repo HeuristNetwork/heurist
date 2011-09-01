@@ -89,11 +89,16 @@ top.HEURIST.search = {
 		};
 		top.HEURIST.search.sid = results.sid;
 
-		if (top.HEURIST.search.results.totalQueryResultRecordCount == 0)
-			top.HEURIST.registerEvent(window, "load", top.HEURIST.search.clearResultRows);
-			top.HEURIST.registerEvent(window, "load", top.HEURIST.search.clearRelatesRows);
+		if (top.HEURIST.search.results.totalQueryResultRecordCount == 0) {
+			top.HEURIST.registerEvent(window, "load", function(){
+						top.HEURIST.search.clearResultRows();
+						top.HEURIST.search.clearRelatesRows();
+						top.HEURIST.search.renderNavigation();
+			});
+		}
+//			top.HEURIST.registerEvent(window, "load", top.HEURIST.search.clearRelatesRows);
 
-		top.HEURIST.registerEvent(window, "load", top.HEURIST.search.renderNavigation);
+//		top.HEURIST.registerEvent(window, "load", top.HEURIST.search.renderNavigation);
 
 		results.notified = true;
 	},
@@ -293,7 +298,7 @@ top.HEURIST.search = {
 
 		if(level>0){
 			var showRelatedMenuItem = document.createElement("div");
-			<!--showRelatedMenuItem.innerHTML = "<a title=\"Click to show records related to the records listed above\" href='#' onclick=top.HEURIST.search.toggleRelated("+level+")>Show Related Records</a>";-->
+//			<!--showRelatedMenuItem.innerHTML = "<a title=\"Click to show records related to the records listed above\" href='#' onclick=top.HEURIST.search.toggleRelated("+level+")>Show Related Records</a>";-->
 			showRelatedMenuItem.innerHTML = "<a title=\"Click to show "+depthInfo.count+" records related to the records listed above\" href='#' onclick=top.HEURIST.search.toggleRelated("+level+")>Show Level "+level+" Related Records <span class=\"relatedCount\">"+depthInfo.count+"</span></a>";
 			showRelatedMenuItem.id = "showrelated"+level;
 			showRelatedMenuItem.className = "showrelated level" + level;
