@@ -79,7 +79,7 @@ mysql_connection_db_overwrite(DATABASE);
 				list($a, $b) = delete_bib($rec_id);
 				$bibs += $a;
 				$bkmks += $b;
-				$refs_res = mysql_query('select rec_ID from recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID left join Records on rec_ID=dtl_RecID where dty_Type="resource" and dtl_Value='.$rec_id.' and rec_RecTypeID=52');
+				$refs_res = mysql_query('select rec_ID from recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID left join Records on rec_ID=dtl_RecID where dty_Type="resource" and dtl_Value='.$rec_id.' and rec_RecTypeID=52');//MAGIC NUMBER
 				while ($row = mysql_fetch_assoc($refs_res)) {
 					list($a, $b) = delete_bib($row['rec_ID']);
 					$rels += $a;

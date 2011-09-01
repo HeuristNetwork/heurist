@@ -144,6 +144,8 @@ foreach ($bibs as $rec_id => $bib) {
 print '<script type="text/javascript">update_counts('.$processed_count.','.$blank_count.','.count($updates).')</script>'."\n";
 print '<hr>';
 
+$titleDT = (defined('DT_TITLE')?DT_TITLE:0);
+
 if (count($updates) > 0) {
 
 	print '<p>Updating records</p>';
@@ -165,11 +167,11 @@ if (count($updates) > 0) {
 	foreach ($reparables as $rec_id) {
 		$rec = $bibs[$rec_id];
 		if ( $rec['rec_RecTypeID'] == 1 && $rec['rec_Title']) {
-			$has_detail_160 = (mysql_num_rows(mysql_query('select dtl_ID from recDetails where dtl_DetailTypeID = 160 and dtl_RecID ='. $rec_id)) > 0);
+			$has_detail_160 = (mysql_num_rows(mysql_query("select dtl_ID from recDetails where dtl_DetailTypeID = $titleDT and dtl_RecID =". $rec_id)) > 0);
 			//touch the record so we can update it  (required by the heuristdb triggers)
 			mysql_query('update Records set rec_RecTypeID=1 where rec_ID='.$rec_id);
 			if ($has_detail_160) {
-				mysql_query('update recDetails set dtl_Value="' .$rec['rec_Title'] . '" where dtl_DetailTypeID = 160 and dtl_RecID='.$rec_id);
+				mysql_query('update recDetails set dtl_Value="' .$rec['rec_Title'] . "\" where dtl_DetailTypeID = $titleDT and dtl_RecID=".$rec_id);
 			}else{
 				mysql_query('insert into recDetails (dtl_RecID, dtl_Value) VALUES(' .$rec_id . ','.$rec['rec_Title'] . ')');
 			}

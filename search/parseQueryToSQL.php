@@ -470,7 +470,7 @@ class SortPhrase {
 			 * then we can only sort by one of them.  We choose a representative value: this is the lex-lowest of all the values,
 			 * UNLESS it is field 158 (creator), in which case the order of the authors is important, and we choose the one with the lowest dtl_ID
 			 */
-			$CREATOR = 158;
+			$CREATOR = (defined('DT_CREATOR')?DT_CREATOR:'0');
 
 			if (preg_match('/^(?:f|field):(\\d+)(:m)?/i', $text, $matches)) {
 				@list($_, $field_id, $show_multiples) = $matches;

@@ -1003,7 +1003,6 @@ function reltype_inverse ($relTermID) {	//saw Enum change - find inverse as an i
 	global $inverses;
 	if (!$relTermID) return;
 	if (! $inverses) {
-		//		$inverses = mysql__select_assoc("defTerms A left join defTerms B on B.trm_ID=A.trm_InverseTermID", "A.trm_Label", "B.trm_Label", "A.rdl_rdt_id=200 and A.trm_Label is not null");
 		$inverses = mysql__select_assoc("defTerms A left join defTerms B on B.trm_ID=A.trm_InverseTermID", "A.trm_ID", "B.trm_ID", "A.trm_Label is not null and B.trm_Label is not null");
 	}
 
@@ -1016,14 +1015,25 @@ function reltype_inverse ($relTermID) {	//saw Enum change - find inverse as an i
 	return $inverse;
 }
 
+$relRT = (defined('RT_RELATION')?RT_RELATION:0);
+$relTypDT = (defined('DT_RELATION_TYPE')?DT_RELATION_TYPE:0);
+$relSrcDT = (defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
+$relTrgDT = (defined('DT_LINKED_RESOURCE')?DT_LINKED_RESOURCE:0);
+$intrpDT = (defined('DT_INTERPRETATION_REFERENCE')?DT_INTERPRETATION_REFERENCE:0);
+$notesDT = (defined('DT_NOTES')?DT_NOTES:0);
+$startDT = (defined('DT_START_DATE')?DT_START_DATE:0);
+$endDT = (defined('DT_END_DATE')?DT_END_DATE:0);
+$titleDT = (defined('DT_TITLE')?DT_TITLE:0);
+
 function fetch_relation_details($recID, $i_am_primary) {
+global $relTypDT,$relSrcDT,$relTrgDT,$intrpDT,$notesDT,$startDT,$endDT,$titleDT;
 	/* Raid recDetails for the given link resource and extract all the necessary values */
 
 	$res = mysql_query('select * from recDetails where dtl_RecID = ' . $recID);
 	$bd = array('recID' => $recID);
 	while ($row = mysql_fetch_assoc($res)) {
 		switch ($row['dtl_DetailTypeID']) {
-			case 200:	//saw Enum change - added RelationValue for UI
+			case $relTypDT:	//saw Enum change - added RelationValue for UI
 				if ($i_am_primary) {
 					$bd['RelTermID'] = $row['dtl_Value'];
 				}else{
@@ -1036,39 +1046,39 @@ function fetch_relation_details($recID, $i_am_primary) {
 				}
 				break;
 
-			case 199:	// linked resource
+			case $relTrgDT:	// linked resource
 				if (! $i_am_primary) break;
 				$r = mysql_query('select rec_ID, rec_Title, rec_RecTypeID, rec_URL
 				from Records where rec_ID = ' . intval($row['dtl_Value']));
 				$bd['RelatedRecID'] = mysql_fetch_assoc($r);
 				break;
 
-			case 202:
+			case $relSrcDT:
 				if ($i_am_primary) break;
 				$r = mysql_query('select rec_ID, rec_Title, rec_RecTypeID, rec_URL
 				from Records where rec_ID = ' . intval($row['dtl_Value']));
 				$bd['RelatedRecID'] = mysql_fetch_assoc($r);
 				break;
 
-			case 638:
+			case $intrpDT:
 				$r = mysql_query('select rec_ID, rec_Title, rec_RecTypeID, rec_URL
 				from Records where rec_ID = ' . intval($row['dtl_Value']));
 				$bd['InterpRecID'] = mysql_fetch_assoc($r);
 				break;
 
-			case 201:
+			case $notesDT:
 				$bd['Notes'] = $row['dtl_Value'];
 				break;
 
-			case 160:
+			case $titleDT:
 				$bd['Title'] = $row['dtl_Value'];
 				break;
 
-			case 177:
+			case $startDT:
 				$bd['StartDate'] = $row['dtl_Value'];
 				break;
 
-			case 178:
+			case $endDT:
 				$bd['EndDate'] = $row['dtl_Value'];
 				break;
 		}
@@ -1078,50 +1088,53 @@ function fetch_relation_details($recID, $i_am_primary) {
 }
 
 function getAllRelatedRecords($recID, $relnRecID=0) {
+global $relRT,$relTypDT,$relSrcDT,$relTrgDT,$intrpDT,$notesDT,$startDT,$endDT,$titleDT;
 	if (! $recID) return null;
-	$query = "select relnID,
-					src.dtl_Value as src,
-					srcRec.rec_RecTypeID as srcRT,
-					srcRec.rec_Title as srcTitle,
-					srcRec.rec_URL as srcURL,
-					trg.dtl_Value as trg,
-					if(srcRec.rec_ID = $recID, 'Primary', 'Non-Primary') as role,
-					trgRec.rec_RecTypeID as trgRT,
-					trgRec.rec_Title as trgTitle,
-					trgRec.rec_URL as trgURL,
-					trm.dtl_Value as trmID,
-					term.trm_Label as term,
-					inv.trm_ID as invTrmID,
-					if(inv.trm_ID, inv.trm_Label, concat('inverse of ', term.trm_Label)) as invTrm,
-					rlnTtl.dtl_Value as title,
-					rlnNote.dtl_Value as note,
-					strDate.dtl_Value as strDate,
-					endDate.dtl_Value as endDate,
-					intrpRec.rec_ID as intrp,
-					intrpRec.rec_RecTypeID as intrpRT,
-					intrpRec.rec_Title as intrpTitle,
-					intrpRec.rec_URL as intrpURL
-				from (select rrc_RecID as relnID from recRelationshipsCache) rels
-					left join recDetails src on src.dtl_RecID = rels.relnID and src.dtl_DetailTypeID = 202
-					left join Records srcRec on src.dtl_Value = srcRec.rec_ID
-					left join recDetails trg on trg.dtl_RecID = rels.relnID and trg.dtl_DetailTypeID = 199
-					left join Records trgRec on trg.dtl_Value = trgRec.rec_ID
-					left join recDetails trm on trm.dtl_RecID = rels.relnID and trm.dtl_DetailTypeID = 200
-					left join defTerms term on term.trm_ID = trm.dtl_Value
-					left join defTerms inv on inv.trm_ID = term.trm_InverseTermID
-					left join recDetails intrp on intrp.dtl_RecID = rels.relnID and intrp.dtl_DetailTypeID = 638
-					left join Records intrpRec on intrp.dtl_Value = intrpRec.rec_ID
-					left join recDetails rlnTtl on rlnTtl.dtl_RecID = rels.relnID and rlnTtl.dtl_DetailTypeID = 160
-					left join recDetails rlnNote on rlnNote.dtl_RecID = rels.relnID and rlnNote.dtl_DetailTypeID = 201
-					left join recDetails strDate on strDate.dtl_RecID = rels.relnID and strDate.dtl_DetailTypeID = 177
-					left join recDetails endDate on endDate.dtl_RecID = rels.relnID and endDate.dtl_DetailTypeID = 178
-				where (srcRec.rec_ID = $recID or trgRec.rec_ID = $recID)";
+	$query = "select relnID,".
+					" src.dtl_Value as src,".
+					" srcRec.rec_RecTypeID as srcRT,".
+					" srcRec.rec_Title as srcTitle,".
+					" srcRec.rec_URL as srcURL,".
+					" trg.dtl_Value as trg,".
+					" if(srcRec.rec_ID = $recID, 'Primary', 'Non-Primary') as role,".
+					" trgRec.rec_RecTypeID as trgRT,".
+					" trgRec.rec_Title as trgTitle,".
+					" trgRec.rec_URL as trgURL,".
+					" trm.dtl_Value as trmID,".
+					" term.trm_Label as term,".
+					" inv.trm_ID as invTrmID,".
+					" if(inv.trm_ID, inv.trm_Label, concat('inverse of ', term.trm_Label)) as invTrm,".
+					" rlnTtl.dtl_Value as title,".
+					" rlnNote.dtl_Value as note,".
+					" strDate.dtl_Value as strDate,".
+					" endDate.dtl_Value as endDate,".
+					" intrpRec.rec_ID as intrp,".
+					" intrpRec.rec_RecTypeID as intrpRT,".
+					" intrpRec.rec_Title as intrpTitle,".
+					" intrpRec.rec_URL as intrpURL".
+				" from (select rrc_RecID as relnID from recRelationshipsCache) rels".
+					" left join recDetails src on src.dtl_RecID = rels.relnID and src.dtl_DetailTypeID = $relSrcDT".
+					" left join Records srcRec on src.dtl_Value = srcRec.rec_ID".
+					" left join recDetails trg on trg.dtl_RecID = rels.relnID and trg.dtl_DetailTypeID = $relTrgDT".
+					" left join Records trgRec on trg.dtl_Value = trgRec.rec_ID".
+					" left join recDetails trm on trm.dtl_RecID = rels.relnID and trm.dtl_DetailTypeID = $relTypDT".
+					" left join defTerms term on term.trm_ID = trm.dtl_Value".
+					" left join defTerms inv on inv.trm_ID = term.trm_InverseTermID".
+					" left join recDetails intrp on intrp.dtl_RecID = rels.relnID and intrp.dtl_DetailTypeID = $intrpDT".
+					" left join Records intrpRec on intrp.dtl_Value = intrpRec.rec_ID".
+					" left join recDetails rlnTtl on rlnTtl.dtl_RecID = rels.relnID and rlnTtl.dtl_DetailTypeID = $titleDT".
+					" left join recDetails rlnNote on rlnNote.dtl_RecID = rels.relnID and rlnNote.dtl_DetailTypeID = $notesDT".
+					" left join recDetails strDate on strDate.dtl_RecID = rels.relnID and strDate.dtl_DetailTypeID = $startDT".
+					" left join recDetails endDate on endDate.dtl_RecID = rels.relnID and endDate.dtl_DetailTypeID = $endDT".
+				" where (srcRec.rec_ID = $recID or trgRec.rec_ID = $recID)";
 	if ($relnRecID) $query .= " and rels.relnID = $relnRecID";
 
 
-	//error_log($query);
+//	error_log($query);
 	$res = mysql_query($query);	/* primary resources first, then non-primary, then authors */
-
+	if (mysql_error($res)) {
+		return array("error"=>mysql_error($res));
+	}
 	if (!mysql_num_rows($res)) {
 		return array();
 	}

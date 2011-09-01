@@ -283,19 +283,19 @@ function print_bib_details ($rec_id, $base_rectype, $visited) {
 	}
 
 	// authors
-	if (@$details['158']) {
+	if (@$details['158']) {//MAGIC NUMBER
 		$res = mysql_query("select rec_Title from Records where rec_ID in (" .
-							(is_array($details['158']) ? join(",", $details['158']) : $details['158']) . ")");
-		$details['158'] = array();
+							(is_array($details['158']) ? join(",", $details['158']) : $details['158']) . ")");//MAGIC NUMBER
+		$details['158'] = array();//MAGIC NUMBER
 		while ($row = mysql_fetch_assoc($res)) {
-			array_push($details['158'], $row['rec_Title']);
+			array_push($details['158'], $row['rec_Title']);//MAGIC NUMBER
 		}
 	}
 
 	// page numbers
-	if (@$details['164']  &&  @$details['165']) {
-		$details['164'] .= '-' . $details['165'];
-		unset($details['165']);
+	if (@$details['164']  &&  @$details['165']) {//MAGIC NUMBER
+		$details['164'] .= '-' . $details['165'];//MAGIC NUMBER
+		unset($details['165']);//MAGIC NUMBER
 	}
 
 	foreach ($details as $rd_type => $detail) {

@@ -154,15 +154,26 @@
 		return 0;
 	}
 
+$relRT = (defined('RT_RELATION')?RT_RELATION:0);
+$relTypDT = (defined('DT_RELATION_TYPE')?DT_RELATION_TYPE:0);
+$relSrcDT = (defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
+$relTrgDT = (defined('DT_LINKED_RESOURCE')?DT_LINKED_RESOURCE:0);
+$intrpDT = (defined('DT_INTERPRETATION_REFERENCE')?DT_INTERPRETATION_REFERENCE:0);
+$notesDT = (defined('DT_NOTES')?DT_NOTES:0);
+$startDT = (defined('DT_START_DATE')?DT_START_DATE:0);
+$endDT = (defined('DT_END_DATE')?DT_END_DATE:0);
+$titleDT = (defined('DT_TITLE')?DT_TITLE:0);
+
 
 	function fetch_relation_details($recID, $i_am_primary) {
+global $relTypDT,$relSrcDT,$relTrgDT,$intrpDT,$notesDT,$startDT,$endDT,$titleDT, $relRT;
 	/* Raid recDetails for the given link resource and extract all the necessary values */
 
 		$res = mysql_query('select * from recDetails where dtl_RecID = ' . $recID);
 		$bd = array('recID' => $recID);
 	while ($row = mysql_fetch_assoc($res)) {
 		switch ($row['dtl_DetailTypeID']) {
-		    case 200:	//saw Enum change - added RelationValue for UI
+		    case $relTypDT:	//saw Enum change - added RelationValue for UI
 			if ($i_am_primary) {
 						$bd['relTermID'] = $row['dtl_Value'];
 			}else{
@@ -175,39 +186,39 @@
 			}
 			break;
 
-		    case 199:	// linked resource
+		    case $relTrgDT:	// linked resource
 			if (! $i_am_primary) break;
 					$r = mysql_query('select rec_ID as recID, rec_Title as title, rec_RecTypeID as rectype, rec_URL as URL
 										from Records where rec_ID = ' . intval($row['dtl_Value']));
 					$bd['relatedRecID'] = mysql_fetch_assoc($r);
 			break;
 
-		    case 202:
+		    case $relSrcDT:
 			if ($i_am_primary) break;
 					$r = mysql_query('select rec_ID as recID, rec_Title as title, rec_RecTypeID as rectype, rec_URL as URL
 										from Records where rec_ID = ' . intval($row['dtl_Value']));
 					$bd['relatedRecID'] = mysql_fetch_assoc($r);
 			break;
 
-		    case 638:
+		    case $intrpDT:
 					$r = mysql_query('select rec_ID as recID, rec_Title as title, rec_RecTypeID as rectype, rec_URL as URL
 										from Records where rec_ID = ' . intval($row['dtl_Value']));
 					$bd['interpRecID'] = mysql_fetch_assoc($r);
 			break;
 
-		    case 201:
+		    case $notesDT:
 					$bd['notes'] = $row['dtl_Value'];
 			break;
 
-		    case 160:
+		    case $titleDT:
 					$bd['title'] = $row['dtl_Value'];
 			break;
 
-		    case 177:
+		    case $startDT:
 					$bd['startDate'] = $row['dtl_Value'];
 			break;
 
-		    case 178:
+		    case $endDT:
 					$bd['endDate'] = $row['dtl_Value'];
 			break;
 		}
@@ -218,14 +229,15 @@
 
 
 	function getAllRelatedRecords($recID, $relnRecID=0) {
+global $relTypDT,$relSrcDT,$relTrgDT,$intrpDT,$notesDT,$startDT,$endDT,$titleDT, $relRT;
 		if (! $recID) return null;
 		$query = "select LINK.dtl_DetailTypeID as type, DETAILS.*, DBIB.rec_Title as title,
 		DBIB.rec_RecTypeID as rt, DBIB.rec_URL as url
 		from recDetails LINK left join Records LBIB on LBIB.rec_ID=LINK.dtl_RecID,
 		recDetails DETAILS left join Records DBIB on DBIB.rec_ID=DETAILS.dtl_Value and
-		DETAILS.dtl_DetailTypeID in (202, 199, 158)
-		where ((LINK.dtl_DetailTypeID in (202, 199) and LBIB.rec_RecTypeID=52)
-		or LINK.dtl_DetailTypeID=158) and LINK.dtl_Value = $recID and DETAILS.dtl_RecID = LINK.dtl_RecID";
+		DETAILS.dtl_DetailTypeID in ($relSrcDT, $relTrgDT)".
+		" where (LINK.dtl_DetailTypeID in ($relSrcDT, $relTrgDT) and LBIB.rec_RecTypeID=$relRT)".
+		" and LINK.dtl_Value = $recID and DETAILS.dtl_RecID = LINK.dtl_RecID";
 		if ($relnRecID) $query .= " and DETAILS.dtl_RecID = $relnRecID";
 
 	$query .= " order by LINK.dtl_DetailTypeID desc, DETAILS.dtl_ID";
@@ -239,15 +251,15 @@
 		$relations = array('relationshipRecs' => array());
 		while ($row = mysql_fetch_assoc($res)) {
 			$relnRecID = $row["dtl_RecID"];
-			$i_am_primary = ($row["type"] == 202);
+			$i_am_primary = ($row["type"] == $relSrcDT);
 			if (! array_key_exists($relnRecID, $relations['relationshipRecs'])){
 				$relations['relationshipRecs'][$relnRecID] = array();
 			}
 
 			if (! array_key_exists("role", $relations['relationshipRecs'][$relnRecID])) {
-				if ($row["type"] == 202) {
+				if ($row["type"] == $relSrcDT) {
 					$relations['relationshipRecs'][$relnRecID]["role"] = "Primary";
-				} else if ($row["type"] == 199) {
+				} else if ($row["type"] == $relTrgDT) {
 					$relations['relationshipRecs'][$relnRecID]["role"] = "Non-primary";
 			} else {
 					$relations['relationshipRecs'][$relnRecID]["role"] = "Unknown";
@@ -258,7 +270,7 @@
 		}
 
 			switch ($row["dtl_DetailTypeID"]) {
-		case 200:	//saw Enum change - nothing to do since dtl_Value is an id and inverse returns an id
+		case $relTypDT:	//saw Enum change - nothing to do since dtl_Value is an id and inverse returns an id
 					$relations['relationshipRecs'][$relnRecID]["relTermID"] = $i_am_primary? $row["dtl_Value"] : reltype_inverse($row["dtl_Value"]);
 					if($relations['relationshipRecs'][$relnRecID]["relTermID"]) {
 						$relval = mysql_fetch_assoc(mysql_query('select trm_Label from defTerms where trm_ID = ' .  intval($relations['relationshipRecs'][$relnRecID]["relTermID"])));
@@ -266,8 +278,8 @@
 					}
 			break;
 
-		case 199:
-		case 202:
+		case $relTrgDT:
+		case $relSrcDT:
 					if ( $row["dtl_Value"] !=  $recID) {
 						$relations['relationshipRecs'][$relnRecID]["relatedRec"] = array("title" => $row["title"],
 																						"rectype" => $row["rt"],
@@ -276,26 +288,26 @@
 					}
 			break;
 
-		case 638:
+		case $intrpDT:
 				$relations['relationshipRecs'][$relnRecID]["interpRec"] = array("title" => $row["title"],
 																				"rectype" => $row["rt"],
 																				"URL" => $row["url"],
 																				"recID" => $row["dtl_Value"]);
 			break;
 
-		case 201:
+		case $notesDT:
 				$relations['relationshipRecs'][$relnRecID]["notes"] = $row["dtl_Value"];
 			break;
 
-		case 160:
+		case $titleDT:
 				$relations['relationshipRecs'][$relnRecID]["title"] = $row["dtl_Value"];
 			break;
 
-		case 177:
+		case $startDT:
 				$relations['relationshipRecs'][$relnRecID]["startDate"] = $row["dtl_Value"];
 			break;
 
-		case 178:
+		case $endDT:
 				$relations['relationshipRecs'][$relnRecID]["endDate"] = $row["dtl_Value"];
 			break;
 		}

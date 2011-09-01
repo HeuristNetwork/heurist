@@ -212,6 +212,13 @@ $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['last-search-url'] = @$_SERVER['H
 
 function print_result($row) {
 	global $num, $page;
+$assocDT = (defined('DT_ASSOCIATED_FILE')?DT_ASSOCIATED_FILE:0);
+$logoDT = (defined('DT_LOGO_IMAGE')?DT_LOGO_IMAGE:0);
+$thumbDT = (defined('DT_THUMBNAIL')?DT_THUMBNAIL:0);
+$imgDT = (defined('DT_IMAGES')?DT_IMAGES:0);
+$otherDT = (defined('DT_OTHER_FILE')?DT_OTHER_FILE:0);
+$turlDT = (defined('DT_THUMB_IMAGE_URL')?DT_THUMB_IMAGE_URL:0);
+$furlDT = (defined('DT_FULL_IMAG_URL')?DT_FULL_IMAG_URL:0);
 
 	print "	[";
 	foreach ($row as $i => $val) {
@@ -226,12 +233,14 @@ function print_result($row) {
 		                      from recDetails
 		                 left join recUploadedFiles on ulf_ID = dtl_UploadedFileID
 		                 left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt
-		                     where dtl_RecID = " . $row[2] . "
-		                       and dtl_DetailTypeID in (223,222,224,221,231)
-		                       and fxm_MimeType like 'image%'
+		                     where dtl_RecID = " . $row[2] .
+		                       " and dtl_DetailTypeID in ($thumbDT,$logoDT,$imgDT,$assocDT,$otherDT)".
+		                       " and fxm_MimeType like 'image%'
 
-		                  order by dtl_DetailTypeID = 223 desc, dtl_DetailTypeID = 222 desc, dtl_DetailTypeID = 224 desc, dtl_DetailTypeID
-		                     limit 1");
+		                  order by dtl_DetailTypeID = $thumbDT desc,".
+		                  " dtl_DetailTypeID = $logoDT desc,".
+		                  " dtl_DetailTypeID = $imgDT desc,".
+		                  " dtl_DetailTypeID limit 1");
 		if ($res && mysql_num_rows($res) == 1) {
 			$file = mysql_fetch_assoc($res);
 			$thumb_url = "../common/php/resizeImage.php?ulf_ID=".$file['ulf_ObfuscatedFileID'];
@@ -240,17 +249,17 @@ function print_result($row) {
 			$res = mysql_query("select dtl_Value
 			                      from recDetails
 			                     where dtl_RecID = " . $row[2] . "
-		                           and dtl_DetailTypeID = 606
-		                         limit 1");
+		                           and dtl_DetailTypeID = $turlDT".
+		                         " limit 1");
 			if ($res && mysql_num_rows($res) == 1) {	//FIXME: we should see about uploading this to the file table
 				$row = mysql_fetch_assoc($res);
 				$thumb_url = "".htmlspecialchars(addslashes($row['dtl_Value']));
 			}else{	// 603  Full image url
 				$res = mysql_query("select dtl_Value
 				                      from recDetails
-				                     where dtl_RecID = " . $row[2] . "
-			                           and dtl_DetailTypeID = 603
-			                         limit 1");
+				                     where dtl_RecID = " . $row[2] .
+			                         "  and dtl_DetailTypeID = $furlDT".
+			                         " limit 1");
 				if ($res && mysql_num_rows($res) == 1) {
 					$row = mysql_fetch_assoc($res);
 					$thumb_url = "../common/php/resizeImage.php?file_url=".htmlspecialchars($row['dtl_Value']);

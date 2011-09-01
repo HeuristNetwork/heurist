@@ -32,7 +32,8 @@ mysql_connection_select(DATABASE);
 // get a list of tags linked to any of the 'blog entry' records for this user
 $res = mysql_query("select rec_ID, group_concat(tag_Text)
 					  from Records, usrRecTagLinks, usrTags
-					 where rec_RecTypeID = 137 and rtl_RecID = rec_ID
+					 where rec_RecTypeID = ".(defined('RT_BLOG_ENTRY')?RT_BLOG_ENTRY:0).
+					 " and rtl_RecID = rec_ID
 					   and tag_ID = rtl_TagID
 					   and tag_UGrpID= " . $userID . "
 					group by rec_ID");

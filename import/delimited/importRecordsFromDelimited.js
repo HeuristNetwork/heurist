@@ -607,7 +607,7 @@ FlexImport = (function () {
 			}
 		}
 
-		if (recType.getID() == 52) {
+		if (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['RT_RELATION'] && recType.getID() == top.HEURIST.magicNumbers['RT_RELATION']) {//MAGIC NUMBER
 			hRec = new HRelationship();
 		}
 		else {

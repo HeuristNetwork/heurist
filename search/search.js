@@ -535,7 +535,7 @@ top.HEURIST.search = {
 				href = "http://" + href;
 			href = href.htmlEscape();
 		}
-		else if (res[4] == 2) {
+		else if (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['RT_NOTE'] && res[4] == top.HEURIST.magicNumbers['RT_NOTE']) {
 			// special handling for notes rectype: link to view page if no URL
 			href = top.HEURIST.basePath+ "records/view/renderRecordData.php?bib_id="+res[2] +(top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
 		}

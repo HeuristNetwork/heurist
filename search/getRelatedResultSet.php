@@ -288,9 +288,13 @@ global $ACCESSABLE_OWNER_IDS;
 	return array_keys($nlrIDs);
 //	return $rv;
 }
+$relRT = (defined('RT_RELATION')?RT_RELATION:0);
+$relTypDT = (defined('DT_RELATION_TYPE')?DT_RELATION_TYPE:0);
+$relSrcDT = (defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
+$relTrgDT = (defined('DT_LINKED_RESOURCE')?DT_LINKED_RESOURCE:0);
 
 function findReversePointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
-global $REVERSE, $ACCESSABLE_OWNER_IDS;
+global $REVERSE, $ACCESSABLE_OWNER_IDS, $relRT;
 //if (!$REVERSE) return array();
 //error_log("in findReversePointers");
 	$nlrIDs = array(); // new linked record IDs
@@ -308,10 +312,10 @@ global $REVERSE, $ACCESSABLE_OWNER_IDS;
 				'AND dtl_Value IN (' . join(',', $qrec_ids) .') '.
 				($rtyIDs && count($rtyIDs)>0 ? 'AND trg.rec_RecTypeID in ('.join(',', $rtyIDs).') ' : '').
 				($dtyIDs && count($dtyIDs)>0 ? 'AND dty_ID in ('.join(',', $dtyIDs).') ' : '').
-				'AND trg.rec_RecTypeID != 52 '.
+				"AND trg.rec_RecTypeID != $relRT ".
 				'AND (trg.rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR NOT trg.rec_NonOwnerVisibility = "hidden")';
 
-//error_log("find  d $depth rev pointer q = $query");
+error_log("find  d $depth rev pointer q = $query");
 	$res = mysql_query($query);
 	while ($res && $row = mysql_fetch_assoc($res)) {
 		// if target is not in the result
@@ -376,7 +380,7 @@ global $REVERSE, $ACCESSABLE_OWNER_IDS;
 }
 
 function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
-	global $REVERSE, $ACCESSABLE_OWNER_IDS;
+	global $REVERSE, $ACCESSABLE_OWNER_IDS, $relRT, $relSrcDT, $relTrgDT, $relTypDT;
 //error_log("in findRelatedRecords");
 	$nlrIDs = array();
 	$query = 'SELECT f.dtl_Value as srcRecID, rel.rec_ID as relID, '.// from detail
@@ -388,13 +392,13 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 				', src.rec_OwnerUGrpID as srcOwner, trg.rec_OwnerUGrpID as trgOwner '.
 				', if(src.rec_NonOwnerVisibility="hidden",1,0) as srcHide, if(trg.rec_NonOwnerVisibility="hidden",1,0) as trgHide '.
 			'FROM recDetails f '.
-				'LEFT JOIN Records rel ON rel.rec_ID = f.dtl_RecID and f.dtl_DetailTypeID = 202 '.
-				'LEFT JOIN recDetails t ON t.dtl_RecID = rel.rec_ID and t.dtl_DetailTypeID = 199 '.
-				'LEFT JOIN recDetails r ON r.dtl_RecID = rel.rec_ID and r.dtl_DetailTypeID = 200 '.
+				"LEFT JOIN Records rel ON rel.rec_ID = f.dtl_RecID and f.dtl_DetailTypeID = $relSrcDT ".
+				"LEFT JOIN recDetails t ON t.dtl_RecID = rel.rec_ID and t.dtl_DetailTypeID = $relTrgDT ".
+				"LEFT JOIN recDetails r ON r.dtl_RecID = rel.rec_ID and r.dtl_DetailTypeID = $relTypDT ".
 				'LEFT JOIN defTerms trm ON trm.trm_ID = r.dtl_Value '.
 				'LEFT JOIN Records trg ON trg.rec_ID = t.dtl_Value '.
 				'LEFT JOIN Records src ON src.rec_ID = f.dtl_Value '.
-			'WHERE rel.rec_RecTypeID = 52 '.
+			"WHERE rel.rec_RecTypeID = $relRT ".
 				'AND (f.dtl_Value IN (' . join(',', $qrec_ids) . ') '.
 				($rtyIDs && count($rtyIDs)>0 ? 'AND trg.rec_RecTypeID in ('.join(',', $rtyIDs).') ' : '').
 				($REVERSE ?'OR t.dtl_Value IN (' . join(',', $qrec_ids) . ') '.
@@ -402,7 +406,7 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 				'AND (src.rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR NOT src.rec_NonOwnerVisibility = "hidden")'.
 				'AND (trg.rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR NOT trg.rec_NonOwnerVisibility = "hidden")'.
 				($relTermIDs && count($relTermIDs)>0 ? 'AND (trm.trm_ID in ('.join(',', $relTermIDs).') OR trm.trm_InverseTermID in ('.join(',', $relTermIDs).')) ' : '');
-//error_log("find  d $depth related q = $query");
+error_log("find  d $depth related q = $query");
 //echo $query;
 	$res = mysql_query($query);
 	while ($res && $row = mysql_fetch_assoc($res)) {

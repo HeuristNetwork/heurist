@@ -62,7 +62,7 @@ function gatherCrumbs(_nameTrack, value, currentId) {
 					
 					//only display colour square only if there is geographic data associated with the record,
 					//since this is when it will be displayed on the timeline, not in the case when the record is an aggregation of records
-					if (crumb.hasGeoData && crumb.recType != "103") {
+					if (crumb.hasGeoData && crumb.recType != "103") {//MAGIC NUMBER
 						if (crumb.hasGeoData.indexOf("l") != -1){
 							var spanchik = document.createElement("span");
 							spanchik.style.backgroundColor = crumbThemes[(value[0].recId == currentId)?i-1:i].colour;

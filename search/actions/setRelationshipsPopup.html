@@ -16,6 +16,7 @@
   <script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
   <script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
   <script src="../common/js/utilsLoad.js"></script>
+  <script src="../common/php/getMagicNumbers.php"></script>
   <title>Add relationships to selected records</title>
 
   <style type="text/css">
@@ -51,9 +52,10 @@ function init () {
 	relTargetInput = document.getElementById("related-record");
 
 	recCountSpan.innerHTML = top.HEURIST.search.getSelectedRecIDs().get().length;
-
-	var relTypeTerms = top.HEURIST.util.expandJsonStructure(top.HEURIST.rectypes.typedefs[52].dtFields[200][11]);
-	var relTypeTermsDisabled = top.HEURIST.util.expandJsonStructure(top.HEURIST.rectypes.typedefs[52].dtFields[200][13]);
+	var reltypDT = top.HEURIST.magicNumbers['DT_RELATION_TYPE'];
+	var relRT = top.HEURIST.magicNumbers['RT_RELATION'];
+	var relTypeTerms = top.HEURIST.util.expandJsonStructure(top.HEURIST.rectypes.typedefs[relRT].dtFields[reltypDT][11]);
+	var relTypeTermsDisabled = top.HEURIST.util.expandJsonStructure(top.HEURIST.rectypes.typedefs[relRT].dtFields[reltypDT][13]);
 
 	relTypeSelect = top.HEURIST.util.createTermSelect(relTypeTerms,
 													(relTypeTermsDisabled || ""),

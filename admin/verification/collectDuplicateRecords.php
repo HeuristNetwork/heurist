@@ -105,20 +105,24 @@ mysql_connection_db_select(DATABASE);
 //$res = mysql_query('select rec_ID, rec_RecTypeID, rec_Title, dtl_Value from Records left join recDetails on dtl_RecID=rec_ID and dtl_DetailTypeID=160 where rec_RecTypeID != 52 and rec_RecTypeID != 55 and not rec_FlagTemporary order by rec_RecTypeID desc');
 $crosstype = false;
 $personMatch = false;
+$relRT = (defined('RT_RELATION')?RT_RELATION:0);
+$perRT = (defined('RT_PERSON')?RT_PERSON:0);
+$surnameDT = (defined('DT_GIVEN_NAMES')?DT_GIVEN_NAMES:0);
+$titleDT = (defined('DT_TITLE')?DT_TITLE:0);
 
 if (@$_REQUEST['crosstype']){
 	$crosstype = true;
 }
 if (@$_REQUEST['personmatch']){
     $personMatch = true;
-    $res = mysql_query('select rec_ID, rec_RecTypeID, rec_Title, dtl_Value from Records left join recDetails on dtl_RecID=rec_ID and dtl_DetailTypeID=291 where '. (strlen($recIDs) > 0 ? "rec_ID in ($recIDs) and " : "") .'rec_RecTypeID = 55 and not rec_FlagTemporary order by rec_ID desc');    //Given Name
+    $res = mysql_query("select rec_ID, rec_RecTypeID, rec_Title, dtl_Value from Records left join recDetails on dtl_RecID=rec_ID and dtl_DetailTypeID=$surnameDT where ". (strlen($recIDs) > 0 ? "rec_ID in ($recIDs) and " : "") ."rec_RecTypeID = $perRT and not rec_FlagTemporary order by rec_ID desc");    //Given Name
     while ($row = mysql_fetch_assoc($res)) {
        $recsGivenNames[$row['rec_ID']] = $row['dtl_Value'];
     }
-    $res = mysql_query('select rec_ID, rec_RecTypeID, rec_Title, dtl_Value from Records left join recDetails on dtl_RecID=rec_ID and dtl_DetailTypeID=160 where '. (strlen($recIDs) > 0 ? "rec_ID in ($recIDs) and " : "") .'rec_RecTypeID = 55 and not rec_FlagTemporary order by dtl_Value asc');    //Family Name
+    $res = mysql_query("select rec_ID, rec_RecTypeID, rec_Title, dtl_Value from Records left join recDetails on dtl_RecID=rec_ID and dtl_DetailTypeID=$titleDT where ". (strlen($recIDs) > 0 ? "rec_ID in ($recIDs) and " : "") ."rec_RecTypeID = $perRT and not rec_FlagTemporary order by dtl_Value asc");    //Family Name
 
 } else{
-    $res = mysql_query('select rec_ID, rec_RecTypeID, rec_Title, dtl_Value from Records left join recDetails on dtl_RecID=rec_ID and dtl_DetailTypeID=160 where '. (strlen($recIDs) > 0 ? "rec_ID in ($recIDs) and " : "") .'rec_RecTypeID != 52 and not rec_FlagTemporary order by rec_RecTypeID desc');
+    $res = mysql_query("select rec_ID, rec_RecTypeID, rec_Title, dtl_Value from Records left join recDetails on dtl_RecID=rec_ID and dtl_DetailTypeID=$titleDT where ". (strlen($recIDs) > 0 ? "rec_ID in ($recIDs) and " : "") ."rec_RecTypeID != $relRT and not rec_FlagTemporary order by rec_RecTypeID desc");
 }
 
 $rectypes = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', '1');

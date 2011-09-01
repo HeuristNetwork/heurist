@@ -681,11 +681,11 @@ class HeuristZoteroEntry extends HeuristForeignEntry {
 			}
 
 			if (! is_array($fields[$zoteroType])) {
-				if ($heuristTag == '243') //thesis type
+				if ($heuristTag == '243') //MAGIC NUMBER//thesis type
 					$entry->addField(new HeuristNativeField($heuristTag, $fields[$zoteroType], decode_thesis_type($fields[$zoteroType])));
 				else if (is_enum_field($heuristTag))
 					$entry->addField(new HeuristNativeField($heuristTag, $fields[$zoteroType], decode_enum($heuristTag, $fields[$zoteroType])));
-				else if ($heuristTag == '160') {	// title field, cook it a little
+				else if ($heuristTag == '160') {//MAGIC NUMBER	// title field, cook it a little
 					$val = preg_replace('/\\s*[&]\\s*/', ' and ', $fields[$zoteroType]);
 					$val = preg_replace('/(.+),\\s*(The|A|An)$/', "$2 $1", $val);	// what is this, a damn library catalogue?
 

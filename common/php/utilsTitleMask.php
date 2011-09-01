@@ -63,11 +63,17 @@ function check_title_mask($mask, $rt) {
 	return '';
 }
 
+$relRT = (defined('RT_RELATION')?RT_RELATION:0);
+$authRT = (defined('RT_AUTHOR_EDITOR')?RT_AUTHOR_EDITOR:0);
+$titleDT = (defined('DT_TITLE')?DT_TITLE:0);
+$surnameDT = (defined('DT_GIVEN_NAMES')?DT_GIVEN_NAMES:0);
+
 
 function fill_title_mask($mask, $rec_id, $rt) {
+global $titleDT;
 	/* Fill the title mask for the given records record */
 
-	if (! $mask) return trim(_title_mask__get_field_value('160', $rec_id, $rt));
+	if (! $mask) return trim(_title_mask__get_field_value($titleDT, $rec_id, $rt));
 
 	if (! preg_match_all('/\s*\\[\\[|\s*\\]\\]|(\\s*(\\[\\s*([^]]+)\\s*\\]))/s', $mask, $matches))
 		return $mask;	// nothing to do -- no substitutions
@@ -105,13 +111,9 @@ function fill_title_mask($mask, $rec_id, $rt) {
 	/* Clean up miscellaneous stray punctuation &c. */
 	return trim($title);
 }
-/*
- * TOUCH IT YOU RUBBISH
- * SHUT IT YOU TOILET
- */
-
 
 function _title_mask__check_field_name($field_name, $rt) {
+global $relRT;
 	/* Check that the given field name exists for the given reference type */
 	/* Returns an error string if it isn't */
 	$rdr = _title_mask__get_rec_detail_requirements();
@@ -133,7 +135,7 @@ function _title_mask__check_field_name($field_name, $rt) {
 		}
 
 		// check that the field is of a sensible type
-		if ($rdt[$rdt_id]['dty_Type'] != 'resource'  ||  $rt == 52) {	// special exception for relationships
+		if ($rdt[$rdt_id]['dty_Type'] != 'resource'  ||  $rt == $relRT) {	// special exception for relationships
 			return '';
 		} else {
 			return $rdt_name . ' in type "' . $rct[$rt] . '" is a resource identifier - that is definitely not what you want.  ' .
@@ -183,6 +185,7 @@ function _title_mask__check_field_name($field_name, $rt) {
 
 
 function _title_mask__get_field_value($field_name, $rec_id, $rt) {
+global $surnameDT, $authRT;
 //error_log("[$field_name]   [$rec_id]   [$rt]");
 
 	if (!$rec_id) { // return blank can't lookup values without a recID
@@ -245,7 +248,7 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt) {
 	$value = '';
 
 	if ($rt_id != 0 &&  $inner_field_name) {
-		if ($rt_id != 75) {	// not an AuthorEditor
+		if ($rt_id != $authRT) {	// not an AuthorEditor
 			while ($inner_rec_id = mysql_fetch_row($res)) {
 				$inner_rec_id = $inner_rec_id[0];
 				$new_value = _title_mask__get_field_value($inner_field_name, $inner_rec_id, $rt_id);
@@ -257,7 +260,7 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt) {
 		} else if (mysql_num_rows($res) == 1) {	// an AuthorEditor
 			$inner_rec_id = mysql_fetch_row($res); $inner_rec_id = $inner_rec_id[0];
 			if ($inner_rec_id == 'anonymous'  ||  ! intval($inner_rec_id)) {
-				if ($inner_field_name == 291  ||  strtolower($inner_field_name) == 'given names')
+				if ($inner_field_name == $surnameDT  ||  strtolower($inner_field_name) == 'given names')
 					return 'Anonymous';
 				else return '';
 			}
@@ -268,7 +271,7 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt) {
 			$inner_rec_id = mysql_fetch_row($res); $inner_rec_id = $inner_rec_id[0];
 
 			if ($inner_rec_id == 'anonymous'  ||  ! intval($inner_rec_id)) {
-				if ($inner_field_name == 291  ||  strtolower($inner_field_name) == 'given names')
+				if ($inner_field_name == $surnameDT  ||  strtolower($inner_field_name) == 'given names')
 					return 'multiple anonymous authors';	// let's hope DDJ finds this fun
 				else return '';
 			}
@@ -276,7 +279,7 @@ function _title_mask__get_field_value($field_name, $rec_id, $rt) {
 
 			// only return details for the first author
 			// unless we're looking for their GIVEN NAMES (which typically appear last), where we add "et al."
-			if ($inner_field_name == 291  ||  strtolower($inner_field_name) == 'given names') {
+			if ($inner_field_name == $surnameDT  ||  strtolower($inner_field_name) == 'given names') {
 				return _title_mask__get_field_value($inner_field_name, $inner_rec_id, $rt_id) . ' et al.';
 			} else {
 				return _title_mask__get_field_value($inner_field_name, $inner_rec_id, $rt_id);
@@ -459,9 +462,10 @@ function _title_mask__get_rec_detail_types() {
 
 
 function make_canonical_title_mask($mask, $rt) {
+global $titleDT;
 	// convert all name-style substitutions to numerical-style
 
-	if (! $mask) return "[160]";	// title field
+	if (! $mask) return "[$titleDT]";	// title field
 
 	if (! preg_match_all('/\\[\\[|\\]\\]|(\\s*(\\[\\s*([^]]+)\\s*\\]))/s', $mask, $matches))
 		return $mask;	// nothing to do -- no substitutions

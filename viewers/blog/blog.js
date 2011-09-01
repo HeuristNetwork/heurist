@@ -22,13 +22,13 @@ var database = (top && top.HEURIST && top.HEURIST.database? top.HEURIST.database
 
 var Blog = {
 
-blogEntryRecordType: HRecordTypeManager.getRecordTypeById(137),	// magic numbers
-websiteRecordType: HRecordTypeManager.getRecordTypeById(1),
-mediaRecordType: HRecordTypeManager.getRecordTypeById(74),
+blogEntryRecordType: (top.HUERIST.magicNumbers && top.HUERIST.magicNumbers['RT_BLOG_ENTRY'] ?HRecordTypeManager.getRecordTypeById(top.HUERIST.magicNumbers['RT_BLOG_ENTRY']):null),
+websiteRecordType: (top.HUERIST.magicNumbers && top.HUERIST.magicNumbers['RT_INTERNET_BOOKMARK'] ?HRecordTypeManager.getRecordTypeById(top.HUERIST.magicNumbers['RT_INTERNET_BOOKMARK']):null),
+mediaRecordType: (top.HUERIST.magicNumbers && top.HUERIST.magicNumbers['RT_MEDIA_RECORD'] ?HRecordTypeManager.getRecordTypeById(top.HUERIST.magicNumbers['RT_MEDIA_RECORD']):null),
 
-titleDetailType: HDetailManager.getDetailTypeById(160),
-thumbnailDetailType: HDetailManager.getDetailTypeById(223),
-geoDetailType: HDetailManager.getDetailTypeById(230),
+titleDetailType: (top.HUERIST.magicNumbers && top.HUERIST.magicNumbers['DT_TITLE'] ?HDetailManager.getDetailTypeById(top.HUERIST.magicNumbers['DT_TITLE']):null),
+thumbnailDetailType: (top.HUERIST.magicNumbers && top.HUERIST.magicNumbers['DT_THUMBNAIL'] ?HDetailManager.getDetailTypeById(top.HUERIST.magicNumbers['DT_THUMBNAIL']):null),
+geoDetailType: (top.HUERIST.magicNumbers && top.HUERIST.magicNumbers['DT_GEO_OBJECT'] ?HDetailManager.getDetailTypeById(top.HUERIST.magicNumbers['DT_GEO_OBJECT']):null),
 
 monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
 

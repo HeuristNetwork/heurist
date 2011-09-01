@@ -668,7 +668,7 @@ function saveRecord(record) {
     var saver = new HSaver(
 		function(r) {
 			alert ("Record saved");
-			if (rec_type_id == 150 || recType.getID() == 150){
+			if (rec_type_id == 150 || recType.getID() == 150){//MAGIC NUMBER
 				window.opener.location.reload(true);
 			}
 			if(window.opener.document.getElementById("results") ){

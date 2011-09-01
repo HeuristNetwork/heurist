@@ -213,21 +213,125 @@
 
 	// MAGIC CONSTANTS for limited set of common rectypes and their detail types
 	// they refer to global definition DB and IDs of rectypes/detailtypes there
-	define('RT_BUG_REPORT',"68-216");
-	define('DT_BUG_REPORT_NAME',"68-179");
-	define('DT_BUG_REPORT_FILE',"68-221");
-	define('DT_BUG_REPORT_DESCRIPTION',"68-303");
-	define('DT_BUG_REPORT_ABSTRACT',"68-560");
-	define('DT_BUG_REPORT_STATUS',"68-725");
+	define('RT_BUG_REPORT',"2-216");
+	define('DT_BUG_REPORT_NAME',"2-179");
+	define('DT_BUG_REPORT_FILE',"2-221");
+	define('DT_BUG_REPORT_DESCRIPTION',"2-303");
+	define('DT_BUG_REPORT_ABSTRACT',"2-560");
+	define('DT_BUG_REPORT_STATUS',"2-725");
 
-	define('RT_NOTE',"68-2");
-	define('DT_NOTE_TITLE',"68-160");
-	define('DT_NOTE_DESCRIPTION',"68-303");
-	define('DT_NOTE_DATE',"68-166");
-	define('DT_NOTE_FILE','68-221');
+	define('DT_ALL_ASSOC_FILE','2-221');
 
-	define('DT_ALL_ASSOC_FILE','68-221');
+	$rtDefines = array(
+		'RT_INTERNET_BOOKMARK' => 1,
+		'RT_NOTE' => 2,
+		'RT_JOURNAL_ARTICLE' => 3,
+		'RT_BOOK' => 5,
+		'RT_JOURNAL_VOLUME' => 28,
+		'RT_RELATION' => 52,
+		'RT_PERSON' => 55,
+		'RT_MEDIA_RECORD' => 74,
+		'RT_AUTHOR_EDITOR' => 75,
+		'RT_BLOG_ENTRY' => 137,
+		'RT_FACTOID' => 150);
 
+	foreach ($rtDefines as $str => $id) {
+		defineRTLocalMagic($str,$id);
+	}
+
+	$dtDefines = array(
+		'DT_TITLE' => 160,
+		'DT_GIVEN_NAMES' => 291,
+		'DT_ALTERNATE_NAME' => 331,
+		'DT_CREATOR' => 158,
+		'DT_EXTENDED_DESCRIPTION' => 191,
+		'DT_LINKED_RESOURCE' => 199,
+		'DT_RELATION_TYPE' => 200,
+		'DT_NOTES' => 201,
+		'DT_PRIMARY_RESOURCE' => 202,
+		'DT_FULL_IMAG_URL' => 603,
+		'DT_THUMB_IMAGE_URL' => 606,
+		'DT_ASSOCIATED_FILE' => 221,
+		'DT_GEO_OBJECT' => 230,
+		'DT_OTHER_FILE' => 231,
+		'DT_LOGO_IMAGE' => 222,
+		'DT_THUMBNAIL' => 223,
+		'DT_IMAGES' => 224,
+		'DT_DATE' => 166,
+		'DT_START_DATE' => 177,
+		'DT_END_DATE' => 178,
+		'DT_INTERPRETATION_REFERENCE' => 638,
+		'DT_DOI' => 198,
+		'DT_WEBSITE_ICON' => 347,
+		'DT_ISBN' => 187,
+		'DT_ISSN' => 188,
+		'DT_JOURNAL_REFERENCE' => 226,
+		'DT_SHORT_SUMMARY' => 303,
+		'DT_MEDIA_REFERENCE' => 508,
+		'DT_TEI_DOCUMENT_REFERENCE' => 322,
+		'DT_START_ELEMENT' => 539,
+		'DT_END_ELEMENT' => 540,
+		'DT_START_WORD' => 329,
+		'DT_MIME_TYPE' => 289,
+		'DT_SERVICE_URL' => 339,
+		'DT_MAP_IMAGE_LAYER_SCHEMA' => 585,
+		'DT_KML_FILE' => 552,
+		'DT_TITLE_SHORT' => 173,
+		'DT_KML' => 551,
+		'DT_MINMUM_ZOOM_LEVEL' => 586,
+		'DT_MAP_IMAGE_LAYER_REFERENCE' => 588,
+		'DT_MAXIMUM_ZOOM_LEVEL' => 587);
+
+	foreach ($dtDefines as $str => $id) {
+		defineDTLocalMagic($str,$id);
+	}
+
+function defineRTLocalMagic($defString, $rtID) {
+	$id = rectypeLocalIDLookup($rtID);
+	if ($id) {
+		define($defString,$id);
+	}
+}
+
+function defineDTLocalMagic($defString, $dtID) {
+	$id = detailtypeLocalIDLookup($dtID);
+	if ($id) {
+		define($defString,$id);
+	}
+}
+
+function rectypeLocalIDLookup($rtID,$dbID = 3) {
+	static $RTIDs;
+	if (!$RTIDs) {
+		$res = mysql_query('select rty_ID as localID,rty_OriginatingDBID as dbID,rty_IDInOriginatingDB as id from defRecTypes order by dbID');
+		if (!$res) returnErrorMsgPage("unable to build rectype ID lookup table -".mysql_error());
+		$RTIDs = array();
+		while ( $row = mysql_fetch_assoc($res)){
+//		error_log("rt ". print_r($row,true));
+			if (!@$RTIDs[$row['dbID']]){
+				$RTIDs[$row['dbID']] = array();
+			}
+			$RTIDs[$row['dbID']][$row['id']] = $row['localID'];
+		}
+	}
+	return (@$RTIDs[$dbID][$rtID] ? $RTIDs[$dbID][$rtID]: null);
+}
+
+function detailtypeLocalIDLookup($dtID,$dbID = 3) {
+	static $DTIDs;
+	if (!$DTIDs) {
+		$res = mysql_query('select dty_ID as localID,dty_OriginatingDBID as dbID,dty_IDInOriginatingDB as id from defDetailTypes order by dbID');
+		if (!$res) returnErrorMsgPage("unable to build detailtype ID lookup table -".mysql_error());
+		$DTIDs = array();
+		while ( $row = mysql_fetch_assoc($res)){
+			if (!@$DTIDs[$row['dbID']]){
+				$DTIDs[$row['dbID']] = array();
+			}
+			$DTIDs[$row['dbID']][$row['id']] = $row['localID'];
+		}
+	}
+	return (@$DTIDs[$dbID][$dtID] ? $DTIDs[$dbID][$dtID]: null);
+}
 
 function returnErrorMsgPage($msg) {
 		echo "location.replace(\"".HEURIST_BASE_URL."common/html/msgErrorMsg.html?msg=$msg\");";

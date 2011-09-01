@@ -17,9 +17,9 @@ require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 
 mysql_connection_db_select(DATABASE);
 
-if (! @$_REQUEST['rec_ID']) return;
+if (! @$_REQUEST['rec_ID'] && !defined('DT_KML')) return;
 
-$query = "SELECT dtl_Value FROM recDetails WHERE dtl_DetailTypeID=551 and dtl_RecID=".$_REQUEST['rec_ID'];
+$query = "SELECT dtl_Value FROM recDetails WHERE dtl_DetailTypeID=".DT_KML." and dtl_RecID=".$_REQUEST['rec_ID'];
 
 //error_log(">>>>>>>>>>>".$query);
 

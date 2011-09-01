@@ -214,11 +214,14 @@ function renderInputs(bibID, rectype) {
 
 		var defaultInputValues = {};
 		if (window.HEURIST.parameters["title"]) {
-			if (rectype == 28) {
+			if (top.HEURIST.magicNumbers &&
+				top.HEURIST.magicNumbers['DT_JOURNAL_REFERENCE'] &&
+				top.HEURIST.magicNumbers['RT_JOURNAL_VOLUME'] &&
+				rectype == top.HEURIST.magicNumbers['RT_JOURNAL_VOLUME']) {
 				// journal volume - put the title into the journal pointer field, not the journal volume title field
-				defaultInputValues["226"] = [ { "title" : window.HEURIST.parameters["title"] } ];
+				defaultInputValues[top.HEURIST.magicNumbers['DT_JOURNAL_REFERENCE']] = [ { "title" : window.HEURIST.parameters["title"] } ];
 			} else {
-				defaultInputValues["160"] = [ { "value" : window.HEURIST.parameters["title"] } ];
+				defaultInputValues[top.HEURIST.magicNumbers['DT_TITLE']] = [ { "value" : window.HEURIST.parameters["title"] } ];
 			}
 		}
 
@@ -277,7 +280,7 @@ function renderInputs(bibID, rectype) {
 		rftElement.id = "rectype";
 		document.forms[0].appendChild(rftElement);
 	}
-	rftElement.value = rectype || (record ? record.rectypeID:1);
+	rftElement.value = rectype || (record ? record.rectypeID:top.HEURIST.magicNumbers['RT_INTERNET_BOOKMARK']);
 }
 
 function renderAdditionalDataSection(container, rectypeID, bdValues) {

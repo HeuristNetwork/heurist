@@ -80,7 +80,7 @@ function countObjElements(obj) {
 }
 
 /**
-* Helper function that lanches the mini-edit.html popup with the record id of the relationship record.
+* Helper function that launches the mini-edit.html popup with the record id of the relationship record.
 * @author Tom Murtagh
 * @author Kim Jackson
 * @author Stephen White
@@ -90,18 +90,20 @@ Relationship.prototype.edit = function() {
 	top.HEURIST.util.popupURL(window, top.HEURIST.basePath + "records/edit/formEditRecordPopup.html?bib_id="+this.relationshipRec.relnID +
 		"&db="+(top.HEURIST.parameters.db?top.HEURIST.parameters.db : (top.HEURIST.database.name? top.HEURIST.database.name:"")),
 	{ callback: function(newRecTitle, newDetails) {
+			var dtRelType = (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_RELATION_TYPE']? '' + top.HEURIST.magicNumbers['DT_RELATION_TYPE']:'');
+			var dtLinkPtr = (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_LINKED_RESOURCE']? '' + top.HEURIST.magicNumbers['DT_LINKED_RESOURCE']:'');
 			if (newDetails) {
-				if (newDetails['200'] && newDetails['200'][0]) {
-					thisRef.relSpan.innerHTML = (newDetails['200'][0]['enumValue'] ?
-													newDetails['200'][0]['enumValue'] :
-													(newDetails['200'][0]['value'] ?
-														newDetails['200'][0]['value']: "" ));
+				if (dtRelType && newDetails[dtRelType] && newDetails[dtRelType][0]) {
+					thisRef.relSpan.innerHTML = (newDetails[dtRelType][0]['enumValue'] ?
+													newDetails[dtRelType][0]['enumValue'] :
+													(newDetails[dtRelType][0]['value'] ?
+														newDetails[dtRelType][0]['value']: "" ));
 				}
-				if (newDetails['199'] && newDetails['199'][0]) {
-					thisRef.titleSpan.innerHTML = (newDetails['199'][0]['title'] ?
-													newDetails['199'][0]['title'] :
-													(newDetails['199'][0]['value'] ?
-														newDetails['199'][0]['value']: "" ));
+				if (dtLinkPtr && newDetails[dtLinkPtr] && newDetails[dtLinkPtr][0]) {
+					thisRef.titleSpan.innerHTML = (newDetails[dtLinkPtr][0]['title'] ?
+													newDetails[dtLinkPtr][0]['title'] :
+													(newDetails[dtLinkPtr][0]['value'] ?
+														newDetails[dtLinkPtr][0]['value']: "" ));
 				}
 			}
 		}

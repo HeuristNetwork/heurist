@@ -34,6 +34,7 @@ $scripts = array(
 //	HAPI_HOME . "php/loadHapiUserInfo.php?key=" . addslashes($_REQUEST["key"])."&db=".$instance,
 	HAPI_HOME . "php/loadHapiCommonInfo.php?db=".$instance,
 	HAPI_HOME . "php/loadHapiUserInfo.php?db=".$instance,
+//	HAPI_HOME . "../common/php/getMagicNumbers.php?db=".$instance,
 	HAPI_HOME . "js/hapi.js"
 );
 

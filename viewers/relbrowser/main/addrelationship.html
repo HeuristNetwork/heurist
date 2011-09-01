@@ -83,9 +83,9 @@
 		//This function is used to save a HRelationship record
 	function saveRelationships(primaryRecord,relationType,secondRecord){
 		var hrelationship=new HRelationship(primaryRecord,relationType,secondRecord);
-		hrelationship.addDetail( HDetailManager.getDetailTypeById(160), document.getElementById("160").value );
-		hrelationship.addDetail( HDetailManager.getDetailTypeById(303), document.getElementById("303").value );
-		hrelationship.addDetail( HDetailManager.getDetailTypeById(191), document.getElementById("191").value );
+		hrelationship.addDetail( HDetailManager.getDetailTypeById(160), document.getElementById("160").value );//MAGIC NUMBER
+		hrelationship.addDetail( HDetailManager.getDetailTypeById(303), document.getElementById("303").value );//MAGIC NUMBER
+		hrelationship.addDetail( HDetailManager.getDetailTypeById(191), document.getElementById("191").value );//MAGIC NUMBER
 
 		var saver = new HSaver(
 				function(r) {

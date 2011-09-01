@@ -36,7 +36,7 @@ function formatDetails(bib, prefix, indent) {
 				if (! innerBib) continue;
 				var rectype = top.HEURIST.rectypes.names[innerBib.rectype];
 
-				if (innerBib.rectype == 75) {
+				if (innerBib.rectype == 75) {//MAGIC NUMBER
 					// author editor is treated specially
 					html += "<tr><td style='padding-left: " + indent + "em;'><i>" + prefix + " Author/Editor</i></td><td>" + htmlEscape(innerBib.title) + "</td></tr>";
 				}

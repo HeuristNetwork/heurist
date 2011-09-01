@@ -567,7 +567,8 @@ top.HEURIST.edit = {
 
 	getLookupConstraintsList: function(dTypeID) {	//saw TODO: change this to terms pass in scrRectypeID
 		var rdtConstrainedLookups = {};
-		var rdtID = top.HEURIST.edit.record.rtConstraints[dTypeID] ? dTypeID : 200;
+		var dtRelType = (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_RELATION_TYPE']? '' + top.HEURIST.magicNumbers['DT_RELATION_TYPE']:'');
+		var rdtID = top.HEURIST.edit.record.rtConstraints[dTypeID] ? dTypeID : dtRelType;
 		for (var rType in top.HEURIST.edit.record.rtConstraints[rdtID]) {
 			var dtRelConstForRecType = top.HEURIST.edit.record.rtConstraints[rdtID][rType];
 			if (!dtRelConstForRecType) continue;
@@ -579,7 +580,7 @@ top.HEURIST.edit = {
 						rdtConstrainedLookups[list[j]] = '';
 					}
 				} else if (dtRelConstForRecType[i]['vcb_ID']) {	// get all the rel lookups for this vocabulary
-					var ontRelations = top.HEURIST.vocabTermLookup[200][dtRelConstForRecType[i]['vcb_ID']];
+					var ontRelations = top.HEURIST.vocabTermLookup[dtRelType][dtRelConstForRecType[i]['vcb_ID']];
 					for (var j = 0; j < ontRelations.length; j++) {
 						rdtConstrainedLookups[ontRelations[j][0]] = '';
 					}
@@ -1175,16 +1176,18 @@ top.HEURIST.edit.inputs.BibDetailInput.prototype.addInputHelper = function(bdVal
 	this.inputs.push(element);
 	this.inputCell.insertBefore(element, this.promptDiv);
 
-	if ((this.detailType[12] === "198"  ||  this.detailType[12] === "187"  ||  this.detailType[12] === "188")
+	if (top.HEURIST.magicNumbers && (top.HEURIST.magicNumbers['DT_DOI'] && this.detailType[12] === top.HEURIST.magicNumbers['DT_DOI']  ||
+									top.HEURIST.magicNumbers['DT_ISBN'] && this.detailType[12] === top.HEURIST.magicNumbers['DT_ISBN']  ||
+									top.HEURIST.magicNumbers['DT_ISSN'] && this.detailType[12] === top.HEURIST.magicNumbers['DT_ISSN'])
 			&&  bdValue  &&  bdValue.value) { // DOI, ISBN, ISSN
 		this.webLookup = this.document.createElement("a");
-		if (this.detailType[12] === "198") {
+		if (this.detailType[12] === top.HEURIST.magicNumbers['DT_DOI']) {
 			this.webLookup.href = "http://dx.doi.org/" + bdValue.value;
-		} else if (this.detailType[12] === "187") {
+		} else if (this.detailType[12] === top.HEURIST.magicNumbers['DT_ISBN']) {
 			// this.webLookup.href = "http://www.biblio.com/search.php?keyisbn=" + bdValue.value;	// doesn't work anymore
 			// this.webLookup.href = "http://www.biblio.com/isbnmulti.php?isbns=" + encodeURIComponent(bdValue.value) + "&stage=1";	// requires POST
 			this.webLookup.href = "http://www.biblio.com/search.php?keyisbn=" + encodeURIComponent(bdValue.value);
-		} else if (this.detailType[12] === "188") {
+		} else if (this.detailType[12] === top.HEURIST.magicNumbers['DT_ISSN']) {
 			var matches = bdValue.value.match(/(\d{4})-?(\d{3}[\dX])/);
 			if (matches) {
 				this.webLookup.href = "http://www.oclc.org/firstsearch/periodicals/results_issn_search.asp?database=%25&fulltext=%22%22&results=paged&PageSize=25&issn1=" + matches[1] + "&issn2=" + matches[2];

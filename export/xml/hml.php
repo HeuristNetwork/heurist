@@ -271,6 +271,10 @@ if (@$ARGV) {	// commandline actuation
 	}
 }
 
+$relRT = (defined('RT_RELATION')?RT_RELATION:0);
+$relTypDT = (defined('DT_RELATION_TYPE')?DT_RELATION_TYPE:0);
+$relSrcDT = (defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
+$relTrgDT = (defined('DT_LINKED_RESOURCE')?DT_LINKED_RESOURCE:0);
 
 //----------------------------------------------------------------------------//
 // Traversal functions
@@ -317,6 +321,7 @@ function findPointers($rec_ids, $rtyIDs) {
 * @return $ret a comma separated list of recIDs of pointed_to_by records
 **/
 function findReversePointers($rec_ids, &$pointers, $rtyIDs) {
+global $relRT;
 	$rv = array();
 	//saw TODO add error checking for numeric values in $rtyIDs
 	// find all detail values, detailTypeID and source recID for resource type details
@@ -329,7 +334,7 @@ function findReversePointers($rec_ids, &$pointers, $rtyIDs) {
 			'WHERE dty_Type = "resource" '.
 				'AND dtl_Value IN (' . join(',', $rec_ids) .') '.
 				($rtyIDs && count($rtyIDs)>0 ? 'AND rec_RecTypeID in ('.join(',', $rtyIDs).') ' : '').
-				'AND rec_RecTypeID != 52';
+				'AND rec_RecTypeID != '.$relRT;
 	$res = mysql_query($query);
 	while ($res && $row = mysql_fetch_assoc($res)) {
 		if (! @$pointers[$row['dtl_Value']]) {
@@ -354,6 +359,7 @@ function findReversePointers($rec_ids, &$pointers, $rtyIDs) {
 * @return $ret a comma separated list of recIDs of other record recIDs
 **/
 function findRelatedRecords($rec_ids, &$relationships, $rtyIDs) {
+global $relSrcDT, $relTrgDT, $relTypDT, $relRT;
 	$rv = array();
 	//saw TODO add error checking for numeric values in $rtyIDs
 	// find all from recID, relRecID and toRecID triples
@@ -366,11 +372,11 @@ function findRelatedRecords($rec_ids, &$relationships, $rtyIDs) {
 				'LEFT JOIN Records rel ON rel.rec_ID = f.dtl_RecID '.
 				'LEFT JOIN recDetails t ON t.dtl_RecID = rel.rec_ID '.
 				($rtyIDs && count($rtyIDs)>0 ? 'LEFT JOIN Records c on c.rec_ID = t.dtl_Value ': '').
-			'WHERE f.dtl_DetailTypeID IN (202,199) './/MAGIC NUMBERS
-				'AND rel.rec_RecTypeID = 52 '.
+			"WHERE f.dtl_DetailTypeID IN ($relSrcDT,$relTrgDT) ".S
+				"AND rel.rec_RecTypeID = $relRT ".
 				'AND f.dtl_Value IN (' . join(',', $rec_ids) . ') '.
 				($rtyIDs && count($rtyIDs)>0 ? 'AND c.rec_RecTypeID in ('.join(',', $rtyIDs).') ' : '').
-				'AND t.dtl_DetailTypeID = IF(f.dtl_DetailTypeID = 202, 199, 202)';
+				"AND t.dtl_DetailTypeID = IF(f.dtl_DetailTypeID = $relSrcDT, $relTrgDT, $relSrcDT)";
 	$res = mysql_query($query);
 	while ($res && $row = mysql_fetch_row($res)) {
 		if (! @$relationships[$row[0]]) {
@@ -448,12 +454,12 @@ function outputRecords($result) {
 }
 
 function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $outputStub=false, $parentID = null) {
-	global $RTN, $DTN, $RQS, $WGN, $MAX_DEPTH, $WOOT, $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS;
+	global $RTN, $DTN, $RQS, $WGN, $MAX_DEPTH, $WOOT, $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT, $relTrgDT, $relSrcDT;
 //error_log("rec = ".$record['rec_ID']);
 //error_log(" in outputRecord record = \n".print_r($record,true));
 	$filter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth]: null );
 	if ( isset($filter) && !in_array($record['rec_RecTypeID'],$filter)){
-		if ($record['rec_RecTypeID'] != 52) {
+		if ($record['rec_RecTypeID'] != $relRT) {
 			if ($depth > 0) {
 				if ($outputStub){
 					outputRecordStub($record);
@@ -489,7 +495,7 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $o
 
 	foreach ($record['details'] as $dt => $details) {
 		foreach ($details as $value) {
-			outputDetail($dt, $value, $record['rec_RecTypeID'], $reverse_pointers, $relationships, $depth, $outputStub, $record['rec_RecTypeID'] == 52 ? $parentID: $record['rec_ID']);
+			outputDetail($dt, $value, $record['rec_RecTypeID'], $reverse_pointers, $relationships, $depth, $outputStub, $record['rec_RecTypeID'] == $relRT ? $parentID: $record['rec_ID']);
 		}
 	}
 
@@ -525,11 +531,11 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $o
 			openTag('relationships');
 			foreach ($relationships[$record['rec_ID']] as $rel_id) {
 				$rel = loadRecord($rel_id);
-error_log(" relRec = ".print_r($rel,true));
-				foreach ( $rel['details'][202] as $dtID => $from){
+//error_log(" relRec = ".print_r($rel,true));
+				foreach ( $rel['details'][$relSrcDT] as $dtID => $from){
 					$fromType = $from['type'];
 				}
-				foreach ( $rel['details'][199] as $dtID => $to){
+				foreach ( $rel['details'][$relTrgDT] as $dtID => $to){
 					$toType = $to['type'];
 				}
 				if (!isset($filter) || (in_array($fromType,$filter) || in_array($toType,$filter))) {
@@ -589,7 +595,7 @@ function makeFileContentNode($file){
 }
 
 function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $depth=0, $outputStub, $parentID) {
-	global $DTN, $DTT, $TL, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH, $INCLUDE_FILE_CONTENT, $SUPRESS_LOOPBACKS;
+	global $DTN, $DTT, $TL, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH, $INCLUDE_FILE_CONTENT, $SUPRESS_LOOPBACKS, $relTypDT, $relTrgDT, $relSrcDT;
 //error_log("in outputDetail dt = $dt value = ". print_r($value,true));
 
 	$attrs = array('id' => $dt, 'conceptID'=>getDetailTypeConceptID($dt));
@@ -599,7 +605,7 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 	if (array_key_exists($rt, $RQS)  &&  array_key_exists($dt, $RQS[$rt])) {
 		$attrs['name'] = $RQS[$rt][$dt];
 	}
-	if ($dt === 200  &&  array_key_exists($value, $INV) && $INV[$value] && array_key_exists($INV[$value], $TL)) {	//saw Enum change
+	if ($dt === $relTypDT  &&  array_key_exists($value, $INV) && $INV[$value] && array_key_exists($INV[$value], $TL)) {	//saw Enum change
 		$attrs['inverse'] = $TL[$INV[$value]]['trm_Label'];
 		$attrs['invTermConceptID'] = getTermConceptID($INV[$value]);
 	}
@@ -607,10 +613,10 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 	if (is_array($value)) {
 		if (array_key_exists('id', $value)) {
 			// record pointer
-			if ($dt === 202 || $dt === 199) { // in a relationship record don't expand from side
+			if ($dt === $relSrcDT || $dt === $relTrgDT) { // in a relationship record don't expand from side
 				if ($value['id'] == $parentID){
 					$attrs['direction'] = "from";
-					if ($dt === 199) {
+					if ($dt === $relTrgDT) {
 						$attrs['useInverse'] = 'true';
 					}
 					if ($SUPRESS_LOOPBACKS){
@@ -625,7 +631,7 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 					}
 				}else{
 					$attrs['direction'] = "to";
-					if ($dt === 202) {
+					if ($dt === $relSrcDT) {
 						$attrs['useInverse'] = 'true';
 					}
 				}

@@ -1076,7 +1076,7 @@ function mode_entry_insertion() {
 
 			foreach (array_keys($fields) as $i) {
 				if (! $fields[$i]->getValue()) continue;
-				if ($fields[$i]->getType() == 158) {
+				if ($fields[$i]->getType() == 158) {//MAGIC NUMBER
 					// an author: cook the value -- could be several authors
 					process_author($fields[$i]);
 					foreach ($fields[$i]->getValue() as $person_bib_id) {
@@ -1560,7 +1560,7 @@ left join defDetailTypes on dty_ID=BD1.dtl_DetailTypeID
           and (BD1.dtl_DetailTypeID = 158  or  dty_Type != "resource")
  group by BD2.dtl_RecID
  order by BD1.dtl_RecID != BD2.dtl_RecID
-';
+';//MAGIC NUMBER
 	$res = mysql_query($equality_query);
 	$bd1_counts = mysql_fetch_assoc($res);
 	$bd2_counts = mysql_fetch_assoc($res);
@@ -1578,7 +1578,7 @@ left join Records on rec_ID='.$bib_id1.'
 left join defRecStructure on rst_DetailTypeID=dty_ID and rst_RecTypeID=rec_RecTypeID
 left join recDetails BD1 on BD1.dtl_DetailTypeID=dty_ID
 left join recDetails BD2 on BD2.dtl_DetailTypeID=dty_ID and BD2.dtl_RecID='.$bib_id2.'
-where BD1.dtl_RecID=rec_ID and (dty_ID != 158  and  dty_Type = "resource") and rst_RecordMatchOrder and BD1.dtl_ID is not null');
+where BD1.dtl_RecID=rec_ID and (dty_ID != 158  and  dty_Type = "resource") and rst_RecordMatchOrder and BD1.dtl_ID is not null');//MAGIC NUMBER
 
 	if (mysql_num_rows($res) == 0) return true;	// there are no resource-pointer types required for a match
 	while ($row = mysql_fetch_row($res)) {
@@ -1651,7 +1651,7 @@ function insert_biblio(&$entry) {
 	foreach (array_keys($bib_details) as $i) {
 		unset($field);
 		$field = &$bib_details[$i];
-		if ($field->getType() == 158) {
+		if ($field->getType() == 158) {//MAGIC NUMBER
 			foreach ($field->getValue() as $person_bib_id) {
 				if ($bib_detail_insert) $bib_detail_insert .= ', ';
 				$bib_detail_insert .= '('.$rec_id.','.$field->getType().', "'.addslashes($person_bib_id).'", NULL, 1)';
@@ -1726,7 +1726,7 @@ if ($master_bib_id == 44) { error_log(str_replace("\n", " ", '
      from recDetails S
 left join recDetails M on S.dtl_DetailTypeID=M.dtl_DetailTypeID and S.dtl_ValShortened=M.dtl_ValShortened and M.dtl_RecID='.$master_bib_id.'
 left join defDetailTypes on dty_ID=S.dtl_DetailTypeID
-    where S.dtl_RecID='.$slave_bib_id.' and M.dtl_RecID is null and (dty_Type != "resource" or S.dtl_DetailTypeID=158)')); }
+    where S.dtl_RecID='.$slave_bib_id.' and M.dtl_RecID is null and (dty_Type != "resource" or S.dtl_DetailTypeID=158)')); }//MAGIC NUMBER
 */
 
 	$new_bd_query = '
@@ -1734,7 +1734,7 @@ left join defDetailTypes on dty_ID=S.dtl_DetailTypeID
      from recDetails S
 left join recDetails M on S.dtl_DetailTypeID=M.dtl_DetailTypeID and S.dtl_ValShortened=M.dtl_ValShortened and M.dtl_RecID='.$master_bib_id.'
 left join defDetailTypes on dty_ID=S.dtl_DetailTypeID
-    where S.dtl_RecID='.$slave_bib_id.' and M.dtl_RecID is null and (dty_Type != "resource" or S.dtl_DetailTypeID=158)';	// ignore non-author references
+    where S.dtl_RecID='.$slave_bib_id.' and M.dtl_RecID is null and (dty_Type != "resource" or S.dtl_DetailTypeID=158)';//MAGIC NUMBER	// ignore non-author references
 	$res = mysql_query($new_bd_query);
 	$num_bd_rows = mysql_num_rows($res);
 
@@ -1794,7 +1794,7 @@ function merge_new_biblio_data($master_biblio_id, &$entry) {
 
 		while ($bd = mysql_fetch_assoc($res)) {
 			if ($bd["dty_Type"] === "resource") {
-				if ($bd["dtl_DetailTypeID"] !== 158) array_push($bib_ids, $bd["dtl_Value"]);	// also pull in fields from non-author related fields
+				if ($bd["dtl_DetailTypeID"] !== 158) array_push($bib_ids, $bd["dtl_Value"]);	//MAGIC NUMBER// also pull in fields from non-author related fields
 			}
 			else {
 				$existingFields[$bd["dtl_DetailTypeID"]."-".trim(strtolower($bd["dtl_Value"]))] = 1;
@@ -1827,7 +1827,7 @@ function merge_new_biblio_data($master_biblio_id, &$entry) {
 		else if ($fields[$i]->getGeographicValue()) {
 			$newFields[] = &$fields[$i];
 		}
-		else if ($fields[$i]->getType() != 158) {
+		else if ($fields[$i]->getType() != 158) {//MAGIC NUMBER
 			// add typed data, if it doesn't exist exactly already
 			if (! @$existingFields[$fields[$i]->getType() . "-" . trim(strtolower($fields[$i]->getRawValue()))]) {
 				$newFields[] = &$fields[$i];
@@ -2030,7 +2030,7 @@ function process_author(&$field) {
 		                             left join recDetails GIVENNAMES on GIVENNAMES.dtl_RecID=rec_ID and GIVENNAMES.dtl_DetailTypeID=291
 		                     where rec_RecTypeID = 75
 		                      and SURNAME.dtl_Value = "'.addslashes(trim($person['surname'].' '.@$person['postfix'])).'"
-		                      and GIVENNAMES.dtl_Value = "'.addslashes(trim($person['first names'])).'"');
+		                      and GIVENNAMES.dtl_Value = "'.addslashes(trim($person['first names'])).'"');//MAGIC NUMBER
 
 
 		if (mysql_num_rows($res) > 0) {
@@ -2041,7 +2041,7 @@ function process_author(&$field) {
 			mysql_query('insert into Records (rec_Title, rec_RecTypeID, rec_FlagTemporary, rec_Modified, rec_Added) values ("'.addslashes(trim($person['surname'].' '.@$person['postfix']).', '.$person['first names']).'", 75, 1, now(), now())');
 			$rec_id = mysql_insert_id();
 			mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id.', 160, "'.addslashes(trim($person['surname'].' '.@$person['postfix'])).'"),
-			                                                                        ('.$rec_id.', 291, "'.addslashes($person['first names']).'")');
+			                                                                        ('.$rec_id.', 291, "'.addslashes($person['first names']).'")');//MAGIC NUMBER
 			mysql_query("update Records set rec_Hash = hhash(rec_ID) where rec_ID = $rec_id");
 		}
 

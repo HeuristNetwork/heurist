@@ -663,16 +663,17 @@ var HRecord = function() {
 		var detailID = bits.pop();
 		var refID = bits.pop();
 
-		if (refID === 158) {	//MAGIC NUMBER
+		if (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_CREATOR'] && refID === top.HEURIST.magicNumbers['DT_CREATOR']) {
 			// an AuthorEditor
+			var surnameDT =(top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_GIVEN_NAMES']?top.HEURIST.magicNumbers['DT_GIVEN_NAMES']:0);
 			if (values.length === 1) {
-				if (! values[0]) { return (detailID === 291)? "Anonymous" : ""; }	//MAGIC NUMBER
+				if (! values[0]) { return (detailID === surnameDT)? "Anonymous" : ""; }
 				else { return values[0]; }
 			}
 			else {
-				if (! values[0]) { return (detailID === 291)? "multiple anonymous authors" : ""; }	//MAGIC NUMBER
+				if (! values[0]) { return (detailID === surnameDT)? "multiple anonymous authors" : ""; }
 				else {
-					if (detailID === 291) { return values[0] + " et al."; }	//MAGIC NUMBER
+					if (detailID === surnameDT) { return values[0] + " et al."; }
 					else { return values[0]; }
 				}
 			}
@@ -1550,15 +1551,15 @@ var HRelationship = function(primaryRecord, relationshipType, secondaryRecord) {
 
 	if (! HRelationship.PrimaryRecordType) {
 		/* Keep a static storage of the types essential to a relationship record */
-		HRelationship.PrimaryRecordType = HDetailManager.getDetailTypeById(202);
-		HRelationship.SecondaryRecordType = HDetailManager.getDetailTypeById(199);
+		HRelationship.PrimaryRecordType = HDetailManager.getDetailTypeById(top.HEURIST.magicNumbers['DT_PRIMARY_RESOURCE']);
+		HRelationship.SecondaryRecordType = HDetailManager.getDetailTypeById(top.HEURIST.magicNumbers['DT_LINKED_RESOURCE']);
 	}
 	if (! HRelationship.RelationshipTypeType) {
-		HRelationship.RelationshipTypeType = HDetailManager.getDetailTypeById(200);
+		HRelationship.RelationshipTypeType = HDetailManager.getDetailTypeById(top.HEURIST.magicNumbers['DT_RELATION_TYPE']);
 		HRelationship.relatedEnums = HRelationship.RelationshipTypeType.getRelatedEnumerationValues();
 	}
 
-	this.setRecordType(HRecordTypeManager.getRecordTypeById(52));
+	this.setRecordType(HRecordTypeManager.getRecordTypeById(top.HEURIST.magicNumbers['RT_RELATION']));
 
 	if (arguments) {
 		try { this.addDetail(HRelationship.PrimaryRecordType, primaryRecord); }
@@ -1582,7 +1583,7 @@ HAPI.inherit(HRelationship, HRecord);
 HRelationship.getClass = function() { return "HRelationship"; };
 HRelationship.getRelationshipTypes = function() {
 	if (! HRelationship.RelationshipTypeType) {
-		HRelationship.RelationshipTypeType = HDetailManager.getDetailTypeById(200);
+		HRelationship.RelationshipTypeType = HDetailManager.getDetailTypeById(top.HEURIST.magicNumbers['DT_RELATION_TYPE']);
 	}
 	return HRelationship.RelationshipTypeType.getEnumerationValues();
 };
@@ -3223,7 +3224,7 @@ var HeuristScholarDB = new HStorageManager();
 				// first sweep: create place-holder records
 				id = parseInt(response.records[i][0]);
 				if (! (record = that.getRecord(id))) {
-					if (parseInt(response.records[i][2]) !== 52) {	// saw TODO need to add check for rectype relation
+					if (parseInt(response.records[i][2]) !== top.HEURIST.magicNumbers['RT_RELATION']) {	// saw TODO need to add check for rectype relation
 						record = new HRecord();
 					}
 					else {

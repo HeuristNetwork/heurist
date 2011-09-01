@@ -1,17 +1,17 @@
 <!--
 
 /**
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
+* filename, brief description, date of creation, by whom
+* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+* @todo
+**/
 
 -->
 <html>
-<!-- search.html
+	<!-- search.html
 
 	Copyright 2005 - 2011 The University of Sydney Digital Innovation Unit
 	This file is part of the Heurist academic knowledge management system (http://HeuristScholar.org)
@@ -35,67 +35,68 @@
 
 	-->
 
-<head>
-<title>Heurist Reference Database - &copy; 2005-2010 The University of Sydney</title>
-<link rel="stylesheet" media="screen and (max-device-width: 800px)" href="../common/css/smallscreen.css"/>
-<link rel=icon href="../favicon.ico" type="image/x-icon">
-<link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
-<link id=httprsslink rel=alternate type="application/rss+xml" title="HTTP RSS feed" href="../export/feeds/searchRSS.php?q=tag:Favourite+OR+tag:Favorite">
-<link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/menu/assets/skins/sam/menu.css">
-<script type="text/javascript" src="../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
-<script type="text/javascript" src="../external/yui/2.8.2r1/build/json/json-min.js"></script>
-<script type="text/javascript" src="../external/yui/2.8.2r1/build/container/container_core-min.js"></script>
-<script type="text/javascript" src="../external/yui/2.8.2r1/build/menu/menu-min.js"></script>
-<script src="../external/jquery/jquery-1.6.min.js"></script>
-<link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
-<link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
-<link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/calendar/assets/skins/sam/calendar.css" />
-<script type="text/javascript" src="../external/yui/2.8.2r1/build/element/element-min.js"></script>
-<script type="text/javascript" src="../external/yui/2.8.2r1/build/tabview/tabview-min.js"></script>
-<script type="text/javascript" src="../external/yui/2.8.2r1/build/calendar/calendar-min.js"></script>
-<!-- Combo-handled YUI CSS files: -->
-<link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/reset-fonts-grids/reset-fonts-grids.css">
-<link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/resize/assets/skins/sam/resize.css">
-<link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/layout/assets/skins/sam/layout.css">
-<!-- Combo-handled YUI JS files: -->
-<script type="text/javascript" src="../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
-<script type="text/javascript" src="../external/yui/2.8.2r1/build/animation/animation-min.js"></script>
-<script type="text/javascript" src="../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
-<script type="text/javascript" src="../external/yui/2.8.2r1/build/element/element-min.js"></script>
-<script type="text/javascript" src="../external/yui/2.8.2r1/build/resize/resize-min.js"></script>
-<script type="text/javascript" src="../external/yui/2.8.2r1/build/layout/layout-min.js"></script>
-<link rel=stylesheet href="../common/css/global.css" media="all">
-<link rel=stylesheet href="../common/css/search.css" media="all">
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<style>
-/* Hack for IE7 betas -- :hover etc in external CSS not respected without these rules */
+	<head>
+		<title>Heurist Reference Database - &copy; 2005-2010 The University of Sydney</title>
+		<link rel="stylesheet" media="screen and (max-device-width: 800px)" href="../common/css/smallscreen.css"/>
+		<link rel=icon href="../favicon.ico" type="image/x-icon">
+		<link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
+		<link id=httprsslink rel=alternate type="application/rss+xml" title="HTTP RSS feed" href="../export/feeds/searchRSS.php?q=tag:Favourite+OR+tag:Favorite">
+		<link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/menu/assets/skins/sam/menu.css">
+		<script type="text/javascript" src="../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+		<script type="text/javascript" src="../external/yui/2.8.2r1/build/json/json-min.js"></script>
+		<script type="text/javascript" src="../external/yui/2.8.2r1/build/container/container_core-min.js"></script>
+		<script type="text/javascript" src="../external/yui/2.8.2r1/build/menu/menu-min.js"></script>
+		<script src="../external/jquery/jquery-1.6.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
+		<link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
+		<link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/calendar/assets/skins/sam/calendar.css" />
+		<script type="text/javascript" src="../external/yui/2.8.2r1/build/element/element-min.js"></script>
+		<script type="text/javascript" src="../external/yui/2.8.2r1/build/tabview/tabview-min.js"></script>
+		<script type="text/javascript" src="../external/yui/2.8.2r1/build/calendar/calendar-min.js"></script>
+		<!-- Combo-handled YUI CSS files: -->
+		<link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/reset-fonts-grids/reset-fonts-grids.css">
+		<link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/resize/assets/skins/sam/resize.css">
+		<link rel="stylesheet" type="text/css" href="../external/yui/2.8.2r1/build/layout/assets/skins/sam/layout.css">
+		<!-- Combo-handled YUI JS files: -->
+		<script type="text/javascript" src="../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+		<script type="text/javascript" src="../external/yui/2.8.2r1/build/animation/animation-min.js"></script>
+		<script type="text/javascript" src="../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
+		<script type="text/javascript" src="../external/yui/2.8.2r1/build/element/element-min.js"></script>
+		<script type="text/javascript" src="../external/yui/2.8.2r1/build/resize/resize-min.js"></script>
+		<script type="text/javascript" src="../external/yui/2.8.2r1/build/layout/layout-min.js"></script>
+		<link rel=stylesheet href="../common/css/global.css" media="all">
+		<link rel=stylesheet href="../common/css/search.css" media="all">
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<style>
+			/* Hack for IE7 betas -- :hover etc in external CSS not respected without these rules */
 		a:hover {
-}
-a:active {
-}
-a:focus {
-}
-a:hover {
-}
-a:active {
-}
-a:focus {
-}
-</style>
-</head>
+			}
+			a:active {
+			}
+			a:focus {
+			}
+			a:hover {
+			}
+			a:active {
+			}
+			a:focus {
+			}
+		</style>
+	</head>
 
-<body>
-<iframe id=searchFrame frameborder=0 style="width:0;height:0;position:absolute;"></iframe>
-<script src="../common/php/loadHAPI.php"></script>
-<script src="../common/js/utilsLoad.js"></script> <!-- core HEURIST functions -->
-<script src="../records/edit/editRecord.js"></script>
-<script>
-		var hBase = "http://" + window.location.host + top.HEURIST.basePath;
+	<body>
+		<iframe id=searchFrame frameborder=0 style="width:0;height:0;position:absolute;"></iframe>
+		<script src="../common/php/loadHAPI.php"></script>
+		<script src="../common/js/utilsLoad.js"></script> <!-- core HEURIST functions -->
+		<script src="../records/edit/editRecord.js"></script>
+		<script>
+			var hBase = (top.HEURIST && top.HEURIST.basePath ? "http://" + window.location.host +  top.HEURIST.basePath :
+									( HeuristBaseURL ? HeuristBaseURL : ""));
 		var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"";
 		var bugReportURL = hBase + 'export/email/formEmailRecordPopup.html?rectype=bugreport&db='+database;
 
 		if (location.search.match(/[&?]q=[^&]+/)) {		//there is a search string
-			document.getElementById("searchFrame").src = top.HEURIST.basePath+"search/getResultsPageAsync.php" + location.search;
+				document.getElementById("searchFrame").src =  hBase +"search/getResultsPageAsync.php" + location.search;
 			top.suppressAutoSearch = true;
 		} else {
 			//	this is a substitute for loading the user's default saved search - it's more intuitive
@@ -114,7 +115,7 @@ a:focus {
 			document.body.className = location.search.match(/w=bookmark/) ? "w-bookmark" : "w-all";
 		}
 		// start loading this early
-		top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadUserInfo.php" +	// user-specific HEURIST data
+			top.HEURIST.loadScript(hBase+"common/php/loadUserInfo.php" +	// user-specific HEURIST data
 							(database ? "?db=" + database : ""));
 
 		top.HEURIST.whenLoaded(["search-html", "obj-common"], top.HEURIST.util.setDBName);
@@ -149,12 +150,12 @@ a:focus {
 				//document.forms[0].submit();
 			}
 		}
-</script>
-<script src="../common/php/displayPreferences.php"></script> <!-- sets body css classes based on prefs in session -->
-<iframe src="../search/actions/actionHandler.php" id=i_action></iframe>
-<!-- actionHandler.php is written to return a form by default or running javascript followed by reload teh default-->
+		</script>
+		<script src="../common/php/displayPreferences.php"></script> <!-- sets body css classes based on prefs in session -->
+		<iframe src="../search/actions/actionHandler.php" id=i_action></iframe>
+		<!-- actionHandler.php is written to return a form by default or running javascript followed by reload teh default-->
 
-<div id="masthead"> <a id=home-link>
+		<div id="masthead"> <a id=home-link>
 
 	<div id=logo title="Click the database logo at top left of any Heurist page to return to your Favourites"></div>
 	</a>
@@ -223,10 +224,10 @@ a:focus {
       </li>
     </ul>
   </div>
-</div>
+		</div>
 
-<!-- sidebar -->
-<div id="sidebar">
+		<!-- sidebar -->
+		<div id="sidebar">
   <div id=left-panel-content class="panel-main-content">
     <div id=saved>
       <div id=my-records-saved-searches class=hide>
@@ -262,11 +263,11 @@ a:focus {
     <div id=tag-search-links></div>
   </div>
   <!--</div>-->
-</div>
-<!-- centre panel positional-->
-<div id="center-panel"></div>
-<!-- search and menu -->
-<div id=search class="banner searchTable" style="border-bottom:1px solid #696969; height:29px;padding:0 0 0 5px">
+		</div>
+		<!-- centre panel positional-->
+		<div id="center-panel"></div>
+		<!-- search and menu -->
+		<div id=search class="banner searchTable" style="border-bottom:1px solid #696969; height:29px;padding:0 0 0 5px">
         <form onSubmit="top.HEURIST.search.checkSearchForm();return false;"><input type=hidden id=w-input name=w>
            SEARCH:
           <div class="searchInput" style="position:relative"><input id=q name=q type=text style="width:300px; clear:both">
@@ -302,9 +303,9 @@ a:focus {
 
 
         </form>
-</div>
-<!-- page -->
-<div id="page" style="position:absolute;left:0;right:0;top:0;bottom:0; background-color:#FFF">
+		</div>
+		<!-- page -->
+		<div id="page" style="position:absolute;left:0;right:0;top:0;bottom:0; background-color:#FFF">
   <!--<div id=pageNavCount> <nobr> <span id=page-nav></span> <span id=resource-count></span> </nobr></div>-->
   <div id="result-container">
     <div id="result-header">
@@ -442,16 +443,16 @@ a:focus {
 
   <!-- end page right -->
   <div id="record-view"></div>
-</div>
-<!-- footer -->
-<div id="footer">
+		</div>
+		<!-- footer -->
+		<div id="footer">
   <!--<div id=pageNavCount> <nobr> <span id=page-nav></span> <span id=resource-count></span> </nobr></div>-->
-</div>
-<div id=password>
+		</div>
+		<div id=password>
   <div><b>Username / password reminder:</b></div>
   <div id=reminder></div>
-</div>
-<div style="position: absolute; left: 50%; top: 145px;">
+		</div>
+		<div style="position: absolute; left: 50%; top: 145px;">
   <div id=popup-notice style="display: none; position: relative; left: -100px; width: 200px; height: 50px; border: 2px solid gray;">
     <table border=0 cellspacing=0 cellpadding=0 style="background-color: light-blue; width: 100%; height: 100%;">
       <tr>
@@ -459,28 +460,29 @@ a:focus {
       </tr>
     </table>
   </div>
-</div>
-<script>
-/* lightweight page-specific autosizing */
-/*
-var lpc = document.getElementById("left-panel-content");
-var rpc = document.getElementById("results");
+		</div>
+		<script>
+			/* lightweight page-specific autosizing */
+			/*
+			var lpc = document.getElementById("left-panel-content");
+			var rpc = document.getElementById("results");
 
-lpc.style.width = (lpc.parentNode.offsetWidth || (lpc.parentNode.parentNode.offsetWidth - 10)) + "px";
-lpc.style.height = (lpc.parentNode.offsetHeight || (lpc.parentNode.parentNode.offsetHeight - 10)) + "px";
-rpc.style.width = (rpc.parentNode.offsetWidth || (rpc.parentNode.parentNode.offsetWidth - 10)) + "px";
-rpc.style.height = (rpc.parentNode.offsetHeight || (rpc.parentNode.parentNode.offsetHeight - 10)) + "px";
-*/
-_tabView = new YAHOO.widget.TabView('applications', { activeIndex: 0 });
-top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadCommonInfo.php");	// core HEURIST object definitions (dynamically generated)
-top.HEURIST.loadScript("searchTypes.js");
-top.HEURIST.loadScript("search.js");				// search-specific HEURIST functions
-//top.HEURIST.loadScript(top.HEURIST.basePath+"records/edit/editRecord.js");				// edit-specific HEURIST functions
-top.HEURIST.fireEvent(window, "heurist-search-html-loaded");
-top.HEURIST.contentLoaded();
+			lpc.style.width = (lpc.parentNode.offsetWidth || (lpc.parentNode.parentNode.offsetWidth - 10)) + "px";
+			lpc.style.height = (lpc.parentNode.offsetHeight || (lpc.parentNode.parentNode.offsetHeight - 10)) + "px";
+			rpc.style.width = (rpc.parentNode.offsetWidth || (rpc.parentNode.parentNode.offsetWidth - 10)) + "px";
+			rpc.style.height = (rpc.parentNode.offsetHeight || (rpc.parentNode.parentNode.offsetHeight - 10)) + "px";
+			*/
+			_tabView = new YAHOO.widget.TabView('applications', { activeIndex: 0 });
+			top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadCommonInfo.php");	// core HEURIST object definitions (dynamically generated)
+			top.HEURIST.loadScript("searchTypes.js");
+			top.HEURIST.loadScript("search.js");				// search-specific HEURIST functions
+			//top.HEURIST.loadScript(top.HEURIST.basePath+"records/edit/editRecord.js");				// edit-specific HEURIST functions
+			top.HEURIST.fireEvent(window, "heurist-search-html-loaded");
+			top.HEURIST.contentLoaded();
 
-</script>
-<!-- hidden iFrame for printing -->
-<iframe id="printingFrame" style="height: 0px; width: 0px; position: absolute; visibility:hidden" src="printresults.html"></iframe>
-</body>
+		</script>
+		<script src="../common/php/getMagicNumbers.php"></script>
+  		<!-- hidden iFrame for printing -->
+		<iframe id="printingFrame" style="height: 0px; width: 0px; position: absolute; visibility:hidden" src="printresults.html"></iframe>
+	</body>
 </html>

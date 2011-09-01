@@ -53,15 +53,15 @@ function annotation_loaded() {
 		for (var i in detail_types) {
 			var val = record.getDetail(detail_types[i]);
 			switch (detail_types[i].getID()) {
-				case 160: document.getElementById("title").value = val; break;
-				case 191: document.getElementById("notes").value = val; break;
-				case 322: break; // tei document reference - no need to load
-				case 539: document.getElementById("start_e").value = val; break;
-				case 540: document.getElementById("end_e").value = val; break;
-				case 329: document.getElementById("start_w").value = val; break;
-				case 330: document.getElementById("end_w").value = val; break;
-				case 199: if(val){setRecord(val.getID(), val.getTitle(), "linked");} break;
-				case 508: if(val){setRecord(val.getID(), val.getTitle(), "image");} break;
+				case 160: document.getElementById("title").value = val; break;//MAGIC NUMBER
+				case 191: document.getElementById("notes").value = val; break;//MAGIC NUMBER
+				case 322: break; // tei document reference - no need to load//MAGIC NUMBER
+				case 539: document.getElementById("start_e").value = val; break;//MAGIC NUMBER
+				case 540: document.getElementById("end_e").value = val; break;//MAGIC NUMBER
+				case 329: document.getElementById("start_w").value = val; break;//MAGIC NUMBER
+				case 330: document.getElementById("end_w").value = val; break;//MAGIC NUMBER
+				case 199: if(val){setRecord(val.getID(), val.getTitle(), "linked");} break;//MAGIC NUMBER
+				case 508: if(val){setRecord(val.getID(), val.getTitle(), "image");} break;//MAGIC NUMBER
 			}
 		}
 }
@@ -137,15 +137,15 @@ function saveRecord() {
 
 			var val = null;
 			switch (detail_types[i].getID()) {
-				case 160: val = document.getElementById("title").value; break;
-				case 191: val = document.getElementById("notes").value; break;
-				case 322: val = related; break;
-				case 539: val = start_e; break;
-				case 540: val = end_e != start_e ? end_e : null; break;
-				case 329: val = start_w; break;
-				case 330: val = end_w != start_w ? end_w : null; break;
-				case 199: val = linked_record;  break;
-				case 508: val = image_record; break;
+				case 160: val = document.getElementById("title").value; break;//MAGIC NUMBER
+				case 191: val = document.getElementById("notes").value; break;//MAGIC NUMBER
+				case 322: val = related; break;//MAGIC NUMBER
+				case 539: val = start_e; break;//MAGIC NUMBER
+				case 540: val = end_e != start_e ? end_e : null; break;//MAGIC NUMBER
+				case 329: val = start_w; break;//MAGIC NUMBER
+				case 330: val = end_w != start_w ? end_w : null; break;//MAGIC NUMBER
+				case 199: val = linked_record;  break;//MAGIC NUMBER
+				case 508: val = image_record; break;//MAGIC NUMBER
 			}
 
 			if (val)

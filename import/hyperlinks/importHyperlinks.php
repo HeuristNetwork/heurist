@@ -518,13 +518,13 @@ function biblio_check($url, $title, $notes, $user_bib_id) {
 		//add title detail
 		mysql__insert('recDetails', array(
 			'dtl_RecID' => $rec_id,
-			'dtl_DetailTypeID' => 160,
+			'dtl_DetailTypeID' => 160,//MAGIC NUMBER
 			'dtl_Value' => $title
 		));
 		//add notes detail
 		mysql__insert('recDetails', array(
 			'dtl_RecID' => $rec_id,
-			'dtl_DetailTypeID' => 191,
+			'dtl_DetailTypeID' => 191,//MAGIC NUMBER
 			'dtl_Value' => $notes
 		));
 		return $rec_id;

@@ -1,6 +1,6 @@
 <?php
 
-/**
+	/**
  * emailRecordDetailsphp
  *
  * Accept POST from
@@ -32,7 +32,7 @@
 
   $ids = "";
 
-	if($_POST["rectype"] == RT_BUG_REPORT){ //MAGIC BUG REPORTER
+	if($_POST["rectype"] == RT_BUG_REPORT){
 
 	$bug_title = $_POST["type:".DT_BUG_REPORT_NAME];
 
@@ -142,7 +142,7 @@
 
   // Converts all record and type codes into Concept
   $arr = array();
-  if($_POST["rectype"] == RT_BUG_REPORT){ //MAGIC BUG REPORTER
+	if($_POST["rectype"] == RT_BUG_REPORT){
   		//bug reporting already codes in global
   		$arr = $_POST;
   }else{
@@ -150,14 +150,14 @@
   		foreach ($_POST as $key => $value)
 		{
 			$pos = strpos($key, "type:");
-//DEBUG error_log(">>>> ".(is_numeric($pos) && $pos == 0)."    ".$pos);
+			//DEBUG error_log(">>>> ".(is_numeric($pos) && $pos == 0)."    ".$pos);
 
 		    if (is_numeric($pos) && $pos == 0)
 		    {
     			//@todo we have to convert the content of fields as well -
 			    // since it may contain terms and references to other rectypes !!!1
     				$typeid = substr($key, 5); //, $top-5);
-//DEBUG error_log(">>>> ".strpos($key, "type:")."  dettype=".$typeid);
+				//DEBUG error_log(">>>> ".strpos($key, "type:")."  dettype=".$typeid);
 					$newkey = getDetailTypeConceptID($typeid);
 					if($newkey){
 			    		$arr["type:".$newkey] = $value;
@@ -170,8 +170,8 @@
 			}
 		}//for
 
-//DEBUG error_log(">>>> rectype=".$_POST["rectype"]);
-//DEBUG error_log(">>>>".getRecTypeConceptID($_POST["rectype"]));
+		//DEBUG error_log(">>>> rectype=".$_POST["rectype"]);
+		//DEBUG error_log(">>>>".getRecTypeConceptID($_POST["rectype"]));
 
 		$newrectype = getRecTypeConceptID($_POST["rectype"]);
 		if($newrectype){
@@ -187,7 +187,7 @@
   //$message = json_format($_POST);
   $message =  json_encode($arr);
 
-// DEBUG error_log(">>>> ".$message);
+	// DEBUG error_log(">>>> ".$message);
  /**/
 	$geekMail->message($message);
 
@@ -199,5 +199,5 @@
 		print '({"result":"ok"})';
 	}
 
-//print '({"result":"ok"})';
+	//print '({"result":"ok"})';
 ?>

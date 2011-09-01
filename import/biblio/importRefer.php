@@ -882,11 +882,11 @@ class HeuristReferEntry extends HeuristForeignEntry {
 					if (! $entry) { error_log('refer-to-heurist mapping inconsistency'); continue; }
 
 					// FIXME: need to put in a fuzzy matching lovey-dovey thing here to recognise ANY enum type, not just THESIS TYPE
-					if ($heurist_tag == '243')
+					if ($heurist_tag == '243')//MAGIC NUMBER
 						$entry->addField(new HeuristNativeField($heurist_tag, $refer_field->getRawValue(), decode_thesis_type($refer_field)));
 					else if (is_enum_field($heurist_tag))
 						$entry->addField(new HeuristNativeField($heurist_tag, $refer_field->getRawValue(), decode_enum($heurist_tag, $refer_field)));
-					else if ($heurist_tag == '160')	// title field -- cook it a little
+					else if ($heurist_tag == '160')	//MAGIC NUMBER// title field -- cook it a little
 						$entry->addField(new HeuristNativeField($heurist_tag, preg_replace('/\\s*[&]\\s*/', ' and ', $refer_field->getValue())));
 					else
 						$entry->addField(new HeuristNativeField($heurist_tag, $refer_field->getValue()));

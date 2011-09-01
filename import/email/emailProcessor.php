@@ -123,14 +123,14 @@
     $arr = json_decode($description, true);
 
 
-//DEBUG error_log(">>>>".is_array($arr)."  ".count($arr)."  ".print_r($arr, true));
+		//DEBUG error_log(">>>>".is_array($arr)."  ".count($arr)."  ".print_r($arr, true));
 
-// assume all id (rtID, dtID, trmID and ontID) are all concept ids (dbID - ID)
-// get rectype concept id and  convert to local id or notes
-// for each detail type: convert to local ids
-//if type is file the save Attachment first
-//if type is enum then convert term ID to local
-// for any id that doesn't convert, save info in scratch in record.
+		// assume all id (rtID, dtID, trmID and ontID) are all concept ids (dbID - ID)
+		// get rectype concept id and  convert to local id or notes
+		// for each detail type: convert to local ids
+		//if type is file the save Attachment first
+		//if type is enum then convert term ID to local
+		// for any id that doesn't convert, save info in scratch in record.
 	if(is_array($arr) && count($arr)>2){
 		//this is from export record from another heurist instance
 
@@ -141,7 +141,7 @@
   		foreach ($arr as $key => $value)
 		{
 			$pos = strpos($key, "type:");
-//DEBUG error_log(">>>> ".(is_numeric($pos) && $pos == 0)."    ".$pos);
+				//DEBUG error_log(">>>> ".(is_numeric($pos) && $pos == 0)."    ".$pos);
 
 		    if (is_numeric($pos) && $pos == 0)
 		    {
@@ -153,7 +153,7 @@
 
 					$newkey = getDetailTypeLocalID($typeid);
 
-//DEBUG error_log(">>>> ".$newkey."  dettype=".$typeid);
+					//DEBUG error_log(">>>> ".$newkey."  dettype=".$typeid);
 
 					if($newkey){
 			    		$arrnew["type:".$newkey] = $value;
@@ -182,14 +182,14 @@
 		}
 
 
-//DEBUG error_log("KEY FILE ".$key_file);
+			//DEBUG error_log("KEY FILE ".$key_file);
 		//assosiated files
 		if($key_file){
 			$files_arr = $arrnew[$key_file];
 
 			if($files_arr && count($files_arr) > 0) //  && preg_match("/\S+/",$files_arr[0]))
 			{
-//error_log(">>>>files_arr=".print_r($files_arr[0], true));
+					//error_log(">>>>files_arr=".print_r($files_arr[0], true));
 				$arrnew[$key_file] = saveAttachments($files_arr, $email);
 				if($arrnew[$key_file]==0) return false;
 			}
@@ -200,11 +200,11 @@
 		}
 
 
-//DEBUG error_log(">>>>ARRAY=".print_r($arrnew, true));
+			//DEBUG error_log(">>>>ARRAY=".print_r($arrnew, true));
 
 		$_POST = $arrnew;
 
-	}else{
+		}else if(defined('RT_NOTE')){
 		// this is from usual email - we will add email rectype
 
     	// liposuction away those unsightly double, triple and quadruple spaces
@@ -234,12 +234,12 @@
 		$_POST["rectype"]="183";  //EMAIL
 		*/
 
-		$_POST["type:".getDetailTypeLocalID(DT_NOTE_TITLE)] = array($email->getSubject()); //title
+			if(defined('DT_TITLE')) $_POST["type:".DT_TITLE] = array($email->getSubject()); //title
 		//$_POST["type:158"] = array("email harvesting"); //creator (recommended)
-		$_POST["type:".getDetailTypeLocalID(DT_NOTE_DATE)] = array(date('Y-m-d H:i:s')); //specific date
-		$_POST["type:".getDetailTypeLocalID(DT_NOTE_DESCRIPTION)] = array($email->getFrom()." ".$description); //notes
+			if(defined('DT_DATE')) $_POST["type:".DT_DATE] = array(date('Y-m-d H:i:s')); //specific date
+			if(defined('DT_SHORT_SUMMARY')) $_POST["type:".DT_SHORT_SUMMARY] = array($email->getFrom()." ".$description); //notes
 
-		$_POST["rectype"] = getRecTypeLocalID(RT_NOTE);  //NOTE
+			$_POST["rectype"] = RT_NOTE;  //NOTE
 
 
 		$_POST["check-similar"]="1";
@@ -247,8 +247,8 @@
 		$arr = saveAttachments(null, $email);
 		if($arr==0){
 			return false;
-		}else if(count($arr)>0){
-			$_POST['type:'.getRecTypeLocalID(DT_NOTE_FILE)] = $arr;
+			}else if(count($arr)>0 ){
+				if (defined('DT_ASSOCIATED_FILE')) $_POST['type:'.DT_ASSOCIATED_FILE] = $arr;
 			//array_push($_POST['type:221'], $arr);
 				//error_log(">>>>>>>>>ARRAY>>".print_r($arr, true));
 		}
@@ -271,7 +271,7 @@
 		}
 
 		$_POST["visibility"] = 'hidden';
-//DEBUG error_log(">>>>before insert POST=".print_r($_POST, true));
+			//DEBUG error_log(">>>>before insert POST=".print_r($_POST, true));
 
     	$updated = insertRecord();
     	if ($updated) {
@@ -279,7 +279,7 @@
     		$email->setRecId($rec_id);
 		}
 
-//error_log("updated = $updated  recID = $rec_id ");
+			//error_log("updated = $updated  recID = $rec_id ");
 	}
 
     printEmail($email);
@@ -304,7 +304,7 @@
 
 		$arr_res = array();
 
-//error_log("WE ARE IN SAVEATTACH");
+		//error_log("WE ARE IN SAVEATTACH");
 
         $attachments=$email->getAttachments();
         foreach($attachments as $attachment){
@@ -313,7 +313,7 @@
 
 			$file_size = strlen($body);
 
-// error_log("SIZE ".$file_size.">>>>>".$attachment_size_max);
+			// error_log("SIZE ".$file_size.">>>>>".$attachment_size_max);
 
             if($file_size>$attachment_size_max){
                 continue;
@@ -325,7 +325,7 @@
             }
             if($filename){
 
-// error_log("AAAA>>>".$filename."     ".$attachment->getName());
+				// error_log("AAAA>>>".$filename."     ".$attachment->getName());
 
             	//find file name and related info if $files_arr
             	if($files_arr){
@@ -334,7 +334,7 @@
 			      	foreach ($files_arr as $temp_arr) {
 			      		if($temp_arr[0]==$filename){
 			      			$file_arr = $temp_arr;
-// error_log("BBBB>>>print_r=".print_r($file_arr, true));
+							// error_log("BBBB>>>print_r=".print_r($file_arr, true));
 			      			break;
 						}
 			  		}
@@ -354,7 +354,7 @@
 					$date_uploaded = date('Y-m-d H:i:s');
 					$mimetypeExt = strtolower(substr($filename,-3,3));
 					if($mimetypeExt=="peg") $mimetypeExt = "jpg";
-// error_log("SAVING>>>>>>>>>>>>>>>>>>>>>".$mimetypeExt."   ".strrpos($filename,".")."    ".substr($fielname,strrpos($filename,".")+1));
+					// error_log("SAVING>>>>>>>>>>>>>>>>>>>>>".$mimetypeExt."   ".strrpos($filename,".")."    ".substr($fielname,strrpos($filename,".")+1));
 				}
 
             	//save into database
@@ -370,7 +370,7 @@
 
             	$full_name = HEURIST_UPLOAD_PATH.$file_id;
 
-// error_log("CCCCC>>>".$full_name);
+				// error_log("CCCCC>>>".$full_name);
 
                 /*if(!is_file($full_name))
                 {
@@ -395,7 +395,7 @@
                 fwrite($file, $attachment->getBody(), $attachment_size_max);
                 fclose($file);
 
-// error_log("DDDDDDDD>> SAVED");
+				// error_log("DDDDDDDD>> SAVED");
 
                 array_push($arr_res, $file_id);
             }

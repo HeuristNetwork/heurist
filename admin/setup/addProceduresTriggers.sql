@@ -162,18 +162,28 @@ DELIMITER $$
 	AFTER INSERT ON `recDetails`
 	FOR EACH ROW
 	begin
-		if NEW.dtl_DetailTypeID=199 then
+		declare relSrcDT integer;
+		declare relTrgDT integer;
+		select dty_ID into relSrcDT
+			from defDetailTypes
+			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 202
+			order by dty_ID desc limit 1;
+		select dty_ID into relTrgDT
+			from defDetailTypes
+			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 199
+			order by dty_ID desc limit 1;
+		if NEW.dtl_DetailTypeID=relTrgDT then
 			update recRelationshipsCache
-			-- need to also save teh RecTypeID for the record
+			-- need to also save the RecTypeID for the record to help with constraint checking
 				set rrc_TargetRecID = NEW.dtl_Value
 				where rrc_RecID=NEW.dtl_RecID;
-		elseif NEW.dtl_DetailTypeID=202 then
+		elseif NEW.dtl_DetailTypeID=relSrcDT then
 			update recRelationshipsCache
-			-- need to also save teh RecTypeID for the record
+			-- need to also save the RecTypeID for the record to help with constraint checking
 				set rrc_SourceRecID = NEW.dtl_Value
 				where rrc_RecID=NEW.dtl_RecID;
 		end if;
-		-- need to add update for 200 to save the termID
+		-- need to add update for 200 to save the termID to help with constraint checking
 	end$$
 
 DELIMITER ;
@@ -204,12 +214,22 @@ DELIMITER $$
 	AFTER UPDATE ON `recDetails`
 	FOR EACH ROW
 	begin
-		if NEW.dtl_DetailTypeID=199 then
+		declare relSrcDT integer;
+		declare relTrgDT integer;
+		select dty_ID into relSrcDT
+			from defDetailTypes
+			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 202
+			order by dty_ID desc limit 1;
+		select dty_ID into relTrgDT
+			from defDetailTypes
+			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 199
+			order by dty_ID desc limit 1;
+		if NEW.dtl_DetailTypeID=relTrgDT then
 			update recRelationshipsCache
 			-- need to also save teh RecTypeID for the record
 				set rrc_TargetRecID = NEW.dtl_Value
 				where rrc_RecID=NEW.dtl_RecID;
-		elseif NEW.dtl_DetailTypeID=202 then
+		elseif NEW.dtl_DetailTypeID=relSrcDT then
 		update recRelationshipsCache
 				set rrc_SourceRecID = NEW.dtl_Value
 			-- need to also save teh RecTypeID for the record
@@ -233,11 +253,15 @@ DELIMITER $$
 	AFTER INSERT ON `Records`
 	FOR EACH ROW
 	begin
+		declare relRT integer;
+		select rty_ID into relRT
+			from defRecTypes
+			where rty_OriginatingDBID = 3 and rty_IDInOriginatingDB = 52 order by rty_ID desc limit 1;
 	-- need to change this to check the rectype's type = relationship
 	insert into usrRecentRecords (rre_UGrpID, rre_RecID, rre_Time)
 								values (@logged_in_user_id, NEW.rec_ID, now());
 	set @rec_id := last_insert_id(NEW.rec_ID);
-		if NEW.rec_RecTypeID = 52 then
+		if NEW.rec_RecTypeID = relRT then
 			--  need to also save relationship records RecTypeID
 			insert into recRelationshipsCache (rrc_RecID, rrc_SourceRecID, rrc_TargetRecID) values (NEW.rec_ID,NEW.rec_ID,NEW.rec_ID);
 		end if;
@@ -282,31 +306,45 @@ DELIMITER $$
 	AFTER UPDATE ON `Records`
 	FOR EACH ROW
 	begin
+		declare relRT integer;
 		declare srcRecID integer;
 		declare trgRecID integer;
+		declare relSrcDT integer;
+		declare relTrgDT integer;
 		if @suppress_update_trigger is null then
 			insert into usrRecentRecords (rre_UGrpID, rre_RecID, rre_Time)
 				values (@logged_in_user_id, NEW.rec_ID, now())
 				on duplicate key update rre_Time = now();
 		end if;
+		select dty_ID into relSrcDT
+			from defDetailTypes
+			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 202
+			order by dty_ID desc limit 1;
+		select dty_ID into relTrgDT
+			from defDetailTypes
+			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 199
+			order by dty_ID desc limit 1;
+		select rty_ID into relRT
+			from defRecTypes
+			where rty_OriginatingDBID = 3 and rty_IDInOriginatingDB = 52 order by rty_ID desc limit 1;
 		-- if change the records type from something else to relation insert cache value
-		if NEW.rec_RecTypeID = 52 AND NOT OLD.rec_RecTypeID = 52 then
+		if NEW.rec_RecTypeID = relRT AND NOT OLD.rec_RecTypeID = relRT then
 			select dtl_Value into srcRecID
 				from recDetails
-				where dtl_DetailTypeID=202 and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
+				where dtl_DetailTypeID = relSrcDT and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
 			if srcRecID is null then
 				set srcRecID = NEW.rec_ID;
 			end if;
 			select dtl_Value into trgRecID
 				from recDetails
-				where dtl_DetailTypeID=199 and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
+				where dtl_DetailTypeID = relTrgDT and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
 			if trgRecID is null then
 				set trgRecID = NEW.rec_ID;
 			end if;
 			insert into recRelationshipsCache (rrc_RecID, rrc_SourceRecID, rrc_TargetRecID) values (NEW.rec_ID,srcRecID,trgRecID);
 		end if;
 		-- if change the records type from relation to something else remove cache value
-		if OLD.rec_RecTypeID = 52 AND NOT NEW.rec_RecTypeID = 52 then
+		if OLD.rec_RecTypeID = relRT AND NOT NEW.rec_RecTypeID = relRT then
 			delete ignore from recRelationshipsCache where rrc_RecID = OLD.rec_ID;
 		end if;
 	end$$
@@ -327,9 +365,13 @@ DELIMITER $$
 
 -- 14/2/11 Ian: Do we need this value set by the previous insert?
 		set @rec_version := last_insert_id();
+		declare relRT integer;
+		select rty_ID into relRT
+			from defRecTypes
+			where rty_OriginatingDBID = 3 and rty_IDInOriginatingDB = 52 order by rty_ID desc limit 1;
 
 	-- need to change this to check the rectype's type = relationship
-		if OLD.rec_RecTypeID = 52 then
+		if OLD.rec_RecTypeID = relRT then
 			delete ignore from recRelationshipsCache where rrc_RecID = OLD.rec_ID;
 		end if;
 	end$$

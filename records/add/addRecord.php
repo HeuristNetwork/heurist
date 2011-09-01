@@ -45,7 +45,7 @@ if (@$_REQUEST['addref']) {	// add a record		//saw TODO: change this to addrec
 }
 // url with no rectype specified gets treated as an internet bookmark
 if (@$_REQUEST['bkmrk_bkmk_url']  &&  ! @$_REQUEST['bib_rectype'])
-	$_REQUEST['bib_rectype'] = 1;	//saw MAGIC NUMBER
+	$_REQUEST['bib_rectype'] = (defined('RT_INTERNET_BOOKMARK')?RT_INTERNET_BOOKMARK:0);
 
 
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
@@ -97,13 +97,13 @@ if (preg_match_all('!DOI:\s*(10\.[-a-zA-Z.0-9]+/\S+)!i', $description, $matches,
 $isbns = array();
 if (preg_match_all('!ISBN(?:-?1[03])?[^a-z]*?(97[89][-0-9]{9,13}[0-9]|[0-9][-0-9]{7,10}[0-9X])\\b!i', $description, $matches, PREG_PATTERN_ORDER)) {
 	$isbns = array_unique($matches[1]);
-	if (! @$_REQUEST['bib_rectype']) $_REQUEST['bib_rectype'] = 5; //saw MAGIC NUMBER
+	if (! @$_REQUEST['bib_rectype']) $_REQUEST['bib_rectype'] = (defined('RT_BOOK')?RT_BOOK:0);
 }
 
 $issns = array();
 if (preg_match_all('!ISSN(?:-?1[03])?[^a-z]*?([0-9]{4}-?[0-9]{3}[0-9X])!i', $description, $matches, PREG_PATTERN_ORDER)) {
 	$issns = array_unique($matches[1]);
-	if (! @$_REQUEST['bib_rectype']) $_REQUEST['bib_rectype'] = 3;
+	if (! @$_REQUEST['bib_rectype']) $_REQUEST['bib_rectype'] = (defined('RT_JOURNAL_ARTICLE')?RT_JOURNAL_ARTICLE:0);
 }
 
 /*  fix url to be complete with protocol and remove any trailing slash */
@@ -176,6 +176,14 @@ if (@$_REQUEST['tag']  &&  strpos($_REQUEST['tag'], "\\")) {
 }
 
 $isNewRecID = false;
+$doiDT = (defined('DT_DOI')?DT_DOI:0);
+$webIconDT = (defined('DT_WEBSITE_ICON')?DT_WEBSITE_ICON:0);
+$isbnDT = (defined('DT_ISBN')?DT_ISBN:0);
+$issnDT = (defined('DT_ISSN')?DT_ISSN:0);
+$titleDT = (defined('DT_TITLE')?DT_TITLE:0);
+$relTypDT = (defined('DT_RELATION_TYPE')?DT_RELATION_TYPE:0);
+$relSrcDT = (defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
+$relTrgDT = (defined('DT_LINKED_RESOURCE')?DT_LINKED_RESOURCE:0);
 
 /* arrive with a new (un-bookmarked) URL to process */
 if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
@@ -187,18 +195,17 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 		if (($row = mysql_fetch_assoc($res))) { // found record
 			$rec_id = intval($row['rec_ID']);
 			$fav = $_REQUEST["f"];
+			$bd = mysql__select_assoc('recDetails', 'concat(dtl_DetailTypeID, ".", dtl_Value)', '1',
+				'dtl_RecID='.$rec_id.' and ((dtl_DetailTypeID = '.$doiDT.' and dtl_Value in ("'.join('","', array_map("addslashes", $dois)).'"))'.
+				                       ' or  (dtl_DetailTypeID = '.$webIconDT.' and dtl_Value = "'.addslashes($fav).'"))'.
+				                       ' or  (dtl_DetailTypeID = '.$issnDT.' and dtl_Value in ("'.join('","', array_map("addslashes", $issns)).'"))'.
+				                       ' or  (dtl_DetailTypeID = '.$isbnDT.' and dtl_Value in ("'.join('","', array_map("addslashes", $isbns)).'")))');
 
-			$bd = mysql__select_assoc('recDetails', 'concat(dtl_DetailTypeID, ".", dtl_Value)', '1', // saw MAGIC NUMBERS
-				'dtl_RecID='.$rec_id.' and ((dtl_DetailTypeID = 198 and dtl_Value in ("'.join('","', array_map("addslashes", $dois)).'"))
-				                        or  (dtl_DetailTypeID = 347 and dtl_Value = "'.addslashes($fav).'"))
-				                        or  (dtl_DetailTypeID = 188 and dtl_Value in ("'.join('","', array_map("addslashes", $issns)).'"))
-				                        or  (dtl_DetailTypeID = 187 and dtl_Value in ("'.join('","', array_map("addslashes", $isbns)).'")))');
-
-			$inserts = array();			//saw  MAGIC NUMBERS
-			foreach ($dois as $doi) if (! $bd["198.$doi"]) array_push($inserts, "($rec_id, 198, '" . addslashes($doi) . "')");
-			if ($fav  &&  ! $bd["347.$fav"]) array_push($inserts, "($rec_id, 347, '" . addslashes($fav) . "')");
-			foreach ($isbns as $isbn) if (! $bd["187.$isbn"]) array_push($inserts, "($rec_id, 187, '" . addslashes($isbn) . "')");
-			foreach ($issns as $issn) if (! $bd["188.$issn"]) array_push($inserts, "($rec_id, 188, '" . addslashes($issn) . "')");
+			$inserts = array();
+			foreach ($dois as $doi) if (! $bd["$doiDT.$doi"]) array_push($inserts, "($rec_id, $doiDT, '" . addslashes($doi) . "')");
+			if ($fav  &&  ! $bd["$webIconDT.$fav"]) array_push($inserts, "($rec_id, $webIconDT, '" . addslashes($fav) . "')");
+			foreach ($isbns as $isbn) if (! $bd["$isbnDT.$isbn"]) array_push($inserts, "($rec_id, $isbnDT, '" . addslashes($isbn) . "')");
+			foreach ($issns as $issn) if (! $bd["$issnDT.$issn"]) array_push($inserts, "($rec_id, $issnDT, '" . addslashes($issn) . "')");
 
 			if ($inserts) {
 				mysql_query("update Records set rec_Modified = now() where rec_ID = $rec_id");
@@ -226,8 +233,8 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 		$isNewRecID = true;
 		$rt = intval($_REQUEST['bib_rectype']);
 		if (! $rt) {
-			if ($url) $_REQUEST['bib_rectype']= $rt = 1;	/* Internet bookmark */
-			else $_REQUEST['bib_rectype'] = $rt = 2;	/* Floating note */
+			if ($url && defined('RT_INTERNET_BOOKMARK')) $_REQUEST['bib_rectype']= $rt = RT_INTERNET_BOOKMARK;	/* Internet bookmark */
+			else if (defined('RT_NOTE')) $_REQUEST['bib_rectype'] = $rt = RT_NOTE;	/* Floating note */
 		} else if (!check_rectype_exist($rt)) {
 			// the rectype passed in is not available on this instance  send them to the  add resource popup
 			header('Location: ' . HEURIST_URL_BASE . 'records/add/addRecord.php'
@@ -244,7 +251,7 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 		                              'rec_Added' => date('Y-m-d H:i:s'),
 		                              'rec_Modified' => date('Y-m-d H:i:s'),
 		                              'rec_AddedByUGrpID' => intval($usrID),
-				                      'rec_RecTypeID' => $rt? $rt : 1,
+				                      'rec_RecTypeID' => $rt? $rt : RT_INTERNET_BOOKMARK,
 				'rec_OwnerUGrpID' => (intval(@$_REQUEST['bib_workgroup'])?
 									intval(@$_REQUEST['bib_workgroup']): intval($usrID)),
 				'rec_NonOwnerVisibility' => (@$_REQUEST['bib_visibility']?
@@ -255,13 +262,13 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 
 		// there are sometimes cases where there is no title set (e.g. webpage with no TITLE tag)
 		if (@$_REQUEST['bkmrk_bkmk_title']) {
-			mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id.',160,"'.addslashes($_REQUEST['bkmrk_bkmk_title']).'")');
+			mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id.','.$titleDT.',"'.addslashes($_REQUEST['bkmrk_bkmk_title']).'")');
 		}
-		$inserts = array(); // saw MAGIC NUMBERS below
-		foreach ($dois as $doi) array_push($inserts, "($rec_id, 198, '" . addslashes($doi) . "')");
-		if (@$_REQUEST["f"]) array_push($inserts, "($rec_id, 347, '" . addslashes($_REQUEST["f"]) . "')");
-		foreach ($isbns as $isbn) array_push($inserts, "($rec_id, 187, '" . addslashes($isbn) . "')");
-		foreach ($issns as $issn) array_push($inserts, "($rec_id, 188, '" . addslashes($issn) . "')");
+		$inserts = array();
+		foreach ($dois as $doi) array_push($inserts, "($rec_id, $doiDT, '" . addslashes($doi) . "')");
+		if (@$_REQUEST["f"]) array_push($inserts, "($rec_id, $webIconDT, '" . addslashes($_REQUEST["f"]) . "')");
+		foreach ($isbns as $isbn) array_push($inserts, "($rec_id, $isbnDT, '" . addslashes($isbn) . "')");
+		foreach ($issns as $issn) array_push($inserts, "($rec_id, $issnDT, '" . addslashes($issn) . "')");
 		if ($inserts) mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ' . join(",", $inserts));
 
 		if ($description) insert_woot_content($rec_id, $description);
@@ -299,13 +306,13 @@ if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 	$rec_id = mysql_insert_id();
 	if (@$_REQUEST['bkmrk_bkmk_title']) {
 		mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.
-						$rec_id.',160,"'.addslashes($_REQUEST['bkmrk_bkmk_title']).'")');
+						$rec_id.','.$titleDT.',"'.addslashes($_REQUEST['bkmrk_bkmk_title']).'")');
 	}
-	$inserts = array(); // saw MAGIC NUMBERS
-	foreach ($dois as $doi) array_push($inserts, "($rec_id, 198, '" . addslashes($doi) . "')");
-	if (@$_REQUEST["f"]) array_push($inserts, "($rec_id, 347, '" . addslashes($_REQUEST["f"]) . "')");
-	foreach ($isbns as $isbn) array_push($inserts, "($rec_id, 187, '" . addslashes($isbn) . "')");
-	foreach ($issns as $issn) array_push($inserts, "($rec_id, 188, '" . addslashes($issn) . "')");
+	$inserts = array();
+	foreach ($dois as $doi) array_push($inserts, "($rec_id, $doiDT, '" . addslashes($doi) . "')");
+	if (@$_REQUEST["f"]) array_push($inserts, "($rec_id, $webIconDT, '" . addslashes($_REQUEST["f"]) . "')");
+	foreach ($isbns as $isbn) array_push($inserts, "($rec_id, $isbnDT, '" . addslashes($isbn) . "')");
+	foreach ($issns as $issn) array_push($inserts, "($rec_id, $issnDT, '" . addslashes($issn) . "')");
 	if ($inserts) mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ' . join(",", $inserts));
 
 	if ($description) insert_woot_content($rec_id, $description);
@@ -413,17 +420,17 @@ if ($rec_id) {
 			"rec_Title" => "Relationship ($rec_id $reln_type $other_bib_id)",	// saw TODO: change this to RecTitle Type RecTitle
 					"rec_Added"     => date('Y-m-d H:i:s'),
 					"rec_Modified"  => date('Y-m-d H:i:s'),
-					"rec_RecTypeID"   => 52,
+					"rec_RecTypeID"   => RT_RELATION,
 					"rec_AddedByUGrpID" => $usrID
 		));
 		$relnBibID = mysql_insert_id();
 
-		if ($relnBibID > 0) { // saw MAGIC NUMBERS below
+		if ($relnBibID > 0) {
 			$query = "insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ";
-			$query .=   "($relnBibID, 160, 'Relationship')";
-			$query .= ", ($relnBibID, 202, $rec_id)";
-			$query .= ", ($relnBibID, 199, $other_bib_id)";
-			$query .= ", ($relnBibID, 200, '" . addslashes($reln_type) . "')"; //saw BUG!!! places in label not ID
+			$query .=   "($relnBibID, $titleDT, 'Relationship')";
+			$query .= ", ($relnBibID, $relSrcDT, $rec_id)";
+			$query .= ", ($relnBibID, $relTrgDT, $other_bib_id)";
+			$query .= ", ($relnBibID, $relTypDT, '" . addslashes($reln_type) . "')"; //saw BUG!!! places in label not ID
 			mysql_query($query);
 		}
 	}

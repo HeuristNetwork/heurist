@@ -156,7 +156,7 @@ function addFileUploadInput()
 <input type="hidden" name="save-mode" id="save-mode">
 <input type="hidden" name="notes" id="notes">
 <input type="hidden" name="rec_url" id="rec_url">
-<input type="hidden" name="rectype" id="rectype" value="<?=RT_BUG_REPORT?>"> <!-- magic number -->
+<input type="hidden" name="rectype" id="rectype" value="<?=RT_BUG_REPORT?>">
 <div id=all-inputs>
 
 <div class="input-row required">

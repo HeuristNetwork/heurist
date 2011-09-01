@@ -425,21 +425,25 @@ function print_other_tags($bib) {
 </div></div>
 <?php
 }
+$relRT = (defined('RT_RELATION')?RT_RELATION:0);
+$relSrcDT = (defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
+$relTrgDT = (defined('DT_LINKED_RESOURCE')?DT_LINKED_RESOURCE:0);
 
 
 function print_relation_details($bib) {
+global $relRT,$relSrcDT,$relTrgDT;
 	$from_res = mysql_query('select recDetails.*
 	                           from recDetails
 	                      left join Records on rec_ID = dtl_RecID
-	                          where dtl_DetailTypeID = 202
-	                            and rec_RecTypeID = 52
-	                            and dtl_Value = ' . $bib['rec_ID']);        // 202 = primary resource
+	                          where dtl_DetailTypeID = '.$relSrcDT.
+	                           ' and rec_RecTypeID = '.$relRT.
+	                           ' and dtl_Value = ' . $bib['rec_ID']);        //primary resource
 	$to_res = mysql_query('select recDetails.*
 	                         from recDetails
 	                    left join Records on rec_ID = dtl_RecID
-	                        where dtl_DetailTypeID = 199
-	                          and rec_RecTypeID = 52
-	                          and dtl_Value = ' . $bib['rec_ID']);          // 199 = linked resource
+	                        where dtl_DetailTypeID = '.$relTrgDT.
+	                         ' and rec_RecTypeID = '.$relRT.
+	                         ' and dtl_Value = ' . $bib['rec_ID']);          //linked resource
 
 	if (mysql_num_rows($from_res) <= 0  &&  mysql_num_rows($to_res) <= 0) return;
 ?>
@@ -484,6 +488,7 @@ function print_relation_details($bib) {
 
 
 function print_linked_details($bib) {
+global $relRT;
 	$res = mysql_query('select *
 	                      from recDetails
 	                 left join defDetailTypes on dty_ID = dtl_DetailTypeID
@@ -491,7 +496,7 @@ function print_linked_details($bib) {
 	                     where dty_Type = "resource"
 	                       and dtl_DetailTypeID = dty_ID
 	                       and dtl_Value = ' . $bib['rec_ID'] . '
-	                       and rec_RecTypeID != 52');
+	                       and rec_RecTypeID != '.$relRT);
 
 	if (mysql_num_rows($res) <= 0) return;
 ?>

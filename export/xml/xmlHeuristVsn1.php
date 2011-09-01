@@ -634,7 +634,7 @@ function writeRelatedData($bib, $depth) {
 							  where a.dtl_DetailTypeID = 202
 								and a.dtl_Value = ' . $bib . '
 								and b.dtl_DetailTypeID = 199
-								and rec_FlagTemporary != 1');        // 202 = primary resource
+								and rec_FlagTemporary != 1');        // 202 = primary resource//MAGIC NUMBER
 
 	$to_res =   mysql_query('select a.dtl_RecID
 							   from recDetails a
@@ -643,7 +643,7 @@ function writeRelatedData($bib, $depth) {
 							  where a.dtl_DetailTypeID = 199
 								and a.dtl_Value = ' . $bib . '
 								and b.dtl_DetailTypeID = 202
-								and rec_FlagTemporary != 1');        // 199 = linked resource
+								and rec_FlagTemporary != 1');        // 199 = linked resource//MAGIC NUMBER
 
 	if (mysql_num_rows($from_res) <= 0  &&  mysql_num_rows($to_res) <= 0) return;
 

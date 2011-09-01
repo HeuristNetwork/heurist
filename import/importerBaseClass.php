@@ -410,8 +410,8 @@ class HeuristNativeEntry {
 		$this->_fields[] = &$field;
 
 		// these are important fields
-		if ($field->getType() == 160) $this->_title_field = &$field;
-		else if ($field->getType() == 158) $this->_author_fields[] = &$field;
+		if ($field->getType() == 160) $this->_title_field = &$field;//MAGIC NUMBER
+		else if ($field->getType() == 158) $this->_author_fields[] = &$field;//MAGIC NUMBER
 
 		if (! @$this->_fields_by_bdt_id[$field->getType()]) $this->_fields_by_bdt_id[$field->_type] = array();
 		$this->_fields_by_bdt_id[$field->getType()][] = $field->_value;
@@ -671,25 +671,25 @@ class HeuristNativeEntry {
 			// FIXME: we only understand two types of resource reference at the moment --
 			// a person reference (author), and whatever used to correspond to the container type for this rectype
 
-			if ($rt_id == 75) {	// author reference
+			if ($rt_id == 75) {	// author reference//MAGIC NUMBER
 				if (preg_match('/^(\\d+)/', $inner_field_name, $matches))
 					$inner_bdt_id = $matches[1];
 				else
-					$inner_bdt_id = $bib_requirement_names[55][strtolower($inner_field_name)];
+					$inner_bdt_id = $bib_requirement_names[55][strtolower($inner_field_name)];//MAGIC NUMBER
 //error_log($inner_bdt_id);
 //error_log($inner_field_name);
 //error_log(print_r($bib_requirement_names[55], 1));
 
 
 				if ($this->_authors[0] == 'anonymous') {
-					if ($inner_bdt_id == 160) return 'Anonymous';
-					else if ($inner_bdt_id == 291  &&  count($this->_authors) > 1) return 'et al.';
+					if ($inner_bdt_id == 160) return 'Anonymous';//MAGIC NUMBER
+					else if ($inner_bdt_id == 291  &&  count($this->_authors) > 1) return 'et al.';//MAGIC NUMBER
 					else return '';
 				}
 
 				if (count($this->_authors) == 1) {	// a single author -- return the relevant field
 					return $this->_authors[0][$inner_bdt_id];
-				} else if ($inner_bdt_id == 291) {	// authors' first names are included after all else, so whack an "et al." on the end
+				} else if ($inner_bdt_id == 291) {	//MAGIC NUMBER// authors' first names are included after all else, so whack an "et al." on the end
 					return $this->_authors[0][$inner_bdt_id] . ' et al.';
 				} else {
 					return $this->_authors[0][$inner_bdt_id];	// multiple authors, but we're not being asked for the "first names" field

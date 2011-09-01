@@ -44,11 +44,11 @@ class Biblio {
 
 			$details = mysql__select_assoc('recDetails', 'dtl_DetailTypeID', 'dtl_Value', 'dtl_RecID='.$rec_id);
 
-			if (array_key_exists('177', $details)) {
-				$this->start = $details['177'];
+			if (DT_START_DATE && array_key_exists(DT_START_DATE, $details)) {
+				$this->start = $details[DT_START_DATE];
 			}
-			if (array_key_exists('178', $details)) {
-				$this->end   = $details['178'];
+			if (DT_END_DATE && array_key_exists(DT_END_DATE, $details)) {
+				$this->end   = $details[DT_END_DATE];
 			}
 
 			$thumb_url = null;
@@ -59,10 +59,16 @@ class Biblio {
 								  from recDetails
 							 left join recUploadedFiles on ulf_ID = dtl_UploadedFileID
 								 where dtl_RecID = $rec_id
-								   and dtl_DetailTypeID in(223,222,224,221,231)
-								   and file_mimetype like 'image%'
-							  order by dtl_DetailTypeID = 223 desc, dtl_DetailTypeID = 222 desc, dtl_DetailTypeID = 224 desc, dtl_DetailTypeID
-								 limit 1");
+								   and dtl_DetailTypeID in(".(defined('DT_THUMBNAIL')?DT_THUMBNAIL:"0").",".
+															(defined('DT_LOGO_IMAGE')?DT_LOGO_IMAGE:"0").",".
+															(defined('DT_IMAGES')?DT_IMAGES:"0").",".
+															(defined('DT_ASSOCIATED_FILE')?DT_ASSOCIATED_FILE:"0").",".
+															(defined('DT_OTHER_FILE')?DT_OTHER_FILE:"0").")".
+								  " and file_mimetype like 'image%'
+							  order by ".(defined('DT_THUMBNAIL')?"dtl_DetailTypeID = ".DT_THUMBNAIL." desc, ":"").
+										(defined('DT_LOGO_IMAGE')?"dtl_DetailTypeID = ".DT_LOGO_IMAGE." desc, ":"").
+										(defined('DT_IMAGES')?"dtl_DetailTypeID = ".DT_IMAGES." desc, ":"").
+										"dtl_DetailTypeID limit 1");
 			if (mysql_num_rows($res) !== 1) {
 				$res = mysql_query("select recUploadedFiles.*
 				                      from recDetails a, defDetailTypes, Records, recDetails b, recUploadedFiles
@@ -80,7 +86,7 @@ class Biblio {
 				$thumb_url = "../../common/php/resizeImage.php?ulf_ID=".$file['ulf_ObfuscatedFileID'];
 			}
 
-			$text = @$details['191'] ? '191' : (@$details['303'] ? '303' : null);
+			$text = DT_EXTENDED_DESCRIPTION && @$details[DT_EXTENDED_DESCRIPTION] ? ''.DT_EXTENDED_DESCRIPTION : (DT_SHORT_SUMMARY && @$details[DT_SHORT_SUMMARY] ? ''.DT_SHORT_SUMMARY : null);
 			$this->description = "";
 			if ($thumb_url) {
 				$this->description .= "<img" . ($text ? " style='float: right;'" : "") . " src='" . $thumb_url . "'/>";
@@ -94,7 +100,7 @@ class Biblio {
 			                     WHERE NOT IsNULL(dtl_Geo)
 			                       AND dtl_RecID = ' . $rec_id);
 
-			if (mysql_num_rows($res) < 1  &&  $this->rec_RecTypeID != 52  &&  $details['177']) {
+			if (mysql_num_rows($res) < 1  &&  (!defined('RT_RELATION') || $this->rec_RecTypeID != RT_RELATION)  &&  DT_START_DATE && $details[DT_START_DATE]) {
 				// Special case behaviour!
 				// If a record has time data but not spatial data,
 				// and it points to record(s) with spatial data, use that.

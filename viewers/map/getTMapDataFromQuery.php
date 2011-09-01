@@ -63,13 +63,13 @@ foreach ($bibIDs as $bibID) {
 
 	$res = mysql_query("select a.dtl_Value, b.dtl_Value, rec_URL,c.dtl_UploadedFileID,d.dtl_UploadedFileID,e.dtl_UploadedFileID,f.dtl_UploadedFileID
 						  from Records
-					 left join recDetails a on a.dtl_RecID=rec_ID and a.dtl_DetailTypeID=303
-					 left join recDetails b on b.dtl_RecID=rec_ID and b.dtl_DetailTypeID=191
-					 left join recDetails c on c.dtl_RecID=rec_ID and c.dtl_DetailTypeID=221
-					 left join recDetails d on d.dtl_RecID=rec_ID and d.dtl_DetailTypeID=222
-					 left join recDetails e on e.dtl_RecID=rec_ID and e.dtl_DetailTypeID=223
-					 left join recDetails f on f.dtl_RecID=rec_ID and f.dtl_DetailTypeID=224
-						 where rec_ID=$bibID");
+					  left join recDetails a on a.dtl_RecID=rec_ID and a.dtl_DetailTypeID=".(DT_SHORT_SUMMARY?DT_SHORT_SUMMARY:"303").
+					" left join recDetails b on b.dtl_RecID=rec_ID and b.dtl_DetailTypeID=".(DT_EXTENDED_DESCRIPTION?DT_EXTENDED_DESCRIPTION:"191").
+					" left join recDetails c on c.dtl_RecID=rec_ID and c.dtl_DetailTypeID=".(DT_ASSOCIATED_FILE?DT_ASSOCIATED_FILE:"221").
+					" left join recDetails d on d.dtl_RecID=rec_ID and d.dtl_DetailTypeID=".(DT_LOGO_IMAGE?DT_LOGO_IMAGE:"222").
+					" left join recDetails e on e.dtl_RecID=rec_ID and e.dtl_DetailTypeID=".(DT_THUMBNAIL?DT_THUMBNAIL:"223").
+					" left join recDetails f on f.dtl_RecID=rec_ID and f.dtl_DetailTypeID=".(DT_IMAGES?DT_IMAGES:"224").
+						" where rec_ID=$bibID");
 	$row = mysql_fetch_row($res);
 	$records[$bibID]["description"] = ($row[0] ? $row[0] : $row[1]);
 	$records[$bibID]["url"] = ($row[2] ? $row[2] : '');
