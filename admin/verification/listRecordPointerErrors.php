@@ -66,7 +66,10 @@ while ($row = mysql_fetch_assoc($res))
 	$bibs[$row['dtl_RecID']] = $row;
 
 ?>
+<div class="banner">
 <h2>Invalid pointer check</h2>
+</div>
+<div id="page-inner">
 
 These checks look for invalid record pointers within the Heurist database. These should arise rarely.
 <p> Click the hyperlinked number at the start of each row to open an edit form on that record. Look for pointer fields which do not display data or dispaly a warning.
@@ -132,6 +135,9 @@ foreach ($bibs as $row) {
 print "</table>\n";
 ?>
 [end of list]
-<p><hr></body>
+<p><hr>
+
+</div>
+</body>
 </html>
 

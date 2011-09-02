@@ -56,9 +56,12 @@
 	border:1px solid #fff;
 	min-width:200;
 }
-.yui-dt0-col-matches .yui-dt-liner, .yui-dt0-col-import .yui-dt-liner {
-	text-align: center;
-}
+#yui-dt0-th-import {width:30px}
+.yui-dt0-col-import div.yui-dt-liner {text-align:center}
+#yui-dt0-th-arrow {width:24px}
+.yui-dt0-col-matches .yui-dt-liner, .yui-dt0-col-import .yui-dt-liner {text-align: center;}
+
+
 #popup-saved {text-align :center; color:#FFF; font-size: 18px; background-color: RGBA(0,0,0,0.8);padding: 0; width: 200px; height: 75px; top: 50%; left:50%; margin :-50px -100px; position: absolute;overflow: visible;-moz-border-radius-bottomleft:10px;-moz-border-radius-bottomright:10px;-moz-border-radius-topleft:10px;-moz-border-radius-topright:10px;-webkit-border-bottom-left-radius:10px;-webkit-border-bottom-right-radius:10px;-webkit-border-top-left-radius:10px;-webkit-border-top-right-radius:10px;border-bottom-left-radius:10px;border-bottom-right-radius:10px;border-top-left-radius:10px;border-top-right-radius:10px;border :2px solid #FFF;-webkit-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);-moz-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);z-index: 100;}
 #popup-saved b {font-size: 16px;line-height:75px;}
 </style>
@@ -110,7 +113,7 @@ function insertData() {
 			mysql_query("use ".$tempDBName);
 			$rtyData = mysql_query("select defRecTypes.rty_ID, defRecStructure.rst_ID, defRecStructure.rst_DetailTypeID, defRecStructure.rst_DisplayName, defDetailTypes.dty_ID, defDetailTypes.dty_Name, defDetailTypes.dty_Type, defDetailTypes.dty_Status, defRecTypes.rty_Description from defRecTypes left join defRecStructure on defRecTypes.rty_ID=defRecStructure.rst_RecTypeID left join defDetailTypes on defRecStructure.rst_DetailTypeID=defDetailTypes.dty_ID order by defRecTypes.rty_ID");
 			// Add recordtypes to the table
-			echo 'myDataTable.addRow({arrow:"<img id=\"arrow'.$rectype["rty_ID"].'\" src=\"../../external/yui/2.8.2r1/build/datatable/assets/images/arrow_closed.png\" />",rtyID:"'.$rectype["rty_ID"].'",rectype:"'.$rectype["rty_Name"].'",matches:"'.$numberOfApproxMatches.'",import:"<a href=\"#import\"><img id=\"importIcon'.$rectype["rty_ID"].'\" src=\"import_icon.png\" width=\"16\" height=\"16\" /></a>"});' . "\n";
+			echo 'myDataTable.addRow({arrow:"<img id=\"arrow'.$rectype["rty_ID"].'\" src=\"../../external/yui/2.8.2r1/build/datatable/assets/images/arrow_closed.png\" />",rtyID:"'.$rectype["rty_ID"].'",rectype:"'.$rectype["rty_Name"].'",matches:"'.$numberOfApproxMatches.'",import:"<a href=\"#import\"><img id=\"importIcon'.$rectype["rty_ID"].'\" src=\"../../common/images/download.png\" width=\"16\" height=\"16\" /></a>"});' . "\n";
 		}
 	}
 	// For every recordtype, add the structure to a javascript array, to show in the tooltip
@@ -147,11 +150,11 @@ YAHOO.util.Event.addListener(window, "load", function() {
 		// Create the columns. Arrow contains the collapse/expand arrow, rtyID is hidden and contains the ID, rectype contains the name, matches the amount of matches and a tooltip, import a button
 		var myColumnDefs = [
 			{ key:"arrow", label:"", formatter:YAHOO.widget.RowExpansionDataTable.formatRowExpansion },
+			{ key:"import", label:"Import", sortable:false, resizeable:false, width:30 },
 			{ key:"rtyID", label:"<u>ID</u>", sortable:true, hidden:true },
 			{ key:"rectype", label:"<u>Record type</u>", sortable:true, resizeable:true, width:200 },
-			{ key:"matches", label:"<u>Matches</u>", sortable:true, resizeable:true, parser:'number', width:50 },
-			{ key:"import", label:"Import", sortable:false, resizeable:false, width:30 }
-		];
+			{ key:"matches", label:"<u>Matches</u>", sortable:true, resizeable:true, parser:'number', width:50 }
+			];
 
 		var myDataSource = new YAHOO.util.DataSource();
 		myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSARRAY;
@@ -167,15 +170,22 @@ YAHOO.util.Event.addListener(window, "load", function() {
 			rowExpansionTemplate:
 				function(obj) {
 					var rty_ID = obj.data.getData('rtyID');
-					var info = "<br /><i>" + rectypeStructures[rty_ID][0][4] + "</i><br /><br />";
-					info += '<table border="1"><tr><td><strong>Fieldname</strong></td><td><strong>Fieldtype</strong></td><td><strong>Datatype</strong></td><td><strong>Status</strong></td></tr></strong><br />';
+					var info = "<i>" + rectypeStructures[rty_ID][0][4] + "</i><br />";
+					info += '<table><tr><th>Fieldname</th><th>Fieldtype</th><th>Datatype</th><th class=\"status\">Status</th></tr>';
 
 					// 0 = rst_DisplayName
 					// 1 = dty_Name
 					// 2 = dty_Type
 					// 3 = dty_Status
+					
+					
 					for(i = 0; i < rectypeStructures[rty_ID].length; i++) {
-						info += "<tr><td>" + rectypeStructures[rty_ID][i][0] + "</td><td>" + rectypeStructures[rty_ID][i][1] + "</td><td>" + rectypeStructures[rty_ID][i][2] + "</td><td>" + rectypeStructures[rty_ID][i][3] + "</td></tr>";
+						if (rectypeStructures[rty_ID][i][3] == "reserved") {
+							dtyStatus = "<img src=\"../../common/images/lock_bw.png\">";
+						}else{
+							dtyStatus = "";
+						};
+						info += "<tr><td>" + rectypeStructures[rty_ID][i][0] + "</td><td>" + rectypeStructures[rty_ID][i][1] + "</td><td>" + rectypeStructures[rty_ID][i][2] + "</td><td class=\"status\">" + dtyStatus + "</td></tr>";
 					}
 					info += "</table><br />";
 					obj.liner_element.innerHTML += info;
@@ -322,27 +332,22 @@ function _hideToolTip(){
 <link rel=stylesheet href="../../common/css/admin.css">
 </head>
 <div class="banner"><h2>Import record types</h2></div>
-<body class="popup yui-skin-sam" style="overflow: auto;" onbeforeunload="dropTempDB(false)">
+<body class="popup yui-skin-sam" onbeforeunload="dropTempDB(false)">
 <script src="../../common/js/utilsLoad.js"></script>
 <script src="../../common/js/utilsUI.js"></script>
-<!-- <div id="page-inner" style="overflow:auto"> -->
-<br /><br />
+<div id="page-inner" style="overflow:auto">
+
 <a id="shortLog" onClick="showShortLog()" href="#">Show short log</a><br />
 <a id="detailedLog" onClick="showDetailedLog()" href="#">Show detailed log</a><br /><br />
 <div id="log"></div><br />
 <div id="log"></div>
-<button id="finish1" onClick="dropTempDB(true)">Finished</button>
+<button id="finish1" onClick="dropTempDB(true)">Finish Import</button>
 <div id="crosswalk" style="width:100%;margin:auto;">
 	<div id="topPagination"></div>
 	<div id="crosswalkTable"></div>
 	<div id="bottomPagination"></div>
 </div>
-<i>Note: If this function reports 'No records found' this normally means that there are no 
-definitions in the selected database which are not already in the current database. 
-</i>
-<br>&nbsp;<br>
-
-<button id="finish2" onClick="dropTempDB(true)">Finished</button>
+<button id="finish2" onClick="dropTempDB(true)">Finish Import</button>
 <div class="tooltip" id="toolTip"><p>tooltip</p></div>
 
 <script type="text/javascript">
@@ -357,7 +362,7 @@ function processAction(rtyID, action) {
 	// Lock import, and set import icon to loading icon
 	if(action == "import") {
 		importPending = true;
-		document.getElementById("importIcon"+rtyID).src = "../../common/images/mini-loading.gif";
+		document.getElementById("importIcon"+rtyID).src = "../setup/loading.gif";
 	}
 	var xmlhttp;
 	if (action.length == 0) {
@@ -484,10 +489,10 @@ function dropTempDB(redirect) {
 		processAction(0, "drop");
 	}
 	if(redirect) {
-		window.location = "about:blank";
+		window.location = "selectDBForImport.php";
 	} else {
 		if(result == "") {
-			// This is jsut a nuisance: alert("Nothing was imported");
+			alert("Nothing was imported");
 		} else {
 			alert(result);
 		}

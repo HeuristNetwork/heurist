@@ -15,26 +15,31 @@
 --        1. create referential constraints with AddReferentialConstraints.sql
 --           (now already done by this file as part of the mysqldump output)
 --        2. add stored procedures from AddProceduresTriggers.sql
+--           ()riggers are included in the mysqldump, procedures are not)
+--           TO DO: review these files to make sure they run cleanly on new DB
 --        3. import core content (minimal database definitions) from
 --           admin/setup/coreDefinitions.txt
 
--- The next section of this file is a PHPMyAdmin dump of H3 database structure
--- DO NOT include referential integrity or triggers/procedures
+-- The next section of this file is a MySQLDump of H3 database structure
+-- mysqldump -u root -ppassword -d hdb_dbname > dbnameStructure.sql
 
 -- ***************************************************************************
 
---       !!!!!!!!!  THE INSERTION STATEMENTS AT THE END ARE * NOT * PART OF THE DUMP
---       !!!!!!!!!  DO NOT DELETE THEM
+-- ***** BEWARE ***** 
+
+--       THE INSERTION STATEMENTS AT THE END ARE * NOT * PART OF THE DUMP
+--       DO NOT DELETE THEM!!!!!
+
+--       REMOVE ALL REFERENTIAL INTEGRITY CONSTRAINTS AND TRIGGERS
 
 -- ***************************************************************************
-
 
 -- phpMyAdmin SQL Dump
 -- version 2.9.0.2
 -- http://www.phpmyadmin.net
 -- 
 -- Host: localhost
--- Generation Time: Aug 11, 2011 at 03:19 PM
+-- Generation Time: Aug 04, 2011 at 05:27 PM
 -- Server version: 5.0.51
 -- PHP Version: 5.2.3
 -- 
@@ -143,7 +148,6 @@ CREATE TABLE defDetailTypes (
   dty_PtrTargetRectypeIDs varchar(63) default NULL COMMENT 'CSVlist of target Rectype IDs, null = any',
   dty_FieldSetRectypeID smallint(5) unsigned default NULL COMMENT 'For a FieldSetMarker, the record type to be inserted as a fieldset',
   dty_ShowInLists tinyint(1) unsigned NOT NULL default '1' COMMENT 'Flags if detail type is to be shown in end-user interface, 1=yes',
-  dty_NonOwnerVisibility enum('hidden','viewable','public') NOT NULL default 'viewable' COMMENT 'Allows restriction of visibility of a particular field in ALL record types (overrides rst_VisibleOutsideGroup)',
   PRIMARY KEY  (dty_ID),
   UNIQUE KEY dty_Name (dty_Name),
   KEY dty_Type (dty_Type),
@@ -220,7 +224,7 @@ CREATE TABLE defRecStructure (
   rst_RecordMatchOrder tinyint(1) unsigned NOT NULL default '0' COMMENT 'Indicates order of significance in detecting duplicate records, 1 = highest',
   rst_CalcFunctionID tinyint(3) unsigned default NULL COMMENT 'FK to table of function specifications for calculating string values',
   rst_RequirementType enum('required','recommended','optional','forbidden') NOT NULL default 'optional',
-  rst_NonOwnerVisibility enum('hidden','viewable','public') NOT NULL default 'viewable' COMMENT 'Allows restriction of visibility of a particular field in a specified record type',
+  rst_VisibleOutsideGroup enum('hidden','viewable','public') NOT NULL default 'viewable' COMMENT 'Allows restriction of visibility of a particular field in a specified record type',
   rst_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
   rst_MayModify enum('locked','discouraged','open') NOT NULL default 'open' COMMENT 'Extent to which detail may be modified within this record structure',
   rst_OriginatingDBID mediumint(8) unsigned default NULL COMMENT 'Database where this record structure element originated, 0 = locally',
@@ -271,17 +275,15 @@ CREATE TABLE defRecTypes (
   rty_OriginatingDBID mediumint(8) unsigned default NULL COMMENT 'Database where this record type originated, 0 = locally',
   rty_NameInOriginatingDB varchar(63) default NULL COMMENT 'Name used in database where this record type originated',
   rty_IDInOriginatingDB smallint(5) unsigned default NULL COMMENT 'ID in database where this record type originated',
-  rty_NonOwnerVisibility enum('hidden','viewable','public') NOT NULL default 'viewable' COMMENT 'Allows blanket restriction of visibility of a particular record type',
+  rty_BlockFromPublicView tinyint(1) unsigned NOT NULL default '0' COMMENT 'If set to 1, this record type is only accessible to logged in users. Overrides record visibility setting.',
   rty_ShowInLists tinyint(1) unsigned NOT NULL default '1' COMMENT 'Flags if record type is to be shown in end-user interface, 1=yes',
-  rty_RecTypeGroupID tinyint(3) unsigned NOT NULL default '1' COMMENT 'Record type group to which this record type belongs',
-  rty_RecTypeModelIDs varchar(63) default NULL COMMENT 'The model group(s) to which this rectype belongs, comma sep. list',
+  rty_RecTypeGroupIDs varchar(63) NOT NULL default '1' COMMENT 'Record type groups, first = functional group, remainder = models',
   rty_FlagAsFieldset tinyint(1) unsigned NOT NULL default '0' COMMENT '0 = full record type, 1 = Fieldset = set of fields to include in other rectypes',
   rty_ReferenceURL varchar(250) default NULL COMMENT 'A reference URL describing/defining the record type',
   rty_AlternativeRecEditor varchar(63) default NULL COMMENT 'Name or URL of alternative record editor function to be used for this rectype',
   rty_Type enum('normal','relationship','dummy') NOT NULL default 'normal' COMMENT 'Use to flag special record types to trigger special functions',
   PRIMARY KEY  (rty_ID),
-  UNIQUE KEY rty_Name (rty_Name),
-  KEY rty_RecTypeGroupID (rty_RecTypeGroupID)
+  UNIQUE KEY rty_Name (rty_Name)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Defines record types, which corresponds with a set of detail';
 
 -- --------------------------------------------------------
@@ -295,14 +297,14 @@ CREATE TABLE defRelationshipConstraints (
   rcs_SourceRectypeID smallint(5) unsigned default NULL COMMENT 'Source record type for this constraint, Null = all types',
   rcs_TargetRectypeID smallint(5) unsigned default NULL COMMENT 'Target record type pointed to by relationship record, Null = all types',
   rcs_Description varchar(1000) default 'Please describe ...',
-  rcs_RelationshipsLimit tinyint(3) unsigned default NULL COMMENT 'Deprecated: Null= no limit; 0=forbidden, 1, 2 ... =max # of relationship records per record per detailtype/rectypes triplet',
+  rcs_RelationshipsLimit tinyint(3) unsigned NOT NULL default '0' COMMENT '0= no limit; 1, 2 ... =max # of relationship records per record per detailtype/rectypes triplet',
   rcs_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
   rcs_OriginatingDBID mediumint(8) unsigned NOT NULL default '0' COMMENT 'Database where this constraint originated, 0 or local db code = locally',
   rcs_IDInOriginatingDB smallint(5) unsigned default '0' COMMENT 'Code used in database where this constraint originated',
   rcs_TermID int(10) unsigned default NULL COMMENT 'The ID of a term to be constrained, applies to descendants unless they have more specific',
-  rcs_TermLimit tinyint(2) unsigned default NULL COMMENT 'Null=none 0=not allowed 1,2..=max # times a term from termSet ident. by termID can be used',
+  rcs_TermLimit tinyint(2) unsigned NOT NULL default '0' COMMENT 'Null=none 0=not allowed 1,2..=max # times a term from termSet ident. by termID can be used',
   PRIMARY KEY  (rcs_ID),
-  UNIQUE KEY rcs_CompositeKey (rcs_SourceRectypeID,rcs_TargetRectypeID,rcs_TermID),
+  KEY rcs_CompositeKey (rcs_SourceRectypeID,rcs_TargetRectypeID,rcs_TermID),
   KEY rcs_TermID (rcs_TermID),
   KEY rcs_TargetRectypeID (rcs_TargetRectypeID)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Constrain target-rectype/vocabularies/values for a pointer d';
@@ -459,8 +461,6 @@ CREATE TABLE recUploadedFiles (
   ulf_UploaderUGrpID smallint(5) unsigned NOT NULL COMMENT 'The user who uploaded the file',
   ulf_Added datetime NOT NULL default '0000-00-00 00:00:00' COMMENT 'The date and time the file was uploaded',
   ulf_ObfuscatedFileID varchar(40) default NULL COMMENT 'SHA-1 hash of ulf_ID and random number to block sequential file harvesting',
-  ulf_ExternalFileReference varchar(1000) default NULL COMMENT 'URI of an external file, which may or may not be cached locally',
-  ulf_PreferredSource enum('local','external') NOT NULL default 'local' COMMENT 'Preferred source of file if both local file and external reference set',
   ulf_Thumbnail blob COMMENT 'Cached autogenerated thumbnail for common image formats',
   ulf_Description text COMMENT 'A user-entered textual description of the file or image contents',
   ulf_MimeExt varchar(10) default NULL COMMENT 'Extension of the file, used to look up in mimetype table',
@@ -849,7 +849,6 @@ CREATE TABLE woots (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Woot records (entries, pages) are linked to a set of XHTML c';
 
 
-
 -- ------------------------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
@@ -859,14 +858,6 @@ CREATE TABLE woots (
 -- STANDARD DATA FOR A NEW DATABASE
 -- This is run BEFORE triggers and referential constraints
 
--- Insert a single row in sysIdentification table = the DB identification record
- DELETE FROM sysIdentification where sys_ID=1;
- INSERT INTO sysIdentification(sys_ID,sys_dbRegisteredID,sys_dbVersion,sys_dbSubVersion,
-  sys_dbSubSubVersion,sys_eMailImapServer,sys_eMailImapPort,
-  sys_eMailImapProtocol,sys_eMailImapUsername,sys_eMailImapPassword,
-  sys_UGrpsdatabase,sys_OwnerGroupID)
-  VALUES (1,0,3,1,0,NULL,NULL,NULL,NULL,NULL,NULL,1);
-  -- 0 is everyone, 1 is the owning admins group, 2 is default dbAdmin user
 
 -- These are critical to the working of the definitions caching system, without these
 -- the system will not 'see' stuff which is addded to the definitions''
@@ -891,6 +882,14 @@ INSERT INTO `sysTableLastUpdated` VALUES ('sysUsrGrpLinks', '0000-00-00 00:00:00
 INSERT INTO `sysTableLastUpdated` VALUES ('usrHyperlinkFilters', '0000-00-00 00:00:00', 1);
 INSERT INTO `sysTableLastUpdated` VALUES ('usrTags', '0000-00-00 00:00:00', 1);
 
+-- Insert a single row in sysIdentification table = the DB identification record
+ DELETE FROM sysIdentification where sys_ID=1;
+ INSERT INTO sysIdentification(sys_ID,sys_dbRegisteredID,sys_dbVersion,sys_dbSubVersion,
+  sys_dbSubSubVersion,sys_eMailImapServer,sys_eMailImapPort,
+  sys_eMailImapProtocol,sys_eMailImapUsername,sys_eMailImapPassword,
+  sys_UGrpsdatabase,sys_OwnerGroupID)
+  VALUES (1,0,3,1,0,NULL,NULL,NULL,NULL,NULL,NULL,1);
+  -- 0 is everyone, 1 is the owning admins group, 2 is default dbAdmin user
 
 INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMail,ugr_Enabled,ugr_FirstName,ugr_LastName)
  VALUES (1,'Database owners',

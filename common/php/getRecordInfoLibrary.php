@@ -703,8 +703,7 @@ function getRectypeStructureFieldColNames(){
 					"rst_Status",
 					"rst_OrderForThumbnailGeneration",
 					"dty_TermIDTreeNonSelectableIDs",
-					"dty_FieldSetRectypeID",
-					"dty_Type");
+					"dty_FieldSetRectypeID");
 }
 
 function getRectypeFields($rt_id) {
@@ -728,8 +727,7 @@ function getRectypeFields($rt_id) {
 						"rst_Status",
 						"rst_OrderForThumbnailGeneration",
 						"dty_TermIDTreeNonSelectableIDs",
-						"dty_FieldSetRectypeID",
-						"dty_Type");
+						"dty_FieldSetRectypeID");
 
 	// get rec Structure info ordered by the detailType Group order, then by recStruct display order and then by ID in recStruct incase 2 have the same order
 	$res = mysql_query("select ".join(",", $colNames)." from defRecStructure
@@ -789,8 +787,7 @@ function getAllRectypeStructures($useCachedData = false) {
 						"rst_Status",
 						"rst_OrderForThumbnailGeneration",
 						"dty_TermIDTreeNonSelectableIDs",
-						"dty_FieldSetRectypeID",
-						"dty_Type");
+						"dty_FieldSetRectypeID");
 
 	// get rec Structure info ordered by the detailType Group order, then by recStruct display order and then by ID in recStruct incase 2 have the same order
 	$query = "select ".join(",", $colNames)." from defRecStructure

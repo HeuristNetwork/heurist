@@ -53,6 +53,9 @@
 			setTimeout(function(){recordFrame.src = top.HEURIST.basePath+"admin/"+url;},500);
 		};
 	</script>
+<script>
+		var bugReportURL = top.HEURIST.baseURL + 'export/email/formEmailRecordPopup.html?rectype=bugreport&db='+database;
+</script>
 <a id=home-link href="../index.php?db=[dbname!]">
 <div id=logo title="Click the logo at top left of any Heurist page to return to your Favourites"></div>
 </a>
@@ -61,7 +64,11 @@
 <a id="dbSearch-link" href="../index.php?db=[dbname!]">
 <div id="dbname" >[dbname!] <span>Database Administration</span></div>
 </a>
-
+<div id="quicklinks" style="top:10px;right:15px">
+		<ul id=quicklink-cell>
+        	<li id="reportBug"><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 320,width: 740,callback: function (title, bd, bibID) {if (bibID) {window.close(bibID, title);}} });return false;" title="Click to send a bug report" ><img src="../common/images/16x16.gif"></a></li>
+		</ul>
+</div>
 
 <!-- sidebar -->
 <div id="sidebar">

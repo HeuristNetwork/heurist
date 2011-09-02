@@ -91,7 +91,7 @@ function DetailTypeEditor() {
 		}
 
 		if (_dtyID && Hul.isnull(_detailType) ){
-			Dom.get("statusMsg").innerHTML = "<strong>Error: field type #"+_dtyID+"  not be found. Clicking 'save' button will create a new Field Type.</strong><br /><br />";
+			Dom.get("statusMsg").innerHTML = "Error: field type #"+_dtyID+"  not be found. Clicking 'save' button will create a new Field Type.";
 		}
 		//creates new empty field type in case ID is not defined
 		if(Hul.isnull(_detailType)){
@@ -103,6 +103,7 @@ function DetailTypeEditor() {
 		}
 
 		_keepStatus = _detailType[6]; // Keeps current status for rollback
+		Dom.get("dty_Status").innerHTML = _keepStatus;
 		_keepType = _detailType[2]; // Keeps current datatype
 
 		// creates and fills group selector
@@ -363,12 +364,13 @@ function DetailTypeEditor() {
 
 			var aUsage = top.HEURIST.detailTypes.rectypeUsage[_dtyID];
 			var iusage = (Hul.isnull(aUsage)) ? 0 : aUsage.length;
+			var warningImg = "<img src='" + top.HEURIST.basePath + "common/images/url_warning.png'>";
 
 			if(iusage > 0) {
 				if(iusage===1) {
-					Dom.get("statusMsg").innerHTML = "<strong>Warning: this fieldtype is used in " + iusage + " recordtype. Changes made, will affect that rectype.</strong><br /><br />";
+					Dom.get("statusMsg").innerHTML = warningImg + "WARNING: this fieldtype is used in " + iusage + " recordtype. Changes will affect that recordtype.";
 				} else {
-					Dom.get("statusMsg").innerHTML = "<strong>Warning: this fieldtype is used in " + iusage + " recordtypes. Changes made, will affect every one of those.</strong><br /><br />";
+					Dom.get("statusMsg").innerHTML = warningImg + "WARNING: this fieldtype is used in " + iusage + " recordtypes. Changes will affect every one of those.";
 				}
 			}
 		}

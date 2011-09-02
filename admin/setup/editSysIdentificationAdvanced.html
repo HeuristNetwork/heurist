@@ -13,42 +13,21 @@
 
 -->
 <html>
- <head>
-  <title>System settings editor</title>
+<head>
 
-  <link rel="icon" href="../../favicon.ico" type="image/x-icon">
-  <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
-
-  <link rel="stylesheet" type="text/css" href="../../common/css/newshsseri.css">
-  <style type="text/css">
-	a img {
-		border: 0;
-	}
-	thead {
-		text-align: left;
-	}
-	table table td, table table th {
-		padding-right: 10px;
-	}
-	tr {
-		vertical-align: top;
-	}
-	.rft_icon {
-		margin-right: 5px;
-		vertical-align: middle;
-	}
-	.rty_Name {
-		font-weight: bold;
-	}
-  </style>
-
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>Database Properties</title>
+    <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+    <link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
+    <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
  </head>
 
- <body>
+ <body class="popup">
+<div class="banner"><h2>Advanced Database Properties</h2></div>
 
   <!--{PageHeader} -->
 
-  <div style="padding: 10px;">
+  <div id="page-inner">
   
  <p><span class="red">[errors]</span></p>     
   
@@ -59,42 +38,59 @@
 
 [update SYSID sysid_update]
 
-<table>
 
-<tr><td><p><b>Advanced Properties</b> </td><td></td></tr>
 
-<tr><td><br>Registration number <b>[sys_dbRegisteredID]</b>&nbsp;&nbsp;&nbsp;
-DB version <b>[sys_dbVersion].[sys_dbSubVersion].[sys_dbSubSubVersion]</b></td>
-<td></td></tr>
+<h3>Advanced Properties</h3>
 
-<tr><td><p><b><br>Incoming / outgoing email</b> </td><td></td></tr>
-<tr><td><br>IMAP server for server receiving emails which can be harvested</td>
-<td>[textbox : sys_eMailImapServer : : size=30]
-Port [textbox : sys_eMailImapPort : : size=4] Protocol [textbox : sys_eMailImapProtocol : : size=10]</td></tr>
-<tr><td><br>IMAP user name / password for incoming mail  </td>
-<td>[textbox : sys_eMailImapUsername : : size=30] / [textbox : sys_eMailImapPassword : : size=30]</td></tr>
-<tr><td><br>Addresses from which incoming mail to be harvested may be received  </td>
-<td>[textbox : sys_IncomingEmailAddresses : : size=60] (other addresses are ignored)</td></tr>
-<tr><td><br>Potential email addresses to which database records may be sent  </td>
-<td>[textbox : sys_TargetEmailAddresses : : size=60] (shared list, will appear for every user)</td></tr>
+<div class="input-row">
+<div class="input-header-cell">Heurist registration number (0 = not registered) and database version</div>
+<div class="input-cell">Registration number <b>[sys_dbRegisteredID]</b>&nbsp;&nbsp;&nbsp;DB version <b>[sys_dbVersion].[sys_dbSubVersion].[sys_dbSubSubVersion]</b></div>
+</div>
+
+<h3>Incoming / outgoing email</h3>
+<div class="input-row">
+<div class="input-header-cell">IMAP server for server receiving emails which can be harvested</div>
+<div class="input-cell">[textbox : sys_eMailImapServer : : size=30]
+Port [textbox : sys_eMailImapPort : : size=4] Protocol [textbox : sys_eMailImapProtocol : : size=10]</div>
+</div>
+<div class="input-row">
+<div class="input-header-cell">IMAP user name / password for incoming mail  </div>
+<div class="input-cell">[textbox : sys_eMailImapUsername : : size=30] / [textbox : sys_eMailImapPassword : : size=30]</div>
+</div>
+<div class="input-row">
+<div class="input-header-cell">Addresses from which incoming mail to be harvested may be received  </div>
+<div class="input-cell">[textbox : sys_IncomingEmailAddresses : : size=60] (other addresses are ignored)</div>
+</div>
+<div class="input-row">
+<div class="input-header-cell">Potential email addresses to which database records may be sent  </div>
+<div class="input-cell">[textbox : sys_TargetEmailAddresses : : size=60] (shared list, will appear for every user)</div>
+</div>
    
-<tr><td><p><b><br>Locations</b>  </td>
-<td></td></tr>
-<tr><td><br>Database containing the sysUGrps table - blank = current database  </td>
-<td>[textbox : sys_UGrpsDatabase : : size=30]        </td></tr>
+<h3>Locations</h3>
+<div class="input-row">
+<div class="input-header-cell">Database containing the sysUGrps table - blank = current database  </div>
+<div class="input-cell">[textbox : sys_UGrpsDatabase : : size=30]        </div>
+</div>
 
-<tr><td><br>Directory in which to write html representation of published records  </td>
-<td>[textbox : sys_hmlOutputDirectory : : size=30] </td></tr>
-<tr><td><br>Directory in which to write HML representation of published records  </td>
-<td>[textbox : sys_htmlOutputDirectory : : size=30]  </td></tr>
-<tr><td><br>Additional folders containing files for indexing (FieldHelper compatibility)  </td>
-<td>[textbox : sys_MediaFolders : : size=30](comma separated)</td></tr>
+<div class="input-row">
+<div class="input-header-cell">Directory in which to write html representation of published records  </div>
+<div class="input-cell">[textbox : sys_hmlOutputDirectory : : size=30] </div>
+</div>
+<div class="input-row">
+<div class="input-header-cell">Directory in which to write HML representation of published records  </div>
+<div class="input-cell">[textbox : sys_htmlOutputDirectory : : size=30]  </div>
+</div>
+<div class="input-row">
+<div class="input-header-cell">Additional folders containing files for indexing (FieldHelper compatibility)  </div>
+<div class="input-cell">[textbox : sys_MediaFolders : : size=30](comma separated)</div>
+</div>
 
-<tr><td><br>Default contsraints behaviour  </td>
-<td>[dropdown : sys_ConstraintDefaultBehavior : Default access outside owner group : enum("locktypetotype", "unconstrainedbydefault", "allownullwildcards") : size="3" ]
-              
-</table>
- [end-update]
+<div class="input-row">
+<div class="input-header-cell">Default contsraints behaviour  </div>
+<div class="input-cell">[dropdown : sys_ConstraintDefaultBehavior : Default access outside owner group : enum("locktypetotype", "unconstrainedbydefault", "allownullwildcards")]</div>
+</div>
+
+[end-update]
 
  
 <p><span class="red">[errors]</span></p>

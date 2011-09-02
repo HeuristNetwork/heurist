@@ -2,6 +2,12 @@
 	padding: 0 6px;
 	font-weight:bold;
 }
+h2 span {
+	text-transform:none;
+	color:#333;
+	font-size:14px;
+	font-weight:bold;
+}
 h3 {
 	height:auto;
 	padding-bottom:10px;
@@ -28,9 +34,7 @@ h3 .description {
 	overflow-y:auto;
 	bottom:0;
 	position:absolute;
-	-webkit-border-radius:10px;
-	-moz-border-radius:10px;
-	border-radius:10px;
+	border-radius:0;
 }
 #adminFrame {
 	-webkit-border-radius:10px;
@@ -44,6 +48,14 @@ body.popup #page-inner {
 }
 #sidebar {
 	width:170px
+}
+.dbList li{
+	list-style: none;
+	background-image: url(../images/b_databasePressed.png);
+	background-position: left;
+	background-repeat: no-repeat;
+	padding-left: 30px;
+	line-height: 17px;
 }
 #page {
 	left:190px
@@ -123,25 +135,29 @@ tr.yui-dt-odd, tr.yui-dt-even {
 .yui-skin-sam .yui-dt table {
 	border: 1px solid #A4B4CB;
 }
-.yui-dt1-col-id, .yui-dt1-col-active, .yui-dt1-col-yui-dt-col14, .yui-dt1-col-yui-dt-col15 {
-	width:40px
+td.center div.yui-dt-liner, th.center div.yui-dt-liner {text-align:center; /*padding-right:6px; padding-left:6px*/}
+td.left div.yui-dt-liner, th.left div.yui-dt-liner {text-align:left}
+td.right div.yui-dt-liner, th.right div.yui-dt-liner {text-align:right}
+th#yui-dt0-th-id {width:40px}
+div.yui-dt-liner select {width:100%}
+body.popup div.yui-dt-liner select {width:80px}
+td div.yui-dt-liner {white-space:nowrap !important}
+th.yui-dt-asc div.yui-dt-liner, th.yui-dt-desc div.yui-dt-liner{text-align:left;}
+div.yui-dt-liner span.count {
+	display: inline-block;
+	height: 16px;
+	color: white;
+	background-color: RGB(185,185,185);
+	border-radius: 8px;
+	line-height: 17px;
+	font-weight: bolder;
+	text-align: center;
+	min-width: 17px;
 }
-.yui-dt0-col-active .yui-dt-liner {
-	width:40px
-}
+
 html body.popup div div#page-inner div#modelTabs.yui-navset div.yui-navset div.yui-content div div#tabContainer1.yui-dt table thead tr.yui-dt-first th#yui-dt1-th-active.center div#yui-dt1-th-active-liner.yui-dt-liner span.yui-dt-label {
 	text-align:center
 }
-/*
-<td class="yui-dt1-col-info yui-dt-col-info" headers="yui-dt1-th-info ">
-<td class="yui-dt1-col-usage yui-dt-col-usage yui-dt-hidden" headers="yui-dt1-th-usage ">
-<td class="yui-dt1-col-icon yui-dt-col-icon" headers="yui-dt1-th-icon ">
-<td class="bold_column yui-dt1-col-name yui-dt-col-name yui-dt-sortable" headers="yui-dt1-th-name ">
-<td class="yui-dt1-col-description yui-dt-col-description" headers="yui-dt1-th-description ">
-<td class="yui-dt1-col-status yui-dt-col-status yui-dt-sortable" headers="yui-dt1-th-status ">
-<td class="yui-dt1-col-grp_id yui-dt-col-grp_id" headers="yui-dt1-th-grp_id ">
-<td class="yui-dt1-col-yui-dt-col23 yui-dt-col-yui-dt-col23 yui-dt-last" headers="yui-dt1-th-yui-dt-col23 ">*/
-
 .tooltip {
 	position:absolute;
 	z-index:999;
@@ -197,4 +213,148 @@ html body.popup div div#page-inner div#modelTabs.yui-navset div.yui-navset div.y
 	border-top:1px solid #CCC;
 	border-bottom:1px solid #CCC;
 	vertical-align:top;
+}
+#errormsg {height: auto;text-align: left;margin: 24px 0;}
+.input-row div.input-header-cell {width:180px}
+.input-row input:not([type="submit"]) {font-size:10px}
+input#tags, .input-cell .in, .input-cell .resource-title, .in, .input-row input:not([type="submit"]), .input-row textarea {
+	background-color: #ECF1FB;
+	min-width:40ex; 
+	border:none;
+}
+.input-row div.input-cell{
+	vertical-align:baseline
+}
+.input-row label {display:inline-block}
+.input-row {border-color:#EFF2F6; padding:6px 0}
+#rectypeIcon img{padding: 5px;border-radius: 3px;box-shadow: 0 1px 3px RGBA(0,0,0,0.5);}
+.px150 {width: 150px !important}
+
+.yui-skin-sam .yui-dt-liner {
+    margin: 0;
+   /* padding: 4px;*/
+    text-align: left;
+}
+.yui-skin-sam th.yui-dt-asc .yui-dt-liner {
+    /*background-image: url("dt-arrow-up.png");
+	*/background-repeat:no-repeat;
+	background-origin: padding-box;
+    background-position: right center;
+    background-repeat: no-repeat;
+    background-size: auto auto;
+	padding: 4px 0;
+    text-indent: 4px;
+    width: 100%;
+}
+.yui-skin-sam th.yui-dt-desc .yui-dt-liner {
+    background-attachment: scroll;
+    background-clip: border-box;
+    background-color: transparent;
+   /* background-image: url("dt-arrow-dn.png");
+   */ background-origin: padding-box;
+    background-position: right center;
+    background-repeat: no-repeat;
+    background-size: auto auto;
+	padding: 4px 0;
+    text-indent: 4px;
+    width: 100%;
+}
+
+img.button:hover {
+	 background-color: rgba(100, 100, 100, 0.1);
+}
+.yui-dt-hidden {display:none}
+
+/* SELECT TREE */
+body {
+	margin:0;
+	padding:0;
+}
+button {
+	width: 80px;
+}
+.termTree, .selectedTerms {
+	border:none;
+	overflow: auto;
+	float:left;
+	width:30%;
+	height:360px;
+	background:#FFF;
+	box-shadow:inset 0px 1px 6px #6A7C99;
+}
+.selectedTerms {margin:0 1%;}
+.termTreeText {
+	width: 30%;
+	padding-left:0;
+	float: left;
+	vertical-align: bottom;
+}
+.selectedTermsText {
+	width: 30%;
+	padding-left:0;
+	float: left;
+	margin: 0 1%;
+}
+.previewListText {
+	padding-left:0;
+	float: left;
+}
+.previewList {
+	width: 200px;
+	max-width: 200px;
+}
+
+.termHeader {
+	font-weight: bold;
+	color: black;
+}
+.depth0 {
+	margin-left: 0px;
+}
+.depth1 {
+	margin-left: 10px;
+}
+.depth2 {
+	margin-left: 20px;
+}
+.depth3 {
+	margin-left: 30px;
+}
+.depth4 {
+	margin-left: 40px;
+}
+.depth5 {
+	margin-left: 50px;
+}
+.depth6 {
+	margin-left: 60px;
+}
+.depth7 {
+	margin-left: 70px;
+}
+.dtyName {
+	padding-left: 20px;
+}
+td.ygtvcell div {line-height: 10px;padding-left: 2ex;text-indent: -1ex; margin:3px 0}
+td.ygtvcell div * {line-height:10px}
+#yui-dt0-th-crosswalk-liner {text-align:center}
+table.ygtvtable {width:100%}
+.ygtvfocus {background-color:transparent !important}
+
+/* YUI expension table formats */
+tr.yui-dt-expansion div.yui-dt-liner {padding:4px 4px 4px 67px}
+body.popup tr.yui-dt-expansion div.yui-dt-liner {padding:4px 4px 4px 4px}
+.yui-dt-expansion .yui-dt-liner th, .yui-dt-expansion .yui-dt-liner table th {padding:4px; background:#DBDFE6;color:#666; border-bottom:1px solid #CBCBCB}
+.yui-dt-expansion .yui-dt-liner table {margin-top:10px}
+.yui-dt-expansion .yui-dt-liner table .status {width:60px; text-align:center	}
+.yui-dt-expansion .yui-dt-liner td, .yui-dt-expansion .yui-dt-liner table td {padding:4px;color:#999}
+.yui-dt-expansion .yui-dt-highlighted, .yui-dt-expansion.yui-dt-highlighted {background:transparent !important; color:#000}
+
+.yui-skin-sam th.yui-dt-sortable .yui-dt-label {margin-right: 0px;}
+
+div#termsFilter.popup {
+	z-index:2;
+	visibility:visible;
+	padding:10px;
+	display:none
 }

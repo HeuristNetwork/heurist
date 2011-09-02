@@ -428,7 +428,8 @@ select, input, textarea {font:2ex;}
 body, .darkBG {background-image:none;background-color: #BDBDBD;}
 
 /*body, .darkBG {background-image:url("../images/backgrounds/dark_bg.png") !important;background-repeat:repeat;}*/
-body.editTab, body.popup, body.tag_edit, body.bookmark_import, body.body_only {font-size: 11px;background-image:none !important;background-color: transparent; padding:15px 20px 10px 30px;overflow:auto;}
+body.editTab, body.popup, body.tag_edit, body.bookmark_import, body.body_only {font-size: 11px;background-image:none !important;background-color: #ECF1FB; padding:15px 20px 10px 30px;overflow:auto;}
+body.popup {background-color:#FFF}
 body.popup, body.tag_edit, body.bookmark_import, body.body_only {padding:10px}
 #sidebar, #footnotes, .mediumBG {background-color:#DBDFE6;}
 #page, .lightBG {background-image:none !important;background-repeat:repeat;background-color:#FFF !important;}
@@ -664,7 +665,7 @@ option {padding-left:15px;background-color: #FFF;}
 #quicklinks {position: absolute;right: 5px;top: 0;z-index: 200000;}
 #quicklink-cell {vertical-align: top;text-align: right;color: #666;font-size:3ex;clear:both;right:10px;top:20px;}
 div#tabbar {z-index:9;clear:left;margin:0;vertical-align:bottom;position:relative;display:block;}
-div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../images/black_gradient.png);background-repeat: repeat-x;clear:both}
+div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../images/black_gradient.png);background-repeat: repeat-x;clear:both; white-space:nowrap;}
 #viewsButton {position:absolute; top:3px; left:0px; z-index:1000;}
 #tabs, #quicklink-cell, #views, ul.menu {
 	list-style:none;
@@ -827,4 +828,15 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 	}
 h3 {
 	display: inline-block;
+}
+#quicklink-cell li#reportBug {
+	width: 16px;
+	padding-left: 2px;
+	padding-right: 2px;
+	background-image:url(../images/bug_off.png);
+	background-repeat:no-repeat;
+	background-position:50%;
+}
+#quicklink-cell li#reportBug:hover {
+		background-image:url(../images/bug_on.png);
 }

@@ -20,5 +20,6 @@ input {vertical-align: sub;}
 .duplicateGroup ul li{line-height: 14px;padding-bottom: 3px;}
 #dupeCount {color:#6A7C99;font-size:12px;font-weight:bold;padding:10px 3px;}
 #q {border:1px solid #ECE9D8;color:#6A7C99;display:inline-block;padding:0 3px;vertical-align:middle;}
-#searchString {display: block;padding: 6px 0;}
+#searchString {display: block;padding: 6px 0;position:relative}
+#searchString #q {display: block;padding: 6px 0; position:absolute; clear:none; right:0; left:14ex; border:1px solid #D3D3D3; box-shadow:inset 0 1px 3px RGBA(0,0,0, 0.2);top:3px; background-color:#FFF }
 .options{display:table-cell; vertical-align: middle;}

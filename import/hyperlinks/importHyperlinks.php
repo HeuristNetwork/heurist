@@ -222,14 +222,20 @@ if (@$urls) {
 
 ?>
 <html>
-<head><title>Import bookmarks</title>
-
-<link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
-<link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
-
+<head>
+	<title>Import Hyperlinks</title>
+	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+  	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
+   	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/admin.css">
+        
+    <style type="text/css">
+		.input-header-cell {width:140px;min-width:140px;max-width:140px; vertical-align:baseline;}
+		.input-header-cell input[type="radio"]{float:left;min-width:35px}
+		.error {color:#C00; font-weight:bold;}
+	</style>
 </head>
 
-<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+
 
 <script src="getTitleFromURL.js"></script>
 <script src="importHyperlinks.js"></script>
@@ -275,49 +281,9 @@ function unCheckAll() {
 //-->
 </script>
 
-<style type="text/css">
-<!--
 
-.inline_url {
-	width: 100%;
-	overflow: hidden;
-	padding: 2px 0px;
-}
-.inline_url a {
-	font-size: 80%;
-	text-decoration:none;
-}
-
-.inline_notes {
-	font-size: 80%;
-	margin-left: 10px;
-	margin-bottom: 8px;
-}
-
-.first_link_row {
-	background-color: lightgray;
-}
-.first_link_row td {
-	padding: 3px 0px;
-	background-color: lightgray;
-}
-
-.curved_left {
-	-moz-border-radius: 20px 0px 0px 20px;
-}
-.curved_right {
-	-moz-border-radius: 0px 0px 0px 0px;
-}
--->
-</style>
 
 <iframe style="display: none;" name="grabber"></iframe>
-
-<!--<table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" height="16">
-  <tr>
-    <td><H2>Import bookmarks</H2></td>
-  </tr>
-</table>-->
 
 <form action="importHyperlinks.php?db=<?=HEURIST_DBNAME?>" method="post" enctype="multipart/form-data" name="mainform" style="margin: 0px 3px;">
 
@@ -329,32 +295,29 @@ function unCheckAll() {
 	if ($nextmode == 'inputselect') {
 ?>
 
-<p class="normal" style="margin-left: 20px;">You can import bookmarks from your web browser favourites (exporting bookmarks creates an html file)
+<p>You can import bookmarks from your web browser favourites (exporting bookmarks creates an html file)
 or by capturing hyperlinks from a web page (such as a list of links, or a page containing some
 hyperlinks of interest).</p>
 
-<p style="margin-left: 20px;" class="normal"><b>Firefox</b>: Bookmarks <b>&nbsp;&gt;&nbsp;</b> Manage Bookmarks <b>&nbsp;&gt;&nbsp;</b> File <b>&nbsp;&gt;&nbsp;</b> Export, writes <tt>bookmarks.html</tt> by default</p>
+<p><b>Firefox</b>: Bookmarks <b>&nbsp;&gt;&nbsp;</b> Manage Bookmarks <b>&nbsp;&gt;&nbsp;</b> File <b>&nbsp;&gt;&nbsp;</b> Export, writes <tt>bookmarks.html</tt> by default</p>
 <p style="margin-left: 20px;" class="normal"><b>IE</b>: File <b>&nbsp;&gt;&nbsp;</b> Import and Export <b>&nbsp;&gt;&nbsp;</b> Export Favourites, writes <tt>bookmark.htm</tt> by default</p>
 
-<table border="0" cellpadding="5" cellspacing="0" class="normal">
+<div class="separator_row" style="margin:20px 0 5px 0;"></div>
+
 <?php		if (@$error) {	?>
- <tr><td colspan="3" style="font-color: red;"><?= $error ?></td></tr>
+ <div class="input-row"><div class="error"><?= $error ?></div></div>
 <?php		} ?>
- <tr>
-  <td><input type="radio" name="source" value="file" id="radio_file"></td>
-  <td>Import from file:</td>
-  <td><input type="file" name="file" size="50" onChange="document.getElementById('radio_file').checked = true;"></td>
- </tr>
- <tr>
-  <td><input type="radio" name="source" value="url" id="radio_url"></td>
-  <td>Import from URL:</td>
-  <td><input type="text" name="url" size="50" onChange="document.getElementById('radio_url').checked = true;"></td>
- </tr>
-</table>
+ <div class="input-row">
+  <div class="input-header-cell"><input type="radio" name="source" value="file" id="radio_file">
+  Import from file:</div>
+  <div class="input-cell"><input type="file" name="file" size="41" onChange="document.getElementById('radio_file').checked = true;"></div>
+ </div>
+ <div class="input-row">
+  <div class="input-header-cell"><input type="radio" name="source" value="url" id="radio_url">Import from URL:</div>
+  <div class="input-cell"><input type="text" name="url" size="50" onChange="document.getElementById('radio_url').checked = true;"><input type="submit" name="mode" value="Analyse"></div>
+ </div>
 
-<br>
 
-<input type="submit" name="mode" value="Analyse">
 <?php
 	} else if ($nextmode == 'printurls') {
 
@@ -382,7 +345,7 @@ Note: the list only shows links which you have not already bookmarked.<br>
 <?php } else { ?>Common<?php } ?>
   hyperlink texts are ignored.
   &nbsp;&nbsp;
-  <input type="button" onclick="top.HEURIST.util.popupURL(top, '<?=HEURIST_SITE_PATH?>admin/profile/configureProfile.php?body_only&db=<?=HEURIST_DBNAME?>&bookmark_import=1&section=bookmarkimport', { callback: function() { document.forms[0].submit(); } });" value="Change settings">
+  <input type="button" onClick="top.HEURIST.util.popupURL(top, '<?=HEURIST_SITE_PATH?>admin/profile/configureProfile.php?body_only&db=<?=HEURIST_DBNAME?>&bookmark_import=1&section=bookmarkimport', { callback: function() { document.forms[0].submit(); } });" value="Change settings">
 </p>
 
 <p style="margin-left: 20px;" class="normal">
@@ -390,37 +353,34 @@ We recommend bookmarking a few links at a time.<br>
 The list is reloaded after each addition and after change of settings.
 </p>
 
-<table border="0" cellpadding="2" cellspacing="0" class="small" style="width: 100%;">
 <?php		if (@$error) {	?>
- <tr><td colspan="6" style="padding: 10px; padding-left: 20px; font-weight: bold; color: red;"><?= $error ?></td></tr>
- <tr><td colspan="6"></td></tr>
+ <div class="input-row"><div class="input-header-cell"><?= $error ?></div></div>
+ <div class="input-row"><div class="input-cell"></div></div>
 <?php		} ?>
 <?php		if (@$success) {	?>
- <tr><td colspan="6" style="padding: 10px; padding-left: 20px; font-size: 150%; font-weight: bold; color: green;"><?= htmlspecialchars($success) ?></td></tr>
- <tr><td colspan="6"></td></tr>
+ <div class="input-row"><div class="input-header-cell"><?= htmlspecialchars($success) ?></div></div>
+ <div class="input-row"><div class="input-cell"></div></div>
 <?php		} ?>
 <?php		if (@$disambiguate_bib_ids) { ?>
- <tr><td colspan="6" style="padding: 10px; padding-left: 20px; color: red;">
+ <div class="input-row"><div class="input-header-cell">
   <b><?= (count($disambiguate_bib_ids) == 1)? 'One of your selected links is' : 'Some of your selected links are' ?>
   similar to record(s) already in the database.</b><br>
   The similar records are shown below: please select the appropriate page, or add a new URL to the database.<br>
   Then click on "Bookmark checked links" again.
- </td></tr>
- <tr><td colspan="6"></td></tr>
+ </div></div>
+ <div class="input-row"></div>
 <?php		} ?>
- <tr>
-  <td></td>
-  <td colspan="5">
+ <div class="input-row">
+  <div class="input-header-cell">
    <a href="#" onClick="checkAll(); return false;">Check all</a>
    &nbsp;&nbsp;
    <a href="#" onClick="unCheckAll(); return false;">Uncheck all</a>
    &nbsp;&nbsp;
-   <input type="submit" name="mode" value="Bookmark checked links" style="font-weight: bold;" onclick="top.HEURIST.util.popupURL(window, '<?=HEURIST_SITE_PATH?>records/tags/add-tags.html', { callback: function(tags) { document.getElementById('wgTags').value = tags; document.getElementById('adding_tags_elt').value = 1; document.forms[0].submit(); } } ); return false;">
-  </td>
- </tr>
+   <input type="submit" name="mode" value="Bookmark checked links" style="font-weight: bold;" onClick="top.HEURIST.util.popupURL(window, '<?=HEURIST_SITE_PATH?>records/tags/add-tags.html', { callback: function(tags) { document.getElementById('wgTags').value = tags; document.getElementById('adding_tags_elt').value = 1; document.forms[0].submit(); } } ); return false;">
+  </div>
+ </div>
 
 
- <tr><td colspan="6">&nbsp;</td></tr>
 
 <?php
 /* do two passes: first print any that need disambiguation, then do the rest */
@@ -434,7 +394,7 @@ The list is reloaded after each addition and after change of settings.
 				$ignore[$url] = 1;
 			}
 
-			print '<tr><td colspan="7">&nbsp;</td></tr>' . "\n";
+			print '<div class="input-row"><td colspan="7">&nbsp;</div></div>' . "\n";
 		}
 
 		$linkno = 0;
@@ -448,9 +408,7 @@ The list is reloaded after each addition and after change of settings.
 			print_link($url, $title);
 		}
 ?>
- <tr><td colspan="6">&nbsp;</td></tr>
 
-</table>
 <?php
 	}
 ?>
@@ -515,13 +473,13 @@ function biblio_check($url, $title, $notes, $user_bib_id) {
 		'rec_AddedByUGrpID' => get_user_id()
 	))) {
 		$rec_id = mysql_insert_id();
-		//add title detail
+		//add title input-cell
 		mysql__insert('recDetails', array(
 			'dtl_RecID' => $rec_id,
 			'dtl_DetailTypeID' => 160,//MAGIC NUMBER
 			'dtl_Value' => $title
 		));
-		//add notes detail
+		//add notes input-cell
 		mysql__insert('recDetails', array(
 			'dtl_RecID' => $rec_id,
 			'dtl_DetailTypeID' => 191,//MAGIC NUMBER
@@ -535,7 +493,7 @@ function biblio_check($url, $title, $notes, $user_bib_id) {
 
 function bookmark_insert($url, $title, $tags, $rec_id) {
 	/*
-	 * Insert a new bookmark with the relevant details;
+	 * Insert a new bookmark with the relevant input-cells;
 	 * return true on success,
 	 * return false on failure, or if the Records record is already bookmarked by this user.
 	 */
@@ -592,30 +550,23 @@ function print_link($url, $title) {
 	global $notes;
 
 ?>
- <tr class="first_link_row">
-  <td style="text-align: right; width: 30px;" class="curved_left">
-   <label>&nbsp;<input type="checkbox" name="links[<?= $linkno ?>]" value="1" class="check_link" id="flag<?= $linkno ?>" <?= @$_REQUEST['links'][$linkno]? 'checked' : '' ?> onchange="var t=document.getElementById('t<?= $linkno ?>').value; var n=document.getElementById('n<?= $linkno ?>').value; if (!this.checked || n.length > t.length) { var e=document.getElementById('un<?= $linkno ?>'); if(e) e.checked = this.checked; }">&nbsp;</label>
-  </td>
-  <td style="width: 50%;"><input type="text" name="title[<?= $linkno ?>]" value="<?= $title ?>" style="width: 100%; font-weight: bold; background-color: #eee;" id="t<?= $linkno ?>">
+ <div class="input-row">
+  <div class="input-header-cell">
+   <label>&nbsp;<input type="checkbox" name="links[<?= $linkno ?>]" value="1" class="check_link" id="flag<?= $linkno ?>" <?= @$_REQUEST['links'][$linkno]? 'checked' : '' ?> onChange="var t=document.getElementById('t<?= $linkno ?>').value; var n=document.getElementById('n<?= $linkno ?>').value; if (!this.checked || n.length > t.length) { var e=document.getElementById('un<?= $linkno ?>'); if(e) e.checked = this.checked; }">&nbsp;</label>
+  </div>
+  <div class="input-cell"><input type="text" name="title[<?= $linkno ?>]" value="<?= $title ?>" style="width: 100%; font-weight: bold; background-color: #eee;" id="t<?= $linkno ?>">
       <input type="hidden" name="alt_title[<?= $linkno ?>]" value="<?= $title ?>" id="at<?= $linkno ?>">
       <input type="hidden" name="link[<?= $linkno ?>]" value="<?= htmlspecialchars($url) ?>" id="u<?= $linkno ?>">
-  </td>
-  <td style="text-align: center; width: 40px;">&#91;<a href="<?= $url ?>" target="_blank">visit</a>&#93;</td>
-  <td style="text-align: center; width: 50px;"><input type="button" name="lookup[<?= $linkno ?>]" value="Lookup" onClick="if (value == 'Lookup') { lookupTitle(this); } else { var e1 = document.getElementById('t<?= $linkno ?>'); var e2 = document.getElementById('at<?= $linkno ?>'); var tmp = e1.value; e1.value = e2.value; e2.value = tmp; }" id="lu<?= $linkno ?>"></td>
-  <td style="text-align: center; width: 50px;"><input type="hidden" name="kwd[<?= $linkno ?>]" value="<?= htmlspecialchars(@$_REQUEST['kwd'][$linkno]) ?>" id="key<?= $linkno ?>"></td>
-  <td>&nbsp;</td>
- </tr>
- <tr>
-  <td></td>
-  <td colspan="4"><div class="inline_url"><a target=_blank href="<?= htmlspecialchars($url) ?>"><?= htmlspecialchars($url) ?></a></div></td>
-  <td>&nbsp;</td>
- </tr>
- <tr>
-  <td></td>
-  <td colspan="4">
-   <table border="0" cellpadding="0" cellspacing="0">
-    <tr>
-     <td style="width: 100px; vertical-align: top;"><nobr>
+  </div>
+  <div class="input-cell">&#91;<a href="<?= $url ?>" target="_blank">visit</a>&#93;</div>
+  <div class="input-cell"><input type="button" name="lookup[<?= $linkno ?>]" value="Lookup" onClick="if (value == 'Lookup') { lookupTitle(this); } else { var e1 = document.getElementById('t<?= $linkno ?>'); var e2 = document.getElementById('at<?= $linkno ?>'); var tmp = e1.value; e1.value = e2.value; e2.value = tmp; }" id="lu<?= $linkno ?>"></div>
+  <div class="input-cell"><input type="hidden" name="kwd[<?= $linkno ?>]" value="<?= htmlspecialchars(@$_REQUEST['kwd'][$linkno]) ?>" id="key<?= $linkno ?>"></div>
+ </div>
+ <div class="input-row">
+  <div class="input-header-cell"><div class="inline_url"><a target=_blank href="<?= htmlspecialchars($url) ?>"><?= htmlspecialchars($url) ?></a></div></div>
+ </div>
+ <div class="input-row">
+    <div class="input-header-cell"><nobr>
       <label>&nbsp;<input style="margin: 0px;" type="checkbox" name="use_notes[<?= $linkno ?>]" value="1" id="un<?= $linkno ?>" class="use_notes_checkbox">&nbsp;
 <?php
 	if (@$_REQUEST['notes'][$linkno])
@@ -629,23 +580,19 @@ function print_link($url, $title) {
 	}
 ?></label>
       <input type="hidden" name="notes[<?= $linkno ?>]" id="n<?= $linkno ?>" value="<?= @$_REQUEST['notes'][$linkno]? str_replace('"', '\\"', htmlspecialchars($_REQUEST['notes'][$linkno])) : str_replace('"', '\\"', htmlspecialchars($notes[$url])) ?>">
-  </nobr></td>
-     <td style="vertical-align: top; padding-right: 20px;"><div class="inline_notes"><?= @$_REQUEST['notes'][$linkno]? htmlspecialchars($_REQUEST['notes'][$linkno]) : wordwrap($notes[$url], 50, "\n", true) ?></div></td>
-    </tr>
-   </table>
-  </td>
-  <td>&nbsp;</td>
- </tr>
+  </nobr></div>
+     <div class="input-header-cell"><div class="inline_notes"><?= @$_REQUEST['notes'][$linkno]? htmlspecialchars($_REQUEST['notes'][$linkno]) : wordwrap($notes[$url], 50, "\n", true) ?></div></div>
+    </div>
+
+  </div>
+ </div>
 <?php
 	if (@$disambiguate_bib_ids[$url]) {
 ?>
- <tr>
-  <td></td>
-
-  <td colspan="4">
-   <div style="padding-bottom:8px;">
+ <div class="input-row">
+  <div class="input-header-cell">
      <label>
-      <input type="radio" name="rec_ID[<?= $linkno ?>]" value="-1" onclick="selectExistingLink(<?= $linkno ?>);">
+      <input type="radio" name="rec_ID[<?= $linkno ?>]" value="-1" onClick="selectExistingLink(<?= $linkno ?>);">
       <b>New (add this URL to the database)</b>
      </label>
    </div>
@@ -661,7 +608,7 @@ function print_link($url, $title) {
 ?>
    <div>
     <label>
-     <input type="radio" name="rec_ID[<?= $linkno ?>]" value="<?= $row['rec_ID'] ?>" onclick="selectExistingLink(<?= $linkno ?>);">
+     <input type="radio" name="rec_ID[<?= $linkno ?>]" value="<?= $row['rec_ID'] ?>" onClick="selectExistingLink(<?= $linkno ?>);">
      <?= htmlspecialchars($row['rec_Title']) ?>
     </label><br>
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a style ="font-size: 80%; text-decoration:none;" target="_testwindow" href="<?= htmlspecialchars($row['rec_URL']) ?>"><?php
@@ -675,13 +622,12 @@ function print_link($url, $title) {
 <?php
 		}
 ?>
-  </td>
-  <td>&nbsp;</td>
- </tr>
+  </div>
+ </div>
 <?php
 	}
 ?>
- <tr><td>&nbsp;</td></tr>
+ <div class="input-row"><td>&nbsp;</div></div>
 <?php
 }
 

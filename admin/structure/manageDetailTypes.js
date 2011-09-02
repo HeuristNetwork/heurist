@@ -60,18 +60,15 @@ function DetailTypeManager() {
 			id: "newGroup",
 			label: "<label title='Create new group, edit or delete the existing group' style='font-style:italic'>edit</label>",
 			content:
-			('<div id="formGroupEditor" style="width:600px; padding:40px">'+
-			'<h3 style="width:100%;text-align:center">Create a new detail group or edit the existing one</h3><br/>'+
-			'<div class="dtyField"><label class="dtyLabel">Group:</label><select id="edGroupId" onchange="onGroupChange()"></select></div>'+
-			'<div class="dtyField"><label class="dtyLabel">Name:</label><input id="edName" style="width:300px"/></div>'+
-			'<div class="dtyField"><label class="dtyLabel">Descrption:</label><input id="edDescription" style="width:300px"/></div>'+
-			'<div style="text-align: center; margin:auto; padding-top:5;">'+
-			'<input id="btnGrpSave" style="display:inline-block" type="button" value="Save" onclick="{detailTypeManager.doGroupSave()}" />'+
-			'<input id="btnGrpCancel" type="button" value="Cancel" onclick="{detailTypeManager.doGroupCancel()}" />'+
-			'</div><hr width="50%"/>'+
-			'<div style="text-align: center; margin:auto; padding-top:5;">'+
-			'Select group above for <input id="btnGrpDelete" type="button" value="Deletion" onclick="{detailTypeManager.doGroupDelete()}" />'+
-			'</div>'+
+			('<div id="formGroupEditor">'+
+				'<h3>Create a new detail group or edit the existing one</h3><br/>'+
+				'<div class="input-row"><div class="input-header-cell">Group:</div><div class="input-cell"><select id="edGroupId" onchange="onGroupChange()"></select><img id="btnGrpDelete" onclick="{detailTypeManager.doGroupDelete()}" src="../../common/images/cross.png" title="Deleted selected group"/></div></div>'+
+				'<div class="input-row"><div class="input-header-cell">Name:</div><div class="input-cell"><input id="edName" style="width:300px"/></div></div>'+
+				'<div class="input-row"><div class="input-header-cell">Descrption:</div><div class="input-cell"><input id="edDescription" style="width:300px"/></div></div>'+
+				'<div class="input-row">'+
+					'<input id="btnGrpSave" style="display:inline-block" type="button" value="Save" onclick="{detailTypeManager.doGroupSave()}" />'+
+					'<input id="btnGrpCancel" type="button" value="Cancel" onclick="{detailTypeManager.doGroupCancel()}" />'+
+				'</div>'+
 			'</div>')
 		}));
 
@@ -261,7 +258,7 @@ function DetailTypeManager() {
 						// last 3 columns for actions
 						arr.push([dty_ID, (Number(deftype[5])===1),
 						deftype[3],deftype[0],deftype[4],deftype[2],deftype[6],deftype[1],
-						dtg_ID, iusage]);
+						dtg_ID, '<span class=count>'+iusage+'</span>']);
 					}
 				}
 			}
@@ -326,10 +323,11 @@ function DetailTypeManager() {
 			YAHOO.widget.DataTable.Formatter.formatterDelete = formatterDelete;*/
 
 			var myColumnDefs = [
-			{ key: "id", label: "<u>Code</u>", sortable:true, width:20, className:'left' },
-			{ key: "vis", label: "Vis", sortable:false, width:20, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
+			{ key: "id", label: "Code", sortable:true, width:40, className:'right',resizeable:false },
+			{ key: "usage", label: "Info", sortable:true, className:'center' },
+			{ key: "vis", label: "Show", sortable:false, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
 			{ key: "order", hidden:true },
-			{ key: "name", label: "<u>Name</u>", sortable:true, className:'bold_column', width:200,
+			{ key: "name", label: "Name", sortable:true, className:'bold_column', width:160, minWidth:160,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var str = oRecord.getData("name");
 					var tit = "";
@@ -351,18 +349,18 @@ function DetailTypeManager() {
 					}
 					elLiner.innerHTML = '<label title="'+tit+'">'+str+'</label>';
 			}},
-			{ key: "type", label: "<u>Data Type</u>", sortable:true },
-			{ key: "status", label: "<u>Status</u>", sortable:true },
+			{ key: "type", label: "Data Type", sortable:true, className:'center' },
+			{ key: "status", label: "Status", sortable:true, className:'center' },
 			{ key: "description",   hidden:true},
-			{ key: "grp_id", label: "Group", sortable:false, width:90,
+			{ key: "grp_id", label: "Group", sortable:false, width:90, className:'center',
 				formatter:YAHOO.widget.DataTable.formatDropdown, dropdownOptions:_groups},
-			{ key: null, label: "Edit", sortable:false, width:20, formatter: function(elLiner, oRecord, oColumn, oData){
-					elLiner.innerHTML = '<a href="#edit"><img src="../../common/images/edit_icon.png" width="16" height="16" border="0" title="Edit" /><\/a>'; } },
+			{ key: null, label: "Edit", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
+					elLiner.innerHTML = '<a href="#edit"><img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /><\/a>'; } },
 			{ key: null, label: "Del", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
-					elLiner.innerHTML = '<a href="#delete"><img src="../../common/images/delete_icon.png" width="16" height="16" border="0" title="Delete" /><\/a>'; } },
+					elLiner.innerHTML = '<a href="#delete"><img src="../../common/images/cross.png" width="12" height="12" border="0" title="Delete" /><\/a>'; } },
 			//{ key: "info", label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
 			//	elLiner.innerHTML = '<a href="#info"><img src="../../common/images/info_icon.png" width="16" height="16" border="0" title="Info" /><\/a>'} },
-			{ key: "usage", label: "<u>Usage</u>", sortable:true, width:20 }
+			
 			];
 
 
@@ -624,14 +622,15 @@ function DetailTypeManager() {
 						var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
 						if(!Hul.isnull(aUsage)){
 
-							textTip = '<div style="padding-left:20px;padding-top:4px"><b>'+detname+'</b><br/>'+
-							'<div style="padding-left:20px;padding-top:4px"><b>Record types:</b><br/><label style="color: #4499ff;">Click on record type to edit</label></div><ul>';
+							textTip = '<h3>'+detname+'</h3>'+
+							'<b>Used in record types:</b><label style="color: #999;margin-left:5px">Click on field type to edit</label><ul>';
 
 							var k;
 							for (k in aUsage) {
-								textTip = textTip + "<li><a href='editRecStructure.html?db="+db+"&rty_ID="+aUsage[k]+"'>"+top.HEURIST.rectypes.names[aUsage[k]]+"</a></li>";
+								url = "structure/editRecStructure.html?db="+db+"&rty_ID="+aUsage[k];
+								textTip = textTip + "<li><a href='#' onClick='top.HEURIST.util.popupURL(top,\""+url+"\",{\"close-on-blur\": false,\"no-resize\": false,height: 520,width: 640})'>"+top.HEURIST.rectypes.names[aUsage[k]]+"</a></li>";
 							}
-							textTip = textTip + "</ul></p>";
+							textTip = textTip + "</ul>";
 						}
 
 					} else {
@@ -648,8 +647,13 @@ function DetailTypeManager() {
 
 					var xy = Hul.getMousePos(event);
 					my_tooltip.html(textTip);  //DEBUG xy[0]+",  "+xy[1]+"<br/>"+
+					
+					var border_top = $(window).scrollTop();
+					var border_right = $(window).width();
+					var border_height = $(window).height();
+					var offset =0;
 
-					Hul.showPopupDivAt(my_tooltip, xy, $(window).scrollTop(), $(window).width(), $(window).height());
+					Hul.showPopupDivAt(my_tooltip, xy,border_top ,border_right ,border_height, offset );
 
 					hideTimer = window.setTimeout(_hideToolTip, 5000);
 				}

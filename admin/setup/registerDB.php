@@ -21,24 +21,27 @@ if (!is_admin()) {
     return;
 }
 ?>
-<link rel=stylesheet href="../../common/css/global.css">
+    <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+	<link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
+    <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
 
 <html>
 	<head>
 		<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
 		<title>Register DB to Heurist Index Server</title>
 	</head>
-	<div class="banner"><h2>Database registration</h2></div>
-	<div id="page-inner" style="overflow:auto">
+	
 
 	<body class="popup">
-		<div id="registerDBForm">
+    <div class="banner"><h2>Database registration</h2></div>
+	<div id="page-inner" style="overflow:auto">
+		<div id="registerDBForm" class="input-row">
 		<form action="registerDB.php" method="POST" name="NewDBRegistration">
-			Enter a short description for this database.<br /><br />
-			<input type="text" maxlength="64" size="25" name="dbDescription">
-			<input type="submit" name="submit" value="Register" style="font-weight: bold;" onClick="registerDB()" >
+			<div class='input-header-cell'>Enter a short description for this database.</div><div class='input-cell'><input type="text" maxlength="64" size="25" name="dbDescription">
+			<input type="submit" name="submit" value="Register" style="font-weight: bold;" onClick="registerDB()" ></div>
 		</form>
 		</div>
+        
 <?php
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
@@ -64,7 +67,7 @@ $ownerGrpID = $row[3];
 // Look up owner group sysadmin password from sysUGrps table
 $res = mysql_query("select ugr_eMail from sysUGrps where `ugr_ID`='$ownerGrpID'");
 if(mysql_num_rows($res) == 0) {
-	echo "Non-critical warning: Unable to read database owners group email, not currently supporting deferred users database";
+	echo "<div class=wrap><div id=errorMsg><span>Non-critical warning</span>Unable to read database owners group email, not currently supporting deferred users database</div></div>";
 	return;
 }
 
@@ -77,8 +80,9 @@ if (isset($DBID) && ($DBID != 0)) { // already registered
 	echo '<script type="text/javascript">';
 	echo 'document.getElementById("registerDBForm").style.display = "none";';
 	echo '</script>';
-	echo "Database: <b>".DATABASE." </b><br><br>Already registered with <b>ID: " . $DBID . "</b>";
-    echo "<br><br>Description: \"<i>". $dbDescription . "</i>\"<br /><br />";
+	echo "<div class='input-row'><div class='input-header-cell'>Database:</div><div class='input-cell'>".DATABASE." </div></div>";
+	echo "<div class='input-row'><div class='input-header-cell'>Already registered with</div><div class='input-cell'><b>ID:</b> " . $DBID . " </div></div>";
+    echo "<div class='input-row'><div class='input-header-cell'>Description:</div><div class='input-cell'>". $dbDescription . "</div></div>";
 } else {
 	echo '<script type="text/javascript">';
 	echo 'document.getElementById("registerDBForm").style.display = "block";';
@@ -122,16 +126,16 @@ function registerDatabase() {
         return;
     } else if($DBID == -1) {
 	    $res = mysql_query("update sysIdentification set `sys_dbDescription`='$dbDescription' where `sys_ID`='1'");
-		echo "Database description succesfully changed to: " . $dbDescription;
+		echo "<div class='input-row'><div class='input-header-cell'>Database description succesfully changed to:</div><div class='input-cell'>". $dbDescription."</div></div>";
     } else { // We have got a new dbID, set the assigned dbID in sysIdentification
 		$res = mysql_query("update sysIdentification set `sys_dbRegisteredID`='$DBID', `sys_dbDescription`='$dbDescription' where `sys_ID`='1'");
 		if($res) {
-			echo "Database: ".DATABASE."<br /><br />";
-			echo "Registration successful, database ID allocated is " . $DBID . "<br /><br />";
-			echo "This database description is: " . $dbDescription . "<br />";
-			echo "If you want to change the description, you can go back to the registration page to do so.";
+			echo "<div class='input-row'><div class='input-header-cell'>Database:</div><div class='input-cell'>".DATABASE."</div></div>";
+			echo "<div class='input-row'><div class='input-header-cell'>Registration successful, database ID allocated is</div><div class='input-cell'>" . $DBID . "</div></div>";
+			echo "<div class='input-row'><div class='input-header-cell'></div><div class='input-cell'>This database description is: " . $dbDescription . "</div></div>";
+			echo "<div class='input-row'><div class='input-header-cell'></div><div class='input-cell'>If you want to change the description, you can go back to the registration page to do so.</div></div>";
 		} else {
-			$msg = "Unable to write database identification record, this database might be incorrectly set up<br />Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
+			$msg = "<div class=wrap><div id=errorMsg><span>Unable to write database identification record</span>this database might be incorrectly set up<br />Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice</div></div>";
 			echo '<script type="text/javascript">';
 			echo 'document.getElementById("changeDescriptionForm").style.display = "none";';
 			echo '</script>';
@@ -141,10 +145,10 @@ function registerDatabase() {
     }
 }
 ?>
-<div id="changeDescriptionForm">
+<div id="changeDescriptionForm" class="input-row">
 	<form action="registerDB.php" method="POST" name="NewDBRegistration">
-		New description: <input type="text" maxlength="100" size="50" name="dbDescription">
-		<input type="submit" name="submitDescriptionChange" value="Change description" style="font-weight: bold;" onClick="changeDescription()" >
+		<div class='input-header-cell'>New description:</div><div class='input-cell'><input type="text" maxlength="100" size="50" name="dbDescription" class="in">
+		<input type="submit" name="submitDescriptionChange" value="Change description" style="font-weight: bold;" onClick="changeDescription()" ></div>
 	</form>
 </div>
 
@@ -176,9 +180,10 @@ if (isset($DBID) && ($DBID != 0) && !isset($_POST['dbDescription'])) {
 }
 ?>
 
-<br>&nbsp;<br>&nbsp;<br>&nbsp;<hr><br>&nbsp;<b>Suggested workflow for new databases:</b>
+<div class="separator_row" style="margin:20px 0;"></div>
+<h3>Suggested workflow for new databases:</h3>
 
 <?php include("includeNewDatabaseWorkflow.html");  ?>
-
+</div>
 </body>
 </html>

@@ -41,8 +41,13 @@ if (@$_REQUEST["g"]) {
 <html>
  <head>
   <title>Modify group/admin status for session</title>
- </head>
- <body>
+    <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+    <link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
+    <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+    </head>
+ <body class="popup">
+ <div class="banner"><h2>Modify group / admin status for session</h2></div>
+ <div id="page-inner">
   <p>This page allows you to exit a group, or relinquish administrator status for a group, for the rest of your session.  Changes will not be saved to the database.  Log out and log back in to restore your normal permissions.</p>
 
   <table>
@@ -61,7 +66,7 @@ foreach ($grp_ids as $grp_id) {
 	print("</td><td><a href=?g=$grp_id>exit</td></tr>");
 }
 ?>
-
+</div>
  </body>
 </html>
 

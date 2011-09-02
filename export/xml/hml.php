@@ -538,9 +538,9 @@ function outputRecord($record, &$reverse_pointers, &$relationships, $depth=0, $o
 				foreach ( $rel['details'][$relTrgDT] as $dtID => $to){
 					$toType = $to['type'];
 				}
-				if (!isset($filter) || (in_array($fromType,$filter) || in_array($toType,$filter))) {
+				if (in_array($fromType,$filter) || in_array($toType,$filter)) {
 					outputRecord($rel, $reverse_pointers, $relationships, $depth, $outputStub,$record['rec_ID']);
-				}
+			}
 			}
 			closeTag('relationships');
 		}

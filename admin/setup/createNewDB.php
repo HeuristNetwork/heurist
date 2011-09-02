@@ -25,27 +25,34 @@
 	}
 ?>
 
-<link rel=stylesheet href="../../common/css/global.css">
+
 
 <html>
 	<head>
 		<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
 		<title>Create New Heurist Database</title>
+        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+		<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
 	</head>
+    <style>
+		.detailType {width:180px !important}
+	</style>
+    <body class="popup">
 	<div class="banner"><h2>Create new Heurist database</h2></div>
 	<div id="page-inner" style="overflow:auto">
  
-     <b>Suggested workflow for new databases:</b>
+     <h3>Suggested workflow for new databases:</h3>
      <?php include("includeNewDatabaseWorkflow.html"); ?>    
-     <hr><br>&nbsp;
+     <div class="separator_row" style="margin:20px 0;"></div>
     
-	<body class="popup">
+	
 		<div id="createDBForm">
 		<form action="createNewDB.php" method="POST" name="NewDBName">
-            <p>New databases are created on the current server. You will become the owner and administrator of the new database.
+            <p>New databases are created on the current server.<br>
+            You will become the owner and administrator of the new database.<br>
              The database will be created with the prefix "<?= HEURIST_DB_PREFIX ?>" 
-            (all databases created by this installation of the software will have the same prefix).
-			<p>Enter a name for the new database:
+            (all databases created by this installation of the software will have the same prefix).</p>
+			<h3>Enter a name for the new database:</h3>
             <div style="margin-left: 40px;">
                 <input type="text" maxlength="64" size="25" name="dbname">
 			    <input type="submit" name="submit" value="Create database" style="font-weight: bold;" >

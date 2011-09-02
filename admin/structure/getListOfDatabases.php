@@ -20,12 +20,13 @@
         die("Could not get database structure from given database source.");
     }
 
-    print "<html><head></head>";
-    print '<body class="popup" width="400" height="500" style="font-size: 14px;overflow:auto;">';
+    print "<html><head><link rel=stylesheet href='../../common/css/global.css'><link rel=stylesheet href='../../common/css/admin.css'></head>";
+    print "<body class='popup'>";
 
-    print "<h3>Heurist databases on this server</h3>";
-    print "Click on the database name to open in new window<br><br>";
-
+    print "<div class='banner'><h2>Heurist databases on this server</h2></div>";
+	print "<div id='page-inner'>";
+    print "Click on the database name to open in new window";
+	print "<ul class='dbList'>";
     $query = "show databases";
     $res = mysql_query($query);
 
@@ -33,9 +34,9 @@
         $test=strpos($row[0],$dbPrefix);
         if (is_numeric($test) && ($test==0) ) {
             $name = substr($row[0],strlen($dbPrefix));  // delete the prefix
-            print("<a href=".HEURIST_BASE_URL."?db=$name target=_blank>$name</a><br>");
+            print("<li><a href=".HEURIST_BASE_URL."?db=$name target=_blank>$name</a></li>");
         }
     }
-
+	print "</div></body></html>";
 
 ?>

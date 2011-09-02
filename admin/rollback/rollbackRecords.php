@@ -12,8 +12,12 @@
 ?>
 
 <html>
+	<head>
+    <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+	<link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
+    <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
  <style>
-  #form { width: 500px }
+  #form { width: 500px; margin:5px }
   #form input[type=text], #form textarea { width: 100% }
   .header div { font-weight: bold; margin-bottom: 10px }
   .detail-type { float: left; width: 200px }
@@ -25,15 +29,18 @@
   .detail-row .insert { background-color: #88ff88 }
   .detail-row.shade .insert { background-color: #88ee88 }
  </style>
+
  <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
  <script type="text/javascript">
 	$(function () {
 		$(".record .detail-row:even").addClass("shade");
 	});
  </script>
- <h3>Record rollback</h3>
- 
-<h2>Warning! This function not yet debugged</h2>
+ </head>
+<body class="popup">
+<div class="banner"><h2>Record rollback</h2></div>
+<div id="page-inner" style="overflow:auto">
+<div id=errorMsg><span>Warning! This function not yet debugged</span></div>
 <?php
 
 define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
@@ -80,9 +87,9 @@ function showForm () {
     back to their state as at the given date.
    </p>
    <div>Record IDs (comma-separated):</div>
-   <textarea name="ids"></textarea>
+   <textarea name="ids" class='in'></textarea>
    <div>Date (YYYY-MM-DD hh:mm:ss):</div>
-   <input type="text" name="date">
+   <input type="text" name="date" class='in'>
    <br><br>
    <input type="submit" value="show rollback changes">
   </div>
@@ -229,4 +236,7 @@ function getChangedValString ($rd_id, $changes) {
 }
 
 ?>
+</div>
+</body>
+
 </html>

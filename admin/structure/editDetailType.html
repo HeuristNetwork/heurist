@@ -25,8 +25,6 @@
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <title>Create new field type</title>
 
-<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-
 <!-- YUI -->
 <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
 <script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
@@ -35,72 +33,21 @@
 <script type="text/javascript" src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
 <script type="text/javascript" src="../../external/yui/2.8.2r1/build/history/history-min.js"></script>
 
-<style type="text/css">
-.dtyField {
-	display: block;
-}
-.dtyHiddenField {
-	display: none;
-}
-.dtyLabel {
-	display: inline-block;
-	width: 130px;
-	text-align: right;
-	padding-right: 3px;
-}
-.dtyValue {
-	display: inline-block;
-}
-.help1 {
-	padding-left: 133px;
-	padding-bottom: 2px;
-}
-.actionButtons {
-	float:right;
-	padding-right: 130px;
-}
+<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+<link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
+<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
 
-.termList {
-	width: 300px;
-	max-width: 300px;
-}
-.terms {
-	float: left;
-}
-.termHeader {
-	font-weight: bold;
-	color: black;
-}
-.depth0 {
-	margin-left: 0px;
-}
-.depth1 {
-	margin-left: 10px;
-}
-.depth2 {
-	margin-left: 20px;
-}
-.depth3 {
-	margin-left: 30px;
-}
-.depth4 {
-	margin-left: 40px;
-}
-.depth5 {
-	margin-left: 50px;
-}
-.depth6 {
-	margin-left: 60px;
-}
-.depth7 {
-	margin-left: 70px;
-}
+<style>
+	.input-row div.input-header-cell {width:150px}
+	.actionButtons {
+		float:right;
+	}
+	.errorMsg {width:100%; text-align:center;}
 
 </style>
-
 </head>
 
-<body>
+<body class="popup">
 
 		<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
 		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
@@ -108,18 +55,15 @@
 		<script src="../../common/php/loadCommonInfo.php"></script>
 		<script type="text/javascript" src="editDetailType.js"></script>
 
-<div style="width:580;margin:auto;">
 
-<br/>
-<div id="statusMsg"></div>
-<div id="detailTypeValues" style="padding:5px;" >
-	<div class="dtyField">
-		<label class="dtyLabel" for="dty_ID">Code:</label>
-		<label id="dty_ID"></label>
+<div class="errorMsg"><span id="statusMsg"></span></div>
+	<div class="input-row" style="margin-top:20px">
+		<div class="input-header-cell" for="dty_ID">Code:</div>
+		<div class="input-cell" id="dty_ID"></div>
 	</div>
-	<div class="dtyField">
-		<label class="dtyLabel" for="dty_Type">Data type:</label>
-		<select class="dtyValue" id="dty_Type" onchange="window.detailTypeEditor.onChangeType(event)">
+	<div class="input-row">
+		<div class="input-header-cell" for="dty_Type">Data type:</div>
+		<div class="input-cell"><select class="dtyValue" id="dty_Type" onChange="window.detailTypeEditor.onChangeType(event)">
 			<option>freetext</option>
 			<option>blocktext</option>
 			<option>integer</option>
@@ -137,91 +81,75 @@
 			<option>calculated</option>
 			<option>fieldsetmarker</option>
 		</select>
-		<div class="help prompt help1">
-			<label>The type of data this rectype accepts</label>
-		</div>
+		<div class="help prompt">The type of data this rectype accepts</div></div>
 	</div>
-	<div class="dtyField">
-		<label class="dtyLabel" for="dty_Name">Standard name:*</label>
-		<input id="dty_Name" style="width:200;" maxlength="255" />
-		<div class="help prompt help1">
-			<label>The name the recordtype should have</label>
-		</div>
+	<div class="input-row required">
+		<div class="input-header-cell" for="dty_Name">Standard name:</div>
+		<div class="input-cell"><input id="dty_Name" style="width:200;" maxlength="255" />
+		<div class="help prompt">The name the recordtype should have</div></div>
 	</div>
-	<div class="dtyField">
-		<label class="dtyLabel" for="dty_HelpText">Default help text:*</label>
-		<input id="dty_HelpText" maxlength="255" style="width:420;"/>
-		<div class="help prompt help1">
-			<label>The text a user will see in front of the field</label>
-		</div>
+	<div class="input-row required">
+		<div class="input-header-cell" for="dty_HelpText">Default help text:</div>
+		<div class="input-cell"><input id="dty_HelpText" maxlength="255" style="width:420;"/>
+		<div class="help prompt">The text a user will see in front of the field</div></div>
 	</div>
-	<div class="dtyField">
-		<label class="dtyLabel" style="vertical-align:top" for="dty_ExtendedDescription">Description:</label>
-		<textarea cols="200" id="dty_ExtendedDescription" rows="3" style="width:420;"></textarea>
-		<div class="help prompt help1">
-			<label>An advanced description, describing the field</label>
-		</div>
+	<div class="input-row">
+		<div class="input-header-cell" style="vertical-align:top" for="dty_ExtendedDescription">Description:</div>
+		<div class="input-cell"><textarea cols="200" id="dty_ExtendedDescription" rows="3" style="width:420;"></textarea>
+		<div class="help prompt">An advanced description, describing the field</div></div>
 	</div>
-	<div class="dtyField">
-		<label class="dtyLabel" for="dty_DetailTypeGroupID">Display group:</label>
-		<select class="dtyValue" id="dty_DetailTypeGroupID"></select>
-		<div class="help prompt help1">
-			<label>The group to which this rectype should belong</label>
+	<div class="input-row">
+		<div class="input-header-cell" for="dty_DetailTypeGroupID">Display group:</div>
+		<div class="input-cell"><select class="dtyValue" id="dty_DetailTypeGroupID"></select>
+		<div class="help prompt">The group to which this rectype should belong</div></div>
+	</div>
+
+	<div class="input-row" style="display:none">
+		<div class="input-header-cell" for="dty_OrderInGroup">Order in group:</div>
+		<div class="input-cell"><input onKeyPress="checkIfInteger(event)" maxlength="3" id="dty_OrderInGroup" style="width:30;"/>
+		<div class="help prompt">Whereabout the rectype should be shown in its group</div></div>
+	</div>
+
+	<div class="input-row">
+		<div class="input-header-cell" for="dty_Status">Status:</div>
+		<div class="input-cell"><div class="dtyValue" id="dty_Status" ></div>
+        	<!--<select class="dtyValue" id="dty_Status" onChange="window.detailTypeEditor.onChangeStatus(event)">
+                <option>reserved</option>
+                <option>approved</option>
+                <option>pending</option>
+                <option selected="selected">open</option>
+			</select>-->
+		<div class="help prompt">The rectype's status. 'Reserverd' can not be changed, 'Open' is normal</div></div>
+	</div>
+	<div class="input-row">
+		<div class="input-header-cell" for="dty_ShowInLists">Visible to end-user:</div>
+		<div class="input-cell"><input id="dty_ShowInLists" type="checkbox"/>
+		<div class="help prompt">Whether the user should be able to see this field</div></div>
+	</div>
+
+	<div id="pnl_fieldsetmarker" class="input-row" style="display:block;">
+		<div class="input-header-cell" for="dty_FieldSetRecTypeIDPreview">Fieldset rectype:</div>
+		<div class="input-cell">
+        	<span class="dtyValue" id="dty_FieldSetRecTypeIDPreview" style="width:270px;"></span>
+            <input type="submit" value="Select Record Type" id="btnSelRecType1" onClick="window.detailTypeEditor.onSelectRectype()"/>
+			<div class="help prompt">The recordtype that describes this fieldset</div></div>
+	</div>
+
+	<div id="pnl_enum" class="input-row" style="display:block;">
+		<div class="input-header-cell" for="termsPreview">Vocabulary:</div>
+        <div class="input-cell">
+		<input type="submit" value="Change vocabulary" id="btnSelTerms" onClick="window.detailTypeEditor.onSelectTerms()"/>
+		<span class="dtyValue" id="termsPreview"><span>preview:</span></span>
+		<div class="help prompt">The terms which define this enum/relationtype/relmarker</div>
 		</div>
 	</div>
 
-	<div class="dtyField" style="display:none">
-		<label class="dtyLabel" for="dty_OrderInGroup">Order in group:</label>
-		<input onkeypress="checkIfInteger(event)" maxlength="3" id="dty_OrderInGroup" style="width:30;"/>
-		<div class="help prompt help1">
-			<label>Whereabout the rectype should be shown in its group</label>
-		</div>
-	</div>
-
-	<div class="dtyField">
-		<label class="dtyLabel" for="dty_Status">Status:</label>
-		<select class="dtyValue" id="dty_Status" onchange="window.detailTypeEditor.onChangeStatus(event)">
-			<option>reserved</option>
-			<option>approved</option>
-			<option>pending</option>
-			<option selected="selected">open</option>
-		</select>
-		<div class="help prompt help1">
-			<label>The rectype's status. 'Reserverd' can not be changed, 'Open' is normal</label>
-		</div>
-	</div>
-	<div class="dtyField">
-		<label class="dtyLabel" for="dty_ShowInLists">Visible to end-user:</label>
-		<input id="dty_ShowInLists" type="checkbox"/>
-		<div class="help prompt help1">
-			<label>Whether the user should be able to see this field</label>
-		</div>
-	</div>
-
-	<div id="pnl_fieldsetmarker" style="display:none;">
-		<label class="dtyLabel" for="dty_FieldSetRecTypeIDPreview">Fieldset rectype:</label>
-		<span class="dtyValue" id="dty_FieldSetRecTypeIDPreview" style="width:270px;"></span>
-		<input type="button" value="Select Record Type" id="btnSelRecType1" onclick="window.detailTypeEditor.onSelectRectype()"/>
-		<div class="help prompt help1">
-			<label>The recordtype that describes this fieldset</label>
-		</div>
-	</div>
-
-	<div id="pnl_enum"  style="display:none;">
-		<label class="dtyLabel" for="termsPreview">Vocabulary:</label>
-		<input type="button" value="Change vocabulary" id="btnSelTerms" onclick="window.detailTypeEditor.onSelectTerms()"/>
-		<div class="dtyValue" id="termsPreview"><label>preview:</label></div>
-		<div class="help prompt help1">
-			<label>The terms which define this enum/relationtype/relmarker</label>
-		</div>
-	</div>
-
-	<div id="pnl_relmarker" style="display:none;">
-		<label class="dtyLabel" for="dty_PtrTargetRectypeIDsPreview">Pointer targets:</label>
+	<div id="pnl_relmarker" class="input-row" style="display:block;">
+		<div class="input-header-cell" for="dty_PtrTargetRectypeIDsPreview">Pointer targets:</div>
+        <div class="input-cell">
 		<span class="dtyValue" id="dty_PtrTargetRectypeIDsPreview" style="width:270px;"></span>
-		<input type="button" value="Select Record Types" id="btnSelRecType2" onclick="window.detailTypeEditor.onSelectRectype()"/>
-		<div class="help prompt help1">
-			<label>The rectypes this pointer/relmarker detailtype should point to</label>
+		<input type="submit" value="Select Record Types" id="btnSelRecType2" onClick="window.detailTypeEditor.onSelectRectype()"/>
+		<div class="help prompt">The rectypes this pointer/relmarker detailtype should point to</div>
 		</div>
 	</div>
 
@@ -233,8 +161,9 @@
 </div>
 <br />
 <div class="actionButtons">
-		<input type="button" style="height: 25px; width: 99px" value="Save" onclick="window.detailTypeEditor.save();" />
-		<input type="button" style="height: 25px; width: 99px" value="Cancel" onclick="window.detailTypeEditor.cancel();" />
+		<input type="button" style="height: 25px; width: 99px" value="Cancel" onClick="window.detailTypeEditor.cancel();" />
+		<input type="button" style="height: 25px; width: 99px" value="Save" onClick="window.detailTypeEditor.save();" />
+		
 </div>
 </div>
 

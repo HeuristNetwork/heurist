@@ -270,7 +270,7 @@
     // ------ Functions to write source DB definitions to local tables ---------------------------------------------------
 
     // These insert statements updated by Ian ~12/8/11
-
+    
     // NOTE: It is ESSENTIAL that the insert statemetn here correspond in fields and in order with the
     //       tables being written out by getDBStructure
 
@@ -278,7 +278,7 @@
     function processRecTypes($dataSet) {
         global $errorCreatingTables;
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-            include "defRecTypesFields.inc";
+            include "defRecTypesFields.inc";         
             $query = "INSERT INTO `defRecTypes` ($flds) VALUES" . $dataSet;
             mysql_query($query);
             if(mysql_error()) {
@@ -292,7 +292,7 @@
     function processDetailTypes($dataSet) {
         global $errorCreatingTables;
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-            include "defDetailTypesFields.inc";
+            include "defDetailTypesFields.inc";         
             $query = "INSERT INTO `defDetailTypes` ($flds) VALUES" . $dataSet;
             mysql_query($query);
             if(mysql_error()) {

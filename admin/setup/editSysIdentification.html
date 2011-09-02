@@ -12,42 +12,21 @@
 
 -->
 <html>
- <head>
-  <title>System settings editor</title>
+<head>
 
-  <link rel="icon" href="../../favicon.ico" type="image/x-icon">
-  <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
-
-  <link rel="stylesheet" type="text/css" href="../../common/css/newshsseri.css">
-  <style type="text/css">
-	a img {
-		border: 0;
-	}
-	thead {
-		text-align: left;
-	}
-	table table td, table table th {
-		padding-right: 10px;
-	}
-	tr {
-		vertical-align: top;
-	}
-	.rft_icon {
-		margin-right: 5px;
-		vertical-align: middle;
-	}
-	.rty_Name {
-		font-weight: bold;
-	}
-  </style>
-
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>Database Properties</title>
+    <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+    <link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
+    <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
  </head>
 
- <body>
-
+ <body class="popup">
+<div class="banner"><h2>Database Properties</h2>
   <!--{PageHeader} -->
+</div>
 
-  <div style="padding: 10px;">
+<div id="page-inner">
   
  <p><span class="red">[errors]</span></p>     
   
@@ -58,66 +37,74 @@
 
 [update required SYSID sysid_update]
 
-<table>
 
-<tr><td><p><b>General information</b> </td><td></td></tr>
 
-<tr><td><br>Heurist registration number (0 = not registered) and database version</td>
-<td>Registration number <b>[sys_dbRegisteredID]</b>&nbsp;&nbsp;&nbsp;
-DB version <b>[sys_dbVersion].[sys_dbSubVersion].[sys_dbSubSubVersion]</b></td></tr>
-<tr><td><br>Display name (more informative than DB name at top of page) </td>
-<td>* [textbox required : sys_dbName : : size=40] </td></tr>
-<tr><td><br>Database rights statement (or URL to rights statement) </td>
-<td>* [textbox : sys_dbRights : : size=60]</td></tr>
-<tr><td><br>Name/institution of owner (or URL to owner information)</td>
-<td>[textbox : sys_dbOwner : : size=60]         </td></tr>
-<tr><td><br>Description of the database/content up to 1Kb (may reference a URL) </td>
-<td>[textbox : sys_dbDescription : : size=60] </td></tr>
+<h3>General information</h3>
+
+<div class="input-row">
+<div class="input-header-cell">Heurist registration number (0 = not registered) and database version</div>
+<div class="input-cell">Registration number <b>[sys_dbRegisteredID]</b>&nbsp;&nbsp;&nbsp;DB version <b>[sys_dbVersion].[sys_dbSubVersion].[sys_dbSubSubVersion]</b></div>
+</div>
+<div class="input-row"><div class="input-header-cell">Display name (more informative than DB name at top of page) </div>
+<div class="input-header-cell"> [textbox required : sys_dbName : : size=40] </div></div>
+<div class="input-row"><div class="input-header-cell">Database rights statement (or URL to rights statement) </div>
+<div class="input-header-cell"> [textbox : sys_dbRights : : size=60]</div></div>
+<div class="input-row"><div class="input-header-cell">Name/institution of owner (or URL to owner information)</div>
+<div class="input-header-cell">[textbox : sys_dbOwner : : size=60]         </div></div>
+<div class="input-row"><div class="input-header-cell">Description of the database/content up to 1Kb (may reference a URL) </div>
+<div class="input-header-cell">[textbox : sys_dbDescription : : size=60] </div></div>
 
 <!--
-<tr><td><br>[sys_SyncDefsWithDB] </td>
-<td></td></tr>
-<tr><td><br>[sys_AutoIncludeFieldSetIDs] </td>
-<td></td></tr>
+<div class="input-row"><div class="input-header-cell">[sys_SyncDefsWithDB] </div>
+<div class="input-header-cell"></div></div>
+<div class="input-row"><div class="input-header-cell">[sys_AutoIncludeFieldSetIDs] </div>
+<div class="input-header-cell"></div></div>
 -->
+<h3>Behaviours / ownership</h3>
+<div class="input-row">
+<div class="input-header-cell">Owner group for new records ('0' indicates 'everyone') </div>
 
-<tr><td><p><b><br>Behaviours / ownership</b>  </td>
-<td></td></tr>
+<div class="input-cell"> [textbox required : sys_NewRecOwnerGrpID : : size=3] BUG: If 0, this MUST be enclosed in ' ' otherwise the form data will not be saved </div>
+</div>  
 
-<tr><td><br>Owner group for new records ('0' indicates 'everyone') </td>
+<div class="input-row">
+<div class="input-header-cell">Default access outside owner group (only owners can edit)</div>
+<div class="input-cell">[dropdown : sys_NewRecAccess : Default access outside owner group : enum( "viewable", "hidden", "public")]</div>
+</div>
+<div class="input-row">
+<div class="input-header-cell">User group which owns the current database  </div>
+<div class="input-cell"> [textbox required :sys_OwnerGroupID  : : size=3] BUG: If 0, this MUST be enclosed in ' ' otherwise the form data will not be saved </div>
+</div>
 
-<td>* [textbox required : sys_NewRecOwnerGrpID : : size=3] BUG: If 0, this MUST be enclosed in ' ' otherwise the form data will not be saved </td></tr>  
+<div class="input-row">
+<div class="input-header-cell">Restrict database access to members of the owners group  </div>
+<div class="input-cell">[checkbox : sys_RestrictAccessToOwnerGroup  : : size=20]</div>
+</div>
+<div class="input-row">
+<div class="input-header-cell">Allow online registration as user (confirmed by SysAdmin)  </div>
+<div class="input-cell">[checkbox : sys_AllowRegistration : : size=20] </div>
+</div>
+<div class="input-row">
+<div class="input-header-cell">Carry out nightly URL validation (can overload targets)  </div>
+<div class="input-cell">[checkbox : sys_URLCheckFlag  : : size=20]</div>
+</div>
 
-<tr><td><br>Default access outside owner group (only owners can edit)</td>
-<td>[dropdown : sys_NewRecAccess : Default access outside owner group : enum( "viewable", "hidden", "public") : size="3" ]</td></tr>
-<tr><td><br>User group which owns the current database  </td>
-<td>* [textbox required :sys_OwnerGroupID  : : size=3] BUG: If 0, this MUST be enclosed in ' ' otherwise the form data will not be saved </td></tr>  </td></tr>
+<h3>Locations</h3>
+<div class="input-row">
+<div class="input-header-cell">Directory for uploaded files (full path, overrides default if non-blank)  </div>
+<div class="input-cell">[textbox : sys_UploadDirectory : : size=30]</div>
+</div>
 
-<tr><td><br>Restrict database access to members of the owners group  </td>
-<td>[checkbox : sys_RestrictAccessToOwnerGroup  : : size=20]</td></tr>
-<tr><td><br>Allow online registration as user (confirmed by SysAdmin)  </td>
-<td>[checkbox : sys_AllowRegistration : : size=20] </td></tr>
-<tr><td><br>Carry out nightly URL validation (can overload targets)  </td>
-<td>[checkbox : sys_URLCheckFlag  : : size=20]</td></tr>
 
-<tr><td><p><b><br>Locations</b>  </td>
-<td></td></tr>
-<tr><td><br>Directory for uploaded files (full path, overrides default if non-blank)  </td>
-<td>[textbox : sys_UploadDirectory : : size=30]        </td></tr>
-
-</table>
  [end-update]
 
-<br>&nbsp;<p>
 
 <p><span class="red">[errors]</span></p>
-                        
 <input type="submit" value="save">
-
 </form>
 
 [end-foreach]
-
+</div>
  </body>
 </html>
 

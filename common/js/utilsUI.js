@@ -1424,7 +1424,10 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		border_height =  document.body.height;*/
 
 		var div_height =  _div.height();
-		var left_pos;
+		var div_width =  _div.width();
+		var pageHeight = _div.parents().height();
+		var scrollValue = _div.parents().scrollTop();
+		/*var left_pos;
 		var top_pos;
 		if(top.HEURIST.util.isnull(offset)){
 		 	offset = 5;
@@ -1441,16 +1444,21 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		} else {
 			//out of bottom   border_top +
 			top_pos = border_top + border_height - div_height - offset;
-		}
+		}*/
+		
 		/*
 		if( (top_pos + _div.height()) > (border_top+border_height) ){
 			top_pos	= border_top + border_height - _div.height() - offset;
 		}*/
-
+		
 
 		//var lft = _div.css('left');
+		left_pos=xy[0]+offset;
+ 		top_pos=xy[1]-(div_height/2)+offset+scrollValue;
+			
 		_div.css( {
-			left:left_pos+'px', top:top_pos+'px'
+			left:left_pos+'px', top:top_pos+'px',
+			
 		});
 	},
 

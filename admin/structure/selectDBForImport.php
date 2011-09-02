@@ -24,6 +24,7 @@ after selection, 26-05-2011, by Juan Adriaanse
 
 <style type="text/css">
 .yui-skin-sam .yui-dt-liner { white-space:nowrap; }
+.button {padding:2px; width:auto; height:15px !important}
 </style>
 
 <link rel=stylesheet href="../../common/css/global.css">
@@ -39,7 +40,7 @@ after selection, 26-05-2011, by Juan Adriaanse
 
 The list below shows all databases registered with the HeuristScholar.org Index database. 
 Use the filter to locate a specific term in the name or title. <br>
-Click the Crosswalk icon on the right to view available record types in that database. 
+Click the database icon on the left to view available record types in that database. 
 <br><br>
 <div class="markup" id="filterDiv" style="display:none">
 	<label for="filter">Filter:</label> <input type="text" id="filter" value="">
@@ -69,9 +70,7 @@ var registeredDBs = [];
 
 	// User must be system administrator or admin of the owners group for this database
 	if (!is_admin()) {
-	    print "<html><body><p>You must be logged in as system administrator to register a database</p><p><a href=" .
-	        HEURIST_URL_BASE . "common/connect/login.php?logout=1&amp;db=" . HEURIST_DBNAME .
-	        "'>Log out</a></p></body></html>";
+	    print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You need to be a system administrator to create a new database</span><p><a href=" . HEURIST_URL_BASE . "common/connect/login.php?logout=1&amp;db=" . HEURIST_DBNAME . "'>Log out</a></p></div></div></body></html>";
 	    return;
 	}
 
@@ -143,13 +142,13 @@ var myDataTable;
 YAHOO.util.Event.addListener(window, "load", function() {
 	YAHOO.example.Basic = function() {
 		var myColumnDefs = [
-			{key:"id", label:"ID" , formatter:YAHOO.widget.DataTable.formatNumber, sortable:true, resizeable:true},
-			{key:"name", label:"DB Name" , sortable:true, resizeable:true},
+			{key:"id", label:"ID" , formatter:YAHOO.widget.DataTable.formatNumber, sortable:true, resizeable:false, width:"40", className:"right"},
+			{key:"crosswalk", label:"Browse", resizeable:false, width:"60", className: "center"},
+			{key:"name", label:"Database Name" , sortable:true, resizeable:true},
 			{key:"description", label:"Description", sortable:true, resizeable:true},
 			// Currently no useful data in popularuity value
-            {key:"popularity", label:"Popularity", formatter:YAHOO.widget.DataTable.formatNumber, 
-                sortable:true, resizeable:true, hidden:true },
-			{key:"crosswalk", label:"Crosswalk", resizeable:true}
+            //{key:"popularity", label:"Popularity", formatter:YAHOO.widget.DataTable.formatNumber,sortable:true, resizeable:true, hidden:true }
+            {key:"URL", label:"URL",sortable:true, resizeable:true}
 		];
 
         //TODO: Add the URL as a hyperlink so that one can got to a search of the database
@@ -159,18 +158,13 @@ YAHOO.util.Event.addListener(window, "load", function() {
 		dataArray = [];
 		for(dbID in registeredDBs) {
 			db = registeredDBs[dbID];
-			dataArray.push([db[0][0],db[0][2],db[0][3],db[0][4],
-            '<a href="#" onClick="doCrosswalk('+dbID+')"><img src="crosswalk_icon.png" width="25" height="16" /></a>']);
+			dataArray.push([db[0][0],db[0][2],db[0][3],'<a href=\"'+db[0][1]+'search/search.html?db='+db[0][2]+'\" target=\"_blank\">'+db[0][1]+'</a>','<a href="#" onClick="doCrosswalk('+dbID+')"><img src="../../common/images/b_database.png" class="button"/></a>']);
 		}
 
 		var myDataSource = new YAHOO.util.LocalDataSource(dataArray,{
 			responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
-			responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
 			responseSchema : {
-				fields: [ "id", "active", "icon", "name", "description", "status", "grp_id", "info"]
-			},
-			responseSchema : {
-				fields: ["id","name","description","popularity","crosswalk"]
+				fields: ["id","name","description","URL","crosswalk"]
 			},
 			// This is the filter function
 			doBeforeCallback : function (req,raw,res,cb) {

@@ -2,6 +2,10 @@
 
 -- Ian Johnson 5 Nov 2010  Last updated 7pm 17/2/11
 
+-- Added additional constraints on defTerms and defRelationshipConstraints 24 Feb
+-- TO DO: Need to check through this file that we have covered all required constraints
+-- with all the recent changes
+
 -- Can be run from command line logged in as root with
 -- mysql -u root -ppassword hdb_databasename < /var/www/htdocs/h3-ij/admin/setup/addReferentialConstraints.sql
 
@@ -28,10 +32,6 @@ ALTER TABLE defDetailTypes
 ALTER TABLE defDetailTypes
   ADD CONSTRAINT FOREIGN KEY (dty_DetailTypeGroupID) REFERENCES defDetailTypeGroups (dtg_ID) ON UPDATE CASCADE;
 
-ALTER TABLE defRecTypes
-  ADD CONSTRAINT FOREIGN KEY (rty_RecTypeGroupID) REFERENCES  defRecTypeGroups (rtg_ID) ON DELETE RESTRICT;
-ALTER TABLE defRecTypes
-  ADD CONSTRAINT FOREIGN KEY (rty_RecTypeGroupID) REFERENCES defRecTypeGroups (rtg_ID) ON UPDATE CASCADE;
 
 -- ---------------------------------------------------------------------------
 

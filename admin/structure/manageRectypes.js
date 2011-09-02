@@ -74,20 +74,17 @@ function RectypeManager() {
 
 		tabView.addTab(new YAHOO.widget.Tab({
 			id: "newGroup",
-			label: "<label title='Create new group, edit or delete the existing group' style='font-style:italic'>edit</label>",
+			label: "<label title='Create new group, edit or delete an existing group' style='font-style:italic'>edit</label>",
 			content:
-			('<div id="formGroupEditor" style="width:600px; padding:40px">'+
-			'<h3 style="width:100%;text-align:center">Create a new rectype group or edit the existing one</h3><br/>'+
-			'<div class="dtyField"><label class="dtyLabel">Group:</label><select id="edGroupId" onchange="onGroupChange()"></select></div>'+
-			'<div class="dtyField"><label class="dtyLabel">Name:</label><input id="edName" style="width:300px"/></div>'+
-			'<div class="dtyField"><label class="dtyLabel">Descrption:</label><input id="edDescription" style="width:300px"/></div>'+
-			'<div style="text-align: center; margin:auto; padding-top:5;">'+
-			'<input id="btnGrpSave" style="display:inline-block" type="button" value="Save" onclick="{rectypeManager.doGroupSave()}" />'+
-			'<input id="btnGrpCancel" type="button" value="Cancel" onclick="{rectypeManager.doGroupCancel()}" />'+
-			'</div><hr width="50%"/>'+
-			'<div style="text-align: center; margin:auto; padding-top:5;">'+
-			'Select group above for <input id="btnGrpDelete" type="button" value="Deletion" onclick="{rectypeManager.doGroupDelete()}" />'+
-			'</div>'+
+			('<div id="formGroupEditor">'+
+				'<h3>Create a new group or edit an existing one</h3><br/>'+
+				'<div class="input-row"><div class="input-header-cell">Group:</div><div class="input-cell"><select id="edGroupId" onchange="onGroupChange()"></select><img id="btnGrpDelete" onclick="{rectypeManager.doGroupDelete()}" src="../../common/images/cross.png" title="Deleted selected group"/></div></div>'+
+				'<div class="input-row"><div class="input-header-cell">Name:</div><div class="input-cell"><input id="edName" style="width:300px"/></div></div>'+
+				'<div class="input-row"><div class="input-header-cell">Descrption:</div><div class="input-cell"><input id="edDescription" style="width:300px"/></div></div>'+
+				'<div class="input-row">'+
+					'<input id="btnGrpSave" style="display:inline-block" type="button" value="Save" onclick="{rectypeManager.doGroupSave()}" />'+
+					'<input id="btnGrpCancel" type="button" value="Cancel" onclick="{rectypeManager.doGroupCancel()}" />'+
+				'</div>'+
 			'</div>')
 		}));
 		tabView.appendTo("modelTabs");
@@ -263,10 +260,19 @@ function RectypeManager() {
 				if(rectypeID !== "commomFieldNames" && rectypeID !== "dtFieldNames") {
 					var td = top.HEURIST.rectypes.typedefs[rectypeID];
 					var rectype = td.commonFields;
+					var rectypeStatus;
+					if (rectype[8] == "restricted") {
+							rectypeStatus = "<img src=\"../../common/images/lock_bw.png\">";
+						}else{
+							rectypeStatus = "<a href=\"#delete\"><img src=\"../../common/images/cross.png\" border=\"0\" title=\"Status:"+rectype[8]+" - Delete\"/><\/a>";
+						};
 					if(rectype[9].indexOf(grpID)>-1) {
 						arr.push([rectypeID, (Number(rectype[7])===1),
-						"<img src=\"../../common/images/16x16.gif\" style=\"background-image:url(../../common/images/rectype-icons/"+rectypeID+".gif)\">",
-						rectype[0], rectype[1], rectype[8], rectype[9], null]);
+						"<img src=\"../../common/images/16x16.gif\" style=\"background-image:url(../../common/images/reftype-icons/"+rectypeID+".png)\">",
+						rectype[0], rectype[1], 
+						rectype[8],
+						//rectypeStatus, 
+						rectype[9], null]);
 
 						/*TODO: top.HEURIST.rectype.rectypeUsage[rectypeID].length*/
 					}
@@ -325,17 +331,16 @@ function RectypeManager() {
 			});
 
 			var myColumnDefs = [
-			{ key: "id", label: "<u>Code</u>", sortable:true, width:20, className:'left' },
-			{ key: "active", label: "Active", sortable:false, width:20, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
-			{ key: null, label: "Edit", sortable:false, width:20, formatter: function(elLiner, oRecord, oColumn, oData) {
-					elLiner.innerHTML = '<a href="#edit_rectype"><img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit record type" /><\/a>'; }
+			{ key: "id", label: "Code", sortable:true, width:40, className:'right' },
+			{ key: "info", label: "Info", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
+				var rectypeID = oRecord.getData('id');
+elLiner.innerHTML = '<img src="../../common/images/info.png"'+
+'onmouseover="rectypeManager.showInfo('+rectypeID+', event)" onmouseout="rectypeManager.hideInfo()"/>'; }
 			},
-			{ key: null, label: "Struc", sortable:false, width:20, formatter: function(elLiner, oRecord, oColumn, oData) {
-					elLiner.innerHTML = '<a href="#edit_sctructure"><img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit record strcuture" /><\/a>'; }
-			},
+			{ key: "active", label: "Active", sortable:false, width:40, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
 			{ key: "usage", label: "Usage", hidden:true },
-			{ key: "icon", label: "Icon", sortable:false },
-			{ key: "name", label: "<u>Name</u>", sortable:true, className: 'bold_column', width:160,
+			{ key: "icon", label: "Icon", className:'center', sortable:false },
+			{ key: "name", label: "Name", sortable:true, className: 'bold_column', width:160, gutter:0,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var str = oRecord.getData("name");
 					var tit = "";
@@ -351,27 +356,24 @@ function RectypeManager() {
 					var tit = "";
 					if(Hul.isempty(str)){
 						str = "";
-					}else if (str.length>35) {
+					}else if (str.length>40) {
 						tit = str;
-						str = str.substr(0,35)+"&#8230";
+						str = str.substr(0,40)+"&#8230";
 					}
-					elLiner.innerHTML = '<label title="'+tit+'">'+str+'</label>';
+					elLiner.innerHTML = '<span title="'+tit+'">'+str+'</span>';
 			}},
-			{ key: "status", label: "<u>Status</u>", sortable:true },
-			{ key: "grp_id", label: "Group", sortable:false, width:70,
+			{ key: "status", label: "Status", sortable:true, className:'center' },
+			{ key: "grp_id", label: "Group", sortable:false, width:90, className:'center',
 				formatter:YAHOO.widget.DataTable.formatDropdown, dropdownOptions:_groups},
-			{ key: null, label: "Del", width:20, sortable:false, formatter: function(elLiner, oRecord, oColumn, oData) {
+			{ key: null, label: "Edit", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
+					elLiner.innerHTML = '<a href="#edit_rectype"><img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit record type" /><\/a>'; }
+			},
+			{ key: null, label: "Struc", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
+					elLiner.innerHTML = '<a href="#edit_sctructure"><img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit record strcuture" /><\/a>'; }
+			},
+			{ key: null, label: "Del", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
 					elLiner.innerHTML = '<a href="#delete"><img src="../../common/images/cross.png" border="0" title="Delete" /><\/a>'; }
 			},
-			{ key: "info", label: "Info", sortable:false, width:20, formatter: function(elLiner, oRecord, oColumn, oData) {
-				var rectypeID = oRecord.getData('id');
-elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" height="16" border="0" '+
-'onmouseover="rectypeManager.showInfo('+rectypeID+', event)" onmouseout="rectypeManager.hideInfo()"/>'; }
-
-//elLiner.innerHTML = '<a href="#info"><img src="../../common/images/info_icon.png" width="16" height="16" border="0"/><\/a>'}
-
-			}
-
 			];
 
 			var myConfigs = {
@@ -591,7 +593,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 				function __hideToolTip2() {
 					needHideTip = true;
 					//_hideToolTip();
-					hideTimer = window.setTimeout(_hideToolTip, 500);
+					//hideTimer = window.setTimeout(_hideToolTip, 500);
 				}
 				//tooltip div mouse over
 				function __clearHideTimer2() {
@@ -633,7 +635,9 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 					var xy = Hul.getMousePos(event);
 					my_tooltip.html(textTip);  //DEBUG xy[0]+",  "+xy[1]+"<br/>"+
 
-					Hul.showPopupDivAt(my_tooltip, xy, $(window).scrollTop(), $(window).width(), $(window).height());
+					//Hul.showPopupDivAt(my_tooltip, xy);
+					Hul.showPopupDivAt(my_tooltip, xy, $(window).scrollTop(), $(window).width(), $(window).height(),0);
+
 					hideTimer = window.setTimeout(_hideToolTip, 5000);
 				}
 				else if(forceHideTip) {
@@ -875,9 +879,9 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 	function _editRecStructure(rty_ID) {
 
 		var URL = top.HEURIST.basePath + "admin/structure/editRecStructure.html?db="+db+"&rty_ID="+rty_ID;
-		this.location.replace(URL);
+		//this.location.replace(URL);
 
-		/*
+		
 		Hul.popupURL(top, URL, {
 			"close-on-blur": false,
 			"no-resize": false,
@@ -890,7 +894,7 @@ elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" hei
 					// alert("Structure is saved");
 				}
 			}
-		});*/
+		});
 	}
 
 	/*  THIS feature is removed by Ian's request

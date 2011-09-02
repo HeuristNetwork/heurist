@@ -533,7 +533,7 @@ div.input-row div.input-cell div#relations-tbody div div div.relation div.resour
 .input-row tr select {
 	display: inline;
 }
-.input-row div.input-header-cell {
+.input-row div.input-header-cell, .input-row label {
 	width: 150px;
 	padding-right: 10px;
 	text-align: right;
@@ -564,7 +564,7 @@ div.input-row div.input-cell div#relations-tbody div div div.relation div.resour
 	color:#999;
 	font-weight: normal;
 }
-input#tags, .input-cell .in, .input-cell .resource-title, .in {
+input#tags, .input-cell .in, .input-cell .resource-title, .in, .input-row input:not([type="submit"]) {
 	font-size:2ex;
 	background:none repeat scroll 0 0 #FFF;
 	border:medium none;
@@ -584,7 +584,7 @@ input.resource-title, input.file-select, input[type="file"]{
 	line-height: 2ex;
 	min-width:40ex
 }
-input#tags:focus, .input-cell .in:focus, .input-cell .resource-title:focus {
+input#tags:focus, .input-cell .in:focus, .input-cell .resource-title:focus, .in:focus, .input-row input:focus {
 	-moz-box-shadow:0 0 4px #6A7C99;
 	-webkit-box-shadow:0 0 4px #6A7C99;
 	box-shadow:0 0 4px #6A7C99;

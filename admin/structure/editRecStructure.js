@@ -152,11 +152,17 @@ function EditRecStructure() {
 			if(!Hul.isnull(_dts)){
 				var rst_ID;
 				for (rst_ID in _dts) {
+					var statusLock;
 					var aval = _dts[rst_ID];
+					if (aval[15] != "reserved"){
+						statusLock = '<a href="#delete"><img src="../../common/images/cross.png" width="12" height="12" border="0" title="Remove detail" /><\/a>';
+					}else{
+						statusLock  = '<img src="../../common/images/lock_bw.png" title="Detail locked" />';
+					};
 					arr.push([ rst_ID, rst_ID, aval[9],
 					aval[0], top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[2], aval[4],
-					aval[7], aval[6], aval[5], aval[3], aval[15],
-					aval]);
+					aval[7], aval[6], aval[5], aval[3],aval[15],
+					statusLock]);
 				}
 			}
 
@@ -195,7 +201,7 @@ function EditRecStructure() {
 
 			var myColumnDefs = [
 			{
-				key:"rst_ID", label: "Code", sortable:false
+				key:"rst_ID", label: "Code", sortable:false, className:"right"
 			},
 			{
 				key:"expandColumn",
@@ -213,11 +219,11 @@ function EditRecStructure() {
 				key:"dty_Type", label: "Type", sortable:false
 			},
 			{
-				key:"rst_DisplayWidth", label: "Wdt", sortable:false, width:10
+				key:"rst_DisplayWidth", label: "Wdt", sortable:false, width:15, className:"center"
 			},
 			//{ key:"rst_DisplayHelpText", label: "Prompt", sortable:false },
 			{
-				key:"rst_RequirementType", label: "Req", sortable:false, width:10,
+				key:"rst_RequirementType", label: "Req", sortable:false, width:15,
 				formatter: function(elLiner, oRecord, oColumn, oData){
 					var reqtype = oRecord.getData('rst_RequirementType');
 					elLiner.innerHTML = reqtype.substring(0,3);
@@ -225,30 +231,31 @@ function EditRecStructure() {
 
 			},
 			{
-				key:"rst_MinValues", label: "Min", sortable:false, width:10
+				key:"rst_MinValues", label: "Min", sortable:false, width:15, className:"center"
 			},
 			{
-				key:"rst_MaxValues", label: "Max", sortable:false, width:10
+				key:"rst_MaxValues", label: "Max", sortable:false, width:15, className:"center"
 			},
 			{
-				key:"rst_DefaultValue", label: "Default", sortable:false,
+				key:"rst_DefaultValue", label: "Default", sortable:false,className:"center",
 				formatter: function(elLiner, oRecord, oColumn, oData){
 					var reqtype = oRecord.getData('rst_DefaultValue');
 					elLiner.innerHTML = reqtype.substring(0,9);
 				}
 			},
 			{
-				key:"rst_Status", label: "Status", sortable:false
+				key:"rst_Status", label: "Status", sortable:false, className:"center"
 			},
 			{
 				key: "rst_values",
 				label: "Del",
 				width : "16px",
 				sortable: false,
-				formatter: function(elLiner, oRecord, oColumn, oData){
-					elLiner.innerHTML =
-					'<a href="#delete"><img src="../../common/images/cross.png" width="12" height="12" border="0" title="Remove detail" /><\/a>';
-				}
+				className:"center",
+				/*formatter: function(elLiner, oRecord, oColumn, oData){
+					
+					elLiner.innerHTML ='<a href="#delete"><img src="../../common/images/cross.png" width="12" height="12" border="0" title="Remove detail" /><\/a>';
+				}*/
 			}
 			];
 
@@ -267,12 +274,12 @@ function EditRecStructure() {
 					*/
 					obj.liner_element.innerHTML =
 					'<div style="padding-left:30; padding-bottom:5; padding-right:5">'+
-					'<div class="dtyField"><label class="dtyLabel">Display name/Label:</label><input id="ed'+rst_ID+'_rst_DisplayName" title="Display Name/Label"/></div>'+
-					'<div class="dtyField"><label class="dtyLabel">Help Text/Prompt:</label><input id="ed'+rst_ID+'_rst_DisplayHelpText" style="width:350px" title="Help Text"/></div>'+
-					'<div class="dtyField"><label class="dtyLabel">Default Value:</label><input id="ed'+rst_ID+'_rst_DefaultValue" title="Default Value"/></div>'+
-					'<div class="dtyField"><label class="dtyLabel">Width:</label><input id="ed'+rst_ID+'_rst_DisplayWidth" title="Visible width of field" style="width:40" size="4" onkeypress="Hul.validate(event)"/></div>'+
+					'<div class="input-row"><label class="dtyLabel">Display name/Label:</label><input id="ed'+rst_ID+'_rst_DisplayName" title="Display Name/Label"/></div>'+
+					'<div class="input-row"><label class="dtyLabel">Help Text/Prompt:</label><input id="ed'+rst_ID+'_rst_DisplayHelpText" style="width:350px" title="Help Text"/></div>'+
+					'<div class="input-row"><label class="dtyLabel">Default Value:</label><input id="ed'+rst_ID+'_rst_DefaultValue" title="Default Value"/></div>'+
+					'<div class="input-row"><label class="dtyLabel">Width:</label><input id="ed'+rst_ID+'_rst_DisplayWidth" title="Visible width of field" style="width:40" size="4" onkeypress="Hul.validate(event)"/></div>'+
 
-					'<div class="dtyField"><label class="dtyLabel">Requirement type:</label>'+
+					'<div class="input-row"><label class="dtyLabel">Requirement type:</label>'+
 					'<select id="ed'+rst_ID+'_rst_RequirementType" onchange="onReqtypeChange(event)">'+
 					'<option value="required">required</option>'+
 					'<option value="recommended">recommended</option>'+
@@ -285,19 +292,19 @@ function EditRecStructure() {
 					'_rst_MaxValues" title="Max Values"  style="width:20" size="2"  '+
 					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/>&nbsp;times</div>'+
 
-					'<div class="dtyField"><label class="dtyLabel">Terms list:</label>'+
+					'<div class="input-row"><label class="dtyLabel">Terms list:</label>'+
 					'<input id="ed'+rst_ID+'_rst_FilteredJsonTermIDTree" type="hidden"/>'+
 					'<input id="ed'+rst_ID+'_rst_TermIDTreeNonSelectableIDs" type="hidden"/>'+
 					'<input type="button" value="Filter terms" id="btnSelTerms" onclick="showTermsTree('+rst_ID+', event)"/>'+
 					'<div id="termsPreview" class="dtyValue"><label>preview:</label></div>'+
 					'</div>'+
 
-					'<div class="dtyField"><label class="dtyLabel">Rectype pointer:</label>'+
+					'<div class="input-row"><label class="dtyLabel">Rectype pointer:</label>'+
 					'<div id="pointerPreview" class="dtyValue"></div>'+
 					'<input id="ed'+rst_ID+'_rst_PtrFilteredIDs" type="hidden"/>'+
 					'<input type="button" value="Filter pointers" id="btnSelTerms" onclick="showPointerFilter('+rst_ID+', event)"/></div>'+
 
-					'<div class="dtyField"><label class="dtyLabel">Status:</label><select id="ed'+rst_ID+
+					'<div class="input-row"><label class="dtyLabel">Status:</label><select id="ed'+rst_ID+
 					'_rst_Status" style="display:inline-block">'+
 					'<option value="reserved">reserved</option>'+
 					'<option value="approved">approved</option>'+
@@ -305,6 +312,8 @@ function EditRecStructure() {
 					'<option value="open">open</option></select>'+
 
 					'<div style="float:right; text-align:right;min-width:250;">'+
+					'<input id="btnEdit_'+rst_ID+
+					'" style="display:inline-block" type="button" value="Edit" onclick="_onAddEditFieldType('+rst_ID+');" />'+
 					'<input id="btnSave_'+rst_ID+
 					'" style="display:inline-block" type="button" value="Save" onclick="doExpliciteCollapse(event);" />'+
 					'<input id="btnCancel_'+rst_ID+
@@ -417,6 +426,9 @@ function EditRecStructure() {
 					// alert("Deletion failed. "+context.error);
 					//}
 					_isServerOperationInProgress = false;
+				}
+				if(elLink.hash === "#edit"){
+					_onAddEditFieldType(dty_ID, 0);
 				}
 
 				if(elLink.hash === "#delete"){
@@ -1187,7 +1199,7 @@ function renderShowAll() {
 			// Make the proxy look like the source element
 			Dom.setStyle(srcEl, "visibility", "hidden");
 			//proxyEl.innerHTML = "<table><tbody>"+srcEl.innerHTML+"</tbody></table>";
-			proxyEl.innerHTML = "<div>dragging detail to new place</div>";
+			proxyEl.innerHTML = "";
 
 			//var rst_ID = this.srcData.rst_ID
 			//_fromUItoArray(rst_ID); //before collapse save to UI
@@ -1463,7 +1475,8 @@ function closeDivPopup1(_allTerms, _disTerms, _dtyID){
 
 		var my_div = $("#termsFilter");
 		my_div.css( {
-			left:"-9999px"
+			//left:"-9999px"
+			display:'none'
 		});
 }
 
@@ -1484,8 +1497,9 @@ function showTermsTree(rst_ID, event){
 	var my_div = $("#termsFilter");
 
 	my_div.css( {
-			left:'5px', top:(border_top+5)+'px', width:'97%', height:'95%'
+			left:'20px', top:'20px', right:'20px', bottom:'20px',
 			//width:$(window).width()-20, height:$(window).height()-20
+			display:'block'
 	});
 
 	//_showDivPopupAt(my_div, [0, border_top]);
@@ -1508,7 +1522,8 @@ function closeDivPopup2(_values, _dtyID){
 
 		var my_div = $("#pointerFilter");
 		my_div.css( {
-			left:"-9999px"
+			//visibility:'hidden'
+			display:'none'
 		});
 }
 
@@ -1667,4 +1682,43 @@ function recreateRecTypesPreview(type, value) {
 			divRecType.title = "";
 		}
 		divRecType.innerHTML = txt;
+}
+
+function _onAddEditFieldType(dty_ID, dtg_ID){
+		
+		var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+											(top.HEURIST.database.name?top.HEURIST.database.name:''));
+		var url = top.HEURIST.basePath + "admin/structure/editDetailType.html?db="+db+ "&detailTypeID="+dty_ID; //existing
+		
+		top.HEURIST.util.popupURL(top, url,
+		{   "close-on-blur": false,
+			"no-resize": false,
+			height: 520,
+			width: 640,
+			callback: function(context) {
+				if(!Hul.isnull(context)){
+
+					//update id
+					var dty_ID = Math.abs(Number(context.result[0]));
+
+					//if user changes group in popup need update both  old and new group tabs
+					var grpID_old = -1;
+					if(Number(context.result[0])>0){
+						grpID_old = top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[7];
+					}
+
+					//refresh the local heurist
+					top.HEURIST.detailTypes = context.detailTypes;
+					_cloneHEU = null;
+
+					//detect what group
+					var grpID = top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[7];
+
+					_removeTable(grpID, true);
+					if(grpID_old!==grpID){
+						_removeTable(grpID_old, true);
+					}
+				}
+			}
+		});
 }
