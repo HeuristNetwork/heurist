@@ -72,6 +72,7 @@ top.HEURIST.search = {
 //		top.HEURIST.search.checkSearchForm();
 //		document.forms[0].submit();
 		top.HEURIST.search.clearResultRows();
+		top.HEURIST.search.clearRelatesRows();
 		top.HEURIST.search.reloadSearch();
 	},
 
@@ -1049,7 +1050,7 @@ top.HEURIST.search = {
 
 	setResultStyle: function(style) {
 		var searchWidth = top.HEURIST.util.getDisplayPreference("searchWidth");
-		if (style == "two-col" && searchWidth < 390) {return;}
+		if (style == "two-col" && searchWidth < 180) {return;}
 		top.HEURIST.util.setDisplayPreference("search-result-style", style);
 		document.getElementById("results-level0").className = style;
 	},
@@ -1588,7 +1589,7 @@ top.HEURIST.search = {
 //		sidebysideFrame.src = top.HEURIST.basePath+"viewers/sidebyside/sidebyside.html"+
 //		("?db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
 //						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")));
-		var ssel = "selectedIds=" + top.HEURIST.search.getSelectedRecIDs().get().join(",");
+		var ssel = "selectedIds=" + selectedRecIDs.join(",");
         top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
 //		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);
 		top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap,"heurist-selectionchange",  ssel);
@@ -2788,143 +2789,80 @@ function removeCustomAlert() {
 			}else if (top.HEURIST.util.getDisplayPreference("sidebarPanel") == "closed"){
 			leftWidth = oldLeftWidth;
 			};
-
+		var searchWidth = top.HEURIST.util.getDisplayPreference("searchWidth");
+		var oldSearchWidth = top.HEURIST.util.getDisplayPreference("oldSearchWidth");
+		if (!searchWidth || !oldSearchWidth) {
+			searchWidth = 180;
+			}else if (top.HEURIST.util.getDisplayPreference("applicationPanel") == "closed"){
+			searchWidth = oldSearchWidth;
+			};
 		var appPanelButton = document.getElementById("appPanelButton");
 		var navButton = document.getElementById("navButton");
-
+		var tabBar = document.getElementById("tabbar");
+		var searchTable = document.getElementById("search");
+		
 		var layout = new YAHOO.widget.Layout({
 			units: [
-				{ position: 'top', height: 50, body: 'masthead', header: '', gutter: '0', collapse: false, resize: false },
-				{ position: 'bottom', height: 10, resize: false, body: 'footer', gutter: '0', collapse: false },
-				{ position: 'left', width: leftWidth, resize: true, useShim: true, body: 'sidebar', gutter: '0', collapse: false, close: false, collapseSize: 0, scroll: false, animate: false },
-				{ position: 'center', body: 'center-panel', gutter: '0 10 0 10', animate: false, collapse:true }
+				{ position: 'top', height: 95, body: 'masthead', header: '', gutter: '0 10px', collapse: false, resize: false },
+				{ position: 'bottom', height: 20, resize: false, body: 'footer', gutter: '0 10px 10px 10px', collapse: false },
+				{ position: 'left', width: leftWidth, resize: true, useShim: true, body: 'sidebar', gutter: '0 0 0 10px', collapse: false, close: false, collapseSize: 0, scroll: false, animate: false, minWidth:150, maxWidth:300},
+				{ position: 'center', body: 'page', gutter: '0', minWidth: 400 },
+				{ position: 'right', width: searchWidth, resize: true, useShim: true, body: 'page-right', gutter: '0 10px 0 0', collapse: false, close: false, collapseSize: 0, scroll: false, animate: false, minWidth:150},
 			]
 		});
-
-		layout.on('render', function() {
-				var el = layout.getUnitByPosition('center').get('wrap');
-
-				var searchWidth = top.HEURIST.util.getDisplayPreference("searchWidth");
-				var oldSearchWidth = top.HEURIST.util.getDisplayPreference("oldSearchWidth");
-					if (searchWidth <= 10){searchWidth = oldSearchWidth};
-
-				var layout2 = new YAHOO.widget.Layout(el, {
-				parent: layout,
-				units: [
-					{ position: 'top', height: 28, body: 'search', header: '', gutter: '0', collapse: false, resize: false },
-					{ position: 'left', width: searchWidth, resize: true, useShim: true, gutter: '0', collapse: true, scroll: true, body: 'page', animate: false, collapseSize: 0, minWidth:180},
-					{ position: 'center', body: 'page-right'}
-					]
-				});
-
-				var setSearchWidth = function() {
-					var searchWidth = layout2.getSizes().left.w;
-					var centerWidth = layout2.getSizes().center.w;
-					var pageWidth = searchWidth + centerWidth;
-					var currentStyle = top.HEURIST.util.getDisplayPreference("search-result-style");
-					var twocollink = document.getElementById("result-style-twoCol");
-					if (searchWidth < pageWidth) {
-						top.HEURIST.util.setDisplayPreference("applicationPanel","open");
-						appPanelButton.className = appPanelButton.className.replace(" closed", "");
-						appPanelButton.innerHTML = "Hide Application Panel";
-					 }else if (searchWidth >= pageWidth) {
-						layout2.getUnitByPosition('left').set("width", pageWidth); //limits page to viewable screen
-						appPanelButton.className +=" closed";
-						appPanelButton.innerHTML = "Show Application Panel";
-						top.HEURIST.util.setDisplayPreference("applicationPanel","closed");
-					 };
-					 top.HEURIST.util.setDisplayPreference("searchWidth", searchWidth);
-					if (searchWidth < 390 && currentStyle == "two-col") {
-						 document.getElementById("results-level0").className = "list"; //temporarliy changes 2-col to list
-						 };
-					if (searchWidth > 390) {
-						 twocollink.className = twocollink.className.replace(" disabled","");
-						 document.getElementById("results-level0").className = currentStyle;
-						 };
-					if (searchWidth < 390 && twocollink.className !== " disabled") {
-						 twocollink.className += " disabled";
-						 };
-					};
-
-				layout2.on('resize', setSearchWidth);
-				layout2.render();
-
-				var currentStyle = top.HEURIST.util.getDisplayPreference("search-result-style");
-				var twocollink = document.getElementById("result-style-twoCol");
-				if (searchWidth < 390 && currentStyle == "two-col") {
-						 document.getElementById("results-level0").className = "list"; //temporarliy changes 2-col to list
-						 };
-					if (searchWidth > 390) {
-						 twocollink.className = twocollink.className.replace(" disabled","");
-						 document.getElementById("results-level0").className = currentStyle;
-						 };
-					if (searchWidth < 390 && twocollink.className !== " disabled") {
-						 twocollink.className += " disabled";
-						 };
-
-				if (top.HEURIST.util.getDisplayPreference("applicationPanel") == "closed"){
-					var searchWidth = layout2.getSizes().left.w;
-					var centerWidth = layout2.getSizes().center.w;
-					var pageWidth = searchWidth + centerWidth;
-					layout2.getUnitByPosition('left').set("width", pageWidth);
-					layout2.getUnitByPosition('left').resize();
-					appPanelButton.className +=" closed";
-					appPanelButton.innerHTML = "Show Application Panel";
-					};
-
-				if (top.HEURIST.util.getDisplayPreference("resultsPanel") == "closed"){
-					layout2.getUnitByPosition('left').collapse();
-					appPanelButton.className +=" closed";
-					appPanelButton.innerHTML = "Show Search Results Panel";
-					};
-
-				Event.on('appPanelButton', 'click', function(ev) {
-					Event.stopEvent(ev);
-					var searchWidth = layout2.getSizes().left.w;
-					var centerWidth = layout2.getSizes().center.w;
-					var pageWidth = searchWidth + centerWidth;
-					if (top.HEURIST.util.getDisplayPreference("applicationPanel") == "open"){
-						var oldSearchWidth = layout2.getSizes().left.w;
-							top.HEURIST.util.setDisplayPreference("oldSearchWidth",oldSearchWidth);
-							layout2.getUnitByPosition('left').set("width", pageWidth);
-							layout2.getUnitByPosition('left').resize();
-						}else{
-						var oldSearchWidth = top.HEURIST.util.getDisplayPreference("oldSearchWidth");
-						layout2.getUnitByPosition('left').set("width",oldSearchWidth);
-						layout2.getUnitByPosition('left').resize();
-						};
-					});
-
-				Event.on('resultsButton', 'click', function(ev) {
-					Event.stopEvent(ev);
-					if (top.HEURIST.util.getDisplayPreference("applicationPanel") == "closed"){ return;};
-					top.HEURIST.util.setDisplayPreference("oldSearchWidth",oldSearchWidth);
-					layout2.getUnitByPosition('left').toggle();
-					});
-
-				Event.on('resetLayout', 'click', function(ev) {
-					Event.stopEvent(ev);
-					if (top.HEURIST.util.getDisplayPreference("applicationPanel") != "open"){
-					appPanelButton.className = appPanelButton.className.replace(" closed", "")
-					appPanelButton.innerHTML = "Hide Application Panel"
-					}
-					layout2.getUnitByPosition('left').set("width", 360);
-					layout2.getUnitByPosition('left').resize();
-					top.HEURIST.util.setDisplayPreference("searchWidth", 360);
-					top.HEURIST.util.setDisplayPreference("applicationPanel","open");
-				});
-		});
-		var setLeftWidth = function() {
+		
+		
+		var setWidths = function() {
 			var leftPanelWidth = layout.getSizes().left.w;
+			var rightPanelWidth = layout.getSizes().right.w;
+			var centerPanelWidth = layout.getSizes().center.w;
+			var maxRightWidth = centerPanelWidth + rightPanelWidth -180;
 			top.HEURIST.util.setDisplayPreference("leftWidth", leftPanelWidth);
+			top.HEURIST.util.setDisplayPreference("searchWidth", rightPanelWidth);
+			navButton.style.width = leftPanelWidth-11;
+			
+			if (navButton.style.width == "20px" || appPanelButton.style.width == "20px"){
+				tabBar.style.width = centerPanelWidth-29;
+			}else if (navButton.style.width == "20px" && appPanelButton.style.width == "20px"){
+				tabBar.style.width = centerPanelWidth-49;
+			}else{
+				tabBar.style.width = centerPanelWidth-8;
+			};
+			
+			searchTable.style.paddingLeft = (leftPanelWidth);
+			if (centerPanelWidth <= 180) {
+				layout.getUnitByPosition('right').set("width",maxRightWidth);
+				top.HEURIST.util.setDisplayPreference("searchWidth", maxRightWidth);
+			}
+			var currentStyle = top.HEURIST.util.getDisplayPreference("search-result-style");
+			var twocollink = document.getElementById("result-style-twoCol");
+			if (centerPanelWidth < 180 && currentStyle == "two-col") {
+					 document.getElementById("results-level0").className = "list"; //temporarliy changes 2-col to list
+					 };
+				if (centerPanelWidth > 180) {
+					 twocollink.className = twocollink.className.replace(" disabled","");
+					 document.getElementById("results-level0").className = currentStyle;
+					 };
+				if (centerPanelWidth < 180 && twocollink.className !== " disabled") {
+					 twocollink.className += " disabled";
+					 };
 		};
-		layout.on('resize',setLeftWidth);
+		
+		layout.on('resize',setWidths);
 		layout.render();
 
 		if (top.HEURIST.util.getDisplayPreference("sidebarPanel") == "closed"){
 					layout.getUnitByPosition('left').collapse();
 					navButton.className +=" closed";
-					navButton.innerHTML = "Show Navigation Panel";
+					searchTable.style.paddingLeft = "5px";
+					navButton.style.width = "20px";
+					navButton.title = "Show Navigation Panel";
+					tabBar.style.width = layout.getSizes().center.w - 29;
+					};
+		if (top.HEURIST.util.getDisplayPreference("applicationPanel") == "closed"){
+					layout.getUnitByPosition('right').collapse();
+					appPanelButton.className +=" closed";
+					appPanelButton.title = "Show Applications";
 					};
 		Event.on('navButton', 'click', function(ev) {
 			Event.stopEvent(ev);
@@ -2934,14 +2872,46 @@ function removeCustomAlert() {
 				layout.getUnitByPosition('left').collapse();
 				top.HEURIST.util.setDisplayPreference("sidebarPanel","closed");
 				navButton.className +=" closed";
-				navButton.innerHTML = "Show Navigation Panel";
+				navButton.style.width = "20px";
+				searchTable.style.paddingLeft = "5px";
+				navButton.title = "Show Navigation Panel";
+				tabBar.style.width = layout.getSizes().center.w - 29;
+				layout.resize();
 			}else{
 				layout.getUnitByPosition('left').expand();
 				top.HEURIST.util.setDisplayPreference("sidebarPanel","open");
 				navButton.className = navButton.className.replace(" closed", "");
-				navButton.innerHTML = "Hide Navigation Panel";
+				searchTable.style.paddingLeft = (leftPanelWidth);
+				navButton.title = "Hide Navigation Panel";
 			}
 		});
+		Event.on('appPanelButton', 'click', function(ev) {
+				Event.stopEvent(ev);
+				if (top.HEURIST.util.getDisplayPreference("applicationPanel") == "open"){
+				var oldSearchWidth = layout.getSizes().center.w;
+					top.HEURIST.util.setDisplayPreference("oldSearchWidth", oldSearchWidth);
+				layout.getUnitByPosition('right').collapse();
+				top.HEURIST.util.setDisplayPreference("applicationPanel","closed");
+				appPanelButton.className +=" closed";
+				tabBar.style.width = layout.getSizes().center.w - 26;
+				appPanelButton.style.width = "20px";
+				appPanelButton.title = "Show Applications";
+			}else{
+				layout.getUnitByPosition('right').expand();
+				top.HEURIST.util.setDisplayPreference("applicationPanel","open");
+				appPanelButton.className = appPanelButton.className.replace(" closed", "");
+				appPanelButton.title = "Hide Applications";
+				tabBar.style.width = layout.getSizes().center.w-8;
+				if (top.HEURIST.util.getDisplayPreference("sidebarPanel") == "closed"){
+					tabBar.style.width = layout.getSizes().center.w - 29;
+				};
+			}
+
+		});
+
+
+
+
 
 		Event.on('resetLayout', 'click', function(ev) {
 			Event.stopEvent(ev);
@@ -2949,7 +2919,7 @@ function removeCustomAlert() {
 						layout.getUnitByPosition('left').expand();
 						top.HEURIST.util.setDisplayPreference("sidebarPanel","open");
 						navButton.className = document.getElementById("navButton").className.replace(" closed", "");
-						navButton.innerHTML = "Show Navigation Panel";
+						navButton.title = "Show Navigation Panel";
 						};
 					layout.getUnitByPosition('left').set("width", 180);
 					layout.getUnitByPosition('left').resize();
