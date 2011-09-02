@@ -372,7 +372,7 @@ global $relSrcDT, $relTrgDT, $relTypDT, $relRT;
 				'LEFT JOIN Records rel ON rel.rec_ID = f.dtl_RecID '.
 				'LEFT JOIN recDetails t ON t.dtl_RecID = rel.rec_ID '.
 				($rtyIDs && count($rtyIDs)>0 ? 'LEFT JOIN Records c on c.rec_ID = t.dtl_Value ': '').
-			"WHERE f.dtl_DetailTypeID IN ($relSrcDT,$relTrgDT) ".S
+			"WHERE f.dtl_DetailTypeID IN ($relSrcDT,$relTrgDT) ".
 				"AND rel.rec_RecTypeID = $relRT ".
 				'AND f.dtl_Value IN (' . join(',', $rec_ids) . ') '.
 				($rtyIDs && count($rtyIDs)>0 ? 'AND c.rec_RecTypeID in ('.join(',', $rtyIDs).') ' : '').

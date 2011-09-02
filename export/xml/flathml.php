@@ -209,6 +209,7 @@ $GEO_TYPES = array(
 $MAX_DEPTH = @$_REQUEST['depth'] ? intval($_REQUEST['depth']) : 0;	// default to only one level
 $REVERSE = @$_REQUEST['rev'] === 'no' ? false : true;	//default to including reverse pointers
 $WOOT = @$_REQUEST['woot'] ? intval($_REQUEST['woot']) : 0;	//default to not output text content
+$USEXINCLUDE = @$_REQUEST['hinclude'] ?  true : false;	//default to not output xinclude format for related records
 $OUTPUT_STUBS = @$_REQUEST['stub'] === '1'? true : false;	//default to not output stubs
 $INCLUDE_FILE_CONTENT = (@$_REQUEST['fc'] && $_REQUEST['fc'] == 0? false :true);	// default to expand xml file content
 $SUPRESS_LOOPBACKS = (@$_REQUEST['slb'] && $_REQUEST['slb'] == 0? false :true);	// default to supress loopbacks or gives oneside of a relationship record
@@ -614,13 +615,16 @@ function outputRecords($result) {
 
 
 function outputRecord($recordInfo, $recInfos, $outputStub=false, $parentID = null) {
-	global $RTN, $DTN, $INV, $TL, $RQS, $WGN,$UGN, $MAX_DEPTH, $WOOT, $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT, $relTrgDT, $relTypDT, $relSrcDT;
+	global $RTN, $DTN, $INV, $TL, $RQS, $WGN,$UGN, $MAX_DEPTH, $WOOT,$USEXINCLUDE, $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT, $relTrgDT, $relTypDT, $relSrcDT;
 	$record = $recordInfo['record'];
 	$depth = $recordInfo['depth'];
 	$filter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth]: null );
 	if ( isset($filter) && !in_array($record['rec_RecTypeID'],$filter)){
 		if ($record['rec_RecTypeID'] != $relRT) {
 			if ($depth > 0) {
+//				if ($USEXINCLUDE){
+//					outputXInclude($record);
+//				}else
 				if ($outputStub){
 					outputRecordStub($record);
 				}else{
@@ -631,6 +635,11 @@ function outputRecord($recordInfo, $recInfos, $outputStub=false, $parentID = nul
 		}
 	}
 	openTag('record', array('depth' => $depth));
+	if ($USEXINCLUDE && $depth > 0){
+		outputXInclude($record);
+		closeTag('record');
+		return;
+	}
 	makeTag('id', null, $record['rec_ID']);
 	makeTag('type', array('id' => $record['rec_RecTypeID'], 'conceptID'=>getRecTypeConceptID($record['rec_RecTypeID'])), $RTN[$record['rec_RecTypeID']]);
 	makeTag('title', null, $record['rec_Title']);
@@ -775,6 +784,16 @@ function outputRecord($recordInfo, $recInfos, $outputStub=false, $parentID = nul
 			}
 		}
 	closeTag('record');
+}
+
+function outputXInclude($record) {
+	$recID = $record['rec_ID'];
+	$outputFilename ="".HEURIST_DBID."-".$recID.".hml";
+	$fallback ="Error: unable to open ".HEURIST_DBID."-".$recID.".hml";
+
+	openTag('xi:include',array('href'=> "".$outputFilename."#xpointer(//hml/records/record[id=$recID]/*)"));
+	makeTag('xi:fallback',null,"<error> $fallback </error>");
+	closeTag('xi:include');
 }
 
 function outputRecordStub($recordStub) {
@@ -1126,8 +1145,13 @@ ob_implicit_flush(1);
 
 //echo "request = ".print_r($_REQUEST,true)."\n";
 $result = loadSearch($_REQUEST,false,true);
+error_log("$result = ".print_r($result,true)."\n");
 
-openTag('hml');
+openTag('hml',
+			($USEXINCLUDE ? array(
+									'xmlns:xi' => 'http://www.w3.org/2001/XInclude')
+							:null)
+);
 /*
 openTag('hml', array(
 	'xmlns' => 'http://heuristscholar.org/heurist/hml',

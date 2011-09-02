@@ -200,6 +200,10 @@
 			HEURIST_DBNAME." has a version of ". HEURIST_DBVERSION.", please update the schema.");
 	}
 
+	define ('HEURIST_HML_PUBPATH', $sysValues['sys_hmlOutputDirectory']);
+	define ('HEURIST_HTML_PUBPATH', $sysValues['sys_htmlOutputDirectory']);
+
+
 	// set up email defines
 	if ($infoEmail) {
 		define('HEURIST_MAIL_TO_INFO', $infoEmail);	//mailto string for heurist installation issues

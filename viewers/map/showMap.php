@@ -92,15 +92,15 @@
 
 	$res = mysql_query("select a.dtl_Value, b.dtl_Value, rec_URL, c.dtl_UploadedFileID,d.dtl_UploadedFileID,e.dtl_UploadedFileID,f.dtl_UploadedFileID, g.dtl_Value, h.dtl_Value, i.dtl_UploadedFileID
 						  from Records
-		  left join recDetails a on a.dtl_RecID=rec_ID and a.dtl_DetailTypeID=".(DT_SHORT_SUMMARY?DT_SHORT_SUMMARY:"303").
-		" left join recDetails b on b.dtl_RecID=rec_ID and b.dtl_DetailTypeID=".(DT_EXTENDED_DESCRIPTION?DT_EXTENDED_DESCRIPTION:"191").
-		" left join recDetails c on c.dtl_RecID=rec_ID and c.dtl_DetailTypeID=".(DT_ASSOCIATED_FILE?DT_ASSOCIATED_FILE:"221").
-		" left join recDetails d on d.dtl_RecID=rec_ID and d.dtl_DetailTypeID=".(DT_LOGO_IMAGE?DT_LOGO_IMAGE:"222").
-		" left join recDetails e on e.dtl_RecID=rec_ID and e.dtl_DetailTypeID=".(DT_THUMBNAIL?DT_THUMBNAIL:"223").
-		" left join recDetails f on f.dtl_RecID=rec_ID and f.dtl_DetailTypeID=".(DT_IMAGES?DT_IMAGES:"224").
-		" left join recDetails g on g.dtl_RecID=rec_ID and g.dtl_DetailTypeID=".(DT_MAP_IMAGE_LAYER_REFERENCE?DT_MAP_IMAGE_LAYER_REFERENCE:"588").
-		" left join recDetails h on h.dtl_RecID=rec_ID and h.dtl_DetailTypeID=".(DT_KML?DT_KML:"551").
-		" left join recDetails i on i.dtl_RecID=rec_ID and i.dtl_DetailTypeID=".(DT_KML_FILE?DT_KML_FILE:"552").
+		  left join recDetails a on a.dtl_RecID=rec_ID and a.dtl_DetailTypeID=".(defined('DT_SHORT_SUMMARY')?DT_SHORT_SUMMARY:"0").
+		" left join recDetails b on b.dtl_RecID=rec_ID and b.dtl_DetailTypeID=".(defined('DT_EXTENDED_DESCRIPTION')?DT_EXTENDED_DESCRIPTION:"0").
+		" left join recDetails c on c.dtl_RecID=rec_ID and c.dtl_DetailTypeID=".(defined('DT_ASSOCIATED_FILE')?DT_ASSOCIATED_FILE:"0").
+		" left join recDetails d on d.dtl_RecID=rec_ID and d.dtl_DetailTypeID=".(defined('DT_LOGO_IMAGE')?DT_LOGO_IMAGE:"0").
+		" left join recDetails e on e.dtl_RecID=rec_ID and e.dtl_DetailTypeID=".(defined('DT_THUMBNAIL')?DT_THUMBNAIL:"0").
+		" left join recDetails f on f.dtl_RecID=rec_ID and f.dtl_DetailTypeID=".(defined('DT_IMAGES')?DT_IMAGES:"0").
+		" left join recDetails g on g.dtl_RecID=rec_ID and g.dtl_DetailTypeID=".(defined('DT_MAP_IMAGE_LAYER_REFERENCE')?DT_MAP_IMAGE_LAYER_REFERENCE:"0").
+		" left join recDetails h on h.dtl_RecID=rec_ID and h.dtl_DetailTypeID=".(defined('DT_KML')?DT_KML:"0").
+		" left join recDetails i on i.dtl_RecID=rec_ID and i.dtl_DetailTypeID=".(defined('DT_KML_FILE')?DT_KML_FILE:"0").
 		" where rec_ID=$bibID");
 	$row = mysql_fetch_row($res);
 	$records[$bibID]["description"] = ($row[0] ? $row[0] : $row[1]);
@@ -242,13 +242,13 @@
         (select trm_Label from defTerms where trm_ID=d.dtl_Value) as mime_type,
 		e.dtl_Value as min_zoom, f.dtl_Value as max_zoom, g.dtl_Value as copyright
 						  from Records
-		  left join recDetails a on a.dtl_RecID=rec_ID and a.dtl_DetailTypeID=".(DT_TITLE_SHORT?DT_TITLE_SHORT:"173").
-		" left join recDetails b on b.dtl_RecID=rec_ID and b.dtl_DetailTypeID=".(DT_MAP_IMAGE_LAYER_SCHEMA?DT_MAP_IMAGE_LAYER_SCHEMA:"585").
-		" left join recDetails c on c.dtl_RecID=rec_ID and c.dtl_DetailTypeID=".(DT_SERVICE_URL?DT_SERVICE_URL:"339").
-		" left join recDetails d on d.dtl_RecID=rec_ID and d.dtl_DetailTypeID=".(DT_MIME_TYPE?DT_MIME_TYPE:"289").
-		" left join recDetails e on e.dtl_RecID=rec_ID and e.dtl_DetailTypeID=".(DT_MINMUM_ZOOM_LEVEL?DT_MINMUM_ZOOM_LEVEL:"586").
-		" left join recDetails f on f.dtl_RecID=rec_ID and f.dtl_DetailTypeID=".(DT_MAXIMUM_ZOOM_LEVEL?DT_MAXIMUM_ZOOM_LEVEL:"587").
-		" left join recDetails g on g.dtl_RecID=rec_ID and g.dtl_DetailTypeID=".(DT_ALTERNATE_NAME?DT_ALTERNATE_NAME:"331").
+		  left join recDetails a on a.dtl_RecID=rec_ID and a.dtl_DetailTypeID=".(defined('DT_TITLE_SHORT')?DT_TITLE_SHORT:"0").
+		" left join recDetails b on b.dtl_RecID=rec_ID and b.dtl_DetailTypeID=".(defined('DT_MAP_IMAGE_LAYER_SCHEMA')?DT_MAP_IMAGE_LAYER_SCHEMA:"0").
+		" left join recDetails c on c.dtl_RecID=rec_ID and c.dtl_DetailTypeID=".(defined('DT_SERVICE_URL')?DT_SERVICE_URL:"0").
+		" left join recDetails d on d.dtl_RecID=rec_ID and d.dtl_DetailTypeID=".(defined('DT_MIME_TYPE')?DT_MIME_TYPE:"0").
+		" left join recDetails e on e.dtl_RecID=rec_ID and e.dtl_DetailTypeID=".(defined('DT_MINMUM_ZOOM_LEVEL')?DT_MINMUM_ZOOM_LEVEL:"0").
+		" left join recDetails f on f.dtl_RecID=rec_ID and f.dtl_DetailTypeID=".(defined('DT_MAXIMUM_ZOOM_LEVEL')?DT_MAXIMUM_ZOOM_LEVEL:"0").
+		" left join recDetails g on g.dtl_RecID=rec_ID and g.dtl_DetailTypeID=".(defined('DT_ALTERNATE_NAME')?DT_ALTERNATE_NAME:"0").
 		" where rec_ID in (" . join(",", $imageLayers) . ")");
 
 		while ($rec = mysql_fetch_assoc($res)) {

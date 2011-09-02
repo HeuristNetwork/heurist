@@ -2881,7 +2881,7 @@ function removeCustomAlert() {
 				layout.getUnitByPosition('left').expand();
 				top.HEURIST.util.setDisplayPreference("sidebarPanel","open");
 				navButton.className = navButton.className.replace(" closed", "");
-				searchTable.style.paddingLeft = (leftPanelWidth);
+				searchTable.style.paddingLeft = top.HEURIST.displayPreference.leftWidth;
 				navButton.title = "Hide Navigation Panel";
 			}
 		});

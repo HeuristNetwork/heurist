@@ -95,7 +95,7 @@ function loadSearch($args, $bare = false, $onlyIDs = false)  {
 	$query = REQUEST_to_query("select SQL_CALC_FOUND_ROWS rec_ID ", $searchType, $args)
 								. (@$limit? " limit $limit" : "") . (@$offset? " offset $offset " : "");
 	$res = mysql_query($query);
-
+error_log($query);
 	$fres = mysql_query('select found_rows()');
 	$resultCount = mysql_fetch_row($fres); $resultCount = $resultCount[0];
 
@@ -105,7 +105,7 @@ function loadSearch($args, $bare = false, $onlyIDs = false)  {
 		while ($row = mysql_fetch_assoc($res)) {
 			$ids .= ($row["rec_ID"] ? ",".$row["rec_ID"]:"");
 		}
-		return array("resultCount" => $resultCount, "recordCount" => count(explode(",",$ids)), "recIDs" => $ids);
+		return array("resultCount" => $resultCount, "recordCount" => (strlen($ids)?count(explode(",",$ids)):0), "recIDs" => $ids);
 	}else{
 		$recs = array();
 		while ($row = mysql_fetch_assoc($res)) {

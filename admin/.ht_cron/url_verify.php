@@ -13,12 +13,10 @@
 
 <?php
 
-require_once(dirname(__FILE__).'/../../common/config/heurist-instances.php');
-require_once(dirname(__FILE__).'/../../common/connect/db.php');
+require_once(dirname(__FILE__).'/../../common/config/initialise.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
-foreach (get_all_instances() as $prefix => $instance) {
-	if (!$instance['verifyURLs']) continue;
-	mysql_connection_db_overwrite($instance["db"]);
+	mysql_connection_db_overwrite(DATABASE);
 
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
@@ -50,27 +48,38 @@ foreach (get_all_instances() as $prefix => $instance) {
 
 
 	mysql_query("set @suppress_update_trigger := 1");
-	$res = mysql_query('select rec_ID, rec_URL from Records where rec_URL is not null and rec_URL != "" and not rec_FlagTemporary order by rec_URLLastVerified is not null, rec_URLLastVerified asc');
+	$res = mysql_query('select rec_ID, rec_URL from Records where rec_URL is not null'.
+							' and rec_URL != "" and not rec_FlagTemporary'.
+							' and rec_URLLastVerified < now() - INTERVAL 1 DAY '.
+							(@$_REQUEST['recID']?' and rec_ID = '.$_REQUEST['recID']:'').
+							' order by rec_URLLastVerified is not null, rec_URLLastVerified asc');
 
 	$good_bibs = array();
 	$bad_bibs = array();
 
 	while ($row = mysql_fetch_assoc($res)) {
 		$row['rec_URL'] = str_replace(" ", "+", trim($row['rec_URL']));
-
+		echo $row['rec_id'] ." checking ". $row['rec_url'] . "\n";
 		if (preg_match('/^file/', $row['rec_URL'])) continue;
 
 		curl_setopt($ch, CURLOPT_URL, $row['rec_URL']);
 		$data = curl_exec($ch);
 
+		preg_match('/^[^\n\r]*/',$data,$matches);
+		echo "data = ". $matches[0]. "\n";
+
 		$error = curl_error($ch);
 		$code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+		echo $error . " ---- code = " . $code . "\n";
 
 		if (curl_error($ch)  ||  $code >= 400) {
 			curl_setopt($ch_ffx, CURLOPT_URL, $row['rec_URL']);
 			$data = curl_exec($ch_ffx);
 			$code = intval(curl_getinfo($ch_ffx, CURLINFO_HTTP_CODE));
 			$error = curl_error($ch_ffx);
+		preg_match('/^[^\n\r]*/',$data,$matches);
+		echo "data2 = ". $matches[0]. "\n";
+		echo $error . " ---- code2 = " . $code . "\n";
 		}
 
 		// 401 is UNAUTHORISED (don't bother with user authentication -- we can't do it anyway)
@@ -100,7 +109,7 @@ foreach (get_all_instances() as $prefix => $instance) {
 	$message .= "\n\nFind these at\nhttp://" . ($prefix? $prefix.".": "") . HOST_BASE .HEURIST_SITE_PATH."search/search.html?q=ids:" . join(',', array_keys($bad_bibs)) . "\n";
 	//mail('kjackson@acl.arts.usyd.edu.au', 'HEURIST - bad URLs', $message);
 	error_log($message);
-}
+
 
 
 function error_for_code($code) {
