@@ -1584,6 +1584,7 @@ top.HEURIST.search = {
 		var viewerFrame = document.getElementById("viewer-frame");
 //		var mapFrame = document.getElementById("map-frame");
 		var mapFrame3 = document.getElementById("map-frame3");
+		var smartyFrame = document.getElementById("smarty-frame");
 
 //        var sidebysideFrame = document.getElementById("sidebyside-frame");
 //		sidebysideFrame.src = top.HEURIST.basePath+"viewers/sidebyside/sidebyside.html"+
@@ -1593,6 +1594,7 @@ top.HEURIST.search = {
         top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
 //		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);
 		top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap,"heurist-selectionchange",  ssel);
+		top.HEURIST.fireEvent(smartyFrame.contentWindow.showReps,"heurist-selectionchange",  ssel);
 
 		return false;
 
@@ -1942,7 +1944,7 @@ top.HEURIST.search = {
 	},
 
 	//ARTEM
-	//listener of selection of map tab
+	//listener of selection in search result - to refelect on map tab
 	mapSelected3: function() {
 			var p = top.HEURIST.parameters;
 			var recIDs = top.HEURIST.search.getSelectedRecIDs().get();
@@ -1968,6 +1970,31 @@ top.HEURIST.search = {
 
 	},
 
+	//ARTEM
+	//listener of selection in search result - to refelect on smarty tab
+	smartySelected: function() {
+			var p = top.HEURIST.parameters;
+			var recIDs = top.HEURIST.search.getSelectedRecIDs().get();
+			if (recIDs.length >= 500) {// maximum number of records ids 500
+				alert("Selected record count is great than 500, reporting the first 500 records!");
+				recIDs = recIDs.slice(0,500);
+			}
+			var query_string = 'ver='+(p['ver'] || "") + '&w=all&q=ids:' +
+				recIDs.join(",") +
+				'&stype='+(p['stype'] || "") +
+				'&db='+(p['db'] || "");
+			query_string = encodeURI(query_string);
+
+			var repframe = document.getElementById("smarty-frame");
+			if(repframe.src){ //do not reload  frame
+				if(repframe.contentWindow.showReps){
+					repframe.contentWindow.showReps.processTemplate(query_string);
+				}
+			}else{
+			 	url = top.HEURIST.basePath+ "viewers/smarty/showReps.html?" + query_string;
+				repframe.src = url;
+			}
+	},
 
 	selectAll: function() {
 		$("div.recordDiv:not(.filtered,.selected).lnk").each(function(i,recDiv) {
@@ -1987,11 +2014,16 @@ top.HEURIST.search = {
 		var viewerFrame = document.getElementById("viewer-frame");
 //		var mapFrame = document.getElementById("map-frame");
 		var mapFrame3 = document.getElementById("map-frame3");
+		var smartyFrame = document.getElementById("smarty-frame");
+
 		var ssel = "selectedIds=" + top.HEURIST.search.getSelectedRecIDs().get().join(",");
+
 
 		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
 //		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);
 		top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap,"heurist-selectionchange",  ssel);
+		top.HEURIST.fireEvent(smartyFrame.contentWindow.showReps,"heurist-selectionchange",  ssel);
+
 		return false;
 	},
 
@@ -2007,11 +2039,14 @@ top.HEURIST.search = {
 		var viewerFrame = document.getElementById("viewer-frame");
 //		var mapFrame = document.getElementById("map-frame");
 		var mapFrame3 = document.getElementById("map-frame3");
+		var smartyFrame = document.getElementById("smarty-frame");
+
 		var ssel = "selectedIds=" + top.HEURIST.search.getSelectedRecIDs().get().join(",");
 
 		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
 //		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);
 		top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap,"heurist-selectionchange",  ssel);
+		top.HEURIST.fireEvent(smartyFrame.contentWindow.showReps,"heurist-selectionchange",  ssel);
 		return false;
 	},
 
@@ -2091,12 +2126,18 @@ top.HEURIST.search = {
 		var viewerFrame = document.getElementById("viewer-frame");
 //		var mapFrame = document.getElementById("map-frame");
 		var mapFrame3 = document.getElementById("map-frame3");
+		var smartyFrame = document.getElementById("smarty-frame");
+
 //		mapFrame.src = "";
+		smartyFrame.src = "";
+
 		var recordFrame = document.getElementById("record-view-frame");
 		recordFrame.src = top.HEURIST.basePath+"common/html/msgNoRecordsSelected.html";
 		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", "selectedIds=");
 //		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange", "selectedIds=");
 		top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap, "heurist-selectionchange", "selectedIds=");
+		top.HEURIST.fireEvent(smartyFrame.contentWindow.showReps, "heurist-selectionchange", "selectedIds=");
+
 		return;
 	},
 
@@ -2930,16 +2971,20 @@ function removeCustomAlert() {
 	});
 
 	_tabView = new YAHOO.widget.TabView('applications', { activeIndex: viewerTabIndex });
-	if (viewerTabIndex == 2){top.HEURIST.search.mapSelected()} //initialises map
-	else if (viewerTabIndex == 3){top.HEURIST.search.mapSelected3()}; //initialises new map
+	//if (viewerTabIndex == 2){top.HEURIST.search.mapSelected()} //initialises map
+	if (Number(viewerTabIndex) === 2){top.HEURIST.search.mapSelected3()} //initialises new map
+	else if (Number(viewerTabIndex) === 3){top.HEURIST.search.smartySelected()}; //initialises smarty repsystem
+
 	var handleActiveTabChange = function(e) {
 		var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));
 		top.HEURIST.util.setDisplayPreference("viewerTab", currentTab);
 	};
 	_tabView.addListener('activeTabChange',handleActiveTabChange);
 	_tabView.getTab(viewerTabIndex);
-	if (viewerTabIndex == 2){top.HEURIST.search.mapSelected()} //initialises map
-	else if (viewerTabIndex == 3){top.HEURIST.search.mapSelected3()}; //initialises new map
+	//if (viewerTabIndex == 2){top.HEURIST.search.mapSelected()} //initialises map
+	if (Number(viewerTabIndex) === 2){top.HEURIST.search.mapSelected3()} //initialises new map
+	else if (Number(viewerTabIndex) === 3){top.HEURIST.search.smartySelected()}; //initialises smarty reports
+
 	_tabView.addListener('activeTabChange',handleActiveTabChange);
 
 
