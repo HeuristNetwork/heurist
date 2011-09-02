@@ -2015,3 +2015,125 @@ div.recorddiv:hover > #recordID {
 	background-position: 2px 4px;
 }
 #appPanelButton.closed {background-image: url(../images/b_showhide_L.png);}
+
+#search {
+	border-bottom: 1px solid #696969;
+    height: 45px;
+    left: 0;
+    padding: 0 0 0 5px;
+    position: absolute;
+    right: 0;
+    top: 51px;
+	border:1px solid #999;
+	width:auto;
+	z-index:1
+}
+#page, #page-right, .yui-skin-sam .yui-navset .yui-content, .yui-skin-sam .yui-navset .yui-navset-top .yui-content  {
+	border-radius:0;
+}
+#sidebar {
+	border-radius:0;
+	left:0 !important;
+	border-right:none;
+
+}
+#page-right {
+		border-left:none;
+		left:0px;
+}
+#navbutton {
+	top:0;
+	height:15px;
+	border-right:1px solid RGBA(100,100,100,0.2);
+	display:inline-block;
+	padding:0;
+	margin:0;
+	left:0;
+	background-position: 100% 0;
+	color:transparent;
+	text-indent:20px;
+	line-height:15px;
+	text-align:right;
+	direction:rtl;
+	min-width:20px !important;
+	position:relative;
+}
+
+#appPanelButton {
+	top:0;
+	height:15px;
+	border-left:1px solid RGBA(100,100,100,0.2);
+	display:inline-block;
+	padding:0;
+	margin:0;
+	left:0;
+	background-position: 2px 0;
+	color:transparent;
+	text-indent:20px;
+	line-height:15px;
+	min-width:20px !important;
+	float:none;
+}
+#navbutton:hover, #appPanelButton:hover {color:#999}
+#navbutton.closed:hover, #appPanelButton.closed:hover {color:transparent}
+#viewTriggers {
+	 border-top: 1px solid rgba(150, 150, 150, 0.3);
+    bottom: 0;
+    display: block;
+    height: 14px;
+    left: 0;
+    position: absolute;
+    right: 0;
+	z-index:1;
+	white-space:nowrap;
+}
+#yui-gen1 {
+	z-index:10
+}
+.yui-layout .yui-layout-noscroll div.yui-layout-bd {
+	overflow:visible
+}
+.yui-resize .yui-resize-handle {
+	z-index:1000000
+}
+.yui-resize .yui-resize-handle-l, .yui-resize .yui-resize-handle-r {
+	cursor:ew-resize !important
+}
+#footer {
+	border-radius: 0 0 10px 10px;
+    border:1px solid #999;
+    display: block;
+    height: 10px;
+	left:0;
+	background-color: #F2F2F2;
+    background-image: url("../images/backgrounds/banner_bg.png") !important;
+    background-position: center bottom;
+    background-repeat: repeat-x;
+	border-top:none;
+}
+
+#result-container {
+	border-right:none;
+}
+div#tabbar {
+	height: 15px;
+	display: inline-block;
+	color: #999;
+	background:transparent;
+	clear:none;
+	min-width:260px !important;
+	white-space:nowrap;
+	z-index: 1;
+}
+#tabs li {
+	height:11px;
+	color:#696969;
+	line-height:36px;
+	padding:2px 6px
+}
+#tabs > li:hover {
+	border-color:RGBA(100,100,100,0.2)
+}
+#result-header {
+	min-height:0px;
+}
