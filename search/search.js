@@ -2306,7 +2306,9 @@ top.HEURIST.search = {
 			alert("Select at least one record to add relationships");
 			return;
 		}
-		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "search/actions/setRelationshipsPopup.html" + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : ""));
+		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "search/actions/setRelationshipsPopup.html" +
+						(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : ""),
+						{callback : top.HEURIST.search.reloadSearch});
 	},
 
 	selectBookmarkMessage: function(operation) {

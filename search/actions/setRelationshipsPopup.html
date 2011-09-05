@@ -108,10 +108,11 @@ function save () {	// xhrFormSubmit only uses the form's action and elements(nam
 				rels = 1;
 			}
 			document.getElementById("status").innerHTML = "<b>" + rels + "</b> relationships added."
-			setTimeout(function () {
+//			setTimeout(function () {
 //				top.location.href = hBase + "?q=relationsfor:" + relTargetID + "&db=" + database;
-				top.location.reload();
-			}, 2000);
+//				top.HEURIST.reloadSearch();
+//			}, 2000);
+			window.close();
 		}
 	});
 }
