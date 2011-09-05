@@ -49,7 +49,7 @@ var database = (top && top.HEURIST && top.HEURIST.database? top.HEURIST.database
 
 function init () {
 
-	relTargetID;
+	relTargetID = null;
 	recCountSpan = document.getElementById("record-count");
 	var relTypeSelectDiv = document.getElementById("relationship-type-div");
 	relTargetInput = document.getElementById("related-record");
@@ -109,7 +109,8 @@ function save () {	// xhrFormSubmit only uses the form's action and elements(nam
 			}
 			document.getElementById("status").innerHTML = "<b>" + rels + "</b> relationships added."
 			setTimeout(function () {
-				top.location.href = hBase + "?q=relationsfor:" + relTargetID + "&db=" + database;
+//				top.location.href = hBase + "?q=relationsfor:" + relTargetID + "&db=" + database;
+				top.location.reload();
 			}, 2000);
 		}
 	});
