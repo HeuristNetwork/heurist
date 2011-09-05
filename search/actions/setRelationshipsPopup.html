@@ -12,11 +12,7 @@
 -->
 <html>
  <head>
-  <link rel="stylesheet" href="../common/css/global.css">
-  <script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
-  <script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
-  <script src="../common/js/utilsLoad.js"></script>
-  <script src="../common/php/getMagicNumbers.php"></script>
+  <link rel="stylesheet" href="../../common/css/global.css">
   <title>Add relationships to selected records</title>
 
   <style type="text/css">
@@ -33,6 +29,13 @@
 		margin-bottom: 20px;
 	}
   </style>
+ </head>
+
+ <body class="popup" onload="init();">
+  <script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
+  <script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
+  <script src="../../common/js/utilsLoad.js"></script>
+  <script src="../../common/php/getMagicNumbers.php"></script>
 
   <script>
 
@@ -114,9 +117,6 @@ function save () {	// xhrFormSubmit only uses the form's action and elements(nam
 
 
   </script>
- </head>
-
- <body class="popup" onload="init();">
 
    <p><span id="record-count"></span> selected records</p>
 

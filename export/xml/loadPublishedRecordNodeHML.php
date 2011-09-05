@@ -77,34 +77,6 @@ global $recID;
 	$dom->load($filename);
 	$dom->xinclude();
 	return $dom->saveXML();
-	// convert to xml
-	$xml = simplexml_import_dom($dom);
-	if (!$xml){
-		returnXMLErrorMsgPage("unable to generate valid hml for $filename");
-	}else{
-//		$xpath = new DOMXPath($xml);
-//		$recHML = new DOMNodelist();
-		$recHML = $xml->xpath("//hml/records/record[id=$recID]");
-//error_log("recHML = ".print_r($recHML,true));
-//		$recHML = $recHML[0];
-//error_log(" text = ".print_r($recHML,true));
-		echo "<?xml version='1.0' encoding='UTF-8'?>\n";
-//		$text =  $recHML->asXML();
-//error_log(" text = ".print_r($text,true));
-//		echo "count + ".count($text);
-//		$text = preg_replace("/<record[^>]*>/","",$text);
-//		echo "count + ".count($text);
-//		$text = preg_replace('/<\/record>$/',"",$text);
-//		echo "count + ".count($text);
-//		echo $text;
-//		$text = "";
-//		foreach ( $recHML[0]->children() as $dNode) {
-//			$text .= $dNode->asXML();
-//		}
-			$text = $recHML[0]->asXML();
-//error_log(" text = ".print_r($text,true));
-		echo $text;
-	}
 }
 
 function returnXMLErrorMsgPage($msg) {

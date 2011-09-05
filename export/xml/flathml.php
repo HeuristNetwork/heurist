@@ -787,12 +787,18 @@ function outputRecord($recordInfo, $recInfos, $outputStub=false, $parentID = nul
 }
 
 function outputXInclude($record) {
+global $RTN;
 	$recID = $record['rec_ID'];
 	$outputFilename ="".HEURIST_DBID."-".$recID.".hml";
-	$fallback ="Error: unable to open ".HEURIST_DBID."-".$recID.".hml";
 
 	openTag('xi:include',array('href'=> "".$outputFilename."#xpointer(//hml/records/record[id=$recID]/*)"));
-	makeTag('xi:fallback',null,"<error> $fallback </error>");
+	openTag('xi:fallback');
+	makeTag('id', null, $recID);
+	$type = $record['rec_RecTypeID'];
+	makeTag('type', array('id' => $type, 'conceptID'=>getRecTypeConceptID($type)), $RTN[$type]);
+	$title = $record['rec_Title'];
+	makeTag('title', null, $title);
+	closeTag('xi:fallback');
 	closeTag('xi:include');
 }
 
