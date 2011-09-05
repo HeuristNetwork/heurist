@@ -269,9 +269,9 @@ function RectypeManager() {
 					if(rectype[9].indexOf(grpID)>-1) {
 						arr.push([rectypeID, (Number(rectype[7])===1),
 						"<img src=\"../../common/images/16x16.gif\" style=\"background-image:url(../../common/images/reftype-icons/"+rectypeID+".png)\">",
-						rectype[0], rectype[1], 
+						rectype[0], rectype[1],
 						rectype[8],
-						//rectypeStatus, 
+						//rectypeStatus,
 						rectype[9], null]);
 
 						/*TODO: top.HEURIST.rectype.rectypeUsage[rectypeID].length*/
@@ -881,7 +881,7 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 		var URL = top.HEURIST.basePath + "admin/structure/editRecStructure.html?db="+db+"&rty_ID="+rty_ID;
 		//this.location.replace(URL);
 
-		
+
 		Hul.popupURL(top, URL, {
 			"close-on-blur": false,
 			"no-resize": false,
@@ -1096,7 +1096,7 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 
 		var grp = top.HEURIST.rectypes.groups[grpID];
 
-		if(!Hul.isnull(grp.types))
+		if(!Hul.isnull(grp.types) && grp.types.length>0)
 		{
 			alert("This group cannot be deleted as it contains record types - please move them first");
 		}else{

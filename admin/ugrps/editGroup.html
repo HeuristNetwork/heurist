@@ -44,6 +44,13 @@
 	text-align: right;
 	padding-right: 3px;
 }
+.dtyLabel.required {
+	color: red;
+	font-weight: bold;
+}
+.dtyLabel.required:before {
+	content: "* ";
+}
 .dtyValue {
 	display: inline-block;
 }
@@ -98,7 +105,7 @@
 		<label id="ugr_ID"></label>
 	</div>
 	<div class="dtyField">
-		<label class="dtyLabel" for="ugr_Name">Standard name:*</label>
+		<label class="dtyLabel required" for="ugr_Name">Standard name:</label>
 		<input id="ugr_Name" style="width:200;" maxlength="65" />
 		<div class="help prompt help1">
 			<label>The name the group should have</label>

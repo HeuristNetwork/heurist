@@ -51,6 +51,20 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 		if(Hul.isnull(dtyID) && (location.search.length > 1)) {
 				top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 				dtyID = top.HEURIST.parameters.detailTypeID;
+
+				var _dt_id = top.HEURIST.parameters.dtname;
+				if(!Hul.isnull(_dt_id)){
+					if(_dt_id<0){
+						Dom.get("dtyName").innerHTML = "New Field Type";
+					}else{
+						var dt = top.HEURIST.detailTypes.typedefs[_dt_id].commonFields;
+						var dtname =  "Field Type #: " + _dt_id;
+						if (!Hul.isnull(dt)) {
+							dtname = dtname + " '"+dt[0]+"'";
+						}
+						Dom.get("dtyName").innerHTML = dtname;
+					}
+				}
 		}
 
 
@@ -63,7 +77,7 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 						_allTerms = dt[9];
 						_disTerms = dt[10];
 
-						Dom.get("dtyName").innerHTML = "Detailtype: " + dt[0];
+						Dom.get("dtyName").innerHTML = "Field Type: " + dt[0];
 					}
 					if(Hul.isempty(_allTerms)){
 						_isFilterMode = false;

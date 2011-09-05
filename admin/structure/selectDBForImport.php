@@ -38,9 +38,9 @@ after selection, 26-05-2011, by Juan Adriaanse
 
 <div id="statusMsg"><img src="../../common/images/mini-loading.gif" width="16" height="16" /> &nbspDownloading database list...</div>
 
-The list below shows all databases registered with the HeuristScholar.org Index database. 
+The list below shows all databases registered with the HeuristScholar.org Index database.
 Use the filter to locate a specific term in the name or title. <br>
-Click the database icon on the left to view available record types in that database. 
+Click the database icon on the left to view available record types in that database.
 <br><br>
 <div class="markup" id="filterDiv" style="display:none">
 	<label for="filter">Filter:</label> <input type="text" id="filter" value="">
@@ -153,7 +153,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
 
         //TODO: Add the URL as a hyperlink so that one can got to a search of the database
         //      Also add as a filter criteria so you can find databases by server, for example
-        
+
 		// Add databases to an array that YUI DataTable can use. Do not show URL for safety
 		dataArray = [];
 		for(dbID in registeredDBs) {
@@ -173,9 +173,11 @@ YAHOO.util.Event.addListener(window, "load", function() {
 				i,l;
 				if (req) {
 					req = req.toLowerCase();
-				// Do a wildcard search for both name and description
+				// Do a wildcard search for both name and description and URL
 				for (i = 0, l = data.length; i < l; ++i) {
-						if (data[i].description.toLowerCase().indexOf(req) >= 0) {
+						if (data[i].description.toLowerCase().indexOf(req) >= 0 ||
+							data[i].URL.toLowerCase().indexOf(req) >= 0)
+						{
 							filtered.push(data[i]);
 						}
 					}

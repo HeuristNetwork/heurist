@@ -360,7 +360,7 @@ function DetailTypeManager() {
 					elLiner.innerHTML = '<a href="#delete"><img src="../../common/images/cross.png" width="12" height="12" border="0" title="Delete" /><\/a>'; } },
 			//{ key: "info", label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
 			//	elLiner.innerHTML = '<a href="#info"><img src="../../common/images/info_icon.png" width="16" height="16" border="0" title="Info" /><\/a>'} },
-			
+
 			];
 
 
@@ -647,7 +647,7 @@ function DetailTypeManager() {
 
 					var xy = Hul.getMousePos(event);
 					my_tooltip.html(textTip);  //DEBUG xy[0]+",  "+xy[1]+"<br/>"+
-					
+
 					var border_top = $(window).scrollTop();
 					var border_right = $(window).width();
 					var border_height = $(window).height();
@@ -1010,7 +1010,7 @@ function DetailTypeManager() {
 
 		var grp = top.HEURIST.detailTypes.groups[grpID];
 
-		if(!Hul.isnull(grp.types))
+		if(!Hul.isnull(grp.types) && grp.types.length>0)
 		{
 			alert("This group cannot be deleted as it contains field types - please move them first");
 		}else{

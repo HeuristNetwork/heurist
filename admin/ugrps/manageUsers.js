@@ -867,6 +867,11 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 	{
 		$("."+className).toggleClass(val?"activated":"deactivated", true);
 		$("."+className).toggleClass(val?"deactivated":"activated", false);
+
+		if(className==="selection"){
+			$(".banner").toggleClass("activated", !val);
+			$(".banner").toggleClass("deactivated", val);
+		}
 	}
 
 

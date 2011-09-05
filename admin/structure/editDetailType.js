@@ -230,7 +230,7 @@ function DetailTypeEditor() {
 	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
 	Hul.popupURL(top, top.HEURIST.basePath +
-		"admin/structure/selectTerms.html?datatype="+type+"&all="+allTerms+"&dis="+disTerms+"&db="+db,
+		"admin/structure/selectTerms.html?dtname="+_dtyID+"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+"&db="+db,
 		{
 		"close-on-blur": false,
 		"no-resize": true,

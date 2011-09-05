@@ -251,11 +251,11 @@ elLiner.innerHTML = '<a href="#edit_group"><img src="../../common/images/edit_ic
 					elLiner.innerHTML = '<label title="'+tit+'">'+str+'</label>';
 			}},
 			{ key: "type", hidden:true},
-			{ key: "members", label: "Members", sortable:false,
+			{ key: "members", label: "Edit Membership", sortable:false,
 				formatter: function(elLiner, oRecord, oColumn, oData){
 elLiner.innerHTML = '<div align="center"><a href="'+top.HEURIST.baseURL + "admin/ugrps/manageUsers.html?db=" +
 								_db + "&grpID="+oRecord.getData("id")+
-								'" title="Show listing of members">'+oRecord.getData('members')+'</a></div>';}},
+								'" title="Show listing of members/Edit membership">'+oRecord.getData('members')+'</a></div>';}},
 			{ key: "id", label: "Admins", sortable:false,
 				formatter: function(elLiner, oRecord, oColumn, oData){
 					var recID = oRecord.getData('id');
