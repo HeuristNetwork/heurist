@@ -8,6 +8,9 @@ define('SMARTY_DIR', _PREF.'htdocs/smarty/Smarty-3.0.7/libs/');
 
 
 require_once(SMARTY_DIR.'Smarty.class.php');
+require_once(dirname(__FILE__).'/../../common/config/initialise.php');
+
+//error_log(">>>>".HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'viewers/smarty/templates/');
 
 $smarty = new Smarty();
 
@@ -17,10 +20,11 @@ $smarty->compile_dir  = '/var/www/htdocs/smarty/sandpit5/templates_c/';
 $smarty->config_dir   = '/var/www/htdocs/h3-ao/viewers/smarty/configs/';
 $smarty->cache_dir    = '/var/www/htdocs/smarty/sandpit5/cache/';
 */
-$smarty->template_dir = _PREF.'htdocs/h3-ao/viewers/smarty/templates/';
+$smarty->template_dir = HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'viewers/smarty/templates/';
+$smarty->config_dir   = HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'viewers/smarty/configs/';
 $smarty->compile_dir  = _PREF.'htdocs/smarty/sandpit5/templates_c/';
-$smarty->config_dir   = _PREF.'htdocs/h3-ao/viewers/smarty/configs/';
 $smarty->cache_dir    = _PREF.'htdocs/smarty/sandpit5/cache/';
+
 
 $smarty->registerResource("string", array("str_get_template",
                                        "str_get_timestamp",

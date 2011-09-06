@@ -16,26 +16,31 @@
 
 	define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-	//require_once(dirname(__FILE__).'/../../common/T1000/.ht_stdefs');
-	define('rectype_DIRECTORY', HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'common/images/rectype-icons/');
+	require_once(dirname(__FILE__).'/../../common/php/imageLibrary.php');
 
 	if (! (is_logged_in()  &&  is_admin()  &&  HEURIST_SESSION_DB_PREFIX != "")) return;
 
 	$rt_id = intval($_REQUEST['rty_ID']);
+	$mode = intval($_REQUEST['mode']);  //0 - icon, 1 - thumbnail
 
-	if (! $rt_id) return;
+	$dim = ($mode==0)?16:75;
+	$image_dir = HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'common/images/rectype-icons/'.(($mode==0)?'':'thumb/th_');
+	$image_url = (($mode==0)?getRectypeIconURL($rt_id):getRectypeThumbURL($rt_id));
 
+	if (!$rt_id) return;
+
+/* ???????
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 	mysql_connection_db_select(DATABASE);
-
 	$res = mysql_query('select * from defRecTypes where rty_ID = ' . $rt_id);
 	$rt = mysql_fetch_assoc($res);
+*/
 
-	list($success_msg, $failure_msg) = upload_file($rt_id);
+	list($success_msg, $failure_msg) = upload_file($rt_id, $dim);
 ?>
 <html>
  <head>
-  <title>Upload reference type icon</title>
+  <title>Upload reference type <?=(($mode==0)?'icon':'thumbnail')?></title>
   <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/newshsseri.css">
 
   <style type="text/css">
@@ -55,10 +60,10 @@
  </head>
 
  <body style="background-color: transparent; width: 320px; height: 120px;">
-  <!-- div class="headline">Record type: <?= htmlspecialchars($rt['rty_Name']) ?></div -->
 
    <div class="rtyField">
-   <label class="rtyLabel">Current icon:</label><img src="../../common/images/rectype-icons/<?= $rt_id ?>.gif?<?= time() ?>" style="vertical-align: middle; width: 16px; height: 16px;">
+   <label class="rtyLabel">Current <?=(($mode==0)?'icon':'thumbnail')?>:</label>
+   <img src="<?=$image_url?>?<?= time() ?>" style="vertical-align: middle; width:<?=$dim?>px; height:<?=$dim?>px;">
   </div>
 
 <?php	if ($success_msg) { ?>
@@ -69,10 +74,11 @@
 
   <form action="uploadRectypeIcon.php?db=<?= HEURIST_DBNAME?>" method="post" enctype="multipart/form-data" border="1">
    <input type="hidden" name="rty_ID" value="<?= $rt_id ?>">
+   <input type="hidden" name="mode" value="<?= $mode ?>">
    <input type="hidden" name="uploading" value="1">
 
    <div class="rtyField">
-    	<label class="rtyLabel">Select new icon</label><input type="file" name="new_icon" style="display:inline-block;">
+    	<label class="rtyLabel">Select new image</label><input type="file" name="new_icon" style="display:inline-block;">
    </div>
    <div style="line-height: 40px;text-align:center;width:100%;">
    		<input type="submit" value="Upload" style="font-weight: bold; line-height: 20px;">
@@ -85,28 +91,51 @@
 
 /***** END OF OUTPUT *****/
 
-function upload_file($rt_id) {
+function upload_file($rt_id, $dim) {
+
+	global $image_dir;
+
 	if (! @$_REQUEST['uploading']) return;
 	if (! $_FILES['new_icon']['size']) return array('', 'Error occurred during upload - file had zero size');
 
-	$im = @imagecreatefromgif($_FILES['new_icon']['tmp_name']);
-	if (! $im) return array('', 'Uploaded file is not a GIF');
-	if (imagesx($im) > 16  ||  imagesy($im) > 16) return array('','Uploaded file must be 16x16 pixels');
+	$mimeExt = $_FILES['new_icon']['type'];
+	$filename = $_FILES['new_icon']['tmp_name'];
+	$img = null;
 
-	$imstring = @file_get_contents($_FILES['new_icon']['tmp_name']);
-	if (! test_transparency($imstring))
-		$warning = '<div style="font-weight: bold; color: orange;">but the icon has no transparency defined - it may look dodgy</div>';
-	else	$warning = '';
+	switch($mimeExt) {
+	case 'image/jpeg':
+	case 'jpeg':
+	case 'jpg':
+		$img = @imagecreatefromjpeg($filename);
+		break;
+	case 'image/gif':
+	case 'gif':
+		$img = @imagecreatefromgif($filename);
+		break;
+	case 'image/png':
+	case 'png':
+		$img = @imagecreatefrompng($filename);
+		break;
+	default:
+		break;
+	}
 
-//error_log(">>>>>>>>>>>>>>".HEURIST_UPLOAD_PATH);
-//error_log(">>>>>>>>>>>>>>".rectype_DIRECTORY . $rt_id . '.gif');
-//rectype_DIRECTORY
-	if (move_uploaded_file($_FILES['new_icon']['tmp_name'], rectype_DIRECTORY . $rt_id . '.gif'))
-		return array('File has been uploaded successfully' . $warning, '');
-	else
-		return array('', 'An error occurred while uploading the file - check directory permissions');
+	if (! $img) return array('', 'Uploaded file is not supported format');
+	//if (imagesx($img) > 16  ||  imagesy($img) > 16) return array('','Uploaded file must be 16x16 pixels');
+
+	$filename = $image_dir . HEURIST_DBID. '-' . $rt_id . '.png'; // tempnam('/tmp', 'resized');
+
+	$error = convert_to_png($img, $dim, $filename);
+
+	if($error){
+		return array('', $error);
+	}else{
+		return array('File has been uploaded successfully', '');
+	}
+
 }
 
+// not used
 function test_transparency($gifstring) {
 	if (substr($gifstring, 0, 6) != 'GIF89a') return false;
 

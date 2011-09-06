@@ -45,6 +45,7 @@ if (strtotime(@$_SERVER["HTTP_IF_MODIFIED_SINCE"]) > $lastModified) {
 // This is the best place I can think of to stick this stuff --kj, 2008-07-21
 print "if (!top.HEURIST) top.HEURIST = {};\n";
 print "top.HEURIST.database = {};\n";
+print "top.HEURIST.database.id = " . json_format(HEURIST_DBID) . ";\n";
 print "top.HEURIST.database.name = " . json_format(HEURIST_DBNAME) . ";\n";
 print "top.HEURIST.database.sessionPrefix = " . json_format(HEURIST_SESSION_DB_PREFIX) . ";\n";
 print "top.HEURIST.database.exploreURL = " . json_format(EXPLORE_URL) . ";\n";

@@ -728,9 +728,9 @@ function ShowReps() {
 						if(insertMode==1){
 							_text = _text + node.data.label+":";
 						}
-						_text = _text + "{$"+node.data.this_id+"}";
+						_text = _text + "{$"+node.data.id+"}";
 					}else{
-						_text = _text + '{out2 lbl="'+node.data.label+'" var=$'+node.data.this_id+ '}';
+						_text = _text + '{out2 lbl="'+node.data.label+'" var=$'+node.data.id+ '}';
 					}
 				}
 				return false;

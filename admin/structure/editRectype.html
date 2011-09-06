@@ -79,7 +79,9 @@
 <br />
 <div id="statusMsg"></div>
 <div id="rectypeValues" style="padding:5px;" >
-	<div id="rectypeIcon" class="rectypeIcon"></div><div style="padding-left: 500px;"><a href="javascript:void(0)" onClick="viewEquivalences()">View equivalences</a></div>
+	<div id="rectypeThumb" class="rectypeThumb" style="display:inline-block;"></div>
+	<div id="rectypeIcon" class="rectypeIcon" style="padding-left:10px;display:inline-block;"></div>
+	<div style="float:right;"><a href="javascript:void(0)" onClick="viewEquivalences()">View equivalences</a></div>
 	<div class="input-row">
 		<div class="input-header-cell">Code:</div>
 		<div class="input-cell" id="rty_ID"></div>
@@ -227,24 +229,28 @@
 	}
 
 	/**
-	* invokes
+	* invokes popup to change icon or thumbnail
 	*/
-	function upload_icon() {
+	function upload_icon(mode) {
 
-		var sURL = top.HEURIST.baseURL + "admin/structure/uploadRectypeIcon.php?db="+ db + "&rty_ID="+rectypeID;
+		var sURL = top.HEURIST.baseURL + "admin/structure/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID="+rectypeID;
 
 		Hul.popupURL(top, sURL, {
 			"close-on-blur": false,
 			"no-resize": false,
-			height: 150,
+			height: (mode==0?120:200),
 			width: 340,
-			callback: icon_refresh
+			callback: mode==0?icon_refresh:thumb_refresh
 		});
 
 	}
 
-	function icon_refresh(val) {
+	function icon_refresh(context) {
 		var img = document.getElementById('imgIcon');
+		img.src = img.src.replace(/\?.*/, '') + '?' + (new Date()).getTime();
+	}
+	function thumb_refresh(context) {
+		var img = document.getElementById('imgThumb');
 		img.src = img.src.replace(/\?.*/, '') + '?' + (new Date()).getTime();
 	}
 
@@ -272,8 +278,14 @@
                 // Now finds the file but returns blank page. admin/structure/uploadRectypeIcon.php?rt_id=42 also loads blank page
                 // so it looks like this file needs updating to new structures
                 document.getElementById("rectypeIcon").innerHTML =
-                "<a href=\"javascript:void(0)\" onClick=\"upload_icon()\">"+
-                "<img id=\"imgIcon\" src=\"../../common/images/rectype-icons/"+rectypeID+".png\"> change icon</a>";
+                "<a href=\"javascript:void(0)\" onClick=\"upload_icon(0)\">"+
+                "<img id=\"imgIcon\" src=\""+rectype[13]+"\" width=\"16\" height=\"16\"> change icon</a>";
+
+                document.getElementById("rectypeThumb").innerHTML =
+                "<a href=\"javascript:void(0)\" onClick=\"upload_icon(1)\">"+
+                "<img id=\"imgThumb\" src=\""+rectype[14]+"\" width=\"75\" height=\"75\"> change thumbnail</a>";
+
+                //../../common/images/rectype-icons/"+rectypeID+".png
 			} catch(e) {
 				alert(e);
 /* 				document.getElementById("rectypeIcon").innerHTML = "<a href=\"../../admin/structure/uploadRectypeIcon.php\">change icon</a>"; */
@@ -688,7 +700,7 @@
 		};
 		return that;
 	})();
-	
+
 	/*var structureFrame = document.getElementById("structureFrame");
 	var URL = top.HEURIST.basePath + "admin/structure/editRecStructure.html?db="+db+"&rty_ID="+rectypeID;
 	structureFrame.src = URL;

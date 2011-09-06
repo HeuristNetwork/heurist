@@ -28,7 +28,7 @@ if (! is_logged_in()) {
 
 //require_once('libs.inc.php');
 //$dir = 'c:/xampp/htdocs/h3-ao/viewers/smarty/templates/';  //$smarty->template_dir
-$dir = '/var/www/htdocs/h3-ao/viewers/smarty/templates/';  //$smarty->template_dir
+$dir = HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'viewers/smarty/templates/';  //$smarty->template_dir
 
 $mode = $_REQUEST['mode'];
 

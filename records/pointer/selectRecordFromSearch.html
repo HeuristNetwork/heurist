@@ -119,7 +119,7 @@ function notifyResults(results) {
 
 		img = recordDiv.appendChild(document.createElement("img"));
 		img.src = top.HEURIST.basePath + "common/images/16x16.gif";
-		img.style.backgroundImage = "url("+ top.HEURIST.basePath + "common/images/rectype-icons/" + (record[3]? record[3] : "blank") + ".png)";
+img.style.backgroundImage = "url("+ top.HEURIST.basePath + "common/images/rectype-icons/" + top.HEURIST.database.id + "-" + (record[3]? record[3] : "blank") + ".png)";
 
 		title = recordDiv.appendChild(document.createElement("span"));
 		title.appendChild(document.createTextNode(record[1]));

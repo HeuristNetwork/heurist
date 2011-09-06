@@ -52,7 +52,7 @@ require_once("dbMySqlWrappers.php");
      <div>
      	<table><tr>
      	<td width="24px" align="right"><font color="#CCC"><?= $row[0] ?>&nbsp;</font></td>
-     	<td width="24px" align="center"><img src="<?=HEURIST_SITE_PATH?>common/images/rectype-icons/<?= $row[0] ?>.png"></td>
+     	<td width="24px" align="center"><img src="<?=HEURIST_SITE_PATH?>common/images/rectype-icons/<?=HEURIST_DBID."-".$row[0] ?>.png"></td>
      	<td><?= htmlspecialchars($row[1]) ?></td>
      	</tr></table>
 </div>

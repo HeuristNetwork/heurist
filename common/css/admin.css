@@ -207,7 +207,7 @@ html body.popup div div#page-inner div#modelTabs.yui-navset div.yui-navset div.y
 .wysiwygCheckTable {
 	width:100%;
 	border-collapse:collapse;
-	
+
 }
 .wysiwygCheckTable td{
 	border-top:1px solid #CCC;
@@ -219,7 +219,7 @@ html body.popup div div#page-inner div#modelTabs.yui-navset div.yui-navset div.y
 .input-row input:not([type="submit"]) {font-size:10px}
 input#tags, .input-cell .in, .input-cell .resource-title, .in, .input-row input:not([type="submit"]), .input-row textarea {
 	background-color: #ECF1FB;
-	min-width:40ex; 
+	min-width:40ex;
 	border:none;
 }
 .input-row div.input-cell{
@@ -228,6 +228,7 @@ input#tags, .input-cell .in, .input-cell .resource-title, .in, .input-row input:
 .input-row label {display:inline-block}
 .input-row {border-color:#EFF2F6; padding:6px 0}
 #rectypeIcon img{padding: 5px;border-radius: 3px;box-shadow: 0 1px 3px RGBA(0,0,0,0.5);}
+#rectypeThumb img{padding: 5px;border-radius: 3px;box-shadow: 0 1px 3px RGBA(0,0,0,0.5);}
 .px150 {width: 150px !important}
 
 .yui-skin-sam .yui-dt-liner {
