@@ -17,14 +17,14 @@ require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 
 mysql_connection_db_select(DATABASE);
 
-if (! @$_REQUEST['rec_ID'] && !defined('DT_KML')) return;
+if (! @$_REQUEST['recID'] && !defined('DT_KML')) return;
 
-$query = "SELECT dtl_Value FROM recDetails WHERE dtl_DetailTypeID=".DT_KML." and dtl_RecID=".$_REQUEST['rec_ID'];
+$query = "SELECT dtl_Value FROM recDetails WHERE dtl_DetailTypeID=".DT_KML." and dtl_RecID=".$_REQUEST['recID'];
 
 //error_log(">>>>>>>>>>>".$query);
 
 $res = mysql_query($query);
-//"'.addslashes($_REQUEST['rec_ID']).'"');
+//"'.addslashes($_REQUEST['recID']).'"');
 
 if (mysql_num_rows($res) != 1) return;
 

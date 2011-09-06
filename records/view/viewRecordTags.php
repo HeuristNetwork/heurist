@@ -35,23 +35,22 @@ if (@$_REQUEST['bkmk_id']) {
 	$bkmk = mysql_fetch_assoc($res);
 	$res = mysql_query('select Records.* from usrBookmarks left join Records on bkm_recID=rec_ID where bkm_ID = '.$bkmk['bkm_ID'].' and (rec_OwnerUGrpID in ('.join(',', $wg_ids).') or rec_NonOwnerVisibility="viewable")');
 	$bib = mysql_fetch_assoc($res);
-	$_REQUEST['bib_id'] = $bib['rec_ID'];
+	$_REQUEST['recID'] = $bib['rec_ID'];
 }
-else if (@$_REQUEST['bib_id']) {
-	$res = mysql_query('select * from usrBookmarks where bkm_recID = '.intval($_REQUEST['bib_id']).' and bkm_UGrpID = '.get_user_id());
+else if (@$_REQUEST['recID']) {
+	$res = mysql_query('select * from usrBookmarks where bkm_recID = '.intval($_REQUEST['recID']).' and bkm_UGrpID = '.get_user_id());
 	$bkmk = mysql_fetch_assoc($res);
-	$res = mysql_query('select * from Records where rec_ID = '.intval($_REQUEST['bib_id']).' and (rec_OwnerUGrpID in ('.join(',', $wg_ids).') or rec_NonOwnerVisibility="viewable")');
+	$res = mysql_query('select * from Records where rec_ID = '.intval($_REQUEST['recID']).' and (rec_OwnerUGrpID in ('.join(',', $wg_ids).') or rec_NonOwnerVisibility="viewable")');
 	$bib = mysql_fetch_assoc($res);
 	$_REQUEST['bkmk_id'] = $bkmk['bkm_ID'];
 }
 
-$_REQUEST['rec_ID'] = $_REQUEST['bib_id'];
 $_REQUEST['bkm_ID'] = $_REQUEST['bkmk_id'];
 
 $lexer = new Lexer($template);
 $body = new BodyScope($lexer);
 
-$body->global_vars['rec_ID'] = $_REQUEST['rec_ID'];
+$body->global_vars['rec_ID'] = $_REQUEST['recID'];
 $body->global_vars['bkm_ID'] = $_REQUEST['bkm_ID'];
 
 $my_kwds = mysql__select_array('usrRecTagLinks left join usrTags on rtl_TagID=tag_ID', 'tag_Text', 'rtl_RecID='.$bib['rec_ID']);

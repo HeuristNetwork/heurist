@@ -116,7 +116,7 @@ top.HEURIST.edit = {
 
 		var urlBits = [];
 		var parameters = top.HEURIST.edit.record;
-		if (parameters.bibID) urlBits.push("bib_id=" + parameters.bibID);
+		if (parameters.bibID) urlBits.push("recID=" + parameters.bibID);
 		if (parameters.bkmkID) urlBits.push("bkmk_id=" + parameters.bkmkID);
 		if (HAPI.database) urlBits.push("db=" + HAPI.database);
 		var url = module.url;
@@ -262,7 +262,7 @@ top.HEURIST.edit = {
 			top.HEURIST.edit.modules.personal.disabledFunction = null;
 
 			// add the bookmark, patch the record structure, and view the personal tab
-			top.HEURIST.util.getJsonData(top.HEURIST.basePath + "records/bookmarks/add-bookmark.php?bib_id=" + top.HEURIST.edit.record.bibID + "&db=" + HAPI.database, function(vals) {
+			top.HEURIST.util.getJsonData(top.HEURIST.basePath + "records/bookmarks/add-bookmark.php?recID=" + top.HEURIST.edit.record.bibID + "&db=" + HAPI.database, function(vals) {
 				for (var i in vals) {
 					top.HEURIST.edit.record[i] = vals[i];
 				}
@@ -1398,7 +1398,7 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 		editImg.title = "Edit this record";
 
 	top.HEURIST.registerEvent(editImg, "click", function() {
-		top.HEURIST.util.popupURL(window,top.HEURIST.basePath +"records/edit/formEditRecordPopup.html?bib_id=" + hiddenElt.value, {
+		top.HEURIST.util.popupURL(window,top.HEURIST.basePath +"records/edit/formEditRecordPopup.html?recID=" + hiddenElt.value, {
 			callback: function(bibTitle) { if (bibTitle) textElt.defaultValue = textElt.value = bibTitle; }
 		});
 	});
@@ -1590,7 +1590,7 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 	} else {
 		if (top.HEURIST.browser.isEarlyWebkit) {	// old way of doing things
 			var newIframe = this.document.createElement("iframe");
-				newIframe.src = top.HEURIST.basePath+"records/files/uploadFile.php?bib_id=" + windowRef.parent.HEURIST.edit.record.bibID + "&bdt_id=" + this.detailType[12];
+				newIframe.src = top.HEURIST.basePath+"records/files/uploadFile.php?recID=" + windowRef.parent.HEURIST.edit.record.bibID + "&bdt_id=" + this.detailType[12];
 				newIframe.frameBorder = 0;
 				newIframe.style.width = "90%";
 				newIframe.style.height = "2em";
@@ -1859,7 +1859,21 @@ top.HEURIST.edit.inputs.BibDetailRelationMarker = function() { top.HEURIST.edit.
 top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
 top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.typeDescription = "record relationship marker";
 top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.changeNotification = function(cmd, relID) {
-	this.windowRef.changed();
+	if (cmd == "delete") {
+		var fakeForm = { action: top.HEURIST.basePath+"records/relationships/saveRelationships.php",
+						elements: [ { name: "delete[]", value: relID },
+									{ name: "recID", value: this.recID } ] };
+		var thisRef = this;
+		top.HEURIST.util.xhrFormSubmit(fakeForm, function(json) {
+			var val = eval(json.responseText);
+			if (val && val.byRectype) {
+				top.HEURIST.edit.record.relatedRecords = val;
+			}else{
+				alert(" There was an error: " + val.error);
+			}
+		});
+	}
+		//	this.windowRef.changed();
 };
 top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.addInput = function(bdValue) {
 
@@ -1912,7 +1926,7 @@ top.HEURIST.edit.Reminder.prototype.remove = function() {
 	var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 	var fakeForm = { action: top.HEURIST.basePath+"records/reminders/saveReminder.php",
 	                 elements: [ { name: "rem_ID", value: this.reminderID },
-	                             { name: "bib_id", value: windowRef.parent.HEURIST.edit.record.bibID },
+	                             { name: "recID", value: windowRef.parent.HEURIST.edit.record.bibID },
 	                             { name: "save-mode", value: "delete" } ] };
 	var thisRef = this;
 	top.HEURIST.util.xhrFormSubmit(fakeForm, function(json) {
@@ -2111,7 +2125,7 @@ top.HEURIST.edit.inputs.ReminderInput = function(parentElement) {
 
 		var bibIDelt = this.document.createElement("input");
 			bibIDelt.type = "hidden";
-			bibIDelt.name = "bib_id";
+			bibIDelt.name = "recID";
 			bibIDelt.value = parent.HEURIST.edit.record.bibID;
 			td.appendChild(bibIDelt);
 		var addElt = this.document.createElement("input");

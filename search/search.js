@@ -441,7 +441,7 @@ top.HEURIST.search = {
 		var resultsDiv =  $("#results-level" + level).get(0);
 		var recIDs = top.HEURIST.search.results.infoByDepth[level].rectypes[rtID];
 		$.each(recIDs,function(i,recID){
-				$('.recordDiv[bib_id='+recID+']',resultsDiv).toggleClass('filtered');
+				$('.recordDiv[recID='+recID+']',resultsDiv).toggleClass('filtered');
 			});
 		$(menuItem).toggleClass('checked')
 		top.HEURIST.search.filterRelated(level+1);
@@ -453,12 +453,12 @@ top.HEURIST.search = {
 		var recIDs = top.HEURIST.search.results.infoByDepth[level].ptrtypes[dtyID];
 		if ($(menuItem).hasClass('checked')) {// filter all pointer links of type dtyID by removing a "lnk" class
 			$.each(recIDs,function(i,recID){
-					recalcFilters = !$('.recordDiv[bib_id='+recID+']',resultsDiv).removeClass('lnk').hasClass('lnk');
+					recalcFilters = !$('.recordDiv[recID='+recID+']',resultsDiv).removeClass('lnk').hasClass('lnk');
 				});
 		}else{
 			$.each(recIDs,function(i,recID){
-					recalcFilters = !$('.recordDiv[bib_id='+recID+']',resultsDiv).hasClass('lnk');
-					$('.recordDiv[bib_id='+recID+']',resultsDiv).get(0).className += ' lnk';
+					recalcFilters = !$('.recordDiv[recID='+recID+']',resultsDiv).hasClass('lnk');
+					$('.recordDiv[recID='+recID+']',resultsDiv).get(0).className += ' lnk';
 				});
 		}
 		$(menuItem).toggleClass('checked');
@@ -473,12 +473,12 @@ top.HEURIST.search = {
 		var recIDs = top.HEURIST.search.results.infoByDepth[level].reltypes[trmID];
 		if ($(menuItem).hasClass('checked')) {// filter all relation links of type dtyID by removing a "lnk" class
 			$.each(recIDs,function(i,recID){
-					recalcFilters = !$('.recordDiv[bib_id='+recID+']',resultsDiv).removeClass('lnk').hasClass('lnk');
+					recalcFilters = !$('.recordDiv[recID='+recID+']',resultsDiv).removeClass('lnk').hasClass('lnk');
 				});
 		}else{
 			$.each(recIDs,function(i,recID){
-					recalcFilters = !$('.recordDiv[bib_id='+recID+']',resultsDiv).hasClass('lnk');
-					$('.recordDiv[bib_id='+recID+']',resultsDiv).get(0).className += ' lnk';
+					recalcFilters = !$('.recordDiv[recID='+recID+']',resultsDiv).hasClass('lnk');
+					$('.recordDiv[recID='+recID+']',resultsDiv).get(0).className += ' lnk';
 				});
 		}
 		$(menuItem).toggleClass('checked')
@@ -543,7 +543,7 @@ top.HEURIST.search = {
 		}
 		else if (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['RT_NOTE'] && res[4] == top.HEURIST.magicNumbers['RT_NOTE']) {
 			// special handling for notes rectype: link to view page if no URL
-			href = top.HEURIST.basePath+ "records/view/renderRecordData.php?bib_id="+res[2] +(top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
+			href = top.HEURIST.basePath+ "records/view/renderRecordData.php?recID="+res[2] +(top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
 		}
 
 		var userPwd;
@@ -556,11 +556,11 @@ top.HEURIST.search = {
 		if (top.HEURIST.rectypes.names[parseInt(res[4])])
 			rectypeTitle = top.HEURIST.rectypes.names[parseInt(res[4])] + " - click to see details";
 		var html =
-		"<div class='recordDiv' title='Select to view, Ctrl-or Shift- for multiple select' bkmk_id='"+res[0]+"' bib_id="+res[2]+" rectype="+res[4]+">" +
+		"<div class='recordDiv' title='Select to view, Ctrl-or Shift- for multiple select' bkmk_id='"+res[0]+"' recID="+res[2]+" rectype="+res[4]+">" +
 		"<input style='display:none' type=checkbox name=bib[] onclick=top.HEURIST.search.resultItemOnClick(this) class='logged-in-only' title='Check box to apply Actions to this record'>"+
 		"<div class='recTypeThumb' "+rectypeThumb+" ></div>" +
 		(res[11] && res[11].length ? "<div class='thumbnail' style='background-image:url("+res[11]+")' ></div>":"") +
-		   "<div class=recordIcons  bkmk_id='"+res[0]+"' bib_id="+res[2]+">" +
+		   "<div class=recordIcons  bkmk_id='"+res[0]+"' recID="+res[2]+">" +
 		   "<img src='"+ top.HEURIST.basePath+"common/images/16x16.gif' title='"+rectypeTitle.htmlEscape()+"' "+rectypeImg+" class='rft'>"+
 		   "<img src='"+ top.HEURIST.basePath+"common/images/13x13.gif' " + pinAttribs + ">"+
 		   "<span class='wg-id-container logged-in-only'>"+
@@ -574,7 +574,7 @@ top.HEURIST.search = {
 			"' target='_blank' title='Open in new window'>ID: "+res[2]+"</a>"+
 			"<div id='rec_edit_link' class='logged-in-only' title='Click to edit'><a href='"+
 			top.HEURIST.basePath+ "records/edit/editRecord.html?sid=" +
-			top.HEURIST.search.sid + "&bib_id="+ res[2] +
+			top.HEURIST.search.sid + "&recID="+ res[2] +
 			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
 			"' target='_blank'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png'/></a></div>" +
 		   "</div>" +
@@ -754,13 +754,13 @@ top.HEURIST.search = {
 		$('ul.ptrtype>li.checked',resultsDiv).each( function(i,li){
 				var dtyID = $(li).attr('ptrtype');
 				$.each(depthInfo.ptrtypes[dtyID],function(i,recID){
-						$('.recordDiv[bib_id='+recID+']',resultsDiv).get(0).className += ' lnk';
+						$('.recordDiv[recID='+recID+']',resultsDiv).get(0).className += ' lnk';
 					});
 			});
 		$('ul.reltype>li.checked',resultsDiv).each( function(i,li){
 				var dtyID = $(li).attr('reltype');
 				$.each(depthInfo.reltypes[dtyID],function(i,recID){
-						$('.recordDiv[bib_id='+recID+']',resultsDiv).get(0).className += ' lnk';
+						$('.recordDiv[recID='+recID+']',resultsDiv).get(0).className += ' lnk';
 					});
 			});
 		top.HEURIST.search.loadLevelFilter(level + 1);
@@ -789,7 +789,7 @@ top.HEURIST.search = {
 				if ($(recDiv).hasClass('filtered') || (!$(recDiv).hasClass('lnk') && (level-1 > 0))){
 					return;
 				}
-				var recInfo = recSet[$(recDiv).attr("bib_id")];
+				var recInfo = recSet[$(recDiv).attr("recID")];
 				if (recInfo.ptrLinks){
 					$.each(recInfo.ptrLinks.byDtlType,function(dtlID, recIDs){
 							var j, recID, recTypeID;
@@ -852,7 +852,7 @@ top.HEURIST.search = {
 				while($(recDiv).hasClass('lnk')){
 					$(recDiv).toggleClass('lnk');
 				}
-				var recID = $(recDiv).attr('bib_id');
+				var recID = $(recDiv).attr('recID');
 				if (recordIDs[recID] == 1) {//record related to upper level unfiltered record
 					if($(recDiv).hasClass('filtered')){
 						$(recDiv).toggleClass('filtered');
@@ -870,7 +870,7 @@ top.HEURIST.search = {
 					if ($(li).hasClass('checked')) {
 						$.each(depthInfo.reltypes[trmID],function(i,recID){
 								if (recordIDs[recID] === 1) {
-									$('.recordDiv[bib_id='+recID+']',resultsDiv).get(0).className += ' lnk';
+									$('.recordDiv[recID='+recID+']',resultsDiv).get(0).className += ' lnk';
 								}
 							});
 					}
@@ -885,7 +885,7 @@ top.HEURIST.search = {
 					if ($(li).hasClass('checked')) {
 						$.each(depthInfo.ptrtypes[dtyID],function(i,recID){
 								if (recordIDs[recID] === 1) {
-									$('.recordDiv[bib_id='+recID+']',resultsDiv).get(0).className += ' lnk';
+									$('.recordDiv[recID='+recID+']',resultsDiv).get(0).className += ' lnk';
 								}
 							});
 					}
@@ -899,7 +899,7 @@ top.HEURIST.search = {
 				if (rectypes[rtID] === 1) { //rectype menu is in the related set
 					if (!$(li).hasClass('checked')) { // if it's not checked then filter all records of this type
 						$.each(depthInfo.rectypes[rtID],function(i,recID){
-								var recDiv = $('.recordDiv[bib_id='+recID+']',resultsDiv);
+								var recDiv = $('.recordDiv[recID='+recID+']',resultsDiv);
 								if (!recDiv.hasClass('filtered')) {
 									recDiv.toggleClass('filtered');
 								}
@@ -980,7 +980,7 @@ top.HEURIST.search = {
 		var recSet = top.HEURIST.search.results.recSet;
 		//apply classes for linked recordIDs
 		$('.recordDiv',resultsDiv).each(function(i, recDiv){
-				var recInfo = recSet[$(recDiv).attr("bib_id")];
+				var recInfo = recSet[$(recDiv).attr("recID")];
 				var linkedRecIDs = {};
 				if (recInfo.ptrLinks){
 					for (recID in recInfo.ptrLinks.byRecIDs){
@@ -1339,18 +1339,18 @@ top.HEURIST.search = {
 			if (targ.nodeType == 3) targ = targ.parentNode;
 		}
 
-		if (targ.getAttribute("bib_id")) {
+		if (targ.getAttribute("recID")) {
 			var resultDiv = targ;
-		}else if (targ.parentNode  &&  targ.parentNode.getAttribute("bib_id")) {
+		}else if (targ.parentNode  &&  targ.parentNode.getAttribute("recID")) {
 			var resultDiv = targ.parentNode;
-		}else if (targ.parentNode.parentNode  &&  targ.parentNode.parentNode.getAttribute("bib_id")) {
+		}else if (targ.parentNode.parentNode  &&  targ.parentNode.parentNode.getAttribute("recID")) {
 			var resultDiv = targ.parentNode.parentNode;
 		}else return;
 
-		var bib_id = $(resultDiv).attr("bib_id");
+		var recID = $(resultDiv).attr("recID");
 
 		window.open(top.HEURIST.basePath+ "records/edit/editRecord.html?sid=" +
-					top.HEURIST.search.sid + "&bib_id="+bib_id+
+					top.HEURIST.search.sid + "&recID="+recID+
 					(top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""));
 
 		return false;
@@ -1360,37 +1360,37 @@ top.HEURIST.search = {
 	selectedRecordIds: [],
 	selectedRecordDivs: [],
 
-	toggleResultItemSelect: function(bib_id,resultDiv,level) {
+	toggleResultItemSelect: function(recID,resultDiv,level) {
 		if (typeof level === "undefined") {
 			level = 0;
 		}
-		if (top.HEURIST.search.selectedRecordDivs[level] && top.HEURIST.search.selectedRecordDivs[level][bib_id]) { // was selected so deselect
-			top.HEURIST.search.deselectResultItem(bib_id,level);
-		}else if (bib_id) {
+		if (top.HEURIST.search.selectedRecordDivs[level] && top.HEURIST.search.selectedRecordDivs[level][recID]) { // was selected so deselect
+			top.HEURIST.search.deselectResultItem(recID,level);
+		}else if (recID) {
 			if (!resultDiv) {
-				resultDiv = $('div[class~=recordDiv]',$("#results-level"+level)).filter('div[bib_id='+ bib_id +']').get(0);
+				resultDiv = $('div[class~=recordDiv]',$("#results-level"+level)).filter('div[recID='+ recID +']').get(0);
 			}
 			$(resultDiv).toggleClass("selected");
-			$(".link"+bib_id,$("#results")).addClass("linkSelected");
+			$(".link"+recID,$("#results")).addClass("linkSelected");
 			if (!top.HEURIST.search.selectedRecordDivs[level]) {
 				top.HEURIST.search.selectedRecordDivs[level] = {};
 			}
-			top.HEURIST.search.selectedRecordDivs[level][bib_id] = resultDiv;
+			top.HEURIST.search.selectedRecordDivs[level][recID] = resultDiv;
 			if (!top.HEURIST.search.selectedRecordIds[level]) {
 				top.HEURIST.search.selectedRecordIds[level] = [];
 			}
-			top.HEURIST.search.selectedRecordIds[level].push(bib_id);
+			top.HEURIST.search.selectedRecordIds[level].push(recID);
 		}
 	},
 
-	deselectResultItem: function(bib_id,level) {
-		var resultDiv = top.HEURIST.search.selectedRecordDivs[level][bib_id];
+	deselectResultItem: function(recID,level) {
+		var resultDiv = top.HEURIST.search.selectedRecordDivs[level][recID];
 		if (resultDiv) {
-			delete top.HEURIST.search.selectedRecordDivs[level][bib_id];
+			delete top.HEURIST.search.selectedRecordDivs[level][recID];
 			$(resultDiv).toggleClass("selected");
-			$(".link"+bib_id,$("#results")).removeClass("linkSelected");
+			$(".link"+recID,$("#results")).removeClass("linkSelected");
 			for(var i = 0; i < top.HEURIST.search.selectedRecordIds[level].length; i++){
-				if (top.HEURIST.search.selectedRecordIds[level][i] == bib_id) {
+				if (top.HEURIST.search.selectedRecordIds[level][i] == recID) {
 					top.HEURIST.search.selectedRecordIds[level].splice(i,1);
 					break;
 				}
@@ -1420,19 +1420,19 @@ top.HEURIST.search = {
 			}
 		}
 
-		if (targ.getAttribute("bib_id")) {
+		if (targ.getAttribute("recID")) {
 			var resultDiv = targ;
-		}else if (targ.parentNode  &&  targ.parentNode.getAttribute("bib_id")) {
+		}else if (targ.parentNode  &&  targ.parentNode.getAttribute("recID")) {
 			var resultDiv = targ.parentNode;
 		}else{
 			return;  // no target so we can't do anything
 		}
 
-		var bib_id = $(resultDiv).attr("bib_id");
-		if(parseInt(bib_id)>=0) {
+		var recID = $(resultDiv).attr("recID");
+		if(parseInt(recID)>=0) {
 			if ($(resultDiv).hasClass("hilited")) return;
 			$(resultDiv).addClass("hilited");
-			$(".link"+bib_id,$("#results")).toggleClass("linkHilited");
+			$(".link"+recID,$("#results")).toggleClass("linkHilited");
 		}
 	},
 
@@ -1458,18 +1458,18 @@ top.HEURIST.search = {
 			}
 		}
 
-		if (targ.getAttribute("bib_id")) {
+		if (targ.getAttribute("recID")) {
 			var resultDiv = targ;
-		}else if (targ.parentNode  &&  targ.parentNode.getAttribute("bib_id")) {
+		}else if (targ.parentNode  &&  targ.parentNode.getAttribute("recID")) {
 			var resultDiv = targ.parentNode;
 		}else{
 			return;  // no target so we can't do anything
 		}
 
-		var bib_id = $(resultDiv).attr("bib_id");
-		if(parseInt(bib_id)>=0) {
+		var recID = $(resultDiv).attr("recID");
+		if(parseInt(recID)>=0) {
 			$(resultDiv).removeClass("hilited");
-			$(".link"+bib_id,$("#results")).toggleClass("linkHilited");
+			$(".link"+recID,$("#results")).toggleClass("linkHilited");
 		}
 	},
 
@@ -1495,26 +1495,26 @@ top.HEURIST.search = {
 			}
 		}
 
-		if (targ.getAttribute("bib_id")) {
+		if (targ.getAttribute("recID")) {
 			var resultDiv = targ;
-		}else if (targ.parentNode  &&  targ.parentNode.getAttribute("bib_id")) {
+		}else if (targ.parentNode  &&  targ.parentNode.getAttribute("recID")) {
 			var resultDiv = targ.parentNode;
 		}else{
 			return;  // no target so we can't do anything
 		}
 
-		var bib_id = $(resultDiv).attr("bib_id");
+		var recID = $(resultDiv).attr("recID");
 		var level = $(resultDiv).parent().attr("level");
 		var results = top.HEURIST.search.results;
 
 		if ( e.ctrlKey) { // CTRL + Click -  do multiselect functionality single item select and unselect from list
-			top.HEURIST.search.toggleResultItemSelect(bib_id,resultDiv,level);
+			top.HEURIST.search.toggleResultItemSelect(recID,resultDiv,level);
 		}else if (e.shiftKey){//SHIFT + Click
 		// find all items from current click item to last selected
 			var recIdToIndexMap = results.infoByDepth[level].recIdToIndexMap;
 			var selectedBibIds = top.HEURIST.search.selectedRecordIds[level];
 			var lastSelectedIndex = recIdToIndexMap[selectedBibIds[selectedBibIds.length - 1]];
-			var clickedIndex = recIdToIndexMap[bib_id];
+			var clickedIndex = recIdToIndexMap[recID];
 			var newSelectedRecIdMap = {};
 			var newSelectedRecIds = [];
 			var recIDs = results.infoByDepth[level].recIDs,
@@ -1523,7 +1523,7 @@ top.HEURIST.search = {
 			if (clickedIndex < lastSelectedIndex){
 				for(var i = clickedIndex; i <= lastSelectedIndex; i++) {
 					recID = recIDs[i];
-					if (!$(".recordDiv[bib_id="+recID,$("#results-level"+level)).hasClass("filtered")){
+					if (!$(".recordDiv[recID="+recID,$("#results-level"+level)).hasClass("filtered")){
 						newSelectedRecIdMap[recID] = true;
 						newSelectedRecIds.push(recID);
 					}
@@ -1531,7 +1531,7 @@ top.HEURIST.search = {
 			}else{
 				for(var i = clickedIndex; i >= lastSelectedIndex; i--) {
 					recID = recIDs[i];
-					if (!$(".recordDiv[bib_id="+recID,$("#results-level"+level)).hasClass("filtered")){
+					if (!$(".recordDiv[recID="+recID,$("#results-level"+level)).hasClass("filtered")){
 						newSelectedRecIdMap[recID] = true;
 						newSelectedRecIds.push(recID);
 					}
@@ -1556,7 +1556,7 @@ top.HEURIST.search = {
 			var j=0;
 			if (top.HEURIST.search.selectedRecordIds[level]) {
 				while (top.HEURIST.search.selectedRecordIds[level].length && !clickedResultFound ||  clickedResultFound && top.HEURIST.search.selectedRecordIds[level].length > 1) {
-					if (!clickedResultFound && top.HEURIST.search.selectedRecordIds[level][0] == bib_id) {
+					if (!clickedResultFound && top.HEURIST.search.selectedRecordIds[level][0] == recID) {
 						clickedResultFound=true;
 						j=1;
 						continue;
@@ -1565,7 +1565,7 @@ top.HEURIST.search = {
 				}
 			}
 			if (!clickedResultFound) { // clicked result was not previously selected so toggle to select
-				top.HEURIST.search.toggleResultItemSelect(bib_id,resultDiv,level);
+				top.HEURIST.search.toggleResultItemSelect(recID,resultDiv,level);
 			}
 		}
 
@@ -1576,7 +1576,7 @@ top.HEURIST.search = {
             recordFrame.src = top.HEURIST.basePath+"common/html/msgNoRecordsSelected.html";
             }else{
 			recordFrame.src = top.HEURIST.basePath+"common/html/msgLoading.html";
-			setTimeout(function(){recordFrame.src = top.HEURIST.basePath+"records/view/renderRecordData.php?bib_id="+bib_id+
+			setTimeout(function(){recordFrame.src = top.HEURIST.basePath+"records/view/renderRecordData.php?recID="+recID+
 							("&db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
 							(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")));},
 							50);
@@ -1608,7 +1608,7 @@ top.HEURIST.search = {
 		if (targ.nodeType == 3) targ = targ.parentNode;
 		if (! targ) return;
 		var row = targ.parentNode;
-		if (! row.getAttribute("bib_id")) {
+		if (! row.getAttribute("recID")) {
 			row = row.parentNode;
 		}
 		if (! row) return;
@@ -1623,7 +1623,7 @@ top.HEURIST.search = {
 			return;
 		}
 
-		bib_ids_elt.value = row.getAttribute("bib_id");
+		bib_ids_elt.value = row.getAttribute("recID");
 		action_elt.value = "bookmark_reference";
 		action_elt.form.submit();
 	},
@@ -1999,7 +1999,7 @@ top.HEURIST.search = {
 	selectAll: function() {
 		$("div.recordDiv:not(.filtered,.selected).lnk").each(function(i,recDiv) {
 				var level = $(recDiv.parentNode).attr("level");
-				var recID = $(recDiv).attr("bib_id");
+				var recID = $(recDiv).attr("recID");
 				recDiv.className += " selected";
 				if (!top.HEURIST.search.selectedRecordDivs[level]) {
 					top.HEURIST.search.selectedRecordDivs[level] = {};
@@ -2031,9 +2031,9 @@ top.HEURIST.search = {
 		var bibs = document.getElementsByName("bib[]");
 		for (var i=0; i < bibs.length; ++i) {
 			bibs[i].checked = true;
-			var bib_id = bibs[i].parentNode.getAttribute("bib_id");
-//			top.HEURIST.search.bib_ids[bib_id] = true;
-			top.HEURIST.search.selectItem(bib_id);
+			var recID = bibs[i].parentNode.getAttribute("recID");
+//			top.HEURIST.search.bib_ids[recID] = true;
+			top.HEURIST.search.selectItem(recID);
 			var bkmk_id = bibs[i].parentNode.getAttribute("bkmk_id");
 		}
 		var viewerFrame = document.getElementById("viewer-frame");
@@ -2050,8 +2050,8 @@ top.HEURIST.search = {
 		return false;
 	},
 
-	selectItem: function(bib_id) {
-		resultDiv = $('div[class~=recordDiv]').filter('div[bib_id='+ bib_id +']').get(0);
+	selectItem: function(recID) {
+		resultDiv = $('div[class~=recordDiv]').filter('div[recID='+ recID +']').get(0);
 		resultDiv.className += " selected";
 		if (!top.HEURIST.search.selectedRecordDivs[0]) {
 			top.HEURIST.search.selectedRecordDivs[0] = {};
@@ -2059,8 +2059,8 @@ top.HEURIST.search = {
 		if (!top.HEURIST.search.selectedRecordIds[0]) {
 			top.HEURIST.search.selectedRecordIds[0] = [];
 		}
-		top.HEURIST.search.selectedRecordDivs[0][bib_id] = resultDiv;
-		top.HEURIST.search.selectedRecordIds[0].push(bib_id);
+		top.HEURIST.search.selectedRecordDivs[0][recID] = resultDiv;
+		top.HEURIST.search.selectedRecordIds[0].push(recID);
 	},
 
 	selectAllPages: function() {
@@ -2097,9 +2097,9 @@ top.HEURIST.search = {
 				search_bib_ids = {};
 				search_bkmk_ids = {};
 				for (i=0; i < bibIDs.length; ++i) {
-					var bib_id = bibIDs[i].bib_id;
+					var recID = bibIDs[i].recID;
 					var bkmk_id = bibIDs[i].bkmk_id;
-					search_bib_ids[bib_id] = true;
+					search_bib_ids[recID] = true;
 					if (bkmk_id)
 						search_bkmk_ids[bkmk_id] = true;
 				}
@@ -2119,8 +2119,8 @@ top.HEURIST.search = {
 		var level = 0;
 		for (level; level < top.HEURIST.search.selectedRecordIds.length; level++) {
 			while (top.HEURIST.search.selectedRecordIds[level].length != 0 ) {
-				bib_id = top.HEURIST.search.selectedRecordIds[level][0];
-				top.HEURIST.search.deselectResultItem(bib_id,level);
+				recID = top.HEURIST.search.selectedRecordIds[level][0];
+				top.HEURIST.search.deselectResultItem(recID,level);
 			}
 		}
 		var viewerFrame = document.getElementById("viewer-frame");
@@ -2144,7 +2144,7 @@ top.HEURIST.search = {
 	getSelectedRecIDs: function() {
 		var recIDs = {};
 		var selectedRecIDs = $(".recordDiv.selected.lnk:not(.filtered) ",$("#results")).map(function(i,recdiv){
-					var recID = $(recdiv).attr("bib_id");
+					var recID = $(recdiv).attr("recID");
 					if (!recIDs[recID] && parseInt(recID)>=0) {
 						recIDs[recID] = true;
 						return recID;

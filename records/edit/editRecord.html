@@ -59,8 +59,8 @@
 		</script>
 		<script src="editRecord.js"></script>
 		<script>
-			var bibID =(top.HEURIST.parameters["bib_id"]? top.HEURIST.parameters["bib_id"] :
-							(window.location.search.match(/bib_id=(\d+).*$/)? window.location.search.match(/bib_id=(\d+).*$/)[1] : ""));
+			var bibID =(top.HEURIST.parameters["recID"]? top.HEURIST.parameters["recID"] :
+							(window.location.search.match(/recID=(\d+).*$/)? window.location.search.match(/recID=(\d+).*$/)[1] : ""));
 			var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:
 							(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name: "");
 
@@ -69,7 +69,7 @@
 			var queryStr = "",
 				recordEvent = "record";
 			if (bibID){
-				queryStr = "bib_id=" + bibID;
+				queryStr = "recID=" + bibID;
 			}
 			if (top.HEURIST.parameters["bkmk_id"]){
 				if (queryStr.length > 0) queryStr += "&";
@@ -82,17 +82,17 @@
 		<script>
 			top.HEURIST.whenLoaded([recordEvent,"edit-html"], function() {
 				var rec = (top && top.HEURIST && top.HEURIST.edit && top.HEURIST.edit.record ? top.HEURIST.edit.record:null);
-				var bib_id =  ((rec?rec.bibID : 0) || (window.HEURIST ? window.HEURIST.parameters["bib_id"]:0) || (top.HEURIST ? top.HEURIST.parameters["bib_id"]:0));
+				var recID =  ((rec?rec.bibID : 0) || (window.HEURIST ? window.HEURIST.parameters["recID"]:0) || (top.HEURIST ? top.HEURIST.parameters["recID"]:0));
 				if (! rec) {
-					window.location.replace(top.HEURIST.basePath +"common/html/invalid.html"+ (bib_id ? "?" + bib_id : ""));
+					window.location.replace(top.HEURIST.basePath +"common/html/invalid.html"+ (recID ? "?" + recID : ""));
 				}
 				if (rec.denied) {
-					window.location.replace(window.HEURIST.basePath +"common/html/denied.html"+ (bib_id ? "?" + bib_id : ""));
+					window.location.replace(window.HEURIST.basePath +"common/html/denied.html"+ (recID ? "?" + recID : ""));
 				}
 				if (rec.replacedBy) {
 					// This record has been deprecated in favour of another ...
 					// Load that page (and make a best effort to stop this one from continuing)
-					window.location.replace("?bib_id=" + rec.replacedBy +"&db="+database);
+					window.location.replace("?recID=" + rec.replacedBy +"&db="+database);
 				}
 			});
 		</script>
@@ -111,8 +111,8 @@
 						document.getElementById("search-nav").innerHTML =
 						"<p>Record "+context.pos+" of "+context.count+" search results</p>" +
 						"<p>" +
-						(context.prev ? "<a style=\"padding-right: 10px;\" href=?db="+database+"&sid="+top.HEURIST.parameters["sid"]+"&bib_id="+context.prev+">previous</a>" : "") +
-						(context.next ? "<a href=?db="+database+"&sid="+top.HEURIST.parameters["sid"]+"&bib_id="+context.next+">next</a>" : "") +
+						(context.prev ? "<a style=\"padding-right: 10px;\" href=?db="+database+"&sid="+top.HEURIST.parameters["sid"]+"&recID="+context.prev+">previous</a>" : "") +
+						(context.next ? "<a href=?db="+database+"&sid="+top.HEURIST.parameters["sid"]+"&recID="+context.next+">next</a>" : "") +
 						"</p>";
 					});
 				}
@@ -378,7 +378,7 @@
 				top.HEURIST.whenLoaded(recordEvent, function() {
 					document.getElementById("moddate").appendChild(document.createTextNode(top.HEURIST.edit.record.moddate));
 					var citeAs = document.getElementById("cite-as-url");
-					citeAs.href = "http://"+window.location.host+ top.HEURIST.basePath +"records/view/viewRecord.php?db="+ top.HEURIST.database.name +"&bib_id=" + top.HEURIST.edit.record.bibID;
+					citeAs.href = "http://"+window.location.host+ top.HEURIST.basePath +"records/view/viewRecord.php?db="+ top.HEURIST.database.name +"&recID=" + top.HEURIST.edit.record.bibID;
 					citeAs.appendChild(document.createTextNode(citeAs.href));
 				});
 			</script>
@@ -468,7 +468,7 @@
 					top.HEURIST.edit.unchanged(eachName);
 				}
 
-				top.location.replace(top.HEURIST.baseURL+"records/edit/editRecord.html?db="+database+"&bib_id="+choice.details.id);
+				top.location.replace(top.HEURIST.baseURL+"records/edit/editRecord.html?db="+database+"&recID="+choice.details.id);
 			}
 		});
 	}

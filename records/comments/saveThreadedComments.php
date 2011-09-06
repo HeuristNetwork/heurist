@@ -25,7 +25,7 @@ mysql_connection_overwrite(DATABASE);
 header("Content-type: text/javascript");
 
 $cmt_id = intval(@$_POST["cmt_ID"]);
-$rec_id = intval(@$_POST["bib_id"]);
+$rec_id = intval(@$_POST["recID"]);
 $owner = intval(@$_POST["owner"]);
 if ($cmt_id) {
 	$updates = array("cmt_Modified" => array("now()"));

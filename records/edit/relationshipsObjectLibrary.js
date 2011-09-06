@@ -87,7 +87,7 @@ function countObjElements(obj) {
 */
 Relationship.prototype.edit = function() {
 	var thisRef = this;
-	top.HEURIST.util.popupURL(window, top.HEURIST.basePath + "records/edit/formEditRecordPopup.html?bib_id="+this.relationshipRec.relnID +
+	top.HEURIST.util.popupURL(window, top.HEURIST.basePath + "records/edit/formEditRecordPopup.html?recID="+this.relationshipRec.relnID +
 		"&db="+(top.HEURIST.parameters.db?top.HEURIST.parameters.db : (top.HEURIST.database.name? top.HEURIST.database.name:"")),
 	{ callback: function(newRecTitle, newDetails) {
 			var dtRelType = (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_RELATION_TYPE']? '' + top.HEURIST.magicNumbers['DT_RELATION_TYPE']:'');
@@ -457,8 +457,9 @@ var RelationManager = function(parentElement, record, relatedRecords, dtIDRelmar
 	if (!this.relTerms) { // if no terms were setup in a relmarker then default to all relationships = unconstrained
 		this.relTerms = top.HEURIST.terms.treesByDomain.relation;
 	}
+	var flatTermIDLookup = null;
 	if (this.relTerms && typeof this.relTerms === "object" && dtIDRelmarker) {
-		var flatTermIDLookup = YAHOO.lang.JSON.stringify(this.relTerms);
+		flatTermIDLookup = YAHOO.lang.JSON.stringify(this.relTerms);
 		flatTermIDLookup = "," + flatTermIDLookup.match(/(\d+)/g).join(",") + ",";
 		if (flatTermIDLookup === ",,"){
 			flatTermIDLookup = null;

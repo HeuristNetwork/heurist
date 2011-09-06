@@ -2903,7 +2903,7 @@ var HStorageManager = function() {
 	var _cache = {};
 	var _stubCache = {};
 
-	var _relationshipCache = {};	// lists of loaded relationships that point to each record (indexed by bib_id)
+	var _relationshipCache = {};	// lists of loaded relationships that point to each record (indexed by recID)
 
 	this.getRecord = function(id) { return (_cache[id]  ||  null); };
 	this.getRecordByNonce = function(nonce) { return (HAPI.recordCache[nonce]  ||  null); };

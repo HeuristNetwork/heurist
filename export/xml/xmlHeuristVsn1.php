@@ -117,7 +117,7 @@ if (@$argv) {
 
 } else if (@$_REQUEST['pub_id']) {
 	$pub_id = intval($_REQUEST['pub_id']);
-	$rec_id = intval(@$_REQUEST['bib_id']);
+	$rec_id = intval(@$_REQUEST['recID']);
 	require_once(dirname(__FILE__).'/../../common/connect/bypassCredentialsForPublished.php');
 
 	if ($rec_id) $_REQUEST['q'] .= ' && ids:' . $rec_id;

@@ -124,7 +124,7 @@ mysql_connection_db_overwrite(DATABASE);
 
 		print "<div".(! $allowed ? ' class=greyed' : '').">\n";
 		print ' <p><input type="checkbox" name="bib[]" value="'.$rec_id.'"'.($bkmk_count <= 1  &&  $refs == 0  &&  $allowed ? ' checked' : '').(! $allowed ? ' disabled' : '').'>' ."\n";
-		print ' ' . $rec_id . '<a target=_new href="'.HEURIST_SITE_PATH.'records/edit/editRecord.html?bib_id='.$rec_id.'"><img src='.HEURIST_SITE_PATH.'common/images/external_link_16x16.gif></a>' ."\n";
+		print ' ' . $rec_id . '<a target=_new href="'.HEURIST_SITE_PATH.'records/edit/editRecord.html?recID='.$rec_id.'"><img src='.HEURIST_SITE_PATH.'common/images/external_link_16x16.gif></a>' ."\n";
 		print ' ' . $rec_title ."</p>\n";
 
 		print ' <p style="margin-left: 20px;"><b>' . $bkmk_count . '</b> bookmark' . ($bkmk_count == 1 ? '' : 's') . ($bkmk_count > 0 ? ':' : '') . "\n  ";
@@ -134,7 +134,7 @@ mysql_connection_db_overwrite(DATABASE);
 		if ($refs) {
 			print ' <p style="margin-left: 20px;">Referenced by: '."\n";
 			while ($row = mysql_fetch_assoc($refs_res)) {
-				print '  <a target=_new href="'.HEURIST_SITE_PATH.'records/edit/editRecord.html?bib_id='.$row['dtl_RecID'].'">'.$row['dtl_RecID'].'</a>'."\n";
+				print '  <a target=_new href="'.HEURIST_SITE_PATH.'records/edit/editRecord.html?recID='.$row['dtl_RecID'].'">'.$row['dtl_RecID'].'</a>'."\n";
 			}
 			print "\n </p>\n";
 		}

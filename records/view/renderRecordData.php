@@ -130,15 +130,15 @@ $wg_ids = mysql__select_array(USERS_DATABASE.'.sysUsrGrpLinks', 'ugl_GroupID', '
 array_push($wg_ids, 0);
 
 // if we get a record id tehn see if there is a personal bookmark for it.
- if (@$_REQUEST['bib_id'] && !@$_REQUEST['bkmk_id']) {
-	$res = mysql_query('select * from usrBookmarks where bkm_recID = '.intval($_REQUEST['bib_id']).' and bkm_UGrpID = '.get_user_id());
+ if (@$_REQUEST['recID'] && !@$_REQUEST['bkmk_id']) {
+	$res = mysql_query('select * from usrBookmarks where bkm_recID = '.intval($_REQUEST['recID']).' and bkm_UGrpID = '.get_user_id());
 	if (mysql_num_rows($res)>0) {
 		$row = mysql_fetch_assoc($res);
 		$_REQUEST['bkmk_id'] = $row['bkm_ID'];
 	}
 }
 $bkm_ID = intval(@$_REQUEST['bkmk_id']);
-$rec_id = intval(@$_REQUEST['bib_id']);
+$rec_id = intval(@$_REQUEST['recID']);
 if ($bkm_ID) {
 	$res = mysql_query('select * from usrBookmarks left join Records on bkm_recID=rec_ID left join defRecTypes on rec_RecTypeID=rty_ID where bkm_ID='.$bkm_ID.' and bkm_UGrpID='.get_user_id().' and (not rec_FlagTemporary or rec_FlagTemporary is null)');
 	$bibInfo = mysql_fetch_assoc($res);
@@ -189,7 +189,7 @@ function print_header_line($bib) {
         <?php if ($webIcon) print "<img id=website-icon src='" . $webIcon . "'>"; ?>
          </span>
         <?php } ?>
-        <div id=recID>Record ID:<?= htmlspecialchars($rec_id) ?><nobr><span class="link"><a id=edit-link class=normal target=_new href="../edit/editRecord.html?db=<?=HEURIST_DBNAME?>&bib_id=<?= $rec_id ?>" onClick="return sane_link_opener(this);"><img src="../../common/images/edit-pencil.png" title="Edit Record"></a></span></nobr></div>
+        <div id=recID>Record ID:<?= htmlspecialchars($rec_id) ?><nobr><span class="link"><a id=edit-link class=normal target=_new href="../edit/editRecord.html?db=<?=HEURIST_DBNAME?>&recID=<?= $rec_id ?>" onClick="return sane_link_opener(this);"><img src="../../common/images/edit-pencil.png" title="Edit Record"></a></span></nobr></div>
 	</div>
 </div>
 <?php
@@ -338,7 +338,7 @@ function print_private_details($bib) {
 
 				$res = mysql_query('select rec_Title from Records where rec_ID='.intval($bd['val']));
 				$row = mysql_fetch_row($res);
-				$bd['val'] = '<a target="_new" href="'.HEURIST_SITE_PATH.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&bib_id='.$bd['val'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row[0]).'</a>';
+				$bd['val'] = '<a target="_new" href="'.HEURIST_SITE_PATH.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['val'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row[0]).'</a>';
 			} else if ($bd['dty_Type'] == 'file'  &&  $bd['dtl_UploadedFileID']) {
 				$res = mysql_query('select * from recUploadedFiles left join defFileExtToMimetype on ulf_MimeExt = fxm_Extension where ulf_ID='.intval($bd['dtl_UploadedFileID']));
 				$file = mysql_fetch_assoc($res);
@@ -421,7 +421,7 @@ function print_other_tags($bib) {
 ?>
 <div class=detailRow>
 	<div class=detailType>Tags</div>
-	<div class=detail><nobr><a target=_new href="<?=HEURIST_SITE_PATH?>records/view/viewRecordTags.php?db=<?=HEURIST_DBNAME?>&bib_id=<?=$bib['rec_ID']?>" target=_top onclick="return link_open(this);">[Other users' tags]</a></nobr>
+	<div class=detail><nobr><a target=_new href="<?=HEURIST_SITE_PATH?>records/view/viewRecordTags.php?db=<?=HEURIST_DBNAME?>&recID=<?=$bib['rec_ID']?>" target=_top onclick="return link_open(this);">[Other users' tags]</a></nobr>
 </div></div>
 <?php
 }
@@ -458,7 +458,7 @@ global $relRT,$relSrcDT,$relTrgDT;
 		print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . '</div>'; // fetch now returns the enum string also
 		print '<div class=detail>';
 		if (@$bd['RelatedRecID']) {
-			print '<a target=_new href="'.HEURIST_URL_BASE.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&bib_id='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
+			print '<a target=_new href="'.HEURIST_URL_BASE.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
 		} else {
 			print htmlspecialchars($bd['Title']);
 		}
@@ -475,7 +475,7 @@ global $relRT,$relSrcDT,$relTrgDT;
 		print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . '</div>';
 		print '<div class=detail>';
 		if (@$bd['RelatedRecID']) {
-			print '<a target=_new href="'.HEURIST_URL_BASE.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&bib_id='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
+			print '<a target=_new href="'.HEURIST_URL_BASE.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
 		} else {
 			print htmlspecialchars($bd['Title']);
 		}
@@ -509,7 +509,7 @@ global $relRT;
 		print '<div class=detailRow>';
 		print '<div class=detailType></div>';
 		print '<div class=detail>';
-		print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&bib_id='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a>';
+		print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a>';
 		print '</div></div>';
 	}
 }

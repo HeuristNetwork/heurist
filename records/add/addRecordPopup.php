@@ -126,9 +126,9 @@ function compute_args() {
 		var wg_id = parseInt(document.getElementById('rec_OwnerUGrpID').value);
 		if (wg_id) {
 			if ( wg_id != usrID) {
-			extra_parms = '&bib_workgroup=' + wg_id;
+			extra_parms = '&rec_owner=' + wg_id;
 			}
-			extra_parms += '&bib_visibility=' + document.getElementById('rec_NonOwnerVisibility').value;
+			extra_parms += '&rec_visibility=' + document.getElementById('rec_NonOwnerVisibility').value;
 
 			var kwdList = document.getElementById('tag');
 			var tags = $("#add-link-tags").val();
@@ -141,7 +141,7 @@ function compute_args() {
 	rt = parseInt(document.getElementById('rectype_elt').value);
 
 	if (rt) {
-		return '&bib_rectype='+rt + extra_parms;
+		return '&rec_rectype='+rt + extra_parms;
 	}
 
 	return '';
@@ -159,9 +159,9 @@ function add_note(e) {
 	if (document.getElementById('restrict_elt').checked) {
 		if (wg_id) {
 			if ( wg_id != usrID) {
-			extra_parms = '&bib_workgroup=' + wg_id;
+			extra_parms = '&rec_owner=' + wg_id;
 			}
-			extra_parms += '&bib_visibility=' + vis;
+			extra_parms += '&rec_visibility=' + vis;
 
 			if (wg_id != usrID && kwdList.selectedIndex > 0) {
 				extra_parms += "&tag=" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value);
@@ -196,7 +196,7 @@ function add_note(e) {
 	}
 
 
-	window.open('<?= HEURIST_URL_BASE?>records/add/addRecord.php?addref=1&db=<?=HEURIST_DBNAME?>&bib_rectype='+rt + extra_parms);
+	window.open('<?= HEURIST_URL_BASE?>records/add/addRecord.php?addref=1&db=<?=HEURIST_DBNAME?>&rec_rectype='+rt + extra_parms);
 
 }
 
@@ -265,7 +265,7 @@ function cancelAdd(e) {
 
 	<div>
 		<div>
-			<input type="checkbox" name="bib_workgroup_restrict" id="restrict_elt" value="1" style="vertical-align: middle" onclick="document.getElementById('maintable').className = this.checked? '' : 'hide_workgroup';" style="margin: 0; padding: 0;"<?= @$_REQUEST['wg_id'] > 0 ? " checked" : ""?>>
+			<input type="checkbox" name="rec_workgroup_restrict" id="restrict_elt" value="1" style="vertical-align: middle" onclick="document.getElementById('maintable').className = this.checked? '' : 'hide_workgroup';" style="margin: 0; padding: 0;"<?= @$_REQUEST['wg_id'] > 0 ? " checked" : ""?>>
 			<label for=restrict_elt>Restrict access</label>
 		</div>
 		<div class="resource workgroup" style="margin:10px 0">

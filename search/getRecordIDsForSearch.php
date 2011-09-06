@@ -57,7 +57,7 @@ if (@$broken) {
 $res = mysql_query($query);
 $ids = array();
 while ($row = mysql_fetch_assoc($res)) {
-	array_push($ids, array("bib_id" => $row["rec_ID"], "bkmk_id" => $row["bkm_ID"]));
+	array_push($ids, array("recID" => $row["rec_ID"], "bkmk_id" => $row["bkm_ID"]));
 }
 
 print json_format($ids);

@@ -8,7 +8,7 @@
  */
 
 function selectExistingLink(linkno) {
-	var radios = document.getElementsByName('bib_id['+linkno+']');
+	var radios = document.getElementsByName('recID['+linkno+']');
 	for (i=0; i < radios.length; ++i) {
 		if (radios[i].checked)
 			radios[i].parentNode.parentNode.style.backgroundColor = '#C0C0C0';

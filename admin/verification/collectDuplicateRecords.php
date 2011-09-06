@@ -234,7 +234,7 @@ if (@$_REQUEST["db"]) {
 <?php
 }
 
-  unset($_REQUEST['personmatch']);
+unset($_REQUEST['personmatch']);
 
 print '<div id=dupeCount>' . count($dupes) . ' potential groups of duplicates</div><div class=duplicateList>';
 
@@ -245,8 +245,8 @@ foreach ($dupes as $rectype => $subarr) {
     	$diffHash = join(',',$diffHash );
     	if (in_array($diffHash,$dupeDifferences)) continue;
 	    print '<div class=duplicateGroup><div style="font-weight: bold;">' . $rectype . '&nbsp;&nbsp;&nbsp;&nbsp;';
-//	    print '<a target="_new" href="'.HEURIST_URL_BASE.'search/search.html?w=all&q=ids:' . join(',', array_keys($bibs[$key])) . '">search</a>&nbsp;&nbsp;&nbsp;&nbsp;';
-//	    print '<a target="fix" href="fix_dupes.php?bib_ids=' . join(',', array_keys($bibs[$key])) . '">fix</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+		//	    print '<a target="_new" href="'.HEURIST_URL_BASE.'search/search.html?w=all&q=ids:' . join(',', array_keys($bibs[$key])) . '">search</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+		//	    print '<a target="fix" href="fix_dupes.php?bib_ids=' . join(',', array_keys($bibs[$key])) . '">fix</a>&nbsp;&nbsp;&nbsp;&nbsp;';
 	    print '<input type="checkbox" name="dupeDiffHash[] title="Check to idicate that all records in this set are unique." id="'.$key.
 	    		'" value="' . $diffHash . '">&nbsp;&nbsp;';
 	    print '<input type="submit" value="hide">';
@@ -256,7 +256,7 @@ foreach ($dupes as $rectype => $subarr) {
 		    $res = mysql_query('select rec_URL from Records where rec_ID = ' . $rec_id);
 		    $row = mysql_fetch_assoc($res);
 		    print '<li>'.($crosstype ? $vals['type'].'&nbsp;&nbsp;' : '').
-		    		'<a target="_new" href="'.HEURIST_URL_BASE.'records/view/viewRecord.php?saneopen=1&bib_id='.$rec_id.'&db='.HEURIST_DBNAME.'">'.$rec_id.': '.htmlspecialchars($vals['val']).'</a>';
+				'<a target="_new" href="'.HEURIST_URL_BASE.'records/view/viewRecord.php?saneopen=1&recID='.$rec_id.'&db='.HEURIST_DBNAME.'">'.$rec_id.': '.htmlspecialchars($vals['val']).'</a>';
 		    if ($row['rec_URL'])
 			    print '&nbsp;&nbsp;&nbsp;<span style="font-size: 70%;">(<a target="_new" href="'.$row['rec_URL'].'">' . $row['rec_URL'] . '</a>)</span>';
 		    print '</li>';

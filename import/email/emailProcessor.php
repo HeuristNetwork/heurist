@@ -275,7 +275,7 @@
 
     	$updated = insertRecord();
     	if ($updated) {
-    		$rec_id = $_REQUEST["rec_ID"];
+				$rec_id = $_REQUEST["recID"];
     		$email->setRecId($rec_id);
 		}
 

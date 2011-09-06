@@ -163,7 +163,7 @@ foreach ($dupes as $rectype => $subarr) {
 		    $res = mysql_query('select rec_URL from Records where rec_ID = ' . $rec_id);
 		    $row = mysql_fetch_assoc($res);
 		    print '<li>'.($crosstype ? $vals['type'].'&nbsp;&nbsp;' : '').
-		    		'<a target="_new" href="'.HEURIST_URL_BASE.'records/view/viewRecord.php?db='.HEURIST_DBNAME.'&saneopen=1&bib_id='.$rec_id.'">'.$rec_id.': '.htmlspecialchars($vals['val']).'</a>';
+				'<a target="_new" href="'.HEURIST_URL_BASE.'records/view/viewRecord.php?db='.HEURIST_DBNAME.'&saneopen=1&recID='.$rec_id.'">'.$rec_id.': '.htmlspecialchars($vals['val']).'</a>';
 		    if ($row['rec_URL'])
 			    print '&nbsp;&nbsp;&nbsp;<span style="font-size: 70%;">(<a target="_new" href="'.$row['rec_URL'].'">' . $row['rec_URL'] . '</a>)</span>';
 		    print '</li>';

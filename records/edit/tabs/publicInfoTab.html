@@ -66,22 +66,22 @@ function setRectype(rftID) {
 	changed();
 }
 function setWorkgroupProperties(wg, wgVis) {
-	var wgElement = document.getElementById("bib_workgroup");
+	var wgElement = document.getElementById("rec_owner");
 	if (! wgElement) {
 		wgElement = document.createElement("input");
 		wgElement.type = "hidden";
-		wgElement.name = "bib_workgroup";
-		wgElement.id = "bib_workgroup";
+		wgElement.name = "rec_owner";
+		wgElement.id = "rec_owner";
 		document.forms[0].appendChild(wgElement);
 	}
 	wgElement.value = wg? wg : "";
 
-	var wgVisElement = document.getElementById("bib_visibility");
+	var wgVisElement = document.getElementById("rec_visibility");
 	if (! wgVisElement) {
 		wgVisElement = document.createElement("input");
 		wgVisElement.type = "hidden";
-		wgVisElement.name = "bib_visibility";
-		wgVisElement.id = "bib_visibility";
+		wgVisElement.name = "rec_visibility";
+		wgVisElement.id = "rec_visibility";
 		document.forms[0].appendChild(wgVisElement);
 	}
 	wgVisElement.value = wgVis? wgVis : "";
@@ -201,7 +201,7 @@ function renderInputs(bibID, rectype) {
 		}
 
 		var bibIDfield = document.createElement("input");
-			bibIDfield.name = "bib_id";
+			bibIDfield.name = "recID";
 			bibIDfield.type = "hidden";
 			bibIDfield.value = record.bibID;
 			document.forms[0].appendChild(bibIDfield);

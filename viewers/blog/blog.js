@@ -452,7 +452,7 @@ BlogEntry: function(record, parentElement, isNew) {
 					};
 				} else {
 					return function () {
-						window.open("../../records/add/addRecordPopup.php?addref=1&bib_rectype=" + type +
+						window.open("../../records/add/addRecordPopup.php?addref=1&rec_rectype=" + type +
 							"&related=" + that.record.getID() + (database ? "&db="+database : ""), "_blank");
 						return false;
 					};
@@ -481,7 +481,7 @@ BlogEntry: function(record, parentElement, isNew) {
 			$("<a href='#'>add</a>")
 				.click((function(type) {
 					return function () {
-						window.open("../../records/add/addRecordPopup.php?addref=1&bib_rectype=" + type +
+						window.open("../../records/add/addRecordPopup.php?addref=1&rec_rectype=" + type +
 							"&related=" + that.record.getID() + (database ? "&db="+database : ""), "_blank");
 						return false;
 					};
@@ -516,7 +516,7 @@ BlogEntry: function(record, parentElement, isNew) {
 		$p = $("<p class='related-link'/>").appendTo($div);
 			$("<a href='#'/>")
 				.click(function () {
-					window.open("../../records/edit/editRecord.html?bib_id=" + that.record.getID() +
+					window.open("../../records/edit/editRecord.html?recID=" + that.record.getID() +
 						(database ? "&db="+database : "") + "#relationships", "_blank");
 					return false;
 				})
@@ -589,7 +589,7 @@ BlogEntry: function(record, parentElement, isNew) {
 		}
 
 		if (Blog.canEdit()  ||  HCurrentUser.isAdministrator()) {
-			$("<a href='../../records/edit/editRecord.html?bib_id=" + this.record.getID() +
+			$("<a href='../../records/edit/editRecord.html?recID=" + this.record.getID() +
 						(database ? "&db="+database : "") +
 						"#annotation' target='_blank' title='edit record in Heurist'>edit full record</a>")
 				.addClass("heurist-edit-link")

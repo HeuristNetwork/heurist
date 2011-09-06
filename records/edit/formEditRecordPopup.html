@@ -52,7 +52,7 @@
   <script>
 			if (!window.HEURIST) window.HEURIST = {};
 			window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-			window.HEURIST.loadScript(top.HEURIST.basePath +'common/php/loadRecordData.php?bib_id='+window.HEURIST.parameters['bib_id'], true);
+			window.HEURIST.loadScript(top.HEURIST.basePath +'common/php/loadRecordData.php?recID='+window.HEURIST.parameters['recID'], true);
 
 			function showRecordProperties() {
 				if (! window.HEURIST.edit.record) {
@@ -75,8 +75,8 @@
 				var editFrame = document.getElementById("edit-frame");
 
 				var parameters = window.HEURIST.parameters;
-				if (parameters  &&  parameters.bib_id) {
-					editFrame.src = top.HEURIST.baseURL + "records/edit/tabs/publicInfoTab.html?bib_id=" + parameters.bib_id;
+				if (parameters  &&  parameters.recID) {
+					editFrame.src = top.HEURIST.baseURL + "records/edit/tabs/publicInfoTab.html?recID=" + parameters.recID;
 					editFrame.style.display = "block";
 				}
 

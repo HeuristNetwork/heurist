@@ -353,7 +353,7 @@ bookmark: function(rectype) {
 				 '&u=' + Heurist.urlcleaner(encodeURIComponent(url)) +
 				 (sel?('&d=' + Heurist.urlcleaner(encodeURIComponent(sel))) : '') +
 				 (favicon? ('&f=' + encodeURIComponent(favicon)) : '') +
-				 (rectype ? '&bib_rectype=' + rectype : '') +
+				 (rectype ? '&rec_rectype=' + rectype : '') +
 				 '&version=' + version);
 	void(window.setTimeout('w.focus()',200));
 },

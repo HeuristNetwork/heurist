@@ -80,7 +80,12 @@ if (count(@$deletions) > 0) {
 //error_log("in deleted details for record $del_recID ".mysql_error());
 			mysql_query("delete from Records where rec_ID = $del_recID");
 //error_log("in deleted delete record $del_recID ".mysql_error());
+			if (mysql_error()) {
+				print "(" . json_format(array("error" => slash(mysql_error()))) . ")";
+				return;
+			}
 		}
+
 
 		$relatedRecords = getAllRelatedRecords($recID);
 

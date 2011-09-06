@@ -31,7 +31,7 @@ if (@$_REQUEST['bkmk_id']) {
 	$bkmk = mysql_fetch_assoc($res);
 	$rec_id = $bkmk['bkm_recID'];
 } else {
-	$rec_id = @$_REQUEST['bib_id'];
+	$rec_id = @$_REQUEST['recID'];
 
 	// check if this bib has been replaced
 	$replacement = get_replacement_bib_id($rec_id);
@@ -78,7 +78,7 @@ $rec_title = $row['rec_Title'];
 	<div><h2>Record details</h2></div>
 	<div>
 	<h3><?= htmlspecialchars($rec_title) ?></h3>
-	<iframe name="viewer" frameborder="0" style="width: 100%;height: 100%;" src="<?=HEURIST_SITE_PATH?>records/view/renderRecordData.php?<?= ($bkm_ID ? ('bkmk_id='.$bkm_ID) : ('bib_id='.$rec_id)) ?><?= $noclutter ?>"></iframe>
+	<iframe name="viewer" frameborder="0" style="width: 100%;height: 100%;" src="<?=HEURIST_SITE_PATH?>records/view/renderRecordData.php?<?= ($bkm_ID ? ('bkmk_id='.$bkm_ID) : ('recID='.$rec_id)) ?><?= $noclutter ?>"></iframe>
 	</div>
 </body>
 </html>

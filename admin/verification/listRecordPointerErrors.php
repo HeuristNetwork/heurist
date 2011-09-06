@@ -85,7 +85,7 @@ These checks look for invalid record pointers within the Heurist database. These
 foreach ($bibs as $row) {
 ?>
  <tr>
-  <td><a target=_new href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&bib_id=<?= $row['dtl_RecID'] ?>'><?= $row['dtl_RecID'] ?></a></td>
+  <td><a target=_new href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'><?= $row['dtl_RecID'] ?></a></td>
   <td><?= $row['dty_Name'] ?></td>
   <td>points to</td>
   <td><?= $row['rec_ID'] ?> (<?= $row['rty_Name'] ?>) - <?= substr($row['rec_Title'], 0, 50) ?></td>
@@ -126,7 +126,7 @@ foreach ($bibs as $row) {
 ?>
  <tr>
   <td><input type=checkbox name=bib_cb value=<?= $row['dtl_RecID'] ?>></td>
-  <td><a target=_new href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&bib_id=<?= $row['dtl_RecID'] ?>'><?= $row['dtl_RecID'] ?></a></td>
+  <td><a target=_new href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'><?= $row['dtl_RecID'] ?></a></td>
   <td><?= $row['rec_Title'] ?></td>
   <td><?= $row['dty_Name'] ?></td>
  </tr>

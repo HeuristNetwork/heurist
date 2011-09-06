@@ -91,9 +91,9 @@ if(numberOfSelectedRecords < 2) {
 
 if(compare) {
 	var record1Frame = document.getElementById("record1Frame");
-	record1Frame.src = top.HEURIST.basePath+"records/view/renderRecordData.php?bib_id="+recordID1+"&db="+db;
+	record1Frame.src = top.HEURIST.basePath+"records/view/renderRecordData.php?recID="+recordID1+"&db="+db;
 	var record2Frame = document.getElementById("record2Frame");
-	record2Frame.src = top.HEURIST.basePath+"records/view/renderRecordData.php?bib_id="+recordID2+"&db="+db;
+	record2Frame.src = top.HEURIST.basePath+"records/view/renderRecordData.php?recID="+recordID2+"&db="+db;
 	document.getElementById("record1Pane").setAttribute("class", "recordPane");
 	document.getElementById("relationPane").setAttribute("class", "relationPane");
 	document.getElementById("record2Pane").setAttribute("class", "recordPane");

@@ -132,7 +132,7 @@ foreach ($recs as $rec_id => $rec) {
 	else
 		print '<li>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($rec['rec_Title']) . '';
 
-	print ' <a target=_blank href="'.HEURIST_URL_BASE.'records/edit/editRecord.html?bib_id='.$rec_id.'&db='.HEURIST_DBNAME.'">*</a> <br> <br>';
+	print ' <a target=_blank href="'.HEURIST_URL_BASE.'records/edit/editRecord.html?recID='.$rec_id.'&db='.HEURIST_DBNAME.'">*</a> <br> <br>';
 
 	if ($rec_id % 10 == 0) {
 		ob_flush();

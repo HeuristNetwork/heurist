@@ -25,7 +25,7 @@ if (! is_logged_in()) return;
 mysql_connection_db_overwrite(DATABASE);
 
 
-$rec_id = intval($_POST["bib_id"]);
+$rec_id = intval($_POST["recID"]);
 $rem_id = intval($_POST["rem_ID"]);
 if ($rec_id  &&  $_POST["save-mode"] == "add") {
 	if ($_POST["reminder-user"]) {

@@ -131,7 +131,7 @@ var Comment = function(parentComment, details) {
 	var detailText = details.text || "";
 		detailText = detailText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 		detailText = detailText.replace(/(http:\/\/[\041-\176]+)/g, "<a href=\"$1\">$1</a>");
-		detailText = detailText.replace(/\[(\d+)\]/g, "[<a href=\""+ installDir +"records/view/viewRecord.php?bib_id=$1\">$1</a>]");
+		detailText = detailText.replace(/\[(\d+)\]/g, "[<a href=\""+ installDir +"records/view/viewRecord.php?recID=$1\">$1</a>]");
 
 	this.textDiv = this.innerDiv.appendChild(this.document.createElement("div"));
 		this.textDiv.className = "text";
@@ -327,7 +327,7 @@ EditableComment.prototype.save = function() {
 	var fakeForm = { action: installDir + "records/comments/saveThreadedComments.php",
 			elements: [
 				{ name: "cmt_ID", value: this.id },
-				{ name: "bib_id", value: parent.HEURIST.edit.record.bibID },
+				{ name: "recID", value: parent.HEURIST.edit.record.bibID },
 				{ name: "owner",  value: this.parentComment.id },
 				{ name: "text",   value: this.textarea.value }
 			] };

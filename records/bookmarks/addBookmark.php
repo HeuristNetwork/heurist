@@ -27,7 +27,7 @@ header("Content-type: text/javascript");
 
 /* chase down any "replaced by" indirections */
 $usrID = get_user_id();
-$rec_id = intval($_REQUEST["bib_id"]);
+$rec_id = intval($_REQUEST["recID"]);
 $res = mysql_query("select * from Records where rec_ID = $rec_id");
 $bib = mysql_fetch_assoc($res);
 if (! $bib) {

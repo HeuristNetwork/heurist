@@ -24,7 +24,7 @@ mysql_connection_overwrite(DATABASE);
 
 header("Content-type: text/javascript");
 
-$rec_id = intval(@$_POST["bib_id"]);
+$rec_id = intval(@$_POST["recID"]);
 $actions = $_POST["action"];
 if ($rec_id  &&  $actions) {
 	$deletions = array();

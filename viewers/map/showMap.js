@@ -118,7 +118,7 @@ function ShowMap() {
 
 				}else if(geoobj.type === "kml"){
 					var url2 = top.HEURIST.basePath;
-					url2 += "viewers/map/getKMLfromRecord.php?db=" + top.HEURIST.database.name + "&rec_ID="+geoobj.recid;
+					url2 += "viewers/map/getKMLfromRecord.php?db=" + top.HEURIST.database.name + "&recID="+geoobj.recid;
 					kmls.push(url2);
 				}else if(geoobj.type === "none"){
 					isempty = true;

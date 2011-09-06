@@ -53,7 +53,7 @@ mysql_query('set @logged_in_user_id = ' . get_user_id());
 
 $checkSimilar = array_key_exists("check-similar", $_POST);
 if ($checkSimilar) {
-	$rec_id = intval(@$_POST["bib_id"]);
+	$rec_id = intval(@$_POST["recID"]);
 	$rec_types = array(intval(@$_POST["rectype"]));
 
 	$fields = array();
@@ -72,14 +72,16 @@ if ($checkSimilar) {
 
 
 
-if ($_POST["save-mode"] == "edit"  &&  intval($_POST["bib_id"])) {
-	$updated = updateRecord(intval($_POST["bib_id"]));
+if ($_POST["save-mode"] == "edit"  &&  intval($_POST["recID"])) {
+	$updated = updateRecord(intval($_POST["recID"]));
 } else if ($_POST["save-mode"] == "new") {
 	$updated = insertRecord();
 } else {
 	$updated = false;
 }
 
+//error_log(" Save dtl Request  ".print_r($_REQUEST,true));
+//error_log(" Save dtl Post  ".print_r($_POST,true));
 
 if ($updated) {
 	// Update bib record data
@@ -211,13 +213,13 @@ function updateRecord($bibID) {
 			$bibUpdates["rec_NonOwnerVisibility"] = $_POST["bib_visibility"];
 		}
 	}
-	error_log(" in saveRecord update recUpdates = ".print_r($bibUpdates,true));
+//	error_log(" in saveRecord update recUpdates = ".print_r($bibUpdates,true));
 	mysql__update("Records", "rec_ID=$bibID", $bibUpdates);
 	$biblioUpdated = (mysql_affected_rows() > 0)? true : false;
 if (mysql_error()) error_log("error rec update".mysql_error());
 	$updatedRowCount = 0;
 	foreach ($bibDetailUpdates as $bdID => $vals) {
-	error_log(" in saveRecord update details dtl_ID = $bdID value =".print_r($vals,true));
+//	error_log(" in saveRecord update details dtl_ID = $bdID value =".print_r($vals,true));
 		mysql__update("recDetails", "dtl_ID=$bdID and dtl_RecID=$bibID", $vals);
 		if (mysql_affected_rows() > 0) {
 			++$updatedRowCount;
@@ -227,7 +229,7 @@ if (mysql_error()) error_log("error detail updates".mysql_error());
 
 	$insertedRowCount = 0;
 	foreach ($bibDetailInserts as $vals) {
-	error_log(" in saveRecord insert details detail =".print_r($vals,true));
+//	error_log(" in saveRecord insert details detail =".print_r($vals,true));
 		mysql__insert("recDetails", $vals);
 		if (mysql_affected_rows() > 0) {
 			++$insertedRowCount;
@@ -237,7 +239,7 @@ if (mysql_error()) error_log("error detail inserts".mysql_error());
 
 	$deletedRowCount = 0;
 	if ($bibDetailDeletes) {
-	error_log(" in saveRecord delete details ".print_r($bibDetailDeletes,true));
+//	error_log(" in saveRecord delete details ".print_r($bibDetailDeletes,true));
 		mysql_query("delete from recDetails where dtl_ID in (" . join($bibDetailDeletes, ",") . ") and dtl_RecID=$bibID");
 		if (mysql_affected_rows() > 0) {
 			$deletedRowCount = mysql_affected_rows();
@@ -283,13 +285,13 @@ function insertRecord() {
 	mysql__insert("Records", array(
 		"rec_Added" => date('Y-m-d H:i:s'),
 		"rec_AddedByUGrpID" => get_user_id(),
-		"rec_RecTypeID" => $_POST["rectype"],
-		"rec_ScratchPad" => $_POST["notes"],
-		"rec_OwnerUGrpID" => $_POST["owner"]?$_POST["owner"]:'0',
-		"rec_NonOwnerVisibility" => $_POST["visibility"]?$_POST["visibility"]:'viewable',
-		"rec_URL" => $_POST["rec_url"]? $_POST["rec_url"] : ""));
+		"rec_RecTypeID" => intval(@$_POST["rectype"])? intval($_POST["rectype"]):RT_NOTE,
+		"rec_ScratchPad" => @$_POST["notes"] ? $_POST["notes"]:null,
+		"rec_OwnerUGrpID" => @$_POST["owner"]?$_POST["owner"]:(HEURIST_NEWREC_OWNER_ID ? HEURIST_NEWREC_OWNER_ID : '0'),
+		"rec_NonOwnerVisibility" => @$_POST["visibility"]?$_POST["visibility"]:(HEURIST_NEWREC_ACCESS ? HEURIST_NEWREC_ACCESS:'viewable'),
+		"rec_URL" => @$_POST["rec_url"]? $_POST["rec_url"] : ""));
 
-	$_REQUEST["rec_ID"] = $bibID = mysql_insert_id();
+	$_REQUEST["recID"] = $bibID = mysql_insert_id();
 	if($bibID){
 		updateRecord($bibID);
 		return true;

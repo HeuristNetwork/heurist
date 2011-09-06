@@ -1483,7 +1483,7 @@ function find_exact_entry(&$entry) {
 	$someMatch = mysql_fetch_row($res);
 	$someMatch = $someMatch[0];
 	if ($someMatch) {
-	// error_log(" matching bib_id = ". $someMatch);
+	// error_log(" matching recID = ". $someMatch);
 		setPermanentBiblioID($entry, $someMatch);
 		return true;
 	}

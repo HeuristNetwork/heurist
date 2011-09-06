@@ -21,8 +21,8 @@ if (! is_logged_in()) return;
 mysql_connection_db_overwrite(DATABASE);
 
 
-if (! @$_POST["rec_ID"]) {
-	$bibID = intval($_GET["bib_id"]);
+if (! @$_POST["recID"]) {
+	$bibID = intval($_GET["recID"]);
 	$bdtID = intval($_GET["bdt_id"]);
 }
 if (@$bibID  &&  @$bdtID) {
@@ -32,7 +32,7 @@ if (@$bibID  &&  @$bdtID) {
 <link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/global.css">
 <body style="padding: 0; margin: 0;">
 <form method=post enctype=multipart/form-data style="display: inline; padding: 0; margin: 0;">
-<input type=hidden name=bib_id value=<?= $bibID ?>>
+<input type=hidden name=recID value=<?= $bibID ?>>
 <input type=hidden name=bdt_id value=<?= $bdtID ?>>
 <input type=file name=file onchange="form.submit()">
 </form>
@@ -41,7 +41,7 @@ if (@$bibID  &&  @$bdtID) {
 	return;
 }
 
-$bibID = intval($_POST["bib_id"]);
+$bibID = intval($_POST["recID"]);
 $bdtID = intval($_POST["bdt_id"]);
 if (! ($bibID && $bdtID)) { print "<html><body style='color: blue;'></body></html>"; return; }
 

@@ -65,10 +65,9 @@ if ($refer == "formEditRecordPopup") {
 	$isPopup = true;
 }
 //error_log(print_r($_SERVER,true));
-error_log("refer = $refer  and  isPopup = ".($isPopup ? "1":"0") );
 mysql_connection_db_select(DATABASE);
 
-list($rec_id, $bkm_ID, $replaced) = getResolvedIDs(@$_REQUEST["bib_id"],@$_REQUEST['bkmk_id']);
+list($rec_id, $bkm_ID, $replaced) = getResolvedIDs(@$_REQUEST["recID"],@$_REQUEST['bkmk_id']);
 
 if (! $rec_id) {
 	// record does not exist
