@@ -206,11 +206,11 @@ function updateRecord($bibID) {
 		$bibUpdates["rec_URL"] = $_POST["rec_url"];
 	}
 	if (is_admin()) {
-		if (array_key_exists("bib_workgroup", $_POST)) {
-			$bibUpdates["rec_OwnerUGrpID"] = $_POST["bib_workgroup"];
+		if (array_key_exists("rec_owner", $_POST)) {
+			$bibUpdates["rec_OwnerUGrpID"] = $_POST["rec_owner"];
 		}
-		if (array_key_exists("bib_visibility", $_POST)) {
-			$bibUpdates["rec_NonOwnerVisibility"] = $_POST["bib_visibility"];
+		if (array_key_exists("rec_visibility", $_POST)) {
+			$bibUpdates["rec_NonOwnerVisibility"] = $_POST["rec_visibility"];
 		}
 	}
 //	error_log(" in saveRecord update recUpdates = ".print_r($bibUpdates,true));

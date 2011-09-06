@@ -385,7 +385,7 @@
 			</span>
 	</div>
 <!-- end footer -->
-<div style="position: absolute;">
+	<div style="position: absolute;">
 	<div id="workgroup-editor" style="display: none;">
         <div>
         	<h2>Change record access:</h2>
@@ -412,7 +412,7 @@
             <input type=button value="Cancel" onClick="closeWorkgroupChanger(true);">
             </div>
 	</div>
-</div>
+	</div>
 
 <div id=workgroup-message style="display: none;">
 	<div style="padding: 5px;">
@@ -433,7 +433,11 @@
 	function testWorkgroupMessage() {
 		top.HEURIST.deregisterEvent(window, "load", testWorkgroupMessage);
 
-		if (! (top.HEURIST.parameters["wg"]  ||  top.HEURIST.parameters["wgkwd"])) return;
+		if (top.HEURIST.parameters["wg"] == top.HEURIST.get_user_id() ||
+				!(top.HEURIST.parameters["wg"] ||
+				top.HEURIST.parameters["wgkwd"])) {
+			return;
+		}
 		var wg = top.HEURIST.workgroups[parseInt(top.HEURIST.parameters["wg"])];
 
 		document.getElementById("workgroup-message-wgname").appendChild(document.createTextNode(wg? wg.name : ""));

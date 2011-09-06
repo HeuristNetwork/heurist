@@ -79,8 +79,10 @@ if (! $rec_id) {
 } else {
 	$record = getBaseProperties($rec_id, $bkm_ID);
 //error_log("base Properties".print_r($record,true));
-	if (@$record["workgroupID"]  &&  $record[@"workgroupVisibility"] == "hidden"  &&  ! $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["user_access"][$record["workgroupID"]]) {
-		// record is hidden and user is not a member of owning workgroup
+	if (@$record["workgroupID"] && $record["workgroupID"] != get_user_id() &&
+			$record[@"workgroupVisibility"] == "hidden"  &&
+			! $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["user_access"][$record["workgroupID"]]) {
+		// record is hidden and user is not the owner or a member of owning workgroup
 		$record = array();
 		$record["denied"] = true;
 	} else {

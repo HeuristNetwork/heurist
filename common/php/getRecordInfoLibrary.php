@@ -105,6 +105,7 @@ function getBaseProperties($rec_id, $bkm_ID) {
 	if ($bkm_ID) {
 		$res = mysql_query('select rec_ID, rec_Title as title, rty_Name as rectype,
 									rty_ID as rectypeID, rec_URL as url, grp.ugr_ID as workgroupID,
+									concat(grp.ugr_FirstName,\' \',grp.ugr_LastName) as name,
 									grp.ugr_Name as workgroup, rec_ScratchPad as notes,
 									rec_NonOwnerVisibility as visibility, bkm_PwdReminder as passwordReminder,
 									bkm_Rating as rating, rec_Modified, rec_FlagTemporary
@@ -115,6 +116,7 @@ function getBaseProperties($rec_id, $bkm_ID) {
 	} else if ($rec_id) {
 		$res = mysql_query('select rec_ID, rec_Title as title, rty_Name as rectype, rty_ID as rectypeID,
 									rec_URL as url, grp.ugr_ID as workgroupID, grp.ugr_Name as workgroup,
+									concat(grp.ugr_FirstName,\' \',grp.ugr_LastName) as name,
 									rec_ScratchPad as notes, rec_NonOwnerVisibility as visibility, rec_Modified,
 									rec_FlagTemporary
 								from Records left join usrBookmarks on bkm_recID=rec_ID
@@ -146,7 +148,7 @@ function getBaseProperties($rec_id, $bkm_ID) {
 	$props["quickNotes"] = @$row["quickNotes"]? $row["quickNotes"] : "";
 	if ($row['workgroupID']) {
 		$props['workgroupID'] = $row['workgroupID'];
-		$props['workgroup'] = $row['workgroup'];
+		$props['workgroup'] = $row['workgroupID']== get_user_id()? $row['name']:$row['workgroup'];
 		if ($row['visibility']) $props['workgroupVisibility'] = $row['visibility'];
 	}
 //	$props['notes'] = $row['notes']; // saw TODO: add code to get personal woots

@@ -252,11 +252,8 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 		                              'rec_Modified' => date('Y-m-d H:i:s'),
 		                              'rec_AddedByUGrpID' => intval($usrID),
 				                      'rec_RecTypeID' => $rt? $rt : RT_INTERNET_BOOKMARK,
-				'rec_OwnerUGrpID' => (intval(@$_REQUEST['rec_owner'])?
-									intval(@$_REQUEST['rec_owner']): intval($usrID)),
-				'rec_NonOwnerVisibility' => (@$_REQUEST['rec_visibility']?
-									(strtolower($_REQUEST['rec_visibility']) == 'viewable'? 'viewable':'hidden')
-									: (@$_REQUEST['rec_owner'] && intval(@$_REQUEST['rec_owner'] !== $userID)? 'hidden' : 'viewable')),
+										'rec_OwnerUGrpID' => (intval(@$_REQUEST['rec_owner'])?intval($_REQUEST['rec_owner']): HEURIST_NEWREC_OWNER_ID),
+										'rec_NonOwnerVisibility' => (@$_REQUEST['rec_visibility']?(strtolower($_REQUEST['rec_visibility'])) :HEURIST_NEWREC_ACCESS),
 		                              'rec_FlagTemporary' => ! ($url  ||  $_REQUEST['bkmrk_bkmk_title'])));
 		$rec_id = mysql_insert_id();
 
@@ -295,13 +292,10 @@ if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 	                              'rec_Added' => date('Y-m-d H:i:s'),
 	                              'rec_Modified' => date('Y-m-d H:i:s'),
 	                              'rec_AddedByUGrpID' => intval($usrID),
-		                      'rec_RecTypeID' => $rt? $rt : 1,
-					'rec_OwnerUGrpID' => (intval(@$_REQUEST['rec_owner'])?
-									intval(@$_REQUEST['rec_owner']): intval($usrID)),
-					'rec_NonOwnerVisibility' => (@$_REQUEST['rec_visibility']?
-									(strtolower($_REQUEST['rec_visibility']) == 'viewable'? 'viewable':'hidden')
-									: (@$_REQUEST['rec_owner'] && intval(@$_REQUEST['rec_owner'] !== $userID)? 'hidden' : 'viewable')),
-	                              'rec_FlagTemporary' => ! $_REQUEST['bkmrk_bkmk_title'])); // saw BUG???
+									'rec_RecTypeID' => $rt? $rt : RT_INTERNET_BOOKMARK,
+									'rec_OwnerUGrpID' => (intval(@$_REQUEST['rec_owner'])?intval($_REQUEST['rec_owner']): HEURIST_NEWREC_OWNER_ID),
+									'rec_NonOwnerVisibility' => (@$_REQUEST['rec_visibility']?(strtolower($_REQUEST['rec_visibility'])) :HEURIST_NEWREC_ACCESS),
+									'rec_FlagTemporary' => ! ($_REQUEST['bkmrk_bkmk_title']))); // saw BUG???
 //	error_log(mysql_error());
 	$rec_id = mysql_insert_id();
 	if (@$_REQUEST['bkmrk_bkmk_title']) {

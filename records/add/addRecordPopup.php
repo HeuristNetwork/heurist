@@ -158,9 +158,7 @@ function add_note(e) {
 	var tags = $("#add-link-tags").val();
 	if (document.getElementById('restrict_elt').checked) {
 		if (wg_id) {
-			if ( wg_id != usrID) {
 			extra_parms = '&rec_owner=' + wg_id;
-			}
 			extra_parms += '&rec_visibility=' + vis;
 
 			if (wg_id != usrID && kwdList.selectedIndex > 0) {
