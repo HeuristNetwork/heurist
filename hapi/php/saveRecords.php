@@ -32,10 +32,25 @@ mysql_query("start transaction");
 /* check if there are any records identified only by their hhash values */
 $nonces = array();
 $retitleRecs = array();
+$addRecDefaults = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['addRecDefaults'];
+if ($addRecDefaults){
+	if ($addRecDefaults[0]){
+		$userDefaultRectype = intval($addRecDefaults[0]);
+	}
+	if ($addRecDefaults[1]){
+		$userDefaultOwnerGroupID = intval($addRecDefaults[1]);
+	}
+	if ($addRecDefaults[2]){
+		$userDefaultVisibility = $addRecDefaults[2];
+	}
+}
 
 foreach ($_REQUEST["records"] as $nonce => $record) {
 	if (! $record["id"]) {
-		mysql__insert("Records", array("rec_AddedByUGrpID" => get_user_id(),"rec_OwnerUGrpID"=> get_user_id(), "rec_Added" => date('Y-m-d H:i:s')));
+		mysql__insert("Records", array("rec_AddedByUGrpID" => get_user_id(),
+										"rec_OwnerUGrpID"=> $userDefaultOwnerGroupID ? $userDefaultOwnerGroupID :
+																(HEURIST_NEWREC_OWNER_ID ? HEURIST_NEWREC_OWNER_ID:0),
+										"rec_Added" => date('Y-m-d H:i:s')));
 		$id = mysql_insert_id();
 		$_REQUEST["records"][$nonce]["id"] = $id;
 	}

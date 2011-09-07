@@ -64,6 +64,19 @@ $usrID = get_user_id();
 mysql_connection_db_overwrite(DATABASE);
 mysql_query("set @logged_in_user_id = $usrID");	//saw TODO: check where else this needs to be used
 
+$addRecDefaults = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['addRecDefaults'];
+if ($addRecDefaults){
+	if ($addRecDefaults[0]){
+		$userDefaultRectype = intval($addRecDefaults[0]);
+	}
+	if ($addRecDefaults[1]){
+		$userDefaultOwnerGroupID = intval($addRecDefaults[1]);
+	}
+	if ($addRecDefaults[2]){
+		$userDefaultVisibility = $addRecDefaults[2];
+	}
+}
+
 /* preprocess any description */
 if (@$_REQUEST['bkmrk_bkmk_description']) {
 	$description = $_REQUEST['bkmrk_bkmk_description'];
@@ -233,8 +246,13 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 		$isNewRecID = true;
 		$rt = intval($_REQUEST['rec_rectype']);
 		if (! $rt) {
-			if ($url && defined('RT_INTERNET_BOOKMARK')) $_REQUEST['rec_rectype']= $rt = RT_INTERNET_BOOKMARK;	/* Internet bookmark */
-			else if (defined('RT_NOTE')) $_REQUEST['rec_rectype'] = $rt = RT_NOTE;	/* Floating note */
+			if ( $userDefaultRectype && check_rectype_exist($userDefaultRectype)) {
+				 $_REQUEST['rec_rectype']= $rt = $userDefaultRectype;
+			} else if ($url && defined('RT_INTERNET_BOOKMARK')) {
+				$_REQUEST['rec_rectype']= $rt = RT_INTERNET_BOOKMARK;	/* Internet bookmark */
+			} else if (defined('RT_NOTE')) {
+				$_REQUEST['rec_rectype'] = $rt = RT_NOTE;	/* Floating note */
+			}
 		} else if (!check_rectype_exist($rt)) {
 			// the rectype passed in is not available on this instance  send them to the  add resource popup
 			header('Location: ' . HEURIST_URL_BASE . 'records/add/addRecord.php'
@@ -252,8 +270,12 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 		                              'rec_Modified' => date('Y-m-d H:i:s'),
 		                              'rec_AddedByUGrpID' => intval($usrID),
 				                      'rec_RecTypeID' => $rt? $rt : RT_INTERNET_BOOKMARK,
-										'rec_OwnerUGrpID' => (intval(@$_REQUEST['rec_owner'])?intval($_REQUEST['rec_owner']): HEURIST_NEWREC_OWNER_ID),
-										'rec_NonOwnerVisibility' => (@$_REQUEST['rec_visibility']?(strtolower($_REQUEST['rec_visibility'])) :HEURIST_NEWREC_ACCESS),
+										'rec_OwnerUGrpID' => (intval(@$_REQUEST['rec_owner'])?intval($_REQUEST['rec_owner']):
+																($userDefaultOwnerGroupID ? $userDefaultOwnerGroupID :
+																	(defined('HEURIST_NEWREC_OWNER_ID') ? HEURIST_NEWREC_OWNER_ID: intval($usrID)))),
+										'rec_NonOwnerVisibility' => (@$_REQUEST['rec_visibility']?(strtolower($_REQUEST['rec_visibility'])):
+																($userDefaultVisibility ? $userDefaultVisibility :
+																	(defined('HEURIST_NEWREC_ACCESS') ? HEURIST_NEWREC_ACCESS: 'viewable'))),
 		                              'rec_FlagTemporary' => ! ($url  ||  $_REQUEST['bkmrk_bkmk_title'])));
 		$rec_id = mysql_insert_id();
 
@@ -293,8 +315,12 @@ if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 	                              'rec_Modified' => date('Y-m-d H:i:s'),
 	                              'rec_AddedByUGrpID' => intval($usrID),
 									'rec_RecTypeID' => $rt? $rt : RT_INTERNET_BOOKMARK,
-									'rec_OwnerUGrpID' => (intval(@$_REQUEST['rec_owner'])?intval($_REQUEST['rec_owner']): HEURIST_NEWREC_OWNER_ID),
-									'rec_NonOwnerVisibility' => (@$_REQUEST['rec_visibility']?(strtolower($_REQUEST['rec_visibility'])) :HEURIST_NEWREC_ACCESS),
+									'rec_OwnerUGrpID' => (intval(@$_REQUEST['rec_owner'])?intval($_REQUEST['rec_owner']):
+															($userDefaultOwnerGroupID ? $userDefaultOwnerGroupID :
+																(defined('HEURIST_NEWREC_OWNER_ID') ? HEURIST_NEWREC_OWNER_ID: intval($usrID)))),
+									'rec_NonOwnerVisibility' => (@$_REQUEST['rec_visibility']?(strtolower($_REQUEST['rec_visibility'])):
+															($userDefaultVisibility ? $userDefaultVisibility :
+																(defined('HEURIST_NEWREC_ACCESS') ? HEURIST_NEWREC_ACCESS: 'viewable'))),
 									'rec_FlagTemporary' => ! ($_REQUEST['bkmrk_bkmk_title']))); // saw BUG???
 //	error_log(mysql_error());
 	$rec_id = mysql_insert_id();

@@ -68,7 +68,7 @@
 				<div class=input-row>
 					<div class=input-header-cell>Private notes<div class="help prompt">These notes are private and visible only to you.</div> </div>
 					<div class=input-cell>
-						<div id=woot></div>
+						<div id=personalWoot></div>
 						<div>
 							<a id=woot-ext-link target=_blank href="../../woot/woot.html">open in new window</a>
 						</div>
@@ -212,7 +212,7 @@
 			document.getElementById("woot-ext-link").href += "?w=" + wootTitle + "&t=" + recTitle;
 
 			HAPI.WOOT.GUI.labelsForLanguage.en.emptyMessage.label = "&lt;&lt; Empty or no visible text blocks &gt;&gt;";
-			var wootEditor = new HAPI.WOOT.GUI.WootEditor({ title: wootTitle, id: "woot" });
+			var wootEditor = new HAPI.WOOT.GUI.WootEditor({ title: wootTitle, element: document.getElementById("personalWoot") });
 
 
 		</script>

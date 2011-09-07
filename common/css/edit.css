@@ -829,7 +829,7 @@ td.input-cell.readonly img.edit-resource {
 	overflow-y: auto;
 }
 .woot-title {
-	display: none;
+	display: none !important;
 }
 /* personal tab */
 .rating-row select {

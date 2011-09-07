@@ -1,11 +1,11 @@
 /*
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- */
+* filename, brief description, date of creation, by whom
+* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+* @todo
+*/
 
 if (! window["HAPI"]) {
 	alert(
@@ -354,6 +354,7 @@ HAPI.WOOT.GUI = function() {
 			HAPI.WOOT.loadWoot(opts.title, { onload: function(_, woot) { that.initWoot(woot); } });
 		}
 	}
+
 	WootEditor.prototype.initWoot = function(woot) {
 		this.woot = woot;
 		this.setTitle(woot.title);
@@ -443,7 +444,7 @@ HAPI.WOOT.GUI = function() {
 
 		this.edit = true;
 		this.div.className += " edit";
-/*		var editLink = document.createElement("a");
+		/*		var editLink = document.createElement("a");
 			editLink.className = "woot-mode-edit-link";
 			editLink.href = "#";
 			editLink.onclick = function() {
@@ -474,7 +475,7 @@ HAPI.WOOT.GUI = function() {
 		this.modeDiv.appendChild(msg);
 		this.modeDiv.appendChild(editLink);
 		this.modeDiv.appendChild(viewLink);
-*/
+		*/
 	};
 
 	WootEditor.prototype.clearChunks = function() {
@@ -571,7 +572,7 @@ HAPI.WOOT.GUI = function() {
 				this.div.className += " empty";
 			}
 
-/*			if (! this.chunk.isReadOnly()) {
+		/*			if (! this.chunk.isReadOnly()) {
 				chunkText.onclick = function() {
 					if (that.wootEditor.edit) {
 						that.unlock();
@@ -581,7 +582,7 @@ HAPI.WOOT.GUI = function() {
 					}
 				};
 			}
-*/
+		*/
 			this.chunkText = chunkText;
 
 			if (this.editButton) {

@@ -129,8 +129,7 @@ function saveRelationship($recID, $relTermID, $trgRecID, $interpRecID, $title, $
 	$srcTitle = $srcTitle['rec_Title'];
 	$trgTitle = mysql_fetch_assoc(mysql_query("select rec_Title from Records where rec_ID = $trgRecID"));
 	$trgTitle = $trgTitle['rec_Title'];
-	mysql__insert("Records", array(
-		"rec_Title" => "$title ($srcTitle $relval $trgTitle)",
+	mysql__insert("Records", array("rec_Title" => "$title ($srcTitle $relval $trgTitle)",
                 "rec_Added"     => date('Y-m-d H:i:s'),
                 "rec_Modified"  => date('Y-m-d H:i:s'),
 					"rec_RecTypeID"   => RT_RELATION,

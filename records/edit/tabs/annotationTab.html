@@ -1,20 +1,20 @@
 <!--
 
 /**
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
+* filename, brief description, date of creation, by whom
+* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+* @todo
+**/
 
 -->
 <html>
  <head>
   <link rel=stylesheet href="../../../common/css/global.css">
   <link rel=stylesheet href="../../../common/css/edit.css">
-<!--  <link rel=stylesheet href="../../../common/css/woot.css">    -->
+		<!--  <link rel=stylesheet href="../../../common/css/woot.css">    -->
 
   <script>
 	function onshow() {}
@@ -33,7 +33,7 @@
    <span class="help prompt">WYSIWYG formatting and embedded links and images.<br>Note: Access rights can be set for individual paragraphs allowing personal notes which are visible only to you or which may be shared with your workgroups.
     </span>
 
-   <div id=woot></div>
+			<div id=publicWoot></div>
    <a id=woot-ext-link target=_blank href="../../woot/woot.html">open in new window</a>
   </div>
 
@@ -46,7 +46,7 @@
 
   <script>
 
-var installDir = function(){
+			var installDir = function(){
 	 var path = (top ? top.location.pathname : (window ? window.location.pathname : ""));
 	 if ( path && path != "undefined") {
 	 	path = path.match(/\/[^\s\/]\//);
@@ -54,13 +54,13 @@ var installDir = function(){
 	 	return path;
 	 }
 	 return "";
-}();
+			}();
 
 
-function changed() { top.HEURIST.edit.changed("annotation"); }
-function unchanged() { top.HEURIST.edit.unchanged("annotation"); }
+			function changed() { top.HEURIST.edit.changed("annotation"); }
+			function unchanged() { top.HEURIST.edit.unchanged("annotation"); }
 
-document.forms[0].heuristForceSubmit = function() {
+			document.forms[0].heuristForceSubmit = function() {
 	if (wootEditor.unlockedChunk) {
 		wootEditor.save();
 	}
@@ -68,24 +68,24 @@ document.forms[0].heuristForceSubmit = function() {
 	for (var i in openComments) {
 		openComments[i].save();
 	}
-}
+			}
 
 
-// woot stuff
-var wootTitle = "record:" + top.HEURIST.edit.record.bibID;
-var recTitle = top.HEURIST.edit.record.title;
+			// woot stuff
+			var wootTitle = "record:" + top.HEURIST.edit.record.bibID;
+			var recTitle = top.HEURIST.edit.record.title;
 
-document.getElementById("woot-ext-link").href += "?w=" + wootTitle + "&t=" + recTitle;
+			document.getElementById("woot-ext-link").href += "?w=" + wootTitle + "&t=" + recTitle;
 
-HAPI.WOOT.GUI.labelsForLanguage.en.emptyMessage.label = "&lt;&lt; Empty or no visible text blocks &gt;&gt;";
-var wootEditor = new HAPI.WOOT.GUI.WootEditor({ title: wootTitle, id: "woot" });
+			HAPI.WOOT.GUI.labelsForLanguage.en.emptyMessage.label = "&lt;&lt; Empty or no visible text blocks &gt;&gt;";
+			var wootEditor = new HAPI.WOOT.GUI.WootEditor({ title: wootTitle, element: document.getElementById("publicWoot") });
 
 
-// comments stuff
+			// comments stuff
 
-var openComments = {};
+			var openComments = {};
 
-var Comment = function(parentComment, details) {
+			var Comment = function(parentComment, details) {
 	this.document = parentComment.document;
 	this.parentComment = parentComment;
 	if (parentComment) {
@@ -167,13 +167,13 @@ var Comment = function(parentComment, details) {
 
 		this.deleteLink.onclick = function() { thisRef.remove(); return false; };
 	}
-};
-Comment.prototype.edit = function() {
+			};
+			Comment.prototype.edit = function() {
 	var editComment = new EditableComment(this);
 	this.div.replaceChild(editComment.innerDiv, this.innerDiv);
 	editComment.textarea.focus();
-};
-Comment.prototype.reply = function() {
+			};
+			Comment.prototype.reply = function() {
 	var editComment = new EditableComment(null, this);
 
 	// Put the editable reply immediately after the comment being replied to,
@@ -184,8 +184,8 @@ Comment.prototype.reply = function() {
 		this.div.insertBefore(editComment.div, this.innerDiv.nextSibling);
 	}
 	editComment.textarea.focus();
-};
-Comment.prototype.remove = function() {
+			};
+			Comment.prototype.remove = function() {
 	if (! confirm("Delete this comment?")) return;
 
 	var fakeForm = { action: installDir + "records/comments/saveThreadedComments.php",
@@ -215,8 +215,8 @@ Comment.prototype.remove = function() {
 		else
 			thisRef.div.appendChild(thisRef.innerDiv);
 	});
-};
-Comment.prototype.formatDate = function(date) {
+			};
+			Comment.prototype.formatDate = function(date) {
 	var date = new Date(Date.parse(date.replace(/-/g, "/")));
 	var now = new Date(Date.parse(top.HEURIST.edit.record.retrieved.replace(/-/g, "/")));
 
@@ -254,17 +254,17 @@ Comment.prototype.formatDate = function(date) {
 
 	/* else ... */
 	return this.monthNames[date.getMonth()] + " " + date.getDate() + " " + date.getFullYear() + ", " + this.formatTime(date.getHours(), date.getMinutes());
-};
-Comment.prototype.formatTime = function(hours, minutes) {
+			};
+			Comment.prototype.formatTime = function(hours, minutes) {
 	if (hours > 12)
 		return (hours - 12) + ":" + minutes + "pm";
 	else
 		return hours + ":" + minutes + "am";
-};
-Comment.prototype.dayNames = [ "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" ];
-Comment.prototype.monthNames = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ];
+			};
+			Comment.prototype.dayNames = [ "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" ];
+			Comment.prototype.monthNames = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ];
 
-var EditableComment = function(associatedComment, parentComment) {
+			var EditableComment = function(associatedComment, parentComment) {
 	this.comment = associatedComment;
 
 	if (associatedComment) {
@@ -290,9 +290,9 @@ var EditableComment = function(associatedComment, parentComment) {
 
 	this.textarea = this.innerDiv.appendChild(this.document.createElement("textarea"));
 		this.textarea.value = this.textarea.defaultValue = this.details.text? this.details.text : "";
-//	var helpDiv = this.innerDiv.appendChild(this.document.createElement("div"));
-//		helpDiv.className = "help prompt";
-//		helpDiv.appendChild(this.document.createTextNode("Reference other records as [XXX] where XXX is the record number"));
+				//	var helpDiv = this.innerDiv.appendChild(this.document.createElement("div"));
+				//		helpDiv.className = "help prompt";
+				//		helpDiv.appendChild(this.document.createTextNode("Reference other records as [XXX] where XXX is the record number"));
 
 	var thisRef = this;
 	this.saveButton = this.document.createElement("input");
@@ -316,8 +316,8 @@ var EditableComment = function(associatedComment, parentComment) {
 		this.nonce = Math.floor(Math.random() * 1000000);
 	} while (openComments[this.nonce]);
 	openComments[this.nonce] = this;
-};
-EditableComment.prototype.save = function() {
+			};
+			EditableComment.prototype.save = function() {
 	if (this.textarea.value == "") {
 		// Don't bother saving an empty input
 		this.cancel();
@@ -354,8 +354,8 @@ EditableComment.prototype.save = function() {
 			delete openComments[thisRef.nonce];
 		}
 	});
-}
-EditableComment.prototype.cancel = function() {
+			}
+			EditableComment.prototype.cancel = function() {
 	if (this.comment) {
 		/* replace this editable comment with the plain comment that it replaced */
 		this.div.replaceChild(this.comment.innerDiv, this.innerDiv);
@@ -364,10 +364,10 @@ EditableComment.prototype.cancel = function() {
 	}
 
 	delete openComments[thisRef.nonce];
-};
+			};
 
 
-function printAllComments() {
+			function printAllComments() {
 	var commentDetails = top.HEURIST.edit.record.comments;
 	var comments = {};
 
@@ -398,14 +398,11 @@ function printAllComments() {
 			comments[cmtID] = topLevelComment;
 		}
 	}
-}
+			}
 
-printAllComments();
+			printAllComments();
 
-</script>
-
-
-
+		</script>
 
  </body>
 </html>
