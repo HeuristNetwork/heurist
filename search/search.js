@@ -304,7 +304,7 @@ top.HEURIST.search = {
 			showRelatedMenuItem.id = "showrelated"+level;
 			showRelatedMenuItem.className = "showrelated level" + level;
 			filterDiv.appendChild(showRelatedMenuItem);
-			resultsDiv.className += " collapsed"; //saw TODO: change this to get preference
+			resultsDiv.className += " collapsed";
 		}
 
 		var filterMenu = document.createElement("ul");

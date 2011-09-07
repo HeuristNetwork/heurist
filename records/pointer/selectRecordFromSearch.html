@@ -100,9 +100,10 @@ if (recTypeName) {
 function addRecord(){
 	top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/formAddRecordPopup.html?rectype='+
 										document.getElementById('t').value+
-										'&amp;title='+document.getElementById('q').value+
-										'&amp;db='+(top.HEURIST.parameters.db?top.HEURIST.parameters.db:
-														(top.HEURIST.database.name? top.HEURIST.database.name:'')),
+										'&title='+document.getElementById('q').value+
+										'&db='+ (window.HEURIST && window.HEURIST.parameters && window.HEURIST.parameters.db ? window.HEURIST.parameters.db :
+														(top.HEURIST.parameters.db?top.HEURIST.parameters.db:
+															(top.HEURIST.database.name? top.HEURIST.database.name:''))),
 									{ callback: function(title, bd, bibID) {
 													if (bibID) {
 														window.close(bibID, title);

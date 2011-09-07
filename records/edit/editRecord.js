@@ -1881,8 +1881,11 @@ top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.addInput = function(bd
 	var newInput = this.document.createElement("div");
 	this.addInputHelper.call(this, bdValue, newInput);
 	newInput.id = "relations-tbody";
-	var relatedRecords = parent.HEURIST.edit.record.relatedRecords;
-	this.relManager = new RelationManager(newInput,top.HEURIST.edit.record, relatedRecords,this.detailType[12],this.changeNotification,true);
+	var relatedRecords = (parent.HEURIST &&
+							parent.HEURIST.edit &&
+							parent.HEURIST.edit.record &&
+							parent.HEURIST.edit.record.relatedRecords ? parent.HEURIST.edit.record.relatedRecords : null);
+	this.relManager = new top.RelationManager(newInput,top.HEURIST.edit.record, relatedRecords,this.detailType[12],this.changeNotification,true);
 
 };
 

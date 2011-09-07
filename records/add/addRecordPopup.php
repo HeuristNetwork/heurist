@@ -183,7 +183,7 @@ function add_note(e) {
 	extra_parms += '<?= @$_REQUEST['t'] ? '&t='.$_REQUEST['t'] : '' ?>';
 
 		rt = parseInt(document.getElementById('rectype_elt').value);
-		if (! rt) rt = "2";  //added ian 19/9/08 to re-enable notes as default
+		if (! rt) rt = RT_NOTE ;  //added ian 19/9/08 to re-enable notes as default
 
 	if (document.getElementById('defaults_elt').checked) {
 		defaults = [ rt, wg_id,"\"" + vis +"\"", "\"" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value) +"\"",

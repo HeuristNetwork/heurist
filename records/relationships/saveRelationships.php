@@ -58,6 +58,19 @@ if (strpos(@$_REQUEST["recID"], ",") !== false) {
 	if (! $recID) return;
 }
 
+$addRecDefaults = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['addRecDefaults'];
+if ($addRecDefaults){
+	if ($addRecDefaults[0]){
+		$userDefaultRectype = intval($addRecDefaults[0]);
+	}
+	if ($addRecDefaults[1]){
+		$userDefaultOwnerGroupID = intval($addRecDefaults[1]);
+	}
+	if ($addRecDefaults[2]){
+		$userDefaultVisibility = $addRecDefaults[2];
+	}
+}
+
 if (@$_REQUEST["delete"]  && $recID) {
 	$deletions = array_map("intval", $_REQUEST["delete"]);
 }
@@ -91,8 +104,7 @@ if (count(@$deletions) > 0) {
 
 		print "(" . json_format($relatedRecords) . ")";
 	}
-}
-else if (@$_REQUEST["save-mode"] == "new") {
+}else if (@$_REQUEST["save-mode"] == "new") {
 	if ($recID) {
 		print "(" . json_format(saveRelationship(
 			$recID,
@@ -130,11 +142,13 @@ function saveRelationship($recID, $relTermID, $trgRecID, $interpRecID, $title, $
 	$trgTitle = mysql_fetch_assoc(mysql_query("select rec_Title from Records where rec_ID = $trgRecID"));
 	$trgTitle = $trgTitle['rec_Title'];
 	mysql__insert("Records", array("rec_Title" => "$title ($srcTitle $relval $trgTitle)",
-                "rec_Added"     => date('Y-m-d H:i:s'),
-                "rec_Modified"  => date('Y-m-d H:i:s'),
+					"rec_Added"     => date('Y-m-d H:i:s'),
+					"rec_Modified"  => date('Y-m-d H:i:s'),
 					"rec_RecTypeID"   => RT_RELATION,
-					"rec_OwnerUGrpID" => get_user_id(),
-									"rec_AddedByUGrpID" => get_user_id()));
+					'rec_OwnerUGrpID' => (intval(@$_REQUEST['rec_owner'])?intval($_REQUEST['rec_owner']):
+											(@$userDefaultOwnerGroupID ? $userDefaultOwnerGroupID :
+											(defined('HEURIST_NEWREC_OWNER_ID') ? HEURIST_NEWREC_OWNER_ID: get_user_id()))),
+					"rec_AddedByUGrpID" => get_user_id()));
 
 	if (mysql_error()) {
 		return array("error" => slash(mysql_error()));
@@ -162,7 +176,7 @@ function saveRelationship($recID, $relTermID, $trgRecID, $interpRecID, $title, $
 			$query .= ", ($relnRecID, ".DT_END_DATE.", '" . addslashes($end_date) . "')";
 //error_log(" rel save query = $query");
 		$res = mysql_query($query);
-error_log("res = $res  error " .mysql_error());
+//error_log("res = $res  error " .mysql_error());
 	}
 
 	if (mysql_error($res)) {

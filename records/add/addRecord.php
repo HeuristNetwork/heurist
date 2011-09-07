@@ -29,7 +29,7 @@ if (! @$_REQUEST['bkmrk_bkmk_title']) $_REQUEST['bkmrk_bkmk_title'] = '';
 define('LATEST_BOOKMARKLET_VERSION', '20060713');	//note! this must be in synch with import/bookmarklet/bookmarkletPopup.php
 // setup parameters for call to editRecord
 if (@$_REQUEST['addref']) {	// add a record		//saw TODO: change this to addrec
-	if (@$_REQUEST['bib_type'])
+	if (@$_REQUEST['rec_rectype'])
 		$outdate = '&edit_type=records';
 	else if (@$_REQUEST['edit_type'])
 		$outdate .= '&edit_type=' . @$_REQUEST['edit_type'];
@@ -210,9 +210,9 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 			$fav = $_REQUEST["f"];
 			$bd = mysql__select_assoc('recDetails', 'concat(dtl_DetailTypeID, ".", dtl_Value)', '1',
 				'dtl_RecID='.$rec_id.' and ((dtl_DetailTypeID = '.$doiDT.' and dtl_Value in ("'.join('","', array_map("addslashes", $dois)).'"))'.
-				                       ' or  (dtl_DetailTypeID = '.$webIconDT.' and dtl_Value = "'.addslashes($fav).'"))'.
-				                       ' or  (dtl_DetailTypeID = '.$issnDT.' and dtl_Value in ("'.join('","', array_map("addslashes", $issns)).'"))'.
-				                       ' or  (dtl_DetailTypeID = '.$isbnDT.' and dtl_Value in ("'.join('","', array_map("addslashes", $isbns)).'")))');
+					' or  (dtl_DetailTypeID = '.$webIconDT.' and dtl_Value = "'.addslashes($fav).'"))'.
+					' or  (dtl_DetailTypeID = '.$issnDT.' and dtl_Value in ("'.join('","', array_map("addslashes", $issns)).'"))'.
+					' or  (dtl_DetailTypeID = '.$isbnDT.' and dtl_Value in ("'.join('","', array_map("addslashes", $isbns)).'")))');
 
 			$inserts = array();
 			foreach ($dois as $doi) if (! $bd["$doiDT.$doi"]) array_push($inserts, "($rec_id, $doiDT, '" . addslashes($doi) . "')");
@@ -264,19 +264,19 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 		}
 
 		mysql__insert('Records', array('rec_URL' => $url,
-		                              'rec_Title' => $_REQUEST['bkmrk_bkmk_title'],
-	                                      'rec_ScratchPad' => $description,
-		                              'rec_Added' => date('Y-m-d H:i:s'),
-		                              'rec_Modified' => date('Y-m-d H:i:s'),
-		                              'rec_AddedByUGrpID' => intval($usrID),
-				                      'rec_RecTypeID' => $rt? $rt : RT_INTERNET_BOOKMARK,
+										'rec_Title' => $_REQUEST['bkmrk_bkmk_title'],
+										'rec_ScratchPad' => $description,
+										'rec_Added' => date('Y-m-d H:i:s'),
+										'rec_Modified' => date('Y-m-d H:i:s'),
+										'rec_AddedByUGrpID' => intval($usrID),
+										'rec_RecTypeID' => $rt? $rt : RT_INTERNET_BOOKMARK,
 										'rec_OwnerUGrpID' => (intval(@$_REQUEST['rec_owner'])?intval($_REQUEST['rec_owner']):
-																($userDefaultOwnerGroupID ? $userDefaultOwnerGroupID :
-																	(defined('HEURIST_NEWREC_OWNER_ID') ? HEURIST_NEWREC_OWNER_ID: intval($usrID)))),
+															(@$userDefaultOwnerGroupID ? $userDefaultOwnerGroupID :
+																(defined('HEURIST_NEWREC_OWNER_ID') ? HEURIST_NEWREC_OWNER_ID: intval($usrID)))),
 										'rec_NonOwnerVisibility' => (@$_REQUEST['rec_visibility']?(strtolower($_REQUEST['rec_visibility'])):
-																($userDefaultVisibility ? $userDefaultVisibility :
-																	(defined('HEURIST_NEWREC_ACCESS') ? HEURIST_NEWREC_ACCESS: 'viewable'))),
-		                              'rec_FlagTemporary' => ! ($url  ||  $_REQUEST['bkmrk_bkmk_title'])));
+															(@$userDefaultVisibility ? $userDefaultVisibility :
+																(defined('HEURIST_NEWREC_ACCESS') ? HEURIST_NEWREC_ACCESS: 'viewable'))),
+										'rec_FlagTemporary' => ! ($url  ||  $_REQUEST['bkmrk_bkmk_title'])));
 		$rec_id = mysql_insert_id();
 
 		// there are sometimes cases where there is no title set (e.g. webpage with no TITLE tag)
@@ -297,7 +297,7 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 // no recID or url passed in so create a new record
 if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 	/* create a new public note */
-//error_log("in add making new records");
+error_log("in add making new records");
 	$isNewRecID = true;
 	$rt = intval($_REQUEST['rec_rectype']);
 	if (!check_rectype_exist($rt)) {
@@ -310,16 +310,16 @@ if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 		return;
 	}
 	mysql__insert('Records', array('rec_Title' => $_REQUEST['bkmrk_bkmk_title'],
-	                              'rec_ScratchPad' => $description,
-	                              'rec_Added' => date('Y-m-d H:i:s'),
-	                              'rec_Modified' => date('Y-m-d H:i:s'),
-	                              'rec_AddedByUGrpID' => intval($usrID),
+									'rec_ScratchPad' => $description,
+									'rec_Added' => date('Y-m-d H:i:s'),
+									'rec_Modified' => date('Y-m-d H:i:s'),
+									'rec_AddedByUGrpID' => intval($usrID),
 									'rec_RecTypeID' => $rt? $rt : RT_INTERNET_BOOKMARK,
 									'rec_OwnerUGrpID' => (intval(@$_REQUEST['rec_owner'])?intval($_REQUEST['rec_owner']):
-															($userDefaultOwnerGroupID ? $userDefaultOwnerGroupID :
+															(@$userDefaultOwnerGroupID ? $userDefaultOwnerGroupID :
 																(defined('HEURIST_NEWREC_OWNER_ID') ? HEURIST_NEWREC_OWNER_ID: intval($usrID)))),
 									'rec_NonOwnerVisibility' => (@$_REQUEST['rec_visibility']?(strtolower($_REQUEST['rec_visibility'])):
-															($userDefaultVisibility ? $userDefaultVisibility :
+															(@$userDefaultVisibility ? $userDefaultVisibility :
 																(defined('HEURIST_NEWREC_ACCESS') ? HEURIST_NEWREC_ACCESS: 'viewable'))),
 									'rec_FlagTemporary' => ! ($_REQUEST['bkmrk_bkmk_title']))); // saw BUG???
 //	error_log(mysql_error());
@@ -498,8 +498,7 @@ function insert_woot_content($rec_id, $content) {
 }
 
 function check_rectype_exist($rt) {
-	$res = mysql_query("select distinct rty_ID,rty_Name from defRecTypes
-	                  where rty_ID = $rt");
+	$res = mysql_query("select distinct rty_ID,rty_Name from defRecTypes where rty_ID = $rt");
 	while ($row = mysql_fetch_assoc($res)) {
 		if ($row["rty_ID"] == $rt) {
 			return true;
