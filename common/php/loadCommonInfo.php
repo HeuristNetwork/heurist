@@ -29,6 +29,11 @@ mysql_connection_db_select(DATABASE);
 
 header("Content-type: text/javascript");
 
+// TODO: 5/9/11 Replace this clunky use of the sys_TableLastUpdated table to record the date of last update of defionition
+// tables, involving a compelx set of triggers on add/update/delete (the latter not working in any case)
+// with a simple max(xxx_Modified) - takes 0.3 millisecs the Records table with 56K records, so practically instant
+// tlu_ fields are only accessed in three palces - this file, getRecordInfoLibrary.php and getRectypesAsJSON.php
+
 // for all tables used in common obj find the lastest update date and if it's not great than the last request
 // signal requester
 $res = mysql_query("select max(tlu_DateStamp) from sysTableLastUpdated where tlu_CommonObj = 1");

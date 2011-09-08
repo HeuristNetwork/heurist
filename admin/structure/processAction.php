@@ -49,6 +49,8 @@ function import() {
 	$tempDBName = $_GET["tempDBName"];
 	$currentDate = date("d-m");
 
+    error_log("Temporary SDB name is: ".$tempDBName);
+
 	// Get recordtype data that has to be imported
 	$entity = mysql_fetch_array(mysql_query("select * from ".$tempDBName.".defRecTypes where rty_ID = ".$_GET["crwSourceCode"]), MYSQL_ASSOC);
 
@@ -331,6 +333,12 @@ function import() {
 				}
 			}
 		}
+
+
+        // 30/8/11: the problem here is that it falls through with an error such as duplicate record detected, but there
+        // is no way of knowing on which table the duplicate was detected or what to do about it. It also appears that it
+        // sees the existance of some code as an error rather than simply 'I already have that one' (and it needs to
+        // handle codes through concept code mapping
 
 		// Give user feedback
 		if(!$error) {

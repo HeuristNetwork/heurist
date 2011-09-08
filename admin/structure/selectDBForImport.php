@@ -130,7 +130,7 @@ var registeredDBs = [];
 				echo 'registeredDB[2] = "'.$dbName.'";' . "\n";
 				echo 'registeredDB[3] = "'.$dbTitle.'";' . "\n";
 				echo 'registeredDB[4] = "'.$dbPopularity.'";' . "\n";
-				echo 'registeredDB[5] = "'.($dbPrefix?$dbPrefix:"").'";' . "\n";
+				echo 'registeredDB[5] = "'.@$dbPrefix.'";' . "\n"; // @ b/c prefix may not be defined
                 echo 'registeredDBs['.$dbID.'].push(registeredDB);' . "\n";
 			}
 		}
@@ -148,7 +148,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
 			{key:"description", label:"Description", sortable:true, resizeable:true},
 			// Currently no useful data in popularuity value
             //{key:"popularity", label:"Popularity", formatter:YAHOO.widget.DataTable.formatNumber,sortable:true, resizeable:true, hidden:true }
-            {key:"URL", label:"URL",sortable:true, resizeable:true}
+            {key:"URL", label:"Server URL",sortable:true, resizeable:true}
 		];
 
         //TODO: Add the URL as a hyperlink so that one can got to a search of the database

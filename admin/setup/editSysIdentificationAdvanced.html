@@ -1,7 +1,7 @@
 <!--
 
 /**
- * editSysIdentificationEmail.html, T1000 template for editing the email section of the system identification record 
+ * editSysIdentificationEmail.html, T1000 template for editing the email section of the system identification record
  * defining email server and addresses for incoming and outgoing mail
  * Ian Johnson 12 aug 2011
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
@@ -28,9 +28,9 @@
   <!--{PageHeader} -->
 
   <div id="page-inner">
-  
- <p><span class="red">[errors]</span></p>     
-  
+
+ <p><span class="red">[errors]</span></p>
+
 
 [foreach SYSID sys]
 
@@ -59,42 +59,43 @@ Port [textbox : sys_eMailImapPort : : size=4] Protocol [textbox : sys_eMailImapP
 </div>
 <div class="input-row">
 <div class="input-header-cell">Addresses from which incoming mail to be harvested may be received  </div>
-<div class="input-cell">[textbox : sys_IncomingEmailAddresses : : size=60] (other addresses are ignored)</div>
+<div class="input-cell">[textbox : sys_IncomingEmailAddresses : : size=60] <br>comma separated, shared list, additional addresses can be added in personal profile, other addresses are ignored</div>
 </div>
 <div class="input-row">
 <div class="input-header-cell">Potential email addresses to which database records may be sent  </div>
-<div class="input-cell">[textbox : sys_TargetEmailAddresses : : size=60] (shared list, will appear for every user)</div>
+<div class="input-cell">[textbox : sys_TargetEmailAddresses : : size=60] <br>comma separated, shared list, will appear for every user, additional addresses can be added in personal profile</div>
 </div>
-   
+
 <h3>Locations</h3>
 <div class="input-row">
-<div class="input-header-cell">Database containing the sysUGrps table - blank = current database  </div>
-<div class="input-cell">[textbox : sys_UGrpsDatabase : : size=30]        </div>
+<div class="input-header-cell">Database containing the user authentication table (sysUGrps) </div>
+<div class="input-cell">[textbox : sys_UGrpsDatabase : : size=30] blank = current database</div>
 </div>
 
 <div class="input-row">
-<div class="input-header-cell">Directory in which to write html representation of published records  </div>
-<div class="input-cell">[textbox : sys_hmlOutputDirectory : : size=30] </div>
+<div class="input-header-cell">Directory in which to write HTML representation of published records  </div>
+<div class="input-cell">[textbox : sys_hmlOutputDirectory : : size=30] blank = default directory</div>
 </div>
 <div class="input-row">
 <div class="input-header-cell">Directory in which to write HML representation of published records  </div>
-<div class="input-cell">[textbox : sys_htmlOutputDirectory : : size=30]  </div>
+<div class="input-cell">[textbox : sys_htmlOutputDirectory : : size=30]  blank = default directory </div>
 </div>
 <div class="input-row">
-<div class="input-header-cell">Additional folders containing files for indexing (FieldHelper compatibility)  </div>
-<div class="input-cell">[textbox : sys_MediaFolders : : size=30](comma separated)</div>
+<div class="input-header-cell">Additional folder(s) containing files for indexing (Picasa/FieldHelper compatibility)  </div>
+<div class="input-cell">[textbox : sys_MediaFolders : : size=30] (comma separated, child folders are included automatically)</div>
 </div>
 
 <div class="input-row">
-<div class="input-header-cell">Default contsraints behaviour  </div>
-<div class="input-cell">[dropdown : sys_ConstraintDefaultBehavior : Default access outside owner group : enum("locktypetotype", "unconstrainedbydefault", "allownullwildcards")]</div>
+<div class="input-header-cell">Default constraints behaviour (advanced)  </div>
+<div class="input-cell">[dropdown : sys_ConstraintDefaultBehavior : : enum("locktypetotype", "unconstrainedbydefault", "allownullwildcards")]
+If in doubt, leave as 'locktypetotype'</div>
 </div>
 
 [end-update]
 
- 
+
 <p><span class="red">[errors]</span></p>
-                        
+
 <input type="submit" value="save">
 
 </form>

@@ -1,16 +1,16 @@
 <?php
 	/**
-	* File: createNewDB.php Create a new database by copying populateBlankDB.sql
+	* File: createNewDB.php Create a new database by applying blankDBStructure.sql and coreDefinitions.txt
 	* Juan Adriaanse 10 Apr 2011
 	* @copyright 2005-2010 University of Sydney Digital Innovation Unit.
 	* @link: http://HeuristScholar.org
 	* @license http://www.gnu.org/licenses/gpl-3.0.txt
 	* @package Heurist academic knowledge management system
-	* @todo 
+	* @todo
 	*
-    * Extensively modified 4/8/11 by Ian Johnson to reduce complexijohty and load new database in
+    * Extensively modified 4/8/11 by Ian Johnson to reduce complexity and load new database in
     * a series of files with checks on each stage and cleanup code
-    * 
+    *
     * **/
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
@@ -40,17 +40,17 @@
     <body class="popup">
 	<div class="banner"><h2>Create new Heurist database</h2></div>
 	<div id="page-inner" style="overflow:auto">
- 
+
      <h3>Suggested workflow for new databases:</h3>
-     <?php include("includeNewDatabaseWorkflow.html"); ?>    
+     <?php include("includeNewDatabaseWorkflow.html"); ?>
      <div class="separator_row" style="margin:20px 0;"></div>
-    
-	
+
+
 		<div id="createDBForm">
 		<form action="createNewDB.php" method="POST" name="NewDBName">
             <p>New databases are created on the current server.<br>
             You will become the owner and administrator of the new database.<br>
-             The database will be created with the prefix "<?= HEURIST_DB_PREFIX ?>" 
+             The database will be created with the prefix "<?= HEURIST_DB_PREFIX ?>"
             (all databases created by this installation of the software will have the same prefix).</p>
 			<h3>Enter a name for the new database:</h3>
             <div style="margin-left: 40px;">
@@ -83,12 +83,12 @@ function isInValid($str) {
     return preg_match('[\W]', $str);
 }
 
-function cleanupNewDB ($newname) { // called in case of failure to remove the opartially created database
+function cleanupNewDB ($newname) { // called in case of failure to remove the partially created database
     global $newDBName, $isNewDB, $done;
     $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'drop database `$newname`'";
     $output2=exec($cmdline . ' 2>&1', $output, $res2);
     echo "Database cleanup for $newname, completed<br>&nbsp;<br>";
-    echo($output2);  
+    echo($output2);
     $done = true;
 } // cleanupNewDB
 
@@ -98,16 +98,16 @@ function makeDatabase() { // Creates a new database and populates it with trigge
 	global $newDBName, $isNewDB, $done;
 	$error = false;
     $warning=false;
-    
+
 	if (isset($_POST['dbname'])) {
-        
+
         // Check that there is a current administrative user  who can be made the owner of the new database
-        if(ADMIN_DBUSERNAME == "") {  
+        if(ADMIN_DBUSERNAME == "") {
 			if(ADMIN_DBUSERPSWD == "") {
 				echo "Admin username and password have not been set. Please do so before trying to create a new database.<br>";
 				echo '<script type="javascript/text">document.getElementById("loading").style.display = "none";</script>';
 				return;
-			}      
+			}
 			echo "Admin username has not been set. Please do so before trying to create a new database.<br>";
 			echo '<script type="javascript/text">document.getElementById("loading").style.display = "none";</script>';
 			return;
@@ -122,9 +122,8 @@ function makeDatabase() { // Creates a new database and populates it with trigge
 		$newDBName = $_POST['dbname'];
 		$newname = HEURIST_DB_PREFIX . $newDBName; // all databases have common prefix
 
-		// Avoid illegal chars in db name 
-        // TODO: Need to remove all illegal chars not jsut dash
-        $hasInvalid = isInValid($newname); 
+		// Avoid illegal chars in db name
+        $hasInvalid = isInValid($newname);
 		if ($hasInvalid) {
             echo ("Only letters, numbers and underscores (_) are allowed in the database name");
             return false;
@@ -132,7 +131,7 @@ function makeDatabase() { // Creates a new database and populates it with trigge
 
 		$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'create database `$newname`'";
 		$output1 = exec($cmdline . ' 2>&1', $output, $res1);
-        if ($res1 != 0 ) {             
+        if ($res1 != 0 ) {
             echo ("Error code $res1 on MySQL exec: Unable to create database $newname<br>&nbsp;<br>");
             echo("\n\n");
             $sqlErrorCode = split(" ", $output);
@@ -142,50 +141,57 @@ function makeDatabase() { // Creates a new database and populates it with trigge
         }
 
 	   // At this point a database exists, so need cleanup if anythign goes wrong later
-        
+
 		// Create the Heurist structure for the newly created database, using the template SQL file
         // This file sets up teh table definitions and inserts a few critical values
         // it does not set referential integrity constraints or triggers
-		$cmdline="mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D$newname < populateBlankDB.sql";
+		$cmdline="mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D$newname < blankDBStructure.sql";
 		$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 
-        if ($res2 != 0 ) {             
-            echo ("Error $res2 on MySQL exec: Unable to load populateBlankDB.sql into database $newname<br>");
+        if ($res2 != 0 ) {
+            echo ("Error $res2 on MySQL exec: Unable to load blankDBStructure.sql into database $newname<br>");
             echo ("Please check whether this file is valid; consult Heurist helpdesk if needed<br>&nbsp;<br>");
             echo($output2);
             cleanupNewDB($newname);
             return false;
         }
-	         
+
         // Add referential constraints
         $cmdline="mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D$newname < addReferentialConstraints.sql";
         $output2 = exec($cmdline . ' 2>&1', $output, $res2);
 
-             if ($res2 != 0 ) {             
+             if ($res2 != 0 ) {
             echo ("Error $res2 on MySQL exec: Unable to load addReferentialConstraints.sql into database $newname<br>");
             echo ("Please check whether this file is valid; consult Heurist helpdesk if needed<br>&nbsp;<br>");
             echo($output2);
             cleanupNewDB($newname);
             return false;
         }
-  
+
         // Add procedures and triggers
         $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D$newname < addProceduresTriggers.sql";
         $output2 = exec($cmdline . ' 2>&1', $output, $res2);
-        
-        if ($res2 != 0 ) {             
+
+        if ($res2 != 0 ) {
             echo ("Error $res2 on MySQL exec: Unable to load addProceduresTriggers.sql for database $newname<br>");
             echo ("Please check whether this file is valid; consult Heurist helpdesk if needed<br>&nbsp;<br>");
             echo($output2);
             cleanupNewDB($newname);
             return false;
         }
-              
+
 		// Run buildCrosswalks to import minimal definitions from coreDefinitions.txt into the new DB
         // yes, this is badly structured, but it works - if it ain't broke ...
 		$isNewDB = true; // flag of context for buildCrosswalks, tells it to use coreDefinitions.txt
 		require_once('../structure/buildCrosswalks.php');
-        
+
+    // errorCreatingTables is set to true by buildCrosswalks if an error occurred
+        if($errorCreatingTables) {
+            echo ("Error importing core definitions from coreDefinitions.txt for database $newname<br>");
+            echo ("Please check whether this file is valid; consult Heurist helpdesk if needed");
+            cleanupNewDB($newname);
+            return false;
+        }
 
         // Get and clean information for the user creating the database
 		mysql_connection_db_insert(DATABASE);
@@ -203,56 +209,53 @@ function makeDatabase() { // Creates a new database and populates it with trigge
 		$state = mysql_escape_string($details[9]);
 		$postcode = mysql_escape_string($details[10]);
 		$interests = mysql_escape_string($details[11]);
-		
-		// errorCreatingTables is set to true by buildCrosswalks if an error occurred
-		if($errorCreatingTables) {
-		    echo ("Error importing core definitions from coreDefinitions.txt for database $newname<br>");
-            echo ("Please check whether this file is valid; consult Heurist helpdesk if needed");
-            cleanupNewDB($newname);
-            return false;
-        }
 
-     /* This should be created on first use, not hardcoded in here
-     //     todo: choose or create upload directory on first use
-     // todo: code location of upload directory into sysIdentification, remove from editing
-     
+        // The upload directory should be created by the administrator, not hardcoded in here
+        //     todo: choose or create upload directory during the creation process
+        //     todo: code location of upload directory into sysIdentification, remove from edit form (should not be changed)
+        //     todo: might wish to control ownership rather than leaving it to the O/S, although this works well at present
+        //     todo:  uploaded-heurist-files should not be hardcoded
+
 		// Create a default upload directory for uploaded files eg multimedia, images etc.
 		$cmdline = "mkdir -m a=rwx ../../../uploaded-heurist-files/".$newDBName;
 		$output2 = exec($cmdline . ' 2>&1', $output, $res2);
         if ($res2 != 0 ) { // TODO: need better setting and full path info for this error
-            echo ("Warning: Unable to create uploaded-heurist-files directory for database $newname<br>&nbsp;<br>");
-            echo ("Please create directory by hand. Consult Heurist helpdesk if needed");
+            // todo: need to properly trap the error and distiguish different versions. Old uplaod directories
+            // hanging around could cause problems if upload file IDs are duplicated, so should probably NOT
+            // allow their re-use
+            echo ("<h2>Warning:</h2> Unable to create uploaded-heurist-files directory for database $newname<br>&nbsp;<br>");
+            echo ("This may be because the directory already exists or the parent folder is not writable<br>");
+            echo ("Please check/create directory by hand. Consult Heurist helpdesk if needed<br><p>");
             // todo: we need to hold the warning here
-            return false;
+            // return false; This is only a warning, should keep going
         }
-	*/
-    			
+
 		// Make the current user the owner and admin of the new database
         mysql_connection_db_insert($newname);
-		mysql_query('UPDATE sysUGrps SET ugr_LongName="'.$longName.'", ugr_FirstName="'.$firstName.'", 
-        ugr_LastName="'.$lastName.'", ugr_eMail="'.$eMail.'", ugr_Name="'.$name.'", 
-        ugr_Password="'.$password.'", ugr_Department="'.$department.'", ugr_Organisation="'.$organisation.'", 
-        ugr_City="'.$city.'", ugr_State="'.$state.'", ugr_Postcode="'.$postcode.'", 
+		mysql_query('UPDATE sysUGrps SET ugr_LongName="'.$longName.'", ugr_FirstName="'.$firstName.'",
+        ugr_LastName="'.$lastName.'", ugr_eMail="'.$eMail.'", ugr_Name="'.$name.'",
+        ugr_Password="'.$password.'", ugr_Department="'.$department.'", ugr_Organisation="'.$organisation.'",
+        ugr_City="'.$city.'", ugr_State="'.$state.'", ugr_Postcode="'.$postcode.'",
         ugr_interests="'.$interests.'" WHERE ugr_ID=2');
 		// TODO: error check, although this is unlikely to fail
         echo "New database <strong>" . $newname . "</strong> created successfully";
 
-        echo "<p>Please click here: <a href='".HEURIST_URL_BASE."admin/adminMenu.php?db=".$newDBName."' title='' target=\"_new\"><strong>administration page</strong></a>, to set up your new database<br />&nbsp;<br />";
-
-		echo "<strong>Note:</strong> The account you are logged in with at this moment, has been copied to your new database and made the owner of the database.<p>";
-		echo "<strong>Admin username:</strong> ".$name."<br />";
+		echo "<p><strong>Admin username:</strong> ".$name."<br />";
 		echo "<strong>Admin password:</strong> &#60;<i>same as account currently logged in to</i>&#62;<p>";
 
 		echo '<script type="text/javascript">document.getElementById("createDBForm").style.display = "none";</script>';
-        echo "The database is accessible at: <a href=\"".HEURIST_URL_BASE."?db=".$newDBName."\" title=\"\" target=\"_new\">".HEURIST_URL_BASE."?db=".$newDBName."</a>.<br /><br />";
-        
-        // TODO: automatically redirect to the new database
-        
+        echo "The search page for this database is: <a href=\"".HEURIST_URL_BASE."?db=".$newDBName."\" title=\"\" target=\"_new\">".HEURIST_URL_BASE."?db=".$newDBName."</a>.<br /><br />";
+
+        echo "<p>Please click here: <a href='".HEURIST_URL_BASE."admin/adminMenu.php?db=".$newDBName."' title='' target=\"_new\"><strong>administration page</strong></a>, to configure your new database<br />";
+
+
+        // TODO: automatically redirect to the new database, maybe, in a new window
+
         return false;
     } // isset
 
 } //makedatabase
-	
-    
+
+
 ?>
 

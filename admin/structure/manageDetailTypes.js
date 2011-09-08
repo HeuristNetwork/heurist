@@ -419,7 +419,7 @@ function DetailTypeManager() {
 								if(Hul.isnull(context.error)){
 									dt.deleteRow(oRecord.getId(), -1);
 									_deleted.push( dty_ID );
-									alert("Field type #"+dty_ID+" was deleted");
+									// alert is a pain alert("Field type #"+dty_ID+" was deleted");
 									top.HEURIST.detailTypes = context.detailTypes;
 									_cloneHEU = null;
 								} /*else {

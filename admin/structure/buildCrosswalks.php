@@ -15,9 +15,8 @@
 
     // started: Ian Johnson 3 March 2010. Revised Ian Johnson 26 sep 2010 14.15 to new table/field names
     // and added selection of definitions to be imported and crosswalk builder, plus instructions and pseudocode.
-    // 4 Aug 2011, changed to import table structures from populateBlankDatabase.sql and to
+    // 4 Aug 2011, changed to import table structures from blankDBStructure.sql and to
     // include crosswalking during creation of a new database
-
 
     // Notes and directions:
 
@@ -49,7 +48,6 @@
     // Verify credentials of the user and check that they are an administrator, check no-one else is trying to
     // change the definitions at the same time
 
-
     // Requires admin user, access to definitions though get_definitions is open
     if (! is_admin()) {
         print "<html><head><link rel=stylesheet href='../../common/css/global.css'>
@@ -62,8 +60,6 @@
 
     require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
-
-    $definitions_being_modified = FALSE;
     $server_offline = FALSE;
     global $errorCreatingTables;
     $errorCreatingTables = FALSE;
@@ -76,6 +72,7 @@
     // Create new temp database with timestamp
     global $tempDBName;
     if(!isset($isNewDB)) { $isNewDB = false; }
+    $isExistingDB = !$isNewDB; // for clarity
 
     if($isNewDB)
     { // For new database, insert coreDefinitions.txt directly into tables, no temp database required
@@ -84,34 +81,33 @@
     } Else { // existing database needs temporary database to store data read and allow selection
         $dbname = DATABASE;
         $isNewDB = false;
-        $dateAndTime = date("dmygisa");
-        $tempDBName = "temp_" . $dateAndTime;
-        mysql_query("CREATE DATABASE `" . $tempDBName . "`");
+        $dateAndTime = date("YMd_H_i");
+        $tempDBName = "temp_".$dateAndTime;
+        mysql_query("CREATE DATABASE `" . $tempDBName . "`"); // TODO: should check database is created
     } // existing database
 
-    // Create the Heurist structure for the temp database, using the new database template SQL file
-    if (!$isNewDB) {
+    // Create the Heurist structure for the temp database, using a stripepd version of the new database template
+    if ($isExistingDB) {
         $cmdline="mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD.
-            " -D$tempDBName < ../setup/createDefinitionTablesOnly.sql";
+            " -D$tempDBName < ../setup/createDefinitionTablesOnly.sql"; // subset of, and must be kept in sync with, blankDBStructure.sql
         $output2 = exec($cmdline . ' 2>&1', $output, $res2);
         if($res2 != 0) {
+            mysql_query("DROP DATABASE `" . $tempDBName . "`");
             die("MySQL exec code $res2 : Unable to create table structure for new database $tempDBName (failure in executing createDefinitionTablesOnly.sql)");
         }
     }
 
     mysql_connection_db_insert($tempDBName); // Use temp database
 
-    $dbVersion = 3.1; // Definitions exchange format version number.
-
-    // TODO: use HEURIST_DBVERSION TO SET THE VERSION HERE
-
     // * IMPORTANT *
-    // UPDATE THE FOLLOWING WHEN DATABASE FORMAT IS CHANGED:
-    // SQL queries for data (below)
-    // Version info in buildCrosswalks.php
-    // insert queries in buildCrosswalks.php
-    // /admin/setup/createDefinitionTablesOnly.sql
-    // /admin/setup/PopulateBlankDatabase.sql
+    //   If database format is changed, update version info, include files, sql fiels for new dbs etc.
+    // see comprehensive lsit in admin/structure/getDBStrucutre.php
+
+
+    function debugStop($var, $msg="none") {
+        echo "msg: ".$msg." var = ".print_r($var,true);
+        exit();
+    }
 
 
     // -----Check not locked by admin -------------------------------
@@ -123,27 +119,27 @@
     // connection is lost, eg. heartbeat on subsequent pages or a specific 'remove admin lock' link (easier)
 
     // Check if someone else is already modifying database definitions, if so: stop.
-    $res = mysql_query("select lck_UGrpID from sysLocks where lck_ID=1");
-    if($res) {
-        if (mysql_num_rows($res)>0) {
-            echo "Definitions are already being modified.";
-            $definitions_being_modified = TRUE; // database definitions are being modified by administrator
-            }
-    }
 
-    if ($definitions_being_modified) {
-        // "Another administrator is modifying the definitions"
-        // "If this is not the case, "(or appears to be same user)" use 'Remove lock on database definition modification' from the administration page"
-        // "Click [continue] to return to the administration page"
-        header('Location: ' . BASE_PATH . 'admin/index.php'); // return to the adminstration page
-        die("Definitions are already being modified.");
-    }
+    $res = mysql_query("select lck_UGrpID from sysLocks where lck_Action='buildcrosswalks'");
+    // 6/9/11 $res is not being recognised as a valid MySQL result, and always returns false. This appear to be identical
+    // to example in help. So the following test is not being processed and the lock is ignored. The query works in MySQL
+    // TODO: get this locking mechanism to work
+
+    if (($res && mysql_num_rows($res)>0)) { // SQL OK and there is a lock record
+        // error log says “supplied argument is not a valid MySQL result resource”
+        echo "Definitions are already being modified or SQL failure on lock check.";
+        header('Location: ' . BASE_PATH . 'common/html/msgLockedByAdmin.html'); // put up informative failure message
+        if (!$isNewDB) {
+            mysql_query("DROP DATABASE `" . $tempDBName . "`");
+        } // drop the temporary database created to hold the definitions read in
+        die("Definitions are already being modified.<p> If this is not the case, you will need to delete the lock record in sysLocks table. <br>Consult Heurist team for assistance if needed");
+    } // detect lock and shuffle out
 
     // Mark database definitons as being modified by adminstrator
-    $definitions_being_modified=TRUE;
-    $query = "insert into sysLocks (lck_ID, lck_UGrpID, lck_Action) VALUES ('1', '0', 'BuildCrosswalks')";
-
+    $query = "insert into sysLocks (lck_ID, lck_UGrpID, lck_Action) VALUES ('1', '0', 'buildcrosswalks')";
     $res = mysql_query($query); // create sysLock
+
+
 
     // ------Find and set the source database-----------------------------------------------------------------------
 
@@ -151,18 +147,20 @@
     // The query should be based on DOAP metadata and keywords which Steven is due to set up in the Index database
 
 
-    //  Set three fields below to information about the database you will be importing from
+    //  Set information about the database you will be importing from
     global $source_db_id;
     if(!isset($_REQUEST["dbID"]) || $_REQUEST["dbID"] == 0) {
+        // TODO: THIS SHOULD NOT HAPPEN, would be better to issue a warning and exit
+        // TODO: check that this poitns at the correct reference database
         $source_db_id = '2'; //MAGIC NUMBER - ID of HeuristSystem_Reference db in Heurist_System_Index database
-        $source_db_name = 'Reference';
-        $source_db_prefix = 'HeuristSystem_';
-        $source_url = "http://heuristscholar.org/h3/admin/structure/getDBStructure.php?prefix=HeuristSystem_&db=Reference";
+        $source_db_name = 'H3CoreDefinitions';
+        $source_db_prefix = 'hdb_';
+        $source_url = "http://heuristscholar.org/h3/admin/structure/getDBStructure.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
+        // parameters were ?prefix=hdb_&db=H3CoreDefinitions";
     } else {
         $source_db_id = $_REQUEST["dbID"];
         $source_db_name = $_REQUEST["dbName"];
         $source_db_prefix = @$_REQUEST["dbPrefix"] && @$_REQUEST["dbPrefix"] != "" ? @$_REQUEST["dbPrefix"] : null;
-        error_log($source_db_name);
         $source_url = $_REQUEST["dbURL"]."admin/structure/getDBStructure.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
     }
 
@@ -193,24 +191,41 @@
             $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
             $server_offline = TRUE;
         }
-    }
+    } // getting data from source database for import of definitions to an existing database
 
     if($server_offline) { // Cancel buildCrosswalk process as no data can be received
-        die("Source database $source_db_id:$source_db_prefix$source_db_name could not be accessed at $source_url, server may be offline");
+        if (!$isNewDB) {
+            mysql_query("DROP DATABASE `" . $tempDBName . "`");
+        }
+        die("<br>Source database <b> $source_db_id : $source_db_prefix$source_db_name </b>could not be accessed <p>URL to structure service: <a href=$source_url target=_blank>$source_url</a> <p>Server may be offline");
     }
 
     // Split received data into data sets for one table defined by >>StartData>> and >>EndData>> markers.
 
-    $splittedData = split(">>StartData>>", $data);
-    $tableNumber;
+    $startToken = ">>StartData>>"; // also defined in getDBStructure.php
 
-    function getNextDataSet($splittedData) {
-        global $tableNumber;
-        if(!$tableNumber) {
-            $tableNumber = 1;
+    $splittedData = split($startToken, $data);
+    $tableNumber =1;
+
+    preg_match("/Database Version:\s*(\d+)\.(\d+)(?:\.(\d+))*/",$data,$sourceDBVersion); // $sourceDBVersion[0] = version string, 1, 2, 3 = ,major, minor, sub versions
+
+    preg_match("/Vsn:\s*(\d+)\.(\d+)(?:\.(\d+))*/","Vsn: ".HEURIST_DBVERSION,$thisDBVersion); // $sourceDBVersion[0] = version string, 1, 2, 3 = ,major, minor, sub versions
+
+        if (!($sourceDBVersion[1] == $thisDBVersion[1] && $sourceDBVersion[2] == $thisDBVersion[2])) {
+        echo "<p><strong>The source database ($sourceDBVersion[0]) is a different major/minor version from the current database (Vsn ".HEURIST_DBVERSION.
+             ")</strong><p>One or other database will need updating to the same major/minor version #";
+        exit();
         }
-        if(sizeof($splittedData) > $tableNumber) {
-            $splittedData2 = split(">>EndData>>", $splittedData[$tableNumber]);
+
+    function getNextDataSet($splittedData) { // returns and removes the first set of data between markers from $splitteddata
+        global $tableNumber;
+        $endToken = ">>EndData>>"; // also defined in getDBStructure.php
+        if(!$tableNumber) {
+           $tableNumber = 1;
+        }
+        // TODO: this is a horrible approach to splitting out the data. Should be rewritten. Works, so for the moment if it ain't broke ...
+        if(sizeof($splittedData) > $tableNumber) { // what the hell does this do? fortunately it is always true!
+            $splittedData2 = split($endToken, $splittedData[$tableNumber]);
             $i = 1;
             $size = strlen($splittedData2[0]);
             $testData = $splittedData2[0];
@@ -236,6 +251,7 @@
 
     // Do the splits and place in arrays
     // Note, these MUST be in the same order as getDBStructure
+
     $recTypeGroups = getNextDataSet($splittedData);
     $detailTypeGroups = getNextDataSet($splittedData);
     $ontologies = getNextDataSet($splittedData);
@@ -246,9 +262,9 @@
     $relationshipConstraints = getNextDataSet($splittedData);
     $fileExtToMimetype = getNextDataSet($splittedData);
     $translations = getNextDataSet($splittedData);
-    // not extracting defCalcFunctions, users, groups and tags
-    error_log(" dt = $detailTypes");
-    
+    // we are not extracting defCalcFunctions, defCrosswalk, defLanguage, defURLPrefixes, users, groups and tags
+    // add later if needed
+
     // insert the arrays into the corresonding tables (new db) or temp tables (existing)
     $query = "SET SESSION sql_mode='NO_AUTO_VALUE_ON_ZERO'";
     mysql_query($query);
@@ -270,19 +286,21 @@
     // ------ Functions to write source DB definitions to local tables ---------------------------------------------------
 
     // These insert statements updated by Ian ~12/8/11
-    
-    // NOTE: It is ESSENTIAL that the insert statemetn here correspond in fields and in order with the
+
+    // NOTE: It is ESSENTIAL that the insert statements here correspond in fields and in order with the
     //       tables being written out by getDBStructure
+    //       Some tables not processed (defCalcFunctions, defCrosswalk, defLanguages, sysIdentification and UGrps and tags)
 
 
     function processRecTypes($dataSet) {
         global $errorCreatingTables;
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-            include "defRecTypesFields.inc";         
+            include "crosswalk/defRecTypesFields.inc";
+//  debugStop($dataSet);
             $query = "INSERT INTO `defRecTypes` ($flds) VALUES" . $dataSet;
             mysql_query($query);
             if(mysql_error()) {
-                echo "RECTYPES Error inserting data: " . mysql_error() . "<p>FIELDS:$flds<br /><p>VALUES:$dataset<p>";
+                echo "RECTYPES Error inserting data: " . mysql_error() . "<p>FIELDS:$flds<br /><p>VALUES:$dataSet<p>";
                 $errorCreatingTables = TRUE;
             }
         } // END Imported first set of data to temp table: defRectypes
@@ -292,7 +310,7 @@
     function processDetailTypes($dataSet) {
         global $errorCreatingTables;
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-            include "defDetailTypesFields.inc";         
+            include "crosswalk/defDetailTypesFields.inc";
             $query = "INSERT INTO `defDetailTypes` ($flds) VALUES" . $dataSet;
             mysql_query($query);
             if(mysql_error()) {
@@ -307,6 +325,7 @@
     function processRecStructure($dataSet) {
         global $errorCreatingTables;
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
+            include "crosswalk/defRecStructureFields.inc";
             $query = "INSERT INTO `defRecStructure` ($flds) VALUES " . $dataSet;
             mysql_query($query);
             if(mysql_error()) {
@@ -321,6 +340,7 @@
     function processTerms($dataSet) {
         global $errorCreatingTables;
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
+            include "crosswalk/defTermsFields.inc";
             $query = "SET FOREIGN_KEY_CHECKS = 0;";
             mysql_query($query);
             $query = "INSERT INTO `defTerms` ($flds) VALUES " . $dataSet;
@@ -339,6 +359,7 @@
     function processOntologies($dataSet) {
         global $errorCreatingTables;
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
+            include "crosswalk/defOntologiesFields.inc";
             $query = "INSERT INTO `defOntologies` ($flds) VALUES " . $dataSet;
             mysql_query($query);
             if(mysql_error()) {
@@ -353,6 +374,7 @@
     function processRelationshipConstraints($dataSet) {
         global $errorCreatingTables;
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
+            include "crosswalk/defRelationshipConstraintsFields.inc";
             $query = "INSERT INTO `defRelationshipConstraints` ($flds) VALUES " . $dataSet;
             mysql_query($query);
             if(mysql_error()) {
@@ -367,6 +389,7 @@
     function processFileExtToMimetype($dataSet) {
         global $errorCreatingTables;
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
+            include "crosswalk/defFileExtToMimetypeFields.inc";
             $query = "INSERT INTO `defFileExtToMimetype` ($flds) VALUES " . $dataSet;
             mysql_query($query);
             if(mysql_error()) {
@@ -381,6 +404,7 @@
     function processRecTypeGroups($dataSet) {
         global $errorCreatingTables;
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
+            include "crosswalk/defRecTypeGroupsFields.inc";
             $query = "INSERT INTO `defRecTypeGroups` ($flds) VALUES " . $dataSet;
             mysql_query($query);
             if(mysql_error()) {
@@ -395,6 +419,7 @@
     function processDetailTypeGroups($dataSet) {
         global $errorCreatingTables;
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
+            include "crosswalk/defDetailTypeGroupsFields.inc";
             $query = "INSERT INTO `defDetailTypeGroups` ($flds) VALUES " . $dataSet;
             mysql_query($query);
             if(mysql_error()) {
@@ -409,6 +434,7 @@
     function processTranslations($dataSet) {
         global $errorCreatingTables;
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
+            include "crosswalk/defTranslationsFields.inc";
             $query = "INSERT INTO `defTranslations` ($flds) VALUES " . $dataSet;
             mysql_query($query);
             if(mysql_error()) {
@@ -421,16 +447,21 @@
 
     // Done inserting data into all tables in temp database (or actual database if new database).
 
+    // If this spits out errors with unkonwn columns, look to see if createDefinitionsTablesOnly.sql has been brought
+    // up to date with the structure of populateBlankDB.sql
+
     if($errorCreatingTables) { // An error occurred while trying to create one (or more) of the tables, or inserting data into them
         if($isNewDB) {
             echo "<br /><strong>An error occurred trying to insert data into the new database.</strong><br />";
         } else {
             echo "<br /><strong>An error occurred trying to insert the downloaded data into the temporary database.</strong><br />";
         }
+        echo "This may be due to a database version mismatch, please advise the Heurist development team<br>";
         mysql_query("DROP DATABASE `" . $tempDBName . "`"); // Delete temp database or incomplete new database
         return;
-    } else if(!$isNewDB){
+    } else if(!$isNewDB){ // do crosswalking for exisitn database, no action for new database
         require_once("createCrosswalkTable.php"); // offer user choice of fields to import
+        mysql_query("DROP DATABASE `" . $tempDBName . "`");
     }
 
     // TODO: Replace this line with centralised locking methodology

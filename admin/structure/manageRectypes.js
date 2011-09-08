@@ -423,7 +423,7 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 
 								if(Hul.isnull(context.error)){
 									dt.deleteRow(oRecord.getId(), -1);
-									alert("Record type #"+rectypeID+" was deleted");
+									//  this alert is a pain alert("Record type #"+rectypeID+" was deleted");
 									top.HEURIST.rectypes = context.rectypes;
 									_cloneHEU = null;
 								}

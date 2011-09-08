@@ -11,10 +11,16 @@
 -- MAY NOT REPORT ERRORS, POSSIBLE NEED TO SET STDOUT FIRST AND/OR USE TEE TO WRITE TO OUTPUT FILE
 -- AND INSPECT
 
+-- Updated to new H3 magic numbers for relationshiop records (type 1, with details 4, 5 and 7)
 
 -- Stored Procedures
 -- ------------------------------------------------------------------------------
 
+
+-- TODO: 5/9/11 Replace the clunky use of the sys_TableLastUpdated table to record the date of last update of defionition
+-- tables, involving a complex set of triggers on add/update/delete (the latter not working in any case)
+-- with a simple max(xxx_Modified) - takes 0.3 millisecs on the Records table with 56K records, so practically instant
+-- tlu_ fields are only accessed in three places - loadCommonInfo.php, getRecordInfoLibrary.php and getRectypesAsJSON.php
 
 DELIMITER $$
 
@@ -162,28 +168,31 @@ DELIMITER $$
 	AFTER INSERT ON `recDetails`
 	FOR EACH ROW
 	begin
-		declare relSrcDT integer;
-		declare relTrgDT integer;
-		select dty_ID into relSrcDT
-			from defDetailTypes
-			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 202
-			order by dty_ID desc limit 1;
-		select dty_ID into relTrgDT
-			from defDetailTypes
-			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 199
-			order by dty_ID desc limit 1;
-		if NEW.dtl_DetailTypeID=relTrgDT then
+--		declare relSrcDT integer;
+--		declare relTrgDT integer;
+--		select dty_ID into relSrcDT
+--			from defDetailTypes
+--			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 202
+--			order by dty_ID desc limit 1;
+--		select dty_ID into relTrgDT
+--			from defDetailTypes
+--			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 199
+--			order by dty_ID desc limit 1;
+--		if NEW.dtl_DetailTypeID=relTrgDT then
+		if NEW.dtl_DetailTypeID=4 then -- linked resource pointer
 			update recRelationshipsCache
 			-- need to also save the RecTypeID for the record to help with constraint checking
 				set rrc_TargetRecID = NEW.dtl_Value
 				where rrc_RecID=NEW.dtl_RecID;
-		elseif NEW.dtl_DetailTypeID=relSrcDT then
+--		elseif NEW.dtl_DetailTypeID=relSrcDT then
+		elseif NEW.dtl_DetailTypeID=7 then -- primary resource pointer
 			update recRelationshipsCache
 			-- need to also save the RecTypeID for the record to help with constraint checking
 				set rrc_SourceRecID = NEW.dtl_Value
 				where rrc_RecID=NEW.dtl_RecID;
 		end if;
-		-- need to add update for 200 to save the termID to help with constraint checking
+-- legacy databases: need to add update for 200 to save the termID to help with constraint checking
+-- new databases: need to add update for detail 200, now 5, to save the termID
 	end$$
 
 DELIMITER ;
@@ -214,28 +223,30 @@ DELIMITER $$
 	AFTER UPDATE ON `recDetails`
 	FOR EACH ROW
 	begin
-		declare relSrcDT integer;
-		declare relTrgDT integer;
-		select dty_ID into relSrcDT
-			from defDetailTypes
-			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 202
-			order by dty_ID desc limit 1;
-		select dty_ID into relTrgDT
-			from defDetailTypes
-			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 199
-			order by dty_ID desc limit 1;
-		if NEW.dtl_DetailTypeID=relTrgDT then
+--		declare relSrcDT integer;
+--		declare relTrgDT integer;
+--		select dty_ID into relSrcDT
+--			from defDetailTypes
+--			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 202
+--			order by dty_ID desc limit 1;
+--		select dty_ID into relTrgDT
+--			from defDetailTypes
+--			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 199
+--			order by dty_ID desc limit 1;
+--		if NEW.dtl_DetailTypeID=relTrgDT then
+		if NEW.dtl_DetailTypeID=4 then -- linked resource pointer
 			update recRelationshipsCache
 			-- need to also save teh RecTypeID for the record
 				set rrc_TargetRecID = NEW.dtl_Value
 				where rrc_RecID=NEW.dtl_RecID;
-		elseif NEW.dtl_DetailTypeID=relSrcDT then
+--		elseif NEW.dtl_DetailTypeID=relSrcDT then
+		elseif NEW.dtl_DetailTypeID=7 then -- primary resource pointer
 		update recRelationshipsCache
 				set rrc_SourceRecID = NEW.dtl_Value
 			-- need to also save teh RecTypeID for the record
 				where rrc_RecID=NEW.dtl_RecID;
 		end if;
-		-- need to add update for 200 to save the termID
+		-- need to add update for detail 200, now 5, to save the termID
 	end$$
 
 DELIMITER ;
@@ -253,20 +264,22 @@ DELIMITER $$
 	AFTER INSERT ON `Records`
 	FOR EACH ROW
 	begin
-		declare relRT integer;
-		select rty_ID into relRT
-			from defRecTypes
-			where rty_OriginatingDBID = 3 and rty_IDInOriginatingDB = 52 order by rty_ID desc limit 1;
+--		declare relRT integer;
+--		select rty_ID into relRT
+--			from defRecTypes
+--			where rty_OriginatingDBID = 3 and rty_IDInOriginatingDB = 52 order by rty_ID desc limit 1;
 	-- need to change this to check the rectype's type = relationship
+    -- 1 = record relationship
 	insert into usrRecentRecords (rre_UGrpID, rre_RecID, rre_Time)
 								values (@logged_in_user_id, NEW.rec_ID, now());
 	set @rec_id := last_insert_id(NEW.rec_ID);
-		if NEW.rec_RecTypeID = relRT then
+--		if NEW.rec_RecTypeID = relRT then
+		if NEW.rec_RecTypeID = 1 then
 			--  need to also save relationship records RecTypeID
 			insert into recRelationshipsCache (rrc_RecID, rrc_SourceRecID, rrc_TargetRecID) values (NEW.rec_ID,NEW.rec_ID,NEW.rec_ID);
 		end if;
 	end$$
-    
+
 DELIMITER ;
 DELIMITER $$
 
@@ -288,13 +301,13 @@ DELIMITER $$
 
 -- 14/2/11 Ian: Do we need this value set by the previous insert?
 			set @rec_version := last_insert_id();
-			
+
 		end if;
 		if NEW.rec_URL != OLD.rec_URL OR NEW.rec_URL is null then
 			set NEW.rec_URLLastVerified := NULL;
 		end if;
 	end$$
-    
+
 DELIMITER ;
 DELIMITER $$
 
@@ -306,49 +319,58 @@ DELIMITER $$
 	AFTER UPDATE ON `Records`
 	FOR EACH ROW
 	begin
-		declare relRT integer;
+--		declare relRT integer;
 		declare srcRecID integer;
 		declare trgRecID integer;
-		declare relSrcDT integer;
-		declare relTrgDT integer;
+--		declare relSrcDT integer;
+--		declare relTrgDT integer;
 		if @suppress_update_trigger is null then
 			insert into usrRecentRecords (rre_UGrpID, rre_RecID, rre_Time)
 				values (@logged_in_user_id, NEW.rec_ID, now())
 				on duplicate key update rre_Time = now();
 		end if;
-		select dty_ID into relSrcDT
-			from defDetailTypes
-			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 202
-			order by dty_ID desc limit 1;
-		select dty_ID into relTrgDT
-			from defDetailTypes
-			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 199
-			order by dty_ID desc limit 1;
-		select rty_ID into relRT
-			from defRecTypes
-			where rty_OriginatingDBID = 3 and rty_IDInOriginatingDB = 52 order by rty_ID desc limit 1;
+--		select dty_ID into relSrcDT
+--			from defDetailTypes
+--			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 202
+--			order by dty_ID desc limit 1;
+--		select dty_ID into relTrgDT
+--			from defDetailTypes
+--			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 199
+--			order by dty_ID desc limit 1;
+--		select rty_ID into relRT
+--			from defRecTypes
+--			where rty_OriginatingDBID = 3 and rty_IDInOriginatingDB = 52 order by rty_ID desc limit 1;
 		-- if change the records type from something else to relation insert cache value
-		if NEW.rec_RecTypeID = relRT AND NOT OLD.rec_RecTypeID = relRT then
+--		if NEW.rec_RecTypeID = relRT AND NOT OLD.rec_RecTypeID = relRT then
+--			select dtl_Value into srcRecID
+--				from recDetails
+--				where dtl_DetailTypeID = relSrcDT and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
+        -- record type 1 = relationship record
+		if NEW.rec_RecTypeID = 1 AND NOT OLD.rec_RecTypeID = 1 then
 			select dtl_Value into srcRecID
-				from recDetails
-				where dtl_DetailTypeID = relSrcDT and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
+            	from recDetails
+                -- primary resource pointer
+				where dtl_DetailTypeID=7 and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
 			if srcRecID is null then
 				set srcRecID = NEW.rec_ID;
 			end if;
 			select dtl_Value into trgRecID
 				from recDetails
-				where dtl_DetailTypeID = relTrgDT and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
+--				where dtl_DetailTypeID = relTrgDT and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
+                -- linked resource pointer
+				where dtl_DetailTypeID=4 and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
 			if trgRecID is null then
 				set trgRecID = NEW.rec_ID;
 			end if;
 			insert into recRelationshipsCache (rrc_RecID, rrc_SourceRecID, rrc_TargetRecID) values (NEW.rec_ID,srcRecID,trgRecID);
 		end if;
 		-- if change the records type from relation to something else remove cache value
-		if OLD.rec_RecTypeID = relRT AND NOT NEW.rec_RecTypeID = relRT then
+--		if OLD.rec_RecTypeID = relRT AND NOT NEW.rec_RecTypeID = relRT then
+	if OLD.rec_RecTypeID = 1 AND NOT NEW.rec_RecTypeID = 1 then
 			delete ignore from recRelationshipsCache where rrc_RecID = OLD.rec_ID;
 		end if;
 	end$$
-    
+
 DELIMITER ;
 DELIMITER $$
 
@@ -365,13 +387,14 @@ DELIMITER $$
 
 -- 14/2/11 Ian: Do we need this value set by the previous insert?
 		set @rec_version := last_insert_id();
-		declare relRT integer;
-		select rty_ID into relRT
-			from defRecTypes
-			where rty_OriginatingDBID = 3 and rty_IDInOriginatingDB = 52 order by rty_ID desc limit 1;
+--		declare relRT integer;
+--		select rty_ID into relRT
+--			from defRecTypes
+--			where rty_OriginatingDBID = 3 and rty_IDInOriginatingDB = 52 order by rty_ID desc limit 1;
 
 	-- need to change this to check the rectype's type = relationship
-		if OLD.rec_RecTypeID = relRT then
+--		if OLD.rec_RecTypeID = relRT then
+		if OLD.rec_RecTypeID = 1 then
 			delete ignore from recRelationshipsCache where rrc_RecID = OLD.rec_ID;
 		end if;
 	end$$
@@ -408,7 +431,7 @@ DELIMITER $$
 	AFTER INSERT ON `sysUGrps`
 	FOR EACH ROW
 		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="sysUGrps"$$
-   
+
 DELIMITER ;
 DELIMITER $$
 
@@ -426,14 +449,15 @@ DELIMITER ;
 DELIMITER $$
 
 --  			delete
-	DROP TRIGGER IF EXISTS sysUGrps_last_delete$$
+-- 5/9/11 This trigger gives an error "multiple triggers with the same action time and event for one table" not yet supported
+--	DROP TRIGGER IF EXISTS sysUGrps_last_delete$$
 
-	CREATE
-	DEFINER=`root`@`localhost`
-	TRIGGER `sysUGrps_last_delete$$`
-	AFTER DELETE ON `sysUGrps`
-	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="sysUGrps"$$
+--	CREATE
+--	DEFINER=`root`@`localhost`
+--	TRIGGER `sysUGrps_last_delete`
+--	AFTER DELETE ON `sysUGrps`
+--	FOR EACH ROW
+--		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="sysUGrps"$$
 
 DELIMITER ;
 
@@ -469,14 +493,15 @@ DELIMITER ;
 DELIMITER $$
 
 --  			delete
-	DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_delete$$
+-- 5/9/11 This trigger gives an error "multiple triggers with the same action time and event for one table" not yet supported
+--	DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_delete$$
 
-	CREATE
-	DEFINER=`root`@`localhost`
-	TRIGGER `sysUsrGrpLinks_last_delete$$`
-	AFTER DELETE ON `sysUsrGrpLinks`
-	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="sysUsrGrpLinks"$$
+--	CREATE
+--	DEFINER=`root`@`localhost`
+--	TRIGGER `sysUsrGrpLinks_last_delete`
+--	AFTER DELETE ON `sysUsrGrpLinks`
+--	FOR EACH ROW
+--		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="sysUsrGrpLinks"$$
 
 DELIMITER ;
 
@@ -577,7 +602,7 @@ DELIMITER $$
 	AFTER INSERT ON `defRecStructure`
 	FOR EACH ROW
 		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecStructure"$$
-    
+
 DELIMITER ;
 DELIMITER $$
 
@@ -594,13 +619,14 @@ DELIMITER ;
 DELIMITER $$
 
 --  			delete
-	DROP TRIGGER IF EXISTS defRecStructure_last_delete$$
+-- 5/9/11 This trigger gives an error "multiple triggers with the same action time and event for one table" not yet supported
+--	DROP TRIGGER IF EXISTS defRecStructure_last_delete$$
 
-	CREATE DEFINER=`root`@`localhost`
-	TRIGGER `defRecStructure_last_delete$$`
-	AFTER DELETE ON `defRecStructure`
-	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecStructure"$$
+--	CREATE DEFINER=`root`@`localhost`
+--	TRIGGER `defRecStructure_last_delete`
+--	AFTER DELETE ON `defRecStructure`
+--	FOR EACH ROW
+--		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecStructure"$$
 
 DELIMITER ;
 
@@ -618,7 +644,7 @@ DELIMITER $$
 	AFTER INSERT ON `defTerms`
 	FOR EACH ROW
 		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms"$$
-        
+
 DELIMITER ;
 DELIMITER $$
 
@@ -645,7 +671,7 @@ DELIMITER $$
     FOR EACH ROW
         update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms"$$
 
-DELIMITER ;   
+DELIMITER ;
 
 -- ------------------------------------------------------------------------------
 -- --------defRelationshipConstraints
@@ -661,7 +687,7 @@ DELIMITER $$
 	AFTER INSERT ON `defRelationshipConstraints`
 	FOR EACH ROW
 		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRelationshipConstraints"$$
-        
+
 DELIMITER ;
 DELIMITER $$
 

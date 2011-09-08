@@ -67,7 +67,7 @@
 </style>
 
 <div id=popup-saved style="display: none">
-	<b>Import succesfull</b>
+	<b>Import succesful</b>
 </div>
 
 <script type="text/javascript">
@@ -177,8 +177,8 @@ YAHOO.util.Event.addListener(window, "load", function() {
 					// 1 = dty_Name
 					// 2 = dty_Type
 					// 3 = dty_Status
-					
-					
+
+
 					for(i = 0; i < rectypeStructures[rty_ID].length; i++) {
 						if (rectypeStructures[rty_ID][i][3] == "reserved") {
 							dtyStatus = "<img src=\"../../common/images/lock_bw.png\">";
@@ -337,18 +337,26 @@ function _hideToolTip(){
 <script src="../../common/js/utilsUI.js"></script>
 <div id="page-inner" style="overflow:auto">
 
-<a id="shortLog" onClick="showShortLog()" href="#">Show short log</a><br />
-<a id="detailedLog" onClick="showDetailedLog()" href="#">Show detailed log</a><br /><br />
-<div id="log"></div><br />
-<div id="log"></div>
-<button id="finish1" onClick="dropTempDB(true)">Finish Import</button>
+<button id="finish1" onClick="dropTempDB(true)">Back to databases</button>
 <div id="crosswalk" style="width:100%;margin:auto;">
 	<div id="topPagination"></div>
 	<div id="crosswalkTable"></div>
 	<div id="bottomPagination"></div>
 </div>
-<button id="finish2" onClick="dropTempDB(true)">Finish Import</button>
+<i>Note: If this function reports 'No records found' this normally means that there are no
+definitions in the selected database which are not already in the current database.<p>
+In version 3.0 this may also mean that the database is in a different format version which is not being read correctly
+</i>
+<!-- TODO: need a check on format version and report if there is a difference in format version -->
+
+<br>&nbsp;<br>
+<button id="finish2" onClick="dropTempDB(true)">Back to databases</button>
 <div class="tooltip" id="toolTip"><p>tooltip</p></div>
+
+<a id="shortLog" onClick="showShortLog()" href="#">Show short log</a><br />
+<a id="detailedLog" onClick="showDetailedLog()" href="#">Show detailed log</a><br /><br />
+<div id="log"></div><br />
+<div id="log"></div>
 
 <script type="text/javascript">
 
@@ -376,14 +384,16 @@ function processAction(rtyID, action) {
 		xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
 	}
 	xmlhttp.onreadystatechange=function() {
-		if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+        // executed on change of ready state:
+        // 0=not init, 1=server connection, 2=request received, 3=processing request, 4= done
+		if (xmlhttp.readyState==4 && xmlhttp.status==200) { // done and OK
 			importPending = false;
 			var response = xmlhttp.responseText;
 			// Handle the response, and give feedback
 			if(response.substring(0,6) == "prompt") {
 				document.getElementById("importIcon"+rtyID).src = "import_icon.png";
 				changeDuplicateEntryName(rtyID);
-			}
+			} // end of OK
 			else if(response.substring(0,5) == "Error") {
 				document.getElementById("importIcon"+rtyID).src = "import_icon.png";
 
@@ -401,7 +411,7 @@ function processAction(rtyID, action) {
 				document.getElementById("log").style.color = "red";
 				document.getElementById("log").innerHTML=response;
 				document.getElementById("popup-saved").innerHTML = "<b>Import succesfull</b>";
-			}
+			} // end of error
 			else {
 				detailedImportLog += response;
 				response = response.split("<br />");
@@ -469,11 +479,13 @@ function showDetailedLog() {
 // If after trying an import the response says that the rectype name already exists, ask user to enter a new one
 var replaceRecTypeName = "";
 function changeDuplicateEntryName(rtyID) {
-	var newRecTypeName = prompt("An entry with the exact same name already exist.\n\nPlease enter a new name for this rectype, or cancel to stop importing it.","");
+	var newRecTypeName = prompt("Duplicate record type name\n\nPlease enter a new name for this record type","");
 	if(newRecTypeName == null || newRecTypeName == "") {
+    /* why do this? it's just the result of cancelling or entering nothing, does not need a warning message
 		document.getElementById("log").style.color = "red";
-		document.getElementById("log").innerHTML="You have to enter a valid new name to import a new rectype with an existing name.";
-		alert("You have to enter a valid new name to import a new rectype with an existing name.");
+		document.getElementById("log").innerHTML="You must supply a new name for the imported record type where the name already exists in the target database";
+		alert("You must supply a new name for the imported record type where the name already exists in the target database");
+    */
 	}
 	else {
 		replaceRecTypeName = newRecTypeName;
@@ -481,7 +493,7 @@ function changeDuplicateEntryName(rtyID) {
 	}
 }
 
-// Drop the temp DB when the page is closed, or 'Finish crosswalk' is clicked
+// Drop the temp DB when the page is closed, or 'Finished' is clicked
 var dropped = false;
 function dropTempDB(redirect) {
 	if(!dropped) {
@@ -492,9 +504,9 @@ function dropTempDB(redirect) {
 		window.location = "selectDBForImport.php";
 	} else {
 		if(result == "") {
-			alert("Nothing was imported");
+			// Annoying alert, you already know this: alert("Nothing was imported");
 		} else {
-			alert(result);
+			// potentially useful but very poorly formatted: alert(result);
 		}
 	}
 }

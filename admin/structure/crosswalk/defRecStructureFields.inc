@@ -1,6 +1,6 @@
 <?php
 // Be sure to use this quote  `  not the upright quote, or you will jsut get field names in place of data
-$flds = "  `rst_ID`, `rst_RecTypeID`,
+$flds = "`rst_ID`, `rst_RecTypeID`,
             `rst_DetailTypeID`, `rst_DisplayName`, `rst_DisplayHelpText`,
             `rst_DisplayExtendedDescription`, `rst_DisplayOrder`, `rst_DisplayWidth`,
             `rst_DefaultValue`, `rst_RecordMatchOrder`, `rst_CalcFunctionID`,
