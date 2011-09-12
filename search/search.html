@@ -89,6 +89,7 @@
 		<iframe id=searchFrame frameborder=0 style="width:0;height:0;position:absolute;"></iframe>
 		<script src="../common/php/loadHAPI.php"></script>
 		<script src="../common/js/utilsLoad.js"></script> <!-- core HEURIST functions -->
+		<script src="../common/php/getMagicNumbers.php"></script>
 		<script src="../records/edit/editRecord.js"></script>
 		<script>
 			var hBase = (top.HEURIST && top.HEURIST.basePath ? "http://" + window.location.host +  top.HEURIST.basePath :
@@ -223,14 +224,14 @@
       </li>
     </ul>
   </div>
-  
+
   <!-- search and menu -->
     <div id=search class="banner searchTable" style="border-bottom:1px solid #696969;">
             <form onSubmit="top.HEURIST.search.checkSearchForm();return false;"><input type=hidden id=w-input name=w>
                SEARCH:
               <div class="searchInput" style="position:relative"><input id=q name=q type=text style="width:300px; clear:both">
                 <div class="simplesearch" title="Click to show simple search builder panel" onclick='$("#simple-search").toggleClass("collapsed");$(this).toggleClass("collapsed");'></div>
-    
+
                <div id="simple-search" class="collapsed">
                     <div class="simple-search-row">
                       <label for="rectype-select">Record type:</label>
@@ -248,10 +249,10 @@
                     <a href="#" title="Search only records which have been bookmarked by you" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();" class="button">search my bookmarks</a>
                     <a href="#" title="Search across all records in Heurist" onClick="document.getElementById('w-input').value = ''; top.HEURIST.search.submitSearchForm();" class="button">search all records</a>
                     <a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">Go to <b>Advanced Search</b></a>
-    
+
                     </div>
                 </div>
-    
+
                </div>
               <div class="searchButtons">
                 <input id=my-records-button type=button value="my bookmarks" title="Search only records which have been bookmarked by you" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();" class="logged-in-only">
@@ -259,7 +260,7 @@
                 <span id="add-record"><input id=add-record-link value="Add New Record" title="Add a new record to the Heurist database, setting record type and ownership" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/addRecordPopup.php'); return false;" class="logged-in-only" >
                 </span></div>
             </form>
-            
+
             <div id="viewTriggers">
     	<div id="navButton" title="Hide Navigation Panel">Hide Navigation</div>
         <div id="tabbar">
@@ -316,17 +317,17 @@
           </li>
         </ul>
       </div>
-        
-        
-        
-        
+
+
+
+
         <div id="appPanelButton" title="Toggle search applications panel">Hide Applications</div>
-		
-    
+
+
     </div>
-            
+
     </div>
-    
+
 </div>
 <!-- sidebar -->
 <div id="sidebar">

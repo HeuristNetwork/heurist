@@ -40,6 +40,7 @@
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
 		<script src="../../common/js/utilsLoad.js"></script>
+		<script src="../../common/php/getMagicNumbers.php"></script>
 		<script src="relationshipsObjectLibrary.js"></script>
 		<script src="../../common/php/loadUserInfo.php"></script>
 		<script>
@@ -337,7 +338,11 @@
 					break;
 				}
 				default:
-				document.getElementById("act-stay").checked = true;
+				if (top.HEURIST && top.HEURIST.parameters && top.HEURIST.parameters['fromadd']) {
+					document.getElementById("act-close").checked = true;
+				} else {
+					document.getElementById("act-stay").checked = true;
+				}
 			}
 
 			var helpOn = (top.HEURIST.util.getDisplayPreference("help") !== "hide");

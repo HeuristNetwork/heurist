@@ -297,7 +297,7 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 // no recID or url passed in so create a new record
 if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 	/* create a new public note */
-error_log("in add making new records");
+//error_log("in add making new records new reco ownid = ". HEURIST_NEWREC_OWNER_ID);
 	$isNewRecID = true;
 	$rt = intval($_REQUEST['rec_rectype']);
 	if (!check_rectype_exist($rt)) {
@@ -322,7 +322,7 @@ error_log("in add making new records");
 															(@$userDefaultVisibility ? $userDefaultVisibility :
 																(defined('HEURIST_NEWREC_ACCESS') ? HEURIST_NEWREC_ACCESS: 'viewable'))),
 									'rec_FlagTemporary' => ! ($_REQUEST['bkmrk_bkmk_title']))); // saw BUG???
-//	error_log(mysql_error());
+//error_log( " after insert error = ". mysql_error());
 	$rec_id = mysql_insert_id();
 	if (@$_REQUEST['bkmrk_bkmk_title']) {
 		mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.

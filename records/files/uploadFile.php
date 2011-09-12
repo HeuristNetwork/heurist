@@ -64,7 +64,7 @@ function fireParentSubmitFunction() {
 <?php
 
 print "var fileDetails = ";
-
+$uploadFileError = null;
 $upload = $_FILES["file"];// saw NOTE!! this must be the same as the input type=file name (see above)
 $fileID = upload_file($upload["name"], $upload["type"], $upload["tmp_name"], $upload["error"], $upload["size"]);
 if ($fileID) {
@@ -86,6 +86,8 @@ if ($fileID) {
 	description: "<?= slash($file["ulf_Description"]) ?>"
 } })
 <?php
+} else if ($uploadFileError){
+	print "({ file: { origName: \"" . slash($_FILES["file"]["name"]) . "\" }, error: $uploadFileError })";
 } else {
 	if ($_FILES["file"]["error"]) {
 		print "({ file: { origName: \"" . slash($_FILES["file"]["name"]) . "\" }, error: \"Uploaded file was too large\" })";
@@ -101,6 +103,7 @@ if ($fileID) {
 <?php
 
 function upload_file($name, $type, $tmp_name, $error, $size) {
+global $uploadFileError;
 	/* Check that the uploaded file has a sane name / size / no errors etc,
 	 * enter an appropriate record in the recUploadedFiles table,
 	 * save it to disk,
@@ -150,6 +153,7 @@ function upload_file($name, $type, $tmp_name, $error, $size) {
 	} else {
 		/* something messed up ... make a note of it and move on */
 		error_log("upload_file: <$name> / <$tmp_name> couldn't be saved as <" . HEURIST_UPLOAD_PATH . $file_id . ">");
+		$uploadFileError = "upload file: $name couldn't be saved to upload path definied for db = ". HEURIST_DBNAME;
 		mysql_query('delete from recUploadedFiles where ulf_ID = ' . $file_id);
 		return 0;
 	}

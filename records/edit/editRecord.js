@@ -484,7 +484,10 @@ top.HEURIST.edit = {
 
 	allInputs: [],
 	createInput: function(detailTypeID, rectypeID, fieldValues, container) {
-		// Get Detail Type info  id, name, canonical type, rec type contraint
+		// Get Detail Type info
+		//0,"dty_Name" 1,"dty_ExtendedDescription" 2,"dty_Type" 3,"dty_OrderInGroup" 4,"dty_HelpText" 5,"dty_ShowInLists"
+		//6,"dty_Status" 7,"dty_DetailTypeGroupID" 8,"dty_FieldSetRectypeID" 9,"dty_JsonTermIDTree"
+		//10,"dty_TermIDTreeNonSelectableIDs" 11,"dty_PtrTargetRectypeIDs" 12,"dty_ID"
 		var dt = top.HEURIST.detailTypes.typedefs[detailTypeID]['commonFields'];
 		var rfr = null;
 		if (rectypeID) {
@@ -492,8 +495,12 @@ top.HEURIST.edit = {
 		}
 		if (!rfr) {
 			// fake low-rent rfr if rectype isn't specified
-			// name, prompt,default, required, repeatable, size, match
-			rfr = [ dt[0], "", "", 'optional', 0, 0, 0 ];	// saw TODO need to get defaults for enum list from dt
+			//0,"rst_DisplayName" 1,"rst_DisplayHelpText" 2,"rst_DisplayExtendedDescription" 3,"rst_DefaultValue" 4,"rst_RequirementType"
+			//5,"rst_MaxValues" 6,"rst_MinValues" 7,"rst_DisplayWidth" 8,"rst_RecordMatchOrder" 9,"rst_DisplayOrder"
+			//10,"rst_DisplayDetailTypeGroupID" 11,"rst_FilteredJsonTermIDTree" 12,"rst_PtrFilteredIDs" 13,"rst_TermIDTreeNonSelectableIDs"
+			//14,"rst_CalcFunctionID" 15,"rst_Status" 16,"rst_OrderForThumbnailGeneration" 17,"dty_TermIDTreeNonSelectableIDs"
+			//18,"dty_FieldSetRectypeID"
+			rfr = [ dt[0], "", "","", 'optional', 0, 0, 0 ];	// saw TODO need to get defaults for enum list from dt
 		}
 
 		var newInput;
@@ -720,7 +727,7 @@ top.HEURIST.edit = {
 		var i, l = order.length;
 		for (i = 0; i < l; ++i) {
 			var dtID = order[i];
-			if (rfrs[dtID][3] == 'forbidden') continue;
+			if (rfrs[dtID][4] == 'forbidden') continue;
 
 			var newInput = top.HEURIST.edit.createInput(dtID, rectypeID, fieldValues[dtID] || [], container);
 			inputs.push(newInput);
@@ -756,7 +763,7 @@ top.HEURIST.edit = {
 			if (! inputs[i].verify()) {
 				// disaster! incomplete input
 /*
-				var niceName = inputs[i].recFieldlRequirements[0].toLowerCase();
+				var niceName = inputs[i].recFieldRequirements[0].toLowerCase();
 				    niceName = niceName.substring(0, 1).toUpperCase() + niceName.substring(1);
 */
 				missingFields.push("\"" + inputs[i].shortName + "\" field requires " + inputs[i].typeDescription);
@@ -1073,38 +1080,51 @@ top.HEURIST.edit = {
 
 top.HEURIST.edit.inputs = { };
 
-top.HEURIST.edit.inputs.BibDetailInput = function(detailType, recFieldlRequirements, fieldValues, parentElement) {
+top.HEURIST.edit.inputs.BibDetailInput = function(detailType, recFieldRequirements, fieldValues, parentElement) {
+
 	if (arguments.length == 0) return;	// for prototyping
+
+// detailType
+//0,"dty_Name" 1,"dty_ExtendedDescription" 2,"dty_Type" 3,"dty_OrderInGroup" 4,"dty_HelpText" 5,"dty_ShowInLists"
+//6,"dty_Status" 7,"dty_DetailTypeGroupID" 8,"dty_FieldSetRectypeID" 9,"dty_JsonTermIDTree"
+//10,"dty_TermIDTreeNonSelectableIDs" 11,"dty_PtrTargetRectypeIDs" 12,"dty_ID"
+
+//recFieldRequirements
+//0,"rst_DisplayName" 1,"rst_DisplayHelpText" 2,"rst_DisplayExtendedDescription" 3,"rst_DefaultValue" 4,"rst_RequirementType"
+//5,"rst_MaxValues" 6,"rst_MinValues" 7,"rst_DisplayWidth" 8,"rst_RecordMatchOrder" 9,"rst_DisplayOrder"
+//10,"rst_DisplayDetailTypeGroupID" 11,"rst_FilteredJsonTermIDTree" 12,"rst_PtrFilteredIDs" 13,"rst_TermIDTreeNonSelectableIDs"
+//14,"rst_CalcFunctionID" 15,"rst_Status" 16,"rst_OrderForThumbnailGeneration" 17,"dty_TermIDTreeNonSelectableIDs"
+//18,"dty_FieldSetRectypeID"	if (arguments.length == 0) return;	// for prototyping
 	var thisRef = this;
 
 	this.detailType = detailType;
-	this.recFieldlRequirements = recFieldlRequirements;
+	this.recFieldRequirements = recFieldRequirements;
 	this.parentElement = parentElement;
 	var elt = parentElement;
 	do { elt = elt.parentNode; } while (elt.nodeType != 9 /* DOCUMENT_NODE */);
 	this.document = elt;
-	this.shortName = recFieldlRequirements[0];
+	this.shortName = recFieldRequirements[0];
 
-	var required = recFieldlRequirements[4];
+	var required = recFieldRequirements[4];
 		if (required == 'optional') required = "optional";
 		else if (required == 'required') required = "required";
 		else if (required == 'recommended') required = "recommended";
 		else required = "";
 	this.required = required;
 
-	this.repeatable = (recFieldlRequirements[5] != 1)? true : false; //saw TODO this really needs to check many exist
+	this.repeatable = (recFieldRequirements[5] != 1)? true : false; //saw TODO this really needs to check many exist
 
 	this.row = parentElement.appendChild(this.document.createElement("div"));
 		this.row.className = "input-row " + required;
 
 	this.headerCell = this.row.appendChild(this.document.createElement("div"));
 		this.headerCell.className = "input-header-cell";
-		this.headerCell.appendChild(this.document.createTextNode(recFieldlRequirements[0]));	// rfr_name
+		this.headerCell.appendChild(this.document.createTextNode(recFieldRequirements[0]));	// rfr_name
 	if (this.repeatable) {
 		var dupImg = this.headerCell.appendChild(this.document.createElement('img'));
 			dupImg.src = top.HEURIST.basePath + "common/images/duplicate.gif";
 			dupImg.className = "duplicator";
-			dupImg.alt = dupImg.title = "Add another " + recFieldlRequirements[0] + " field";
+			dupImg.alt = dupImg.title = "Add another " + recFieldRequirements[0] + " field";
 			top.HEURIST.registerEvent(dupImg, "click", function() { thisRef.duplicateInput.call(thisRef); } );
 	}
 
@@ -1114,7 +1134,7 @@ top.HEURIST.edit.inputs.BibDetailInput = function(detailType, recFieldlRequireme
 	// make sure that the promptDiv is the last item in the input cell
 	this.promptDiv = this.inputCell.appendChild(this.document.createElement("div"));
 		this.promptDiv.className = "help prompt";
-		this.promptDiv.innerHTML = recFieldlRequirements[1];
+		this.promptDiv.innerHTML = recFieldRequirements[1];
 
 	this.inputs = [];
 	if (this.repeatable) {	//saw TODO adjust this code for Cardinality
@@ -1122,13 +1142,13 @@ top.HEURIST.edit.inputs.BibDetailInput = function(detailType, recFieldlRequireme
 			this.addInput(fieldValues[i]);
 		}
 		if (fieldValues.length == 0) {
-			this.addInput();	// add an empty input
+			this.addInput({"value" : recFieldRequirements[3]});	// add default value input make it look like bdvalue without id field
 		}
 	} else {
 		if (fieldValues.length > 0) {
 			this.addInput(fieldValues[0]);
 		} else {
-			this.addInput();
+			this.addInput({"value" : recFieldRequirements[3]});
 		}
 	}
 };
@@ -1147,7 +1167,7 @@ top.HEURIST.edit.inputs.BibDetailInput.prototype.duplicateInput = function() { t
 top.HEURIST.edit.inputs.BibDetailInput.prototype.addInputHelper = function(bdValue, element) {
 	this.elementName = "type:" + this.detailType[12];
 		element.name = (bdValue && bdValue.id)? (this.elementName + "[bd:" + bdValue.id + "]") : (this.elementName + "[]");
-		element.title = this.recFieldlRequirements[0];
+		element.title = this.recFieldRequirements[0];
 		element.setAttribute("bib-detail-type", this.detailType[12]);
 		var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
@@ -1165,8 +1185,8 @@ top.HEURIST.edit.inputs.BibDetailInput.prototype.addInputHelper = function(bdVal
 		}
 		else	this.constrainrectype = 0;
 	}
-	if (parseFloat(this.recFieldlRequirements[7]) > 0) {	//if the size is greater than zero
-		element.style.width = Math.round(4/3 * this.recFieldlRequirements[7]) + "ex";
+	if (parseFloat(this.recFieldRequirements[7]) > 0) {	//if the size is greater than zero
+		element.style.width = Math.round(4/3 * this.recFieldRequirements[7]) + "ex";
 	}
 
 	element.expando = true;
@@ -1516,9 +1536,9 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.getPrimaryValue = funct
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.typeDescription = "a value from the dropdown";
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.regex = new RegExp(".");
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdValue) {
-	var termHeaderList = typeof this.recFieldlRequirements[13] == "string" ?
-						top.HEURIST.util.expandJsonStructure(this.recFieldlRequirements[13]): [];//get DetailType non selectables
-	var newInput = top.HEURIST.util.createTermSelect(top.HEURIST.util.expandJsonStructure(this.recFieldlRequirements[11]),
+	var termHeaderList = typeof this.recFieldRequirements[13] == "string" ?
+						top.HEURIST.util.expandJsonStructure(this.recFieldRequirements[13]): [];//get DetailType non selectables
+	var newInput = top.HEURIST.util.createTermSelect(top.HEURIST.util.expandJsonStructure(this.recFieldRequirements[11]),
 														termHeaderList,
 														this.detailType[2] == "enum" ?
 															top.HEURIST.terms.termsByDomainLookup['enum'] :
@@ -1723,7 +1743,7 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 	this.addInputHelper.call(this, bdValue, newDiv);
 
 	var input = this.document.createElement("input");
-	    input.type = "hidden";
+		input.type = "hidden";
 		// This is a bit complicated:
 		// We don't put in an input if there's already a value,
 		// because MySQL says   bd_geo != geomfromtext(astext(bd_geo))   so we would get false deltas.
@@ -1851,7 +1871,7 @@ top.HEURIST.edit.inputs.BibDetailSeparator.prototype.addInput = function(bdValue
 	if (this.promptDiv){
 		this.promptDiv.className = "";
 		this.promptDiv.style.display = "none";
-		newInput.title = this.recFieldlRequirements[1];
+		newInput.title = this.recFieldRequirements[1];
 	}
 };
 

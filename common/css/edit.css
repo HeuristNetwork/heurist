@@ -246,7 +246,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	max-width:139px;
 	padding:4px 4px 6px 45px;
 }
- .sidebar-link ::-moz-selection {
+.sidebar-link ::-moz-selection {
 color: inherit;
 background-color: inherit;
 }
@@ -268,7 +268,7 @@ div.sidebar-link img {
 	float: right;
 }
 div.sidebar-link.changed img {
-	background-image: url(../images/save-disk.gif);
+	background-image: url('../images/save-disk.gif');
 }
 body div.sidebar-link.disabled, body div.sidebar-link.disabled:hover {
 	cursor: default;
@@ -503,7 +503,7 @@ div.input-row div.input-cell div#relations-tbody div div div.relation div.resour
 	width: 19px;
 }
 .temporal-button {
-	background: url(../images/temporal.gif) lightgray scroll center center no-repeat;
+	background: url("../images/temporal.gif") lightgray scroll center center no-repeat;
 	border: medium none;
 	height: 13px;
 	margin: 5px;
@@ -614,7 +614,7 @@ input#tags:focus, .input-cell .in:focus, .input-cell .resource-title:focus, .in:
 .input-cell .resource-div .delete-resource {
 	cursor: pointer;
 	margin-left: 5px;
-	background-image: url(../images/cross.png);
+	background-image: url('../images/cross.png');
 }
 .input-cell .resource-div.empty img.edit-resource {
 	visibility: hidden;
@@ -622,7 +622,7 @@ input#tags:focus, .input-cell .in:focus, .input-cell .resource-title:focus, .in:
 .input-cell .resource-div.empty img.delete-resource {
 	cursor: default;
 	margin-left: 5px;
-	background-image: url(../images/cross-grey.png);
+	background-image: url('../images/cross-grey.png');
 }
 .input-cell a {
 	display: inline-block;

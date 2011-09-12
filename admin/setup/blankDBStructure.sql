@@ -911,6 +911,13 @@ INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMa
   -- Note: ugr_id=2 is set as the database admin in the sysUsrGrpLinks table
   -- there can be multipl admins for a database
 
+INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMail,ugr_Enabled,ugr_FirstName,ugr_LastName)
+ VALUES (3,'Everyone',
+ 'Group 0 represents all logged in users. DO NOT DELETE.',
+ 'Workgroup','PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=0','y','every','user');
+ -- Note: ugr_id=0 is set as the default new rec owner in the sysidentification table, this entry is require to constraint
+ UPDATE sysUGrps set ugr_ID = 0 where ugr_ID = 3;
+
 -- Insert a row to define the link between group 1 (dbowners) and user 2 (the first admin)
 INSERT IGNORE INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID,ugl_Role) VALUES (2,1,'admin');
 

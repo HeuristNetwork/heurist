@@ -227,63 +227,63 @@
 	define('DT_ALL_ASSOC_FILE','2-221');
 
 	$rtDefines = array(
-		'RT_INTERNET_BOOKMARK' => 1,
-		'RT_NOTE' => 2,
-		'RT_JOURNAL_ARTICLE' => 3,
-		'RT_BOOK' => 5,
-		'RT_JOURNAL_VOLUME' => 28,
-		'RT_RELATION' => 52,
-		'RT_PERSON' => 55,
-		'RT_MEDIA_RECORD' => 74,
-		'RT_AUTHOR_EDITOR' => 75,
-		'RT_BLOG_ENTRY' => 137,
-		'RT_FACTOID' => 150);
+		'RT_INTERNET_BOOKMARK' => 2,
+		'RT_NOTE' => 3,
+		'RT_JOURNAL_ARTICLE' => 15,
+		'RT_BOOK' => 13,
+		'RT_JOURNAL_VOLUME' => 18,
+		'RT_RELATION' => 1,
+		'RT_PERSON' => 20,
+		'RT_MEDIA_RECORD' => 5,
+		'RT_AUTHOR_EDITOR' => 23,
+		'RT_BLOG_ENTRY' => 8,
+		'RT_FACTOID' => 22);
 
 	foreach ($rtDefines as $str => $id) {
 		defineRTLocalMagic($str,$id);
 	}
 
 	$dtDefines = array(
-		'DT_TITLE' => 160,
-		'DT_GIVEN_NAMES' => 291,
-		'DT_ALTERNATE_NAME' => 331,
-		'DT_CREATOR' => 158,
-		'DT_EXTENDED_DESCRIPTION' => 191,
-		'DT_LINKED_RESOURCE' => 199,
-		'DT_RELATION_TYPE' => 200,
-		'DT_NOTES' => 201,
-		'DT_PRIMARY_RESOURCE' => 202,
+		'DT_TITLE' => 1,
+		'DT_GIVEN_NAMES' => 33,
+		'DT_ALTERNATE_NAME' => 36,
+		'DT_CREATOR' => 19,
+		'DT_EXTENDED_DESCRIPTION' => 17,
+		'DT_LINKED_RESOURCE' => 4,
+		'DT_RELATION_TYPE' => 5,
+		'DT_NOTES' => 12,
+		'DT_PRIMARY_RESOURCE' => 7,
 		'DT_FULL_IMAG_URL' => 603,
 		'DT_THUMB_IMAGE_URL' => 606,
-		'DT_ASSOCIATED_FILE' => 221,
+		'DT_ASSOCIATED_FILE' => 8,
 		'DT_GEO_OBJECT' => 230,
 		'DT_OTHER_FILE' => 231,
 		'DT_LOGO_IMAGE' => 222,
-		'DT_THUMBNAIL' => 223,
+		'DT_THUMBNAIL' => 9,
 		'DT_IMAGES' => 224,
-		'DT_DATE' => 166,
-		'DT_START_DATE' => 177,
-		'DT_END_DATE' => 178,
-		'DT_INTERPRETATION_REFERENCE' => 638,
-		'DT_DOI' => 198,
+		'DT_DATE' => 16,
+		'DT_START_DATE' => 2,
+		'DT_END_DATE' => 3,
+		'DT_INTERPRETATION_REFERENCE' => 13,
+		'DT_DOI' => 99,
 		'DT_WEBSITE_ICON' => 347,
-		'DT_ISBN' => 187,
-		'DT_ISSN' => 188,
-		'DT_JOURNAL_REFERENCE' => 226,
-		'DT_SHORT_SUMMARY' => 303,
+		'DT_ISBN' => 97,
+		'DT_ISSN' => 108,
+		'DT_JOURNAL_REFERENCE' => 111,
+		'DT_SHORT_SUMMARY' => 12,
 		'DT_MEDIA_REFERENCE' => 508,
 		'DT_TEI_DOCUMENT_REFERENCE' => 322,
 		'DT_START_ELEMENT' => 539,
 		'DT_END_ELEMENT' => 540,
 		'DT_START_WORD' => 329,
-		'DT_MIME_TYPE' => 289,
+		'DT_MIME_TYPE' => 48,
 		'DT_SERVICE_URL' => 339,
 		'DT_MAP_IMAGE_LAYER_SCHEMA' => 585,
 		'DT_KML_FILE' => 552,
-		'DT_TITLE_SHORT' => 173,
-		'DT_KML' => 551,
+		'DT_TITLE_SHORT' => 55,
+		'DT_KML' => 138,
 		'DT_MINMUM_ZOOM_LEVEL' => 586,
-		'DT_MAP_IMAGE_LAYER_REFERENCE' => 588,
+		'DT_MAP_IMAGE_LAYER_REFERENCE' => 92,
 		'DT_MAXIMUM_ZOOM_LEVEL' => 587);
 
 	foreach ($dtDefines as $str => $id) {
@@ -304,7 +304,7 @@ function defineDTLocalMagic($defString, $dtID) {
 	}
 }
 
-function rectypeLocalIDLookup($rtID,$dbID = 3) {
+function rectypeLocalIDLookup($rtID,$dbID = 2) {
 	static $RTIDs;
 	if (!$RTIDs) {
 		$res = mysql_query('select rty_ID as localID,rty_OriginatingDBID as dbID,rty_IDInOriginatingDB as id from defRecTypes order by dbID');
@@ -321,7 +321,7 @@ function rectypeLocalIDLookup($rtID,$dbID = 3) {
 	return (@$RTIDs[$dbID][$rtID] ? $RTIDs[$dbID][$rtID]: null);
 }
 
-function detailtypeLocalIDLookup($dtID,$dbID = 3) {
+function detailtypeLocalIDLookup($dtID,$dbID = 2) {
 	static $DTIDs;
 	if (!$DTIDs) {
 		$res = mysql_query('select dty_ID as localID,dty_OriginatingDBID as dbID,dty_IDInOriginatingDB as id from defDetailTypes order by dbID');
