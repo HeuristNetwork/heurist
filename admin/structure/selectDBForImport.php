@@ -49,8 +49,11 @@ Click the database icon on the left to view available record types in that datab
 <div id="topPagination"></div>
 <div id="selectDB"></div>
 <div id="bottomPagination"></div>
+<?php
+	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+?>
 
-<form id="crosswalkInfo" action="buildCrosswalks.php" method="POST">
+<form id="crosswalkInfo" action="buildCrosswalks.php?db=<?= HEURIST_DBNAME?>" method="POST">
 <input id="dbID" name="dbID" type="hidden">
 <input id="dbURL" name="dbURL" type="hidden">
 <input id="dbName" name="dbName" type="hidden">
@@ -61,7 +64,6 @@ Click the database icon on the left to view available record types in that datab
 <script type="text/javascript">
 var registeredDBs = [];
 <?php
-	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
 	if (!is_logged_in()) {
 	    header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);

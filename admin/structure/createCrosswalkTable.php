@@ -71,9 +71,9 @@
 </div>
 
 <script type="text/javascript">
-var crwSourceDBID = "1";
-var crwDefType = "";
-var crwLocalCode = "";
+//var crwSourceDBID = "1";
+//var crwDefType = "";
+//var crwLocalCode = "";
 var replaceRecTypeName = "";
 
 var rectypeStructures = [];
@@ -93,32 +93,49 @@ function insertData() {
 		$identicalMatches = mysql_query("select rty_ID from " . DATABASE . ".defRecTypes where rty_OriginatingDBID = $OriginatingDBID AND rty_IDInOriginatingDB = $IDInOriginatingDB");
 
 		// These rectypes are not in the importing database
-		if(mysql_num_rows($identicalMatches) == 0) {
+		if(!mysql_num_rows($identicalMatches)) {
 			$approxMatches = mysql_query("select rty_Name, rty_Description from " . DATABASE . ".defRecTypes where (rty_Name like '%$nameInTempDB%')"); // TODO: if rectype is more than one word, check for both words
 			$numberOfApproxMatches = mysql_num_rows($approxMatches);
 			// Add all approximate matches to a javascript array
 			if($numberOfApproxMatches > 0) {
-				while($approxRectypes = mysql_fetch_array($approxMatches, MYSQL_ASSOC)) {
+				while($approxRectypes = mysql_fetch_assoc($approxMatches)) {
 					echo 'if(!approxRectypes['.$IDInOriginatingDB.']) {' . "\n";
 					echo 'approxRectypes['.$IDInOriginatingDB.'] = new Array();' . "\n";
 					echo '}' . "\n";
 					echo 'var approxRtysRow = [];' . "\n";
-					$approxRectypes["rty_Name"] = mysql_escape_string($approxRectypes["rty_Name"]);
-					$approxRectypes["rty_Description"] = mysql_escape_string($approxRectypes["rty_Description"]);
-					echo 'approxRtysRow[0] = "'.$approxRectypes["rty_Name"].'";' . "\n";
-					echo 'approxRtysRow[1] = "'.$approxRectypes["rty_Description"].'";' . "\n";
+					$approxRty_Name = mysql_escape_string($approxRectypes["rty_Name"]);
+					$approxRty_Description = mysql_escape_string($approxRectypes["rty_Description"]);
+					echo "approxRtysRow[0] = \"$approxRty_Name\";" . "\n";
+					echo "approxRtysRow[1] = \"$approxRty_Description\";" . "\n";
 					echo 'approxRectypes['.$IDInOriginatingDB.'].push(approxRtysRow);' . "\n";
 				}
 			}
-			mysql_query("use ".$tempDBName);
-			$rtyData = mysql_query("select defRecTypes.rty_ID, defRecStructure.rst_ID, defRecStructure.rst_DetailTypeID, defRecStructure.rst_DisplayName, defDetailTypes.dty_ID, defDetailTypes.dty_Name, defDetailTypes.dty_Type, defDetailTypes.dty_Status, defRecTypes.rty_Description from defRecTypes left join defRecStructure on defRecTypes.rty_ID=defRecStructure.rst_RecTypeID left join defDetailTypes on defRecStructure.rst_DetailTypeID=defDetailTypes.dty_ID order by defRecTypes.rty_ID");
 			// Add recordtypes to the table
 			echo 'myDataTable.addRow({arrow:"<img id=\"arrow'.$rectype["rty_ID"].'\" src=\"../../external/yui/2.8.2r1/build/datatable/assets/images/arrow_closed.png\" />",rtyID:"'.$rectype["rty_ID"].'",rectype:"'.$rectype["rty_Name"].'",matches:"'.$numberOfApproxMatches.'",import:"<a href=\"#import\"><img id=\"importIcon'.$rectype["rty_ID"].'\" src=\"../../common/images/download.png\" width=\"16\" height=\"16\" /></a>"});' . "\n";
 		}
 	}
+	mysql_query("use ".$tempDBName);
+	$rtyData = mysql_query("select defRecTypes.rty_ID,
+									defRecStructure.rst_ID,
+									defRecStructure.rst_DetailTypeID,
+									defRecStructure.rst_DisplayName,
+									defDetailTypes.dty_ID,
+									defDetailTypes.dty_Name,
+									defDetailTypes.dty_Type,
+									defDetailTypes.dty_Status,
+									defDetailTypes.dty_IDInOriginatingDB as origDtyID,
+									defDetailTypes.dty_OriginatingDBID as origDBID,
+									defRecTypes.rty_Description
+							from defRecTypes
+								left join defRecStructure on defRecTypes.rty_ID=defRecStructure.rst_RecTypeID
+								left join defDetailTypes on defRecStructure.rst_DetailTypeID=defDetailTypes.dty_ID
+							order by defRecTypes.rty_ID");
 	// For every recordtype, add the structure to a javascript array, to show in the tooltip
 	if(isset($rtyData)) {
-		while($rectypeStructure = mysql_fetch_array($rtyData, MYSQL_ASSOC)) {
+		while($rectypeStructure = mysql_fetch_assoc($rtyData)) {
+			$dtyImported = mysql_query("select dty_ID from " . DATABASE . ".defDetailTypes ".
+										"where dty_OriginatingDBID = ".$rectypeStructure['origDBID'].
+										" AND dty_IDInOriginatingDB = ".$rectypeStructure['origDtyID']);
 			echo 'if(!rectypeStructures['.$rectypeStructure["rty_ID"].']) {' . "\n";
 			echo 'rectypeStructures['.$rectypeStructure["rty_ID"].'] = new Array();' . "\n";
 			echo '}' . "\n";
@@ -131,6 +148,7 @@ function insertData() {
 			echo 'rtyDataRow[3] = "'.$rectypeStructure["dty_Status"].'";' . "\n";
 			$rectypeStructure["rty_Description"] = mysql_escape_string($rectypeStructure["rty_Description"]);
 			echo 'rtyDataRow[4] = "'.$rectypeStructure["rty_Description"].'";' . "\n";
+			echo 'rtyDataRow[5] = "'.(mysql_num_rows($dtyImported)).'";' . "\n";
 			echo 'rectypeStructures['.$rectypeStructure["rty_ID"].'].push(rtyDataRow);' . "\n";
 		}
 	}
@@ -177,6 +195,8 @@ YAHOO.util.Event.addListener(window, "load", function() {
 					// 1 = dty_Name
 					// 2 = dty_Type
 					// 3 = dty_Status
+					// 4 = dty_Description
+					// 5 = dty exist in DB
 
 
 					for(i = 0; i < rectypeStructures[rty_ID].length; i++) {
@@ -185,7 +205,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
 						}else{
 							dtyStatus = "";
 						};
-						info += "<tr><td>" + rectypeStructures[rty_ID][i][0] + "</td><td>" + rectypeStructures[rty_ID][i][1] + "</td><td>" + rectypeStructures[rty_ID][i][2] + "</td><td class=\"status\">" + dtyStatus + "</td></tr>";
+						info += "<tr"+ (rectypeStructures[rty_ID][i][5] == 1? ' style="background-color:#CCCCCC;"' : "") +"><td>" + rectypeStructures[rty_ID][i][0] + "</td><td>" + rectypeStructures[rty_ID][i][1] + "</td><td>" + rectypeStructures[rty_ID][i][2] + "</td><td class=\"status\">" + dtyStatus + "</td></tr>";
 					}
 					info += "</table><br />";
 					obj.liner_element.innerHTML += info;
@@ -366,7 +386,7 @@ var result = "";
 var importedRowID;
 var importPending = false;
 // Start an asynchronous call, sending the recordtypeID and action
-function processAction(rtyID, action) {
+function processAction(rtyID, action, rectypeName) {
 	// Lock import, and set import icon to loading icon
 	if(action == "import") {
 		importPending = true;
@@ -392,9 +412,8 @@ function processAction(rtyID, action) {
 			// Handle the response, and give feedback
 			if(response.substring(0,6) == "prompt") {
 				document.getElementById("importIcon"+rtyID).src = "import_icon.png";
-				changeDuplicateEntryName(rtyID);
-			} // end of OK
-			else if(response.substring(0,5) == "Error") {
+				changeDuplicateEntryName(rtyID, rectypeName);
+			} else if(response.substring(0,5) == "Error") {
 				document.getElementById("importIcon"+rtyID).src = "import_icon.png";
 
 				shortImportLog += '<p style="color:red">'+response+"</p>";
@@ -411,8 +430,7 @@ function processAction(rtyID, action) {
 				document.getElementById("log").style.color = "red";
 				document.getElementById("log").innerHTML=response;
 				document.getElementById("popup-saved").innerHTML = "<b>Import succesfull</b>";
-			} // end of error
-			else {
+			} else {
 				detailedImportLog += response;
 				response = response.split("<br />");
 				result += response[0]+"\n\n";
@@ -434,10 +452,17 @@ function processAction(rtyID, action) {
 				myDataTable.deleteRow(importedRowID, -1);
 			}
 		}
-		else {
-		}
-	}
-	xmlhttp.open("GET","processAction.php?action="+action+"&tempDBName="+tempDBName+"&crwSourceDBID="+crwSourceDBID+"&crwSourceCode="+rtyID+"&crwDefType="+crwDefType+"&crwLocalCode="+crwLocalCode+"&replaceRecTypeName="+replaceRecTypeName+"&importingDB="+importingDBFullName,true);
+	} // end readystate callback
+
+	xmlhttp.open("GET","processAction.php?"+
+						"action="+action+
+						"&tempDBName="+tempDBName+
+//						"&="+crwSourceDBID+
+						"&crwSourceCode="+rtyID+
+//						"&crwDefType="+crwDefType+
+//						"&crwLocalCode="+crwLocalCode+
+						"&replaceRecTypeName="+replaceRecTypeName+
+						"&importingDB="+importingDBFullName,true);
 	xmlhttp.send();
 }
 
@@ -477,19 +502,20 @@ function showDetailedLog() {
 }
 
 // If after trying an import the response says that the rectype name already exists, ask user to enter a new one
-var replaceRecTypeName = "";
-function changeDuplicateEntryName(rtyID) {
-	var newRecTypeName = prompt("Duplicate record type name\n\nPlease enter a new name for this record type","");
-	if(newRecTypeName == null || newRecTypeName == "") {
-    /* why do this? it's just the result of cancelling or entering nothing, does not need a warning message
-		document.getElementById("log").style.color = "red";
-		document.getElementById("log").innerHTML="You must supply a new name for the imported record type where the name already exists in the target database";
-		alert("You must supply a new name for the imported record type where the name already exists in the target database");
-    */
+function changeDuplicateEntryName(rtyID,rectypeName) {
+	var newRecTypeName = rectypeName + 1;
+	if (rectypeName) {
+		var match = rectypeName.match(/(.*[\D])(\d+)$/);
+		if (match && match[2]){
+			newRecTypeName = match[1] + (parseInt(match[2]) + 1);
 	}
-	else {
+	}
+	newRecTypeName = prompt("Duplicate record type name\n\nPlease enter a new name for this record type",newRecTypeName);
+	if(newRecTypeName != replaceRecTypeName) {
 		replaceRecTypeName = newRecTypeName;
-		processAction(rtyID, "import");
+		window.setTimeout(function() { processAction(rtyID, "import", newRecTypeName);},0);
+	} else {
+//		dropTempDB(true);
 	}
 }
 

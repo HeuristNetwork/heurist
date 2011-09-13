@@ -60,7 +60,6 @@
 
     require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
-    $server_offline = FALSE;
     global $errorCreatingTables;
     $errorCreatingTables = FALSE;
 
@@ -68,46 +67,27 @@
     mysql_connection_db_insert(DATABASE);
 
     global $dbname;
-
-    // Create new temp database with timestamp
     global $tempDBName;
+
     if(!isset($isNewDB)) { $isNewDB = false; }
     $isExistingDB = !$isNewDB; // for clarity
 
     if($isNewDB)
     { // For new database, insert coreDefinitions.txt directly into tables, no temp database required
-        $tempDBName = "`".$newname."`";
+		$tempDBName =$newname;
         $dbname = $newname;
     } Else { // existing database needs temporary database to store data read and allow selection
         $dbname = DATABASE;
         $isNewDB = false;
-        $dateAndTime = date("YMd_H_i");
-        $tempDBName = "temp_".$dateAndTime;
-        mysql_query("CREATE DATABASE `" . $tempDBName . "`"); // TODO: should check database is created
+		$tempDBName = "temp_".$dbname;
     } // existing database
 
-    // Create the Heurist structure for the temp database, using a stripepd version of the new database template
-    if ($isExistingDB) {
-        $cmdline="mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD.
-            " -D$tempDBName < ../setup/createDefinitionTablesOnly.sql"; // subset of, and must be kept in sync with, blankDBStructure.sql
-        $output2 = exec($cmdline . ' 2>&1', $output, $res2);
-        if($res2 != 0) {
-            mysql_query("DROP DATABASE `" . $tempDBName . "`");
-            die("MySQL exec code $res2 : Unable to create table structure for new database $tempDBName (failure in executing createDefinitionTablesOnly.sql)");
-        }
-    }
-
-    mysql_connection_db_insert($tempDBName); // Use temp database
-
+error_log(" tempdbname = $tempDBName  is new = $isNewDB  dbname = $dbname");
     // * IMPORTANT *
     //   If database format is changed, update version info, include files, sql fiels for new dbs etc.
     // see comprehensive lsit in admin/structure/getDBStrucutre.php
 
 
-    function debugStop($var, $msg="none") {
-        echo "msg: ".$msg." var = ".print_r($var,true);
-        exit();
-    }
 
 
     // -----Check not locked by admin -------------------------------
@@ -120,6 +100,7 @@
 
     // Check if someone else is already modifying database definitions, if so: stop.
 
+	if ($isExistingDB) {
     $res = mysql_query("select lck_UGrpID from sysLocks where lck_Action='buildcrosswalks'");
     // 6/9/11 $res is not being recognised as a valid MySQL result, and always returns false. This appear to be identical
     // to example in help. So the following test is not being processed and the lock is ignored. The query works in MySQL
@@ -129,16 +110,26 @@
         // error log says “supplied argument is not a valid MySQL result resource”
         echo "Definitions are already being modified or SQL failure on lock check.";
         header('Location: ' . BASE_PATH . 'common/html/msgLockedByAdmin.html'); // put up informative failure message
-        if (!$isNewDB) {
-            mysql_query("DROP DATABASE `" . $tempDBName . "`");
-        } // drop the temporary database created to hold the definitions read in
         die("Definitions are already being modified.<p> If this is not the case, you will need to delete the lock record in sysLocks table. <br>Consult Heurist team for assistance if needed");
     } // detect lock and shuffle out
 
     // Mark database definitons as being modified by adminstrator
-    $query = "insert into sysLocks (lck_ID, lck_UGrpID, lck_Action) VALUES ('1', '0', 'buildcrosswalks')";
+		$query = "insert into sysLocks (lck_ID, lck_UGrpID, lck_Action) VALUES ('1', '".(function_exists('get_user_id') ? get_user_id(): 0)."', 'buildcrosswalks')";
     $res = mysql_query($query); // create sysLock
 
+		// Create the Heurist structure for the temp database, using a stripepd version of the new database template
+		mysql_query("DROP DATABASE IF EXIST`" . $tempDBName . "`");	// database might exist from previous use
+		mysql_query("CREATE DATABASE `" . $tempDBName . "`"); // TODO: should check database is created
+		$cmdline="mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD.
+		" -D$tempDBName < ../setup/createDefinitionTablesOnly.sql"; // subset of, and must be kept in sync with, blankDBStructure.sql
+		$output2 = exec($cmdline . ' 2>&1', $output, $res2);
+		if($res2 != 0) {
+			mysql_query("DROP DATABASE `" . $tempDBName . "`");
+			die("MySQL exec code $res2 : Unable to create table structure for new database $tempDBName (failure in executing createDefinitionTablesOnly.sql)");
+		}
+	}
+
+	mysql_connection_db_insert($tempDBName); // Use temp database
 
 
     // ------Find and set the source database-----------------------------------------------------------------------
@@ -147,6 +138,15 @@
     // The query should be based on DOAP metadata and keywords which Steven is due to set up in the Index database
 
 
+
+	if($isNewDB) { // minimal definitions from coreDefinitions.txt - format same as getDBStructure returns
+		$file = fopen("../setup/coreDefinitions.txt", "r");
+		while(!feof($file)) {
+			$output = $output . fgets($file, 4096);
+		}
+		fclose($file);
+		$data = $output;
+	} else { // Request data from source database using getDBStructure.php
     //  Set information about the database you will be importing from
     global $source_db_id;
     if(!isset($_REQUEST["dbID"]) || $_REQUEST["dbID"] == 0) {
@@ -164,16 +164,6 @@
         $source_url = $_REQUEST["dbURL"]."admin/structure/getDBStructure.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
     }
 
-
-    if($isNewDB) { // minimal definitions from coreDefinitions.txt - format same as getDBStructure returns
-        $file = fopen("../setup/coreDefinitions.txt", "r");
-        while(!feof($file)) {
-            $output = $output . fgets($file, 4096);
-        }
-        fclose($file);
-        $data = $output;
-        $server_offline = FALSE; //we don't care as we have the data
-        } else { // Request data from source database using getDBStructure.php
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);	//return curl_exec output as string
@@ -189,16 +179,12 @@
         $error = curl_error($ch);
         if ($error || !$data || substr($data, 0, 6) == "unable") {
             $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-            $server_offline = TRUE;
-        }
-    } // getting data from source database for import of definitions to an existing database
-
-    if($server_offline) { // Cancel buildCrosswalk process as no data can be received
-        if (!$isNewDB) {
-            mysql_query("DROP DATABASE `" . $tempDBName . "`");
-        }
+			mysql_query("DROP DATABASE IF EXIST`" . $tempDBName . "`");
+			//unlock
+			mysql_query("delete from sysLocks where lck_ID='1'"); // Remove sysLock
         die("<br>Source database <b> $source_db_id : $source_db_prefix$source_db_name </b>could not be accessed <p>URL to structure service: <a href=$source_url target=_blank>$source_url</a> <p>Server may be offline");
     }
+	} // getting data from source database for import of definitions to an existing database
 
     // Split received data into data sets for one table defined by >>StartData>> and >>EndData>> markers.
 
@@ -296,7 +282,7 @@
         global $errorCreatingTables;
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
             include "crosswalk/defRecTypesFields.inc";
-//  debugStop($dataSet);
+			//  debugStop($dataSet);
             $query = "INSERT INTO `defRecTypes` ($flds) VALUES" . $dataSet;
             mysql_query($query);
             if(mysql_error()) {
@@ -461,7 +447,7 @@
         return;
     } else if(!$isNewDB){ // do crosswalking for exisitn database, no action for new database
         require_once("createCrosswalkTable.php"); // offer user choice of fields to import
-        mysql_query("DROP DATABASE `" . $tempDBName . "`");
+//		mysql_query("DROP DATABASE `" . $tempDBName . "`");
     }
 
     // TODO: Replace this line with centralised locking methodology

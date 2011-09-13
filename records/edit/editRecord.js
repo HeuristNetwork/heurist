@@ -1380,7 +1380,7 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 
 	var textElt = newDiv.textElt = newDiv.appendChild(this.document.createElement("input"));
 		textElt.type = "text";
-		textElt.value = textElt.defaultValue = bdValue? bdValue.title : "";
+		textElt.value = textElt.defaultValue = bdValue && bdValue.title ? bdValue.title : "";
 		textElt.title = "Click here to search for a record, or drag-and-drop a search value";
 		textElt.setAttribute("autocomplete", "off");
 		textElt.className = "resource-title";

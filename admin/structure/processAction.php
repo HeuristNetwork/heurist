@@ -10,14 +10,16 @@
 	* @todo If an error occurres, delete everything that has been imported
 	**/
 
-$action = $_GET["action"];
-$importingDB = $_GET["importingDB"];
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
+$importingDB = $_GET["importingDB"];
+$error = false;
+$importLog = array();
+
 mysql_connection_db_insert($importingDB);
-switch($action) {
+switch($_GET["action"]) {
 	case "crosswalk":
 		crosswalk();
 		break;
@@ -32,48 +34,48 @@ switch($action) {
 }
 
 function crosswalk() {
-	$res = mysql_query("insert into `defCrosswalk` (`crw_SourcedbID`, `crw_SourceCode`, `crw_DefType`, `crw_LocalCode`) values ('".$_GET["crwSourceDBID"]."','".$_GET["crwSourceCode"]."','rectype','".$_GET["crwLocalCode"]."')");
+/*	$res = mysql_query("insert into `defCrosswalk` (`crw_SourcedbID`, `crw_SourceCode`, `crw_DefType`, `crw_LocalCode`) values ('".$_GET["crwSourceDBID"]."','".$_GET["crwSourceCode"]."','rectype','".$_GET["crwLocalCode"]."')");
 	if(!mysql_error()) {
 		echo "Successfully crosswalked rectypes (IDs: " . $_GET["crwSourceCode"] . " and " . $_GET["crwLocalCode"] . ")";
 	} else {
 		echo "Error: " . mysql_error();
 	}
-}
+*/}
 
-$error = false;
-$importLog = array();
 function import() {
 	global $error, $importLog, $importingDB;
 	$error = false;
 	$importLog = array();
 	$tempDBName = $_GET["tempDBName"];
 	$currentDate = date("d-m");
-
-    error_log("Temporary SDB name is: ".$tempDBName);
-
+//error_log("Import params are  ".print_r($_GET,true));
 	// Get recordtype data that has to be imported
-	$entity = mysql_fetch_array(mysql_query("select * from ".$tempDBName.".defRecTypes where rty_ID = ".$_GET["crwSourceCode"]), MYSQL_ASSOC);
+	//$entity = mysql_fetch_array(mysql_query("select * from ".$tempDBName.".defRecTypes where rty_ID = ".$_GET["crwSourceCode"]), MYSQL_ASSOC);
+	$res = mysql_query("select * from ".$tempDBName.".defRecTypes where rty_ID = ".$_GET["crwSourceCode"]);
+	$entity = mysql_fetch_assoc($res); //mysql_query("select * from `".$tempDBName."`.defRecTypes where rty_ID = ".$_GET["crwSourceCode"]), MYSQL_ASSOC);
+//error_log("Import entity is  ".print_r($entity,true));
 
-	// Create new group with todays date, which the recordtype will be added to
+	// Finded 'Imported' rectype group or create it if it doesn't exist
 	$rtyGroup = mysql_query("select rtg_ID from ".$importingDB.".defRecTypeGroups where rtg_Name = 'Imported'");
 	if(mysql_num_rows($rtyGroup) == 0) {
 		mysql_query("INSERT INTO ".$importingDB.".defRecTypeGroups VALUES ('','Imported','functionalgroup' , '999', 'This group contains all record types that were imported from external databases')");
 		// Write the insert action to $logEntry, and set $error to true if one occurred
 		if(mysql_error()) {
 			$error = true;
-			$logEntry = array("rectypeGroup", -1, mysql_error());
-			array_push($importLog, $logEntry);
+			makeLogEntry("rectypeGroup", -1, mysql_error());
 		} else {
 			$newRtyGroupID = mysql_insert_id();
-			$logEntry = array("rectypeGroup", $newRtyGroupID, "New record type group was created for this import");
-			array_push($importLog, $logEntry);
+			makeLogEntry("rectypeGroup", $newRtyGroupID, "'Import' record type group was created");
 		}
 	} else {
 		$row = mysql_fetch_row($rtyGroup);
 		$newRtyGroupID = $row[0];
+		makeLogEntry("rectypeGroup", $newRtyGroupID, "'Import' record type group was found");
 	}
 
-	if(!$error) {
+	if(!$error) {	//import rectype
+		// check that originating field types don't exist
+
 		// Change some recordtype fields to make it suitable for the new DB
 		$entity["rty_ID"] = "";
 		if($_GET["replaceRecTypeName"] != "") {
@@ -95,12 +97,10 @@ function import() {
 		// Write the insert action to $logEntry, and set $error to true if one occurred
 		if(mysql_error()) {
 			$error = true;
-			$logEntry = array("rectype", -1, mysql_error());
-			array_push($importLog, $logEntry);
+			makeLogEntry("rectype", -1, mysql_error());
 		} else {
 			$importedRecTypeID = mysql_insert_id();
-			$logEntry = array("rectype", $importedRecTypeID, "Successfully imported recordtype with name: \"".$entity["rty_Name"]."\"");
-			array_push($importLog, $logEntry);
+			makeLogEntry("rectype", $importedRecTypeID, "Successfully imported recordtype with name: \"".$entity["rty_Name"]."\"");
 		}
 
 		if(!$error) {
@@ -111,12 +111,10 @@ function import() {
 				// Write the insert action to $logEntry, and set $error to true if one occurred
 				if(mysql_error()) {
 					$error = true;
-					$logEntry = array("detailtypeGroup", -1, mysql_error());
-					array_push($importLog, $logEntry);
+					makeLogEntry("detailtypeGroup", -1, mysql_error());
 				} else {
 					$newDtyGroupID = mysql_insert_id();
-					$logEntry = array("detailtypeGroup", $newDtyGroupID, "New detail type group was created for this import");
-					array_push($importLog, $logEntry);
+					makeLogEntry("detailtypeGroup", $newDtyGroupID, "New detail type group was created for this import");
 				}
 			} else {
 				$row = mysql_fetch_row($dtyGroup);
@@ -144,8 +142,7 @@ function import() {
 						$detailTypeSuffix = 2;
 						while(mysql_num_rows(mysql_query("select * from ".$importingDB.".defDetailTypes where dty_Name = '".$detailType["dty_Name"]."'")) != 0) {
 							$detailType["dty_Name"] = $detailType["dty_Name"] . $detailTypeSuffix;
-							$logEntry = array("detailtype", 0, "Detailtype used in source DB was already in use. Added suffix: ".$detailTypeSuffix);
-							array_push($importLog, $logEntry);
+							makeLogEntry("detailtype", 0, "Detailtype used in source DB was already in use. Added suffix: ".$detailTypeSuffix);
 							$detailTypeSuffix++;
 						}
 
@@ -197,13 +194,11 @@ function import() {
 												// Write the insert action to $logEntry, and set $error to true if one occurred
 												if(mysql_error()) {
 													$error = true;
-													$logEntry = array("term", -1, mysql_error());
-													array_push($importLog, $logEntry);
+													makeLogEntry("term", -1, mysql_error());
 													break;
 												} else {
 													$inverseTrmID = mysql_insert_id();
-													$logEntry = array("term", $inverseTrmID, "New term imported");
-													array_push($importLog, $logEntry);
+													makeLogEntry("term", $inverseTrmID, "New term imported");
 												}
 												// If else, then the inverse term was already owned. Change the inverse ID to the local ID of the inverse
 											} else {
@@ -228,13 +223,11 @@ function import() {
 										// Write the insert action to $logEntry, and set $error to true if one occurred
 										if(mysql_error()) {
 											$error = true;
-											$logEntry = array("term", -1, mysql_error());
-											array_push($importLog, $logEntry);
+											makeLogEntry("term", -1, mysql_error());
 											break;
 										} else {
 											$newTermID = mysql_insert_id();
-											$logEntry = array("term", $newTermID, "New term imported");
-											array_push($importLog, $logEntry);
+											makeLogEntry("term", $newTermID, "New term imported");
 										}
 										// The inverse points to itself, so set it to the term's new ID
 										if($inverseSelf) {
@@ -284,13 +277,11 @@ function import() {
 						// Write the insert action to $logEntry, and set $error to true if one occurred
 						if(mysql_error()) {
 							$error = true;
-							$logEntry = array("detailtype", -1, mysql_error());
-							array_push($importLog, $logEntry);
+							makeLogEntry("detailtype", -1, mysql_error());
 							break;
 						} else {
 							$lastImportedDetailTypeID = mysql_insert_id();
-							$logEntry = array("detailtype", $lastImportedDetailTypeID, "New detailtype imported");
-							array_push($importLog, $logEntry);
+							makeLogEntry("detailtype", $lastImportedDetailTypeID, "New detailtype imported");
 						}
 					} else {
 						$row = mysql_fetch_row($lookupDty);
@@ -320,13 +311,11 @@ function import() {
 							// Write the insert action to $logEntry, and set $error to true if one occurred
 							if(mysql_error()) {
 								$error = true;
-								$logEntry = array("defRecStructure", -1, mysql_error());
-								array_push($importLog, $logEntry);
+								makeLogEntry("defRecStructure", -1, mysql_error());
 								break;
 							} else {
 								$lastRstID = mysql_insert_id();
-								$logEntry = array("defRecStructure", $lastRstID, "New defRecStructure imported");
-								array_push($importLog, $logEntry);
+								makeLogEntry("defRecStructure", $lastRstID, "New defRecStructure imported");
 							}
 						}
 					}
@@ -441,13 +430,11 @@ function importTermParents($term) {
 				// Write the insert action to $logEntry, and set $error to true if one occurred
 				if(mysql_error()) {
 					$error = true;
-					$logEntry = array("term", -1, mysql_error());
-					array_push($importLog, $logEntry);
+					makeLogEntry("term", -1, mysql_error());
 					break;
 				} else {
 					$inverseTrmID = mysql_insert_id();
-					$logEntry = array("term", $inverseTrmID, "New parent term imported");
-					array_push($importLog, $logEntry);
+					makeLogEntry("term", $inverseTrmID, "New parent term imported");
 				}
 			} else {
 				$localInverse = mysql_fetch_row($lookupInverseTrm);
@@ -465,13 +452,11 @@ function importTermParents($term) {
 		// Write the insert action to $logEntry, and set $error to true if one occurred
 		if(mysql_error()) {
 			$error = true;
-			$logEntry = array("term", -1, mysql_error());
-			array_push($importLog, $logEntry);
+			makeLogEntry("term", -1, mysql_error());
 			break;
 		} else {
 			$newLastTermID = mysql_insert_id();
-			$logEntry = array("term", $newLastTermID, "New parent term imported");
-			array_push($importLog, $logEntry);
+			makeLogEntry("term", $newLastTermID, "New parent term imported");
 		}
 		// Inverse ID points to itself, so set to it's own local ID
 		if($inverseSelf) {
@@ -520,13 +505,11 @@ function fetchInverseTerm($term) {
 		mysql_query("INSERT INTO ".$importingDB.".defTerms (".implode(", ",array_keys($term)).") VALUES ('".implode("', '",array_values($term))."')");
 		if(mysql_error()) {
 			$error = true;
-			$logEntry = array("term", -1, mysql_error());
-			array_push($importLog, $logEntry);
+			makeLogEntry("term", -1, mysql_error());
 			break;
 		} else {
 			$newInvID = mysql_insert_id();
-			$logEntry = array("term", $inverseTrmID, "New inverse term imported");
-			array_push($importLog, $logEntry);
+			makeLogEntry("term", $inverseTrmID, "New inverse term imported");
 		}
 		return $newInvID;
 		// The term has an inverse
@@ -543,13 +526,11 @@ function fetchInverseTerm($term) {
 			// Write the insert action to $logEntry, and set $error to true if one occurred
 			if(mysql_error()) {
 				$error = true;
-				$logEntry = array("term", -1, mysql_error());
-				array_push($importLog, $logEntry);
+				makeLogEntry("term", -1, mysql_error());
 				break;
 			} else {
 				$newInvID = mysql_insert_id();
-				$logEntry = array("term", $inverseTrmID, "New inverse term imported");
-				array_push($importLog, $logEntry);
+				makeLogEntry("term", $inverseTrmID, "New inverse term imported");
 			}
 			return $newInvID;
 			// The inverse term is in the local DB, and therefore it's inverse and parents as well. Set the right inverseID, and insert the term
@@ -561,19 +542,21 @@ function fetchInverseTerm($term) {
 			// Write the insert action to $logEntry, and set $error to true if one occurred
 			if(mysql_error()) {
 				$error = true;
-				$logEntry = array("term", -1, mysql_error());
-				array_push($importLog, $logEntry);
+				makeLogEntry("term", -1, mysql_error());
 				break;
 			} else {
 				$newInvID = mysql_insert_id();
-				$logEntry = array("term", $inverseTrmID, "New inverse term imported");
-				array_push($importLog, $logEntry);
+				makeLogEntry("term", $inverseTrmID, "New inverse term imported");
 			}
 			return $newInvID;
 		}
 	}
 }
 
+function makeLogEntry( $name = "unknown", $id = "", $msg = "no message" ) {
+	global $importLog;
+	array_push($importLog, array($name, $id, $msg));
+}
 // Checks wether passed $tempDBName contains 'temp_', and if so, deletes the database
 function dropDB() {
 	$tempDBName = $_GET["tempDBName"];

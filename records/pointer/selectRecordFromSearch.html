@@ -235,7 +235,7 @@ function initPage() {
 	}
 	}
 
-	if (window.HEURIST.parameters["r"] == "recent")
+	if (window.HEURIST.parameters["r"] == "recent" || qVal == "")
 		document.getElementById("r-recent").checked = true;
 	else
 		document.getElementById("r-all").checked = true;

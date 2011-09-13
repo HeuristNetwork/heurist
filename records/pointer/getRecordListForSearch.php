@@ -59,8 +59,8 @@ $query = REQUEST_to_query("select " . join(", ", $colNames) . " ", BOTH);
 
 if (@$_REQUEST["r"] == "recent") {
 	$query = preg_replace("/\\swhere\\s/", " where (TOPBIBLIO.rec_ID in (select distinct rre_RecID from usrRecentRecords where rre_UGrpID = " . get_user_id() . ")) and ", $query);
-	// can probably FIXME: do we want the sort order to reflect how recently the user has seen each record?
-	$query = preg_replace("/(.*)\\sorder by.*/", "$1 order by (select -max(rre_ID) from usrRecentRecords where rre_UGrpID=" . get_user_id() . " and rre_RecID=TOPBIBLIO.rec_ID)", $query);
+	// saw CHECK ME: this code assumes order by is last clause of query
+	$query = preg_replace("/(.*)\\sorder by.*/", "$1 order by TOPBIBLIO.rec_Modified desc", $query);
 }
 
 $query .= " limit $limit";
