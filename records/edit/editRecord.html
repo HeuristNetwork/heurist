@@ -166,6 +166,8 @@
 					document.getElementById("non-wg-hide").checked = true;
 				} else if (top.HEURIST.edit.record.workgroupVisibility == "viewable"){
 					document.getElementById("non-wg-view").checked = true;
+                } else if (top.HEURIST.edit.record.workgroupVisibility == "pending"){
+                    document.getElementById("non-wg-pending").checked = true;
 				} else {
 					document.getElementById("non-wg-public").checked = true;
 				}
@@ -200,7 +202,7 @@
 			function closeWorkgroupChanger(cancel) {
 				if (! cancel) {
 					var wgValue = document.getElementById("new-workgroup-value").value;
-					var wgVisValue = document.getElementById("non-wg-hide").checked? "hidden" : (document.getElementById("non-wg-view").checked?"viewable":"public");
+					var wgVisValue = document.getElementById("non-wg-hide").checked? "hidden" : (document.getElementById("non-wg-view").checked?"viewable" : (document.getElementById("non-wg-pending").checked?"pending" : "public"));
 					if (top.HEURIST.edit.record.workgroup != wgValue  ||  top.HEURIST.edit.record.workgroupVisibility != wgVisValue) {
 						top.HEURIST.edit.record.workgroup = wgValue? (wgValue == top.HEURIST.get_user_id() ? top.HEURIST.get_user_name() : top.HEURIST.workgroups[wgValue].name) : null;
 						top.HEURIST.edit.record.workgroupVisibility = wgVisValue;
@@ -401,17 +403,23 @@
             <select id=new-workgroup-value class=in></select>
             </div>
         <div class="detailRow">
-            <input type=radio name=new-non-workgroup value=public id=non-wg-public>
-            <label for=non-wg-public>Anyone can view the record (published)</label>
-            <div style="margin-left: 20px;">(except fields marked as restricted)</div>
+            <input type=radio name=new-non-workgroup value=hidden id=non-wg-hide>
+            <label for=non-wg-hide>Only members of this group can view the record</label>
             </div>
         <div class="detailRow">
             <input type=radio name=new-non-workgroup value=viewable id=non-wg-view>
-            <label for=non-wg-view>Logged in users can view the record</label>
+            <label for=non-wg-view>Any logged-in user can view the record</label>
             </div>
         <div class="detailRow">
-            <input type=radio name=new-non-workgroup value=hidden id=non-wg-hide>
-            <label for=non-wg-hide>Only members of this groups can view the record</label>
+            <input type=radio name=new-non-workgroup value=pending id=non-wg-pending>
+            <label for=non-wg-pending>Flagged for external publication, any logged-in user</label>
+            <div style="margin-left: 20px; font-style: italic;">No effect on existing external views - hml, html etc.</div>
+            <div style="margin-left: 20px; font-style: italic;">Can be auto-set whenever a public record is edited.</div>
+            </div>
+        <div class="detailRow">
+            <input type=radio name=new-non-workgroup value=public id=non-wg-public>
+            <label for=non-wg-public>Published - written automatically to external views</label>
+            <div style="margin-left: 20px; font-style: italic;">except fields marked as restricted.</div>
             </div>
         <div class="detailRow" style="text-align:right; padding-top:15px">
             <input type=button value="Change" style="font-weight: bold;" onClick="closeWorkgroupChanger();">

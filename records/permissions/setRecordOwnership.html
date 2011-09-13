@@ -33,26 +33,30 @@
 
  </head>
 
- <body width=500 height=200>
+ <body width=500 height=220>
 
 <table cellspacing=10>
  <tr>
-  <td><nobr>Records are editable by:</nobr></td>
+  <td><nobr>Records are editable by :</nobr></td>
   <td>
    <select id=wg-select>
+    <option disabled value="">please select ...</option>
     <option value=0>Any logged-in user (no restriction)</option>
    </select>
   </td>
  </tr>
 
  <tr>
-  <td>Record is visible to:</td>
+  <td valign="top">Record is visible to :</td>
   <td>
-   <label for=non-wg-pub><input type=radio name=non-wg-vis id=non-wg-pub> Anyone (public, except restricted fields)</label>
+   <label for=non-wg-hide><input type=radio name=non-wg-vis id=non-wg-hide> Members of this group / this user only</label>
    <br>&nbsp;<br>
-   <label for=non-wg-view><input type=radio name=non-wg-vis id=non-wg-view checked> Logged in users</label>
+   <label for=non-wg-view><input type=radio name=non-wg-vis id=non-wg-view checked> Logged in users only</label>
    <br>&nbsp;<br> 
-   <label for=non-wg-hide><input type=radio name=non-wg-vis id=non-wg-hide> This user / members of this group</label>
+   <label for=non-wg-pending><input type=radio name=non-wg-vis id=non-wg-pending> Logged-in users, marked for potential external publish</label>
+   <br>&nbsp;<br>
+   <label for=non-wg-public><input type=radio name=non-wg-vis id=non-wg-public> Anyone (automatic external publish, except restricted fields)</label>
+   <!-- 12/9/11 this was non-wg-pub, which looks like an error to me -->
   </td>
  </tr>
 
@@ -60,7 +64,9 @@
 
  <tr>
   <td colspan=2 style="width: 100%; text-align: right;">
-   <input type=submit value=save onclick="window.close($('#wg-select').val(), $('#non-wg-view')[0].checked, $('#non-wg-hide')[0].checked);">
+    <!-- TODO: we should check that a value has been selected
+         TODO: ideally, if all the records have the same group and/or non-owner-visibility, this should be set as the value for radio box and pulldown -->
+   <input type=submit value=save onclick="window.close( $('#wg-select').val(), $('#non-wg-view')[0].checked, $('#non-wg-hide')[0].checked, $('#non-wg-pending')[0].checked );">
    <input type=submit value=cancel onclick="window.close();">
   </td>
  </tr>

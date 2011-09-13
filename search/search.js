@@ -2278,7 +2278,7 @@ top.HEURIST.search = {
 			return;
 		}
 		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "records/permissions/setRecordOwnership.html" + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : ""), {
-			callback: function(wg,viewable,hidden) {
+			callback: function(wg,viewable,hidden,pending) {
 				if (wg === undefined) return;
 
 				var action_fr = top.document.getElementById("i_action");
@@ -2295,7 +2295,7 @@ top.HEURIST.search = {
 				action_elt.value = "set_wg_and_vis";
 				bib_ids_elt.value = recIDs_list.join(',');
 				wg_elt.value = wg;
-				vis_elt.value = hidden ? "hidden" : viewable ? "viewable" : "public";
+				vis_elt.value = hidden ? "hidden" : viewable ? "viewable" : pending ? "pending" : "public";
                 action_elt.form.submit();
 			}
 		});

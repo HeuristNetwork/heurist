@@ -461,7 +461,7 @@ function set_wg_and_vis() {
 		$wg = intval(@$_REQUEST['wg_id']);
 		$vis = $_REQUEST['vis'];
 
-		if (($wg == 0  ||  in_array($wg, get_group_ids()))  &&  ($vis == 'viewable'  ||  $vis == 'hidden')) {
+		if (($wg == 0  ||  in_array($wg, get_group_ids()))  &&  ($vis == 'viewable'  ||  $vis == 'hidden' || $vis == 'pending' || $vis == 'public')) {
 			mysql_connection_db_overwrite(DATABASE);
 
 			if ($wg === 0) $vis = 'NULL';
@@ -476,10 +476,10 @@ function set_wg_and_vis() {
 			header('Location: actionHandler.php?db='.HEURIST_DBNAME.'');
 			exit();
 		} else {
-			$onload = 'alert(\'Invalid arguments\'); location.replace(\'actionHandler.php?db='.HEURIST_DBNAME.'\');';
+			$onload = 'alert(\'Invalid arguments for workgoup or visibility\'); location.replace(\'actionHandler.php?db='.HEURIST_DBNAME.'\');';
 		}
 	} else {
-		$onload = 'alert(\'Permission denied\'); location.replace(\'actionHandler.php?db='.HEURIST_DBNAME.'\');';
+		$onload = 'alert(\'Permission denied for workgroup or visibility setting\'); location.replace(\'actionHandler.php?db='.HEURIST_DBNAME.'\');';
 	}
 	return $onload;
 }

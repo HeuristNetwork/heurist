@@ -291,12 +291,13 @@ function cancelAdd(e) {
 			</div>
 
 			<div class="input-row workgroup">
-				<div class="input-header-cell">Outside this group:</div>
+				<div class="input-header-cell">Outside this group record is:</div>
 				<div class="input-cell">
 					<select name="rec_NonOwnerVisibility" id="rec_NonOwnerVisibility" style="width: 200px;">
-						<option value="public">record is public</option>
-						<option value="viewable">record is viewable</option>
-						<option value="hidden">record is hidden</option>
+                        <option value="hidden">Restricted to owning group/user</option>
+                        <option value="viewable">Viewable by logged-in users only</option>
+                        <option value="pending">Pending (marked for potential publication)</option>
+                        <option value="public">Public (automatically published to hml etc.)</option>
 					</select>
 				</div>
 			</div>

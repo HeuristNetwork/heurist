@@ -241,16 +241,19 @@ top.HEURIST.edit = {
 				if (top.HEURIST.edit.record.workgroup) {
 					document.getElementById('workgroup-val').innerHTML = '';
 					document.getElementById('workgroup-val').appendChild(document.createTextNode(top.HEURIST.edit.record.workgroup));
-					document.getElementById('workgroup-div').style.display = "inline-block";
-
-					var othersAccess = (top.HEURIST.edit.record.workgroupVisibility == "hidden")? "not visible" : "visible";
-					document.getElementById('workgroup-access').innerHTML = othersAccess;
 				} else {
 					document.getElementById('workgroup-val').innerHTML = 'everyone';
-					document.getElementById('workgroup-div').style.display = "inline-block";
-
+				}
+				if (top.HEURIST.edit.record.workgroupVisibility) {
+					var recVis = top.HEURIST.edit.record.workgroupVisibility;
+					var othersAccess = (recVis == "hidden")? "hidden (owners only)" :
+										(recVis == "viewable")? "any logged-in user" :
+										(recVis == "pending")? "pending publication" : "public (autopublish)";
+					document.getElementById('workgroup-access').innerHTML = othersAccess;
+				} else {
 					document.getElementById('workgroup-access').innerHTML = 'visible';
 				}
+				document.getElementById('workgroup-div').style.display = "inline-block";
 			}
 		}
 	},
