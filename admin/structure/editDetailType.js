@@ -551,7 +551,7 @@ function DetailTypeEditor() {
 
 
 
-			/**
+	/**
 	* onChangeType - listener for datetype selector
 	*
 	* Sets visibilty for div with terms tree and record pointer

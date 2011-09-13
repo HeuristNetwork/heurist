@@ -1,7 +1,10 @@
 <?php
 
 /**
- * filename, brief description, date of creation, by whom
+ * It seems this is old way of upload file. It is utilized only for old version.
+ * See hapi/php/saveFile.php
+ *
+ *
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
@@ -75,6 +78,7 @@ if ($fileID) {
 
 	$res = mysql_query("select * from recUploadedFiles where ulf_ID = $fileID");
 	$file = mysql_fetch_assoc($res);
+
 ?>
 ({ file: {	// saw TODO:  update this to include url or nonce and thumbURL
 	id: "<?= $file["ulf_ID"] ?>",

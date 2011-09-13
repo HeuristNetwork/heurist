@@ -536,6 +536,9 @@ top.HEURIST.edit = {
 			case "file":
 				newInput = new top.HEURIST.edit.inputs.BibDetailFileInput(dt, rfr, fieldValues, container);
 				break;
+			case "urlinclude":
+				newInput = new top.HEURIST.edit.inputs.BibDetailURLincludeInput(dt, rfr, fieldValues, container);
+				break;
 			case "geo":
 				newInput = new top.HEURIST.edit.inputs.BibDetailGeographicInput(dt, rfr, fieldValues, container);
 				break;
@@ -661,7 +664,7 @@ top.HEURIST.edit = {
 			}
 		});
 	},
-
+	// callback function - on completion of file upload
 	fileInputUploaded: function(element, uploadsDiv, fileDetails) {
 		var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
@@ -688,7 +691,8 @@ top.HEURIST.edit = {
 				id: fileDetails.file.getID(),
 				origName: fileDetails.file.getOriginalName(),
 				url: fileDetails.file.getURL(),
-				fileSize: fileDetails.file.getSize()
+				fileSize: fileDetails.file.getSize(),
+				fileType: fileDetails.file.getType()
 			};
 
 			var b = uploadsDiv.appendChild(this.document.createElement("b"));
@@ -1548,7 +1552,9 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdV
 	newInput.style.width = "auto";
 };
 
-
+/**
+*  FILE UPLOAD input control
+*/
 top.HEURIST.edit.inputs.BibDetailFileInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
 top.HEURIST.edit.inputs.BibDetailFileInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
 top.HEURIST.edit.inputs.BibDetailFileInput.prototype.focus = function() { try { this.inputs[0].valueElt.focus(); } catch(e) { } };
@@ -1605,6 +1611,8 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 				windowRef.changed();
 			});
 		inputDiv.valueElt = hiddenElt;
+		inputDiv.link = link.href;
+		inputDiv.fileType = bdValue.file.fileType;
 		inputDiv.className = "file-div";
 
 	} else {
@@ -1637,7 +1645,15 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 			fileElt.onchange = function() { top.HEURIST.edit.uploadFileInput.call(thisRef, fileElt); };
 			inputDiv.className = "file-div empty";
 		}
+
+		inputDiv.link = "";
+		inputDiv.fileType = "";
 	}
+
+	if(this.onchange){
+		this.onchange(inputDiv);
+	}
+
 
 // FIXME: change references to RESOURCE to RECORD
 // FIXME: make sure that all changed() calls are invoked (esp. RESOURCES -- chooseResource, deleteResource ...)
@@ -1670,6 +1686,9 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.removeFile = function(input
 };
 top.HEURIST.edit.inputs.BibDetailFileInput.prototype.getPrimaryValue = function(input) { return input? input.valueElt.value : ""; };
 top.HEURIST.edit.inputs.BibDetailFileInput.prototype.regex = new RegExp("\\S");
+/*
+*  END -------------------------------- FILE UPLOAD input control
+*/
 
 
 top.HEURIST.edit.inputs.BibDetailGeographicInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };

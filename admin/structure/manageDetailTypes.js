@@ -258,7 +258,7 @@ function DetailTypeManager() {
 						// last 3 columns for actions
 						arr.push([dty_ID, (Number(deftype[5])===1),
 						deftype[3],deftype[0],deftype[4],deftype[2],deftype[6],deftype[1],
-						dtg_ID, '<span class=count>'+iusage+'</span>']);
+						dtg_ID, iusage]);  // IREK!!!! THIS IS NOT CORRECT WAY!!!! '<span class=count>'+iusage+'</span>']);
 					}
 				}
 			}
@@ -324,7 +324,11 @@ function DetailTypeManager() {
 
 			var myColumnDefs = [
 			{ key: "id", label: "Code", sortable:true, width:40, className:'right',resizeable:false },
-			{ key: "usage", label: "Info", sortable:true, className:'center' },
+			{ key: "usage", label: "Info", sortable:true, className:'count',
+				formatter: function(elLiner, oRecord, oColumn, oData) {
+					var str = oRecord.getData("usage");
+					elLiner.innerHTML = '<span class="count">'+str+'</span>';
+				}},
 			{ key: "vis", label: "Show", sortable:false, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
 			{ key: "order", hidden:true },
 			{ key: "name", label: "Name", sortable:true, className:'bold_column', width:160, minWidth:160,
@@ -687,7 +691,7 @@ function DetailTypeManager() {
 				arrTables[tabIndex] = null; //.addRow(record.getData(), 0);
 
 				var currIndex = tabView.get('activeIndex');
-				if(tabIndex === currIndex && needRefresh)
+				if((Number(tabIndex) === Number(currIndex)) && needRefresh)
 				{
 					initTabContent(tabView.getTab(tabIndex));
 				}
@@ -901,7 +905,7 @@ function DetailTypeManager() {
 					//if user changes group in popup need update both  old and new group tabs
 					var grpID_old = -1;
 					if(Number(context.result[0])>0){
-						grpID_old = top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[7];
+						grpID_old = Number(top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[7]);
 					}
 
 					//refresh the local heurist
@@ -909,7 +913,7 @@ function DetailTypeManager() {
 					_cloneHEU = null;
 
 					//detect what group
-					var grpID = top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[7];
+					var grpID = Number(top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[7]);
 
 					_removeTable(grpID, true);
 					if(grpID_old!==grpID){
@@ -1058,10 +1062,9 @@ function DetailTypeManager() {
 	//
 	//
 	function _getIndexByGroupId(grpID){
-		var ind = -1;
-		for (ind in _groups)
-		{
-			if(ind>=0 && _groups[ind].value===grpID){
+		var ind;
+		for (ind in _groups){
+			if(!Hul.isnull(ind) && (Number(_groups[ind].value)===Number(grpID)) ){
 				return ind;
 			}
 		}

@@ -52,7 +52,7 @@ if ($fileID) {
 	$URL = HEURIST_URL_BASE."records/files/downloadFile.php/" . urlencode($file["ulf_OrigFileName"]) . "?db=".HEURIST_DBNAME."&ulf_ID=" . $file["ulf_ObfuscatedFileID"];
 error_log("url = ". $URL);
 	print json_format(array("file" => array(	// file[0] => id , file [1] => origFileName, etc...
-		$file["ulf_ID"], $file["ulf_OrigFileName"], $file["ulf_FileSizeKB"], $file["file_mimetype"], $URL, $thumbnailURL, $file["ulf_Description"]
+		$file["ulf_ID"], $file["ulf_OrigFileName"], $file["ulf_FileSizeKB"], $file["ulf_MimeExt"], $URL, $thumbnailURL, $file["ulf_Description"]
 	)));
 	mysql_query("commit");
 }

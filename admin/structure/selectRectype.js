@@ -140,7 +140,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 							rectype = top.HEURIST.rectypes.typedefs[rty_ID].commonFields;
 
 							arr.push([true, //selected
-											rectype[13], //icon
+"<img src=\"../../common/images/16x16.gif\" style=\"background-image:url("+rectype[13]+")\">", //icon
 											rectype[0], //name
 											rectype[1], //descr
 											rectype[8], //status
@@ -172,7 +172,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 										if(datatype!=="fieldsetmarker" || rectype[10]==="1")//??????????????SAW what is this  (flagAsFieldSet)
 										{
 										arr.push([(_arr_selection.indexOf(rty_ID)>0),
-											rectype[13], //icon
+"<img src=\"../../common/images/16x16.gif\" style=\"background-image:url("+rectype[13]+")\">", //icon
 											rectype[0], //name
 											rectype[1], //descr
 											rectype[8], //status

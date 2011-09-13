@@ -267,7 +267,8 @@ function RectypeManager() {
 							rectypeStatus = "<a href=\"#delete\"><img src=\"../../common/images/cross.png\" border=\"0\" title=\"Status:"+rectype[8]+" - Delete\"/><\/a>";
 						};
 					if (rectype[9] === grpID) {  //(rectype[9].indexOf(grpID)>-1) {
-						arr.push([rectypeID, (Number(rectype[7])===1),
+						arr.push([rectypeID,
+						(Number(rectype[7])===1),
 						"<img src=\"../../common/images/16x16.gif\" style=\"background-image:url("+rectype[13]+")\">",
 						rectype[0], rectype[1],
 						rectype[8],

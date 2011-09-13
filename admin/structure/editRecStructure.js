@@ -253,7 +253,7 @@ function EditRecStructure() {
 				sortable: false,
 				className:"center",
 				/*formatter: function(elLiner, oRecord, oColumn, oData){
-					
+
 					elLiner.innerHTML ='<a href="#delete"><img src="../../common/images/cross.png" width="12" height="12" border="0" title="Remove detail" /><\/a>';
 				}*/
 			}
@@ -286,10 +286,10 @@ function EditRecStructure() {
 					'<option value="optional">optional</option>'+
 					'<option value="forbidden">forbidden</option></select>'+
 					'&nbsp;&nbsp;repeat from&nbsp;<input id="ed'+rst_ID+
-					'_rst_MinValues" title="Min Values" style="width:20" size="2" '+
+					'_rst_MinValues" title="Min Values" style="width:20px" size="2" '+
 					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/>&nbsp;'+
 					'&nbsp;to&nbsp;<input id="ed'+rst_ID+
-					'_rst_MaxValues" title="Max Values"  style="width:20" size="2"  '+
+					'_rst_MaxValues" title="Max Values"  style="width:20px" size="2"  '+
 					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/>&nbsp;times</div>'+
 
 					'<div class="input-row"><label class="dtyLabel">Terms list:</label>'+
@@ -302,7 +302,7 @@ function EditRecStructure() {
 					'<div class="input-row"><label class="dtyLabel">Rectype pointer:</label>'+
 					'<div id="pointerPreview" class="dtyValue"></div>'+
 					'<input id="ed'+rst_ID+'_rst_PtrFilteredIDs" type="hidden"/>'+
-					'<input type="button" value="Filter pointers" id="btnSelTerms" onclick="showPointerFilter('+rst_ID+', event)"/></div>'+
+					'<button value="Filter pointers" id="btnSelTerms" onclick="showPointerFilter('+rst_ID+', event)">Filter pointers</button></div>'+
 
 					'<div class="input-row"><label class="dtyLabel">Status:</label><select id="ed'+rst_ID+
 					'_rst_Status" style="display:inline-block">'+
@@ -312,8 +312,8 @@ function EditRecStructure() {
 					'<option value="open">open</option></select>'+
 
 					'<div style="float:right; text-align:right;min-width:250;">'+
-					'<input id="btnEdit_'+rst_ID+
-					'" style="display:inline-block" type="button" value="Edit" onclick="_onAddEditFieldType('+rst_ID+');" />'+
+					'<button id="btnEdit_'+rst_ID+
+					'" style="display:inline-block" value="Edit" onclick="_onAddEditFieldType('+rst_ID+');">Edit</button>'+
 					'<input id="btnSave_'+rst_ID+
 					'" style="display:inline-block" type="button" value="Save" onclick="doExpliciteCollapse(event);" />'+
 					'<input id="btnCancel_'+rst_ID+
@@ -1544,8 +1544,9 @@ function showPointerFilter(rst_ID, event){
 	var my_div = $("#pointerFilter");
 
 	my_div.css( {
-			left:'5px', top:(border_top+5)+'px', width:'97%', height:'95%'
+			left:'20px', top:'20px', right:'20px', bottom:'20px',
 			//width:$(window).width()-20, height:$(window).height()-20
+			display:'block'
 	});
 
 	//_showDivPopupAt(my_div, [0, border_top]);
@@ -1685,11 +1686,11 @@ function recreateRecTypesPreview(type, value) {
 }
 
 function _onAddEditFieldType(dty_ID, dtg_ID){
-		
+
 		var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 											(top.HEURIST.database.name?top.HEURIST.database.name:''));
 		var url = top.HEURIST.basePath + "admin/structure/editDetailType.html?db="+db+ "&detailTypeID="+dty_ID; //existing
-		
+
 		top.HEURIST.util.popupURL(top, url,
 		{   "close-on-blur": false,
 			"no-resize": false,

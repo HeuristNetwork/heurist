@@ -1,7 +1,10 @@
 <?php
 
-	/**
- * filename, brief description, date of creation, by whom
+/**
+ * showMap.php
+ *
+ * search records and fills the structure to display on map
+ *
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
