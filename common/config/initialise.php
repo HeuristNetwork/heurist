@@ -31,7 +31,7 @@
 
 	//set up system path defines
 	define('HEURIST_VERSION',"3.1");
-	define('HEURIST_MIN_DBVERSION',"3.1.0");
+	define('HEURIST_MIN_DBVERSION',"1.0.0");
 
 	define('HEURIST_TOP_DIRS',"admin|common|export|external|hapi|help|import|records|search|viewers");	// this is the path from the heurist code base root. Only change if file moves.
 	define('HEURIST_SERVER_NAME', @$_SERVER["SERVER_NAME"]);	// this will read the server host name for the configured name.

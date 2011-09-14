@@ -70,7 +70,11 @@
 
 <div class="input-row">
 <div class="input-header-cell">Default access outside owner group (only owners can edit)</div>
-<div class="input-cell">[dropdown : sys_NewRecAccess : Default access outside owner group : enum( "viewable", "hidden", "public")]</div>
+<div class="input-cell">[dropdown : sys_NewRecAccess : Default access outside owner group : enum( "hidden", "viewable", "pending", "public")]</div>
+</div>
+<div class="input-row">
+<div class="input-header-cell">Set 'public' to 'pending' when record edited (use to stage record edits)</div>
+<div class="input-cell">[checkbox : sys_SetPublicToPendingOnEdit : : size=20] </div>
 </div>
 <div class="input-row">
 <div class="input-header-cell">User group which owns the current database  </div>

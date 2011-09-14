@@ -36,7 +36,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Sep 06, 2011 at 07:46 PM
+-- Generation Time: Sep 13, 2011 at 06:37 PM
 -- Server version: 5.0.51
 -- PHP Version: 5.2.3
 --
@@ -62,7 +62,7 @@ CREATE TABLE Records (
   rec_Popularity int(10) unsigned NOT NULL default '0' COMMENT 'Calculated popularity rating for sorting order, set by cron job',
   rec_FlagTemporary tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flags a partially created record before fully populated',
   rec_OwnerUGrpID smallint(5) unsigned NOT NULL default '0' COMMENT 'User group which owns this record, 0 = everyone',
-  rec_NonOwnerVisibility enum('viewable','hidden','public') NOT NULL default 'viewable' COMMENT 'Defines if record visible outside owning user group(s)',
+  rec_NonOwnerVisibility enum('viewable','hidden','public','pending') NOT NULL default 'viewable' COMMENT 'Defines if record visible outside owning user group(s) or to anyone',
   rec_URLLastVerified datetime default NULL COMMENT 'Last date time when URL was verified as contactable',
   rec_URLErrorMessage varchar(255) default NULL COMMENT 'Error returned by URL checking script for bad/inaccessible URLs',
   rec_URLExtensionForMimeType varchar(10) default NULL COMMENT 'A mime type extension for multimedia files pointed to DIRECTLY by the record URL',
@@ -87,6 +87,7 @@ CREATE TABLE defCalcFunctions (
   cfn_ID smallint(3) unsigned NOT NULL auto_increment COMMENT 'Primary key of defCalcFunctions table',
   cfn_Domain enum('calcfieldstring','pluginphp') NOT NULL default 'calcfieldstring' COMMENT 'Domain of application of this function specification',
   cfn_FunctionSpecification text NOT NULL COMMENT 'A function or chain of functions, or some PHP plugin code',
+  cfn_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (cfn_ID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Specifications for generating calculated fields, plugins and';
 
@@ -118,6 +119,7 @@ CREATE TABLE defDetailTypeGroups (
   dtg_Name varchar(63) NOT NULL COMMENT 'Descriptive heading to be displayed for each group of details (fields)',
   dtg_Order tinyint(3) unsigned zerofill NOT NULL default '002' COMMENT 'Ordering of detail type groups within pulldown lists',
   dtg_Description varchar(255) NOT NULL COMMENT 'General description fo this group of detail (field) types',
+  dtg_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (dtg_ID)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Groups detail types for display in separate sections of edit';
 
@@ -145,7 +147,8 @@ CREATE TABLE defDetailTypes (
   dty_PtrTargetRectypeIDs varchar(63) default NULL COMMENT 'CSVlist of target Rectype IDs, null = any',
   dty_FieldSetRectypeID smallint(5) unsigned default NULL COMMENT 'For a FieldSetMarker, the record type to be inserted as a fieldset',
   dty_ShowInLists tinyint(1) unsigned NOT NULL default '1' COMMENT 'Flags if detail type is to be shown in end-user interface, 1=yes',
-  dty_NonOwnerVisibility enum('hidden','viewable','public') NOT NULL default 'viewable' COMMENT 'Allows restriction of visibility of a particular field in ALL record types (overrides rst_VisibleOutsideGroup)',
+  dty_NonOwnerVisibility enum('hidden','viewable','public','pending') NOT NULL default 'viewable' COMMENT 'Allows restriction of visibility of a particular field in ALL record types (overrides rst_VisibleOutsideGroup)',
+  dty_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (dty_ID),
   UNIQUE KEY dty_Name (dty_Name),
   KEY dty_Type (dty_Type),
@@ -165,6 +168,7 @@ CREATE TABLE defFileExtToMimetype (
   fxm_IconFileName varchar(31) default NULL COMMENT 'Filename of the icon file for this mimetype (shared by several)',
   fxm_FiletypeName varchar(31) default NULL COMMENT 'A textual name for the file type represented by the extension',
   fxm_ImagePlaceholder varchar(63) default NULL COMMENT 'Thumbnail size representation for display, generate from fxm_FiletypeName',
+  fxm_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (fxm_Extension)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Converts extensions to mimetypes and provides icons and mime';
 
@@ -179,6 +183,7 @@ CREATE TABLE defLanguages (
   lng_ISO639 char(2) NOT NULL COMMENT 'Two character ISO639 language code',
   lng_Name varchar(63) NOT NULL COMMENT 'Language name, generally accepted name (normally English terminology)',
   lng_Notes varchar(1000) default NULL COMMENT 'URL reference to, or notes on the definition of the language',
+  lng_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (lng_NISOZ3953)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Language list including optional standard language codes';
 
@@ -199,6 +204,7 @@ CREATE TABLE defOntologies (
   ont_NameInOriginatingDB varchar(63) default NULL COMMENT 'Name used in database where this ontology originated',
   ont_IDInOriginatingDB smallint(5) unsigned default NULL COMMENT 'ID used in database where this ontology originated',
   ont_Order tinyint(3) unsigned zerofill NOT NULL default '255' COMMENT 'Ordering value to define alternate display order in interface',
+  ont_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (ont_ID),
   UNIQUE KEY ont_ShortName (ont_ShortName)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='A table of references to different ontologies used by Heuris';
@@ -222,7 +228,7 @@ CREATE TABLE defRecStructure (
   rst_RecordMatchOrder tinyint(1) unsigned NOT NULL default '0' COMMENT 'Indicates order of significance in detecting duplicate records, 1 = highest',
   rst_CalcFunctionID tinyint(3) unsigned default NULL COMMENT 'FK to table of function specifications for calculating string values',
   rst_RequirementType enum('required','recommended','optional','forbidden') NOT NULL default 'optional',
-  rst_NonOwnerVisibility enum('hidden','viewable','public') NOT NULL default 'viewable' COMMENT 'Allows restriction of visibility of a particular field in a specified record type',
+  rst_NonOwnerVisibility enum('hidden','viewable','public','pending') NOT NULL default 'viewable' COMMENT 'Allows restriction of visibility of a particular field in a specified record type',
   rst_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
   rst_MayModify enum('locked','discouraged','open') NOT NULL default 'open' COMMENT 'Extent to which detail may be modified within this record structure',
   rst_OriginatingDBID mediumint(8) unsigned default NULL COMMENT 'Database where this record structure element originated, 0 = locally',
@@ -234,10 +240,10 @@ CREATE TABLE defRecStructure (
   rst_PtrFilteredIDs varchar(250) default NULL COMMENT 'Allowed Rectypes (CSV) within list defined by defDetailType (for pointer details)',
   rst_OrderForThumbnailGeneration tinyint(3) unsigned default NULL COMMENT 'Priority order of fields to use in generating thumbnail, null = do not use',
   rst_TermIDTreeNonSelectableIDs varchar(255) default NULL COMMENT 'Term IDs to use as non-selectable headers for this field',
+  rst_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (rst_ID),
   UNIQUE KEY rst_composite (rst_RecTypeID,rst_DetailTypeID),
-  KEY rst_DetailTypeID (rst_DetailTypeID),
-  KEY rst_DetailTypeID_2 (rst_DetailTypeID)
+  KEY rst_DetailTypeID (rst_DetailTypeID)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='The record details (fields) required for each record type';
 
 -- --------------------------------------------------------
@@ -252,6 +258,7 @@ CREATE TABLE defRecTypeGroups (
   rtg_Domain enum('functionalgroup','modelview') NOT NULL default 'functionalgroup' COMMENT 'Functional group (rectype has only one) or a Model/View group',
   rtg_Order tinyint(3) unsigned zerofill NOT NULL default '002' COMMENT 'Ordering of record type groups within pulldown lists',
   rtg_Description varchar(250) default NULL COMMENT 'A description of the record type group and its purpose',
+  rtg_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (rtg_ID),
   UNIQUE KEY rtg_Name (rtg_Name)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Grouping mechanism for record types in pulldowns';
@@ -274,7 +281,7 @@ CREATE TABLE defRecTypes (
   rty_OriginatingDBID mediumint(8) unsigned default NULL COMMENT 'Database where this record type originated, 0 = locally',
   rty_NameInOriginatingDB varchar(63) default NULL COMMENT 'Name used in database where this record type originated',
   rty_IDInOriginatingDB smallint(5) unsigned default NULL COMMENT 'ID in database where this record type originated',
-  rty_NonOwnerVisibility enum('hidden','viewable','public') NOT NULL default 'viewable' COMMENT 'Allows blanket restriction of visibility of a particular record type',
+  rty_NonOwnerVisibility enum('hidden','viewable','public','pending') NOT NULL default 'viewable' COMMENT 'Allows blanket restriction of visibility of a particular record type',
   rty_ShowInLists tinyint(1) unsigned NOT NULL default '1' COMMENT 'Flags if record type is to be shown in end-user interface, 1=yes',
   rty_RecTypeGroupID tinyint(3) unsigned NOT NULL default '1' COMMENT 'Record type group to which this record type belongs',
   rty_RecTypeModelIDs varchar(63) default NULL COMMENT 'The model group(s) to which this rectype belongs, comma sep. list',
@@ -282,6 +289,7 @@ CREATE TABLE defRecTypes (
   rty_ReferenceURL varchar(250) default NULL COMMENT 'A reference URL describing/defining the record type',
   rty_AlternativeRecEditor varchar(63) default NULL COMMENT 'Name or URL of alternative record editor function to be used for this rectype',
   rty_Type enum('normal','relationship','dummy') NOT NULL default 'normal' COMMENT 'Use to flag special record types to trigger special functions',
+  rty_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (rty_ID),
   UNIQUE KEY rty_Name (rty_Name),
   KEY rty_RecTypeGroupID (rty_RecTypeGroupID)
@@ -304,12 +312,11 @@ CREATE TABLE defRelationshipConstraints (
   rcs_IDInOriginatingDB smallint(5) unsigned default '0' COMMENT 'Code used in database where this constraint originated',
   rcs_TermID int(10) unsigned default NULL COMMENT 'The ID of a term to be constrained, applies to descendants unless they have more specific',
   rcs_TermLimit tinyint(2) unsigned default NULL COMMENT 'Null=none 0=not allowed 1,2..=max # times a term from termSet ident. by termID can be used',
+  rcs_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (rcs_ID),
   UNIQUE KEY rcs_CompositeKey (rcs_SourceRectypeID,rcs_TargetRectypeID,rcs_TermID),
   KEY rcs_TermID (rcs_TermID),
-  KEY rcs_TargetRectypeID (rcs_TargetRectypeID),
-  KEY rcs_SourceRectypeID (rcs_SourceRectypeID),
-  KEY rcs_TargetRectypeID_2 (rcs_TargetRectypeID)
+  KEY rcs_TargetRectypeID (rcs_TargetRectypeID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Constrain target-rectype/vocabularies/values for a pointer d';
 
 -- --------------------------------------------------------
@@ -334,6 +341,7 @@ CREATE TABLE defTerms (
   trm_ChildCount tinyint(3) NOT NULL default '0' COMMENT 'Stores the count of children, updated whenever children are added/removed',
   trm_ParentTermID int(10) unsigned default NULL COMMENT 'The ID of the parent/owner term in the hierarchy',
   trm_Depth tinyint(1) unsigned NOT NULL default '1' COMMENT 'Depth of term in the term tree, should always be 1+parent depth',
+  trm_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (trm_ID),
   KEY trm_ParentTermIDKey (trm_ParentTermID),
   KEY trm_InverseTermIDKey (trm_InverseTermId)
@@ -351,6 +359,7 @@ CREATE TABLE defTranslations (
   trn_Code smallint(5) unsigned NOT NULL COMMENT 'The primary key / ID in the table containing the text to be translated',
   trn_LanguageCode3 char(3) NOT NULL COMMENT 'The translation language code (NISO 3 character) for this record',
   trn_Translation varchar(63) NOT NULL COMMENT 'The translation of the text in this location (table/field/id)',
+  trn_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (trn_ID),
   UNIQUE KEY trn_composite (trn_Source,trn_Code,trn_LanguageCode3),
   KEY trn_LanguageCode3 (trn_LanguageCode3)
@@ -365,6 +374,7 @@ CREATE TABLE defTranslations (
 CREATE TABLE defURLPrefixes (
   urp_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'ID which will be stored as proxy for the URL prefix',
   urp_Prefix varchar(250) NOT NULL COMMENT 'URL prefix which is prepended to record URLs',
+  urp_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (urp_ID),
   UNIQUE KEY urp_Prefix (urp_Prefix)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Common URL prefixes allowing single-point change of URL for ';
@@ -384,6 +394,7 @@ CREATE TABLE recDetails (
   dtl_UploadedFileID mediumint(8) unsigned default NULL COMMENT 'The numeric code = filename of an uploaded file ',
   dtl_Geo geometry default NULL COMMENT 'A geometry (spatial) object',
   dtl_ValShortened varchar(31) NOT NULL COMMENT 'Truncated version of the textual value without spaces',
+  dtl_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record detail, used to get last updated date for table',
   PRIMARY KEY  (dtl_ID),
   KEY dtl_DetailtypeIDkey (dtl_DetailTypeID),
   KEY dtl_RecIDKey (dtl_RecID),
@@ -463,6 +474,7 @@ CREATE TABLE recUploadedFiles (
   ulf_OrigFileName varchar(255) NOT NULL COMMENT 'The original name of the file uploaded',
   ulf_UploaderUGrpID smallint(5) unsigned NOT NULL COMMENT 'The user who uploaded the file',
   ulf_Added datetime NOT NULL default '0000-00-00 00:00:00' COMMENT 'The date and time the file was uploaded',
+  ulf_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'The date of last modification of the file description record, automatic update',
   ulf_ObfuscatedFileID varchar(40) default NULL COMMENT 'SHA-1 hash of ulf_ID and random number to block sequential file harvesting',
   ulf_ExternalFileReference varchar(1000) default NULL COMMENT 'URI of an external file, which may or may not be cached locally',
   ulf_PreferredSource enum('local','external') NOT NULL default 'local' COMMENT 'Preferred source of file if both local file and external reference set',
@@ -557,7 +569,8 @@ CREATE TABLE sysIdentification (
   sys_hmlOutputDirectory varchar(255) default NULL COMMENT 'Directory in which to write hml representation of published records, default to hml within upload directory',
   sys_htmlOutputDirectory varchar(255) default NULL COMMENT 'Directory in which to write html representation of published records, default to html within upload directory',
   sys_NewRecOwnerGrpID smallint(5) unsigned NOT NULL default '0' COMMENT 'Group which by default owns new records, 0=everyone. Allow override per user',
-  sys_NewRecAccess enum('viewable','hidden','public') NOT NULL default 'viewable' COMMENT 'Default visibility for new records - allow override per user',
+  sys_NewRecAccess enum('viewable','hidden','public','pending') NOT NULL default 'viewable' COMMENT 'Default visibility for new records - allow override per user',
+  sys_SetPublicToPendingOnEdit tinyint(1) unsigned NOT NULL default '0' COMMENT '0=immediate publish when ''public'' record edited, 1 = reset to ''pending''',
   sys_ConstraintDefaultBehavior enum('locktypetotype','unconstrainedbydefault','allownullwildcards') NOT NULL default 'locktypetotype' COMMENT 'Determines default behaviour when no detail types are specified',
   sys_AllowRegistration tinyint(1) unsigned NOT NULL default '0' COMMENT 'If set, people can apply for registration through web-based form',
   sys_MediaFolders varchar(10000) default NULL COMMENT 'Additional comma-sep directories which can contain files indexed in database',
@@ -621,6 +634,7 @@ CREATE TABLE sysUGrps (
   ugr_TargetEmailAddresses varchar(255) default NULL COMMENT 'Comma-sep list for selecting target for sending records as data, see also sys_TargetEmailAddresses',
   ugr_URLs varchar(2000) default NULL COMMENT 'URL(s) of group or personal website(s), comma separated',
   ugr_FlagJT int(1) unsigned NOT NULL default '0' COMMENT 'Flag to enable in Jobtrack/Worktrack application',
+  ugr_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (ugr_ID),
   UNIQUE KEY ugr_Name (ugr_Name),
   UNIQUE KEY ugr_eMail (ugr_eMail)
@@ -725,6 +739,7 @@ CREATE TABLE usrReminders (
   rem_StartDate date NOT NULL default '1970-01-01' COMMENT 'The first (or only) date for sending the reminder',
   rem_Freq enum('once','daily','weekly','monthly','annually') NOT NULL default 'once' COMMENT 'The frequency of sending reminders',
   rem_Nonce varchar(31) default NULL COMMENT 'Random number hash for reminders',
+  rem_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT ' ugr_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT ''Date of last modification of this record, used to get last updated date for table'',',
   PRIMARY KEY  (rem_ID),
   KEY rem_RecID (rem_RecID),
   KEY rem_OwnerUGrpID (rem_OwnerUGrpID),
@@ -775,6 +790,7 @@ CREATE TABLE usrTags (
   tag_Text varchar(63) NOT NULL COMMENT 'The value (text) of the tag provided by the user or workgroup administrator',
   tag_Description varchar(250) default NULL COMMENT 'Description of the concept to which this tag is attached, optional',
   tag_AddedByImport tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flag as to whether this tag was added by an import (1) or by editing (0)',
+  tag_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT ' ugr_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT ''Date of last modification of this record, used to get last updated date for table'',',
   PRIMARY KEY  (tag_ID),
   UNIQUE KEY tag_composite_key (tag_Text,tag_UGrpID),
   KEY tag_UGrpID (tag_UGrpID),
@@ -871,7 +887,7 @@ CREATE TABLE woots (
   sys_dbSubSubVersion,sys_eMailImapServer,sys_eMailImapPort,
   sys_eMailImapProtocol,sys_eMailImapUsername,sys_eMailImapPassword,
   sys_UGrpsdatabase,sys_OwnerGroupID)
-  VALUES (1,0,3,1,0,NULL,NULL,NULL,NULL,NULL,NULL,1);
+  VALUES (1,0,1,0,0,NULL,NULL,NULL,NULL,NULL,NULL,1);
   -- 0 is everyone, 1 is the owning admins group, 2 is default dbAdmin user
 
 -- These are critical to the working of the definitions caching system, without these

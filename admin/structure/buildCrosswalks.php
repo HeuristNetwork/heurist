@@ -197,7 +197,9 @@ error_log(" tempdbname = $tempDBName  is new = $isNewDB  dbname = $dbname");
 
     preg_match("/Vsn:\s*(\d+)\.(\d+)(?:\.(\d+))*/","Vsn: ".HEURIST_DBVERSION,$thisDBVersion); // $sourceDBVersion[0] = version string, 1, 2, 3 = ,major, minor, sub versions
 
-        if (!($sourceDBVersion[1] == $thisDBVersion[1] && $sourceDBVersion[2] == $thisDBVersion[2])) {
+        // we ignore following test if creating a new database, because the current database version is irrelevant, the definition files determine the version created
+        // Note 13/9/11: HEURIST_DBVERSION seems to reflect the default database or ? the first opened database rather than the current open database
+        if ((!$isNewDB) && (!($sourceDBVersion[1] == $thisDBVersion[1] && $sourceDBVersion[2] == $thisDBVersion[2]))) {
         echo "<p><strong>The source database ($sourceDBVersion[0]) is a different major/minor version from the current database (Vsn ".HEURIST_DBVERSION.
              ")</strong><p>One or other database will need updating to the same major/minor version #";
         exit();

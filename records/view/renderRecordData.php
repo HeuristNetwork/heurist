@@ -221,7 +221,7 @@ function print_private_details($bib) {
 		<div class=detail>
 			<?php
 				print '<span style="font-weight: bold; color: black;">'.htmlspecialchars($workgroup_name).'</span>';
-				if ($bib['rec_NonOwnerVisibility'] == 'viewable') print '<span> - read-only to others</span></div></div>';
+                if ($bib['rec_NonOwnerVisibility'] != 'hidden') print '<span> - read-only to others</span></div></div>';
 				else print '<span> - hidden to others</span></div></div>';
 				}
 			?>
