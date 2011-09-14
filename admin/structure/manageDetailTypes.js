@@ -341,17 +341,17 @@ function DetailTypeManager() {
 					}
 					elLiner.innerHTML = '<label title="'+tit+'">'+str+'</label>';
 			}},
-			{ key: "help", label: "Description", sortable:false, width:200,
+			{ key: "help", label: "Description", sortable:false, minWidth:200, maxAutoWidth:300,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
-					var str = oRecord.getData("description");
-					var tit = "";
+					var str = oRecord.getData("help");
+					var tit = oRecord.getData("description");
 					if(Hul.isnull(str)){
 						str = "";
-					}else if (str.length>30) {
+					}/*else if (str.length>30) {
 						tit = str;
 						str = str.substr(0,30)+"&#8230";
-					}
-					elLiner.innerHTML = '<label title="'+tit+'">'+str+'</label>';
+					}*/
+					elLiner.innerHTML = '<div title="'+tit+'">'+str+'</div>';
 			}},
 			{ key: "type", label: "Data Type", sortable:true, className:'center' },
 			{ key: "status", label: "Status", sortable:true, className:'center' },

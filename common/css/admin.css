@@ -132,16 +132,24 @@ tr.yui-dt-odd, tr.yui-dt-even {
 .yui-dt-col-icon .yui-dt-liner, .yui-dt-col-yui-dt-col23 .yui-dt-liner, .yui-dt-col-info .yui-dt-liner, .yui-dt-col-active .yui-dt-liner {
 	text-align:center
 }
+td.yui-dt-col-status, td.yui-dt-col-struc, td.yui-dt-col-edit{width:40px}
+td.yui-dt0-col-grp_id {width:90px}
 .yui-skin-sam .yui-dt table {
 	border: 1px solid #A4B4CB;
 }
+.yui-dt-liner input#tags, .yui-dt-liner .input-cell .in, .yui-dt-liner .input-cell .resource-title, .yui-dt-liner .in, .yui-dt-liner .input-row input:not([type="submit"]), .yui-dt-liner .input-row textarea {
+	min-width: 20px;
+}
+
+
 td.center div.yui-dt-liner, th.center div.yui-dt-liner {text-align:center; /*padding-right:6px; padding-left:6px*/}
 td.left div.yui-dt-liner, th.left div.yui-dt-liner {text-align:left}
 td.right div.yui-dt-liner, th.right div.yui-dt-liner {text-align:right}
 th#yui-dt0-th-id {width:40px}
 div.yui-dt-liner select {width:100%}
-body.popup div.yui-dt-liner select {width:80px}
-td div.yui-dt-liner {white-space:nowrap !important}
+div.yui-dt-liner img {background-repeat:no-repeat}
+body.popup div.yui-dt-liner select {width:20ex; min-width:20ex}
+td div.yui-dt-liner {overflow: hidden;text-overflow: ellipsis;}
 th.yui-dt-asc div.yui-dt-liner, th.yui-dt-desc div.yui-dt-liner{text-align:left;}
 div.yui-dt-liner span.count {
 	display: inline-block;
@@ -220,7 +228,7 @@ html body.popup div div#page-inner div#modelTabs.yui-navset div.yui-navset div.y
 input#tags, .input-cell .in, .input-cell .resource-title, .in, .input-row input:not([type="submit"]), .input-row textarea {
 	background-color: #ECF1FB;
 	min-width:40ex;
-	border:none;
+	border:1px solid #DCDCDC;
 }
 .input-row div.input-cell{
 	vertical-align:baseline
@@ -349,7 +357,8 @@ body.popup tr.yui-dt-expansion div.yui-dt-liner {padding:4px 4px 4px 4px}
 .yui-dt-expansion .yui-dt-liner table {margin-top:10px}
 .yui-dt-expansion .yui-dt-liner table .status {width:60px; text-align:center	}
 .yui-dt-expansion .yui-dt-liner td, .yui-dt-expansion .yui-dt-liner table td {padding:4px;color:#999}
-.yui-dt-expansion .yui-dt-highlighted, .yui-dt-expansion.yui-dt-highlighted {background:transparent !important; color:#000}
+.yui-dt-expansion .yui-dt-highlighted, .yui-dt-expansion.yui-dt-highlighted {background:#FFF !important; color:#000}
+.yui-dt-expansion, .yui-dt-expansion {background:#FFF !important; color:#000}
 
 .yui-skin-sam th.yui-dt-sortable .yui-dt-label {margin-right: 0px;}
 
@@ -359,3 +368,43 @@ div#termsFilter.popup {
 	padding:10px;
 	display:none
 }
+.greyButton {
+    background-color:#CCC;
+	background:-moz-linear-gradient(center top , #EEE, #CCC) repeat scroll 0 0 transparent;
+	background:-webkit-gradient(linear, left top, left bottom, from(#EEE), to(#CCC));
+	border: 1px solid #999;
+	-moz-border-radius:3px;
+	-webkit-border-radius:3px;
+	border-radius:3px;
+	padding:0 3px;
+	font-size:11px;
+	color:#666;
+	margin:3px;
+	height:20px;
+	line-height:18px;
+	display:inline-block;
+	text-transform:uppercase
+}
+.greyButton:hover {
+	color:#333;
+    box-shadow: 0 1px 3px #666 inset;
+}
+
+.thumbPopup {
+	background-color: rgba(255, 255, 255, 0.75);
+    border: 1px solid #FFFFFF;
+    border-radius: 5px 5px 5px 5px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+    color: #EDEDED;
+    padding: 5px;
+    z-index: 999;
+	background-repeat:no-repeat;
+	background-position:50%;
+	background-size:90%;
+	margin:-51px 20px;
+	height:75px;
+	width:75px;
+	display:none;
+	position:absolute
+}
+.rectypeImages:hover div.thumbPopup {display:block}

@@ -274,51 +274,55 @@ function EditRecStructure() {
 					*/
 					obj.liner_element.innerHTML =
 					'<div style="padding-left:30; padding-bottom:5; padding-right:5">'+
-					'<div class="input-row"><label class="dtyLabel">Display name/Label:</label><input id="ed'+rst_ID+'_rst_DisplayName" title="Display Name/Label"/></div>'+
-					'<div class="input-row"><label class="dtyLabel">Help Text/Prompt:</label><input id="ed'+rst_ID+'_rst_DisplayHelpText" style="width:350px" title="Help Text"/></div>'+
-					'<div class="input-row"><label class="dtyLabel">Default Value:</label><input id="ed'+rst_ID+'_rst_DefaultValue" title="Default Value"/></div>'+
-					'<div class="input-row"><label class="dtyLabel">Width:</label><input id="ed'+rst_ID+'_rst_DisplayWidth" title="Visible width of field" style="width:40" size="4" onkeypress="Hul.validate(event)"/></div>'+
+					'<div class="input-row"><div class="input-header-cell">Display name/Label:</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DisplayName" title="Display Name/Label"/></div></div>'+
+					'<div class="input-row"><div class="input-header-cell">Help Text/Prompt:</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DisplayHelpText" style="width:350px" title="Help Text"/></div></div>'+
+					'<div class="input-row"><div class="input-header-cell">Default Value:</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DefaultValue" title="Default Value"/></div></div>'+
+					'<div class="input-row"><div class="input-header-cell">Width:</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DisplayWidth" title="Visible width of field" style="width:40" size="4" onkeypress="Hul.validate(event)"/></div></div>'+
 
-					'<div class="input-row"><label class="dtyLabel">Requirement type:</label>'+
-					'<select id="ed'+rst_ID+'_rst_RequirementType" onchange="onReqtypeChange(event)">'+
+					'<div class="input-row"><div class="input-header-cell">Requirement type:</div>'+
+					'<div class="input-cell">'+
+					'<select id="ed'+rst_ID+'_rst_RequirementType" onchange="onReqtypeChange(event)" style="display:inline; margin-right:20px">'+
 					'<option value="required">required</option>'+
 					'<option value="recommended">recommended</option>'+
 					'<option value="optional">optional</option>'+
 					'<option value="forbidden">forbidden</option></select>'+
-					'&nbsp;&nbsp;repeat from&nbsp;<input id="ed'+rst_ID+
+					'repeat from&nbsp;<input id="ed'+rst_ID+
 					'_rst_MinValues" title="Min Values" style="width:20px" size="2" '+
 					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/>&nbsp;'+
 					'&nbsp;to&nbsp;<input id="ed'+rst_ID+
 					'_rst_MaxValues" title="Max Values"  style="width:20px" size="2"  '+
-					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/>&nbsp;times</div>'+
+					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/>&nbsp;times</div></div>'+
 
-					'<div class="input-row"><label class="dtyLabel">Terms list:</label>'+
+					'<div class="input-row"><div class="input-header-cell">Terms list:</div>'+
+					'<div class="input-cell">'+
 					'<input id="ed'+rst_ID+'_rst_FilteredJsonTermIDTree" type="hidden"/>'+
 					'<input id="ed'+rst_ID+'_rst_TermIDTreeNonSelectableIDs" type="hidden"/>'+
-					'<input type="button" value="Filter terms" id="btnSelTerms" onclick="showTermsTree('+rst_ID+', event)"/>'+
-					'<div id="termsPreview" class="dtyValue"><label>preview:</label></div>'+
-					'</div>'+
+					'<input type="submit" value="Filter terms" id="btnSelTerms" onclick="showTermsTree('+rst_ID+', event)" style="margin:0 20px 0 0"/>'+
+					'Preview:'+
+					'<span class="input-cell" id="termsPreview" class="dtyValue" style="margin:0 10px"></span>'+
+					'</div></div>'+
 
-					'<div class="input-row"><label class="dtyLabel">Rectype pointer:</label>'+
-					'<div id="pointerPreview" class="dtyValue"></div>'+
+					'<div class="input-row"><div class="input-header-cell">Rectype pointer:</div>'+
+					'<div id="pointerPreview" class="input-cell">'+
 					'<input id="ed'+rst_ID+'_rst_PtrFilteredIDs" type="hidden"/>'+
-					'<button value="Filter pointers" id="btnSelTerms" onclick="showPointerFilter('+rst_ID+', event)">Filter pointers</button></div>'+
-
-					'<div class="input-row"><label class="dtyLabel">Status:</label><select id="ed'+rst_ID+
+					'<input value="Filter pointers" id="btnSelTerms" onclick="showPointerFilter('+rst_ID+', event)"></div></div>'+
+					
+					'<div class="input-row"><div class="input-header-cell">Status:</div>'+
+					'<div class="input-cell"><select id="ed'+rst_ID+
 					'_rst_Status" style="display:inline-block">'+
 					'<option value="reserved">reserved</option>'+
 					'<option value="approved">approved</option>'+
 					'<option value="pending">pending</option>'+
-					'<option value="open">open</option></select>'+
+					'<option value="open">open</option></select></div></div>'+
 
-					'<div style="float:right; text-align:right;min-width:250;">'+
-					'<button id="btnEdit_'+rst_ID+
-					'" style="display:inline-block" value="Edit" onclick="_onAddEditFieldType('+rst_ID+');">Edit</button>'+
+					'<div class="input-row" style="text-align:right">'+
+					'<input type="submit" id="btnEdit_'+rst_ID+
+					'" style="display:inline-block" value="Edit" onclick="_onAddEditFieldType('+rst_ID+');">'+
 					'<input id="btnSave_'+rst_ID+
-					'" style="display:inline-block" type="button" value="Save" onclick="doExpliciteCollapse(event);" />'+
+					'" style="display:inline-block" type="submit" value="Save" onclick="doExpliciteCollapse(event);" />'+
 					'<input id="btnCancel_'+rst_ID+
-					'" type="button" value="Cancel" onclick="doExpliciteCollapse(event);" />'+
-					'</div></div></div>';
+					'" type="submit" value="Cancel" onclick="doExpliciteCollapse(event);" />'+
+					'</div></div>';
 				}
 			}
 			);
@@ -797,12 +801,12 @@ function renderShowAll() {
 
 			if(rst_type === "relmarker" && fieldnames[k] === "rst_DefaultValue"){
 					//hide defaulvalue
-					edt.parentNode.style.display = "none";
+					edt.parentNode.parentNode.style.display = "none";
 					//show disable jsontree
 			}else if(fieldnames[k] === "rst_TermIDTreeNonSelectableIDs"){
 				if(rst_type === "enum" || rst_type === "relmarker" || rst_type === "relationtype"){
 					//show filter jsontree
-					edt.parentNode.style.display = "block";
+					edt.parentNode.parentNode.style.display = "block";
 
 					var edt2 = Dom.get('ed'+rst_ID+'_rst_FilteredJsonTermIDTree');
 
@@ -813,18 +817,18 @@ function renderShowAll() {
 					//editedTermTree, editedDisabledTerms);
 
 				}else{
-					edt.parentNode.style.display = "none";
+					edt.parentNode.parentNode.style.display = "none";
 				}
 
 			}else if(fieldnames[k] === "rst_PtrFilteredIDs"){
 				if(rst_type === "relmarker" || rst_type === "resource"){
 					//show filter jsontree
-					edt.parentNode.style.display = "block";
+					edt.parentNode.parentNode.style.display = "block";
 
 					recreateRecTypesPreview(rst_type,
 					(Hul.isempty(edt.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[11]:edt.value) ); //dty_PtrTargetRectypeIDs
 				}else{
-					edt.parentNode.style.display = "none";
+					edt.parentNode.parentNode.style.display = "none";
 				}
 
 			}else if(rst_type === "relationtype"){
@@ -835,10 +839,10 @@ function renderShowAll() {
 			}else if(rst_type === "separator"  &&
 				!(fieldnames[k] === "rst_DisplayName" || fieldnames[k] === "rst_DisplayWidth")){
 					//hide all but width
-					edt.parentNode.style.display = "none";
+					edt.parentNode.parentNode.style.display = "none";
 			}else if(rst_type === "fieldsetmarker" && !(fieldnames[k] === "rst_DisplayName" || fieldnames[k] === "rst_Status")){
 					//hide all, required - once
-					edt.parentNode.style.display = "none";
+					edt.parentNode.parentNode.style.display = "none";
 			}
 			}
 		}//for
