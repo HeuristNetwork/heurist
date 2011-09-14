@@ -16,7 +16,7 @@
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
 	if(!is_logged_in()) {
-		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
+		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
 		return;
 	}
 	if(!is_admin()) {
@@ -47,7 +47,7 @@
 
 
 		<div id="createDBForm">
-			<form action="createNewDB.php" method="POST" name="NewDBName">
+			<form action="createNewDB.php?db=<?= HEURIST_DBNAME ?>" method="POST" name="NewDBName">
 				<p>New databases are created on the current server.<br>
 					You will become the owner and administrator of the new database.<br>
 					The database will be created with the prefix "<?= HEURIST_DB_PREFIX ?>"

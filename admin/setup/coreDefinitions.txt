@@ -29,7 +29,7 @@
 -- Installation = http://heuristscholar.org/h3-ij/
 -- Database = H3CoreDefinitions
 -- Program Version: 3.1
--- Database Version: 3.1.0
+-- Database Version: 1.0.0
 
 -- RECORD TYPE GROUPS
 -- `rtg_ID`,`rtg_Name`,`rtg_Domain`,`rtg_Order`,`rtg_Description`

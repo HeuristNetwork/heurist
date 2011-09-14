@@ -18,6 +18,7 @@
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 	mysql_connection_db_insert($tempDBName); // Use temp database
+
 ?>
 <html>
 <head>
@@ -71,7 +72,7 @@
 </div>
 
 <script type="text/javascript">
-//var crwSourceDBID = "1";
+var sourceDBID = <?=$source_db_id?>;
 //var crwDefType = "";
 //var crwLocalCode = "";
 var replaceRecTypeName = "";
@@ -115,26 +116,27 @@ function insertData() {
 		}
 	}
 	mysql_query("use ".$tempDBName);
-	$rtyData = mysql_query("select defRecTypes.rty_ID,
-									defRecStructure.rst_ID,
-									defRecStructure.rst_DetailTypeID,
-									defRecStructure.rst_DisplayName,
-									defDetailTypes.dty_ID,
-									defDetailTypes.dty_Name,
-									defDetailTypes.dty_Type,
-									defDetailTypes.dty_Status,
-									defDetailTypes.dty_IDInOriginatingDB as origDtyID,
-									defDetailTypes.dty_OriginatingDBID as origDBID,
-									defRecTypes.rty_Description
+	$rtyData = mysql_query("select rty_ID,
+									rst_ID,
+									rst_DetailTypeID,
+									rst_DisplayName,
+									dty_ID,
+									dty_Name,
+									dty_Type,
+									dty_Status,
+									if(dty_OriginatingDBID,dty_IDInOriginatingDB,dty_ID) as origDtyID,
+									if(dty_OriginatingDBID,dty_OriginatingDBID,$source_db_id) as origDtyDBID,
+									rty_Description
 							from defRecTypes
-								left join defRecStructure on defRecTypes.rty_ID=defRecStructure.rst_RecTypeID
-								left join defDetailTypes on defRecStructure.rst_DetailTypeID=defDetailTypes.dty_ID
-							order by defRecTypes.rty_ID");
+								left join defRecStructure on rty_ID = rst_RecTypeID
+								left join defDetailTypes on rst_DetailTypeID = dty_ID
+							order by rty_ID");
 	// For every recordtype, add the structure to a javascript array, to show in the tooltip
 	if(isset($rtyData)) {
 		while($rectypeStructure = mysql_fetch_assoc($rtyData)) {
+			// check to see if the source rectype field's detailType exist in our DB
 			$dtyImported = mysql_query("select dty_ID from " . DATABASE . ".defDetailTypes ".
-										"where dty_OriginatingDBID = ".$rectypeStructure['origDBID'].
+										"where dty_OriginatingDBID = ".$rectypeStructure['origDtyDBID'].
 										" AND dty_IDInOriginatingDB = ".$rectypeStructure['origDtyID']);
 			echo 'if(!rectypeStructures['.$rectypeStructure["rty_ID"].']) {' . "\n";
 			echo 'rectypeStructures['.$rectypeStructure["rty_ID"].'] = new Array();' . "\n";
@@ -148,7 +150,7 @@ function insertData() {
 			echo 'rtyDataRow[3] = "'.$rectypeStructure["dty_Status"].'";' . "\n";
 			$rectypeStructure["rty_Description"] = mysql_escape_string($rectypeStructure["rty_Description"]);
 			echo 'rtyDataRow[4] = "'.$rectypeStructure["rty_Description"].'";' . "\n";
-			echo 'rtyDataRow[5] = "'.(mysql_num_rows($dtyImported)).'";' . "\n";
+			echo 'rtyDataRow[5] = "'.($dtyImported && mysql_num_rows($dtyImported)? 1: 0).'";' . "\n";
 			echo 'rectypeStructures['.$rectypeStructure["rty_ID"].'].push(rtyDataRow);' . "\n";
 		}
 	}
@@ -457,12 +459,12 @@ function processAction(rtyID, action, rectypeName) {
 	xmlhttp.open("GET","processAction.php?"+
 						"action="+action+
 						"&tempDBName="+tempDBName+
-//						"&="+crwSourceDBID+
-						"&crwSourceCode="+rtyID+
+						"&sourceDBID="+sourceDBID+
+						"&importRtyID="+rtyID+
 //						"&crwDefType="+crwDefType+
 //						"&crwLocalCode="+crwLocalCode+
 						"&replaceRecTypeName="+replaceRecTypeName+
-						"&importingDB="+importingDBFullName,true);
+						"&importingDBName="+importingDBFullName,true);
 	xmlhttp.send();
 }
 
