@@ -319,7 +319,7 @@ function EditRecStructure() {
 					'<input type="submit" id="btnEdit_'+rst_ID+
 					'" style="display:inline-block" value="Edit" onclick="_onAddEditFieldType('+rst_ID+');">'+
 					'<input id="btnSave_'+rst_ID+
-					'" style="display:inline-block" type="submit" value="Save" onclick="doExpliciteCollapse(event);" />'+
+					'" style="display:inline-block; margin:0 5px" type="submit" value="Save" onclick="doExpliciteCollapse(event);"/>'+
 					'<input id="btnCancel_'+rst_ID+
 					'" type="submit" value="Cancel" onclick="doExpliciteCollapse(event);" />'+
 					'</div></div>';

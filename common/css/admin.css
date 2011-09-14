@@ -133,7 +133,7 @@ tr.yui-dt-odd, tr.yui-dt-even {
 	text-align:center
 }
 td.yui-dt-col-status, td.yui-dt-col-struc, td.yui-dt-col-edit{width:40px}
-td.yui-dt0-col-grp_id {width:90px}
+td.yui-dt0-col-grp_id, td.yui-dt-col-grp_id {width:90px}
 .yui-skin-sam .yui-dt table {
 	border: 1px solid #A4B4CB;
 }
@@ -149,6 +149,7 @@ th#yui-dt0-th-id {width:40px}
 div.yui-dt-liner select {width:100%}
 div.yui-dt-liner img {background-repeat:no-repeat}
 body.popup div.yui-dt-liner select {width:20ex; min-width:20ex}
+body.popup div.yui-dt-liner select.yui-dt-dropdown {width:90px; min-width:90px}
 td div.yui-dt-liner {overflow: hidden;text-overflow: ellipsis;}
 th.yui-dt-asc div.yui-dt-liner, th.yui-dt-desc div.yui-dt-liner{text-align:left;}
 div.yui-dt-liner span.count {
@@ -401,10 +402,11 @@ div#termsFilter.popup {
 	background-repeat:no-repeat;
 	background-position:50%;
 	background-size:90%;
-	margin:-51px 20px;
+	margin:-51px 25px;
 	height:75px;
 	width:75px;
 	display:none;
 	position:absolute
 }
 .rectypeImages:hover div.thumbPopup {display:block}
+#formGroupEditor {margin:0 0 20px 0}

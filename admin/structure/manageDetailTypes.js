@@ -61,14 +61,16 @@ function DetailTypeManager() {
 			label: "<label title='Create new group, edit or delete the existing group' style='font-style:italic'>edit</label>",
 			content:
 			('<div id="formGroupEditor">'+
-				'<h3>Create a new detail group or edit the existing one</h3><br/>'+
-				'<div class="input-row"><div class="input-header-cell">Group:</div><div class="input-cell"><select id="edGroupId" onchange="onGroupChange()"></select><img id="btnGrpDelete" onclick="{detailTypeManager.doGroupDelete()}" src="../../common/images/cross.png" title="Deleted selected group"/></div></div>'+
+				'<style>#formGroupEditor .input-row .input-header-cell {vertical-align: baseline;}</style>'+
+				'<h3>Create a new detail group or edit an existing one</h3><br/>'+
+				'<div class="input-row"><div class="input-header-cell">Group:</div><div class="input-cell"><select id="edGroupId" onchange="onGroupChange()"></select></div></div>'+
 				'<div class="input-row"><div class="input-header-cell">Name:</div><div class="input-cell"><input id="edName" style="width:300px"/></div></div>'+
 				'<div class="input-row"><div class="input-header-cell">Descrption:</div><div class="input-cell"><input id="edDescription" style="width:300px"/></div></div>'+
-				'<div class="input-row">'+
-					'<input id="btnGrpSave" style="display:inline-block" type="button" value="Save" onclick="{detailTypeManager.doGroupSave()}" />'+
-					'<input id="btnGrpCancel" type="button" value="Cancel" onclick="{detailTypeManager.doGroupCancel()}" />'+
-				'</div>'+
+				'<div class="input-row"><div class="input-header-cell"></div><div class="input-cell">'+
+					'<input id="btnGrpSave" style="display:inline-block" type="submit" value="Save" onclick="{rectypeManager.doGroupSave()}" />'+
+					'<input id="btnGrpCancel" type="submit" value="Cancel" onclick="{rectypeManager.doGroupCancel()}" style="margin:0 5px" />'+
+					'<input id="btnGrpDelete" onclick="{rectypeManager.doGroupDelete()}" value="Deleted selected group" type="submit"/>'+
+				'</div></div>'+
 			'</div>')
 		}));
 
@@ -258,7 +260,7 @@ function DetailTypeManager() {
 						// last 3 columns for actions
 						arr.push([dty_ID, (Number(deftype[5])===1),
 						deftype[3],deftype[0],deftype[4],deftype[2],deftype[6],deftype[1],
-						dtg_ID, iusage]);  // IREK!!!! THIS IS NOT CORRECT WAY!!!! '<span class=count>'+iusage+'</span>']);
+						dtg_ID, iusage]);
 					}
 				}
 			}
@@ -354,17 +356,25 @@ function DetailTypeManager() {
 					elLiner.innerHTML = '<div title="'+tit+'">'+str+'</div>';
 			}},
 			{ key: "type", label: "Data Type", sortable:true, className:'center' },
-			{ key: "status", label: "Status", sortable:true, className:'center' },
 			{ key: "description",   hidden:true},
 			{ key: "grp_id", label: "Group", sortable:false, width:90, className:'center',
 				formatter:YAHOO.widget.DataTable.formatDropdown, dropdownOptions:_groups},
 			{ key: null, label: "Edit", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
 					elLiner.innerHTML = '<a href="#edit"><img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /><\/a>'; } },
-			{ key: null, label: "Del", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
-					elLiner.innerHTML = '<a href="#delete"><img src="../../common/images/cross.png" width="12" height="12" border="0" title="Delete" /><\/a>'; } },
+			/*{ key: null, label: "Del", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
+					elLiner.innerHTML = '<a href="#delete"><img src="../../common/images/cross.png" width="12" height="12" border="0" title="Delete" /><\/a>'; } },*/
 			//{ key: "info", label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
 			//	elLiner.innerHTML = '<a href="#info"><img src="../../common/images/info_icon.png" width="16" height="16" border="0" title="Info" /><\/a>'} },
-
+			{ key: "status", label: "Status", sortable:true, className:'center', minWidth:40, maxAutoWidth:40, width:40,
+				formatter: function(elLiner, oRecord, oColumn, oData) {
+					var str = oRecord.getData("status");
+					if (str == "reserved") {
+							rectypeStatus = "<img src=\"../../common/images/lock_bw.png\" title=\"Status:"+str+" - Locked\">";
+						}else{
+							rectypeStatus = "<a href=\"#delete\"><img src=\"../../common/images/cross.png\" border=\"0\" title=\"Status: "+str+" - Delete\"/><\/a>";
+						};
+					elLiner.innerHTML = rectypeStatus;
+			}},
 			];
 
 

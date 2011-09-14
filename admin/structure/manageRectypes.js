@@ -77,14 +77,16 @@ function RectypeManager() {
 			label: "<label title='Create new group, edit or delete an existing group' style='font-style:italic'>edit</label>",
 			content:
 			('<div id="formGroupEditor">'+
-				'<h3>Create a new group or edit an existing one</h3><br/>'+
-				'<div class="input-row"><div class="input-header-cell">Group:</div><div class="input-cell"><select id="edGroupId" onchange="onGroupChange()"></select><img id="btnGrpDelete" onclick="{rectypeManager.doGroupDelete()}" src="../../common/images/cross.png" title="Deleted selected group"/></div></div>'+
+				'<style>#formGroupEditor .input-row .input-header-cell {vertical-align: baseline;}</style>'+
+				'<h3>Create a new record type group or edit an existing one</h3><br/>'+
+				'<div class="input-row"><div class="input-header-cell">Group:</div><div class="input-cell"><select id="edGroupId" onchange="onGroupChange()"></select></div></div>'+
 				'<div class="input-row"><div class="input-header-cell">Name:</div><div class="input-cell"><input id="edName" style="width:300px"/></div></div>'+
 				'<div class="input-row"><div class="input-header-cell">Descrption:</div><div class="input-cell"><input id="edDescription" style="width:300px"/></div></div>'+
-				'<div class="input-row">'+
-					'<input id="btnGrpSave" style="display:inline-block" type="button" value="Save" onclick="{rectypeManager.doGroupSave()}" />'+
-					'<input id="btnGrpCancel" type="button" value="Cancel" onclick="{rectypeManager.doGroupCancel()}" />'+
-				'</div>'+
+				'<div class="input-row"><div class="input-header-cell"></div><div class="input-cell">'+
+					'<input id="btnGrpSave" style="display:inline-block" type="submit" value="Save" onclick="{rectypeManager.doGroupSave()}" />'+
+					'<input id="btnGrpCancel" type="submit" value="Cancel" onclick="{rectypeManager.doGroupCancel()}" style="margin:0 5px" />'+
+					'<input id="btnGrpDelete" onclick="{rectypeManager.doGroupDelete()}" value="Deleted selected group" type="submit"/>'+
+				'</div></div>'+
 			'</div>')
 		}));
 		tabView.appendTo("modelTabs");
@@ -175,7 +177,7 @@ function RectypeManager() {
 				sel.remove(0);
 			}
 			option = document.createElement("option");
-			option.text = "new group";
+			option.text = "Add new group";
 			option.value = "-1";
 			try {
 				// for IE earlier than version 8
@@ -260,20 +262,11 @@ function RectypeManager() {
 				if(rectypeID !== "commomFieldNames" && rectypeID !== "dtFieldNames") {
 					var td = top.HEURIST.rectypes.typedefs[rectypeID];
 					var rectype = td.commonFields;
-					var rectypeStatus;
-					if (rectype[8] == "restricted") {
-							rectypeStatus = "<img src=\"../../common/images/lock_bw.png\">";
-						}else{
-							rectypeStatus = "<a href=\"#delete\"><img src=\"../../common/images/cross.png\" border=\"0\" title=\"Status:"+rectype[8]+" - Delete\"/><\/a>";
-						};
 					if (rectype[9] === grpID) {  //(rectype[9].indexOf(grpID)>-1) {
-						arr.push([rectypeID,
-						(Number(rectype[7])===1),
-						"<img src=\"../../common/images/16x16.gif\" style=\"background-image:url("+rectype[13]+")\">",
-						rectype[0], rectype[1],
-						rectype[8],
-						//rectypeStatus,
-						rectype[9], null]);
+						arr.push([rectypeID, (Number(rectype[7])===1),
+						rectype[13], // +")\" id=\"icon"+rectypeID+"\"><div style=\"background-image:url("+rectype[14]+");\" class=\"thumbPopup\"></div></a>",
+						rectype[0], rectype[1], 
+						rectype[8], rectype[9], null]);
 
 						/*TODO: top.HEURIST.rectype.rectypeUsage[rectypeID].length*/
 					}
@@ -332,7 +325,7 @@ function RectypeManager() {
 			});
 
 			var myColumnDefs = [
-			{ key: "id", label: "Code", sortable:true, width:40, className:'right' },
+			{ key: "id", label: "Code", sortable:true, minWidth:40, maxAutoWidth:40, width:40, className:'right' },
 			{ key: "info", label: "Info", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
 				var rectypeID = oRecord.getData('id');
 elLiner.innerHTML = '<img src="../../common/images/info.png"'+
@@ -340,8 +333,15 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 			},
 			{ key: "active", label: "Active", sortable:false, width:40, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
 			{ key: "usage", label: "Usage", hidden:true },
-			{ key: "icon", label: "Icon", className:'center', sortable:false },
-			{ key: "name", label: "Name", sortable:true, className: 'bold_column', width:160, gutter:0,
+			{ key: "icon", label: "Icon", className:'center', sortable:false,
+				formatter: function(elLiner, oRecord, oColumn, oData) {
+					var id = oRecord.getData("id");
+					var str = oRecord.getData("icon");
+					var thumb = top.HEURIST.baseURL + "common/images/reftype-icons/thumb/th_" + top.HEURIST.database.id +"-" + id + ".png";
+					icon ="<div class=\"rectypeImages\"><a href=\"#edit_icon\"><img src=\"../../common/images/16x16.gif\" style=\"background-image:url("+str+")\" id=\"icon"+id+"\"></a><div style=\"background-image:url("+thumb+");\" class=\"thumbPopup\"><a href=\"#edit_thumb\"><img src=\"../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a></div></div>"
+					elLiner.innerHTML = icon;
+			}},
+			{ key: "name", label: "Name", sortable:true, className: 'bold_column', minWidth:160, maxAutoWidth:160, width:160, gutter:0,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var str = oRecord.getData("name");
 					var tit = "";
@@ -351,30 +351,40 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 					}
 					elLiner.innerHTML = '<label title="'+tit+'">'+str+'</label>';
 			}},
-			{ key: "description", label: "Description", sortable:false, width:200,
+			{ key: "description", label: "Description", sortable:false, minWidth:200, width:200,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var str = oRecord.getData("description");
-					var tit = "";
+					var tit = oRecord.getData("description");
 					if(Hul.isempty(str)){
 						str = "";
-					}else if (str.length>40) {
+					}/*else if (str.length>40) {
 						tit = str;
 						str = str.substr(0,40)+"&#8230";
-					}
+					}*/
 					elLiner.innerHTML = '<span title="'+tit+'">'+str+'</span>';
 			}},
-			{ key: "status", label: "Status", sortable:true, className:'center' },
-			{ key: "grp_id", label: "Group", sortable:false, width:90, className:'center',
+			
+			{ key: "grp_id", label: "Group", sortable:false, minWidth:90, maxAutoWidth:90, width:90, className:'center',
 				formatter:YAHOO.widget.DataTable.formatDropdown, dropdownOptions:_groups},
-			{ key: null, label: "Edit", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
-					elLiner.innerHTML = '<a href="#edit_rectype"><img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit record type" /><\/a>'; }
+			{ key: "edit", label: "Edit", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
+					elLiner.innerHTML = '<a href="#edit_rectype"><img src="../../common/images/edit-recType.png" width="16" height="16" border="0" title="Edit record type" /><\/a>'; }
 			},
-			{ key: null, label: "Struc", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
-					elLiner.innerHTML = '<a href="#edit_sctructure"><img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit record strcuture" /><\/a>'; }
+			{ key: "struc", label: "Struc", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
+					elLiner.innerHTML = '<a href="#edit_sctructure"><img src="../../common/images/edit-structure.png" width="16" height="16" border="0" title="Edit record strcuture" /><\/a>'; }
 			},
-			{ key: null, label: "Del", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
+			/*{ key: null, label: "Del", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
 					elLiner.innerHTML = '<a href="#delete"><img src="../../common/images/cross.png" border="0" title="Delete" /><\/a>'; }
-			},
+			},*/
+			{ key: "status", label: "Status", sortable:true, className:'center', minWidth:40, maxAutoWidth:40, width:40,
+				formatter: function(elLiner, oRecord, oColumn, oData) {
+					var str = oRecord.getData("status");
+					if (str == "reserved") {
+							rectypeStatus = "<img src=\"../../common/images/lock_bw.png\" title=\"Status: "+str+" - Locked\">";
+						}else{
+							rectypeStatus = "<a href=\"#delete\"><img src=\"../../common/images/cross.png\" border=\"0\" title=\"Status: "+str+" - Delete\"/><\/a>";
+						};
+					elLiner.innerHTML = rectypeStatus;
+			}},
 			];
 
 			var myConfigs = {
@@ -411,6 +421,20 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 					// TO REMOVE editRectypeWindow(rectypeID);
 				} else if(elLink.hash === "#edit_sctructure") {
 					_editRecStructure(rectypeID);
+				}else if(elLink.hash === "#edit_icon") {
+					_upload_icon(rectypeID,0);
+				}else if(elLink.hash === "#edit_thumb") {
+					_upload_icon(rectypeID,1);
+					/*var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+							(top.HEURIST.database.name?top.HEURIST.database.name:''));
+					var sURL = top.HEURIST.baseURL + "admin/structure/uploadRectypeIcon.php?db="+ db + "&rty_ID="+rectypeID;
+					top.HEURIST.util.popupURL(top, sURL, {
+						"close-on-blur": false,
+						"no-resize": false,
+						height: 150,
+						width: 340,
+						//callback: icon_refresh
+					});*/
 
 				}else if(elLink.hash === "#delete"){
 					var iUsage = 0; //@todo oRecord.getData('usage');
@@ -933,7 +957,7 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 		{   "close-on-blur": false,
 			"no-resize": false,
 			height: 620,
-			width: 620,
+			width: 700,
 			callback: function(context) {
 				if(!Hul.isnull(context)){
 
@@ -1208,6 +1232,30 @@ function onGroupChange() {
 	}
 
 }
+
+function _upload_icon(rectypeID,mode) {
+		if (!mode){
+			mode = 0;
+		}
+
+		var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+		var sURL = top.HEURIST.baseURL + "admin/structure/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID=" + rectypeID;
+		top.HEURIST.util.popupURL(top, sURL, {
+			"close-on-blur": false,
+			"no-resize": false,
+			height: (mode==0?120:200),
+			width: 340,
+			callback: icon_refresh(rectypeID)
+		});
+		
+	}
+
+function icon_refresh(rectypeID) {
+		var db = top.HEURIST.database.id;
+		var imgIcon = "icon" + rectypeID;
+		var img = document.getElementById(imgIcon);
+		img.style.backgroundImage = "url(" + top.HEURIST.baseURL + "common/images/reftype-icons/"+db+"-"+rectypeID+".png) !important";
+	}
 
 /*
 
