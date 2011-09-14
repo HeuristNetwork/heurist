@@ -49,12 +49,18 @@ function EditTerms() {
 		_currentNode,
 		_parentNode,
 		_currentDomain,
-		_db;
+		_db,
+		_isWindowMode=false,
+		_isSomethingChanged=false;
 
 	/**
 	*	Initialization of tabview with 2 tabs with treeviews
 	*/
 	function _init (){
+
+		top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+
+		_isWindowMode = !Hul.isnull(top.HEURIST.parameters.popup);
 
 		_db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
@@ -73,6 +79,15 @@ function EditTerms() {
 
 		_tabView.set("activeIndex", 0);
 
+		var dv1 = Dom.get('divApply');
+		var dv2 = Dom.get('divBanner');
+		if(_isWindowMode){
+			dv1.style.display = "block";
+			dv2.style.display = "none";
+		}else{
+			dv1.style.display = "none";
+			dv2.style.display = "block";
+		}
 	}
 
 	/**
@@ -391,6 +406,9 @@ function EditTerms() {
 						}//for
 
 						if(!error) {
+								top.HEURIST.terms = context.terms;
+
+								_isSomethingChanged = true;
 								Dom.get('div_btnAddChild').style.display = "inline-block";
 								Dom.get('btnDelete').value = "Delete Term";
 								Dom.get('div_SaveMessage').style.display = "inline-block";
@@ -439,10 +457,13 @@ function EditTerms() {
 								alert("Unknown server side error");
 							}
 							else if(Hul.isnull(context.error)){
+								top.HEURIST.terms = context.terms;
+
 								_currTreeView.popNode(_currentNode);
 								_currTreeView.render();
 								_currentNode = null;
 								_onNodeClick(null);
+								_isSomethingChanged = true;
 							}
 					}
 
@@ -549,6 +570,12 @@ function EditTerms() {
 				findNodes: function(sSearch){ return _findNodes(sSearch); },
 				doEdit: function(){ _doEdit(); },
 				doSelectInverse: function(){ _doSelectInverse(); },
+
+				applyChanges: function(){ //for window mode only
+						if(_isWindowMode){
+							window.close(_isSomethingChanged);
+						}
+				},
 
 				getClass: function () {
 					return _className;

@@ -360,7 +360,8 @@
 			array_push($rv['result'], $res);
 		}
 
-		// $rv['terms'] = getTerms();
+		//slow down the performace, but we need the updated terms because Ian wishes to update terms while select terms in edit field type
+		$rv['terms'] = getTerms();
 		break;
 
 		case 'deleteTerms':
@@ -370,10 +371,8 @@
 			$rv = array();
 			$rv['error'] = "invalid or no term ID sent with deleteTerms method call to saveStructure.php";
 		}else{
-			$rv = deleteTerms($trmID);
-			/*if (!array_key_exists('error',$rv)) {
-			$rv['detailTypes'] = getAllDetailTypeStructures();
-			}*/
+			$rv['result'] = deleteTerms($trmID);
+			$rv['terms'] = getTerms();
 		}
 		break;
 	}

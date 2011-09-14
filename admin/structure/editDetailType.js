@@ -234,7 +234,7 @@ function DetailTypeEditor() {
 		{
 		"close-on-blur": false,
 		"no-resize": true,
-		height: 650,
+		height: 500,
 		width: 750,
 		callback: function(editedTermTree, editedDisabledTerms) {
 			if(editedTermTree || editedDisabledTerms) {

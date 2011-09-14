@@ -42,8 +42,8 @@
 <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
 <style type="text/css">
 	.termTree, .selectedTerms, .termTreeText, .selectedTermsText {width:49%}
-	.previewListText {float:none}
-	 
+	.previewListText {float:none;}
+
 </style>
 
 </head>
@@ -54,28 +54,46 @@
 <script type="text/javascript" src="../../common/js/utilsUI.js"></script>
 <script type="text/javascript" src="../../admin/structure/selectTerms.js"></script>
 
-<h2 class="dtyName" id="dtyName"></h2>
-<div id="termTreeText" class="termTreeText">
+<!--
+<iframe id="structure" src="../../common/php/loadCommonInfo.php" width="10px" height="10px"></iframe>
+-->
+
+<div>
+<div id="dtyName" style="display:inline-block;"></div>
+<div style="float:right;padding-top:2px">
+    <h3 style="margin:0px;padding:2px;">Preview the result</h3>
+    <div style="float:right;padding-top:0px;padding-right:10px;padding-left: 5px;">
+    	<select id="previewList" class="previewList"></select>
+    </div>
+</div>
+</div>
+
+<div>
+<div id="termTreeText" class="termTreeText" style="display:inline-block;">
 	<h3>Select the terms you want</h3>
-	<div style="float:right;padding-top:8px;padding-right:10px;"><button title="Clear selection" onClick="selectTerms.clearSelection()">Clear</button></div>
+	<div style="float:right;padding-top:8px;padding-right:10px;visibility: hidden;"><button title="Clear selection" onClick="selectTerms.clearSelection()">Clear</button></div>
 </div>
-<div id="termTreeText" class="selectedTermsText">
+<div id="termTreeText" class="selectedTermsText" style="display:inline-block;">
 	<h3>Unselect to be disabled</h3>
-	<div style="float:right;padding-top:8px;padding-right:20px;"><button title="Clear disbales" onClick="selectTerms.clearDisables()">Enable All</button></div>
+	<div style="float:right;padding-top:8px;padding-right:20px;visibility: hidden;"><button title="Clear disbales" onClick="selectTerms.clearDisables()">Enable All</button></div>
 </div>
+</div>
+
 <div id="termTree" class="termTree ygtv-checkbox"></div>
 <div id="selectedTermsTree" class="selectedTerms ygtv-checkbox"></div>
 
-<div id="termTreeText" class="previewListText">
-    <h3>Preview the result</h3>
-    <div id="termTreeText" class="previewListText">
-        <div><select id="previewList" class="previewList"></select></div>
-        <div style="padding-top:20px;text-align:right;'">
-            <button title="Cancel changes" onClick="selectTerms.cancel();">Cancel</button><button title="Save selection" onClick="selectTerms.apply();">Save</button>
-        </div>
+<div style="text-align:right;">&nbsp;</div>
+<div>
+	<div id="dtyName" style="width:49%;padding-top:10px;display:inline-block;text-align:right;">
+            <button title="Add new term" onClick="selectTerms.addNewTerm();" style="width:120px;font-weight: 800;">Add&nbsp;new&nbsp;term</button>
+	</div>
+	<div style="float:right;text-align:right;padding-top:10px;padding-right:10px;">
+            <button title="Cancel changes" onClick="selectTerms.cancel();">Cancel</button>
+            <button title="Save selection" onClick="selectTerms.apply();">Save</button>
     </div>
 </div>
-<div id="selectedTerms"></div>
+
+<!--  div id="selectedTerms"></div -->
 
 <script type="text/javascript">
 

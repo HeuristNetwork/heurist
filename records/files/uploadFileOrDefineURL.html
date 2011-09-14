@@ -3,7 +3,8 @@
 /**
  * uploadFileOrDefineURL.html
  *
- * Popup dialogue to upload file or define URL
+ * Popup dialogue to define URLinclude field type in editRecord
+ * URL is either to external resource or link file uploaded to heurist
  *
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
@@ -36,124 +37,48 @@
 	</head>
 <body class="popup">
 <script src="../../common/js/utilsLoad.js"></script>
+<script src="../../common/js/utilsUI.js"></script>
+<script src="uploadFileOrDefineURL.js"></script>
 <script>
 // width="640" height="480"
 if (window == top) {
-top.HEURIST.loadScript(top.HEURIST.basePath +"common/php/loadCommonInfo.php");	// core HEURIST object definitions (dynamically generated)
+	//top.HEURIST.loadScript(top.HEURIST.basePath +"common/php/loadCommonInfo.php");	// core HEURIST object definitions (dynamically generated)
 }
 </script>
 
-<form onSubmit="this.submit(); return false;">
-<div id="search" class="banner" style="top:0;height:70px">
+<div>
+<div id="search" class="banner" style="top:0;height:105px">
 		<div style="width: 100%;" id="div_fileupload"></div>
 		<div style="width: 100%;" id="div_url"></div>
+		<div style="width: 100%; text-align: center;" id="div_type">
+			Source:
+			<select id="cbSource">
+				<option>Arbitrary</option>
+				<option>Heurist</option>
+				<option>Panoramio</option>
+				<option>Flickr</option>
+				<option>Locr</option>
+				<option>Youtube</option>
+			</select>
+			Type:
+			<select id="cbType">
+				<option>Unknown</option>
+				<option>Image</option>
+				<option>Audio</option>
+				<option>Video</option>
+				<option>Text/HTML</option>
+				<option>Document</option>
+				<option>Flash</option>
+			</select>
+			<button onclick="onApply()">Apply</button>
+			<button onclick="onCancel()">Cancel</button>
+		</div>
 </div>
-</form>
-<div id="preview" style="position:absolute;top:71px;bottom:0px;left:0px;right:0px;"></div>
+</div>
+<div id="preview" style="position:absolute;top:106px;bottom:0px;left:0px;right:0px;"></div>
 
   <script language="JavaScript">
-window.HEURIST.parameters = top.HEURIST.parseParams(window.location.search);
-
-var viewerObject;
-
-// to remove
-var rectype = window.HEURIST.parameters["t"];
-if (rectype) {
-	var rectypes = {};
-	var recTypeName = "";
-	if (rectype.search(",") != -1) {//seems like we have multiple type constraint, test that it is well formed
-		var temp = rectype.split(",");
-		for (var i=0; i<temp.length; i++) {
-			if (temp[i].search(/\D/) == -1) {
-				rectypes[temp[i]] = 1;
-				recTypeName += top.HEURIST.rectypes.names[temp[i]].toLowerCase() + ",";
-			}
-		}
-		recTypeName = recTypeName.slice(0,-1); // remove the last comma
-		delete temp;
-	}else if (rectype.search(/\D/) == -1) {
-		rectypes[rectype] = 1;
-		recTypeName = top.HEURIST.rectypes.names[rectype].toLowerCase();
-	}else{
-		rectypes = null;
-	}
-}
-
-document.forms[0].submit = function() {
-	return false;
-}
-
-/* FLAGRANT abuse of the onsubmit function, but otherwise hitting return in the field submits the entire page */
-document.forms[0].onsubmit = function() { document.forms[0].submit(); return false; };
-
-//
-//
-updateURLtoFile = function(input){
- var rec_url = document.getElementById("rec_url");
- rec_url.value = input.link;
- if(input.link!==""){
- 	//alert(input.fileType);
- 	if(input.fileType==="jpg" || input.fileType==="png" || input.fileType==="gif"){
-
- 		if(viewerObject){
- 			var cell = document.getElementById("preview");
-			if ( cell.hasChildNodes() )
-			{
-    			while ( cell.childNodes.length >= 1 )
-    			{
-        			cell.removeChild( cell.firstChild );
-    			}
-			}
-			viewerObject = null;
-		}
-
-		viewer.toolbarImages="../images/toolbar"
-		viewer.onload =  viewer.toolbar;
-
-		viewerObject = new viewer({
-				parent: document.getElementById('preview'),
-				imageSource: input.link,
-				frame: ['100%','100%']
-		});
-	}
- }
-}
-
-function initPage() {
-
-		var fieldValues = [];
-
-		//toremove
-		var dt = []; //top.HEURIST.detailTypes.typedefs[detailTypeID]['commonFields'];
-		var rfr = null;
-		/* to implement
-		if (rectypeID) {
-			rfr = top.HEURIST.rectypes.typedefs[rectypeID]['dtFields'][detailTypeID];
-		}*/
-		if (!rfr) {
-			// fake low-rent rfr if rectype isn't specified
-			// name dt[0], prompt,default, required, repeatable, size, match
-			rfr = ["File", "", "", 'optional', 0, 1, 0 ];	// saw TODO need to get defaults for enum list from dt
-		}
-
-
-		//add file upload component
-		var container = document.getElementById("div_fileupload");
-		var newInput = new top.HEURIST.edit.inputs.BibDetailFileInput(dt, rfr, fieldValues, container);
-
-		newInput.onchange = updateURLtoFile;
-
-		//add URL component
-		container = document.getElementById("div_url");
-		var defaultURL = "";
-		var URLInput = new top.HEURIST.edit.inputs.BibURLInput(container, defaultURL, false);
-
-		// access to inout element URLInput.inputs[0]
-		this.changed = function(){};
-
-
-}
-top.HEURIST.registerEvent(window, "load", initPage);
+  		top.HEURIST.registerEvent(window, "load", initPage);
   </script>
  </body>
 </html>

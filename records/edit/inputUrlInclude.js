@@ -24,12 +24,19 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 		newDiv.expando = true;
 	this.addInputHelper.call(this, bdValue, newDiv);
 
+	var hiddenElt = newDiv.hiddenElt = this.document.createElement("input");
+		hiddenElt.name = newDiv.name;
+		hiddenElt.value = hiddenElt.defaultValue = "??";//(bdValue && bdValue.file)? bdValue.file.id : "";
+		//hiddenElt.type = "hidden";
+		newDiv.appendChild(hiddenElt);
+
 	var textElt = newDiv.textElt = newDiv.appendChild(this.document.createElement("input"));
 		textElt.type = "text";
 		textElt.value = textElt.defaultValue = bdValue? bdValue.title : "";
 		textElt.title = "Click here to upload file and/or define the URL";
 		textElt.setAttribute("autocomplete", "off");
 		textElt.className = "in"; //"resource-title";
+		textElt.style.width = 200;
 		textElt.onkeypress = function(e) {
 			// refuse non-tab key-input
 			if (! e) e = window.event;
@@ -97,10 +104,16 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.defineURL = function(
 	top.HEURIST.util.popupURL(window, url, {
 		height: 480,
 		width: 640,
-		callback: function(url) {
+		callback: function(url, source, type) {
+			//it returns url - link to external or heurist file
+			//			source - name of source/service
+			//			type - type of media
+			element.input.setURL(element, url, source+"|"+type);
+			/*
 			if (bibID) element.input.setURL(element, url);
 			thisRef.choosing = false;
 			setTimeout(function() { element.textElt.focus(); }, 100);
+			*/
 		}
 	} );
 };
@@ -108,13 +121,15 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.defineURL = function(
 /**
 * clear value
 */
-top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.clearURL = function(element) { this.setURL(element, ""); };
+top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.clearURL = function(element) { this.setURL(element, "", ""); };
 /**
 * assign new URL value
 */
-top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.setURL = function(element, url) {
+top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.setURL = function(element, url, src_type) {
 
 	element.textElt.title = element.textElt.value = element.textElt.defaultValue = url? url : "";
+	element.hiddenElt.title = element.hiddenElt.value = element.hiddenElt.defaultValue = src_type? src_type : "";
+
 
 	var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 	windowRef.changed();

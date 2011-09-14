@@ -68,7 +68,7 @@
 
 	<script type="text/javascript" src="editTerms.js"></script>
 
-    <div class="banner"><h2>Edit Terms</h2></div>
+    <div id="divBanner" class="banner"><h2>Edit Terms</h2></div>
 	<div id="page-inner">
 
 	<div id="pnlLeft" style="height:100%; width:300; max-width:300; float: left; padding-right:5px; overflow: hidden;">
@@ -147,6 +147,11 @@
 	</div>
 
 	</div>
+
+	<div id="divApply" style="position: absolute; bottom:0px; text-align:center;display: none;width:100px;">
+		<input type="button" id="btnApply1" value="Apply Changes" onclick="editTerms.applyChanges();" />
+	</div>
+
 	<script  type="text/javascript">
 
 		YAHOO.util.Event.addListener(window, "load", function(){ editTerms = new EditTerms();} );

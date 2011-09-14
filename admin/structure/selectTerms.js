@@ -55,12 +55,12 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 				var _dt_id = top.HEURIST.parameters.dtname;
 				if(!Hul.isnull(_dt_id)){
 					if(_dt_id<0){
-						Dom.get("dtyName").innerHTML = "New Field Type";
+						Dom.get("dtyName").innerHTML = "<h2 class='dtyName'>New Field Type</h2>";
 					}else{
 						var dt = top.HEURIST.detailTypes.typedefs[_dt_id].commonFields;
-						var dtname =  "Field Type #: " + _dt_id;
+						var dtname =  "<div style='display:inline-block;font-weight:800;'>field id:</div><h2 style='display:inline-block;padding-left:5px;'>" + _dt_id + '</h2>';
 						if (!Hul.isnull(dt)) {
-							dtname = dtname + " '"+dt[0]+"'";
+							dtname = dtname + " <div style='display:inline-block;font-weight:800;padding-left:20px;'>name:</div><h2 style='display:inline-block;padding-left:5px;'>"+dt[0]+"</h2>";
 						}
 						Dom.get("dtyName").innerHTML = dtname;
 					}
@@ -664,6 +664,64 @@ TREE REALTED ROUTINES ---------------------------------------
 END TREE REALTED ROUTINES ---------------------------------------
 */
 
+	/**
+	*  open editTerm in popup - refresh tree on close
+	*/
+	function _addNewTerm(){
+
+		existingTree = _createTermArray(_selectedTermsTree.getRoot());
+		try { // In case no terms have been disabled yet
+			_setDisabledTerms();
+		}catch(e) { }
+
+
+	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+
+	Hul.popupURL(top, top.HEURIST.basePath + "admin/structure/editTerms.html?popup=1&db="+db,
+		{
+		"close-on-blur": false,
+		"no-resize": false,
+		height: 640,
+		width: 900,
+		callback: function(needTreeReload) {
+			if(needTreeReload) {
+
+				if(_datatype === "enum"){
+					treesByDomain = top.HEURIST.terms.treesByDomain['enum'];
+					termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup['enum'];
+				}else if(_datatype === "relationtype" || _datatype === "relmarker")
+				{
+					treesByDomain = top.HEURIST.terms.treesByDomain.relation;
+					termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup.relation;
+
+				}
+				_treesInit();
+
+/* weird way - but it works
+				var callback = function (context){
+					eval(context.responseText);
+
+							if(_datatype === "enum"){
+								treesByDomain = top.HEURIST.terms.treesByDomain['enum'];
+								termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup['enum'];
+
+							}else if(_datatype === "relationtype" || _datatype === "relmarker")
+							{
+								treesByDomain = top.HEURIST.terms.treesByDomain.relation;
+								termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup.relation;
+
+							}
+							_treesInit();
+				}
+
+				top.HEURIST.util.sendRequest(top.HEURIST.basePath+"common/php/loadCommonInfo.php", callback, null);
+*/
+
+			}
+		}
+		});
+	}
+
 
 	//
 	//public members
@@ -707,6 +765,9 @@ END TREE REALTED ROUTINES ---------------------------------------
 				},
 				setFilterMode : function (val) {
 					_isFilterMode = val;
+				},
+				addNewTerm : function (val) {
+					_addNewTerm();
 				},
 
 				getClass: function () {
