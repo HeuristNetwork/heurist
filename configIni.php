@@ -1,7 +1,7 @@
 <?php
 
 /*<!--
- * configIni.php - Configuration information for Heurist Initialization - USER EDITABLE
+ * configIni.php - Configuration information for Heurist Initialization - EDITABLE by the installer of Heurist
  * @version $Id$
  * @copyright 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
@@ -11,69 +11,65 @@
  *
  -->*/
 
- 
+
 // [database]
 // enter the host name or IP address of your MySQL server, blank --> localhost
-// $dbHost = "heuristscholar.org";  will cause the code to use mysql on heuristscholar.org server
-$dbHost = "";
+// for example $dbHost = "heuristscholar.org";  will cause the code to use mysql on the server at heuristscholar.org
+$dbHost = ""; // required
 
 // MySQL user with full write (create) access on this database server
-// the default installation of MySql will give you "root" as the user with whatever password was typed "mySecretPwd"
-// for which you would use
-//$dbAdminUsername = "root";
-//$dbAdminPassword = "mySecretPwd";
-$dbAdminUsername = "";
-$dbAdminPassword = "";
+// The default installation of MySql gives you "root" as the master user with whatever password you set up for this,
+// but you can specify another user and password with full access if preferred
+$dbAdminUsername = ""; // required
+$dbAdminPassword = ""; //required
 
 // MySQL user with readonly access on this database server
-//assume you create a useracct named "readonly" with a password "readonlypwd"
-//you would use
-//$dbReadonlyUsername = "readonly";
-//$dbAReadonlyPassword = "readonlypwd";
-$dbReadonlyUsername = "";
-$dbReadonlyPassword = "";
+// For example, if there is a user account "readonly" with a password "readonlypwd", then you would use:
+// $dbReadonlyUsername = "readonly";
+// $dbAReadonlyPassword = "readonlypwd";
+$dbReadonlyUsername = ""; // required
+$dbReadonlyPassword = ""; //required
 
-// dbPrefix will be prepended to all database names so that you
-// can easily distinguish Heurist databases on your database system
-// It may be left blank, in which case nothing is prepended.
-$dbPrefix = "hdb_";
+// dbPrefix will be prepended to all database names so that you can easily distinguish Heurist databases on your database server
+// from other MySQL databases. Some Admin tools such as PHPMyAdmin will group databases with common prefixes ending in underscore
+// The prefix may be left blank, in which case nothing is prepended.
+$dbPrefix = "hdb_"; // recommended
 
-// the name of the default database which will be used if no db= is supplied in the URL
-// change this to the name of the database you want to use for your day-to-day database
-// eg. your web bookmarks and bibliography
-// DO NOT include the prefix, this will be added automatically
-$defaultDBname = "";
+// The name of the default database which will be used if no db= is supplied in the URL.
+// If the users of this server nearly always use a shared database eg. a workgroup database of web bookmarks, bibliographic or other research data,
+// specify its name here. DO NOT include the prefix, this will be added automatically.
+// If defaultDBName is blank, a list of available databases will be displayed on startup if none is specified
+$defaultDBname = ""; // may be left blank
 
 // [folders]
 
 // The default root pathname of a directory where Heurist can store uploaded
 // files eg. images, pdfs. PHP must be able to create subdirectories of this directory
-// for each Heurist database and write files within them
-// for instance if you would like to upload to /var/www/myUploadDir then use
-//$defaultRootFileUploadPath = "/var/www/myUploadDir/";  BE SURE TO INCLUDE THE TRAILING "/"
-//then when running heurist with db=main uploaded files will be loaded into /var/www/myUploadDir/main/
-//leaving this blank will cause the document directory for your website to be used with an added "upload" subdir
-$defaultRootFileUploadPath = "";
-
+// for each Heurist database and write files within them.
+// For instance, if you would like to upload to /var/www/myUploadDir then use
+// $defaultRootFileUploadPath = "/var/www/myUploadDir/";  BE SURE TO INCLUDE THE TRAILING "/"
+// Then, when running Heurist with db=main, uploaded files will be loaded into /var/www/myUploadDir/main/
+// Leaving this blank will cause the root document directory for your web server to be used
+// with an added "upload" subdir, for example: /var/www/htdocs/upload/
+$defaultRootFileUploadPath = ""; // recommended
 
 // [email]
 
 // email address for the system administrator/installer of Heurist
-// where you would like Heurist to deliver system alerts
-// leaving this blank will suppress system alert emails
-$sysAdminEmail = "";
+// where you would like Heurist to deliver system alerts.
+// Leaving this blank will suppress system alert emails
+$sysAdminEmail = ""; // recommended
 
-// email address to which info@<installation server> will be redirected
-// leaving this blank will suppress info inquiry emails
-$infoEmail = "";
-// error_log("in config dbHost = $dbHost");
+// email address to which info@<installation server> will be redirected.
+// Leaving this blank will suppress info inquiry emails
+$infoEmail = ""; // recommended
 
-// system defult file
+
+// system default file - if a heuristConfigIni.php file exists in the parent directory of the installation,
+// it will override the ConfigIni.php in the installation. This allows unconfigured ConfigIni.php files to exist
+// in multiple experimental codebases on a single server and avoids accidental distribution of passwords etc.
 $parentIni = dirname(__FILE__)."/../heuristConfigIni.php";
-// error_log("in config dbHost = $dbHost  and parent path = $parentIni");
 if (is_file($parentIni)){
-// error_log("trying to load parent configIni");
 	include_once($parentIni);
 }
-
 ?>

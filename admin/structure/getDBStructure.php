@@ -580,5 +580,9 @@
 
 		} // end Switch
 
+if ($_REQUEST['pretty']) {
+	print"<br>";
+}
+
 	} // end function print_row
 ?>

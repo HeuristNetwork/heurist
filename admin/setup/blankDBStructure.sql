@@ -13,7 +13,6 @@
 -- TO DO: After creating the structure from this file we need to:
 --
 --        1. create referential constraints with AddReferentialConstraints.sql
---           (now already done by this file as part of the mysqldump output)
 --        2. add stored procedures from AddProceduresTriggers.sql
 --        3. import core content (minimal database definitions) from
 --           admin/setup/coreDefinitions.txt
@@ -36,7 +35,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Sep 13, 2011 at 06:37 PM
+-- Generation Time: Sep 19, 2011 at 07:55 PM
 -- Server version: 5.0.51
 -- PHP Version: 5.2.3
 --
@@ -472,7 +471,7 @@ CREATE TABLE recThreadedComments (
 CREATE TABLE recUploadedFiles (
   ulf_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'A unique numeric file ID used as filename to store the data on disk and should be different ids if shared',
   ulf_OrigFileName varchar(255) NOT NULL COMMENT 'The original name of the file uploaded',
-  ulf_UploaderUGrpID smallint(5) unsigned NOT NULL COMMENT 'The user who uploaded the file',
+  ulf_UploaderUGrpID smallint(5) unsigned default NULL COMMENT 'The user who uploaded the file',
   ulf_Added datetime NOT NULL default '0000-00-00 00:00:00' COMMENT 'The date and time the file was uploaded',
   ulf_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'The date of last modification of the file description record, automatic update',
   ulf_ObfuscatedFileID varchar(40) default NULL COMMENT 'SHA-1 hash of ulf_ID and random number to block sequential file harvesting',
@@ -871,7 +870,6 @@ CREATE TABLE woots (
 
 
 
-
 -- ------------------------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
@@ -880,6 +878,8 @@ CREATE TABLE woots (
 
 -- STANDARD DATA FOR A NEW DATABASE
 -- This is run BEFORE triggers and referential constraints
+
+-- *** Update the following INSERT statement if database version # is changed
 
 -- Insert a single row in sysIdentification table = the DB identification record
  DELETE FROM sysIdentification where sys_ID=1;
@@ -901,7 +901,7 @@ INSERT INTO `sysTableLastUpdated` VALUES ('defLanguages', '0000-00-00 00:00:00',
 INSERT INTO `sysTableLastUpdated` VALUES ('defOntologies', '0000-00-00 00:00:00', 1);
 INSERT INTO `sysTableLastUpdated` VALUES ('defRecStructure', '0000-00-00 00:00:00', 1);
 INSERT INTO `sysTableLastUpdated` VALUES ('defRecTypeGroups', '0000-00-00 00:00:00', 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defRecTypes', '2011-08-04 16:49:50', 1);
+INSERT INTO `sysTableLastUpdated` VALUES ('defRecTypes', '0000-00-00 00:00:00', 1);
 INSERT INTO `sysTableLastUpdated` VALUES ('defRelationshipConstraints', '0000-00-00 00:00:00', 1);
 INSERT INTO `sysTableLastUpdated` VALUES ('defTerms', '0000-00-00 00:00:00', 1);
 INSERT INTO `sysTableLastUpdated` VALUES ('defTranslations', '0000-00-00 00:00:00', 1);
@@ -932,7 +932,7 @@ INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMa
  'Group 0 represents all logged in users. DO NOT DELETE.',
  'Workgroup','PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=0','y','every','user');
  -- Note: ugr_id=0 is set as the default new rec owner in the sysidentification table, this entry is require to constraint
- UPDATE sysUGrps set ugr_ID = 0 where ugr_ID = 3;
+ UPDATE sysUGrps set ugr_ID = 0 where ugr_ID = 3; -- cannot insert 0 straight up, it gets appended
 
 -- Insert a row to define the link between group 1 (dbowners) and user 2 (the first admin)
 INSERT IGNORE INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID,ugl_Role) VALUES (2,1,'admin');

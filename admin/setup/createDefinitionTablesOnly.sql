@@ -19,9 +19,40 @@
 --       Extract the relevant tables from blankDBStructure.sql
 
 -- ***** Database version: 1.1  @ 13/9/2011 ******
+
+-- SQL below copied from blankDBStructure.sql 19/9/11
+
 --
 -- Table structure for table 'Records'
 --
+
+CREATE TABLE Records (
+  rec_ID int(10) unsigned NOT NULL auto_increment COMMENT 'The primary record ID, also called, historically, bib_id',
+  rec_URL varchar(2000) default NULL COMMENT 'The primary URL pointed to by this record (particularly for Internet bookmarks)',
+  rec_Added datetime NOT NULL default '0000-00-00 00:00:00' COMMENT 'Date and time record added',
+  rec_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date and time the record was modified',
+  rec_Title varchar(1023) NOT NULL COMMENT 'Composite (constructed) title of the record, used for display and search',
+  rec_ScratchPad text COMMENT 'Scratchpad, mainly for text captured with bookmarklet',
+  rec_RecTypeID smallint(5) unsigned NOT NULL COMMENT 'Record type, foreign key to defRecTypes table',
+  rec_AddedByUGrpID smallint(5) unsigned default NULL COMMENT 'ID of the user who created the record',
+  rec_AddedByImport tinyint(1) unsigned NOT NULL default '0' COMMENT 'Whether added by an import (value 1) or by manual entry (value 0)',
+  rec_Popularity int(10) unsigned NOT NULL default '0' COMMENT 'Calculated popularity rating for sorting order, set by cron job',
+  rec_FlagTemporary tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flags a partially created record before fully populated',
+  rec_OwnerUGrpID smallint(5) unsigned NOT NULL default '0' COMMENT 'User group which owns this record, 0 = everyone',
+  rec_NonOwnerVisibility enum('viewable','hidden','public','pending') NOT NULL default 'viewable' COMMENT 'Defines if record visible outside owning user group(s) or to anyone',
+  rec_URLLastVerified datetime default NULL COMMENT 'Last date time when URL was verified as contactable',
+  rec_URLErrorMessage varchar(255) default NULL COMMENT 'Error returned by URL checking script for bad/inaccessible URLs',
+  rec_URLExtensionForMimeType varchar(10) default NULL COMMENT 'A mime type extension for multimedia files pointed to DIRECTLY by the record URL',
+  rec_Hash varchar(60) default NULL COMMENT 'A composite truncated metaphones + numeric values hash of significant fields',
+  PRIMARY KEY  (rec_ID),
+  KEY rec_URL (rec_URL(63)),
+  KEY rec_Title (rec_Title(63)),
+  KEY rec_RecTypeID (rec_RecTypeID),
+  KEY rec_Modified (rec_Modified),
+  KEY rec_OwnerUGrpID (rec_OwnerUGrpID),
+  KEY rec_Hash (rec_Hash(40)),
+  KEY rec_AddedByUGrpID (rec_AddedByUGrpID)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -310,6 +341,20 @@ CREATE TABLE defTranslations (
   UNIQUE KEY trn_composite (trn_Source,trn_Code,trn_LanguageCode3),
   KEY trn_LanguageCode3 (trn_LanguageCode3)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Translation table into multiple languages for all translatab';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table 'defURLPrefixes'
+--
+
+CREATE TABLE defURLPrefixes (
+  urp_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'ID which will be stored as proxy for the URL prefix',
+  urp_Prefix varchar(250) NOT NULL COMMENT 'URL prefix which is prepended to record URLs',
+  urp_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
+  PRIMARY KEY  (urp_ID),
+  UNIQUE KEY urp_Prefix (urp_Prefix)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Common URL prefixes allowing single-point change of URL for ';
 
 -- --------------------------------------------------------
 
