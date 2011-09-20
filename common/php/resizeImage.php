@@ -42,7 +42,7 @@ if (array_key_exists('ulf_ID', $_REQUEST)) {
 		return;
 	}
 
-	$filename = HEURIST_UPLOAD_PATH. $file['ulf_ID'];
+	$filename = HEURIST_UPLOAD_DIR."/". $file['ulf_ID'];
 	$filename = str_replace('/../', '/', $filename);
 
 	$mimeExt = '';

@@ -31,7 +31,7 @@ if (mysql_num_rows($res)) {
 	$res = mysql_query("select ulf_ID from recDetails left join recUploadedFiles on ulf_ID = dtl_UploadedFileID where dtl_RecID = " . intval($_REQUEST["id"]) . " and dtl_DetailTypeID = " . FILE_DETAIL_TYPE);
 	$file_id = mysql_fetch_array($res);
 	$file_id = $file_id[0];
-	print file_get_contents(UPLOAD_PATH . "/" . $file_id);
+	print file_get_contents(HEURIST_UPLOAD_DIR . "/" . $file_id);
 }
 
 ?>

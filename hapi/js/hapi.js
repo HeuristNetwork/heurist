@@ -2305,34 +2305,38 @@ var HDetailManager = new function(detailTypes, detailRequirements) {
 		// 3-dty_Type
 		// 4-enums [trmID, trmLabel [, invID, invLabel]]
 		// 5-dty_PtrTargetRectypeIDs
+		//-------------- TODO need to integrate new information
 		// 6-dty_JsonTermIDTree
 		// 7-dty_TermIDTreeNonSelectableIDs
 		// 8-dty_ExtendedDescription
 		// 9-dty_DetailTypeGroupID,
 		//10-dty_FieldSetRecTypeID
 		//11-dty_ShowInLists
+		//12-dty_NonOwnerVisibility
 	// detailRequirements is an array of
 		// OLD VALUES [recordTypeID, detailTypeID, requiremence, repeatable, name, prompt, match, size, order, default] values
 		// 0-recTypeID
 		// 1-detailTypeID
-		// 2-RequirementType
-		// 3-MaxValue
-		// 4-Name
-		// 5-HelpText
-		// 6-Match Order
-		// 7-DisplayWidth
-		// 8-Display Order
-		// 9-Extended Description
-		//10-Default Value
-		//11-MinValue
-		//12-DetailGroupID
-		//13-Filtered Enum Term IDs
-		//14-Extended Disabled Term IDs
-		//15-Detail Type Disabled Term IDs
-		//16-Filtered Pointer Constraint Rectype IDs
-		//17-Calc Function ID
-		//18-Thumbnail selection Order
-		//19-Detail base type
+		// ------------- slice point reorder
+		// 2- 0-RequirementType
+		// 3- 1-MaxValue
+		// 4- 2-Name
+		// 5- 3-HelpText
+		// 6- 4-Match Order
+		// 7- 5-DisplayWidth
+		// 8- 6-Display Order
+		// 9- 7-Extended Description
+		//10- 8-Default Value
+		//11- 9-MinValue
+		//12- 10-DetailGroupID
+		//13- 11-Filtered Enum Term IDs
+		//14- 12-Extended Disabled Term IDs
+		//15- 13-Detail Type Disabled Term IDs
+		//16- 14-Filtered Pointer Constraint Rectype IDs
+		//17- 15-Calc Function ID
+		//18- 16-Thumbnail selection Order
+		//19- 17-Status
+		//20- 18-Non-Owner Visibility
 
     var _typesById = {};
     var _typesByName = {};
@@ -2416,7 +2420,7 @@ var HDetailManager = new function(detailTypes, detailRequirements) {
 		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
 		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object expected for argument #2"); }
 		var details = _recordPlusTypeDetails[recordType.getID()+"."+detailType.getID()];
-		return (details  &&  details[1] != 1)? true : false;
+		return (details  && details[1] && details[1] > 1)? true : false;
 	};
 	this.getDetailMaxRepeat = function(recordType, detailType) {
 		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
@@ -2470,7 +2474,7 @@ var HDetailManager = new function(detailTypes, detailRequirements) {
 		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
 		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object expected for argument #2"); }
 		var details = _recordPlusTypeDetails[recordType.getID()+"."+detailType.getID()];
-		return (details  &&  details[7])? details[7] : null;
+		return (details  &&  details[8])? details[8] : null;
 	};
 	this.isValidDetailValue = function(recordType, detailType, detailValue) {
 		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }

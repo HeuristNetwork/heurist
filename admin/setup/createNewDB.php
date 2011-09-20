@@ -217,7 +217,7 @@
 			//     todo:  uploaded-heurist-files should not be hardcoded
 
 			// Create a default upload directory for uploaded files eg multimedia, images etc.
-			$cmdline = "mkdir -m a=rwx ../../../uploaded-heurist-files/".$newDBName;
+			$cmdline = "mkdir -p -m a=rwx ".HEURIST_UPLOAD_ROOT.$newDBName;
 			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 			if ($res2 != 0 ) { // TODO: need better setting and full path info for this error
 				// todo: need to properly trap the error and distiguish different versions. Old uplaod directories
@@ -226,9 +226,29 @@
 				echo ("<h2>Warning:</h2> Unable to create uploaded-heurist-files directory for database $newname<br>&nbsp;<br>");
 				echo ("This may be because the directory already exists or the parent folder is not writable<br>");
 				echo ("Please check/create directory by hand. Consult Heurist helpdesk if needed<br><p>");
+				echo($output2);
+				// todo: we need to hold the warning here
+				// return false; This is only a warning, should keep going
+			}
+
+			// Create a default icon upload directory for uploaded icon and thumbnails.
+			$iconPath = "".HEURIST_ICON_ROOT.$newDBName."/rectype-icons/thumb";
+			$cmdline = "mkdir -p ".$iconPath;
+			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
+			if ($res2 != 0 ) { // TODO: need better setting and full path info for this error
+				// todo: need to properly trap the error and distiguish different versions. Old uplaod directories
+				// hanging around could cause problems if upload file IDs are duplicated, so should probably NOT
+				// allow their re-use
+				echo ("<h2>Warning:</h2> Unable to create icon directory ( $iconPath ) <br>&nbsp;<br>");
+				echo ("This may be because the directory already exists or the parent folder is not writable<br>");
+				echo ("Please check/create directory by hand. Consult Heurist helpdesk if needed<br><p>");
+				echo($output2);
 				// todo: we need to hold the warning here
 				// return false; This is only a warning, should keep going
 				}
+			$iconPath = "".HEURIST_ICON_ROOT.$newDBName;
+			$cmdline = "chmod -R 774 ".$iconPath;
+			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 
 			// Make the current user the owner and admin of the new database
 			mysql_connection_db_insert($newname);

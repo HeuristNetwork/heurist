@@ -93,8 +93,8 @@
 
 		$res = mysql_query($query);
   		while ($row = mysql_fetch_row($res)) {
-			//DEBUG error_log(">>>> ".HEURIST_UPLOAD_PATH.$row[0]);
-			$geekMail->attach(HEURIST_UPLOAD_PATH.$row[0]);
+			//DEBUG error_log(">>>> ".HEURIST_UPLOAD_DIR."/".$row[0]);
+			$geekMail->attach(HEURIST_UPLOAD_DIR."/".$row[0]);
 			array_push($files_arr, $row);
 		}
 

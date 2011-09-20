@@ -56,7 +56,7 @@ while ($row = mysql_fetch_row($res)) array_push($recordTypes, $row);
 
 $res = mysql_query("select dty_ID, dty_Name, dty_HelpText, dty_Type, NULL as enums, dty_PtrTargetRectypeIDs,
 					dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, dty_ExtendedDescription, dty_DetailTypeGroupID,
-					dty_FieldSetRecTypeID, dty_ShowInLists
+					dty_FieldSetRecTypeID, dty_ShowInLists, dty_NonOwnerVisibility
 					from defDetailTypes");
 
 $detailTypes = array();
@@ -175,15 +175,14 @@ $rec_types = mysql__select_array("defRecTypes","distinct rty_ID", "1 order by rt
 			//16-rst_OrderForThumbnailGeneration
 			//17-dty_TermIDTreeNonSelectableIDs
 			//18-dty_FieldSetRectypeID
-			//19-dty_Type]....]
-
+			//19-rst_NonOwnerVisibility]....]
 
 
 		//rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
 		// rst_DefaultValue, rst_RequirementType, rst_MaxValues, rst_MinValues, rst_DisplayWidth, rst_RecordMatchOrder,
 		// rst_DisplayOrder, rst_DisplayDetailTypeGroupID, rst_FilteredJsonTermIDTree, rst_PtrFilteredIDs,
 		// rst_TermIDTreeNonSelectableIDs, rst_CalcFunctionID, rst_Status, rst_OrderForThumbnailGeneration,
-		// dty_TermIDTreeNonSelectableIDs, dty_FieldSetRectypeID, dty_Type] ...]
+		// dty_TermIDTreeNonSelectableIDs, dty_FieldSetRectypeID, rst_NonOwnerVisibility] ...]
 //error_log(print_r($rec_types,true));
 foreach ($rec_types as $rec_type) {
 	foreach (getRectypeFields($rec_type) as $dtyID => $rdr) {
@@ -198,8 +197,8 @@ foreach ($rec_types as $rec_type) {
 			intval($rdr[8]),	// 6-Match Order
 			intval($rdr[7]),	// 7-DisplayWidth
 			intval($rdr[9]),	// 8-Display Order
-			$rdr[3],			// 9-Extended Description
-			$rdr[2],			//10-Default Value
+			$rdr[2],			// 9-Extended Description
+			$rdr[3],			//10-Default Value
 			intval($rdr[6]),	//11-MinValue
 			$rdr[10],			//12-DetailGroupID
 			$rdr[11],			//13-Filtered Enum Term IDs
@@ -207,8 +206,9 @@ foreach ($rec_types as $rec_type) {
 			$rdr[17],			//15-Detail Type Disabled Term IDs
 			$rdr[12],			//16-Filtered Pointer Constraint Rectype IDs
 			$rdr[14],			//17-Calc Function ID
-			$rdr[16]			//18-Thumbnail selection Order
-		));
+			$rdr[16],			//18-Thumbnail selection Order
+			$rdr[15],			//19-Status
+			$rdr[19]));			//20-Non-Owner Visibility
 	}
 }
 

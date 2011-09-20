@@ -78,7 +78,7 @@ function upload_file($name, $type, $tmp_name, $error, $size, $description) {
 	 * and return the ulf_ID for that record.
 	 * This will be zero if anything went pear-shaped along the way.
 	 */
-error_log("in saveFile upload_file  name = ". $name. " type = ". $type. " error = ". $error. " size = " . $size . " uploadPath = ". UPLOAD_PATH );
+//error_log("in saveFile upload_file  name = ". $name. " type = ". $type. " error = ". $error. " size = " . $size . " uploadDir = ". HEURIST_UPLOAD_DIR );
 
 	if ($size <= 0  ||  $error) { error_log("size is $size, error is $error"); return 0; }
 
@@ -98,8 +98,6 @@ error_log("in saveFile upload_file  name = ". $name. " type = ". $type. " error 
 		}
 	}
 
-	$path = ''; /* can change this to something more complicated later on, to prevent crowding the upload directory
-				 the path MUST start and NOT END with a slash so that  "UPLOAD_PATH . $path . '/' .$file_id" is valid */
 
 	if ($size && $size < 1024) {
 		$file_size = 1;
@@ -118,11 +116,11 @@ error_log("in saveFile upload_file  name = ". $name. " type = ". $type. " error 
 	mysql_query('update recUploadedFiles set ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
 		/* nonce is a random value used to download the file */
 
-	if (move_uploaded_file($tmp_name, HEURIST_UPLOAD_PATH . $file_id)) {
+	if (move_uploaded_file($tmp_name, HEURIST_UPLOAD_DIR . "/" . $file_id)) {
 		return $file_id;
 	} else {
 		/* something messed up ... make a note of it and move on */
-		error_log("upload_file: <$name> / <$tmp_name> couldn't be saved as <" . HEURIST_UPLOAD_PATH . $file_id . ">");
+		error_log("upload_file: <$name> / <$tmp_name> couldn't be saved as <" . HEURIST_UPLOAD_DIR . "/" . $file_id . ">");
 		mysql_query('delete from recUploadedFiles where ulf_ID = ' . $file_id);
 		return 0;
 	}

@@ -547,14 +547,14 @@ function EditRecStructure() {
 
 
 		//loadPublicEditFrame();
-		//setTimeout(renderInputs, 500);
-		renderInputs();
+		setTimeout(function(){renderInputs(rty_ID);}, 0);
+		//renderInputs();
 	}
 
 
-function renderInputs() {
+function renderInputs(rectype) {
 
-	var rectype = rty_ID,
+	var //rectype = rty_ID,
 		inputs;
 	// Clear out any existing inputs
 
@@ -580,7 +580,7 @@ function renderInputs() {
 
 		inputs = top.HEURIST.edit.createInputsForRectype(rectype, defaultInputValues, allInputs);
 
-		renderShowAll();
+//		renderShowAll();
 
 		//renderAdditionalDataSection(allInputs, rectype);
 		//window.HEURIST.inputs = inputs;

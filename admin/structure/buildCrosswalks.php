@@ -151,8 +151,8 @@
 		global $source_db_id;
 		if(!isset($_REQUEST["dbID"]) || $_REQUEST["dbID"] == 0) {
 			// TODO: THIS SHOULD NOT HAPPEN, would be better to issue a warning and exit
-			// TODO: check that this poitns at the correct reference database
-			$source_db_id = '2'; //MAGIC NUMBER - ID of HeuristSystem_Reference db in Heurist_System_Index database
+			// TODO: check that this points at the correct reference database
+			$source_db_id = '2'; //MAGIC NUMBER - ID of H3CoreDefinitions db in Heurist_System_Index database
 			$source_db_name = 'H3CoreDefinitions';
 			$source_db_prefix = 'hdb_';
 			$source_url = "http://heuristscholar.org/h3/admin/structure/getDBStructure.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");

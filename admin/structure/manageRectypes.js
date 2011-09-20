@@ -337,8 +337,9 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var id = oRecord.getData("id");
 					var str = oRecord.getData("icon");
-					var thumb = top.HEURIST.baseURL + "common/images/reftype-icons/thumb/th_" + top.HEURIST.database.id +"-" + id + ".png";
-					icon ="<div class=\"rectypeImages\"><a href=\"#edit_icon\"><img src=\"../../common/images/16x16.gif\" style=\"background-image:url("+str+")\" id=\"icon"+id+"\"></a><div style=\"background-image:url("+thumb+");\" class=\"thumbPopup\"><a href=\"#edit_thumb\"><img src=\"../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a></div></div>"
+					var str1 = top.HEURIST.baseURL + "common/images/" + top.HEURIST.database.name +"/rectype-icons/" + id + ".png";
+					var thumb = top.HEURIST.baseURL + "common/images/" + top.HEURIST.database.name +"/rectype-icons/thumb/th_" + id + ".png";
+					icon ="<div class=\"rectypeImages\"><a href=\"#edit_icon\"><img src=\"../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\"></a><div style=\"background-image:url("+thumb+");\" class=\"thumbPopup\"><a href=\"#edit_thumb\"><img src=\"../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a></div></div>"
 					elLiner.innerHTML = icon;
 			}},
 			{ key: "name", label: "Name", sortable:true, className: 'bold_column', minWidth:160, maxAutoWidth:160, width:160, gutter:0,
@@ -1254,7 +1255,7 @@ function icon_refresh(rectypeID) {
 		var db = top.HEURIST.database.id;
 		var imgIcon = "icon" + rectypeID;
 		var img = document.getElementById(imgIcon);
-		img.style.backgroundImage = "url(" + top.HEURIST.baseURL + "common/images/reftype-icons/"+db+"-"+rectypeID+".png) !important";
+		img.style.backgroundImage = "url(" + top.HEURIST.baseURL + "common/images/" + top.HEURIST.database.name +"/rectype-icons/"+rectypeID+".png) !important";
 	}
 
 /*

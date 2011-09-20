@@ -550,8 +550,8 @@ top.HEURIST.search = {
 		if (res[10]) userPwd = "style='display:inline;cursor:pointer;margin-left:8px' user_pwd='"+res[10].htmlEscape()+"'";
 		else userPwd = "style='display:none;'";
 
-		var rectypeImg = "style='background-image:url("+ top.HEURIST.basePath+"common/images/rectype-icons/" + top.HEURIST.database.id + "-" + (res[4]? res[4] : "blank") + ".png)'";
-		var rectypeThumb = "style='background-image:url("+ top.HEURIST.basePath+"common/images/rectype-icons/thumb/th_" + top.HEURIST.database.id + "-" + (res[4]? res[4] : "blank") + ".png)'";
+		var rectypeImg = "style='background-image:url("+ top.HEURIST.basePath+"common/images/" + top.HEURIST.database.name + "/rectype-icons/" + (res[4]? res[4] : "blank") + ".png)'";
+		var rectypeThumb = "style='background-image:url("+ top.HEURIST.basePath+"common/images/" + top.HEURIST.database.name + "/rectype-icons/thumb/th_" + (res[4]? res[4] : "blank") + ".png)'";
 		var rectypeTitle = "Click to see details";
 		if (top.HEURIST.rectypes.names[parseInt(res[4])])
 			rectypeTitle = top.HEURIST.rectypes.names[parseInt(res[4])] + " - click to see details";
@@ -2565,7 +2565,7 @@ top.HEURIST.search = {
 			rtID;
 		for (var rtID in results.infoByDepth[0].rectypes) {
 			if (top.HEURIST.rectypes.names[rtID])
-				iHTML += "<li><img src='"+ top.HEURIST.basePath+"common/images/rectype-icons/"+top.HEURIST.database.id + "-" + rtID+".png'>"+top.HEURIST.rectypes.names[rtID]+"</li>";
+				iHTML += "<li><img src='"+ top.HEURIST.basePath+"common/images/" + top.HEURIST.database.name + "/rectype-icons/" + rtID+".png'>"+top.HEURIST.rectypes.names[rtID]+"</li>";
 		}
 
 		document.getElementById("legend-box-list").innerHTML = iHTML;

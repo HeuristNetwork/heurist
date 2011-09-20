@@ -159,8 +159,8 @@ function insertData() {
 <?php
 echo 'var tempDBName = "'.$tempDBName.'";';
 echo 'var URLBase = "'.HEURIST_URL_BASE.'";';
-echo 'var importingDBName = "'.HEURIST_DBNAME.'";';
-echo 'var importingDBFullName = "'.DATABASE.'";';
+echo 'var importTargetDBName = "'.HEURIST_DBNAME.'";';
+echo 'var importTargetDBFullName = "'.DATABASE.'";';
 ?>
 var myDataTable;
 var hideTimer;
@@ -458,13 +458,14 @@ function processAction(rtyID, action, rectypeName) {
 
 	xmlhttp.open("GET","processAction.php?"+
 						"action="+action+
-						"&tempDBName="+tempDBName+
-						"&sourceDBID="+sourceDBID+
+						"&tempSourceDBName="+tempDBName+
+						"&sourceDBID="+ (sourceDBID ? sourceDBID : "0")+
 						"&importRtyID="+rtyID+
 //						"&crwDefType="+crwDefType+
 //						"&crwLocalCode="+crwLocalCode+
 						"&replaceRecTypeName="+replaceRecTypeName+
-						"&importingDBName="+importingDBFullName,true);
+						"&importingTargetDBName="+importingTargetDBFullName,
+						true);
 	xmlhttp.send();
 }
 

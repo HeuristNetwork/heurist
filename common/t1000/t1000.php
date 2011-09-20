@@ -525,7 +525,7 @@ function do_file_update(&$file, $type, $condition, $new_filename) {
 	if (@$FILES[$type]['type']) $updates[$FILES[$type]['type']] = $file['filetype'];
 	$updates[$FILES[$type]['path']] = $new_filename;
 
-	if (! move_uploaded_file($file['localpath'], UPLOAD_PATH . '/' . $new_filename))
+	if (! move_uploaded_file($file['localpath'], HEURIST_UPLOAD_DIR . '/' . $new_filename))
 		fatal("desperate failure while handling uploaded file");
 
 	if (! mysql__update($MAINTABLES[$type], $condition, $updates))

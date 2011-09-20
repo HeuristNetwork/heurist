@@ -17,7 +17,7 @@
  */
  function getRectypeIconURL($rectypeID){
 
-	$name = "common/images/rectype-icons/".HEURIST_DBID."-".$rectypeID.".png";
+	$name = "common/images/".HEURIST_DBNAME."/rectype-icons/".$rectypeID.".png";
 
 	$filename =  HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.$name;
 	if(!file_exists($filename)){
@@ -38,7 +38,7 @@
  */
  function getRectypeThumbURL($rectypeID){
 
-	$name = "common/images/rectype-icons/thumb/th_".HEURIST_DBID."-".$rectypeID.".png";
+	$name = "common/images/".HEURIST_DBNAME."/rectype-icons/thumb/th_".$rectypeID.".png";
 
 	$filename =  HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.$name;
 	if(!file_exists($filename)){
@@ -148,7 +148,7 @@ function convert_to_png($img, $dim, $filename){
 				$new_y = $dim;
 			}
 
-error_log(">>>>>".$new_x.",".$new_y);
+//error_log(">>>>>".$new_x.",".$new_y);
 
 		}else{
 			$new_x = $orig_x;
@@ -165,7 +165,7 @@ error_log(">>>>>".$new_x.",".$new_y);
 	$left = ceil(($dim-$new_x)/2) ;
 	$top = ceil(($dim-$new_y)/2) ;
 
-error_log("LT>>>>>".$left.",".$top);
+//error_log("LT>>>>>".$left.",".$top);
 
 	if(!imagecopyresampled($img_resized, $img, $left, $top, 0, 0, $new_x, $new_y, $orig_x, $orig_y)){
 		$error = 'An error occurred while uploading the file - can\'t resize the image';

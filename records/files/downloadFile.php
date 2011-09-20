@@ -44,7 +44,7 @@ if (@$mimeType['fxm_MimeType']) {
 	header('Content-type: binary/download');
 }
 
-$filename = HEURIST_UPLOAD_PATH . $file['ulf_ID'];
+$filename = HEURIST_UPLOAD_DIR ."/". $file['ulf_ID'];
 //error_log("filename = $filename and mime = ".$mimeType['fxm_MimeType']. " mysqlerr = ".mysql_error());
 //error_log("filename = ".$filename);
 $filename = str_replace('/../', '/', $filename);

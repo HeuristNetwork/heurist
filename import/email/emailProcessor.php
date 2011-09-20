@@ -368,7 +368,7 @@
 	$file_id = mysql_insert_id();
 	mysql_query('update recUploadedFiles set ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
 
-            	$full_name = HEURIST_UPLOAD_PATH.$file_id;
+            	$full_name = HEURIST_UPLOAD_DIR."/".$file_id;
 
 				// error_log("CCCCC>>>".$full_name);
 

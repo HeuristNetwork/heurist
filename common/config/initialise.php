@@ -149,17 +149,26 @@
 	define('USER_GROUPS_ROLE_FIELD', 'ugl_Role');
 
 	// upload path
-	$upload = $sysValues['sys_UploadDirectory'];
-	if ($upload) {
-		//	error_log("upload = $upload");
-		define('HEURIST_UPLOAD_PATH', $upload);// upload must be a full path
-		}else{
 		if ($defaultRootFileUploadPath) {
-			define('HEURIST_UPLOAD_PATH', $defaultRootFileUploadPath.$dbName."/");
+		define('HEURIST_UPLOAD_ROOT', $defaultRootFileUploadPath);
 		} else {
-			define('HEURIST_UPLOAD_PATH', HEURIST_DOCUMENT_ROOT."/uploaded-heurist-files/$dbName/");
+		define('HEURIST_UPLOAD_ROOT', HEURIST_DOCUMENT_ROOT."/uploaded-heurist-files/");
 		}
+
+	$upload = @$sysValues['sys_UploadDirectory'];
+	if ($upload) {
+		if (preg_match("/\/$/",$upload)) {
+			$upload = preg_replace("/\/$/","",$upload);
 	}
+		//	error_log("upload = $upload");
+		define('HEURIST_UPLOAD_DIR', $upload);// upload must be a full path
+	} else {
+		define('HEURIST_UPLOAD_DIR', HEURIST_UPLOAD_ROOT.$dbName);
+	}
+
+	// icon path
+	define('HEURIST_ICON_ROOT', HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH."common/images/");
+	define('HEURIST_ICON_DIR', HEURIST_ICON_ROOT.$dbName);
 
 	//define cocoon record explorer URL
 	if (file_exists(HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH."/viewers/relbrowser/".HEURIST_DBNAME)) {
@@ -169,8 +178,6 @@
 	}
 
 	define('EXPLORE_URL',"/cocoon".HEURIST_SITE_PATH."viewers/relbrowser/".$browserSubDir."/item/");
-	//TODO : change define 'UPLOAD_PATH' to HEURIST_UPLOAD_PATH for now duplicate
-	define('UPLOAD_PATH',HEURIST_UPLOAD_PATH);
 	// change  define('HEURIST_INSTANCE' to HEURIST_DBNAME
 	define('HEURIST_INSTANCE',HEURIST_DBNAME);
 	// change  define('HEURIST_INSTANCE_PREFIX' to HEURIST_SESSION_DB_PREFIX

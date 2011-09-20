@@ -24,6 +24,7 @@ global $lastModified;
 }
 
 function getCachedData($key) {
+return null;
 	global $memcache, $lastModified;
 	if (! $memcache) {
 		$memcache = new Memcache;
@@ -675,7 +676,8 @@ function getRectypeColNames(){
 					"rty_RecTypeGroupID",
 					"rty_FlagAsFieldset",
 					"rty_ReferenceURL",
-					"rty_AlternativeRecEditor");
+					"rty_AlternativeRecEditor",
+					"rty_NonOwnerVisibility");
 }
 
 // plus 2 fields for icon and thumb paths
@@ -727,7 +729,8 @@ function getRectypeStructureFieldColNames(){
 					"rst_Status",
 					"rst_OrderForThumbnailGeneration",
 					"dty_TermIDTreeNonSelectableIDs",
-					"dty_FieldSetRectypeID");
+					"dty_FieldSetRectypeID",
+					"rst_NonOwnerVisibility");
 }
 
 function getRectypeFields($rt_id) {
@@ -751,7 +754,8 @@ function getRectypeFields($rt_id) {
 						"rst_Status",
 						"rst_OrderForThumbnailGeneration",
 						"dty_TermIDTreeNonSelectableIDs",
-						"dty_FieldSetRectypeID");
+						"dty_FieldSetRectypeID",
+						"rst_NonOwnerVisibility");
 
 	// get rec Structure info ordered by the detailType Group order, then by recStruct display order and then by ID in recStruct incase 2 have the same order
 	$res = mysql_query("select ".join(",", $colNames)." from defRecStructure
@@ -815,7 +819,8 @@ function getAllRectypeStructures($useCachedData = false) {
 						"rst_Status",
 						"rst_OrderForThumbnailGeneration",
 						"dty_TermIDTreeNonSelectableIDs",
-						"dty_FieldSetRectypeID");
+						"dty_FieldSetRectypeID",
+						"rst_NonOwnerVisibility");
 
 	// get rec Structure info ordered by the detailType Group order, then by recStruct display order and then by ID in recStruct incase 2 have the same order
 	$query = "select ".join(",", $colNames)." from defRecStructure
@@ -941,7 +946,8 @@ function getDetailTypeColNames() {
 					"dty_JsonTermIDTree",
 					"dty_TermIDTreeNonSelectableIDs",
 					"dty_PtrTargetRectypeIDs",
-					"dty_ID");
+					"dty_ID",
+					"dty_NonOwnerVisibility");
 }
 
 // returns an array of RecType Structures for all RecTypes

@@ -562,7 +562,7 @@ function outputRecordStub($recordStub) {
 }
 
 function makeFileContentNode($file){
-//	$filename = HEURIST_UPLOAD_PATH . $file['id'];
+//	$filename = HEURIST_UPLOAD_DIR ."/" . $file['id'];
 	$filename = $file['URL'];
 	if ($file['type'] ==="application/xml"){// && file_exists($filename)) {
 		$xml = simplexml_load_file($filename);
