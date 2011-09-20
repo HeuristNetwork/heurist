@@ -680,25 +680,6 @@ function getRectypeColNames(){
 					"rty_NonOwnerVisibility");
 }
 
-// plus 2 fields for icon and thumb paths
-function getRectypeColNames_withIcons(){
-
-	$rectypeColNames = getRectypeColNames();
-	array_push($rectypeColNames, "rty_Icon");
-	array_push($rectypeColNames, "rty_Thumbnail");
-	return 	$rectypeColNames;
-}
-
-function addIconAndThumbPaths($rectypeID, $row){
-
-	$iconURL = getRectypeIconURL($rectypeID);
-	$thumbURL = getRectypeThumbURL($rectypeID);
-
-	array_push($row, $iconURL);
-	array_push($row, $thumbURL);
-	return $row;
-}
-
 function getRectypeDef($rt_id) {
 	$rtDef = array();
 	// get rec Structure info ordered by the detailType Group order, then by recStruct display order and then by ID in recStruct incase 2 have the same order
@@ -772,8 +753,7 @@ function getRectypeFields($rt_id) {
 function getRectypeStructure($rtID) {
 	$rectypesStructure = array();
 
-	$commonFields = addIconAndThumbPaths( $rtID, getRectypeDef($rtID) );
-	$rectypesStructure['commonFields'] = $commonFields;
+	$rectypesStructure['commonFields'] = getRectypeDef($rtID);
 	$rectypesStructure['dtFields'] = getRectypeFields($rtID);
 	return $rectypesStructure;
 }
@@ -781,7 +761,7 @@ function getRectypeStructure($rtID) {
 // returns an array of RecType Structures for array of ids passed in
 function getRectypeStructures($rt_ids) {
 
-	$rtStructs = array('commomFieldNames' => getRectypeColNames_withIcons(),
+	$rtStructs = array('commomFieldNames' => getRectypeColNames(),
 						'dtFieldNames' => getRectypeStructureFieldColNames());
 	foreach ($rt_ids as $rt_id) {
 		$rtStructs[$rt_id] = getRectypeStructure($rt_id);
@@ -836,7 +816,7 @@ function getAllRectypeStructures($useCachedData = false) {
 						'pluralNames' => array(),
 						'usageCount' => getRecTypeUsageCount(),
 						'dtDisplayOrder' => array());
-	$rtStructs['typedefs'] = array('commomFieldNames' => getRectypeColNames_withIcons(),
+	$rtStructs['typedefs'] = array('commomFieldNames' => getRectypeColNames(),
 									'dtFieldNames' => getRectypeStructureFieldColNames());
 	while ($row = mysql_fetch_row($res)) {
 		if (!array_key_exists($row[0],$rtStructs['typedefs'])) {
@@ -860,7 +840,7 @@ function getAllRectypeStructures($useCachedData = false) {
 			$rtStructs['groups'][$row[1]]['types'][$row[0]] = $row[10];
 		}
 
-		$commonFields = addIconAndThumbPaths( $row[0], array_slice($row,3) );
+		$commonFields = array_slice($row,3);
 
 		$rtStructs['typedefs'][$row[0]]['commonFields'] = $commonFields;
 		$rtStructs['names'][$row[0]] = $row[3];

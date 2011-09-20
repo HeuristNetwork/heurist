@@ -150,7 +150,7 @@
 	<div class="input-row required">
 		<div class="input-header-cell" for="rty_TitleMask">Title mask:</div>
 		<div class="input-cell">
-        	<input maxlength="500" id="rty_TitleMask" style="width:400;"/>
+        	<input maxlength="500" id="rty_TitleMask" style="width:300;"/><span><button onclick="_onEditMask()">Edit</button></span>
 			<div class="help prompt">Mask to build a composite title from fields (see manual).
             The title mask is a string into which field values are inserted to create an extended title for the record, e.g. [Title], pp. [Start_Page]-[End_Page] renders the Title field and start and end page fields as in "Alice in Wonderland, pp. 37-39". The element names in square brackets should match field names for this record type. The constructed value is used as the extended title displayed in search results and other lists. To insert a literal square-bracket, use two consecutive square-brackets ([[ or ]]).</div>
 		</div>
@@ -279,11 +279,15 @@
                 // so it looks like this file needs updating to new structures
                 document.getElementById("rectypeIcon").innerHTML =
                 "<a href=\"javascript:void(0)\" onClick=\"upload_icon(0)\">"+
-                "<img id=\"imgIcon\" src=\""+rectype[13]+"\" width=\"16\" height=\"16\"> change icon</a>";
+                "<img id=\"imgIcon\" src=\""+
+                top.HEURIST.baseURL + "common/images/" + top.HEURIST.database.name +"/rectype-icons/" + rectypeID + ".png" +
+                "\" width=\"16\" height=\"16\"> change icon</a>";
 
                 document.getElementById("rectypeThumb").innerHTML =
                 "<a href=\"javascript:void(0)\" onClick=\"upload_icon(1)\">"+
-                "<img id=\"imgThumb\" src=\""+rectype[14]+"\" width=\"75\" height=\"75\"> change thumbnail</a>";
+                "<img id=\"imgThumb\" src=\""+
+                top.HEURIST.baseURL + "common/images/" + top.HEURIST.database.name +"/rectype-icons/thumb/th_" + rectypeID + ".png" +
+                "\" width=\"75\" height=\"75\"> change thumbnail</a>";
 
                 //../../common/images/rectype-icons/"+rectypeID+".png
 			} catch(e) {
@@ -429,6 +433,7 @@
 			groupDropdown.disabled = true;
 			document.getElementById("rty_ShowInLists").disabled = true;
 			document.getElementById("rty_TitleMask").disabled = true;
+			document.getElementById("btn_TitleMask").disabled = true;
 			typesDropdown.disabled = true;
 			document.getElementById("rty_FlagAsFieldset").disabled = true;
 			if(!changed) {
@@ -441,6 +446,7 @@
 			groupDropdown.disabled = false;
 			document.getElementById("rty_ShowInLists").disabled = false;
 			document.getElementById("rty_TitleMask").disabled = false;
+			document.getElementById("btn_TitleMask").disabled = false;
 			typesDropdown.disabled = false;
 			document.getElementById("rty_FlagAsFieldset").disabled = false;
 		}
@@ -465,6 +471,30 @@
 		}
 	}
 
+
+	/**
+	* Edit title mask
+	*/
+	function _onEditMask(){
+
+		var maskvalue = document.getElementById("rty_TitleMask").value;
+
+		Hul.popupURL(top, top.HEURIST.basePath +
+			"admin/structure/editRectypeTitle.html?rectypeID="+rectypeID+"&mask="+maskvalue+"&db="+db,
+		{
+		"close-on-blur": false,
+		"no-resize": true,
+		height: 300,
+		width: 800,
+		callback: function(newvalue) {
+			if(!Hul.isnull(newvalue)){
+				document.getElementById("rty_TitleMask").value = newvalue;
+			}
+		}
+	});
+	}
+
+	//
 	function updateRectypeOnServer() {
 		var str = getUpdatedFields();
 

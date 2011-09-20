@@ -22,7 +22,7 @@ function EditRecStructure() {
 
 	var _className = "EditRecStructure",
 	_myDataTable,
-	_tabView = new YAHOO.widget.TabView(),
+	//2011-09-20 replaced to popup _tabView = new YAHOO.widget.TabView(),
 	rty_ID,
 	_isDragEnabled = false,
 	_updatedDetails = [], //list of dty_ID that were affected with edition
@@ -44,54 +44,50 @@ function EditRecStructure() {
 			rty_ID = window.HEURIST.parameters.rty_ID;
 			//DEBUG Dom.get("ed_rty_ID").value = rty_ID;
 			document.title = "Record Type: " + rty_ID+" : " + top.HEURIST.rectypes.names[rty_ID];
-			document.getElementById("recordTitle").innerHTML = "Editing Record Type: "+ top.HEURIST.rectypes.names[rty_ID] + "("+rty_ID+")";
+			//since popup - we don't need it document.getElementById("recordTitle").innerHTML = "Editing Record Type: "+ top.HEURIST.rectypes.names[rty_ID] + "("+rty_ID+")";
 		}
 
 
 		// buttons on top and bottom of design tab
-		var hToolBar = '<div style="width:600px"><div style="display:inline-block; text-align:left">'+
+		var hToolBar = '<div style="width:740px">'+
+		//<div style="display:inline-block; text-align:left">
 		//'<input type="button" value="collapse all" onclick="onCollapseAll()"/>'+
 		//'<input type="button" value="Enable Drag" onclick="onToggleDrag(event)"/></div>'+
-		'<label style="width:400px;text-align:center;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Click row to edit or Drag to change the order</label>'+
+		'<label style="width:250px;text-align:center;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Click row to edit or Drag to change the order</label>'+
 		'<div style="float:right; text-align:right;min-width:360;">'+
 		'<input style="display:none;" type="button" id="btnSaveOrder" value="Save Order" onclick="onUpdateStructureOnServer(false)"/>'+
 		'<input type="button" value="Insert Field" onclick="onAddNewDetail()"/>'+
-		//'<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/>'+
-		'</div></div>';
-		//'<textarea id="dbg" rows="5"></textarea>';
+		//'<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/></div>
+		'</div>';
 
+
+	  	Dom.get("modelTabs").innerHTML =  '<div id="tabDesign" style="width:780;margin:auto;">'+hToolBar+'<div id="tableContainer"></div>'+hToolBar+'</div>';
+	  	_initTabDesign(null);
+
+/* 2011-09-20 replaced to popup
 		//create TabView with 2 tabs
 		_tabView.addTab(new YAHOO.widget.Tab({
 			id: 'design',
 			label: 'Design',
-			content: '<div id="tabDesign" style="width:600;margin:auto;">'+hToolBar+'<div id="tableContainer"></div>'+hToolBar+'</div>'
+			content: '<div id="tabDesign" style="width:800;margin:auto;">'+hToolBar+'<div id="tableContainer"></div>'+hToolBar+'</div>'
 		}));
 		_tabView.addTab(new YAHOO.widget.Tab({
 			id: 'preview',
 			label: 'Preview',
 			content:
-			'<div id="all-inputs" style="width:590, max-width:590;"></div>'
+			'<div id="all-inputs" style="width:800, max-width:800;"></div>'
 		}));
 		_tabView.addListener("activeTabChange", _handleTabChange);
 		_tabView.appendTo("modelTabs");
 
 		//init design tab
 		_tabView.set("activeIndex", 0);
-/*
-			'<div id="previewpage">'+
-				'<input type=checkbox id=input-visibility onClick="Hul.setDisplayPreference(\'input-visibility\', this.checked? \'all\' : \'recommended\')" class=minimal>'+
-				'<label for=input-visibility>show optional fields</label>'+
-			'</div>'+
-				'<script>'+
-					'top.HEURIST.whenLoaded("display-preferences", function() {'+
-						'document.getElementById("input-visibility").checked = (top.HEURIST.displayPreferences["input-visibility"] === "all");'+
-					'});'+
-				'</script>'+
 */
 	}
 
 	/**
-	* Event listener on TabView active page change
+	* 2011-09-20 replaced to popup
+	* Event listener on TabView active page change - NOT USED ANYMORE
 	*
 	* Creates either design grid or fills preview of Record input form
 	*/
@@ -156,8 +152,11 @@ function EditRecStructure() {
 					var aval = _dts[rst_ID];
 
 					arr.push([ rst_ID, rst_ID, aval[9],
-					aval[0], top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[2], aval[4],
-					aval[7], aval[6], aval[5], aval[3],aval[15],'']);
+					top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[0], //field name
+					aval[0],
+					top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[2], //field type
+					aval[4],
+					aval[7], aval[6], aval[5], aval[3], aval[15], aval[19], '']);
 					//statusLock]);   last column stores edited values and show either delete or lock image
 				}
 			}
@@ -167,9 +166,10 @@ function EditRecStructure() {
 				responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
 				responseSchema : {
 					fields: [ "rst_ID","expandColumn", "rst_DisplayOrder",
+					"dty_Name",
 					"rst_DisplayName", "dty_Type", "rst_RequirementType",
 					"rst_DisplayWidth", "rst_MinValues", "rst_MaxValues", "rst_DefaultValue", "rst_Status",
-					"rst_values"]
+					"rst_NonOwnerVisibility", "rst_values"]
 				}
 			});
 
@@ -210,27 +210,36 @@ function EditRecStructure() {
 				key:"rst_DisplayOrder", label: "Order", sortable:true, hidden:true
 			},
 			{
-				key:"rst_DisplayName", label: "DispName", width:120, sortable:false },
+				key:"dty_Name", label: "Field name", width:120, sortable:false },
 			{
-				key:"dty_Type", label: "Type", sortable:false
+				key:"rst_DisplayName", label: "Field prompt", width:120, sortable:false },
+			{
+				key:"dty_Type", label: "Data type", sortable:false
 			},
 			{
-				key:"rst_DisplayWidth", label: "Wdt", sortable:false, width:15, className:"center"
+				key:"rst_DisplayWidth", label: "Width", sortable:false, width:15, className:"center"
 			},
 			//{ key:"rst_DisplayHelpText", label: "Prompt", sortable:false },
 			{
-				key:"rst_RequirementType", label: "Req", sortable:false, width:15,
+				key:"rst_RequirementType", label: "Requirement", sortable:false
+			},
+			{
+				key:"rst_MinValues", label: "Min", hidden:true
+			},
+			{
+				key:"rst_MaxValues", label: "Repeatability", sortable:false,
 				formatter: function(elLiner, oRecord, oColumn, oData){
-					var reqtype = oRecord.getData('rst_RequirementType');
-					elLiner.innerHTML = reqtype.substring(0,3);
+					var minval = oRecord.getData('rst_MinValues');
+					var maxval = oRecord.getData('rst_MaxValues');
+					var res = 'repeatable';
+					if(Number(maxval)===1){
+						res = 'single value';
+					}else if(Number(maxval)>1){
+						res = 'limit '+maxval;
+					}
+					elLiner.innerHTML = res;
 				}
 
-			},
-			{
-				key:"rst_MinValues", label: "Min", sortable:false, width:15, className:"center"
-			},
-			{
-				key:"rst_MaxValues", label: "Max", sortable:false, width:15, className:"center"
 			},
 			{
 				key:"rst_DefaultValue", label: "Default", sortable:false,className:"center",
@@ -241,6 +250,9 @@ function EditRecStructure() {
 			},
 			{
 				key:"rst_Status", label: "Status", sortable:false, className:"center"
+			},
+			{
+				key:"rst_NonOwnerVisibility", hidden: true
 			},
 			{
 				key: "rst_values",
@@ -280,19 +292,29 @@ function EditRecStructure() {
 					'<div class="input-row"><div class="input-header-cell">Default Value:</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DefaultValue" title="Default Value"/></div></div>'+
 					'<div class="input-row"><div class="input-header-cell">Width:</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DisplayWidth" title="Visible width of field" style="width:40" size="4" onkeypress="Hul.validate(event)"/></div></div>'+
 
-					'<div class="input-row"><div class="input-header-cell">Requirement type:</div>'+
+					'<div class="input-row"><div class="input-header-cell">Requirement:</div>'+
 					'<div class="input-cell">'+
 					'<select id="ed'+rst_ID+'_rst_RequirementType" onchange="onReqtypeChange(event)" style="display:inline; margin-right:20px">'+
 					'<option value="required">required</option>'+
 					'<option value="recommended">recommended</option>'+
 					'<option value="optional">optional</option>'+
 					'<option value="forbidden">forbidden</option></select>'+
-					'repeat from&nbsp;<input id="ed'+rst_ID+
+					'<span id="ed'+rst_ID+'_spanMinValue"><label class="input-header-cell">Minimum&nbsp;values:</label>'+
+					'<input id="ed'+rst_ID+
 					'_rst_MinValues" title="Min Values" style="width:20px" size="2" '+
-					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/>&nbsp;'+
-					'&nbsp;to&nbsp;<input id="ed'+rst_ID+
-					'_rst_MaxValues" title="Max Values"  style="width:20px" size="2"  '+
-					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/>&nbsp;times</div></div>'+
+					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/></span></div></div>'+
+
+					'<div class="input-row"><div class="input-header-cell">Repeatability :</div>'+
+					'<div class="input-cell">'+
+					'<select id="ed'+rst_ID+'_Repeatability" onchange="onRepeatChange(event)" style="display:inline; margin-right:20px">'+
+					'<option value="single">single</option>'+
+					'<option value="repeatable">repeatable</option>'+
+					'<option value="limited">limited</option></select>'+
+					'<span id="ed'+rst_ID+'_spanMaxValue"><label class="input-header-cell">Maximum&nbsp;values:</label>'+
+					'<input id="ed'+rst_ID+
+					'_rst_MaxValues" title="Maximum Values" style="width:20px" size="2" '+
+					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/></span></div></div>'+
+
 
 					'<div class="input-row"><div class="input-header-cell">Terms list:</div>'+
 					'<div class="input-cell">'+
@@ -311,15 +333,23 @@ function EditRecStructure() {
 					'</div></div>'+
 					'<div class="input-row"><div class="input-header-cell">Status:</div>'+
 					'<div class="input-cell"><select id="ed'+rst_ID+
-					'_rst_Status" style="display:inline-block">'+
+					'_rst_Status" style="display:inline-block" onchange="onStatusChange(event)">'+
 					'<option value="reserved">reserved</option>'+
 					'<option value="approved">approved</option>'+
 					'<option value="pending">pending</option>'+
-					'<option value="open">open</option></select></div></div>'+
+					'<option value="open">open</option></select>'+
+
+					'<span><label class="input-header-cell">Non owner visibility:</label><select id="ed'+rst_ID+
+					'_rst_NonOwnerVisibility">'+  // style="display:inline-block"
+					'<option value="hidden">hidden</option>'+
+					'<option value="viewable">viewable</option>'+
+					'<option value="public">public</option>'+
+					'<option value="pending">pending</option></select></span>'+
+					'</div></div>'+
 
 					'<div class="input-row" style="text-align:right">'+
 					'<input type="submit" id="btnEdit_'+rst_ID+
-					'" style="display:inline-block;font-weight:800;" value="Edit Field Type" onclick="_onAddEditFieldType('+rst_ID+');">'+
+					'" style="width:125px;display:inline-block;font-weight:800;" value="Edit Field Type" onclick="_onAddEditFieldType('+rst_ID+');">'+
 					'<input id="btnSave_'+rst_ID+
 					'" style="display:inline-block; margin:0 5px" type="submit" value="Save" onclick="doExpliciteCollapse(event);"/>'+
 					'<input id="btnCancel_'+rst_ID+
@@ -502,6 +532,10 @@ function EditRecStructure() {
 		}
 	} // end _initTabDesign -------------------------------
 
+	function initPreview(){
+
+	}
+
 	/**
 	* Shows all our chanages on preview tab
 	*
@@ -547,14 +581,14 @@ function EditRecStructure() {
 
 
 		//loadPublicEditFrame();
-		setTimeout(function(){renderInputs(rty_ID);}, 0);
-		//renderInputs();
+		//setTimeout(renderInputs, 500);
+		renderInputs();
 	}
 
 
-function renderInputs(rectype) {
+function renderInputs() {
 
-	var //rectype = rty_ID,
+	var rectype = rty_ID,
 		inputs;
 	// Clear out any existing inputs
 
@@ -580,7 +614,7 @@ function renderInputs(rectype) {
 
 		inputs = top.HEURIST.edit.createInputsForRectype(rectype, defaultInputValues, allInputs);
 
-//		renderShowAll();
+		renderShowAll();
 
 		//renderAdditionalDataSection(allInputs, rectype);
 		//window.HEURIST.inputs = inputs;
@@ -858,6 +892,24 @@ function renderShowAll() {
 			}
 		}//for
 
+
+		//update min/max visibility
+		onReqtypeChange(Number(rst_ID));
+
+		//determine what is repeatability type
+		var sel = Dom.get("ed"+rst_ID+"_Repeatability");
+		var maxval = Number(Dom.get("ed"+rst_ID+"_rst_MaxValues").value);
+		var res = 'repeatable';
+		if(maxval===1){
+			res = 'single';
+		}else if(maxval>1){
+			res = 'limited';
+		}
+		sel.value = res;
+		onRepeatChange(Number(rst_ID));
+
+		//If reserved, requirements can only be increased, nor can you change min or max values
+		onStatusChnage(Number(rst_ID));
 	}
 
 
@@ -905,11 +957,11 @@ function renderShowAll() {
 				//add new detail type
 				// 0		1		2	   3	4		 5   6   7    8?    9  10?
 				var arr_target = [arrs[0],arrs[4],arrs[1],"","optional","1","0","60","0",order,"1",
-				null, null, null, null, "open", null, null, null];
-				// 11	12    13    14     15	 16	    17    18
+				null, null, null, null, "open", null, null, null, "viewable"];
+				// 11	12    13    14     15	 16	    17    18     19
 
 				recDetTypes[dty_ID] = arr_target;
-
+//FIX!!!!
 				data_toadd.push({rst_ID:dty_ID,
 					expandColumn:dty_ID,
 					rst_DisplayOrder: order,
@@ -921,6 +973,7 @@ function renderShowAll() {
 					rst_DefaultValue: "",
 					rst_DisplayWidth: 60,
 					rst_Status: "open",
+					rst_NonOwnerVisibility: "viewable",
 					rst_values: arr_target });
 
 				_updatedDetails.push(dty_ID); //track change
@@ -1381,7 +1434,7 @@ function onAddNewDetail(){
 /**
 * Invokes popup window to create and add new field type
 */
-function onDefineNewType(){
+	function onDefineNewType(){
 
 	if(Hul.isnull(popupSelect))
 	{
@@ -1435,29 +1488,97 @@ function onUpdateStructureOnServer(needClose)
 }
 
 /**
+*
+*/
+function onStatusChange(evt){
+	var name;
+
+	if(typeof evt === 'number'){
+		name = 'ed'+evt;
+	}else{
+		var el = evt.target;
+		name = el.id.substring(0,el.id.indexOf("_")); //. _rst_RequirementType
+	}
+
+	//If reserved, requirements can only be increased, nor can you change min or max values
+	var isReserved = Dom.get(name+"_rst_Status").value === "reserved";
+	Dom.get(name+"_rst_MinValues").disabled = isReserved;
+	Dom.get(name+"_rst_MaxValues").disabled = isReserved;
+	var sel = Dom.get(name+"_Repeatability");
+	sel.disabled = isReserved;
+
+	sel = Dom.get(name+"_rst_RequirementType");
+	sel.disabled = (isReserved && (sel.value==='required'));
+}
+
+/**
 * Listener of requirement type selector (combobox)
 */
 function onReqtypeChange(evt){
-	var el = evt.target;
-	var name = el.id.substring(0,el.id.indexOf("_")); //. _rst_RequirementType
+	var el, name;
 
+	if(typeof evt === 'number'){
+		el = Dom.get("ed"+evt+"_rst_RequirementType")
+		name = 'ed'+evt;
+	}else{
+		el = evt.target;
+		name = el.id.substring(0,el.id.indexOf("_")); //. _rst_RequirementType
+	}
+
+	var span_min = Dom.get(name+'_spanMinValue');
 	var el_min = Dom.get(name+"_rst_MinValues");
 	var el_max = Dom.get(name+"_rst_MaxValues");
 
 	if(el.value === "required"){
-		el_min.value = 1;
-		el_max.value = 1;
+		if(Number(el_min.value)===0) {  el_min.value = 1; }
+		//el_max.value = 1;
+		Dom.setStyle(span_min, "visibility", "visible");
 	} else if(el.value === "recommended"){
 		el_min.value = 0;
-		el_max.value = 1;
+		//el_max.value = 1;
+		Dom.setStyle(span_min, "visibility", "hidden");
 	} else if(el.value === "optional"){
 		el_min.value = 0;
-		el_max.value = 1;
+		//el_max.value = 1;
+		Dom.setStyle(span_min, "visibility", "hidden");
 	} else if(el.value === "forbidden"){
 		el_min.value = 0;
 		el_max.value = 0;
+		Dom.setStyle(span_min, "visibility", "hidden");
 	}
 }
+
+/**
+* Listener of Repeatable type selector (combobox)
+*/
+function onRepeatChange(evt){
+
+	var el, name;
+
+	if(typeof evt === 'number'){
+		el = Dom.get("ed"+evt+"_Repeatability")
+		name = 'ed'+evt;
+	}else{
+		el = evt.target;
+	 	name = el.id.substring(0,el.id.indexOf("_")); //. _rst_RequirementType
+	}
+
+	var span_max = Dom.get(name+'_spanMaxValue');
+	var el_min = Dom.get(name+"_rst_MinValues");
+	var el_max = Dom.get(name+"_rst_MaxValues");
+
+	if(el.value === "single"){
+		el_max.value = 1;
+		Dom.setStyle(span_max, "visibility", "hidden");
+	} else if(el.value === "repeatable"){
+		el_max.value = 0;
+		Dom.setStyle(span_max, "visibility", "hidden");
+	} else if(el.value === "limited"){
+		if(el_max.value<2) el_max.value = 2;
+		Dom.setStyle(span_max, "visibility", "visible");
+	}
+}
+
 /**
 * Max repeat value must be >= then min value
 */
@@ -1471,104 +1592,6 @@ function onRepeatValueChange(evt){
 	}
 }
 
-/**
-* Hides div with json tree filter
-*/
-function closeDivPopup1(_allTerms, _disTerms, _dtyID){
-
-		if(!Hul.isnull(_dtyID)){
-			//assign new values to hidden inputs
-			var edt1 = Dom.get('ed'+_dtyID+'_rst_FilteredJsonTermIDTree');
-			var edt2 = Dom.get('ed'+_dtyID+'_rst_TermIDTreeNonSelectableIDs');
-			edt1.value = _allTerms;
-			edt2.value = _disTerms;
-
-			var rst_type = top.HEURIST.detailTypes.typedefs[_dtyID].commonFields[2];
-
-			recreateTermsPreviewSelector( rst_type, edt1.value, edt2.value );
-		}
-
-		var my_div = $("#termsFilter");
-		my_div.css( {
-			//left:"-9999px"
-			display:'none'
-		});
-}
-
-/**
-* Shows div on top with terms filter
-*/
-function showTermsTree(rst_ID, event){
-
-	if(Hul.isnull(selectTerms)){
-		selectTerms = new  SelectTerms(true, false); //filtered mode, in div
-	}else{
-		selectTerms.setFilterMode(true);
-	}
-	selectTerms.reinit(rst_ID, closeDivPopup1);
-
-	var border_top = $(window).scrollTop();
-
-	var my_div = $("#termsFilter");
-
-	my_div.css( {
-			left:'20px', top:'20px', right:'20px', bottom:'20px',
-			//width:$(window).width()-20, height:$(window).height()-20
-			display:'block'
-	});
-
-	//_showDivPopupAt(my_div, [0, border_top]);
-}
-
-/**
-* Hides div with rectype pointer filter
-*/
-function closeDivPopup2(_values, _dtyID){
-
-		if(!Hul.isnull(_dtyID)){
-			//assign new values to inputs
-			var edt = Dom.get('ed'+_dtyID+'_rst_PtrFilteredIDs');
-			edt.value = _values;
-
-			var rst_type = top.HEURIST.detailTypes.typedefs[_dtyID].commonFields[2];
-
-			recreateRecTypesPreview( rst_type, edt.value );
-		}
-
-		var my_div = $("#pointerFilter");
-		my_div.css( {
-			//visibility:'hidden'
-			display:'none'
-		});
-}
-
-/**
-* Shows popup div with rectype pointer filter
-*/
-function showPointerFilter(rst_ID, event){
-
-	if(Hul.isnull(selectRecordType)){
-		selectRecordType = new  SelectRecordType(true, false); //filtered mode, in div
-	}else{
-		selectRecordType.setFilterMode(true);
-	}
-	selectRecordType.reinit(rst_ID, closeDivPopup2);
-
-	var border_top = $(window).scrollTop();
-
-	var my_div = $("#pointerFilter");
-
-	my_div.css( {
-			left:'20px', top:'20px', right:'20px', bottom:'20px',
-			//width:$(window).width()-20, height:$(window).height()-20
-			display:'block'
-	});
-
-	//_showDivPopupAt(my_div, [0, border_top]);
-}
-
-
-
 // DEBUG
 //temp function to fill values with given rty_ID
 /*
@@ -1576,40 +1599,6 @@ function _tempFillValue(){
 editStructure.initTabDesign(document.getElementById("ed_rty_ID").value);
 }
 */
-
-/** REMOVE
-* prevents out of border for popup div
-* @todo move to common util
-*/
-	function _showDivPopupAt(_tooltip, xy){
-
-		var border_top = $(window).scrollTop();
-		var border_right = $(window).width();
-		var border_height = $(window).height();
-		var left_pos;
-		var top_pos;
-		var offset = 5;
-		if(border_right - (offset *2) >= _tooltip.width() +  xy[0]) {
-			left_pos = xy[0]+offset;
-		} else {
-			left_pos = border_right-_tooltip.width()-offset;
-		}
-
-		if((border_top + offset *2) >=  xy[1] - _tooltip.height()) {
-			top_pos = border_top + offset + xy[1]; //
-		} else {
-			top_pos = border_top + xy[1] - _tooltip.height()-offset;
-		}
-		if(top_pos + _tooltip.height() > border_top+border_height){
-			top_pos	= border_top + border_height - _tooltip.height()-5;
-		}
-
-		//var lft = _tooltip.css('left');
-		_tooltip.css( {
-			left:left_pos+'px', top:top_pos+'px'
-		});
-
-	}
 
 
 function _preventSel(event){

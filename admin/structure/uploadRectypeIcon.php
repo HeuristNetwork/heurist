@@ -123,7 +123,7 @@ function upload_file($rt_id, $dim) {
 	if (! $img) return array('', 'Uploaded file is not supported format');
 	//if (imagesx($img) > 16  ||  imagesy($img) > 16) return array('','Uploaded file must be 16x16 pixels');
 
-	$filename = $image_dir . HEURIST_DBID. '-' . $rt_id . '.png'; // tempnam('/tmp', 'resized');
+	$filename = $image_dir . $rt_id . '.png'; // tempnam('/tmp', 'resized');
 
 	$error = convert_to_png($img, $dim, $filename);
 

@@ -264,8 +264,8 @@ function RectypeManager() {
 					var rectype = td.commonFields;
 					if (rectype[9] === grpID) {  //(rectype[9].indexOf(grpID)>-1) {
 						arr.push([rectypeID, (Number(rectype[7])===1),
-						rectype[13], // +")\" id=\"icon"+rectypeID+"\"><div style=\"background-image:url("+rectype[14]+");\" class=\"thumbPopup\"></div></a>",
-						rectype[0], rectype[1], 
+						'', //icon
+						rectype[0], rectype[1],
 						rectype[8], rectype[9], null]);
 
 						/*TODO: top.HEURIST.rectype.rectypeUsage[rectypeID].length*/
@@ -336,10 +336,10 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 			{ key: "icon", label: "Icon", className:'center', sortable:false,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var id = oRecord.getData("id");
-					var str = oRecord.getData("icon");
+
 					var str1 = top.HEURIST.baseURL + "common/images/" + top.HEURIST.database.name +"/rectype-icons/" + id + ".png";
 					var thumb = top.HEURIST.baseURL + "common/images/" + top.HEURIST.database.name +"/rectype-icons/thumb/th_" + id + ".png";
-					icon ="<div class=\"rectypeImages\"><a href=\"#edit_icon\"><img src=\"../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\"></a><div style=\"background-image:url("+thumb+");\" class=\"thumbPopup\"><a href=\"#edit_thumb\"><img src=\"../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a></div></div>"
+					var icon ="<div class=\"rectypeImages\"><a href=\"#edit_icon\"><img src=\"../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\"></a><div style=\"background-image:url("+thumb+");\" class=\"thumbPopup\"><a href=\"#edit_thumb\"><img src=\"../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a></div></div>"
 					elLiner.innerHTML = icon;
 			}},
 			{ key: "name", label: "Name", sortable:true, className: 'bold_column', minWidth:160, maxAutoWidth:160, width:160, gutter:0,
@@ -364,7 +364,7 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 					}*/
 					elLiner.innerHTML = '<span title="'+tit+'">'+str+'</span>';
 			}},
-			
+
 			{ key: "grp_id", label: "Group", sortable:false, minWidth:90, maxAutoWidth:90, width:90, className:'center',
 				formatter:YAHOO.widget.DataTable.formatDropdown, dropdownOptions:_groups},
 			{ key: "edit", label: "Edit", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
@@ -907,12 +907,13 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 		var URL = top.HEURIST.basePath + "admin/structure/editRecStructure.html?db="+db+"&rty_ID="+rty_ID;
 		//this.location.replace(URL);
 
+		var dim = Hul.innerDimensions(this.window);
 
 		Hul.popupURL(top, URL, {
 			"close-on-blur": false,
 			"no-resize": false,
-			height: 480,
-			width: 640,
+			height: dim.h*0.9,
+			width: 840,
 			callback: function(context) {
 				if(Hul.isnull(context)) {
 					// Canceled
@@ -1248,7 +1249,7 @@ function _upload_icon(rectypeID,mode) {
 			width: 340,
 			callback: icon_refresh(rectypeID)
 		});
-		
+
 	}
 
 function icon_refresh(rectypeID) {

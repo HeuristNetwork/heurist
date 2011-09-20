@@ -90,7 +90,8 @@
 	"rst_FilteredJsonTermIDTree"=>"s",
 	"rst_TermIDTreeNonSelectableIDs"=>"s",
 	"rst_PtrFilteredIDs"=>"s",
-	"rst_OrderForThumbnailGeneration"=>"i"
+	"rst_OrderForThumbnailGeneration"=>"i",
+	"rst_NonOwnerVisibility"=>"s"
 	);
 
 	$dtyColumnNames = array(
@@ -723,7 +724,7 @@
 
 					if ($rows==0) {
 						$oper = (($isInsert)?"inserting":"updating");
-						array_push($ret[$rtyID], "error ".$oper." field type ".$dtyID." for record type ".$rtyID." in updateRecStructure - ".$msqli->error);
+						array_push($ret[$rtyID], "error ".$oper." field type ".$dtyID." for record type ".$rtyID." in updateRecStructure - ".mysql_error()); // $msqli->error);
 					} else {
 						array_push($ret[$rtyID], $dtyID);
 					}

@@ -20,7 +20,8 @@ var Dom = YAHOO.util.Dom,
 */
 function SelectTerms(_isFilterMode, _isWindowMode) {
 
-	var _dtyID,
+	var _className = "SelectTerms",
+		_dtyID,
 		_datatype,
 		_allTerms, //all terms
 		_disTerms, //disabled terms
@@ -157,7 +158,7 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 	}
 
 	/**
-	* Empties disabled list
+	* Empties disabled list (not used anymore)
 	*/
 	function _clearDisables(){
 		// Reset the 'selected terms tree'
@@ -383,7 +384,7 @@ TREE REALTED ROUTINES ---------------------------------------
 							}
 							term.label = term.label + '</div>';
 
-							term.label = term.label + ((cnt_children>0)?'</b>':'') + '</div>';
+							term.label = ((cnt_children>0)?'<b>':'') + term.label + ((cnt_children>0)?'</b>':'') + '</div>';
 
 							childNode = new YAHOO.widget.TextNode(term, parentEntry, false); // Create the node
 							childNode.highlightState = 1;
@@ -466,14 +467,16 @@ TREE REALTED ROUTINES ---------------------------------------
 		while(index < termNode.children.length) { // While term in _termTree has children
 			if(termNode.children[index].highlightState === 1) { // If the term is selected, add it to the 'selected term tree'
 
-				var term_id = termNode.children[index].data.id;
+				var _node = termNode.children[index];
+				var term_id = _node.data.id;
 				var termName = termsByDomainLookup[term_id][0];
 
 				childNode = new YAHOO.widget.TextNode('<div id="'+term_id+'"><a href="javascript:void(0)"></a>&nbsp;' + termName + '</div>', parentNode, true);
 				childNode.id = term_id;
 				childNode.href = "{javascript:void(0)}";
+				childNode.isVocabulary = (_node.parent && _node.parent._type=="RootNode");
 
-				if(!_isDisabled(term_id)){
+				if ((!_isDisabled(term_id)) && (!childNode.isVocabulary)) {
 					childNode.toggleHighlight();
 				}
 
@@ -636,8 +639,10 @@ TREE REALTED ROUTINES ---------------------------------------
 
 			_selectedTermsTree.subscribe("clickEvent",
 					function() { // On click, select (disable) the term, and recreate the selected terms, and disabled terms arrays
-						var term_id = arguments[0].node.id;
-						if(!_isDisabledOriginally(term_id)) {
+						var _node = arguments[0].node;
+						var term_id = _node.id;
+						//prevent click on checkbox
+						if(!_isDisabledOriginally(term_id) &&  !_node.isVocabulary) {
 							this.onEventToggleHighlight.apply(this,arguments);
 							_createPreview();
 						}
