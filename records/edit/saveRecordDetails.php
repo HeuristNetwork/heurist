@@ -93,6 +93,11 @@ if ($updated) {
 }
 /***** END OF OUTPUT *****/
 
+/**
+* Main method that parses POST and update details for given record ID
+*
+* @param int $bibID
+*/
 function updateRecord($bibID) {
 	// Update the given record.
 	// This is non-trivial: so that the versioning stuff (achive_*) works properly
@@ -115,7 +120,7 @@ function updateRecord($bibID) {
 	$bib = mysql_fetch_assoc($res);
 //error_log("save record dtls POST ".print_r($_POST,true));
 	// Upload any files submitted ... (doesn't have to take place right now, but may as well)
-	uploadFiles();
+	uploadFiles();  //Artem: it does not work here - since we uploaded files at once
 
 	// Get the existing records details and compare them to the incoming data
 	$bibDetails = getBiblioDetails($bibID);
@@ -423,7 +428,13 @@ function upload_file($name, $type, $tmp_name, $error, $size) {
 	}
 }
 
-
+/**
+* Creates static array of classes for each particular detail type
+* Returns the class for specified detail type
+*
+* @param mixed $typeID - detail type name
+* @return mixed - class to parse the particular detail type in POST
+*/
 function getInputHandlerForType($typeID) {
 	static $typeToSpecies = null;
 	if (! $typeToSpecies) {
@@ -444,6 +455,7 @@ function getInputHandlerForType($typeID) {
 			"relationtype" => new BibDetailDropdownInput(),
 			"enum" => new BibDetailDropdownInput(),
 			"file" => new BibDetailFileInput(),
+			"urlinclude" => new BibDetailUrlIncludeInput(),
 			"geo" => new BibDetailGeographicInput(),
 			"separator" => new BibDetailSeparator(),
 			"default" => new BibDetailInput()
@@ -539,6 +551,14 @@ class BibDetailDropdownInput extends BibDetailInput {
 class BibDetailFileInput extends BibDetailInput {
 	function convertPostToMysql($postVal) {
 		return array("dtl_UploadedFileID" => $postVal);
+	}
+	function inputOK($postVal) {
+		return preg_match("/\\S/", $postVal);	// has non space characters
+	}
+}
+class BibDetailUrlIncludeInput extends BibDetailInput {
+	function convertPostToMysql($postVal) {
+		return array("dtl_Value" => $postVal, "dtl_ValShortened" => "KUKU");
 	}
 	function inputOK($postVal) {
 		return preg_match("/\\S/", $postVal);	// has non space characters

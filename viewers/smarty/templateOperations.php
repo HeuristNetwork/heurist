@@ -1,7 +1,11 @@
 <?php
 
 /**
- * filename, brief description, date of creation, by whom
+ * teamplateOperations.pho
+ *
+ * operations with template files - save, delete, get, list
+ *
+ *
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt

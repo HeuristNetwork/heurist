@@ -40,7 +40,7 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 	*
 	* Reads GET parameters, creates TabView and triggers init of first tab
 	*/
-	function _init(dtyID, _callback) {
+		function _init(dtyID, _callback) {
 
 		_callback_func = _callback;
 
@@ -57,12 +57,7 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 					if(_dt_id<0){
 						Dom.get("dtyName").innerHTML = "<h2 class='dtyName'>New Field Type</h2>";
 					}else{
-						var dt = top.HEURIST.detailTypes.typedefs[_dt_id].commonFields;
-						var dtname =  "<div style='display:inline-block;font-weight:800;'>field id:</div><h2 style='display:inline-block;padding-left:5px;'>" + _dt_id + '</h2>';
-						if (!Hul.isnull(dt)) {
-							dtname = dtname + " <div style='display:inline-block;font-weight:800;padding-left:20px;'>name:</div><h2 style='display:inline-block;padding-left:5px;'>"+dt[0]+"</h2>";
-						}
-						Dom.get("dtyName").innerHTML = dtname;
+						Dom.get("dtyName").innerHTML = _getTitle(_dt_id);
 					}
 				}
 		}
@@ -77,7 +72,7 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 						_allTerms = dt[9];
 						_disTerms = dt[10];
 
-						Dom.get("dtyName").innerHTML = "Field Type: " + dt[0];
+						Dom.get("dtyName").innerHTML = _getTitle(_dtyID);
 					}
 					if(Hul.isempty(_allTerms)){
 						_isFilterMode = false;
@@ -123,6 +118,16 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 
 
 	}//end _init
+
+	//
+	function _getTitle(dt_id){
+			var dtname =  "<div style='display:inline-block;font-weight:800;'>field id:</div><h2 style='display:inline-block;padding-left:5px;'>" + dt_id + '</h2>';
+			var dt = top.HEURIST.detailTypes.typedefs[dt_id].commonFields;
+			if (!Hul.isnull(dt)) {
+							dtname = dtname + " <div style='display:inline-block;font-weight:800;padding-left:20px;'>name:</div><h2 style='display:inline-block;padding-left:5px;'>"+dt[0]+"</h2>";
+			}
+			return dtname;
+	}
 
 
 	/**

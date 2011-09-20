@@ -3,10 +3,10 @@
 /**
  * templateGenerate.php
  *
- * Generates the template on the base of structures of record
+ * Generates the template on the basis of structure of record
  * type that are included in result of given query
  *
- * besises template text it returns the list of variables (array indexes) that are utilized
+ * besides template text it returns the list of variables (array indexes) that are utilized
  * in this tempalte
  *
  * the result is JSON array

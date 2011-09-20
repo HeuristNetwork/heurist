@@ -154,15 +154,11 @@ function EditRecStructure() {
 				for (rst_ID in _dts) {
 					var statusLock;
 					var aval = _dts[rst_ID];
-					if (aval[15] != "reserved"){
-						statusLock = '<a href="#delete"><img src="../../common/images/cross.png" width="12" height="12" border="0" title="Remove detail" /><\/a>';
-					}else{
-						statusLock  = '<img src="../../common/images/lock_bw.png" title="Detail locked" />';
-					};
+
 					arr.push([ rst_ID, rst_ID, aval[9],
 					aval[0], top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[2], aval[4],
-					aval[7], aval[6], aval[5], aval[3],aval[15],
-					statusLock]);
+					aval[7], aval[6], aval[5], aval[3],aval[15],'']);
+					//statusLock]);   last column stores edited values and show either delete or lock image
 				}
 			}
 
@@ -252,10 +248,15 @@ function EditRecStructure() {
 				width : "16px",
 				sortable: false,
 				className:"center",
-				/*formatter: function(elLiner, oRecord, oColumn, oData){
-
-					elLiner.innerHTML ='<a href="#delete"><img src="../../common/images/cross.png" width="12" height="12" border="0" title="Remove detail" /><\/a>';
-				}*/
+				formatter: function(elLiner, oRecord, oColumn, oData){
+					var status = oRecord.getData('rst_Status');
+					if (status !== "reserved"){
+						statusLock = '<a href="#delete"><img src="../../common/images/cross.png" width="12" height="12" border="0" title="Remove detail" /><\/a>';
+					}else{
+						statusLock  = '<img src="../../common/images/lock_bw.png" title="Detail locked" />';
+					};
+					elLiner.innerHTML = statusLock;
+				}
 			}
 			];
 
@@ -297,16 +298,17 @@ function EditRecStructure() {
 					'<div class="input-cell">'+
 					'<input id="ed'+rst_ID+'_rst_FilteredJsonTermIDTree" type="hidden"/>'+
 					'<input id="ed'+rst_ID+'_rst_TermIDTreeNonSelectableIDs" type="hidden"/>'+
-					'<input type="submit" value="Filter terms" id="btnSelTerms" onclick="showTermsTree('+rst_ID+', event)" style="margin:0 20px 0 0"/>'+
-					'Preview:'+
-					'<span class="input-cell" id="termsPreview" class="dtyValue" style="margin:0 10px"></span>'+
+//REMOVED BY IAN's request on 16-09					'<input type="submit" value="Filter terms" id="btnSelTerms" onclick="showTermsTree('+rst_ID+', event)" style="margin:0 20px 0 0"/>'+
+//					'Preview:'+
+					'<span class="input-cell" id="termsPreview" class="dtyValue"></span>'+
+					'<span class="input-cell" style="margin:0 10px">to change click "Edit" and then "Change Vocabulary"</span>'+
 					'</div></div>'+
 
 					'<div class="input-row"><div class="input-header-cell">Rectype pointer:</div>'+
 					'<div id="pointerPreview" class="input-cell">'+
 					'<input id="ed'+rst_ID+'_rst_PtrFilteredIDs" type="hidden"/>'+
-					'<input value="Filter pointers" id="btnSelTerms" onclick="showPointerFilter('+rst_ID+', event)"></div></div>'+
-					
+//REMOVED BY IAN's request on 16-09					'<input value="Filter pointers" id="btnSelTerms" onclick="showPointerFilter('+rst_ID+', event)">'+
+					'</div></div>'+
 					'<div class="input-row"><div class="input-header-cell">Status:</div>'+
 					'<div class="input-cell"><select id="ed'+rst_ID+
 					'_rst_Status" style="display:inline-block">'+
@@ -317,7 +319,7 @@ function EditRecStructure() {
 
 					'<div class="input-row" style="text-align:right">'+
 					'<input type="submit" id="btnEdit_'+rst_ID+
-					'" style="display:inline-block" value="Edit" onclick="_onAddEditFieldType('+rst_ID+');">'+
+					'" style="display:inline-block;font-weight:800;" value="Edit Field Type" onclick="_onAddEditFieldType('+rst_ID+');">'+
 					'<input id="btnSave_'+rst_ID+
 					'" style="display:inline-block; margin:0 5px" type="submit" value="Save" onclick="doExpliciteCollapse(event);"/>'+
 					'<input id="btnCancel_'+rst_ID+
@@ -810,9 +812,14 @@ function renderShowAll() {
 
 					var edt2 = Dom.get('ed'+rst_ID+'_rst_FilteredJsonTermIDTree');
 
+/* Ian's request - no more filtering
 					recreateTermsPreviewSelector(rst_type,
 					(Hul.isempty(edt2.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[9]:edt2.value),   //dty_JsonTermIDTree
 					(Hul.isempty(edt.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[10]:edt.value)); //dty_TermIDTreeNonSelectableIDs
+*/
+					recreateTermsPreviewSelector(rst_type,
+						top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[9],
+						top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[10]);
 
 					//editedTermTree, editedDisabledTerms);
 
@@ -825,8 +832,12 @@ function renderShowAll() {
 					//show filter jsontree
 					edt.parentNode.parentNode.style.display = "block";
 
+/* Ian's request - no more filtering
 					recreateRecTypesPreview(rst_type,
 					(Hul.isempty(edt.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[11]:edt.value) ); //dty_PtrTargetRectypeIDs
+*/
+					recreateRecTypesPreview(rst_type,top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[11]);
+
 				}else{
 					edt.parentNode.parentNode.style.display = "none";
 				}
@@ -1466,7 +1477,7 @@ function onRepeatValueChange(evt){
 function closeDivPopup1(_allTerms, _disTerms, _dtyID){
 
 		if(!Hul.isnull(_dtyID)){
-			//assign new values to inputs
+			//assign new values to hidden inputs
 			var edt1 = Dom.get('ed'+_dtyID+'_rst_FilteredJsonTermIDTree');
 			var edt2 = Dom.get('ed'+_dtyID+'_rst_TermIDTreeNonSelectableIDs');
 			edt1.value = _allTerms;
@@ -1630,7 +1641,7 @@ function recreateTermsPreviewSelector(datatype, allTerms, disabledTerms ) {
 
 					var parent = document.getElementById("termsPreview"),
 						i;
-					for (i = 1; i < parent.children.length; i++) {
+					for (i = 0; i < parent.children.length; i++) {
 						parent.removeChild(parent.childNodes[0]);
 					}
 
@@ -1716,13 +1727,25 @@ function _onAddEditFieldType(dty_ID, dtg_ID){
 					top.HEURIST.detailTypes = context.detailTypes;
 					_cloneHEU = null;
 
-					//detect what group
+					var rst_type = top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[2];
+					//update
+					if(rst_type === "enum" || rst_type === "relmarker" || rst_type === "relationtype"){
+						recreateTermsPreviewSelector(rst_type,
+							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[9],
+							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[10]);
+					}
+					if(rst_type === "relmarker" || rst_type === "resource"){
+						recreateRecTypesPreview(rst_type,
+							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[11]);
+					}
+
+					/*detect what group
 					var grpID = top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[7];
 
 					_removeTable(grpID, true);
 					if(grpID_old!==grpID){
 						_removeTable(grpID_old, true);
-					}
+					}*/
 				}
 			}
 		});

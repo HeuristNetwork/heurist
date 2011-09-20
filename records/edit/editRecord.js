@@ -1171,6 +1171,9 @@ top.HEURIST.edit.inputs.BibDetailInput.prototype.setReadonly = function(readonly
 	}
 };
 top.HEURIST.edit.inputs.BibDetailInput.prototype.duplicateInput = function() { this.addInput(); };
+// 1. specify the correct name for element - based on record ID and detail type ID
+// 2. put element into inputs array
+// 3.
 top.HEURIST.edit.inputs.BibDetailInput.prototype.addInputHelper = function(bdValue, element) {
 	this.elementName = "type:" + this.detailType[12];
 		element.name = (bdValue && bdValue.id)? (this.elementName + "[bd:" + bdValue.id + "]") : (this.elementName + "[]");
@@ -1542,9 +1545,37 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype = new top.HEURIST.edit.
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.getPrimaryValue = function(input) { return input? (input.selectedIndex !== -1 && input.options[input.selectedIndex].value) : ""; };
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.typeDescription = "a value from the dropdown";
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.regex = new RegExp(".");
-top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdValue) {
+
+top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = function(bdValue, needClear){
+
+	if(needClear){
+		//find and remove previous selector
+		var parent = this.inputCell,
+				 i;
+		 for (i = 0; i < this.inputs.length; i++) {
+		 	parent.removeChild(this.inputs[i]); //this.inputs.shift()
+		 }
+		 this.inputs = [];
+	}
+
+
+	//disabled terms
 	var termHeaderList = typeof this.recFieldRequirements[13] == "string" ?
 						top.HEURIST.util.expandJsonStructure(this.recFieldRequirements[13]): [];//get DetailType non selectables
+/*
+	var newInput = this.document.createElement("div");
+	this.addInputHelper.call(this, bdValue, newInput);
+	newInput.style.width = "auto";
+
+
+		var newCombo = top.HEURIST.util.createTermSelect(top.HEURIST.util.expandJsonStructure(this.recFieldRequirements[11]),
+														termHeaderList,
+														this.detailType[2] == "enum" ?
+															top.HEURIST.terms.termsByDomainLookup['enum'] :
+															top.HEURIST.terms.termsByDomainLookup.relation,
+														(bdValue && bdValue.value ? bdValue.value : null));
+		newInput.appendChild(newCombo);
+*/
 	var newInput = top.HEURIST.util.createTermSelect(top.HEURIST.util.expandJsonStructure(this.recFieldRequirements[11]),
 														termHeaderList,
 														this.detailType[2] == "enum" ?
@@ -1553,6 +1584,78 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdV
 														(bdValue && bdValue.value ? bdValue.value : null));
 	this.addInputHelper.call(this, bdValue, newInput);
 	newInput.style.width = "auto";
+
+	return newInput;
+}
+
+top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdValue) {
+
+		var newInput = this.recreateSelector(bdValue, false);
+
+		if(this.inputs.length>1 || !top.HEURIST.is_admin()) {return}  //only one edit link
+
+		var urlSpan = this.document.createElement("span");
+			urlSpan.style.paddingLeft = "1em";
+			urlSpan.style.color = "blue";
+			urlSpan.style['float'] = "right";
+			urlSpan.style.cursor = "pointer";
+		var editImg = urlSpan.appendChild(this.document.createElement("img"));
+			editImg.src = top.HEURIST.basePath+"common/images/edit-pencil.png";
+		urlSpan.appendChild(editImg);
+		urlSpan.appendChild(this.document.createTextNode("edit"));
+
+		//var detailType = this.detailType;
+		//var recFieldRequirements = this.recFieldRequirements;
+		//urlSpan.comboboxSelector = newInput;
+		urlSpan.thisElement = this;
+		urlSpan.bdValue = bdValue;
+
+		//open selectTerms to update detailtype
+		urlSpan.onclick = function() {
+//-----------------------------------------------
+	var _dtyID = this.thisElement.detailType[12];
+	var type = this.thisElement.detailType[2]; //enum or relation
+	var _element = this.thisElement;
+	var _bdValue = this.bdValue;
+	//var allTerms = top.HEURIST.util.expandJsonStructure(recFieldRequirements[11]);
+	//var disTerms = termHeaderList;
+	//"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+
+
+	function onSelecTermsUpdate(editedTermTree, editedDisabledTerms) {
+			if(editedTermTree || editedDisabledTerms) {
+				// recreate and replace combobox
+				_element.recFieldRequirements[11] = editedTermTree;
+				_element.recFieldRequirements[13] = editedDisabledTerms;
+
+				_element.recreateSelector(_bdValue, true);
+
+				/* update hidden fields
+				Dom.get("dty_JsonTermIDTree").value = editedTermTree;
+				Dom.get("dty_TermIDTreeNonSelectableIDs").value = editedDisabledTerms;
+					_recreateTermsPreviewSelector(Dom.get("dty_Type").value, editedTermTree, editedDisabledTerms);
+				*/
+			}
+	}
+
+
+	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+
+	top.HEURIST.util.popupURL(top, top.HEURIST.basePath +
+		"admin/structure/selectTerms.html?detailTypeID="+_dtyID+"&db="+db,
+		{
+		"close-on-blur": false,
+		"no-resize": true,
+		height: 500,
+		width: 750,
+		callback: onSelecTermsUpdate
+		}
+	);
+//-----------------------------------------------
+		};
+
+		//this.inputCell.insertBefore(urlSpan, this.promptDiv);
+		this.inputCell.appendChild(urlSpan);
+
 };
 
 /**
@@ -1944,7 +2047,7 @@ top.HEURIST.edit.Reminder = function(parentElement, reminderDetails) {
 	} else if (reminderDetails.group) {
 		who = top.HEURIST.workgroups[reminderDetails.group]
 		if (who) who = who.name;
-d	} else if (reminderDetails.email) {
+	} else if (reminderDetails.email) {
 		who = reminderDetails.email;
 	} else {
 		who = "";
