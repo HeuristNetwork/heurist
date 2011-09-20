@@ -76,7 +76,7 @@
         <div class="input-cell"><input type="file" name="new_icon" style="display:inline-block;"></div>
    </div>
    <div class="actionButtons" style="padding-left:100px">
-   		<input type="button" value="Upload" style="margin-right:10px">
+   		<input type="button" onclick="window.document.forms[0].submit();" value="Upload" style="margin-right:10px">
    		<input type="button" value="Close window" onClick="window.close(null);"></div>
    </div>
   </form>
