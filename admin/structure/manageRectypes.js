@@ -145,7 +145,7 @@ function RectypeManager() {
 					'&nbsp;&nbsp;&nbsp;'+
 				'<input id="btnSave'+grpID+'" type="button" value="Save Changes" '+
 							'style="color:red; display: none;"/>'+ //inline-block
-				'<input type="button" id="btnAddRecordType'+grpID+'" value="Add Record Type" style="float:right;"/>'+
+				'<input type="button" id="btnAddRecordType'+grpID+'" value="Add Record Type" class="add"/>'+
 				//'<input type="button" id="btnAddFieldType'+grpID+'" value="Add Field Type" style="float:right;"/>'+
 			'</div></div>'+
 			'<div id="tabContainer'+grpID+'"></div></div>')
@@ -619,7 +619,6 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 				function __hideToolTip2() {
 					needHideTip = true;
 					//_hideToolTip();
-					//hideTimer = window.setTimeout(_hideToolTip, 500);
 				}
 				//tooltip div mouse over
 				function __clearHideTimer2() {
@@ -658,13 +657,20 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 					my_tooltip.mouseover(__clearHideTimer2);
 					my_tooltip.mouseout(__hideToolTip2);
 
-					var xy = Hul.getMousePos(event);
+					//var xy = Hul.getMousePos(event);
+					xy = [posx = event.target.x,posy = event.target.y];
+
+
 					my_tooltip.html(textTip);  //DEBUG xy[0]+",  "+xy[1]+"<br/>"+
 
-					//Hul.showPopupDivAt(my_tooltip, xy);
-					Hul.showPopupDivAt(my_tooltip, xy, $(window).scrollTop(), $(window).width(), $(window).height(),0);
+					var border_top = $(window).scrollTop();
+					var border_right = $(window).width();
+					var border_height = $(window).height();
+					var offset =0;
 
-					hideTimer = window.setTimeout(_hideToolTip, 5000);
+					Hul.showPopupDivAt(my_tooltip, xy,border_top ,border_right ,border_height, offset );
+
+					//hideTimer = window.setTimeout(_hideToolTip, 2000);
 				}
 				else if(forceHideTip) {
 					_hideToolTip();
@@ -835,7 +841,8 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 			clearHideTimer();
 			var my_tooltip = $("#toolTip2");
 			my_tooltip.css( {
-				left:"-9999px"
+				visibility:"hidden",
+				opacity:"0"
 			});
 		}
 	}
@@ -875,7 +882,6 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 	// call new popup - to edit detail type
 	//
 	function _editDetailType(detailTypeID) {
-
 		var URL = "";
 		if(detailTypeID) {
 			URL = top.HEURIST.basePath + "admin/structure/editDetailType.html?db="+db+"&detailTypeID="+detailTypeID;
@@ -884,11 +890,14 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 			URL = top.HEURIST.basePath + "admin/structure/editDetailType.html?db="+db;
 		}
 
+		var popupHeight = Math.round(document.body.offsetHeight * 0.9);
+		var popupWidth = Math.round(document.body.offsetWidth * 0.6);
+
 		Hul.popupURL(top, URL, {
 			"close-on-blur": false,
 			"no-resize": false,
-			height: 600,
-			width: 640,
+			height: popupHeight,
+			width: popupWidth,
 			callback: function(changedValues) {
 				if(Hul.isnull(changedValues)) {
 					// Canceled
@@ -910,6 +919,9 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 		var dim = Hul.innerDimensions(this.window);
 
 		Hul.popupURL(top, URL, {
+
+			//"no-titlebar": true,
+			//"title": "Editing Record Structure",
 			"close-on-blur": false,
 			"no-resize": false,
 			height: dim.h*0.9,
@@ -1201,8 +1213,9 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 		doGroupCancel: function(){ _doGroupCancel(); },
 		hasChanges: function(){ return  (_updatesCnt>0); },
 		showInfo: function(rectypeID, event){ _showInfoToolTip( rectypeID, event ); },
-		hideInfo: function() { hideTimer = window.setTimeout(_hideToolTip, 1000); },
-
+		hideInfo: function() { hideTimer = window.setTimeout(_hideToolTip, 500); },
+		forcehideInfo: function() { hideTimer = window.setTimeout(_hideToolTip, 0); },
+		//hideInfo: function() { _hideToolTip(); },
 		getClass: function () {
 			return _className;
 		},

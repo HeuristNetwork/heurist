@@ -22,6 +22,8 @@
  <head>
   <link rel=stylesheet href="../../common/css/global.css">
   <link rel=stylesheet href="../../common/css/edit.css">
+  <link rel=stylesheet href="../../common/css/admin.css">
+
 
   <script type="text/javascript">
 
@@ -145,7 +147,7 @@ function addFileUploadInput()
   </script>
 
  </head>
- <body class="editTab" onload="addFileUploadInput()">
+ <body class="popup" onLoad="addFileUploadInput()">
   <script src="../../common/js/utilsLoad.js"></script>
   <script src="../../common/php/displayPreferences.php"></script>
 
@@ -188,7 +190,7 @@ function addFileUploadInput()
 		<div id="fileUploadDiv" class="file-div empty"
 				style="width: 80ex;" title="Screenshot">
 			<input class="file-select" id="fileUploadInput"
-				name="type:<?=DT_BUG_REPORT_FILE?>[]" type="file" onchange="doUploadFile(event)"></div>
+				name="type:<?=DT_BUG_REPORT_FILE?>[]" type="file" onChange="doUploadFile(event)"></div>
 			<div class="help prompt">Make a screenshot of bug and browser this image file</div>
 	</div>
 </div>

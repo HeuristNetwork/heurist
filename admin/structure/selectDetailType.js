@@ -87,7 +87,7 @@ function SelectDetailType() {
 									//window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 									top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 									rty_ID = top.HEURIST.parameters.rty_ID;
-									document.title = top.HEURIST.rectypes.names[rty_ID]+" - select and add field types";
+									document.title = "ADD FIELD TYPES: " + top.HEURIST.rectypes.names[rty_ID];
 								}
 
 								//////////////////// create data table

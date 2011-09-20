@@ -397,6 +397,7 @@ function EditRecStructure() {
 						_myDataTable.onEventToggleRowExpansion(record_id);
 						_expandedRecord = rst_ID;
 						_fromArrayToUI(rst_ID, false); //after expand restore values from HEURIST
+
 					}else{
 						_saveUpdates(false); //save on server
 					}
@@ -1417,7 +1418,7 @@ function onAddNewDetail(){
 		{	"close-on-blur": false,
 			"no-resize": false,
 			height: 480,
-			width: 440,
+			width: 700,
 			callback: function(detailTypesToBeAdded) {
 				if(!Hul.isnull(detailTypesToBeAdded)){
 					editStructure.addDetails(detailTypesToBeAdded);

@@ -25,6 +25,7 @@ after selection, 26-05-2011, by Juan Adriaanse
 <style type="text/css">
 .yui-skin-sam .yui-dt-liner { white-space:nowrap; }
 .button {padding:2px; width:auto; height:15px !important}
+button.button {width:auto;}
 </style>
 
 <link rel=stylesheet href="../../common/css/global.css">
@@ -33,15 +34,16 @@ after selection, 26-05-2011, by Juan Adriaanse
 </head>
 <body class="popup yui-skin-sam" style="overflow: auto;">
 
-<div class="banner"><h2>Registered databases</h2></div>
+<div class="banner"><h2>Import record type definitions into current database</h2></div>
 <div id="page-inner" style="overflow:auto">
 
 <div id="statusMsg"><img src="../../common/images/mini-loading.gif" width="16" height="16" /> &nbspDownloading database list...</div>
-
-The list below shows all databases registered with the HeuristScholar.org Index database.
-Use the filter to locate a specific term in the name or title. <br>
-Click the database icon on the left to view available record types in that database.
-<br><br>
+<div>
+<p>    The list below shows available databases registered with the HeuristScholar.org Index database.<br>
+    Use the filter to locate a specific term in the name or title. <br>
+    Click the database icon on the left to view available record types in that database.
+    <br><br>
+</p></div>
 <div class="markup" id="filterDiv" style="display:none">
 	<label for="filter">Filter:</label> <input type="text" id="filter" value="">
 	<div id="tbl"></div>
@@ -101,6 +103,7 @@ var registeredDBs = [];
 		if($res) {
 			$row = mysql_fetch_row($res);
 			$ownDBID = $row[0];
+			echo 'var ownDBname = "'.$ownDBID.'";' . "\n";
 		} else {
 			$ownDBID = 0;
 		}

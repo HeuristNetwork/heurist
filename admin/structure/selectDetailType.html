@@ -17,109 +17,122 @@
 
 -->
 <html>
-	<head>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>DETAIL TYPE</title>
+<link rel="icon" href="../../favicon.ico" type="image/x-icon">
+<link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+<link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
+<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
 
+<!-- YUI -->
+<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/history/history-min.js"></script>
 
-		<meta http-equiv="content-type" content="text/html; charset=utf-8">
-		<title>Heurist - details</title>
+<!-- DATATABLE DEFS -->
+<link type="text/css" rel="stylesheet" href="../../external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
+<!-- datatable Dependencies -->
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/datasource/datasource-min.js"></script>
+<!-- OPTIONAL: Drag Drop (enables resizeable or reorderable columns) -->
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
+<!-- Source files -->
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
+<!-- END DATATABLE DEFS-->
 
-		<link rel="icon" href="../../favicon.ico" type="image/x-icon">
-		<link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+<!-- PAGINATOR -->
+<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/paginator/assets/skins/sam/paginator.css">
+<script type="text/javascript" src="../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
+<!-- END PAGINATOR -->
 
-		<link rel="stylesheet" type="text/css" href="../../common/css/heurist.css">
-		<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-
-		<!-- YUI -->
-		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
-		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
-		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
-		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/history/history-min.js"></script>
-
-		<!-- DATATABLE DEFS -->
-		<link type="text/css" rel="stylesheet" href="../../external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
-		<!-- datatable Dependencies -->
-		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/datasource/datasource-min.js"></script>
-		<!-- OPTIONAL: Drag Drop (enables resizeable or reorderable columns) -->
-		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
-		<!-- Source files -->
-		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
-		<!-- END DATATABLE DEFS-->
-
-		<!-- PAGINATOR -->
-		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/paginator/assets/skins/sam/paginator.css">
-		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
-		<!-- END PAGINATOR -->
-
-		<!-- OVERLAYS
+<!-- OVERLAYS
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/button/button-min.js"></script>
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/container/container-min.js"></script>
 		END OVERLAYS -->
 
-		<script type="text/javascript" src="../../external/jquery/jquery.js"></script>
-		<!-- <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>  -->
+<script type="text/javascript" src="../../external/jquery/jquery.js"></script>
+<!-- <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>  -->
 
-		<style type="text/css">
-			.tooltip {
-				position:absolute;
-				z-index:999;
-				left:-9999px;
-				top:0px;
-				background-color:#dedede;
-				padding:5px;
-				border:1px solid #fff;
-				min-width:200;
-			}
+<style type="text/css">
+.tooltip {
+	position:absolute;
+	z-index:999;
+	left:-9999px;
+	top:0px;
+	background-color:#dedede;
+	padding:5px;
+	border:1px solid #fff;
+	min-width:200;
+}
+.yui-skin-sam .yui-dt td {
+	margin:0;
+	padding:0;
+	border:none;
+	text-align:left;
+}
+.yui-skin-sam .yui-dt-list td {
+	border-right:none; /* disable inner column border in list mode */
+}
+.labeldiv {
+	display: inline-block;
+	width: 60px;
+	text-align: right;
+}
+.yui-dt table {
+	width: 100%;
+}
+.input-row label {width: auto;color: black;margin: 0 10px 0 0;padding: 0;}
+#toolbar .input-cell select { margin-right:10px}
+.input-row .input-header-cell {vertical-align:baseline}
+.input-row div.input-header-cell {width:50px}
+</style>
+</head>
 
-			.yui-skin-sam .yui-dt td {
-				margin:0;padding:0;
-				border:none;
-				text-align:left;
-			}
-			.yui-skin-sam .yui-dt-list td {
-				border-right:none; /* disable inner column border in list mode */
-			}
-			.labeldiv{
-				display: inline-block;
-				width: 60px;
-				text-align: right;
-			}
-			.yui-dt table {
-    				width: 400;
-			}
-		</style>
-
-	</head>
-
-
-	<body class="yui-skin-sam" style="overflow: scroll;">
-
-		<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
-		<script src="../../common/php/loadCommonInfo.php"></script>
-		<script type="text/javascript" src="selectDetailType.js"></script>
-
-		<div class="tooltip" id="toolTip2"><p>popup popup</p></div>
-
-		<div style="width:400;margin:auto;">
-
-			<div id="toolbar" style="height:80">
-				<div><label>Filter</label></div>
-				<div><div class="labeldiv"><label>by group:</label></div><select id="inputFilterByGroup" name="inputFilterByGroup" size="1" style="width:138px;height:16"><option value="all">all groups</option></select></div>
-				<div><div class="labeldiv"><label>by name:</label></div><input type="text" id="inputFilterByName" name="inputFilterByName" style="width:140px;" value=""/></div>
-				<div><div class="labeldiv"><label>show:</label></div><input type="radio" id="inputFilterBySelection1" name="inputFilterBySelection" value="all" checked="checked"/> All <input type="radio" id="inputFilterBySelection2" name="inputFilterBySelection" value="selonly"/> Selected&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" id="btnClearSelection" value="clear" title="clear selection"/></div>
-			</div>
-
-			<div id="tb_top" style="height:30">
-				<div style="display:inline-block;"><div id="dt_pagination_top"></div></div>
-				<div style="float:right; text-align:right;padding-top:5px">
-					<label id="lblSelect1"></label>
-					<input type="button" tabindex="12" value="Cancel" onclick="selectDetailType.cancel();" />
-					<input type="button" tabindex="11" value="Insert Selection" onclick="selectDetailType.apply();" />
-				</div>
-			</div>
-
-			<div id="tabContainer">
-
-				<script  type="text/javascript">
+<body class="popup yui-skin-sam" style="overflow: scroll;">
+<script type="text/javascript" src="../../common/js/utilsLoad.js"></script> 
+<script src="../../common/php/loadCommonInfo.php"></script> 
+<script type="text/javascript" src="selectDetailType.js"></script>
+<div class="tooltip" id="toolTip2">
+  <p>tool-tip</p>
+</div>
+<div id="toolbar">
+  <div class="input-row">
+  	<div class="input-header-cell">
+    	Filter by:
+        </div>
+     <div class="input-cell">
+    	<label>group:</label>
+		<select id="inputFilterByGroup" name="inputFilterByGroup" size="1" style="width:138px;height:16">
+			<option value="all">all groups</option>
+		</select>
+        <label>name:</label>
+		    <input type="text" id="inputFilterByName" name="inputFilterByName" style="width:140px;" value=""/>
+      </div>
+	</div>
+	<div class="input-row">
+  	<div class="input-header-cell">
+		show:
+    	</div>
+     <div class="input-cell">
+	    <input type="radio" id="inputFilterBySelection1" name="inputFilterBySelection" value="all" checked="checked"/><label for="inputFilterBySelection1">All</label>
+        <input type="radio" id="inputFilterBySelection2" name="inputFilterBySelection" value="selonly"/><label for="inputFilterBySelection2">Selected</label>
+        </div>
+		</div>
+    </div>
+</div>
+<div id="tb_top" style="height:30">
+  <div style="display:inline-block;"> </div>
+  <div style="float:right; text-align:right;padding-top:5px">
+    <label id="lblSelect1"></label>
+    <!--    <input type="button" id="btnClearSelection" value="clear selection" title="clear selection"/>
+    <input type="button" tabindex="12" value="Cancel" onClick="selectDetailType.cancel();" />-->
+    <input type="button" tabindex="11" value="Insert Selected Fields" onClick="selectDetailType.apply();" />
+  </div>
+</div>
+<div id="tabContainer"> 
+  <script  type="text/javascript">
 
 				// SelectDetailType object
 				var selectDetailType;
@@ -133,18 +146,15 @@
 				YAHOO.util.Event.onDOMReady(init);
 				//YAHOO.util.Event.addListener(window, "load", function(){ selectDetailType = new  SelectDetailType(); });
 
-				</script>
-			</div>
-
-			<div id="tb_bottom" style="height:30">
-				<div style="display:inline-block;"><div id="dt_pagination_bottom"></div></div>
-				<div style="float:right; text-align:right;padding-top:5px">
-					<label id="lblSelect2"></label>
-					<input type="button" tabindex="12" value="Cancel" onclick="selectDetailType.cancel();" />
-					<input type="button" tabindex="11" value="Insert Selection" onclick="selectDetailType.apply();" />
-				</div>
-			</div>
-
-		</div>
-	</body>
+				</script> 
+</div>
+<div id="tb_bottom" style="height:30">
+  <div style="display:inline-block;"> </div>
+  <div style="float:right; text-align:right;padding-top:5px">
+    <label id="lblSelect2"></label>
+    <!--<input type="button" tabindex="12" value="Cancel" onClick="selectDetailType.cancel();" />-->
+    <input type="button" tabindex="11" value="Insert Selected Fields" onClick="selectDetailType.apply();" />
+  </div>
+</div>
+</body>
 </html>

@@ -22,10 +22,22 @@
   <title>Email record</title>
 
   <link rel=stylesheet href="../../common/css/global.css">
-
+  <link rel=stylesheet href="../../common/css/edit.css">
+  <link rel=stylesheet href="../../common/css/admin.css">
  <!--
 <script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
 <script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script> -->
+
+	<style>
+		.greyButton {
+			background-image: url("../../common/images/bug_off.png");
+			background-repeat: no-repeat;
+			background-position: 0 -1px;
+			padding: 0 6px 0 20px;
+			line-height: 19px;
+		}
+		
+	</style>
 
  </head>
 
@@ -39,8 +51,8 @@
 
 <div class="header"><b><span id=rectype-val></span></b><span id=title-val></span></div>
 <div id="results"><iframe frameborder=0 class=tab id=edit-frame style="width: 100%; height: 100%;"></iframe></div>
-<div id="add_records_footer" style="width:100%;text-align: center;">
-	<input id="btnSubmit" type=button onClick="window.HEURIST.edit.save();" value="Email record">
+<div id="add_records_footer" style="width:100%;text-align: center;height:30px">
+	<input id="btnSubmit" type=button onClick="window.HEURIST.edit.save();" value="Email record" class="greyButton">
 </div>
 
   <script type="text/javascript">

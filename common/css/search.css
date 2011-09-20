@@ -1804,7 +1804,8 @@ div.searchInput > .simplesearch.collapsed {
 }
 .simple-search-row {
 	border-top:1px solid #666;
-	padding:3px
+	padding:3px;
+	white-space:normal
 	}
 #simple-search .simple-search-row .button {
 	background-color: rgba(100, 100, 100, 0.6);
@@ -2026,7 +2027,8 @@ div.recorddiv:hover > #recordID {
     top: 51px;
 	border:1px solid #999;
 	width:auto;
-	z-index:1
+	z-index:1;
+	white-space:nowrap;
 }
 #page, #page-right, .yui-skin-sam .yui-navset .yui-content, .yui-skin-sam .yui-navset .yui-navset-top .yui-content  {
 	border-radius:0;

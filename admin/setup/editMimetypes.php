@@ -53,7 +53,7 @@ $fielddef = array(
         FLD_INPUT_SZ => 50, FLD_INPUT_MAXLEN => 100, FLD_INPUT_DFLT => '',
         FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => '',
         FLD_DATABASE => 'fxm_MimeType'),
-    'f2' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Open this file type in new window (1 = yes, 0 = no)', FLD_DISPLAY_SZ => 2,
+    'f2' => array(FLD_ID => false, FLD_VISIBLE => true, FLD_DISPLAY => 'Open in new window (1 = yes, 0 = no)', FLD_DISPLAY_SZ => 5,
         FLD_INPUT => true, FLD_INPUT_TYPE => 'text',
         FLD_INPUT_SZ => 1, FLD_INPUT_MAXLEN => 1, FLD_INPUT_DFLT => '1',
         FLD_INPUT_NOTEMPTY => true, FLD_INPUT_VALIDATION => 'Numeric',
@@ -192,13 +192,14 @@ switch ($mode) {
 <html><head>
 <title>Heurist Mime Types Editing</title>
 <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $config['encoding'];?>" />
+        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+		<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
 <style type="text/css">
-    body                 { font-family: Tahoma,sans-serif,Verdana; font-size: 9pt;}
+
     table.datatable      { background: #fcfcfc; }
-    table.datatable * td { padding: 0px 8px 0px 8px; margin: 0 8px 0 8px; }
-    tr.sublight          { background: #ededed; }
-/*     table.datatable * tr { white-space: nowrap; } */
-    table.datatable * th { background: #ffffcc; text-align: center; }
+    table.datatable * td { padding: 2px 8px 2px 8px; margin: 0 8px 0 8px; }
+    tr.sublight          { background: #EFF2F6; }
+    table.datatable * th { background: #DBDFE6; text-align: center; }
 </style>
 <script  type="text/javascript">
 <!--
@@ -325,7 +326,7 @@ function CheckForm(theForm) {
 //-->
 </script>
 </head>
-<body>
+<body class="popup">
 <?php
     if ($show_message) {
 ?>
@@ -338,7 +339,7 @@ function CheckForm(theForm) {
 
 <?php
     } else if ($show_input) {
-      echo "<h3>Heurist Mime Types for db = " . HEURIST_DBNAME ."</h3>";
+      echo "<div class='banner'><h2>Heurist Mime Types for " . HEURIST_DBNAME ."</h2></div><div id='page-inner'>";
 ?>
 
 <form name="InputForm" method="post" enctype="multipart-form-data"
@@ -383,7 +384,7 @@ function CheckForm(theForm) {
     ?>
 </form>
 <?php } else if ($show_data) { ?>
-<?php echo "<h3>Heurist Mime Types for db = " . HEURIST_DBNAME . ";    </h3>"; ?>
+<?php echo "<div class='banner'><h2>Heurist Mime Types for " . HEURIST_DBNAME . "</h2></div><div id='page-inner'>"; ?>
 <form name="ActionForm" method="post" action="">
 <table cellpadding="1" cellspacing="0" border="0" bgcolor="#ababab"><tr><td>
 <table cellpadding="0" cellspacing="1" border="0" class="datatable">
@@ -440,16 +441,13 @@ function CheckForm(theForm) {
         }
     ?>
 <br />
-<table cellpadding="1" cellspacing="0" border="0" bgcolor="#ababab"><tr><td>
-<table cellpadding="1" cellspacing="0" border="0" bgcolor="#fcfcfc"><tr><td>
+<div style="margin-bottom:20px">
     <input type="button" value="insert" onclick="document.forms.ActionForm.action='?mode=i'; document.forms.ActionForm.submit()" />&nbsp;
     <input type="button" value="edit" onclick="document.forms.ActionForm.action='?mode=u'; document.forms.ActionForm.submit()" />&nbsp;
     <input type="button" value="delete" onclick="document.forms.ActionForm.action='?mode=d'; document.forms.ActionForm.submit()" />
-</td></tr>
-</table>
-</td></tr>
-</table>
+</div>
 </form>
 <?php } ?>
+</div>
 </body>
 </html>

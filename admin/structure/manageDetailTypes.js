@@ -326,10 +326,11 @@ function DetailTypeManager() {
 
 			var myColumnDefs = [
 			{ key: "id", label: "Code", sortable:true, width:40, className:'right',resizeable:false },
-			{ key: "usage", label: "Info", sortable:true, className:'count',
+			{ key: "usage", label: "Info", sortable:true, className:'count', 
 				formatter: function(elLiner, oRecord, oColumn, oData) {
-					var str = oRecord.getData("usage");
-					elLiner.innerHTML = '<span class="count">'+str+'</span>';
+				var str = oRecord.getData("usage");
+				var id = oRecord.getData("id");
+				elLiner.innerHTML = '<span class="count" onmouseover="detailTypeManager.showInfo('+id+', event)" onmouseout="detailTypeManager.hideInfo()"/>'+str+'</span>';
 				}},
 			{ key: "vis", label: "Show", sortable:false, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
 			{ key: "order", hidden:true },
@@ -548,6 +549,8 @@ function DetailTypeManager() {
 				_updateSaveNotice(grp_id);
 			}
 
+			/* MOVED TO SPAN LISTENER
+			
 			//mouse over help colums shows the datailed description
 			dt.on('cellMouseoverEvent', function (oArgs) {
 
@@ -564,8 +567,9 @@ function DetailTypeManager() {
 
 			});
 			dt.on('cellMouseoutEvent', function (oArgs) {
-				hideTimer = window.setTimeout(_hideToolTip, 2000);
-			});
+				//hideTimer = window.setTimeout(_hideToolTip, 0);
+				_hideToolTip();
+			});*/
 
 			arrTables[currentTabIndex] = dt;
 			arrDataSources[currentTabIndex] = myDataSource;
@@ -667,9 +671,9 @@ function DetailTypeManager() {
 					var border_height = $(window).height();
 					var offset =0;
 
-					Hul.showPopupDivAt(my_tooltip, xy,border_top ,border_right ,border_height, offset );
+					Hul.showPopupDivAt(my_tooltip,xy,border_top ,border_right ,border_height, offset );
 
-					hideTimer = window.setTimeout(_hideToolTip, 5000);
+					//hideTimer = window.setTimeout(_hideToolTip, 2000);
 				}
 				else if(forceHideTip) {
 					_hideToolTip();
@@ -850,8 +854,9 @@ function DetailTypeManager() {
 			clearHideTimer();
 			var my_tooltip = $("#toolTip2");
 			my_tooltip.css( {
-				left:"-9999px"
-			});
+				visibility:"hidden",
+				opacity:"0"
+			});;
 		}
 	}
 
@@ -1099,9 +1104,9 @@ function DetailTypeManager() {
 		doGroupDelete: function(){ _doGroupDelete(); },
 		doGroupCancel: function(){ _doGroupCancel(); },
 		hasChanges: function(){ return  (_updatesCnt>0); },
-		//showInfo: function(rectypeID, event){ _showInfoToolTip( rectypeID, event ); },
-		//hideInfo: function() { hideTimer = window.setTimeout(_hideToolTip, 1000); }
-
+		showInfo: function(rectypeID, event){ _showInfoToolTip( rectypeID, event ); },
+		hideInfo: function() { hideTimer = window.setTimeout(_hideToolTip, 500); },
+		forcehideInfo: function() { hideTimer = window.setTimeout(_hideToolTip, 0); },
 		getClass: function () {
 				return _className;
 		},

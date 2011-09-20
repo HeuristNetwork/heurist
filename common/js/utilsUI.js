@@ -1456,7 +1456,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
  		top_pos=xy[1]-(div_height/2)+offset+scrollValue;
 
 		_div.css( {
-			left:left_pos+'px', top:top_pos+'px',
+			left:left_pos+'px', top:top_pos+'px',visibility:'visible', opacity:'1'
 
 		});
 	},

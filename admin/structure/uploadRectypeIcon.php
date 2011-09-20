@@ -40,30 +40,23 @@
 ?>
 <html>
  <head>
-  <title>Upload reference type <?=(($mode==0)?'icon':'thumbnail')?></title>
-  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/newshsseri.css">
+
+  <title>Upload reference type icon</title>
+  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
+  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/admin.css">
 
   <style type="text/css">
 .success { font-weight: bold; color: green; margin-left: 3px; }
 .failure { font-weight: bold; color: red; margin-left: 3px; }
-.rtyLabel {
-	display: inline-block;
-	width: 120px;
-	text-align: right;
-	padding-right: 3px;
-}
-.rtyField {
-	padding-top: 10px;
-    display: block;
-}
+.input-row div.input-header-cell {width:90px; vertical-align:baseline}
   </style>
  </head>
 
- <body style="background-color: transparent; width: 320px; height: 120px;">
-
-   <div class="rtyField">
-   <label class="rtyLabel">Current <?=(($mode==0)?'icon':'thumbnail')?>:</label>
-   <img src="<?=$image_url?>?<?= time() ?>" style="vertical-align: middle; width:<?=$dim?>px; height:<?=$dim?>px;">
+ <body class="popup">
+   <div class="input-row">
+   	<div class="input-header-cell">Current <?=(($mode==0)?'icon':'thumbnail')?>:</div>
+    <div class="input-cell"><img src="<?=$image_url?>?<?= time() ?>" style="vertical-align: middle; width:<?=$dim?>px; height:<?=$dim?>px;"></div>
   </div>
 
 <?php	if ($success_msg) { ?>
@@ -72,17 +65,19 @@
   <div class="failure"><?= $failure_msg ?></div>
 <?php	} ?>
 
-  <form action="uploadRectypeIcon.php?db=<?= HEURIST_DBNAME?>" method="post" enctype="multipart/form-data" border="1">
+  <form action="uploadRectypeIcon.php?db=<?= HEURIST_DBNAME?>" method="post" enctype="multipart/form-data" border="0">
    <input type="hidden" name="rty_ID" value="<?= $rt_id ?>">
    <input type="hidden" name="mode" value="<?= $mode ?>">
    <input type="hidden" name="uploading" value="1">
 
-   <div class="rtyField">
-    	<label class="rtyLabel">Select new image</label><input type="file" name="new_icon" style="display:inline-block;">
+
+   <div class="input-row">
+    	<div class="input-header-cell">Select new image</div>
+        <div class="input-cell"><input type="file" name="new_icon" style="display:inline-block;"></div>
    </div>
-   <div style="line-height: 40px;text-align:center;width:100%;">
-   		<input type="submit" value="Upload" style="font-weight: bold; line-height: 20px;">
-   		<input type="button" value="Close window" onclick="window.close(null);">
+   <div class="actionButtons" style="padding-left:100px">
+   		<input type="button" value="Upload" style="margin-right:10px">
+   		<input type="button" value="Close window" onClick="window.close(null);"></div>
    </div>
   </form>
  </body>

@@ -138,7 +138,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #workgroup-editor .detailRow input, #workgroup-editor .detailRow label {
 	margin-right:10px;
 }
-#rectype-editor table tr td, #url-editor table tr td{
+#rectype-editor table tr td, #url-editor table tr td {
 	white-space: nowrap;
 	font-size: 11px;
 }
@@ -483,7 +483,7 @@ div.input-row div.input-cell div#relations-tbody {
 	width:100% !important
 }
 div.input-row div.input-cell div#relations-tbody div.relation {
-	display:block
+	display:block;
 }
 div.input-row div.input-cell div#relations-tbody div {
 	display: block;
@@ -502,12 +502,18 @@ div.input-row div.input-cell div#relations-tbody div div div.relation div.resour
 	margin: 5px;
 	width: 19px;
 }
-.temporal-button {
-	background: url("../images/temporal.gif") lightgray scroll center center no-repeat;
+div.temporal-div input.temporal-button {
+	background: url("../images/temporal.png") no-repeat scroll center center transparent;
 	border: medium none;
-	height: 13px;
-	margin: 5px;
+	margin: 2px 5px;
+	padding: 3px;
 	width: 19px;
+	border-radius:3px;
+	height:18px;
+	width:24px
+}
+div.temporal-div input.temporal-button:hover {
+	box-shadow: 0 1px 3px #666 inset;
 }
 /***** title row *****/
 .title-row {
@@ -522,10 +528,13 @@ div.input-row div.input-cell div#relations-tbody div div div.relation div.resour
 .input-row select {
 	display: block;
 	border: none;
-	font-size: 2ex;
+	font-size:11px;
 	padding: 0.5ex;
 	display:inline-block;
-	min-width: 40ex;
+}
+.popup .input-row select {
+	max-width:400px;
+	background-color:#ECF1FB;
 }
 .input-row div {
 	display: inline-block;
@@ -545,11 +554,12 @@ div.input-row div.input-cell div#relations-tbody div div div.relation div.resour
 	display:table-cell
 }
 .input-row.required div.input-header-cell {
-	color: red;
+	color: #354F75;
 	font-weight: bold;
 }
 .input-row.required div.input-header-cell:before {
 	content: "* ";
+	color:red;
 }
 .input-row.recommended div.input-header-cell {
 	color: #354F75;
@@ -574,7 +584,7 @@ input#tags, .input-cell .in, .input-cell .resource-title, .in, .input-row input:
 input#tags {
 	min-width :80ex;
 }
-input.resource-title, input.file-select, input[type="file"]{
+input.resource-title, input.file-select, input[type="file"] {
 	background-color:RGBA(255,255,255,0.5) !important;
 	border-color:RGBA(255,255,255,0);
 	color:#6A7C99;

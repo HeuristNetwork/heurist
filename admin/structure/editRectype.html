@@ -20,26 +20,20 @@
 
 <html>
 <head>
-
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
-<title>Create new record type</title>
-
-
-
+<title>CREATING NEW RECORD TYPE</title>
 <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
 <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
 <link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
 <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
 <style type="text/css">
-.input-row div.input-header-cell {width:150px}
-.actionButtons {
-	float:right;
-    padding-top: 30px;
-	padding-right: 130px;
+.input-row div.input-header-cell {
+	width:150px
 }
-.rtyHiddenField {display:none}
+.rtyHiddenField {
+	display:none
+}
 </style>
-
 </head>
 
 <body class="popup">
@@ -47,13 +41,9 @@
 
 <script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
 <script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json.js"></script>
-
 <script src="../../common/js/utilsLoad.js"></script>
 <script src="../../common/php/displayPreferences.php"></script>
 <script src="../../common/php/loadCommonInfo.php"></script>
-
-
-
 <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
 <script	 type="text/javascript">
 
@@ -75,123 +65,126 @@
 	catch(e) {} // No rectypeID, so give empty form to create a new one
 
 </script>
-
 <br />
 <div id="statusMsg"></div>
 <div id="rectypeValues" style="padding:5px;" >
-	<div id="rectypeThumb" class="rectypeThumb" style="display:inline-block;"></div>
-	<div id="rectypeIcon" class="rectypeIcon" style="padding-left:10px;display:inline-block;"></div>
-	<div style="float:right;"><a href="javascript:void(0)" onClick="viewEquivalences()">View equivalences</a></div>
-	<div class="input-row">
-		<div class="input-header-cell">Code:</div>
-		<div class="input-cell" id="rty_ID"></div>
-	</div>
-
-	<div class="input-row  required">
-		<div class="input-header-cell" for="rty_Name">Name:</div>
-		<div class="input-cell"><input id="rty_Name" maxlength="63" style="width:200;" onKeyUp="createPlural()" />
-        	<div class="help prompt">Name for display in selection lists, formats or reporting</div>
-        </div>
-	</div>
-
-	<div class="input-row required">
-		<div class="input-header-cell" for="rty_Plural">Plural:</div>
-		<div class="input-cell"><input id="rty_Plural" maxlength="63" style="width:200;" />
-			<div class="help prompt">Pluralised version of the name</div>
-		</div>
-	</div>
-
-    <div class="input-row">
-        <div class="input-header-cell" for="rty_RecTypeGroupID">Functional group:</div>
-        <div class="input-cell">
-        	<div class="rtyValue" id="rty_RecTypeGroupID"></div>
-        	<div class="help prompt help1">Record types are grouped together into related types for easier management</div>
-        </div>
+<!--  <div style="float:right;"><a href="javascript:void(0)" onClick="viewEquivalences()">View equivalences</a></div>-->
+  <div class="input-row">
+    <div class="input-header-cell" style="vertical-align: baseline;"><h2>Id:</h2></div>
+    <div class="input-cell"><h2><span class="recTypeName" id="rty_ID"></span></h2></div>
+  </div>
+  <div class="input-row">
+    <div class="input-header-cell" style="vertical-align: middle;">Thumbnail & Icon:</div>
+    <div class="input-cell" style="vertical-align: middle;">
+      <div id="rectypeThumb" class="rectypeThumb"></div>
+      <div id="rectypeIcon" class="rectypeIcon" style="margin: 10px 0;vertical-align: middle;"></div>
     </div>
-
-    <!-- HIDDEN -->
-	<div class="input-row" style="display:none">
-		<div class="input-header-cell" for="rty_Type">Record Type:</div>
-		<div class="input-cell">
-        	<div class="rtyValue" id="rty_Type"></div>
-			<div class="help prompt">Distinguish ordinary records from relationship records</div>
-		</div>
-	</div>
-
-    <!-- HIDDEN -->
-	<div class="input-row" style="display:none">
-		<div class="input-header-cell" for="rty_OrderInGroup">Order in group:</div>
-		<input onKeyPress="checkIfInteger(event)" maxlength="3" id="rty_OrderInGroup" style="width:30;"/>
-	</div>
-
-	<div class="input-row">
-		<div class="input-header-cell" for="rty_ShowInLists">Visible to end-user:</div>
-		<div class="input-cell">
-        	<input id="rty_ShowInLists" type="checkbox"/>
-			<div class="help prompt">Whether the user should be able to see this record type in lists etc.</div>
-		</div>
-	</div>
-
- <!-- HIDDEN -->
-    <div class="input-row" style="display:none">
-		<div class="input-header-cell">for="rty_Status">Status:</div>
-		<div class="input-cell">
-        	<div class="rtyValue" id="rty_Status"></div>
-			<div class="help prompt">The record type's status. 'Reserved' can not be changed, 'Open' can be changed and is normal setting</div>
-		</div>
-	</div>
-	<div class="input-row required">
-		<div class="input-header-cell" style="vertical-align:top" for="rty_Description">Description:</div>
-		<div class="input-cell">
-        	<textarea cols="200" id="rty_Description" rows="3" style="width:400;"></textarea>
-			<div class="help prompt">Detailed description of the record type, providing an explanation of its content</div>
-		</div>
-	</div>
-	<div class="input-row required">
-		<div class="input-header-cell" for="rty_TitleMask">Title mask:</div>
-		<div class="input-cell">
-        	<input maxlength="500" id="rty_TitleMask" style="width:300;"/><span><button onclick="_onEditMask()">Edit</button></span>
-			<div class="help prompt">Mask to build a composite title from fields (see manual).
-            The title mask is a string into which field values are inserted to create an extended title for the record, e.g. [Title], pp. [Start_Page]-[End_Page] renders the Title field and start and end page fields as in "Alice in Wonderland, pp. 37-39". The element names in square brackets should match field names for this record type. The constructed value is used as the extended title displayed in search results and other lists. To insert a literal square-bracket, use two consecutive square-brackets ([[ or ]]).</div>
-		</div>
-	</div>
-	<div class="input-row">
-		<div class="input-header-cell" for="rty_ReferenceURL">Reference URL:</div>
-		<div class="input-cell">
-        	<input id="rty_ReferenceURL" maxlength="250" style="width:400;" />
-			<div class="help prompt">URL to a full description of the record type or ontological description</div>
-		</div>
-	</div>
-
-    <!-- HIDDEN -->
-        <div class="input-row"  style="display:none">
-        <div class="input-header-cell" for="rty_FlagAsFieldset">Use as fieldset:</div>
-        <div class="input-cell">
-        	<input id="rty_FlagAsFieldset" type="checkbox"/>
-        	<div class="help prompt">Fieldsets are partial records for reuse in other records</div>
-        </div>
+  </div>
+  <div class="input-row  required">
+    <div class="input-header-cell" for="rty_Name">Name:</div>
+    <div class="input-cell">
+      <input id="rty_Name" maxlength="63" style="width:200;" onKeyUp="createPlural()" />
+      <div class="help prompt">Name for display in selection lists, formats or reporting</div>
     </div>
-
-    <!-- HIDDEN -->
-	<div class="input-row" style="display:none">
-		<div class="input-header-cell" for="rty_AlternativeRecEditor">Alternative record editor:</div>
-		<div class="input-cell">
-        	<input id="rty_AlternativeRecEditor" maxlength="250" style="width:400;" />
-			<div class="help prompt">PHP file providing a specialised editor for this record type</div>
-		</div>
-	</div>
-
-	<div class="rtyHiddenField"><input id="rty_CanonicalTitleMask" /></div>
-	<div class="rtyHiddenField"><input id="rty_RecTypeGroupID" /></div>
-
-
-        <div class="actionButtons">
-            <input type="button" style="height: 25px; width: 99px" value="Save" onClick="EditPopup.save(false);" />
-            <input type="button" style="height: 25px; width: 190px" value="Save and show structure (fields)" onClick="EditPopup.save(true)"/>
-            <input type="button" style="height: 25px; width: 99px" value="Cancel" onClick="EditPopup.cancel();" />
-        </div>
+  </div>
+  <div class="input-row required">
+    <div class="input-header-cell" for="rty_Plural">Plural:</div>
+    <div class="input-cell">
+      <input id="rty_Plural" maxlength="63" style="width:200;" />
+      <div class="help prompt">Pluralised version of the name</div>
     </div>
+  </div>
+  <div class="input-row">
+    <div class="input-header-cell" for="rty_RecTypeGroupID">Functional group:</div>
+    <div class="input-cell">
+      <div class="rtyValue" id="rty_RecTypeGroupID"></div>
+      <div class="help prompt help1">Record types are grouped together into related types for easier management</div>
+    </div>
+  </div>
 
+  <!-- HIDDEN -->
+  <div class="input-row" style="display:none">
+    <div class="input-header-cell" for="rty_Type">Record Type:</div>
+    <div class="input-cell">
+      <div class="rtyValue" id="rty_Type"></div>
+      <div class="help prompt">Distinguish ordinary records from relationship records</div>
+    </div>
+  </div>
+
+  <!-- HIDDEN -->
+  <div class="input-row" style="display:none">
+    <div class="input-header-cell" for="rty_OrderInGroup">Order in group:</div>
+    <input onKeyPress="checkIfInteger(event)" maxlength="3" id="rty_OrderInGroup" style="width:30;"/>
+  </div>
+  <div class="input-row">
+    <div class="input-header-cell" for="rty_ShowInLists">Visible to end-user:</div>
+    <div class="input-cell">
+      <input id="rty_ShowInLists" type="checkbox"/>
+      <div class="help prompt">Whether the user should be able to see this record type in lists etc.</div>
+    </div>
+  </div>
+
+  <!-- HIDDEN -->
+  <div class="input-row" style="display:none">
+    <div class="input-header-cell">for="rty_Status">Status:</div>
+    <div class="input-cell">
+      <div class="rtyValue" id="rty_Status"></div>
+      <div class="help prompt">The record type's status. 'Reserved' can not be changed, 'Open' can be changed and is normal setting</div>
+    </div>
+  </div>
+  <div class="input-row required">
+    <div class="input-header-cell" style="vertical-align:top" for="rty_Description">Description:</div>
+    <div class="input-cell">
+      <textarea cols="200" id="rty_Description" rows="3" style="width:400;"></textarea>
+      <div class="help prompt">Detailed description of the record type, providing an explanation of its content</div>
+    </div>
+  </div>
+  <div class="input-row required">
+    <div class="input-header-cell" for="rty_TitleMask">Title mask:</div>
+    <div class="input-cell">
+      <input maxlength="500" id="rty_TitleMask" style="width:400;"/>
+      <div class="help prompt">Mask to build a composite title from fields (see manual).
+        The title mask is a string into which field values are inserted to create an extended title for the record, e.g. [Title], pp. [Start_Page]-[End_Page] renders the Title field and start and end page fields as in "Alice in Wonderland, pp. 37-39". The element names in square brackets should match field names for this record type. The constructed value is used as the extended title displayed in search results and other lists. To insert a literal square-bracket, use two consecutive square-brackets ([[ or ]]).</div>
+    </div>
+  </div>
+  <div class="input-row">
+    <div class="input-header-cell" for="rty_ReferenceURL">Reference URL:</div>
+    <div class="input-cell">
+      <input id="rty_ReferenceURL" maxlength="250" style="width:400;" />
+      <div class="help prompt">URL to a full description of the record type or ontological description</div>
+    </div>
+  </div>
+
+  <!-- HIDDEN -->
+  <div class="input-row"  style="display:none">
+    <div class="input-header-cell" for="rty_FlagAsFieldset">Use as fieldset:</div>
+    <div class="input-cell">
+      <input id="rty_FlagAsFieldset" type="checkbox"/>
+      <div class="help prompt">Fieldsets are partial records for reuse in other records</div>
+    </div>
+  </div>
+
+  <!-- HIDDEN -->
+  <div class="input-row" style="display:none">
+    <div class="input-header-cell" for="rty_AlternativeRecEditor">Alternative record editor:</div>
+    <div class="input-cell">
+      <input id="rty_AlternativeRecEditor" maxlength="250" style="width:400;" />
+      <div class="help prompt">PHP file providing a specialised editor for this record type</div>
+    </div>
+  </div>
+  <div class="rtyHiddenField">
+    <input id="rty_CanonicalTitleMask" />
+  </div>
+  <div class="rtyHiddenField">
+    <input id="rty_RecTypeGroupID" />
+  </div>
+  <div class="actionButtons">
+    <input type="button" value="Save" onClick="EditPopup.save(false);" />
+    <input type="button" value="Save and show structure (fields)" onClick="EditPopup.save(true)"/>
+    <input type="button" value="Cancel" onClick="EditPopup.cancel();" />
+  </div>
+</div>
+</div>
 </div>
 <!--<iframe width="100%" height="auto" id="structureFrame"></iframe>
 -->
@@ -267,7 +260,7 @@
 	}
 
 	function setRtyValues() {
-		document.title = "Edit Record Type: " + rectype[0];
+		document.title = "EDITING RECORD TYPE"
 		getGroups();
 		getTypes();
 		if(rectype) {
@@ -736,6 +729,5 @@
 	structureFrame.src = URL;
 */
 </script>
-
 </body>
 </html>

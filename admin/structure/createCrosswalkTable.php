@@ -359,8 +359,8 @@ function _hideToolTip(){
 <script src="../../common/js/utilsUI.js"></script>
 <div id="page-inner" style="overflow:auto">
 
-<button id="finish1" onClick="dropTempDB(true)">Back to databases</button>
-<div id="crosswalk" style="width:100%;margin:auto;">
+<!--<button id="finish1" onClick="dropTempDB(true)" class="button">Back to databases</button>
+--><div id="crosswalk" style="width:100%;margin:auto;">
 	<div id="topPagination"></div>
 	<div id="crosswalkTable"></div>
 	<div id="bottomPagination"></div>
@@ -372,7 +372,7 @@ In version 3.0 this may also mean that the database is in a different format ver
 <!-- TODO: need a check on format version and report if there is a difference in format version -->
 
 <br>&nbsp;<br>
-<button id="finish2" onClick="dropTempDB(true)">Back to databases</button>
+<button id="finish2" onClick="dropTempDB(true)" class="button">Back to databases</button>
 <div class="tooltip" id="toolTip"><p>tooltip</p></div>
 
 <a id="shortLog" onClick="showShortLog()" href="#">Show short log</a><br />

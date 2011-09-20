@@ -91,12 +91,14 @@ function DetailTypeEditor() {
 		}
 
 		if (_dtyID && Hul.isnull(_detailType) ){
+			Dom.get("msg").style.visibility = "visible";
 			Dom.get("statusMsg").innerHTML = "Error: field type #"+_dtyID+"  not be found. Clicking 'save' button will create a new Field Type.";
 		}
 		//creates new empty field type in case ID is not defined
 		if(Hul.isnull(_detailType)){
 			_dtyID =  -1;
-			_detailType = ['','','freetext',0,'',1,'open',dtgID,null,null,null,null];
+			//_detailType = ['','','freetext',0,'',1,'open',dtgID,null,null,null,null];
+			_detailType = ['','','',0,'',1,'open',dtgID,null,null,null,null];
 			Dom.get("dty_Type").disabled = false;
 		}else{
 			Dom.get("dty_Type").disabled = true;
@@ -368,8 +370,10 @@ function DetailTypeEditor() {
 
 			if(iusage > 0) {
 				if(iusage===1) {
+					Dom.get("msg").style.visibility = "visible";
 					Dom.get("statusMsg").innerHTML = warningImg + "WARNING: this fieldtype is used in " + iusage + " recordtype. Changes will affect that recordtype.";
 				} else {
+					Dom.get("msg").style.visibility = "visible";
 					Dom.get("statusMsg").innerHTML = warningImg + "WARNING: this fieldtype is used in " + iusage + " recordtypes. Changes will affect every one of those.";
 				}
 			}
