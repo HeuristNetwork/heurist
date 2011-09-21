@@ -392,7 +392,7 @@ function processAction(rtyID, action, rectypeName) {
 	// Lock import, and set import icon to loading icon
 	if(action == "import") {
 		importPending = true;
-		document.getElementById("importIcon"+rtyID).src = "../setup/loading.gif";
+		document.getElementById("importIcon"+rtyID).src = "../../common/images/mini-loading.gif";
 	}
 	var xmlhttp;
 	if (action.length == 0) {
@@ -413,10 +413,8 @@ function processAction(rtyID, action, rectypeName) {
 			var response = xmlhttp.responseText;
 			// Handle the response, and give feedback
 			if(response.substring(0,6) == "prompt") {
-				document.getElementById("importIcon"+rtyID).src = "import_icon.png";
 				changeDuplicateEntryName(rtyID, rectypeName);
 			} else if(response.substring(0,5) == "Error") {
-				document.getElementById("importIcon"+rtyID).src = "import_icon.png";
 
 				shortImportLog += '<p style="color:red">'+response+"</p>";
 				result += response+"\n\n";
@@ -431,8 +429,9 @@ function processAction(rtyID, action, rectypeName) {
 				}, 0);
 				document.getElementById("log").style.color = "red";
 				document.getElementById("log").innerHTML=response;
-				document.getElementById("popup-saved").innerHTML = "<b>Import succesfull</b>";
+				document.getElementById("popup-saved").innerHTML = "<b>Import error</b>";
 			} else {
+				document.getElementById("importIcon"+rtyID).src = "../../common/images/import_icon.png";
 				detailedImportLog += response;
 				response = response.split("<br />");
 				result += response[0]+"\n\n";
@@ -464,7 +463,7 @@ function processAction(rtyID, action, rectypeName) {
 //						"&crwDefType="+crwDefType+
 //						"&crwLocalCode="+crwLocalCode+
 						"&replaceRecTypeName="+replaceRecTypeName+
-						"&importingTargetDBName="+importingTargetDBFullName,
+						"&importingTargetDBName="+importTargetDBFullName,
 						true);
 	xmlhttp.send();
 }
