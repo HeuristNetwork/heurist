@@ -842,3 +842,12 @@ h3 {
 		background-image:url(../images/bug_on.png);
 }
 .recTypeName {text-transform:none !important}
+.rectypeIconHolder {
+	width: 16px;
+	height: 16px;
+	display: inline-block;
+	vertical-align: bottom;
+	margin-right: 5px;
+	background-position: center;
+	background-repeat: no-repeat;
+}

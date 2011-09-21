@@ -43,25 +43,26 @@ function EditRecStructure() {
 			window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 			rty_ID = window.HEURIST.parameters.rty_ID;
 			//DEBUG Dom.get("ed_rty_ID").value = rty_ID;
-			document.title = "Record Type: " + rty_ID+" : " + top.HEURIST.rectypes.names[rty_ID];
+			var recTypeIcon  = top.HEURIST.baseURL + "common/images/"+top.HEURIST.database.name+"/rectype-icons/"+rty_ID+".png";
+			var formTitle = document.getElementById('recordTitle');
+			formTitle.innerHTML = "<div class=\"rectypeIconHolder\" style=\"background-image:url("+recTypeIcon+")\"></div><span class=\"recTypeName\">"+top.HEURIST.rectypes.names[rty_ID]+"</span>";
+			//document.title = "Record Type: " + rty_ID+" : " + top.HEURIST.rectypes.names[rty_ID];
 			//since popup - we don't need it document.getElementById("recordTitle").innerHTML = "Editing Record Type: "+ top.HEURIST.rectypes.names[rty_ID] + "("+rty_ID+")";
 		}
 
 
 		// buttons on top and bottom of design tab
-		var hToolBar = '<div style="width:740px">'+
+		var hToolBar = '<div style=\"text-align:right;float:right;\">'+
 		//<div style="display:inline-block; text-align:left">
 		//'<input type="button" value="collapse all" onclick="onCollapseAll()"/>'+
 		//'<input type="button" value="Enable Drag" onclick="onToggleDrag(event)"/></div>'+
-		'<label style="width:250px;text-align:center;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Click row to edit or Drag to change the order</label>'+
-		'<div style="float:right; text-align:right;min-width:360;">'+
 		'<input style="display:none;" type="button" id="btnSaveOrder" value="Save Order" onclick="onUpdateStructureOnServer(false)"/>'+
-		'<input type="button" value="Insert Field" onclick="onAddNewDetail()"/>'+
+		'<input type="button" class="add" value="Insert Field" onclick="onAddNewDetail()"/>'+
 		//'<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/></div>
 		'</div>';
 
-
-	  	Dom.get("modelTabs").innerHTML =  '<div id="tabDesign" style="width:780;margin:auto;">'+hToolBar+'<div id="tableContainer"></div>'+hToolBar+'</div>';
+		Dom.get("recordTitle").innerHTML += hToolBar;
+	  	Dom.get("modelTabs").innerHTML =  '<div id="tabDesign"><div id="tableContainer"></div></div>';
 	  	_initTabDesign(null);
 
 /* 2011-09-20 replaced to popup
@@ -347,13 +348,10 @@ function EditRecStructure() {
 					'<option value="pending">pending</option></select></span>'+
 					'</div></div>'+
 
-					'<div class="input-row" style="text-align:right">'+
-					'<input type="submit" id="btnEdit_'+rst_ID+
-					'" style="width:125px;display:inline-block;font-weight:800;" value="Edit Field Type" onclick="_onAddEditFieldType('+rst_ID+');">'+
-					'<input id="btnSave_'+rst_ID+
-					'" style="display:inline-block; margin:0 5px" type="submit" value="Save" onclick="doExpliciteCollapse(event);"/>'+
-					'<input id="btnCancel_'+rst_ID+
-					'" type="submit" value="Cancel" onclick="doExpliciteCollapse(event);" />'+
+					'<div style="text-align:right; margin:5px 0">'+
+					'<input id="btnEdit_'+rst_ID+'" type="button" value="Edit Field Type" onclick="_onAddEditFieldType('+rst_ID+');">'+
+					'<input id="btnSave_'+rst_ID+'" type="button" value="Save" onclick="doExpliciteCollapse(event);" style="margin:0 10px;"/>'+
+					'<input id="btnCancel_'+rst_ID+'" type="button" value="Cancel" onclick="doExpliciteCollapse(event);" />'+
 					'</div></div>';
 				}
 			}

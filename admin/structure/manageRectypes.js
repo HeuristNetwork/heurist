@@ -890,14 +890,13 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 			URL = top.HEURIST.basePath + "admin/structure/editDetailType.html?db="+db;
 		}
 
-		var popupHeight = Math.round(document.body.offsetHeight * 0.9);
-		var popupWidth = Math.round(document.body.offsetWidth * 0.6);
+		var dim = Hul.innerDimensions(this.window);
 
 		Hul.popupURL(top, URL, {
 			"close-on-blur": false,
 			"no-resize": false,
-			height: popupHeight,
-			width: popupWidth,
+			height: dim.h*0.9,
+			width: dim.w*0.6,
 			callback: function(changedValues) {
 				if(Hul.isnull(changedValues)) {
 					// Canceled
@@ -919,9 +918,6 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 		var dim = Hul.innerDimensions(this.window);
 
 		Hul.popupURL(top, URL, {
-
-			//"no-titlebar": true,
-			//"title": "Editing Record Structure",
 			"close-on-blur": false,
 			"no-resize": false,
 			height: dim.h*0.9,

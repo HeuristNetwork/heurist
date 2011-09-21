@@ -428,7 +428,8 @@ tr.yui-dt-expansion div.yui-dt-liner {
 	padding:4px 4px 4px 67px
 }
 body.popup tr.yui-dt-expansion div.yui-dt-liner {
-	padding:4px 4px 4px 4px
+	padding:4px 4px 4px 4px;
+	border: 2px solid #426FD9;
 }
 .yui-dt-expansion .yui-dt-liner th, .yui-dt-expansion .yui-dt-liner table th {
 	padding:4px;
