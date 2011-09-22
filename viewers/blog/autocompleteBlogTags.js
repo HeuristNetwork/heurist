@@ -15,7 +15,9 @@
  * July 2008 - made Heurist-independent (KJ)
  */
 
-top.HEURIST = {};
+if (!top.HEURIST) {
+	top.HEURIST = {};
+}
 
 // ripped from heurist.js
 top.HEURIST.registerEvent = function(element, eventType, fn, capture, priority) {

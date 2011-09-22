@@ -56,4 +56,6 @@ print " 'DT_KML' : ".(defined('DT_KML')?DT_KML:"''").",\n";
 print " 'DT_MINMUM_ZOOM_LEVEL' : ".(defined('DT_MINMUM_ZOOM_LEVEL')?DT_MINMUM_ZOOM_LEVEL:"''").",\n";
 print " 'DT_MAP_IMAGE_LAYER_REFERENCE' : ".(defined('DT_MAP_IMAGE_LAYER_REFERENCE')?DT_MAP_IMAGE_LAYER_REFERENCE:"''").",\n";
 print " 'DT_MAXIMUM_ZOOM_LEVEL' : ".(defined('DT_MAXIMUM_ZOOM_LEVEL')?DT_MAXIMUM_ZOOM_LEVEL:"''")."};};\n";
+print "if (top != window && !window.HEURIST) window.HEURIST = {};\n";
+print "if (!window.HEURIST.magicNumbers) { \n window.HEURIST.magicNumbers = top.HEURIST.magicNumbers;\n};";
 ?>
