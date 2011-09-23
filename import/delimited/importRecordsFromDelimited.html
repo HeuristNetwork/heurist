@@ -34,7 +34,8 @@
 				height: 400px;
 				border: 2px solid black;
 			}
-			#csv-separator, #val-separator, #csv-terminator { width: 30px; }
+			#csv-separator { width: 70px; }
+			#val-separator, #csv-terminator { width: 30px; }
 			table { border-collapse: collapse; }
 			td { width: 100px; border: 1px solid gray; padding: 2px; }
 			td select { width: 100px; }
@@ -54,21 +55,21 @@
 		<div id=results></div>
 		<p id=records-div></p>
 		<div id=csv-entry-div>
-			<p>Paste some CSV data into the box below and click "analyse".</p>
+			<p>Paste CSV data into the box below and click "analyse". Break large files into blocks of a couple of thousand lines.</p>
 			<div>
-				Field separator: <input id=csv-separator value=,>
-				Multi-value separator: <input id=val-separator value=|>
-				Line separator: <input id=csv-terminator value=\n>
-				Quote: <select id=csv-quote><option selected>"</option><option>'</option></select>
+				Field separator: <select id=csv-separator><option value="," selected>comma</option><option value="\t">tab</option></select>&nbsp;&nbsp;&nbsp;
+				Multi-value separator: <select id=val-separator><option selected value="|">|</option><option value=",">,</option><option value=":">:</option><option value=";">;</option></select>&nbsp;&nbsp;&nbsp;
+				Line separator: <input id=csv-terminator value="\n">&nbsp;&nbsp;&nbsp;
+				Quote: <select id=csv-quote><option selected value='"'>"</option><option value="'">'</option></select>&nbsp;&nbsp;&nbsp;
+				Header lines: <input type="checkbox" id=csv-header />&nbsp;&nbsp;&nbsp;
 				<input type=button value=analyse onclick="FlexImport.analyseCSV();">
 			</div>
 			<div><textarea id=csv-textarea></textarea></div>
 			<p>Note: geographic data is accepted in OpenGIS WKT format, e.g. POINT(x y). See <a href="http://en.wikipedia.org/wiki/Well-known_text">this Wikipedia article</a> for more details.</p>
-			<p>You can have multiple geographic objects (of the same type) per column, separated
-			by the | (pipe) character, i.e. POINT(x y)|POINT(x y)|...</p>
+			<p>To specify multiple values for a repeatable field, separate the values with a | (pipe) symbol within the field, eg. 1,2,"3|4",5</p>
+			<p>You can have multiple geographic objects (of the same type) per field eg. POINT(x y)|POINT(x y)|...</p>
 			<p>You needn't assign all the columns - unassigned columns will be ignored.</p>
-			<p>Duplicate records will not be created: multiple effectively equivalent lines (for the columns you have assigned) will result in only one record.</p>
-			<p>To specify multiple values for a repeatable detail, separate the values with pipe within a field, e.g. 1,2,"3|4",5</p>
+			<p>Duplicate records will not be created: lines which are effectively equivalent (ie. for the columns you have assigned) will result in only one record.</p>
 		</div>
 
 	</body>

@@ -9,10 +9,11 @@
 
 FlexImport = (function () {
 
-	function _addOpt(sel, val, text) {
+	function _addOpt(sel, val, text, selected) {
 	return $("<option>")
 		.val(val)
 		.html(text)
+		.attr('selected', selected ? true :false)
 		.appendTo(sel)[0];
 	}
 
@@ -66,6 +67,7 @@ FlexImport = (function () {
 		var terminator = $("#csv-terminator").val();
 		this.quote = $("#csv-quote").val();
 		this.valSep = $("#val-separator").val();
+		this.hasHeaderRow = $("#csv-header").attr("checked");
 		var lineRegex, fieldRegex, doubleQuoteRegex;
 
 		if (terminator == "\\n") terminator = "\n";
@@ -176,14 +178,29 @@ FlexImport = (function () {
 		a.innerHTML = "Detail requirements for " + FlexImport.recType.getName() + " records";
 
 
+		var i, l = FlexImport.columnCount;
 		var table = document.createElement("table");
 		table.id = "col-select-table";
 		var tbody = table.appendChild(document.createElement("tbody"));
+		//create header row if supplied
+		var headerRow = null;
+		if (this.hasHeaderRow){
+			headerRow = FlexImport.fields[0];
+			tr = tbody.appendChild(document.createElement("tr"));
+			tr.id = "col-header-row";
+			td = tr.appendChild(document.createElement("td"));
+			td.innerHTML = "Column Heading"; //
+			for (i = 0; i < headerRow.length; ++i) {
+				td = tr.appendChild(document.createElement("td"));
+				td.innerHTML = headerRow[i];
+			}
+		}
+		//create row of field type selectors
 		var tr = tbody.appendChild(document.createElement("tr"));
 		tr.id = "col-select-row";
 		var td, sel, opt;
 		td = tr.appendChild(document.createElement("td"));
-		var i, l = FlexImport.columnCount;
+		td.innerHTML = "row number";
 		for (i = 0; i < l; ++i) {
 			// add column select header for selecting detail type for this column
 			td = tr.appendChild(document.createElement("td"));
@@ -228,12 +245,19 @@ FlexImport = (function () {
 			};
 			// fill in comlumn selector options for recType
 			FlexImport.colSelectors[i] = sel;
+			var columnName = "";
+			// if the user supplied a header row and there is a collumn heading for the current column
+			if (this.hasHeaderRow && headerRow && headerRow[i]){
+				columnName = headerRow[i].toLowerCase();
+				columnName = columnName.replace(/^\s*/,"");
+				columnName = columnName.replace(/\s*$/,"");
+			}
 			opt = sel.appendChild(document.createElement("option"));
 			opt.value = null; opt.innerHTML = "do not import";
-			_addOpt(sel, "url", "URL");
-			_addOpt(sel, "notes", "Notes");
-			_addOpt(sel, "tags", "Tag(s)");
-			_addOpt(sel, "wgTags", "Workgroup Tag(s)");
+			_addOpt(sel, "url", "URL", columnName == "url");
+			_addOpt(sel, "notes", "Notes", columnName == "notes");
+			_addOpt(sel, "tags", "Tag(s)", columnName == "tag(s)");
+			_addOpt(sel, "wgTags", "Workgroup Tag(s)", columnName == "workgroup tag(s)");
 
 			var reqDetailTypes = HDetailManager.getRequiredDetailTypesForRecordType(FlexImport.recType);
 			var detailTypes = HDetailManager.getDetailTypesForRecordType(FlexImport.recType);
@@ -244,7 +268,8 @@ FlexImport = (function () {
 			grp.label = "Required Fields";
 			for (d = 0; d < rdl; ++d) {
 				var rdID = reqDetailTypes[d].getID();
-				var opt = _addOpt(sel, rdID,  HDetailManager.getDetailNameForRecordType(FlexImport.recType, reqDetailTypes[d]));
+				var rdName = HDetailManager.getDetailNameForRecordType(FlexImport.recType, reqDetailTypes[d]);
+				var opt = _addOpt(sel, rdID,  rdName, columnName == rdName.toLowerCase());
 				opt.className = "required";
 				for (var r = 0; r < dl; ++r){
 					if (rdID == detailTypes[r].getID()) {
@@ -256,19 +281,20 @@ FlexImport = (function () {
 			grp.label = "Other Fields";
 			for (d = 0; d < dl; ++d) {
 				if (rdIndex[d]) continue;
-				var opt = _addOpt(sel, detailTypes[d].getID(), HDetailManager.getDetailNameForRecordType(FlexImport.recType, detailTypes[d]));
+				var rdName = HDetailManager.getDetailNameForRecordType(FlexImport.recType, detailTypes[d]);
+				var opt = _addOpt(sel, detailTypes[d].getID(),rdName,columnName == rdName.toLowerCase());
 			}
 		}
 
 		// create rest of table filling it with the csv analysed data
-		for (var i = 0; i < FlexImport.fields.length; ++i) {
+		for (var i = this.hasHeaderRow ? 1:0; i < FlexImport.fields.length; ++i) {
 			var inputRow = FlexImport.fields[i];
 			tr = tbody.appendChild(document.createElement("tr"));
 			if (FlexImport.lineErrorMap[i] && FlexImport.lineErrorMap[i].invalidRecord){
 				tr.className = "invalidRecord";
 			}
 			td = tr.appendChild(document.createElement("td"));
-			td.innerHTML = i + 1; //row number
+			td.innerHTML = i + (this.hasHeaderRow?0:1); //row number
 			//for each column
 			for (var j = 0; j < FlexImport.columnCount; ++j) {
 				td = tr.appendChild(document.createElement("td"));
