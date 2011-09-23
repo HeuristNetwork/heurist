@@ -18,6 +18,7 @@ FlexImport = (function () {
 
 	return {
 
+	valSep : '|',
 	fields: [],
 	lineHashes: {},
 	columnCount: 0,
@@ -32,8 +33,8 @@ FlexImport = (function () {
 	records: [],
 	lineRecordMap: {},
 	lineErrorMap: {},
-	constChunkSize: 5, // controls the number of records per request for saving records
-	                    //FIXME  need to develop an algorithm for Chunk size
+	constChunkSize: 5,	// controls the number of records per request for saving records
+						//FIXME  need to develop an algorithm for Chunk size
 	recStart: 0,
 	recEnd: 5,
 	SavRecordChunk: [],
@@ -63,21 +64,22 @@ FlexImport = (function () {
 	analyseCSV: function () {
 		var separator = $("#csv-separator").val();
 		var terminator = $("#csv-terminator").val();
-		var quote = $("#csv-quote").val();
+		this.quote = $("#csv-quote").val();
+		this.valSep = $("#val-separator").val();
 		var lineRegex, fieldRegex, doubleQuoteRegex;
 
 		if (terminator == "\\n") terminator = "\n";
 
 		var switches = (terminator == "\n") ? "m" : "";
 
-		if (quote == "'") {
+		if (this.quote == "'") {
 			lineRegex = new RegExp(terminator + "(?=(?:[^']*'[^']*')*(?![^']*'))", switches);
 			fieldRegex = new RegExp(separator + "(?=(?:[^']*'[^']*')*(?![^']*'))", switches);
 		} else {
 			lineRegex = new RegExp(terminator + "(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))", switches);
 			fieldRegex = new RegExp(separator + "(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))", switches);
 		}
-		doubleQuoteRegex = new RegExp(quote + quote, "g");
+		doubleQuoteRegex = new RegExp(this.quote + this.quote, "g");
 
 		var lines = $("#csv-textarea").val().split(lineRegex);
 		var i, l = lines.length;
@@ -85,7 +87,7 @@ FlexImport = (function () {
 			if (lines[i].length > 0) {
 				FlexImport.fields[i] = lines[i].split(fieldRegex);
 				for (var j = 0; j < FlexImport.fields[i].length; ++j) {
-					FlexImport.fields[i][j] = FlexImport.fields[i][j].replace(doubleQuoteRegex, quote);
+					FlexImport.fields[i][j] = FlexImport.fields[i][j].replace(doubleQuoteRegex, this.quote);
 					FlexImport.columnCount = Math.max(FlexImport.columnCount, j + 1);
 				}
 			}
@@ -272,8 +274,9 @@ FlexImport = (function () {
 				td = tr.appendChild(document.createElement("td"));
 				if (inputRow.length > j) {
 					//strip quotes if necessary
-					if (inputRow[j].toString().match("\"")) {
-						inputRow[j] = inputRow[j].replace(/"/g, "");
+					re = new RegExp ("^\\s*" + this.quote + "(.*)" +this.quote +"\\s*$");
+					if (inputRow[j].toString().match(re)) {
+						inputRow[j] = inputRow[j].toString().match(re)[1];
 					}
 					if (FlexImport.lineErrorMap[i] && FlexImport.lineErrorMap[i][j]){
 						td.className = "invalidInput";
@@ -657,7 +660,7 @@ FlexImport = (function () {
 					detailType = HDetailManager.getDetailTypeById(FlexImport.cols[j]);
 					var vals;
 					if (HDetailManager.getDetailRepeatable(recType, detailType)) {
-						vals = val.split( detailType.getVariety() == HVariety.GEOGRAPHIC ? "|" : "," ); //FIXME multi-valued fields from CSV format might have | as delimiter
+						vals = val.split( detailType.getVariety() == HVariety.GEOGRAPHIC ? "|" : this.valSep ); //FIXME multi-valued fields from CSV format might have | as delimiter
 					} else {
 						vals = [ val ];
 					}
