@@ -172,8 +172,8 @@ YAHOO.util.Event.addListener(window, "load", function() {
 			{ key:"arrow", label:"", formatter:YAHOO.widget.RowExpansionDataTable.formatRowExpansion },
 			{ key:"import", label:"Import", sortable:false, resizeable:false, width:30 },
 			{ key:"rtyID", label:"<u>ID</u>", sortable:true, hidden:true },
-			{ key:"rectype", label:"<u>Record type</u>", sortable:true, resizeable:true, width:200 },
-			{ key:"matches", label:"<u>Matches</u>", sortable:true, resizeable:true, parser:'number', width:50 }
+			{ key:"rectype", label:"<span title='Click on row to view information about the record type'><u>Record type</u></span>", sortable:true, resizeable:true, width:200 },
+			{ key:"matches", label:"<span title='Matches shows the number of record types with simliar names'><u>Matches</u></span>", sortable:true, resizeable:true, parser:'number', width:50 }
 			];
 
 		var myDataSource = new YAHOO.util.DataSource();
@@ -191,7 +191,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
 				function(obj) {
 					var rty_ID = obj.data.getData('rtyID');
 					var info = "<i>" + rectypeStructures[rty_ID][0][4] + "</i><br />";
-					info += '<table><tr><th>Fieldname</th><th>Fieldtype</th><th>Datatype</th><th class=\"status\">Status</th></tr>';
+					info += '<table><tr><th><b>Field name</b></th><th><b>Field type</b></th><th><b>Data type</b></th><th class=\"status\"><b>Status</b></th></tr>';
 
 					// 0 = rst_DisplayName
 					// 1 = dty_Name
@@ -207,16 +207,20 @@ YAHOO.util.Event.addListener(window, "load", function() {
 						}else{
 							dtyStatus = "";
 						};
-						info += "<tr"+ (rectypeStructures[rty_ID][i][5] == 1? ' style="background-color:#CCCCCC;"' : "") +"><td>" + rectypeStructures[rty_ID][i][0] + "</td><td>" + rectypeStructures[rty_ID][i][1] + "</td><td>" + rectypeStructures[rty_ID][i][2] + "</td><td class=\"status\">" + dtyStatus + "</td></tr>";
+						info += "<tr"+ (rectypeStructures[rty_ID][i][5] == 1? ' style="background-color:#CCCCCC;"' : "") +
+								"><td>" + (rectypeStructures[rty_ID][i][5] == 1? "(imported) " : "") + rectypeStructures[rty_ID][i][0] +
+								"</td><td>" + rectypeStructures[rty_ID][i][1] +
+								"</td><td>" + rectypeStructures[rty_ID][i][2] +
+								"</td><td class=\"status\">" + dtyStatus + "</td></tr>";
 					}
 					info += "</table><br />";
 					obj.liner_element.innerHTML += info;
 				},
 				paginator: new YAHOO.widget.Paginator({
-                    rowsPerPage:50,
-                    containers:['topPagination','bottomPagination']
-                }),
-                sortedBy: { key:'rectype' }
+				rowsPerPage:50,
+				containers:['topPagination','bottomPagination']
+			}),
+			sortedBy: { key:'rectype' }
 			}
 		);
 		insertData();
@@ -353,7 +357,7 @@ function _hideToolTip(){
 <link rel=stylesheet href="../../common/css/global.css">
 <link rel=stylesheet href="../../common/css/admin.css">
 </head>
-<div class="banner"><h2>Import record types</h2></div>
+<div class="banner"><h2>Import record types from <?= $source_db_id." : ".$source_db_name?> </h2></div>
 <body class="popup yui-skin-sam" onbeforeunload="dropTempDB(false)">
 <script src="../../common/js/utilsLoad.js"></script>
 <script src="../../common/js/utilsUI.js"></script>
