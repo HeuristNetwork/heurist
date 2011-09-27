@@ -381,7 +381,7 @@ top.HEURIST.search = {
 		if (levelRelTypes){
 			var j;
 			var relNames = $.map(levelRelTypes, function(recIDs,trmID) {
-								return (top.HEURIST.terms.termsByDomainLookup.relation[trmID] ? "" + top.HEURIST.terms.termsByDomainLookup.relation[trmID][0] + ":" + trmID : null);
+								return (top.HEURIST.terms.termsByDomainLookup.relation[trmID] ? "" + top.HEURIST.terms.termsByDomainLookup.relation[trmID][top.HEURIST.terms.fieldNamesToIndex['trm_Label']] + ":" + trmID : null);
 							});
 			relNames.sort();
 			var reltypeMenuItem = document.createElement("li");
@@ -2907,8 +2907,8 @@ function removeCustomAlert() {
 					layout.getUnitByPosition('right').collapse();
 					appPanelButton.className +=" closed";
 					appPanelButton.title = "Show Applications";
-					var tabBarWidth = tabBar.offsetWidth - 21; 
-					tabBar.style.width = tabBarWidth; 
+					var tabBarWidth = tabBar.offsetWidth - 21;
+					tabBar.style.width = tabBarWidth;
 					};
 		Event.on('navButton', 'click', function(ev) {
 			Event.stopEvent(ev);

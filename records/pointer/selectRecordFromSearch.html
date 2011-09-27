@@ -217,13 +217,11 @@ function initPage() {
 		for (var grpID in top.HEURIST.rectypes.groups){
 		var grp = document.createElement("optgroup");
 			grp.label = top.HEURIST.rectypes.groups[grpID].name;
-		tElt.appendChild(grp);
-			for (var recTypeID in top.HEURIST.rectypes.groups[grpID].types) {
-				if (top.HEURIST.rectypes.groups[grpID].types[recTypeID]) {
+			tElt.appendChild(grp);
+			for (var recTypeID in top.HEURIST.rectypes.groups[grpID].showTypes) {
 					var name = top.HEURIST.rectypes.names[recTypeID];
 					tElt.appendChild( new Option(name, recTypeID));
-				}
-	}
+			}
 		}
 	}else{
 		for (var rectypeID in rectypes) {

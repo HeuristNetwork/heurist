@@ -410,6 +410,90 @@ function getTermTree($termDomain, $matching = 'exact') {	// vocabDomain can be e
 	return $terms;
 }
 
+function updateTermData() {
+//	mysql_query("start transaction");
+	// set al child counts to zero
+	// and set all depths to zero
+	mysql_query("update defTerms set trm_ChildCount = 0, trm_Depth = 0");
+	// update child counts
+	mysql_query("update defTerms c
+				join (select distinct a.trm_ID as ID, count(b.trm_ID) as cnt
+						from defTerms b
+						left join defTerms a on b.trm_ParentTermID = a.trm_ID
+						where a.trm_ID is not null and not b.trm_ID = a.trm_ID
+						group by a.trm_ID) temp on temp.ID = c.trm_ID
+				set c.trm_ChildCount = temp.cnt");
+
+	function getChildTerms($parentID){
+		$children = array();
+		if ($parentID == "top") {
+			$whereClause = "trm_ParentTermID is null";
+		}else{
+			$whereClause = "trm_ParentTermID = $parentID";
+		}
+		$res = mysql_query("select trm_ID,trm_ChildCount from defTerms where $whereClause");
+		// if we have an error or found nothing return null
+		if (!mysql_num_rows($res)){
+			return null;
+		}
+		while ($row = mysql_fetch_row($res)) {
+			$children[$row[0]] = $row[1];
+		}
+		return $children;
+	}
+
+	function setChildDepth($parentID, $parentDepth){
+//error_log(" parentID = $parentID and parentDepth = $parentDepth");
+		$children = getChildTerms($parentID);
+//error_log(" children = ". print_r($children,true));
+		if (!$children) {
+			return;
+		}
+		$childIDList = join(",",array_keys($children));
+//error_log(" childID list = $childIDList");
+		$depth = $parentDepth + 1;
+		// set every childs depth
+		$query = "update defTerms set trm_Depth = $depth where trm_ID in($childIDList)";
+		mysql_query($query);
+		foreach ($children as $childID => $childCount){
+			if ($childCount) {
+				setChildDepth($childID,$depth);
+			}
+		}
+	}
+
+	//find all top level termIDs
+	$rootTermIDs = getChildTerms("top");
+
+	//for each top level if children setChildren depth (recursively)
+	foreach ($rootTermIDs as $rootID => $childCount){
+		if ($childCount) {
+			setChildDepth($rootID,0);
+		}
+	}
+//	mysql_query("commit");
+}
+
+function getTermColNames(){
+	return array(	"trm_ID",
+					"trm_Label",
+					"trm_InverseTermID",
+					"trm_Description",
+					"trm_Status",
+					"trm_OriginatingDBID",
+//					"trm_NameInOriginatingDB",
+//					"trm_IDInOriginatingDB",
+					"trm_AddedByImport",
+					"trm_IsLocalExtension",
+					"trm_Domain",
+					"trm_OntID",
+					"trm_ChildCount",
+					"trm_ParentTermID",
+					"trm_Depth",
+					"trm_Modified",
+					"trm_LocallyModified");
+}
+
 function getTerms($useCachedData = false) {	// vocabDomain can be empty, 'reltype' or 'enum' or any future term use domain defined in trm_Domain enum
 	$cacheKey = DATABASE.":getTerms";
 	if ($useCachedData) {
@@ -419,13 +503,13 @@ function getTerms($useCachedData = false) {	// vocabDomain can be empty, 'reltyp
 		}
 	}
 
-	$query = "select trm_ID as ID, trm_Label as Term, trm_Description as Description, trm_InverseTermId as InverseId, if(trm_Domain like 'enum%', 'enum', 'relation') as Domain
-				from defTerms
-				order by Domain, trm_Label";
+	$query = "select ".join(",", getTermColNames())." from defTerms order by trm_Domain, trm_Label";
 	$res = mysql_query($query);
-	$terms = array('termsByDomainLookup' => array('relation'=> array(), 'enum'=> array()));
-	while ($row = mysql_fetch_assoc($res)) {
-			$terms['termsByDomainLookup'][$row["Domain"]][$row["ID"]] = array($row['Term'], $row['Description'],  $row['InverseId']);
+	$terms = array('termsByDomainLookup' => array('relation'=> array(), 'enum'=> array()),
+					'commonFieldNames' => array_slice(getTermColNames(),1),
+					'fieldNamesToIndex' => getColumnNameToIndex(array_slice(getTermColNames(),1)));
+	while ($row = mysql_fetch_row($res)) {
+			$terms['termsByDomainLookup'][$row[8]][$row[0]] = array_slice($row,1);
 	}
 	$terms['treesByDomain'] = array('relation' => getTermTree("relation","prefix"),
 									'enum' => getTermTree("enum","prefix"));
@@ -664,20 +748,35 @@ function getPrunedTermSubtree($termID,$pruneIDs) {
 */
 
 function getRectypeColNames(){
-	return array("rty_Name",
-					"rty_Description",
-					"rty_Type",
+	return array(	"rty_Name",
 					"rty_OrderInGroup",
+					"rty_Description",
 					"rty_TitleMask",
 					"rty_CanonicalTitleMask",
 					"rty_Plural",
-					"rty_ShowInLists",
 					"rty_Status",
+					"rty_OriginatingDBID",
+//					"rty_NameInOriginatingDB",
+//					"rty_IDInOriginatingDB",
+					"rty_NonOwnerVisibility",
+					"rty_ShowInLists",
 					"rty_RecTypeGroupID",
+					"rty_RecTypeModelIDs",
 					"rty_FlagAsFieldset",
 					"rty_ReferenceURL",
 					"rty_AlternativeRecEditor",
-					"rty_NonOwnerVisibility");
+					"rty_Type",
+					"rty_Modified",
+					"rty_LocallyModified");
+}
+
+function getColumnNameToIndex($columns){
+	$columnsNameIndexMap = array();
+	$index = 0;
+	foreach($columns as $columnName) {
+		$columnsNameIndexMap[$columnName] = $index++;
+	}
+	return $columnsNameIndexMap;
 }
 
 function getRectypeDef($rt_id) {
@@ -692,26 +791,30 @@ function getRectypeDef($rt_id) {
 }
 
 function getRectypeStructureFieldColNames(){
-	return array("rst_DisplayName",
+	return array(	"rst_DisplayName",
 					"rst_DisplayHelpText",
 					"rst_DisplayExtendedDescription",
+					"rst_DisplayOrder",
+					"rst_DisplayWidth",
 					"rst_DefaultValue",
+					"rst_RecordMatchOrder",
+					"rst_CalcFunctionID",
 					"rst_RequirementType",
+					"rst_NonOwnerVisibility",
+					"rst_Status",
+					"rst_OriginatingDBID",
+//					"rst_IDInOriginatingDB",
 					"rst_MaxValues",
 					"rst_MinValues",
-					"rst_DisplayWidth",
-					"rst_RecordMatchOrder",
-					"rst_DisplayOrder",
 					"rst_DisplayDetailTypeGroupID",
 					"rst_FilteredJsonTermIDTree",
 					"rst_PtrFilteredIDs",
-					"rst_TermIDTreeNonSelectableIDs",
-					"rst_CalcFunctionID",
-					"rst_Status",
 					"rst_OrderForThumbnailGeneration",
+					"rst_TermIDTreeNonSelectableIDs",
+					"rst_Modified",
+					"rst_LocallyModified",
 					"dty_TermIDTreeNonSelectableIDs",
-					"dty_FieldSetRectypeID",
-					"rst_NonOwnerVisibility");
+					"dty_FieldSetRectypeID");
 }
 
 function getRectypeFields($rt_id) {
@@ -720,30 +823,34 @@ function getRectypeFields($rt_id) {
 						"if(rst_DisplayName is not null and CHAR_LENGTH(rst_DisplayName)>0,rst_DisplayName,dty_Name) as rst_DisplayName",
 						"if(rst_DisplayHelpText is not null and CHAR_LENGTH(rst_DisplayHelpText)>0,rst_DisplayHelpText,dty_HelpText) as rst_DisplayHelpText",
 						"if(rst_DisplayExtendedDescription is not null and CHAR_LENGTH(rst_DisplayExtendedDescription)>0,rst_DisplayExtendedDescription,dty_ExtendedDescription) as rst_DisplayExtendedDescription",
+						"rst_DisplayOrder",
+						"rst_DisplayWidth",
 						"rst_DefaultValue",
+						"rst_RecordMatchOrder",
+						"rst_CalcFunctionID",
 						"rst_RequirementType",
+						"rst_NonOwnerVisibility",
+						"rst_Status",
+						"rst_OriginatingDBID",
+//						"rst_IDInOriginatingDB",
 						"rst_MaxValues",
 						"rst_MinValues",
-						"rst_DisplayWidth",
-						"rst_RecordMatchOrder",
-						"rst_DisplayOrder",
 						"if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID) as rst_DisplayDetailTypeGroupID",
 						"if(rst_FilteredJsonTermIDTree is not null and CHAR_LENGTH(rst_FilteredJsonTermIDTree)>0,rst_FilteredJsonTermIDTree,dty_JsonTermIDTree) as rst_FilteredJsonTermIDTree",
 						"if(rst_PtrFilteredIDs is not null and CHAR_LENGTH(rst_PtrFilteredIDs)>0,rst_PtrFilteredIDs,dty_PtrTargetRectypeIDs) as rst_PtrFilteredIDs",
-						"rst_TermIDTreeNonSelectableIDs",
-						"rst_CalcFunctionID",
-						"rst_Status",
 						"rst_OrderForThumbnailGeneration",
+						"rst_TermIDTreeNonSelectableIDs",
+						"rst_Modified",
+						"rst_LocallyModified",
 						"dty_TermIDTreeNonSelectableIDs",
-						"dty_FieldSetRectypeID",
-						"rst_NonOwnerVisibility");
+						"dty_FieldSetRectypeID");
 
 	// get rec Structure info ordered by the detailType Group order, then by recStruct display order and then by ID in recStruct incase 2 have the same order
 	$res = mysql_query("select ".join(",", $colNames)." from defRecStructure
 															left join defDetailTypes on rst_DetailTypeID = dty_ID
 															left join defDetailTypeGroups on dtg_ID = if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID)
 														where rst_RecTypeID=".$rt_id."
-														order by dtg_Order, dtg_Name, rst_DisplayOrder, rst_ID");
+														order by rst_DisplayOrder, rst_ID");
 	while ($row = mysql_fetch_row($res)) {
 		$rtfs[$row[0]] = array_slice($row,1);
 	}
@@ -762,6 +869,8 @@ function getRectypeStructure($rtID) {
 function getRectypeStructures($rt_ids) {
 
 	$rtStructs = array('commomFieldNames' => getRectypeColNames(),
+						'commonNamesToIndex' => getColumnNameToIndex(getRectypeColNames()),
+						'dtFieldNamesToIndex' => getColumnNameToIndex(getRectypeStructureFieldColNames()),
 						'dtFieldNames' => getRectypeStructureFieldColNames());
 	foreach ($rt_ids as $rt_id) {
 		$rtStructs[$rt_id] = getRectypeStructure($rt_id);
@@ -784,30 +893,34 @@ function getAllRectypeStructures($useCachedData = false) {
 						"if(rst_DisplayName is not null and CHAR_LENGTH(rst_DisplayName)>0,rst_DisplayName,dty_Name) as rst_DisplayName",
 						"if(rst_DisplayHelpText is not null and CHAR_LENGTH(rst_DisplayHelpText)>0,rst_DisplayHelpText,dty_HelpText) as rst_DisplayHelpText",
 						"if(rst_DisplayExtendedDescription is not null and CHAR_LENGTH(rst_DisplayExtendedDescription)>0,rst_DisplayExtendedDescription,dty_ExtendedDescription) as rst_DisplayExtendedDescription",
+						"rst_DisplayOrder",
+						"rst_DisplayWidth",
 						"rst_DefaultValue",
+						"rst_RecordMatchOrder",
+						"rst_CalcFunctionID",
 						"rst_RequirementType",
+						"rst_NonOwnerVisibility",
+						"rst_Status",
+						"rst_OriginatingDBID",
+//						"rst_IDInOriginatingDB",
 						"rst_MaxValues",
 						"rst_MinValues",
-						"rst_DisplayWidth",
-						"rst_RecordMatchOrder",
-						"rst_DisplayOrder",
 						"if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID) as rst_DisplayDetailTypeGroupID",
 						"if(rst_FilteredJsonTermIDTree is not null and CHAR_LENGTH(rst_FilteredJsonTermIDTree)>0,rst_FilteredJsonTermIDTree,dty_JsonTermIDTree) as rst_FilteredJsonTermIDTree",
 						"if(rst_PtrFilteredIDs is not null and CHAR_LENGTH(rst_PtrFilteredIDs)>0,rst_PtrFilteredIDs,dty_PtrTargetRectypeIDs) as rst_PtrFilteredIDs",
-						"rst_TermIDTreeNonSelectableIDs",
-						"rst_CalcFunctionID",
-						"rst_Status",
 						"rst_OrderForThumbnailGeneration",
+						"rst_TermIDTreeNonSelectableIDs",
+						"rst_Modified",
+						"rst_LocallyModified",
 						"dty_TermIDTreeNonSelectableIDs",
-						"dty_FieldSetRectypeID",
-						"rst_NonOwnerVisibility");
+						"dty_FieldSetRectypeID");
 
 	// get rec Structure info ordered by the detailType Group order, then by recStruct display order and then by ID in recStruct incase 2 have the same order
 	$query = "select ".join(",", $colNames)." from defRecStructure
 					left join defDetailTypes on rst_DetailTypeID = dty_ID
 					left join defDetailTypeGroups on
 		dtg_ID = if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID)
-				order by rst_RecTypeID, dtg_Order, dtg_Name,  rst_DisplayOrder, rst_ID";
+				order by rst_RecTypeID, rst_DisplayOrder, rst_ID";
 
 
 	$res = mysql_query($query);
@@ -817,6 +930,8 @@ function getAllRectypeStructures($useCachedData = false) {
 						'usageCount' => getRecTypeUsageCount(),
 						'dtDisplayOrder' => array());
 	$rtStructs['typedefs'] = array('commomFieldNames' => getRectypeColNames(),
+									'commonNamesToIndex' => getColumnNameToIndex(getRectypeColNames()),
+									'dtFieldNamesToIndex' => getColumnNameToIndex(getRectypeStructureFieldColNames()),
 									'dtFieldNames' => getRectypeStructureFieldColNames());
 	while ($row = mysql_fetch_row($res)) {
 		if (!array_key_exists($row[0],$rtStructs['typedefs'])) {
@@ -828,37 +943,40 @@ function getAllRectypeStructures($useCachedData = false) {
 		array_push($rtStructs['dtDisplayOrder'][$row[0]],$row[1]);
 	}
 
-	// get rec Structure info ordered by the detailType Group order, then by recStruct display order and then by ID in recStruct incase 2 have the same order
+	// get rectypes ordered by the RecType Group order, then by Group Name, then by rectype order in group and then by rectype name
 	$res = mysql_query("select rty_ID, rtg_ID, rtg_Name, ".join(",", getRectypeColNames())." from defRecTypes
 							left join defRecTypeGroups  on rtg_ID = rty_RecTypeGroupID
 							order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
 
 	while ($row = mysql_fetch_row($res)) {
-		if (!array_key_exists($row[1],$rtStructs['groups'])) {
-			$rtStructs['groups'][$row[1]] = array('types'=> array($row[0] => $row[10]), 'name' => $row[2]);
-		}else{
-			$rtStructs['groups'][$row[1]]['types'][$row[0]] = $row[10];
+		array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$row[1]]]['allTypes'],$row[0]);
+		if ($row[12]) {
+			array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$row[1]]]['showTypes'],$row[0]);
 		}
 
 		$commonFields = array_slice($row,3);
 
 		$rtStructs['typedefs'][$row[0]]['commonFields'] = $commonFields;
 		$rtStructs['names'][$row[0]] = $row[3];
-		$rtStructs['pluralNames'][$row[0]] = $row[9];
+		$rtStructs['pluralNames'][$row[0]] = $row[8];
 	}
 	$rtStructs['constraints'] = getAllRectypeConstraint();
 	setCachedData($cacheKey,$rtStructs);
 	return $rtStructs;
 }
 
+
 function getRectypeGroups() {
-	$rtGroups = array();
+	$rtGroups = array('groupIDToIndex'=>array());
+	$index = 0;
 	$res = mysql_query("select * from defRecTypeGroups order by rtg_Order, rtg_Name");
 	while ($row = mysql_fetch_assoc($res)) {
-		$rtGroups[$row["rtg_ID"]] = array('name' => $row["rtg_Name"], 'description' => $row["rtg_Description"]);
+		array_push($rtGroups, array( 'name' => $row["rtg_Name"], 'order' => $row["rtg_Order"], 'description' => $row["rtg_Description"], 'allTypes' => array(), 'showTypes' => array()));
+		$rtGroups['groupIDToIndex'][$row["rtg_ID"]] = $index++;
 	}
 	return $rtGroups;
 }
+
 
 function getRecTypesByGroup() {
 	$rectypesByGroup = array();
@@ -912,22 +1030,27 @@ function getDetailTypeUsageCount() {
 	return $recDetailsByDetailType;
 }
 
-
 function getDetailTypeColNames() {
-	return array("dty_Name",
-					"dty_ExtendedDescription",
+	return array(	"dty_ID",
+					"dty_Name",
+					"dty_Documentation",
 					"dty_Type",
-					"dty_OrderInGroup",
 					"dty_HelpText",
-					"dty_ShowInLists",
+					"dty_ExtendedDescription",
 					"dty_Status",
+					"dty_OriginatingDBID",
+//					"dty_NameInOriginatingDB",
+//					"dty_IDInOriginatingDB",
 					"dty_DetailTypeGroupID",
-					"dty_FieldSetRectypeID",
+					"dty_OrderInGroup",
 					"dty_JsonTermIDTree",
 					"dty_TermIDTreeNonSelectableIDs",
 					"dty_PtrTargetRectypeIDs",
-					"dty_ID",
-					"dty_NonOwnerVisibility");
+					"dty_FieldSetRectypeID",
+					"dty_ShowInLists",
+					"dty_NonOwnerVisibility",
+					"dty_Modified",
+					"dty_LocallyModified");
 }
 
 // returns an array of RecType Structures for all RecTypes
@@ -945,9 +1068,10 @@ function getAllDetailTypeStructures($useCachedData = false) {
 						'names' => array(),
 						'rectypeUsage' => getDetailTypeDefUsage(),
 						'usageCount' => getDetailTypeUsageCount(),
-						'typedefs' => array('commomFieldNames' => getDetailTypeColNames()));
+						'typedefs' => array('commomFieldNames' => getDetailTypeColNames(),
+											'fieldNamesToIndex' => getColumnNameToIndex(getDetailTypeColNames())));
 
-	$query = "select dty_ID, dtg_ID, dtg_Name, ".join(",", getDetailTypeColNames())." from defDetailTypes
+	$query = "select dtg_ID, dtg_Name, ".join(",", getDetailTypeColNames())." from defDetailTypes
 							left join defDetailTypeGroups  on dtg_ID = dty_DetailTypeGroupID
 							order by dtg_Order, dtg_Name, dty_OrderInGroup, dty_Name";
 
@@ -955,9 +1079,12 @@ function getAllDetailTypeStructures($useCachedData = false) {
 
 
 	while ($row = mysql_fetch_row($res)) {
-			$dtStructs['groups'][$row[1]]['types'][$row[0]] = $row[8];
-		$dtStructs['typedefs'][$row[0]]['commonFields'] = array_slice($row,3);
-		$dtStructs['names'][$row[0]] = $row[3];
+		array_push($dtStructs['groups'][$dtG['groupIDToIndex'][$row[0]]]['allTypes'],$row[2]);
+		if ($row[16]) {
+			array_push($dtStructs['groups'][$dtG['groupIDToIndex'][$row[0]]]['showTypes'],$row[2]);
+		}
+		$dtStructs['typedefs'][$row[2]]['commonFields'] = array_slice($row,2);
+		$dtStructs['names'][$row[2]] = $row[3];
 	}
 	setCachedData($cacheKey,$dtStructs);
 //error_log(print_r($dtStructs['typedefs'],true));
@@ -991,27 +1118,14 @@ function getDetailTypeStructures($dtIDs) {
 }
 
 function getDetailTypeGroups() {
-	$dtGroups = array();
+	$dtGroups = array('groupIDToIndex'=>array());
+	$index = 0;
 	$res = mysql_query("select * from defDetailTypeGroups order by dtg_Order, dtg_Name");
 	while ($row = mysql_fetch_assoc($res)) {
-		$dtGroups[$row["dtg_ID"]] = array( 'name' => $row["dtg_Name"], 'description' => $row["dtg_Description"], 'types' => array() );
+		array_push($dtGroups, array( 'name' => $row["dtg_Name"], 'order' => $row["dtg_Order"], 'description' => $row["dtg_Description"], 'allTypes' => array(), 'showTypes' => array()));
+		$dtGroups['groupIDToIndex'][$row["dtg_ID"]] = $index++;
 	}
 	return $dtGroups;
-}
-
-function getDetailTypesByGroup() {
-	$detailTypesByGroup = array();
-	// query assumes rty_RecTypeGroupID is ordered isngle functional group ID followed by zero or more model group ids
-	$res = mysql_query("select dtg_ID,dtg_Name,dty_ID, dty_ShowInLists
-							from defDetailTypes left join defDetailTypeGroups  on dtg_ID = dty_DetailTypeGroupID
-							where 1 order by dtg_Order, dtg_Name, dty_OrderInGroup, dty_Name");
-	while ($row = mysql_fetch_assoc($res)) {
-		if (!array_key_exists($row['dtg_ID'],$detailTypesByGroup)){
-			$detailTypesByGroup[$row['dtg_ID']] = array('name'=>$row["dtg_Name"],'types'=>array());
-		}
-		$detailTypesByGroup[$row['dtg_ID']]['types'][$row["dty_ID"]] = $row["dty_ShowInLists"];
-	}
-	return $detailTypesByGroup;
 }
 
 function reltype_inverse ($relTermID) {	//saw Enum change - find inverse as an id instead of a string

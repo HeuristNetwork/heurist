@@ -1306,7 +1306,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 			var termID;
 			var localLookup = termLookupInner;
 			for(termID in termSubTree) { // For every term in 'term'
-				var termName = (localLookup[termID] ? localLookup[termID][0] : "unknown term ID");
+				var termName = (localLookup[termID] ? localLookup[termID][top.HEURIST.terms.fieldNamesToIndex['trm_Label']] : "unknown term ID");
 				var isHeader = (headers[termID]? true:false);
 				var opt = new Option(termName,termID);
 				opt.className = "depth" + depth;

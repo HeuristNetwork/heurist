@@ -431,7 +431,7 @@ if (!top.Relationship) {
 
 		if (dtIDRelmarker) { // we are dealing with a relmark so get definitions and process them for UI
 			// get any trgPointer restrictions
-			var trgRectypeList = temp = top.HEURIST.rectypes.typedefs[this.rectypeID].dtFields[dtIDRelmarker][12];
+			var trgRectypeList = temp = top.HEURIST.rectypes.typedefs[this.rectypeID].dtFields[dtIDRelmarker][top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_PtrFilteredIDs']];
 			var targetRectypes = {};
 			if (temp) {
 				temp = temp.split(",");
@@ -442,7 +442,7 @@ if (!top.Relationship) {
 			}
 
 			// get HeaderTerms list - the values from the structure can be null
-			var rfrHdr = top.HEURIST.rectypes.typedefs[this.rectypeID].dtFields[dtIDRelmarker][13];
+			var rfrHdr = top.HEURIST.rectypes.typedefs[this.rectypeID].dtFields[dtIDRelmarker][top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_TermIDTreeNonSelectableIDs']];
 			var headerList = {};
 			if (rfrHdr) {
 				rfrHdr = rfrHdr.split(",");
@@ -453,7 +453,7 @@ if (!top.Relationship) {
 			}
 
 			// get relationship terms from relmarker definition
-			this.relTerms = top.HEURIST.util.expandJsonStructure(top.HEURIST.rectypes.typedefs[this.rectypeID].dtFields[dtIDRelmarker][11]);
+			this.relTerms = top.HEURIST.util.expandJsonStructure(top.HEURIST.rectypes.typedefs[this.rectypeID].dtFields[dtIDRelmarker][[top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_FilteredJsonTermIDTree']]]);
 		}
 		if (!this.relTerms) { // if no terms were setup in a relmarker then default to all relationships = unconstrained
 			this.relTerms = top.HEURIST.terms.treesByDomain.relation;
@@ -472,38 +472,38 @@ if (!top.Relationship) {
 				var found = false;
 				var relRecs = null;
 				for (relnID in relatedRecords.relationshipRecs) {
-					if (typeof this.trgRectypes == "object" &&	//filter any rectypes not in list (null list = don't constrain
+					if (typeof this.trgRectypes == "object" && //filter any rectypes not in list (null list = don't constrain
 						!this.trgRectypes[relatedRecords.relationshipRecs[relnID].relatedRec.rectype]) {
 						continue;
 					}
-					if (typeof flatTermIDLookup === "string" &&	//filter any records who's relType in not in list
-							flatTermIDLookup.indexOf("," + [relatedRecords.relationshipRecs[relnID].relTermID] + ",") === -1) {
+					if (typeof flatTermIDLookup === "string" && //filter any records who's relType in not in list
+						flatTermIDLookup.indexOf("," + [relatedRecords.relationshipRecs[relnID].relTermID] + ",") === -1) {
 						continue;
 					}
-						if (!found) {
-							found = true;
-							relRecs = {'rels':{}, 'byT':{}, 'byRt':{}};
-				}
-						relRecs.rels[relnID] = relatedRecords.relationshipRecs[relnID];
-						var relRectype = relRecs.rels[relnID].relatedRec.rectype;
-					var relnType = relRecs.rels[relnID].relTermID;
-						if (!relRecs.byT[relnType]) {
-							relRecs.byT[relnType] = {};
-				}
-						if (!relRecs.byT[relnType][relRectype]) {
-							relRecs.byT[relnType][relRectype] = [relnID];
-						} else {
-							relRecs.byT[relnType][relRectype].push(relnID);
-						}
-						if (!relRecs.byRt[relRectype]) {
-							relRecs.byRt[relRectype] = {};
-						}
-						if (!relRecs.byRt[relRectype][relnType]) {
-							relRecs.byRt[relRectype][relnType] = [relnID];
-						} else {
-							relRecs.byRt[relRectype][relnType].push(relnID);
-						}
+					if (!found) {
+						found = true;
+						relRecs = {'rels':{}, 'byT':{}, 'byRt':{}};
 					}
+					relRecs.rels[relnID] = relatedRecords.relationshipRecs[relnID];
+					var relRectype = relRecs.rels[relnID].relatedRec.rectype;
+					var relnType = relRecs.rels[relnID].relTermID;
+					if (!relRecs.byT[relnType]) {
+						relRecs.byT[relnType] = {};
+					}
+					if (!relRecs.byT[relnType][relRectype]) {
+						relRecs.byT[relnType][relRectype] = [relnID];
+					} else {
+						relRecs.byT[relnType][relRectype].push(relnID);
+					}
+					if (!relRecs.byRt[relRectype]) {
+						relRecs.byRt[relRectype] = {};
+					}
+					if (!relRecs.byRt[relRectype][relnType]) {
+						relRecs.byRt[relRectype][relnType] = [relnID];
+					} else {
+						relRecs.byRt[relRectype][relnType].push(relnID);
+					}
+				}
 				if (found) {
 					this.relatedRecords = relRecs.rels;
 					this.relnIDs = {};
@@ -533,10 +533,10 @@ if (!top.Relationship) {
 							default:
 								if (! targetRectypes[index]){
 									delete(this.constraints[term][index]);
-			}
-			}
-		}
-		}
+								}
+						}
+					}
+				}
 			}
 		}
 
@@ -596,9 +596,9 @@ if (!top.Relationship) {
 		addOtherTd.colSpan = 7;
 		var a = addOtherTd.appendChild(document.createElement("a"));
 		a.href = "#";
-			var addImg = a.appendChild(document.createElement("img"));
-			addImg.src = top.HEURIST.basePath +"common/images/add-record-small.png";
-			addImg.className = "add_records_img";
+		var addImg = a.appendChild(document.createElement("img"));
+		addImg.src = top.HEURIST.basePath +"common/images/add-record-small.png";
+		addImg.className = "add_records_img";
 		if (this.relationships.length > 0) {
 			addImg.title = "Add another relationship";
 			a.appendChild(document.createTextNode("add more ..."));

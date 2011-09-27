@@ -62,7 +62,7 @@ if(numberOfSelectedRecords < 2) {
 			while(top.HEURIST.search.results.recSet[recordID1].relLinks.byRelType[relType][index]) {
 				var relatedRecordID = top.HEURIST.search.results.recSet[recordID1].relLinks.byRelType[relType][index];
 				if(relatedRecordID == recordID2) {
-					relTypeName = top.HEURIST.terms.termsByDomainLookup.relation[relType][0];
+					relTypeName = top.HEURIST.terms.termsByDomainLookup.relation[relType][top.HEURIST.terms.fieldNamesToIndex['trm_Label']];
 					document.getElementById("relationPane").innerHTML += "<span><img src='../../common/images/next_page.png'>" + relTypeName + "<img src='../../common/images/next_page.png'></span>";
 				}
 				index++;
@@ -75,7 +75,7 @@ if(numberOfSelectedRecords < 2) {
 			while(top.HEURIST.search.results.recSet[recordID2].relLinks.byRelType[relType][index]) {
 				var relatedRecordID = top.HEURIST.search.results.recSet[recordID2].relLinks.byRelType[relType][index];
 				if(relatedRecordID == recordID1) {
-					relTypeName = top.HEURIST.terms.termsByDomainLookup.relation[relType][0];
+					relTypeName = top.HEURIST.terms.termsByDomainLookup.relation[relType][top.HEURIST.terms.fieldNamesToIndex['trm_Label']];
 					document.getElementById("relationPane").innerHTML += "<span><img src='../../common/images/previous_page.png'>" + relTypeName + "<img src='../../common/images/previous_page.png'>";
 				}
 				index++;

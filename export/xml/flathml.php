@@ -209,7 +209,8 @@ $GEO_TYPES = array(
 $MAX_DEPTH = @$_REQUEST['depth'] ? intval($_REQUEST['depth']) : 0;	// default to only one level
 $REVERSE = @$_REQUEST['rev'] === 'no' ? false : true;	//default to including reverse pointers
 $WOOT = @$_REQUEST['woot'] ? intval($_REQUEST['woot']) : 0;	//default to not output text content
-$USEXINCLUDE = @$_REQUEST['hinclude'] ?  true : false;	//default to not output xinclude format for related records
+$USEXINCLUDELEVEL = array_key_exists('hinclude', $_REQUEST) && is_numeric($_REQUEST['hinclude']) ?  $_REQUEST['hinclude'] : 99;	//default to not output xinclude format for related records
+$USEXINCLUDE = array_key_exists('hinclude', $_REQUEST) ?  true : false;	//default to not output xinclude format for related records
 $OUTPUT_STUBS = @$_REQUEST['stub'] === '1'? true : false;	//default to not output stubs
 $INCLUDE_FILE_CONTENT = (@$_REQUEST['fc'] && $_REQUEST['fc'] == 0? false :true);	// default to expand xml file content
 $SUPRESS_LOOPBACKS = (@$_REQUEST['slb'] && $_REQUEST['slb'] == 0? false :true);	// default to supress loopbacks or gives oneside of a relationship record
@@ -615,14 +616,14 @@ function outputRecords($result) {
 
 
 function outputRecord($recordInfo, $recInfos, $outputStub=false, $parentID = null) {
-	global $RTN, $DTN, $INV, $TL, $RQS, $WGN,$UGN, $MAX_DEPTH, $WOOT,$USEXINCLUDE, $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT, $relTrgDT, $relTypDT, $relSrcDT;
+	global $RTN, $DTN, $INV, $TL, $RQS, $WGN,$UGN, $MAX_DEPTH, $WOOT,$USEXINCLUDELEVEL, $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT, $relTrgDT, $relTypDT, $relSrcDT;
 	$record = $recordInfo['record'];
 	$depth = $recordInfo['depth'];
 	$filter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth]: null );
 	if ( isset($filter) && !in_array($record['rec_RecTypeID'],$filter)){
 		if ($record['rec_RecTypeID'] != $relRT) {
 			if ($depth > 0) {
-//				if ($USEXINCLUDE){
+//				if ($USEXINCLUDELEVEL){
 //					outputXInclude($record);
 //				}else
 				if ($outputStub){
@@ -634,8 +635,9 @@ function outputRecord($recordInfo, $recInfos, $outputStub=false, $parentID = nul
 			return;
 		}
 	}
+error_log(" depth = $depth  xlevel = $USEXINCLUDELEVEL");
 	openTag('record', array('depth' => $depth));
-	if ($USEXINCLUDE && $depth > 0){
+	if ($depth > $USEXINCLUDELEVEL){
 		outputXInclude($record);
 		closeTag('record');
 		return;

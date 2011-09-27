@@ -57,8 +57,8 @@ function init () {
 	recCountSpan.innerHTML = top.HEURIST.search.getSelectedRecIDs().get().length;
 	var reltypDT = top.HEURIST.magicNumbers['DT_RELATION_TYPE'];
 	var relRT = top.HEURIST.magicNumbers['RT_RELATION'];
-	var relTypeTerms = top.HEURIST.util.expandJsonStructure(top.HEURIST.rectypes.typedefs[relRT].dtFields[reltypDT][11]);
-	var relTypeTermsDisabled = top.HEURIST.util.expandJsonStructure(top.HEURIST.rectypes.typedefs[relRT].dtFields[reltypDT][13]);
+	var relTypeTerms = top.HEURIST.util.expandJsonStructure(top.HEURIST.rectypes.typedefs[relRT].dtFields[reltypDT][top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_FilteredJsonTermIDTree']]);
+	var relTypeTermsDisabled = top.HEURIST.util.expandJsonStructure(top.HEURIST.rectypes.typedefs[relRT].dtFields[reltypDT][top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_TermIDTreeNonSelectableIDs']]);
 
 	relTypeSelect = top.HEURIST.util.createTermSelect(relTypeTerms,
 													(relTypeTermsDisabled || ""),

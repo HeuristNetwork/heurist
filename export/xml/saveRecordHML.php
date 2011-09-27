@@ -67,7 +67,7 @@ if ( $row['rec_NonOwnerVisibility'] != 'public' && (count($rec_owner_id) != 1 ||
 	returnXMLErrorMsgPage(" no access to record id $recID ");
 }
 
-saveRecordHML(HEURIST_URL_BASE."export/xml/flathml.php?ver=1&a=1&f=1&depth=1&hinclude=1&w=all&q=ids:$recID&db=".HEURIST_DBNAME);
+saveRecordHML(HEURIST_URL_BASE."export/xml/flathml.php?ver=1&a=1&f=1&depth=1&hinclude=0&w=all&q=ids:$recID&db=".HEURIST_DBNAME);
 
 function saveRecordHML($filename){
 global $recID;
@@ -82,7 +82,7 @@ global $recID;
 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);	// don't verify peer cert
 	curl_setopt($ch, CURLOPT_TIMEOUT, 10);	// timeout after ten seconds
 	curl_setopt($ch, CURLOPT_MAXREDIRS, 5);	// no more than 5 redirections
-	curl_setopt($ch, CURLOPT_PROXY, 'www-cache.usyd.edu.au:8080');
+//	curl_setopt($ch, CURLOPT_PROXY, 'www-cache.usyd.edu.au:8080');
 	curl_setopt($ch, CURLOPT_URL, $filename);
 	$hml = curl_exec($ch);
 	$xml = new DOMDocument;

@@ -77,8 +77,8 @@ top.HEURIST.workgroup = {
 			var grp = document.createElement("optgroup");
 			grp.label = top.HEURIST.rectypes.groups[grpID].name;
 			rectype_select.appendChild(grp);
-			for (var i=0; i < top.HEURIST.rectypes.groups[grpID].types.length; ++i) {
-				var value = top.HEURIST.rectypes.groups[grpID].types[i];
+			for (var i=0; i < top.HEURIST.rectypes.groups[grpID].showTypes.length; ++i) {
+				var value = top.HEURIST.rectypes.groups[grpID].showTypes[i];
 				var name = top.HEURIST.rectypes.names[value];
 				rectype_select.options[j++] = new Option(name, value);
 			}

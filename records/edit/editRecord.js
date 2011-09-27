@@ -492,18 +492,42 @@ top.HEURIST.edit = {
 		//6,"dty_Status" 7,"dty_DetailTypeGroupID" 8,"dty_FieldSetRectypeID" 9,"dty_JsonTermIDTree"
 		//10,"dty_TermIDTreeNonSelectableIDs" 11,"dty_PtrTargetRectypeIDs" 12,"dty_ID"
 		var dt = top.HEURIST.detailTypes.typedefs[detailTypeID]['commonFields'];
+		var dtyFieldNamesIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamestoIndex;
 		var rfr = null;
 		if (rectypeID) {
 			rfr = top.HEURIST.rectypes.typedefs[rectypeID]['dtFields'][detailTypeID];
 		}
 		if (!rfr) {
-			// fake low-rent rfr if rectype isn't specified
-			//0,"rst_DisplayName" 1,"rst_DisplayHelpText" 2,"rst_DisplayExtendedDescription" 3,"rst_DefaultValue" 4,"rst_RequirementType"
-			//5,"rst_MaxValues" 6,"rst_MinValues" 7,"rst_DisplayWidth" 8,"rst_RecordMatchOrder" 9,"rst_DisplayOrder"
-			//10,"rst_DisplayDetailTypeGroupID" 11,"rst_FilteredJsonTermIDTree" 12,"rst_PtrFilteredIDs" 13,"rst_TermIDTreeNonSelectableIDs"
-			//14,"rst_CalcFunctionID" 15,"rst_Status" 16,"rst_OrderForThumbnailGeneration" 17,"dty_TermIDTreeNonSelectableIDs"
-			//18,"dty_FieldSetRectypeID"
-			rfr = [ dt[0], "", "","", 'optional', 0, 0, 0 ];	// saw TODO need to get defaults for enum list from dt
+			var l = top.HEURIST.rectypes.typedefs.dtFiledNames.length;
+			var i;
+			var fieldIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
+			rfr = [];
+			for (i=0; i<l; i++){
+				rfr.push("");
+			}
+			rfr[fieldIndexMap['rst_DisplayName']] = dt[dtyFieldNamesIndexMap['dty_Name']];
+			rfr[fieldIndexMap['dty_FieldSetRectypeID']] = dt[dtyFieldNamesIndexMap['dty_FieldSetRectypeID']];
+			rfr[fieldIndexMap['dty_TermIDTreeNonSelectableIDs']] = dt[dtyFieldNamesIndexMap['dty_TermIDTreeNonSelectableIDs']];
+			rfr[fieldIndexMap['rst_TermIDTreeNonSelectableIDs']] = dt[dtyFieldNamesIndexMap['dty_TermIDTreeNonSelectableIDs']];
+			rfr[fieldIndexMap['rst_MaxValues']] = 1;
+			rfr[fieldIndexMap['rst_MinValues']] = 0;
+			rfr[fieldIndexMap['rst_CalcFunctionID']] = null;
+			rfr[fieldIndexMap['rst_DefaultValue']] = null;
+			rfr[fieldIndexMap['rst_DisplayDetailTypeGroupID']] = dt[dtyFieldNamesIndexMap['dty_DetailTypeGroupID']];
+			rfr[fieldIndexMap['rst_DisplayExtendedDescription']] = dt[dtyFieldNamesIndexMap['dty_ExtendedDescription']];
+			rfr[fieldIndexMap['rst_DisplayHelpText']] = dt[dtyFieldNamesIndexMap['dty_HelpText']];
+			rfr[fieldIndexMap['rst_DisplayOrder']] = 99;
+			rfr[fieldIndexMap['rst_DisplayWidth']] = 30;
+			rfr[fieldIndexMap['rst_FilteredJsonTermIDTree']] = dt[dtyFieldNamesIndexMap['dty_JsonTermIDTree']];
+			rfr[fieldIndexMap['rst_LocallyModified']] = 0;
+			rfr[fieldIndexMap['rst_Modified']] = 0;
+			rfr[fieldIndexMap['rst_NonOwnerVisibility']] = dt[dtyFieldNamesIndexMap['dty_NonOwnerVisibility']];
+			rfr[fieldIndexMap['rst_OrderForThumbnailGeneration']] = 0;
+			rfr[fieldIndexMap['rst_OriginatingDBID']] = 0;
+			rfr[fieldIndexMap['rst_PtrFilteredIDs']] = dt[dtyFieldNamesIndexMap['dty_PtrTargetRectypeIDs']];
+			rfr[fieldIndexMap['rst_RecordMatchOrder']] = 0;
+			rfr[fieldIndexMap['rst_RequirementType']] = 'optional';
+			rfr[fieldIndexMap['rst_Status']] = dt[dtyFieldNamesIndexMap['dty_Status']];
 		}
 
 		var newInput;

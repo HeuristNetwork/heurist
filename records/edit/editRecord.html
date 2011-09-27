@@ -135,16 +135,14 @@
 					var grp = document.createElement("optgroup");
 					grp.label = top.HEURIST.rectypes.groups[grpID].name;
 					rectypeValSelect.appendChild(grp);
-					for (var recTypeID in top.HEURIST.rectypes.groups[grpID].types) {
-						if (top.HEURIST.rectypes.groups[grpID].types[recTypeID]) {
-							var name = top.HEURIST.rectypes.names[recTypeID];
-							rectypeValSelect.appendChild(new Option(name, recTypeID));
+					for (var recTypeID in top.HEURIST.rectypes.groups[grpID].showTypes) {
+						var name = top.HEURIST.rectypes.names[recTypeID];
+						rectypeValSelect.appendChild(new Option(name, recTypeID));
 						if (name == top.HEURIST.edit.record.rectype) {
 							rectypeValSelect.selectedIndex = rectypeValSelect.options.length-1;
 						}
 					}
 				}
-			}
 			}
 
 			function changeRectype() {
