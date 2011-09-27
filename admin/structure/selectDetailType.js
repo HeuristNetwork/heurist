@@ -1,3 +1,4 @@
+var selectDetailType;
 
 //aliases
 var Dom = YAHOO.util.Dom,

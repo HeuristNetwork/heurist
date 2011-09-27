@@ -22,7 +22,6 @@ function EditRecStructure() {
 
 	var _className = "EditRecStructure",
 	_myDataTable,
-	//2011-09-20 replaced to popup _tabView = new YAHOO.widget.TabView(),
 	rty_ID,
 	_isDragEnabled = false,
 	_updatedDetails = [], //list of dty_ID that were affected with edition
@@ -46,8 +45,6 @@ function EditRecStructure() {
 			var recTypeIcon  = top.HEURIST.baseURL + "common/images/"+top.HEURIST.database.name+"/rectype-icons/"+rty_ID+".png";
 			var formTitle = document.getElementById('recordTitle');
 			formTitle.innerHTML = "<div class=\"rectypeIconHolder\" style=\"background-image:url("+recTypeIcon+")\"></div><span class=\"recTypeName\">"+top.HEURIST.rectypes.names[rty_ID]+"</span>";
-			//document.title = "Record Type: " + rty_ID+" : " + top.HEURIST.rectypes.names[rty_ID];
-			//since popup - we don't need it document.getElementById("recordTitle").innerHTML = "Editing Record Type: "+ top.HEURIST.rectypes.names[rty_ID] + "("+rty_ID+")";
 		}
 
 
@@ -64,47 +61,6 @@ function EditRecStructure() {
 		Dom.get("recordTitle").innerHTML += hToolBar;
 	  	Dom.get("modelTabs").innerHTML =  '<div id="tabDesign"><div id="tableContainer"></div></div>';
 	  	_initTabDesign(null);
-
-/* 2011-09-20 replaced to popup
-		//create TabView with 2 tabs
-		_tabView.addTab(new YAHOO.widget.Tab({
-			id: 'design',
-			label: 'Design',
-			content: '<div id="tabDesign" style="width:800;margin:auto;">'+hToolBar+'<div id="tableContainer"></div>'+hToolBar+'</div>'
-		}));
-		_tabView.addTab(new YAHOO.widget.Tab({
-			id: 'preview',
-			label: 'Preview',
-			content:
-			'<div id="all-inputs" style="width:800, max-width:800;"></div>'
-		}));
-		_tabView.addListener("activeTabChange", _handleTabChange);
-		_tabView.appendTo("modelTabs");
-
-		//init design tab
-		_tabView.set("activeIndex", 0);
-*/
-	}
-
-	/**
-	* 2011-09-20 replaced to popup
-	* Event listener on TabView active page change - NOT USED ANYMORE
-	*
-	* Creates either design grid or fills preview of Record input form
-	*/
-	function _handleTabChange (e) {
-
-		var ind = _tabView.get("activeIndex");
-		if(e.newValue!==e.prevValue){
-			if(ind===0){
-				//reload design
-				_initTabDesign(null);
-
-			}else if(ind===1){
-				//reload preview
-				_initTabPreview();
-			}
-		}
 	}
 
 	/**
@@ -152,7 +108,7 @@ function EditRecStructure() {
 					var statusLock;
 					var aval = _dts[rst_ID];
 
-					arr.push([ rst_ID, rst_ID, aval[9],
+					arr.push([ rst_ID, rst_ID,Number(aval[9]),
 					top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[0], //field name
 					aval[0],
 					top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[2], //field type
@@ -166,7 +122,7 @@ function EditRecStructure() {
 			var myDataSource = new YAHOO.util.LocalDataSource(arr,{
 				responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
 				responseSchema : {
-					fields: [ "rst_ID","expandColumn", "rst_DisplayOrder",
+					fields: [  "rst_ID","expandColumn","rst_DisplayOrder",
 					"dty_Name",
 					"rst_DisplayName", "dty_Type", "rst_RequirementType",
 					"rst_DisplayWidth", "rst_MinValues", "rst_MaxValues", "rst_DefaultValue", "rst_Status",
@@ -198,7 +154,7 @@ function EditRecStructure() {
 
 			var myColumnDefs = [
 			{
-				key:"rst_ID", label: "Code", sortable:false, className:"right"
+				key:"rst_ID", label: "Code", sortable:true, className:"right"
 			},
 			{
 				key:"expandColumn",
@@ -279,7 +235,8 @@ function EditRecStructure() {
 			myColumnDefs,
 			myDataSource,
 			//this is box of expandable record
-			{ rowExpansionTemplate :
+			{	sortedBy:{key:'rst_DisplayOrder', dir:YAHOO.widget.DataTable.CLASS_ASC},
+				rowExpansionTemplate :
 				function ( obj ) {
 					var rst_ID = obj.data.getData('rst_ID');
 					//var rst_values = obj.data.getData('rst_values');
@@ -531,146 +488,37 @@ function EditRecStructure() {
 		}
 	} // end _initTabDesign -------------------------------
 
-	function initPreview(){
-
-	}
-
 	/**
-	* Shows all our chanages on preview tab
-	*
-	* It utilizes methods from HEURIST.edit
-	*
-	* 1) Saves all changes if some row (detail type) is expanded
-	* 2) Loads all changes top.HEURIST.rectypes.typedefs[rty_ID].dtFields
-	* 3) Creates inputs with createInputsForRectype
+	* Opens popup with preview
 	*/
-	function _initTabPreview(){
+	function _initPreview(){
 
+	if(Hul.isnull(popupSelect))
+	{
 		//save all changes
 		_doExpliciteCollapse(null, true);
 
+		var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+							(top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-			top.HEURIST.edit.allInputs = [];
-			//top.HEURIST.edit.inputs = {};
-			top.HEURIST.edit.modules = {};
+		var url = top.HEURIST.basePath +
+		"admin/structure/editRecStructurePreview.html?rty_ID="+editStructure.getRty_ID()+"&db="+db;
 
-			top.HEURIST.edit.record = {bdValuesByType:{},
-					bibID: null,
-					bkmkID: null,
-					comments:[],
-					isTemporary:[],
-					moddate:"",
-					quickNotes:"",
-					recID: "0",
-					rectype: "", //name of rectype
-					rectypeID: rty_ID,
-					relatedRecords:[],
-					reminders:[],
-					retrieved:"",
-					rtConstraints:[],
-					tagString:"",
-					title:"kala mala",
-					url:"",
-					wikis:[],
-					workgroup:"Heurist",
-					workgroupID: "12",
-					workgroupTags:[]
-
-		};
-
-
-		//loadPublicEditFrame();
-		//setTimeout(renderInputs, 500);
-		renderInputs();
-	}
-
-
-function renderInputs() {
-
-	var rectype = rty_ID,
-		inputs;
-	// Clear out any existing inputs
-
-	var allInputs = document.getElementById("all-inputs");
-	while (allInputs.childNodes.length > 0){
-		allInputs.removeChild(allInputs.childNodes[0]);
-	}
-
-	var showAllDiv = document.getElementById("show-all-div");
-	if (showAllDiv){
-		showAllDiv.parentNode.removeChild(showAllDiv);
-	}
-
-	var innerDims = Hul.innerDimensions(window);
-
-	if (rectype) {
-
-		var defaultInputValues = {};
-
-		/*if(!window.HEURIST.edit){
-			window.HEURIST.edit = top.HEURIST.edit;
-		}*/
-
-		inputs = top.HEURIST.edit.createInputsForRectype(rectype, defaultInputValues, allInputs);
-
-		renderShowAll();
-
-		//renderAdditionalDataSection(allInputs, rectype);
-		//window.HEURIST.inputs = inputs;
-	}
-
-}
-
-function renderShowAll() {
-	var hrRow = document.getElementById("all-inputs").appendChild(document.createElement("div"));
-		hrRow.className = "separator_row";
-		hrRow.style.margin = "20px 0 0 0";
-
-	var showDiv = document.getElementById("all-inputs").appendChild(document.createElement("div"));
-		showDiv.id = "show-all-div";
-		showDiv.className = "title-row not-optional-fields";
-
-	var showLink = showDiv.appendChild(document.createElement("div")).appendChild(document.createElement("a"));
-		showLink.className = "additional-header-cell not-optional-fields";
-		showLink.style.fontWeight = "bold";
-		showLink.href = "#";
-		showLink.appendChild(document.createTextNode("Show all fields"));
-		showLink.onclick = function() {
-			Hul.setDisplayPreference("input-visibility", "all");
-			//Dom.get("input-visibility").checked = true;
-			return false;
-		};
-
-	var showInnerDiv = showDiv.appendChild(document.createElement("div"));
-		showInnerDiv.appendChild(document.createTextNode("Only "));
-		showInnerDiv.className = "input-cell";
-	var showInnerSpan = showInnerDiv.appendChild(document.createElement("span"));
-		showInnerSpan.className = "required-only";
-		showInnerSpan.style.fontWeight = "bold";
-		showInnerSpan.appendChild(document.createTextNode("required"));
-		showInnerSpan = showInnerDiv.appendChild(document.createElement("span"));
-		showInnerSpan.className = "recommended";
-		showInnerSpan.style.fontWeight = "bold";
-		showInnerSpan.appendChild(document.createTextNode("recommended"));
-		showInnerDiv.appendChild(document.createTextNode(" fields are currently visible"));
-}
-
-
-	/*function loadPublicEditFrame() {
-			//fills top.HEURRIST.edit.record
-
-			if (! top.HEURIST.edit.record) {
-					alert("Sorry - record not found");
-			}else{
-				var editFrame = document.getElementById("edit-frame");
-
-				var parameters = top.HEURIST.edit.record;
-				//if (parameters  &&  parameters.bibID) {
-					editFrame.src = top.HEURIST.baseURL + "records/edit/tabs/publicInfoTab.html";
-					editFrame.style.display = "block";
-				//}
+		window.open(url,'','scrollbars=no,menubar=no,height=600,width=800,resizable=yes,toolbar=no,location=no,status=no');
+/*
+		popupSelect = Hul.popupURL(top, url,
+		{	"close-on-blur": false,
+			"no-resize": false,
+			height: 640,
+			width: 800,
+			callback: function(context) {
+				popupSelect = null;
 			}
-	}*/
+		});
+*/
+	}
+
+	}
 
 	/**
 	* Collapses the expanded row and save record structure type to server
@@ -908,7 +756,7 @@ function renderShowAll() {
 		onRepeatChange(Number(rst_ID));
 
 		//If reserved, requirements can only be increased, nor can you change min or max values
-		onStatusChnage(Number(rst_ID));
+		onStatusChange(Number(rst_ID));
 	}
 
 
@@ -960,8 +808,9 @@ function renderShowAll() {
 				// 11	12    13    14     15	 16	    17    18     19
 
 				recDetTypes[dty_ID] = arr_target;
-//FIX!!!!
-				data_toadd.push({rst_ID:dty_ID,
+
+				data_toadd.push({
+					rst_ID:dty_ID,
 					expandColumn:dty_ID,
 					rst_DisplayOrder: order,
 					rst_DisplayName: arrs[0],
@@ -1374,6 +1223,9 @@ function renderShowAll() {
 		},
 		saveUpdates:function(needClose){
 			return _saveUpdates(needClose);
+		},
+		initPreview:function(){
+			return _initPreview();
 		},
 
 		getClass: function () {

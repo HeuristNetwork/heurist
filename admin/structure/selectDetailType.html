@@ -91,36 +91,35 @@
 </head>
 
 <body class="popup yui-skin-sam" style="overflow: scroll;">
-<script type="text/javascript" src="../../common/js/utilsLoad.js"></script> 
-<script src="../../common/php/loadCommonInfo.php"></script> 
+<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
+<script src="../../common/php/loadCommonInfo.php"></script>
 <script type="text/javascript" src="selectDetailType.js"></script>
 <div class="tooltip" id="toolTip2">
   <p>tool-tip</p>
 </div>
 <div id="toolbar">
-  <div class="input-row">
-  	<div class="input-header-cell">
-    	Filter by:
-        </div>
-     <div class="input-cell">
-    	<label>group:</label>
-		<select id="inputFilterByGroup" name="inputFilterByGroup" size="1" style="width:138px;height:16">
-			<option value="all">all groups</option>
-		</select>
-        <label>name:</label>
-		    <input type="text" id="inputFilterByName" name="inputFilterByName" style="width:140px;" value=""/>
-      </div>
+	<div class="input-row">
+		<div class="input-header-cell">
+			Filter by:
+		</div>
+		<div class="input-cell">
+			<label>group:</label>
+			<select id="inputFilterByGroup" name="inputFilterByGroup" size="1" style="width:138px;height:20">
+					<option value="all">all groups</option>
+			</select>
+			<label>name:</label>
+			<input type="text" id="inputFilterByName" name="inputFilterByName" style="width:140px;" value=""/>
+		</div>
 	</div>
 	<div class="input-row">
-  	<div class="input-header-cell">
-		show:
-    	</div>
-     <div class="input-cell">
-	    <input type="radio" id="inputFilterBySelection1" name="inputFilterBySelection" value="all" checked="checked"/><label for="inputFilterBySelection1">All</label>
-        <input type="radio" id="inputFilterBySelection2" name="inputFilterBySelection" value="selonly"/><label for="inputFilterBySelection2">Selected</label>
-        </div>
+		<div class="input-header-cell">
+			show:
 		</div>
-    </div>
+		<div class="input-cell">
+			<input type="radio" id="inputFilterBySelection1" name="inputFilterBySelection" value="all" checked="checked"/><label for="inputFilterBySelection1">All</label>
+			<input type="radio" id="inputFilterBySelection2" name="inputFilterBySelection" value="selonly"/><label for="inputFilterBySelection2">Selected</label>
+        </div>
+	</div>
 </div>
 <div id="tb_top" style="height:30">
   <div style="display:inline-block;"> </div>
@@ -128,14 +127,15 @@
     <label id="lblSelect1"></label>
     <!--    <input type="button" id="btnClearSelection" value="clear selection" title="clear selection"/>
     <input type="button" tabindex="12" value="Cancel" onClick="selectDetailType.cancel();" />-->
-    <input type="button" tabindex="11" value="Insert Selected Fields" onClick="selectDetailType.apply();" />
+    <input type="button" tabindex="11" value="Insert Selected Fields" onClick="onApply()" />
   </div>
 </div>
-<div id="tabContainer"> 
-  <script  type="text/javascript">
+<div id="tabContainer">
+<script  type="text/javascript">
 
-				// SelectDetailType object
-				var selectDetailType;
+				function onApply(){
+					selectDetailType.apply();
+				}
 
 				function init(){
 					selectDetailType = new  SelectDetailType();
@@ -146,7 +146,7 @@
 				YAHOO.util.Event.onDOMReady(init);
 				//YAHOO.util.Event.addListener(window, "load", function(){ selectDetailType = new  SelectDetailType(); });
 
-				</script> 
+</script>
 </div>
 <div id="tb_bottom" style="height:30">
   <div style="display:inline-block;"> </div>

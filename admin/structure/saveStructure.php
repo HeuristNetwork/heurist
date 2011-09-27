@@ -60,12 +60,16 @@
 	"rty_OriginatingDBID"=>"i",
 	"rty_NameInOriginatingDB"=>"s",
 	"rty_IDInOriginatingDB"=>"i",
+	"rty_NonOwnerVisibility"=>"s",
 	"rty_ShowInLists"=>"i",
 	"rty_RecTypeGroupID"=>"i",
+	"rty_RecTypeModelsIDs"=>"s",
 	"rty_FlagAsFieldset"=>"i",
 	"rty_ReferenceURL"=>"s",
 	"rty_AlternativeRecEditor"=>"s",
-	"rty_Type"=>"s"
+	"rty_Type"=>"s",
+	"rty_Modified"=>"i",
+	"rty_LocallyModified"=>"i"
 	);
 
 	$rstColumnNames = array(
@@ -81,17 +85,20 @@
 	"rst_RecordMatchOrder"=>"i",
 	"rst_CalcFunctionID"=>"i",
 	"rst_RequirementType"=>"s",
+	"rst_NonOwnerVisibility"=>"s",
 	"rst_Status"=>"s",
+	"rst_MayModify"=>"s",
 	"rst_OriginatingDBID"=>"i",
 	"rst_IDInOriginatingDB"=>"i",
 	"rst_MaxValues"=>"i",
 	"rst_MinValues"=>"i",
 	"rst_DisplayDetailTypeGroupID"=>"i",
 	"rst_FilteredJsonTermIDTree"=>"s",
-	"rst_TermIDTreeNonSelectableIDs"=>"s",
 	"rst_PtrFilteredIDs"=>"s",
 	"rst_OrderForThumbnailGeneration"=>"i",
-	"rst_NonOwnerVisibility"=>"s"
+	"rst_TermIDTreeNonSelectableIDs"=>"s",
+	"rst_Modified"=>"i",
+	"rst_LocallyModified"=>"i"
 	);
 
 	$dtyColumnNames = array(
@@ -110,18 +117,29 @@
 	"dty_PtrTargetRectypeIDs"=>"s",
 	"dty_JsonTermIDTree"=>"s",
 	"dty_TermIDTreeNonSelectableIDs"=>"s",
+	"dty_PtrTargetRectypeIDs"=>"s",
 	"dty_FieldSetRectypeID"=>"i",
-	"dty_ShowInLists"=>"i"
+	"dty_ShowInLists"=>"i",
+	"dty_NonOwnerVisibility"=>"s",
+	"dty_Modified"=>"i",
+	"dty_LocallyModified"=>"i"
 	);
 
 	//field names and types for defRecTypeGroups
 	$rtgColumnNames = array(
+	"rtg_ID"=>"i",
 	"rtg_Name"=>"s",
+	"rtg_Domain"=>"s",
+	"rtg_Order"=>"i",
 	"rtg_Description"=>"s",
+	"rtg_Modified"=>"i"
 	);
 	$dtgColumnNames = array(
+	"dtg_ID"=>"i",
 	"dtg_Name"=>"s",
+	"dtg_Order"=>"i",
 	"dtg_Description"=>"s",
+	"dtg_Modified"=>"i"
 	);
 
 	$trmColumnNames = array(
@@ -129,8 +147,19 @@
 	"trm_Label"=>"s",
 	"trm_InverseTermId"=>"i",
 	"trm_Description"=>"s",
+	"trm_Status"=>"s",
+	"trm_OriginatingDBID"=>"i",
+	"trm_NameInOriginatingDB"=>"s",
+	"trm_IDInOriginatingDB"=>"i",
+	"trm_AddedByImport"=>"i",
+	"trm_IsLocalExtension"=>"i",
 	"trm_Domain"=>"s",
-	"trm_ParentTermID"=>"i"
+	"trm_OntID"=>"i",
+	"trm_ChildCount"=>"i",
+	"trm_ParentTermID"=>"i",
+	"trm_Depth"=>"i",
+	"trm_Modified"=>"i",
+	"trm_LocallyModified"=>"i"
 	);
 
 
@@ -180,7 +209,7 @@
 		$rv['rectypes'] = getAllRectypeStructures();
 		break;
 
-		case 'saveRTS':
+	case 'saveRTS':
 
 
 //DEBUG error_log(">>>>>>>".print_r($data,true));
@@ -204,7 +233,7 @@
 		$rv['rectypes'] = getAllRectypeStructures();
 		break;
 
-		case 'deleteRTS':
+	case 'deleteRTS':
 
 		$rtyID = @$_REQUEST['rtyID'];
 		$dtyID = @$_REQUEST['dtyID'];
@@ -220,8 +249,8 @@
 		}
 		break;
 
-		case 'deleteRectype':
-		case 'deleteRT':
+	case 'deleteRectype':
+	case 'deleteRT':
 
 		$rtyID = @$_REQUEST['rtyID'];
 
@@ -605,16 +634,20 @@
 
 		$ret = null;
 
-		$db->query("select rty_ID from defRecTypes where rty_ID = $rtyID");
+		$res = $db->query("select rty_OriginatingDBID from defRecTypes where rty_ID = $rtyID");
 
-		if ($db->affected_rows<1){
+		if ($res->num_rows<1){ //$db->affected_rows<1){
 			$ret = "invalid rty_ID ($rtyID) passed in data to updateRectype";
+			return $ret;
 		}
+
+//		$row = $res->fetch_object();
+//		$query = "rty_LocallyModified=".(($row->rty_OriginatingDBID>0)?"1":"0").",";
 
 //error_log(">>>>>>>>>>>>>>> ".is_array($rt['common']));
 //error_log(">>>>>>>>>>>>>>> ".$rt['common'].length);
+		$query="";
 
-		$query = "";
 		if (count($commonNames)) {
 
 			$parameters = array(""); //list of field date types
@@ -636,6 +669,8 @@
 			}
 			//
 			if($query!=""){
+
+				$query = $query.", rty_LocallyModified=IF(rty_OriginatingDBID>0,1,0)";
 				$query = "update defRecTypes set ".$query." where rty_ID = $rtyID";
 
 //error_log(">>>>>>>>>>>>>>>".$query."   params=".join(",",$parameters)."<<<<<<<<<<<<<<<");
@@ -673,28 +708,42 @@
 
 		if ($db->affected_rows<1){
 			array_push($ret, "invalid rty_ID ($rtyID) passed in data to updateRectype");
+			return $ret;
 		}
+
+		$query2 = null;
 
 		if (count($dtFieldNames) && count($rt['dtFields']))
 		{
 
+			$wasLocallyModified = false;
+
 			foreach ($rt['dtFields'] as $dtyID => $fieldVals)
 			{
-
 				//$ret['dtFields'][$dtyID] = array();
 
-				$db->query("select rst_RecTypeID from defRecStructure where rst_RecTypeID = $rtyID and rst_DetailTypeID = $dtyID");
+				$res = $db->query("select rts_OriginatingDBID from defRecStructure where rst_RecTypeID = $rtyID and rst_DetailTypeID = $dtyID");
 
 				$isInsert = ($db->affected_rows<1);
+				if($isInsert){
+					$query2 = "rts_LocallyModified=0,";
+				}else{
+					$row = $res->fetch_object();
+					$query2 = "rts_LocallyModified=".(($row->rts_OriginatingDBID>0)?"1":"0").",";
+
+					$wasLocallyModified = ($wasLocallyModified || ($row->rts_OriginatingDBID>0));
+				}
 
 				//$fieldNames = "rst_RecTypeID,rst_DetailTypeID,".join(",",$dtFieldNames);
 
-				$query = "";
+				$query = $query2;
 				$fieldNames = "";
 				$parameters = array(""); //list of field date types
 				foreach ($dtFieldNames as $colName) {
 
 					$val = array_shift($fieldVals);
+
+//error_log(">>".$dtyID."   ".$colName."=".$val);
 
 					if (array_key_exists($colName, $rstColumnNames)) {
 						//array_push($ret['error'], "$colName is not a valid column name for defDetailTypes val= $val was not used");
@@ -730,7 +779,13 @@
 					}
 				}
 			}//for each dt
-			} //if column names
+
+			if($wasLocallyModified){
+				$query = "update defRecTypes set rty_LocallyModified=1  where rty_ID = $rtyID";
+				execSQL($db, $query, $parameters, true);
+			}
+
+		} //if column names
 
 		if (count($ret[$rtyID])==0) {
 			array_push($ret[$rtyID], "no data supplied for updating record structure - $rtyID");
@@ -1140,13 +1195,16 @@
 
 		$ret = null;
 
-		$db->query("select dty_ID from defDetailTypes where dty_ID = $dtyID");
+		$res = $db->query("select dty_OriginatingDBID from defDetailTypes where dty_ID = $rtyID");
 
-		if ($db->affected_rows<1){
+		if ($res->num_rows<1){ //$db->affected_rows<1){
 			$ret = "invalid dty_ID ($dtyID) passed in data to updateDetailType";
-	}
-
+			return $ret;
+		}
+		//$row = $res->fetch_object();
+		//$query = "dty_LocallyModified=".(($row->dty_OriginatingDBID>0)?"1":"0").",";
 		$query = "";
+
 	if (count($commonNames)) {
 
 			$vals = $dt['common'];
@@ -1168,6 +1226,8 @@
 		}//for
 			//
 			if($query!=""){
+
+				$query = $query.", dty_LocallyModified=IF(dty_OriginatingDBID>0,1,0)";
 				$query = "update defDetailTypes set ".$query." where dty_ID = $dtyID";
 
 				$rows = execSQL($db, $query, $parameters, true);
@@ -1238,6 +1298,7 @@
 				if($isInsert){
 					$query = "insert into defTerms (".$fieldNames.") values (".$query.")";
 				}else{
+					$query = $query.", trm_LocallyModified=IF(trm_OriginatingDBID>0,1,0)";
 					$query = "update defTerms set ".$query." where trm_ID = $trmID";
 				}
 

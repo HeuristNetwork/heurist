@@ -107,6 +107,8 @@ function ShowReps() {
 	* Reads GET parameters and requests for map data from server
 	*/
 	function _init() {
+		_setLayout(true, true); //aftert load show viewer only
+
 		_reload_templates();
 
 		if (top.HEURIST) {
@@ -156,7 +158,7 @@ function ShowReps() {
 	function _isEditorVisible(){
 		//
 		if(!isEditorVisible && !isInited){
-			setupMCE(); //auto setup mce
+			//MCE works only once????  setupMCE(); //auto setup mce
 			return false;
 		}else{
 			return isEditorVisible;
@@ -165,10 +167,17 @@ function ShowReps() {
 
 	/**
 	* Creates new template from the given query
+	*
+	* isLoadGenerated - new template
 	*/
-	function _generateTemplate(squery, isLoadGenerated) {
+	function _generateTemplate(name, squery, isLoadGenerated) {
 
 		function __onGenerateTemplate(context){
+
+			if(context===false || Hul.isnull(context['text'])){
+				alert('No template generated');
+				return;
+			}
 
 			if(isLoadGenerated){
 
@@ -176,7 +185,7 @@ function ShowReps() {
 					var ed = tinyMCE.get('edTemplateBody');
 					ed.setContent(context['text']);
 				}else{
-					Dom.get("edTemplateName").value = 'Generated';
+					Dom.get("edTemplateName").value = name;
 					ApplyLineBreaks(Dom.get("edTemplateBody"), context['text']);
 				}
 			}
@@ -210,14 +219,19 @@ function ShowReps() {
 			_onSelectRectype();
 
 			_setLayout(true, true);
+
+			_doExecute(); //execute at once
 		}
 
 			if(Hul.isnull(squery)){
 				squery = _currenQuery;
 			}
-
-			var baseurl = top.HEURIST.basePath + "viewers/smarty/templateGenerate.php";
-			top.HEURIST.util.getJsonData(baseurl, __onGenerateTemplate, squery);
+			if(Hul.isnull(squery)){
+				alert('You have to select some records in search result');
+			}else{
+				var baseurl = top.HEURIST.basePath + "viewers/smarty/templateGenerate.php";
+				top.HEURIST.util.getJsonData(baseurl, __onGenerateTemplate, squery);
+			}
 	}
 
 	/**
@@ -246,12 +260,12 @@ function ShowReps() {
 					}
 			}, squery);
 
-			_generateTemplate(null, false);
+			_generateTemplate(template_file, null, false);
 	}
 
 	/**
 	* Close editor
-	* @param mode 0 - just close, 1 - save and close,  2 - save, 3 - delete and close
+	* @param mode 0 - just close, 1 - save as (not close),  2 - save (not close), 3 - delete and close
 	*/
 	function _operationEditor(mode) {
 
@@ -263,19 +277,34 @@ function ShowReps() {
 
 			if(mode<3)
 			{ //save
+				template_file = jQuery.trim(Dom.get("edTemplateName").value);
+
+				if(mode==1){ //save as - get new name
+					template_file = jQuery.trim(prompt("Please enter new template name", template_file));
+					if (Hul.isempty(template_file)){
+						return;
+					}
+					Dom.get("edTemplateName").value = template_file;
+				}
+
 				var template_body = Dom.get("edTemplateBody").value;
 				if(template_body && template_body.length>10){
-					template_file = Dom.get("edTemplateName").value;
 					squery = squery + 'save&template='+template_file+'&template_body='+template_body;
 
 				}else{
+					alert('The template body is suspiciously short. No operation performed');
 					squery = null;
 				}
 			}
-			else if (mode===3 && _originalFileName!=="")
+			else if (mode===3 && _originalFileName!=="") //delete template
 			{ //delete
-				squery = squery + 'delete&template='+_originalFileName
-				_originalFileName = null;
+				var r=confirm("Are you sure you wish to delete template '"+_originalFileName+"'?");
+				if (r==true){
+					squery = squery + 'delete&template='+_originalFileName
+					_originalFileName = null;
+				}else{
+					return;
+				}
 			}
 
 			if(squery){
@@ -286,9 +315,11 @@ function ShowReps() {
 					}else{
 						var mode = context.ok;
 						if(mode==="delete"){
-							//todo - remove template from the list and clear editor
+							//todo!!!! - remove template from the list and clear editor
 						}else if(template_file!=null){
 							_originalFileName = template_file;//_onGetTemplate(obj);
+							alert("Template '"+template_file+"' has been saved");
+							//add new entry into list
 						}
 					}
 				}
@@ -297,7 +328,7 @@ function ShowReps() {
 			}
 		}
 
-		if(mode!==2){
+		if(mode===0 || mode===3){ //for close or delete
 			_setLayout(true, false);
 		}
 	}
@@ -355,9 +386,9 @@ function ShowReps() {
 		var units;
 		if(isviewer && iseditor){
 				units = [
-				{ position: 'center', body: 'viewercontainer'},
-				{ position: 'bottom', header: 'Template Editor', height: 150,
-				resize: true, body: 'editorcontainer', gutter: '5px', collapse: true}
+				{ position: 'top', header: 'Editor', height: 150,
+					resize: true, body: 'editorcontainer', gutter:'2px', collapse: true},
+				{ position: 'center', body: 'viewercontainer'}
 				];
 		}else if(isviewer){
 				units = [
@@ -369,8 +400,9 @@ function ShowReps() {
 						];
 		}
 
+		//var el = Dom.get('layout');
 		layout = null;
-		layout = new YAHOO.widget.Layout({
+		layout = new YAHOO.widget.Layout('layout', {
 							units: units
 							});
 		layout.render();
@@ -435,8 +467,14 @@ function ShowReps() {
 
 		var container = Dom.get("vars_list"),
 			sel = Dom.get('selRectype'),
-			recTypeID = sel.options[sel.selectedIndex].value,
+			recTypeID,
 			varnames; //contains vars - flat array and tree - tree array
+
+		if(sel.selectedIndex<0 || sel.selectedIndex>=sel.options.length){
+			return;
+		}
+		recTypeID = sel.options[sel.selectedIndex].value;
+
 
 		//find list of variables for current record type
 		var i, j;
@@ -895,8 +933,8 @@ function ShowReps() {
 				_reload(squery, template_file);
 			},
 
-			generateTemplate:  function (squery){
-				_generateTemplate(squery, true);
+			generateTemplate:  function (name, squery){
+				_generateTemplate(name, squery, true);
 			},
 
 			showEditor:  function (template_file){
@@ -955,6 +993,7 @@ function ShowReps() {
 
 	};
 
+	// init on load
 	_init();
 	return that;
 }

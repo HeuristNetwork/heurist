@@ -36,7 +36,7 @@ require_once('libs.inc.php');
 
 	if(!array_key_exists('records',$qresult)){
 //error_log(">>>>>>>>NOTHING FOUND");
-		echo "nothing found";
+		echo "Select somthing in search result to execute the template";
 		exit();
 	}
 

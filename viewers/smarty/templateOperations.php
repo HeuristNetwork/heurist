@@ -51,21 +51,26 @@ if($mode){ //opeartion with template files
 			getTemplate($template_file);
 		break;
 		case 'save':
+			header("Content-type: text/javascript");
 			//get template body from request (for execution from editor)
 			$template_body = (array_key_exists('template_body',$_REQUEST)?$_REQUEST['template_body']:null);
 			//add extension and save in default template directory
 
 			$template_file = $dir.$template_file;
 			$path_parts = pathinfo($template_file);
-			$ext = strtolower($path_parts['extension']);
+			$ext = (array_key_exists('extension',$path_parts))?strtolower($path_parts['extension']):"";
 			if($ext!="tpl"){
 				$template_file = $template_file.".tpl";
 			}
+
 			$file = fopen ($template_file, "w");
+			if(!$file){
+				print json_format(array("error"=>"Can't write file. Check permission for smarty template directory"));
+				exit();
+			}
 			fwrite($file, $template_body);
 			fclose ($file);
 
-			header("Content-type: text/javascript");
 			print json_format(array("ok"=>$mode));
 
 		break;

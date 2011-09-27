@@ -405,7 +405,7 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 				'AND (src.rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR NOT src.rec_NonOwnerVisibility = "hidden")'.
 				'AND (trg.rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR NOT trg.rec_NonOwnerVisibility = "hidden")'.
 				($relTermIDs && count($relTermIDs)>0 ? 'AND (trm.trm_ID in ('.join(',', $relTermIDs).') OR trm.trm_InverseTermID in ('.join(',', $relTermIDs).')) ' : '');
-error_log("find  d $depth related q = $query");
+//error_log("find  d $depth related q = $query");
 //echo $query;
 	$res = mysql_query($query);
 	while ($res && $row = mysql_fetch_assoc($res)) {

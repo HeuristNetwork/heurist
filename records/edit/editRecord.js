@@ -1162,6 +1162,8 @@ top.HEURIST.edit.inputs.BibDetailInput = function(detailType, recFieldRequiremen
 	this.inputCell = this.row.appendChild(this.document.createElement("div"));
 		this.inputCell.className = "input-cell";
 
+	this.linkSpan = null;
+
 	// make sure that the promptDiv is the last item in the input cell
 	this.promptDiv = this.inputCell.appendChild(this.document.createElement("div"));
 		this.promptDiv.className = "help prompt";
@@ -1609,15 +1611,17 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = func
 	this.addInputHelper.call(this, bdValue, newInput);
 	newInput.style.width = "auto";
 
+	//move span before prompt div
+	if(this.linkSpan){
+		this.inputCell.removeChild(this.linkSpan);
+		this.inputCell.insertBefore(this.linkSpan, this.promptDiv);
+	}
+
+
 	return newInput;
 }
 
-top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdValue) {
-
-		var newInput = this.recreateSelector(bdValue, false);
-
-		if(this.inputs.length>1 || !top.HEURIST.is_admin()) {return}  //only one edit link
-
+top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSpanLinkTerms = function(bdValue){
 		var urlSpan = this.document.createElement("span");
 			urlSpan.style.paddingLeft = "1em";
 			urlSpan.style.color = "blue";
@@ -1626,7 +1630,7 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdV
 		var editImg = urlSpan.appendChild(this.document.createElement("img"));
 			editImg.src = top.HEURIST.basePath+"common/images/edit-pencil.png";
 		urlSpan.appendChild(editImg);
-		urlSpan.appendChild(this.document.createTextNode("edit"));
+		urlSpan.appendChild(this.document.createTextNode("list"));
 
 		//var detailType = this.detailType;
 		//var recFieldRequirements = this.recFieldRequirements;
@@ -1645,6 +1649,7 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdV
 	//var disTerms = termHeaderList;
 	//"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+
 
+    //after updating of terms list we have to recreate the selector
 	function onSelecTermsUpdate(editedTermTree, editedDisabledTerms) {
 			if(editedTermTree || editedDisabledTerms) {
 				// recreate and replace combobox
@@ -1665,7 +1670,7 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdV
 	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
 	top.HEURIST.util.popupURL(top, top.HEURIST.basePath +
-		"admin/structure/selectTerms.html?detailTypeID="+_dtyID+"&db="+db,
+		"admin/structure/selectTerms.html?detailTypeID="+_dtyID+"&db="+db+"&mode=editrecord",
 		{
 		"close-on-blur": false,
 		"no-resize": true,
@@ -1677,9 +1682,20 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdV
 //-----------------------------------------------
 		};
 
-		//this.inputCell.insertBefore(urlSpan, this.promptDiv);
-		this.inputCell.appendChild(urlSpan);
+		this.inputCell.insertBefore(urlSpan, this.promptDiv);
+		//this.inputCell.appendChild(urlSpan);
 
+		this.linkSpan = urlSpan;
+
+}
+
+top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdValue) {
+
+		var newInput = this.recreateSelector(bdValue, false);
+
+		if(this.inputs.length>1 || !top.HEURIST.is_admin()) {return}  //only one edit link
+
+		this.createSpanLinkTerms(bdValue);
 };
 
 /**

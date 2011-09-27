@@ -60,6 +60,14 @@
 body {
 	font: 10px Verdana, Geneva, sans-serif;
 }
+
+/* hide header in top layout element */
+.yui-skin-sam .yui-layout .yui-layout-hd {
+	background: none;
+	border: 1px solid #808080;
+	height: 0px;
+	display: none;
+}
 </style>
 
 </head>
@@ -69,44 +77,45 @@ body {
 		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
 		<script type="text/javascript" src="../../viewers/smarty/showReps.js"></script>
 
-		<div id="viewercontainer">
-			<div id="rep_list" style="text-align: left;">
-				<select id="selTemplates" onchange="onSelectTemplate()"></select>
-				<button>Print</button>
+		<iframe id="ifrmPrint" src="#" style="width:0px; height:0px;"></iframe>
 
-				<button onclick="onShowEditor()">Edit</button>
-				<button onclick="onGenerate()">Generate</button>
+<!-- position:absolute;top:30px;height:30px; -->
+		<div id="toolbar"
+			style="width:100%;text-align:left;">
+			<div id="rep_list" style="padding-left:10px;display:inline-block;">
+				<select id="selTemplates" onchange="onSelectTemplate()" style="width:200px;"></select>
+				<button  onclick="onPrint()">Print</button>
+				<button>To file</button>
 			</div>
-
-			<div style="height:100%;">
-				<div id="rep_container" style="overflow:auto;height:100%;"></div>
+			<div style="text-align: left;float:right;padding-right:10px;">
+				<button onclick="onShowEditor()">Edit</button>
+				<button onclick="onGenerate()">New Template</button>
 			</div>
 		</div>
 
+<!--  style="position:absolute;top:30px;bottom:0px;left:0px;right:0px;"
+style="position:absolute;top:0px;bottom:20px;left:0px;right:0px;"
+background-color:#ccc;border: solid 1px #f00;
+-->
+		<div id="layout" style="position:absolute;top:25px;bottom:0px;left:0px;right:0px;">
+
+		<div id="viewercontainer">
+			<div id="rep_container" style="overflow:auto;height:100%;"></div>
+		</div>
+
 		<div id="editorcontainer">
-			<div id="editor_toolbar" style="text-align: left; height:20px;">
-				<label for="cbDebug">Show debug info</label>
-				<input id="cbDebug" type="checkbox"  title="Show debug info"/>
-				<button onclick="window.showReps.doExecute()">Execute</button>
-
-
-				<input type="text" width="100" size="100" id="edTemplateName"/>
-				<button onclick="doEditor(1)">Save</button>
-				<button onclick="doEditor(0)">Cancel</button>
-				<button onclick="doEditor(3)">Delete</button>
-
-				<button onclick="javascript:setupMCE();">TinyMCE</button>
-			</div>
-			<div style="width:100%;height:100%">
-				<div id="text_container" style="width:70%;height:100%;display: inline-block;">
+<!--
+			<div>
+			<div id="text_container" style="width:70%;float:left;bottom:30px;top:0px;position:absolute;">
 					<form method="post" action="somepage">
-						<textarea style="width:100%;height:100%"
+						<textarea style="width:100%;height:100%;"
                                                           id="edTemplateBody" name="edTemplateBody"
                                                           class="mceAdvanced">
 						</textarea>
 					</form>
-				</div>
-				<div id="vars_container" style="width:30%;height:100%;float:right;position:relative;">
+			</div>
+			<div id="vars_container" style="width:30%;float:right;bottom:30px;border:solid 1px #0f0;">
+				<div>
 					<div id="vars_toolbar" style="text-align: left; height:60px;">
 						<select id="selRectype" onchange="window.showReps.onSelectRectype()">
 							<option>List of available rectypes</option>
@@ -121,12 +130,80 @@ body {
 						<button onclick="window.showReps.insertSelectedVarsAsLoop()">Insert Loop</button>
 						<button onclick="window.showReps.clearAllSeelectionInTree()">Clear marked</button>
 					</div>
-					<div style="position:absolute;top:61px;bottom:20px;left:0px;right:0px;overflow-y:scroll;">
+					<div style="position:relative;top:61px;bottom:20px;left:0px;right:0px;overflow-y:scroll;">
 						<div id="varsTree" class="ygtv-checkbox"></div>
-						<!--<div id="vars_list" style="border:aqua solid 1px;padding-left:3px;"></div>-->
 					</div>
 				</div>
 			</div>
+
+			</div>
+
+			<div id="editor_toolbar" style="text-align:left; width:100%;position:absolute;bottom:0px;">
+				<label for="cbDebug">Show debug info</label>
+				<input id="cbDebug" type="checkbox"  title="Show debug info"/>
+				<button onclick="window.showReps.doExecute()">Execute</button>
+
+
+				<input type="text" width="100" size="100" id="edTemplateName"/>
+				<button onclick="doEditor(1)">Save</button>
+				<button onclick="doEditor(0)">Cancel</button>
+				<button onclick="doEditor(3)">Delete</button>
+
+				<button onclick="javascript:setupMCE();">TinyMCE</button>
+			</div>
+			</div>
+-->
+			<table border="1" height="100%">
+			<tr>
+				<td rowspan="2" width="70%">
+					<form method="post" action="somepage" style="height:100%;">
+						<textarea style="width:100%;height:100%;"
+                                                          id="edTemplateBody" name="edTemplateBody"
+                                                          class="mceAdvanced">
+						</textarea>
+					</form>
+				</td>
+				<td width="30%" height="60">
+						<select id="selRectype" onchange="window.showReps.onSelectRectype()">
+							<option>List of available rectypes</option>
+						</select>
+						<button onclick="window.showReps.insertRectypeSection()">Insert Section</button><br/>
+						<select id="selInsertMode">
+							<option value="0">Variable</option>
+							<option value="1">Label+Variable</option>
+							<option value="2">'Out' function</option>
+						</select>
+						<button onclick="window.showReps.insertSelectedVars()">Insert Marked</button>
+						<button onclick="window.showReps.insertSelectedVarsAsLoop()">Insert Loop</button>
+						<button onclick="window.showReps.clearAllSeelectionInTree()">Clear marked</button>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<div style="overflow-y:scroll;height:100%;max-height:200px">
+						<div id="varsTree" class="ygtv-checkbox"></div>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2" height="20">
+					<label for="cbDebug">Show debug info</label>
+					<input id="cbDebug" type="checkbox"  title="Show debug info"/>
+					<button onclick="window.showReps.doExecute()">Test</button>
+
+
+					<input type="text" width="10" size="100" id="edTemplateName"/>
+					<button onclick="doEditor(2)">Save</button>
+					<button onclick="doEditor(1)">Save As</button>
+					<button onclick="doEditor(0)">Close</button>
+					<button onclick="doEditor(3)">Delete</button>
+
+					<button onclick="javascript:setupMCE();">TinyMCE</button>
+				</td>
+			</tr>
+			</table>
+
+		</div>
 		</div>
 
 
@@ -142,13 +219,13 @@ if(isInited){
       mode : "textareas",
       theme : "advanced",
       editor_selector : "mceAdvanced",
-/*"advanced"*/
+/*"advanced"
       plugins : "pagebreak,style,layer,table,save,advhr,advimage,advlink,emotions,iespell,insertdatetime,preview,media,searchreplace,print,contextmenu,paste,directionality,fullscreen,noneditable,visualchars,nonbreaking,xhtmlxtras,template",
 
       theme_advanced_buttons1 : "bold,italic,underline,strikethrough,forecolor,backcolor,|,justifyleft,justifycenter,justifyright,justifyfull,|,formatselect,fontselect,fontsizeselect,|,sub,sup,|,charmap,emotions",
       theme_advanced_buttons2 : "cut,copy,paste,|,search,replace,|,bullist,numlist,|,outdent,indent,blockquote,|,undo,redo,|,link,unlink,anchor,|,insertdate,inserttime",
       theme_advanced_buttons3 : "tablecontrols,|,hr,removeformat,visualaid", //",iespell,media,advhr",
-
+*/
 /*
       theme_advanced_buttons1 : "save,newdocument,|,bold,italic,underline,strikethrough,|,justifyleft,justifycenter,justifyright,justifyfull,|,styleselect,formatselect,fontselect,fontsizeselect",
       theme_advanced_buttons2 : "cut,copy,paste,pastetext,pasteword,|,search,replace,|,bullist,numlist,|,outdent,indent,blockquote,|,undo,redo,|,link,unlink,anchor,image,cleanup,help,code,|,insertdate,inserttime,preview,|,forecolor,backcolor",
@@ -167,6 +244,24 @@ if(isInited){
 }
 
 	//
+	function onPrint()
+	{
+		try{
+			var oIframe = document.getElementById("ifrmPrint");
+			var oContent = document.getElementById("rep_container").innerHTML;
+			var oDoc = (oIframe.contentWindow || oIframe.contentDocument);
+			if (oDoc.document) oDoc = oDoc.document;
+			oDoc.write("<head><title></title>");
+			oDoc.write("</head><body onload=\"this.focus(); this.print();\">");
+			oDoc.write(oContent + "</body>");
+			oDoc.close();
+		}
+		catch(e){
+			//self.print();
+		}
+	}
+
+	//
 	function onShowEditor()
 	{
 		var sel = document.getElementById('selTemplates'),
@@ -178,7 +273,11 @@ if(isInited){
 	//
 	function onGenerate()
 	{
-		window.showReps.generateTemplate();
+		var name=jQuery.trim(prompt("Please enter template name",""));
+		if (!Hul.isempty(name))
+  		{
+			window.showReps.generateTemplate(name);
+		}
 	}
 
 	//

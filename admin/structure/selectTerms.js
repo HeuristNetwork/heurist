@@ -22,6 +22,7 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 
 	var _className = "SelectTerms",
 		_dtyID,
+        _isNeedSave = false, //when it is invoked from editRecord - the changes are saved in defDetailType implicitely
 		_datatype,
 		_allTerms, //all terms
 		_disTerms, //disabled terms
@@ -52,6 +53,7 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 		if(Hul.isnull(dtyID) && (location.search.length > 1)) {
 				top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 				dtyID = top.HEURIST.parameters.detailTypeID;
+                _isNeedSave = (top.HEURIST.parameters.mode==="editrecord");
 
 				var _dt_id = top.HEURIST.parameters.dtname;
 				if(!Hul.isnull(_dt_id)){
@@ -196,6 +198,11 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 
 
 		if ((_allTerms !== _allTermsNew) || (_disTerms !== _disTermsNew)){
+            //there were changes
+            if(_isNeedSave){
+                 _updateDetailTypeOnServer(_allTermsNew, _disTermsNew)
+            }
+
 			if(_isWindowMode){
 				window.close(_allTermsNew, _disTermsNew, _dtyID);
 			}else if (!Hul.isnull(_callback_func) ) {
@@ -210,6 +217,45 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 
 		}
 	}
+
+    /**
+    * sends updated list of terms in defDetailType - applicable when this form is invoked from editRecord
+    */
+    function _updateDetailTypeOnServer(_allTerms, _disTerms)
+    {
+
+        var str = null;
+
+        //creates object to be sent to server
+        if(_dtyID !== null){
+            var k,
+                val;
+
+			var oDetailType = {detailtype:{
+				colNames:{common:['dty_JsonTermIDTree', 'dty_TermIDTreeNonSelectableIDs']},
+				defs: {}
+			}};
+
+			oDetailType.detailtype.defs[_dtyID] = {};
+			oDetailType.detailtype.defs[_dtyID].common = [_allTerms, _disTerms];
+
+            str = YAHOO.lang.JSON.stringify(oDetailType);
+        }
+
+
+        if(str !== null) {
+//DEBUG alert("Stringified changes: " + str);
+
+            // 3. sends data to server
+            var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+                                (top.HEURIST.database.name?top.HEURIST.database.name:''));
+            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+            var callback = null; //_updateResult;
+            var params = "method=saveDT&db="+db+"&data=" + encodeURIComponent(str);
+            Hul.getJsonData(baseurl, callback, params);
+        }
+    }
+
 
 	/**
 	* Verifies that term with given ID is existing selection tree
