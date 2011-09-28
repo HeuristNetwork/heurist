@@ -87,7 +87,7 @@
 		global $newDBName, $isNewDB, $done;
 		$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'drop database `$newname`'";
 		$output2=exec($cmdline . ' 2>&1', $output, $res2);
-		echo "Database cleanup for $newname, completed<br>&nbsp;<br>";
+		echo "<br>Database cleanup for $newname, completed<br>&nbsp;<br>";
 		echo($output2);
 		$done = true;
 	} // cleanupNewDB

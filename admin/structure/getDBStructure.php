@@ -41,6 +41,7 @@
     // Version info in common/config/initialise.php
     // admin/setup/blankDBStructure.sql - dump structure of hdb_H3CoreDefinitions database and insert where indicated in file
     // admin/setup/createDefinitionTablesOnly.sql - copy blankDBStructure.sql and delete non-definitional tables for temp db creation speed
+    // admin/setup/coreDefinitions.txt (get this from the admin interface lsiting in exchange format)
     // List of fields in the include files in admin/structure/crosswalk, used for getDBStructure and insertions
     // print statements at the end of getDBStructure.php, must match the include files
 
@@ -415,7 +416,7 @@
 			'$rty_CanonicalTitleMask','$rty_Plural','$row[rty_Status]',
 			'$row[rty_OriginatingDBID]','$rty_NameInOriginatingDB','$row[rty_IDInOriginatingDB]',
 			'$row[rty_NonOwnerVisibility]','$row[rty_ShowInLists]','$rty_RecTypeGroupID','$row[rty_FlagAsFieldset]','$rty_ReferenceURL',
-			'$rty_AlternativeRecEditor','$row[rty_Type]'),";
+			'$rty_AlternativeRecEditor','$row[rty_Type]','$row[rty_LocallyModified]'),";
 			}
 			break;
 
@@ -432,7 +433,7 @@
 			'$dty_ExtendedDescription','$row[dty_Status]','$row[dty_OriginatingDBID]',
 			'$dty_NameInOriginatingDB','$row[dty_IDInOriginatingDB]','$row[dty_DetailTypeGroupID]',
 			'$row[dty_OrderInGroup]','$dty_JsonTermIDTree','$dty_TermIDTreeNonSelectableIDs',
-			'$dty_PtrTargetRectypeIDs','$row[dty_FieldSetRecTypeID]','$row[dty_ShowInLists]','$row[dty_NonOwnerVisibility]'),";
+			'$dty_PtrTargetRectypeIDs','$row[dty_FieldSetRecTypeID]','$row[dty_ShowInLists]','$row[dty_NonOwnerVisibility]','$row[dty_LocallyModified]'),";
 			break;
 
 			case 'defRecStructure': // Data from the defRecStructure table
@@ -451,7 +452,7 @@
                 '$row[rst_OriginatingDBID]','$row[rst_IDInOriginatingDB]',
 			    '$row[rst_MaxValues]','$row[rst_MinValues]','$row[rst_DisplayDetailTypeGroupID]',
                 '$rst_FilteredJsonTermIDTree','$rst_PtrFilteredIDs',
-                '$row[rst_OrderForThumbnailGeneration]','$rst_TermIDTreeNonSelectableIDs'),";
+                '$row[rst_OrderForThumbnailGeneration]','$rst_TermIDTreeNonSelectableIDs','$row[rst_LocallyModified]'),";
 			break;
 
 			case 'defTerms': // Data from the rec_details_lookup table
@@ -462,7 +463,7 @@
                 '$trm_Description','$row[trm_Status]',
                 '$row[trm_OriginatingDBID]','$trm_NameInOriginatingDB','$row[trm_IDInOriginatingDB]',
 			    '$row[trm_AddedByImport]','$row[trm_IsLocalExtension]','$row[trm_Domain]','$row[trm_OntID]',
-			    '$row[trm_ChildCount]','$row[trm_ParentTermID]','$row[trm_Depth]'),";
+			    '$row[trm_ChildCount]','$row[trm_ParentTermID]','$row[trm_Depth]','$row[trm_LocallyModified]'),";
 			break;
 
 			case 'defOntologies': // Data from Ontologies table
@@ -474,7 +475,7 @@
 			print "('$row[ont_ID]','$ont_ShortName','$ont_FullName','$ont_Description',
                 '$ont_RefURI','$row[ont_Status]',
                 '$row[ont_OriginatingDBID]','$ont_NameInOriginatingDB','$row[ont_IDInOriginatingDB]',
-                '$row[ont_Order]'),";
+                '$row[ont_Order]','$row[ont_LocallyModified]'),";
 			break;
 
 			case 'defRelationshipConstraints': // Data from relationship constraints table
@@ -482,7 +483,7 @@
 			print "('$row[rcs_ID]','$row[rcs_SourceRectypeID]','$row[rcs_TargetRectypeID]','$rcs_Description',
                 '$row[rcs_RelationshipsLimit]','$row[rcs_Status]',
                 '$row[rcs_OriginatingDB]','$row[rcs_IDInOriginatingDB]',
-			    '$row[rcs_TermID]','$row[rcs_TermLimit]'),";
+			    '$row[rcs_TermID]','$row[rcs_TermLimit]','$row[rcs_LocallyModified]'),";
 			break;
 
 			case 'defFileExtToMimetype': // Data from field extension to mimetype table
