@@ -454,14 +454,15 @@ top.HEURIST.edit = {
 
 
 	getDetailTypeBasetype: function(detailTypeID) {
-			return top.HEURIST.detailTypes.typedefs[detailTypeID].commonFields[2];
+		var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+			return top.HEURIST.detailTypes.typedefs[detailTypeID].commonFields[dtyFieldNamesToDtIndexMap['dty_Type']];
 	},
 
 	getNonRecDetailTypedefs: function(rectypeID) {
 		var non_recDTs = {};
 		var rfrs = top.HEURIST.rectypes.typedefs[rectypeID].dtFields;
 		for (var dt_id in top.HEURIST.detailTypes.typedefs) {
-			if (dt_id == "commomFieldNames") continue;
+			if (dt_id == "commomFieldNames" || dt_id == "fieldNamesToIndex") continue;
 			var skip = false;
 			for (var dtID in rfrs) {
 				if (dtID == dt_id) skip = true;
@@ -486,52 +487,86 @@ top.HEURIST.edit = {
 	},
 
 	allInputs: [],
+
+	createFakeFieldRequirement: function(dt,rstDisplayName,rstDisplayHelpText,rstDefaultValue,rstRequirementType,rstMaxValues,rstTermIDs,rstPtrRectypeIDs,rstTermNonSelectableIDs) {
+		var l = top.HEURIST.rectypes.typedefs.dtFieldNames.length;
+		var i;
+		var dtyFieldNamesIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+		var fieldIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
+		var ffr = [];
+		for (i=0; i<l; i++){
+			ffr.push("");
+		}
+		ffr[fieldIndexMap['rst_DisplayName']] = (rstDisplayName ? rstDisplayName : (dt ? dt[dtyFieldNamesIndexMap['dty_Name']]:"fake Field"));
+		ffr[fieldIndexMap['dty_FieldSetRectypeID']] = dt?dt[dtyFieldNamesIndexMap['dty_FieldSetRectypeID']] : 0;
+		ffr[fieldIndexMap['dty_TermIDTreeNonSelectableIDs']] = (dt?dt[dtyFieldNamesIndexMap['dty_TermIDTreeNonSelectableIDs']]:"");
+		ffr[fieldIndexMap['rst_TermIDTreeNonSelectableIDs']] = rstTermNonSelectableIDs ? rstTermNonSelectableIDs : (dt?dt[dtyFieldNamesIndexMap['dty_TermIDTreeNonSelectableIDs']]:"");
+		ffr[fieldIndexMap['rst_MaxValues']] = rstMaxValues ? rstMaxValues : 1;
+		ffr[fieldIndexMap['rst_MinValues']] = 0;
+		ffr[fieldIndexMap['rst_CalcFunctionID']] = null;
+		ffr[fieldIndexMap['rst_DefaultValue']] = rstDefaultValue ? rstDefaultValue : null;
+		ffr[fieldIndexMap['rst_DisplayDetailTypeGroupID']] = (dt?dt[dtyFieldNamesIndexMap['dty_DetailTypeGroupID']]:"");
+		ffr[fieldIndexMap['rst_DisplayExtendedDescription']] = (dt?dt[dtyFieldNamesIndexMap['dty_ExtendedDescription']]:"");
+		ffr[fieldIndexMap['rst_DisplayHelpText']] = rstDisplayHelpText ? rstDisplayHelpText :(dt?dt[dtyFieldNamesIndexMap['dty_HelpText']]:"");
+		ffr[fieldIndexMap['rst_DisplayOrder']] = 999;
+		ffr[fieldIndexMap['rst_DisplayWidth']] = 50;
+		ffr[fieldIndexMap['rst_FilteredJsonTermIDTree']] = rstTermIDs ? rstTermIDs : (dt?dt[dtyFieldNamesIndexMap['dty_JsonTermIDTree']]:"");
+		ffr[fieldIndexMap['rst_LocallyModified']] = 0;
+		ffr[fieldIndexMap['rst_Modified']] = 0;
+		ffr[fieldIndexMap['rst_NonOwnerVisibility']] = (dt?dt[dtyFieldNamesIndexMap['dty_NonOwnerVisibility']]:"viewable");
+		ffr[fieldIndexMap['rst_OrderForThumbnailGeneration']] = 0;
+		ffr[fieldIndexMap['rst_OriginatingDBID']] = 0;
+		ffr[fieldIndexMap['rst_PtrFilteredIDs']] = rstPtrRectypeIDs ? rstPtrRectypeIDs : (dt?dt[dtyFieldNamesIndexMap['dty_PtrTargetRectypeIDs']]:"");
+		ffr[fieldIndexMap['rst_RecordMatchOrder']] = 0;
+		ffr[fieldIndexMap['rst_RequirementType']] = rstRequirementType ? rstRequirementType :'optional';
+		ffr[fieldIndexMap['rst_Status']] = (dt?dt[dtyFieldNamesIndexMap['dty_Status']]:"open");
+		return ffr;
+	},
+
+	createFakeDetailType: function(dtyID,dtyName,dtyType,dtyHelpText,dtyTermIDs,dtyTermNonSelectableIDs,dtyPtrRectypeIDs) {
+		var l = top.HEURIST.detailTypes.typedefs.commonFieldNames.length;
+		var i;
+		var fieldIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+		var fdt = [];
+		for (i=0; i<l; i++){
+			fdt.push("");
+		}
+		fdt[fieldIndexMap['dty_ID']] = dtyID ? dtyID : 0;
+		fdt[fieldIndexMap['dty_Name']] = dtyName?dtyName : " fake DetailType";
+		fdt[fieldIndexMap['dty_Type']] = dtyType ? dtyType : "freetext";
+		fdt[fieldIndexMap['dty_HelpText']] = dtyHelpText ? dtyHelpText :"";
+		fdt[fieldIndexMap['dty_Status']] = "open";
+		fdt[fieldIndexMap['dty_OriginatingDBID']] = 0;
+		fdt[fieldIndexMap['dty_DetailTypeGroupID']] = 1;
+		fdt[fieldIndexMap['dty_OrderInGroup']] = 999;
+		fdt[fieldIndexMap['dty_JsonTermIDTree']] = dtyTermIDs ? dtyTermIDs : "";
+		fdt[fieldIndexMap['dty_TermIDTreeNonSelectableIDs']] = dtyTermNonSelectableIDs ? dtyTermNonSelectableIDs : "";
+		fdt[fieldIndexMap['dty_PtrTargetRectypeIDs']] = dtyPtrRectypeIDs ? dtyPtrRectypeIDs : "";
+		fdt[fieldIndexMap['dty_FieldSetRectypeID']] = 0;
+		fdt[fieldIndexMap['dty_ShowInLists']] = 0;
+		fdt[fieldIndexMap['dty_NonOwnerVisibility']] = "viewable";
+		fdt[fieldIndexMap['dty_Modified']] = 0;
+		fdt[fieldIndexMap['dty_LocallyModified']] = 0;
+		return fdt;
+	},
+
 	createInput: function(detailTypeID, rectypeID, fieldValues, container) {
 		// Get Detail Type info
 		//0,"dty_Name" 1,"dty_ExtendedDescription" 2,"dty_Type" 3,"dty_OrderInGroup" 4,"dty_HelpText" 5,"dty_ShowInLists"
 		//6,"dty_Status" 7,"dty_DetailTypeGroupID" 8,"dty_FieldSetRectypeID" 9,"dty_JsonTermIDTree"
 		//10,"dty_TermIDTreeNonSelectableIDs" 11,"dty_PtrTargetRectypeIDs" 12,"dty_ID"
 		var dt = top.HEURIST.detailTypes.typedefs[detailTypeID]['commonFields'];
-		var dtyFieldNamesIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamestoIndex;
+		var dtyFieldNamesIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
 		var rfr = null;
 		if (rectypeID) {
 			rfr = top.HEURIST.rectypes.typedefs[rectypeID]['dtFields'][detailTypeID];
 		}
 		if (!rfr) {
-			var l = top.HEURIST.rectypes.typedefs.dtFiledNames.length;
-			var i;
-			var fieldIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
-			rfr = [];
-			for (i=0; i<l; i++){
-				rfr.push("");
-			}
-			rfr[fieldIndexMap['rst_DisplayName']] = dt[dtyFieldNamesIndexMap['dty_Name']];
-			rfr[fieldIndexMap['dty_FieldSetRectypeID']] = dt[dtyFieldNamesIndexMap['dty_FieldSetRectypeID']];
-			rfr[fieldIndexMap['dty_TermIDTreeNonSelectableIDs']] = dt[dtyFieldNamesIndexMap['dty_TermIDTreeNonSelectableIDs']];
-			rfr[fieldIndexMap['rst_TermIDTreeNonSelectableIDs']] = dt[dtyFieldNamesIndexMap['dty_TermIDTreeNonSelectableIDs']];
-			rfr[fieldIndexMap['rst_MaxValues']] = 1;
-			rfr[fieldIndexMap['rst_MinValues']] = 0;
-			rfr[fieldIndexMap['rst_CalcFunctionID']] = null;
-			rfr[fieldIndexMap['rst_DefaultValue']] = null;
-			rfr[fieldIndexMap['rst_DisplayDetailTypeGroupID']] = dt[dtyFieldNamesIndexMap['dty_DetailTypeGroupID']];
-			rfr[fieldIndexMap['rst_DisplayExtendedDescription']] = dt[dtyFieldNamesIndexMap['dty_ExtendedDescription']];
-			rfr[fieldIndexMap['rst_DisplayHelpText']] = dt[dtyFieldNamesIndexMap['dty_HelpText']];
-			rfr[fieldIndexMap['rst_DisplayOrder']] = 99;
-			rfr[fieldIndexMap['rst_DisplayWidth']] = 30;
-			rfr[fieldIndexMap['rst_FilteredJsonTermIDTree']] = dt[dtyFieldNamesIndexMap['dty_JsonTermIDTree']];
-			rfr[fieldIndexMap['rst_LocallyModified']] = 0;
-			rfr[fieldIndexMap['rst_Modified']] = 0;
-			rfr[fieldIndexMap['rst_NonOwnerVisibility']] = dt[dtyFieldNamesIndexMap['dty_NonOwnerVisibility']];
-			rfr[fieldIndexMap['rst_OrderForThumbnailGeneration']] = 0;
-			rfr[fieldIndexMap['rst_OriginatingDBID']] = 0;
-			rfr[fieldIndexMap['rst_PtrFilteredIDs']] = dt[dtyFieldNamesIndexMap['dty_PtrTargetRectypeIDs']];
-			rfr[fieldIndexMap['rst_RecordMatchOrder']] = 0;
-			rfr[fieldIndexMap['rst_RequirementType']] = 'optional';
-			rfr[fieldIndexMap['rst_Status']] = dt[dtyFieldNamesIndexMap['dty_Status']];
+			rfr = top.HERUIST.edit.createFakeFieldRequirement(dt);
 		}
 
 		var newInput;
-		switch (dt[2]) {
+		switch (dt[dtyFieldNamesIndexMap['dty_Type']]) {
 			case "freetext":
 				newInput = new top.HEURIST.edit.inputs.BibDetailFreetextInput(dt, rfr, fieldValues, container);
 				break;
@@ -587,7 +622,7 @@ top.HEURIST.edit = {
 	},
 
 	getConstrainedRectypeList: function(dtyID,rtID) {	//saw TODO: change this to terms pass in scrRectypeID
-		var listConstdRectype = top.HEURIST.rectypes.typedefs[rtID].dtFields[dtyID][12];
+		var listConstdRectype = top.HEURIST.rectypes.typedefs[rtID].dtFields[dtyID][top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_PtrFilteredIDs']];
 		for (var rType in top.HEURIST.edit.record.rtConstraints[rdtID]) {	// saw TODO  need to change this to dTypeID for relmarkers
 			if (first) {
 				listConstdRectype += "" + rType;
@@ -736,6 +771,8 @@ top.HEURIST.edit = {
 
 	createInputsForRectype: function(rectypeID, fieldValues, container) {
 		var rfrs = top.HEURIST.rectypes.typedefs[rectypeID].dtFields;
+		var rstFieldNamesToRdrIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
+
 		if (! container.ownerDocument) {
 			var elt = container;
 			do { elt = elt.parentNode; } while (elt.nodeType != 9 /* DOCUMENT_NODE */);
@@ -758,7 +795,7 @@ top.HEURIST.edit = {
 		var i, l = order.length;
 		for (i = 0; i < l; ++i) {
 			var dtID = order[i];
-			if (rfrs[dtID][4] == 'forbidden') continue;
+			if (rfrs[dtID][rstFieldNamesToRdrIndexMap['rst_RequirementType']] == 'forbidden') continue;
 
 			var newInput = top.HEURIST.edit.createInput(dtID, rectypeID, fieldValues[dtID] || [], container);
 			inputs.push(newInput);
@@ -1125,8 +1162,10 @@ top.HEURIST.edit.inputs.BibDetailInput = function(detailType, recFieldRequiremen
 //5,"rst_MaxValues" 6,"rst_MinValues" 7,"rst_DisplayWidth" 8,"rst_RecordMatchOrder" 9,"rst_DisplayOrder"
 //10,"rst_DisplayDetailTypeGroupID" 11,"rst_FilteredJsonTermIDTree" 12,"rst_PtrFilteredIDs" 13,"rst_TermIDTreeNonSelectableIDs"
 //14,"rst_CalcFunctionID" 15,"rst_Status" 16,"rst_OrderForThumbnailGeneration" 17,"dty_TermIDTreeNonSelectableIDs"
-//18,"dty_FieldSetRectypeID"	if (arguments.length == 0) return;	// for prototyping
+//18,"dty_FieldSetRectypeID"
 	var thisRef = this;
+	var rstFieldNamesToRdrIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
+	var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
 
 	this.detailType = detailType;
 	this.recFieldRequirements = recFieldRequirements;
@@ -1134,28 +1173,28 @@ top.HEURIST.edit.inputs.BibDetailInput = function(detailType, recFieldRequiremen
 	var elt = parentElement;
 	do { elt = elt.parentNode; } while (elt.nodeType != 9 /* DOCUMENT_NODE */);
 	this.document = elt;
-	this.shortName = recFieldRequirements[0];
+	this.shortName = recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']];
 
-	var required = recFieldRequirements[4];
+	var required = recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_RequirementType']];
 		if (required == 'optional') required = "optional";
 		else if (required == 'required') required = "required";
 		else if (required == 'recommended') required = "recommended";
 		else required = "";
 	this.required = required;
 
-	this.repeatable = (recFieldRequirements[5] != 1)? true : false; //saw TODO this really needs to check many exist
+	this.repeatable = (recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_MaxValues']] != 1)? true : false; //saw TODO this really needs to check many exist
 
 	this.row = parentElement.appendChild(this.document.createElement("div"));
 		this.row.className = "input-row " + required;
 
 	this.headerCell = this.row.appendChild(this.document.createElement("div"));
 		this.headerCell.className = "input-header-cell";
-		this.headerCell.appendChild(this.document.createTextNode(recFieldRequirements[0]));	// rfr_name
+		this.headerCell.appendChild(this.document.createTextNode(recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']]));	// rfr_name
 	if (this.repeatable) {
 		var dupImg = this.headerCell.appendChild(this.document.createElement('img'));
 			dupImg.src = top.HEURIST.basePath + "common/images/duplicate.gif";
 			dupImg.className = "duplicator";
-			dupImg.alt = dupImg.title = "Add another " + recFieldRequirements[0] + " field";
+			dupImg.alt = dupImg.title = "Add another " + recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']] + " field";
 			top.HEURIST.registerEvent(dupImg, "click", function() { thisRef.duplicateInput.call(thisRef); } );
 	}
 
@@ -1167,7 +1206,7 @@ top.HEURIST.edit.inputs.BibDetailInput = function(detailType, recFieldRequiremen
 	// make sure that the promptDiv is the last item in the input cell
 	this.promptDiv = this.inputCell.appendChild(this.document.createElement("div"));
 		this.promptDiv.className = "help prompt";
-		this.promptDiv.innerHTML = recFieldRequirements[1];
+		this.promptDiv.innerHTML = recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayHelpText']];
 
 	this.inputs = [];
 	if (this.repeatable) {	//saw TODO adjust this code for Cardinality
@@ -1175,13 +1214,13 @@ top.HEURIST.edit.inputs.BibDetailInput = function(detailType, recFieldRequiremen
 			this.addInput(fieldValues[i]);
 		}
 		if (fieldValues.length == 0) {
-			this.addInput({"value" : recFieldRequirements[3]});	// add default value input make it look like bdvalue without id field
+			this.addInput({"value" : recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DefaultValue']]});	// add default value input make it look like bdvalue without id field
 		}
 	} else {
 		if (fieldValues.length > 0) {
 			this.addInput(fieldValues[0]);
 		} else {
-			this.addInput({"value" : recFieldRequirements[3]});
+			this.addInput({"value" : recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DefaultValue']]});
 		}
 	}
 };
@@ -1201,10 +1240,12 @@ top.HEURIST.edit.inputs.BibDetailInput.prototype.duplicateInput = function() { t
 // 2. put element into inputs array
 // 3.
 top.HEURIST.edit.inputs.BibDetailInput.prototype.addInputHelper = function(bdValue, element) {
-	this.elementName = "type:" + this.detailType[12];
+	var rstFieldNamesToRdrIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
+	var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+	this.elementName = "type:" + this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']];
 		element.name = (bdValue && bdValue.id)? (this.elementName + "[bd:" + bdValue.id + "]") : (this.elementName + "[]");
-		element.title = this.recFieldRequirements[0];
-		element.setAttribute("bib-detail-type", this.detailType[12]);
+		element.title = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']];
+		element.setAttribute("bib-detail-type", this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']]);
 		var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
 		if (element.value !== undefined) {	/* if this is an input element, register the onchange event */
@@ -1215,14 +1256,14 @@ top.HEURIST.edit.inputs.BibDetailInput.prototype.addInputHelper = function(bdVal
 			 */
 			top.HEURIST.registerEvent(element, "keypress", function() { windowRef.changed(); });
 		}
-	if (this.detailType[2] === "resource" || this.detailType[2] === "relmarker") {	// dt_type
-		if (this.detailType[11]) {	// dt_constrain_rectype
-			this.constrainrectype = this.detailType[11]; // saw TODO  modify this to validate the list first.
+	if (this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] === "resource" || this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] === "relmarker") {	// dt_type
+		if (this.detailType[dtyFieldNamesToDtIndexMap['dty_PtrTargetRectypeIDs']]) {	// dt_constrain_rectype
+			this.constrainrectype = this.detailType[dtyFieldNamesToDtIndexMap['dty_PtrTargetRectypeIDs']]; // saw TODO  modify this to validate the list first.
 		}
 		else	this.constrainrectype = 0;
 	}
-	if (parseFloat(this.recFieldRequirements[7]) > 0) {	//if the size is greater than zero
-		element.style.width = Math.round(4/3 * this.recFieldRequirements[7]) + "ex";
+	if (parseFloat(this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayWidth']]) > 0) {	//if the size is greater than zero
+		element.style.width = Math.round(4/3 * this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayWidth']]) + "ex";
 	}
 
 	element.expando = true;
@@ -1232,18 +1273,18 @@ top.HEURIST.edit.inputs.BibDetailInput.prototype.addInputHelper = function(bdVal
 	this.inputs.push(element);
 	this.inputCell.insertBefore(element, this.promptDiv);
 
-	if (top.HEURIST.magicNumbers && (top.HEURIST.magicNumbers['DT_DOI'] && this.detailType[12] === top.HEURIST.magicNumbers['DT_DOI']  ||
-									top.HEURIST.magicNumbers['DT_ISBN'] && this.detailType[12] === top.HEURIST.magicNumbers['DT_ISBN']  ||
-									top.HEURIST.magicNumbers['DT_ISSN'] && this.detailType[12] === top.HEURIST.magicNumbers['DT_ISSN'])
+	if (top.HEURIST.magicNumbers && (top.HEURIST.magicNumbers['DT_DOI'] && this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']] === top.HEURIST.magicNumbers['DT_DOI']  ||
+									top.HEURIST.magicNumbers['DT_ISBN'] && this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']] === top.HEURIST.magicNumbers['DT_ISBN']  ||
+									top.HEURIST.magicNumbers['DT_ISSN'] && this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']] === top.HEURIST.magicNumbers['DT_ISSN'])
 			&&  bdValue  &&  bdValue.value) { // DOI, ISBN, ISSN
 		this.webLookup = this.document.createElement("a");
-		if (this.detailType[12] === top.HEURIST.magicNumbers['DT_DOI']) {
+		if (this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']] === top.HEURIST.magicNumbers['DT_DOI']) {
 			this.webLookup.href = "http://dx.doi.org/" + bdValue.value;
-		} else if (this.detailType[12] === top.HEURIST.magicNumbers['DT_ISBN']) {
+		} else if (this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']] === top.HEURIST.magicNumbers['DT_ISBN']) {
 			// this.webLookup.href = "http://www.biblio.com/search.php?keyisbn=" + bdValue.value;	// doesn't work anymore
 			// this.webLookup.href = "http://www.biblio.com/isbnmulti.php?isbns=" + encodeURIComponent(bdValue.value) + "&stage=1";	// requires POST
 			this.webLookup.href = "http://www.biblio.com/search.php?keyisbn=" + encodeURIComponent(bdValue.value);
-		} else if (this.detailType[12] === top.HEURIST.magicNumbers['DT_ISSN']) {
+		} else if (this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']] === top.HEURIST.magicNumbers['DT_ISSN']) {
 			var matches = bdValue.value.match(/(\d{4})-?(\d{3}[\dX])/);
 			if (matches) {
 				this.webLookup.href = "http://www.oclc.org/firstsearch/periodicals/results_issn_search.asp?database=%25&fulltext=%22%22&results=paged&PageSize=25&issn1=" + matches[1] + "&issn2=" + matches[2];
@@ -1573,6 +1614,8 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.typeDescription = "a va
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.regex = new RegExp(".");
 
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = function(bdValue, needClear){
+	var rstFieldNamesToRdrIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
+	var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
 
 	if(needClear){
 		//find and remove previous selector
@@ -1586,25 +1629,25 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = func
 
 
 	//disabled terms
-	var termHeaderList = typeof this.recFieldRequirements[13] == "string" ?
-						top.HEURIST.util.expandJsonStructure(this.recFieldRequirements[13]): [];//get DetailType non selectables
+	var termHeaderList = typeof this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_TermIDTreeNonSelectableIDs']] == "string" ?
+						top.HEURIST.util.expandJsonStructure(this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_TermIDTreeNonSelectableIDs']]): [];//get DetailType non selectables
 /*
 	var newInput = this.document.createElement("div");
 	this.addInputHelper.call(this, bdValue, newInput);
 	newInput.style.width = "auto";
 
 
-		var newCombo = top.HEURIST.util.createTermSelect(top.HEURIST.util.expandJsonStructure(this.recFieldRequirements[11]),
+		var newCombo = top.HEURIST.util.createTermSelect(top.HEURIST.util.expandJsonStructure(this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_FilteredJsonTermIDTree']]),
 														termHeaderList,
-														this.detailType[2] == "enum" ?
+														this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] == "enum" ?
 															top.HEURIST.terms.termsByDomainLookup['enum'] :
 															top.HEURIST.terms.termsByDomainLookup.relation,
 														(bdValue && bdValue.value ? bdValue.value : null));
 		newInput.appendChild(newCombo);
 */
-	var newInput = top.HEURIST.util.createTermSelect(top.HEURIST.util.expandJsonStructure(this.recFieldRequirements[11]),
+	var newInput = top.HEURIST.util.createTermSelect(top.HEURIST.util.expandJsonStructure(this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_FilteredJsonTermIDTree']]),
 														termHeaderList,
-														this.detailType[2] == "enum" ?
+														this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] == "enum" ?
 															top.HEURIST.terms.termsByDomainLookup['enum'] :
 															top.HEURIST.terms.termsByDomainLookup.relation,
 														(bdValue && bdValue.value ? bdValue.value : null));
@@ -1622,39 +1665,41 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = func
 }
 
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSpanLinkTerms = function(bdValue){
-		var urlSpan = this.document.createElement("span");
-			urlSpan.style.paddingLeft = "1em";
-			urlSpan.style.color = "blue";
-			urlSpan.style['float'] = "right";
-			urlSpan.style.cursor = "pointer";
-		var editImg = urlSpan.appendChild(this.document.createElement("img"));
-			editImg.src = top.HEURIST.basePath+"common/images/edit-pencil.png";
-		urlSpan.appendChild(editImg);
-		urlSpan.appendChild(this.document.createTextNode("list"));
+	var rstFieldNamesToRdrIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
+	var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+	var urlSpan = this.document.createElement("span");
+		urlSpan.style.paddingLeft = "1em";
+		urlSpan.style.color = "blue";
+		urlSpan.style['float'] = "right";
+		urlSpan.style.cursor = "pointer";
+	var editImg = urlSpan.appendChild(this.document.createElement("img"));
+		editImg.src = top.HEURIST.basePath+"common/images/edit-pencil.png";
+	urlSpan.appendChild(editImg);
+	urlSpan.appendChild(this.document.createTextNode("list"));
 
-		//var detailType = this.detailType;
-		//var recFieldRequirements = this.recFieldRequirements;
-		//urlSpan.comboboxSelector = newInput;
-		urlSpan.thisElement = this;
-		urlSpan.bdValue = bdValue;
+	//var detailType = this.detailType;
+	//var recFieldRequirements = this.recFieldRequirements;
+	//urlSpan.comboboxSelector = newInput;
+	urlSpan.thisElement = this;
+	urlSpan.bdValue = bdValue;
 
-		//open selectTerms to update detailtype
-		urlSpan.onclick = function() {
+	//open selectTerms to update detailtype
+	urlSpan.onclick = function() {
 //-----------------------------------------------
-	var _dtyID = this.thisElement.detailType[12];
-	var type = this.thisElement.detailType[2]; //enum or relation
+	var _dtyID = this.thisElement.detailType[dtyFieldNamesToDtIndexMap['dty_ID']];
+	var type = this.thisElement.detailType[dtyFieldNamesToDtIndexMap['dty_Type']]; //enum or relation
 	var _element = this.thisElement;
 	var _bdValue = this.bdValue;
 	//var allTerms = top.HEURIST.util.expandJsonStructure(recFieldRequirements[11]);
 	//var disTerms = termHeaderList;
 	//"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+
 
-    //after updating of terms list we have to recreate the selector
+	//after updating of terms list we have to recreate the selector
 	function onSelecTermsUpdate(editedTermTree, editedDisabledTerms) {
 			if(editedTermTree || editedDisabledTerms) {
 				// recreate and replace combobox
-				_element.recFieldRequirements[11] = editedTermTree;
-				_element.recFieldRequirements[13] = editedDisabledTerms;
+				_element.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_FilteredJsonTermIDTree']] = editedTermTree;
+				_element.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_TermIDTreeNonSelectableIDs']] = editedDisabledTerms;
 
 				_element.recreateSelector(_bdValue, true);
 
@@ -1670,15 +1715,15 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSpanLinkTerms = f
 	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
 	top.HEURIST.util.popupURL(top, top.HEURIST.basePath +
-		"admin/structure/selectTerms.html?detailTypeID="+_dtyID+"&db="+db+"&mode=editrecord",
-		{
-		"close-on-blur": false,
-		"no-resize": true,
-		height: 500,
-		width: 750,
-		callback: onSelecTermsUpdate
-		}
-	);
+								"admin/structure/selectTerms.html?detailTypeID="+_dtyID+"&db="+db+"&mode=editrecord",
+								{//options
+								"close-on-blur": false,
+								"no-resize": true,
+								height: 500,
+								width: 750,
+								callback: onSelecTermsUpdate
+								}
+							);
 //-----------------------------------------------
 		};
 
@@ -1718,6 +1763,7 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.replaceInput = function(inp
 top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(inputDiv, bdValue) {
 	var thisRef = this;	// for great closure
 	var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
+	var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
 
 	if (bdValue  &&  bdValue.file) {
 		// A pre-existing file: just display details and a remove button
@@ -1764,7 +1810,7 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 	} else {
 		if (top.HEURIST.browser.isEarlyWebkit) {	// old way of doing things
 			var newIframe = this.document.createElement("iframe");
-				newIframe.src = top.HEURIST.basePath+"records/files/uploadFile.php?recID=" + windowRef.parent.HEURIST.edit.record.bibID + "&bdt_id=" + this.detailType[12];
+				newIframe.src = top.HEURIST.basePath+"records/files/uploadFile.php?recID=" + windowRef.parent.HEURIST.edit.record.bibID + "&bdt_id=" + this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']];
 				newIframe.frameBorder = 0;
 				newIframe.style.width = "90%";
 				newIframe.style.height = "2em";
@@ -1902,9 +1948,9 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.wktValueToDescription
 top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(bdValue) {
 	var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 	var thisRef = this;
-
 	var newDiv = this.document.createElement("div");
-		newDiv.className = (bdValue && bdValue.geo) ? "geo-div" : "geo-div empty";
+
+	newDiv.className = (bdValue && bdValue.geo) ? "geo-div" : "geo-div empty";
 	this.addInputHelper.call(this, bdValue, newDiv);
 
 	var input = this.document.createElement("input");
@@ -1920,22 +1966,22 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 		} else {
 			input.name = "_" + newDiv.name;
 		}
-	newDiv.appendChild(input);
-	newDiv.input = input;
+		newDiv.appendChild(input);
+		newDiv.input = input;
 
 	var geoImg = this.document.createElement("img");
-	    geoImg.src = top.HEURIST.basePath+"common/images/16x16.gif";
-	    geoImg.className = "geo-image";
-	    newDiv.appendChild(geoImg);
+		geoImg.src = top.HEURIST.basePath+"common/images/16x16.gif";
+		geoImg.className = "geo-image";
+		newDiv.appendChild(geoImg);
 
 	var descriptionSpan = newDiv.appendChild(this.document.createElement("span"));
-	    descriptionSpan.className = "geo-description";
-	newDiv.descriptionSpan = descriptionSpan;
+		descriptionSpan.className = "geo-description";
+		newDiv.descriptionSpan = descriptionSpan;
 
 	var editLink = this.document.createElement("span")
-	    newDiv.editLink = editLink;
-	    editLink.className = "geo-edit";
-	    editLink.onclick = function() {
+		newDiv.editLink = editLink;
+		editLink.className = "geo-edit";
+		editLink.onclick = function() {
 			if (top.HEURIST.browser.isEarlyWebkit) {
 				alert("Geographic objects use Google Maps API, which doesn't work on this browser - sorry");
 				return;
@@ -1950,10 +1996,10 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 					);
 				}
 			});
-
 		};
+
 	var editSpan = newDiv.appendChild(this.document.createElement("span"));
-	    editSpan.appendChild(editLink);
+		editSpan.appendChild(editLink);
 
 	var removeImg = newDiv.appendChild(this.document.createElement("img"));
 		removeImg.src = top.HEURIST.basePath+"common/images/12x12.gif";
@@ -2018,9 +2064,10 @@ top.HEURIST.edit.inputs.BibDetailUnknownInput = function() { top.HEURIST.edit.in
 top.HEURIST.edit.inputs.BibDetailUnknownInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
 top.HEURIST.edit.inputs.BibDetailUnknownInput.prototype.typeDescription = "some value";
 top.HEURIST.edit.inputs.BibDetailUnknownInput.prototype.addInput = function(bdValue) {
+	var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
 
 	var newInput = this.document.createElement("div");
-		newInput.appendChild(this.document.createTextNode("Input type \"" + this.detailType[2] + "\" not implemented"));
+		newInput.appendChild(this.document.createTextNode("Input type \"" + this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] + "\" not implemented"));
 	this.addInputHelper.call(this, bdValue, newInput);
 };
 
@@ -2028,6 +2075,7 @@ top.HEURIST.edit.inputs.BibDetailSeparator = function() { top.HEURIST.edit.input
 top.HEURIST.edit.inputs.BibDetailSeparator.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
 top.HEURIST.edit.inputs.BibDetailSeparator.prototype.typeDescription = "record details separator";
 top.HEURIST.edit.inputs.BibDetailSeparator.prototype.addInput = function(bdValue) {
+	var rstFieldNamesToRdrIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
 
 	var newInput = this.document.createElement("div");
 		//newInput.style.border = '1px solid grey';
@@ -2036,7 +2084,7 @@ top.HEURIST.edit.inputs.BibDetailSeparator.prototype.addInput = function(bdValue
 	if (this.promptDiv){
 		this.promptDiv.className = "";
 		this.promptDiv.style.display = "none";
-		newInput.title = this.recFieldRequirements[1];
+		newInput.title = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayHelpText']];
 	}
 };
 
@@ -2061,6 +2109,7 @@ top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.changeNotification = f
 		//	this.windowRef.changed();
 };
 top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.addInput = function(bdValue) {
+	var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
 
 	this.windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 	var newInput = this.document.createElement("div");
@@ -2070,7 +2119,7 @@ top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.addInput = function(bd
 							parent.HEURIST.edit &&
 							parent.HEURIST.edit.record &&
 							parent.HEURIST.edit.record.relatedRecords ? parent.HEURIST.edit.record.relatedRecords : null);
-	this.relManager = new top.RelationManager(newInput,top.HEURIST.edit.record, relatedRecords,this.detailType[12],this.changeNotification,true);
+	this.relManager = new top.RelationManager(newInput,top.HEURIST.edit.record, relatedRecords,this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']],this.changeNotification,true);
 
 };
 
@@ -2113,9 +2162,9 @@ top.HEURIST.edit.Reminder = function(parentElement, reminderDetails) {
 top.HEURIST.edit.Reminder.prototype.remove = function() {
 	var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 	var fakeForm = { action: top.HEURIST.basePath+"records/reminders/saveReminder.php",
-	                 elements: [ { name: "rem_ID", value: this.reminderID },
-	                             { name: "recID", value: windowRef.parent.HEURIST.edit.record.bibID },
-	                             { name: "save-mode", value: "delete" } ] };
+					 elements: [ { name: "rem_ID", value: this.reminderID },
+								 { name: "recID", value: windowRef.parent.HEURIST.edit.record.bibID },
+								 { name: "save-mode", value: "delete" } ] };
 	var thisRef = this;
 	top.HEURIST.util.xhrFormSubmit(fakeForm, function(json) {
 		var val = eval(json.responseText);

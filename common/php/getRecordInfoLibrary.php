@@ -868,7 +868,7 @@ function getRectypeStructure($rtID) {
 // returns an array of RecType Structures for array of ids passed in
 function getRectypeStructures($rt_ids) {
 
-	$rtStructs = array('commomFieldNames' => getRectypeColNames(),
+	$rtStructs = array('commonFieldNames' => getRectypeColNames(),
 						'commonNamesToIndex' => getColumnNameToIndex(getRectypeColNames()),
 						'dtFieldNamesToIndex' => getColumnNameToIndex(getRectypeStructureFieldColNames()),
 						'dtFieldNames' => getRectypeStructureFieldColNames());
@@ -929,7 +929,7 @@ function getAllRectypeStructures($useCachedData = false) {
 						'pluralNames' => array(),
 						'usageCount' => getRecTypeUsageCount(),
 						'dtDisplayOrder' => array());
-	$rtStructs['typedefs'] = array('commomFieldNames' => getRectypeColNames(),
+	$rtStructs['typedefs'] = array('commonFieldNames' => getRectypeColNames(),
 									'commonNamesToIndex' => getColumnNameToIndex(getRectypeColNames()),
 									'dtFieldNamesToIndex' => getColumnNameToIndex(getRectypeStructureFieldColNames()),
 									'dtFieldNames' => getRectypeStructureFieldColNames());
@@ -971,7 +971,7 @@ function getRectypeGroups() {
 	$index = 0;
 	$res = mysql_query("select * from defRecTypeGroups order by rtg_Order, rtg_Name");
 	while ($row = mysql_fetch_assoc($res)) {
-		array_push($rtGroups, array( 'name' => $row["rtg_Name"], 'order' => $row["rtg_Order"], 'description' => $row["rtg_Description"], 'allTypes' => array(), 'showTypes' => array()));
+		array_push($rtGroups, array('id'=>$row["rtg_ID"], 'name' => $row["rtg_Name"], 'order' => $row["rtg_Order"], 'description' => $row["rtg_Description"], 'allTypes' => array(), 'showTypes' => array()));
 		$rtGroups['groupIDToIndex'][$row["rtg_ID"]] = $index++;
 	}
 	return $rtGroups;
@@ -1068,7 +1068,7 @@ function getAllDetailTypeStructures($useCachedData = false) {
 						'names' => array(),
 						'rectypeUsage' => getDetailTypeDefUsage(),
 						'usageCount' => getDetailTypeUsageCount(),
-						'typedefs' => array('commomFieldNames' => getDetailTypeColNames(),
+						'typedefs' => array('commonFieldNames' => getDetailTypeColNames(),
 											'fieldNamesToIndex' => getColumnNameToIndex(getDetailTypeColNames())));
 
 	$query = "select dtg_ID, dtg_Name, ".join(",", getDetailTypeColNames())." from defDetailTypes
@@ -1110,7 +1110,7 @@ function getDetailTypeStructure($dtID) {
 
 // returns an array of DetailType Structures for array of ids passed in
 function getDetailTypeStructures($dtIDs) {
-	$dtStructs = array('commomFieldNames' => getDetailTypeColNames());
+	$dtStructs = array('commonFieldNames' => getDetailTypeColNames());
 	foreach ($dtIDs as $dtID) {
 		$dtStructs[$dtID] = getDetailTypeStructure($dtID);
 	}
@@ -1122,7 +1122,7 @@ function getDetailTypeGroups() {
 	$index = 0;
 	$res = mysql_query("select * from defDetailTypeGroups order by dtg_Order, dtg_Name");
 	while ($row = mysql_fetch_assoc($res)) {
-		array_push($dtGroups, array( 'name' => $row["dtg_Name"], 'order' => $row["dtg_Order"], 'description' => $row["dtg_Description"], 'allTypes' => array(), 'showTypes' => array()));
+		array_push($dtGroups, array('id'=>$row["dtg_ID"], 'name' => $row["dtg_Name"], 'order' => $row["dtg_Order"], 'description' => $row["dtg_Description"], 'allTypes' => array(), 'showTypes' => array()));
 		$dtGroups['groupIDToIndex'][$row["dtg_ID"]] = $index++;
 	}
 	return $dtGroups;

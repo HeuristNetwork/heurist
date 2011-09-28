@@ -284,6 +284,7 @@ function renderInputs(bibID, rectype) {
 }
 
 function renderAdditionalDataSection(container, rectypeID, bdValues) {
+	var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
 
 	var addRow = container.appendChild(document.createElement("div"));
 		addRow.className = "input-row extradata";
@@ -310,7 +311,8 @@ function renderAdditionalDataSection(container, rectypeID, bdValues) {
 
 	var dtsByName = {};
 	for (var dtID in dts) {
-		dtsByName[dts[dtID]['commonFields'][0]]= [dtID].concat(dts[dtID]['commonFields']);// saw TODO: type struct change needed
+		if (dtID == 'commonFieldNames') continue;
+		dtsByName[dts[dtID]['commonFields'][dtyFieldNamesToDtIndexMap['dty_Name']]]= dts[dtID]['commonFields'];// saw TODO: type struct change needed
 	}
 	var dtNames = [];
 	for (var name in dtsByName) {
@@ -324,7 +326,7 @@ function renderAdditionalDataSection(container, rectypeID, bdValues) {
 	var i = 1;
 	for (var n = 0; n < dtNames.length; ++n) {
 		var name = dtNames[n];
-		dtSelect.options[i++] = new Option(dtsByName[name][1], dtsByName[name][0]);// saw TODO: type struct change needed
+		dtSelect.options[i++] = new Option(dtsByName[name][dtyFieldNamesToDtIndexMap['dty_Name']], dtsByName[name][dtyFieldNamesToDtIndexMap['dty_ID']]);// saw TODO: type struct change needed
 	}
 	var button = document.createElement("input");
 		button.type = "button";

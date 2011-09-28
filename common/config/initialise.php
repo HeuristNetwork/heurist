@@ -244,6 +244,7 @@
 		'RT_MEDIA_RECORD' => 5,
 		'RT_AUTHOR_EDITOR' => 23,
 		'RT_BLOG_ENTRY' => 8,
+		'RT_INTERPRETATION' => 10,
 		'RT_FACTOID' => 22);
 
 	foreach ($rtDefines as $str => $id) {

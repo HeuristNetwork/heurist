@@ -304,7 +304,9 @@ top.HEURIST.search = {
 			showRelatedMenuItem.id = "showrelated"+level;
 			showRelatedMenuItem.className = "showrelated level" + level;
 			filterDiv.appendChild(showRelatedMenuItem);
-			resultsDiv.className += " collapsed";
+			if (!$(resultsDiv).hasClass('collapsed')) {
+				resultsDiv.className += " collapsed";
+			}
 		}
 
 		var filterMenu = document.createElement("ul");
@@ -382,7 +384,7 @@ top.HEURIST.search = {
 			var j;
 			var relNames = $.map(levelRelTypes, function(recIDs,trmID) {
 								return (top.HEURIST.terms.termsByDomainLookup.relation[trmID] ? "" + top.HEURIST.terms.termsByDomainLookup.relation[trmID][top.HEURIST.terms.fieldNamesToIndex['trm_Label']] + ":" + trmID : null);
-							});
+								});
 			relNames.sort();
 			var reltypeMenuItem = document.createElement("li");
 			reltypeMenuItem.innerHTML = "<span>Filter by Relation Type</span>";
@@ -417,9 +419,9 @@ top.HEURIST.search = {
 		if (className.match(/loaded/)) {
 			if ($("#results-level" + level).hasClass("collapsed")) {
 				$("#showrelated" + level).html("<a onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Show Level "+level+" Related Records</a>");
-				}else{
+			}else{
 				$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Hide Level "+level+" Related Records</a>");
-				};
+			};
 		}else{
 			top.HEURIST.search.loadRelatedLevel(level);
 			document.getElementById("showrelated" + level).className = className + " loaded";

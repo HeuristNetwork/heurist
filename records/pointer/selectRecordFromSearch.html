@@ -84,8 +84,8 @@ if (rectype) {
 		}
 		recTypeName = recTypeName.slice(0,-1); // remove the last comma
 		delete temp;
-	}else if (rectype.search(/\D/) == -1) {
-		rectypes[rectype] = 1;
+	}else if (rectype.search(/\D/) == -1 && rectype.search(/\d/) != -1) {
+		rectypes[rectype] = (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['RT_NOTE']? '' + top.HEURIST.magicNumbers['RT_NOTE']:1);
 		recTypeName = top.HEURIST.rectypes.names[rectype].toLowerCase();
 	}else{
 		rectypes = null;
@@ -162,9 +162,14 @@ document.forms[0].submit = function() {
 	// Make an AJAX request for the search results.  If no search specified, default to RECENT entries.
 	var q = document.forms[0].elements["q"].value;
 	var t = document.forms[0].elements["t"].value;
+	q = q.replace(/^\s*/,"");
+	q = q.replace(/\s*$/,"");
+	t = t.replace(/^\s*/,"");
+	t = t.replace(/\s*$/,"");
 	if (t == "0") t = "";
+	q += (t? ((q?" ":"")+"type:"+parseInt(t)) : "");
 // saw TODO modify for multi constraints set
-	var query = "q=" + encodeURIComponent(q + (t? (" type:"+parseInt(t)) : ""));
+	var query = "q=" + encodeURIComponent(q);
 	if (document.getElementById("r-recent").checked  ||  q == "") {
 		query += "&r=recent";
 	}

@@ -131,11 +131,14 @@
 				rectypeEdit.appendChild(rectypeValSelect);
 
 				// rectypes displayed in Groups by group display order then by display order within group
-				for (var grpID in top.HEURIST.rectypes.groups){
+				var index;
+				for (index in top.HEURIST.rectypes.groups){
+					if (index == "groupIDToIndex") continue;
 					var grp = document.createElement("optgroup");
-					grp.label = top.HEURIST.rectypes.groups[grpID].name;
+					grp.label = top.HEURIST.rectypes.groups[index].name;
 					rectypeValSelect.appendChild(grp);
-					for (var recTypeID in top.HEURIST.rectypes.groups[grpID].showTypes) {
+					for (var recTypeIDIndex in top.HEURIST.rectypes.groups[index].showTypes) {
+						var recTypeID = top.HEURIST.rectypes.groups[index].showTypes[recTypeIDIndex];
 						var name = top.HEURIST.rectypes.names[recTypeID];
 						rectypeValSelect.appendChild(new Option(name, recTypeID));
 						if (name == top.HEURIST.edit.record.rectype) {

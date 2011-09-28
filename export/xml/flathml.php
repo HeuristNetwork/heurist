@@ -1167,7 +1167,7 @@ openTag('hml', array(
 	'xsi:schemaLocation' => 'http://heuristscholar.org/heurist/hml http://heuristscholar.org/heurist/schemas/hml.xsd')
 );
 */
-$query_attrs = array_intersect_key($_REQUEST, array('q'=>1,'w'=>1,'depth'=>1,'f'=>1,'limit'=>1,'offset'=>1,'db'=>1,'stub'=>1,'woot'=>1,'fc'=>1,'slb'=>1,'fc'=>1,'slb'=>1,'rtfilters'=>1,'relfilters'=>1,'ptrfilters'=>1));
+$query_attrs = array_intersect_key($_REQUEST, array('q'=>1,'w'=>1,'hinclude'=>1,'depth'=>1,'f'=>1,'limit'=>1,'offset'=>1,'db'=>1,'stub'=>1,'woot'=>1,'fc'=>1,'slb'=>1,'fc'=>1,'slb'=>1,'rtfilters'=>1,'relfilters'=>1,'ptrfilters'=>1));
 if ($pub_id) {
 	$query_attrs['pubID'] = $pub_id;
 }

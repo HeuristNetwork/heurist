@@ -27,7 +27,7 @@
  * Once the results are finished, the window.HEURIST.notifyResults( searchID ) is called.
  */
 
-define("RESULT_LIMIT", 50);
+define("RESULT_LIMIT", 100);
 define("SAVE_URI", "disabled");
 
 define("SEARCH_VERSION", 1);

@@ -13,6 +13,7 @@ print " 'RT_PERSON' : ".(defined('RT_PERSON')?RT_PERSON:"''").",\n";
 print " 'RT_MEDIA_RECORD' : ".(defined('RT_MEDIA_RECORD')?RT_MEDIA_RECORD:"''").",\n";
 print " 'RT_AUTHOR_EDITOR' : ".(defined('RT_AUTHOR_EDITOR')?RT_AUTHOR_EDITOR:"''").",\n";
 print " 'RT_BLOG_ENTRY' : ".(defined('RT_BLOG_ENTRY')?RT_BLOG_ENTRY:"''").",\n";
+print " 'RT_INTERPRETATION' : ".(defined('RT_INTERPRETATION')?RT_INTERPRETATION:"''").",\n";
 print " 'RT_FACTOID' : ".(defined('RT_FACTOID')?RT_FACTOID:"''").",\n";
 
 print " 'DT_TITLE' : ".(defined('DT_TITLE')?DT_TITLE:"''").",\n";

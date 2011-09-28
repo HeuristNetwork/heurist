@@ -221,14 +221,29 @@ if (!top.Relationship) {
 		}
 	*/
 		// filter rectypes for constraints
-		var fakeBDT = ["Related record","", "resource",
-						null,null,1,null,
-						null,null,null,null,
-						this.rectypes? this.rectypes : (rectypes ? rectypes : 0),199];
-		var fakeBDR = ["Related record", "", "",null,"required",
-						1,1,60,null,null,
-						null,null,this.rectypes? this.rectypes : (rectypes ? rectypes : 0),null,null,
-						null,null,null,null];
+		// detailType
+			//0,"dty_Name" 1,"dty_ExtendedDescription" 2,"dty_Type" 3,"dty_OrderInGroup" 4,"dty_HelpText"
+			//5,"dty_ShowInLists" 6,"dty_Status" 7,"dty_DetailTypeGroupID" 8,"dty_FieldSetRectypeID" 9,"dty_JsonTermIDTree"
+			//10,"dty_TermIDTreeNonSelectableIDs" 11,"dty_PtrTargetRectypeIDs" 12,"dty_ID"
+
+		//recFieldRequirements
+			//0,"rst_DisplayName" 1,"rst_DisplayHelpText" 2,"rst_DisplayExtendedDescription" 3,"rst_DefaultValue"
+			//4,"rst_RequirementType" 5,"rst_MaxValues" 6,"rst_MinValues" 7,"rst_DisplayWidth" 8,"rst_RecordMatchOrder"
+			//9,"rst_DisplayOrder" 10,"rst_DisplayDetailTypeGroupID" 11,"rst_FilteredJsonTermIDTree" 12,"rst_PtrFilteredIDs"
+			//13,"rst_TermIDTreeNonSelectableIDs" 14,"rst_CalcFunctionID" 15,"rst_Status"
+			//16,"rst_OrderForThumbnailGeneration" 17,"dty_TermIDTreeNonSelectableIDs"
+			//18,"dty_FieldSetRectypeID"
+
+		var fakeBDT = top.HEURIST.edit.createFakeDetailType((top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_LINKED_RESOURCE']?
+																'' + top.HEURIST.magicNumbers['DT_LINKED_RESOURCE']:''),
+															"Related record",
+															"resource",
+															"",
+															null,null,
+															this.rectypes? this.rectypes : (rectypes ? rectypes : 0));
+
+		var fakeBDR = top.HEURIST.edit.createFakeFieldRequirement(fakeBDT);
+
 		this.relatedRecord = new top.HEURIST.edit.inputs.BibDetailResourceInput(fakeBDT, fakeBDR, [], tbody);
 		this.relatedRecordID = this.relatedRecord.inputs[0].hiddenElt;
 
@@ -266,15 +281,18 @@ if (!top.Relationship) {
 		td.className = "section-header-cell optional";
 		td.appendChild(this.document.createTextNode("Optional Fields"));
 
-		fakeBDT = ["Interpretation","", "resource",
-						null,null,1,null,
-						null,null,null,null,
-						182,638];
 		var helpString = "Record the evidence and/or reasoning on which this relationship is based";
-		fakeBDR = ["Interpretation", helpString, "",null,"optional",
-						1,0,60,null,null,
-						null,null,182,null,null,
-						null,null,null,null];
+		fakeBDT = top.HEURIST.edit.createFakeDetailType((top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_INTERPRETATION_REFERENCE']?
+																'' + top.HEURIST.magicNumbers['DT_INTERPRETATION_REFERENCE']:''),
+															"Interpretation",
+															"resource",
+															helpString,
+															null,null,
+															(top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['RT_INTERPRETATION']?
+																'' + top.HEURIST.magicNumbers['RT_INTERPRETATION']:''));
+
+		var fakeBDR = top.HEURIST.edit.createFakeFieldRequirement(fakeBDT);
+
 		this.interpResource = new top.HEURIST.edit.inputs.BibDetailResourceInput(fakeBDT, fakeBDR, [], opt);
 		this.interpResourceID = this.interpResource.inputs[0].hiddenElt;
 
