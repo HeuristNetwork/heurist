@@ -115,7 +115,7 @@
 	<div class="input-row required">
 		<div class="input-header-cell" for="dty_Type">Data type:</div>
 		<div class="input-cell"><select class="dtyValue" id="dty_Type" onChange="window.detailTypeEditor.onChangeType(event)">
-        	<option selected="selected" disabled="disabled">-- Select data type --</option>
+        	<option selected="selected" disabled="disabled" value="">-- Select data type --</option>
 			<option>freetext</option>
 			<option>blocktext</option>
 			<option>integer</option>
@@ -144,7 +144,7 @@
 		<div class="help prompt">The terms which define this enum/relationtype/relmarker</div>
 		</div>
 	</div>
-	
+
 	<div id="pnl_relmarker" class="input-row" style="display:block;">
 		<div class="input-header-cell" for="dty_PtrTargetRectypeIDsPreview">Pointer targets:</div>
         <div class="input-cell">
@@ -153,7 +153,7 @@
 		<div class="help prompt">The rectypes this pointer/relmarker detailtype should point to</div>
 		</div>
 	</div>
-	
+
 	<input type="hidden" id="dty_JsonTermIDTree"/>  <!-- for enum, relationtype, relmarker. Preview select is in termsPreview -->
 	<input type="hidden" id="dty_TermIDTreeNonSelectableIDs"/> <!-- disabled terms for the same types as above -->
 	<input type="hidden" id="dty_PtrTargetRectypeIDs"/>  <!-- for resource and relmarker -->

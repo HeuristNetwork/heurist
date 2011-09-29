@@ -495,8 +495,8 @@
 			$query = "insert into defRecTypes ($colNames) values ($query)";
 			$rows = execSQL($db, $query, $parameters, true);
 
-			if ($rows==0) {
-				$ret = "error inserting into defRecTypes - ".$msqli->error;
+			if ($rows==0 || is_string($rows) ) {
+				$ret = "error inserting into defRecTypes - ".$rows;
 			} else {
 				$rtyID = $db->insert_id;
 				$ret = -$rtyID;
@@ -680,7 +680,7 @@
 					$ret = "error updating $rtyID in updateRectype - ".$res;
 					//}else if ($rows==0) {
 					//	$ret = "error updating $rtyID in updateRectype - ".$msqli->error;
-					} else {
+				} else {
 					$ret = $rtyID;
 				}
 			}
@@ -711,7 +711,7 @@
 			return $ret;
 		}
 
-		$query2 = null;
+		$query2 = "";
 
 		if (count($dtFieldNames) && count($rt['dtFields']))
 		{
@@ -721,31 +721,34 @@
 			foreach ($rt['dtFields'] as $dtyID => $fieldVals)
 			{
 				//$ret['dtFields'][$dtyID] = array();
+				$fieldNames = "";
+				$parameters = array(""); //list of field date types
 
-				$res = $db->query("select rts_OriginatingDBID from defRecStructure where rst_RecTypeID = $rtyID and rst_DetailTypeID = $dtyID");
+
+				$res = $db->query("select rst_OriginatingDBID from defRecStructure where rst_RecTypeID = $rtyID and rst_DetailTypeID = $dtyID");
+
+//error_log("2>>>".$db->affected_rows."  ".$res->num_rows);
 
 				$isInsert = ($db->affected_rows<1);
 				if($isInsert){
-					$query2 = "rts_LocallyModified=0,";
+					$fieldNames = $fieldNames.", rst_LocallyModified";
+					$query2 = "9";
 				}else{
 					$row = $res->fetch_object();
-					$query2 = "rts_LocallyModified=".(($row->rts_OriginatingDBID>0)?"1":"0").",";
-
-					$wasLocallyModified = ($wasLocallyModified || ($row->rts_OriginatingDBID>0));
+					$query2 = "rst_LocallyModified=".(($row->rst_OriginatingDBID>0)?"1":"0");
+					$wasLocallyModified = ($wasLocallyModified || ($row->rst_OriginatingDBID>0));
 				}
 
 				//$fieldNames = "rst_RecTypeID,rst_DetailTypeID,".join(",",$dtFieldNames);
 
 				$query = $query2;
-				$fieldNames = "";
-				$parameters = array(""); //list of field date types
 				foreach ($dtFieldNames as $colName) {
 
 					$val = array_shift($fieldVals);
 
 //error_log(">>".$dtyID."   ".$colName."=".$val);
 
-					if (array_key_exists($colName, $rstColumnNames)) {
+					if (array_key_exists($colName, $rstColumnNames) && $colName!="rst_LocallyModified") {
 						//array_push($ret['error'], "$colName is not a valid column name for defDetailTypes val= $val was not used");
 
 						if($isInsert){
@@ -769,11 +772,13 @@
 						$query = "update defRecStructure set ".$query." where rst_RecTypeID = $rtyID and rst_DetailTypeID = $dtyID";
 					}
 
+//error_log(">>>3.".$query);
+
 					$rows = execSQL($db, $query, $parameters, true);
 
-					if ($rows==0) {
+					if ($rows==0 || is_string($rows) ) {
 						$oper = (($isInsert)?"inserting":"updating");
-						array_push($ret[$rtyID], "error ".$oper." field type ".$dtyID." for record type ".$rtyID." in updateRecStructure - ".mysql_error()); // $msqli->error);
+						array_push($ret[$rtyID], "error ".$oper." field type ".$dtyID." for record type ".$rtyID." in updateRecStructure - ".$rows);
 					} else {
 						array_push($ret[$rtyID], $dtyID);
 					}
@@ -845,8 +850,8 @@
 
 			$rows = execSQL($db, $query, $parameters, true);
 
-			if ($rows==0) {
-					$ret['error'] = "error inserting into defRecTypeGroups - ".$msqli->error;
+			if ($rows==0 || is_string($rows) ) {
+					$ret['error'] = "error inserting into defRecTypeGroups - ".$rows;
 			} else {
 				$rtgID = $db->insert_id;
 				$ret['result'] = $rtgID;
@@ -906,8 +911,8 @@
 			$query = "update defRecTypeGroups set ".$query." where rtg_ID = $rtgID";
 
 			$rows = execSQL($db, $query, $parameters, true);
-			if ($rows==0) {
-				$ret['error'] = "error updating $colName in updateRectypeGroup - ".$msqli->error;
+			if ($rows==0 || is_string($rows) ) {
+				$ret['error'] = "error updating $colName in updateRectypeGroup - ".$rows;
 			} else {
 				$ret['result'] = $rtgID;
 			}
@@ -988,8 +993,8 @@
 
 			$rows = execSQL($db, $query, $parameters, true);
 
-			if ($rows==0) {
-					$ret['error'] = "error inserting into defDetailTypeGroups - ".$msqli->error;
+			if ($rows==0 || is_string($rows) ) {
+					$ret['error'] = "error inserting into defDetailTypeGroups - ".$rows;
 			} else {
 				$dtgID = $db->insert_id;
 				$ret['result'] = $dtgID;
@@ -1049,8 +1054,8 @@
 			$query = "update defDetailTypeGroups set ".$query." where dtg_ID = $dtgID";
 
 			$rows = execSQL($db, $query, $parameters, true);
-			if ($rows==0) {
-				$ret['error'] = "error updating $colName in updateDettypeGroup - ".$msqli->error;
+			if ($rows==0 || is_string($rows) ) {
+				$ret['error'] = "error updating $colName in updateDettypeGroup - ".$rows;
 			} else {
 				$ret['result'] = $dtgID;
 			}
@@ -1128,10 +1133,11 @@
 			}
 
 			$query = "insert into defDetailTypes ($colNames) values ($query)";
+
 			$rows = execSQL($db, $query, $parameters, true);
 
-			if ($rows==0) {
-				$ret = "error inserting into defDetailTypes - ".$msqli->error;
+			if ($rows==0 || is_string($rows) ) {
+				$ret = "error inserting into defDetailTypes - ".$rows;
 			} else {
 				$dtyID = $db->insert_id;
 				$ret = -$dtyID;
@@ -1195,7 +1201,7 @@
 
 		$ret = null;
 
-		$res = $db->query("select dty_OriginatingDBID from defDetailTypes where dty_ID = $rtyID");
+		$res = $db->query("select dty_OriginatingDBID from defDetailTypes where dty_ID = $dtyID");
 
 		if ($res->num_rows<1){ //$db->affected_rows<1){
 			$ret = "invalid dty_ID ($dtyID) passed in data to updateDetailType";
@@ -1231,8 +1237,8 @@
 				$query = "update defDetailTypes set ".$query." where dty_ID = $dtyID";
 
 				$rows = execSQL($db, $query, $parameters, true);
-				if ($rows==0) {
-					$ret = "error updating $dtyID in updateDetailType - ".$query."  ".$parameters[1]."  ".$parameters[2]; //$msqli->error;
+				if ($rows==0 || is_string($rows) ) {
+					$ret = "error updating $dtyID in updateDetailType - ".$query."  ".$parameters[1]."  ".$parameters[2]; //$db->error;
 				} else {
 					$ret = $dtyID;
 				}
@@ -1304,9 +1310,9 @@
 
 				$rows = execSQL($db, $query, $parameters, true);
 
-				if ($rows==0) {
+			if ($rows==0 || is_string($rows) ) {
 					$oper = (($isInsert)?"inserting":"updating");
-					$ret = "error $oper term# $trmID in updateTerms - ".$msqli->error;
+					$ret = "error $oper term# $trmID in updateTerms - ".$rows;
 			} else {
 					if($isInsert){
 						$trmID = $db->insert_id;
@@ -1429,11 +1435,14 @@
 		   call_user_func_array(array($stmt, 'bind_param'), refValues($params));
 
 		   $stmt->execute();
+		   $result;
 
 		   if($close){
 			$result = $mysqli->error;
 			if($result == ""){
 		   		$result = $mysqli->affected_rows;
+			}else{
+				error_log(">>>Error=".$mysqli->error);
 			}
 		   } else {
 		   		$meta = $stmt->result_metadata();

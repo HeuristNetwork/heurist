@@ -128,7 +128,8 @@ function EditTerms() {
 			tv_parent = tv.getRoot(),
 			first_node,
 			treesByDomain = top.HEURIST.terms.treesByDomain[_currentDomain],
-			termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[_currentDomain];
+			termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[_currentDomain],
+			fi = top.HEURIST.terms.fieldNamesToIndex;
 
 		//first level terms
 		for (termid in treesByDomain)
@@ -143,9 +144,9 @@ function EditTerms() {
 			term.id = termid;
 			term.parent_id = null;
 			term.domain = _currentDomain;
-			term.label = arTerm[0];
-			term.description = arTerm[1];
-			term.inverseid = arTerm[2];
+			term.label = arTerm[fi.trm_Label];
+			term.description = arTerm[fi.trm_Description];
+			term.inverseid = arTerm[fi.trm_InverseTermID];
 
 			//'<div id="'+parentElement+'"><a href="javascript:void(0)" onClick="selectAllChildren('+nodeIndex+')">All </a> '+termsByDomainLookup[parentElement]+'</div>';
 			//term.href = "javascript:void(0)";
@@ -169,9 +170,9 @@ function EditTerms() {
 					term.id = child;
 					term.parent_id = parent_id;
 					term.domain = _currentDomain;
-					term.label = arTerm[0];
-					term.description = arTerm[1];
-					term.inverseid = arTerm[2];
+					term.label = arTerm[fi.trm_Label];
+					term.description = arTerm[fi.trm_Description];
+					term.inverseid = arTerm[fi.trm_InverseTermID];
 
 					//term.label = '<div id="'+child+'"><a href="javascript:void(0)" onClick="selectAllChildren('+nodeIndex+')">All </a> '+termsByDomainLookup[child]+'</div>';
 					//term.href = "javascript:void(0)"; // To make 'select all' clickable, but not leave the page when hitting enter

@@ -94,19 +94,36 @@ function DetailTypeEditor() {
 			Dom.get("msg").style.visibility = "visible";
 			Dom.get("statusMsg").innerHTML = "Error: field type #"+_dtyID+"  not be found. Clicking 'save' button will create a new Field Type.";
 		}
+
+		var fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+
 		//creates new empty field type in case ID is not defined
 		if(Hul.isnull(_detailType)){
 			_dtyID =  -1;
-			//_detailType = ['','','freetext',0,'',1,'open',dtgID,null,null,null,null];
-			_detailType = ['','','',0,'',1,'open',dtgID,null,null,null,null];
+
+			_detailType = new Array();
+
+			_detailType[fi.dty_Name] = '';
+			_detailType[fi.dty_ExtendedDescription] = '';
+			_detailType[fi.dty_Type] = '';
+			_detailType[fi.dty_OrderInGroup] = 0;
+			_detailType[fi.dty_HelpText] = '';
+			_detailType[fi.dty_ShowInLists] = 1;
+			_detailType[fi.dty_Status] = 'open';
+			_detailType[fi.dty_DetailTypeGroupID] = dtgID;
+			_detailType[fi.dty_FieldSetRectypeID] = null;
+			_detailType[fi.dty_JsonTermIDTree] = null;
+			_detailType[fi.dty_TermIDTreeNonSelectableIDs] = null;
+			_detailType[fi.dty_PtrTargetRectypeIDs] = null;
+
 			Dom.get("dty_Type").disabled = false;
 		}else{
 			Dom.get("dty_Type").disabled = true;
 		}
 
-		_keepStatus = _detailType[6]; // Keeps current status for rollback
+		_keepStatus = _detailType[fi.dty_Status]; // Keeps current status for rollback
 		Dom.get("dty_Status").innerHTML = _keepStatus;
-		_keepType = _detailType[2]; // Keeps current datatype
+		_keepType = _detailType[fi.dty_Type]; // Keeps current datatype
 
 		// creates and fills group selector
 		_initGroupComboBox();
@@ -306,11 +323,13 @@ function DetailTypeEditor() {
 	function _initGroupComboBox() {
 
 		var el = Dom.get("dty_DetailTypeGroupID"),
-			dtg_ID;
+			dtg_ID,
+			index;
 
-		for (dtg_ID in top.HEURIST.detailTypes.groups){
-			if(!Hul.isnull(dtg_ID)) {
-				var grpName = top.HEURIST.detailTypes.groups[dtg_ID].name;
+		for (index in top.HEURIST.detailTypes.groups){
+			if(!isNaN(Number(index))) {
+				dtg_ID = top.HEURIST.detailTypes.groups[index].id;
+				var grpName = top.HEURIST.detailTypes.groups[index].name;
 
 				var option = document.createElement("option");
 				option.text = grpName;
@@ -335,15 +354,16 @@ function DetailTypeEditor() {
 	function _fromArrayToUI(){
 
 		var i,
-			el;
-		var fnames = top.HEURIST.detailTypes.typedefs.commomFieldNames;
+			el,
+			fnames = top.HEURIST.detailTypes.typedefs.commonFieldNames,
+			fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
 
 		for (i = 0, l = fnames.length; i < l; i++) {
 			var fname = fnames[i];
 			el = Dom.get(fname);
 			if(!Hul.isnull(el)){
-				if ( i===5 ) { // dty_ShowInLists
-					el.checked = (Number(_detailType[5])===1);
+				if ( fname==='dty_ShowInLists' ) { // dty_ShowInLists
+					el.checked = (Number(_detailType[fi.dty_ShowInLists])===1);
 				}else{
 				el.value = _detailType[i];
 			}
@@ -354,15 +374,21 @@ function DetailTypeEditor() {
 		_onChangeType(null);
 
 		// create preview for Terms Tree and record pointer
-		_recreateTermsPreviewSelector(_detailType[2], _detailType[9], _detailType[10]);
-		_recreateRecTypesPreview(_detailType[2], ((_detailType[2]==="fieldsetmarker")?_detailType[8]:_detailType[11]) );
+		_recreateTermsPreviewSelector(
+						_detailType[fi.dty_Type],
+						_detailType[fi.dty_JsonTermIDTree],
+						_detailType[fi.dty_TermIDTreeNonSelectableIDs]);
+
+		_recreateRecTypesPreview(_detailType[fi.dty_Type],
+					((_detailType[fi.dty_Type]==="fieldsetmarker")
+							?_detailType[fi.dty_FieldSetRectypeID]:_detailType[fi.dty_PtrTargetRectypeIDs]) );
 
 		if (_dtyID<0){
 			Dom.get("dty_ID").innerHTML = 'to be generated';
 			document.title = "Create New Field Type";
 		}else{
 			Dom.get("dty_ID").innerHTML =  _dtyID;
-			document.title = "Field Type #: " + _dtyID+" '"+_detailType[0]+"'";
+			document.title = "Field Type #: " + _dtyID+" '"+_detailType[fi.dty_Name]+"'";
 
 			var aUsage = top.HEURIST.detailTypes.rectypeUsage[_dtyID];
 			var iusage = (Hul.isnull(aUsage)) ? 0 : aUsage.length;
@@ -403,7 +429,7 @@ function DetailTypeEditor() {
 		el.value = el.checked?1:0;
 
 		var i;
-		var fnames = top.HEURIST.detailTypes.typedefs.commomFieldNames;
+		var fnames = top.HEURIST.detailTypes.typedefs.commonFieldNames;
 
 		//take only changed values
 		for (i = 0, l = fnames.length; i < l; i++){
@@ -446,12 +472,21 @@ function DetailTypeEditor() {
 				return "mandatory";
 			}
 		}
+		var val = Dom.get("dty_Type").value;
+		if(Hul.isempty(val)){
+				if(isShowWarn) {
+					alert("Data Type is madatory field");
+				}
+				Dom.get("dty_Type").focus();
+				_updatedFields = [];
+				return "mandatory";
+		}
 
 		return "ok";
 	}
 
 	/**
-	* Http responce listener
+	* Http response listener
 	*
 	* shows information about result of operation of saving on server and closes this pop-up window in case of success
 	*
@@ -521,7 +556,7 @@ function DetailTypeEditor() {
 			}};
 
 			//fill array of updated fieldnames
-			//var fieldNames = top.HEURIST.detailTypes.typedefs.commomFieldNames;
+			//var fieldNames = top.HEURIST.detailTypes.typedefs.commonFieldNames;
 
 			var values = [];
 			for(k = 0; k < _updatedFields.length; k++) {

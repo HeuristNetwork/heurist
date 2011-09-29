@@ -92,12 +92,13 @@ function SelectDetailType() {
 								}
 
 								//////////////////// create data table
-								var arr = [];
-								var dty_ID;
+								var arr = [],
+									dty_ID,
+									fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
 
 								//2. create datatable and fill it values of particular group
 								for (dty_ID in top.HEURIST.detailTypes.typedefs) {
-									if(dty_ID!=="commomFieldNames")
+									if(!isNaN(Number(dty_ID)))
 									{
 										var td = top.HEURIST.detailTypes.typedefs[dty_ID];
 										var deftype = td.commonFields;
@@ -107,11 +108,19 @@ function SelectDetailType() {
 										if(isnull(aUsage) || aUsage.indexOf(rty_ID)<0){
 
 											var iusage = isnull(aUsage) ? 0 : aUsage.length;
-											var ptr_1 = isnull(deftype[8])?'':deftype[8];
-											var ptr_2 = isnull(deftype[11])?'':deftype[11];
+											var ptr_1 = isnull(deftype[fi.dty_FieldSetRectypeID])?'':deftype[fi.dty_FieldSetRectypeID];
+											var ptr_2 = isnull(deftype[fi.dty_PtrTargetRectypeIDs])?'':deftype[fi.dty_PtrTargetRectypeIDs];
 											// add order in group, name, help, type and status,
 											// doc will be hidden (for pop-up)
-											arr.push([0, deftype[3],deftype[0],deftype[4],deftype[2],deftype[6],deftype[1],deftype[7],dty_ID,iusage,ptr_1,ptr_2]);
+											arr.push([0,
+												deftype[fi.dty_OrderInGroup],
+												deftype[fi.dty_Name],
+												deftype[fi.dty_HelpText],
+												deftype[fi.dty_Type],
+												deftype[fi.dty_Status],
+												deftype[fi.dty_ExtendedDescription],
+												deftype[fi.dty_DetailTypeGroupID],
+												dty_ID,iusage,ptr_1,ptr_2]);
 
 										}
 									}
@@ -435,10 +444,14 @@ function SelectDetailType() {
 	function _initGroupComboBoxFilter()
 	{
 							filterByGroup = Dom.get('inputFilterByGroup');
-							var dtg_ID;
+							var dtg_ID,
+								index;
 
-							for (dtg_ID in top.HEURIST.detailTypes.groups) {
-								var grpName = top.HEURIST.detailTypes.groups[dtg_ID].name;
+				for (index in top.HEURIST.detailTypes.groups) {
+					if( !isNaN(Number(index)) ) {
+
+						dtg_ID = top.HEURIST.detailTypes.groups[index].id;
+						var grpName = top.HEURIST.detailTypes.groups[index].name;
 
 								var option = document.createElement("option");
 								option.text = grpName;
@@ -452,11 +465,10 @@ function SelectDetailType() {
 								{
 									filterByGroup.add(option,null);
 								}
+					}
+				} //for
 
-							} //for
-
-							filterByGroup.onchange = _updateFilter;
-
+				filterByGroup.onchange = _updateFilter;
 	}
 
 	/**
@@ -490,7 +502,7 @@ function SelectDetailType() {
 							lblSelect1 = Dom.get('lblSelect1');
 							lblSelect2 = Dom.get('lblSelect2');
 							var btnClear = Dom.get('btnClearSelection');
-							btnClear.onclick = _clearSelection;
+							if(btnClear) btnClear.onclick = _clearSelection;
 	} //end init listener
 
 	//

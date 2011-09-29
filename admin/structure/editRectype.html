@@ -287,18 +287,20 @@
 				alert(e);
 /* 				document.getElementById("rectypeIcon").innerHTML = "<a href=\"../../admin/structure/uploadRectypeIcon.php\">change icon</a>"; */
 			}
-			document.getElementById("rty_Name").value = rectype[0];
-			document.getElementById("rty_Plural").value = rectype[6];
-			document.getElementById("rty_Description").value = rectype[1];
-			document.getElementById("rty_OrderInGroup").value = rectype[3];
-			document.getElementById("rty_ShowInLists").checked = (Number(rectype[7]) === 1);
-			document.getElementById("rty_TitleMask").value = rectype[4];
-			document.getElementById("rty_FlagAsFieldset").checked = (Number(rectype[10]) === 1);
-			document.getElementById("rty_ReferenceURL").value = rectype[11];
-			document.getElementById("rty_AlternativeRecEditor").value = rectype[12];
+			var fi = top.HEURIST.rectypes.typedefs.commonNamesToIndex;
 
-			document.getElementById("rty_CanonicalTitleMask").value = rectype[5];
-			document.getElementById("rty_RecTypeGroupID").value = rectype[9];
+			document.getElementById("rty_Name").value = rectype[fi.rty_Name];
+			document.getElementById("rty_Plural").value = rectype[fi.rty_Plural];
+			document.getElementById("rty_Description").value = rectype[fi.rty_Description];
+			document.getElementById("rty_OrderInGroup").value = rectype[fi.rty_OrderInGroup];
+			document.getElementById("rty_ShowInLists").checked = (Number(rectype[fi.rty_ShowInLists]) === 1);
+			document.getElementById("rty_TitleMask").value = rectype[fi.rty_TitleMask];
+			document.getElementById("rty_FlagAsFieldset").checked = (Number(rectype[fi.rty_FlagAsFieldset]) === 1);
+			document.getElementById("rty_ReferenceURL").value = rectype[fi.rty_ReferenceURL];
+			document.getElementById("rty_AlternativeRecEditor").value = rectype[fi.rty_AlternativeRecEditor];
+
+			document.getElementById("rty_CanonicalTitleMask").value = rectype[fi.rty_CanonicalTitleMask];
+			document.getElementById("rty_RecTypeGroupID").value = rectype[fi.rty_RecTypeGroupID];
 		}
 		getStatus();
 	}
@@ -319,7 +321,7 @@
 		statusDropdown.onchange = function(){statusChange();};
 
 		if(rectype) {
-			switch(top.HEURIST.rectypes.typedefs[rectypeID].commonFields[8]) {
+			switch(top.HEURIST.rectypes.typedefs[rectypeID].commonFields[top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_Status]) {
 				case "reserved":
 					statusDropdown[0].selected = "1";
 					status = 0;
@@ -372,7 +374,7 @@
 		optionDummy.text = "dummy";
 
 		if(rectype) {
-			switch(top.HEURIST.rectypes.typedefs[rectypeID].commonFields[2]) {
+			switch(top.HEURIST.rectypes.typedefs[rectypeID].commonFields[top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_Type]) {
 				case "normal":
 					typesDropdown[0].selected = "1";
 					break;
@@ -389,34 +391,39 @@
 
 	function getGroups() {
 		groupDropdown = document.createElement("select");
-		var existingGroup = "";
-		index = 0;
-		for(var group in top.HEURIST.rectypes.groups) {
-			optn = document.createElement("option");
-			optn.text = top.HEURIST.rectypes.groups[group].name;
-			optn.value = group;
+		var existingGroup = "",
+			index = 0,
+			rtg_ID;
 
-			groupDropdown.options.add(optn);
-			if(rectype) {
-				if(group == top.HEURIST.rectypes.typedefs[rectypeID].commonFields[9]) {
-					selectedIndex = index;
-					var existingGroup = true;
+		for (index in top.HEURIST.rectypes.groups){
+			if(!isNaN(Number(index))) {
+				rtg_ID = top.HEURIST.rectypes.groups[index].id;
+
+				optn = document.createElement("option");
+				optn.text = top.HEURIST.rectypes.groups[index].name;
+				optn.value = rtg_ID;
+
+				groupDropdown.options.add(optn);
+				if(rectype) {
+					if(rtg_ID == top.HEURIST.rectypes.typedefs[rectypeID].commonFields[top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_RecTypeGroupID]) {
+						selectedIndex = index;
+						var existingGroup = true;
+					}
 				}
-			}
-			else if(defaultGroupID) {
-				if(group == defaultGroupID) {
-					selectedIndex = index;
-					var existingGroup = true;
+				else if(defaultGroupID) {
+					if(rtg_ID == defaultGroupID) {
+						selectedIndex = index;
+						var existingGroup = true;
+					}
 				}
+				index++;
 			}
-			index++;
-		}
-		if(existingGroup) {
-			groupDropdown[selectedIndex].selected = 1;
-		}
-		document.getElementById("rty_RecTypeGroupID").appendChild(groupDropdown);
+			if(existingGroup) {
+				groupDropdown[selectedIndex].selected = 1;
+			}
+			document.getElementById("rty_RecTypeGroupID").appendChild(groupDropdown);
+		}//for
 	}
-
 	// Toggle fields to disable. Is called when status is set to 'Reserved'. If changed = true, it means that the status is manually changed to reserved, so untill it is saved, it can be changed back. If it was reserved when starting the editRectype, keep it disabled
 	function toggleAll(disable, changed) {
 		if(disable) {
@@ -593,7 +600,7 @@
 				defs: {}
 			}};
 			//fill array of updated fieldnames
-			var fieldNames = top.HEURIST.rectypes.typedefs.commomFieldNames;
+			var fieldNames = top.HEURIST.rectypes.typedefs.commonFieldNames;
 			var values = [];
 			for(k = 0; k < updatedFields.length; k++) {
 				oRectype.rectype.colNames.common.push(fieldNames[updatedFields[k]]);
@@ -634,7 +641,7 @@
 		} else {
 			var rectypeValues = top.HEURIST.rectypes.typedefs[rectypeID].commonFields;
 		}
-		var fieldNames = top.HEURIST.rectypes.typedefs.commomFieldNames;
+		var fieldNames = top.HEURIST.rectypes.typedefs.commonFieldNames;
 
 		var index;
 		for(index = 0; index < fieldNames.length; index++) {
@@ -674,9 +681,9 @@
 				fieldNameElementValue = groupDropdown.value;
 
 			}else
-			if(index == 2 ) { // dropdown menu's. Can't get the value with element.value
+			if(fieldName === "rty_Type" ) { // dropdown menu's. Can't get the value with element.value
 				fieldNameElementValue = typesDropdown.value;
-			} else if(index == 8) {
+			} else if(fieldName === "rty_Status") {
 				fieldNameElementValue = statusDropdown.value.toLowerCase();
 			}
 

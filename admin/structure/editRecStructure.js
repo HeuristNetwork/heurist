@@ -77,6 +77,8 @@ function EditRecStructure() {
 
 			// take list of detail types from HEURIST DB
 			var typedef = top.HEURIST.rectypes.typedefs[rty_ID];
+			var fi = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
+
 			if(Hul.isnull(typedef)){
 				alert("Record type ID "+rty_ID+" is not exist");
 				rty_ID = null;
@@ -108,12 +110,20 @@ function EditRecStructure() {
 					var statusLock;
 					var aval = _dts[rst_ID];
 
-					arr.push([ rst_ID, rst_ID,Number(aval[9]),
-					top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[0], //field name
-					aval[0],
-					top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[2], //field type
-					aval[4],
-					aval[7], aval[6], aval[5], aval[3], aval[15], aval[19], '']);
+					arr.push([ rst_ID,
+						rst_ID,
+						Number(aval[fi.rst_DisplayOrder]),
+						top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Name], //field name
+						aval[fi.rst_DisplayName],
+						top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type], //field type
+						aval[fi.rst_RequirementType],
+						aval[fi.rst_DisplayWidth],
+						aval[fi.rst_MinValues],
+						aval[fi.rst_MaxValues],
+						aval[fi.rst_DefaultValue],
+						aval[fi.rst_Status],
+						aval[fi.rst_NonOwnerVisibility],
+						'']);
 					//statusLock]);   last column stores edited values and show either delete or lock image
 				}
 			}
@@ -130,27 +140,6 @@ function EditRecStructure() {
 				}
 			});
 
-			/*
-			0"rst_DisplayName", +
-			1"rst_DisplayHelpText", +
-			2"rst_DisplayExtendedDescription",
-			3"rst_DefaultValue" +
-			4"rst_RequirementType" +
-			5"rst_MaxValues" +
-			6"rst_MinValues" +
-			7"rst_DisplayWidth" +
-			8"rst_RecordMatchOrder"  ????
-			9"rst_DisplayOrder" +
-			10"rst_DisplayDetailTypeGroupID"
-			11"rst_FilteredJsonTermIDTree"
-			12"rst_PtrFilteredIDs"
-			13 "rst_TermIDTreeNonSelectableIDs"
-			14 "rst_CalcFunctionID"
-			15 "rst_Status"   !!!!!
-			16 "rst_OrderForThumbnailGeneration"
-			17 "dty_TermIDTreeNonSelectableIDs"
-			18 "dty_FieldSetRectypeID"
-			*/
 
 			var myColumnDefs = [
 			{
@@ -673,7 +662,7 @@ function EditRecStructure() {
 	{
 		var fieldnames = top.HEURIST.rectypes.typedefs.dtFieldNames;
 		var values = top.HEURIST.rectypes.typedefs[rty_ID].dtFields[rst_ID];
-		var rst_type = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[2];
+		var rst_type = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type];
 
 		var k;
 		for(k=0; k<fieldnames.length; k++){
@@ -699,8 +688,8 @@ function EditRecStructure() {
 					(Hul.isempty(edt.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[10]:edt.value)); //dty_TermIDTreeNonSelectableIDs
 */
 					recreateTermsPreviewSelector(rst_type,
-						top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[9],
-						top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[10]);
+						top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_JsonTermIDTree],
+						top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_TermIDTreeNonSelectableIDs]);
 
 					//editedTermTree, editedDisabledTerms);
 
@@ -717,7 +706,8 @@ function EditRecStructure() {
 					recreateRecTypesPreview(rst_type,
 					(Hul.isempty(edt.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[11]:edt.value) ); //dty_PtrTargetRectypeIDs
 */
-					recreateRecTypesPreview(rst_type,top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[11]);
+					recreateRecTypesPreview(rst_type,
+						top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_PtrTargetRectypeIDs]);
 
 				}else{
 					edt.parentNode.parentNode.style.display = "none";
@@ -782,7 +772,9 @@ function EditRecStructure() {
 		}
 
 		var data_toadd = [];
-		var detTypes = top.HEURIST.detailTypes.typedefs;
+		var detTypes = top.HEURIST.detailTypes.typedefs,
+			fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex,
+			rst = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
 
 		//find max order and index to insert
 		var recs = _myDataTable.getRecordSet();
@@ -802,10 +794,28 @@ function EditRecStructure() {
 			if(Hul.isnull(recDetTypes[dty_ID])){
 				var arrs = detTypes[dty_ID].commonFields;
 				//add new detail type
-				// 0		1		2	   3	4		 5   6   7    8?    9  10?
-				var arr_target = [arrs[0],arrs[4],arrs[1],"","optional","1","0","60","0",order,"1",
-				null, null, null, null, "open", null, null, null, "viewable"];
-				// 11	12    13    14     15	 16	    17    18     19
+
+				var arr_target = new Array();
+				arr_target[rst.rst_DisplayName] = arrs[fi.dty_Name];
+				arr_target[rst.rst_DisplayHelpText] = arrs[fi.dty_HelpText];
+				arr_target[rst.rst_DisplayExtendedDescription] = arrs[fi.dty_ExtendedDescription];
+				arr_target[rst.rst_DefaultValue ] = "";
+				arr_target[rst.rst_RequirementType] = "optional";
+				arr_target[rst.rst_MaxValues] = "1";
+				arr_target[rst.rst_MinValues] = "0";
+				arr_target[rst.rst_DisplayWidth] = "60";
+				arr_target[rst.rst_RecordMatchOrder] = "0";
+				arr_target[rst.rst_DisplayOrder] = order;
+				arr_target[rst.rst_DisplayDetailTypeGroupID] = "1";
+				arr_target[rst.rst_FilteredJsonTermIDTree] = null;
+				arr_target[rst.rst_PtrFilteredIDs] = null;
+				arr_target[rst.rst_TermIDTreeNonSelectableIDs] = null;
+				arr_target[rst.rst_CalcFunctionID] = null;
+				arr_target[rst.rst_Status] = "open";
+				arr_target[rst.rst_OrderForThumbnailGeneration] = null;
+				arr_target[rst.dty_TermIDTreeNonSelectableIDs] = null;
+				arr_target[rst.dty_FieldSetRectypeID] = null;
+				arr_target[rst.rst_NonOwnerVisibility] = "viewable";
 
 				recDetTypes[dty_ID] = arr_target;
 
@@ -813,16 +823,18 @@ function EditRecStructure() {
 					rst_ID:dty_ID,
 					expandColumn:dty_ID,
 					rst_DisplayOrder: order,
-					rst_DisplayName: arrs[0],
-					dty_Type: arrs[2],
+					dty_Name: arrs[fi.dty_Name],
+					rst_DisplayName: arrs[fi.dty_Name],
+					dty_Type: arrs[fi.dty_Type],
 					rst_RequirementType: "optional",
+					rst_DisplayWidth: 60,
 					rst_MinValues: 1,
 					rst_MaxValues: 1,
 					rst_DefaultValue: "",
-					rst_DisplayWidth: 60,
 					rst_Status: "open",
 					rst_NonOwnerVisibility: "viewable",
 					rst_values: arr_target });
+
 
 				_updatedDetails.push(dty_ID); //track change
 
@@ -840,22 +852,6 @@ function EditRecStructure() {
 
 			_saveUpdates(false);
 		}
-
-		/*
-		0"dty_Name"
-		1"dty_ExtendedDescription"
-		2"dty_Type"
-		3"dty_OrderInGroup"
-		4"dty_HelpText"
-		5"dty_ShowInLists"
-		6"dty_Status"
-		7"dty_DetailTypeGroupID"
-		8"dty_FieldSetRecTypeID"
-		9"dty_JsonTermIDTree"
-		10"dty_TermIDTreeNonSelectableIDs"
-		11"dty_PtrTargetRectypeIDs"
-		12"dty_ID"
-		*/
 
 	}//end _addDetails
 
@@ -1051,7 +1047,7 @@ function EditRecStructure() {
 				}
 
 				//@todo update rst_values directly
-				top.HEURIST.rectypes.typedefs[rty_ID].dtFields[data.rst_ID][9] = i;
+				top.HEURIST.rectypes.typedefs[rty_ID].dtFields[data.rst_ID][top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayOrder] = i;
 				/*
 				var ed_name = 'ed'+data.rst_ID+'_rst_DisplayOrder';
 				var edt = Dom.get(ed_name);
@@ -1396,6 +1392,15 @@ function onReqtypeChange(evt){
 		el_min.value = 0;
 		el_max.value = 0;
 		Dom.setStyle(span_min, "visibility", "hidden");
+
+		Dom.get(name+"_Repeatability").disabled = (Dom.get(name+"_rst_Status").value !== "reserved");
+	}
+
+	if(el.value !== "forbidden"){
+		Dom.get(name+"_Repeatability").disabled = false;
+		if(typeof evt !== 'number'){
+			onRepeatChange(evt);
+		}
 	}
 }
 
@@ -1414,6 +1419,7 @@ function onRepeatChange(evt){
 	 	name = el.id.substring(0,el.id.indexOf("_")); //. _rst_RequirementType
 	}
 
+	var span_min = Dom.get(name+'_spanMinValue');
 	var span_max = Dom.get(name+'_spanMaxValue');
 	var el_min = Dom.get(name+"_rst_MinValues");
 	var el_max = Dom.get(name+"_rst_MaxValues");
@@ -1426,6 +1432,7 @@ function onRepeatChange(evt){
 		Dom.setStyle(span_max, "visibility", "hidden");
 	} else if(el.value === "limited"){
 		if(el_max.value<2) el_max.value = 2;
+		Dom.setStyle(span_min, "visibility", "visible");
 		Dom.setStyle(span_max, "visibility", "visible");
 	}
 }
@@ -1557,26 +1564,28 @@ function _onAddEditFieldType(dty_ID, dtg_ID){
 					//update id
 					var dty_ID = Math.abs(Number(context.result[0]));
 
-					//if user changes group in popup need update both  old and new group tabs
+					/*if user changes group in popup need update both  old and new group tabs
 					var grpID_old = -1;
 					if(Number(context.result[0])>0){
 						grpID_old = top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[7];
-					}
+					}*/
 
 					//refresh the local heurist
 					top.HEURIST.detailTypes = context.detailTypes;
 					_cloneHEU = null;
 
-					var rst_type = top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[2];
+					var fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+
+					var rst_type = top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_Type];
 					//update
 					if(rst_type === "enum" || rst_type === "relmarker" || rst_type === "relationtype"){
 						recreateTermsPreviewSelector(rst_type,
-							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[9],
-							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[10]);
+							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_Type.dty_JsonTermIDTree],
+							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_TermIDTreeNonSelectableIDs]);
 					}
 					if(rst_type === "relmarker" || rst_type === "resource"){
 						recreateRecTypesPreview(rst_type,
-							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[11]);
+							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_PtrTargetRectypeIDs]);
 					}
 
 					/*detect what group

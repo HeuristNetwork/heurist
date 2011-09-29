@@ -133,18 +133,17 @@
 <div id="tabContainer">
 <script  type="text/javascript">
 
-				function onApply(){
-					selectDetailType.apply();
-				}
-
 				function init(){
-					selectDetailType = new  SelectDetailType();
+					window.selectDetailType = new  SelectDetailType();
+				}
+				function onApply(){
+					window.selectDetailType.apply();
 				}
 				//
 				//  starts initialization on load completion of this window
 				//
-				YAHOO.util.Event.onDOMReady(init);
-				//YAHOO.util.Event.addListener(window, "load", function(){ selectDetailType = new  SelectDetailType(); });
+				//YAHOO.util.Event.onDOMReady(init);
+				YAHOO.util.Event.addListener(window, "load", init);
 
 </script>
 </div>

@@ -45,15 +45,17 @@ function DetailTypeManager() {
 	function _init()
 	{
 		var ind = 0,
-			dtg_ID;
+			dtg_ID,
+			index;
 		//
 		// init tabview with names of group
-		for (dtg_ID in top.HEURIST.detailTypes.groups) {
-
-			var grpName = top.HEURIST.detailTypes.groups[dtg_ID].name;
-			var grpDescription = top.HEURIST.detailTypes.groups[dtg_ID].description;
-			_addNewTab(ind, dtg_ID, grpName, grpDescription);
-			ind++;
+		for (index in top.HEURIST.detailTypes.groups) {
+			if( !isNaN(Number(index)) ) {
+				_addNewTab(ind, top.HEURIST.detailTypes.groups[index].id,
+						top.HEURIST.detailTypes.groups[index].name,
+						top.HEURIST.detailTypes.groups[index].description);
+				ind++;
+			}
 		} //for
 
 		tabView.addTab(new YAHOO.widget.Tab({
@@ -67,9 +69,9 @@ function DetailTypeManager() {
 				'<div class="input-row"><div class="input-header-cell">Name:</div><div class="input-cell"><input id="edName" style="width:300px"/></div></div>'+
 				'<div class="input-row"><div class="input-header-cell">Descrption:</div><div class="input-cell"><input id="edDescription" style="width:300px"/></div></div>'+
 				'<div class="input-row"><div class="input-header-cell"></div><div class="input-cell">'+
-					'<input id="btnGrpSave" style="display:inline-block" type="submit" value="Save" onclick="{rectypeManager.doGroupSave()}" />'+
-					'<input id="btnGrpCancel" type="submit" value="Cancel" onclick="{rectypeManager.doGroupCancel()}" style="margin:0 5px" />'+
-					'<input id="btnGrpDelete" onclick="{rectypeManager.doGroupDelete()}" value="Deleted selected group" type="submit"/>'+
+					'<input id="btnGrpSave" style="display:inline-block" type="submit" value="Save" onclick="{detailTypeManager.doGroupSave()}" />'+
+					'<input id="btnGrpCancel" type="submit" value="Cancel" onclick="{detailTypeManager.doGroupCancel()}" style="margin:0 5px" />'+
+					'<input id="btnGrpDelete" onclick="{detailTypeManager.doGroupDelete()}" value="Deleted selected group" type="submit"/>'+
 				'</div></div>'+
 			'</div>')
 		}));
@@ -243,24 +245,32 @@ function DetailTypeManager() {
 		if(Hul.isnull(dt)){
 
 			var arr = [],
-				dty_ID;
+				dty_ID,
+				fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
 
 			//create datatable and fill it valurs of particular group
 			for (dty_ID in top.HEURIST.detailTypes.typedefs) {
-				if(dty_ID!=="commomFieldNames")
+
+				if(!isNaN(Number(dty_ID)))
 				{
 					var td = top.HEURIST.detailTypes.typedefs[dty_ID];
 					var deftype = td.commonFields;
 					//only for this group and  visible in UI
-					if(Number(deftype[7])===Number(dtg_ID)){
+					if(Number(deftype[fi['dty_DetailTypeGroupID']])===Number(dtg_ID)){
 						var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
 						var iusage = (Hul.isnull(aUsage)) ? 0 : aUsage.length;
 						// add order in group, name, help, type and status,
 						// doc will be hidden (for pop-up)
 						// last 3 columns for actions
-						arr.push([dty_ID, (Number(deftype[5])===1),
-						deftype[3],deftype[0],deftype[4],deftype[2],deftype[6],deftype[1],
-						dtg_ID, iusage]);
+						arr.push([dty_ID,
+								(Number(deftype[fi.dty_ShowInLists])===1),
+								deftype[fi.dty_OrderInGroup],
+								deftype[fi.dty_Name],
+								deftype[fi.dty_HelpText],
+								deftype[fi.dty_Type],
+								deftype[fi.dty_Status],
+								deftype[fi.dty_ExtendedDescription],
+								dtg_ID, iusage]);
 					}
 				}
 			}
@@ -326,7 +336,7 @@ function DetailTypeManager() {
 
 			var myColumnDefs = [
 			{ key: "id", label: "Code", sortable:true, width:40, className:'right',resizeable:false },
-			{ key: "usage", label: "Info", sortable:true, className:'count', 
+			{ key: "usage", label: "Info", sortable:true, className:'count',
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 				var str = oRecord.getData("usage");
 				var id = oRecord.getData("id");
@@ -534,8 +544,8 @@ function DetailTypeManager() {
 				//update HEURIST
 				var td = top.HEURIST.detailTypes.typedefs[dty_ID];
 				var deftype = td.commonFields;
-				deftype[5] = newvals[0]; //visibility
-				deftype[7] = newvals[1]; //group
+				deftype[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex['dty_ShowInLists']] = newvals[0]; //visibility
+				deftype[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex['dty_DetailTypeGroupID']] = newvals[1]; //group
 
 				//update keep object
 				var dt_def = _oDetailType.detailtype.defs[dty_ID];
@@ -550,7 +560,7 @@ function DetailTypeManager() {
 			}
 
 			/* MOVED TO SPAN LISTENER
-			
+
 			//mouse over help colums shows the datailed description
 			dt.on('cellMouseoverEvent', function (oArgs) {
 
@@ -920,7 +930,7 @@ function DetailTypeManager() {
 					//if user changes group in popup need update both  old and new group tabs
 					var grpID_old = -1;
 					if(Number(context.result[0])>0){
-						grpID_old = Number(top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[7]);
+						grpID_old = Number(top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex['dty_DetailTypeGroupID']]);
 					}
 
 					//refresh the local heurist
@@ -928,7 +938,7 @@ function DetailTypeManager() {
 					_cloneHEU = null;
 
 					//detect what group
-					var grpID = Number(top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[7]);
+					var grpID = Number(top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex['dty_DetailTypeGroupID']]);
 
 					_removeTable(grpID, true);
 					if(grpID_old!==grpID){
@@ -966,7 +976,7 @@ function DetailTypeManager() {
 			orec.dettypegroups.defs[-1].push({values:[name, description]});
 		}else{
 			//for existing - rename
-			grp = top.HEURIST.detailTypes.groups[grpID];
+			grp = top.HEURIST.detailTypes.groups[top.HEURIST.detailTypes.groups.groupIDToIndex[grpID]];
 			grp.name = name;
 			grp.description = description;
 			orec.dettypegroups.defs[grpID] = [name, description];
@@ -1027,7 +1037,7 @@ function DetailTypeManager() {
 
 		if(grpID<0) { return; }
 
-		var grp = top.HEURIST.detailTypes.groups[grpID];
+		var grp = top.HEURIST.detailTypes.groups[top.HEURIST.detailTypes.groups.groupIDToIndex[grpID]];
 
 		if(!Hul.isnull(grp.types) && grp.types.length>0)
 		{
@@ -1077,6 +1087,7 @@ function DetailTypeManager() {
 	//
 	//
 	function _getIndexByGroupId(grpID){
+		//return top.HEURIST.detailTypes.groups.groupIDToIndex[grpID];
 		var ind;
 		for (ind in _groups){
 			if(!Hul.isnull(ind) && (Number(_groups[ind].value)===Number(grpID)) ){
@@ -1133,8 +1144,8 @@ function onGroupChange() {
 		edName.value = "";
 		edDescription.value = "";
 	}else{
-		edName.value = top.HEURIST.detailTypes.groups[grpID].name;
-		edDescription.value = top.HEURIST.detailTypes.groups[grpID].description;
+		edName.value = top.HEURIST.detailTypes.groups[top.HEURIST.detailTypes.groups.groupIDToIndex[grpID]].name;
+		edDescription.value = top.HEURIST.detailTypes.groups[top.HEURIST.detailTypes.groups.groupIDToIndex[grpID]].description;
 	}
 
 }

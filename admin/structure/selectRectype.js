@@ -111,6 +111,8 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 
 				_dtyID = dtyID;
 
+				var fi = top.HEURIST.rectypes.typedefs.commonNamesToIndex;
+
 				if(_isFilterMode){
 
 
@@ -122,14 +124,12 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 					}
 
 					//get datatype by id
-					var recsPtr = top.HEURIST.detailTypes.typedefs[dtyID].commonFields[11];
+					var recsPtr = top.HEURIST.detailTypes.typedefs[dtyID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_PtrTargetRectypeIDs];
 					if(Hul.isempty(recsPtr)){
 						_arr_selection = [];
 					}else{
 						_arr_selection = recsPtr.split(",");
 					}
-
-
 
 					var ind;
 					for (ind in _arr_selection) {
@@ -141,10 +141,10 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 
 							arr.push([true, //selected
 											"", //icon
-											rectype[0], //name
-											rectype[1], //descr
-											rectype[8], //status
-											rectype[9], //group
+											rectype[fi.rty_Name], //name
+											rectype[fi.rty_Description], //descr
+											rectype[fi.rty_Status], //status
+											rectype[fi.rty_RecTypeGroupID], //group
 											rty_ID
 											]);
 					} //for
@@ -155,7 +155,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 						return;
 					}
 
-					datatype = top.HEURIST.detailTypes.typedefs[dtyID].commonFields[2];
+					datatype = top.HEURIST.detailTypes.typedefs[dtyID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type];
 
 						Dom.get('toolbar').style.display = 'none';
 
@@ -165,18 +165,18 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 
 						//create datatable and fill it values of all rectypes
 						for (rty_ID in top.HEURIST.rectypes.typedefs) {
-								if(rty_ID !== "commomFieldNames" && rty_ID !== "dtFieldNames")
+								if(!isNaN(Number(rty_ID)))
 								{
 										rectype = top.HEURIST.rectypes.typedefs[rty_ID].commonFields;
 
-										if(datatype!=="fieldsetmarker" || rectype[10]==="1")//??????????????SAW what is this  (flagAsFieldSet)
+										if(datatype!=="fieldsetmarker" || rectype[fi.rty_FlagAsFieldset]==="1")//??????????????SAW what is this  (flagAsFieldSet)
 										{
 										arr.push([(_arr_selection.indexOf(rty_ID)>0),
 											"", //icon
-											rectype[0], //name
-											rectype[1], //descr
-											rectype[8], //status
-											rectype[9], //group
+											rectype[fi.rty_Name], //name
+											rectype[fi.rty_Description], //descr
+											rectype[fi.rty_Status], //status
+											rectype[fi.rty_RecTypeGroupID], //group
 											rty_ID
 											]);
 										}
@@ -456,28 +456,31 @@ oRecord.getData('description')+'"/>';}
 	function _initGroupComboBoxFilter()
 	{
 
-							filterByGroup = Dom.get('inputFilterByGroup');
-							var grpID;
+				filterByGroup = Dom.get('inputFilterByGroup');
+				var grpID,
+					index;
 
-							for (grpID in top.HEURIST.rectypes.groups) {
-								var grpName = top.HEURIST.rectypes.groups[grpID].name;
+				for (index in top.HEURIST.rectypes.groups) {
+					if( !isNaN(Number(index)) ) {
 
-								var option = document.createElement("option");
-								option.text = grpName;
-								option.value = grpID;
-								try
-								{
-									// for IE earlier than version 8
-									filterByGroup.add(option, filterByGroup.options[null]);
-								}
-								catch (e)
-								{
-									filterByGroup.add(option,null);
-								}
+						grpID = top.HEURIST.rectypes.groups[index].id;
+						var grpName = top.HEURIST.rectypes.groups[index].name;
 
-							} //for
-
-							filterByGroup.onchange = _updateFilter;
+						var option = document.createElement("option");
+						option.text = grpName;
+						option.value = grpID;
+						try
+						{
+								// for IE earlier than version 8
+								filterByGroup.add(option, filterByGroup.options[null]);
+						}
+						catch (e)
+						{
+								filterByGroup.add(option,null);
+						}
+					}
+				} //for
+				filterByGroup.onchange = _updateFilter;
 
 	}
 
@@ -570,4 +573,4 @@ oRecord.getData('description')+'"/>';}
 	_init();  // initialize before returning
 	return that;
 
-}
+};

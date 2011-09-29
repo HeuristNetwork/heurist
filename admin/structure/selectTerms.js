@@ -69,11 +69,13 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 		if(!Hul.isnull(dtyID)){
 
 					_dtyID = dtyID;
-					var dt = top.HEURIST.detailTypes.typedefs[dtyID].commonFields;
+					var dt = top.HEURIST.detailTypes.typedefs[dtyID].commonFields,
+						fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+
 					if (!Hul.isnull(dt)) {
-						_datatype = dt[2];
-						_allTerms = dt[9];
-						_disTerms = dt[10];
+						_datatype = dt[fi.dty_Type];
+						_allTerms = dt[fi.dty_JsonTermIDTree];
+						_disTerms = dt[fi.dty_TermIDTreeNonSelectableIDs];
 
 						Dom.get("dtyName").innerHTML = _getTitle(_dtyID);
 					}
@@ -127,7 +129,7 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 			var dtname =  "<div style='display:inline-block;font-weight:800;'>field id:</div><h2 style='display:inline-block;padding-left:5px;'>" + dt_id + '</h2>';
 			var dt = top.HEURIST.detailTypes.typedefs[dt_id].commonFields;
 			if (!Hul.isnull(dt)) {
-							dtname = dtname + " <div style='display:inline-block;font-weight:800;padding-left:20px;'>name:</div><h2 style='display:inline-block;padding-left:5px;'>"+dt[0]+"</h2>";
+							dtname = dtname + " <div style='display:inline-block;font-weight:800;padding-left:20px;'>name:</div><h2 style='display:inline-block;padding-left:5px;'>"+dt[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Name]+"</h2>";
 			}
 			return dtname;
 	}

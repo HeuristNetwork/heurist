@@ -61,15 +61,18 @@ function RectypeManager() {
 	function _init()
 	{
 		var grpID,
-			ind = 0;
+			ind = 0,
+			index;
 		//
 		// init tabview with names of group
-		for (grpID in top.HEURIST.rectypes.groups) {
-
-			var grpName = top.HEURIST.rectypes.groups[grpID].name;
-			var grpDescription = top.HEURIST.rectypes.groups[grpID].description;
-			_addNewTab(ind, grpID, grpName, grpDescription);
-			ind++;
+		for (index in top.HEURIST.rectypes.groups) {
+			if( !isNaN(Number(index)) ) {
+				_addNewTab(ind,
+					top.HEURIST.rectypes.groups[index].id,
+					top.HEURIST.rectypes.groups[index].name,
+					top.HEURIST.rectypes.groups[index].description);
+				ind++;
+			}
 		}//for groups
 
 		tabView.addTab(new YAHOO.widget.Tab({
@@ -255,18 +258,24 @@ function RectypeManager() {
 		if(Hul.isnull(dt)) {
 
 			var arr = [],
-				rectypeID;
+				rectypeID,
+				fi = top.HEURIST.rectypes.typedefs.commonNamesToIndex;
 			//create datatable and fill it values of particular group
 			for (rectypeID in top.HEURIST.rectypes.typedefs)
 			{
-				if(rectypeID !== "commomFieldNames" && rectypeID !== "dtFieldNames") {
+				if(!isNaN(Number(rectypeID))) {
+
 					var td = top.HEURIST.rectypes.typedefs[rectypeID];
 					var rectype = td.commonFields;
-					if (rectype[9] === grpID) {  //(rectype[9].indexOf(grpID)>-1) {
-						arr.push([rectypeID, (Number(rectype[7])===1),
+					if (rectype[fi.rty_RecTypeGroupID] === grpID) {  //(rectype[9].indexOf(grpID)>-1) {
+						arr.push([rectypeID,
+						(Number(rectype[fi.rty_ShowInLists])===1),
 						'', //icon
-						rectype[0], rectype[1],
-						rectype[8], rectype[9], null]);
+						rectype[fi.rty_Name],
+						rectype[fi.rty_Description],
+						rectype[fi.rty_Status],
+						rectype[fi.rty_RecTypeGroupID],
+						null]);
 
 						/*TODO: top.HEURIST.rectype.rectypeUsage[rectypeID].length*/
 					}
@@ -528,8 +537,8 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 				//update HEURIST
 				var td = top.HEURIST.rectypes.typedefs[rty_ID];
 				var deftype = td.commonFields;
-				deftype[7] = newvals[0]; //visibility
-				deftype[9] = newvals[1]; //group
+				deftype[top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_ShowInList] = newvals[0]; //visibility
+				deftype[top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_RecTypeGroupID] = newvals[1]; //group
 
 				//update keep object
 				//var dt_def = _oRecordType.rectype.defs[rty_ID];
@@ -978,9 +987,11 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 					rty_ID = Math.abs(Number(context.result[0]));
 
 					//if user changes group in popup need update both  old and new group tabs
-					var grpID_old = -1;
+					var grpID_old = -1,
+						ind_grpfld = top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_RecTypeGroupID;
+
 					if(Number(context.result[0])>0){
-						grpID_old = top.HEURIST.rectypes.typedefs[rty_ID].commonFields[9];
+						grpID_old = top.HEURIST.rectypes.typedefs[rty_ID].commonFields[ind_grpfld];
 					}
 
 					//refresh the local heurist
@@ -988,7 +999,7 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 					_cloneHEU = null;
 
 					//detect what group
-					var grpID = top.HEURIST.rectypes.typedefs[rty_ID].commonFields[9];
+					var grpID = top.HEURIST.rectypes.typedefs[rty_ID].commonFields[ind_grpfld];
 
 					_removeTable(grpID, true);
 					if(grpID_old!==grpID){
@@ -1065,7 +1076,7 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 			orec.rectypegroups.defs[-1].push({values:[name, description]});
 		}else{
 			//for existing - rename
-			grp = top.HEURIST.rectypes.groups[grpID];
+			grp = top.HEURIST.rectypes.groups[top.HEURIST.rectypes.groups.groupIDToIndex[grpID]];
 			grp.name = name;
 			grp.description = description;
 			orec.rectypegroups.defs[grpID] = [name, description];
@@ -1129,7 +1140,7 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 
 		if(grpID<0) { return; }
 
-		var grp = top.HEURIST.rectypes.groups[grpID];
+		var grp = top.HEURIST.rectypes.groups[top.HEURIST.rectypes.groups.groupIDToIndex[grpID]];
 
 		if(!Hul.isnull(grp.types) && grp.types.length>0)
 		{
@@ -1181,6 +1192,8 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 	//
 	//
 	function _getIndexByGroupId(grpID){
+		//return top.HEURIST.rectypes.groups.groupIDToIndex[grpID]
+
 		var ind;
 		for (ind in _groups){
 			if(!Hul.isnull(ind) && _groups[ind].value===grpID){
@@ -1188,6 +1201,7 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 			}
 		}
 		return -1;
+
 	}
 	//
 	//
@@ -1238,8 +1252,8 @@ function onGroupChange() {
 		edName.value = "";
 		edDescription.value = "";
 	}else{
-		edName.value = top.HEURIST.rectypes.groups[grpID].name;
-		edDescription.value = top.HEURIST.rectypes.groups[grpID].description;
+		edName.value = top.HEURIST.rectypes.groups[top.HEURIST.rectypes.groups.groupIDToIndex[grpID]].name;
+		edDescription.value = top.HEURIST.rectypes.groups[top.HEURIST.rectypes.groups.groupIDToIndex[grpID]].description;
 	}
 
 }
