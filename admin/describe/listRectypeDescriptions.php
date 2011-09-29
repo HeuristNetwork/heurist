@@ -30,6 +30,7 @@ $template = str_replace('{PageHeader}', '[literal]'.file_get_contents('menu.html
 $lexer = new Lexer($template);
 
 $body = new BodyScope($lexer);
+$body->global_vars['dbname'] = HEURIST_DBNAME;
 
 $body->verify();
 $body->render();

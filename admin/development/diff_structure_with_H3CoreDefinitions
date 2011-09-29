@@ -20,7 +20,8 @@ echo ""
 echo ""
 mysqldump -u root -psmith18 -d hdb_H3CoreDefinitions > temp/H3CoreDefinitions.sql
 mysqldump -u root -psmith18 -d hdb_$1 > temp/$1.sql
-diff H3CoreDefinitions.sql $1.sql > temp/$1.diff
+diff -b -w -B -a -u -d temp/H3CoreDefinitions.sql temp/$1.sql | grep -v AUTO_INCREMENT > temp/$1.diff
+# auto-increment lines will vary jsut by the increment values between databases
 echo ""
 echo "done, look in temp directory for files"
 echo ""
