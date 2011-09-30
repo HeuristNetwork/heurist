@@ -64,8 +64,8 @@ $(document).ready(function() {
 		}
 		buildworkgroupTagselect(defaults[1] ? parseInt(defaults[1]) : null, defaults[3] ? decodeURIComponent(defaults[3]) : null );
 	}else{
-	var matches = location.search.match(/wg_id=(\d+)/);
-	buildworkgroupTagselect(matches ? matches[1] : null);
+		var matches = location.search.match(/wg_id=(\d+)/);
+		buildworkgroupTagselect(matches ? matches[1] : null);
 		$("#rec_NonOwnerVisibility").val(defAccess);
 		$("#rec_OwnerUGrpID").val(parseInt(defOwnerID));
 	}
@@ -156,20 +156,21 @@ function add_note(e) {
 	var vis = document.getElementById('rec_NonOwnerVisibility').value;
 	var kwdList = document.getElementById('tag');
 	var tags = $("#add-link-tags").val();
+	extra_parms = '&rec_owner=' + wg_id;
+	extra_parms += '&rec_visibility=' + vis;
 	if (document.getElementById('restrict_elt').checked) {
-		if (wg_id) {
-			extra_parms = '&rec_owner=' + wg_id;
-			extra_parms += '&rec_visibility=' + vis;
+		if (wg_id || wg_id == 0) {
 
 			if (wg_id != usrID && kwdList.selectedIndex > 0) {
 				extra_parms += "&tag=" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value);
-		}
+			}
 		}else {
 			alert('Please select a group to which this record shall be restricted');
 			document.getElementById('rec_OwnerUGrpID').focus();
 			return;
 		}
 	}
+
 	if (tags) {
 		extra_parms += (extra_parms.match(/&tag=/))  ?  "," + tags  :  "&tag=" + tags; // warning! code assumes that &tag= is at the end of string
 	}
@@ -183,7 +184,7 @@ function add_note(e) {
 	extra_parms += '<?= @$_REQUEST['t'] ? '&t='.$_REQUEST['t'] : '' ?>';
 
 		rt = parseInt(document.getElementById('rectype_elt').value);
-		if (! rt) rt = RT_NOTE ;  //added ian 19/9/08 to re-enable notes as default
+		if (! rt) rt = <?=RT_NOTE?> ;  //added ian 19/9/08 to re-enable notes as default
 
 	if (document.getElementById('defaults_elt').checked) {
 		defaults = [ rt, wg_id,"\"" + vis +"\"", "\"" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value) +"\"",

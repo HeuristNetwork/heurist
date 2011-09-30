@@ -95,7 +95,7 @@ function RectypeManager() {
 		tabView.appendTo("modelTabs");
 
 
-		var bookmarkedTabViewState = YAHOO.util.History.getBookmarkedState("tabview");
+/*		var bookmarkedTabViewState = YAHOO.util.History.getBookmarkedState("tabview");
 		var initialTabViewState = bookmarkedTabViewState || "tab0";
 
 		YAHOO.util.History.register("tabview", initialTabViewState, function (state) {
@@ -116,8 +116,8 @@ function RectypeManager() {
 		try {
 			YAHOO.util.History.initialize("yui-history-field", "yui-history-iframe");
 		} catch (e) {
-			initTabView();
 		}
+*/			initTabView();
 
 	}//end _init
 

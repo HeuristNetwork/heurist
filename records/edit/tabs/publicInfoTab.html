@@ -19,6 +19,7 @@
  <body class="editTab" onLoad="onshow();">
   <script src="../../../common/js/utilsLoad.js"></script>
   <script src="../../../common/php/displayPreferences.php"></script>
+  <script src="../../../external/jquery/jquery-1.6.min.js"></script>
 
 	<script>
 		document.write('<form method=post enctype="multipart/form-data"'+
@@ -155,6 +156,7 @@ function renderInputs(bibID, rectype) {
 			for (var i=0; i < extraInputs.length; ++i) {
 				inputs.push(extraInputs[i]);
 			}
+			$("div.extradata",allInputs).removeClass("hidden");
 		}
 
 		renderAdditionalDataSection(allInputs, record.rectypeID, record.bdValuesByType);
@@ -312,7 +314,7 @@ function renderAdditionalDataSection(container, rectypeID, bdValues) {
 	var dtsByName = {};
 	for (var dtID in dts) {
 		if (dtID == 'commonFieldNames') continue;
-		dtsByName[dts[dtID]['commonFields'][dtyFieldNamesToDtIndexMap['dty_Name']]]= dts[dtID]['commonFields'];// saw TODO: type struct change needed
+		dtsByName[dts[dtID]['commonFields'][dtyFieldNamesToDtIndexMap['dty_Name']]]= dts[dtID]['commonFields'];
 	}
 	var dtNames = [];
 	for (var name in dtsByName) {
@@ -326,7 +328,7 @@ function renderAdditionalDataSection(container, rectypeID, bdValues) {
 	var i = 1;
 	for (var n = 0; n < dtNames.length; ++n) {
 		var name = dtNames[n];
-		dtSelect.options[i++] = new Option(dtsByName[name][dtyFieldNamesToDtIndexMap['dty_Name']], dtsByName[name][dtyFieldNamesToDtIndexMap['dty_ID']]);// saw TODO: type struct change needed
+		dtSelect.options[i++] = new Option(dtsByName[name][dtyFieldNamesToDtIndexMap['dty_Name']], dtsByName[name][dtyFieldNamesToDtIndexMap['dty_ID']]);
 	}
 	var button = document.createElement("input");
 		button.type = "button";
@@ -350,9 +352,9 @@ function renderExtraDataHeader(container) {
 		sepRow.className = "separator_row";
 		sepRow.style.margin = "20px 0 0 0";
 
-	var explainRow = container.appendChild(document.createElement("div"));
-		explainRow.className = "title-row extradata";
-	var hrCell = explainRow.appendChild(document.createElement("div"));
+	var extraDataHeader = container.appendChild(document.createElement("div"));
+		extraDataHeader.className = "title-row extradata hidden";
+	var hrCell = extraDataHeader.appendChild(document.createElement("div"));
 		hrCell.innerHTML = "<b>Non-standard rectype fields for this record</b>";
 		hrCell.className = "additional-header-cell";
 

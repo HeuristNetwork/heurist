@@ -85,7 +85,7 @@ if (!_is_logged_in()  &&  defined("BYPASS_LOGIN")) {
 		if (!is_logged_in()) return false;
 		switch ($contx) {
 			case 'sys':
-				return @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'][1] == 'admin';
+				return @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'][HEURIST_SYS_GROUP_ID] == 'admin';
 				break;
 			case 'group':
 				if ($ug > 0)
@@ -96,8 +96,8 @@ if (!_is_logged_in()  &&  defined("BYPASS_LOGIN")) {
 			default:
 			//error_log("in is_admin username = ".@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_name']);
 				return  @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'][HEURIST_OWNER_GROUP_ID] == 'admin' ||
-						@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'][1] == 'admin'; // ||
-//						@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_name'] == 'stevewh';
+						@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'][HEURIST_SYS_GROUP_ID] == 'admin'; // ||
+	//					@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_name'] == 'stevewh';
 		}
 	}
 

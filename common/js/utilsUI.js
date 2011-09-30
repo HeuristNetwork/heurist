@@ -1426,6 +1426,9 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		var div_width =  _div.width();
 		var pageHeight = _div.parents().height();
 		var scrollValue = _div.parents().scrollTop();
+		if(!offset) {
+			offset = 5;
+		}
 		/*var left_pos;
 		var top_pos;
 		if(top.HEURIST.util.isnull(offset)){
@@ -1452,14 +1455,14 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
 
 		//var lft = _div.css('left');
-		left_pos=xy[0]+offset;
- 		top_pos=xy[1]-(div_height/2)+offset+scrollValue;
+		left_pos=Math.max(0,Math.min(xy[0]+offset, border_right - div_width));
+ 		top_pos=Math.max(xy[1]-(div_height/2)+offset,0)+scrollValue;
 
-		_div.css( {
-			left:left_pos+'px', top:top_pos+'px',visibility:'visible', opacity:'1'
-
-		});
-	},
+		_div.css( {	left:left_pos+'px',
+					top:top_pos+'px',
+					visibility:'visible',
+					opacity:'1'});
+					},
 
 	/**
 	* write script - should be used in top of page

@@ -163,12 +163,12 @@
 
 
 			function openWorkgroupChanger() {
-				if (top.HEURIST.edit.record.workgroupVisibility == "hidden") {
+				if (top.HEURIST.edit.record.visibility == "hidden") {
 					document.getElementById("non-wg-hide").checked = true;
-				} else if (top.HEURIST.edit.record.workgroupVisibility == "viewable"){
+				} else if (top.HEURIST.edit.record.visibility == "viewable"){
 					document.getElementById("non-wg-view").checked = true;
-                } else if (top.HEURIST.edit.record.workgroupVisibility == "pending"){
-                    document.getElementById("non-wg-pending").checked = true;
+				} else if (top.HEURIST.edit.record.visibility == "pending"){
+					document.getElementById("non-wg-pending").checked = true;
 				} else {
 					document.getElementById("non-wg-public").checked = true;
 				}
@@ -204,9 +204,9 @@
 				if (! cancel) {
 					var wgValue = document.getElementById("new-workgroup-value").value;
 					var wgVisValue = document.getElementById("non-wg-hide").checked? "hidden" : (document.getElementById("non-wg-view").checked?"viewable" : (document.getElementById("non-wg-pending").checked?"pending" : "public"));
-					if (top.HEURIST.edit.record.workgroup != wgValue  ||  top.HEURIST.edit.record.workgroupVisibility != wgVisValue) {
+					if (top.HEURIST.edit.record.workgroup != wgValue  ||  top.HEURIST.edit.record.visibility != wgVisValue) {
 						top.HEURIST.edit.record.workgroup = wgValue? (wgValue == top.HEURIST.get_user_id() ? top.HEURIST.get_user_name() : top.HEURIST.workgroups[wgValue].name) : null;
-						top.HEURIST.edit.record.workgroupVisibility = wgVisValue;
+						top.HEURIST.edit.record.visibility = wgVisValue;
 
 						top.HEURIST.edit.modules["public"].frame.contentWindow.setWorkgroupProperties(wgValue, wgVisValue);
 

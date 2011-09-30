@@ -281,6 +281,7 @@ if (@$ARGV) {	// commandline actuation
 	function is_admin() { return false; }
 	function is_logged_in() { return true; }
 	$pub_id = 0;
+
 } else {	// loggin required entry
 	$pub_id = 0;
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
@@ -635,7 +636,7 @@ function outputRecord($recordInfo, $recInfos, $outputStub=false, $parentID = nul
 			return;
 		}
 	}
-error_log(" depth = $depth  xlevel = $USEXINCLUDELEVEL");
+//error_log(" depth = $depth  xlevel = $USEXINCLUDELEVEL");
 	openTag('record', array('depth' => $depth));
 	if ($depth > $USEXINCLUDELEVEL){
 		outputXInclude($record);
@@ -799,7 +800,9 @@ global $RTN;
 	$type = $record['rec_RecTypeID'];
 	makeTag('type', array('id' => $type, 'conceptID'=>getRecTypeConceptID($type)), $RTN[$type]);
 	$title = $record['rec_Title'];
-	makeTag('title', null, $title);
+//	makeTag('title', null, $title);
+	makeTag('title', null, "Record Not Available");
+	makeTag('notavailable', null, null);
 	closeTag('xi:fallback');
 	closeTag('xi:include');
 }
@@ -1153,7 +1156,7 @@ ob_implicit_flush(1);
 
 //echo "request = ".print_r($_REQUEST,true)."\n";
 $result = loadSearch($_REQUEST,false,true);
-error_log("$result = ".print_r($result,true)."\n");
+//error_log("$result = ".print_r($result,true)."\n");
 
 openTag('hml',
 			($USEXINCLUDE ? array(

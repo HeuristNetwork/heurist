@@ -244,8 +244,8 @@ top.HEURIST.edit = {
 				} else {
 					document.getElementById('workgroup-val').innerHTML = 'everyone';
 				}
-				if (top.HEURIST.edit.record.workgroupVisibility) {
-					var recVis = top.HEURIST.edit.record.workgroupVisibility;
+				if (top.HEURIST.edit.record.visibility) {
+					var recVis = top.HEURIST.edit.record.visibility;
 					var othersAccess = (recVis == "hidden")? "hidden (owners only)" :
 										(recVis == "viewable")? "any logged-in user" :
 										(recVis == "pending")? "pending publication" : "public (autopublish)";
@@ -562,7 +562,7 @@ top.HEURIST.edit = {
 			rfr = top.HEURIST.rectypes.typedefs[rectypeID]['dtFields'][detailTypeID];
 		}
 		if (!rfr) {
-			rfr = top.HERUIST.edit.createFakeFieldRequirement(dt);
+			rfr = top.HEURIST.edit.createFakeFieldRequirement(dt);
 		}
 
 		var newInput;

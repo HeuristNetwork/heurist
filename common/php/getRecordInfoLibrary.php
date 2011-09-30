@@ -150,8 +150,8 @@ function getBaseProperties($rec_id, $bkm_ID) {
 	if ($row['workgroupID']) {
 		$props['workgroupID'] = $row['workgroupID'];
 		$props['workgroup'] = $row['workgroupID']== get_user_id()? $row['name']:$row['workgroup'];
-		if ($row['visibility']) $props['workgroupVisibility'] = $row['visibility'];
 	}
+	if ($row['visibility']) $props['visibility'] = $row['visibility'];
 //	$props['notes'] = $row['notes']; // saw TODO: add code to get personal woots
 
 	if ($bkm_ID) {

@@ -524,9 +524,14 @@ div.temporal-div input.temporal-button:hover {
 }
 /***** title row *****/
 .title-row {
+	display: block;
 	padding: 10px 0;
 	border:none;
 }
+.title-row.hidden {
+	display: none;
+}
+
 /**** input rows *****/
 .input-row {
 	border-bottom:1px solid RGBA(255,255,255,0.5);
