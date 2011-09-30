@@ -22,9 +22,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#quicklinks {
-	right:50px;
-}
 #sidebar, #page {
 	top:140px;
 }
@@ -322,6 +319,15 @@ body.mode-public .public-visible {
 	visibility: visible;
 	display:inline;
 }
+
+.sidebar-nav {
+	background-color:#DBDFE6;
+	border-radius:6px;
+	margin:10px;
+	width:150px;
+	padding:10px;
+
+}
 /* ----- global overrides styles -------*/
 
 .banner {
@@ -502,6 +508,7 @@ div.input-row div.input-cell div#relations-tbody div div div.relation div.resour
 	margin: 5px;
 	width: 19px;
 }
+div.temporal-div input.in {vertical-align:top; margin:0}
 div.temporal-div input.temporal-button {
 	background: url("../images/temporal.png") no-repeat scroll center center transparent;
 	border: medium none;
@@ -859,7 +866,7 @@ div.reminder-table in.input, div.reminder-table select {
 	height:23px;
 	border:none
 }
-.reminder-table [type="radio"] {
+div.input-cell fieldset.reminder .reminder-table input[type="radio"] {
 	vertical-align: bottom;
 	margin: 0 5px 0 20px;
 	height:auto

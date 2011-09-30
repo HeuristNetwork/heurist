@@ -415,17 +415,18 @@ top.HEURIST.search = {
 
 	toggleRelated: function(level){
 		var className =  document.getElementById("showrelated" + level).className;
+		var depthInfo = top.HEURIST.search.results.infoByDepth[level];
 		$("#results-level" + level).toggleClass("collapsed");
 		if (className.match(/loaded/)) {
 			if ($("#results-level" + level).hasClass("collapsed")) {
-				$("#showrelated" + level).html("<a onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Show Level "+level+" Related Records</a>");
+				$("#showrelated" + level).html("<a onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Show Level "+level+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span>");
 			}else{
-				$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Hide Level "+level+" Related Records</a>");
+				$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Hide Level "+level+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span>");
 			};
 		}else{
 			top.HEURIST.search.loadRelatedLevel(level);
 			document.getElementById("showrelated" + level).className = className + " loaded";
-			$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Hide Level "+level+" Related Records</a>");
+			$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Hide Level "+level+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span>");
 			top.HEURIST.search.filterRelated(level);
 		}
 	},
@@ -1112,8 +1113,10 @@ top.HEURIST.search = {
 
 		if (totalRecordCount == 1) {
 			document.getElementById("resource-count").innerHTML = "1 record";
+		} else if (totalRecordCount == resultsPerPage) {
+			document.getElementById("resource-count").innerHTML = "Showing all <span class=\"recordCount\">" + totalRecordCount + "</span> records";
 		} else {
-			document.getElementById("resource-count").innerHTML = firstRes + " - " + lastRes + " / " + totalRecordCount;
+			document.getElementById("resource-count").innerHTML = firstRes + " - " + lastRes + " / <span class=\"recordCount\">" + totalRecordCount + "</span>";
 		}
 
 		var innerHTML = "";

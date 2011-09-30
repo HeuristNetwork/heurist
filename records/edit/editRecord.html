@@ -111,11 +111,11 @@
 					top.HEURIST.util.getJsonData(top.HEURIST.basePath+"records/edit/setResultsNavigation.php?db="+database+"&s="+top.HEURIST.parameters["sid"]+"&id="+top.HEURIST.edit.record.bibID, function(context) {
 						if (! context) return;
 						document.getElementById("search-nav").innerHTML =
-						"<p>Record "+context.pos+" of "+context.count+" search results</p>" +
-						"<p>" +
-						(context.prev ? "<a style=\"padding-right: 10px;\" href=?db="+database+"&sid="+top.HEURIST.parameters["sid"]+"&recID="+context.prev+">previous</a>" : "") +
-						(context.next ? "<a href=?db="+database+"&sid="+top.HEURIST.parameters["sid"]+"&recID="+context.next+">next</a>" : "") +
-						"</p>";
+						"<div style=\"padding:10px 0;\">Record "+context.pos+" of "+context.count+" search results</div>" +
+						"<div>" +
+						(context.prev ? "<a class=\"button\" style=\"height:18px !important\" href=?db="+database+"&sid="+top.HEURIST.parameters["sid"]+"&recID="+context.prev+"><img src=\""+top.HEURIST.baseURL+"/common/images/previous_page.png\">previous</a>" : "") +
+						(context.next ? "<a class=\"button\" style=\"float:right; height:18px !important\" href=?db="+database+"&sid="+top.HEURIST.parameters["sid"]+"&recID="+context.next+">next<img src=\""+top.HEURIST.baseURL+"/common/images/next_page.png\"></a>" : "") +
+						"</div>";
 					});
 				}
 			});
@@ -233,26 +233,23 @@
 <!-- message of the day -->
 <div id="message"> Heurist 3 : Open Source <a href="../help/webhelp/index.html?ACL" target="_blank" title="Click for full information. Design: Ireneusz Golka, Ian Johnson &amp; Ingrid Mason. Programming: Steve Whtie, Kim Jackson, Tom Murtagh &amp; Maria Shvedova. University of Sydney Digital Innovation Unit."><br><font style="font-size:11px">Credits</font></a> </div>
 <!-- quicklinks -->
-<div id="quicklinks" >
-  <div id=quicklink-cell class=yui-skin-sam>
-  	<nobr><b>
-		<a href="../../help/about.html" onClick="top.HEURIST.util.popupURL(window, href); return false;">About</a> |
-		<a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 320,width: 740,callback: function (title, bd, bibID) {if (bibID) {window.close(bibID, title);}} });return false;" title="Click to send a bug report">Report bug</a> |
-		<a id=contact-link href="mailto:info@heuristscholar.org">Contact us</a> |
-		<a id=help-link href='#' onClick="top.HEURIST.util.helpToggler(this)"></a>
-
-		<script>
-			top.HEURIST.whenLoaded(["edit-html", "obj-common"], top.HEURIST.util.setDBName);
-			top.HEURIST.whenLoaded(recordEvent, function() {
-				var contactLinkSubject = "HEURIST v" + top.HEURIST.VERSION + " user:"+top.HEURIST.get_user_username() + " edit";
-				if (top.HEURIST.edit.record.bibID) contactLinkSubject += " bibID:"+top.HEURIST.edit.record.bibID;
-				if (top.HEURIST.edit.record.bkmkID) contactLinkSubject += " bkmkID:"+top.HEURIST.edit.record.bkmkID;
-				top.document.getElementById("contact-link").href += "?subject=" + encodeURIComponent(contactLinkSubject);
-			});
-		</script>
-	</b></nobr>
-	</div>
+<div id="quicklinks">
+	<div id="logged-in" style="height:22px"></div>
+  	<ul id=quicklink-cell>
+		<li><a href="../../help/about.html" onClick="top.HEURIST.util.popupURL(window, href); return false;"><b>About</b></a></li>
+		<li><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 320,width: 740,callback: function (title, bd, bibID) {if (bibID) {window.close(bibID, title);}} });return false;" title="Click to send a bug report"><b>Report bug</b></a></li>
+		<li><a id=contact-link href="mailto:info@heuristscholar.org"><b>Contact us</b></a></li>
+	</ul>
 </div>
+<script>
+	top.HEURIST.whenLoaded(["edit-html", "obj-common"], top.HEURIST.util.setDBName);
+	top.HEURIST.whenLoaded(recordEvent, function() {
+		var contactLinkSubject = "HEURIST v" + top.HEURIST.VERSION + " user:"+top.HEURIST.get_user_username() + " edit";
+		if (top.HEURIST.edit.record.bibID) contactLinkSubject += " bibID:"+top.HEURIST.edit.record.bibID;
+		if (top.HEURIST.edit.record.bkmkID) contactLinkSubject += " bkmkID:"+top.HEURIST.edit.record.bkmkID;
+		top.document.getElementById("contact-link").href += "?subject=" + encodeURIComponent(contactLinkSubject);
+	});
+</script>
 <!-- search -->
 <div id=search  class="roundedBoth outline bannerBG">
 	<!-- div class="tablecell" id="edit_record_title">EDIT RECORD</div -->
@@ -309,19 +306,52 @@
 		<b>Relationships</b>
 		<span id=desc>Cross-referencing, link related records</span>
 	</div>
-
-	<div style="width: 180px; text-align: center; padding: 20px 0;" id=public-link>
-		<input type=button name=save-button value=Cancel onClick="top.HEURIST.edit.cancelSave();">
-		&nbsp;&nbsp;
-		<input type=button name=save-button value=Save style="font-weight: bold;" onClick="top.HEURIST.edit.save();">
+    <div class="sidebar-nav" style="text-align:right">
+    <div style="padding: 3px 0;">
+       <label for=act-stay >stay on page</label>
+        <input type=radio name=act id=act-stay value=stay
+			onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)">
+         
+      </div>
+    <div style="padding: 3px 0;" id="close-window-option">
+        <label for=act-close>close window</label>
+        <input type=radio name=act id=act-close value=close
+			onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)">
+        
+      </div>
+     	<div id="public-link" style="padding: 3px 0;">
+        <input type=button name=save-button value=Cancel onClick="top.HEURIST.edit.cancelSave();">
+        &nbsp;&nbsp;
+        <input type=button name=save-button value=Save onClick="top.HEURIST.edit.save();">
+      </div>
+      </div>
+      
+    <div id=search-nav class="sidebar-nav"></div>
+  </div>
+</div>
+<!-- end sidebar -->
+<!-- page -->
+	<div id=page>
+		<!-- banner -->
+		<div class="banner">
+        	<a id="help-link" href='#' onClick="top.HEURIST.util.helpToggler(this)" style="width:80px;padding-right:0;text-align:center"></a>
+			<div class=public-visible style="margin:3px 10px">
+					<input type=checkbox id=input-visibility onClick="top.HEURIST.util.setDisplayPreference('input-visibility', this.checked? 'all' : 'recommended')" class=minimal>
+					<label for=input-visibility>show optional fields</label>
+				<script>
+					top.HEURIST.whenLoaded("display-preferences", function() {
+						document.getElementById("input-visibility").checked = (top.HEURIST.displayPreferences["input-visibility"] === "all");
+					});
+				</script>
+			</div>
+		</div>
+		<!-- main panel -->
+		<div id="page-inner" class="panel-main-div">
+			<div id=tab-holder >
+			</div>
+		</div>
 	</div>
-	<div style="padding: 0 30px;">
-		<div style="padding: 3px 0;"><label for=act-stay><input type=radio name=act id=act-stay value=stay
-			onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)"> stay on page</label></div>
-		<div style="padding: 3px 0;" id=close-window-option><label for=act-close><input type=radio name=act id=act-close value=close
-			onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)"> close window</label></div>
-		<div id=search-nav></div>
-	</div>
+<!-- end page -->
 	<script>
 		top.HEURIST.whenLoaded("display-preferences", function() {
 			var canCloseWindow = false;
@@ -351,34 +381,10 @@
 
 			var helpOn = (top.HEURIST.util.getDisplayPreference("help") !== "hide");
 			var helpLink = top.document.getElementById("help-link");
-			helpLink.innerHTML = "<span>Help is " + (helpOn? "on" : "off") + "</span>";
+			helpLink.innerHTML = "<span>" + (helpOn? "Hide Help" : "Show Help") + "</span>";
 			helpLink.title = helpOn? "Click here to hide help text" : "Click here to show help text";
 		});
 	</script>
-
-</div>
-<!-- end sidebar -->
-<!-- page -->
-	<div id=page>
-		<!-- banner -->
-		<div class="banner">
-			<div class=public-visible style="margin:3px 10px">
-					<input type=checkbox id=input-visibility onClick="top.HEURIST.util.setDisplayPreference('input-visibility', this.checked? 'all' : 'recommended')" class=minimal>
-					<label for=input-visibility>show optional fields</label>
-				<script>
-					top.HEURIST.whenLoaded("display-preferences", function() {
-						document.getElementById("input-visibility").checked = (top.HEURIST.displayPreferences["input-visibility"] === "all");
-					});
-				</script>
-			</div>
-		</div>
-		<!-- main panel -->
-		<div id="page-inner" class="panel-main-div">
-			<div id=tab-holder >
-			</div>
-		</div>
-	</div>
-<!-- end page -->
 <!-- footer -->
 	<div id=footer>
 			<span>last accessed: <span id=moddate></span>

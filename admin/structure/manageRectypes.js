@@ -666,8 +666,8 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 					my_tooltip.mouseover(__clearHideTimer2);
 					my_tooltip.mouseout(__hideToolTip2);
 
-					//var xy = Hul.getMousePos(event);
-					xy = [posx = event.target.x,posy = event.target.y];
+					var xy = Hul.getMousePos(event);
+					//xy = [posx = event.target.x,posy = event.target.y];
 
 
 					my_tooltip.html(textTip);  //DEBUG xy[0]+",  "+xy[1]+"<br/>"+

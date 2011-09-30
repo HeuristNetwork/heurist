@@ -253,13 +253,13 @@ function EditRecStructure() {
 
 					'<div class="input-row"><div class="input-header-cell">Repeatability :</div>'+
 					'<div class="input-cell">'+
-					'<select id="ed'+rst_ID+'_Repeatability" onchange="onRepeatChange(event)" style="display:inline; margin-right:20px">'+
+					'<select id="ed'+rst_ID+'_Repeatability" onchange="onRepeatChange(event)">'+
 					'<option value="single">single</option>'+
 					'<option value="repeatable">repeatable</option>'+
 					'<option value="limited">limited</option></select>'+
-					'<span id="ed'+rst_ID+'_spanMaxValue"><label class="input-header-cell">Maximum&nbsp;values:</label>'+
+					'<span id="ed'+rst_ID+'_spanMaxValue"><label>Maximum&nbsp;values:</label>'+
 					'<input id="ed'+rst_ID+
-					'_rst_MaxValues" title="Maximum Values" style="width:20px" size="2" '+
+					'_rst_MaxValues" title="Maximum Values" style="width:20px; text-align:center;" size="2" '+
 					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/></span></div></div>'+
 
 
@@ -294,7 +294,7 @@ function EditRecStructure() {
 					'<option value="pending">pending</option></select></span>'+
 					'</div></div>'+
 
-					'<div style="text-align:right; margin:5px 0">'+
+					'<div style="text-align:right; margin:5	px 0">'+
 					'<input id="btnEdit_'+rst_ID+'" type="button" value="Edit Field Type" onclick="_onAddEditFieldType('+rst_ID+');">'+
 					'<input id="btnSave_'+rst_ID+'" type="button" value="Save" onclick="doExpliciteCollapse(event);" style="margin:0 10px;"/>'+
 					'<input id="btnCancel_'+rst_ID+'" type="button" value="Cancel" onclick="doExpliciteCollapse(event);" />'+

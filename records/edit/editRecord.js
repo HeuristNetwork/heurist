@@ -2346,9 +2346,7 @@ top.HEURIST.edit.inputs.ReminderInput = function(parentElement) {
 		this.saveButton = this.document.createElement("input");
 			this.saveButton.type = "button";
 			this.saveButton.value = "Send";
-			//this.saveButton.style.fontWeight = "bold";
-			//this.saveButton.style.marginBottom = "1em";
-			//this.saveButton.style.display = "inline";
+			this.saveButton.style.margin = "0 10px 0 0";
 			var thisRef = this;
 			this.saveButton.onclick = function() { thisRef.save(thisRef.nowRadioButton.checked); };
 			td.appendChild(this.saveButton);

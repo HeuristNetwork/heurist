@@ -135,7 +135,7 @@ function DetailTypeManager() {
 				'<input id="btnSave'+grpID+'" type="button" value="Save Changes" '+
 							'style="color:red; display: none;"/>'+ //inline-block
 
-				'<input type="button" id="btnAdd'+grpID+'" value="Add Field Type" style="float:right;"/>'+
+				'<input type="button" id="btnAdd'+grpID+'" value="Add Field Type" style="float:right;" class="add"/>'+
 			'</div></div>'+
 			'<div id="tabContainer'+grpID+'"></div></div>')
 
@@ -674,7 +674,6 @@ function DetailTypeManager() {
 					my_tooltip.mouseout(__hideToolTip2);
 
 					var xy = Hul.getMousePos(event);
-					my_tooltip.html(textTip);  //DEBUG xy[0]+",  "+xy[1]+"<br/>"+
 
 					var border_top = $(window).scrollTop();
 					var border_right = $(window).width();

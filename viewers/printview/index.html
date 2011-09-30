@@ -313,9 +313,17 @@
 			}
 
 			function onSelectAll(eventType, argList) {
+				function getNodeContents(elem, nodeName,index) {
+					if(!elem) return elem;
+					var nodes = elem.getElementsByTagName(nodeName);
+					if (!isNaN(index)){
+						return nodes[index];
+					}
+					return elem;
+				}
 				//if page xml not loaded then load sync
 				if (eventType == "heurist-selectall"){
-					var tempXML, recordsNode;
+					var tempXML,recordsNode;
 					for (var page = 1; page <= pageCount; page++){
 						if (!pageXMLs[page]){ //load pageXML now
 							var pageQuery = query;
@@ -326,15 +334,26 @@
 						}
 						if (page == 1){
 							tempXML = pageXMLs[page].cloneNode(true); //saw TODO  check if this clones or not
-							recordsNode = tempXML.getElementsByTagName("records")[0];
+							if(!tempXML){
+								tempXML = pageXMLs[page];
+							}
+							recordsNode = getNodeContents(tempXML,"records",0);
 						}else{
-						var recordNodes = pageXMLs[page].getElementsByTagName("records")[0].childNodes;
-							for (var i =1; i<recordNodes.length; i++) {
-							recordsNode.appendChild(recordNodes[i].cloneNode(true));
+							tempXML = pageXMLs[page].cloneNode(true); //saw TODO  check if this clones or not
+							if(!tempXML){
+								tempXML = pageXMLs[page];
+							}
+							var recordNodes = getNodeContents(tempXML,"records",0);
+							if (!recordsNode) {
+								recordsNode = recordNodes;
+							}else{
+								for (var i =1; i<recordNodes.childNodes.length; i++) {
+									recordsNode.appendChild(recordNodes.childNodes[i].cloneNode(true));
+								}
+							}
 						}
 					}
-					}
-					pageXMLs[0] = tempXML;
+					pageXMLs[0] = recordsNode;
 					selectedIds = [];
 					displayResultPage(curStyle,0);
 				}

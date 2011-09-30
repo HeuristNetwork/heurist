@@ -1242,12 +1242,12 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		if (u.getDisplayPreference("help") === "hide") {
 			u.setDisplayPreference("help", "show");
 			helpDiv.title = alts["show"];
-			helpDiv.innerHTML = "<span>Help is on</span>";
+			helpDiv.innerHTML = "<span>Hide Help</span>";
 		}
 		else {
 			u.setDisplayPreference("help", "hide");
 			helpDiv.title = alts["hide"];
-			helpDiv.innerHTML = "<span>Help is off</span>";
+			helpDiv.innerHTML = "<span>Show Help</span>";
 		}
 	},
 

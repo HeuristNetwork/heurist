@@ -104,16 +104,16 @@ a {
 }
 #active-label {
 	background: none repeat scroll 0 0 #DCDFE6 !important;
-    color: #666666;
-    font-size: 12px;
-    font-weight: bold;
-    height: 22px;
-    line-height: 23px;
-    margin-left: 0;
-    margin-right: 0;
-    padding-left: 10px;
-    text-align: left !important;
-    text-transform: uppercase;
+	color: #666666;
+	font-size: 12px;
+	font-weight: bold;
+	height: 22px;
+	line-height: 23px;
+	margin-left: 0;
+	margin-right: 0;
+	padding-left: 10px;
+	text-align: left !important;
+	text-transform: uppercase;
 }
 .toolboxheading {
 	font-size: 140%;
@@ -257,24 +257,24 @@ body.w-bookmark .bookmarked {
 	position: absolute;
 }
 .wg-id {
-    display: block;
-    font-size: 8px;
-    font-weight: bold;
-    left: -13px;
-    position: relative;
-    text-align: center;
-    top: 15px;
-    width: 13px;
+	display: block;
+	font-size: 8px;
+	font-weight: bold;
+	left: -13px;
+	position: relative;
+	text-align: center;
+	top: 15px;
+	width: 13px;
 }
 .thumbnails .wg-id , .thumbs .wg-id {
-    display: block;
-    font-size: 8px;
-    font-weight: bold;
-    left: 1px;
-    position: relative;
-    text-align: left;
-    top: 6px;
-    width: 13px;
+	display: block;
+	font-size: 8px;
+	font-weight: bold;
+	left: 1px;
+	position: relative;
+	text-align: left;
+	top: 6px;
+	width: 13px;
 }
 .viewers {
 	border:0;
@@ -535,13 +535,13 @@ div.right_margin_info div.mini-tools a {
 	display: block;
 	padding: 0 !important;
 	background: none repeat scroll 0 0 transparent !important;
-    bottom: 0;
-    display: block;
-    left: 0;
-    padding: 0 !important;
-    position: absolute !important;
-    right: 0;
-    top: 47px;
+	bottom: 0;
+	display: block;
+	left: 0;
+	padding: 0 !important;
+	position: absolute !important;
+	right: 0;
+	top: 47px;
 	text-align:left !important;
 }
 #loading-search-status, #noquery-search-status, #noresult-search-status {
@@ -1085,17 +1085,17 @@ div.hide .saved-search-subheading {
 
 #add-record-link, #new-entry-button {
 	background-image: url("../images/add-record-small.png");
-    background-position: 2px 2px;
-    background-repeat: no-repeat;
-    padding: 0 0 0 20px;
-    white-space: nowrap;
+	background-position: 2px 2px;
+	background-repeat: no-repeat;
+	padding: 0 0 0 20px !important; 
+	white-space: nowrap;
 }
 #add-record-link:hover, #new-entry-button:hover {text-decoration:none}
 #add-record {
-    border-left: 1px solid rgba(150, 150, 150, 0.3);
-    display: inline-block;
-    padding: 0 0 0 8px;
-    }
+	border-left: 1px solid rgba(150, 150, 150, 0.3);
+	display: inline-block;
+	padding: 0 0 0 8px;
+	}
 .shadow {
 	-webkit-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
 	-moz-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
@@ -1260,7 +1260,7 @@ input[type=checkbox] {
 }
 .banner a:hover {
 	background: none;\
-    background-repeat: no-repeat;
+	background-repeat: no-repeat;
 	text-decoration: underline;
 }
 .passwordIcon {
@@ -1526,23 +1526,23 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 .two-col {text-align:left !important}
 .list .recordDiv, .two-col .recordDiv {
 	border-bottom: 1px solid #CCCCCC;
-    border-collapse: collapse;
-    border-radius: 0;
+	border-collapse: collapse;
+	border-radius: 0;
 	border-top: 1px solid #FFFFFF;
-    display: block;
-    height: 20px;
-    left: 0;
-    margin: 0;
-    padding: 4px 8px;
-    position: relative;
-    text-align: left;
+	display: block;
+	height: 20px;
+	left: 0;
+	margin: 0;
+	padding: 4px 8px;
+	position: relative;
+	text-align: left;
 	overflow:hidden;
 	}
 .two-col .recorddiv {margin: 0;
-    max-width: 50%;
-    padding-left: 0;
-    padding-right: 0;
-    width: 50%;}
+	max-width: 50%;
+	padding-left: 0;
+	padding-right: 0;
+	width: 50%;}
 .list .recordDiv .recordTitle, .two-col .recordDiv .recordTitle {
 	display: block;
 	height: 1.1em;
@@ -1564,44 +1564,44 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 
 .icons .recordDiv {
 	border: 2px solid #FFFFFF;
-    border-collapse: collapse;
-    border-radius: 3px 3px 3px 3px;
-    box-shadow: 0 1px 2px #BBBBBB;
-    display: inline-block;
-    font-size: 6px !important;
-    height: 32px;
-    margin: 6px;
-    position: relative;
-    width: 128px;
+	border-collapse: collapse;
+	border-radius: 3px 3px 3px 3px;
+	box-shadow: 0 1px 2px #BBBBBB;
+	display: inline-block;
+	font-size: 6px !important;
+	height: 32px;
+	margin: 6px;
+	position: relative;
+	width: 128px;
 	font-size:6px !important
 	}
 .thumbnails .recordDiv .thumbnail,.thumbs .recordDiv .thumbnail, .thumbnails .recordDiv .recTypeThumb, .thumbs .recordDiv .recTypeThumb {
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: 100% auto;
-    height: 75px;
-    left: 0;
-    margin: 0;
-    position: absolute;
-    right: 0;
-    text-align: center;
-    top: 10px;
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-size: 100% auto;
+	height: 75px;
+	left: 0;
+	margin: 0;
+	position: absolute;
+	right: 0;
+	text-align: center;
+	top: 10px;
 }
 .thumbnails .recordDiv .thumbnail, .thumbs .recordDiv .thumbnail{background-color:#FFF}
 .thumbnails .recordDiv .recTypeThumb, .thumbs .recordDiv .recTypeThumb {opacity:0.3}
 
 .icons .recordDiv .thumbnail, .icons .recordDiv .recTypeThumb{background-position: center center;
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: auto 100%;
-    height: 32px;
-    left: 0;
-    margin: 0;
-    position: absolute;
-    right: 0;
-    text-align: center;
-    top: 0;
-    width: 51px;}
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-size: auto 100%;
+	height: 32px;
+	left: 0;
+	margin: 0;
+	position: absolute;
+	right: 0;
+	text-align: center;
+	top: 0;
+	width: 51px;}
 .icons .recordDiv .thumbnail {display:none}
 .icons div.recordDiv:hover .thumbnail{display:block !important}
 .icons div.recordDiv:hover a{text-decoration: none}
@@ -1658,6 +1658,13 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 .thumbnails .recordDiv .unbookmarked, .thumbs .recordDiv .unbookmarked {margin-bottom: 2px;}
 .thumbnails .recordDiv .bookmarked, .thumbs .recordDiv .bookmarked {margin-bottom: 2px;}
 .thumbnails .recordDiv .recordIcons, .info_button, .done_button, .rec_links {position:absolute; left:3px;bottom:1px;}
+
+.thumbnails .recordDiv .recordIcons {
+	position:absolute; 
+	left:3px;bottom:1px;
+}
+
+
 .thumbnails .recordDiv .recordIcons img, .thumbs .recordDiv .recordIcons img {vertical-align: text-bottom; margin-left: 0px;}
 .thumbnails .recordDiv .recordIcons input, .thumbs .recordDiv .recordIcons input {vertical-align: text-bottom;}
 
@@ -1685,16 +1692,16 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	background:-webkit-gradient(linear, left top, left bottom, from(#e6f8fd), to(#bee4f8));
 	}
 .two-col .recorddiv.selected {border-left: 1px solid #62A7F8;
-    border-right: 1px solid #62A7F8;
-    margin: 0 -1px;
-    z-index: 1;}
+	border-right: 1px solid #62A7F8;
+	margin: 0 -1px;
+	z-index: 1;}
 .two-col .recorddiv .recordIcons {
 	border-left: 1px solid #AAA;
-    bottom: 0;
-    height: auto;
-    padding: 5px 0 0 5px;
-    position: absolute;
-    top: 0;
+	bottom: 0;
+	height: auto;
+	padding: 5px 0 0 5px;
+	position: absolute;
+	top: 0;
 	}
 div.recorddiv:hover{
 	-moz-box-shadow:0 1px 4px #000;
@@ -1744,26 +1751,27 @@ div.recorddiv:hover{
 	}
 div.filter .showrelated {padding-left:0; text-align:left;padding:6px 0 0 0; height:13px; white-space:nowrap}
 div.filter .showrelated a {
-    background-image: url("../images/heading_saved_search-hidden.png");
-    background-position: 0 -7px;
-    background-repeat: no-repeat;
-    color: #6A7C99 !important;
-    font-weight: bold !important;
-    padding-left: 20px;
+	background-image: url("../images/heading_saved_search-hidden.png");
+	background-position: 0 -7px;
+	background-repeat: no-repeat;
+	color: #6A7C99 !important;
+	font-weight: bold !important;
+	padding-left: 20px;
 }
-div.filter .showrelated .relatedCount {
+div.filter .showrelated .relatedCount, #resource-count .recordCount {
 	margin:0;
 	background-color: #999999;
-    color: #FFFFFF;
-    display: inline-block;
-    font-size: 10px;
-    font-weight: normal;
-    padding: 0;
+	color: #FFFFFF;
+	display: inline-block;
+	font-size: 10px;
+	font-weight: normal;
+	padding: 0;
 	-moz-border-radius:3px;
 	-webkit-border-radius:3px;
 	border-radius:3px;
 	border:3px solid #999;
 	height:9px;
+	line-height: 8px;
 }
 #result-header {
 	min-height:25px;
@@ -1785,11 +1793,11 @@ div.searchInput >  div.collapsed {display: none !important;}
 	box-shadow: 0 1px 3px RGBA(0,0,0,0.5);
 	}
 div.searchInput > .simplesearch.collapsed {
-    background-image: url("../images/blue-up-triangle.png");
+	background-image: url("../images/blue-up-triangle.png");
 	display:inline-block !important;
 }
  .simplesearch {
-    background-image: url("../images/blue-down-triangle.png");
+	background-image: url("../images/blue-down-triangle.png");
 	background-position: 50%;
 	background-repeat: no-repeat;
 	width: 19px;
@@ -1817,7 +1825,7 @@ div.searchInput > .simplesearch.collapsed {
 	border-radius:3px;
 	padding:3px;
 	font-size:10px;
-	color:#CCC;
+	color:#CCC !important;
 	width:150px;
 	margin:3px;
 	height:18px;
@@ -1825,7 +1833,7 @@ div.searchInput > .simplesearch.collapsed {
 }
 
 #simple-search .simple-search-row .button:hover {
-	color:#FFF;
+	color:#FFF !important;
 	border-color:#666;
 	text-decoration:none
 }
@@ -1872,7 +1880,7 @@ div.searchInput > .simplesearch.collapsed {
 }
 .advanced-search-row .button:hover {
 	color:#333;
-    box-shadow: 0 1px 3px #666 inset;
+	box-shadow: 0 1px 3px #666 inset;
 }
 .advanced-search-row label {
 	color:#4C5F76;
@@ -1915,17 +1923,17 @@ div.recorddiv:hover > #rec_edit_link {
 	border-top-right-radius: 3px 3px;
 	color: #CCC;
 	display: none;
-    text-align:left;
+	text-align:left;
 	font-size: 10px;
 	height: 9px;
 	line-height: 8px;
 	padding: 3px;
 	position: absolute;
 	top: -12px;
-    right:0;
-    left:0;
-    height:auto;
-    box-shadow: 0 1px 3px #000000 inset;
+	right:0;
+	left:0;
+	height:auto;
+	box-shadow: 0 1px 3px #000000 inset;
 	}
 #recordID a{color:#CCC}
 .thumbnails #recordID {top: 0px;}
@@ -1933,15 +1941,15 @@ div.recorddiv:hover > #rec_edit_link {
 /*.list #recordID a:hover,.two-col #recordID a:hover{color:#000}*/
 #recordID a:hover{color:#FFF; text-decoration:none}
 .list #recordID,.two-col #recordID{
-    bottom: 0;
-    font-size: 9px;
-    line-height:9px;
-    height: auto;
-    left: auto;
-    padding: 2px 19px 2px 3px;
-    right: 3px;
-    top: 0;
-    width: auto;
+	bottom: 0;
+	font-size: 9px;
+	line-height:9px;
+	height: auto;
+	left: auto;
+	padding: 2px 19px 2px 3px;
+	right: 3px;
+	top: 0;
+	width: auto;
 	}
 div.recorddiv:hover > #recordID {
 	display: block}
@@ -1974,12 +1982,12 @@ div.recorddiv:hover > #recordID {
 }
 .searchInput {
 	background: none repeat scroll 0 0 white;
-    border: 1px solid #999999;
-    border-radius: 15px 15px 15px 15px;
-    display: inline-block;
-    height: 22px;
-    margin: 3px 0 0;
-    padding: 0 3px;
+	border: 1px solid #999999;
+	border-radius: 15px 15px 15px 15px;
+	display: inline-block;
+	height: 22px;
+	margin: 3px 0 0;
+	padding: 0 3px;
 }
 
 #resultsButton {
@@ -2019,12 +2027,12 @@ div.recorddiv:hover > #recordID {
 
 #search {
 	border-bottom: 1px solid #696969;
-    height: 45px;
-    left: 0;
-    padding: 0 0 0 5px;
-    position: absolute;
-    right: 0;
-    top: 51px;
+	height: 45px;
+	left: 0;
+	padding: 0 0 0 5px;
+	position: absolute;
+	right: 0;
+	top: 51px;
 	border:1px solid #999;
 	width:auto;
 	z-index:1;
@@ -2080,12 +2088,12 @@ div.recorddiv:hover > #recordID {
 #navbutton.closed:hover, #appPanelButton.closed:hover {color:transparent}
 #viewTriggers {
 	 border-top: 1px solid rgba(150, 150, 150, 0.3);
-    bottom: 0;
-    display: block;
-    height: 14px;
-    left: 0;
-    position: absolute;
-    right: 0;
+	bottom: 0;
+	display: block;
+	height: 14px;
+	left: 0;
+	position: absolute;
+	right: 0;
 	z-index:1;
 	white-space:nowrap;
 }
@@ -2103,14 +2111,14 @@ div.recorddiv:hover > #recordID {
 }
 #footer {
 	border-radius: 0 0 10px 10px;
-    border:1px solid #999;
-    display: block;
-    height: 10px;
+	border:1px solid #999;
+	display: block;
+	height: 10px;
 	left:0;
 	background-color: #F2F2F2;
-    background-image: url("../images/backgrounds/banner_bg.png") !important;
-    background-position: center bottom;
-    background-repeat: repeat-x;
+	background-image: url("../images/backgrounds/banner_bg.png") !important;
+	background-position: center bottom;
+	background-repeat: repeat-x;
 	border-top:none;
 }
 

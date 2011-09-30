@@ -384,8 +384,8 @@ function DetailTypeEditor() {
 							?_detailType[fi.dty_FieldSetRectypeID]:_detailType[fi.dty_PtrTargetRectypeIDs]) );
 
 		if (_dtyID<0){
-			Dom.get("dty_ID").innerHTML = 'to be generated';
-			document.title = "Create New Field Type";
+			Dom.get("dty_ID").innerHTML = '<span style="color:#999">will be automatically assigned</span>';
+			document.title = "CREATE NEW FIELD TYPE";
 		}else{
 			Dom.get("dty_ID").innerHTML =  _dtyID;
 			document.title = "Field Type #: " + _dtyID+" '"+_detailType[fi.dty_Name]+"'";

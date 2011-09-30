@@ -249,7 +249,7 @@
 
 
 	function initializeEmptyForm() {
-		document.getElementById("rty_ID").innerHTML= "<i>(will be generated)</i>";
+		document.getElementById("rty_ID").innerHTML= "<span style=\"color:#999; font-weight:normal; font-size:11px;\">will be automatically assigned</span>";
 		document.getElementById("rty_ShowInLists").checked = true;
 		getGroups();
 		// Set group from URL
@@ -271,16 +271,16 @@
                 // Now finds the file but returns blank page. admin/structure/uploadRectypeIcon.php?rt_id=42 also loads blank page
                 // so it looks like this file needs updating to new structures
                 document.getElementById("rectypeIcon").innerHTML =
-                "<a href=\"javascript:void(0)\" onClick=\"upload_icon(0)\">"+
+                "<a href=\"javascript:void(0)\" onClick=\"upload_icon(0)\" title=\"Click to change icon\">"+
                 "<img id=\"imgIcon\" src=\""+
                 top.HEURIST.baseURL + "common/images/" + top.HEURIST.database.name +"/rectype-icons/" + rectypeID + ".png" +
-                "\" width=\"16\" height=\"16\"> change icon</a>";
+                "\" width=\"16\" height=\"16\"></a>";
 
                 document.getElementById("rectypeThumb").innerHTML =
-                "<a href=\"javascript:void(0)\" onClick=\"upload_icon(1)\">"+
+                "<a href=\"javascript:void(0)\" onClick=\"upload_icon(1)\" title=\"Click to change thumbnail\">"+
                 "<img id=\"imgThumb\" src=\""+
                 top.HEURIST.baseURL + "common/images/" + top.HEURIST.database.name +"/rectype-icons/thumb/th_" + rectypeID + ".png" +
-                "\" width=\"75\" height=\"75\"> change thumbnail</a>";
+                "\" width=\"75\" height=\"75\"></a>";
 
                 //../../common/images/rectype-icons/"+rectypeID+".png
 			} catch(e) {

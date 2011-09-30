@@ -610,7 +610,7 @@ if (!top.Relationship) {
 
 		var addOtherTr = document.createElement("div");
 		var addOtherTd = addOtherTr.appendChild(document.createElement("div"));
-		addOtherTd.style.paddingTop = "20px";
+		addOtherTd.style.paddingTop = "0px";
 		addOtherTd.colSpan = 7;
 		var a = addOtherTd.appendChild(document.createElement("a"));
 		a.href = "#";

@@ -517,14 +517,3 @@ div#termsFilter.popup {
 	visibility:hidden;
 	opacity:0;
 }
-input[type="button"].add {
-	float: right;
-	background-image: url(../../common/images/add-record-small.png);
-	background-repeat: no-repeat;
-	padding: 0 5px 0 20px;
-	background-position: 2px;
-}
-.actionButtons {
-	padding-top: 10px;
-	padding-left: 155px;
-}
