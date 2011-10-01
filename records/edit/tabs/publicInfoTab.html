@@ -19,7 +19,6 @@
  <body class="editTab" onLoad="onshow();">
   <script src="../../../common/js/utilsLoad.js"></script>
   <script src="../../../common/php/displayPreferences.php"></script>
-  <script src="../../../external/jquery/jquery-1.6.min.js"></script>
 
 	<script>
 		document.write('<form method=post enctype="multipart/form-data"'+
@@ -149,14 +148,16 @@ function renderInputs(bibID, rectype) {
 
 		var inputs = top.HEURIST.edit.createInputsForRectype(record.rectypeID, record.bdValuesByType, allInputs);
 
-		renderExtraDataHeader(allInputs);
+		var extrasHeader = renderExtraDataHeader(allInputs);
 
 		var extraInputs = top.HEURIST.edit.createInputsNotForRectype(record.rectypeID, record.bdValuesByType, allInputs);
 		if (extraInputs.length > 0) {
 			for (var i=0; i < extraInputs.length; ++i) {
 				inputs.push(extraInputs[i]);
 			}
-			$("div.extradata",allInputs).removeClass("hidden");
+			if (extrasHeader) {
+				extrasHeader.className = extrasHeader.className.replace(/hidden/g,"");
+			}
 		}
 
 		renderAdditionalDataSection(allInputs, record.rectypeID, record.bdValuesByType);
@@ -358,7 +359,7 @@ function renderExtraDataHeader(container) {
 		hrCell.innerHTML = "<b>Non-standard rectype fields for this record</b>";
 		hrCell.className = "additional-header-cell";
 
-		return;
+		return extraDataHeader;
 	var showDiv = document.getElementById("all-inputs").appendChild(document.createElement("div"));
 		showDiv.id = "show-all-div";
 		showDiv.className = "title-row not-optional-fields";

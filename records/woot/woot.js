@@ -351,7 +351,9 @@ HAPI.WOOT.GUI = function() {
 			this.initWoot(opts.woot);
 		}
 		else {        // if we have a record then load it's woot
-			HAPI.WOOT.loadWoot(opts.title, { onload: function(_, woot) { that.initWoot(woot); } });
+			HAPI.WOOT.loadWoot(opts.title, { onload: function(_, woot) {
+														that.initWoot(woot);
+													} });
 		}
 	}
 
@@ -402,7 +404,7 @@ HAPI.WOOT.GUI = function() {
 			return;
 		}
 
-        // create an empty editable chunk
+		// create an empty editable chunk
 		var newChunk = new EditableChunk({ wootEditor: this, chunk: new HAPI.WOOT.Chunk(
 			null, "", HCurrentUser.getID(), HCurrentUser.getID()) });
 
@@ -433,8 +435,9 @@ HAPI.WOOT.GUI = function() {
 		if (! this.titleDiv) {
 			this.titleDiv = this.div.appendChild(document.createElement("div"));
 			this.titleDiv.className = "woot-title";
+		}else{
+			this.titleDiv.innerHTML = "";
 		}
-		else { this.titleDiv.innerHTML = ""; }
 
 		this.titleDiv.appendChild(document.createTextNode(title));
 	};
@@ -546,7 +549,9 @@ HAPI.WOOT.GUI = function() {
 			editButton.className = "edit-button";
 			editButton.innerHTML = labels.edit.label;
 			editButton.title = labels.edit.title;
-			editButton.onclick = function() { that.unlock(); };
+			editButton.onclick = function() {
+												that.unlock();
+											};
 			this.editButton = editButton;
 		}
 		var addButton = document.createElement("div");
@@ -570,6 +575,8 @@ HAPI.WOOT.GUI = function() {
 			if (! this.chunk.getText()) {
 				chunkText.innerHTML = "(empty chunk)";
 				this.div.className += " empty";
+			}else{
+				this.div.className = this.div.className.replace(/\sempty/g,"");
 			}
 
 		/*			if (! this.chunk.isReadOnly()) {
@@ -631,7 +638,7 @@ HAPI.WOOT.GUI = function() {
 		if (this.div.innerHTML.match(/\S/)) {
 			// Need at least one non-whitespace character ...
 			this.chunk.setText(this.div.innerHTML);
-			this.div.className = this.div.className.replace(/\bempty\b/, "");
+			this.div.className = this.div.className.replace(/\sempty\b/g, "");
 		}
 		else {
 			// ... or else we regard the chunk as empty.
@@ -647,7 +654,7 @@ HAPI.WOOT.GUI = function() {
 		this.div.insertBefore(this.ownerText, this.div.firstChild);
 		this.div.insertBefore(this.addButton, this.div.firstChild);
 
-		this.div.appendChild(document.createElement("br")).style.clear = "both";	// prevent floating contents from protruding
+//		this.div.appendChild(document.createElement("br")).style.clear = "both";	// prevent floating contents from protruding
 	};
 	EditableChunk.prototype.unlock = function() {
 		if (! this.locked) { return; }
@@ -667,7 +674,14 @@ HAPI.WOOT.GUI = function() {
 		this.wootEditor.unlockedChunk = this;
 		this.locked = false;
 
-		this.div.innerHTML = this.chunk.getText();
+		this.div.removeChild(this.addButton);
+		this.div.removeChild(this.ownerText);
+		this.div.removeChild(this.editButton);
+		if (this.chunkText.innerHTML.match(/\(empty\schunk\)/)) {
+			this.chunkText.innerHTML = "";
+		}
+		this.innerHTML = this.chunkText.innerHTML;
+
 		editChunk(this);
 	};
 	EditableChunk.prototype.isLocked = function() { return this.locked; };
@@ -681,7 +695,7 @@ HAPI.WOOT.GUI = function() {
 			tinyMCE.init({
 				mode: "none",
 
-				content_css: HAPI.HeuristBaseURL + "common/css/woot.css",
+				content_css: (top.HeuristBaseURL?top.HeuristBaseURL:(HAPI.HeuristBaseURL?HAPI.HeuristBaseURL:"../../")) + "common/css/global.css",
 				theme: "advanced",
 				plugins: "inlinepopups,nonbreaking,permissions,save,hrecords",
 				inline_styles: false,
@@ -709,10 +723,8 @@ HAPI.WOOT.GUI = function() {
 		}
 		tinyMCE.settings.auto_focus = editableChunk.div.id;	// Set the new editor as auto-focused
 		tinyMCE.activeChunk = editableChunk;
-
-
-
 	}
+
 	function uneditChunk(editableChunk) {
 		tinyMCE.execCommand("mceRemoveControl", false, editableChunk.div.id);
 	}
@@ -722,7 +734,7 @@ HAPI.WOOT.GUI = function() {
 			save: { label: "[save]", title: "Save all chunks" },
 			edit: { label: "[edit]", title: "Edit this chunk" },
 			append: { label: "[add]", title: "Add a new chunk after this one" },
-			emptyMessage: { label: "<b>This WOOT is empty.</b>  Click here to add your own content.", title: "Click here to add a chunk to this WOOT" }
+			emptyMessage: { label: "(empty chunk)", title: "Click here to add a chunk to this WOOT" }
 		}
 	};
 

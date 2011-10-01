@@ -512,7 +512,7 @@ body.w-all #all-records-button, body.w-bookmark #my-records-button {color:#000;}
 	line-height:19px !important;
 	}
 #my-records-button:hover, #all-records-button:hover, #add-record-link:hover, #new-entry-button:hover, .button:hover, input[type="button"]:hover {
-	background-color:RGBA(0,0,0,0.1) !important; 
+	background-color:RGBA(0,0,0,0.1) !important;
 	border:1px solid RGBA(0,0,0,0.4) !important;
 	box-shadow: 0 1px 2px RGBA(0,0,0,0.4) inset !important;
 	text-decoration:none !important;
@@ -565,7 +565,9 @@ div#mapDiv .close-button {top:2px; right:2px}
 .woot-mode-div{text-align:left;font-size: 90%;}
 .woot-mode-div input{margin: 0;}
 .woot-chunk {border: 1px solid transparent;padding: 0.5ex;margin: 0.5ex 0;background-color: #ffffff;min-height: 0.75em;}
+.input-row .woot-chunk {display:block;}
 .woot-editor div.empty {color: gray;}
+.woot-chunk .edit-button {font-size: 85%;float: left;margin-left: 1ex;color: blue;}
 .woot-chunk .owner-text,.woot-chunk .add-button {font-size: 85%;float: right;margin-left: 1ex;color: lightgray;}
 .woot-chunk .add-button {cursor: pointer;color: blue;}
 div.woot-chunk:hover .owner-text { color: black; }
@@ -832,7 +834,7 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 	border-bottom-right-radius: 10px;
 	-moz-border-radius-bottomright:10px;
 	margin:6px;
-	
+
 }
 .wrap div {
 	display:table-cell;

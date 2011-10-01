@@ -265,7 +265,7 @@ top.HEURIST.edit = {
 			top.HEURIST.edit.modules.personal.disabledFunction = null;
 
 			// add the bookmark, patch the record structure, and view the personal tab
-			top.HEURIST.util.getJsonData(top.HEURIST.basePath + "records/bookmarks/add-bookmark.php?recID=" + top.HEURIST.edit.record.bibID + "&db=" + HAPI.database, function(vals) {
+			top.HEURIST.util.getJsonData(top.HEURIST.basePath + "records/bookmarks/addBookmark.php?recID=" + top.HEURIST.edit.record.bibID + "&db=" + HAPI.database, function(vals) {
 				for (var i in vals) {
 					top.HEURIST.edit.record[i] = vals[i];
 				}

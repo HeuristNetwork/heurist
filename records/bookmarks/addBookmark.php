@@ -15,8 +15,8 @@
 
 define("SAVE_URI", "disabled");
 
-require_once(dirname(__FILE__)."/../../common/connect/cred.php");
-require_once(dirname(__FILE__)."/../../common/connect/db.php");
+require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
+require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 
 if (! is_logged_in()) return;
 
@@ -36,7 +36,7 @@ if (! $bib) {
 }
 
 /* check workgroup permissions */
-if ($bib["rec_OwnerUGrpID"]  &&  $bib["rec_NonOwnerVisibility"] == "hidden") {
+if ($bib["rec_OwnerUGrpID"] && $bib["rec_OwnerUGrpID"] != $usrID &&  $bib["rec_NonOwnerVisibility"] == "hidden") {
 	error_log("select ugl_GroupID from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=$usrID and ugl_GroupID=" . intval($bib["rec_OwnerUGrpID"]));
 	$res = mysql_query("select ugl_GroupID from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=$usrID and ugl_GroupID=" . intval($bib["rec_OwnerUGrpID"]));
 	if (! mysql_num_rows($res)) {
@@ -62,8 +62,7 @@ if (mysql_num_rows($res) == 0) {
 	}
 	$bkmk = mysql_fetch_assoc($res);
 	$tagString = "";
-}
-else {
+}else{
 	$bkmk = mysql_fetch_assoc($res);
 	$kwds = mysql__select_array("usrRecTagLinks left join usrTags on tag_ID=rtl_TagID", "tag_Text", "rtl_RecID=$rec_id and tag_UGrpID=$usrID order by rtl_Order, rtl_ID");
 	$tagString = join(",", $kwds);
