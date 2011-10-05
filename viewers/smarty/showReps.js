@@ -70,7 +70,7 @@ function ShowReps() {
 			} // for
 
 
-			var squery = location.searchl; //_currenQuery;
+			var squery = location.search; //_currenQuery;
 			_reload(squery, context[0].filename);
 
 		}
@@ -855,7 +855,7 @@ function ShowReps() {
 
 
 	//
-	// utility function
+	// utility function - move to HEURIST.utils
 	//
 	function insertAtCursor(myField, myValue) {
 			//IE support

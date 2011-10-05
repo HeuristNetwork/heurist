@@ -29,8 +29,6 @@
 	return;
 	}
 
-	header('Content-type: text/javascript');
-
 	$legalMethods = array(
 	"saveRectype",
 	"saveRT",
@@ -162,23 +160,34 @@
 	"trm_LocallyModified"=>"i"
 	);
 
+	$method = null;
 
+//error_log(">>>".print_r($_REQUEST, true));
 
-	mysql_connection_db_overwrite(DATABASE);
-
-	if (!@$_REQUEST['method']) {
-	die("invalid call to saveStructure, method parameter is required");
+	$method = @$_REQUEST['method'];
+	if (!$method) {
+			//die("invalid call to saveStructure, 'method' parameter is required");
+			$method = null;
 	}else if(!in_array($_REQUEST['method'],$legalMethods)) {
-	die("unsupported method call to saveStructure");
+			//die("unsupported method call to saveStructure");
+			$method = null;
 	}
 
+	if($method)
+	{
+	header('Content-type: text/javascript');
+
+	mysql_connection_db_overwrite(DATABASE);
 	$db = mysqli_connection_overwrite(DATABASE); //artem's
 
 	//decode and unpack data
-	$data = json_decode(urldecode(@$_REQUEST['data']), true);
+	$data = null;
+	if(@$_REQUEST['data']){
+		$data = json_decode(urldecode(@$_REQUEST['data']), true);
+	}
 
 
-	switch (@$_REQUEST['method']) {
+	switch ($method) {
 
 
 	//{ rectype:
@@ -386,7 +395,7 @@
 		$rv['result'] = array(); //result
 
 		foreach ($data['terms']['defs'] as $trmID => $dt) {
-			$res = updateTerms($colNames, $trmID, $dt);
+			$res = updateTerms($colNames, $trmID, $dt, null);
 			array_push($rv['result'], $res);
 		}
 
@@ -415,6 +424,8 @@
 	}*/
 
 	exit();
+
+	}//$method!=null
 
 	/* END OF LOGIC */
 
@@ -1262,9 +1273,13 @@
 	* @param $values - array of values
 	* @return $ret - if success this is ID of term, if failure - error string
 	*/
-	function updateTerms( $colNames, $trmID, $values) {
+	function updateTerms( $colNames, $trmID, $values, $ext_db) {
 
 		global $db, $trmColumnNames;
+
+		if($ext_db==null){
+			$ext_db = $db;
+		}
 
 		$ret = null;
 
@@ -1308,14 +1323,14 @@
 					$query = "update defTerms set ".$query." where trm_ID = $trmID";
 				}
 
-				$rows = execSQL($db, $query, $parameters, true);
+				$rows = execSQL($ext_db, $query, $parameters, true);
 
 			if ($rows==0 || is_string($rows) ) {
 					$oper = (($isInsert)?"inserting":"updating");
 					$ret = "error $oper term# $trmID in updateTerms - ".$rows;
 			} else {
 					if($isInsert){
-						$trmID = $db->insert_id;
+						$trmID = $ext_db->insert_id;
 			}
 
 					$ret = $trmID;

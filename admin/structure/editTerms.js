@@ -484,20 +484,23 @@ function EditTerms() {
 	/**
 	* Adds new child term for current term or adds new root term
 	*/
-	function _doAddChild(isRoot)
+	function _doAddChild(isRoot, value)
 	{
 		var term;
+		if(value==null){
+			value = {id:null,label:"New Term",desription:""};
+		}
 
 		if(isRoot){
 
 			var rootNode = _currTreeView.getRoot();
 
 			term = {}; //new Object();
-			term.id = "0-" + (rootNode.getNodeCount()); //correct
+			term.id = (value.id)?value.id:"0-" + (rootNode.getNodeCount()); //correct
 			term.parent_id = null;
 			term.domain = _currentDomain;
-			term.label = "New Term";
-			term.description = "";
+			term.label = value.label;
+			term.description = value.description;
 			term.inverseid = null;
 
 			rootNode = new YAHOO.widget.TextNode(term, rootNode, false); // Create root node
@@ -510,12 +513,13 @@ function EditTerms() {
 		}else if(!Hul.isnull(_currentNode))
 		{
 			term = {}; //new Object();
-			term.id = _currentNode.data.id+"-" + (_currentNode.getNodeCount());  //correct
+			term.id = (value.id)?value.id:_currentNode.data.id+"-" + (_currentNode.getNodeCount());  //correct
 			term.parent_id = _currentNode.data.id;
 			term.domain = _currentDomain;
-			term.label = "New Term";
-			term.description = "";
+			term.label = value.label;
+			term.description = value.description;
 			term.inverseid = null;
+
 			var newNode = new YAHOO.widget.TextNode(term, _currentNode, false);
 			_currTreeView.render();
 
@@ -558,6 +562,71 @@ function EditTerms() {
 		}
 	}
 
+	/**
+	* invokes popup to import list of terms
+	*/
+	function _import(isRoot) {
+
+		if(isRoot || !Hul.isnull(_currentNode)){
+
+			var term_id = (isRoot)?0:_currentNode.data.id;
+
+			var sURL = top.HEURIST.baseURL + "admin/structure/editTermsImport.php?db="+ _db +
+						"&parent="+term_id+
+						"&domain="+_currentDomain;
+
+			Hul.popupURL(top, sURL, {
+					"close-on-blur": false,
+					"no-resize": false,
+					height: 120,
+					width: 340,
+					callback: _import_complete
+			});
+
+		}
+	}
+
+	/**
+	*  Add the list of imported terms
+	*/
+	function _import_complete(context){
+		if(context && !context.error) {
+			top.HEURIST.terms = context.terms;
+			var res = context.result,
+				ind;
+				parentNode = (context.parent===0)?_currTreeView.getRoot():_currentNode,
+				fi = top.HEURIST.terms.fieldNamesToIndex;
+
+			if(res.length>0){
+
+			for (ind in res)
+			{
+				if(!Hul.isnull(ind)){
+					var termid = res[ind];
+
+					var arTerm = top.HEURIST.terms.termsByDomainLookup[_currentDomain][termid];
+
+					var term = {}; //new Object();
+					term.id = termid;
+					term.label = arTerm[fi.trm_Label];
+					term.description = arTerm[fi.trm_Description];
+					term.parent_id = context.parent; //_currentNode.data.id;
+					term.domain = _currentDomain;
+					term.inverseid = null;
+
+					var newNode = new YAHOO.widget.TextNode(term, parentNode, false);
+				}
+			}//for
+			_currTreeView.render();
+			parentNode.focus(); //expand
+					/*var _temp = _currentNode;
+					_onNodeClick(_currentNode);
+					_parentNode = _temp;
+					*/
+			}//if length>0
+		}
+	}
+
 
 	//
 	//public members
@@ -571,6 +640,8 @@ function EditTerms() {
 				findNodes: function(sSearch){ return _findNodes(sSearch); },
 				doEdit: function(){ _doEdit(); },
 				doSelectInverse: function(){ _doSelectInverse(); },
+
+				doImport: function(isRoot){ _import(isRoot); },
 
 				applyChanges: function(){ //for window mode only
 						if(_isWindowMode){

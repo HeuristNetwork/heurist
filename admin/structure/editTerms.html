@@ -73,7 +73,7 @@
 
 	<div id="pnlLeft" style="height:100%; width:300; max-width:300; float: left; padding-right:5px; overflow: hidden;">
 
-		<div style="padding-left:190px"><input id="btnAddChild" type="button" value="Add First Level Term" onClick="{editTerms.doAddChild(true)}"/>
+		<div style="padding-left:140px"><input id="btnAddChild" type="button" value="Add First Level Term" onClick="{editTerms.doAddChild(true)}"/>
 		</div>
 
 		<!-- Container for tab control component, each tab contains tree view, one for enums, one for relationship types-->
@@ -114,6 +114,7 @@
 
 				<div id='div_btnAddChild' style="text-align: left; display:inline-block;">
 					<input id="btnAddChild" type="button" value="Add Child Term" onClick="{editTerms.doAddChild(false)}"/>
+					<input id="btnImport" type="button" value="Import" onClick="{editTerms.doImport(false)}"/>
 				</div>
 					<input id="btnDelete" type="button" value="Delete Term" onClick="{editTerms.doDelete()}" />
 
