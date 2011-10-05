@@ -40,7 +40,7 @@ function showMembers() {
 	}
 
 	var dateString;
-	if (top.HEURIST.is_admin()) {
+	if (top.HEURIST.is_wgAdmin(wg)) {
 		var now = new Date();
 		var y = now.getFullYear();
 		var m = now.getMonth() + 1;
@@ -73,7 +73,7 @@ function showMembers() {
 			link.appendChild(document.createTextNode("blog"));
 		}
 
-		if (top.HEURIST.is_admin()) {
+		if (top.HEURIST.is_wgAdmin(wg)) {
 			td = tr.appendChild(document.createElement("td"));
 			var a = td.appendChild(document.createElement("a"));
 				a.target = "_blank";
@@ -82,7 +82,7 @@ function showMembers() {
 		}
 	}
 
-	if (top.HEURIST.is_admin()) {
+	if (top.HEURIST.is_wgAdmin(wg)) {
 		var div = document.createElement("div");
 			div.style.cssFloat = div.style.styleFloat = "right";
 		var a = div.appendChild(document.createElement("a"));

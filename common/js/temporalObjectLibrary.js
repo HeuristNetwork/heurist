@@ -1011,8 +1011,20 @@ TDate.parse = function () {
 			}
 			temp = temp.replace(/\d\d?([:\.,]\d\d?\d?){0,3}\s*(am|pm)/i, t12[1]);
 		}
+
+		var periodDesignator = "";
+		var BCE = false;
+		p = temp.match(/(?:\b|\d)(bce|ce|bc|ad)\b/i);
+		if (p){
+			temp = temp.replace(p[1], '');
+			periodDesignator = p[1].toUpperCase();
+			if (p[1][0].toLowerCase() == "b"){
+				BCE = true;
+			}
+		}
+
 		var t = temp.match(/[^\.\-\d:\s\+\/]/);
-		if (t && t[0] && t[0] !== "T") { // possible word for month
+		while (t && t[0] && t[0] !== "T") { // possible word for month
 			var word = temp.match(/^\s*(?:\d+[\.\-\d:\s\+\/]\s*)*([^\.\-\d:\s\+\/]{1,20}\.?)\s*(?:\d+\s)*/);//(/^\s*(?:\d+\s)*\s*([^\.\-\d:\s\+\/]{1,20}\.?)\s*(?:\d+\s)*/);
 			var valid = false;
 			if (word) {
@@ -1020,7 +1032,7 @@ TDate.parse = function () {
 				var m = word.match(/(jan|feb|mar|apr|may|jun|jul|aug|sept?|oct|nov|dec)\.?/i);
 				if (m) {
 					temp = temp.replace( word, m[1].toLowerCase());
-				} else {
+				} else{
 					var roman = { i:'1',ii:'2',iii:'3',iv:'4',v:'5',vi:'6',vii:'7',viii:'8',ix:'9',x:'10',xi:'11',xii:'12', iiii:'4', viiii:'9'};
 					m = roman[word.toLowerCase()];
 					if (m) {
@@ -1032,10 +1044,13 @@ TDate.parse = function () {
 			} else {
 				throw "TDate parser exception -  unrecognized characters found in input string - " + str;
 			}
+			t = temp.match(/[^\.\-\d:\s\+\/]/);
 		}
 		temp = temp.replace(/,\s*/g,' ');   // take care of any comma separation and turn them into a single space
 		temp = temp.match(/^\s*((?:(?:\-?\d+|(?:jan|febr?)(?:uary)?|(?:(?:(?:sept?|nov|dec)(?:em)?)|octo?)(?:ber)?|marc?h?|apri?l?|may|june?|july?|aug(?:ust)?)[\/\-\s]?){0,3})?\s*[\s|T]?\s*([012]?\d(?:[:\.,]\d\d?\d?){0,3})?\s*(Z|(?:[\+\-\s]?\d\d:?(?:\d\d)?))?/i);
-
+		if (periodDesignator){ // period format does have time or timezone
+			temp[2] = temp[3] = null;
+		}
 		if (!(temp[1] || temp[2] )) {
 			throw "TDate parser exception -  unrecognized format should be date and/or time with or without timezone  - " + str;
 		}
@@ -1073,8 +1088,10 @@ TDate.parse = function () {
 			}
 		}
 
-		var date = temp[1];
+		var date = temp[1] && BCE ? temp[0] : temp[1];
 		if (date) {
+			date = date.replace(/(^\s+|\s+$)/g,""); //trim
+			date = date.replace(/\s+/g," "); //reduce spaces to single space
 			date = date.split(/[\/\-\s]/); //separate year, month and day
 				for (var i = 0; i < date.length - 1; i++) {
 					if (!date[i] && date[i+1]) {	// neg sign add it back in
@@ -1134,10 +1151,16 @@ TDate.parse = function () {
 								if (date.length === 2) {
 									throw "TDate parser exception -  date string error - detected day followed by year  - " + (temp && temp[1] ? temp[1] : "" );
 								}
+								if (BCE) {
+									throw "TDate parser exception -  date string error - detected day in a BC/BCE  - " + (temp && temp[1] ? temp[1] : "" );
+								}
 								dayFound = true;
 								if (dateFormat.length > 1 && dateFormat[1] === "md"){
 									dateFormat[1] = "m";
 								}
+							}
+							if (dateFormat[j] === "md" && date.length ===2) {
+								dateFormat[j] = "m";
 							}
 							if (dateFormat[j] === "m") {
 								monthFound = true;
@@ -1166,7 +1189,15 @@ TDate.parse = function () {
 							if ( yearFound ) {
 								throw "TDate parser exception -  date string error - detected year followed by day  - " + (temp && temp[1] ? temp[1] : "" );
 							}
-							dateFormat.push("yd");
+							if (periodDesignator) {// found year
+								if (i===1){
+									dateFormat[0]="m";
+								}
+								dateFormat.push("y");
+								yearFound = true;
+							}else{
+								dateFormat.push("yd");
+							}
 						}
 					} else {	// can be month, day or year
 						if (dayFound) {
@@ -1175,7 +1206,9 @@ TDate.parse = function () {
 							dateFormat.push(  date.length === 2 ? "m" : "md");
 						} else if (monthFound) {
 							dateFormat.push(date.length === 3 && i === 1 ? "d" : "yd");
-						} else  {
+						} else if (periodDesignator) {
+							dateFormat.push(BCE || date.length === 2 ? "ym" : "ymd");
+						} else {
 							dateFormat.push(date.length === 3 && i === 1 ? "md" : "ymd");
 						}
 					}
@@ -1218,6 +1251,10 @@ TDate.parse = function () {
 						}
 				}
 			}
+		}
+
+		if (_year && BCE && _year > 0){
+			_year = "-" + _year;
 		}
 
 		var time = temp[2];

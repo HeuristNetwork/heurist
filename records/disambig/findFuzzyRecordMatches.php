@@ -19,7 +19,8 @@ function findFuzzyMatches($fields, $rec_types, $rec_id=NULL, $fuzziness=NULL) {
 
 	// Get some data about the matching data for the given record type
 	$types = mysql__select_assoc('defRecStructure left join defDetailTypes on rst_DetailTypeID=dty_ID',
-	                             'dty_ID', 'dty_Type', 'rst_RecTypeID=' . $rec_types[0] . ' and rst_RecordMatchOrder or rst_DetailTypeID=160');
+								'dty_ID', 'dty_Type', 'rst_RecTypeID=' . $rec_types[0] .
+														' and rst_RecordMatchOrder or rst_DetailTypeID='.DT_TITLE);
 	$fuzzyFields = array();
 	$strictFields = array();
 	foreach ($fields as $key => $vals) {
@@ -30,30 +31,37 @@ function findFuzzyMatches($fields, $rec_types, $rec_id=NULL, $fuzziness=NULL) {
 		if (! $vals) continue;
 
 		switch ($types[$rdt_id]) {
-		    case "blocktext": case "freetext":
+			case "blocktext": case "freetext": case "urlinclude":
 			foreach ($vals as $val)
 				if (trim($val)) array_push($fuzzyFields, array($rdt_id, trim($val)));
 			break;
 
-		    case "integer": case "float":
-		    case "date": case "year":
-		    case "enum": case "boolean":
+			case "integer": case "float":
+			case "date": case "year": case "file":
+			case "enum": case "boolean":
 			case "relationtype": case "resource":
 			foreach ($vals as $val)
 				if (trim($val)) array_push($strictFields, array($rdt_id, trim($val)));
 			break;
 
 			case "separator":	// this should never happen since separators are not saved as details, skip if it does
-			case "relmarker" : // saw seems like relmarkers are external to the record and should not be part of matching
+			case "relmarker": // saw seems like relmarkers are external to the record and should not be part of matching
+			case "fieldsetmarker":
+			case "calculated":
 			default:
 			continue;
 		}
 	}
 	if (count($fuzzyFields) == 0  &&  count($strictFields) == 0) return;
 
-
+	$groups = get_group_ids();
+	if(is_logged_in()){
+		array_push($group,get_user_id());
+		array_push($group,0);
+	}
+	$groups = join(",",$groups);
 	$tables = "records";
-	$predicates = "rec_RecTypeID=$rec_types[0] and ! rec_FlagTemporary and (rec_OwnerUGrpID=0 or rec_NonOwnerVisibility='viewable')" . ($rec_id ? " and rec_ID != $rec_id" : "");
+	$predicates = "rec_RecTypeID=$rec_types[0] and ! rec_FlagTemporary and (rec_OwnerUGrpID in ($groups) or not rec_NonOwnerVisibility='hidden')" . ($rec_id ? " and rec_ID != $rec_id" : "");
 	$N = 0;
 	foreach ($fuzzyFields as $field) {
 		list($rdt_id, $val) = $field;

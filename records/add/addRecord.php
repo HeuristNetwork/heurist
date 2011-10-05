@@ -204,7 +204,9 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 	if (! @$rec_id  &&  ! @$force_new) {
 
 		/* look up the records table, see if the requested URL is already in the database; if not, add it */
-		$res = mysql_query('select * from Records where rec_URL = "'.addslashes($url).'" and (rec_OwnerUGrpID=0 or rec_NonOwnerVisibility="viewable")');
+		$res = mysql_query('select * from Records where rec_URL = "'.addslashes($url).'" '.
+								'and (rec_OwnerUGrpID in (0'.(get_user_id()?','.get_user_id():'').')'.
+										' or not rec_NonOwnerVisibility="hidden")');
 		if (($row = mysql_fetch_assoc($res))) { // found record
 			$rec_id = intval($row['rec_ID']);
 			$fav = $_REQUEST["f"];

@@ -84,9 +84,9 @@ if (!_is_logged_in()  &&  defined("BYPASS_LOGIN")) {
 	function is_admin($contx = 'database',$ug = 0) {
 		if (!is_logged_in()) return false;
 		switch ($contx) {
-			case 'sys':
-				return @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'][HEURIST_SYS_GROUP_ID] == 'admin';
-				break;
+//			case 'sys':// TOD: remove is_admin('sys')
+//				return @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'][HEURIST_SYS_GROUP_ID] == 'admin';
+//				break;
 			case 'group':
 				if ($ug > 0)
 					return @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'][$ug] == 'admin';
@@ -95,14 +95,18 @@ if (!_is_logged_in()  &&  defined("BYPASS_LOGIN")) {
 			case 'database':
 			default:
 			//error_log("in is_admin username = ".@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_name']);
-				return  @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'][HEURIST_OWNER_GROUP_ID] == 'admin' ||
-						@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'][HEURIST_SYS_GROUP_ID] == 'admin'; // ||
+				return  @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'][HEURIST_OWNER_GROUP_ID]; // ||
 	//					@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_name'] == 'stevewh';
 		}
 	}
 
 	function get_user_id() {
-		if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_id']) return $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_id']; else return -1;
+		if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_id']) {
+			return $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_id'];
+		}else if (!is_logged_in()){
+			return 0;
+		}
+		return -1;
 	}
 
 	function get_group_ids() {
@@ -118,13 +122,13 @@ if (!_is_logged_in()  &&  defined("BYPASS_LOGIN")) {
 	function get_user_username() { return @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_name']; }
 }
 
-function get_user_access() {
+function get_user_access() { // T1000.php only
 	if (is_admin()) return 'admin';
 	if (is_logged_in()) return 'member';
 	return 'not-logged-in';
 }
 
-function get_access_levels() {
+function get_access_levels() {//T1000.php only
 	return array(
 		'modeluser' => is_modeluser() ? 1 : 0,
 		'admin' => is_admin() ? 1 : 0,

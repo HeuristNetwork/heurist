@@ -63,7 +63,7 @@ array_push($ACCESSABLE_OWNER_IDS,0);	// 0 = belong to everyone
 $rec_owner_id = mysql__select_array("Records","rec_OwnerUGrpID","rec_ID=$recID");
 //error_log(" rec owner = $rec_owner_id[0]  ".count($rec_owner_id)." vis = ".$row['rec_NonOwnerVisibility']." ".print_r($ACCESSABLE_OWNER_IDS,true));
 
-if ( $row['rec_NonOwnerVisibility'] != 'public' && (count($rec_owner_id) != 1 || !in_array($rec_owner_id[0],$ACCESSABLE_OWNER_IDS))){
+if ( $row['rec_NonOwnerVisibility'] == 'hidden' && (count($rec_owner_id) < 1 || !in_array($rec_owner_id[0],$ACCESSABLE_OWNER_IDS))){
 	returnXMLErrorMsgPage(" no access to record id $recID ");
 }
 $inputFilename ="".HEURIST_HML_PUBPATH.HEURIST_DBID."-".$recID.".hml";

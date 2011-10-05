@@ -17,7 +17,7 @@ define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on n
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
-if (! is_logged_in()  ||  ! is_admin()) return;
+if (!is_admin()) return;
 
 
 $fuzziness = intval($_REQUEST['fuzziness']);
@@ -111,7 +111,7 @@ foreach ($dupes as $typekey => $subarr) {
 }
 
 ?><html>
-<body>    
+<body>
 <h3>DUPLICATE RECORDS SEARCH</h3>
 
 <form>

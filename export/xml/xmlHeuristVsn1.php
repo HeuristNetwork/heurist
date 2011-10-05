@@ -756,7 +756,7 @@ function getRecords() {
  * @param string $rec_id  records id of a record
  * return boolean
  */
-function have_bib_permissions_forall($rec_id) {
+function canViewRecord_forall($rec_id) {
 
 	$rec_id = intval($rec_id);
 	$query = 'select * from Records where rec_ID='.$rec_id;
@@ -773,7 +773,7 @@ function have_bib_permissions_forall($rec_id) {
 	return true;
 }
 /**
- * This function checks if the record is single and uses have_bib_permissions_forall function
+ * This function checks if the record is single and uses canViewRecord_forall function
  * to check if it is workgroup-protected
  * @param string $q  search query from url
  * return boolean
@@ -783,7 +783,7 @@ function single_record_retrieval($q) {
 //                  match on word boundary for "id" with optional "s" followed by : followed by a number on the word boundary ignoring case
    if (preg_match ('/\bids?:([0-9]+)(?!,)\b/i', $q, $matches)) {
 		$rec_id = $matches[1];
-		if (have_bib_permissions_forall($rec_id)) return true;
+		if (canViewRecord_forall($rec_id)) return true;
 	}
 	return false;
 }

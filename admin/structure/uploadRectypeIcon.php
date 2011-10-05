@@ -18,7 +18,7 @@
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/php/imageLibrary.php');
 
-	if (! (is_logged_in()  &&  is_admin()  &&  HEURIST_SESSION_DB_PREFIX != "")) return;
+	if (!is_admin()) return;//TOD change this for just admin and return msg
 
 	$rt_id = intval($_REQUEST['rty_ID']);
 	$mode = intval($_REQUEST['mode']);  //0 - icon, 1 - thumbnail

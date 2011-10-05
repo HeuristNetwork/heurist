@@ -19,7 +19,7 @@
 	require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
 	require_once(dirname(__FILE__).'/../../admin/verification/fetchRecordDetails.php');
 
-	if (! is_logged_in()  ||  ! is_admin()) return;
+	if (!is_admin()) return;
 
 	session_start();
 

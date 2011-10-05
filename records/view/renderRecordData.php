@@ -55,7 +55,7 @@ $noclutter = array_key_exists('noclutter', $_REQUEST);
 <html>
 <head>
 	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
-    <script src="../../external/jquery/jquery-1.6.min.js"></script>
+	<script src="../../external/jquery/jquery-1.6.min.js"></script>
 	<script type="text/javascript">
 
 function zoomInOut(obj,thumb,url) {
@@ -199,12 +199,12 @@ function print_header_line($bib) {
 //this  function displays private info if there is any.
 function print_private_details($bib) {
 
-	$res = mysql_query('select grp.ugr_Name from Records, '.USERS_DATABASE.'.sysUGrps grp where grp.ugr_ID=rec_OwnerUGrpID and grp.ugr_Type!="User"  and rec_ID='.$bib['rec_ID']);
+	$res = mysql_query('select grp.ugr_Name,grp.ugr_Type,concat(grp.ugr_FirstName," ",grp.ugr_LastName) from Records, '.USERS_DATABASE.'.sysUGrps grp where grp.ugr_ID=rec_OwnerUGrpID and rec_ID='.$bib['rec_ID']);
 	$workgroup_name = NULL;
 	// check to see if this record is owned by a workgroup
 	if (mysql_num_rows($res) > 0) {
 		$row = mysql_fetch_row($res);
-		$workgroup_name = $row[0];
+		$workgroup_name = $row[1] == 'user'? $row[2] : $row[0];
 	}
 	// check for workgroup tags
 	$res = mysql_query('select grp.ugr_Name, tag_Text from usrRecTagLinks left join usrTags on rtl_TagID=tag_ID left join '.USERS_DATABASE.'.sysUGrps grp on tag_UGrpID=grp.ugr_ID left join '.USERS_DATABASE.'.sysUsrGrpLinks on ugl_GroupID=ugr_ID and ugl_UserID='.get_user_id().' where rtl_RecID='.$bib['rec_ID'].' and tag_UGrpID is not null and ugl_ID is not null order by rtl_Order');
@@ -217,13 +217,22 @@ function print_private_details($bib) {
 			if ( $workgroup_name) {
 	?>
 	<div class=detailRow>
-		<div class=detailType>Workgroup</div>
+		<div class=detailType>Ownership</div>
 		<div class=detail>
 			<?php
 				print '<span style="font-weight: bold; color: black;">'.htmlspecialchars($workgroup_name).'</span>';
-                if ($bib['rec_NonOwnerVisibility'] != 'hidden') print '<span> - read-only to others</span></div></div>';
-				else print '<span> - hidden to others</span></div></div>';
+				switch ($bib['rec_NonOwnerVisibility']) {
+					case 'hidden':
+						print '<span> - hidden to others</span></div></div>';
+						break;
+					case 'viewable':
+						print '<span> - read-only to other logged-in users</span></div></div>';
+						break;
+					case 'public':
+					default:
+						print '<span> - read-only to general public</span></div></div>';
 				}
+			}
 			?>
 
 	<?php

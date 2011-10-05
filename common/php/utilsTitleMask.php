@@ -119,19 +119,31 @@ global $relRT;
 	$rdr = _title_mask__get_rec_detail_requirements();
 	$rdt = _title_mask__get_rec_detail_types();
 	$rct = _title_mask__get_rec_types();
+	if (is_array($rt)){
+		return "$field_name was tested with Array of rectypes - bad parameter";
+	}
+//error_log("fieldname = $field_name and rt = $rt");
 
 	$dot_pos = strpos($field_name, '.');
 	if ($dot_pos === FALSE) {	/* direct field-name check */
 		if (preg_match('/^(\\d+)\\s*(?:-.*)?$/', $field_name, $matches)) {	// field number has been supplied
-			if (! array_key_exists($matches[1], $rdr[$rt]))	// field does not exist
+			if (! array_key_exists($matches[1], $rdr[$rt]))	// field does not exist for rectype
 				return 'Type "' . $rct[$rt] . '" does not have field #' . $matches[1];
 			$rdt_id = $matches[1];
-			$rdt_name = 'Field #' . $rdt_id;
-		} else {
-			if (! array_key_exists(strtolower($field_name), $rdr[$rt]))	// field does not exist
+			$rdt_name = $rdr[$rt][$rdt_id]['rst_DisplayName'];
+		} else if(strtolower(trim($field_name))=== 'rectitle'){
+			return '';
+		}else{//fieldname lookup
+			if ( array_key_exists(strtolower($field_name), $rdr[$rt])) {	// field name defined for rectype
+				$rdt_id = $rdr[$rt][strtolower($field_name)]['dty_ID'];
+			}else{
+				$rdt_id = $rdt[strtolower($field_name)]['dty_ID'];
+			}
+			if ($rdt_id) {
+				$rdt_name = $rdr[$rt][$rdt_id]['rst_DisplayName'];
+			}else{
 				return 'Type "' . $rct[$rt] . '" does not have "' . $field_name . '" field';
-			$rdt_id = $rdt[strtolower($field_name)]['dty_ID'];
-			$rdt_name = '"' . $field_name . '" field';
+			}
 		}
 
 		// check that the field is of a sensible type
@@ -151,19 +163,34 @@ global $relRT;
 		if (! array_key_exists($matches[1], $rdr[$rt])) {
 			return 'Type "' . $rct[$rt] . '" does not have field #' . $matches[1];
 		}
-
-		$inner_rec_type = $rdr[$rt][$matches[1]];
+		$rdt_id = $matches[1];
+		$rdt_type = $rdt[$rdt_id]['dty_Type'];
+		if ( $rdt_type !== 'resource') {
+			return 'Field "'. $rdr[$rdt_id]['rst_DisplayName']. "\" id type \"$rdt_type\" which doesn't support subfields like $matches[2]";
+		}
+		$inner_rec_type = $rdr[$rt][$rdt_id]['rst_PtrFilteredIDs'];
 		$inner_field_name = $matches[2];
 	} else {	// match all characters before and after a fullstop
 		preg_match('/^([^.]+?)\\s*\\.\\s*(.+)$/', $field_name, $matches);
-		if (! array_key_exists(strtolower($matches[1]), $rdr[$rt])) {
+		if ( array_key_exists(strtolower($matches[1]), $rdr[$rt])) {
+			$rdt_id = $rdr[$rt][strtolower($matches[1])]['dty_ID'];
+		}else{
+			$rdt_id = $rdt[strtolower($matches[1])]['dty_ID'];
+		}
+		if (!$rdt_id) {
 			return 'Type "' . $rct[$rt] . '" does not have "' . $matches[1] . '" field';
 		}
-		$inner_rec_type = $rdr[$rt][strtolower($matches[1])];
+		$rdt_type = $rdt[$rdt_id]['dty_Type'];
+
+		if ( $rdt_type !== 'resource') {
+			return 'Field "'. $rdr[$rdt_id]['rst_DisplayName']. "\" id type \"$rdt_type\" which doesn't support subfields like $matches[2]";
+		}
+		$inner_rec_type = $rdr[$rt][$rdt_id]['rst_PtrFilteredIDs'];
 		$inner_field_name = $matches[2];
 	}
+//error_log("inner rec type = ".print_r($inner_rec_type,true));
 
-	if ($inner_rec_type == 0) {
+	if (!$inner_rec_type && $inner_field_name) {
 		// an unconstrained pointer: we can't say what fields might be available.
 		// just check that the specified field exists.
 
@@ -173,13 +200,26 @@ global $relRT;
 			}
 		} else {
 			if (! array_key_exists(strtolower($inner_field_name), $rdt)) {
-				return 'Field "' . $inner_field_name . '" does not exist';
+				return 'Field type "' . $inner_field_name . '" does not exist';
 			}
 		}
 		return '';
 	}
 
 	/* recurse! */
+	if (strpos($inner_rec_type, ',')){ // multi rt pointer
+		$ret = "multi-rt return = ";
+		$inner_rec_type = explode(",",$inner_rec_type);
+		foreach ($inner_rec_type as $rtID){
+			$rtid = intval($rtID);
+			if (!$rtid) continue;
+			$errStr = _title_mask__check_field_name($inner_field_name, $rtid);
+			if (!$errStr) return '';
+			$ret .= " ".$errStr;
+		}
+		return $ret;
+	}
+
 	return _title_mask__check_field_name($inner_field_name, $inner_rec_type);
 }
 
@@ -238,7 +278,7 @@ global $surnameDT, $authRT;
 	} else {	// doesn't match a title mask pattern so return an empty string so nothing is added to title
 		return '';
 	}
-	$rt_id = @$rdr[$rt][$rdt_id]['dty_PtrTargetRectypeIDs'];
+	$rt_id = @$rdr[$rt][$rdt_id]['rst_PtrFilteredIDs'];
 	$rt_id = $rt_id ? explode(",",$rt_id) : 0;
 
 
@@ -408,7 +448,10 @@ function _title_mask__get_rec_detail($rec_id, $rdt_id) {
 
 function _title_mask__get_rec_types() {
 	static $rct;
-	if (! $rct) $rct = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', '1');
+	if (! $rct) {
+		$rct = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', '1');
+//error_log("rt ".print_r($rct,true));
+	}
 	return $rct;
 }
 
@@ -422,9 +465,10 @@ function _title_mask__get_rec_detail_requirements() {
 		$rdr = array();
 
 		$res = mysql_query('select rst_RecTypeID, dty_ID, lower(dty_Name) as dty_Name, lower(rst_DisplayName) as rst_DisplayName,
-									rst_PtrFilteredIDs, dty_PtrTargetRectypeIDs
+									if(rst_PtrFilteredIDs,rst_PtrFilteredIDs, dty_PtrTargetRectypeIDs) as rst_PtrFilteredIDs
 								from defRecStructure left join defDetailTypes on rst_DetailTypeID=dty_ID
-								where rst_RequirementType in ("required", "recommended", "optional")');
+								where rst_RequirementType in ("required", "recommended", "optional")
+								order by rst_RecTypeID, dty_ID' );
 		while ($row = mysql_fetch_assoc($res)) {
 			if (@$rdr[$row['rst_RecTypeID']]) {
 				$rdr[$row['rst_RecTypeID']][$row['dty_ID']] = $row;
@@ -439,6 +483,7 @@ function _title_mask__get_rec_detail_requirements() {
 				$rdr[$row['rst_RecTypeID']][$row['rst_DisplayName']] = $row;
 			}
 		}
+//error_log("rf ".print_r($rdr,true));
 	}
 	return $rdr;
 }
@@ -450,11 +495,12 @@ function _title_mask__get_rec_detail_types() {
 	if (! $rdt) {
 		$rdt = array();
 
-		$res = mysql_query('select dty_ID, dty_Name, dty_Type, dty_PtrTargetRectypeIDs from defDetailTypes');
+		$res = mysql_query('select dty_ID, lower(dty_Name) as dty_Name, dty_Type, dty_PtrTargetRectypeIDs from defDetailTypes');
 		while ($row = mysql_fetch_assoc($res)) {
 			$rdt[$row['dty_ID']] = $row;
 			$rdt[strtolower($row['dty_Name'])] = $row;
 		}
+//error_log("dt ".print_r($rdt,true));
 	}
 
 	return $rdt;
@@ -490,23 +536,44 @@ global $titleDT;
 
 
 function _title_mask__get_field_number($field_name, $rt) {
+	$rdt = _title_mask__get_rec_detail_types();
+	$rdr = _title_mask__get_rec_detail_requirements();
+
+	if (is_array($rt)){
+		return "$field_name was tested with Array of rectypes - bad parameter";
+	}
+//error_log("fieldname = $field_name and rt = $rt");
+
 	// Return the rec-detail-type ID for the given field in the given record type
 	if (strpos($field_name, ".") === FALSE) {	// direct field name lookup
-		if (preg_match('/^(\\d+)/', $field_name, $matches)) {
+		if (preg_match('/^\s*(\\d+)\s*/', $field_name, $matches)) {
 			$rdt_id = $matches[1];
 		} else {
-			$rdt = _title_mask__get_rec_detail_types();
-			$rdt_id = $rdt[strtolower($field_name)]['dty_ID'];
+			$rdt_id = $rdr[$rt][strtolower($field_name)]['dty_ID'];
+			if (!$rdt_id) $rdt_id = $rdt[strtolower($field_name)]['dty_ID'];
 		}
-		return $rdt_id;
+		return $rdt_id ? $rdt_id : $field_name;
 	}
 
 	if (preg_match('/^(\\d+)\\s*(?:-[^.]*?)?\\.\\s*(.+)$/', $field_name, $matches)) {
 		$rdt_id = $matches[1];
+		if (!array_key_exists($rdt_id,$rdt) ||
+				!array_key_exists($rdt_id,$rdr[$rt]) ||
+				$rdt[$rdt_id]['dty_Type'] !== 'resource') {
+			return "invalid field id $rdt_id";
+		}
 		$inner_field_name = $matches[2];
 	} else if (preg_match('/^([^.]+?)\\s*\\.\\s*(.+)$/', $field_name, $matches)) {
-		$rdt = _title_mask__get_rec_detail_types();
-		$rdt_id = $rdt[strtolower($matches[1])]['dty_ID'];
+		$rdt_id = $rdr[$rt][strtolower($matches[1])]['dty_ID'];
+		if (!$rdt_id) $rdt_id = $rdt[strtolower($matches[1])]['dty_ID'];
+		if (!$rdt_id ||
+				!array_key_exists($rdt_id,$rdt) ||
+				!array_key_exists($rdt_id,$rdr[$rt]) ||
+				$rdt[$rdt_id]['dty_Type'] !== 'resource') {
+//error_log("dt = ".print_r($rdt[$rdt_id],true));
+//error_log("fld = ".print_r($rdr[$rt][$rdt_id],true));
+			return "invalid field $matches[1] of type ".$rdt[$rdt_id]['dty_Type'];
+		}
 		$inner_field_name = $matches[2];
 	} else {
 		return "";
@@ -514,11 +581,15 @@ function _title_mask__get_field_number($field_name, $rt) {
 
 
 	if ($rdt_id  &&  $inner_field_name) {
-		$rdr = _title_mask__get_rec_detail_requirements();
-		$inner_rec_type = $rdr[$rt][$rdt_id];
-		$inner_rdt = _title_mask__get_field_number($inner_field_name, $inner_rec_type);
-		if ($inner_rdt) {
-			return $rdt_id . "." . $inner_rdt;
+		$inner_rec_type = $rdr[$rt][$rdt_id]['rst_PtrFilteredIDs'];
+		$inner_rec_type = explode(",",$inner_rec_type);
+		foreach ($inner_rec_type as $rtID){
+			$rtid = intval($rtID);
+			if (!$rtid) continue;
+			$inner_rdt = _title_mask__get_field_number($inner_field_name, $rtid);
+			if ($inner_rdt) {
+				return $rdt_id . "." . $inner_rdt;
+			}
 		}
 	}
 

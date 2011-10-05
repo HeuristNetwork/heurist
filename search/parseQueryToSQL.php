@@ -119,7 +119,6 @@ class Query {
 
 	function addWorkgroupRestriction($wg_ids) {
 		if ($wg_ids) $this->workgroups = $wg_ids;
-		array_push($this->workgroups, 0);	// everybody can access records with rec_OwnerUGrpID set to 0
 	}
 
 	function makeSQL() {
@@ -167,7 +166,10 @@ class Query {
 			if ($where_clause) $where_clause = '(' . $where_clause . ') and ';
 			$where_clause .= 'not rec_FlagTemporary ';
 		}
-		$where_clause = '(rec_OwnerUGrpID is null or rec_OwnerUGrpID='. get_user_id().' or not rec_NonOwnerVisibility="hidden" or rec_OwnerUGrpID in (' . join(',', $this->workgroups) . ')) and ' . $where_clause;
+		$where_clause = '('.(is_logged_in()?'rec_OwnerUGrpID='. get_user_id().' or ':'').// this includes non logged in because it returns 0
+							(is_logged_in()?'not rec_NonOwnerVisibility="hidden"':'rec_NonOwnerVisibility="public"').
+							(!empty($this->workgroups)?(' or rec_OwnerUGrpID in (' . join(',', $this->workgroups) . '))'):')').
+							' and ' . $where_clause;
 
 		return $from_clause . 'where ' . $where_clause . $sort_clause;
 	}
@@ -1179,18 +1181,20 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL) {
 		$q_clauses = array();
 		foreach ($q_bits as $q_bit) {
 			$q = parse_query($search_type, $q_bit, $parms['s'], $wg_ids);
-			preg_match('/.*?where [(]rec_OwnerUGrpID is null or rec_OwnerUGrpID=[0-9]* or not rec_NonOwnerVisibility="hidden" or rec_OwnerUGrpID in \\([0-9,]*\\)[)] and (.*) order by/s', $q, $matches);
+			// for each qbit if there is owner/vis followed by clause followed by order by, capture it for and'ing
+			preg_match('/.*?where [(]rec_OwnerUGrpID=[-0-9]* or (?:rec_NonOwnerVisibility="public"|not rec_NonOwnerVisibility="hidden")(?: or rec_OwnerUGrpID in \\([0-9,]*\\))?[)] and (.*) order by/s', $q, $matches);
 			if ($matches[1]) {
 				array_push($q_clauses, '(' . $matches[1] . ')');
 			}
 		}
 		sort($q_clauses);
 		$where_clause = join(' and ', $q_clauses);
-
-		if (preg_match('/(.*?where [(]rec_OwnerUGrpID is null or rec_OwnerUGrpID=[0-9]* or not rec_NonOwnerVisibility="hidden" or rec_OwnerUGrpID in [(][0-9,]*[)][)] and ).*( order by.*)/s', $q, $matches))
+		// check last qbits for form of owner/vis prefix and order by suffix, then capture and add them
+		if (preg_match('/(.*?where [(]rec_OwnerUGrpID=[0-9]* or (?:rec_NonOwnerVisibility="public"|not rec_NonOwnerVisibility="hidden")(?: or rec_OwnerUGrpID in [(][0-9,]*[)])?[)] and ).*( order by.*)/s', $q, $matches))
 			$query .= $matches[1] . $where_clause . $matches[2];
 	}
 
+	error_log("request to query returns ".print_r($query,true));
 	return $query;
 }
 

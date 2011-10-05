@@ -19,7 +19,7 @@ define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on n
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.phps');
 require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
-if (! is_logged_in()  ||  ! is_admin()) {
+if (!is_admin()) {
 	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
 	return;
 }

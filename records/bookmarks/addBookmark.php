@@ -31,14 +31,18 @@ $rec_id = intval($_REQUEST["recID"]);
 $res = mysql_query("select * from Records where rec_ID = $rec_id");
 $bib = mysql_fetch_assoc($res);
 if (! $bib) {
-	print "{ error: \"invalid record ID\" }";
+	print "{ error: \"invalid record ID - $rec_id\" }";
 	return;
 }
 
 /* check workgroup permissions */
-if ($bib["rec_OwnerUGrpID"] && $bib["rec_OwnerUGrpID"] != $usrID &&  $bib["rec_NonOwnerVisibility"] == "hidden") {
-	error_log("select ugl_GroupID from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=$usrID and ugl_GroupID=" . intval($bib["rec_OwnerUGrpID"]));
-	$res = mysql_query("select ugl_GroupID from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=$usrID and ugl_GroupID=" . intval($bib["rec_OwnerUGrpID"]));
+if (array_key_exists("rec_OwnerUGrpID",$bib) &&
+		$bib["rec_OwnerUGrpID"] != $usrID &&
+		$bib["rec_OwnerUGrpID"] != 0 &&
+		$bib["rec_NonOwnerVisibility"] == "hidden") {
+//	error_log("select ugl_GroupID from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=$usrID and ugl_GroupID=" . intval($bib["rec_OwnerUGrpID"]));
+	$res = mysql_query("select ugl_GroupID from ".USERS_DATABASE.".sysUsrGrpLinks ".
+						"where ugl_UserID=$usrID and ugl_GroupID=" . intval($bib["rec_OwnerUGrpID"]));
 	if (! mysql_num_rows($res)) {
 		$res = mysql_query("select grp.ugr_Name from ".USERS_DATABASE.".sysUGrps grp where grp.ugr_ID=" . $bib["rec_OwnerUGrpID"]);
 		$grp_name = mysql_fetch_row($res);  $grp_name = $grp_name[0];

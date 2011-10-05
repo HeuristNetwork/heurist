@@ -12,15 +12,15 @@
 ?>
 
 <?php
+define('T1000_DEBUG',1);
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
 if (!is_logged_in()) {
-        header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
-        return;
+	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php');
+	return;
 }
-
 //error_log(print_r($LOOKUPS, 1));
 
 mysql_connection_db_overwrite(DATABASE);
@@ -28,43 +28,45 @@ $template = file_get_contents('viewRecordTags.html');
 $template = str_replace('[logged-in-user-id]', intval(get_user_id()), $template);
 
 $wg_ids = mysql__select_array(USERS_DATABASE.'.sysUsrGrpLinks', 'ugl_GroupID', 'ugl_UserID='.get_user_id());
-array_push($wg_ids, 0);
+array_push($wg_ids, get_user_id());
 
 if (@$_REQUEST['bkmk_id']) {
 	$res = mysql_query('select * from usrBookmarks where bkm_ID = '.intval($_REQUEST['bkmk_id']));
 	$bkmk = mysql_fetch_assoc($res);
-	$res = mysql_query('select Records.* from usrBookmarks left join Records on bkm_recID=rec_ID where bkm_ID = '.$bkmk['bkm_ID'].' and (rec_OwnerUGrpID in ('.join(',', $wg_ids).') or rec_NonOwnerVisibility="viewable")');
+	$res = mysql_query('select Records.* from usrBookmarks left join Records on bkm_recID=rec_ID '.
+						'where bkm_ID = '.$bkmk['bkm_ID'].
+						' and (rec_OwnerUGrpID in ('.join(',', $wg_ids).') or not rec_NonOwnerVisibility="hidden")');
 	$bib = mysql_fetch_assoc($res);
 	$_REQUEST['recID'] = $bib['rec_ID'];
-}
-else if (@$_REQUEST['recID']) {
+}else if (@$_REQUEST['recID']) {
 	$res = mysql_query('select * from usrBookmarks where bkm_recID = '.intval($_REQUEST['recID']).' and bkm_UGrpID = '.get_user_id());
 	$bkmk = mysql_fetch_assoc($res);
-	$res = mysql_query('select * from Records where rec_ID = '.intval($_REQUEST['recID']).' and (rec_OwnerUGrpID in ('.join(',', $wg_ids).') or rec_NonOwnerVisibility="viewable")');
+	$res = mysql_query('select * from Records where rec_ID = '.intval($_REQUEST['recID']).' and (rec_OwnerUGrpID in ('.join(',', $wg_ids).') or not rec_NonOwnerVisibility="hidden")');
 	$bib = mysql_fetch_assoc($res);
 	$_REQUEST['bkmk_id'] = $bkmk['bkm_ID'];
 }
+//error_log("bookmark is ".print_r($bkmk,true));
+//error_log("record is ".print_r($bib,true));
 
 $_REQUEST['bkm_ID'] = $_REQUEST['bkmk_id'];
 
 $lexer = new Lexer($template);
 $body = new BodyScope($lexer);
 
+$body->global_vars['LINKED_BIBLIO-ID'] = $_REQUEST['recID'];
 $body->global_vars['rec_ID'] = $_REQUEST['recID'];
 $body->global_vars['bkm_ID'] = $_REQUEST['bkm_ID'];
 
 $my_kwds = mysql__select_array('usrRecTagLinks left join usrTags on rtl_TagID=tag_ID', 'tag_Text', 'rtl_RecID='.$bib['rec_ID']);
 
-$tags = mysql__select_assoc('usrBookmarks
-								 left join usrRecTagLinks on bkm_RecID=rtl_RecID
-								 left join usrTags on rtl_TagID=tag_ID
-								 left join '.USERS_DATABASE.'.sysUGrps usr on usr.ugr_ID=tag_UGrpID',
+$tags = mysql__select_assoc('usrRecTagLinks left join usrTags on rtl_TagID=tag_ID'.
+								' left join '.USERS_DATABASE.'.sysUGrps usr on usr.ugr_ID=tag_UGrpID',
 								'tag_Text', 'count(tag_ID) as kcount',
-								'bkm_RecID='.$bib['rec_ID'].'
-								 and rtl_ID is not null
-								 and usr.ugr_Enabled="Y"
-								 group by tag_Text
-								 order by kcount desc, tag_Text');
+								'rtl_RecID='.$_REQUEST['recID'].
+								' and rtl_ID is not null'.
+								' and usr.ugr_Enabled="Y"'.
+								' group by tag_Text'.
+								' order by kcount desc, tag_Text');
 
 /*
 $res = mysql_query('select concat(ugr_FirstName," ",ugr_LastName) as bkmk_user, tag_Text
@@ -85,6 +87,8 @@ while ($row = mysql_fetch_assoc($res)) {
 		$user_tags[$bkmk_user] = array($kwd_name);
 }
 */
+//error_log("tags are ".print_r($tags,true));
+//error_log("kwds are ".print_r($my_kwds,true));
 
 if ($tags) {
 	$kwd_list = '';
@@ -123,6 +127,7 @@ if ($tags) {
 } else {
 	$kwd_list = '<tr><td>(no matching tags)</td></tr>';
 }
+error_log("kwdlist is ".print_r($kwd_list,true));
 
 $body->global_vars['tag-list'] = $kwd_list;
 

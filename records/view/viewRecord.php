@@ -50,7 +50,7 @@ if (@$_REQUEST['bkmk_id']) {
 }
 
 require_once(dirname(__FILE__).'/testPermissions.php');
-if (! have_bib_permissions($rec_id)) {
+if (! canViewRecord($rec_id)) {
 	header('Location: ' . BASE_PATH . 'common/html/denied.html?'.$rec_id);
 	return;
 }

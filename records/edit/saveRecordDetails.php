@@ -210,7 +210,8 @@ function updateRecord($bibID) {
 	if (array_key_exists("rec_url", $_POST)) {
 		$bibUpdates["rec_URL"] = $_POST["rec_url"];
 	}
-	if (is_admin()) {
+	$owner = $bib['rec_OwnerUGrpID'];
+	if ($owner == 0 && is_admin() || is_Admin('group',$owner) || $owner == get_user_id()) {// must be grpAdmin or record owner to changes ownership or visibility
 		if (array_key_exists("rec_owner", $_POST)) {
 			$bibUpdates["rec_OwnerUGrpID"] = $_POST["rec_owner"];
 		}

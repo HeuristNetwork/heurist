@@ -48,8 +48,8 @@ mysql_connection_db_select(DATABASE);
 
 // set parameter defaults
 $recID = @$_REQUEST['recID'] ? $_REQUEST['recID'] : null;
+	//if no style given then try default, if default doesn't exist we our put raw xml
 $style = @$_REQUEST['style'] ? $_REQUEST['style'] : 'default';
-$validStyle = true;
 $inputFilename ="".HEURIST_HML_PUBPATH.HEURIST_DBID."-".$recID.".hml";
 $outputFilename ="".HEURIST_HTML_PUBPATH.$style.HEURIST_DBID."-".$recID.".html";
 
@@ -62,10 +62,10 @@ if ($pos !== false){
 if ($inputFilename && !file_exists($inputFilename)) {
 		returnXMLErrorMsgPage("unable to load hml for $inputFilename");
 }
+//set the style filename and check that it exist
 $styleFilename = ($style ? "".HEURIST_HML_PUBPATH."xsl/".$style.".xsl":null);
 if ($styleFilename && !file_exists($styleFilename)) {
 	$styleFilename = null;
-	$validStyle = false;
 }
 
 loadRecordHTML($inputFilename,$styleFilename);
@@ -75,7 +75,7 @@ returnXMLSuccessMsgPage("Successfully wrote output file".
 
 
 function loadRecordHTML($recHMLFilename, $styleFilename){
-global $recID, $validStyle, $outputFilename;
+global $recID, $outputFilename;
 	$recHmlDoc = new DOMDocument();
 	$recHmlDoc ->load($recHMLFilename);
 	$recHmlDoc->xinclude();

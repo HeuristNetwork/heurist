@@ -62,7 +62,9 @@ function sendReminderEmail($reminder, $USERS_DATABASE, $HOST, $BASE_URL) {
 		$email_headers .= "\r\nReply-To: ".$owner['ugr_FirstName'].' '.$owner['ugr_LastName'].' <'.$owner['ugr_eMail'].'>';
 	}
 
-	$res = mysql_query('select rec_Title, rec_OwnerUGrpID, rec_NonOwnerVisibility, grp.ugr_Name from Records left join '.$USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID and grp.ugr_Type != "User" where rec_ID = '.$reminder['rem_RecID']);
+	$res = mysql_query('select rec_Title, rec_OwnerUGrpID, rec_NonOwnerVisibility, grp.ugr_Name from Records '.
+						'left join '.$USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID and grp.ugr_Type != "User" '.
+						'where rec_ID = '.$reminder['rem_RecID']);
 	$bib = mysql_fetch_assoc($res);
 
 	$email_subject = '[Heurist] "'.$bib['rec_Title'].'"';
@@ -72,17 +74,17 @@ function sendReminderEmail($reminder, $USERS_DATABASE, $HOST, $BASE_URL) {
 
 	foreach($recipients as $recipient) {
 		$email_text = 'Reminder From: ' . ($reminder['rem_ToUserID'] == $reminder['rem_OwnerUGrpID'] ? 'you'
-										   : $owner['ugr_FirstName'].' '.$owner['ugr_LastName'].' <'.$owner['ugr_eMail'].'>') . "\n\n"
+											: $owner['ugr_FirstName'].' '.$owner['ugr_LastName'].' <'.$owner['ugr_eMail'].'>') . "\n\n"
 					. 'For: "'.$bib['rec_Title'].'"' . "\n\n"
 					. 'URL: http://'.$BASE_URL.'?w=all&q=ids:'.$reminder['rem_RecID'] . "\n\n";
-					
+
 		if ($bib['rec_OwnerUGrpID'] && $bib['rec_NonOwnerVisibility'] == 'hidden') {
 			$email_text .= "Note: Record belongs to workgroup ".$bib['ugr_Name'] . "\n"
-         				.	"You must be logged in to Heurist and a member of this workgroup to view it". "\n\n";
+							."You must be logged in to Heurist and a member of this workgroup to view it". "\n\n";
 		}
-		
+
 		$email_text .= 'Message: '.$reminder['rem_Message'] . "\n\n";
-		
+
 		if (@$reminder['rem_ID']  &&  $reminder['rem_Freq'] != "once") {
 			$email_text .= "-------------------------------------------\n\n"
 						.  "You will receive this reminder " . $reminder['rem_Freq'] . "\n"

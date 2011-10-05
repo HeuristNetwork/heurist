@@ -1447,7 +1447,7 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 	var thisRef = this;	// provide input reference for closures
 
 	var newDiv = this.document.createElement("div");
-		newDiv.className = bdValue && bdValue.value ? "resource-div" : "resource-div empty";
+		newDiv.className = bdValue && bdValue.value? "resource-div" : "resource-div empty";
 		newDiv.expando = true;
 	this.addInputHelper.call(this, bdValue, newDiv);
 
@@ -1738,7 +1738,7 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdV
 
 		var newInput = this.recreateSelector(bdValue, false);
 
-		if(this.inputs.length>1 || !top.HEURIST.is_admin()) {return}  //only one edit link
+		if(this.inputs.length>1 || !top.HEURIST.is_admin()) {return}  //only one edit link if admin
 
 		this.createSpanLinkTerms(bdValue);
 };

@@ -18,17 +18,7 @@ define('T1000_SUPPRESS_HIDDEN_FIELDS',1);
 define('T1000_XML', 1);
 //define('T1000_DEBUG', 1);
 define('SAVE_URI', 'disabled');
-if (!@$_REQUEST['a'] == 1) {
-	define("BYPASS_LOGIN",true);
-	$where = "where rec_NonOwnerVisibility ='viewable' or rec_NonOwnerVisibility is null";
-}
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-
-if (!is_logged_in()) {
-        header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
-        return;
-}
-
 
 //define('T1000_DEFS', '.safe_htstdefs');
 require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');

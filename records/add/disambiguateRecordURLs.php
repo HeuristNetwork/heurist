@@ -157,7 +157,9 @@ or <a href="addRecord.php?db=<?=HEURIST_DBNAME?>&recID=-1&bkmrk_bkmk_url=<?= url
 		$bkmk_url = $_REQUEST['bkmk_url'];
 		$bkmk_url_len = strlen($bkmk_url);
 
-		$res = mysql_query('select * from Records where rec_ID in (' . join(',', $bib_ids) . ') and (rec_OwnerUGrpID=0 or rec_NonOwnerVisibility="viewable")');
+		$res = mysql_query('select * from Records where rec_ID in (' . join(',', $bib_ids) . ') '.
+								'and (rec_OwnerUGrpID in (0'.(get_user_id()?','.get_user_id():'').')'.
+										' or not rec_NonOwnerVisibility="hidden")');
 		$all_bibs = array();
 		while ($row = mysql_fetch_assoc($res))
 			$all_bibs[$row['rec_ID']] = $row;

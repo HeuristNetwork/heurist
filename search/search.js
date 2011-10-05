@@ -695,7 +695,7 @@ top.HEURIST.search = {
 	renderLoginDependentContent: function() {
 		var logged_in_elt = document.getElementById("logged-in");
 		var left_panel_elt = document.getElementById("left-panel-content");
-		if (top.HEURIST.is_logged_in()) {
+		if (top.HEURIST.is_logged_in && top.HEURIST.is_logged_in()) {
 			logged_in_elt.innerHTML = top.HEURIST.get_user_name() + " : <a href=" +top.HEURIST.basePath+ "common/connect/login.php?logout=1"+(top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "")+">log&nbsp;out</a>";
 		} else {
 			logged_in_elt.innerHTML = "not logged in : <a href=" +top.HEURIST.basePath+ "common/connect/login.php"+(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "")+">log in</a>";

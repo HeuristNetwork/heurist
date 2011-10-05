@@ -65,6 +65,7 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 			else
 				$groups[$row[GROUPS_ID_FIELD]] = 'member';
 		}
+		$groups[$user[USERS_ID_FIELD]] = 'member'; // a person in a member of his own user type group, not admin as can't add users to this group
 
 		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['cookie_version'] = COOKIE_VERSION;
 		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_name'] = $user[USERS_USERNAME_FIELD];

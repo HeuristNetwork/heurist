@@ -65,7 +65,7 @@ if (@$argv) {
 	if (@$ARGV['-fc']) $_REQUEST['fc'] = '1'; // inline file content
 
 }
-
+//error_log("flathml session".print_r(@$_SESSION,true));
 /*header("Content-type: text/javascript");
 */header('Content-type: text/xml; charset=utf-8');
 echo "<?xml version='1.0' encoding='UTF-8'?>\n";
@@ -122,26 +122,6 @@ function openCDATA() {
 
 function closeCDATA() {
 	echo "]]>\n";
-}
-
-
-//----------------------------------------------------------------------------//
-//  Authentication helpers
-//----------------------------------------------------------------------------//
-
-function single_record_retrieval($q) {
-   if (preg_match ('/\bids?:([0-9]+)(?!,)\b/i', $q, $matches)) {
-		$query = 'select * from Records where rec_ID='.$matches[1];
-		$res = mysql_query($query);
-		if (mysql_num_rows($res) < 1) return false;
-		$rec = mysql_fetch_assoc($res);
-		//saw FIXME need to compare against current user's UGrpID, need to say no user or group user belongs to and is HIDDEN
-		if ($rec['rec_OwnerUGrpID']  &&  $rec['rec_NonOwnerVisibility'] === 'hidden') {
-			return false;
-		}
-		return true;
-	}
-	return false;
 }
 
 
@@ -264,9 +244,9 @@ if (@$ARGV) {	// commandline actuation
 	function get_user_id() { return 0; }
 	function get_user_name() { return ''; }
 	function get_user_username() { return ''; }
-	function get_group_ids() { return array(HEURIST_USER_GROUP_ID); }
+	function get_group_ids() { return array(0); }
 	function is_admin() { return false; }
-	function is_logged_in() { return true; }
+	function is_logged_in() { return false; }
 	$pub_id = 0;
 
 } else if (@$_REQUEST['pub_id']) {	//published save query call.
@@ -285,12 +265,6 @@ if (@$ARGV) {	// commandline actuation
 } else {	// loggin required entry
 	$pub_id = 0;
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-	if (!is_logged_in()) { // check if the record being retrieved is a single non-protected record
-		if (!single_record_retrieval($_REQUEST['q'])) {
-			header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
-			return;
-		}
-	}
 }
 
 $relRT = (defined('RT_RELATION')?RT_RELATION:0);
@@ -300,8 +274,12 @@ $relTrgDT = (defined('DT_LINKED_RESOURCE')?DT_LINKED_RESOURCE:0);
 
 $ACCESSABLE_OWNER_IDS = mysql__select_array('sysUsrGrpLinks left join sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID',
 								'ugl_UserID='.get_user_id().' and grp.ugr_Type != "user" order by ugl_GroupID');
-array_push($ACCESSABLE_OWNER_IDS,get_user_id());
-array_push($ACCESSABLE_OWNER_IDS,0);	// 0 = belong to everyone
+if (is_logged_in()){
+	array_push($ACCESSABLE_OWNER_IDS,get_user_id());
+	if (!in_array(0,$ACCESSABLE_OWNER_IDS)){
+		array_push($ACCESSABLE_OWNER_IDS,0);
+	}
+}
 
 //----------------------------------------------------------------------------//
 // Traversal functions
@@ -336,8 +314,10 @@ global $ACCESSABLE_OWNER_IDS;
 				'WHERE dtl_RecID in (' . join(',', $qrec_ids) .') '.
 				($rtyIDs && count($rtyIDs)>0 ? 'AND trg.rec_RecTypeID in ('.join(',', $rtyIDs).') ' : '').
 				($dtyIDs && count($dtyIDs)>0 ? 'AND dty_ID in ('.join(',', $dtyIDs).') ' : '').
-					'AND dty_Type = "resource" '.
-					'AND (trg.rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR NOT trg.rec_NonOwnerVisibility = "hidden")';
+					'AND dty_Type = "resource" AND '.
+					(count($ACCESSABLE_OWNER_IDS)>0?'(trg.rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') ':'(0 ').
+					(is_logged_in()?'OR NOT trg.rec_NonOwnerVisibility = "hidden")':
+									'OR trg.rec_NonOwnerVisibility = "public")');
 
 //error_log("find d $depth pointer q = $query");
 //echo "\n $query\n";
@@ -412,8 +392,10 @@ global $REVERSE, $ACCESSABLE_OWNER_IDS,$relRT;
 				'AND dtl_Value IN (' . join(',', $qrec_ids) .') '.
 				($rtyIDs && count($rtyIDs)>0 ? 'AND trg.rec_RecTypeID in ('.join(',', $rtyIDs).') ' : '').
 				($dtyIDs && count($dtyIDs)>0 ? 'AND dty_ID in ('.join(',', $dtyIDs).') ' : '').
-				'AND trg.rec_RecTypeID != '.$relRT.' '.
-				'AND (trg.rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR NOT trg.rec_NonOwnerVisibility = "hidden")';
+				"AND trg.rec_RecTypeID != $relRT AND ".
+				(count($ACCESSABLE_OWNER_IDS)>0?'(trg.rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') ':'(0 ').
+				(is_logged_in()?'OR NOT trg.rec_NonOwnerVisibility = "hidden")':
+								'OR trg.rec_NonOwnerVisibility = "public")');
 
 //error_log("find  d $depth rev pointer q = $query");
 	$res = mysql_query($query);
@@ -488,8 +470,12 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 				($rtyIDs && count($rtyIDs)>0 ? 'AND trg.rec_RecTypeID in ('.join(',', $rtyIDs).') ' : '').
 				($REVERSE ?'OR t.dtl_Value IN (' . join(',', $qrec_ids) . ') '.
 					($rtyIDs && count($rtyIDs)>0 ? 'AND src.rec_RecTypeID in ('.join(',', $rtyIDs).') ' : '') :'').')'.
-				'AND (src.rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR NOT src.rec_NonOwnerVisibility = "hidden")'.
-				'AND (trg.rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR NOT trg.rec_NonOwnerVisibility = "hidden")'.
+				(count($ACCESSABLE_OWNER_IDS)>0?'AND (src.rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') ':'AND (0 ').
+					(is_logged_in()?'OR NOT src.rec_NonOwnerVisibility = "hidden")':
+									'OR src.rec_NonOwnerVisibility = "public")').
+				(count($ACCESSABLE_OWNER_IDS)>0?'AND (trg.rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') ':'AND (0 ').
+					(is_logged_in()?'OR NOT trg.rec_NonOwnerVisibility = "hidden")':
+									'OR trg.rec_NonOwnerVisibility = "public")').
 				($relTermIDs && count($relTermIDs)>0 ? 'AND (trm.trm_ID in ('.join(',', $relTermIDs).') OR trm.trm_InverseTermID in ('.join(',', $relTermIDs).')) ' : '');
 //error_log("find  d $depth related q = $query");
 //echo $query;
