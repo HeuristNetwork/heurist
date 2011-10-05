@@ -1219,12 +1219,17 @@ top.HEURIST.search = {
 			top.HEURIST.search.calcShowSimpleSearch();
 		}
 		// rectypes displayed in Groups by group display order then by display order within group
-		for (var grpID in rectypes.groups){
+		for (var index in rectypes.groups){
+			if (index == 'groupIDToIndex'){
+				continue;
+			}
 			var grp = document.createElement("optgroup");
-			var firstInGroup = true;
-			grp.label = rectypes.groups[grpID].name;
-			for (var recTypeID in rectypes.groups[grpID].types) {
-				if (rectypes.groups[grpID].types[recTypeID] && rectypes.usageCount[recTypeID]) {
+			var firstInGroup = true,
+				i=0;
+			grp.label = rectypes.groups[index].name;
+			for (; i < rectypes.groups[index].showTypes.length; i++) {
+				var recTypeID = rectypes.groups[index].showTypes[i];
+				if (recTypeID && rectypes.usageCount[recTypeID]) {
 					if (firstInGroup){
 						rectypeValSelect.appendChild(grp);
 						firstInGroup = false;
@@ -1250,12 +1255,17 @@ top.HEURIST.search = {
 		fieldValSelect.onchange =  top.HEURIST.search.calcShowSimpleSearch;
 
 		// rectypes displayed in Groups by group display order then by display order within group
-		for (var grpID in detailTypes.groups){
+		for (var index in detailTypes.groups){
+			if (index == 'groupIDToIndex'){
+				continue;
+			}
 			var grp = document.createElement("optgroup");
-			var firstInGroup = true;
-			grp.label = detailTypes.groups[grpID].name;
-			for (var detailTypeID in detailTypes.groups[grpID].types) {
-				if (detailTypes.groups[grpID].types[detailTypeID] && detailTypes.usageCount[detailTypeID]) {
+			var firstInGroup = true,
+				i=0;
+			grp.label = detailTypes.groups[index].name;
+			for (; i < detailTypes.groups[index].showTypes.length; i++) {
+				var detailTypeID = detailTypes.groups[index].showTypes[i];
+				if (detailTypeID && detailTypes.usageCount[detailTypeID]) {
 					if (firstInGroup){
 						fieldValSelect.appendChild(grp);
 						firstInGroup = false;
