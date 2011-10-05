@@ -149,13 +149,12 @@ if (!top.Relationship) {
 				endDate: null
 			};
 		}
+		this.div = parentElement.appendChild(this.document.createElement("fieldset"));
+		this.div.className = "relation editable reminder";
 
-		this.div = parentElement.appendChild(this.document.createElement("div"));
-		this.div.className = "relation editable";
-
-		this.header = this.div.appendChild(this.document.createElement("div"));
-		this.header.className = "header";
-		this.header.style.marginBottom = "0.5ex";
+		this.header = this.div.appendChild(this.document.createElement("legend"));
+		//this.header.className = "header";
+		//this.header.style.marginBottom = "0.5ex";
 		this.header.appendChild(this.document.createTextNode("Add new relationship"));
 
 		var tbody = this.div.appendChild(this.document.createElement("div"));
@@ -258,6 +257,7 @@ if (!top.Relationship) {
 		var saveButton = this.document.createElement("input");
 		saveButton.type = "button";
 		saveButton.style.fontWeight = "bold";
+		saveButton.style.marginRight = "10px";
 		saveButton.value = "Add relationship";
 		saveButton.onclick = function() { thisRef.save(); };
 
@@ -372,19 +372,34 @@ if (!top.Relationship) {
 				alert("Error while saving:\n" + vals.error);
 			}else if (vals.relationship) {
 				parent.HEURIST.edit.record.relatedRecords = vals.relationship;
-
+				
 				var myTR = thisRef.div.parentNode.parentNode;
+				var newRels = window.frames[4].document.getElementById("newly-added-rels");
+				if (!newRels) {
+					newRels = document.createElement("div");
+					newRels.id = "newly-added-rels";
+					newRels.style.marginTop ="20px";
+					newRelsHeading = newRels.appendChild(this.document.createElement("div"));
+					newRelsHeading.innerHTML = "New Relationships";
+					newRelsHeading.className = "relation-title";
+					myTR.appendChild(newRels);
+				};
+
+				
+				
 				var newReln = new top.Relationship(myTR.parentNode, vals.relationship.relationshipRecs[vals.relnRecID],thisRef.manager);
 				myTR.parentNode.insertBefore(newReln.tr, myTR.nextSibling); //saw might be better to store myTR.parentNode as thisref.container
 
 				thisRef.clear();
+				thisRef.remove();//removes form after saving
 
-				var prevRelnDiv = windowRef.document.getElementById("newly-added");
+				var prevRelnDiv = window.frames[4].document.getElementById("newly-added");
 				if (prevRelnDiv) prevRelnDiv.id = "";
 
 				newReln.tr.id = "newly-added";
 
 				thisRef.manager.remove(thisRef);
+				 
 			}
 		});
 	};
@@ -608,10 +623,11 @@ if (!top.Relationship) {
 			}
 		}
 
-		var addOtherTr = document.createElement("div");
-		var addOtherTd = addOtherTr.appendChild(document.createElement("div"));
-		addOtherTd.style.paddingTop = "0px";
-		addOtherTd.colSpan = 7;
+		var addOtherTd = document.createElement("div");
+		//var addOtherTd = addOtherTr.appendChild(document.createElement("div"));
+		addOtherTd.style.paddingTop = "5px";
+		//addOtherTd.colSpan = 7;
+		addOtherTd.id = "addRelationshipLink";
 		var a = addOtherTd.appendChild(document.createElement("a"));
 		a.href = "#";
 		var addImg = a.appendChild(document.createElement("img"));
@@ -628,14 +644,14 @@ if (!top.Relationship) {
 		a.onclick = function(rtypes,dtID) { return function() {
 			var newRow = document.createElement("div");
 			var newCell = newRow.appendChild(document.createElement("div"));
-			newCell.colSpan = 7;
-			thisRef.parentElement.appendChild(newRow);
+			//newCell.colSpan = 7;
+			thisRef.parentElement.insertBefore(newRow,thisRef.parentElement.lastChild);
 			var rel = new top.EditableRelationship(newCell,null,rtypes,dtID,thisRef);
 			rel.nonce = thisRef.getNonce();
 			thisRef.openRelationships[rel.nonce] = rel;
 			rel.relTypeSelect.focus();
 			}; }((trgRectypeList ? trgRectypeList : 0),dtIDRelmarker);
-		this.parentElement.appendChild(addOtherTr);
+		this.parentElement.appendChild(addOtherTd);
 
 
 	//saw TODO  fix ellipses as they have been temporarily disabled  4/4/10

@@ -1980,15 +1980,7 @@ div.recorddiv:hover > #recordID {
 #result-header div#tabbar{
 	clear:none;
 }
-.searchInput {
-	background: none repeat scroll 0 0 white;
-	border: 1px solid #999999;
-	border-radius: 15px 15px 15px 15px;
-	display: inline-block;
-	height: 22px;
-	margin: 3px 0 0;
-	padding: 0 3px;
-}
+
 
 #resultsButton {
 	width: 19px;

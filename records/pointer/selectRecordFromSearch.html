@@ -13,6 +13,7 @@
 <html>
  <head>
   <link rel=stylesheet href="../../common/css/global.css">
+  <link rel=stylesheet href="../../common/css/edit.css">
   <title>Find records</title>
   <style>
 	#search {height: 55px;left: 0;margin-bottom: 10px;position: relative;top: 0;}
@@ -36,8 +37,8 @@ if (window == top) {
   <div id="search" class="banner" style="top:0">
     <table border=0 cellspacing=0 cellpadding=0 class=expander style="margin-bottom: 1em;"><tr>
      <td style="width: 40px; text-align: right;">Find&nbsp;</td>
-     <td style="padding: 5px;">
-      <div style="width: 100%;">
+     <td style="padding: 2px 5px 5px 5px;">
+      <div style="width: 98%;" class="searchInput">
        <div><input autocomplete=off type=text name=q id=q onChange="top.HEURIST.util.setDisplayPreference('record-search-string', value);" style="padding: 1px 18px 1px 2px; margin: 0; width: 100%;"></div>
        <div id=help-div>Enter part of word and click <img src="../../common/images/tiny-magglass.gif" onClick="document.forms[0].submit()" style="vertical-align: middle;"></div>
       </div>

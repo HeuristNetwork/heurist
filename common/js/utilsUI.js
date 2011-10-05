@@ -182,7 +182,10 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				helpDiv.innerHTML = "<span>Help is " + ((top.HEURIST.util.getDisplayPreference("help") === "hide")? "off" : "on") + "</span>";
 		}
 		if (options["title"]) {
-			titleDiv.appendChild(top.document.createTextNode(options["title"]));
+			titleSpan = top.document.createElement("span");
+			titleSpan.innerHTML = (options["title"]);
+			titleSpan.title = (options["title"]);
+			titleDiv.appendChild(titleSpan);
 		}
 
 //		var bodyCell = newPopup.bodyCell = newTable.lastChild.lastChild.appendChild(top.document.createElement("td"));
@@ -269,7 +272,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				top.HEURIST.registerEvent(newIframe, "load", function() {
 					// Multi-shot onload -- when(ever) document loads, set the title bar
 					try {
-						titleDiv.replaceChild(top.document.createTextNode(newIframe.contentWindow.document.title), titleDiv.lastChild);
+						titleSpan = top.document.createElement("span");
+						titleSpan.innerHTML = newIframe.contentWindow.document.title;
+						titleSpan.title = newIframe.contentWindow.document.title;
+						titleDiv.replaceChild(titleSpan, titleDiv.lastChild);
+	//					titleDiv.replaceChild(top.document.createTextNode(newIframe.contentWindow.document.title), titleDiv.lastChild);
 						newIframe.contentWindow.close = newIframe.close;	// make window.close() do what we expect
 						newIframe.contentWindow.popupOpener = parentWindow;	// make a persistent reference to the popup opener
 						newIframe.contentWindow.HEURIST_WINDOW_ID = newHeuristID;

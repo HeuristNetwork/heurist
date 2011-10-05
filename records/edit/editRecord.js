@@ -979,7 +979,7 @@ top.HEURIST.edit = {
 	makeDateButton: function(dateBox, doc) {
 		var buttonElt = doc.createElement("input");
 			buttonElt.type = "button";
-			buttonElt.className = "date-button";
+			buttonElt.className = "temporal-button";
 		if (dateBox.nextSibling)
 			dateBox.parentNode.insertBefore(buttonElt, dateBox.nextSibling);
 		else
@@ -1447,7 +1447,7 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 	var thisRef = this;	// provide input reference for closures
 
 	var newDiv = this.document.createElement("div");
-		newDiv.className = bdValue? "resource-div" : "resource-div empty";
+		newDiv.className = bdValue && bdValue.value ? "resource-div" : "resource-div empty";
 		newDiv.expando = true;
 	this.addInputHelper.call(this, bdValue, newDiv);
 

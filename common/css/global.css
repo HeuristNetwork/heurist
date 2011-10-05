@@ -190,7 +190,7 @@ body.popup div.header {
 body.popup h3 {
 	white-space:normal
 }
-div.popup div.header {
+div.popup div.header, div.popup div.header span {
 	background-attachment:scroll;
 	background-image:url("../images/backgrounds/banner_bg.png");
 	background-position:0 bottom;
@@ -203,6 +203,19 @@ div.popup div.header {
 	line-height:24px;
 	padding-left:10px;
 	text-shadow:0 1px 1px #FFFFFF;/*text-transform:uppercase;*/
+	position:absolute;
+	top:0;
+	right:0;
+	left:0;
+	white-space:nowrap;
+	z-index:-1;
+	
+}
+div.popup div.header span {
+	overflow: hidden;
+	display: inline-block;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 div.popup div.header::selection, div.draggable div.header::selection, div.draggable div.header b::selection {
 	background-color: inherit;
@@ -269,7 +282,7 @@ div.popup div.popupBody {
 	height: 200px;
 	border: 0;
 	padding: 0;
-	margin: 0;
+	margin: 25px 0 0 0;
 	overflow: hidden;
 }
 iframe#coverall, div.coverall-div, #coverall, .coverall {
@@ -879,4 +892,12 @@ input[type="button"].add {
 	padding-top: 10px;
 	text-align: right;
 }
-
+.searchInput {
+	background: none repeat scroll 0 0 white;
+	border: 1px solid #999999;
+	border-radius: 15px 15px 15px 15px;
+	display: inline-block;
+	height: 22px;
+	margin: 3px 0 0;
+	padding: 0 3px;
+}

@@ -300,7 +300,7 @@ top.HEURIST.search = {
 		if(level>0){
 			var showRelatedMenuItem = document.createElement("div");
 //			<!--showRelatedMenuItem.innerHTML = "<a title=\"Click to show records related to the records listed above\" href='#' onclick=top.HEURIST.search.toggleRelated("+level+")>Show Related Records</a>";-->
-			showRelatedMenuItem.innerHTML = "<a title=\"Click to show "+depthInfo.count+" records related to the records listed above\" href='#' onclick=top.HEURIST.search.toggleRelated("+level+")>Show Level "+level+" Related Records <span class=\"relatedCount\">"+depthInfo.count+"</span></a>";
+			showRelatedMenuItem.innerHTML = "<a title=\"Click to show "+depthInfo.count+" records related to the records listed above\" href='#' onclick=top.HEURIST.search.toggleRelated("+level+")>Load Level "+level+" Related Records <span class=\"relatedCount\">"+depthInfo.count+"</span></a>";
 			showRelatedMenuItem.id = "showrelated"+level;
 			showRelatedMenuItem.className = "showrelated level" + level;
 			filterDiv.appendChild(showRelatedMenuItem);
