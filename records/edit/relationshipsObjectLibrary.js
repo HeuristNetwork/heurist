@@ -121,7 +121,7 @@ if (!top.Relationship) {
 		var elt = parentElement;
 		do { elt = elt.parentNode; } while (elt.nodeType != 9 /* DOCUMENT_NODE */);
 		this.document = elt;
-
+		var rtInterp = top.HEURIST.magicNumbers['RT_INTERPRETATION'];
 		var rectype = null;
 		if (rectypes && rectypes.search(",") != -1) {
 			this.rectypes = rectypes;
@@ -142,7 +142,7 @@ if (!top.Relationship) {
 				relInvTerm: "",
 				relInvTermID: "",
 				relatedRec: { title: "", rectype: (rectypes ? rectypes : 0), URL: "", recID: 0 },
-				intrpRec: { title: "", rectype: "182", URL: "", recID: 0 },
+				intrpRec: { title: "", rectype: rtInterp, URL: "", recID: 0 },
 				notes: "",
 				title: "",
 				startDate: null,
@@ -243,7 +243,7 @@ if (!top.Relationship) {
 
 		var fakeBDR = top.HEURIST.edit.createFakeFieldRequirement(fakeBDT);
 
-		this.relatedRecord = new top.HEURIST.edit.inputs.BibDetailResourceInput(fakeBDT, fakeBDR, [], tbody);
+		this.relatedRecord = new top.HEURIST.edit.inputs.BibDetailResourceInput(this.manager.recID, fakeBDT, fakeBDR, [], tbody);
 		this.relatedRecordID = this.relatedRecord.inputs[0].hiddenElt;
 
 
@@ -293,7 +293,7 @@ if (!top.Relationship) {
 
 		var fakeBDR = top.HEURIST.edit.createFakeFieldRequirement(fakeBDT);
 
-		this.interpResource = new top.HEURIST.edit.inputs.BibDetailResourceInput(fakeBDT, fakeBDR, [], opt);
+		this.interpResource = new top.HEURIST.edit.inputs.BibDetailResourceInput(this.manager.recID, fakeBDT, fakeBDR, [], opt);
 		this.interpResourceID = this.interpResource.inputs[0].hiddenElt;
 
 		tr = opt.appendChild(this.document.createElement("div"));
@@ -372,7 +372,7 @@ if (!top.Relationship) {
 				alert("Error while saving:\n" + vals.error);
 			}else if (vals.relationship) {
 				parent.HEURIST.edit.record.relatedRecords = vals.relationship;
-				
+
 				var myTR = thisRef.div.parentNode.parentNode;
 				var newRels = window.frames[4].document.getElementById("newly-added-rels");
 				if (!newRels) {
@@ -385,8 +385,8 @@ if (!top.Relationship) {
 					myTR.appendChild(newRels);
 				};
 
-				
-				
+
+
 				var newReln = new top.Relationship(myTR.parentNode, vals.relationship.relationshipRecs[vals.relnRecID],thisRef.manager);
 				myTR.parentNode.insertBefore(newReln.tr, myTR.nextSibling); //saw might be better to store myTR.parentNode as thisref.container
 
@@ -399,7 +399,7 @@ if (!top.Relationship) {
 				newReln.tr.id = "newly-added";
 
 				thisRef.manager.remove(thisRef);
-				 
+
 			}
 		});
 	};

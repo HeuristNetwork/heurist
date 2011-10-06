@@ -87,7 +87,7 @@ function renderInputs() {
 			window.HEURIST.edit = top.HEURIST.edit;
 		}*/
 
-		inputs = top.HEURIST.edit.createInputsForRectype(rectype, defaultInputValues, allInputs);
+		inputs = top.HEURIST.edit.createInputsForRectype(null,rectype, defaultInputValues, allInputs);
 
 		renderShowAll();
 

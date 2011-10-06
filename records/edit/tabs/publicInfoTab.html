@@ -146,11 +146,11 @@ function renderInputs(bibID, rectype) {
 
 		var record = parent.HEURIST.edit.record;
 
-		var inputs = top.HEURIST.edit.createInputsForRectype(record.rectypeID, record.bdValuesByType, allInputs);
+		var inputs = top.HEURIST.edit.createInputsForRectype(bibID,record.rectypeID, record.bdValuesByType, allInputs);
 
 		var extrasHeader = renderExtraDataHeader(allInputs);
 
-		var extraInputs = top.HEURIST.edit.createInputsNotForRectype(record.rectypeID, record.bdValuesByType, allInputs);
+		var extraInputs = top.HEURIST.edit.createInputsNotForRectype(bibID,record.rectypeID, record.bdValuesByType, allInputs);
 		if (extraInputs.length > 0) {
 			for (var i=0; i < extraInputs.length; ++i) {
 				inputs.push(extraInputs[i]);
@@ -160,7 +160,7 @@ function renderInputs(bibID, rectype) {
 			}
 		}
 
-		renderAdditionalDataSection(allInputs, record.rectypeID, record.bdValuesByType);
+		renderAdditionalDataSection(allInputs, bibID, record.rectypeID, record.bdValuesByType);
 
 		if (! top.document.getElementById("notes")) {
 			var width = 400;
@@ -228,11 +228,11 @@ function renderInputs(bibID, rectype) {
 			}
 		}
 
-		var inputs = top.HEURIST.edit.createInputsForRectype(rectype, defaultInputValues, allInputs);
+		var inputs = top.HEURIST.edit.createInputsForRectype(null,rectype, defaultInputValues, allInputs);
 
 		renderExtraDataHeader(allInputs);
 
-		renderAdditionalDataSection(allInputs, rectype);
+		renderAdditionalDataSection(allInputs,null, rectype);
 
 		if (! top.document.getElementById("notes")) {
 			var width = 400;
@@ -286,7 +286,7 @@ function renderInputs(bibID, rectype) {
 	rftElement.value = rectype || (record ? record.rectypeID:top.HEURIST.magicNumbers['RT_INTERNET_BOOKMARK']);
 }
 
-function renderAdditionalDataSection(container, rectypeID, bdValues) {
+function renderAdditionalDataSection(container, recID, rectypeID, bdValues) {
 	var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
 
 	var addRow = container.appendChild(document.createElement("div"));
@@ -336,7 +336,7 @@ function renderAdditionalDataSection(container, rectypeID, bdValues) {
 		button.value = "add";
 		button.onclick = function() {
 			if (dtSelect.selectedIndex == 0) return;
-			window.HEURIST.inputs.push(top.HEURIST.edit.createInput(dtSelect.value, 0, [], container));
+			window.HEURIST.inputs.push(top.HEURIST.edit.createInput(recID, dtSelect.value, 0, [], container));
 			dtSelect.remove(dtSelect.selectedIndex);
 			dtSelect.selectedIndex = 0;
 		};

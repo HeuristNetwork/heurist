@@ -199,7 +199,8 @@ global $relRT;
 				return 'Field type "' . $matches[1] . '" does not exist';
 			}
 		} else {
-			if (! array_key_exists(strtolower($inner_field_name), $rdt)) {
+			if (! array_key_exists(strtolower($inner_field_name), $rdt)&&
+					strtolower($inner_field_name) !== 'rectitle') {
 				return 'Field type "' . $inner_field_name . '" does not exist';
 			}
 		}
@@ -543,7 +544,9 @@ function _title_mask__get_field_number($field_name, $rt) {
 		return "$field_name was tested with Array of rectypes - bad parameter";
 	}
 //error_log("fieldname = $field_name and rt = $rt");
-
+	if(strtolower($field_name) == 'rectitle') {
+		return $field_name;
+	}
 	// Return the rec-detail-type ID for the given field in the given record type
 	if (strpos($field_name, ".") === FALSE) {	// direct field name lookup
 		if (preg_match('/^\s*(\\d+)\s*/', $field_name, $matches)) {
@@ -579,7 +582,6 @@ function _title_mask__get_field_number($field_name, $rt) {
 		return "";
 	}
 
-
 	if ($rdt_id  &&  $inner_field_name) {
 		$inner_rec_type = $rdr[$rt][$rdt_id]['rst_PtrFilteredIDs'];
 		$inner_rec_type = explode(",",$inner_rec_type);
@@ -591,6 +593,7 @@ function _title_mask__get_field_number($field_name, $rt) {
 				return $rdt_id . "." . $inner_rdt;
 			}
 		}
+		return $rdt_id. ($inner_field_name? ".".$inner_field_name:"");
 	}
 
 	return "";
