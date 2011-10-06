@@ -15,7 +15,8 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 $targetDBName = @$_GET["importingTargetDBName"];
-$sourceTempDBName = @$_GET["tempSourceDBName"];
+$tempDBName = @$_GET["tempDBName"];
+$sourceDBName = @$_GET["sourceDBName"];
 $importRtyID = @$_GET["importRtyID"];
 $sourceDBID = @$_GET["sourceDBID"];
 $currentDate = date("d-m");
@@ -47,8 +48,8 @@ function crosswalk() {
 */}
 
 function import() {
-	global $error, $importLog, $sourceTempDBName, $targetDBName, $sourceDBID, $importRtyID;
-	if( !$sourceTempDBName || $sourceTempDBName === "" || !$targetDBName || $targetDBName === "" ||
+	global $error, $importLog, $tempDBName, $sourceDBName, $targetDBName, $sourceDBID, $importRtyID;
+	if( !$tempDBName || $tempDBName === "" || !$targetDBName || $targetDBName === "" ||
 		!$sourceDBID || !is_numeric($sourceDBID)|| !$importRtyID || !is_numeric($importRtyID)) {
 		makeLogEntry("importParameters", -1, "One or more required import parameters not supplied or correct form ( ".
 					"importingDBName={name of target DB} sourceDBID={reg number of source DB or 0} ".
@@ -60,10 +61,10 @@ function import() {
 		mysql_query("start transaction");
 
 		// Get recordtype data that has to be imported
-		$res = mysql_query("select * from ".$sourceTempDBName.".defRecTypes where rty_ID = ".$importRtyID);
+		$res = mysql_query("select * from ".$tempDBName.".defRecTypes where rty_ID = ".$importRtyID);
 		if(mysql_num_rows($res) == 0) {
 			$error = true;
-			makeLogEntry("rectype", $importRtyID, "Rectype was not found in $sourceTempDBName");
+			makeLogEntry("defRectype", $importRtyID, " was not found in (local temporary copy of )source database ($sourceDBName)");
 		} else {
 			$importRty = mysql_fetch_assoc($res);
 			//error_log("Import entity is  ".print_r($importRty,true));
@@ -89,7 +90,7 @@ function import() {
 			if(mysql_num_rows($resRtyExist) > 0 ) {
 				$localRtyID = mysql_fetch_array($resRtyExist,MYSQL_NUM);
 				$localRtyID = $localRtyID[0];
-				makeLogEntry("rectype", $importRtyID, "Rectype $importRtyID was found in $targetDBName as $localRtyID");
+				makeLogEntry("defRectype", $importRtyID, " was found in $targetDBName as ID = $localRtyID");
 				break;
 			}
 			$localRtyID = importRectype($importRty);
@@ -101,7 +102,7 @@ function import() {
 		$statusMsg = "";
 		if(sizeof($importLog) > 0) {
 			foreach($importLog as $logLine) {
-				echo  $logLine[0].": ID-".$logLine[1]." ".$logLine[2] . "<br />";
+				echo  $logLine[0].": import ID = ".$logLine[1]." ".$logLine[2] . "<br />";
 			}
 		}
 		echo "<br />";
@@ -123,10 +124,10 @@ function import() {
 				if($logLine[1] == -1) {
 					$statusMsg .= $logLine[0].": ".$logLine[2] . "<br />";
 				}else{
-					$statusMsg .= $logLine[0].": ID-".$logLine[1]." ".$logLine[2] . "<br />";
+					$statusMsg .= $logLine[0].": import ID = ".$logLine[1]." ".$logLine[2] . "<br />";
 				}
 			}
-			$statusMsg .= "An error occurred trying to import the record type";
+			$statusMsg .= "Changes rolled back, nothing was imported";
 		}
 		// TODO: Delete all information that has already been imported (retrieve from $importLog)
 		echo $statusMsg;
@@ -134,7 +135,7 @@ function import() {
 }
 
 function importDetailType($importDty) {
-	global $error, $importLog, $sourceTempDBName, $targetDBName, $sourceDBID;
+	global $error, $importLog, $tempDBName, $targetDBName, $sourceDBID;
 	static $importDtyGroupID;
 	$importDtyID = $importDty["dty_ID"];
 //error_log(" in import dty $importDtyID");
@@ -149,39 +150,40 @@ function importDetailType($importDty) {
 			// Write the insert action to $logEntry, and set $error to true if one occurred
 			if(mysql_error()) {
 				$error = true;
-				makeLogEntry("detailtypeGroup", -1, mysql_error());
+				makeLogEntry("defDetailTypeGroup", -1, "Error finding detail type group 'Import' - ".mysql_error());
 			} else {
 				$importDtyGroupID = mysql_insert_id();
-				makeLogEntry("detailtypeGroup", $newDtyGroupID, "New detail type group was created for this import");
+				makeLogEntry("defDetailTypeGroup", -1, "Created provisional entry 'Import' as ID = $newDtyGroupID");
 			}
 		} else {
 			$row = mysql_fetch_row($dtyGroup);
 			$importDtyGroupID = $row[0];
+			makeLogEntry("defDetailTypeGroup", -1, "DetailTypeGroup 'Import' found in $targetDBName as ID = $newDtyGroupID");
 		}
 	}
 //error_log("import dty $importDtyID 1".($error?"error":""));
 
 	if(!$error && @$importDty['dty_JsonTermIDTree'] && $importDty['dty_JsonTermIDTree'] != '') {
 		// term tree exist so need to translate to new ids
-		$importDty['dty_JsonTermIDTree'] =  translateTermIDs($importDty['dty_JsonTermIDTree']);
+		$importDty['dty_JsonTermIDTree'] =  translateTermIDs($importDty['dty_JsonTermIDTree'],"term tree"," detailType '".$importDty["dty_Name"]."' ID = $importDtyID");
 	}
 //error_log("import dty $importDtyID 2".($error?"error":""));
 
 	if(!$error && @$importDty['dty_TermIDTreeNonSelectableIDs'] && $importDty['dty_TermIDTreeNonSelectableIDs'] != '') {
 		// term non selectable list exist so need to translate to new ids
-		$importDty['dty_TermIDTreeNonSelectableIDs'] =  translateTermIDs($importDty['dty_TermIDTreeNonSelectableIDs']);
+		$importDty['dty_TermIDTreeNonSelectableIDs'] =  translateTermIDs($importDty['dty_TermIDTreeNonSelectableIDs'],"non-selectable"," detailType '".$importDty["dty_Name"]."' ID = $importDtyID");
 	}
 //error_log("import dty $importDtyID 3".($error?"error":""));
 
 	if(!$error && @$importDty['dty_PtrTargetRectypeIDs'] && $importDty['dty_PtrTargetRectypeIDs'] != '') {
 		// Target Rectype list exist so need to translate to new ids
-		$importDty['dty_PtrTargetRectypeIDs'] =  translateRtyIDs($importDty['dty_PtrTargetRectypeIDs']);
+		$importDty['dty_PtrTargetRectypeIDs'] =  translateRtyIDs($importDty['dty_PtrTargetRectypeIDs'],'pointers',$importDty["dty_ID"]);
 	}
 //error_log("import dty $importDtyID 4".($error?"error":""));
 
 	if(!$error && @$importDty['dty_FieldSetRectypeID'] && $importDty['dty_FieldSetRectypeID'] != '') {
 		// dty represents a base rectype so need to translate to local id
-		$importDty['dty_FieldSetRectypeID'] =  translateRtyIDs("".$importDty['dty_FieldSetRectypeID']);
+		$importDty['dty_FieldSetRectypeID'] =  translateRtyIDs("".$importDty['dty_FieldSetRectypeID'],'fieldsets',$importDty["dty_ID"]);
 	}
 //error_log("import dty $importDtyID 5".($error?"error":""));
 
@@ -191,7 +193,7 @@ function importDetailType($importDty) {
 		$detailTypeSuffix = 2;
 		while(mysql_num_rows(mysql_query("select * from ".$targetDBName.".defDetailTypes where dty_Name = '".$importDty["dty_Name"]."'")) != 0) {
 			$importDty["dty_Name"] = $importDty["dty_Name"] . $detailTypeSuffix;
-			makeLogEntry("detailtype", 0, "Detailtype Name used in source DB already exist in target DB. Added suffix: ".$detailTypeSuffix);
+			makeLogEntry("defDetailTypes", $importDtyID, "Detailtype Name used in source DB already exist in target DB. Added suffix: ".$detailTypeSuffix);
 			$detailTypeSuffix++;
 		}
 
@@ -207,19 +209,19 @@ function importDetailType($importDty) {
 		// Write the insert action to $logEntry, and set $error to true if one occurred
 		if(mysql_error()) {
 			$error = true;
-			makeLogEntry("detailtype", $importDtyID, mysql_error());
+			makeLogEntry("defDetailType", $importDtyID, "Error importing defDetailType - ".mysql_error());
 			break;
 		} else {
 			$importedDtyID = mysql_insert_id();
-			makeLogEntry("detailtype", $importedDtyID, "New detailtype imported");
+			makeLogEntry("defDetailType", $importDtyID, "created provisional entry for defDetailType '".$importDty["dty_Name"]."' as ID = $importedDtyID");
 			return $importedDtyID;
 		}
 	}
 }
 
 // function that translates all rectype ids in the passed string to there local/imported value
-function translateRtyIDs($strRtyIDs) {
-	global $error, $importLog, $sourceTempDBName, $targetDBName, $sourceDBID;
+function translateRtyIDs($strRtyIDs, $contextString, $forDtyID) {
+	global $error, $importLog, $tempDBName, $sourceDBName, $targetDBName, $sourceDBID;
 	if (!$strRtyIDs) {
 		return "";
 	}
@@ -228,10 +230,10 @@ function translateRtyIDs($strRtyIDs) {
 	$rtyIDs = explode(",",$strRtyIDs);
 	foreach($rtyIDs as $importRtyID) {
 	// Get recordtype data that has to be imported
-		$res = mysql_query("select * from ".$sourceTempDBName.".defRecTypes where rty_ID = ".$importRtyID);
+		$res = mysql_query("select * from ".$tempDBName.".defRecTypes where rty_ID = ".$importRtyID);
 		if(mysql_num_rows($res) == 0) {
 			$error = true;
-			makeLogEntry("rectype", $importRtyID, "Rectype was not found in source database, please contact owner of $sourceTempDBName");
+			makeLogEntry("defRectype", $importRtyID, " referenced rectype for $contextString in detailType '$forDtyID' was not found in (local temporary copy of )source database ($sourceDBName)");
 			return null; // missing rectype in importing DB
 		} else {
 			$importRty = mysql_fetch_assoc($res);
@@ -254,15 +256,15 @@ function translateRtyIDs($strRtyIDs) {
 			if(mysql_num_rows($resRtyExist) == 0 ) {
 //error_log("translateRtyIDS import rtyID - ".$importRty['rty_ID']);
 				$localRtyID = importRectype($importRty);
-				$msgCat = "Import RtyID";
+				$msg = " created provisional entry rectype as ID = $localRtyID";
 			} else {
 				$row = mysql_fetch_row($resRtyExist,MYSQL_NUM);
 				$localRtyID = $row[0];
-				$msgCat = "Translate RtyID";
+				$msg = " found matching rectype entry in $targetDBName rectype ID = $localRtyID";
 			}
 //error_log($msgCat." $importRtyID to local ID $localRtyID ");
 			if (!$error){
-				makeLogEntry($msgCat,$importRtyID, $msgCat." $importRtyID to local ID $localRtyID ");
+				makeLogEntry("defRecType",$importRtyID, "while translating rectype for $contextString in detailType '$forDtyID'".$msg);
 				array_push($outputRtyIDs, $localRtyID); // store the local ID in output array
 			}
 		}
@@ -274,7 +276,7 @@ function translateRtyIDs($strRtyIDs) {
 }
 
 function importRectype($importRty) {
-	global $error, $importLog, $sourceTempDBName, $targetDBName, $sourceDBID;
+	global $error, $importLog, $tempDBName, $sourceDBName, $targetDBName, $sourceDBID;
 	static $importRtyGroupID;
 	$importRtyID = $importRty['rty_ID'];
 //error_log("import rtyID $importRtyID to  $targetDBName DB");
@@ -293,16 +295,16 @@ function importRectype($importRty) {
 //error_log("import rty 2");
 			if(mysql_error()) {
 				$error = true;
-				makeLogEntry("rectypeGroup", -1, mysql_error());
+				makeLogEntry("rectypeGroup", -1, "Error finding defRectypeGroup entry 'Import' - ".mysql_error());
 			} else {
 				$importRtyGroupID = mysql_insert_id();
-				makeLogEntry("rectypeGroup", $importRtyGroupID, "'Import' record type group was created");
+				makeLogEntry("defRectypeGroup", -1, "Created provisional defRectypeGroup entry 'Import' as ID = $importRtyGroupID");
 			}
 		} else {
 //error_log("import rty 3");
 			$row = mysql_fetch_row($rtyGroup);
 			$importRtyGroupID = $row[0];
-			makeLogEntry("rectypeGroup", $importRtyGroupID, "'Import' record type group was found");
+			makeLogEntry("defRectypeGroup", -1, "defRectypeGroup entry 'Import' found in $targetDBName as ID = $importRtyGroupID");
 		}
 	}
 //error_log("import rty 3a");
@@ -312,7 +314,7 @@ function importRectype($importRty) {
 		// get rectype Fields and check they are not already imported
 		$recStructuresByDtyID = array();
 		// get the rectypes structure
-		$resRecStruct = mysql_query("select * from ".$sourceTempDBName.".defRecStructure where rst_RecTypeID = ".$importRtyID);
+		$resRecStruct = mysql_query("select * from ".$tempDBName.".defRecStructure where rst_RecTypeID = ".$importRtyID);
 		while($rtsFieldDef = mysql_fetch_assoc($resRecStruct)) {
 			$importDtyID = $rtsFieldDef['rst_DetailTypeID'];
 			$recStructuresByDtyID[$importDtyID] = $rtsFieldDef;
@@ -327,7 +329,7 @@ function importRectype($importRty) {
 							"where rst_OriginatingDBID = ".$rtsFieldDef["rst_OriginatingDBID"].
 							" AND rst_IDInOriginatingDB = ".$rtsFieldDef["rst_IDInOriginatingDB"]);
 			if ( mysql_num_rows($resRstExist)) {
-				makeLogEntry("rectypeStructure", $importDtyID, "Error: found existing rectype structure \"".$rtsFieldDef["rst_DisplayName"]."\"");
+				makeLogEntry("defRecStructure", $importDtyID, "Error: found existing field structure while importing field \"".$rtsFieldDef["rst_DisplayName"]."\" defDetailType ID = $importDtyID rectype ID = $importRtyID");
 				$error = true;
 			}
 		}
@@ -339,8 +341,8 @@ function importRectype($importRty) {
 			$recTypeSuffix = 2;
 			while(mysql_num_rows(mysql_query("select * from ".$targetDBName.".defRecTypes where rty_Name = '".$importRty["rty_Name"]."'")) != 0) {
 				$importRty["rty_Name"] = $importRty["rty_Name"] . $recTypeSuffix;
-				makeLogEntry("rectype", 0, "Rectype Name used in source DB already exist in target DB. Added suffix: ".$detailTypeSuffix);
-				$detailTypeSuffix++;
+				makeLogEntry("defRectype",$importRtyID, "Rectype Name used in source DB already exist in target DB($targetDBName). Added suffix: ".$recTypeSuffix);
+				$recTypeSuffix++;
 			}
 
 			// Change some recordtype fields to make it suitable for the new DB
@@ -361,10 +363,10 @@ function importRectype($importRty) {
 			if(mysql_error()) {
 				$error = true;
 //error_log("import rty $importRtyID 3bbb  ". mysql_error());
-				makeLogEntry("rectype", -1, mysql_error());
+				makeLogEntry("defRectype", $importRtyID, "Error importing rectype - ".mysql_error());
 			} else {
 				$importedRecTypeID = mysql_insert_id();
-				makeLogEntry("rectype", $importedRecTypeID, "Successfully imported recordtype with name: \"".$importRty["rty_Name"]."\"");
+				makeLogEntry("defRectype", $importRtyID, " create provisional entry '".$importRty["rty_Name"]."' with ID = $importedRecTypeID");
 			}
 		}
 
@@ -372,11 +374,11 @@ function importRectype($importRty) {
 			// Import the structure for the recordtype imported
 			foreach ( $recStructuresByDtyID as $dtyID => $rtsFieldDef) {
 				// get import detailType for this field
-				 $resDTY= mysql_query("select * from ".$sourceTempDBName.".defDetailTypes where dty_ID = $dtyID");
+				 $resDTY= mysql_query("select * from ".$tempDBName.".defDetailTypes where dty_ID = $dtyID");
 				if(mysql_num_rows($resDTY) == 0) {
 					$error = true;
 //error_log("import rty $importRtyID 3cc  dtyID = $dtyID not in source db ");
-					makeLogEntry("detailtype", $dtyID, "Detailtype was not found in source database, please contact owner of $sourceTempDBName");
+					makeLogEntry("defDetailType", $dtyID, "Detailtype ($dtyID) for field '".$rtsFieldDef['rst_DisplayName']."' of rectype ID (".$rtsFieldDef['rst_RecTypeID'].") not found in source database, please contact owner of $sourceDBName");
 					return null; // missing detatiltype in importing DB
 				} else {
 					$importDty = mysql_fetch_assoc($resDTY);
@@ -409,24 +411,20 @@ function importRectype($importRty) {
 				if(!$error && @$rtsFieldDef['rst_FilteredJsonTermIDTree'] && $rtsFieldDef['rst_FilteredJsonTermIDTree'] != '') {
 //error_log("import rty $importRtyID 6  dtyID = ".$importDty['dty_ID']."->".$rtsFieldDef["rst_DetailTypeID"]." (".$rtsFieldDef['rst_FilteredJsonTermIDTree'].")");
 					// term tree exist so need to translate to new ids
-					$rtsFieldDef['rst_FilteredJsonTermIDTree'] =  translateTermIDs($rtsFieldDef['rst_FilteredJsonTermIDTree']);
+					$rtsFieldDef['rst_FilteredJsonTermIDTree'] =  translateTermIDs($rtsFieldDef['rst_FilteredJsonTermIDTree'],"filtered term tree"," field '".$rtsFieldDef['rst_DisplayName']."' detailTypeID = $dtyID in rectype '".$importRty["rty_Name"]."'");
 				}
 
 				if(!$error && @$rtsFieldDef['rst_TermIDTreeNonSelectableIDs'] && $rtsFieldDef['rst_TermIDTreeNonSelectableIDs'] != '') {
 //error_log("import rty $importRtyID 7  dtyID = ".$importDty['dty_ID']."->".$rtsFieldDef["rst_DetailTypeID"]);
 					// term non selectable list exist so need to translate to new ids
 //error_log("non selectable = ". print_r($rtsFieldDef['rst_TermIDTreeNonSelectableIDs'],true));
-					$termList = implode(",",$rtsFieldDef['rst_TermIDTreeNonSelectableIDs']);
-					$translatedTermList = translateTermIDs($termList);
-					if ($translatedTermList) {
-						$rtsFieldDef['rst_TermIDTreeNonSelectableIDs'] = "[".$translatedTermList."]";
-					}
+					$rtsFieldDef['rst_TermIDTreeNonSelectableIDs'] = translateTermIDs($rtsFieldDef['rst_TermIDTreeNonSelectableIDs'],"non-selectable"," field '".$rtsFieldDef['rst_DisplayName']."' detailTypeID = $dtyID in rectype '".$importRty["rty_Name"]."'");
 				}
 
 				if(!$error && @$rtsFieldDef['rst_PtrFilteredIDs'] && $rtsFieldDef['rst_PtrFilteredIDs'] != '') {
 //error_log("import rty $importRtyID 8  dtyID = ".$importDty['dty_ID']."->".$rtsFieldDef["rst_DetailTypeID"]);
 					// Target Rectype list exist so need to translate to new ids
-					$rtsFieldDef['rst_PtrFilteredIDs'] =  translateRtyIDs($rtsFieldDef['rst_PtrFilteredIDs']);
+					$rtsFieldDef['rst_PtrFilteredIDs'] =  translateRtyIDs($rtsFieldDef['rst_PtrFilteredIDs'],'filtered pointers',$importDty["dty_ID"]);
 				}
 //error_log("import rty $importRtyID 9  dtyID = ".$importDty['dty_ID']."->".$rtsFieldDef["rst_DetailTypeID"]);
 
@@ -446,10 +444,10 @@ function importRectype($importRty) {
 					// Write the insert action to $logEntry, and set $error to true if one occurred
 					if(mysql_error()) {
 						$error = true;
-						makeLogEntry("defRecStructure", $importRstID, mysql_error());
+						makeLogEntry("defRecStructure", $importRstID, "Error importing field '".$rtsFieldDef["rst_DisplayName"]."' for rectype '".$importRty["rty_Name"]."' - ".mysql_error());
 						break;
 					} else {
-						makeLogEntry("defRecStructure",  mysql_insert_id(), "New defRecStructure field imported");
+						makeLogEntry("defRecStructure", mysql_insert_id(), "created provisional entry '".$rtsFieldDef["rst_DisplayName"]."' for rectype '".$importRty["rty_Name"]."'");
 					}
 				}
 				if ($error) {
@@ -466,11 +464,12 @@ function importRectype($importRty) {
 
 
 // function that translates all term ids in the passed string to there local/imported value
-function translateTermIDs($formattedStringOfTermIDs) {
-	global $error, $importLog, $sourceTempDBName, $targetDBName, $sourceDBID;
+function translateTermIDs($formattedStringOfTermIDs, $contextString, $forEntryString) {
+	global $error, $importLog, $tempDBName, $targetDBName, $sourceDBID;
 	if (!$formattedStringOfTermIDs || $formattedStringOfTermIDs == "") {
 		return "";
 	}
+	makeLogEntry("Term Translation", -1, "Translating $contextString terms $formattedStringOfTermIDs for $forEntryString");
 	$retJSonTermIDs = $formattedStringOfTermIDs;
 	if (strpos($retJSonTermIDs,"{")!== false) {
 //error_log( "term tree string = ". $formattedStringOfTermIDs);
@@ -503,19 +502,19 @@ function translateTermIDs($formattedStringOfTermIDs) {
 }
 
 function importTermID($importTermID) {
-	global $error, $importLog, $sourceTempDBName, $targetDBName, $sourceDBID;
+	global $error, $importLog, $tempDBName, $targetDBName, $sourceDBID;
 //error_log( "import termID = ". $importTermID);
 	if (!$importTermID){
 		return "";
 	}
 	//the source term we want to import
-	$term = mysql_fetch_assoc(mysql_query("select * from ".$sourceTempDBName.".defTerms where trm_ID = ".$importTermID));
+	$term = mysql_fetch_assoc(mysql_query("select * from ".$tempDBName.".defTerms where trm_ID = ".$importTermID));
 	if(!$term || @$term['trm_ID'] != $importTermID) {
 		// log the problem and return an empty string
 		$error = true;
-		makeLogEntry("term", $importTermID, "Unable to import term id-$importTermID doesn't exist in sourceDB.");
+		makeLogEntry("defTterm", $importTermID, "Error term ID = $importTermID doesn't exist in sourceDB.");
 		if(mysql_error()) {
-			makeLogEntry("term", -1, mysql_error());
+			makeLogEntry("defTterm", $importTermID, "Error importing term - ".mysql_error());
 		}
 		return "";
 	} else {
@@ -540,11 +539,11 @@ function importTermID($importTermID) {
 				$localParentTermID = importTermID($sourceParentTermID);
 				// TODO: check that the term imported correctly
 				if (($localParentTermID == "") || ($localParentTermID == 0)) {
-					makeLogEntry("term", $sourceParentTermID, "Unable to import parentterm for term id-$importTermID .");
+					makeLogEntry("defTterm", $sourceParentTermID, "Error importing parentTerm for term ID =$importTermID .");
 					return "";
 				}else{
 					$term["trm_ParentTermID"] = $localParentTermID;
-					makeLogEntry("term", $localParentTermID, "Imported parentterm for term id-$sourceParentTermID .");
+					makeLogEntry("defTterm", $sourceParentTermID, "create provisional  parentTerm entry with term ID = $localParentTermID");
 				}
 			} else {
 				unset($term["trm_ParentTermID"]);
@@ -568,12 +567,11 @@ function importTermID($importTermID) {
 			// Write the insert action to $logEntry, and set $error to true if one occurred
 			if(mysql_error()) {
 				$error = true;
-				makeLogEntry("term", $importTermID, "Unable to insert term id-$importTermID .");
-				makeLogEntry("term", -1, mysql_error());
+				makeLogEntry("defTterm", $importTermID, "Error importing term -".mysql_error());
 				return "";
 			} else {
 				$newTermID = mysql_insert_id();
-				makeLogEntry("term", $newTermID, "New term imported");
+				makeLogEntry("defTterm", $importTermID, "created provisional term ID = $newTermID");
 			}
 
 			//handle inverseTerm if there is one
@@ -596,12 +594,12 @@ function makeLogEntry( $name = "unknown", $id = "", $msg = "no message" ) {
 	array_push($importLog, array($name, $id, $msg));
 }
 
-// Checks wether passed $sourceTempDBName contains 'temp_', and if so, deletes the database
+// Checks whether passed $tempDBName contains 'temp_', and if so, deletes the database
 function dropDB() {
-	$sourceTempDBName = $_GET["tempDBName"];
-	$isTempDB = strpos($sourceTempDBName, "temp_");
+	$tempDBName = $_GET["tempDBName"];
+	$isTempDB = strpos($tempDBName, "temp_");
 	if($isTempDB !== false) {
-		mysql_query("drop database ".$sourceTempDBName);
+		mysql_query("drop database ".$tempDBName);
 		if(!mysql_error()) {
 			echo "Temporary database was sucessfully deleted";
 			return true;

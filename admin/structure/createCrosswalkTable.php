@@ -169,6 +169,7 @@ function insertData() {
 }
 <?php
 echo 'var tempDBName = "'.$tempDBName.'";'. "\n";
+echo 'var sourceDBName = "'.$source_db_name.'";'. "\n";
 echo 'var URLBase = "'.HEURIST_URL_BASE.'";'. "\n";
 echo 'var importTargetDBName = "'.HEURIST_DBNAME.'";'. "\n";
 echo 'var importTargetDBFullName = "'.DATABASE.'";'. "\n";
@@ -474,7 +475,8 @@ function processAction(rtyID, action, rectypeName) {
 
 	xmlhttp.open("GET","processAction.php?"+
 						"action="+action+
-						"&tempSourceDBName="+tempDBName+
+						"&tempDBName="+tempDBName+
+						"&sourceDBName="+sourceDBName+
 						"&sourceDBID="+ (sourceDBID ? sourceDBID : "0")+
 						"&importRtyID="+rtyID+
 //						"&crwDefType="+crwDefType+

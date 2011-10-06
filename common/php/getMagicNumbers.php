@@ -3,6 +3,16 @@ require_once(dirname(__FILE__)."/../config/initialise.php");
 
 print "if (!top.HEURIST) top.HEURIST = {};\n";
 print "if (!top.HEURIST.magicNumbers) { \n top.HEURIST.magicNumbers = {";
+
+$rtDefines = getRTDefineKeys();
+$const = get_defined_constants(true);
+$userDefines = $const['user'];
+
+foreach ($rtDefines as $magicRTName) {
+	print " '$magicRTName' : ".(array_key_exists($magicRTName,$userDefines)?$userDefines[$magicRTName]:"''").",\n";
+}
+
+/*
 print " 'RT_INTERNET_BOOKMARK' : ".(defined('RT_INTERNET_BOOKMARK')?RT_INTERNET_BOOKMARK:"''").",\n";
 print " 'RT_NOTE' : ".(defined('RT_NOTE')?RT_NOTE:"''").",\n";
 print " 'RT_JOURNAL_ARTICLE' : ".(defined('RT_JOURNAL_ARTICLE')?RT_JOURNAL_ARTICLE:"''").",\n";
@@ -15,7 +25,15 @@ print " 'RT_AUTHOR_EDITOR' : ".(defined('RT_AUTHOR_EDITOR')?RT_AUTHOR_EDITOR:"''
 print " 'RT_BLOG_ENTRY' : ".(defined('RT_BLOG_ENTRY')?RT_BLOG_ENTRY:"''").",\n";
 print " 'RT_INTERPRETATION' : ".(defined('RT_INTERPRETATION')?RT_INTERPRETATION:"''").",\n";
 print " 'RT_FACTOID' : ".(defined('RT_FACTOID')?RT_FACTOID:"''").",\n";
+*/
 
+$dtDefines = getDTDefineKeys();
+
+foreach ($dtDefines as $magicDTName) {
+	print " '$magicDTName' : ".(array_key_exists($magicDTName,$userDefines)?$userDefines[$magicDTName]:"''").",\n";
+}
+
+/*
 print " 'DT_TITLE' : ".(defined('DT_TITLE')?DT_TITLE:"''").",\n";
 print " 'DT_GIVEN_NAMES' : ".(defined('DT_GIVEN_NAMES')?DT_GIVEN_NAMES:"''").",\n";
 print " 'DT_ALTERNATE_NAME' : ".(defined('DT_ALTERNATE_NAME')?DT_ALTERNATE_NAME:"''").",\n";
@@ -57,6 +75,9 @@ print " 'DT_KML' : ".(defined('DT_KML')?DT_KML:"''").",\n";
 print " 'DT_MINMUM_ZOOM_LEVEL' : ".(defined('DT_MINMUM_ZOOM_LEVEL')?DT_MINMUM_ZOOM_LEVEL:"''").",\n";
 print " 'DT_MAP_IMAGE_LAYER_REFERENCE' : ".(defined('DT_MAP_IMAGE_LAYER_REFERENCE')?DT_MAP_IMAGE_LAYER_REFERENCE:"''").",\n";
 print " 'DT_MAXIMUM_ZOOM_LEVEL' : ".(defined('DT_MAXIMUM_ZOOM_LEVEL')?DT_MAXIMUM_ZOOM_LEVEL:"''")."};};\n";
+*/
+
 print "if (top != window && !window.HEURIST) window.HEURIST = {};\n";
 print "if (!window.HEURIST.magicNumbers) { \n window.HEURIST.magicNumbers = top.HEURIST.magicNumbers;\n};";
+
 ?>

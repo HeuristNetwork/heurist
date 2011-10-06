@@ -234,79 +234,89 @@
 	define('DT_ALL_ASSOC_FILE','2-221');
 
 	$rtDefines = array(
-		'RT_INTERNET_BOOKMARK' => 2,
-		'RT_NOTE' => 3,
-		'RT_JOURNAL_ARTICLE' => 15,
-		'RT_BOOK' => 13,
-		'RT_JOURNAL_VOLUME' => 18,
-		'RT_RELATION' => 1,
-		'RT_PERSON' => 20,
-		'RT_MEDIA_RECORD' => 5,
-		'RT_AUTHOR_EDITOR' => 23,
-		'RT_BLOG_ENTRY' => 8,
-		'RT_INTERPRETATION' => 10,
-		'RT_FACTOID' => 22);
+		'RT_INTERNET_BOOKMARK' => array(2,2),
+		'RT_NOTE' => array(2,3),
+		'RT_JOURNAL_ARTICLE' => array(2,15),
+		'RT_BOOK' => array(2,13),
+		'RT_JOURNAL_VOLUME' => array(2,18),
+		'RT_RELATION' => array(2,1),
+		'RT_PERSON' => array(2,20),
+		'RT_MEDIA_RECORD' => array(2,5),
+		'RT_AUTHOR_EDITOR' => array(2,23),
+		'RT_BLOG_ENTRY' => array(2,8),
+		'RT_INTERPRETATION' => array(2,10),
+		'RT_FACTOID' => array(2,22));
 
 	foreach ($rtDefines as $str => $id) {
-		defineRTLocalMagic($str,$id);
+		defineRTLocalMagic($str,$id[1],$id[0]);
 	}
 
 	$dtDefines = array(
-		'DT_TITLE' => 1,
-		'DT_GIVEN_NAMES' => 33,
-		'DT_ALTERNATE_NAME' => 36,
-		'DT_CREATOR' => 19,
-		'DT_EXTENDED_DESCRIPTION' => 17,
-		'DT_LINKED_RESOURCE' => 4,
-		'DT_RELATION_TYPE' => 5,
-		'DT_NOTES' => 12,	//TODO: change dty to Short summary and remove from code
-		'DT_PRIMARY_RESOURCE' => 7,
-		'DT_FULL_IMAG_URL' => 603,	//TODO: remove from code
-		'DT_THUMB_IMAGE_URL' => 606,	//TODO: remove from code
-		'DT_ASSOCIATED_FILE' => 8,
-		'DT_GEO_OBJECT' => 11,
-		'DT_OTHER_FILE' => 62,
-		'DT_LOGO_IMAGE' => 222,
-		'DT_THUMBNAIL' => 9,
-		'DT_IMAGES' => 222,	//TODO: remove from code
-		'DT_DATE' => 16,
-		'DT_START_DATE' => 2,
-		'DT_END_DATE' => 3,
-		'DT_INTERPRETATION_REFERENCE' => 13,
-		'DT_DOI' => 99,
-		'DT_WEBSITE_ICON' => 347,
-		'DT_ISBN' => 97,
-		'DT_ISSN' => 108,
-		'DT_JOURNAL_REFERENCE' => 111,
-		'DT_SHORT_SUMMARY' => 12,
-		'DT_MEDIA_REFERENCE' => 508,
-		'DT_TEI_DOCUMENT_REFERENCE' => 322,
-		'DT_START_ELEMENT' => 539,
-		'DT_END_ELEMENT' => 540,
-		'DT_START_WORD' => 329,
-		'DT_MIME_TYPE' => 48,
-		'DT_SERVICE_URL' => 339,
-		'DT_MAP_IMAGE_LAYER_SCHEMA' => 585,
-		'DT_KML_FILE' => 552,
-		'DT_TITLE_SHORT' => 55,
-		'DT_KML' => 138,
-		'DT_MINMUM_ZOOM_LEVEL' => 586,
-		'DT_MAP_IMAGE_LAYER_REFERENCE' => 92,
-		'DT_MAXIMUM_ZOOM_LEVEL' => 587);
+		'DT_TITLE' => array(2,1),
+		'DT_GIVEN_NAMES' => array(2,33),
+		'DT_ALTERNATE_NAME' => array(2,36),
+		'DT_CREATOR' => array(2,19),
+		'DT_EXTENDED_DESCRIPTION' => array(2,17),
+		'DT_LINKED_RESOURCE' => array(2,4),
+		'DT_RELATION_TYPE' => array(2,5),
+		'DT_NOTES' => array(2,12),	//TODO: change dty to Short summary and remove from code
+		'DT_PRIMARY_RESOURCE' => array(2,7),
+		'DT_FULL_IMAG_URL' => array(2,603),	//TODO: remove from code
+		'DT_THUMB_IMAGE_URL' => array(2,606),	//TODO: remove from code
+		'DT_ASSOCIATED_FILE' => array(2,8),
+		'DT_GEO_OBJECT' => array(2,11),
+		'DT_OTHER_FILE' => array(2,62),
+		'DT_LOGO_IMAGE' => array(2,222),
+		'DT_THUMBNAIL' => array(2,9),
+		'DT_IMAGES' => array(2,222),	//TODO: remove from code
+		'DT_DATE' => array(2,16),
+		'DT_START_DATE' => array(2,2),
+		'DT_END_DATE' => array(2,3),
+		'DT_INTERPRETATION_REFERENCE' => array(2,13),
+		'DT_DOI' => array(2,99),
+		'DT_WEBSITE_ICON' => array(2,347),
+		'DT_ISBN' => array(2,97),
+		'DT_ISSN' => array(2,108),
+		'DT_JOURNAL_REFERENCE' => array(2,111),
+		'DT_SHORT_SUMMARY' => array(2,12),
+		'DT_MEDIA_REFERENCE' => array(2,508),
+		'DT_TEI_DOCUMENT_REFERENCE' => array(2,322),
+		'DT_START_ELEMENT' => array(2,539),
+		'DT_END_ELEMENT' => array(2,540),
+		'DT_START_WORD' => array(2,329),
+		'DT_MIME_TYPE' => array(2,48),
+		'DT_SERVICE_URL' => array(2,339),
+		'DT_MAP_IMAGE_LAYER_SCHEMA' => array(2,585),
+		'DT_KML_FILE' => array(2,552),
+		'DT_TITLE_SHORT' => array(2,55),
+		'DT_KML' => array(2,138),
+		'DT_MINMUM_ZOOM_LEVEL' => array(2,586),
+		'DT_MAP_IMAGE_LAYER_REFERENCE' => array(2,92),
+		'DT_MAXIMUM_ZOOM_LEVEL' => array(2,587));
 
 	foreach ($dtDefines as $str => $id) {
-		defineDTLocalMagic($str,$id);
+		defineDTLocalMagic($str,$id[1],$id[0]);
 	}
 
-function defineRTLocalMagic($defString, $rtID) {
-	$id = rectypeLocalIDLookup($rtID);
+function getRTDefineKeys(){
+	global $rtDefines;
+	return array_keys($rtDefines);
+}
+
+function getDTDefineKeys(){
+	global $dtDefines;
+	return array_keys($dtDefines);
+}
+
+function defineRTLocalMagic($defString, $rtID,$dbID) {
+	$id = rectypeLocalIDLookup($rtID,$dbID);
 	if ($id) {
 		define($defString,$id);
 	}
 }
 
-function defineDTLocalMagic($defString, $dtID) {
-	$id = detailtypeLocalIDLookup($dtID);
+function defineDTLocalMagic($defString, $dtID,$dbID) {
+	$id = detailtypeLocalIDLookup($dtID,$dbID);
 	if ($id) {
 		define($defString,$id);
 	}
