@@ -17,7 +17,7 @@
 		<link rel=stylesheet href="../../../common/css/autocomplete.css">
 		<!--link rel=stylesheet href="../../../common/css/woot.css"-->
 	</head>
-	<body class="editTab" onload="onshow();">
+	<body class="editTab" onLoad="onshow();">
 		<script>
 
 			function onshow() {
@@ -68,11 +68,12 @@
 				<div class=input-row>
 					<div class=input-header-cell>Private notes<div class="help prompt">These notes are private and visible only to you.</div> </div>
 					<div class=input-cell>
+                    <fieldset>
+                    <legend>Personal Notes</legend>
 						<div id=personalWoot></div>
-						<div>
-							<a id=woot-ext-link target=_blank href="../../woot/woot.html">open in new window</a>
-						</div>
-					</div>
+						<div><a id=woot-ext-link target=_blank href="../../woot/woot.html">open in new window</a></div>
+					</fieldset>
+                    </div>
 				</div>
 
 				<div class=input-row>
@@ -85,7 +86,7 @@
 		</div>
 		</form>
 
-		<form method=post jsonAction="records/reminders/saveReminder.php" action="records/reminders/saveReminder.php" onsubmit="return false;">
+		<form method=post jsonAction="records/reminders/saveReminder.php" action="records/reminders/saveReminder.php" onSubmit="return false;">
 			<div><!-- separate table, because this is a separate form -->
 					<div class=input-row>
 						<div class=input-header-cell>Reminders</div>

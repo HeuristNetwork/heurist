@@ -190,7 +190,7 @@ body.popup div.header {
 body.popup h3 {
 	white-space:normal
 }
-div.popup div.header, div.popup div.header span {
+div.popup div.header, div.popup div.header > span {
 	background-attachment:scroll;
 	background-image:url("../images/backgrounds/banner_bg.png");
 	background-position:0 bottom;
@@ -438,7 +438,7 @@ select, input, textarea {font:2ex;}
 
 /******* backgrounds ********/
 body, .darkBG {background-image:none;background-color: #BDBDBD;}
-
+.mceContentBody {background-color:#FFF}
 /*body, .darkBG {background-image:url("../images/backgrounds/dark_bg.png") !important;background-repeat:repeat;}*/
 body.editTab, body.popup, body.tag_edit, body.bookmark_import, body.body_only {font-size: 11px;background-image:none !important;background-color: #ECF1FB; padding:15px 20px 10px 30px;overflow:auto;}
 body.popup {background-color:#FFF}
