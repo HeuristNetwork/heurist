@@ -77,6 +77,7 @@ print " 'DT_MAP_IMAGE_LAYER_REFERENCE' : ".(defined('DT_MAP_IMAGE_LAYER_REFERENC
 print " 'DT_MAXIMUM_ZOOM_LEVEL' : ".(defined('DT_MAXIMUM_ZOOM_LEVEL')?DT_MAXIMUM_ZOOM_LEVEL:"''")."};};\n";
 */
 
+print "'DEFAULT':0};};\n";
 print "if (top != window && !window.HEURIST) window.HEURIST = {};\n";
 print "if (!window.HEURIST.magicNumbers) { \n window.HEURIST.magicNumbers = top.HEURIST.magicNumbers;\n};";
 
