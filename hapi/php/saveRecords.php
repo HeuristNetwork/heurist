@@ -30,6 +30,10 @@ mysql_connection_db_overwrite(DATABASE);
 mysql_query("start transaction");
 
 /* check if there are any records identified only by their hhash values */
+if (!is_logged_in()) {// must be logged into save
+	jsonError("invalid workgroup");
+}
+
 $nonces = array();
 $retitleRecs = array();
 $addRecDefaults = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['addRecDefaults'];
@@ -47,9 +51,14 @@ if ($addRecDefaults){
 
 foreach ($_REQUEST["records"] as $nonce => $record) {
 	if (! $record["id"]) {
+		$wg = defined(HEURIST_NEWREC_OWNER_ID) ? HEURIST_NEWREC_OWNER_ID:get_user_id();
+		if(@$record["group"]){// check membership as non-member saves are not allowed
+			$res = mysql_query("select * from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=" . get_user_id() . " and ugl_GroupID=" . $record["group"]);
+			$wg = (mysql_num_rows($res) > 0 ? $record["group"]: get_user_id());
+		}
 		mysql__insert("Records", array("rec_AddedByUGrpID" => get_user_id(),
-										"rec_OwnerUGrpID"=> $userDefaultOwnerGroupID ? $userDefaultOwnerGroupID :
-																(HEURIST_NEWREC_OWNER_ID ? HEURIST_NEWREC_OWNER_ID:0),
+										"rec_OwnerUGrpID" => $wg,
+										"rec_FlagTemporary" => 1,
 										"rec_Added" => date('Y-m-d H:i:s')));
 		$id = mysql_insert_id();
 		$_REQUEST["records"][$nonce]["id"] = $id;
@@ -63,7 +72,6 @@ foreach ($_REQUEST["records"] as $nonce => $record) {
 // FIXME?  should we perhaps index these by the nonce
 	array_push($out["record"], saveRecord(@$record["id"], @$record["type"], @$record["url"], @$record["notes"], @$record["group"], @$record["vis"], @$record["bookmark"], @$record["pnotes"], @$record["rating"], @$record["tags"], @$record["wgTags"], @$record["detail"], @$record["-notify"], @$record["+notify"], @$record["-comment"], @$record["comment"], @$record["+comment"], $nonces, $retitleRecs));
 }
-
 
 if (count($retitleRecs) > 0) {
 	foreach ( $retitleRecs as $id  ) {

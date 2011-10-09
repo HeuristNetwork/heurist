@@ -52,7 +52,7 @@ $query = 'select SQL_CALC_FOUND_ROWS
           rec_RecTypeID,
           rec_Title,
           rec_OwnerUGrpID,
-          if(rec_NonOwnerVisibility="hidden",1,0),
+          rec_NonOwnerVisibility,
           rec_URLLastVerified,
           rec_URLErrorMessage,
           bkm_PwdReminder ';

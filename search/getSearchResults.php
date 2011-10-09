@@ -186,7 +186,7 @@ function loadBareRecordFromDB($id) {
 	            rec_URL,
 	            rec_ScratchPad,
 	            rec_OwnerUGrpID,
-	            if (rec_NonOwnerVisibility = 'hidden', 0, 1) as rec_NonOwnerVisibility,
+	            rec_NonOwnerVisibility,
 	            rec_URLLastVerified,
 	            rec_URLErrorMessage,
 	            rec_Added,

@@ -150,12 +150,12 @@ var HAPI = {
 				}
 				else if ((c >= 128) && (c < 2048)) {
 					output += String.fromCharCode((c >> 6) | 0xC0) +
-					          String.fromCharCode((c & 0x3F) | 0x80);
+							  String.fromCharCode((c & 0x3F) | 0x80);
 				}
 				else {
 					output += String.fromCharCode((c >> 12) | 0xE0) +
-					          String.fromCharCode(((c >> 6) & 0x3F) | 0x80) +
-					          String.fromCharCode((c & 0x3F) | 0x80);
+							  String.fromCharCode(((c >> 6) & 0x3F) | 0x80) +
+							  String.fromCharCode((c & 0x3F) | 0x80);
 				}
 			}
 
@@ -258,16 +258,16 @@ var HAPI = {
 			}
 
 			switch (inputLength % 4) {
-			    case 0:
+				case 0:
 				i = 0x080000000;
 				break;
-			    case 1:
+				case 1:
 				i = input.charCodeAt(inputLength-1) << 24 | 0x800000;
 				break;
-			    case 2:
+				case 2:
 				i = input.charCodeAt(inputLength-2) << 24 | input.charCodeAt(inputLength-1) << 16 | 0x8000;
 				break;
-			    case 3:
+				case 3:
 				i = input.charCodeAt(inputLength-3) << 24 | input.charCodeAt(inputLength-2) << 16 | input.charCodeAt(inputLength-1) << 8 | 0x80;
 				break;
 			}
@@ -544,12 +544,12 @@ var HGeographicValue = function(type, wkt) {
 	// We use the generic HGeographicValue constructor as a factory for specific Geographic values if GOI is loaded
 	if (HAPI.GOI && type) {
 		switch (type) {
-		    case "p": HAPI.GOI.PointValue.call(this, wkt); break;
-		    case "r": HAPI.GOI.BoundsValue.call(this, wkt); break;
-		    case "c": HAPI.GOI.CircleValue.call(this, wkt); break;
-		    case "pl": HAPI.GOI.PolygonValue.call(this, wkt); break;
-		    case "l": HAPI.GOI.PathValue.call(this, wkt); break;
-		    default:
+			case "p": HAPI.GOI.PointValue.call(this, wkt); break;
+			case "r": HAPI.GOI.BoundsValue.call(this, wkt); break;
+			case "c": HAPI.GOI.CircleValue.call(this, wkt); break;
+			case "pl": HAPI.GOI.PolygonValue.call(this, wkt); break;
+			case "l": HAPI.GOI.PathValue.call(this, wkt); break;
+			default:
 			throw new HAPI.GOI.InvalidGeographicValueException("unknown geographic type");
 		}
 	}
@@ -588,7 +588,7 @@ var HRecord = function() {
 	var _url = null;
 	var _notes = null;
 
-	var _workgroup = null, _nonworkgroupVisible = true;	// default to "read-only but visible" outside this workgroup
+	var _workgroup = null, _nonOwnerVisible = 'viewable';	// default to "read-only but visible" outside this workgroup
 	var _urlDate = null, _urlError = null;
 
 	var _creationDate = null, _modificationDate = null;
@@ -916,7 +916,7 @@ var HRecord = function() {
 	this.setWorkgroup = function(workgroup) {
 		/* PRE */ if (! HAPI.isA(workgroup, "HWorkgroup")) { throw new HTypeException("HWorkgroup object required"); }
 		if (_readonly) { throw new HPermissionException("Record is read-only"); }
-		if (_workgroup  &&  ! HCurrentUser.isWorkgroupAdmin(_workgroup)) {
+		if (_workgroup  &&  ! HCurrentUser.isInWorkgroup(_workgroup)) {
 			// workgroup is already set for this record
 			throw new HPermissionException("Non-administrator cannot remove workgroup restriction");
 		}
@@ -928,14 +928,17 @@ var HRecord = function() {
 		_modified = true;
 	};
 
-	this.getNonWorkgroupVisible = function() { return (_workgroup === null  ||  _nonworkgroupVisible === true); };
+	this.getNonWorkgroupVisible = function() { return (_workgroup === null  ||  _nonOwnerVisible.toLowerCase !== 'hidden'); };
 	this.setNonWorkgroupVisible = function(visible) {
 		if (_readonly) { throw new HPermissionException("Record is read-only"); }
 		if (! _workgroup) { return; }
 		if (! HCurrentUser.isInWorkgroup(_workgroup)) {
 			throw new HPermissionException("Non-member cannot change non-workgroup visibility");
 		}
-		_nonworkgroupVisible = visible? true : false;
+		_nonOwnerVisible = visible? true : false;
+		_nonOwnerVisible = (typeof visible == 'string' &&
+									visible.toLowerCase() in {'hidden':1,'viewable':1,'pending':1,'public':1}?
+										 visible.toLowerCase() : (!visible || visible == '0'? 'hidden':'viewable'));
 		_modified = true;
 	};
 
@@ -1307,12 +1310,12 @@ var HRecord = function() {
 			}
 			else if (typeof(val) === "object"  &&  val.constructor === Date) {
 				return 	(val.getFullYear() + "-" +
-				       	(val.getMonth() < 9  ?  "0" + (val.getMonth()+1)  :  val.getMonth()+1) + "-" +
-				       	(val.getDate() <= 9  ?  "0" + val.getDate()  :  val.getDate()) +
+					(val.getMonth() < 9  ?  "0" + (val.getMonth()+1)  :  val.getMonth()+1) + "-" +
+					(val.getDate() <= 9  ?  "0" + val.getDate()  :  val.getDate()) +
 					(val.getSeconds() != 0 ? " "+  (val.getHours() < 10 ? "0"+ val.getHours() : val.getHours()) + ":" +
 					(val.getMinutes() < 10 ? "0"+ val.getMinutes() : val.getMinutes()) + ":" +
 					(val.getSeconds() < 10 ? "0"+ val.getSeconds() : val.getSeconds()) :
-				       	((val.getHours() !=0 || val.getMinutes()!=0) ? " " + (val.getHours() < 10 ? "0"+ val.getHours() : val.getHours()) + ":" +
+					((val.getHours() !=0 || val.getMinutes()!=0) ? " " + (val.getHours() < 10 ? "0"+ val.getHours() : val.getHours()) + ":" +
 					(val.getMinutes() < 10 ? "0"+ val.getMinutes() : val.getMinutes()) : "")));
 			}
 			else {
@@ -1326,7 +1329,7 @@ var HRecord = function() {
 			url: (_url || ""),
 			notes: (_notes || ""),
 			group: (_workgroup? _workgroup.getID() : ""),
-			vis: (_nonworkgroupVisible || ""),
+			vis: (_nonOwnerVisible || ""),
 
 			bookmark: (_isPersonalised? 1 : 0),
 			pnotes: (_personalNotes || ""),
@@ -1405,7 +1408,9 @@ var HRecord = function() {
 		_url = url;
 		_notes = notes;
 		_workgroup = wg? HWorkgroupManager.getWorkgroupById(wg) : null;
-		_nonworkgroupVisible = nonwgVis;
+		_nonOwnerVisible = (typeof nonwgVis == 'string' &&
+									nonwgVis.toLowerCase() in {'hidden':1,'viewable':1,'pending':1,'public':1}?
+										 nonwgVis.toLowerCase() : (!nonwgVis || nonwgVis == '0'? 'hidden':'viewable'));
 		_urlDate = urlDate;
 		_urlError = urlError;
 		_creationDate = cDate;
@@ -1750,13 +1755,13 @@ var HFrequency = {
 
 	isValidFrequency: function(value) {
 		switch (value.toLowerCase()) {
-		    case "once":
-		    case "daily":
-		    case "weekly":
-		    case "monthly":
-		    case "annually":
+			case "once":
+			case "daily":
+			case "weekly":
+			case "monthly":
+			case "annually":
 			return true;
-		    default:
+			default:
 			return false;
 		}
 	},
@@ -1827,33 +1832,33 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
 
 		var valueType = typeof(value);
 		switch (_variety) {
-		    case HVariety.LITERAL:
+			case HVariety.LITERAL:
 			case HVariety.BLOCKTEXT:
 			case HVariety.BOOLEAN:
 			return (valueType === "boolean"  ||  valueType === "number"  ||  valueType === "string");
 
-		    case HVariety.DATE:
+			case HVariety.DATE:
 			// Date object is alright; so are certain numbers and strings
 			return ((valueType === "object"  &&  value.constructor === Date)
 					||  valueType === "number"  ||  valueType === "string");
 
-		    case HVariety.ENUMERATION:
+			case HVariety.ENUMERATION:
 			case HVariety.RELATIONTYPE:
 			// Check that we were passed a literal ...
 			if (valueType !== "boolean"  &&  valueType !== "number"  &&  valueType !== "string") { return false; }
 			// ... now check that it is one of the legitimate enumeration values for this type.
 			return (_enumsMap[("" + value).toLowerCase()] !== undefined);	// saw TODO it's necessary to check enums by recType
 
-		    case HVariety.REFERENCE:
+			case HVariety.REFERENCE:
 			return (HAPI.isA(value, "HRecordStub")  ||  (HAPI.isA(value, "HRecord")  &&  ! HAPI.isA(value, "HNotes")));
 
-		    case HVariety.FILE:
+			case HVariety.FILE:
 			return HAPI.isA(value, "HFile");
 
-		    case HVariety.GEOGRAPHIC:
+			case HVariety.GEOGRAPHIC:
 			return HAPI.isA(value, "HGeographicValue");
 
-		    default:
+			default:
 			return false;
 		}
 	};
@@ -1906,7 +1911,7 @@ var HComment = function(parentObject, autoAdd) {
 	if (! HCurrentUser.isLoggedIn()) { throw new HNotLoggedInException(); }
 
 	if (! parentObject  ||  typeof(parentObject) !== "object"  ||
-	    (! HAPI.isA(parentObject, "HRecord")  &&  ! HAPI.isA(parentObject, "HComment"))) {
+		(! HAPI.isA(parentObject, "HRecord")  &&  ! HAPI.isA(parentObject, "HComment"))) {
 		throw new HTypeException("HRecord or HComment object required");
 	}
 	if (HAPI.isA(parentObject, "HNotes")) {
@@ -2132,9 +2137,9 @@ var HTagManager = new function(tags) {
 
 		if (term === "") { return []; }
 
-		term = term.replace(/[^a-zA-Z0-9]/g, " ");      // remove punctuation and other non-alphanums
-		term = term.toLowerCase().replace(/^ +| +$/, "");       // trim whitespace from start and end
-		regexSafeTerm = term.replace(/[\\^.$|()\[\]*+?{}]/g, "\\$0");       // neutralise any special regex characters
+		term = term.replace(/[^a-zA-Z0-9]/g, " ");	  // remove punctuation and other non-alphanums
+		term = term.toLowerCase().replace(/^ +| +$/, "");	   // trim whitespace from start and end
+		regexSafeTerm = term.replace(/[\\^.$|()\[\]*+?{}]/g, "\\$0");	   // neutralise any special regex characters
 		if (regexSafeTerm.indexOf(" ") === -1) {
 			// term is a single word ... look for it to start any word in the tag
 			regex = new RegExp("(.?)\\b" + regexSafeTerm);
@@ -2198,11 +2203,11 @@ HTagManager.prototype = new HObject();
 HAPI.TagManager = HTagManager;
 
 
-var HWorkgroupManager = new function(workgroups) {
+var HWorkgroupManager = new function(workgroups, users) {
 	/* workgroups is an array, each entry is a 5let of [id, name, longname, description, url] */
 	var _workgroups = [];
-    var _workgroupsMap = {};
-    var _workgroupsNameMap = {};
+	var _workgroupsMap = {};
+	var _workgroupsNameMap = {};
 
 	var wg, newWorkgroup;
 	for (var i=0; i < workgroups.length; ++i) {
@@ -2211,13 +2216,21 @@ var HWorkgroupManager = new function(workgroups) {
 
 		_workgroups.push(newWorkgroup);
 		_workgroupsMap[wg[0]] = newWorkgroup;
-        _workgroupsNameMap[wg[1].toLowerCase()] = newWorkgroup;
-    }
+		_workgroupsNameMap[wg[1].toLowerCase()] = newWorkgroup;
+	}
+	for (var i=0; i < users.length; ++i) {
+		wg = users[i];
+		newWorkgroup = new HWorkgroup(parseInt(wg[0]), wg[1], wg[2], 'user', '');
 
-    this.getWorkgroupById = function(id) { return (_workgroupsMap[id] || null); };
-    this.getWorkgroupByName = function(name) { return (_workgroupsNameMap[name.toLowerCase()] || null); };
+		_workgroups.push(newWorkgroup);
+		_workgroupsMap[wg[0]] = newWorkgroup;
+		_workgroupsNameMap[wg[1].toLowerCase()] = newWorkgroup;
+	}
+
+	this.getWorkgroupById = function(id) { return (_workgroupsMap[id] || null); };
+	this.getWorkgroupByName = function(name) { return (_workgroupsNameMap[name.toLowerCase()] || null); };
 	this.getWorkgroups = function() { return _workgroups.slice(0); };
-}(HAPI_commonData.workgroups || []);
+}(HAPI_commonData.workgroups || [],HAPI_commonData.users || []);
 HWorkgroupManager.prototype = new HObject();
 HAPI.WorkgroupManager = HWorkgroupManager;
 
@@ -2225,8 +2238,8 @@ HAPI.WorkgroupManager = HWorkgroupManager;
 var HWorkgroupTagManager = new function(wgTags) {
 	/* wgTags is an array, each entry is a triplet of [id, name, workgroupID] */
 	var _wgTags = [];
-    var _wgTagsById = {};
-    var _wgTagsByName = {};
+	var _wgTagsById = {};
+	var _wgTagsByName = {};
 	var _wgTagsByGroup = {};
 
 	/* wgTags are constructed by the tag manager */
@@ -2238,8 +2251,8 @@ var HWorkgroupTagManager = new function(wgTags) {
 		newWgTag = new HWorkgroupTag(parseInt(wgTags[i][0]), wgTags[i][1], workgroup);
 
 		_wgTags.push(newWgTag);
-        _wgTagsById[wgTags[i][0]] = newWgTag;
-        _wgTagsByName[wgTags[i][1].toLowerCase()] = newWgTag;
+		_wgTagsById[wgTags[i][0]] = newWgTag;
+		_wgTagsByName[wgTags[i][1].toLowerCase()] = newWgTag;
 		if (_wgTagsByGroup[wgTags[i][2]]) {
 			_wgTagsByGroup[wgTags[i][2]].push(newWgTag);
 		}
@@ -2248,14 +2261,14 @@ var HWorkgroupTagManager = new function(wgTags) {
 		}
 	}
 
-    this.getWgTagById = function(id) {
-        if (! HCurrentUser.isLoggedIn()) { throw new HNotLoggedInException(); }
-        return (_wgTagsById[id] || null);
-    };
-    this.getWgTagByName = function(name) {
-        if (! HCurrentUser.isLoggedIn()) { throw new HNotLoggedInException(); }
-        return (_wgTagsByName[name.toLowerCase()] || null);
-    };
+	this.getWgTagById = function(id) {
+		if (! HCurrentUser.isLoggedIn()) { throw new HNotLoggedInException(); }
+		return (_wgTagsById[id] || null);
+	};
+	this.getWgTagByName = function(name) {
+		if (! HCurrentUser.isLoggedIn()) { throw new HNotLoggedInException(); }
+		return (_wgTagsByName[name.toLowerCase()] || null);
+	};
 	this.getAllWgTags = function() {
 		if (! HCurrentUser.isLoggedIn()) { throw new HNotLoggedInException(); }
 		return _wgTags.slice(0);
@@ -2338,56 +2351,56 @@ var HDetailManager = new function(detailTypes, detailRequirements) {
 		//19- 17-Status
 		//20- 18-Non-Owner Visibility
 
-    var _typesById = {};
-    var _typesByName = {};
-    var _detailTypesByRecordType = {};
-    var _requiredDetailTypesByRecordType = {};
-    var _recommendedDetailTypesByRecordType = {};
-    var _optionalDetailTypesByRecordType = {};
-    var _matchingDetailTypesByRecordType = {};
+	var _typesById = {};
+	var _typesByName = {};
+	var _detailTypesByRecordType = {};
+	var _requiredDetailTypesByRecordType = {};
+	var _recommendedDetailTypesByRecordType = {};
+	var _optionalDetailTypesByRecordType = {};
+	var _matchingDetailTypesByRecordType = {};
 
-    var _recordPlusTypeDetails = {};
+	var _recordPlusTypeDetails = {};
 
-    var i, dt, newType;
-    for (i=0; i < detailTypes.length; ++i) {
-        dt = detailTypes[i];
-        newType = new HDetailType(parseInt(dt[0]), dt[1], dt[2], dt[3], dt[4], dt[5]);
-        _typesById[dt[0]] = newType;
-        _typesByName[dt[1].toLowerCase()] = newType;
-    }
+	var i, dt, newType;
+	for (i=0; i < detailTypes.length; ++i) {
+		dt = detailTypes[i];
+		newType = new HDetailType(parseInt(dt[0]), dt[1], dt[2], dt[3], dt[4], dt[5]);
+		_typesById[dt[0]] = newType;
+		_typesByName[dt[1].toLowerCase()] = newType;
+	}
 
-    var dr, type;
-    for (i=0; i < detailRequirements.length; ++i) {
-        dr = detailRequirements[i];
-        _recordPlusTypeDetails[dr[0]+"."+dr[1]] = dr.slice(2);
+	var dr, type;
+	for (i=0; i < detailRequirements.length; ++i) {
+		dr = detailRequirements[i];
+		_recordPlusTypeDetails[dr[0]+"."+dr[1]] = dr.slice(2);
 		type = null;
 		if (dr[2] !== 'forbidden') {// non-excluded detail
-            type = _typesById[dr[1]];
-            if (_detailTypesByRecordType[dr[0]]) { _detailTypesByRecordType[dr[0]].push(type); }
-            else { _detailTypesByRecordType[dr[0]] = [type]; }
+			type = _typesById[dr[1]];
+			if (_detailTypesByRecordType[dr[0]]) { _detailTypesByRecordType[dr[0]].push(type); }
+			else { _detailTypesByRecordType[dr[0]] = [type]; }
 
 			if (dr[2] === 'required') {// required detail
-                if (_requiredDetailTypesByRecordType[dr[0]]) { _requiredDetailTypesByRecordType[dr[0]].push(type); }
-                else { _requiredDetailTypesByRecordType[dr[0]] = [type]; }
-            }
+				if (_requiredDetailTypesByRecordType[dr[0]]) { _requiredDetailTypesByRecordType[dr[0]].push(type); }
+				else { _requiredDetailTypesByRecordType[dr[0]] = [type]; }
+			}
 			else if (dr[2] === 'recommended') {// recommended detail
-                if (_recommendedDetailTypesByRecordType[dr[0]]) { _recommendedDetailTypesByRecordType[dr[0]].push(type); }
-                else { _recommendedDetailTypesByRecordType[dr[0]] = [type]; }
-            }
+				if (_recommendedDetailTypesByRecordType[dr[0]]) { _recommendedDetailTypesByRecordType[dr[0]].push(type); }
+				else { _recommendedDetailTypesByRecordType[dr[0]] = [type]; }
+			}
 			else {// optional detail
-                if (_optionalDetailTypesByRecordType[dr[0]]) { _optionalDetailTypesByRecordType[dr[0]].push(type); }
-                else { _optionalDetailTypesByRecordType[dr[0]] = [type]; }
-            }
-        }
+				if (_optionalDetailTypesByRecordType[dr[0]]) { _optionalDetailTypesByRecordType[dr[0]].push(type); }
+				else { _optionalDetailTypesByRecordType[dr[0]] = [type]; }
+			}
+		}
 
 		if (dr[6] && type) {
-            if (_matchingDetailTypesByRecordType[dr[0]]) { _matchingDetailTypesByRecordType[dr[0]].push(type); }
-            else { _matchingDetailTypesByRecordType[dr[0]] = [type]; }
-        }
-    }
+			if (_matchingDetailTypesByRecordType[dr[0]]) { _matchingDetailTypesByRecordType[dr[0]].push(type); }
+			else { _matchingDetailTypesByRecordType[dr[0]] = [type]; }
+		}
+	}
 
-    this.getDetailTypeById = function(id) { return (_typesById[id] || null); };
-    this.getDetailTypeByName = function(name) { return (_typesByName[name.toLowerCase()] || null); };
+	this.getDetailTypeById = function(id) { return (_typesById[id] || null); };
+	this.getDetailTypeByName = function(name) { return (_typesByName[name.toLowerCase()] || null); };
 	this.getDetailTypesForRecordType = function(recordType) {
 		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected"); }
 		return (_detailTypesByRecordType[recordType.getID()] || []).slice(0);
@@ -2623,11 +2636,11 @@ HAPI.XHR = {
 
 		Date.prototype.toJSON = function () {
 			return this.getUTCFullYear()   + '-' +
-			     f(this.getUTCMonth() + 1) + '-' +
-			     f(this.getUTCDate())      + 'T' +
-			     f(this.getUTCHours())     + ':' +
-			     f(this.getUTCMinutes())   + ':' +
-			     f(this.getUTCSeconds())   + 'Z';
+				 f(this.getUTCMonth() + 1) + '-' +
+				 f(this.getUTCDate())	  + 'T' +
+				 f(this.getUTCHours())	 + ':' +
+				 f(this.getUTCMinutes())   + ':' +
+				 f(this.getUTCSeconds())   + 'Z';
 		};
 
 
@@ -2638,25 +2651,25 @@ HAPI.XHR = {
 			var val;
 
 			switch (typeof value) {
-			    case 'string':
+				case 'string':
 				val = (r.test(value) ?
-			        '"' + value.replace(r, function (a) {
-			            var c = m[a];
-			            if (c) { return c; }
-			            c = a.charCodeAt();
-			            return '\\u00' + Math.floor(c / 16).toString(16) + (c % 16).toString(16);
-			        }) + '"' :
-			        '"' + value + '"');
+					'"' + value.replace(r, function (a) {
+						var c = m[a];
+						if (c) { return c; }
+						c = a.charCodeAt();
+						return '\\u00' + Math.floor(c / 16).toString(16) + (c % 16).toString(16);
+					}) + '"' :
+					'"' + value + '"');
 				return val;
 
-			    case 'number':
+				case 'number':
 				return isFinite(value) ? String(value) : 'null';
 
-			    case 'boolean':
-			    case 'null':
+				case 'boolean':
+				case 'null':
 				return String(value);
 
-			    case 'object':
+				case 'object':
 				if (! value) { return 'null'; }
 
 				if (typeof value.toJSON === 'function') { return stringify(value.toJSON()); }
@@ -3175,17 +3188,17 @@ var HeuristScholarDB = new HStorageManager();
 		/* Create a new detail of the appropriate type for the given detail string -- used to deserialise records */
 		var val, f;
 		switch (variety) {
-		    case HVariety.LITERAL:
+			case HVariety.LITERAL:
 			case HVariety.BOOLEAN:
 			case HVariety.BLOCKTEXT:
-		    case HVariety.ENUMERATION:
-		    case HVariety.DATE:
+			case HVariety.ENUMERATION:
+			case HVariety.DATE:
 			return details;
 
-		    case HVariety.REFERENCE:
+			case HVariety.REFERENCE:
 			return that.getRecordStub(details.id, details.title, details.hhash);
 
-		    case HVariety.FILE:
+			case HVariety.FILE:
 			f = details.file;
 			// Oh, wow ... this really isn't the best way to protect the HFile constructor.  FIXME
 			that.initFile = makeDetail;
@@ -3194,10 +3207,10 @@ var HeuristScholarDB = new HStorageManager();
 			delete that.initFile;
 			return val;
 
-		    case HVariety.GEOGRAPHIC:
+			case HVariety.GEOGRAPHIC:
 			return new HGeographicValue(details.geo.type, details.geo.wkt);
 
-		    default:
+			default:
 			return null;
 		}
 	}

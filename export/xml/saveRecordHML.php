@@ -65,14 +65,19 @@ if ($recID ){ // check access first
 	$row = mysql_fetch_assoc($res);
 	$ACCESSABLE_OWNER_IDS = mysql__select_array('sysUsrGrpLinks left join sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID',
 									'ugl_UserID='.get_user_id().' and grp.ugr_Type != "user" order by ugl_GroupID');
-	array_push($ACCESSABLE_OWNER_IDS,get_user_id());
-	array_push($ACCESSABLE_OWNER_IDS,0);	// 0 = belong to everyone
+	if (is_logged_in()){
+		array_push($ACCESSABLE_OWNER_IDS,get_user_id());
+		if (!in_array(0,$ACCESSABLE_OWNER_IDS)){
+			array_push($ACCESSABLE_OWNER_IDS,0);// 0 = belong to everyone
+		}
+	}
 
 	$rec_owner_id = mysql__select_array("Records","rec_OwnerUGrpID","rec_ID=$recID");
 	//error_log(" rec owner = $rec_owner_id[0]  ".count($rec_owner_id)." vis = ".$row['rec_NonOwnerVisibility']." ".print_r($ACCESSABLE_OWNER_IDS,true));
 
-	if ( $row['rec_NonOwnerVisibility'] != 'public' && (count($rec_owner_id) != 1 ||
-			!in_array($rec_owner_id[0],$ACCESSABLE_OWNER_IDS))){
+	if ( $row['rec_NonOwnerVisibility'] != 'public' && (count($rec_owner_id) < 1 ||
+			!in_array($rec_owner_id[0],$ACCESSABLE_OWNER_IDS) ||
+			(is_logged_in() &&  $row['rec_NonOwnerVisibility'] == 'hidden'))){
 		returnXMLErrorMsgPage(" no access to record id $recID ");
 	}
 	if (!$outName){

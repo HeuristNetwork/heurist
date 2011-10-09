@@ -38,7 +38,7 @@ require_once(dirname(__FILE__)."/../../search/getSearchResults.php");
 function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $pnotes, $rating, $tags, $wgTags, $details, $notifyREMOVE, $notifyADD, $commentREMOVE, $commentMOD, $commentADD, &$nonces=null, &$retitleRecs=null) {
 	$recordID = intval($recordID);
 	$wg = intval($wg);
-	if ($wg) {
+	if ($wg || !is_logged_in()) {// non-member saves are not allowed
 		$res = mysql_query("select * from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=" . get_user_id() . " and ugl_GroupID=" . $wg);
 		if (mysql_num_rows($res) < 1) jsonError("invalid workgroup");
 	}
@@ -48,6 +48,9 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 		jsonError("cannot change existing record to private note");
 	}
 
+	if ($vis && (!in_array(strtolower($vis),array('hidden','viewable','pending','public')))){
+		$vis = null;
+	}
 	$now = date('Y-m-d H:i:s');
 
 	// public records data
@@ -56,8 +59,8 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 		"rec_RecTypeID" => $type,
 		"rec_URL" => $url,
 		"rec_ScratchPad" => $notes,
-		"rec_OwnerUGrpID" => ($wg?$wg:get_user_id()),
-		"rec_NonOwnerVisibility" => $wg? ($vis? "viewable" : "hidden") : "viewable",
+		"rec_OwnerUGrpID" => ($wg||$wg==0?$wg:get_user_id()),
+		"rec_NonOwnerVisibility" => ($vis? $vis:"viewable"),
 		"rec_AddedByUGrpID" => get_user_id(),
 		"rec_Added" => $now,
 		"rec_Modified" => $now
@@ -78,14 +81,14 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 				jsonError("user does not have sufficient authority to change public record to workgroup record");
 			}
 		}
-		if (! $wg) { $vis = NULL; }
 
 		mysql__update("Records", "rec_ID=$recordID", array(
 		"rec_RecTypeID" => $type,
 		"rec_URL" => $url,
 		"rec_ScratchPad" => $notes,
-		"rec_OwnerUGrpID" => $wg?$wg:get_user_id(),
-		"rec_NonOwnerVisibility" => $wg? ($vis? "viewable" : "hidden") : "viewable",
+		"rec_OwnerUGrpID" => ($wg||$wg==0?$wg:get_user_id()),
+		"rec_NonOwnerVisibility" => ($vis? $vis:"viewable"),
+		"rec_FlagTemporary" => 0,
 		"rec_Modified" => $now
 		));
 		if (mysql_error()) jsonError("database write error" . mysql_error());

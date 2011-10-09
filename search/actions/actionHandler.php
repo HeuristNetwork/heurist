@@ -74,7 +74,7 @@ if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['action-message']) {
 	$msg = $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['action-message'];
 	unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['action-message']);
 	session_write_close();
-	print "<script> if(confirm(\"" . $msg . "\\n\\nInformation changes will be visible on relaod of this page!\\nReloading will reset filters and selection!\\n\\nWould you like to reload now?\")) { top.location.reload(); }else{ location.replace('actionHandler.php?db=".HEURIST_DBNAME."');}</script>\n";
+	print "<script> if(confirm(\"" . $msg . "\\n\\nInformation changes will be visible on relaod of this page!\\nReloading will reset filters and selection!\\n\\nWould you like to reload now?\")) { top.HEURIST.search.reloadFromParameters(); }else{ location.replace('actionHandler.php?db=".HEURIST_DBNAME."');}</script>\n";
 } else {
 	print_input_form();
 }
@@ -407,7 +407,7 @@ function bookmark_tag_and_save_seach() {
 }
 
 function save_search() {
-    define('T1000_DEBUG', 1);
+//    define('T1000_DEBUG', 1);
 	mysql_connection_db_overwrite(DATABASE);
 	$wg = intval(@$_REQUEST['svs_UGrpID']);
 	$ss = $_REQUEST['svs_ID'];
@@ -418,17 +418,13 @@ function save_search() {
 	$cmb = Array(
 		'svs_Name'     => $_REQUEST['svs_Name'],
 		'svs_Query'    => urldecode($_REQUEST['svs_Query']),
-		'svs_UGrpID'   => get_user_id(),
+		'svs_UGrpID'   => $wg?$wg:get_user_id(),
 		'svs_Added'     => $now,
 		'svs_Modified'  => $now);
 
-	if ($wg) {	// user / group id was passed in so use it over teh current user id.
-		$cmb['svs_UGrpID'] = $wg;
-	}
-
 	// overwrites saved search with same name
-	$res = mysql_query('select svs_ID, svs_UGrpID from usrSavedSearches where svs_Name="'.slash($_REQUEST['svs_Name']).'" and '.
-									($wg ? 'svs_UGrpID='.$wg : 'svs_UGrpID='.get_user_id()));
+	$res = mysql_query('select svs_ID, svs_UGrpID from usrSavedSearches where svs_Name="'.slash($_REQUEST['svs_Name']).'"'.
+						' and svs_UGrpID='.$cmb['svs_UGrpID']);
 	$row = mysql_fetch_row($res);
 
 	if ($row || $ss) {
@@ -461,15 +457,15 @@ function set_wg_and_vis() {
 		$wg = intval(@$_REQUEST['wg_id']);
 		$vis = $_REQUEST['vis'];
 
-		if (($wg == 0  ||  in_array($wg, get_group_ids()))  &&  ($vis == 'viewable'  ||  $vis == 'hidden' || $vis == 'pending' || $vis == 'public')) {
+		if (($wg == 0 ||  in_array($wg, get_group_ids()))  &&
+			(in_array(strtolower($vis),array('viewable','hidden','pending','public')))) {
 			mysql_connection_db_overwrite(DATABASE);
 
-			if ($wg === 0) $vis = 'NULL';
-			else $vis = '"' . $vis . '"';
+			if ($wg === 0 && $vis === 'hidden') $vis = 'viewable';
 
-			mysql_query('update Records
-			                set rec_OwnerUGrpID = ' . $wg . ', rec_NonOwnerVisibility = ' . $vis . '
-			              where rec_ID in (' . join(',', $bib_ids) . ')');
+			mysql_query('update Records'.
+							' set rec_OwnerUGrpID = ' . $wg . ', rec_NonOwnerVisibility = "' . $vis . '"'.
+							' where rec_ID in (' . join(',', $bib_ids) . ')');
 
 			$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['action-message'] = mysql_affected_rows().' records updated';
 			session_write_close();

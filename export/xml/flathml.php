@@ -194,7 +194,7 @@ $USEXINCLUDE = array_key_exists('hinclude', $_REQUEST) ?  true : false;	//defaul
 $OUTPUT_STUBS = @$_REQUEST['stub'] === '1'? true : false;	//default to not output stubs
 $INCLUDE_FILE_CONTENT = (@$_REQUEST['fc'] && $_REQUEST['fc'] == 0? false :true);	// default to expand xml file content
 $SUPRESS_LOOPBACKS = (@$_REQUEST['slb'] && $_REQUEST['slb'] == 0? false :true);	// default to supress loopbacks or gives oneside of a relationship record
-
+$FRESH = (@$_REQUEST['f'] && $_REQUEST['f'] == 1? true :false);
 $filterString = (@$_REQUEST['rtfilters'] ? $_REQUEST['rtfilters'] : null);
 if ( $filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/',$filterString)) {
 	die(" error invalid json rectype filters string");
@@ -248,7 +248,7 @@ if (@$ARGV) {	// commandline actuation
 	function is_admin() { return false; }
 	function is_logged_in() { return false; }
 	$pub_id = 0;
-
+/*
 } else if (@$_REQUEST['pub_id']) {	//published save query call.
 	$pub_id = intval($_REQUEST['pub_id']);
 	require_once(dirname(__FILE__).'/../../common/connect/bypassCredentialsForPublished.php');
@@ -261,7 +261,7 @@ if (@$ARGV) {	// commandline actuation
 	function is_admin() { return false; }
 	function is_logged_in() { return true; }
 	$pub_id = 0;
-
+*/
 } else {	// loggin required entry
 	$pub_id = 0;
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
@@ -307,7 +307,7 @@ global $ACCESSABLE_OWNER_IDS;
 					'dtl_Value as trgRecID, '.
 					'dtl_DetailTypeID as ptrDetailTypeID '.
 					', trg.* '.
-					', if(trg.rec_NonOwnerVisibility="hidden",1,0) as trgHide './/saw TODO check if we need to also check group ownership
+					', trg.rec_NonOwnerVisibility './/saw TODO check if we need to also check group ownership
 				'FROM recDetails LEFT JOIN defDetailTypes on dtl_DetailTypeID = dty_ID '.
 									'LEFT JOIN Records src on src.rec_ID = dtl_RecID '.
 									'LEFT JOIN Records trg on trg.rec_ID = dtl_Value '.
@@ -383,7 +383,7 @@ global $REVERSE, $ACCESSABLE_OWNER_IDS,$relRT;
 	$query = 'SELECT dtl_Value as srcRecID, src.rec_RecTypeID as srcType, '.
 					'dtl_RecID as trgRecID, dty_ID as ptrDetailTypeID '.
 					', trg.* '.
-					', if(trg.rec_NonOwnerVisibility="hidden",1,0) as trgHide '.
+					', trg.rec_NonOwnerVisibility '.
 			'FROM recDetails '.
 				'LEFT JOIN defDetailTypes ON dtl_DetailTypeID = dty_ID '.
 				'LEFT JOIN Records trg on trg.rec_ID = dtl_RecID '.
@@ -457,7 +457,7 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 	$query = 'SELECT f.dtl_Value as srcRecID, rel.rec_ID as relID, '.// from detail
 				'IF( f.dtl_Value IN ('. join(',', $qrec_ids) . '),1,0) as srcIsFrom, '.
 				't.dtl_Value as trgRecID, trm.trm_ID as relType, trm.trm_InverseTermId as invRelType '.
-				', if(src.rec_NonOwnerVisibility="hidden",1,0) as srcHide, if(trg.rec_NonOwnerVisibility="hidden",1,0) as trgHide '.
+				', src.rec_NonOwnerVisibility , trg.rec_NonOwnerVisibility '.
 			'FROM recDetails f '.
 				'LEFT JOIN Records rel ON rel.rec_ID = f.dtl_RecID and f.dtl_DetailTypeID = '.$relSrcDT.' '.
 				'LEFT JOIN recDetails t ON t.dtl_RecID = rel.rec_ID and t.dtl_DetailTypeID = '.$relTrgDT.' '.
@@ -575,7 +575,7 @@ function buildGraphStructure($rec_ids, &$recSet) {
 
 
 function outputRecords($result) {
-	global $OUTPUT_STUBS;
+	global $OUTPUT_STUBS,$FRESH;
 	$recSet = array('count'=> 0,
 					'relatedSet'=>array());
 	$rec_ids = explode(",",$result['recIDs']);
@@ -586,7 +586,7 @@ function outputRecords($result) {
 	buildGraphStructure($rec_ids, $recSet);
 	$recSet['count'] = count($recSet['relatedSet']);
 	foreach ($recSet['relatedSet'] as $recID => $recInfo) {
-		$recSet['relatedSet'][$recID]['record'] = loadRecord($recID);
+		$recSet['relatedSet'][$recID]['record'] = loadRecord($recID,$FRESH,true);
 	}
 
 	openTag('records',array('count'=> $recSet['count']));
@@ -622,8 +622,8 @@ function outputRecord($recordInfo, $recInfos, $outputStub=false, $parentID = nul
 			return;
 		}
 	}
-//error_log(" depth = $depth  xlevel = $USEXINCLUDELEVEL");
-	openTag('record', array('depth' => $depth));
+//if ($record['rec_ID'] == 45133) error_log(" depth = $depth  xlevel = $USEXINCLUDELEVEL rec = ".print_r($record,true));
+	openTag('record', array('depth' => $depth, 'visibility' => ($record['rec_NonOwnerVisibility']?$record['rec_NonOwnerVisibility']:'viewable')));
 	if ($depth > $USEXINCLUDELEVEL){
 		outputXInclude($record);
 		closeTag('record');

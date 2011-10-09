@@ -211,7 +211,7 @@ global $ACCESSABLE_OWNER_IDS;
 					', trg.rec_Title as trgTitle '.
 					',trg.rec_URL as trgURL '.
 					', trg.rec_OwnerUGrpID as trgOwner '.
-					', if(trg.rec_NonOwnerVisibility="hidden",1,0) as trgHide '.
+					', trg.rec_NonOwnerVisibility as trgVis '.
 				'FROM recDetails LEFT JOIN defDetailTypes on dtl_DetailTypeID = dty_ID '.
 									'LEFT JOIN Records src on src.rec_ID = dtl_RecID '.
 									'LEFT JOIN Records trg on trg.rec_ID = dtl_Value '.
@@ -255,7 +255,7 @@ global $ACCESSABLE_OWNER_IDS;
 																				@$row['trgType'],
 																				@$row['trgTitle'],
 																				@$row['trgOwner'],
-																				@$row['trgHide'],
+																				@$row['trgVis'],
 																				null,
 																				null,
 																				null,null));
@@ -305,7 +305,7 @@ global $REVERSE, $ACCESSABLE_OWNER_IDS, $relRT;
 					', trg.rec_Title as trgTitle '.
 					', trg.rec_URL as trgURL '.
 					', trg.rec_OwnerUGrpID as trgOwner '.
-					', if(trg.rec_NonOwnerVisibility="hidden",1,0) as trgHide '.
+					', trg.rec_NonOwnerVisibility as trgVis '.
 			'FROM recDetails '.
 				'LEFT JOIN defDetailTypes ON dtl_DetailTypeID = dty_ID '.
 				'LEFT JOIN Records trg on trg.rec_ID = dtl_RecID '.
@@ -348,7 +348,7 @@ error_log("find  d $depth rev pointer q = $query");
 																				@$row['trgType'],
 																				@$row['trgTitle'],
 																				@$row['trgOwner'],
-																				@$row['trgHide'],
+																				@$row['trgVis'],
 																				null,
 																				null,
 																				null,null));
@@ -394,7 +394,7 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 				', src.rec_Title as srcTitle, trg.rec_Title as trgTitle '.
 				', src.rec_URL as srcURL, trg.rec_URL as trgURL '.
 				', src.rec_OwnerUGrpID as srcOwner, trg.rec_OwnerUGrpID as trgOwner '.
-				', if(src.rec_NonOwnerVisibility="hidden",1,0) as srcHide, if(trg.rec_NonOwnerVisibility="hidden",1,0) as trgHide '.
+				', src.rec_NonOwnerVisibility as srcVis, trg.rec_NonOwnerVisibility as trgVis '.
 			'FROM recDetails f '.
 				"LEFT JOIN Records rel ON rel.rec_ID = f.dtl_RecID and f.dtl_DetailTypeID = $relSrcDT ".
 				"LEFT JOIN recDetails t ON t.dtl_RecID = rel.rec_ID and t.dtl_DetailTypeID = $relTrgDT ".
@@ -465,7 +465,7 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 									$row['srcType'],
 									$row['srcTitle'],
 									$row['srcOwner'],
-									$row['srcHide'],
+									$row['srcVis'],
 									null,
 									null,
 									null,null));
@@ -479,7 +479,7 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 									$row['trgType'],
 									$row['trgTitle'],
 									$row['trgOwner'],
-									$row['trgHide'],
+									$row['trgVis'],
 									null,
 									null,
 									null,null));

@@ -149,6 +149,16 @@ top.HEURIST.search = {
 		window.location.href = temp;
 	},
 
+	reloadFromParameters: function() {
+		var temp = top.HEURIST.basePath+"search/search.html?" +
+			("w=" + encodeURIComponent(window.HEURIST.parameters["w"])) + "&" +
+			("stype=" + (window.HEURIST.parameters["stype"] ? encodeURIComponent(window.HEURIST.parameters["stype"]) : "")) + "&" +
+			("ver=" + top.HEURIST.search.VERSION) + "&" +
+			("q=" + encodeURIComponent(window.HEURIST.parameters["q"])+
+			(window.HEURIST.database && window.HEURIST.database.name ? "&db=" + window.HEURIST.database.name : ""));
+		window.location.href = temp;
+	},
+
 	reloadSearch: function() {
 		window.HEURIST.parameters["q"] = document.getElementById("q").value;
 		window.HEURIST.parameters["w"] = document.getElementById("w-input").value;
@@ -512,7 +522,7 @@ top.HEURIST.search = {
 		if (res[6]  &&  res[6] != "0" && res[6] != res[1]) {	// check if this is a usergroup owned record
 			linkTitle = "Owned by " + (top.HEURIST.workgroups[wgID] ? "workgroup " + top.HEURIST.workgroups[wgID].name:top.HEURIST.allUsers[wgID][0]) + " - " + (res[7]==1? "hidden" : "read-only") + " to others";
 			wgHTML = res[6];
-			wgColor = " style='color:" + ((res[7]==1)? "red" : "green") + "'";
+			wgColor = " style='color:" + ((res[7]=='hidden')? "red" : "green") + "'";
 		}
 
 		var verified_date = null;
@@ -1877,22 +1887,22 @@ top.HEURIST.search = {
 		});
 	},
 
-    launchAdvancedSearch: function() {
-        var q = document.getElementById("q").value;
-        var url = top.HEURIST.basePath+ "search/queryBuilderPopup.php?" + encodeURIComponent(q) + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
-        top.HEURIST.util.popupURL(window, url, { callback: top.HEURIST.search.advancedSearchCallback });
-    },
+	launchAdvancedSearch: function() {
+		var q = document.getElementById("q").value;
+		var url = top.HEURIST.basePath+ "search/queryBuilderPopup.php?" + encodeURIComponent(q) + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
+		top.HEURIST.util.popupURL(window, url, { callback: top.HEURIST.search.advancedSearchCallback });
+	},
 
 
-    advancedSearchCallback: function(q) {
-        if (q === undefined) {
-            // user clicked close-button ... do nothing
-        } else {
-            this.document.getElementById("q").value = q;
-            this.document.forms[0].submit();
-        }
-        return true;
-    },
+	advancedSearchCallback: function(q) {
+		if (q === undefined) {
+			// user clicked close-button ... do nothing
+		} else {
+			this.document.getElementById("q").value = q;
+			this.document.forms[0].submit();
+		}
+		return true;
+	},
 
 
 	autoPopupLink: function(e) {
@@ -2180,27 +2190,27 @@ top.HEURIST.search = {
 		return selectedBkmIDs;
 	},
 
-    notificationPopup: function() {
-        var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
-        if (recIDs_list.length == 0) {
-            top.HEURIST.search.selectBookmarkMessage("for notification");
-            return;
-        }else{
-            recIDs_list = recIDs_list.join(",");
-        }
-        top.HEURIST.util.popupURL(window, top.HEURIST.baseURL+ "search/actions/sendNotificationsPopup.php?bib_ids=\""+recIDs_list+"\"" + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""));
-    },
+	notificationPopup: function() {
+		var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
+		if (recIDs_list.length == 0) {
+			top.HEURIST.search.selectBookmarkMessage("for notification");
+			return;
+		}else{
+			recIDs_list = recIDs_list.join(",");
+		}
+		top.HEURIST.util.popupURL(window, top.HEURIST.baseURL+ "search/actions/sendNotificationsPopup.php?bib_ids=\""+recIDs_list+"\"" + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""));
+	},
 
-    emailToDatabasePopup: function() {
-        var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
-        if (recIDs_list.length == 0) {
-            top.HEURIST.search.selectBookmarkMessage("for sending");
-            return;
-        }else{
-            recIDs_list = recIDs_list.join(",");
-        }
-        top.HEURIST.util.popupURL(window, top.HEURIST.baseURL+ "search/actions/emailToDatabasePopup.php?bib_ids=\""+recIDs_list+"\"" + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""));
-    },
+	emailToDatabasePopup: function() {
+		var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
+		if (recIDs_list.length == 0) {
+			top.HEURIST.search.selectBookmarkMessage("for sending");
+			return;
+		}else{
+			recIDs_list = recIDs_list.join(",");
+		}
+		top.HEURIST.util.popupURL(window, top.HEURIST.baseURL+ "search/actions/emailToDatabasePopup.php?bib_ids=\""+recIDs_list+"\"" + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""));
+	},
 
 	addTagsPopup: function(reload) {
 			top.HEURIST.search.addRemoveTagsPopup(reload);
@@ -2311,7 +2321,7 @@ top.HEURIST.search = {
 				bib_ids_elt.value = recIDs_list.join(',');
 				wg_elt.value = wg;
 				vis_elt.value = hidden ? "hidden" : viewable ? "viewable" : pending ? "pending" : "public";
-                action_elt.form.submit();
+				action_elt.form.submit();
 			}
 		});
 	},
