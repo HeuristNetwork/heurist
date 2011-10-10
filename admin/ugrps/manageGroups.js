@@ -225,7 +225,7 @@ function GroupManager(_isFilterMode, _isSelection, _isWindowMode) {
 				formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
 			{ key: null, label: "Edit", sortable:false,  hidden:(_isSelection), width:20,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
-elLiner.innerHTML = '<a href="#edit_group"><img src="../../common/images/edit_icon.png" width="16" height="16" border="0" title="Edit group" /><\/a>';}
+elLiner.innerHTML = '<a href="#edit_group"><img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit"><\/a>';}
 			},
 
 			{ key: "name", label: "<div align='left'><u>Name</u></div>", sortable:true,
@@ -259,7 +259,7 @@ elLiner.innerHTML = '<div align="center"><a href="'+top.HEURIST.baseURL + "admin
 			{ key: "id", label: "Admins", sortable:false,
 				formatter: function(elLiner, oRecord, oColumn, oData){
 					var recID = oRecord.getData('id');
-elLiner.innerHTML = '<div align="center"><img src="../../common/images/info_icon.png" width="16" height="16" border="0" '+
+elLiner.innerHTML = '<div align="center"><img src="../../common/images/info.png" '+
 'onmouseover="groupManager.showInfo('+recID+', event)" onmouseout="groupManager.hideInfo()"/></div>';}
 			},
 			{ key: null, label: "Del", width:20, sortable:false,

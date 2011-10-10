@@ -477,6 +477,7 @@ div#notes {
 	width:100%;
 	border-bottom-color: RGBA(100,100,100,0.1);
 }
+.resource .input-cell {width:80%}
 .relation.editable.reminder {margin:10px 0 0 0;}
 .relation.editable.reminder .resource-div.empty input{width:100% !important}
 .resource.optional {
@@ -944,7 +945,6 @@ hr {
 #top-tags-cell, #recent-tags-cell {
 	padding: 1ex 0 0 0;
 	color: #999;
-	display:block
 }
 #top-tags-cell a.add-tag-link {
 	background:none

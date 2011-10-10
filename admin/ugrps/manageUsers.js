@@ -271,14 +271,14 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 								var myColumnDefs = [
 			{ key: "selection", label: "Sel", hidden:(!_isSelection), sortable:true, width:20,
 				formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
-			{ key: null, label: "Inactive", sortable:false,  hidden:(_isSelection), width:20,
+			{ key: null, label: "Active", sortable:false,  hidden:(_isSelection), width:20,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var isenabled = (oRecord.getData('enabled')==="y");
-					elLiner.innerHTML = (isenabled)?"":"X";
+					elLiner.innerHTML = (isenabled)?"<img src=\"../../common/images/tick-grey.gif\">":"";
 			}},
 			{ key: null, label: "Edit", sortable:false,  hidden:(_isSelection), width:20,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
-elLiner.innerHTML = '<a href="#edit_user"><img src="../../common/images/edit_icon.png" width="16" height="16" border="0" title="Edit group" /><\/a>';}
+elLiner.innerHTML = '<a href="#edit_user"><img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit"><\/a>';}
 			},
 			{ key: "name", label: "<div align='left'><u>Name</u></div>", sortable:true,
 				formatter: function(elLiner, oRecord, oColumn, oData){
