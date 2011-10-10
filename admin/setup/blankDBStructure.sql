@@ -35,7 +35,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Sep 26, 2011 at 01:14 PM
+-- Generation Time: Oct 10, 2011 at 05:55 PM
 -- Server version: 5.0.51
 -- PHP Version: 5.2.3
 --
@@ -744,7 +744,7 @@ CREATE TABLE usrReminders (
   rem_StartDate date NOT NULL default '1970-01-01' COMMENT 'The first (or only) date for sending the reminder',
   rem_Freq enum('once','daily','weekly','monthly','annually') NOT NULL default 'once' COMMENT 'The frequency of sending reminders',
   rem_Nonce varchar(31) default NULL COMMENT 'Random number hash for reminders',
-  rem_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT ' ugr_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT ''Date of last modification of this record, used to get last updated date for table'',',
+  rem_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (rem_ID),
   KEY rem_RecID (rem_RecID),
   KEY rem_OwnerUGrpID (rem_OwnerUGrpID),
@@ -795,7 +795,7 @@ CREATE TABLE usrTags (
   tag_Text varchar(63) NOT NULL COMMENT 'The value (text) of the tag provided by the user or workgroup administrator',
   tag_Description varchar(250) default NULL COMMENT 'Description of the concept to which this tag is attached, optional',
   tag_AddedByImport tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flag as to whether this tag was added by an import (1) or by editing (0)',
-  tag_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT ' ugr_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT ''Date of last modification of this record, used to get last updated date for table'',',
+  tag_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT ' Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (tag_ID),
   UNIQUE KEY tag_composite_key (tag_Text,tag_UGrpID),
   KEY tag_UGrpID (tag_UGrpID),
@@ -873,6 +873,7 @@ CREATE TABLE woots (
   PRIMARY KEY  (woot_ID),
   UNIQUE KEY woot_title_key (woot_Title(200))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Woot records (entries, pages) are linked to a set of XHTML c';
+
 
 
 -- ------------------------------------------------------------------------------------------------
