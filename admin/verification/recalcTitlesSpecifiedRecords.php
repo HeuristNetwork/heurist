@@ -71,6 +71,9 @@ $processed_count = 0;
 
 <script type="text/javascript">
 function update_counts(processed, blank, repair, changed) {
+	if(changed==null || changed==undefined){
+		changed = 0;
+	}
 	document.getElementById('processed_count').innerHTML = processed;
 	document.getElementById('changed_count').innerHTML = changed;
 	document.getElementById('same_count').innerHTML = processed - (changed + blank);
@@ -87,7 +90,7 @@ function update_counts2(processed, total) {
 <?php
 
 print '<div><span id=total_count>'.count($recs).'</span> records in total</div>';
-print '<div><span id=processed_count>0</span> processed so far (<span id=percent>0</span>% done)</div>';
+print '<div><span id=processed_count>0</span> processed so far (<span id=percent>0</span><font color="#ff0000"><b>%</b></font> done)</div>';
 print '<div><span id=changed_count>0</span> to be updated</div>';
 print '<div><span id=same_count>0</span> are the same</div>';
 print '<div><span id=repair_count>0</span> are internet bookmarks that are reparable</div>';

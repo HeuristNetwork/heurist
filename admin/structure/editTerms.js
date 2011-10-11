@@ -147,6 +147,8 @@ function EditTerms() {
 			term.label = arTerm[fi.trm_Label];
 			term.description = arTerm[fi.trm_Description];
 			term.inverseid = arTerm[fi.trm_InverseTermID];
+            term.status = arTerm[fi.trm_Status];
+            term.original_db = arTerm[fi.trm_OriginatingDBID];
 
 			//'<div id="'+parentElement+'"><a href="javascript:void(0)" onClick="selectAllChildren('+nodeIndex+')">All </a> '+termsByDomainLookup[parentElement]+'</div>';
 			//term.href = "javascript:void(0)";
@@ -173,6 +175,9 @@ function EditTerms() {
 					term.label = arTerm[fi.trm_Label];
 					term.description = arTerm[fi.trm_Description];
 					term.inverseid = arTerm[fi.trm_InverseTermID];
+                    term.status = arTerm[fi.trm_Status];
+                    term.original_db = arTerm[fi.trm_OriginatingDBID];
+                    
 
 					//term.label = '<div id="'+child+'"><a href="javascript:void(0)" onClick="selectAllChildren('+nodeIndex+')">All </a> '+termsByDomainLookup[child]+'</div>';
 					//term.href = "javascript:void(0)"; // To make 'select all' clickable, but not leave the page when hitting enter
@@ -259,54 +264,130 @@ function EditTerms() {
 				_doSave(true);
 			}
 			_currentNode = node;
+			
+			var disable_status = false,
+				disable_fields = false,
+				add_reserved = false,
+				status = 'open';
 
-		if(!Hul.isnull(node)){
-			Dom.get('formMessage').style.display = "none";
-			Dom.get('formEditor').style.display = "block";
+			if(!Hul.isnull(node)){
+				Dom.get('formMessage').style.display = "none";
+				Dom.get('formEditor').style.display = "block";
 
-			//	alert("label was clicked"+ node.data.id+"  "+node.data.domain+"  "+node.label);
-			Dom.get('edId').value = node.data.id;
-			Dom.get('edName').value = node.label;
-			Dom.get('edName').focus();
-			if(Hul.isnull(node.data.description)) {
-				node.data.description="";
-			}
-			Dom.get('edDescription').value = node.data.description;
+				//	alert("label was clicked"+ node.data.id+"  "+node.data.domain+"  "+node.label);
+				Dom.get('edId').value = node.data.id;
+				Dom.get('edName').value = node.label;
+				Dom.get('edName').focus();
+				if(Hul.isnull(node.data.description)) {
+					node.data.description="";
+				}
+				Dom.get('edDescription').value = node.data.description;
 
-			var node_invers = null;
-			if(node.data.inverseid>0){
-				node_invers = _findNodeById(node.data.inverseid, false);
-			}
-			if(!Hul.isnull(node_invers)){ //inversed term found
-					Dom.get('edInverseTermId').value = node_invers.data.id;
-					Dom.get('edInverseTerm').value = getParentLabel(node_invers);
-					Dom.get('btnInverseSetClear').value = 'clear';
-			}else{
-					node.data.inverseid = null;
-					Dom.get('edInverseTermId').value = '0';
-					Dom.get('edInverseTerm').value = '';
-					Dom.get('btnInverseSetClear').value = 'set';
-			}
+				var node_invers = null;
+				if(node.data.inverseid>0){
+					node_invers = _findNodeById(node.data.inverseid, false);
+				}
+				if(!Hul.isnull(node_invers)){ //inversed term found
+						Dom.get('edInverseTermId').value = node_invers.data.id;
+						Dom.get('edInverseTerm').value = getParentLabel(node_invers);
+						Dom.get('btnInverseSetClear').value = 'clear';
+				}else{
+						node.data.inverseid = null;
+						Dom.get('edInverseTermId').value = '0';
+						Dom.get('edInverseTerm').value = '';
+						Dom.get('btnInverseSetClear').value = 'set';
+				}
 
-			if(isExistingNode(node)){
-					Dom.get('div_btnAddChild').style.display = "inline-block";
-					Dom.get('btnDelete').value = "Delete Term";
-			}else{//new term
-					Dom.get('div_btnAddChild').style.display = "none";
-					Dom.get('btnDelete').value = "Cancel Add";
-			}
+				if(isExistingNode(node)){
+						Dom.get('div_btnAddChild').style.display = "inline-block";
+						Dom.get('btnDelete').value = "Delete Term";
+				}else{//new term
+						Dom.get('div_btnAddChild').style.display = "none";
+						Dom.get('btnDelete').value = "Cancel Add";
+				}
 
-			Dom.get('divInverse').style.display = (_currTreeView === _termTree2)?"block":"none";
+				Dom.get('divInverse').style.display = (_currTreeView === _termTree2)?"block":"none";
 
+
+				var dbId = Number(top.HEURIST.database.id),
+					original_dbId = node.data.original_db,
+					status = node.data.status;
+					
+				if(Hul.isnull(original_dbId)) {original_dbId = dbId;}
+
+				if((dbId>0) && (dbId<1001) && (original_dbId===dbId)) {
+					add_reserved = true;
+				}
+
+				if(status==='reserved'){ //if reserved - it means original dbid<1001
+
+					disable_status = (original_dbId!==dbId) && (original_dbId>0) && (original_dbId<1001);
+					disable_fields = true;
+					add_reserved = true;
+
+				}else if(status==='approved'){
+					disable_fields = true;
+				}
+				
+				
+				_optionReserved(add_reserved);
+				_toggleAll(disable_status || disable_fields, disable_status);
+
+				var selstatus = Dom.get("trm_Status");
+				selstatus.value = status;
+			}//node!=null
 		}
-		}
-
+		
 		Dom.get('formInverse').style.display = "none";
 		if(Hul.isnull(node)){
 			Dom.get('formEditor').style.display = "none";
 			Dom.get('formMessage').style.display = "block";
 		}
 
+	}
+	
+	/**
+	* adds reserved option to status dropdown list
+	*/
+	function _optionReserved(isAdd){
+		var selstatus = Dom.get("trm_Status");
+		if(isAdd && selstatus.length<4){
+				var option = document.createElement("option");
+				option.text = 'reserved';
+				option.value = 'reserved';
+				try {
+					// for IE earlier than version 8
+					selstatus.add(option, sel.options[null]);
+				}catch (ex2){
+					selstatus.add(option,null);
+				}
+		}else if (!isAdd && selstatus.length===4){
+			selstatus.length=3;
+			//selstaus.remove(3);
+		}
+	}
+	
+	/**
+	* Toggle fields to disable. Is called when status is set to 'Reserved'.
+	*/
+	function _toggleAll(disable, reserved) {
+
+			Dom.get("trm_Status").disabled = reserved;
+			
+			Dom.get("btnDelete").disabled = disable;
+			Dom.get("btnInverseSetClear").disabled = disable;
+	}
+
+	/**
+	* 
+	*/
+	function _onChangeStatus(event){
+		var el = event.target;
+		if(el.value === "reserved" || el.value === "approved") {
+            _toggleAll(true, false);
+		} else {
+			_toggleAll(false, false);
+		}
 	}
 
 	/**
@@ -316,11 +397,13 @@ function EditTerms() {
 
 		var sName = Dom.get('edName').value;
 		var sDesc = Dom.get('edDescription').value;
+		var sStatus = Dom.get('trm_Status').value;
 		var iInverseId = Number(Dom.get('edInverseTermId').value);
 		iInverseId = (iInverseId>0) ?iInverseId:null;
 
 		var wasChanged = ((_currentNode.label !== sName) ||
 			(_currentNode.data.description !== sDesc) ||
+			(_currentNode.data.status !== sStatus) ||
 			( !(Hul.isempty(_currentNode.data.inverseid)&&Hul.isnull(iInverseId)) &&
 				Number(_currentNode.data.inverseid) !== iInverseId));
 
@@ -347,6 +430,7 @@ function EditTerms() {
 
 			_currentNode.label = sName;
 			_currentNode.data.description = sDesc;
+			_currentNode.data.status = sStatus;
 
 			_currentNode.data.inverseid = (iInverseId>0) ?iInverseId:null;
 			_currentNode.title = _currentNode.data.description;
@@ -366,10 +450,10 @@ function EditTerms() {
 		var term = node.data;
 
 		var oTerms = {terms:{
-				colNames:['trm_Label','trm_InverseTermId','trm_Description','trm_Domain','trm_ParentTermID'],
+				colNames:['trm_Label','trm_InverseTermId','trm_Description','trm_Domain','trm_ParentTermID','trm_Status'],
 				defs: {}
 		}};
-		oTerms.terms.defs[term.id] = [node.label, term.inverseid, term.description, term.domain, term.parent_id ];
+		oTerms.terms.defs[term.id] = [node.label, term.inverseid, term.description, term.domain, term.parent_id, term.status ];
 
 		var str = YAHOO.lang.JSON.stringify(oTerms);
 
@@ -636,6 +720,7 @@ function EditTerms() {
 				doSave: function(){ _doSave(false); },
 				doDelete: function(){ _doDelete(true); },
 				doAddChild: function(isRoot){ _doAddChild(isRoot); },
+				onChangeStatus: function(event){ _onChangeStatus(event); },
 
 				findNodes: function(sSearch){ return _findNodes(sSearch); },
 				doEdit: function(){ _doEdit(); },

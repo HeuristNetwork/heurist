@@ -59,7 +59,7 @@ function EditRectypeTitle() {
 
 			_variables = context['vars'];
 
-			//fille selection box with the list of templates
+			/*fille selection box with the list of templates
 			var sel = Dom.get("selRectype");
 			//celear selection list
 			while (sel.length>0){
@@ -84,10 +84,12 @@ function EditRectypeTitle() {
 
 			sel.selectedIndex = 0;
 			_onSelectRectype();
+			*/
 
+			_onSelectRectype();
 
 			//fille list of records
-			sel = Dom.get("listRecords");
+			var sel = Dom.get("listRecords");
 			//celear selection list
 			while (sel.length>1){
 				sel.remove(1);
@@ -119,6 +121,7 @@ function EditRectypeTitle() {
 	//
 	function _onSelectRectype(){
 
+		/*
 		var container = Dom.get("vars_list"),
 			sel = Dom.get('selRectype'),
 			recTypeID,
@@ -128,6 +131,10 @@ function EditRectypeTitle() {
 			return;
 		}
 		recTypeID = sel.options[sel.selectedIndex].value;
+		*/
+		if(Hul.isnull(_variables) || _variables.length<1) return;
+
+		recTypeID = _variables[0].id;
 
 
 		//find list of variables for current record type
@@ -144,7 +151,18 @@ function EditRectypeTitle() {
 					_varsTree = new YAHOO.widget.TreeView("varsTree");
 					_varsTree.subscribe("clickEvent",
 						function() { // On click, select the term, and add it to the selected terms tree
-							this.onEventToggleHighlight.apply(this,arguments);
+
+							var _node = arguments[0].node;
+							if(_node.children.length<1){
+								this.onEventToggleHighlight.apply(this,arguments);
+							}
+
+							window.setTimeout(function() {
+									var textedit = Dom.get("rty_TitleMask");
+									textedit.focus();
+								}, 300);
+
+
 							//var parentNode = arguments[0].node;
 							//_selectAllChildren(parentNode);
 					});
@@ -329,6 +347,7 @@ function EditRectypeTitle() {
 		//function for each node in _varsTree - create the list
 		function __loopNodes(node){
 				if(node.children.length===0 && node.highlightState===1){
+						node.highlightState=0;
 						var parent = (node.data.parent_id=='r')?'':(node.data.parent_id+'.');
 						_text = _text + '['+parent + node.data.this_id+']';
 				}
@@ -339,9 +358,13 @@ function EditRectypeTitle() {
 
 		if(_text!=="")	{
 			insertAtCursor(textedit, _text);
+			_varsTree.render();
 		}else{
 			alert('No one variable is selected');
 		}
+
+		var textedit = Dom.get("rty_TitleMask");
+		textedit.focus();
 	}
 
 	//

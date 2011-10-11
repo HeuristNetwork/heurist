@@ -110,6 +110,15 @@
 				<input id="btnInverseSetClear" type="button" value="clear" style="width:45px" onClick="{setOrclearInverseTermId()}" />
 				<input id="edInverseTermId" type="hidden"/>
 			</div>
+            <div id="divStatus" class="dtyField"><label class="dtyLabel">Status:</label>
+                <select class="dtyValue" id="trm_Status" onChange="editTerms.onChangeStatus(event)">
+                    <option selected="selected">open</option>
+                    <option>pending</option>
+                    <option>approved</option>
+                    <!-- option>reserved</option -->
+                </select>
+            </div>
+            
 				<div style="padding-top:5;">
 
 				<div id='div_btnAddChild' style="text-align: left; display:inline-block;">
@@ -128,20 +137,20 @@
 			</div>
 		</div>
 
-        <!-- search for and set inmverse terms, only for relationship types -->
+        <!-- search for and set inverse terms, only for relationship types -->
 		<div id="formInverse" style="display:none;">
 
 			<h3 style="border-style: none;">Select Inverse Term</h3>
 			<div style="border: black; border-style: solid; border-width:thin; padding:10px;">
 
-			<div style="display:inline-block;vertical-align: top; width:110px;">
+			<div style="display:inline-block;vertical-align: top; width:130px;">
 				<label class="dtyLabel" style="width:30px;">Find:</label>
 				<input id="edSearchInverse" style="width:70px" onkeyup="{doSearch(event)}"/><br/>
 				type 3 or more letters<br/><br/>select inverse from list
 				<input id="btnSelect2" type="button" value="and Set As Inversed" onClick="{editTerms.doSelectInverse()}" />
 			</div>
 			<div style="display:inline-block;">
-				<select id="resSearchInverse" size="5" style="width:340px" ondblclick="{editTerms.doSelectInverse()}"></select>
+				<select id="resSearchInverse" size="5" style="width:320px" ondblclick="{editTerms.doSelectInverse()}"></select>
 			</div>
 		</div>
 	</div>

@@ -106,6 +106,8 @@ function UserEditor() {
 				el.disabled = disable;
 			}
 		}
+		//plus second password
+		Dom.get("ugr_Password2").disabled = Dom.get("ugr_Password").disabled;
 	}
 
 	/**
@@ -135,6 +137,10 @@ function UserEditor() {
 				}
 			}
 		}
+
+		//plus second password
+		Dom.get("ugr_Password2").readOnly = Dom.get("ugr_Password").readOnly;
+
 
 		el = Dom.get("ugr_ID");
 		if (_recID<0){

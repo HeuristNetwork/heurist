@@ -90,14 +90,15 @@
 
 	<div class="input-row">
 		<div class="input-header-cell" for="dty_Status">Status:</div>
-		<div class="input-cell"><div class="dtyValue" id="dty_Status" ></div>
-        	<!--<select class="dtyValue" id="dty_Status" onChange="window.detailTypeEditor.onChangeStatus(event)">
-                <option>reserved</option>
-                <option>approved</option>
-                <option>pending</option>
+		<div class="input-cell">
+        	<select class="dtyValue" id="dty_Status" onChange="window.detailTypeEditor.onChangeStatus(event)">
                 <option selected="selected">open</option>
-			</select>-->
-		<div class="help prompt">The rectype's status. 'Reserverd' can not be changed, 'Open' is normal</div></div>
+                <option>pending</option>
+                <option>approved</option>
+                <!-- option>reserved</option -->
+			</select>
+			<div class="help prompt">'Reserverd' can not be changed, 'Open' is normal</div>
+		</div>
 	</div>
 	<div class="input-row">
 		<div class="input-header-cell" for="dty_ShowInLists">Visible to end-user:</div>

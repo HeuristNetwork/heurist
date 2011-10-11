@@ -27,7 +27,9 @@ function EditRecStructure() {
 	_updatedDetails = [], //list of dty_ID that were affected with edition
 	_updatedFields = [],  //list of indexes in fieldname array that were affected
 	_expandedRecord = null, //rstID of record (row) in design datatable that is (was) expanded (edited)
-	_isServerOperationInProgress = false; //prevents send request if there is not respoce from previous one
+	_isServerOperationInProgress = false, //prevents send request if there is not respoce from previous one
+	_isReserved = false,
+	_rty_Status,
 	myDTDrags = {};
 
 	/**
@@ -84,6 +86,10 @@ function EditRecStructure() {
 				rty_ID = null;
 				return;
 			}
+
+
+			_rty_Status = typedef[ top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_Status];
+			_isReserved = (_rty_Status==='reserved') || (_rty_Status==='approved');
 
 			//clear _updatedDetails and _updatedFields
 			_clearUpdates();
@@ -208,10 +214,11 @@ function EditRecStructure() {
 				className:"center",
 				formatter: function(elLiner, oRecord, oColumn, oData){
 					var status = oRecord.getData('rst_Status');
-					if (status !== "reserved"){
-						statusLock = '<a href="#delete"><img src="../../common/images/cross.png" width="12" height="12" border="0" title="Remove detail" /><\/a>';
-					}else{
+					var isRequired = (oRecord.getData('rst_RequirementType')==='required');
+					if ( (_isReserved && isRequired) || status === "reserved" || status === "approved"){
 						statusLock  = '<img src="../../common/images/lock_bw.png" title="Detail locked" />';
+					}else{
+						statusLock = '<a href="#delete"><img src="../../common/images/cross.png" width="12" height="12" border="0" title="Remove detail" /><\/a>';
 					};
 					elLiner.innerHTML = statusLock;
 				}
@@ -281,10 +288,10 @@ function EditRecStructure() {
 					'<div class="input-row"><div class="input-header-cell">Status:</div>'+
 					'<div class="input-cell"><select id="ed'+rst_ID+
 					'_rst_Status" style="display:inline-block" onchange="onStatusChange(event)">'+
-					'<option value="reserved">reserved</option>'+
-					'<option value="approved">approved</option>'+
+					'<option value="open">open</option>'+
 					'<option value="pending">pending</option>'+
-					'<option value="open">open</option></select>'+
+					'<option value="approved">approved</option>'+
+					'</select>'+  //<option value="reserved">reserved</option>
 
 					'<span><label class="input-header-cell">Non owner visibility:</label><select id="ed'+rst_ID+
 					'_rst_NonOwnerVisibility">'+  // style="display:inline-block"
@@ -654,15 +661,58 @@ function EditRecStructure() {
 	}//end of _doExpliciteCollapse
 
 	/**
+	* add or remove 'reserved' option in status dropdown
+	*/
+	function _optionReserved(selstatus, isAdd){
+		if(isAdd && selstatus.length<4){
+				var option = document.createElement("option");
+				option.text = 'reserved';
+				option.value = 'reserved';
+				try {
+					// for IE earlier than version 8
+					selstatus.add(option, sel.options[null]);
+				}catch (ex2){
+					selstatus.add(option,null);
+				}
+		}else if (!isAdd && selstatus.length===4){
+			selstatus.length=3;
+			//selstaus.remove(3);
+		}
+	}
+
+	/**
 	* Restores values from HEURSIT db structure to input controls after expand the row
 	* @param _rst_ID record structure type ID
 	* @param isAll - not used (false always)
 	*/
 	function _fromArrayToUI(rst_ID, isAll)
 	{
-		var fieldnames = top.HEURIST.rectypes.typedefs.dtFieldNames;
-		var values = top.HEURIST.rectypes.typedefs[rty_ID].dtFields[rst_ID];
-		var rst_type = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type];
+		var fieldnames = top.HEURIST.rectypes.typedefs.dtFieldNames,
+			values = top.HEURIST.rectypes.typedefs[rty_ID].dtFields[rst_ID],
+			rst_type = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type],
+			selstatus = Dom.get('ed'+rst_ID+'_rst_Status'),
+			dbId = Number(top.HEURIST.database.id);
+
+		//find original dbid
+		var original_dbId = values[top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_OriginatingDBID];
+		if(Hul.isnull(original_dbId)){
+			//if original dbid is not defined for this field, we take it from common(header) of rectype
+//			original_dbId = top.HEURIST.rectypes.typedefs[rty_ID].commonFields[top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_OriginatingDBID];
+			if(Hul.isnull(original_dbId)){
+				original_dbId = dbId;
+			}
+		}
+
+		var status = values[top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_Status];
+		var isReserved = (status === "reserved" || status === "approved");
+
+		if (((dbId>0) && (dbId<1001) && (original_dbId===dbId)) || isReserved)
+		{
+			_optionReserved(selstatus, true);
+		}else{
+			_optionReserved(selstatus, false);
+		}
+		selstatus.disabled = ((status === "reserved") && (original_dbId!==dbId) && (original_dbId>0) && (original_dbId<1001));
 
 		var k;
 		for(k=0; k<fieldnames.length; k++){
@@ -1348,7 +1398,8 @@ function onStatusChange(evt){
 	}
 
 	//If reserved, requirements can only be increased, nor can you change min or max values
-	var isReserved = Dom.get(name+"_rst_Status").value === "reserved";
+	var status = Dom.get(name+"_rst_Status").value;
+	var isReserved = (status === "reserved" || status === "approved");
 	Dom.get(name+"_rst_MinValues").disabled = isReserved;
 	Dom.get(name+"_rst_MaxValues").disabled = isReserved;
 	var sel = Dom.get(name+"_Repeatability");
@@ -1393,7 +1444,8 @@ function onReqtypeChange(evt){
 		el_max.value = 0;
 		Dom.setStyle(span_min, "visibility", "hidden");
 
-		Dom.get(name+"_Repeatability").disabled = (Dom.get(name+"_rst_Status").value !== "reserved");
+		var status = Dom.get(name+"_rst_Status").value;
+		Dom.get(name+"_Repeatability").disabled = (!(status === "reserved" || status === "approved"));
 	}
 
 	if(el.value !== "forbidden"){

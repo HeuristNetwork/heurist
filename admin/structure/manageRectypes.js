@@ -375,7 +375,16 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 			}},
 
 			{ key: "grp_id", label: "Group", sortable:false, minWidth:90, maxAutoWidth:90, width:90, className:'center',
-				formatter:YAHOO.widget.DataTable.formatDropdown, dropdownOptions:_groups},
+				formatter: function(elLiner, oRecord, oColumn, oData, oDataTable) {
+                    var str = oRecord.getData("status");
+                    if (false){ //(str === "reserved" || str === "approved") {
+                          var grp_id = oRecord.getData("grp_id");
+                          elLiner.innerHTML = _groups[_getIndexByGroupId(grp_id)].text;
+                    }else{
+                          YAHOO.widget.DataTable.formatDropdown( elLiner , oRecord , oColumn , oData , oDataTable);
+                    }                    
+                
+                }, dropdownOptions:_groups},
 			{ key: "edit", label: "Edit", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
 					elLiner.innerHTML = '<a href="#edit_rectype"><img src="../../common/images/edit-recType.png" width="16" height="16" border="0" title="Edit record type" /><\/a>'; }
 			},
@@ -388,7 +397,7 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 			{ key: "status", label: "Status", sortable:true, className:'center', minWidth:40, maxAutoWidth:40, width:40,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var str = oRecord.getData("status");
-					if (str == "reserved") {
+					if (str === "reserved" || str === "approved") {
 							rectypeStatus = "<img src=\"../../common/images/lock_bw.png\" title=\"Status: "+str+" - Locked\">";
 						}else{
 							rectypeStatus = "<a href=\"#delete\"><img src=\"../../common/images/cross.png\" border=\"0\" title=\"Status: "+str+" - Delete\"/><\/a>";

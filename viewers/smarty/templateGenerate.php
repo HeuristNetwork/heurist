@@ -423,9 +423,11 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind){
 
 				$pointerRecTypeId = $dtValue[$rst_fi['rst_PtrFilteredIDs']]; //@TODO!!!!! it may be comma separated string
 
-//error_log(">>>>".$parentName."   DET KEY=".$dtKey."  RECORD TYPE ID=".$pointerRecTypeId);
+
+//error_log(">>>>>>>".$dt_label." array :".$pointerRecTypeId); //print_r($pointerRecTypeId, false) );
+
 				//load this record
-				if($recursion_depth<2 && array_key_exists($pointerRecTypeId, $rtNames)){
+				if($recursion_depth<2 && ($mode=='varsonly' || array_key_exists($pointerRecTypeId, $rtNames))) {
 
 				$recursion_depth++;
 
@@ -436,6 +438,7 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind){
 					$recordTypeName = getVariableNameForSmarty($recordTypeName, false);
 				}
 
+//error_log($dt_label.">>>>".$parentName."  rectypename=".$recordTypeName."  DET KEY=".$dtKey."  RECORD TYPE ID=".$pointerRecTypeId);
 
 
 //<div style="padding-left:10px;border:solid aqua 1px;">
@@ -460,6 +463,8 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind){
 				}else{
 
 				}
+
+				if(array_key_exists($pointerRecTypeId, $rtNames)){
 
 				//$tree[$recordTypeName] = array_merge($tree[$recordTypeName], $res2['tree']);
 
@@ -498,6 +503,8 @@ error_log(">>>>            ");
 error_log(">>>>            ".print_r($res2['tree'], true));
 					$tree = array_merge($tree, $res2['tree']);
 				}*/
+
+				}//array_key_exists($pointerRecTypeId, $rtNames))
 
 				array_push($arr_text, '{/foreach}');
 				array_push($arr_text, '');

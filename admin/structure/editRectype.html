@@ -47,7 +47,9 @@
 <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
 <script	 type="text/javascript">
 
-	var Hul = top.HEURIST.util;
+	var Hul = top.HEURIST.util,
+        _keepStatus;
+        
 
 	try {
 		var hash;
@@ -124,14 +126,20 @@
     </div>
   </div>
 
-  <!-- HIDDEN -->
-  <div class="input-row" style="display:none">
-    <div class="input-header-cell">for="rty_Status">Status:</div>
+  <!-- STATUS -->
+  <div class="input-row">
+    <div class="input-header-cell" for="rty_Status">Status:</div>
     <div class="input-cell">
-      <div class="rtyValue" id="rty_Status"></div>
-      <div class="help prompt">The record type's status. 'Reserved' can not be changed, 'Open' can be changed and is normal setting</div>
+       	<select class="rtyValue" id="rty_Status" onChange="onChangeStatus(event)">
+                <option selected="selected">open</option>
+                <option>pending</option>
+                <option>approved</option>
+                <!-- option>reserved</option -->
+		</select>
+		<div class="help prompt">The rectype's status. 'Reserverd' can not be changed, 'Open' is normal</div>
     </div>
   </div>
+
   <div class="input-row required">
     <div class="input-header-cell" style="vertical-align:top" for="rty_Description">Description:</div>
     <div class="input-cell">
@@ -256,8 +264,6 @@
 		// Set group from URL
 		getTypes();
 		getStatus();
-		statusDropdown.selectedIndex = 3; // Set 'Open' to default status value
-//ART document.getElementById("rectypeIcon").innerHTML = "<a href=\"../../admin/structure/uploadRectypeIcon.php\">change icon</a>";
 	}
 
 	function setRtyValues() {
@@ -268,22 +274,22 @@
 			document.getElementById("rty_ID").innerHTML = rectypeID;
 			try {
 				// 27/7/11 Was lookiogn for non-existant icon edit file. Ian changed path
-                // to ../../admin/structure/uploadRectypeIcon.php and added ?rt_id="+rectypeID+
-                // Now finds the file but returns blank page. admin/structure/uploadRectypeIcon.php?rt_id=42 also loads blank page
-                // so it looks like this file needs updating to new structures
-                document.getElementById("rectypeIcon").innerHTML =
-                "<a href=\"javascript:void(0)\" onClick=\"upload_icon(0)\" title=\"Click to change icon\">"+
-                "<img id=\"imgIcon\" src=\""+
-                top.HEURIST.baseURL + "common/images/" + top.HEURIST.database.name +"/rectype-icons/" + rectypeID + ".png" +
-                "\" width=\"16\" height=\"16\"></a>";
+				// to ../../admin/structure/uploadRectypeIcon.php and added ?rt_id="+rectypeID+
+				// Now finds the file but returns blank page. admin/structure/uploadRectypeIcon.php?rt_id=42 also loads blank page
+				// so it looks like this file needs updating to new structures
+				document.getElementById("rectypeIcon").innerHTML =
+				"<a href=\"javascript:void(0)\" onClick=\"upload_icon(0)\" title=\"Click to change icon\">"+
+				"<img id=\"imgIcon\" src=\""+
+				top.HEURIST.baseURL + "common/images/" + top.HEURIST.database.name +"/rectype-icons/" + rectypeID + ".png" +
+				"\" width=\"16\" height=\"16\"></a>";
 
-                document.getElementById("rectypeThumb").innerHTML =
-                "<a href=\"javascript:void(0)\" onClick=\"upload_icon(1)\" title=\"Click to change thumbnail\">"+
-                "<img id=\"imgThumb\" src=\""+
-                top.HEURIST.baseURL + "common/images/" + top.HEURIST.database.name +"/rectype-icons/thumb/th_" + rectypeID + ".png" +
-                "\" width=\"75\" height=\"75\"></a>";
+				document.getElementById("rectypeThumb").innerHTML =
+				"<a href=\"javascript:void(0)\" onClick=\"upload_icon(1)\" title=\"Click to change thumbnail\">"+
+				"<img id=\"imgThumb\" src=\""+
+				top.HEURIST.baseURL + "common/images/" + top.HEURIST.database.name +"/rectype-icons/thumb/th_" + rectypeID + ".png" +
+				"\" width=\"75\" height=\"75\"></a>";
 
-                //../../common/images/rectype-icons/"+rectypeID+".png
+				//../../common/images/rectype-icons/"+rectypeID+".png
 			} catch(e) {
 				alert(e);
 /* 				document.getElementById("rectypeIcon").innerHTML = "<a href=\"../../admin/structure/uploadRectypeIcon.php\">change icon</a>"; */
@@ -306,61 +312,82 @@
 		getStatus();
 	}
 
+	function _addOptionReserved(){
+		var selstatus = document.getElementById("rty_Status");
+		if(selstatus.length<4){
+				var option = document.createElement("option");
+				option.text = 'reserved';
+				option.value = 'reserved';
+				try {
+					// for IE earlier than version 8
+					selstatus.add(option, sel.options[null]);
+				}catch (ex2){
+					selstatus.add(option,null);
+				}
+		}
+		}
+
 	// Create the status dropdown menu with all possible statusses. In case it is reserved, disable the entire form. Always save the previous status in 'var status', so we can change it back to the previous status when someone 'cancels' on the prompt wether they really want to change the status to 'reserved'
 	function getStatus() {
-		statusDropdown = document.createElement("select");
-		statusDropdown.options.add(optionReserved = document.createElement("option"));
-		statusDropdown.options.add(optionApproved = document.createElement("option"));
-		statusDropdown.options.add(optionPending = document.createElement("option"));
-		statusDropdown.options.add(optionOpen = document.createElement("option"));
 
-		optionReserved.text = "Reserved";
-		optionApproved.text = "Approved";
-		optionPending.text = "Pending";
-		optionOpen.text = "Open";
+		var disable_status = false,
+            disable_fields = false,
+			selstatus = document.getElementById("rty_Status"),
+			fi = top.HEURIST.rectypes.typedefs.commonNamesToIndex,
+			dbId = Number(top.HEURIST.database.id);
 
-		statusDropdown.onchange = function(){statusChange();};
+		var original_dbId = (rectype)?Number(rectype[fi.rty_OriginatingDBID]):dbId;
+		if(Hul.isnull(original_dbId)) {original_dbId = dbId;}
+            
+			
+		if((dbId>0) && (dbId<1001) && (original_dbId===dbId)) {
+			_addOptionReserved();
+		}
 
-		if(rectype) {
-			switch(top.HEURIST.rectypes.typedefs[rectypeID].commonFields[top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_Status]) {
-				case "reserved":
-					statusDropdown[0].selected = "1";
-					status = 0;
-					toggleAll(true, false);
-					break;
-				case "approved":
-					statusDropdown[1].selected = "1";
-					status = 1;
-					break;
-				case "pending":
-					statusDropdown[2].selected = "1";
-					status = 2;
-					break;
-				case "open":
-					statusDropdown[3].selected = "1";
-					status = 3;
-					break;
+
+		if(rectype){ //edit
+
+			if(rectype[fi.rty_Status]==='reserved'){
+
+				disable_status = (original_dbId!==dbId) && (original_dbId>0) && (original_dbId<1001);
+				disable_fields = true;
+				_addOptionReserved();
+
+			}else if(rectype[fi.rty_Status]==='approved'){
+
+				disable_fields = true;
 			}
+
+			_keepStatus = rectype[fi.rty_Status];
+			selstatus.value = rectype[fi.rty_Status];
+
+		}else{ //new
+			selstatus.value = "open";
 		}
-		else {
-			status = 3;
-		}
-		document.getElementById("rty_Status").appendChild(statusDropdown);
+        toggleAll(disable_status || disable_fields, disable_status);
 	}
 
 	// Change the status. If reserved, disable the entire form. Else, enable the entire form. Always save the previous status in 'var status', so we can change it back to the previous status when someone 'cancels' on the prompt wether they really want to change the status to 'reserved'
-	function statusChange() {
-		if(statusDropdown.value == "Reserved") {
-			var changeToReserved = confirm("If you change the status to reserved, you will no longer be able to change any fields of this rectype after you save it.\n\nAre you sure?");
+	function onChangeStatus(e) {
+
+		var el = e.target;
+		if(el.value === "reserved") {
+
+			var changeToReserved = confirm("If you change the status to 'reserved'," +
+					" some fields of this rectype will no longer be able to change.\n\nAre you sure?");
 			if(changeToReserved) {
-				toggleAll(true, true);
+					toggleAll(true, false);
 			} else {
-				statusDropdown.selectedIndex = status;
+					el.value = _keepStatus; //restore previous value
 			}
+		}else if(el.value === "approved") {
+			_keepStatus = el.value;
+			toggleAll(true, false);
 		} else {
-			status = statusDropdown.selectedIndex;
-			toggleAll(false, true);
+				_keepStatus = el.value;
+				toggleAll(false, false);
 		}
+
 	}
 
 	// Create the dropdown menu with all possible types, and if an existing rectype is being editted, select the right value
@@ -426,31 +453,19 @@
 		}//for
 	}
 	// Toggle fields to disable. Is called when status is set to 'Reserved'. If changed = true, it means that the status is manually changed to reserved, so untill it is saved, it can be changed back. If it was reserved when starting the editRectype, keep it disabled
-	function toggleAll(disable, changed) {
-		if(disable) {
-			document.getElementById("rty_Name").disabled = true;
-			document.getElementById("rty_Plural").disabled = true;
-			document.getElementById("rty_OrderInGroup").disabled = true;
-			groupDropdown.disabled = true;
-			document.getElementById("rty_ShowInLists").disabled = true;
-			document.getElementById("rty_TitleMask").disabled = true;
-			document.getElementById("btn_TitleMask").disabled = true;
-			typesDropdown.disabled = true;
-			document.getElementById("rty_FlagAsFieldset").disabled = true;
-			if(!changed) {
-				statusDropdown.disabled = true;
-			}
-		} else {
-			document.getElementById("rty_Name").disabled = false;
-			document.getElementById("rty_Plural").disabled = false;
-			document.getElementById("rty_OrderInGroup").disabled = false;
-			groupDropdown.disabled = false;
-			document.getElementById("rty_ShowInLists").disabled = false;
-			document.getElementById("rty_TitleMask").disabled = false;
-			document.getElementById("btn_TitleMask").disabled = false;
-			typesDropdown.disabled = false;
-			document.getElementById("rty_FlagAsFieldset").disabled = false;
-		}
+	function toggleAll(disable, reserved) {
+			document.getElementById("rty_Status").disabled = reserved;
+			document.getElementById("rty_OrderInGroup").disabled = disable;
+			document.getElementById("rty_FlagAsFieldset").disabled = disable;
+			document.getElementById("rty_ReferenceURL").disabled = disable;
+
+			//document.getElementById("rty_Name").disabled = disable;
+			//document.getElementById("rty_Plural").disabled = disable;
+			//groupDropdown.disabled = disable;
+			//document.getElementById("rty_ShowInLists").disabled = disable;
+			//document.getElementById("rty_TitleMask").disabled = disable;
+			//document.getElementById("btn_TitleMask").disabled = disable;
+			typesDropdown.disabled = disable;
 	}
 
 
@@ -484,8 +499,8 @@
 			"admin/structure/editRectypeTitle.html?rectypeID="+rectypeID+"&mask="+maskvalue+"&db="+db,
 		{
 		"close-on-blur": false,
-		"no-resize": true,
-		height: 300,
+		"no-resize": false,
+		height: 500,
 		width: 800,
 		callback: function(newvalue) {
 			if(!Hul.isnull(newvalue)){
@@ -655,28 +670,28 @@
 			var fieldNameElementValue = fieldNameElement.value;
 
 			if(fieldName=="rty_Name" && fieldNameElementValue=="") {
-  				if(isShowWarn) alert("Name is mandatory field");
-  				document.getElementById("rty_Name").focus();
-  				updatedFields = [];
-  				return "mandatory";
+				if(isShowWarn) alert("Name is mandatory field");
+				document.getElementById("rty_Name").focus();
+				updatedFields = [];
+				return "mandatory";
 			}
 			else if(fieldName=="rty_Plural" && fieldNameElementValue=="") {
-  				if(isShowWarn) alert("Plural is mandatory field");
-  				document.getElementById("rty_Plural").focus();
-  				updatedFields = [];
-  				return "mandatory";
+				if(isShowWarn) alert("Plural is mandatory field");
+				document.getElementById("rty_Plural").focus();
+				updatedFields = [];
+				return "mandatory";
 			}
 			else if(fieldName=="rty_Description" && fieldNameElementValue=="") {
-  				if(isShowWarn) alert("Description is mandatory field");
-  				document.getElementById("rty_Description").focus();
-  				updatedFields = [];
-  				return "mandatory";
+				if(isShowWarn) alert("Description is mandatory field");
+				document.getElementById("rty_Description").focus();
+				updatedFields = [];
+				return "mandatory";
 			}
 			else if(fieldName=="rty_TitleMask" && fieldNameElementValue=="") {
-  				if(isShowWarn) alert("Title Mask is mandatory field");
-  				document.getElementById("rty_TitleMask").focus();
-  				updatedFields = [];
-  				return "mandatory";
+				if(isShowWarn) alert("Title Mask is mandatory field");
+				document.getElementById("rty_TitleMask").focus();
+				updatedFields = [];
+				return "mandatory";
 			}else if(fieldName=="rty_RecTypeGroupID") {
 
 				fieldNameElementValue = groupDropdown.value;
@@ -685,7 +700,7 @@
 			if(fieldName === "rty_Type" ) { // dropdown menu's. Can't get the value with element.value
 				fieldNameElementValue = typesDropdown.value;
 			} else if(fieldName === "rty_Status") {
-				fieldNameElementValue = statusDropdown.value.toLowerCase();
+				fieldNameElementValue = document.getElementById("rty_Status").value;
 			}
 
 			if(fieldNameElement.type=="checkbox"){
@@ -733,8 +748,10 @@
 
 
 	var EditPopup = (function () {
+        
 		//public members
 		var that = {
+            
 				save : function (openEditStructure) {
 					_openEditStrucutreAfterClose = openEditStructure;
 					updateRectypeOnServer();

@@ -95,7 +95,19 @@ function DetailTypeEditor() {
 			Dom.get("statusMsg").innerHTML = "Error: field type #"+_dtyID+"  not be found. Clicking 'save' button will create a new Field Type.";
 		}
 
-		var fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+		var fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex,
+			disable_status = false,
+			disable_fields = false,
+			selstatus = Dom.get("dty_Status"),
+			dbId = Number(top.HEURIST.database.id);
+
+		var original_dbId = (Hul.isnull(_detailType))?dbId:Number(_detailType[fi.dty_OriginatingDBID]);
+		if(Hul.isnull(original_dbId)) {original_dbId = dbId;}
+			
+		if((dbId>0) && (dbId<1001) && (original_dbId===dbId)) {
+			_addOptionReserved();
+		}
+
 
 		//creates new empty field type in case ID is not defined
 		if(Hul.isnull(_detailType)){
@@ -119,10 +131,24 @@ function DetailTypeEditor() {
 			Dom.get("dty_Type").disabled = false;
 		}else{
 			Dom.get("dty_Type").disabled = true;
+
+
+			if(_detailType[fi.dty_Status]==='reserved'){ //if reserved - it means original dbid<1001
+
+				disable_status = (original_dbId!==dbId) && (original_dbId>0) && (original_dbId<1001);
+				disable_fields = true;
+				_addOptionReserved();
+
+			}else if(_detailType[fi.dty_Status]==='approved'){
+				disable_fields = true;
+			}
 		}
 
+		//disable if reserved
+		_toggleAll(disable_status || disable_fields, disable_status);
+
 		_keepStatus = _detailType[fi.dty_Status]; // Keeps current status for rollback
-		Dom.get("dty_Status").innerHTML = _keepStatus;
+		selstatus.value = _keepStatus;
 		_keepType = _detailType[fi.dty_Type]; // Keeps current datatype
 
 		// creates and fills group selector
@@ -133,17 +159,33 @@ function DetailTypeEditor() {
 	}
 
 	/**
-	* Toggle fields to disable. Is called when status is set to 'Reserved'.
-	* If changed = true, it means that the status is manually changed to reserved,
-	* so untill it is saved, it can be changed back. If it was reserved when starting the editRectype,
-	* keep it disabled
+	* adds reserved option to status dropdown list
 	*/
-	function _toggleAll(disable, changed) {
-			Dom.get("dty_Name").disabled = disable;
-			Dom.get("dty_DetailTypeGroupID").disabled = disable;
-			//Dom.get("dty_Status").disabled = disable;
+	function _addOptionReserved(){
+		var selstatus = Dom.get("dty_Status");
+		if(selstatus.length<4){
+				var option = document.createElement("option");
+				option.text = 'reserved';
+				option.value = 'reserved';
+				try {
+					// for IE earlier than version 8
+					selstatus.add(option, sel.options[null]);
+				}catch (ex2){
+					selstatus.add(option,null);
+				}
+		}
+	}
+
+	/**
+	* Toggle fields to disable. Is called when status is set to 'Reserved'.
+	*/
+	function _toggleAll(disable, reserved) {
+
+			//Dom.get("dty_Name").disabled = disable;
+			//Dom.get("dty_DetailTypeGroupID").disabled = disable;
+			Dom.get("dty_Status").disabled = reserved;
 			Dom.get("dty_OrderInGroup").disabled = disable;
-			Dom.get("dty_ShowInLists").disabled = disable;
+			//Dom.get("dty_ShowInLists").disabled = disable;
 
 			Dom.get("termsPreview").disabled = disable;
 			Dom.get("btnSelTerms").disabled = disable;
@@ -650,24 +692,27 @@ function DetailTypeEditor() {
 	}
 
 	/**
-	*	status selector listener
+	*	status selector listener (not used)
 	*/
 	function _onChangeStatus(e){
 
 		var el = e.target;
 		if(el.value === "reserved") {
-			var changeToReserved = confirm("If you change the status to reserved," +
-											" you will no longer be able to change any "+
-											"fields of this detailtype after you save it.\n\nAre you sure?");
+			var changeToReserved = confirm("If you change the status to 'reserved'," +
+											" some fields of this detailtype will no longer be able to change.\n\nAre you sure?");
 			if(changeToReserved) {
-					_toggleAll(true, true);
+					_toggleAll(true, false);
 			} else {
 					el.value = that.keepStatus; //restore previous value
 			}
+        }else if(el.value === "approved") {
+                that.keepStatus = el.value;
+                _toggleAll(true, false);
 		} else {
 				that.keepStatus = el.value;
-				_toggleAll(false, true);
-			}
+				_toggleAll(false, false);
+		}
+
 	}
 
 	//public members

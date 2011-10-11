@@ -22,7 +22,7 @@ require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 		header("Location: " . HEURIST_URL_BASE . "common/connect/login.php?db=".HEURIST_DBNAME);
 		return;
 	}
-	
+
 	if (!is_admin()) {
     print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You do not have sufficient privileges to access this page</span><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
     return;
@@ -54,6 +54,9 @@ $processed_count = 0;
 <head>
 <script type="text/javascript">
 function update_counts(processed, blank, repair, changed) {
+	if(changed==null || changed==undefined){
+		changed = 0;
+	}
 	document.getElementById('processed_count').innerHTML = processed;
 	document.getElementById('changed_count').innerHTML = changed;
 	document.getElementById('same_count').innerHTML = processed - (changed + blank);
@@ -80,7 +83,7 @@ function update_counts2(processed, total) {
 </p>
 
 <div><span id=total_count><?=count($recs)?></span> records in total</div>
-<div><span id=processed_count>0</span> processed so far (<span id=percent>0</span>)</div>
+<div><span id=processed_count>0</span> processed so far (<span id=percent>0<font color="#ff0000"><b>%</b></font></span>)</div>
 <div><span id=changed_count>0</span> to be updated</div>
 <div><span id=same_count>0</span> are the same</div>
 <div><span id=repair_count>0</span> are internet bookmarks that are reparable</div>
