@@ -227,7 +227,7 @@ if (@$urls) {
 	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
   	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
    	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/admin.css">
-        
+
     <style type="text/css">
 		.input-header-cell {width:140px;min-width:140px;max-width:140px; vertical-align:baseline;}
 		.input-header-cell input[type="radio"]{float:left;min-width:35px}
@@ -429,14 +429,14 @@ function biblio_check($url, $title, $notes, $user_bib_id) {
 	 */
 
 	// saw FIXME thsi should be
-	$res = mysql_query('select rec_ID from Records where rec_URL = "'.addslashes($url).'" and (rec_OwnerUGrpID=0 or rec_NonOwnerVisibility="viewable")');
+	$res = mysql_query('select rec_ID from Records where rec_URL = "'.addslashes($url).'" and (rec_OwnerUGrpID=0 or not rec_NonOwnerVisibility="hidden")');
 	if (mysql_num_rows($res) > 0) {
 		$bib = mysql_fetch_assoc($res);
 		return $bib['rec_ID'];
 	}
 
 	if ($user_bib_id > 0) {
-		$res = mysql_query('select rec_ID from Records where rec_ID = "'.addslashes($user_bib_id).'" and (rec_OwnerUGrpID=0 or rec_NonOwnerVisibility="viewable")');
+		$res = mysql_query('select rec_ID from Records where rec_ID = "'.addslashes($user_bib_id).'" and (rec_OwnerUGrpID=0 or not rec_NonOwnerVisibility="hidden")');
 		if (mysql_num_rows($res) > 0) {
 			$bib = mysql_fetch_assoc($res);
 			return $bib['rec_ID'];
@@ -451,7 +451,7 @@ function biblio_check($url, $title, $notes, $user_bib_id) {
 		if (substr($par_url, strlen($par_url)-1) == '/')	// ends in a slash; remove it
 			$par_url = substr($par_url, 0, strlen($par_url)-1);
 
-		$res = mysql_query('select rec_ID from Records where rec_URL like "'.addslashes($par_url).'%" and (rec_OwnerUGrpID=0 or rec_NonOwnerVisibility="viewable")');
+		$res = mysql_query('select rec_ID from Records where rec_URL like "'.addslashes($par_url).'%" and (rec_OwnerUGrpID=0 or not rec_NonOwnerVisibility="hidden")');
 		if (mysql_num_rows($res) > 0) {
 			$bib_ids = array();
 			while ($row = mysql_fetch_row($res))

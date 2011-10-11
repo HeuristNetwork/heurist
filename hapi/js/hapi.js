@@ -1408,7 +1408,7 @@ var HRecord = function() {
 		_url = url;
 		_notes = notes;
 		_workgroup = wg? HWorkgroupManager.getWorkgroupById(wg) : null;
-		_nonOwnerVisible = (typeof nonwgVis == 'string' &&
+		_nonOwnerVisible = (typeof nonwgVis == 'string' &&	// if vis is set just usw it otherwise if ole value is 0 then use hidden default to viewable
 									nonwgVis.toLowerCase() in {'hidden':1,'viewable':1,'pending':1,'public':1}?
 										 nonwgVis.toLowerCase() : (!nonwgVis || nonwgVis == '0'? 'hidden':'viewable'));
 		_urlDate = urlDate;

@@ -319,7 +319,7 @@ global $REVERSE, $ACCESSABLE_OWNER_IDS, $relRT;
 				(is_logged_in()?'OR NOT trg.rec_NonOwnerVisibility = "hidden")':
 								'OR trg.rec_NonOwnerVisibility = "public")');
 
-error_log("find  d $depth rev pointer q = $query");
+//error_log("find  d $depth rev pointer q = $query");
 	$res = mysql_query($query);
 	while ($res && $row = mysql_fetch_assoc($res)) {
 		// if target is not in the result

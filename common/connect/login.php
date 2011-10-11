@@ -19,12 +19,12 @@ require_once(dirname(__FILE__).'/../php/dbMySqlWrappers.php');
 //require_once('applyCredentials.php');
 //require_once('../php/dbMySqlWrappers.php');
 session_start();
-//error_log("in login  loaded includes  userdb = ". USERS_DATABASE);
+error_log("in login  loaded includes  userdb = ". USERS_DATABASE);
 //error_log(" params =". $_SERVER['QUERY_STRING']);
 
 $last_uri = urldecode(@$_REQUEST['last_uri']);
 
-//error_log(" last uri = $last_uri");
+error_log(" last uri = $last_uri");
 //if (! $last_uri)
 //	$last_uri = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['last_uri'];
 if (! $last_uri) {
@@ -54,7 +54,7 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 		 $user[USERS_ACTIVE_FIELD] == 'y'  &&
 		 crypt($_REQUEST['password'], $user[USERS_PASSWORD_FIELD]) == $user[USERS_PASSWORD_FIELD] ) {
 //		 (crypt($_REQUEST['password'], $user[USERS_PASSWORD_FIELD]) == $user[USERS_PASSWORD_FIELD]  ||  $_SESSION['heurist']['user_name'] == 'stevewh')) {
-//error_log("in login  after crypt check");
+error_log("in login  after crypt check");
 
 		$res = mysql_query('select '.GROUPS_ID_FIELD.','.USER_GROUPS_ROLE_FIELD.' from '.USER_GROUPS_TABLE.','.GROUPS_TABLE.
 							' where '.USER_GROUPS_GROUP_ID_FIELD.'='.GROUPS_ID_FIELD.

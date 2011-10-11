@@ -2854,17 +2854,17 @@ function removeCustomAlert() {
 		var oldLeftWidth = top.HEURIST.util.getDisplayPreference("oldLeftWidth");
 		if (!leftWidth || !oldLeftWidth) {
 			leftWidth = 180;
-			}else if (top.HEURIST.util.getDisplayPreference("sidebarPanel") == "closed"){
+		}else if (top.HEURIST.util.getDisplayPreference("sidebarPanel") == "closed"){
 			leftWidth = oldLeftWidth;
-			};
+		};
 		var appPanelStatus = top.HEURIST.util.getDisplayPreference("applicationPanel");
 		var searchWidth = top.HEURIST.util.getDisplayPreference("searchWidth");
 		var oldSearchWidth = top.HEURIST.util.getDisplayPreference("oldSearchWidth");
 		if (!searchWidth || !oldSearchWidth) {
 			searchWidth = 180;
-			}else if (appPanelStatus != "open"){
+		}else if (appPanelStatus != "open"){
 			searchWidth = oldSearchWidth;
-			};
+		};
 		var appPanelButton = document.getElementById("appPanelButton");
 		var navButton = document.getElementById("navButton");
 		var tabBar = document.getElementById("tabbar");
@@ -2952,30 +2952,29 @@ function removeCustomAlert() {
 				layout.getUnitByPosition('left').expand();
 				top.HEURIST.util.setDisplayPreference("sidebarPanel","open");
 				navButton.className = navButton.className.replace(" closed", "");
-				searchTable.style.paddingLeft = top.HEURIST.displayPreference.leftWidth;
+				searchTable.style.paddingLeft = top.HEURIST.displayPreferences.leftWidth;
 				navButton.title = "Hide Navigation Panel";
 			}
 		});
 		Event.on('appPanelButton', 'click', function(ev) {
-				Event.stopEvent(ev);
-				if (top.HEURIST.util.getDisplayPreference("applicationPanel") == "open"){
+			Event.stopEvent(ev);
+			if (top.HEURIST.util.getDisplayPreference("applicationPanel") == "open"){
 				var oldSearchWidth = layout.getSizes().center.w;
 					top.HEURIST.util.setDisplayPreference("oldSearchWidth", oldSearchWidth);
+				var offset = 29  + (top.HEURIST.displayPreferences.sidebarPanel == "closed"?20:0);
 				layout.getUnitByPosition('right').collapse();
 				top.HEURIST.util.setDisplayPreference("applicationPanel","closed");
 				appPanelButton.className +=" closed";
-				tabBar.style.width = layout.getSizes().center.w - 29;
+				tabBar.style.width = layout.getSizes().center.w - offset;
 				appPanelButton.style.width = "20px";
 				appPanelButton.title = "Show Applications";
 			}else{
+				var offset = 9  + (top.HEURIST.displayPreferences.sidebarPanel == "closed"?20:0);
 				layout.getUnitByPosition('right').expand();
 				top.HEURIST.util.setDisplayPreference("applicationPanel","open");
 				appPanelButton.className = appPanelButton.className.replace(" closed", "");
 				appPanelButton.title = "Hide Applications";
-				tabBar.style.width = layout.getSizes().center.w-8;
-				if (top.HEURIST.util.getDisplayPreference("sidebarPanel") == "closed"){
-					tabBar.style.width = layout.getSizes().center.w - 29;
-				};
+				tabBar.style.width = layout.getSizes().center.w - offset;
 			}
 
 		});
