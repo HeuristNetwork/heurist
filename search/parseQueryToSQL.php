@@ -25,7 +25,7 @@ define('SORT_ADDED', 'a');
 define('SORT_TITLE', 't');
 
 
-function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL) {
+function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL, $publicOnly = false) {
 	// wg_ids is a list of the workgroups we can access; records records marked with a rec_OwnerUGrpID not in this list are omitted
 
 	// clean up the query.
@@ -35,7 +35,7 @@ function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL) {
 	$text = preg_replace('/[\000-\041\043-\046\050-\053\073\077\100\133\135\136\140\173-\177]+/s', ' ', $text);
 	$text = preg_replace('/- (?=[^"]*(?:"[^"]*"[^"]*)*$)/', ' ', $text); // remove any dashes outside matched quotes.
 
-	$query = new Query($search_type, $text);
+	$query = new Query($search_type, $text, $publicOnly);
 	$query->addWorkgroupRestriction($wg_ids);
 	$q = $query->makeSQL();
 
@@ -88,8 +88,9 @@ class Query {
 
 	var $workgroups;
 
-	function Query($search_type, $text) {
+	function Query($search_type, $text, $publicOnly) {
 		$this->search_type = $search_type;
+		$this->isPublicOnly = $publicOnly;
 		$this->or_limbs = array();
 		$this->sort_phrases = array();
 		$this->sort_tables = array();
@@ -166,9 +167,10 @@ class Query {
 			if ($where_clause) $where_clause = '(' . $where_clause . ') and ';
 			$where_clause .= 'not rec_FlagTemporary ';
 		}
-		$where_clause = '('.(is_logged_in()?'rec_OwnerUGrpID='. get_user_id().' or ':'').// this includes non logged in because it returns 0
-							(is_logged_in()?'not rec_NonOwnerVisibility="hidden"':'rec_NonOwnerVisibility="public"').
-							(!empty($this->workgroups)?(' or rec_OwnerUGrpID in (' . join(',', $this->workgroups) . '))'):')').
+//error_log("query obj  - ".print_r($this,true));
+		$where_clause = '('.((is_logged_in() && !$this->isPublicOnly) ?'rec_OwnerUGrpID='. get_user_id().' or ':'').// this includes non logged in because it returns 0
+							((is_logged_in() && !$this->isPublicOnly) ?'not rec_NonOwnerVisibility="hidden"':'rec_NonOwnerVisibility="public"').
+							((!empty($this->workgroups) && !$this->isPublicOnly) ?(' or rec_OwnerUGrpID in (' . join(',', $this->workgroups) . '))'):')').
 							' and ' . $where_clause;
 
 		return $from_clause . 'where ' . $where_clause . $sort_clause;
@@ -1149,7 +1151,7 @@ function construct_legacy_search() {
 }
 
 
-function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL) {
+function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publicOnly = false) {
 	// wg_ids is a list of the workgroups we can access; Records records marked with a rec_OwnerUGrpID not in this list are omitted
 
 	/* use the supplied _REQUEST variables (or $parms if supplied) to construct a query starting with $query */
@@ -1162,7 +1164,7 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL) {
 	}
 
 	if (! @$parms['qq']  &&  ! preg_match('/&&|\\bAND\\b/i', @$parms['q'])) {
-		$query .= parse_query($search_type, $parms['q'], @$parms['s'], $wg_ids);
+		$query .= parse_query($search_type, $parms['q'], @$parms['s'], $wg_ids, $publicOnly);
 	} else {
 		// search-within-search gives us top-level ANDing (full expressiveness of conjunctions and disjunctions! hot damn)
 		// basically for free!
@@ -1180,7 +1182,7 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL) {
 		$where_clause = '';
 		$q_clauses = array();
 		foreach ($q_bits as $q_bit) {
-			$q = parse_query($search_type, $q_bit, $parms['s'], $wg_ids);
+			$q = parse_query($search_type, $q_bit, $parms['s'], $wg_ids, $publicOnly);
 			// for each qbit if there is owner/vis followed by clause followed by order by, capture it for and'ing
 			preg_match('/.*?where [(]rec_OwnerUGrpID=[-0-9]* or (?:rec_NonOwnerVisibility="public"|not rec_NonOwnerVisibility="hidden")(?: or rec_OwnerUGrpID in \\([0-9,]*\\))?[)] and (.*) order by/s', $q, $matches);
 			if ($matches[1]) {
@@ -1194,7 +1196,7 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL) {
 			$query .= $matches[1] . $where_clause . $matches[2];
 	}
 
-	error_log("request to query returns ".print_r($query,true));
+	//error_log("request to query returns ".print_r($query,true));
 	return $query;
 }
 

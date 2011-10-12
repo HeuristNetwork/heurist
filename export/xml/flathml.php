@@ -196,6 +196,9 @@ $INCLUDE_FILE_CONTENT = (@$_REQUEST['fc'] && $_REQUEST['fc'] == 0? false :true);
 //TODO: supress loopback by default unless there is a filter.
 $SUPRESS_LOOPBACKS = (@$_REQUEST['slb'] && $_REQUEST['slb'] == 0? false :true);	// default to supress loopbacks or gives oneside of a relationship record
 $FRESH = (@$_REQUEST['f'] && $_REQUEST['f'] == 1? true :false);
+//$PUBONLY = (((@$_REQUEST['pub_ID'] && is_numeric($_REQUEST['pub_ID'])) ||
+//			(@$_REQUEST['pubonly'] && $_REQUEST['pubonly'] > 0)) ? true :false);
+$PUBONLY = ((@$_REQUEST['pubonly'] && $_REQUEST['pubonly'] > 0) ? true :false);
 $filterString = (@$_REQUEST['rtfilters'] ? $_REQUEST['rtfilters'] : null);
 if ( $filterString && preg_match('/[^\\:\\s"\\[\\]\\{\\}0-9\\,]/',$filterString)) {
 	die(" error invalid json rectype filters string");
@@ -298,7 +301,7 @@ if (is_logged_in()){
 **/
 
 function findPointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
-global $ACCESSABLE_OWNER_IDS;
+global $ACCESSABLE_OWNER_IDS, $PUBONLY;
 //error_log("in findPointers");
 	//saw TODO add error checking for numeric values in $rtyIDs and $dtyIDs
 	// find all detail values for resource type details which exist for any record with an id in $rec_ids
@@ -316,9 +319,9 @@ global $ACCESSABLE_OWNER_IDS;
 				($rtyIDs && count($rtyIDs)>0 ? 'AND trg.rec_RecTypeID in ('.join(',', $rtyIDs).') ' : '').
 				($dtyIDs && count($dtyIDs)>0 ? 'AND dty_ID in ('.join(',', $dtyIDs).') ' : '').
 					'AND dty_Type = "resource" AND '.
-					(count($ACCESSABLE_OWNER_IDS)>0?'(trg.rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') ':'(0 ').
-					(is_logged_in()?'OR NOT trg.rec_NonOwnerVisibility = "hidden")':
-									'OR trg.rec_NonOwnerVisibility = "public")');
+					(count($ACCESSABLE_OWNER_IDS)>0  && !$PUBONLY?'(trg.rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR ':'(').
+					((is_logged_in() && !$PUBONLY) ?'NOT trg.rec_NonOwnerVisibility = "hidden")':
+									'trg.rec_NonOwnerVisibility = "public")');
 
 //error_log("find d $depth pointer q = $query");
 //echo "\n $query\n";
@@ -377,7 +380,7 @@ global $ACCESSABLE_OWNER_IDS;
 **/
 
 function findReversePointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
-global $REVERSE, $ACCESSABLE_OWNER_IDS,$relRT;
+global $REVERSE, $ACCESSABLE_OWNER_IDS,$relRT,$PUBONLY;
 //if (!$REVERSE) return array();
 //error_log("in findReversePointers");
 	$nlrIDs = array(); // new linked record IDs
@@ -394,9 +397,9 @@ global $REVERSE, $ACCESSABLE_OWNER_IDS,$relRT;
 				($rtyIDs && count($rtyIDs)>0 ? 'AND trg.rec_RecTypeID in ('.join(',', $rtyIDs).') ' : '').
 				($dtyIDs && count($dtyIDs)>0 ? 'AND dty_ID in ('.join(',', $dtyIDs).') ' : '').
 				"AND trg.rec_RecTypeID != $relRT AND ".
-				(count($ACCESSABLE_OWNER_IDS)>0?'(trg.rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') ':'(0 ').
-				(is_logged_in()?'OR NOT trg.rec_NonOwnerVisibility = "hidden")':
-								'OR trg.rec_NonOwnerVisibility = "public")');
+				(count($ACCESSABLE_OWNER_IDS)>0  && !$PUBONLY ?'(trg.rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR ':'(').
+				(is_logged_in() && ! $PUBONLY ?'NOT trg.rec_NonOwnerVisibility = "hidden")':
+								'trg.rec_NonOwnerVisibility = "public")');
 
 //error_log("find  d $depth rev pointer q = $query");
 	$res = mysql_query($query);
@@ -452,7 +455,7 @@ global $REVERSE, $ACCESSABLE_OWNER_IDS,$relRT;
 **/
 
 function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
-	global $REVERSE, $ACCESSABLE_OWNER_IDS, $relRT, $relTrgDT, $relTypDT, $relSrcDT;
+	global $REVERSE, $ACCESSABLE_OWNER_IDS, $relRT, $relTrgDT, $relTypDT, $relSrcDT, $PUBONLY;
 //error_log("in findRelatedRecords");
 	$nlrIDs = array();
 	$query = 'SELECT f.dtl_Value as srcRecID, rel.rec_ID as relID, '.// from detail
@@ -471,12 +474,12 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 				($rtyIDs && count($rtyIDs)>0 ? 'AND trg.rec_RecTypeID in ('.join(',', $rtyIDs).') ' : '').
 				($REVERSE ?'OR t.dtl_Value IN (' . join(',', $qrec_ids) . ') '.
 					($rtyIDs && count($rtyIDs)>0 ? 'AND src.rec_RecTypeID in ('.join(',', $rtyIDs).') ' : '') :'').')'.
-				(count($ACCESSABLE_OWNER_IDS)>0?'AND (src.rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') ':'AND (0 ').
-					(is_logged_in()?'OR NOT src.rec_NonOwnerVisibility = "hidden")':
-									'OR src.rec_NonOwnerVisibility = "public")').
-				(count($ACCESSABLE_OWNER_IDS)>0?'AND (trg.rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') ':'AND (0 ').
-					(is_logged_in()?'OR NOT trg.rec_NonOwnerVisibility = "hidden")':
-									'OR trg.rec_NonOwnerVisibility = "public")').
+				(count($ACCESSABLE_OWNER_IDS)>0 && !$PUBONLY ?'AND (src.rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR ':'AND (').
+					((is_logged_in() && !$PUBONLY) ?'NOT src.rec_NonOwnerVisibility = "hidden")':
+									'src.rec_NonOwnerVisibility = "public")').
+				(count($ACCESSABLE_OWNER_IDS)>0 && !$PUBONLY ?'AND (trg.rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR ':'AND (').
+					(is_logged_in() && !$PUBONLY ?'NOT trg.rec_NonOwnerVisibility = "hidden")':
+									'trg.rec_NonOwnerVisibility = "public")').
 				($relTermIDs && count($relTermIDs)>0 ? 'AND (trm.trm_ID in ('.join(',', $relTermIDs).') OR trm.trm_InverseTermID in ('.join(',', $relTermIDs).')) ' : '');
 //error_log("find  d $depth related q = $query");
 //echo $query;
@@ -1142,7 +1145,7 @@ ob_implicit_flush(1);
 
 
 //echo "request = ".print_r($_REQUEST,true)."\n";
-$result = loadSearch($_REQUEST,false,true);
+$result = loadSearch($_REQUEST,false,true, $PUBONLY);
 //error_log("$result = ".print_r($result,true)."\n");
 
 openTag('hml',
@@ -1157,7 +1160,7 @@ openTag('hml', array(
 	'xsi:schemaLocation' => 'http://heuristscholar.org/heurist/hml http://heuristscholar.org/heurist/schemas/hml.xsd')
 );
 */
-$query_attrs = array_intersect_key($_REQUEST, array('q'=>1,'w'=>1,'hinclude'=>1,'depth'=>1,'f'=>1,'limit'=>1,'offset'=>1,'db'=>1,'stub'=>1,'woot'=>1,'fc'=>1,'slb'=>1,'fc'=>1,'slb'=>1,'rtfilters'=>1,'relfilters'=>1,'ptrfilters'=>1));
+$query_attrs = array_intersect_key($_REQUEST, array('q'=>1,'w'=>1,'pubonly'=>1,'hinclude'=>1,'depth'=>1,'f'=>1,'limit'=>1,'offset'=>1,'db'=>1,'stub'=>1,'woot'=>1,'fc'=>1,'slb'=>1,'fc'=>1,'slb'=>1,'rtfilters'=>1,'relfilters'=>1,'ptrfilters'=>1));
 if ($pub_id) {
 	$query_attrs['pubID'] = $pub_id;
 }

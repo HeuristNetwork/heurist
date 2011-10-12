@@ -46,7 +46,7 @@ $memcache = null;
 
 mysql_connection_select(DATABASE);
 
-function loadSearch($args, $bare = false, $onlyIDs = false)  {
+function loadSearch($args, $bare = false, $onlyIDs = false, $publicOnly = false)  {
 	/*
 	 * Three basic steps are involved here:
 	 *
@@ -92,10 +92,10 @@ function loadSearch($args, $bare = false, $onlyIDs = false)  {
 		$offset = intval(@$args["offset"]);  // this is back in since hml.php passes through stuff from sitemap.xmap
 	}
 
-	$query = REQUEST_to_query("select SQL_CALC_FOUND_ROWS rec_ID ", $searchType, $args)
+	$query = REQUEST_to_query("select SQL_CALC_FOUND_ROWS rec_ID ", $searchType, $args, null, $publicOnly)
 								. (@$limit? " limit $limit" : "") . (@$offset? " offset $offset " : "");
 	$res = mysql_query($query);
-error_log($query);
+// error_log($query);
 	$fres = mysql_query('select found_rows()');
 	$resultCount = mysql_fetch_row($fres); $resultCount = $resultCount[0];
 
