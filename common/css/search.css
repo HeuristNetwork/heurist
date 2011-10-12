@@ -825,6 +825,7 @@ nobr#activesaved a {
 }
 #legend-box ul li {
 	padding: 1px 0;
+	list-style:none;
 }
 #legend-box ul li * {
 	vertical-align: middle;

@@ -2870,7 +2870,7 @@ function removeCustomAlert() {
 		var searchWidth = top.HEURIST.util.getDisplayPreference("searchWidth");
 		var oldSearchWidth = top.HEURIST.util.getDisplayPreference("oldSearchWidth");
 		if (!searchWidth || !oldSearchWidth) {
-			searchWidth = 180;
+			searchWidth = 400;
 		}else if (appPanelStatus != "open"){
 			searchWidth = oldSearchWidth;
 		};
@@ -2987,23 +2987,27 @@ function removeCustomAlert() {
 			}
 
 		});
-
-
-
-
-
 		Event.on('resetLayout', 'click', function(ev) {
 			Event.stopEvent(ev);
 					if (top.HEURIST.util.getDisplayPreference("sidebarPanel") != "open"){
 						layout.getUnitByPosition('left').expand();
 						top.HEURIST.util.setDisplayPreference("sidebarPanel","open");
-						navButton.className = document.getElementById("navButton").className.replace(" closed", "");
-						navButton.title = "Show Navigation Panel";
+						navButton.className = navButton.className.replace(" closed", "");
+						navButton.title = "Hide Navigation Panel";
 						};
+					if (top.HEURIST.util.getDisplayPreference("applicationPanel") != "open"){
+						layout.getUnitByPosition('right').expand();
+						top.HEURIST.util.setDisplayPreference("applicationPanel","open");
+						appPanelButton.className = appPanelButton.className.replace(" closed", "");
+						appPanelButton.title = "Hide Applications";
+					}
 					layout.getUnitByPosition('left').set("width", 180);
 					layout.getUnitByPosition('left').resize();
 					top.HEURIST.util.setDisplayPreference("leftWidth", 180);
-					top.HEURIST.util.setDisplayPreference("sidebarPanel","open");
+					layout.getUnitByPosition('right').set("width", 400);
+					layout.getUnitByPosition('right').resize();
+					top.HEURIST.util.setDisplayPreference("searchWidth", 400);
+					tabBar.style.width = layout.getSizes().center.w - 9;
 				});
 
 	});
