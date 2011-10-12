@@ -547,6 +547,17 @@ div.temporal-div input.temporal-button:hover {
 	border-bottom:1px solid RGBA(255,255,255,0.5);
 	padding: 3px 0;
 }
+.input-row.separator {
+	border-top: 1px solid #A4B4CB;
+	margin-top: 10px;
+	padding: 10px 0;
+}
+.input-row.separator .input-header-cell {
+	text-align:left;
+	text-transform:uppercase;
+	font-weight:bold;
+	color: #999;
+}
 .input-row select {
 	display: block;
 	border: none;

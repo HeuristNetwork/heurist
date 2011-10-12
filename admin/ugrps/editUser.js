@@ -82,7 +82,7 @@ function UserEditor() {
 		if(!_isAdmin){
 			//hide and rename buttons
 			Dom.get("btn_edits").style.display = "none";
-			Dom.get("btn_view").style.display = "block";
+			Dom.get("btn_view").style.display = "inline-block";
 		}
 
 	}
@@ -148,7 +148,8 @@ function UserEditor() {
 				document.title = "Create New User";
 		}else{
 				el.innerHTML =  _recID;
-				document.title = "User #: " + _recID+" '"+_entity[6]+" "+_entity[7]+"'";
+				//document.title = "User #: " + _recID+" '"+_entity[6]+" "+_entity[7]+"'";
+				document.title = "Editing User: "+" "+_entity[6]+" "+_entity[7];
 				Dom.get("statusMsg").innerHTML = "";
 		}
 

@@ -1196,6 +1196,7 @@ top.HEURIST.edit.inputs.BibDetailInput = function(recID, detailType, recFieldReq
 
 	this.row = parentElement.appendChild(this.document.createElement("div"));
 		this.row.className = "input-row " + required;
+		if (this.detailType[3] == "separator") this.row.className = "input-row separator";
 
 	this.headerCell = this.row.appendChild(this.document.createElement("div"));
 		this.headerCell.className = "input-header-cell";

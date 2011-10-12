@@ -276,6 +276,10 @@ input#tags, .input-cell .in, .input-cell .resource-title, .in, .input-row input:
 	min-width:4ex;
 	margin-right:5px;
 }
+.input-row input[type="checkbox"] {
+	min-width:16px;
+	margin-right:5px;
+}
 .input-row div.input-cell {
 	vertical-align:baseline
 }
