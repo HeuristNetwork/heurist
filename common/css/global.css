@@ -331,18 +331,7 @@ div.coverall-div.saving {
 	color: black;
 	z-index: 1000;
 }
-body.is-not-admin *.admin-only {
-	display: none;
-}
-body.is-not-logged-in *.logged-in-only {
-	display: none !important;
-}
-*.not-logged-in-only {
-	display: none;
-}
-body.is-not-logged-in div.not-logged-in-only {
-	display: block;
-}
+
 body.help-show .help {
 }
 body.help-hide .help {
@@ -900,4 +889,16 @@ input[type="button"].add {
 	height: 22px;
 	margin: 3px 0 0;
 	padding: 0 3px;
+}
+body.is-not-admin *.admin-only {
+	display: none;
+}
+body.is-not-logged-in #my-records-button.logged-in-only ,body.is-not-logged-in #add-record-link.logged-in-only, body.is-not-logged-in *.logged-in-only {
+	display: none !important;
+}
+*.not-logged-in-only {
+	display: none;
+}
+body.is-not-logged-in div.not-logged-in-only {
+	display: block;
 }

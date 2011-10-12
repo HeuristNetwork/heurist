@@ -520,11 +520,21 @@ top.HEURIST.search = {
 		var wgHTML = "";
 		var wgColor = "";
 		if (res[6]  &&  res[6] != "0" && res[6] != res[1]) {	// check if this is a usergroup owned record
-			linkTitle = "Owned by " + (top.HEURIST.workgroups[wgID] ? "workgroup " + top.HEURIST.workgroups[wgID].name:top.HEURIST.allUsers[wgID][0]) + " - " + (res[7]==1? "hidden" : "read-only") + " to others";
+			linkTitle = "Owned by " + (top.HEURIST.workgroups[wgID] ? "workgroup " + top.HEURIST.workgroups[wgID].name:top.HEURIST.allUsers[wgID][0]) + " - " + ((res[7]=='hidden')? "hidden" : "read-only") + " to others";
 			wgHTML = res[6];
 			wgColor = " style='color:" + ((res[7]=='hidden')? "red" : "green") + "'";
 		}
 
+		var editLinkIcon = "<div id='rec_edit_link' class='logged-in-only' title='Click to edit'><a href='"+
+			top.HEURIST.basePath+ "records/edit/editRecord.html?sid=" +
+			top.HEURIST.search.sid + "&recID="+ res[2] +
+			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
+			"' target='_blank'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png'/></a></div>";
+		if (top.HEURIST.user){
+			if (!top.HEURIST.user.isInWorkgroup(res[6]) && res[6]  &&  res[6] != "0" && res[6] != res[1]) {
+				editLinkIcon = "";
+			};
+		}
 		var verified_date = null;
 		if (res[8]) {
 			// locale-independent date parsing (early Webkit uses the local format)
@@ -585,13 +595,9 @@ top.HEURIST.search = {
 			"<div id='recordID'>"+top.HEURIST.rectypes.names[parseInt(res[4])]+"<br><a href='"+top.HEURIST.basePath+"search/search.html?q=ids:"+res[2]+
 			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
 			"' target='_blank' title='Open in new window'>ID: "+res[2]+"</a>"+
-			"<div id='rec_edit_link' class='logged-in-only' title='Click to edit'><a href='"+
-			top.HEURIST.basePath+ "records/edit/editRecord.html?sid=" +
-			top.HEURIST.search.sid + "&recID="+ res[2] +
-			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
-			"' target='_blank'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png'/></a></div>" +
-		   "</div>" +
-           "</div>" +
+			editLinkIcon +
+			"</div>" +
+		"</div>" +
 		"</div>";
 		return html;
 	},
@@ -3015,5 +3021,3 @@ function removeCustomAlert() {
 	else if (Number(viewerTabIndex) === 3){top.HEURIST.search.smartySelected()}; //initialises smarty reports
 
 	_tabView.addListener('activeTabChange',handleActiveTabChange);
-
-
