@@ -28,6 +28,7 @@
 <head>
 	<link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/global.css">
 	<link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
+	<link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/admin.css">
 	<title>Add new record</title>
 
   <script src="<?=HEURIST_SITE_PATH?>external/jquery/jquery.js"></script>
@@ -219,11 +220,11 @@ function cancelAdd(e) {
   </script>
 
   <style type=text/css>
-			.hide_workgroup .workgroup { display: none; }
-			hr { margin: 20px 0; }
+			.hide_workgroup .resource.workgroup { display: none !important;overflow:hidden; }
 			#add-link-input { width: 100%; }
-			#add-link-tags {width : 70%;float:right}
+			#add-link-tags {width : 100%;}
 			p {line-height: 14px;}
+			.input-cell a {background:none !important; padding:0}
   </style>
 
  </head>
@@ -236,8 +237,9 @@ function cancelAdd(e) {
 	 print  ''. @$_REQUEST['error_msg'] ? $_REQUEST['error_msg'] . '' : '' ;
 				?>
 	</div>
-	<div>
-		<label> Record type:</label>
+	<div class="input-row">
+		<div class="input-header-cell">Record type:</div>
+		<div class="input-cell">
 					<?php
 						$res = mysql_query("select distinct rty_ID,rty_Name,rty_Description, rtg_Name
 						from defRecTypes left join defRecTypeGroups on rtg_ID = rty_RecTypeGroupID
@@ -251,7 +253,7 @@ function cancelAdd(e) {
 						if ($row["rtg_Name"] != $section) {
 							if ($section) print "</optgroup>\n";
 							$section = $row["rtg_Name"];
-							print '<optgroup label="' . htmlspecialchars($section) . ' types">';
+							print '<optgroup label="' . htmlspecialchars($section) . '">';
 						}
 				?>
 			<option value="<?= $row["rty_ID"] ?>" title="<?= htmlspecialchars($row["rty_Description"]) ?>" <?= $row["rty_Name"]=="Notes" ? 'selected':'' ?> ><?= htmlspecialchars($row["rty_Name"]) ?></option>
@@ -259,19 +261,20 @@ function cancelAdd(e) {
 					}
 				?>
 		</optgroup>
-		</select><br/>
+		</select>
+		</div>
 	</div>
 
-	<div>
-		<div>
+	<div class="input-row">
+		<div class="input-header-cell">Restrict access</div>
+		<div class="input-cell">
 			<input type="checkbox" name="rec_workgroup_restrict" id="restrict_elt" value="1" style="vertical-align: middle" onclick="document.getElementById('maintable').className = this.checked? '' : 'hide_workgroup';" style="margin: 0; padding: 0;"<?= @$_REQUEST['wg_id'] > 0 ? " checked" : ""?>>
-			<label for=restrict_elt>Restrict access</label>
 		</div>
 		<div class="resource workgroup" style="margin:10px 0">
 			<div class="input-row workgroup">
 				<div class="input-header-cell">Select Work Group</div>
 				<div class="input-cell">
-					<select name="rec_OwnerUGrpID" id="rec_OwnerUGrpID" style="width: 200px;" onchange="buildworkgroupTagselect(options[selectedIndex].value)">
+					<select name="rec_OwnerUGrpID" id="rec_OwnerUGrpID" style="width: 200px;" onChange="buildworkgroupTagselect(options[selectedIndex].value)">
 						<option value="0" disabled selected>(select group)</option>
 											<?php
 						print "      <option value=".get_user_id().(@$_REQUEST['wg_id']==get_user_id() ? " selected" : "").">".htmlspecialchars(get_user_name())." only</option>\n";
@@ -304,31 +307,40 @@ function cancelAdd(e) {
 			</div>
 		</div>
 	</div>
-
+	<div class="input-row">
+		<div class="input-header-cell" title="Default to these values for future additions (until changed)">Set as defaults</div>
+		<div class="input-cell">
+		<input type="checkbox" name="use_as_defaults" id="defaults_elt" value="1" style="margin: 0; padding: 0; vertical-align: middle;"<?= $addRecDefaults ? " checked" : ""?>>
+		</div>
+	</div>
 	</div>
 
-	<div class="separator_row" style="margin:20px 0"></div>
+
 	<a id="show-adv-link" href="#">more...</a>
 	<div id=advanced-section style="display: none;">
-		<h2>Advanced</h2>
-		<div>Add these personal tags: <input id=add-link-tags></div>
-		<div style="clear:both;margin-top:20px">Hyperlink this URL in your web page or a desktop shortcut to provide one-click addition of Heurist records with these characteristics:
-		<textarea id=add-link-input></textarea>
-		<p><a id=broken-kwd-link target=_blank style="display: none;">search for records added by non workgroup members using the above link</a></p>
+		<div class="input-row separator">
+			<div class="input-header-cell">Advanced</div>
+		</div>
+		<div class="input-row">
+			<div class="input-header-cell">Add these personal tags:</div>
+			<div class="input-cell"><input id=add-link-tags></div>
+		</div>
+		<div class="input-row">
+			<div class="input-header-cell">Hyperlink this URL in your web page or a desktop shortcut to provide one-click addition of Heurist records with these characteristics:</div>
+			<div class="input-cell"><textarea id=add-link-input style="height:90px"></textarea>
+				<div class="prompt">
+					<a id=broken-kwd-link target=_blank style="display: none;">Click here to search for records added by non workgroup members using the above link</a>
+				</div>
+			</div>
+		</div>
 		</div>
 	</div>
 
-	<div class="separator_row" style="margin:20px 0"></div>
 
-	<div>
-		<input type="checkbox" name="use_as_defaults" id="defaults_elt" value="1" style="margin: 0; padding: 0; vertical-align: middle;"<?= $addRecDefaults ? " checked" : ""?>>
-		<label for=restrict_elt title="Default to these values for future additions (until changed)">Set as defaults</label>
-	</div>
-	<div>
-		<input type="button" style="font-weight: bold;" value="Add" onclick="add_note(event);">
-		&nbsp;&nbsp;
-		<input type="button" value="Cancel" onclick="cancelAdd(event);" id="note_cancel">
+	<div class="actionButtons">
+		<input type="button" class="add" style="float:none;" value="Add Record" onClick="add_note(event);">
+		<input type="button" value="Cancel" onClick="cancelAdd(event);" id="note_cancel">
 	</div
 
-</body>
+></body>
 </html>
