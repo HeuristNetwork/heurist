@@ -20,21 +20,26 @@
 
 -- ***** Database version: 1.1  @ 13/9/2011 ******
 
--- SQL below copied from blankDBStructure.sql 19/9/11
+-- -------------------------------------------------------------------------------------------------------
+
+-- SQL below copied from blankDBStructure.sql
 -- Delete Records table plus everything below defURLPrefixes
 
+-- -------------------------------------------------------------------------------------------------------
 
 -- phpMyAdmin SQL Dump
 -- version 2.9.0.2
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Oct 10, 2011 at 05:55 PM
+-- Generation Time: Oct 12, 2011 at 06:29 PM
 -- Server version: 5.0.51
 -- PHP Version: 5.2.3
 --
 -- Database: 'hdb_H3CoreDefinitions'
 --
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table 'defCalcFunctions'
@@ -203,8 +208,7 @@ CREATE TABLE defRecStructure (
   rst_LocallyModified tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flags a definition element which has been modified relative to the original source',
   PRIMARY KEY  (rst_ID),
   UNIQUE KEY rst_composite (rst_RecTypeID,rst_DetailTypeID),
-  KEY rst_DetailTypeID (rst_DetailTypeID),
-  KEY fk_rst_DetailtypeID (rst_DetailTypeID)
+  KEY rst_DetailTypeID (rst_DetailTypeID)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='The record details (fields) required for each record type';
 
 -- --------------------------------------------------------
@@ -279,9 +283,7 @@ CREATE TABLE defRelationshipConstraints (
   PRIMARY KEY  (rcs_ID),
   UNIQUE KEY rcs_CompositeKey (rcs_SourceRectypeID,rcs_TargetRectypeID,rcs_TermID),
   KEY rcs_TermID (rcs_TermID),
-  KEY rcs_TargetRectypeID (rcs_TargetRectypeID),
-  KEY fk_rcs_SourceRecTypeID (rcs_SourceRectypeID),
-  KEY fk_rcs_TargetRecTypeID (rcs_TargetRectypeID)
+  KEY rcs_TargetRectypeID (rcs_TargetRectypeID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Constrain target-rectype/vocabularies/values for a pointer d';
 
 -- --------------------------------------------------------

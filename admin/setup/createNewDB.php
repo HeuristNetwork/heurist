@@ -129,7 +129,7 @@
 				return false;
 			} // rejecting illegal characters in db name
 
-			$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'create database `$newname`'";
+			$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e\"create database `$newname`\"";
 			$output1 = exec($cmdline . ' 2>&1', $output, $res1);
 			if ($res1 != 0 ) {
 				echo ("Error code $res1 on MySQL exec: Unable to create database $newname<br>&nbsp;<br>");
