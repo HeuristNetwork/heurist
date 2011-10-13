@@ -678,6 +678,58 @@ top.HEURIST.edit = {
 	uploadsDiv: null,
 	uploadsInProgress: { counter: 0, names: {} },
 */
+	uploadURL: function(fileInput) {
+
+		//var URLInput = new top.HEURIST.edit.inputs.BibURLInput(container, defaultURL, required);
+		//get URL
+		var sURL = top.HEURIST.edit.allInputs[0].inputs[0].value;
+
+		if (top.HEURIST.util.isempty(sURL)){ // (typeof sURL==="undefined") || (sURL===null) || (sURL==="") || (sURL==="null") ){
+			alert('Specify URL first');
+			return;
+		}
+
+		top.HEURIST.util.startLoadingPopup();
+
+		var thisRef = this;
+		var element = fileInput.parentNode;
+		//call thumbnail maker
+		top.HEURIST.util.getJsonData(top.HEURIST.basePath + "records/files/saveURLasFile.php?url=" + sURL + "&db=" + HAPI.database, 				function(vals) {
+					top.HEURIST.edit.fileInputURLsaved.call(thisRef, element, vals);
+			});
+
+
+
+	},
+
+	// callback function - on completion of URL download and saving it as file
+	fileInputURLsaved: function(element, fileDetails) {
+
+		top.HEURIST.util.finishLoadingPopup();
+		top.HEURIST.util.sendCoverallToBack();
+
+		var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
+
+		if (fileDetails.error) {
+			// There was an error!  Display it.
+			element.input.replaceInput(element);
+			//alert(fileDetails.error);
+		} else {
+			// translate the HFile object back into something we can use here
+			var fo = {file:{
+				id: fileDetails.file[0],
+				origName: fileDetails.file[1],
+				url: fileDetails.file[4],
+				fileSize: fileDetails.file[2],
+				fileType: fileDetails.file[3]
+			}};
+			// update the BibDetailFileInput to show the file
+			element.input.replaceInput(element, fo );
+			windowRef.changed();
+		}
+	},
+
+
 	uploadFileInput: function(fileInput) {
 		var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
@@ -1852,6 +1904,17 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 			var thisRef = this;
 			fileElt.onchange = function() { top.HEURIST.edit.uploadFileInput.call(thisRef, fileElt); };
 			inputDiv.className = "file-div empty";
+
+			//additional button for Thumbnail Image - to create web snap shot
+			if(Number(top.HEURIST.edit.record.rectypeID) === top.HEURIST.magicNumbers['RT_INTERNET_BOOKMARK']){
+				var thumbElt = this.document.createElement("input");
+					thumbElt.name = inputDiv.name;
+					thumbElt.value = "Web snapshot";
+					thumbElt.type = "button";
+					thumbElt.onclick = function(){top.HEURIST.edit.uploadURL.call(thisRef, fileElt);}
+				inputDiv.appendChild(thumbElt);
+			}
+
 		}
 
 		inputDiv.link = "";
