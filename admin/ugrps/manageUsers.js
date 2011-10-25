@@ -172,7 +172,10 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 	function _init(grpID, _callback)
 	{
 		_callback_func = _callback;
-		_db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+		_db = (top.HEURIST.parameters && top.HEURIST.parameters.db?
+				top.HEURIST.parameters.db :
+				(top.HEURIST.database && top.HEURIST.database.name?
+					top.HEURIST.database.name:''));
 
 				if (Hul.isnull(grpID) && location.search.length > 1) {
 									//window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
@@ -185,6 +188,10 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 									_setMode("selection", _isSelection);
 									_setMode("listing", !_isSelection);
 
+							if (!_db) {
+								_db = (top.HEURIST.parameters && top.HEURIST.parameters.db?
+										top.HEURIST.parameters.db : '');
+							}
 									//list of selected
 									var sIDs = top.HEURIST.parameters.ids;
 									if (sIDs) {

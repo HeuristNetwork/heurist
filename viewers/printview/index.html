@@ -376,7 +376,8 @@
 						return;
 					}
 						clearAndDisplayLoading();
-					var pageQuery = "?w=all&a=1&depth=1&q=ids:"+ newSelectionIds.join(",")+"&limit=" + limit;
+					var pageQuery = "?w=all&a=1&depth=1&q=ids:"+ newSelectionIds.join(",")+"&limit=" + limit +
+										(top.HEURIST.database.name? "&db=" + top.HEURIST.database.name:"");
 					var url = top.HEURIST.baseURL+ "export/xml/flathml.php" + pageQuery;
 						var errorMsg = "Error loading " + url + " using XMLHttpRequest";
 					xml = loadXMLDocFromFile(url);
@@ -401,7 +402,8 @@
 								$('iframe[id=viewer-frame]',top.document).get(0).contentDocument).length > 0) {
 						$('div#'+selectedIds[selectedIds.length-1],$('iframe[id=viewer-frame]',top.document).get(0).contentDocument).get(0).scrollIntoView();
 					}
-*/				}
+*/
+				}
 			}
 
 			function updateSelection(){// saw TODO change this to update the selection for levels

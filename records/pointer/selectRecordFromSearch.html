@@ -1,13 +1,13 @@
 <!--
 
 /**
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
+* filename, brief description, date of creation, by whom
+* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+* @todo
+**/
 
 -->
 <html>
@@ -28,9 +28,9 @@
  <body class="popup" width="500" height="250" >
   <script src="../../common/js/utilsLoad.js"></script>
   <script>
-if (window == top) {
+			if (window == top) {
 	top.HEURIST.loadScript(top.HEURIST.basePath +"common/php/loadCommonInfo.php");	// core HEURIST object definitions (dynamically generated)
-}
+			}
   </script>
 
   <form onSubmit="this.submit(); return false;">
@@ -59,9 +59,9 @@ if (window == top) {
      </td>
     </tr></table>
    </div>
-<!--   <div id=results-container class=expander style="overflow: hidden;">-->
+			<!--   <div id=results-container class=expander style="overflow: hidden;">-->
     	<div id=results></div>
-<!--   </div>-->
+			<!--   </div>-->
    <div id="add_records_footer">
     Didn't find what you were looking for?
     <a href="#" onClick=" return addRecord();"><img src="../../common/images/add-record-small.png" />Add a new record</a>
@@ -69,10 +69,10 @@ if (window == top) {
   </form>
 
   <script language="JavaScript">
-window.HEURIST.parameters = top.HEURIST.parseParams(window.location.search);
+			window.HEURIST.parameters = top.HEURIST.parseParams(window.location.search);
 
-var rectype = window.HEURIST.parameters["t"];
-if (rectype) {
+			var rectype = window.HEURIST.parameters["t"];
+			if (rectype) {
 	var rectypes = {};
 	var recTypeName = "";
 	if (rectype.search(",") != -1) {//seems like we have multiple type constraint, test that it is well formed
@@ -91,14 +91,14 @@ if (rectype) {
 	}else{
 		rectypes = null;
 	}
-}
+			}
 
-/* If a rectype has been chosen then set a custom title -- need to do before onload so the popup code will catch it */
-if (recTypeName) {
+			/* If a rectype has been chosen then set a custom title -- need to do before onload so the popup code will catch it */
+			if (recTypeName) {
 	document.title = "Find " + recTypeName + " records";
-}
+			}
 
-function addRecord(){
+			function addRecord(){
 	top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/formAddRecordPopup.html?rectype='+
 										document.getElementById('t').value+
 										'&title='+document.getElementById('q').value+
@@ -114,10 +114,10 @@ function addRecord(){
 												}
 									});
 	return false;
-}
+			}
 
-// search callback which fills the result area with a line for each record in the result set
-function notifyResults(results) {
+			// search callback which fills the result area with a line for each record in the result set
+			function notifyResults(results) {
 	var resultsDiv = document.getElementById("results");
 	var records = eval(results.responseText).records;
 
@@ -138,7 +138,7 @@ function notifyResults(results) {
 
 		img = recordDiv.appendChild(document.createElement("img"));
 		img.src = top.HEURIST.basePath + "common/images/16x16.gif";
-img.style.backgroundImage = "url("+ top.HEURIST.basePath + "common/images/" + top.HEURIST.database.name + "/rectype-icons/" + (record[3]? record[3] : "blank") + ".png)";
+					img.style.backgroundImage = "url("+ top.HEURIST.basePath + "common/images/" + top.HEURIST.database.name + "/rectype-icons/" + (record[3]? record[3] : "blank") + ".png)";
 
 		title = recordDiv.appendChild(document.createElement("span"));
 		title.appendChild(document.createTextNode(record[1]));
@@ -157,9 +157,9 @@ img.style.backgroundImage = "url("+ top.HEURIST.basePath + "common/images/" + to
 	}
 
 	document.body.cursor = "";
-}
+			}
 
-document.forms[0].submit = function() {
+			document.forms[0].submit = function() {
 	// Make an AJAX request for the search results.  If no search specified, default to RECENT entries.
 	var q = document.forms[0].elements["q"].value;
 	var t = document.forms[0].elements["t"].value;
@@ -169,7 +169,7 @@ document.forms[0].submit = function() {
 	t = t.replace(/\s*$/,"");
 	if (t == "0") t = "";
 	q += (t? ((q?" ":"")+"type:"+parseInt(t)) : "");
-// saw TODO modify for multi constraints set
+				// saw TODO modify for multi constraints set
 	var query = "q=" + encodeURIComponent(q);
 	if (document.getElementById("r-recent").checked  ||  q == "") {
 		query += "&r=recent";
@@ -188,13 +188,13 @@ document.forms[0].submit = function() {
 	top.HEURIST.util.sendRequest(top.HEURIST.baseURL + "records/pointer/getRecordListForSearch.php", notifyResults, query);
 
 	return false;
-}
+			}
 
-/* FLAGRANT abuse of the onsubmit function, but otherwise hitting return in the field submits the entire page */
-document.forms[0].onsubmit = function() { document.forms[0].submit(); return false; };
+			/* FLAGRANT abuse of the onsubmit function, but otherwise hitting return in the field submits the entire page */
+			document.forms[0].onsubmit = function() { document.forms[0].submit(); return false; };
 
 
-function initPage() {
+			function initPage() {
 	var qVal = window.HEURIST.parameters["q"];
 	if (! qVal  &&  ! (rectype)) {
 		qVal = top.HEURIST.util.getDisplayPreference("record-search-string");
@@ -220,13 +220,16 @@ function initPage() {
 	if (!rectypes) {
 		tElt.options[tElt.options.length] = new Option("Any record type", "");
 		// rectypes displayed in Groups by group display order then by display order within group
-		for (var grpID in top.HEURIST.rectypes.groups){
+					for (index in top.HEURIST.rectypes.groups){
+						if (index == "groupIDToIndex" ||
+							top.HEURIST.rectypes.groups[index].showTypes.length < 1) continue;
 		var grp = document.createElement("optgroup");
-			grp.label = top.HEURIST.rectypes.groups[grpID].name;
+						grp.label = top.HEURIST.rectypes.groups[index].name;
 			tElt.appendChild(grp);
-			for (var recTypeID in top.HEURIST.rectypes.groups[grpID].showTypes) {
+						for (var recTypeIDIndex in top.HEURIST.rectypes.groups[index].showTypes) {
+							var recTypeID = top.HEURIST.rectypes.groups[index].showTypes[recTypeIDIndex];
 					var name = top.HEURIST.rectypes.names[recTypeID];
-					tElt.appendChild( new Option(name, recTypeID));
+							tElt.appendChild(new Option(name, recTypeID));
 			}
 		}
 	}else{
@@ -239,10 +242,11 @@ function initPage() {
 	}
 	}
 
-	if (window.HEURIST.parameters["r"] == "recent" || qVal == "")
+				if (window.HEURIST.parameters["r"] == "recent" || qVal == ""){
 		document.getElementById("r-recent").checked = true;
-	else
+				}else{
 		document.getElementById("r-all").checked = true;
+				}
 
 	document.forms[0].submit();
 
@@ -254,8 +258,8 @@ function initPage() {
 			}
 		} catch (e) { }
 	}, 0);
-}
-top.HEURIST.registerEvent(window, "load", initPage);
+			}
+			top.HEURIST.registerEvent(window, "load", initPage);
   </script>
  </body>
 </html>

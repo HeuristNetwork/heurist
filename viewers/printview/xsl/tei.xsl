@@ -7,7 +7,7 @@
 		<!-- begin including code -->
 		<xsl:comment>
 			<!-- name (desc.) that will appear in dropdown list -->
-			[name]TEI view[/name]
+			[name]TEI[/name]
 			<!-- match the name of the stylesheet-->
 			[output]tei[/output]
 		</xsl:comment>

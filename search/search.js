@@ -1239,7 +1239,7 @@ top.HEURIST.search = {
 		}
 		// rectypes displayed in Groups by group display order then by display order within group
 		for (var index in rectypes.groups){
-			if (index == 'groupIDToIndex'){
+			if (index == 'groupIDToIndex' || top.HEURIST.rectypes.groups[index].showTypes.length < 1){
 				continue;
 			}
 			var grp = document.createElement("optgroup");
@@ -1749,6 +1749,9 @@ top.HEURIST.search = {
 			for (var i = 0; i < top.HEURIST.user.workgroups.length; ++i) {
 				var w = top.HEURIST.user.workgroups[i];
 
+				if (!top.HEURIST.workgroups[w]) {
+					continue;
+				}
 				var pref = top.HEURIST.util.getDisplayPreference("workgroup-searches-" + w);
 				var hide = (! pref  ||  pref == "hide");
 
