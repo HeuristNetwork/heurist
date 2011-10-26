@@ -18,10 +18,12 @@ var g_text2DetailSelect = null;
 var g_delimiterSelect = null;
 var g_queryInput = null;
 var g_dtIDsCheckbox = null;
+var g_includeFieldNamesCheckbox = null;
 var g_detailTypes = [];
 var g_recType;
 var g_recTypeLoaded;
 var g_exportMap = [];
+var g_exportMapNames = [];
 var g_cols = [];
 var g_records = [];
 
@@ -31,7 +33,7 @@ This function gets the record types from HAPI and loads them into a Select eleme
 */
 function getRecTypes() {
 	var e = document.getElementById("select-rec-type");
-	e.appendChild(document.createTextNode("Select record type: "));
+	e.appendChild(document.createTextNode("Please select record type first: "));
 	g_recTypeSelect = e.appendChild(document.createElement("select"));
 	// once a recordtype is selected show the detailTypes
 	g_recTypeSelect.onchange = function() { getDetailTypes() };
@@ -57,7 +59,7 @@ function getDetailTypes(){
 	//remove the old selection so we can recreate it
 	removeChildren(e);
 	removeChildren(document.getElementById("export-detail-map"));
-	g_textDetailSelect = document.createTextNode("Select reference types: ");
+	g_textDetailSelect = document.createTextNode("Select fields to export: ");
 	e.appendChild(g_textDetailSelect);
 
 	//create a multi-selection list of Detail Types   FIXME -- Should handle the single-type case
@@ -73,36 +75,52 @@ function getDetailTypes(){
 		addOpt(g_recDetailSelect, d, HDetailManager.getDetailNameForRecordType(g_recType, g_detailTypes[d]));
 	}
 
-	// add search string box
+	//spacer
 	e.appendChild(document.createElement("br"));
-	e.appendChild(document.createTextNode("enter additional query string: "));
-	g_queryInput = document.createElement("input");
-	e.appendChild(g_queryInput);
 
-	// output detail IDs as well?
+    // output detail IDs as well?
 	e.appendChild(document.createElement("br"));
-	e.appendChild(document.createTextNode("output detail type IDs as well?: "));
+	e.appendChild(document.createTextNode("Include internal field code in column preceding values? "));
 	g_dtIDsCheckbox = document.createElement("input");
 	g_dtIDsCheckbox.type = "checkbox";
 	g_dtIDsCheckbox.onchange = function(){ updateExportMap() };
 	e.appendChild(g_dtIDsCheckbox);
+	e.appendChild(document.createTextNode(" (used by Heurist 'field updater')"));
+
+	// add search string box
+	e.appendChild(document.createElement("br"));
+	e.appendChild(document.createTextNode("Heurist query string (optional) - provides additional filtering): "));
+	g_queryInput = document.createElement("input");
+	e.appendChild(g_queryInput);
 
 	//create selection for choosing the delimiter
 	e.appendChild(document.createElement("br"));
-	e.appendChild(document.createTextNode("use "));
+	e.appendChild(document.createTextNode("Use delimeter:"));
 	g_delimiterSelect = e.appendChild(document.createElement("select"));
 	addOpt(g_delimiterSelect,",","comma"); //default
 	addOpt(g_delimiterSelect,"\t","tab");
-	e.appendChild(document.createTextNode(" as delimiter"));
+
+	// Include field names as header in first row
+	e.appendChild(document.createElement("br"));
+	e.appendChild(document.createTextNode("Include field names as first output row? "));
+	g_includeFieldNamesCheckbox = document.createElement("input");
+	g_includeFieldNamesCheckbox.type = "checkbox";
+	e.appendChild(g_includeFieldNamesCheckbox);
+
+
+	//spacer
+	e.appendChild(document.createElement("br"));
+	e.appendChild(document.createTextNode(""));
 
 	//add button for getting the records
 	e.appendChild(document.createElement("br"));
-	g_text2DetailSelect = document.createTextNode("then ");
+	g_text2DetailSelect = document.createTextNode("Select fields above, then: ");
 	e.appendChild(g_text2DetailSelect);
 	var button = e.appendChild(document.createElement("input"));
 	button.type = "button";
-	button.value = "get records";
+	button.value = "generate delimited data";
 	button.onclick = function() { getRecords(); };
+
 
 }
 
@@ -120,6 +138,8 @@ function updateExportMap() {
 	while (g_exportMap.length>0){
 		g_exportMap.pop();
 	}
+	g_exportMapNames = [];
+
 
 	//if multiple select then for each selected pointer create input field marking id with detailType id
 	var table = e1.appendChild(document.createElement("table"));
@@ -128,7 +148,8 @@ function updateExportMap() {
 	tr.id = "export-map-row";
 	var td, sel, opt;
 	td = tr.appendChild(document.createElement("td"));
-	td.innerHTML = "record ID";
+	td.innerHTML = "Record ID";
+	g_exportMapNames.push("Record ID");
 	var l = g_recDetailSelect.options.length;
 	for (var i = 0; i < l; ++i) {
 		if (g_recDetailSelect.options[i].selected) {
@@ -140,6 +161,7 @@ function updateExportMap() {
 			td = tr.appendChild(document.createElement("td"));
 			td.innerHTML = sel.text;
 			g_exportMap.push(sel.value);
+			g_exportMapNames.push(sel.text);
 /* version 2 should allow the selection of the detail type for the referenced object type (constrained case)
 		// if constrained case then show select list for field in referenced record type
 		// note that this will require multiple pass record retrieval
@@ -168,7 +190,7 @@ function loadAllRecords(query, options, loader) {
 			records.push.apply(records, r);
 			if (r.length < 100) {
 				// we've loaded all the records: invoke the loader's onload
-				document.getElementById('results').innerHTML = '<b>Loaded ' + records.length + ' of ' + c + ' records </b>';
+				document.getElementById('results').innerHTML = '<br><b>Loaded ' + records.length + ' of ' + c + ' records </b>(select below with Ctrl-A, copy and paste to file as required)</b>';
 				loader.onload(baseSearch, records);
 			}
 			else {
@@ -216,6 +238,22 @@ function showRecordData(hRecords) {
 
 	var lines = "";
 	var dl;
+
+	// Generate header if required
+	if (g_includeFieldNamesCheckbox.checked) {
+
+		var k = g_exportMapNames.length,
+			line = "";
+		for (var j = 0; j < k; j++) {
+			line += (g_exportMapNames[j]+strDelim);
+			if (g_dtIDsCheckbox.checked) {
+				line += g_detailTypes[j].getID() + strDelim;
+			}
+		}
+		lines = line.slice(0,-1) + strRowTerm;
+	}
+
+	// Generate rows of data
 	var l = hRecords.length;
 	for (var i = 0; i < l; ++i) {
 		var line = hRecords[i].getID()+ strDelim;

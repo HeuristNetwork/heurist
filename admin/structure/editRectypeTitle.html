@@ -61,7 +61,7 @@ body {
 
 </head>
 
-<body class="yui-skin-sam" width="800" height="500">
+<body class="yui-skin-sam" width=800 height=800>
 		<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
 		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
 		<script type="text/javascript" src="../../admin/structure/editRectypeTitle.js"></script>
@@ -75,8 +75,7 @@ body {
 					<option>List of available rectypes</option>
 		</select>
 -->
-		<div>Select fields here then click Insert field</div>
-
+		<div>&nbsp;<br>Select fields then click Insert<br>(add fields to record structure first)<br>&nbsp;<br></div>
 		<div style="top:30px;bottom:20px;left:0px;width:200px;height:460px;overflow-y:scroll;">
 				<div id="varsTree" class="ygtv-checkbox"></div>
 		</div>
@@ -88,15 +87,16 @@ body {
 		Mask to build a composite title from fields (see manual).
         The title mask is a string into which field values are inserted to create an extended title for the record, e.g. [Title], pp. [Start_Page]-[End_Page] renders the Title field and start and end page fields as in "Alice in Wonderland, pp. 37-39". The element names in square brackets should match field names for this record type. The constructed value is used as the extended title displayed in search results and other lists. To insert a literal square-bracket, use two consecutive square-brackets ([[ or ]]).
    		</div>
-		<div style="padding-top:10px;">
-        	<button onclick="onInsert()" style="width:150px;">Insert field at cursor</button><input maxlength="500" id="rty_TitleMask" style="width:400;"/>
+		<div style="padding-top:5px;padding-bottom:10px;padding-left: 20px;">
+			<button onclick="onTest()" style="width:100px;">Test with record</button>&nbsp;&nbsp;<select id="listRecords" style="width:400px;"><option>select record (if any of this type exist) on which to test the result ...</option></select>
 		</div>
-		<div style="padding-top:10px;padding-bottom:10px;">
-			<button onclick="onTest()" style="width:150px;">Test with record:</button><select id="listRecords" style="width:400px;"><option>SELECT RECORD TO TEST TITLE MASK</option></select>
+		<div style="padding-left: 20px";>
+			<div id="testResult" title="Test result will appear in this box"  style="padding-left:10px; padding:5px; width: 500px; height: 10px; border: blue 1px dashed;"></div>
 		</div>
-		<div id="testResult" style="padding:5px; width: 550px; height: 50px; border: blue 1px solid;">
+		<div style="padding-top: 20px; padding-left: 20px;">
+        	<button onclick="onInsert()" style="width:100px;">Insert fields</button><br>&nbsp;<br>Mask:&nbsp;<input maxlength="500" id="rty_TitleMask" style="width:400;"/>
 		</div>
-		<div style="width:100%; text-align:center; padding-top:10px;">
+		<div style="text-align:left; padding-top:10px; padding-left: 60px;">
 			<button onclick="onSave()">Save</button>
 			<button onclick="window.close(null)">Cancel</button>
 		</div>

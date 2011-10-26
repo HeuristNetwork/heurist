@@ -678,6 +678,7 @@ top.HEURIST.edit = {
 	uploadsDiv: null,
 	uploadsInProgress: { counter: 0, names: {} },
 */
+
 	uploadURL: function(fileInput) {
 
 		//var URLInput = new top.HEURIST.edit.inputs.BibURLInput(container, defaultURL, required);
@@ -698,8 +699,6 @@ top.HEURIST.edit = {
 					top.HEURIST.edit.fileInputURLsaved.call(thisRef, element, vals);
 			});
 
-
-
 	},
 
 	// callback function - on completion of URL download and saving it as file
@@ -714,6 +713,7 @@ top.HEURIST.edit = {
 			// There was an error!  Display it.
 			element.input.replaceInput(element);
 			//alert(fileDetails.error);
+
 		} else {
 			// translate the HFile object back into something we can use here
 			var fo = {file:{
@@ -728,7 +728,6 @@ top.HEURIST.edit = {
 			windowRef.changed();
 		}
 	},
-
 
 	uploadFileInput: function(fileInput) {
 		var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
@@ -1558,13 +1557,15 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 		editImg.title = "Edit this record";
 
 	top.HEURIST.registerEvent(editImg, "click", function() {
-				top.HEURIST.util.popupURL(window,
-							top.HEURIST.basePath +"records/edit/formEditRecordPopup.html?recID=" + hiddenElt.value +
-									(top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:""),
-							{callback: function(bibTitle) {
-								if (bibTitle) textElt.defaultValue = textElt.value = bibTitle;
-								}
-							});
+				window.open(top.HEURIST.basePath +"records/edit/editRecord.html?recID=" + hiddenElt.value +
+									(top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:""))
+//				top.HEURIST.util.popupURL(window,
+//							top.HEURIST.basePath +"records/edit/formEditRecordPopup.html?recID=" + hiddenElt.value +
+//									(top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:""),
+//							{callback: function(bibTitle) {
+//								if (bibTitle) textElt.defaultValue = textElt.value = bibTitle;
+//								}
+//							});
 	});
 
 	if (window.HEURIST && window.HEURIST.parameters && window.HEURIST.parameters["title"]  &&  bdValue  &&  bdValue.title  &&  windowRef.parent.frameElement) {
@@ -1695,30 +1696,32 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = func
 		 this.inputs = [];
 	}
 
+	var sAllTerms = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_FilteredJsonTermIDTree']];
+	var sDisTerms = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['dty_TermIDTreeNonSelectableIDs']];
 
-	//disabled terms
-	var termHeaderList = typeof this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_TermIDTreeNonSelectableIDs']] == "string" ?
-						top.HEURIST.util.expandJsonStructure(this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_TermIDTreeNonSelectableIDs']]): [];//get DetailType non selectables
-/*
-	var newInput = this.document.createElement("div");
-	this.addInputHelper.call(this, bdValue, newInput);
-	newInput.style.width = "auto";
+	var	allTerms = typeof sAllTerms == "string" ? top.HEURIST.util.expandJsonStructure(sAllTerms) :[];
+	var	disabledTerms = typeof sDisTerms == "string" ? top.HEURIST.util.expandJsonStructure(sDisTerms) : [];
 
-
-		var newCombo = top.HEURIST.util.createTermSelect(top.HEURIST.util.expandJsonStructure(this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_FilteredJsonTermIDTree']]),
-														termHeaderList,
+	var newInput = top.HEURIST.util.createTermSelect(allTerms, disabledTerms,
 														this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] == "enum" ?
 															top.HEURIST.terms.termsByDomainLookup['enum'] :
 															top.HEURIST.terms.termsByDomainLookup.relation,
 														(bdValue && bdValue.value ? bdValue.value : null));
-		newInput.appendChild(newCombo);
-*/
-	var newInput = top.HEURIST.util.createTermSelect(top.HEURIST.util.expandJsonStructure(this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_FilteredJsonTermIDTree']]),
-														termHeaderList,
-														this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] == "enum" ?
-															top.HEURIST.terms.termsByDomainLookup['enum'] :
-															top.HEURIST.terms.termsByDomainLookup.relation,
-														(bdValue && bdValue.value ? bdValue.value : null));
+
+	if(newInput.length>0){
+		var option = document.createElement("option");
+		option.text = "";
+		option.value = ""
+		var sel = newInput.options[0];
+		try
+		{
+			newInput.add(option,sel);
+		}catch(ex){
+			// for IE earlier than version 8
+			newInput.add(option, 0);
+		}
+	}
+
 	this.addInputHelper.call(this, bdValue, newInput);
 	newInput.style.width = "auto";
 

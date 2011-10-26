@@ -7,8 +7,8 @@
     * @license http://www.gnu.org/licenses/gpl-3.0.txt
     * @package Heurist academic knowledge management system
     * @todo
-    * 
-    -->*/       
+    *
+    -->*/
 
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
@@ -20,7 +20,11 @@
         die("Could not get database structure from given database source.");
     }
 
-    print "<html><head><link rel=stylesheet href='../../common/css/global.css'><link rel=stylesheet href='../../common/css/admin.css'></head>";
+    print "<html><head>";
+    print "<link rel=stylesheet href='../../common/css/global.css'><link rel=stylesheet href='../../common/css/admin.css'></head>";
+
+    print '<body class="popup" width="300" height="800" style="font-size: 11px;overflow:auto;">';
+
     print "<body class='popup'>";
 
     print "<div class='banner'><h2>Heurist databases on this server</h2></div>";
@@ -30,7 +34,7 @@
     $query = "show databases";
     $res = mysql_query($query);
 
-    while ($row = mysql_fetch_array($res)) { 
+    while ($row = mysql_fetch_array($res)) {
         $test=strpos($row[0],$dbPrefix);
         if (is_numeric($test) && ($test==0) ) {
             $name = substr($row[0],strlen($dbPrefix));  // delete the prefix

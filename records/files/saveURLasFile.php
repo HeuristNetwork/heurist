@@ -46,7 +46,7 @@ $sURL = $_REQUEST['url'];
 //get picture from service
 
 //"http://www.sitepoint.com/forums/image.php?u=106816&dateline=1312480118";
-$remote_path = "http://immediatenet.com/t/m?Size=1024x768&URL=".$sURL;
+$remote_path =  str_replace("[URL]", $sURL, WEBSITE_THUMBNAIL_SERVICE);
 $heurist_path = tempnam(HEURIST_UPLOAD_DIR, "_temp_"); // . $file_id;
 
 //error_log("22222 WE ARE HERE! ".$remote_path."   ".$heurist_path);

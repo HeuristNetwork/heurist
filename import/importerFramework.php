@@ -180,6 +180,7 @@ if (! top.HEURIST.user) top.HEURIST.loadScript('<?=HEURIST_SITE_PATH?>common/php
 
   <form action="importerFramework.php" method="post" enctype="multipart/form-data" name="import_form">
    <input type=hidden name=current-mode value="<?= htmlspecialchars($session_data["mode"]) ?>">
+   <input type=hidden name=db value="<?=HEURIST_DBNAME?>">
 
 <?php	if ($fileName) {	?>
 <div style="margin-top: 1em; margin-bottom: 1.5em;">
@@ -521,7 +522,6 @@ function mode_zotero_request_parsing() {
    <input type="submit" value="Continue" style="font-weight: bold;">
 <?php
 }
-
 
 function mode_print_rectype_selection() {
 	global $session_data, $import_id;
@@ -1633,7 +1633,7 @@ function insert_biblio(&$entry) {
 		} else if ($fields[$i]->getType() === "url") {
 			// set as the rec_URL
 			$bib["rec_URL"] = $fields[$i]->getRawValue();
-		} else if ($fields[$i]->getType() === 256  &&  ! @$bib["rec_URL"]) {
+		} else if ($fields[$i]->getType() === 256  &&  ! @$bib["rec_URL"]) { //256 - web links MAGIC NUMBER
 			// use first web link as the rec_URL
 			$bib["rec_URL"] = $fields[$i]->getRawValue();
 		} else {
@@ -1643,6 +1643,8 @@ function insert_biblio(&$entry) {
 	if ($rec_scratchpad) $bib['rec_ScratchPad'] = $rec_scratchpad;
 
 
+	$creatorDT = (defined('DT_CREATOR')?DT_CREATOR:0);
+
 	mysql__insert('Records', $bib);
 	$rec_id = mysql_insert_id();
 	$entry->setBiblioID($rec_id);
@@ -1651,7 +1653,10 @@ function insert_biblio(&$entry) {
 	foreach (array_keys($bib_details) as $i) {
 		unset($field);
 		$field = &$bib_details[$i];
-		if ($field->getType() == 158) {//MAGIC NUMBER
+
+error_log(">>>>>> dtType=".$field->getType());
+
+		if ($field->getType() == $creatorDT) {//MAGIC NUMBER - Author/Creator
 			foreach ($field->getValue() as $person_bib_id) {
 				if ($bib_detail_insert) $bib_detail_insert .= ', ';
 				$bib_detail_insert .= '('.$rec_id.','.$field->getType().', "'.addslashes($person_bib_id).'", NULL, 1)';
@@ -1672,12 +1677,14 @@ function insert_biblio(&$entry) {
 		if ($bib_detail_insert) $bib_detail_insert .= ', ';
 
 		$resource_pointer_type = @$rectype_to_bdt_id_map[$entry->_container->getReferenceType()];
-		if (! $resource_pointer_type) $resource_pointer_type = 267;
+		if (! $resource_pointer_type) $resource_pointer_type = 267; //MAGIC bibliographic reference
 		$bib_detail_insert .= '('.$rec_id.','.$resource_pointer_type.','.$entry->_container->getBiblioID().', NULL, 1)';
 	}
 	if ($bib_detail_insert) {
 		$bib_detail_insert = 'insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_Geo, dtl_AddedByImport) values '
 		                                             . $bib_detail_insert;
+
+error_log(">>>>>>".$bib_detail_insert);
 		mysql_query($bib_detail_insert);
 	}
 
@@ -2008,6 +2015,9 @@ function process_author(&$field) {
 	// field corresponds to a person: make sure they're in the database, and set the field's value to that per_id.
 	// We will need to get fairly sophisticated about this eventually, but for now this quick hacque will do.
 
+	$titleDT = (defined('DT_TITLE')?DT_TITLE:0);
+
+
 	$person_bib_ids = array();
 
 	$persons = parseName($field->getRawValue());
@@ -2026,7 +2036,7 @@ function process_author(&$field) {
 		}
 
 		$res = mysql_query('select rec_ID from Records
-		                             left join recDetails SURNAME on SURNAME.dtl_RecID=rec_ID and SURNAME.dtl_DetailTypeID=160
+		                             left join recDetails SURNAME on SURNAME.dtl_RecID=rec_ID and SURNAME.dtl_DetailTypeID=$titleDT
 		                             left join recDetails GIVENNAMES on GIVENNAMES.dtl_RecID=rec_ID and GIVENNAMES.dtl_DetailTypeID=291
 		                     where rec_RecTypeID = 75
 		                      and SURNAME.dtl_Value = "'.addslashes(trim($person['surname'].' '.@$person['postfix'])).'"

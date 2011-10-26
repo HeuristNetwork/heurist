@@ -17,9 +17,11 @@ require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 require_once(dirname(__FILE__)."/../importerBaseClass.php");
 
+$titleDT = (defined('DT_TITLE')?DT_TITLE:0);
+$geoDT = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
 $kml_to_heurist_map = array(
-	"name" => 160,
+	"name" => $titleDT,
 	"address" => 181,
 	"AddressDetails" => 181,
 	"phoneNumber" => 309,
@@ -380,7 +382,7 @@ class HeuristKMLEntry extends HeuristForeignEntry {
 	}
 
 	function crosswalk() {
-		global $kml_to_heurist_map;
+		global $kml_to_heurist_map, $geoDT;
 
 		$heuristType = HeuristKMLParser::getHeuristReferenceTypeByID($this->_type);
 		if (! $heuristType) return NULL;
@@ -425,7 +427,7 @@ class HeuristKMLEntry extends HeuristForeignEntry {
 						list($geoType, $geoValue) = $geometry;
 
 						unset($newField);
-						$newField = &new HeuristNativeField(230, $geoType);
+						$newField = &new HeuristNativeField($geoDT, $geoType);
 						$newField->setGeographicValue($geoValue);
 						$entry->addField($newField);
 					}

@@ -698,9 +698,8 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 }
 #tabs li, #quicklink-cell li, #views li, ul.menu li {
 	display:inline-block;
-	/* float:left; */
 	height:15px;
-	padding:5px 10px 0 5px;
+	padding:5px 5px 0 5px;
 	white-space:nowrap;
 	color: #CCC;
 	margin:0;

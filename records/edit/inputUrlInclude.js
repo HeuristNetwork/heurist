@@ -26,7 +26,7 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 
 	var hiddenElt = newDiv.hiddenElt = this.document.createElement("input");
 		hiddenElt.name = newDiv.name;
-		hiddenElt.value = hiddenElt.defaultValue = "??";//(bdValue && bdValue.file)? bdValue.file.id : "";
+		hiddenElt.value = hiddenElt.defaultValue = "it will be hidden";//(bdValue && bdValue.file)? bdValue.file.id : "";
 		//hiddenElt.type = "hidden";
 		newDiv.appendChild(hiddenElt);
 
@@ -108,7 +108,7 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.defineURL = function(
 			//it returns url - link to external or heurist file
 			//			source - name of source/service
 			//			type - type of media
-			element.input.setURL(element, url, source+"|"+type);
+			element.input.setURL(element, url, url+'|'+source+"|"+type);
 			/*
 			if (bibID) element.input.setURL(element, url);
 			thisRef.choosing = false;
@@ -127,6 +127,7 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.clearURL = function(e
 */
 top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.setURL = function(element, url, src_type) {
 
+	this.choosing = false;
 	element.textElt.title = element.textElt.value = element.textElt.defaultValue = url? url : "";
 	element.hiddenElt.title = element.hiddenElt.value = element.hiddenElt.defaultValue = src_type? src_type : "";
 

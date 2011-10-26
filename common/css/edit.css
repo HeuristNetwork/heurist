@@ -496,13 +496,14 @@ div#notes {
 	display:block
 }
 div.input-row div.input-cell div#relations-tbody {
-	width:100% !important
+	width:100% !important;
+	display:block;
 }
 div.input-row div.input-cell div#relations-tbody div.relation {
 	display:block;
 }
 div.input-row div.input-cell div#relations-tbody div {
-	display: block;
+	display: inline-block;
 }
 div.input-row div.input-cell div#relations-tbody div.relation div {
 	display:inline-block

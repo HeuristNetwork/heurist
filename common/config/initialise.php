@@ -30,7 +30,8 @@
 	*/
 
 	//set up system path defines
-	define('HEURIST_VERSION',"3.1");
+	define('HEURIST_VERSION',"3.1.1");
+	// Update sub-sub-version weekly and record date 3.1.1 = 17/10/11
 	define('HEURIST_MIN_DBVERSION',"1.0.0");
 
 	define('HEURIST_TOP_DIRS',"admin|common|export|external|hapi|help|import|records|search|viewers");	// this is the path from the heurist code base root. Only change if file moves.
@@ -221,6 +222,13 @@
 	}else if ($infoEmail){
 		define('HEURIST_MAIL_TO_ADMIN', $infoEmail);	//mailto string for heurist installation issues
 	}
+
+	// url of 3d party service that generates thumbnails for given website, set for installation in intialise.php
+	define('WEBSITE_THUMBNAIL_SERVICE',$websiteThumbnailService);
+	define('WEBSITE_THUMBNAIL_USERNAME',$websiteThumbnailUsername);
+	define('WEBSITE_THUMBNAIL_PASSWORD',$websiteThumbnailPassword);
+	define('WEBSITE_THUMBNAIL_XSIZE',$websiteThumbnailXsize);
+	define('WEBSITE_THUMBNAIL_YSIZE',$websiteThumbnailYsize);
 
 	// MAGIC CONSTANTS for limited set of common rectypes and their detail types
 	// they refer to global definition DB and IDs of rectypes/detailtypes there

@@ -84,7 +84,7 @@ function RectypeManager() {
 				'<h3>Create a new record type group or edit an existing one</h3><br/>'+
 				'<div class="input-row"><div class="input-header-cell">Group:</div><div class="input-cell"><select id="edGroupId" onchange="onGroupChange()"></select></div></div>'+
 				'<div class="input-row"><div class="input-header-cell">Name:</div><div class="input-cell"><input id="edName" style="width:300px"/></div></div>'+
-				'<div class="input-row"><div class="input-header-cell">Descrption:</div><div class="input-cell"><input id="edDescription" style="width:300px"/></div></div>'+
+				'<div class="input-row"><div class="input-header-cell">Description:</div><div class="input-cell"><input id="edDescription" style="width:300px"/></div></div>'+
 				'<div class="input-row"><div class="input-header-cell"></div><div class="input-cell">'+
 					'<input id="btnGrpSave" style="display:inline-block" type="submit" value="Save" onclick="{rectypeManager.doGroupSave()}" />'+
 					'<input id="btnGrpCancel" type="submit" value="Cancel" onclick="{rectypeManager.doGroupCancel()}" style="margin:0 5px" />'+
@@ -146,8 +146,8 @@ function RectypeManager() {
 				'<label id="lblNoticeAboutChanges'+grpID+'" '+
 					'style="padding-left:3px; padding-right:3px; background-color:white; color:red; display: inline-block;"></label>'+
 					'&nbsp;&nbsp;&nbsp;'+
-				'<input id="btnSave'+grpID+'" type="button" value="Save Changes" '+
-							'style="color:red; display: none;"/>'+ //inline-block
+			'<input id="btnSave'+grpID+'" type="button" value="Save or" '+
+							'style="color:red; display: none;margin-right:5px;"/>'+ //inline-block
 				'<input type="button" id="btnAddRecordType'+grpID+'" value="Add Record Type" class="add"/>'+
 				//'<input type="button" id="btnAddFieldType'+grpID+'" value="Add Field Type" style="float:right;"/>'+
 			'</div></div>'+
@@ -340,7 +340,7 @@ function RectypeManager() {
 elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 'onmouseover="rectypeManager.showInfo('+rectypeID+', event)" onmouseout="rectypeManager.hideInfo()"/>'; }
 			},
-			{ key: "active", label: "Active", sortable:false, width:40, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
+			{ key: "active", label: "Show", sortable:false, width:40, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
 			{ key: "usage", label: "Usage", hidden:true },
 			{ key: "icon", label: "Icon", className:'center', sortable:false,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
@@ -375,16 +375,8 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 			}},
 
 			{ key: "grp_id", label: "Group", sortable:false, minWidth:90, maxAutoWidth:90, width:90, className:'center',
-				formatter: function(elLiner, oRecord, oColumn, oData, oDataTable) {
-                    var str = oRecord.getData("status");
-                    if (false){ //(str === "reserved" || str === "approved") {
-                          var grp_id = oRecord.getData("grp_id");
-                          elLiner.innerHTML = _groups[_getIndexByGroupId(grp_id)].text;
-                    }else{
-                          YAHOO.widget.DataTable.formatDropdown( elLiner , oRecord , oColumn , oData , oDataTable);
-                    }                    
-                
-                }, dropdownOptions:_groups},
+				formatter: YAHOO.widget.DataTable.formatDropdown,
+				dropdownOptions:_groups},
 			{ key: "edit", label: "Edit", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
 					elLiner.innerHTML = '<a href="#edit_rectype"><img src="../../common/images/edit-recType.png" width="16" height="16" border="0" title="Edit record type" /><\/a>'; }
 			},
@@ -984,7 +976,7 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 		Hul.popupURL(top, url,
 		{   "close-on-blur": false,
 			"no-resize": false,
-			height: 620,
+			height: 800,
 			width: 700,
 			callback: function(context) {
 				if(!Hul.isnull(context)){

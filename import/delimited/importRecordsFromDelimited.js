@@ -23,6 +23,7 @@ FlexImport = (function () {
 	fields: [],
 	lineHashes: {},
 	columnCount: 0,
+	hasHeaderRow: false,
 	recTypeSelect: null,
 	recType: null,
 	workgroupSelect: null,
@@ -348,7 +349,7 @@ FlexImport = (function () {
 		var recIDs = [];
 		var recID = "";
 		var valCheck = {};
-
+		//detect what fields to be imported
 		var i, l = FlexImport.colSelectors.length;
 		for (i = 0; i < l; ++i) {
 			if (FlexImport.colSelectors[i].selectedIndex > 0) {
@@ -555,7 +556,8 @@ FlexImport = (function () {
 		}
 		// create records
 		l = FlexImport.fields.length;
-		for (var i = 0; i < l; ++i) {
+		var istart = (FlexImport.hasHeaderRow)?1:0;
+		for (var i = istart; i < l; ++i) {
 
 			var lineHash = FlexImport.makeHash(FlexImport.fields[i]);
 

@@ -103,7 +103,7 @@ function DetailTypeEditor() {
 
 		var original_dbId = (Hul.isnull(_detailType))?dbId:Number(_detailType[fi.dty_OriginatingDBID]);
 		if(Hul.isnull(original_dbId)) {original_dbId = dbId;}
-			
+
 		if((dbId>0) && (dbId<1001) && (original_dbId===dbId)) {
 			_addOptionReserved();
 		}
@@ -204,7 +204,7 @@ function DetailTypeEditor() {
 	* @allTerms - JSON string with terms
 	* @disabledTerms  - JSON string with disabled terms
 	*/
-	function _recreateTermsPreviewSelector( datatype, allTerms, disabledTerms ) {
+		function _recreateTermsPreviewSelector( datatype, allTerms, disabledTerms ) {
 
 				allTerms = Hul.expandJsonStructure(allTerms);
 				disabledTerms = Hul.expandJsonStructure(disabledTerms);

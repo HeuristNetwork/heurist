@@ -131,6 +131,8 @@ function EditTerms() {
 			termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[_currentDomain],
 			fi = top.HEURIST.terms.fieldNamesToIndex;
 
+		tv.removeChildren(tv_parent); // Reset the the tree
+
 		//first level terms
 		for (termid in treesByDomain)
 		{
@@ -177,7 +179,7 @@ function EditTerms() {
 					term.inverseid = arTerm[fi.trm_InverseTermID];
                     term.status = arTerm[fi.trm_Status];
                     term.original_db = arTerm[fi.trm_OriginatingDBID];
-                    
+
 
 					//term.label = '<div id="'+child+'"><a href="javascript:void(0)" onClick="selectAllChildren('+nodeIndex+')">All </a> '+termsByDomainLookup[child]+'</div>';
 					//term.href = "javascript:void(0)"; // To make 'select all' clickable, but not leave the page when hitting enter
@@ -206,6 +208,10 @@ function EditTerms() {
 		tv.render();
 		//first_node.focus();
 		//first_node.toggle();
+
+		if(_currentNode){
+			_findNodeById(_currentNode.data.id);
+		}
 	}
 
 	//
@@ -264,7 +270,7 @@ function EditTerms() {
 				_doSave(true);
 			}
 			_currentNode = node;
-			
+
 			var disable_status = false,
 				disable_fields = false,
 				add_reserved = false,
@@ -276,8 +282,15 @@ function EditTerms() {
 
 				//	alert("label was clicked"+ node.data.id+"  "+node.data.domain+"  "+node.label);
 				Dom.get('edId').value = node.data.id;
-				Dom.get('edName').value = node.label;
-				Dom.get('edName').focus();
+				Dom.get('edParentId').value = node.data.parent_id;
+				var edName = Dom.get('edName');
+				edName.value = node.label;
+				if(node.label==="New Term"){
+					//highlight all text
+					edName.selectionStart = 0;
+					edName.selectionEnd = 8;
+				}
+				edName.focus();
 				if(Hul.isnull(node.data.description)) {
 					node.data.description="";
 				}
@@ -312,7 +325,7 @@ function EditTerms() {
 				var dbId = Number(top.HEURIST.database.id),
 					original_dbId = node.data.original_db,
 					status = node.data.status;
-					
+
 				if(Hul.isnull(original_dbId)) {original_dbId = dbId;}
 
 				if((dbId>0) && (dbId<1001) && (original_dbId===dbId)) {
@@ -328,8 +341,8 @@ function EditTerms() {
 				}else if(status==='approved'){
 					disable_fields = true;
 				}
-				
-				
+
+
 				_optionReserved(add_reserved);
 				_toggleAll(disable_status || disable_fields, disable_status);
 
@@ -337,7 +350,7 @@ function EditTerms() {
 				selstatus.value = status;
 			}//node!=null
 		}
-		
+
 		Dom.get('formInverse').style.display = "none";
 		if(Hul.isnull(node)){
 			Dom.get('formEditor').style.display = "none";
@@ -345,7 +358,7 @@ function EditTerms() {
 		}
 
 	}
-	
+
 	/**
 	* adds reserved option to status dropdown list
 	*/
@@ -366,20 +379,20 @@ function EditTerms() {
 			//selstaus.remove(3);
 		}
 	}
-	
+
 	/**
 	* Toggle fields to disable. Is called when status is set to 'Reserved'.
 	*/
 	function _toggleAll(disable, reserved) {
 
 			Dom.get("trm_Status").disabled = reserved;
-			
+
 			Dom.get("btnDelete").disabled = disable;
 			Dom.get("btnInverseSetClear").disabled = disable;
 	}
 
 	/**
-	* 
+	*
 	*/
 	function _onChangeStatus(event){
 		var el = event.target;
@@ -400,10 +413,15 @@ function EditTerms() {
 		var sStatus = Dom.get('trm_Status').value;
 		var iInverseId = Number(Dom.get('edInverseTermId').value);
 		iInverseId = (iInverseId>0) ?iInverseId:null;
+		var iParentId = Number(Dom.get('edParentId').value);
+		iParentId = (iParentId>0)?iParentId:null;
+		var iParentId_prev = Number(_currentNode.data.parent_id);
+		iParentId_prev = (iParentId_prev>0)?iParentId_prev:null;
 
 		var wasChanged = ((_currentNode.label !== sName) ||
 			(_currentNode.data.description !== sDesc) ||
 			(_currentNode.data.status !== sStatus) ||
+			(iParentId_prev !== iParentId) ||
 			( !(Hul.isempty(_currentNode.data.inverseid)&&Hul.isnull(iInverseId)) &&
 				Number(_currentNode.data.inverseid) !== iInverseId));
 
@@ -434,9 +452,13 @@ function EditTerms() {
 
 			_currentNode.data.inverseid = (iInverseId>0) ?iInverseId:null;
 			_currentNode.title = _currentNode.data.description;
+
+			var needReload = (_currentNode.data.parent_id != iParentId);
+			_currentNode.data.parent_id = iParentId;
+
 			_currTreeView.render();
 
-			_updateTermsOnServer(_currentNode);
+			_updateTermsOnServer(_currentNode, needReload);
 			//alert("TODO SAVE ON SERVER");
 		}
 	}
@@ -444,10 +466,11 @@ function EditTerms() {
 	/**
 	* Sends data to server
 	*/
-	function _updateTermsOnServer(node)
+	function _updateTermsOnServer(node, _needReload)
 	{
 
 		var term = node.data;
+		var needReload = _needReload;
 
 		var oTerms = {terms:{
 				colNames:['trm_Label','trm_InverseTermId','trm_Description','trm_Domain','trm_ParentTermID','trm_Status'],
@@ -499,6 +522,11 @@ function EditTerms() {
 								Dom.get('div_SaveMessage').style.display = "inline-block";
 								setTimeout(function(){Dom.get('div_SaveMessage').style.display = "none";}, 2000);
 								//alert("Term was succesfully saved");
+
+								if(needReload){
+									var ind = _tabView.get("activeIndex");
+									_fillTreeView((ind===0)?_termTree1:_termTree2);
+								}
 						}
 					}
 			};
@@ -563,6 +591,38 @@ function EditTerms() {
 				_onNodeClick(null);
 			}
 		}
+	}
+
+	/**
+	* Open popup and select new parent term
+	*/
+	function _selectParent(){
+
+	if(_currentNode===null) return;
+
+	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+
+	Hul.popupURL(top, top.HEURIST.basePath +
+		"admin/structure/selectTermParent.html?domain="+_currentDomain+"&child="+_currentNode.data.id+"&db="+db,
+		{
+		"close-on-blur": false,
+		"no-resize": true,
+		height: 500,
+		width: 450,
+		callback: function(newparent_id) {
+			if(newparent_id) {
+				if(newparent_id === "root") {
+					Dom.get('edParentId').value = "";
+				}else{
+					Dom.get('edParentId').value = newparent_id;
+				}
+				_doSave(false);
+			}
+		}
+	});
+
+
+
 	}
 
 	/**
@@ -720,6 +780,7 @@ function EditTerms() {
 				doSave: function(){ _doSave(false); },
 				doDelete: function(){ _doDelete(true); },
 				doAddChild: function(isRoot){ _doAddChild(isRoot); },
+				selectParent: function(){ _selectParent(); },
 				onChangeStatus: function(event){ _onChangeStatus(event); },
 
 				findNodes: function(sSearch){ return _findNodes(sSearch); },

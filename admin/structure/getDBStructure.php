@@ -31,7 +31,7 @@
 
 	mysql_connection_db_select(DATABASE);
 	if(mysql_error()) {
-		die("Could not get database structure from given database source.");
+		die("Could not get database structure from given database source, MySQL error - unable to connect to database.");
 	}
 
 // TODO: use HEURIST_DBVERSION TO SET THE VERSION HERE

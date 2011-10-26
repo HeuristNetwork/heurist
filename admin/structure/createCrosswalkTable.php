@@ -3,6 +3,7 @@
 	* createCrosswalkTable.php, Imports recordtypes from another Heurist database, 17-05-2011, by Juan Adriaanse
 	* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
 	* @link: http://HeuristScholar.org
+	*
 	* @license http://www.gnu.org/licenses/gpl-3.0.txt
 	* @package Heurist academic knowledge management system
 	* @todo Sorting of columns - Matches sorts alphabatically, not numeric and Record type name doesn't seem to sort at all
@@ -181,11 +182,11 @@ YAHOO.util.Event.addListener(window, "load", function() {
 	YAHOO.example.Basic = function() {
 		// Create the columns. Arrow contains the collapse/expand arrow, rtyID is hidden and contains the ID, rectype contains the name, matches the amount of matches and a tooltip, import a button
 		var myColumnDefs = [
-			{ key:"arrow", label:"", formatter:YAHOO.widget.RowExpansionDataTable.formatRowExpansion },
+			{ key:"arrow", label:"click for details ...", formatter:YAHOO.widget.RowExpansionDataTable.formatRowExpansion },
 			{ key:"import", label:"Import", sortable:false, resizeable:false, width:30 },
 			{ key:"rtyID", label:"<u>ID</u>", sortable:true, hidden:true },
-			{ key:"rectype", label:"<span title='Click on row to view information about the record type'><u>Record type</u></span>", sortable:true, resizeable:true, width:200 },
-			{ key:"matches", label:"<span title='Matches shows the number of record types with simliar names'><u>Matches</u></span>", sortable:true, resizeable:true, parser:'number', width:50 }
+			{ key:"rectype", label:"<span title='Click on row to view information about the record type'><u>Record type</u></span>", sortable:true, resizeable:true, width:150 },
+			{ key:"matches", label:"<span title='Shows the number of record types in the current database with simliar names'><u>Potential dupes in this DB</u></span>", sortable:true, resizeable:true, parser:'number', width:50 }
 			];
 
 		var myDataSource = new YAHOO.util.DataSource();

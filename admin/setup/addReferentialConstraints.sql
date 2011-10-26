@@ -53,6 +53,9 @@ ALTER TABLE defDetailTypes
 -- inverse term IDs to NULL (NOT to 0). Also beware multiple recs with same inverse term
 -- none in sandpit4
 SELECT `trm_InverseTermId` from defTerms where NOT `trm_InverseTermId` in (select `trm_ID` from defTerms);
+-- This is a precaution since some old databases have invalid 0 values instead of null
+Update defTerms set trm_ParentTermID=NULL where trm_ParentTermID=0;
+Update defTerms set trm_InverseTermID=NULL where trm_InverseTermID=0;
 
 -- If this fails due to constraint failure you may need to use this first
 -- delete from defTerms where NOT trm_ParentTermId in (select trm_ID from defTerms);

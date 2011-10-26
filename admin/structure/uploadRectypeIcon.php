@@ -48,14 +48,14 @@
   <style type="text/css">
 .success { font-weight: bold; color: green; margin-left: 3px; }
 .failure { font-weight: bold; color: red; margin-left: 3px; }
-.input-row div.input-header-cell {width:90px; vertical-align:baseline}
+.input-row div.input-header-cell {width:90px; vertical-align:baseline; min-width:90px;}
   </style>
  </head>
 
  <body class="popup">
    <div class="input-row">
    	<div class="input-header-cell">Current <?=(($mode==0)?'icon':'thumbnail')?>:</div>
-    <div class="input-cell"><img src="<?=$image_url?>?<?= time() ?>" style="vertical-align: middle; width:<?=$dim?>px; height:<?=$dim?>px;"></div>
+    <div class="input-cell"><img src="<?=$image_url?>?<?= time() ?>" style="vertical-align: middle; height:<?=$dim?>px;"></div>
   </div>
 
 <?php	if ($success_msg) { ?>
@@ -75,7 +75,7 @@
         <div class="input-cell"><input type="file" name="new_icon" style="display:inline-block;"></div>
    </div>
    <div class="actionButtons" style="padding-left:100px">
-   		<input type="button" onclick="window.document.forms[0].submit();" value="Upload" style="margin-right:10px">
+   		<input type="button" onClick="window.document.forms[0].submit();" value="Upload" style="margin-right:10px">
    		<input type="button" value="Close window" onClick="window.close(null);"></div>
    </div>
   </form>

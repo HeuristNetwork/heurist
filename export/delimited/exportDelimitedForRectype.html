@@ -52,11 +52,14 @@
 	</head>
 
 	<body onload = "getRecTypes();">
-		<h2>Record Data Export Tool</h2>
+		<h2>Delimited data export</h2>
+		<p>This function exports data for specified fields of a selected record type in comma or tab separated format.<br>
+		An additional query string using normal Heurist query structure can be used to select a subset of the record type.</p>
+		<p>Due to the limitations of the delimited text format, only one record type can be exported at a time.</p>
 		<p id=info-p></p>
 		<p id=select-rec-type></p>
 		<div id=select-detail-type></div>
-		<div id=export-detail-map></div>
+		<div id="export-detail-map" style="padding-top:30px;"></div>
 		<div id="results"></div>
 		<p id=records-p></p>
 	</body>

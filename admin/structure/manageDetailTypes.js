@@ -369,16 +369,8 @@ function DetailTypeManager() {
 			{ key: "type", label: "Data Type", sortable:true, className:'center' },
 			{ key: "description",   hidden:true},
 			{ key: "grp_id", label: "Group", sortable:false, width:90, className:'center',
-				formatter: function(elLiner, oRecord, oColumn, oData, oDataTable) {
-                    var str = oRecord.getData("status");
-                    if (false){//(str === "reserved" || str === "approved") {
-                          var grp_id = oRecord.getData("grp_id");
-                          elLiner.innerHTML = _groups[_getIndexByGroupId(grp_id)].text;
-                    }else{
-                          YAHOO.widget.DataTable.formatDropdown( elLiner , oRecord , oColumn , oData , oDataTable);
-                    }                    
-                
-                }, dropdownOptions:_groups},
+				formatter: YAHOO.widget.DataTable.formatDropdown,
+				dropdownOptions:_groups},
 			{ key: null, label: "Edit", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
 					elLiner.innerHTML = '<a href="#edit"><img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /><\/a>'; } },
 			/*{ key: null, label: "Del", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){

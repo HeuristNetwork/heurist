@@ -103,7 +103,12 @@
 			<h3 style="border-style: none;">Edit Selected Term</h3>
 			<div style="border: black; border-style: solid; border-width:thin; padding:10px;">
 
-			<div class="dtyField"><label class="dtyLabel">ID:</label><input id="edId" readonly="readonly" style="width:50px"/></div>
+			<div class="dtyField"><label class="dtyLabel">ID:</label><input id="edId" readonly="readonly" style="width:50px"/>
+				<input id="edParentId" type="hidden"/>
+				<div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
+					<b>Terms was saved</b>
+				</div>
+			</div>
 			<div class="dtyField"><label class="dtyLabel">Display name:</label><input id="edName" style="width:300px"/></div>
 			<div class="dtyField"><label class="dtyLabel">Description:</label><input id="edDescription" style="width:300px"/></div>
 			<div id="divInverse" class="dtyField"><label class="dtyLabel">Inverse Term:</label><input id="edInverseTerm" readonly="readonly" style="width:250px"/>
@@ -118,18 +123,15 @@
                     <!-- option>reserved</option -->
                 </select>
             </div>
-            
+
 				<div style="padding-top:5;">
 
 				<div id='div_btnAddChild' style="text-align: left; display:inline-block;">
 					<input id="btnAddChild" type="button" value="Add Child Term" onClick="{editTerms.doAddChild(false)}"/>
+					<input id="btnSetParent" type="button" value="Set Parent" title="Change the parent" onClick="{editTerms.selectParent()}"/>
 					<input id="btnImport" type="button" value="Import" onClick="{editTerms.doImport(false)}"/>
 				</div>
 					<input id="btnDelete" type="button" value="Delete Term" onClick="{editTerms.doDelete()}" />
-
-				<div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
-					<b>Terms was saved</b>
-				</div>
 
 
 				<input id="btnSave" style="float:right;" type="button" value="Save Changes" onClick="{editTerms.doSave()}" />

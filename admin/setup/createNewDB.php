@@ -19,13 +19,7 @@
 		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
 		return;
 	}
-	if(!is_admin()) {
-		print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You need to be a system administrator to create a new database</span><p><a href=".HEURIST_URL_BASE." target='_top'>Return to Heurist</a></p></div></div></body></html>";
-		return;
-	}
 ?>
-
-
 
 <html>
 	<head>
@@ -38,6 +32,19 @@
 		.detailType {width:180px !important}
 	</style>
 	<body class="popup">
+
+	<script>
+		function challengeForDB(){
+		  var pwd_value = document.getElementById("pwd").value;
+		  if(pwd_value==="<?=$passwordForDatabaseCreation?>"){
+		  	  document.getElementById("challengeForDB").style.display = "none";
+		  	  document.getElementById("createDBForm").style.display = "block";
+		  }else{
+			  alert("Password incorrect, please check with system administrator. Note: password is case sensitive");
+		  }
+		}
+	</script>
+
 		<div class="banner"><h2>Create new Heurist database</h2></div>
 		<div id="page-inner" style="overflow:auto">
 
@@ -45,8 +52,15 @@
 		<?php include("includeNewDatabaseWorkflow.html"); ?>
 		<div class="separator_row" style="margin:20px 0;"></div>
 
+	   		<div id="challengeForDB" style="display:<?=$passwordForDatabaseCreation==''?'none':'block'?>">
+				<h3>Enter the password set by your system adminstrator for new database creation:</h3>
+					<input type="password" maxlength="64" size="25" id="pwd">
+					<input type="button" onclick="challengeForDB()" value="OK" style="font-weight: bold;" >
+				</div>
+				<br /><br /><div id="loading" style="display:none"><img src="../../common/images/mini-loading.gif" width="16" height="16" /> <strong>&nbspCreating database, please wait...</strong></div>
+			</form>
 
-		<div id="createDBForm">
+		<div id="createDBForm" style="display:<?=$passwordForDatabaseCreation==''?'block':'none'?>;">
 			<form action="createNewDB.php?db=<?= HEURIST_DBNAME ?>" method="POST" name="NewDBName">
 				<p>New databases are created on the current server.<br>
 					You will become the owner and administrator of the new database.<br>
@@ -57,7 +71,8 @@
 					<input type="text" maxlength="64" size="25" name="dbname">
 					<input type="submit" name="submit" value="Create database" style="font-weight: bold;" >
 				</div>
-				<br /><br /><div id="loading" style="display:none"><img src="../../common/images/mini-loading.gif" width="16" height="16" /> <strong>&nbspCreating database, please wait...</strong></div>
+				<br /><br />
+				<div id="loading" style="display:none"><img src="../../common/images/mini-loading.gif" width="16" height="16" /> <strong>&nbspCreating database, please wait...</strong></div>
 			</form>
 		</div>
 	</body>
@@ -101,19 +116,19 @@
 
 		if (isset($_POST['dbname'])) {
 
-			// Check that there is a current administrative user  who can be made the owner of the new database
+			// Check that there is a current administrative user who can be made the owner of the new database
 			if(ADMIN_DBUSERNAME == "") {
 				if(ADMIN_DBUSERPSWD == "") {
-					echo "Admin username and password have not been set. Please do so before trying to create a new database.<br>";
+					echo "DB Admin username and password have not been set in config.ini. Please do so before trying to create a new database.<br>";
 					echo '<script type="javascript/text">document.getElementById("loading").style.display = "none";</script>';
 					return;
 				}
-				echo "Admin username has not been set. Please do so before trying to create a new database.<br>";
+				echo "DB Admin username has not been set in config.ini. Please do so before trying to create a new database.<br>";
 				echo '<script type="javascript/text">document.getElementById("loading").style.display = "none";</script>';
 				return;
 			}
 			if(ADMIN_DBUSERPSWD == "") {
-				echo "Admin password has not been set. Please do so before trying to create a new database.<br>";
+				echo "DB Admin password has not been set in config.ini. Please do so before trying to create a new database.<br>";
 				echo '<script type="javascript/text">document.getElementById("loading").style.display = "none";</script>';
 				return;
 			} // checking for current administrative user
@@ -129,7 +144,12 @@
 				return false;
 			} // rejecting illegal characters in db name
 
-			$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e\"create database `$newname`\"";
+			if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+				$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e\"create database `$newname`\"";
+				} else {
+				$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'create database `$newname`'";
+			}
+
 			$output1 = exec($cmdline . ' 2>&1', $output, $res1);
 			if ($res1 != 0 ) {
 				echo ("Error code $res1 on MySQL exec: Unable to create database $newname<br>&nbsp;<br>");

@@ -30,24 +30,22 @@ if (!is_admin()) {
 		<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
 		<title>Register DB to Heurist Index Server</title>
 	</head>
-	
+
 
 	<body class="popup">
     <div class="banner"><h2>Database registration</h2></div>
 	<div id="page-inner" style="overflow:auto">
 		<div id="registerDBForm" class="input-row">
 		<form action="registerDB.php" method="POST" name="NewDBRegistration">
-			<div class='input-header-cell'>Enter a short description for this database.</div><div class='input-cell'><input type="text" maxlength="64" size="25" name="dbDescription">
+			<div class='input-header-cell'>Enter a short description for this database.</div><div class='input-cell'><input type="text" maxlength="1000" size="80" name="dbDescription">
 			<input type="submit" name="submit" value="Register" style="font-weight: bold;" onClick="registerDB()" ></div>
 		</form>
 		</div>
-        
+
 <?php
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
-mysql_connection_db_insert(DATABASE); // Connect to the current database
-
-// Check if already registered and exit if so, otherwise request registration from Heurist Index database
+mysql_connection_db_insert(DATABASE); // Connect to the current database (the one being registered)
 
 $res = mysql_query("select sys_dbRegisteredID, sys_dbName, sys_dbDescription, sys_OwnerGroupID from sysIdentification where `sys_ID`='1'");
 
@@ -59,30 +57,41 @@ if (!$res) { // Problem reading current registration ID
 }
 
 $row = mysql_fetch_row($res); // Get system information for current database
-$DBID = $row[0];
+$dbID = $row[0];
 $dbName = $row[1];
 $dbDescription = $row[2];
 $ownerGrpID = $row[3];
 
-// Look up owner group sysadmin password from sysUGrps table
-$res = mysql_query("select ugr_eMail from sysUGrps where `ugr_ID`='$ownerGrpID'");
+// Look up current user email from sysUGrps table in the current database (the one being registered)
+$user_id=get_user_id();
+$res = mysql_query("select ugr_eMail, ugr_Password,ugr_Name,ugr_FirstName,ugr_LastName from sysUGrps where `ugr_ID`='$user_id'");
 if(mysql_num_rows($res) == 0) {
-	echo "<div class=wrap><div id=errorMsg><span>Non-critical warning</span>Unable to read database owners group email, not currently supporting deferred users database</div></div>";
+	echo "<div class=wrap><div id=errorMsg><span>Non-critical warning</span>Unable to read your email address from sysUGrps. Note: not currently supporting deferred users database</div></div>";
 	return;
 }
 
 $row = mysql_fetch_row($res);
-$ownerGrpEmail = $row[0]; // Get owner group email address from UGrps table
+$usrEmail = $row[0]; // Get the current user's email address from UGrps table
+$usrPassword = $row[1];
+$usrName = $row[2];
+$usrFirstName = $row[3];
+$usrLastName = $row[4];
 
-          
+error_log('current dbid = '.$dbID);
+
 // Check if database has already been registered
-if (isset($DBID) && ($DBID != 0)) { // already registered
+
+if (isset($dbID) && ($dbID != 0)) { // already registered
 	echo '<script type="text/javascript">';
 	echo 'document.getElementById("registerDBForm").style.display = "none";';
 	echo '</script>';
 	echo "<div class='input-row'><div class='input-header-cell'>Database:</div><div class='input-cell'>".DATABASE." </div></div>";
-	echo "<div class='input-row'><div class='input-header-cell'>Already registered with</div><div class='input-cell'><b>ID:</b> " . $DBID . " </div></div>";
+	echo "<div class='input-row'><div class='input-header-cell'>Already registered with</div><div class='input-cell'><b>ID:</b> " . $dbID . " </div></div>";
     echo "<div class='input-row'><div class='input-header-cell'>Description:</div><div class='input-cell'>". $dbDescription . "</div></div>";
+    $url="http://heuristscholar.org/h3/records/edit/editRecord.html?recID=".$dbID."&db=H3MasterIndex";
+    echo "<div class='input-row'><div class='input-header-cell'>Collection metadata:</div><div class='input-cell'>
+    <a href=$url target=_blank>Click here to edit</a> (login - if asked - as person who registered this database)
+    </div></div>";
 } else {
 	echo '<script type="text/javascript">';
 	echo 'document.getElementById("registerDBForm").style.display = "block";';
@@ -91,9 +100,8 @@ if (isset($DBID) && ($DBID != 0)) { // already registered
 
 function registerDatabase() {
 	$heuristDBname = rawurlencode(HEURIST_DBNAME);
-	global $DBID, $dbName, $ownerGrpID, $ownerGrpEmail, $dbDescription;
+	global $dbID, $dbName, $ownerGrpID, $indexdb_user_id, $usrEmail, $usrPassword, $usrName, $usrFirstName, $usrLastName, $dbDescription;
 	$serverURL = HEURIST_BASE_URL . "?db=" . $heuristDBname;
-
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);    //return curl_exec output as string
@@ -104,11 +112,16 @@ function registerDatabase() {
 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);    // don't verify peer cert
 	curl_setopt($ch, CURLOPT_TIMEOUT, 10);    // timeout after ten seconds
 	curl_setopt($ch, CURLOPT_MAXREDIRS, 5);    // no more than 5 redirections
-	$ownerGrpEmail = rawurlencode($ownerGrpEmail);
+	$usrEmail = rawurlencode($usrEmail);
+	$usrName = rawurlencode($usrName);
+	$usrFirstName = rawurlencode($usrFirstName);
+	$usrLastName = rawurlencode($usrLastName);
+	$usrPassword = rawurlencode($usrPassword);
 	$dbDescriptionEncoded = rawurlencode($dbDescription);
 	$reg_url =  HEURIST_BASE_URL . "admin/setup/getNextDBRegistrationID.php" . // TODO: Change to HEURIST_INDEX_BASE_URL
-				"?serverURL=" . $serverURL . "&dbReg=" . $heuristDBname . 
-				"&dbTitle=" . $dbDescriptionEncoded . "&ownerGrpEmail=".$ownerGrpEmail;
+				"?serverURL=" . $serverURL . "&dbReg=" . $heuristDBname .
+				"&dbTitle=" . $dbDescriptionEncoded . "&usrPassword=" . $usrPassword .
+				"&usrName=" . $usrName . "&usrFirstName=" . $usrFirstName . "&usrLastName=" . $usrLastName . "&usrEmail=".$usrEmail;
 	curl_setopt($ch, CURLOPT_URL,$reg_url);
 	$data = curl_exec($ch);
 	$error = curl_error($ch);
@@ -116,25 +129,33 @@ function registerDatabase() {
 		$code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
 		echo $error . " (" . $code . ")";
     } else {
-		$DBID = intval($data);
+		$dbID = intval($data);
     }
-    if ($DBID == 0) { // Unable to allocate a new database identifier
+
+    error_log('registered dbid = '.$dbID);
+
+
+    if ($dbID == 0) { // Unable to allocate a new database identifier
 		$decodedData = explode(',', $data);
 		$errorMsg = $decodedData[0];
+		error_log ('Problem allocating a database identifier from the Heurist index, dbID is 0');
         $msg = "Problem allocating a database identifier from the Heurist index.\n" .
         "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
         return;
-    } else if($DBID == -1) {
+    } else if($dbID == -1) {
 	    $res = mysql_query("update sysIdentification set `sys_dbDescription`='$dbDescription' where `sys_ID`='1'");
 		echo "<div class='input-row'><div class='input-header-cell'>Database description succesfully changed to:</div><div class='input-cell'>". $dbDescription."</div></div>";
     } else { // We have got a new dbID, set the assigned dbID in sysIdentification
-		$res = mysql_query("update sysIdentification set `sys_dbRegisteredID`='$DBID', `sys_dbDescription`='$dbDescription' where `sys_ID`='1'");
+		$res = mysql_query("update sysIdentification set `sys_dbRegisteredID`='$dbID', `sys_dbDescription`='$dbDescription' where `sys_ID`='1'");
 		if($res) {
 			echo "<div class='input-row'><div class='input-header-cell'>Database:</div><div class='input-cell'>".DATABASE."</div></div>";
-			echo "<div class='input-row'><div class='input-header-cell'>Registration successful, database ID allocated is</div><div class='input-cell'>" . $DBID . "</div></div>";
-			echo "<div class='input-row'><div class='input-header-cell'></div><div class='input-cell'>This database description is: " . $dbDescription . "</div></div>";
-			echo "<div class='input-row'><div class='input-header-cell'></div><div class='input-cell'>If you want to change the description, you can go back to the registration page to do so.</div></div>";
+			echo "<div class='input-row'><div class='input-header-cell'>Registration successful, database ID allocated is</div><div class='input-cell'>" . $dbID . "</div></div>";
+			echo "<div class='input-row'><div class='input-header-cell'></div><div class='input-cell'>Basic description: " . $dbDescription . "</div></div>";
+			$url="http://heuristscholar.org/h3/records/edit/editRecord.html?recID=".$dbID."&db=H3MasterIndex";
+    		echo "<div class='input-row'><div class='input-header-cell'>Collection metadata:</div><div class='input-cell'>
+    			 <a href=$url target=_blank>Click here to edit</a> (login - if asked - as yourself)";
 		} else {
+			error_log ('Unable to write database identification record, dbID is '.$dbID);
 			$msg = "<div class=wrap><div id=errorMsg><span>Unable to write database identification record</span>this database might be incorrectly set up<br />Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice</div></div>";
 			echo '<script type="text/javascript">';
 			echo 'document.getElementById("changeDescriptionForm").style.display = "none";';
@@ -161,6 +182,7 @@ function registerDatabase() {
 	}
 	document.getElementById("changeDescriptionForm").style.display = "none";
 </script>
+
 <?php
 if(isset($_POST['dbDescription'])) {
 	if(strlen($_POST['dbDescription']) > 3 && strlen($_POST['dbDescription']) < 1022) {
@@ -173,7 +195,7 @@ if(isset($_POST['dbDescription'])) {
 		echo "The database description should be at least 4 characters, and at most 1021 characters long.";
 	}
 }
-if (isset($DBID) && ($DBID != 0) && !isset($_POST['dbDescription'])) {
+if (isset($dbID) && ($dbID != 0) && !isset($_POST['dbDescription'])) {
 	echo '<script type="text/javascript">';
 	echo 'document.getElementById("changeDescriptionForm").style.display = "block";';
 	echo '</script>';

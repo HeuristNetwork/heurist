@@ -83,13 +83,13 @@
           <li><a href="#" onClick="loadContent('structure/getListOfDatabases.php')"
             type="List the databases on the current server">List databases</a></li>
           <li class="seperator"><a href="#" onClick="loadContent('setup/createNewDB.php')"
-            type="Create a new database with essential structure elements">New Database</a></li>
+            type="Create a new database with essential structure elements">New database</a></li>
           <li class="seperator"><a href="#" onClick="loadContent('setup/registerDB.php?db=[dbname!]')"
-            title="Register this database with the Heurist Index">Register</a></li>
+            title="Register this database with the Heurist Master Index">Registration<a></li>
           <li class="seperator"><a href="#" onClick="loadContent('setup/editSysIdentification.php?db=[dbname!]')"
             title="Edit the internal metadata describing the database and set some global behaviours">Properties</a></li>
           <li class="seperator"><a href="#" onClick="loadContent('setup/editSysIdentificationAdvanced.php?db=[dbname!]')"
-            title="Edit the internal metadata describing the database and set some global behaviours">Advanced properties</a></li>
+            title="Edit advanced behaviours">Advanced properties</a></li>
           <li class="seperator"><a href="#" onClick="loadContent('rollback/rollbackRecords.php?db=[dbname!]')"
             title="Selectively roll back the data in the database to a specific date and time)">Rollback</a></li>
         </ul>
@@ -101,11 +101,11 @@
         <ul>
           <li><a href="#"
             onClick="loadContent('structure/selectDBForImport.php?db=[dbname!]')" title="Selectively import structural elements from other Heurist databases">Import record types</a></li>
-          <li class="seperator"><a href="#" onClick="loadContent('structure/manageRectypes.html?db=[dbname!]')" title="Add new / modify existing record types and their use of globally defined fields">Record types</a></li>
+          <li class="seperator"><a href="#" onClick="loadContent('structure/manageRectypes.html?db=[dbname!]')" title="Add new / modify existing record types and their use of globally defined fields">Record and field definitions</a></li>
+         <li class="seperator"><a href="#"
+            onClick="loadContent('structure/editTerms.html?db=[dbname!]')" title="Define terms used for relationship types and for other enumerated fields">Terms (categories) tree</a></li>
           <li class="seperator"><a href="#"
             onClick="loadContent('structure/manageDetailTypes.html?db=[dbname!]')" title="Direct access to the global field definitions">Field types</a></li>
-         <li class="seperator"><a href="#"
-            onClick="loadContent('structure/editTerms.html?db=[dbname!]')" title="Define terms used for relationship types and for other enumerated fields">Terms</a></li>
           <li  class="seperator"><a href="#"
             onClick="loadContent('structure/editRectypeConstraints.html?db=[dbname!]')" title="Define constraints on the record types which can be related, and allowable relationship types">Constraints</a></li>
           <li class="seperator"><a href="#"
@@ -121,7 +121,10 @@
       <h3><a href="#">ACCESS: </a><span class="description">Management of users and groups, the assignment of users to group and the assignment of group tags</span></h3>
       <div class="adminSection">
         <ul>
+          <!-- 17/10/11 - Artem has moved addition of users to the workgroups page -->
+          <!-- TO DO: Take this menu entry out so that navigation is via user groups -->
           <li><a href="#" onClick="loadContent('ugrps/manageUsers.html?db=[dbname!]')" title="Add and edit database users and usergroups, including authorization of new users">Manage users</a></li>
+
           <li class="seperator"><a href="#"
             onClick="loadContent('ugrps/manageGroups.html?db=[dbname!]')" title="Assign users to usergroups and set their roles">Manage groups</a></li>
           <li class="seperator"><a href="#"

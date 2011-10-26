@@ -1,3 +1,4 @@
+
 <!--
 
 /**
@@ -87,6 +88,7 @@
 
 	<body>
 		<iframe id=searchFrame frameborder=0 style="width:0;height:0;position:absolute;"></iframe>
+		<script src="../common/js/browserDetect.js"></script>
 		<script src="../common/php/loadHAPI.php"></script>
 		<script src="../common/js/utilsLoad.js"></script> <!-- core HEURIST functions -->
 		<script src="../common/php/getMagicNumbers.php"></script>
@@ -169,13 +171,13 @@
 		<font style="font-size:11px;">Credits</font></a> </div>
 	<!-- quicklinks -->
 	<div id="quicklinks">
-    	<div id=logged-in></div>
+		<div id=logged-in></div>
 		<ul id=quicklink-cell>
-        	<li class="admin-only" id="reportBug"><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 320,width: 740,callback: _bugReportCallback});return false;" title="Click to send a bug report" ><img src="../common/images/16x16.gif"></a></li>
+			<li class="admin-only" id="reportBug"><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 320,width: 740,callback: _bugReportCallback});return false;" title="Click to send a bug report" ><img src="../common/images/16x16.gif"></a></li>
 			<li class="logged-in-only"> <span id=my-heurist-menu-link class=logged-in-only><b>My Profile</b></span>
 				<ul id="my-heurist-menu">
 					<li><a href="../admin/profile/editPreferences.html" name="auto-popup" title="Display preferences">Preferences</a></li>
-                    <li><a href="../admin/profile/importModelUserProfile.php" name="auto-popup" title="Add useful resources to your collection from a range of academic templates">Load profiles</a></li>
+					<li><a href="../admin/profile/importModelUserProfile.php" name="auto-popup" title="Add useful resources to your collection from a range of academic templates">Load profiles</a></li>
 					<li><a href="../admin/profile/configureProfile.php?body_only&amp;tag_edit=1" name="auto-popup" title="Delete, combine, rename your personal tags">Manage tags</a></li>
 					<li><a href="../admin/ugrps/showSimilarUsers.php" name="auto-popup" title="Find people with similar bookmarking patterns">Find similar users</a></li>
 					<li><a href="../admin/ugrps/manageGroups.html" name="auto-popup" title="Find people with similar bookmarking patterns">My User Groups</a></li>
@@ -183,10 +185,12 @@
 					<li><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 320,width: 740,callback: _bugReportCallback});return false;" title="Click to send a bug report">Report bug</a></li>
 				</ul>
 			</li>
+
+			<li class="logged-in-only"><a href="../admin/structure/editStructure.php" onClick="this.href = '../admin/adminMenu.php?db=' + database;" title="Administer database structure"><b>DB Admin</b></a></li>
+
 			<li class="logged-in-only"> <span id=advanced-menu-link class="logged-in-only"><b>Advanced</b></span>
 				<ul id="advanced-menu">
-                    <li><a href="../admin/structure/getListOfDatabases.php" name="auto-popup" title="For administrators only">List databases</a></li>
-                    <li class="admin-only"><a href="../admin/structure/editStructure.php" onClick="this.href = '../admin/adminMenu.php?db=' + database;" title="For administrators only" class="seperator">Database Administration</a></li>
+					<li><a href="../admin/structure/getListOfDatabases.php" name="auto-popup" title="For administrators only">List databases</a></li>
 					<li><a href="../import/email/emailProcessingSetup.php" name="auto-popup" class='seperator' title="Harvest email from a designated IMAP email server (set in configuration)">Harvest email</a></li>
 					<li><a href="../import/hyperlinks/importHyperlinks.php" name="auto-popup" title="Import web links from a browser bookmarks file or an html web page file">Import hyperlinks</a></li>
 					<li><a href="../admin/profile/configureProfile.php?body_only&amp;bookmark_import=1" name="auto-popup" title="Settings for web links importer">Importer settings</a></li>
@@ -202,12 +206,13 @@
 					<!-- separator-->
 				</ul>
 			</li>
-			<li> <a href="../help/webhelp" target=_blank title="Overview and guides to the use of Heurist plus comprehensive detailed help"><b>Help</b></a> </li>
+
+			<li> <a href="../help/webhelp" target=_blank title="Overview and guides to the use of Heurist plus comprehensive detailed help"><b>Guides</b></a> </li>
 			<li> <a id=contact-link style="display:none" title="Send us an email with bug information or feature requests" href="mailto:info@heuristscholar.org"><b>Contact us</b></a>
             <script>
 
 					var bookmarkletname = top.HEURIST.VERSION;
-					var html = "<a id=\"bookmarklet-link\" onclick=\"alert('Drag the Heurist Bookmarklet link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;\" title=\"Drag the Heurist Bookmarklet link to your browser bookmarks toolbar, or right-click the link,"
+					var html = "<a id=\"bookmarklet-link\" onclick=\"alert('Heurist Bookmarklet: drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;\" title=\"Heurist Bookmarklet. Drag this link to your browser bookmarks toolbar, or right-click the link,"
 								+ " choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.\""
 								+ " href=\"javascript:(function(){h='" + document.location.href.replace(/search\/.*/,"") + "';"
 										+ "d=document;c=d.contentType;"
@@ -218,7 +223,7 @@
 											+ "d.getElementsByTagName('head')[0].appendChild(s);}"
 										+ "else{e=encodeURIComponent;w=open(h+'records/add/addRecordPopup.php?db="+database+"&t='+e(d.title)+'&u='+e(location.href));"
 											+ "window.setTimeout('w.focus()',200);}"
-										+ "})();\"><b>"+database+" Bookmarklet</b></a>";
+										+ "})();\"><b>>> "+database+" </b></a>";
 							document.write(html);
 				</script>
       </li>
@@ -228,7 +233,7 @@
   <!-- search and menu -->
     <div id=search class="banner searchTable" style="border-bottom:1px solid #696969;">
             <form onSubmit="top.HEURIST.search.checkSearchForm();return false;"><input type=hidden id=w-input name=w>
-               SEARCH:
+               <!-- SEARCH:  it's obvious it's a search, one less bit of clutter -->
               <div class="searchInput" style="position:relative"><input id=q name=q type=text style="width:300px; clear:both">
                 <div class="simplesearch" title="Click to show simple search builder panel" onclick='$("#simple-search").toggleClass("collapsed");$(this).toggleClass("collapsed");'></div>
 
@@ -348,7 +353,7 @@
       <div id=all-records-saved-searches class=hide>
         <div class=search-type title="Personal Saved searches which search across all records in Heurist" onClick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">All records</div>
         <div class=content>
-          <div class=saved-search-subsubheading><a href="?ver=1&amp;w=all&amp;q=sortby:-m%20after:"1 week ago"&amp;label=Recently+modified" onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">Recent changes</a></div>
+          <div class=saved-search-subsubheading><a href='?ver=1&amp;w=all&amp;q=sortby:-m%20after:"1 week ago"&amp;label=Recently+modified' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">Recent changes</a></div>
           <div class=saved-search-subsubheading>Saved searches</div>
           <div id=all-records-saved-searches-searches></div>
         </div>
@@ -406,11 +411,13 @@
           <br>
           <p>Please <a href="../admin/ugrps/findAddUser.php?register=1">register</a> and then <a href="../common/connect/login.php">login</a> to take full advantage of the system. </p>
         </div>
-        <div id="noresult-search-status" class="errorMsg"> <span>No matching records</span>
+        <div id="noresult-search-status" class="errorMsg"> <span>&nbsp;&nbsp;No records match the search&nbsp;&nbsp;</span>
           <div class="not-logged-in-only">To see workgoup-owned and non-public records you may need to log in</div>
           <div class="logged-in-only">Note: some records are only visible to members of particular workgroups</div>
           <div id="noresult-search-status-search-all">Click <a href="#" onClick="top.HEURIST.search.searchAll(); return false;">all records</a> to search all of Heurist</div>
+          <!--
           <div id="noresult-search-status-search-web">Click <a href="#" onClick="top.HEURIST.search.launchWebSearch(); return false;">web search</a> to search the web</div>
+          -->
         </div>
       </div>
       <div id=results-level0 class="icons" level="0"></div>

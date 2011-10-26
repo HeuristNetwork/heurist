@@ -188,7 +188,7 @@
 							and ugl_UserID=".get_user_id();
 					$rows = execSQL($db, $query, null, true);
 
-					if (!is_numeric($rows)) {
+					if ($rows==0 || is_string($rows) ) {
 						$ret = "Error checking rights Group $recID in updateUserGroup - ".$rows;
 					}else if ($rows==0){
 						$ret = "You are not admin for Group# $recID. Edit is not allowed";
@@ -278,7 +278,7 @@
 
 				$rows = execSQL($db, $query, $parameters, true);
 
-				if (!is_numeric($rows) || $rows==0) {
+				if ($rows==0 || is_string($rows) ) {
 					$oper = (($isInsert)?"inserting":"updating");
 					$ret = "error $oper $type# $recID in updateUserGroup - ".$rows; //$msqli->error;
 				} else {
@@ -308,17 +308,18 @@ overviews and step-by-step instructions for using Heurist.
 							if (! $rv) {
 								error_log("mail send failed: " . $ugr_eMail);
 							}
-								if($groupID){
+							if($groupID){
 									//add new user to specified group
 									changeRole($groupID, $recID, "member", null, false);
-								}
-
-
-							}else{
-								//add current user as admin for new group
-								changeRole($recID, get_user_id(), "admin", null, false);
 							}
-							$ret = -$recID;
+
+
+						}else{
+							//this is addition of new group
+							//add current user as admin for new group
+							changeRole($recID, get_user_id(), "admin", null, false);
+						}
+						$ret = -$recID;
 
 
 					}//if $isInsert
@@ -357,8 +358,7 @@ overviews and step-by-step instructions for using Heurist.
 
 		$rows = execSQL($db, $query, null, true);
 
-
-		if (!is_numeric($rows)) {
+		if ($rows==0 || is_string($rows) ) {
 			$ret['error'] = "error finding Records for User $recID in deleteUser - ".$rows;
 		}else if ($rows>0){
 			$ret['error'] = "Error. Deleting User ($recID) with existing Records not allowed";
@@ -373,14 +373,14 @@ overviews and step-by-step instructions for using Heurist.
 			//delete references from user-group link table
 			$query = "delete from sysUsrGrpLinks where ugl_UserID=$recID";
 			$rows = execSQL($db, $query, null, true);
-			if (!is_numeric($rows) || $rows==0) {
+			if ($rows==0 || is_string($rows) ) {
 					$ret['error'] = "db error deleting relations for User $recID from sysUsrGrpLinks - ".$rows;
 			}else{
 
 				$query = "delete from sysUGrps where ugr_ID=$recID";
 				$rows = execSQL($db, $query, null, true);
 
-				if (!is_numeric($rows) || $rows==0) {
+				if ($rows==0 || is_string($rows) ) {
 					$ret['error'] = "db error deleting of User $recID from sysUGrps - ".$rows;
 				} else {
 					$ret['result'] = $recID;
@@ -410,8 +410,7 @@ overviews and step-by-step instructions for using Heurist.
 		$query = "select rec_ID from Records where rec_OwnerUGrpID=$recID limit 1";
 		$rows = execSQL($db, $query, null, true);
 
-
-		if (!is_numeric($rows)) {
+		if ($rows==0 || is_string($rows) ) {
 			$ret['error'] = "error finding Records for User $recID in deleteGroup - ".$rows;
 		}else if ($rows>0){
 			$ret['error'] = "Error. Deleting Group ($recID) with existing Records not allowed";
@@ -429,13 +428,13 @@ overviews and step-by-step instructions for using Heurist.
 
 			$query = "delete from sysUsrGrpLinks where ugl_GroupID=$recID";
 			$rows = execSQL($db, $query, null, true);
-			if (!is_numeric($rows) || $rows==0) {
+			if ($rows==0 || is_string($rows) ) {
 					$ret['error'] = "db error deleting relations for Group $recID from sysUsrGrpLinks - ".$rows;
 			}else{
 				$query = "delete from sysUGrps where ugr_ID=$recID";
 				$rows = execSQL($db, $query, null, true);
 
-				if (!is_numeric($rows) || $rows==0) {
+				if ($rows==0 || is_string($rows) ) {
 					$ret['error'] = "db error deleting of Group $recID from sysUGrps - ".$rows;
 				} else {
 					$ret['result'] = $recID;
@@ -447,7 +446,7 @@ overviews and step-by-step instructions for using Heurist.
 	}
 
 	/**
-	* put your comment there...
+	* check if given user is the last admin in group
 	*
 	* @param mixed $recID - user ID
 	*/
@@ -466,14 +465,14 @@ from sysUsrGrpLinks as g1 where g1.ugl_UserID=$recID and g1.ugl_Role='admin'";
 
 //DEBUG error_log("CHECK LAST ADMIN >>>>>>>>>>>>>>>>>>>>	".$query);
 
-			$resquery = execSQL($db, $query, null, false);
+			$rows = execSQL($db, $query, null, false);
 
-			if (is_string($resquery)){
-				$ret = "DB error finding number of possible orphan groups for User $recID from sysUsrGrpLinks - ".$resquery;
+			if ( (is_numeric($rows) && $rows==0) || is_string($rows) ) {
+				$ret = "DB error finding number of possible orphan groups for User $recID from sysUsrGrpLinks - ".$rows;
 				return $ret;
 			}
 
-			while ($row = mysqli_fetch_row($resquery)) {
+			while ($row = mysqli_fetch_row($rows)) {
 //DEBUG error_log("ROWS   >>>".$row[1]."   <<<<<<<<<<<<"); //."  ".$row[2].
 
 					if($row[1]<2){ // && $row[2]>0){
@@ -495,6 +494,9 @@ from sysUsrGrpLinks as g1 where g1.ugl_UserID=$recID and g1.ugl_Role='admin'";
 		global $db;
 
 		$ret = array();
+
+//error_log(">>>>> grpId=".$grpID.", recIds=".$recIds.", newrole=".$newRole.", oldrole=".$oldRole);
+
 
 		if($needCheck){
 			$ret2 = checkPermission('group', $grpID);
@@ -523,7 +525,7 @@ from sysUsrGrpLinks as g1 where g1.ugl_UserID=$recID and g1.ugl_Role='admin'";
 //DEBUG error_log("DELETED DELETED DELETED DELETED DELETED DELETED DELETED DELETED ");
 					$query = "delete from sysUsrGrpLinks where ugl_UserID=$userID and ugl_GroupID=$grpID";
 					$rows = execSQL($db, $query, null, true);
-					if (!is_numeric($rows) || $rows==0) {
+					if ($rows==0 || is_string($rows) ) {
 						// error delete reference for this user
 						array_push($ret['errors'], "db error deleting relations for user# $userID");
 					}else{
@@ -534,22 +536,40 @@ from sysUsrGrpLinks as g1 where g1.ugl_UserID=$recID and g1.ugl_Role='admin'";
 				}
 			}
 
+		}else if($oldRole!=null){ //modification of role
+
+			$ret['errors'] = array();
+			$ret['results'] = array();
+
+			foreach ($arr as $userID) {
+				$error = null;
+				if($oldRole=="admin" && $newRole=="member"){
+					$error = checkLastAdmin($userID, $grpID);
+					if($error){
+						array_push($ret['errors'], $error);
+					}
+				}
+				if($error==null){
+						$query = "UPDATE sysUsrGrpLinks set ugl_Role='$newRole' where ugl_GroupID=$grpID and ugl_UserID=$userID";
+						$rows = execSQL($db, $query, null, true);
+
+						if ($rows==0 || is_string($rows) ) {
+							array_push($ret['errors'], "DB error changing roles in sysUsrGrpLinks for group $grpID, user $userID - ".$rows);
+						} else {
+							array_push($ret['results'], $userID);
+						}
+				}
+			}//for
+
 		}else{
 
 			//insert new roles for non-existing entries
 			$query = "INSERT INTO sysUsrGrpLinks (ugl_GroupID, ugl_UserID, ugl_Role) VALUES ";
 			$nofirst = false;
 
-			$ret['errors'] = array();
 			$resIDs = "";
 
 			foreach ($arr as $userID) {
-
-				if($oldRole==="admin" && $newRole==="member"){
-					$error = checkLastAdmin($userID, $grpID);
-					array_push($ret['errors'], $error);
-				}else{
-
 					if($nofirst) {
 						$query	= $query.", ";
 						$resIDs = $resIDs.", ";
@@ -557,7 +577,6 @@ from sysUsrGrpLinks as g1 where g1.ugl_UserID=$recID and g1.ugl_Role='admin'";
 					$query	= $query."($grpID, $userID, '$newRole')";
 					$resIDs = $resIDs."$userID";
 					$nofirst = true;
-				}
 			}
 
 /* DEBUG
@@ -567,22 +586,21 @@ error_log("DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO  $new
 				//$ret['result'] = $resIDs;
 			}
 */
-
-
 			if($nofirst){
 
 				$query	= $query." ON DUPLICATE KEY UPDATE ugl_Role='$newRole'";
 
 				$rows = execSQL($db, $query, null, true);
 
-				if (!is_numeric($rows) || $rows==0) {
-					$ret['error'] = "DB error changing roles in sysUsrGrpLinks - ".$rows;
+				if ($rows==0 || is_string($rows) ) {
+					$ret['error'] = "DB error setting role in sysUsrGrpLinks - ".$rows;
 				} else {
 					$ret['result'] = $resIDs;
 				}
 			}
 
 		}
+
 
 		return $ret;
 	}
@@ -595,6 +613,62 @@ error_log("DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO  $new
 	*/
 	function execSQL($mysqli, $sql, $params, $close){
 
+		$result;
+
+		if($params==null || count($params)<1){
+
+			if($result = $mysqli->query($sql)){
+				if($close){
+					$result = $mysqli->affected_rows;
+				}
+			}else{
+				$result = $mysqli->error;
+				if($result == ""){
+		   			$result = $mysqli->affected_rows;
+				}else{
+					error_log(">>>Error=".$mysqli->error);
+				}
+			}
+
+		}else{ //prepared query
+
+		   $stmt = $mysqli->prepare($sql) or die ("Failed to prepared the statement!");
+		   call_user_func_array(array($stmt, 'bind_param'), refValues($params));
+
+		   $stmt->execute();
+
+		   if($close){
+			$result = $mysqli->error;
+			if($result == ""){
+		   		$result = $mysqli->affected_rows;
+			}else{
+				error_log(">>>Error=".$mysqli->error);
+			}
+		   } else {
+		   		$meta = $stmt->result_metadata();
+
+				while ( $field = $meta->fetch_field() ) {
+					$parameters[] = &$row[$field->name];
+				}
+
+				call_user_func_array(array($stmt, 'bind_result'), refValues($parameters));
+
+			   	while ( $stmt->fetch() ) {
+					$x = array();
+					foreach( $row as $key => $val ) {
+							$x[$key] = $val;
+						}
+					$results[] = $x;
+				}
+
+				$result = $results;
+			}
+
+		   	$stmt->close();
+		}
+		   	return  $result;
+
+/*		 OLD WAY
 		$result = "unknown error";
 
 		if($params==null || count($params)<1){
@@ -646,6 +720,7 @@ error_log("DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO DOWN TO  $new
 		}
 
 		return  $result;
+*/
 	}
 
 	function refValues($arr){

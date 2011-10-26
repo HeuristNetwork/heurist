@@ -100,10 +100,16 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 	}
 
 	// check that all the required fields are present
-	$res = mysql_query("select rst_ID from defRecStructure left join recDetails on dtl_RecID=$recordID and rst_DetailTypeID=dtl_DetailTypeID where rst_RecTypeID=$type and rst_RequirementType='required' and dtl_ID is null");
+	$res = mysql_query("select rst_ID, rst_DetailTypeID, rst_DisplayName from defRecStructure left join recDetails on dtl_RecID=$recordID and rst_DetailTypeID=dtl_DetailTypeID where rst_RecTypeID=$type and rst_RequirementType='required' and dtl_ID is null");
 	if (mysql_num_rows($res) > 0) {
+			//ARTEM TEST
+			$missed = "";
+			while ($row = mysql_fetch_row($res)) {
+					$missed = $missed.$row[2]." ";
+			}
+error_log("MISSED ".$missed);
 		// at least one missing field
-		jsonError("record is missing required field(s)");
+		jsonError("record is missing required field(s): ".$missed);
 	}
 /* Override  code removed by SAW on 13/1/11
 	$res = mysql_query("select rst_ID from rec_detail_requirements_overrides left join recDetails on dtl_RecID=$recordID and rst_DetailTypeID=dtl_DetailTypeID where (rdr_wg_id = 0 or rdr_wg_id=$wg) and rdr_wg_id = rst_RecTypeID=$type and rst_RequirementType='required' and dtl_ID is null");

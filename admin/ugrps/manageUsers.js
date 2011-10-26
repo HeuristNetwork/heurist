@@ -45,9 +45,9 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 			needHideTip = true,
 			hideTimer;
 
-		var _roles = [{value:"admin", text:"admin"},{value:"member", text:"member"},
+		var _roles = [{value:"admin", text:"admin"},{value:"member", text:"member"}];
 		//{value:"invited", text:"invited", enabled:false},{value:"request", text:"request", disabled:true },
-		{value:"delete", text:"remove"} ];
+		//{value:"delete", text:"remove"} ];
 
 	/**
 	* Result handler for search on server
@@ -93,25 +93,51 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 
 
-							Dom.get("pnlFilterByRole").style.display = (filter_group==="all")?"none":"inline-block";
+							//Dom.get("btnSelectAdd1").style.display = (filter_group==="all")?"none":"block";
+							//Dom.get("btnSelectAdd2").style.display = (filter_group==="all")?"none":"block";
 
 							isNotAdmin = _isNotAdmin(filter_group);
 
-							var nstyle = (isNotAdmin)?"none":"inline-block";
+							var nstyle = (!_isSelection && (filter_group==="all" || !isNotAdmin))?"inline-block":"none";
+							var nstyle2 = (filter_group==="all")?"none":"inline-block";
 
-							Dom.get("btnSelectAdd1").style.display	 = nstyle;
-							Dom.get("btnSelectAdd2").style.display	 = nstyle;
+							//hide both buttons in case not admin
+							Dom.get("pnlCtrlEdit1").style.display	 = nstyle;
+							Dom.get("pnlCtrlEdit2").style.display	 = nstyle;
+
+							//hide only select button in case all groups
+							Dom.get("pnlFilterByRole").style.display = nstyle2;
+							Dom.get("btnSelectAdd1").style.display	 = nstyle2;
+							Dom.get("btnSelectAdd2").style.display	 = nstyle2;
+
 							if(_myDataTable) {
-									var col = _myDataTable.getColumn("role2");
-									col.hidden = !_isSelection || !isNotAdmin;
+									var col_1 = _myDataTable.getColumn("role");
+									var col_2 = _myDataTable.getColumn("kickoff");
+									if(filter_group==="all"){
+										col_1._elThLabel.innerHTML = "";
+										col_2._elThLabel.innerHTML = "";
+									}else{
+										col_1._elThLabel.innerHTML = "Role";
+										col_2._elThLabel.innerHTML = "Remove";
+									}
 
-									_myDataTable.getColumn("role").hidden = _isSelection ||
-											filter_group==="all" || !top.HEURIST.is_admin();
+									if (filter_group==="all" || isNotAdmin) { //top.HEURIST.is_admin() ||
+										col_1.formatter = null;
+									}else{
+										col_1.formatter = YAHOO.widget.DataTable.formatDropdown;
+									}
+
+									/*var col = _myDataTable.getColumn("role2");
+									col.hidden = !_isSelection || !isNotAdmin;*/
+
+									/*_myDataTable.getColumn("role").hidden = _isSelection ||
+											filter_group==="all" || top.HEURIST.is_admin() || isNotAdmin;
+
 									_myDataTable.getColumn("role").label = "Role";
-
-									_myDataTable.getColumn("kickoff").hidden = _isSelection ||
-															top.HEURIST.is_admin() || isNotAdmin;
-
+									*/
+									var ishidden = _isSelection ||	top.HEURIST.is_admin() || isNotAdmin;
+									//_myDataTable.getColumn("kickoff").hidden = ishidden;
+									//_myDataTable.getColumn("kickoff").width = ishidden?0:20;
 							}
 	};
 
@@ -327,19 +353,35 @@ elLiner.innerHTML = '<a href="#edit_user"><img src="../../common/images/edit-pen
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 							elLiner.innerHTML = oRecord.getData('role');
 				}},
-			{ key: "role", label: "Role", sortable:false, hidden: true, width:70,
-				formatter:YAHOO.widget.DataTable.formatDropdown,
+			{ key: "role", label: "Role", sortable:false, hidden: _isSelection, width:90,
+				/*formatter:function(elLiner, oRecord, oColumn, oData, oDataTable){
+
+					var filter_group = (_isSelection || Hul.isnull(_grpID)) ?filterByGroup.value:_grpID;
+					var is_NotAdmin = _isNotAdmin(filter_group);
+
+					if (filter_group==="all" || is_NotAdmin) { //top.HEURIST.is_admin() ||
+						elLiner.innerHTML = (filter_group==="all")?"":oRecord.getData('role');
+					}else{
+							oColumn.formatter = YAHOO.widget.DataTable.formatDropdown;
+							//( elLiner , oRecord , oColumn , oData , oDataTable);
+					}
+				},*/
 				dropdownOptions: _roles },
-			{ key: "id", label: "Delete", width:20, sortable:false, hidden:(_isSelection || !top.HEURIST.is_admin()),
+			{ key: "id", label: "Delete", width:30, sortable:false, hidden:(_isSelection || !top.HEURIST.is_admin()),
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete_icon.png" width="16" height="16" border="0" title="Delete this User" /><\/a>';
 				}
 			},
-			{ key: "kickoff", label: "Remove", width:20, sortable:false, hidden:(_isSelection || top.HEURIST.is_admin() ||																						isNotAdmin ),
+			{ key: "kickoff", label: "Remove", width:30, sortable:false, hidden: _isSelection,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
-					if(Number(oRecord.getData('id'))===top.HEURIST.get_user_id()){
+
+					var filter_group = (_isSelection || Hul.isnull(_grpID)) ?filterByGroup.value:_grpID;
+					var isNotAdmin = (filter_group==="all" || _isNotAdmin(filter_group));
+
+					if(isNotAdmin || Number(oRecord.getData('id'))===top.HEURIST.get_user_id()){
 						elLiner.innerHTML = "";
 					}else{
+						//oColumn._elThLabel.innerHTML = "Remove";
 elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delete_icon.png" width="16" height="16" border="0" title="Delete this User from group" /><\/a>';
 					}
 				}
@@ -349,10 +391,10 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 
 		// Define a custom row formatter function
 		var myRowFormatter = function(elTr, oRecord) {
-	    	if (oRecord.getData('enabled')!=="y") {
-	        	Dom.addClass(elTr, 'inactive');
-	    	}
-	    	return true;
+			if (oRecord.getData('enabled')!=="y") {
+				Dom.addClass(elTr, 'inactive');
+			}
+			return true;
 		};
 
 		var myConfigs = {
@@ -466,7 +508,8 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 			//role selector handler
 			_myDataTable.subscribe('dropdownChangeEvent', function(oArgs){
 
-				if (Hul.isnull(_grpID)) { return; }
+				var groupToBeUpdated = (Hul.isnull(_grpID)) ?filterByGroup.value:_grpID;
+				if (Hul.isnull(groupToBeUpdated) || groupToBeUpdated==="all") { return; }
 
 				var elDropdown = oArgs.target;
 				var record = this.getRecord(elDropdown);
@@ -489,7 +532,6 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 						}
 					}
 
-					var groupToBeUpdated = (Hul.isnull(_grpID)?filterByGroup.value:_grpID);
 					//keep the track of changes in special object
 					//TODO _updateUser(record);
 					var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
@@ -790,8 +832,8 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 				if(!Hul.isnull(filterByRole)) { filterByRole.onchange = _updateFilter; }
 
 
-				var inputFilterGroup = Dom.get('inputFilterGroup');
-				if(!Hul.isnull(inputFilterGroup)) { inputFilterGroup.onkeyup = _handlerGroupSelector; }
+				//var inputFilterGroup = Dom.get('inputFilterByGroup');
+				//if(!Hul.isnull(inputFilterGroup)) { inputFilterGroup.onkeyup = _handlerGroupSelector; }
 
 	} //end init listener
 

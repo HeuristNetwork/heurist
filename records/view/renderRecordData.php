@@ -56,6 +56,9 @@ $noclutter = array_key_exists('noclutter', $_REQUEST);
 <head>
 	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
 	<script src="../../external/jquery/jquery-1.6.min.js"></script>
+	<script type="text/javascript" src="../../external/js/simple_js_viewer/script/core/Simple_Viewer_beta_1.1.js"></script>
+	<script type="text/javascript" src="../../records/files/initViewer.js"></script>
+
 	<script type="text/javascript">
 
 function zoomInOut(obj,thumb,url) {
@@ -116,6 +119,26 @@ function add_sid() {
 		var e = document.getElementById("edit-link");
 		if (e) {
 			e.href = e.href.replace(/editRecord\.html\?/, "editRecord.html?sid="+top.HEURIST.search.sid+"&");
+		}
+	}
+
+	fillPreviewes()
+}
+
+/**
+* create preview for urlinclude detail types
+*/
+function fillPreviewes(){
+//alert('ops!');
+	//get all divs of class urlinclude
+	var elements = document.getElementsByClassName('urlinclude'); //$('div.urlinclude').find('div');
+	if(!top.HEURIST.util.isnull(elements)){
+		var element, ind;
+		for (ind=0; ind<elements.length; ind++)
+		{
+			// alert(elements[ind].id);
+			// in initViewer.js
+			showViewer(elements[ind], elements[ind].innerHTML);
 		}
 	}
 }
@@ -343,7 +366,11 @@ function print_private_details($bib) {
 				));
 			}
 
-			if ($bd['dty_Type'] == 'resource') {
+			if ($bd['dty_Type'] == 'urlinclude') {
+
+				$bd['val'] = '<div id="preview'.$bd['dty_ID'].'" class="urlinclude" style="border:solid red 1px;width:400px;height:300px;">'.$bd['val'].'</div>';
+
+			}else 	if ($bd['dty_Type'] == 'resource') {
 
 				$res = mysql_query('select rec_Title from Records where rec_ID='.intval($bd['val']));
 				$row = mysql_fetch_row($res);

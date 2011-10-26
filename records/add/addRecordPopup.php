@@ -272,16 +272,16 @@ function cancelAdd(e) {
 		</div>
 		<div class="resource workgroup" style="margin:10px 0">
 			<div class="input-row workgroup">
-				<div class="input-header-cell">Select Work Group</div>
+				<div class="input-header-cell">Owner group (or self)</div>
 				<div class="input-cell">
 					<select name="rec_OwnerUGrpID" id="rec_OwnerUGrpID" style="width: 200px;" onChange="buildworkgroupTagselect(options[selectedIndex].value)">
 						<option value="0" disabled selected>(select group)</option>
 											<?php
-						print "      <option value=".get_user_id().(@$_REQUEST['wg_id']==get_user_id() ? " selected" : "").">".htmlspecialchars(get_user_name())." only</option>\n";
+						print "      <option value=".get_user_id().(@$_REQUEST['wg_id']==get_user_id() ? " selected" : "").">".htmlspecialchars(get_user_name())." </option>\n";
 						$res = mysql_query('select '.GROUPS_ID_FIELD.', '.GROUPS_NAME_FIELD.' from '.USERS_DATABASE.'.'.USER_GROUPS_TABLE.' left join '.USERS_DATABASE.'.'.GROUPS_TABLE.' on '.GROUPS_ID_FIELD.'='.USER_GROUPS_GROUP_ID_FIELD.' where '.USER_GROUPS_USER_ID_FIELD.'='.get_user_id().' and '.GROUPS_TYPE_FIELD.'!="Usergroup" order by '.GROUPS_NAME_FIELD);
 						$wgs = array();
 						while ($row = mysql_fetch_row($res)) {
-							print "      <option value=".$row[0].(@$_REQUEST['wg_id']==$row[0] ? " selected" : "").">".htmlspecialchars($row[1])." only</option>\n";
+							print "      <option value=".$row[0].(@$_REQUEST['wg_id']==$row[0] ? " selected" : "").">".htmlspecialchars($row[1])." </option>\n";
 							array_push($wgs, $row[0]);
 						}
 											?>
@@ -298,8 +298,8 @@ function cancelAdd(e) {
 				<div class="input-header-cell">Outside this group record is:</div>
 				<div class="input-cell">
 					<select name="rec_NonOwnerVisibility" id="rec_NonOwnerVisibility" style="width: 200px;">
-                        <option value="hidden">Restricted to owning group/user</option>
-                        <option value="viewable">Viewable by logged-in users only</option>
+                        <option value="hidden">Hidden (restricted to owners)</option>
+                        <option value="viewable">Viewable (logged-in users only)</option>
                         <option value="pending">Pending (marked for potential publication)</option>
                         <option value="public">Public (automatically published to hml etc.)</option>
 					</select>

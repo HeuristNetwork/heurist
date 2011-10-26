@@ -20,14 +20,14 @@ $dbHost = ""; // required
 // MySQL user with full write (create) access on this database server
 // The default installation of MySql gives you "root" as the master user with whatever password you set up for this,
 // but you can specify another user and password with full access if preferred
-$dbAdminUsername = ""; // required
+$dbAdminUsername = "root"; // required
 $dbAdminPassword = ""; //required
 
 // MySQL user with readonly access on this database server
 // For example, if there is a user account "readonly" with a password "readonlypwd", then you would use:
 // $dbReadonlyUsername = "readonly";
 // $dbAReadonlyPassword = "readonlypwd";
-$dbReadonlyUsername = ""; // required
+$dbReadonlyUsername = "root"; // required
 $dbReadonlyPassword = ""; //required
 
 // dbPrefix will be prepended to all database names so that you can easily distinguish Heurist databases on your database server
@@ -41,6 +41,9 @@ $dbPrefix = "hdb_"; // recommended
 // If defaultDBName is blank, a list of available databases will be displayed on startup if none is specified
 $defaultDBname = ""; // may be left blank
 
+// A challenge password for creation of new databsaes. If left blank, any logged in user can create a new database
+$passwordForDatabaseCreation=""; // blank = any logged in user can create
+
 // [folders]
 
 // The default root pathname of a directory where Heurist can store uploaded
@@ -51,7 +54,7 @@ $defaultDBname = ""; // may be left blank
 // Then, when running Heurist with db=main, uploaded files will be loaded into /var/www/myUploadDir/main/
 // Leaving this blank will cause the root document directory for your web server to be used
 // with an added "upload" subdir, for example: /var/www/htdocs/upload/
-$defaultRootFileUploadPath = ""; // recommended
+$defaultRootFileUploadPath = ""; // recommended, defaults to root document directory/upload/dbname
 
 // [email]
 
@@ -72,4 +75,11 @@ $parentIni = dirname(__FILE__)."/../heuristConfigIni.php";
 if (is_file($parentIni)){
 	include_once($parentIni);
 }
+
+// URL of 3d party website thumbnail service
+$websiteThumbnailService = "http://immediatenet.com/t/m?Size=1024x768&URL=[URL]";
+$websiteThumbnailUsername = "";
+$websiteThumbnailPassword = "";
+$websiteThumbnailXsize = 500;
+$websiteThumbnailYsize = 300;
 ?>

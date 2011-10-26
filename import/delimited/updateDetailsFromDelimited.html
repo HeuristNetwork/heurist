@@ -1,7 +1,7 @@
 <!--
 
 /**
- * filename, brief description, date of creation, by whom
+ * updateDetailsFromDelimited.html, reads a delimited file including record IDs and updates a field with the values provided
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
@@ -12,7 +12,7 @@
 -->
 <html>
 	<head>
-		<title>HAPI Detail Updater v1.06</title>
+		<title>Heurist Field Updater</title>
 
 		<!--
 		This HAPI tool is designed to update details in a heurist record or records of
@@ -38,7 +38,8 @@
 		<script src="../../common/js/temporalObjectLibrary.js"></script>
 
 		<script>
-			const recChunk = 1000;
+			const recChunk = 10000; // increased from 1000 by ian 24/10/11
+			// TODO: Why are we using literals in the code rather than using the constant?
 			var fields = [];
 			var recTypeSelect;
 			var workgroupSelect;
@@ -104,7 +105,7 @@
 							recIDs.push(fields[i+recStart][3]);
 						}
 					}
-					if ((newIDs.length + recIDs.length)>1000){
+					if ((newIDs.length + recIDs.length)>10000){ // increased from 1000 by Ian 24/10/11
 						//adjust recEnd and break out
 						recEnd = i + recStart;
 						break;
@@ -113,9 +114,9 @@
 					}
 				} //for i
 //				console.debug("loading records " + recIDs.join());
-				if (recIDs.length > 1000) {
+				if (recIDs.length > 10000) { // increased from 1000 by Ian 24/10/11
 					alert("This is embarrassing, but somehow you have exceeded ("+ recIDs.length +
-							") the capacity (1000) of the updater to handle. We need to start again. The last row handled was " + recStart);
+							") the capacity (10000) of the updater to handle. We need to start again. The last row handled was " + recStart);
 					location.reload();
 				}
 
@@ -130,7 +131,7 @@
 				});
 				var mysearch = new HSearch("ids:" + recIDs.join());
 
-				HeuristScholarDB.setDefaultLoadRecordLimit(1000); //set the limit to the max
+				HeuristScholarDB.setDefaultLoadRecordLimit(10000); //set the limit to the max, increased from 1000 by Ian 24/10/11
 				HeuristScholarDB.loadRecords(mysearch,loader);  //asynchronous call for record data
 			}
 
@@ -450,8 +451,8 @@
 	</head>
 
 	<body >
-		<h2>Heurist Detail Updater (v.1.05)</h2>
 
+		<h2>Heurist field updater</h2>
 
 		<p id=info-p></p>
 		<div id=process-div style="display:none;">
@@ -461,42 +462,42 @@
 			<p id=records-p></p>
 		</div>
 		<div id=csv-entry-div>
-			<p>The purpose of this utility is to update a series of heurist records with a set of values. Put another
-				way, if you have a series of "tape" records that you have imported and need to update details for them
-				and you have the associated Heurist ids of the records to update and the type ids of the detail types that
-				you want to update,	you can update them by entering a triple of HRecordID, HDetailTypeID, newValue for each
-			detail you want to change (including resource pointers - valid record ids) and then pressing "analyse". </p>
+			<p>This function reads CSV data and updates specified fields in records designated by their Heurist record IDs.<br>
+			<p>The CSV structure is: <i>Record ID, Internal field code, Value to be inserted</p></i>
 
-			<p>The csv structure is as follows:</p>
-
-			<code>5,365,"My new title"</code><br/>
-			<code>5,373,0</code>
+			<code>5,365,"Sydney Opera House"</code><br/>
+			<code>5,373,41</code><br>
+			<code>6,373,41</code><br>
+			<code>etc ...</code>
 
 			<p>
-				<dl>
-					<dt>The first number is the Heurist id of the recieving object (or tape following on from the example given).</dt>
-					<dt>The second number is the Heurist detail type id of the "field" in the recieving object where you wish the
-						change the value. In this case 365 is used to denote the 'title' and 373 represents 'born digital' (0 = false).
-					(see ...... for a full list of Heurist types and details). </dt>
-				<dt>The final number is Detail type appropriate value to be placed in the record. </dt></dl>
+
+			The internal field codes are shown on the left of the Field Types listing in database administration- see
+			<a href='../../admin/structure/manageDetailTypes.html?db=[dbname!]' target="_listFields">Field types</a> (opens in new window)<br>
+
+			Values supplied are added to any existing values for the field. Multiple values can be separated by | (pipe) characters.<br>
+			Values for record pointer fields should be the id of the record to which the pointer points.<br>
+			Geographic data are represented as a geographic type identifier plus OpenGIS WKT data, eg. <code>p:POINT(134.657 32.326)</code><br>
+
+				<!--
+				Multiple geographic objects per column can be separated by | (pipe) characters, eg. <code>p:POINT(134.657 32.326)|p:POINT(134.756 32.378)|</code>...<br>
+			-->
+
+			Geographic type identifiers are: <code>p:POINT</code> for point, <code>r:POLYGON</code> for rectangle,
+				   <code>c:LINESTRING</code> for circle,  <code>pl:POLYGON</code> for polygon,
+					<code>l:LINESTRING</code> for polyline
 			</p>
-			<p>Note: geographic data is accepted in duples of HAPI abbreviation and OpenGIS WKT format, e.g. <code>p:POINT(x y)</code>.<br>
-				You can have multiple geographic objects per column, separated
-				by the | (pipe) character, i.e. <code>p:POINT(x y)|p:POINT(x y)|</code>...<br>
-				Valid HAPI/OpenGIS WKT combinations are:
-				<ul>
-					<li><code>p:POINT</code> for point</li>
-					<li><code>r:POLYGON</code> for bounds</li>
-					<li><code>c:LINESTRING</code> for circle</li>
-					<li><code>pl:POLYGON</code> for polygon</li>
-					<li><code>l:LINESTRING</code> for path</li>
-				</ul>
-			</p>
-			<div>
-				Field separator: <input id=csv-separator value=",">
-				Line separator: <input id=csv-terminator value="\n">
-				Quote: <select id=csv-quote><option selected>"</option><option>'</option></select>
-				<input type=button value=analyse onclick="analyseCSV();">
+			<p>Tip: To rapidly update a subset of records, use the delimited export function with a query string,
+			select the field to be updated, and check the box "Include internal field code in column preceding values".
+			This will output the record IDs and field code, allowing values to be added to the end of each row of data and imported using this function.
+
+			<div><b>Paste CSV file in the box below and click <i>Analyse</i></b>
+				<p>
+				&nbsp;&nbsp;Field separator: <input id=csv-separator value=",">
+				&nbsp;&nbsp;Line separator: <input id=csv-terminator value="\n">
+				&nbsp;&nbsp;Quote: <select id=csv-quote><option selected>"</option><option>'</option></select>
+				&nbsp;&nbsp;&nbsp;&nbsp;
+				<input type=button value=Analyse onclick="analyseCSV();">
 			</div>
 			<div><textarea id=csv-textarea></textarea></div>
 		</div>

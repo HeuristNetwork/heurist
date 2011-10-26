@@ -1680,7 +1680,7 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	box-shadow:0 0 3px 1px #DC8501;
 
 	}
-.recorddiv.selected{
+.recorddiv.selected, .recorddiv.selected:hover {
 	border-color:#62A7F8;
 	background:#EEE;
 	background:-moz-linear-gradient(center top , #e6f8fd, #bee4f8) repeat scroll 0 0 transparent;

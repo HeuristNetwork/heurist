@@ -83,9 +83,11 @@ body {
 		<div id="toolbar"
 			style="width:100%;text-align:left;">
 			<div id="rep_list" style="padding-left:10px;display:inline-block;">
+				<label style="width:100px">Select template</label>
 				<select id="selTemplates" onchange="onSelectTemplate()" style="width:200px;"></select>
-				<button  onclick="onPrint()">Print</button>
-				<button>To file</button>
+				<button onclick="doExecute()">Reload</button>
+				<button onclick="onPrint()">Print</button>
+				<button onclick="onFile()">Get URL</button>
 			</div>
 			<div style="text-align: left;float:right;padding-right:10px;">
 				<button onclick="onShowEditor()">Edit</button>
@@ -93,115 +95,74 @@ body {
 			</div>
 		</div>
 
-<!--  style="position:absolute;top:30px;bottom:0px;left:0px;right:0px;"
-style="position:absolute;top:0px;bottom:20px;left:0px;right:0px;"
-background-color:#ccc;border: solid 1px #f00;
--->
+
 		<div id="layout" style="position:absolute;top:25px;bottom:0px;left:0px;right:0px;">
 
 		<div id="viewercontainer">
-			<div id="rep_container" style="overflow:auto;height:100%;"></div>
+			<div id="rep_container" style="overflow:auto;width:100%;"></div>
 		</div>
 
 		<div id="editorcontainer">
-<!--
-			<div>
-			<div id="text_container" style="width:70%;float:left;bottom:30px;top:0px;position:absolute;">
-					<form method="post" action="somepage">
-						<textarea style="width:100%;height:100%;"
-                                                          id="edTemplateBody" name="edTemplateBody"
-                                                          class="mceAdvanced">
-						</textarea>
-					</form>
-			</div>
-			<div id="vars_container" style="width:30%;float:right;bottom:30px;border:solid 1px #0f0;">
-				<div>
-					<div id="vars_toolbar" style="text-align: left; height:60px;">
-						<select id="selRectype" onchange="window.showReps.onSelectRectype()">
-							<option>List of available rectypes</option>
-						</select>
-						<button onclick="window.showReps.insertRectypeSection()">Insert Section</button><br/>
-						<select id="selInsertMode">
-							<option value="0">Variable</option>
-							<option value="1">Label+Variable</option>
-							<option value="2">'Out' function</option>
-						</select>
-						<button onclick="window.showReps.insertSelectedVars()">Insert Marked</button>
-						<button onclick="window.showReps.insertSelectedVarsAsLoop()">Insert Loop</button>
-						<button onclick="window.showReps.clearAllSeelectionInTree()">Clear marked</button>
-					</div>
-					<div style="position:relative;top:61px;bottom:20px;left:0px;right:0px;overflow-y:scroll;">
-						<div id="varsTree" class="ygtv-checkbox"></div>
+
+			<div style="position:absolute; left:0px; right:300px;top:0px;bottom:0px;">
+				<div style="height:25px">
+					<label style="width:100px">Template</label>
+					<input type="text" style="width:200px;" id="edTemplateName"/>
+					<button onclick="doEditor(2)">Save</button>
+					<button onclick="doEditor(1)">Save As</button>
+					<button onclick="doEditor(3)">Delete</button>
+
+				</div>
+				<div style="position:absolute;left:0px; right:0px;top:25px;bottom:25px;overflow: auto;">
+					<textarea style="width:100%;height:99%;"
+						id="edTemplateBody" name="edTemplateBody">efwwefwefe fefwf
+					</textarea>
+				</div>
+				<div style="position:absolute;bottom: 0px;width:100%;">
+					<label for="cbDebug">Show debug info</label>
+					<input id="cbDebug" type="checkbox"  title="Show debug info"/>
+					<div style="text-align:right;position:absolute;right:2px;bottom:2px;">
+						<button onclick="doExecute()" title="Test your template" style="font-weight: 800;">Update output below</button>
 					</div>
 				</div>
 			</div>
 
-			</div>
-
-			<div id="editor_toolbar" style="text-align:left; width:100%;position:absolute;bottom:0px;">
-				<label for="cbDebug">Show debug info</label>
-				<input id="cbDebug" type="checkbox"  title="Show debug info"/>
-				<button onclick="window.showReps.doExecute()">Execute</button>
-
-
-				<input type="text" width="100" size="100" id="edTemplateName"/>
-				<button onclick="doEditor(1)">Save</button>
-				<button onclick="doEditor(0)">Cancel</button>
-				<button onclick="doEditor(3)">Delete</button>
-
-				<button onclick="javascript:setupMCE();">TinyMCE</button>
-			</div>
-			</div>
--->
-			<table border="1" height="100%">
-			<tr>
-				<td rowspan="2" width="70%">
-					<form method="post" action="somepage" style="height:100%;">
-						<textarea style="width:100%;height:100%;"
-                                                          id="edTemplateBody" name="edTemplateBody"
-                                                          class="mceAdvanced">
-						</textarea>
-					</form>
-				</td>
-				<td width="30%" height="60">
-						<select id="selRectype" onchange="window.showReps.onSelectRectype()">
-							<option>List of available rectypes</option>
-						</select>
-						<button onclick="window.showReps.insertRectypeSection()">Insert Section</button><br/>
+			<div style="width:300px;position:absolute;right:0px;top:0px;bottom:0px;">
+				<div style="height:40px">
+					<div>Choose required fields in tree then:</div>
+					<!--
+					<button onclick="window.showReps.insertSelectedVars(null, false)">Insert fields only</button><br/>
+					<button onclick="window.showReps.insertRectypeSection()">All</button>
+					<button onclick="window.showReps.insertSelectedVarsAsLoop(null)">Insert fields in loop</button><br/>
+					-->
+					<label>Style</label>
 						<select id="selInsertMode">
 							<option value="0">Variable</option>
 							<option value="1">Label+Variable</option>
 							<option value="2">'Out' function</option>
 						</select>
-						<button onclick="window.showReps.insertSelectedVars()">Insert Marked</button>
-						<button onclick="window.showReps.insertSelectedVarsAsLoop()">Insert Loop</button>
-						<button onclick="window.showReps.clearAllSeelectionInTree()">Clear marked</button>
-				</td>
-			</tr>
-			<tr>
-				<td>
-					<div style="overflow-y:scroll;height:100%;max-height:200px">
-						<div id="varsTree" class="ygtv-checkbox"></div>
+				</div>
+				<div id="treeContainer"
+					style="position:absolute;left:0px; right:0px;top:40px;bottom:25px;overflow-y: auto;">
+					<div id="varsTree" class="ygtv-checkbox"></div>
+				</div>
+				<div style="position:absolute;bottom: 0px;text-align:right;width:100%;">
+					<button onclick="doEditor(0)">Close Editor</button>
+				</div>
+			</div>
+
+
+<!--
+					<select id="selRectype" onchange="window.showReps.onSelectRectype()" title="List of available rectypes">
+							<option>List of available rectypes</option>
+					</select>
+					<button onclick="window.showReps.clearAllSeelectionInTree()">Clear marked</button>
+					<div  style="padding-right:10px;">
+						<button onclick="doEditor(0)">Close Editor</button>
+					 button onclick="javascript:setupMCE();">TinyMCE</button
 					</div>
-				</td>
-			</tr>
-			<tr>
-				<td colspan="2" height="20">
-					<label for="cbDebug">Show debug info</label>
-					<input id="cbDebug" type="checkbox"  title="Show debug info"/>
-					<button onclick="window.showReps.doExecute()">Test</button>
+-->
 
-
-					<input type="text" width="10" size="100" id="edTemplateName"/>
-					<button onclick="doEditor(2)">Save</button>
-					<button onclick="doEditor(1)">Save As</button>
-					<button onclick="doEditor(0)">Close</button>
-					<button onclick="doEditor(3)">Delete</button>
-
-					<button onclick="javascript:setupMCE();">TinyMCE</button>
-				</td>
-			</tr>
-			</table>
 
 		</div>
 		</div>
@@ -259,6 +220,35 @@ if(isInited){
 		catch(e){
 			//self.print();
 		}
+	}
+
+	//
+	function onFile(){
+
+		var sel = document.getElementById('selTemplates');
+		if(Hul.isnull(sel) || Hul.isnull(sel.options) || sel.options.length===0) { return; }
+
+		var template_file = sel.options[sel.selectedIndex].value; // by default first entry
+
+		var surl = top.HEURIST.baseURL + "viewers/smarty/showReps.php?"+
+				window.showReps.getQuery() + '&debug=0&template='+template_file;
+
+		window.prompt ("Copy to clipboard: Ctrl+C, Enter", surl);
+
+		/*
+		try{
+			var oIframe = document.getElementById("ifrmPrint");
+			var oContent = document.getElementById("rep_container").innerHTML;
+			var oDoc = (oIframe.contentWindow || oIframe.contentDocument);
+			if (oDoc.document) oDoc = oDoc.document;
+			oDoc.write("<head><title></title>");
+			oDoc.write("</head><body onload=\"this.focus(); document.execCommand('saveas',false,'c:\export.txt');\">");
+			oDoc.write(oContent + "</body>");
+			oDoc.close();
+		}
+		catch(e){
+			//self.print();
+		}*/
 	}
 
 	//

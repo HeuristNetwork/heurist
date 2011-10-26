@@ -54,6 +54,8 @@ require_once('libs.inc.php');
 	foreach ($records as $rec){
 		$res1 = getRecordForSmarty($rec, 0);
 		array_push($results, $res1);
+
+//error_log(print_r($res1, true));
 	}
 	//activate default template - generic list of records
 
@@ -148,7 +150,7 @@ function getRecordForSmarty($rec, $recursion_depth){
 				$record['rec'.substr($key,4)] = $value;
 
 				if($key=="rec_RecTypeID"){ //additional field
-					$record["recTypeName"] = $rtStructs['typedefs'][$value]['commonFields'][0];
+					$record["recTypeName"] = $rtStructs['typedefs'][$value]['commonFields'][ $rtStructs['typedefs']['commonNamesToIndex']['rty_Name'] ];
 				}
 
 			}
@@ -171,6 +173,10 @@ function getRecordForSmarty($rec, $recursion_depth){
 			}
 		}
 
+/* DEBUG
+		foreach ($record as $dtKey => $dtValue){
+error_log(">>>".$dtKey."=".$dtValue);
+		}*/
 		return $record;
 	}
 }
@@ -196,7 +202,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth){
 
 		$dtDef = $dtStructs['typedefs'][$dtKey]['commonFields'];
 		if($dtDef){
-			$detailType = $dtDef[2];  //HARDCODED!!!!
+			$detailType = $dtDef[ $dtStructs['typedefs']['fieldNamesToIndex']['dty_Type']  ];
 
 //error_log(">>>>>>>".$dtKey."=".$dtNames[$dtKey].">>>".$dtname." TYPE=".$detailType);
 
@@ -205,7 +211,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth){
 
 				$res = "";
 				foreach ($dtValue as $key => $value){
-					$term_value = $dtTerms['termsByDomainLookup']['enum'][$value][0];
+					$term_value = $dtTerms['termsByDomainLookup']['enum'][$value][ $dtTerms['fieldNamesToIndex']['trm_Label'] ];
 					if($term_value){
 						if(strlen($res)>0) $res = $res.", ";
 						$res = $res.$term_value;
@@ -267,7 +273,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth){
 				{
 					$recordTypeName = $rtNames[$rectypeID];
 					$recordTypeName = getVariableNameForSmarty($recordTypeName, false);
-//error_log(">>>>>>>>>>".$rectypeID."=".$rtNames[$rectypeID]."=".$recordTypeName);
+//error_log(">>>>>>>>>>".$rectypeID."=".$rtNames[$rectypeID]."=".$recordTypeName."array=".print_r($res[0],true));
 					$res = array( $recordTypeName."s" =>$res, $recordTypeName =>$res[0] );
 				}else{
 					$res = null;

@@ -409,8 +409,10 @@ class HeuristNativeEntry {
 		// $field is a HeuristNativeField
 		$this->_fields[] = &$field;
 
+		$titleDT = (defined('DT_TITLE')?DT_TITLE:0);
+
 		// these are important fields
-		if ($field->getType() == 160) $this->_title_field = &$field;//MAGIC NUMBER
+		if ($field->getType() == $titleDT) $this->_title_field = &$field;//MAGIC NUMBER
 		else if ($field->getType() == 158) $this->_author_fields[] = &$field;//MAGIC NUMBER
 
 		if (! @$this->_fields_by_bdt_id[$field->getType()]) $this->_fields_by_bdt_id[$field->_type] = array();

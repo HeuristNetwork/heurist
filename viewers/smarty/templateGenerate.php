@@ -174,12 +174,24 @@ exit();
 
 /**
 * generates various line separator
-* 1. as paragraphs for tinymcs
-* 2. or \n for usual textarea
 *
 * @param mixed $lines
 */
 function _maketext($lines, $ind){
+
+	$sep1 = str_repeat('   ', $ind);
+	$sep2 = '\n';
+
+	$res = '';
+
+	foreach ($lines as $line ){
+		$res = $res.$sep1.$line.$sep2;
+	}
+
+	return $res;
+}
+
+function _maketext_div($lines, $ind){
 
 	if($ind>0){
 	 	$sep1 = '<div style="padding-left: '.(10*$ind).'px;">';
