@@ -763,42 +763,52 @@ var HRecord = function() {
 		if (HDetailManager.getDetailRepeatable(_type, detailType)) { throw new HValueException("detail is repeatable"); }
 
 		var tmpDetails = _namedDetails[detailType.getID()];
-		if (! tmpDetails) { return null; }
+		if (! tmpDetails) { return null; }//saw CHECK:  why return null if no existing detail , could be a newly added one not yet saved.
 
-		for (var i in tmpDetails) { return tmpDetails[i]; }	// return the first value
+		for (var i in tmpDetails) {
+			if(detailType.getVariety()===HVariety.ENUMERATION || detailType.getVariety()===HVariety.RELATIONSHIP){
+				return detailType.getEnumerationValueFromId(tmpDetails[i]);
+			}
+			return tmpDetails[i];	// return the first value, having multiple might mean that the rectype has changed where detail is not repeatable now
+		}
 	};
 	this.getDetails = function(detailType) {
 		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object required"); }
 		var details = [], bdID, i;
 		var tmpDetails = _namedDetails[detailType.getID()];
+		var termTranslate = (detailType.getVariety()===HVariety.ENUMERATION || detailType.getVariety()===HVariety.RELATIONSHIP);
 		if (tmpDetails) {
 			// put named details (those that correspond to an existing bd_id) first
 			for (bdID in tmpDetails) {
-				details.push(tmpDetails[bdID]);
+				details.push(termTranslate ? detailType.getEnumerationValueFromId(tmpDetails[bdID]) : tmpDetails[bdID]);
 			}
 		}
 		tmpDetails = _details[detailType.getID()];
 		if (tmpDetails) {
 			// put un-named details at the end
 			for (i=0; i < tmpDetails.length; ++i) {
-				details.push(tmpDetails[i]);
+				details.push(termTranslate ? detailType.getEnumerationValueFromId(tmpDetails[i]) : tmpDetails[i]);
 			}
 		}
 		return (details  ||  null);
 	};
 	this.getAllDetails = function() {
-		var i, j, details = {};
+		var i, j, detailType, termTranslate, details = {};
 		for (i in _namedDetails) {
+			detailType = HDetailManager.getDetailTypeById(i);
+			termTranslate = (detailType.getVariety()===HVariety.ENUMERATION || detailType.getVariety()===HVariety.RELATIONSHIP);
 			details[i] = [];
 			for (j in _namedDetails[i]) {
-				details[i].push(_namedDetails[i][j]);
+				details[i].push(termTranslate ? detailType.getEnumerationValueFromId(_namedDetails[i][j]) : _namedDetails[i][j]);
 			}
 		}
 		for (i in _details) {
+			detailType = HDetailManager.getDetailTypeById(i);
+			termTranslate = (detailType.getVariety()===HVariety.ENUMERATION || detailType.getVariety()===HVariety.RELATIONSHIP);
 			if (! details[i]) {
 				details[i] = [];
 			}
-			details[i].push.apply(details[i], _details[i]);
+			details[i].push.apply(details[i], (termTranslate ? detailType.getEnumerationValueFromId(_details[i]) : _details[i]));
 		}
 		return (details  ||  null);
 	};
@@ -821,11 +831,12 @@ var HRecord = function() {
 		}
 
 		//check if enum or relationtype variety translate values to id
+		var termTranslate = (detailType.getVariety()===HVariety.ENUMERATION || detailType.getVariety()===HVariety.RELATIONSHIP);
+
 		if (! _details[detailType.getID()]) {
-			_details[detailType.getID()] = [ detailValue ];
-		}
-		else {
-			_details[detailType.getID()].push(detailValue);
+			_details[detailType.getID()] = [ (termTranslate ? detailType.getIdForEnumerationValue(detailValue):detailValue)];
+		}else{
+			_details[detailType.getID()].push(termTranslate ? detailType.getIdForEnumerationValue(detailValue):detailValue);
 		}
 		_modified = true;
 	};
@@ -838,9 +849,23 @@ var HRecord = function() {
 			throw new HValueException("invalid new value ("+newValue+") for field "+ detailType.getName()+" in " +_type.getName()+' record');
 		}
 
+		if (_type  &&  ! HDetailManager.isValidDetailValue(_type, detailType, oldValue)) {
+			throw new HValueException("invalid old value ("+oldValue+") for field "+ detailType.getName()+" in " +_type.getName()+' record');
+		}
+
 		// reduce records to stubs for comparison
 		if (HAPI.isA(oldValue, "HRecord")) {
 			oldValue = _storageManager.getStubForRecord(oldValue);
+		}
+
+		// change enum values to ids
+		if (detailType.getVariety()===HVariety.ENUMERATION || detailType.getVariety()===HVariety.RELATIONSHIP){
+			if (isNaN(oldValue)) {
+				oldValue = detailType.getIdForEnumerationValue(oldValue);
+			}
+			if (isNaN(newValue)) {
+				newValue = detailType.getIdForEnumerationValue(newValue);
+			}
 		}
 
 		// find where the old value is being stored.  It is either in the namedDetails ...
@@ -889,6 +914,7 @@ var HRecord = function() {
 		if (_readonly) { throw new HPermissionException("Record is read-only"); }
 		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object required"); }
 
+		var termTranslate = (detailType.getVariety()===HVariety.ENUMERATION || detailType.getVariety()===HVariety.RELATIONSHIP);
 		var newDetails = [];
 		var detailValue;
 		for (var i=0; i < detailValues.length; ++i) {
@@ -899,13 +925,12 @@ var HRecord = function() {
 				throw new HValueException("in valid value ("+detailValue+") for field "+ detailType.getName()+" in " +_type.getName()+' record');
 			}
 
-			newDetails.push(detailValue);
+			newDetails.push(termTranslate ? detailType.getIdForEnumerationValue(detailValue):detailValue);
 		}
 		if (newDetails) {
 			delete _namedDetails[detailType.getID()];
 			_details[detailType.getID()] = newDetails;
-		}
-		else {
+		}else{
 			delete _namedDetails[detailType.getID()];
 			delete _details[detailType.getID()];
 		}
@@ -935,7 +960,7 @@ var HRecord = function() {
 		if (! HCurrentUser.isInWorkgroup(_workgroup)) {
 			throw new HPermissionException("Non-member cannot change non-workgroup visibility");
 		}
-		_nonOwnerVisible = visible? true : false;
+// saw removed 30/10/11		_nonOwnerVisible = visible? true : false;
 		_nonOwnerVisible = (typeof visible == 'string' &&
 									visible.toLowerCase() in {'hidden':1,'viewable':1,'pending':1,'public':1}?
 										 visible.toLowerCase() : (!visible || visible == '0'? 'hidden':'viewable'));
@@ -1823,6 +1848,9 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
 	this.getConstrainedRecordType = function() { return _constraint[0]; };
 	this.getConstrainedRecordTypes = function() { return _constraint; };
 	this.getRelatedEnumerationValues = function() { return _relatedEnums; };
+	this.getIdForEnumerationValue = function(value) { return (_termsMap[("" + value).toLowerCase()]  ||  null); };
+	this.getEnumerationValueFromId = function(id) { return (_enumsMap[id]  ||  null); };
+
 
 	this.checkValue = function(value) {
 		if (! value  &&  (value !== 0  &&  value !== false)) {
@@ -3184,16 +3212,21 @@ var HeuristScholarDB = new HStorageManager();
 	};
 
 
-	/* private */ function makeDetail(variety, details) {
+	/* private */ function makeDetail(hDetailType, details) {
 		/* Create a new detail of the appropriate type for the given detail string -- used to deserialise records */
-		var val, f;
+		var val, f,
+			variety = hDetailType? hDetailType.getVariety() : "literal";
+
 		switch (variety) {
 			case HVariety.LITERAL:
 			case HVariety.BOOLEAN:
 			case HVariety.BLOCKTEXT:
-			case HVariety.ENUMERATION:
 			case HVariety.DATE:
 			return details;
+
+			case HVariety.ENUMERATION:
+			case HVariety.RELATIONTYPE:
+			return hDetailType.getEnumerationValueFromId(details);
 
 			case HVariety.REFERENCE:
 			return that.getRecordStub(details.id, details.title, details.hhash);
@@ -3220,7 +3253,7 @@ var HeuristScholarDB = new HStorageManager();
 		var callback;
 		var i, j, id, bdID;
 		var recordDetails;
-		var details, detailTypeID, variety;
+		var details, detailTypeID, hDetailType;
 		var notifications, comments, commentsMap, newComment, processedComments, user;
 		var args, recipient, text, date, modDate, freq;
 
@@ -3261,13 +3294,12 @@ var HeuristScholarDB = new HStorageManager();
 				// construct the DETAILS -- they are provided in literal form, transform them into full objects
 				details = recordDetails[4];
 				for (detailTypeID in details) {
-					variety = HDetailManager.getDetailTypeById(detailTypeID);
-					variety = variety? variety.getVariety() : "literal";
+					hDetailType = HDetailManager.getDetailTypeById(detailTypeID);
 					for (j in details[detailTypeID]) {
 						if (details[detailTypeID][j] === null  ||  details[detailTypeID][j] === "") {
 							delete details[detailTypeID][j];
 						} else {
-							details[detailTypeID][j] = makeDetail(variety, details[detailTypeID][j]);
+							details[detailTypeID][j] = makeDetail(hDetailType, details[detailTypeID][j]);
 						}
 					}
 				}

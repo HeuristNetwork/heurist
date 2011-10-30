@@ -12,18 +12,14 @@
 			[output]teiview[/output]
 		</xsl:comment>
 		<!-- end including code -->
-<!--		<xsl:apply-templates select="/hml/records/record[@type=99]"/>
+<!--		<xsl:apply-templates select="/hml/records/record[type[@conceptID='2-7']]"/>
 
 
 
 -->
-		<script src="/h3-sw/viewers/js/annotationHighlight.js" type="text/javascript"/>
 
 		<xsl:call-template name="setupRefs"></xsl:call-template>
-		<div><h2>Annotations</h2></div>
-
 		<xsl:apply-templates select="/hml/records/record[type[@conceptID='3-25']]"/>
-		<h2>Document body</h2>
 
 		<xsl:apply-templates select="/hml/records/record[type[@conceptID='2-7']]"/>
 
@@ -32,14 +28,6 @@
 	</xsl:template>
 
 	<xsl:template match="record[type[@conceptID='3-25']]">
-		<!-- annotations -->
-		Title: <xsl:value-of select="detail[@conceptID='2-1']"/><br/>
-		HID of source document: <xsl:value-of select="detail[@conceptID='3-322']"/><br/>
-		HID of target object (if any) <xsl:value-of select="detail[@conceptID='2-4']"/><br/>
-		Element: <xsl:value-of select="detail[@conceptID='3-539']"/><br/>
-		Start word:	<xsl:value-of select="detail[@conceptID='3-329']"/><br/>
-		Start word:	<xsl:value-of select="detail[@conceptID='3-330']"/><hr/>
-
 		<xsl:call-template name="addRef">
 			<xsl:with-param name="ref" select="."/>
 			<xsl:with-param name="hide">false</xsl:with-param>
@@ -94,7 +82,7 @@
 			var root = document.getElementById("content");
 			if (root  &&  window["refs"])
 			highlight(root, refs);
-			},50);
+			},0);
 		]]>
 		</script>
 	</xsl:template>

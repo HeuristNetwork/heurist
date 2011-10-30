@@ -1196,7 +1196,7 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 			$query .= $matches[1] . $where_clause . $matches[2];
 	}
 
-	//error_log("request to query returns ".print_r($query,true));
+	error_log("request to query returns ".print_r($query,true));
 	return $query;
 }
 

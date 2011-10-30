@@ -107,7 +107,7 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 			while ($row = mysql_fetch_row($res)) {
 					$missed = $missed.$row[2]." ";
 			}
-error_log("MISSED ".$missed);
+//error_log("MISSED ".$missed);
 		// at least one missing field
 		jsonError("record is missing required field(s): ".$missed);
 	}
@@ -336,18 +336,20 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 			}
 		}
 	}
+	//delete all details except the one that are being updated
 	$deleteDetailQuery = "delete from recDetails where dtl_RecID=$recordID";
 	if (count($dontDeletes)) $deleteDetailQuery .= " and dtl_ID not in (" . join(",", $dontDeletes) . ")";
 	mysql_query($deleteDetailQuery);
 	if (mysql_error()) jsonError("database error - " . mysql_error());
 
 	if (mysql_error()) jsonError("database error - " . mysql_error());
+	//update all details to be kept
 	foreach ($updates as $update) {
 		mysql_query($update);
 		if (mysql_error()) jsonError("database error - " . mysql_error());
 	}
 
-	if (count($inserts)) {
+	if (count($inserts)) {//insert all new details
 		mysql_query("insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, dtl_Geo) values " . join(",", $inserts));
 		$first_bd_id = mysql_insert_id();
 		return range($first_bd_id, $first_bd_id + count($inserts) - 1);

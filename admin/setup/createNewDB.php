@@ -150,13 +150,15 @@
 				$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'create database `$newname`'";
 			}
 
+// SAW SOLUTION			$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e\"create database $newname\"";
 			$output1 = exec($cmdline . ' 2>&1', $output, $res1);
 			if ($res1 != 0 ) {
 				echo ("Error code $res1 on MySQL exec: Unable to create database $newname<br>&nbsp;<br>");
 				echo("\n\n");
+//error_log("cmd = $cmdline      output = ".print_r($output,true));
 				$sqlErrorCode = split(" ", $output);
-				if($sqlErrorCode[1] == "1007");
-				echo "<strong>A database with that name already exists.</strong>";
+				if(count($sqlErrorCode) > 1 &&  $sqlErrorCode[1] == "1007")
+					echo "<strong>A database with that name already exists.</strong>";
 				return false;
 			}
 

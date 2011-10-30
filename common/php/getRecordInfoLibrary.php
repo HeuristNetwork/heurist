@@ -24,7 +24,7 @@ global $lastModified;
 }
 
 function getCachedData($key) {
-return null;
+//return null;
 	global $memcache, $lastModified;
 	if (! $memcache) {
 		$memcache = new Memcache;
