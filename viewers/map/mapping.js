@@ -150,7 +150,7 @@ if (typeof mxn.LatLonPoint == "function") {
 			if(zoomIndex<0) {
 				zoomIndex=0;
 			} else if (zoomIndex>=M.timeZoomSteps.length){
-				zoomIndex>M.timeZoomSteps.length-1;
+				zoomIndex = M.timeZoomSteps.length-1;
 			}
 						var band, interval;
 						band = tm.timeline.getBand(bandIndex),
@@ -398,7 +398,6 @@ ether_zoom = function(_band, ether, zoomIn) {
 						tm.map.setZoom(tm.opts.mapZoom);
 					}
 				}
-
 			};
 
 			var myLatlng = new mxn.LatLonPoint(-33.87, 151.20);

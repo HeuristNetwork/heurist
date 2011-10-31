@@ -15,7 +15,7 @@
 
 //aliases
 var Hul = top.HEURIST.util,
-		Event = YAHOO.util.Event;
+Event = YAHOO.util.Event;
 
 /**
 * UserEditor - class for pop-up edit group
@@ -44,21 +44,21 @@ function ShowMap() {
 		HEURIST.tmap = context;
 
 		var ind = 0,
-			k = 0,
-			geoobj,
-			record,
-			item,
-			items = [],
-			kmls = [],
-			rec_withtime = 0;
-/**/
+		k = 0,
+		geoobj,
+		record,
+		item,
+		items = [],
+		kmls = [],
+		rec_withtime = 0;
+		/**/
 		for (ind in HEURIST.tmap.geoObjects) {
 			if(!Hul.isnull(ind))
 			{
 				geoobj = HEURIST.tmap.geoObjects[ind];
 
 				var shape = null,
-					isempty = false;
+				isempty = false;
 
 				if(geoobj.type === "point"){
 					shape = {point:{lat: geoobj.geo.y, lon: geoobj.geo.x}};
@@ -125,9 +125,9 @@ function ShowMap() {
 				}
 
 				if(shape || isempty){
-				//
-				//
-				//
+					//
+					//
+					//
 					record = HEURIST.tmap.records[geoobj.bibID];
 
 					if(!Hul.isnull(record.geoindex)){ //already exists
@@ -139,44 +139,47 @@ function ShowMap() {
 						var hastime = false;
 
 						// parse temporal object
-						if(true){ //Temporal.isValidFormat(record.start)){
-							try  {
-								var temporal = new Temporal(record.start);
-
-								if(temporal){
-
-								var s = temporal.toString();
-								var dt = temporal.getTDate('PDB');
-								if(!dt) dt = temporal.getTDate('TPQ');
-								if(!dt) dt = temporal.getTDate('DAT');
-								record.start = (dt)?dt.toString():"";
-
-								dt = temporal.getTDate('PDE');
-								if(!dt) dt = temporal.getTDate('TAQ');
-								record.end = (dt)?dt.toString():record.end;
-
-									hastime = (record.start!=="");
-									if(hastime){
-										rec_withtime++;
+						if(record.start){ //Temporal.isValidFormat(record.start)){
+							try{
+								var temporal;
+								if(record.start && record.start.search(/VER=/)){
+									temporal = new Temporal(record.start);
+									if(temporal){
+										var dt = temporal.getTDate('PDB');
+										if(!dt) dt = temporal.getTDate('TPQ');
+										if(!dt) dt = temporal.getTDate('DAT');
+										record.start = (dt)?dt.toString():"";
+										hastime = (record.start!=="");
 									}
+								}
+								if(record.end && record.end.search(/VER=/)){
+									temporal = new Temporal(record.end);
+									if(temporal){
+										var dt = temporal.getTDate('PDE');
+										if(!dt) dt = temporal.getTDate('TAQ');
+										if(!dt) dt = temporal.getTDate('DAT');
+										record.end = (dt)?dt.toString():"";
+										hastime = (hastime ||(record.end!==""));
+									}
+								}
+								if(hastime){
+									rec_withtime++;
 								}
 							}catch(e){
 							}
-
 						}
 
 						if(!isempty || hastime){
-
 							item = {
-							start: record.start,
-							title: record.title,
-							options:{
-								description: record.description,
-								theme: "purple",
-								url: record.URL,
-								recid: record.bibID,
-								rectype: record.rectype,
-								thumb:  record.thumb_file_id
+								start: record.start,
+								title: record.title,
+								options:{
+									description: record.description,
+									theme: "purple",
+									url: record.URL,
+									recid: record.bibID,
+									rectype: record.rectype,
+									thumb:  record.thumb_file_id
 								}
 							};
 
@@ -211,75 +214,75 @@ function ShowMap() {
 				rec_withtime++; //it is assumed that kml is timeenabled
 
 				datasets.push({theme: "blue", type: "kml",
-                				options: {
-                    				url: _url // KML file to load
-                				}
-            				});
+					options: {
+						url: _url // KML file to load
+					}
+				});
 			}//for
 		}
 
 
-				RelBrowser.Mapping.mapdata = {
-//					focus: "<xsl:value-of select="detail[@id=230]/geo/wkt"/>",
+		RelBrowser.Mapping.mapdata = {
+			//					focus: "<xsl:value-of select="detail[@id=230]/geo/wkt"/>",
 
-					/*timemap: [
-						{
-							type: "basic",
-							options: {
-                    			items: [
- 								{
-                            		start : "2010-01-01",
-                            		point : {
-                                		lat : 43.7717,
-                                		lon : 11.2536
-                            		},
-                            		title : "Marker Placemark",
-                            		options : {
-                                		description: "Just a plain old marker",
-                                		theme: "purple"
-                            		}
- 								}
-                        		,{
-									start : "2010-04-01",
-                            		imagelayer : {
-                                		type: "virtual earth",
-                                		url: "http://acl.arts.usyd.edu.au/dos/maps/1854_woolcott-clarke/Layer_NewLayer/",
-                                		mime_type:"image/png",
-                                		copyright:"",
-                                		min_zoom:1,
-                                		max_zoom:19
-                            		},
-                            		title : "Syndey 1854",
-                            		options : {
-                                		description: "lalala",
-                                		theme: "orange"
-                            		}
-								}
-                    			]
-							}
-						}
-					],*/
+			/*timemap: [
+			{
+			type: "basic",
+			options: {
+			items: [
+			{
+			start : "2010-01-01",
+			point : {
+			lat : 43.7717,
+			lon : 11.2536
+			},
+			title : "Marker Placemark",
+			options : {
+			description: "Just a plain old marker",
+			theme: "purple"
+			}
+			}
+			,{
+			start : "2010-04-01",
+			imagelayer : {
+			type: "virtual earth",
+			url: "http://acl.arts.usyd.edu.au/dos/maps/1854_woolcott-clarke/Layer_NewLayer/",
+			mime_type:"image/png",
+			copyright:"",
+			min_zoom:1,
+			max_zoom:19
+			},
+			title : "Syndey 1854",
+			options : {
+			description: "lalala",
+			theme: "orange"
+			}
+			}
+			]
+			}
+			}
+			],*/
 
-					timemap: datasets,
+			timemap: datasets,
 
-					layers: HEURIST.tmap.layers,
+			layers: HEURIST.tmap.layers,
 
-					count_mapobjects: (context.cntWithGeo+HEURIST.tmap.layers.length)
-				};
+			count_mapobjects: (context.cntWithGeo+HEURIST.tmap.layers.length)
+		};
 
 		setLayout(((context.cntWithGeo+HEURIST.tmap.layers.length)>0), (rec_withtime>0))
 
 		initMapping(); //from mapping.js
-    }
+	}
 
 
 	function _onSelectionChange(eventType, argList) {
 		if (parent.document.getElementById("m3").className == "yui-hidden") {
 			return false;
 		}else {
-				if (eventType == "heurist-selectionchange"){
-					top.HEURIST.search.mapSelected3();
-				}
+			if (eventType == "heurist-selectionchange"){
+				top.HEURIST.search.mapSelected3();
+			}
 		}
 	}
 
@@ -288,7 +291,7 @@ function ShowMap() {
 	function setLayout(ismap, istime){
 
 		if(_ismap===ismap && _istime===istime ||
-			(!ismap && !istime) )
+		(!ismap && !istime) )
 		{
 			return;
 		}
@@ -297,26 +300,26 @@ function ShowMap() {
 
 		var units;
 		if(ismap && istime){
-				units = [
-	                { position: 'center', body: 'mapcontainer'},
-	                { position: 'bottom', header: 'TimeLine', height: 150,
-	                	resize: true, body: 'timelinecontainer', gutter: '5px', collapse: true}
-	            ];
+			units = [
+			{ position: 'center', body: 'mapcontainer'},
+			{ position: 'bottom', header: 'TimeLine', height: 150,
+				resize: true, body: 'timelinecontainer', gutter: '5px', collapse: true}
+			];
 		}else if(ismap){
-				units = [
-	                { position: 'center', body: 'mapcontainer'}
-	                	];
+			units = [
+			{ position: 'center', body: 'mapcontainer'}
+			];
 		}else if(istime){
-				units = [
-	                { position: 'center', body: 'timelinecontainer'}
-	                	];
+			units = [
+			{ position: 'center', body: 'timelinecontainer'}
+			];
 		}
 
 		layout = null;
 		layout = new YAHOO.widget.Layout({
-	            units: units
-	        });
-	    layout.render();
+			units: units
+		});
+		layout.render();
 	}
 
 
@@ -327,13 +330,13 @@ function ShowMap() {
 	*/
 	function _init() {
 
-	    setLayout(true, true);
-	    /*
-	    var lunit = layout.getUnitById('timelinecontainer');
- 		Event.on('timelinecontainer', 'endResize', function() {
-	            Alert('!!!!');
-	    });
-        */
+		setLayout(true, true);
+		/*
+		var lunit = layout.getUnitById('timelinecontainer');
+		Event.on('timelinecontainer', 'endResize', function() {
+		Alert('!!!!');
+		});
+		*/
 
 		squery = location.search;
 		_reload(squery);
@@ -343,30 +346,30 @@ function ShowMap() {
 		}
 	}
 	function _reload(squery) {
-				var baseurl = top.HEURIST.basePath + "viewers/map/showMap.php";
-				var callback = _updateMap;
-				var params = squery;
-				top.HEURIST.util.getJsonData(baseurl, callback, squery);
+		var baseurl = top.HEURIST.basePath + "viewers/map/showMap.php";
+		var callback = _updateMap;
+		var params = squery;
+		top.HEURIST.util.getJsonData(baseurl, callback, squery);
 	}
 
 
 	//public members
 	var that = {
 
-			reload:  function (squery){
-				_reload(squery);
-			},
+		reload:  function (squery){
+			_reload(squery);
+		},
 
-			baseURL:  function (){
-				return top.HEURIST.basePath;
-			},
+		baseURL:  function (){
+			return top.HEURIST.basePath;
+		},
 
-			getClass: function () {
-				return _className;
-			},
+		getClass: function () {
+			return _className;
+		},
 
-			isA: function (strClass) {
-				return (strClass === _className);
+		isA: function (strClass) {
+			return (strClass === _className);
 		}
 
 	};

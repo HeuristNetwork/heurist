@@ -250,6 +250,7 @@
 		'RT_RELATION' => array(2,1),
 		'RT_PERSON' => array(2,20),
 		'RT_MEDIA_RECORD' => array(2,5),
+		'RT_IMAGE_LAYER' => array(2,6),
 		'RT_AUTHOR_EDITOR' => array(2,23),
 		'RT_BLOG_ENTRY' => array(2,8),
 		'RT_INTERPRETATION' => array(2,10),

@@ -43,9 +43,12 @@ $lastModified = strtotime($lastModified[0]);
 // not changed since last requested so return
 if (strtotime(@$_SERVER["HTTP_IF_MODIFIED_SINCE"]) > $lastModified) {
   header('HTTP/1.1 304 Not Modified');
+error_log(" exiting loadCommonInfo with 'Not Modified' $lastModified");
   exit();
 }
 
+header('Cache-Control: no-cache');
+header('Pragma: no-cache');
 
 // This is the best place I can think of to stick this stuff --kj, 2008-07-21
 print "if (!top.HEURIST) top.HEURIST = {};\n";
