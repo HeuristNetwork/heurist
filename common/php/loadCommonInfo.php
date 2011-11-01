@@ -60,6 +60,11 @@ print "top.HEURIST.database.exploreURL = " . json_format(EXPLORE_URL) . ";\n";
 print "if (!top.HEURIST.basePath) top.HEURIST.basePath = ".json_format(HEURIST_SITE_PATH) . ";\n";
 print "if (!top.HEURIST.baseURL) top.HEURIST.baseURL = ".json_format(HEURIST_URL_BASE) . ";\n";
 
+
+// $cache=true - use cache
+//$cache = (!array_keys(@$_REQUEST, 'cache') || @$_REQUEST['cache']=="1");
+
+
 /* rectypes are an array of names sorted alphabetically, and lists of
    primary (bibliographic) and other rectypes, also sorted alphbetically */
 print "top.HEURIST.rectypes = ".json_format(getAllRectypeStructures(true)).";\n";

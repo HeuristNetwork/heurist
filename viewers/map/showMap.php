@@ -27,6 +27,7 @@
 
 	header("Content-type: text/javascript");
 
+	$imagelayerRT = (defined('RT_IMAGELAYER')?RT_IMAGELAYER:0);
 
 	mysql_connection_db_select(DATABASE);
 
@@ -42,7 +43,7 @@
 	$cols = "rec_ID as bibID, rec_RecTypeID as rectype, rec_Title as title, rec_URL as URL";
 	$query = REQUEST_to_query("select $cols ", $search_type);
 
-//	error_log(">>>>>>>>>>>>>>>>>>>>>>>".$query);
+	//error_log(">>>>>>>>>>>>>>>>>>>>>>>".$query);
 	$res = mysql_query($query);
 	if (mysql_error()) {
 		print mysql_error();
@@ -61,10 +62,10 @@
 		$records[$bibID] = $bib;
 		array_push($bibIDs, $bibID);
 
-		if($bib["rectype"]==RT_IMAGE_LAYER){ //map image layer
-			array_push($imageLayers, $bibID);
-			$geoBibIDs[$bibID] = $bibID;
-		}
+	if($bib["rectype"]==$imagelayerRT){ //map image layer
+		array_push($imageLayers, $bibID);
+		$geoBibIDs[$bibID] = $bibID;
+	}
 	}
 
 	function getKmlFilePath($fileID){
@@ -142,9 +143,13 @@
 		}
 	}//for
 
+	if($bibIDs)
+	{
 	// Find the records that actually have any geographic data to plot
 	$res = mysql_query("select dtl_RecID, dtl_Value, astext(dtl_Geo), astext(envelope(dtl_Geo)) from recDetails where dtl_Geo is not null and dtl_RecID in (" . join(",", $bibIDs) . ")");
-//	error_log(mysql_error());
+if(mysql_error()) {
+	error_log("ERROR in ShowMap=".mysql_error());
+}
 	if($res){
 		while ($val = mysql_fetch_row($res)) {
 			// get the bounding box
@@ -214,6 +219,7 @@
 			*/
 		}
 	}
+	}//$bibIDs!=null
 
 	// OLD WAY TO STORE GEO DATA - directly in dtl_value as dettypes: 210(long) and 211(lat)
 /* removed by SAW  as 211 is an old magic number not brought forward.
@@ -226,10 +232,14 @@
 	}
 */
 	//some records may contain reference to map image layer record (dettype 588),
-	// but we may have such records in search result as well rectype=168
+	// but we may have such records in search result as well rectype=$imagelayerRT
 	/*
 	$res = mysql_query("select rec_ID  from Records
+<<<<<<< Updated upstream:viewers/map/showMap.php
 	where rec_ID in (" . join(",", $bibIDs) . ") and rec_RecTypeID=168");
+=======
+						 where rec_ID in (" . join(",", $bibIDs) . ") and rec_RecTypeID=$imagelayerRT");
+>>>>>>> Stashed changes:viewers/map/showMap.php
 	if($res){
 	while ($val = mysql_fetch_row($res)) {
 	array_push($imageLayers, $val[0]);

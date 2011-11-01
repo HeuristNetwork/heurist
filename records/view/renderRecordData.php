@@ -144,34 +144,11 @@ function fillPreviewes(){
 }
 
 	</script>
-	<style>
-		.detail a, .detail {
-			width:100%
-		}
-		.urlinclude > div {
-			border: 0 solid #000000;
-			height: auto;
-			margin: 0;
-			overflow: hidden;
-			padding: 0;
-			position: relative;
-			z-index: 2;
-		}
-		.urlinclude > div img{
-			height: auto;
-			width: 100%;
-			z-index: 3;
-			position:relative !important;
-		}
-		.detailType {
-			min-width:90px;
-			width:90px
-			}
-		</style>
 </head>
 <body class="popup" onLoad="add_sid();">
 
 <?php
+
 // get a list of workgroups the user belongs to.
 $wg_ids = mysql__select_array(USERS_DATABASE.'.sysUsrGrpLinks', 'ugl_GroupID', 'ugl_UserID='.get_user_id());
 array_push($wg_ids, 0);
@@ -225,7 +202,7 @@ function print_header_line($bib) {
 	if ($url  &&  ! preg_match('!^[^\\/]+:!', $url))
 		$url = 'http://' . $url;
 
-	$webIcon = @mysql_fetch_row(mysql_query("select dtl_Value from recDetails where dtl_RecID=" . $bib['rec_ID'] . " and dtl_DetailTypeID=347"));
+	$webIcon = @mysql_fetch_row(mysql_query("select dtl_Value from recDetails where dtl_RecID=" . $bib['rec_ID'] . " and dtl_DetailTypeID=347"));  //MAGIC NUMBER
 	$webIcon = @$webIcon[0];
 ?>
 <div class=HeaderRow style="margin-bottom:20px"><h2><?= htmlspecialchars($bib['rec_Title']) ?></h2>
@@ -392,7 +369,7 @@ function print_private_details($bib) {
 
 			if ($bd['dty_Type'] == 'urlinclude') {
 
-				$bd['val'] = '<div id="preview'.$bd['dty_ID'].'" class="urlinclude">'.$bd['val'].'</div>';
+				$bd['val'] = '<div id="preview'.$bd['dty_ID'].'" class="urlinclude" style="border:none red 1px;width:100%;height:300px;">'.$bd['val'].'</div>';
 
 			}else 	if ($bd['dty_Type'] == 'resource') {
 
@@ -467,7 +444,7 @@ function print_private_details($bib) {
 </div>
 <?php
 	foreach ($bds as $bd) {
-		print '<div class=detailRow><div class=detailType>'.htmlspecialchars($bd['name']).'</div><div class=detail>'.$bd['val'].'</div></div>';
+		print '<div class=detailRow style="width:100%;border:none 1px #00ff00;"><div class=detailType>'.htmlspecialchars($bd['name']).'</div><div class=detail>'.$bd['val'].'</div></div>';
 	}
 ?>
 

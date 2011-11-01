@@ -136,6 +136,10 @@ function detectSourceAndType(link, extension){
 			//alternative extension = filename.split('.').pop();
 			//@TODO if extension is still undefined - try to load via server and detectg mimeType
 		}
+		if ( !Hul.isnull(extension ) ){ //
+			extension = extension.toLowerCase();
+		}
+
 
 		if(extension==="jpg" || extension==="jpeg" || extension==="png" || extension==="gif"){
 			type = 'Image';
@@ -217,7 +221,7 @@ function showViewer(container, url_and_cfg){
 	   var sType;
 	   var sSource;
 	   if(acfg.length<3){
-	   		var oType = detectSourceAndType(url, null);
+	   		var oType = detectSourceAndType(sUrl, null);
 	   		sType = oType.type;
 	   		sSource = oType.source;
 	   }else{
@@ -230,7 +234,7 @@ function showViewer(container, url_and_cfg){
  		if(sType === "Image"){
 
  			viewerObject = null;
-			viewer.toolbarImages="../images/toolbar"
+			viewer.toolbarImages = top.HEURIST.baseURL+"images/toolbar";
 			viewer.onload =  viewer.toolbar;
 
 			viewerObject = new viewer({

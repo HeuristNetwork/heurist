@@ -61,35 +61,39 @@
 <div class="input-header-cell"></div></div>
 -->
 <h3>Behaviours / ownership</h3>
+
+
+<!-- This has caused lots of trouble - it is not really necessary because system remembers user's choice.
+     If we do re-enable it, it shoudl be a pulldown and should be changed to OVERRIDE the user's choice
 <div class="input-row">
 <div class="input-header-cell">Owner group for new records ('0' indicates 'everyone') </div>
-
-<div class="input-cell"> [textbox : sys_NewRecOwnerGrpID : : size=3] 0 indicates the 'all users' pseudo-group </div>
-<!-- This should really be 'required' but T1000 treats 0 as False, so it is rejected -->
+<div class="input-cell" > [textbox : sys_NewRecOwnerGrpID : : size=3] 0 indicates the 'all users' pseudo-group </div>
 </div>
+This should really be 'required' but T1000 treats 0 as False, so it is rejected
+-->
 
 <div class="input-row">
 <div class="input-header-cell">Default access outside owner group (only owners can edit)</div>
 <div class="input-cell">[dropdown : sys_NewRecAccess : Default access outside owner group : enum( "hidden", "viewable", "pending", "public")]</div>
 </div>
+
 <div class="input-row">
 <div class="input-header-cell">Set 'public' to 'pending' when record edited (use to stage record edits)</div>
 <div class="input-cell">[checkbox : sys_SetPublicToPendingOnEdit : : size=20] </div>
 </div>
-<div class="input-row">
-<div class="input-header-cell">User group which owns the current database  </div>
-<div class="input-cell"> [textbox :sys_OwnerGroupID  : : size=3] 0 indicates the 'all users' pseudo-group</div>
-<!-- This should really be 'required' but T1000 treats 0 as False, so it is rejected -->
-</div>
 
+<!-- Sep 2011: bug - even the owners couldn't see the records
 <div class="input-row">
 <div class="input-header-cell">Restrict database access to members of the owners group  </div>
 <div class="input-cell">[checkbox : sys_RestrictAccessToOwnerGroup  : : size=20]</div>
 </div>
+-->
+
 <div class="input-row">
 <div class="input-header-cell">Allow online registration as user (confirmed by SysAdmin)  </div>
 <div class="input-cell">[checkbox : sys_AllowRegistration : : size=20] </div>
 </div>
+
 <div class="input-row">
 <div class="input-header-cell">Carry out nightly URL validation (can overload targets)  </div>
 <div class="input-cell">[checkbox : sys_URLCheckFlag  : : size=20]</div>
@@ -97,8 +101,8 @@
 
 <h3>Locations</h3>
 <div class="input-row">
-<div class="input-header-cell">Directory for uploaded files (full path, overrides default (codebase/uploaded-heurist-files) if non-blank)  </div>
-<div class="input-cell">[textbox : sys_UploadDirectory : : size=30]</div>
+<div class="input-header-cell">Full directory path for uploaded files, overrides default (codebase/uploaded-heurist-files) if non-blank </div>
+<div class="input-cell">[textbox : sys_UploadDirectory : : size=30] WARNING: directory must be created manually</div>
 </div>
 
 

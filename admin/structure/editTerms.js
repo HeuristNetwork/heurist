@@ -186,7 +186,6 @@ function EditTerms() {
 
 					childNode = new YAHOO.widget.TextNode(term, parentEntry, false); // Create the node
 
-
 					__createChildren(parentNode[child], term.id, childNode); // createChildren() again for every child found
 					}
 				}
@@ -194,6 +193,7 @@ function EditTerms() {
 			}
 
 			var topLayerParent = new YAHOO.widget.TextNode(term, tv_parent, false); // Create the node
+			
 			if(!first_node) { first_node = topLayerParent;}
 
 			var parentNode = treesByDomain[termid];
@@ -203,6 +203,7 @@ function EditTerms() {
 
 		tv.subscribe("labelClick", _onNodeClick);
 		tv.singleNodeHighlight = true;
+		
 		tv.subscribe("clickEvent", tv.onEventToggleHighlight);
 
 		tv.render();

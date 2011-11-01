@@ -116,7 +116,7 @@ function ShowMap() {
 					url1 += "records/files/downloadFile.php?db=" + top.HEURIST.database.name + "&ulf_ID="+geoobj.fileid;
 					kmls.push(url1);
 
-				}else if(geoobj.type === "kml"){
+				}else if(geoobj.type === "kml"){ //kml content is stored as field value
 					var url2 = top.HEURIST.basePath;
 					url2 += "viewers/map/getKMLfromRecord.php?db=" + top.HEURIST.database.name + "&recID="+geoobj.recid;
 					kmls.push(url2);

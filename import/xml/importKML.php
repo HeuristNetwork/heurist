@@ -19,16 +19,21 @@ require_once(dirname(__FILE__)."/../importerBaseClass.php");
 
 $titleDT = (defined('DT_TITLE')?DT_TITLE:0);
 $geoDT = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
+$locationDT = (defined('DT_LOCATION')?DT_LOCATION:0);
+$contactDT = (defined('DT_CONTACT_INFO')?DT_CONTACT_INFO:0);
+$startdateDT = (defined('DT_START_DATE')?DT_START_DATE:0);
+$enddateDT = (defined('DT_END_DATE')?DT_END_DATE:0);
+
 
 $kml_to_heurist_map = array(
 	"name" => $titleDT,
-	"address" => 181,
-	"AddressDetails" => 181,
-	"phoneNumber" => 309,
+	"address" => $locationDT,
+	"AddressDetails" => $locationDT,
+	"phoneNumber" => $contactDT,
 	"Snippet" => 0,
 	"description" => 0,
-	"TimeSpan" => array("begin" => 177, "end" => 178),
-	"TimeStamp" => array("when" => array(177, 178)),
+	"TimeSpan" => array("begin" => $startdateDT, "end" => $enddateDT),
+	"TimeStamp" => array("when" => array($startdateDT, $enddateDT)),
 	"Metadata" => 0,
 
 	"Region" => "geo",

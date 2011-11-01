@@ -166,6 +166,8 @@ mysql_connection_db_select(DATABASE);
 /* Specify the template file containing the web page to be processed and displayed */
 $template = file_get_contents('configureProfile.html');
 
+$template = str_replace('{database}', HEURIST_DBNAME, $template);
+
 if (! array_key_exists('body_only', $_REQUEST)) {
 	/* Replaces the word {PageHeader} in the web page with the concatenation of the files specified */
 

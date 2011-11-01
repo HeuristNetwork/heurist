@@ -32,6 +32,8 @@ require_once('libs.inc.php');
 	$dtStructs = getAllDetailTypeStructures(true);
 	$dtTerms = getTerms(true);
 
+	$_REQUEST["f"] = 1;
+
 	$qresult = loadSearch($_REQUEST); //from search/getSearchResults.php - loads array of records based og GET request
 
 	if(!array_key_exists('records',$qresult)){
@@ -52,10 +54,10 @@ require_once('libs.inc.php');
 	$records =  $qresult["records"];
 	$results = array();
 	foreach ($records as $rec){
+error_log(print_r($rec, true));
+
 		$res1 = getRecordForSmarty($rec, 0);
 		array_push($results, $res1);
-
-//error_log(print_r($res1, true));
 	}
 	//activate default template - generic list of records
 
@@ -205,6 +207,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth){
 			$detailType = $dtDef[ $dtStructs['typedefs']['fieldNamesToIndex']['dty_Type']  ];
 
 //error_log(">>>>>>>".$dtKey."=".$dtNames[$dtKey].">>>".$dtname." TYPE=".$detailType);
+//ENUM('freetext','blocktext','integer','date','year','relmarker','boolean','enum','relationtype','resource','float','file','geo','separator','calculated','fieldsetmarker','urlinclude')
 
 			switch ($detailType) {
 			case 'enum':
@@ -226,11 +229,41 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth){
 			break;
 
 			case 'file':
+			   //get url for file download
+
+			   //if image - special case
+
+			break;
+			case 'urlinclude':
+				//
+				$res = "";
+				foreach ($dtValue as $key => $value){
+					if(strlen($res)>0) $res = $res.", ";
+					$res = $res.$value;
+				}
+				if(strlen($res)==0){ //no valid terms
+					$res = null;
+				}else{
+					$res = array( $dtname=>$res );
+				}
+
+error_log("rr111>>>>>".print_r($dtValue, true));
+error_log("rr222>>>>>".print_r($res, true));
+
 			break;
 			case 'relmarker':
 			break;
 			case 'relationtype':
 			break;
+			case 'geo':
+			break;
+			case 'separator':
+			break;
+			case 'calculated':
+			break;
+			case 'fieldsetmarker':
+			break;
+
 			case 'resource': // link to another record type
 
 				//@todo - parsing will depend on depth level
@@ -280,13 +313,6 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth){
 				}
 
 			break;
-			case 'geo':
-			break;
-			case 'calculated':
-			break;
-			case 'fieldsetmarker':
-			break;
-
 			default:
 				// repeated basic detail types
 				$res = "";
@@ -322,6 +348,16 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth){
 //
 function smarty_function_out($params, &$smarty)
 {
+	$dt = null;
+	if(array_key_exists('dt',$params)){
+		$dt = $params['dt'];
+	}
+
+	if($dt=="urlinclude" || $dt=="file"){
+		//insert image or youtube if appropriate
+
+	}
+
 	if($params['var']){
     	return '<div><div class="tlbl">'.$params['lbl'].': </div><b>'.$params['var'].'</b></div>';
 	}else{

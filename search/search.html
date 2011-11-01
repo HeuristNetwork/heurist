@@ -190,6 +190,10 @@
 			<li class="logged-in-only"> <span id=advanced-menu-link class="logged-in-only"><b>Advanced</b></span>
 				<ul id="advanced-menu">
 					<li><a href="../admin/structure/getListOfDatabases.php" name="auto-popup" title="For administrators only">List databases</a></li>
+<<<<<<< Updated upstream:search/search.html
+=======
+					<li><a href="javascript:void(0)" onclick="{top.HEURIST.util.reloadStrcuture();}" title="Click to clear the internal working memory of Heurist" >Clear memory</a></li>
+>>>>>>> Stashed changes:search/search.html
 					<li><a href="../import/email/emailProcessingSetup.php" name="auto-popup" class='seperator' title="Harvest email from a designated IMAP email server (set in configuration)">Harvest email</a></li>
 					<li><a href="../import/hyperlinks/importHyperlinks.php" name="auto-popup" title="Import web links from a browser bookmarks file or an html web page file">Import hyperlinks</a></li>
 					<li><a href="../admin/profile/configureProfile.php?body_only&amp;bookmark_import=1" name="auto-popup" title="Settings for web links importer">Importer settings</a></li>
@@ -200,6 +204,10 @@
                     <!-- separator-->
                     <li><a href="?ver=1&amp;w=bookmark&amp;q=-tag&amp;label=Bookmarks+without+tags" class='seperator' title="Find bookmarks which you have not tagged">Bookmarks without tags</a></li>
 					<!-- separator-->
+<<<<<<< Updated upstream:search/search.html
+=======
+					<li class="admin-only"><a href="../admin/setup/straightCopyDatabase.php" onClick="this.href = top.HEURIST.baseURL +'admin/setup/straightCopyDatabase.php?db=' + database;" target="_blank" title="Copy current database to an identical copy with a new name" class="seperator">Copy database verbatim</a></li>
+>>>>>>> Stashed changes:search/search.html
 					<li class="admin-only"><a href="../import/delimited/updateDetailsFromDelimited.html" onClick="this.href = top.HEURIST.baseURL +'import/delimited/updateDetailsFromDelimited.html?db=' + database;" target="_blank" title="Update record details using delimited text" class="seperator">Detail updater</a></li>
 					<li class="admin-only"><a href="../export/delimited/exportDelimitedForRectype.html" target="_blank" onClick="this.href = top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database;" title="Export records as delimited text">Export delimited</a></li>
 					<!-- separator-->
@@ -316,6 +324,10 @@
               <li><a href="#" id=result-style-icons-link title="View results as icons" onClick="top.HEURIST.search.setResultStyle('icons');">Icons</a></li>
               <li><a href="#" id=result-style-thumbs-link-new title="View results as icons" onClick="top.HEURIST.search.setResultStyle('thumbnails');">Thumbnails</a></li>
               <li><a href="#" title="Click to hide/show the legend" onClick="top.HEURIST.search.toggleLegend(); blur(); return false;" id="legend-link" class="seperator">Show legend</a></li>
+              <li><a href= "../export/xml/flathml.php?w=all&a=1&depth=1&q=?????????????&limit=1&db=??????" id=result-style-icons-link title="Generate HML for current search">Generate HML</a></li>
+                <!--  todo: required by Steven 1/11/11: set the query and the databsae above
+                      also, provide this in the Advanced pulldown to render the current selection
+                -->
               <li><a href="#" id="resetLayout" title="Resets all panels to default width and visibility" class="seperator">Reset Layout</a></li>
             </ul>
           </li>

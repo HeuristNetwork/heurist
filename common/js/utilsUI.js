@@ -1034,6 +1034,31 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		}, postData);
 	},
 
+	//reload rectype, details and terms for top.HEURIST
+	reloadStrcuture: function() {
+
+			var _updateHEURIST = function(context){
+
+					if(!context) {
+						alert("An error occurred trying to contact the database");
+					} else {
+
+						top.HEURIST.rectypes = context.rectypes;
+						top.HEURIST.detailTypes = context.detailTypes;
+						top.HEURIST.terms = context.terms;
+
+						alert("DB definition strcuture has been refreshed");
+					}
+			}
+
+			var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+			var baseurl = top.HEURIST.basePath + "common/php/reloadCommonInfo.php";
+			var callback = _updateHEURIST;
+			var params = "db="+_db;
+			top.HEURIST.util.getJsonData(baseurl, callback, params);
+
+	},
+
 	tagAutofill: function(term) {
 	// FIXME: we can improve this a lot by doing very simple caching
 

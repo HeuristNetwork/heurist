@@ -18,7 +18,8 @@
 --           admin/setup/coreDefinitions.txt
 
 -- The next section of this file is a PHPMyAdmin dump of H3 database structure
--- DO NOT include referential integrity or triggers/procedures
+-- DO NOT include referential integrity or triggers/procedures. Turn off use of
+-- backquotes, auto increment value and dumping of actual data
 
 -- ***************************************************************************
 
@@ -35,7 +36,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Oct 12, 2011 at 06:29 PM
+-- Generation Time: Oct 27, 2011 at 02:23 PM
 -- Server version: 5.0.51
 -- PHP Version: 5.2.3
 --
@@ -74,7 +75,7 @@ CREATE TABLE Records (
   KEY rec_OwnerUGrpID (rec_OwnerUGrpID),
   KEY rec_Hash (rec_Hash(40)),
   KEY rec_AddedByUGrpID (rec_AddedByUGrpID)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -406,7 +407,7 @@ CREATE TABLE recDetails (
   KEY dtl_ValShortenedKey (dtl_ValShortened),
   KEY dtl_ValueKey (dtl_Value(63)),
   KEY dtl_UploadedFileIDKey (dtl_UploadedFileID)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='The detail (field) values for each record - public data';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='The detail (field) values for each record - public data';
 
 -- --------------------------------------------------------
 
@@ -573,7 +574,7 @@ CREATE TABLE sysIdentification (
   sys_UploadDirectory varchar(128) default NULL COMMENT 'Absolute directory path for uploaded files (blank = use default from installation)',
   sys_hmlOutputDirectory varchar(255) default NULL COMMENT 'Directory in which to write hml representation of published records, default to hml within upload directory',
   sys_htmlOutputDirectory varchar(255) default NULL COMMENT 'Directory in which to write html representation of published records, default to html within upload directory',
-  sys_NewRecOwnerGrpID smallint(5) unsigned NOT NULL default '0' COMMENT 'Group which by default owns new records, 0=everyone. Allow override per user',
+  sys_NewRecOwnerGrpID smallint(5) unsigned NOT NULL default '1' COMMENT 'Group which by default owns new records, 0=everyone. Allow override per user',
   sys_NewRecAccess enum('viewable','hidden','public','pending') NOT NULL default 'viewable' COMMENT 'Default visibility for new records - allow override per user',
   sys_SetPublicToPendingOnEdit tinyint(1) unsigned NOT NULL default '0' COMMENT '0=immediate publish when ''public'' record edited, 1 = reset to ''pending''',
   sys_ConstraintDefaultBehavior enum('locktypetotype','unconstrainedbydefault','allownullwildcards') NOT NULL default 'locktypetotype' COMMENT 'Determines default behaviour when no detail types are specified',
@@ -681,7 +682,7 @@ CREATE TABLE usrBookmarks (
   UNIQUE KEY bkm_RecID (bkm_RecID,bkm_UGrpID),
   KEY bkm_UGrpID (bkm_UGrpID),
   KEY bkm_Modified (bkm_Modified)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Bookmark = personal data relating to a record, one for each ';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Bookmark = personal data relating to a record, one for each ';
 
 -- --------------------------------------------------------
 
@@ -720,7 +721,7 @@ CREATE TABLE usrRecTagLinks (
 --
 
 CREATE TABLE usrRecentRecords (
-  rre_UGrpID smallint(5) unsigned NOT NULL COMMENT 'ID of user who used the record',
+  rre_UGrpID smallint(5) unsigned default NULL COMMENT 'ID of user who used the record',
   rre_RecID int(10) unsigned NOT NULL COMMENT 'ID of recently used record',
   rre_Time timestamp NOT NULL default CURRENT_TIMESTAMP COMMENT 'Timestamp of use of records, notably those searched for with pointer field',
   UNIQUE KEY rre_composite (rre_UGrpID,rre_RecID),
@@ -875,7 +876,6 @@ CREATE TABLE woots (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Woot records (entries, pages) are linked to a set of XHTML c';
 
 
-
 -- ------------------------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
@@ -920,6 +920,7 @@ INSERT INTO `sysTableLastUpdated` VALUES ('usrHyperlinkFilters', '0000-00-00 00:
 INSERT INTO `sysTableLastUpdated` VALUES ('usrTags', '0000-00-00 00:00:00', 1);
 
 
+-- The owners of the database - always group 1
 INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMail,ugr_Enabled,ugr_FirstName,ugr_LastName)
  VALUES (1,'Database owners',
  'Group 1 owns databases by default. DO NOT DELETE.',
@@ -929,19 +930,37 @@ INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMa
  -- This user (#2) is replaced with the user who created the database
  INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMail,ugr_Enabled,ugr_FirstName,ugr_LastName)
  VALUES (2,'dbAdmin','User 2 is default administrator for databases. DO NOT DELETE',
- 'User','cfefBRSMX8ggU','EMAIL NOT SET FOR ID=2','y','sys','admin');  -- password is 'none'
+ 'User','TO BE RESET','EMAIL NOT SET FOR ID=2','y','sys','admin');  -- password is 'none'
   -- Note: ugr_id=2 is set as the database admin in the sysUsrGrpLinks table
   -- there can be multipl admins for a database
 
-INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMail,ugr_Enabled,ugr_FirstName,ugr_LastName)
- VALUES (3,'Everyone',
+  -- An extra group of users to give people the idea
+ INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMail,ugr_Enabled,ugr_FirstName,ugr_LastName)
+ VALUES (3,'Other users',
+ 'Another group, can be used eg. for guests',
+ 'Workgroup','PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=3','y','other','users');
+ -- Note: ugr_id=1 is set as the database owner group in the sysidentification table
+
+-- insert as 4 then change - cannot insert 0 straight up, as it gets reset to 4 in any case
+ INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMail,ugr_Enabled,ugr_FirstName,ugr_LastName)
+ VALUES (4,'Everyone',
  'Group 0 represents all logged in users. DO NOT DELETE.',
  'Workgroup','PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=0','y','every','user');
  -- Note: ugr_id=0 is set as the default new rec owner in the sysidentification table, this entry is require to constraint
- UPDATE sysUGrps set ugr_ID = 0 where ugr_ID = 3; -- cannot insert 0 straight up, it gets appended
+ UPDATE sysUGrps set ugr_ID = 0 where ugr_ID = 4; -- cannot insert 0 straight up, it gets appended
 
--- Insert a row to define the link between group 1 (dbowners) and user 2 (the first admin)
+-- Insert a row to define the link between group 1 (dbowners) and group 3 (other users) and user 2 (the first admin)
 INSERT IGNORE INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID,ugl_Role) VALUES (2,1,'admin');
+INSERT IGNORE INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID,ugl_Role) VALUES (2,3,'admin');
+
+-- Add a debugging user for convenience of the Heurist team, make it a database owner group admin
+INSERT INTO `sysUGrps` ( `ugr_ID` , `ugr_Type` , `ugr_Name` , `ugr_LongName` , `ugr_Description` , `ugr_Password` ,
+`ugr_eMail` , `ugr_FirstName` , `ugr_LastName` , `ugr_Department`, `ugr_Organisation` , `ugr_City` , `ugr_State` ,
+`ugr_Postcode` , `ugr_Interests` , `ugr_Enabled` , `ugr_LastLoginTime` , `ugr_MinHyperlinkWords` , `ugr_LoginCount` ,
+`ugr_IsModelUser` ,`ugr_IncomingEmailAddresses` , `ugr_TargetEmailAddresses` , `ugr_URLs` , `ugr_FlagJT` , `ugr_Modified` )
+VALUES (4 , 'user', 'debug', 'debug user', NULL , 'XPDHNqkWMM7Xs', 'info@heuristscholar.org', 'debug', 'user',
+	'Arts eResearch' , 'University of Sydney' , NULL , NULL , NULL ,NULL , 'y', NULL , '3', '0', '0', NULL , NULL , NULL , '0', NOW( ));
+INSERT IGNORE INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID,ugl_Role) VALUES (4,1,'admin');
 
 
 -- defRectypegroups and defDetailtypeGroups are now inserted by coreDefinitions.txt

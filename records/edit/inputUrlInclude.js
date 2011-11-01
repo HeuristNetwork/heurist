@@ -24,15 +24,24 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 		newDiv.expando = true;
 	this.addInputHelper.call(this, bdValue, newDiv);
 
+	var val = "";
+	if(bdValue){
+		val = bdValue.value;
+		var arr = val.split("|");
+		if(arr && arr.length>0){
+			val = arr[0];
+		}
+	}
+
 	var hiddenElt = newDiv.hiddenElt = this.document.createElement("input");
 		hiddenElt.name = newDiv.name;
-		hiddenElt.value = hiddenElt.defaultValue = "it will be hidden";//(bdValue && bdValue.file)? bdValue.file.id : "";
-		//hiddenElt.type = "hidden";
+		hiddenElt.value = hiddenElt.defaultValue = (bdValue)? bdValue.value : "";
+		hiddenElt.type = "hidden";
 		newDiv.appendChild(hiddenElt);
 
 	var textElt = newDiv.textElt = newDiv.appendChild(this.document.createElement("input"));
 		textElt.type = "text";
-		textElt.value = textElt.defaultValue = bdValue? bdValue.title : "";
+		textElt.value = textElt.defaultValue = val;
 		textElt.title = "Click here to upload file and/or define the URL";
 		textElt.setAttribute("autocomplete", "off");
 		textElt.className = "in"; //"resource-title";
@@ -48,7 +57,7 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 			}
 			else return true;	// allow tab or control/alt etc to do their normal thing (cycle through controls)
 		};
-		top.HEURIST.registerEvent(textElt, "click", function() { if (! newDiv.readOnly) thisRef.defineURL(newDiv); });
+		top.HEURIST.registerEvent(textElt, "click", function() { thisRef.defineURL(newDiv); });
 		top.HEURIST.registerEvent(textElt, "mouseup", function() { if (! newDiv.readOnly) thisRef.handlePossibleDragDrop(thisRef, newDiv); });
 		top.HEURIST.registerEvent(textElt, "mouseover", function() { if (! newDiv.readOnly) thisRef.handlePossibleDragDrop(thisRef, newDiv); });
 
@@ -90,16 +99,15 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.getPrimaryValue = fun
 /**
 * Open popup - to upload file and specify URL
 */
-top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.defineURL = function(element, searchValue) {
-	if (this.choosing) return;	// we are already choosing a resource!
-	this.choosing = true;
+top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.defineURL = function(element, editValue) {
+
 	var thisRef = this;
 
-	if (! searchValue) searchValue = element.textElt.value;
-	var url = top.HEURIST.basePath+"records/files/uploadFileOrDefineURL.html?q="+encodeURIComponent(searchValue)
-	if (element.input.constrainrectype){
+	if (!editValue) editValue = element.hiddenElt.value;
+	var url = top.HEURIST.basePath+"records/files/uploadFileOrDefineURL.html?value="+encodeURIComponent(editValue);
+	/*if (element.input.constrainrectype){
 		url += "&t="+element.input.constrainrectype;
-	}
+	}*/
 
 	top.HEURIST.util.popupURL(window, url, {
 		height: 480,
@@ -108,12 +116,11 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.defineURL = function(
 			//it returns url - link to external or heurist file
 			//			source - name of source/service
 			//			type - type of media
-			element.input.setURL(element, url, url+'|'+source+"|"+type);
-			/*
-			if (bibID) element.input.setURL(element, url);
-			thisRef.choosing = false;
-			setTimeout(function() { element.textElt.focus(); }, 100);
-			*/
+			if(top.HEURIST.util.isempty(url)){
+				//element.input.setURL(element, "", "");
+			}else{
+				element.input.setURL(element, url, url+'|'+source+"|"+type);
+			}
 		}
 	} );
 };
@@ -127,7 +134,6 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.clearURL = function(e
 */
 top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.setURL = function(element, url, src_type) {
 
-	this.choosing = false;
 	element.textElt.title = element.textElt.value = element.textElt.defaultValue = url? url : "";
 	element.hiddenElt.title = element.hiddenElt.value = element.hiddenElt.defaultValue = src_type? src_type : "";
 

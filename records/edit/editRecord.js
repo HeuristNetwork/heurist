@@ -1907,6 +1907,18 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 			var thisRef = this;
 			fileElt.onchange = function() { top.HEURIST.edit.uploadFileInput.call(thisRef, fileElt); };
 			inputDiv.className = "file-div empty";
+
+			//additional button for Thumbnail Image - to create web snap shot
+			if(Number(top.HEURIST.edit.record.rectypeID) === top.HEURIST.magicNumbers['RT_INTERNET_BOOKMARK']){
+				var thumbElt = this.document.createElement("input");
+					thumbElt.name = inputDiv.name;
+					thumbElt.value = "Web page snapshot";
+					thumbElt.type = "button";
+					thumbElt.title = "Click here to snapshot the web page indicated by the URL and store as the thumbnail";
+					thumbElt.onclick = function(){top.HEURIST.edit.uploadURL.call(thisRef, fileElt);}
+				inputDiv.appendChild(thumbElt);
+			}
+
 		}
 
 		inputDiv.link = "";

@@ -254,7 +254,9 @@
 		'RT_AUTHOR_EDITOR' => array(2,23),
 		'RT_BLOG_ENTRY' => array(2,8),
 		'RT_INTERPRETATION' => array(2,10),
-		'RT_FACTOID' => array(2,22));
+		'RT_FACTOID' => array(2,22),
+		'RT_IMAGELAYER' => array(3,168)
+		);
 
 	foreach ($rtDefines as $str => $id) {
 		defineRTLocalMagic($str,$id[1],$id[0]);
@@ -301,7 +303,12 @@
 		'DT_KML' => array(2,138),
 		'DT_MINMUM_ZOOM_LEVEL' => array(2,586),
 		'DT_MAP_IMAGE_LAYER_REFERENCE' => array(2,92),
-		'DT_MAXIMUM_ZOOM_LEVEL' => array(2,587));
+		'DT_MAXIMUM_ZOOM_LEVEL' => array(2,587),
+		'DT_LOCATION' => array(3,181),
+		'DT_CONTACT_INFO' => array(3,309),
+		'DT_XLON' => array(3,210),
+		'DT_YLAT' => array(3,211)
+		);
 
 	foreach ($dtDefines as $str => $id) {
 		defineDTLocalMagic($str,$id[1],$id[0]);

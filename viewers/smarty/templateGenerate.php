@@ -90,7 +90,7 @@ require_once('libs.inc.php');
 			$qresult = loadSearch($_REQUEST); //from search/getSearchResults.php - loads array of records based on GET request
 
 			if(!array_key_exists('records',$qresult)){
-			//error_log(">>>>>>>>NOTHING FOUND");
+//error_log(">>>>>>>>NOTHING FOUND");
 				echo "Nothing found. Impossible generate the template";
 				exit();
 			}
@@ -98,6 +98,8 @@ require_once('libs.inc.php');
 			//convert to array that will assigned to smarty variable
 			$records =  $qresult["records"];
 
+//error_log("RECORDS>>>>>".print_r($records,true));
+			
 			//it is required to obtain name of header (common) fields only
 			$first_record = $records[0];
 
@@ -291,6 +293,9 @@ function getRecordHeaderSectionForSmarty($rec, $parentName, $ind){
 
 		//loop for all record properties
 		foreach ($rec as $key => $value){
+			
+//error_log($key."=".$value);
+
 			$pos = strpos($key,"rec_");
 			if(is_numeric($pos) && $pos==0){
 				//array_push($record, array(substr($key,4) => $value));

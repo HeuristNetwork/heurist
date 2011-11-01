@@ -121,6 +121,9 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 	// calculate title, do an update
 	$mask = mysql__select_array("defRecTypes", "rty_TitleMask", "rty_ID=$type");  $mask = $mask[0];
 	$title = fill_title_mask($mask, $recordID, $type);
+
+//error_log("DEBUG >>>>>>MASK=".$mask."=".$title);
+
 	if ($title) {
 		mysql_query("update Records set rec_Title = '" . addslashes($title) . "' where rec_ID = $recordID");
 	}
@@ -254,7 +257,7 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 					break;
 
 				case "freetext": case "blocktext":
-				case "date": case "year":
+				case "date": case "year": case "urlinclude":
 					if (! $val) { if ($bdID) array_push($dontDeletes, $bdID); continue; }
 					$bdVal = "'" . addslashes($val) . "'";
 					break;

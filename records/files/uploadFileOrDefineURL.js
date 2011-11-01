@@ -62,6 +62,29 @@ function initPage() {
 			rfr = ["File", "", "", 'optional', 0, 1, 0 ];	// saw TODO need to get defaults for enum list from dt
 		}
 
+		var sUrl = "";
+		var sType = "";
+		var sSource = "";
+
+		if(location.search.length > 1) {
+			top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+
+			var acfg = top.HEURIST.parameters['value'].split('|');
+			if(Hul.isnull(acfg) || acfg.length<1){
+				return;
+			}
+
+			sUrl = acfg[0];
+
+			if(acfg.length<3){
+				var oType = detectSourceAndType(sUrl, null);
+				sType = oType.type;
+				sSource = oType.source;
+			}else{
+				sSource = acfg[1];
+				sType = acfg[2];
+			}
+		}
 
 		//add file upload component
 		var container = document.getElementById("div_fileupload");
@@ -71,13 +94,26 @@ function initPage() {
 
 		//add URL component
 		container = document.getElementById("div_url");
-		var defaultURL = "";
-		URLInput = new top.HEURIST.edit.inputs.BibURLInput(container, defaultURL, false);
+		URLInput = new top.HEURIST.edit.inputs.BibURLInput(container, sUrl, false);
 
 		// access to input element URLInput.inputs[0]
 		this.changed = function(){};
 		URLInput.inputs[0].onblur = onChangeURL;
 
+		if(Hul.isempty(sSource)){
+			document.getElementById("cbSource").selectedIndex = 0;
+		}else{
+			document.getElementById("cbSource").value = sSource;
+		}
+		if(Hul.isempty(sSource)){
+			document.getElementById("cbType").selectedIndex = 0;
+		}else{
+			document.getElementById("cbType").value = sType;
+		}
+
+		if(!Hul.isempty(sUrl)){
+			onChangeURL(null, null);
+		}
 
 }
 
@@ -86,5 +122,5 @@ function onApply(){
 }
 
 function onCancel(){
-	window.close();
+	window.close(null);
 }

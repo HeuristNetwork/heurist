@@ -514,6 +514,8 @@ function ShowReps() {
 		//create treeview
 		if(Hul.isnull(_varsTree)){
 					_varsTree = new YAHOO.widget.TreeView("varsTree");
+					_varsTree.singleNodeHighlight = true;
+					_varsTree.selectable = false;
 					_varsTree.subscribe("clickEvent",
 						function() { // On click, select the term, and add it to the selected terms tree
 							this.onEventToggleHighlight.apply(this,arguments);
@@ -522,77 +524,9 @@ function ShowReps() {
 					});
 		}
 
-		//fill treeview with content
-		var i, termid, term,
-			tv = _varsTree,
-			tv_parent = tv.getRoot(),
-			first_node,
-			varid,
-			varnames;
-
-		//clear treeview
-		tv.removeChildren(tv_parent);
-
-		for (i in _variables){
-		if(i!==undefined)
-		{
-			varnames = _variables[i];  // && _variables[i].id===recTypeID
-
-			term = {};//new Object();
-			term.id = _variables[i].id;
-			term.this_id = 'r';
-			term.parent_id = null;
-			term.label = '<div style="padding-left:10px;">'+_variables[i].name;
-			if(i>0){
-				term.label =  term.label + '&nbsp;(<a href="javascript:void(0)" title="Insert IF operator for this record type. It will allow to avoid an error if this type is missed in the result set" onClick="showReps.insertRectypeIf(\''+
-											_variables[i].name+'\')">IF</a>)';
-			}else{
-				term.label =  term.label + '&nbsp;(<a href="javascript:void(0)" title="Insert root FOREACH operator" onClick="showReps.insertRootForEach()">FOREACH</a>)';
-			}
-			term.label =  term.label + '</div>';
-
-			term.href = "javascript:void(0)";
-
-			var topLayerParent = new YAHOO.widget.TextNode(term, tv_parent, false); // Create the node
-			if(!first_node) { first_node = topLayerParent;}
-
-			var prefix_id = term.id; //rectype id
-
-		//first level terms
-		for (varid in varnames.tree)
-		{
-		if(!Hul.isnull(varid)){
-
-			term = {};//new Object();
-			term.id = prefix_id+"."+varid; //unique id including rectype ID
-			term.parent_id = "r";  //uniques parent prefix
-			term.this_id = varid;
-			term.label = '<div style="padding-left:10px;">';//<a href="javascript:void(0)"></a>&nbsp;&nbsp;'+varid+'</div>';
-
-			term.href = "{javascript:void(0)}";
-			if( Object.keys(varnames.tree[varid]).length > 0){type:
-					term.label = term.label +
-					'<a href="javascript:void(0)" onClick="showReps.markAllChildren(\''+
-											term.id+'\')">All</a>&nbsp;&nbsp;';
-					term.href = "javascript:void(0)"; // To make 'select all' clickable, but not leave the page when hitting enter
-
-					if(varid!=="r"){
-						term.label = term.label +
-'(<a href="javascript:void(0)" title="Insert FOREACH operator for this resource" onClick="showReps.insertSelectedVarsAsLoop(\''+term.id+'\')">FOR</a>'+
-'&nbsp;<a href="javascript:void(0)" title="Insert marked variables in loop (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true)">In</a>'+
-'&nbsp;<a href="javascript:void(0)" title="Insert marked variables with parent prefix. To use outside the loop" onClick="showReps.insertSelectedVars(\''+term.id+'\', false)">Out</a>)&nbsp;';
-					}else{
-						term.label = term.label +
-'(<a href="javascript:void(0)" title="Insert marked variables" onClick="showReps.insertSelectedVars(\''+term.id+'\', false)">Ins</a>)&nbsp;';
-					}
-
-			}
-			term.label = term.label + varid+'</div>'; //to debug replace to term.id
-
-			//'<div id="'+parentElement+'"><a href="javascript:void(0)" onClick="selectAllChildren('+nodeIndex+')">All </a> '+termsByDomainLookup[parentElement]+'</div>';
-			//term.href = "javascript:void(0)";
+		
 		//internal function
-			function __createChildren(parentNode, parent_id, _prefix, parentEntry) { // Recursively get all children
+			function __createChildren(parentNode, parent_id, _prefix, parentEntry, varnames) { // Recursively get all children
 				var term,
 					childNode,
 					child;
@@ -619,38 +553,136 @@ function ShowReps() {
 					term.labelonly = label;
 
 					if( is_record ){
+/* Ian's reuest 10-28						
 							term.label = term.label +
 							'<a href="javascript:void(0)" onClick="showReps.markAllChildren(\''+
 											term.id+'\')">All</a>&nbsp;&nbsp';
 							term.href = "{javascript:void(0)}";
-
-							term.label = term.label +
-'(<a href="javascript:void(0)" title="Insert FOREACH operator for this resource" onClick="showReps.insertSelectedVarsAsLoop(\''+term.id+'\')">FOR</a>'+
-'&nbsp;<a href="javascript:void(0)" title="Insert marked variables in loop (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true)">In</a>'+
-'&nbsp;<a href="javascript:void(0)" title="Insert marked variables with parent prefix. To use outside the loop" onClick="showReps.insertSelectedVars(\''+term.id+'\', false)">Out</a>)&nbsp;';
+*/
+							term.label = term.label + '<b>' + label + '</b>' +
+'&nbsp;(<a href="javascript:void(0)" title="Insert FOREACH operator for this resource" onClick="showReps.insertSelectedVarsAsLoop(\''+term.id+'\')">loop</a>)</div>';
+/*
+'&nbsp;<a href="javascript:void(0)" title="Insert marked variables in loop (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true)">in</a>'+
+'&nbsp;<a href="javascript:void(0)" title="Insert marked variables with parent prefix. To use outside the loop" onClick="showReps.insertSelectedVars(\''+term.id+'\', false)">out</a>)</div>';
+*/
+					}else{
+						if(parent_id=="r"){
+							term.label = term.label + label +
+'&nbsp;(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.insertSelectedVars(\''+term.id+'\', true)">insert</a>)</div>';
+						}else{
+							term.label = term.label + label +
+'&nbsp;(<a href="javascript:void(0)" title="Insert variable in loop (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true)">in</a>'+
+'&nbsp;<a href="javascript:void(0)" title="Insert variable with parent prefix. To use outside the loop" onClick="showReps.insertSelectedVars(\''+term.id+'\', false)">out</a>)</div>';
+						}
 					}
 
-					term.label = term.label + label + '</div>'; //to debug replace to term.id
-
 					childNode = new YAHOO.widget.TextNode(term, parentEntry, false); // Create the node
+					childNode.enableHighlight = false;
+
 					if( is_record ){
-						__createChildren(fullid, child, term.id, childNode); // createChildren() again for every child found
+						__createChildren(fullid, child, term.id, childNode, varnames); // createChildren() again for every child found
 					}
 
 
 					}
 				}
 				}//for
+			}//__createChildren
+		//end internal function
+		
+		
+		//fill treeview with content
+		var i, termid, term,
+			tv = _varsTree,
+			tv_parent = tv.getRoot(),
+			first_node,
+			varid,
+			varnames;
+
+		//clear treeview
+		tv.removeChildren(tv_parent);
+
+		for (i=1; i<_variables.length; i++){
+		
+		
+			varnames = _variables[i];  // && _variables[i].id===recTypeID
+
+			term = {};//new Object();
+			term.id = _variables[i].id;
+			term.this_id = 'r';
+			term.parent_id = null;
+			term.label = '<div style="padding-left:10px;">'+_variables[i].name;
+			if(i>0){
+				term.label =  '<b>' + term.label + '</b>&nbsp;(<a href="javascript:void(0)" title="Insert IF operator for this record type. It will allow to avoid an error if this type is missed in the result set" onClick="showReps.insertRectypeIf(\''+
+											_variables[i].name+'\')">if</a>)';
+			}else{
+				//DO NOT common section - keep reference and common header values in top of each record type
+				term.label =  term.label + '&nbsp;(<a href="javascript:void(0)" title="Insert root FOREACH operator" onClick="showReps.insertRootForEach()">insert loop</a>)';
+			}
+			term.label =  term.label + '</div>';
+
+			term.href = "javascript:void(0)";
+
+			var topLayerParent = new YAHOO.widget.TextNode(term, tv_parent, false); // Create the node
+			if(!first_node) { first_node = topLayerParent;}
+
+			var prefix_id = term.id; //rectype id
+
+		//first level terms
+		for (varid in varnames.tree)
+		{
+		if(!Hul.isnull(varid)){
+
+
+			
+			if(varid==="r"){ //don't create additional level - add childeren to rectype directly
+				//common for all types
+				__createChildren(_variables[0].tree.r, "r", prefix_id+".r", topLayerParent, _variables[0]);
+				
+				//specific for this type
+				__createChildren(varnames.tree.r, "r", prefix_id+".r", topLayerParent, varnames);
+				continue;	
+			}
+
+			term = {};//new Object();
+			term.id = prefix_id+"."+varid; //unique id including rectype ID
+			term.parent_id = "r";  //uniques parent prefix
+			term.this_id = varid;
+			term.label = '<div style="padding-left:10px;">';//<a href="javascript:void(0)"></a>&nbsp;&nbsp;'+varid+'</div>';
+
+			term.href = "{javascript:void(0)}";
+			if( Object.keys(varnames.tree[varid]).length > 0){type:
+/*IAN's request 10-28			
+					term.label = term.label +
+					'<a href="javascript:void(0)" onClick="showReps.markAllChildren(\''+
+											term.id+'\')">All</a>&nbsp;&nbsp;';
+*/
+					term.href = "javascript:void(0)"; // To make 'select all' clickable, but not leave the page when hitting enter
+					if(varid!=="r"){
+						term.label = term.label + '<b>' + varid + '</b>' +
+'&nbsp;(<a href="javascript:void(0)" title="Insert FOREACH operator for this resource" onClick="showReps.insertSelectedVarsAsLoop(\''+term.id+'\')">loop</a>)';
+					}else{
+						term.label = term.label + varid;
+//IAN's '+'(<a href="javascript:void(0)" title="Insert marked variables" onClick="showReps.insertSelectedVars(\''+term.id+'\', false)">ins</a>)&nbsp;';
+					}
+                    term.label = term.label + '</div>'
+			}else{
+					term.label = term.label + varid+ //to debug replace to term.id
+'&nbsp;<a href="javascript:void(0)" title="Insert variable in loop (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true)">insert</a>)</div>';
+					
 			}
 
 			var rectypeLayer = new YAHOO.widget.TextNode(term, topLayerParent, false); // Create the node
 
 			var _parentNode = varnames.tree[varid];
-			__createChildren(_parentNode, varid, term.id, rectypeLayer); // Look for children of the node
+			rectypeLayer.enableHighlight = false;
+			
+			
+			__createChildren(_parentNode, varid, term.id, rectypeLayer, varnames); // Look for children of the node
+			
 		}
-		}//for
-		}
-		}//for
+		}//for  varnames.tree
+		}//for  _variables
 
 		//TODO tv.subscribe("labelClick", _onNodeClick);
 		//tv.singleNodeHighlight = true;
@@ -685,12 +717,9 @@ function ShowReps() {
 	//
 	function _insertRootForEach(){
 		var textedit = Dom.get("edTemplateBody");
-		var _text = '{foreach $results as $r}\n{* INSERT YOUR CODE HERE *}\n{/foreach}\n';
+		var _text = '{foreach $results as $r}\n\t\n{/foreach}\n';  //{* INSERT YOUR CODE HERE *}
 
-		var scrollTop = textedit.scrollTop;
-		insertAtCursor(textedit, _text);
-		textedit.scrollTop = scrollTop;
-		textedit.focus();
+		insertAtCursor(textedit, _text, false, -12);
 	}
 	//
 	//
@@ -698,12 +727,9 @@ function ShowReps() {
 	function _insertRectypeIf(rectypeName){
 
 		var textedit = Dom.get("edTemplateBody");
-		var _text = '{if ($r.recTypeName=="'+rectypeName+'")}\n{* INSERT YOUR CODE HERE *}\n{/if}\n';
+		var _text = '{if ($r.recTypeName=="'+rectypeName+'")}\n\t\n{/if}\n';  //{* INSERT YOUR CODE HERE *}
 
-		var scrollTop = textedit.scrollTop;
-		insertAtCursor(textedit, _text);
-		textedit.scrollTop = scrollTop;
-		textedit.focus();
+		insertAtCursor(textedit, _text, false, -7);
 	}
 
 	//
@@ -728,11 +754,7 @@ function ShowReps() {
 								var ed = tinyMCE.get('edTemplateBody');
 								ed.selection.setContent(_variables[i].text);
 							}else{
-								var scrollTop = textedit.scrollTop;
-								insertAtCursor(textedit, _variables[i].text+'<br/>');
-								textedit = ApplyLineBreaks(textedit, textedit.value);
-								textedit.scrollTop = scrollTop;
-								textedit.focus();
+								insertAtCursor(textedit, _variables[i].text+'<br/>', true, 0);
 							}
 
 							break;
@@ -759,6 +781,7 @@ function ShowReps() {
 			_varid = varid,
 			_inloop = inloop;
 			_prefix = "";
+			
 
 		//function for each node in _varsTree - create the list
 		/*
@@ -825,21 +848,38 @@ function ShowReps() {
 					}*/
 				}
 
-				if(_inloop){
-					_prefix = _nodep.data.this_id + ".";
-				}else{
-					var s = _nodep.data.id; //get all parents
-					s = s.substring(s.indexOf('.')+1);
-					if(s!=="r"){
-						s = "r."+s;
+				if (_nodep.children &&	_nodep.children > 0) 
+				{
+				
+					if(_inloop){
+						_prefix = _nodep.data.this_id + ".";
+					}else{
+						var s = _nodep.data.id; //get all parents
+						s = s.substring(s.indexOf('.')+1);
+						if(s!=="r"){
+							s = "r."+s;
+						}
+						_prefix = s + ".";
+						/*if(_prefix!==_nodep.data.id){
+							_prefix = s_prefix + _nodep.data.id + ".";
+						}*/
 					}
-					_prefix = s + ".";
-					/*if(_prefix!==_nodep.data.id){
-						_prefix = s_prefix + _nodep.data.id + ".";
-					}*/
-				}
 
-				__loopNodes2(_nodep.children);
+					__loopNodes2(_nodep.children);
+				}else{
+					if(_inloop){
+						_prefix = _nodep.data.parent_id + ".";
+					}else{
+						var s = _nodep.data.id; //get all parents
+						s = s.substring(s.indexOf('.')+1);
+						if(s!=="r"){
+							s = "r."+s;
+						}
+						s = s.substring(0,s.length-_nodep.data.this_id.length);
+						_prefix = s;
+					}
+					_text = _text + _addVariable(_nodep.data, _prefix);
+				}
 			}
 		}
 
@@ -848,10 +888,7 @@ function ShowReps() {
 				var ed = tinyMCE.get('edTemplateBody');
 				ed.selection.setContent(_text);
 			}else{
-				var scrollTop = textedit.scrollTop;
-				insertAtCursor(textedit, _text);
-				textedit.scrollTop = scrollTop;
-				textedit.focus();
+				insertAtCursor(textedit, _text, false, 0);
 			}
 			_varsTree.render();
 		}else{
@@ -920,7 +957,7 @@ function ShowReps() {
 				_prefix = _nodep.data.this_id + ".";
 
 				if( !__loopNodes(_nodep.children, 0) ){
-						_text = _text + "{* INSERT YOUR CODE HERE *}\n";
+						_text = _text + "\t\n"; //{* INSERT YOUR CODE HERE *}
 				}
 				_text = _text + "{/foreach}\n";
 			}
@@ -932,10 +969,7 @@ function ShowReps() {
 					var ed = tinyMCE.get('edTemplateBody');
 					ed.selection.setContent(_text);
 			}else{
-				var scrollTop = textedit.scrollTop;
-				insertAtCursor(textedit, _text);
-				textedit.scrollTop = scrollTop;
-				textedit.focus();
+				insertAtCursor(textedit, _text, false, -12);
 			}
 
 			_varsTree.render();
@@ -949,9 +983,9 @@ function ShowReps() {
 	//
 	// utility function - move to HEURIST.utils
 	//
-	function insertAtCursor(myField, myValue) {
+	function insertAtCursor(myField, myValue, isApplyBreaks, cursorIndent) {
 
-			//var scrollTop = myField.scrollTop;
+			var scrollTop = myField.scrollTop;
 
 			//IE support
 			if (document.selection) {
@@ -966,12 +1000,22 @@ function ShowReps() {
 				myField.value = myField.value.substring(0, startPos)
 				+ myValue
 				+ myField.value.substring(endPos, myField.value.length);
+				
+				myField.selectionStart = endPos + myValue.length + cursorIndent;
+				myField.selectionEnd = endPos + myValue.length + cursorIndent;
+				
 			} else {
 				myField.value += myValue;
 			}
 
-			//myField.scrollTop = scrollTop;
-			//myField.focus();
+
+			if(isApplyBreaks){
+				myField = ApplyLineBreaks(myField, myField.value);
+			}
+			
+			myField.scrollTop = scrollTop;
+			
+			setTimeout(function() {myField.focus(); }, 500);
 	}
 	//
 	// apply line breaks
