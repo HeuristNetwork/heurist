@@ -233,20 +233,14 @@ if(mysql_error()) {
 */
 	//some records may contain reference to map image layer record (dettype 588),
 	// but we may have such records in search result as well rectype=$imagelayerRT
-	/*
 	$res = mysql_query("select rec_ID  from Records
-<<<<<<< Updated upstream:viewers/map/showMap.php
-	where rec_ID in (" . join(",", $bibIDs) . ") and rec_RecTypeID=168");
-=======
 						 where rec_ID in (" . join(",", $bibIDs) . ") and rec_RecTypeID=$imagelayerRT");
->>>>>>> Stashed changes:viewers/map/showMap.php
 	if($res){
-	while ($val = mysql_fetch_row($res)) {
-	array_push($imageLayers, $val[0]);
-	$geoBibIDs[$val[0]] = $val[0];
+		while ($val = mysql_fetch_row($res)) {
+			array_push($imageLayers, $val[0]);
+			$geoBibIDs[$val[0]] = $val[0];
+		}
 	}
-	}
-	*/
 
 
 	$layers = array();
@@ -398,7 +392,7 @@ if(mysql_error()) {
 		from Records
 		cross join defDetailTypes yt
 		left join recDetails y on y.dtl_RecID = rec_ID and y.dtl_DetailTypeID = yt.dty_ID
-		where rec_ID in (" . join(",", $bibIDs) . ")
+		where rec_ID in (" . join(",", $anyDateBibIDs) . ")
 		and yt.dty_Type = 'year'
 		group by rec_ID");
 		if($res){
