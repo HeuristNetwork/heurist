@@ -30,9 +30,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-body {padding:0;overflow: hidden;}
-
-*|* {font-family: Helvetica, Arial, Verdana !important;font-size: 11px;}
+body {
+	padding:0;
+	overflow: hidden;
+}
+ *|* {font-family: Helvetica, Arial, Verdana !important;font-size: 11px;}
 
 H1, H2, H3 {color:#6A7C99;font-size: 12px;display: inline;}
 h3 {color:#DC8501;font-size:12px;white-space:nowrap;display: block;}
@@ -141,7 +143,50 @@ div.show-related:hover {text-decoration: underline;}
 .greyType {color: #999999}
 .note {display:block; color:#999;}
 #displayResult #content {
-	text-align:left;
-	padding:10px;
+	bottom: 0;
+	left: 0;
+	overflow-y: auto;
+	padding: 10px;
+	position: absolute;
+	right: 0;
+	text-align: left;
+	top: 25px;;
 }
 .L0 {display:block !important}
+
+/* annotationss */
+#annotationList li {text-align:left; color:#666; padding:5px; list-style:none; display:inline-block; max-width:150px; vertical-align:top; border-right:1px solid #CCC;}
+#annotationList ul {padding:5px; display:none}
+#annotationList:hover ul {padding:5px; display:block}
+#annotationList {
+	background-color: RGBA(237,245,255, 0.85);
+	background-image: url("../images/heading_saved_search-hidden.png");
+	background-position: 0 1px;
+	background-repeat: no-repeat;
+	padding: 5px 5px 5px 15px;
+	text-align: left;
+	position:absolute;
+	left:0;
+	right:0;
+	max-height:200px;
+	overflow-y:auto;
+	z-index:10;
+	}
+#annotationList:hover {background-image: url("../images/heading_saved_search.png");}
+#annotationList H2{padding:5px}
+.annotation {border-radius:5px; background-color:RGBA(153,204,255,0.2);padding:0 3px;}
+.annotation.superscript, li .annotation {background-color:transparent}
+.preview {
+	background-color: rgba(0, 0, 0, 0.75);
+	border: 1px solid #FFFFFF;
+	border-radius: 5px 5px 5px 5px;
+	box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+	color: #EDEDED;
+	left: -9999px;
+	width: 200px;
+	padding: 5px;
+	position: absolute;
+	top: 0;
+	z-index: 999;
+}
+

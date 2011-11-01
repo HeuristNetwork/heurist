@@ -525,16 +525,19 @@ top.HEURIST.search = {
 			wgColor = " style='color:" + ((res[7]=='hidden')? "red" : "green") + "'";
 		}
 
-		var editLinkIcon = "<div id='rec_edit_link' class='logged-in-only' title='Click to edit'><a href='"+
+		var editLinkIcon = "<div id='rec_edit_link' class='logged-in-only'><a href='"+
 			top.HEURIST.basePath+ "records/edit/editRecord.html?sid=" +
 			top.HEURIST.search.sid + "&recID="+ res[2] +
 			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
-			"' target='_blank'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png'/></a></div>";
+			"' target='_blank' title='Click to edit record'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png'/></a></div>";
 		if (top.HEURIST.user){
 			if (!top.HEURIST.user.isInWorkgroup(res[6]) && res[6]  &&  res[6] != "0" && res[6] != res[1]) {
 				editLinkIcon = "";
 			};
 		}
+		var newSearchWindow = "<a href='"+top.HEURIST.basePath+"search/search.html?q=ids:"+res[2]+
+			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
+			"' target='_blank' title='Open in new window'><img src='"+	top.HEURIST.basePath + "common/images/caret_grey.png'/></a>"
 		var verified_date = null;
 		if (res[8]) {
 			// locale-independent date parsing (early Webkit uses the local format)
@@ -592,10 +595,9 @@ top.HEURIST.search = {
 		   "<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/lock.png' " + userPwd + ">"+
 		    "</div>" +
 			"<div class='recordTitle' title='"+linkText+"'>" + (res[3] && res[3].length ? daysBad +"<a href='"+res[3]+"' target='_blank'>"+linkText + "</a>" : linkText ) + "</div>" +
-			"<div id='recordID'>"+top.HEURIST.rectypes.names[parseInt(res[4])]+"<br><a href='"+top.HEURIST.basePath+"search/search.html?q=ids:"+res[2]+
-			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
-			"' target='_blank' title='Open in new window'>ID: "+res[2]+"</a>"+
+			"<div id='recordID'>"+
 			editLinkIcon +
+			newSearchWindow +
 			"</div>" +
 		"</div>" +
 		"</div>";

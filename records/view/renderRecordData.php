@@ -144,6 +144,30 @@ function fillPreviewes(){
 }
 
 	</script>
+	<style>
+		.detail a, .detail {
+			width:100%
+		}
+		.urlinclude > div {
+			border: 0 solid #000000;
+			height: auto;
+			margin: 0;
+			overflow: hidden;
+			padding: 0;
+			position: relative;
+			z-index: 2;
+		}
+		.urlinclude > div img{
+			height: auto;
+			width: 100%;
+			z-index: 3;
+			position:relative !important;
+		}
+		.detailType {
+			min-width:90px;
+			width:90px
+			}
+		</style>
 </head>
 <body class="popup" onLoad="add_sid();">
 
@@ -368,7 +392,7 @@ function print_private_details($bib) {
 
 			if ($bd['dty_Type'] == 'urlinclude') {
 
-				$bd['val'] = '<div id="preview'.$bd['dty_ID'].'" class="urlinclude" style="border:solid red 1px;width:400px;height:300px;">'.$bd['val'].'</div>';
+				$bd['val'] = '<div id="preview'.$bd['dty_ID'].'" class="urlinclude">'.$bd['val'].'</div>';
 
 			}else 	if ($bd['dty_Type'] == 'resource') {
 

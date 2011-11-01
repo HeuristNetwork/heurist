@@ -55,8 +55,9 @@ function EditRecStructure() {
 		//<div style="display:inline-block; text-align:left">
 		//'<input type="button" value="collapse all" onclick="onCollapseAll()"/>'+
 		//'<input type="button" value="Enable Drag" onclick="onToggleDrag(event)"/></div>'+
-		'<input style="display:none;" type="button" id="btnSaveOrder" value="Save Order" onclick="onUpdateStructureOnServer(false)"/>'+
-		'<input type="button" class="add" value="Insert Field" onclick="onAddNewDetail()"/>'+
+		'<input type="button" class="add" value="Insert Field" onclick="onAddNewDetail()" style="margin-right:5px; float:none"/>' +
+//		'<input style="display:none;" type="button" id="btnSaveOrder" value="Save Order" onclick="onUpdateStructureOnServer(false)"/>'+
+		'<input type="button" value="Define New Field" onClick="onDefineNewType()"/>'+
 		//'<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/></div>
 		'</div>';
 
@@ -1332,35 +1333,37 @@ function onAddNewDetail(){
 * Invokes popup window to create and add new field type
 */
 	function onDefineNewType(){
-
-	if(Hul.isnull(popupSelect))
-	{
-		editStructure.doExpliciteCollapse(null, true);
-
-		var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-							(top.HEURIST.database.name?top.HEURIST.database.name:''));
-		var url = top.HEURIST.basePath + "admin/structure/editDetailType.html?db="+db;
-
-		popupSelect = Hul.popupURL(top, url,
-		{	"close-on-blur": false,
-			"no-resize": false,
-			height: 430,
-
-			width: 600,
-			callback: function(context) {
-
-				if(!Hul.isnull(context)){
-					//refresh the local heurist
-					top.HEURIST.detailTypes = context.detailTypes;
-
-					//new field type to be added
-					var dty_ID = Math.abs(Number(context.result[0]));
-					editStructure.addDetails(String(dty_ID));
+	var answer = confirm("It is best to use existing field type. Are you sure you want to create a NEW field type?")
+	if (answer){
+		if(Hul.isnull(popupSelect))
+		{
+			editStructure.doExpliciteCollapse(null, true);
+	
+			var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+								(top.HEURIST.database.name?top.HEURIST.database.name:''));
+			var url = top.HEURIST.basePath + "admin/structure/editDetailType.html?db="+db;
+	
+			popupSelect = Hul.popupURL(top, url,
+			{	"close-on-blur": false,
+				"no-resize": false,
+				height: 550,
+	
+				width: 700,
+				callback: function(context) {
+	
+					if(!Hul.isnull(context)){
+						//refresh the local heurist
+						top.HEURIST.detailTypes = context.detailTypes;
+	
+						//new field type to be added
+						var dty_ID = Math.abs(Number(context.result[0]));
+						editStructure.addDetails(String(dty_ID));
+					}
+	
+					popupSelect =  null;
 				}
-
-				popupSelect =  null;
-			}
-		});
+			});
+		}
 	}
 }
 

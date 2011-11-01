@@ -37,9 +37,9 @@
 	-->
 	<head>
 		<title>Heurist Reference Database - Workgroup home - &copy; 2007 University of Sydney</title>
-		<link rel=stylesheet href='../../common/css/global.css'>
-		<link rel=stylesheet href='../../common/css/search.css'>
-		<link rel=stylesheet href='../../common/css/workgroup.css'>
+		<link rel=stylesheet href="../common/css/global.css" media="all">
+		<link rel=stylesheet href="../common/css/search.css" media="all">
+		<link rel=stylesheet href='../common/css/workgroup.css'>
 	</head>
 	<body>
 
@@ -90,7 +90,7 @@
 	<tr id=info-row>
 	<td><nobr><a id=wg-link target=_blank>Workgroup web site</a>&nbsp;&nbsp;&nbsp;</nobr></td>
 	<td><nobr><a id=blog-link target=_blank href='../../viewers/blog/?g='>Workgroup blog</a>&nbsp;&nbsp;&nbsp;</nobr></td>
-	<td>Membership: &nbsp; <a href='#' onclick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath + 'admin/ugrps/listUsergroupMembers.html?wg_id='+top.HEURIST.workgroup.wg_id); return false;"><nobr><span id=wg-members></span>&nbsp;members</nobr></a></td>
+	<td>Membership: &nbsp; <a href='#' onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath + 'admin/ugrps/listUsergroupMembers.html?wg_id='+top.HEURIST.workgroup.wg_id); return false;"><nobr><span id=wg-members></span>&nbsp;members</nobr></a></td>
 	<td>&nbsp;</td>
 	<td>Administrators: &nbsp; <span id=wg-admins></span> </td>
 	</tr>
@@ -101,10 +101,10 @@
 			<td id=filter-controls>
 				<p>
 					Show:
-					<select id=rectype-select onchange="top.HEURIST.workgroup.filterSearch('type', this.value);"><option value=''>all types</option></select>
-					<select id=wgtag-select onchange="top.HEURIST.workgroup.filterSearch('kwd', this.value);"><option value=''>not filtered by tag</option></select>
+					<select id=rectype-select onChange="top.HEURIST.workgroup.filterSearch('type', this.value);"><option value=''>all types</option></select>
+					<select id=wgtag-select onChange="top.HEURIST.workgroup.filterSearch('kwd', this.value);"><option value=''>not filtered by tag</option></select>
 					Sort by:
-					<select id=sortby-select onchange="top.HEURIST.workgroup.filterSearch('sortby', this.value);">
+					<select id=sortby-select onChange="top.HEURIST.workgroup.filterSearch('sortby', this.value);">
 						<option value=t>title</option>
 						<option value=-m>recently modified</option>
 					</select>
@@ -117,7 +117,7 @@
 				</p-->
 			</td>
 			<td id=img-buttons-cell>
-				Add workgroup-owned record<img class="img-button logged-in-only" title="Add new record" src='../../common/images/add-record.png' onclick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath + 'records/add/addRecord.php?wg_id='+top.HEURIST.workgroup.wg_id);">
+				Add workgroup-owned record<img class="img-button logged-in-only" title="Add new record" src='../../common/images/add-record.png' onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath + 'records/add/addRecord.php?wg_id='+top.HEURIST.workgroup.wg_id);">
 
 			</td>
 	</tr></table>
@@ -127,7 +127,7 @@
 
 <div id=saved></div>
 	<div id="saved-search-heading" class="banner">Workgroup searches
-	<a id=wg-manage-saved-searches-link href='../saved/manageSavedSearchesPopup.html' onclick="top.HEURIST.util.popupURL(window, this.href); return false;">manage</a>
+	<a id=wg-manage-saved-searches-link href='../saved/manageSavedSearchesPopup.html' onClick="top.HEURIST.util.popupURL(window, this.href); return false;">manage</a>
 	</div>
 	<div id="sidebar-inner"><div id=wg-saved-search-msg>Links open a new search window</div>
 		<div id=left-panel-content class="panel-main-content"></div>

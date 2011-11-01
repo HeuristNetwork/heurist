@@ -743,7 +743,7 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 	height:15px;
 }
 #tabs li ul, ul.menu li ul, #quicklink-cell li ul, #views li ul {
-	-webkit-transition: opacity 0.15s linear, visibility 0.15s linear;
+	-webkit-transition: opacity 0.25s linear;/*, visibility 0.15s linear;*/
 	-moz-transition: opacity 0.15s linear, visibility 0.15s linear;
 	-o-transition: opacity 0.15s linear, visibility 0.15s linear;
 	transition: opacity 0.15s linear, visibility 0.15s linear;

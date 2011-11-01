@@ -12,27 +12,37 @@
 			[output]teiview[/output]
 		</xsl:comment>
 		<!-- end including code -->
-<!--		<xsl:apply-templates select="/hml/records/record[type[@conceptID='2-7']]"/>
+<!--		<xsl:apply-templates select="/hml/records/record[@type=99]"/>
 
 
 
 -->
+		<script src="../js/annotationHighlight.js" type="text/javascript"/>
 
 		<xsl:call-template name="setupRefs"></xsl:call-template>
-		<xsl:apply-templates select="/hml/records/record[type[@conceptID='3-25']]"/>
-
+		<div id="annotationList">
+			<h2>Annotations</h2>
+			<ul>
+				
+			</ul>
+		</div>
+		<div id="previews">
+			<xsl:apply-templates select="/hml/records/record[type[@conceptID='3-25']]"/>
+		</div>
 		<xsl:apply-templates select="/hml/records/record[type[@conceptID='2-7']]"/>
 
 		<xsl:call-template name="renderRefs"></xsl:call-template>
-
+		
 	</xsl:template>
 
 	<xsl:template match="record[type[@conceptID='3-25']]">
+		<div class="preview" style="display:none">
+			<xsl:value-of select="detail[@conceptID='2-1']"/>
+		</div>
 		<xsl:call-template name="addRef">
 			<xsl:with-param name="ref" select="."/>
 			<xsl:with-param name="hide">false</xsl:with-param>
 		</xsl:call-template>
-
 	</xsl:template>
 
 
@@ -68,7 +78,8 @@
 					target : <xsl:value-of select="detail[@conceptID='2-4']"/>,
 					</xsl:if>
 					title : "<xsl:call-template name="cleanQuote"><xsl:with-param name="string" select="detail[@conceptID='2-1']"/></xsl:call-template>",
-					recordID : "<xsl:value-of select="id"/>"
+					recordID : "<xsl:value-of select="id"/>",
+					summary : "<xsl:value-of select="detail[@conceptID='2-12']"/>"
 				} );
 			}
 		</script>
@@ -82,7 +93,7 @@
 			var root = document.getElementById("content");
 			if (root  &&  window["refs"])
 			highlight(root, refs);
-			},0);
+			},50);
 		]]>
 		</script>
 	</xsl:template>
@@ -91,7 +102,6 @@
 	<xsl:template match="record[type[@conceptID='2-7']]">
 		<!-- this template looks for records with the concept of TEI document -->
 		<div id="content">
-
 
 
 <!--		<div><b><xsl:apply-templates select="reversePointer"/></b></div>-->

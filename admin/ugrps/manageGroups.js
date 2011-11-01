@@ -223,11 +223,13 @@ function GroupManager(_isFilterMode, _isSelection, _isWindowMode) {
 								var myColumnDefs = [
 			{ key: "selection", label: "Sel", hidden:(!_isSelection), sortable:true,
 				formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
-			{ key: null, label: "Edit", sortable:false,  hidden:(_isSelection), width:20,
-				formatter: function(elLiner, oRecord, oColumn, oData) {
-elLiner.innerHTML = '<a href="#edit_group"><img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit"><\/a>';}
+				
+			{ key: "id", label: "Admins", sortable:false, className:'center', 
+				formatter: function(elLiner, oRecord, oColumn, oData){
+					var recID = oRecord.getData('id');
+elLiner.innerHTML = '<div align="center"><img src="../../common/images/info.png" '+
+'onmouseover="groupManager.showInfo('+recID+', event)" onmouseout="groupManager.hideInfo()"/></div>';}
 			},
-
 			{ key: "name", label: "<div align='left'><u>Name</u></div>", sortable:true,
 				formatter: function(elLiner, oRecord, oColumn, oData){
 					if(Hul.isempty(oRecord.getData('url'))){
@@ -251,7 +253,7 @@ elLiner.innerHTML = '<a href="#edit_group"><img src="../../common/images/edit-pe
 					elLiner.innerHTML = '<label title="'+tit+'">'+str+'</label>';
 			}},
 			{ key: "type", hidden:true},
-			{ key: "members", label: "Edit Membership", sortable:false,
+			{ key: "members", label: "Edit Membership", sortable:false, className:'center',
 				formatter: function(elLiner, oRecord, oColumn, oData){
 elLiner.innerHTML = '<div align="left"><a href="'+top.HEURIST.baseURL + "admin/ugrps/manageUsers.html?db=" +
 								_db + "&grpID="+oRecord.getData("id")+
@@ -262,7 +264,7 @@ elLiner.innerHTML = '<div align="left"><a href="'+top.HEURIST.baseURL + "admin/u
 elLiner.innerHTML = '<div align="center"><img src="../../common/images/info.png" '+
 'onmouseover="groupManager.showInfo('+recID+', event)" onmouseout="groupManager.hideInfo()"/></div>';}
 			},
-			{ key: null, label: "Del", width:20, sortable:false,
+			{ key: null, label: "Del", className:'center', sortable:false,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					/*r iusage = Number(oRecord.getData('members'));
 					if(iusage>1){
@@ -270,9 +272,9 @@ elLiner.innerHTML = '<div align="center"><img src="../../common/images/info.png"
 					}else{}*/
 					var recID = oRecord.getData('id');
 					if(top.HEURIST.is_admin() || _isGroupAdmin(top.HEURIST.get_user_id(), recID) ){
-elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../../common/images/delete_icon.png" width="16" height="16" border="0" title="Delete this Group" /></a></div>';
+elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../../common/images/cross.png" border="0" title="Delete this Group"" /><\/a></div>';
 					}else{
-						elLiner.innerHTML = "";
+						elLiner.innerHTML = "<img src=\"../../common/images/lock_bw.png\" title=\"Status: Not Admin - Locked\">";
 					}
 
 				}
@@ -416,7 +418,8 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../..
 			clearHideTimer();
 			var my_tooltip = $("#toolTip2");
 			my_tooltip.css( {
-				left:"-9999px"
+				visibility:"hidden",
+				opacity:"0"
 			});
 		}
 	}
@@ -445,8 +448,8 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../..
 						if(grpname.length>40) { grpname = grpname.substring(0,40)+"&#8230"; }
 						//find all records that reference this type
 						var admins = _workgroups[recID].admins;
-						textTip = '<div style="padding-left:20px;padding-top:4px"><b>'+grpname+'</b><br/>'+
-						'<div style="padding-left:20px;padding-top:4px"><b>Admins:</b><br/><label style="color: #4499ff;">Click on admin to edit</label></div><ul>';
+						textTip = '<h3>'+grpname+'</h3>'+
+						'<b>Admins:</b><label style="color: #999;margin-left:5px">Click on admin to edit</label><ul>';
 						var index;
 						for(index in admins) {
 							if(!Hul.isnull(index)){
@@ -470,9 +473,14 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../..
 
 					var xy = Hul.getMousePos(event);
 					my_tooltip.html(textTip);  //DEBUG xy[0]+",  "+xy[1]+"<br/>"+
+					
+					var border_top = $(window).scrollTop();
+					var border_right = $(window).width();
+					var border_height = $(window).height();
+					var offset =0;
 
 					Hul.showPopupDivAt(my_tooltip, xy, $(window).scrollTop(), $(window).width(), $(window).height());
-					hideTimer = window.setTimeout(_hideToolTip, 5000);
+					//hideTimer = window.setTimeout(_hideToolTip, 5000);
 				}
 				else if(forceHideTip) {
 					_hideToolTip();
@@ -693,7 +701,8 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../..
 				*/
 				editUser: function(user){ _editUser( user ); },
 				showInfo: function(recID, event){ _showInfoToolTip( recID, event ); },
-				hideInfo: function() { hideTimer = window.setTimeout(_hideToolTip, 1000); },
+				hideInfo: function() { hideTimer = window.setTimeout(_hideToolTip, 500); },
+				forcehideInfo: function() { hideTimer = window.setTimeout(_hideToolTip, 0); },
 
 				getClass: function () {
 					return _className;

@@ -101,6 +101,18 @@
 		</div>
 	</div>
 	<div class="input-row">
+		<div class="input-header-cell" for="dty_Status">Non-owner visibility:</div>
+		<div class="input-cell">
+        	<select class="dtyValue" id="dty_NonOwnerVisibility" onChange="window.detailTypeEditor.onChangeStatus(event)">
+                <option selected="selected">open</option>
+                <option>pending</option>
+                <option>approved</option>
+                <!-- option>reserved</option -->
+			</select>
+			<div class="help prompt">'Reserverd' can not be changed, 'Open' is normal</div>
+		</div>
+	</div>
+	<div class="input-row">
 		<div class="input-header-cell" for="dty_ShowInLists">Visible to end-user:</div>
 		<div class="input-cell"><input id="dty_ShowInLists" type="checkbox"/>
 		<div class="help prompt">Whether the user should be able to see this field</div></div>
@@ -116,7 +128,7 @@
 	<div class="input-row required">
 		<div class="input-header-cell" for="dty_Type">Data type:</div>
 		<div class="input-cell"><select class="dtyValue" id="dty_Type" onChange="window.detailTypeEditor.onChangeType(event)">
-        	<option selected="selected" disabled="disabled" value="">-- Select data type --</option>
+			<option selected="selected" disabled="disabled" value="">-- Select data type --</option>
 			<option>freetext</option>
 			<option>blocktext</option>
 			<option>integer</option>
@@ -162,7 +174,7 @@
 
 
 <br />
-<div class="actionButtons">
+<div class="actionButtons" style="bottom:10px;left:10px; right:10px;text-align:right; position:absolute;">
 		<input type="button" value="Cancel" onClick="window.detailTypeEditor.cancel();" />
 		<input type="button" value="Save" onClick="window.detailTypeEditor.save();" />
 

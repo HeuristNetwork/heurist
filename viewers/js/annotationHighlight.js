@@ -263,13 +263,36 @@ console.log("sections: " + sections.toSource());
 				var ref = refs[section.refId];
 				var a = document.createElement("a");
 				a.className = (section.refCount > 1 ? "annotation multiple" : "annotation");
-				a.href = "#ref" + ref.recordID;
-				a.title = ref.title;
+				//a.href = "#ref" + ref.recordID;
+				a.href = top.HEURIST.basePath+"search/search.html?q=ids:"+ref.recordID+"&db="+((top.HEURIST.database) ? top.HEURIST.database.name : "");
+				a.target = "_blank";
+				//a.title = ref.title;
 				a.name = "ref" + ref.recordID;
+				a.id = "ref" + ref.recordID;
 				a.setAttribute("annotation-id", ref.recordID);
 				a.onclick = function() { showFootnote(this.getAttribute("annotation-id")); highlightAnnotation(this.getAttribute("annotation-id")); };
 				a.innerHTML = wordString;
 				newElements.push(a);
+				list = document.getElementById("annotationList").childNodes[1].appendChild(document.createElement("li"));
+				refItem = document.createElement("a");
+				refItem.className = (section.refCount > 1 ? "annotation multiple" : "annotation");
+				refItem.title = ref.title;
+				refItem.href = "#" + a.id;
+				refItem.appendChild(document.createTextNode(ref.title));
+				list.appendChild(refItem);
+				if (ref.summary !=="") {
+					a.setAttribute("onmouseover", "showPreview(this, event)");
+					a.setAttribute("onmouseout", "hidePreview(this)");
+					previews = document.getElementById("content");
+					preview = previews.appendChild(document.createElement("div"));
+					previewHTML = "<div><b>"+ref.title+"</b></div><div>"+ref.summary+"</div>";
+					preview.title = ref.title;
+					preview.className = "preview";
+					preview.id = "preview-ref" + ref.recordID;
+					preview.innerHTML=previewHTML;
+					//preview.appendChild(document.createTextNode(ref.summary));
+					previews.appendChild(preview);
+				}
 
 				for (var r = 0; r < section.refNums.length; ++r) {
 					var ref = refs[section.refNums[r]];
@@ -362,3 +385,32 @@ function highlightOnLoad() {
 		highlightAnnotation(matches[1]);
 	}
 }
+function showPreview(element, event) {
+	var previewId = "preview-" + element.id;
+	var preview = $("#"+previewId);	
+	var border_top = $("#content").scrollTop();
+	var border_right = $("#content").width();
+	var border_height = $("#content").height();
+	var offset =0;
+	var target=event.currentTarget;
+	var maxLeftPos = target.offsetLeft+target.offsetWidth+preview.width()+10;
+	var contentWidth = $("#content").width();
+	if (contentWidth > maxLeftPos) {
+		var posX=target.offsetLeft+target.offsetWidth;
+		var posY=target.offsetTop-(target.offsetHeight/2)-border_top;
+	}else{
+		var posX=target.offsetLeft;
+		var posY=target.offsetTop+target.offsetHeight+preview.height()/2-border_top;
+		border_right = $("#content").width()-10;
+	}
+	var pos = [posX,posY];
+
+	top.HEURIST.util.showPopupDivAt(preview,pos,border_top ,border_right ,border_height, offset );
+}
+function hidePreview(element) {
+	var previewId = "preview-" + element.id;
+	var preview = document.getElementById(previewId);
+	//preview.style.display = "none"
+	preview.style.left = "-9999px";
+}
+

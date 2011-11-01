@@ -304,7 +304,7 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 								var myColumnDefs = [
 			{ key: "selection", label: "Sel", hidden:(!_isSelection), sortable:true, width:20,
 				formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
-			{ key: null, label: "Active", sortable:false,  hidden:(_isSelection), width:20,
+			{ key: null, label: "Active", sortable:false,  hidden:(_isSelection), className:'center',
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var isenabled = (oRecord.getData('enabled')==="y");
 					elLiner.innerHTML = (isenabled)?"<img src=\"../../common/images/tick-grey.gif\">":"";
@@ -369,7 +369,7 @@ elLiner.innerHTML = '<a href="#edit_user"><img src="../../common/images/edit-pen
 				dropdownOptions: _roles },
 			{ key: "id", label: "Delete", width:30, sortable:false, hidden:(_isSelection || !top.HEURIST.is_admin()),
 				formatter: function(elLiner, oRecord, oColumn, oData) {
-elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/delete_icon.png" width="16" height="16" border="0" title="Delete this User" /><\/a>';
+elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/cross.png" title="Delete this User" /><\/a>';
 				}
 			},
 			{ key: "kickoff", label: "Remove", width:30, sortable:false, hidden: _isSelection,

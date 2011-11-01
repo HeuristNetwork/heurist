@@ -43,7 +43,8 @@ h3 .description {
 body.popup #page-inner {
 	top:40px;
 	right:5px;
-	left:10px
+	left:10px;
+	padding-right:5px;
 }
 #sidebar {
 	width:170px
@@ -259,7 +260,8 @@ html body.popup div div#page-inner div#modelTabs.yui-navset div.yui-navset div.y
 	margin: 24px 0;
 }
 .input-row div.input-header-cell {
-	width:180px
+	width:180px;
+	min-width:180px;
 }
 .input-row input:not([type="submit"]) {
 	font-size:10px

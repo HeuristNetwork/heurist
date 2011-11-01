@@ -1147,5 +1147,4 @@ function onGroupChange() {
 		edName.value = top.HEURIST.detailTypes.groups[top.HEURIST.detailTypes.groups.groupIDToIndex[grpID]].name;
 		edDescription.value = top.HEURIST.detailTypes.groups[top.HEURIST.detailTypes.groups.groupIDToIndex[grpID]].description;
 	}
-
 }
