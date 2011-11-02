@@ -119,6 +119,7 @@ div.show-related:hover {text-decoration: underline;}
 .wait {background-image: url("../images/mini-loading.gif") !important;}
 .relatedHeader {border-top:1px solid #FFF; font-weight:bold; color:#6A7C99; text-transform:uppercase; margin: 5px 0 5px 0; font-size:10px; padding:5px 0 0 0;}
 #printingLink {display: inline;padding:0 3px;width:16px; height:16px; background-image:url("../images/print.png"); background-repeat: no-repeat ;display: inline-block; vertical-align: top;margin-left: 10px;}
+#annotationLink {display: inline;padding:0 3px;width:16px; height:16px; background-image:url("../images/annotation_tool.png"); background-repeat: no-repeat ;display: inline-block; vertical-align: top;margin-left: 10px;}
 
 /*  thumbnail view */
 .result_thumb {-moz-border-radius:10px 10px 10px 10px;-moz-box-shadow:0 2px 4px #AAAAAA;border-radius:10px 10px 10px 10px;box-shadow:0 2px 4px #AAAAAA;-webkit-border-radius:10px 10px 10px 10px;-webkit-box-shadow:0 2px 4px #AAAAAA;background:url("../images/backgrounds/thumbnail_bg.png") repeat-x scroll 0 bottom #F6F6F6 !important;border:3px solid #FFFFFF;border-collapse:collapse;display:inline-block;height:140px;margin:7px;overflow:visible;padding:0;position:relative;width:140px;overflow:hidden;}
@@ -142,38 +143,38 @@ div.show-related:hover {text-decoration: underline;}
 .rec_type {-moz-border-radius:6px 6px 6px 6px;-webkit-border-radius:6px 6px 6px 6px;border-radius:6px 6px 6px 6px; background-color:RGBA(0,0,0,0.3);color:#FFFFFF;left:0;padding:0 3px;position:absolute;text-align:center;top:126px;width:134px;}
 .greyType {color: #999999}
 .note {display:block; color:#999;}
-#displayResult #content {
+#displayResult div.annotatedDocument div.content {
 	bottom: 0;
 	left: 0;
 	overflow-y: auto;
 	padding: 10px;
-	position: absolute;
 	right: 0;
 	text-align: left;
 	top: 25px;;
 }
 .L0 {display:block !important}
+div.annotatedDocument {display:block !important}
 
 /* annotationss */
-#annotationList li {text-align:left; color:#666; padding:5px; list-style:none; display:inline-block; max-width:150px; vertical-align:top; border-right:1px solid #CCC;}
-#annotationList ul {padding:5px; display:none}
-#annotationList:hover ul {padding:5px; display:block}
-#annotationList {
+div.annotationList li {text-align:left; color:#666; padding:5px; list-style:none; display:inline-block; max-width:150px; vertical-align:top; border-right:1px solid #CCC;}
+div.annotationList ul {padding:5px; display:none}
+div.annotationList:hover ul {padding:5px; display:block}
+div.annotationList {
 	background-color: RGBA(237,245,255, 0.85);
 	background-image: url("../images/heading_saved_search-hidden.png");
 	background-position: 0 1px;
 	background-repeat: no-repeat;
 	padding: 5px 5px 5px 15px;
 	text-align: left;
-	position:absolute;
+	position:relative;
 	left:0;
 	right:0;
 	max-height:200px;
 	overflow-y:auto;
 	z-index:10;
 	}
-#annotationList:hover {background-image: url("../images/heading_saved_search.png");}
-#annotationList H2{padding:5px}
+div.annotationList:hover {background-image: url("../images/heading_saved_search.png");}
+div.annotationList H2{padding:5px}
 .annotation {border-radius:5px; background-color:RGBA(153,204,255,0.2);padding:0 3px;}
 .annotation.superscript, li .annotation {background-color:transparent}
 .preview {

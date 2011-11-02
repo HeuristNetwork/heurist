@@ -77,6 +77,7 @@
 			var loadCount;	// to restict the number of pages that are loaded. Some queries gives all records.
 			var maxLoadPages = 10;
 			var curStyle = top.HEURIST.util.getDisplayPreference("defaultPrintView"); //saved default stylesheet
+			var curQueryURL;
 			var currentPage = 1;
 			var totalRecordCount = 0;
 			var resultsPerPage = 50;
@@ -94,6 +95,7 @@
 						var temp = location.search.match(/style=([^&=#]*)/)[1];
 						if (styles[temp]) { //check if there is a template for this style
 							curStyle = temp;
+							top.HEURIST.util.setDisplayPreference("defaultPrintView",temp);
 						}
 					}
 				//selection
@@ -382,9 +384,9 @@
 						clearAndDisplayLoading();
 					var pageQuery = "?w=all&a=1&depth=1&q=ids:"+ newSelectionIds.join(",")+"&limit=" + limit +
 										(top.HEURIST.database.name? "&db=" + top.HEURIST.database.name:"");
-					var url = top.HEURIST.baseURL+ "export/xml/flathml.php" + pageQuery;
-						var errorMsg = "Error loading " + url + " using XMLHttpRequest";
-					xml = loadXMLDocFromFile(url);
+					curQueryURL = top.HEURIST.baseURL+ "export/xml/flathml.php" + pageQuery;
+					var errorMsg = "Error loading " + curQueryURL + " using XMLHttpRequest";
+					xml = loadXMLDocFromFile(curQueryURL);
 					selectedIds = newSelectionIds;
 					displayResultDoc(curStyle,xml);
 /*
@@ -428,6 +430,7 @@
 
 			function displayResult(style){
 				curStyle = style;
+				top.HEURIST.util.setDisplayPreference("defaultPrintView",style);
 				displayResultDoc(style,xml);
 			}
 
@@ -501,6 +504,50 @@
 				resultDiv.appendChild(xhtmlResultDoc);
 				updateSelection();
 			}
+
+			function addAnnotation(){
+				var contentDivs = $(".annotatedDocument div.content").get();
+				if (!contentDivs[0]){
+					alert("No content container element was found. Please use format that allows annotation. Try TeiView. ");
+					return;
+				}
+				var annoStruct = window.findSelectionAddressInDocs(contentDivs);
+				if (!annoStruct || !annoStruct.addr) {
+					alert("No selection was found. Please make a selection and then press Annotation Button.");
+					return;
+				}
+				var recTitle = $(annoStruct.docElem).attr("recTitle");
+				var recID = $(annoStruct.docElem).attr("recID");
+				confirm(" Would you like to add an annotation to '" +recTitle+ "' as follows:\n " +
+							"Start  Elem:" + annoStruct.addr.startElems.join(":") +
+							" Word:" + annoStruct.addr.startWord + "\n" +
+							"End  Elem:" + annoStruct.addr.endElems.join(":") +
+							" Word:" + annoStruct.addr.endWord)+ " ?";
+				top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/formAddRecordPopup.html?rectype='+
+							top.HEURIST.magicNumbers['RT_ANNOTATION']+
+										'&addr='+annoStruct.addr.startElems.join(":") +","+
+												annoStruct.addr.startWord +","+
+												annoStruct.addr.endElems.join(":") +","+
+												annoStruct.addr.endWord +
+										(recID ? '&trgRecID='+recID : "") +
+										(recTitle ? '&trgRecTitle='+recTitle : "") +
+										'&db='+ (window.HEURIST && window.HEURIST.parameters && window.HEURIST.parameters.db ? window.HEURIST.parameters.db :
+														(top.HEURIST.parameters.db?top.HEURIST.parameters.db:
+															(top.HEURIST.database.name? top.HEURIST.database.name:''))),
+									{ callback: function(title, bd, bibID) {
+													if (bibID) {
+														//save scroll location
+														//reload Document
+														xml = loadXMLDocFromFile(curQueryURL);
+														displayResultDoc(curStyle,xml);
+														//setScroll location
+													} else {
+														alert("annotation didn't save please try again");
+													}
+												}
+									});
+
+			}
 		</script>
 
 	</head>
@@ -508,7 +555,8 @@
 		<div class="banner">
 		<select id="style_select" style="width: 180px;" onChange="displayResult(this.options[this.selectedIndex].value);">
 		</select>
-		<A HREF="javascript:window.print()"><div id="printingLink"></div></a>
+		<a href="javascript:window.print()"><div id="printingLink"></div></a>
+		<a href="javascript:window.addAnnotation()"><div id="annotationLink"></div></a>
 		</div>
 		<div id="displayResult" ></div>
 	</body>

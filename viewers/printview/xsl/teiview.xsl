@@ -20,17 +20,26 @@
 		<script src="../js/annotationHighlight.js" type="text/javascript"/>
 
 		<xsl:call-template name="setupRefs"></xsl:call-template>
-		<div id="annotationList">
+		<xsl:for-each select="/hml/records/record[type[@conceptID='2-7']]">
+			<xsl:variable name="recIDTeiDoc" select="./id"/>
+			<div class="annotatedDocument" recID="{$recIDTeiDoc}">
+				<div class="annotationList" >
 			<h2>Annotations</h2>
 			<ul>
 				
 			</ul>
 		</div>
-		<div id="previews">
-			<xsl:apply-templates select="/hml/records/record[type[@conceptID='3-25']]"/>
+				<div id="annoPreviews{$recIDTeiDoc}">
+					<xsl:for-each select="/hml/records/record[type[@conceptID='3-25']]">
+						<xsl:if test="$recIDTeiDoc = detail[@conceptID='3-322']" >
+							<xsl:apply-templates select="."/>
+						</xsl:if>
+					</xsl:for-each>
+				</div>
+				<xsl:apply-templates select="."/>
 		</div>
-		<xsl:apply-templates select="/hml/records/record[type[@conceptID='2-7']]"/>
 
+		</xsl:for-each>
 		<xsl:call-template name="renderRefs"></xsl:call-template>
 		
 	</xsl:template>
@@ -56,11 +65,15 @@
 	<xsl:template name="addRef">
 		<xsl:param name="ref"/>
 		<xsl:param name="hide"/>
+		<xsl:variable name="docRecID"><xsl:value-of select="detail[@conceptID='3-322']"/></xsl:variable>
 		<script type="text/javascript">
-			if (window["refs"]) {
-				refs.push( {
+			if (window["refs"]){
+				if (!window["refs"]["<xsl:value-of select="$docRecID"/>"]){
+					window["refs"]["<xsl:value-of select="$docRecID"/>"] = [];
+				}
+				refs["<xsl:value-of select="$docRecID"/>"].push( {
 					startElems : [ <xsl:value-of select="detail[@conceptID='3-539']"/> ],
-					endElems : [ <xsl:value-of select="detail[@conceptID='3-539']"/> ],
+					endElems : [ <xsl:value-of select="detail[@conceptID='3-540']"/> ],
 					startWord :
 						<xsl:choose>
 							<xsl:when test="detail[@conceptID='3-329']"><xsl:value-of select="detail[@conceptID='3-329']"/></xsl:when>
@@ -89,19 +102,17 @@
 		<script type="text/javascript">
 
 		<![CDATA[
-			window.setTimeout(function(){
-			var root = document.getElementById("content");
-			if (root  &&  window["refs"])
-			highlight(root, refs);
-			},50);
+			window.setTimeout(function(){ highLightAllAnnotated();},50);
 		]]>
 		</script>
 	</xsl:template>
 
 	<!-- only use text/body/div from TEI, discard the rest -->
 	<xsl:template match="record[type[@conceptID='2-7']]">
+		<xsl:variable name="recID" select="./id"/>
+		<xsl:variable name="recTitle" select="./title"/>
 		<!-- this template looks for records with the concept of TEI document -->
-		<div id="content">
+		<div class="content" recID="{$recID}" recTitle="{$recTitle}">
 
 
 <!--		<div><b><xsl:apply-templates select="reversePointer"/></b></div>-->

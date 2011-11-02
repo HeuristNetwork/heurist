@@ -67,12 +67,17 @@ window.HEURIST.parameters = top.HEURIST.parseParams(window.location.search);
 var rectype = parseInt(window.HEURIST.parameters["rectype"]);
 var titleBits = (window.HEURIST.parameters["title"] || "").split(/\s+/);
 var db = (window.HEURIST.parameters["db"] || "");
+// capitalise the first letter of each word in the title
 for (var i=0; i < titleBits.length; ++i) {
 	titleBits[i] = titleBits[i].charAt(0).toUpperCase() + titleBits[i].substring(1);
 }
 var title = titleBits.join(" ");
 document.getElementById("title-val").appendChild(document.createTextNode(title || ""));
 var url = window.HEURIST.parameters["url"];
+var addr = window.HEURIST.parameters["addr"];
+var trgRecID = window.HEURIST.parameters["trgRecID"];
+var trgRecTitle = window.HEURIST.parameters["trgRecTitle"];
+
 if (! rectype) {
 	var setInitialrectype = function() {
 		var rectype = rectypeDropdown.options[rectypeDropdown.selectedIndex].value;
@@ -119,7 +124,11 @@ if (! rectype) {
 
 } else {
 	var editFrame = document.getElementById("edit-frame");
-	editFrame.src = "../edit/tabs/publicInfoTab.html?db="+db+"&rectype="+rectype+"&title="+encodeURIComponent(title);
+	editFrame.src = "../edit/tabs/publicInfoTab.html?db="+db+"&rectype="+rectype+
+					(title ? "&title="+encodeURIComponent(title):"") +
+					(addr ? "&addr="+addr : "") +
+					(trgRecID ? "&trgRecID="+trgRecID : "") +
+					(trgRecTitle ? "&trgRecTitle="+trgRecTitle : "");
 	editFrame.style.display = "block";
 
 	document.getElementById("rectype-val").appendChild(document.createTextNode(top.HEURIST.rectypes.names[rectype]));

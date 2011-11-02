@@ -109,7 +109,7 @@ function handleSaved(json) {
 	}
 
 	if (vals.error) {
-		alert(vals.error);
+		alert("Error occured while saving record details: " + vals.error);
 		return;
 	}
 
@@ -118,8 +118,7 @@ function handleSaved(json) {
 		for (var i in vals)
 			parent.HEURIST.edit.record[i] = vals[i];
 		window.location.reload();
-	}
-	else {
+	}else {
 		// we have been supplied with a list of biblio records that look like this one
 		if (parent.popupDisambiguation) parent.popupDisambiguation(vals.matches);
 	}
@@ -228,6 +227,29 @@ function renderInputs(bibID, rectype) {
 			}
 		}
 
+		if (window.HEURIST.parameters["addr"]) {
+			if (top.HEURIST.magicNumbers &&
+				top.HEURIST.magicNumbers['RT_ANNOTATION'] &&
+				top.HEURIST.magicNumbers['DT_START_ELEMENT'] &&
+				top.HEURIST.magicNumbers['DT_END_ELEMENT'] &&
+				top.HEURIST.magicNumbers['DT_START_WORD'] &&
+				top.HEURIST.magicNumbers['DT_END_WORD'] &&
+				rectype == top.HEURIST.magicNumbers['RT_ANNOTATION']) {
+				var addr = window.HEURIST.parameters["addr"];
+				addr = addr.split(",");
+				if (addr.length == 4) {
+					defaultInputValues[top.HEURIST.magicNumbers['DT_START_ELEMENT']] = [ { "value" : addr[0] } ];
+					defaultInputValues[top.HEURIST.magicNumbers['DT_START_WORD']] = [ { "value" : addr[1] } ];
+					defaultInputValues[top.HEURIST.magicNumbers['DT_END_ELEMENT']] = [ { "value" : addr[2] } ];
+					defaultInputValues[top.HEURIST.magicNumbers['DT_END_WORD']] = [ { "value" : addr[3] } ];
+				}
+				var trgRecID = window.HEURIST.parameters["trgRecID"];
+				var trgRecTitle = window.HEURIST.parameters["trgRecTitle"];
+				if (trgRecID && trgRecTitle) {
+					defaultInputValues[top.HEURIST.magicNumbers['DT_TEI_DOCUMENT_REFERENCE']] = [ { "value" : trgRecID, "title" : trgRecTitle } ];
+				}
+			}
+		}
 		var inputs = top.HEURIST.edit.createInputsForRectype(null,rectype, defaultInputValues, allInputs);
 
 		renderExtraDataHeader(allInputs);

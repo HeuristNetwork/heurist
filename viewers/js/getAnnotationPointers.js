@@ -8,6 +8,30 @@
  */
 
 
+function findSelectionAddressInDocs (docList) {
+	if (typeof $.fn.hasParent === 'undefined'){
+		$.fn.hasParent = function(objs) {
+			// ensure that objs is a jQuery array
+			objs = $(objs); var found = false;
+			$(this[0]).parents().andSelf().each(function() {
+				if ($.inArray(this, objs) != -1) {
+					found = true;
+					return false; // stops the each...
+				}
+			});
+			return found;
+		}
+	}
+	var sel = window.getSelection();
+	var startNode = sel.getRangeAt(0).startContainer;
+	for ( var i in docList){
+		var docContainer = docList[i];
+		if ($(startNode).hasParent($(docContainer))){
+			return { 'docElem': docContainer, 'addr': getSelectionAddress(docContainer)};
+		}
+	}
+	return null;
+}
 // IE not supported, for now
 function getSelectionAddress (root) {
 	var sel = window.getSelection();
@@ -62,7 +86,11 @@ function getSelectionAddress (root) {
 	startWord += offsetCorrection(range.startContainer);
 	endWord += offsetCorrection(range.endContainer);
 
-	return { "startElems": startAddr, "endElems": endAddr, "startWord": startWord, "endWord": endWord };
+	var retStruct = { "startElems": startAddr, "endElems": endAddr, "startWord": startWord, "endWord": endWord };
+	if ($(root).attr("recID")){
+		retStruct["recID"] = $(root).attr("recID");
+	}
+	return retStruct;
 }
 
 function findSelection (node, startNode, endNode) {

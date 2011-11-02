@@ -8,8 +8,19 @@
  */
 
 var currentRefs;
+var curDoc;
+function highLightAllAnnotated() {
+		$("div.annotatedDocument").each(function(index,annoDocDiv){
+					var recID = $(annoDocDiv).attr("recID");
+					var containerDiv = $("div.content",annoDocDiv).get(0);
+					if (containerDiv && window["refs"] && window["refs"][recID]){
+						highlight(containerDiv, refs[recID]);
+					}
+				});
 
-function highlight (root, refs) {
+}
+var annoListRefs;
+function highlight (docRoot, refs) {
 	// normalise addresses
 	for (var i = 0; i < refs.length; ++i) {
 
@@ -31,7 +42,9 @@ function highlight (root, refs) {
 
 	//console.log("normalised refs: " + refs.toSource());
 	currentRefs = [];
-	traverse(root, refs, []);
+	annoListRefs = {};
+	curDoc = docRoot;
+	traverse(docRoot, refs, []);
 }
 
 function traverse (elem, refs, address) {
@@ -250,7 +263,6 @@ console.log("endPositions:" + endPositions.toSource());
 			sections.push(section);
 		}
 console.log("sections: " + sections.toSource());
-
 		for (var i = 0; i < sections.length; ++i) {
 			var section = sections[i];
 
@@ -270,10 +282,12 @@ console.log("sections: " + sections.toSource());
 				a.name = "ref" + ref.recordID;
 				a.id = "ref" + ref.recordID;
 				a.setAttribute("annotation-id", ref.recordID);
-				a.onclick = function() { showFootnote(this.getAttribute("annotation-id")); highlightAnnotation(this.getAttribute("annotation-id")); };
+				a.onclick = function() { highlightAnnotation(this.getAttribute("annotation-id")); };
 				a.innerHTML = wordString;
 				newElements.push(a);
-				list = document.getElementById("annotationList").childNodes[1].appendChild(document.createElement("li"));
+				if (!annoListRefs[ref.recordID]){
+					annoListRefs[ref.recordID] = 1; // mark this annotation is in the list
+					list = $("div.annotationList",curDoc.parentNode).get(0).childNodes[1].appendChild(document.createElement("li"));
 				refItem = document.createElement("a");
 				refItem.className = (section.refCount > 1 ? "annotation multiple" : "annotation");
 				refItem.title = ref.title;
@@ -281,17 +295,21 @@ console.log("sections: " + sections.toSource());
 				refItem.appendChild(document.createTextNode(ref.title));
 				list.appendChild(refItem);
 				if (ref.summary !=="") {
-					a.setAttribute("onmouseover", "showPreview(this, event)");
-					a.setAttribute("onmouseout", "hidePreview(this)");
-					previews = document.getElementById("content");
+	//					previews = document.getElementById("content");
+						previews = curDoc;
 					preview = previews.appendChild(document.createElement("div"));
 					previewHTML = "<div><b>"+ref.title+"</b></div><div>"+ref.summary+"</div>";
 					preview.title = ref.title;
 					preview.className = "preview";
-					preview.id = "preview-ref" + ref.recordID;
+						preview.id = "preview-" + a.id;// this is unique since each annotation is a separate record
 					preview.innerHTML=previewHTML;
 					//preview.appendChild(document.createTextNode(ref.summary));
 					previews.appendChild(preview);
+				}
+				}
+				if ($("#preview-"+a.id).get(0)) {// if we have a preview then attach teh appropriate event handlers
+					a.setAttribute("onmouseover", "showPreview(this, event)");
+					a.setAttribute("onmouseout", "hidePreview(this)");
 				}
 
 				for (var r = 0; r < section.refNums.length; ++r) {
@@ -300,7 +318,7 @@ console.log("sections: " + sections.toSource());
 					a.className = "annotation superscript";
 					a.href = "#ref" + (section.refNums[r] + 1);
 					a.title = ref.title;
-					a.onclick = function() { showFootnote(this.getAttribute("annotation-id")); highlightAnnotation(this.getAttribute("annotation-id")); };
+					a.onclick = function() { highlightAnnotation(this.getAttribute("annotation-id")); };
 					var s = a.appendChild(document.createElement("sup"));
 					s.innerHTML = "[" + (section.refNums[r] + 1) + "]";
 					//s.innerHTML = "";
@@ -388,20 +406,21 @@ function highlightOnLoad() {
 function showPreview(element, event) {
 	var previewId = "preview-" + element.id;
 	var preview = $("#"+previewId);	
-	var border_top = $("#content").scrollTop();
-	var border_right = $("#content").width();
-	var border_height = $("#content").height();
+	var docContainer = $(element).parents(".content").get(0);
+	var border_top = $(docContainer).scrollTop();
+	var border_right = $(docContainer).width();
+	var border_height = $(docContainer).height();
 	var offset =0;
 	var target=event.currentTarget;
 	var maxLeftPos = target.offsetLeft+target.offsetWidth+preview.width()+10;
-	var contentWidth = $("#content").width();
+	var contentWidth = $(docContainer).width();
 	if (contentWidth > maxLeftPos) {
 		var posX=target.offsetLeft+target.offsetWidth;
 		var posY=target.offsetTop-(target.offsetHeight/2)-border_top;
 	}else{
 		var posX=target.offsetLeft;
 		var posY=target.offsetTop+target.offsetHeight+preview.height()/2-border_top;
-		border_right = $("#content").width()-10;
+		border_right = $(docContainer).width()-10;
 	}
 	var pos = [posX,posY];
 
