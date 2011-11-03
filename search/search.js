@@ -2509,6 +2509,28 @@ top.HEURIST.search = {
 		top.HEURIST.util.popupTinyElement(window, pwd, { x: pos.x + elt.offsetWidth, y: pos.y - scroll, width: 200, height: 50 });
 	},
 
+	exportHML: function(isAll){
+		var database = top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
+					(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "");
+
+		var q = "";
+		if(isAll){
+			q = encodeURIComponent(window.HEURIST.parameters["q"]);//document.getElementById("q").value;
+		}else{
+			var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
+			if (recIDs_list.length == 0) {
+				alert("Select at least one record to export");
+				return false;
+			}
+			q = "ids:"+recIDs_list.join(",");
+		}
+
+		var sURL = "../export/xml/flathml.php?w=all&a=1&depth=1&q=" + q + "&db=" + database;
+
+		window.open(sURL, '_blank');
+		return false;
+	},
+
 	launchWebSearch: function() {
 		var q = document.getElementById("q").value;
 		// look up rectypes
@@ -2638,7 +2660,7 @@ top.HEURIST.search = {
 		if (p['stype']) args.push('stype='+p['stype']);
 		if (p['q']) args.push('q='+escape(p['q']));
 		var query_string = args.join('&');
-		window.location.href = top.HEURIST.basePath+"admin/verification/collectDuplicateRecords.php?"+ query_string + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
+		window.location.href = top.HEURIST.basePath+"admin/verification/listDuplicateRecordsForSearchResults.php?"+ query_string + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
 	},
 
 	setupSearchPage: function() {

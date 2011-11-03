@@ -39,6 +39,7 @@ function findFuzzyMatches($fields, $rec_types, $rec_id=NULL, $fuzziness=NULL) {
 			case "integer": case "float":
 			case "date": case "year": case "file":
 			case "enum": case "boolean":
+			case "urlinclude":
 			case "relationtype": case "resource":
 			foreach ($vals as $val)
 				if (trim($val)) array_push($strictFields, array($rdt_id, trim($val)));

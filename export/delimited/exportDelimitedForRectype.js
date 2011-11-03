@@ -225,6 +225,16 @@ function getRecords() {
 	}
 }
 
+//extracts url from urlinclude value - perhaps move it to HAPI?
+function extractURL(urlinclude){
+	if(urlinclude && urlinclude!=""){
+		var ar = urlinclude.split('|');
+		return ar[0];
+	}else{
+		return  urlinclude;
+	}
+}
+
 
 function showRecordData(hRecords) {
 	var strDelim = g_delimiterSelect.value;
@@ -267,7 +277,17 @@ function showRecordData(hRecords) {
 				if (!details[0]){  //null detail
 					line += strDelim;
 				}else {
-					if (g_detailTypes[g_exportMap[j]].getVariety() == HVariety.REFERENCE) { //multi-valued reference detail
+					if (g_detailTypes[g_exportMap[j]].getVariety() == HVariety.URLINCLUDE) {
+
+						var field = "";
+						dl = details.length;
+						for(var d = 0; d < dl; ++d){ //Ver 2 will need to extract the value for the selected detail type
+							field += extractURL(details[d]) +("|");
+						}
+						line += csv_escape(field.slice(0,-1)) + strDelim;  // trim off last delimiter
+
+
+					}else if (g_detailTypes[g_exportMap[j]].getVariety() == HVariety.REFERENCE) { //multi-valued reference detail
 						dl = details.length;
 						for(var d = 0; d < dl; ++d){ //Ver 2 will need to extract the value for the selected detail type
 							line += details[d].getID() +("|");
@@ -285,7 +305,12 @@ function showRecordData(hRecords) {
 					}
 				}
 			}else{ // single valued cases
-				if (g_detailTypes[g_exportMap[j]].getVariety() == HVariety.REFERENCE) { //reference case
+
+				if (g_detailTypes[g_exportMap[j]].getVariety() == HVariety.URLINCLUDE) {
+
+						line += csv_escape(extractURL(hRecords[i].getDetail(g_detailTypes[g_exportMap[j]])))+strDelim;
+
+				}else 	if (g_detailTypes[g_exportMap[j]].getVariety() == HVariety.REFERENCE) { //reference case
 					var record = hRecords[i].getDetail(g_detailTypes[g_exportMap[j]]);
 					if (record) {//reference  Ver 2 will need to extract the value for the selected detail type
 						line += record.getID()+strDelim;

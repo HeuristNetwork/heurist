@@ -149,13 +149,10 @@
 				} else {
 				$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'create database `$newname`'";
 			}
-
-// SAW SOLUTION			$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e\"create database $newname\"";
 			$output1 = exec($cmdline . ' 2>&1', $output, $res1);
 			if ($res1 != 0 ) {
 				echo ("Error code $res1 on MySQL exec: Unable to create database $newname<br>&nbsp;<br>");
 				echo("\n\n");
-//error_log("cmd = $cmdline      output = ".print_r($output,true));
 				$sqlErrorCode = split(" ", $output);
 				if(count($sqlErrorCode) > 1 &&  $sqlErrorCode[1] == "1007")
 					echo "<strong>A database with that name already exists.</strong>";
@@ -270,6 +267,10 @@
 				}
 			$iconPath = "".HEURIST_ICON_ROOT.$newDBName;
 			$cmdline = "chmod -R 774 ".$iconPath;
+			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
+
+			// copy default set of icons from example database provided with installation
+			$cmdline = "cp ".HEURIST_ICON_ROOT."h3_example_db/*.* " $iconPath; // added 2/11/2011 to prepoulate with icons
 			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 
 			// Make the current user the owner and admin of the new database

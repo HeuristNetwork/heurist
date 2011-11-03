@@ -205,7 +205,7 @@ function loadBareRecordFromDB($id) {
 
 function loadRecordDetails(&$record) {
 	$recID = $record["rec_ID"];
-	$res = mysql_query(
+	$squery =
 	    "select dtl_ID,
 	            dtl_DetailTypeID,
 	            dtl_Value,
@@ -219,7 +219,9 @@ function loadRecordDetails(&$record) {
 	       from recDetails
 	  left join defDetailTypes on dty_ID = dtl_DetailTypeID
 	  left join Records on rec_ID = dtl_Value and dty_Type = 'resource'
-	      where dtl_RecID = $recID");
+	      where dtl_RecID = $recID";
+
+	$res = mysql_query($squery);
 
 	$details = array();
 	while ($rd = mysql_fetch_assoc($res)) {
@@ -230,6 +232,7 @@ function loadRecordDetails(&$record) {
 		$detailValue = null;
 
 		switch ($rd["dty_Type"]) {
+			case "urlinclude":
 			case "freetext": case "blocktext":
 			case "integer": case "float": case "boolean":
 			case "date": case "year":

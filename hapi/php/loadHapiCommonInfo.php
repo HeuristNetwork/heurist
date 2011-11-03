@@ -143,7 +143,9 @@ while ($row = mysql_fetch_row($res)) {
 		case "blocktext":
         $row[3] = "blocktext";
 		break;
-
+		case "urlinclude":
+        $row[3] = "urlinclude";
+		break;
 	    default:
 		$row[3] = "literal";
 	}

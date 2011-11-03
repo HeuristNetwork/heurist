@@ -541,7 +541,9 @@ function ShowReps() {
 									Object.keys(fullid).length > 0);
 
 					var _varnames = varnames.vars;
+					var _detailtypes = varnames.detailtypes;
 					var label = is_record?child:_varnames[fullid];
+					var dtype = (is_record || Hul.isnull(_detailtypes))?"":_detailtypes[fullid];
 
 					if(!Hul.isnull(label)){
 
@@ -551,6 +553,7 @@ function ShowReps() {
 					term.this_id = child;
 					term.label = '<div style="padding-left:10px;">'; //???arVars[0];
 					term.labelonly = label;
+					term.dtype = dtype;
 
 					if( is_record ){
 /* Ian's reuest 10-28						
@@ -706,7 +709,12 @@ function ShowReps() {
 			}
 			res = res + "{$"+prefix+nodedata.this_id+"}";
 		}else{
-			res = '{out2 lbl="'+nodedata.labelonly+'" var=$'+prefix+nodedata.this_id+ '}';
+			res = '{out2 lbl="'+nodedata.labelonly+'" var=$'+prefix+nodedata.this_id;
+			if(nodedata.dtype === 'file' || nodedata.dtype === 'urlinclude'){
+				res = res + '_originalvalue dt="'+nodedata.dtype+'"';
+			}else{
+			}
+			res = res +'}';
 		}
 
 		return (res+'<br/>\n');

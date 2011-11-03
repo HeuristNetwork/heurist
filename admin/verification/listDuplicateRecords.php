@@ -115,7 +115,7 @@ foreach ($dupes as $typekey => $subarr) {
 <h3>DUPLICATE RECORDS SEARCH</h3>
 
 <form>
-Select fuzziness: <select name="fuzziness" id="fuzziness" onchange="form.submit();">
+Matching precision: <select name="fuzziness" id="fuzziness" onchange="form.submit();">
 <option value=3>3</option>
 <option value=4 <?= $fuzziness == 4  ? "selected" : "" ?>>4</option>
 <option value=5 <?= $fuzziness == 5 ? "selected" : "" ?>>5</option>
@@ -130,20 +130,21 @@ Select fuzziness: <select name="fuzziness" id="fuzziness" onchange="form.submit(
 <option value=25 <?= $fuzziness >= 25 && $fuzziness < 30 ? "selected" : "" ?>>25</option>
 <option value=30 <?= $fuzziness >= 30 ? "selected" : "" ?>>30</option>
 </select>
-characters of metaphone must match
+characters of metaphone must match (larger value = fewer matches)
 <br />
 <br />Cross type matching will attemp to match titles of different record types. This is potentially a long search
-<br />with many matching results. Increasing fuzziness will reduce the number of matches.
+<br />with many matching results. Increasing value above will reduce the number of matches.
 <br />
 <br />
-<input type="checkbox" name="crosstype" id="crosstype" value=1 <?= $crosstype ? "checked" : "" ?>  onclick="form.submit();"> Do Cross Type Matching
-<br />
-<input type="checkbox" name="personmatch" id="personmatch" value=1   onclick="form.submit();"> Do Person Matching by SurName first
+<input type="checkbox" name="crosstype" id="crosstype" value=1 <?= $crosstype ? "checked" : "" ?>  onclick="form.submit();"> Do record matching across record types<br />
+<input type="checkbox" name="personmatch" id="personmatch" value=1   onclick="form.submit();"> Do person matching by surname first <br />
 
 <?php
   unset($_REQUEST['personmatch']);
 
 print '<p><hr><div><p>There are <b>' . count($dupes) . '</b> potential groups of duplicates</div>';
+
+print "<p>Check several groups and then click any <b>not dupes</b> button to set this for multiple groups";
 
 foreach ($dupes as $rectype => $subarr) {
     foreach ($subarr as $index => $key) {
@@ -151,13 +152,15 @@ foreach ($dupes as $rectype => $subarr) {
     	sort($diffHash,SORT_ASC);
     	$diffHash = join(',',$diffHash );
     	if (in_array($diffHash,$dupeDifferences)) continue;
-	    print '<div style="font-weight: bold;">';
+	    print '<div>';
 	    print '<input type="checkbox" name="dupeDiffHash[] title="Check to idicate that all records in this set are unique." id="'.$key.
 	    		'" value="' . $diffHash . '">&nbsp;&nbsp;';
-		print $rectype . '&nbsp;&nbsp;&nbsp;&nbsp;';
-	    print '<a target="_new" href="'.HEURIST_URL_BASE.'search/search.html?db='.HEURIST_DBNAME.'&w=all&q=ids:' . join(',', array_keys($bibs[$key])) . '">search</a>&nbsp;&nbsp;&nbsp;&nbsp;';
-	    print '<a target="fix" href="combineDuplicateRecords.php?db='.HEURIST_DBNAME.'&bib_ids=' . join(',', array_keys($bibs[$key])) . '">fix</a>&nbsp;&nbsp;&nbsp;&nbsp;';
-	    print '<input type="submit" value="&nbsp;not dupes&nbsp;">';
+		print '<label style="font-weight: bold;">'.$rectype .'</label>&nbsp;&nbsp;&nbsp;&nbsp;';
+	    print '<input type="submit" value="&nbsp;not dupes&nbsp;">&nbsp;&nbsp;&nbsp;&nbsp;';
+
+	    print '<a target="fix" href="combineDuplicateRecords.php?db='.HEURIST_DBNAME.'&bib_ids=' . join(',', array_keys($bibs[$key])) . '">fix this group</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+		print '<a target="_new" href="'.HEURIST_URL_BASE.'search/search.html?db='.HEURIST_DBNAME.'&w=all&q=ids:' . join(',', array_keys($bibs[$key])) . '">view as search</a>';
+
 	    print '</div>';
 	    print '<ul>';
 	    foreach ($bibs[$key] as $rec_id => $vals) {

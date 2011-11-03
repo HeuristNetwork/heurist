@@ -159,7 +159,6 @@ function detectSourceAndType(link, extension){
 	return {source:source, type:type};
 }
 
-// Linkify youtube URLs which are not already links.
 function linkifyYouTubeURLs(text) {
     /* Commented regex (in PHP syntax)
     $text = preg_replace('%

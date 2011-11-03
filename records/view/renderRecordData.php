@@ -138,7 +138,7 @@ function fillPreviewes(){
 		{
 			// alert(elements[ind].id);
 			// in initViewer.js
-			showViewer(elements[ind], elements[ind].innerHTML);
+			showViewer(elements[ind], elements[ind].childNodes[0].value);
 		}
 	}
 }
@@ -369,7 +369,7 @@ function print_private_details($bib) {
 
 			if ($bd['dty_Type'] == 'urlinclude') {
 
-				$bd['val'] = '<div id="preview'.$bd['dty_ID'].'" class="urlinclude" style="border:none red 1px;width:100%;height:300px;">'.$bd['val'].'</div>';
+				$bd['val'] = '<div id="preview'.$bd['dty_ID'].'" class="urlinclude" style="border:none red 1px;width:100%;height:300px;"><input type="hidden" value="'.$bd['val'].'"></div>';
 
 			}else 	if ($bd['dty_Type'] == 'resource') {
 

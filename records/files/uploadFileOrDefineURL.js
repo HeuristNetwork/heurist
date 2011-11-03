@@ -50,17 +50,9 @@ function initPage() {
 		var fieldValues = [];
 
 		//toremove
-		var dt = []; //top.HEURIST.detailTypes.typedefs[detailTypeID]['commonFields'];
-		var rfr = null;
-		/* to implement
-		if (rectypeID) {
-			rfr = top.HEURIST.rectypes.typedefs[rectypeID]['dtFields'][detailTypeID];
-		}*/
-		if (!rfr) {
-			// fake low-rent rfr if rectype isn't specified
-			// name dt[0], prompt,default, required, repeatable, size, match
-			rfr = ["File", "", "", 'optional', 0, 1, 0 ];	// saw TODO need to get defaults for enum list from dt
-		}
+		var dt = top.HEURIST.detailTypes.typedefs[221]['commonFields']; //associated file
+		var rfr = ["File", "File", null, "005", "60", "", "0", null, "optional", "viewable", "open", null, "1", "0", "1",
+			null,null,null,null,"","9",null,null];
 
 		var sUrl = "";
 		var sType = "";
@@ -88,7 +80,7 @@ function initPage() {
 
 		//add file upload component
 		var container = document.getElementById("div_fileupload");
-		var newInput = new top.HEURIST.edit.inputs.BibDetailFileInput(dt, rfr, [], fieldValues, container);
+		var newInput = new top.HEURIST.edit.inputs.BibDetailFileInput("0", dt, rfr, fieldValues, container);
 
 		newInput.onchange = updateURLtoFile;
 

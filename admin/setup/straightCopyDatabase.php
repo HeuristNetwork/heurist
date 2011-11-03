@@ -10,6 +10,10 @@
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+	require_once(dirname(__FILE__).'/../../common/config/initialise.php');
+
+	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+
 	if (! is_logged_in()) {
 		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
 		return;
@@ -35,7 +39,20 @@
 	<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
 	<script src="../../common/php/loadCommonInfo.php"></script>
 	<h2>Heurist Direct Copy</h2>
-	This script simply copies the current database to a new one with no changes. New database is identical to the old in all respects including access.<br><p>
+	This script simply copies the current database <b> <?=HEURIST_DBNAME?> </b> to a new one with no changes. New database is identical to the old in all respects including access.<br><p>
+	<p>It will take a long time to execute for large databases (more than 5 - 10,000 records) and may fail on the reload of the dumped data.
+	<br>In this case we recommend the following steps from the command line interface:
+	<ul>
+		<li>Dump the existing database with mysqldump:  mysqldump -uxxxxx -pxxxxx hdb_zzzzzzz > filename</li>
+		<li>Create database, switch to database: mysqldump -uxxxxx -pxxxxx -e 'create database hdb_yyyyyy'</li>
+		<li>Load the dumped database: mysqldump -uxxxxx -pxxxxx hdb_yyyyyy < filename </li>
+		<li>Change to <?HEURIST_UPLOAD_DIR?> and copy the following directories and contents:</li>
+			<ul>
+			<li>Upload file directory '<?=HEURIST_DBNAME?>' to directory with name of new database (excluding prefix)</li>
+			<li>Icons directory '<?=HEURIST_DBNAME?>' to directory with name of new database (excluding prefix)</li>
+			</ul>
+	</ul>
+
 <?php
 
 
@@ -59,8 +76,8 @@
 // ---- PROCESS THE COPY FUNCTION (second pass) --------------------------------------------------------------------
 
     if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
-		$targetdbname = $dbPrefix.$_REQUEST['targetdbname'];
-		error_log("Target database is $targetdbname");
+		$targetdbname = $_REQUEST['targetdbname'];
+		error_log("Target database is $dbPrefix$targetdbname");
 	 	straightCopyDatabase($targetdbname);
 	}
 
@@ -68,25 +85,69 @@
 // ---- COPY FUNCTION -----------------------------------------------------------------
 
 
-function straightCopyDatabase($newname) {
+function straightCopyDatabase($targetdbname) {
+
 	// Use the file upload directory for this database because we know it should exist and be writable
 
-	$dump_command = "mysqldump -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".DATABASE." > ".HEURIST_UPLOAD_DIR."/temporary_db_dump.sql";
+	$newname = HEURIST_DB_PREFIX.$targetdbname;
+
+	$dump_command = "mysqldump -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".HEURIST_DB_PREFIX.HEURIST_DBNAME." > ".HEURIST_UPLOAD_DIR."/temporary_db_dump.sql";
 	$create_command = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e 'create database $newname'";
 	$upload_command = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." $newname < '".HEURIST_UPLOAD_DIR."/temporary_db_dump.sql'";
 	$cleanup_command = "rm ".HEURIST_UPLOAD_DIR."/temporary_db_dump.sql"; // cleanup
 
+	echo ("Execution log:<p>");
 
-	exec("$dump_command;$create_command;$upload_command;$cleanup_command",$output,$res);
-	// Note: before this had three separate execs, but ended up with truncated SQL file in first step
-	// Assume this was due to the execs being spawned as separate processes, hence putting them all in one exec
-	// This gives less opportunity for error checking, but for the moment it works
+	// exec("$dump_command;$create_command;$upload_command;$cleanup_command". ' 2>&1', $output, $res1);
+	print " processing: $dump_command<br>";
+	exec("$dump_command". ' 2>&1', $output, $res1);
+	if ($res1 != 0 ) {
+		die ("Unable to process database dump ($dump_command) - check directory/file is writable (delete file if it exists)");
+	}
+	print " processing: $create_command<br>";
+	exec("$create_command". ' 2>&1', $output, $res1);
+	if ($res1 != 0 ) {
+		die ("Unable to process database create ($create_command) - database may already exist");
+	}
+	print " processing: $upload_command<br>";
+	exec("$upload_command". ' 2>&1', $output, $res1);
+	if ($res1 != 0 ) {
+		die ("Unable to process upload command ($upload_command)");
+	}
+	/* Actually not a bad idea to leave this in the directory
+	print " processing: $cleanup_command<br><p>";
+	exec("$cleanup_command". ' 2>&1', $output, $res1);
+	if ($res1 != 0 ) {
+		die ("Unable to process cleanup command ($cleanup_command)");
+	}
+	*/
 
-	// TODO: NEED PROPER ERROR CHECKING
+ // Copy the images and the icons directories
 
-	print "<br>Done. New database <b>$newname</b> created (please report if not successful)<br>";
+	    // TODO: THE ICONS SHOUDL BE IN A DIRECTORY WITHIN THE UOPLOADED FILES DIRECTORY, NOT IN THE CODEBASE
+	    // ESSENTIAL CHANGE TO AVOID PROBLEMS WITH SYMLINKS AND/OR DELETING ICONS AS PART OF SOFTWARE UPDATES
+	    // SMARTY TEMPLATES SHOULD ALSO BE IN THE UPLOADED FILES DIRECTORY, XSLT TEMPLATES TOO (MAYBE)
+
+		$copy_file_directory = "cp -R " . HEURIST_UPLOAD_ROOT.HEURIST_DBNAME . " " . HEURIST_UPLOAD_ROOT."$targetdbname"; // no prefix
+        print "<br>Copying upload files: $copy_file_directory";
+        exec("$copy_file_directory" . ' 2>&1', $output, $res1);
+		if ($res1 != 0 ) {
+			die ("<p>Unable to copy uploaded files ($copy_file_directory) - please copy directory manually");
+		}
+
+        $copy_icons_directory = "cp -R ../../common/images/".HEURIST_DBNAME."/rectype-icons  ../../common/images/$targetdbname/rectype-icons"; // no prefix
+        print "<br>Copying icons: $copy_icons_directory";
+        exec("$copy_icons_directory" . ' 2>&1', $output, $res1);
+		if ($res1 != 0 ) {
+			die ("<p>Unable to copy icon files ($copy_icons_directory) - please copy directory manually");
+		}
+
+        print "<br><p>Done. New database <b>$newname</b> created<br>";
+		print "<p>New upload directory ".HEURIST_UPLOAD_ROOT."$targetdbname";
 	print "</body></html>";
 	exit;
+
+
 } // straightCopyNewDatabase
 
 

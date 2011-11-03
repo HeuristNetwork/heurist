@@ -1865,6 +1865,9 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
 			case HVariety.BOOLEAN:
 			return (valueType === "boolean"  ||  valueType === "number"  ||  valueType === "string");
 
+			case HVariety.URLINCLUDE:
+			return (valueType === "string");
+
 			case HVariety.DATE:
 			// Date object is alright; so are certain numbers and strings
 			return ((valueType === "object"  &&  value.constructor === Date)
@@ -1906,6 +1909,7 @@ var HVariety = {
 	GEOGRAPHIC: "geographic",
 	BOOLEAN: "boolean",
 	BLOCKTEXT: "blocktext",
+	URLINCLUDE: "urlinclude",
 
 	getClass: function() { return "HVariety"; }
 };
@@ -3222,6 +3226,7 @@ var HeuristScholarDB = new HStorageManager();
 			case HVariety.BOOLEAN:
 			case HVariety.BLOCKTEXT:
 			case HVariety.DATE:
+			case HVariety.URLINCLUDE:
 			return details;
 
 			case HVariety.ENUMERATION:

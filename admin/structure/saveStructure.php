@@ -25,7 +25,14 @@
 	}
 
 	if (! is_admin()) {
+			header('Content-type: text/javascript');
+			$rv = array();
+			$rv['error'] = "You do not have sufficient privileges for this operation";
+			print json_format($rv);
+
+/*
 	print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href=".HEURIST_URL_BASE.">Return to Heurist</a></p></body></html>";
+*/
 	return;
 	}
 
@@ -820,8 +827,11 @@
 		$db->query("delete from defRecStructure where rst_RecTypeID = $rtyID and rst_DetailTypeID = $dtyID limit 1");
 
 		$rv = array();
-
-		if ($db->affected_rows<1){
+//error_log(">>>>>>>>>>>>>>>".$db->affected_rows);
+//error_log(">>>Error=".$mysqli->error);
+		if($mysqli->error!=""){
+			$rv['error'] = "error delting entry in defRecStructure for record type #$rtyID and field type #$dtyID Error:".$mysqli->error;
+		}else if ($db->affected_rows<1){
 			$rv['error'] = "error delting entry in defRecStructure for record type #$rtyID and field type #$dtyID";
 		}else{
 			$rv['result'] = $dtyID;

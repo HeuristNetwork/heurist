@@ -68,13 +68,13 @@ require_once('libs.inc.php');
 		$res = getRecordTypeSectionForSmarty($rectypeID, 'r', 0);
 
 		//text for rectypes fill be inserted manually:  $resText  = $resText.$res['text'];
-		$resVars = array_merge($resVars, $res['vars']);
+		$resVars = array_merge($resVars, $res['vars']); //whole list of variables without grouping by record type
 
 		$res['tree']['r'] = array_merge($res0['tree']['r'], $res['tree']['r']);
 
 		array_push($resVarsByType, array("id"=>$rectypeID,
 										"name"=>$rtStructs['names'][$rectypeID],
-										"vars"=>array_merge($res0['vars'], $res['vars']),
+										"vars"=>array_merge($res0['vars'], $res['vars']), //header+details
 										"tree"=>$res['tree']));
 
 		$qresult = loadSearch($_REQUEST);
@@ -114,7 +114,7 @@ require_once('libs.inc.php');
 			$res = getRecordHeaderSectionForSmarty($first_record, 'r', 0); //from
 
 			$resText  = $resText.$res['text'];
-			$resVars = array_merge($resVars, $res['vars']);
+			$resVars = array_merge($resVars, $res['vars']); //whole list of variables without grouping by record type
 			array_push($resVarsByType, array("id"=>"0",
 											"name"=>"common",
 											"vars"=>$res['vars'],
@@ -138,6 +138,7 @@ require_once('libs.inc.php');
 					array_push($resVarsByType, array("id"=>$rectypeID,
 													"name"=>$rtStructs['names'][$rectypeID],
 													"vars"=>$res['vars'],
+													"detailtypes"=>$res['detailtypes'],
 													"text"=>$res['text'],
 													"tree"=>$res['tree'] ));
 
@@ -352,6 +353,7 @@ function getRecordTypeSectionForSmarty($recTypeId, $parentName, $ind){
 
 	$tree = array($parentName=>array());
 	$vars = array();
+	$detailtypes = array();
 	$arr_text = array();
 	//IAN ask for comparison with rectype name $text = $ind.$ind.'{if ($'.$parentName.'.recRecTypeID=='.$recTypeId.')}\n'; //table mode<tr><td colspan="13">';
 	$recTypeName = $rtStructs['names'][$recTypeId];
@@ -368,6 +370,7 @@ function getRecordTypeSectionForSmarty($recTypeId, $parentName, $ind){
 		if($dt){
 			array_push($arr_text, $dt['text']);
 			$vars = array_merge($vars, $dt['vars']);
+			$detailtypes = array_merge($detailtypes, $dt['detailtypes']);
 
 			$tree[$parentName] = array_merge($tree[$parentName], $dt['tree_children']);
 			$tree = array_merge($tree, $dt['tree']);
@@ -377,7 +380,7 @@ function getRecordTypeSectionForSmarty($recTypeId, $parentName, $ind){
 	array_push($arr_text, '{/if}');
 	$text = _maketext($arr_text, $ind);
 
-	return array("text"=>$text, "vars"=>$vars, "tree"=>$tree);
+	return array("text"=>$text, "vars"=>$vars, "tree"=>$tree, "detailtypes"=>$detailtypes);
 }
 
 /*
@@ -410,6 +413,7 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind){
 			$tree = array();
 			$tree_children = array();
 			$vars = array();
+			$detailtypes = array();
 			$arr_text = array();
 
 			$detailType = $dtDef[$dty_fi['dty_Type']];  //HARDCODED!!!!
@@ -495,6 +499,7 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind){
 					if($dt){
 						array_push($arr_text, $dt['text']);
 						$vars = array_merge($vars, $dt['vars']);
+						$detailtypes = array_merge($detailtypes, $dt['detailtypes']);
 
 						if(false && $recursion_depth>1){
 							//$res2[$recordTypeName] = array_merge($res2[$recordTypeName], $dt['tree_children']);
@@ -573,13 +578,14 @@ error_log(">>>>            ".print_r($res2['tree'], true));
 				//array_push($vars, $dtname);
 				$tree_children = array_merge($tree_children, array($dtname_wo_parent=>$dtname));
 				$vars = array_merge($vars, array($dtname=>$dt_label));
+				$detailtypes = array_merge($detailtypes, array($dtname=>$detailType));
 				array_push($arr_text, '{out2 lbl="'.$dt_label.'" var=$'.$dtname.'}');
 
 			}//end switch
 
 			$text = _maketext($arr_text, $ind);
 
-		return array("text"=>$text, "vars"=>$vars, 'tree_children'=>$tree_children, 'tree'=>$tree);
+		return array("text"=>$text, "vars"=>$vars, 'detailtypes'=>$detailtypes, 'tree_children'=>$tree_children, 'tree'=>$tree);
 
 	} else {
 		return null; //detail type not found in detailTypes.typedefs

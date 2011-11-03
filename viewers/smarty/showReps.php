@@ -32,7 +32,7 @@ require_once('libs.inc.php');
 	$dtStructs = getAllDetailTypeStructures(true);
 	$dtTerms = getTerms(true);
 
-	$_REQUEST["f"] = 1;
+	$_REQUEST["f"] = 1; //always search
 
 	$qresult = loadSearch($_REQUEST); //from search/getSearchResults.php - loads array of records based og GET request
 
@@ -54,7 +54,7 @@ require_once('libs.inc.php');
 	$records =  $qresult["records"];
 	$results = array();
 	foreach ($records as $rec){
-error_log(print_r($rec, true));
+//error_log(print_r($rec, true));
 
 		$res1 = getRecordForSmarty($rec, 0);
 		array_push($results, $res1);
@@ -232,23 +232,51 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth){
 			   //get url for file download
 
 			   //if image - special case
+//error_log("FILE>>>>>".print_r($dtValue, true));
+
+				$res = "";
+				$arres = array();
+
+				foreach ($dtValue as $key => $value){
+					if(strlen($res)>0) $res = $res.", ";
+					$res = $res.$value['file']['URL'];
+
+					//original value keeps the whole 'file' array
+					$dtname2 = $dtname."_originalvalue";
+					$arres = array_merge($arres, array($dtname2=>$value['file']));
+				}
+				if(strlen($res)==0){
+					$res = null;
+				}else{
+					$res = array_merge($arres, array($dtname=>$res));
+				}
+
+//error_log("RES>>>>>".print_r($res, true));
 
 			break;
 			case 'urlinclude':
 				//
 				$res = "";
+				$arres = array();
+
 				foreach ($dtValue as $key => $value){
 					if(strlen($res)>0) $res = $res.", ";
-					$res = $res.$value;
+
+					$arr = explode('|', $value);
+					$res = $res.$arr[0];
+
+					//original value keeps source and type
+					$dtname2 = $dtname."_originalvalue";
+					$arres = array_merge($arres, array($dtname2=>$value));
 				}
-				if(strlen($res)==0){ //no valid terms
+				if(strlen($res)==0){
 					$res = null;
 				}else{
-					$res = array( $dtname=>$res );
+					$res = array_merge($arres, array($dtname=>$res));
 				}
 
-error_log("rr111>>>>>".print_r($dtValue, true));
-error_log("rr222>>>>>".print_r($res, true));
+//error_log("rr111>>>>>".print_r($dtValue, true));
+//error_log("rr222>>>>>".print_r($res, true));
 
 			break;
 			case 'relmarker':
@@ -349,14 +377,6 @@ error_log("rr222>>>>>".print_r($res, true));
 function smarty_function_out($params, &$smarty)
 {
 	$dt = null;
-	if(array_key_exists('dt',$params)){
-		$dt = $params['dt'];
-	}
-
-	if($dt=="urlinclude" || $dt=="file"){
-		//insert image or youtube if appropriate
-
-	}
 
 	if($params['var']){
     	return '<div><div class="tlbl">'.$params['lbl'].': </div><b>'.$params['var'].'</b></div>';
@@ -365,13 +385,158 @@ function smarty_function_out($params, &$smarty)
 	}
 }
 
+// Linkify youtube URLs which are not already links.
+function linkifyYouTubeURLs($text) {
+    $text = preg_replace('~
+        # Match non-linked youtube URL in the wild. (Rev:20111012)
+        https?://         # Required scheme. Either http or https.
+        (?:[0-9A-Z-]+\.)? # Optional subdomain.
+        (?:               # Group host alternatives.
+          youtu\.be/      # Either youtu.be,
+        | youtube\.com    # or youtube.com followed by
+          \S*             # Allow anything up to VIDEO_ID,
+          [^\w\-\s]       # but char before ID is non-ID char.
+        )                 # End host alternatives.
+        ([\w\-]{11})      # $1: VIDEO_ID is exactly 11 chars.
+        (?=[^\w\-]|$)     # Assert next char is non-ID or EOS.
+        (?!               # Assert URL is not pre-linked.
+          [?=&+%\w]*      # Allow URL (query) remainder.
+          (?:             # Group pre-linked alternatives.
+            [\'"][^<>]*>  # Either inside a start tag,
+          | </a>          # or inside <a> element text contents.
+          )               # End recognized pre-linked alts.
+        )                 # End negative lookahead assertion.
+        [?=&+%\w]*        # Consume any URL (query) remainder.
+        ~ix',
+        '<iframe width="420" height="345" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>',
+        $text);
+
+        //'<a href="http://www.youtube.com/watch?v=$1">YouTube link: $1</a>'
+        //'<iframe width="420" height="345" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>',
+//error_log(">>>".$text."<<<<");
+    return $text;
+}
+//
+//
+function detectSourceAndType($url){
+
+	$source = 'Arbitrary';
+	$type = 'Unknown';
+
+	//1. detect source
+	if(strpos($url,'http://heuristscholar.org')==0){
+		$source = 'Heurist';
+	}else if(strpos($url,'http://www.flickr.com')==0){
+		$source = 'Flickr';
+		$type = 'Image';
+	}else if(strpos($url, 'http://www.panoramio.com/')==0){
+		$source = 'Panoramio';
+		$type = 'Image';
+	}else if(preg_match('http://(www.)?locr\.de|locr\.com', $url)){
+		$source = 'Locr';
+		$type = 'Image';
+	//}else if(link.indexOf('http://www.youtube.com/')==0 || link.indexOf('http://youtu.be/')==0){
+	}else if(preg_match('http://(www.)?youtube|youtu\.be', $url)){
+		$source = 'Youtube';
+		$type = 'Video';
+	}
+
+	//try to detect type by extension and protocol
+	if($type=='Unknown'){
+
+		//get extension from url - unreliable
+		$extension = null;
+		$ap = parse_url($url);
+		if( array_key_exists('path', $ap) ){
+			$path = $ap['path'];
+			if($path){
+				$extension = pathinfo($path, PATHINFO_EXTENSION);
+			}
+		}
+		if($extension){
+			$extension = strtolower($extension);
+		}
+
+		if($extension=="jpg" || $extension=="jpeg" || $extension=="png" || $extension=="gif"){
+			$type = 'Image';
+		}else if($extension=="mp4" || $extension=="mov" || $extension=="avi"){
+			$type = 'Video';
+		}else if($extension=="mp3" || $extension=="wav"){
+			$type = 'Audio';
+		}else if($extension=="html" || $extension=="htm" || $extension=="txt"){
+			$type = 'Text/HTML';
+		}else if($extension=="pdf" || $extension=="doc" || $extension=="xls"){
+			$type = 'Document';
+		}else if($extension=="swf"){
+			$type = 'Flash';
+		}
+	}
+
+	return array($source, $type);
+}
+
 //
 // smarty plugin function
 //
 function smarty_function_out2($params, &$smarty)
 {
+
 	if($params['var']){
+
+
+		if(array_key_exists('dt',$params)){
+			$dt = $params['dt'];
+		}
+
+		if($dt=="file"){  //$dt=="urlinclude" ||
+			//insert image or link
+			$value = $params['var'];
+
+			if( strpos($value['type'],'image')==0 ){
+				return "<img src='".$value['URL']."' width='300px' title='".$value['description']."'/>".$value['origName'];
+			}else{
+				return "<a href='".$value['URL']."' target='_blank' title='".$value['description']."'>".$value['origName']."</a>";
+			}
+
+		}else if($dt=="urlinclude") {
+			//insert image or youtube if appropriate
+			$value = $params['var'];
+			//get url, source and type
+			$acfg = explode('|', $value);
+			$url = $acfg[0];
+
+
+			if(count($acfg)<3){
+	   			$oType = detectSourceAndType($url);
+	   			$url_type = $oType[0];
+	   			$url_source = $oType[1];
+	   		}else{
+	   			$url_source = $acfg[1];
+	   			$url_type = $acfg[2];
+	   		}
+
+//error_log(">>>>>>>>".$value."  type=".$url_type."  source=".$url_source);
+
+			if($url_type == "Image"){
+
+				return "<img src='".$url."' width='300px'/>";
+
+			}else if ($url_type == "Text/HTML"){
+				//load file and return its value as string
+
+
+			}else if ($url_type == "Video"){
+
+				if($url_source == "Youtube"){
+					//var id = /^.*((youtu.be\/)|(v\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/.exec(curr_link);
+//error_log(">>>>>URL=".$url);
+					return linkifyYouTubeURLs($url);
+				}
+			}
+
+		}else{
     	return $params['lbl'].': <b>'.$params['var'].'</b>';
+		}
 	}else{
 		return '';
 	}
