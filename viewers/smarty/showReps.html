@@ -61,12 +61,12 @@ body {
 	font: 10px Verdana, Geneva, sans-serif;
 }
 
-/* hide header in top layout element */
+/* hide header in top layout */
 .yui-skin-sam .yui-layout .yui-layout-hd {
 	background: none;
-	border: 1px solid #808080;
-	height: 0px;
+	border: 1px solid #ff0000;
 	display: none;
+	height: 0px;
 }
 </style>
 
@@ -79,49 +79,62 @@ body {
 
 		<iframe id="ifrmPrint" src="#" style="width:0px; height:0px;"></iframe>
 
-<!-- position:absolute;top:30px;height:30px; -->
-		<div id="toolbar"
-			style="width:100%;text-align:left;">
-			<div id="rep_list" style="padding-left:10px;display:inline-block;">
-				<label style="width:100px">Select template</label>
-				<select id="selTemplates" onchange="onSelectTemplate()" style="width:200px;"></select>
-				<button onclick="doExecute()">Reload</button>
-				<button onclick="onPrint()">Print</button>
-				<button onclick="onFile()">Get URL</button>
-				<button onclick="onShowEditor()">Edit</button>
-				<button onclick="onGenerate()">New Template</button>
-			</div>
-			<div style="text-align: left;float:right;padding-right:10px;">
-			</div>
-		</div>
+<!-- position:absolute;top:30px;height:30px;
 
-
-		<div id="layout" style="position:absolute;top:25px;bottom:0px;left:0px;right:0px;">
+style="position:absolute;top:25px;bottom:0px;left:0px;right:0px;"
+		<div id="layout"></div>
+-->
 
 		<div id="viewercontainer">
-			<div id="rep_container" style="overflow:auto;width:100%;"></div>
+			<div id="toolbar"
+				style="width:100%;text-align:left;">
+				<div id="rep_list" style="padding-left:10px;display:inline-block;">
+					<label style="width:100px">Select template</label>
+					<select id="selTemplates" onchange="onSelectTemplate()" style="width:200px;"></select>
+					<button onclick="doExecute()">Reload</button>
+					<button onclick="onPrint()">Print</button>
+					<button onclick="onFile()">Get URL</button>
+					<button onclick="onShowEditor()">Edit</button>
+					<button onclick="onGenerate()">New Template</button>
+				</div>
+				<div style="text-align: left;float:right;padding-right:10px;">
+				</div>
+			</div>
+			<div id="rep_container" style="overflow:auto;width:100%;height:100%;"></div>
 		</div>
 
-		<div id="editorcontainer">
+		<div id="editorcontainer" style="display:none">
 
 			<div style="position:absolute; left:0px; right:300px;top:0px;bottom:0px;">
-				<div style="height:25px">
+				<div>
 					<label style="width:100px">Template</label>
-					<input type="text" style="width:200px;" id="edTemplateName"/>
+					<input type="text" style="width:40%;" id="edTemplateName"/>
 					<button onclick="doEditor(2)">Save</button>
 					<button onclick="doEditor(1)">Save As</button>
 					<button onclick="doEditor(3)">Delete</button>
 
 				</div>
-				<div style="position:absolute;left:0px; right:0px;top:25px;bottom:25px;overflow: auto;">
-					<textarea style="width:100%;height:99%;font-size: 10pt;"
+ <!-- style="height:25px"
+ position:absolute;left:0px; right:0px;top:25px;bottom:25px;
+ position:absolute;bottom: 0px;
+ height:99%;
+ position:absolute;right:2px;bottom:2px;
+ -->
+				<div style="overflow: auto; position:absolute;left:0px; right:0px;top:25px;bottom:20px;">
+					<textarea style="width:100%;height:99%;font-size: 10pt;resize: none;"
 						id="edTemplateBody" name="edTemplateBody">efwwefwefe fefwf
 					</textarea>
 				</div>
-				<div style="position:absolute;bottom: 0px;width:100%;">
-					<label for="cbDebug">Show debug info</label>
-					<input id="cbDebug" type="checkbox"  title="Show debug info"/>
-					<div style="text-align:right;position:absolute;right:2px;bottom:2px;">
+				<div style="width:100%;height:20px;position:absolute;bottom: 0px;">
+					<div style="display: inline-block;">
+						<input id="cbNorep" name="replevel" value="0" type="radio"  title="No report output"/>
+						<label for="cbNorep">Ignore errors</label>&nbsp;&nbsp;
+						<input id="cbError" name="replevel" value="2" type="radio"  title="Show errors and missed fields" checked="checked"/>
+						<label for="cbError">Show errors</label>&nbsp;&nbsp;
+						<input id="cbDebug" name="replevel" value="1" type="radio"  title="Show debug info"/>
+						<label for="cbDebug">Debug info</label>
+					</div>
+					<div style="float:right;">
 						<button onclick="doExecute()" title="Test your template" style="font-weight: 800;">Update output below</button>
 					</div>
 				</div>
@@ -137,11 +150,11 @@ body {
 					-->
 					<label>Style</label>
 						<select id="selInsertMode">
-							<option value="0">Variable</option>
-							<option value="1">Label+Variable</option>
-							<option value="2">'Out' function</option>
+							<option value="0">Field only</option>
+							<option value="1">Field + Label</option>
+							<option value="2">Field + function wrapper</option>
 						</select>
-					&nbsp;	
+					&nbsp;
 					<a href="javascript:void(0)" title="Insert root FOREACH operator" onClick="showReps.insertRootForEach()">insert loop</a>
 					<a href="../../../help/index.html?SmartyTemplates" title="Read documentation how to create the exellent Smarty template" target="_blank">help</a>
 				</div>
@@ -168,8 +181,6 @@ body {
 
 
 		</div>
-		</div>
-
 
 <script type="text/javascript">
 

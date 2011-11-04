@@ -35,7 +35,8 @@ function ShowReps() {
 		_currenQuery,
 		_variables, //object with all variables
 		_varsTree, //treeview object
-		_needListRefresh = false; //if true - reload list of templates after editor exit
+		_needListRefresh = false, //if true - reload list of templates after editor exit
+		_keepTemplateValue;
 
 
 	/**
@@ -112,7 +113,7 @@ function ShowReps() {
 	* Reads GET parameters and requests for map data from server
 	*/
 	function _init() {
-		_setLayout(true, true); //aftert load show viewer only
+		_setLayout(true, false); //aftert load show viewer only
 
 		_reload_templates();
 
@@ -192,6 +193,7 @@ function ShowReps() {
 				}else{
 					Dom.get("edTemplateName").value = name;
 					ApplyLineBreaks(Dom.get("edTemplateBody"), context['text']);
+					_keepTemplateValue = Dom.get("edTemplateBody").value;
 				}
 			}
 
@@ -248,6 +250,7 @@ function ShowReps() {
 		function _onGetTemplate(context){
 			Dom.get("edTemplateName").value = template_file;
 			Dom.get("edTemplateBody").value = context;
+			_keepTemplateValue = Dom.get("edTemplateBody").value;
 			_setLayout(true, true);
 		}
 
@@ -297,6 +300,7 @@ function ShowReps() {
 				if(template_body && template_body.length>10){
 					squery = squery + 'save&template='+template_file+'&template_body='+template_body;
 
+					_keepTemplateValue = template_body;
 				}else{
 					alert('The template body is suspiciously short. No operation performed');
 					squery = null;
@@ -343,8 +347,14 @@ function ShowReps() {
 			}
 		}
 
-		if(mode===0){ //for close or delete
-			_setLayout(true, false);
+		if(mode===0){ //for close
+			var r = true;
+			if(_keepTemplateValue!=Dom.get("edTemplateBody").value){
+				r=confirm("Template was changed. Are you sure you wish to exit and lose all modifications?");
+			}
+			if (r==true){
+				_setLayout(true, false);
+			}
 		}
 	}
 
@@ -355,7 +365,14 @@ function ShowReps() {
 	*/
 	function _doExecute(squery) {
 
-		var isdebug = document.getElementById('cbDebug').checked?1:0;
+		var replevel = 0;
+		if(document.getElementById('cbDebug').checked){
+			replevel = 1;
+		}else if (document.getElementById('cbError').checked){
+			replevel = 2;
+		}
+		//var isdebug = document.getElementById('cbDebug').checked?1:0;
+		//var iserror = document.getElementById('cbError').checked?1:0;
 
 		var template_body;
 		if(_isEditorVisible()){
@@ -373,7 +390,7 @@ function ShowReps() {
 
 				var baseurl = top.HEURIST.basePath + "viewers/smarty/showReps.php";
 
-				squery = squery + '&debug='+isdebug+'&template_body='+encodeURIComponent(template_body);
+				squery = squery + '&replevel='+replevel+'&template_body='+encodeURIComponent(template_body);
 
 				top.HEURIST.util.sendRequest(baseurl, function(xhr) {
 					var obj = xhr.responseText;
@@ -401,6 +418,10 @@ function ShowReps() {
 		_isviewer=isviewer;
 		_iseditor=iseditor;
 
+		editorcontainer
+		Dom.get("toolbar").style.display = (iseditor) ?"none" :"block";
+		Dom.get("editorcontainer").style.display = (iseditor) ?"block" :"none";
+
 		var units;
 		if(isviewer && iseditor){
 				units = [
@@ -419,14 +440,16 @@ function ShowReps() {
 		}
 
 		//
-		Dom.get("toolbar").style.display = (iseditor) ?"none" :"block";
-		Dom.get("layout").style.top = (iseditor) ?"0" :"25";
+		//Dom.get("layout").style.top = (iseditor) ?"0" :"25";
 
 		//var el = Dom.get('layout');
 		layout = null;
-		layout = new YAHOO.widget.Layout('layout', {
+		layout = new YAHOO.widget.Layout({
+			units: units
+		});
+		/*layout = new YAHOO.widget.Layout('layout', {
 							units: units
-							});
+							});*/
 		layout.render();
 
 		//reload templates list
@@ -524,7 +547,7 @@ function ShowReps() {
 					});
 		}
 
-		
+
 		//internal function
 			function __createChildren(parentNode, parent_id, _prefix, parentEntry, varnames) { // Recursively get all children
 				var term,
@@ -556,7 +579,7 @@ function ShowReps() {
 					term.dtype = dtype;
 
 					if( is_record ){
-/* Ian's reuest 10-28						
+/* Ian's reuest 10-28
 							term.label = term.label +
 							'<a href="javascript:void(0)" onClick="showReps.markAllChildren(\''+
 											term.id+'\')">All</a>&nbsp;&nbsp';
@@ -592,8 +615,8 @@ function ShowReps() {
 				}//for
 			}//__createChildren
 		//end internal function
-		
-		
+
+
 		//fill treeview with content
 		var i, termid, term,
 			tv = _varsTree,
@@ -606,8 +629,8 @@ function ShowReps() {
 		tv.removeChildren(tv_parent);
 
 		for (i=1; i<_variables.length; i++){
-		
-		
+
+
 			varnames = _variables[i];  // && _variables[i].id===recTypeID
 
 			term = {};//new Object();
@@ -637,14 +660,14 @@ function ShowReps() {
 		if(!Hul.isnull(varid)){
 
 
-			
+
 			if(varid==="r"){ //don't create additional level - add childeren to rectype directly
 				//common for all types
 				__createChildren(_variables[0].tree.r, "r", prefix_id+".r", topLayerParent, _variables[0]);
-				
+
 				//specific for this type
 				__createChildren(varnames.tree.r, "r", prefix_id+".r", topLayerParent, varnames);
-				continue;	
+				continue;
 			}
 
 			term = {};//new Object();
@@ -655,7 +678,7 @@ function ShowReps() {
 
 			term.href = "{javascript:void(0)}";
 			if( Object.keys(varnames.tree[varid]).length > 0){type:
-/*IAN's request 10-28			
+/*IAN's request 10-28
 					term.label = term.label +
 					'<a href="javascript:void(0)" onClick="showReps.markAllChildren(\''+
 											term.id+'\')">All</a>&nbsp;&nbsp;';
@@ -672,17 +695,17 @@ function ShowReps() {
 			}else{
 					term.label = term.label + varid+ //to debug replace to term.id
 '&nbsp;<a href="javascript:void(0)" title="Insert variable in loop (without parent prefix)" onClick="showReps.insertSelectedVars(\''+term.id+'\', true)">insert</a>)</div>';
-					
+
 			}
 
 			var rectypeLayer = new YAHOO.widget.TextNode(term, topLayerParent, false); // Create the node
 
 			var _parentNode = varnames.tree[varid];
 			rectypeLayer.enableHighlight = false;
-			
-			
+
+
 			__createChildren(_parentNode, varid, term.id, rectypeLayer, varnames); // Look for children of the node
-			
+
 		}
 		}//for  varnames.tree
 		}//for  _variables
@@ -789,7 +812,7 @@ function ShowReps() {
 			_varid = varid,
 			_inloop = inloop;
 			_prefix = "";
-			
+
 
 		//function for each node in _varsTree - create the list
 		/*
@@ -856,9 +879,9 @@ function ShowReps() {
 					}*/
 				}
 
-				if (_nodep.children &&	_nodep.children > 0) 
+				if (_nodep.children &&	_nodep.children > 0)
 				{
-				
+
 					if(_inloop){
 						_prefix = _nodep.data.this_id + ".";
 					}else{
@@ -1008,10 +1031,10 @@ function ShowReps() {
 				myField.value = myField.value.substring(0, startPos)
 				+ myValue
 				+ myField.value.substring(endPos, myField.value.length);
-				
+
 				myField.selectionStart = endPos + myValue.length + cursorIndent;
 				myField.selectionEnd = endPos + myValue.length + cursorIndent;
-				
+
 			} else {
 				myField.value += myValue;
 			}
@@ -1020,9 +1043,9 @@ function ShowReps() {
 			if(isApplyBreaks){
 				myField = ApplyLineBreaks(myField, myField.value);
 			}
-			
+
 			myField.scrollTop = scrollTop;
-			
+
 			setTimeout(function() {myField.focus(); }, 500);
 	}
 	//

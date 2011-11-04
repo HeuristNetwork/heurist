@@ -44,13 +44,34 @@ var viewerObject,
 	}
  }
 
+// @todo MOVE to HEURIST.util ????
+//
+// find detail type by "origin dbid"-"id in original db"
+//
+function findDetailTypeByType(type){
+
+	var fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+	var dt;
+	for (dt in top.HEURIST.detailTypes.typedefs){
+		if(!(Hul.isnull(dt) || isNaN(Number(dt)))) {
+			var dtype= top.HEURIST.detailTypes.typedefs[dt];
+
+			if(dtype['commonFields'][fi.dty_Type]===type){
+				return dtype;
+			}
+		}
+	}
+	return null; //nothing found
+}
+
+
 //
 function initPage() {
 
 		var fieldValues = [];
 
 		//toremove
-		var dt = top.HEURIST.detailTypes.typedefs[221]['commonFields']; //associated file
+		var dt = findDetailTypeByType("file"); //top.HEURIST.detailTypes.typedefs[221]['commonFields']; //associated file
 		var rfr = ["File", "File", null, "005", "60", "", "0", null, "optional", "viewable", "open", null, "1", "0", "1",
 			null,null,null,null,"","9",null,null];
 

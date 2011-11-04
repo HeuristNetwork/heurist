@@ -47,7 +47,7 @@ require_once('libs.inc.php');
 	//get template body from request (for execution from editor)
 	$template_body = (array_key_exists('template_body',$_REQUEST)?$_REQUEST['template_body']:null);
 
-	$isdebug = (array_key_exists('debug',$_REQUEST)?$_REQUEST['debug']:0);
+	$replevel = (array_key_exists('replevel',$_REQUEST)?$_REQUEST['replevel']:0);
 
 //DEBUG error_log(">>>>>>>>".$template_file);
 	//convert to array that will assigned to smarty variable
@@ -63,13 +63,23 @@ require_once('libs.inc.php');
 
 	$smarty->assign('results', $results);
 
+	ini_set( 'display_errors' , 'false');// 'stdout' );
+	$smarty->error_reporting = 0;
+
 	if($template_body)
 	{	//execute template from string - modified temoplate in editor
 //DEBUG error_log(">>>".$template_body."<<<");
-error_log(">>>>>>>".$isdebug."<<<<<<");
+error_log(">>>>>>>".$replevel."<<<<<<");
+
+		if($replevel=="2"){
+			ini_set( 'display_errors' , 'true');// 'stdout' );
+			$smarty->debugging = false;
+			$smarty->error_reporting = E_ALL & ~E_STRICT; //~E_NOTICE
+		}else{
+			$smarty->debugging = ($replevel=="1");
+		}
 
 		$smarty->debug_tpl = dirname(__FILE__).'/debug_html.tpl';
-		$smarty->debugging = ($isdebug=="1");
 
 		//save temporary template
 			//this is user name $template_file = "_temp.tpl";
@@ -88,6 +98,7 @@ error_log(">>>>>>>".$isdebug."<<<<<<");
 		}
 //error_log(">>>>>>>>PRINT".$template_file);
 		$smarty->debugging = false;
+		$smarty->error_reporting = 0;
 		$smarty->display($template_file);
 	}
 
