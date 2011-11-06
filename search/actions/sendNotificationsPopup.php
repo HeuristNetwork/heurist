@@ -20,8 +20,9 @@ if (! is_logged_in()) return;
 
 mysql_connection_db_select(DATABASE);
 
+error_log("request is ".print_r($_REQUEST,true));
 
-if ($_REQUEST['send_notification']) {
+if (@$_REQUEST['send_notification']) {
 	$notification_sent_message = handle_notification();
 	$success = preg_match('/^Notification email sent/', $notification_sent_message);
 
@@ -90,7 +91,7 @@ function reset_group() {
 
  <body class="popup" width=700 height=160 style="font-size: 11px;" onload="fill_bib_ids();">
 
-  <?= $notification_sent_message ?>
+  <?= @$notification_sent_message?$notification_sent_message:"" ?>
 
   <form action="sendNotificationsPopup.php" method="post" style="display: inline;">
 
@@ -150,13 +151,19 @@ function reset_group() {
 <?php
 
 function handle_notification() {
-	$bib_ids = array_map('intval', explode(',', $_REQUEST['bib_ids']));
-	if (! count($bib_ids))
+	function getInt($strInt){
+//error_log("str = ".preg_replace("/[\"']/","",$strInt)." val =". intval($strInt));
+		return intval(preg_replace("/[\"']/","",$strInt));
+	}
+	$bib_ids = array_map("getInt", explode(',', $_REQUEST['bib_ids']));
+//error_log("bibids = ".print_r($bib_ids,true));
+	if (! count($bib_ids)){
 		return '<div style="color: red; font-weight: bold; padding: 5px;">(you must select at least one bookmark)</div>';
+	}
+	$bibIDList = join(',', $bib_ids);
+	$notification_link = BASE_PATH . 'search/search.html?db='.HEURIST_DBNAME.'&w=all&q=ids:' . $bibIDList;
 
-	$notification_link = BASE_PATH . 'search/search.html?db='.HEURIST_DBNAME.'&w=all&q=ids:' . join(',', $bib_ids);
-
-	$bib_titles = mysql__select_assoc('Records', 'rec_ID', 'rec_Title', 'rec_ID in (' . join(',', $bib_ids) . ')');
+	$bib_titles = mysql__select_assoc('Records', 'rec_ID', 'rec_Title', 'rec_ID in (' . $bibIDList . ')');
 	$title_list = "Id      Title\n" . "------  ---------\n";
 	foreach ($bib_titles as $rec_id => $rec_title)
 		$title_list .= str_pad("$rec_id", 8) . $rec_title . "\n";

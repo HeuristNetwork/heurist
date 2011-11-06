@@ -14,7 +14,7 @@ require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
 // TO DO: set flag from sysIdentification.sys_AllowRegistration and exit here if false
 
-// Go to login if request is for approval and not a logged in administrator, 
+// Go to login if request is for approval and not a logged in administrator,
 // otherwise contineu with collecting registration info or approving
 if (!@$_REQUEST['register'] && !(is_logged_in() && is_admin())) {
 	header('Location: '.HEURIST_URL_BASE.'common/connect/login.php?db='.HEURIST_DBNAME);
@@ -53,6 +53,7 @@ if (@$_REQUEST['register']) {
 }
 
 $body->global_vars['new-user-id'] = 0;
+$body->global_vars['logged-in-user-username'] = (is_logged_in() ? get_user_username():"");
 
 
 $body->global_vars['model-user-dropdown'] = '<select name="model_usr_id">'."\n";
