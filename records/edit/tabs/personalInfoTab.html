@@ -28,14 +28,15 @@
 		</script>
 		<script src="../../../external/tinymce/jscripts/tiny_mce/tiny_mce.js"></script>
 		<script src="../../woot/woot.js"></script>
+		
 		<script src="../../../common/js/utilsLoad.js"></script>
 		<script src="../../../common/php/displayPreferences.php"></script>
 		<script src="../../tags/autocompleteTags.js"></script>
-
 		<script>
 			var db = (top.HAPI.database || top.HEURIST.database.name || top.HEURIST.parameters.db);
 			document.write('<form method=post jsonAction="'+top.HEURIST.basePath+'records/bookmarks/saveBookmarkData.php?db='+db+'" action="'+top.HEURIST.basePath+'records/bookmarks/saveBookmarkData.php?db='+db+'" onsubmit="return verifyForm();">');
 		</script>
+
 		<input type=hidden name=save-mode id=save-mode value=edit>
 		<input type=hidden name=bkmk_id id=bkmk_id>
 

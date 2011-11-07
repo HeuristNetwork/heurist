@@ -51,7 +51,7 @@ if (@$_REQUEST['bkmk_id']) {
 
 require_once(dirname(__FILE__).'/testPermissions.php');
 if (! canViewRecord($rec_id)) {
-	header('Location: ' . BASE_PATH . 'common/html/denied.html?'.$rec_id);
+	header('Location: ' . BASE_PATH . 'common/html/msgAccessDenied.html?'.$rec_id);
 	return;
 }
 

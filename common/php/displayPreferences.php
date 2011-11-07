@@ -63,7 +63,9 @@ $prefs = array(
 	"searchWidth" => 360,
 	"oldSearchWidth" => 360,
 	"viewerTab" =>0,
-	"defaultPrintView" => "default"
+	"defaultPrintView" => "default",
+
+	"favourites" => "Favourites"
 );
 
 foreach (get_group_ids() as $gid) {

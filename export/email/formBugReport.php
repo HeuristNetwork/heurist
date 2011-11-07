@@ -63,7 +63,7 @@ return false;
 }
 var elname = window.document.getElementById('type:<?=DT_BUG_REPORT_NAME?>[]');
 if(elname.value === ''){
-	alert("There was a problem:\n'Bug Title' field is required. Specify short name for bug.");
+	alert("'Title' field is required. Specify concise informative title for bug or feature.");
 	elname.focus();
 	return false;
 }
@@ -98,7 +98,7 @@ var uploadCompleted = function(inputDiv, bdValue) {
 				link.href = bdValue.file.url;
 			}
 			link.target = "_surf";
-			link.onclick = function() { top.open(link.href, "", "width=300,height=200,resizable=yes"); return false; };
+			link.onclick = function() { top.open(link.href, "", "width=300,height=300,resizable=yes"); return false; };
 
 		link.appendChild(window.document.createTextNode(bdValue.file.origName));	//saw TODO: add a title to this which is the bdValue.file.description
 
@@ -147,7 +147,7 @@ function addFileUploadInput()
   </script>
 
  </head>
- <body class="popup" onLoad="addFileUploadInput()">
+ <body class="popup" onLoad="addFileUploadInput()"> <!-- size set at call -->
   <script src="../../common/js/utilsLoad.js"></script>
   <script src="../../common/php/displayPreferences.php"></script>
 
@@ -162,24 +162,24 @@ function addFileUploadInput()
 <div id=all-inputs>
 
 <div class="input-row required">
-	<div class="input-header-cell">Bug Title</div>
+	<div class="input-header-cell">Title</div>
 	<div class="input-cell">
-		<input style="width: 80ex;" title="Bug Title" id="type:<?=DT_BUG_REPORT_NAME?>[]" name="type:<?=DT_BUG_REPORT_NAME?>[]" class="in" autocomplete="off" type="text">
-		<div class="help prompt">Specify short name for bug</div>
+		<input style="width: 70ex;" title="Title" id="type:<?=DT_BUG_REPORT_NAME?>[]" name="type:<?=DT_BUG_REPORT_NAME?>[]" class="in" autocomplete="off" type="text">
+		<div class="help prompt">Please give a concise but descriptive title for the bug or feature request</div>
 	</div>
 </div>
 <div class="input-row">
-	<div class="input-header-cell">Bug description</div>
+	<div class="input-header-cell">Description</div>
 	<div class="input-cell">
-		<textarea style="width: 80ex;" title="Bug description" name="type:<?=DT_BUG_REPORT_DESCRIPTION?>[]" class="in" rows="3"></textarea>
-		<div class="help prompt">Detail description of bug</div>
+		<textarea style="width: 70ex;" title="Description" name="type:<?=DT_BUG_REPORT_DESCRIPTION?>[]" class="in" rows="3"></textarea>
+		<div class="help prompt">Please give a detailed description of the bug or feature request</div>
 	</div>
 </div>
 <div class="input-row">
 	<div class="input-header-cell">Steps to reproduce</div>
 	<div class="input-cell">
-		<textarea style="width: 80ex;" title="Steps to reproduce" name="type:<?=DT_BUG_REPORT_ABSTRACT?>[]" class="in" rows="3"></textarea>
-		<div class="help prompt">Describe what actions you took to obtain the bug</div>
+		<textarea style="width: 70ex;" title="Steps to reproduce" name="type:<?=DT_BUG_REPORT_ABSTRACT?>[]" class="in" rows="3"></textarea>
+		<div class="help prompt">Describe in detail what actions led up to the bug, or how you would get to the feature</div>
 	</div>
 </div>
 <div class="input-row">
@@ -191,7 +191,7 @@ function addFileUploadInput()
 				style="width: 80ex;" title="Screenshot">
 			<input class="file-select" id="fileUploadInput"
 				name="type:<?=DT_BUG_REPORT_FILE?>[]" type="file" onChange="doUploadFile(event)"></div>
-			<div class="help prompt">Make a screenshot of bug and browser this image file</div>
+			<div class="help prompt">Upload a screen capture or document showing the bug or describing the feature in more detail (optional)</div>
 	</div>
 </div>
 <!--

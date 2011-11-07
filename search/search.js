@@ -149,6 +149,12 @@ top.HEURIST.search = {
 		window.location.href = temp;
 	},
 
+	loadFavourites: function(strLocation) {
+		var temp = strLocation + top.HEURIST.util.getDisplayPreference("favourites") + ("&db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
+						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")));
+		window.location.href = temp;
+	},
+
 	reloadFromParameters: function() {
 		var temp = top.HEURIST.basePath+"search/search.html?" +
 			("w=" + encodeURIComponent(window.HEURIST.parameters["w"])) + "&" +
@@ -2526,6 +2532,28 @@ top.HEURIST.search = {
 		}
 
 		var sURL = "../export/xml/flathml.php?w=all&a=1&depth=1&q=" + q + "&db=" + database;
+
+		window.open(sURL, '_blank');
+		return false;
+	},
+
+	exportKML: function(isAll){
+		var database = top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
+					(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "");
+
+		var q = "";
+		if(false && isAll){
+			q = encodeURIComponent(window.HEURIST.parameters["q"]);//document.getElementById("q").value;
+		}else{
+			var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
+			if (recIDs_list.length == 0) {
+				alert("Select at least one record to export");
+				return false;
+			}
+			q = "ids:"+recIDs_list.join(",");
+		}
+
+		var sURL = "../export/xml/kml.php?w=all&a=1&depth=1&q=" + q + "&db=" + database;
 
 		window.open(sURL, '_blank');
 		return false;

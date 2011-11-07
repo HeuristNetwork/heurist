@@ -205,16 +205,18 @@ function print_header_line($bib) {
 	$webIcon = @mysql_fetch_row(mysql_query("select dtl_Value from recDetails where dtl_RecID=" . $bib['rec_ID'] . " and dtl_DetailTypeID=347"));  //MAGIC NUMBER
 	$webIcon = @$webIcon[0];
 ?>
+
 <div class=HeaderRow style="margin-bottom:20px"><h2><?= htmlspecialchars($bib['rec_Title']) ?></h2>
 	<div id=footer>
         <h3><?= htmlspecialchars($bib['rty_Name']) ?></h3>
+        <br>
         <?php if (@$url) { ?>
         <span class="link"><a target=_new href="<?= htmlspecialchars($url) ?>"><?= output_chunker($url) ?></a>
         <?php if ($webIcon) print "<img id=website-icon src='" . $webIcon . "'>"; ?>
          </span>
         <?php } ?>
-        <div id=recID>Record ID:<?= htmlspecialchars($rec_id) ?><nobr><span class="link"><a id=edit-link class=normal target=_new href="../edit/editRecord.html?db=<?=HEURIST_DBNAME?>&recID=<?= $rec_id ?>" onClick="return sane_link_opener(this);"><img src="../../common/images/edit-pencil.png" title="Edit Record"></a></span></nobr></div>
 	</div>
+<div id=recID><br>Record ID:<?= htmlspecialchars($rec_id) ?><nobr><span class="link"><a id=edit-link class=normal target=_new href="../edit/editRecord.html?db=<?=HEURIST_DBNAME?>&recID=<?= $rec_id ?>" onClick="return sane_link_opener(this);"><img src="../../common/images/edit-pencil.png" title="Edit record"></a></span></nobr></div>
 </div>
 <?php
 }
@@ -236,7 +238,7 @@ function print_private_details($bib) {
 	while ($row = mysql_fetch_row($res)) array_push($kwds, $row);
 	if ( $workgroup_name || count($kwds) || $bib['bkm_ID']) {
 ?>
-<div class=detailRowHeader>Private info
+<div class=detailRowHeader>Private
 	<?php
 			if ( $workgroup_name) {
 	?>
@@ -431,7 +433,7 @@ function print_private_details($bib) {
 
 
 
-<div class=detailRowHeader>Public info
+<div class=detailRowHeader>Shared
 <div  class=thumbnail>
 <?php
 	foreach ($thumbs as $thumb) {
@@ -449,7 +451,7 @@ function print_private_details($bib) {
 ?>
 
 <div class=detailRow><div class=detailType>Updated</div><div class=detail><?= $bib['rec_Modified'] ?></div></div>
-<div class=detailRow><div class=detailType>Cite as</div><div class=detail>http://<?= HOST ?>/resource/<?= $bib['rec_ID'] ?></div></div></div>
+<div class=detailRow><div class=detailType>Cite as</div><div class=detail><a target=_blank href="<?= HEURIST_BASE_URL ?>resource/<?= $bib['rec_ID']."?db=".HEURIST_DBNAME ?>"><?= HEURIST_BASE_URL ?>resource/<?= $bib['rec_ID']."?db=".HEURIST_DBNAME ?></a></div></div></div>
 <?php
 }
 
@@ -557,7 +559,7 @@ function print_text_details($bib) {
 	if (! $result["success"] && count($cmts) == 0) return;
 ?>
 </DIV>
-<div class=detailRowHeader>Text info
+<div class=detailRowHeader>Text
 
 <?php
 	print_woot_precis($result["woot"],$bib);

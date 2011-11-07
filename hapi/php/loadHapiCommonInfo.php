@@ -35,11 +35,13 @@ mysql_connection_db_select(DATABASE);
 
 
 if (defined('HEURIST_USER_GROUP_ID')) {
-	$res = mysql_query("select usr.ugr_ID, usr.ugr_Name, concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname from ".USERS_DATABASE.".sysUGrps usr, ".USERS_DATABASE.".sysUsrGrpLinks
-	                     where ugl_GroupID=2 and ugl_UserID=usr.ugr_ID and usr.ugr_Enabled='y' and usr.ugr_FirstName is not null and usr.ugr_LastName is not null and !usr.ugr_IsModelUser");
+	$res = mysql_query("select usr.ugr_ID, usr.ugr_Name, concat(if(usr.ugr_FirstName is null,'Fred',usr.ugr_FirstName),' ',if(usr.ugr_LastName is null,'Nerks',usr.ugr_LastName)) as Realname from ".USERS_DATABASE.".sysUGrps usr, ".USERS_DATABASE.".sysUsrGrpLinks
+	                     where ugl_GroupID=2 and ugl_UserID=usr.ugr_ID and usr.ugr_Enabled='y' and !usr.ugr_IsModelUser");
+//usr.ugr_FirstName is not null and usr.ugr_LastName is not null and
 } else {
-	$res = mysql_query("select usr.ugr_ID, usr.ugr_Name, concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname from ".USERS_DATABASE.".sysUGrps usr
-	                     where usr.ugr_Enabled='y' and usr.ugr_FirstName is not null and usr.ugr_LastName is not null and !usr.ugr_IsModelUser");
+	$res = mysql_query("select usr.ugr_ID, usr.ugr_Name, concat(if(usr.ugr_FirstName is null,'Fred',usr.ugr_FirstName),' ',if(usr.ugr_LastName is null,'Nerks',usr.ugr_LastName)) as Realname from ".USERS_DATABASE.".sysUGrps usr
+	                     where usr.ugr_Enabled='y' and !usr.ugr_IsModelUser");
+//usr.ugr_FirstName is not null and usr.ugr_LastName is not null and
 }
 
 $users = array();

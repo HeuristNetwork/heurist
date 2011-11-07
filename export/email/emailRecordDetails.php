@@ -1,13 +1,8 @@
 <?php
 
-	/**
- * emailRecordDetailsphp
- *
- * Accept POST from
- *
- * 2011/06/07
+/**
+ * emailRecordDetailsphp, generic function to email a record from a Heurist database (generally to another), AO 2011/06/07
  * @author: Artem Osmakov
- *
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
@@ -28,7 +23,14 @@
 	//send an email
 	$geekMail = new geekMail();
 	$geekMail->setMailType('html');
-	$geekMail->to('prime.heurist@gmail.com');
+
+	// This is set up to send email to a Heurist instance via an email account (from which the records are harvested)
+	// TODO: replace hard-cioded email address with address passed to request
+	// TODO: for bug reporting, change back to generic gmail account for Heurist once a workflow
+	// TODO: has been establsihed for automatically harvesting and notifying emails
+	// $geekMail->to('prime.heurist@gmail.com');
+	// but during development it's best just to send it to the team so we actually SEE them ...
+	$geekMail->to('info@heuristscholar.org');
 
   $ids = "";
 
@@ -37,7 +39,7 @@
 	$bug_title = $_POST["type:".DT_BUG_REPORT_NAME];
 
 	$geekMail->from("bugs@heuristscholar.org", "Bug reporter"); //'noreply@heuristscholar.org', 'Bug Report');
-	$geekMail->subject('Bug Report: '.$bug_title[0]);
+	$geekMail->subject('Bug report or feature request: '.$bug_title[0]);
 
 	$key_abs = "type:".DT_BUG_REPORT_ABSTRACT;
 	$ext_desc = $_POST[$key_abs];
@@ -48,13 +50,13 @@
 		}
 	}
   	//add current system information into message
-	array_push($ext_desc, "Browser information: ".$_SERVER['HTTP_USER_AGENT']);
+	array_push($ext_desc, "    Browser information: ".$_SERVER['HTTP_USER_AGENT']);
   	//add current heurist information into message
   	//add current heurist information into message
-	array_push($ext_desc, "Heurist codebase: ".HEURIST_BASE_URL);
-	array_push($ext_desc, "Heurist version: ".HEURIST_DBVERSION);
-	array_push($ext_desc, "Heurist database: ". DATABASE);
-	array_push($ext_desc, "Heurist user: ".get_user_name());
+	array_push($ext_desc, "   Heurist codebase: ".HEURIST_BASE_URL);
+	array_push($ext_desc, "   Heurist version: ".HEURIST_DBVERSION);
+	array_push($ext_desc, "   Heurist database: ". DATABASE);
+	array_push($ext_desc, "   Heurist user: ".get_user_name());
 
 	$_POST[$key_abs] = $ext_desc;
 
@@ -162,7 +164,7 @@
 					if($newkey){
 			    		$arr["type:".$newkey] = $value;
 					}else{
-						print '({"error":"Can\'t find the global concept for fieldtype #"'.$typeid.'"})';
+						print '({"error":"Can\'t find the global concept ID for fieldtype #"'.$typeid.'"})';
 						exit();
 					}
 			}else{
@@ -177,7 +179,7 @@
 		if($newrectype){
   			$arr["rectype"] = $newrectype;
 		}else{
-			print '({"error":"Can\'t find the global concept for rectype #"'.$_POST["rectype"].'"})';
+			print '({"error":"Can\'t find the global concept ID for rectype #"'.$_POST["rectype"].'"})';
 			exit();
 		}
 

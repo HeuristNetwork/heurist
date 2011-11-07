@@ -1,7 +1,7 @@
 <!--
 
 /**
-* filename, brief description, date of creation, by whom
+* search.html, the main Heursit search page, effectively the home page for Heurist
 * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
 * @link: http://HeuristScholar.org
 * @license http://www.gnu.org/licenses/gpl-3.0.txt
@@ -11,30 +11,6 @@
 
 -->
 <html>
-	<!-- search.html
-
-	Copyright 2005 - 2011 The University of Sydney Digital Innovation Unit
-	This file is part of the Heurist academic knowledge management system (http://HeuristScholar.org)
-	mailto:info@heuristscholar.org
-
-	Concept and direction: Ian Johnson.
-	Developers: Tom Murtagh, Kim Jackson, Steve White, Steven Hayes,Maria Shvedova, Artem Osmakov, Maxim Nikitin, Ireneusz Golka.
-	Design and advice: Andrew Wilson, Ireneusz Golka, Martin King.
-
-	Heurist is free software; you can redistribute it and/or modify it under the terms of the
-	GNU General Public License as published by the Free Software Foundation; either version 3
-	of the License, or (at your option) any later version.
-
-	Heurist is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
-	even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License along with this program.
-	If not, see <http://www.gnu.org/licenses/>
-	or write to the Free Software Foundation,Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-	-->
-
 
 <head>
 <title>Heurist Reference Database - &copy; 2005-2010 The University of Sydney</title>
@@ -96,7 +72,8 @@
 			var hBase = (top.HEURIST && top.HEURIST.basePath ? "http://" + window.location.host +  top.HEURIST.basePath :
 			( HeuristBaseURL ? HeuristBaseURL : ""));
 			var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"";
-			var bugReportURL = hBase + 'export/email/formEmailRecordPopup.html?rectype=bugreport&db='+database;
+			var bugReportURL = '../export/email/formEmailRecordPopup.html?rectype=bugreport&db='+database;
+			    // was hBase, but ../ seems to work jsut as well
 
 			if (location.search.match(/[&?]q=[^&]+/)) {		//there is a search string
 				document.getElementById("searchFrame").src =  hBase +"search/getResultsPageAsync.php" + location.search;
@@ -108,7 +85,7 @@
 					if (top.HEURIST.is_logged_in()  ) {	//FIXME: this doesn't work for installed verisons
 						document.body.className = "w-bookmark";
 						window.HEURIST.parameters["w"] = "bookmark";
-						window.HEURIST.parameters["q"] = "tag:Favourite OR tag:Favorite";
+						window.HEURIST.parameters["q"] = "tag:" + top.HEURIST.util.getDisplayPreference("favourites");
 						window.HEURIST.parameters["db"] = database;
 					}
 				});
@@ -172,7 +149,7 @@
 			<div id="quicklinks">
 				<div id=logged-in></div>
 				<ul id=quicklink-cell>
-					<li class="admin-only" id="reportBug"><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 320,width: 740,callback: _bugReportCallback});return false;" title="Click to send a bug report" ><img src="../common/images/16x16.gif"></a></li>
+					<li class="admin-only" id="reportBug"><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 450,width: 740,callback: _bugReportCallback});return false;" title="Click to send a bug report" ><img src="../common/images/16x16.gif"></a></li>
 					<li class="logged-in-only"> <span id=my-heurist-menu-link class=logged-in-only><b>My Profile</b></span>
 						<ul id="my-heurist-menu">
 							<li><a href="../admin/profile/editPreferences.html" name="auto-popup" title="Display preferences">Preferences</a></li>
@@ -207,11 +184,14 @@
 
 							<li class="admin-only"><a href="../import/delimited/updateDetailsFromDelimited.html" onClick="this.href = top.HEURIST.baseURL +'import/delimited/updateDetailsFromDelimited.html?db=' + database;" target="_blank" title="Update record details using delimited text" class="seperator">Detail updater</a></li>
 							<li class="admin-only"><a href="../export/delimited/exportDelimitedForRectype.html" target="_blank" onClick="this.href = top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database;" title="Export records as delimited text">Export delimited</a></li>
+						  <li><a href="#" id=result-style-icons-link title="Generate KML for selected set of search results" onClick="top.HEURIST.search.exportKML(false);">Export KML for selected</a></li>
+
 							<!-- separator-->
 						</ul>
 					</li>
 
-					<li> <a href="../help/webhelp" target=_blank title="Overview and guides to the use of Heurist plus comprehensive detailed help"><b>Guides</b></a> </li>
+					<li> <a href="../help/webhelp" target=_blank title="Online help for Heurist"><b>Help</b></a> </li>
+					<li> <a href="../index.html" target=_blank title="The Heurist project plus comprehensive detailed help"><b>Project</b></a> </li>
 					<li> <a id=contact-link style="display:none" title="Send us an email with bug information or feature requests" href="mailto:info@heuristscholar.org"><b>Contact us</b></a>
 
             <script>
@@ -355,7 +335,7 @@
 					<div id=my-records-saved-searches class=hide>
 						<div class=search-type title="Personal Saved searches which search only the records you have bookmarked (your collection)" onClick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">My bookmarks</div>
 						<div class=content>
-							<div class=saved-search-subsubheading><a href="?ver=1&amp;w=bookmark&amp;q=tag:Favourites+OR+tag:Favorites&amp;label=Favourites" onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">My Favourites</a></div>
+							<div class=saved-search-subsubheading><a href="?ver=1&amp;w=bookmark&amp;label=Favourites&amp;q=tag:" onClick="top.HEURIST.search.loadFavourites(this.href);return false;">My Favourites</a></div>
 							<div class=saved-search-subsubheading><a href='?ver=1&amp;w=bookmark&amp;q=sortby:-m%20after:"1 week ago"&amp;label=Recently+modified' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">Recent changes</a></div>
 							<div class=saved-search-subsubheading><a id=search-by-tag-link href="#" onClick="top.HEURIST.search.showTagSearchLinks(); return false;">My Tags</a></div>
 							<div class=saved-search-subsubheading><a id=my-blog-link target="_blank" href="#">My Blog</a></div>

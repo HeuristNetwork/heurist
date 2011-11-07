@@ -16,31 +16,37 @@
 	<link rel=stylesheet href="../../common/css/global.css">
 </head>
 
-<body class="popup" onload="showPreferences()" width=300 height=200>
+<body class="popup" onload="showPreferences()" width=350 height=300>
 
   <script src="../../common/js/utilsLoad.js"></script>
   <script>
 	function showPreferences() {
 		document.getElementById("results-per-page").value
 			= top.HEURIST.util.getDisplayPreference("results-per-page");
+		document.getElementById("favourites").value
+			= top.HEURIST.util.getDisplayPreference("favourites");
 	}
 
 	function save() {
 		var rpp = parseInt(document.getElementById("results-per-page").value);
+		var fav = document.getElementById("favourites").value;
 		if (rpp < 0 || rpp > 500) {
 			alert("Results per page must be between 1 and 500");
 			return;
 		}
 		top.HEURIST.util.setDisplayPreference("results-per-page", rpp);
+		top.HEURIST.util.setDisplayPreference("favourites", fav);
 		window.close();
 	}
   </script>
 
   <!-- h2>Preferences</h2 -->
   <div>
-   <div><h2>Search results per page</h2></div>
-   <p>Must be between 1 and 500</p>
-   <input id="results-per-page">
+   <div><h2>Display Preferences</h2></div>
+   <p>
+   Search results per page (20 - 500) <input id="results-per-page">
+   <p>
+   Spelling of Favourites / Favorites <input id="favourites">
   </div>
   <div id="buttons">
    <input type="button" value="save" onclick="save();">

@@ -339,12 +339,15 @@ if(mysql_error()) {
 	//saw TODO; modify this for handle durations with a start or end date
 	$timeObjects = array();
 	if (defined('DT_START_DATE') && defined('DT_END_DATE')) {
-		$res = mysql_query("select START.dtl_RecID, START.dtl_Value, END.dtl_Value ".
+
+		$squery = "select START.dtl_RecID, START.dtl_Value, END.dtl_Value ".
 							"from recDetails START left join recDetails END on START.dtl_RecID=END.dtl_RecID ".
 							"and END.dtl_DetailTypeID=".DT_END_DATE.
 							" where START.dtl_DetailTypeID=".DT_START_DATE.
 							" and (START.dtl_Value || END.dtl_Value) ".
-							"and START.dtl_RecID in (" . join(",", $bibIDs) . ")");
+							"and START.dtl_RecID in (" . join(",", $bibIDs) . ")";
+
+		$res = mysql_query($squery);
 		while ($val = mysql_fetch_row($res)) {
 			if ($val[1] || $val[2]) {
 				$timeObjects[$val[0]] = array($val[1], $val[2]);
@@ -359,7 +362,7 @@ if(mysql_error()) {
 	//"
 	$anyDateBibIDs = array();
 	foreach($bibIDs as $bibID) {
-		if (!$timeObjects[$bibID]){
+		if ( !array_key_exists($bibID, $timeObjects) ){
 			array_push($anyDateBibIDs,$bibID);
 		}
 	}
@@ -407,22 +410,22 @@ if(mysql_error()) {
 				$years[$val[0]] = array($val[1],($val[1] !== $val[2] ? $val[2]:null));
 			}
 		}
-	}
 
-	foreach( $bibIDs as $bibID){
-		$sd = (@$dates[$bibID][0] ? $dates[$bibID][0]:null);
-		$ed = (@$dates[$bibID][1] ? $dates[$bibID][1]:null);
-		$sy = (@$years[$bibID][0] ? $years[$bibID][0]:null);
-		$ey = (@$years[$bibID][1] ? $years[$bibID][1]:null);
+		foreach( $bibIDs as $bibID){
+			$sd = (@$dates[$bibID][0] ? $dates[$bibID][0]:null);
+			$ed = (@$dates[$bibID][1] ? $dates[$bibID][1]:null);
+			$sy = (@$years[$bibID][0] ? $years[$bibID][0]:null);
+			$ey = (@$years[$bibID][1] ? $years[$bibID][1]:null);
 
-		if (! $sd  &&  ! $ed  && $sy && $sy == $ey)
-		$ey = $sy + 1;
+			if (! $sd  &&  ! $ed  && $sy && $sy == $ey)
+			$ey = $sy + 1;
 
-		$s = ($sd ? $sd : $sy);
-		$e = ($ed ? $ed : $ey);
-		if ($s >= $e) $e = null;
+			$s = ($sd ? $sd : $sy);
+			$e = ($ed ? $ed : $ey);
+			if ($s >= $e) $e = null;
 
-		$timeObjects[$bibID] = array($s, $e);
+			$timeObjects[$bibID] = array($s, $e);
+		}
 	}
 
 	//sort($geoBibIDs);
@@ -435,10 +438,11 @@ if(mysql_error()) {
 		//	$bibID = ""+$bibID;
 
 		//error_log("2>>>>>>".$geoBibIDs["97025"]);
-		//error_log("3>>>>>>".$geoBibIDs[$bibID]);
+		//error_log("3>>>>>>".$bibID."    ".$geoBibIDs[$bibID]."   time=".array_key_exists($bibID, $timeObjects) );
+
 		$isNotGeoLoc = !@$geoBibIDs[$bibID];
 
-		if((!$isNotGeoLoc) || @$timeObjects[$bibID]){
+		if((!$isNotGeoLoc) || array_key_exists($bibID, $timeObjects) ){
 			//error_log(">>>>>".$bibID."=".$geoBibIDs[$bibID]."<<<<<<".(!@$geoBibIDs[$bibID])."<<<<<<");
 
 			$geoRecords[$bibID] = $records[$bibID];
@@ -450,7 +454,7 @@ if(mysql_error()) {
 			}else{
 				$cnt_geo++;
 			}
-			if (@$timeObjects[$bibID]) {
+			if ( array_key_exists($bibID, $timeObjects) ) {
 				list($start, $end) = $timeObjects[$bibID];
 				$geoRecords[$bibID]["start"] = $start;
 				if ($end) $geoRecords[$bibID]["end"] = $end;

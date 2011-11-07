@@ -265,6 +265,7 @@
 				// todo: we need to hold the warning here
 				// return false; This is only a warning, should keep going
 				}
+/* IAN's code
 			$iconPath = "".HEURIST_ICON_ROOT.$newDBName;
 			$cmdline = "chmod -R 774 ".$iconPath;
 			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
@@ -272,7 +273,7 @@
 			// copy default set of icons from example database provided with installation
 			$cmdline = "cp ".HEURIST_ICON_ROOT."h3_example_db/*.* " $iconPath; // added 2/11/2011 to prepoulate with icons
 			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
-
+*/
 			// Make the current user the owner and admin of the new database
 			mysql_connection_db_insert($newname);
 			mysql_query('UPDATE sysUGrps SET ugr_LongName="'.$longName.'", ugr_FirstName="'.$firstName.'",

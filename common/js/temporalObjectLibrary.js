@@ -1029,9 +1029,10 @@ TDate.parse = function () {
 			var valid = false;
 			if (word) {
 				word = word[1];
-				var m = word.match(/(jan|feb|mar|apr|may|jun|jul|aug|sept?|oct|nov|dec)\.?/i);
+				var m = word.match(/(jan|feb|mar|apr|may|jun|jul|aug|sept|oct|nov|dec)\.?/i);
 				if (m) {
 					temp = temp.replace( word, m[1].toLowerCase());
+					break; //artem ??
 				} else{
 					var roman = { i:'1',ii:'2',iii:'3',iv:'4',v:'5',vi:'6',vii:'7',viii:'8',ix:'9',x:'10',xi:'11',xii:'12', iiii:'4', viiii:'9'};
 					m = roman[word.toLowerCase()];
