@@ -302,7 +302,7 @@
 		'DT_MAP_IMAGE_LAYER_SCHEMA' => array(3,585),
 		'DT_KML_FILE' => array(3,552),
 		'DT_TITLE_SHORT' => array(3,55),
-		'DT_KML' => array(2,138),
+		'DT_KML' => array(3,138),
 		'DT_MINMUM_ZOOM_LEVEL' => array(3,586),
 		'DT_MAP_IMAGE_LAYER_REFERENCE' => array(3,92),
 		'DT_MAXIMUM_ZOOM_LEVEL' => array(3,587),

@@ -1001,8 +1001,7 @@ TDate.parse = function () {
 		temp = temp.replace(/\s+/g," ");	//compress multiple spaces into a single space
 		temp = temp.replace(/\s*\([^\)]+\)\s*$/,""); //remove any Timezone adorment like (AUS  Eastern Daylight Time)
 		temp = temp.replace(/\s*(sun|mon|tues?|wed(nes)?|thur?s?|fri)(day)?\.?,?\s*/i,"");  //remove any day indicators
-		temp = temp.replace(/nd|rd|th|\sof/ig,"");
-		temp = temp.replace(/1st|1\sst/,"1");
+		temp = temp.replace(/([012]?\d)\s*(th|rd|nd|st)(\s*of)?/i,"$1d");
 		temp = temp.replace(/\s+/g," ");	//compress multiple spaces into a single space
 		if (temp.match(/\d\d?\s*(?:am|pm)/i)) {  //  12 hour clock need to convert
 			var t12 = temp.match(/(?:\s+(\d\d?)([:\.,]\d\d?\d?){0,3})\s*(am|pm)/i);
@@ -1023,21 +1022,21 @@ TDate.parse = function () {
 			}
 		}
 
-		var t = temp.match(/[^\.\-\d:\s\+\/]/);
+		var t = temp.match(/\b[^\.\-\d:,\s\+\/]/);
 		while (t && t[0] && t[0] !== "T") { // possible word for month
-			var word = temp.match(/^\s*(?:\d+[\.\-\d:\s\+\/]\s*)*([^\.\-\d:\s\+\/]{1,20}\.?)\s*(?:\d+\s)*/);//(/^\s*(?:\d+\s)*\s*([^\.\-\d:\s\+\/]{1,20}\.?)\s*(?:\d+\s)*/);
+			var word = temp.match(/^\s*(?:\-?\d+(?:d|m)?[\.\-:,\s\+\/]\s*)*([^\.\-\d:,\s\+\/]{1,20}\.?)\s*(?:\-?\d+(?:d|m)?\s)*/);//(/^\s*(?:\d+\s)*\s*([^\.\-\d:\s\+\/]{1,20}\.?)\s*(?:\d+\s)*/);
 			var valid = false;
 			if (word) {
 				word = word[1];
-				var m = word.match(/(jan|feb|mar|apr|may|jun|jul|aug|sept|oct|nov|dec)\.?/i);
+				var m = word.match(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i);
 				if (m) {
-					temp = temp.replace( word, m[1].toLowerCase());
-					break; //artem ??
+					var month = {jan:'1',feb:'2',mar:'3',apr:'4',may:'5',jun:'6',jul:'7',aug:'8',sep:'9',oct:'10',nov:'11',dec:'12'};
+					temp = temp.replace( word,''+month[m[1].toLowerCase()]+'m');
 				} else{
 					var roman = { i:'1',ii:'2',iii:'3',iv:'4',v:'5',vi:'6',vii:'7',viii:'8',ix:'9',x:'10',xi:'11',xii:'12', iiii:'4', viiii:'9'};
 					m = roman[word.toLowerCase()];
 					if (m) {
-						temp = temp.replace( word,m);
+						temp = temp.replace( word,'' + m +'m');
 					}else{
 						throw "TDate parser exception -  unrecognized word found - " + word ;
 					}
@@ -1045,11 +1044,12 @@ TDate.parse = function () {
 			} else {
 				throw "TDate parser exception -  unrecognized characters found in input string - " + str;
 			}
-			t = temp.match(/[^\.\-\d:\s\+\/]/);
+			t = temp.match(/\b[^\.\-\d:,\s\+\/]/);
 		}
 		temp = temp.replace(/,\s*/g,' ');   // take care of any comma separation and turn them into a single space
-		temp = temp.match(/^\s*((?:(?:\-?\d+|(?:jan|febr?)(?:uary)?|(?:(?:(?:sept?|nov|dec)(?:em)?)|octo?)(?:ber)?|marc?h?|apri?l?|may|june?|july?|aug(?:ust)?)[\/\-\s]?){0,3})?\s*[\s|T]?\s*([012]?\d(?:[:\.,]\d\d?\d?){0,3})?\s*(Z|(?:[\+\-\s]?\d\d:?(?:\d\d)?))?/i);
-		if (periodDesignator){ // period format does have time or timezone
+//		temp = temp.match(/^\s*((?:(?:\-?\d+(?:d|m)?|(?:jan|febr?)(?:uary)?|(?:(?:(?:sept?|nov|dec)(?:em)?)|octo?)(?:ber)?|marc?h?|apri?l?|may|june?|july?|aug(?:ust)?)[\/\-\s]?){0,3})?\s*[\s|T]?\s*([012]?\d(?:[:\.,]\d\d?\d?){0,3})?\s*(Z|(?:[\+\-\s]?\d\d:?(?:\d\d)?))?/i);
+		temp = temp.match(/^\s*((?:(?:\-?\d+(?:d|m)?)[\/\-\s]?){0,3})?\s*[\s|T]?\s*([012]?\d(?:[:\.,]\d\d?\d?){0,3})?\s*(Z|(?:[\+\-\s]?\d\d:?(?:\d\d)?))?/i);
+		if (periodDesignator){ // period format doesn't have time or timezone  TODO:check this is correct
 			temp[2] = temp[3] = null;
 		}
 		if (!(temp[1] || temp[2] )) {
@@ -1091,17 +1091,20 @@ TDate.parse = function () {
 
 		var date = temp[1] && BCE ? temp[0] : temp[1];
 		if (date) {
-			date = date.replace(/(^\s+|\s+$)/g,""); //trim
+			date = date.replace(/(^\s+|\s+$)/g,""); //trim beginning and ending spaces
 			date = date.replace(/\s+/g," "); //reduce spaces to single space
-			date = date.split(/[\/\-\s]/); //separate year, month and day
+			date = date.split(/[\/\-\s]/); //separate year, month and day using slash, dash or space as a delimiter
 				for (var i = 0; i < date.length - 1; i++) {
 					if (!date[i] && date[i+1]) {	// neg sign add it back in
 						date[i+1] = "-" + date[i+1];
-						date.splice(i,1);
+					date.splice(i,1);	// remove the empty element
 						break;
 					} else if (i === date.length - 2 && date[i+1] === "") { // last interation
 						date.splice(i+1,1);
 					}
+			}
+			if (date.length > 3) {
+				throw "TDate parser exception -  too many values in date string - " + date;
 			}
 			if (date.length === 1) { // only one number assume it's the year
 				_year = date[0];
@@ -1119,14 +1122,21 @@ TDate.parse = function () {
 						}
 						throw "TDate parser exception -  empty value in date string is not allowed  - " + (temp && temp[1] ? temp[1] : "" );
 					}
-					if ( !monthFound && date[i].search(/[^\-\d]/) !== -1) {  // found characters should be month name
-						if ( date[i].substring(0,3).match(/jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec/i)) {
-							date[i] = {	jan:"01",feb:"02",mar:"03",
-										apr:"04",may:"05",jun:"06",
-										jul:"07",aug:"08",sep:"09",
-										oct:"10",nov:"11",dec:"12"}[date[i].substring(0,3).toLowerCase()];
+					var codedDatePart = date[i].match(/(\d\d?)(m|d)/);
+					if (codedDatePart) {  // found character which codes the meaning of this number
+						date[i] = codedDatePart[1];
+						var numFormat = codedDatePart[2],
+							num = Number(date[i]);
+						if (numFormat == "m") {
+							if (monthFound){
+								throw "TDate parser exception -  unrecognized date string duplicate month designated - " + (temp && temp[1] ? temp[1] : "" );
+							}
+							if (num < 1 || num > 12 ){
+								throw "TDate parser exception -  out of range month designator "+ date[i] + (temp && temp[1] ? "in "+temp[1] : "" );
+							}
+							monthFound = true;
 							for (var j=0; j < dateFormat.length; j++) {
-								dateFormat[j] = dateFormat[j].replace(/m/,""); // remove any existing year possibilities
+								dateFormat[j] = dateFormat[j].replace(/m/,""); // remove any existing month possibilities
 								if (dateFormat[j] === "d") {
 									dayFound = true;
 								}
@@ -1135,16 +1145,56 @@ TDate.parse = function () {
 								}
 							}
 							dateFormat.push("m");
-							monthFound = true;
 							continue;
 						} else {
-							throw "TDate parser exception -  unrecognized date string with no digit characters - " + (temp && temp[1] ? temp[1] : "" );
+							if (dayFound){
+								throw "TDate parser exception -  unrecognized date string duplicate day designated - " + (temp && temp[1] ? temp[1] : "" );
+							}
+							if (num < 1 || num > 31 ){
+								throw "TDate parser exception -  out of range day designator "+ date[i] + (temp && temp[1] ? "in "+temp[1] : "" );
+							}
+							dayFound = true;
+							for (var j=0; j < dateFormat.length; j++) {
+								dateFormat[j] = dateFormat[j].replace(/d/,""); // remove any existing month possibilities
+								if (dateFormat[j] === "m") {
+									monthFound = true;
+								}
+								if (dateFormat[j] === "y") {
+									yearFound = true;
+								}
+							}
+							dateFormat.push("d");
+							continue;
 						}
 					}
+/*
+					if ( !monthFound && date[i].search(/[^\-\d]/) !== -1) {  // found characters should be month name
+						if ( date[i].substring(0,3).match(/jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec/i)) {
+							date[i] = {	jan:"01",feb:"02",mar:"03",
+										apr:"04",may:"05",jun:"06",
+										jul:"07",aug:"08",sep:"09",
+										oct:"10",nov:"11",dec:"12"}[date[i].substring(0,3).toLowerCase()];
+							monthFound = true;
+							for (var j=0; j < dateFormat.length; j++) {
+								dateFormat[j] = dateFormat[j].replace(/m/,""); // remove any existing month possibilities
+								if (dateFormat[j] === "d") {
+									dayFound = true;
+								}
+								if (dateFormat[j] === "y") {
+									yearFound = true;
+								}
+							}
+							dateFormat.push("m");
+							continue;
+						} else {
+							throw "TDate parser exception -  unrecognized date string with non digit characters - " + (temp && temp[1] ? temp[1] : "" );
+						}
+					}
+*/
 					var val = Number(date[i]);
 					if ( !yearFound && (date[i].length > 2 || val < 1 || val > 31 || (dayFound && monthFound)) ) { // definitely a year
 						if ( date.length === 3 && i === 1) { // year is the middle and not allowed
-							throw "TDate parser exception -  unrecognized date string  - " + (temp && temp[1] ? temp[1] : "" );
+							throw "TDate parser exception -  unrecognized date string  unexpected year - " + (temp && temp[1] ? temp[1] : "" );
 						}
 						for (var j=0; j < dateFormat.length; j++) {
 							dateFormat[j] = dateFormat[j].replace(/y/,""); // remove any existing year possibilities

@@ -18,6 +18,7 @@
   <script type="text/javascript" src="../../common/js/temporalObjectLibrary.js"></script>
   <!--script type="text/javascript" src="../js/date_formatted.js"></script-->
   <!--script type="text/javascript" src="../js/date.js"></script-->
+	<script type="text/javascript" src="temporalTestInputs.js"></script>
   <script type="text/javascript">
   		var displayDiv;
 		function runSelectedTest () {
@@ -46,7 +47,10 @@
 					testCase7();
 					break;
 				case 8:
-					testCase7();
+					testCase8();
+					break;
+				case 9:
+					testCase9();
 					break;
 				default:
 					runtest();
@@ -154,7 +158,7 @@
 			}
 		}
 
-		function testCase2() { // Make Date usign parseExact.
+		function testCase2() { // Make Date using parseExact.
 			//make a Date
 			var str = document.getElementById("teststring").value,
 				frm = document.getElementById("formatstring").value;
@@ -312,6 +316,34 @@
 							"<p> *********** UTC output ****************** " + linefeed +
 							displayUTCDate(tDate) + "</p>";
 		}
+		function testCase9() { // Acceptance Test   -  test all input string variations
+			//make a Date
+			var str = document.getElementById("teststring").value;
+			if (!str) {
+				for (var i = 0; i < testInputs.length; i++) {
+					try {
+						msg = testInputs[i][0];
+						str = testInputs[i][1];
+						tDate = TDate.parse(str);
+						displayDiv.innerHTML += "<p> ##################" + msg + "############### </p>";
+						displayDiv.innerHTML += "<p> TDate parse of " + str + " = " + tDate.toString() + " </p>";
+					}
+					catch(e) {
+						displayDiv.innerHTML += "<p> !!!!!!! Exception !!!!!!" + e + linefeed +
+												" str = " + str + " for test = " + msg + "</p>";
+					}
+				}
+			} else {
+				try {
+					tDate = TDate.parse(str);
+					appendDateResults(str, displayDiv, tDate);
+				}
+				catch(e) {
+					displayDiv.innerHTML = "<p> !!!!!!! Exception !!!!!!" + e + linefeed +
+											" str = " + str + "</p>";
+				}
+			}
+		}
 
   </script>
 </head>
@@ -325,6 +357,7 @@
   <option value="6">Modify Temporal Change TDate from String</option>
   <option value="7">Modify Temporal Change Type to Simple Date</option>
   <option value="8">Modify Temporal Change TDate from TDate</option>
+  <option value="9">Acceptence Test</option>
 </select><br/>
 <label for="teststring">Enter Test String</label>
 <input type="text" name="teststring" id="teststring" size="200" maxlength="300"   title="enter teststring">
