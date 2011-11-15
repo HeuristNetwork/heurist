@@ -1,128 +1,88 @@
 <!--
 
 /**
- * findAddUser.html, Template new user registration form (find function no longer relevant)
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
+* findAddUser.html, Template new user registration form (find function no longer relevant)
+* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+* @todo
+**/
 
 -->
 <html>
-<head>
+	<head>
 	[if : register]
-	<title>Register</title>
+		<title>Heurist user registration</title>
 	[else]
-	<title>Add user</title>
+		<title>Heurist user addition</title>
 	[end-if]
 	<link href="../../common/css/heurist.css" rel="stylesheet" type="text/css">
 	<link href="../../common/css/registration.css" rel="stylesheet" type="text/css">
 
 	<script language="JavaScript" src="../../external/jquery/jquery.js"></script>
-</head>
+	</head>
 
-<body>
-<table id="page" class="expander" border="0" cellpadding="0" cellspacing="0">
-<tr><td id="header">
+	<body>
 
-<table border="0" cellpadding="0" cellspacing="0" class="expander">
-<tbody><tr>
-<td rowspan="2" id="logo-cell"><a href="../../"><img src="../../common/images/hlogo-small.jpg" alt="Heurist" title="Click the logo at top left of any Heurist page to return to your favourites"></a></td>
-<td rowspan="2">
-[if : register]
-[else]
-<a href="assignUsersToGroups.php?db=[dbname!]">Edit user groups</a>
-[end-if]
-</td>
-<td align="right" style="vertical-align: baseline;">
-[if : register]
-[else]
-<font color="#008000"><small>Logged in as: </small><tt>[logged-in-user-username]</tt></font><br>
-	[if-eq : logged-in-user-username : ""]
-	<a href="../../common/connect/login.php?db=[dbname!]"><small>Log in</small></a>
+		[if : register] [else] <a href="assignUsersToGroups.php?db=[dbname!]">Assign group membership</a> [end-if]
+
+		<h2> [if : register] Registration [else] Add User [end-if] </h2>
+
+		[if : register]
 	[else]
-	<a href="../../common/connect/login.php?logout=1&amp;db=[dbname!]"><small>Log out</small></a>
-	[end-if-eq]
-[end-if]
-</td>
-</tr>
-<tr><td id="menu-cell">
-</td></tr>
-</tbody></table>
-</td></tr>
-<tr>
-<td height="109" id="search-cell" style="padding-left:40px; padding-right:40px; color:#FFF; font-weight:bold; font-size:1.6em;">
-[if : register]
-Registration
-[else]
-Add User
-[end-if]
-</td>
-<td></td>
-</tr>
-
-<tr>
-<td colspan="3" style="padding-left:40px; padding-right:40px;">
-
-
-
-[if : register]
-[else]
-<form action="findAddUser.php?db=[dbname!]">
+		<form action="findAddUser.php?db=[dbname!]">
 	<p>[extended-search USER USER_search]
 	</p>
 
 	<hr color="#cccccc" size="1" width="100%" align="left">
-<b>Search for user</b>
+			<b>Search for user</b>
 
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; First name&nbsp; [textbox : ugr_FirstName : user ??? : size=&quot;20&quot;]&nbsp;
-Last name&nbsp; [textbox : ugr_LastName : user ??? : size=&quot;20&quot;]&nbsp;&nbsp;
-Email [textbox : ugr_eMail : user email: size=&quot;30&quot;]&nbsp;
+			<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; First name&nbsp; [textbox : ugr_FirstName : user ??? : size=&quot;20&quot;]&nbsp;
+				Last name&nbsp; [textbox : ugr_LastName : user ??? : size=&quot;20&quot;]&nbsp;&nbsp;
+				Email [textbox : ugr_eMail : user email: size=&quot;30&quot;]&nbsp;
 
-<input type="submit" value="Find"><i><span class="smallfont"> Search will match partial
-strings</span></i></p>
+			<input type="submit" value="Find"><i><span class="smallfont"> Search will match partial	strings</span></i></p>
 
-<a name="results"></a>
+			<a name="results"></a>
 
-[if:USER_search-searched] <p>
+			[if:USER_search-searched] <p>
 	<b>Count: [result-count] </b>
 	<i>&nbsp;&nbsp;&nbsp;
 	[if:result-count] Showing [result-first] to [result-last]&nbsp;&nbsp;</i>Click on user name to edit<i> </i>[if:prev-url] <a href="[prev-url]">previous
 	page</a>[end-if]
 	[if:next-url] <a href="[next-url]">next page</a>[end-if]</i>[end-if]
-[end-if] </i>
-&nbsp;</p>
-<p>
-<table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse">
-[foreach USER searchrecordloop]
+				[end-if] </i>
+			&nbsp;</p>
+			<p>
+				<table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse">
+					[foreach USER searchrecordloop]
 	<tr>
 		<td style="padding-right: 20px;"><b>[ugr_ID]</b></td>
         <td style="padding-right: 20px;"><b><a href="editUser.php?db=[dbname!]&amp;Id=[ugr_ID]">[ugr_FirstName] [ugr_LastName]</a></b></td>
 		<td><a href="assignUsersToGroups.php?db=[dbname!]&amp;filterId=[ugr_ID]">edit groups</a></td>
 	</tr>
-[end-foreach]
-</table>
-</p>
-<p>[end-extended-search] </p>
-<hr color="#cccccc" size="1" width="100%" align="left">
-</form>
-[end-if]
-<!-- end non-registration code -->
-<form action="findAddUser.php?db=[dbname!]" method="post">
-[insert required USER user_insert]
+					[end-foreach]
+				</table>
+			</p>
+			<p>[end-extended-search] </p>
+			<hr color="#cccccc" size="1" width="100%" align="left">
+		</form>
+		[end-if]
+		<!-- end non-registration code -->
+		<form action="findAddUser.php?db=[dbname!]" method="post">
+			[insert required USER user_insert]
 
-[if : register]
-[else]
-<p class="red">Please search for user (below) to ensure that they don't exist before adding&nbsp;&nbsp;&nbsp;&nbsp; </b></p>
-[end-if]
+			[if : register]
+			[else]
+			<p class="red">Please search for user (below) to ensure that they don't exist before adding&nbsp;&nbsp;&nbsp;&nbsp; </b></p>
+			[end-if]
 
-<!-- end non-registration code -->
-<span class="red">[errors]</span>
-<div id="required" style="margin-top:20px;">
-<a>Required information </a>
-<br>
+			<!-- end non-registration code -->
+			<span class="red">[errors]</span>
+			<div id="required" style="margin-top:20px;">
+				<a>Required information </a>
+				<br>
 	<label>First name</label>[textbox required : ugr_FirstName : First name : size=&quot;20&quot;]
 	<label>Last name</label>[textbox required : ugr_LastName : Last name : size=&quot;40&quot;]
 	<label>Email<br>
@@ -136,10 +96,10 @@ strings</span></i></p>
 	<label>Password</label>[password required : ugr_Password : two matching passwords : size=&quot;20&quot;]
 	<label>Repeat password</label><input type="password" name="password2" size="20">
 
-<p style="color:red">Warning: this is not an encrypted connection, so please don't use your institutional or banking password.</p>
-</div>
-<br>
-<div class="hide" id="optional"><a onMouseDown="$('#options').slideToggle('fast'); $('#optional').toggleClass('hide');">Optional information</a>
+				<p style="color:red">Warning: this is not an encrypted connection, so please don't use your institutional or banking password.</p>
+			</div>
+			<br>
+			<div class="hide" id="optional"><a onMouseDown="$('#options').slideToggle('fast'); $('#optional').toggleClass('hide');">Optional information</a>
 	<div id="options" style="display:none;">
 	<br>
 		<label>Department</label>[textbox : ugr_Department : Department : size=&quot;50&quot;]
@@ -148,12 +108,12 @@ strings</span></i></p>
 		<label>State</label>[textbox : ugr_State : State : size=&quot;30&quot;]
 		<label>Post/zipcode</label>[textbox : ugr_Postcode : Post/zipcode : size=&quot;10&quot;]
 	</div>
-</div>
-<br>
-<div>
-[if : register]
+			</div>
+			<br>
+			<div>
+			[if : register]
 	[model-user-dropdown!]
-[else]
+			[else]
 	<table border="0" cellspacing="0" style="border-collapse: collapse" width="100%" id="AutoNumber1" class="normal">
 	<tr>
 	<td width="6%" height="19">&nbsp;</td>
@@ -169,33 +129,33 @@ strings</span></i></p>
 	&nbsp;&nbsp;
 	</td>
 	</tr>
-</table>
-[end-if]
+			</table>
+			[end-if]
 
-[if : register]
-<div>
-<p>Please read the Conditions of Use below, then click the Register button at the end of the page.</p>
+			[if : register]
+			<div>
+				<p>Please read the Conditions of Use below, then click the Register button at the end of the page.</p>
 
-<p>If you experience problems with the registration process, please let us know what went wrong (and send your registration details for manual addition).</p>
-<p><div id="contactDetails"></div></p>
-<script type="text/javascript">
-document.getElementById("contactDetails").innerHTML = adminDetails;
-</script>
-<br>
-<input type="checkbox" name="agree" onClick="e=getElementById('register_button'); if (e) e.disabled=!this.checked;">
-I have read and agree to the Terms and Conditions of Use below<br>
-</div>
+				<p>If you experience problems with the registration process, please let us know what went wrong (and send your registration details for manual addition).</p>
+				<p><div id="contactDetails"></div></p>
+				<script type="text/javascript">
+					document.getElementById("contactDetails").innerHTML = adminDetails;
+				</script>
+				<br>
+				<input type="checkbox" name="agree" onClick="e=getElementById('register_button'); if (e) e.disabled=!this.checked;">
+				I have read and agree to the Terms and Conditions of Use below<br>
+			</div>
 
-<div class="hide" id="conditions" style="margin-top:20px;">
-<a onMouseDown="$('#conditionstext').slideToggle('fast'); $('#conditions').toggleClass('hide');">Conditions</a>
-<div id="conditionstext" style="display:none; height:440px; margin: 12px; border-top:solid; border-width:1px; border-color:#CCC;">
-<p>HEURIST is an experimental system maintained by the University of Sydney,
-Arts eResearch and our funding is modest. By using the HEURIST
+			<div class="hide" id="conditions" style="margin-top:20px;">
+				<a onMouseDown="$('#conditionstext').slideToggle('fast'); $('#conditions').toggleClass('hide');">Conditions</a>
+				<div id="conditionstext" style="display:none; height:440px; margin: 12px; border-top:solid; border-width:1px; border-color:#CCC;">
+					<p>HEURIST is an experimental system maintained by the University of Sydney,
+						Arts eResearch and our funding is modest. By using the HEURIST
  system and other AeR applications you acknowledge the following and
  agree to license these systems on the following terms and conditions:</p>
-<ul>
+					<ul>
 
-<li>
+						<li>
    HEURIST is intended for personal and academic use only. All
    users are specifically identified by their name, email address and
    institution. This is required to provide a focus and accountability and to
@@ -248,44 +208,44 @@ Arts eResearch and our funding is modest. By using the HEURIST
    without recourse and without explanation.
   </li>
 
-</ul>
-</div>
-</div>
+					</ul>
+				</div>
+			</div>
 
-<input type="hidden" name="register" value="1">
-[end-if /* register */]
+			<input type="hidden" name="register" value="1">
+			[end-if /* register */]
 
-<p>[end-insert]</p>
+			<p>[end-insert]</p>
 
-[if : register]
-<div>
-[recaptcha!]
-</div>
-<p><input type="submit" value="Register" id="register_button" disabled></p>
-[else]
-<p><input type="submit" value="Add new user"></p>
-[end-if]
+			[if : register]
+			<div>
+				[recaptcha!]
+			</div>
+			<p><input type="submit" value="Register" id="register_button" disabled></p>
+			[else]
+			<p><input type="submit" value="Add new user"></p>
+			[end-if]
 
-[if : new-user-id]
-<p>
-<span class="red">User added</span><br>
-<a href="editUser.php?db=[dbname!]&amp;Id=[new-user-id]">Click here to edit</a>
-</p>
-[end-if]
+			[if : new-user-id]
+			<p>
+				<span class="red">User added</span><br>
+				<a href="editUser.php?db=[dbname!]&amp;Id=[new-user-id]">Click here to edit</a>
+			</p>
+			[end-if]
 
-</form>
+		</form>
 
-[not-found]
+		[not-found]
 
-<body>
-<span class="normalgr"><i>User not found</i></span>
-<p>
-<!--a href="users_search.php">Return to users list</a-->	<!-- FIXME: need to find this or it's replacement. -->
-</p>
-</body>
-[end-not-found]
+		<body>
+			<span class="normalgr"><i>User not found</i></span>
+			<p>
+				<!--a href="users_search.php">Return to users list</a-->	<!-- FIXME: need to find this or it's replacement. -->
+			</p>
+		</body>
+		[end-not-found]
 
-</td></tr></table>
 
-</body>
+
+	</body>
 </html>

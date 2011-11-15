@@ -155,7 +155,7 @@
 <span class="normal">
 
 <!--p>Internet Explorer users:  Add the latest version of <a href="{Bookmarklet_ie}" onclick="alert('Right-click this link and choose Add to Favorites...');return false;">H-Bookmark (IE)</a> <b>(IE version)</b> to your favorites</p-->
-<p>Drag the latest version of <a href="{Bookmarklet}" onclick="alert('Drag this link to your personals toolbar, or right-click it and\nchoose Bookmark This Link... / Add to Favorites...');return false;">H-Bookmark</a> to your toolbar</p>
+<p>Drag the latest version of <a href="{Bookmarklet}" onClick="alert('Drag this link to your personals toolbar, or right-click it and\nchoose Bookmark This Link... / Add to Favorites...');return false;">H-Bookmark</a> to your toolbar</p>
 <p>(<b>does not</b> automatically remove existing versions of bookmarklet)</p>
 
 <br>
@@ -206,12 +206,12 @@ Hyperlink text to ignore:<br><br>
  </nobr>
 </td>
 </tr>
-<tr><td>&nbsp;</td><td style="text-align: right;"><input type=button value=Done onclick="window.close();"></td></tr>
+<tr><td>&nbsp;</td><td style="text-align: right;"><input type=button value=Done onClick="window.close();"></td></tr>
 </table>
 
 {UserHyperlinksImport}
 
-  <input type="submit" value="Update these settings" class="hide_on_bookmark_import">
+  <input type="buttons" value="Update these settings" class="hide_on_bookmark_import">
 
 </form>
 
@@ -267,9 +267,9 @@ var kwd = new Object();
 document.getElementById("tags-loading").style.display = "none";
 document.getElementById("tags-table").style.display = "block";
   </script>
- <br clear="all">
- <input type="submit" value="Update tags" style="font-weight: bold;">
- <input type="button" value="Delete selected tags" style="font-weight: bold;" onclick="delete_multiple();">
+ <div class="actionButtons">
+ <input type="button" value="Update tags" style="font-weight: bold;">
+ <input type="button" value="Delete selected tags" style="font-weight: bold;" onClick="delete_multiple();">
  <input type="hidden" name="delete_kwd_id" value="0">
  <input type="hidden" name="update_kwd_from" value="0">
  <input type="hidden" name="update_kwd_to" value="0">
@@ -278,7 +278,7 @@ document.getElementById("tags-table").style.display = "block";
  <input type="hidden" name="replace_kwd_id" value="0">
  <input type="hidden" name="replace_with_kwd_id" value="0">
  <input type="hidden" name="delete_multiple_kwds" value="0">
-
+</div>
 </form>
 
 </blockquote>

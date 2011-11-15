@@ -271,7 +271,13 @@ elLiner.innerHTML = '<div align="center"><img src="../../common/images/info.png"
 						elLiner.innerHTML = "";
 					}else{}*/
 					var recID = oRecord.getData('id');
-					if(top.HEURIST.is_admin() || _isGroupAdmin(top.HEURIST.get_user_id(), recID) ){
+					if(Number(recID)===1)
+					{
+						elLiner.innerHTML = "<img src=\"../../common/images/lock_bw.png\" title=\"System group - Locked\">";
+					//}else if(Number(oRecord.getData('members'))>1){
+//elLiner.innerHTML = "<img src=\"../../common/images/lock_bw.png\" title=\"Impossible to delete group with members\">";
+					} else if(top.HEURIST.is_admin() || _isGroupAdmin(top.HEURIST.get_user_id(), recID) )
+					{
 elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../../common/images/cross.png" border="0" title="Delete this Group"" /><\/a></div>';
 					}else{
 						elLiner.innerHTML = "<img src=\"../../common/images/lock_bw.png\" title=\"Status: Not Admin - Locked\">";
@@ -346,7 +352,7 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../..
 							top.HEURIST.util.getJsonData(baseurl, callback, params);
 
 						}else{
-							alert("Impossible to delele group in usage");
+							//alert("Impossible to delete group in usage");
 						}
 
 				}

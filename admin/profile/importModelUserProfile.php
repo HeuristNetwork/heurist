@@ -73,7 +73,7 @@ table.normal {margin:10px 0}
   <td>
    <form method="get">
     Show new data for:
-    <select name="model_user_id" onchange="form.submit();">
+    <select name="model_user_id" onChange="form.submit();">
 <?php
 	$res = mysql_query("select usr.ugr_ID, concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as realname from ".USERS_DATABASE.".sysUGrps usr where usr.ugr_IsModelUser=1");
 	while ($row = mysql_fetch_assoc($res)) { ?>
@@ -220,7 +220,7 @@ table.normal {margin:10px 0}
 
 <table border="0" cellpadding="3" cellspacing="0" width="100%">
   <tr>
-    <td align="right"><span class="small"><input type="submit" value="Add selected items" style="font-weight: bold;"></span>&nbsp;&nbsp;</td>
+    <td align="right"><span class="small"><input type="button" value="Add selected items" style="font-weight: bold;"></span>&nbsp;&nbsp;</td>
   </tr>
 </table>
 

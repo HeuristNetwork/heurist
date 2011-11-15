@@ -65,7 +65,9 @@ $prefs = array(
 	"viewerTab" =>0,
 	"defaultPrintView" => "default",
 
-	"favourites" => "Favourites"
+	"defaultSearch" => "tag:Favourites",
+	"favourites" => "Favourites", // standard spelling for default search
+	"loadRelatedOnSearch" => "true" // by default do not load related records, can be set in Preferences dialogue
 );
 
 foreach (get_group_ids() as $gid) {
@@ -74,6 +76,7 @@ foreach (get_group_ids() as $gid) {
 
 session_start();
 
+//save preference
 $writeMode = false;
 foreach ($_REQUEST as $property => $value) {
 	if (array_key_exists($property, $prefs)) {

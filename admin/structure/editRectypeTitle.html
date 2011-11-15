@@ -66,22 +66,13 @@ body {
 		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
 		<script type="text/javascript" src="../../admin/structure/editRectypeTitle.js"></script>
 
-<table>
-<tr>
-<td width="200" valign="top">
-
-<!--
-		<select id="selRectype" onchange="window.editRectypeTitle.onSelectRectype()">
-					<option>List of available rectypes</option>
-		</select>
--->
+		<div style="position:absolute;top:0px;bottom:0px;left:0px;width:202px;">
 		<div>&nbsp;<br>Select fields then click Insert<br>(add fields to record structure first)<br>&nbsp;<br></div>
-		<div style="top:30px;bottom:20px;left:0px;width:200px;height:460px;overflow-y:scroll;">
+		<div style="position:absolute;top:40px;bottom:10px;left:0px;width:200px;overflow-y:scroll;">
 				<div id="varsTree" class="ygtv-checkbox"></div>
 		</div>
-</td>
-<td valign="top">
-	<div id="formContainer" style="padding:5px;">
+		</div>
+	<div id="formContainer" style="position:absolute;top:0px;bottom:0px;left:202px;right:5px;">
 
 		<div style="padding:10px;">
 		Mask to build a composite title from fields (see manual).
@@ -96,14 +87,13 @@ body {
 		<div style="padding-top: 20px; padding-left: 20px;">
         	<button onclick="onInsert()" style="width:100px;">Insert fields</button><br>&nbsp;<br>Mask:&nbsp;<input maxlength="500" id="rty_TitleMask" style="width:400;"/>
 		</div>
-		<div style="text-align:left; padding-top:10px; padding-left: 60px;">
+
+		<div style="text-align:center; padding-top:10px; padding-left: 60px;">
 			<button onclick="onSave()">Save</button>
 			<button onclick="window.close(null)">Cancel</button>
 		</div>
 	</div>
-</td>
-</tr>
-</table>
+
 
 <script type="text/javascript">
 

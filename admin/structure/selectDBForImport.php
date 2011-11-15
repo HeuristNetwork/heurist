@@ -1,15 +1,18 @@
-<!--
-* selectDBForImport.php, Shows a dropdown list with all registered databases and shows crosswalk table
-after selection, 26-05-2011, by Juan Adriaanse
+<?php
+/*
+* selectDBForImport.php, Shows a list of registered databases to allow choosing source for structural elements
+* First version 26-05-2011, by Juan Adriaanse
 * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
 * @link: http://HeuristScholar.org
 * @license http://www.gnu.org/licenses/gpl-3.0.txt
 * @package Heurist academic knowledge management system
 * @todo
--->
+*/
+?>
+
 <html>
 <head>
-<title>Select database for import</title>
+<title>Selection of source database for structure import</title>
 
 <!-- YUI -->
 <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
@@ -30,12 +33,27 @@ button.button {width:auto;}
 
 <link rel=stylesheet href="../../common/css/global.css">
 <link rel=stylesheet href="../../common/css/admin.css">
-
 </head>
+
 <body class="popup yui-skin-sam" style="overflow: auto;">
 
-<div class="banner"><h2>Import record type definitions into current database</h2></div>
+<div class="banner"><h2>Import structural definitions into current database</h2></div>
 <div id="page-inner" style="overflow:auto">
+
+<?php
+	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+
+	if (!is_logged_in()) {
+	    header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
+	    return;
+	}
+
+	// User must be system administrator or admin of the owners group for this database
+	if (!is_admin()) {
+	    print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You need to be a system administrator to import structural elements</span><p><a href=" . HEURIST_URL_BASE . "common/connect/login.php?logout=1&amp;db=" . HEURIST_DBNAME . "'>Log out</a></p></div></div></body></html>";
+	    return;
+	}
+?>
 
 <div id="statusMsg"><img src="../../common/images/mini-loading.gif" width="16" height="16" /> &nbspDownloading database list...</div>
 <div>
@@ -51,9 +69,7 @@ button.button {width:auto;}
 <div id="topPagination"></div>
 <div id="selectDB"></div>
 <div id="bottomPagination"></div>
-<?php
-	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-?>
+
 
 <form id="crosswalkInfo" action="buildCrosswalks.php?db=<?= HEURIST_DBNAME?>" method="POST">
 <input id="dbID" name="dbID" type="hidden">
@@ -74,7 +90,7 @@ var registeredDBs = [];
 
 	// User must be system administrator or admin of the owners group for this database
 	if (!is_admin()) {
-	    print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You need to be a system administrator to create a new database</span><p><a href=" . HEURIST_URL_BASE . "common/connect/login.php?logout=1&amp;db=" . HEURIST_DBNAME . "'>Log out</a></p></div></div></body></html>";
+	    print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You need to be a system administrator to import structural elements</span><p><a href=" . HEURIST_URL_BASE . "common/connect/login.php?logout=1&amp;db=" . HEURIST_DBNAME . "'>Log out</a></p></div></div></body></html>";
 	    return;
 	}
 

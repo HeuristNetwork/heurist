@@ -56,9 +56,9 @@ if (!@$_REQUEST['q'] || array_key_exists("error", @$result) || @$result['resultC
 	</style>
 
 </head>
-<body>
+<body class="popup">
 
-<a id=home-link href='../../'>
+<!--<a id=home-link href='../../'>
 <div id=logo title="Click the logo at top left of any Heurist page to return to your Favourites"></div>
 </a>
 <div id=page>
@@ -66,7 +66,7 @@ if (!@$_REQUEST['q'] || array_key_exists("error", @$result) || @$result['resultC
 		<h2>Duplicate records in search results set</h2>
 	</div>
 	An error occured while retrieving the set of records to compare:
-
+-->
 <?php
 	if (!@$_REQUEST['q']){
 		print "You must supply a query in order to specify the search set of records.";
@@ -76,7 +76,7 @@ if (!@$_REQUEST['q'] || array_key_exists("error", @$result) || @$result['resultC
 		print " The number of recIDs returned is not equal to the total number in the query result set.";
 	}
 ?>
-</div>
+<!--</div>-->
 </body>
 </html>
 
@@ -173,18 +173,18 @@ foreach ($dupes as $typekey => $subarr) {
 	</style>
 
 </head>
-<body>
+<body class="popup">
 
-<a id=home-link href='../../'>
+<!--<a id=home-link href='../../'>
 <div id=logo title="Click the logo at top left of any Heurist page to return to your Favourites"></div>
 </a>
 <div id=page>
 	<div class="banner">
 		<h2>Duplicate records in search results set</h2>
-	</div>
+	</div>-->
 <form>
 <div class="wizard-box roundedBoth">
-	Select fuzziness: <select name="fuzziness" id="fuzziness" onchange="form.submit();">
+	Select fuzziness: <select name="fuzziness" id="fuzziness" onChange="form.submit();">
 	<option value=3>3</option>
 	<option value=4 <?= $fuzziness == 4  ? "selected" : "" ?>>4</option>
 	<option value=5 <?= $fuzziness == 5 ? "selected" : "" ?>>5</option>
@@ -253,7 +253,8 @@ foreach ($dupes as $rectype => $subarr) {
 	    		'" value="' . $diffHash . '">&nbsp;&nbsp;';
 	    print $rectype . ' &nbsp;&nbsp;&nbsp;&nbsp;';
 	    print '<input type="submit" value="&nbsp;not dupes&nbsp;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-		print '<a target="fix" href="combineDuplicateRecords.php?bib_ids=' . join(',', array_keys($bibs[$key])) . '">fix this group</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+		print '<a target="fix" onClick="top.HEURIST.search.popupLink("'.HEURIST_URL_BASE.'admin/verification/combineDuplicateRecords.php?bib_ids=' . join(',', array_keys($bibs[$key])) . '")">fix this group</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+
 	    print '<a target="_new" href="'.HEURIST_URL_BASE.'search/search.html?q=ids:'.join(",",array_keys($bibs[$key])).'&db='.HEURIST_DBNAME.'">view as search</a>&nbsp;&nbsp;&nbsp;&nbsp;';
 		print '</div>';
 	    print '<ul>';

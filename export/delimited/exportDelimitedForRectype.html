@@ -49,9 +49,12 @@
 			td.error { color: red; }
 			#col-select-row td { border: none; padding: 1px 5px 5px 0px; vertical-align: top; }
 		</style>
+		<link href="../../common/css/global.css" type="text/css" rel="stylesheet">
+		<link href="../../common/css/admin.css" type="text/css" rel="stylesheet">
+		<link href="../../common/css/edit.css" type="text/css" rel="stylesheet">
 	</head>
 
-	<body onload = "getRecTypes();">
+	<body class="popup" onload = "getRecTypes();">
 		<h2>Delimited data export</h2>
 		<p>This function exports data for specified fields of a selected record type in comma or tab separated format.<br>
 		An additional query string using normal Heurist query structure can be used to select a subset of the record type.</p>

@@ -152,7 +152,7 @@
 					<li class="admin-only" id="reportBug"><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 450,width: 740,callback: _bugReportCallback});return false;" title="Click to send a bug report" ><img src="../common/images/16x16.gif"></a></li>
 					<li class="logged-in-only"> <span id=my-heurist-menu-link class=logged-in-only><b>My Profile</b></span>
 						<ul id="my-heurist-menu">
-							<li><a href="../admin/profile/editPreferences.html" name="auto-popup" title="Display preferences">Preferences</a></li>
+							<li><a href="../admin/profile/editPreferences.html" class="small" name="auto-popup" title="Display preferences">Preferences</a></li>
 							<li><a href="../admin/profile/importModelUserProfile.php" name="auto-popup" title="Add useful resources to your collection from a range of academic templates">Load profiles</a></li>
 							<li><a href="../admin/profile/configureProfile.php?body_only&amp;tag_edit=1" name="auto-popup" title="Delete, combine, rename your personal tags">Manage tags</a></li>
 							<li><a href="../admin/ugrps/showSimilarUsers.php" name="auto-popup" title="Find people with similar bookmarking patterns">Find similar users</a></li>
@@ -167,11 +167,11 @@
 					<li class="logged-in-only"> <span id=advanced-menu-link class="logged-in-only"><b>Advanced</b></span>
 						<ul id="advanced-menu">
 							<li><a href="../admin/structure/getListOfDatabases.php" name="auto-popup" title="For administrators only">List databases</a></li>
-							<li><a href="javascript:void(0)" onclick="{top.HEURIST.util.reloadStrcuture();}" title="Click to clear the internal working memory of Heurist" >Clear memory</a></li>
+							<li><a href="javascript:void(0)" onClick="{top.HEURIST.util.reloadStrcuture();}" title="Click to clear the internal working memory of Heurist" >Clear memory</a></li>
 
 							<li><a href="../import/email/emailProcessingSetup.php" name="auto-popup" class='seperator' title="Harvest email from a designated IMAP email server (set in configuration)">Harvest email</a></li>
 							<li><a href="../import/hyperlinks/importHyperlinks.php" name="auto-popup" title="Import web links from a browser bookmarks file or an html web page file">Import hyperlinks</a></li>
-							<li><a href="../admin/profile/configureProfile.php?body_only&amp;bookmark_import=1" name="auto-popup" title="Settings for web links importer">Importer settings</a></li>
+							<li><a href="../admin/profile/configImportSettings.php" name="auto-popup" title="Settings for web links importer">Importer settings</a></li>
 
 							<li><a href="../import/importerFramework.php?format=BIB" name="auto-popup"  class="seperator" title="Import bibliographic exchange format files">Import bibliographic</a></li>
 							<li><a href="../import/importerFramework.php?format=GEO" name="auto-popup" title="Import KML files">Import geographic</a></li>
@@ -182,8 +182,14 @@
 
 							<li class="admin-only"><a href="../admin/setup/straightCopyDatabase.php" onClick="this.href = top.HEURIST.baseURL +'admin/setup/straightCopyDatabase.php?db=' + database;" target="_blank" title="Copy current database to an identical copy with a new name" class="seperator">Copy database verbatim</a></li>
 
-							<li class="admin-only"><a href="../import/delimited/updateDetailsFromDelimited.html" onClick="this.href = top.HEURIST.baseURL +'import/delimited/updateDetailsFromDelimited.html?db=' + database;" target="_blank" title="Update record details using delimited text" class="seperator">Detail updater</a></li>
-							<li class="admin-only"><a href="../export/delimited/exportDelimitedForRectype.html" target="_blank" onClick="this.href = top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database;" title="Export records as delimited text">Export delimited</a></li>
+							<li class="admin-only"><a href="../import/delimited/updateDetailsFromDelimited.html" onClick="this.href = top.HEURIST.baseURL +'import/delimited/updateDetailsFromDelimited.html?db=' + database;" target="_blank" title="Update record details using delimited text" class="seperator" name="auto-popup">Detail updater</a></li>
+
+
+
+							<!--<li class="admin-only"><a href="#" target="_blank" onClick="this.href = top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database;" title="Export records as delimited text">Export delimited</a></li>-->
+							<li class="admin-only"><a href="#" onClick="top.HEURIST.search.popupLink(top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database);" title="Export records as delimited text">Export delimited</a></li>
+			  <li><a href="#" id=result-style-icons-link title="Generate HML for current set of search results" onClick="top.HEURIST.search.exportHML(true);" >Export HML for All</a></li>
+			  <li><a href="#" id=result-style-icons-link title="Generate HML for selected set of search results" onClick="top.HEURIST.search.exportHML(false);">Export HML for selected</a></li>
 						  <li><a href="#" id=result-style-icons-link title="Generate KML for selected set of search results" onClick="top.HEURIST.search.exportKML(false);">Export KML for selected</a></li>
 
 							<!-- separator-->
@@ -218,7 +224,7 @@
 			<div id=search class="banner searchTable" style="border-bottom:1px solid #696969;">
 				<form onSubmit="top.HEURIST.search.checkSearchForm();return false;"><input type=hidden id=w-input name=w>
 					<!-- SEARCH:  it's obvious it's a search, one less bit of clutter -->
-					<div class="searchInput" style="position:relative"><input id=q name=q type=text style="width:300px; clear:both">
+					<div class="searchInput" style="position:relative"><input id=q name=q type=text style="width:300px; clear:both" onKeyPress="if (event.keyCode == 13) {document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();}">
 						<div class="simplesearch" title="Click to show simple search builder panel" onclick='$("#simple-search").toggleClass("collapsed");$(this).toggleClass("collapsed");'></div>
 
 						<div id="simple-search" class="collapsed">
@@ -294,6 +300,7 @@
 									<li><a href="#" onClick="top.HEURIST.search.setWorkgroupPopup(); return false;" title="Select one or more records, then click to set workgroup ownership and visibility">Set workgroup</a></li>
 									<li><a href="#" onClick="top.HEURIST.search.addRemoveKeywordsPopup(); return false;" title="Select one or more records, then click to add or remove workgroup tags">Workgroup Tag</a></li>
 									<li><a href="#" onClick="top.HEURIST.search.notificationPopup(); return false;" title="Select one or more records, then click to send notification">Notify (email)</a></li>
+									<li><a name="auto-popup" class="small" href="../viewers/map/mapMenu.html" Title="Map Search Results">Publish Map</a></li>
 								</ul>
 							</li>
 							<li><span>View</span>
@@ -303,9 +310,6 @@
 									<li><a href="#" id=result-style-icons-link title="View results as icons" onClick="top.HEURIST.search.setResultStyle('icons');">Icons</a></li>
 									<li><a href="#" id=result-style-thumbs-link-new title="View results as icons" onClick="top.HEURIST.search.setResultStyle('thumbnails');">Thumbnails</a></li>
 									<li><a href="#" title="Click to hide/show the legend" onClick="top.HEURIST.search.toggleLegend(); blur(); return false;" id="legend-link" class="seperator">Show legend</a></li>
-			  <li><a href="#" id=result-style-icons-link title="Generate HML for current set of search results" onClick="top.HEURIST.search.exportHML(true);">Generate HML for All</a></li>
-			  <li><a href="#" id=result-style-icons-link title="Generate HML for selected set of search results" onClick="top.HEURIST.search.exportHML(false);">Generate HML for selected</a></li>
-
 
 									<!--  todo: required by Steven 1/11/11: set the query and the databsae above
 									also, provide this in the Advanced pulldown to render the current selection
@@ -441,6 +445,7 @@
 					<!--    <div id="m"><iframe id="map-frame" class=viewers></iframe></div>-->
 					<!--    <div id="c"><iframe id="sidebyside-frame" class=viewers></iframe></div>-->
 					<div id="m3">
+						<a name="auto-popup" class="small" href="../viewers/map/mapMenu.html" Title="Map Search Results"><div id="mapButton" class="button">Publish Map</div></a>
 						<iframe id="map-frame3" class=viewers></iframe>
 					</div>
 					<div id="s">

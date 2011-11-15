@@ -1709,6 +1709,11 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = func
 														(bdValue && bdValue.value ? bdValue.value : null));
 
 	if(newInput.length>0){
+		newInput.innerHTML = "<option></option>"+newInput.innerHTML;
+		if(!(bdValue && bdValue.value)){
+			newInput.selectedIndex = 0;
+		}
+		/*
 		var option = document.createElement("option");
 		option.text = "";
 		option.value = ""
@@ -1719,7 +1724,7 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = func
 		}catch(ex){
 			// for IE earlier than version 8
 			newInput.add(option, 0);
-		}
+		}*/
 	}
 
 	this.addInputHelper.call(this, bdValue, newInput);

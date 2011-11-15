@@ -146,9 +146,9 @@ function RectypeManager() {
 				'<label id="lblNoticeAboutChanges'+grpID+'" '+
 					'style="padding-left:3px; padding-right:3px; background-color:white; color:red; display: inline-block;"></label>'+
 					'&nbsp;&nbsp;&nbsp;'+
-			'<input id="btnSave'+grpID+'" type="button" value="Save or" '+
+			'<input id="btnSave'+grpID+'" type="button" value="Save order" '+
 							'style="color:red; display: none;margin-right:5px;"/>'+ //inline-block
-				'<input type="button" id="btnAddRecordType'+grpID+'" value="Add Record Type" class="add"/>'+
+				'<input type="button" id="btnAddRecordType'+grpID+'" value="New record type" class="add"/>'+
 				//'<input type="button" id="btnAddFieldType'+grpID+'" value="Add Field Type" style="float:right;"/>'+
 			'</div></div>'+
 			'<div id="tabContainer'+grpID+'"></div></div>')
@@ -972,11 +972,11 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 		}else{
 			url = url + "&groupID="+rtg_ID; //new one
 		}
-
+		var dim = Hul.innerDimensions(this.window);
 		Hul.popupURL(top, url,
 		{   "close-on-blur": false,
 			"no-resize": false,
-			height: 800,
+			height: dim.h*0.9,
 			width: 700,
 			callback: function(context) {
 				if(!Hul.isnull(context)){
@@ -1059,10 +1059,22 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 		if(_needToSaveFirst()) { return; }
 
 		var sel = Dom.get('edGroupId'),
-		name = Dom.get('edName').value,
-		description = Dom.get('edDescription').value,
+		name = Dom.get('edName').value.replace(/^\s+|\s+$/g, ''), //trim
+		description = Dom.get('edDescription').value.replace(/^\s+|\s+$/g, ''), //trim
 		grpID = sel.options[sel.selectedIndex].value,
 		grp; //object in HEURIST
+
+		if(Hul.isempty(name)){
+			alert('Group name is required. Please sepecify it');
+			Dom.get('edName').focus();
+			return;
+		}
+		if(Hul.isempty(description)){
+			alert('Group description is required. Please sepecify it');
+			Dom.get('edDescription').focus();
+			return;
+		}
+
 
 		var orec = {rectypegroups:{
 				colNames:['rtg_Name','rtg_Description'],

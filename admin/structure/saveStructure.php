@@ -1,23 +1,19 @@
 <?php
 
-	/*<!--
-	* saveStructure.php
- * This file accepts request to update the system structural
- * definitions rectypes, detailtypes, terms and constraints.
- * it returns the entire structure for tthe affected area inorder
- * to update top.HEURIST
+/*
+ * saveStructure.php. This file accepts request to update the system structural definitions -
+ * rectypes, detailtypes, terms and constraints. It returns the entire structure for the affected area
+ * in order to update top.HEURIST
  * create by Stephen A. White on 17/03/2011
  * @copyright (C) 2005-2011 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
- -->*/
-
+*/
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 	require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
-
 
 	if (! is_logged_in()) {
 		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
@@ -27,12 +23,8 @@
 	if (! is_admin()) {
 			header('Content-type: text/javascript');
 			$rv = array();
-			$rv['error'] = "You do not have sufficient privileges for this operation";
+			$rv['error'] = "Sorry, you need to be a database owner and adminstrator to be able to modify the database structure";
 			print json_format($rv);
-
-/*
-	print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href=".HEURIST_URL_BASE.">Return to Heurist</a></p></body></html>";
-*/
 	return;
 	}
 
@@ -169,7 +161,7 @@
 
 	$method = null;
 
-//error_log(">>>".print_r($_REQUEST, true));
+	//error_log(">>>".print_r($_REQUEST, true));
 
 	$method = @$_REQUEST['method'];
 	if (!$method) {
@@ -196,19 +188,21 @@
 
 	switch ($method) {
 
-
 	//{ rectype:
 	//			{colNames:{ common:[rty_name,rty_OrderInGroup,.......],
 	//						dtFields:[rst_DisplayName, ....]},
 	//			defs : {-1:[[common:['newRecType name',56,34],dtFields:{dty_ID:[overide name,76,43], 160:[overide name2,136,22]}],
 	//						[common:[...],dtFields:{nnn:[....],...,mmm:[....]}]],
 	//					23:{common:[....], dtFields:{nnn:[....],...,mmm:[....]}}}}}
+
 	case 'saveRectype':
-	case 'saveRT':
+
+	case 'saveRT': // Record type
+
 		if (!array_key_exists('rectype',$data) ||
 		!array_key_exists('colNames',$data['rectype']) ||
 		!array_key_exists('defs',$data['rectype'])) {
-			die("invalid data structure sent with saveRectype method call to saveStructure.php");
+			die("Error: invalid data structure sent with saveRectype method call to saveStructure.php");
 		}
 		$commonNames = $data['rectype']['colNames']['common'];
 		//$dtFieldNames = $rtData['rectype']['colNames']['dtFields'];
@@ -225,16 +219,14 @@
 		$rv['rectypes'] = getAllRectypeStructures();
 		break;
 
-	case 'saveRTS':
+	case 'saveRTS': // Record type structure
 
-
-//DEBUG error_log(">>>>>>>".print_r($data,true));
-
+		//DEBUG error_log(">>>>>>>".print_r($data,true));
 		if (!array_key_exists('rectype',$data) ||
 		!array_key_exists('colNames',$data['rectype']) ||
 		!array_key_exists('defs',$data['rectype']))
 		{
-			die("invalid data structure sent with updateRecStructure method call to saveStructure.php");
+			die("Error: invalid data structure sent with updateRecStructure method call to saveStructure.php");
 		}
 
 		//$commonNames = $rtData['rectype']['colNames']['common'];
@@ -256,7 +248,7 @@
 
 		if (!$rtyID || !$dtyID) {
 			$rv = array();
-			$rv['error'] = "invalid or no IDs sent with deleteReStructure method call to saveStructure.php";
+			$rv['error'] = "Error: No IDs or invalid IDs sent with deleteRecStructure method call to saveStructure.php";
 		}else{
 			$rv = deleteRecStructure($rtyID, $dtyID);
 			if (!array_key_exists('error', $rv)) {
@@ -272,7 +264,7 @@
 
 		if (!$rtyID) {
 			$rv = array();
-			$rv['error'] = "invalid or not rectype ID sent with deleteRectype method call to saveStructure.php";
+			$rv['error'] = "Error: No IDs or invalid IDs sent with deleteRectype method call to saveStructure.php";
 		}else{
 			$rv = deleteRecType($rtyID);
 			if (!array_key_exists('error',$rv)) {
@@ -282,12 +274,13 @@
 		break;
 
 		//------------------------------------------------------------
-	case 'saveRTG':		// SAVE RECORDTYPE GROUP
+
+	case 'saveRTG':	// Record type group
 
 		if (!array_key_exists('rectypegroups',$data) ||
 		!array_key_exists('colNames',$data['rectypegroups']) ||
 		!array_key_exists('defs',$data['rectypegroups'])) {
-			die("invalid data structure sent with saveRectype method call to saveStructure.php");
+			die("Error: invalid data structure sent with saveRectypeGroup method call to saveStructure.php");
 		}
 		$colNames = $data['rectypegroups']['colNames'];
 		$rv = array();
@@ -301,14 +294,13 @@
 		if (!array_key_exists('error',$rv)) {
 				$rv['rectypes'] = getAllRectypeStructures();
 		}
-
 		break;
 
 	case 'deleteRTG':
 
 		$rtgID = @$_REQUEST['rtgID'];
 		if (!$rtgID) {
-			die("invalid or not rectype sent with deleteRectypeGroup method call to saveStructure.php");
+			die("Error: invalid or no record type group ID sent with deleteRectypeGroup method call to saveStructure.php");
 		}
 		$rv = deleteRectypeGroup($rtgID);
 		if (!array_key_exists('error',$rv)) {
@@ -316,12 +308,12 @@
 		}
 		break;
 
-	case 'saveDTG':		// SAVE DET TYPE GROUP
+	case 'saveDTG':	// Field (detail) type group
 
 		if (!array_key_exists('dettypegroups',$data) ||
 		!array_key_exists('colNames',$data['dettypegroups']) ||
 		!array_key_exists('defs',$data['dettypegroups'])) {
-			die("invalid data structure sent with saveDettype method call to saveStructure.php");
+			die("Error: invalid data structure sent with saveDetailType method call to saveStructure.php");
 		}
 		$colNames = $data['dettypegroups']['colNames'];
 		$rv = array();
@@ -335,14 +327,13 @@
 		if (!array_key_exists('error',$rv)) {
 				$rv['detailTypes'] = getAllDetailTypeStructures();
 		}
-
 		break;
 
 	case 'deleteDTG':
 
 		$dtgID = @$_REQUEST['dtgID'];
 		if (!$dtgID) {
-			die("invalid or not dettype group ID sent with deleteDettype method call to saveStructure.php");
+			die("Error: invalid or no detail type group ID sent with deleteDetailType method call to saveStructure.php");
 		}
 		$rv = deleteDettypeGroup($dtgID);
 		if (!array_key_exists('error',$rv)) {
@@ -351,13 +342,14 @@
 		break;
 
 		//------------------------------------------------------------
-	case 'saveDetailType':
+
+	case 'saveDetailType': // Field (detail) types
 	case 'saveDT':
 
 		if (!array_key_exists('detailtype',$data) ||
 		!array_key_exists('colNames',$data['detailtype']) ||
 		!array_key_exists('defs',$data['detailtype'])) {
-			die("invalid data structure sent with saveDetailType method call to saveStructure.php");
+			die("Error: invalid data structure sent with saveDetailType method call to saveStructure.php");
 		}
 		$commonNames = $data['detailtype']['colNames']['common'];
 		$rv = array();
@@ -381,7 +373,7 @@
 
 		if (!$dtyID) {
 			$rv = array();
-			$rv['error'] = "invalid or no detailtype ID sent with deleteDetailType method call to saveStructure.php";
+			$rv['error'] = "Error: No IDs or invalid IDs sent with deleteDetailType method call to saveStructure.php";
 		}else{
 		$rv = deleteDetailType($dtyID);
 		if (!array_key_exists('error',$rv)) {
@@ -390,12 +382,14 @@
 		}
 		break;
 
-		case 'saveTerms':
+		//------------------------------------------------------------
+
+		case 'saveTerms': // Terms
 
 		if (!array_key_exists('terms',$data) ||
 		!array_key_exists('colNames',$data['terms']) ||
 		!array_key_exists('defs',$data['terms'])) {
-			die("invalid data structure sent with saveTerms method call to saveStructure.php");
+			die("Error: invalid data structure sent with saveTerms method call to saveStructure.php");
 		}
 		$colNames = $data['terms']['colNames'];
 		$rv = array();
@@ -406,7 +400,8 @@
 			array_push($rv['result'], $res);
 		}
 
-		//slow down the performace, but we need the updated terms because Ian wishes to update terms while select terms in edit field type
+		// slows down the performance, but we need the updated terms because Ian wishes to update terms
+		// while selecting terms while editing the field type
 		$rv['terms'] = getTerms();
 		break;
 
@@ -415,7 +410,7 @@
 
 		if (!trmID) {
 			$rv = array();
-			$rv['error'] = "invalid or no term ID sent with deleteTerms method call to saveStructure.php";
+			$rv['error'] = "Error: No IDs or invalid IDs sent with deleteTerms method call to saveStructure.php";
 		}else{
 			$rv['result'] = deleteTerms($trmID);
 			$rv['terms'] = getTerms();
@@ -514,7 +509,7 @@
 			$rows = execSQL($db, $query, $parameters, true);
 
 			if ($rows==0 || is_string($rows) ) {
-				$ret = "error inserting into defRecTypes - ".$rows;
+				$ret = "SQL error inserting data into table defRecTypes: ".$rows;
 			} else {
 				$rtyID = $db->insert_id;
 				$ret = -$rtyID;
@@ -541,11 +536,11 @@
 		$query = "select rec_ID from Records where rec_RecTypeID=$rtyID limit 1";
 	$res = mysql_query($query);
 	if (mysql_error()) {
-			$ret['error'] = "Error finding records of type $rtyID from Records - ".mysql_error();
+			$ret['error'] = "SQL error finding records of type $rtyID in the Records table: ".mysql_error();
 	} else {
 		$recCount = mysql_num_rows($res);
 		if ($recCount) { // there are records existing of this rectype, need to return error and the recIDs
-			$ret['error'] = "Error deleting Rectype($rtyID) with existing data Records ($recCount) not allowed";
+			$ret['error'] = "You cannot delete record type $rtyID as it has $recCount existing data records";
 			$ret['recIDs'] = array();
 			while ($row = mysql_fetch_row($res)) {
 				array_push($ret['recIDs'], $row[0]);
@@ -554,7 +549,7 @@
 			$query = "delete from defRecTypes where rty_ID = $rtyID";
 			$res = mysql_query($query);
 			if (mysql_error()) {
-					$ret['error'] = "DB error deleting of rectype $rtyID from defRecTypes - ".mysql_error();
+					$ret['error'] = "SQL error deleting record type $rtyID from defRecTypes table: ".mysql_error();
 			} else {
 					$ret['result'] = $rtyID;
 			}
@@ -695,7 +690,7 @@
 
 				$res = execSQL($db, $query, $parameters, true);
 				if(!is_numeric($res)){
-					$ret = "error updating $rtyID in updateRectype - ".$res;
+					$ret = "SQL error updating record type $rtyID in updateRectype: ".$res;
 					//}else if ($rows==0) {
 					//	$ret = "error updating $rtyID in updateRectype - ".$msqli->error;
 				} else {
@@ -796,7 +791,7 @@
 
 					if ($rows==0 || is_string($rows) ) {
 						$oper = (($isInsert)?"inserting":"updating");
-						array_push($ret[$rtyID], "error ".$oper." field type ".$dtyID." for record type ".$rtyID." in updateRecStructure - ".$rows);
+						array_push($ret[$rtyID], "Error on ".$oper." field type ".$dtyID." for record type ".$rtyID." in updateRecStructure: ".$rows);
 					} else {
 						array_push($ret[$rtyID], $dtyID);
 					}
@@ -830,9 +825,9 @@
 //error_log(">>>>>>>>>>>>>>>".$db->affected_rows);
 //error_log(">>>Error=".$mysqli->error);
 		if($mysqli->error!=""){
-			$rv['error'] = "error delting entry in defRecStructure for record type #$rtyID and field type #$dtyID Error:".$mysqli->error;
+			$rv['error'] = "SQL error deleting entry in defRecStructure for record type $rtyID and field type $dtyID: ".$mysqli->error;
 		}else if ($db->affected_rows<1){
-			$rv['error'] = "error delting entry in defRecStructure for record type #$rtyID and field type #$dtyID";
+			$rv['error'] = "Error - no rows affected - deleting entry in defRecStructure for record type $rtyID and field type $dtyID";
 		}else{
 			$rv['result'] = $dtyID;
 		}
@@ -872,7 +867,7 @@
 			$rows = execSQL($db, $query, $parameters, true);
 
 			if ($rows==0 || is_string($rows) ) {
-					$ret['error'] = "error inserting into defRecTypeGroups - ".$rows;
+					$ret['error'] = "SQL error inserting data into defRecTypeGroups: ".$rows;
 			} else {
 				$rtgID = $db->insert_id;
 				$ret['result'] = $rtgID;
@@ -881,7 +876,7 @@
 		}
 	}
 	if (!@$ret['result'] && !@$ret['error']) {
-		$ret['error'] = "no data supplied for inserting rectype";
+		$ret['error'] = "Error: no data supplied for insertion into record type";
 	}
 
 
@@ -904,7 +899,7 @@
 	$db->query("select * from defRecTypeGroups where rtg_ID = $rtgID");
 
 	if ($db->affected_rows<1){
-		return array("error" => "invalid rtg_ID ($rtgID) passed in data to updateRectypeGroup");
+		return array("error" => "Error: invalid record type group ID (rtg_ID) $rtgID passed in data to updateRectypeGroup");
 	}
 
 	$ret = array();
@@ -933,14 +928,14 @@
 
 			$rows = execSQL($db, $query, $parameters, true);
 			if ($rows==0 || is_string($rows) ) {
-				$ret['error'] = "error updating $colName in updateRectypeGroup - ".$rows;
+				$ret['error'] = "SQL error updating $colName in updateRectypeGroup: ".$rows;
 			} else {
 				$ret['result'] = $rtgID;
 			}
 		}
 	}
 	if (!@$ret['result'] && !@$ret['error']) {
-		$ret['error'] = "no data supplied for updating rectype - $rtgID";
+		$ret['error'] = "Error: no data supplied for updating record type group $rtgID in defRecTypeGroups table";
 	}
 
 	return $ret;
@@ -958,11 +953,11 @@
 	$query = "select rty_ID from defRecTypes where rty_RecTypeGroupID =$rtgID";
 	$res = mysql_query($query);
 	if (mysql_error()) {
-		$ret['error'] = "error finding record type of group $rtgID from defRecTypes - ".mysql_error();
+		$ret['error'] = "Error finding record types for group $rtgID in defRecTypes table: ".mysql_error();
 	} else {
 		$recCount = mysql_num_rows($res);
 		if ($recCount) { // there are rectypes existing of this group, need to return error and the recIDs
-			$ret['error'] = "error deleting Group ($rtgID) with existing recordTypes ($recCount) not allowed";
+			$ret['error'] = "You cannot delete group $rtgID as there are $recCount record types in this group";
 			$ret['rtyIDs'] = array();
 			while ($row = mysql_fetch_row($res)) {
 				array_push($ret['rtyIDs'], $row[0]);
@@ -972,7 +967,7 @@
 			$query = "delete from defRecTypeGroups where rtg_ID=$rtgID";
 			$res = mysql_query($query);
 			if (mysql_error()) {
-				$ret['error'] = "db error deleting of rectype $rtgID from defRecTypeGroups - ".mysql_error();
+				$ret['error'] = "Database error deleting record types group $rtgID from defRecTypeGroups table: ".mysql_error();
 			} else {
 				$ret['result'] = $rtgID;
 			}
@@ -1015,7 +1010,7 @@
 			$rows = execSQL($db, $query, $parameters, true);
 
 			if ($rows==0 || is_string($rows) ) {
-					$ret['error'] = "error inserting into defDetailTypeGroups - ".$rows;
+					$ret['error'] = "SQL error inserting data into defDetailTypeGroups table: ".$rows;
 			} else {
 				$dtgID = $db->insert_id;
 				$ret['result'] = $dtgID;
@@ -1024,7 +1019,7 @@
 		}
 	}
 	if (!@$ret['result'] && !@$ret['error']) {
-		$ret['error'] = "no data supplied for inserting dettype";
+		$ret['error'] = "Error: no data supplied for insertion of detail (field) type";
 	}
 
 
@@ -1047,7 +1042,7 @@
 	$db->query("select * from defDetailTypeGroups where dtg_ID = $dtgID");
 
 	if ($db->affected_rows<1){
-		return array("error" => "invalid dtg_ID ($dtgID) passed in data to defDetailTypeGroups");
+		return array("error" => "Error: looking for invalid field type group ID (dtg_ID) $dtgID in defDetailTypeGroups table");
 	}
 
 	$ret = array();
@@ -1076,14 +1071,14 @@
 
 			$rows = execSQL($db, $query, $parameters, true);
 			if ($rows==0 || is_string($rows) ) {
-				$ret['error'] = "error updating $colName in updateDettypeGroup - ".$rows;
+				$ret['error'] = "SQL error updating $colName in updateDettypeGroup: ".$rows;
 			} else {
 				$ret['result'] = $dtgID;
 			}
 		}
 	}
 	if (!@$ret['result'] && !@$ret['error']) {
-		$ret['error'] = "no data supplied for updating dettype - $dtgID";
+		$ret['error'] = "Error: no data supplied for updating field type group $dtgID in defDetailTypeGroups table";
 	}
 
 	return $ret;
@@ -1101,11 +1096,11 @@
 	$query = "select dty_ID from defDetailTypes where dty_DetailTypeGroupID =$dtgID";
 	$res = mysql_query($query);
 	if (mysql_error()) {
-		$ret['error'] = "error finding record type of group $dtgID from defDetailTypes - ".mysql_error();
+		$ret['error'] = "Error: unable to find detail types in group $dtgID in the defDetailTypes table: ".mysql_error();
 	} else {
 		$recCount = mysql_num_rows($res);
 		if ($recCount) { // there are rectypes existing of this group, need to return error and the recIDs
-			$ret['error'] = "error deleting Group ($dtgID) with existing detailTypes ($recCount) not allowed";
+			$ret['error'] = "You cannot delete field types group $dtgID because it contains $recCount field types";
 			$ret['dtyIDs'] = array();
 			while ($row = mysql_fetch_row($res)) {
 				array_push($ret['dtyIDs'], $row[0]);
@@ -1115,7 +1110,7 @@
 			$query = "delete from defDetailTypeGroups where dtg_ID=$dtgID";
 			$res = mysql_query($query);
 			if (mysql_error()) {
-				$ret['error'] = "db error deleting of rectype $dtgID from defRecTypeGroups - ".mysql_error();
+				$ret['error'] = "SQL error deleting field type group $dtgID from defRecTypeGroups table:".mysql_error();
 			} else {
 				$ret['result'] = $dtgID;
 			}
@@ -1158,7 +1153,7 @@
 			$rows = execSQL($db, $query, $parameters, true);
 
 			if ($rows==0 || is_string($rows) ) {
-				$ret = "error inserting into defDetailTypes - ".$rows;
+				$ret = "Error inserting data into defDetailTypes table: ".$rows;
 			} else {
 				$dtyID = $db->insert_id;
 				$ret = -$dtyID;
@@ -1193,11 +1188,11 @@
 	$query = "select dtl_ID from recDetails where dtl_DetailTypeID =$dtyID";
 	$res = mysql_query($query);
 	if (mysql_error()) {
-			$ret['error'] = "Error finding records of type $dtyID from recDetails - ".mysql_error();
+			$ret['error'] = "SQL error: unable to retrieve fields of type $dtyID from recDetails table: ".mysql_error();
 	} else {
 		$dtCount = mysql_num_rows($res);
 			if ($dtCount) { // there are records existing of this rectype, need to return error and the recIDs
-				$ret['error'] = "Error deleting detailType($dtyID) with existing data recDetails ($dtCount) not allowed";
+				$ret['error'] = "You cannot delete field type $dtyID as it is used $dtCount times in the data";
 			$ret['dtlIDs'] = array();
 			while ($row = mysql_fetch_row($res)) {
 				array_push($ret['dtlIDs'], $row[0]);
@@ -1206,7 +1201,7 @@
 				$query = "delete from defDetailTypes where dty_ID = $dtyID";
 			$res = mysql_query($query);
 			if (mysql_error()) {
-					$ret['error'] = "DB error deleting of detailtype $dtyID from defDetailTypes - ".mysql_error();
+					$ret['error'] = "SQL error deleting field type $dtyID from defDetailTypes table: ".mysql_error();
 			} else {
 					$ret['result'] = $dtyID;
 			}
@@ -1259,7 +1254,7 @@
 
 				$rows = execSQL($db, $query, $parameters, true);
 				if ($rows==0 || is_string($rows) ) {
-					$ret = "error updating $dtyID in updateDetailType - ".$query."  ".$parameters[1]."  ".$parameters[2]; //$db->error;
+					$ret = "SQL error updating field type $dtyID in updateDetailType: ".$query."  ".$parameters[1]."  ".$parameters[2]; //$db->error;
 				} else {
 					$ret = $dtyID;
 				}
@@ -1337,7 +1332,7 @@
 
 			if ($rows==0 || is_string($rows) ) {
 					$oper = (($isInsert)?"inserting":"updating");
-					$ret = "error $oper term# $trmID in updateTerms - ".$rows;
+					$ret = "SQL error $oper term $trmID in updateTerms: ".$rows;
 			} else {
 					if($isInsert){
 						$trmID = $ext_db->insert_id;
@@ -1396,12 +1391,12 @@
 			$query = "select dty_ID from defDetailTypes where (FIND_IN_SET($termID, dty_JsonTermIDTree)>0)";
 			$res = mysql_query($query);
 			if (mysql_error()) {
-				$ret['error'] = "Error finding detail types for $termID in deleteTerm - ".mysql_error();
+				$ret['error'] = "SQL error in deleteTerms retreiving feild types which use term $termID: ".mysql_error();
 				break;
 			}else{
 				$dtCount = mysql_num_rows($res);
 				if ($dtCount>0) { // there are records existing of this rectype, need to return error and the recIDs
-					$ret['error'] = "Error deleting term# $trmID. ".(($trmID==$termID)?"It":"Its child term # $termID")." is reffered in ($dtCount) Field type(s)";
+					$ret['error'] = "You cannot delete term $trmID. ".(($trmID==$termID)?"It":"Its child term $termID")." is referenced in $dtCount field type(s)";
 					$ret['dtyIDs'] = array();
 					while ($row = mysql_fetch_row($res)) {
 						array_push($ret['dtyIDs'], $row[0]);
@@ -1424,7 +1419,7 @@
 				$res = mysql_query($query);
 //error_log(">>>>>>>>>>>>>>>>>".$res."   ".mysql_error());
 				if (mysql_error()) {
-					$ret['error'] = "DB error deleting of term $termID from defTerms - ".mysql_error();
+					$ret['error'] = "SQL error deleting term $termID from defTerms table: ".mysql_error();
 					break;
 				}
 			}
@@ -1455,7 +1450,7 @@
 	*/
 	function execSQL($mysqli, $sql, $params, $close){
 
-		   $stmt = $mysqli->prepare($sql) or die ("Failed to prepared the statement!");
+		   $stmt = $mysqli->prepare($sql) or die ("Error: failed to prepare the SQL statement in execSQL fucntion");
 
 		   call_user_func_array(array($stmt, 'bind_param'), refValues($params));
 

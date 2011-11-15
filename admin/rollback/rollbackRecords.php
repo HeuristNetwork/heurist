@@ -49,10 +49,12 @@ require_once(dirname(__FILE__)."/../../search/getSearchResults.php");
 require_once(dirname(__FILE__)."/../../common/php/getRecordInfoLibrary.php");
 require_once("rollbackRecordsFuncs.php");
 
-if (! is_admin()) {
-	print "Administrator access required.";
+// User must be system administrator or admin of the owners group for this database
+if (!is_admin()) {
+    print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to rollback the database</span><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
 	return;
 }
+
 
 $ids = @$_REQUEST["ids"];
 $date = @$_REQUEST["date"];

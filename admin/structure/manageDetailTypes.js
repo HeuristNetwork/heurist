@@ -125,9 +125,10 @@ function DetailTypeManager() {
 			'<div style="display:inline-block;"><label>Filter by name:</label>'+
 			'<input type="text" id="filter'+grpID+'" value="">'+
 			'&nbsp;&nbsp;'+
-			'<input type="checkbox" id="filter'+grpID+'vis" value="1" style="padding-top:5px;">&nbsp;Show active only&nbsp;&nbsp;'+
-			'<input type="checkbox" id="filter_forall'+grpID+'" value="1" style="padding-top:5px;">&nbsp;Apply for all groups'+
-			'</div>'+
+			'<input type="checkbox"  id="filter'+grpID+'vis" value="1" style="padding-top:5px;">&nbsp;Show visible only&nbsp;&nbsp;'+
+			// todo: hide the following checkbox and make it true for all tabs so filter works across all of them
+			// todo: better still we need a search which will work across all tabs
+			'<input type="checkbox" id="filter_forall'+grpID+'" checked=true value="1" style="padding-top:5px;">&nbsp;Filter for all</div>'+
 			'<div style="float:right; text-align:right">'+
 				'<label id="lblNoticeAboutChanges'+grpID+'" '+
 					'style="padding-left:3px; padding-right:3px; background-color:white; color:red; display: inline-block;"></label>'+
@@ -135,7 +136,7 @@ function DetailTypeManager() {
 				'<input id="btnSave'+grpID+'" type="button" value="Save Changes" '+
 							'style="color:red; display: none;"/>'+ //inline-block
 
-				'<input type="button" id="btnAdd'+grpID+'" value="Add Field Type" style="float:right;" class="add"/>'+
+				'<input type="button" id="btnAdd'+grpID+'" value="New Field Type" style="float:right;" class="add"/>'+
 			'</div></div>'+
 			'<div id="tabContainer'+grpID+'"></div></div>')
 
@@ -461,7 +462,7 @@ function DetailTypeManager() {
 
 						}
 					}else{
-						alert("Impossible to delele field type, in use by a record type");
+						alert("This field type cannot be deleted as it is in use by a record type");
 					}
 				}
 
@@ -919,8 +920,8 @@ function DetailTypeManager() {
 		top.HEURIST.util.popupURL(top, url,
 		{   "close-on-blur": false,
 			"no-resize": false,
-			height: 520,
-			width: 640,
+			height: 680,
+			width: 660,
 			callback: function(context) {
 				if(!Hul.isnull(context)){
 
@@ -958,10 +959,21 @@ function DetailTypeManager() {
 		if(_needToSaveFirst()) { return; }
 
 		var sel = Dom.get('edGroupId'),
-		name = Dom.get('edName').value,
-		description = Dom.get('edDescription').value,
+		name = Dom.get('edName').value.replace(/^\s+|\s+$/g, ''), //trim
+		description = Dom.get('edDescription').value.replace(/^\s+|\s+$/g, ''),
 		grpID = sel.options[sel.selectedIndex].value,
 		grp; //object in HEURIST
+
+		if(Hul.isempty(name)){
+			alert('Group name is required. Please sepecify it');
+			Dom.get('edName').focus();
+			return;
+		}
+		if(Hul.isempty(description)){
+			alert('Group description is required. Please sepecify it');
+			Dom.get('edDescription').focus();
+			return;
+		}
 
 		var orec = {dettypegroups:{
 				colNames:['dtg_Name','dtg_Description'],

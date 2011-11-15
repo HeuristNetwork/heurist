@@ -434,7 +434,7 @@
 
 
 		</script>
-
+		<link rel="stylesheet" type="text/css" href= "../../common/css/global.css">
 		<style>
 			#csv-textarea {
 				width: 100%;
@@ -450,7 +450,7 @@
 		</style>
 	</head>
 
-	<body >
+	<body class="popup">
 
 		<h2>Heurist field updater</h2>
 
@@ -458,7 +458,7 @@
 		<div id=process-div style="display:none;">
 			<p>The details shown below will be used to update records in the database. Please review before processing.
 			Note that erronious input rows will be skipped.</p>
-			<input  type=button value="Process Links" onclick="loadPointers();" >
+			<input  type=button value="Process Links" onClick="loadPointers();" >
 			<p id=records-p></p>
 		</div>
 		<div id=csv-entry-div>
@@ -497,7 +497,7 @@
 				&nbsp;&nbsp;Line separator: <input id=csv-terminator value="\n">
 				&nbsp;&nbsp;Quote: <select id=csv-quote><option selected>"</option><option>'</option></select>
 				&nbsp;&nbsp;&nbsp;&nbsp;
-				<input type=button value=Analyse onclick="analyseCSV();">
+				<input type=button value=Analyse onClick="analyseCSV();">
 			</div>
 			<div><textarea id=csv-textarea></textarea></div>
 		</div>

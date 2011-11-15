@@ -287,6 +287,22 @@ body.w-bookmark .bookmarked {
 	border:none;
 	border-top:1px solid #FFF;
 }
+#map-frame3 {
+	top:30px
+}
+#mapButton {
+	background-image: url("../images/b_Map.png");
+	background-position: 2px 2px;
+	background-repeat: no-repeat;
+	padding: 0 5px 0 26px !important;
+	white-space: nowrap;
+	margin:5px;
+	height:18px !important;
+	float:right
+}
+a.small:hover  {
+	text-decoration:none !important;
+}
 .result_thumb {
 	-moz-border-radius:10px 10px 10px 10px;
 	-moz-box-shadow:0 2px 4px #AAAAAA;
@@ -1561,7 +1577,7 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	left: 64px;
 	overflow: hidden;
 	position: absolute;
-	right: 20px;
+	right: 32px;
 	text-overflow: ellipsis;
 	top: 8px;
 	vertical-align: middle;
@@ -1585,9 +1601,9 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	-moz-box-shadow:0px 3px 8px #666;
 	-webkit-box-shadow:0px 3px 8px #666;
 	box-shadow:0px 3px 8px #666;
-	height:38px;
-	width:134px;
-	margin:3px;
+	height:42px;
+	width:144px;
+	margin:0px -2px;
 }
 .icons .recordDiv {
 	border: 2px solid #FFFFFF;
@@ -1632,7 +1648,7 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	right: 0;
 	text-align: center;
 	top: 0;
-	width: 51px;
+	width: 38px;
 }
 .icons .recordDiv:hover .thumbnail, .icons .recordDiv:hover .recTypeThumb {
 	height:38px;
@@ -1653,18 +1669,20 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	display:none
 }
 .icons .recordTitle {
-	height: 26px;
-	left: 53px;
-	line-height: 13px;
+	/*height: 26px;*/
+	left: 42px;
+	line-height: 11px;
 	overflow: hidden;
 	position: absolute;
-	right: 2px;
+	/*right: 2px;*/
+	width:75px;
 	text-align: left;
-	top: 3px;
+	top: 5px;
+	bottom:3px;
 	white-space: normal;
 }
 .icons .recordTitle a {
-	line-height: 13px;
+	line-height: 11px;
 }
 .icons .recordIcons {
 	display:none
@@ -1833,10 +1851,13 @@ div.recorddiv:hover {
 .filter {
 	border-top:1px solid #BBB;
 	color: #999999;
-	position: relative;
+	position: absolute;
 	min-height:20px;
 	margin-bottom: 0;
 	border-bottom:1px solid #DDD;
+	left:0;
+	right:0;
+	top:0;
 }
 .filter ul li ul {
 	position:absolute;
@@ -1867,6 +1888,7 @@ div.recorddiv:hover {
 	background:-moz-linear-gradient(center top, #F0F0F0, #FFF) repeat scroll 0 0 transparent;
 	background:-webkit-gradient(linear, left top, left bottom, from(#F0F0F0), to(#FFF));
 }
+#results #results-level0 {padding-top:20px}
 div.filter .showrelated {
 	padding-left:0;
 	text-align:left;
@@ -2063,7 +2085,7 @@ div.recorddiv:hover > #rec_edit_link {
 	display: block;
 }
 #recordID {
-	background-color: rgba(100, 100, 100, 0.6);
+	/*background-color: rgba(100, 100, 100, 0.6);*/
 	border-radius: 3px;
 	color: #CCC;
 	display: none;
@@ -2077,11 +2099,23 @@ div.recorddiv:hover > #rec_edit_link {
 	right:-10px;
 	/*left:0;*/
 	height:16px;
+	/*box-shadow: 0 1px 3px #000000 inset;*/
+}
+#recordID > div {
+	display: inline;
+	float: right;
+	height: 16px;
+	width: 16px;
+}
+#recordID > div {
+	border-radius: 3px;
+	background-color: rgba(100, 100, 100, 0.0);
+}
+#recordID > div:hover {
+	background-color: rgba(100, 100, 100, 0.4);
 	box-shadow: 0 1px 3px #000000 inset;
 }
-#recordID > * {
-	display:inline-block
-}
+
 #recordID a {
 	color:#CCC
 }
@@ -2117,6 +2151,10 @@ div.recorddiv:hover > #recordID {
 }
 .recordTitle a.daysbad {
 	color:#900;
+}
+.recordTitle img.daysbad {
+	height:11px;
+	width:auto;
 }
 #pageNavCount {
 	height: 7px;
@@ -2244,29 +2282,31 @@ div.recorddiv:hover > #recordID {
 	padding:0;
 	margin:0;
 	left:0;
-	background-position: 100% 0;
+	background-position: 2px 0px;
 	color:transparent;
 	text-indent:20px;
 	line-height:15px;
-	text-align:right;
-	direction:rtl;
+	text-align:left;
+/*	direction:rtl;*/
 	min-width:20px !important;
 	position:relative;
 }
 #appPanelButton {
 	top:0;
 	height:15px;
-	border-left:1px solid RGBA(100,100,100,0.2);
-	display:inline-block;
+/*	border-left:1px solid RGBA(100,100,100,0.2);
+*/	display:inline-block;
 	padding:0;
 	margin:0;
-	left:0;
+	right:0;
 	background-position: 2px 0;
 	color:transparent;
 	text-indent:20px;
 	line-height:15px;
 	min-width:20px !important;
 	float:none;
+	position:absolute;
+	direction:rtl;
 }
 #navbutton:hover, #appPanelButton:hover {
 	color:#999
@@ -2321,6 +2361,8 @@ div#tabbar {
 	min-width:260px !important;
 	white-space:nowrap;
 	z-index: 1;
+	border-right: 1px solid rgba(100, 100, 100, 0.2);
+	padding: 0 3px 0 0;
 }
 #tabs li {
 	height:11px;
@@ -2333,4 +2375,13 @@ div#tabbar {
 }
 #result-header {
 	min-height:0px;
+}
+.externalLink {
+	width:16px;
+	height:16px;
+	display:inline-block;
+	background-image: url("../images/jump.png");
+}
+.externalLink:hover {
+	background-image: url("../images/jump_white.png");
 }

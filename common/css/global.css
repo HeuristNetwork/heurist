@@ -430,7 +430,7 @@ body, .darkBG {background-image:none;background-color: #BDBDBD;}
 .mceContentBody {background-color:#FFF}
 /*body, .darkBG {background-image:url("../images/backgrounds/dark_bg.png") !important;background-repeat:repeat;}*/
 body.editTab, body.popup, body.tag_edit, body.bookmark_import, body.body_only {font-size: 11px;background-image:none !important;background-color: #ECF1FB; padding:15px 20px 10px 30px;overflow:auto;}
-body.popup {background-color:#FFF}
+body.popup, body.tag_edit {background-color:#FFF}
 body.popup, body.tag_edit, body.bookmark_import, body.body_only {padding:10px}
 #sidebar, #footnotes, .mediumBG {background-color:#DBDFE6;}
 #page, .lightBG {background-image:none !important;background-repeat:repeat;background-color:#FFF !important;}

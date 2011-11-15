@@ -234,7 +234,9 @@ top.HEURIST.search = {
 													top.HEURIST.search.loadLevelFilter(0);
 													top.HEURIST.search.addResultLevelLinks(0);
 													if (top.HEURIST.search.results.infoByDepth.length >1 &&
-															top.HEURIST.search.results.infoByDepth[1].count > 0) {
+															top.HEURIST.search.results.infoByDepth[1].count > 0 &&
+															top.HEURIST.util.getDisplayPreference("loadRelatedOnSearch")!= "true"
+															) {
 														top.HEURIST.search.loadLevelFilter(1);
 													}
 									});
@@ -541,9 +543,9 @@ top.HEURIST.search = {
 				editLinkIcon = "";
 			};
 		}
-		var newSearchWindow = "<a href='"+top.HEURIST.basePath+"search/search.html?q=ids:"+res[2]+
+		var newSearchWindow = "<div><a href='"+top.HEURIST.basePath+"search/search.html?q=ids:"+res[2]+
 			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
-			"' target='_blank' title='Open in new window'><img src='"+	top.HEURIST.basePath + "common/images/caret_grey.png'/></a>"
+			"' target='_blank' title='Open in new window' class='externalLink'></a></div>"
 		var verified_date = null;
 		if (res[8]) {
 			// locale-independent date parsing (early Webkit uses the local format)
@@ -602,8 +604,8 @@ top.HEURIST.search = {
 		    "</div>" +
 			"<div class='recordTitle' title='"+linkText+"'>" + (res[3] && res[3].length ? daysBad +"<a href='"+res[3]+"' target='_blank'>"+linkText + "</a>" : linkText ) + "</div>" +
 			"<div id='recordID'>"+
-			editLinkIcon +
 			newSearchWindow +
+			editLinkIcon +
 			"</div>" +
 		"</div>" +
 		"</div>";
@@ -1932,8 +1934,25 @@ top.HEURIST.search = {
 		if (targ.nodeType == 3) targ = targ.parentNode;
 
 		if (! targ.href  && targ.parentNode && targ.parentNode.href) targ = targ.parentNode;	// sometimes get the span, not the link
-		top.HEURIST.util.popupURL(top, targ.href);
+		var dim = top.HEURIST.util.innerDimensions(window);
+		if (targ.className.match(/\bsmall\b/)){
+			top.HEURIST.util.popupURL(top, targ.href, {height:dim.h*0.5, width:dim.w*0.5});
+		}else{
+			top.HEURIST.util.popupURL(top, targ.href, {height:dim.h*0.8, width:dim.w*0.8});
+		}
+		e.cancelBubble = true;
+		if (e.stopPropagation) e.stopPropagation();
+		return false;
+	},
 
+	popupLink: function(url,size) {
+
+		var dim = top.HEURIST.util.innerDimensions(window);
+		if (size == "small"){
+			top.HEURIST.util.popupURL(top, url, {height:dim.h*0.5, width:dim.w*0.5});
+		}else{
+			top.HEURIST.util.popupURL(top, url, {height:dim.h*0.8, width:dim.w*0.8});
+		}
 		e.cancelBubble = true;
 		if (e.stopPropagation) e.stopPropagation();
 		return false;
@@ -2688,7 +2707,8 @@ top.HEURIST.search = {
 		if (p['stype']) args.push('stype='+p['stype']);
 		if (p['q']) args.push('q='+escape(p['q']));
 		var query_string = args.join('&');
-		window.location.href = top.HEURIST.basePath+"admin/verification/listDuplicateRecordsForSearchResults.php?"+ query_string + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
+		//window.location.href = top.HEURIST.basePath+"admin/verification/listDuplicateRecordsForSearchResults.php?"+ query_string + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
+		top.HEURIST.search.popupLink(top.HEURIST.basePath+"admin/verification/listDuplicateRecordsForSearchResults.php?"+ query_string + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""));
 	},
 
 	setupSearchPage: function() {

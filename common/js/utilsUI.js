@@ -1029,7 +1029,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 	getJsonData: function(url, callback, postData) {
 		top.HEURIST.util.sendRequest(url, function(xhr) {
 			var obj = top.HEURIST.util.evalJson(xhr.responseText);
-			if (obj  &&  obj.error) alert("utilsUI:getJsonData response error -" + obj.error);
+			if (obj  &&  obj.error) alert("utilsUI:getJsonData returned error: '" + obj.error + "'");
 			if (callback) callback(obj);
 		}, postData);
 	},
@@ -1324,42 +1324,72 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 * @param defaultTermID id of term to show as selected, can be null
 * @return selObj an HTML select object node
 **/
-	createTermSelect: function(termIDTree, headerTermIDsList, termLookup, defaultTermID) { // Creates the preview
+	createTermSelect: function(termIDTree, disabledTermIDsList, termLookup, defaultTermID) { // Creates the preview
 		var selObj = document.createElement("select");
-		var temp = ( headerTermIDsList instanceof(Array) ?
-						headerTermIDsList : (typeof(headerTermIDsList) === "string" && headerTermIDsList.length > 0 ?
-						headerTermIDsList.split(","):
+		var temp = ( disabledTermIDsList instanceof(Array) ?
+						disabledTermIDsList : (typeof(disabledTermIDsList) === "string" && disabledTermIDsList.length > 0 ?
+						disabledTermIDsList.split(","):
 						[]));
-		var headers = {};
+		var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
+
+		var disabledTerms = {};
 		for (var id in temp) {
-			headers[temp[id]] = temp[id];
+			disabledTerms[temp[id]] = temp[id];
 		}
-		function createSubTreeOptions(depth, termSubTree, termLookupInner, defaultTermID) {
+		function createSubTreeOptions(optgroup, depth, termSubTree, termLookupInner, defaultTermID) {
 			var termID;
 			var localLookup = termLookupInner;
 			for(termID in termSubTree) { // For every term in 'term'
 				var termName = (localLookup[termID] ? localLookup[termID][top.HEURIST.terms.fieldNamesToIndex['trm_Label']] : "unknown term ID");
-				var isHeader = (headers[termID]? true:false);
-				var opt = new Option(termName,termID);
-				opt.className = "depth" + depth;
-				if(isHeader) { // header term behaves like an option group
-					opt.className +=  ' termHeader';
-					opt.disabled = true;
+
+				if(isNotFirefox && depth>1){
+					//for non mozilla add manual indent
+					var a = new Array(depth*2);
+					termName = a.join('. ') + termName;
 				}
+
+				var isDisabled = (disabledTerms[termID]? true:false);
+				var hasChildren = ( typeof termSubTree[termID] == "object" && Object.keys(termSubTree[termID]).length>0 );
+				var isHeader   = ((disabledTerms[termID]? true:false) && hasChildren);
+
+
+				if(isHeader) { // header term behaves like an option group
+					//opt.className +=  ' termHeader';
+
+					var new_optgroup = document.createElement("optgroup");
+					new_optgroup.label = termName;
+
+					if(optgroup==null){
+						selObj.appendChild(new_optgroup);
+					}else{
+						optgroup.appendChild(new_optgroup);
+				}
+
+					//A dept of 8 (depth starts at 0) is maximum, to keep it organised
+					createSubTreeOptions( new_optgroup, ((depth<7)?depth+1:depth), termSubTree[termID], localLookup, defaultTermID)
+				}else{
+					var opt = new Option(termName, termID);
+					opt.className = "depth" + depth;
+					opt.disabled = isDisabled;
 				if (termID == defaultTermID) {
 					opt.selected = true;
 				}
+					if(optgroup==null){
 				selObj.appendChild(opt);
-				if(typeof termSubTree[termID] == "object") {
-					if(depth == 7) { // A dept of 8 (depth starts at 0) is maximum, to keep it organised
-						createSubTreeOptions(depth, termSubTree[termID], localLookup, defaultTermID);
-					} else {
-						createSubTreeOptions(depth+1, termSubTree[termID], localLookup, defaultTermID);
+					}else{
+						optgroup.appendChild(opt);
+					}
+
+					//second and more levels terms
+					if(hasChildren) {
+						// A dept of 8 (depth starts at 0) is maximum, to keep it organised
+						createSubTreeOptions( optgroup, ((depth<7)?depth+1:depth), termSubTree[termID], localLookup, defaultTermID);
 					}
 				}
+
 	}
 		}
-		createSubTreeOptions(0,termIDTree, termLookup, defaultTermID);
+		createSubTreeOptions(null, 0,termIDTree, termLookup, defaultTermID);
 		if (!defaultTermID) selObj.selectedIndex = 0;
 		return selObj;
 	},

@@ -88,7 +88,7 @@ function SelectDetailType() {
 									//window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 									top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 									rty_ID = top.HEURIST.parameters.rty_ID;
-									document.title = "ADD FIELD TYPES: " + top.HEURIST.rectypes.names[rty_ID];
+									document.title = "Insert fields -> " + top.HEURIST.rectypes.names[rty_ID];
 								}
 
 								//////////////////// create data table
@@ -164,19 +164,19 @@ function SelectDetailType() {
 								});
 
 								var myColumnDefs = [
-								{ key: "selection", label: "Sel", sortable:true, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
+								{ key: "selection", label: "", sortable:true, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
 								{ key: "order", label: "Order", hidden:true },
-								{ key: "name", label: "Name", sortable:true },
+								{ key: "name", label: "Field type name", sortable:true, width:100 },
 								{ key: "help", label: "Help", hidden:true, sortable:false},
-								{ key: "type", label: "Type", sortable:true },
+								{ key: "type", label: "Field type", sortable:true, width:40 },
 								{ key: "status", label: "Status", hidden:true, sortable:false },
 								{ key: "description",   hidden:true},
 								{ key: "group",   hidden:true},
 								{ key: "info", hidden:true, label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
 										elLiner.innerHTML = '<img src="../../common/images/info_icon.png" width="16" height="16" border="0" title="Info"/>';} },
-								{ key: "usage", label: "Usage", sortable:true },
+								{ key: "usage", label: "Used in", sortable:true, width:25, className:'center' },
 								{ key: "fieldset_rectypeid",   hidden:true},
-								{ key: "ptrtarget_rectypeids",   hidden:true}
+								{ key: "ptrtarget_rectypeids", label: "Pointer targets"}
 								];
 
 								var myConfigs = {

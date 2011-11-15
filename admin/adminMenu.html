@@ -69,7 +69,7 @@
 <div id="quicklinks" style="top:10px;right:15px">
 		<ul id=quicklink-cell>
         	<li id="reportBug"><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 400,width: 740,callback: function (title, bd, bibID) {if (bibID) {window.close(bibID, title);}} });return false;" title="Click to send a bug report or feature request" ><img src="../common/images/16x16.gif"></a></li>
-        	<li><a href="javascript:void(0)" onclick="{top.HEURIST.util.reloadStrcuture();}" title="Click to clear the internal working memory of Heurist" >clear memory</a></li>
+        	<li><a href="javascript:void(0)" onClick="{top.HEURIST.util.reloadStrcuture();}" title="Click to clear the internal working memory of Heurist" >clear memory</a></li>
 		</ul>
 </div>
 
@@ -101,21 +101,22 @@
       <span class="description">Management of the database model which defines the types of data which can be recorded and the layout of data entry</span></h3>
       <div class="adminSection">
         <ul>
-          <li><a href="#"
-            onClick="loadContent('structure/selectDBForImport.php?db=[dbname!]')" title="Selectively import structural elements from other Heurist databases">Import record types</a></li>
-          <li class="seperator"><a href="#" onClick="loadContent('structure/manageRectypes.html?db=[dbname!]')" title="Add new / modify existing record types and their use of globally defined fields">Record and field definitions</a></li>
-         <li class="seperator"><a href="#"
-            onClick="loadContent('structure/editTerms.html?db=[dbname!]')" title="Define terms used for relationship types and for other enumerated fields">Terms (categories) tree</a></li>
-          <li class="seperator"><a href="#"
-            onClick="loadContent('structure/manageDetailTypes.html?db=[dbname!]')" title="Direct access to the global field definitions">Field types</a></li>
-          <li  class="seperator"><a href="#"
-            onClick="loadContent('structure/editRectypeConstraints.html?db=[dbname!]')" title="Define constraints on the record types which can be related, and allowable relationship types">Constraints</a></li>
-          <li class="seperator"><a href="#"
-            onClick="loadContent('describe/listRectypeDescriptions.php?db=[dbname!]')" title="Display/print a formatted view of the database structure">Structure (human readable)</a></li>
-          <li class="seperator"><a href="#"
-            onClick="loadContent('structure/getDBStructure.php?db=[dbname!]&pretty=1')" title="Lists the record type and field definitions in a computer-readable form">Structure (exchange format)</a></li>
-          <li class="seperator"><a href="#"
-            onClick="loadContent('setup/editMimetypes.php?db=[dbname!]')" title="Define the relationship between file extensions and mime type">Mime types</a></li>
+          <li><a href="#" onClick="loadContent('structure/manageRectypes.php?db=[dbname!]')"
+          		title="Add new / modify existing record types and their use of globally defined fields">Record types</a></li>
+          <li class="seperator"><a href="#" onClick="loadContent('structure/manageDetailTypes.php?db=[dbname!]')"
+            	title="Direct access to the global field definitions">Field types</a></li>
+         <li class="seperator"><a href="#" onClick="loadContent('structure/editTerms.php?db=[dbname!]')"
+         		title="Define terms used for relationship types and for other enumerated fields">Terms</a></li>
+          <li  class="seperator"><a href="#" onClick="loadContent('structure/editRectypeConstraints.php?db=[dbname!]')"
+            	title="Define constraints on the record types which can be related, and allowable relationship types">Constraints</a></li>
+          <li  class="seperator"><a href="#" onClick="loadContent('structure/selectDBForImport.php?db=[dbname!]')"
+            	title="Selectively import structural elements from other Heurist databases">Import structure</a></li>
+          <li class="seperator"><a href="#" onClick="loadContent('describe/listRectypeDescriptions.php?db=[dbname!]')"
+            	title="Display/print a formatted view of the database structure">Structure (human readable)</a></li>
+          <li class="seperator"><a href="#" onClick="loadContent('structure/getDBStructure.php?db=[dbname!]&pretty=1')"
+            	title="Lists the record type and field definitions in a computer-readable form">Structure (exchange format)</a></li>
+          <li class="seperator"><a href="#" onClick="loadContent('setup/editMimetypes.php?db=[dbname!]')"
+            	title="Define the relationship between file extensions and mime type">Mime types</a></li>
           </ul>
       </div>
 
@@ -125,10 +126,10 @@
         <ul>
           <!-- 17/10/11 - Artem has moved addition of users to the workgroups page -->
           <!-- TO DO: Take this menu entry out so that navigation is via user groups -->
-          <li><a href="#" onClick="loadContent('ugrps/manageUsers.html?db=[dbname!]')" title="Add and edit database users and usergroups, including authorization of new users">Manage users</a></li>
+          <li><a href="#" onClick="loadContent('ugrps/manageUsers.php?db=[dbname!]')" title="Add and edit database users and usergroups, including authorization of new users">Manage users</a></li>
 
           <li class="seperator"><a href="#"
-            onClick="loadContent('ugrps/manageGroups.html?db=[dbname!]')" title="Assign users to usergroups and set their roles">Manage groups</a></li>
+            onClick="loadContent('ugrps/manageGroups.php?db=[dbname!]')" title="Assign users to usergroups and set their roles">Manage groups</a></li>
           <li class="seperator"><a href="#"
             onClick="loadContent('ugrps/editGroupTags.php?db=[dbname!]')" title="Add and remove workgroup tags">Workgroup tags</a></li>
           <li class="seperator"><a href="#"

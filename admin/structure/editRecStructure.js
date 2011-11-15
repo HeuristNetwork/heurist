@@ -49,15 +49,16 @@ function EditRecStructure() {
 			formTitle.innerHTML = "<div class=\"rectypeIconHolder\" style=\"background-image:url("+recTypeIcon+")\"></div><span class=\"recTypeName\">"+top.HEURIST.rectypes.names[rty_ID]+"</span>";
 		}
 
-
 		// buttons on top and bottom of design tab
 		var hToolBar = '<div style=\"text-align:right;float:right;\">'+
 		//<div style="display:inline-block; text-align:left">
 		//'<input type="button" value="collapse all" onclick="onCollapseAll()"/>'+
 		//'<input type="button" value="Enable Drag" onclick="onToggleDrag(event)"/></div>'+
-		'<input style="display:none;" type="button" id="btnSaveOrder" value="Save Order" onclick="onUpdateStructureOnServer(false)"/>'+
-		'<input type="button" class="add" value="Insert Field" onclick="onAddNewDetail()"/>'+
-		//'<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/></div>
+		'<input style="display:none;" type="button" id="btnSaveOrder" value="Save order" onclick="onUpdateStructureOnServer(false)"/>'+
+		'&nbsp;&nbsp;<input type="button" class="add" value="Insert field" onclick="onAddNewDetail()"/>'+
+		// note class=add --> global.css add-button, is set to float:right, but class adds the + to the button
+		'&nbsp;&nbsp;<input type="button" value="New field type" onClick="onDefineNewType()"/>'+
+		// '<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/>'+
 		'</div>';
 
 		Dom.get("recordTitle").innerHTML += hToolBar;
@@ -162,14 +163,14 @@ function EditRecStructure() {
 				key:"rst_DisplayOrder", label: "Order", sortable:true, hidden:true
 			},
 			{
-				key:"dty_Name", label: "Field name", width:120, sortable:false },
+				key:"dty_Name", label: "Field type", width:120, sortable:false },
 			{
-				key:"rst_DisplayName", label: "Field prompt", width:120, sortable:false },
+				key:"rst_DisplayName", label: "Field name (used for this type)", width:120, sortable:false },
 			{
 				key:"dty_Type", label: "Data type", sortable:false
 			},
 			{
-				key:"rst_DisplayWidth", label: "Width", sortable:false, width:15, className:"center"
+				key:"rst_DisplayWidth", label: "Width", sortable:false, width:20, className:"center"
 			},
 			//{ key:"rst_DisplayHelpText", label: "Prompt", sortable:false },
 			{
@@ -340,7 +341,7 @@ function EditRecStructure() {
 					record_id = _myDataTable.getTdEl({record:oRecord, column:_myDataTable.getColumn("expandColumn")});
 				}
 
-				// after expantion - fill input values from HEURIST db
+				// after expansion - fill input values from HEURIST db
 				// after collapse - save data on server
 				function __toggle(){
 
@@ -389,7 +390,7 @@ function EditRecStructure() {
 				YAHOO.util.Event.stopEvent(oArgs.event);
 
 				if(!Hul.isnull(_updatedFields) && _updatedFields.indexOf(9)>=0){ //order was changed
-					alert("You have to save your changes in view order first");
+					alert("Please click Save Order button to save changes in view-order beofre exiting");
 					return;
 				}
 
@@ -401,18 +402,13 @@ function EditRecStructure() {
 				function __updateAfterDelete(context) {
 
 					if(!context){
-						alert("Unknown error on server side");
+						alert("Unknown error on server in editRecStructure.js");
 					}else if(Hul.isnull(context.error)){
 
 						_myDataTable.deleteRow(oRecord.getId(), -1);
 
-						// pain in the ... alert("Field type #"+dty_ID+" was deleted from record #"+rty_ID);
 						top.HEURIST.rectypes = context.rectypes;
 					}
-					//else {
-					// if error is property of context it will be shown by getJsonData
-					// alert("Deletion failed. "+context.error);
-					//}
 					_isServerOperationInProgress = false;
 				}
 				if(elLink.hash === "#edit"){
@@ -877,7 +873,7 @@ function EditRecStructure() {
 					rst_DisplayName: arrs[fi.dty_Name],
 					dty_Type: arrs[fi.dty_Type],
 					rst_RequirementType: "optional",
-					rst_DisplayWidth: 60,
+					rst_DisplayWidth: 40,
 					rst_MinValues: 1,
 					rst_MaxValues: 1,
 					rst_DefaultValue: "",
@@ -1313,8 +1309,8 @@ function onAddNewDetail(){
 		"admin/structure/selectDetailType.html?rty_ID="+editStructure.getRty_ID()+"&db="+db,
 		{	"close-on-blur": false,
 			"no-resize": false,
-			height: 480,
-			width: 700,
+			height: '800',
+			width: '450',
 			callback: function(detailTypesToBeAdded) {
 				if(!Hul.isnull(detailTypesToBeAdded)){
 					editStructure.addDetails(detailTypesToBeAdded);
@@ -1344,9 +1340,9 @@ function onAddNewDetail(){
 			popupSelect = Hul.popupURL(top, url,
 			{	"close-on-blur": false,
 				"no-resize": false,
-			height: 430,
+			height: 500,
 	
-			width: 600,
+			width: 650,
 				callback: function(context) {
 	
 					if(!Hul.isnull(context)){

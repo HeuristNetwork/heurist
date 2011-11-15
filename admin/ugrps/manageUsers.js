@@ -369,7 +369,11 @@ elLiner.innerHTML = '<a href="#edit_user"><img src="../../common/images/edit-pen
 				dropdownOptions: _roles },
 			{ key: "id", label: "Delete", width:30, sortable:false, hidden:(_isSelection || !top.HEURIST.is_admin()),
 				formatter: function(elLiner, oRecord, oColumn, oData) {
+						if(Number(oRecord.getData('id'))===2){
+elLiner.innerHTML = "<img src=\"../../common/images/lock_bw.png\" title=\"System user - Locked\">";
+						}else{
 elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/cross.png" title="Delete this User" /><\/a>';
+				}
 				}
 			},
 			{ key: "kickoff", label: "Remove", width:30, sortable:false, hidden: _isSelection,
@@ -863,7 +867,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 			"close-on-blur": false,
 			"no-resize": false,
 			height: 560,
-			width: 640,
+			width: 740,
 			callback: function(context) {
 				if(!Hul.isnull(context)){
 

@@ -1,7 +1,7 @@
-<!--
+<?php
 
 /**
-* manageUsers.html
+* manageUsers.php
 * workgroup listing
 *
 * @version 2011.0510
@@ -14,7 +14,14 @@
 * @todo
 **/
 
--->
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+if (!is_admin()) {
+    print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to add or change users</span><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
+    return;
+}
+
+?>
+
 <html>
 	<head>
 
@@ -104,7 +111,7 @@
 
 	<body class="popup yui-skin-sam" style="overflow:auto;">
     <div>
-		<h2>Manage Users</h2>
+    	<div class="banner"><h2>Manage Users</h2></div>
 
 		<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
 		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
@@ -124,7 +131,7 @@
 
 			<div>
 				<div id="pnlFilterByGroup">
-					<label for="inputFilterByGroup">Filter by group:</label>
+                        <label for="inputFilterByGroup">Filter by group:</label>
                             <select id="inputFilterByGroup" size="1" style="width:138px">
                                 <option value="all">all groups</option>
                             </select>
@@ -140,7 +147,7 @@
 
                 <div  id="pnlFilterByRole" style="display:none;">
 					<br>
-				<label for="inputFilterByRole" style="width:120px;display:inline-block;text-align:right">Filter by role:</label>
+                    <label style="width:120px;display:inline-block;text-align:right">Filter by role:</label>
 					<select id="inputFilterByRole" name="inputFilterByRole" size="1" style="width:75px">
 						<option value="all">all roles</option>
 						<option value="admin">admin</option>

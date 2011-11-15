@@ -1,7 +1,7 @@
 <?php
 
 /**
- * filename, brief description, date of creation, by whom
+ * findReplaceRecord.php - where a record has been merged into another, this one finds the record into which it has been merged
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt

@@ -127,6 +127,7 @@ function DetailTypeEditor() {
 			_detailType[fi.dty_JsonTermIDTree] = null;
 			_detailType[fi.dty_TermIDTreeNonSelectableIDs] = null;
 			_detailType[fi.dty_PtrTargetRectypeIDs] = null;
+			_detailType[fi.dty_NonOwnerVisibility] = 'viewable';
 
 			Dom.get("dty_Type").disabled = false;
 		}else{
@@ -258,17 +259,20 @@ function DetailTypeEditor() {
 				var arr = value.split(","),
 				ind, dtName;
 				for (ind in arr) {
-					dtName = top.HEURIST.rectypes.names[arr[ind]];
+					var ind2 = Number(arr[Number(ind)]);
+					if(!isNaN(ind2)){
+						dtName = top.HEURIST.rectypes.names[ind2];
 					if(!txt) {
 						txt = dtName;
 					}else{
 						txt += ", " + dtName;
 					}
+					}
 				} //for
 		}else{
 			txt = "unconstrained";
 		}
-		if (txt.length > 40){
+		if (!Hul.isnull(txt) && txt.length > 40){
 			divRecType.title = txt;
 			txt = txt.substr(0,40) + "&#8230";
 		}else{
@@ -427,23 +431,20 @@ function DetailTypeEditor() {
 
 		if (_dtyID<0){
 			Dom.get("dty_ID").innerHTML = '<span style="color:#999">will be automatically assigned</span>';
-			document.title = "CREATE NEW FIELD TYPE";
+			document.title = "Create new field type";
 		}else{
 			Dom.get("dty_ID").innerHTML =  _dtyID;
-			document.title = "Field Type #: " + _dtyID+" '"+_detailType[fi.dty_Name]+"'";
+			document.title = "Field Type # " + _dtyID+" '"+_detailType[fi.dty_Name]+"'";
 
 			var aUsage = top.HEURIST.detailTypes.rectypeUsage[_dtyID];
 			var iusage = (Hul.isnull(aUsage)) ? 0 : aUsage.length;
 			var warningImg = "<img src='" + top.HEURIST.basePath + "common/images/url_warning.png'>";
 
 			if(iusage > 0) {
-				if(iusage===1) {
+
 					Dom.get("msg").style.visibility = "visible";
-					Dom.get("statusMsg").innerHTML = warningImg + "WARNING: this fieldtype is used in " + iusage + " recordtype. Changes will affect that recordtype.";
-				} else {
-					Dom.get("msg").style.visibility = "visible";
-					Dom.get("statusMsg").innerHTML = warningImg + "WARNING: this fieldtype is used in " + iusage + " recordtypes. Changes will affect every one of those.";
-				}
+					Dom.get("statusMsg").innerHTML = warningImg + "WARNING: Changes to this field type will affect all record types (" + iusage + ") in which it is used";
+
 			}
 		}
 	}
@@ -653,7 +654,7 @@ function DetailTypeEditor() {
 				|| (that.keepType==="relationtype") || (that.keepType==="fieldsetmarker"))
 				 && el.value!==that.keepType){
 			changeToNewType = confirm("If you change the type to '"+el.value+
-											"' you will lost all your vocabulary settings for type '"+that.keepType+
+											"' you will lose all your vocabulary settings for type '"+that.keepType+
 										"'.\n\nAre you sure?");
 		}
 

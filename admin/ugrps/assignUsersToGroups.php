@@ -82,7 +82,7 @@ if (@$_REQUEST['_submit']) {
 		if ($body->execute()) {
 			$ugl_ID = mysql_insert_id();
 
-			header('Location: usergroupadmin.php?db='.HEURIST_DBNAME.(@$_REQUEST['filterId'] ? '&amp;filterId='.$_REQUEST['filterId'] : '') );
+			header('Location: assignUsersToGroups.php?db='.HEURIST_DBNAME.(@$_REQUEST['filterId'] ? '&amp;filterId='.$_REQUEST['filterId'] : '') );
 		}
 	}
 }

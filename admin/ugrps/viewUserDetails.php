@@ -14,7 +14,7 @@
 <?php
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
+	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 if (!is_logged_in()) {
 	header('Location: '.HEURIST_URL_BASE.'common/connect/login.php?db='.HEURIST_DBNAME);
@@ -22,43 +22,158 @@ if (!is_logged_in()) {
 }
 
 mysql_connection_db_overwrite(DATABASE);
-$template = file_get_contents('viewUserDetails.html');
-$template = str_replace('[logged-in-user-id]', intval(get_user_id()), $template);
 
-$lexer = new Lexer($template);
-$body = new BodyScope($lexer);
+$refurl = HEURIST_URL_BASE."admin/ugrps/showSimilarUsers.php?db=".HEURIST_DBNAME;
 
-$body->global_vars['sort'] = ($_REQUEST['sort'] == 'alpha' ? 'alpha' : 'freq');
+$sortby = (array_key_exists('sort',$_REQUEST) && $_REQUEST['sort'] == 'alpha' ? 'alpha' : 'freq');
+$ugr_ID = $_REQUEST['Id'];
 
-$name = mysql__select_array(USERS_DATABASE.'.'.USERS_TABLE, "concat(".USERS_FIRSTNAME_FIELD.",' ',".USERS_LASTNAME_FIELD.")", USERS_ID_FIELD.'='.$_REQUEST['Id']);
-$name = $name[0];
+$table = USERS_DATABASE.'.'.USERS_TABLE;
+$fields = "ugr_FirstName, ugr_LastName, ugr_Department, ugr_Organisation, ugr_eMail";
+$condition = USERS_ID_FIELD.'='.$ugr_ID;
 
-$body->global_vars['tags'] = '';
-$body->global_vars['dbname'] = HEURIST_DBNAME;
+$res = mysql_query("SELECT $fields FROM $table WHERE $condition");
+if (!$res) {
+	print "<html><body>user not found</body></html>";
+	return;
+}
+$row = mysql_fetch_array($res);
+
+$ugr_FullName = $row[0]." ".$row[1];
+$ugr_Department = $row[2];
+$ugr_Organisation = $row[3];
+$ugr_eMail = $row[4];
+
+$tags = '';
 
 $res = mysql_query('select tag_Text,count(rtl_ID) as bkmks
                       from usrRecTagLinks
                  left join usrTags on rtl_TagID=tag_ID
                      where tag_UGrpID='.$_REQUEST['Id'].'
                   group by tag_Text
-                  order by '. ($_REQUEST['sort'] == 'alpha' ? 'tag_Text, bkmks desc' : 'bkmks desc, tag_Text'));
+                  order by '.
+(array_key_exists('sort',$_REQUEST) && $_REQUEST['sort'] == 'alpha' ? 'tag_Text, bkmks desc' : 'bkmks desc, tag_Text'));
 
-$body->global_vars['tags'] .= '<span id="top10">'."\n";
+$tags .= '<span id="top10">'."\n";
 $i = 0;
 while ($row = mysql_fetch_assoc($res)) {
 	if ($i == 10)
-		$body->global_vars['tags'] .= "</span>\n".'<span id="top20" style="display: none;">'."\n";
+		$tags .= "</span>\n".'<span id="top20" style="display: none;">'."\n";
 	if ($i == 20)
-		$body->global_vars['tags'] .= "</span>\n".'<span id="top50" style="display: none;">'."\n";
+		$tags .= "</span>\n".'<span id="top50" style="display: none;">'."\n";
 	if ($i == 50)
-		$body->global_vars['tags'] .= "</span>\n".'<span id="top100" style="display: none;">'."\n";
+		$tags .= "</span>\n".'<span id="top100" style="display: none;">'."\n";
 	$i++;
-	$body->global_vars['tags'] .= '<a target="_top" href="'.HEURIST_URL_BASE.'search/search.html?w=all&q=tag:%22'.urlencode($row['tag_Text']).'%22+user:'.$_REQUEST['Id'].'" title="Search for '.$name.'\'s references with the tag \''.$row['tag_Text'].'\'"><nobr>'.$row['tag_Text'].' ('.$row['bkmks'].")</nobr></a>&nbsp&nbsp\n";
+	$tags .= '<a target="_top" href="'.HEURIST_URL_BASE.'search/search.html?w=all&q=tag:%22'.urlencode($row['tag_Text']).'%22+user:'.$_REQUEST['Id'].'" title="Search for '.$ugr_FullName.'\'s references with the tag \''.$row['tag_Text'].'\'"><nobr>'.$row['tag_Text'].' ('.$row['bkmks'].")</nobr></a>&nbsp&nbsp\n";
 }
-$body->global_vars['tags'] .= "</span>\n";
-
-
-$body->verify();
-$body->render();
-
+$tags .= "</span>\n";
 ?>
+
+<html>
+<head>
+  <title>HEURIST - User Profile</title>
+
+  <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" type="text/css" href= "../../common/css/newshsseri.css">
+</head>
+<body>
+
+
+<table border="0" cellpadding="0" cellspacing="4" width="100%" style="background-color: black; color: white;">
+ <tr>
+  <td><nobr><b>User Profile</b></nobr></td>
+  <td width="100%"></td>
+ </tr>
+</table>
+
+<div style="padding: 10px;">
+
+<div style="float: right;"><a href="<?=$refurl?>">back</a></div>
+
+<table border="0" cellpadding="2" cellspacing="0" style="border-collapse: collapse">
+  <tr>
+    <td><b><?=$ugr_FullName?></b></td>
+  </tr>
+ <?php
+ if ($ugr_Department){
+  	print "<tr><td>".$ugr_Department."</td></tr>";
+ }
+ if ($ugr_Organisation){
+  	print "<tr><td>".$ugr_Organisation."</td></tr>";
+ }
+ ?>
+  <tr>
+    <td><a href="mailto:[<?=$ugr_eMail?>"><?=$ugr_eMail?></a></td>
+  </tr>
+</table>
+
+<hr color="#C0C0C0" size="1">
+
+<b>Tags</b><br>
+
+<script type="text/javascript">
+<!--
+function show_tags(n) {
+  top10_elt = document.getElementById('top10');
+  top20_elt = document.getElementById('top20');
+  top50_elt = document.getElementById('top50');
+  top100_elt = document.getElementById('top100');
+
+  if (n == 10) {
+    if (top100_elt) top100_elt.style.display = 'none';
+    if (top50_elt) top50_elt.style.display = 'none';
+    if (top20_elt) top20_elt.style.display = 'none';
+  }
+  else if (n == 20) {
+    if (top100_elt) top100_elt.style.display = 'none';
+    if (top50_elt) top50_elt.style.display = 'none';
+    if (top20_elt) top20_elt.style.display = '';
+  }
+  else if (n == 50) {
+    if (top100_elt) top100_elt.style.display = 'none';
+    if (top20_elt) top20_elt.style.display = '';
+    if (top50_elt) top50_elt.style.display = '';
+  }
+  else if (n == 100) {
+    if (top20_elt) top20_elt.style.display = '';
+    if (top50_elt) top50_elt.style.display = '';
+    if (top100_elt) top100_elt.style.display = '';
+  }
+
+  elt = document.getElementById('show10');
+  if (n == 10) elt.style.fontWeight = 'bold';
+  else elt.style.fontWeight = '';
+  elt = document.getElementById('show20');
+  if (n == 20) elt.style.fontWeight = 'bold';
+  else elt.style.fontWeight = '';
+  elt = document.getElementById('show50');
+  if (n == 50) elt.style.fontWeight = 'bold';
+  else elt.style.fontWeight = '';
+  elt = document.getElementById('show100');
+  if (n == 100) elt.style.fontWeight = 'bold';
+  else elt.style.fontWeight = '';
+}
+-->
+</script>
+sort:
+<a href="viewUserDetails.php?Id=<?=$ugr_ID?>&amp;sort=freq&amp;db=<?=HEURIST_DBNAME?>" style="font-weight:<?=$sortby=='freq'?'bold':'normal'?>;">freq</a>
+<a href="viewUserDetails.php?Id=<?=$ugr_ID?>&amp;sort=alpha&amp;db=<?=HEURIST_DBNAME?>" style="font-weight: <?=$sortby=='alpha'?'bold':'normal'?>;">alpha</a>
+
+&nbsp;&nbsp;
+
+show:
+<span id="show10" style="cursor: pointer; text-decoration: underline; font-weight: bold;" onclick="show_tags(10);">10</span>
+<span id="show20" style="cursor: pointer; text-decoration: underline;" onclick="show_tags(20);">20</span>
+<span id="show50" style="cursor: pointer; text-decoration: underline;" onclick="show_tags(50);">50</span>
+<span id="show100" style="cursor: pointer; text-decoration: underline;" onclick="show_tags(100);">all</span>
+
+<br>
+<br>
+
+<?=$tags?>
+
+</div>
+
+</body>
+</html>

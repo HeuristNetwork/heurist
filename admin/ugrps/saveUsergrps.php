@@ -99,9 +99,11 @@
 
 	case 'deleteUser':
 
-		if (!$recID) {
 			$rv = array();
+		if (!$recID) {
 			$rv['error'] = "invalid or not ID sent with deleteUser method call to saveUsergrps.php";
+		}else if( intval($recID)==2 ){
+			$rv['error'] = "Can't delete system user dbAdmin";
 		}else{
 			$rv = deleteUser($recID);
 			if (!array_key_exists('error',$rv)) {
@@ -129,9 +131,11 @@
 
 	case 'deleteGroup':
 
-		if (!$recID) {
 			$rv = array();
+		if (!$recID) {
 			$rv['error'] = "invalid or not ID sent with deleteGroup method call to saveUsergrps.php";
+		}else if( intval($recID)==2 ){
+			$rv['error'] = "Can't delete system group 'Database Owners'";
 		}else{
 			$rv = deleteGroup($recID);
 		}

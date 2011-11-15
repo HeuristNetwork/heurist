@@ -20,8 +20,6 @@ if (! is_logged_in()) {
 	header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
 	return;
 }
-if (! is_admin()) return;
-
 
 mysql_connection_db_select(DATABASE);
 

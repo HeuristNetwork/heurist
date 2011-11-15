@@ -1,18 +1,18 @@
 <!--
 
 /**
- * filename, brief description, date of creation, by whom
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
- **/
+* assignUsersToGroups.html, T1000 template, user to group assignment for all users
+* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+* @todo
+**/
 
 -->
 <html>
-<head>
- <title>User Group Administration</title>
+	<head>
+		<title>Heurist User-Group Administration</title>
  <link rel="stylesheet" type="text/css" href="../../common/css/newshsseri.css">
 
  <script language="JavaScript">
@@ -42,116 +42,114 @@
  //-->
  </script>
 
-</head>
+	</head>
 
-<body style="margin: 0px" link="blue" vlink="blue" onload="setScrollPosition()">
+	<body style="margin: 0px" link="blue" vlink="blue" onload="setScrollPosition()">
 
-<div style="background-color: #660000;"><a href=..><img style="border: 0;" src="../../common/images/hlogo-small.jpg"></a></div>
+		<table width="1000px;"  border="0" style="border-collapse: collapse; margin-left: 30px;">
+			<tr><td>
+					<table width="100%" border="0" style="border-collapse: collapse">
+						<tr>
+							<td align="left"><h2>User Group Administration</h2>
+								<a href="findAddUser.php?db=[dbname!]">Add new user</a><br><br>
+							</td>
+						</tr>
+					</table>
 
-<table width="95%"  border="0" style="border-collapse: collapse; margin-left: 5%;"><tr><td>
+					[if : logged-in-is-admin]
 
-<table width="100%" border="0" style="border-collapse: collapse">
+					<p>
+						Use the dropdowns on the right to add a user to a group.<br>
+						Click "x" to remove a user from a group.<br>
+						Click "add" / "rem" to grant / revoke admin privileges for a group.<br>
+					</p>
+
+					<form action="assignUsersToGroups.php?db=[dbname!]" method="post" onsubmit="saveScrollPosition()">
+
+						<input type="hidden" name="scrollTop" value="0">
+						<input type="hidden" name="make_admin" id="make_admin_elt" value="0">
+						<input type="hidden" name="unmake_admin" id="unmake_admin_elt" value="0">
+						<input type="hidden" name="remove_group_link" id="remove_group_link_elt" value="0">
+
+						[if : filterId]
+						<input type=hidden name=filterId value='[filterId]'>
+						[end-if]
+
+						<table border="1" rules="rows" frame="void">
+
  <tr>
-  <td align="left"><h2>User Group Administration</h2></td>
-  <td align="right" valign="top">
-	<a href="findAddUser.php?db=[dbname!]">Add user</a><br><br>
-   <font color="#008000"><small>Logged in as: </small><tt>[logged-in-user-username]</tt></font><br>
-   [if-eq : logged-in-user-username : ""]
-   <a href="../../common/connect/login.php?db=[dbname!]"><small>Log in</small></a>
-   [else]
-   <a href="../../common/connect/login.php?logout=1&amp;db=[dbname!]"><small>Log out</small></a>
-   [end-if-eq]
-  </td>
+								<th align="left" width="40px">Id</th>
+								<th align="left" width="150px">Name of person</th>
+								<th align="left" width="200px">Login name</th>
+								<th align="left" width="200px">Addition to groups</th>
+								<th align="left" width="120px">Member of these groups (change roles below)</th>
+
  </tr>
-</table>
 
-<p>
-Use the dropdowns on the right to add a user to a group.<br>
-Click "x" to remove a user from a group.<br>
-Click "+" / "-" to grant / revoke admin privileges for a group.<br>
-</p>
-
-[if : logged-in-is-admin]
-
-<form action="usergroupadmin.php?db=[dbname!]" method="post" onsubmit="saveScrollPosition()">
-
-<input type="hidden" name="scrollTop" value="0">
-<input type="hidden" name="make_admin" id="make_admin_elt" value="0">
-<input type="hidden" name="unmake_admin" id="unmake_admin_elt" value="0">
-<input type="hidden" name="remove_group_link" id="remove_group_link_elt" value="0">
-[if : filterId]
-<input type=hidden name=filterId value='[filterId]'>
-[end-if]
-
-<table border="1" rules="rows" frame="void">
-
-<tr>
- <th align="left">Id</th>
- <th align="left">Username</th>
- <th align="left">Realname</th>
- <th align="left" width="200">Member of</th>
- <td width="60"></td>
- <th align="left">Add to</th>
-</tr>
-[foreach USER users_foreach]
-[if-eq : ugr_Enabled : "Y"]
-
-<tr>
+							[foreach USER users_foreach]
+							<tr>
  <td valign="top">[ugr_ID]&nbsp;&nbsp;</td>
- <td valign="top">[ugr_Name]&nbsp;&nbsp;&nbsp;&nbsp;</td>
  <td valign="top">[ugr_FirstName] [ugr_LastName]&nbsp;&nbsp;&nbsp;&nbsp;</td>
- <td>
+								<td valign="top">[ugr_Name]&nbsp;&nbsp;&nbsp;&nbsp;</td>
 
+								<td width="250px" align="left" valign="top">
+									<input type="submit" value="Make member of">
+									[insert USER_GROUPS user_groups_insert]
+									[auto : ugl_UserID : ugr_ID]
+									[dropdown required : ugl_GroupID : groups dropdown : select grp.ugr_ID,grp.ugr_Name from sysUGrps grp order by grp.ugr_Name : style="width: 100;" : ]
+									[end-insert]
+								</td>
+
+								<td>
   <table border="0" cellspacing="0" cellpadding="0">
+
   [foreach USER_GROUPS user_groups_foreach]
    <tr>
     [select GROUP groups_select]
-     <td width="150">[ugr_Name]&nbsp;&nbsp;</td>
-	 <td width="40">
-	  <a title="remove from group" href="#" onclick="elt=document.getElementById('remove_group_link_elt'); if (elt) { elt.value=[ugl_ID]; elt.form.submit(); return true; } return false;" style="text-decoration: none; color: blue"><tt><b>x</b></tt></a>
-     </td>
+											<td width="150"><b>[ugr_Name]</b>&nbsp;&nbsp;</td>
+											<td></td>
+											<td width="60px" align="left"><b>[ugl_Role]</b></td>
      <td>
-      <nobr>
-      <a title="grant admin privilege" href="#" onclick="elt=document.getElementById('make_admin_elt'); if (elt) { elt.value=[ugl_ID]; elt.form.submit(); return true; } return false;" style="text-decoration: none; color: blue"><tt><b>+</b></tt></a>
-      <a title="revoke admin privilege" href="#" onclick="elt=document.getElementById('unmake_admin_elt'); if (elt) { elt.value=[ugl_ID]; elt.form.submit(); return true; } return false;" style="text-decoration: none; color: blue"><tt><b>-</b></tt></a>&nbsp;
+												<nobr>&nbsp;&nbsp;&nbsp;&nbsp;
+													<a title="grant admin privilege" href="#" onclick="elt=document.getElementById('make_admin_elt'); if (elt) { elt.value=[ugl_ID]; elt.form.submit(); return true; } return false;" style="text-decoration: none; color: blue"><b>Admin</b></a>&nbsp;&nbsp;
+													<a title="revoke admin privilege" href="#" onclick="elt=document.getElementById('unmake_admin_elt'); if (elt) { elt.value=[ugl_ID]; elt.form.submit(); return true; } return false;" style="text-decoration: none; color: blue"><tt><b>Member</b></tt></a>&nbsp;&nbsp;
+													<a title="remove from group" href="#" onclick="elt=document.getElementById('remove_group_link_elt'); if (elt) { elt.value=[ugl_ID]; elt.form.submit(); return true; } return false;" style="text-decoration: none; color: blue"><tt><b>Remove</b></tt></a>
+
       </nobr>
      </td>
-     <td>[ugl_Role]&nbsp;&nbsp;</td>
-
     [end-select]
+											<td></td>
      </tr>
   [end-foreach]
+
+
+
   [not-found]
   [end-not-found]
+
+
   </table>
-</td>
- <td></td>
- <td valign="top">
-  [insert USER_GROUPS user_groups_insert]
-   [auto : ugl_UserID : ugr_ID]
-   [dropdown required : ugl_GroupID : groups dropdown : select grp.ugr_ID,grp.ugr_Name from sysUGrps grp order by grp.ugr_Name : style="width: 100;" : ]
-  [end-insert]
- </td>
- <td valign="top">
-  <input type="submit" value="add">
  </td>
  </tr>
-[end-if-eq]
-[end-foreach]
 
-</table>
 
-</form>
 
-[else]
 
-<p><font color="#FF0000"><b>
-You do not have permission to edit user groups.<br>
-Only an administrator may edit user groups.
-</b></font></p>
+							[end-foreach]
 
-[end-if]
+						</table>
 
-</td></tr></table>
-</body>
+					</form>
+
+					[else]
+
+					<p><font color="#FF0000"><b>
+								You do not have permission to edit user groups.<br>
+								Only an administrator may edit user groups.
+					</b></font></p>
+
+					[end-if]
+
+		</td></tr></table>
+	</body>
 </html>

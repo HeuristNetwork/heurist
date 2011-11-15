@@ -21,9 +21,6 @@ require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 if (! is_logged_in()) {
 	header('Location: ' . BASE_PATH);
 	return;
-} else if (! is_admin()) {
-	print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>Workgroup tag administration is restricted to administrators only</span></div></div></body></html>";
-	return;
 }
 
 mysql_connection_db_select(DATABASE);
@@ -43,20 +40,21 @@ body { overflow: auto; }
 ul { margin: 2px; }
  </style>
 
- <script type="text/javascript">
+<script type="text/javascript">
 function delete_tag(tag_ID) {
 	if (! confirm('Really delete this tag?')) return;
 	var kd = document.getElementById('kwd_delete');
 	kd.value = tag_ID + '';
 	kd.form.submit();
 }
- </script>
+</script>
 
 </head>
 
 <body class="popup">
 
-<?php echo file_get_contents('menu.html'); ?>
+<?php // fiel does not exist echo file_get_contents('menu.html');
+?>
 
 <div class="banner">
 <h2>Manage workgroup tags</h2>
@@ -65,15 +63,20 @@ function delete_tag(tag_ID) {
 Unlike personal tags, which can be freely added by individual users while editing data and apply only to that user, 
 workgroup tags are a controlled list of shared tags established by a workgroup administrator.
 <br>The list below only shows workgroups of which you are an administrator. <br>
+
 <?php
-	if ($_REQUEST['deleting']) delete_tag();
-	else if ($_REQUEST['adding']) add_tags();
+	// TODO: these are giving undefined index errors for 'deleting' and 'adding' in the log  7/11/11
+	if ($_REQUEST['deleting']) {
+		delete_tag();
+	} else if ($_REQUEST['adding']) {
+		add_tags();
+	}
 ?>
 
 <form method="post">
 
 <br>Note: Deleting a tag deletes all references to that tag.
-<p>To add new tags, type a tag into the blank field at the end of a workgroup and hit [enter] or click 
+<p>To add new tags, type a tag into the blank field at the end of a workgroup and hit [enter] or click this button:
 
 
 <input type="submit" value="Add workgroup tag(s)">
@@ -82,11 +85,16 @@ workgroup tags are a controlled list of shared tags established by a workgroup a
 
 <?php
 	$adminGroupList = array();
-	foreach ($_SESSION['heurist']['user_access'] as $grp_id => $access) {
-		if ($access == "admin") array_push($adminGroupList,$grp_id);
+	// This retrieves all the user groups of which the user is a member IN THE DEFAULT DATABASE, ratehr than the current
+	// foreach ($_SESSION['heurist']['user_access'] as $grp_id => $access) {
+	//	if ($access == "admin") array_push($adminGroupList,$grp_id);
+	$q='select distinct ugl_GroupID from '.USERS_DATABASE.'.sysUsrGrpLinks where ugl_UserID='.get_user_id().' and ugl_Role="admin"';
+	$gres = mysql_query($q);
+	while ($grp = mysql_fetch_assoc($gres)) {
+		array_push($adminGroupList,$grp['ugl_GroupID']);
 	}
 	if (count($adminGroupList) < 1){
-		print '<html><body> You must have administration rights to work groups in order to add tags</body></html>';
+		print '<html><body> <h2>No workgroups</h2>You must have administration rights to a work group in order to add workgroup tags to it. You are not an adminstrator of any workgroups in this database.</body></html>';
 		return;
 	}
 	$adminGroupList = join(',', $adminGroupList);
@@ -105,7 +113,8 @@ workgroup tags are a controlled list of shared tags established by a workgroup a
  <li><b><?= htmlspecialchars($tag['tag_Text']) ?></b> <?= $used ?> [<a href="#" onClick="delete_tag(<?= $tag['tag_ID'] ?>); return false;">delete</a>]</li>
 <?php
 		}
-		print ' <li><input type="text" class="tbox" name="new[' . htmlspecialchars($grp['ugr_ID']) . ']" onkeypress="return (event.which != 92  &&  event.keyCode != 92);" value="' . htmlspecialchars($_REQUEST['new'][$grp['ugr_ID']]) . '"></li>';
+		// TODO: this is giving undefined index error for 'new' in the log  7/11/11
+		print ' <li>add: <input type="text" class="tbox" name="new[' . htmlspecialchars($grp['ugr_ID']) . ']" onkeypress="return (event.which != 92  &&  event.keyCode != 92);" value="' . htmlspecialchars($_REQUEST['new'][$grp['ugr_ID']]) . '"></li>';
 		print '</ul>';
 		print '</div>';
 	}

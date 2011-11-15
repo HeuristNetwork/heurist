@@ -609,6 +609,7 @@ div.temporal-div input.temporal-button:hover {
 	font-size: 10px;
 	color:#999;
 	font-weight: normal;
+	max-width:450px;
 }
 input#tags, .input-cell .in, .input-cell .resource-title, .in, .input-row input:not([type="submit"]) {
 	font-size:2ex;

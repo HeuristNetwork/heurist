@@ -70,7 +70,7 @@
                 id = row.id.replace(/row/,'');
                 d = document.getElementById('duplicate' + id);
                 if (id == rec_id){
-                    row.style.backgroundColor = '#bbffbb';
+                    row.style.backgroundColor = '#EEE';
                     if(d){
                         d.style.display = "none";
                         d.nextSibling.style.display = "none";
@@ -81,7 +81,7 @@
                         d.nextSibling.style.display = "block";
                     }
                     if (d && d.checked){
-                        row.style.backgroundColor = '#ffbbbb';
+                        row.style.backgroundColor = '#EEE';
                     }else{
                         row.style.backgroundColor = '';
                     }
@@ -95,7 +95,7 @@
 	}
 	function delete_bib(rec_id) {
 		e = document.getElementById('row'+rec_id);
-		if (e) e.style.backgroundColor = '#ffbbbb';
+		if (e) e.style.backgroundColor = '#EEE';
 	}
 	function undelete_bib(rec_id) {
 		e = document.getElementById('row'+rec_id);
@@ -103,11 +103,13 @@
 	}
  -->
  </script>
+	<link rel=stylesheet href="../../common/css/global.css" media="all">
+	<link rel=stylesheet href="../../common/css/admin.css" media="all">
 	</head>
-	<body>
+	<body class="popup">
 		<form>
 
-			<div style="width: 500px;">
+			<div>
 				<?php
  if (! @$do_merge_details){
      print 'This function combines duplicate records. One record MUST be selected as a master record'.
@@ -216,7 +218,7 @@
     foreach($records as $record) {
       //  $record = $records[$index];
 								$is_master = ($record['rec_ID']== $master_rec_id);
-								print '<tr'. ($is_master && !$finished_merge ? ' style="background-color: #bbffbb;" ': '').' id="row'.$record['rec_ID'].'">';
+								print '<tr'. ($is_master && !$finished_merge ? ' style="background-color: #EEE;" ': '').' id="row'.$record['rec_ID'].'">';
 	    $checkKeep =  $is_master? "checked" : "";
         $disableDup = $is_master? "none" : "block";
 	    if (!$finished_merge) print '<td><input type="checkbox" name="duplicate[]" '.
@@ -231,7 +233,7 @@
               '" title="Click to select this record as the Master record"'.
 								' id="keep'.$record['rec_ID'].
 								'" onclick="keep_bib('.$record['rec_ID'].');">';
-								print '<span style="font-size: 120%;"><a target="edit" href="'.HEURIST_URL_BASE.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$record['rec_ID'].'">'.$record['rec_ID'] . ' ' . '<b>'.$record['rec_Title'].'</b></a> - <span style="background-color: #FFDDDD;">'. $rfts[$record['rec_RecTypeID']].'</span></span>';
+								print '<span style="font-size: 120%;"><a target="edit" href="'.HEURIST_URL_BASE.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$record['rec_ID'].'">'.$record['rec_ID'] . ' ' . '<b>'.$record['rec_Title'].'</b></a> - <span style="background-color: #EEE;">'. $rfts[$record['rec_RecTypeID']].'</span></span>';
 	    print '<table>';
 	    foreach ($record['details'] as $rd_type => $detail) {
 		    if (! $detail) continue;    //FIXME  check if required and mark it as missing and required
@@ -326,7 +328,7 @@
         if ($is_master) print '<td><div><b>MASTER</b></div></td>';
         else print '<td><div><b>Duplicate</b></div></td>';
         print '<td style="width: 500px;">';
-								print '<div style="font-size: 120%;"><a target="edit" href="'.HEURIST_URL_BASE.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$record['rec_ID'].'">'.$record['rec_ID'] . ' ' . '<b>'.$record['rec_Title'].'</b></a> - <span style="background-color: #FFDDDD;">'. $rfts[$record['rec_RecTypeID']].'</span></div>';
+								print '<div style="font-size: 120%;"><a target="edit" href="'.HEURIST_URL_BASE.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$record['rec_ID'].'">'.$record['rec_ID'] . ' ' . '<b>'.$record['rec_Title'].'</b></a> - <span style="background-color: #EEE;">'. $rfts[$record['rec_RecTypeID']].'</span></div>';
         print '<table>';
         if ($is_master) $_SESSION['master_details']=$record['details']; // save master details for processing - signals code to do_fix_dupe
         foreach ($record['details'] as $rd_type => $detail) {
@@ -421,7 +423,7 @@
 			</tbody></table>
 			<?php
     if (! $finished_merge) {
-       print '<input type="submit" name="'.($do_merge_details? "commit":"merge").'" style="background-color:#fbb;" value="'. ($do_merge_details? "commit&nbsp;changes":"merge&nbsp;duplicates").'" >';
+       print '<input type="button" name="'.($do_merge_details? "commit":"merge").'" style="float:right;" value="'. ($do_merge_details? "commit&nbsp;changes":"merge&nbsp;duplicates").'" >';
     } else{
        print '<div> Changes were commited </div>';
        print '<input type="button" name="close_window" id="close_window" value="Close Window"   title="Cick here to close this window" onclick="window.close();">';
