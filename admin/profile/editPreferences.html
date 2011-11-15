@@ -34,6 +34,12 @@
 		var rel = top.HEURIST.util.getDisplayPreference("loadRelatedOnSearch");
 		document.getElementById("loadRelatedOnSearch").checked
 			= (rel==='true');
+		var rec = top.HEURIST.util.getDisplayPreference("defaultRecentPointerSearch"); // pointer field editing
+		document.getElementById("defaultRecentPointerSearch").checked
+			= (rec==='true');
+		var bkm = top.HEURIST.util.getDisplayPreference("defaultMyBookmarksSearch"); // main search default on [enter]
+		document.getElementById("defaultMyBookmarksSearch").checked
+			= (bkm==='true');
 	}
 
 	function save() {
@@ -41,6 +47,8 @@
 		var def = document.getElementById("defaultSearch").value;
 		var fav = document.getElementById("favourites").value;
 		var rel = (document.getElementById("loadRelatedOnSearch").checked)?'true':'false';
+		var rec = (document.getElementById("defaultRecentPointerSearch").checked)?'true':'false';
+		var bkm = (document.getElementById("defaultMyBookmarksSearch").checked)?'true':'false';
 
 		if (rpp < 0 || rpp > 500) {
 			alert("Results per page must be between 1 and 500");
@@ -50,6 +58,8 @@
 		top.HEURIST.util.setDisplayPreference("defaultSearch", def);
 		top.HEURIST.util.setDisplayPreference("favourites", fav);
 		top.HEURIST.util.setDisplayPreference("loadRelatedOnSearch", rel);
+		top.HEURIST.util.setDisplayPreference("defaultRecentPointerSearch", rec);
+		top.HEURIST.util.setDisplayPreference("defaultMyBookmarksSearch", bkm);
 		window.close();
 	}
   </script>
@@ -68,6 +78,12 @@
    </div>
    <div class="input-row">
 	<div class="input-header-cell">Load related records below search (leave off if not required)</div><div  class="input-cell"><input type="checkbox" id="loadRelatedOnSearch"></div>
+  </div>
+   <div class="input-row">
+	<div class="input-header-cell">Default pointer field search in edit to show recent records (otherwise All Records)</div><div  class="input-cell"><input type="checkbox" id="defaultRecentPointerSearch"></div>
+  </div>
+   <div class="input-row">
+	<div class="input-header-cell">Default main search on [enter] to My Bookmarks (otherwise All Records)</div><div  class="input-cell"><input type="checkbox" id="defaultMyBookmarksSearch"></div>
   </div>
   <div id="buttons" class="actionButtons">
    <input type="button" value="save" onClick="save();">

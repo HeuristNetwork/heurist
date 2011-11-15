@@ -63,11 +63,14 @@ $prefs = array(
 	"searchWidth" => 360,
 	"oldSearchWidth" => 360,
 	"viewerTab" =>0,
+	"viewerCurrentTemplate" =>"",
 	"defaultPrintView" => "default",
 
 	"defaultSearch" => "tag:Favourites",
 	"favourites" => "Favourites", // standard spelling for default search
-	"loadRelatedOnSearch" => "true" // by default do not load related records, can be set in Preferences dialogue
+	"loadRelatedOnSearch" => "true", // by default do not load related records, can be set in Preferences dialogue
+	"defaultRecentPointerSearch" => "true", // when searching for pointers to records, show recent records by default
+	"defaultMyBookmarksSearch" => "true" // hitting Enter will do a My Bookmarks search
 );
 
 foreach (get_group_ids() as $gid) {

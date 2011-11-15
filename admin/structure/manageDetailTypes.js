@@ -71,7 +71,7 @@ function DetailTypeManager() {
 				'<div class="input-row"><div class="input-header-cell"></div><div class="input-cell">'+
 					'<input id="btnGrpSave" style="display:inline-block" type="submit" value="Save" onclick="{detailTypeManager.doGroupSave()}" />'+
 					'<input id="btnGrpCancel" type="submit" value="Cancel" onclick="{detailTypeManager.doGroupCancel()}" style="margin:0 5px" />'+
-					'<input id="btnGrpDelete" onclick="{detailTypeManager.doGroupDelete()}" value="Deleted selected group" type="submit"/>'+
+					'<input id="btnGrpDelete" onclick="{detailTypeManager.doGroupDelete()}" value="Delete selected group" type="submit" style="margin-left:100px"/>'+
 				'</div></div>'+
 			'</div>')
 		}));

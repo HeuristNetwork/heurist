@@ -18,13 +18,8 @@ if (! is_logged_in()) {
 	return;
 }
 
-// we will need this test on individual menu entries in the html template
-// if (is_admin()) {
-//	}
-
 
 $template = file_get_contents('adminMenu.html');
-$template = str_replace('{PageHeader}', '[literal]'.file_get_contents(dirname(__FILE__).'/../common/html/simpleHeader.html').'[end-literal]', $template);
 $lexer = new Lexer($template);
 
 $body = new BodyScope($lexer);

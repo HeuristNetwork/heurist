@@ -153,7 +153,7 @@
 		if ($defaultRootFileUploadPath) {
 		define('HEURIST_UPLOAD_ROOT', $defaultRootFileUploadPath);
 		} else {
-		define('HEURIST_UPLOAD_ROOT', HEURIST_DOCUMENT_ROOT."/uploaded-heurist-files/");
+		define('HEURIST_UPLOAD_ROOT', HEURIST_DOCUMENT_ROOT."/HEURIST_FILESTORE/"); // uploaded-heurist-files to 14 Nov 2011
 		}
 
 	$upload = @$sysValues['sys_UploadDirectory'];
@@ -161,15 +161,28 @@
 		if (preg_match("/\/$/",$upload)) {
 			$upload = preg_replace("/\/$/","",$upload);
 	}
-		//	error_log("upload = $upload");
-		define('HEURIST_UPLOAD_DIR', $upload);// upload must be a full path
+		define('HEURIST_UPLOAD_DIR', $upload); // upload must be a full path
 	} else {
-		define('HEURIST_UPLOAD_DIR', HEURIST_UPLOAD_ROOT.$dbName);
+		define('HEURIST_UPLOAD_DIR', HEURIST_UPLOAD_ROOT.$dbName.'/');
 	}
 
-	// icon path
-	define('HEURIST_ICON_ROOT', HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH."common/images/");
-	define('HEURIST_ICON_DIR', HEURIST_ICON_ROOT.$dbName);
+	// icon path - note code now assumes that this is within the fielstore for the database
+	define('HEURIST_ICON_DIRNAME',"rectype-icons/");
+	define('HEURIST_ICON_ROOT',HEURIST_UPLOAD_DIR);
+	  // to 14/11/11: HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH."common/images/");
+	define('HEURIST_ICON_DIR', HEURIST_ICON_ROOT.HEURIST_ICON_DIRNAME);
+
+	// smarty template path  - note code now assumes that this is within the fielstore for the database
+	define('HEURIST_SMARTY_TEMPLATES_DIRNAME',"smarty-templates/");
+	define('HEURIST_SMARTY_TEMPLATES_ROOT',HEURIST_UPLOAD_DIR);
+	  // to 14/11/11: stored in codebase in viewers/smarty/templates
+	define('HEURIST_SMARTY_TEMPLATES_DIR', HEURIST_SMARTY_TEMPLATES_ROOT.HEURIST_SMARTY_TEMPLATES_DIRNAME);
+
+	// xsl templates path  - note code now assumes that this is within the fielstore for the database
+	define('HEURIST_XSL_TEMPLATES_DIRNAME',"xsl-templates/");
+	define('HEURIST_XSL_TEMPLATES_ROOT',HEURIST_UPLOAD_DIR);
+	  // to 14/11/11: stroed in codebase under viewers/publish/xsl
+	define('HEURIST_XSL_TEMPLATES_DIR', HEURIST_XSL_TEMPLATES_ROOT.HEURIST_XSL_TEMPLATES_DIRNAME);
 
 	//define cocoon record explorer URL
 	if (file_exists(HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH."/viewers/relbrowser/".HEURIST_DBNAME)) {

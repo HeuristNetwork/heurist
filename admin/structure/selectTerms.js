@@ -735,14 +735,14 @@ END TREE REALTED ROUTINES ---------------------------------------
 
 	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-	Hul.popupURL(top, top.HEURIST.basePath + "admin/structure/editTerms.html?popup=1&db="+db,
+	Hul.popupURL(top, top.HEURIST.basePath + "admin/structure/editTerms.php?popup=1&db="+db,
 		{
 		"close-on-blur": false,
 		"no-resize": false,
-		height: 640,
+		height: 620,
 		width: 900,
 		callback: function(needTreeReload) {
-			if(needTreeReload) {
+			if(true || needTreeReload) { //refresh in any case
 
 				if(_datatype === "enum"){
 					treesByDomain = top.HEURIST.terms.treesByDomain['enum'];

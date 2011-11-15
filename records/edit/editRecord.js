@@ -231,7 +231,7 @@ top.HEURIST.edit = {
 //		document.getElementById('rectype-val').appendChild(document.createTextNode(top.HEURIST.record.rectype));
 		if (document) {
 			if (document.getElementById('rectype-img')) {
-				document.getElementById('rectype-img').style.backgroundImage = "url("+ top.HEURIST.basePath+"common/images/" + top.HEURIST.database.name + "/rectype-icons/" + top.HEURIST.edit.record.rectypeID + ".png)";
+				document.getElementById('rectype-img').style.backgroundImage = "url("+ top.HEURIST.iconDir + top.HEURIST.edit.record.rectypeID + ".png)";
 			}
 			if (document.getElementById('title-val')) {
 				document.getElementById('title-val').innerHTML = '';
@@ -1712,6 +1712,8 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = func
 		newInput.innerHTML = "<option></option>"+newInput.innerHTML;
 		if(!(bdValue && bdValue.value)){
 			newInput.selectedIndex = 0;
+		}else{
+			newInput.value = bdValue.value
 		}
 		/*
 		var option = document.createElement("option");

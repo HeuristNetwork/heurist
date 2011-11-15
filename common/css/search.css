@@ -806,9 +806,6 @@ nobr#activesaved a {
 	display: inline-block;
 	padding: 5px
 }
-#footer {
-	height: 20px;
-}
 #logged-in {
 	color: #444;
 	font-size:11px;
@@ -1081,13 +1078,6 @@ div.hide .saved-search-subheading {
 	border-top-left-radius:0;
 	border-top-right-radius:10px;
 	border: 1px solid #999999;
-}
-#footer {
-	position:absolute;
-	left:200px;
-	right:0;
-	bottom:0px;
-	height:20px;
 }
 #search {
 	display:block;
@@ -2252,10 +2242,10 @@ div.recorddiv:hover > #recordID {
 #search {
 	border-bottom: 1px solid #696969;
 	height: 45px;
-	left: 0;
+	left: 10px;
 	padding: 0 0 0 5px;
 	position: absolute;
-	right: 0;
+	right: 10px;
 	top: 51px;
 	border:1px solid #999;
 	width:auto;
@@ -2338,16 +2328,17 @@ div.recorddiv:hover > #recordID {
 	cursor:ew-resize !important
 }
 #footer {
-	border-radius: 0 0 10px 10px;
+	border-radius:0;
 	border:1px solid #999;
 	display: block;
-	height: 10px;
+	height: 19px;
 	left:0;
 	background-color: #F2F2F2;
 	background-image: url("../images/backgrounds/banner_bg.png") !important;
 	background-position: center bottom;
 	background-repeat: repeat-x;
 	border-top:none;
+	border-radius:0 0 10px 10px
 }
 #result-container {
 	border-right:none;
@@ -2363,6 +2354,8 @@ div#tabbar {
 	z-index: 1;
 	border-right: 1px solid rgba(100, 100, 100, 0.2);
 	padding: 0 3px 0 0;
+	position:absolute;
+	top:0;
 }
 #tabs li {
 	height:11px;

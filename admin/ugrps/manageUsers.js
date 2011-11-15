@@ -367,16 +367,16 @@ elLiner.innerHTML = '<a href="#edit_user"><img src="../../common/images/edit-pen
 					}
 				},*/
 				dropdownOptions: _roles },
-			{ key: "id", label: "Delete", width:30, sortable:false, hidden:(_isSelection || !top.HEURIST.is_admin()),
+			{ key: "id", label: "Delete", width:30, className:'center', sortable:false, hidden:(_isSelection || !top.HEURIST.is_admin()),
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 						if(Number(oRecord.getData('id'))===2){
 elLiner.innerHTML = "<img src=\"../../common/images/lock_bw.png\" title=\"System user - Locked\">";
 						}else{
 elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/cross.png" title="Delete this User" /><\/a>';
-				}
+						}
 				}
 			},
-			{ key: "kickoff", label: "Remove", width:30, sortable:false, hidden: _isSelection,
+			{ key: "kickoff", label: "Remove", width:30, className:'center', sortable:false, hidden: _isSelection,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 
 					var filter_group = (_isSelection || Hul.isnull(_grpID)) ?filterByGroup.value:_grpID;
@@ -386,7 +386,7 @@ elLiner.innerHTML = '<a href="#delete_user"><img src="../../common/images/cross.
 						elLiner.innerHTML = "";
 					}else{
 						//oColumn._elThLabel.innerHTML = "Remove";
-elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delete_icon.png" width="16" height="16" border="0" title="Delete this User from group" /><\/a>';
+elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross.png" border="0" title="Delete this User from group" /><\/a>';
 					}
 				}
 			}
@@ -729,7 +729,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/delet
 				var divfil = Dom.get("pnlFilterByGroup");
 				divfil.style.display = "none";
 				Dom.get("pnlGroupTitle").style.display = "block";
-				Dom.get("lblGroupTitle").innerHTML = "USERS - members of '"+_workgroups[_grpID].name+"'";
+				Dom.get("lblGroupTitle").innerHTML = "Members of <span class='recTypeName'>"+_workgroups[_grpID].name+"</span>";
 				return;
 			}
 		}

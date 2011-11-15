@@ -39,7 +39,7 @@ function loadTimeline() {
 			/* description */ record.description,
 			/* URL image */ "",
 			/* URL link */ "",
-			/* URL icon */ "../../common/images/rectype-icons/" + record.rectype + ".png",
+			/* URL icon */ top.HEURIST.iconDir + record.rectype + ".png",
 			/* colour */ "#aa0000",
 			/* text colour */ "#000000"
 		);

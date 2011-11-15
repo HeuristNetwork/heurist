@@ -223,8 +223,8 @@ function GroupManager(_isFilterMode, _isSelection, _isWindowMode) {
 								var myColumnDefs = [
 			{ key: "selection", label: "Sel", hidden:(!_isSelection), sortable:true,
 				formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
-				
-			{ key: "id", label: "Admins", sortable:false, className:'center', 
+
+			{ key: "id", label: "Admins", sortable:false, className:'center',
 				formatter: function(elLiner, oRecord, oColumn, oData){
 					var recID = oRecord.getData('id');
 elLiner.innerHTML = '<div align="center"><img src="../../common/images/info.png" '+
@@ -255,16 +255,16 @@ elLiner.innerHTML = '<div align="center"><img src="../../common/images/info.png"
 			{ key: "type", hidden:true},
 			{ key: "members", label: "Edit Membership", sortable:false, className:'center',
 				formatter: function(elLiner, oRecord, oColumn, oData){
-elLiner.innerHTML = '<div align="left"><a href="'+top.HEURIST.baseURL + "admin/ugrps/manageUsers.html?db=" +
-								_db + "&grpID="+oRecord.getData("id")+
-								'" title="Show listing of members/Edit membership">edit members ['+oRecord.getData('members')+']</a></div>';}},
-			{ key: "id", label: "Admins", sortable:false,
+elLiner.innerHTML = '<div align="center"><a href="#" onClick=top.HEURIST.search.popupLink("'+top.HEURIST.baseURL + 'admin/ugrps/manageUsers.html?db=' +
+								_db + '&grpID='+oRecord.getData("id")+
+								'","wide") title="Show listing of members/Edit membership"><span class="count">'+oRecord.getData('members')+'</span></a></div>';}},
+/*			{ key: "id", label: "Admins", sortable:false,
 				formatter: function(elLiner, oRecord, oColumn, oData){
 					var recID = oRecord.getData('id');
 elLiner.innerHTML = '<div align="center"><img src="../../common/images/info.png" '+
 'onmouseover="groupManager.showInfo('+recID+', event)" onmouseout="groupManager.hideInfo()"/></div>';}
 			},
-			{ key: null, label: "Del", className:'center', sortable:false,
+*/			{ key: null, label: "Del", className:'center', sortable:false,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					/*r iusage = Number(oRecord.getData('members'));
 					if(iusage>1){
@@ -455,7 +455,7 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../..
 						//find all records that reference this type
 						var admins = _workgroups[recID].admins;
 						textTip = '<h3>'+grpname+'</h3>'+
-						'<b>Admins:</b><label style="color: #999;margin-left:5px">Click on admin to edit</label><ul>';
+						'<b>Administrators:</b><label style="color: #999;margin-left:5px">Click on admin to edit</label><ul>';
 						var index;
 						for(index in admins) {
 							if(!Hul.isnull(index)){
@@ -479,7 +479,7 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../..
 
 					var xy = Hul.getMousePos(event);
 					my_tooltip.html(textTip);  //DEBUG xy[0]+",  "+xy[1]+"<br/>"+
-					
+
 					var border_top = $(window).scrollTop();
 					var border_right = $(window).width();
 					var border_height = $(window).height();
@@ -617,11 +617,12 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../..
 		//}else if(!Hul.isnull(user)){
 		//	URL = top.HEURIST.basePath + "admin/ugrps/editUser.html?db=" + _db + "&user="+user; //email
 		}
+		var dim = top.HEURIST.util.innerDimensions(window);
 		top.HEURIST.util.popupURL(top, URL, {
 			"close-on-blur": false,
 			"no-resize": false,
-			height: 560,
-			width: 640,
+			height:dim.h*0.8,
+			width:dim.w*0.8,
 			callback: function(changedValues) {
 				/*if(Hul.isnull(changedValues)) {
 					// Canceled

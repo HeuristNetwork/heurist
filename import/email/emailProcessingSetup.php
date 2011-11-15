@@ -68,7 +68,7 @@ if(!is_admin()){
 <p>This function allows the owner of a Heurist database to set up an email
    account to which users of the database can forward emails they receive or copy
    emails that they send, in order to have them archived in the Heurist database.</p>
-<p><a href="#" onclick="_editUser(<?=get_user_id()?>); return false;"> <img src="../../common/images/external_link_16x16.gif"/>
+<p><a href="#" onClick="_editUser(<?=get_user_id()?>); return false;"> <img src="../../common/images/external_link_16x16.gif"/>
    Configure email addresses to be harvested</a></p>
 
 <p>The default behaviour is to create a record of type Email, but in future this may be
@@ -76,7 +76,7 @@ if(!is_admin()){
    and other information to be added to the record.</p>
 
 <div style="width:100%; text-align: center;">
-	<button onclick="window.open('../../import/email/emailProcessor.php?db=<?=HEURIST_DBNAME?>', '_self')">
+	<button onClick="window.open('../../import/email/emailProcessor.php?db=<?=HEURIST_DBNAME?>', '_self')" class="button">
    		<b>Harvest email from IMAP server</b>
    	</button>
 </div>

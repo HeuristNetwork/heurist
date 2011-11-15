@@ -958,7 +958,7 @@ INSERT INTO `sysUGrps` ( `ugr_ID` , `ugr_Type` , `ugr_Name` , `ugr_LongName` , `
 `ugr_eMail` , `ugr_FirstName` , `ugr_LastName` , `ugr_Department`, `ugr_Organisation` , `ugr_City` , `ugr_State` ,
 `ugr_Postcode` , `ugr_Interests` , `ugr_Enabled` , `ugr_LastLoginTime` , `ugr_MinHyperlinkWords` , `ugr_LoginCount` ,
 `ugr_IsModelUser` ,`ugr_IncomingEmailAddresses` , `ugr_TargetEmailAddresses` , `ugr_URLs` , `ugr_FlagJT` , `ugr_Modified` )
-VALUES (4 , 'user', 'debug', 'debug user', NULL , 'XPDHNqkWMM7Xs', 'info@heuristscholar.org', 'debug', 'user',
+VALUES (4 , 'user', 'debug', 'debug user', NULL , '6RAQw1ULVIvIA', 'info@heuristscholar.org', 'debug', 'user',
 	'Arts eResearch' , 'University of Sydney' , NULL , NULL , NULL ,NULL , 'y', NULL , '3', '0', '0', NULL , NULL , NULL , '0', NOW( ));
 INSERT IGNORE INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID,ugl_Role) VALUES (4,1,'admin');
 

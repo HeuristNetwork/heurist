@@ -44,7 +44,7 @@ function EditRecStructure() {
 			window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 			rty_ID = window.HEURIST.parameters.rty_ID;
 			//DEBUG Dom.get("ed_rty_ID").value = rty_ID;
-			var recTypeIcon  = top.HEURIST.baseURL + "common/images/"+top.HEURIST.database.name+"/rectype-icons/"+rty_ID+".png";
+			var recTypeIcon  = top.HEURIST.iconDir+rty_ID+".png";
 			var formTitle = document.getElementById('recordTitle');
 			formTitle.innerHTML = "<div class=\"rectypeIconHolder\" style=\"background-image:url("+recTypeIcon+")\"></div><span class=\"recTypeName\">"+top.HEURIST.rectypes.names[rty_ID]+"</span>";
 		}
@@ -1311,6 +1311,7 @@ function onAddNewDetail(){
 			"no-resize": false,
 			height: '800',
 			width: '450',
+
 			callback: function(detailTypesToBeAdded) {
 				if(!Hul.isnull(detailTypesToBeAdded)){
 					editStructure.addDetails(detailTypesToBeAdded);
@@ -1332,28 +1333,28 @@ function onAddNewDetail(){
 		if(Hul.isnull(popupSelect))
 		{
 			editStructure.doExpliciteCollapse(null, true);
-	
+
 			var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 								(top.HEURIST.database.name?top.HEURIST.database.name:''));
 			var url = top.HEURIST.basePath + "admin/structure/editDetailType.html?db="+db;
-	
+
 			popupSelect = Hul.popupURL(top, url,
 			{	"close-on-blur": false,
 				"no-resize": false,
-			height: 500,
-	
+			height: 700,
+
 			width: 650,
 				callback: function(context) {
-	
+
 					if(!Hul.isnull(context)){
 						//refresh the local heurist
 						top.HEURIST.detailTypes = context.detailTypes;
-	
+
 						//new field type to be added
 						var dty_ID = Math.abs(Number(context.result[0]));
 						editStructure.addDetails(String(dty_ID));
 					}
-	
+
 					popupSelect =  null;
 				}
 			});

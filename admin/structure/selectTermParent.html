@@ -57,10 +57,17 @@
 
 <div id="termTree" class="termTree ygtv-highlight" style="width:100%"></div>
 
-<div style="text-align:right;padding-top:20px;padding-right:10px;">
-            <button title="Cancel changes" onClick="selectTermParent.cancel();">Cancel</button>
+<div style="padding-right:20px;">
+
+<div style="padding-top:20px;display: inline-block;">
             <button title="Set root as a parent" onClick="selectTermParent.apply(true);">Parent is Root</button>
+</div>
+
+<div style="padding-top:20px;float:right;text-align:right;padding-right:10px;">
+	<button title="Cancel changes" onClick="selectTermParent.cancel();">Cancel</button>
             <button title="Set selected terms as new parent" onClick="selectTermParent.apply(false);">Set Parent</button>
+</div>
+
 </div>
 
 <!--  div id="selectedTerms"></div -->

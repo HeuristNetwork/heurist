@@ -12,11 +12,6 @@
  * @package Heurist academic knowledge management system
  * @todo
  **/
-
-?>
-
-<?php
-
 require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
@@ -32,7 +27,7 @@ if (! is_logged_in()) {
 
 //require_once('libs.inc.php');
 //$dir = 'c:/xampp/htdocs/h3-ao/viewers/smarty/templates/';  //$smarty->template_dir
-$dir = HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'viewers/smarty/templates/';  //$smarty->template_dir
+$dir = HEURIST_SMARTY_TEMPLATES_DIR;
 
 $mode = $_REQUEST['mode'];
 
@@ -147,6 +142,4 @@ function getTemplate($filename){
 		print json_format(array("error"=>"file not found"));
 	}
 }
-
-
 ?>

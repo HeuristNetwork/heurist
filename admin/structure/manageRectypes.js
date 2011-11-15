@@ -88,7 +88,7 @@ function RectypeManager() {
 				'<div class="input-row"><div class="input-header-cell"></div><div class="input-cell">'+
 					'<input id="btnGrpSave" style="display:inline-block" type="submit" value="Save" onclick="{rectypeManager.doGroupSave()}" />'+
 					'<input id="btnGrpCancel" type="submit" value="Cancel" onclick="{rectypeManager.doGroupCancel()}" style="margin:0 5px" />'+
-					'<input id="btnGrpDelete" onclick="{rectypeManager.doGroupDelete()}" value="Deleted selected group" type="submit"/>'+
+					'<input id="btnGrpDelete" onclick="{rectypeManager.doGroupDelete()}" value="Delete selected group" type="submit" style="margin-left:100px"/>'+
 				'</div></div>'+
 			'</div>')
 		}));
@@ -346,8 +346,8 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var id = oRecord.getData("id");
 
-					var str1 = top.HEURIST.baseURL + "common/images/" + top.HEURIST.database.name +"/rectype-icons/" + id + ".png";
-					var thumb = top.HEURIST.baseURL + "common/images/" + top.HEURIST.database.name +"/rectype-icons/thumb/th_" + id + ".png";
+					var str1 = top.HEURIST.iconDir + id + ".png";
+					var thumb = top.HEURIST.inconDir + "thumb/th_" + id + ".png";
 					var icon ="<div class=\"rectypeImages\"><a href=\"#edit_icon\"><img src=\"../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\"></a><div style=\"background-image:url("+thumb+");\" class=\"thumbPopup\"><a href=\"#edit_thumb\"><img src=\"../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a></div></div>"
 					elLiner.innerHTML = icon;
 			}},
@@ -1292,7 +1292,7 @@ function icon_refresh(rectypeID) {
 		var db = top.HEURIST.database.id;
 		var imgIcon = "icon" + rectypeID;
 		var img = document.getElementById(imgIcon);
-		img.style.backgroundImage = "url(" + top.HEURIST.baseURL + "common/images/" + top.HEURIST.database.name +"/rectype-icons/"+rectypeID+".png) !important";
+		img.style.backgroundImage = "url(" + top.HEURIST.iconDir+rectypeID+".png) !important";
 	}
 
 /*

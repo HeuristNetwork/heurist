@@ -244,7 +244,7 @@ function mode_file_selection() {
 <?php
 		}else if ($frm == "GEO") {
 ?>
-	Currently, support is limited to <a href='<?=HEURIST_SITE_PATH?>help/kml_import.html' onclick="top.HEURIST.util.popupURL(window, href); return false;">KML</a> format.<br>
+	Currently, support is limited to <a href='<?=HEURIST_SITE_PATH?>help/kml_import.html' onClick="top.HEURIST.util.popupURL(window, href); return false;">KML</a> format.<br>
 <?php
 		}
 	}
@@ -266,9 +266,10 @@ function mode_file_selection() {
 <div class="separator_row" style="margin:10px 0"></div>
 
 
-   <br clear=all>
-    <input type=button value="Cancel" onclick="window.close();" style="margin-right: 4ex;">
+<div class="actionButtons">
+	<input type="button" value="Cancel" onClick="window.close();" style="margin-right: 5px;">
     <input type="submit" value="Continue" style="font-weight: bold;">
+	</div>
 <?php
 }
 
@@ -359,9 +360,9 @@ function mode_file_parsing() {
    </div>
 
 <?php	if (! @$session_data['zoteroImport']) { ?>
-   <input type="button" value="Cancel" onclick="window.location.replace('importerFramework.php');">
+   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php');">
 <?php	} else { ?>
-   <input type="button" value="Close" onclick="window.close();">
+   <input type="button" value="Close" onClick="window.close();">
 <?php	} ?>
 <?php
 		$session_data['mode'] = 'error';
@@ -397,9 +398,9 @@ function mode_file_parsing() {
    </div>
 
 <?php	if (! @$session_data['zoteroImport']) { ?>
-   <input type="button" value="Cancel" onclick="window.location.replace('importerFramework.php');">
+   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php');">
 <?php	} else { ?>
-   <input type="button" value="Close" onclick="window.close();">
+   <input type="button" value="Close" onClick="window.close();">
 <?php	} ?>
 <?php
 		$session_data['mode'] = 'error';
@@ -413,9 +414,9 @@ function mode_file_parsing() {
    </div>
 
 <?php	if (! @$session_data['zoteroImport']) { ?>
-   <input type="button" value="Cancel" onclick="window.location.replace('importerFramework.php');">
+   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php');">
 <?php	} else { ?>
-   <input type="button" value="Close" onclick="window.close();">
+   <input type="button" value="Close" onClick="window.close();">
 <?php	} ?>
 <?php
 		$session_data['mode'] = 'error';
@@ -429,9 +430,9 @@ function mode_file_parsing() {
    <hr>
    <br clear=all>
 <?php	if (! @$session_data['zoteroImport']) { ?>
-   <input type="button" value="Cancel" onclick="window.location.replace('importerFramework.php');" style="margin-right: 4ex;">
+   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php');" style="margin-right: 4ex;">
 <?php	} else { ?>
-   <input type="button" value="Cancel" onclick="window.close();" style="margin-right: 4ex;">
+   <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 4ex;">
 <?php	} ?>
    <input type="submit" value="Continue" style="font-weight: bold;">
 <?php
@@ -491,7 +492,7 @@ function mode_zotero_request_parsing() {
    <br clear=all>
    <hr>
    <br clear=all>
-   <input type="button" value="Cancel" onclick="window.close();">
+   <input type="button" value="Cancel" onClick="window.close();">
 <?php
 		$session_data['mode'] = 'error';
 		return;
@@ -506,7 +507,7 @@ function mode_zotero_request_parsing() {
    <br clear=all>
    <hr>
    <br clear=all>
-   <input type="button" value="Cancel" onclick="window.close();" style="margin-right: 4ex;">
+   <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 4ex;">
 <?php
 		$session_data['mode'] = 'error';
 		return;
@@ -518,7 +519,7 @@ function mode_zotero_request_parsing() {
    <br clear=all>
    <hr>
    <br clear=all>
-   <input type="button" value="Cancel" onclick="window.close();" style="margin-right: 4ex;">
+   <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 4ex;">
    <input type="submit" value="Continue" style="font-weight: bold;">
 <?php
 }
@@ -576,7 +577,7 @@ function heuristic_enabler(enabled) {
 //-->
 </script>
      <td>
-      <label><input type="radio" name="set-rectype" value="use heuristic" onclick="if (this.checked) heuristic_enabler(true)">
+      <label><input type="radio" name="set-rectype" value="use heuristic" onClick="if (this.checked) heuristic_enabler(true)">
       <span style="vertical-align: top;">or <b>let Heurist guess</b> the additional record types</span></label>
       <br>
       <input type="radio" style="visibility: hidden;">
@@ -591,7 +592,7 @@ function heuristic_enabler() { }
     </tr>
 <?php	foreach ($session_data['parser']->getReferenceTypes() as $rectype) { ?>
     <tr>
-     <td style="text-align: right;"><label>&nbsp;<input type="radio" name="set-rectype" value="<?= htmlspecialchars($rectype) ?>" onclick="if (this.checked) heuristic_enabler(false);">&nbsp;</label></td>
+     <td style="text-align: right;"><label>&nbsp;<input type="radio" name="set-rectype" value="<?= htmlspecialchars($rectype) ?>" onClick="if (this.checked) heuristic_enabler(false);">&nbsp;</label></td>
      <td>
       <label>
 <?php	if ($session_data['parser']->supportsReferenceTypeGuessing()) { ?>
@@ -609,9 +610,9 @@ function heuristic_enabler() { }
    <hr>
    <br clear=all>
 <?php	if (! @$session_data['zoteroImport']) { ?>
-   <input type="button" value="Cancel" onclick="window.location.replace('importerFramework.php');" style="margin-right: 4ex;">
+   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php');" style="margin-right: 4ex;">
 <?php	} else { ?>
-   <input type="button" value="Cancel" onclick="window.close();" style="margin-right: 4ex;">
+   <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 4ex;">
 <?php	} ?>
    <input type="submit" value="Continue" style="font-weight: bold;">
 <?php
@@ -748,9 +749,9 @@ function mode_apply_rectype_heuristic() {
    <br clear=all>
 
 <?php		if (! @$session_data['zoteroImport']) { ?>
-   <input type="button" value="Cancel" onclick="window.location.replace('importerFramework.php');" style="margin-right: 4ex;">
+   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php');" style="margin-right: 4ex;">
 <?php		} else { ?>
-   <input type="button" value="Cancel" onclick="window.close();" style="margin-right: 4ex;">
+   <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 4ex;">
 <?php		} ?>
    <input type="submit" name="use-suggestions" value="Add checked record types">
    <input type="submit" name="continue" value="Continue" style="font-weight: bold;">
@@ -761,9 +762,9 @@ function mode_apply_rectype_heuristic() {
    <br clear=all>
 
 <?php		if (! @$session_data['zoteroImport']) { ?>
-   <input type="button" value="Cancel" onclick="window.location.replace('importerFramework.php');" style="margin-right: 4ex;">
+   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php');" style="margin-right: 4ex;">
 <?php		} else { ?>
-   <input type="button" value="Cancel" onclick="window.close();" style="margin-right: 4ex;">
+   <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 4ex;">
 <?php		} ?>
    <input type="submit" name="continue" value="Continue" style="font-weight: bold;">
 <?php	} else { ?>
@@ -774,9 +775,9 @@ function mode_apply_rectype_heuristic() {
    <br clear=all>
 
 <?php		if (! @$session_data['zoteroImport']) { ?>
-   <input type="button" value="Cancel" onclick="window.location.replace('importerFramework.php');">
+   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php');">
 <?php		} else { ?>
-   <input type="button" value="Cancel" onclick="window.close();">
+   <input type="button" value="Cancel" onClick="window.close();">
 <?php		} ?>
 <?php
 		$session_data['mode'] = 'error';
@@ -897,8 +898,8 @@ function mode_crosswalking() {
 
      <div class="smallgr" style="padding-left: 10ex; margin-left: 10px;">
        <nobr>Add:</nobr>
-        <nobr><a href="#" target="_ignore" onclick="add_tag('Favourites'); return false;">Favourites</a></nobr>&nbsp;
-        <nobr><a href="#" target="_ignore" onclick="add_tag('To Read'); return false;">To Read</a></nobr>&nbsp;
+        <nobr><a href="#" target="_ignore" onClick="add_tag('Favourites'); return false;">Favourites</a></nobr>&nbsp;
+        <nobr><a href="#" target="_ignore" onClick="add_tag('To Read'); return false;">To Read</a></nobr>&nbsp;
       </div>
        <?php
 	$top_tags = mysql__select_array('usrRecTagLinks left join usrTags on rtl_TagID=tag_ID',
@@ -911,7 +912,7 @@ function mode_crosswalking() {
 <?php
 		foreach ($top_tags as $tag) {
 			$tag = htmlspecialchars($tag);
-?>      <nobr><a href="#" target="_ignore" onclick="add_tag('<?=$tag?>'); return false;"><?=$tag?></a></nobr>&nbsp; <?php
+?>      <nobr><a href="#" target="_ignore" onClick="add_tag('<?=$tag?>'); return false;"><?=$tag?></a></nobr>&nbsp; <?php
 		}
 ?>
       </div>
@@ -930,7 +931,7 @@ function mode_crosswalking() {
 <?php
 		foreach ($recent_tags as $tag) {
 			$tag = htmlspecialchars($tag);
-?>      <nobr><a href="#" target="_ignore" onclick="add_tag('<?=$tag?>'); return false;"><?=$tag?></a></nobr>&nbsp; <?php
+?>      <nobr><a href="#" target="_ignore" onClick="add_tag('<?=$tag?>'); return false;"><?=$tag?></a></nobr>&nbsp; <?php
 		}
 ?>
       </div>
@@ -990,9 +991,9 @@ function add_tag(tag) {
    <br clear=all>
 
 <?php	if (! @$session_data['zoteroImport']) { ?>
-   <input type="button" value="Cancel" onclick="window.location.replace('importerFramework.php');" style="margin-right: 4ex;">
+   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php');" style="margin-right: 4ex;">
 <?php	} else { ?>
-   <input type="button" value="Cancel" onclick="window.close();" style="margin-right: 4ex;">
+   <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 4ex;">
 <?php	} ?>
 
     <input type="submit" name="continue" value="Continue" style="font-weight: bold;">
@@ -1012,9 +1013,9 @@ function add_tag(tag) {
       <a target="_errors" href="interface/downloadRecsWithErrors.php/<?= htmlspecialchars($import_id) ?>-data_error.txt?import_id=<?= htmlspecialchars($import_id) ?>">Download errors</a>
 <?php		} ?>
 <?php		if (! @$session_data['zoteroImport']) { ?>
-   <input type="button" value="Cancel" onclick="window.location.replace('importerFramework.php');">
+   <input type="button" value="Cancel" onClick="window.location.replace('importerFramework.php');">
 <?php		} else { ?>
-   <input type="button" value="Cancel" onclick="window.close();">
+   <input type="button" value="Cancel" onClick="window.close();">
 <?php		} ?>
 <?php
 		$session_data['mode'] = 'error';
@@ -1283,21 +1284,21 @@ error_log("total time: " . ($etime - $stime));
 
 <?php	if (! @$session_data['zoteroImport']) { ?>
 <?php		if ($ambig_count  ||  $session_data['non_out_entries']) { ?>
-   <a target="_errors" href="interface/downloadNonImported.php/<?= htmlspecialchars($import_id) ?>-unimported.txt?import_id=<?= htmlspecialchars($import_id) ?>" onclick="elt=document.getElementById('finished_button'); if (elt) elt.disabled = false;" style="color: red;">Download non-imported records</a>
+   <a target="_errors" href="interface/downloadNonImported.php/<?= htmlspecialchars($import_id) ?>-unimported.txt?import_id=<?= htmlspecialchars($import_id) ?>" onClick="elt=document.getElementById('finished_button'); if (elt) elt.disabled = false;" style="color: red;">Download non-imported records</a>
 <?php		}
 		if (! $ambig_count  &&  $session_data['non_out_entries']) { ?>
-   <input type="button" value="Finished" onclick="window.location.replace('importerFramework.php');" disabled="true" id="finished_button" style="font-weight: bold;" title="You must download non-imported records before clicking this button">
+   <input type="button" value="Finished" onClick="window.location.replace('importerFramework.php');" disabled="true" id="finished_button" style="font-weight: bold;" title="You must download non-imported records before clicking this button">
 <?php		}	?>
 <?php	} else {	?>
 <?php		if ($ambig_count  ||  $session_data['non_out_entries']) { ?>
-   <a href="interface/downloadNonImported.php/<?= htmlspecialchars($import_id) ?>-unimported.txt?import_id=<?= htmlspecialchars($import_id) ?>" onclick="elt=document.getElementById('finished_button'); if (elt) elt.disabled = false;" style="color: red;">Download non-imported records</a>
+   <a href="interface/downloadNonImported.php/<?= htmlspecialchars($import_id) ?>-unimported.txt?import_id=<?= htmlspecialchars($import_id) ?>" onClick="elt=document.getElementById('finished_button'); if (elt) elt.disabled = false;" style="color: red;">Download non-imported records</a>
 <?php		}	?>
 <?php	} ?>
 <?php	if (! $ambig_count  &&  ! $session_data['non_out_entries']) { ?>
 <?php		if (@$session_data["zoteroImport"]) {	?>
-   <input type="button" value="Finished" onclick="window.close();" style="font-weight: bold;">
+   <input type="button" value="Finished" onClick="window.close();" style="font-weight: bold;">
 <?php		} else {	?>
-   <input type="button" value="Finished" onclick="window.location.replace('importerFramework.php');" style="font-weight: bold;">
+   <input type="button" value="Finished" onClick="window.location.replace('importerFramework.php');" style="font-weight: bold;">
 <?php		} ?>
 <?php	}
 
@@ -2077,7 +2078,7 @@ function print_disambiguation_options(&$entry) {
 <h1>Potential duplicates</h1>
 <div style="margin-left: 3ex;">
  <p><b>The following record(s) are potential duplicates.  Please choose the appropriate action by selecting the radio buttons below.</b></p>
- <p><a href="NEW record" onclick="return false;"><b>NEW</b></a> indicates the record being imported.  Selecting this will create a new record in Heurist.</p>
+ <p><a href="NEW record" onClick="return false;"><b>NEW</b></a> indicates the record being imported.  Selecting this will create a new record in Heurist.</p>
  <p>Numbers indicate an existing record ID in Heurist.<br>
   <span style="color: mediumvioletred;">Purple text flags any differences between the imported record and existing records.</span></p>
 </div>
@@ -2101,9 +2102,9 @@ function print_disambiguation_options(&$entry) {
   <hr>
   <div class="ambiguous">
 <?php if ($entry == $ambig_entry) { ?>
-   <div><span style="font-weight: bold;"><?= $entry_type ?></span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=<?= $compare_link ?> onclick="var win = open(href, 'compare', 'width=600,height=300,scrollbars=1,resizable=1'); win.focus(); return false;">compare versions</a></div>
+   <div><span style="font-weight: bold;"><?= $entry_type ?></span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=<?= $compare_link ?> onClick="var win = open(href, 'compare', 'width=600,height=300,scrollbars=1,resizable=1'); win.focus(); return false;">compare versions</a></div>
 <?php } else { ?>
-   <div><span style="font-weight: bold;"><?= $heurist_rectypes[$ambig_entry->getReferenceType()]["rty_Name"] ?></span> of &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=<?= $compare_link ?> onclick="var win = open(href, 'compare', 'width=600,height=300,scrollbars=1,resizable=1'); win.focus(); return false;">compare versions</a></div>
+   <div><span style="font-weight: bold;"><?= $heurist_rectypes[$ambig_entry->getReferenceType()]["rty_Name"] ?></span> of &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=<?= $compare_link ?> onClick="var win = open(href, 'compare', 'width=600,height=300,scrollbars=1,resizable=1'); win.focus(); return false;">compare versions</a></div>
    <div style="margin-top: 1ex; margin-left: 3ex; background-color: #f0f0f0;"><?= htmlspecialchars($entry->getTitle()) ?> <i>(<?= $entry_type ?>)</i></div>
 <?php } ?>
 
@@ -2280,8 +2281,8 @@ function print_tag_stuff(&$out_entries) {
 
 <br clear=all>
 
-<input type=button value="Select all tags" onclick="var ok=document.getElementsByName('orig_tags[]'); for (var i=0; i < ok.length; ++i) ok[i].checked = true;">
-<input type=button value="Unselect all tags" onclick="var ok=document.getElementsByName('orig_tags[]'); for (var i=0; i < ok.length; ++i) ok[i].checked = false;">
+<input type=button value="Select all tags" onClick="var ok=document.getElementsByName('orig_tags[]'); for (var i=0; i < ok.length; ++i) ok[i].checked = true;">
+<input type=button value="Unselect all tags" onClick="var ok=document.getElementsByName('orig_tags[]'); for (var i=0; i < ok.length; ++i) ok[i].checked = false;">
 </p>
 
 <hr>

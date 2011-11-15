@@ -1,7 +1,7 @@
 <?php
 
 /**
-* editTerms.html
+* editTerms.php
 *
 * add/edit/delete terms. Treeveiew on the left side with tabview to select domain: enum or relation
 * form to edit term on the right side
@@ -79,7 +79,7 @@ if (!is_admin()) {
 
 	<div id="pnlLeft" style="height:100%; width:300; max-width:300; float: left; padding-right:5px; overflow: hidden;">
 
-		<div style="padding-left:140px"><input id="btnAddChild" type="button" value="Add First Level Term" onClick="{editTerms.doAddChild(true)}"/>
+		<div style="padding-left:120px"><input id="btnAddChild" type="button" value="Add Vocabulary (top level)" onClick="{editTerms.doAddChild(true)}"/>
 		</div>
 
 		<!-- Container for tab control component, each tab contains tree view, one for enums, one for relationship types-->
@@ -101,8 +101,9 @@ if (!is_admin()) {
 	<div id="formContainer" style="float: left; padding-bottom:5px; padding-left: 10px;">
 
 		<h3 id="formMessage" style="border-style: none;display:block;text-align:center;width:300px;">
-			Select term in the tree or add new first level term
+			Select a term in the tree to edit or add child terms
 		</h3>
+		Click button on the left to add a new vocabulary
 
 	    <!-- Edit form for modifying characteristics of terms, including insertion of child terms and deletion -->
         <div id="formEditor" style="display:none;">
@@ -112,10 +113,10 @@ if (!is_admin()) {
 			<div class="dtyField"><label class="dtyLabel">ID:</label><input id="edId" readonly="readonly" style="width:50px"/>
 				<input id="edParentId" type="hidden"/>
 				<div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
-					<b>Terms was saved</b>
+					<b>Term saved</b>
 				</div>
 			</div>
-			<div class="dtyField"><label class="dtyLabel">Display name:</label><input id="edName" style="width:300px"/></div>
+			<div class="dtyField"><label class="dtyLabel">Display name:</label><input id="edName" style="width:150px"/></div>
 			<div class="dtyField"><label class="dtyLabel">Description:</label><input id="edDescription" style="width:300px"/></div>
 			<div id="divInverse" class="dtyField"><label class="dtyLabel">Inverse Term:</label><input id="edInverseTerm" readonly="readonly" style="width:250px"/>
 				<input id="btnInverseSetClear" type="button" value="clear" style="width:45px" onClick="{setOrclearInverseTermId()}" />
@@ -130,18 +131,18 @@ if (!is_admin()) {
                 </select>
             </div>
 
-				<div style="padding-top:5;">
-
-				<div id='div_btnAddChild' style="text-align: left; display:inline-block;">
-					<input id="btnAddChild" type="button" value="Add Child Term" onClick="{editTerms.doAddChild(false)}"/>
-					<input id="btnSetParent" type="button" value="Set Parent" title="Change the parent" onClick="{editTerms.selectParent()}"/>
-					<input id="btnImport" type="button" value="Import" onClick="{editTerms.doImport(false)}"/>
+				<div style="text-align: right; padding-top:5;">
+					<div id='div_btnAddChild' style="text-align: right; display:inline-block;">
+					<input id="btnAddChild" type="button" value="Add Child" onClick="{editTerms.doAddChild(false)}"/>
+					</div>
+					<input id="btnSave" type="button" value="Save Changes" onClick="{editTerms.doSave()}" />
 				</div>
+				<p><h2>WARNING</h2> ADDING TERMS TO THE TREE DOES NOT ADD THEM TO ENUMERATED FIELDS
+				<p>To add terms to fields, edit the field and click the [Vocabulary] button<p>
+				<input id="btnImport" type="button" value="Import from file" onClick="{editTerms.doImport(false)}"/>&nbsp;&nbsp;&nbsp;
+				<input id="btnSetParent" type="button" value="Change Parent" title="Change the parent" onClick="{editTerms.selectParent()}"/>&nbsp;&nbsp;&nbsp;
 					<input id="btnDelete" type="button" value="Delete Term" onClick="{editTerms.doDelete()}" />
 
-
-				<input id="btnSave" style="float:right;" type="button" value="Save Changes" onClick="{editTerms.doSave()}" />
-				</div>
 			</div>
 		</div>
 
@@ -161,14 +162,18 @@ if (!is_admin()) {
 				<select id="resSearchInverse" size="5" style="width:320px" ondblclick="{editTerms.doSelectInverse()}"></select>
 			</div>
 		</div>
+
 	</div>
+
+		<div id="divApply" style="position: relative; text-align:right; display: block; margin:20px 0;">
+		Note: new terms must be selected (selection window behind this one) <br>after addition to the tree, in order to appear in data entry pulldown lists<p>
+		<input type="button" id="btnApply1" value="Close window" onclick="editTerms.applyChanges();" />
 	</div>
 
 	</div>
 
-	<div id="divApply" style="position: absolute; bottom:0px; text-align:center;display: none;width:100px;">
-		<input type="button" id="btnApply1" value="Apply Changes" onclick="editTerms.applyChanges();" />
 	</div>
+
 
 	<script  type="text/javascript">
 

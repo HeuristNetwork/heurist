@@ -36,9 +36,10 @@ require_once('libs.inc.php');
 
 	$qresult = loadSearch($_REQUEST); //from search/getSearchResults.php - loads array of records based og GET request
 
-	if(!array_key_exists('records',$qresult)){
-//error_log(">>>>>>>>NOTHING FOUND");
-		echo "Select somthing in search result to execute the template";
+//error_log(">>>>>>>>".print_r($qresult,true));
+
+	if(!array_key_exists('records',$qresult) ||  $qresult['resultCount']==0 ){
+		echo "<b><font color='#ff0000'>Select records to see template output</font></b>";
 		exit();
 	}
 
@@ -71,12 +72,16 @@ require_once('libs.inc.php');
 //DEBUG error_log(">>>".$template_body."<<<");
 error_log(">>>>>>>".$replevel."<<<<<<");
 
-		if($replevel=="2"){
+		if($replevel=="1" || $replevel=="2"){
 			ini_set( 'display_errors' , 'true');// 'stdout' );
 			$smarty->debugging = false;
-			$smarty->error_reporting = E_ALL & ~E_STRICT; //~E_NOTICE
+			if($replevel=="2"){
+				$smarty->error_reporting = E_ALL & ~E_STRICT & ~E_NOTICE;
+			}else{
+				$smarty->error_reporting = E_NOTICE;
+			}
 		}else{
-			$smarty->debugging = ($replevel=="1");
+			$smarty->debugging = ($replevel=="3");
 		}
 
 		$smarty->debug_tpl = dirname(__FILE__).'/debug_html.tpl';
@@ -397,7 +402,7 @@ function smarty_function_out($params, &$smarty)
 }
 
 // Linkify youtube URLs which are not already links.
-function linkifyYouTubeURLs($text) {
+function linkifyYouTubeURLs($text, $size) {
     $text = preg_replace('~
         # Match non-linked youtube URL in the wild. (Rev:20111012)
         https?://         # Required scheme. Either http or https.
@@ -419,7 +424,7 @@ function linkifyYouTubeURLs($text) {
         )                 # End negative lookahead assertion.
         [?=&+%\w]*        # Consume any URL (query) remainder.
         ~ix',
-        '<iframe width="420" height="345" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>',
+        '<iframe '.$size.' src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>',
         $text);
 
         //'<a href="http://www.youtube.com/watch?v=$1">YouTube link: $1</a>'
@@ -489,7 +494,7 @@ function detectSourceAndType($url){
 //
 // smarty plugin function
 //
-function smarty_function_out2($params, &$smarty)
+function smarty_function_wrap($params, &$smarty)
 {
 
 	if($params['var']){
@@ -499,12 +504,43 @@ function smarty_function_out2($params, &$smarty)
 			$dt = $params['dt'];
 		}
 
-		if($dt=="file"){  //$dt=="urlinclude" ||
+		$label = "";
+		if(array_key_exists('lbl',$params) && $params['lbl']!=""){
+			$label = $params['lbl'].": ";
+		}
+		$width = "";
+		if(array_key_exists('width',$params) && $params['width']!=""){
+			$width = $params['width'];
+			if(is_numeric($width)<0){
+				$width = $width."px";
+			}
+		}
+		$height = "";
+		if(array_key_exists('height',$params) && $params['height']!=""){
+			$height = $params['height'];
+			if(is_numeric($height)<0){
+				$height = $height."px";
+			}
+		}
+
+		$size = "";
+		if($width=="" && $height==""){
+			$size = "width='300px'";
+		}else {
+			if($width!=""){
+				$size = "width='".$width."'";
+			}
+			if($height!=""){
+				$size = $size." height='".$height."'";
+			}
+		}
+
+		if($dt=="file"){
 			//insert image or link
 			$value = $params['var'];
 
 			if( strpos($value['type'],'image')==0 ){
-				return "<img src='".$value['URL']."' width='300px' title='".$value['description']."'/>".$value['origName'];
+				return "<img src='".$value['URL']."' ".$size." title='".$value['description']."'/>".$value['origName'];
 			}else{
 				return "<a href='".$value['URL']."' target='_blank' title='".$value['description']."'>".$value['origName']."</a>";
 			}
@@ -541,12 +577,24 @@ function smarty_function_out2($params, &$smarty)
 				if($url_source == "Youtube"){
 					//var id = /^.*((youtu.be\/)|(v\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/.exec(curr_link);
 //error_log(">>>>>URL=".$url);
-					return linkifyYouTubeURLs($url);
+					$size = "";
+					if($width=="" && $height==""){
+						$size = "width='420' height='345'";
+					}else {
+						if($width!=""){
+							$size = "width='".$width."'";
+						}
+						if($height!=""){
+							$size = $size." height='".$height."'";
+						}
+					}
+
+					return linkifyYouTubeURLs($url, $size);
 				}
 			}
 
 		}else{
-    	return $params['lbl'].': <b>'.$params['var'].'</b>';
+    		return $label.$params['var'].'<br/>';
 		}
 	}else{
 		return '';

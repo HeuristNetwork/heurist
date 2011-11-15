@@ -29,6 +29,7 @@ $lexer = new Lexer($template);
 
 $body = new BodyScope($lexer);
 $body->global_vars['dbname'] = HEURIST_DBNAME;
+$body->global_vars['iconDir'] = HEURIST_ICON_DIR;
 
 $body->verify();
 $body->render();

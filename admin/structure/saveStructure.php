@@ -408,11 +408,13 @@
 		case 'deleteTerms':
 		$trmID = @$_REQUEST['trmID'];
 
-		if (!trmID) {
+		if (!$trmID) {
 			$rv = array();
 			$rv['error'] = "Error: No IDs or invalid IDs sent with deleteTerms method call to saveStructure.php";
 		}else{
-			$rv['result'] = deleteTerms($trmID);
+			$rv = array();
+			$ret = deleteTerms($trmID);
+			$rv['result'] = $ret;
 			$rv['terms'] = getTerms();
 		}
 		break;

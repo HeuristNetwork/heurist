@@ -8,9 +8,11 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo
- *
  -->*/
 
+// if a heuristConfigIni.php file exists in the parent directory of the installation,
+// it will override the ConfigIni.php in the installation. This allows unconfigured ConfigIni.php files to exist
+// in multiple experimental codebases on a single server and avoids accidental distribution of passwords etc.
 
 // [database]
 // enter the host name or IP address of your MySQL server, blank --> localhost
@@ -52,9 +54,8 @@ $passwordForDatabaseCreation=""; // blank = any logged in user can create
 // For instance, if you would like to upload to /var/www/myUploadDir then use
 // $defaultRootFileUploadPath = "/var/www/myUploadDir/";  BE SURE TO INCLUDE THE TRAILING "/"
 // Then, when running Heurist with db=main, uploaded files will be loaded into /var/www/myUploadDir/main/
-// Leaving this blank will cause the root document directory for your web server to be used
-// with an added "upload" subdir, for example: /var/www/htdocs/upload/
-$defaultRootFileUploadPath = ""; // recommended, defaults to root document directory/upload/dbname
+// defaults to root document directory/HEURIST_FILESTORE/dbname
+$defaultRootFileUploadPath = "/var/www/htdocs/HEURIST_FILESTORE/"; // recommended
 
 // [email]
 

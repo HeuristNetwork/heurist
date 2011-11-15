@@ -318,7 +318,7 @@ function getRecordHeaderSectionForSmarty($rec, $parentName, $ind){
 					$key=="RecTypeID" || $key=="Modified") {
 					$tree[$parentName] = array_merge($tree[$parentName], array($name_wo_parent=>$name));
 					$vars = array_merge($vars, array($name=>$key));
-					array_push($arr_text, '{out2 lbl="'.$key.'" var=$'.$name.'}');
+					array_push($arr_text, '{wrap var=$'.$name.'}');
 
 //					'{out lbl="'.$key.'" var=$'.$name.'}');
 
@@ -579,7 +579,7 @@ error_log(">>>>            ".print_r($res2['tree'], true));
 				$tree_children = array_merge($tree_children, array($dtname_wo_parent=>$dtname));
 				$vars = array_merge($vars, array($dtname=>$dt_label));
 				$detailtypes = array_merge($detailtypes, array($dtname=>$detailType));
-				array_push($arr_text, '{out2 lbl="'.$dt_label.'" var=$'.$dtname.'}');
+				array_push($arr_text, '{wrap var=$'.$dtname.'}'); //lbl="'.$dt_label.'"
 
 			}//end switch
 

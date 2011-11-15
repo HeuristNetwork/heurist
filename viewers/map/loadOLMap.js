@@ -46,7 +46,7 @@ function loadMap(options) {
 
 	/* add objects to the map */
 
-	var url = "../../common/images/rectype-icons/questionmark.gif";
+	var url = top.HEURIST.iconDir+"questionmark.gif"; // todo: needs to load top.heurist
 
 	var sz = new OpenLayers.Size(16, 16);
 	var calculateOffset = function(size) {
@@ -68,7 +68,8 @@ function loadMap(options) {
 
 		if (! iconsByrectype[record.rectype]) {
 			iconsByrectype[record.rectype] = baseIcon.clone();
-			iconsByrectype[record.rectype].setUrl("../../common/images/rectype-icons/" + record.rectype + ".png");
+			iconsByrectype[record.rectype].setUrl(top.HEURIST.iconDir + record.rectype + ".png");
+				// todo: 14/11/11 need to set top.HEURIST
 		}
 
 		var marker = null;

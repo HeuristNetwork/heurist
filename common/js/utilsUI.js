@@ -1047,7 +1047,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 						top.HEURIST.detailTypes = context.detailTypes;
 						top.HEURIST.terms = context.terms;
 
-						alert("DB definition strcuture has been refreshed");
+						alert("Database structure definitions have been refreshed");
 					}
 			}
 

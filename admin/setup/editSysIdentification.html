@@ -43,9 +43,9 @@
 
 <div class="input-row">
 <div class="input-header-cell">Heurist registration number (0 = not registered) and database version</div>
-<div class="input-cell">Registration number <b>[sys_dbRegisteredID]</b>&nbsp;&nbsp;&nbsp;DB version <b>[sys_dbVersion].[sys_dbSubVersion].[sys_dbSubSubVersion]</b></div>
+<div class="input-cell">Registration number <b>[sys_dbRegisteredID]</b>&nbsp;&nbsp;&nbsp;Database version <b>[sys_dbVersion].[sys_dbSubVersion].[sys_dbSubSubVersion]</b></div>
 </div>
-<div class="input-row"><div class="input-header-cell">Display name (more informative than DB name at top of page) * </div>
+<div class="input-row"><div class="input-header-cell">Display name (more informative than database name at top of page) * </div>
 <div class="input-header-cell"> [textbox required : sys_dbName : : size=40] </div></div>
 <div class="input-row"><div class="input-header-cell">Database rights statement (or URL to rights statement) </div>
 <div class="input-header-cell"> [textbox : sys_dbRights : : size=60]</div></div>
@@ -99,12 +99,13 @@ This should really be 'required' but T1000 treats 0 as False, so it is rejected
 <div class="input-cell">[checkbox : sys_URLCheckFlag  : : size=20]</div>
 </div>
 
+<!-- for the moment we want to stick to standard locations to reduce complexity
 <h3>Locations</h3>
 <div class="input-row">
-<div class="input-header-cell">Full directory path for uploaded files, overrides default (codebase/uploaded-heurist-files) if non-blank </div>
+<div class="input-header-cell">Full directory path for uploaded files, overrides default (codebase/HEURIST_FILESTORE) if non-blank </div>
 <div class="input-cell">[textbox : sys_UploadDirectory : : size=30] WARNING: directory must be created manually</div>
 </div>
-
+-->
 
  [end-update]
 

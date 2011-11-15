@@ -431,15 +431,51 @@
 				p.appendChild(table);
 			}
 
+			function popupFieldTypes(){
+				top.HEURIST.search.popupLink(top.HEURIST.baseURL+"admin/structure/manageDetailTypes.html?db="+top.HEURIST.database.name, "wide");
+			}
+
+
+			var arr = [],
+				dty_ID,
+				fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+
+			//create datatable and fill it valurs of particular group
+			for (dty_ID in top.HEURIST.detailTypes.typedefs) {
+
+				if(!isNaN(Number(dty_ID)))
+				{
+					var td = top.HEURIST.detailTypes.typedefs[dty_ID];
+					var deftype = td.commonFields;
+					//only for this group and  visible in UI
+					if(Number(deftype[fi['dty_DetailTypeGroupID']])===Number(dtg_ID)){
+						var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
+						var iusage = (Hul.isnull(aUsage)) ? 0 : aUsage.length;
+						// add order in group, name, help, type and status,
+						// doc will be hidden (for pop-up)
+						// last 3 columns for actions
+						arr.push([dty_ID,
+								(Number(deftype[fi.dty_ShowInLists])===1),
+								deftype[fi.dty_OrderInGroup],
+								deftype[fi.dty_Name],
+								deftype[fi.dty_HelpText],
+								deftype[fi.dty_Type],
+								deftype[fi.dty_Status],
+								deftype[fi.dty_ExtendedDescription],
+								dtg_ID, iusage]);
+					}
+				}
+			}
 
 
 		</script>
 		<link rel="stylesheet" type="text/css" href= "../../common/css/global.css">
+		<link rel="stylesheet" type="text/css" href= "../../common/css/admin.css">
 		<style>
 			#csv-textarea {
 				width: 100%;
 				height: 400px;
-				border: 2px solid black;
+				border: 1px solid #6A7C99;
 			}
 			#csv-separator, #csv-terminator { width: 30px; }
 			table { border-collapse: collapse; }
@@ -452,8 +488,8 @@
 
 	<body class="popup">
 
-		<h2>Heurist field updater</h2>
-
+		<!--<h2>Heurist field updater</h2>-->
+		<div id="fieldTypesList" class="tooltip"></div>
 		<p id=info-p></p>
 		<div id=process-div style="display:none;">
 			<p>The details shown below will be used to update records in the database. Please review before processing.
@@ -463,7 +499,7 @@
 		</div>
 		<div id=csv-entry-div>
 			<p>This function reads CSV data and updates specified fields in records designated by their Heurist record IDs.<br>
-			<p>The CSV structure is: <i>Record ID, Internal field code, Value to be inserted</p></i>
+			The CSV structure is: <i>Record ID, Internal field code, Value to be inserted</i></p>
 
 			<code>5,365,"Sydney Opera House"</code><br/>
 			<code>5,373,41</code><br>
@@ -473,7 +509,7 @@
 			<p>
 
 			The internal field codes are shown on the left of the Field Types listing in database administration- see
-			<a href='../../admin/structure/manageDetailTypes.html?db=[dbname!]' target="_listFields">Field types</a> (opens in new window)<br>
+			<a href='#' onClick="popupFieldTypes()" id="fieldTypes">Field types</a> (opens in new window)<br>
 
 			Values supplied are added to any existing values for the field. Multiple values can be separated by | (pipe) characters.<br>
 			Values for record pointer fields should be the id of the record to which the pointer points.<br>
@@ -501,6 +537,5 @@
 			</div>
 			<div><textarea id=csv-textarea></textarea></div>
 		</div>
-
 	</body>
 </html>

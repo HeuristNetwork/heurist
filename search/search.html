@@ -154,7 +154,7 @@
 						<ul id="my-heurist-menu">
 							<li><a href="../admin/profile/editPreferences.html" class="small" name="auto-popup" title="Display preferences">Preferences</a></li>
 							<li><a href="../admin/profile/importModelUserProfile.php" name="auto-popup" title="Add useful resources to your collection from a range of academic templates">Load profiles</a></li>
-							<li><a href="../admin/profile/configureProfile.php?body_only&amp;tag_edit=1" name="auto-popup" title="Delete, combine, rename your personal tags">Manage tags</a></li>
+							<li><a href="../admin/profile/configureProfile.php?body_only&amp;tag_edit=1" class="portrait" name="auto-popup" title="Delete, combine, rename your personal tags">Manage tags</a></li>
 							<li><a href="../admin/ugrps/showSimilarUsers.php" name="auto-popup" title="Find people with similar bookmarking patterns">Find similar users</a></li>
 							<li><a href="../admin/ugrps/manageGroups.html" name="auto-popup" title="Find people with similar bookmarking patterns">My User Groups</a></li>
 							<li><a href="../admin/profile/manageReminders.php" name="auto-popup" title="View and delete automatic notification emails sent from your bookmarks">Manage reminders</a></li>
@@ -169,13 +169,13 @@
 							<li><a href="../admin/structure/getListOfDatabases.php" name="auto-popup" title="For administrators only">List databases</a></li>
 							<li><a href="javascript:void(0)" onClick="{top.HEURIST.util.reloadStrcuture();}" title="Click to clear the internal working memory of Heurist" >Clear memory</a></li>
 
-							<li><a href="../import/email/emailProcessingSetup.php" name="auto-popup" class='seperator' title="Harvest email from a designated IMAP email server (set in configuration)">Harvest email</a></li>
+							<li><a href="../import/email/emailProcessingSetup.php" name="auto-popup" class='seperator small' title="Harvest email from a designated IMAP email server (set in configuration)">Harvest email</a></li>
 							<li><a href="../import/hyperlinks/importHyperlinks.php" name="auto-popup" title="Import web links from a browser bookmarks file or an html web page file">Import hyperlinks</a></li>
-							<li><a href="../admin/profile/configImportSettings.php" name="auto-popup" title="Settings for web links importer">Importer settings</a></li>
+							<li><a href="../admin/profile/configImportSettings.php" name="auto-popup" class="small" title="Settings for web links importer">Importer settings</a></li>
 
 							<li><a href="../import/importerFramework.php?format=BIB" name="auto-popup"  class="seperator" title="Import bibliographic exchange format files">Import bibliographic</a></li>
 							<li><a href="../import/importerFramework.php?format=GEO" name="auto-popup" title="Import KML files">Import geographic</a></li>
-							<li><a href="../import/delimited/importRecordsFromDelimited.html" onClick="this.href = top.HEURIST.baseURL +'import/delimited/importRecordsFromDelimited.html?db=' + database;" title="Import a delimited text file of data for one record type" target="_blank">Import delimited</a></li>
+							<li><a href="../import/delimited/importRecordsFromDelimited.html" name="auto-popup" onClick="this.href = top.HEURIST.baseURL +'import/delimited/importRecordsFromDelimited.html?db=' + database;" title="Import a delimited text file of data for one record type" target="_blank">Import delimited</a></li>
 							<!-- separator-->
 							<li><a href="?ver=1&amp;w=bookmark&amp;q=-tag&amp;label=Bookmarks+without+tags" class='seperator' title="Find bookmarks which you have not tagged">Bookmarks without tags</a></li>
 							<!-- separator-->
@@ -200,7 +200,7 @@
 					<li> <a href="../index.html" target=_blank title="The Heurist project plus comprehensive detailed help"><b>Project</b></a> </li>
 					<li> <a id=contact-link style="display:none" title="Send us an email with bug information or feature requests" href="mailto:info@heuristscholar.org"><b>Contact us</b></a>
 
-            <script>
+						<script>
 							var bookmarkletname = top.HEURIST.VERSION;
 							var html = "<a id=\"bookmarklet-link\" onclick=\"alert('Heurist Bookmarklet: drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;\" title=\"Heurist Bookmarklet. Drag this link to your browser bookmarks toolbar, or right-click the link,"
 							+ " choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.\""
@@ -283,7 +283,7 @@
 									<li><a href="#" onClick="top.HEURIST.search.deleteBookmarks(); return false;" title="Select one or more records, then click to remove bookmarks">Remove bookmarks</a></li>
 									<li><a href="#" onClick="top.HEURIST.search.deleteBiblios(); return false;" title="Select one or more records, then click to delete" class="seperator">Delete</a></li>
 									<li><a href="#" onClick="top.HEURIST.search.fixDuplicates(); return false;" title="Select one or more records, then click to fix duplicates">Merge</a></li>
-              <li><a href="#" onClick="top.HEURIST.search.collectDuplicates(); return false;" title="Click to identify possible duplicates in the current query and create collections for each set">Identify duplicates</a></li>
+									<li><a href="#" onClick="top.HEURIST.search.collectDuplicates(); return false;" title="Click to identify possible duplicates in the current query and create collections for each set">Identify duplicates</a></li>
 								</ul>
 							</li>
 							<li><span id=collection-label title="Select records and click collect to add to a temporary collection which can later be saved as a search." >Collect&nbsp;&nbsp;</span><span class="collected-shown" style="display:inline"></span>
@@ -332,6 +332,8 @@
 
 </div>
 <!-- sidebar -->
+<div id="loadingCover" class="On" ></div>
+<div id="mainbody">
 <div id="sidebar">
 
 			<div id=left-panel-content class="panel-main-content">
@@ -473,6 +475,7 @@
 					</tr>
 				</table>
 			</div>
+</div>
 </div>
 <script>
 /* lightweight page-specific autosizing */

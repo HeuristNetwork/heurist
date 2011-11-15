@@ -85,7 +85,8 @@ function displayResults(s,r) {
 
 	for (var i = 0; i < r.length; i++) {
 		if (r[i].getRecordType()){
-			innerHTML += "<div class='displayTable'><div class='editIcon'><img src=\""+ thisInstancePath + "common/images/rectype-icons/" + r[i].getRecordType().getID() + ".png\"/></div>";
+			// todo: top.HEURIST may need setting, but this code is likely no longer used
+			innerHTML += "<div class='displayTable'><div class='editIcon'><img src="+ top.HEURIST.iconDir + r[i].getRecordType().getID() + ".png\"/></div>";
 			innerHTML += "<div class='link'><a href='../" + r[i].getID() + "' target=\"_blank\">" + r[i].getTitle() + "</a></div></div>";
 		}
 	}

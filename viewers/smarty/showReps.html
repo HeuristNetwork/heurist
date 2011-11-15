@@ -24,6 +24,8 @@
 <!-- yui layout -->
 
 <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/reset-fonts-grids/reset-fonts-grids.css">
+<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/container/assets/skins/sam/container.css">
+
 <!-- Skin CSS files resize.css must load before layout.css -->
 <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/assets/skins/sam/resize.css">
 <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/assets/skins/sam/layout.css">
@@ -48,13 +50,12 @@
 		<!-- TreeView source file -->
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/treeview/treeview-min.js" ></script>
 		<!-- END TREEVIEW DEFS-->
+		<!-- for yui simply dialog -->
+		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/container/container-min.js"></script>
+
 
 <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
 <script type="text/javascript" src="../../external/tinymce3.4.4/jscripts/tiny_mce/tiny_mce.js"></script>
-
-	<script type="text/javascript">
-			var showReps, isEditorVisible=false;
-	</script>
 
 <style type="text/css">
 body {
@@ -70,18 +71,22 @@ body {
 }
 </style>
 
+<script type="text/javascript">
+			var showReps, isEditorVisible=false;
+</script>
+
+
 </head>
 
 <body class="yui-skin-sam">
 		<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
 		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
 		<script type="text/javascript" src="../../viewers/smarty/showReps.js"></script>
-
 		<iframe id="ifrmPrint" src="#" style="width:0px; height:0px;"></iframe>
 
 <!-- position:absolute;top:30px;height:30px;
 
-style="position:absolute;top:25px;bottom:0px;left:0px;right:0px;"
+	style="position:absolute;top:25px;bottom:0px;left:0px;right:0px;"
 		<div id="layout"></div>
 -->
 
@@ -91,11 +96,12 @@ style="position:absolute;top:25px;bottom:0px;left:0px;right:0px;"
 				<div id="rep_list" style="padding-left:10px;display:inline-block;">
 					<label style="width:100px">Select template</label>
 					<select id="selTemplates" onchange="onSelectTemplate()" style="width:200px;"></select>
-					<button onclick="doExecute()">Reload</button>
+					<button onclick="onSelectTemplate()">Reload</button>
 					<button onclick="onPrint()">Print</button>
 					<button onclick="onFile()">Get URL</button>
 					<button onclick="onShowEditor()">Edit</button>
 					<button onclick="onGenerate()">New Template</button>
+					<input type="checkbox" id="cbUseAllRecords1" checked="checked" onchange="onUseAll(event)"/>Use full search result
 				</div>
 				<div style="text-align: left;float:right;padding-right:10px;">
 				</div>
@@ -108,8 +114,8 @@ style="position:absolute;top:25px;bottom:0px;left:0px;right:0px;"
 			<div style="position:absolute; left:0px; right:300px;top:0px;bottom:0px;">
 				<div>
 					<label style="width:100px">Template</label>
-					<input type="text" style="width:40%;" id="edTemplateName"/>
-					<button onclick="doEditor(2)">Save</button>
+					<label style="width:40%;font-weight:bold;" id="edTemplateName"></label>
+					<button onclick="doEditor(2)" title="Save, Close and Execute the updated template">Save</button>
 					<button onclick="doEditor(1)">Save As</button>
 					<button onclick="doEditor(3)">Delete</button>
 
@@ -127,36 +133,77 @@ style="position:absolute;top:25px;bottom:0px;left:0px;right:0px;"
 				</div>
 				<div style="width:100%;height:20px;position:absolute;bottom: 0px;">
 					<div style="display: inline-block;">
+						<select id="cbErrorReportLevel">
+							<option value="0" selected="selected">Ignore errors</option>
+							<option value="1">Show warnings</option>
+							<option value="2">Show errors</option>
+							<option value="3">Debug info</option>
+						</select>
+<!--
 						<input id="cbNorep" name="replevel" value="0" type="radio"  title="No report output"/>
 						<label for="cbNorep">Ignore errors</label>&nbsp;&nbsp;
 						<input id="cbError" name="replevel" value="2" type="radio"  title="Show errors and missed fields" checked="checked"/>
 						<label for="cbError">Show errors</label>&nbsp;&nbsp;
 						<input id="cbDebug" name="replevel" value="1" type="radio"  title="Show debug info"/>
 						<label for="cbDebug">Debug info</label>
+-->
 					</div>
 					<div style="float:right;">
-						<button onclick="doExecute()" title="Test your template" style="font-weight: 800;">Update output below</button>
+						<input type="checkbox" id="cbUseAllRecords2" checked="checked" onchange="onUseAll(event)"/>Use full search result
+
+						<button onclick="doExecuteFromEditor()" title="Test your template" style="font-weight: 800;">Update output below</button>
 					</div>
 				</div>
 			</div>
 
 			<div style="width:300px;position:absolute;right:0px;top:0px;bottom:0px;">
 				<div style="height:40px">
-					<div>Choose required fields in tree then:</div>
+					<!-- div>Choose required fields in tree then:</div -->
+
+					<div>
+
+					<label>Modifiers</label>
+						<select id="selInsertModifiers" onchange="onSelectModifier()" style="width:100px">
+							<option>choose modifier</option>
+							<option>capitalize</option>
+							<option>cat</option>
+							<option>count_characters</option>
+							<option>count_paragraphs</option>
+							<option>count_sentences</option>
+							<option>count_words</option>
+							<option>date_format</option>
+							<option>default</option>
+							<option>escape</option>
+							<option>indent</option>
+							<option>lower</option>
+							<option>nl2br</option>
+							<option>regex_replace</option>
+							<option>replace</option>
+							<option>spacify</option>
+							<option>string_format</option>
+							<option>strip</option>
+							<option>strip_tags</option>
+							<option>truncate</option>
+							<option>upper</option>
+							<option>wordwrap</option>
+						</select>
+
+					<a href="javascript:void(0)" title="Insert root FOREACH operator" onClick="showReps.insertRootForEach()">insert loop</a>
+					<a href="../../../help/index.html?SmartyTemplates" title="Read documentation how to create the exellent Smarty template" target="_blank">help</a>
+
+
+					</div>
 					<!--
 					<button onclick="window.showReps.insertSelectedVars(null, false)">Insert fields only</button><br/>
 					<button onclick="window.showReps.insertRectypeSection()">All</button>
 					<button onclick="window.showReps.insertSelectedVarsAsLoop(null)">Insert fields in loop</button><br/>
 					-->
 					<label>Style</label>
-						<select id="selInsertMode">
+						<select id="selInsertMode" style="width:100px">
 							<option value="0">Field only</option>
 							<option value="1">Field + Label</option>
 							<option value="2">Field + function wrapper</option>
 						</select>
-					&nbsp;
-					<a href="javascript:void(0)" title="Insert root FOREACH operator" onClick="showReps.insertRootForEach()">insert loop</a>
-					<a href="../../../help/index.html?SmartyTemplates" title="Read documentation how to create the exellent Smarty template" target="_blank">help</a>
 				</div>
 				<div id="treeContainer"
 					style="position:absolute;left:0px; right:0px;top:40px;bottom:25px;overflow-y: auto;">
@@ -268,26 +315,33 @@ if(isInited){
 	//
 	function onShowEditor()
 	{
-		var sel = document.getElementById('selTemplates'),
-			template_file = sel.options[sel.selectedIndex].value;
+		var sel = document.getElementById('selTemplates');
 
+		if(sel.selectedIndex>=0){
+			var template_file = sel.options[sel.selectedIndex].value;
 		window.showReps.showEditor(template_file);
+	}
 	}
 
 	//
+	//
 	function onGenerate()
 	{
+		if(window.showReps.isNeedSelection()){
+			alert('You have to select some records');
+		}else{
 		var name=jQuery.trim(prompt("Please enter template name",""));
 		if (!Hul.isempty(name))
   		{
 			window.showReps.generateTemplate(name);
 		}
 	}
+	}
 
 	//
-	function doExecute()
+	function doExecuteFromEditor()
 	{
-		window.showReps.doExecute();
+		window.showReps.doExecuteFromEditor();
 	}
 
 	//
@@ -299,10 +353,32 @@ if(isInited){
 	//
 	function onSelectTemplate()
 	{
-		var sel = document.getElementById('selTemplates'),
-			template_file = sel.options[sel.selectedIndex].value;
+		var sel = document.getElementById('selTemplates');
+		if(sel.selectedIndex>=0){
 
-		window.showReps.processTemplate(null, template_file);
+			var template_file = sel.options[sel.selectedIndex].value;
+
+			top.HEURIST.util.setDisplayPreference("viewerCurrentTemplate", template_file);
+			window.showReps.processTemplate(template_file);
+		}
+	}
+
+	function onSelectModifier(){
+		var sel = document.getElementById('selInsertModifiers');
+		if(sel.selectedIndex>0){
+			window.showReps.insertModifier(sel.value);
+			sel.selectedIndex = 0;
+		}
+	}
+
+	function onUseAll(event){
+		var elem = event.target;
+		if(elem.id=="cbUseAllRecords1"){
+			document.getElementById('cbUseAllRecords2').checked = elem.checked;
+		}else{
+			document.getElementById('cbUseAllRecords1').checked = elem.checked;
+		}
+		window.showReps.setUseAllRecords(elem.checked);
 	}
 
 	//

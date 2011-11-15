@@ -135,12 +135,29 @@ function straightCopyDatabase($targetdbname) {
 			die ("<p>Unable to copy uploaded files ($copy_file_directory) - please copy directory manually");
 		}
 
-        $copy_icons_directory = "cp -R ../../common/images/".HEURIST_DBNAME."/rectype-icons  ../../common/images/$targetdbname/rectype-icons"; // no prefix
+		/* NOT NEEDED, since they are all within the database's upload directory
+        // Copy the record type icons directory, which includes the record type thumbnails directory
+        $copy_icons_directory = "cp -R ".HEURIST_ICON_DIR." ".HEURIST_ICON_ROOT.$targetdbname."/".HEURIST_ICON_DIRNAME;
         print "<br>Copying icons: $copy_icons_directory";
         exec("$copy_icons_directory" . ' 2>&1', $output, $res1);
 		if ($res1 != 0 ) {
 			die ("<p>Unable to copy icon files ($copy_icons_directory) - please copy directory manually");
 		}
+        // Copy the smarty templates directory
+        $copy_smarty_directory = "cp -R ".HEURIST_SMARTY_TEMPLATES_DIR." ".HEURIST_SMARTY_TEMPLATES_ROOT.$targetdbname."/".HEURIST_SMARTY_TEMPLATES_DIRNAME;
+        print "<br>Copying smarty tempaltes: $copy_smarty_directory";
+        exec("$copy_smarty_directory" . ' 2>&1', $output, $res1);
+		if ($res1 != 0 ) {
+			die ("<p>Unable to copy smarty template files ($copy_smarty_directory) - please copy directory manually");
+		}
+        // Copy the xsl tempaltes directory
+        $copy_xsl_directory = "cp -R ".HEURIST_XSL_TEMPLATES_DIR." ".HEURIST_XSL_TEMPLATES_ROOT.$targetdbname."/".HEURIST_XSL_TEMPLATES_DIRNAME;
+        print "<br>Copying xsl templates: $copy_xsl_directory";
+        exec("$copy_xsl_directory" . ' 2>&1', $output, $res1);
+		if ($res1 != 0 ) {
+			die ("<p>Unable to copy xsl template files ($copy_xsl_directory) - please copy directory manually");
+		}
+		*/
 
         print "<br><p>Done. New database <b>$newname</b> created<br>";
 		print "<p>New upload directory ".HEURIST_UPLOAD_ROOT."$targetdbname";

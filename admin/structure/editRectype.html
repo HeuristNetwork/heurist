@@ -49,7 +49,7 @@
 
 	var Hul = top.HEURIST.util,
         _keepStatus;
-        
+
 
 	try {
 		var hash;
@@ -307,16 +307,15 @@
 				document.getElementById("rectypeIcon").innerHTML =
 				"<a href=\"javascript:void(0)\" onClick=\"upload_icon(0)\" title=\"Click to change icon\">"+
 				"<img id=\"imgIcon\" src=\""+
-				top.HEURIST.baseURL + "common/images/" + top.HEURIST.database.name +"/rectype-icons/" + rectypeID + ".png" +
+				top.HEURIST.iconDir + rectypeID + ".png" +
 				"\" width=\"16\" height=\"16\"></a>";
 
 				document.getElementById("rectypeThumb").innerHTML =
 				"<a href=\"javascript:void(0)\" onClick=\"upload_icon(1)\" title=\"Click to change thumbnail\">"+
 				"<img id=\"imgThumb\" src=\""+
-				top.HEURIST.baseURL + "common/images/" + top.HEURIST.database.name +"/rectype-icons/thumb/th_" + rectypeID + ".png" +
+				top.HEURIST.iconDir + "thumb/th_" + rectypeID + ".png" +
 				"\" width=\"75\" height=\"75\"></a>";
 
-				//../../common/images/rectype-icons/"+rectypeID+".png
 			} catch(e) {
 				alert(e);
 /* 				document.getElementById("rectypeIcon").innerHTML = "<a href=\"../../admin/structure/uploadRectypeIcon.php\">change icon</a>"; */
@@ -367,8 +366,8 @@
 
 		var original_dbId = (rectype)?Number(rectype[fi.rty_OriginatingDBID]):dbId;
 		if(Hul.isnull(original_dbId)) {original_dbId = dbId;}
-            
-			
+
+
 		if((dbId>0) && (dbId<1001) && (original_dbId===dbId)) {
 			_addOptionReserved();
 		}
@@ -877,10 +876,10 @@
 
 
 	var EditPopup = (function () {
-        
+
 		//public members
 		var that = {
-            
+
 				save : function (openEditStructure) {
 					_openEditStrucutreAfterClose = openEditStructure;
 					updateRectypeOnServer();

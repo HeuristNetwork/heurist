@@ -51,8 +51,8 @@ function loadMap(options) {
 	/* add objects to the map */
 
 	var baseIcon = new GIcon();
-	baseIcon.image = "../../common/images/rectype-icons/questionmark.gif";
-	baseIcon.shadow = "../../common/images/shadow.png";
+	baseIcon.image = "../../common/images/questionmark.gif"; // image moved up one level
+	baseIcon.shadow = "../../common/images/shadow.png"; // image moved up one level
 	baseIcon.iconAnchor = new GPoint(16, 31);
 	baseIcon.infoWindowAnchor = new GPoint(16,16);
 	baseIcon.iconSize = new GSize(31, 31);
@@ -72,7 +72,7 @@ function loadMap(options) {
 
 		if (! iconsByrectype[record.rectype]) {
 			iconsByrectype[record.rectype] = new GIcon(baseIcon);
-			//iconsByrectype[record.rectype].image = "../../common/images/rectype-icons/" + record.rectype + ".png";
+			//iconsByrectype[record.rectype].image = top.HEURIST.iconDir + record.rectype + ".png";
 			//iconsByrectype[record.rectype].image = "../../common/images/pointerMapWhite.png";
 			iconsByrectype[record.rectype].image = "../../common/images/31x31.gif";
 		}
@@ -260,7 +260,7 @@ function getHtmlMarker(y,x,arrayRecsByTypeObjs,numMarkers, options) {
 				url += "common/php/resize_image.php?db=" + top.HEURIST.database.name + "&amp;file_id=" + Records[0]['thumb_file_id'];
 			}else {
 				//get recType image
-				url += "common/images/rectype-icons/map-icons/map_" + recType + ".png";
+				url += top.HEURIST.iconDir + map-icons/map_" + recType + ".png";
 			}
 			return url;
 		}
@@ -323,9 +323,9 @@ function getHtmlMarker(y,x,arrayRecsByTypeObjs,numMarkers, options) {
 				markerIcon.iconAnchor = new GPoint(36, markerHeight);
 				markerClass = "geomarker76";
 				break;
-			default:
+			default: // 13/11/2011 - Artem says this file is no longer used, directory below was incorrectly stated 'map-icons', did not exist
 				markerHTML += "style=\"width:24px;\">"
-							+ "<div class=\"icon\" style=\"background-image:url("+HEURIST.baseURL+"common/images/rectype-icons/map-icons/map_multiRecords.png\")\">"
+							+ "<div class=\"icon\" style=\"background-image:url("+top.HEURIST.iconDir+ "maps-icons/map_multiRecords.png\")\">"
 							+ "<div class=\"refCount\"> " + recIDs.length + "</div></div>"
 				+ "</div>"
 				+ indicatorHTML;

@@ -20,11 +20,27 @@ $smarty->compile_dir  = '/var/www/htdocs/smarty/sandpit5/templates_c/';
 $smarty->config_dir   = '/var/www/htdocs/h3-ao/viewers/smarty/configs/';
 $smarty->cache_dir    = '/var/www/htdocs/smarty/sandpit5/cache/';
 */
-$smarty->template_dir = HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'viewers/smarty/templates/';
-$smarty->config_dir   = HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'viewers/smarty/configs/';
+//$smarty->template_dir = HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'viewers/smarty/templates/';
+//$smarty->config_dir = HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'viewers/smarty/configs/';
+
+//check folder existance and create new folders if they missed
+if(!file_exists(HEURIST_SMARTY_TEMPLATES_DIR)){
+	if (!mkdir(HEURIST_SMARTY_TEMPLATES_DIR, 0777, true)) {
+    	die('Failed to create folder for smarty templates');
+	}
+}
+if(!file_exists(HEURIST_SMARTY_TEMPLATES_DIR."configs/")){
+	if (!mkdir(HEURIST_SMARTY_TEMPLATES_DIR."configs/", 0777, true)) {
+    	die('Failed to create folder for smarty templates');
+	}
+}
+
+$smarty->template_dir = HEURIST_SMARTY_TEMPLATES_DIR;
+$smarty->config_dir   = HEURIST_SMARTY_TEMPLATES_DIR."configs/";
 $smarty->compile_dir  = _PREF.'htdocs/smarty/sandpit5/templates_c/';
 $smarty->cache_dir    = _PREF.'htdocs/smarty/sandpit5/cache/';
 
+//error_log(">>>>>".HEURIST_SMARTY_TEMPLATES_DIR);
 
 $smarty->registerResource("string", array("str_get_template",
                                        "str_get_timestamp",

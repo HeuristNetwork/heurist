@@ -1,6 +1,6 @@
 /**
 * editTerms.js
-* Support file for editTerms.html
+* Support file for editTerms.php
 *
 * 28/04/2011
 * @author: Juan Adriaanse
@@ -81,9 +81,13 @@ function EditTerms() {
 
 		var dv1 = Dom.get('divApply');
 		var dv2 = Dom.get('divBanner');
+		var dv3 = Dom.get('page-inner');
 		if(_isWindowMode){
 			dv1.style.display = "block";
 			dv2.style.display = "none";
+			dv3.style.top = "5px";
+			window.close = that.applyChanges;
+
 		}else{
 			dv1.style.display = "none";
 			dv2.style.display = "block";
@@ -315,9 +319,11 @@ function EditTerms() {
 				if(isExistingNode(node)){
 						Dom.get('div_btnAddChild').style.display = "inline-block";
 						Dom.get('btnDelete').value = "Delete Term";
+						Dom.get('btnSave').value = "Save changes";
 				}else{//new term
 						Dom.get('div_btnAddChild').style.display = "none";
-						Dom.get('btnDelete').value = "Cancel Add";
+						Dom.get('btnDelete').value = "Cancel";
+						Dom.get('btnSave').value = "Add Term";
 				}
 
 				Dom.get('divInverse').style.display = (_currTreeView === _termTree2)?"block":"none";
@@ -520,6 +526,7 @@ function EditTerms() {
 								_isSomethingChanged = true;
 								Dom.get('div_btnAddChild').style.display = "inline-block";
 								Dom.get('btnDelete').value = "Delete Term";
+								Dom.get('btnSave').value = "Save";
 								Dom.get('div_SaveMessage').style.display = "inline-block";
 								setTimeout(function(){Dom.get('div_SaveMessage').style.display = "none";}, 2000);
 								//alert("Term was succesfully saved");
@@ -556,7 +563,7 @@ function EditTerms() {
 
 		var r = (!needConfirm) ||
 		confirm(isExistingTerm
-		?("Delete term '"+_currentNode.label+"'? Are you sure? All children terms will be deleted as well")
+		?("Delete term\n\n     '"+_currentNode.label+"'\n\nAre you sure? \nWarning: All child terms will be deleted as well")
 		:"Cancel the addition of new term?");
 
 		if (r && !Hul.isnull(_currTreeView)) {
@@ -633,7 +640,11 @@ function EditTerms() {
 	{
 		var term;
 		if(value==null){
-			value = {id:null,label:"New Term",desription:""};
+			if (isRoot){
+					value = {id:null,label:"new term [vocab]",desription:""};
+				} else {
+					value = {id:null,label:"new term",desription:""};
+				}
 		}
 
 		if(isRoot){
@@ -723,8 +734,8 @@ function EditTerms() {
 			Hul.popupURL(top, sURL, {
 					"close-on-blur": false,
 					"no-resize": false,
-					height: 120,
-					width: 340,
+					height: 140,
+					width: 500,
 					callback: _import_complete
 			});
 
@@ -790,9 +801,10 @@ function EditTerms() {
 
 				doImport: function(isRoot){ _import(isRoot); },
 
-				applyChanges: function(){ //for window mode only
+				applyChanges: function(event){ //for window mode only
 						if(_isWindowMode){
 							window.close(_isSomethingChanged);
+							//top.HEURIST.util.closePopup.apply(this, [_isSomethingChanged]);
 						}
 				},
 

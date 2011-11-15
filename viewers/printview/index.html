@@ -366,7 +366,9 @@
 			}
 
 			function onSelectionChange(eventType, argList) {
-				if (eventType == "heurist-selectionchange"){	// saw TODO change this to update the selection for levels
+				if (parent.document.getElementById("p").className == "yui-hidden") { //ARTEM
+					return false;
+				}else  if (eventType == "heurist-selectionchange"){	// saw TODO change this to update the selection for levels
 																// if a level is not loaded then load synch
 					newSelectionIds = [];
 					if (top.HEURIST.search.getSelectedRecIDs().get().length > 0) {

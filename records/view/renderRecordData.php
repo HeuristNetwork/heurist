@@ -23,6 +23,7 @@ require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 
 $noclutter = array_key_exists('noclutter', $_REQUEST);
 
+$terms = getTerms();
 ?>
 <html>
 <head>
@@ -312,6 +313,9 @@ function print_private_details($bib) {
 
 
 	function print_public_details($bib) {
+
+		global $terms;
+
 		$bds_res = mysql_query('select dty_ID,
 		                               ifnull(rdr.rst_DisplayName, dty_Name) as name,
 		                               dtl_Value as val,
@@ -344,6 +348,14 @@ function print_private_details($bib) {
 			if ($bd['dty_Type'] == 'urlinclude') {
 
 				$bd['val'] = '<div id="preview'.$bd['dty_ID'].'" class="urlinclude" style="border:none red 1px;width:100%;height:300px;"><input type="hidden" value="'.$bd['val'].'"></div>';
+
+			}else 	if ($bd['dty_Type'] == 'enum') {
+
+				$bd['val'] = output_chunker($terms['termsByDomainLookup']['enum'][$bd['val']][0]);
+
+			}else 	if ($bd['dty_Type'] == 'relationtype') {
+
+				$bd['val'] = output_chunker($terms['termsByDomainLookup']['relation'][$bd['val']][0]);
 
 			}else 	if ($bd['dty_Type'] == 'resource') {
 

@@ -202,7 +202,7 @@ if (top.HEURIST && top.HEURIST.firedEvents["heurist-search-html-loaded"] && top.
 	print ' -->';
 ?>
  <body>
-<?php foreach ($rectypes as $rt_id) if ($rt_id > 0) print "<img src=../common/images/".HEURIST_DBNAME."/rectype-icons/".$rt_id.".png>"; ?>
+<?php foreach ($rectypes as $rt_id) if ($rt_id > 0) print "<img src=".HEURIST_ICON_DIR.$rt_id.".png>"; ?>
  </body>
 </html>
 <?php

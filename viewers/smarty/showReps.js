@@ -32,11 +32,25 @@ function ShowReps() {
 
 	var _className = "ShowReps",
 		_originalFileName,
-		_currenQuery,
+		_currentQuery_all,
+		_currentQuery_sel,
 		_variables, //object with all variables
 		_varsTree, //treeview object
 		_needListRefresh = false, //if true - reload list of templates after editor exit
-		_keepTemplateValue;
+		_keepTemplateValue,
+		_needSelection = false,
+		_isUseAllRecords = true,
+		mySimpleDialog,
+		infoMessageBox;
+
+	var handleYes = function() {
+					_operationEditor(2);
+				    this.hide();
+				};
+	var handleNo = function() {
+				    _setLayout(true, false);
+				    this.hide();
+				};
 
 
 	/**
@@ -48,7 +62,8 @@ function ShowReps() {
 
 		var sel = document.getElementById('selTemplates'),
 			option,
-			keepSelIndex = sel.selectedIndex;
+			keepSelIndex = sel.selectedIndex,
+	 		_currentTemplate = top.HEURIST.util.getDisplayPreference("viewerCurrentTemplate");
 
 		//celear selection list
 		while (sel.length>0){
@@ -63,6 +78,11 @@ function ShowReps() {
 				option = document.createElement("option");
 				option.text = context[i].name;
 				option.value = context[i].filename;
+
+				if(keepSelIndex<0 && _currentTemplate==option.value){
+					keepSelIndex = sel.length;
+				}
+
 				try {
 					// for IE earlier than version 8
 					sel.add(option, sel.options[null]);
@@ -72,12 +92,10 @@ function ShowReps() {
 			}
 			} // for
 
-
 			sel.selectedIndex = (keepSelIndex<0)?0:keepSelIndex;
 
-			var squery = location.search; //_currenQuery;
 			if(sel.selectedIndex>=0){
-				_reload(squery, context[sel.selectedIndex].filename);
+				_reload(context[sel.selectedIndex].filename);
 			}
 		}
 		_setLayout(true, false);
@@ -89,10 +107,14 @@ function ShowReps() {
 	*/
 	function _updateReps(context) {
 
+		infoMessageBox.hide();
+
 		//converts Heurist.tmap structure to timemap structure
 		//HEURIST.tmap = context;
 		var div_rep = document.getElementById("rep_container");//Dom.get("rep_container");
 		div_rep.innerHTML = context;
+
+		_needSelection = (context.indexOf("Select records to see template output")>0);
     }
 
 
@@ -115,11 +137,45 @@ function ShowReps() {
 	function _init() {
 		_setLayout(true, false); //aftert load show viewer only
 
+		_currentQuery_all = location.search;
+		_currentQuery_sel = null;
+
 		_reload_templates();
 
 		if (top.HEURIST) {
 			top.HEURIST.registerEvent(that,"heurist-selectionchange", _onSelectionChange);
 		}
+
+		infoMessageBox  =
+				new YAHOO.widget.SimpleDialog("simpledialog2",
+					{ width: "350px",
+					fixedcenter: true,
+					modal: false,
+					visible: false,
+					draggable: false,
+					close: false,
+					text: "some text"
+				} );
+		infoMessageBox.render(document.body);
+
+		mySimpleDialog =
+				new YAHOO.widget.SimpleDialog("simpledialog1",
+					{ width: "350px",
+					fixedcenter: true,
+					modal: true,
+					visible: false,
+					draggable: false,
+					close: true,
+					header: 'Warning',
+					text: "some text",
+					icon: YAHOO.widget.SimpleDialog.WARNING,
+					buttons: [
+				    { text: "Save", handler: handleYes, isDefault:true },
+				    { text:"Discard", handler: handleNo}
+					]
+				} );
+		mySimpleDialog.render(document.body);
+
 	}
 
 	/**
@@ -134,16 +190,16 @@ function ShowReps() {
 	/**
 	* Executes the template with the given query
 	*/
-	function _reload(squery, template_file) {
+	function _reload(template_file) {
 
 				var baseurl = top.HEURIST.basePath + "viewers/smarty/showReps.php";
-//window.open(baseurl+squery, '_blank');
 
-				if(Hul.isnull(squery)){
-					squery = _currenQuery;
+				var squery = _getQuery();
+
+				if(Hul.isempty(squery)){
+					_updateReps("<b><font color='#ff0000'>Select records to see template output</font></b>");
+
 				}else{
-					_currenQuery = squery;
-				}
 
 				if(Hul.isnull(template_file)){
 					var sel = document.getElementById('selTemplates');
@@ -152,11 +208,15 @@ function ShowReps() {
 				}
 				squery = squery + '&template='+template_file;
 
+					infoMessageBox.setBody("Execute template '"+template_file+"'. Please wait");
+					infoMessageBox.show();
+
 				top.HEURIST.util.sendRequest(baseurl, function(xhr) {
 					var obj = xhr.responseText;
 					_updateReps(obj);
 				}, squery);
 
+				}
 				//top.HEURIST.util.getJsonData(baseurl, callback, squery);
 	}
 
@@ -176,7 +236,7 @@ function ShowReps() {
 	*
 	* isLoadGenerated - new template
 	*/
-	function _generateTemplate(name, squery, isLoadGenerated) {
+	function _generateTemplate(name, isLoadGenerated) {
 
 		function __onGenerateTemplate(context){
 
@@ -191,7 +251,7 @@ function ShowReps() {
 					var ed = tinyMCE.get('edTemplateBody');
 					ed.setContent(context['text']);
 				}else{
-					Dom.get("edTemplateName").value = name;
+					Dom.get("edTemplateName").innerHTML = name;
 					ApplyLineBreaks(Dom.get("edTemplateBody"), context['text']);
 					_keepTemplateValue = Dom.get("edTemplateBody").value;
 				}
@@ -228,12 +288,11 @@ function ShowReps() {
 
 			_setLayout(true, true);
 
-			_doExecute(); //execute at once
+			_doExecuteFromEditor(); //execute at once
 		}
 
-			if(Hul.isnull(squery)){
-				squery = _currenQuery;
-			}
+			var squery = _getQuery();
+
 			if(Hul.isnull(squery)){
 				alert('You have to select some records in search result');
 			}else{
@@ -248,7 +307,7 @@ function ShowReps() {
 	function _showEditor(template_file) {
 
 		function _onGetTemplate(context){
-			Dom.get("edTemplateName").value = template_file;
+			Dom.get("edTemplateName").innerHTML = template_file;
 			Dom.get("edTemplateBody").value = context;
 			_keepTemplateValue = Dom.get("edTemplateBody").value;
 			_setLayout(true, true);
@@ -274,7 +333,7 @@ function ShowReps() {
 
 	/**
 	* Close editor
-	* @param mode 0 - just close, 1 - save as (not close),  2 - save (not close), 3 - delete and close
+	* @param mode 0 - just close, 1 - save as (not close),  2 - save, close and execute, 3 - delete and close
 	*/
 	function _operationEditor(mode) {
 
@@ -286,14 +345,14 @@ function ShowReps() {
 
 			if(mode<3)
 			{ //save
-				template_file = jQuery.trim(Dom.get("edTemplateName").value);
+				template_file = jQuery.trim(Dom.get("edTemplateName").innerHTML);
 
 				if(mode==1){ //save as - get new name
 					template_file = jQuery.trim(prompt("Please enter new template name", template_file));
 					if (Hul.isempty(template_file)){
 						return;
 					}
-					Dom.get("edTemplateName").value = template_file;
+					Dom.get("edTemplateName").innerHTML = template_file;
 				}
 
 				var template_body = Dom.get("edTemplateBody").value;
@@ -309,6 +368,7 @@ function ShowReps() {
 			else if (mode===3 && _originalFileName!=="") //delete template
 			{ //delete
 				var r=confirm("Are you sure you wish to delete template '"+_originalFileName+"'?");
+
 				if (r==true){
 					squery = squery + 'delete&template='+_originalFileName
 					_originalFileName = null;
@@ -319,7 +379,8 @@ function ShowReps() {
 
 			if(squery){
 
-				var modeRef = mode
+				var modeRef = mode;
+				var alwin;
 
 				function __onOperEnd(context){
 					if(context && context.error){
@@ -330,15 +391,22 @@ function ShowReps() {
 							//todo!!!! - remove template from the list and clear editor
 						}else if(template_file!=null){
 							_originalFileName = template_file;//_onGetTemplate(obj);
-							alert("Template '"+template_file+"' has been saved");
-							//add new entry into list
+
+							infoMessageBox.setBody("Template '"+template_file+"' has been saved");
+							infoMessageBox.show();
+
+							setTimeout(function(){infoMessageBox.hide();}, 1000);
 						}
 
 						if(modeRef===1 || modeRef===3){
 							_needListRefresh = true;
 						}
-						if(modeRef===3){ //for close or delete
+						if(modeRef===2 || modeRef===3){ //for close or delete
 							_setLayout(true, false);
+						}
+						if(modeRef===2){
+							//reload and execute the template
+							_reload(template_file);
 						}
 					}
 				}
@@ -348,6 +416,23 @@ function ShowReps() {
 		}
 
 		if(mode===0){ //for close
+
+			if(_keepTemplateValue!=Dom.get("edTemplateBody").value){
+
+				/*var myButtons = [
+				    { text: "Save", handler: handleYes, isDefault:true },
+				    { text:"Discard", handler: handleNo}
+				];
+				mySimpleDialog.cfg.queueProperty("buttons", myButtons);*/
+
+				mySimpleDialog.setHeader("Warning!");
+				mySimpleDialog.setBody("Template was changed. Are you sure you wish to exit and lose all modifications?");
+				mySimpleDialog.show();
+			}else{
+				_setLayout(true, false);
+			}
+
+/*
 			var r = true;
 			if(_keepTemplateValue!=Dom.get("edTemplateBody").value){
 				r=confirm("Template was changed. Are you sure you wish to exit and lose all modifications?");
@@ -355,6 +440,7 @@ function ShowReps() {
 			if (r==true){
 				_setLayout(true, false);
 			}
+*/
 		}
 	}
 
@@ -363,16 +449,19 @@ function ShowReps() {
 	*
 	* isdebug = 1-yes
 	*/
-	function _doExecute(squery) {
+	function _doExecuteFromEditor() {
 
-		var replevel = 0;
+		var replevel = document.getElementById('cbErrorReportLevel').value;
+		if(replevel<0) {
+			document.getElementById('cbErrorReportLevel').value = 0;
+			replevel = 0;
+		}
+		/*
 		if(document.getElementById('cbDebug').checked){
 			replevel = 1;
 		}else if (document.getElementById('cbError').checked){
 			replevel = 2;
-		}
-		//var isdebug = document.getElementById('cbDebug').checked?1:0;
-		//var iserror = document.getElementById('cbError').checked?1:0;
+		}*/
 
 		var template_body;
 		if(_isEditorVisible()){
@@ -384,13 +473,14 @@ function ShowReps() {
 
 		if(template_body && template_body.length>10){
 
-				if(Hul.isnull(squery)){
-					squery = _currenQuery;
-				}
+				var squery = _getQuery();
 
 				var baseurl = top.HEURIST.basePath + "viewers/smarty/showReps.php";
 
 				squery = squery + '&replevel='+replevel+'&template_body='+encodeURIComponent(template_body);
+
+				infoMessageBox.setBody("Compiling and execution of updated template. Please wait");
+				infoMessageBox.show();
 
 				top.HEURIST.util.sendRequest(baseurl, function(xhr) {
 					var obj = xhr.responseText;
@@ -418,7 +508,6 @@ function ShowReps() {
 		_isviewer=isviewer;
 		_iseditor=iseditor;
 
-		editorcontainer
 		Dom.get("toolbar").style.display = (iseditor) ?"none" :"block";
 		Dom.get("editorcontainer").style.display = (iseditor) ?"block" :"none";
 
@@ -726,15 +815,20 @@ function ShowReps() {
 		var res= "",
 			insertMode = Dom.get("selInsertMode").value;
 
-		if(insertMode<2){
-			if(insertMode==1){
-				res = nodedata.labelonly+":";
-			}
-			res = res + "{$"+prefix+nodedata.this_id+"}";
+		if(insertMode==0){
+
+			res = "{$"+prefix+nodedata.this_id+"}";
+
+		}else if (insertMode==1){
+
+			res = nodedata.labelonly+": {$"+prefix+nodedata.this_id+"}";
+
 		}else{
-			res = '{out2 lbl="'+nodedata.labelonly+'" var=$'+prefix+nodedata.this_id;
+			//lbl="'+nodedata.labelonly+'"
+			res = '{wrap var=$'+prefix+nodedata.this_id;
 			if(nodedata.dtype === 'file' || nodedata.dtype === 'urlinclude'){
 				res = res + '_originalvalue dt="'+nodedata.dtype+'"';
+				res = res + ' width="300" height="300"';
 			}else{
 			}
 			res = res +'}';
@@ -1099,32 +1193,104 @@ function ShowReps() {
 		return oTextarea;
 	}
 
+	//
+	//
+	//
+	function _insertModifier(modname){
+
+		var textedit = Dom.get("edTemplateBody");
+
+		if (textedit.selectionStart || textedit.selectionStart == '0') {
+
+			//1. detect that cursor inside the variable or wrap function {$ |  }  or {wrap  }
+			var startPos = textedit.selectionStart;
+			var endPos = textedit.selectionEnd;
+
+			//find last { occurence before endPos
+			var k = -1,
+				pos1;
+
+			do{
+				pos1 = k;
+				k = textedit.value.indexOf("{$", k+1);
+			}while (k>=0 && k<endPos);
+
+			if(pos1<0){
+				alert('Place cursor inside variable entry: between {}');
+				return;
+			}
+
+			var pos2 = textedit.value.indexOf("}", pos1);
+			if(pos2<endPos){
+				alert('Place cursor inside variable entry: between {}');
+				return;
+			}
+
+			//2. insert modifier name in the end of {}
+			textedit.value = textedit.value.substring(0, pos2)
+				+ "|"+modname
+				+ textedit.value.substring(pos2, textedit.value.length);
+		}
+	}
+
+	//
+	function _getQuery(){
+		return _isUseAllRecords?_currentQuery_all:_currentQuery_sel;
+	}
+
+
 	//public members
 	var that = {
 
 			getQuery: function(){
-				return _currenQuery;
+				return _getQuery();
 			},
 
-			processTemplate:  function (squery, template_file){
-				_reload(squery, template_file);
+			setQuery: function(q_all, q_sel){
+				_currentQuery_all = q_all;
+				_currentQuery_sel = q_sel;
 			},
 
-			generateTemplate:  function (name, squery){
+			processTemplate: function (template_file){
+				_reload(template_file);
+			},
+
+			isNeedSelection: function(){
+				return _needSelection;
+			},
+
+			isUseAllRecords: function(){
+				return _isUseAllRecords;
+			},
+
+			setUseAllRecords: function(val){
+				_isUseAllRecords = val;
+			},
+
+
+			generateTemplate:  function (name){
+				if(_needSelection){
+					alert('You have to select some records');
+				}else{
 				_needListRefresh = true;
-				_generateTemplate(name, squery, true);
+					_generateTemplate(name, true);
+				}
 			},
 
 			showEditor:  function (template_file){
+				if(_needSelection){
+					alert('You have to select some records');
+				}else{
 				_showEditor(template_file);
+				}
 			},
 
 			operationEditor:  function (action){
 				_operationEditor(action);
 			},
 
-			doExecute: function(squery){
-				_doExecute(squery);
+			doExecuteFromEditor: function(){
+				_doExecuteFromEditor();
 			},
 
 			//insert section type at the cursor position
@@ -1156,6 +1322,10 @@ function ShowReps() {
 			// mark - unmark child nodes
 			markAllChildren:function(varid){
 				_markAllChildren(varid);
+			},
+
+			insertModifier:function(modname){
+				_insertModifier(modname);
 			},
 
 			baseURL:  function (){

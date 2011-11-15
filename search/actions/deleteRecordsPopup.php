@@ -144,7 +144,7 @@ mysql_connection_db_overwrite(DATABASE);
 ?>
 
 <input type="hidden" name="delete" value="1">
-<input class="deleteButton "type="submit" value="delete" onclick="return confirm('ARE YOU SURE YOU WISH TO DELETE THE SELECTED RECORDS, ALONG WITH ALL ASSOCIATED BOOKMARKS?')  &&  confirm('REALLY REALLY SURE?');">
+<input class="deleteButton "type="button" style="color:red !important" value="delete" onClick="return confirm('ARE YOU SURE YOU WISH TO DELETE THE SELECTED RECORDS, ALONG WITH ALL ASSOCIATED BOOKMARKS?')  &&  confirm('REALLY REALLY SURE?');">
 
 </form>
 

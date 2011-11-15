@@ -36,7 +36,7 @@
 		if(array_key_exists('error', $res)){
 			$failure_msg = $res['error'];
 		}else{
-			$success_msg = "Import is successefull";
+			$success_msg = "Import successefull";
 			$res_array = json_format($res);
 		}
 	}
@@ -85,12 +85,13 @@
 
 
    <div class="input-row">
-    	<div class="input-header-cell">Select file to import</div>
+    	<div class="input-header-cell">Select file to import <br>(text file with one term per line)</div>
         <div class="input-cell"><input type="file" name="import_file" style="display:inline-block;"></div>
    </div>
-   <div class="actionButtons" style="padding-left:100px">
+   <div class="actionButtons" style="padding-right:80px">
+   		Terms are imported as children of the currently selected term<p>
    		<input type="button" onclick="window.document.forms[0].submit();" value="Import" style="margin-right:10px">
-   		<input type="button" value="Close window" onClick="window.close(result);"></div>
+   		<input type="button" value="Done" onClick="window.close(result);"></div>
    </div>
   </form>
  </body>

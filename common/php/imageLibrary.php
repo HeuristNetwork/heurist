@@ -17,7 +17,7 @@
  */
  function getRectypeIconURL($rectypeID){
 
-	$name = "common/images/".HEURIST_DBNAME."/rectype-icons/".$rectypeID.".png";
+	$name = HEURIST_ICON_DIR.$rectypeID.".png";
 
 	$filename =  HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.$name;
 	if(!file_exists($filename)){
@@ -38,7 +38,7 @@
  */
  function getRectypeThumbURL($rectypeID){
 
-	$name = "common/images/".HEURIST_DBNAME."/rectype-icons/thumb/th_".$rectypeID.".png";
+	$name = HEURIST_ICON_DIR."thumb/th_".$rectypeID.".png";
 
 	$filename =  HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.$name;
 	if(!file_exists($filename)){

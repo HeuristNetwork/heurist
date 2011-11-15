@@ -23,7 +23,7 @@
 	$mode = intval($_REQUEST['mode']);  //0 - icon, 1 - thumbnail
 
 	$dim = ($mode==0)?16:75;
-	$image_dir = HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.'common/images/'.HEURIST_DBNAME.'/rectype-icons/'.(($mode==0)?'':'thumb/th_');
+	$image_dir = HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.HEURIST_ICON_DIR.(($mode==0)?'':'thumb/th_');
 	$image_url = (($mode==0)?getRectypeIconURL($rt_id):getRectypeThumbURL($rt_id));
 
 	if (!$rt_id) return;

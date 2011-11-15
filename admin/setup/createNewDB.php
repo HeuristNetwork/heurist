@@ -229,51 +229,51 @@
 			$postcode = mysql_escape_string($details[10]);
 			$interests = mysql_escape_string($details[11]);
 
-			// The upload directory should be created by the administrator, not hardcoded in here
-			//     todo: choose or create upload directory during the creation process
 			//     todo: code location of upload directory into sysIdentification, remove from edit form (should not be changed)
 			//     todo: might wish to control ownership rather than leaving it to the O/S, although this works well at present
-			//     todo:  uploaded-heurist-files should not be hardcoded
+
+			$warnings = 0;
 
 			// Create a default upload directory for uploaded files eg multimedia, images etc.
-			$cmdline = "mkdir -p -m a=rwx ".HEURIST_UPLOAD_ROOT.$newDBName;
+			$uploadPath =HEURIST_UPLOAD_ROOT.$newDBName;
+			$cmdline = "mkdir -p -m a=rwx ".$uploadPath;
 			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
-			if ($res2 != 0 ) { // TODO: need better setting and full path info for this error
-				// todo: need to properly trap the error and distiguish different versions. Old uplaod directories
-				// hanging around could cause problems if upload file IDs are duplicated, so should probably NOT
-				// allow their re-use
-				echo ("<h2>Warning:</h2> Unable to create uploaded-heurist-files directory for database $newname<br>&nbsp;<br>");
+			if ($res2 != 0 ) { // TODO: need to properly trap the error and distiguish different versions.
+				// Old uplaod directories hanging around could cause problems if upload file IDs are duplicated,
+				// so should probably NOT allow their re-use
+				echo ("<h2>Warning:</h2> Unable to create $uploadPath directory for database $newDBName<br>&nbsp;<br>");
 				echo ("This may be because the directory already exists or the parent folder is not writable<br>");
-				echo ("Please check/create directory by hand. Consult Heurist helpdesk if needed<br><p>");
+				echo ("Please check/create directory by hand. Consult Heurist helpdesk if needed<br>");
 				echo($output2);
-				// todo: we need to hold the warning here
-				// return false; This is only a warning, should keep going
+				$warnings = 1;
 			}
 
-			// Create a default icon upload directory for uploaded icon and thumbnails.
-			$iconPath = "".HEURIST_ICON_ROOT.$newDBName."/rectype-icons/thumb";
-			$cmdline = "mkdir -p ".$iconPath;
+			// copy icon and thumbnail directories from default set in the program code (sync. with H3CoreDefinitions)
+			$cmdline = "cp -R rectype-icons $uploadPath"; // creates directories and copies icons and thumbnails
 			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
-			if ($res2 != 0 ) { // TODO: need better setting and full path info for this error
-				// todo: need to properly trap the error and distiguish different versions. Old uplaod directories
-				// hanging around could cause problems if upload file IDs are duplicated, so should probably NOT
-				// allow their re-use
-				echo ("<h2>Warning:</h2> Unable to create icon directory ( $iconPath ) <br>&nbsp;<br>");
-				echo ("This may be because the directory already exists or the parent folder is not writable<br>");
-				echo ("Please check/create directory by hand. Consult Heurist helpdesk if needed<br><p>");
+			if ($res2 != 0 ) {
+				echo ("<h2>Warning:</h2> Unable to create/copy record type icons folder rectype-icons to $uploadPath<br>");
+				echo ("If upload directory was created OK, this is probably due to incorrect file permissions on new folders<br>");
 				echo($output2);
-				// todo: we need to hold the warning here
-				// return false; This is only a warning, should keep going
+				$warnings = 1;
 				}
-/* IAN's code
-			$iconPath = "".HEURIST_ICON_ROOT.$newDBName;
-			$cmdline = "chmod -R 774 ".$iconPath;
+			// copy smarty template directory from default set in the program code
+			$cmdline = "cp -R smarty-templates $uploadPath";
 			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
+			if ($res2 != 0 ) {
+				echo ("<h2>Warning:</h2> Unable to create/copy smarty-templates folder to $uploadPath<br>");
+				echo($output2);
+				$warnings = 1;
+				}
+			// copy xsl template directories from default set in the program code
+			$cmdline = "cp -R xsl-templates $uploadPath";
+			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
+			if ($res2 != 0 ) {
+				echo ("<h2>Warning:</h2> Unable to create/copy xsl-templates folder to $uploadPath<br>");
+				echo($output2);
+				$warnings = 1;
+				}
 
-			// copy default set of icons from example database provided with installation
-			$cmdline = "cp ".HEURIST_ICON_ROOT."h3_example_db/*.* " $iconPath; // added 2/11/2011 to prepoulate with icons
-			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
-*/
 			// Make the current user the owner and admin of the new database
 			mysql_connection_db_insert($newname);
 			mysql_query('UPDATE sysUGrps SET ugr_LongName="'.$longName.'", ugr_FirstName="'.$firstName.'",
@@ -282,7 +282,13 @@
 			ugr_City="'.$city.'", ugr_State="'.$state.'", ugr_Postcode="'.$postcode.'",
 			ugr_interests="'.$interests.'" WHERE ugr_ID=2');
 			// TODO: error check, although this is unlikely to fail
-			echo "New database <strong>" . $newname . "</strong> created successfully";
+			echo "<p>New database <strong>" . $newname . "</strong> created successfully";
+
+			if ($warnings == 1) {
+				echo "<h2>Please take note of warnings above</h2>";
+				echo "You must create the folders indicated or uploads, icons and templates will not work<br>";
+				echo "If upload folder is created but icons and template forlders are not, look at file permissions on new folder creation";
+			}
 
 			echo "<p><strong>Admin username:</strong> ".$name."<br />";
 			echo "<strong>Admin password:</strong> &#60;<i>same as account currently logged in to</i>&#62;<p>";
