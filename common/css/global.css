@@ -928,4 +928,3 @@ body.is-not-logged-in #my-records-button.logged-in-only ,body.is-not-logged-in #
 }
 body.is-not-logged-in div.not-logged-in-only {
 	display: block;
-}

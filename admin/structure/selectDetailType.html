@@ -87,6 +87,8 @@
 #toolbar .input-cell select { margin-right:10px}
 .input-row .input-header-cell {vertical-align:baseline}
 .input-row div.input-header-cell {width:50px}
+			#toolbar .input-row div.input-header-cell {min-width:60px}
+			#toolbar .input-row label {min-width:60px; width:60px}
 </style>
 </head>
 
@@ -116,8 +118,8 @@
 			show:
 		</div>
 		<div class="input-cell">
-			<input type="radio" id="inputFilterBySelection1" name="inputFilterBySelection" value="all" checked="checked"/><label for="inputFilterBySelection1">All</label>
-			<input type="radio" id="inputFilterBySelection2" name="inputFilterBySelection" value="selonly"/><label for="inputFilterBySelection2">Selected</label>
+			<input type="radio" id="inputFilterBySelection1" name="inputFilterBySelection" value="all" checked="checked"/><label for="inputFilterBySelection1" style="text-align:left; width:20px; min-width:20px;">All</label>
+			<input type="radio" id="inputFilterBySelection2" name="inputFilterBySelection" value="selonly"/><label for="inputFilterBySelection2" style="text-align:left">Selected</label>
         </div>
 	</div>
 </div>
