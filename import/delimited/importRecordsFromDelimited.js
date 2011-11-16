@@ -244,6 +244,7 @@ FlexImport = (function () {
 					}
 				}
 			};
+
 			// fill in comlumn selector options for recType
 			FlexImport.colSelectors[i] = sel;
 			var columnName = "";
@@ -285,6 +286,10 @@ FlexImport = (function () {
 				var rdName = HDetailManager.getDetailNameForRecordType(FlexImport.recType, detailTypes[d]);
 				var opt = _addOpt(sel, detailTypes[d].getID(),rdName,columnName == rdName.toLowerCase());
 			}
+
+			if(i<FlexImport.cols.length &&  FlexImport.cols[i]){
+				sel.value = FlexImport.cols[i];
+			}
 		}
 
 		// create rest of table filling it with the csv analysed data
@@ -315,6 +320,7 @@ FlexImport = (function () {
 						}
 						var ed = td.appendChild(document.createElement("input"));
 						ed.value = temp;
+						ed.id = "wrin"+i+"_"+j;
 						ed.className = "invalidInput";
 						ed.cleared = false;
 						ed.onfocus = function () {
@@ -325,16 +331,32 @@ FlexImport = (function () {
 						};
 						ed.row = i;
 						ed.col = j;
+						ed.parentTd = td;
 						ed.onblur = function () {
 							if (this.cleared) {
-								FlexImport.fields[this.row][this.col] = this.value;
+								//was FlexImport.fields[this.row][this.col] = this.value;
+								var wrongValue = FlexImport.fields[this.row][this.col];
+								var i, len = FlexImport.fields.length;
+								for (i = 1; i < len; ++i) {
+									if(wrongValue==FlexImport.fields[i][this.col]){
+										FlexImport.fields[i][this.col] = this.value;
+										//find the appropriate input element
+										var inpt = document.getElementById("wrin"+i+"_"+this.col);
+										var parentTd = inpt.parentTd;
+										parentTd.innerHTML = this.value;
+									}
+								}
 							}
 						};
 						var p = td.appendChild(document.createElement("p"));
 						p.className = "errorMsg";
 						p.innerHTML = FlexImport.lineErrorMap[i][j];
 					} else {
-						td.appendChild(document.createTextNode(inputRow[j]));
+						var str = inputRow[j];
+						if(str.length>50){
+							str = str.substring(0,50)+"..";
+						}
+						td.appendChild(document.createTextNode(str));
 					}
 				}
 			}
@@ -354,6 +376,8 @@ FlexImport = (function () {
 		for (i = 0; i < l; ++i) {
 			if (FlexImport.colSelectors[i].selectedIndex > 0) {
 				FlexImport.cols[i] = FlexImport.colSelectors[i].value;
+			}else if(i<FlexImport.cols.length){
+				FlexImport.cols[i] = undefined;
 			}
 			FlexImport.subTypes[i] = FlexImport.colSelectors[i].subTypeSelect ? FlexImport.colSelectors[i].subTypeSelect.value : null;
 			if ( FlexImport.cols[i]  &&  FlexImport.cols[i]!=="tags"   &&  FlexImport.cols[i]!== "wgTags" && FlexImport.cols[i] !== "url" && FlexImport.cols[i] !== "notes") {

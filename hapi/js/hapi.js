@@ -2525,7 +2525,7 @@ var HDetailManager = new function(detailTypes, detailRequirements) {
 		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
 		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object expected for argument #2"); }
 		if (! detailType.checkValue(detailValue)) {
-			throw new HDetailVarietyMismatchException("Expected " + detailType.getVariety() + " value");
+			throw new HDetailVarietyMismatchException("Unexpected value: '"+detailValue+"' for " + detailType.getVariety() + " value");
 		}
 		var details = _recordPlusTypeDetails[recordType.getID()+"."+detailType.getID()];
 		//saw TODO for enum or relationtype check recstructure values
