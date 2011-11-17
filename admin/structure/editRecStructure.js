@@ -55,9 +55,9 @@ function EditRecStructure() {
 		//'<input type="button" value="collapse all" onclick="onCollapseAll()"/>'+
 		//'<input type="button" value="Enable Drag" onclick="onToggleDrag(event)"/></div>'+
 		'<input style="display:none;" type="button" id="btnSaveOrder" value="Save order" onclick="onUpdateStructureOnServer(false)"/>'+
-		'&nbsp;&nbsp;<input type="button" class="add" value="Insert field" onclick="onAddNewDetail()"/>'+
+		'<input type="button" class="add" value="Insert field" onclick="onAddNewDetail()"/>'+
 		// note class=add --> global.css add-button, is set to float:right, but class adds the + to the button
-		'&nbsp;&nbsp;<input type="button" value="New field type" onClick="onDefineNewType()"/>'+
+		'<input type="button" style="margin:0 5px" value="New field type" onClick="onDefineNewType()"/>'+
 		// '<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/>'+
 		'</div>';
 
@@ -1302,15 +1302,15 @@ function onAddNewDetail(){
 		//var pos = this.window.offset();
 		// x: pos.left+$(window).width(),
 		// y: pos.top,
-
+		var dim = top.HEURIST.util.innerDimensions(top);
 		var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 							(top.HEURIST.database.name?top.HEURIST.database.name:''));
 		popupSelect = Hul.popupURL(top, top.HEURIST.basePath +
 		"admin/structure/selectDetailType.html?rty_ID="+editStructure.getRty_ID()+"&db="+db,
 		{	"close-on-blur": false,
 			"no-resize": false,
-			height: '800',
-			width: '450',
+			height: dim.h*0.9,
+			width: dim.w*0.5,
 
 			callback: function(detailTypesToBeAdded) {
 				if(!Hul.isnull(detailTypesToBeAdded)){

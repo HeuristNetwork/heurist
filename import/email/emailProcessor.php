@@ -449,7 +449,7 @@
 ?>
 <html>
     <head>
-		<title>Heurist Email harvester</title>
+		<title>Email harvester</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
     </head>
@@ -459,9 +459,9 @@
 			try{
     if(!isset($_REQUEST['p'])){
         if($senders){
-            echo '<div><b>Processing incoming emails from '.$senders.' ...</b></div>';
+            echo '<div><b><br><p>Processing incoming emails from: '.$senders.' ...</b></div>';
         }else{
-            echo '<div><b>Processing incoming emails ...</b></div>';
+            echo '<div><b><br><p>Processing incoming emails ...</b></div>';
         }
 				?>
         <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" id="process_form">
@@ -478,9 +478,9 @@
 				<?php
     }else{
         if($senders){
-            echo '<b>Processing incoming emails from '.$senders.':</b><br><br>';
+            echo '<br><p><b>Processing incoming emails from: '.$senders.':</b><br><br>';
         }else{
-            echo '<b>Processing incoming emails:</b><br><br>';
+            echo '<br><p><b>Processing incoming emails:</b><br><br>';
         }
         $mail_processor=new EmailProcessor($server, $port, $username, $password, $use_ssl);
         echo '<table style="border: 1px solid black;">';
@@ -499,9 +499,12 @@
 
     }
 			}catch(Exception $e){
-    echo '<b>An error occured: '.$e->getMessage().'</b>';
-			}
-		?>
+    echo '<b>Processing failed with the following message: '.$e->getMessage().'</b>';
+	echo "<p>If the user name and password or IMAP server detaisl are incorrect, you may get 'Login aborted'";
+	echo "<p><a href='../../admin/setup/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."' target='_blank'>
+	<img src='../../common/images/external_link_16x16.gif'/>Configure connection to IMAP mail server</a> (per-database)</p>";
+	}
+	?>
 
     </body>
 </html>

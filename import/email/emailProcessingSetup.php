@@ -29,7 +29,7 @@ if(!is_admin()){
 <html>
 
 <head>
-	<title>Heurist Email harvester</title>
+	<title>Email harvester</title>
 	<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
 
 	<script type="text/javascript">
@@ -61,15 +61,15 @@ if(!is_admin()){
    specific email addresses (set in each user's profile). The emails are dissected
    and used to create Heurist records owned by that user.
    The email server must support IMAP.</p>
-<p><a href="../../admin/setup/editSysIdentification.php?db=<?=HEURIST_DBNAME?>" target="_blank">
+<p><a href="../../admin/setup/editSysIdentificationAdvanced.php?db=<?=HEURIST_DBNAME?>" target="_blank">
 	<img src="../../common/images/external_link_16x16.gif"/>
-   Configure connection to IMAP mail server</a></p>
+   Configure connection to IMAP mail server</a> (per-database)</p>
 
-<p>This function allows the owner of a Heurist database to set up an email
+<p>This function allows a member of the Database Owners of a Heurist database to set up an email
    account to which users of the database can forward emails they receive or copy
    emails that they send, in order to have them archived in the Heurist database.</p>
 <p><a href="#" onClick="_editUser(<?=get_user_id()?>); return false;"> <img src="../../common/images/external_link_16x16.gif"/>
-   Configure email addresses to be harvested</a></p>
+   Configure email addresses to be harvested</a> (per-user)</p>
 
 <p>The default behaviour is to create a record of type Email, but in future this may be
    overriden with commands at the start of the email to create any specifid type, which will also allow tags

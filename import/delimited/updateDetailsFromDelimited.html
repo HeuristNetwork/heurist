@@ -36,6 +36,7 @@
 
 		<script src="../../hapi/js/goi.js"></script>
 		<script src="../../common/js/temporalObjectLibrary.js"></script>
+		<script src="../../external/jquery/jquery-1.6.min.js"></script>
 
 		<script>
 			const recChunk = 10000; // increased from 1000 by ian 24/10/11
@@ -430,11 +431,9 @@
 
 				p.appendChild(table);
 			}
-
 			function popupFieldTypes(){
 				top.HEURIST.search.popupLink(top.HEURIST.baseURL+"admin/structure/manageDetailTypes.html?db="+top.HEURIST.database.name, "wide");
 			}
-
 
 			var arr = [],
 				dty_ID,
@@ -467,7 +466,7 @@
 				}
 			}
 
-
+		
 		</script>
 		<link rel="stylesheet" type="text/css" href= "../../common/css/global.css">
 		<link rel="stylesheet" type="text/css" href= "../../common/css/admin.css">
@@ -483,13 +482,19 @@
 			td select { width: 100px; }
 			td.error { color: red; }
 			#col-select-row td { border: none; padding: 1px 5px 5px 0px; vertical-align: top; }
+			#theList {top:10px; bottom:10px; right:10px; left:auto; overflow:auto;display:none}
+			#fieldList {padding:0 10px}
+			#fieldTypes {display:inline; clear:none; color:blue; width:20px}
+			#fieldTypes:hover div#toolTip2 {visibility:visible; opacity:1}
 		</style>
+		<link rel=stylesheet href="../../common/css/global.css" media="all">
+		<link rel=stylesheet href="../../common/css/admin.css" media="all">
 	</head>
 
 	<body class="popup">
 
-		<!--<h2>Heurist field updater</h2>-->
-		<div id="fieldTypesList" class="tooltip"></div>
+		<h2>Heurist field updater</h2>
+		<div id="theList" class="tooltip"><div class="close-button fieldsToggle" style="right:3px; top:3px"></div><ul id="fieldList"><h3>Field Types</h3></ul></div>
 		<p id=info-p></p>
 		<div id=process-div style="display:none;">
 			<p>The details shown below will be used to update records in the database. Please review before processing.
@@ -508,8 +513,7 @@
 
 			<p>
 
-			The internal field codes are shown on the left of the Field Types listing in database administration- see
-			<a href='#' onClick="popupFieldTypes()" id="fieldTypes">Field types</a> (opens in new window)<br>
+			The internal field codes are shown on the left of the Field Types listing in database administration- see <a href="#" id="fieldTypes" class="fieldsToggle">Field types</a></p>
 
 			Values supplied are added to any existing values for the field. Multiple values can be separated by | (pipe) characters.<br>
 			Values for record pointer fields should be the id of the record to which the pointer points.<br>
@@ -536,6 +540,20 @@
 				<input type=button value=Analyse onClick="analyseCSV();">
 			</div>
 			<div><textarea id=csv-textarea></textarea></div>
+			<script>
+				var fieldList = document.getElementById("fieldList");
+				for (var attr in top.HEURIST.detailTypes.typedefs) 
+				{if(!isNaN(Number([attr]))) 
+				{
+				listItem = fieldList.appendChild(document.createElement("li"));
+				listItem.innerHTML = "<span style=\"margin-right:10px;\">"+top.HEURIST.detailTypes.typedefs[attr].commonFields[0] + "</span><span>" + top.HEURIST.detailTypes.typedefs[attr].commonFields[1] + "</span>";
+					}
+				}
+				
+				$('.fieldsToggle').click(function() {
+					$('#theList').toggle();
+				});
+			</script>
 		</div>
 	</body>
 </html>
