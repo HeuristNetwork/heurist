@@ -573,6 +573,7 @@ class HeuristNativeEntry {
 		if ($this->_title) return $this->_title;
 
 		$mask = $heurist_rectypes[$this->_rectype]['rty_TitleMask'];
+
 		$this->_title = fill_title_mask($mask, $this->getBiblioID(), $this->getReferenceType());
 
 		return $this->_title;
@@ -988,7 +989,7 @@ function load_heurist_rectypes() {
 	$heurist_rectypes = array();
 
 	// mysql_connection_db_select('SHSSERI_bookmarks');
-	$res = mysql_query('select * from join defRecTypes where rty_ID');
+	$res = mysql_query('select * from defRecTypes');
 	while ($row = mysql_fetch_assoc($res)) {
 		// fix up the title masks
 

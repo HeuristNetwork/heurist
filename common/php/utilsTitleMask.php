@@ -73,6 +73,7 @@ function fill_title_mask($mask, $rec_id, $rt) {
 global $titleDT;
 	/* Fill the title mask for the given records record */
 
+	///mask not defined - take value from fieldtype "dt_title"
 	if (! $mask) return trim(_title_mask__get_field_value($titleDT, $rec_id, $rt));
 
 	if (! preg_match_all('/\s*\\[\\[|\s*\\]\\]|(\\s*(\\[\\s*([^]]+)\\s*\\]))/s', $mask, $matches))

@@ -4,7 +4,9 @@
 //define('_PREF', 'c:/xampp/');
 define('_PREF', '/var/www/');
 
-define('SMARTY_DIR', _PREF.'htdocs/smarty/Smarty-3.0.7/libs/');
+//define('SMARTY_DIR', _PREF.'htdocs/smarty/Smarty-3.0.7/libs/');
+
+define('SMARTY_DIR', dirname(__FILE__).'/../../external/Smarty-3.0.7/libs/');
 
 
 require_once(SMARTY_DIR.'Smarty.class.php');
@@ -34,11 +36,21 @@ if(!file_exists(HEURIST_SMARTY_TEMPLATES_DIR."configs/")){
     	die('Failed to create folder for smarty templates');
 	}
 }
+if(!file_exists(HEURIST_SMARTY_TEMPLATES_DIR."templates_c/")){
+	if (!mkdir(HEURIST_SMARTY_TEMPLATES_DIR."templates_c/", 0777, true)) {
+    	die('Failed to create folder for smarty templates');
+	}
+}
+if(!file_exists(HEURIST_SMARTY_TEMPLATES_DIR."cache/")){
+	if (!mkdir(HEURIST_SMARTY_TEMPLATES_DIR."cache/", 0777, true)) {
+    	die('Failed to create folder for smarty templates');
+	}
+}
 
 $smarty->template_dir = HEURIST_SMARTY_TEMPLATES_DIR;
 $smarty->config_dir   = HEURIST_SMARTY_TEMPLATES_DIR."configs/";
-$smarty->compile_dir  = _PREF.'htdocs/smarty/sandpit5/templates_c/';
-$smarty->cache_dir    = _PREF.'htdocs/smarty/sandpit5/cache/';
+$smarty->compile_dir  = HEURIST_SMARTY_TEMPLATES_DIR.'templates_c/';
+$smarty->cache_dir    = HEURIST_SMARTY_TEMPLATES_DIR.'cache/';
 
 //error_log(">>>>>".HEURIST_SMARTY_TEMPLATES_DIR);
 

@@ -1060,6 +1060,8 @@ function mode_entry_insertion() {
 <?php
 	set_progress_bar_title('Preparing database entries');
 
+	$creatorDT = define('DT_CREATOR')?DT_CREATOR:0;
+
 	$j = 0;
 	foreach (array_keys($session_data['out_entries']) as $i) {
 		$entry = &$session_data['out_entries'][$i];
@@ -1077,7 +1079,7 @@ function mode_entry_insertion() {
 
 			foreach (array_keys($fields) as $i) {
 				if (! $fields[$i]->getValue()) continue;
-				if ($fields[$i]->getType() == 158) {//MAGIC NUMBER
+				if ($fields[$i]->getType() ==  $creatorDT) {//MAGIC NUMBER 158
 					// an author: cook the value -- could be several authors
 					process_author($fields[$i]);
 					foreach ($fields[$i]->getValue() as $person_bib_id) {
@@ -1500,6 +1502,8 @@ function find_similar_entries(&$entry) {
 	if ($entry->getReferenceType() == 44  ||  $entry->getReferenceType() == 28) {	// a publication series or journal volume
 		$hash = $entry->getHHash();
 		$hashColumn = "rec_Hash";
+	}else{
+		return;
 	}
 	$hash_len = intval(strlen($hash) * HASH_FUZZINESS);
 
@@ -1655,7 +1659,7 @@ function insert_biblio(&$entry) {
 		unset($field);
 		$field = &$bib_details[$i];
 
-error_log(">>>>>> dtType=".$field->getType());
+//error_log(">>>>>> dtType=".$field->getType());
 
 		if ($field->getType() == $creatorDT) {//MAGIC NUMBER - Author/Creator
 			foreach ($field->getValue() as $person_bib_id) {
@@ -1685,12 +1689,13 @@ error_log(">>>>>> dtType=".$field->getType());
 		$bib_detail_insert = 'insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_Geo, dtl_AddedByImport) values '
 		                                             . $bib_detail_insert;
 
-error_log(">>>>>>".$bib_detail_insert);
+//error_log(">>>>>>".$bib_detail_insert);
 		mysql_query($bib_detail_insert);
 	}
 
+	$recTitle = $entry->getTitle();
 	mysql_query('set @suppress_update_trigger := 1');
-	mysql_query('update Records set rec_Title = "'.addslashes($entry->getTitle()).'", rec_Hash = hhash(rec_ID) where rec_ID='.$rec_id);
+	mysql_query('update Records set rec_Title = "'.addslashes($recTitle).'", rec_Hash = hhash(rec_ID) where rec_ID='.$rec_id);
 	mysql_query('set @suppress_update_trigger := NULL');
 }
 

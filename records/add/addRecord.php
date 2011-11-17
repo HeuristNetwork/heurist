@@ -49,6 +49,7 @@ if (@$_REQUEST['bkmrk_bkmk_url']  &&  ! @$_REQUEST['rec_rectype'])
 
 
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
+require_once(dirname(__FILE__)."/../../records/files/saveURLasFile.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 require_once(dirname(__FILE__).'/../disambig/testSimilarURLs.php');
 require_once(dirname(__FILE__).'/../woot/woot.php');
@@ -244,7 +245,8 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 		}
 	}
 //if no similar url's and recID was -1 then force a new record of rec_rectype supplied
-	if (! $rec_id  ||  $force_new) {
+
+	if (!$rec_id  ||  (@$force_new && $force_new)) {
 		$isNewRecID = true;
 		$rt = intval($_REQUEST['rec_rectype']);
 		if (! $rt) {
@@ -293,6 +295,11 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 		if ($inserts) mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ' . join(",", $inserts));
 
 		if ($description) insert_woot_content($rec_id, $description);
+
+		//artem - add auto thumbnail creation
+		if ($url && $rt == RT_INTERNET_BOOKMARK) {
+			insert_thumbnail_content($rec_id, $url);
+		}
 	}
 } // end pre-processing of url
 
@@ -338,6 +345,7 @@ if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 	if ($inserts) mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ' . join(",", $inserts));
 
 	if ($description) insert_woot_content($rec_id, $description);
+
 }
 
 // there is a record and it wasn't forced directly   //SAW shouldn't this test rfw_NewRecID
@@ -507,5 +515,18 @@ function check_rectype_exist($rt) {
 		}
 	}
 	return false;
+}
+
+//artem - generate thumbnail and insert detail about it
+function insert_thumbnail_content($recid, $url){
+
+	if(defined('DT_THUMBNAIL')){
+
+		$res = generate_thumbnail($url, false);
+
+		if(!array_key_exists("error", $res)){
+			mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_UploadedFileID) values ('.$recid.','.DT_THUMBNAIL.','.$res['file']['0'].')');
+		}
+	}
 }
 ?>

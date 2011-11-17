@@ -689,6 +689,10 @@ top.HEURIST.edit = {
 			alert('Specify URL first');
 			return;
 		}
+		if (sURL.indexOf('https:')==0){
+			alert('https protocol is not supported for thumbnail generation');
+			return;
+		}
 
 		top.HEURIST.util.startLoadingPopup();
 

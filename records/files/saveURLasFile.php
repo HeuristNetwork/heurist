@@ -31,58 +31,81 @@ if (! defined("USING-XSS")) {
 
 	if ($_POST["heurist-sessionid"] != $_COOKIE["heurist-sessionid"]) {	// saw TODO: check that this is ok or should this be the database session?
 		// saveFile is only available through dispatcher.php, or if heurist-sessionid is known (presumably only our scripts will know this)
-		jsonError("unauthorised HAPI user");
+		getError("unauthorised HAPI user");
 	}
 }
 */
 
-if (! is_logged_in()) {
-	jsonError("no logged-in user");
+if(@$_REQUEST['url']){
+	$sURL = $_REQUEST['url'];
+	$res = generate_thumbnail($sURL, true);
+	print json_format($res);
 	exit;
 }
+//
+// main function
+//
+function generate_thumbnail($sURL, $needConnect){
 
-$sURL = $_REQUEST['url'];
+	if (! is_logged_in()) {
+		return getError("no logged-in user");
+	}
 
-//get picture from service
+	$res = array();
+	//get picture from service
+	//"http://www.sitepoint.com/forums/image.php?u=106816&dateline=1312480118";
+	$remote_path =  str_replace("[URL]", $sURL, WEBSITE_THUMBNAIL_SERVICE);
+	$heurist_path = tempnam(HEURIST_UPLOAD_DIR, "_temp_"); // . $file_id;
 
-//"http://www.sitepoint.com/forums/image.php?u=106816&dateline=1312480118";
-$remote_path =  str_replace("[URL]", $sURL, WEBSITE_THUMBNAIL_SERVICE);
-$heurist_path = tempnam(HEURIST_UPLOAD_DIR, "_temp_"); // . $file_id;
+	//error_log("22222 WE ARE HERE! ".$remote_path."   ".$heurist_path);
 
-//error_log("22222 WE ARE HERE! ".$remote_path."   ".$heurist_path);
+	$filesize = save_image($remote_path, $heurist_path);
 
-$filesize = save_image($remote_path, $heurist_path);
+	//error_log(">>>>>SAVED SIZE=".$filesize);
 
-//error_log(">>>>>SAVED SIZE=".$filesize);
+	if($filesize>0){
 
-if($filesize>0){
+		//check the dimension of returned thumbanil in case it less than 50 - consider it as error
+		if(strpos($remote_path, substr(WEBSITE_THUMBNAIL_SERVICE,0,24))==0){
 
-mysql_connection_db_overwrite(DATABASE);
+			$image_info = getimagesize($heurist_path);
+			if($image_info[1]<50){
+				//remove temp file
+				unlink($heurist_path);
+				return getError("Thumbnail genetator service can't create the image for specified URL");
+			}
+		}
 
-mysql_query("start transaction");
+		if($needConnect){
+			mysql_connection_db_overwrite(DATABASE);
+		}
 
-$fileID = upload_file("snapshot", "image/jpeg", $heurist_path, null, $filesize, $sURL);
+		mysql_query("start transaction");
 
-if ($fileID) {
-	$res = mysql_query("select * from recUploadedFiles where ulf_ID = $fileID");
-	$file = mysql_fetch_assoc($res);
-	//$thumbnailURL = HEURIST_URL_BASE."common/php/resizeImage.php?db=".HEURIST_DBNAME."&ulf_ID=" . $file["ulf_ObfuscatedFileID"];
-	$URL = HEURIST_URL_BASE."records/files/downloadFile.php/" . urlencode($file["ulf_OrigFileName"]) . "?db=".HEURIST_DBNAME."&ulf_ID=" . $file["ulf_ObfuscatedFileID"];
-//error_log("url = ". $URL);
-	print json_format(array("file" => array(	// file[0] => id , file [1] => origFileName, etc...
-		$file["ulf_ID"], $file["ulf_OrigFileName"], $file["ulf_FileSizeKB"], $file["ulf_MimeExt"], $URL, $URL, $file["ulf_Description"]
-	)));
-	mysql_query("commit");
+		$fileID = upload_file("snapshot", "image/jpeg", $heurist_path, null, $filesize, $sURL);
+
+		if ($fileID) {
+			$res = mysql_query("select * from recUploadedFiles where ulf_ID = $fileID");
+			$file = mysql_fetch_assoc($res);
+			//$thumbnailURL = HEURIST_URL_BASE."common/php/resizeImage.php?db=".HEURIST_DBNAME."&ulf_ID=" . $file["ulf_ObfuscatedFileID"];
+			$URL = HEURIST_URL_BASE."records/files/downloadFile.php/" . urlencode($file["ulf_OrigFileName"]) . "?db=".HEURIST_DBNAME."&ulf_ID=" . $file["ulf_ObfuscatedFileID"];
+		//error_log("url = ". $URL);
+			$res = array("file" => array(	// file[0] => id , file [1] => origFileName, etc...
+				$file["ulf_ID"], $file["ulf_OrigFileName"], $file["ulf_FileSizeKB"], $file["ulf_MimeExt"], $URL, $URL, $file["ulf_Description"]
+			));
+			mysql_query("commit");
+		}
+		else {
+			$res = getError("File upload was interrupted");
+		}
+
+	//error_log("22222 FILE ID=".$fileID);
+	}else{
+		$res = getError("Can't download image");
+	}
+
+	return $res;
 }
-else {
-	jsonError("file upload was interrupted");
-}
-
-//error_log("22222 FILE ID=".$fileID);
-}else{
-	jsonError("Can't download image");
-}
-
 
 //***** END OF OUTPUT *****/
 function save_image3($inPath, $outPath){
@@ -115,13 +138,15 @@ function save_image($inPath, $outPath)
 return filesize($outPath);
 }
 
-
-
-function jsonError($message) {
+//
+//
+function getError($message) {
 	mysql_query("rollback");
-	print "{\"error\":\"" . addslashes($message) . "\"}";
+	return array("error" => addslashes($message));
 }
 
+//
+//
 function upload_file($name, $type, $tmp_name, $error, $size, $description) {
 	/* Check that the uploaded file has a sane name / size / no errors etc,
 	 * enter an appropriate record in the recUploadedFiles table,
