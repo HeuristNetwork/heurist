@@ -2702,8 +2702,8 @@ top.HEURIST.search = {
 
 	fixDuplicates: function() {
 		var bib_ids = top.HEURIST.search.getSelectedRecIDs().get();
-		if (bib_ids.length === 0) {
-			alert("Select at least one record to fix duplicates");
+		if (bib_ids.length < 2 ) {
+			alert("Select at least two records to merge duplicate records");
 		} else {
 			window.location.href = top.HEURIST.basePath+"admin/verification/combineDuplicateRecords.php?bib_ids=" + bib_ids.join(",") + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
 		}

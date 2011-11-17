@@ -176,21 +176,20 @@
 							<li><a href="../import/importerFramework.php?format=BIB" name="auto-popup"  class="seperator" title="Import bibliographic exchange format files">Import bibliographic</a></li>
 							<li><a href="../import/importerFramework.php?format=GEO" name="auto-popup" title="Import KML files">Import geographic</a></li>
 							<li><a href="../import/delimited/importRecordsFromDelimited.html" name="auto-popup" onClick="this.href = top.HEURIST.baseURL +'import/delimited/importRecordsFromDelimited.html?db=' + database;" title="Import a delimited text file of data for one record type" target="_blank">Import delimited</a></li>
+							<li class="admin-only"><a href="../import/delimited/updateDetailsFromDelimited.html" onClick="this.href = top.HEURIST.baseURL +'import/delimited/updateDetailsFromDelimited.html?db=' + database;" target="_blank" title="Update record details using delimited text" name="auto-popup">Update fields from CSV</a></li>
+
 							<!-- separator-->
-							<li><a href="?ver=1&amp;w=bookmark&amp;q=-tag&amp;label=Bookmarks+without+tags" class='seperator' title="Find bookmarks which you have not tagged">Bookmarks without tags</a></li>
+							<li><a href="?ver=1&amp;w=bookmark&amp;q=-tag&amp;label=Bookmarks+without+tags" class='seperator' title="Find bookmarks which you have not tagged">Bookmarks w/o tags</a></li>
 							<!-- separator-->
 
-							<li class="admin-only"><a href="../admin/setup/straightCopyDatabase.php" onClick="this.href = top.HEURIST.baseURL +'admin/setup/straightCopyDatabase.php?db=' + database;" target="_blank" title="Copy current database to an identical copy with a new name" class="seperator">Copy database verbatim</a></li>
-
-							<li class="admin-only"><a href="../import/delimited/updateDetailsFromDelimited.html" onClick="this.href = top.HEURIST.baseURL +'import/delimited/updateDetailsFromDelimited.html?db=' + database;" target="_blank" title="Update record details using delimited text" class="seperator" name="auto-popup">Detail updater</a></li>
-
+							<li class="admin-only"><a href="../admin/setup/straightCopyDatabase.php" onClick="this.href = top.HEURIST.baseURL +'admin/setup/straightCopyDatabase.php?db=' + database;" target="_blank" title="Copy current database to an identical copy with a new name" class="seperator">Verbatim db copy</a></li>
 
 
 							<!--<li class="admin-only"><a href="#" target="_blank" onClick="this.href = top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database;" title="Export records as delimited text">Export delimited</a></li>-->
-							<li class="admin-only"><a href="#" onClick="top.HEURIST.search.popupLink(top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database);" title="Export records as delimited text">Export delimited</a></li>
-			  <li><a href="#" id=result-style-icons-link title="Generate HML for current set of search results" onClick="top.HEURIST.search.exportHML(true);" >Export HML for All</a></li>
-			  <li><a href="#" id=result-style-icons-link title="Generate HML for selected set of search results" onClick="top.HEURIST.search.exportHML(false);">Export HML for selected</a></li>
-						  <li><a href="#" id=result-style-icons-link title="Generate KML for selected set of search results" onClick="top.HEURIST.search.exportKML(false);">Export KML for selected</a></li>
+							<li class="admin-only"><a href="#" onClick="top.HEURIST.search.popupLink(top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database);" title="Export records as delimited text">Export delim (filtered)</a></li>
+			  				<li><a href="#" id=result-style-icons-link title="Generate HML for current set of search results" onClick="top.HEURIST.search.exportHML(true);" >Export HML (resultset)</a></li>
+			  				<li><a href="#" id=result-style-icons-link title="Generate HML for selected set of search results" onClick="top.HEURIST.search.exportHML(false);">Export HML (selected)</a></li>
+						  	<li><a href="#" id=result-style-icons-link title="Generate KML for selected set of search results" onClick="top.HEURIST.search.exportKML(false);">Export KML (selected)</a></li>
 
 							<!-- separator-->
 						</ul>
@@ -262,28 +261,28 @@
 						<ul id="tabs" class="horizontal not-query-collected">
 							<li><span>Search</span>
 								<ul>
-									<li><a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">Advanced Search</a></li>
-									<li><a href="../help/advanced_search.html" title="Detailed description of the syntax for advanced search strings" target=_blank>Help</a></li>
-              <li><a href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members" onClick="top.HEURIST.util.popupURL(window, 'saved/saveSearchPopup.html'); return false;">Save search to...</a></li>
-              <!-- only prints first couple of records
-									<li><a href="#" onClick="top.HEURIST.search.printResultRow()" title="Print search results">Print</a></li>
-              -->
+									<li><a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">Advanced search</a></li>
+									<li><a href="../help/advanced_search.html" title="Detailed description of the syntax for advanced search strings" target=_blank>Advanced search help</a></li>
+              						<li><a href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members" onClick="top.HEURIST.util.popupURL(window, 'saved/saveSearchPopup.html'); return false;">Save search as ...</a></li>
+
+									<!-- Coomenting out the following line breaks the search page, but we don't want it!!! TO REMOVE -->
 									<li id=publish-image-placeholder></li>
-									<li><a href="#" onClick="top.HEURIST.search.openSelected()" title="Launch selected records in a new search window">Selected to new window</a></li>
+
+									<li><a href="#" onClick="top.HEURIST.search.openSelected()" title="Launch selected records in a new search window">Open selection in new window</a></li>
 								</ul>
 							</li>
 							<li><span>Edit</span>
 								<ul>
 									<li><a href="#" onClick="top.HEURIST.search.selectAll()" title="Select All on page" id="selectRecords">Select all on page</a></li>
 									<li><a href="#" onClick="top.HEURIST.search.deselectAll()" title="Clear selection">Select none</a></li>
-									<li><a href="#" onClick="top.HEURIST.search.addRemoveTagsPopup(true); return false;" title="Select one or more records, then click to add or remove tags">Tag</a></li>
-									<li><a href="#" onClick="top.HEURIST.search.setRatingsPopup(); return false;" title="Select one or more records, then click to set ratings">Rate</a></li>
-									<li><a href="#" onClick="top.HEURIST.search.addRelationshipsPopup(); return false;" title="Select one or more records, then click to add relationships">Relate</a></li>
+									<li><a href="#" onClick="top.HEURIST.search.addRelationshipsPopup(); return false;" title="Select one or more records, then click to add relationships" class="seperator">Relate to ...</a></li>
+									<li><a href="#" onClick="top.HEURIST.search.addRemoveTagsPopup(true); return false;" title="Select one or more records, then click to add or remove tags" class="seperator">Tag</a></li>
+									<li><a href="#" onClick="top.HEURIST.search.setRatingsPopup(); return false;" title="Select one or more records, then click to set ratings" >Rate</a></li>
 									<li><a href="#" onClick="top.HEURIST.search.addBookmarks(); return false;" title="Select one or more records, then click to bookmark">Bookmark</a></li>
-									<li><a href="#" onClick="top.HEURIST.search.deleteBookmarks(); return false;" title="Select one or more records, then click to remove bookmarks">Remove bookmarks</a></li>
-									<li><a href="#" onClick="top.HEURIST.search.deleteBiblios(); return false;" title="Select one or more records, then click to delete" class="seperator">Delete</a></li>
-									<li><a href="#" onClick="top.HEURIST.search.fixDuplicates(); return false;" title="Select one or more records, then click to fix duplicates">Merge</a></li>
-									<li><a href="#" onClick="top.HEURIST.search.collectDuplicates(); return false;" title="Click to identify possible duplicates in the current query and create collections for each set">Identify duplicates</a></li>
+									<li><a href="#" onClick="top.HEURIST.search.deleteBookmarks(); return false;" title="Select one or more records, then click to remove bookmarks">Un-bookmark</a></li>
+									<li><a href="#" onClick="top.HEURIST.search.deleteBiblios(); return false;" title="Select one or more records, then click to delete">Delete</a></li>
+									<li><a href="#" onClick="top.HEURIST.search.collectDuplicates(); return false;" title="Click to identify possible duplicates in the current query and create collections for each set"class="seperator">Identify duplicates (within search results)</a></li>
+									<li><a href="#" onClick="top.HEURIST.search.fixDuplicates(); return false;" title="Select one or more records, then click to identify/fix duplicates">Merge selected</a></li>
 								</ul>
 							</li>
 							<li><span id=collection-label title="Select records and click collect to add to a temporary collection which can later be saved as a search." >Collect&nbsp;&nbsp;</span><span class="collected-shown" style="display:inline"></span>
@@ -298,9 +297,8 @@
 							<li><span>Share</span>
 								<ul>
 									<li><a href="#" onClick="top.HEURIST.search.setWorkgroupPopup(); return false;" title="Select one or more records, then click to set workgroup ownership and visibility">Set workgroup</a></li>
-									<li><a href="#" onClick="top.HEURIST.search.addRemoveKeywordsPopup(); return false;" title="Select one or more records, then click to add or remove workgroup tags">Workgroup Tag</a></li>
+									<li><a href="#" onClick="top.HEURIST.search.addRemoveKeywordsPopup(); return false;" title="Select one or more records, then click to add or remove workgroup tags">Tag for workgroup</a></li>
 									<li><a href="#" onClick="top.HEURIST.search.notificationPopup(); return false;" title="Select one or more records, then click to send notification">Notify (email)</a></li>
-									<li><a name="auto-popup" class="small" href="../viewers/map/mapMenu.html" Title="Map Search Results">Publish Map</a></li>
 								</ul>
 							</li>
 							<li><span>View</span>
@@ -314,7 +312,7 @@
 									<!--  todo: required by Steven 1/11/11: set the query and the databsae above
 									also, provide this in the Advanced pulldown to render the current selection
 									-->
-									<li><a href="#" id="resetLayout" title="Resets all panels to default width and visibility" class="seperator">Reset Layout</a></li>
+									<li><a href="#" id="resetLayout" title="Resets all panels to default width and visibility" class="seperator">Reset layout</a></li>
 								</ul>
 							</li>
 						</ul>
