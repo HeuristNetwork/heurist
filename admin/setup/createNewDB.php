@@ -275,7 +275,7 @@
 				}
 
 			// create a settings space for files such as import mappings
-			$cmdline = "mkdir $uploadPath"."settings";
+			$cmdline = "mkdir $uploadPath/settings";
 			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 			if ($res2 != 0 ) {
 				echo ("<h2>Warning:</h2> Unable to create settings directory $uploadPath"."settings (used to store import mappings and the like)<br>");
@@ -284,7 +284,7 @@
 				}
 
 			// create a scratch space for teemporary files
-			$cmdline = "mkdir $uploadPath"."scratch";
+			$cmdline = "mkdir $uploadPath/scratch";
 			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 			if ($res2 != 0 ) {
 				echo ("<h2>Warning:</h2> Unable to create scratch directory $uploadPath"."scratch (used to store temporary files)<br>");
