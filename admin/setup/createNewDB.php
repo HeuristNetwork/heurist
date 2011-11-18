@@ -274,6 +274,24 @@
 				$warnings = 1;
 				}
 
+			// create a settings space for files such as import mappings
+			$cmdline = "mkdir $uploadPath"."settings";
+			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
+			if ($res2 != 0 ) {
+				echo ("<h2>Warning:</h2> Unable to create settings directory $uploadPath"."settings (used to store import mappings and the like)<br>");
+				echo($output2);
+				$warnings = 1;
+				}
+
+			// create a scratch space for teemporary files
+			$cmdline = "mkdir $uploadPath"."scratch";
+			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
+			if ($res2 != 0 ) {
+				echo ("<h2>Warning:</h2> Unable to create scratch directory $uploadPath"."scratch (used to store temporary files)<br>");
+				echo($output2);
+				$warnings = 1;
+				}
+
 			// Make the current user the owner and admin of the new database
 			mysql_connection_db_insert($newname);
 			mysql_query('UPDATE sysUGrps SET ugr_LongName="'.$longName.'", ugr_FirstName="'.$firstName.'",
