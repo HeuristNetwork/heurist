@@ -1878,6 +1878,12 @@ div.recorddiv:hover {
 	background:-moz-linear-gradient(center top, #F0F0F0, #FFF) repeat scroll 0 0 transparent;
 	background:-webkit-gradient(linear, left top, left bottom, from(#F0F0F0), to(#FFF));
 }
+#results > div.related-results {
+	padding-top:40px;
+}
+#results > div.related-results.collapsed {
+	padding-top:20px;
+}
 #results #results-level0 {padding-top:20px}
 div.filter .showrelated {
 	padding-left:0;

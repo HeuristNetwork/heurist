@@ -296,7 +296,7 @@ top.HEURIST.search = {
 			resultsDiv = document.createElement("div");
 			resultsDiv.id = "results-level" + level;
 			$(resultsDiv).attr("level",level);
-			resultsDiv.className = "icons"; //saw TODO: change this to get preference
+			resultsDiv.className = "icons related-results"; //saw TODO: change this to get preference
 			document.getElementById("results").appendChild(resultsDiv);
 		}else{
 			resultsDiv =resultsDiv.get(0);
