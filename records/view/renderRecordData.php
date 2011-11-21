@@ -88,10 +88,10 @@ function link_open(link) {
 }
 
 function add_sid() {
-	if (top.HEURIST  &&  top.HEURIST.search  &&  top.HEURIST.search.sid) {
+	if (top.HEURIST  &&  top.HEURIST.search  &&  top.HEURIST.search.results.querySid) {
 		var e = document.getElementById("edit-link");
 		if (e) {
-			e.href = e.href.replace(/editRecord\.html\?/, "editRecord.html?sid="+top.HEURIST.search.sid+"&");
+			e.href = e.href.replace(/editRecord\.html\?/, "editRecord.html?sid="+top.HEURIST.search.results.querySid+"&");
 		}
 	}
 

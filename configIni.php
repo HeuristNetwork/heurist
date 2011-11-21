@@ -22,14 +22,14 @@ $dbHost = ""; // required
 // MySQL user with full write (create) access on this database server
 // The default installation of MySql gives you "root" as the master user with whatever password you set up for this,
 // but you can specify another user and password with full access if preferred
-$dbAdminUsername = "root"; // required
+$dbAdminUsername = ""; // required
 $dbAdminPassword = ""; //required
 
 // MySQL user with readonly access on this database server
 // For example, if there is a user account "readonly" with a password "readonlypwd", then you would use:
 // $dbReadonlyUsername = "readonly";
 // $dbAReadonlyPassword = "readonlypwd";
-$dbReadonlyUsername = "root"; // required
+$dbReadonlyUsername = ""; // required
 $dbReadonlyPassword = ""; //required
 
 // dbPrefix will be prepended to all database names so that you can easily distinguish Heurist databases on your database server
@@ -57,6 +57,17 @@ $passwordForDatabaseCreation=""; // blank = any logged in user can create
 // defaults to root document directory/HEURIST_FILESTORE/dbname
 $defaultRootFileUploadPath = ""; // recommended
 
+// The Document root  relative pathname of a directory where Heurist can store uploaded
+// icons eg. .png for rectypes. PHP must be able to create subdirectories off this directory
+// for each Heurist database and write files within them.
+// For instance, if you would like to upload to /var/www/htdocs/myUploadDir/myDB/rectype-icons/
+// assuming that /var/www/htdocs is the sites document root then use
+// $siteRelativeIconUploadBasePath = "/myUploadDir/";  BE SURE TO INCLUDE THE TRAILING "/"
+// Then, when running Heurist with db=main, uploaded icons will be loaded into
+// /var/www/htdocs/myUploadDir/main/rectype-icons/
+// defaults /HEURIST_FILESTORE/
+$siteRelativeIconUploadBasePath = ""; // recommended
+
 // [email]
 
 // email address for the system administrator/installer of Heurist
@@ -76,7 +87,7 @@ $parentIni = dirname(__FILE__)."/../heuristConfigIni.php";
 if (is_file($parentIni)){
 	include_once($parentIni);
 }
-
+$defaultRootFileUploadPath = "";
 // URL of 3d party website thumbnail service
 $websiteThumbnailService = "http://immediatenet.com/t/m?Size=1024x768&URL=[URL]";
 $websiteThumbnailUsername = "";

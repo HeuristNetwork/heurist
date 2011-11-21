@@ -416,20 +416,19 @@ function updateTermData() {
 	// and set all depths to zero
 	mysql_query("update defTerms set trm_ChildCount = 0, trm_Depth = 0");
 	// update child counts
-	mysql_query("update defTerms c
-				join (select distinct a.trm_ID as ID, count(b.trm_ID) as cnt
-						from defTerms b
-						left join defTerms a on b.trm_ParentTermID = a.trm_ID
-						where a.trm_ID is not null and not b.trm_ID = a.trm_ID
-						group by a.trm_ID) temp on temp.ID = c.trm_ID
-				set c.trm_ChildCount = temp.cnt");
+	mysql_query("update defTerms c ".
+					"join (select distinct a.trm_ID as ID, count(b.trm_ID) as cnt ".
+							"from defTerms b left join defTerms a on b.trm_ParentTermID = a.trm_ID ".
+							"where a.trm_ID is not null and not b.trm_ID = a.trm_ID ".
+							"group by a.trm_ID) temp on temp.ID = c.trm_ID ".
+					"set c.trm_ChildCount = temp.cnt");
 
 	function getChildTerms($parentID){
 		$children = array();
 		if ($parentID == "top") {
-			$whereClause = "trm_ParentTermID is null";
+			$whereClause = "trm_ParentTermID is null or trm_ParentTermID = 0";
 		}else{
-			$whereClause = "trm_ParentTermID = $parentID";
+			$whereClause = "trm_ParentTermID = ".$parentID;
 		}
 		$res = mysql_query("select trm_ID,trm_ChildCount from defTerms where $whereClause");
 		// if we have an error or found nothing return null
@@ -453,8 +452,9 @@ function updateTermData() {
 //error_log(" childID list = $childIDList");
 		$depth = $parentDepth + 1;
 		// set every childs depth
-		$query = "update defTerms set trm_Depth = $depth where trm_ID in($childIDList)";
+		$query = "update defTerms set trm_Depth = ".$depth." where trm_ID in(".$childIDList.")";
 		mysql_query($query);
+//error_log("query = $query and errors ".mysql_error());
 		foreach ($children as $childID => $childCount){
 			if ($childCount) {
 				setChildDepth($childID,$depth);
@@ -667,7 +667,7 @@ function getAllRectypeConstraint() {
 					rcs_TargetRectypeID as trgID,
 					rcs_TermLimit as max,
 					trm_Depth as level,
-					if(trm_ChildCount > 0, true, false) as hasCildren
+					if(trm_ChildCount > 0, true, false) as hasChildren
 				from defRelationshipConstraints
 					left join defTerms on rcs_TermID = trm_ID
 				order by rcs_SourceRectypeID is null,
@@ -680,26 +680,41 @@ function getAllRectypeConstraint() {
 	$res = mysql_query($query);
 	$cnstrnts = array();
 	while ($row = mysql_fetch_assoc($res)) {
-		$srcID = (@$row['srcID'] === null ? "".'0' : $row['srcID']);
-		$trmID = (@$row['trmID'] === null ? "".'0' : $row['trmID']);
-		$trgID = (@$row['trgID'] === null ? "".'0' : $row['trgID']);
-		$max = (@$row['max'] === null ? '' : $row['max']);
+//		$srcID = (@$row['srcID'] === null ? "".'0' : $row['srcID']);
+//		$trmID = (@$row['trmID'] === null ? "".'0' : $row['trmID']);
+//		$trgID = (@$row['trgID'] === null ? "".'0' : $row['trgID']);
+//		$max = (@$row['max'] === null ? '' : $row['max']);
+		$srcID = (@$row['srcID'] === null ? "any" : $row['srcID']);
+		$trmID = (@$row['trmID'] === null ? "any" : $row['trmID']);
+		$trgID = (@$row['trgID'] === null ? "any" : $row['trgID']);
+		$max = (@$row['max'] === null ? 'unlimited' : $row['max']);
+		$hasChildren = $row['hasChildren'];
 		if (!@$cnstrnts[$srcID]) {
-			$cnstrnts[$srcID] = array();
+			$cnstrnts[$srcID] = array('byTerm'=>array(),'byTarget'=>array());
 		}
-		if (!@$cnstrnts[$srcID][$trmID] || @$cnstrnts[$srcID][$trmID]['inheritCnstrnt']) {
-			if(@$cnstrnts[$srcID][$trmID]['inheritCnstrnt']) {	// term has a defined constratin so override the inheritted
-				unset($cnstrnts[$srcID][$trmID]);
+		if (!@$cnstrnts[$srcID]['byTerm'][$trmID]) {
+			$cnstrnts[$srcID]['byTerm'][$trmID]= array($trgID=>$max);
 		}
-			$offspring = $trmID ? getTermOffspringList($trmID):null;
-			$cnstrnts[$srcID][$trmID] = $offspring ? array('offspring' => $offspring, $trgID => $max):
-																array($trgID => $max);
-		}else{
-			$cnstrnts[$srcID][$trmID][$trgID] = $max;
+		if (!@$cnstrnts[$srcID]['byTarget'][$trgID]) {
+			$cnstrnts[$srcID]['byTarget'][$trgID]= array($trmID=>$max);
 		}
-		if (@$cnstrnts[$srcID][$trmID]['offspring']) {
-			foreach ($cnstrnts[$srcID][$trmID]['offspring'] as $childTermID) { // point all offspring to inherit from term
-				$cnstrnts[$srcID][$childTermID] = array('inheritCnstrnt' => $trmID);
+		if (!@$cnstrnts[$srcID]['byTerm'][$trmID][$trgID]) {
+			$cnstrnts[$srcID]['byTerm'][$trmID][$trgID] = $max;
+			$cnstrnts[$srcID]['byTarget'][$trgID][$trmID] = $max;
+		}
+		if (@$cnstrnts[$srcID]['byTerm'][$trmID][$trgID]['addsTo']) {
+			$cnstrnts[$srcID]['byTerm'][$trmID][$trgID]['limit'] = $max;
+		}
+		if (@$cnstrnts[$srcID]['byTarget'][$trgID][$trmID]['addsTo']) {
+			$cnstrnts[$srcID]['byTarget'][$trgID][$trmID]['limit'] = $max;
+		}
+		$offspring = $trmID && $trmID !== "any" && $hasChildren ? getTermOffspringList($trmID):null;
+//error_log("offspring for $trmID = ".print_r($offspring,true));
+		if ($offspring) {
+			$cnstrnts[$srcID]['byTerm'][$trmID]['offspring'] = $offspring;
+			foreach ($offspring as $childTermID) { // point all offspring to inherit from term
+				$cnstrnts[$srcID]['byTerm'][$childTermID][$trgID] = array('addsTo' => $trmID);
+				$cnstrnts[$srcID]['byTarget'][$trgID][$childTermID] = array('addsTo' => $trmID);
 			}
 		}
 	}

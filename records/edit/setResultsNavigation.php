@@ -26,12 +26,14 @@ $sid = $_REQUEST["s"];
 
 session_start();
 
-if (! @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["search-results"][$sid]) {
+if (!@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["search-results"][$sid] ||
+	!@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$sid]["infoByDepth"] ||
+	!@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$sid]["infoByDepth"][0]) {
 	print "null";
 	return;
 }
 
-$results = $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["search-results"][$sid];
+$results = $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["search-results"][$sid]["infoByDepth"][0]["recIDs"];
 
 foreach ($results as $i => $rec_id) {
 	if ($rec_id == $_REQUEST["id"]) {

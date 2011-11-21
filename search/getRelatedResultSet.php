@@ -34,6 +34,9 @@
 	-->*/
 
 
+list($usec, $sec) = explode(' ', microtime());
+$stime = $sec + $usec;
+
 if (@$argv) {
 	// handle command-line queries
 
@@ -60,10 +63,6 @@ if (@$argv) {
 	$_REQUEST['style'] = '';
 	$_REQUEST['depth'] = @$ARGV['-depth'] ? $ARGV['-depth']: 0;
 	if (@$ARGV['-rev'])$_REQUEST['rev'] = $ARGV['-rev'];
-	if (@$ARGV['-woot'])$_REQUEST['woot'] = $ARGV['-woot'];
-	if (@$ARGV['-stub']) $_REQUEST['stub'] = '1';
-	if (@$ARGV['-fc']) $_REQUEST['fc'] = '1'; // inline file content
-
 }
 
 header("Content-type: text/javascript");
@@ -138,6 +137,9 @@ $GEO_TYPES = array(
 );
 
 $MAX_DEPTH = @$_REQUEST['depth'] ? intval($_REQUEST['depth']) : 1;
+if(@$_REQUEST['sid']) {
+	$QSID = $_REQUEST['sid'];//session query id passed in so used session cached version, pore man's progressive query
+}
 $REVERSE = @$_REQUEST['rev'] === 'no' ? false : true;
 $EXPAND_REV_PTR = @$_REQUEST['revexpand'] === 'no' ? false : true;
 
@@ -171,7 +173,7 @@ if (!isset($PTRTYPE_FILTERS)) {
 }
 //error_log("ptr filters".print_r($PTRTYPE_FILTERS,true));
 if (preg_match('/_COLLECTED_/', $_REQUEST['q'])) {
-if (!session_id()) session_start();
+	if (!session_id()) session_start();
 	$collection = &$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['record-collection'];
 	if (count($collection) > 0) {
 		$_REQUEST['q'] = 'ids:' . join(',', array_keys($collection));
@@ -247,8 +249,8 @@ global $ACCESSABLE_OWNER_IDS;
 		} else if ( !in_array($row['trgRecID'],$recSet['infoByDepth'][$depth]['rectypes'][$row['trgType']])){
 			array_push($recSet['infoByDepth'][$depth]['rectypes'][$row['trgType']],$row['trgRecID']);
 		}
-		if ( !array_key_exists($row['trgRecID'], $recSet['relatedSet'])) {
-			$recSet['relatedSet'][$row['trgRecID']]=array('depth'=>$depth,
+		if ( !array_key_exists($row['trgRecID'], $recSet['recSet'])) {
+			$recSet['recSet'][$row['trgRecID']]=array('depth'=>$depth,
 															'record'=> array(null,null,
 																				@$row['trgRecID'],
 																				@$row['trgURL'],
@@ -260,31 +262,31 @@ global $ACCESSABLE_OWNER_IDS;
 																				null,
 																				null,null));
 		}
-		if ( !@$recSet['relatedSet'][$row['trgRecID']]['revPtrLinks']) {
-			$recSet['relatedSet'][$row['trgRecID']]['revPtrLinks']= array('byInvDtlType'=>array(),'byRecIDs' => array());	//create an entry
+		if ( !@$recSet['recSet'][$row['trgRecID']]['revPtrLinks']) {
+			$recSet['recSet'][$row['trgRecID']]['revPtrLinks']= array('byInvDtlType'=>array(),'byRecIDs' => array());	//create an entry
 		}
-		if ( !@$recSet['relatedSet'][$row['trgRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']]) {
-			$recSet['relatedSet'][$row['trgRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']] = array($row['srcRecID']);
-		}else if ( !in_array($row['srcRecID'],$recSet['relatedSet'][$row['trgRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']])){
-			array_push($recSet['relatedSet'][$row['trgRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']],$row['srcRecID']);
+		if ( !@$recSet['recSet'][$row['trgRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']]) {
+			$recSet['recSet'][$row['trgRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']] = array($row['srcRecID']);
+		}else if ( !in_array($row['srcRecID'],$recSet['recSet'][$row['trgRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']])){
+			array_push($recSet['recSet'][$row['trgRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']],$row['srcRecID']);
 		}
-		if ( !@$recSet['relatedSet'][$row['trgRecID']]['revPtrLinks']['byRecIDs'][$row['srcRecID']]) {
-			$recSet['relatedSet'][$row['trgRecID']]['revPtrLinks']['byRecIDs'][$row['srcRecID']] = array($row['ptrDetailTypeID']);
-		}else if ( !in_array($row['ptrDetailTypeID'],$recSet['relatedSet'][$row['trgRecID']]['revPtrLinks']['byRecIDs'][$row['srcRecID']])){
-			array_push($recSet['relatedSet'][$row['trgRecID']]['revPtrLinks']['byRecIDs'][$row['srcRecID']],$row['ptrDetailTypeID']);
+		if ( !@$recSet['recSet'][$row['trgRecID']]['revPtrLinks']['byRecIDs'][$row['srcRecID']]) {
+			$recSet['recSet'][$row['trgRecID']]['revPtrLinks']['byRecIDs'][$row['srcRecID']] = array($row['ptrDetailTypeID']);
+		}else if ( !in_array($row['ptrDetailTypeID'],$recSet['recSet'][$row['trgRecID']]['revPtrLinks']['byRecIDs'][$row['srcRecID']])){
+			array_push($recSet['recSet'][$row['trgRecID']]['revPtrLinks']['byRecIDs'][$row['srcRecID']],$row['ptrDetailTypeID']);
 		}
-		if ( !@$recSet['relatedSet'][$row['srcRecID']]['ptrLinks']) {
-			$recSet['relatedSet'][$row['srcRecID']]['ptrLinks']= array('byDtlType'=>array(),'byRecIDs' => array());	//create an entry
+		if ( !@$recSet['recSet'][$row['srcRecID']]['ptrLinks']) {
+			$recSet['recSet'][$row['srcRecID']]['ptrLinks']= array('byDtlType'=>array(),'byRecIDs' => array());	//create an entry
 		}
-		if ( !@$recSet['relatedSet'][$row['srcRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']]) {
-			$recSet['relatedSet'][$row['srcRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']] = array($row['trgRecID']);
-		}else if ( !in_array($row['trgRecID'],$recSet['relatedSet'][$row['srcRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']])){
-			array_push($recSet['relatedSet'][$row['srcRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']],$row['trgRecID']);
+		if ( !@$recSet['recSet'][$row['srcRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']]) {
+			$recSet['recSet'][$row['srcRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']] = array($row['trgRecID']);
+		}else if ( !in_array($row['trgRecID'],$recSet['recSet'][$row['srcRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']])){
+			array_push($recSet['recSet'][$row['srcRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']],$row['trgRecID']);
 		}
-		if ( !@$recSet['relatedSet'][$row['srcRecID']]['ptrLinks']['byRecIDs'][$row['trgRecID']]) {
-			$recSet['relatedSet'][$row['srcRecID']]['ptrLinks']['byRecIDs'][$row['trgRecID']] = array($row['ptrDetailTypeID']);
-		}else if ( !in_array($row['ptrDetailTypeID'],$recSet['relatedSet'][$row['srcRecID']]['ptrLinks']['byRecIDs'][$row['trgRecID']])){
-			array_push($recSet['relatedSet'][$row['srcRecID']]['ptrLinks']['byRecIDs'][$row['trgRecID']],$row['ptrDetailTypeID']);
+		if ( !@$recSet['recSet'][$row['srcRecID']]['ptrLinks']['byRecIDs'][$row['trgRecID']]) {
+			$recSet['recSet'][$row['srcRecID']]['ptrLinks']['byRecIDs'][$row['trgRecID']] = array($row['ptrDetailTypeID']);
+		}else if ( !in_array($row['ptrDetailTypeID'],$recSet['recSet'][$row['srcRecID']]['ptrLinks']['byRecIDs'][$row['trgRecID']])){
+			array_push($recSet['recSet'][$row['srcRecID']]['ptrLinks']['byRecIDs'][$row['trgRecID']],$row['ptrDetailTypeID']);
 		}
 	}
 	return array_keys($nlrIDs);
@@ -340,8 +342,8 @@ global $REVERSE, $ACCESSABLE_OWNER_IDS, $relRT;
 		} else if ( !in_array($row['trgRecID'],$recSet['infoByDepth'][$depth]['rectypes'][$row['trgType']])){
 			array_push($recSet['infoByDepth'][$depth]['rectypes'][$row['trgType']],$row['trgRecID']);
 		}
-		if ( !array_key_exists($row['trgRecID'], $recSet['relatedSet'])) {
-			$recSet['relatedSet'][$row['trgRecID']]=array('depth'=>$depth,
+		if ( !array_key_exists($row['trgRecID'], $recSet['recSet'])) {
+			$recSet['recSet'][$row['trgRecID']]=array('depth'=>$depth,
 															'record'=> array(null,null,
 																				@$row['trgRecID'],
 																				@$row['trgURL'],
@@ -353,31 +355,31 @@ global $REVERSE, $ACCESSABLE_OWNER_IDS, $relRT;
 																				null,
 																				null,null));
 		}
-		if ( !@$recSet['relatedSet'][$row['trgRecID']]['ptrLinks']) {
-			$recSet['relatedSet'][$row['trgRecID']]['ptrLinks']= array('byDtlType'=>array(),'byRecIDs' => array());	//create an entry
+		if ( !@$recSet['recSet'][$row['trgRecID']]['ptrLinks']) {
+			$recSet['recSet'][$row['trgRecID']]['ptrLinks']= array('byDtlType'=>array(),'byRecIDs' => array());	//create an entry
 		}
-		if ( !@$recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']]) {
-			$recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']] = array($row['srcRecID']);
-		}else if ( !in_array($row['srcRecID'],$recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']])){
-			array_push($recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']],$row['srcRecID']);
+		if ( !@$recSet['recSet'][$row['trgRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']]) {
+			$recSet['recSet'][$row['trgRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']] = array($row['srcRecID']);
+		}else if ( !in_array($row['srcRecID'],$recSet['recSet'][$row['trgRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']])){
+			array_push($recSet['recSet'][$row['trgRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']],$row['srcRecID']);
 		}
-		if ( !@$recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byRecIDs'][$row['srcRecID']]) {
-			$recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byRecIDs'][$row['srcRecID']] = array($row['ptrDetailTypeID']);
-		}else if ( !in_array($row['ptrDetailTypeID'],$recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byRecIDs'][$row['srcRecID']])){
-			array_push($recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byRecIDs'][$row['srcRecID']],$row['ptrDetailTypeID']);
+		if ( !@$recSet['recSet'][$row['trgRecID']]['ptrLinks']['byRecIDs'][$row['srcRecID']]) {
+			$recSet['recSet'][$row['trgRecID']]['ptrLinks']['byRecIDs'][$row['srcRecID']] = array($row['ptrDetailTypeID']);
+		}else if ( !in_array($row['ptrDetailTypeID'],$recSet['recSet'][$row['trgRecID']]['ptrLinks']['byRecIDs'][$row['srcRecID']])){
+			array_push($recSet['recSet'][$row['trgRecID']]['ptrLinks']['byRecIDs'][$row['srcRecID']],$row['ptrDetailTypeID']);
 		}
-		if ( !@$recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']) {
-			$recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']= array('byInvDtlType'=>array(),'byRecIDs' => array());	//create an entry
+		if ( !@$recSet['recSet'][$row['srcRecID']]['revPtrLinks']) {
+			$recSet['recSet'][$row['srcRecID']]['revPtrLinks']= array('byInvDtlType'=>array(),'byRecIDs' => array());	//create an entry
 		}
-		if ( !@$recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']]) {
-			$recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']] = array($row['trgRecID']);
-		}else if ( !in_array($row['trgRecID'],$recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']])){
-			array_push($recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']],$row['trgRecID']);
+		if ( !@$recSet['recSet'][$row['srcRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']]) {
+			$recSet['recSet'][$row['srcRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']] = array($row['trgRecID']);
+		}else if ( !in_array($row['trgRecID'],$recSet['recSet'][$row['srcRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']])){
+			array_push($recSet['recSet'][$row['srcRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']],$row['trgRecID']);
 		}
-		if ( !@$recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byRecIDs'][$row['trgRecID']]) {
-			$recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byRecIDs'][$row['trgRecID']] = array($row['ptrDetailTypeID']);
-		}else if ( !in_array($row['ptrDetailTypeID'],$recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byRecIDs'][$row['trgRecID']])){
-			array_push($recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byRecIDs'][$row['trgRecID']],$row['ptrDetailTypeID']);
+		if ( !@$recSet['recSet'][$row['srcRecID']]['revPtrLinks']['byRecIDs'][$row['trgRecID']]) {
+			$recSet['recSet'][$row['srcRecID']]['revPtrLinks']['byRecIDs'][$row['trgRecID']] = array($row['ptrDetailTypeID']);
+		}else if ( !in_array($row['ptrDetailTypeID'],$recSet['recSet'][$row['srcRecID']]['revPtrLinks']['byRecIDs'][$row['trgRecID']])){
+			array_push($recSet['recSet'][$row['srcRecID']]['revPtrLinks']['byRecIDs'][$row['trgRecID']],$row['ptrDetailTypeID']);
 		}
 	}
 	return array_keys($nlrIDs);
@@ -457,8 +459,8 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 				array_push($recSet['infoByDepth'][$depth]['reltypes'][$row['relType']],$row['trgRecID']);
 			}
 		}
-		if ( !array_key_exists($row['srcRecID'], $recSet['relatedSet'])) {
-			$recSet['relatedSet'][$row['srcRecID']]=array('depth'=>$depth,
+		if ( !array_key_exists($row['srcRecID'], $recSet['recSet'])) {
+			$recSet['recSet'][$row['srcRecID']]=array('depth'=>$depth,
 				'record'=> array(null,null,
 									$row['srcRecID'],
 									$row['srcURL'],
@@ -471,8 +473,8 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 									null,null));
 		}
 		// if target is not in the result
-		if ( !array_key_exists($row['trgRecID'], $recSet['relatedSet'])) {
-			$recSet['relatedSet'][$row['trgRecID']]=array('depth'=>$depth,
+		if ( !array_key_exists($row['trgRecID'], $recSet['recSet'])) {
+			$recSet['recSet'][$row['trgRecID']]=array('depth'=>$depth,
 				'record'=> array(null,null,
 									$row['trgRecID'],
 									$row['trgURL'],
@@ -484,48 +486,47 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 									null,
 									null,null));
 		}
-		if ( !@$recSet['relatedSet'][$row['srcRecID']]['relLinks']) {
-			$recSet['relatedSet'][$row['srcRecID']]['relLinks']= array('byRelType'=>array(),'byRecIDs' => array(), 'relRecIDs'=> array());	//create an entry
+		if ( !@$recSet['recSet'][$row['srcRecID']]['relLinks']) {
+			$recSet['recSet'][$row['srcRecID']]['relLinks']= array('byRelType'=>array(),'byRecIDs' => array(), 'relRecIDs'=> array());	//create an entry
 		}
-		if ( !@$recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRelType'][$row['relType']]) {
-			$recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRelType'][$row['relType']] = array($row['trgRecID']);
-		}else if ( !in_array($row['trgRecID'],$recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRelType'][$row['relType']])){
-			array_push($recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRelType'][$row['relType']],$row['trgRecID']);
+		if ( !@$recSet['recSet'][$row['srcRecID']]['relLinks']['byRelType'][$row['relType']]) {
+			$recSet['recSet'][$row['srcRecID']]['relLinks']['byRelType'][$row['relType']] = array($row['trgRecID']);
+		}else if ( !in_array($row['trgRecID'],$recSet['recSet'][$row['srcRecID']]['relLinks']['byRelType'][$row['relType']])){
+			array_push($recSet['recSet'][$row['srcRecID']]['relLinks']['byRelType'][$row['relType']],$row['trgRecID']);
 		}
-		if ( !@$recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRecIDs'][$row['trgRecID']]) {
-			$recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRecIDs'][$row['trgRecID']] = array($row['relType']);
-		}else if ( !in_array($row['relType'],$recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRecIDs'][$row['trgRecID']])){
-			array_push($recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRecIDs'][$row['trgRecID']],$row['relType']);
+		if ( !@$recSet['recSet'][$row['srcRecID']]['relLinks']['byRecIDs'][$row['trgRecID']]) {
+			$recSet['recSet'][$row['srcRecID']]['relLinks']['byRecIDs'][$row['trgRecID']] = array($row['relType']);
+		}else if ( !in_array($row['relType'],$recSet['recSet'][$row['srcRecID']]['relLinks']['byRecIDs'][$row['trgRecID']])){
+			array_push($recSet['recSet'][$row['srcRecID']]['relLinks']['byRecIDs'][$row['trgRecID']],$row['relType']);
 		}
-		if ( $row['relID'] && !in_array($row['relID'],$recSet['relatedSet'][$row['srcRecID']]['relLinks']['relRecIDs'])) {
-			array_push($recSet['relatedSet'][$row['srcRecID']]['relLinks']['relRecIDs'],$row['relID']);
+		if ( $row['relID'] && !in_array($row['relID'],$recSet['recSet'][$row['srcRecID']]['relLinks']['relRecIDs'])) {
+			array_push($recSet['recSet'][$row['srcRecID']]['relLinks']['relRecIDs'],$row['relID']);
 		}
-		if ( !@$recSet['relatedSet'][$row['trgRecID']]['revRelLinks']) {
-			$recSet['relatedSet'][$row['trgRecID']]['revRelLinks']= array('byInvRelType'=>array(),'byRecIDs' => array(), 'relRecIDs'=> array());	//create an entry
+		if ( !@$recSet['recSet'][$row['trgRecID']]['revRelLinks']) {
+			$recSet['recSet'][$row['trgRecID']]['revRelLinks']= array('byInvRelType'=>array(),'byRecIDs' => array(), 'relRecIDs'=> array());	//create an entry
 		}
 		$inverse = $row['invRelType']?$row['invRelType']: "-".$row['relType'];
-		if ( !@$recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byInvRelType'][$inverse]) {
-			$recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byInvRelType'][$inverse] = array($row['srcRecID']);
-		}else if ( !in_array($row['srcRecID'],$recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byInvRelType'][$inverse])){
-			array_push($recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byInvRelType'][$inverse],$row['srcRecID']);
+		if ( !@$recSet['recSet'][$row['trgRecID']]['revRelLinks']['byInvRelType'][$inverse]) {
+			$recSet['recSet'][$row['trgRecID']]['revRelLinks']['byInvRelType'][$inverse] = array($row['srcRecID']);
+		}else if ( !in_array($row['srcRecID'],$recSet['recSet'][$row['trgRecID']]['revRelLinks']['byInvRelType'][$inverse])){
+			array_push($recSet['recSet'][$row['trgRecID']]['revRelLinks']['byInvRelType'][$inverse],$row['srcRecID']);
 		}
-		if ( !@$recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byRecIDs'][$row['srcRecID']]) {
-			$recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byRecIDs'][$row['srcRecID']] = array($inverse);
-		}else if ( !in_array($inverse,$recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byRecIDs'][$row['srcRecID']])){
-			array_push($recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byRecIDs'][$row['srcRecID']],$inverse);
+		if ( !@$recSet['recSet'][$row['trgRecID']]['revRelLinks']['byRecIDs'][$row['srcRecID']]) {
+			$recSet['recSet'][$row['trgRecID']]['revRelLinks']['byRecIDs'][$row['srcRecID']] = array($inverse);
+		}else if ( !in_array($inverse,$recSet['recSet'][$row['trgRecID']]['revRelLinks']['byRecIDs'][$row['srcRecID']])){
+			array_push($recSet['recSet'][$row['trgRecID']]['revRelLinks']['byRecIDs'][$row['srcRecID']],$inverse);
 		}
-		if ( $row['relID'] && !in_array($row['relID'],$recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['relRecIDs'])) {
-			array_push($recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['relRecIDs'],$row['relID']);
+		if ( $row['relID'] && !in_array($row['relID'],$recSet['recSet'][$row['trgRecID']]['revRelLinks']['relRecIDs'])) {
+			array_push($recSet['recSet'][$row['trgRecID']]['revRelLinks']['relRecIDs'],$row['relID']);
 		}
 	}
 	return array_keys($nlrIDs);
 }
 
-function buildGraphStructure($rec_ids, &$recSet) {
+function buildFilteredGraphStructure($rec_ids, &$recSet, $depth = 0) {
 	global $MAX_DEPTH, $REVERSE, $RECTYPE_FILTERS, $RELTYPE_FILTERS, $PTRTYPE_FILTERS, $EXPAND_REV_PTR;
-	$depth = 0;
 	$rtfilter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth]: null );
-	if ($rtfilter){
+	if ($rtfilter){// apply rctype filterring as we may have just the query results
 		$query = 'SELECT rec_ID from Records '.
 					'WHERE rec_ID in ('.join(",",$rec_ids).') '.
 					'AND rec_RecTypeID in ('.join(",",$rtfilter).')';
@@ -563,16 +564,19 @@ function buildGraphStructure($rec_ids, &$recSet) {
 //  Output functions
 //----------------------------------------------------------------------------//
 
-function getRelationStructure($queryResult) {
+function createQueryRecSet() {
+	//echo "request = ".print_r($_REQUEST,true)."\n";
+	$qresult = loadSearch($_REQUEST);
+	//echo "query result = ".print_r($qresult,true)."\n";
 	$recSet = array('count'=> 0,
-					'relatedSet'=>array(),
-					'params'=> array_intersect_key($_REQUEST, array('q'=>1,'w'=>1,'depth'=>1,'f'=>1,'limit'=>1,'offset'=>1,'rev'=>1,'revexpand'=>1,'db'=>1,'stub'=>1,'woot'=>1,'fc'=>1,'slb'=>1,'rtfilters'=>1,'relfilters'=>1,'ptrfilters'=>1)),
+					'recSet'=>array(),
+					'params'=> array_intersect_key($_REQUEST, array('q'=>1,'w'=>1,'depth'=>1,'f'=>1,'limit'=>1,'offset'=>1,'rev'=>1,'revexpand'=>1,'db'=>1,'sid'=>1,'slb'=>1,'rtfilters'=>1,'relfilters'=>1,'ptrfilters'=>1)),
 					'infoByDepth'=>array(array('recIDs'=>array(),'rectypes'=>array())));
 //echo "query reults = ".json_format($result,true);
 	$rec_ids = array();
-	foreach ($queryResult['records'] as $record) {
+	foreach ($qresult['records'] as $record) {
 		array_push($rec_ids, $record['rec_ID']);
-		$recSet['relatedSet'][$record['rec_ID']] = array('depth'=>0,
+		$recSet['recSet'][$record['rec_ID']] = array('depth'=>0,
 						'record'=> array(null,null,
 									$record['rec_ID'],
 									$record['rec_URL'],
@@ -584,17 +588,45 @@ function getRelationStructure($queryResult) {
 									null,
 									null,null));
 		array_push($recSet['infoByDepth'][0]['recIDs'],$record['rec_ID']);
+		// add recID to it's rectype array for this depth
 		if (!@$recSet['infoByDepth'][0]['rectypes'][$record['rec_RecTypeID']]) {
 			$recSet['infoByDepth'][0]['rectypes'][$record['rec_RecTypeID']] = array($record['rec_ID']);
 		} else if ( !in_array($record['rec_ID'],$recSet['infoByDepth'][0]['rectypes'][$record['rec_RecTypeID']])){
 			array_push($recSet['infoByDepth'][0]['rectypes'][$record['rec_RecTypeID']],$record['rec_ID']);
 		}
 	}
-//echo "rec IDs = ".json_format($rec_ids,true);
-//echo "relationships = ".json_format($relationships,true);
+	return $recSet;
+}
 
-	buildGraphStructure($rec_ids, $recSet);
-	$recSet['count'] = count($recSet['relatedSet']);
+function getRelationStructure() {
+	global $stime, $QSID, $MAX_DEPTH;
+	//check if there is a cached set
+//	error_log("sid = ".$QSID." session prefix = ".HEURIST_SESSION_DB_PREFIX);
+	if($QSID && @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$QSID]) {
+		$recSet = &$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$QSID];
+//error_log("recset = ". print_r($recSet,true));
+		if ( $MAX_DEPTH > 0 && @$recSet["infoByDepth"][$MAX_DEPTH] ){//all requested info in session so return everything.
+			list($usec, $sec) = explode(' ', microtime());
+			$etime = $sec + $usec;
+			$recSet["eslapsedTime"] = ''.(($etime - $stime)*1000)."ms xx";
+			return $recSet;
+		} else if($MAX_DEPTH == 0 && @$recSet["infoByDepth"][0] && @$recSet["infoByDepth"][0]["recIDs"]){
+			$depth = 0;
+			$rec_ids = $recSet["infoByDepth"][0]["recIDs"];
+		}else{
+			$depth = count($recSet["infoByDepth"]) - 1;
+			$rec_ids = @$recSet["infoByDepth"][$depth]["recIDs"];
+		}
+	}else{
+		$recSet = createQueryRecSet();
+		$depth = count($recSet["infoByDepth"]) - 1;
+		$rec_ids = @$recSet["infoByDepth"][$depth]["recIDs"];
+	}
+
+	//if not create a base structure using the query
+		//set recIDs to array set
+	buildFilteredGraphStructure($rec_ids, $recSet, $depth);
+	$recSet['count'] = count($recSet['recSet']);
 /*	foreach ($relationships as $recID => $linkInfo) {
 		if (!@$recSet['infoByDepth'][$linkInfo['depth']]) {
 			$recSet['infoByDepth'][$linkInfo['depth']] = array('recIDs'=>array(),'rectypes'=>array());
@@ -640,6 +672,15 @@ function getRelationStructure($queryResult) {
 		}
 	}
 */
+	list($usec, $sec) = explode(' ', microtime());
+	$etime = $sec + $usec;
+	$recSet["eslapsedTime"] = ''.(($etime - $stime)*1000)."ms";
+//error_log("made it to the end and sid = $QSID");
+	// cache the relation set in
+	if ($QSID && @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$QSID]) {
+		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$QSID] = $recSet;
+//error_log("made it to store recSet");
+	}
 	return $recSet;
 }
 
@@ -648,11 +689,7 @@ function getRelationStructure($queryResult) {
 //  Output
 //----------------------------------------------------------------------------//
 
-//$result = loadSearch($_REQUEST);
-//echo "request = ".print_r($_REQUEST,true)."\n";
-$qresult = loadSearch($_REQUEST);
-//echo "query result = ".print_r($qresult,true)."\n";
-echo json_format( getRelationStructure($qresult), true);
+echo json_format( getRelationStructure(), true);
 
 ?>
 

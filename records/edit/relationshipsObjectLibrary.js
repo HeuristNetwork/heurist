@@ -281,20 +281,21 @@ if (!top.Relationship) {
 		td.className = "section-header-cell optional";
 		td.appendChild(this.document.createTextNode("Optional Fields"));
 
-		var helpString = "Record the evidence and/or reasoning on which this relationship is based";
-		fakeBDT = top.HEURIST.edit.createFakeDetailType((top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_INTERPRETATION_REFERENCE']?
-																'' + top.HEURIST.magicNumbers['DT_INTERPRETATION_REFERENCE']:''),
+		if (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_INTERPRETATION_REFERENCE'] &&
+										top.HEURIST.magicNumbers['RT_INTERPRETATION']) {
+			var helpString = "Record the evidence and/or reasoning on which this relationship is based";
+			var fakeBDT = top.HEURIST.edit.createFakeDetailType( top.HEURIST.magicNumbers['DT_INTERPRETATION_REFERENCE'],
 															"Interpretation",
 															"resource",
 															helpString,
 															null,null,
-															(top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['RT_INTERPRETATION']?
-																'' + top.HEURIST.magicNumbers['RT_INTERPRETATION']:''));
+															'' + top.HEURIST.magicNumbers['RT_INTERPRETATION']);
 
-		var fakeBDR = top.HEURIST.edit.createFakeFieldRequirement(fakeBDT);
+			var fakeBDR = top.HEURIST.edit.createFakeFieldRequirement(fakeBDT);
 
-		this.interpResource = new top.HEURIST.edit.inputs.BibDetailResourceInput(this.manager.recID, fakeBDT, fakeBDR, [], opt);
-		this.interpResourceID = this.interpResource.inputs[0].hiddenElt;
+			this.interpResource = new top.HEURIST.edit.inputs.BibDetailResourceInput(this.manager.recID, fakeBDT, fakeBDR, [], opt);
+			this.interpResourceID = this.interpResource.inputs[0].hiddenElt;
+		}
 
 		tr = opt.appendChild(this.document.createElement("div"));
 		tr.className = "input-row optional";
@@ -447,10 +448,10 @@ if (!top.Relationship) {
 	top.RelationManager = function(parentElement, record, relatedRecords, dtIDRelmarker, changeNotification, supressHeaders) {
 		if (!parentElement || !record || isNaN(record.recID)) return null;
 		var thisRef = this;
-		this.parentElement = parentElement;
+		this.parentElement = parentElement; // the containing element for display of relationships
 		this.rectypeID = parseInt(record.rectypeID);
 		this.recID = parseInt(record.recID);
-		if (dtIDRelmarker) {
+		if (dtIDRelmarker) {	// relmarker detail type which means we possibly have range constraints for tragets and relation terms
 			this.dtID = dtIDRelmarker;
 		}
 
@@ -460,7 +461,7 @@ if (!top.Relationship) {
 		}
 
 		//get all constraints for src rectype or global constraints
-		this.constraints = (top.HEURIST.rectypes.constraints[this.rectypeID] || top.HEURIST.rectypes.constraints['0']);
+		this.constraints = (top.HEURIST.rectypes.constraints[this.rectypeID] || top.HEURIST.rectypes.constraints['any']);
 
 		if (dtIDRelmarker) { // we are dealing with a relmark so get definitions and process them for UI
 			// get any trgPointer restrictions

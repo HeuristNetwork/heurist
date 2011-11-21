@@ -60,6 +60,7 @@ print "top.HEURIST.database.exploreURL = " . json_format(EXPLORE_URL) . ";\n";
 print "if (!top.HEURIST.basePath) top.HEURIST.basePath = ".json_format(HEURIST_SITE_PATH) . ";\n";
 print "if (!top.HEURIST.baseURL) top.HEURIST.baseURL = ".json_format(HEURIST_URL_BASE) . ";\n";
 print "if (!top.HEURIST.iconDir) top.HEURIST.iconDir = ".json_format(HEURIST_ICON_DIR) . ";\n";
+print "if (!top.HEURIST.iconBaseURL) top.HEURIST.iconBaseURL = ".json_format(HEURIST_ICON_URL_BASE) . ";\n";
 
 
 // $cache=true - use cache

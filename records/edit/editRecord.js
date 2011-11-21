@@ -231,7 +231,7 @@ top.HEURIST.edit = {
 //		document.getElementById('rectype-val').appendChild(document.createTextNode(top.HEURIST.record.rectype));
 		if (document) {
 			if (document.getElementById('rectype-img')) {
-				document.getElementById('rectype-img').style.backgroundImage = "url("+ top.HEURIST.iconDir + top.HEURIST.edit.record.rectypeID + ".png)";
+				document.getElementById('rectype-img').style.backgroundImage = "url("+ top.HEURIST.iconBaseURL + top.HEURIST.edit.record.rectypeID + ".png)";
 			}
 			if (document.getElementById('title-val')) {
 				document.getElementById('title-val').innerHTML = '';

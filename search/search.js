@@ -86,9 +86,9 @@ top.HEURIST.search = {
 				rectypes : {}
 				}],
 			recSetCount: results.totalRecordCount,
-			totalQueryResultRecordCount: results.totalRecordCount
+			totalQueryResultRecordCount: results.totalRecordCount,
+			querySid : results.sid
 		};
-		top.HEURIST.search.sid = results.sid;
 
 		if (top.HEURIST.search.results.totalQueryResultRecordCount == 0) {
 			top.HEURIST.registerEvent(window, "load", function(){
@@ -241,17 +241,17 @@ top.HEURIST.search = {
 													}
 									});
 		top.HEURIST.util.getJsonData(URL,
-				function(related) {
+				function(related) {	// callback function to process results from
 					var results = top.HEURIST.search.results,
 						recID,i,j;
-					if (related && related.count >= results.totalQueryResultRecordCount) {
+					if (related && related.count >= results.totalQueryResultRecordCount) { //check that we have related records
 						results.recSetCount = related.count;
 						results.params = related.params;
-						for (recID in related.relatedSet){
-							var recInfo = related.relatedSet[recID];
+						for (recID in related.recSet){
+							var recInfo = related.recSet[recID];
 							if (!results.recSet[recID]){
 								results.recSet[recID] = recInfo;
-							}else if(recInfo.depth == 0){
+							}else if(recInfo.depth == 0){// it's possible that related levels are linked and have added link info here
 								if ( recInfo.ptrLinks ) {
 									results.recSet[recID].ptrLinks = recInfo.ptrLinks;
 								}
@@ -266,7 +266,7 @@ top.HEURIST.search = {
 								}
 							}
 						}
-						if (related.infoByDepth.length > 1) {
+						if (related.infoByDepth.length > 1) {// if we have more that just level 0 we need to update the levels
 							for (i=1; i < related.infoByDepth.length; i++) {
 								results.infoByDepth[i] = related.infoByDepth[i];
 								results.infoByDepth[i].count = results.infoByDepth[i].recIDs.length;
@@ -535,7 +535,7 @@ top.HEURIST.search = {
 
 		var editLinkIcon = "<div id='rec_edit_link' class='logged-in-only'><a href='"+
 			top.HEURIST.basePath+ "records/edit/editRecord.html?sid=" +
-			top.HEURIST.search.sid + "&recID="+ res[2] +
+			top.HEURIST.search.results.querySid + "&recID="+ res[2] +
 			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
 			"' target='_blank' title='Click to edit record'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png'/></a></div>";
 		if (top.HEURIST.user){
@@ -584,8 +584,8 @@ top.HEURIST.search = {
 		if (res[10]) userPwd = "style='display:inline;cursor:pointer;margin-left:8px' user_pwd='"+res[10].htmlEscape()+"'";
 		else userPwd = "style='display:none;'";
 
-		var rectypeImg = "style='background-image:url("+ top.HEURIST.iconDir + (res[4]? res[4] : "blank") + ".png)'";
-		var rectypeThumb = "style='background-image:url("+ top.HEURIST.iconDir + "thumb/th_" + (res[4]? res[4] : "blank") + ".png)'";
+		var rectypeImg = "style='background-image:url("+ top.HEURIST.iconBaseURL + (res[4]? res[4] : "blank") + ".png)'";
+		var rectypeThumb = "style='background-image:url("+ top.HEURIST.iconBaseURL + "thumb/th_" + (res[4]? res[4] : "blank") + ".png)'";
 		var rectypeTitle = "Click to see details";
 		if (top.HEURIST.rectypes.names[parseInt(res[4])])
 			rectypeTitle = top.HEURIST.rectypes.names[parseInt(res[4])] + " - click to see details";
@@ -1393,7 +1393,7 @@ top.HEURIST.search = {
 		var recID = $(resultDiv).attr("recID");
 
 		window.open(top.HEURIST.basePath+ "records/edit/editRecord.html?sid=" +
-					top.HEURIST.search.sid + "&recID="+recID+
+					top.HEURIST.search.results.querySid + "&recID="+recID+
 					(top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""));
 
 		return false;
@@ -2682,7 +2682,7 @@ top.HEURIST.search = {
 			rtID;
 		for (var rtID in results.infoByDepth[0].rectypes) {
 			if (top.HEURIST.rectypes.names[rtID])
-				iHTML += "<li><img src='"+ top.HEURIST.iconDir+ rtID+".png'>"+top.HEURIST.rectypes.names[rtID]+"</li>";
+				iHTML += "<li><img src='"+ top.HEURIST.iconBaseURL+ rtID+".png'>"+top.HEURIST.rectypes.names[rtID]+"</li>";
 		}
 
 		document.getElementById("legend-box-list").innerHTML = iHTML;

@@ -112,7 +112,7 @@ session_start();
 
 if ($num_rows <= SEARCH_SET_SAVE_LIMIT) {
 	$sid = dechex(rand());
-
+// set up search context for use with edit records prev next
 	if (! @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'])
 		$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'] = array();
 
@@ -122,9 +122,14 @@ if ($num_rows <= SEARCH_SET_SAVE_LIMIT) {
 		array_shift($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results']);
 	}
 
-	$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$sid] = array();
+	$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$sid] = array(
+																	"infoByDepth"=>array(array( "count"=>0,
+																								"recIDs"=>array(),
+																								"rectypes"=>array())),
+																	"recSet"=> array()
+																	);
 }
-
+$resDepth = 0; // the result records depth with respect to the query
 ?>
 <html>
  <head>
@@ -181,7 +186,18 @@ if (top.HEURIST && top.HEURIST.firedEvents["heurist-search-html-loaded"] && top.
 
 		array_push($results, $row);
 		if ($num_rows <= SEARCH_SET_SAVE_LIMIT) {
-			array_push($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$sid], $row[2]);
+			array_push($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$sid]["infoByDepth"][0]["recIDs"], $row[2]);
+			$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$sid]["infoByDepth"][0]["count"]++;
+			if (!@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$sid]["recSet"][$row[2]]){
+				$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$sid]["recSet"][$row[2]] = array("depth" => $resDepth,
+																												"record" => $row);
+		if (!$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$sid]['infoByDepth'][0]['rectypes'][$row[4]]) {
+			$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$sid]['infoByDepth'][0]['rectypes'][$row[4]] = array($row[2]);
+		} else if ( !in_array($row[2],$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$sid]['infoByDepth'][0]['rectypes'][$row[4]])){
+			array_push($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$sid]['infoByDepth'][0]['rectypes'][$row[4]],$row[2]);
+		}
+
+			}
 		}
 	}
 	print ");\n";
@@ -202,7 +218,7 @@ if (top.HEURIST && top.HEURIST.firedEvents["heurist-search-html-loaded"] && top.
 	print ' -->';
 ?>
  <body>
-<?php foreach ($rectypes as $rt_id) if ($rt_id > 0) print "<img src=".HEURIST_ICON_DIR.$rt_id.".png>"; ?>
+<?php foreach ($rectypes as $rt_id) if ($rt_id > 0) print "<img src=".HEURIST_ICON_URL_BASE.$rt_id.".png>"; ?>
  </body>
 </html>
 <?php
@@ -229,37 +245,37 @@ $furlDT = (defined('DT_FULL_IMAG_URL')?DT_FULL_IMAG_URL:0);
 		// 223  Thumbnail
 		// 222  Logo image
 		// 224  Images
-		$res = mysql_query("select recUploadedFiles.*
-		                      from recDetails
-		                 left join recUploadedFiles on ulf_ID = dtl_UploadedFileID
-		                 left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt
-		                     where dtl_RecID = " . $row[2] .
-		                       " and dtl_DetailTypeID in ($thumbDT,$logoDT,$imgDT,$assocDT,$otherDT)".
-		                       " and fxm_MimeType like 'image%'
-
-		                  order by dtl_DetailTypeID = $thumbDT desc,".
-		                  " dtl_DetailTypeID = $logoDT desc,".
-		                  " dtl_DetailTypeID = $imgDT desc,".
-		                  " dtl_DetailTypeID limit 1");
+		$res = mysql_query("select recUploadedFiles.* ".
+							"from recDetails ".
+								"left join recUploadedFiles on ulf_ID = dtl_UploadedFileID ".
+								"left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt ".
+							"where dtl_RecID = " . $row[2] .
+								" and dtl_DetailTypeID in ($thumbDT,$logoDT,$imgDT,$assocDT,$otherDT)".
+								" and fxm_MimeType like 'image%' ".
+							"order by".
+								($thumbDT?" dtl_DetailTypeID = $thumbDT desc,":"").
+								($logoDT?" dtl_DetailTypeID = $logoDT desc,":"").
+								($imgDT?" dtl_DetailTypeID = $imgDT desc,":"").
+								" dtl_DetailTypeID limit 1");
 		if ($res && mysql_num_rows($res) == 1) {
 			$file = mysql_fetch_assoc($res);
 			$thumb_url = "../common/php/resizeImage.php?ulf_ID=".$file['ulf_ObfuscatedFileID'];
 		} else {
 			// 606  Thumbimage url
-			$res = mysql_query("select dtl_Value
-			                      from recDetails
-			                     where dtl_RecID = " . $row[2] . "
-		                           and dtl_DetailTypeID = $turlDT".
-		                         " limit 1");
+			$res = mysql_query("select dtl_Value ".
+								"from recDetails ".
+								"where dtl_RecID = " . $row[2] .
+								($turlDT?" and dtl_DetailTypeID = $turlDT":"").
+								" limit 1");
 			if ($res && mysql_num_rows($res) == 1) {	//FIXME: we should see about uploading this to the file table
 				$row = mysql_fetch_assoc($res);
 				$thumb_url = "".htmlspecialchars(addslashes($row['dtl_Value']));
 			}else{	// 603  Full image url
-				$res = mysql_query("select dtl_Value
-				                      from recDetails
-				                     where dtl_RecID = " . $row[2] .
-			                         "  and dtl_DetailTypeID = $furlDT".
-			                         " limit 1");
+				$res = mysql_query("select dtl_Value ".
+									"from recDetails ".
+									"where dtl_RecID = " . $row[2] .
+									($furlDT?" and dtl_DetailTypeID = $furlDT":"").
+									" limit 1");
 				if ($res && mysql_num_rows($res) == 1) {
 					$row = mysql_fetch_assoc($res);
 					$thumb_url = "../common/php/resizeImage.php?file_url=".htmlspecialchars($row['dtl_Value']);

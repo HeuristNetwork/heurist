@@ -955,21 +955,21 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		var req = top.HEURIST.util.createXMLHTTPObject();
 		if (!req) return;
 		var method = (postData) ? "POST" : "GET";
-		req.open(method,url,true);
+		req.open(method,url,true);// set for asynch call
 		if (postData)
 			req.setRequestHeader('Content-type','application/x-www-form-urlencoded');
-		req.onreadystatechange = function () {
-			if (req.readyState != 4) return;
-			if (req.status != 200 && req.status != 304) {
-				if (req.status == 404) {
-					alert('H-Util HTTP error ' + req.status + " " +file);
-				}else if (req.status){
-					alert('H-Util HTTP error ' + req.status);
+			req.onreadystatechange = function () {// callback for ajax object
+				if (req.readyState != 4) return;
+				if (req.status != 200 && req.status != 304) {
+					if (req.status == 404) {
+						alert('H-Util HTTP error file not found' + req.status + " " +file);
+					}else if (req.status){
+						alert('H-Util HTTP error ' + req.status);
+					}
+					return;
 				}
-				return;
+				callback(req);
 			}
-			callback(req);
-		}
 		if (req.readyState == 4) return;
 		req.send(postData);
 	},
