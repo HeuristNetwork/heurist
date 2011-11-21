@@ -27,6 +27,7 @@ FlexImport = (function () {
 	recTypeSelect: null,
 	recTypeSelectSavedMapping: null,
 	recType: null,
+	errorSummary: null,
 	workgroupSelect: null,
 	workgroups: {},
 	workgroupTags: {},
@@ -322,6 +323,9 @@ FlexImport = (function () {
 			td.innerHTML = "Column Heading"; //
 			for (i = 0; i < headerRow.length; ++i) {
 				td = tr.appendChild(document.createElement("td"));
+				if(headerRow[i].charAt(0)=='"'){
+					headerRow[i] = headerRow[i].substr(1,headerRow[i].length-2);
+				}
 				td.innerHTML = headerRow[i];
 			}
 		}
@@ -421,6 +425,8 @@ FlexImport = (function () {
 			}
 		}
 
+		FlexImport.errorSummary = new Array(FlexImport.columnCount);
+
 		// create rest of table filling it with the csv analysed data
 		for (var i = this.hasHeaderRow ? 1:0; i < FlexImport.fields.length; ++i) {
 			var inputRow = FlexImport.fields[i];
@@ -480,6 +486,17 @@ FlexImport = (function () {
 						var p = td.appendChild(document.createElement("p"));
 						p.className = "errorMsg";
 						p.innerHTML = FlexImport.lineErrorMap[i][j];
+
+						var eS = FlexImport.errorSummary;
+						if(eS[j]){
+							if(eS[j].indexOf(inputRow[j])<0){
+								eS[j].push(inputRow[j]);
+							}
+						}else{
+							eS[j] = [];
+							eS[j].push(inputRow[j]);
+						}
+
 					} else {
 						var str = inputRow[j];
 						if(str.length>50){
@@ -492,9 +509,73 @@ FlexImport = (function () {
 		}
 
 		e.appendChild(table);
+
+		FlexImport.showErrorSummary(table);
+
 	},
+
+	showErrorSummary: function (before) {
+
+		var eS = FlexImport.errorSummary;
+
+		if(eS){
+
+			var e = $("#col-select-div")[0];
+
+			var table = document.createElement("table");
+			table.id = "col-select-table";
+			var tbody = table.appendChild(document.createElement("tbody"));
+
+			var headerRow = FlexImport.fields[0];
+			var haserr = false;
+
+			for (var j = 0; j < FlexImport.columnCount; ++j) {
+				if(eS[j]){
+					tr = tbody.appendChild(document.createElement("tr"));
+					td = tr.appendChild(document.createElement("td"));
+					td.innerHTML = (this.hasHeaderRow)?headerRow[j]:("column "+j);
+					td = tr.appendChild(document.createElement("td"));
+					var s = eS[j].join("<br/>");
+					td.innerHTML = s;
+					td = tr.appendChild(document.createElement("td"));
+					if(FlexImport.colSelectors[j].selectedIndex>0){
+
+						var a = td.appendChild(document.createElement("a"));
+						a.href = "#";
+						a.innerHTML = "Edit";
+						a.id2 = FlexImport.colSelectors[j].value;
+						var _onEditClick = function (e){
+
+							var dtid = e.target.id2;
+							var url = HeuristBaseURL+
+								"admin/structure/editDetailType.html?db="+HAPI.database+"&detailTypeID="+dtid;
+
+							top.HEURIST.util.popupURL(top, url,
+							{   "close-on-blur": false,
+								"no-resize": false,
+								height: 680,
+								width: 660,
+								callback: function(context) {
+								}
+							});
+
+						};
+						a.onclick = _onEditClick;
+					}
+					haserr = true;
+				}
+			}
+			if(haserr){
+				e.insertBefore(table, before);
+				e.insertBefore(document.createTextNode("UNRECGONIZED VALUES FOR FIELDS"), table);
+			}
+
+		}
+	},
+
 	// This function preloads all records necessary for REFERENCE detail types
-	loadReferencedRecords: function () {
+	loadReferencedRecords: function ()
+	{
 		var detailType;
 		var refCols = [];
 		var recIDs = [];
