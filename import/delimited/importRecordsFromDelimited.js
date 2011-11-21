@@ -25,6 +25,7 @@ FlexImport = (function () {
 	columnCount: 0,
 	hasHeaderRow: false,
 	recTypeSelect: null,
+	recTypeSelectSavedMapping: null,
 	recType: null,
 	workgroupSelect: null,
 	workgroups: {},
@@ -105,6 +106,129 @@ FlexImport = (function () {
 		);
 
 		FlexImport.createRecTypeOptions();
+
+		FlexImport.loadSavedMappings();
+	},
+
+	//load mapping from file
+	reapplyMapping: function(){
+
+			function _onLoadSavedMappingsContent(context){
+
+				if(context.response.indexOf("Error:")==0){
+					alert(context.response );
+					return;
+				}
+
+				var savedMapping = context.response.split(",");
+
+				if(savedMapping.length<1){
+					alert("Error: Empty mapping");
+					return;
+				}
+
+				var recTypeID = Number(FlexImport.recTypeSelect.value);
+
+				if(recTypeID!==Number(savedMapping[0])){
+					FlexImport.recTypeSelect.value = savedMapping[0];
+					FlexImport.createColumnSelectors();
+				}
+
+				var i, j=1,
+					m = savedMapping.length,
+					l = FlexImport.colSelectors.length;
+
+				for (i = 0; i < l; ++i) {
+					if(j<m){
+						FlexImport.colSelectors[i].value = savedMapping[j];
+						j++;
+					}else{
+						FlexImport.colSelectors[i].selectedIndex = 0;
+					}
+				}
+			}
+
+			var baseurl = HeuristBaseURL+"import/delimited/importRecordsFromDelimited.php";
+			var callback = _onLoadSavedMappingsContent;
+			var params = "mode=load&file="+FlexImport.recTypeSelectSavedMapping.value+"&db=" + HAPI.database;
+			top.HEURIST.util.sendRequest(baseurl, callback, params);
+
+	},
+
+	//load list of saved mappings
+	loadSavedMappings: function () {
+
+			function _onLoadSavedMappingsList(context){
+
+				var savedMapping = context.response.split("|");
+
+				var e = $("#rec-type-select-div")[0];
+				e.appendChild(document.createTextNode("  or select saved mapping for record type: "));
+				FlexImport.recTypeSelectSavedMapping = e.appendChild(document.createElement("select"));
+				FlexImport.recTypeSelectSavedMapping.onchange = function() {
+						FlexImport.reapplyMapping();
+				};
+				var opt = document.createElement("option");
+				opt.innerHTML = "mapping...";
+				opt.disabled = true;
+				opt.selected = true;
+				FlexImport.recTypeSelectSavedMapping.appendChild(opt);
+
+				var i, l = savedMapping.length;
+				for (i = 0; i < l; ++i) {
+					opt = document.createElement("option");
+					opt.value = savedMapping[i];
+					opt.innerHTML = savedMapping[i];
+					FlexImport.recTypeSelectSavedMapping.appendChild(opt);
+				}
+
+			}
+
+			var baseurl = HeuristBaseURL+"import/delimited/importRecordsFromDelimited.php";
+			var callback = _onLoadSavedMappingsList;
+			var params = "mode=list&db=" + HAPI.database;
+			top.HEURIST.util.sendRequest(baseurl, callback, params);
+
+	},
+
+	saveMappings: function () {
+
+			function _onSaveMappingsList(context){
+				alert(context.response);
+			}
+
+			var sel = FlexImport.recTypeSelect;
+
+			if(sel && sel.selectedIndex>0){
+
+				var recordType = sel.options[sel.selectedIndex].text;
+
+				var i,
+					atleastOne = false,
+					content = [],
+					l = FlexImport.colSelectors.length;
+
+				content.push(sel.value);
+
+				for 	(i = 0; i < l; ++i) {
+					if (FlexImport.colSelectors[i].selectedIndex > 0) {
+						atleastOne = true;
+						content.push(FlexImport.colSelectors[i].value);
+					}else{
+						content.push("0");
+					}
+				}
+
+				if(atleastOne){
+					var baseurl = HeuristBaseURL+"import/delimited/importRecordsFromDelimited.php";
+					var callback = _onSaveMappingsList;
+					var params = "mode=save&db=" + HAPI.database+"&file="+recordType+"&content="+content.join(",");
+					top.HEURIST.util.sendRequest(baseurl, callback, params);
+				}else{
+					alert("Define at least one mapping value");
+				}
+
+			}
 	},
 
 	createRecTypeOptions: function () {
@@ -171,6 +295,11 @@ FlexImport = (function () {
 			button.value = "create records";
 			button.onclick = function() { FlexImport.loadReferencedRecords(); };
 		p.appendChild(document.createTextNode(" (doesn't save to Heurist yet)"));
+
+		var button = p.appendChild(document.createElement("input"));
+			button.type = "button";
+			button.value = "save mapping";
+			button.onclick = function() { FlexImport.saveMappings(); };
 
 		p = e.appendChild(document.createElement("p"));
 		a = p.appendChild(document.createElement("a"));

@@ -15,7 +15,7 @@
 		<title>Heurist Flexible Import System</title>
 
 		<script src="../../common/php/loadHAPI.php"></script>
-		<script src="../../common/php/getMagicNumbers.php"></script>
+
 		<script>
 			if (!(HAPI && HAPI.CurrentUser.isLoggedIn())){
 				window.location = HeuristBaseURL + "common/connect/login.php?db="+HAPI.database;//saw FIXME: instance code here
@@ -50,6 +50,12 @@
 	</head>
 
 	<body class="popup">
+
+		<script src="../../common/js/utilsLoad.js"></script>
+		<!-- script src="../../common/php/loadCommonInfo.php"></script -->
+		<script src="../../common/php/getMagicNumbers.php"></script>
+		<script src="../../common/js/utilsUI.js"></script>
+
 		<h2>CSV (comma-separated values) importer</h2>
 		<p id=info-p></p>
 		<p id=rec-type-select-div></p>
