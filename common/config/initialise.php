@@ -34,10 +34,10 @@
 	// Update sub-sub-version weekly and record date 3.1.1 = 17/10/11
 	define('HEURIST_MIN_DBVERSION',"1.0.0");
 
-	define('HEURIST_TOP_DIRS',"admin|common|export|external|hapi|help|import|records|search|viewers");	// this is the path from the heurist code base root. Only change if file moves.
-	define('HEURIST_SERVER_NAME', @$_SERVER["SERVER_NAME"]);	// this will read the server host name for the configured name.
-	define('HEURIST_HOST_NAME', @$_SERVER["HTTP_HOST"]);	//
-	define('HEURIST_DOCUMENT_ROOT',@$_SERVER["DOCUMENT_ROOT"]);
+	define('HEURIST_TOP_DIRS',"admin|common|export|external|hapi|help|import|records|search|viewers"); // a pipe delimited list of the top level directories in the heurist code base root. Only change if new ones are added.
+	define('HEURIST_SERVER_NAME', @$_SERVER["SERVER_NAME"]);	// server host name for the configured name, eg. heuristscholar.org
+	define('HEURIST_HOST_NAME', @$_SERVER["HTTP_HOST"]);	    // eg. heuristscholar.org
+	define('HEURIST_DOCUMENT_ROOT',@$_SERVER["DOCUMENT_ROOT"]); //  eg. /var/www/htdocs
 
 	// calculate the dir where the Heurist code is installed
 	$installDir = preg_replace("/\/(".HEURIST_TOP_DIRS.")\/.*/","",@$_SERVER["SCRIPT_NAME"]);// remove "/top level dir" and everything that follows it.
@@ -149,13 +149,12 @@
 	define('USER_GROUPS_GROUP_ID_FIELD', 'ugl_GroupID');
 	define('USER_GROUPS_ROLE_FIELD', 'ugl_Role');
 
-	// upload path
+	// upload path eg. /var/www/htdoCs/HEURIST_FILESTORE
 		if ($defaultRootFileUploadPath) {
 		define('HEURIST_UPLOAD_ROOT', $defaultRootFileUploadPath);
 		} else {
 		define('HEURIST_UPLOAD_ROOT', HEURIST_DOCUMENT_ROOT."/HEURIST_FILESTORE/"); // uploaded-heurist-files to 14 Nov 2011
 		}
-	error_log("HEURIST_UPLOAD_ROOT = ".HEURIST_UPLOAD_ROOT);
 
 	$upload = @$sysValues['sys_UploadDirectory'];
 	error_log("upload 1 = ".$upload);
@@ -173,10 +172,9 @@
 
 	// icon path - note code now assumes that this is within the fielstore for the database
 	define('HEURIST_ICON_DIRNAME',"rectype-icons/");
-	define('HEURIST_ICON_ROOT',HEURIST_UPLOAD_DIR);
-	  // to 14/11/11: HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH."common/images/");
+	define('HEURIST_ICON_ROOT',HEURIST_UPLOAD_DIR); // eg /var/www/htdocs/HEURIST_FILESTORE
+	  // to 14/11/11: HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH."common/images/ so /var/www/htdocs/h3/common/images
 	define('HEURIST_ICON_DIR', HEURIST_ICON_ROOT.HEURIST_ICON_DIRNAME);
-	error_log("HEURIST_ICON_DIR = ".HEURIST_ICON_DIR);
 
 	// smarty template path  - note code now assumes that this is within the fielstore for the database
 	define('HEURIST_SMARTY_TEMPLATES_DIRNAME',"smarty-templates/");

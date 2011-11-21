@@ -55,7 +55,7 @@ $passwordForDatabaseCreation=""; // blank = any logged in user can create
 // $defaultRootFileUploadPath = "/var/www/myUploadDir/";  BE SURE TO INCLUDE THE TRAILING "/"
 // Then, when running Heurist with db=main, uploaded files will be loaded into /var/www/myUploadDir/main/
 // defaults to root document directory/HEURIST_FILESTORE/dbname
-$defaultRootFileUploadPath = "/var/www/htdocs/HEURIST_FILESTORE/"; // recommended
+$defaultRootFileUploadPath = ""; // recommended
 
 // [email]
 
