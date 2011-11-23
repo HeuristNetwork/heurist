@@ -496,6 +496,10 @@ CREATE TABLE recUploadedFiles (
   KEY ulf_MimeExt (ulf_MimeExt)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Index to uploaded files linked from records';
 
+-- 18/11/11: add path and proper fielname for uploaded files to allow multiple paths and ingestion of FieldHelper etc.
+	ALTER TABLE recUploadedFiles ADD ulf_FilePath VARCHAR( 1024 ) DEFAULT NULL COMMENT  'The path where the uploaded file is stored',
+	ADD ulf_FileName VARCHAR( 512 ) DEFAULT NULL COMMENT  'The filename for the uploaded file';
+
 -- --------------------------------------------------------
 
 --

@@ -36,13 +36,21 @@
 
 	include_once 'classEmailProcessor.php';
 
+
+	function returnErrorMsgPage($msg) {
+	  $msg2= "<p>&nbsp;<h2>Email configuration error</h2><p>".$msg."<p><i>Please edit the system configuration (DBAdmin > Database > Advanced Properties) or user configuration ( DBAdmin > Access > Users)</i>";
+	  header("Location: ".HEURIST_BASE_URL."common/html/msgErrorMsg.html?msg=$msg2");
+		// echo "location.replace(\"".HEURIST_BASE_URL."common/html/msgErrorMsg.html?msg=$msg2\");";
+		} // returnErrorMsgPage
+
+
 	mysql_connection_db_overwrite(DATABASE);
 
 	//error_log(HEURIST_DBNAME."         ".HEURIST_URL_BASE.'            '.DATABASE);
 
 	// get mail server options from database
 	$res = mysql_query('select * from sysIdentification');
-	if (!$res) returnErrorMsgPage("Unable to retrieve db sys information, MySQL error: ".mysql_error());
+	if (!$res) returnErrorMsgPage("Unable to retrieve email configuration from sysIdentification record, MySQL error: ".mysql_error());
 	$sysValues = mysql_fetch_assoc($res);
 	$server   = $sysValues['sys_eMailImapServer'];
 	$port     = $sysValues['sys_eMailImapPort'];
@@ -70,7 +78,7 @@
 
 	// get list of emails addresses - messages from them will be processed
 	$res=mysql_query("select ugr_IncomingEmailAddresses from sysUGrps where ugr_ID=".get_user_id());
-	if (!$res) returnErrorMsgPage("Unable to retrieve user incoming email information, MySQL error: ".mysql_error());
+	if (!$res) returnErrorMsgPage("Unable to retrieve incoming email address information from user's sysUGrps record, MySQL error: ".mysql_error());
 	$email = mysql_fetch_assoc($res);
 	if($email && $email['ugr_IncomingEmailAddresses']){
 	if($senders){
@@ -500,7 +508,7 @@
     }
 			}catch(Exception $e){
     echo '<b>Processing failed with the following message: '.$e->getMessage().'</b>';
-	echo "<p>If the user name and password or IMAP server detaisl are incorrect, you may get 'Login aborted'";
+	echo "<p>If the user name and password or IMAP server details are incorrect, you may get 'Login aborted'";
 	echo "<p><a href='../../admin/setup/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."' target='_blank'>
 	<img src='../../common/images/external_link_16x16.gif'/>Configure connection to IMAP mail server</a> (per-database)</p>";
 	}
