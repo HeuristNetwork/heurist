@@ -1,0 +1,8 @@
+# This file determines access in the root upload directroy (and descendants)
+# Apache config msut be set to allow htaccess controls
+Deny from all
+# TODO: tHIS ALLOWS ACCWESS TO UPLOADED jpg FILES ETC. WE NEED TO RESTRICT 'ulf_*.*'
+<FilesMatch "\.(flv|gif|jpg|jpeg|png|icon)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>

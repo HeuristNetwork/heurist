@@ -19,7 +19,7 @@
 
 	$name = HEURIST_ICON_DIR.$rectypeID.".png";
 
-	$filename =  HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.$name;
+	$filename =  /* HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH. Ian 21/11/11 - HEURIST_ICON_DIR is full path to the icon */ $name;
 	if(!file_exists($filename)){
 		//create the stub image with text - rectypeID
 		$img = make_file_image($rectypeID, 16, 2);

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * filename, brief description, date of creation, by whom
+ * uploadRectypeIcon.php, uploads icons and thumbnails for record types
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
@@ -17,16 +17,22 @@
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/php/imageLibrary.php');
 
-	if (!is_admin()) return;//TOD change this for just admin and return msg
+	if (!is_admin()) return;//TOD change this for just admin and return msg. Is probably only called where user is admin
 
 	$rt_id = intval($_REQUEST['rty_ID']);
 	$mode = intval($_REQUEST['mode']);  //0 - icon, 1 - thumbnail
 
-	$dim = ($mode==0)?16:75;
-	$image_dir = HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.HEURIST_ICON_DIR.(($mode==0)?'':'thumb/th_');
+	if (!$rt_id) { // no ID set, hopefully this should not occur
+			error_log("uploadRectypeIcon.php called without a record type ID set"); return;
+	}
+
+	$dim = ($mode==0)?16:75; // appropriate sizes for icons and thumbnails
+
+	$image_dir = /* HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.*/ HEURIST_ICON_DIR.(($mode==0)?'':'thumb/th_');
 	$image_url = (($mode==0)?getRectypeIconURL($rt_id):getRectypeThumbURL($rt_id));
 
-	if (!$rt_id) return;
+	error_log("image directroy / imasge url: ".$image_dir."  /  ".$image_url);
+
 
 /* ???????
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
@@ -87,7 +93,7 @@
 
 function upload_file($rt_id, $dim) {
 
-	global $image_dir;
+	global $image_dir, $mode;
 
 	if (! @$_REQUEST['uploading']) return;
 	if (! $_FILES['new_icon']['size']) return array('', 'Error occurred during upload - file had zero size');
@@ -115,7 +121,9 @@ function upload_file($rt_id, $dim) {
 	}
 
 	if (! $img) return array('', 'Uploaded file is not supported format');
-	//if (imagesx($img) > 16  ||  imagesy($img) > 16) return array('','Uploaded file must be 16x16 pixels');
+
+	// check that the image is not mroe than trwice desired size to avoid scaling issues
+		if (imagesx($img) > ($dim*2)  ||  imagesy($img) > ($dim*2)) return array('','Uploaded file must be no larger than twice $dim pixels in any direction');
 
 	$filename = $image_dir . $rt_id . '.png'; // tempnam('/tmp', 'resized');
 
