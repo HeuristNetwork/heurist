@@ -1892,7 +1892,7 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 	} else {
 		if (top.HEURIST.browser.isEarlyWebkit) {	// old way of doing things
 			var newIframe = this.document.createElement("iframe");
-				newIframe.src = top.HEURIST.basePath+"records/files/uploadFile.php?recID=" + windowRef.parent.HEURIST.edit.record.bibID + "&bdt_id=" + this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']];
+				newIframe.src = top.HEURIST.basePath+"records/files/uploadFileForm.php?recID=" + windowRef.parent.HEURIST.edit.record.bibID + "&bdt_id=" + this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']];
 				newIframe.frameBorder = 0;
 				newIframe.style.width = "90%";
 				newIframe.style.height = "2em";

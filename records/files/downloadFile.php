@@ -21,7 +21,7 @@ mysql_connection_db_select(DATABASE);
 // May be best to avoid the possibility of somebody harvesting ulf_ID=1, 2, 3, ...
 // so the files are indexed by the SHA-1 hash of the concatenation of the ulf_ID and a random integer.
 
-if (! @$_REQUEST['ulf_ID']) return; // nothign returned if no ulf_ID parameter
+if (! @$_REQUEST['ulf_ID']) return; // nothing returned if no ulf_ID parameter
 
 $res = mysql_query('select * from recUploadedFiles where ulf_ObfuscatedFileID = "' . addslashes($_REQUEST['ulf_ID']) . '"');
 if (mysql_num_rows($res) != 1) return; // nothign returned if parameter does not match one and only one row
@@ -52,20 +52,22 @@ if (@$mimeType['fxm_MimeType']) {
 // from 18/11/11, it is a disambiguated concatenation of 'ulf_' plus ulf_id plus ulfFileName
 if ($file['ulf_FileName']) {
 	$filename = $file['ulf_FilePath'].$file['ulf_FileName']; // post 18/11/11 proper file path and name
-	} else {
+} else {
 	$filename = HEURIST_UPLOAD_DIR ."/". $file['ulf_ID']; // pre 18/11/11 - bare numbers as names, just use file ID
 }
 
 
 //error_log("filename = $filename and mime = ".$mimeType['fxm_MimeType']. " mimeext=".$mimeExt." mysqlerr = ".mysql_error());
 //error_log("filename = ".$filename);
-$filename = str_replace('/../', '/', $filename);  // not sure why this is being taken out, pre 18/11/11, unlikely tio be needed any more
+$filename = str_replace('/../', '/', $filename);  // not sure why this is being taken out, pre 18/11/11, unlikely to be needed any more
 $filename = str_replace('//', '/', $filename);
 //error_log("filename = ".$filename);
 if(false)
 {
 /*
 	todo: waht is all this and when was it removed? Could it be useful for the furture. ? check with Artem, may be work related to kmls mid Nov 2011
+	artem: THIS IS FOR showMap - to support kmz in timeline, it extracts kmz file and sends as kml to client side
+
 	($mimeExt=="kmz"){
 	$zip=zip_open($filename);
 	if(!$zip) {return("Unable to proccess file '{$filename}'");}

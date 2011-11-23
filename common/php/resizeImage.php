@@ -31,7 +31,8 @@ $img = null;
 mysql_connection_db_overwrite(DATABASE);
 mysql_query('set character set binary');
 
-if (array_key_exists('ulf_ID', $_REQUEST)) {
+if (array_key_exists('ulf_ID', $_REQUEST))
+{
 	$res = mysql_query('select * from recUploadedFiles where ulf_ObfuscatedFileID = "' . addslashes($_REQUEST['ulf_ID']) . '"');
 	if (mysql_num_rows($res) != 1) return;
 	$file = mysql_fetch_assoc($res);
@@ -42,7 +43,12 @@ if (array_key_exists('ulf_ID', $_REQUEST)) {
 		return;
 	}
 
-	$filename = HEURIST_UPLOAD_DIR."/". $file['ulf_ID'];
+	if ($file['ulf_FileName']) {
+		$filename = $file['ulf_FilePath'].$file['ulf_FileName']; // post 18/11/11 proper file path and name
+	} else {
+		$filename = HEURIST_UPLOAD_DIR ."/". $file['ulf_ID']; // pre 18/11/11 - bare numbers as names, just use file ID
+	}
+
 	$filename = str_replace('/../', '/', $filename);
 
 	$mimeExt = '';

@@ -8,11 +8,8 @@
  * @package Heurist academic knowledge management system
  * @todo
  **/
+ 	define('ROOTINIT',"1");
 
-?>
-
-<?php
-	define('INITROOT','1');
 	require_once(dirname(__FILE__).'/common/config/initialise.php');
 	   // correct parameters, connection, existence of database are all checked in initialise.php
 
@@ -43,7 +40,7 @@
 	print "&nbsp;&nbsp;&nbsp;&nbsp;<a href = GOOGLE NEEDED HERE >Google</a><p>";
 	*/
 
-	?>
+?>
 
 
 

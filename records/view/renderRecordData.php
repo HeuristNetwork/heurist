@@ -373,7 +373,7 @@ function print_private_details($bib) {
 							'thumb' => HEURIST_SITE_PATH.'common/php/resizeImage.php?ulf_ID='.$file['ulf_ObfuscatedFileID']
 						));
 					}
-					$bd['val'] = '<a target="_surf" href="'.htmlspecialchars($img_url).'"><img src="'.HEURIST_SITE_PATH.'common/images/external_link_16x16.gif">'.htmlspecialchars($file['ulf_OrigFileName']).'</a> [' .htmlspecialchars($file['ulf_FileSizeKB']) . ']';
+					$bd['val'] = '<a target="_surf" href="'.htmlspecialchars($img_url).'"><img src="'.HEURIST_SITE_PATH.'common/images/external_link_16x16.gif">'.htmlspecialchars($file['ulf_OrigFileName']).'</a> [' .htmlspecialchars($file['ulf_FileSizeKB']) . 'kB]';
 				}
 			} else {
 				if (preg_match('/^http:/', $bd['val'])) {

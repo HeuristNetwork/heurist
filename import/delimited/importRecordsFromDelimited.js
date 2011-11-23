@@ -427,6 +427,28 @@ FlexImport = (function () {
 
 		FlexImport.errorSummary = new Array(FlexImport.columnCount);
 
+        if (!Array.prototype.indexOf)
+        {
+            Array.prototype.indexOf = function(elt /*, from*/)
+            {
+                var len = this.length;
+                var from = Number(arguments[1]) || 0;
+                from = (from < 0)
+                        ? Math.ceil(from)
+                        : Math.floor(from);
+                if (from < 0)
+                    from += len;
+
+                for (; from < len; from++)
+                {
+                    if (from in this &&
+                    this[from] === elt)
+                    return from;
+                }
+                   return -1;
+            };
+        }
+
 		// create rest of table filling it with the csv analysed data
 		for (var i = this.hasHeaderRow ? 1:0; i < FlexImport.fields.length; ++i) {
 			var inputRow = FlexImport.fields[i];
@@ -447,6 +469,7 @@ FlexImport = (function () {
 					}
 					if (FlexImport.lineErrorMap[i] && FlexImport.lineErrorMap[i][j]){
 						td.className = "invalidInput";
+						if(FlexImport.fields.length<100){ //avoid jquery error in chrome
 						var temp = "";
 						if (inputRow[j]) {
 							temp += "Correct value : " + inputRow[j];
@@ -483,6 +506,7 @@ FlexImport = (function () {
 								}
 							}
 						};
+						}//if <500
 						var p = td.appendChild(document.createElement("p"));
 						p.className = "errorMsg";
 						p.innerHTML = FlexImport.lineErrorMap[i][j];
@@ -508,19 +532,16 @@ FlexImport = (function () {
 			}
 		}
 
+		FlexImport.showErrorSummary(e);
+
 		e.appendChild(table);
+},
 
-		FlexImport.showErrorSummary(table);
-
-	},
-
-	showErrorSummary: function (before) {
+	showErrorSummary: function (e) {
 
 		var eS = FlexImport.errorSummary;
 
 		if(eS){
-
-			var e = $("#col-select-div")[0];
 
 			var table = document.createElement("table");
 			table.id = "col-select-table";
@@ -566,8 +587,8 @@ FlexImport = (function () {
 				}
 			}
 			if(haserr){
-				e.insertBefore(table, before);
-				e.insertBefore(document.createTextNode("UNRECGONIZED VALUES FOR FIELDS"), table);
+				e.appendChild(document.createTextNode("UNRECGONIZED VALUES FOR FIELDS"));
+				e.appendChild(table);
 			}
 
 		}

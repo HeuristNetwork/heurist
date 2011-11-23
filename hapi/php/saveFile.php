@@ -15,6 +15,7 @@
 
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
+require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 
 //error_log("in saveFile baseURL = ".HEURIST_URL_BASE );
 if (! defined("USING-XSS")) {
@@ -43,20 +44,19 @@ mysql_query("start transaction");
 
 $upload = $_FILES["file"];
 error_log("upload file info - ". print_r($_FILES["file"],true));
-$fileID = upload_file($upload["name"], $upload["type"], $upload["tmp_name"], $upload["error"], $upload["size"], $_REQUEST["description"]);
+									//$upload["type"]
+$fileID = upload_file($upload["name"], null, $upload["tmp_name"], $upload["error"], $upload["size"], $_REQUEST["description"], false);
 
-if ($fileID) {
-	$res = mysql_query("select * from recUploadedFiles where ulf_ID = $fileID");
-	$file = mysql_fetch_assoc($res);
-	$thumbnailURL = HEURIST_URL_BASE."common/php/resizeImage.php?db=".HEURIST_DBNAME."&ulf_ID=" . $file["ulf_ObfuscatedFileID"];
-	$URL = HEURIST_URL_BASE."records/files/downloadFile.php/" . urlencode($file["ulf_OrigFileName"]) . "?db=".HEURIST_DBNAME."&ulf_ID=" . $file["ulf_ObfuscatedFileID"];
-error_log("url = ". $URL);
-	print json_format(array("file" => array(	// file[0] => id , file [1] => origFileName, etc...
-		$file["ulf_ID"], $file["ulf_OrigFileName"], $file["ulf_FileSizeKB"], $file["ulf_MimeExt"], $URL, $thumbnailURL, $file["ulf_Description"]
-	)));
+if (is_numeric($fileID)) {
+
+	$file = get_uploaded_file_info($fileID, false, false);
+	print json_format($file);
+
 	mysql_query("commit");
 }
-else if ($_FILES["file"]["error"]) {
+else if ($fileID) {
+	jsonError($fileID);
+}else if ($_FILES["file"]["error"]) {
 	jsonError("uploaded file was too large");
 }
 else {
@@ -71,59 +71,5 @@ function jsonError($message) {
 	print "{\"error\":\"" . addslashes($message) . "\"}";
 }
 
-function upload_file($name, $type, $tmp_name, $error, $size, $description) {
-	/* Check that the uploaded file has a sane name / size / no errors etc,
-	 * enter an appropriate record in the recUploadedFiles table,
-	 * save it to disk,
-	 * and return the ulf_ID for that record.
-	 * This will be zero if anything went pear-shaped along the way.
-	 */
-//error_log("in saveFile upload_file  name = ". $name. " type = ". $type. " error = ". $error. " size = " . $size . " uploadDir = ". HEURIST_UPLOAD_DIR );
-
-	if ($size <= 0  ||  $error) { error_log("size is $size, error is $error"); return 0; }
-
-	/* clean up the provided file name -- these characters shouldn't make it through anyway */
-	$name = str_replace("\0", '', $name);
-	$name = str_replace('\\', '/', $name);
-	$name = preg_replace('!.*/!', '', $name);
-
-	$mimetype = null;
-	$mimetypeExt = null;
-	if (preg_match('/\\.([^.]+)$/', $name, $matches)) {
-		$extension = $matches[1];
-		$res = mysql_query('select * from defFileExtToMimetype where fxm_Extension = "'.addslashes($extension).'"');
-		if (mysql_num_rows($res) == 1) {
-			$mimetype = mysql_fetch_assoc($res);
-			$mimetypeExt = $mimetype['fxm_Extension'];
-		}
-	}
-
-
-	if ($size && $size < 1024) {
-		$file_size = 1;
-	}else{
-		$file_size = round($size / 1024);
-	}
-
-	$res = mysql__insert('recUploadedFiles', array(	'ulf_OrigFileName' => $name,
-													'ulf_UploaderUGrpID' => get_user_id(),
-													'ulf_Added' => date('Y-m-d H:i:s'),
-													'ulf_MimeExt ' => $mimetypeExt,
-													'ulf_FileSizeKB' => $file_size,
-													'ulf_Description' => $description? $description : NULL));
-	if (! $res) { error_log("error inserting file upload info: " . mysql_error()); return 0; }
-	$file_id = mysql_insert_id();
-	mysql_query('update recUploadedFiles set ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
-		/* nonce is a random value used to download the file */
-
-	if (move_uploaded_file($tmp_name, HEURIST_UPLOAD_DIR . "/" . $file_id)) {
-		return $file_id;
-	} else {
-		/* something messed up ... make a note of it and move on */
-		error_log("upload_file: <$name> / <$tmp_name> couldn't be saved as <" . HEURIST_UPLOAD_DIR . "/" . $file_id . ">");
-		mysql_query('delete from recUploadedFiles where ulf_ID = ' . $file_id);
-		return 0;
-	}
-}
 
 ?>

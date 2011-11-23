@@ -33,7 +33,7 @@ header("Content-type: text/javascript");
 $prefs = array(
 	"help" => "show",
     "advanced" => "hide",
-	"input-visibility" => "required",
+	"input-visibility" => "all",
 	"action-on-save" => "stay",
 	"gigitiser-view" => "",
 	"double-click-action" => "edit",

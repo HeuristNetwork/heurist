@@ -21,12 +21,18 @@ $islist = array_key_exists("q", $_REQUEST);
 
 if(!$islist && array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!=""){
 	//kml is stored in uploaded file
-	$res = mysql_query("select ulf_ID from recDetails left join recUploadedFiles on ulf_ID = dtl_UploadedFileID where dtl_RecID = " . intval($_REQUEST["id"]) . " and (dtl_DetailTypeID = ".(defined('DT_ASSOCIATED_FILE')?DT_ASSOCIATED_FILE:"0")." OR dtl_DetailTypeID = ".(defined('DT_KML_FILE')?DT_KML_FILE:"0").")");
+	$res = mysql_query("select ulf_ID, ulf_FilePath, ulf_FileName from recDetails left join recUploadedFiles on ulf_ID = dtl_UploadedFileID where dtl_RecID = " . intval($_REQUEST["id"]) . " and (dtl_DetailTypeID = ".(defined('DT_ASSOCIATED_FILE')?DT_ASSOCIATED_FILE:"0")." OR dtl_DetailTypeID = ".(defined('DT_KML_FILE')?DT_KML_FILE:"0").")");
 
 	if (mysql_num_rows($res)) {
-		$file_id = mysql_fetch_array($res);
-		$file_id = $file_id[0];
-		print file_get_contents(HEURIST_UPLOAD_DIR . "/" . $file_id);
+			$file_data = mysql_fetch_array($res);
+
+			if ($file_data[2]) {
+				$filename = $file_data[1].$file_data[2]; // post 18/11/11 proper file path and name
+			} else {
+				$filename = HEURIST_UPLOAD_DIR."/".$file_data[0]; // pre 18/11/11 - bare numbers as names, just use file ID
+			}
+
+		print file_get_contents($filename);
 		exit;
 	}else{
 		$res = mysql_query("select dtl_Value from recDetails where dtl_RecID = " . intval($_REQUEST["id"]) . " and dtl_DetailTypeID = ".(defined('DT_KML')?DT_KML:"0"));
@@ -38,6 +44,8 @@ if(!$islist && array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!=""){
 		}
 	}
 }
+//@TODO - include reference to external kml file as a LINK into kml output
+
 
 if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 

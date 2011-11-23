@@ -25,6 +25,7 @@
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 	require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
+	require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 
 	if (! is_logged_in()) {
 		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
@@ -337,21 +338,21 @@
 
             	//find file name and related info if $files_arr
             	if($files_arr){
-					$file_arr = null;
+					$file_data = null;
 
 			      	foreach ($files_arr as $temp_arr) {
 			      		if($temp_arr[0]==$filename){
-			      			$file_arr = $temp_arr;
-							// error_log("BBBB>>>print_r=".print_r($file_arr, true));
+			      			$file_data = $temp_arr;
+							// error_log("BBBB>>>print_r=".print_r($file_data, true));
 			      			break;
 						}
 			  		}
 
-					if($file_arr){
-						$name = $file_arr[1];
-						$date_uploaded = date('Y-m-d H:i:s'); //$file_arr[2];
-						$mimetypeExt = $file_arr[3];
-						//$file_size = $file_arr[4];
+					if($file_data){
+						$name = $file_data[0];
+						$date_uploaded = date('Y-m-d H:i:s'); //$file_data[2];
+						$mimetypeExt = $file_data[1];
+						//$file_size = $file_data[4];
 					}else{
 						//skip this attachment
 						continue;
@@ -366,42 +367,41 @@
 				}
 
             	//save into database
-	$res = mysql__insert('recUploadedFiles', array(	'ulf_OrigFileName' => $name,
-													'ulf_UploaderUGrpID' => get_user_id(),
-													'ulf_Added' => date('Y-m-d H:i:s'),
-													'ulf_MimeExt ' => $mimetypeExt,
-													'ulf_FileSizeKB' => $file_size,
-													'ulf_Description' => NULL ));
-	if (! $res) { error_log("error inserting file upload info: " . mysql_error()); return 0; }
-	$file_id = mysql_insert_id();
-	mysql_query('update recUploadedFiles set ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
+            	$file_id = upload_file($name, $mimetypeExt, null, null, $file_size, null, false);
 
-            	$full_name = HEURIST_UPLOAD_DIR."/".$file_id;
+            	if(is_numeric($file_id)){
 
-				// error_log("CCCCC>>>".$full_name);
+            		$full_name = HEURIST_UPLOAD_DIR."/ulf_".$file_id."_".$name;
 
-                /*if(!is_file($full_name))
-                {
-                    $filenameparts=split("[/\\.]", $filename);
+					// error_log("CCCCC>>>".$full_name);
 
-                    $index=2;
-                    do{
-                        $filenameparts=split("[/\\.]", $filename);
-                        if(count($filenameparts)>1){
-                            $filenameparts[count($filenameparts)-2].='('.$index.')';
-                        }else{
-                            $filenameparts[0].='('.$index.')';
-                        }
-                        $filename_new=join('.', $filenameparts);
-                        $index++;
-                    }while(is_file($attachments_save_path.$rec_id.'__'.$filename_new));
-                }*/
-                $attachment->setFilename($full_name);
-                $attachment->setName($full_name);
+	                /*if(!is_file($full_name))
+	                {
+	                    $filenameparts=split("[/\\.]", $filename);
 
-                $file=fopen($full_name, 'wb');
-                fwrite($file, $attachment->getBody(), $attachment_size_max);
-                fclose($file);
+	                    $index=2;
+	                    do{
+	                        $filenameparts=split("[/\\.]", $filename);
+	                        if(count($filenameparts)>1){
+	                            $filenameparts[count($filenameparts)-2].='('.$index.')';
+	                        }else{
+	                            $filenameparts[0].='('.$index.')';
+	                        }
+	                        $filename_new=join('.', $filenameparts);
+	                        $index++;
+	                    }while(is_file($attachments_save_path.$rec_id.'__'.$filename_new));
+	                }*/
+	                $attachment->setFilename($full_name);
+	                $attachment->setName($full_name);
+
+	                $file=fopen($full_name, 'wb');
+	                fwrite($file, $attachment->getBody(), $attachment_size_max);
+	                fclose($file);
+
+				}else{
+                	error_log("error inserting file upload info: " . $file_id);
+                	return 0;
+				}
 
 				// error_log("DDDDDDDD>> SAVED");
 

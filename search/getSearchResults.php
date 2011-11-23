@@ -41,6 +41,7 @@ if (!defined('MEMCACHED_PORT')) define('MEMCACHED_PORT', 11211);
 require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/parseQueryToSQL.php');
+require_once(dirname(__FILE__)."../../records/files/uploadFile.php");
 
 $memcache = null;
 
@@ -242,25 +243,9 @@ function loadRecordDetails(&$record) {
 			break;
 
 			case "file":
-			$fres = mysql_query(//saw NOTE! these field names match thoses used in HAPI to init an HFile object.
-			    "select ulf_ID as id,
-			            ulf_ObfuscatedFileID as nonce,
-			            ulf_OrigFileName as origName,
-			            ulf_FileSizeKB as size,
-			            fxm_MimeType as type,
-			            ulf_Added as date,
-			            ulf_Description as description
-			       from recUploadedFiles left join defFileExtToMimetype on ulf_MimeExt = fxm_Extension
-			      where ulf_ID = " . intval($rd["dtl_UploadedFileID"]));
 
-			$detailValue = array("file" => mysql_fetch_assoc($fres));
-			$origName = urlencode($detailValue["file"]["origName"]);
-			$detailValue["file"]["URL"] =
-				HEURIST_URL_BASE."records/files/downloadFile.php?". (defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )
-				."ulf_ID=".$detailValue["file"]["nonce"];
-			$detailValue["file"]["thumbURL"] =
-				HEURIST_URL_BASE."common/php/resizeImage.php?" . (defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )
-				."ulf_ID=".$detailValue["file"]["nonce"];
+			$detailValue = get_uploaded_file_info($rd["dtl_UploadedFileID"], true, false);
+
 			break;
 
 			case "resource":

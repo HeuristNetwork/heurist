@@ -1,8 +1,6 @@
 <?php
 
 /**
- * It seems this is old way of upload file. It is utilized only for old version.
- * See hapi/php/saveFile.php
  *
  *
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
@@ -12,118 +10,53 @@
  * @todo
  **/
 
-?>
-
-<?php
-
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 
-if (! is_logged_in()) return;
+/**
+* @param mixed $name - originak file name
+* @param mixed $mimetypeExt - ??
+* @param mixed $tmp_name - temporary name from FILE array
+* @param mixed $error
+* @param mixed $size
+*
+* @return file ID or error message
+*/
+function upload_file($name, $mimetypeExt, $tmp_name, $error, $size, $description, $needConnect) {
 
-mysql_connection_db_overwrite(DATABASE);
+	if (! is_logged_in()) return "Not logged in";
 
-
-if (! @$_POST["recID"]) {
-	$bibID = intval($_GET["recID"]);
-	$bdtID = intval($_GET["bdt_id"]);
-}
-if (@$bibID  &&  @$bdtID) {
-?>
-<html>
-<head>
-<link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/global.css">
-<body style="padding: 0; margin: 0;">
-<form method=post enctype=multipart/form-data style="display: inline; padding: 0; margin: 0;">
-<input type=hidden name=recID value=<?= $bibID ?>>
-<input type=hidden name=bdt_id value=<?= $bdtID ?>>
-<input type=file name=file onchange="form.submit()">
-</form>
-</body></html>
-<?php
-	return;
-}
-
-$bibID = intval($_POST["recID"]);
-$bdtID = intval($_POST["bdt_id"]);
-if (! ($bibID && $bdtID)) { print "<html><body style='color: blue;'></body></html>"; return; }
-
-
-?>
-<html>
-<head>
-<script>
-function fireParentSubmitFunction() {
-	var parentFrames = parent.document.getElementsByTagName("iframe");
-	var frameElement = null;
-	for (var i=0; i < parentFrames.length; ++i)
-		if (parentFrames[i].contentWindow == window) frameElement = parentFrames[i];
-
-	if (! frameElement) return;
-
-	frameElement.submitFunction(fileDetails);
-}
-
-<?php
-
-print "var fileDetails = ";
-$uploadFileError = null;
-$upload = $_FILES["file"];// saw NOTE!! this must be the same as the input type=file name (see above)
-$fileID = upload_file($upload["name"], $upload["type"], $upload["tmp_name"], $upload["error"], $upload["size"]);
-if ($fileID) {
-	if ($bibID  &&  $bdtID) {
-		mysql_query("update Records set rec_Modified=now() where rec_ID=$bibID");
-		mysql_query("insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_UploadedFileID) values ($bibID, $bdtID, $fileID)");
-	}
-
-	$res = mysql_query("select * from recUploadedFiles where ulf_ID = $fileID");
-	$file = mysql_fetch_assoc($res);
-
-?>
-({ file: {	// saw TODO:  update this to include url or nonce and thumbURL
-	id: "<?= $file["ulf_ID"] ?>",
-	origName: "<?= slash($file["ulf_OrigFileName"]) ?>",
-	date: "<?= slash($file["ulf_Added"]) ?>",
-	mimeType: "<?= slash($file["ulf_MimeExt"]) ?>",
-	nonce: "<?= slash($file["ulf_ObfuscatedFileID"]) ?>",
-	fileSize: "<?= slash($file["ulf_FileSizeKB"]) ?>",
-	description: "<?= slash($file["ulf_Description"]) ?>"
-} })
-<?php
-} else if ($uploadFileError){
-	print "({ file: { origName: \"" . slash($_FILES["file"]["name"]) . "\" }, error: $uploadFileError })";
-} else {
-	if ($_FILES["file"]["error"]) {
-		print "({ file: { origName: \"" . slash($_FILES["file"]["name"]) . "\" }, error: \"Uploaded file was too large\" })";
-	} else {
-		print "({ file: { origName: \"" . slash($_FILES["file"]["name"]) . "\" }, error: \"File upload was interrupted\" })";
-	}
-}
-?>
-</script>
-</head>
-<body onload="fireParentSubmitFunction()"></body>
-</html>
-<?php
-
-function upload_file($name, $type, $tmp_name, $error, $size) {
-global $uploadFileError;
 	/* Check that the uploaded file has a sane name / size / no errors etc,
 	 * enter an appropriate record in the recUploadedFiles table,
 	 * save it to disk,
 	 * and return the ulf_ID for that record.
-	 * This will be zero if anything went pear-shaped along the way.
+	 * This will be error message if anything went pear-shaped along the way.
 	 */
-	if ($size <= 0  ||  $error) { error_log("size is $size, error is $error"); return 0; }
+	if ($size <= 0  ||  $error) {
+			error_log("size is $size, error is $error");
+			return $error;
+	}
 
 	/* clean up the provided file name -- these characters shouldn't make it through anyway */
 	$name = str_replace("\0", '', $name);
 	$name = str_replace('\\', '/', $name);
 	$name = preg_replace('!.*/!', '', $name);
 
-	$mimetype = null;
-	$mimetypeExt = null;
-	if (preg_match('/\\.([^.]+)$/', $name, $matches)) {	//find the extention
+	if($needConnect){
+		mysql_connection_db_overwrite(DATABASE);
+	}
+
+	if($mimetypeExt){ //check extension
+		$res = mysql_query('select fxm_Extension from defFileExtToMimetype where fxm_Extension = "'.addslashes($mimetypeExt).'"');
+		if (mysql_num_rows($res) == 1) {
+			$mimetype = mysql_fetch_assoc($res);
+			$mimetypeExt = $mimetype['fxm_Extension'];
+		}
+	}
+
+	if (!$mimetypeExt && preg_match('/\\.([^.]+)$/', $name, $matches))
+	{	//find the extention
+
 		$extension = $matches[1];
 		$res = mysql_query('select * from defFileExtToMimetype where fxm_Extension = "'.addslashes($extension).'"');
 		if (mysql_num_rows($res) == 1) {
@@ -143,21 +76,111 @@ global $uploadFileError;
 													'ulf_Added' => date('Y-m-d H:i:s'),
 													'ulf_MimeExt ' => $mimetypeExt,
 													'ulf_FileSizeKB' => $file_size,
-													'ulf_Description' => $description? $description : NULL));
-	if (! $res) { error_log("error inserting: " . mysql_error()); return 0; }
-	$file_id = mysql_insert_id();
-	mysql_query('update recUploadedFiles set ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
-		/* nonce is a random value used to download the file */
+													'ulf_Description' => $description? $description : NULL,
+													'ulf_FilePath' => HEURIST_UPLOAD_DIR)
+													);
 
-	if (move_uploaded_file($tmp_name, HEURIST_UPLOAD_DIR . "/" . $file_id)) {
+	if (! $res) {
+		error_log("error inserting file upload info: " . mysql_error());
+		$uploadFileError = "Error inserting file upload info into database";
+		return $uploadFileError;
+	}
+
+	$file_id = mysql_insert_id();
+	$filename = "ulf_".$file_id."_".$name;
+	mysql_query('update recUploadedFiles set ulf_FileName = "'.$filename.
+				'", ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
+		/* nonce is a random value used to download the file */
+//error_log(">>>>".$tmp_name."  >>>> ".$filename);
+	$pos = strpos($tmp_name, HEURIST_UPLOAD_DIR);
+	if( is_numeric($pos) && $pos==0 && copy($tmp_name, HEURIST_UPLOAD_DIR . "/" . $filename) )
+	{
+		unlink($tmp_name);
+		return $file_id;
+
+	} else if ($tmp_name==null || move_uploaded_file($tmp_name, HEURIST_UPLOAD_DIR . "/" . $filename)) {
+
 		return $file_id;
 	} else {
 		/* something messed up ... make a note of it and move on */
-		error_log("upload_file: <$name> / <$tmp_name> couldn't be saved as <" . HEURIST_UPLOAD_DIR . "/" . $file_id . ">");
 		$uploadFileError = "upload file: $name couldn't be saved to upload path definied for db = ". HEURIST_DBNAME;
+		error_log($uploadFileError);
 		mysql_query('delete from recUploadedFiles where ulf_ID = ' . $file_id);
-		return 0;
+		return $uploadFileError;
 	}
 }
 
+/**
+* put your comment there...
+*
+* @param mixed $fileID
+* @param mixed $needConnect
+*/
+function get_uploaded_file_info($fileID, $isnamedarray, $needConnect)
+{
+
+		if($needConnect){
+			mysql_connection_db_overwrite(DATABASE);
+		}
+
+		$fres = mysql_query(//saw NOTE! these field names match thoses used in HAPI to init an HFile object.
+			"select ulf_ID as id,
+			        ulf_ObfuscatedFileID as nonce,
+			        ulf_OrigFileName as origName,
+			        ulf_FileSizeKB as size,
+			        fxm_MimeType as type,
+			        ulf_Added as date,
+			        ulf_Description as description,
+			        ulf_MimeExt as ext
+			   from recUploadedFiles left join defFileExtToMimetype on ulf_MimeExt = fxm_Extension
+			  where ulf_ID = ".intval($fileID));
+
+		$res = array("file" => mysql_fetch_assoc($fres));
+
+		$origName = urlencode($res["file"]["origName"]);
+		$res["file"]["URL"] =
+			HEURIST_URL_BASE."records/files/downloadFile.php/".$origName."?".
+				(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["file"]["nonce"];
+		$res["file"]["thumbURL"] =
+			HEURIST_URL_BASE."common/php/resizeImage.php?".
+				(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["file"]["nonce"];
+
+		if(!$isnamedarray){
+
+			$res = array("file" => array(	// file[0] => id , file [1] => origFileName, etc...
+					$res["file"]["id"],
+					$res["file"]["origName"],
+					$res["file"]["size"],
+					$res["file"]["ext"],
+					$res["file"]["URL"],
+					$res["file"]["thumbURL"],
+					$res["file"]["description"]
+			));
+
+		}
+/*
+			$res = mysql_query("select * from recUploadedFiles where ulf_ID = $fileID");
+			$file = mysql_fetch_assoc($res);
+			$origName = urlencode($file["ulf_OrigFileName"]);
+
+			$thumbnailURL = HEURIST_URL_BASE."common/php/resizeImage.php?".
+				(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=" . $file["ulf_ObfuscatedFileID"];
+			$URL = HEURIST_URL_BASE."records/files/downloadFile.php/".$origName."?".
+				(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=" . $file["ulf_ObfuscatedFileID"];
+		//error_log("url = ". $URL);
+			$res = array("file" => array(	// file[0] => id , file [1] => origFileName, etc...
+					$file["ulf_ID"],
+					$file["ulf_OrigFileName"],
+					$file["ulf_FileSizeKB"],
+					$file["ulf_MimeExt"],
+					$URL,
+					$thumbnailURL,
+					$file["ulf_Description"]
+			));
+		}
+*/
+
+	return $res;
+
+}
 ?>

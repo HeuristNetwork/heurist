@@ -44,6 +44,7 @@ require_once(dirname(__FILE__)."/../../common/php/utilsTitleMask.php");
 require_once(dirname(__FILE__)."/../../common/php/getRecordInfoLibrary.php");
 require_once(dirname(__FILE__)."/../disambig/findFuzzyRecordMatches.php");
 require_once(dirname(__FILE__)."/../../search/getSearchResults.php");
+require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 
 if (! is_logged_in()) return;
 
@@ -352,10 +353,10 @@ function uploadFiles() {
 		foreach ($upload["size"] as $eltID => $size) {
 			if ($size <= 0) continue;
 
-			$fileID = upload_file($upload["name"][$eltID], $upload["type"][$eltID],
-			                      $upload["tmp_name"][$eltID], $upload["error"][$eltID], $upload["size"][$eltID]);
+			$fileID = upload_file($upload["name"][$eltID], null, //$upload["type"][$eltID],
+			                      $upload["tmp_name"][$eltID], $upload["error"][$eltID], $upload["size"][$eltID], null, false);
 
-			if ($fileID) {
+			if (is_numeric($fileID)) {
 				/* We got ourselves an uploaded file.
 				 * Put an appropriate entry in the $_POST array:
 				 *  - if a bdID was specified, preserve that bdID slot in the $_POST (for UPDATE)
@@ -370,59 +371,6 @@ function uploadFiles() {
 				}
 			}
 		}
-	}
-}
-
-
-function upload_file($name, $type, $tmp_name, $error, $size) {
-	/* Check that the uploaded file has a sane name / size / no errors etc,
-	 * enter an appropriate record in the recUploadedFiles table,
-	 * save it to disk,
-	 * and return the ulf_ID for that record.
-	 * This will be zero if anything went pear-shaped along the way.
-	 */
-	if ($size <= 0  ||  $error) { error_log("size is $size, error is $error"); return 0; }
-
-	/* clean up the provided file name -- these characters shouldn't make it through anyway */
-	$name = str_replace("\0", '', $name);
-	$name = str_replace('\\', '/', $name);
-	$name = preg_replace('!.*/!', '', $name);
-
-	$mimetype = null;
-	$mimetypeExt = null;
-	if (preg_match('/\\.([^.]+)$/', $name, $matches)) {
-		$extension = $matches[1];
-		$res = mysql_query('select * from defFileExtToMimetype where fxm_Extension = "'.addslashes($extension).'"');
-		if (mysql_num_rows($res) == 1) {
-			$mimetype = mysql_fetch_assoc($res);
-			$mimetypeExt = $mimetype['fxm_Extension'];
-		}
-	}
-
-	if ($size && $size < 1024) {
-		$file_size = 1;
-	}else{
-		$file_size = round($size / 1024);
-	}
-
-	$res = mysql__insert('recUploadedFiles', array(	'ulf_OrigFileName' => $name,
-													'ulf_UploaderUGrpID' => get_user_id(),
-													'ulf_Added' => date('Y-m-d H:i:s'),
-													'ulf_MimeExt ' => $mimetypeExt,
-													'ulf_FileSizeKB' => $file_size,
-													'ulf_Description' => $description? $description : NULL));
-	if (! $res) { error_log("error inserting: " . mysql_error()); return 0; }
-	$file_id = mysql_insert_id();
-	mysql_query('update recUploadedFiles set ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
-		/* nonce is a random value used to download the file */
-
-	if (move_uploaded_file($tmp_name, HEURIST_UPLOAD_DIR . '/'. $file_id)) {
-		return $file_id;
-	} else {
-		/* something messed up ... make a note of it and move on */
-		error_log("upload_file: <$name> / <$tmp_name> couldn't be saved as <" . HEURIST_UPLOAD_DIR . '/' . $file_id . ">");
-		mysql_query('delete from recUploadedFiles where ulf_ID = ' . $file_id);
-		return 0;
 	}
 }
 

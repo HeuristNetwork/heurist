@@ -87,17 +87,24 @@
   if($ids!=""){
   	  	mysql_connection_db_overwrite(DATABASE);
 
-		$query = "select ulf_ID, ulf_OrigFileName, ulf_Added, ulf_MimeExt, ulf_FileSizeKB from recUploadedFiles where ulf_ID in ".$ids.")";
+		$query = "select ulf_ID, ulf_OrigFileName, ulf_Added, ulf_MimeExt, ulf_FileSizeKB, ulf_FilePath, ulf_FileName from recUploadedFiles where ulf_ID in ".$ids.")";
 
 		//DEBUG error_log(">>>> ".$query);
 
 		$files_arr = array();
 
 		$res = mysql_query($query);
-  		while ($row = mysql_fetch_row($res)) {
+  		while ($row = mysql_fetch_row($res)) { //mysql_fetch_assoc
 			//DEBUG error_log(">>>> ".HEURIST_UPLOAD_DIR."/".$row[0]);
-			$geekMail->attach(HEURIST_UPLOAD_DIR."/".$row[0]);
-			array_push($files_arr, $row);
+
+			if ($row[6]) {
+				$filename = $row[5].$row[6]; // post 18/11/11 proper file path and name
+			} else {
+				$filename = HEURIST_UPLOAD_DIR."/".$row[0]; // pre 18/11/11 - bare numbers as names, just use file ID
+			}
+
+			$geekMail->attach($filename);
+			array_push($files_arr, array($row[1],$row[3])); //name, ext   $row);
 		}
 
 		$_POST[$key_file] = $files_arr;
