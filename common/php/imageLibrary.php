@@ -17,15 +17,15 @@
  */
  function getRectypeIconURL($rectypeID){
 
-	$name = HEURIST_ICON_DIR.$rectypeID.".png";
+	$name = $rectypeID.".png";
+	$filename = HEURIST_ICON_DIR.$name;
 
-	$filename =  /* HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH. Ian 21/11/11 - HEURIST_ICON_DIR is full path to the icon */ $name;
 	if(!file_exists($filename)){
 		//create the stub image with text - rectypeID
 		$img = make_file_image($rectypeID, 16, 2);
 		imagepng($img, $filename);
 	}
-	return HEURIST_BASE_URL.$name;
+	return HEURIST_ICON_URL_BASE.$name;
 }
 
 /**
@@ -38,15 +38,15 @@
  */
  function getRectypeThumbURL($rectypeID){
 
-	$name = HEURIST_ICON_DIR."thumb/th_".$rectypeID.".png";
+	$name = "th_".$rectypeID.".png";
+	$filename = HEURIST_ICON_DIR."thumb/".$name;
 
-	$filename =  HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.$name;
 	if(!file_exists($filename)){
 		//create the stub image with text - rectypeID
 		$img = make_file_image($rectypeID, 75, 48);
 		imagepng($img, $filename);
 	}
-	return HEURIST_BASE_URL.$name;
+	return HEURIST_ICON_URL_BASE."thumb/".$name;
 }
 
 /**

@@ -31,7 +31,7 @@
 	$image_dir = /* HEURIST_DOCUMENT_ROOT.HEURIST_SITE_PATH.*/ HEURIST_ICON_DIR.(($mode==0)?'':'thumb/th_');
 	$image_url = (($mode==0)?getRectypeIconURL($rt_id):getRectypeThumbURL($rt_id));
 
-	error_log("image directroy / imasge url: ".$image_dir."  /  ".$image_url);
+	error_log("image directory / image url: ".$image_dir."  /  ".$image_url);
 
 
 /* ???????
@@ -97,9 +97,10 @@ function upload_file($rt_id, $dim) {
 
 	if (! @$_REQUEST['uploading']) return;
 	if (! $_FILES['new_icon']['size']) return array('', 'Error occurred during upload - file had zero size');
-
+//error_log(" file info ".print_r($_FILES,true));
 	$mimeExt = $_FILES['new_icon']['type'];
 	$filename = $_FILES['new_icon']['tmp_name'];
+	$origfilename = $_FILES['new_icon']['name'];
 	$img = null;
 
 	switch($mimeExt) {
@@ -125,16 +126,18 @@ function upload_file($rt_id, $dim) {
 	// check that the image is not mroe than trwice desired size to avoid scaling issues
 		if (imagesx($img) > ($dim*2)  ||  imagesy($img) > ($dim*2)) return array('','Uploaded file must be no larger than twice $dim pixels in any direction');
 
-	$filename = $image_dir . $rt_id . '.png'; // tempnam('/tmp', 'resized');
+	$newfilename = $image_dir . $rt_id . '.png'; // tempnam('/tmp', 'resized');
 
 	$error = convert_to_png($img, $dim, $filename);
 
 	if($error){
 		return array('', $error);
-	}else{
+	}else if (move_uploaded_file($filename, $newfilename)) { // actually save the file
 		return array('File has been uploaded successfully', '');
 	}
-
+	/* something messed up ... make a note of it and move on */
+	error_log("upload_file: <$name> / <$tmp_name> couldn't be saved as <" . $newfilename . ">");
+	return array('', "upload file: $name couldn't be saved to upload path definied for db = ". HEURIST_DBNAME);
 }
 
 // not used

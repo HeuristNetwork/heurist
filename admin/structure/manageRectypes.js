@@ -346,8 +346,8 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var id = oRecord.getData("id");
 
-					var str1 = top.HEURIST.iconDir + id + ".png";
-					var thumb = top.HEURIST.inconDir + "thumb/th_" + id + ".png";
+					var str1 = top.HEURIST.iconBaseURL + id + ".png";
+					var thumb = top.HEURIST.iconBaseURL + "thumb/th_" + id + ".png";
 					var icon ="<div class=\"rectypeImages\"><a href=\"#edit_icon\"><img src=\"../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\"></a><div style=\"background-image:url("+thumb+");\" class=\"thumbPopup\"><a href=\"#edit_thumb\"><img src=\"../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a></div></div>"
 					elLiner.innerHTML = icon;
 			}},
@@ -1292,7 +1292,7 @@ function icon_refresh(rectypeID) {
 		var db = top.HEURIST.database.id;
 		var imgIcon = "icon" + rectypeID;
 		var img = document.getElementById(imgIcon);
-		img.style.backgroundImage = "url(" + top.HEURIST.iconDir+rectypeID+".png) !important";
+		img.style.backgroundImage = "url(" + top.HEURIST.iconBaseURL+rectypeID+".png) !important";
 	}
 
 /*
