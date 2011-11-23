@@ -29,7 +29,7 @@ header("content-type:application/vnd.google-earth.kml+xml");
  * include requiered files
  */
 
-require_once(dirname(__FILE__).'/../../common/config/initialise.php');
+// This is called by applyCredentials require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 
 
 
@@ -38,7 +38,7 @@ if( !empty($_REQUEST['pub_id'])) {
 	require_once(dirname(__FILE__).'/../../common/connect/bypassCredentialsForPublished.php');
 } else {
 	define("BYPASS_LOGIN", true);
-	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php'); // TODO: this bypass method shoudl br expunged
 }
 
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');

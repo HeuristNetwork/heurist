@@ -29,13 +29,13 @@ header("content-type:application/vnd.google-earth.kml+xml");
  * include requiered files
  */
 
-require_once(dirname(__FILE__).'/../../common/config/initialise.php');
+// called by applyCredentials require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 
 
 
 define('SEARCH_VERSION', 1);
 if( !empty($_REQUEST['pub_id'])) {
-	require_once(dirname(__FILE__).'/../../common/connect/bypassCredentialsForPublished.php');
+	require_once(dirname(__FILE__).'/../../common/connect/bypassCredentialsForPublished.php'); // TODO" expunge this bypass method
 } else {
 	define("BYPASS_LOGIN", true);
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');

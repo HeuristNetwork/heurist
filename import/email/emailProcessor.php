@@ -42,7 +42,7 @@
 
 	// get mail server options from database
 	$res = mysql_query('select * from sysIdentification');
-	if (!$res) returnErrorMsgPage("unable to retrieve db sys information -".mysql_error());
+	if (!$res) returnErrorMsgPage("Unable to retrieve db sys information, MySQL error: ".mysql_error());
 	$sysValues = mysql_fetch_assoc($res);
 	$server   = $sysValues['sys_eMailImapServer'];
 	$port     = $sysValues['sys_eMailImapPort'];
@@ -70,7 +70,7 @@
 
 	// get list of emails addresses - messages from them will be processed
 	$res=mysql_query("select ugr_IncomingEmailAddresses from sysUGrps where ugr_ID=".get_user_id());
-	if (!$res) returnErrorMsgPage("unable to retrieve user incoming email information -".mysql_error());
+	if (!$res) returnErrorMsgPage("Unable to retrieve user incoming email information, MySQL error: ".mysql_error());
 	$email = mysql_fetch_assoc($res);
 	if($email && $email['ugr_IncomingEmailAddresses']){
 	if($senders){

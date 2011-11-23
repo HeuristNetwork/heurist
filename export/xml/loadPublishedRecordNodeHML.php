@@ -38,7 +38,7 @@
 header('Content-type: text/xml; charset=utf-8');
 /*echo "<?xml version='1.0' encoding='UTF-8'?>\n";
 */
-require_once(dirname(__FILE__).'/../../common/config/initialise.php');
+// called by applyCredentials require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 if (!is_logged_in()) { // check if the record being retrieved is a single non-protected record

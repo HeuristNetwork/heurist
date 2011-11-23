@@ -37,7 +37,7 @@
 
 //header('Content-type: text/xml; charset=utf-8');
 
-require_once(dirname(__FILE__).'/../../common/config/initialise.php');
+// called by applyCredentials require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 if (!is_logged_in()) {
