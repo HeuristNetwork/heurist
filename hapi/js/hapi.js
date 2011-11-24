@@ -1845,8 +1845,16 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
 	this.getPrompt = function() { return _prompt; };
 	this.getVariety = function() { return _variety; };
 	this.getEnumerationValues = function() { return (_enums  ||  null); };
-	this.getConstrainedRecordType = function() { return _constraint[0]; };
-	this.getConstrainedRecordTypes = function() { return _constraint; };
+	this.getConstrainedRecordType = function() {
+		if(_constraint){
+			return _constraint[0];
+		} else {
+			return null;
+		}
+	};
+	this.getConstrainedRecordTypes = function() {
+		return _constraint;
+	};
 	this.getRelatedEnumerationValues = function() { return _relatedEnums; };
 	this.getIdForEnumerationValue = function(value) { return (_termsMap[("" + value).toLowerCase()]  ||  null); };
 	this.getEnumerationValueFromId = function(id) { return (_enumsMap[id]  ||  null); };
