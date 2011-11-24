@@ -1,5 +1,5 @@
 /*
-* filename, brief description, date of creation, by whom
+* importRecordsFromDelimited, javascript functions for importing comma or tab delimited data
 * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
 * @link: http://HeuristScholar.org
 * @license http://www.gnu.org/licenses/gpl-3.0.txt
@@ -103,7 +103,7 @@ FlexImport = (function () {
 		$("#info-p").html(
 			"Found <b>" + FlexImport.fields.length + "</b> rows of data," +
 			" in <b>" + FlexImport.fields[0].length + "</b> columns. " +
-			"<a href='"+HeuristBaseURL+"import/delimited/importRecordsFromDelimited.html?db="+HAPI.database+"' >Start over</a>"
+			"<a href='"+HeuristBaseURL+"import/delimited/importRecordsFromDelimited.html?db="+HAPI.database+"' ><b>Start over</b></a>"
 		);
 
 		FlexImport.createRecTypeOptions();
@@ -234,7 +234,7 @@ FlexImport = (function () {
 
 	createRecTypeOptions: function () {
 		var e = $("#rec-type-select-div")[0];
-		e.appendChild(document.createTextNode("Select record type: "));
+		e.appendChild(document.createTextNode("Step 2: Select record type: "));
 		FlexImport.recTypeSelect = e.appendChild(document.createElement("select"));
 		FlexImport.recTypeSelect.onchange = function() { FlexImport.createColumnSelectors() };
 		var opt = document.createElement("option");
@@ -282,31 +282,34 @@ FlexImport = (function () {
 			FlexImport.workgroups[wgs[i].getID()] = wgs[i];
 			_addOpt(FlexImport.workgroupSelect, wgs[i].getID(), wgs[i].getName());
 		}
-		p.appendChild(document.createTextNode(" (NOTE: Workgroup tags must be pre-existing!  Create them "));
+		p.appendChild(document.createTextNode(" NOTE: Workgroup tags must already exist. "));
 		var a = p.appendChild(document.createElement("a"));
 			a.target = "_blank";
 			a.href = HeuristBaseURL + "admin/ugrps/editGroupTags.php?db="+HAPI.database
-			a.innerHTML = "here";
-		p.appendChild(document.createTextNode(" then start over.)"));
+			a.innerHTML = "Create new tags";
+		p.appendChild(document.createTextNode(" then start over"));
 
 		p = e.appendChild(document.createElement("p"));
 		p.appendChild(document.createTextNode("Select column assignments, then "));
-		var button = p.appendChild(document.createElement("input"));
-			button.type = "button";
-			button.value = "create records";
-			button.onclick = function() { FlexImport.loadReferencedRecords(); };
-		p.appendChild(document.createTextNode(" (doesn't save to Heurist yet)"));
 
 		var button = p.appendChild(document.createElement("input"));
 			button.type = "button";
-			button.value = "save mapping";
+			button.value = " Save field mapping ";
 			button.onclick = function() { FlexImport.saveMappings(); };
+		p.appendChild(document.createTextNode(" then "));
+
+		var button = p.appendChild(document.createElement("input"));
+			button.type = "button";
+			button.value = " Prepare records ";
+			button.onclick = function() { FlexImport.loadReferencedRecords(); };
+		p.appendChild(document.createTextNode(" SAFE - doesn't write to the database"));
+
 
 		p = e.appendChild(document.createElement("p"));
 		a = p.appendChild(document.createElement("a"));
 		a.target = "_blank";
 			a.href = HeuristBaseURL +"admin/describe/listRectypeDescriptions.php?db="+ HAPI.database +"#rt" + FlexImport.recType.getID();
-		a.innerHTML = "Detail requirements for " + FlexImport.recType.getName() + " records";
+		a.innerHTML = "Show field list for <b>" + FlexImport.recType.getName() + "</b>";
 
 
 		var i, l = FlexImport.columnCount;
@@ -342,13 +345,14 @@ FlexImport = (function () {
 			sel.onchange = function() {
 				if (this.value != "tags"  &&  this.value != "wgTags") {
 					//search if this detail is in another column and remove it from the other column if it is
+					// todo: should we stop people putting data from two columns into the same field? I think not. Maybe popup an alert
 					var j, m = FlexImport.colSelectors.length;
 					for (j = 0; j < m; ++j) {
 						var s = FlexImport.colSelectors[j];
 						if (s != this  &&  s.value == this.value) {
 							s.selectedIndex = 0;
-							if (s.subTypeSelect) {
-								s.parentNode.removeChild(s.subTypeSelect);
+							if (s.subTypeSelect) { alert("Warning: you've selected the same target field for more than one soruce field");
+								// s.parentNode.removeChild(s.subTypeSelect);
 							}
 						}
 					}
@@ -400,7 +404,8 @@ FlexImport = (function () {
 			var dl = detailTypes.length;
 			var rdIndex = {};
 			var grp = sel.appendChild(document.createElement("optgroup"));
-			grp.label = "Required Fields";
+			grp.label = "Required fields";
+			//todo: doesn't list required fields under this heading, lsits required and optional under the Other fields heading
 			for (d = 0; d < rdl; ++d) {
 				var rdID = reqDetailTypes[d].getID();
 				var rdName = HDetailManager.getDetailNameForRecordType(FlexImport.recType, reqDetailTypes[d]);
@@ -413,7 +418,7 @@ FlexImport = (function () {
 				}
 			}
 			grp = sel.appendChild(document.createElement("optgroup"));
-			grp.label = "Other Fields";
+			grp.label = "Optional fields";
 			for (d = 0; d < dl; ++d) {
 				if (rdIndex[d]) continue;
 				var rdName = HDetailManager.getDetailNameForRecordType(FlexImport.recType, detailTypes[d]);
@@ -426,28 +431,6 @@ FlexImport = (function () {
 		}
 
 		FlexImport.errorSummary = new Array(FlexImport.columnCount);
-
-        if (!Array.prototype.indexOf)
-        {
-            Array.prototype.indexOf = function(elt /*, from*/)
-            {
-                var len = this.length;
-                var from = Number(arguments[1]) || 0;
-                from = (from < 0)
-                        ? Math.ceil(from)
-                        : Math.floor(from);
-                if (from < 0)
-                    from += len;
-
-                for (; from < len; from++)
-                {
-                    if (from in this &&
-                    this[from] === elt)
-                    return from;
-                }
-                   return -1;
-            };
-        }
 
 		// create rest of table filling it with the csv analysed data
 		for (var i = this.hasHeaderRow ? 1:0; i < FlexImport.fields.length; ++i) {
@@ -469,7 +452,6 @@ FlexImport = (function () {
 					}
 					if (FlexImport.lineErrorMap[i] && FlexImport.lineErrorMap[i][j]){
 						td.className = "invalidInput";
-						if(FlexImport.fields.length<100){ //avoid jquery error in chrome
 						var temp = "";
 						if (inputRow[j]) {
 							temp += "Correct value : " + inputRow[j];
@@ -506,7 +488,6 @@ FlexImport = (function () {
 								}
 							}
 						};
-						}//if <500
 						var p = td.appendChild(document.createElement("p"));
 						p.className = "errorMsg";
 						p.innerHTML = FlexImport.lineErrorMap[i][j];
@@ -532,16 +513,19 @@ FlexImport = (function () {
 			}
 		}
 
-		FlexImport.showErrorSummary(e);
-
 		e.appendChild(table);
-},
 
-	showErrorSummary: function (e) {
+		FlexImport.showErrorSummary(table);
+
+	},
+
+	showErrorSummary: function (before) {
 
 		var eS = FlexImport.errorSummary;
 
 		if(eS){
+
+			var e = $("#col-select-div")[0];
 
 			var table = document.createElement("table");
 			table.id = "col-select-table";
@@ -587,8 +571,8 @@ FlexImport = (function () {
 				}
 			}
 			if(haserr){
-				e.appendChild(document.createTextNode("UNRECGONIZED VALUES FOR FIELDS"));
-				e.appendChild(table);
+				e.insertBefore(table, before);
+				e.insertBefore(document.createTextNode("Unrecognised values in imported data"), table);
 			}
 
 		}
@@ -752,9 +736,9 @@ FlexImport = (function () {
 
 		// show command button for saving records
 		var e = $("#records-div")[0];
-		e.innerHTML = "<p>If you are happy with the records created below, then <input type=button value=\"save records\" onclick=\"FlexImport.Saver.saveRecords();\"></p>";
-		e.innerHTML += "<p>If you would like to edit the input, then press <input type=button value=\"edit input data\" onclick=\"FlexImport.createColumnSelectors();\"></p>";
-		e.innerHTML += "<p>records created:</p>";
+		e.innerHTML = "<p>If records appear OK: <input type=button value=\"Save records\" onclick=\"FlexImport.Saver.saveRecords();\">&nbsp;&nbsp;This step updates the database (irreversible, except by editing the database)</p>";
+		e.innerHTML += "<p>If there are errors: <input type=button value=\"Go back\" onclick=\"FlexImport.createColumnSelectors();\"></p>";
+		e.innerHTML += "<p><b>Records prepared for import:</b></p>";
 		var table = e.appendChild(document.createElement("table"));
 		var tbody = table.appendChild(document.createElement("tbody"));
 		var tr, td;

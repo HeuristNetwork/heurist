@@ -63,13 +63,13 @@
 		<div id=results></div>
 		<p id=records-div></p>
 		<div id=csv-entry-div>
-			<p>Paste CSV data into the box below and click "analyse". Break large files into blocks of a couple of thousand lines.</p>
+			<p>Step 1: Paste CSV or tab delimited data into the box below and click Analyse. <p>Note: Only one record type can be imported at a time. It is best to break large files into blocks of a couple of thousand lines.</p>
 			<div>
 				Field separator: <select id=csv-separator><option value="," selected>comma</option><option value="\t">tab</option></select>&nbsp;&nbsp;&nbsp;
 				Multi-value separator: <select id=val-separator><option selected value="|">|</option><option value=",">,</option><option value=":">:</option><option value=";">;</option></select>&nbsp;&nbsp;&nbsp;
 				Line separator: <input id=csv-terminator value="\n">&nbsp;&nbsp;&nbsp;
 				Quote: <select id=csv-quote><option selected value='"'>"</option><option value="'">'</option></select>&nbsp;&nbsp;&nbsp;
-				Header lines: <input type="checkbox" id=csv-header />&nbsp;&nbsp;&nbsp;
+				<p>Header lines: <input type="checkbox" id=csv-header />&nbsp;&nbsp;&nbsp;
 				<input type=button value=analyse onClick="FlexImport.analyseCSV();">
 			</div>
 			<div><textarea id=csv-textarea></textarea></div>
