@@ -12,7 +12,6 @@
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
-
 	if (! is_admin()) {
 		print "<html><body><p><h2>Request disallowed</h2>You must log in as an administrator of the database owners group to delete a database</p>".
 		"<p><a href=".HEURIST_URL_BASE."?db=$dbname>Return to Heurist</a></p></body></html>";
@@ -46,21 +45,31 @@
 	if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2') {
 		if (array_key_exists('del', $_REQUEST) && $_REQUEST['del']=='DELETE MY DATABASE') {
 			print "<p><hr>";
-			$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'drop database ".HEURIST_DB_PREFIX."$dbname'";
-			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
+			if ($dbname=='') {
+				print "<p>Undefined database name"; // shouldn't get here
+				} else {
+				// It's too risky to delete data with "rm -Rf .$uploadPath", could end up trashing stuff needed elsewhere, so we move it
+				$uploadPath = HEURIST_UPLOAD_ROOT.$dbname; // individual deletio nto avoid risk of unintended disaster with -Rf
+				$cmdline = "mv ".$uploadPath." ".HEURIST_UPLOAD_ROOT."deleted_databases";
+				$output2 = exec($cmdline . ' 2>&1', $output, $res2);
+				if ($res2 != 0 ) {
+					echo ("<h2>Warning:</h2> Unable to move <b>$uploadPath</b> to the deleted files folder, perhaps a permissions problem or previously deleted.");
+					echo ("<p>Please ask your system adminstrator to delete this folder if it exists.<br>");
+					echo($output2);
+				}
+				$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'drop database ".HEURIST_DB_PREFIX."$dbname'";
+				$output2 = exec($cmdline . ' 2>&1', $output, $res2); // this is the one we really care about
+				}
 			if ($res2 != 0 ) {
 				echo ("<h2>Warning:</h2> Unable to delete <b>".HEURIST_DB_PREFIX.$dbname."</b>");
 				echo ("<p>Check that the database still exists. Consult Heurist helpdesk if needed<br>");
 				echo($output2);
 			} else {
-				$uploadPath = HEURIST_UPLOAD_ROOT.$dbname;
 				print "Database <b>$dbname</b> has been deleted";
-				print "<p>Associated files are stored in <b>$uploadPath</b>. <p>These could be used by another program.".
-				"To avoid danger of unintended data loss, these have not been deleted. Please delete this folder manually.".
+				print "<p>Associated files stored in upload subdirectories<b>$uploadPath</b> have ben moved to ".HEURIST_UPLOAD_ROOT."deleted_databases.".
+				"<p>If you delete databases with a large volume of data, please ask your system administrator to empty this folder.".
 				"<p><a href=".HEURIST_URL_BASE.">Return to Heurist</a>";
-				// IT IS ALTOGETHER TOO RISKY TO DELETE DIRECTORIES WITH "rm -Rf .$uploadPath"
-				// if something stuffs up it could delete every data directory for all databases on the system
-				} 
+			}
 		} else { // didn't request properly
 			print "<p><h2>Request disallowed</h2>Incorrect challenge words entered. Database $dbname was not deleted. ".
 			"<p><a href=".HEURIST_URL_BASE."?db=$dbname>Return to Heurist</a>";
