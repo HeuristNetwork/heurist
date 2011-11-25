@@ -117,12 +117,13 @@ function ShowReps() {
 		_needSelection = (context.indexOf("Select records to see template output")>0);
     }
 
-
 	function _onSelectionChange(eventType, argList) {
 		if (parent.document.getElementById("s").className == "yui-hidden") {
 			return false;
 		}else {
-				if (eventType == "heurist-selectionchange"){
+				if ( (!_isUseAllRecords && eventType == "heurist-selectionchange")
+						 || eventType == "heurist-recordset-loaded")
+				{
 					top.HEURIST.search.smartySelected();
 				}
 		}
@@ -138,12 +139,16 @@ function ShowReps() {
 		_setLayout(true, false); //aftert load show viewer only
 
 		_currentQuery_all = location.search;
+		if(_currentQuery_all=="?noquery"){
+			_currentQuery_all = null;
+		}
 		_currentQuery_sel = null;
 
 		_reload_templates();
 
 		if (top.HEURIST) {
 			top.HEURIST.registerEvent(that,"heurist-selectionchange", _onSelectionChange);
+			top.HEURIST.registerEvent(that,"heurist-recordset-loaded", _onSelectionChange);
 		}
 
 		infoMessageBox  =
@@ -196,8 +201,12 @@ function ShowReps() {
 
 				var squery = _getQuery();
 
-				if(Hul.isempty(squery)){
-					_updateReps("<b><font color='#ff0000'>Select records to see template output</font></b>");
+				if(Hul.isempty(squery) ||  (squery.indexOf("&q=")<0) || (squery.indexOf("&q=") == squery.length-3)) {
+					if(_isUseAllRecords){
+						_updateReps("<b><font color='#ff0000'>Perform search to see template output</font></b>");
+					}else{
+						_updateReps("<b><font color='#ff0000'>Select records to see template output</font></b>");
+					}
 
 				}else{
 
@@ -1247,7 +1256,7 @@ function ShowReps() {
 			},
 
 			setQuery: function(q_all, q_sel){
-				_currentQuery_all = q_all;
+				if(q_all) _currentQuery_all = q_all;
 				_currentQuery_sel = q_sel;
 			},
 
@@ -1264,9 +1273,12 @@ function ShowReps() {
 			},
 
 			setUseAllRecords: function(val){
+				var isChanged = _isUseAllRecords != val;
 				_isUseAllRecords = val;
+				if (isChanged) {
+					_reload(null);
+				}
 			},
-
 
 			generateTemplate:  function (name){
 				if(_needSelection){

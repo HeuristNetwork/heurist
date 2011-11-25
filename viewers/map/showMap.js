@@ -31,7 +31,8 @@ Event = YAHOO.util.Event;
 
 function ShowMap() {
 
-	var _className = "ShowMap";
+	var _className = "ShowMap",
+		_isUseAllRecords = true;
 
 	/**
 	* Initialization
@@ -51,6 +52,8 @@ function ShowMap() {
 		items = [],
 		kmls = [],
 		rec_withtime = 0;
+
+
 		/**/
 		for (ind in HEURIST.tmap.geoObjects) {
 			if(!Hul.isnull(ind))
@@ -280,7 +283,9 @@ function ShowMap() {
 		if (parent.document.getElementById("m3").className == "yui-hidden") {
 			return false;
 		}else {
-			if (eventType == "heurist-selectionchange"){
+			if ( (!_isUseAllRecords && eventType == "heurist-selectionchange")
+						 || eventType == "heurist-recordset-loaded")
+			{
 				top.HEURIST.search.mapSelected3();
 			}
 		}
@@ -338,30 +343,39 @@ function ShowMap() {
 		});
 		*/
 
-		squery = location.search;
-		_reload(squery);
+		var squery_all = location.search;
+		_reload(squery_all, null);
 
 		if (top.HEURIST) {
 			top.HEURIST.registerEvent(that,"heurist-selectionchange", _onSelectionChange);
+			top.HEURIST.registerEvent(that,"heurist-recordset-loaded", _onSelectionChange);
 		}
 	}
-	function _reload(squery) {
+	function _reload(squery_all, squery_sel) {
 		var baseurl = top.HEURIST.basePath + "viewers/map/showMap.php";
 		var callback = _updateMap;
-		var params = squery;
-		top.HEURIST.util.getJsonData(baseurl, callback, squery);
+		var params =  (_isUseAllRecords) ?squery_all :squery_sel;
+		top.HEURIST.util.getJsonData(baseurl, callback, params);
 	}
 
 
 	//public members
 	var that = {
 
-		reload:  function (squery){
-			_reload(squery);
+		reload:  function (squery_all, squery_sel){
+			_reload(squery_all, squery_sel);
 		},
 
 		baseURL:  function (){
 			return top.HEURIST.basePath;
+		},
+
+		isUseAllRecords: function(){
+			return _isUseAllRecords;
+		},
+
+		setUseAllRecords: function(val){
+			_isUseAllRecords = val;
 		},
 
 		getClass: function () {

@@ -137,6 +137,16 @@ top.HEURIST.search = {
 			});
 		}
 
+		var mapFrame3 = document.getElementById("map-frame3");
+		var smartyFrame = document.getElementById("smarty-frame");
+		if (smartyFrame && smartyFrame.contentWindow.showReps) {
+			top.HEURIST.fireEvent(smartyFrame.contentWindow.showReps, "heurist-recordset-loaded");
+		}
+		if (mapFrame3 && mapFrame3.contentWindow.showMap) {
+			top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap, "heurist-recordset-loaded");
+		}
+
+
 		if (top.HEURIST.search.results.infoByDepth[0].count == top.HEURIST.search.results.totalQueryResultRecordCount){
 			top.HEURIST.search.loadRelatedResults();
 		}
@@ -1975,7 +1985,7 @@ top.HEURIST.search = {
 				'&db='+(p['db'] || "");
 			window.open(top.HEURIST.basePath+'search/search.html'+query_string,"_blank");
 	},
-
+	//old map version
 	mapSelected: function() {
 			var p = top.HEURIST.parameters;
 			var recIDs = top.HEURIST.search.getSelectedRecIDs().get();
@@ -2013,28 +2023,43 @@ top.HEURIST.search = {
 	//ARTEM
 	//listener of selection in search result - to refelect on map tab
 	mapSelected3: function() {
+
 			var p = top.HEURIST.parameters;
-			var recIDs = top.HEURIST.search.getSelectedRecIDs().get();
-			if (recIDs.length >= 500) {// maximum number of records ids 500
-				alert("Selected record count is great than 500, mapping the first 500 records!");
-				recIDs = recIDs.slice(0,500);
-			}
-			var query_string = 'ver='+(p['ver'] || "") + '&w=all&q=ids:' +
-				recIDs.join(",") +
-				'&stype='+(p['stype'] || "") +
-				'&db='+(p['db'] || "");
-			query_string = encodeURI(query_string);
+			var query_string = 'ver='+(p['ver'] || "") +
+									'&w='+(p['w'] || "") +
+									'&stype='+(p['stype'] || "") + '&db='+(p['db'] || "");
 
 			var mapframe = document.getElementById("map-frame3");
 			if(mapframe.src){ //do not reload map frame
-				if(mapframe.contentWindow.showMap){
-					mapframe.contentWindow.showMap.reload(query_string);
+
+				var showMap = mapframe.contentWindow.showMap;
+				if(showMap){
+					var queryp = p["q"];
+					var query_string_all = (queryp) ?encodeURI(query_string + '&q=' + queryp) :null;
+
+					var recIDs = top.HEURIST.search.getSelectedRecIDs().get();
+					if (recIDs.length >= 500) {// maximum number of records ids 500
+						alert("Selected record count is great than 500, mapping the first 500 records!");
+						recIDs = recIDs.slice(0,500);
+					}
+					var query_string_sel = query_string + '&q=ids:' + recIDs.join(",");
+
+					showMap.reload(query_string_all, encodeURI(query_string_sel));
 				}
 			}else{
-			 	url = top.HEURIST.basePath+ "viewers/map/showMap.html?" + query_string;
+				//by default use all records
+				query_string = query_string + '&q=' + window.HEURIST.parameters["q"];
+			 	url = top.HEURIST.basePath+ "viewers/map/showMap.html?"+query_string;
 				mapframe.src = url;
 			}
+	},
 
+
+	onMapUseAllRecords: function(event) {
+		var mapframe = document.getElementById("map-frame3");
+		if(mapframe.src){
+			mapframe.contentWindow.showMap.setUseAllRecords(!event.target.checked);
+		}
 	},
 
 	//ARTEM
@@ -2042,14 +2067,17 @@ top.HEURIST.search = {
 	smartySelected: function() {
 
 			var p = top.HEURIST.parameters;
-			var query_string = 'ver='+(p['ver'] || "") + '&w=all&stype='+(p['stype'] || "") + '&db='+(p['db'] || "");
+			var query_string = 'ver='+(p['ver'] || "") +
+						'&w='+(p['w'] || "") +
+						'&stype='+(p['stype'] || "") + '&db='+(p['db'] || "");
 
 			var repframe = document.getElementById("smarty-frame");
 			if(repframe.src){ //do not reload  frame
 				var showReps = repframe.contentWindow.showReps;
 				if(showReps){
 
-					var query_string_all = query_string + '&q=' + window.HEURIST.parameters["q"];
+					var queryp = p["q"];
+					var query_string_all = (queryp) ?encodeURI(query_string + '&q=' + queryp) :null;
 
 					var recIDs = top.HEURIST.search.getSelectedRecIDs().get();
 					if (recIDs.length >= 500) {// maximum number of records ids 500
@@ -2058,12 +2086,16 @@ top.HEURIST.search = {
 					}
 					var query_string_sel = query_string + '&q=ids:' + recIDs.join(",");
 
-					showReps.setQuery(encodeURI(query_string_all), encodeURI(query_string_sel));
+					showReps.setQuery( query_string_all, encodeURI(query_string_sel));
 					showReps.processTemplate();
 				}
 			}else{
 				//by default use all records
-				query_string = query_string + '&q=' + window.HEURIST.parameters["q"];
+				if(window.HEURIST.parameters["q"]){
+					query_string = query_string + '&q=' + window.HEURIST.parameters["q"];
+				}else{
+					//query_string = "noquery";
+				}
 			 	url = top.HEURIST.basePath+ "viewers/smarty/showReps.html?"+query_string;
 				repframe.src = url;
 			}

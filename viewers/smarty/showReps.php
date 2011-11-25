@@ -39,7 +39,7 @@ require_once('libs.inc.php');
 //error_log(">>>>>>>>".print_r($qresult,true));
 
 	if(!array_key_exists('records',$qresult) ||  $qresult['resultCount']==0 ){
-		echo "<b><font color='#ff0000'>Select records to see template output</font></b>";
+		echo "<b><font color='#ff0000'>Search or Select records to see template output</font></b>";
 		exit();
 	}
 

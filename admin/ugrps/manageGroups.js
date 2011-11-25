@@ -255,9 +255,13 @@ elLiner.innerHTML = '<div align="center"><img src="../../common/images/info.png"
 			{ key: "type", hidden:true},
 			{ key: "members", label: "Edit Membership", sortable:false, className:'center',
 				formatter: function(elLiner, oRecord, oColumn, oData){
-elLiner.innerHTML = '<div align="center"><a href="#" onClick=top.HEURIST.search.popupLink("'+top.HEURIST.baseURL + 'admin/ugrps/manageUsers.html?db=' +
-								_db + '&grpID='+oRecord.getData("id")+
-								'","wide") title="Show listing of members/Edit membership"><span class="count">'+oRecord.getData('members')+'</span></a></div>';}},
+elLiner.innerHTML = '<div align="center">'+
+		'<a href="'+top.HEURIST.baseURL + "admin/ugrps/manageUsers.html?db=" +
+		_db + "&grpID="+oRecord.getData("id")+
+		'" title="Show listing of members/Edit membership"><span class="count">'+oRecord.getData('members')+'</span></a></div>';
+
+//IREK that does not work! <a href="#" onClick=top.HEURIST.search.popupLink("'+top.HEURIST.baseURL + 'admin/ugrps/manageUsers.//html?db=' +_db + '&grpID='+oRecord.getData("id")+'","wide") title="Show listing of members/Edit membership">
+				}},
 /*			{ key: "id", label: "Admins", sortable:false,
 				formatter: function(elLiner, oRecord, oColumn, oData){
 					var recID = oRecord.getData('id');

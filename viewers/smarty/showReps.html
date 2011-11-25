@@ -101,7 +101,7 @@ body {
 					<button onclick="onFile()">Get URL</button>
 					<button onclick="onShowEditor()">Edit</button>
 					<button onclick="onGenerate()">New Template</button>
-					<input type="checkbox" id="cbUseAllRecords1" checked="checked" onchange="onUseAll(event)"/>Use full search result
+					<input type="checkbox" id="cbUseAllRecords1" onchange="onUseAll(event)"/>Selected only
 				</div>
 				<div style="text-align: left;float:right;padding-right:10px;">
 				</div>
@@ -149,7 +149,7 @@ body {
 -->
 					</div>
 					<div style="float:right;">
-						<input type="checkbox" id="cbUseAllRecords2" checked="checked" onchange="onUseAll(event)"/>Use full search result
+						<input type="checkbox" id="cbUseAllRecords2" onchange="onUseAll(event)"/>Selected only
 
 						<button onclick="doExecuteFromEditor()" title="Test your template" style="font-weight: 800;">Update output below</button>
 					</div>
@@ -378,7 +378,7 @@ if(isInited){
 		}else{
 			document.getElementById('cbUseAllRecords1').checked = elem.checked;
 		}
-		window.showReps.setUseAllRecords(elem.checked);
+		window.showReps.setUseAllRecords(!elem.checked);
 	}
 
 	//

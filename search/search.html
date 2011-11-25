@@ -154,7 +154,7 @@
 						<ul id="my-heurist-menu">
 							<li><a href="../admin/profile/editPreferences.html" class="small" name="auto-popup"
 								title="Display preferences">Preferences</a></li>
-								
+
 							<li><a href="../admin/profile/importModelUserProfile.php" name="auto-popup"
 								title="Add useful resources to your collection from a range of academic templates">Load profiles</a></li>
 
@@ -487,7 +487,12 @@
 					<!--    <div id="m"><iframe id="map-frame" class=viewers></iframe></div>-->
 					<!--    <div id="c"><iframe id="sidebyside-frame" class=viewers></iframe></div>-->
 					<div id="m3">
-						<a name="auto-popup" class="small" href="../viewers/map/mapMenu.html" Title="Map Search Results"><div id="mapButton" class="button">Publish Map</div></a>
+						<div style="height:25px;">
+							<input type="checkbox" style="display:inline-block;position:absolute; top:5px;left:5px;"
+								id="cbMapUseAllRecords" onchange="top.HEURIST.search.onMapUseAllRecords(event)">
+							<label style="padding-left: 20px;">Selected only</label>
+							<a name="auto-popup" class="small" href="../viewers/map/mapMenu.html" Title="Map Search Results"><div id="mapButton" class="button">Publish Map</div></a>
+						</div>
 						<iframe id="map-frame3" class=viewers></iframe>
 					</div>
 					<div id="s">
