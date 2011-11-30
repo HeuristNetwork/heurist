@@ -13,6 +13,7 @@
 <html>
  <head>
   <link rel=stylesheet href="../../common/css/global.css">
+  <link rel=stylesheet href="../../common/css/search.css">
   <title>Save search</title>
   <script>
 
@@ -126,15 +127,14 @@
 		if (savedSearches  &&  savedSearches.length) {
 			for (var i = 0; i < savedSearches.length; ++i) {
 				if (val == savedSearches[i][0]) {
-					document.getElementById("mainbody").style.display = "none";
-					document.getElementById("overwrite").innerHTML =
-					  "A search with that name already exists.  "
-					  + "Do you want to overwrite it?<br><br>"
+					document.getElementById("coverall").style.display = "block";
+					document.getElementById("alertBox").innerHTML =
+					  "<p>A search with that name already exists.  "
+					  + "Do you want to overwrite it?</p>"
 					  + "<input type=hidden id=search-name value=\""+val+"\">"
 					  + "<input type=hidden id=wg-select value=\""+wg+"\">";
-					document.getElementById("overwrite").innerHTML += (wg > 0 ? "This is a <b>workgroup saved search</b>. Other workgroup members will be affected.": "");
-					document.getElementById("overwrite").innerHTML += "<input type=button value=overwrite onclick=save()>"
-					  + "&nbsp;&nbsp;"
+					document.getElementById("alertBox").innerHTML += (wg > 0 ? "This is a <b>workgroup saved search</b>. Other workgroup members will be affected.": "");
+					document.getElementById("alertBox").innerHTML += "<input type=button value=overwrite onclick=save()>"
 					  + "<input type=button value=cancel onclick=window.close()>";
 					return;
 				}
@@ -214,13 +214,15 @@
 	input, select{ margin-top: 5px;}
 	#bookmark-check-p { color: #660000; }
 	#save {font-weight: bold;}
+	#coverall {background-color:RGBA(255,255,255,0.5);}
+
   </style>
  </head>
- <body class="popup" width=400 height=250 onload="init();">
- <div id="mainbody">
+ <body class="popup" width=400 height=250 onLoad="init();">
+<!-- <div id="mainbody">-->
  <p id=warning-message></p>
    <div style="width:150px; text-align:right; display:inline-block">Enter a name for this search:</div>
-   <input style="width:200px;height: 17px; margin-left: 5px;" type=text id=search-name onkeypress="return keypress(event)">
+   <input style="width:200px;height: 17px; margin-left: 5px;" type=text id=search-name onKeyPress="return keypress(event)">
   <p id=wg-p>
    <div style="width:150px; text-align:right; display:inline-block">Add search to:</div>
    <select style="width:200px;height: 17px; margin-left: 5px;" id=wg-select onChange="displayBookmarkCheck();">
@@ -242,9 +244,11 @@
   </p>
   		<div class="separator_row" style="margin:20px 0"></div>
 
-<input style="float:right" type=button value=Save id=save onclick="check();">
+<input style="float:right" type=button value=Save id=save onClick="check();">
   <p id=message></p>
-  </div>
-  <div id = "overwrite"></div>
+<!--  </div>-->
+<div id="coverall" style="display:none">
+  <div id = "alertBox" ></div>
+</div>
  </body>
 </html>

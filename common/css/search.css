@@ -1621,7 +1621,7 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	top: 10px;
 }
 .thumbnails .recordDiv .thumbnail, .thumbs .recordDiv .thumbnail {
-	background-color:#FFF
+	background-color:#FFF;
 }
 .thumbnails .recordDiv .recTypeThumb, .thumbs .recordDiv .recTypeThumb {
 	opacity:0.3
@@ -1958,7 +1958,7 @@ div.searchInput > .simplesearch.collapsed {
 	padding:3px;
 	white-space:normal
 }
-#simple-search .simple-search-row .button {
+#simple-search .simple-search-row .button, #alertBox input[type="button"], #alertBox input[type="submit"] {
 	background-color: rgba(100, 100, 100, 0.6);
 	background:-moz-linear-gradient(center top, #666, #333) repeat scroll 0 0 transparent;
 	background:-webkit-gradient(linear, left top, left bottom, from(#666), to(#333));
@@ -1974,7 +1974,7 @@ div.searchInput > .simplesearch.collapsed {
 	height:18px;
 	line-height:18px;
 }
-#simple-search .simple-search-row .button:hover {
+#simple-search .simple-search-row .button:hover, #alertBox input[type="button"]:hover, #alertBox input[type="submit"]:hover {
 	color:#FFF !important;
 	border-color:#666;
 	text-decoration:none

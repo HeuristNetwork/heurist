@@ -36,9 +36,9 @@ h3 .description {
 	border-radius:0;
 }
 #adminFrame {
-	-webkit-border-radius:10px;
-	-moz-border-radius:10px;
-	border-radius:10px;
+	-webkit-border-radius:5px;
+	-moz-border-radius:5px;
+	border-radius:5px;
 }
 body.popup #page-inner {
 	top:40px;
@@ -89,9 +89,9 @@ body.popup #page-inner {
 	position: absolute;
 	right: 0px;
 	top: 0;
-	-moz-border-radius:10px;
-	-webkit-border-radius:10px;
-	border-radius:10px;
+	-moz-border-radius:5px;
+	-webkit-border-radius:5px;
+	border-radius:5px;
 }
 #sidebar ul li a {
 	color: #515151;
@@ -187,7 +187,15 @@ div.yui-dt-liner span.count {
 	font-weight: bolder;
 	text-align: center;
 	min-width: 17px;
+	padding:0 3px;
 }
+div.yui-dt-liner span.count:hover {
+	padding:0 20px 0 3px;
+	background-image:url(../images/edit_pencil_small.png);
+	background-repeat:no-repeat;
+	background-position:right;
+	}
+
 html body.popup div div#page-inner div#modelTabs.yui-navset div.yui-navset div.yui-content div div#tabContainer1.yui-dt table thead tr.yui-dt-first th#yui-dt1-th-active.center div#yui-dt1-th-active-liner.yui-dt-liner span.yui-dt-label {
 	text-align:center
 }

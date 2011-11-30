@@ -179,7 +179,7 @@ function print_header_line($bib) {
 	$webIcon = @$webIcon[0];
 ?>
 
-<div class=HeaderRow style="margin-bottom:20px"><h2><?= htmlspecialchars($bib['rec_Title']) ?></h2>
+<div class=HeaderRow style="margin-bottom:20px"><h2 style="text-transform:none; line-height:16px"><?= htmlspecialchars($bib['rec_Title']) ?></h2>
 	<div id=footer>
         <h3><?= htmlspecialchars($bib['rty_Name']) ?></h3>
         <br>

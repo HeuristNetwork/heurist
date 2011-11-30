@@ -2793,7 +2793,7 @@ top.HEURIST.search = {
 				return false;
 			}
 			a.appendChild(document.createTextNode("Publish"));
-			im_container.appendChild(a);
+			//im_container.appendChild(a);
 	},
 
 	showPublishPopup: function() {
