@@ -81,10 +81,16 @@
 				<span class="description">Overall management of the database and its relation with other Heurist databases registered in the Heurist index at HeuristScholar.org</span></h3>
 				<div class="adminSection">
 					<ul>
+						<hr width=80%; align=left>
 						<li><a href="#" onClick="loadContent('structure/getListOfDatabases.php')"
 							type="List the databases on the current server">List databases</a></li>
 						<li class="seperator"><a href="#" onClick="loadContent('setup/createNewDB.php')"
 							type="Create a new database with essential structure elements">New database</a></li>
+						<li class="seperator"><a href="#" onClick="loadContent('setup/straightCopyDatabase.php?db=[dbname!]')"
+							title="Clones a complete database with all data, users, attached files, templates etc.">Clone database</a></li>
+						<li class="seperator"><a href="#" onClick="loadContent('setup/deleteCurrentDB.php?db=[dbname!]')"
+							title="Delete a database completely">Delete database</a></li>
+							<hr width=80%; align=left>
 						<li class="seperator"><a href="#" onClick="loadContent('setup/registerDB.php?db=[dbname!]')"
 							title="Register this database with the Heurist Master Index">Registration</a></li>
 						<li class="seperator"><a href="#" onClick="loadContent('setup/editSysIdentification.php?db=[dbname!]')"
@@ -93,13 +99,15 @@
 							title="Edit advanced behaviours">Advanced properties</a></li>
 						<li class="seperator"><a href="#" onClick="loadContent('rollback/rollbackRecords.php?db=[dbname!]')"
 							title="Selectively roll back the data in the database to a specific date and time)">Rollback</a></li>
-					</ul>
+						<hr width=80%; align=left>
+		</ul>
 				</div>
 
 				<h3><a href="#">STRUCTURE: </a>
 				<span class="description">Management of the database model which defines the types of data which can be recorded and the layout of data entry</span></h3>
 				<div class="adminSection">
 					<ul>
+						<hr width=80%; align=left>
 						<li><a href="#" onClick="loadContent('structure/manageRectypes.php?db=[dbname!]')"
 							title="Add new / modify existing record types and their use of globally defined fields">Record types</a></li>
 						<li class="seperator"><a href="#" onClick="loadContent('structure/manageDetailTypes.php?db=[dbname!]')"
@@ -108,6 +116,7 @@
 							title="Define terms used for relationship types and for other enumerated fields">Terms</a></li>
 						<li  class="seperator"><a href="#" onClick="loadContent('structure/editRectypeConstraints.php?db=[dbname!]')"
 							title="Define constraints on the record types which can be related, and allowable relationship types">Constraints</a></li>
+						<hr width=80%; align=left>
 						<li  class="seperator"><a href="#" onClick="loadContent('structure/selectDBForImport.php?db=[dbname!]')"
 							title="Selectively import structural elements from other Heurist databases">Import structure</a></li>
 						<li class="seperator"><a href="#" onClick="loadContent('describe/listRectypeDescriptions.php?db=[dbname!]')"
@@ -116,6 +125,7 @@
 							title="Lists the record type and field definitions in a computer-readable form">Structure (exchange format)</a></li>
 						<li class="seperator"><a href="#" onClick="loadContent('setup/editMimetypes.php?db=[dbname!]')"
 							title="Define the relationship between file extensions and mime type">Mime types</a></li>
+						<hr width=80%; align=left>
 					</ul>
 				</div>
 
@@ -123,23 +133,31 @@
 				<h3><a href="#">ACCESS: </a><span class="description">Management of users and groups, the assignment of users to group and the assignment of group tags</span></h3>
 				<div class="adminSection">
 					<ul>
+						<hr width=80%; align=left>
 						<!-- 17/10/11 - Artem has moved addition of users to the workgroups page -->
 						<!-- TO DO: Take this menu entry out so that navigation is via user groups -->
-						<li><a href="#" onClick="loadContent('ugrps/manageUsers.php?db=[dbname!]')" title="Add and edit database users and usergroups, including authorization of new users">Manage users</a></li>
-
+						<li><a href="#" onClick="loadContent('ugrps/manageUsers.php?db=[dbname!]')"
+							title="Add and edit database users and usergroups, including authorization of new users">Manage users</a></li>
 						<li class="seperator"><a href="#"
-							onClick="loadContent('ugrps/manageGroups.php?db=[dbname!]')" title="Assign users to usergroups and set their roles">Manage groups</a></li>
+							onClick="loadContent('ugrps/manageGroups.php?db=[dbname!]')"
+							title="Assign users to usergroups and set their roles">Manage groups</a></li>
+						<li class="seperator"><a href="#"
+							onClick="loadContent('setup/getUserFromDB.php?db=[dbname!]')"
+							title="Import users one at a time from another database on the system">Import a user</a></li>
+						<hr width=80%; align=left>
 						<li class="seperator"><a href="#"
 							onClick="loadContent('ugrps/editGroupTags.php?db=[dbname!]')" title="Add and remove workgroup tags">Workgroup tags</a></li>
 						<li class="seperator"><a href="#"
 							onClick="loadContent('ugrps/quitGroupForSession.php?db=[dbname!]')" title="Quit a workgroup for this session to allow testing of non-group-members view">Quit workgroup temporarily</a></li>
-					</ul>
+						<hr width=80%; align=left>
+</ul>
 				</div>
 
 
 				<h3><a href="#">UTILITIES: </a><span class="description">Verification of the integrity of the database and various data-cleaning functions and utilities</span></h3>
 				<div class="adminSection">
 					<ul>
+						<hr width=80%; align=left>
 						<li><a href="#" onClick="loadContent('verification/recalcTitlesAllRecords.php?db=[dbname!]')" title="Rebuilds the constructed record titles listed in search results, for all records">Rebuild titles</a></li>
 						<!-- : Also have capabuility for specific records and rectypes</p> -->
 						<li class="seperator"><a href="#"
@@ -165,15 +183,15 @@
 						<li class="seperator"><a href="../search/search.html?q=_BROKEN_&amp;w=all&amp;db=[dbname!]" target="_blank"
 							title="Show records with URLs which point to a non-existant or otherwise faulty address">Broken URL search</a></li>
 
+						<hr width=80%; align=left>
+
 						<li class="seperator"><a href="../import/direct/getRecordsFromDB.php?db=[dbname!]" target="_blank"
 							title="Import records directly from one database to another, mapping record types, fields types and terms">Database-to-database transfer</a></li>
-
-						<li class="seperator"><a href="../admin/setup/deleteCurrentDB.php?db=[dbname!]" target="_blank"
-							title="Delete a database completely">Delete entire database</a></li>
 
 						<!-- Section for specific maintenance functionality which will be removed later. Yes, could be run directly, but this makes them easily available-->
 						<li class="seperator"><a href="../import/direct/upgradeToNamedFiles.php?db=[dbname!]" target="_blank"
 							title="Update the old format bare-number associated file storage to new format path + name">Upgrade associated files naming</a></li>
+						<hr width=80%; align=left>
 
 					</ul>
 				</div>

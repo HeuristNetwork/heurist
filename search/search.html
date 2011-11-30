@@ -215,10 +215,6 @@
 								title="Find bookmarks which you have not tagged">Bookmarks w/o tags</a></li>
 							<!-- separator-->
 
-							<li class="admin-only"><a href="../admin/setup/straightCopyDatabase.php"
-								onClick="this.href = top.HEURIST.baseURL +'admin/setup/straightCopyDatabase.php?db=' + database;" target="_blank"
-								title="Copy current database to an identical copy with a new name" class="seperator">Verbatim db copy</a></li>
-
 							<!--<li class="admin-only"><a href="#" target="_blank" onClick="this.href = top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database;" title="Export records as delimited text">Export delimited</a></li>-->
 							<li class="admin-only"><a href="#"
 								onClick="top.HEURIST.search.popupLink(top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database);"
@@ -383,6 +379,7 @@
 						<div class=content>
 							<div class=saved-search-subsubheading><a href="?ver=1&amp;w=bookmark&amp;label=Favourites&amp;q=tag:" onClick="top.HEURIST.search.loadFavourites(this.href);return false;">My Favourites</a></div>
 							<div class=saved-search-subsubheading><a href='?ver=1&amp;w=bookmark&amp;q=sortby:-m%20after:"1 week ago"&amp;label=Recently+modified' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">Recent changes</a></div>
+							<div class=saved-search-subsubheading><a href='?ver=1&amp;w=bookmark&amp;q=sortby:-m&amp;label=All records in database sorted by descending date order' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">All (date order)</a></div>
 							<div class=saved-search-subsubheading><a id=search-by-tag-link href="#" onClick="top.HEURIST.search.showTagSearchLinks(); return false;">My Tags</a></div>
 							<div class=saved-search-subsubheading><a id=my-blog-link target="_blank" href="#">My Blog</a></div>
 							<div class=saved-search-subsubheading>Saved searches</div>
@@ -393,7 +390,7 @@
 						<div class=search-type title="Personal Saved searches which search across all records in Heurist" onClick="top.HEURIST.search.toggleSavedSearches(this.parentNode);">All records</div>
 						<div class=content>
 							<div class=saved-search-subsubheading><a href='?ver=1&amp;w=all&amp;q=sortby:-m%20after:"1 week ago"&amp;label=Recently+modified' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">Recent changes</a></div>
-							<div class=saved-search-subsubheading>Saved searches</div>
+							<div class=saved-search-subsubheading><a href='?ver=1&amp;w=all&amp;q=sortby:-m&amp;label=All records in database sorted by descending date order' onClick="top.HEURIST.search.loadSearchLocation(this.href);return false;">All (date order)</a></div>							<div class=saved-search-subsubheading>Saved searches</div>
 							<div id=all-records-saved-searches-searches></div>
 						</div>
 					</div>

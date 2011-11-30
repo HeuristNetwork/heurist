@@ -161,10 +161,10 @@ function print_details($bib) {
 	print_header_line($bib);
 	print_public_details($bib);
 	print_private_details($bib);
+	print_other_tags($bib);
 	print_text_details($bib);
 	print_relation_details($bib);
 	print_linked_details($bib);
-	print_other_tags($bib);
 }
 
 
@@ -179,6 +179,9 @@ function print_header_line($bib) {
 	$webIcon = @$webIcon[0];
 ?>
 
+<div id=recID>Record ID:<?= htmlspecialchars($rec_id) ?><nobr><span class="link"><a id=edit-link class=normal target=_new href="../edit/editRecord.html?db=<?=HEURIST_DBNAME?>&recID=<?= $rec_id ?>" onClick="return sane_link_opener(this);"><img src="../../common/images/edit-pencil.png" title="Edit record"></a></span></nobr></div>
+</div>
+
 <div class=HeaderRow style="margin-bottom:20px"><h2 style="text-transform:none; line-height:16px"><?= htmlspecialchars($bib['rec_Title']) ?></h2>
 	<div id=footer>
         <h3><?= htmlspecialchars($bib['rty_Name']) ?></h3>
@@ -189,8 +192,7 @@ function print_header_line($bib) {
          </span>
         <?php } ?>
 	</div>
-<div id=recID><br>Record ID:<?= htmlspecialchars($rec_id) ?><nobr><span class="link"><a id=edit-link class=normal target=_new href="../edit/editRecord.html?db=<?=HEURIST_DBNAME?>&recID=<?= $rec_id ?>" onClick="return sane_link_opener(this);"><img src="../../common/images/edit-pencil.png" title="Edit record"></a></span></nobr></div>
-</div>
+
 <?php
 }
 
@@ -232,7 +234,23 @@ function print_private_details($bib) {
 						print '<span> - read-only to general public</span></div></div>';
 				}
 			}
-			?>
+
+	$ratings = array("0"=>"none",
+					"1"=> "*",
+					"2"=>"**",
+					"3"=>"***",
+					"4"=>"****",
+					"5"=>"*****");
+	$rating_label = $ratings[$bkmk['bkm_Rating']];
+	?>
+
+	<div class=detailRow>
+	<div class=detailType>Rating</div>
+	<div class=detail>
+	 <!-- <span class=label>Rating:</span> --> <?= $rating_label? $rating_label : 'none' ?>
+
+	</div>
+	</div>
 
 	<?php
 			if ($kwds) {
@@ -289,22 +307,6 @@ function print_private_details($bib) {
 			}
 		}
 	?>
-	</div>
-	</div>
-	<?php
-		$ratings = array("0"=>"not rated",
-						"1"=> "*",
-						"2"=>"**",
-						"3"=>"***",
-						"4"=>"****",
-						"5"=>"*****");
-		$rating_label = $ratings[$bkmk['bkm_Rating']];
-	?>
-	<div class=detailRow>
-	<div class=detailType>Ratings</div>
-	<div class=detail>
-	 <span class=label>Rating:</span> <?= $rating_label? $rating_label : '(not set)' ?>
-
 	</div>
 	</div>
 
@@ -471,7 +473,7 @@ global $relRT,$relSrcDT,$relTrgDT;
 	if (mysql_num_rows($from_res) <= 0  &&  mysql_num_rows($to_res) <= 0) return;
 ?>
 </div>
-<div class=detailRowHeader>Related Records
+<div class=detailRowHeader>Related
 <?php
 	while ($reln = mysql_fetch_assoc($from_res)) {
 		$bd = fetch_relation_details($reln['dtl_RecID'], true);
