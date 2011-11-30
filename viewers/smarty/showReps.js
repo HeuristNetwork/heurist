@@ -121,6 +121,9 @@ function ShowReps() {
 		if (parent.document.getElementById("s").className == "yui-hidden") {
 			return false;
 		}else {
+				//@todo - we miss selected ids in case use all records - so when
+				// we switch to show selected - nothing happens
+
 				if ( (!_isUseAllRecords && eventType == "heurist-selectionchange")
 						 || eventType == "heurist-recordset-loaded")
 				{
@@ -137,6 +140,10 @@ function ShowReps() {
 	*/
 	function _init() {
 		_setLayout(true, false); //aftert load show viewer only
+
+		_isUseAllRecords = (top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]==0);
+		document.getElementById('cbUseAllRecords2').checked = !_isUseAllRecords;
+		document.getElementById('cbUseAllRecords1').checked = !_isUseAllRecords;
 
 		_currentQuery_all = location.search;
 		if(_currentQuery_all=="?noquery"){
@@ -1275,6 +1282,17 @@ function ShowReps() {
 			setUseAllRecords: function(val){
 				var isChanged = _isUseAllRecords != val;
 				_isUseAllRecords = val;
+				top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"] = _isUseAllRecords?0:1;
+				top.HEURIST.util.setDisplayPreference("showSelectedOnlyOnMapAndSmarty", _isUseAllRecords?0:1);
+
+
+				if(document.getElementById('cbUseAllRecords1')){
+						document.getElementById('cbUseAllRecords1').checked = !val;
+				}
+				if(document.getElementById('cbUseAllRecords2')){
+					document.getElementById('cbUseAllRecords2').checked = !val;
+				}
+
 				if (isChanged) {
 					_reload(null);
 				}

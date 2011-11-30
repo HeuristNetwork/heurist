@@ -224,12 +224,21 @@ function GroupManager(_isFilterMode, _isSelection, _isWindowMode) {
 			{ key: "selection", label: "Sel", hidden:(!_isSelection), sortable:true,
 				formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
 
-			{ key: "id", label: "Admins", sortable:false, className:'center',
+			{ key: "id", label: "Admins", sortable:false, className:'center', 
 				formatter: function(elLiner, oRecord, oColumn, oData){
 					var recID = oRecord.getData('id');
 elLiner.innerHTML = '<div align="center"><img src="../../common/images/info.png" '+
 'onmouseover="groupManager.showInfo('+recID+', event)" onmouseout="groupManager.hideInfo()"/></div>';}
 			},
+			{ key: "members", label: "Edit Membership", sortable:false, className:'center',
+				formatter: function(elLiner, oRecord, oColumn, oData){
+elLiner.innerHTML = '<div align="center">'+
+		'<a href="'+top.HEURIST.baseURL + "admin/ugrps/manageUsers.html?db=" +
+		_db + "&grpID="+oRecord.getData("id")+
+		'" title="Show listing of members/Edit membership"><span class="count">'+oRecord.getData('members')+'</span></a></div>';
+
+//IREK that does not work! <a href="#" onClick=top.HEURIST.search.popupLink("'+top.HEURIST.baseURL + 'admin/ugrps/manageUsers.//html?db=' +_db + '&grpID='+oRecord.getData("id")+'","wide") title="Show listing of members/Edit membership">
+				}},
 			{ key: "name", label: "<div align='left'><u>Name</u></div>", sortable:true,
 				formatter: function(elLiner, oRecord, oColumn, oData){
 					if(Hul.isempty(oRecord.getData('url'))){
@@ -253,15 +262,6 @@ elLiner.innerHTML = '<div align="center"><img src="../../common/images/info.png"
 					elLiner.innerHTML = '<label title="'+tit+'">'+str+'</label>';
 			}},
 			{ key: "type", hidden:true},
-			{ key: "members", label: "Edit Membership", sortable:false, className:'center',
-				formatter: function(elLiner, oRecord, oColumn, oData){
-elLiner.innerHTML = '<div align="center">'+
-		'<a href="'+top.HEURIST.baseURL + "admin/ugrps/manageUsers.html?db=" +
-		_db + "&grpID="+oRecord.getData("id")+
-		'" title="Show listing of members/Edit membership"><span class="count">'+oRecord.getData('members')+'</span></a></div>';
-
-//IREK that does not work! <a href="#" onClick=top.HEURIST.search.popupLink("'+top.HEURIST.baseURL + 'admin/ugrps/manageUsers.//html?db=' +_db + '&grpID='+oRecord.getData("id")+'","wide") title="Show listing of members/Edit membership">
-				}},
 /*			{ key: "id", label: "Admins", sortable:false,
 				formatter: function(elLiner, oRecord, oColumn, oData){
 					var recID = oRecord.getData('id');

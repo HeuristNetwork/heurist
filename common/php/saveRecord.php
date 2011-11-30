@@ -34,6 +34,8 @@
 
 	-->*/
 require_once(dirname(__FILE__)."/../../search/getSearchResults.php");
+require_once(dirname(__FILE__)."/../../common/php/utilsTitleMask.php");
+
 // NOTE  tags are a complete replacement list of personal tags for this record and are only used if personalised is true
 function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $pnotes, $rating, $tags, $wgTags, $details, $notifyREMOVE, $notifyADD, $commentREMOVE, $commentMOD, $commentADD, &$nonces=null, &$retitleRecs=null) {
 	$recordID = intval($recordID);

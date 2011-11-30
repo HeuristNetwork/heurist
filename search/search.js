@@ -3130,6 +3130,23 @@ function removeCustomAlert() {
 	var handleActiveTabChange = function(e) {
 		var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));
 		top.HEURIST.util.setDisplayPreference("viewerTab", currentTab);
+
+		if(currentTab===2){
+			var cbsel = document.getElementById('cbMapUseAllRecords');
+			var isSelOnly = (top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]==1);
+			var wasChanged = cbsel.checked != isSelOnly;
+			cbsel.checked = isSelOnly;
+			if(wasChanged){
+				var mapframe = document.getElementById("map-frame3");
+				mapframe.contentWindow.showMap.setUseAllRecords(!isSelOnly);
+				//top.HEURIST.search.onMapUseAllRecords(null);
+			}
+		}else if (currentTab===3){
+				var smartyFrame = document.getElementById("smarty-frame");
+				smartyFrame.contentWindow.showReps.setUseAllRecords(
+						(top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]==0));
+		}
+
 	};
 	_tabView.addListener('activeTabChange',handleActiveTabChange);
 	_tabView.getTab(viewerTabIndex);
@@ -3138,3 +3155,5 @@ function removeCustomAlert() {
 	else if (Number(viewerTabIndex) === 3){top.HEURIST.search.smartySelected()}; //initialises smarty reports
 
 	_tabView.addListener('activeTabChange',handleActiveTabChange);
+
+document.getElementById('cbMapUseAllRecords').checked = (top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]==1);

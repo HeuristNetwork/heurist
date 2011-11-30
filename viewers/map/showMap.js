@@ -32,7 +32,9 @@ Event = YAHOO.util.Event;
 function ShowMap() {
 
 	var _className = "ShowMap",
-		_isUseAllRecords = true;
+		_isUseAllRecords = true,
+		squery_all,
+		squery_sel;
 
 	/**
 	* Initialization
@@ -335,6 +337,9 @@ function ShowMap() {
 	*/
 	function _init() {
 
+
+		_isUseAllRecords = (top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]==0);
+
 		setLayout(true, true);
 		/*
 		var lunit = layout.getUnitById('timelinecontainer');
@@ -343,19 +348,24 @@ function ShowMap() {
 		});
 		*/
 
-		var squery_all = location.search;
-		_reload(squery_all, null);
+		var _squery_all = location.search;
+		_reload(_squery_all, null);
 
 		if (top.HEURIST) {
 			top.HEURIST.registerEvent(that,"heurist-selectionchange", _onSelectionChange);
 			top.HEURIST.registerEvent(that,"heurist-recordset-loaded", _onSelectionChange);
 		}
 	}
-	function _reload(squery_all, squery_sel) {
+	function _reload(_squery_all, _squery_sel) {
+		squery_all = _squery_all;
+		squery_sel = _squery_sel;
+
 		var baseurl = top.HEURIST.basePath + "viewers/map/showMap.php";
 		var callback = _updateMap;
-		var params =  (_isUseAllRecords) ?squery_all :squery_sel;
-		top.HEURIST.util.getJsonData(baseurl, callback, params);
+		var params =  (_isUseAllRecords) ?_squery_all :_squery_sel;
+		if(params!=null){
+			top.HEURIST.util.getJsonData(baseurl, callback, params);
+		}
 	}
 
 
@@ -375,7 +385,13 @@ function ShowMap() {
 		},
 
 		setUseAllRecords: function(val){
+			var isChanged = _isUseAllRecords != val;
 			_isUseAllRecords = val;
+			if (isChanged && _isUseAllRecords) {
+				_reload(squery_all, squery_sel);
+			}
+			top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"] = _isUseAllRecords?0:1;
+			top.HEURIST.util.setDisplayPreference("showSelectedOnlyOnMapAndSmarty", _isUseAllRecords?0:1);
 		},
 
 		getClass: function () {

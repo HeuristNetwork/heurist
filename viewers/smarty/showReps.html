@@ -332,7 +332,7 @@ if(isInited){
 		}else{
 		var name=jQuery.trim(prompt("Please enter template name",""));
 		if (!Hul.isempty(name))
-  		{
+		{
 			window.showReps.generateTemplate(name);
 		}
 	}
@@ -373,11 +373,6 @@ if(isInited){
 
 	function onUseAll(event){
 		var elem = event.target;
-		if(elem.id=="cbUseAllRecords1"){
-			document.getElementById('cbUseAllRecords2').checked = elem.checked;
-		}else{
-			document.getElementById('cbUseAllRecords1').checked = elem.checked;
-		}
 		window.showReps.setUseAllRecords(!elem.checked);
 	}
 

@@ -71,7 +71,6 @@ if (preg_match('/\\b_COLLECTED_\\b/', $_REQUEST['q'])) {
 }
 
 $query = REQUEST_to_query($query, $search_type);
-//error_log($query);
 
 if (@$broken) {
 	$query = str_replace(' where ', ' where (to_days(now()) - to_days(rec_URLLastVerified) >= 8) and ', $query);
@@ -245,7 +244,7 @@ $furlDT = (defined('DT_FULL_IMAG_URL')?DT_FULL_IMAG_URL:0);
 		// 223  Thumbnail
 		// 222  Logo image
 		// 224  Images
-		$res = mysql_query("select recUploadedFiles.* ".
+		$squery = "select recUploadedFiles.* ".
 							"from recDetails ".
 								"left join recUploadedFiles on ulf_ID = dtl_UploadedFileID ".
 								"left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt ".
@@ -256,26 +255,37 @@ $furlDT = (defined('DT_FULL_IMAG_URL')?DT_FULL_IMAG_URL:0);
 								($thumbDT?" dtl_DetailTypeID = $thumbDT desc,":"").
 								($logoDT?" dtl_DetailTypeID = $logoDT desc,":"").
 								($imgDT?" dtl_DetailTypeID = $imgDT desc,":"").
-								" dtl_DetailTypeID limit 1");
+								" dtl_DetailTypeID limit 1";
+//error_log(">>>>>>>>>>>>>>>>>>>>>>>".$squery);
+		$res = mysql_query($squery);
+
 		if ($res && mysql_num_rows($res) == 1) {
 			$file = mysql_fetch_assoc($res);
 			$thumb_url = "../common/php/resizeImage.php?ulf_ID=".$file['ulf_ObfuscatedFileID'];
-		} else {
+		} else if($turlDT>0) {
 			// 606  Thumbimage url
-			$res = mysql_query("select dtl_Value ".
+			$squery = "select dtl_Value ".
 								"from recDetails ".
 								"where dtl_RecID = " . $row[2] .
 								($turlDT?" and dtl_DetailTypeID = $turlDT":"").
-								" limit 1");
+								" limit 1";
+
+//error_log("2.>>>>>>>>>>>>>>>>>>>>>>>".$squery);
+			$res = mysql_query($squery);
+
 			if ($res && mysql_num_rows($res) == 1) {	//FIXME: we should see about uploading this to the file table
 				$row = mysql_fetch_assoc($res);
 				$thumb_url = "".htmlspecialchars(addslashes($row['dtl_Value']));
-			}else{	// 603  Full image url
-				$res = mysql_query("select dtl_Value ".
+			}else if($furlDT>0){	// 603  Full image url
+				$squery = "select dtl_Value ".
 									"from recDetails ".
 									"where dtl_RecID = " . $row[2] .
 									($furlDT?" and dtl_DetailTypeID = $furlDT":"").
-									" limit 1");
+									" limit 1";
+
+//error_log("3.>>>>>>>>>>>>>>>>>>>>>>>".$squery);
+				$res = mysql_query($squery);
+
 				if ($res && mysql_num_rows($res) == 1) {
 					$row = mysql_fetch_assoc($res);
 					$thumb_url = "../common/php/resizeImage.php?file_url=".htmlspecialchars($row['dtl_Value']);

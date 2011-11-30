@@ -72,13 +72,13 @@ function upload_file($name, $mimetypeExt, $tmp_name, $error, $size, $description
 	}
 
 	$res = mysql__insert('recUploadedFiles', array(	'ulf_OrigFileName' => $name,
-													'ulf_UploaderUGrpID' => get_user_id(),
-													'ulf_Added' => date('Y-m-d H:i:s'),
-													'ulf_MimeExt ' => $mimetypeExt,
-													'ulf_FileSizeKB' => $file_size,
-													'ulf_Description' => $description? $description : NULL,
-													'ulf_FilePath' => HEURIST_UPLOAD_DIR)
-													);
+			'ulf_UploaderUGrpID' => get_user_id(),
+			'ulf_Added' => date('Y-m-d H:i:s'),
+			'ulf_MimeExt ' => $mimetypeExt,
+			'ulf_FileSizeKB' => $file_size,
+			'ulf_Description' => $description? $description : NULL,
+			'ulf_FilePath' => HEURIST_UPLOAD_DIR)
+			);
 
 	if (! $res) {
 		error_log("error inserting file upload info: " . mysql_error());
@@ -107,6 +107,91 @@ function upload_file($name, $mimetypeExt, $tmp_name, $error, $size, $description
 		error_log($uploadFileError);
 		mysql_query('delete from recUploadedFiles where ulf_ID = ' . $file_id);
 		return $uploadFileError;
+	}
+}
+
+/**
+ *
+ * @param type $name
+ * @param type $description
+ * @param type $needConnect
+ * @return string
+ */
+function register_file($fullname, $description, $needConnect) {
+
+	if (! is_logged_in()) return "Not logged in";
+
+	/* clean up the provided file name -- these characters shouldn't make it through anyway */
+	$fullname = str_replace("\0", '', $fullname);
+	$fullname = str_replace('\\', '/', $fullname);
+	//$fullname = preg_replace('!.*/!', '', $fullname);
+
+	if (!file_exists($fullname)) {
+	    return "Error: $fullname file does not exist";
+	}
+	$size = filesize($fullname);
+	if ( (!is_numeric($size)) || ($size <= 0) ) {
+	    return "Error: size is ".$size;
+	}
+
+	if($needConnect){
+		mysql_connection_db_overwrite(DATABASE);
+	}
+
+	//get folder, extension and filename
+	$path_parts = pathinfo($fullname);
+	$dirname = $path_parts['dirname']."/";
+	$mimetypeExt = $path_parts['extension'];
+	//$filename = $path_parts['filename'];
+	$filename = $path_parts['basename'];
+
+	if($mimetypeExt){ //check extension
+	    $res = mysql_query('select fxm_Extension from defFileExtToMimetype where fxm_Extension = "'.addslashes($mimetypeExt).'"');
+	    if (mysql_num_rows($res) == 1) {
+		$mimetype = mysql_fetch_assoc($res);
+		$mimetypeExt = $mimetype['fxm_Extension'];
+	    }else{
+		return "Error: unsupported extension ".$mimetypeExt;
+	    }
+	}
+
+	if ($size && $size < 1024) {
+		$file_size = 1;
+	}else{
+		$file_size = round($size / 1024);
+	}
+
+	//check if sudh file is already registered
+	$res = mysql_query('select ulf_ID from recUploadedFiles '.
+'where ulf_FilePath = "'.addslashes($dirname).
+'" and ulf_FileName = "'.addslashes($filename).'"');
+
+	if (mysql_num_rows($res) == 1) {
+	    $row = mysql_fetch_assoc($res);
+	    $file_id = $row['ulf_ID'];
+	    return $file_id;
+	}else{
+
+	    $res = mysql__insert('recUploadedFiles', array(	'ulf_OrigFileName' => $filename,
+				'ulf_UploaderUGrpID' => get_user_id(),
+				'ulf_Added' => date('Y-m-d H:i:s'),
+				'ulf_MimeExt ' => $mimetypeExt,
+				'ulf_FileSizeKB' => $file_size,
+				'ulf_Description' => $description? $description : NULL,
+				'ulf_FilePath' => $dirname,
+				'ulf_FileName' => $filename)
+				);
+
+	    if (!$res) {
+		    return "Error registration file $fullanme into database";
+	    }
+
+	    $file_id = mysql_insert_id();
+	    
+	    mysql_query('update recUploadedFiles set ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
+
+	    return $file_id;
+
 	}
 }
 
