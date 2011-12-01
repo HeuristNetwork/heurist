@@ -292,6 +292,25 @@
 				$warnings = 1;
 				}
 
+			// create an output directory for HML files
+			$cmdline = "mkdir $uploadPath/hml-output";
+			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
+			if ($res2 != 0 ) {
+				echo ("<h2>Warning:</h2> Unable to create output directory $uploadPath"."hml-output (used to write published records as hml files)<br>");
+				echo($output2);
+				$warnings = 1;
+				}
+
+			// create an output directory for HTML files
+			$cmdline = "mkdir $uploadPath/html-output";
+			$output2 = exec($cmdline . ' 2>&1', $output, $res2);
+			if ($res2 != 0 ) {
+				echo ("<h2>Warning:</h2> Unable to create output directory $uploadPath"."html-output (used to write published records as generic html files)<br>");
+				echo($output2);
+				$warnings = 1;
+				}
+
+
 			// Make the current user the owner and admin of the new database
 			mysql_connection_db_insert($newname);
 			mysql_query('UPDATE sysUGrps SET ugr_LongName="'.$longName.'", ugr_FirstName="'.$firstName.'",

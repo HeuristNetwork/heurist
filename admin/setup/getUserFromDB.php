@@ -37,9 +37,8 @@
 				die("Sorry, could not connect to the database (mysql_connection_db_overwrite error)");
 			}
 
-			print "<h2>Heurist Database User Import</h2>";
-			print "<h2>FOR  ADVANCED USERS ONLY</h2>";
-			print "This script reads a user record from another database and them into the current logged-in database";
+			print "<h2>Import user from another database</h2>";
+			print "Imports a user record from another Heurist database on the system and adds the user to the current database, making them a member of the database owners group";
 
 			$sourcedbname = NULL;
 
