@@ -83,16 +83,24 @@
 				//	and simplifies management of saved searches
 				top.HEURIST.whenLoaded("obj-user", function() {	//FIXME: need to get instance info and set it to heurist params
 					if (top.HEURIST.is_logged_in()  ) {	//FIXME: this doesn't work for installed verisons
-						document.body.className = "w-bookmark";
-						window.HEURIST.parameters["w"] = "bookmark";
-						window.HEURIST.parameters["q"] = "tag:" + top.HEURIST.util.getDisplayPreference("favourites");
+						if (top.HEURIST.displayPreferences.defaultMyBookmarksSearch == "true") {
+							document.body.className = "w-bookmark";
+							document.getElementById("w-input").value = "bookmark";
+							window.HEURIST.parameters["w"] = "bookmark";
+						}
+						if (top.HEURIST.displayPreferences.defaultMyBookmarksSearch == "false"){
+							document.body.className = "w-all";
+							document.getElementById("w-input").value = "all";
+							window.HEURIST.parameters["w"] = "all";
+						}
+						window.HEURIST.parameters["q"] = top.HEURIST.displayPreferences.defaultSearch;
 						window.HEURIST.parameters["db"] = database;
 					}
 				});
 			}
 
 			if (! document.body.className) {
-				document.body.className = location.search.match(/w=bookmark/) ? "w-bookmark" : "w-all";
+				document.body.className = "w-" + window.HEURIST.parameters["w"];
 			}
 			// start loading this early
 			top.HEURIST.loadScript(hBase+"common/php/loadUserInfo.php" +	// user-specific HEURIST data
@@ -261,7 +269,7 @@
 			<div id=search class="banner searchTable" style="border-bottom:1px solid #696969;">
 				<form onSubmit="top.HEURIST.search.checkSearchForm();return false;"><input type=hidden id=w-input name=w>
 					<!-- SEARCH:  it's obvious it's a search, one less bit of clutter -->
-					<div class="searchInput" style="position:relative"><input id=q name=q type=text style="width:300px; clear:both" onKeyPress="if (event.keyCode == 13) {document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();}">
+					<div class="searchInput" style="position:relative"><input id=q name=q type=text style="width:300px; clear:both" onKeyPress="if (event.keyCode == 13) {top.HEURIST.search.submitSearchForm();}">
 						<div class="simplesearch" title="Click to show simple search builder panel" onclick='$("#simple-search").toggleClass("collapsed");$(this).toggleClass("collapsed");'></div>
 
 						<div id="simple-search" class="collapsed">
@@ -279,7 +287,7 @@
 							</div>
 							<div class="simple-search-row" style="text-align:center;">
 								<a href="#" title="Search only records which have been bookmarked by you" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();" class="button">search my bookmarks</a>
-								<a href="#" title="Search across all records in Heurist" onClick="document.getElementById('w-input').value = ''; top.HEURIST.search.submitSearchForm();" class="button">search all records</a>
+								<a href="#" title="Search across all records in Heurist" onClick="document.getElementById('w-input').value = 'all'; top.HEURIST.search.submitSearchForm();" class="button">search all records</a>
 								<a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">Go to <b>Advanced Search</b></a>
 
 							</div>
@@ -288,7 +296,7 @@
 					</div>
 					<div class="searchButtons">
 						<input id=my-records-button type=button value="my bookmarks" title="Search only records which have been bookmarked by you" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();" class="logged-in-only">
-						<input id=all-records-button type=button value="all records"  title="Search across all records in Heurist" onClick="document.getElementById('w-input').value = ''; top.HEURIST.search.submitSearchForm();">
+						<input id=all-records-button type=button value="all records"  title="Search across all records in Heurist" onClick="document.getElementById('w-input').value = 'all'; top.HEURIST.search.submitSearchForm();">
 						<span id="add-record"><input id=add-record-link value="Add New Record" title="Add a new record to the Heurist database, setting record type and ownership" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/addRecordPopup.php'); return false;" class="logged-in-only" >
 					</span></div>
 				</form>

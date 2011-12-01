@@ -12,9 +12,9 @@
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
-	if (! is_admin()) {
-		print "<html><body><p><h2>Request disallowed</h2>You must log in as an administrator of the database owners group to delete a database</p>".
-		"<p><a href=".HEURIST_URL_BASE."?db=$dbname>Return to Heurist</a></p></body></html>";
+	// User must be system administrator or admin of the owners group for this database
+	if (!is_admin()) {
+		print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to register a database</span><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
 		return;
 	}
 
@@ -25,13 +25,13 @@
 		print "<head><meta content='text/html; charset=ISO-8859-1' http-equiv='content-type'>";
 		print "<title>Delete Current Heurist Database</title>";
 		print "<link rel='stylesheet' type='text/css' href='../../common/css/global.css'>";
+		print "<link rel='stylesheet' type='text/css' href='../../common/css/edit.css'>";
 		print "<link rel='stylesheet' type='text/css' href='../../common/css/admin.css'>";
 		print "</head>";
 		print "<body class='popup'>";
 		print "<div class='banner'><h2>Delete Current Heurist database</h2></div>";
 		print "<div id='page-inner' style='overflow:auto'>";
-		print "<h2>!!!! DANGER- !!!! </h2>";
-		print "<h1>DELETION OF CURRENT DATABASE</h1>";
+		print "<h4 style='display:inline-block; margin:0 5px 0 0'><span><img src='../../common/images/url_error.png' /> DANGER <img src='../../common/images/url_error.png' /></span></h4><h1 style='display:inline-block'>DELETION OF CURRENT DATABASE</h1><br>";
 		print "<h3>This will PERMANENTLY AND IRREVOCABLY delete the current database: </h3> <b>$dbname</b>";
 		print "<form name='deletion' action='deleteCurrentDB.php' method='get'>";
 		print "<p>Enter the words DELETE MY DATABASE in all-capitals to confirm that you want to delete the current database".

@@ -16,6 +16,10 @@
 	<link rel=stylesheet href="../../common/css/global.css">
 	<link rel=stylesheet href="../../common/css/edit.css">
 	<link rel=stylesheet href="../../common/css/admin.css">
+	<style>
+	.input-row, .input-row .input-header-cell, .input-row div.input-cell {vertical-align:middle}
+	</style>
+		
 </head>
 
 <body class="popup" onLoad="showPreferences()" width=500 height=400>
@@ -66,24 +70,25 @@
 
   <!-- h2>Preferences</h2 -->
 
-   <div><h2>Display Preferences</h2></div>
+
    <div class="input-row">
 	<div class="input-header-cell">Search results per page (20 - 500)</div><div  class="input-cell"><input id="results-per-page"></div>
    </div>
    <div class="input-row">
-	<div class="input-header-cell">Default search on load</div><div  class="input-cell"><input id="defaultSearch"></div>
+	<div class="input-header-cell">Default search on load</div><div  class="input-cell"><input id="defaultSearch">
+	<br><input type="checkbox" id="defaultMyBookmarksSearch" style="vertical-align:middle">Search MyBookmarks only
+<!--	<br><input type="radio" name="defaultMyBookmarksSearch" value="myBookmarks">My Bookmarks
+	<br><input type="radio" name="defaultMyBookmarksSearch" value="allBookmarks">All Bookmarks-->
+	</div>
    </div>
    <div class="input-row">
 	<div class="input-header-cell">How do you spell Favourites/Favorites?</div><div  class="input-cell"><input id="favourites"></div>
    </div>
    <div class="input-row">
-	<div class="input-header-cell">Load related records below search (leave off if not required)</div><div  class="input-cell"><input type="checkbox" id="loadRelatedOnSearch"></div>
+	<div class="input-header-cell">Load related records below search (leave off if not required)</div><div class="input-cell"><input type="checkbox" id="loadRelatedOnSearch"></div>
   </div>
    <div class="input-row">
 	<div class="input-header-cell">Default pointer field search in edit to show recent records (otherwise All Records)</div><div  class="input-cell"><input type="checkbox" id="defaultRecentPointerSearch"></div>
-  </div>
-   <div class="input-row">
-	<div class="input-header-cell">Default main search on [enter] to My Bookmarks (otherwise All Records)</div><div  class="input-cell"><input type="checkbox" id="defaultMyBookmarksSearch"></div>
   </div>
   <div id="buttons" class="actionButtons">
    <input type="button" value="save" onClick="save();">

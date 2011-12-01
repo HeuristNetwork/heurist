@@ -510,14 +510,11 @@ a#dbSearch-link div#dbname:hover {padding-right:10px; background-color:RGBA(100,
 #q, #toolbar select, #query-input {border:0 solid #666666;height:22px;margin-right:-3px;}
 #q {background-color:transparent}
 
-body.w-all #my-records-button, body.w-bookmark #all-records-button {color:#666;}
-
-body.w-all #all-records-button, body.w-bookmark #my-records-button {color:#000;}
 
 #my-records-button, #all-records-button, #web-search-link, .button, #add-record-link, #new-entry-button, input[type="button"], input[type="submit"] {
 	text-transform: uppercase !important;
 	display:inline-block !important;
-	color: #666 !important;
+	color: #666;
 	cursor: pointer !important;
 	font-weight:bold !important;
 	background-color:transparent !important;
@@ -537,6 +534,9 @@ body.w-all #all-records-button, body.w-bookmark #my-records-button {color:#000;}
 	color:#000 !important;
 }
 * #my-records-button:hover, * #all-records-button:hover, * #web-search-link:hover, .button:hover{color :#000;}
+
+body.w-all #my-records-button, body.w-bookmark #all-records-button {color:#666;}
+body.w-all #all-records-button, body.w-bookmark #my-records-button {color:#000;}
 
 .outline {border:1px solid #999;padding:0 10px 0 5px;background-image:url("../images/backgrounds/banner_bg_dark.png");background-position:bottom;display:inline-block;height: 22px;/* overflow: hidden; */vertical-align:middle;}
 #my-records-saved-searches, #all-records-saved-searches, #workgroup-saved-searches, .relType {padding: 0 0px 0px 0px;background-color: none;background-image:url(../images/heading_saved_search.png);background-position:left top;background-repeat:no-repeat;}

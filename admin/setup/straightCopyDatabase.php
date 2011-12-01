@@ -15,9 +15,10 @@
 		header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
 		return;
 	}
-	if (! is_admin()) {
-	print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href=".HEURIST_URL_BASE.">Return to Heurist</a></p></body></html>";
-	return;
+	// User must be system administrator or admin of the owners group for this database
+	if (!is_admin()) {
+		print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to register a database</span><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
+		return;
 	}
 
 	mysql_connection_db_overwrite(DATABASE);
@@ -30,27 +31,43 @@
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
 	<title>Heurist - Straight copy of a database to an identical copy</title>
+	
+	<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+	<link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
+	<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+	
+	<style>
+		ul {color:#CCC;}
+		li {line-height: 20px; list-style:outside square; font-size:9px;}
+		li ul {color:#CFE8EF; font-size:9px}
+		li span {font-size:11px; color:#000;}
+	</style>
 </head>
-<body>
+<body class="popup">
+	<div class="banner"><h2>Heurist Direct Copy</h2></div>
+	
 	<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
 	<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
 	<script src="../../common/php/loadCommonInfo.php"></script>
-	<h2>Heurist Direct Copy</h2>
-	This script simply copies the current database <b> <?=HEURIST_DBNAME?> </b> to a new one with no changes. The new database is identical to the old in all respects including access.<br><p>
-	<hr>
+<div id="page-inner" style="overflow:auto">
+
+	<p>This script simply copies the current database <b> <?=HEURIST_DBNAME?> </b> to a new one with no changes. The new database is identical to the old in all respects including access.</p>
+
 	<p>The script will take a long time to execute for large databases (more than 5 - 10,000 records) and may fail on the reload of the dumped data.
 	<p>In this case we recommend the following steps from the command line interface:
 	<ul>
-		<li>Dump the existing database with mysqldump:  mysqldump -u... -p... hdb_xxxxx > filename</li>
-		<li>Create database, switch to database: mysqldump -u... -p... -e 'create database hdb_yyyyy'</li>
-		<li>Load the dumped database: mysqldump -u... -p... hdb_yyyyyy < filename </li>
-		<li>Change to <?HEURIST_UPLOAD_DIR?> and copy the following directories and contents:</li>
+		<li><span>Dump the existing database with mysqldump:  mysqldump -u... -p... hdb_xxxxx > filename</span></li>
+		<li><span>Create database, switch to database: mysqldump -u... -p... -e 'create database hdb_yyyyy'</span></li>
+		<li><span>Load the dumped database: mysqldump -u... -p... hdb_yyyyyy < filename </span></li>
+		<li><span>Change to <?HEURIST_UPLOAD_DIR?> and copy the following directories and contents:</span>
 			<ul>
-			<li>Upload file directory '<?=HEURIST_DBNAME?>' to directory with name of new database (excluding prefix)</li>
-			<li>Icons directory '<?=HEURIST_DBNAME?>' to directory with name of new database (excluding prefix)</li>
+				<li><span>Upload file directory '<?=HEURIST_DBNAME?>' to directory with name of new database (excluding prefix)</span></li>
+				<li><span>Icons directory '<?=HEURIST_DBNAME?>' to directory with name of new database (excluding prefix)</span></li>
 			</ul>
+		</li>
 	</ul>
-	<hr>
+
+
 <?php
 
 
@@ -58,13 +75,19 @@
 
  	if(!array_key_exists('mode', $_REQUEST) || !array_key_exists('targetdbname', $_REQUEST)){
 ?>
-
+<div class="separator_row" style="margin:20px 0;"></div>
 <form name='selectdb' action='straightCopyDatabase.php' method='get'>
 <input name='mode' value='2' type='hidden'> <!-- calls the form to select mappings, step 2 -->
 <input name='db' value='<?=HEURIST_DBNAME?>' type='hidden'>
-<br>Enter name for new database to be created (prefix added automatically): <input type='text' name='targetdbname' />
-<input type='submit' value='Go'/>
+<p>The database will be created with the prefix "hdb_" (all databases created by this installation of the software will have the same prefix).</p>
+<h3>Enter a name for the new database:</h3>
+<div style="margin-left: 40px;">
+	<input type='text' name='targetdbname' />
+	<input type='submit' value='Clone <?=HEURIST_DBNAME?>'/>
+	</div>
+
 </form>
+</div>
 </body>
 </html>
 <?php

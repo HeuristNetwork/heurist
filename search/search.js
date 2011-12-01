@@ -74,6 +74,7 @@ top.HEURIST.search = {
 		top.HEURIST.search.clearResultRows();
 		top.HEURIST.search.clearRelatesRows();
 		top.HEURIST.search.reloadSearch();
+		top.HEURIST.search.setBodyClass();
 	},
 
 	searchNotify: function(results) {
@@ -211,6 +212,8 @@ top.HEURIST.search = {
 
 		// set search type
 		if (top.HEURIST.is_logged_in()  &&  args["w"] === "bookmark") {
+			args["w"] = "bookmark";
+		} else if (top.HEURIST.is_logged_in()  &&  top.HEURIST.displayPreferences.defaultMyBookmarksSearch == "true") {
 			args["w"] = "bookmark";
 		} else {
 			args["w"] = "all";
@@ -440,7 +443,16 @@ top.HEURIST.search = {
 		}
 
 	},
-
+	setBodyClass: function() {
+		window.HEURIST.parameters["w"] = document.getElementById("w-input").value;
+		var searchType = document.getElementById("w-input").value;
+		if ($("body").hasClass("w-all")) {
+			$("body").removeClass("w-all");}
+		if ($("body").hasClass("w-bookmark")) {
+			$("body").removeClass("w-bookmark");}
+		var bodyClass = "w-" + searchType;
+		$("body").addClass(bodyClass);
+	},
 	toggleRelated: function(level){
 		var className =  document.getElementById("showrelated" + level).className;
 		var depthInfo = top.HEURIST.search.results.infoByDepth[level];
@@ -644,8 +656,9 @@ top.HEURIST.search = {
 		}
 
 		// set body class for elements whose display depends on search mode
-		document.body.className += (document.body.className ? " " : "") + "w-" + params["w"];
-
+		if (!$("body").hasClass("w-all") || !$("body").hasClass("w-bookmark")) {
+		//document.body.className += (document.body.className ? " " : "") + "w-" + params["w"];
+		}
 		if (params["cf"]) {
 			document.getElementById("q").value = "";
 			set_stype_option("stype-0");
@@ -2673,9 +2686,9 @@ top.HEURIST.search = {
 		link.rel = "alternate";
 		link.type = "application/rss+xml";
 		link.title = "RSS feed";
-		link.href = "feed://"+window.location.host+top.HEURIST.basePath+"export/feeds/searchRSS.php"+(document.location.search ? document.location.search : "?q=tag:Favourites") + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
+		link.href = "feed://"+window.location.host+top.HEURIST.basePath+"export/feeds/searchRSS.php"+(document.location.search ? document.location.search : "?q=" + top.HEURIST.displayPreferences.defaultSearch) + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
 		document.getElementsByTagName("head")[0].appendChild(link);
-		document.getElementById("httprsslink").href += (document.location.search ? document.location.search : "?q=tag:Favourites" + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""));
+		document.getElementById("httprsslink").href += (document.location.search ? document.location.search : "?q=" + top.HEURIST.displayPreferences.defaultSearch + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""));
 	},
 
 	toggleLegend: function() {
