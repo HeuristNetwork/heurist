@@ -34,6 +34,10 @@ require_once('libs.inc.php');
 
 	$_REQUEST["f"] = 1; //always search
 
+	if( !array_key_exists("limit", $_REQUEST) ){ //not defined
+		$_REQUEST["limit"] = "500"; //force offset and limit (max 500)
+	}
+
 	$qresult = loadSearch($_REQUEST); //from search/getSearchResults.php - loads array of records based og GET request
 
 //error_log(">>>>>>>>".print_r($qresult,true));

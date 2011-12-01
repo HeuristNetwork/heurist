@@ -75,26 +75,8 @@ function loadSearch($args, $bare = false, $onlyIDs = false, $publicOnly = false)
 
 	$fresh = !! @$args["f"];
 
-	if (array_key_exists("l", $args)) {
-		$limit = intval(@$args["l"]);
-		unset($args["l"]);
-	}else if(array_key_exists("limit", $args)) {
-		$limit = intval(@$args["limit"]);  // this is back in since hml.php passes through stuff from sitemap.xmap
-	}else{
-		$limit = 100;
-	}
-	if ($limit < 0 ) unset($limit);
-	if (@$limit) $limit = min($limit, 1000);
+	$query = REQUEST_to_query("select SQL_CALC_FOUND_ROWS rec_ID ", $searchType, $args, null, $publicOnly);
 
-	if (array_key_exists("o", $args)) {
-		$offset = intval(@$args["o"]);
-		unset($args["o"]);
-	}else if(array_key_exists("offset", $args)) {
-		$offset = intval(@$args["offset"]);  // this is back in since hml.php passes through stuff from sitemap.xmap
-	}
-
-	$query = REQUEST_to_query("select SQL_CALC_FOUND_ROWS rec_ID ", $searchType, $args, null, $publicOnly)
-								. (@$limit? " limit $limit" : "") . (@$offset? " offset $offset " : "");
 	$res = mysql_query($query);
 // error_log($query);
 	$fres = mysql_query('select found_rows()');

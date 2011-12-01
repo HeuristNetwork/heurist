@@ -1,7 +1,8 @@
 <!--
 
 /**
-* showMap.html
+* showMapS.php
+* standalone
 * Timemap = Mapstraction+Timeline
 *
 * @version 2011.0615
@@ -152,27 +153,115 @@ body {
 <body class="yui-skin-sam">
 
 		<script>
-			var HRST = top.HEURIST; //alias that are in use in showMap.js
+
+	var HEURIST = {tmap:null};
+
+	var installDir = window.location.pathname.replace(/(((admin|common|export|external|hapi|help|import|records|search|viewers)\/.*)|(index.*))/, "");
+	var HRST = {
+		VERSION: "build 3.1.3.231111",
+		basePath: installDir,
+		database: {
+			name: "sandpit5"
+			},
+		util:{
+			isnull: function(obj){
+				return ( (typeof obj==="undefined") || (obj===null));
+			},
+
+	sendRequest: function(url,callback,postData) {
+		// if we don't have a fully formed or root URL then prepend the base path
+		if (! url.match(/^http:/)  &&  ! url.match(/^\//))
+			url = HRST.basePath + url;
+		var file = url;
+		var req = HRST.util.createXMLHTTPObject();
+		if (!req) return;
+		var method = (postData) ? "POST" : "GET";
+		req.open(method,url,true);// set for asynch call
+		if (postData)
+			req.setRequestHeader('Content-type','application/x-www-form-urlencoded');
+			req.onreadystatechange = function () {// callback for ajax object
+				if (req.readyState != 4) return;
+				if (req.status != 200 && req.status != 304) {
+					if (req.status == 404) {
+						alert('H-Util HTTP error file not found' + req.status + " " +file);
+					}else if (req.status){
+						alert('H-Util HTTP error ' + req.status);
+					}
+					return;
+				}
+				callback(req);
+			}
+		if (req.readyState == 4) return;
+		req.send(postData);
+	},
+
+	XMLHttpFactories: [
+		function () {return new XMLHttpRequest()},
+		function () {return new ActiveXObject("Msxml2.XMLHTTP")},
+		function () {return new ActiveXObject("Msxml3.XMLHTTP")},
+		function () {return new ActiveXObject("Microsoft.XMLHTTP")}
+	],
+
+	createXMLHTTPObject: function() {
+		var xmlhttp = false;
+		for (var i=0;i<HRST.util.XMLHttpFactories.length;i++) {
+			try {
+				xmlhttp = HRST.util.XMLHttpFactories[i]();
+			}
+			catch (e) {
+				continue;
+			}
+			break;
+		}
+		return xmlhttp;
+	},
+
+	xhrFormSubmit: function(form, callback) {
+	// submit a form via XMLHttpRequest;
+	// call the callback with the response text when it is done
+		var postData = "";
+		for (var i=0; i < form.elements.length; ++i) {
+			var elt = form.elements[i];
+
+			// skip over un-selected options
+			if ((elt.type == "checkbox"  ||  elt.type == "radio")  &&  ! elt.checked) continue;
+
+			// FIXME: deal with select-multiple at some stage   (perhaps we should use | to separate values)
+			// place form data into a stream of name = value pairs
+			if (elt.strTemporal && (elt.strTemporal.search(/\|VER/) != -1)) elt.value = elt.strTemporal;	// saw fix to capture simple date temporals.
+			if (postData) postData += "&";
+			postData += encodeURIComponent(elt.name) + "=" + encodeURIComponent(elt.value);
+		}
+
+		HRST.util.sendRequest((form.getAttribute && form.getAttribute("jsonAction")) || form.action, callback, postData);
+	},
+
+	evalJson: function() {
+		// Note that we use a different regexp from RFC 4627 --
+		// the only variables available now to malicious JSON are those made up of the characters "e" and "E".
+		// EEEEEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEeEEEEEEEEEE
+		var re1 = /"(\\.|[^"\\])*"|true|false|null/g;
+		var re2 = /[^,:{}\[\]0-9.\-+Ee \n\r\t]/;
+		return function(testString) {
+			return ! re2.test(testString.replace(re1, " "))  &&  eval("(" + testString + ")");
+		};
+	}(),
+
+	getJsonData: function(url, callback, postData) {
+		HRST.util.sendRequest(url, function(xhr) {
+			var obj = HRST.util.evalJson(xhr.responseText);
+			if (obj  &&  obj.error) alert("utilsUI:getJsonData returned error: '" + obj.error + "'");
+			if (callback) callback(obj);
+		}, postData);
+	}
+
+		} //end util
+	};
+
 		</script>
-		<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
-		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
+		<!-- script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
+		<script type="text/javascript" src="../../common/js/utilsUI.js"></script -->
 		<script type="text/javascript" src="../../viewers/map/showMap.js"></script>
-
-		<script type="text/javascript">
-
-// http://heuristscholar.org/h3-ao/viewers/map/showMap.html?ver=1&w=all&q=ids:145255&stype=&db=sandpit5
-// http://heuristscholar.org/h3-ao/viewers/map/showGMapWithTimeline.html?ver=1&w=all&q=ids:97024&stype=&db=sandpit5
-// http://heuristscholar.org/h3-ao/viewers/map/showMap.html?ver=1&w=all&q=ids:97024&stype=&db=sandpit5
-// http://heuristscholar.org/h3-ao/viewers/map/showMap.html?ver=1&w=all&q=ids:97024,94594,69612,70316,123167&stype=&db=sandpit5
-/*
-			if(!top.HEURIST) { top.HEURIST = {}; }
-
-			var _url = location.pathname.replace(/\/[^\/]*$/,"/")+'getMapDataFromQuery.php'+location.search;
-
-			//top.HEURIST.loadScript(_url, true);
-			Hul.loadScript2(this.document, _url);
-*/
-		</script>
 
 		<div id="mapcontainer">
 				<div id="map" class="full"></div>

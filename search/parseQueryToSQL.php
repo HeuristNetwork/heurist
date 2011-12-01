@@ -1196,6 +1196,33 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 			$query .= $matches[1] . $where_clause . $matches[2];
 	}
 
+	if(array_key_exists("l",$parms) || array_key_exists("limit",$parms)){
+
+		if (array_key_exists("l", $parms)) {
+			$limit = intval(@$args["l"]);
+			unset($parms["l"]);
+		}else if(array_key_exists("limit", $parms)) {
+			$limit = intval(@$parms["limit"]);  // this is back in since hml.php passes through stuff from sitemap.xmap
+		}else{
+			$limit = 100;
+		}
+		if ($limit < 1 ) unset($limit);
+		if (@$limit){
+			$limit = min($limit, 500);
+		}else{
+			$limit = 100;
+		}
+
+		if (array_key_exists("o", $parms)) {
+			$offset = intval(@$parms["o"]);
+			unset($args["o"]);
+		}else if(array_key_exists("offset", $parms)) {
+			$offset = intval(@$parms["offset"]);  // this is back in since hml.php passes through stuff from sitemap.xmap
+		}
+
+		$query .=  (@$limit? " limit $limit" : "") . (@$offset? " offset $offset " : "");
+	}
+
 	error_log("request to query returns ".print_r($query,true));
 	return $query;
 }

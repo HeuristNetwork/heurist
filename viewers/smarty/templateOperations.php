@@ -110,13 +110,16 @@ function getList(){
 		//$ext = preg_replace('/^.*\.([^.]+)$/D', '$1', $filename);
 
 		$path_parts = pathinfo($filename);
-		$ext = strtolower($path_parts['extension']);
-//error_log(">>>>".$path_parts['filename']."    ".$filename.indexOf("_")."<<<<");
-		$ind = strpos($filename,"_");
-                $isnot_temp = (!(is_numeric($ind) && $ind==0));
-		if(file_exists($dir.$filename) && $ext=="tpl" && $isnot_temp)
+		if(array_key_exists('extension', $path_parts))
 		{
-			array_push($results, array( 'filename'=>$filename, 'name'=>$path_parts['filename'] ));
+			$ext = strtolower($path_parts['extension']);
+	//error_log(">>>>".$path_parts['filename']."    ".$filename.indexOf("_")."<<<<");
+			$ind = strpos($filename,"_");
+	                $isnot_temp = (!(is_numeric($ind) && $ind==0));
+			if(file_exists($dir.$filename) && $ext=="tpl" && $isnot_temp)
+			{
+				array_push($results, array( 'filename'=>$filename, 'name'=>$path_parts['filename'] ));
+			}
 		}
 	}
 	header("Content-type: text/javascript");

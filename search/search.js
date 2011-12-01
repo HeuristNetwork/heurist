@@ -48,6 +48,7 @@ String.prototype.htmlEscape = function() {
 top.HEURIST.search = {
 	VERSION: "1",
 
+	currentMapSearch:null,
 	pageLimit: 1000,
 	resultsPerPage: top.HEURIST.displayPreferences["results-per-page"],
 	currentPage: 0,
@@ -1365,7 +1366,10 @@ top.HEURIST.search = {
 		}
 
 		top.HEURIST.search.currentPage = pageNumber;
-		top.HEURIST.search.deselectAll();
+		top.HEURIST.search.deselectAll(false);
+
+		var mapFrame3 = document.getElementById("map-frame3");
+		var smartyFrame = document.getElementById("smarty-frame");
 
 		// Check if we've already loaded the given page ...
 		var firstOnPage = pageNumber*resultsPerPage;
@@ -1381,6 +1385,12 @@ top.HEURIST.search = {
 				top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-pagechange", "pageNum=" + (pageNumber +1));
 			}
 			top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange");
+
+			top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap,"heurist-recordset-loaded");
+			top.HEURIST.fireEvent(smartyFrame.contentWindow.showReps,"heurist-recordset-loaded");
+		}else{
+			top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap,"heurist-selectionchange");
+			top.HEURIST.fireEvent(smartyFrame.contentWindow.showReps,"heurist-selectionchange");
 		}
 		/*else {
 			// Have to wait for the data to load
@@ -2040,7 +2050,14 @@ top.HEURIST.search = {
 			var p = top.HEURIST.parameters;
 			var query_string = 'ver='+(p['ver'] || "") +
 									'&w='+(p['w'] || "") +
-									'&stype='+(p['stype'] || "") + '&db='+(p['db'] || "");
+									'&stype='+(p['stype'] || "") +
+									'&db='+(p['db'] || "") +
+									'&limit='+top.HEURIST.search.resultsPerPage;
+
+			if(top.HEURIST.search.currentPage>0){
+				query_string = query_string + '&offset=' +
+					top.HEURIST.search.currentPage*top.HEURIST.search.resultsPerPage;
+			}
 
 			var mapframe = document.getElementById("map-frame3");
 			if(mapframe.src){ //do not reload map frame
@@ -2058,11 +2075,16 @@ top.HEURIST.search = {
 					var query_string_sel = query_string + '&q=ids:' + recIDs.join(",");
 
 					showMap.reload(query_string_all, encodeURI(query_string_sel));
+
+			 		top.HEURIST.search.currentMapSearch = (showMap.isUseAllRecords) ?query_string_all :query_string_sel;
 				}
 			}else{
 				//by default use all records
 				query_string = query_string + '&q=' + window.HEURIST.parameters["q"];
 			 	url = top.HEURIST.basePath+ "viewers/map/showMap.html?"+query_string;
+
+			 	top.HEURIST.search.currentMapSearch = query_string;
+
 				mapframe.src = url;
 			}
 	},
@@ -2082,7 +2104,14 @@ top.HEURIST.search = {
 			var p = top.HEURIST.parameters;
 			var query_string = 'ver='+(p['ver'] || "") +
 						'&w='+(p['w'] || "") +
-						'&stype='+(p['stype'] || "") + '&db='+(p['db'] || "");
+						'&stype='+(p['stype'] || "") +
+						'&db='+(p['db'] || "") +
+						'&limit='+top.HEURIST.search.resultsPerPage;
+
+			if(top.HEURIST.search.currentPage>0){
+				query_string = query_string + '&offset=' +
+					top.HEURIST.search.currentPage*top.HEURIST.search.resultsPerPage;
+			}
 
 			var repframe = document.getElementById("smarty-frame");
 			if(repframe.src){ //do not reload  frame
@@ -2093,7 +2122,7 @@ top.HEURIST.search = {
 					var query_string_all = (queryp) ?encodeURI(query_string + '&q=' + queryp) :null;
 
 					var recIDs = top.HEURIST.search.getSelectedRecIDs().get();
-					if (recIDs.length >= 500) {// maximum number of records ids 500
+					if (recIDs.length >= 500) {// maximum number of records ids 500 - it should never happen since max per page is 500
 						//alert("Selected record count is great than 500, reporting the first 500 records!");
 						recIDs = recIDs.slice(0,500);
 					}
@@ -2231,7 +2260,7 @@ top.HEURIST.search = {
 		top.HEURIST.util.sendCoverallToBack();
 	},
 
-	deselectAll: function() {
+	deselectAll: function(fireEvent) {
 //		_tabView.set('activeIndex', 0); //set printView tab before deselecting to avoid mapping error
 		if (!top.HEURIST.search.selectedRecordIds || top.HEURIST.search.selectedRecordIds.length == 0) return false;
 		var level = 0;
@@ -2243,8 +2272,6 @@ top.HEURIST.search = {
 		}
 		var viewerFrame = document.getElementById("viewer-frame");
 //		var mapFrame = document.getElementById("map-frame");
-		var mapFrame3 = document.getElementById("map-frame3");
-		var smartyFrame = document.getElementById("smarty-frame");
 
 //		mapFrame.src = "";
 		smartyFrame.src = "";
@@ -2253,8 +2280,15 @@ top.HEURIST.search = {
 		recordFrame.src = top.HEURIST.basePath+"common/html/msgNoRecordsSelected.html";
 		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", "selectedIds=");
 //		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange", "selectedIds=");
-		top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap, "heurist-selectionchange", "selectedIds=");
-		top.HEURIST.fireEvent(smartyFrame.contentWindow.showReps, "heurist-selectionchange", "selectedIds=");
+
+		if(fireEvent){
+			var mapFrame3 = document.getElementById("map-frame3");
+			var smartyFrame = document.getElementById("smarty-frame");
+			//smartyFrame.src = ""; //???
+
+			top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap, "heurist-selectionchange", "selectedIds=");
+			top.HEURIST.fireEvent(smartyFrame.contentWindow.showReps, "heurist-selectionchange", "selectedIds=");
+		}
 
 		return;
 	},
@@ -2558,7 +2592,7 @@ top.HEURIST.search = {
 		top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/manageCollection.php", top.HEURIST.search.addRemoveCollectionCB, "fetch=1&add=" + recIDs_list.join(",") +
 				("&db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
 						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : ""))));
-		top.HEURIST.search.deselectAll();
+		top.HEURIST.search.deselectAll(true);
 		document.getElementById("collection-label").className += "show-changed";
 		top.HEURIST.search.showCollectionChange(true);
 	},

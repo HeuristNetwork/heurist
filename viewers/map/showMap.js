@@ -14,7 +14,7 @@
 **/
 
 //aliases
-var Hul = top.HEURIST.util,
+var Hul = HRST.util,
 Event = YAHOO.util.Event;
 
 /**
@@ -117,13 +117,13 @@ function ShowMap() {
 
 					shape = {polygon:shape};
 				}else if(geoobj.type === "kmlfile"){
-					var url1 = top.HEURIST.basePath;
-					url1 += "records/files/downloadFile.php?db=" + top.HEURIST.database.name + "&ulf_ID="+geoobj.fileid;
+					var url1 = HRST.basePath;
+					url1 += "records/files/downloadFile.php?db=" + HRST.database.name + "&ulf_ID="+geoobj.fileid;
 					kmls.push(url1);
 
 				}else if(geoobj.type === "kml"){ //kml content is stored as field value
-					var url2 = top.HEURIST.basePath;
-					url2 += "viewers/map/getKMLfromRecord.php?db=" + top.HEURIST.database.name + "&recID="+geoobj.recid;
+					var url2 = HRST.basePath;
+					url2 += "viewers/map/getKMLfromRecord.php?db=" + HRST.database.name + "&recID="+geoobj.recid;
 					kmls.push(url2);
 				}else if(geoobj.type === "none"){
 					isempty = true;
@@ -288,7 +288,7 @@ function ShowMap() {
 			if ( (!_isUseAllRecords && eventType == "heurist-selectionchange")
 						 || eventType == "heurist-recordset-loaded")
 			{
-				top.HEURIST.search.mapSelected3();
+				HRST.search.mapSelected3();
 			}
 		}
 	}
@@ -337,8 +337,11 @@ function ShowMap() {
 	*/
 	function _init() {
 
-
-		_isUseAllRecords = (top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]==0);
+		if(HRST.search){
+			_isUseAllRecords = (HRST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]==0);
+		}else{
+			_isUseAllRecords = true;
+		}
 
 		setLayout(true, true);
 		/*
@@ -351,20 +354,20 @@ function ShowMap() {
 		var _squery_all = location.search;
 		_reload(_squery_all, null);
 
-		if (top.HEURIST) {
-			top.HEURIST.registerEvent(that,"heurist-selectionchange", _onSelectionChange);
-			top.HEURIST.registerEvent(that,"heurist-recordset-loaded", _onSelectionChange);
+		if (HRST.search) {
+			HRST.registerEvent(that,"heurist-selectionchange", _onSelectionChange);
+			HRST.registerEvent(that,"heurist-recordset-loaded", _onSelectionChange);
 		}
 	}
 	function _reload(_squery_all, _squery_sel) {
 		squery_all = _squery_all;
 		squery_sel = _squery_sel;
 
-		var baseurl = top.HEURIST.basePath + "viewers/map/showMap.php";
+		var baseurl = HRST.basePath + "viewers/map/showMap.php";
 		var callback = _updateMap;
 		var params =  (_isUseAllRecords) ?_squery_all :_squery_sel;
 		if(params!=null){
-			top.HEURIST.util.getJsonData(baseurl, callback, params);
+			HRST.util.getJsonData(baseurl, callback, params);
 		}
 	}
 
@@ -377,7 +380,7 @@ function ShowMap() {
 		},
 
 		baseURL:  function (){
-			return top.HEURIST.basePath;
+			return HRST.basePath;
 		},
 
 		isUseAllRecords: function(){
@@ -390,8 +393,10 @@ function ShowMap() {
 			if (isChanged && _isUseAllRecords) {
 				_reload(squery_all, squery_sel);
 			}
-			top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"] = _isUseAllRecords?0:1;
-			top.HEURIST.util.setDisplayPreference("showSelectedOnlyOnMapAndSmarty", _isUseAllRecords?0:1);
+			if(HRST.displayPreferences){
+				HRST.displayPreferences["showSelectedOnlyOnMapAndSmarty"] = _isUseAllRecords?0:1;
+				HRST.util.setDisplayPreference("showSelectedOnlyOnMapAndSmarty", _isUseAllRecords?0:1);
+			}
 		},
 
 		getClass: function () {

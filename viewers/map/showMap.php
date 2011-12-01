@@ -27,7 +27,7 @@
 
 	header("Content-type: text/javascript");
 
-	$imagelayerRT = (defined('RT_IMAGELAYER')?RT_IMAGELAYER:0);
+	$imagelayerRT = (defined('RT_IMAGE_LAYER')?RT_IMAGE_LAYER:0);
 
 	mysql_connection_db_select(DATABASE);
 
@@ -35,15 +35,19 @@
 	construct_legacy_search();      // migration path
 
 	if ($_REQUEST['w'] == 'B'  ||  $_REQUEST['w'] == 'bookmark')
-	$search_type = BOOKMARK;	// my bookmarks
+		$search_type = BOOKMARK;	// my bookmarks
 	else
-	$search_type = BOTH;	// all records
+		$search_type = BOTH;	// all records
+
+	if( !array_key_exists("limit", $_REQUEST) ){ //not defined
+		$_REQUEST["limit"] = "500"; //force offset and limit (max 500)
+	}
 
 	// find all matching records
 	$cols = "rec_ID as bibID, rec_RecTypeID as rectype, rec_Title as title, rec_URL as URL";
 	$query = REQUEST_to_query("select $cols ", $search_type);
 
-	//error_log(">>>>>>>>>>>>>>>>>>>>>>>".$query);
+//error_log(">>>>>>>>>>>>>>>>>>>>>>>".$query);
 	$res = mysql_query($query);
 	if (mysql_error()) {
 		print mysql_error();
@@ -143,7 +147,7 @@
 		}
 	}//for
 
-	if($bibIDs)
+	if($bibIDs && count($bibIDs)>0)
 	{
 	// Find the records that actually have any geographic data to plot
 	$res = mysql_query("select dtl_RecID, dtl_Value, astext(dtl_Geo), astext(envelope(dtl_Geo)) from recDetails where dtl_Geo is not null and dtl_RecID in (" . join(",", $bibIDs) . ")");
@@ -233,12 +237,16 @@ if(mysql_error()) {
 */
 	//some records may contain reference to map image layer record (dettype 588),
 	// but we may have such records in search result as well rectype=$imagelayerRT
-	$res = mysql_query("select rec_ID  from Records
-						 where rec_ID in (" . join(",", $bibIDs) . ") and rec_RecTypeID=$imagelayerRT");
-	if($res){
-		while ($val = mysql_fetch_row($res)) {
-			array_push($imageLayers, $val[0]);
-			$geoBibIDs[$val[0]] = $val[0];
+	if($bibIDs && count($bibIDs)>0){
+		$squery = "select rec_ID  from Records
+							 where rec_ID in (" . join(",", $bibIDs) . ") and rec_RecTypeID=$imagelayerRT";
+//error_log($squery);
+		$res = mysql_query($squery);
+		if($res){
+			while ($val = mysql_fetch_row($res)) {
+				array_push($imageLayers, $val[0]);
+				$geoBibIDs[$val[0]] = $val[0];
+			}
 		}
 	}
 
@@ -247,21 +255,23 @@ if(mysql_error()) {
 	//find image layers
 	if(count($imageLayers)>0){
 
-		$res = mysql_query("select rec_ID, a.dtl_Value as title,
-		(select trm_Label from defTerms where trm_ID=b.dtl_Value) as type,
-		c.dtl_Value as url,
-		(select trm_Label from defTerms where trm_ID=d.dtl_Value) as mime_type,
-		e.dtl_Value as min_zoom, f.dtl_Value as max_zoom, g.dtl_Value as copyright
-		from Records
-		left join recDetails a on a.dtl_RecID=rec_ID and a.dtl_DetailTypeID=".(defined('DT_TITLE_SHORT')?DT_TITLE_SHORT:"0").
+		$squery = "select rec_ID, a.dtl_Value as title,".
+		" (select trm_Label from defTerms where trm_ID=b.dtl_Value) as type,".
+		" c.dtl_Value as url,".
+		" (select trm_Label from defTerms where trm_ID=d.dtl_Value) as mime_type,".
+		" e.dtl_Value as min_zoom, f.dtl_Value as max_zoom, g.dtl_Value as copyright".
+		" from Records".
+		" left join recDetails a on a.dtl_RecID=rec_ID and a.dtl_DetailTypeID=".(defined('DT_TITLE_SHORT')?DT_TITLE_SHORT:"0").
 		" left join recDetails b on b.dtl_RecID=rec_ID and b.dtl_DetailTypeID=".(defined('DT_MAP_IMAGE_LAYER_SCHEMA')?DT_MAP_IMAGE_LAYER_SCHEMA:"0").
 		" left join recDetails c on c.dtl_RecID=rec_ID and c.dtl_DetailTypeID=".(defined('DT_SERVICE_URL')?DT_SERVICE_URL:"0").
 		" left join recDetails d on d.dtl_RecID=rec_ID and d.dtl_DetailTypeID=".(defined('DT_MIME_TYPE')?DT_MIME_TYPE:"0").
 		" left join recDetails e on e.dtl_RecID=rec_ID and e.dtl_DetailTypeID=".(defined('DT_MINMUM_ZOOM_LEVEL')?DT_MINMUM_ZOOM_LEVEL:"0").
 		" left join recDetails f on f.dtl_RecID=rec_ID and f.dtl_DetailTypeID=".(defined('DT_MAXIMUM_ZOOM_LEVEL')?DT_MAXIMUM_ZOOM_LEVEL:"0").
-		" left join recDetails g on g.dtl_RecID=rec_ID and g.dtl_DetailTypeID=".(defined('DT_ALTERNATE_NAME')?DT_ALTERNATE_NAME:"0").
-		" where rec_ID in (" . join(",", $imageLayers) . ")");
-
+		" left join recDetails g on g.dtl_RecID=rec_ID and g.dtl_DetailTypeID=".(defined('DT_ALTERNATE_NAME')?DT_ALTERNATE_NAME:"0").    //change to DT_COPYRIGHT (#311 in sandpit5)
+		" where rec_ID in (" . join(",", $imageLayers) . ")";
+//error_log($squery);
+		$res = mysql_query($squery);
+//error_log(mysql_error());
 		while ($rec = mysql_fetch_assoc($res)) {
 			array_push($layers, $rec);
 		}
@@ -338,7 +348,7 @@ if(mysql_error()) {
 	// check for specific details first
 	//saw TODO; modify this for handle durations with a start or end date
 	$timeObjects = array();
-	if (defined('DT_START_DATE') && defined('DT_END_DATE')) {
+	if (defined('DT_START_DATE') && defined('DT_END_DATE') && $bibIDs && count($bibIDs)>0){
 
 		$squery = "select START.dtl_RecID, START.dtl_Value, END.dtl_Value ".
 							"from recDetails START left join recDetails END on START.dtl_RecID=END.dtl_RecID ".
@@ -433,6 +443,7 @@ if(mysql_error()) {
 	$geoRecords = array();
 	$cnt_geo = 0;
 	$cnt_time = 0;
+
 	//foreach ($geoBibIDs as $bibID) {
 	foreach ($bibIDs as $bibID) { //loop for all records
 		//	$bibID = ""+$bibID;
