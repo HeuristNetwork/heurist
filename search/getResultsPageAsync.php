@@ -23,6 +23,7 @@ if (array_key_exists('alt', $_REQUEST)) define('use_alt_db', 1);
 require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/parseQueryToSQL.php');
+require_once(dirname(__FILE__).'/../records/files/uploadFile.php');
 
 
 list($usec, $sec) = explode(' ', microtime());
@@ -227,78 +228,20 @@ $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['last-search-url'] = @$_SERVER['H
 
 function print_result($row) {
 	global $num;
-	// file uploaded details
-	$assocDT = (defined('DT_ASSOCIATED_FILE')?DT_ASSOCIATED_FILE:0);
-	$logoDT = (defined('DT_LOGO_IMAGE')?DT_LOGO_IMAGE:0);
-	$thumbDT = (defined('DT_THUMBNAIL')?DT_THUMBNAIL:0);
-	$imgDT = (defined('DT_IMAGES')?DT_IMAGES:0); //deprecated
-	$otherDT = (defined('DT_OTHER_FILE')?DT_OTHER_FILE:0);
-	//url details
-	$thumbUrlDT = (defined('DT_THUMB_IMAGE_URL')?DT_THUMB_IMAGE_URL:0); //deprecated
-	$fullUrlDT = (defined('DT_FULL_IMAG_URL')?DT_FULL_IMAG_URL:0); //deprecated
-	$webIconDT = (defined('DT_WEBSITE_ICON')?DT_WEBSITE_ICON:0);
+
 	print "	[";
 	foreach ($row as $i => $val) {
 		if ($i > 0) print ',';
 		print "'".str_replace("\n", '\\n', str_replace("\r", '', addslashes($val)))."'";
 	}
-	$thumb_url = "";
-	// 223  Thumbnail
-	// 222  Logo image
-	// 224  Images
-	//check file type details for a something to represent this record as an icon
-	if ( $thumbDT || $logoDT || $imgDT || $assocDT || $otherDT) {
-		$squery = "select recUploadedFiles.*".
-					" from recDetails".
-						" left join recUploadedFiles on ulf_ID = dtl_UploadedFileID".
-						" left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt".
-					" where dtl_RecID = " . $row[2] .
-						" and dtl_DetailTypeID in ($thumbDT,$logoDT,$imgDT,$assocDT,$otherDT)".	// no dty_ID of zero so undefined are ignored
-						" and fxm_MimeType like 'image%'".
-					" order by".
-		($thumbDT?		" dtl_DetailTypeID = $thumbDT desc,"	:"").
-		($logoDT?		" dtl_DetailTypeID = $logoDT desc,"		:"").
-		($imgDT?		" dtl_DetailTypeID = $imgDT desc,"		:"").
-						" dtl_DetailTypeID".	// no preference on associated or other files just select the first
-						" limit 1";
-//error_log(">>>>>>>>>>>>>>>>>>>>>>>".$squery);
-		$res = mysql_query($squery);
 
-		if ($res && mysql_num_rows($res) == 1) {
-			$file = mysql_fetch_assoc($res);
-			$thumb_url = "../common/php/resizeImage.php?ulf_ID=".$file['ulf_ObfuscatedFileID'];
-		}
-	}
-	//check freetext (url) type details for a something to represent this record as an icon
-	if( $thumb_url == "" && ($thumbUrlDT || $fullUrlDT || $webIconDT)) {
-		$squery = "select dtl_Value".
-					" from recDetails".
-					" where dtl_RecID = " . $row[2] .
-						" and dtl_DetailTypeID in ($thumbUrlDT,$fullUrlDT,$webIconDT)".	// no dty_ID of zero so undefined are ignored
-					" order by".
-		($thumbUrlDT?	" dtl_DetailTypeID = $thumbUrlDT desc,"		:"").
-		($fullUrlDT?	" dtl_DetailTypeID = $fullUrlDT desc,"		:"").
-						" dtl_DetailTypeID".	// anythingelse is last
-					" limit 1";
+	$thumb_url = getThumbnailURL($row[2]);
 
-//error_log("2.>>>>>>>>>>>>>>>>>>>>>>>".$squery);
-		$res = mysql_query($squery);
-
-		if ($res && mysql_num_rows($res) == 1) {
-			$dRow = mysql_fetch_assoc($res);
-			if ( $fullUrlDT &&  $dRow['dtl_DetailTypeID'] == $fullUrlDT) {
-			$thumb_url = "../common/php/resizeImage.php?file_url=".htmlspecialchars($dRow['dtl_Value']);
-			}else{
-				$thumb_url = "".htmlspecialchars(addslashes($row['dtl_Value']));
-			}
-		}
-	}
 	print ",'$thumb_url'";
 	print "]";
 
 	++$num;
 }
-
 
 function rss_url() {
 	return HEURIST_URL_BASE.'export/feeds/searchRSS.php?s='.@$_REQUEST['s'].'&w='.@$_REQUEST['w'].'&q='.urlencode(@$_REQUEST['q']);

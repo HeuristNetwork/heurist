@@ -404,6 +404,18 @@ ether_zoom = function(_band, ether, zoomIn) {
 //				     mapZoom: 13,
 // 					 mapCenter: myLatlng,
 
+			var rectypeImg = "style='background-image:url(" + top.HEURIST.iconBaseURL + "{{rectype}}.png)'";
+
+			var template = "<div>"+
+			//"<div style='display:inline-block;background-image:url({{thumb}})'></div>"+
+			"<div style='display:inline-block;'>"+
+			"<img src='"+top.HEURIST.basePath+"common/images/10x10.gif' width='100' style='display:inline-block;background-image:url({{thumb}})'>"+
+			"</div>"+
+			"<div style='display:inline-block;text-align:left;padding-left:3px;'><b>{{title}}</b><br/><div style='max-width:300px;'>{{description}}</div>"+
+					"<img src='"+top.HEURIST.basePath+"common/images/16x16.gif' "+rectypeImg+" class='rft'>"+
+			"<div></div>";
+
+
 			M.tmap = TimeMap.init({
 				mapId: "map", // Id of map div element (required)
 				timelineId: "timeline", // Id of timeline div element (required)
@@ -411,6 +423,7 @@ ether_zoom = function(_band, ether, zoomIn) {
 				options: {
 					mapZoom: 2,
 					onlyTimeline: (M.mapdata.count_mapobjects<1),
+					infoTemplate: template,
 					/*
 					mapZoom: 1, //default zoom
 					centerMapOnItems: bounds ? false : true,
@@ -422,6 +435,7 @@ ether_zoom = function(_band, ether, zoomIn) {
 					eventIconPath: RelBrowser.baseURL + "timemap.2.0/images/",
 					//!!! theme: TimeMapTheme.create("blue", { eventIconPath: RelBrowser.baseURL + "timemap.2.0/images/" }),
 					openInfoWindow: mini ? function () { return false; } : RelBrowser.Mapping.openInfoWindowHandler
+					openInfoWindow: RelBrowser.Mapping.openInfoWindowHandler,
 					*/
 					eventIconPath: RelBrowser.baseURL + "external/timemap.2.0/images/"
 				},

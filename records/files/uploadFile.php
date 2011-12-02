@@ -187,7 +187,7 @@ function register_file($fullname, $description, $needConnect) {
 	    }
 
 	    $file_id = mysql_insert_id();
-	    
+
 	    mysql_query('update recUploadedFiles set ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
 
 	    return $file_id;
@@ -268,4 +268,79 @@ function get_uploaded_file_info($fileID, $isnamedarray, $needConnect)
 	return $res;
 
 }
+
+/**
+* returns thumbail url or empty string
+*
+* used in getResultsPageAsync.php and showMap.php
+*
+* @param mixed $recordId
+*/
+function getThumbnailURL($recordId){
+
+	$assocDT = (defined('DT_ASSOCIATED_FILE')?DT_ASSOCIATED_FILE:0);
+	$logoDT = (defined('DT_LOGO_IMAGE')?DT_LOGO_IMAGE:0);
+	$thumbDT = (defined('DT_THUMBNAIL')?DT_THUMBNAIL:0);
+	$imgDT = (defined('DT_IMAGES')?DT_IMAGES:0); //deprecated
+	$otherDT = (defined('DT_OTHER_FILE')?DT_OTHER_FILE:0);
+	//url details
+	$thumbUrlDT = (defined('DT_THUMB_IMAGE_URL')?DT_THUMB_IMAGE_URL:0); //deprecated
+	$fullUrlDT = (defined('DT_FULL_IMAG_URL')?DT_FULL_IMAG_URL:0); //deprecated
+	$webIconDT = (defined('DT_WEBSITE_ICON')?DT_WEBSITE_ICON:0);
+
+	$thumb_url = "";
+	// 223  Thumbnail
+	// 222  Logo image
+	// 224  Images
+	//check file type details for a something to represent this record as an icon
+	if ( $thumbDT || $logoDT || $imgDT || $assocDT || $otherDT) {
+		$squery = "select recUploadedFiles.*".
+					" from recDetails".
+						" left join recUploadedFiles on ulf_ID = dtl_UploadedFileID".
+						" left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt".
+					" where dtl_RecID = $recordId" .
+						" and dtl_DetailTypeID in ($thumbDT,$logoDT,$imgDT,$assocDT,$otherDT)".	// no dty_ID of zero so undefined are ignored
+						" and fxm_MimeType like 'image%'".
+					" order by".
+		($thumbDT?		" dtl_DetailTypeID = $thumbDT desc,"	:"").
+		($logoDT?		" dtl_DetailTypeID = $logoDT desc,"		:"").
+		($imgDT?		" dtl_DetailTypeID = $imgDT desc,"		:"").
+						" dtl_DetailTypeID".	// no preference on associated or other files just select the first
+						" limit 1";
+//error_log(">>>>>>>>>>>>>>>>>>>>>>>".$squery);
+		$res = mysql_query($squery);
+
+		if ($res && mysql_num_rows($res) == 1) {
+			$file = mysql_fetch_assoc($res);
+			$thumb_url = HEURIST_BASE_URL."common/php/resizeImage.php?ulf_ID=".$file['ulf_ObfuscatedFileID'];
+		}
+	}
+	//check freetext (url) type details for a something to represent this record as an icon
+	if( $thumb_url == "" && ($thumbUrlDT || $fullUrlDT || $webIconDT)) {
+		$squery = "select dtl_Value".
+					" from recDetails".
+					" where dtl_RecID = $recordId" .
+						" and dtl_DetailTypeID in ($thumbUrlDT,$fullUrlDT,$webIconDT)".	// no dty_ID of zero so undefined are ignored
+					" order by".
+		($thumbUrlDT?	" dtl_DetailTypeID = $thumbUrlDT desc,"		:"").
+		($fullUrlDT?	" dtl_DetailTypeID = $fullUrlDT desc,"		:"").
+						" dtl_DetailTypeID".	// anythingelse is last
+					" limit 1";
+
+//error_log("2.>>>>>>>>>>>>>>>>>>>>>>>".$squery);
+		$res = mysql_query($squery);
+
+		if ($res && mysql_num_rows($res) == 1) {
+			$dRow = mysql_fetch_assoc($res);
+			if ( $fullUrlDT &&  $dRow['dtl_DetailTypeID'] == $fullUrlDT) {
+				$thumb_url = HEURIST_BASE_URL."common/php/resizeImage.php?file_url=".htmlspecialchars($dRow['dtl_Value']);
+			}else{
+				$thumb_url = "".htmlspecialchars(addslashes($row['dtl_Value']));
+			}
+		}
+	}
+
+	return $thumb_url;
+}
+
 ?>

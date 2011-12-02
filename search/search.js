@@ -48,7 +48,7 @@ String.prototype.htmlEscape = function() {
 top.HEURIST.search = {
 	VERSION: "1",
 
-	currentMapSearch:null,
+	currentSearchQuery:null,
 	pageLimit: 1000,
 	resultsPerPage: top.HEURIST.displayPreferences["results-per-page"],
 	currentPage: 0,
@@ -72,6 +72,7 @@ top.HEURIST.search = {
 	submitSearchForm: function() {
 //		top.HEURIST.search.checkSearchForm();
 //		document.forms[0].submit();
+		top.HEURIST.search.currentPage = 0;
 		top.HEURIST.search.clearResultRows();
 		top.HEURIST.search.clearRelatesRows();
 		top.HEURIST.search.reloadSearch();
@@ -94,6 +95,7 @@ top.HEURIST.search = {
 
 		if (top.HEURIST.search.results.totalQueryResultRecordCount == 0) {
 			top.HEURIST.registerEvent(window, "load", function(){
+						top.HEURIST.search.currentPage = 0;
 						top.HEURIST.search.clearResultRows();
 						top.HEURIST.search.clearRelatesRows();
 						top.HEURIST.search.renderNavigation();
@@ -130,24 +132,16 @@ top.HEURIST.search = {
 			// should have some sort of "searchready" event -- FIXME as part of holistic event-based solution
 			var lastIndex = Math.min(startIndex + top.HEURIST.search.resultsPerPage, top.HEURIST.search.results.totalQueryResultRecordCount);
 			top.HEURIST.registerEvent(window, "contentloaded", function() {
+				top.HEURIST.search.currentPage = 0;
 				top.HEURIST.search.renderSearchResults(startIndex, lastIndex-1);
 				top.HEURIST.search.renderNavigation();
+				top.HEURIST.search.updateMapOrSmarty();
 			});
 			top.HEURIST.registerEvent(window, "load", function() {
 				document.getElementById("viewer-frame").src = top.HEURIST.basePath+ "viewers/printview/index.html" +
 					(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
 			});
 		}
-
-		var mapFrame3 = document.getElementById("map-frame3");
-		var smartyFrame = document.getElementById("smarty-frame");
-		if (smartyFrame && smartyFrame.contentWindow.showReps) {
-			top.HEURIST.fireEvent(smartyFrame.contentWindow.showReps, "heurist-recordset-loaded");
-		}
-		if (mapFrame3 && mapFrame3.contentWindow.showMap) {
-			top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap, "heurist-recordset-loaded");
-		}
-
 
 		if (top.HEURIST.search.results.infoByDepth[0].count == top.HEURIST.search.results.totalQueryResultRecordCount){
 			top.HEURIST.search.loadRelatedResults();
@@ -1368,9 +1362,6 @@ top.HEURIST.search = {
 		top.HEURIST.search.currentPage = pageNumber;
 		top.HEURIST.search.deselectAll(false);
 
-		var mapFrame3 = document.getElementById("map-frame3");
-		var smartyFrame = document.getElementById("smarty-frame");
-
 		// Check if we've already loaded the given page ...
 		var firstOnPage = pageNumber*resultsPerPage;
 		var lastOnPage = Math.min((pageNumber+1)*resultsPerPage, results.totalQueryResultRecordCount)-1;
@@ -1386,12 +1377,8 @@ top.HEURIST.search = {
 			}
 			top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange");
 
-			top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap,"heurist-recordset-loaded");
-			top.HEURIST.fireEvent(smartyFrame.contentWindow.showReps,"heurist-recordset-loaded");
-		}else{
-			top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap,"heurist-selectionchange");
-			top.HEURIST.fireEvent(smartyFrame.contentWindow.showReps,"heurist-selectionchange");
 		}
+		top.HEURIST.search.updateMapOrSmarty();
 		/*else {
 			// Have to wait for the data to load
 			document.getElementById("results-level0").innerHTML = "";
@@ -1659,8 +1646,6 @@ top.HEURIST.search = {
             };
 		var viewerFrame = document.getElementById("viewer-frame");
 //		var mapFrame = document.getElementById("map-frame");
-		var mapFrame3 = document.getElementById("map-frame3");
-		var smartyFrame = document.getElementById("smarty-frame");
 
 //        var sidebysideFrame = document.getElementById("sidebyside-frame");
 //		sidebysideFrame.src = top.HEURIST.basePath+"viewers/sidebyside/sidebyside.html"+
@@ -1669,8 +1654,14 @@ top.HEURIST.search = {
 		var ssel = "selectedIds=" + selectedRecIDs.join(",");
         top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
 //		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);
+
+/*
+		var mapFrame3 = document.getElementById("map-frame3");
+		var smartyFrame = document.getElementById("smarty-frame");
 		top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap,"heurist-selectionchange",  ssel);
 		top.HEURIST.fireEvent(smartyFrame.contentWindow.showReps,"heurist-selectionchange",  ssel);
+*/
+		top.HEURIST.search.updateMapOrSmarty();
 
 		return false;
 
@@ -2043,8 +2034,87 @@ top.HEURIST.search = {
 		mapDiv.parentNode.removeChild(mapDiv);
 	},
 
+	lastParamQuery: null,
+	lastParamOther: null,
+
 	//ARTEM
 	//listener of selection in search result - to refelect on map tab
+	updateMapOrSmarty: function(){
+
+			var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));
+			if(!(currentTab==2 || currentTab==3)) return;
+
+			var p = top.HEURIST.parameters;
+
+			if(p["q"]){
+				lastParamOther = 'ver='+(p['ver'] || "") +
+									'&w='+(p['w'] || "") +
+									'&stype='+(p['stype'] || "") +
+									'&db='+(p['db'] || "");
+				lastParamQuery = p["q"];
+
+			}else if (lastParamQuery==null){
+				return;
+			}
+
+			var query_string = lastParamOther + '&limit='+top.HEURIST.search.resultsPerPage;
+
+			var query_string_all = query_string + '&q=' + lastParamQuery;
+			if(top.HEURIST.search.currentPage>0){
+				query_string_all = query_string_all + '&offset=' +
+					top.HEURIST.search.currentPage*top.HEURIST.search.resultsPerPage;
+			}
+			query_string_all = encodeURI(query_string_all);
+
+
+			var query_string_sel = null;
+			var recIDs = top.HEURIST.search.getSelectedRecIDs().get();
+			if(recIDs && recIDs.length>0){
+				query_string_sel = encodeURI(query_string + '&q=ids:' + recIDs.join(","));
+			}
+
+	 		top.HEURIST.search.currentSearchQuery =
+	 				(top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]==1)
+	 							?query_string_sel :query_string_all;
+
+			if(currentTab===2){ //map
+
+				var mapframe = document.getElementById("map-frame3");
+				if(mapframe.src){ //do not reload map frame
+					var showMap = mapframe.contentWindow.showMap;
+					if(showMap){
+						showMap.reload(query_string_all, query_string_sel);
+					}else{
+						//alert('shit1');
+					}
+				}else{
+					mapframe.src = top.HEURIST.basePath +
+									"viewers/map/showMap.html?" +
+					 				top.HEURIST.search.currentSearchQuery;
+				}
+
+			}else if (currentTab===3){ //smarty
+				var smartyFrame = document.getElementById("smarty-frame");
+
+				if(smartyFrame.src){ //do not reload map frame
+
+					var showReps = smartyFrame.contentWindow.showReps;
+					if(showReps){
+						showReps.setQuery( query_string_all, query_string_sel);
+						showReps.processTemplate();
+					}else{
+						//alert('shit2');
+					}
+
+				}else{
+					smartyFrame.src = top.HEURIST.basePath +
+									"viewers/smarty/showReps.html?" +
+					 				top.HEURIST.search.currentSearchQuery;
+				}
+			}
+	},
+
+	/*outdaated
 	mapSelected3: function() {
 
 			var p = top.HEURIST.parameters;
@@ -2087,7 +2157,7 @@ top.HEURIST.search = {
 
 				mapframe.src = url;
 			}
-	},
+	},*/
 
 
 	onMapUseAllRecords: function(event) {
@@ -2097,6 +2167,7 @@ top.HEURIST.search = {
 		}
 	},
 
+	/*outdaated
 	//ARTEM
 	//listener of selection in search result - to refelect on smarty tab
 	smartySelected: function() {
@@ -2141,7 +2212,7 @@ top.HEURIST.search = {
 			 	url = top.HEURIST.basePath+ "viewers/smarty/showReps.html?"+query_string;
 				repframe.src = url;
 			}
-	},
+	},*/
 
 	selectAll: function() {
 		$("div.recordDiv:not(.filtered,.selected).lnk").each(function(i,recDiv) {
@@ -2160,16 +2231,14 @@ top.HEURIST.search = {
 
 		var viewerFrame = document.getElementById("viewer-frame");
 //		var mapFrame = document.getElementById("map-frame");
-		var mapFrame3 = document.getElementById("map-frame3");
-		var smartyFrame = document.getElementById("smarty-frame");
 
 		var ssel = "selectedIds=" + top.HEURIST.search.getSelectedRecIDs().get().join(",");
 
 
 		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
 //		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);
-		top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap,"heurist-selectionchange",  ssel);
-		top.HEURIST.fireEvent(smartyFrame.contentWindow.showReps,"heurist-selectionchange",  ssel);
+
+		top.HEURIST.search.updateMapOrSmarty();
 
 		return false;
 	},
@@ -2185,15 +2254,14 @@ top.HEURIST.search = {
 		}
 		var viewerFrame = document.getElementById("viewer-frame");
 //		var mapFrame = document.getElementById("map-frame");
-		var mapFrame3 = document.getElementById("map-frame3");
-		var smartyFrame = document.getElementById("smarty-frame");
 
 		var ssel = "selectedIds=" + top.HEURIST.search.getSelectedRecIDs().get().join(",");
 
 		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
 //		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);
-		top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap,"heurist-selectionchange",  ssel);
-		top.HEURIST.fireEvent(smartyFrame.contentWindow.showReps,"heurist-selectionchange",  ssel);
+
+		top.HEURIST.search.updateMapOrSmarty();
+
 		return false;
 	},
 
@@ -2282,12 +2350,7 @@ top.HEURIST.search = {
 //		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange", "selectedIds=");
 
 		if(fireEvent){
-			var mapFrame3 = document.getElementById("map-frame3");
-			var smartyFrame = document.getElementById("smarty-frame");
-			//smartyFrame.src = ""; //???
-
-			top.HEURIST.fireEvent(mapFrame3.contentWindow.showMap, "heurist-selectionchange", "selectedIds=");
-			top.HEURIST.fireEvent(smartyFrame.contentWindow.showReps, "heurist-selectionchange", "selectedIds=");
+			top.HEURIST.search.updateMapOrSmarty();
 		}
 
 		return;
@@ -3171,35 +3234,44 @@ function removeCustomAlert() {
 
 	_tabView = new YAHOO.widget.TabView('applications', { activeIndex: viewerTabIndex });
 	//if (viewerTabIndex == 2){top.HEURIST.search.mapSelected()} //initialises map
+	/*
 	if (Number(viewerTabIndex) === 2){top.HEURIST.search.mapSelected3()} //initialises new map
 	else if (Number(viewerTabIndex) === 3){top.HEURIST.search.smartySelected()}; //initialises smarty repsystem
+	*/
 
 	var handleActiveTabChange = function(e) {
 		var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));
 		top.HEURIST.util.setDisplayPreference("viewerTab", currentTab);
 
-		if(currentTab===2){
+		if(currentTab===2){ //map
 			var cbsel = document.getElementById('cbMapUseAllRecords');
 			var isSelOnly = (top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]==1);
 			var wasChanged = cbsel.checked != isSelOnly;
 			cbsel.checked = isSelOnly;
-			if(wasChanged){
+
+			top.HEURIST.search.updateMapOrSmarty();
+			/*if(wasChanged){
 				var mapframe = document.getElementById("map-frame3");
 				mapframe.contentWindow.showMap.setUseAllRecords(!isSelOnly);
 				//top.HEURIST.search.onMapUseAllRecords(null);
-			}
-		}else if (currentTab===3){
-				var smartyFrame = document.getElementById("smarty-frame");
+			}*/
+		}else if (currentTab===3){ //smarty
+			var smartyFrame = document.getElementById("smarty-frame");
+			if(smartyFrame.src && smartyFrame.contentWindow.showReps){
 				smartyFrame.contentWindow.showReps.setUseAllRecords(
-						(top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]==0));
+						(top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]==0), false);
+			}
+			top.HEURIST.search.updateMapOrSmarty();
 		}
 
 	};
-	_tabView.addListener('activeTabChange',handleActiveTabChange);
+	_tabView.addListener('activeTabChange', handleActiveTabChange);
 	_tabView.getTab(viewerTabIndex);
 	//if (viewerTabIndex == 2){top.HEURIST.search.mapSelected()} //initialises map
+	/*
 	if (Number(viewerTabIndex) === 2){top.HEURIST.search.mapSelected3()} //initialises new map
 	else if (Number(viewerTabIndex) === 3){top.HEURIST.search.smartySelected()}; //initialises smarty reports
+	*/
 
 	_tabView.addListener('activeTabChange',handleActiveTabChange);
 

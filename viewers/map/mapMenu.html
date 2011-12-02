@@ -22,7 +22,7 @@
  <script>
 
    function build_links() {
-     if (top.HEURIST  && top.HEURIST.search && top.HEURIST.search.currentMapSearch)
+     if (top.HEURIST  && top.HEURIST.search && top.HEURIST.search.currentSearchQuery)
      {
 
 /*
@@ -46,7 +46,7 @@
      		query_string = encodeURI(query_string);
 */
 
-	 		var url = top.HEURIST.baseURL+"viewers/map/showMapS.html?" + top.HEURIST.search.currentMapSearch;
+	 		var url = top.HEURIST.baseURL+"viewers/map/showMapS.html?" + top.HEURIST.search.currentSearchQuery;
 
 			document.getElementById("linkTimeline").href = url;
 

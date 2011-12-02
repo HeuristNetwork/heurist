@@ -181,10 +181,10 @@ function ShowMap() {
 								options:{
 									description: record.description,
 									theme: "purple",
-									url: record.URL,
-									recid: record.bibID,
+									url: record.url,
+									recid: record.recID,
 									rectype: record.rectype,
-									thumb:  record.thumb_file_id
+									thumb: record.thumb_url
 								}
 							};
 
@@ -280,7 +280,7 @@ function ShowMap() {
 		initMapping(); //from mapping.js
 	}
 
-
+/* outdated - to remove
 	function _onSelectionChange(eventType, argList) {
 		if (parent.document.getElementById("m3").className == "yui-hidden") {
 			return false;
@@ -292,6 +292,7 @@ function ShowMap() {
 			}
 		}
 	}
+*/
 
 	var layout, _ismap, _istime;
 
@@ -354,10 +355,12 @@ function ShowMap() {
 		var _squery_all = location.search;
 		_reload(_squery_all, null);
 
+/* outdated - toremove
 		if (HRST.search) {
 			HRST.registerEvent(that,"heurist-selectionchange", _onSelectionChange);
 			HRST.registerEvent(that,"heurist-recordset-loaded", _onSelectionChange);
 		}
+*/
 	}
 	function _reload(_squery_all, _squery_sel) {
 		squery_all = _squery_all;

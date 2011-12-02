@@ -20,8 +20,9 @@
 
 	require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 	require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
+	require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
 
-	require_once(dirname(__FILE__)."/../../search/parseQueryToSQL.php");
+	require_once(dirname(__FILE__).'/../../records/files/uploadFile.php');
 
 	require_once("encodePolyline.php");
 
@@ -66,10 +67,10 @@
 		$records[$bibID] = $bib;
 		array_push($bibIDs, $bibID);
 
-	if($bib["rectype"]==$imagelayerRT){ //map image layer
-		array_push($imageLayers, $bibID);
-		$geoBibIDs[$bibID] = $bibID;
-	}
+		if($bib["rectype"]==$imagelayerRT){ //map image layer
+			array_push($imageLayers, $bibID);
+			$geoBibIDs[$bibID] = $bibID;
+		}
 	}
 
 	function getKmlFilePath($fileID){
@@ -93,55 +94,53 @@
 		//1 DT_EXTENDED_DESCRIPTION
 		//2 - record URL
 		//3 DT_ASSOCIATED_FILE
-		//4 DT_LOGO_IMAGE
-		//5 DT_THUMBNAIL
-		//6 DT_IMAGES
-		//7 DT_MAP_IMAGE_LAYER_REFERENCE
-		//8 DT_KML
-		//9 DT_KML_FILE
+		//REMOVED 4 DT_LOGO_IMAGE
+		//REMOVED 5 DT_THUMBNAIL
+		//REMOVED 6 DT_IMAGES
+		//4 7 DT_MAP_IMAGE_LAYER_REFERENCE
+		//5 8 DT_KML
+		//6 9 DT_KML_FILE
+		//7 10 record type
 
-		$res = mysql_query("select a.dtl_Value, b.dtl_Value, rec_URL, c.dtl_UploadedFileID,d.dtl_UploadedFileID,e.dtl_UploadedFileID,f.dtl_UploadedFileID, g.dtl_Value, h.dtl_Value, i.dtl_UploadedFileID
+//d.dtl_UploadedFileID,e.dtl_UploadedFileID,f.dtl_UploadedFileID,
+
+		$res = mysql_query("select a.dtl_Value, b.dtl_Value, rec_URL, c.dtl_UploadedFileID, g.dtl_Value, h.dtl_Value, i.dtl_UploadedFileID, rec_RecTypeID
 		from Records
 		left join recDetails a on a.dtl_RecID=rec_ID and a.dtl_DetailTypeID=".(defined('DT_SHORT_SUMMARY')?DT_SHORT_SUMMARY:"0").
 		" left join recDetails b on b.dtl_RecID=rec_ID and b.dtl_DetailTypeID=".(defined('DT_EXTENDED_DESCRIPTION')?DT_EXTENDED_DESCRIPTION:"0").
 		" left join recDetails c on c.dtl_RecID=rec_ID and c.dtl_DetailTypeID=".(defined('DT_ASSOCIATED_FILE')?DT_ASSOCIATED_FILE:"0").
-		" left join recDetails d on d.dtl_RecID=rec_ID and d.dtl_DetailTypeID=".(defined('DT_LOGO_IMAGE')?DT_LOGO_IMAGE:"0").
-		" left join recDetails e on e.dtl_RecID=rec_ID and e.dtl_DetailTypeID=".(defined('DT_THUMBNAIL')?DT_THUMBNAIL:"0").
-		" left join recDetails f on f.dtl_RecID=rec_ID and f.dtl_DetailTypeID=".(defined('DT_IMAGES')?DT_IMAGES:"0").
+//		" left join recDetails d on d.dtl_RecID=rec_ID and d.dtl_DetailTypeID=".(defined('DT_LOGO_IMAGE')?DT_LOGO_IMAGE:"0").
+//		" left join recDetails e on e.dtl_RecID=rec_ID and e.dtl_DetailTypeID=".(defined('DT_THUMBNAIL')?DT_THUMBNAIL:"0").
+//		" left join recDetails f on f.dtl_RecID=rec_ID and f.dtl_DetailTypeID=".(defined('DT_IMAGES')?DT_IMAGES:"0").
 		" left join recDetails g on g.dtl_RecID=rec_ID and g.dtl_DetailTypeID=".(defined('DT_MAP_IMAGE_LAYER_REFERENCE')?DT_MAP_IMAGE_LAYER_REFERENCE:"0").
 		" left join recDetails h on h.dtl_RecID=rec_ID and h.dtl_DetailTypeID=".(defined('DT_KML')?DT_KML:"0").
 		" left join recDetails i on i.dtl_RecID=rec_ID and i.dtl_DetailTypeID=".(defined('DT_KML_FILE')?DT_KML_FILE:"0").
 		" where rec_ID=$bibID");
 		$row = mysql_fetch_row($res);
-		$records[$bibID]["description"] = ($row[0] ? $row[0] : $row[1]);
+		$records[$bibID]["recID"] = $bibID;
+		$records[$bibID]["rectype"] = $row[7];
+		$records[$bibID]["description"] = ( $row[0] ?$row[0] :($row[1]?$row[1]:"") );
 		$records[$bibID]["url"] = ($row[2] ? $row[2] : '');
-		$records[$bibID]["thumb_file_id"] = "";
 
-		if($row[7] && is_numeric($row[7]) && ! in_array($row[7],$imageLayers)){
-			array_push($imageLayers, $row[7]);
+		$thumb_url = getThumbnailURL($bibID); //function fro getResultsPageSync.php
+		if($thumb_url==""){
+			$thumb_url = HEURIST_ICON_URL_BASE.	"thumb/th_".$row[7].".png";
 		}
 
-		$fileID = ($row[3] ? $row[3] : ($row[4] ? $row[4] : ($row[5] ? $row[5] : ($row[6] ? $row[6] : null))));
-		if ($fileID!=null) {/* search for thumbnail image */
-			$fres = mysql_query(
-			"select ulf_ObfuscatedFileID, ulf_MimeExt from recUploadedFiles where ulf_ID = ".intval($fileID));
-			if ($fres) {//saw TODO  change this so that it matches the thumb priority for a given record type and search each one for ext/type
-				$row2 = mysql_fetch_row($fres);
-				$ext = strtolower($row2[1]);
-				if($row2[0] && ($ext=="jpg" || $ext=="png" || $ext=="gif")){
-					$records[$bibID]["thumb_file_id"] = $row2[0];
-				}
-			}
+		$records[$bibID]["thumb_url"] = $thumb_url;
+
+		if($row[7] && is_numeric($row[4]) && ! in_array($row[7],$imageLayers)){
+			array_push($imageLayers, $row[4]);
 		}
 		$kml_path =  getKmlFilePath($row[3]); //DT_ASSOCIATED_FILE
 // removed by SAW as DT_KML_FILE changed from a file base type to blocktext
 //		if($kml_path==null){
-//			$kml_path =  getKmlFilePath($row[9]); //DT_KML_FILE
+//			$kml_path =  getKmlFilePath($row[6]); //DT_KML_FILE
 //			}
 		if($kml_path!=null){
 			array_push($geoObjects, array("bibID" => $bibID, "type" => "kmlfile", "fileid" => $kml_path));
 			$geoBibIDs[$bibID] = $bibID;
-		}else if ($row[8]) { //DT_KML dtl_value contains KML		saw TODO: modify to check that text is valid KML.
+		}else if ($row[5]) { //DT_KML dtl_value contains KML		saw TODO: modify to check that text is valid KML.
 			array_push($geoObjects, array("bibID" => $bibID, "type" => "kml", "recid" => $bibID));
 			$geoBibIDs[$bibID] = $bibID;
 		}

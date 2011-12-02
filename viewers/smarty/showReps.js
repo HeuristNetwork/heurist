@@ -52,7 +52,6 @@ function ShowReps() {
 				    this.hide();
 				};
 
-
 	/**
 	*  show the list of available reports
 	*  #todo - filter based on record types in result set
@@ -117,21 +116,6 @@ function ShowReps() {
 		_needSelection = (context.indexOf("Select records to see template output")>0);
     }
 
-	function _onSelectionChange(eventType, argList) {
-		if (parent.document.getElementById("s").className == "yui-hidden") {
-			return false;
-		}else {
-				//@todo - we miss selected ids in case use all records - so when
-				// we switch to show selected - nothing happens
-
-				if ( (!_isUseAllRecords && eventType == "heurist-selectionchange")
-						 || eventType == "heurist-recordset-loaded")
-				{
-					top.HEURIST.search.smartySelected();
-				}
-		}
-	}
-
 
 	/**
 	* Initialization
@@ -152,11 +136,6 @@ function ShowReps() {
 		_currentQuery_sel = null;
 
 		_reload_templates();
-
-		if (top.HEURIST) {
-			top.HEURIST.registerEvent(that,"heurist-selectionchange", _onSelectionChange);
-			top.HEURIST.registerEvent(that,"heurist-recordset-loaded", _onSelectionChange);
-		}
 
 		infoMessageBox  =
 				new YAHOO.widget.SimpleDialog("simpledialog2",
@@ -1279,7 +1258,7 @@ function ShowReps() {
 				return _isUseAllRecords;
 			},
 
-			setUseAllRecords: function(val){
+			setUseAllRecords: function(val, needReload){
 				var isChanged = _isUseAllRecords != val;
 				_isUseAllRecords = val;
 				top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"] = _isUseAllRecords?0:1;
@@ -1293,7 +1272,7 @@ function ShowReps() {
 					document.getElementById('cbUseAllRecords2').checked = !val;
 				}
 
-				if (isChanged) {
+				if (isChanged && needReload) {
 					_reload(null);
 				}
 			},
