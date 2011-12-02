@@ -955,6 +955,8 @@ CREATE TABLE `recUploadedFiles` (
   `ulf_MimeExt` varchar(10) default NULL COMMENT 'Extension of the file, used to look up in mimetype table',
   `ulf_AddedByImport` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flag whether added by import = 1 or manual editing = 0',
   `ulf_FileSizeKB` int(10) unsigned default NULL COMMENT 'File size in Kbytes calculated at upload',
+  ulf_FilePath varchar(1024) default NULL COMMENT 'The path where the uploaded file is stored',
+  ulf_FileName varchar(512) default NULL COMMENT 'The filename for the uploaded file',
   PRIMARY KEY  (`ulf_ID`),
   KEY `ulf_ObfuscatedFileIDKey` (`ulf_ObfuscatedFileID`),
   KEY `ulf_Description` (`ulf_Description`(100)),

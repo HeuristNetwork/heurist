@@ -30,20 +30,20 @@
 -- phpMyAdmin SQL Dump
 -- version 2.9.0.2
 -- http://www.phpmyadmin.net
---
+-- 
 -- Host: localhost
--- Generation Time: Oct 12, 2011 at 06:29 PM
+-- Generation Time: Dec 03, 2011 at 09:19 AM
 -- Server version: 5.0.51
 -- PHP Version: 5.2.3
---
+-- 
 -- Database: 'hdb_H3CoreDefinitions'
---
+-- 
 
 -- --------------------------------------------------------
 
---
+-- 
 -- Table structure for table 'defCalcFunctions'
---
+-- 
 
 CREATE TABLE defCalcFunctions (
   cfn_ID smallint(3) unsigned NOT NULL auto_increment COMMENT 'Primary key of defCalcFunctions table',
@@ -55,9 +55,9 @@ CREATE TABLE defCalcFunctions (
 
 -- --------------------------------------------------------
 
---
+-- 
 -- Table structure for table 'defCrosswalk'
---
+-- 
 
 CREATE TABLE defCrosswalk (
   crw_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Primary key',
@@ -72,9 +72,9 @@ CREATE TABLE defCrosswalk (
 
 -- --------------------------------------------------------
 
---
+-- 
 -- Table structure for table 'defDetailTypeGroups'
---
+-- 
 
 CREATE TABLE defDetailTypeGroups (
   dtg_ID tinyint(3) unsigned NOT NULL auto_increment COMMENT 'Primary ID - Code for detail type groups',
@@ -87,15 +87,15 @@ CREATE TABLE defDetailTypeGroups (
 
 -- --------------------------------------------------------
 
---
+-- 
 -- Table structure for table 'defDetailTypes'
---
+-- 
 
 CREATE TABLE defDetailTypes (
   dty_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Code for the detail type (field) - may vary between Heurist DBs',
   dty_Name varchar(255) NOT NULL COMMENT 'The canonical (standard) name of the detail type, used as default in edit form',
   dty_Documentation varchar(5000) default 'Please document the nature of this detail type (field)) ...' COMMENT 'Documentation of the detail type, what it means, how defined',
-  dty_Type enum('freetext','blocktext','integer','date','year','relmarker','boolean','enum','relationtype','resource','float','file','geo','separator','calculated','fieldsetmarker') NOT NULL COMMENT 'The value-type of this detail type, what sort of data is stored',
+  dty_Type enum('freetext','blocktext','integer','date','year','relmarker','boolean','enum','relationtype','resource','float','file','geo','separator','calculated','fieldsetmarker','urlinclude') NOT NULL COMMENT 'The value-type of this detail type, what sort of data is stored',
   dty_HelpText varchar(255) NOT NULL default 'Please provide a short explanation for the user ...' COMMENT 'The default help text displayed to the user under the field',
   dty_ExtendedDescription varchar(5000) default 'Please provide an extended description for display on rollover ...' COMMENT 'Extended text describing this detail type, for display in rollover',
   dty_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
@@ -120,9 +120,9 @@ CREATE TABLE defDetailTypes (
 
 -- --------------------------------------------------------
 
---
+-- 
 -- Table structure for table 'defFileExtToMimetype'
---
+-- 
 
 CREATE TABLE defFileExtToMimetype (
   fxm_Extension varchar(10) NOT NULL COMMENT 'The file extension, indicates mimetype, icon and some beahviours',
@@ -137,9 +137,9 @@ CREATE TABLE defFileExtToMimetype (
 
 -- --------------------------------------------------------
 
---
+-- 
 -- Table structure for table 'defLanguages'
---
+-- 
 
 CREATE TABLE defLanguages (
   lng_NISOZ3953 char(3) NOT NULL COMMENT 'Three character NISO Z39.53 language code',
@@ -152,9 +152,9 @@ CREATE TABLE defLanguages (
 
 -- --------------------------------------------------------
 
---
+-- 
 -- Table structure for table 'defOntologies'
---
+-- 
 
 CREATE TABLE defOntologies (
   ont_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Ontology code, primary key',
@@ -175,9 +175,9 @@ CREATE TABLE defOntologies (
 
 -- --------------------------------------------------------
 
---
+-- 
 -- Table structure for table 'defRecStructure'
---
+-- 
 
 CREATE TABLE defRecStructure (
   rst_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Primary key for the record structures table',
@@ -213,9 +213,9 @@ CREATE TABLE defRecStructure (
 
 -- --------------------------------------------------------
 
---
+-- 
 -- Table structure for table 'defRecTypeGroups'
---
+-- 
 
 CREATE TABLE defRecTypeGroups (
   rtg_ID tinyint(3) unsigned NOT NULL auto_increment COMMENT 'Record type group ID referenced in defRectypes',
@@ -230,9 +230,9 @@ CREATE TABLE defRecTypeGroups (
 
 -- --------------------------------------------------------
 
---
+-- 
 -- Table structure for table 'defRecTypes'
---
+-- 
 
 CREATE TABLE defRecTypes (
   rty_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Record type code, widely used to reference record types, primary key',
@@ -263,9 +263,9 @@ CREATE TABLE defRecTypes (
 
 -- --------------------------------------------------------
 
---
+-- 
 -- Table structure for table 'defRelationshipConstraints'
---
+-- 
 
 CREATE TABLE defRelationshipConstraints (
   rcs_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Record-detailtype constraint table primary key',
@@ -288,9 +288,9 @@ CREATE TABLE defRelationshipConstraints (
 
 -- --------------------------------------------------------
 
---
+-- 
 -- Table structure for table 'defTerms'
---
+-- 
 
 CREATE TABLE defTerms (
   trm_ID int(10) unsigned NOT NULL auto_increment COMMENT 'Primary key, the term code used in the detail record',
@@ -317,9 +317,9 @@ CREATE TABLE defTerms (
 
 -- --------------------------------------------------------
 
---
+-- 
 -- Table structure for table 'defTranslations'
---
+-- 
 
 CREATE TABLE defTranslations (
   trn_ID int(10) unsigned NOT NULL auto_increment COMMENT 'Primary key of defTranslations table',
@@ -335,9 +335,9 @@ CREATE TABLE defTranslations (
 
 -- --------------------------------------------------------
 
---
+-- 
 -- Table structure for table 'defURLPrefixes'
---
+-- 
 
 CREATE TABLE defURLPrefixes (
   urp_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'ID which will be stored as proxy for the URL prefix',

@@ -311,8 +311,21 @@
 				}
 
 
+
 			// Make the current user the owner and admin of the new database
 			mysql_connection_db_insert($newname);
+
+			$query="update sysIdentification set (sys_hmlOutputDirectory,sys_htmlOutputDirectory
+
+			!!!!!!!!! to do
+
+  			mysql_query($query);
+			if ($warnings == 1) {
+				echo "<h2>Please take note of warnings above</h2>";
+				echo "Unable tyo update sysIdentification table - please go to DBAdmin > Databases > Properties & Advanced Properties and check the path".
+				" to the upload, hml and html directroies";
+			}
+
 			mysql_query('UPDATE sysUGrps SET ugr_LongName="'.$longName.'", ugr_FirstName="'.$firstName.'",
 			ugr_LastName="'.$lastName.'", ugr_eMail="'.$eMail.'", ugr_Name="'.$name.'",
 			ugr_Password="'.$password.'", ugr_Department="'.$department.'", ugr_Organisation="'.$organisation.'",
