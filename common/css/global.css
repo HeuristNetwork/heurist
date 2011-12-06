@@ -225,7 +225,7 @@ div.popup div.header::-moz-selection, div.draggable div.header::-moz-selection, 
 background-color: inherit;
 color: inherit
 }
-div.popup div.close-button, .close-button {
+div.popup div.close-button, .close-button, .yui-skin-sam .container-close {
 	background:url("../images/white-cross.gif") no-repeat scroll center center RGBA(0,0,0,0.5);
 	cursor:pointer;
 	float:right;
@@ -245,7 +245,7 @@ div.popup div.close-button, .close-button {
 	box-shadow: 0 1px 6px #000;
 	border: 2px solid #FFF !important;
 }
-div.popup div.close-button:hover, .close-button {
+div.popup div.close-button:hover, .close-button, .yui-skin-sam .container-close:hover {
 	background-image: url(../images/black-cross.gif);
 }
 body table.popup div.help-button {
@@ -701,10 +701,10 @@ li {list-style:disc ;}
 #modalContainer {/*background-color: RGBA(100,100,100,0.5);*/}
 #alertBox {padding:10px;width:250px; height:auto; position:absolute; left:50%; top:50%; margin:-50px 0 0 -125px;text-align: center;font-size: 14px; overflow:hidden}
 #alertBox p{border-bottom-color: #AAAAAA;border-bottom-style: solid;border-bottom-width: 1px;color: #FFFFFF;font-size: 13px;line-height: 15px;margin-bottom: 10px;padding-bottom: 10px;}
-#alertBox #closeBtn,#alertBox #OKBtn,#alertBox #cancelBtn{color:#FFFFFF; font-size: 12px;-moz-border-radius:2px; -webkit-border-radius:2px; border-radius:2px;border:1px solid #AAA;background-color: #666;width:40px; bottom:10px; left:50%; -webkit-box-shadow: 0 3px 6px #000;-moz-box-shadow: 0 3px 6px #000;box-shadow: 0 3px 6px #000}
+#alertBox #closeBtn,#alertBox #OKBtn,#alertBox #cancelBtn,#alertBox button, .yui-simple-dialog button{color:#CCC; font-size: 12px;-moz-border-radius:2px; -webkit-border-radius:2px; border-radius:2px;border-color: #CCC !important;background-color: #666; bottom:10px; left:50%; -webkit-box-shadow: 0 3px 6px #000;-moz-box-shadow: 0 3px 6px #000;box-shadow: 0 3px 6px #000; margin:0 3px}
 #alertBox #cancelBtn{width:60px;left:66%; margin-right:-30px;}
 #alertBox #OKBtn{left:33%; margin-left:-20px;}
-#alertBox #closeBtn:hover,#alertBox #OKBtn:hover,#alertBox #cancelBtn:hover{color:#333; background-color: #777;}
+#alertBox #closeBtn:hover,#alertBox #OKBtn:hover,#alertBox #cancelBtn:hover,#alertBox button:hover, .yui-simple-dialog button:hover{color:#FFF !important; background-color:#777 !important}
 
 /***** drop-down menus *****/
 optgroup {font-style: normal;font-weight:bold; background-color: #ECF1FB;padding:0; border-top:1px solid #A4B4CB; margin-top:5px; text-indent: 5px; }

@@ -204,7 +204,8 @@ function ShowReps() {
 				}
 				squery = squery + '&template='+template_file;
 
-					infoMessageBox.setBody("Execute template '"+template_file+"'. Please wait");
+					//infoMessageBox.setBody("Execute template '"+template_file+"'. Please wait");
+					infoMessageBox.setBody("<img src='../../common/images/loading-animation-white.gif'>");
 					infoMessageBox.show();
 
 				top.HEURIST.util.sendRequest(baseurl, function(xhr) {
@@ -475,7 +476,7 @@ function ShowReps() {
 
 				squery = squery + '&replevel='+replevel+'&template_body='+encodeURIComponent(template_body);
 
-				infoMessageBox.setBody("Compiling and execution of updated template. Please wait");
+				infoMessageBox.setBody("<img src='../../common/images/loading-animation-white.gif'>");
 				infoMessageBox.show();
 
 				top.HEURIST.util.sendRequest(baseurl, function(xhr) {
