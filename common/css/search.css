@@ -1841,13 +1841,16 @@ div.recorddiv:hover {
 .filter {
 	border-top:1px solid #BBB;
 	color: #999999;
-	position: absolute;
+	position: relative;
 	min-height:20px;
 	margin-bottom: 0;
-	border-bottom:1px solid #DDD;
+	/*border-bottom:1px solid #DDD;*/
 	left:0;
 	right:0;
 	top:0;
+}
+.related-results.collapsed ul {
+	display:none;
 }
 .filter ul li ul {
 	position:absolute;
@@ -1869,14 +1872,15 @@ div.recorddiv:hover {
 	color: white;
 }
 .filter ul.menu {
-	text-align:right
+	text-align:right;
+	float:right;
 }
 #results > div {
 	text-align: center;
 	position: relative;
-	background-color: #DDD;
+/*	background-color: #DDD;
 	background:-moz-linear-gradient(center top, #F0F0F0, #FFF) repeat scroll 0 0 transparent;
-	background:-webkit-gradient(linear, left top, left bottom, from(#F0F0F0), to(#FFF));
+	background:-webkit-gradient(linear, left top, left bottom, from(#F0F0F0), to(#FFF));*/
 }
 #results > div.related-results {
 	padding-top:40px;
@@ -1886,6 +1890,7 @@ div.recorddiv:hover {
 }
 #results #results-level0 {padding-top:20px}
 div.filter .showrelated {
+	float:left;
 	padding-left:0;
 	text-align:left;
 	padding:6px 0 0 0;

@@ -41,6 +41,7 @@ function ShowReps() {
 		_needSelection = false,
 		_isUseAllRecords = true,
 		mySimpleDialog,
+		needReload = true,
 		infoMessageBox;
 
 	var handleYes = function() {
@@ -191,7 +192,7 @@ function ShowReps() {
 					if(_isUseAllRecords){
 						_updateReps("<b><font color='#ff0000'>Perform search to see template output</font></b>");
 					}else{
-						_updateReps("<b><font color='#ff0000'>Select records to see template output</font></b>");
+						_updateReps("<div class='wrap'><div id='errorMsg'><span>No Records Selected</span></div></div>");
 					}
 
 				}else{
@@ -509,8 +510,8 @@ function ShowReps() {
 		var units;
 		if(isviewer && iseditor){
 				units = [
-				{ position: 'top', header: 'Editor', height: 150,
-					resize: true, body: 'editorcontainer', gutter:'2px', collapse: true},
+				{ position: 'top', header: 'Editor', height: 200,
+					resize: true, body: 'editorcontainer', gutter:'5px', useShim: true, collapse: true},
 				{ position: 'center', body: 'viewercontainer'}
 				];
 		}else if(isviewer){
@@ -823,7 +824,7 @@ function ShowReps() {
 			res = '{wrap var=$'+prefix+nodedata.this_id;
 			if(nodedata.dtype === 'file' || nodedata.dtype === 'urlinclude'){
 				res = res + '_originalvalue dt="'+nodedata.dtype+'"';
-				res = res + ' width="300" height="300"';
+				res = res + ' width="300" height="auto"';
 			}else{
 			}
 			res = res +'}';
@@ -1258,7 +1259,7 @@ function ShowReps() {
 				return _isUseAllRecords;
 			},
 
-			setUseAllRecords: function(val, needReload){
+			setUseAllRecords: function(val){
 				var isChanged = _isUseAllRecords != val;
 				_isUseAllRecords = val;
 				top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"] = _isUseAllRecords?0:1;

@@ -511,7 +511,7 @@ a#dbSearch-link div#dbname:hover {padding-right:10px; background-color:RGBA(100,
 #q {background-color:transparent}
 
 
-#my-records-button, #all-records-button, #web-search-link, .button, #add-record-link, #new-entry-button, input[type="button"], input[type="submit"] {
+#my-records-button, #all-records-button, #web-search-link, .button, button, #add-record-link, #new-entry-button, input[type="button"], input[type="submit"] {
 	text-transform: uppercase !important;
 	display:inline-block !important;
 	color: #666;
@@ -525,8 +525,10 @@ a#dbSearch-link div#dbname:hover {padding-right:10px; background-color:RGBA(100,
 	padding:0 3px !important ;
 	height:20px !important ;
 	line-height:19px !important;
+	font: 10px arial,helvetica,clean,sans-serif;
 	}
-#my-records-button:hover, #all-records-button:hover, #add-record-link:hover, #new-entry-button:hover, .button:hover, input[type="button"]:hover {
+	button {height:auto !important; line-height:16px !important}
+#my-records-button:hover, #all-records-button:hover, #add-record-link:hover, #new-entry-button:hover, .button:hover, button:hover, input[type="button"]:hover {
 	background-color:RGBA(0,0,0,0.1) !important;
 	border:1px solid RGBA(0,0,0,0.4) !important;
 	box-shadow: 0 1px 2px RGBA(0,0,0,0.4) inset !important;
@@ -834,7 +836,7 @@ div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../
 }
 #views ul li a{background-repeat:no-repeat !important; background-position:5px 3px !important; padding-left:28px !important}
 
-#tabs li ul li a.seperator, #tabs li.active ul li a.seperator, #quicklink-cell li ul li a.seperator, #views li ul li a.seperator {border-top:1px solid #666;}
+#tabs li ul li a.separator, #tabs li.active ul li a.separator, ul.menu li ul li a.separator, ul.menu li.active ul li a.separator, #quicklink-cell li ul li a.separator, #views li ul li a.separator {border-top:1px solid #666;}
 
 #errorMsg{
 	width:100%;

@@ -75,12 +75,12 @@ var BrowserDetect = {
 			identity: "Explorer",
 			versionSearch: "MSIE"
 		},
-//		{
-//			string: navigator.userAgent,
-//			subString: "Gecko",
-//			identity: "Mozilla",
-//			versionSearch: "rv"
-//		},
+		{
+			string: navigator.userAgent,
+			subString: "Gecko",
+			identity: "Mozilla",
+			versionSearch: "rv"
+		},
 //		{ 		// for older Netscapes (4-)
 //			string: navigator.userAgent,
 //			subString: "Mozilla",
@@ -108,14 +108,19 @@ var BrowserDetect = {
 			string: navigator.platform,
 			subString: "Linux",
 			identity: "Linux"
+		},
+		{
+			string: navigator.platform,
+			subString: "android",
+			identity: "android"
 		}
 	]
 
 };
 BrowserDetect.init();
-var browserString = BrowserDetect.browser+" "+BrowserDetect.version;
+var browserString = BrowserDetect.OS+" "+BrowserDetect.browser+" "+BrowserDetect.version;
 var browser;
-if ((BrowserDetect.browser == "Explorer") || (BrowserDetect.browser == "other") || (BrowserDetect.browser == "Firefox" && BrowserDetect.version < 6) || (BrowserDetect.browser == "Safari" && BrowserDetect.version < 5) || (BrowserDetect.browser == "Chrome" && BrowserDetect.version < 14)) {
+if ((BrowserDetect.browser == "Explorer") || (BrowserDetect.browser == "other") || (BrowserDetect.browser == "Firefox" && BrowserDetect.version < 6) || (BrowserDetect.browser == "Safari" && BrowserDetect.version < 5) || (BrowserDetect.browser == "Chrome" && BrowserDetect.version < 10)) {
 		window.open("../common/html/browserErrorMsg.html?msg="+browserString, "_self");
 }
 
