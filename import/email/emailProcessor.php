@@ -38,11 +38,11 @@
 	include_once 'classEmailProcessor.php';
 
 
-	function returnErrorMsgPage($msg) {
-	  $msg2= "<p>&nbsp;<h2>Email configuration error</h2><p>".$msg."<p><i>Please edit the system configuration (DBAdmin > Database > Advanced Properties) or user configuration ( DBAdmin > Access > Users)</i>";
+	function returnErrorMsgPage2($msg) {
+	  $msg2= "<p>&nbsp;<h2>Email configuration error</h2></p><p>".$msg."</p><p><i>Please edit the system configuration (DBAdmin > Database > Advanced Properties) or user configuration ( DBAdmin > Access > Users)</i></p>";
 	  header("Location: ".HEURIST_BASE_URL."common/html/msgErrorMsg.html?msg=$msg2");
 		// echo "location.replace(\"".HEURIST_BASE_URL."common/html/msgErrorMsg.html?msg=$msg2\");";
-		} // returnErrorMsgPage
+	} // returnErrorMsgPage2
 
 
 	mysql_connection_db_overwrite(DATABASE);
@@ -51,7 +51,7 @@
 
 	// get mail server options from database
 	$res = mysql_query('select * from sysIdentification');
-	if (!$res) returnErrorMsgPage("Unable to retrieve email configuration from sysIdentification record, MySQL error: ".mysql_error());
+	if (!$res) returnErrorMsgPage2("Unable to retrieve email configuration from sysIdentification record, MySQL error: ".mysql_error());
 	$sysValues = mysql_fetch_assoc($res);
 	$server   = $sysValues['sys_eMailImapServer'];
 	$port     = $sysValues['sys_eMailImapPort'];
@@ -79,7 +79,7 @@
 
 	// get list of emails addresses - messages from them will be processed
 	$res=mysql_query("select ugr_IncomingEmailAddresses from sysUGrps where ugr_ID=".get_user_id());
-	if (!$res) returnErrorMsgPage("Unable to retrieve incoming email address information from user's sysUGrps record, MySQL error: ".mysql_error());
+	if (!$res) returnErrorMsgPage2("Unable to retrieve incoming email address information from user's sysUGrps record, MySQL error: ".mysql_error());
 	$email = mysql_fetch_assoc($res);
 	if($email && $email['ugr_IncomingEmailAddresses']){
 	if($senders){
@@ -467,9 +467,9 @@
 			try{
     if(!isset($_REQUEST['p'])){
         if($senders){
-            echo '<div><b><br><p>Processing incoming emails from: '.$senders.' ...</b></div>';
+            echo '<div><b><br>Processing incoming emails from: '.$senders.' ...</b></div>';
         }else{
-            echo '<div><b><br><p>Processing incoming emails ...</b></div>';
+            echo '<div><b><br>Processing incoming emails ...</b></div>';
         }
 				?>
         <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" id="process_form">
@@ -486,9 +486,9 @@
 				<?php
     }else{
         if($senders){
-            echo '<br><p><b>Processing incoming emails from: '.$senders.':</b><br><br>';
+            echo '<br><b>Processing incoming emails from: '.$senders.':</b><br><br>';
         }else{
-            echo '<br><p><b>Processing incoming emails:</b><br><br>';
+            echo '<br><b>Processing incoming emails:</b><br><br>';
         }
         $mail_processor=new EmailProcessor($server, $port, $username, $password, $use_ssl);
         echo '<table style="border: 1px solid black;">';
@@ -508,7 +508,7 @@
     }
 			}catch(Exception $e){
     echo '<b>Processing failed with the following message: '.$e->getMessage().'</b>';
-	echo "<p>If the user name and password or IMAP server details are incorrect, you may get 'Login aborted'";
+	echo "<p>If the user name and password or IMAP server details are incorrect, you may get 'Login aborted'</p>";
 	echo "<p><a href='../../admin/setup/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."' target='_blank'>
 	<img src='../../common/images/external_link_16x16.gif'/>Configure connection to IMAP mail server</a> (per-database)</p>";
 	}

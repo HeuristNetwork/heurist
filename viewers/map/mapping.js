@@ -324,10 +324,7 @@ ether_zoom = function(_band, ether, zoomIn) {
 			}
 
 			//tiled images
-			M.map.removeAllTileLayers();
-			if (M.mapdata["layers"]) {
-				M.addLayers();
-			}
+			M.addLayers(M.mapdata.layers);
 
 			//???? M.map.setUIToDefault();
 			if (! mini) {
@@ -348,13 +345,13 @@ ether_zoom = function(_band, ether, zoomIn) {
 			//tl_theme.event.bubble.maxHeight = 0;
 			//tl_theme.event.bubble.width = 320;
 
+			//overview timeline theme
 			tl_theme2 = Timeline.ClassicTheme.create();
 			tl_theme2.autoWidth = true;
 			tl_theme2.ether.backgroundColors = [ "#D1CECA", "#e3c5a6", "#E8E8F4", "#D0D0E8"];
 			//tl_theme2.event.tape.height = 3;
 
-
-
+			//after loading - zoom to extent
 			onDataLoaded = function (tm) {
 				// find centre date, choose scale to show entire dataset
 				var start, end, zoomIndex, eventSource, d = new Date();
@@ -404,17 +401,43 @@ ether_zoom = function(_band, ether, zoomIn) {
 //				     mapZoom: 13,
 // 					 mapCenter: myLatlng,
 
-			var rectypeImg = "style='background-image:url(" + top.HEURIST.iconBaseURL + "{{rectype}}.png)'";
+		var basePath = RelBrowser.baseURL,
+			db = RelBrowser.database,
+			iconPath = RelBrowser.iconBaseURL;
+
+		var rectypeImg = "style='background-image:url(" + iconPath + "{{rectype}}.png)'";
+
+		var editLinkIcon = "<div id='rec_edit_link' class='logged-in-only'><a href='"+
+						basePath+ "records/edit/editRecord.html?recID={{recid}}&db="+ db +
+						 "' target='_blank' title='Click to edit record'><img src='"+
+						 basePath + "common/images/edit_pencil_small.png'/></a></div>";
+
+		var newSearchWindow = "<div><a href='"+basePath+"search/search.html?q=ids:{{recid}}&db=" + db +
+						"' target='_blank' title='Open in new window' class='externalLink'>view</a></div>"
 
 			var template = "<div>"+
 			//"<div style='display:inline-block;background-image:url({{thumb}})'></div>"+
 			"<div style='display:inline-block;'>"+
-			"<img src='"+top.HEURIST.basePath+"common/images/10x10.gif' width='100' style='display:inline-block;background-image:url({{thumb}})'>"+
-			"</div>"+
-			"<div style='display:inline-block;text-align:left;padding-left:3px;'><b>{{title}}</b><br/><div style='max-width:300px;'>{{description}}</div>"+
-					"<img src='"+top.HEURIST.basePath+"common/images/16x16.gif' "+rectypeImg+" class='rft'>"+
+			"<img src='"+basePath+"common/images/10x10.gif' width='100' style='display:inline-block;background-repeat:no-repeat;background-image:url({{thumb}})'>"+
+			"</div>"+                                          //#' onclick='  target='_blank'
+			"<div style='display:inline-block;text-align:left;padding-left:3px;'><b><a href={{url}}>{{title}}</a></b><br/><div style='max-width:300px;'>{{description}}</div>"+
+					"<img src='"+basePath+"common/images/16x16.gif' "+rectypeImg+" class='rft'>"+
+					"<div id='recordID' style='float:right;'>"+
+						editLinkIcon +
+						newSearchWindow +
+					"</div>"
 			"<div></div>";
 
+
+			var customIcon = "heuristicon.png"; //TODO!!!! - deault marker
+
+    		var customTheme = new TimeMapTheme({
+        		"color": "#0000FF",
+        		"icon": customIcon,
+        		"iconSize": [16,16],
+        		"iconShadow": null,
+        		"iconAnchor":[9,17]
+    		});
 
 			M.tmap = TimeMap.init({
 				mapId: "map", // Id of map div element (required)
@@ -424,6 +447,7 @@ ether_zoom = function(_band, ether, zoomIn) {
 					mapZoom: 2,
 					onlyTimeline: (M.mapdata.count_mapobjects<1),
 					infoTemplate: template,
+					theme: customTheme,
 					/*
 					mapZoom: 1, //default zoom
 					centerMapOnItems: bounds ? false : true,
@@ -488,9 +512,13 @@ ether_zoom = function(_band, ether, zoomIn) {
 			return quad;
 		},
 
-		addLayers: function () {
+		addLayers: function (layers) {
+
 			var i, M = RelBrowser.Mapping;
-			for (i = 0; i < M.mapdata.layers.length; ++i) {
+
+			M.map.removeAllTileLayers();
+
+			for (i = 0; i < layers.length; ++i) {
 				(function (layer) {
 
 					var tile_url;
@@ -535,7 +563,7 @@ ether_zoom = function(_band, ether, zoomIn) {
 				}
 
 
-				})(M.mapdata.layers[i]);
+				})(layers[i]);
 			}
 		},
 
@@ -577,4 +605,5 @@ ether_zoom = function(_band, ether, zoomIn) {
 			M.initMap(mini);
 		}
 	}
+
 }

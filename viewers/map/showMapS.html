@@ -46,12 +46,11 @@
 
 	<script type="text/javascript">
 			RelBrowser = {
-						baseURL: "http://heuristscholar.org/h3-ao/",
+						//baseURL: "http://heuristscholar.org/h3-ao/",
 						pipelineBaseURL: "../"
 			};
 
-//	 Timeline_urlPrefix = RelBrowser.baseURL + "external/timemap.2.0/lib/";
-	Timeline_urlPrefix = RelBrowser.baseURL + "external/timemap.2.0/lib/";
+//	Timeline_urlPrefix = RelBrowser.baseURL + "external/timemap.2.0/lib/";
 
 /*      Timeline_ajax_url   = RelBrowser.baseURL + "external/timeline_2.3.0/timeline_ajax/simile-ajax-api.js";
       Timeline_urlPrefix  = RelBrowser.baseURL + "external/timeline_2.3.0/timeline_js/";
@@ -154,14 +153,47 @@ body {
 
 		<script>
 
+	//find db parameter (similar in utilsLoad)
+	function parseParams(paramString) {
+		if (! paramString) {
+			paramString = window.location.search;
+		}
+		if (paramString.charAt(0) == '?') {
+			paramString = paramString.substring(1);
+		}
+
+		paramString = paramString.replace(/[+]/g, ' ');	// frustratingly, decodeURIComponent does not decode '+' to ' '
+
+		var parmBits = paramString.split('&');
+		var parms = {};
+		for (var i=0; i < parmBits.length; ++i) {
+			var equalPos = parmBits[i].indexOf('=');
+			var parmName = decodeURIComponent(parmBits[i].substring(0, equalPos));
+			if (equalPos >= 0) {
+				parms[parmName] = decodeURIComponent(parmBits[i].substring(equalPos+1));
+			} else {
+				parms[parmName] = null;
+			}
+		}
+
+		return parms;
+	}
+
+	var params = parseParams();
+	if(!params['db']){
+		params['db'] = 'sandpit5'; //HARDCODED
+	}
+
 	var HEURIST = {tmap:null};
 
-	var installDir = window.location.pathname.replace(/(((admin|common|export|external|hapi|help|import|records|search|viewers)\/.*)|(index.*))/, "");
+	var installDir = window.location.protocol+"//"+window.location.host+
+		window.location.pathname.replace(/(((admin|common|export|external|hapi|help|import|records|search|viewers)\/.*)|(index.*))/, "");
 	var HRST = {
 		VERSION: "build 3.1.3.231111",
 		basePath: installDir,
+		iconBaseURL: installDir + "/HEURIST_FILESTORE/" + params['db'] + "/rectype-icons/",
 		database: {
-			name: "sandpit5"
+			name: params['db']
 			},
 		util:{
 			isnull: function(obj){
@@ -253,10 +285,12 @@ body {
 			if (obj  &&  obj.error) alert("utilsUI:getJsonData returned error: '" + obj.error + "'");
 			if (callback) callback(obj);
 		}, postData);
-	}
+	},
+
 
 		} //end util
 	};
+
 
 		</script>
 		<!-- script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
@@ -277,6 +311,13 @@ body {
 	//
 	//  starts initialization on load completion of this window
 	function loadHandler(){
+
+		RelBrowser.baseURL = HRST.basePath;
+		RelBrowser.iconBaseURL =  HRST.iconBaseURL;
+		RelBrowser.database = HRST.database.name;
+
+		Timeline_urlPrefix = HRST.basePath + "external/timemap.2.0/lib/";
+
 		window.showMap = new ShowMap();
 	}
 

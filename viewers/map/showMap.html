@@ -45,18 +45,17 @@
 
 	<script type="text/javascript">
 			RelBrowser = {
-						baseURL: "http://heuristscholar.org/h3-ao/",
+						//baseURL: "http://heuristscholar.org/h3-ao/",
 						pipelineBaseURL: "../"
 			};
 
-//	 Timeline_urlPrefix = RelBrowser.baseURL + "external/timemap.2.0/lib/";
-	Timeline_urlPrefix = RelBrowser.baseURL + "external/timemap.2.0/lib/";
+//	Timeline_urlPrefix = RelBrowser.baseURL + "external/timemap.2.0/lib/";
 
 /*      Timeline_ajax_url   = RelBrowser.baseURL + "external/timeline_2.3.0/timeline_ajax/simile-ajax-api.js";
       Timeline_urlPrefix  = RelBrowser.baseURL + "external/timeline_2.3.0/timeline_js/";
       Timeline_parameters = 'bundle=true'; */
 
-			var showMap;
+			var showMap, HRST;
 	</script>
 
 <link href="../../external/jquery/jquery-ui-1.8.css" rel="stylesheet" type="text/css"/>
@@ -82,8 +81,10 @@
 <script src="../../viewers/map/mapping.js" type="text/javascript"></script>
 <script src="../../common/js/temporalObjectLibrary.js" type="text/javascript"></script>
 
+
 <!--
-					<script src="{$urlbase}js/gmapimage.js" type="text/javascript"/>
+<link rel=stylesheet href="../../common/css/global.css" media="all">
+<script src="{$urlbase}js/gmapimage.js" type="text/javascript"/>
 -->
 <style type="text/css">
 body {
@@ -145,14 +146,26 @@ body {
   						margin-left: -0.3em;
     					top: -0.3em;
 }
+
+#mapButton {
+	background-image: url("../../common/images/b_Map.png");
+	background-position: 2px 2px;
+	background-repeat: no-repeat;
+	padding: 0 5px 0 26px !important;
+	white-space: nowrap;
+	margin:5px;
+	height:18px !important;
+	float:right
+}
+
 </style>
 
 </head>
 
 <body class="yui-skin-sam">
 
-		<script>
-			var HRST = top.HEURIST; //alias that are in use in showMap.js
+		<script type="text/javascript">
+		 	HRST = top.HEURIST;
 		</script>
 		<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
 		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
@@ -174,6 +187,27 @@ body {
 */
 		</script>
 
+		<div id="toolbarcontainer">
+				<div id="toolbardiv">
+					<div style="padding:5px;display:inline-block;">
+							<input type="radio" style="display:inline-block;"
+								id="rbMapUseAllRecords" name="showmapmode" value="0"
+								onChange="showMap.setUseAllRecords(event)">
+							<label>Show all</label>
+							<input type="radio" style="display:inline-block;"
+								id="rbMapUseSelectedRecords" name="showmapmode" value="1"
+								 onChange="showMap.setUseAllRecords(event)">
+							<label>Selected only</label>
+
+					</div>
+					<select id="cbLayers" style="display:inline-block;" onchange="showMap.loadLayer(event)"></select>
+					<!--
+					<a name="auto-popup" class="small" href="../../viewers/map/mapMenu.html" Title="Map Search Results"><div id="mapButton" class="button">Publish Map</div></a>
+					-->
+					<button id="mapButton" onclick="javascript:{Hul.popupURL(this,'../viewers/map/mapMenu.html',null);}" Title="Map Search Results">Publish Map</button>
+				</div>
+		</div>
+
 		<div id="mapcontainer">
 				<div id="map" class="full"></div>
 		</div>
@@ -188,6 +222,15 @@ body {
 	//
 	//  starts initialization on load completion of this window
 	function loadHandler(){
+
+		HRST = top.HEURIST; //alias that are in use in showMap.js
+
+		RelBrowser.baseURL = HRST.basePath;
+		RelBrowser.iconBaseURL =  HRST.iconBaseURL;
+		RelBrowser.database = HRST.database.name;
+
+		Timeline_urlPrefix = HRST.basePath + "external/timemap.2.0/lib/";
+
 		window.showMap = new ShowMap();
 	}
 

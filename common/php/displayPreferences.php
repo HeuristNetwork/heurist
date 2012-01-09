@@ -65,7 +65,7 @@ $prefs = array(
 	"viewerTab" =>0,
 	"viewerCurrentTemplate" =>"",
 	"defaultPrintView" => "default",
-	"showSelectedOnlyOnMapAndSmarty" => 0, //by default show all records
+	"showSelectedOnlyOnMapAndSmarty" => "all", //by default show all records
 
 	"defaultSearch" => "tag:Favourites",
 	"favourites" => "Favourites", // standard spelling for default search

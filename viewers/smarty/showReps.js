@@ -126,7 +126,7 @@ function ShowReps() {
 	function _init() {
 		_setLayout(true, false); //aftert load show viewer only
 
-		_isUseAllRecords = (top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]==0);
+		_isUseAllRecords = (top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]=="all");
 		document.getElementById('cbUseAllRecords2').checked = !_isUseAllRecords;
 		document.getElementById('cbUseAllRecords1').checked = !_isUseAllRecords;
 
@@ -1263,8 +1263,7 @@ function ShowReps() {
 			setUseAllRecords: function(val){
 				var isChanged = _isUseAllRecords != val;
 				_isUseAllRecords = val;
-				top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"] = _isUseAllRecords?0:1;
-				top.HEURIST.util.setDisplayPreference("showSelectedOnlyOnMapAndSmarty", _isUseAllRecords?0:1);
+				top.HEURIST.util.setDisplayPreference("showSelectedOnlyOnMapAndSmarty", _isUseAllRecords?"all":"selected");
 
 
 				if(document.getElementById('cbUseAllRecords1')){

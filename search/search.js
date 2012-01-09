@@ -48,7 +48,7 @@ String.prototype.htmlEscape = function() {
 top.HEURIST.search = {
 	VERSION: "1",
 
-	currentSearchQuery:null,
+	currentSearchQuery:null, //keeps current search query to use it in showMap and showReport in case these frames are not loaded
 	pageLimit: 1000,
 	resultsPerPage: top.HEURIST.displayPreferences["results-per-page"],
 	currentPage: 0,
@@ -84,7 +84,7 @@ top.HEURIST.search = {
 			recSet: {},
 			infoByDepth: [ {
 				count : 0,
-				recIdToIndexMap : {},
+				recIdToIndexMap : {}, //????? artem:what's this
 				recIDs : [],
 				rectypes : {}
 				}],
@@ -125,6 +125,7 @@ top.HEURIST.search = {
 			top.HEURIST.search.results.recSet[recID] = { depth:0,
 														record:rec};
 		}
+
 		newResults.records = [];	//clear results
 
 		// check if we've just loaded the page we were expecting to render
@@ -452,20 +453,22 @@ top.HEURIST.search = {
 		var className =  document.getElementById("showrelated" + level).className;
 		var depthInfo = top.HEURIST.search.results.infoByDepth[level];
 		$("#results-level" + level).toggleClass("collapsed");
-		if (className.match(/loaded/)) {
+		if (className.match(/loaded/)) {  //hide
 			if ($("#results-level" + level).hasClass("collapsed")) {
 				$("#showrelated" + level).html("<a onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Show Level "+level+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span>");
 			}else{
 				$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Hide Level "+level+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span>");
 			};
-		}else{
+		}else{  //show
 			top.HEURIST.search.loadRelatedLevel(level);
 			document.getElementById("showrelated" + level).className = className + " loaded";
 			$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Hide Level "+level+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span>");
 			top.HEURIST.search.filterRelated(level);
 		}
+		top.HEURIST.search.updateMapRelated();
 	},
 
+	// toggle selection in filter menu
 	setAllFilterItems: function(filterMenu, level, toChecked){
 		var selector = "li:not(.checked,.cmd)";
 		if (!toChecked){
@@ -473,16 +476,24 @@ top.HEURIST.search = {
 		}
 		$(selector,filterMenu).toggleClass('checked');
 		top.HEURIST.search.filterRelated(level);
+		top.HEURIST.search.updateMapRelated();
 	},
 
 	toggleRectypeFilter: function(menuItem, level, rtID){
 		var resultsDiv =  $("#results-level" + level).get(0);
 		var recIDs = top.HEURIST.search.results.infoByDepth[level].rectypes[rtID];
+
 		$.each(recIDs,function(i,recID){
-				$('.recordDiv[recID='+recID+']',resultsDiv).toggleClass('filtered');
+				//old way $('.recordDiv[recID='+recID+']',resultsDiv).toggleClass('filtered');
+
+				var recDiv = $('.recordDiv[recID='+recID+']', resultsDiv);
+				if(recDiv){
+					recDiv.toggleClass('filtered');
+				}
 			});
 		$(menuItem).toggleClass('checked')
 		top.HEURIST.search.filterRelated(level+1);
+		top.HEURIST.search.updateMapRelated();
 	},
 
 	togglePtrtypeFilter: function(menuItem, level, dtyID){
@@ -502,6 +513,7 @@ top.HEURIST.search = {
 		$(menuItem).toggleClass('checked');
 //		if (recalcFilters) {
 			top.HEURIST.search.filterRelated(level+1);
+			top.HEURIST.search.updateMapRelated();
 //		}
 	},
 
@@ -522,6 +534,7 @@ top.HEURIST.search = {
 		$(menuItem).toggleClass('checked')
 //		if (recalcFilters) {
 			top.HEURIST.search.filterRelated(level+1);
+			top.HEURIST.search.updateMapRelated();
 //		}
 	},
 
@@ -821,6 +834,7 @@ top.HEURIST.search = {
 		if (!resultsDiv || !parentLevelResultDiv) {
 			return;
 		}
+
 		//find unfiltered types from level filter
 		var rectypes = {};
 		var ptrtypes = {};
@@ -945,10 +959,11 @@ top.HEURIST.search = {
 				if (rectypes[rtID] === 1) { //rectype menu is in the related set
 					if (!$(li).hasClass('checked')) { // if it's not checked then filter all records of this type
 						$.each(depthInfo.rectypes[rtID],function(i,recID){
-								var recDiv = $('.recordDiv[recID='+recID+']',resultsDiv);
+								var recDiv = $('.recordDiv[recID='+recID+']', resultsDiv);
 								if (!recDiv.hasClass('filtered')) {
 									recDiv.toggleClass('filtered');
 								}
+
 							});
 					}
 				}else{
@@ -989,9 +1004,11 @@ top.HEURIST.search = {
 		var leftHTML = "";
 		var rightHTML = "";
 		var recordCount = lastIndex - firstIndex + 1;
+
 		for (var i = 0; i < recordCount; ++i) {
 			if (recInfo.recIDs[firstIndex+i]) {
 				var recHTML = top.HEURIST.search.renderResultRecord(recSet[recInfo.recIDs[firstIndex+i]].record);
+
 				innerHTML += recHTML;
 				if (i < recordCount / 2) {
 					leftHTML += recHTML;
@@ -1011,6 +1028,7 @@ top.HEURIST.search = {
 		top.HEURIST.search.addResultLevelEventHandlers(0);
 		top.HEURIST.search.addResultLevelLinks(0);
 		top.HEURIST.search.filterRelated(1);
+		top.HEURIST.search.updateMapRelated();
 
 		top.HEURIST.registerEvent(window, "load", function() {top.HEURIST.search.trimAllLinkTexts(0);});
 		top.HEURIST.registerEvent(window, "load", function() {
@@ -2034,47 +2052,66 @@ top.HEURIST.search = {
 		mapDiv.parentNode.removeChild(mapDiv);
 	},
 
-	lastParamQuery: null,
-	lastParamOther: null,
-
 	//ARTEM
 	//listener of selection in search result - to refelect on map tab
+	//
+	// it should be replaced to "real" event listener in particual application (map or smarty)
+	//
 	updateMapOrSmarty: function(){
 
+			if(!_tabView) return;
 			var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));
 			if(!(currentTab==2 || currentTab==3)) return;
 
-			var p = top.HEURIST.parameters;
+			var p = top.HEURIST.parameters,
+				query_string = "w=all",
+				query_string_sel = null,
+				query_string_all = null;
 
 			if(p["q"]){
-				lastParamOther = 'ver='+(p['ver'] || "") +
+				query_string = 'ver='+(p['ver'] || "") +
 									'&w='+(p['w'] || "") +
 									'&stype='+(p['stype'] || "") +
 									'&db='+(p['db'] || "");
-				lastParamQuery = p["q"];
-
-			}else if (lastParamQuery==null){
-				return;
 			}
 
-			var query_string = lastParamOther + '&limit='+top.HEURIST.search.resultsPerPage;
-
-			var query_string_all = query_string + '&q=' + lastParamQuery;
-			if(top.HEURIST.search.currentPage>0){
-				query_string_all = query_string_all + '&offset=' +
-					top.HEURIST.search.currentPage*top.HEURIST.search.resultsPerPage;
-			}
-			query_string_all = encodeURI(query_string_all);
-
-
-			var query_string_sel = null;
+			//only selected
 			var recIDs = top.HEURIST.search.getSelectedRecIDs().get();
 			if(recIDs && recIDs.length>0){
+				if (recIDs.length >= 500) {// maximum number of records ids 500
+					alert("Selected record count is great than 500, opening the first 500 records!");
+					recIDs = recIDs.slice(0,500);
+				}
 				query_string_sel = encodeURI(query_string + '&q=ids:' + recIDs.join(","));
 			}
 
+			//all visible records
+			recIDs = [];
+			for(var i=0; i<4; i++){
+				var resultsDiv = document.getElementById("results-level"+i);
+				if (resultsDiv &&
+					( (i===0) || !resultsDiv.className.match(/collapsed/) ))
+				{  //visible
+
+					$('.recordDiv',resultsDiv).each( function(i,recDiv){
+
+						if($(recDiv).hasClass('lnk') && !$(recDiv).hasClass('filtered')){
+							var recID = $(recDiv).attr('recID');
+							recIDs.push(recID);
+						}
+					}); //each functions
+
+				}
+			}
+			recIDs = jQuery.unique(recIDs);
+			if (recIDs.length >= 500) {// maximum number of records ids 500
+				//alert("Selected record count is great than 500, opening the first 500 records!");
+				recIDs = recIDs.slice(0,500);
+			}
+			query_string_all = encodeURI(query_string + '&q=ids:' + recIDs.join(","));
+
 	 		top.HEURIST.search.currentSearchQuery =
-	 				(top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]==1)
+	 				(top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]=="selected")
 	 							?query_string_sel :query_string_all;
 
 			if(currentTab===2){ //map
@@ -2083,9 +2120,10 @@ top.HEURIST.search = {
 				if(mapframe.src){ //do not reload map frame
 					var showMap = mapframe.contentWindow.showMap;
 					if(showMap){
-						showMap.reload(query_string_all, query_string_sel);
+						showMap.setQuery( query_string_all, query_string_sel);
+						showMap.processMap(); //reload
 					}else{
-						//alert('shit1');
+						//alert('not inited 1');
 					}
 				}else{
 					mapframe.src = top.HEURIST.basePath +
@@ -2103,7 +2141,7 @@ top.HEURIST.search = {
 						showReps.setQuery( query_string_all, query_string_sel);
 						showReps.processTemplate();
 					}else{
-						//alert('shit2');
+						//alert('not inited 2');
 					}
 
 				}else{
@@ -2114,7 +2152,12 @@ top.HEURIST.search = {
 			}
 	},
 
-	/*outdaated
+	//update related records on map
+	updateMapRelated: function(){
+		top.HEURIST.search.updateMapOrSmarty();
+	},
+
+	/*outdated
 	mapSelected3: function() {
 
 			var p = top.HEURIST.parameters;
@@ -2340,9 +2383,7 @@ top.HEURIST.search = {
 		}
 		var viewerFrame = document.getElementById("viewer-frame");
 //		var mapFrame = document.getElementById("map-frame");
-
 //		mapFrame.src = "";
-		smartyFrame.src = "";
 
 		var recordFrame = document.getElementById("record-view-frame");
 		recordFrame.src = top.HEURIST.basePath+"common/html/msgNoRecordsSelected.html";
@@ -3244,22 +3285,19 @@ function removeCustomAlert() {
 		top.HEURIST.util.setDisplayPreference("viewerTab", currentTab);
 
 		if(currentTab===2){ //map
-			var cbsel = document.getElementById('cbMapUseAllRecords');
-			var isSelOnly = (top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]==1);
-			var wasChanged = cbsel.checked != isSelOnly;
-			cbsel.checked = isSelOnly;
 
+			var mapFrame3 = document.getElementById("map-frame3");
+			if(mapFrame3.src && mapFrame3.contentWindow.showMap){
+				mapFrame3.contentWindow.showMap.setUseAllRecords(
+						(top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]=="all"));
+			}
 			top.HEURIST.search.updateMapOrSmarty();
-			/*if(wasChanged){
-				var mapframe = document.getElementById("map-frame3");
-				mapframe.contentWindow.showMap.setUseAllRecords(!isSelOnly);
-				//top.HEURIST.search.onMapUseAllRecords(null);
-			}*/
+
 		}else if (currentTab===3){ //smarty
 			var smartyFrame = document.getElementById("smarty-frame");
 			if(smartyFrame.src && smartyFrame.contentWindow.showReps){
 				smartyFrame.contentWindow.showReps.setUseAllRecords(
-						(top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]==0), false);
+						(top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]=="all"), false);
 			}
 			top.HEURIST.search.updateMapOrSmarty();
 		}
@@ -3274,5 +3312,3 @@ function removeCustomAlert() {
 	*/
 
 	_tabView.addListener('activeTabChange',handleActiveTabChange);
-
-document.getElementById('cbMapUseAllRecords').checked = (top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]==1);

@@ -32,13 +32,22 @@
 
 	mysql_connection_db_select(DATABASE);
 
-	if (! @$_REQUEST['q']  ||  (@$_REQUEST['ver'] && intval(@$_REQUEST['ver']) < SEARCH_VERSION))
-	construct_legacy_search();      // migration path
+	if (array_key_exists('layers', $_REQUEST)) { //special mode - load ALL image layers and kml records only
 
-	if ($_REQUEST['w'] == 'B'  ||  $_REQUEST['w'] == 'bookmark')
-		$search_type = BOOKMARK;	// my bookmarks
-	else
-		$search_type = BOTH;	// all records
+		$_REQUEST['ver'] = "1";
+		$_REQUEST['q'] = "type:".$imagelayerRT;
+		$search_type = BOTH;
+	}else{
+
+		if (! @$_REQUEST['q']  ||  (@$_REQUEST['ver'] && intval(@$_REQUEST['ver']) < SEARCH_VERSION))
+		construct_legacy_search();      // migration path
+
+		if ($_REQUEST['w'] == 'B'  ||  $_REQUEST['w'] == 'bookmark')
+			$search_type = BOOKMARK;	// my bookmarks
+		else
+			$search_type = BOTH;	// all records
+
+	}
 
 	if( !array_key_exists("limit", $_REQUEST) ){ //not defined
 		$_REQUEST["limit"] = "500"; //force offset and limit (max 500)
@@ -48,7 +57,7 @@
 	$cols = "rec_ID as bibID, rec_RecTypeID as rectype, rec_Title as title, rec_URL as URL";
 	$query = REQUEST_to_query("select $cols ", $search_type);
 
-//error_log(">>>>>>>>>>>>>>>>>>>>>>>".$query);
+//error_log(">>>>>>>>>>>>>>>>>>>>>>>".$search_type."<<<<<<".$query);
 	$res = mysql_query($query);
 	if (mysql_error()) {
 		print mysql_error();
@@ -120,11 +129,13 @@
 		$records[$bibID]["recID"] = $bibID;
 		$records[$bibID]["rectype"] = $row[7];
 		$records[$bibID]["description"] = ( $row[0] ?$row[0] :($row[1]?$row[1]:"") );
-		$records[$bibID]["url"] = ($row[2] ? $row[2] : '');
+		$records[$bibID]["url"] = ($row[2] ? "'".$row[2]."' target='_blank'"  :"'javascript:void(0);'");
+		//'javascript:{this.href="'+$row[2]+'"}' : 'javascript:{return false;}');//javascript:void(0)}');
+		$records[$bibID]["icon_url"] = HEURIST_ICON_URL_BASE . $row[7] . ".png";;
 
 		$thumb_url = getThumbnailURL($bibID); //function fro getResultsPageSync.php
 		if($thumb_url==""){
-			$thumb_url = HEURIST_ICON_URL_BASE.	"thumb/th_".$row[7].".png";
+			$thumb_url = HEURIST_ICON_URL_BASE.	"thumb/th_" . $row[7] . ".png";
 		}
 
 		$records[$bibID]["thumb_url"] = $thumb_url;
@@ -234,7 +245,7 @@ if(mysql_error()) {
 		}
 	}
 */
-	//some records may contain reference to map image layer record (dettype 588),
+	// some records may contain reference to map image layer record (dettype 588),
 	// but we may have such records in search result as well rectype=$imagelayerRT
 	if($bibIDs && count($bibIDs)>0){
 		$squery = "select rec_ID  from Records
@@ -360,23 +371,26 @@ if(mysql_error()) {
 		while ($val = mysql_fetch_row($res)) {
 			if ($val[1] || $val[2]) {
 				$timeObjects[$val[0]] = array($val[1], $val[2]);
+//error_log("XXXX>>>>>> ". $val[0]."  ".$val[1]."  ".$val[2] );
 			}
 		}
 	}
+
 
 //	$timeObjects = array();
 	//"
 	//select d.dtl_RecID, min(d.dtl_Value), max(d.dtl_Value), min(y.dtl_Value), max(y.dtl_Value)
 	//from recDetails b, recDetails y
 	//"
-	$anyDateBibIDs = array();
+	$anyDateBibIDs = array();  //no date enabled
 	foreach($bibIDs as $bibID) {
-		if ( !array_key_exists($bibID, $timeObjects) ){
-			array_push($anyDateBibIDs,$bibID);
+		if (!array_key_exists($bibID, $timeObjects) ){
+			array_push($anyDateBibIDs, $bibID);
 		}
 	}
 
-	// now process those records that don't have specific start and end dates
+	// now process those records that don't have specific start and end dates -
+	// try to extract date from details
 	if (count($anyDateBibIDs) > 0) {
 		$dates = array();
 		$years =array();
@@ -420,7 +434,8 @@ if(mysql_error()) {
 			}
 		}
 
-		foreach( $bibIDs as $bibID){
+		foreach( $anyDateBibIDs as $bibID){
+
 			$sd = (@$dates[$bibID][0] ? $dates[$bibID][0]:null);
 			$ed = (@$dates[$bibID][1] ? $dates[$bibID][1]:null);
 			$sy = (@$years[$bibID][0] ? $years[$bibID][0]:null);
@@ -435,7 +450,7 @@ if(mysql_error()) {
 
 			$timeObjects[$bibID] = array($s, $e);
 		}
-	}
+	}//if
 
 	//sort($geoBibIDs);
 

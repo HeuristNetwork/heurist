@@ -34,7 +34,9 @@ function ShowMap() {
 	var _className = "ShowMap",
 		_isUseAllRecords = true,
 		squery_all,
-		squery_sel;
+		squery_sel,
+		currentQuery,
+		systemAllLayers; //all image layers in the system
 
 	/**
 	* Initialization
@@ -46,6 +48,95 @@ function ShowMap() {
 		//converts Heurist.tmap structure to timemap structure
 		HEURIST.tmap = context;
 
+		var res = prepareDataset(context);
+
+		var items = res.items,
+			kmls = res.kmls,
+			rec_withtime = res.rec_withtime;
+
+
+		var datasets = [];
+
+		if(items.length>0){
+			datasets.push({ name: "search result", type: "basic",	options: { items: items }});
+		}
+		if(kmls.length>0){
+			var i;
+			for(i=0; i<kmls.length; i++){
+
+				var _url = kmls[i];
+				rec_withtime++; //it is assumed that kml is timeenabled
+
+				datasets.push({theme: "blue", type: "kml",
+					options: {
+						url: _url // KML file to load
+					}
+				});
+			}//for
+		}
+
+
+		RelBrowser.Mapping.mapdata = {
+			//					focus: "<xsl:value-of select="detail[@id=230]/geo/wkt"/>",
+
+			/*timemap: [
+			{
+			type: "basic",
+			options: {
+			items: [
+			{
+			start : "2010-01-01",
+			point : {
+			lat : 43.7717,
+			lon : 11.2536
+			},
+			title : "Marker Placemark",
+			options : {
+			description: "Just a plain old marker",
+			theme: "purple"
+			}
+			}
+			,{
+			start : "2010-04-01",
+			imagelayer : {
+			type: "virtual earth",
+			url: "http://acl.arts.usyd.edu.au/dos/maps/1854_woolcott-clarke/Layer_NewLayer/",
+			mime_type:"image/png",
+			copyright:"",
+			min_zoom:1,
+			max_zoom:19
+			},
+			title : "Syndey 1854",
+			options : {
+			description: "lalala",
+			theme: "orange"
+			}
+			}
+			]
+			}
+			}
+			],*/
+
+			timemap: datasets,
+
+			layers: HEURIST.tmap.layers,
+
+			count_mapobjects: (context.cntWithGeo+HEURIST.tmap.layers.length)
+
+		};
+
+		setLayout(((context.cntWithGeo+HEURIST.tmap.layers.length)>0), (rec_withtime>0))
+
+		initMapping(); //from mapping.js
+	}
+
+	/**
+	* context - result from showMap.php search
+	*
+	* returns array of items (for basic dataset) and array of kml
+	*/
+	function prepareDataset(context){
+
 		var ind = 0,
 		k = 0,
 		geoobj,
@@ -54,7 +145,6 @@ function ShowMap() {
 		items = [],
 		kmls = [],
 		rec_withtime = 0;
-
 
 		/**/
 		for (ind in HEURIST.tmap.geoObjects) {
@@ -66,7 +156,7 @@ function ShowMap() {
 				isempty = false;
 
 				if(geoobj.type === "point"){
-					shape = {point:{lat: geoobj.geo.y, lon: geoobj.geo.x}};
+					shape = { point:{lat: geoobj.geo.y, lon: geoobj.geo.x} };
 					//item.point =
 				}else if(geoobj.type === "rect"){
 
@@ -179,12 +269,13 @@ function ShowMap() {
 								start: record.start,
 								title: record.title,
 								options:{
+									//theme: "purple",
 									description: record.description,
-									theme: "purple",
 									url: record.url,
 									recid: record.recID,
 									rectype: record.rectype,
-									thumb: record.thumb_url
+									thumb: record.thumb_url,
+									icon: record.icon_url
 								}
 							};
 
@@ -206,79 +297,41 @@ function ShowMap() {
 			}
 		}
 
-		var datasets = [];
-
-		if(items.length>0){
-			datasets.push({ type: "basic",	options: { items: items }});
-		}
-		if(kmls.length>0){
-			var i;
-			for(i=0; i<kmls.length; i++){
-
-				var _url = kmls[i];
-				rec_withtime++; //it is assumed that kml is timeenabled
-
-				datasets.push({theme: "blue", type: "kml",
-					options: {
-						url: _url // KML file to load
-					}
-				});
-			}//for
-		}
-
-
-		RelBrowser.Mapping.mapdata = {
-			//					focus: "<xsl:value-of select="detail[@id=230]/geo/wkt"/>",
-
-			/*timemap: [
-			{
-			type: "basic",
-			options: {
-			items: [
-			{
-			start : "2010-01-01",
-			point : {
-			lat : 43.7717,
-			lon : 11.2536
-			},
-			title : "Marker Placemark",
-			options : {
-			description: "Just a plain old marker",
-			theme: "purple"
-			}
-			}
-			,{
-			start : "2010-04-01",
-			imagelayer : {
-			type: "virtual earth",
-			url: "http://acl.arts.usyd.edu.au/dos/maps/1854_woolcott-clarke/Layer_NewLayer/",
-			mime_type:"image/png",
-			copyright:"",
-			min_zoom:1,
-			max_zoom:19
-			},
-			title : "Syndey 1854",
-			options : {
-			description: "lalala",
-			theme: "orange"
-			}
-			}
-			]
-			}
-			}
-			],*/
-
-			timemap: datasets,
-
-			layers: HEURIST.tmap.layers,
-
-			count_mapobjects: (context.cntWithGeo+HEURIST.tmap.layers.length)
-		};
-
-		setLayout(((context.cntWithGeo+HEURIST.tmap.layers.length)>0), (rec_withtime>0))
-
-		initMapping(); //from mapping.js
+		return {items: items, kmls:kmls, rec_withtime:rec_withtime};
 	}
+
+
+	/** ARTEM - todo
+	*
+	* 1. convert php result to set of datasets and layers
+	*
+	*
+	*
+	*/
+
+	/**
+	*  name - name of dataset (main, related 1,2,3)
+	*  phpres - result of showMap.php
+	*  returns - object of 2 arrays (dataset and layers) and counts of objects with coordinates and timeenabled
+	*/
+	function getDatasets(name, phpres){
+
+	}
+
+	function removeDatasets(name){
+
+	}
+
+	function removeLayers(name){
+
+	}
+
+	// merge given mapdata with the current RelBrowser.Mapping.mapdata
+	function mergeLayers( mapdata ){
+
+	}
+
+
 
 /* outdated - to remove
 	function _onSelectionChange(eventType, argList) {
@@ -306,19 +359,24 @@ function ShowMap() {
 		_ismap=ismap;
 		_istime=istime;
 
+		var toolbar = { position: 'top', body: 'toolbarcontainer', height:25, resize:false, collapse:false};
+
 		var units;
 		if(ismap && istime){
 			units = [
+			toolbar,
 			{ position: 'center', body: 'mapcontainer'},
 			{ position: 'bottom', header: 'TimeLine', height: 150,
 				resize: true, body: 'timelinecontainer', gutter: '5px', collapse: true}
 			];
 		}else if(ismap){
 			units = [
+			toolbar,
 			{ position: 'center', body: 'mapcontainer'}
 			];
 		}else if(istime){
 			units = [
+			toolbar,
 			{ position: 'center', body: 'timelinecontainer'}
 			];
 		}
@@ -338,11 +396,15 @@ function ShowMap() {
 	*/
 	function _init() {
 
-		if(HRST.search){
-			_isUseAllRecords = (HRST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]==0);
+
+		if(HRST.displayPreferences){
+			_isUseAllRecords = (top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]=="all");
+			document.getElementById('rbMapUseAllRecords').checked = _isUseAllRecords;
+			document.getElementById('rbMapUseSelectedRecords').checked = !_isUseAllRecords;
 		}else{
 			_isUseAllRecords = true;
 		}
+
 
 		setLayout(true, true);
 		/*
@@ -352,8 +414,13 @@ function ShowMap() {
 		});
 		*/
 
-		var _squery_all = location.search;
-		_reload(_squery_all, null);
+		squery_all = location.search;
+		_reload();
+
+		if(HRST.displayPreferences){
+			_load_layers(0);
+		}
+
 
 /* outdated - toremove
 		if (HRST.search) {
@@ -362,28 +429,109 @@ function ShowMap() {
 		}
 */
 	}
-	function _reload(_squery_all, _squery_sel) {
-		squery_all = _squery_all;
-		squery_sel = _squery_sel;
 
-		var baseurl = HRST.basePath + "viewers/map/showMap.php";
-		var callback = _updateMap;
-		var params =  (_isUseAllRecords) ?_squery_all :_squery_sel;
-		if(params!=null){
-			HRST.util.getJsonData(baseurl, callback, params);
+	function _reload() {
+
+		var newQuery = _getQuery();
+		if(currentQuery!=newQuery){ //newQuery!=null &&
+			currentQuery = newQuery;
+
+			var baseurl = HRST.basePath + "viewers/map/showMap.php";
+			var callback = _updateMap;
+			var params =  currentQuery;
+			if(params!=null){
+				HRST.util.getJsonData(baseurl, callback, params);
+			}
 		}
+	}
+
+	/**
+	* fill list of layers
+	*/
+	function _updateLayersList(context){
+
+		systemAllLayers = context.layers;
+		var elem = document.getElementById('cbLayers'),
+			s = "<option value='-1'>none</option>";
+
+		for (ind in systemAllLayers) {
+			if(!Hul.isnull(ind)){
+
+				var sTitle = systemAllLayers[ind].title;
+				if(Hul.isempty(sTitle)){
+					sTitle = context.records[systemAllLayers[ind].rec_ID].title;
+				}
+				if(Hul.isempty(sTitle)){
+					sTitle = 'Undefined title. Rec#'+systemAllLayers[ind].rec_ID;
+				}
+
+				s = s + "<option value='" + ind + "'>"+ sTitle +"</option>";
+			}
+		}
+
+		elem.innerHTML = s;
+	}
+
+	/**
+	*
+	*/
+	function _loadLayer(event){
+
+		var val = Number(event.target.value);
+
+		if(isNaN(val) || val < 0){
+			RelBrowser.Mapping.addLayers([]);
+		}else{
+			RelBrowser.Mapping.addLayers([systemAllLayers[val]]);
+		}
+
+	}
+
+	/**
+	* mode: 0 - both, 1 -image layers, 2 - kml
+	*/
+	function _load_layers(mode) {
+
+			var baseurl = HRST.basePath + "viewers/map/showMap.php";
+			var callback = _updateLayersList;
+			var params =  "ver=1&layers="+mode+"&db="+HRST.database.name;
+			HRST.util.getJsonData(baseurl, callback, params);
+	}
+
+
+	//
+	function _getQuery(){
+		return _isUseAllRecords ?squery_all:squery_sel;
+	}
+
+	// NOT USED relRecords - array of queries
+	function _updateRelatedRecords(relRecords){
+
+		for(var i=0; i<3; i++){
+				//relRecords[i];
+		}
+
 	}
 
 
 	//public members
 	var that = {
 
-		reload:  function (squery_all, squery_sel){
-			_reload(squery_all, squery_sel);
+		processMap:  function (){
+			_reload();
 		},
 
 		baseURL:  function (){
 			return HRST.basePath;
+		},
+
+		getQuery: function(){
+			return _getQuery();
+		},
+
+		setQuery: function(q_all, q_sel){
+			if(q_all) squery_all = q_all;
+			squery_sel = q_sel;
 		},
 
 		isUseAllRecords: function(){
@@ -391,16 +539,31 @@ function ShowMap() {
 		},
 
 		setUseAllRecords: function(val){
+			if(val.target){
+				val = (val.target.value == "0");
+			}
 			var isChanged = _isUseAllRecords != val;
 			_isUseAllRecords = val;
-			if (isChanged && _isUseAllRecords) {
-				_reload(squery_all, squery_sel);
+			if (isChanged) { // && _isUseAllRecords
+				_reload();
 			}
-			if(HRST.displayPreferences){
-				HRST.displayPreferences["showSelectedOnlyOnMapAndSmarty"] = _isUseAllRecords?0:1;
-				HRST.util.setDisplayPreference("showSelectedOnlyOnMapAndSmarty", _isUseAllRecords?0:1);
+
+			if(document.getElementById('rbMapUseAllRecords')){
+				top.HEURIST.util.setDisplayPreference("showSelectedOnlyOnMapAndSmarty", _isUseAllRecords?"all":"selected");
+				document.getElementById('rbMapUseAllRecords').checked = _isUseAllRecords;
+				document.getElementById('rbMapUseSelectedRecords').checked = !_isUseAllRecords;
 			}
 		},
+
+		//load image layer
+		loadLayer: function(event){
+			return _loadLayer(event);
+		},
+
+		updateRelatedRecords: function(relRecords){
+			_updateRelatedRecords(relRecords);
+		},
+
 
 		getClass: function () {
 			return _className;
