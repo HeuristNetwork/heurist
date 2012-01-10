@@ -51,6 +51,11 @@
 			document.getElementById("linkTimeline").href = url;
 
      		document.getElementById("code-textbox").value = '<iframe src="' + url + '" width="800" height="650" frameborder="0"></iframe>';
+
+	 		var url_kml = top.HEURIST.baseURL+"export/xml/kml.php?" + top.HEURIST.search.currentSearchQuery;
+
+			document.getElementById("linkKml").href = url_kml;
+
 	 }
    }
  </script>
@@ -67,10 +72,10 @@
 
 
 <p><img src="../../common/images/google-earth-logo.gif" align="middle"> &nbsp; &nbsp;
-<a href="../mapper/googleearth.kml.php/heurist-map.kml" onClick="setTimeout(window.close, 1000)"><b>Google Earth</b></a></p>
+<a id="linkKml" href="#" target=_new onClick="setTimeout(window.close, 1000)"><b>Google Earth</b></a></p>
 
 <img src="../../common/images/google-maps-logo.gif" align="middle"> &nbsp; &nbsp;
-<a href="#" id="linkTimeline" target=_new onClick="setTimeout(window.close, 0);"><b>Google Map + Timeline</b></a>
+<a href="#" id="linkTimeline" target=_new onClick="setTimeout(window.close, 200);"><b>Google Map + Timeline</b></a>
 
 <p>
 <blockquote>

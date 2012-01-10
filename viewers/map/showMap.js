@@ -347,7 +347,7 @@ function ShowMap() {
 	}
 */
 
-	var layout, _ismap, _istime;
+	var layout, _ismap, _istime, _hidetoolbar = false;
 
 	function setLayout(ismap, istime){
 
@@ -359,7 +359,9 @@ function ShowMap() {
 		_ismap=ismap;
 		_istime=istime;
 
-		var toolbar = { position: 'top', body: 'toolbarcontainer', height:25, resize:false, collapse:false};
+		var toolbar = { position: 'top', body: 'toolbarcontainer', height:(_hidetoolbar?0:25),
+						visible: _hidetoolbar,
+						resize:false, collapse:false};
 
 		var units;
 		if(ismap && istime){
@@ -403,6 +405,8 @@ function ShowMap() {
 			document.getElementById('rbMapUseSelectedRecords').checked = !_isUseAllRecords;
 		}else{
 			_isUseAllRecords = true;
+			//hide toolbar
+			_hidetoolbar = true;
 		}
 
 
