@@ -62,7 +62,7 @@ Requirements: req. = Required, rec. = Recommended, xcl. = Forbidden, otherwise O
  [foreach rectype rtf : rty_ID order by (rty_RecTypeGroupID), rty_OrderInGroup, rty_Name]
  <tr class="rty_Name">
   <td style="text-align: right;">[rty_ID]</td>
-  <td><img src="[iconDir!][rty_ID].gif" id="rt[rty_ID]" class="rft_icon"><span class="rty_Name">[rty_Name]</span></td>
+  <td><img src="[iconURL!][rty_ID].png" id="rt[rty_ID]" class="rft_icon"><span class="rty_Name">[rty_Name]</span></td>
  </tr>
  <tr>
   <td></td>
@@ -90,7 +90,6 @@ Requirements: req. = Required, rec. = Recommended, xcl. = Forbidden, otherwise O
 	 <tr>
 	  <td width="30">[select BIB_DETAIL_TYPE bdt][dty_ID][end-select]</td>
 	  <td width="150">[rst_DisplayName]</td>
-	  <td width="100" style="text-align: left;">[select BIB_DETAIL_TYPE bdt][dty_Type][end-select]</td>
 	  <td width="100" style="text-align: left;">[select BIB_DETAIL_TYPE bdt][dty_Type][end-select]</td>
 
 	  <td width="30" style="text-align: left;"><script type="text/javascript">
