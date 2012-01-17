@@ -829,7 +829,8 @@ top.HEURIST.edit = {
 		}
 	},
 
-	createInputsForRectype: function(recID, rectypeID, fieldValues, container) {
+	createInputsForRectype: function(recID, rectypeID, fieldValues, container)
+	{
 		var rfrs = top.HEURIST.rectypes.typedefs[rectypeID].dtFields;
 		var rstFieldNamesToRdrIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
 

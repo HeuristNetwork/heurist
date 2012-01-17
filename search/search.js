@@ -1663,7 +1663,6 @@ top.HEURIST.search = {
 							50);
             };
 		var viewerFrame = document.getElementById("viewer-frame");
-//		var mapFrame = document.getElementById("map-frame");
 
 //        var sidebysideFrame = document.getElementById("sidebyside-frame");
 //		sidebysideFrame.src = top.HEURIST.basePath+"viewers/sidebyside/sidebyside.html"+
@@ -1671,7 +1670,9 @@ top.HEURIST.search = {
 //						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")));
 		var ssel = "selectedIds=" + selectedRecIDs.join(",");
         top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
-//		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);
+/*art temp old mapping
+		var mapFrame = document.getElementById("map-frame");
+		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);*/
 
 /*
 		var mapFrame3 = document.getElementById("map-frame3");
@@ -2273,13 +2274,14 @@ top.HEURIST.search = {
 			});
 
 		var viewerFrame = document.getElementById("viewer-frame");
-//		var mapFrame = document.getElementById("map-frame");
 
 		var ssel = "selectedIds=" + top.HEURIST.search.getSelectedRecIDs().get().join(",");
 
 
 		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
-//		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);
+/*art temp old mapping
+		var mapFrame = document.getElementById("map-frame");
+		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);*/
 
 		top.HEURIST.search.updateMapOrSmarty();
 
@@ -2296,12 +2298,13 @@ top.HEURIST.search = {
 			var bkmk_id = bibs[i].parentNode.getAttribute("bkmk_id");
 		}
 		var viewerFrame = document.getElementById("viewer-frame");
-//		var mapFrame = document.getElementById("map-frame");
 
 		var ssel = "selectedIds=" + top.HEURIST.search.getSelectedRecIDs().get().join(",");
 
 		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
-//		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);
+/*art temp old mapping
+		var mapFrame = document.getElementById("map-frame");
+		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);*/
 
 		top.HEURIST.search.updateMapOrSmarty();
 
@@ -2382,13 +2385,15 @@ top.HEURIST.search = {
 			}
 		}
 		var viewerFrame = document.getElementById("viewer-frame");
-//		var mapFrame = document.getElementById("map-frame");
-//		mapFrame.src = "";
 
 		var recordFrame = document.getElementById("record-view-frame");
 		recordFrame.src = top.HEURIST.basePath+"common/html/msgNoRecordsSelected.html";
 		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", "selectedIds=");
-//		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange", "selectedIds=");
+
+/*art temp old mapping
+		var mapFrame = document.getElementById("map-frame");
+		mapFrame.src = "";
+		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange", "selectedIds=");*/
 
 		if(fireEvent){
 			top.HEURIST.search.updateMapOrSmarty();

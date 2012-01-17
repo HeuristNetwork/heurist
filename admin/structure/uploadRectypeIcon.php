@@ -124,7 +124,7 @@ function upload_file($rt_id, $dim) {
 	if (! $img) return array('', 'Uploaded file is not supported format');
 
 	// check that the image is not mroe than trwice desired size to avoid scaling issues
-		if (imagesx($img) > ($dim*2)  ||  imagesy($img) > ($dim*2)) return array('','Uploaded file must be no larger than twice $dim pixels in any direction');
+		if (imagesx($img) > ($dim*2)  ||  imagesy($img) > ($dim*2)) return array('','Uploaded file must be no larger than twice '.$dim.' pixels in any direction');
 
 	$newfilename = $image_dir . $rt_id . '.png'; // tempnam('/tmp', 'resized');
 

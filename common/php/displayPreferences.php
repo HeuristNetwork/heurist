@@ -45,6 +45,7 @@ $prefs = array(
 
 	"record-search-string" => "",
 	"record-search-type" => "",
+	"record-search-last" => "", //list of rectypes and last selected records - up to 15
 
 	"search-result-style" => "list",
 	"results-per-page" => 50,

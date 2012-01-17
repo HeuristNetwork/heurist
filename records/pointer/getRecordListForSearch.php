@@ -65,7 +65,6 @@ if (@$_REQUEST["r"] == "recent") {
 
 $query .= " limit $limit";
 
-
 header("Content-type: text/javascript");
 
 ?>

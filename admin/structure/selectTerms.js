@@ -306,15 +306,31 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 	*
 	* Selects all children of the node clicked
 	*/
-	function _selectAllChildren(termid) { //
+	function _selectAllChildren(termid, state) { //
 			var parentNode = _findNodeById(termid); // _termTree.getNodeByIndex(parent);
+
+			if(state<0){
+				state = parentNode.data.isall?0:1;
+				parentNode.data.isall = !parentNode.data.isall;
+				if(parentNode.data.isall){
+					parentNode.label = parentNode.label.replace("&nbsp;&nbsp;all</a>", "&nbsp;&nbsp;none</a>");
+				}else{
+					parentNode.label = parentNode.label.replace("&nbsp;&nbsp;none</a>", "&nbsp;&nbsp;all</a>");
+				}
+				_termTree.render();
+			}
+
 			if(parentNode.children.length > 0) {
 				var index = 0;
 				while(index < parentNode.children.length) { // While it has children, select them and look if they have children too
 					var child = parentNode.children[index];
-					child.toggleHighlight();
+
+					if(child.highlightState != state){
+							child.toggleHighlight();
+					}
+
 					if(child.children.length > 0) {
-						_selectAllChildren(child.data.id); //index);
+						_selectAllChildren(child.data.id, state); //index);
 					}
 					index++;
 				}
@@ -409,6 +425,7 @@ TREE REALTED ROUTINES ---------------------------------------
 
 					term = {}; //new Object();
 					term.id = term_id;
+					term.isall = false;
 
 					cnt_children = Object.keys(parentNode[term_id]).length;
 					term.label = '<div id="'+term_id+'">';
@@ -416,7 +433,7 @@ TREE REALTED ROUTINES ---------------------------------------
 					if(cnt_children>0){
 						term.label = term.label +
 					'<a href="javascript:void(0)" onClick="selectTerms.selectAllChildren(\''+
-											term_id+'\')">&nbsp;&nbsp;All</a>';//+termsByDomainLookup[term_id][0]+'</div>';
+term_id+'\', -1)">&nbsp;&nbsp;all</a>';//+termsByDomainLookup[term_id][0]+'</div>';
 						term.href = "{javascript:void(0)}"; // To make 'select all' clickable, but not leave the page when hitting enter
 					}else if(_isFilterMode){
 						term.label = term.label + '&nbsp;&nbsp;';
@@ -467,11 +484,12 @@ TREE REALTED ROUTINES ---------------------------------------
 
 			term = {}; //new Object();
 			term.id = parentElement;
+			term.isall = false;
 			term.label = '<div id="'+parentElement+'">';
 
 			if(cnt_children>0){
 				term.label = term.label + '<a href="javascript:void(0)" onClick="selectTerms.selectAllChildren(\''+
-							term.id+'\')">&nbsp;&nbsp;All</a>&nbsp;'; //+termsByDomainLookup[parentElement][0]+'</div>';
+term.id+'\', -1)">&nbsp;&nbsp;all</a>&nbsp;'; //+termsByDomainLookup[parentElement][0]+'</div>';
 				term.href = "{javascript:void(0)}"; // To make 'select all' clickable, but not leave the page when hitting enter
 			}
 
@@ -818,8 +836,8 @@ END TREE REALTED ROUTINES ---------------------------------------
 				clearDisables : function () {
 					_clearDisables();
 				},
-				selectAllChildren : function (termid) {
-					_selectAllChildren(termid);
+				selectAllChildren : function (termid, state) {
+					_selectAllChildren(termid, state);
 				},
 				setFilterMode : function (val) {
 					_isFilterMode = val;

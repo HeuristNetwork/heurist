@@ -287,6 +287,9 @@
 		document.getElementById("rty_ID").innerHTML= "<span style=\"color:#999; font-weight:normal; font-size:11px;\">will be automatically assigned</span>";
 		document.getElementById("rty_ShowInLists").checked = true;
 		document.getElementById("rty_NonOwnerVisibility").selectedIndex = 0;
+
+		document.getElementById("rty_TitleMask").value = "record [ID]: Please set title mask for this record type once fields have been defined";
+
 		getGroups();
 		// Set group from URL
 		getTypes();
@@ -307,13 +310,13 @@
 				document.getElementById("rectypeIcon").innerHTML =
 				"<a href=\"javascript:void(0)\" onClick=\"upload_icon(0)\" title=\"Click to change icon\">"+
 				"<img id=\"imgIcon\" src=\""+
-				top.HEURIST.iconDir + rectypeID + ".png" +
+				top.HEURIST.iconBaseURL + rectypeID + ".png" +
 				"\" width=\"16\" height=\"16\"></a>";
 
 				document.getElementById("rectypeThumb").innerHTML =
 				"<a href=\"javascript:void(0)\" onClick=\"upload_icon(1)\" title=\"Click to change thumbnail\">"+
 				"<img id=\"imgThumb\" src=\""+
-				top.HEURIST.iconDir + "thumb/th_" + rectypeID + ".png" +
+				top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID + ".png" +
 				"\" width=\"75\" height=\"75\"></a>";
 
 			} catch(e) {

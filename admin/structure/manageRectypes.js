@@ -267,7 +267,7 @@ function RectypeManager() {
 
 					var td = top.HEURIST.rectypes.typedefs[rectypeID];
 					var rectype = td.commonFields;
-					if (rectype[fi.rty_RecTypeGroupID] === grpID) {  //(rectype[9].indexOf(grpID)>-1) {
+					if (rectype && rectype[fi.rty_RecTypeGroupID] === grpID) {  //(rectype[9].indexOf(grpID)>-1) {
 						arr.push([rectypeID,
 						(Number(rectype[fi.rty_ShowInLists])===1),
 						'', //icon

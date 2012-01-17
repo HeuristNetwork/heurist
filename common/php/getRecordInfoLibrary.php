@@ -930,7 +930,8 @@ function getAllRectypeStructures($useCachedData = false) {
 						"dty_TermIDTreeNonSelectableIDs",
 						"dty_FieldSetRectypeID");
 
-	// get rec Structure info ordered by the detailType Group order, then by recStruct display order and then by ID in recStruct incase 2 have the same order
+	// get rec Structure info ordered by the rst_DisplayOrder
+	//OLDWAY: by detailType Group order, then by recStruct display order and then by ID in recStruct incase 2 have the same order
 	$query = "select ".join(",", $colNames)." from defRecStructure
 					left join defDetailTypes on rst_DetailTypeID = dty_ID
 					left join defDetailTypeGroups on

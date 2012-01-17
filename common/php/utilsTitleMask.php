@@ -233,12 +233,18 @@ global $surnameDT, $authRT;
 	if (!$rec_id) { // return blank can't lookup values without a recID
 		return '';
 	}
-	if (!$rt) { // lookup the rectype of this
-		$resRec = mysql_query("select rec_RecTypeID from Records where rec_ID=$rec_id");
+	if($field_name=='ID'){
+		return $rec_id;
+	}
+	if (!$rt || $field_name=='Modified') { // lookup the rectype of this
+		$resRec = mysql_query("select rec_RecTypeID, rec_Modified  from Records where rec_ID=$rec_id");
 		if (mysql_error()) {
 			return '';
 		}
 		$rt = mysql_fetch_row($resRec);
+		if($field_name=='Modified'){
+			return $rt[1];
+		}
 		$rt = $rt[0];
 	}
 	/* Return the value for the given field in the given records record */

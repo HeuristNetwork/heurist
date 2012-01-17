@@ -40,22 +40,23 @@
      <td style="padding: 2px 5px 5px 5px;">
       <div style="width: 98%;" class="searchInput">
        <div><input autocomplete=off type=text name=q id=q onChange="top.HEURIST.util.setDisplayPreference('record-search-string', value);" style="padding: 1px 18px 1px 2px; margin: 0; width: 100%;"></div>
-       <div id=help-div>Enter part of word and click <img src="../../common/images/tiny-magglass.gif" onClick="document.forms[0].submit()" style="vertical-align: middle;"></div>
+       <div id=help-div  style="width: 150px;">Enter part of word and click <img src="../../common/images/tiny-magglass.gif" onClick="document.forms[0].submit()" style="vertical-align: middle;"></div>
       </div>
      </td>
      <td style="width: 1px; vertical-align: middle;">
       <div style="overflow: visible; width: 1px;">
-      <img src="../../common/images/small-magglass.gif" style="position: relative; cursor: pointer; z-index: 1; left: -22px;"
+      <img src="../../common/images/small-magglass.gif" style="position: relative; cursor: pointer; z-index: 1; top:10px; left: -22px;"
            onclick="document.forms[0].submit()" title="Search records">
       </div>
-      <input type=submit value=Find style="display: none; font-weight: bold; padding: 0 1ex; margin-right: 1ex;">
+      <input type=submit value=Find style="display: none; font-weight: bold; padding: 0 1ex; margin-right: 1ex;" >
      </td>
      <td style="width: 120px;" title="Restrict search to this record type">
       <select id=t name=t style="width: 100%;" onChange="top.HEURIST.util.setDisplayPreference('record-search-type', options[selectedIndex].value);"></select>
      </td>
      <td style="width: 80px; padding: 0 5px;">
-      <div class=radio><nobr><label for=r-recent><input type=radio name=r id=r-recent value=recent> recent</label></nobr></div>
-      <div class=radio><nobr><label for=r-all><input type=radio name=r id=r-all value=all> all records</label></nobr></div>
+      <div class=radio><nobr><label for=r-recent-search><input type=radio name=r id=r-recent-search value=recent-search onChange="document.forms[0].submit()"> recent selection</label></nobr></div>
+      <div class=radio><nobr><label for=r-recent><input type=radio name=r id=r-recent value=recent onChange="document.forms[0].submit()"> recently added</label></nobr></div>
+      <div class=radio><nobr><label for=r-all><input type=radio name=r id=r-all value=all onChange="document.forms[0].submit()"> all records</label></nobr></div>
      </td>
     </tr></table>
    </div>
@@ -116,150 +117,201 @@
 	return false;
 			}
 
-			// search callback which fills the result area with a line for each record in the result set
-			function notifyResults(results) {
-	var resultsDiv = document.getElementById("results");
-	var records = eval(results.responseText).records;
+	// search callback which fills the result area with a line for each record in the result set
+	function notifyResults(results)
+	{
+		var resultsDiv = document.getElementById("results");
+		var records = eval(results.responseText).records;
 
-	var recordDiv;
-	var record;
-	var bibID, img, title;
+		var recordDiv;
+		var record;
+		var bibID, img, title;
 
-	resultsDiv.innerHTML = "";
-	for (var i=0; i < records.length; ++i) {
-		record = records[i];
+		resultsDiv.innerHTML = "";
+		for (var i=0; i < records.length; ++i) {
+			record = records[i];
 
-		recordDiv = resultsDiv.appendChild(document.createElement("div"));
-		recordDiv.className = "result_row";
+			recordDiv = resultsDiv.appendChild(document.createElement("div"));
+			recordDiv.className = "result_row";
 
-		bibID = recordDiv.appendChild(document.createElement("span"));
-		bibID.appendChild(document.createTextNode(record[0]));
-		bibID.className = "id";
+			bibID = recordDiv.appendChild(document.createElement("span"));
+			bibID.appendChild(document.createTextNode(record[0]));
+			bibID.className = "id";
 
-		img = recordDiv.appendChild(document.createElement("img"));
-		img.src = top.HEURIST.basePath + "common/images/16x16.gif";
-					img.style.backgroundImage = "url("+ top.HEURIST.iconBaseURL + (record[3]? record[3] : "blank") + ".png)";
+			img = recordDiv.appendChild(document.createElement("img"));
+			img.src = top.HEURIST.basePath + "common/images/16x16.gif";
+						img.style.backgroundImage = "url("+ top.HEURIST.iconBaseURL + (record[3]? record[3] : "blank") + ".png)";
 
-		title = recordDiv.appendChild(document.createElement("span"));
-		title.appendChild(document.createTextNode(record[1]));
-		title.title = record[1];
-		title.className = "title";
+			title = recordDiv.appendChild(document.createElement("span"));
+			title.appendChild(document.createTextNode(record[1]));
+			title.title = record[1];
+			title.className = "title";
 
-		top.HEURIST.registerEvent(recordDiv, "click", function(bibID, bibTitle) {
-			return function() {
-				window.close(bibID, bibTitle);
-			}
-		}(record[0], record[1]));
-	}
+			//select record and close
+			top.HEURIST.registerEvent(recordDiv, "click", function(bibID, bibTitle, recType) {
+				return function() {
 
-	if (records.length == 0) {
-		resultsDiv.innerHTML = "<b style='padding: 1ex;'>No matching records</b>";
-	}
+					//save last selected
+					var lastSearcheS = top.HEURIST.util.getDisplayPreference("record-search-last");
+					var lastSearch = (lastSearcheS==="")?[]:lastSearcheS.split(",",50);
+					var k = lastSearch.indexOf(bibID);
+					if(k<0){
+						if(lastSearch.length>49) {
+							lastSearch.shift();
+						}
+						lastSearch.push(bibID);
+					} else if (k<49) {
+						lastSearch.splice(k,1)
+						lastSearch.push(bibID);
+					}
 
-	document.body.cursor = "";
-			}
+					top.HEURIST.util.setDisplayPreference("record-search-last", lastSearch.join(","));
 
-			document.forms[0].submit = function() {
-	// Make an AJAX request for the search results.  If no search specified, default to RECENT entries.
-	var q = document.forms[0].elements["q"].value;
-	var t = document.forms[0].elements["t"].value;
-	q = q.replace(/^\s*/,"");
-	q = q.replace(/\s*$/,"");
-	t = t.replace(/^\s*/,"");
-	t = t.replace(/\s*$/,"");
-	if (t == "0") t = "";
-	q += (t? ((q?" ":"")+"type:"+parseInt(t)) : "");
-				// saw TODO modify for multi constraints set
-	var query = "q=" + encodeURIComponent(q);
-	if (document.getElementById("r-recent").checked  ||  q == "") {
-		query += "&r=recent";
-	}
-	if (top.HEURIST.parameters.db) {
-		query += "&db=" + top.HEURIST.parameters.db;
-	}else if (top.HEURIST.database.name) {
-		query += "&db=" + top.HEURIST.database.name;
-	}
-
-	document.body.cursor = "wait";
-
-	var resultsDiv = document.getElementById("results");
-	resultsDiv.innerHTML = "<i style='padding: 1ex;'>Searching ...</i>";
-
-	top.HEURIST.util.sendRequest(top.HEURIST.baseURL + "records/pointer/getRecordListForSearch.php", notifyResults, query);
-
-	return false;
-			}
-
-			/* FLAGRANT abuse of the onsubmit function, but otherwise hitting return in the field submits the entire page */
-			document.forms[0].onsubmit = function() { document.forms[0].submit(); return false; };
-
-
-			function initPage() {
-	var qVal = window.HEURIST.parameters["q"];
-	if (! qVal  &&  ! (rectype)) {
-		qVal = top.HEURIST.util.getDisplayPreference("record-search-string");
-	}
-	document.forms[0].elements["q"].value = qVal  ||  "";
-
-	top.HEURIST.registerEvent(window, "load", function() { document.forms[0].elements["q"].focus(); });
-
-	var preferredType = top.HEURIST.util.getDisplayPreference("record-search-type");
-	var initialType = preferredType;
-	if (rectypes) {
-		for (var type in rectypes) {	// careful! this only runs once and then breaks.
-			if (!rectypes[preferredType]) {
-				initialType = type;
-			}
-			break;
-		}
-	}
-
-	var tElt = document.getElementById("t");
-	tElt.selectedIndex = 0;
-
-	if (!rectypes) {
-		tElt.options[tElt.options.length] = new Option("Any record type", "");
-		// rectypes displayed in Groups by group display order then by display order within group
-					for (index in top.HEURIST.rectypes.groups){
-						if (index == "groupIDToIndex" ||
-							top.HEURIST.rectypes.groups[index].showTypes.length < 1) continue;
-		var grp = document.createElement("optgroup");
-						grp.label = top.HEURIST.rectypes.groups[index].name;
-			tElt.appendChild(grp);
-						for (var recTypeIDIndex in top.HEURIST.rectypes.groups[index].showTypes) {
-							var recTypeID = top.HEURIST.rectypes.groups[index].showTypes[recTypeIDIndex];
-					var name = top.HEURIST.rectypes.names[recTypeID];
-							tElt.appendChild(new Option(name, recTypeID));
-			}
-		}
-	}else{
-		for (var rectypeID in rectypes) {
-			var name = top.HEURIST.rectypes.names[rectypeID];
-			tElt.appendChild( new Option(name, rectypeID));
-			if (rectypeID == initialType) {
-			tElt.selectedIndex = tElt.options.length-1;
-		}
-	}
-	}
-
-				if (window.HEURIST.parameters["r"] == "recent" || qVal == ""){
-		document.getElementById("r-recent").checked = true;
-				}else{
-		document.getElementById("r-all").checked = true;
+					///close and window and sent result
+					window.close(bibID, bibTitle);
 				}
+			}(record[0], record[1], record[3]));
+		}
 
-	document.forms[0].submit();
+		if (records.length == 0) {
+			resultsDiv.innerHTML = "<b style='padding: 1ex;'>No matching records</b>";
+		}
 
-	var intervalID = setInterval(function() {
-		try {
-			if (document.getElementById("q")) {
-				document.getElementById("q").focus();
-				clearInterval(intervalID);
+		document.body.cursor = "";
+	}
+
+	document.forms[0].submit = function()
+	{
+
+		// Make an AJAX request for the search results.  If no search specified, default to RECENT entries.
+		var q = document.forms[0].elements["q"].value;
+		var t = document.forms[0].elements["t"].value;
+		q = q.replace(/^\s*/,"");
+		q = q.replace(/\s*$/,"");
+		t = t.replace(/^\s*/,"");
+		t = t.replace(/\s*$/,"");
+		if (t == "0") t = "";
+
+		if(q!=""){
+			 q = "\""+q+"\"";
+		}
+
+		q += (t? ((q?" ":"")+"type:"+parseInt(t)) : "");
+
+		if(document.getElementById("r-recent-search").checked){
+			//find recent search results
+			var lastSearcheS = top.HEURIST.util.getDisplayPreference("record-search-last");
+			q += (q?" ":"") + " ids:"+lastSearcheS;
+		}
+
+		// saw TODO modify for multi constraints set
+		var query = "q=" + encodeURIComponent(q);
+
+		if (document.getElementById("r-recent").checked  ||  q == "") {
+			query += "&r=recent";
+		}
+
+		if (top.HEURIST.parameters.db) {
+			query += "&db=" + top.HEURIST.parameters.db;
+		}else if (top.HEURIST.database.name) {
+			query += "&db=" + top.HEURIST.database.name;
+		}
+
+		document.body.cursor = "wait";
+
+		var resultsDiv = document.getElementById("results");
+		resultsDiv.innerHTML = "<i style='padding: 1ex;'>Searching ...</i>";
+
+		top.HEURIST.util.sendRequest(top.HEURIST.baseURL + "records/pointer/getRecordListForSearch.php", notifyResults, query);
+
+		return false;
+	}
+
+	/* FLAGRANT abuse of the onsubmit function, but otherwise hitting return in the field submits the entire page */
+	document.forms[0].onsubmit = function() { document.forms[0].submit(); return false; };
+
+
+	function initPage()
+	{
+
+		var qVal = window.HEURIST.parameters["q"];
+		if (! qVal  &&  ! (rectype)) {
+			qVal = top.HEURIST.util.getDisplayPreference("record-search-string");
+		}
+		document.forms[0].elements["q"].value = qVal  ||  "";
+
+		top.HEURIST.registerEvent(window, "load", function() { document.forms[0].elements["q"].focus(); });
+
+		var preferredType = top.HEURIST.util.getDisplayPreference("record-search-type");
+		var initialType = preferredType;
+		if (rectypes) {
+			for (var type in rectypes) {	// careful! this only runs once and then breaks.
+				if (!rectypes[preferredType]) {
+					initialType = type;
+				}
+				break;
 			}
-		} catch (e) { }
-	}, 0);
+		}
+
+		var tElt = document.getElementById("t");
+		tElt.selectedIndex = 0;
+
+		if (!rectypes) {
+			tElt.options[tElt.options.length] = new Option("Any record type", "");
+			// rectypes displayed in Groups by group display order then by display order within group
+			for (index in top.HEURIST.rectypes.groups){
+				if (index == "groupIDToIndex" ||
+					top.HEURIST.rectypes.groups[index].showTypes.length < 1) {
+						continue;
+				}
+				var grp = document.createElement("optgroup");
+				grp.label = top.HEURIST.rectypes.groups[index].name;
+				tElt.appendChild(grp);
+				for (var recTypeIDIndex in top.HEURIST.rectypes.groups[index].showTypes) {
+						var recTypeID = top.HEURIST.rectypes.groups[index].showTypes[recTypeIDIndex];
+						var name = top.HEURIST.rectypes.names[recTypeID];
+						tElt.appendChild(new Option(name, recTypeID));
+				}
 			}
-			top.HEURIST.registerEvent(window, "load", initPage);
+		}else{
+			for (var rectypeID in rectypes) {
+				var name = top.HEURIST.rectypes.names[rectypeID];
+				tElt.appendChild( new Option(name, rectypeID));
+				if (rectypeID == initialType) {
+					tElt.selectedIndex = tElt.options.length-1;
+				}
+			}
+		}
+
+		var lastSearcheS = top.HEURIST.util.getDisplayPreference("record-search-last");
+		//parse string
+		if(lastSearcheS!=="")
+		{
+			document.forms[0].elements["q"].value = "";
+			document.getElementById("r-recent-search").checked = true;
+
+		}else{
+			//if there is not previous search for current record type - show all or recently added
+			if (window.HEURIST.parameters["r"] == "recent" || qVal == ""){
+				document.getElementById("r-recent").checked = true;
+			}else{
+				document.getElementById("r-all").checked = true;
+			}
+
+		}
+		document.forms[0].submit();
+
+			var intervalID = setInterval(function() {
+				try {
+					if (document.getElementById("q")) {
+						document.getElementById("q").focus();
+						clearInterval(intervalID);
+					}
+				} catch (e) { }
+			}, 0);
+	}
+
+	top.HEURIST.registerEvent(window, "load", initPage);
   </script>
  </body>
 </html>

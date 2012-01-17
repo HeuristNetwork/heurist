@@ -44,7 +44,7 @@ function EditRecStructure() {
 			window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 			rty_ID = window.HEURIST.parameters.rty_ID;
 			//DEBUG Dom.get("ed_rty_ID").value = rty_ID;
-			var recTypeIcon  = top.HEURIST.iconDir+rty_ID+".png";
+			var recTypeIcon  = top.HEURIST.iconBaseURL+rty_ID+".png";
 			var formTitle = document.getElementById('recordTitle');
 			formTitle.innerHTML = "<div class=\"rectypeIconHolder\" style=\"background-image:url("+recTypeIcon+")\"></div><span class=\"recTypeName\">"+top.HEURIST.rectypes.names[rty_ID]+"</span>";
 		}
@@ -54,7 +54,7 @@ function EditRecStructure() {
 		//<div style="display:inline-block; text-align:left">
 		//'<input type="button" value="collapse all" onclick="onCollapseAll()"/>'+
 		//'<input type="button" value="Enable Drag" onclick="onToggleDrag(event)"/></div>'+
-		'<input style="display:none;" type="button" id="btnSaveOrder" value="Save order" onclick="onUpdateStructureOnServer(false)"/>'+
+		'<input style="display:none override;color:red;visibility:hidden;" type="button" id="btnSaveOrder" value="Save order" onclick="onUpdateStructureOnServer(false)"/>'+
 		'<input type="button" class="add" value="Insert field" onclick="onAddNewDetail()"/>'+
 		// note class=add --> global.css add-button, is set to float:right, but class adds the + to the button
 		'<input type="button" style="margin:0 5px" value="New field type" onClick="onDefineNewType()"/>'+
@@ -975,6 +975,7 @@ function EditRecStructure() {
 
 		var btnSaveOrder = Dom.get('btnSaveOrder');
 		btnSaveOrder.style.display = "none";
+		btnSaveOrder.style.visibility = "hidden";
 
 		if(!Hul.isnull(str)){
 			//DEBUG  alert(str);
@@ -1107,8 +1108,10 @@ function EditRecStructure() {
 
 		if(isChanged){
 			//index if field rst_DisplayOrder
-			if(!Hul.isnull(_updatedFields) && _updatedFields.indexOf(9)<0){
-				_updatedFields.push(9);
+			var field_index = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayOrder;
+
+			if(!Hul.isnull(_updatedFields) && _updatedFields.indexOf(field_index)<0){
+				_updatedFields.push(field_index);
 			}
 			top.HEURIST.rectypes.dtDisplayOrder[rty_ID] = neworder;
 
@@ -1116,8 +1119,12 @@ function EditRecStructure() {
 			dragDropEnable();
 			//					DDM.refreshCache();
 
+			_saveUpdates(false);
+			/* art 2012-01-17 - save at once
 			var btnSaveOrder = YAHOO.util.Dom.get('btnSaveOrder');
 			btnSaveOrder.style.display = "inline-block";
+			btnSaveOrder.style.visibility = "visible";
+			*/
 		}
 	}
 
