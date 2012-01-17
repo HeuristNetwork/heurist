@@ -227,6 +227,12 @@
 		define('HEURIST_RESTRICT_GROUP_ID',$sysValues['sys_OwnerGroupID']);
 	}
 
+	if (@$sysValues['sys_SetPublicToPendingOnEdit'] == 1) {
+		define('HEURIST_PUBLIC_TO_PENDING',1);
+	}else{
+		define('HEURIST_PUBLIC_TO_PENDING',0);
+	}
+
 	define ('HEURIST_NEWREC_OWNER_ID', $sysValues['sys_NewRecOwnerGrpID']);
 	define ('HEURIST_NEWREC_ACCESS', $sysValues['sys_NewRecAccess']);
 	define ('HEURIST_DBID', $sysValues['sys_dbRegisteredID']);

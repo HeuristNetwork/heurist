@@ -218,6 +218,8 @@ function updateRecord($bibID) {
 		}
 		if (array_key_exists("rec_visibility", $_POST)) {
 			$bibUpdates["rec_NonOwnerVisibility"] = $_POST["rec_visibility"];
+		}else if ($bib['rec_NonOwnerVisibility'] == 'public' && HEURIST_PUBLIC_TO_PENDING){
+			$bibUpdates["rec_NonOwnerVisibility"] = 'pending';
 		}
 	}
 //	error_log(" in saveRecord update recUpdates = ".print_r($bibUpdates,true));

@@ -351,15 +351,67 @@ function print_private_details($bib) {
 
 				$bd['val'] = '<div id="preview'.$bd['dty_ID'].'" class="urlinclude" style="border:none red 1px;width:100%;height:300px;"><input type="hidden" value="'.$bd['val'].'"></div>';
 
-			}else 	if ($bd['dty_Type'] == 'enum') {
+			}else if ($bd['dty_Type'] == 'enum') {
 
 				$bd['val'] = output_chunker($terms['termsByDomainLookup']['enum'][$bd['val']][0]);
 
-			}else 	if ($bd['dty_Type'] == 'relationtype') {
+			}else if ($bd['dty_Type'] == 'relationtype') {
 
 				$bd['val'] = output_chunker($terms['termsByDomainLookup']['relation'][$bd['val']][0]);
 
-			}else 	if ($bd['dty_Type'] == 'resource') {
+			}else if ($bd['dty_Type'] == 'date') {
+				if (strpos($bd['val'],"|")!==false) {// temporal encoded date
+					$value = $bd['val'];
+					$tDate = array();
+					$props = explode("|",substr_replace($value,"",0,1)); // remove first verticle bar and create array
+					foreach ($props as $prop) {//create an assoc array
+						list($tag, $val) = explode("=",$prop);
+						$tDate[$tag] = $val;
+					}
+					switch ($tDate["TYP"]){
+						case 's'://simple
+							if (@$tDate['DAT']){
+								$bd['val'] = $tDate['DAT'];
+							}else{
+								$bd['val'] = "unknown temporal format";
+							}
+							break;
+						case 'f'://fuzzy
+							if (@$tDate['DAT']){
+								$bd['val'] = $tDate['DAT'] .
+											($tDate['RNG']? ' ' . convertDurationToDelta($tDate['RNG'],'±'):"");
+							}else{
+								$bd['val'] = "unknown fuzzy temporal format";
+							}
+							break;
+						case 'c'://carbon
+							$bd['val'] = (@$tDate['BPD']? '' . $tDate['BPD'] . ' BPD':
+											@$tDate['BCE']? '' . $tDate['BCE'] . ' BCE': "");
+							if ($bd['val']) {
+								$bd['val'] = $bd['val'].(@$tDate['DEV']? ' ' . convertDurationToDelta($tDate['DEV'],'±'):
+													@$tDate['DVP']? ' ' . convertDurationToDelta($tDate['DVP'],'+').
+															(@$tDate['DVN']?"/ ".convertDurationToDelta($tDate['DVN'],'-'):""):
+													@$tDate['DVN']?" ".convertDurationToDelta($tDate['DVN'],'-'):"");
+							}else{
+								$bd['val'] = "unknown carbon temporal format";
+							}
+							break;
+						case 'p'://probability range
+							if (@$tDate['PDB'] && @$tDate['PDE']){
+								$bd['val'] = "" . $tDate['PDB']." - ". $tDate['PDE'];
+							}else if (@$tDate['TPQ'] && @$tDate['TAQ']){
+								$bd['val'] = "" . $tDate['TPQ']." - ". $tDate['TAQ'];
+							}else{
+								$bd['val'] = "unknown probability range temporal format";
+							}
+							break;
+					}
+					$bd['val'] .= " [$value]";
+				}
+
+				$bd['val'] = output_chunker($bd['val']);
+
+			}else if ($bd['dty_Type'] == 'resource') {
 
 				$res = mysql_query('select rec_Title from Records where rec_ID='.intval($bd['val']));
 				$row = mysql_fetch_row($res);
@@ -441,6 +493,40 @@ function print_private_details($bib) {
 <?php
 }
 
+function convertDurationToDelta($value,$prefix = "") {
+	if (preg_match('/^P([^T]*)T?(.*)$/', $value, $matches)) { // valid ISO Duration split into date and time
+		$date = @$matches[1];
+		$time = @$matches[2];
+		if ($date) {
+			if (preg_match('/[YMD]/',$date)){ //char separated version 6Y5M8D
+				preg_match('/(?:(\d+)Y)?(?:(\d|0\d|1[012])M)?(?:(0?[1-9]|[12]\d|3[01])D)?/',$date,$matches);
+			}else{ //delimited version  0004-12-06
+				preg_match('/^(?:(\d\d\d\d)[-\/]?)?(?:(1[012]|0[23]|[23](?!\d)|0?1(?!\d)|0?[4-9](?!\d))[-\/]?)?(?:([12]\d|3[01]|0?[1-9]))?\s*$/',$date,$matches);
+			}
+			if (@$matches[1]) $year = intval($matches[1]);
+			if (@$matches[2]) $month = intval($matches[2]);
+			if (@$matches[3]) $day = intval($matches[3]);
+		}
+		if ($time) {
+			if (preg_match('/[HMS]/',$time)){ //char separated version 6H5M8S
+				preg_match('/(?:(0?[1-9]|1\d|2[0-3])H)?(?:(0?[1-9]|[0-5]\d)M)?(?:(0?[1-9]|[0-5]\d)S)?/',$time,$matches);
+			}else{ //delimited version  23:59:59
+				preg_match('/(?:(0?[1-9]|1\d|2[0-3])[:\.])?(?:(0?[1-9]|[0-5]\d)[:\.])?(?:(0?[1-9]|[0-5]\d))?/',$time,$matches);
+			}
+			if (@$matches[1]) $hour = intval($matches[1]);
+			if (@$matches[2]) $minute = intval($matches[2]);
+			if (@$matches[3]) $second = intval($matches[3]);
+		}
+		return (@$year ? "$prefix" + $year + "year(s)" :
+				@$month ? "$prefix" + $month + "month(s)" :
+				@$day ? "$prefix" + $day + "day(s)" :
+				@$hour ? "$prefix" + $hour + "hour(s)" :
+				@$minute ? "$prefix" + $minute + "minute(s)" :
+				@$second ? "$prefix" + $second + "second(s)" :
+				"");
+
+	}
+}
 
 function print_other_tags($bib) {
 ?>

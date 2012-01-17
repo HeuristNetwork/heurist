@@ -963,7 +963,7 @@ $tDurationDict = array(	"DUR" =>	"Simple Duration",
 
 function outputTemporalDetail($attrs, $value) {
 	global $typeDict,$fieldsDict,$determinationCodes,$profileCodes,$tDateDict,$tDurationDict;
-	$temporalStr = substr_replace($value,"",0,1);
+	$temporalStr = substr_replace($value,"",0,1); // remove first verticle bar
 	$props = explode("|", $temporalStr);
 	$properties = array();
 	foreach ($props as $prop) {

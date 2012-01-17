@@ -1155,7 +1155,7 @@ function reltype_inverse ($relTermID) {	//saw Enum change - find inverse as an i
 	if (!$inverse)
 	$inverse = array_search($relTermID, $inverses);
 	if (!$inverse)
-	$inverse = 'Inverse of '.$relTermID;
+	$inverse = 'Inverse of '.$relTermID;	//FIXME: This should be translated to the term label.
 
 	return $inverse;
 }
@@ -1182,7 +1182,7 @@ global $relTypDT,$relSrcDT,$relTrgDT,$intrpDT,$notesDT,$startDT,$endDT,$titleDT;
 				if ($i_am_primary) {
 					$bd['RelTermID'] = $row['dtl_Value'];
 				}else{
-					$bd['RelTermID'] = reltype_inverse($row['dtl_Value']);
+					$bd['RelTermID'] = reltype_inverse($row['dtl_Value']);  // BUG: assumes reltype_inverse returns ID
 				}
 				$relval = mysql_fetch_assoc(mysql_query('select trm_Label, trm_ParentTermID from defTerms where trm_ID = ' .  intval($bd['RelTermID'])));
 				$bd['RelTerm'] = $relval['trm_Label'];
