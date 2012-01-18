@@ -46,16 +46,19 @@
 
 //mysql_connection_db_select(DATABASE);
 
-
 function check_title_mask($mask, $rt) {
+	return check_title_mask2($mask, $rt, false);
+}
+
+function check_title_mask2($mask, $rt, $checkempty) {
 	/* Check that the given title mask is well-formed for the given reference type */
 	/* Returns an error string describing any faults in the mask. */
 
 	if (! preg_match_all('/\\[\\[|\\]\\]|\\[\\s*([^]]+)\\s*\\]/', $mask, $matches))
-		return '';	// no substitutions to make, therefore no errors
+		return $checkempty?'Mask must have at least one field to replace':'';	// no substitutions to make, therefore no errors
 
 	foreach ($matches[1] as $field_name) {
-		if (! $field_name) continue;
+		if ( (!$field_name) || $field_name == "ID" || $field_name == "Modified") continue;
 		$err = _title_mask__check_field_name($field_name, $rt);
 		if ($err) return $err;
 	}
@@ -119,11 +122,16 @@ global $relRT;
 	/* Returns an error string if it isn't */
 	$rdr = _title_mask__get_rec_detail_requirements();
 	$rdt = _title_mask__get_rec_detail_types();
-	$rct = _title_mask__get_rec_types();
 	if (is_array($rt)){
 		return "$field_name was tested with Array of rectypes - bad parameter";
+	}else if (!$rt){
+		return "Record type is not defined";
 	}
-//error_log("fieldname = $field_name and rt = $rt");
+	$rct = _title_mask__get_rec_types($rt);
+//error_log("fieldname = $field_name and rt = $rt   ".array_key_exists($rt, $rct));
+	if (! array_key_exists($rt, $rct) ){
+		return "Title mask can be tested with the existing record type. Record type $rt not found";
+	}
 
 	$dot_pos = strpos($field_name, '.');
 	if ($dot_pos === FALSE) {	/* direct field-name check */
@@ -454,10 +462,12 @@ function _title_mask__get_rec_detail($rec_id, $rdt_id) {
 }
 
 
-function _title_mask__get_rec_types() {
+function _title_mask__get_rec_types($rt) {
 	static $rct;
 	if (! $rct) {
-		$rct = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', '1');
+		$cond = ($rt) ?'rty_ID='.$rt :'1';
+
+		$rct = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', $cond);
 //error_log("rt ".print_r($rct,true));
 	}
 	return $rct;

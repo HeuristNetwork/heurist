@@ -14,10 +14,6 @@
  * @todo
  **/
 
-?>
-
-<?php
-
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 //require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
@@ -26,9 +22,14 @@ require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
 mysql_connection_select(DATABASE);
 
 $rectypeID = @$_REQUEST['rty_id'];
-$recID = @$_REQUEST['rec_id'];
 $mask = @$_REQUEST['mask'];
 
-echo fill_title_mask($mask, $recID, $rectypeID);
+if(array_key_exists("check",@$_REQUEST))
+{
+	echo check_title_mask2($mask, $rectypeID, true);
+}else{
+	$recID = @$_REQUEST['rec_id'];
+	echo fill_title_mask($mask, $recID, $rectypeID);
+}
 exit();
 ?>

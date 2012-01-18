@@ -172,8 +172,9 @@ $currfile = null;
 						if(!($filename=="." || $filename=="..")){
 							if(is_dir($dir.$filename)){
 								array_push($subdirs, $dir.$filename."/");
-							}else if($filename == "fieldhelper.xml"){
+							}else { //if($filename == "fieldhelper.xml"){
 								$rep_counter = $rep_counter + harvest_in_dir($dir);
+								break; //todo - check for folder with name zzzz (i am not sure about sort order)
 							}
 						}
 					}
@@ -215,40 +216,66 @@ error_log("ERROR :".$message);
     function harvest_in_dir($dir) {
 
 	    global $rep_issues, $fieldhelper_to_heurist_map,
-		    $geoDT, $fileDT;
+		    $geoDT, $fileDT, $titleDT, $startdateDT, $enddateDT, $descriptionDT;
 
 		$rep_processed = 0;
+	    $rep_ignored = 0;
+		$f_items = null; //reference to items element
+
+		if(!is_writable($dir)){
+   			$rep_issues = "Folder ".$dir." is not writable. Check permissions";
+   			return 0;
+		}
+
 
 	    $manifest_file = $dir."fieldhelper.xml";
 
+		$all_files = scandir($dir);
+
 error_log(">>>>>>in dir: ".$manifest_file);
+		if(file_exists($manifest_file)){
 
-	    //read fieldhelpe.xml
-	    if(is_readable($manifest_file)){
+	    	//read fieldhelpe.xml
+	    	if(is_readable($manifest_file)){
 
-    	//check write permission
-    	if(is_writable($manifest_file)){
+    			//check write permission
+    			if(!is_writable($manifest_file)){
+	    			$rep_issues = $rep_issues."<br/> Manifest is not writable in ".$dir;
+	    			return 0;
+				}
+			}else{
+	    		$rep_issues = $rep_issues."<br> manifest is not readable in ".$dir;
+	    		return 0;
+			}
 
-		    $fh_data = simplexml_load_file($manifest_file);
+		$fh_data = simplexml_load_file($manifest_file);
+
+		if($fh_data==null || is_string($fh_data)){
+		    $rep_issues = "Manifest file is corrupted";
+		    return 0;
+		}
+
+		//MAIN 	LOOP in manifest
 		    $not_found = true;
 
-		    foreach ($fh_data->children() as $f_gen){
+		foreach ($fh_data->children() as $f_gen){
 			if($f_gen->getName()=="items"){
+
+				$f_items = $f_gen;
 			    $not_found = false;
-			    $rep_ignored = 0;
 
 			    foreach ($f_gen->children() as $f_item){
 
-				$recordId	 = null;
-				$recordType  = RT_MEDIA_RECORD; //media by default
-				$recordURL   = null;
-				$recordNotes = null;
-				$el_heuristid = null;
-				$lat = null;
-				$lon = null;
-				$filename = null;
-				$details = array();
-				$file_id = null;
+					$recordId	 = null;
+					$recordType  = RT_MEDIA_RECORD; //media by default
+					$recordURL   = null;
+					$recordNotes = null;
+					$el_heuristid = null;
+					$lat = null;
+					$lon = null;
+					$filename = null;
+					$details = array();
+					$file_id = null;
 
 				foreach ($f_item->children() as $el){  //$key=>$value
 
@@ -285,60 +312,73 @@ error_log(">>>>>>in dir: ".$manifest_file);
 						}
 
 					}
-				}//for item
+				}//for item keys
 
 
 			    if($recordId==null){ //import only new
 
-				if($filename){
+					if($filename){
 
-					$currfile = $filename;
+						if(file_exists($filename)){
 
-				    //add-update the uploaded file
-				    $file_id = register_file($filename, null, false);
-				    if(is_numeric($file_id)){
-						$details["t:".$fileDT] = array("1"=>$file_id);
-				    }else{
-						$rep_issues = $rep_issues."<br/>Can't register file:".$currfile.". ".$file_id;
-						$file_id = null;
+						    //add-update the uploaded file
+						    $file_id = register_file($filename, null, false);
+						    if(is_numeric($file_id)){
+								$details["t:".$fileDT] = array("1"=>$file_id);
+						    }else{
+								$rep_issues = $rep_issues."<br/>Can't register file:".$filename.". ".$file_id;
+								$file_id = null;
+							}
+
+							//exclude from the list of all files in this folder
+							if($file_id && array_key_exists($filename, $all_files)){
+								unset($all_files[$filename]);
+							}
+						}
 					}
-				}
 
-				if(!$file_id){
-				    continue; //add with valid file only
-				}
+					if(!$file_id){
+					    continue; //add with valid file only
+					}
 
-				if(is_numeric($lat) && is_numeric($lon) && ($lat!=0 || $lon!=0) ){
-				    $details["t:".$geoDT] = array("1"=>"p POINT($lon $lat)");
-				}
+					if(is_numeric($lat) && is_numeric($lon) && ($lat!=0 || $lon!=0) ){
+					    $details["t:".$geoDT] = array("1"=>"p POINT($lon $lat)");
+					}
+
+					//set title by default
+					if (!array_key_exists("t:".$titleDT, $details)){
+						$details["t:".$titleDT] = "title for ".$filename;
+					}
 
 //error_log(">>>>>>details: ".print_r($details, true));
 
-				//add-update Heurist record
-				$out = saveRecord($recordId, $recordType,
-					$recordURL,
-					$recordNotes,
-					null, //???get_group_ids(), //group
-					null, //viewable
-					null, //bookmark
-					null, //pnotes
-					null, //rating
-					null, //tags
-					null, //wgtags
-					$details,
-					null, //-notify
-					null, //+notify
-					null, //-comment
-					null, //comment
-					null //+comment
-					);
+					//add-update Heurist record
+					$out = saveRecord($recordId, $recordType,
+						$recordURL,
+						$recordNotes,
+						null, //???get_group_ids(), //group
+						null, //viewable
+						null, //bookmark
+						null, //pnotes
+						null, //rating
+						null, //tags
+						null, //wgtags
+						$details,
+						null, //-notify
+						null, //+notify
+						null, //-comment
+						null, //comment
+						null //+comment
+						);
 
-				//update xml
-				if($recordId==null){
-					$f_item->addChild("heurist_id", $out["bibID"]);
-				}else{
-					$el_heuristid["heurist_id"] = $out["bibID"];
-				}
+//error_log(">>>>>>".print_r($out, true));
+
+					//update xml
+					if($recordId==null){
+						$f_item->addChild("heurist_id", $out["bibID"]);
+					}else{
+						$el_heuristid["heurist_id"] = $out["bibID"];
+					}
 
 					$rep_processed++;
 
@@ -348,26 +388,118 @@ error_log(">>>>>>in dir: ".$manifest_file);
 
 				}//for items
 			}//if has items
-			}//for
+			}//for all children in manifest
 
-		    if($not_found){
-				$rep_issues=$rep_issues."<br>folder $dir cotains corrupted or empty manifest file";
-		    }else{
-				if($rep_ignored>0){
-			    	$rep_issues=$rep_issues."<br> $rep_ignored entries are ignored for ".$dir;
-				}
+		}//manifest does not exists
+		else{
 
-				//save modified xml (with updated heurist_id tags
-				$fh_data->formatOutput = true;
-				$fh_data->saveXML($manifest_file);
-		    }
+			//create empty manifest XML  - TODO!!!!
+$s_manifest = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<fieldhelper version="1">
+  <info>
+    <AppName>Heurist</AppName>
+    <AppVersion>v 3.0.0 2012-01-01</AppVersion>
+    <AppCopyright>© ArtEresearch, University of Sydney</AppCopyright>
+    <date></date>
+  </info>
+<formatOutput>1</formatOutput></fieldhelper>
+XML;
 
-
-		}else{
-	    	$rep_issues = $rep_issues."<br/> Manifest is not writable in ".$dir;
+			$fh_data = simplexml_load_string($s_manifest);
 		}
+
+		// add new empty items element
+		if($f_items==null){
+			$f_items = $fh_data->addChild("items");
+		}
+
+		$allowed_exts = array("jpg", "jpeg", "png", "gif");
+
+		//for files in folder that are not specified in the directory
+		foreach ($all_files as $filename){
+				if(!($filename=="." || $filename==".." || is_dir($dir.$filename))){
+
+//error_log("1>>>>".is_dir($filename)."  ".$filename);
+
+						$filename = $dir.$filename;
+						$flleinfo = pathinfo($filename);
+
+						//checks for allowed extensions
+						if(in_array(strtolower($flleinfo['extension']),$allowed_exts))
+						{
+
+							$details = array();
+
+						    $file_id = register_file($filename, null, false);
+						    if(is_numeric($file_id)){
+								$details["t:".$fileDT] = array("1"=>$file_id);
+						    }else{
+								$rep_issues = $rep_issues."<br/>Can't register file:".$filename.". ".$file_id;
+								$file_id = null;
+								continue;
+							}
+
+							$details["t:".$titleDT] = array("1"=>"title for ".$flleinfo['basename']);
+							/* TODO - extract these data from exif
+							$details["t:".$descriptionDT] = array("1"=>$file_id);
+							$details["t:".$startdateDT] = array("1"=>$file_id);
+							$details["t:".$enddateDT] = array("1"=>$file_id);
+							$details["t:".$geoDT] = array("1"=>$file_id);
+							*/
+
+							//add-update Heurist record
+							$out = saveRecord(null, //record ID
+								RT_MEDIA_RECORD, //record type
+								null,  //record URL
+								null,  //Notes
+								null, //???get_group_ids(), //group
+								null, //viewable
+								null, //bookmark
+								null, //pnotes
+								null, //rating
+								null, //tags
+								null, //wgtags
+								$details,
+								null, //-notify
+								null, //+notify
+								null, //-comment
+								null, //comment
+								null //+comment
+								);
+
+
+							$f_item = $f_items->addChild("item");
+							$f_item->addChild("filename", $flleinfo['basename']);
+							$f_item->addChild("nativePath", $filename);
+							$f_item->addChild("folder", $flleinfo['dirname']);
+							$f_item->addChild("extension", $flleinfo['extension']);
+							//$f_item->addChild("DateTime", );
+							//$f_item->addChild("DateTimeOriginal", );
+							$f_item->addChild("filedate", date("Y/m/d H:i:s.", filectime($filename)));
+							$f_item->addChild("typeContent", "image");
+							$f_item->addChild("device", "image");
+							$f_item->addChild("duration", "2000");
+							$f_item->addChild("original_metadata", "chk");
+							$f_item->addChild("Name0", "title for ".$flleinfo['basename']);
+							$f_item->addChild("heurist_id", $out["bibID"]);
+
+							$rep_processed++;
+							$not_found = false;
+						}//check ext
+				}
+		}//for files in folder that are not specified in the directory
+
+		if($not_found){
+			$rep_issues=$rep_issues."<br>folder $dir cotains corrupted or empty manifest file";
 		}else{
-	    	$rep_issues=$rep_issues."<br> manifest is not exist or not readable in ".$dir;
+			if($rep_ignored>0){
+			    $rep_issues=$rep_issues."<br> $rep_ignored entries in manifest are ignored for ".$dir;
+			}
+
+			//save modified xml (with updated heurist_id tags
+			$fh_data->formatOutput = true;
+			$fh_data->saveXML($manifest_file);
 		}
 
 		return $rep_processed;

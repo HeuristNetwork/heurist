@@ -362,7 +362,7 @@ overviews and step-by-step instructions for using Heurist.
 
 		$rows = execSQL($db, $query, null, true);
 
-		if ($rows==0 || is_string($rows) ) {
+		if (is_string($rows) ) {
 			$ret['error'] = "error finding Records for User $recID in deleteUser - ".$rows;
 		}else if ($rows>0){
 			$ret['error'] = "Error. Deleting User ($recID) with existing Records not allowed";
@@ -377,7 +377,7 @@ overviews and step-by-step instructions for using Heurist.
 			//delete references from user-group link table
 			$query = "delete from sysUsrGrpLinks where ugl_UserID=$recID";
 			$rows = execSQL($db, $query, null, true);
-			if ($rows==0 || is_string($rows) ) {
+			if (is_string($rows) ) {
 					$ret['error'] = "db error deleting relations for User $recID from sysUsrGrpLinks - ".$rows;
 			}else{
 

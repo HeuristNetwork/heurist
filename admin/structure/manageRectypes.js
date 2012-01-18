@@ -40,6 +40,9 @@ function RectypeManager() {
 		_deleted = [], //keep removed types to exclude on filtering
 		_cloneHEU = null; //keep Heurist for rollback in case user cancels group/visibility editing
 
+	var __d = new Date(),
+		curtimestamp = __d.getMilliseconds();
+
 	//object to send changes (visibility and group belong) for update on server
 	var _oRecordType = {rectype:{
 			colNames:{common:['rty_ShowInLists','rty_RecTypeGroupID'], dtFields:[]},
@@ -346,8 +349,8 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var id = oRecord.getData("id");
 
-					var str1 = top.HEURIST.iconBaseURL + id + ".png";
-					var thumb = top.HEURIST.iconBaseURL + "thumb/th_" + id + ".png";
+					var str1 = top.HEURIST.iconBaseURL + id + ".png?" + curtimestamp;
+					var thumb = top.HEURIST.iconBaseURL + "thumb/th_" + id + ".png?" + curtimestamp;
 					var icon ="<div class=\"rectypeImages\"><a href=\"#edit_icon\"><img src=\"../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\"></a><div style=\"background-image:url("+thumb+");\" class=\"thumbPopup\"><a href=\"#edit_thumb\"><img src=\"../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a></div></div>"
 					elLiner.innerHTML = icon;
 			}},
@@ -1289,10 +1292,14 @@ function _upload_icon(rectypeID,mode) {
 	}
 
 function icon_refresh(rectypeID) {
+
+		var d = new Date();
+		curtimestamp = d.getMilliseconds();
+
 		var db = top.HEURIST.database.id;
 		var imgIcon = "icon" + rectypeID;
 		var img = document.getElementById(imgIcon);
-		img.style.backgroundImage = "url(" + top.HEURIST.iconBaseURL+rectypeID+".png) !important";
+		img.style.backgroundImage = "url(" + top.HEURIST.iconBaseURL+rectypeID+".png?"+curtimestamp+") !important";
 	}
 
 /*

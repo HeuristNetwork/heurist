@@ -293,25 +293,36 @@ function EditRectypeTitle() {
 	*/
 	function _doTest()
 	{
-		var sel = Dom.get("listRecords");
-		if (sel.selectedIndex>0){
-
 			var mask = document.getElementById('rty_TitleMask').value;
 			var rec_type = top.HEURIST.parameters.rectypeID;
-			var rec_id = sel.value;
+
             var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
                                 (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
 
 			var baseurl = top.HEURIST.basePath + "admin/structure/editRectypeTitle.php";
-			var squery = "?rty_id="+rec_type+"&rec_id="+rec_id+"&mask="+mask+"&db="+db;
+			var squery = "rty_id="+rec_type+"&rec_id="+rec_id+"&mask="+mask+"&db="+db+"&check=1";
 
 			top.HEURIST.util.sendRequest(baseurl, function(xhr) {
 					var obj = xhr.responseText;
-					document.getElementById('testResult').innerHTML = obj;
-				}, squery);
+					if(obj===""){
+						var sel = Dom.get("listRecords");
+						if (sel.selectedIndex>0){
 
-		}
+							var rec_id = sel.value;
+							squery = "rty_id="+rec_type+"&rec_id="+rec_id+"&mask="+mask+"&db="+db;
+							top.HEURIST.util.sendRequest(baseurl, function(xhr) {
+								var obj2 = xhr.responseText;
+								document.getElementById('testResult').innerHTML = obj2;
+							}, squery);
+						}else{
+							alert('Select record from pulldown to test your title mask');
+						}
+					}else{
+						alert(obj);
+					}
+
+				}, squery);
 	}
 
 	//
