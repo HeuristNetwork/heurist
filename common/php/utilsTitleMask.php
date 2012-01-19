@@ -465,6 +465,7 @@ function _title_mask__get_rec_detail($rec_id, $rdt_id) {
 function _title_mask__get_rec_types($rt) {
 	static $rct;
 	if (! $rct) {
+
 		$cond = ($rt) ?'rty_ID='.$rt :'1';
 
 		$rct = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', $cond);

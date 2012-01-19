@@ -81,32 +81,38 @@ $currfile = null;
 
 		if(!array_key_exists('mode', $_REQUEST)) {
 
-			// Find out which folders to parse for XML manifests
-			$query1 = "SELECT sys_MediaFolders from sysIdentification where sys_ID=1";
-			$res1 = mysql_query($query1);
-			if (!$res1 || mysql_num_rows($res1) == 0) {
-				die ("<p><b>Sorry, unable to read the sysIdentification from the current databsae. Possibly wrong database format, please consult Heurist team");
-			}
+			if(false || HEURIST_DBID==0){ //is not registered
 
-			$row1 = $row = mysql_fetch_row($res1);
-			$mediaFolders = $row1[0];
-			$dirs = explode(';', $mediaFolders); // get an array of folders
+				print "<p style=\"color:red\">Database must be registered to use FieldHelper sync function</p>";
 
-			if ($mediaFolders=="" || count($dirs) == 0) {
-				print ("<p><b>It seems that there are no media folders specified for this database</b>");
 			}else{
-				print "<p><b>Media folders for harvesting:</b> $mediaFolders<p>";
-			}
-			print  "<p><a href='../../admin/setup/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."' target='_blank'>".
-			"<img src='../../common/images/external_link_16x16.gif'>Set media folders</a><p>";
+				// Find out which folders to parse for XML manifests
+				$query1 = "SELECT sys_MediaFolders from sysIdentification where sys_ID=1";
+				$res1 = mysql_query($query1);
+				if (!$res1 || mysql_num_rows($res1) == 0) {
+					die ("<p><b>Sorry, unable to read the sysIdentification from the current databsae. Possibly wrong database format, please consult Heurist team");
+				}
+
+				$row1 = $row = mysql_fetch_row($res1);
+				$mediaFolders = $row1[0];
+				$dirs = explode(';', $mediaFolders); // get an array of folders
+
+				if ($mediaFolders=="" || count($dirs) == 0) {
+					print ("<p><b>It seems that there are no media folders specified for this database</b>");
+				}else{
+					print "<p><b>Media folders for harvesting:</b> $mediaFolders<p>";
+				}
+				print  "<p><a href='../../admin/setup/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."' target='_blank'>".
+				"<img src='../../common/images/external_link_16x16.gif'>Set media folders</a><p>";
 
 
-			if (!($mediaFolders=="" || count($dirs) == 0)) {
-				print "<form name='selectdb' action='synchroniseWithFieldHelper.php' method='get'>";
-				print "<input name='mode' value='2' type='hidden'>"; // calls the form to select mappings, step 2
-				print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
-				print "<input name='media' value='$mediaFolders' type='hidden'>";
-				print "<input type='submit' value='Continue' />";
+				if (!($mediaFolders=="" || count($dirs) == 0)) {
+					print "<form name='selectdb' action='synchroniseWithFieldHelper.php' method='get'>";
+					print "<input name='mode' value='2' type='hidden'>"; // calls the form to select mappings, step 2
+					print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
+					print "<input name='media' value='$mediaFolders' type='hidden'>";
+					print "<input type='submit' value='Continue' />";
+				}
 			}
 			exit;
 		}
@@ -232,7 +238,7 @@ error_log("ERROR :".$message);
 
 		$all_files = scandir($dir);
 
-error_log(">>>>>>in dir: ".$manifest_file);
+//error_log(">>>>>>in dir: ".$manifest_file);
 		if(file_exists($manifest_file)){
 
 	    	//read fieldhelpe.xml
@@ -274,6 +280,7 @@ error_log(">>>>>>in dir: ".$manifest_file);
 					$lat = null;
 					$lon = null;
 					$filename = null;
+					$filename_base = null;
 					$details = array();
 					$file_id = null;
 
@@ -294,6 +301,7 @@ error_log(">>>>>>in dir: ".$manifest_file);
 
 						if($key=="file"){
 							$filename = $dir.$value;
+							$filename_base = $value;
 
 						}else if($key=="lat"){
 
@@ -315,6 +323,14 @@ error_log(">>>>>>in dir: ".$manifest_file);
 				}//for item keys
 
 
+				if($filename){
+							//exclude from the list of all files in this folder
+							if(in_array($filename_base, $all_files)){
+								$ind = array_search($filename_base,$all_files,true);
+								unset($all_files[$ind]);
+							}
+				}
+
 			    if($recordId==null){ //import only new
 
 					if($filename){
@@ -330,10 +346,6 @@ error_log(">>>>>>in dir: ".$manifest_file);
 								$file_id = null;
 							}
 
-							//exclude from the list of all files in this folder
-							if($file_id && array_key_exists($filename, $all_files)){
-								unset($all_files[$filename]);
-							}
 						}
 					}
 
@@ -420,7 +432,7 @@ XML;
 		foreach ($all_files as $filename){
 				if(!($filename=="." || $filename==".." || is_dir($dir.$filename))){
 
-//error_log("1>>>>".is_dir($filename)."  ".$filename);
+//error_log("2>>>>".is_dir($dir.$filename)."  ".$filename);
 
 						$filename = $dir.$filename;
 						$flleinfo = pathinfo($filename);

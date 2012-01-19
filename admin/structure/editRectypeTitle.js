@@ -301,7 +301,7 @@ function EditRectypeTitle() {
 
 
 			var baseurl = top.HEURIST.basePath + "admin/structure/editRectypeTitle.php";
-			var squery = "rty_id="+rec_type+"&rec_id="+rec_id+"&mask="+mask+"&db="+db+"&check=1";
+			var squery = "rty_id="+rec_type+"&mask="+mask+"&db="+db+"&check=1";
 
 			top.HEURIST.util.sendRequest(baseurl, function(xhr) {
 					var obj = xhr.responseText;
