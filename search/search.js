@@ -1259,10 +1259,48 @@ top.HEURIST.search = {
 		top.HEURIST.search.gotoResultPage(0, true);
 	},
 
+	handleFieldSelectSimpleSearch: function(){
+		var fld = $("#field-select").val();
+		var dtID = fld.match(/f\:(\d+)\:/);
+		if (!dtID[1]){
+			return;
+		}else{
+			dtID=dtID[1];
+		}
+		var dtyDefs = top.HEURIST.detailTypes.typedefs;
+		// if detatilType is enumeration then create a select for the values.
+		if (dtyDefs[dtID] && dtyDefs[dtID]['commonFields'][dtyDefs['fieldNamesToIndex']['dty_Type']] === 'enum'){
+			//tagging the div as enum hides the inputfield
+			$("#field-select").parent().addClass('enum');
+			//create selector from typedef
+			var allTerms = top.HEURIST.util.expandJsonStructure(dtyDefs[dtID]['commonFields'][dtyDefs['fieldNamesToIndex']['dty_JsonTermIDTree']]),
+				disabledTerms = top.HEURIST.util.expandJsonStructure(dtyDefs[dtID]['commonFields'][dtyDefs['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']]);
+			var enumSelector = top.HEURIST.util.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup['enum'], null);
+			if (enumSelector){
+				enumSelector.id = "simple-search-enum-selector";
+			}
+			//attach onchange handler
+			enumSelector.onchange = function(){
+				top.HEURIST.search.calcShowSimpleSearch();
+			}
+			//add it to the popup
+			YAHOO.util.Dom.insertAfter(enumSelector,$("#input-contains").get(0))
+		}else{//reset to standard freetext input field
+			//if enum selector exist remove it
+			if ($("#simple-search-enum-selector").length>0) {
+				$("#simple-search-enum-selector").remove();
+			}
+			//untagging the div shows the regular input field
+			$("#field-select").parent().removeClass('enum');
+		}
+		top.HEURIST.search.calcShowSimpleSearch();
+	},
+
 	calcShowSimpleSearch: function () {
 		var q = $("#rectype-select").val();
 		var fld = $("#field-select").val();
-		var ctn = $("#input-contains").val();
+		var ctn = $("#field-select").parent().hasClass('enum') ?$("#simple-search-enum-selector").val() :
+																$("#input-contains").val();
 		q = (q? (fld?q+" ": q ):"") + (fld?fld + (ctn?'"'+ctn+'"':""):"");
 		if (q) {
 			$("#q").val(q);
@@ -1316,7 +1354,7 @@ top.HEURIST.search = {
 		var detailTypes = top.HEURIST.detailTypes;
 		var fieldValSelect = document.getElementById("field-select");
 		fieldValSelect.innerHTML = '<option value="" selected>Any field</option>';
-		fieldValSelect.onchange =  top.HEURIST.search.calcShowSimpleSearch;
+		fieldValSelect.onchange =  top.HEURIST.search.handleFieldSelectSimpleSearch;
 
 		// rectypes displayed in Groups by group display order then by display order within group
 		for (var index in detailTypes.groups){
@@ -1351,7 +1389,7 @@ top.HEURIST.search = {
 		var fields = top.HEURIST.rectypes.typedefs[rt].dtFields;
 		var fieldValSelect = document.getElementById("field-select");
 		fieldValSelect.innerHTML = '<option value="" selected>Any field</option>';
-		fieldValSelect.onchange =  top.HEURIST.search.calcShowSimpleSearch;
+		fieldValSelect.onchange = top.HEURIST.search.handleFieldSelectSimpleSearch;
 		// rectypes displayed in Groups by group display order then by display order within group
 		for (var dtID in fields){
 			var name = fields[dtID][0] +" (" + dtID + ")";
@@ -2732,11 +2770,60 @@ top.HEURIST.search = {
 		top.HEURIST.util.popupTinyElement(window, pwd, { x: pos.x + elt.offsetWidth, y: pos.y - scroll, width: 200, height: 50 });
 	},
 
-	exportHML: function(isAll){
+	getPushDownFilter: function(type){
+		var ret = "",
+			prefix;
+		switch(type) {
+			case 'rectype':
+				prefix = 'rt';
+				break;
+			case 'reltype':
+				prefix = 'rel';
+				break;
+			case 'ptrtype':
+				prefix = 'ptr';
+				break;
+			default://invalid type so return empty
+				return ret;
+		}
+		//find all the filters for loaded levels (this always includes level 0
+		var filterMenus = $("div.filter:has(div[class*=loaded],ul#filter0) ul[id^=filter] ul."+type);
+		// if there are no menus of this type return empty
+		if (!filterMenus.length){
+			return ret;
+		}
+		//for each levels filterMenu if any items are unchecked (user has used filtering)
+		// then find id's of all check items
+		var i,
+			maxLevel = 0,
+			filter = {};
+		for (i=0; i<filterMenus.length; i++) {
+			var level = filterMenus[i].className.match(/level(\d+)/);
+			level = level[1];
+			maxLevel = parseInt(level) > maxLevel ?  parseInt(level): maxLevel;
+			if ($("li:not('[class*=checked],[class*=cmd]')",filterMenus[i]).length && level){//any unchecked
+				filter[level] = [];
+				$("li[class*=checked]:not([class*=disabled])",filterMenus[i]).each(function(){
+					filter[level].push( $(this).attr(type));
+				});
+			}
+		}
+		ret = YAHOO.lang.JSON.stringify(filter);
+		if (ret === "{}"){
+			ret = "";
+		}else{
+			ret = prefix+"filters="+ret;
+		}
+		return [maxLevel,ret];
+	},
+
+	exportHML: function(isAll,includeRelated){
 		var database = top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
 					(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "");
 
-		var q = "";
+		var q = "",
+			rtFilter,relFilter,ptrFilter,
+			depth = 0;
 		if(isAll){
 			q = encodeURIComponent(window.HEURIST.parameters["q"]);//document.getElementById("q").value;
 		}else{
@@ -2747,8 +2834,32 @@ top.HEURIST.search = {
 			}
 			q = "ids:"+recIDs_list.join(",");
 		}
-
-		var sURL = "../export/xml/flathml.php?w=all&a=1&depth=1&q=" + q + "&db=" + database;
+		if (includeRelated){
+			rtFilter = top.HEURIST.search.getPushDownFilter('rectype');
+			if (rtFilter[0] > depth){
+				depth = rtFilter[0];
+			}
+			rtFilter = rtFilter[1];
+			relFilter = top.HEURIST.search.getPushDownFilter('reltype');
+			if (relFilter[0] > depth){
+				depth = relFilter[0];
+			}
+			relFilter = relFilter[1];
+			ptrFilter = top.HEURIST.search.getPushDownFilter('ptrtype');
+			if (ptrFilter[0] > depth){
+				depth = ptrFilter[0];
+			}
+			ptrFilter = ptrFilter[1];
+		}
+		var sURL = "../export/xml/flathml.php?"+
+						"w=all"+
+						"&a=1"+
+						"&depth="+depth +
+						"&q=" + q +
+						(rtFilter ? "&" + rtFilter : "") +
+						(relFilter ? "&" + relFilter : "") +
+						(ptrFilter ? "&" + ptrFilter : "") +
+						"&db=" + database;
 
 		window.open(sURL, '_blank');
 		return false;

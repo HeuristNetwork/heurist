@@ -229,14 +229,17 @@
 								onClick="top.HEURIST.search.popupLink(top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database);"
 								title="Export records as delimited text">Export delim (filtered)</a></li>
 
-			  				<li><a href="#" id=result-style-icons-link title="Generate HML for current set of search results"
-			  					onClick="top.HEURIST.search.exportHML(true);" >Export HML (resultset)</a></li>
+							<li><a href="#" id=result-style-icons-link title="Generate HML for current set of search results"
+								onClick="top.HEURIST.search.exportHML(true);" >Export HML (resultset)</a></li>
 
-			  				<li><a href="#" id=result-style-icons-link title="Generate HML for selected set of search results"
-			  					onClick="top.HEURIST.search.exportHML(false);">Export HML (selected)</a></li>
+							<li><a href="#" id=result-style-icons-link title="Generate HML for current set of search results"
+								onClick="top.HEURIST.search.exportHML(true,true);" >Export HML (resultset with related)</a></li>
 
-						  	<li><a href="#" id=result-style-icons-link title="Generate KML for selected set of search results"
-						  		onClick="top.HEURIST.search.exportKML(false);">Export KML (selected)</a></li>
+							<li><a href="#" id=result-style-icons-link title="Generate HML for selected set of search results"
+								onClick="top.HEURIST.search.exportHML(false);">Export HML (selected)</a></li>
+
+							<li><a href="#" id=result-style-icons-link title="Generate KML for selected set of search results"
+								onClick="top.HEURIST.search.exportKML(false);">Export KML (selected)</a></li>
 
 							<!-- separator-->
 						</ul>
@@ -282,7 +285,7 @@
 							</div>
 							<div class="simple-search-row">
 								<label for="field-select">Field:</label>
-								<select id="field-select" >
+								<select id="field-select">
 								</select>
 								<label for="input-contains">contains</label>
 								<input type="text" id="input-contains" onKeyPress="setTimeout(top.HEURIST.search.calcShowSimpleSearch,0);"/>
