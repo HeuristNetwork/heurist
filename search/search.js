@@ -45,10 +45,15 @@ String.prototype.htmlEscape = function() {
 	return this.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/'/g, "&#39;");
 }
 
+var _TAB_MAP = 1,
+	_TAB_SMARTY = 2,
+	_TAB_SPECIAL = 3;
+
 top.HEURIST.search = {
 	VERSION: "1",
 
-	currentSearchQuery:null, //keeps current search query to use it in showMap and showReport in case these frames are not loaded
+	currentSearchQuery_all:null, //keeps current search query to use it in mapMenu (publish map)
+	currentSearchQuery_sel:null,
 	pageLimit: 1000,
 	resultsPerPage: top.HEURIST.displayPreferences["results-per-page"],
 	currentPage: 0,
@@ -1700,14 +1705,16 @@ top.HEURIST.search = {
 							(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")));},
 							50);
             };
-		var viewerFrame = document.getElementById("viewer-frame");
 
 //        var sidebysideFrame = document.getElementById("sidebyside-frame");
 //		sidebysideFrame.src = top.HEURIST.basePath+"viewers/sidebyside/sidebyside.html"+
 //		("?db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
 //						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")));
+
+		var viewerFrame = document.getElementById("viewer-frame");
 		var ssel = "selectedIds=" + selectedRecIDs.join(",");
         top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
+
 /*art temp old mapping
 		var mapFrame = document.getElementById("map-frame");
 		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);*/
@@ -2100,7 +2107,7 @@ top.HEURIST.search = {
 
 			if(!_tabView) return;
 			var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));
-			if(!(currentTab==2 || currentTab==3)) return;
+			if(!(currentTab==_TAB_MAP || currentTab==_TAB_SMARTY)) return;
 
 			var p = top.HEURIST.parameters,
 				query_string = "w=all",
@@ -2149,11 +2156,13 @@ top.HEURIST.search = {
 			}
 			query_string_all = encodeURI(query_string + '&q=ids:' + recIDs.join(","));
 
-	 		top.HEURIST.search.currentSearchQuery =
+	 		var currentSearchQuery =
 	 				(top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]=="selected")
 	 							?query_string_sel :query_string_all;
+			top.HEURIST.search.currentSearchQuery_all = query_string_all;
+			top.HEURIST.search.currentSearchQuery_sel = query_string_sel;
 
-			if(currentTab===2){ //map
+			if(currentTab===_TAB_MAP){ //map
 
 				var mapframe = document.getElementById("map-frame3");
 				if(mapframe.src){ //do not reload map frame
@@ -2167,10 +2176,10 @@ top.HEURIST.search = {
 				}else{
 					mapframe.src = top.HEURIST.basePath +
 									"viewers/map/showMap.html?" +
-					 				top.HEURIST.search.currentSearchQuery;
+					 				currentSearchQuery;
 				}
 
-			}else if (currentTab===3){ //smarty
+			}else if (currentTab===_TAB_SMARTY){ //smarty
 				var smartyFrame = document.getElementById("smarty-frame");
 
 				if(smartyFrame.src){ //do not reload map frame
@@ -2186,7 +2195,7 @@ top.HEURIST.search = {
 				}else{
 					smartyFrame.src = top.HEURIST.basePath +
 									"viewers/smarty/showReps.html?" +
-					 				top.HEURIST.search.currentSearchQuery;
+					 				currentSearchQuery;
 				}
 			}
 	},
@@ -3390,9 +3399,9 @@ function removeCustomAlert() {
 	});
 
 	_tabView = new YAHOO.widget.TabView('applications', { activeIndex: viewerTabIndex });
-	//if (viewerTabIndex == 2){top.HEURIST.search.mapSelected()} //initialises map
+	//if (viewerTabIndex == _TAB_MAP){top.HEURIST.search.mapSelected()} //initialises map
 	/*
-	if (Number(viewerTabIndex) === 2){top.HEURIST.search.mapSelected3()} //initialises new map
+	if (Number(viewerTabIndex) === _TAB_MAP){top.HEURIST.search.mapSelected3()} //initialises new map
 	else if (Number(viewerTabIndex) === 3){top.HEURIST.search.smartySelected()}; //initialises smarty repsystem
 	*/
 
@@ -3400,16 +3409,24 @@ function removeCustomAlert() {
 		var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));
 		top.HEURIST.util.setDisplayPreference("viewerTab", currentTab);
 
-		if(currentTab===2){ //map
+		if(currentTab===_TAB_SPECIAL){ //printview
+
+			var viewerFrame = document.getElementById("viewer-frame");
+			var selectedRecIDs = top.HEURIST.search.getSelectedRecIDs().get();
+			var ssel = "selectedIds=" + selectedRecIDs.join(",");
+        	top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
+
+		}else  if(currentTab===_TAB_MAP){ //map
 
 			var mapFrame3 = document.getElementById("map-frame3");
 			if(mapFrame3.src && mapFrame3.contentWindow.showMap){
 				mapFrame3.contentWindow.showMap.setUseAllRecords(
 						(top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]=="all"));
+				mapFrame3.contentWindow.showMap.checkResize(); //to fix gmap bug
 			}
 			top.HEURIST.search.updateMapOrSmarty();
 
-		}else if (currentTab===3){ //smarty
+		}else if (currentTab===_TAB_SMARTY){ //smarty
 			var smartyFrame = document.getElementById("smarty-frame");
 			if(smartyFrame.src && smartyFrame.contentWindow.showReps){
 				smartyFrame.contentWindow.showReps.setUseAllRecords(
@@ -3421,9 +3438,9 @@ function removeCustomAlert() {
 	};
 	_tabView.addListener('activeTabChange', handleActiveTabChange);
 	_tabView.getTab(viewerTabIndex);
-	//if (viewerTabIndex == 2){top.HEURIST.search.mapSelected()} //initialises map
+	//if (viewerTabIndex == _TAB_MAP){top.HEURIST.search.mapSelected()} //initialises map
 	/*
-	if (Number(viewerTabIndex) === 2){top.HEURIST.search.mapSelected3()} //initialises new map
+	if (Number(viewerTabIndex) === _TAB_MAP){top.HEURIST.search.mapSelected3()} //initialises new map
 	else if (Number(viewerTabIndex) === 3){top.HEURIST.search.smartySelected()}; //initialises smarty reports
 	*/
 

@@ -130,11 +130,13 @@ function ShowReps() {
 		document.getElementById('cbUseAllRecords2').checked = !_isUseAllRecords;
 		document.getElementById('cbUseAllRecords1').checked = !_isUseAllRecords;
 
-		_currentQuery_all = location.search;
-		if(_currentQuery_all=="?noquery"){
-			_currentQuery_all = null;
+		var s1 = location.search;
+		if(s1=="" || s1=="?null" || s1=="?noquery"){
+			 s1 = null;
 		}
-		_currentQuery_sel = null;
+
+		_currentQuery_all = _isUseAllRecords?s1:null;
+		_currentQuery_sel = _isUseAllRecords?null:s1;
 
 		_reload_templates();
 

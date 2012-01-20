@@ -22,7 +22,7 @@
  <script>
 
    function build_links() {
-     if (top.HEURIST  && top.HEURIST.search && top.HEURIST.search.currentSearchQuery)
+     if (top.HEURIST  && top.HEURIST.search)
      {
 
 /*
@@ -46,16 +46,25 @@
      		query_string = encodeURI(query_string);
 */
 
-	 		var url = top.HEURIST.baseURL+"viewers/map/showMapS.html?" + top.HEURIST.search.currentSearchQuery;
+	 		var currentSearchQuery =
+	 				(top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]=="selected")
+						?top.HEURIST.search.currentSearchQuery_sel
+						:top.HEURIST.search.currentSearchQuery_all;
+
+			if(currentSearchQuery)
+			{
+
+	 		var url = top.HEURIST.baseURL+"viewers/map/showMapS.html?" + currentSearchQuery;
 
 			document.getElementById("linkTimeline").href = url;
 
      		document.getElementById("code-textbox").value = '<iframe src="' + url + '" width="800" height="650" frameborder="0"></iframe>';
 
-	 		var url_kml = top.HEURIST.baseURL+"export/xml/kml.php?" + top.HEURIST.search.currentSearchQuery;
+	 		var url_kml = top.HEURIST.baseURL+"export/xml/kml.php?" + currentSearchQuery;
 
 			document.getElementById("linkKml").href = url_kml;
 
+	 		}
 	 }
    }
  </script>

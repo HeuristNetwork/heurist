@@ -24,7 +24,6 @@
 	return;
 	}
 ?>
-
 <html>
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -51,8 +50,8 @@
      print "Make sure the target records and field types are compatible. <b>";
     print "If you get the codes wrong, you will get a complete dog's breakfast in your target database ...</b><p>\n";
 
-    print "<p>This function is under development at 18/11/11 - please check back shortly ...</p>";
-    
+    print "<p>This function is under development at 23/11/11 - please check back shortly ...</p>";
+
 	$sourcedbname = NULL;
 
 // ----FORM 1 - SELECT THE SOURCE DATABASE --------------------------------------------------------------------------------
@@ -104,11 +103,10 @@
 // ---- visit #5 - PROCESS THE TRANSFER -----------------------------------------------------------------
 
     if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='5'){
-    	print "TRANSFER!!!!";
-		//transfer();
+    	transfer();
 	}
 
-// ---- Crete mapping form -----------------------------------------------------------------
+// ---- Create mapping form -----------------------------------------------------------------
 
 	function getPresetId($config, $id){
 		if($config && array_key_exists($id, $config)){
@@ -263,7 +261,7 @@
 		$res = "";
 
 		foreach ($names as $id => $name) {
-			$res = $res."<option id='".$pref.$id."' name='".$pref.$id."' value='".$id."'>".$id." ".$name."</option>";
+			$res = $res."<option id='".$pref.$id."' name='".$pref.$id."' value='".$id."'>".$name." [$id]</option>";
 		}
 
 		return $res;
@@ -358,7 +356,7 @@
 
 		$sourcedb = $dbPrefix.$sourcedbname;
 
-	    print "<p>Now copying data from <b>$sourcedb</b> to <b>". HEURIST_DBNAME. "</b><p>Processing: ";
+	    echo "<p>Now copying data from <b>$sourcedb</b> to <b>". HEURIST_DBNAME. "</b><p>Processing: ";
 
 	    // Loop through types for all records in the database (actual records, not defined types)
 	    $query1 = "SELECT DISTINCT (`rec_RecTypeID`) FROM $sourcedb.Records";
@@ -372,21 +370,24 @@
 	    // loop through the set of rectypes actually in the records in the database
 	    while ($row1 = mysql_fetch_assoc($res1)) {
 	        $rt=$row1['rec_RecTypeID'];
-	        print "<br>record type: $rt  "; // tell user somethign is happening
+	        print "<br>Record type: $rt  &nbsp;&nbsp;&nbsp;"; // tell user somethign is happening
+			ob_flush();flush(); // flush to screen
     		include 'recFields.inc'; // sets value of $flds2 to the fields we want from the records table
 		    $query2 = "select $flds2 from $sourcedb.Records Where $sourcedb.Records.rec_RecTypeID=$rt";
 	        $res2 = mysql_query($query2);
 			if(!$res2) {
-				print "<br>Bad query for records loop for record type $rt";
+				print "<br>Bad query for records loop for source record type $rt";
 				print "Query: $query2";
 				die ("<p>Sorry ...");
 			}
 
 			// RECTYPE
 			// loop through the records for this rectype
+			print "record ids: ";
 			 while ($row2 = mysql_fetch_assoc($res2)) {
 				$rid=$row2['rec_ID'];
-				print "id=$rid "; // print out record numbers
+				print " $rid "; // print out record numbers
+				ob_flush();flush();
 				$rec_RecTypeID = $_REQUEST['cbr'.$row2['rec_RecTypeID']]; // sets the mapped rectype ID
 				$rec_URL=mysql_real_escape_string($row2['rec_URL']);
 				$rec_Title=mysql_real_escape_string($row2['rec_Title']);
@@ -402,18 +403,18 @@
 
  				// RECORD
  				// write the new record into the target database
- 				$query2target = "INSERT INTO ".
- 				"Records (rec_RecTypeID,rec_URL,rec_Added,rec_Title,rec_AddedByUGrpID,rec_AddedByImport,rec_OwnerUGrpID,rec_NonOwnerVisibility,rec_URLExtensionForMimeType,rec_Hash) " .
-				"VALUES ('$rec_RecTypeID','$rec_URL','$rec_Added','$rec_Title','$rec_AddedByUGrpID','$rec_AddedByImport','$rec_OwnerUGrpID','$rec_NonOwnerVisibility','$rec_URLExtensionForMimeType','$rec_Hash')";
+ 				$query2target = "INSERT INTO Records (rec_RecTypeID,rec_URL,rec_Added,rec_Title,rec_AddedByUGrpID,rec_AddedByImport,".
+ 					"rec_OwnerUGrpID,rec_NonOwnerVisibility,rec_URLExtensionForMimeType,rec_Hash) " .
+					"VALUES ('$rec_RecTypeID','$rec_URL','$rec_Added','$rec_Title','$rec_AddedByUGrpID','$rec_AddedByImport',".
+					"'$rec_OwnerUGrpID','$rec_NonOwnerVisibility','$rec_URLExtensionForMimeType','$rec_Hash')";
 		        $res2target = mysql_query($query2target);
+
+				$ridNew =  mysql_insert_id(); // the ID of the new record inserted (if successful)
+
 				if (mysql_error()) {
-				}
-
-				$ridNew =  mysql_insert_id(); // the ID of the new record inserted
-
-				if(!$res2target) {
-					print "<br>Bad insert of record, Query2target: $query2target";
- 					print "<br>ridNew=".$ridNew." &nbsp;&nbsp;&nbsp;&nbsp; rec_RecTypeID=".$rec_RecTypeID."  &nbsp;&nbsp;&nbsp;&nbsp; original=".$row2['rec_RecTypeID'];
+					print "<p>Inserting record type ID: &nbsp;&nbsp;&nbsp; Source =".$row2['rec_RecTypeID']."  &nbsp;&nbsp;&nbsp;&nbsp; Target =".$rec_RecTypeID;
+ 					print "<p>MySQL error on record insert: ".mysql_error();
+					print "<p><i>$query2target</i>";
  					die ("<p>Sorry ...");
 				}
 
@@ -463,16 +464,23 @@
 						//TODO; Need to copy the actual file over, changing its name to the new ID
 					}
 
+
  				// write the new detail into the target database
+ 				/*
+ 				print ".";
  				$query3target = "INSERT INTO ".
  				"recDetails(dtl_RecID,dtl_DetailTypeID,dtl_Value,dtl_Geo,dtl_ValShortened,dtl_UploadedFileID) ".
 				"VALUES ('$ridNew','$dtl_DetailTypeID','$dtl_Value','$dtl_Geo','$dtl_ValShortened',$newFileID) ";
 		        $res3target = mysql_query($query3target);
 				if(!$res3target) {
-					print "<br>Bad detail insert for record type $rt  record id = $rid  new record id = $ridNew";
-					print "<br>Query3Target: $query3target";
+					ob_flush();flush();
+					print "<p>Bad detail insert: record type $rt  source record id = $rid  new record id = $ridNew";
+					print "<p>Query: $query3target";
+					print "<p>MySQL error: <i>".mysql_error()."</i>";
 					die ("<p>Sorry ...");
 				}
+				*/
+
 
 
 				}; // end of loop for details
@@ -488,83 +496,6 @@
 
 ?>
 
-<script type="text/javascript">
-//
-// fill the array of dropdown with the list of record types
-//
-function initDroodowns(_kind){
-
-	//get array of dropdowns
-	var elements = document.getElementsByClassName(_kind);
-	var len = elements.length,
-		ind, typeid, sel0, sel, typeid2,
-		names,
-		option, optpref,
-		kind = _kind;
-
-	if(kind=='terms'){
-		names = top.HEURIST.terms.termsByDomainLookup['enum'];
-		optpref = 'ot';
-	}else{
-		names = top.HEURIST[kind].names;
-		if(kind=='rectypes'){
-			optpref = 'or';
-		}else{
-			optpref = 'od';
-		}
-	}
-
-	sel0 = elements[0];
-	typeid2 = sel0.id.substring(3);
-
-	//addoption(0);
-
-	//
-	function addoption(_typeid)
-	{
-				option = document.createElement("option");
-				if(kind=='terms'){
-					option.text = (_typeid>0)?names[_typeid][0]:'';
-				}else{
-					option.text = (_typeid>0)?(_typeid+' '+names[_typeid]):'';
-				}
-				option.value = _typeid;
-				option.id = optpref+_typeid;
-				option.name = optpref+_typeid;
-				try {
-					// for IE earlier than version 8
-					sel0.add(option, sel0.options[null]);
-				}catch (ex2){
-					sel0.add(option,null);
-				}
-	}
-
-	for (typeid in names)
-	{
-		if(!top.HEURIST.util.isnull(typeid))
-		{
-				addoption(typeid);
-				if(typeid2===typeid){
-					sel0.selectedIndex = sel0.options.length-1;
-				}
-
-		}
-	}//for
-
-	for (ind=1; ind<len; ind++){
-			sel = elements[ind];
-			sel.innerHTML = sel.innerHTML+sel0.innerHTML;
-			typeid2 = sel.id.substring(3);
-			option = sel.options.namedItem(optpref+typeid2);
-			if(!top.HEURIST.util.isnull(option)){
-				option.selected = true;
-			}
-	}//for
-}
-function onLoad(){
-}
-
-</script>
 
 </body>
 </html>

@@ -125,6 +125,10 @@ function ShowMap() {
 
 		};
 
+		if(context.cntWithGeo+HEURIST.tmap.layers.length+rec_withtime==0){
+			document.getElementById("mapreportcontainer").innerHTML = "<div class='wrap'><div id='errorMsg'><span>No map and time data</span></div></div>";
+		}
+
 		setLayout(((context.cntWithGeo+HEURIST.tmap.layers.length)>0), (rec_withtime>0))
 
 		initMapping(); //from mapping.js
@@ -351,8 +355,7 @@ function ShowMap() {
 
 	function setLayout(ismap, istime){
 
-		if(_ismap===ismap && _istime===istime ||
-		(!ismap && !istime) )
+		if(_ismap===ismap && _istime===istime )  //|| (!ismap && !istime)
 		{
 			return;
 		}
@@ -371,16 +374,21 @@ function ShowMap() {
 			{ position: 'bottom', header: 'TimeLine', height: 150,
 				resize: true, body: 'timelinecontainer', gutter: '5px', collapse: true}
 			];
-		}else if(ismap){
+		} else if(ismap){
 			units = [
 			toolbar,
 			{ position: 'center', body: 'mapcontainer'}
 			];
-		}else if(istime){
+		} else if(istime){
 			units = [
 			toolbar,
 			{ position: 'center', body: 'timelinecontainer'}
 			];
+		} else {
+			units = [
+				toolbar,
+				{ position: 'center', body: 'mapreportcontainer'}
+			 ];
 		}
 
 		layout = null;
@@ -401,7 +409,7 @@ function ShowMap() {
 
 		if(HRST.displayPreferences){
 			_isUseAllRecords = (top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]=="all");
-			document.getElementById('rbMapUseAllRecords').checked = _isUseAllRecords;
+			//ian's request document.getElementById('rbMapUseAllRecords').checked = _isUseAllRecords;
 			document.getElementById('rbMapUseSelectedRecords').checked = !_isUseAllRecords;
 		}else{
 			_isUseAllRecords = true;
@@ -411,6 +419,7 @@ function ShowMap() {
 
 
 		setLayout(true, true);
+
 		/*
 		var lunit = layout.getUnitById('timelinecontainer');
 		Event.on('timelinecontainer', 'endResize', function() {
@@ -418,13 +427,17 @@ function ShowMap() {
 		});
 		*/
 
-		squery_all = location.search;
+		var s1 = location.search;
+		if(s1=="" || s1=="?null" || s1=="?noquery"){
+			 s1 = null;
+		}
+		squery_all = _isUseAllRecords?s1:null;
+		squery_sel = _isUseAllRecords?null:s1;
 		_reload();
 
 		if(HRST.displayPreferences){
 			_load_layers(0);
 		}
-
 
 /* outdated - toremove
 		if (HRST.search) {
@@ -447,6 +460,11 @@ function ShowMap() {
 				HRST.util.getJsonData(baseurl, callback, params);
 			}
 		}
+		if (!currentQuery) {
+			document.getElementById("mapreportcontainer").innerHTML = "<div class='wrap'><div id='errorMsg'><span>No Records Selected</span></div></div>";
+			setLayout(false, false);
+		}
+
 	}
 
 	/**
@@ -490,6 +508,7 @@ function ShowMap() {
 		}
 
 	}
+
 
 	/**
 	* mode: 0 - both, 1 -image layers, 2 - kml
@@ -544,7 +563,7 @@ function ShowMap() {
 
 		setUseAllRecords: function(val){
 			if(val.target){
-				val = (val.target.value == "0");
+				val = !val.target.checked; // (val.target.value == "0");
 			}
 			var isChanged = _isUseAllRecords != val;
 			_isUseAllRecords = val;
@@ -552,9 +571,9 @@ function ShowMap() {
 				_reload();
 			}
 
-			if(document.getElementById('rbMapUseAllRecords')){
+			if(document.getElementById('rbMapUseSelectedRecords')){
 				top.HEURIST.util.setDisplayPreference("showSelectedOnlyOnMapAndSmarty", _isUseAllRecords?"all":"selected");
-				document.getElementById('rbMapUseAllRecords').checked = _isUseAllRecords;
+				//ian's request document.getElementById('rbMapUseAllRecords').checked = _isUseAllRecords;
 				document.getElementById('rbMapUseSelectedRecords').checked = !_isUseAllRecords;
 			}
 		},
@@ -568,6 +587,10 @@ function ShowMap() {
 			_updateRelatedRecords(relRecords);
 		},
 
+		//to fix issue with gmap after tab switching
+		checkResize: function(){
+			RelBrowser.Mapping.checkResize();
+		},
 
 		getClass: function () {
 			return _className;

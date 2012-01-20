@@ -81,7 +81,7 @@ $currfile = null;
 
 		if(!array_key_exists('mode', $_REQUEST)) {
 
-			if(false && HEURIST_DBID==0){ //is not registered
+			if(HEURIST_DBID==0){ //is not registered
 
 				print "<p style=\"color:red\">Database must be registered to use FieldHelper sync function</p>";
 

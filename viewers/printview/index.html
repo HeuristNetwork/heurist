@@ -18,7 +18,7 @@
 		<script src="../js/getAnnotationPointers.js"></script>
 		<script type="text/javascript" src="../../external/jquery/jquery.js"></script>
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
-		
+
 		<script src="loadPrintFormats.php"></script>
 		<script>
 			function loadXMLDocFromFile(filename)
@@ -555,10 +555,15 @@
 	</head>
 	<body onLoad="init()">
 		<div class="banner">
-		<select id="style_select" style="width: 180px;" onChange="displayResult(this.options[this.selectedIndex].value);">
-		</select>
-		<a href="javascript:window.print()"><div id="printingLink"></div></a>
-		<a href="javascript:window.addAnnotation()"><div id="annotationLink"></div></a>
+			<select id="style_select" style="width: 180px;" onChange="displayResult(this.options[this.selectedIndex].value);">
+			</select>
+			<a href="javascript:window.print()"><div id="printingLink"></div></a>
+			<a href="javascript:window.addAnnotation()"><div id="annotationLink"></div></a>
+
+			<input type="checkbox" style="display:inline-block;"
+				id="rbUseSelectedRecords" checked="checked"
+				 title="Display of all records not currently available in this view" disabled="disabled">
+			<label title="Display of all records not currently available in this view">Selected only</label>
 		</div>
 		<div id="displayResult" ></div>
 	</body>

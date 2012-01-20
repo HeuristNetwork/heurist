@@ -143,6 +143,11 @@ if (typeof mxn.LatLonPoint == "function") {
 
 	}, //end of addCustomMapTypeControl
 
+	//to fix gmap bug after tab switching
+	checkResize: function(){
+		RelBrowser.Mapping.map.resizeTo(0,0);
+	},
+
 	changeScale: function (bandIndex, zoomIndex, tm) {
 			var M = RelBrowser.Mapping;
 			if(!tm) tm = M.tmap;
@@ -407,26 +412,31 @@ ether_zoom = function(_band, ether, zoomIn) {
 
 		var rectypeImg = "style='background-image:url(" + iconPath + "{{rectype}}.png)'";
 
-		var editLinkIcon = "<div id='rec_edit_link' class='logged-in-only'><a href='"+
+		var editLinkIcon = "<div id='rec_edit_link' style='display:inline-block;' class='logged-in-only'><a href='"+
 						basePath+ "records/edit/editRecord.html?recID={{recid}}&db="+ db +
 						 "' target='_blank' title='Click to edit record'><img src='"+
 						 basePath + "common/images/edit_pencil_small.png'/></a></div>";
 
-		var newSearchWindow = "<div><a href='"+basePath+"search/search.html?q=ids:{{recid}}&db=" + db +
+		var newSearchWindow = "<div style='float:right;'><a href='"+basePath+"search/search.html?q=ids:{{recid}}&db=" + db +
 						"' target='_blank' title='Open in new window' class='externalLink'>view</a></div>"
 
-			var template = "<div>"+
+		//info window
+		var template = "<div style='max-width:450px;'>"+
 			//"<div style='display:inline-block;background-image:url({{thumb}})'></div>"+
-			"<div style='display:inline-block;'>"+
-			"<img src='"+basePath+"common/images/10x10.gif' width='100' style='display:inline-block;background-repeat:no-repeat;background-image:url({{thumb}})'>"+
-			"</div>"+                                          //#' onclick='  target='_blank'
-			"<div style='display:inline-block;text-align:left;padding-left:3px;'><b><a href={{url}}>{{title}}</a></b><br/><div style='max-width:300px;'>{{description}}</div>"+
+			"<b><a href={{url}}>{{title}}</a></b><br/>"+
+
+			"<div style='display:inline-block;text-align:left;padding-left:3px;padding-top:3px;'>"+
+			"<img src='"+basePath+"common/images/10x10.gif' width='100' align='left' style='display:inline-block;background-repeat:no-repeat;background-image:url({{thumb}})'>{{description}}</div>"+
+
+			"<div style='width:100%'>"+
+				"<div style='display:inline-block;'>"+
 					"<img src='"+basePath+"common/images/16x16.gif' "+rectypeImg+" class='rft'>"+
-					"<div id='recordID' style='float:right;'>"+
+				"</div>"+
+				"<div style='float:right;padding-right:10px;' id='recordID'>"+
 						editLinkIcon +
 						newSearchWindow +
-					"</div>"
-			"<div></div>";
+				"</div>"
+			"<div>";
 
 
 			var customIcon = "heuristicon.png"; //TODO!!!! - deault marker
@@ -597,6 +607,7 @@ ether_zoom = function(_band, ether, zoomIn) {
 
 	function initMapping() {
 		var mini, $img, M = RelBrowser.Mapping;
+
 		mini = M.mapdata.mini || false;
 		$img = $("img.entity-picture");
 		if ($img.length > 0  &&  $img.width() === 0) {
