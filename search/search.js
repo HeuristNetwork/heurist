@@ -504,16 +504,27 @@ top.HEURIST.search = {
 	togglePtrtypeFilter: function(menuItem, level, dtyID){
 		var recalcFilters = false;
 		var resultsDiv =  $("#results-level" + level).get(0);
+		var activeParentRecIDs = {};
+		$("div.recordDiv:not(.filtered)",$("#results-level" + (level -1)).get(0)).each(function(){
+			activeParentRecIDs[$(this).attr('recid')]=1;});
 		var recIDs = top.HEURIST.search.results.infoByDepth[level].ptrtypes[dtyID];
+		var recSet = top.HEURIST.search.results.recSet;
 		if ($(menuItem).hasClass('checked')) {// filter all pointer links of type dtyID by removing a "lnk" class
 			$.each(recIDs,function(i,recID){
-					recalcFilters = !$('.recordDiv[recID='+recID+']',resultsDiv).removeClass('lnk').hasClass('lnk');
+					$('.recordDiv[recID='+recID+']',resultsDiv).removeClass('lnk');
 				});
 		}else{
 			$.each(recIDs,function(i,recID){
-					recalcFilters = !$('.recordDiv[recID='+recID+']',resultsDiv).hasClass('lnk');
-					$('.recordDiv[recID='+recID+']',resultsDiv).get(0).className += ' lnk';
-				});
+				//TODO  check if recID is link to active level-1 record !!!!!!!!!!!
+				//for each of the revPointer[dtyID] recIDs check if there is one active
+				if (recSet[recID] && recSet[recID]['revPtrLinks']['byInvDtlType'][dtyID]){
+					$.each(recSet[recID]['revPtrLinks']['byInvDtlType'][dtyID], function(i, parentRecID){
+						if (activeParentRecIDs[parentRecID]){
+							$('.recordDiv[recID='+recID+']',resultsDiv).get(0).className += ' lnk';
+						}
+					});
+				}
+			});
 		}
 		$(menuItem).toggleClass('checked');
 //		if (recalcFilters) {
@@ -848,7 +859,8 @@ top.HEURIST.search = {
 		// and for each calculate filtered record set for this level.
 		var recSet = top.HEURIST.search.results.recSet;
 		var depthInfo = top.HEURIST.search.results.infoByDepth[level];
-		var recordIDs = {};
+		var ptrRecordIDs = {};
+		var relRecordIDs = {};
 		$('.recordDiv',parentLevelResultDiv).each(function(i,recDiv){
 				// for all parentlevel records that are not filtered or without links
 				if ($(recDiv).hasClass('filtered') || (!$(recDiv).hasClass('lnk') && (level-1 > 0))){
@@ -863,7 +875,7 @@ top.HEURIST.search = {
 								recID = recIDs[j];
 								recTypeID = recSet[recID].record[4];
 								rectypes[recTypeID] = 1;
-								recordIDs[recID] = 1;
+								ptrRecordIDs[recID] = 1;
 							}
 						});
 				}
@@ -875,7 +887,7 @@ top.HEURIST.search = {
 								recID = recIDs[j];
 								recTypeID = recSet[recID].record[4];
 								rectypes[recTypeID] = 1;
-								recordIDs[recID] = 1;
+								ptrRecordIDs[recID] = 1;
 							}
 						});
 				}
@@ -887,7 +899,7 @@ top.HEURIST.search = {
 								recID = recIDs[j];
 								recTypeID = recSet[recID].record[4];
 								rectypes[recTypeID] = 1;
-								recordIDs[recID] = 1;
+								relRecordIDs[recID] = 1;
 							}
 						});
 				}
@@ -899,7 +911,7 @@ top.HEURIST.search = {
 								recID = recIDs[j];
 								recTypeID = recSet[recID].record[4];
 								rectypes[recTypeID] = 1;
-								recordIDs[recID] = 1;
+								relRecordIDs[recID] = 1;
 							}
 						});
 				}
@@ -918,7 +930,7 @@ top.HEURIST.search = {
 					$(recDiv).toggleClass('lnk');
 				}
 				var recID = $(recDiv).attr('recID');
-				if (recordIDs[recID] == 1) {//record related to upper level unfiltered record
+				if (relRecordIDs[recID] == 1 || ptrRecordIDs[recID] == 1) {//record related to upper level unfiltered record
 					if($(recDiv).hasClass('filtered')){
 						$(recDiv).toggleClass('filtered');
 					}
@@ -934,7 +946,7 @@ top.HEURIST.search = {
 				if (reltypes[trmID] === 1) {
 					if ($(li).hasClass('checked')) {
 						$.each(depthInfo.reltypes[trmID],function(i,recID){
-								if (recordIDs[recID] === 1) {
+								if (relRecordIDs[recID] === 1) {
 									$('.recordDiv[recID='+recID+']',resultsDiv).get(0).className += ' lnk';
 								}
 							});
@@ -949,7 +961,7 @@ top.HEURIST.search = {
 				if (ptrtypes[dtyID] === 1) {
 					if ($(li).hasClass('checked')) {
 						$.each(depthInfo.ptrtypes[dtyID],function(i,recID){
-								if (recordIDs[recID] === 1) {
+								if (ptrRecordIDs[recID] === 1) {
 									$('.recordDiv[recID='+recID+']',resultsDiv).get(0).className += ' lnk';
 								}
 							});
