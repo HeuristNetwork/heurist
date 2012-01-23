@@ -86,10 +86,10 @@
 				var rec = (top && top.HEURIST && top.HEURIST.edit && top.HEURIST.edit.record ? top.HEURIST.edit.record:null);
 				var recID =  ((rec?rec.bibID : 0) || (window.HEURIST ? window.HEURIST.parameters["recID"]:0) || (top.HEURIST ? top.HEURIST.parameters["recID"]:0));
 				if (! rec) {
-					window.location.replace(top.HEURIST.basePath +"common/html/invalid.html"+ (recID ? "?" + recID : ""));
+					window.location.replace(top.HEURIST.basePath +"common/html/msgInvalidRecID.html"+ (recID ? "?" + recID : ""));
 				}
 				if (rec.denied) {
-					window.location.replace(window.HEURIST.basePath +"common/html/denied.html"+ (recID ? "?" + recID : ""));
+					window.location.replace(window.HEURIST.basePath +"common/html/msgAccessDenied.html"+ (recID ? "?" + recID : ""));
 				}
 				if (rec.replacedBy) {
 					// This record has been deprecated in favour of another ...
