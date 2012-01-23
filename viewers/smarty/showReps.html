@@ -280,9 +280,12 @@ if(isInited){
 		var template_file = sel.options[sel.selectedIndex].value; // by default first entry
 
 		var surl = top.HEURIST.baseURL + "viewers/smarty/showReps.php?"+
-				window.showReps.getQuery() + '&debug=0&template='+template_file;
+				window.showReps.getQuery() + '&publish=1&debug=0&template='+template_file;
 
-		window.prompt ("Copy to clipboard: Ctrl+C, Enter", surl);
+		window.prompt (
+"                                         Copy to clipboard by hitting Ctrl-C or [Enter]\n\n"+
+"                Note: The URL will only show records to which the viewer has access.\n"+
+"External viewers will not be able to see any records unless they are marked as Public visibility\n\n", surl);
 
 		/*
 		try{

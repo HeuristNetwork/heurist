@@ -56,6 +56,7 @@ var mapDiv;
 var shape = {};
 var searchcontrol;
 var coordBoxWindow, coordBox;
+var _keepZoom;
 
 function openCoordBox() {
 	if (! shape.type) {
@@ -270,7 +271,8 @@ function load() {
 		var defaultViewString = top.HEURIST.util.getDisplayPreference("gigitiser-view");
 		var viewBits;
 		if (defaultViewString  &&  (viewBits = defaultViewString.match(/(.*),(.*)@(\d+)(:[mkh])?/))) {
-			map.setCenter(new GLatLng(parseFloat(viewBits[1]) || 0, parseFloat(viewBits[2]) || 0), parseInt(viewBits[3]));
+			_keepZoom = parseInt(viewBits[3]);
+			map.setCenter(new GLatLng(parseFloat(viewBits[1]) || 0, parseFloat(viewBits[2]) || 0), _keepZoom);
 			var mapTypes = {};
 			var tempTypes = map.getMapTypes(),
 			t;
@@ -298,6 +300,9 @@ function load() {
 		} else {
 			loadParameters();
 		}
+
+		var button = document.getElementById("button-save-zoom");
+		button.value = "Remember\nthis view";
 	}
 	else {
 		mapDiv.innerHTML = "<h3>Google Maps browser not available</h3><p>Sorry, but the Heurist digitiser uses the Google Maps API, which is not available on your browser.</p><a href=# onclick='window.close()'>Close this window</a>";
@@ -331,6 +336,7 @@ function loadParameters(val) {
 	if (! matches) return;
 	var type = matches[1];
 	var value = matches[2];
+	var __point;
 
 	var sePoint, nwPoint;
 	switch (type) {
@@ -338,6 +344,7 @@ function loadParameters(val) {
 		var matches = value.match(/POINT\((\S+)\s+(\S+)\)/i);
 		if (! matches) break;
 		var point = new GLatLng(parseFloat(matches[2]), parseFloat(matches[1]));
+		__point = point;
 		initPoint(point);
 		sePoint = new GLatLng(point.lat() - 0.5, point.lng() + 0.5);
 		nwPoint = new GLatLng(point.lat() + 0.5, point.lng() - 0.5);
@@ -420,7 +427,12 @@ function loadParameters(val) {
 			button.parentNode.parentNode.parentNode.className = "selected";
 	}
 
-	zoomToBounds(nwPoint, sePoint);
+	if(_keepZoom && __point){
+		//in case of "point" zoom to saved zoom
+		map.setCenter(__point, _keepZoom);
+	}else{
+		zoomToBounds(nwPoint, sePoint);
+	}
 }
 
 
@@ -942,11 +954,11 @@ function markerCallback(marker, html, result) {
 
    </script>
   </head>
-  <body width="750" height="450" style="margin: 5px; margin-right: 110px; padding: 0;" onload="setTimeout(load, 0)" onunload="GUnload()">
+  <body width="750" height="450" style="margin: 5px; margin-right: 110px; padding: 0; overflow:hidden;" onload="setTimeout(load, 0)" onunload="GUnload()">
 
    <script src="../../../common/js/utilsLoad.js"></script>
 
-     <div style="width: 100%; height: 100%;"><div id="map" style="width: 100%; height: 100%;" defaulttitle="Double-click one or more times to zoom to a location" title="Double-click one or more times to zoom to a location"></div></div>
+     <div style="width: 100%; height: 100%; overflow:hidden;"><div id="map" style="width: 100%; height: 100%;" defaulttitle="Double-click one or more times to zoom to a location" title="Double-click one or more times to zoom to a location"></div></div>
 
       <table border="0" cellspacing="5" cellpadding="0" style="width: 100px; height: 100%; position: absolute; right: 0; top: 0;">
        <tbody id="buttons">
@@ -959,7 +971,7 @@ function markerCallback(marker, html, result) {
         <tr><td><div><input type="button" id="button-enter-values" value="Enter values" title="Open manual coordinate data entry form" onclick="openCoordBox();" /></div></td></tr>
         <tr><td>&nbsp;</td></tr>
         <tr><td>&nbsp;</td></tr>
-        <tr><td><div><input type="button" id="button-save-zoom" value="Remember this view" title="Map will re-open to this area for new digitising" onclick="saveZoom();" /></div></td></tr>
+        <tr><td><div><input type="button" id="button-save-zoom" value="Remember" title="Map will re-open to this area for new digitising" onclick="saveZoom();" /></div></td></tr>
         <tr><td>&nbsp;</td></tr>
         <tr><td><div><input type="button" id="button-use" disabled="disabled" style="font-weight: bold;" value="Save" onclick="closeWithValue();" /></div></td></tr>
        </tbody>

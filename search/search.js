@@ -2126,12 +2126,16 @@ top.HEURIST.search = {
 				query_string_sel = null,
 				query_string_all = null;
 
+
 			if(p["q"]){
 				query_string = 'ver='+(p['ver'] || "") +
 									'&w='+(p['w'] || "") +
-									'&stype='+(p['stype'] || "") +
-									'&db='+(p['db'] || "");
+									'&stype='+(p['stype'] || "");
 			}
+
+			var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+					 (top.HEURIST.database.name?top.HEURIST.database.name:''));
+			query_string = query_string+"&db="+db;
 
 			//only selected
 			var recIDs = top.HEURIST.search.getSelectedRecIDs().get();
@@ -2174,6 +2178,9 @@ top.HEURIST.search = {
 			top.HEURIST.search.currentSearchQuery_all = query_string_all;
 			top.HEURIST.search.currentSearchQuery_sel = query_string_sel;
 
+			top.HEURIST.currentQuery_all = query_string_all;
+			top.HEURIST.currentQuery_sel = query_string_sel;
+
 			if(currentTab===_TAB_MAP){ //map
 
 				var mapframe = document.getElementById("map-frame3");
@@ -2187,8 +2194,7 @@ top.HEURIST.search = {
 					}
 				}else{
 					mapframe.src = top.HEURIST.basePath +
-									"viewers/map/showMap.html?" +
-					 				currentSearchQuery;
+									"viewers/map/showMap.html"; //+"?"+currentSearchQuery;
 				}
 
 			}else if (currentTab===_TAB_SMARTY){ //smarty
@@ -2206,8 +2212,7 @@ top.HEURIST.search = {
 
 				}else{
 					smartyFrame.src = top.HEURIST.basePath +
-									"viewers/smarty/showReps.html?" +
-					 				currentSearchQuery;
+									"viewers/smarty/showReps.html"; //+"?"+currentSearchQuery;
 				}
 			}
 	},

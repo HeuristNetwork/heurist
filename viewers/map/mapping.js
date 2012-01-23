@@ -347,6 +347,7 @@ ether_zoom = function(_band, ether, zoomIn) {
 			tl_theme = Timeline.ClassicTheme.create();
 			tl_theme.autoWidth = true;
 			tl_theme.mouseWheel = "default";//"zoom";
+			//tl_theme.event.instant.icon = Timeline.urlPrefix + "images/dull-blue-circle.png";
 			//tl_theme.event.bubble.maxHeight = 0;
 			//tl_theme.event.bubble.width = 320;
 
@@ -482,16 +483,6 @@ ether_zoom = function(_band, ether, zoomIn) {
 
 			bandInfo: [
 					{
-					theme: tl_theme,
-					showEventText: true,
-					intervalUnit: M.timeZoomSteps[M.initTimeZoomIndex].unit,
-					intervalPixels: M.timeZoomSteps[M.initTimeZoomIndex].pixelsPerInterval,
-					zoomIndex: M.initTimeZoomIndex,
-					zoomSteps: M.timeZoomSteps,
-					trackHeight:    1.2,
-					width: "80%"
-					},
-					{
 					theme: tl_theme2,
 					showEventText: false,
 					intervalUnit: M.timeZoomSteps[M.initTimeZoomIndex-1].unit,
@@ -500,8 +491,18 @@ ether_zoom = function(_band, ether, zoomIn) {
 					zoomSteps: M.timeZoomSteps,
 					trackHeight:    0.2,
 					trackGap:       0.1,
-					width: "20%",
+					width: "30px",
 					layout:'overview'
+					},
+					{
+					theme: tl_theme,
+					showEventText: true,
+					intervalUnit: M.timeZoomSteps[M.initTimeZoomIndex].unit,
+					intervalPixels: M.timeZoomSteps[M.initTimeZoomIndex].pixelsPerInterval,
+					zoomIndex: M.initTimeZoomIndex,
+					zoomSteps: M.timeZoomSteps,
+					trackHeight:    1.2,
+					width: "100%"
 					}
 					],
 				dataLoadedFunction: onDataLoaded

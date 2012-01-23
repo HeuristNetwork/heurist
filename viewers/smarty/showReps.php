@@ -43,7 +43,11 @@ require_once('libs.inc.php');
 //error_log(">>>>>>>>".print_r($qresult,true));
 
 	if(!array_key_exists('records',$qresult) ||  $qresult['resultCount']==0 ){
-		echo "<b><font color='#ff0000'>Search or Select records to see template output</font></b>";
+		if(array_key_exists("publish", $_REQUEST)){
+			echo "<b><font color='#ff0000'>Note: There are no records in this view. The URL will only show records to which the viewer has access. Unless you are logged in to the database, you can only see records which are marked as Public visibility</font></b>";
+		}else{
+			echo "<b><font color='#ff0000'>Search or Select records to see template output</font></b>";
+		}
 		exit();
 	}
 
@@ -52,7 +56,7 @@ require_once('libs.inc.php');
 	//get template body from request (for execution from editor)
 	$template_body = (array_key_exists('template_body',$_REQUEST)?$_REQUEST['template_body']:null);
 
-	$replevel = (array_key_exists('replevel',$_REQUEST)?$_REQUEST['replevel']:0);
+	$replevel = (array_key_exists('replevel',$_REQUEST) ?$_REQUEST['replevel']:0);
 
 //DEBUG error_log(">>>>>>>>".$template_file);
 	//convert to array that will assigned to smarty variable

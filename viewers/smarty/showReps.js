@@ -133,10 +133,12 @@ function ShowReps() {
 		var s1 = location.search;
 		if(s1=="" || s1=="?null" || s1=="?noquery"){
 			 s1 = null;
+			 _currentQuery_all = top.HEURIST.currentQuery_all;
+			 _currentQuery_sel = top.HEURIST.currentQuery_sel;
+		}else{
+			_currentQuery_all = _isUseAllRecords?s1:null;
+			_currentQuery_sel = _isUseAllRecords?null:s1;
 		}
-
-		_currentQuery_all = _isUseAllRecords?s1:null;
-		_currentQuery_sel = _isUseAllRecords?null:s1;
 
 		_reload_templates();
 

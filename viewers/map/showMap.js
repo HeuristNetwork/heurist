@@ -126,10 +126,10 @@ function ShowMap() {
 		};
 
 		if(context.cntWithGeo+HEURIST.tmap.layers.length+rec_withtime==0){
-			document.getElementById("mapreportcontainer").innerHTML = "<div class='wrap'><div id='errorMsg'><span>No map and time data</span></div></div>";
+			document.getElementById("mapreportcontainer").innerHTML = "<div class='wrap'><div id='errorMsg'><span>No map and time data</span></div></div>"+(HRST.external_publish?"<p align='center'>Note: 	There are no records in this view. The URL will only show records to which the viewer has access. Unless you are logged in to the database, you can only see records which are marked as Public visibility</p>":"");
 		}
 
-		setLayout(((context.cntWithGeo+HEURIST.tmap.layers.length)>0), (rec_withtime>0))
+		setLayout(((context.cntWithGeo+HEURIST.tmap.layers.length)>0), (rec_withtime>0));
 
 		initMapping(); //from mapping.js
 	}
@@ -430,9 +430,12 @@ function ShowMap() {
 		var s1 = location.search;
 		if(s1=="" || s1=="?null" || s1=="?noquery"){
 			 s1 = null;
+			 squery_all = top.HEURIST.currentQuery_all;
+			 squery_sel = top.HEURIST.currentQuery_sel;
+		}else{
+			squery_all = _isUseAllRecords?s1:null;
+			squery_sel = _isUseAllRecords?null:s1;
 		}
-		squery_all = _isUseAllRecords?s1:null;
-		squery_sel = _isUseAllRecords?null:s1;
 		_reload();
 
 		if(HRST.displayPreferences){
@@ -559,6 +562,10 @@ function ShowMap() {
 
 		isUseAllRecords: function(){
 			return _isUseAllRecords;
+		},
+
+		isEmpty: function(){
+			return !(_ismap || _istime);
 		},
 
 		setUseAllRecords: function(val){
