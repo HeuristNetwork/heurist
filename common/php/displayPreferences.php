@@ -32,7 +32,7 @@ header("Content-type: text/javascript");
 /* an array of the properties that may be set, and default values */
 $prefs = array(
 	"help" => "show",
-    "advanced" => "hide",
+	"advanced" => "hide",
 	"input-visibility" => "all",
 	"action-on-save" => "stay",
 	"gigitiser-view" => "",
@@ -72,7 +72,9 @@ $prefs = array(
 	"favourites" => "Favourites", // standard spelling for default search
 	"loadRelatedOnSearch" => "true", // by default do not load related records, can be set in Preferences dialogue
 	"defaultRecentPointerSearch" => "true", // when searching for pointers to records, show recent records by default
-	"defaultMyBookmarksSearch" => "true" // hitting Enter will do a My Bookmarks search
+	"defaultMyBookmarksSearch" => "true", // hitting Enter will do a My Bookmarks search
+	"autoSelectRelated" => "true", // autoSelect related records
+	"autoDeselectOtherLevels" => "true" // auto deselct other level before selecting current.
 );
 
 foreach (get_group_ids() as $gid) {

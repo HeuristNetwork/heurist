@@ -19,7 +19,7 @@
 	<style>
 	.input-row, .input-row .input-header-cell, .input-row div.input-cell {vertical-align:middle}
 	</style>
-		
+
 </head>
 
 <body class="popup" onLoad="showPreferences()" width=500 height=400>
@@ -44,6 +44,12 @@
 		var bkm = top.HEURIST.util.getDisplayPreference("defaultMyBookmarksSearch"); // main search default on [enter]
 		document.getElementById("defaultMyBookmarksSearch").checked
 			= (bkm==='true');
+		var asr = top.HEURIST.util.getDisplayPreference("autoSelectRelated"); // auto select related records (one level for now)
+		document.getElementById("autoSelectRelated").checked
+			= (asr!=='false');
+		var adl = top.HEURIST.util.getDisplayPreference("autoDeselectOtherLevels"); // main search default on [enter]
+		document.getElementById("autoDeselectOtherLevels").checked
+			= (adl!=='false');
 	}
 
 	function save() {
@@ -53,6 +59,8 @@
 		var rel = (document.getElementById("loadRelatedOnSearch").checked)?'true':'false';
 		var rec = (document.getElementById("defaultRecentPointerSearch").checked)?'true':'false';
 		var bkm = (document.getElementById("defaultMyBookmarksSearch").checked)?'true':'false';
+		var asr = (document.getElementById("autoSelectRelated").checked)?'true':'false';
+		var adl = (document.getElementById("autoDeselectOtherLevels").checked)?'true':'false';
 
 		if (rpp < 0 || rpp > 500) {
 			alert("Results per page must be between 1 and 500");
@@ -64,6 +72,8 @@
 		top.HEURIST.util.setDisplayPreference("loadRelatedOnSearch", rel);
 		top.HEURIST.util.setDisplayPreference("defaultRecentPointerSearch", rec);
 		top.HEURIST.util.setDisplayPreference("defaultMyBookmarksSearch", bkm);
+		top.HEURIST.util.setDisplayPreference("autoSelectRelated", asr);
+		top.HEURIST.util.setDisplayPreference("autoDeselectOtherLevels", adl);
 		window.close();
 	}
   </script>
@@ -89,6 +99,12 @@
   </div>
    <div class="input-row">
 	<div class="input-header-cell">Default pointer field search in edit to show recent records (otherwise All Records)</div><div  class="input-cell"><input type="checkbox" id="defaultRecentPointerSearch"></div>
+  </div>
+   <div class="input-row">
+	<div class="input-header-cell">Automatically select related records</div><div  class="input-cell"><input type="checkbox" id="autoSelectRelated"></div>
+  </div>
+   <div class="input-row">
+	<div class="input-header-cell">Automatically deselect when changing active level</div><div  class="input-cell"><input type="checkbox" id="autoDeselectOtherLevels"></div>
   </div>
   <div id="buttons" class="actionButtons">
    <input type="button" value="save" onClick="save();">

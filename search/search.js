@@ -564,7 +564,7 @@ top.HEURIST.search = {
 		/* rec_NonOwnerVisibility, rec_URLLastVerified, rec_URLErrorMessage, bkm_PwdReminder, thumbnailURL */
 
 		var pinAttribs = res[0]? "class='logged-in-only bookmarked' title='Bookmarked - click to see details'"
-		                       : "class='logged-in-only unbookmarked' title='Bookmark this record'";
+								:"class='logged-in-only unbookmarked' title='Bookmark this record'";
 
 		var href = res[3];
 		var linkText = res[5] + " ";
@@ -640,19 +640,19 @@ top.HEURIST.search = {
 		"<input style='display:none' type=checkbox name=bib[] onclick=top.HEURIST.search.resultItemOnClick(this) class='logged-in-only' title='Check box to apply Actions to this record'>"+
 		"<div class='recTypeThumb' "+rectypeThumb+" ></div>" +
 		(res[11] && res[11].length ? "<div class='thumbnail' style='background-image:url("+res[11]+")' ></div>":"") +
-		   "<div class=recordIcons  bkmk_id='"+res[0]+"' recID="+res[2]+">" +
-		   "<img src='"+ top.HEURIST.basePath+"common/images/16x16.gif' title='"+rectypeTitle.htmlEscape()+"' "+rectypeImg+" class='rft'>"+
-		   "<img src='"+ top.HEURIST.basePath+"common/images/13x13.gif' " + pinAttribs + ">"+
-		   "<span class='wg-id-container logged-in-only'>"+
-		   "<span class=wg-id title='"+linkTitle.htmlEscape()+"' " + (wgColor? wgColor: "") + ">" + (wgHTML? wgHTML.htmlEscape() : "") + "</span>"+
-		   "</span>"+
-		   "<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/lock.png' " + userPwd + ">"+
-		    "</div>" +
-			"<div class='recordTitle' title='"+linkText+"'>" + (res[3] && res[3].length ? daysBad +"<a href='"+res[3]+"' target='_blank'>"+linkText + "</a>" : linkText ) + "</div>" +
-			"<div id='recordID'>"+
-			newSearchWindow +
-			editLinkIcon +
-			"</div>" +
+		"<div class=recordIcons  bkmk_id='"+res[0]+"' recID="+res[2]+">" +
+		"<img src='"+ top.HEURIST.basePath+"common/images/16x16.gif' title='"+rectypeTitle.htmlEscape()+"' "+rectypeImg+" class='rft'>"+
+		"<img src='"+ top.HEURIST.basePath+"common/images/13x13.gif' " + pinAttribs + ">"+
+		"<span class='wg-id-container logged-in-only'>"+
+		"<span class=wg-id title='"+linkTitle.htmlEscape()+"' " + (wgColor? wgColor: "") + ">" + (wgHTML? wgHTML.htmlEscape() : "") + "</span>"+
+		"</span>"+
+		"<img onclick=top.HEURIST.search.passwordPopup(this) title='Click to see password reminder' src='"+ top.HEURIST.basePath+"common/images/lock.png' " + userPwd + ">"+
+		"</div>" +
+		"<div class='recordTitle' title='"+linkText+"'>" + (res[3] && res[3].length ? daysBad +"<a href='"+res[3]+"' target='_blank'>"+linkText + "</a>" : linkText ) + "</div>" +
+		"<div id='recordID'>"+
+		newSearchWindow +
+		editLinkIcon +
+		"</div>" +
 		"</div>" +
 		"</div>";
 		return html;
@@ -1492,7 +1492,6 @@ top.HEURIST.search = {
 		return false;
 	},
 
-
 	selectedRecordIds: [],
 	selectedRecordDivs: [],
 
@@ -1507,7 +1506,25 @@ top.HEURIST.search = {
 				resultDiv = $('div[class~=recordDiv]',$("#results-level"+level)).filter('div[recID='+ recID +']').get(0);
 			}
 			$(resultDiv).toggleClass("selected");
-			$(".link"+recID,$("#results")).addClass("linkSelected");
+			if (top.HEURIST.displayPreferences.autoSelectRelated != "true"){
+				$(".link"+recID,$("#results")).addClass("linkSelected");
+			}else{// mark all related records
+				//for each related record mark as relateSelected and add them into the selected array
+				$(".link"+recID+":not(.selected)",$("#results")).each(function(){
+					var div = $(this);
+					var relRecID = div.attr("recid");
+					var lvl = div.parent().attr("level");
+					div.addClass("relateSelected");
+					if (!top.HEURIST.search.selectedRecordDivs[lvl]) {
+						top.HEURIST.search.selectedRecordDivs[lvl] = {};
+					}
+					top.HEURIST.search.selectedRecordDivs[lvl][relRecID] = this;
+					if (!top.HEURIST.search.selectedRecordIds[lvl]) {
+						top.HEURIST.search.selectedRecordIds[lvl] = [];
+					}
+					top.HEURIST.search.selectedRecordIds[lvl].push(relRecID);
+				});
+			}
 			if (!top.HEURIST.search.selectedRecordDivs[level]) {
 				top.HEURIST.search.selectedRecordDivs[level] = {};
 			}
@@ -1521,10 +1538,29 @@ top.HEURIST.search = {
 
 	deselectResultItem: function(recID,level) {
 		var resultDiv = top.HEURIST.search.selectedRecordDivs[level][recID];
-		if (resultDiv) {
+		if (resultDiv && $(resultDiv).hasClass("selected")) {
 			delete top.HEURIST.search.selectedRecordDivs[level][recID];
 			$(resultDiv).toggleClass("selected");
-			$(".link"+recID,$("#results")).removeClass("linkSelected");
+			if (top.HEURIST.displayPreferences.autoSelectRelated != "true"){
+				$(".link"+recID,$("#results")).removeClass("linkSelected");
+			}else{// unmark all related records
+				//for each related record mark as relateSelected and add them into the selected array
+				$(".link"+recID+".relateSelected",$("#results")).each(function(){
+					var div = $(this);
+					var relRecID = div.attr("recid");
+					var lvl = div.parent().attr("level");
+					div.removeClass("relateSelected");
+					if (!div.hasClass("relateSelected")) {
+						delete top.HEURIST.search.selectedRecordDivs[lvl][relRecID];
+						for(var i = 0; i < top.HEURIST.search.selectedRecordIds[lvl].length; i++){
+							if (top.HEURIST.search.selectedRecordIds[lvl][i] == relRecID) {
+								top.HEURIST.search.selectedRecordIds[lvl].splice(i,1);
+								break;
+							}
+						}
+					}
+				});
+			}
 			for(var i = 0; i < top.HEURIST.search.selectedRecordIds[level].length; i++){
 				if (top.HEURIST.search.selectedRecordIds[level][i] == recID) {
 					top.HEURIST.search.selectedRecordIds[level].splice(i,1);
@@ -1609,6 +1645,8 @@ top.HEURIST.search = {
 		}
 	},
 
+	activeLevel:0,
+
 	resultItemOnClick: function(e, targ) {
 		//find the event and target element
 		if (! e) e = window.event;
@@ -1642,14 +1680,41 @@ top.HEURIST.search = {
 		var recID = $(resultDiv).attr("recID");
 		var level = $(resultDiv).parent().attr("level");
 		var results = top.HEURIST.search.results;
+		var selectRelated = top.HEURIST.displayPreferences.autoSelectRelated == "true";
+		var deselectAllOnLevelChange = top.HEURIST.displayPreferences.autoDeselectOtherLevels == "true";
+
+		if (deselectAllOnLevelChange && level != top.HEURIST.search.activeLevel){
+			top.HEURIST.search.activeLevel = level;
+			//reset selection on all recordDivs - linkSelect, relatedSelect and select
+			$(".recordDiv.selected",$("#results")).each(function(){//selected
+				while ($(this).hasClass("selected")){
+					$(this).removeClass("selected");
+				}
+			});
+			$(".recordDiv.linkSelected",$("#results")).each(function(){//linkSelected
+				while ($(this).hasClass("linkSelected")){
+					$(this).removeClass("linkSelected");
+				}
+			});
+			$(".recordDiv.relateSelected",$("#results")).each(function(){//relateSelected
+				while ($(this).hasClass("relateSelected")){
+					$(this).removeClass("relateSelected");
+				}
+			});
+			var i; // reset the selected RecIDs by level array
+			for (i=0; i< top.HEURIST.search.selectedRecordIds.length; i++) {
+				top.HEURIST.search.selectedRecordIds[i] = [];
+				top.HEURIST.search.selectedRecordDivs[i] = [];
+			}
+		}
 
 		if ( e.ctrlKey) { // CTRL + Click -  do multiselect functionality single item select and unselect from list
 			top.HEURIST.search.toggleResultItemSelect(recID,resultDiv,level);
 		}else if (e.shiftKey){//SHIFT + Click
-		// find all items from current click item to last selected
+		// find all items from current click item to last selected since index map is a display ordering by level
 			var recIdToIndexMap = results.infoByDepth[level].recIdToIndexMap;
 			var selectedBibIds = top.HEURIST.search.selectedRecordIds[level];
-			var lastSelectedIndex = recIdToIndexMap[selectedBibIds[selectedBibIds.length - 1]];
+			var lastSelectedIndex = selectedBibIds.length?recIdToIndexMap[selectedBibIds[selectedBibIds.length - 1]]:0;
 			var clickedIndex = recIdToIndexMap[recID];
 			var newSelectedRecIdMap = {};
 			var newSelectedRecIds = [];
@@ -1707,16 +1772,16 @@ top.HEURIST.search = {
 
 		//send selectionChange event
 		var selectedRecIDs = top.HEURIST.search.getSelectedRecIDs().get();
-        var recordFrame = document.getElementById("record-view-frame");
+		var recordFrame = document.getElementById("record-view-frame");
 		if (!selectedRecIDs.length){
-            recordFrame.src = top.HEURIST.basePath+"common/html/msgNoRecordsSelected.html";
-            }else{
+			recordFrame.src = top.HEURIST.basePath+"common/html/msgNoRecordsSelected.html";
+		}else{
 			recordFrame.src = top.HEURIST.basePath+"common/html/msgLoading.html";
 			setTimeout(function(){recordFrame.src = top.HEURIST.basePath+"records/view/renderRecordData.php?recID="+recID+
 							("&db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
 							(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "")));},
 							50);
-            };
+		};
 
 //        var sidebysideFrame = document.getElementById("sidebyside-frame");
 //		sidebysideFrame.src = top.HEURIST.basePath+"viewers/sidebyside/sidebyside.html"+
@@ -1725,7 +1790,7 @@ top.HEURIST.search = {
 
 		var viewerFrame = document.getElementById("viewer-frame");
 		var ssel = "selectedIds=" + selectedRecIDs.join(",");
-        top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
+		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
 
 /*art temp old mapping
 		var mapFrame = document.getElementById("map-frame");
@@ -2451,7 +2516,7 @@ top.HEURIST.search = {
 		var viewerFrame = document.getElementById("viewer-frame");
 
 		var recordFrame = document.getElementById("record-view-frame");
-		recordFrame.src = top.HEURIST.basePath+"common/html/msgNoRecordsSelected.html";
+		recordFrame.src = top.HEURIST.basePath+"common/html/msgNoRecordsSelected.html";// saw BUG this code shoulw be part of the event response to selection change
 		top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", "selectedIds=");
 
 /*art temp old mapping

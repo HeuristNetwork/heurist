@@ -784,7 +784,7 @@ nobr#activesaved a {
 	margin-bottom:5px;
 }
 #workgroup-saved-searches-searches div.content {
-	
+
 }
 #workgroup-saved-searches div.content div#workgroup-saved-searches-searches > div {
 	background-color:RGBA(255,255,255,0.5);
@@ -1817,15 +1817,27 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 }
 .recorddiv.selected, .recorddiv.selected:hover {
 	border-color:#62A7F8;
-	background:#EEE;
+	background:#CCC;
 	background:-moz-linear-gradient(center top, #e6f8fd, #bee4f8) repeat scroll 0 0 transparent;
 	background:-webkit-gradient(linear, left top, left bottom, from(#e6f8fd), to(#bee4f8));
 }
+.recorddiv.relateSelected, .recorddiv.relateSelected:hover {
+	border-color:#62A7F8;
+	background:#EEF;
+	background:-moz-linear-gradient(center top, #f6fbfe, #ceedfb) repeat scroll 0 0 transparent;
+	background:-webkit-gradient(linear, left top, left bottom, from(#f6fbfe), to(#ceedfb));
+}
 .recorddiv.selected.linkselected {
 	border-color:#62A7F8;
-	background:#EEE;
+	background:#CCC;
 	background:-moz-linear-gradient(center top, #e6f8fd, #bee4f8) repeat scroll 0 0 transparent;
 	background:-webkit-gradient(linear, left top, left bottom, from(#e6f8fd), to(#bee4f8));
+}
+.recorddiv.relateSelected.linkselected {
+	border-color:#62A7F8;
+	background:#CCC;
+	background:-moz-linear-gradient(center top, #f6fbfe, #ceedfb) repeat scroll 0 0 transparent;
+	background:-webkit-gradient(linear, left top, left bottom, from(#f6fbfe), to(#ceedfb));
 }
 .two-col .recorddiv.selected {
 	border-left: 1px solid #62A7F8;
