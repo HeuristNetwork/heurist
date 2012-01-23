@@ -780,8 +780,18 @@ nobr#activesaved a {
 	font-weight:bold;
 }
 #saved .content {
-	padding-bottom: 6px; 	/*background-image:url(../images/backgrounds/light_bg.png)*/
-	;
+	padding-bottom: 5px;
+	margin-bottom:5px;
+}
+#workgroup-saved-searches-searches div.content {
+	
+}
+#workgroup-saved-searches div.content div#workgroup-saved-searches-searches > div {
+	background-color:RGBA(255,255,255,0.5);
+	margin-left:15px;
+}
+#workgroup-saved-searches div.content div#workgroup-saved-searches-searches > div.hide {
+	background:none;
 }
 #saved div.hide .content {
 	display: none;
@@ -955,13 +965,13 @@ img.saved-search-edit {
 .saved-search-subheading {
 	font-weight: bold;
 	margin-top: 0px;
-	padding: 3px 0 0 30px;
+	padding: 3px 0 0 15px;
 	color: #6A7C99;/*border-top: 1px dotted #A4B4CB*/
 	;
 	cursor: pointer;
 	background-color: none;
 	background-image: url(../images/sub_heading_saved_search.png);
-	background-position: 13px -5px;
+	background-position: 0 -5px;
 	background-repeat: no-repeat;
 }
 div.hide .saved-search-subheading {
@@ -970,8 +980,9 @@ div.hide .saved-search-subheading {
 	padding-top:2px;
 }
 .saved-search-subsubheading {
-	padding: 1px 0px 1px 24px;
-	color: #6A7C99;/*border-top:1px solid #FFFFFF*/
+	padding: 1px 0px 1px 15px;
+	color: #6A7C99;
+	margin-top:5px;
 	;
 }
 .saved-search-subsubheading a {
