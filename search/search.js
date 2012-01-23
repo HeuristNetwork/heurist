@@ -2533,7 +2533,7 @@ top.HEURIST.search = {
 
 	getSelectedRecIDs: function() {
 		var recIDs = {};
-		var selectedRecIDs = $(".recordDiv.selected.lnk:not(.filtered) ",$("#results")).map(function(i,recdiv){
+		var selectedRecIDs = $(".recordDiv.selected.lnk:not(.filtered),.recordDiv.relateSelected.lnk:not(.filtered)",$("#results")).map(function(i,recdiv){
 					var recID = $(recdiv).attr("recID");
 					if (!recIDs[recID] && parseInt(recID)>=0) {
 						recIDs[recID] = true;
