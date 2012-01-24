@@ -1607,7 +1607,7 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	margin:0px -2px;
 }
 .icons .recordDiv {
-	border: 2px solid #FFFFFF;
+	border: 3px solid #FFFFFF;
 	border-collapse: collapse;
 	border-radius: 3px 3px 3px 3px;
 	box-shadow: 0 1px 2px #BBBBBB;
@@ -1823,9 +1823,18 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 }
 .recorddiv.relateSelected, .recorddiv.relateSelected:hover {
 	border-color:#62A7F8;
-	background:#EEF;
+	/*background:#EEF;
 	background:-moz-linear-gradient(center top, #f6fbfe, #ceedfb) repeat scroll 0 0 transparent;
-	background:-webkit-gradient(linear, left top, left bottom, from(#f6fbfe), to(#ceedfb));
+	background:-webkit-gradient(linear, left top, left bottom, from(#f6fbfe), to(#ceedfb));*/
+}
+/* related selected progress */
+.recorddiv.relateSelected2 {
+	border:2px solid #62A7F8;
+	padding:1px;
+}
+.recorddiv.relateSelected3 {
+	border:1px solid #62A7F8;
+	padding:2px;
 }
 .recorddiv.selected.linkselected {
 	border-color:#62A7F8;
