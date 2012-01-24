@@ -75,6 +75,15 @@ function ShowMap() {
 			}//for
 		}
 
+		if(context.cntWithGeo>0){
+			var elem = document.getElementById('cbLayers');
+			if(HEURIST.tmap.layers.length==0 && elem.selectedIndex>0){
+				HEURIST.tmap.layers = [systemAllLayers[elem.value]];
+			}else{
+				elem.selectedIndex = 0;
+			}
+		}
+
 
 		RelBrowser.Mapping.mapdata = {
 			//					focus: "<xsl:value-of select="detail[@id=230]/geo/wkt"/>",
@@ -149,6 +158,8 @@ function ShowMap() {
 		items = [],
 		kmls = [],
 		rec_withtime = 0;
+
+		var installDir = window.location.protocol+"//"+window.location.host;
 
 		/**/
 		for (ind in HEURIST.tmap.geoObjects) {
@@ -275,15 +286,18 @@ function ShowMap() {
 								options:{
 									//theme: "purple",
 									description: record.description,
-									url: record.url,
+									url: (record.url ? "'"+record.url+"' target='_blank'"  :"'javascript:void(0);'"), //for timemap popup
+									link: record.url,  //for timeline popup
 									recid: record.recID,
 									rectype: record.rectype,
 									thumb: record.thumb_url,
-									icon: record.icon_url
+									icon: record.icon_url,  //installDir+
+									start: (record.start || ''),
+									end: ((Hul.isnull(record.end) || record.end==record.start)?'':record.end)
 								}
 							};
 
-							if(!Hul.isnull(record.end)){
+							if(!Hul.isnull(record.end) && record.end!==record.start){
 								item.end = record.end;
 							}
 
@@ -303,39 +317,6 @@ function ShowMap() {
 
 		return {items: items, kmls:kmls, rec_withtime:rec_withtime};
 	}
-
-
-	/** ARTEM - todo
-	*
-	* 1. convert php result to set of datasets and layers
-	*
-	*
-	*
-	*/
-
-	/**
-	*  name - name of dataset (main, related 1,2,3)
-	*  phpres - result of showMap.php
-	*  returns - object of 2 arrays (dataset and layers) and counts of objects with coordinates and timeenabled
-	*/
-	function getDatasets(name, phpres){
-
-	}
-
-	function removeDatasets(name){
-
-	}
-
-	function removeLayers(name){
-
-	}
-
-	// merge given mapdata with the current RelBrowser.Mapping.mapdata
-	function mergeLayers( mapdata ){
-
-	}
-
-
 
 /* outdated - to remove
 	function _onSelectionChange(eventType, argList) {

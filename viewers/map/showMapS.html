@@ -56,7 +56,10 @@
       Timeline_urlPrefix  = RelBrowser.baseURL + "external/timeline_2.3.0/timeline_js/";
       Timeline_parameters = 'bundle=true'; */
 
-			var showMap;
+	Timeline_urlPrefix = "../../external/timemap.2.0/lib/timeline/";
+	Timeline_ajax_url = "../../external/timemap.2.0/lib/timeline/timeline_ajax/simile-ajax-api.js";
+
+	var showMap;
 	</script>
 
 <link href="../../external/jquery/jquery-ui-1.8.css" rel="stylesheet" type="text/css"/>
@@ -67,8 +70,9 @@
 <script type="text/javascript" src="../../external/timemap.2.0/lib/mxn/mxn.js?(googlev3)"></script>
 
 <script type="text/javascript" src="../../external/timemap.2.0/lib/markerclusterer.js"></script>
-<script type="text/javascript" src="../../external/timemap.2.0/lib/timeline-1.2.js"></script>
+<script type="text/javascript" src="../../external/timemap.2.0/lib/timeline/timeline-api.js?bundle=true"></script>
 <!--
+<script type="text/javascript" src="../../external/timemap.2.0/lib/timeline-1.2.js"></script>
 <script type="text/javascript" src="../../external/timemap.2.0/lib/timeline-2.3.0.js"></script>
 <script type="text/javascript" src="../../external/timeline_2.3.0/timeline_js/timeline-api.js"></script>
 -->
@@ -146,6 +150,13 @@ body {
     					top: -0.3em;
 }
 
+#rec_popup{
+	color:green;
+	display:inline-block;
+	text-align:left;
+	padding-left:3px;
+	padding-top:3px;
+}
 
 #errorMsg{
 	width:100%;
@@ -355,7 +366,7 @@ body {
 		RelBrowser.iconBaseURL =  HRST.iconBaseURL;
 		RelBrowser.database = HRST.database.name;
 
-		Timeline_urlPrefix = HRST.basePath + "external/timemap.2.0/lib/";
+		//Timeline_urlPrefix = HRST.basePath + "external/timemap.2.0/lib/";
 
 		window.showMap = new ShowMap();
 	}

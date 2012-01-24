@@ -347,6 +347,9 @@ ether_zoom = function(_band, ether, zoomIn) {
 			tl_theme = Timeline.ClassicTheme.create();
 			tl_theme.autoWidth = true;
 			tl_theme.mouseWheel = "default";//"zoom";
+			tl_theme.event.bubble.bodyStyler = function(elem){
+				$(elem).addClass("popup_body");
+			};
 			//tl_theme.event.instant.icon = Timeline.urlPrefix + "images/dull-blue-circle.png";
 			//tl_theme.event.bubble.maxHeight = 0;
 			//tl_theme.event.bubble.width = 320;
@@ -422,11 +425,12 @@ ether_zoom = function(_band, ether, zoomIn) {
 						"' target='_blank' title='Open in new window' class='externalLink'>view</a></div>"
 
 		//info window
+		/*OLD WAY
 		var template = "<div style='max-width:450px;'>"+
 			//"<div style='display:inline-block;background-image:url({{thumb}})'></div>"+
 			"<b><a href={{url}}>{{title}}</a></b><br/>"+
 
-			"<div style='display:inline-block;text-align:left;padding-left:3px;padding-top:3px;'>"+
+			"<div id='rec_popup'>"+
 			"<img src='"+basePath+"common/images/10x10.gif' width='100' align='left' style='display:inline-block;background-repeat:no-repeat;background-image:url({{thumb}})'>{{description}}</div>"+
 
 			"<div style='width:100%'>"+
@@ -437,8 +441,23 @@ ether_zoom = function(_band, ether, zoomIn) {
 						editLinkIcon +
 						newSearchWindow +
 				"</div>"
-			"<div>";
-
+			"<div>";*/
+//class="simileAjax-bubble-contentContainer simileAjax-bubble-contentContainer-pngTranslucent"
+			var template = '<div style="max-width: 300px;padding-top:5px;">'+
+'<div style="position: static;"><img src="{{thumb}}" class="timeline-event-bubble-image">'+
+'<div class="timeline-event-bubble-title"><a href={{url}}>{{title}}</a></div>'+
+'<div class="popup_body">{{description}}</div>'+
+'<div class="timeline-event-bubble-time">{{start}}</div>'+
+'<div class="timeline-event-bubble-time">{{end}}</div>'+
+			'<div style="width:100%">'+
+				'<div style="display:inline-block;">'+
+					'<img src="'+basePath+'common/images/16x16.gif" '+rectypeImg+' class="rft">'+
+				'</div>'+
+				'<div style="float:right;padding-right:10px;" id="recordID">'+
+						editLinkIcon +
+						newSearchWindow +
+				'</div>'+
+'</div></div>';
 
 			var customIcon = "heuristicon.png"; //TODO!!!! - deault marker
 

@@ -49,7 +49,12 @@
 						pipelineBaseURL: "../"
 			};
 
-//	Timeline_urlPrefix = RelBrowser.baseURL + "external/timemap.2.0/lib/";
+	//Timeline_urlPrefix = RelBrowser.baseURL + "external/timemap.2.0/lib/";
+//	Timeline_urlPrefix = "http://heuristscholar.org/h3-ao/external/timemap.2.0/lib/timeline/";
+//	Timeline_ajax_url = "http://heuristscholar.org/h3-ao/external/timemap.2.0/lib/timeline/timeline_ajax/simile-ajax-api.js";
+
+	Timeline_urlPrefix = "../../external/timemap.2.0/lib/timeline/";
+	Timeline_ajax_url = "../../external/timemap.2.0/lib/timeline/timeline_ajax/simile-ajax-api.js";
 
 /*      Timeline_ajax_url   = RelBrowser.baseURL + "external/timeline_2.3.0/timeline_ajax/simile-ajax-api.js";
       Timeline_urlPrefix  = RelBrowser.baseURL + "external/timeline_2.3.0/timeline_js/";
@@ -66,11 +71,13 @@
 <script type="text/javascript" src="../../external/timemap.2.0/lib/mxn/mxn.js?(googlev3)"></script>
 
 <script type="text/javascript" src="../../external/timemap.2.0/lib/markerclusterer.js"></script>
-<script type="text/javascript" src="../../external/timemap.2.0/lib/timeline-2.3.0.js"></script>
 <!--
-<script type="text/javascript" src="../../external/timeline_2.3.0/timeline_js/timeline-api.js"></script>
+<script type="text/javascript" src="../../external/timemap.2.0/lib/timeline-2.3.0.js"></script>
 <script type="text/javascript" src="../../external/timemap.2.0/lib/timeline-1.2.js"></script>
+
+<script type="text/javascript" src="../../external/timemap.2.0/lib/timeline-2.3.0.js"></script>
 -->
+<script type="text/javascript" src="../../external/timemap.2.0/lib/timeline/timeline-api.js?bundle=true"></script>
 
 <script src="../../external/timemap.2.0/src/timemap.js" type="text/javascript"></script>
 <script src="../../external/timemap.2.0/src/param.js" type="text/javascript"></script>
@@ -138,6 +145,20 @@ body {
 #timeline.entity-timeline .timeline-event-tape {
 	cursor: default;
 }
+
+#rec_popup{
+	color:green;
+	display:inline-block;
+	text-align:left;
+	padding-left:3px;
+	padding-top:3px;
+}
+
+.popup_body{
+	color:green;
+	text-align:left;
+}
+
 
 /* for transparency slider*/
 .ui-slider .ui-slider-handle {width: 0.25em;height:0.75em;}
@@ -298,7 +319,8 @@ button {height:auto !important;
 		RelBrowser.iconBaseURL =  HRST.iconBaseURL;
 		RelBrowser.database = HRST.database.name;
 
-		Timeline.urlPrefix = HRST.baseURL + "external/timemap.2.0/lib/";
+		//Timeline.urlPrefix = HRST.baseURL + "external/timemap.2.0/lib/timeline/"; //"external/timemap.2.0/lib/";
+		//Timeline.urlPrefix = HRST.baseURL + "external/timemap.2.0/lib/";
 
 		window.showMap = new ShowMap();
 	}

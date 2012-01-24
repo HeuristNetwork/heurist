@@ -129,7 +129,7 @@
 		$records[$bibID]["recID"] = $bibID;
 		$records[$bibID]["rectype"] = $row[7];
 		$records[$bibID]["description"] = ( $row[0] ?$row[0] :($row[1]?$row[1]:"") );
-		$records[$bibID]["url"] = ($row[2] ? "'".$row[2]."' target='_blank'"  :"'javascript:void(0);'");
+		$records[$bibID]["url"] = $row[2]; //($row[2] ? "'".$row[2]."' target='_blank'"  :"'javascript:void(0);'");
 		//'javascript:{this.href="'+$row[2]+'"}' : 'javascript:{return false;}');//javascript:void(0)}');
 		$records[$bibID]["icon_url"] = HEURIST_ICON_URL_BASE . $row[7] . ".png";;
 
