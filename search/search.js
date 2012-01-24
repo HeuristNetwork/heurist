@@ -1503,7 +1503,7 @@ top.HEURIST.search = {
 			top.HEURIST.search.deselectResultItem(recID,level);
 		}else if (recID) {
 			if (!resultDiv) {
-				resultDiv = $('div[class~=recordDiv]',$("#results-level"+level)).filter('div[recID='+ recID +']').get(0);
+				resultDiv = $('div[class~=recordDiv]',$("#results-level"+level)).filter('div[recid='+ recID +']').get(0);
 			}
 			$(resultDiv).toggleClass("selected");
 			if (top.HEURIST.displayPreferences.autoSelectRelated != "true"){
@@ -1518,11 +1518,13 @@ top.HEURIST.search = {
 					if (!top.HEURIST.search.selectedRecordDivs[lvl]) {
 						top.HEURIST.search.selectedRecordDivs[lvl] = {};
 					}
-					top.HEURIST.search.selectedRecordDivs[lvl][relRecID] = this;
 					if (!top.HEURIST.search.selectedRecordIds[lvl]) {
 						top.HEURIST.search.selectedRecordIds[lvl] = [];
 					}
-					top.HEURIST.search.selectedRecordIds[lvl].push(relRecID);
+					if (!top.HEURIST.search.selectedRecordDivs[lvl][relRecID]) {
+						top.HEURIST.search.selectedRecordDivs[lvl][relRecID] = this;
+						top.HEURIST.search.selectedRecordIds[lvl].push(relRecID);
+					}
 				});
 			}
 			if (!top.HEURIST.search.selectedRecordDivs[level]) {
@@ -1564,10 +1566,11 @@ top.HEURIST.search = {
 			for(var i = 0; i < top.HEURIST.search.selectedRecordIds[level].length; i++){
 				if (top.HEURIST.search.selectedRecordIds[level][i] == recID) {
 					top.HEURIST.search.selectedRecordIds[level].splice(i,1);
-					break;
+					return true; // signal that we remove the id from selected ids
 				}
 			}
 		}
+		return false;
 	},
 
 	resultItemMouseOver: function(e, targ) {
@@ -1741,8 +1744,9 @@ top.HEURIST.search = {
 		// for all selectedBibIds items not in new selection set, deselect item (which also removes it from selectedBibIds)
 			for(var j =0;  j< selectedBibIds.length; j++) {
 				if (!newSelectedRecIdMap[selectedBibIds[j]]){
-					top.HEURIST.search.deselectResultItem(selectedBibIds[j],level);
-					j--; //adjust for changed selectedBibIds
+					if (top.HEURIST.search.deselectResultItem(selectedBibIds[j],level)) {
+						j--; //adjust for changed selectedBibIds
+					}
 				}
 			}
 		//select all unselected new items and replace the selectedBidIds
@@ -1756,11 +1760,12 @@ top.HEURIST.search = {
 			var clickedResultFound = false;
 			var j=0;
 			if (top.HEURIST.search.selectedRecordIds[level]) {
-				while (top.HEURIST.search.selectedRecordIds[level].length && !clickedResultFound ||  clickedResultFound && top.HEURIST.search.selectedRecordIds[level].length > 1) {
-					if (!clickedResultFound && top.HEURIST.search.selectedRecordIds[level][0] == recID) {
+				for (j=0; j<top.HEURIST.search.selectedRecordIds[level].length; j++) {
+					if (!clickedResultFound &&
+							top.HEURIST.search.selectedRecordIds[level][0] == recID &&
+							top.HEURIST.search.selectedRecordDivs[level][recID] &&
+							$(top.HEURIST.search.selectedRecordDivs[level][recID]).hasClass("selected") ) {
 						clickedResultFound=true;
-						j=1;
-						continue;
 					}
 					top.HEURIST.search.deselectResultItem(top.HEURIST.search.selectedRecordIds[level][j],level);
 				}

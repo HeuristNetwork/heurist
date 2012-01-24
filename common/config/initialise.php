@@ -31,8 +31,7 @@
 
 	//set up system path defines
 
-	define('HEURIST_VERSION',"3.1.3");// need to change this in common/js/utilLoad.js
-	// Update sub-sub-version weekly and record date 3.1.3 = 23/11/11
+	define('HEURIST_VERSION',"3.1.0");// need to change this in common/js/utilLoad.js
 	define('HEURIST_MIN_DBVERSION',"1.0.0");
 
 	define('HEURIST_TOP_DIRS',"admin|common|export|external|hapi|help|import|records|search|viewers");

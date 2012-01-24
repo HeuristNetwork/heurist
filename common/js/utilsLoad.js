@@ -19,7 +19,7 @@ if (! document.body) {
 if (! top.HEURIST) {
 	var installDir = top.location.pathname.replace(/(((admin|common|export|external|hapi|help|import|records|search|viewers)\/.*)|(index.*))/, "");
 	top.HEURIST = {
-	VERSION: "build 3.1.3.231111",
+	VERSION: "build 3.1.0.240112",
 
 		basePath: installDir,
 	// TODO:  needs to change to be perminent heuristscholar or relative to the installed version's INSTALL_DIR  can use basePath
