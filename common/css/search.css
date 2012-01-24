@@ -1652,7 +1652,7 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	width: 38px;
 }
 .icons .recordDiv:hover .thumbnail, .icons .recordDiv:hover .recTypeThumb {
-	height:38px;
+	height:42px;
 }
 .icons .recordDiv .thumbnail {
 	display:none
