@@ -45,8 +45,11 @@
 		$arr_outputs = array();
 
 		//open directory and read in file names
-		if (is_dir(DIR)) {
-			if ($dh = opendir(DIR)) {
+		// Ian changed 'DIR' below to HEURIST_UPLOAD_DIR.xsl-templates 25/1/12
+        // TODO: check that the xsl template directory is hardcoded as subdirectory of the
+        // databases's upload directory - I think it is
+        if (is_dir(HEURIST_UPLOAD_DIR)) {
+			if ($dh = opendir(HEURIST_UPLOAD_DIR.'/xsl-templates')) {
 				while (($file = readdir($dh)) !== false) {
 					$arr_files[] = $file;
 
