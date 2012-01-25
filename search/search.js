@@ -1499,13 +1499,17 @@ top.HEURIST.search = {
 		if (typeof level === "undefined") {
 			level = 0;
 		}
-		if (top.HEURIST.search.selectedRecordDivs[level] && top.HEURIST.search.selectedRecordDivs[level][recID]) { // was selected so deselect
+		if (top.HEURIST.search.selectedRecordDivs[level] && top.HEURIST.search.selectedRecordDivs[level][recID] &&
+				$(top.HEURIST.search.selectedRecordDivs[level][recID]).hasClass("selected")){
 			top.HEURIST.search.deselectResultItem(recID,level);
 		}else if (recID) {
 			if (!resultDiv) {
 				resultDiv = $('div[class~=recordDiv]',$("#results-level"+level)).filter('div[recid='+ recID +']').get(0);
 			}
 			$(resultDiv).toggleClass("selected");
+//			while ($(resultDiv).hasClass("relateSelected")){
+//				$(resultDiv).removeClass("relateSelected");
+//			}
 			if (top.HEURIST.displayPreferences.autoSelectRelated != "true"){
 				$(".link"+recID,$("#results")).addClass("linkSelected");
 			}else{// mark all related records
@@ -1514,7 +1518,7 @@ top.HEURIST.search = {
 					var div = $(this);
 					var relRecID = div.attr("recid");
 					var lvl = div.parent().attr("level");
-					div.addClass("relateSelected");
+					this.className = this.className + " relateSelected";
 					if (!top.HEURIST.search.selectedRecordDivs[lvl]) {
 						top.HEURIST.search.selectedRecordDivs[lvl] = {};
 					}
@@ -1751,7 +1755,8 @@ top.HEURIST.search = {
 			}
 		//select all unselected new items and replace the selectedBidIds
 			for(var newSelectedRecId in newSelectedRecIdMap){
-				if (!top.HEURIST.search.selectedRecordDivs[level][newSelectedRecId]){
+				if (!top.HEURIST.search.selectedRecordDivs[level][newSelectedRecId] ||
+					!$(top.HEURIST.search.selectedRecordDivs[level][newSelectedRecId]).hasClass("selected")){
 					top.HEURIST.search.toggleResultItemSelect(newSelectedRecId,null,level);
 				}
 			}
@@ -1762,12 +1767,15 @@ top.HEURIST.search = {
 			if (top.HEURIST.search.selectedRecordIds[level]) {
 				for (j=0; j<top.HEURIST.search.selectedRecordIds[level].length; j++) {
 					if (!clickedResultFound &&
-							top.HEURIST.search.selectedRecordIds[level][0] == recID &&
+							top.HEURIST.search.selectedRecordIds[level][j] == recID &&
 							top.HEURIST.search.selectedRecordDivs[level][recID] &&
 							$(top.HEURIST.search.selectedRecordDivs[level][recID]).hasClass("selected") ) {
 						clickedResultFound=true;
+					}else{
+						if (top.HEURIST.search.deselectResultItem(top.HEURIST.search.selectedRecordIds[level][j],level)){
+							j--;
+						}
 					}
-					top.HEURIST.search.deselectResultItem(top.HEURIST.search.selectedRecordIds[level][j],level);
 				}
 			}
 			if (!clickedResultFound) { // clicked result was not previously selected so toggle to select
