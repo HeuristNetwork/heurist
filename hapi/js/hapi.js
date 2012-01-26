@@ -766,7 +766,7 @@ var HRecord = function() {
 		if (! tmpDetails) { return null; }//saw CHECK:  why return null if no existing detail , could be a newly added one not yet saved.
 
 		for (var i in tmpDetails) {
-			if(detailType.getVariety()===HVariety.ENUMERATION || detailType.getVariety()===HVariety.RELATIONSHIP){
+			if(detailType.getVariety()===HVariety.ENUMERATION || detailType.getVariety()===HVariety.RELATIONTYPE){
 				return detailType.getEnumerationValueFromId(tmpDetails[i]);
 			}
 			return tmpDetails[i];	// return the first value, having multiple might mean that the rectype has changed where detail is not repeatable now
@@ -776,7 +776,7 @@ var HRecord = function() {
 		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object required"); }
 		var details = [], bdID, i;
 		var tmpDetails = _namedDetails[detailType.getID()];
-		var termTranslate = (detailType.getVariety()===HVariety.ENUMERATION || detailType.getVariety()===HVariety.RELATIONSHIP);
+		var termTranslate = (detailType.getVariety()===HVariety.ENUMERATION || detailType.getVariety()===HVariety.RELATIONTYPE);
 		if (tmpDetails) {
 			// put named details (those that correspond to an existing bd_id) first
 			for (bdID in tmpDetails) {
@@ -796,7 +796,7 @@ var HRecord = function() {
 		var i, j, detailType, termTranslate, details = {};
 		for (i in _namedDetails) {
 			detailType = HDetailManager.getDetailTypeById(i);
-			termTranslate = (detailType.getVariety()===HVariety.ENUMERATION || detailType.getVariety()===HVariety.RELATIONSHIP);
+			termTranslate = (detailType.getVariety()===HVariety.ENUMERATION || detailType.getVariety()===HVariety.RELATIONTYPE);
 			details[i] = [];
 			for (j in _namedDetails[i]) {
 				details[i].push(termTranslate ? detailType.getEnumerationValueFromId(_namedDetails[i][j]) : _namedDetails[i][j]);
@@ -804,7 +804,7 @@ var HRecord = function() {
 		}
 		for (i in _details) {
 			detailType = HDetailManager.getDetailTypeById(i);
-			termTranslate = (detailType.getVariety()===HVariety.ENUMERATION || detailType.getVariety()===HVariety.RELATIONSHIP);
+			termTranslate = (detailType.getVariety()===HVariety.ENUMERATION || detailType.getVariety()===HVariety.RELATIONTYPE);
 			if (! details[i]) {
 				details[i] = [];
 			}
@@ -830,8 +830,8 @@ var HRecord = function() {
 			}
 		}
 
-		//check if enum or relationtype variety translate values to id
-		var termTranslate = (detailType.getVariety()===HVariety.ENUMERATION || detailType.getVariety()===HVariety.RELATIONSHIP);
+		//check if enum or relationship variety translate values to id
+		var termTranslate = (detailType.getVariety()===HVariety.ENUMERATION || detailType.getVariety()===HVariety.RELATIONTYPE);
 
 		if (! _details[detailType.getID()]) {
 			_details[detailType.getID()] = [ (termTranslate ? detailType.getIdForEnumerationValue(detailValue):detailValue)];
@@ -859,7 +859,7 @@ var HRecord = function() {
 		}
 
 		// change enum values to ids
-		if (detailType.getVariety()===HVariety.ENUMERATION || detailType.getVariety()===HVariety.RELATIONSHIP){
+		if (detailType.getVariety()===HVariety.ENUMERATION || detailType.getVariety()===HVariety.RELATIONTYPE){
 			if (isNaN(oldValue)) {
 				oldValue = detailType.getIdForEnumerationValue(oldValue);
 			}
@@ -914,7 +914,7 @@ var HRecord = function() {
 		if (_readonly) { throw new HPermissionException("Record is read-only"); }
 		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object required"); }
 
-		var termTranslate = (detailType.getVariety()===HVariety.ENUMERATION || detailType.getVariety()===HVariety.RELATIONSHIP);
+		var termTranslate = (detailType.getVariety()===HVariety.ENUMERATION || detailType.getVariety()===HVariety.RELATIONTYPE);
 		var newDetails = [];
 		var detailValue;
 		for (var i=0; i < detailValues.length; ++i) {
@@ -922,7 +922,7 @@ var HRecord = function() {
 			if (! detailValue  &&  (detailValue !== 0  &&  detailValue !== false)) { continue; }
 			// check validity of value
 			if (_type  &&  ! HDetailManager.isValidDetailValue(_type, detailType, detailValue)) {
-				throw new HValueException("in valid value ("+detailValue+") for field "+ detailType.getName()+" in " +_type.getName()+' record');
+				throw new HValueException("invalid value ("+detailValue+") for field "+ detailType.getName()+" in " +_type.getName()+' record');
 			}
 
 			newDetails.push(termTranslate ? detailType.getIdForEnumerationValue(detailValue):detailValue);
