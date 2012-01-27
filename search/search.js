@@ -1322,7 +1322,7 @@ top.HEURIST.search = {
 		var fld = $("#field-select").val();
 		var ctn = $("#field-select").parent().hasClass('enum') ?$("#simple-search-enum-selector").val() :
 																$("#input-contains").val();
-		q = (q? (fld?q+" ": q ):"") + (fld?fld + (ctn?'"'+ctn+'"':""):"");
+		q = (q? (fld?q+" ": q ):"") + (fld?fld:" all:") + (ctn?'"'+ctn+'"':"");
 		if (q) {
 			$("#q").val(q);
 		}
@@ -2614,40 +2614,44 @@ top.HEURIST.search = {
 		if (recIDs_list.length == 0  &&  bkmkIDs_list.length == 0) {
 			//nothing selected
 			alert("Select at least one record to add tags");
-		}
-		else if (recIDs_list.length > bkmkIDs_list.length) {
+			return;
+		}else if (recIDs_list.length > bkmkIDs_list.length) {
 			// at least one unbookmarked record selected
 			hasRecordsNotBkmkd = true;
 		}
-		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "records/tags/updateTagsSearchPopup.html?show-remove" + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""), { callback: function(add, tags) {
-			if (! tags) {
-				if (reload) top.location.reload();
-				return;
-			}
+		top.HEURIST.util.popupURL(window,
+					top.HEURIST.basePath+ "records/tags/updateTagsSearchPopup.html?show-remove" + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""),
+					{ callback: function(add, tags) {//options
+							if (! tags) {
+								if (reload) top.location.reload();
+								return;
+							}
 
-			var action_fr = top.document.getElementById("i_action");
-			var action_elt = action_fr.contentWindow.document.getElementById('action');
-			var bib_ids_elt = action_fr.contentWindow.document.getElementById('bib_ids');
-			var bkmk_ids_elt = action_fr.contentWindow.document.getElementById('bkmk_ids');
-			var tagString_elt = action_fr.contentWindow.document.getElementById('tagString');
-			var reload_elt = action_fr.contentWindow.document.getElementById('reload');
+							var action_fr = top.document.getElementById("i_action");
+							var action_elt = action_fr.contentWindow.document.getElementById('action');
+							var bib_ids_elt = action_fr.contentWindow.document.getElementById('bib_ids');
+							var bkmk_ids_elt = action_fr.contentWindow.document.getElementById('bkmk_ids');
+							var tagString_elt = action_fr.contentWindow.document.getElementById('tagString');
+							var reload_elt = action_fr.contentWindow.document.getElementById('reload');
 
-			if (! action_fr  ||  ! action_elt  ||  ! bkmk_ids_elt  ||  ! tagString_elt  ||  ! reload_elt) {
-				alert("Problem contacting server - try again in a moment");
-				if ( action_fr ) {
-					action_fr.src = "../search/actions/actionHandler.php";
-				}
-				return;
-			}
+							if (! action_fr  ||  ! action_elt  ||  ! bkmk_ids_elt  ||  ! tagString_elt  ||  ! reload_elt) {
+								alert("Problem contacting server - try again in a moment");
+								if ( action_fr ) {
+									action_fr.src = "../search/actions/actionHandler.php";
+								}
+								return;
+							}
 
-			action_elt.value = (add ? (hasRecordsNotBkmkd? "bookmark_and":"add") : "remove") + "_tags";
-			tagString_elt.value = tags;
-			bkmk_ids_elt.value = bkmkIDs_list.join(',');
-			bib_ids_elt.value = recIDs_list.join(',');
-			reload_elt.value = reload ? "1" : "";
+							action_elt.value = (add ? (hasRecordsNotBkmkd? "bookmark_and":"add") : "remove") + "_tags";
+							tagString_elt.value = tags;
+							bkmk_ids_elt.value = bkmkIDs_list.join(',');
+							bib_ids_elt.value = recIDs_list.join(',');
+							reload_elt.value = reload ? "1" : "";
 
-			action_elt.form.submit();
-		} });
+							action_elt.form.submit();
+						}
+					}
+		);
 	},
 	addRemoveKeywordsPopup: function() {
 		var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
