@@ -54,8 +54,8 @@ top.HEURIST.search = {
 
 	currentSearchQuery_all:null, //keeps current search query to use it in mapMenu (publish map)
 	currentSearchQuery_sel:null,
-	pageLimit: 1000,
-	resultsPerPage: top.HEURIST.displayPreferences["results-per-page"],
+	pageLimit: 5000,
+	resultsPerPage: top.HEURIST.util.getDisplayPreference("results-per-page"),
 	currentPage: 0,
 
 //	bib_ids: {},	//depricated  by SAW 21/7/11  newer selection model
@@ -78,6 +78,7 @@ top.HEURIST.search = {
 //		top.HEURIST.search.checkSearchForm();
 //		document.forms[0].submit();
 		top.HEURIST.search.currentPage = 0;
+		top.HEURIST.search.resultsPerPage = top.HEURIST.util.getDisplayPreference("results-per-page");
 		top.HEURIST.search.clearResultRows();
 		top.HEURIST.search.clearRelatesRows();
 		top.HEURIST.search.reloadSearch();
@@ -149,11 +150,11 @@ top.HEURIST.search = {
 			});
 		}
 
-		if (top.HEURIST.search.results.infoByDepth[0].count == top.HEURIST.search.results.totalQueryResultRecordCount){
-			top.HEURIST.search.loadRelatedResults();
+		if (top.HEURIST.search.results.infoByDepth[0].count == top.HEURIST.search.results.totalQueryResultRecordCount &&
+			top.HEURIST.util.getDisplayPreference("loadRelatedOnSearch") === "true"){
+				top.HEURIST.search.loadRelatedResults();
 		}
 	},
-
 
 	loadSearchLocation: function(strLocation) {
 		var temp = strLocation + ("&db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
@@ -214,7 +215,7 @@ top.HEURIST.search = {
 		// set search type
 		if (top.HEURIST.is_logged_in()  &&  args["w"] === "bookmark") {
 			args["w"] = "bookmark";
-		} else if (top.HEURIST.is_logged_in()  &&  top.HEURIST.displayPreferences.defaultMyBookmarksSearch == "true") {
+		} else if (top.HEURIST.is_logged_in()  &&  top.HEURIST.util.getDisplayPreference("defaultMyBookmarksSearch") == "true") {
 			args["w"] = "bookmark";
 		} else {
 			args["w"] = "all";
@@ -249,7 +250,7 @@ top.HEURIST.search = {
 													top.HEURIST.search.addResultLevelLinks(0);
 													if (top.HEURIST.search.results.infoByDepth.length >1 &&
 															top.HEURIST.search.results.infoByDepth[1].count > 0 &&
-															top.HEURIST.displayPreferences.loadRelatedOnSearch != "false"
+															top.HEURIST.util.getDisplayPreference("loadRelatedOnSearch") != "false"
 															) {
 														top.HEURIST.search.loadLevelFilter(1);
 													}
@@ -795,6 +796,9 @@ top.HEURIST.search = {
 	clearResultRows: function() {
 		var resultsPerPage = top.HEURIST.search.resultsPerPage;
 		$("#results-level0 div.recordDiv").remove();
+		if (top.HEURIST.util.getDisplayPreference("loadRelatedOnSearch") ==="false"){
+			$("#results-level0 div.filter").remove();
+		}
 	},
 
 	clearRelatesRows: function() {
@@ -1180,8 +1184,8 @@ top.HEURIST.search = {
 		}
 
 		var i;
-		var totalRecordCount = top.HEURIST.search.results.totalQueryResultRecordCount;
-		var resultsPerPage = top.HEURIST.search.resultsPerPage;
+		var totalRecordCount = parseInt(top.HEURIST.search.results.totalQueryResultRecordCount);
+		var resultsPerPage = parseInt(top.HEURIST.search.resultsPerPage);
 		var pageCount = Math.ceil(totalRecordCount / resultsPerPage);
 		var currentPage = top.HEURIST.search.currentPage;
 
@@ -1241,7 +1245,7 @@ top.HEURIST.search = {
 			// innerHTML += "&nbsp;&nbsp;<span id=next_page>next&nbsp;page</span>";
 		}
 
-		if (pageCount > 1  &&  totalRecordCount < top.HEURIST.search.pageLimit) {
+		if (pageCount > 1  &&  totalRecordCount <= top.HEURIST.search.pageLimit) {
 			innerHTML += "<a href=# onclick=\"top.HEURIST.search.showAll(); return false;\">show&nbsp;all</a>";
 		}
 
@@ -1268,9 +1272,9 @@ top.HEURIST.search = {
 	},
 
 	showAll: function() {
-		if (top.HEURIST.search.results.totalQueryResultRecordCount > 1000) {
+		if (top.HEURIST.search.results.totalQueryResultRecordCount > top.HEURIST.search.pageLimit) {
 			alert("There are too many search results to perform operations on.  Please refine your search first.");
-			document.getElementById("select-all-checkbox").checked = false;
+//			document.getElementById("select-all-checkbox").checked = false;
 			return;
 		}
 		top.HEURIST.search.gotoResultPage(0, true);
@@ -1510,7 +1514,7 @@ top.HEURIST.search = {
 //			while ($(resultDiv).hasClass("relateSelected")){
 //				$(resultDiv).removeClass("relateSelected");
 //			}
-			if (top.HEURIST.displayPreferences.autoSelectRelated != "true"){
+			if (top.HEURIST.util.getDisplayPreference("autoSelectRelated") != "true"){
 				$(".link"+recID,$("#results")).addClass("linkSelected");
 			}else{// mark all related records
 				//for each related record mark as relateSelected and add them into the selected array
@@ -1547,7 +1551,7 @@ top.HEURIST.search = {
 		if (resultDiv && $(resultDiv).hasClass("selected")) {
 			delete top.HEURIST.search.selectedRecordDivs[level][recID];
 			$(resultDiv).toggleClass("selected");
-			if (top.HEURIST.displayPreferences.autoSelectRelated != "true"){
+			if (top.HEURIST.util.getDisplayPreference("autoSelectRelated") != "true"){
 				$(".link"+recID,$("#results")).removeClass("linkSelected");
 			}else{// unmark all related records
 				//for each related record mark as relateSelected and add them into the selected array
@@ -1687,7 +1691,7 @@ top.HEURIST.search = {
 		var recID = $(resultDiv).attr("recID");
 		var level = $(resultDiv).parent().attr("level");
 		var results = top.HEURIST.search.results;
-		var selectRelated = top.HEURIST.displayPreferences.autoSelectRelated == "true";
+		var selectRelated = top.HEURIST.util.getDisplayPreference("autoSelectRelated") == "true";
 		var deselectAllOnLevelChange = top.HEURIST.displayPreferences.autoDeselectOtherLevels == "true";
 
 		if (deselectAllOnLevelChange && level != top.HEURIST.search.activeLevel){
@@ -2154,6 +2158,8 @@ top.HEURIST.search = {
 			window.open(top.HEURIST.basePath+'search/search.html'+query_string,"_blank");
 	},
 	//old map version
+	//TODO: this code needs to be changed to the application model using events. Special knowledge of applications
+	// couples this code to the application and is not maintainable in the long run.
 	mapSelected: function() {
 			var p = top.HEURIST.parameters;
 			var recIDs = top.HEURIST.search.getSelectedRecIDs().get();
@@ -2192,7 +2198,8 @@ top.HEURIST.search = {
 	//listener of selection in search result - to refelect on map tab
 	//
 	// it should be replaced to "real" event listener in particual application (map or smarty)
-	//
+	//TODO: this code needs to be changed to the application model using events. Special knowledge of applications
+	// couples this code to the application and is not maintainable in the long run.
 	updateMapOrSmarty: function(){
 
 			if(!_tabView) return;
@@ -2250,9 +2257,9 @@ top.HEURIST.search = {
 			}
 			query_string_all = encodeURI(query_string + '&q=ids:' + recIDs.join(","));
 
-	 		var currentSearchQuery =
-	 				(top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]=="selected")
-	 							?query_string_sel :query_string_all;
+			var currentSearchQuery =
+					(top.HEURIST.util.getDisplayPreference("showSelectedOnlyOnMapAndSmarty")=="selected")
+								?query_string_sel :query_string_all;
 			top.HEURIST.search.currentSearchQuery_all = query_string_all;
 			top.HEURIST.search.currentSearchQuery_sel = query_string_sel;
 
@@ -2296,6 +2303,8 @@ top.HEURIST.search = {
 	},
 
 	//update related records on map
+	//TODO: this code needs to be changed to the application model using events. Special knowledge of applications
+	// couples this code to the application and is not maintainable in the long run.
 	updateMapRelated: function(){
 		top.HEURIST.search.updateMapOrSmarty();
 	},
@@ -2346,6 +2355,8 @@ top.HEURIST.search = {
 	},*/
 
 
+	//TODO: this code needs to be changed to the application model using events. Special knowledge of applications
+	// couples this code to the application and is not maintainable in the long run.
 	onMapUseAllRecords: function(event) {
 		var mapframe = document.getElementById("map-frame3");
 		if(mapframe.src){
@@ -3018,9 +3029,8 @@ top.HEURIST.search = {
 	},
 
 	searchAll: function() {
-		var w = document.getElementById("w-input");
-		w.value = "";
-		w.form.submit();
+		document.getElementById("w-input").value = "all";
+		top.HEURIST.search.submitSearchForm();
 	},
 
 	setContactLink: function() {
@@ -3044,9 +3054,9 @@ top.HEURIST.search = {
 		link.rel = "alternate";
 		link.type = "application/rss+xml";
 		link.title = "RSS feed";
-		link.href = "feed://"+window.location.host+top.HEURIST.basePath+"export/feeds/searchRSS.php"+(document.location.search ? document.location.search : "?q=" + top.HEURIST.displayPreferences.defaultSearch) + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
+		link.href = "feed://"+window.location.host+top.HEURIST.basePath+"export/feeds/searchRSS.php"+(document.location.search ? document.location.search : "?q=" + top.HEURIST.util.getDisplayPreference("defaultSearch")) + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
 		document.getElementsByTagName("head")[0].appendChild(link);
-		document.getElementById("httprsslink").href += (document.location.search ? document.location.search : "?q=" + top.HEURIST.displayPreferences.defaultSearch + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""));
+		document.getElementById("httprsslink").href += (document.location.search ? document.location.search : "?q=" + top.HEURIST.util.getDisplayPreference("defaultSearch") + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""));
 	},
 
 	toggleLegend: function() {
@@ -3443,7 +3453,7 @@ function removeCustomAlert() {
 				layout.getUnitByPosition('left').expand();
 				top.HEURIST.util.setDisplayPreference("sidebarPanel","open");
 				navButton.className = navButton.className.replace(" closed", "");
-				searchTable.style.paddingLeft = top.HEURIST.displayPreferences.leftWidth;
+				searchTable.style.paddingLeft = top.HEURIST.util.getDisplayPreference("leftWidth");
 				navButton.title = "Hide Navigation Panel";
 				layout.resize();
 			}
@@ -3516,7 +3526,7 @@ function removeCustomAlert() {
 			var mapFrame3 = document.getElementById("map-frame3");
 			if(mapFrame3.src && mapFrame3.contentWindow.showMap){
 				mapFrame3.contentWindow.showMap.setUseAllRecords(
-						(top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]=="all"));
+						(top.HEURIST.util.getDisplayPreference("showSelectedOnlyOnMapAndSmarty")=="all"));
 				mapFrame3.contentWindow.showMap.checkResize(); //to fix gmap bug
 			}
 			top.HEURIST.search.updateMapOrSmarty();
@@ -3525,7 +3535,7 @@ function removeCustomAlert() {
 			var smartyFrame = document.getElementById("smarty-frame");
 			if(smartyFrame.src && smartyFrame.contentWindow.showReps){
 				smartyFrame.contentWindow.showReps.setUseAllRecords(
-						(top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]=="all"), false);
+						(top.HEURIST.util.getDisplayPreference("showSelectedOnlyOnMapAndSmarty")=="all"), false);
 			}
 			top.HEURIST.search.updateMapOrSmarty();
 		}

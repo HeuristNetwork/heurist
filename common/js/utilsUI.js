@@ -928,6 +928,12 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				top.HEURIST.util.setDisplayPreference(prefName, val, win.frames[i], replacementRegExp);
 			} catch (e) { }
 		}
+		//reread preferences
+		top.HEURIST.loadScript(top.HEURIST.basePath+'common/php/displayPreferences.php?'+
+						'db='+ (top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name
+									: top.HEURIST.parameters.db ? top.HEURIST.parameters.db:"")+
+						'&' + encodeURIComponent(prefName) + '=' + encodeURIComponent(val));
+
 	},
 
 	getDisplayPreference: function(prefName) {

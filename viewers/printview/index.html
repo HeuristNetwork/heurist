@@ -292,6 +292,9 @@
 
 			function onPageChange(eventType, argList) {// saw TODO change this to update the selection for levels
 																// if a level is not loaded then load synch
+				if (parent.document.getElementById("p").className == "yui-hidden") {
+					return false;
+				}
 				clearAndDisplayLoading();
 				//if page xml not loaded then load sync
 				if (eventType == "heurist-pagechange"){
@@ -328,7 +331,9 @@
 					return elem;
 				}
 				//if page xml not loaded then load sync
-				if (eventType == "heurist-selectall"){
+				if (parent.document.getElementById("p").className == "yui-hidden") {
+					return false;
+				}else if (eventType == "heurist-selectall"){
 					var tempXML,recordsNode;
 					for (var page = 1; page <= pageCount; page++){
 						if (!pageXMLs[page]){ //load pageXML now
