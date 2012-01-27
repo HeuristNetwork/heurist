@@ -953,7 +953,7 @@ FlexImport = (function () {
 					logError("invalidRecord", " Missing " + name +".");
 				}
 				detailType = HDetailManager.getDetailTypeById(FlexImport.cols[j]);
-				if (detailType.getVariety() == HVariety.REFERENCE) {
+				if (detailType && detailType.getVariety() == HVariety.REFERENCE) {
 					logError( j, "Resource record ID is not defined");
 				}
 				continue;
@@ -1025,7 +1025,7 @@ FlexImport = (function () {
 			}
 		}
 		if ((!err || !err.invalidRecord) && !hRec.isValid()) { // if record is invalid and hasn't been flagged yet, must be a missing req detail
-			logError("invalidRecord", " Missing unknown reqired detail.");
+			logError("invalidRecord", " Missing unknown required detail.");
 		}
 		return {record : hRec, error : err};
 	},
