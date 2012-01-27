@@ -47,7 +47,6 @@ function initPreview(){
 					tagString:"",
 					title:"kala mala",
 					url:"",
-					wikis:[],
 					workgroup:"Heurist",
 					workgroupID: "12",
 					workgroupTags:[]

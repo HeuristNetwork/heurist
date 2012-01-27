@@ -107,7 +107,7 @@ require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 		$message .= '  ' . $rec_id . ': ' . $details[0] . ' (' . $details[1] . ')' . "\n";
 	}
 	$message .= "\n\nFind these at\nhttp://" . ($prefix? $prefix.".": "") . HOST_BASE .HEURIST_SITE_PATH."search/search.html?q=ids:" . join(',', array_keys($bad_bibs)) . "\n";
-	//mail('kjackson@acl.arts.usyd.edu.au', 'HEURIST - bad URLs', $message);
+	//TODO   send? and where?  mail('????@??????', 'HEURIST - bad URLs', $message);
 	error_log($message);
 
 

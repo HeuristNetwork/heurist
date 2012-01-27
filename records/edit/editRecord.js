@@ -1167,42 +1167,6 @@ top.HEURIST.edit = {
 		return buttonElt;
 	},
 
-	makeWiki: function(document, title, name, precis) {
-		if (! precis) precis = "";
-
-		var tr = document.createElement("tr");
-			tr.className = "wiki";
-		var td = tr.appendChild(document.createElement("td"));
-			td.className = "wiki-name";
-			td.innerHTML = title;
-
-		td = tr.appendChild(document.createElement("td"));
-		if (precis) {
-			var precisSpan = td.appendChild(document.createElement("span"));
-				precisSpan.className = "precis";
-				precisSpan.appendChild(document.createTextNode(precis + " "));
-		}
-
-		if (precis) {
-			var wikiLinkSpan = td.appendChild(document.createElement("span"));
-				wikiLinkSpan.className = "wiki-link";
-			var wikiLink = wikiLinkSpan.appendChild(document.createElement("a"));
-				wikiLink.href = "/tmwiki/index.php/" + name;
-				wikiLink.target = "_wiki_edit";
-				wikiLink.appendChild(document.createTextNode("view"));
-		}
-
-		td.appendChild(document.createTextNode(" "));
-		var wikiLinkSpan = td.appendChild(document.createElement("span"));
-			wikiLinkSpan.className = "wiki-link";
-		var wikiLink = wikiLinkSpan.appendChild(document.createElement("a"));
-			wikiLink.href = "/tmwiki/index.php/" + name + "?action=edit";
-			wikiLink.target = "_wiki_edit";
-			wikiLink.appendChild(document.createTextNode(precis? "edit" : "add"));
-
-		return tr;
-	},
-
 	addOption: function(document, dropdown, text, value) {
 		var newOption = document.createElement("option");
 			newOption.value = value;

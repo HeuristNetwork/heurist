@@ -110,7 +110,7 @@ FlexImport = (function () {
 		$("#csv-entry-div").remove();
 
 		$("#info-p").html(
-			"Found <b>" + FlexImport.fields.length + "</b> rows of data," +
+			"Found <b>" + (this.hasHeaderRow ? FlexImport.fields.length - 1:FlexImport.fields.length) + "</b> rows of data," +
 			" in <b>" + FlexImport.fields[0].length + "</b> columns. " +
 			"<a href='"+HeuristBaseURL+"import/delimited/importRecordsFromDelimited.html?db="+HAPI.database+"' ><b>Start over</b></a>"
 		);

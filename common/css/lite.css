@@ -191,31 +191,24 @@ iframe.show_on_collapse { display: block; position: absolute; visibility: hidden
 .reln .ib { border-color: #53740e; background-color: #F4F6EF; }
 #tab_row .reln { color: #53740e; }
 
-.wiki_selected tr td { border: 2px solid #000000; background-color: #F3F3F3; }
-.wiki_selected #tab_row .wiki { font-weight: bold; border-width: 2px; border-bottom: 0; background-color: #F3F3F3; }
-.wiki .ib { border-color: #000000; background-color: #F3F3F3; }
-#tab_row .wiki { color: #000000; }
-
 
 .bookmark_selected #tab_row .bookmark .ib,
 .biblio_selected #tab_row .biblio .ib,
 .web_selected #tab_row .web .ib,
 .disc_selected #tab_row .disc .ib,
-.reln_selected #tab_row .reln .ib,
-.wiki_selected #tab_row .wiki .ib
+.reln_selected #tab_row .reln .ib
  { border: 0; margin: 3px 3px 3px 0; }
 
-.bookmark_only, .biblio_only, .web_only, .disc_only, .reln_only, .wiki_only { position: absolute; visibility: hidden; }
+.bookmark_only, .biblio_only, .web_only, .disc_only, .reln_only { position: absolute; visibility: hidden; }
 .bookmark_selected .bookmark_only,
 .biblio_selected .biblio_only,
 .web_selected .web_only,
 .disc_selected .disc_only,
-.reln_selected .reln_only,
-.wiki_selected .wiki_only
+.reln_selected .reln_only
 { position: static; visibility: visible; }
 
-.bookmark_only_dn, .biblio_only_dn, .disc_only_dn, .reln_only_dn, .wiki_only_dn { display: none; }
-.bookmark_selected .bookmark_only_dn, .biblio_selected .biblio_only_dn, .disc_selected .disc_only_dn, .reln_selected .reln_only_dn, .wiki_selected .wiki_only_dn { display: inline; }
+.bookmark_only_dn, .biblio_only_dn, .disc_only_dn, .reln_only_dn { display: none; }
+.bookmark_selected .bookmark_only_dn, .biblio_selected .biblio_only_dn, .disc_selected .disc_only_dn, .reln_selected .reln_only_dn { display: inline; }
 
 
 #tsp { height: 10px; border: 0; background-color: transparent; }

@@ -9,7 +9,7 @@
 
 /* Heurist API  v0.3
 * Copyright (c) Archaeological Computing Laboratory, University of Sydney 2007
-* Author: Tom Murtagh <tfm@acl.arts.usyd.edu.au>
+* Author: Tom Murtagh
 *
 * 0.2 (2007/12/12) - JSON data transfer both upstream and downstream
 * 0.1 - initial release
@@ -2115,34 +2115,6 @@ HAPI.inherit(HFile, HObject);
 HAPI.File = HFile;
 
 
-var HWikiManager = new function() {
-	var _wikiBase = "http://heuristscholar.org/tmwiki/index.php/";	// FIXME: need to remove this as tmwiki is deprecated
-
-	this.getWikis = function(record) {
-		/* PRE */ if (! HAPI.isA(record, "HRecord")) { throw new HTypeException("HRecord object required"); }
-
-		var wikis = {};
-		if (record.getBookmarkID()) {
-			wikis.Private = _wikiBase + ("Bookmark:" + record.getBookmarkID());
-		}
-		var workgroups;
-		var i, wg;
-		if (record.getID()) {
-			wikis.Public = _wikiBase + ("Biblio:" + record.getID());
-
-			workgroups = HWorkgroupManager.getUserWorkgroups();
-			for (i=0; i < workgroups.length; ++i) {
-				wg = workgroups[i];
-				wikis[wg.getName()] = _wikiBase + ("Biblio:" + record.getID() + "_Workgroup:" + wg.getID());
-			}
-		}
-		return wikis;
-	};
-}();
-HWikiManager.getClass = function() { return "HWikiManager"; };
-HWikiManager.prototype = new HObject();
-HAPI.WikiManager = HWikiManager;
-
 
 var HTagManager = new function(tags) {
 	// tags is an array of tag strings
@@ -3860,7 +3832,6 @@ HAPI.importSymbols = function(from, to) {
 		"HLoader",
 		"HSearch",
 		"HFile",
-		"HWikiManager",
 		"HTagManager",
 		"HWorkgroupManager",
 		"HWorkgroupTagManager",

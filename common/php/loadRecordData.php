@@ -88,7 +88,6 @@ error_log("base Properties".print_r($record,true));
 	} else {
 		$record["bdValuesByType"] = getAllBibDetails($rec_id);
 		$record["reminders"] = getAllReminders($rec_id);
-		$record["wikis"] = getAllWikis($rec_id, $bkm_ID);
 		$record["comments"] = getAllComments($rec_id);
 		$record["workgroupTags"] = getAllworkgroupTags($rec_id);
 		$record["relatedRecords"] = getAllRelatedRecords($rec_id);

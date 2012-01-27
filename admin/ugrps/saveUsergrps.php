@@ -308,7 +308,7 @@ overviews and step-by-step instructions for using Heurist.
 ";
 							$rv = mail($ugr_eMail, 'Heurist User Registration: '.$ugr_FirstName.' '.
 								$ugr_LastName.' ['.$ugr_eMail.']', $email_text,
-								"From: info@acl.arts.usyd.edu.au\r\nCc: info@acl.arts.usyd.edu.au");
+								"From: ".HEURIST_MAIL_TO_INFO."\r\nCc: ".HEURIST_MAIL_TO_INFO);
 							if (! $rv) {
 								error_log("mail send failed: " . $ugr_eMail);
 							}

@@ -130,7 +130,6 @@ if (@$_REQUEST['_submit']  &&  $dup_check_ok) {
 	$city =         preg_replace('/\s+/s', ' ', $_REQUEST['user_insert_ugr_City']);
 	$state =        preg_replace('/\s+/s', ' ', $_REQUEST['user_insert_ugr_State']);
 
-	$tmwikiname = preg_replace('/ /', '', $firstname . $lastname);
 
 	$body->input_check();
 
@@ -227,7 +226,6 @@ if (@$_REQUEST['_submit']  &&  $dup_check_ok) {
 /* END HEURIST STUFF */
 
 
-			// add user to Heurist and TMWiki groups
 // TODO: check this is necessary			mysql_query("insert into ".USERS_DATABASE.".sysUsrGrpLinks (ugl_UserID, ugl_GroupID) values ($usr_id, 2), ($usr_id, 4)");
 
 			if ($_REQUEST['register']) {
@@ -260,7 +258,7 @@ Go to the address below to review further details and approve the registration:
 				                              "ugr_eMail",
 				                              "ugl_GroupID = " . HEURIST_DBADMIN_GROUP_ID . " and ugl_Role = 'admin'");
 				if (! @$admins  ||  count($admins) === 0) {
-					$admins = array("info@acl.arts.usyd.edu.au");
+					$admins = array(HEURIST_MAIL_TO_INFO);
 				}
 				mail(join(", ", $admins), "Heurist User Registration: $firstname $lastname [$email]", $email_text, 'From: root');
 

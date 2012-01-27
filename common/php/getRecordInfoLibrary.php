@@ -275,46 +275,6 @@ function getAllReminders($rec_id) {
 	return $reminders;
 }
 
-function getAllWikis($rec_id, $bkm_ID) {
-	// Get all wikis for this record / bookmark as an array/object
-
-	$wikis = array();
-	$wikiNames = array();
-
-	if ($bkm_ID) {
-		array_push($wikis, array("Private", "Bookmark:$bkm_ID"));
-		array_push($wikiNames, "Bookmark:$bkm_ID");
-	}
-
-	if ($rec_id) {
-		$res = mysql_query("select rec_URL from Records where rec_ID=".$rec_id);
-		$row = mysql_fetch_assoc($res);
-		if (preg_match("!(acl.arts.usyd.edu.au|heuristscholar.org)/tmwiki!", @$row["rec_URL"])) {	//FIXME: this needs to be configurable or generic for installations
-			array_push($wikis, array("Public", preg_replace("!.*/!", "", $row["rec_URL"])));
-			array_push($wikiNames, preg_replace("!.*/!", "", $row["rec_URL"]));
-		} else {
-			array_push($wikis, array("Public", "Biblio:$rec_id"));
-			array_push($wikiNames, "Biblio:$rec_id");
-		}
-
-		$res = mysql_query("select grp.ugr_ID, grp.ugr_Name from ".USERS_DATABASE.".sysUsrGrpLinks left join ".USERS_DATABASE.".sysUGrps grp on ugl_GroupID=grp.ugr_ID where ugl_UserID=".get_user_id()." and grp.ugr_Type !='User' order by grp.ugr_Name");
-		while ($grp = mysql_fetch_row($res)) {
-			array_push($wikis, array(htmlspecialchars($grp[1]), "Biblio:".$rec_id."_Workgroup:".$grp[0]));
-			array_push($wikiNames, slash("Biblio:".$rec_id."_Workgroup:".$grp[0]));
-		}
-	}
-
-	// get a precis for each of the wikis we're dealing with	//FIXME:  tmwikidb is not used??
-	$preces = mysql__select_assoc("tmwikidb.tmw_page left join tmwikidb.tmw_revision on rev_id=page_latest left join tmwikidb.tmw_text on old_id=rev_text_id", "page_title", "old_text", "page_title in ('" . join("','", $wikiNames) . "')");
-	foreach ($wikis as $id => $wiki) {
-		$precis = @$preces[$wiki[1]];	// look-up by wiki page name
-		if (strlen($precis) > 100) $precis = substr($precis, 0, 100) . "...";
-		array_push($wikis[$id], $precis? $precis : "");
-	}
-
-	return $wikis;
-}
-
 function getAllComments($rec_id) {
 	$res = mysql_query("select cmt_ID, cmt_Deleted, cmt_Text, cmt_ParentCmtID, cmt_Added, cmt_Modified, cmt_OwnerUGrpID, concat(usr.ugr_FirstName,' ',usr.ugr_LastName) as Realname from recThreadedComments left join ".USERS_DATABASE.".sysUGrps usr on cmt_OwnerUGrpID=usr.ugr_ID where cmt_RecID = $rec_id order by cmt_Added");
 

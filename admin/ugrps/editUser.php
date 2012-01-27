@@ -93,7 +93,7 @@ overviews and step-by-step instructions for using Heurist.
 
 ";
 			error_log("sending user confirmation mail: " . $email . ", " . $row['ugr_FirstName'].' '.$row['ugr_LastName'].'['.$row['ugr_eMail'].']');
-			$rv = mail($email, 'Heurist User Registration: '.$row['ugr_FirstName'].' '.$row['ugr_LastName'].' ['.$row['ugr_eMail'].']', $email_text, "From: info@acl.arts.usyd.edu.au\r\nCc: info@acl.arts.usyd.edu.au");
+			$rv = mail($email, 'Heurist User Registration: '.$row['ugr_FirstName'].' '.$row['ugr_LastName'].' ['.$row['ugr_eMail'].']', $email_text, "From: ".HEURIST_MAIL_TO_INFO."\r\nCc: ".HEURIST_MAIL_TO_INFO);
 			if (! $rv) error_log("mail send failed: " . $email . ", " . $row['ugr_FirstName'].' '.$row['ugr_LastName'].' ['.$row['ugr_eMail'].']');
 		}
 

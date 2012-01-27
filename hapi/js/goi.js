@@ -9,7 +9,7 @@
 
 /* Geographic Object Interface (GOI) for Heurist API  v0.1
  * Copyright (c) Archaeological Computing Laboratory, University of Sydney 2007
- * Author: Tom Murtagh <tfm@acl.arts.usyd.edu.au>
+ * Author: Tom Murtagh
  */
 var GOI = {};
 
