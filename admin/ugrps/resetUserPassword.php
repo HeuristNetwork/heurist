@@ -55,7 +55,7 @@ To change your password, go to:
 
 You will first be asked to log in with the new password above.
 ';
-	mail($email, 'Heurist password reset', $msg, 'From: info@heuristscholar.org');
+	mail($email, 'Heurist password reset', $msg, 'From: '.HEURIST_MAIL_TO_INFO);
 }
 
 

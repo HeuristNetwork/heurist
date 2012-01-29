@@ -109,7 +109,7 @@ function ShowMap() {
 			start : "2010-04-01",
 			imagelayer : {
 			type: "virtual earth",
-			url: "http://acl.arts.usyd.edu.au/dos/maps/1854_woolcott-clarke/Layer_NewLayer/",
+			url: "url for map layer service",
 			mime_type:"image/png",
 			copyright:"",
 			min_zoom:1,

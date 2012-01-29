@@ -88,6 +88,10 @@
 		define('HEURIST_DEFAULT_DBNAME',$defaultDBname);	//default dbname used when the URI is ambiguous about the db
 		}
 
+	if ($httpProxy != '') {
+		define('HEURIST_HTTP_PROXY',$httpProxy);	//http address:port for proxy request
+	}
+
 	// error_log("initialise REQUEST = ".print_r($_REQUEST,true));
 
 	if (@$_REQUEST["db"]) {

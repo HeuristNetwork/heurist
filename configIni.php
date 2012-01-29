@@ -43,6 +43,10 @@ $dbPrefix = "hdb_"; // recommended
 // If defaultDBName is blank, a list of available databases will be displayed on startup if none is specified
 $defaultDBname = ""; // may be left blank
 
+// The HTTP address:port of teh proxy server that will allow access to the internet for external URI's
+// this address will allow heurist to request content through the firewall for general Internet URI's
+$httpProxy = ""; // blank = assumes direct internet access from server - ok for laptop installations.
+
 // A challenge password for creation of new databsaes. If left blank, any logged in user can create a new database
 $passwordForDatabaseCreation=""; // blank = any logged in user can create
 

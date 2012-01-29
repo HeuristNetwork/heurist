@@ -27,7 +27,9 @@ require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
 	curl_setopt($ch, CURLOPT_TIMEOUT, 10);	// timeout after ten seconds
 	curl_setopt($ch, CURLOPT_MAXREDIRS, 5);	// no more than 5 redirections
-	curl_setopt($ch, CURLOPT_PROXY, 'www-cache.usyd.edu.au:8080');
+	if (defined("HEURIST_HTTP_PROXY")) {
+		curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
+	}
 	curl_setopt($ch, CURLOPT_RANGE, '0-1000');
 
 	// another connection with some atypical headers
@@ -43,7 +45,9 @@ require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 	curl_setopt($ch_ffx, CURLOPT_HTTPHEADER, array('Cache-Control: no-cache'));
 	curl_setopt($ch_ffx, CURLOPT_TIMEOUT, 10);	// timeout after ten seconds
 	curl_setopt($ch_ffx, CURLOPT_MAXREDIRS, 5);	// no more than 5 redirections
-	curl_setopt($ch_ffx, CURLOPT_PROXY, 'www-cache.usyd.edu.au:8080');
+	if (defined("HEURIST_HTTP_PROXY")) {
+		curl_setopt($ch_ffx, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
+	}
 	curl_setopt($ch_ffx, CURLOPT_RANGE, '0-1000');
 
 

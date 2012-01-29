@@ -33,7 +33,9 @@ if (mysql_num_rows($res)) {
 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);	// don't verify peer cert
 	curl_setopt($ch, CURLOPT_TIMEOUT, 100);	// timeout after ten seconds
 	curl_setopt($ch, CURLOPT_MAXREDIRS, 5);	// no more than 5 redirections
-	curl_setopt($ch, CURLOPT_PROXY, 'www-cache.usyd.edu.au:8080');
+	if (defined("HEURIST_HTTP_PROXY")) {
+		curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
+	}
 	$rawXML = curl_exec($ch);
 	curl_close($ch);
 	// clean up encodings that make the default parsers barf.

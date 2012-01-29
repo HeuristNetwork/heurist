@@ -1,6 +1,6 @@
 <?php
 
-/**
+	/**
  * emailRecordDetailsphp, generic function to email a record from a Heurist database (generally to another), AO 2011/06/07
  * @author: Artem Osmakov
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
@@ -30,7 +30,7 @@
 	// TODO: has been establsihed for automatically harvesting and notifying emails
 	// $geekMail->to('prime.heurist@gmail.com');
 	// but during development it's best just to send it to the team so we actually SEE them ...
-	$geekMail->to('info@heuristscholar.org');
+	$geekMail->to(HEURIST_MAIL_TO_INFO);
 
   $ids = "";
 

@@ -50,7 +50,9 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 
 		$ch = curl_init(@$_REQUEST['url']);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_PROXY, 'www-cache.usyd.edu.au:8080');
+		if (defined("HEURIST_HTTP_PROXY")) {
+			curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
+		}
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 		$src = curl_exec($ch);
 		$error = curl_error($ch);
