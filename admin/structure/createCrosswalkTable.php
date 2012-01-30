@@ -158,7 +158,7 @@ function insertData() {
 								mysql_escape_string($rtStruct["rty_Description"]),	//[4]
 								$dtyAlreadyImported ? 1: 0);						//[5]
 
-			if (!$rectypeStructures[$rtStruct["rty_ID"]]){
+			if (!@$rectypeStructures[$rtStruct["rty_ID"]]){
 				$rectypeStructures[$rtStruct["rty_ID"]] = array($rtsShortRow);
 			}else{
 				array_push($rectypeStructures[$rtStruct["rty_ID"]],$rtsShortRow);
@@ -273,12 +273,13 @@ YAHOO.util.Event.addListener(window, "load", function() {
 			var elLink = oArgs.target;
 			var oRecord = this.getRecord(elLink);
 			var rty_ID = oRecord.getData("rtyID");
+			var rty_Name = oRecord.getData("rectype");
 			if(elLink.hash === "#import") {
 				if(importPending) {
 					alert("Please wait until previous import is complete.");
 				} else {
 					importedRowID = oRecord.getId();
-					processAction(rty_ID, "import");
+					processAction(rty_ID, "import",rty_Name);
 				}
 			}
 		});
@@ -394,6 +395,7 @@ In version 3.0 this may also mean that the database is in a different format ver
 <button id="finish2" onClick="dropTempDB(true)" class="button">Back to databases</button>
 <div class="tooltip" id="toolTip"><p>tooltip</p></div>
 
+<div ><p>Logs give a more detailed history of the actions taken to import structure. Click the links below to see the short version and long version respectively.</p></div>
 <a id="shortLog" onClick="showShortLog()" href="#">Show short log</a><br />
 <a id="detailedLog" onClick="showDetailedLog()" href="#">Show detailed log</a><br /><br />
 <div id="log"></div><br />
@@ -402,6 +404,7 @@ In version 3.0 this may also mean that the database is in a different format ver
 <script type="text/javascript">
 
 var detailedImportLog = "";
+var logHeader = ""
 var shortImportLog = "";
 var result = "";
 var importedRowID;
@@ -412,6 +415,8 @@ function processAction(rtyID, action, rectypeName) {
 	if(action == "import") {
 		importPending = true;
 		document.getElementById("importIcon"+rtyID).src = "../../common/images/mini-loading.gif";
+		curTime = new Date();
+		logHeader = '<p style="color:green; font-weight:bold">'+"Attemp importing rectype "+rectypeName+" at "+ curTime +"</p>";
 	}
 	var xmlhttp;
 	if (action.length == 0) {
@@ -435,9 +440,7 @@ function processAction(rtyID, action, rectypeName) {
 				changeDuplicateEntryName(rtyID, rectypeName);
 			} else if(response.substring(0,5) == "Error") {
 
-				shortImportLog += '<p style="color:red">'+response+"</p>";
-				result += response+"\n\n";
-				detailedImportLog += '<p style="color:red">'+response+"</p>";
+				detailedImportLog = '<p style="color:red">'+ logHeader+response+"</p>" + detailedImportLog;
 
 				document.getElementById("popup-saved").innerHTML = "<b>Error. Check log for details</b>";
 				setTimeout(function() {
@@ -446,16 +449,38 @@ function processAction(rtyID, action, rectypeName) {
 						document.getElementById("popup-saved").style.display = "none";
 					}, 1000);
 				}, 0);
-				document.getElementById("log").style.color = "red";
-				document.getElementById("log").innerHTML=response;
+				document.getElementById("log").innerHTML='<p style="color:red">'+response+"</p>";
+				result += logHeader;
+				response = response.split("<br />");
+				tempLog = "";
+				for (var i =0; i<response.length; i++) {
+					if (response[i].search(/(Error|error)/)!= -1) {
+						result += response[i]+"\n\n";
+						tempLog += response[i]+"<br />";
+					}
+				}
+				shortImportLog = logHeader+'<p style="color:red">'+tempLog+"</p><br />"+shortImportLog;
 				document.getElementById("popup-saved").innerHTML = "<b>Import error</b>";
+				document.getElementById("detailedLog").innerHTML = "Show detailed log";
+				document.getElementById("shortLog").innerHTML = "Show short log";
 			} else {
 				document.getElementById("importIcon"+rtyID).src = "../../common/images/import_icon.png";
-				detailedImportLog += response;
+				detailedImportLog = '<p style="color:green">'+ logHeader+response+"</p>" + detailedImportLog;
+				result += logHeader;
 				response = response.split("<br />");
-				result += response[0]+"\n\n";
-				shortImportLog += response[0]+"<br />";
+				tempLog = "";
+				for (var i =0; i<response.length; i++) {
+					if (response[i].search(/^(defRectype:|Successful)/)!= -1) {
+						result += response[i]+"\n\n";
+						tempLog += response[i]+"<br />";
+					}
+					if (response[i].search(/^defDetailType:/)!= -1) {
+						tempLog += response[i]+"<br />";
+					}
+				}
+				shortImportLog = logHeader+'<p style="color:green">'+tempLog+"</p><br />"+shortImportLog;
 
+				document.getElementById("popup-saved").innerHTML = "<b>Import sucessful</b>";
 				setTimeout(function() {
 					document.getElementById("popup-saved").style.display = "block";
 					setTimeout(function() {
@@ -468,7 +493,6 @@ function processAction(rtyID, action, rectypeName) {
 					document.getElementById("log").innerHTML = shortImportLog;
 				}
 
-				document.getElementById("log").style.color = "green";
 				myDataTable.deleteRow(importedRowID, -1);
 			}
 		}

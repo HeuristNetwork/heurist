@@ -68,7 +68,7 @@
 				print "Database <b>$dbname</b> has been deleted";
 				print "<p>Associated files stored in upload subdirectories<b>$uploadPath</b> have ben moved to ".HEURIST_UPLOAD_ROOT."deleted_databases.".
 				"<p>If you delete databases with a large volume of data, please ask your system administrator to empty this folder.".
-				"<p><a href=".HEURIST_URL_BASE.">Return to Heurist</a>";
+				"<p><a href='".HEURIST_URL_BASE."?db=H3ExampleDB' >Return to Heurist</a>";
 			}
 		} else { // didn't request properly
 			print "<p><h2>Request disallowed</h2>Incorrect challenge words entered. Database $dbname was not deleted. ".

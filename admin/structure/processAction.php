@@ -49,6 +49,8 @@ function crosswalk() {
 
 function import() {
 	global $error, $importLog, $tempDBName, $sourceDBName, $targetDBName, $sourceDBID, $importRtyID;
+	$error = false;
+	$importLog = array();
 	if( !$tempDBName || $tempDBName === "" || !$targetDBName || $targetDBName === "" ||
 		!$sourceDBID || !is_numeric($sourceDBID)|| !$importRtyID || !is_numeric($importRtyID)) {
 		makeLogEntry("importParameters", -1, "One or more required import parameters not supplied or correct form ( ".
@@ -59,7 +61,7 @@ function import() {
 
 	if(!$error) {
 		mysql_query("start transaction");
-
+		$startedTransaction = true;
 		// Get recordtype data that has to be imported
 		$res = mysql_query("select * from ".$tempDBName.".defRecTypes where rty_ID = ".$importRtyID);
 		if(mysql_num_rows($res) == 0) {
@@ -91,29 +93,30 @@ function import() {
 				$localRtyID = mysql_fetch_array($resRtyExist,MYSQL_NUM);
 				$localRtyID = $localRtyID[0];
 				makeLogEntry("defRectype", $importRtyID, " was found in $targetDBName as ID = $localRtyID");
-				break;
-			}
+			}else{
 			$localRtyID = importRectype($importRty);
 		}
 	}
+	}
 	// successful import
 	if(!$error) {
-		mysql_query("commit");
+		if ($startedTransaction) mysql_query("commit");
 		$statusMsg = "";
 		if(sizeof($importLog) > 0) {
 			foreach($importLog as $logLine) {
 				echo  $logLine[0].": import ID = ".$logLine[1]." ".$logLine[2] . "<br />";
 			}
 		}
+		echo "Successful import of '".$importRty["rty_Name"]."' rectype from ".$sourceDBName."<br />";
 		echo "<br />";
 		return $localRtyID;
 	// duplicate record found
 	} else if (substr(mysql_error(), 0, 9) == "Duplicate") {
-		mysql_query("rollback");
+		if ($startedTransaction) mysql_query("rollback");
 		echo "prompt";
 	//general error condition
 	} else {
-		mysql_query("rollback");
+		if ($startedTransaction) mysql_query("rollback");
 		if (mysql_error()) {
 			$statusMsg = "Error: " . mysql_error() . "<br />";
 		} else  {
@@ -153,12 +156,12 @@ function importDetailType($importDty) {
 				makeLogEntry("defDetailTypeGroup", -1, "Error finding detail type group 'Import' - ".mysql_error());
 			} else {
 				$importDtyGroupID = mysql_insert_id();
-				makeLogEntry("defDetailTypeGroup", -1, "Created provisional entry 'Import' as ID = $newDtyGroupID");
+				makeLogEntry("defDetailTypeGroup", -1, "Created provisional entry 'Import' as ID = $importDtyGroupID");
 			}
 		} else {
 			$row = mysql_fetch_row($dtyGroup);
 			$importDtyGroupID = $row[0];
-			makeLogEntry("defDetailTypeGroup", -1, "DetailTypeGroup 'Import' found in $targetDBName as ID = $newDtyGroupID");
+			makeLogEntry("defDetailTypeGroup", -1, "DetailTypeGroup 'Import' found in $targetDBName as ID = $importDtyGroupID");
 		}
 	}
 //error_log("import dty $importDtyID 1".($error?"error":""));
@@ -258,13 +261,13 @@ function translateRtyIDs($strRtyIDs, $contextString, $forDtyID) {
 				$localRtyID = importRectype($importRty);
 				$msg = " created provisional entry rectype as ID = $localRtyID";
 			} else {
-				$row = mysql_fetch_row($resRtyExist,MYSQL_NUM);
+				$row = mysql_fetch_row($resRtyExist);
 				$localRtyID = $row[0];
-				$msg = " found matching rectype entry in $targetDBName rectype ID = $localRtyID";
+				$msg = " found matching rectype entry in $targetDBName rectype ID = ".$localRtyID;
 			}
 //error_log($msgCat." $importRtyID to local ID $localRtyID ");
 			if (!$error){
-				makeLogEntry("defRecType",$importRtyID, "while translating rectype for $contextString in detailType '$forDtyID'".$msg);
+				makeLogEntry("defRectype",$importRtyID, "while translating rectype for $contextString in detailType '$forDtyID'".$msg);
 				array_push($outputRtyIDs, $localRtyID); // store the local ID in output array
 			}
 		}
