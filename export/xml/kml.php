@@ -10,7 +10,7 @@
  * @todo - only one kml per record, perhaps need to return the combination of kml
  * **/
 
-require_once(dirname(__FILE__).'/../../common/config/manageInstancesDeprecated.php');
+require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 include_once('../../external/geoPHP/geoPHP.inc');
 

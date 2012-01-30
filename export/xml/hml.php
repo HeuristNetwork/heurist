@@ -69,7 +69,6 @@ if (@$argv) {
 header('Content-type: text/xml; charset=utf-8');
 echo "<?xml version='1.0' encoding='UTF-8'?>\n";
 
-require_once(dirname(__FILE__).'/../../common/config/defineFriendlyServers.php');
 require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
@@ -248,18 +247,6 @@ if (@$ARGV) {	// commandline actuation
 	function is_logged_in() { return true; }
 	$pub_id = 0;
 
-} else if (@$_REQUEST['pub_id']) {	//published save query call.
-	$pub_id = intval($_REQUEST['pub_id']);
-	require_once(dirname(__FILE__).'/../../common/connect/bypassCredentialsForPublished.php');
-
-} else if (friendlyServer(@$_SERVER['SERVER_ADDR']) && !(@$_REQUEST['a'])) {	// internal request ... apparently we don't want to authenticate ..?
-	function get_user_id() { return 0; }
-	function get_user_name() { return ''; }
-	function get_user_username() { return ''; }
-	function get_group_ids() { return array(0); }
-	function is_admin() { return false; }
-	function is_logged_in() { return true; }
-	$pub_id = 0;
 } else {	// loggin required entry
 	$pub_id = 0;
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');

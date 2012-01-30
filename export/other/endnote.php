@@ -16,16 +16,12 @@
 define('SEARCH_VERSION', 1);
 
 header('Content-type: text/plain');
-require_once(dirname(__FILE__).'/../../common/config/manageInstancesDeprecated.php');
+require_once(dirname(__FILE__).'/../../common/config/initialise.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
-if ($_REQUEST['pub_id']) {
-	require_once(dirname(__FILE__).'/../../common/connect/bypassCredentialsForPublished.php');
-} else {
-	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-	if (!is_logged_in()) {
+if (!is_logged_in()) {
 	        header('Location: ' . HEURIST_URL_BASE . 'common/connect/login.php?db='.HEURIST_DBNAME);
 	        return;
-	}
 }
 
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');

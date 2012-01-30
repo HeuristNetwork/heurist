@@ -34,13 +34,7 @@ header("content-type:application/vnd.google-earth.kml+xml");
 
 
 define('SEARCH_VERSION', 1);
-if( !empty($_REQUEST['pub_id'])) {
-	require_once(dirname(__FILE__).'/../../common/connect/bypassCredentialsForPublished.php');
-} else {
-	define("BYPASS_LOGIN", true);
-	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php'); // TODO: this bypass method shoudl br expunged
-}
-
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
 require_once('class.searchCursor.php');

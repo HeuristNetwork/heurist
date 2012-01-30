@@ -3154,6 +3154,7 @@ top.HEURIST.search = {
 		top.HEURIST.search.loadSearchParameters();
 	},
 
+/* Depricated
 	buildPublishLinks: function() {
 		var p = window.HEURIST.parameters;
 		var args = [];
@@ -3204,7 +3205,7 @@ top.HEURIST.search = {
 			popup = top.HEURIST.util.popupElement(top, div, { width: '350', height: '150' });
 		}
 	},
-
+*/
 	buildMenu: function() {
 		YAHOO.util.Event.onDOMReady(function() {
 			top.HEURIST.search.myHeuristMenu = new YAHOO.widget.Menu("my-heurist-menu", {
@@ -3271,8 +3272,8 @@ top.HEURIST.search = {
 		top.HEURIST.search.setContactLink();
 		top.HEURIST.search.setHomeLink();
 		top.HEURIST.search.writeRSSLinks();
-		top.HEURIST.search.buildPublishLinks();
-		top.HEURIST.search.showPublishPopup();
+//		top.HEURIST.search.buildPublishLinks();
+//		top.HEURIST.search.showPublishPopup();
 
 		var autoPopups = document.getElementsByName("auto-popup"),
 			demark;
