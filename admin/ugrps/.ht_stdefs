@@ -1,11 +1,11 @@
 <?php
 
-/* 
+/*
 
 This file is part of the T1000 web database templating system
 
-Developed by Tom Murtagh, 
-Archaeological Computing Laboratory, 
+Developed by Tom Murtagh,
+Archaeological Computing Laboratory,
 University of Sydney
 
 Copyright (c) 2005, Archaeological Computing Laboratory, University of Sydney
@@ -32,12 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 define('RESULTS_PER_PAGE', 50);
 //define('UPLOAD_PATH', '.');
 
-define('READUSER', 'readonly');
-define('READPASS', 'mitnick');
-define('WRITEUSER', 'root');
-define('WRITEPASS', 'smith18');
-
-/* Define the tables and joins/lookups needed 
+/* Define the tables and joins/lookups needed
    An appropriate database and table may be created by running t1000_database_create.sql
 
    mysql -u root -p < database_create.sql  */
