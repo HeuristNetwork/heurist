@@ -534,7 +534,7 @@ FlexImport = (function () {
 						var btn = p.appendChild(document.createElement("button"));
 						btn.col = j;
 						btn.wrongValue = (eS[j][i]?eS[j][i]:"");
-						btn.innerHTML = "Edit";
+						btn.innerHTML = "Modify data";
 						btn.onclick = function () {
 
 								//was FlexImport.fields[this.row][this.col] = this.value;
@@ -564,7 +564,7 @@ FlexImport = (function () {
 
 						var a = td.appendChild(document.createElement("a"));
 						a.href = "#";
-						a.innerHTML = "Edit detail type";
+						a.innerHTML = "Edit field definition";
 						a.id2 = FlexImport.colSelectors[j].value;
 						var _onEditClick = function (e){
 
@@ -589,7 +589,7 @@ FlexImport = (function () {
 			}
 			if(haserr){
 				e.insertBefore(table, before);
-				e.insertBefore(document.createTextNode("Unrecognised values in imported data"), table);
+                e.insertBefore(document.createTextNode("Unrecognised values in imported data (edit red values below and click Modify Data, then Prepare Records again. Alternatively you can edit the field definitions with the link to the right of each value.)"), table);
 			}
 
 		}
@@ -1167,7 +1167,8 @@ FlexImport.Saver = (function () {
 			function(r) {
 				$("#rec-type-select-div").empty();
 				$("#rec-type-select-div").empty();
-				$("#records-div").html("<b>" + r.length + "</b> records saved for a total of " + FlexImport.recEnd);
+				$("#records-div").html("Saved <b>" + FlexImport.recEnd+ "</b> records"); 
+                // r.length gives the number of records in the chunk being saved
 				FlexImport.recStart = FlexImport.recEnd;
 				_getChunk();
 			},

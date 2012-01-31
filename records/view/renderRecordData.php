@@ -489,7 +489,9 @@ function print_private_details($bib) {
 ?>
 
 <div class=detailRow><div class=detailType>Updated</div><div class=detail><?= $bib['rec_Modified'] ?></div></div>
-<div class=detailRow><div class=detailType>Cite as</div><div class=detail><a target=_blank href="<?= HEURIST_BASE_URL ?>records/view/viewRecord.php?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>"><?= HEURIST_BASE_URL ?>records/view/viewRecord.php?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?></a></div></div></div>
+<div class=detailRow><div class=detailType>Cite as</div><div class=detail><a target=_blank 
+    href="<?= HEURIST_BASE_URL ?>resolver.php?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>">
+          <?= HEURIST_BASE_URL ?>resolver.php?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?></a></div></div></div>
 <?php
 }
 
