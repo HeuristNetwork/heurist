@@ -37,7 +37,11 @@ require_once(dirname(__FILE__)."/../../search/getSearchResults.php");
 require_once(dirname(__FILE__)."/../../common/php/utilsTitleMask.php");
 
 // NOTE  tags are a complete replacement list of personal tags for this record and are only used if personalised is true
-function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $pnotes, $rating, $tags, $wgTags, $details, $notifyREMOVE, $notifyADD, $commentREMOVE, $commentMOD, $commentADD, &$nonces=null, &$retitleRecs=null) {
+// $modeImport - 0 no import, 1 - import and check structure, 2 - import as is (without check record type structure
+function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $pnotes, $rating, $tags, $wgTags, $details, $notifyREMOVE, $notifyADD, $commentREMOVE, $commentMOD, $commentADD, &$nonces=null, &$retitleRecs=null, $modeImport=0) {
+
+error_log("DETAILS in saveRecord:>>>>".print_r($details,true));
+
 	$recordID = intval($recordID);
 	$wg = intval($wg);
 	if ($wg || !is_logged_in()) {// non-member saves are not allowed
@@ -65,7 +69,8 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 		"rec_NonOwnerVisibility" => ($vis? $vis:"viewable"),
 		"rec_AddedByUGrpID" => get_user_id(),
 		"rec_Added" => $now,
-		"rec_Modified" => $now
+		"rec_Modified" => $now,
+		"rec_AddedByImport" => ($modeImport>0?1:0)
 		));
 		if (mysql_error()) jsonError("database write error - " . mysql_error());
 
@@ -98,7 +103,7 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 
 	// public recDetails data
 	if ($details) {
-		$bdIDs = doDetailInsertion($recordID, $details, $type, $wg, $nonces, $retitleRecs);
+		$bdIDs = doDetailInsertion($recordID, $details, $type, $wg, $nonces, $retitleRecs, $modeImport);
 	}
 
 	// check that all the required fields are present
@@ -209,7 +214,7 @@ details : [t:xxx] => [ [bd:yyy] => val ]*
 */
 
 
-function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$retitleRecs) {
+function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$retitleRecs, $modeImport) {
 	/* $nonces :  nonce-to-bibID mapping, makes it possible to resolve recDetails values of reference variety */
 	/* $retitleRecs : set of records whos titles could be out of date and need recalc */
 	// do a double-pass to grab the expected varieties for each bib-detail-type we encounter
@@ -221,13 +226,16 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 		array_push($types, $bdtID);
 	}
 	$typeVarieties = mysql__select_assoc("defDetailTypes", "dty_ID", "dty_Type", "dty_ID in (" . join($types, ",") . ")");
-	//TODO saw: need to change this to include min value or perhaps we let it go and allow saving the min across multiple saves.
-	$repeats = mysql__select_assoc("defRecStructure", "rst_DetailTypeID", "rst_MaxValues", "rst_DetailTypeID in (" . join($types, ",") . ") and rst_RecTypeID=" . $recordType);
+	if($modeImport!=2){ //import without check of record type structure
+		//TODO saw: need to change this to include min value or perhaps we let it go and allow saving the min across multiple saves.
+			$repeats = mysql__select_assoc("defRecStructure", "rst_DetailTypeID", "rst_MaxValues", "rst_DetailTypeID in (" . join($types, ",") . ") and rst_RecTypeID=" . $recordType);
+	}
 
 	$updates = array();
 	$inserts = array();
 	$dontDeletes = array();
 	foreach ($details as $type => $pairs) {
+
 		if (substr($type, 0, 2) != "t:") continue;	// skip any non t: or type designators
 		if (! ($bdtID = intval(substr($type, 2)))) continue;	// invalid type id so skip it
 
@@ -241,11 +249,13 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 			$val = trim($val);
 
 			$bdVal = $bdFileID = $bdGeo = "NULL";
-			if ( ! array_key_exists($bdtID,$repeats)) continue; // detail type not allowed or hit limit
-			if ($repeats[$bdtID] > 1) {
-				$repeats[$bdtID] = $repeats[$bdtID] - 1; // decrement to reduce limit count NOTE: assumes that all details are given to save
-			} else if ($repeats[$bdtID] == 1) {
-				unset ($repeats[$bdtID]);	// remove this type so no more values can be accepted
+			if($modeImport!=2){ //import without check of record type structure
+				if ( ! array_key_exists($bdtID, $repeats)) continue; // detail type not allowed or hit limit
+				if ($repeats[$bdtID] > 1) {
+					$repeats[$bdtID] = $repeats[$bdtID] - 1; // decrement to reduce limit count NOTE: assumes that all details are given to save
+				} else if ($repeats[$bdtID] == 1) {
+					unset ($repeats[$bdtID]);	// remove this type so no more values can be accepted
+				}
 			}
 			switch ($typeVarieties[$bdtID]) {
 				case "integer":
@@ -337,7 +347,7 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 				array_push($dontDeletes, $bdID);
 			}
 			else {
-				array_push($inserts, "($recordID, $bdtID, $bdVal, $bdFileID, $bdGeo)");
+				array_push($inserts, "($recordID, $bdtID, $bdVal, $bdFileID, $bdGeo,".($modeImport>0?1:0).")");
 			}
 		}
 	}
@@ -355,7 +365,7 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 	}
 
 	if (count($inserts)) {//insert all new details
-		mysql_query("insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, dtl_Geo) values " . join(",", $inserts));
+		mysql_query("insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, dtl_Geo, dtl_AddedByImport) values " . join(",", $inserts));
 		$first_bd_id = mysql_insert_id();
 		return range($first_bd_id, $first_bd_id + count($inserts) - 1);
 	}else{

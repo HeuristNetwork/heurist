@@ -4,7 +4,9 @@
  * saveStructure.php. This file accepts request to update the system structural definitions -
  * rectypes, detailtypes, terms and constraints. It returns the entire structure for the affected area
  * in order to update top.HEURIST
+ *
  * create by Stephen A. White on 17/03/2011
+ *
  * @copyright (C) 2005-2011 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
@@ -528,6 +530,7 @@
 
 	/**
 	* deleteRectype - Helper function that delete a rectype from defRecTypes table.if there are no existing records of this type
+	*
 	* @author Stephen White
 	* @param $rtyID rectype ID to delete
 	* @return $ret an array of return values for the various data elements created or errors if they occurred
@@ -838,6 +841,7 @@
 
 	/**
 	* createRectypeGroups - Helper function that inserts a new rectypegroup into defRecTypeGroups table
+	* 
 	* @author Artem Osmakov
 	* @param $columnNames an array valid column names in the defRecTypeGroups table which match the order of data in the $rt param
 	* @param $rt array of data

@@ -115,7 +115,7 @@ function upload_file($name, $mimetypeExt, $tmp_name, $error, $size, $description
  * @param type $name
  * @param type $description
  * @param type $needConnect
- * @return string
+ * @return string  new file id
  */
 function register_file($fullname, $description, $needConnect) {
 
