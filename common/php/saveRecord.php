@@ -40,8 +40,6 @@ require_once(dirname(__FILE__)."/../../common/php/utilsTitleMask.php");
 // $modeImport - 0 no import, 1 - import and check structure, 2 - import as is (without check record type structure
 function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $pnotes, $rating, $tags, $wgTags, $details, $notifyREMOVE, $notifyADD, $commentREMOVE, $commentMOD, $commentADD, &$nonces=null, &$retitleRecs=null, $modeImport=0) {
 
-error_log("DETAILS in saveRecord:>>>>".print_r($details,true));
-
 	$recordID = intval($recordID);
 	$wg = intval($wg);
 	if ($wg || !is_logged_in()) {// non-member saves are not allowed

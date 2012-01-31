@@ -247,23 +247,40 @@
 
  		 // --------------------------------------------------------------------------------------------------------------------
 
+ 		createTermsOptions('enum');
+ 		createTermsOptions('relation');
+		print "</form>";
+
+	}
+
+ 	function createTermsOptions($type){
+
+		global $sourcedbname, $db_prefix, $dbPrefix, $is_h2;
+
+		$sourcedb = $db_prefix.$sourcedbname;
+
 		 $entnames = getTerms(); //in current database
-		 $entnames = $entnames['termsByDomainLookup']['enum'];
+		 $entnames = $entnames['termsByDomainLookup'][$type];
 		 foreach ($entnames as $id => $name) {
 		 	 $entnames[$id] = $name[0];
 		 }
 		 $seloptions = createOptions("ot", $entnames);
 
 
-		 print "<h3>Term mappings</h3>Code on left, in <b>$sourcedb</b>, maps to field type in <b>$dbPrefix" . HEURIST_DBNAME."</b><p>";// . "<p>";
+		 print "<h3>Term mappings $type</h3>Code on left, in <b>$sourcedb</b>, maps to field type in <b>$dbPrefix" . HEURIST_DBNAME."</b><p>";// . "<p>";
 	     // Get the term mapping, by default assume that the code is unchanged so select the equivalent term if available
 		 if($is_h2){
-	     	$query1 = "SELECT DISTINCT `rd_val`,`rdl_id`,`rd_val` FROM `$sourcedb`.`rec_details`,`$sourcedb`.`rec_detail_lookups` ".
-	     			"where (`rd_type`=`rdl_rdt_id`) AND (`rdl_value`=`rd_val`)";
+	     	$query1 = "SELECT DISTINCT `rdl_id`,`rdl_id`,`rd_val` FROM `$sourcedb`.`rec_details`,`$sourcedb`.`rec_detail_lookups` ".
+	     			"where (`rd_type`=`rdl_rdt_id`) AND (`rdl_value`=`rd_val`) AND (`rdl_related_rdl_id` is ".
+	     			(($type!='enum')?"not":"")." null)";
 		 }else{
+		 	 if($type!='enum'){
+		 	 	 $type = 'relationtype';
+			 }
+
 	     	$query1 = "SELECT DISTINCT `dtl_Value`,`trm_ID`,`trm_Label` FROM `$sourcedb`.`recDetails`,`$sourcedb`.`defTerms` ".
 	     			"where (`dtl_Value`=`trm_ID`) AND (`dtl_DetailTypeID` in (select `dty_ID` from `$sourcedb`.`defDetailTypes` ".
-	     			"where (`dty_Type`='enum') or (`dty_type`='relationtype')))";
+	     			"where (`dty_Type`='$type') ))";
 		 }
 	     $res1 = mysql_query($query1);
 	     print "<table>";
@@ -286,8 +303,6 @@
        				$selopts."</select></td></tr>\n";
 		 } // loop through terms
          print "</table>";
-		 print "</form>";
-
 	}
 
 // ---- Create options for HTML select -----------------------------------------------------------------
@@ -394,8 +409,17 @@
 
 	    echo "<p>Now copying data from <b>$sourcedb</b> to <b>". $dbPrefix.HEURIST_DBNAME. "</b><p>Processing: ";
 
+	    $terms_h2 = array();
+
 	    // Loop through types for all records in the database (actual records, not defined types)
 	    if($is_h2){
+	    	//load all terms
+	    	$query1 = "SELECT `rdl_id`,`rdl_value` FROM `$sourcedb`.`rec_detail_lookups`";
+	    	$res1 = mysql_query($query1);
+	    	while ($row1 = mysql_fetch_array($res1)) {
+				$terms_h2[$row1[1]] = $row1[0];
+			}
+
 	    	$query1 = "SELECT DISTINCT (`rec_type`) FROM `$sourcedb`.`records`";
 		}else{
 	    	$query1 = "SELECT DISTINCT (`rec_RecTypeID`) FROM $sourcedb.Records";
@@ -409,6 +433,7 @@
 
 
 		$added_records = array();
+		$unresolved_pointers = array();
 
 		 /*$detailTypes = getAllDetailTypeStructures(); //in current database
 		 $detailTypes = $detailTypes['typedefs'];
@@ -469,6 +494,7 @@ FROM $sourcedb.`recDetails` rd, $sourcedb.`defDetailTypes` dt where rd.`dtl_Deta
 					//die ("<p>Sorry ...</p>");
 				}
 
+				$unresolved_records = array();
 				$details = array();
 				$dtid = 0;
 				$key = 0;
@@ -488,6 +514,9 @@ FROM $sourcedb.`recDetails` rd, $sourcedb.`defDetailTypes` dt where rd.`dtl_Deta
 	        		if(!array_key_exists('cbd'.$row3[0], $_REQUEST)) continue;
 					$key = $_REQUEST['cbd'.$row3[0]];
 					if(intval($key)<1) {
+						if($rt==52){//debug
+print "mapping not defined for detail #".$dtid;
+						}
 						//mapping for this detail type is not specified
 						continue;
 					}
@@ -497,6 +526,13 @@ FROM $sourcedb.`recDetails` rd, $sourcedb.`defDetailTypes` dt where rd.`dtl_Deta
 					//determine the type of filedtype
 					if($row3[1]=='enum' || $row3[1]=='relationtype'){
 
+						if($is_h2){
+							if(array_key_exists($value, $terms_h2)){
+						 		$value = $terms_h2[$value];
+							}else{
+								print "<div  style='color:#ffaaaa;'>term ".$value." not found in $sourcedb</div>";
+							}
+						}
 						$value = getDestinationTerm($value);
 
 					}else if($row3[1]=='file'){
@@ -515,10 +551,11 @@ FROM $sourcedb.`recDetails` rd, $sourcedb.`defDetailTypes` dt where rd.`dtl_Deta
 
 					}else if($row3[1]=='resource'){
 						//find the id of record in destionation database among pairs of added records
-						if(array_key_exists($value,$added_records)){
+						if(array_key_exists($value, $added_records)){
 							$value = $added_records[$value];
 						}else{
-							print "<div  style='color:#ffaaaa;'>resource record#".$value." not found</div>";
+							array_push($unresolved_records, $key."|".$value);
+							//print "<div  style='color:#ffaaaa;'>resource record#".$value." not found</div>";
 							$value = null; //ingnore
 						}
 					}
@@ -562,7 +599,12 @@ FROM $sourcedb.`recDetails` rd, $sourcedb.`defDetailTypes` dt where rd.`dtl_Deta
 						);
 
 
-					$added_records[$rid] = $out["bibID"];
+					$new_recid = $out["bibID"];
+					$added_records[$rid] = $new_recid;
+
+					if(count($unresolved_records)>0){
+						$unresolved_pointers[$new_recid] = $unresolved_records;
+					}
 
 					print "=>".$out["bibID"];
 
@@ -571,6 +613,38 @@ FROM $sourcedb.`recDetails` rd, $sourcedb.`defDetailTypes` dt where rd.`dtl_Deta
 			ob_flush();flush(); // flush to screen
 
 		} // end of loop for record types
+
+error_log(">>>>>".print_r($unresolved_pointers, true));
+
+		//resolve record pointers
+		$inserts = array();
+		foreach ($unresolved_pointers as $recid => $unresolved_records) {
+
+			foreach ($unresolved_records as $code) {
+
+//print "<br>".$code;
+				$aa = explode("|", $code);
+				$dt_id = $aa[0];
+				$src_recid = $aa[1];
+
+//print "    ".$dt_id."=".$src_recid;
+
+				if(array_key_exists($src_recid, $added_records)){
+
+					print "<br>      resource ".$src_recid."=>".$added_records[$src_recid];
+
+					array_push($inserts, "($recid, $dt_id, ".$added_records[$src_recid].", 1)");
+				}else{
+					print "<div  style='color:#ffaaaa;'>resource record#".$src_recid." not found</div>";
+				}
+			}
+		}
+		if (count($inserts)) {//insert all new details
+			$query1 = "insert into $dbPrefix".HEURIST_DBNAME.".recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) values " . join(",", $inserts);
+error_log(">>>>>>>>>>>>>>>".$query1);
+			mysql_query($query1);
+		}
+
 		print "<p><h3>Transfer completed</h3>";
 	} // function doTransfer
 
@@ -708,7 +782,10 @@ error_log("ERROR :".$message);
 	*/
 	function getDestinationTerm($src_termid){
 
-	    if(!array_key_exists('cbt'.$src_termid, $_REQUEST)) continue;
+	    if(!array_key_exists('cbt'.$src_termid, $_REQUEST)) {
+print "TERM NOT FOUND >>>>".$src_termid;
+	    	return null;
+		}
 		$key = $_REQUEST['cbt'.$src_termid];
 		if(intval($key)<1) {
 			//mapping for this term is not specified
