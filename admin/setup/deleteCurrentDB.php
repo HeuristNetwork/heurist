@@ -20,6 +20,12 @@
 
 	$dbname = $_REQUEST['db'];
 
+	if ($dbname=='H3ExampleDB') {// we require a valid DB incase the user deletes all DBs
+				print "<p>Deleteion of H3ExampleDB is not supported through this interface.".
+					"<p><a href='".HEURIST_URL_BASE."admin/adminMenu.php?db=H3ExampleDB' >Return to Heurist</a>";
+					return;
+	}
+
 	if(!array_key_exists('mode', $_REQUEST)) {
 		print "<html>";
 		print "<head><meta content='text/html; charset=ISO-8859-1' http-equiv='content-type'>";
@@ -47,7 +53,7 @@
 			print "<p><hr>";
 			if ($dbname=='') {
 				print "<p>Undefined database name"; // shouldn't get here
-				} else {
+			} else {
 				// It's too risky to delete data with "rm -Rf .$uploadPath", could end up trashing stuff needed elsewhere, so we move it
 				$uploadPath = HEURIST_UPLOAD_ROOT.$dbname; // individual deletio nto avoid risk of unintended disaster with -Rf
 				$cmdline = "mv ".$uploadPath." ".HEURIST_UPLOAD_ROOT."deleted_databases";
@@ -59,7 +65,7 @@
 				}
 				$cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'drop database ".HEURIST_DB_PREFIX."$dbname'";
 				$output2 = exec($cmdline . ' 2>&1', $output, $res2); // this is the one we really care about
-				}
+			}
 			if ($res2 != 0 ) {
 				echo ("<h2>Warning:</h2> Unable to delete <b>".HEURIST_DB_PREFIX.$dbname."</b>");
 				echo ("<p>Check that the database still exists. Consult Heurist helpdesk if needed<br>");

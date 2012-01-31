@@ -39,7 +39,7 @@
 		<script src="../../external/jquery/jquery-1.6.min.js"></script>
 
 		<script>
-			const recChunk = 10000; // increased from 1000 by ian 24/10/11
+			const recChunkSize = 1000; // increased from 1000 by ian 24/10/11
 			// TODO: Why are we using literals in the code rather than using the constant?
 			var fields = [];
 			var recTypeSelect;
@@ -54,7 +54,7 @@
 			var references = [];
 			var bRecordsLoaded = false;
 			var recStart = 0;
-			var recEnd = recChunk;
+			var recEnd = recChunkSize;
 			var fMapIndexLookup = ["dd/mm/yyyy","mm/dd/yyyy", "yyyy/mm/dd","yyyy"];
 			var fMapIndex=0; //default to dd/mm/yyyy
 			var fMap = [["0","1","2"],["1","0","2"],["2","1","0"],["2","zm","zd"]];
@@ -76,10 +76,10 @@
 				}
 				if (recStart > 0) {
 					recStart = recEnd;
-					if (recEnd + recChunk > fields.length) {
+					if (recEnd + recChunkSize > fields.length) {
 						recEnd = fields.length;
 					}	else {
-						recEnd = recStart + recChunk;
+						recEnd = recStart + recChunkSize;
 					}
 				}else {
 					if (recEnd > fields.length) {
@@ -87,7 +87,7 @@
 					}
 				}
 				var recIDs = [];
-				//get recChunk records
+				//get recChunkSize records
 				for(i=0; i < (recEnd-recStart); i++) {
 					var newIDs = [];
 					// flatten the recordID
@@ -106,7 +106,7 @@
 							recIDs.push(fields[i+recStart][3]);
 						}
 					}
-					if ((newIDs.length + recIDs.length)>10000){ // increased from 1000 by Ian 24/10/11
+					if ((newIDs.length + recIDs.length)>recChunkSize){ // increased from 1000 by Ian 24/10/11
 						//adjust recEnd and break out
 						recEnd = i + recStart;
 						break;
@@ -115,9 +115,9 @@
 					}
 				} //for i
 //				console.debug("loading records " + recIDs.join());
-				if (recIDs.length > 10000) { // increased from 1000 by Ian 24/10/11
+				if (recIDs.length > recChunkSize) { // increased from 1000 by Ian 24/10/11
 					alert("This is embarrassing, but somehow you have exceeded ("+ recIDs.length +
-							") the capacity (10000) of the updater to handle. We need to start again. The last row handled was " + recStart);
+							") the capacity (1000) of the updater to handle. We need to start again. The last row handled was " + recStart);
 					location.reload();
 				}
 
@@ -132,7 +132,10 @@
 				});
 				var mysearch = new HSearch("ids:" + recIDs.join());
 
-				HeuristScholarDB.setDefaultLoadRecordLimit(10000); //set the limit to the max, increased from 1000 by Ian 24/10/11
+				HeuristScholarDB.setDefaultLoadRecordLimit(recChunkSize); //set the limit to the max, increased from 1000 by Ian 24/10/11
+				if (HeuristScholarDB.getDefaultLoadRecordLimit() != recChunkSize){
+					alert("record limit not properly set."); //set the limit to the max, increased from 1000 by Ian 24/10/11
+				}
 				HeuristScholarDB.loadRecords(mysearch,loader);  //asynchronous call for record data
 			}
 
@@ -466,7 +469,7 @@
 				}
 			}
 
-		
+
 		</script>
 		<link rel="stylesheet" type="text/css" href= "../../common/css/global.css">
 		<link rel="stylesheet" type="text/css" href= "../../common/css/admin.css">
@@ -526,7 +529,6 @@
 			Geographic type identifiers are: <code>p:POINT</code> for point, <code>r:POLYGON</code> for rectangle,
 				   <code>c:LINESTRING</code> for circle,  <code>pl:POLYGON</code> for polygon,
 					<code>l:LINESTRING</code> for polyline
-			</p>
 			<p>Tip: To rapidly update a subset of records, use the delimited export function with a query string,
 			select the field to be updated, and check the box "Include internal field code in column preceding values".
 			This will output the record IDs and field code, allowing values to be added to the end of each row of data and imported using this function.
@@ -542,14 +544,14 @@
 			<div><textarea id=csv-textarea></textarea></div>
 			<script>
 				var fieldList = document.getElementById("fieldList");
-				for (var attr in top.HEURIST.detailTypes.typedefs) 
-				{if(!isNaN(Number([attr]))) 
+				for (var attr in top.HEURIST.detailTypes.typedefs)
+				{if(!isNaN(Number([attr])))
 				{
 				listItem = fieldList.appendChild(document.createElement("li"));
 				listItem.innerHTML = "<span style=\"margin-right:10px;\">"+top.HEURIST.detailTypes.typedefs[attr].commonFields[0] + "</span><span>" + top.HEURIST.detailTypes.typedefs[attr].commonFields[1] + "</span>";
 					}
 				}
-				
+
 				$('.fieldsToggle').click(function() {
 					$('#theList').toggle();
 				});

@@ -1373,7 +1373,7 @@ var HRecord = function() {
 
 			details = _namedDetails[type];
 			for (bdID in details) {
-				jso.detail["t:"+type]["bd:"+bdID] = encodeDetail(details[bdID],true);
+				jso.detail["t:"+type]["bd:"+bdID] = (details[bdID] === null ? null :encodeDetail(details[bdID],true));
 			}
 		}
 		for (type in _details) {
@@ -1381,7 +1381,7 @@ var HRecord = function() {
 
 			details = _details[type];
 			for (i=0; i < details.length; ++i) {
-				jso.detail["t:"+type][i] = encodeDetail(details[i],true);
+				jso.detail["t:"+type][i] = (details[i] === null ? null : encodeDetail(details[i],true)) ;
 			}
 		}
 
@@ -3349,9 +3349,9 @@ var HeuristScholarDB = new HStorageManager();
 		if (callback) { setTimeout(callback, 0); }
 
 	}
-	var _defaultLoadRecordLimit = 100;
+	this._defaultLoadRecordLimit = 100;
 	this.getDefaultLoadRecordLimit = function () {
-		return _defaultLoadRecordLimit;
+		return this._defaultLoadRecordLimit;
 	}
 	this.setDefaultLoadRecordLimit = function (limit) {
 		if (!limit || parseInt(limit) == "NaN") {
@@ -3364,7 +3364,7 @@ var HeuristScholarDB = new HStorageManager();
 		if (temp<1) {
 			temp = 1;
 		}
-		_defaultLoadRecordLimit = temp;
+		this._defaultLoadRecordLimit = temp;
 	}
 	this.loadRecords = function(searchSpec, loader) {
 		var searchData;
@@ -3400,7 +3400,7 @@ var HeuristScholarDB = new HStorageManager();
 		}else if (options["limit"]) {
 			limit = parseInt(options["limit"]);
 		}else{
-			limit = _defaultLoadRecordLimit;
+			limit = this._defaultLoadRecordLimit;
 		}
 		if (typeof limit == "number") {
 			searchData.l = limit;

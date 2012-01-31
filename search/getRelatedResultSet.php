@@ -69,7 +69,6 @@ header("Content-type: text/javascript");
 //header('Content-type: text/xml; charset=utf-8');
 /*echo "<?xml version='1.0' encoding='UTF-8'?>\n";
 */
-require_once(dirname(__FILE__).'/../common/config/defineFriendlyServers.php');
 require_once(dirname(__FILE__).'/../common/config/initialise.php');
 require_once(dirname(__FILE__).'/../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../search/getSearchResults.php');

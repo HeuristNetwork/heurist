@@ -1197,9 +1197,9 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 	}
 
 	if(array_key_exists("l",$parms) || array_key_exists("limit",$parms)){
-
+error_log("param".print_r($parms,true));
 		if (array_key_exists("l", $parms)) {
-			$limit = intval(@$args["l"]);
+			$limit = intval(@$parms["l"]);
 			unset($parms["l"]);
 		}else if(array_key_exists("limit", $parms)) {
 			$limit = intval(@$parms["limit"]);  // this is back in since hml.php passes through stuff from sitemap.xmap
@@ -1208,7 +1208,7 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 		}
 		if ($limit < 1 ) unset($limit);
 		if (@$limit){
-			$limit = min($limit, 500);
+			$limit = min($limit, 1000);
 		}else{
 			$limit = 100;
 		}

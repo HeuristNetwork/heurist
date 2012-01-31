@@ -84,11 +84,11 @@
 	$db = mysql_connect(HEURIST_DBSERVER_NAME, $dbReadonlyUsername, $dbReadonlyPassword) or
 	returnErrorMsgPage('1',"Unable to connect to db server with readonly account, set login in configIni.php. MySQL error: ".mysql_error());
 
-	if ($defaultDBname != '') {
+	if (@$defaultDBname != '') {
 		define('HEURIST_DEFAULT_DBNAME',$defaultDBname);	//default dbname used when the URI is ambiguous about the db
 		}
 
-	if ($httpProxy != '') {
+	if (@$httpProxy != '') {
 		define('HEURIST_HTTP_PROXY',$httpProxy);	//http address:port for proxy request
 	}
 
