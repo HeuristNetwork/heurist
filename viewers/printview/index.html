@@ -58,10 +58,9 @@
 				styleSelectElt.options[0] = new Option("Select a style...", "");
 				styleSelectElt.options[0].disabled = true;
 				var i = 1;
-				for (var n = 0; n < styles.length; ++n) {
-					var style = styles[n];
-					styleSelectElt.options[i++] = new Option(style[1], style[0]);
-					if (style[0] == s) styleSelectElt.selectedIndex = i-1;
+				for (var style in styles) {
+					styleSelectElt.options[i++] = new Option(styles[style][0], style);
+					if (style == s) styleSelectElt.selectedIndex = i-1;
 				}
 				styleSelectElt.options[i] = new Option("Generic XML", "genericXML");
 			}
@@ -339,7 +338,7 @@
 						if (!pageXMLs[page]){ //load pageXML now
 							var pageQuery = query;
 							pageQuery = pageQuery.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"offset=" + (page-1)*resultsPerPage);
-							var url = top.HEURIST.baseURL+ "export/xml/hml.php" + pageQuery;
+							var url = top.HEURIST.baseURL+ "export/xml/flathml.php" + pageQuery;
 							var errorMsg = "Error loading " + url + " using XMLHttpRequest";
 							pageXMLs[page] = loadXMLDocFromFile(url);
 						}
@@ -453,10 +452,10 @@
 					xhtmlResultDoc = document.createTextNode(genXML);
 				}else{
 					if (!xsls[style]){
-						xsls[style]=loadXMLDocFromFile("xsl/" +style +".xsl");
+						xsls[style]=loadXMLDocFromFile(top.HEURIST.baseURL + "viewers/printview/loadXSLTemplate.php?style=" + style);
 					}
 					if (!xsls[style]) {
-						alert("Unable to read .xsl file, check to see if this style sheet is readable in your browser or another browser.");
+						alert("Unable to read '"+ style +"' file, check to see if this style sheet is readable in your browser or another browser.");
 						return;
 					}
 					// code for IE
@@ -488,7 +487,7 @@
 					xhtmlResultDoc = pageXMLs[page].documentElement;
 				}else{
 					if (!xsls[style]){
-						xsls[style]=loadXMLDocFromFile("xsl/" +style +".xsl");
+						xsls[style]=loadXMLDocFromFile(styles[style][2]);
 					}
 					if (!xsls[style]) {
 						alert("Unable to read .xsl file, check to see if this style sheet is readable in your browser or another browser.");
