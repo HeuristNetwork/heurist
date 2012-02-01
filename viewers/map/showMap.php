@@ -133,7 +133,7 @@
 		//'javascript:{this.href="'+$row[2]+'"}' : 'javascript:{return false;}');//javascript:void(0)}');
 		$records[$bibID]["icon_url"] = HEURIST_ICON_URL_BASE . $row[7] . ".png";;
 
-		$thumb_url = getThumbnailURL($bibID); //function fro getResultsPageSync.php
+		$thumb_url = getThumbnailURL($bibID); //function from uploadFile.php
 		if($thumb_url==""){
 			$thumb_url = HEURIST_ICON_URL_BASE.	"thumb/th_" . $row[7] . ".png";
 		}

@@ -34,8 +34,8 @@ $mode = $_REQUEST['mode'];
 if($mode){ //opeartion with template files
 
 	//get name of tempalte file
-	$template_file = (array_key_exists('template',$_REQUEST)?$_REQUEST['template']:null);
-
+	$template_file = (array_key_exists('template',$_REQUEST)?  urldecode($_REQUEST['template'])  :null);
+error_log(">>>>>>>>>>".$template_file);
 	try{
 
 	switch ($mode) {
@@ -113,12 +113,16 @@ function getList(){
 		if(array_key_exists('extension', $path_parts))
 		{
 			$ext = strtolower($path_parts['extension']);
-	//error_log(">>>>".$path_parts['filename']."    ".$filename.indexOf("_")."<<<<");
+//error_log(">>>>".$path_parts['filename']."<<<<<");//."    ".$filename.indexOf("_")."<<<<");
+
 			$ind = strpos($filename,"_");
-	                $isnot_temp = (!(is_numeric($ind) && $ind==0));
+	        $isnot_temp = (!(is_numeric($ind) && $ind==0));
+
 			if(file_exists($dir.$filename) && $ext=="tpl" && $isnot_temp)
 			{
-				array_push($results, array( 'filename'=>$filename, 'name'=>$path_parts['filename'] ));
+				//$path_parts['filename'] )); - does not work for nonlatin names
+				$name = substr($filename, 0, -4);
+				array_push($results, array( 'filename'=>$filename, 'name'=>$name));
 			}
 		}
 	}

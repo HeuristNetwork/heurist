@@ -358,7 +358,7 @@ function ShowReps() {
 
 				var template_body = Dom.get("edTemplateBody").value;
 				if(template_body && template_body.length>10){
-					squery = squery + 'save&template='+template_file+'&template_body='+template_body;
+					squery = squery + 'save&template='+encodeURIComponent(template_file)+'&template_body='+encodeURIComponent(template_body);
 
 					_keepTemplateValue = template_body;
 				}else{

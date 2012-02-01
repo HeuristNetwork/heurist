@@ -76,8 +76,9 @@ require_once('libs.inc.php');
 
 	if($template_body)
 	{	//execute template from string - modified temoplate in editor
-//DEBUG error_log(">>>".$template_body."<<<");
-error_log(">>>>>>>".$replevel."<<<<<<");
+//DEBUG
+//error_log(">>>".$template_body."<<<");
+//error_log(">>>>>>>".$replevel."<<<<<<");
 
 		if($replevel=="1" || $replevel=="2"){
 			ini_set( 'display_errors' , 'true');// 'stdout' );

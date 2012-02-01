@@ -312,7 +312,7 @@ function getThumbnailURL($recordId){
 
 		if ($res && mysql_num_rows($res) == 1) {
 			$file = mysql_fetch_assoc($res);
-			$thumb_url = HEURIST_BASE_URL."common/php/resizeImage.php?ulf_ID=".$file['ulf_ObfuscatedFileID'];
+			$thumb_url = HEURIST_BASE_URL."common/php/resizeImage.php?db=".HEURIST_DBNAME."&ulf_ID=".$file['ulf_ObfuscatedFileID'];
 		}
 	}
 	//check freetext (url) type details for a something to represent this record as an icon
@@ -333,7 +333,7 @@ function getThumbnailURL($recordId){
 		if ($res && mysql_num_rows($res) == 1) {
 			$dRow = mysql_fetch_assoc($res);
 			if ( $fullUrlDT &&  $dRow['dtl_DetailTypeID'] == $fullUrlDT) {
-				$thumb_url = HEURIST_BASE_URL."common/php/resizeImage.php?file_url=".htmlspecialchars($dRow['dtl_Value']);
+				$thumb_url = HEURIST_BASE_URL."common/php/resizeImage.php?db=".HEURIST_DBNAME."&file_url=".htmlspecialchars($dRow['dtl_Value']);
 			}else{
 				$thumb_url = "".htmlspecialchars(addslashes($row['dtl_Value']));
 			}
