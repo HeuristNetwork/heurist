@@ -134,7 +134,7 @@ function DetailTypeManager() {
 					'style="padding-left:3px; padding-right:3px; background-color:white; color:red; display: inline-block;"></label>'+
 					'&nbsp;&nbsp;&nbsp;'+
 				'<input id="btnSave'+grpID+'" type="button" value="Save Changes" '+
-							'style="color:red; display: none;"/>'+ //inline-block
+							'style="color:red; display: none !important;"/>'+ //inline-block
 
 				'<input type="button" id="btnAdd'+grpID+'" value="New Field Type" style="float:right;" class="add"/>'+
 			'</div></div>'+
@@ -462,7 +462,22 @@ function DetailTypeManager() {
 
 						}
 					}else{
-						alert("This field type cannot be deleted as it is in use by a record type");
+
+						//find all records that reference this type
+						var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
+						var sUsage = "";
+						if(!Hul.isnull(aUsage)){
+							var k;
+							for (k in aUsage) {
+								sUsage = sUsage + top.HEURIST.rectypes.names[aUsage[k]]+"\n";
+							}
+						}
+						if(sUsage!=""){
+							alert("This field type is used in the following record types:\n"+sUsage+
+							"\nYou will need to delete these record types before you can delete this field.");
+						}else{
+							alert("This field type cannot be deleted as it is in use by a record type");
+						}
 					}
 				}
 
@@ -671,6 +686,8 @@ function DetailTypeManager() {
 					clearHideTimer();
 					needHideTip = true;
 					var my_tooltip = $("#toolTip2");
+
+					my_tooltip.html(textTip);
 
 					my_tooltip.mouseover(__clearHideTimer2);
 					my_tooltip.mouseout(__hideToolTip2);

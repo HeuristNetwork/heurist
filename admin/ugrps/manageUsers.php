@@ -32,6 +32,8 @@ if (!is_admin()) {
 		<link rel=stylesheet href="../../common/css/global.css">
 
 		<!-- YUI -->
+		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/container/assets/skins/sam/container.css">
+
 		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
 		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
@@ -53,6 +55,8 @@ if (!is_admin()) {
 		<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/paginator/assets/skins/sam/paginator.css">
 		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
 		<!-- END PAGINATOR -->
+
+		<script type="text/javascript" src="../../external/yui/2.8.2r1/build/container/container-min.js"></script>
 
 		<script type="text/javascript" src="../../external/jquery/jquery.js"></script>
 

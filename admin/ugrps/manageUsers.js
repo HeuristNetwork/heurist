@@ -43,7 +43,8 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 		//for tooltip
 		var currentTipId,
 			needHideTip = true,
-			hideTimer;
+			hideTimer,
+			infoMessageBox;
 
 		var _roles = [{value:"admin", text:"admin"},{value:"member", text:"member"}];
 		//{value:"invited", text:"invited", enabled:false},{value:"request", text:"request", disabled:true },
@@ -197,6 +198,19 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 	*/
 	function _init(grpID, _callback)
 	{
+
+		infoMessageBox  =
+				new YAHOO.widget.SimpleDialog("simpledialog2",
+					{ width: "350px",
+					fixedcenter: true,
+					modal: false,
+					visible: false,
+					draggable: false,
+					close: false,
+					text: "some text"
+				} );
+		infoMessageBox.render(document.body);
+
 		_callback_func = _callback;
 		_db = (top.HEURIST.parameters && top.HEURIST.parameters.db?
 				top.HEURIST.parameters.db :
@@ -527,10 +541,16 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 
 					function __onUpdateRole(context){
 						if(_updateRole(context)){
+
+							infoMessageBox.setBody("Role has been changed");
+							infoMessageBox.show();
+							setTimeout(function(){infoMessageBox.hide();}, 1000);
+
 							data.role = newValue;
 							if(newValue==="delete"){
 								_updateFilter();
 							}
+
 						}else{ //restore previous value in dropdown
 							elDropdown.value = oldValue;
 						}

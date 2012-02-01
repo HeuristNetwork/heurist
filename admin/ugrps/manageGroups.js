@@ -224,7 +224,7 @@ function GroupManager(_isFilterMode, _isSelection, _isWindowMode) {
 			{ key: "selection", label: "Sel", hidden:(!_isSelection), sortable:true,
 				formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
 
-			{ key: "id", label: "Admins", sortable:false, className:'center', 
+			{ key: "id", label: "Admins", sortable:false, className:'center',
 				formatter: function(elLiner, oRecord, oColumn, oData){
 					var recID = oRecord.getData('id');
 elLiner.innerHTML = '<div align="center"><img src="../../common/images/info.png" '+

@@ -150,7 +150,7 @@ function RectypeManager() {
 					'style="padding-left:3px; padding-right:3px; background-color:white; color:red; display: inline-block;"></label>'+
 					'&nbsp;&nbsp;&nbsp;'+
 			'<input id="btnSave'+grpID+'" type="button" value="Save order" '+
-							'style="color:red; display: none;margin-right:5px;"/>'+ //inline-block
+							'style="color:red; display: none !important;margin-right:5px;"/>'+ //inline-block
 				'<input type="button" id="btnAddRecordType'+grpID+'" value="New record type" class="add"/>'+
 				//'<input type="button" id="btnAddFieldType'+grpID+'" value="Add Field Type" style="float:right;"/>'+
 			'</div></div>'+
