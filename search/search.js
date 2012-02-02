@@ -134,13 +134,18 @@ top.HEURIST.search = {
 
 		newResults.records = [];	//clear results
 
-		// check if we've just loaded the page we were expecting to render
-		if (Math.floor(startIndex / top.HEURIST.search.resultsPerPage) == top.HEURIST.search.currentPage) {
+		var loadedRecCount = top.HEURIST.search.results.infoByDepth[0].count;
+		// check if we've fully loaded the page we were expecting to render
+		var firstOnPage = top.HEURIST.search.currentPage*top.HEURIST.search.resultsPerPage;
+		var lastOnPage = Math.min(top.HEURIST.search.results.totalQueryResultRecordCount,
+										(top.HEURIST.search.currentPage + 1)*top.HEURIST.search.resultsPerPage)-1;
+		if (startIndex <= lastOnPage &&
+			top.HEURIST.search.results.infoByDepth[0].recIDs[firstOnPage] &&
+			top.HEURIST.search.results.infoByDepth[0].recIDs[lastOnPage]) {
 			// should have some sort of "searchready" event -- FIXME as part of holistic event-based solution
-			var lastIndex = Math.min(startIndex + top.HEURIST.search.resultsPerPage, top.HEURIST.search.results.totalQueryResultRecordCount);
 			top.HEURIST.registerEvent(window, "contentloaded", function() {
 				top.HEURIST.search.currentPage = 0;
-				top.HEURIST.search.renderSearchResults(startIndex, lastIndex-1);
+				top.HEURIST.search.renderSearchResults(firstOnPage, lastOnPage);
 				top.HEURIST.search.renderNavigation();
 				top.HEURIST.search.updateMapOrSmarty();
 			});
@@ -149,7 +154,7 @@ top.HEURIST.search = {
 					(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
 			});
 		}
-
+		// when the last result is loaded start loading related if user wants it
 		if (top.HEURIST.search.results.infoByDepth[0].count == top.HEURIST.search.results.totalQueryResultRecordCount &&
 			top.HEURIST.util.getDisplayPreference("loadRelatedOnSearch") === "true"){
 				top.HEURIST.search.loadRelatedResults();
@@ -236,6 +241,8 @@ top.HEURIST.search = {
 	},
 
 	loadRelatedResults: function() {
+		window.HEURIST.parameters["q"] = document.getElementById("q").value;
+		window.HEURIST.parameters["w"] = document.getElementById("w-input").value;
 		var URL = top.HEURIST.basePath+"search/getRelatedResultSet.php?" +
 			("w=" + (window.HEURIST.parameters["w"] ? encodeURIComponent(window.HEURIST.parameters["w"]) : "all")) +
 			(window.HEURIST.parameters["stype"] ? "&stype=" +encodeURIComponent(window.HEURIST.parameters["stype"]) : "") +
@@ -249,11 +256,13 @@ top.HEURIST.search = {
 													top.HEURIST.search.loadLevelFilter(0);
 													top.HEURIST.search.addResultLevelLinks(0);
 													if (top.HEURIST.search.results.infoByDepth.length >1 &&
-															top.HEURIST.search.results.infoByDepth[1].count > 0 &&
-															top.HEURIST.util.getDisplayPreference("loadRelatedOnSearch") != "false"
-															) {
+															top.HEURIST.search.results.infoByDepth[1].count > 0) {
 														top.HEURIST.search.loadLevelFilter(1);
+													}else{
+														alert("did not loadLevel 1 filter info-" +
+																top.HEURIST.search.results.infoByDepth.length);
 													}
+													top.HEURIST.search.filterRelated(0);
 									});
 		top.HEURIST.util.getJsonData(URL,
 				function(related) {	// callback function to process results from
@@ -443,7 +452,6 @@ top.HEURIST.search = {
 			reltypeMenuItem.appendChild(reltypeList);
 			filterMenu.appendChild(reltypeMenuItem);
 		}
-
 	},
 	setBodyClass: function() {
 		window.HEURIST.parameters["w"] = document.getElementById("w-input").value;
@@ -505,9 +513,6 @@ top.HEURIST.search = {
 	togglePtrtypeFilter: function(menuItem, level, dtyID){
 		var recalcFilters = false;
 		var resultsDiv =  $("#results-level" + level).get(0);
-		var activeParentRecIDs = {};
-		$("div.recordDiv:not(.filtered)",$("#results-level" + (level -1)).get(0)).each(function(){
-			activeParentRecIDs[$(this).attr('recid')]=1;});
 		var recIDs = top.HEURIST.search.results.infoByDepth[level].ptrtypes[dtyID];
 		var recSet = top.HEURIST.search.results.recSet;
 		if ($(menuItem).hasClass('checked')) {// filter all pointer links of type dtyID by removing a "lnk" class
@@ -515,6 +520,9 @@ top.HEURIST.search = {
 					$('.recordDiv[recID='+recID+']',resultsDiv).removeClass('lnk');
 				});
 		}else{
+			var activeParentRecIDs = {};
+			$("div.recordDiv:not(.filtered)",$("#results-level" + (level -1)).get(0)).each(function(){
+				activeParentRecIDs[$(this).attr('recid')]=1;});
 			$.each(recIDs,function(i,recID){
 				//TODO  check if recID is link to active level-1 record !!!!!!!!!!!
 				//for each of the revPointer[dtyID] recIDs check if there is one active
@@ -846,12 +854,12 @@ top.HEURIST.search = {
 	},
 
 	filterRelated: function(level){
-		if (level == 0 || !$("#showrelated" + level).hasClass("loaded")) {
+		if (level != 0 && !$("#showrelated" + level).hasClass("loaded")) {
 			return;
 		}
 		var resultsDiv = document.getElementById("results-level"+level);
-		var parentLevelResultDiv = document.getElementById("results-level"+(level-1));
-		if (!resultsDiv || !parentLevelResultDiv) {
+		var parentLevelResultDiv = (level == 0 ? null : document.getElementById("results-level"+(level-1)));
+		if (!resultsDiv || (level>0 && !parentLevelResultDiv)) {
 			return;
 		}
 
@@ -865,12 +873,20 @@ top.HEURIST.search = {
 		var depthInfo = top.HEURIST.search.results.infoByDepth[level];
 		var ptrRecordIDs = {};
 		var relRecordIDs = {};
-		$('.recordDiv',parentLevelResultDiv).each(function(i,recDiv){
-				// for all parentlevel records that are not filtered or without links
-				if ($(recDiv).hasClass('filtered') || (!$(recDiv).hasClass('lnk') && (level-1 > 0))){
+		var recInfo;
+		if (level==0) {
+			$('.recordDiv',resultsDiv).each(function(i,recDiv){
+				recTypeID = recSet[$(recDiv).attr("recID")].record[4];
+				rectypes[recTypeID] = 1;
+			});
+		}else{
+			$('.recordDiv',parentLevelResultDiv).each(function(i,recDiv){
+				// skips all parentlevel records that are filtered or without links
+				if ($(recDiv).hasClass('filtered') || (!$(recDiv).hasClass('lnk') && level -1 > 0)){
 					return;
 				}
-				var recInfo = recSet[$(recDiv).attr("recID")];
+				//for this parentlevel record find the rectypes of all related records and all
+				recInfo = recSet[$(recDiv).attr("recID")];
 				if (recInfo.ptrLinks){
 					$.each(recInfo.ptrLinks.byDtlType,function(dtlID, recIDs){
 							var j, recID, recTypeID;
@@ -920,6 +936,7 @@ top.HEURIST.search = {
 						});
 				}
 			});
+		}
 		//un check all filter menu items
 //		$('ul>li.checked',resultsDiv).each( function(i,li){
 //				$(li).toggleClass('checked');
@@ -930,18 +947,9 @@ top.HEURIST.search = {
 			});
 		// remove all lnk class tags
 		$('.recordDiv',resultsDiv).each( function(i,recDiv){
+				var recID = $(recDiv).attr('recID');
 				while($(recDiv).hasClass('lnk')){
 					$(recDiv).toggleClass('lnk');
-				}
-				var recID = $(recDiv).attr('recID');
-				if (relRecordIDs[recID] == 1 || ptrRecordIDs[recID] == 1) {//record related to upper level unfiltered record
-					if($(recDiv).hasClass('filtered')){
-						$(recDiv).toggleClass('filtered');
-					}
-				}else{
-					if(!$(recDiv).hasClass('filtered')){
-						$(recDiv).toggleClass('filtered');
-					}
 				}
 			});
 		//for each of the menus disable reltype menu items not in the reltype set and lnk records for those that are checked
@@ -977,16 +985,21 @@ top.HEURIST.search = {
 		//for each of the menus disable rectype menu items not in the rectype set and filter records of those that are not checked
 		$('ul.rectype>li:not(.cmd)',resultsDiv).each( function(i,li){
 				var rtID = $(li).attr('rectype');
+				var filterType = !$(li).hasClass('checked'),
+					isFiltered;
 				if (rectypes[rtID] === 1) { //rectype menu is in the related set
-					if (!$(li).hasClass('checked')) { // if it's not checked then filter all records of this type
-						$.each(depthInfo.rectypes[rtID],function(i,recID){
-								var recDiv = $('.recordDiv[recID='+recID+']', resultsDiv);
-								if (!recDiv.hasClass('filtered')) {
+					$.each(depthInfo.rectypes[rtID],function(i,recID){
+							var recDiv = $('.recordDiv[recID='+recID+']', resultsDiv);
+							if (recDiv.hasClass('filtered')) {
+								if (!filterType) {// it's filtered and need to be unfiltered
 									recDiv.toggleClass('filtered');
 								}
-
-							});
-					}
+							}else{
+								if (filterType) {// it's not filtered and needed to be filtered
+									recDiv.toggleClass('filtered');
+								}
+							}
+						});
 				}else{
 					$(li).toggleClass('disabled');
 				}
@@ -1048,7 +1061,7 @@ top.HEURIST.search = {
 		// add click handlers
 		top.HEURIST.search.addResultLevelEventHandlers(0);
 		top.HEURIST.search.addResultLevelLinks(0);
-		top.HEURIST.search.filterRelated(1);
+		top.HEURIST.search.filterRelated(0);
 		top.HEURIST.search.updateMapRelated();
 
 		top.HEURIST.registerEvent(window, "load", function() {top.HEURIST.search.trimAllLinkTexts(0);});
@@ -1090,7 +1103,7 @@ top.HEURIST.search = {
 				var classLinkedRecIDs = $.map(linkedRecIDs,function(i,recID){
 																return "link" + recID;
 															});
-				if (level == 0) {
+				if (level !== 0) {
 					classLinkedRecIDs.push("lnk");
 				}
 				$(recDiv).addClass(classLinkedRecIDs.join(" "));
