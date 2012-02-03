@@ -76,6 +76,7 @@
 			    // was hBase, but ../ seems to work jsut as well
 
 			if (location.search.match(/[&?]q=[^&]+/)) {		//there is a search string
+//				top.HEURIST.parseParams();
 				document.getElementById("searchFrame").src =  hBase +"search/getResultsPageAsync.php" + location.search;
 				top.suppressAutoSearch = true;
 			} else {
@@ -102,7 +103,7 @@
 
 			if (! document.body.className) {
 				document.body.className = "w-" + window.HEURIST.parameters["w"];
-    		}
+			}
 			// start loading this early
 			top.HEURIST.loadScript(hBase+"common/php/loadUserInfo.php" +	// user-specific HEURIST data
 			(database ? "?db=" + database : ""));
@@ -142,7 +143,7 @@
 		</script>
 		<script src="../common/php/displayPreferences.php"></script> <!-- sets body css classes based on prefs in session -->
 		<iframe src="../search/actions/actionHandler.php" id=i_action></iframe>
-		<!-- actionHandler.php is written to return a form by default or running javascript followed by reload teh default-->
+		<!-- actionHandler.php is written to return a form by default or running javascript followed by reload the default-->
 
 
 <div id="masthead">
@@ -302,7 +303,7 @@
 					<div class="searchButtons">
 						<input id=my-records-button type=button value="my bookmarks" title="Search only records which have been bookmarked by you" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();" class="logged-in-only">
 						<input id=all-records-button type=button value="all records"  title="Search across all records in Heurist" onClick="document.getElementById('w-input').value = 'all'; top.HEURIST.search.submitSearchForm();">
-  						<span id="add-record"><input id=add-record-link value="Add New Record" title="Add a new record to the Heurist database, setting record type and ownership" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/addRecordPopup.php'); return false;" class="logged-in-only" >
+						<span id="add-record"><input id=add-record-link value="Add New Record" title="Add a new record to the Heurist database, setting record type and ownership" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/addRecordPopup.php'); return false;" class="logged-in-only" >
 					</span></div>
 				</form>
 
@@ -314,10 +315,9 @@
 								<ul>
 									<li><a href="#" title="Advanced search function builds complex search strings through an easy form-based interface" onClick="top.HEURIST.search.launchAdvancedSearch(); return false;">Advanced search</a></li>
 									<li><a href="../help/advanced_search.html" title="Detailed description of the syntax for advanced search strings" target=_blank>Advanced search help</a></li>
-              						<li><a href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members" onClick="top.HEURIST.util.popupURL(window, 'saved/saveSearchPopup.html'); return false;">Save search as ...</a></li>
+									<li><a href="#" title="Save current results set as a Saved Search, either personal or shared with workgroup members" onClick="top.HEURIST.util.popupURL(window, 'saved/saveSearchPopup.html'); return false;">Save search as ...</a></li>
 
 									<!-- Coomenting out the following line breaks the search page, but we don't want it!!! TO REMOVE -->
-
 									<li><a href="#" onClick="top.HEURIST.search.openSelected()" title="Launch selected records in a new search window">Open selection in new window</a></li>
 								</ul>
 							</li>
@@ -331,7 +331,7 @@
 									<li><a href="#" onClick="top.HEURIST.search.addBookmarks(); return false;" title="Select one or more records, then click to bookmark">Bookmark</a></li>
 									<li><a href="#" onClick="top.HEURIST.search.deleteBookmarks(); return false;" title="Select one or more records, then click to remove bookmarks">Un-bookmark</a></li>
 									<li><a href="#" onClick="top.HEURIST.search.deleteBiblios(); return false;" title="Select one or more records, then click to delete">Delete</a></li>
-      								<li><a href="#" onClick="top.HEURIST.search.fixDuplicates(); return false;" title="Select one or more records, then click to identify/fix duplicates">Merge</a></li>
+									<li><a href="#" onClick="top.HEURIST.search.fixDuplicates(); return false;" title="Select one or more records, then click to identify/fix duplicates">Merge</a></li>
 								</ul>
 							</li>
 							<li><span id=collection-label title="Select records and click collect to add to a temporary collection which can later be saved as a search." >Collect&nbsp;&nbsp;</span><span class="collected-shown" style="display:inline"></span>

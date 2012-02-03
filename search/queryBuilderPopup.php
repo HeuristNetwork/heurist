@@ -38,7 +38,7 @@
 
 		var snippet;
 
-		if (elt.name == 'sortby') {
+/*		if (elt.name == 'sortby') {
 			var repeat_elt = document.getElementById('sortby_multiple');
 			var repeat_elt_label = document.getElementById('sortby_multiple_label');
 			if (elt.options[elt.selectedIndex].value.substr(0, 2) == 'f:') {
@@ -52,7 +52,7 @@
 				repeat_elt_label.style.color = 'gray';
 			}
 		}
-
+*/
 		if (elt.name === "type") {
 			// update the list of record-type-specific bib-detail-types
 			var typeOptgroup = document.getElementById("rectype-specific-fields");
@@ -108,12 +108,12 @@
 				snippet = HQuery.makeQuerySnippet('field:'+elt.options[elt.selectedIndex].value, field_elt.value);
 
 			} else if (elt.name == 'sortby') {
-				if (elt.value.match(/^f:|^field:/)) {
-					var sortby_field = document.getElementById('ascdesc').value + elt.value + (document.getElementById('sortby_multiple').checked? '' : ':m');
-					snippet = HQuery.makeQuerySnippet(elt.name, sortby_field);
-				} else {
+//				if (elt.value.match(/^f:|^field:/)) {
+//					var sortby_field = document.getElementById('ascdesc').value + elt.value + (document.getElementById('sortby_multiple').checked? '' : ':m');
+//					snippet = HQuery.makeQuerySnippet(elt.name, sortby_field);
+//				} else {
 					snippet = HQuery.makeQuerySnippet(elt.name, document.getElementById('ascdesc').value + elt.value);
-				}
+//				}
 
 			} else {
 				snippet = HQuery.makeQuerySnippet(elt.name, elt.value);
@@ -176,13 +176,12 @@
 
 
 	function load_query() {
-		var q = location.search;
-		if (q.charAt(0) == '?') q = q.substr(1);
+		var params = top.HEURIST.parseParams(location.search);
 
-		var q_val = decodeURIComponent(q);
-		document.getElementById('q').value = q_val;
+		var q_str = decodeURIComponent(params["q"]);
+		document.getElementById('q').value = q_str;
 
-		var q_bits = HQuery.parseQuery(q_val);
+		var q_bits = HQuery.parseQuery(q_str);
 		if (q_bits) {
 			for (q_key in q_bits) {
 				if (document.getElementById(q_key)) {

@@ -200,55 +200,57 @@ top.HEURIST.search = {
 			return;
 		}
 		var iframeElt = document.createElement("iframe");
+		var params = top.HEURIST.parameters;
 		iframeElt.style.border = "0";
 		iframeElt.style.width = "0";
 		iframeElt.style.height = "0";
 		iframeElt.frameBorder = 0;
 		iframeElt.style.position = "absolute";
 		iframeElt.src = top.HEURIST.basePath+"search/getResultsPageAsync.php?" +
-			("w=" + encodeURIComponent(window.HEURIST.parameters["w"])) + "&" +
-			("stype=" + (window.HEURIST.parameters["stype"] ? encodeURIComponent(window.HEURIST.parameters["stype"]) : "")) + "&" +
+			("w=" + encodeURIComponent(params["w"])) + "&" +
+			("stype=" + (params["stype"] ? encodeURIComponent(params["stype"]) : "")) + "&" +
 			("ver=" + top.HEURIST.search.VERSION) + "&" +
-			("q=" + encodeURIComponent(window.HEURIST.parameters["q"])+
-			(window.HEURIST.database && window.HEURIST.database.name ? "&db=" + window.HEURIST.database.name : ""));
+			("q=" + encodeURIComponent(params["q"]))+
+			("&db=" + (params['db'] ? params['db'] :
+					(window.HEURIST.database && window.HEURIST.database.name ? window.HEURIST.database.name : "")));
+
 		document.body.appendChild(iframeElt);
 	},
 
 	loadSearchParameters: function() {
-		var args = window.HEURIST.parameters;
+		var params = window.HEURIST.parameters;
 
 		// set search type
-		if (top.HEURIST.is_logged_in()  &&  args["w"] === "bookmark") {
-			args["w"] = "bookmark";
+		if (top.HEURIST.is_logged_in()  &&  params["w"] === "bookmark") {
+			params["w"] = "bookmark";
 		} else if (top.HEURIST.is_logged_in()  &&  top.HEURIST.util.getDisplayPreference("defaultMyBookmarksSearch") == "true") {
-			args["w"] = "bookmark";
+			params["w"] = "bookmark";
 		} else {
-			args["w"] = "all";
+			params["w"] = "all";
 		}
 
-		if (! args["q"]) {
-			args["q"] = "";
+		if (! params["q"]) {
+			params["q"] = "";
 		}
 
 		// set search version
-		args["ver"] = top.HEURIST.search.VERSION;
+		params["ver"] = top.HEURIST.search.VERSION;
 
-		if (args["view"]) {
-			top.HEURIST.search.setResultStyle(args["view"]);
+		if (params["view"]) {
+			top.HEURIST.search.setResultStyle(params["view"]);
 		}
 
 		if (! top.suppressAutoSearch) top.HEURIST.search.loadSearch();
 	},
 
 	loadRelatedResults: function() {
-		window.HEURIST.parameters["q"] = document.getElementById("q").value;
-		window.HEURIST.parameters["w"] = document.getElementById("w-input").value;
+		var params = top.HEURIST.parameters;
 		var URL = top.HEURIST.basePath+"search/getRelatedResultSet.php?" +
-			("w=" + (window.HEURIST.parameters["w"] ? encodeURIComponent(window.HEURIST.parameters["w"]) : "all")) +
-			(window.HEURIST.parameters["stype"] ? "&stype=" +encodeURIComponent(window.HEURIST.parameters["stype"]) : "") +
+			("w=" + (params["w"] ? encodeURIComponent(params["w"]) : "all")) +
+			(params["stype"] ? "&stype=" +encodeURIComponent(params["stype"]) : "") +
 			("&ver=" + top.HEURIST.search.VERSION) +
-			("&q=" + encodeURIComponent(window.HEURIST.parameters["q"])) +
-			("&db=" + (top.HEURIST.parameters['db'] ? top.HEURIST.parameters['db'] :
+			("&q=" + encodeURIComponent(params["q"])) +
+			("&db=" + (params['db'] ? params['db'] :
 						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : ""))) +
 			"&depth=3&limit=1000";
 		top.HEURIST.registerEvent(window, "heurist-related-recordset-loaded",
@@ -258,9 +260,6 @@ top.HEURIST.search = {
 													if (top.HEURIST.search.results.infoByDepth.length >1 &&
 															top.HEURIST.search.results.infoByDepth[1].count > 0) {
 														top.HEURIST.search.loadLevelFilter(1);
-													}else{
-														alert("did not loadLevel 1 filter info-" +
-																top.HEURIST.search.results.infoByDepth.length);
 													}
 													top.HEURIST.search.filterRelated(0);
 									});
@@ -2105,7 +2104,7 @@ top.HEURIST.search = {
 
 	launchAdvancedSearch: function() {
 		var q = document.getElementById("q").value;
-		var url = top.HEURIST.basePath+ "search/queryBuilderPopup.php?" + encodeURIComponent(q) + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
+		var url = top.HEURIST.basePath+ "search/queryBuilderPopup.php?q=" + encodeURIComponent(q) + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
 		top.HEURIST.util.popupURL(window, url, { callback: top.HEURIST.search.advancedSearchCallback });
 	},
 
@@ -2115,7 +2114,8 @@ top.HEURIST.search = {
 			// user clicked close-button ... do nothing
 		} else {
 			this.document.getElementById("q").value = q;
-			this.document.forms[0].submit();
+//			this.document.forms[0].submit();
+			top.HEURIST.search.reloadSearch();
 		}
 		return true;
 	},
@@ -2570,7 +2570,11 @@ top.HEURIST.search = {
 
 	getSelectedRecIDs: function() {
 		var recIDs = {};
-		var selectedRecIDs = $(".recordDiv.selected.lnk:not(.filtered),.recordDiv.relateSelected.lnk:not(.filtered)",$("#results")).map(function(i,recdiv){
+		var selectedRecIDs = $("#results-level0 > .recordDiv.selected:not(.filtered),"+
+								" #results-level0 > .recordDiv.relateSelected:not(.filtered),"+
+								" .recordDiv.selected.lnk:not(.filtered),"+
+								" .recordDiv.relateSelected.lnk:not(.filtered)",
+								$("#results")).map(function(i,recdiv){
 					var recID = $(recdiv).attr("recID");
 					if (!recIDs[recID] && parseInt(recID)>=0) {
 						recIDs[recID] = true;
@@ -3140,12 +3144,12 @@ top.HEURIST.search = {
 	},
 
 	collectDuplicates: function() {
-		var p = window.HEURIST.parameters;
+		var params = window.HEURIST.parameters;
 		var args = [];
-		if (p['ver']) args.push('ver='+p['ver']);
-		if (p['w']) args.push('w='+p['w']);
-		if (p['stype']) args.push('stype='+p['stype']);
-		if (p['q']) args.push('q='+escape(p['q']));
+		if (params['ver']) args.push('ver='+params['ver']);
+		if (params['w']) args.push('w='+params['w']);
+		if (params['stype']) args.push('stype='+params['stype']);
+		if (params['q']) args.push('q='+escape(params['q']));
 		var query_string = args.join('&');
 		//window.location.href = top.HEURIST.basePath+"admin/verification/listDuplicateRecordsForSearchResults.php?"+ query_string + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
 		top.HEURIST.search.popupLink(top.HEURIST.basePath+"admin/verification/listDuplicateRecordsForSearchResults.php?"+ query_string + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""));

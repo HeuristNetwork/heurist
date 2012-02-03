@@ -495,7 +495,7 @@ function print_input_form() {
 <input type="hidden" name="publish" id="publish" value="">
 <input type="hidden" name="wg_id" id="wg_id" value="">
 <input type="hidden" name="vis" id="vis" value="">
-<input type="hidden" name="db" id="db" value="">
+<input type="hidden" name="db" id="db" value="<?=HEURIST_DBNAME?>">
 <input type="hidden" name="action" id="action" value="">
 <input type="hidden" name="reload" id="reload" value="">
 </form>
