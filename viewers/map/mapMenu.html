@@ -48,8 +48,8 @@
 
 	 		var currentSearchQuery =
 	 				(top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]=="selected")
-						?top.HEURIST.search.currentSearchQuery_sel
-						:top.HEURIST.search.currentSearchQuery_all;
+						?top.HEURIST.currentQuery_sel  //top.HEURIST.search.currentSearchQuery_sel
+						:top.HEURIST.currentQuery_all;  //top.HEURIST.search.currentSearchQuery_all;
 
 			if(currentSearchQuery)
 			{

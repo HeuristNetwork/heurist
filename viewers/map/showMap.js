@@ -77,10 +77,12 @@ function ShowMap() {
 
 		if(context.cntWithGeo>0){
 			var elem = document.getElementById('cbLayers');
-			if(HEURIST.tmap.layers.length==0 && elem.selectedIndex>0){
-				HEURIST.tmap.layers = [systemAllLayers[elem.value]];
-			}else{
-				elem.selectedIndex = 0;
+			if(elem){
+				if(HEURIST.tmap.layers.length==0 && elem.selectedIndex>0){
+					HEURIST.tmap.layers = [systemAllLayers[elem.value]];
+				}else{
+					elem.selectedIndex = 0;
+				}
 			}
 		}
 
@@ -478,6 +480,7 @@ function ShowMap() {
 		elem.innerHTML = s;
 	}
 
+	var currentBackgroundLayer = "";
 	/**
 	*
 	*/
@@ -487,8 +490,13 @@ function ShowMap() {
 
 		if(isNaN(val) || val < 0){
 			RelBrowser.Mapping.addLayers([]);
+			top.HEURIST.currentQuery_all = top.HEURIST.currentQuery_all.replace(","+currentBackgroundLayer,"");
+			top.HEURIST.currentQuery_sel = top.HEURIST.currentQuery_sel.replace(","+currentBackgroundLayer,"");
 		}else{
+			currentBackgroundLayer = systemAllLayers[val].rec_ID;
 			RelBrowser.Mapping.addLayers([systemAllLayers[val]]);
+			top.HEURIST.currentQuery_all = top.HEURIST.currentQuery_all + "," + currentBackgroundLayer;
+			top.HEURIST.currentQuery_sel = top.HEURIST.currentQuery_sel + "," + currentBackgroundLayer;
 		}
 
 	}

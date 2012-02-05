@@ -117,7 +117,7 @@
   <div class="input-row required">
     <div class="input-header-cell" for="rty_TitleMask">Title mask:</div>
     <div class="input-cell">
-      <input maxlength="500" id="rty_TitleMask" style="width:300px;" onblur="testTitleMask(event)"/>
+      <input maxlength="500" id="rty_TitleMask" style="width:300px;"/>
       <span><button onClick="_onEditMask()">Edit</button></span>
       <div class="help prompt">Mask to build a composite title from fields (see manual).
         The title mask is a string into which field values are inserted to create an extended title for the record, e.g. [Title], pp. [Start_Page]-[End_Page] renders the Title field and start and end page fields as in "Alice in Wonderland, pp. 37-39". The element names in square brackets should match field names for this record type. The constructed value is used as the extended title displayed in search results and other lists. To insert a literal square-bracket, use two consecutive square-brackets ([[ or ]]).</div>
@@ -547,7 +547,11 @@
 
 	//
 	function updateRectypeOnServer() {
+		testTitleMask(); //then it calls updateRectypeOnServer_continue
+	}
 
+	function updateRectypeOnServer_continue()
+	{
 		if(!titleMaskIsOk){
 			alert("Title mask is invalid");
 			return;
@@ -764,9 +768,9 @@
 		return "ok";
 	}
 
-	function testTitleMask(event)
+	function testTitleMask()
 	{
-					var mask = event.target.value;
+					var mask = document.getElementById("rty_TitleMask").value;
 
             		var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 	                                (top.HEURIST.database.name?top.HEURIST.database.name:''));
@@ -781,6 +785,7 @@
 							alert(obj);
 						}else{
 							titleMaskIsOk = true;
+							updateRectypeOnServer_continue();
 						}
 					}, squery);
 	}
