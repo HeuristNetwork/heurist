@@ -96,9 +96,23 @@
 
 // ---- PROCESS THE COPY FUNCTION (second pass) --------------------------------------------------------------------
 
+
+        function isInValid($str) {
+        return preg_match('[\W]', $str);
+    }
+
     if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
 		$targetdbname = $_REQUEST['targetdbname'];
 		error_log("Target database is $dbPrefix$targetdbname");
+        
+        // Avoid illegal chars in db name
+            $hasInvalid = isInValid($targetdbname);
+            if ($hasInvalid) {
+                echo ("<p><hr><p>&nbsp;<p>Requested database copy name: <b>$targetdbname</b>".
+                   "<p>Sorry, only letters, numbers and underscores (_) are allowed in the database name");
+                return false;
+            } // rejecting illegal characters in db name
+
 	 	straightCopyDatabase($targetdbname);
 	}
 

@@ -16,7 +16,7 @@
 -->
 <html>
 <head>
-<title>Edit record type title mask</title>
+<title>Record-type title mask</title>
 
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
@@ -66,31 +66,44 @@ body {
 		<script type="text/javascript" src="../../admin/structure/editRectypeTitle.js"></script>
 
 		<div style="position:absolute;top:0px;bottom:0px;left:0px;width:202px;">
-		<div>&nbsp;<br>Select fields then click Insert<br>(add fields to record structure first)<br>&nbsp;<br></div>
-		<div style="position:absolute;top:40px;bottom:10px;left:0px;width:200px;overflow-y:scroll;">
+		<div align="left">&nbsp;<br>Select fields to insert<br>(add to record structure first)<br>&nbsp;<br></div>
+		<div style="position:absolute;top:50px;bottom:10px;left:0px;width:200px;overflow-y:scroll;">
 				<div id="varsTree" class="ygtv-checkbox"></div>
 		</div>
 		</div>
 	<div id="formContainer" style="position:absolute;top:0px;bottom:0px;left:202px;right:5px;">
 
-		<div style="padding:10px;">
-		Mask to build a composite title from fields (see manual).
-        The title mask is a string into which field values are inserted to create an extended title for the record, e.g. [Title], pp. [Start_Page]-[End_Page] renders the Title field and start and end page fields as in "Alice in Wonderland, pp. 37-39". The element names in square brackets should match field names for this record type. The constructed value is used as the extended title displayed in search results and other lists. To insert a literal square-bracket, use two consecutive square-brackets ([[ or ]]).
+		<div style="padding:10px;" align="left">
+		The title mask builds a composite title from fields in the record (see manual).
+        Field values identified by [ ] are inserted into the mask,
+        e.g. <b>[Title], pp. [Start_Page]-[End_Page] </b> might generate:
+        <b>"Alice in Wonderland, pp. 37-39" </b><br>&nbsp;<br>
+        The element names in square brackets should match field names for this record type.<br>
+        The constructed value is used as the extended title displayed in search results and other lists.<br>
+        To insert a literal square-bracket, use two consecutive square-brackets ([[ or ]]).
    		</div>
-		<div style="padding-top:5px;padding-bottom:10px;padding-left: 20px;">
-			<button onclick="onTest()" style="width:100px;">Test with record</button>&nbsp;&nbsp;<select id="listRecords" style="width:400px;"><option>select record (if any of this type exist) on which to test the result ...</option></select>
-		</div>
-		<div style="padding-left: 20px";>
-			<div id="testResult" title="Test result will appear in this box"  style="padding-left:10px; padding:5px; width: 500px; height: 10px; border: blue 1px dashed;"></div>
-		</div>
-		<div style="padding-top: 20px; padding-left: 20px;">
-        	<button onclick="onInsert()" style="width:100px;">Insert fields</button><br>&nbsp;<br>Mask:&nbsp;<input maxlength="500" id="rty_TitleMask" style="width:400;"/>
-		</div>
 
-		<div style="text-align:center; padding-top:10px; padding-left: 60px;">
-			<button onclick="onSave()">Save</button>
-			<button onclick="window.close(null)">Cancel</button>
+		<div style="padding-top: 10px; padding-left: 10px;" align="left">
+        	<button onclick="onInsert()" style="width:60px;">Insert fields</button>
+            <br>
+        </div>
+
+		<div style="text-align:left; padding-top:10px; padding-left: 10px;" >
+            Mask:&nbsp;
+            <input maxlength="500" id="rty_TitleMask" style="width:350;"/> &nbsp;&nbsp;
+			<button style="width:60px;" onclick="onSave()">Save mask</button>&nbsp;&nbsp;
+			<button style="width:60px;" onclick="window.close(null)">Cancel</button>
+            <br>&nbsp;<br>&nbsp;<br>
 		</div>
+        
+        <hr>
+
+        <div style="padding-top:5px;padding-bottom:10px;padding-left: 20px;" align="left">
+            <b>Test mask</b> <br>&nbsp;<br>
+            <select id="listRecords" style="width:300px;"><option>select from records of this type (if any exist) ...</option></select>
+            <br>&nbsp;<br><button onclick="onTest()" style="width:40px;">Test</button>
+            <div id="testResult" title="Test result will appear here"  style="padding-left:40px; padding:5px; width: 400px; height: 10px; align: left"></div>
+        </div>
 	</div>
 
 

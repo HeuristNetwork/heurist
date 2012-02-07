@@ -371,7 +371,7 @@ function EditRectypeTitle() {
 			insertAtCursor(textedit, _text);
 			_varsTree.render();
 		}else{
-			alert('No one variable is selected');
+			alert('You must select a field for insertion');
 		}
 
 		var textedit = Dom.get("rty_TitleMask");

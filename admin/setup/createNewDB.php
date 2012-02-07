@@ -62,15 +62,21 @@
 
 		<div id="createDBForm" style="display:<?=$passwordForDatabaseCreation==''?'block':'none'?>;">
 			<form action="createNewDB.php?db=<?= HEURIST_DBNAME ?>" method="POST" name="NewDBName">
-				<p>New databases are created on the current server.<br>
+				<p>New database creation takes 10 - 20 seconds. New databases are created on the current server.<br>
 					You will become the owner and administrator of the new database.<br>
 					The database will be created with the prefix "<?= HEURIST_DB_PREFIX ?>"
 				(all databases created by this installation of the software will have the same prefix).</p>
 				<h3>Enter a name for the new database:</h3>
-				<div style="margin-left: 40px;">
+                <div style="margin-left: 40px;">
+                    <!-- user name used as prefix -->
+                    <b><?= HEURIST_DB_PREFIX ?>
+                    <input type="text" maxlength="20" size="6" name="uname" 
+                    style="padding-left:3px; font-weight:bold;" value=<?=substr(get_user_username(),0,5)?> > 
+                    _  </b>
 					<input type="text" maxlength="64" size="25" name="dbname">
 					<input type="submit" name="submit" value="Create database" style="font-weight: bold;" >
-				</div>
+				<p>The user name prefix is editable, and may be blank, but we suggest using a consistent prefix for personal databases<br> so that all your personal databases appear together in the list of databases<p></p>
+                </div>
 				<br /><br />
 				<div id="loading" style="display:none"><img src="../../common/images/mini-loading.gif" width="16" height="16" /> <strong>&nbspCreating database, please wait...</strong></div>
 			</form>
@@ -134,8 +140,9 @@
 			} // checking for current administrative user
 
 			// Create a new blank database
-			$newDBName = $_POST['dbname'];
-			$newname = HEURIST_DB_PREFIX . $newDBName; // all databases have common prefix
+            $newDBName = $_POST['dbname'];
+            $usrPrefix = $_POST['uname'];
+			$newname = HEURIST_DB_PREFIX . $usrPrefix . '_' . $newDBName; // all databases have common prefix then user prefix
 
 			// Avoid illegal chars in db name
 			$hasInvalid = isInValid($newname);
@@ -310,23 +317,22 @@
 				$warnings = 1;
 				}
 
-
-
-			// Make the current user the owner and admin of the new database
+            // Prepare to write to the newly created database
 			mysql_connection_db_insert($newname);
 
-			/*ARTEM: WHO COMMITTED IT?!!!!
-			$query="update sysIdentification set (sys_hmlOutputDirectory,sys_htmlOutputDirectory
-
-			!!!!!!!!! to do
-
+            // Update file locations
+			$query='update sysIdentification 
+                set sys_hmlOutputDirectory = "$uploadPath/hml-output", 
+                sys_htmlOutputDirectory = "$uploadPath/html-output"';
   			mysql_query($query);
 			if ($warnings == 1) {
 				echo "<h2>Please take note of warnings above</h2>";
-				echo "Unable tyo update sysIdentification table - please go to DBAdmin > Databases > Properties & Advanced Properties and check the path".
-				" to the upload, hml and html directroies";
-			}*/
+				echo "Unable to update sysIdentification table - please go to DBAdmin > Databases > Properties &".
+				" Advanced Properties, and check the path to the upload, hml and html directories";
+			}
 
+
+            // Make the current user the owner and admin of the new database
 			mysql_query('UPDATE sysUGrps SET ugr_LongName="'.$longName.'", ugr_FirstName="'.$firstName.'",
 			ugr_LastName="'.$lastName.'", ugr_eMail="'.$eMail.'", ugr_Name="'.$name.'",
 			ugr_Password="'.$password.'", ugr_Department="'.$department.'", ugr_Organisation="'.$organisation.'",
