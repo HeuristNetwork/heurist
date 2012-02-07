@@ -308,7 +308,7 @@ div#loadingCover.On {
 	background-image: url(../images/loading-animation-white.gif);
 	background-repeat: no-repeat;
 	background-position:50%;
-	z-index:1000000;
+	z-index:3;
 
 }
 #coverall {
@@ -537,8 +537,8 @@ a#dbSearch-link div#dbname:hover {padding-right:10px; background-color:RGBA(100,
 }
 * #my-records-button:hover, * #all-records-button:hover, * #web-search-link:hover, .button:hover{color :#000;}
 
-body.w-all #my-records-button, body.w-bookmark #all-records-button {color:#666;}
-body.w-all #all-records-button, body.w-bookmark #my-records-button {color:#000;}
+body.w-all #my-records-button, body.w-bookmark #all-records-button {color:#666;top:20px}
+body.w-all #all-records-button, body.w-bookmark #my-records-button {color:#000;top:0px;}
 
 .outline {border:1px solid #999;padding:0 10px 0 5px;background-image:url("../images/backgrounds/banner_bg_dark.png");background-position:bottom;display:inline-block;height: 22px;/* overflow: hidden; */vertical-align:middle;}
 #my-records-saved-searches, #all-records-saved-searches, #workgroup-saved-searches, .relType {padding: 0 0px 0px 0px;background-color: none;background-image:url(../images/heading_saved_search.png);background-position:left top;background-repeat:no-repeat;}
@@ -628,7 +628,7 @@ input { padding: 0; margin: 0; }
 #add_records_footer a img {vertical-align: text-bottom;}
 .tab {background-color: #ECF1FB !important;} /* to match tabs in edit */
 #rectype-val {left:2ex;position:relative;top:2.5ex;}
-#masthead {position:absolute; left:0;right:0;z-index:1}
+#masthead {position:absolute; left:0;right:0;z-index:4}
 #mainbody {
 	position:absolute;
 	top:97px;
@@ -930,3 +930,13 @@ body.is-not-logged-in #my-records-button.logged-in-only ,body.is-not-logged-in #
 }
 body.is-not-logged-in div.not-logged-in-only {
 	display: block;
+}
+.externalLink {
+	width:16px;
+	height:16px;
+	display:inline-block;
+	background-image: url("../images/jump.png");
+}
+.externalLink:hover {
+	background-image: url("../images/jump_white.png");
+}

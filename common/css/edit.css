@@ -590,13 +590,14 @@ div.temporal-div input.temporal-button:hover {
 	display:table-cell
 }
 .input-row.required div.input-header-cell {
-	color: #354F75;
+/*	color: #354F75;
+*/	color: #CC0000;
 	font-weight: bold;
 }
-.input-row.required div.input-header-cell:before {
+/*.input-row.required div.input-header-cell:before {
 	content: "* ";
-	color:red;
-}
+	color:#CC0000;
+}*/
 .input-row.recommended div.input-header-cell {
 	color: #354F75;
 	font-weight: bold;
@@ -614,7 +615,7 @@ div.temporal-div input.temporal-button:hover {
 input#tags, .input-cell .in, .input-cell .resource-title, .in, .input-row input:not([type="submit"]) {
 	font-size:2ex;
 	background:none repeat scroll 0 0 #FFF;
-	border:medium none;
+	border:1px solid rgba(0, 0, 0, 0.2);
 	margin:2px 0;
 	padding:3px;
 }
@@ -622,9 +623,10 @@ input#tags {
 	min-width :80ex;
 }
 input.resource-title, input.file-select, input[type="file"] {
-	background-color:RGBA(255,255,255,0.5) !important;
+	background: transparent !important;
 	border-color:RGBA(255,255,255,0);
 	color:#6A7C99;
+	border:1px solid rgba(0, 0, 0, 0.2) !important
 }
 .input-cell textarea.in {
 	height:9ex;

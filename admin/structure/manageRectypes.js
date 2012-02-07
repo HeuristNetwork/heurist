@@ -392,7 +392,7 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 			{ key: "status", label: "Status", sortable:true, className:'center', minWidth:40, maxAutoWidth:40, width:40,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var str = oRecord.getData("status");
-					if (str === "reserved"){ 
+					if (str === "reserved"){
 							rectypeStatus = "<img src=\"../../common/images/lock_bw.png\" title=\"Status: "+str+" - Locked\">";
 						}else{
 							rectypeStatus = "<a href=\"#delete\"><img src=\"../../common/images/cross.png\" border=\"0\" title=\"Status: "+str+" - Delete\"/><\/a>";
@@ -1284,8 +1284,8 @@ function _upload_icon(rectypeID,mode) {
 		top.HEURIST.util.popupURL(top, sURL, {
 			"close-on-blur": false,
 			"no-resize": false,
-			height: (mode==0?120:200),
-			width: 340,
+			height: (mode==0?200:250),
+			width: 350,
 			callback: icon_refresh(rectypeID)
 		});
 

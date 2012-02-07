@@ -1119,6 +1119,7 @@ div.hide .saved-search-subheading {
 	border-left: 1px solid rgba(150, 150, 150, 0.3);
 	display: inline-block;
 	padding: 0 0 0 8px;
+	margin-left:133px;
 }
 .shadow {
 	-webkit-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
@@ -2191,6 +2192,7 @@ div.recorddiv:hover > #recordID {
 .recordTitle img.daysbad {
 	height:11px;
 	width:auto;
+	display:none;
 }
 #pageNavCount {
 	height: 7px;
@@ -2233,10 +2235,50 @@ div.recorddiv:hover > #recordID {
 #prev_page a img, #next_page a img {
 	vertical-align:top
 }
-.searchButtons {
-	display:inline-block;
+#searchButtons.collapsed {
+	height: 18px;
+	max-height:18px;
+}
+#searchButtons {
+	max-height:40px;
+	height:40px !important;
+	background-color: #F2F2F2 !important;
+	top: 6px;
+	position: absolute;
+	left: 498px;
+	z-index:10;
+	padding:0 !important;
+	display:block;
 	white-space:nowrap;
 	text-align:right;
+	width: 120px;
+	overflow: hidden;
+}
+
+#searchButtons .searchButtonsTrigger {
+	background-image: url("../images/blue-down-triangle.png");
+	height: 43px;
+	top: 0;
+	background-position: 3px 2px;
+	background-repeat: no-repeat;
+	border-left: 1px solid #CCC;
+	position: absolute;
+	right: 0;
+	width: 20px;
+}
+#searchButtons .searchButtonsTrigger.collapsed {
+	background-image: url("../images/blue-up-triangle.png");
+}
+.searchButtons input#my-records-button, .searchButtons input#all-records-button{
+	display:block !important;
+	margin:0;
+	border:none !important;
+	width:100px;
+	position:absolute;
+	left:0;
+	border-radius:0px !important;
+	text-align: left;
+	text-indent: 3px;
 }
 #result-header {
 	position:relative;

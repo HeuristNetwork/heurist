@@ -189,6 +189,11 @@ top.HEURIST.search = {
 		if (!$("#simple-search").hasClass("collapsed")) {
 			$("#simple-search").toggleClass("collapsed");
 			$("div.simplesearch").toggleClass("collapsed");
+
+		}
+		if (!$("#searchButtons").hasClass("collapsed")) {
+			$("#searchButtons").toggleClass("collapsed");
+			$("div.searchButtonsTrigger").toggleClass("collapsed");
 		}
 		top.HEURIST.search.loadSearch();
 	},
@@ -3135,11 +3140,12 @@ top.HEURIST.search = {
 	},
 
 	fixDuplicates: function() {
-		var bib_ids = top.HEURIST.search.getSelectedRecIDs().get();
-		if (bib_ids.length < 2 ) {
-			alert("Select at least two records to merge duplicate records");
-		} else {
-			window.location.href = top.HEURIST.basePath+"admin/verification/combineDuplicateRecords.php?bib_ids=" + bib_ids.join(",") + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
+	var bib_ids = top.HEURIST.search.getSelectedRecIDs().get();
+	if (bib_ids.length < 2 ) {
+		alert("Select at least two records to merge duplicate records");
+	} else {
+		var dim = top.HEURIST.util.innerDimensions(window);
+		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+"admin/verification/combineDuplicateRecords.php?bib_ids=" + bib_ids.join(",") + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""), {height:dim.h*0.6, width:dim.w*0.6, "no-help":true});
 		}
 	},
 

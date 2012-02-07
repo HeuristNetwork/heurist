@@ -300,11 +300,12 @@
 						</div>
 
 					</div>
-					<div class="searchButtons">
+					<div class="searchButtons button collapsed" id="searchButtons">
+						<div class="searchButtonsTrigger" onclick='$("#searchButtons").toggleClass("collapsed");$(this).toggleClass("collapsed");'></div>
 						<input id=my-records-button type=button value="my bookmarks" title="Search only records which have been bookmarked by you" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();" class="logged-in-only">
 						<input id=all-records-button type=button value="all records"  title="Search across all records in Heurist" onClick="document.getElementById('w-input').value = 'all'; top.HEURIST.search.submitSearchForm();">
-						<span id="add-record"><input id=add-record-link value="Add New Record" title="Add a new record to the Heurist database, setting record type and ownership" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/addRecordPopup.php'); return false;" class="logged-in-only" >
-					</span></div>
+						</div>
+					<span id="add-record"><input id=add-record-link value="Add New Record" title="Add a new record to the Heurist database, setting record type and ownership" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/addRecordPopup.php'); return false;" class="logged-in-only" ></span>
 				</form>
 
 				<div id="viewTriggers">

@@ -69,7 +69,7 @@
 <?php	} else if ($failure_msg) { ?>
   <div class="failure"><?= $failure_msg ?></div>
 <?php	} else { ?>
-  <div>Uploaded image will be scaled to <?=$dim?>x<?=$dim?></div>
+  <div style="padding:10px 0">Uploaded image will be scaled to <?=$dim?>x<?=$dim?></div>
 <?php	} ?>
 
   <form action="uploadRectypeIcon.php?db=<?= HEURIST_DBNAME?>" method="post" enctype="multipart/form-data" border="0">
@@ -82,7 +82,7 @@
     	<div class="input-header-cell">Select new image</div>
         <div class="input-cell"><input type="file" name="new_icon" style="display:inline-block;"></div>
    </div>
-   <div class="actionButtons" style="padding-left:100px">
+   <div class="actionButtons" style="position:absolute; right:10px; bottom:10px">
    		<input type="button" onClick="window.document.forms[0].submit();" value="Upload" style="margin-right:10px">
    		<input type="button" value="Close window" onClick="window.close(null);"></div>
    </div>

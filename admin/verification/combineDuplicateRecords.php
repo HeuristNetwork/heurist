@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream:admin/verification/combineDuplicateRecords.php
 <?php
 
 /**
