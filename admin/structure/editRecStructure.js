@@ -90,7 +90,7 @@ function EditRecStructure() {
 
 
 			_rty_Status = typedef[ top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_Status];
-			_isReserved = (_rty_Status==='reserved') || (_rty_Status==='approved');
+			_isReserved = (_rty_Status==='reserved'); // || (_rty_Status==='approved');
 
 			//clear _updatedDetails and _updatedFields
 			_clearUpdates();
@@ -216,7 +216,7 @@ function EditRecStructure() {
 				formatter: function(elLiner, oRecord, oColumn, oData){
 					var status = oRecord.getData('rst_Status');
 					var isRequired = (oRecord.getData('rst_RequirementType')==='required');
-					if ( (_isReserved && isRequired) || status === "reserved" || status === "approved"){
+					if ( (_isReserved && isRequired) || status === "reserved"){ // || status === "approved"
 						statusLock  = '<img src="../../common/images/lock_bw.png" title="Detail locked" />';
 					}else{
 						statusLock = '<a href="#delete"><img src="../../common/images/cross.png" width="12" height="12" border="0" title="Remove detail" /><\/a>';
@@ -700,7 +700,7 @@ function EditRecStructure() {
 		}
 
 		var status = values[top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_Status];
-		var isReserved = (status === "reserved" || status === "approved");
+		var isReserved = (status === "reserved");// || status === "approved");
 
 		if (((dbId>0) && (dbId<1001) && (original_dbId===dbId)) || isReserved)
 		{
@@ -841,6 +841,19 @@ function EditRecStructure() {
 				var arrs = detTypes[dty_ID].commonFields;
 				//add new detail type
 
+				var def_width = 60;
+				var dt_type = arrs[fi.dty_Type];
+				if(dt_type === "file" || dt_type === "geo") {
+                    def_width = 40;
+				}else if (dt_type === "enum" || dt_type === "relationtype") {
+                    def_width = 20;
+				}else if (dt_type === "integer" || dt_type === "float" || dt_type === "year" ||
+							dt_type === "date" || dt_type === "calculated") {
+                    def_width = 10;
+				}else if (dt_type === "boolean") {
+                    def_width = 4; break;
+				}
+
 				var arr_target = new Array();
 				arr_target[rst.rst_DisplayName] = arrs[fi.dty_Name];
 				arr_target[rst.rst_DisplayHelpText] = arrs[fi.dty_HelpText];
@@ -849,7 +862,7 @@ function EditRecStructure() {
 				arr_target[rst.rst_RequirementType] = "optional";
 				arr_target[rst.rst_MaxValues] = "1";
 				arr_target[rst.rst_MinValues] = "0";
-				arr_target[rst.rst_DisplayWidth] = "60";
+				arr_target[rst.rst_DisplayWidth] = def_width;
 				arr_target[rst.rst_RecordMatchOrder] = "0";
 				arr_target[rst.rst_DisplayOrder] = order;
 				arr_target[rst.rst_DisplayDetailTypeGroupID] = "1";
@@ -873,7 +886,7 @@ function EditRecStructure() {
 					rst_DisplayName: arrs[fi.dty_Name],
 					dty_Type: arrs[fi.dty_Type],
 					rst_RequirementType: "optional",
-					rst_DisplayWidth: 40,
+					rst_DisplayWidth: def_width,
 					rst_MinValues: 1,
 					rst_MaxValues: 1,
 					rst_DefaultValue: "",
@@ -1403,7 +1416,7 @@ function onStatusChange(evt){
 
 	//If reserved, requirements can only be increased, nor can you change min or max values
 	var status = Dom.get(name+"_rst_Status").value;
-	var isReserved = (status === "reserved" || status === "approved");
+	var isReserved = (status === "reserved"); // || status === "approved");
 	Dom.get(name+"_rst_MinValues").disabled = isReserved;
 	Dom.get(name+"_rst_MaxValues").disabled = isReserved;
 	var sel = Dom.get(name+"_Repeatability");
@@ -1449,7 +1462,7 @@ function onReqtypeChange(evt){
 		Dom.setStyle(span_min, "visibility", "hidden");
 
 		var status = Dom.get(name+"_rst_Status").value;
-		Dom.get(name+"_Repeatability").disabled = (!(status === "reserved" || status === "approved"));
+		Dom.get(name+"_Repeatability").disabled = (!(status === "reserved"));// || status === "approved"));
 	}
 
 	if(el.value !== "forbidden"){

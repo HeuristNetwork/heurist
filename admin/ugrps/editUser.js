@@ -130,7 +130,7 @@ function UserEditor() {
 						el.onchange = _onChangeEnable;
 					}
 
-					_toggleAll(!el.checked, true);
+					//Ian's request 2012-02-07 _toggleAll(!el.checked, true);
 				}else{
 					el.value = _entity[i];
 					el.readOnly = !_isAdmin;
@@ -333,12 +333,12 @@ function UserEditor() {
 	* enable checkbox listener
 	*/
 	function _onChangeEnable(e){
-
+/* IAN's request 2012-02-07
 		var el = e.target;
 		if(!el.checked) {
 			var changeToDisabled = confirm("If you change user to disabled," +
 											" you will no longer be able to change any "+
-											"fields of this group after you save it.\n\nAre you sure?");
+											"fields of this user after you save it.\n\nAre you sure?");
 			if(changeToDisabled) {
 					_toggleAll(true, true);
 			} else {
@@ -347,6 +347,7 @@ function UserEditor() {
 		} else {
 				_toggleAll(false, true);
 		}
+*/
 	}
 
 

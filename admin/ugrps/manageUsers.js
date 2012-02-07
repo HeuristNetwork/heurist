@@ -381,7 +381,7 @@ elLiner.innerHTML = '<a href="#edit_user"><img src="../../common/images/edit-pen
 					}
 				},*/
 				dropdownOptions: _roles },
-			{ key: "id", label: "Delete", width:30, className:'center', sortable:false, hidden:(_isSelection || !top.HEURIST.is_admin()),
+			{ key: "id", label: "Delete", width:30, className:'center', sortable:false, hidden:(_isSelection || !top.HEURIST.is_admin() ||  !Hul.isnull(_workgroups[_grpID]) ),
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 						if(Number(oRecord.getData('id'))===2){
 elLiner.innerHTML = "<img src=\"../../common/images/lock_bw.png\" title=\"System user - Locked\">";

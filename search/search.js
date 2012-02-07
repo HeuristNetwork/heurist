@@ -52,8 +52,8 @@ var _TAB_MAP = 1,
 top.HEURIST.search = {
 	VERSION: "1",
 
-	currentSearchQuery_all:null, //keeps current search query to use it in mapMenu (publish map)
-	currentSearchQuery_sel:null,
+	//currentSearchQuery_all:null, //keeps current search query to use it in mapMenu (publish map)
+	//currentSearchQuery_sel:null,
 	pageLimit: 5000,
 	resultsPerPage: top.HEURIST.util.getDisplayPreference("results-per-page"),
 	currentPage: 0,
@@ -2227,7 +2227,7 @@ top.HEURIST.search = {
 
 			if(p["q"]){
 				query_string = 'ver='+(p['ver'] || "") +
-									'&w='+(p['w'] || "") +
+									'&w=all'+   //(p['w'] || "") +
 									'&stype='+(p['stype'] || "");
 			}
 
@@ -2247,15 +2247,15 @@ top.HEURIST.search = {
 
 			//all visible records
 			recIDs = [];
-			for(var i=0; i<4; i++){
-				var resultsDiv = document.getElementById("results-level"+i);
+			for(var ilevel=0; ilevel<4; ilevel++){
+				var resultsDiv = document.getElementById("results-level"+ilevel);
 				if (resultsDiv &&
-					( (i===0) || !resultsDiv.className.match(/collapsed/) ))
+					( (ilevel===0) || !resultsDiv.className.match(/collapsed/) ))
 				{  //visible
 
 					$('.recordDiv',resultsDiv).each( function(i,recDiv){
 
-						if($(recDiv).hasClass('lnk') && !$(recDiv).hasClass('filtered')){
+						if( ((ilevel===0) || $(recDiv).hasClass('lnk')) && !$(recDiv).hasClass('filtered')){
 							var recID = $(recDiv).attr('recID');
 							recIDs.push(recID);
 						}
@@ -2273,8 +2273,8 @@ top.HEURIST.search = {
 			var currentSearchQuery =
 					(top.HEURIST.util.getDisplayPreference("showSelectedOnlyOnMapAndSmarty")=="selected")
 								?query_string_sel :query_string_all;
-			top.HEURIST.search.currentSearchQuery_all = query_string_all;
-			top.HEURIST.search.currentSearchQuery_sel = query_string_sel;
+			//top.HEURIST.search.currentSearchQuery_all = query_string_all;
+			//top.HEURIST.search.currentSearchQuery_sel = query_string_sel;
 
 			top.HEURIST.currentQuery_all = query_string_all;
 			top.HEURIST.currentQuery_sel = query_string_sel;
@@ -3142,6 +3142,20 @@ top.HEURIST.search = {
 			window.location.href = top.HEURIST.basePath+"admin/verification/combineDuplicateRecords.php?bib_ids=" + bib_ids.join(",") + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
 		}
 	},
+
+    fixDuplicatesPopup: function() {
+		var rec_ids = top.HEURIST.search.getSelectedRecIDs().get();
+		if (rec_ids.length < 2 ) {
+            alert("Select at least two records to identify/merge duplicate records");
+            return;
+        }
+        top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "admin/verification/combineDuplicateRecords.php?bib_ids="
+            + rec_ids.join(",")
+            + (top.HEURIST.database && top.HEURIST.database.name ? "&db="
+            + top.HEURIST.database.name : ""),
+                        {callback : top.HEURIST.search.reloadSearch});
+    },
+
 
 	collectDuplicates: function() {
 		var params = window.HEURIST.parameters;

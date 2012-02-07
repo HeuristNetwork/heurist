@@ -2055,6 +2055,17 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 					);
 				}
 			});
+/*
+			HAPI.PJ.store("gigitiser_geo_object", input.value, {
+				callback: function(_, _, response) {
+					top.HEURIST.util.popupURL(
+						windowRef,
+						"digitizer/index.html?" + (response.success ? "edit" : encodeURIComponent(input.value)),	// FIXME: need to map this to new location of gigitiser
+						{ callback: function(type, value) { thisRef.setGeo(newDiv, value? (type+" "+value) : ""); } }
+					);
+				}
+			});
+*/
 		};
 
 	var editSpan = newDiv.appendChild(this.document.createElement("span"));

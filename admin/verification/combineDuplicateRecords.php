@@ -105,8 +105,9 @@
  </script>
 	<link rel=stylesheet href="../../common/css/global.css" media="all">
 	<link rel=stylesheet href="../../common/css/admin.css" media="all">
+	<title>Merging records</title>
 	</head>
-	<body class="popup">
+	<body class="popup" width="600" height="400">
 		<form>
 
 			<div>

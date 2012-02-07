@@ -187,11 +187,12 @@ function DetailTypeEditor() {
 			Dom.get("dty_Status").disabled = reserved;
 			Dom.get("dty_OrderInGroup").disabled = disable;
 			//Dom.get("dty_ShowInLists").disabled = disable;
-
+/* Ian's request 2012-02-07
 			Dom.get("termsPreview").disabled = disable;
 			Dom.get("btnSelTerms").disabled = disable;
 			Dom.get("btnSelRecType1").disabled = disable;
 			Dom.get("btnSelRecType2").disabled = disable;
+*/
 	}
 
 	function _preventSel(event){
