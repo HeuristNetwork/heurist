@@ -130,7 +130,7 @@ global $relRT;
 	$rct = _title_mask__get_rec_types();//$rt);
 //error_log("fieldname = $field_name and rt = $rt   ".array_key_exists($rt, $rct));
 	if (! array_key_exists($rt, $rct) ){
-		return "Title mask can be tested with the existing record type. Record type $rt not found";
+		return "Title mask cannot be tested with the existing record type. Record type $rt not found";
 	}
 
 	$dot_pos = strpos($field_name, '.');

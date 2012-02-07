@@ -210,7 +210,7 @@ function loadRecordDetails(&$record) {
 	while ($rd = mysql_fetch_assoc($res)) {
 		if (! @$details[$rd["dtl_DetailTypeID"]]) $details[$rd["dtl_DetailTypeID"]] = array();
 
-		if ( !$rd["dtl_DetailTypeID"] === "file" && $rd["dtl_Value"] === null ) continue;
+		if ( !$rd["dtl_DetailTypeID"] === "file" && $rd["dtl_Value"] === null ) continue;//TODO: check this for URLinclude, etc.
 
 		$detailValue = null;
 

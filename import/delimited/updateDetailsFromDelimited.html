@@ -71,7 +71,7 @@
 			function loadPointers( ) {
 				var i;
 				if (recStart >= fields.length){
-					showProcessSummary();
+					showProcessSummary();//we are done show the user what happened
 					return;
 				}
 				if (recStart > 0) {
@@ -148,6 +148,8 @@
 				var saver = new HSaver(
 				function(r) {
 //					console.debug("saved records" + r);    //FIXME  write code to valid field value and update fields array with success message
+					recStart = recEnd;
+					setTimeout(function(){loadPointers();},100);
 				},
 				function(r,e) {
 					alert("record save failed: " + e);     //FIXME write code to put error message in fields array.
@@ -344,9 +346,9 @@
 				//save the records to effect the changes
 				//console.debug("saving records " + savRecords);
 				HeuristScholarDB.saveRecords(savRecords, saver);
-				recStart = recEnd;
+//				recStart = recEnd;
 				//make a timer call letting this fucntion complete in order to unroll the stack.
-				setTimeout(function(){loadPointers();},100);
+//				setTimeout(function(){loadPointers();},100);
 			}
 
 
@@ -390,9 +392,64 @@
 			function showProcessSummary() {
 				var e = document.getElementById("process-div");
 				e.style.display = "none";
-				if (confirm("Would you like to use DetailUpdater for more updating?"))location.reload();
-			}
+				var p = document.getElementById("records-p");
+				p.innerHTML = "";
+				var table = document.createElement("table");
+				table.id = "detail-input-table";
+				tr = table.appendChild(document.createElement("tr"));
+				td = tr.appendChild(document.createElement("td"));
+				td.innerHTML = "row #"; //row number
+				td = tr.appendChild(document.createElement("td"));
+				td.innerHTML = "HRecord ID"; //record ID
+				td = tr.appendChild(document.createElement("td"));
+				td.innerHTML = "HDetail ID"; //HDetail ID
+				td = tr.appendChild(document.createElement("td"));
+				td.innerHTML = "Update Value(s)"; //value or list of values for a repeatable field
+				td = tr.appendChild(document.createElement("td"));
+				td.innerHTML = "Error and/or warnings"; // old value to replace
 
+				var errorsOrWarningExist = false;
+				for (var i = 0; i < fields.length; ++i) {
+					if(!isNaN(fields[i][0])) { //record input
+						//get the HRecord updated
+						recHR = HeuristScholarDB.getRecord(fields[i][0]);
+						if (! recHR) {
+							continue;
+						}else if (recHR.hasError() || recHR.hasWarning()) {
+							var tr = table.appendChild(document.createElement("tr"));
+							var td = tr.appendChild(document.createElement("td"));
+							td.innerHTML = i + 1; //row number
+							for (var j =0; j<3; j++) {
+								td = tr.appendChild(document.createElement("td"));
+								td.appendChild(document.createTextNode(fields[i][j]));
+							}
+							td = tr.appendChild(document.createElement("td"));
+							var errors = recHR.getError();
+							if (errors.length) {
+								errorsOrWarningExist = true;
+								para = document.createElement('pre');
+								para.innerHTML = "Error(s):\n" + errors.join(". \n");
+								td.appendChild(para);
+							}
+							var warnings = recHR.getWarning();
+							if (warnings.length) {
+								errorsOrWarningExist = true;
+								para = document.createElement('pre');
+								para.innerHTML = "Warning(s):\n" + warnings.join(". \n");
+								td.appendChild(para);
+							}
+						}
+					}
+				}
+				if (errorsOrWarningExist) {
+					p.appendChild(table);
+					e.style.display = "block";
+				} else {
+					if (confirm("SUCCESS!  " + fields.length + " entries processed. \n" +"Would you like to use DetailUpdater for more updating?")){
+						location.reload();
+					}
+				}
+			}
 
 			function showDetails(){
 				var e = document.getElementById("process-div");
@@ -413,7 +470,6 @@
 				td.innerHTML = "Update Value(s)"; //value or list of values for a repeatable field
 				td = tr.appendChild(document.createElement("td"));
 				td.innerHTML = "Old Value"; // old value to replace
-
 
 				// create rest of table filling it with the csv analysed data
 				for (var i = 0; i < fields.length; ++i) {
@@ -436,37 +492,6 @@
 			}
 			function popupFieldTypes(){
 				top.HEURIST.search.popupLink(top.HEURIST.baseURL+"admin/structure/manageDetailTypes.html?db="+top.HEURIST.database.name, "wide");
-			}
-
-			var arr = [],
-				dty_ID,
-				fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
-
-			//create datatable and fill it valurs of particular group
-			for (dty_ID in top.HEURIST.detailTypes.typedefs) {
-
-				if(!isNaN(Number(dty_ID)))
-				{
-					var td = top.HEURIST.detailTypes.typedefs[dty_ID];
-					var deftype = td.commonFields;
-					//only for this group and  visible in UI
-					if(Number(deftype[fi['dty_DetailTypeGroupID']])===Number(dtg_ID)){
-						var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
-						var iusage = (Hul.isnull(aUsage)) ? 0 : aUsage.length;
-						// add order in group, name, help, type and status,
-						// doc will be hidden (for pop-up)
-						// last 3 columns for actions
-						arr.push([dty_ID,
-								(Number(deftype[fi.dty_ShowInLists])===1),
-								deftype[fi.dty_OrderInGroup],
-								deftype[fi.dty_Name],
-								deftype[fi.dty_HelpText],
-								deftype[fi.dty_Type],
-								deftype[fi.dty_Status],
-								deftype[fi.dty_ExtendedDescription],
-								dtg_ID, iusage]);
-					}
-				}
 			}
 
 

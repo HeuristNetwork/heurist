@@ -603,7 +603,8 @@ var HRecord = function() {
 
 	var _readonly = false;
 	var _modified = true;
-
+	var _error = null;
+	var _warning = null;
 	// Strictly internal stuff
 	var _storageManager = null;	// the HStorageManager from which this record was loaded
 
@@ -820,7 +821,7 @@ var HRecord = function() {
 
 		// check validity of value
 		if (_type  &&  ! HDetailManager.isValidDetailValue(_type, detailType, detailValue)) {
-			throw new HValueException("in valid value ("+detailValue+") for field "+ detailType.getName()+" in " +_type.getName()+' record');
+			throw new HValueException("invalid value ("+detailValue+") for field "+ detailType.getName()+" in " +_type.getName()+' record');
 		}
 
 		// check repeatability, if we can (if the record type isn't set yet, there's nothing we can do)
@@ -1290,6 +1291,12 @@ var HRecord = function() {
 		return relatives;
 	};
 
+	this.hasError = function() { return _error && _error.length > 0 ? true : false };
+	this.getError = function() { return _error };
+	this.setError = function(err) { _error = err; }; //TODO add checking to ensure this is an array
+	this.hasWarning = function() { return _warning && _warning.length > 0 ? true : false };
+	this.getWarning = function() { return _warning };
+	this.setWarning = function(warn) { _warning = warn; }; //TODO add checking to ensure this is an array
 	this.isReadOnly = function() { return _readonly? true : false; };
 
 	this.isModified = function() { return _modified? true : false; };
@@ -1303,7 +1310,6 @@ var HRecord = function() {
 		}
 		return true;
 	};
-
 
 	this.toJSO = function() {
 		/* Create a JSO-representation of this record in HTTP POST format;
@@ -1475,7 +1481,7 @@ var HRecord = function() {
 		_notifications = notifications;
 		_comments = comments;
 	};
-	this.saveChanges = function(sm, id, version, bkmkID, title, detailIDs, notifyIDs, commentIDs, mDate) {
+	this.saveChanges = function(sm, id, version, bkmkID, title, detailIDs, notifyIDs, commentIDs, mDate, warnings) {
 		// Called internally by the HStorageManager to update the local HRecord when it is saved.
 		// We assume that (e.g.) the actual values of the details were saved alright,
 		// but we need to know what their IDs are in their respective tables.
@@ -1495,21 +1501,37 @@ var HRecord = function() {
 				tmpDetails.push([type, _details[type][i]]);
 			}
 		}
-		if ((! detailIDs  &&  tmpDetails.length > 0)  ||  (detailIDs  &&  tmpDetails.length !== detailIDs.length)) {
+		if ((! detailIDs.inserted  &&  tmpDetails.length > 0)  ||  (detailIDs.inserted  &&  tmpDetails.length !== detailIDs.inserted.length)) {
 			/* FIXME: an inconsistency from the server.  Should reload this record, huh. */
 			console.log("saveChanges: " + this.toString() + ": detailIDs / _details mismatch");
 		}
 
-		var detailTypeID, value;
-		for (i=0; i < tmpDetails.length; ++i) {
+		var detailTypeID;
+		for (i=0; i < tmpDetails.length; ++i) {// WARNING this code relies on the order of inserts to remain the same
 			detailTypeID = tmpDetails[i][0];
-			value = tmpDetails[i][1];
 			if (! _namedDetails[detailTypeID]) {
 				_namedDetails[detailTypeID] = {};
 			}
-			_namedDetails[detailTypeID][detailIDs[i]] = tmpDetails[i][1];
+			_namedDetails[detailTypeID][detailIDs.inserted[i]] = tmpDetails[i][1];
 		}
 		_details = [];
+
+		if (detailIDs.translatedIDs) { // we had to translate the id as the detail ID was bad but the user has changed the value
+			for (i=0; i < detailIDs.translatedIDs.length; i++) {
+				var oldID = detailIDs.translatedIDs[i];
+				var newID = detailIDs.translated[oldID]['new_bdID'];
+				var dtType = detailIDs.translated[oldID]['dtType'];
+				if (_namedDetails[dtType] && _namedDetails[dtType][oldID]) {
+					_namedDetails[dtType][newID] = _namedDetails[dtType][oldID]; // ok since the old ID's value was used to insert
+					delete _namedDetails[dtType][oldID];
+				}
+			}
+		}
+
+		if (warnings) {
+			_error = [];
+			_warning = warnings;
+		}
 
 		if (notifyIDs) {
 			for (i=0; i < notifyIDs.length; ++i) {
@@ -1573,7 +1595,6 @@ HAPI.inherit(HRecord, HObject);
 HRecord.getClass = function() { return "HRecord"; };
 HAPI.Record = HRecord;
 
-
 var HRelationship = function(primaryRecord, relationshipType, secondaryRecord) {
 	var that = this;
 
@@ -1618,7 +1639,6 @@ HRelationship.getRelationshipTypes = function() {
 	return HRelationship.RelationshipTypeType.getEnumerationValues();
 };
 HAPI.Relationship = HRelationship;
-
 
 var HNotes = function() {
 	/* Notes in Heurist have been a nasty, ugly, evil hack from the very beginning.
@@ -3112,18 +3132,31 @@ var HeuristScholarDB = new HStorageManager();
 		if (! response) {
 			errorString = "internal Heurist error";
 			if (saver  &&  saver.onerror) { callback = function() { saver.onerror(recordSet, errorString); }; }
-		}
-		else if (response.error) {
-			errorString = response.error;
+		} else if (response.error || recordSet.length == 1 && recordSet[0]['error']) {
+			errorString = response.error ? response.error : recordSet[0]['error'].join(',');
 			if (saver  &&  saver.onerror) { callback = function() { saver.onerror(recordSet, errorString); }; }
-		}
-		else {
+		} else {
 			for (i=0; i < recordSet.length; ++i) {
 				recordInfo = response.record[i];
-				recordSet[i].saveChanges(that, parseInt(recordInfo.bibID), recordInfo.version, parseInt(recordInfo.bkmkID), recordInfo.title, recordInfo.detail, recordInfo.notify, recordInfo.comment);
-				that.addRecordToCache(recordInfo.bibID, recordSet[i]);
+				if (recordInfo.error) { // save sent back an error and did not save this record
+					recordSet[i].setError(recordInfo.error);
+				}else{
+					recordSet[i].saveChanges(that, parseInt(recordInfo.bibID),
+												recordInfo.version,
+												parseInt(recordInfo.bkmkID),
+												recordInfo.title,
+												recordInfo.detail,
+												recordInfo.notify,
+												recordInfo.comment,
+												recordInfo.modified,
+												recordInfo.warning);
+					that.addRecordToCache(recordInfo.bibID, recordSet[i]);
+				}
 			}
 			for (i=0; i < recordSet.length; ++i) {
+				if (recordSet[i].hasError()) {
+					continue;
+				}
 				record = recordSet[i];
 
 				// saved a relationship ... make sure it's in the _relationshipCache

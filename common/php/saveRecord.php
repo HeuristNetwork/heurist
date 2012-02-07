@@ -36,20 +36,49 @@
 require_once(dirname(__FILE__)."/../../search/getSearchResults.php");
 require_once(dirname(__FILE__)."/../../common/php/utilsTitleMask.php");
 
+
+$msgInfoSaveRec = array(); //array for containing the warning and error information for the calling code.
+
+//utility function for recording an error message
+function errSaveRec($msg){
+	global $msgInfoSaveRec;
+	if (!@$msgInfoSaveRec['error']){
+		$msgInfoSaveRec['error'] = array($msg);
+	}else{
+		array_push($msgInfoSaveRec['error'],$msg);
+	}
+	mysql_query("rollback");
+}
+//utility function for recording an error message
+function warnSaveRec($msg){
+	global $msgInfoSaveRec;
+	if (!@$msgInfoSaveRec['warning']){
+		$msgInfoSaveRec['warning'] = array($msg);
+	}else{
+		array_push($msgInfoSaveRec['warning'],$msg);
+	}
+}
 // NOTE  tags are a complete replacement list of personal tags for this record and are only used if personalised is true
 // $modeImport - 0 no import, 1 - import and check structure, 2 - import as is (without check record type structure
 function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $pnotes, $rating, $tags, $wgTags, $details, $notifyREMOVE, $notifyADD, $commentREMOVE, $commentMOD, $commentADD, &$nonces=null, &$retitleRecs=null, $modeImport=0) {
-
+	global $msgInfoSaveRec;
+	$msgInfoSaveRec = array(); // reset the message array
+	mysql_query("start transaction");
+//	$log = " saving record ($recordID) ";
 	$recordID = intval($recordID);
 	$wg = intval($wg);
 	if ($wg || !is_logged_in()) {// non-member saves are not allowed
 		$res = mysql_query("select * from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=" . get_user_id() . " and ugl_GroupID=" . $wg);
-		if (mysql_num_rows($res) < 1) jsonError("invalid workgroup");
+		if (mysql_num_rows($res) < 1) {
+			errSaveRec("invalid workgroup, record save aborted");
+			return $msgInfoSaveRec;
+		}
 	}
 
 	$type = intval($type);
 	if ($recordID  &&  ! $type) {
-		jsonError("cannot change existing record to private note");
+		errSaveRec("cannot change existing record to private note, record save aborted");
+		return $msgInfoSaveRec;
 	}
 
 	if ($vis && (!in_array(strtolower($vis),array('hidden','viewable','pending','public')))){
@@ -59,6 +88,7 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 
 	// public records data
 	if (! $recordID) {
+//		$log .= "- inserting record ";
 		mysql__insert("Records", array(
 		"rec_RecTypeID" => $type,
 		"rec_URL" => $url,
@@ -70,23 +100,27 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 		"rec_Modified" => $now,
 		"rec_AddedByImport" => ($modeImport>0?1:0)
 		));
-		if (mysql_error()) jsonError("database write error - " . mysql_error());
-
+		if (mysql_error()) {
+			errSaveRec("database record insert error - " . mysql_error());
+			return $msgInfoSaveRec;
+		}
 		$recordID = mysql_insert_id();
 	}else{
 		$res = mysql_query("select * from Records left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_GroupID=rec_OwnerUGrpID and ugl_UserID=".get_user_id()." where rec_ID=$recordID");
 		$record = mysql_fetch_assoc($res);
-
 		if ($wg != $record["rec_OwnerUGrpID"] && $record["rec_OwnerUGrpID"] != get_user_id() ) {
 			if ($record["rec_OwnerUGrpID"] > 0  &&  $record["ugl_Role"] != "admin") {
 				// user is trying to change the workgroup when they are not an admin
-				jsonError("user is not a workgroup admin");
+				errSaveRec("user is not a workgroup admin");
+				return $msgInfoSaveRec;
 			} else if (! is_admin()) {
 				// you must be an database admin to change a public record into a workgroup record
-				jsonError("user does not have sufficient authority to change public record to workgroup record");
+				errSaveRec("user does not have sufficient authority to change public record to workgroup record");
+				return $msgInfoSaveRec;
 			}
 		}
 
+//		$log .= "- updating record ";
 		mysql__update("Records", "rec_ID=$recordID", array(
 		"rec_RecTypeID" => $type,
 		"rec_URL" => $url,
@@ -96,34 +130,40 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 		"rec_FlagTemporary" => 0,
 		"rec_Modified" => $now
 		));
-		if (mysql_error()) jsonError("database write error" . mysql_error());
+		if (mysql_error()) {
+			errSaveRec("database record update error - " . mysql_error());
+			return $msgInfoSaveRec;
+		}
 	}
 
 	// public recDetails data
 	if ($details) {
-		$bdIDs = doDetailInsertion($recordID, $details, $type, $wg, $nonces, $retitleRecs, $modeImport);
+//		$log .= "- inserting details ";
+		$dtlIDsByAction = doDetailInsertion($recordID, $details, $type, $wg, $nonces, $retitleRecs, $modeImport);
+		if (@$dtlIDsByAction['error']){
+			array_push($msgInfoSaveRec['error'],$dtlIDsByAction['error']);
+			return $msgInfoSaveRec;
+		}
 	}
 
 	// check that all the required fields are present
 	$res = mysql_query("select rst_ID, rst_DetailTypeID, rst_DisplayName from defRecStructure left join recDetails on dtl_RecID=$recordID and rst_DetailTypeID=dtl_DetailTypeID where rst_RecTypeID=$type and rst_RequirementType='required' and dtl_ID is null");
 	if (mysql_num_rows($res) > 0) {
-			//ARTEM TEST
-			$missed = "";
-			while ($row = mysql_fetch_row($res)) {
-					$missed = $missed.$row[2]." ";
-			}
+//		$log .= "- testing missing detatils ";
+		//ARTEM TEST
+		$missed = "";
+		while ($row = mysql_fetch_row($res)) {
+				$missed = $missed.$row[2]." ";
+		}
 //error_log("MISSED ".$missed);
 		// at least one missing field
-		jsonError("record is missing required field(s): ".$missed);
+		errSaveRec("record is missing required field(s): ".$missed);
+		return $msgInfoSaveRec;
 	}
-/* Override  code removed by SAW on 13/1/11
-	$res = mysql_query("select rst_ID from rec_detail_requirements_overrides left join recDetails on dtl_RecID=$recordID and rst_DetailTypeID=dtl_DetailTypeID where (rdr_wg_id = 0 or rdr_wg_id=$wg) and rdr_wg_id = rst_RecTypeID=$type and rst_RequirementType='required' and dtl_ID is null");
-	if (mysql_num_rows($res) > 0) {
-		// at least one missing field
-		jsonError("record is missing required field(s)");
-	}
-*/
+	mysql_query("commit");// if we get to here we have a valid save of the core record.
+
 	// calculate title, do an update
+//	$log .= "- filling titlemask ";
 	$mask = mysql__select_array("defRecTypes", "rty_TitleMask", "rty_ID=$type");  $mask = $mask[0];
 	$title = fill_title_mask($mask, $recordID, $type);
 
@@ -143,9 +183,14 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 		if (! $bkm_ID) {
 			// Record is not yet bookmarked, but we want it to be
 			mysql_query("insert into usrBookmarks (bkm_Added,bkm_Modified,bkm_UGrpID,bkm_recID) values (now(),now(),".get_user_id().",$recordID)");
-			if (mysql_error()) jsonError("database error - " . mysql_error());
-			$bkm_ID = mysql_insert_id();
+			if (mysql_error()) {
+				warnSaveRec("trying to create a bookmark - database error - " . mysql_error());
+			}else{
+				$bkm_ID = mysql_insert_id();
+			}
 		}
+
+//		$log .= "- updating bookmark ";
 
 		mysql__update("usrBookmarks", "bkm_ID=$bkm_ID", array(
 //		"pers_notes" => $pnotes,	//saw TODO: need to add code to place this in a personal woot
@@ -156,13 +201,16 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 		doTagInsertion($recordID, $bkm_ID, $tags);
 	} else if ($bkm_ID) {
 		// Record is bookmarked, but the user doesn't want it to be
+//		$log .= "- deleting bookmark ";
 		$query = "delete usrBookmarks, usrRecTagLinks ".
 					"from usrBookmarks left join usrRecTagLinks on rtl_RecID = bkm_recID ".
 					"left join usrTags on tag_ID = rtl_TagID ".
 					"where bkm_ID=$bkm_ID and bkm_recID=$recordID and bkm_UGrpID = tag_UGrpID and bkm_UGrpID=" . get_user_id();
 //error_log("saveRecord delete bkmk - q = $query");
 		mysql_query($query);
-		if (mysql_error()) jsonError("database error while removing bookmark- " . mysql_error());
+		if (mysql_error()) {
+			warnSaveRec("database error while removing bookmark- " . mysql_error());
+		}
 		//saw TODO: add code to remove other personal data reminders, personal notes (woots), etc.
 	}
 
@@ -181,8 +229,8 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 	if ($title) {
 		$rval["title"] = $title;
 	}
-	if (@$bdIDs) {
-		$rval["detail"] = $bdIDs;
+	if (@$dtlIDsByAction) {
+		$rval["detail"] = $dtlIDsByAction;
 	}
 	if (@$notifyIDs) {
 		$rval["notify"] = $notifyIDs;
@@ -190,6 +238,13 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 	if (@$commentIDs) {
 		$rval["comment"] = $commentIDs;
 	}
+	if (@$msgInfoSaveRec['warning']) {
+		$rval["warning"] = $msgInfoSaveRec['warning'];
+	}
+	if (@$msgInfoSaveRec['error']) {//should never get here with error set
+		$rval["error"] = $msgInfoSaveRec['error'];
+	}
+//	error_log($log);
 
 	return $rval;
 }
@@ -217,6 +272,14 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 	/* $retitleRecs : set of records whos titles could be out of date and need recalc */
 	// do a double-pass to grab the expected varieties for each bib-detail-type we encounter
 
+/*$details is the form
+*	$detailsb = array("t:1" => array("bd:234463" => "7th Ave"),
+*	,,,
+*					"t:11" => array("0" => "p POINT(-73.951172 40.805661)"));
+*	where t:id means detail type id  and bd:id means detail record id
+*	new details are array values without a preceeding detail ID as in the last line of this example
+*/
+
 	$types = array();
 	foreach ($details as $type => $pairs) {
 		if (substr($type, 0, 2) != "t:") continue;
@@ -228,10 +291,16 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 		//TODO saw: need to change this to include min value or perhaps we let it go and allow saving the min across multiple saves.
 			$repeats = mysql__select_assoc("defRecStructure", "rst_DetailTypeID", "rst_MaxValues", "rst_DetailTypeID in (" . join($types, ",") . ") and rst_RecTypeID=" . $recordType);
 	}
-
-	$updates = array();
-	$inserts = array();
-	$dontDeletes = array();
+//error_log("repeats = ".print_r($repeats,true));
+//error_log("details = ".print_r($details,true));
+	$updateIDs = array();
+	$updateQueries = array();
+	$insertQueryValues = array();
+	$badIdInsertQueryValues = array();
+	$deleteIDs = array();
+	$ignoreIDs = array();
+	$translated = array();
+	$translatedIDs = array();
 	foreach ($details as $type => $pairs) {
 
 		if (substr($type, 0, 2) != "t:") continue;	// skip any non t: or type designators
@@ -240,7 +309,20 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 		foreach ($pairs as $bdID => $val) {
 			if (substr($bdID, 0, 3) == "bd:") {// this detail corresponds to an existing recDetails: remember its existing dtl_ID
 				if (! ($bdID = intval(substr($bdID, 3)))) continue; // invalid id so skip it
-			}else {	// simple case: this is a new detail (no existing dtl_ID)
+				$resDtl = mysql_query("select dtl_DetailTypeID from recDetails where dtl_RecID = $recordID and dtl_ID = $bdID");
+				if (mysql_num_rows($resDtl) == 1){
+					$dtlTypeID = (mysql_fetch_row($resDtl));
+					if ($dtlTypeID[0] != $bdtID){// invalid type supplied so skip and give warning
+						warnSaveRec("invalid detail type supplied $bdtID, did not update detail id $bdID");
+						array_push($ignoreIDs,$bdID);
+						continue;
+					}
+				}else{// no existent dtl id so change this to insert and give warning.
+					warnSaveRec("detail id $bdID is not part of record $recordID, inserting new detail instead");
+					$oldBdID = $bdID;
+					$bdID = false; // fail test differently to identify different processing
+				}
+			}else {	// simple case: this is a new detail (no existing dtl_ID) it assumes an array index number
 				if ($bdID != intval($bdID)) continue;
 				$bdID = "";
 			}
@@ -248,7 +330,10 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 
 			$bdVal = $bdFileID = $bdGeo = "NULL";
 			if($modeImport!=2){ //import without check of record type structure
-				if ( ! array_key_exists($bdtID, $repeats)) continue; // detail type not allowed or hit limit
+				if ( ! array_key_exists($bdtID, $repeats)) {
+					error_log("hit limit for detail type $bdtID");
+					continue; // detail type not allowed or hit limit
+				}
 				if ($repeats[$bdtID] > 1) {
 					$repeats[$bdtID] = $repeats[$bdtID] - 1; // decrement to reduce limit count NOTE: assumes that all details are given to save
 				} else if ($repeats[$bdtID] == 1) {
@@ -258,17 +343,17 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 			switch ($typeVarieties[$bdtID]) {
 				case "integer":
 					if (intval($val)  ||  $val == "0") $bdVal = intval($val);
-					else { if ($bdID) array_push($dontDeletes, $bdID); continue; }
+					else { if ($bdID) array_push($updateIDs, $bdID); continue; }
 					break;
 
 				case "float":
 					if (floatval($val)  ||  preg_match('/^0(?:[.]0*)?$/', $val)) $bdVal = floatval($val);
-					else { if ($bdID) array_push($dontDeletes, $bdID); continue; }
+					else { if ($bdID) array_push($updateIDs, $bdID); continue; }
 					break;
 
 				case "freetext": case "blocktext":
 				case "date": case "year": case "urlinclude":
-					if (! $val) { if ($bdID) array_push($dontDeletes, $bdID); continue; }
+					if (! $val) { if ($bdID) array_push($updateIDs, $bdID); continue; }
 					$bdVal = "'" . addslashes($val) . "'";
 					break;
 
@@ -298,9 +383,10 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 							if (is_array($retitleRecs)) {
 								array_push($retitleRecs,$val);
 							}
-						}
-						else {
-							jsonError("invalid resource reference '".$val."'");
+						}else{
+							errSaveRec("invalid resource reference '".$val."' for detail type '".$bdtID);
+							return array("error" => "recordID = $recordID rectype = $recordType detailtype = $bdtID".
+													($bdID ? " detailID = $bdID":""));
 						}
 					}
 					//FIXME :saw  change this to check for superuser adn valid recID or valid and viewable record for current user.
@@ -312,7 +398,9 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 
 				case "file":
 					if (mysql_num_rows(mysql_query("select ulf_ID from recUploadedFiles where ulf_ID=".intval($val))) <= 0){
-						jsonError("invalid file pointer");
+						errSaveRec("invalid file pointer '".$val."' for detail type '".$bdtID);
+						return array("error" => "recordID = $recordID rectype = $recordType detailtype = $bdtID".
+												($bdID ? " detailID = $bdID":""));
 					}
 					$bdFileID = intval($val);
 					break;
@@ -324,7 +412,9 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 					$row = mysql_fetch_row($res);
 					if ($row[0]) {
 						// bad object!  Go stand in the corner.
-						jsonError("invalid geographic value");
+						errSaveRec("invalid geographic value '".$val."' for detail type '".$bdtID);
+						return array("error" => "recordID = $recordID rectype = $recordType detailtype = $bdtID".
+												($bdID ? " detailID = $bdID":""));
 					}
 					$bdVal = '"' . addslashes($geoType) . '"';
 					$bdGeo = "geomfromtext('".addslashes($geoVal)."')";
@@ -336,39 +426,99 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 
 				default:
 					// ???
-					if ($bdID) array_push($dontDeletes, $bdID);
+					if ($bdID) array_push($updateIDs, $bdID);
 					continue;
 			}
 
 			if ($bdID) {
-				array_push($updates, "update recDetails set dtl_Value=$bdVal, dtl_UploadedFileID=$bdFileID, dtl_Geo=$bdGeo where dtl_ID=$bdID and dtl_DetailTypeID=$bdtID and dtl_RecID=$recordID");
-				array_push($dontDeletes, $bdID);
-			}
-			else {
-				array_push($inserts, "($recordID, $bdtID, $bdVal, $bdFileID, $bdGeo,".($modeImport>0?1:0).")");
+				array_push($updateQueries, "update recDetails set dtl_Value=$bdVal, dtl_UploadedFileID=$bdFileID, dtl_Geo=$bdGeo where dtl_ID=$bdID and dtl_DetailTypeID=$bdtID and dtl_RecID=$recordID");
+				array_push($updateIDs, $bdID);
+			} else if ($bdID === false) { //bad bdID passed insert detail
+				array_push($badIdInsertQueryValues, "($recordID, $bdtID, $bdVal, $bdFileID, $bdGeo,".($modeImport>0?1:0).")");
+				$translated[$oldBdID] = array('val' => $val,'dtType' => $bdtID);
+				array_push($translatedIDs, $oldBdID);
+			}else {
+				array_push($insertQueryValues, "($recordID, $bdtID, $bdVal, $bdFileID, $bdGeo,".($modeImport>0?1:0).")");
 			}
 		}
 	}
 	//delete all details except the one that are being updated
-	$deleteDetailQuery = "delete from recDetails where dtl_RecID=$recordID";
-	if (count($dontDeletes)) $deleteDetailQuery .= " and dtl_ID not in (" . join(",", $dontDeletes) . ")";
-	mysql_query($deleteDetailQuery);
-	if (mysql_error()) jsonError("database error - " . mysql_error());
+	$deleteDetailIDsQuery = "select dtl_ID from recDetails where dtl_RecID=$recordID";
+	if (count($updateIDs)) $deleteDetailIDsQuery .= " and dtl_ID not in (" . join(",", $updateIDs) . ")";
+	if (count($ignoreIDs)) $deleteDetailIDsQuery .= " and dtl_ID not in (" . join(",", $ignoreIDs) . ")";
+	$resDel = mysql_query($deleteDetailIDsQuery);
+	if (mysql_error()) {
+		errSaveRec("db error while finding details to be deleted for record ID ".$recordID." error : ".mysql_error());
+		return array("error" => "recordID = $recordID rectype = $recordType ");
+	}
 
-	if (mysql_error()) jsonError("database error - " . mysql_error());
+	// find details to be deleted
+	if (mysql_num_rows($resDel)) {
+		while ($row = mysql_fetch_row($resDel)) {
+			array_push($deleteIDs, $row[0]);
+		}
+	}
+
+	/*	$retval is an array of arrays of detail ids
+	*	with an array for deletes, updates and inserts
+	*	if they occurred
+	*/
+	$retval = array();
+
+	if (count($ignoreIDs)) {
+		$retval["ignored"] = $ignoreIDs;
+	}
 	//update all details to be kept
-	foreach ($updates as $update) {
-		mysql_query($update);
-		if (mysql_error()) jsonError("database error - " . mysql_error());
+	if (count($deleteIDs)) {
+		$deleteDetailsQuery = "delete from recDetails where dtl_ID in (" . join(",", $deleteIDs) . ")";
+		mysql_query($deleteDetailsQuery);
+		if (mysql_error()) {
+			errSaveRec("db error while deleteing details (" . join(",", $deleteIDs) . ") for record ID ".$recordID." error : ".mysql_error());
+			return array("error" => "recordID = $recordID rectype = $recordType ");
+		}
+		$retval["deleted"] = $deleteIDs;
 	}
 
-	if (count($inserts)) {//insert all new details
-		mysql_query("insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, dtl_Geo, dtl_AddedByImport) values " . join(",", $inserts));
-		$first_bd_id = mysql_insert_id();
-		return range($first_bd_id, $first_bd_id + count($inserts) - 1);
-	}else{
-		return array();
+	//update all details to be kept
+	if (count($updateQueries)) {
+//		error_log("in DoInserts updating details ".print_r($updateQueries,true));
+		foreach ($updateQueries as $update) {
+			mysql_query($update);
+			if (mysql_error()) {
+				errSaveRec("db error while running '" . $update . "' for record ID ".$recordID." error : ".mysql_error());
+				return array("error" => "recordID = $recordID rectype = $recordType ");
+			}
+		}
+		$retval["updated"] = $updateIDs;
 	}
+
+	if (count($insertQueryValues)) {//insert all new details
+//		error_log("in DoInserts inserting details ".print_r($inserts,true));
+		mysql_query("insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, dtl_Geo, dtl_AddedByImport) values " . join(",", $insertQueryValues));
+		$first_bd_id = mysql_insert_id();
+		if (mysql_error()) {
+			errSaveRec("db error while inserting '" . $insertQueryValues . "' for record ID ".$recordID." error : ".mysql_error());
+			return array("error" => "recordID = $recordID rectype = $recordType ");
+		}
+		$retval["inserted"] = range($first_bd_id, $first_bd_id + count($inserts) - 1);
+	}
+
+	if (count($badIdInsertQueryValues)) {//insert all new details
+//		error_log("in DoInserts inserting details ".print_r($inserts,true));
+		$j = 0;
+		foreach ($badIdInsertQueryValues as $valueSet ) {
+			mysql_query("insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, dtl_Geo, dtl_AddedByImport) values " . $valueSet);
+			if (mysql_error()) {
+				errSaveRec("db error while inserting '" . $valueSet . "' for record ID ".$recordID." error : ".mysql_error());
+				return array("error" => "recordID = $recordID rectype = $recordType ");
+			}
+			$new_bdID = mysql_insert_id();
+			$translated[$translatedIDs[$j]]['new_bdID'] = $new_bdID;
+		}
+		$retval["translated"] = $translated;
+		$retval["translatedIDs"] = $translatedIDs;
+	}
+	return $retval;
 }
 
 function doTagInsertion($recordID, $bkmkID, $tagString) {
