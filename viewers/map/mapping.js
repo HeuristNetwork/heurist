@@ -314,7 +314,7 @@ ether_zoom = function(_band, ether, zoomIn) {
 				}
 			}
 
-			if (window["TimeMap"]) {
+			if (window["Timeline"]) {
 				M.initTMap(mini, bounds);
 			} else {
 

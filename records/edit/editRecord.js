@@ -2058,7 +2058,7 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 				alert("Geographic objects use Google Maps API, which doesn't work on this browser - sorry");
 				return;
 			}
-
+/*
 			HAPI.PJ.store("gigitiser_geo_object", input.value, {
 				callback: function(_, _, response) {
 					top.HEURIST.util.popupURL(
@@ -2068,7 +2068,7 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 					);
 				}
 			});
-/*
+*/
 			HAPI.PJ.store("gigitiser_geo_object", input.value, {
 				callback: function(_, _, response) {
 					top.HEURIST.util.popupURL(
@@ -2078,7 +2078,7 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 					);
 				}
 			});
-*/
+
 		};
 
 	var editSpan = newDiv.appendChild(this.document.createElement("span"));

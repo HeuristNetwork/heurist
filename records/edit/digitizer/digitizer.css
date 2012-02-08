@@ -1,0 +1,71 @@
+* {margin:0;padding:0;border:0;outline:0}
+#coords1 {
+    padding: 5px;
+    font-weight: normal;
+    width:130px;
+    height:320px;
+}
+#presenter {
+    opacity:0.7;
+    filter:alpha(opacity=70);
+    -ms-filter:alpha(opacity=70);
+    -moz-opacity:0.7;
+    KHTMLOpacity: 0.7;
+    MozOpacity: 0.7;
+    -khtml-opacity:.70;
+}
+#presenter {
+    position: absolute;
+    top: 160px;
+    left: 540px;
+    width: 523px;
+    height: 413px;
+    border: 2px solid #ccc;
+}
+/*
+#buttonrow {
+    position: absolute;
+    top: 50px;
+    left: 540px;
+    width: 505px;
+    height: 80px;
+    background-color: #ffffff;
+}
+*/
+#map {
+    position: absolute;
+    top: 30px;
+    left: 0px;
+    right: 135px;
+    bottom: 0px;
+    background-color: #ffffff;
+}
+
+#polygonstuff {
+    position: absolute;
+    top: 400px;
+    left: 5px;
+    width: 70px;
+    height: 60px;
+    background-color: #ff0000;
+    color: #ffffff;
+    visibility: hidden;
+}
+.topbutton {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    float: left;
+}
+#googlead {
+    margin: 0 auto;
+    width: 800px;
+    padding-top: 5px;
+}
+.label {
+	float: left;
+	text-align: right;
+	margin-right: 5px;
+	width: 80px;
+	padding-top: 5px;
+}
