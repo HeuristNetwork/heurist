@@ -78,15 +78,19 @@ Port [textbox : sys_eMailImapPort : : size=4] Protocol [textbox : sys_eMailImapP
 
 <div class="input-row">
 <div class="input-header-cell">Directory in which to write HTML representation of published records  </div>
-<div class="input-cell">[textbox : sys_hmlOutputDirectory : : size=30] blank = default directory</div>
+<div class="input-cell">[textbox : sys_hmlOutputDirectory : : size=30] full path, blank = default directory</div>
 </div>
 <div class="input-row">
 <div class="input-header-cell">Directory in which to write HML representation of published records  </div>
-<div class="input-cell">[textbox : sys_htmlOutputDirectory : : size=30]  blank = default directory </div>
+<div class="input-cell">[textbox : sys_htmlOutputDirectory : : size=30]  full path, blank = default directory </div>
 </div>
 <div class="input-row">
 <div class="input-header-cell">Additional folder(s) containing files for indexing (Picasa/FieldHelper compatibility)  </div>
 <div class="input-cell">[textbox : sys_MediaFolders : : size=30] (comma separated, child folders are included automatically)</div>
+</div>
+<div class="input-row">
+<div class="input-header-cell">File extensions to index (comma-separatd list)  </div>
+<div class="input-cell">[textbox : sys_MediaExtensions : : size=30] (comma separated)</div>
 </div>
 
 <div class="input-row">
