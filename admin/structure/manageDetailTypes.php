@@ -1,8 +1,7 @@
 <?php
 
 /**
-* manageDetailTypes.html
-* add/edit detailType
+* manageDetailTypes.php - display tabbed view of fields (detail types) and link to field type addition and editor
 * 2011-03-14
 * @autor: Artem Osmakov
 *

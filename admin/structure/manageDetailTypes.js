@@ -33,7 +33,7 @@ function DetailTypeManager() {
 	}};
 
 	var _updatesCnt = 0, //number of affected field types
-		_filterForAll = false,
+		_filterForAll = true,
 		_filterText = "",
 		_filterVisible = 0;
 
@@ -121,14 +121,11 @@ function DetailTypeManager() {
 			id: grpID,
 			label: "<label title='"+grpDescription+"'>"+grpName+"</label>",
 			content:
-			('<div>'+                   //for="filter"
-			'<div style="display:inline-block;"><label>Filter by name:</label>'+
-			'<input type="text" id="filter'+grpID+'" value="">'+
-			'&nbsp;&nbsp;'+
+			('<div><br>&nbsp;&nbsp;<b>'+ grpDescription + '</b><br>&nbsp;<hr style="width: 100%; height: 1px;"><p>'+ //for="filter"
+			'<div style="float:right; display:inline-block; margin-bottom: 10px;"><label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Filter by name:</label>'+
+			'<input type="text" id="filter'+grpID+'" value="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+
 			'<input type="checkbox"  id="filter'+grpID+'vis" value="1" style="padding-top:5px;">&nbsp;Show visible only&nbsp;&nbsp;'+
-			// todo: hide the following checkbox and make it true for all tabs so filter works across all of them
-			// todo: better still we need a search which will work across all tabs
-			'<input type="checkbox" id="filter_forall'+grpID+'" checked=true value="1" style="padding-top:5px;">&nbsp;Filter for all</div>'+
+            '</div>'+
 			'<div style="float:right; text-align:right">'+
 				'<label id="lblNoticeAboutChanges'+grpID+'" '+
 					'style="padding-left:3px; padding-right:3px; background-color:white; color:red; display: inline-block;"></label>'+
@@ -136,7 +133,7 @@ function DetailTypeManager() {
 				'<input id="btnSave'+grpID+'" type="button" value="Save Changes" '+
 							'style="color:red; display: none !important;"/>'+ //inline-block
 
-				'<input type="button" id="btnAdd'+grpID+'" value="New Field Type" style="float:right;" class="add"/>'+
+				'<input type="button" id="btnAdd'+grpID+'" value="Define New Field Type" style="float:right;" class="add"/>'+
 			'</div></div>'+
 			'<div id="tabContainer'+grpID+'"></div></div>')
 
@@ -236,7 +233,6 @@ function DetailTypeManager() {
 			_filterText = el1.value;
 			_filterVisible = el2.checked?1:0;
 		}
-		Dom.get('filter_forall'+dtg_ID).checked = _filterForAll;
 
 		//does not work var dt = Dom.get("datatable"+dtg_ID);
 
@@ -401,7 +397,7 @@ function DetailTypeManager() {
 					//containers: 'dt_pagination',
 
 					// use a custom layout for pagination controls
-					template: "{PageLinks} Show {RowsPerPageDropdown} per page",
+					template: "&nbsp;Page: {PageLinks} Show {RowsPerPageDropdown} per page",
 
 					// show all links
 					pageLinks: YAHOO.widget.Paginator.VALUE_UNLIMITED,

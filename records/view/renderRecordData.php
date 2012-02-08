@@ -441,10 +441,12 @@ function print_private_details($bib) {
 					if ($bd["val"] == "l"  &&  preg_match("/^LINESTRING[(]([^ ]+) ([^ ]+),.*,([^ ]+) ([^ ]+)[)]$/",$bd["dtl_Geo"],$matches)) {
 						list($dummy, $minX, $minY, $maxX, $maxY) = $matches;
 					}
-					$minX = intval($minX*10)/10;
+					/*   redundant
+                    $minX = intval($minX*10)/10;
 					$minY = intval($minY*10)/10;
 					$maxX = intval($maxX*10)/10;
 					$maxY = intval($maxY*10)/10;
+                    */
 
 					switch ($bd["val"]) {
 					  case "p": $type = "Point"; break;
@@ -456,9 +458,10 @@ function print_private_details($bib) {
 					}
 
 					if ($type == "Point")
-						$bd["val"] = "<b>Point</b> X ($minX) - Y ($minY)";
+						$bd["val"] = "<b>Point</b> ".round($minX,5).",".round($minY,5);
 					else
-						$bd['val'] = "<b>$type</b> X ($minX,$maxX) - Y ($minY,$maxY)";
+						$bd['val'] = "<b>$type</b> X ".round($minX,5).",".round($maxX,5).
+                                                 " Y ".round($minY,5).",".round($maxY,5);
 				} else {
 					$bd['val'] = output_chunker($bd['val']);
 				}

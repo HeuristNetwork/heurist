@@ -1954,14 +1954,14 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.setReadonly = functio
 	}
 };
 top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.geoValueToDescription = function(geo) {
-	function R(x) { return Math.round(x*10)/10; }
+	function R(x) { return Math.round(x*100000)/100000 ; } 
 
 	var geoSummary;
 	var geoType = geo.type.charAt(0).toUpperCase() + geo.type.substring(1);
 	if (geo.type == "point") {
-		geoSummary = "X ("+R(geo.x)+") - Y ("+R(geo.y)+")";
+		geoSummary = R(geo.x)+", "+R(geo.y);
 	} else {
-		geoSummary = "X ("+R(geo.minX)+","+R(geo.maxX)+") - Y ("+R(geo.minY)+","+R(geo.maxY)+")";
+		geoSummary = "X "+R(geo.minX)+" - "+R(geo.maxX)+"  Y "+R(geo.minY)+" - "+R(geo.maxY);
 	}
 
 	return { type: geoType, summary: geoSummary };
@@ -1980,12 +1980,13 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.wktValueToDescription
 	}
 
 	if (typeCode == "p") {
-		var Xp = Math.round(X[0]*10) / 10;
-		var Yp = Math.round(Y[0]*10) / 10;
-		return { type: "Point", summary: "X ("+Xp+") - Y ("+Yp+")" };
+		return { type: "Point", summary: round(X[0],5)+", "+round(Y[0],5)};
 	}
 	else if (typeCode == "l") {
-		return { type: "Path", summary: "X,Y ("+Math.round(X.shift()*10)/10+","+Math.round(Y.shift()*10)/10+") - ("+Math.round(X.pop()*10)/10+","+Math.round(Y.pop()*10)/10+")" };
+/*       DELETE THIS
+        return { type: "Path", summary: "X,Y ("+Math.round(X.shift()*100000)/100000+","+Math.round(Y.shift()*100000)/100000+") - ("+Math.round(X.pop()*100000)/100000+","+Math.round(Y.pop()*100000)/100000+")" };
+*/
+        return { type: "Path", summary: "X,Y ("+round(X.shift(),5)+","+Math.round(Y.shift(),5)+") - ("+Math.round(X.pop(),5)+","+Math.round(Y.pop(),5)+")" };
 	}
 	else {
 		X.sort();
@@ -1997,11 +1998,11 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.wktValueToDescription
 		else if (typeCode == "c") type = "Circle";
 		else if (typeCode == "l") type = "Path";
 
-		var minX = Math.round(X[0] * 10) / 10;
-		var minY = Math.round(Y[0] * 10) / 10;
-		var maxX = Math.round(X.pop() * 10) / 10;
-		var maxY = Math.round(Y.pop() * 10) / 10;
-		return { type: type, summary: "X ("+minX+","+maxX+") - Y ("+minY+","+maxY+")" };
+		var minX = X[0];
+		var minY = Y[0];
+		var maxX = X.pop();
+		var maxY = Y.pop();
+		return { type: type, summary: "X "+round(minX,5)+","+round(maxX,5)+" Y "+round(minY,5)+","+round(maxY,5) };
 	}
 };
 top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(bdValue) {

@@ -51,7 +51,7 @@ function RectypeManager() {
 
 
 	var _updatesCnt = 0, //number of affected rec types (visibility, group belong)
-		_filterForAll = false,
+		_filterForAll = true,
 		_filterText = "",
 		_filterVisible = 0;
 
@@ -129,7 +129,7 @@ function RectypeManager() {
 	//
 	function _addNewTab(ind, grpID, grpName, grpDescription)
 	{
-		if(!Hul.isempty(grpDescription)){
+		if(Hul.isempty(grpDescription)){
 			grpDescription = "Describe this group!";
 		}
 
@@ -139,11 +139,10 @@ function RectypeManager() {
 			id: grpID,
 			label: "<label title='"+grpDescription+"'>"+grpName+"</label>",
 			content:
-			('<div>'+                   //for="filter"
-			'<div style="display:inline-block;"><label>Filter by name:</label>'+
-			'<input type="text" id="filter'+grpID+'" value="">&nbsp;&nbsp;'+
+			('<div><br>&nbsp;&nbsp;<b>'+ grpDescription + '</b><br>&nbsp;<hr style="width: 100%; height: 1px;"><p>' + //for="filter"
+			'<div style="float:right; display:inline-block; margin-bottom: 10px;"><label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Filter by name:&nbsp;&nbsp;</label>'+
+			'<input type="text" id="filter'+grpID+'" value="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+
 			'<input type="checkbox" id="filter'+grpID+'vis" value="1" style="padding-top:5px;">&nbsp;Show active only&nbsp;&nbsp;'+
-			'<input type="checkbox" id="filter_forall'+grpID+'" value="1" style="padding-top:5px;">&nbsp;Apply for all groups'+
 			'</div>'+
 			'<div style="float:right; text-align:right">'+
 				'<label id="lblNoticeAboutChanges'+grpID+'" '+
@@ -151,7 +150,7 @@ function RectypeManager() {
 					'&nbsp;&nbsp;&nbsp;'+
 			'<input id="btnSave'+grpID+'" type="button" value="Save order" '+
 							'style="color:red; display: none !important;margin-right:5px;"/>'+ //inline-block
-				'<input type="button" id="btnAddRecordType'+grpID+'" value="New record type" class="add"/>'+
+				'<input type="button" id="btnAddRecordType'+grpID+'" value="Define new record type" class="add"/>'+
 				//'<input type="button" id="btnAddFieldType'+grpID+'" value="Add Field Type" style="float:right;"/>'+
 			'</div></div>'+
 			'<div id="tabContainer'+grpID+'"></div></div>')
@@ -252,7 +251,6 @@ function RectypeManager() {
 			_filterText = el1.value;
 			_filterVisible = el2.checked?1:0;
 		}
-		Dom.get('filter_forall'+grpID).checked = _filterForAll;
 
 		var _currentTabIndex = tabView.get('activeIndex');
 
@@ -340,8 +338,8 @@ function RectypeManager() {
 			{ key: "id", label: "Code", sortable:true, minWidth:40, maxAutoWidth:40, width:40, className:'right' },
 			{ key: "info", label: "Info", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
 				var rectypeID = oRecord.getData('id');
-elLiner.innerHTML = '<img src="../../common/images/info.png"'+
-'onmouseover="rectypeManager.showInfo('+rectypeID+', event)" onmouseout="rectypeManager.hideInfo()"/>'; }
+                elLiner.innerHTML = '<img src="../../common/images/info.png"'+
+                'onmouseover="rectypeManager.showInfo('+rectypeID+', event)" onmouseout="rectypeManager.hideInfo()"/>'; }
 			},
 			{ key: "active", label: "Show", sortable:false, width:40, formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
 			{ key: "usage", label: "Usage", hidden:true },
@@ -408,13 +406,13 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 					totalRecords: arr.length,
 
 					// use a custom layout for pagination controls
-					template: "Page: {PageLinks} &nbsp Show {RowsPerPageDropdown} per page",
+					template: "&nbsp;Page: {PageLinks} &nbsp Show {RowsPerPageDropdown} per page",
 
 					// show all links
 					pageLinks: YAHOO.widget.Paginator.VALUE_UNLIMITED,
 
 					// use these in the rows-per-page dropdown
-					rowsPerPageOptions: [25, 50, 100]
+					rowsPerPageOptions: [25, 50, 100, 250]
 
 				})
 			};
@@ -585,11 +583,12 @@ elLiner.innerHTML = '<img src="../../common/images/info.png"'+
 			arrDataSources[_currentTabIndex] = myDataSource;
 
 			// add listeners
+            /*Ian's
 			var filter_forall = Dom.get('filter_forall'+grpID);
 			filter_forall.onchange = function (e) {
 				_filterForAll = filter_forall.checked;
 				};
-
+            */
 			var filter = Dom.get('filter'+grpID);
 			filter.onkeyup = function (e) {
 				clearTimeout(filterTimeout);
