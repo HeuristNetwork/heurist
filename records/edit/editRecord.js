@@ -102,7 +102,6 @@ top.HEURIST.edit = {
 			var oneTimeOnload = function() {
 				// One time onload
 				if (module.postload) module.postload.apply(newIframe.contentWindow);
-				top.HEURIST.edit.moduleLoaded(name);
 				top.HEURIST.deregisterEvent(newIframe, "load", oneTimeOnload);
 			};
 
@@ -221,10 +220,15 @@ top.HEURIST.edit = {
 		}
 	},
 
-	moduleLoaded: function(moduleName) {
-
+	userCanEdit: function() {
+		if (top.HEURIST.user && window.HEURIST.edit.record) {
+			if (!window.HEURIST.edit.record.workgroupID ||
+				top.HEURIST.user.workgroups.indexOf(window.HEURIST.edit.record.workgroupID) != -1 ||
+				window.HEURIST.edit.record.workgroupID == top.HEURIST.get_user_id())
+				return true;
+		}
+		return false;
 	},
-
 	showRecordProperties: function() {
 		// fill in the toolbar fields with the details for this record
 //		document.getElementById('rectype-val').innerHTML = '';
@@ -254,6 +258,13 @@ top.HEURIST.edit = {
 					document.getElementById('workgroup-access').innerHTML = 'visible';
 				}
 				document.getElementById('workgroup-div').style.display = "inline-block";
+			}
+			if (document.getElementById('workgroup-edit')) {
+				if (top.HEURIST.edit.userCanEdit()){
+					document.getElementById('workgroup-edit').onclick = openWorkgroupChanger;
+				}else{
+					document.getElementById('workgroup-edit').onclick = null;
+				}
 			}
 		}
 	},
@@ -1488,6 +1499,7 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdV
 		textElt.title = "Click here to search for a record, or drag-and-drop a search value";
 		textElt.setAttribute("autocomplete", "off");
 		textElt.className = "resource-title";
+		textElt.style.width = "" + (parseInt(newDiv.style.width)-5) +"ex";
 		textElt.onkeypress = function(e) {
 			// refuse non-tab key-input
 			if (! e) e = window.event;

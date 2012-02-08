@@ -595,12 +595,13 @@ top.HEURIST.search = {
 		var editLinkIcon = "<div id='rec_edit_link' class='logged-in-only'><a href='"+
 			top.HEURIST.basePath+ "records/edit/editRecord.html?sid=" +
 			top.HEURIST.search.results.querySid + "&recID="+ res[2] +
-			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
-			"' target='_blank' title='Click to edit record'><img src='"+	top.HEURIST.basePath + "common/images/edit_pencil_small.png'/></a></div>";
-		if (top.HEURIST.user){
-			if (!top.HEURIST.user.isInWorkgroup(res[6]) && res[6]  &&  res[6] != "0" && res[6] != res[1]) {
-				editLinkIcon = "";
-			};
+			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '');
+		if (top.HEURIST.user && res[6] && top.HEURIST.user.isInWorkgroup(res[6]) || res[6] == res[1]) {
+			editLinkIcon += "' target='_blank' title='Click to edit record'><img src='"+
+							top.HEURIST.basePath + "common/images/edit_pencil_small.png'/></a></div>";
+		}else{
+			editLinkIcon += "' target='_blank' title='Click to edit record extras only'><img src='"+
+							top.HEURIST.basePath + "common/images/partial_edit_pencil_small.png'/></a></div>";
 		}
 		var newSearchWindow = "<div><a href='"+top.HEURIST.basePath+"search/search.html?q=ids:"+res[2]+
 			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
@@ -1380,9 +1381,6 @@ top.HEURIST.search = {
 					$(opt).attr("rectype",recTypeID);
 					$(opt).attr("title","" + rectypes.usageCount[recTypeID] + " records");
 					rectypeValSelect.appendChild(opt);
-//					if (name == top.HEURIST.edit.record.rectype) {
-//						rectypeValSelect.selectedIndex = rectypeValSelect.options.length-1;
-//					}
 				}
 			}
 		}
@@ -1414,9 +1412,6 @@ top.HEURIST.search = {
 //					var name = detailTypes.names[detailTypeID] +" (detail:" + detailTypeID + ")";
 					var value =  "f:" + (useIDs ? detailTypeID : '"'+name+'"') + ":";
 					fieldValSelect.appendChild(new Option(name,value));
-//					if (name == top.HEURIST.edit.record.rectype) {
-//						rectypeValSelect.selectedIndex = rectypeValSelect.options.length-1;
-//					}
 				}
 			}
 		}
@@ -1433,9 +1428,6 @@ top.HEURIST.search = {
 			var name = fields[dtID][0] +" (" + dtID + ")";
 			var value =  "f:" + (useIDs ? dtID : '"'+name+'"') + ":";
 			fieldValSelect.appendChild(new Option(name,value));
-//			if (name == top.HEURIST.edit.record.rectype) {
-//				rectypeValSelect.selectedIndex = rectypeValSelect.options.length-1;
-//			}
 		}
 	},
 
@@ -3149,18 +3141,18 @@ top.HEURIST.search = {
 		}
 	},
 
-    fixDuplicatesPopup: function() {
+	fixDuplicatesPopup: function() {
 		var rec_ids = top.HEURIST.search.getSelectedRecIDs().get();
 		if (rec_ids.length < 2 ) {
-            alert("Select at least two records to identify/merge duplicate records");
-            return;
-        }
-        top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "admin/verification/combineDuplicateRecords.php?bib_ids="
-            + rec_ids.join(",")
-            + (top.HEURIST.database && top.HEURIST.database.name ? "&db="
-            + top.HEURIST.database.name : ""),
-                        {callback : top.HEURIST.search.reloadSearch});
-    },
+			alert("Select at least two records to identify/merge duplicate records");
+			return;
+		}
+		top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "admin/verification/combineDuplicateRecords.php?bib_ids="
+		+ rec_ids.join(",")
+		+ (top.HEURIST.database && top.HEURIST.database.name ? "&db="
+		+ top.HEURIST.database.name : ""),
+		{callback : top.HEURIST.search.reloadSearch});
+	},
 
 
 	collectDuplicates: function() {

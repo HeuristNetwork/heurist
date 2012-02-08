@@ -96,16 +96,6 @@
 					// Load that page (and make a best effort to stop this one from continuing)
 					window.location.replace("?recID=" + rec.replacedBy +"&db="+database);
 				}
-			});
-		</script>
-		<script src="../../common/php/loadHAPI.php"></script> <!-- FIXME:  need to just change hapi to load without instances and keys  -->
-
-		<script>
-			top.HEURIST.registerEvent(window, "contentloaded", function() {
-				document.getElementById("home-link").href = top.HEURIST.basePath + "?db=" +top.HEURIST.database.name;
-			});
-
-			top.HEURIST.whenLoaded([recordEvent, "edit-html"], function() {
 				top.HEURIST.edit.showRecordProperties();
 				if (top.HEURIST.parameters["sid"]) {
 					top.HEURIST.util.getJsonData(top.HEURIST.basePath+"records/edit/setResultsNavigation.php?db="+database+"&s="+top.HEURIST.parameters["sid"]+"&id="+top.HEURIST.edit.record.bibID, function(context) {
@@ -119,6 +109,14 @@
 					});
 				}
 			});
+		</script>
+		<script src="../../common/php/loadHAPI.php"></script> <!-- FIXME:  need to just change hapi to load without instances and keys  -->
+
+		<script>
+			top.HEURIST.registerEvent(window, "contentloaded", function() {
+				document.getElementById("home-link").href = top.HEURIST.basePath + "?db=" +top.HEURIST.database.name;
+			});
+
 			top.HEURIST.whenLoaded([recordEvent, "edit-js", "edit-html"], top.HEURIST.edit.loadAllModules);
 			top.HEURIST.whenLoaded([recordEvent, "edit-js", "HAPI", "edit-html"],createRectypeChanger );
 			window.onbeforeunload = top.HEURIST.edit.onbeforeunload;
@@ -236,7 +234,7 @@
 		<!-- quicklinks -->
 		<div id="quicklinks">
 	<div id="logged-in" style="height:22px"></div>
-  	<ul id=quicklink-cell>
+	<ul id=quicklink-cell>
 		<li><a href="../../help/about.html" onClick="top.HEURIST.util.popupURL(window, href); return false;"><b>About</b></a></li>
 		<li><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 320,width: 740,callback: function (title, bd, bibID) {if (bibID) {window.close(bibID, title);}} });return false;" title="Click to send a bug report"><b>Report bug</b></a></li>
 		<li><a id=contact-link href="mailto:info@heuristscholar.org"><b>Contact us</b></a></li>
@@ -307,50 +305,48 @@
 		<b>Relationships</b>
 		<span id=desc>Cross-referencing, link related records</span>
 	</div>
-    <div class="sidebar-nav" style="text-align:right">
-    <div style="padding: 3px 0;">
-       <label for=act-stay >stay on page</label>
-        <input type=radio name=act id=act-stay value=stay
-			onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)">
-
-      </div>
-    <div style="padding: 3px 0;" id="close-window-option">
-        <label for=act-close>close window</label>
-        <input type=radio name=act id=act-close value=close
-			onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)">
-
-      </div>
-     	<div id="public-link" style="padding: 3px 0;">
-        <input type=button name=save-button value=Cancel onClick="top.HEURIST.edit.cancelSave();">
-        &nbsp;&nbsp;
-        <input type=button name=save-button value=Save onClick="top.HEURIST.edit.save();">
-      </div>
-      </div>
-
-    <div id="search-nav" class="sidebar-nav"></div>
-  </div>
-		<!-- end sidebar -->
-		<!-- page -->
-	<div id=page>
-		<!-- banner -->
-		<div class="banner">
-        	<a id="help-link" href='#' onClick="top.HEURIST.util.helpToggler(this)" style="width:80px;padding-right:0;text-align:center"></a>
-			<div class=public-visible style="margin:3px 10px">
-					<input type=checkbox id=input-visibility onClick="top.HEURIST.util.setDisplayPreference('input-visibility', this.checked? 'all' : 'recommended')" class=minimal>
-					<label for=input-visibility>show optional fields</label>
-				<script>
-					top.HEURIST.whenLoaded("display-preferences", function() {
-						document.getElementById("input-visibility").checked = (top.HEURIST.displayPreferences["input-visibility"] === "all");
-					});
-				</script>
-			</div>
+	<div class="sidebar-nav" style="text-align:right">
+		<div style="padding: 3px 0;">
+			<label for=act-stay >stay on page</label>
+			<input type=radio name=act id=act-stay value=stay
+				onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)">
 		</div>
-		<!-- main panel -->
-		<div id="page-inner" class="panel-main-div">
-			<div id=tab-holder >
-			</div>
+		<div style="padding: 3px 0;" id="close-window-option">
+			<label for=act-close>close window</label>
+			<input type=radio name=act id=act-close value=close
+				onclick="top.HEURIST.util.setDisplayPreference('action-on-save', value)">
+		</div>
+		<div id="public-link" style="padding: 3px 0;">
+			<input type=button name=save-button value=Cancel onClick="top.HEURIST.edit.cancelSave();">
+			&nbsp;&nbsp;
+			<input type=button name=save-button value=Save onClick="top.HEURIST.edit.save();">
 		</div>
 	</div>
+
+			<div id="search-nav" class="sidebar-nav"></div>
+		</div>
+		<!-- end sidebar -->
+		<!-- page -->
+		<div id=page>
+			<!-- banner -->
+			<div class="banner">
+				<a id="help-link" href='#' onClick="top.HEURIST.util.helpToggler(this)" style="width:80px;padding-right:0;text-align:center"></a>
+				<div class=public-visible style="margin:3px 10px">
+					<input type=checkbox id=input-visibility onClick="top.HEURIST.util.setDisplayPreference('input-visibility', this.checked? 'all' : 'recommended')" class=minimal>
+					<label for=input-visibility>show optional fields</label>
+					<script>
+						top.HEURIST.whenLoaded("display-preferences", function() {
+							document.getElementById("input-visibility").checked = (top.HEURIST.displayPreferences["input-visibility"] === "all");
+						});
+					</script>
+				</div>
+			</div>
+			<!-- main panel -->
+			<div id="page-inner" class="panel-main-div">
+				<div id=tab-holder >
+				</div>
+			</div>
+		</div>
 		<!-- end page -->
 	<script>
 		top.HEURIST.whenLoaded("display-preferences", function() {

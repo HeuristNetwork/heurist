@@ -1346,8 +1346,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 			var termID;
 			var localLookup = termLookupInner;
 			for(termID in termSubTree) { // For every term in 'term'
-				var termName = (localLookup[termID] ? localLookup[termID][top.HEURIST.terms.fieldNamesToIndex['trm_Label']] : "unknown term ID");
-
+				var termName = (localLookup[termID] ? localLookup[termID][top.HEURIST.terms.fieldNamesToIndex['trm_Label']] : "");
+				if (termName == "") continue;
 				if(isNotFirefox && depth>1){
 					//for non mozilla add manual indent
 					var a = new Array(depth*2);
@@ -1388,12 +1388,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
 					//second and more levels terms
 					if(hasChildren) {
-						// A dept of 8 (depth starts at 0) is maximum, to keep it organised
+						// A depth of 8 (depth starts at 0) is the max indentation, to keep it organised
 						createSubTreeOptions( optgroup, ((depth<7)?depth+1:depth), termSubTree[termID], localLookup, defaultTermID);
 					}
 				}
-
-	}
+			}
 		}
 		createSubTreeOptions(null, 0,termIDTree, termLookup, defaultTermID);
 		if (!defaultTermID) selObj.selectedIndex = 0;
@@ -1437,7 +1436,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
 		function isArray(a)
 		{
-    		return Object.prototype.toString.apply(a) === '[object Array]';
+			return Object.prototype.toString.apply(a) === '[object Array]';
 		}
 
 		if(typeof(o) != "object") return o;

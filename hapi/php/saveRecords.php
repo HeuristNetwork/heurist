@@ -56,19 +56,28 @@ foreach ($_REQUEST["records"] as $nonce => $record) {
 			$res = mysql_query("select * from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=" . get_user_id() . " and ugl_GroupID=" . $record["group"]);
 			$wg = (mysql_num_rows($res) > 0 ? $record["group"]: get_user_id());// if not a member we save the record with user as owner
 		}
-		mysql__insert("Records", array("rec_AddedByUGrpID" => get_user_id(),
+		$type = @$record['type'];
+		if ($type) {
+			mysql__insert("Records", array("rec_AddedByUGrpID" => get_user_id(),
+										"rec_RecTypeID" => $type,
 										"rec_OwnerUGrpID" => $wg,
 										"rec_FlagTemporary" => 1,
 										"rec_Added" => date('Y-m-d H:i:s')));
-		if (mysql_error()) {
-			array_push($out["record"], array("error" => " creating temporary record nonce = $nonce rectype = "
-															.@$record["type"]." error : ".mysql_error(),
+			if (mysql_error()) {
+				array_push($out["record"], array("error" => " creating temporary record nonce = $nonce rectype = "
+																.@$record["type"]." error : ".mysql_error(),
+												"record" => $record,
+												"nonce" => $nonce));
+				$_REQUEST["records"][$nonce]["id"] = -1;
+			}else{
+				$id = mysql_insert_id();
+				$_REQUEST["records"][$nonce]["id"] = $id;
+			}
+		}else{
+			array_push($out["record"], array("error" => " creating temporary record nonce = $nonce no rectype given",
 											"record" => $record,
 											"nonce" => $nonce));
 			$_REQUEST["records"][$nonce]["id"] = -1;
-		}else{
-			$id = mysql_insert_id();
-			$_REQUEST["records"][$nonce]["id"] = $id;
 		}
 	}
 	$nonces[$nonce] = $_REQUEST["records"][$nonce]["id"];

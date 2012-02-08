@@ -1197,7 +1197,7 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 	}
 
 	if(array_key_exists("l",$parms) || array_key_exists("limit",$parms)){
-error_log("param".print_r($parms,true));
+//error_log("params".print_r($parms,true));
 		if (array_key_exists("l", $parms)) {
 			$limit = intval(@$parms["l"]);
 			unset($parms["l"]);
@@ -1223,7 +1223,7 @@ error_log("param".print_r($parms,true));
 		$query .=  (@$limit? " limit $limit" : "") . (@$offset? " offset $offset " : "");
 	}
 
-	error_log("request to query returns ".print_r($query,true));
+//	error_log("request to query returns ".print_r($query,true));
 	return $query;
 }
 
