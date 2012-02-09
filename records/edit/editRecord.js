@@ -229,6 +229,15 @@ top.HEURIST.edit = {
 		}
 		return false;
 	},
+
+	setAllInputsReadOnly: function(readonly) {
+		for (var i =0; i< top.HEURIST.edit.allInputs.length; i++) {
+			if (top.HEURIST.edit.allInputs[i].setReadonly) {
+				top.HEURIST.edit.allInputs[i].setReadonly(readonly);
+			}
+		}
+	},
+
 	showRecordProperties: function() {
 		// fill in the toolbar fields with the details for this record
 //		document.getElementById('rectype-val').innerHTML = '';
@@ -262,8 +271,14 @@ top.HEURIST.edit = {
 			if (document.getElementById('workgroup-edit')) {
 				if (top.HEURIST.edit.userCanEdit()){
 					document.getElementById('workgroup-edit').onclick = openWorkgroupChanger;
+					document.getElementById('workgroup-edit').title = "Restrict access by workgroup";
+					document.getElementById('wg-edit-img').src = "../../common/images/edit_pencil_small.png"
+					top.HEURIST.edit.setAllInputsReadOnly(false);
 				}else{
 					document.getElementById('workgroup-edit').onclick = null;
+					document.getElementById('workgroup-edit').title = "Access denied";
+					document.getElementById('wg-edit-img').src = "../../common/images/no_edit_pencil_small.png"
+					top.HEURIST.edit.setAllInputsReadOnly(true);
 				}
 			}
 		}
@@ -1270,8 +1285,18 @@ top.HEURIST.edit.inputs.BibDetailInput.prototype.focus = function() { this.input
 top.HEURIST.edit.inputs.BibDetailInput.prototype.setReadonly = function(readonly) {
 	if (readonly) {
 		this.inputCell.className += " readonly";
+		inputElem = this.inputCell.getElementsByClassName("in");
+		if (inputElem[0]){
+			inputElem = inputElem[0];
+			inputElem.setAttribute("disabled","disabled");
+		}
 	} else {
 		this.inputCell.className = this.inputCell.className.replace(/\s*\breadonly\b/, "");
+		inputElem = this.inputCell.getElementsByClassName("in");
+		if (inputElem[0]){
+			inputElem = inputElem[0];
+			inputElem.removeAttribute("disabled");
+		}
 	}
 	for (var i=0; i < this.inputs.length; ++i) {
 		this.inputs[i].readOnly = readonly;
@@ -1382,6 +1407,7 @@ top.HEURIST.edit.inputs.BibDetailInput.prototype.getValues = function() {
 
 top.HEURIST.edit.inputs.BibDetailFreetextInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
 top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
+top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailInput.prototype;
 top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype.regex = new RegExp("\\S");	// text field is okay if it contains non-whitespace
 top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype.typeDescription = "a text value";
 top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype.addInput = function(bdValue) {
@@ -1395,21 +1421,25 @@ top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype.addInput = function(bdV
 
 top.HEURIST.edit.inputs.BibDetailIntegerInput = function() { top.HEURIST.edit.inputs.BibDetailFreetextInput.apply(this, arguments); };
 top.HEURIST.edit.inputs.BibDetailIntegerInput.prototype = new top.HEURIST.edit.inputs.BibDetailFreetextInput;
+top.HEURIST.edit.inputs.BibDetailIntegerInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype;
 top.HEURIST.edit.inputs.BibDetailIntegerInput.prototype.typeDescription = "an integer value";
 top.HEURIST.edit.inputs.BibDetailIntegerInput.prototype.regex = new RegExp("^\\s*-?\\d+\\s*$");	// obvious integer regex
 
 top.HEURIST.edit.inputs.BibDetailFloatInput = function() { top.HEURIST.edit.inputs.BibDetailFreetextInput.apply(this, arguments); };
 top.HEURIST.edit.inputs.BibDetailFloatInput.prototype = new top.HEURIST.edit.inputs.BibDetailFreetextInput;
+top.HEURIST.edit.inputs.BibDetailFloatInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype;
 top.HEURIST.edit.inputs.BibDetailFloatInput.prototype.typeDescription = "a numeric value";
 top.HEURIST.edit.inputs.BibDetailFloatInput.prototype.regex = new RegExp("^\\s*-?(?:\\d+[.]?|\\d*[.]\\d+(?:[eE]-?\\d+))\\s*$");	// extended float regex
 
 top.HEURIST.edit.inputs.BibDetailYearInput = function() { top.HEURIST.edit.inputs.BibDetailFreetextInput.apply(this, arguments); };
 top.HEURIST.edit.inputs.BibDetailYearInput.prototype = new top.HEURIST.edit.inputs.BibDetailFreetextInput;
+top.HEURIST.edit.inputs.BibDetailYearInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype;
 top.HEURIST.edit.inputs.BibDetailYearInput.prototype.typeDescription = "a year, or \"in press\"";
 top.HEURIST.edit.inputs.BibDetailYearInput.prototype.regex = new RegExp("^\\s*(?:(?:-|ad\\s*)?\\d+(?:\\s*bce?)?|in\\s+press)\\s*$", "i");
 
 top.HEURIST.edit.inputs.BibDetailDateInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
 top.HEURIST.edit.inputs.BibDetailDateInput.prototype = new top.HEURIST.edit.inputs.BibDetailFreetextInput;
+top.HEURIST.edit.inputs.BibDetailDateInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype;
 top.HEURIST.edit.inputs.BibDetailDateInput.prototype.addInput = function(bdValue) {
 	var newDiv = this.document.createElement("div");
 		newDiv.className = "date-div";
@@ -1435,6 +1465,7 @@ top.HEURIST.edit.inputs.BibDetailDateInput.prototype.regex = new RegExp("\\S");
 
 top.HEURIST.edit.inputs.BibDetailTemporalInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
 top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype = new top.HEURIST.edit.inputs.BibDetailFreetextInput;
+top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype;
 top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.addInput = function(bdValue) {
 	var newDiv = this.document.createElement("div");
 		newDiv.className = "temporal-div";
@@ -1470,6 +1501,7 @@ top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.regex = new RegExp("\\S
 
 top.HEURIST.edit.inputs.BibDetailBlocktextInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
 top.HEURIST.edit.inputs.BibDetailBlocktextInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
+top.HEURIST.edit.inputs.BibDetailBlocktextInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailInput.prototype;
 top.HEURIST.edit.inputs.BibDetailBlocktextInput.prototype.typeDescription = "a text value";
 top.HEURIST.edit.inputs.BibDetailBlocktextInput.prototype.addInput = function(bdValue) {
 	var newInput = this.document.createElement("textarea");
@@ -1482,9 +1514,21 @@ top.HEURIST.edit.inputs.BibDetailBlocktextInput.prototype.addInput = function(bd
 
 top.HEURIST.edit.inputs.BibDetailResourceInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
 top.HEURIST.edit.inputs.BibDetailResourceInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
+top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailInput.prototype;
 top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.focus = function() { this.inputs[0].textElt.focus(); };
 top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.regex = new RegExp("^[1-9]\\d*$");
 top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.typeDescription = "a record";
+top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.setReadonly = function(readonly) {
+//	this.parent.setReadonly.call(this, readonly);
+	for (var i=0; i < this.inputs.length; ++i) {
+		elem = this.inputs[i].textElt;
+		if (readonly) {
+			elem.setAttribute("disabled","disabled");
+		}else{
+			elem.removeAttribute("disabled");
+		}
+	}
+};
 top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput = function(bdValue) {
 	var thisRef = this;	// provide input reference for closures
 
@@ -1634,6 +1678,7 @@ top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.calculateDroppedText = 
 
 top.HEURIST.edit.inputs.BibDetailBooleanInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
 top.HEURIST.edit.inputs.BibDetailBooleanInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
+top.HEURIST.edit.inputs.BibDetailBooleanInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailInput.prototype;
 top.HEURIST.edit.inputs.BibDetailBooleanInput.prototype.regex = new RegExp("^(?:true|false)$");
 top.HEURIST.edit.inputs.BibDetailBooleanInput.prototype.typeDescription = "either \"yes\" or \"no\"";
 top.HEURIST.edit.inputs.BibDetailBooleanInput.prototype.addInput = function(bdValue) {
@@ -1659,9 +1704,20 @@ top.HEURIST.edit.inputs.BibDetailBooleanInput.prototype.addInput = function(bdVa
 
 top.HEURIST.edit.inputs.BibDetailDropdownInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
+top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailInput.prototype;
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.getPrimaryValue = function(input) { return input? (input.selectedIndex !== -1 && input.options[input.selectedIndex].value) : ""; };
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.typeDescription = "a value from the dropdown";
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.regex = new RegExp(".");
+top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.setReadonly = function(readonly) {
+	for (var i=0; i < this.inputs.length; ++i) {
+		elem = this.inputs[i];
+		if (readonly) {
+			elem.setAttribute("disabled","disabled");
+		}else{
+			elem.removeAttribute("disabled");
+		}
+	}
+};
 
 top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector = function(bdValue, needClear){
 	var rstFieldNamesToRdrIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
@@ -1744,52 +1800,50 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSpanLinkTerms = f
 
 	//open selectTerms to update detailtype
 	urlSpan.onclick = function() {
-//-----------------------------------------------
-	var _dtyID = this.thisElement.detailType[dtyFieldNamesToDtIndexMap['dty_ID']];
-	var type = this.thisElement.detailType[dtyFieldNamesToDtIndexMap['dty_Type']]; //enum or relation
-	var _element = this.thisElement;
-	var _bdValue = this.bdValue;
-	//var allTerms = top.HEURIST.util.expandJsonStructure(recFieldRequirements[11]);
-	//var disTerms = termHeaderList;
-	//"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+
+		var _dtyID = this.thisElement.detailType[dtyFieldNamesToDtIndexMap['dty_ID']];
+		var type = this.thisElement.detailType[dtyFieldNamesToDtIndexMap['dty_Type']]; //enum or relation
+		var _element = this.thisElement;
+		var _bdValue = this.bdValue;
+		//var allTerms = top.HEURIST.util.expandJsonStructure(recFieldRequirements[11]);
+		//var disTerms = termHeaderList;
+		//"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+
 
-	//after updating of terms list we have to recreate the selector
-	function onSelecTermsUpdate(editedTermTree, editedDisabledTerms) {
-			if(editedTermTree || editedDisabledTerms) {
-				// recreate and replace combobox
-				_element.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_FilteredJsonTermIDTree']] = editedTermTree;
-				_element.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_TermIDTreeNonSelectableIDs']] = editedDisabledTerms;
+		//after updating of terms list we have to recreate the selector
+		function onSelecTermsUpdate(editedTermTree, editedDisabledTerms) {
+				if(editedTermTree || editedDisabledTerms) {
+					// recreate and replace combobox
+					_element.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_FilteredJsonTermIDTree']] = editedTermTree;
+					_element.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_TermIDTreeNonSelectableIDs']] = editedDisabledTerms;
 
-				_element.recreateSelector(_bdValue, true);
+					_element.recreateSelector(_bdValue, true);
 
-				/* update hidden fields
-				Dom.get("dty_JsonTermIDTree").value = editedTermTree;
-				Dom.get("dty_TermIDTreeNonSelectableIDs").value = editedDisabledTerms;
-					_recreateTermsPreviewSelector(Dom.get("dty_Type").value, editedTermTree, editedDisabledTerms);
-				*/
-			}
-	}
+					/* update hidden fields
+					Dom.get("dty_JsonTermIDTree").value = editedTermTree;
+					Dom.get("dty_TermIDTreeNonSelectableIDs").value = editedDisabledTerms;
+						_recreateTermsPreviewSelector(Dom.get("dty_Type").value, editedTermTree, editedDisabledTerms);
+					*/
+				}
+		}
 
 
-	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+		var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-	top.HEURIST.util.popupURL(top, top.HEURIST.basePath +
-								"admin/structure/selectTerms.html?detailTypeID="+_dtyID+"&db="+db+"&mode=editrecord",
-								{//options
-								"close-on-blur": false,
-								"no-resize": true,
-								height: 500,
-								width: 750,
-								callback: onSelecTermsUpdate
-								}
-							);
-//-----------------------------------------------
-		};
+		top.HEURIST.util.popupURL(top, top.HEURIST.basePath +
+									"admin/structure/selectTerms.html?detailTypeID="+_dtyID+"&db="+db+"&mode=editrecord",
+									{//options
+									"close-on-blur": false,
+									"no-resize": true,
+									height: 500,
+									width: 750,
+									callback: onSelecTermsUpdate
+									}
+								);
+	};
 
-		this.inputCell.insertBefore(urlSpan, this.promptDiv);
-		//this.inputCell.appendChild(urlSpan);
+	this.inputCell.insertBefore(urlSpan, this.promptDiv);
+	//this.inputCell.appendChild(urlSpan);
 
-		this.linkSpan = urlSpan;
+	this.linkSpan = urlSpan;
 
 }
 
@@ -1807,8 +1861,36 @@ top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdV
 */
 top.HEURIST.edit.inputs.BibDetailFileInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
 top.HEURIST.edit.inputs.BibDetailFileInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
+top.HEURIST.edit.inputs.BibDetailFileInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailInput.prototype;
 top.HEURIST.edit.inputs.BibDetailFileInput.prototype.focus = function() { try { this.inputs[0].valueElt.focus(); } catch(e) { } };
 top.HEURIST.edit.inputs.BibDetailFileInput.prototype.typeDescription = "a file";
+top.HEURIST.edit.inputs.BibDetailFileInput.prototype.setReadonly = function(readonly) {
+	this.parent.setReadonly.call(this, readonly);
+	for (var i=0; i < this.inputs.length; ++i) {
+		var elem;
+		if (elem = this.inputs[i].removeImg){
+			if (readonly) {
+				elem.setAttribute("disabled","disabled");
+			}else{
+				elem.removeAttribute("disabled");
+			}
+		}
+		if (elem = this.inputs[i].fileElt){
+			if (readonly) {
+				elem.setAttribute("disabled","disabled");
+			}else{
+				elem.removeAttribute("disabled");
+			}
+		}
+		if (elem = this.inputs[i].thumbElt){
+			if (readonly) {
+				elem.setAttribute("disabled","disabled");
+			}else{
+				elem.removeAttribute("disabled");
+			}
+		}
+	}
+};
 top.HEURIST.edit.inputs.BibDetailFileInput.prototype.addInput = function(bdValue) {
 	var newDiv = this.document.createElement("div");
 	this.addInputHelper.call(this, bdValue, newDiv);
@@ -1862,6 +1944,7 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 				windowRef.changed();
 			});
 		inputDiv.valueElt = hiddenElt;
+		inputDiv.removeImg = removeImg;
 		inputDiv.link = link.href;
 		inputDiv.fileType = bdValue.file.fileType;
 		inputDiv.className = "file-div";
@@ -1890,7 +1973,7 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 			var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 				// top.HEURIST.registerEvent(fileElt, "change", function() { windowRef.changed(); });
 				// (nowadays an uploaded file is automatically saved to the relevant record)
-			inputDiv.valueElt = fileElt;
+			inputDiv.fileElt = fileElt;
 
 			var thisRef = this;
 			fileElt.onchange = function() { top.HEURIST.edit.uploadFileInput.call(thisRef, fileElt); };
@@ -1905,6 +1988,7 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 					thumbElt.title = "Click here to snapshot the web page indicated by the URL and store as the thumbnail";
 					thumbElt.onclick = function(){top.HEURIST.edit.uploadURL.call(thisRef, fileElt);}
 				inputDiv.appendChild(thumbElt);
+				inputDiv.thumbElt = thumbElt;
 			}
 
 		}
@@ -1956,17 +2040,19 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.regex = new RegExp("\\S");
 
 top.HEURIST.edit.inputs.BibDetailGeographicInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
 top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
+top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailInput.prototype;
 top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.regex = new RegExp("^(?:p|c|r|pl|l) (?:point|polygon|linestring)\\(?\\([-0-9.+, ]+?\\)\\)?$", "i");
 top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.getPrimaryValue = function(input) { return input? input.input.value : ""; };
 top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.typeDescription = "a geographic value";
 top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.setReadonly = function(readonly) {
-	this.prototype.setReadonly.apply(this, readonly);
+	this.parent.setReadonly.call(this, readonly);
 	for (var i=0; i < this.inputs.length; ++i) {
-		this.inputs[i].editLink.innerHTML = readonly? "view" : "edit";
+		this.inputs[i].editLink.style.display = readonly? "none" : "";
+		this.inputs[i].removeImg.style.display = readonly? "none" : "";
 	}
 };
 top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.geoValueToDescription = function(geo) {
-	function R(x) { return Math.round(x*100000)/100000 ; } 
+	function R(x) { return Math.round(x*100000)/100000 ; }
 
 	var geoSummary;
 	var geoType = geo.type.charAt(0).toUpperCase() + geo.type.substring(1);
@@ -2058,7 +2144,7 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 				alert("Geographic objects use Google Maps API, which doesn't work on this browser - sorry");
 				return;
 			}
-/*
+
 			HAPI.PJ.store("gigitiser_geo_object", input.value, {
 				callback: function(_, _, response) {
 					top.HEURIST.util.popupURL(
@@ -2068,7 +2154,7 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 					);
 				}
 			});
-*/
+/*
 			HAPI.PJ.store("gigitiser_geo_object", input.value, {
 				callback: function(_, _, response) {
 					top.HEURIST.util.popupURL(
@@ -2078,7 +2164,7 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 					);
 				}
 			});
-
+*/
 		};
 
 	var editSpan = newDiv.appendChild(this.document.createElement("span"));
@@ -2086,6 +2172,7 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 
 	var removeImg = newDiv.appendChild(this.document.createElement("img"));
 		removeImg.src = top.HEURIST.basePath+"common/images/12x12.gif";
+		newDiv.removeImg = removeImg;
 		removeImg.className = "delete-geo";
 		removeImg.title = "Remove this geographic object";
 		top.HEURIST.registerEvent(removeImg, "click", function() {
@@ -2543,6 +2630,7 @@ top.HEURIST.edit.inputs.BibURLInput = function(parentElement, defaultValue, requ
 		headerCell.appendChild(this.document.createTextNode("URL"));
 	var inputCell = row.appendChild(this.document.createElement("div"));
 		inputCell.className = "input-cell";
+	this.inputCell = inputCell;
 
 	var inputField = inputCell.appendChild(this.document.createElement("input"));
 	this.inputs = [ inputField ];
@@ -2552,6 +2640,7 @@ top.HEURIST.edit.inputs.BibURLInput = function(parentElement, defaultValue, requ
 		this.inputs[0].name = "rec_url";
 		this.inputs[0].id = "rec_url";
 		this.inputs[0].value = defaultValue  ||  "";
+		inputCell.inputField = inputField;
 
 	if (defaultValue) {
 		inputField.style.display = "none";
@@ -2580,12 +2669,28 @@ top.HEURIST.edit.inputs.BibURLInput = function(parentElement, defaultValue, requ
 			inputField.style.display = "";
 		};
 
+		inputCell.editImg = editImg;
 		inputCell.appendChild(urlOutput);
 		inputCell.appendChild(urlSpan);
 	}
 
 	var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 		top.HEURIST.registerEvent(this.inputs[0], "change", function() { windowRef.changed(); });
+};
+top.HEURIST.edit.inputs.BibURLInput.prototype.setReadonly = function(readonly) {
+	if (readonly) {
+		this.inputCell.className += " readonly";
+		if (this.inputCell.editImg){
+			this.inputCell.editImg.setAttribute("disabled","disabled");
+		}
+		this.inputCell.inputField.setAttribute("disabled","disabled");
+	} else {
+		this.inputCell.className = this.inputCell.className.replace(/\s*\breadonly\b/, "");
+		if (this.inputCell.editImg){
+			this.inputCell.editImg.removeAttribute("disabled");
+		}
+		this.inputCell.inputField.removeAttribute("disabled");
+	}
 };
 top.HEURIST.edit.inputs.BibURLInput.prototype.focus = function() { this.inputs[0].focus(); };
 top.HEURIST.edit.inputs.BibURLInput.prototype.verify = function() {

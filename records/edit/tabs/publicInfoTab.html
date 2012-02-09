@@ -90,7 +90,6 @@ function setWorkgroupProperties(wg, wgVis) {
 }
 
 
-
 function changed() {
 	if (parent == top) top.HEURIST.edit.changed("public");
 	else if (parent.HEURIST.edit.changed)
@@ -137,6 +136,10 @@ function renderInputs(bibID, rectype) {
 		showAllDiv.parentNode.removeChild(showAllDiv);
 
 	var innerDims = top.HEURIST.util.innerDimensions(window);
+	var userCanEdit = top.HEURIST.edit.userCanEdit();
+	if (!userCanEdit) {
+		allInputs.className = allInputs.className + " readonly";
+	}
 
 	if (bibID) {
 		if (! parent.HEURIST.edit.record  ||  ! parent.HEURIST.edit.record.bibID) {	// shouldn't get here -- catch it at the parent frame
@@ -159,7 +162,12 @@ function renderInputs(bibID, rectype) {
 			}
 		}
 
-		renderAdditionalDataSection(allInputs, bibID, record.rectypeID, record.bdValuesByType);
+
+		if (userCanEdit) {
+			renderAdditionalDataSection(allInputs, bibID, record.rectypeID, record.bdValuesByType);
+		}
+
+		top.HEURIST.edit.setAllInputsReadOnly(!userCanEdit);
 
 		if (! top.document.getElementById("notes")) {
 			var width = 400;
@@ -254,7 +262,11 @@ function renderInputs(bibID, rectype) {
 
 		renderExtraDataHeader(allInputs);
 
-		renderAdditionalDataSection(allInputs,null, rectype);
+		if (userCanEdit) {
+			renderAdditionalDataSection(allInputs, null, rectype);
+		}
+
+		top.HEURIST.edit.setAllInputsReadOnly(!userCanEdit);
 
 		if (! top.document.getElementById("notes")) {
 			var width = 400;
@@ -382,33 +394,6 @@ function renderExtraDataHeader(container) {
 		hrCell.className = "additional-header-cell";
 
 		return extraDataHeader;
-	var showDiv = document.getElementById("all-inputs").appendChild(document.createElement("div"));
-		showDiv.id = "show-all-div";
-		showDiv.className = "title-row not-optional-fields";
-
-	var showLink = showDiv.appendChild(document.createElement("div")).appendChild(document.createElement("a"));
-		showLink.className = "additional-header-cell not-optional-fields";
-		showLink.style.fontWeight = "bold";
-		showLink.href = "#";
-		showLink.appendChild(document.createTextNode("Show all fields"));
-		showLink.onclick = function() {
-			top.HEURIST.util.setDisplayPreference("input-visibility", "all");
-			top.document.getElementById("input-visibility").checked = true;
-			return false;
-		};
-
-	var showInnerDiv = showDiv.appendChild(document.createElement("div"));
-		showInnerDiv.appendChild(document.createTextNode("Only "));
-		showInnerDiv.className = "input-cell";
-	var showInnerSpan = showInnerDiv.appendChild(document.createElement("span"));
-		showInnerSpan.className = "required-only";
-		showInnerSpan.style.fontWeight = "bold";
-		showInnerSpan.appendChild(document.createTextNode("required"));
-		showInnerSpan = showInnerDiv.appendChild(document.createElement("span"));
-		showInnerSpan.className = "recommended";
-		showInnerSpan.style.fontWeight = "bold";
-		showInnerSpan.appendChild(document.createTextNode("recommended"));
-		showInnerDiv.appendChild(document.createTextNode(" fields are currently visible"));
 }
 
 

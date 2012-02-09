@@ -596,7 +596,7 @@ top.HEURIST.search = {
 			top.HEURIST.basePath+ "records/edit/editRecord.html?sid=" +
 			top.HEURIST.search.results.querySid + "&recID="+ res[2] +
 			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '');
-		if (top.HEURIST.user && res[6] && top.HEURIST.user.isInWorkgroup(res[6]) || res[6] == res[1]) {
+		if (top.HEURIST.user && res[6] && (top.HEURIST.user.isInWorkgroup(res[6])|| res[6] == top.HEURIST.get_user_id()) || res[6] == 0) {
 			editLinkIcon += "' target='_blank' title='Click to edit record'><img src='"+
 							top.HEURIST.basePath + "common/images/edit_pencil_small.png'/></a></div>";
 		}else{
