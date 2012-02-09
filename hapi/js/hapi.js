@@ -871,9 +871,9 @@ var HRecord = function() {
 
 		// find where the old value is being stored.  It is either in the namedDetails ...
 		var tmpDetails = _namedDetails[detailType.getID()];
-		if (! tmpDetails) {
-			throw new HValueException("can't change non-existent value");
-		}
+//		if (! tmpDetails) {
+//			throw new HValueException("can't change non-existent value");
+//		}
 		for (var bdID in tmpDetails) {
 			var detail = tmpDetails[bdID];
 			if (HAPI.isA(detail, "HRecord")) {
@@ -2465,7 +2465,7 @@ var HDetailManager = new function(detailTypes, detailRequirements) {
 		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
 		/* PRE */ if (! HAPI.isA(detailType, "HDetailType")) { throw new HTypeException("HDetailType object expected for argument #2"); }
 		var details = _recordPlusTypeDetails[recordType.getID()+"."+detailType.getID()];
-		return (details  && details[1] && details[1] > 1)? true : false;
+		return (details  && details[1] && details[1] != 1 )? true : false;
 	};
 	this.getDetailMaxRepeat = function(recordType, detailType) {
 		/* PRE */ if (! HAPI.isA(recordType, "HRecordType")) { throw new HTypeException("HRecordType object expected for argument #1"); }
