@@ -186,6 +186,9 @@ top.HEURIST.search = {
 	reloadSearch: function() {
 		window.HEURIST.parameters["q"] = document.getElementById("q").value;
 		window.HEURIST.parameters["w"] = document.getElementById("w-input").value;
+		if (window.HEURIST.parameters["label"]) {
+			delete window.HEURIST.parameters["label"];
+		}
 		if (!$("#simple-search").hasClass("collapsed")) {
 			$("#simple-search").toggleClass("collapsed");
 			$("div.simplesearch").toggleClass("collapsed");
@@ -206,6 +209,17 @@ top.HEURIST.search = {
 		}
 		var iframeElt = document.createElement("iframe");
 		var params = top.HEURIST.parameters;
+		if (params["label"]) {
+			document.getElementById("active-label").innerHTML = params["label"];
+			if (params["label"] == "Favourites") {
+				document.getElementById("results-message").innerHTML = "Click on a record to view details. CTRL click to select multiple records";
+				document.getElementById("results-message").style.display = "block";
+			}
+		} else if (params['q']){
+			document.getElementById("active-label").innerHTML = params['q'];
+		}else{
+			document.getElementById("active-label").innerHTML = "Search results";
+		}
 		iframeElt.style.border = "0";
 		iframeElt.style.width = "0";
 		iframeElt.style.height = "0";
@@ -1056,7 +1070,9 @@ top.HEURIST.search = {
 				}
 			}
 		}
-
+		if (recordCount == 1){
+			document.getElementById("active-label").innerHTML = recSet[recInfo.recIDs[0]].record[5];
+		}
 		//if (style == "list"  ||  style == "thumbnails" || style =="icons") {
 			resultsDiv.innerHTML += innerHTML;
 		//} else if (style = "two-col") {
