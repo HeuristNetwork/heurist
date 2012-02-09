@@ -13,6 +13,7 @@ if(top.HAPI){
 
 var _keepZoom; //art
 var systemAllLayers;
+var currentBackgroundLayer;
 
 var map;
 var polyShape;
@@ -259,6 +260,15 @@ function activateMarker() {
 }
 function initmap(){
 
+	var defaultViewString = top.HEURIST.util.getDisplayPreference("gigitiser-view");
+	var viewBits;
+	if (defaultViewString  &&  (viewBits = defaultViewString.match(/(.*),(.*)@(\d+):(\S+):(.*)?/))) {  //[mkh] (.*)
+			if(viewBits[5]){
+				currentBackgroundLayer = viewBits[5];
+			}
+	}
+
+
 	_load_layers(1);
 
     geocoder = new google.maps.Geocoder();
@@ -310,9 +320,7 @@ function initmap(){
 
 
 /*  RESTORE SAVED EXTENT */
-		var defaultViewString = top.HEURIST.util.getDisplayPreference("gigitiser-view");
-		var viewBits;
-		if (defaultViewString  &&  (viewBits = defaultViewString.match(/(.*),(.*)@(\d+):(.*)?/))) {  //[mkh]
+		if (viewBits) {
 			_keepZoom = parseInt(viewBits[3]);
 			map.setCenter(new google.maps.LatLng(parseFloat(viewBits[1]) || 0, parseFloat(viewBits[2]) || 0));
 			map.setZoom(_keepZoom);
@@ -2129,7 +2137,8 @@ function _updateLayersList(context){
 
 		systemAllLayers = context.layers;
 		var elem = document.getElementById('cbLayers'),
-			s = "<option value='-1'>none</option>";
+			s = "<option value='-1'>none</option>",
+			selIndex = -1;
 
 		for (ind in systemAllLayers) {
 			if(!top.HEURIST.util.isnull(ind))
@@ -2143,26 +2152,40 @@ function _updateLayersList(context){
 				}
 
 				s = s + "<option value='" + ind + "'>"+ sTitle +"</option>";
+
+				if( (!top.HEURIST.util.isnull(currentBackgroundLayer)) &&
+					systemAllLayers[ind].rec_ID === currentBackgroundLayer){
+					selIndex = ind;
+				}
 			}
 		}
 
 		elem.innerHTML = s;
+
+		if(selIndex>=0){
+			setTimeout(function() {
+				loadLayer2(selIndex);
+				elem.selectedIndex = Number(selIndex)+1;
+			}, 2000);
+		}
 }
 
 /**
 *
 */
 function loadLayer(event){
-
 	var val = Number(event.target.value);
+	loadLayer2(val);
+}
 
-	if(isNaN(val) || val < 0){
+function loadLayer2(index){
+
+	if(isNaN(index) || index < 0){
 		RelBrowser.Mapping.addLayers([]);
 	}else{
-		currentBackgroundLayer = systemAllLayers[val].rec_ID;
-		RelBrowser.Mapping.addLayers([systemAllLayers[val]]);
+		currentBackgroundLayer = systemAllLayers[index].rec_ID;
+		RelBrowser.Mapping.addLayers([systemAllLayers[index]]);
 	}
-
 }
 
 function keepExtent() {
@@ -2171,7 +2194,7 @@ function keepExtent() {
 	var currentLatLng = map.getCenter();
 	var currentZoom = map.getZoom();
 	var currentMap = map.getMapTypeId(); //getCurrentMapType().getUrlArg();
-	var viewString = currentLatLng.lat() + "," + currentLatLng.lng() + "@" + currentZoom + ":" + currentMap;
+	var viewString = currentLatLng.lat() + "," + currentLatLng.lng() + "@" + currentZoom + ":" + currentMap+":"+currentBackgroundLayer;
 
 	top.HEURIST.util.setDisplayPreference("gigitiser-view", viewString);
 
