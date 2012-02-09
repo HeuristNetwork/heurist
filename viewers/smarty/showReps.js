@@ -388,8 +388,10 @@ function ShowReps() {
 						//do nothing alert(context.error);
 					}else{
 						var mode = context.ok;
-						if(mode==="delete"){
+						//if(mode==="delete"){
+						if(modeRef===3){ //delete
 							//todo!!!! - remove template from the list and clear editor
+							_reload_templates();
 						}else if(template_file!=null){
 							_originalFileName = template_file;//_onGetTemplate(obj);
 
@@ -1239,7 +1241,6 @@ function ShowReps() {
 		return _isUseAllRecords?_currentQuery_all:_currentQuery_sel;
 	}
 
-
 	//public members
 	var that = {
 
@@ -1344,6 +1345,11 @@ function ShowReps() {
 
 			baseURL:  function (){
 				return top.HEURIST.basePath;
+			},
+
+			originalFileName:  function (val){
+				_originalFileName = val;
+				//_setOrigName(val);
 			},
 
 			getClass: function () {

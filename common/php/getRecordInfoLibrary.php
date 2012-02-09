@@ -1040,6 +1040,7 @@ function getAllDetailTypeStructures($useCachedData = false) {
 	}
 	$dtG = getDetailTypeGroups();
 //error_log(print_r($dtG,true));
+
 	$dtStructs = array('groups' => $dtG,
 						'names' => array(),
 						'rectypeUsage' => getDetailTypeDefUsage(),

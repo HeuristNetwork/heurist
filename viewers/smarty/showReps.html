@@ -65,6 +65,12 @@
 	display: none;
 	height: 0px;
 }
+/*display: none !important;
+	display: block;
+*/
+.linkadmin{
+	visibility: hidden;
+}
 </style>
 <script type="text/javascript">
 			var showReps, isEditorVisible=false;
@@ -105,8 +111,9 @@
 					<li><a href="#" onClick="onSelectTemplate()">Reload</a></li>
 					<li><a href="#" onClick="onPrint()">Print</a></li>
 					<li><a href="#" onClick="onFile()">Get URL</a></li>
-					<li><a href="#" onClick="onShowEditor()"  class="separator">Edit Template</a></li>
-					<li><a href="#" onClick="onGenerate()">New Template</a></li>
+					<li><a href="#" class="linkadmin" onClick="onDeleteTemplate()">Delete Template</a></li>
+					<li><a href="#" class="linkadmin" onClick="onShowEditor()">Edit Template</a></li>
+					<li><a href="#" class="linkadmin" onClick="onGenerate()">New Template</a></li>
 				</ul>
 			</li>
 		</ul>
@@ -311,8 +318,19 @@ if(isInited){
 
 		if(sel.selectedIndex>=0){
 			var template_file = sel.options[sel.selectedIndex].value;
-		window.showReps.showEditor(template_file);
+			window.showReps.showEditor(template_file);
+		}
 	}
+
+	//
+	function onDeleteTemplate()
+	{
+		var sel = document.getElementById('selTemplates');
+
+		if(sel.selectedIndex>=0){
+			window.showReps.originalFileName(sel.options[sel.selectedIndex].value);
+			doEditor(3);
+		}
 	}
 
 	//
@@ -373,6 +391,13 @@ if(isInited){
 	function loadHandler(){
 		window.showReps = new ShowReps();
 		//setupMCE();
+
+		//$('.linkadmin').css('display', 'block  !important');
+		//$('.linkadmin').css('display', 'none  !important');
+		//$('#lnkDel').css('display', 'none  !important');
+		if(top.HEURIST.is_admin()){
+			$('.linkadmin').css('visibility', 'visible');
+		}
 	}
 
 	YAHOO.util.Event.addListener(window, "load", loadHandler );

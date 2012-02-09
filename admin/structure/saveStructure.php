@@ -829,7 +829,7 @@
 		$rv = array();
 //error_log(">>>>>>>>>>>>>>>".$db->affected_rows);
 //error_log(">>>Error=".$mysqli->error);
-		if($mysqli->error!=""){
+		if(isset($mysqli) && $mysqli->error!=""){
 			$rv['error'] = "SQL error deleting entry in defRecStructure for record type $rtyID and field type $dtyID: ".$mysqli->error;
 		}else if ($db->affected_rows<1){
 			$rv['error'] = "Error - no rows affected - deleting entry in defRecStructure for record type $rtyID and field type $dtyID";
@@ -841,7 +841,7 @@
 
 	/**
 	* createRectypeGroups - Helper function that inserts a new rectypegroup into defRecTypeGroups table
-	* 
+	*
 	* @author Artem Osmakov
 	* @param $columnNames an array valid column names in the defRecTypeGroups table which match the order of data in the $rt param
 	* @param $rt array of data

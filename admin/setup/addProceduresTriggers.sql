@@ -620,13 +620,13 @@ DELIMITER $$
 
 --  			delete
 -- 5/9/11 This trigger gives an error "multiple triggers with the same action time and event for one table" not yet supported
---	DROP TRIGGER IF EXISTS defRecStructure_last_delete$$
+	DROP TRIGGER IF EXISTS defRecStructure_last_delete$$
 
---	CREATE DEFINER=`root`@`localhost`
---	TRIGGER `defRecStructure_last_delete`
---	AFTER DELETE ON `defRecStructure`
---	FOR EACH ROW
---		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecStructure"$$
+	CREATE DEFINER=`root`@`localhost`
+	TRIGGER `defRecStructure_last_delete`
+	AFTER DELETE ON `defRecStructure`
+	FOR EACH ROW
+		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecStructure"$$
 
 DELIMITER ;
 

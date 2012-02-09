@@ -349,7 +349,7 @@ function RectypeManager() {
 
 					var str1 = top.HEURIST.iconBaseURL + id + ".png?" + curtimestamp;
 					var thumb = top.HEURIST.iconBaseURL + "thumb/th_" + id + ".png?" + curtimestamp;
-					var icon ="<div class=\"rectypeImages\"><a href=\"#edit_icon\"><img src=\"../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\"></a><div style=\"background-image:url("+thumb+");\" class=\"thumbPopup\"><a href=\"#edit_thumb\"><img src=\"../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a></div></div>"
+					var icon ="<div class=\"rectypeImages\"><a href=\"#edit_icon\"><img src=\"../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\"></a><div id=\"thumb"+id+"\" style=\"background-image:url("+thumb+");\" class=\"thumbPopup\"><a href=\"#edit_thumb\"><img src=\"../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a></div></div>"
 					elLiner.innerHTML = icon;
 			}},
 			{ key: "name", label: "Name", sortable:true, className: 'bold_column', minWidth:160, maxAutoWidth:160, width:160, gutter:0,
@@ -902,7 +902,7 @@ function RectypeManager() {
 			URL = top.HEURIST.basePath + "admin/structure/editDetailType.html?db="+db;
 		}
 
-		var dim = Hul.innerDimensions(this.window);
+		var dim = Hul.innerDimensions(window);
 
 		Hul.popupURL(top, URL, {
 			"close-on-blur": false,
@@ -1004,6 +1004,9 @@ function RectypeManager() {
 					//detect what group
 					var grpID = top.HEURIST.rectypes.typedefs[rty_ID].commonFields[ind_grpfld];
 
+					var d = new Date();
+					curtimestamp = d.getMilliseconds();
+
 					_removeTable(grpID, true);
 					if(grpID_old!==grpID){
 						_removeTable(grpID_old, true);
@@ -1012,6 +1015,7 @@ function RectypeManager() {
 					}//context.result
 					else{
 						rty_ID = context.rty_ID;
+						icon_refresh(rty_ID);
 					}
 
 					if(context.isOpenEditStructure){
@@ -1291,16 +1295,25 @@ function _upload_icon(rectypeID,mode) {
 	}
 
 function icon_refresh(rectypeID) {
-
+	if(rectypeID){
 		var d = new Date();
 		curtimestamp = d.getMilliseconds();
 
 		var db = top.HEURIST.database.id;
-		var imgIcon = "icon" + rectypeID;
-		var img = document.getElementById(imgIcon);
-		img.style.backgroundImage = "url(" + top.HEURIST.iconBaseURL+rectypeID+".png?"+curtimestamp+") !important";
-	}
+		var imgIcon = "#icon" + rectypeID;
+		var img = $(imgIcon);
+		if(img){
+			img.css('background-image', 'url("' + top.HEURIST.iconBaseURL+rectypeID+".png?"+curtimestamp+'")');
+		}
 
+		var imgThumb = "#thumb" + rectypeID;
+		img = $(imgThumb);
+		if(img){
+			img.css('background-image', 'url("' + top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID+".png?"+curtimestamp+'")');
+			///img.style.backgroundImage = 'url("' + top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID + ".png?" + curtimestamp+'") !important';
+		}
+	}
+}
 /*
 
 function ellipsis(e) {

@@ -229,7 +229,9 @@
 
 	init();
 
-	var _openEditStrucutreAfterClose = false;
+	var _openEditStrucutreAfterClose = false,
+		_isIconWasUpdated = false;
+
 
 	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 				(top.HEURIST.database.name?top.HEURIST.database.name:''));
@@ -267,7 +269,7 @@
 		Hul.popupURL(top, sURL, {
 			"close-on-blur": false,
 			"no-resize": false,
-			height: (mode==0?120:200),
+			height: (mode==0?140:220),
 			width: 340,
 			callback: mode==0?icon_refresh:thumb_refresh
 		});
@@ -277,10 +279,12 @@
 	function icon_refresh(context) {
 		var img = document.getElementById('imgIcon');
 		img.src = img.src.replace(/\?.*/, '') + '?' + (new Date()).getTime();
+		_isIconWasUpdated = true;
 	}
 	function thumb_refresh(context) {
 		var img = document.getElementById('imgThumb');
 		img.src = img.src.replace(/\?.*/, '') + '?' + (new Date()).getTime();
+		_isIconWasUpdated = true;
 	}
 
 
@@ -570,12 +574,14 @@
 			var callback = updateResult;
 			var params = "method=saveRT&db="+db+"&data=" + encodeURIComponent(str);
 			Hul.getJsonData(baseurl, callback, params);
-		} else {
+		} else { //nothing changed
 
 			var context = null;
 			if(_openEditStrucutreAfterClose){
 				//editRecStructure();
 				context = {rty_ID:rectypeID, isOpenEditStructure:true};
+			}else if(_isIconWasUpdated){
+				context = {rty_ID:rectypeID, isOpenEditStructure:false};
 			}
 
 			window.close(context);
