@@ -222,9 +222,9 @@ top.HEURIST.edit = {
 
 	userCanEdit: function() {
 		if (top.HEURIST.user && window.HEURIST.edit.record) {
-			if (!window.HEURIST.edit.record.workgroupID ||
-				top.HEURIST.user.workgroups.indexOf(window.HEURIST.edit.record.workgroupID) != -1 ||
-				window.HEURIST.edit.record.workgroupID == top.HEURIST.get_user_id())
+			if (!window.HEURIST.edit.record.workgroupID || //no owner
+				top.HEURIST.user.workgroups.indexOf(parseInt(window.HEURIST.edit.record.workgroupID)) != -1 || // user in owner group
+				window.HEURIST.edit.record.workgroupID == top.HEURIST.get_user_id()) // user is owner
 				return true;
 		}
 		return false;
