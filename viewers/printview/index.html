@@ -511,6 +511,13 @@
 				updateSelection();
 			}
 
+			//scroll viewer back to top
+			function backToTop(){
+				var resultDiv =document.getElementById("displayResult");
+				resultDiv.scrollTop = 0;
+			}
+
+			//
 			function addAnnotation(){
 				var contentDivs = $(".annotatedDocument div.content").get();
 				if (!contentDivs[0]){
@@ -524,11 +531,12 @@
 				}
 				var recTitle = $(annoStruct.docElem).attr("recTitle");
 				var recID = $(annoStruct.docElem).attr("recID");
+				/*
 				confirm(" Would you like to add an annotation to '" +recTitle+ "' as follows:\n " +
 							"Start  Elem:" + annoStruct.addr.startElems.join(":") +
 							" Word:" + annoStruct.addr.startWord + "\n" +
 							"End  Elem:" + annoStruct.addr.endElems.join(":") +
-							" Word:" + annoStruct.addr.endWord)+ " ?";
+							" Word:" + annoStruct.addr.endWord)+ " ?"; */
 				top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/formAddRecordPopup.html?rectype='+
 							top.HEURIST.magicNumbers['RT_ANNOTATION']+
 										'&addr='+annoStruct.addr.startElems.join(":") +","+
@@ -558,6 +566,7 @@
 
 	</head>
 	<body onLoad="init()">
+
 		<div class="banner">
 			<select id="style_select" style="width: 180px;" onChange="displayResult(this.options[this.selectedIndex].value);">
 			</select>
@@ -568,6 +577,8 @@
 				id="rbUseSelectedRecords" checked="checked"
 				 title="Display of all records not currently available in this view" disabled="disabled">
 			<label title="Display of all records not currently available in this view">Selected only</label>
+
+			<a href="javascript:window.backToTop()" style="float: right;">to top</a>
 		</div>
 		<div id="displayResult" ></div>
 	</body>

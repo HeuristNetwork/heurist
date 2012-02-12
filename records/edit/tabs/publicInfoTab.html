@@ -136,7 +136,7 @@ function renderInputs(bibID, rectype) {
 		showAllDiv.parentNode.removeChild(showAllDiv);
 
 	var innerDims = top.HEURIST.util.innerDimensions(window);
-	var userCanEdit = top.HEURIST.edit.userCanEdit();
+	var userCanEdit = parent.HEURIST.edit.userCanEdit();
 	if (!userCanEdit) {
 		allInputs.className = allInputs.className + " readonly";
 	}

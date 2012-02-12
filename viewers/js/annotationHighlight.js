@@ -119,9 +119,12 @@ function transformTextNode (elem, refs, startingRefs, endingRefs, wordOffset) {
 //								+ " endingRefs: " + endingRefs.join(","));
 	var parentElem = elem.parentNode;
 	var text = elem.textContent;
-	var matches = text.match(/^(\s*)(.*?)(\s*)$/);
+	var matches = text.match(/^(\s*)(.*?)(\s*)$/); //check for empty lines
+	if(!matches){
+		return 0;
+	}
 	text = matches[2];
-	if (text.length === 0) {
+	if (text.length === 0) { //ignore empty line
 		return 0;
 	}
 	var words = text.split(/\s+/);
@@ -407,7 +410,7 @@ function highlightOnLoad() {
 }
 function showPreview(element, event) {
 	var previewId = "preview-" + element.id;
-	var preview = $("#"+previewId);	
+	var preview = $("#"+previewId);
 	var docContainer = $(element).parents(".content").get(0);
 	var border_top = $(docContainer).scrollTop();
 	var border_right = $(docContainer).width();

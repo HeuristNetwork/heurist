@@ -107,13 +107,7 @@
 		</select>
 		<ul id="rep_list" class="horizontal menu">
 			<li><span class="button">Tools</span>
-				<ul>
-					<li><a href="#" onClick="onSelectTemplate()">Reload</a></li>
-					<li><a href="#" onClick="onPrint()">Print</a></li>
-					<li><a href="#" onClick="onFile()">Get URL</a></li>
-					<li><a href="#" class="linkadmin" onClick="onDeleteTemplate()">Delete Template</a></li>
-					<li><a href="#" class="linkadmin" onClick="onShowEditor()">Edit Template</a></li>
-					<li><a href="#" class="linkadmin" onClick="onGenerate()">New Template</a></li>
+				<ul id="toolMenuItems">
 				</ul>
 			</li>
 		</ul>
@@ -395,9 +389,17 @@ if(isInited){
 		//$('.linkadmin').css('display', 'block  !important');
 		//$('.linkadmin').css('display', 'none  !important');
 		//$('#lnkDel').css('display', 'none  !important');
+		//$('.linkadmin').css('visibility', 'visible');
+
+
+		var s = '<li><a href="#" onClick="onSelectTemplate()">Reload</a></li><li><a href="#" onClick="onPrint()">Print</a></li><li><a href="#" onClick="onFile()">Get URL</a></li>';
+
 		if(top.HEURIST.is_admin()){
-			$('.linkadmin').css('visibility', 'visible');
+			s = s + '<li><a href="#" onClick="onDeleteTemplate()">Delete Template</a></li><li><a href="#" onClick="onShowEditor()">Edit Template</a></li><li><a href="#" onClick="onGenerate()">New Template</a></li>';
 		}
+
+		var elem = document.getElementById('toolMenuItems');
+		elem.innerHTML = s;
 	}
 
 	YAHOO.util.Event.addListener(window, "load", loadHandler );

@@ -405,20 +405,30 @@ error_log("ERROR :".$message);
 
 //error_log(">>>>>>".print_r($out, true));
 
-					//update xml
-					if($recordId==null){
 
-						$new_md5 = md5_file($filename);
-						if($old_md5!=$new_md5){
-							print "<div style=\"color:#ff8844\">warning $filename_base checksum differs from value in manifest</div>";
-						}
-						$f_item->addChild("heurist_id", $out["bibID"]);
-						$f_item->addChild("md5", $new_md5);
+					if (@$out['error']) {
+						print "<div style='color:red'>$filename_base Error: ".implode("; ",$out["error"])."</div>";
 					}else{
-						$el_heuristid["heurist_id"] = $out["bibID"];
-					}
 
-					$rep_processed++;
+						//update xml
+						if($recordId==null){
+
+							$new_md5 = md5_file($filename);
+							if($old_md5!=$new_md5){
+								print "<div style=\"color:#ff8844\">warning $filename_base checksum differs from value in manifest</div>";
+							}
+							$f_item->addChild("heurist_id", $out["bibID"]);
+							$f_item->addChild("md5", $new_md5);
+						}else{
+							$el_heuristid["heurist_id"] = $out["bibID"];
+						}
+
+						if (@$out['warning']) {
+								print "<div style=\"color:#ff8844\">$filename_base Warning: ".implode("; ",$out["warning"])."</div>";
+						}
+
+						$rep_processed++;
+					}
 
 				}else{
 					$rep_ignored++;

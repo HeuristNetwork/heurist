@@ -17,13 +17,14 @@
   <link rel=stylesheet href="../../common/css/global.css">
  </head>
 
- <body class="popup" width=600 height=400>
+ <body width="760" height="560" style="overflow:hidden; background:#ffffff; padding 0px !important;">
   <script src="../../common/js/utilsLoad.js"></script>
   <script src="../../records/edit/relationshipsObjectLibrary.js"></script>
   <script src="../../common/php/displayPreferences.php"></script>
 <div class="header"><b><span id=rectype-val></span></b><span id=title-val></span></div>
 <div id="results"><iframe frameborder=0 class=tab id=edit-frame style="width: 100%; height: 100%;"></iframe></div>
-<div id="add_records_footer"><input type=button onClick="window.HEURIST.edit.save();" value="Save new record"></div>
+<div id="add_records_footer"><input type=button onClick="window.HEURIST.edit.save();" value="Save new record">
+<input type=button onClick="window.close();" value="Cancel"></div>
   <script>
 
 window.HEURIST.edit = {
@@ -35,6 +36,10 @@ window.HEURIST.edit = {
 
 	changed: function() {
 		window.HEURIST.edit.publicHasChanged = true;
+	},
+
+	userCanEdit: function(){
+		return true;
 	},
 
 	save: function() {

@@ -598,16 +598,24 @@ print "mapping not defined for detail #".$dtid;
 						2	// import without check of record type structure
 						);
 
+					if (@$out['error']) {
+						print "=><div style='color:red'> Error: ".implode("; ",$out["error"])."</div>";
+					}else{
 
-					$new_recid = $out["bibID"];
-					$added_records[$rid] = $new_recid;
+						$new_recid = $out["bibID"];
+						$added_records[$rid] = $new_recid;
 
-					if(count($unresolved_records)>0){
-						$unresolved_pointers[$new_recid] = $unresolved_records;
+						if(count($unresolved_records)>0){
+							$unresolved_pointers[$new_recid] = $unresolved_records;
+						}
+
+						print "=>".$out["bibID"];
+
+						if (@$out['warning']) {
+								print "<br>Warning: ".implode("; ",$out["warning"]);
+						}
+
 					}
-
-					print "=>".$out["bibID"];
-
 			}//while by record of particular record type
 
 			ob_flush();flush(); // flush to screen

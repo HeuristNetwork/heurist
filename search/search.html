@@ -487,7 +487,7 @@
 					<li><a href="#m" onClick="top.HEURIST.search.mapSelected();"><em>Map View v2</em></a></li>
 					-->
   				</ul>
-				<div class="yui-content">
+				<div class="yui-content" style="overflow: hidden;">
 					<div id="r">
 						<iframe id="record-view-frame" class=viewers src="../common/html/msgNoRecordsSelected.html"></iframe>
 					</div>
@@ -550,7 +550,7 @@ rpc.style.height = (rpc.parentNode.offsetHeight || (rpc.parentNode.parentNode.of
 */top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadCommonInfo.php");	// core HEURIST object definitions (dynamically generated)
 top.HEURIST.loadScript("searchTypes.js");
 top.HEURIST.loadScript("search.js");				// search-specific HEURIST functions
-//top.HEURIST.loadScript(top.HEURIST.basePath+"records/edit/editRecord.js");				// edit-specific HEURIST functions
+top.HEURIST.loadScript(top.HEURIST.basePath+"records/edit/editRecord.js");				// edit-specific HEURIST functions
 top.HEURIST.fireEvent(window, "heurist-search-html-loaded");
 top.HEURIST.contentLoaded();
 
