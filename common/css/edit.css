@@ -690,7 +690,7 @@ td.input-cell.readonly img.edit-resource {
 	visibility: visible;
 }
 #all-inputs.readonly{
-	background-image: url(../images/readonly-watermark.png);
+	background-image: url(../images/non-editable-watermark.png);
 }
 .input-row .duplicator {
 	cursor: pointer;

@@ -81,29 +81,29 @@
 		<div class="input-header-cell" for="dty_Type">Data type:</div>
 		<div class="input-cell"><select class="dtyValue" id="dty_Type" onChange="window.detailTypeEditor.onChangeType(event)">
 			<option selected="selected" disabled="disabled" value="">-- Select data type --</option>
-			<option>freetext</option>
-			<option>blocktext</option>
-			<option>integer</option>
-			<option>date</option>
-			<option>year</option>
-			<option>relmarker</option>
-			<option>boolean</option>
-			<option>enum</option>
-			<option>relationtype</option>
-			<option>resource</option>
-			<option>float</option>
-			<option>file</option>
-			<option>urlinclude</option>
-			<option>geo</option>
-			<option>separator</option>
-			<option>calculated</option>
-			<option>fieldsetmarker</option>
+			<option value="enum">Enumerated (terms)</option>
+			<option value="relationtype">Relationship type (terms)</option>
+			<option value="integer">Numeric - integer</option>
+			<option value="float">Numeric - decimal</option>
+			<option value="date">Date / temporal</option>
+			<option value="year">Year (no mm-dd)</option>
+			<option value="file">File - local or uploaded</option>
+			<option value="urlinclude">File/URL of include content</option>
+			<option value="geo">Geospatial object</option>
+			<option value="freetext">Text (single line)</option>
+			<option value="blocktext">Memo (multi-line)</option>
+			<option value="resource">Record pointer</option>
+			<option value="relmarker">Relationship marker</option>
+			<option value="boolean">Boolean (true/false)</option>
+			<option value="separator">Separator (no data)</option>
+			<!--option value="calculated">Calculated value</option>
+			<option value="fieldsetmarker">Field set marker</option-->
 		</select>
 		<div class="help prompt">The type of data to be recorded in this field - once a field is defined, this cannot be changed</div></div>
 	</div>
 	<div id="pnl_enum" class="input-row" style="display:block;">
 		<div class="input-header-cell" for="termsPreview">Vocabulary (terms):</div>
-        <div class="input-cell">
+		<div class="input-cell">
 		<input type="submit" value="Change vocabulary" id="btnSelTerms" onClick="window.detailTypeEditor.onSelectTerms()"/>
 		<span class="dtyValue" id="termsPreview"><span>preview:</span></span>
 		<div class="help prompt">The set of terms which may be selected for this field (for enumerated values and relationships)</div>
@@ -112,7 +112,7 @@
 
 	<div id="pnl_relmarker" class="input-row" style="display:block;">
 		<div class="input-header-cell" for="dty_PtrTargetRectypeIDsPreview">Target record types:</div>
-        <div class="input-cell">
+		<div class="input-cell">
 		<span class="dtyValue" id="dty_PtrTargetRectypeIDsPreview" style="width:270px;"></span>
 		<input type="submit" value="Select Record Types" id="btnSelRecType2" onClick="window.detailTypeEditor.onSelectRectype()"/>
 		<div class="help prompt">The set of record types to which this field can point (for pointer fields and relationship markers. If undefined, it can point to any record type.</div>

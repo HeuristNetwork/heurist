@@ -654,7 +654,7 @@ function DetailTypeEditor() {
 			if( ((that.keepType==="resource") || (that.keepType==="relmarker") || (that.keepType==="enum")
 				|| (that.keepType==="relationtype") || (that.keepType==="fieldsetmarker"))
 				 && el.value!==that.keepType){
-			changeToNewType = confirm("If you change the type to '"+el.value+
+			changeToNewType = confirm("If you change the type to '"+el.value+	//saw TODO change this to the selected options text
 											"' you will lose all your vocabulary settings for type '"+that.keepType+
 										"'.\n\nAre you sure?");
 		}
@@ -707,9 +707,9 @@ function DetailTypeEditor() {
 			} else {
 					el.value = that.keepStatus; //restore previous value
 			}
-        }else if(el.value === "approved") {
-                that.keepStatus = el.value;
-                _toggleAll(true, false);
+		}else if(el.value === "approved") {
+			that.keepStatus = el.value;
+			_toggleAll(true, false);
 		} else {
 				that.keepStatus = el.value;
 				_toggleAll(false, false);

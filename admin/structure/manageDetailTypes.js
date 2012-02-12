@@ -363,7 +363,31 @@ function DetailTypeManager() {
 					}*/
 					elLiner.innerHTML = '<div title="'+tit+'">'+str+'</div>';
 			}},
-			{ key: "type", label: "Data Type", sortable:true, className:'center' },
+			{ key: "type", label: "Data Type", sortable:true,
+				formatter: function(elLiner, oRecord, oColumn, oData) {
+					var type = oRecord.getData("type");
+					var lookup = {
+						"enum" : "Enumerated (terms)",
+						"relationtype" : "Relationship type (terms)",
+						"integer" : "Numeric - integer",
+						"float" : "Numeric - decimal",
+						"date" : "Date / temporal",
+						"year" : "Year (no mm-dd)",
+						"file" : "File - local or uploaded",
+						"urlinclude" : "File/URL of include content",
+						"geo" : "Geospatial object",
+						"freetext" : "Text (single line)",
+						"blocktext" : "Memo (multi-line)",
+						"resource" : "Record pointer",
+						"relmarker" : "Relationship marker",
+						"boolean" : "Boolean (true/false)",
+						"separator" : "Separator (no data)",
+						"calculated" : "Calculated value",
+						"fieldsetmarker" : "Field set marker"
+					};
+					elLiner.innerHTML = lookup[type];
+				}
+			},
 			{ key: "description",   hidden:true},
 			{ key: "grp_id", label: "Group", sortable:false, width:90, className:'center',
 				formatter: YAHOO.widget.DataTable.formatDropdown,
