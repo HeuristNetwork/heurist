@@ -175,19 +175,19 @@ top.HEURIST.search = {
 
 	reloadFromParameters: function() {
 		var temp = top.HEURIST.basePath+"search/search.html?" +
-			("w=" + encodeURIComponent(window.HEURIST.parameters["w"])) + "&" +
-			("stype=" + (window.HEURIST.parameters["stype"] ? encodeURIComponent(window.HEURIST.parameters["stype"]) : "")) + "&" +
+			("w=" + encodeURIComponent(top.HEURIST.parameters["w"])) + "&" +
+			("stype=" + (top.HEURIST.parameters["stype"] ? encodeURIComponent(top.HEURIST.parameters["stype"]) : "")) + "&" +
 			("ver=" + top.HEURIST.search.VERSION) + "&" +
-			("q=" + encodeURIComponent(window.HEURIST.parameters["q"])+
+			("q=" + encodeURIComponent(top.HEURIST.parameters["q"])+
 			(window.HEURIST.database && window.HEURIST.database.name ? "&db=" + window.HEURIST.database.name : ""));
 		window.location.href = temp;
 	},
 
 	reloadSearch: function() {
-		window.HEURIST.parameters["q"] = document.getElementById("q").value;
-		window.HEURIST.parameters["w"] = document.getElementById("w-input").value;
-		if (window.HEURIST.parameters["label"]) {
-			delete window.HEURIST.parameters["label"];
+		top.HEURIST.parameters["q"] = document.getElementById("q").value;
+		top.HEURIST.parameters["w"] = document.getElementById("w-input").value;
+		if (top.HEURIST.parameters["label"]) {
+			delete top.HEURIST.parameters["label"];
 		}
 		if (!$("#simple-search").hasClass("collapsed")) {
 			$("#simple-search").toggleClass("collapsed");
@@ -202,7 +202,7 @@ top.HEURIST.search = {
 	},
 
 	loadSearch: function() {
-		if (! window.HEURIST.parameters["q"]) {
+		if (! top.HEURIST.parameters["q"]) {
 			top.HEURIST.registerEvent(window, "contentloaded",
 			function() { document.getElementById("search-status").className = "noquery"; });
 			return;
@@ -237,12 +237,12 @@ top.HEURIST.search = {
 	},
 
 	loadSearchParameters: function() {
-		var params = window.HEURIST.parameters;
+		var params = top.HEURIST.parameters;
 
 		// set search type
 		if (top.HEURIST.is_logged_in()  &&  params["w"] === "bookmark") {
 			params["w"] = "bookmark";
-		} else if (top.HEURIST.is_logged_in()  &&  top.HEURIST.util.getDisplayPreference("defaultMyBookmarksSearch") == "true") {
+		} else if (top.HEURIST.is_logged_in()  && params["w"] === "" &&  top.HEURIST.util.getDisplayPreference("defaultMyBookmarksSearch") == "true") {
 			params["w"] = "bookmark";
 		} else {
 			params["w"] = "all";
@@ -271,7 +271,7 @@ top.HEURIST.search = {
 			("&q=" + encodeURIComponent(params["q"])) +
 			("&db=" + (params['db'] ? params['db'] :
 						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : ""))) +
-			"&depth=3&limit=1000";
+			"&depth=3";
 		top.HEURIST.registerEvent(window, "heurist-related-recordset-loaded",
 									function (evt) {
 													top.HEURIST.search.loadLevelFilter(0);
@@ -472,7 +472,7 @@ top.HEURIST.search = {
 		}
 	},
 	setBodyClass: function() {
-		window.HEURIST.parameters["w"] = document.getElementById("w-input").value;
+		top.HEURIST.parameters["w"] = document.getElementById("w-input").value;
 		var searchType = document.getElementById("w-input").value;
 		if ($("body").hasClass("w-all")) {
 			$("body").removeClass("w-all");}
@@ -689,7 +689,7 @@ top.HEURIST.search = {
 
 	displaySearchParameters: function() {
 		// Transfer query components to their form elements
-		var params = window.HEURIST.parameters;
+		var params = top.HEURIST.parameters;
 		if (! params["w"]) {
 			if (top.HEURIST.is_logged_in()  &&  params["w"] === "bookmark") {
 				params["w"] = "bookmark";
@@ -708,9 +708,9 @@ top.HEURIST.search = {
 		}
 
 		// set body class for elements whose display depends on search mode
-		if (!$("body").hasClass("w-all") || !$("body").hasClass("w-bookmark")) {
+//		if (!$("body").hasClass("w-all") || !$("body").hasClass("w-bookmark")) {
 		//document.body.className += (document.body.className ? " " : "") + "w-" + params["w"];
-		}
+//		}
 		if (params["cf"]) {
 			document.getElementById("q").value = "";
 			set_stype_option("stype-0");
@@ -1212,7 +1212,7 @@ top.HEURIST.search = {
 			if (document.getElementById("page-nav"))
 				document.getElementById("page-nav").innerHTML = "";
 			document.getElementById("search-status").className = "noresult"
-				+ (window.HEURIST.parameters["w"] == "bookmark" ? "" : " all");
+				+ (top.HEURIST.parameters["w"] == "bookmark" ? "" : " all");
 			document.getElementById("resource-count").innerHTML = "";
 			return;
 		}
@@ -1883,7 +1883,7 @@ top.HEURIST.search = {
 		printSavedSearch = function(cmb, wg) {
 			var sid = cmb[2];
 
-			var active = (sid == window.HEURIST.parameters["sid"]);
+			var active = (sid == top.HEURIST.parameters["sid"]);
 
 
 			var innerHTML = "<nobr" + (active ? " id=activesaved" : "") + (cmb[4] || wg ? ">" : " class=bkmk>");
@@ -2371,7 +2371,7 @@ top.HEURIST.search = {
 				}
 			}else{
 				//by default use all records
-				query_string = query_string + '&q=' + window.HEURIST.parameters["q"];
+				query_string = query_string + '&q=' + top.HEURIST.parameters["q"];
 			 	url = top.HEURIST.basePath+ "viewers/map/showMap.html?"+query_string;
 
 			 	top.HEURIST.search.currentMapSearch = query_string;
@@ -2427,8 +2427,8 @@ top.HEURIST.search = {
 				}
 			}else{
 				//by default use all records
-				if(window.HEURIST.parameters["q"]){
-					query_string = query_string + '&q=' + window.HEURIST.parameters["q"];
+				if(top.HEURIST.parameters["q"]){
+					query_string = query_string + '&q=' + top.HEURIST.parameters["q"];
 				}else{
 					//query_string = "noquery";
 				}
@@ -2836,7 +2836,7 @@ top.HEURIST.search = {
 			return;
 		}
 		if (top.HEURIST.search.collectCount > 0) {
-			if (window.HEURIST.parameters["q"]  &&  window.HEURIST.parameters["q"].match(/_COLLECTED_/)) {
+			if (top.HEURIST.parameters["q"]  &&  top.HEURIST.parameters["q"].match(/_COLLECTED_/)) {
 				$('.not-query-collected').removeClass('not-query-collected').addClass('query-collected');
 			} else {
 				$('.query-collected').removeClass('query-collected').addClass('not-query-collected');
@@ -2857,7 +2857,7 @@ top.HEURIST.search = {
 		}
 		top.HEURIST.search.collection = results.ids;
 		top.HEURIST.search.renderCollectionUI();
-		if (window.HEURIST.parameters["q"].match(/_COLLECTED_/) && refresh) {
+		if (top.HEURIST.parameters["q"].match(/_COLLECTED_/) && refresh) {
 			top.location.reload();
 		}
 		top.HEURIST.search.collChangeTimer = 0;
@@ -2974,7 +2974,7 @@ top.HEURIST.search = {
 			rtFilter,relFilter,ptrFilter,
 			depth = 0;
 		if(isAll){
-			q = encodeURIComponent(window.HEURIST.parameters["q"]);//document.getElementById("q").value;
+			q = encodeURIComponent(top.HEURIST.parameters["q"]);//document.getElementById("q").value;
 		}else{
 			var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
 			if (recIDs_list.length == 0) {
@@ -3020,7 +3020,7 @@ top.HEURIST.search = {
 
 		var q = "";
 		if(false && isAll){
-			q = encodeURIComponent(window.HEURIST.parameters["q"]);//document.getElementById("q").value;
+			q = encodeURIComponent(top.HEURIST.parameters["q"]);//document.getElementById("q").value;
 		}else{
 			var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
 			if (recIDs_list.length == 0) {
@@ -3070,8 +3070,8 @@ top.HEURIST.search = {
 	setContactLink: function() {
 		document.getElementById("contact-link").href += "?subject=HEURIST%20v" + top.HEURIST.VERSION +
 														"%20user:" + top.HEURIST.get_user_username() +
-														(window.HEURIST.parameters["q"]
-															? "%20q:" + window.HEURIST.parameters["q"]
+														(top.HEURIST.parameters["q"]
+															? "%20q:" + top.HEURIST.parameters["q"]
 															: "") + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : "");
 	},
 
@@ -3172,7 +3172,7 @@ top.HEURIST.search = {
 
 
 	collectDuplicates: function() {
-		var params = window.HEURIST.parameters;
+		var params = top.HEURIST.parameters;
 		var args = [];
 		if (params['ver']) args.push('ver='+params['ver']);
 		if (params['w']) args.push('w='+params['w']);
@@ -3201,7 +3201,7 @@ top.HEURIST.search = {
 
 /* Depricated
 	buildPublishLinks: function() {
-		var p = window.HEURIST.parameters;
+		var p = top.HEURIST.parameters;
 		var args = [];
 		if (p['ver']) args.push('ver='+p['ver']);
 		if (p['w']) args.push('w='+p['w']);
@@ -3216,8 +3216,8 @@ top.HEURIST.search = {
 				a.title = "Publish the current search results as formatted output which can be printed, saved or generated (live) in a web page";
 				a.href = "#";
 			a.onclick = function() {
-				if (window.HEURIST.parameters["label"] && window.HEURIST.parameters["sid"]) {
-					window.open(top.HEURIST.basePath+ "viewers/publish/publisher.php?pub_id=" + window.HEURIST.parameters["sid"] + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""));
+				if (top.HEURIST.parameters["label"] && top.HEURIST.parameters["sid"]) {
+					window.open(top.HEURIST.basePath+ "viewers/publish/publisher.php?pub_id=" + top.HEURIST.parameters["sid"] + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""));
 				} else {
 					top.HEURIST.util.popupURL(window, top.HEURIST.basePath + 'search/saved/saveSearchPopup.html?publish=yes' + (top.HEURIST.database && top.HEURIST.database.name ? "&db=" + top.HEURIST.database.name : ""));
 				}
@@ -3228,7 +3228,7 @@ top.HEURIST.search = {
 	},
 
 	showPublishPopup: function() {
-		var div, a, p, popup, param = window.HEURIST.parameters;
+		var div, a, p, popup, param = top.HEURIST.parameters;
 		if (param['pub']  &&  param['sid']) {
 			setTimeout('window.open("'+top.HEURIST.basePath+'viewers/publish/publisher.php?pub_id=' + param["sid"]+'");',0);
 			return;

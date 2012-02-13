@@ -72,7 +72,7 @@
 			( HeuristBaseURL ? HeuristBaseURL : ""));
 			var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"";
 			var bugReportURL = '../export/email/formEmailRecordPopup.html?rectype=bugreport&db='+database;
-			    // was hBase, but ../ seems to work jsut as well
+				// was hBase, but ../ seems to work jsut as well
 
 			if (location.search.match(/[&?]q=[^&]+/)) {		//there is a search string
 //				top.HEURIST.parseParams();
@@ -86,22 +86,22 @@
 						if (top.HEURIST.displayPreferences.defaultMyBookmarksSearch == "true") {
 							document.body.className = "w-bookmark";
 							document.getElementById("w-input").value = "bookmark";
-							window.HEURIST.parameters["w"] = "bookmark";
+							top.HEURIST.parameters["w"] = "bookmark";
 						}
 						if (top.HEURIST.displayPreferences.defaultMyBookmarksSearch == "false"){
 							document.body.className = "w-all";
 							document.getElementById("w-input").value = "all";
-							window.HEURIST.parameters["w"] = "all";
+							top.HEURIST.parameters["w"] = "all";
 						}
-						window.HEURIST.parameters["q"] = top.HEURIST.displayPreferences.defaultSearch;
+						top.HEURIST.parameters["q"] = top.HEURIST.displayPreferences.defaultSearch;
 
-						window.HEURIST.parameters["db"] = database;
+						top.HEURIST.parameters["db"] = database;
 					}
 				});
 			}
 
 			if (! document.body.className) {
-				document.body.className = "w-" + window.HEURIST.parameters["w"];
+				document.body.className = "w-" + top.HEURIST.parameters["w"];
 			}
 			// start loading this early
 			top.HEURIST.loadScript(hBase+"common/php/loadUserInfo.php" +	// user-specific HEURIST data
