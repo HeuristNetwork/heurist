@@ -140,9 +140,10 @@
 			} // checking for current administrative user
 
 			// Create a new blank database
-            $newDBName = $_POST['dbname'];
-            $usrPrefix = $_POST['uname'];
-			$newname = HEURIST_DB_PREFIX . $usrPrefix . '_' . $newDBName; // all databases have common prefix then user prefix
+            $newDBName = trim($_POST['uname']).'_';
+            if ($newDBName == '_') {$newDBName='';}; // don't double up underscore if no user prefix
+            $newDBName = $newDBName . trim($_POST['dbname']);
+			$newname = HEURIST_DB_PREFIX . $newDBName; // all databases have common prefix then user prefix
 
 			// Avoid illegal chars in db name
 			$hasInvalid = isInValid($newname);

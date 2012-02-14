@@ -88,8 +88,10 @@
 							type="Create a new database with essential structure elements">New database</a></li>
 						<li><a href="#" onClick="loadContent('setup/straightCopyDatabase.php?db=[dbname!]')"
 							title="Clones a complete database with all data, users, attached files, templates etc.">Clone database</a></li>
-						<li><a href="setup/deleteCurrentDB.php?db=[dbname!]"
-							title="Delete a database completely">Delete database</a></li>
+                        <li><a href="setup/deleteCurrentDB.php?db=[dbname!]"
+                            title="Delete a database completely">Delete entire database</a></li>
+                        <li><a href="setup/clearCurrentDB.php?db=[dbname!]"
+                            title="Clear all data from the current database, database definitions are unaffected">Delete all records</a></li>
 
 						<li class="seperator"><a href="#" onClick="loadContent('setup/registerDB.php?db=[dbname!]')"
 							title="Register this database with the Heurist Master Index">Registration</a></li>
