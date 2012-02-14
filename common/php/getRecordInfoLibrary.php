@@ -15,6 +15,7 @@ require_once(dirname(__FILE__).'/imageLibrary.php');
 if (!defined('MEMCACHED_PORT')) define('MEMCACHED_PORT', 11211);
 $memcache = null;
 $lastModified = null;
+$dbID = intval(HEURIST_DBID);
 // read
 function setLastModified() {
 global $lastModified;
@@ -336,7 +337,7 @@ function attachChild($contIndex, $index, $terms) {
 		return $terms;
 	}
 
-function getTermTree($termDomain, $matching = 'exact') {	// vocabDomain can be empty, 'reltype' or 'enum' or any future term use domain defined in trm_Domain enum
+function getTermTree($termDomain, $matching = 'exact') {	// termDomain can be empty, 'reltype' or 'enum' or any future term use domain defined in trm_Domain enum
 
 	$whereClause = "a.trm_Domain ".($matching == 'prefix' ?  " like '".$termDomain."%' " :
 									($matching == 'postfix' ?  " like '%".$termDomain."' " :
@@ -442,7 +443,7 @@ function getTermColNames(){
 					"trm_Status",
 					"trm_OriginatingDBID",
 //					"trm_NameInOriginatingDB",
-//					"trm_IDInOriginatingDB",
+					"trm_IDInOriginatingDB",
 					"trm_AddedByImport",
 					"trm_IsLocalExtension",
 					"trm_Domain",
@@ -451,10 +452,11 @@ function getTermColNames(){
 					"trm_ParentTermID",
 					"trm_Depth",
 					"trm_Modified",
-					"trm_LocallyModified");
+					"trm_LocallyModified",
+					"trm_ConceptID");
 }
 
-function getTerms($useCachedData = false) {	// vocabDomain can be empty, 'reltype' or 'enum' or any future term use domain defined in trm_Domain enum
+function getTerms($useCachedData = false) {
 	$cacheKey = DATABASE.":getTerms";
 	if ($useCachedData) {
 		$terms = getCachedData($cacheKey);
@@ -463,13 +465,20 @@ function getTerms($useCachedData = false) {	// vocabDomain can be empty, 'reltyp
 		}
 	}
 
-	$query = "select ".join(",", getTermColNames())." from defTerms order by trm_Domain, trm_Label";
+	$query = "select ".join(",", getTermColNames());
+	$query = preg_replace("/trm_ConceptID/","",$query);
+	if ($dbID) {//if(trm_OriginatingDBID,concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))),'null') as trm_ConceptID
+		$query .= " if(trm_OriginatingDBID, concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))), concat('$dbID-',cast(trm_ID as char(5)))) as trm_ConceptID";
+	}else{
+		$query .= " if(trm_OriginatingDBID, concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))), '') as trm_ConceptID";
+	}
+	$query .= " from defTerms order by trm_Domain, trm_Label";
 	$res = mysql_query($query);
 	$terms = array('termsByDomainLookup' => array('relation'=> array(), 'enum'=> array()),
 					'commonFieldNames' => array_slice(getTermColNames(),1),
 					'fieldNamesToIndex' => getColumnNameToIndex(array_slice(getTermColNames(),1)));
 	while ($row = mysql_fetch_row($res)) {
-			$terms['termsByDomainLookup'][$row[8]][$row[0]] = array_slice($row,1);
+			$terms['termsByDomainLookup'][$row[9]][$row[0]] = array_slice($row,1);
 	}
 	$terms['treesByDomain'] = array('relation' => getTermTree("relation","prefix"),
 									'enum' => getTermTree("enum","prefix"));
@@ -731,8 +740,8 @@ function getRectypeColNames(){
 					"rty_Plural",
 					"rty_Status",
 					"rty_OriginatingDBID",
-//					"rty_NameInOriginatingDB",
-//					"rty_IDInOriginatingDB",
+					"rty_NameInOriginatingDB",
+					"rty_IDInOriginatingDB",
 					"rty_NonOwnerVisibility",
 					"rty_ShowInLists",
 					"rty_RecTypeGroupID",
@@ -742,7 +751,8 @@ function getRectypeColNames(){
 					"rty_AlternativeRecEditor",
 					"rty_Type",
 					"rty_Modified",
-					"rty_LocallyModified");
+					"rty_LocallyModified",
+					"rty_ConceptID");
 }
 
 function getColumnNameToIndex($columns){
@@ -920,13 +930,21 @@ function getAllRectypeStructures($useCachedData = false) {
 	}
 
 	// get rectypes ordered by the RecType Group order, then by Group Name, then by rectype order in group and then by rectype name
-	$res = mysql_query("select rty_ID, rtg_ID, rtg_Name, ".join(",", getRectypeColNames())." from defRecTypes
-							left join defRecTypeGroups  on rtg_ID = rty_RecTypeGroupID
-							order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
+	$query = "select rty_ID, rtg_ID, rtg_Name, ".join(",", getRectypeColNames());
+	$query = preg_replace("/rty_ConceptID/","",$query);
+	if ($dbID) {//if(trm_OriginatingDBID,concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))),'null') as trm_ConceptID
+		$query .= " if(rty_OriginatingDBID, concat(cast(rty_OriginatingDBID as char(5)),'-',cast(rty_IDInOriginatingDB as char(5))), concat('$dbID-',cast(rty_ID as char(5)))) as rty_ConceptID";
+	}else{
+		$query .= " if(rty_OriginatingDBID, concat(cast(rty_OriginatingDBID as char(5)),'-',cast(rty_IDInOriginatingDB as char(5))), '') as rty_ConceptID";
+	}
+	$query .= " from defRecTypes left join defRecTypeGroups  on rtg_ID = rty_RecTypeGroupID".
+				" order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name";
+	$res = mysql_query($query);
+
 
 	while ($row = mysql_fetch_row($res)) {
 		array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$row[1]]]['allTypes'],$row[0]);
-		if ($row[12]) {
+		if ($row[11]) {//rty_ShowInList
 			array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$row[1]]]['showTypes'],$row[0]);
 		}
 
@@ -934,7 +952,7 @@ function getAllRectypeStructures($useCachedData = false) {
 
 		$rtStructs['typedefs'][$row[0]]['commonFields'] = $commonFields;
 		$rtStructs['names'][$row[0]] = $row[3];
-		$rtStructs['pluralNames'][$row[0]] = $row[8];
+		$rtStructs['pluralNames'][$row[0]] = $row[5];
 	}
 	$rtStructs['constraints'] = getAllRectypeConstraint();
 	setCachedData($cacheKey,$rtStructs);
@@ -1016,7 +1034,7 @@ function getDetailTypeColNames() {
 					"dty_Status",
 					"dty_OriginatingDBID",
 //					"dty_NameInOriginatingDB",
-//					"dty_IDInOriginatingDB",
+					"dty_IDInOriginatingDB",
 					"dty_DetailTypeGroupID",
 					"dty_OrderInGroup",
 					"dty_JsonTermIDTree",
@@ -1026,7 +1044,8 @@ function getDetailTypeColNames() {
 					"dty_ShowInLists",
 					"dty_NonOwnerVisibility",
 					"dty_Modified",
-					"dty_LocallyModified");
+					"dty_LocallyModified",
+					"dty_ConceptID");
 }
 
 // returns an array of RecType Structures for all RecTypes
@@ -1048,9 +1067,15 @@ function getAllDetailTypeStructures($useCachedData = false) {
 						'typedefs' => array('commonFieldNames' => getDetailTypeColNames(),
 											'fieldNamesToIndex' => getColumnNameToIndex(getDetailTypeColNames())));
 
-	$query = "select dtg_ID, dtg_Name, ".join(",", getDetailTypeColNames())." from defDetailTypes
-							left join defDetailTypeGroups  on dtg_ID = dty_DetailTypeGroupID
-							order by dtg_Order, dtg_Name, dty_OrderInGroup, dty_Name";
+	$query = "select dtg_ID, dtg_Name, ".join(",", getDetailTypeColNames());
+	$query = preg_replace("/dty_ConceptID/","",$query);
+	if ($dbID) {//if(trm_OriginatingDBID,concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))),'null') as trm_ConceptID
+		$query .= " if(dty_OriginatingDBID, concat(cast(dty_OriginatingDBID as char(5)),'-',cast(dty_IDInOriginatingDB as char(5))), concat('$dbID-',cast(dty_ID as char(5)))) as dty_ConceptID";
+	}else{
+		$query .= " if(dty_OriginatingDBID, concat(cast(dty_OriginatingDBID as char(5)),'-',cast(dty_IDInOriginatingDB as char(5))), '') as dty_ConceptID";
+	}
+	$query .= " from defDetailTypes left join defDetailTypeGroups  on dtg_ID = dty_DetailTypeGroupID".
+				" order by dtg_Order, dtg_Name, dty_OrderInGroup, dty_Name";
 
 	$res = mysql_query($query);
 
