@@ -403,15 +403,57 @@ FlexImport = (function () {
 			}
 			opt = sel.appendChild(document.createElement("option"));
 			opt.value = null; opt.innerHTML = "do not import";
-			_addOpt(sel, "url", "URL", columnName == "url");
-			_addOpt(sel, "notes", "Notes", columnName == "notes");
+
+			var grp = sel.appendChild(document.createElement("optgroup"));
+			grp.label = " ";
+
 			_addOpt(sel, "tags", "Tag(s)", columnName == "tag(s)");
 			_addOpt(sel, "wgTags", "Workgroup Tag(s)", columnName == "workgroup tag(s)");
 
 			var reqDetailTypes = HDetailManager.getRequiredDetailTypesForRecordType(FlexImport.recType);
 			var detailTypes = HDetailManager.getDetailTypesForRecordType(FlexImport.recType);
-			var d, rdl = reqDetailTypes.length;
+			var d, k, rdl = reqDetailTypes.length;
 			var dl = detailTypes.length;
+
+			var alist = [];
+
+			alist.push({id:'url', name:'URL', selected:(columnName == 'url'), req:false});
+			alist.push({id:'notes', name:'Notes', selected:(columnName == 'notes'), req:false});
+
+			for (d = 0; d < dl; ++d) {
+				var rdName = HDetailManager.getDetailNameForRecordType(FlexImport.recType, detailTypes[d]);
+				var det_id = detailTypes[d].getID();
+				var isrequired = false;
+
+				for (k = 0; d < rdl; ++k) {
+					if(det_id = reqDetailTypes[k].getID()){
+						isrequired = true;
+						break;
+					}
+				}
+
+				alist.push({id:det_id, name:rdName, selected:(columnName == rdName.toLowerCase()), req:isrequired});
+			}
+
+			//sort by name
+			alist.sort(function (a,b){
+				return a.name<b.name?-1:1;
+			});
+
+			grp = sel.appendChild(document.createElement("optgroup"));
+			grp.label = " ";
+
+			//create options for select
+			for (d = 0; d < alist.length; ++d) {
+				var opt = _addOpt(sel, alist[d].id, alist[d].name, alist[d].selected);
+				if(alist[d].req){
+					opt.className = "required";
+				}
+			}
+
+//_addOpt(sel, val, text, selected)
+
+/* it works!!! but it used before 2012-02-14
 			var rdIndex = {};
 			var grp = sel.appendChild(document.createElement("optgroup"));
 			grp.label = "Required fields";
@@ -434,7 +476,7 @@ FlexImport = (function () {
 				var rdName = HDetailManager.getDetailNameForRecordType(FlexImport.recType, detailTypes[d]);
 				var opt = _addOpt(sel, detailTypes[d].getID(),rdName,columnName == rdName.toLowerCase());
 			}
-
+*/
 			if(i<FlexImport.cols.length &&  FlexImport.cols[i]){
 				sel.value = FlexImport.cols[i];
 			}
