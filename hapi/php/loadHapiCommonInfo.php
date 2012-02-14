@@ -188,31 +188,32 @@ $rec_types = mysql__select_array("defRecTypes","distinct rty_ID", "1 order by rt
 		// rst_TermIDTreeNonSelectableIDs, rst_CalcFunctionID, rst_Status, rst_OrderForThumbnailGeneration,
 		// dty_TermIDTreeNonSelectableIDs, dty_FieldSetRectypeID, rst_NonOwnerVisibility] ...]
 //error_log(print_r($rec_types,true));
+$rstC2I = getColumnNameToIndex(getRectypeStructureFieldColNames());
 foreach ($rec_types as $rec_type) {
 	foreach (getRectypeFields($rec_type) as $dtyID => $rdr) {
 		// saw TODO need to represent the trm ids  and rectype pointer ids that are valid for this rectype.detailtype.
 		array_push($detailRequirements, array(
-			$rec_type,			// 0-recTypeID
-			$dtyID,				// 1-detailTypeID
-			$rdr[4],			// 2-RequirementType
-			intval($rdr[5]),	// 3-MaxValue
-			$rdr[0],			// 4-Name
-			$rdr[1],			// 5-HelpText
-			intval($rdr[8]),	// 6-Match Order
-			intval($rdr[7]),	// 7-DisplayWidth
-			intval($rdr[9]),	// 8-Display Order
-			$rdr[2],			// 9-Extended Description
-			$rdr[3],			//10-Default Value
-			intval($rdr[6]),	//11-MinValue
-			$rdr[10],			//12-DetailGroupID
-			$rdr[11],			//13-Filtered Enum Term IDs
-			$rdr[13],			//14-Extended Disabled Term IDs
-			$rdr[17],			//15-Detail Type Disabled Term IDs
-			$rdr[12],			//16-Filtered Pointer Constraint Rectype IDs
-			$rdr[14],			//17-Calc Function ID
-			$rdr[16],			//18-Thumbnail selection Order
-			$rdr[15],			//19-Status
-			$rdr[19]));			//20-Non-Owner Visibility
+			$rec_type,																							// 0-recTypeID
+			$dtyID,																								// 1-detailTypeID
+			$rstC2I['rst_RequirementType']?$rdr[$rstC2I['rst_RequirementType']]:null,							// 2-RequirementType
+			$rstC2I['rst_MaxValues']?intval($rdr[$rstC2I['rst_MaxValues']]):0,									// 3-MaxValue
+			$rstC2I['rst_DisplayName']?$rdr[$rstC2I['rst_DisplayName']]:null,									// 4-Name
+			$rstC2I['rst_DisplayHelpText']?$rdr[$rstC2I['rst_DisplayHelpText']]:null,							// 5-HelpText
+			$rstC2I['rst_RecordMatchOrder']?intval($rdr[$rstC2I['rst_RecordMatchOrder']]):0,					// 6-Match Order
+			$rstC2I['rst_DisplayWidth']?intval($rdr[$rstC2I['rst_DisplayWidth']]):0,							// 7-DisplayWidth
+			$rstC2I['rst_DisplayOrder']?intval($rdr[$rstC2I['rst_DisplayOrder']]):0,							// 8-Display Order
+			$rstC2I['rst_DisplayExtendedDescription']?$rdr[$rstC2I['rst_DisplayExtendedDescription']]:null,		// 9-Extended Description
+			$rstC2I['rst_DefaultValue']?$rdr[$rstC2I['rst_DefaultValue']]:null,									//10-Default Value
+			$rstC2I['rst_MinValues']?intval($rdr[$rstC2I['rst_MinValues']]):0,									//11-MinValue
+			$rstC2I['rst_DisplayDetailTypeGroupID']?$rdr[$rstC2I['rst_DisplayDetailTypeGroupID']]:null,			//12-DetailGroupID
+			$rstC2I['rst_FilteredJsonTermIDTree']?$rdr[$rstC2I['rst_FilteredJsonTermIDTree']]:null,				//13-Filtered Enum Term IDs
+			$rstC2I['rst_TermIDTreeNonSelectableIDs']?$rdr[$rstC2I['rst_TermIDTreeNonSelectableIDs']]:null,		//14-Extended Disabled Term IDs
+			$rstC2I['dty_TermIDTreeNonSelectableIDs']?$rdr[$rstC2I['dty_TermIDTreeNonSelectableIDs']]:null,		//15-Detail Type Disabled Term IDs
+			$rstC2I['rst_PtrFilteredIDs']?$rdr[$rstC2I['rst_PtrFilteredIDs']]:null,								//16-Filtered Pointer Constraint Rectype IDs
+			$rstC2I['rst_CalcFunctionID']?$rdr[$rstC2I['rst_CalcFunctionID']]:null,								//17-Calc Function ID
+			$rstC2I['rst_OrderForThumbnailGeneration']?$rdr[$rstC2I['rst_OrderForThumbnailGeneration']]:null,	//18-Thumbnail selection Order
+			$rstC2I['rst_Status']?$rdr[$rstC2I['rst_Status']]:null,												//19-Status
+			$rstC2I['rst_NonOwnerVisibility']?$rdr[$rstC2I['rst_NonOwnerVisibility']]:null,));					//20-Non-Owner Visibility
 	}
 }
 
