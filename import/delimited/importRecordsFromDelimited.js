@@ -1167,7 +1167,7 @@ FlexImport.Saver = (function () {
 			function(r) {
 				$("#rec-type-select-div").empty();
 				$("#rec-type-select-div").empty();
-				$("#records-div").html("Saved <b>" + FlexImport.recEnd+ "</b> records"); 
+				$("#records-div").html("Saved <b>" + FlexImport.recEnd+ "</b> records");
                 // r.length gives the number of records in the chunk being saved
 				FlexImport.recStart = FlexImport.recEnd;
 				_getChunk();

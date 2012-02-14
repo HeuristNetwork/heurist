@@ -47,8 +47,55 @@
 				return tagOnlySearches;
 			}
 
+			//
+			function parseOnlyCollections(searches) {
+				var res = [];
+
+				for (var i =0; i < searches.length; i++) {
+					var ss = searches[i];
+					if (!ss[1]) {
+						continue;
+					}
+					//TEST if(i==38){alert('!!!');}
+					var q = ss[1].match(/[\?&]q=([^&]*)/);
+					if (!q || !q[1]) {
+						continue;
+					}
+
+					q = q[1].replace(/\+?sortby:('[^']+'|"[^"]+"|\S+)/g,'');	//remove any sortby predicates
+					q = q.replace(/OR(?![^:='"]+['"])/g,'');	// remove any 'OR' s not in a quoted string
+					var preds = q.match(/\S+[:=](?:'[^']+'|"[^"]+"|\S+)|[^:='"\s]+/g);	//create an array of all predicates including stand alone words
+
+					for (var j =0; j < preds.length; j++) {
+						if(preds[j].indexOf('ids:')===0){
+							res.push([ss[0], i]); //name and index in top.HEURIST.user.savedSearches
+							break;
+						}
+					}
+				}
+				return res;
+			}
+
+			/**
+
+			*/
 			function init() {
+
+				//collections
+				var ss = parseOnlyCollections(top.HEURIST.user.savedSearches);
 				var iHTML = '<option value="" selected disabled>select ...</option>';
+				if (ss.length>0) {
+					iHTML += '<optgroup label="saved collections" id="my-searches">';
+					for (var i = 0; i < ss.length; i++) {
+						iHTML += "<option value='" + ss[i][1] + "'>" + ss[i][0] + "</option>";
+					}
+					iHTML += "</optgroup>";
+				}
+				document.getElementById("collection-select").innerHTML = iHTML;
+
+
+				iHTML = '<option value="" selected disabled>select ...</option>';
+
 				var ss = parseTagOnlySearches(top.HEURIST.user.savedSearches);
 				if (ss.length) {
 					iHTML += '<optgroup label="Personal saved searches" id="my-searches">';
@@ -82,31 +129,20 @@
 				document.getElementById("wg-options").innerHTML += iHTML;
 
 				document.title += " Save collection (" + top.HEURIST.search.collectCount + " records) as Saved Search";
-				setTimeout(function() { document.getElementById('search-select').focus() }, 10);
+				setTimeout(function() { document.getElementById('ssType2').click() }, 10);
+/* not used since 2012-02-13
 				var tagsElt = document.getElementById('personal-tags');
 				window.autocomplete = new top.HEURIST.autocomplete.AutoComplete(tagsElt, top.HEURIST.util.tagAutofill, { nonVocabularyCallback: top.HEURIST.util.showConfirmNewTag });
-
 				var removeButton = document.getElementById("remove-button");
 				var addButton = document.getElementById("add-button");
 
 				var currWgTagsElt = document.getElementById("current-workgroup-tags");
 				var allWgTagsElt = document.getElementById("all-workgroup-tags");
 				HEURIST.wgTagEditor.WgTagEditor(currWgTagsElt, allWgTagsElt, addButton, removeButton);
-
+*/
 			}
 
-			function keypress(e) {
-				if (! e)
-				e = window.event;
-				var code = e.keyCode;
-				if (e.which)
-				code = e.which;
-				// " and '
-				if (code == 34  ||  code == 39)
-				return false;
-			}
-
-
+/* not used since 2012-02-13
 			function checkPersonalTags() {
 				var tagsElem = document.getElementById("personal-tags");
 				var tagsWarnStyle = document.getElementById('personal-tags-warning').style;
@@ -115,9 +151,26 @@
 				} else if (!tagsElem.value && !tagsWarnStyle.display) {
 					tagsWarnStyle.display = "none";
 				}
+			}*/
+
+			function keypress(e) {
+				if (! e)
+					e = window.event;
+				var code = e.keyCode;
+				if (e.which)
+					code = e.which;
+				// " and '
+				if (code == 34  ||  code == 39)
+					return false;
+
+				switchModeNew();
 			}
 
-			function save() {
+			/**
+			  use form actionHandler.php in i_action frame in parent search.html
+			*/
+			function save()
+			{
 				var action_fr = parent.document.getElementById("i_action").contentWindow;
 				var action_elt = action_fr.document.getElementById("action");
 				var ss_name_elt = action_fr.document.getElementById("svs_Name");
@@ -125,13 +178,86 @@
 				var ss_wgid_elt = action_fr.document.getElementById("svs_UGrpID");
 				var ss_id_elt = action_fr.document.getElementById("svs_ID");
 				var ss_kwds_elt = action_fr.document.getElementById("tagString");
-				action_fr.document.getElementById("bib_ids").value = top.HEURIST.search.collection.join(',');
+				var cmb_instance = action_fr.document.getElementById("db");
 
 				if (! action_fr  ||  ! action_elt  ||  ! ss_name_elt  ||  ! ss_query_elt  ||  ! ss_wgid_elt ||  ! ss_id_elt ||  ! ss_kwds_elt) {
 					alert("Problem contacting server - try again in a moment");
 					return;
 				}
-				if ($('input[name="ssType"]:checked').val()== "1") { //create a saved search
+
+				var rec_ids = top.HEURIST.search.collection.join(',');
+
+				action_fr.document.getElementById("bib_ids").value = rec_ids;
+
+				if($("#ssType2").attr('checked')){  //add to existing collection
+
+					var elem = document.getElementById("collection-select");
+					action_elt.value = "save_search";
+					index = Number(elem.value);
+
+
+					if (isNaN(index) || index < 1) {
+						alert("You must select the existing collection to add to.");
+						return;
+					}
+
+					var ss = top.HEURIST.user.savedSearches[index];
+
+					ss_id_elt.value = ss[2];
+					ss_name_elt.value = elem.options[elem.selectedIndex].text;
+
+					var m = ss[1].match(/ids:([^&]*)/);
+					var ex_rec_ids = m[1];
+					var q = ss[1].replace(/ids:([^&]*)/ , "ids:"+ex_rec_ids+","+rec_ids);
+
+					ss_query_elt.value = q;
+
+				}else if ($("#ssType1").attr('checked')) { // Create new collection
+
+					action_elt.value = "save_search";
+					ss_name_elt.value = document.getElementById("search-name").value;
+					ss_wgid_elt.value = document.getElementById("wg-select").value;
+
+					if (!ss_name_elt.value) {
+						alert("You must enter name for the saved-search before saying.");
+						return;
+					}
+
+
+					var query = new Array();
+					if (ss_wgid_elt.value > 0 ){
+
+						var bkmk_only = document.getElementById("bookmark-check");
+
+						if (!bkmk_only.checked){
+							//for workgroup searches overwrite with all records search
+							query.push("w=all");
+						} else {
+							query.push("w=bookmark");
+							rec_ids = rec_ids + " user:" + top.HEURIST.get_user_id();
+						}
+					}
+					query.push("q=ids:"+rec_ids);
+
+					for (var p in top.HEURIST.parameters) { //remove it at all????
+						if (p != "label" && p != "sid" && p != "db" && p != "w" && p != "q") {
+							query.push(p + "=" + encodeURIComponent(top.HEURIST.parameters[p]));
+						}
+					}
+
+					var result_style = document.getElementById("result-style-select").value;
+					if (result_style) {
+						query.push("view=" + result_style);
+					}
+					if (top.HEURIST.database.name){
+						cmb_instance.value = top.HEURIST.database.name;
+					}
+
+					ss_query_elt.value = "?" + query.join("&");
+
+
+				}else if (false){ //not used since 2012-02-13
+
 					action_elt.value = "bookmark_tag_and_ssearch";
 					ss_name_elt.value = document.getElementById("search-name").value;
 					if (!ss_name_elt.value) {
@@ -166,81 +292,145 @@
 					query.push("w=" + $("input[name='w']:checked").val());
 					ss_query_elt.value = "?" + query.join("&");
 
+
+
 				}else{	//tag collections so they show up in an exisitng tag only saved search
 					action_elt.value = "bookmark_and_tag";
 					ss_kwds_elt.value = $('#search-tag-list').text().replace(/\s\|\s/,',');
 				}
+
 				action_elt.form.submit();
 				setTimeout(function() { window.close(); }, 10);
 			}
 
-			function switchMode(toID,fromID,focusID) {
-				$('#'+fromID).removeClass('bggray');
-				$('#'+toID).addClass('bggray');
-				var enableID = '#' + toID.match(/^[^_]+_/)[0] + "span";
-				var disableID = '#' + fromID.match(/^[^_]+_/)[0] + "span";
+			//
+			// enable-disable components according to current mode
+			//
+			function switchMode(toID,arrFromID,focusID) {
+				$('#'+toID).removeClass('bggray');
+				var enableID = '#' + toID + "_span";
 				$( enableID + " input, " + enableID + " select").attr("disabled",false);
-				$( disableID + " input, " + disableID + " select").attr("disabled",true);
-				$(enableID + " .wgtag-list tr").show()
-				$(disableID + " .wgtag-list tr").hide()
+				//$(enableID + " .wgtag-list tr").show();
+
+				for(var ind in arrFromID)
+				if(!top.HEURIST.util.isnull(ind)){
+					var fromID = arrFromID[ind]
+					$('#'+fromID).addClass('bggray');
+					var disableID = '#' + fromID + "_span";
+					$( disableID + " input, " + disableID + " select").attr("disabled",true);
+					//$(disableID + " .wgtag-list tr").hide();
+				}
+
 				$('#'+focusID).focus();
 			}
 
-			function displayBookmarkCheck(){
-				if (document.getElementById("wg-select").value) {
-					$('#all')[0].click();
-				} else {
-					$('bookmark')[0].click();
-				}
+			//
+			//
+			//
+			function switchModeNew() {
+				switchMode('create_new_search',['add_to_collection','add_to_search'],'search-name');
+				$("#ssType1").attr('checked', true);
 			}
+
+			//
+			//
+			//
+			function displayBookmarkCheck(){
+				switchModeNew();
+				var vis = (document.getElementById("wg-select").value=="")?'block':'none';
+				document.getElementById('bookmark-check-span').style.display = vis;
+					document.getElementById('bookmark-warning').style.display = (vis=='block' && document.getElementById('bookmark-check').checked)?'block':'none';
+			}
+
+			//
+			//
+			//
+			function showTagInfo(event){
+				var elem = event.target;
+				//document.getElementById('divTagInfo').style.display = (elem.value!='')?'block':'none';
+				document.getElementById('divTagInfo').style.visibility = (elem.value!='')?'visible':'hidden';
+				document.getElementById('search-tag-list').innerHTML = elem.value; //.options[this.selectedIndex].value;
+				return false;
+			}
+
+
 		</script>
 	</head>
 
 	<body class="popup" onload="init();">
-
+<!-- not used since 2012-02-13
 		<script src='../../records/tags/autocompleteTags.js'></script>
-
-		<div id="add_to_search" style="padding:10px 0">
-				<input type="radio" name="ssType" id="ssType" value="0" checked="checked" onclick="switchMode('add_to_search','create_new_search','search-select');">&nbsp;<b>Add to existing saved search</b>
-				<span id="add_span">
-				<select id="search-select" style="max-width:150px" onchange="document.getElementById('search-tag-list').innerHTML = this.options[this.selectedIndex].value; document.getElementById('ssType').click(); return false;">
-				</select>
-				<span class="help prompt" style="margin-left:5px" >
-					Only tag-based searches can be used
-				</span><br/>
-				<div style="margin:10px 0">
-					<span style="margin-left: 16px;">The following tag(s) will be added: </span>
-					<span id="search-tag-list" style="color: #6A7C99" ></span>
-				</div>
+-->
+		<div id="add_to_collection" style="padding:10px 0">
+				<input type="radio" name="ssType" id="ssType2" value="2" checked="checked"
+				onclick="switchMode('add_to_collection',['add_to_search','create_new_search'],'collection-select');"
+				style="float:left;">
+				<div style="padding-left:5px;float:left;min-width:180px;font-weight:bold;">Add to existing collection</div>
+				<span id="add_to_collection_span">
+					<select id="collection-select" style="width:150px">
+					</select>
 				</span>
-			</div>
+		</div>
 
 		<div class="separator_row" style="margin-bottom:20px"></div>
 
-			<div id="create_new_search">
-			<input type="radio" name="ssType" value="1" onclick="switchMode('create_new_search','add_to_search','search-name');">&nbsp;<b>Create new saved search</b><br/>
+		<div id="add_to_search" style="padding:10px 0">
+				<input type="radio" name="ssType" id="ssType0" value="0"
+				onclick="switchMode('add_to_search',['add_to_collection','create_new_search'],'search-select');"
+				style="float:left;">
+				<div style="padding-left:5px;float:left;min-width:180px;font-weight:bold;">Add to existing saved search</div>
+				<span id="add_to_search_span">
+					<select id="search-select" style="width:150px" onchange="showTagInfo(event);">
+					</select>
+					<span class="help prompt" style="margin-left:5px" >
+						Only tag-based searches can be used
+					</span><br/>
+					<div style="margin:10px 0; visibility:hidden;" id="divTagInfo">
+						<span style="margin-left: 16px;">The following tag(s) will be added: </span>
+						<span id="search-tag-list" style="color: #6A7C99" ></span>
+					</div>
+				</span>
+		</div>
+
+		<div class="separator_row" style="margin-bottom:20px"></div>
+
+		<div id="create_new_search">
+			<input type="radio" name="ssType" id="ssType1" value="1"
+					onclick="switchModeNew()">&nbsp;<b>Create new collection</b><br/>
 			<div style="margin-left:16px">
 					<div class="div-section">
-					<div style="width:125px; text-align:right; display:inline-block">Name for this search:</div>
-					<input style="width:150px;height: 17px; margin-left: 5px;" type=text id=search-name onkeypress="return keypress(event)">
-						<span style="float: right; margin-right: 107px;">
-							<input type="radio" name="w" value="all" id="all" checked="checked" onclick="document.getElementById('bookmark-warning').style.display = 'none';">
-							<label for="all" >&nbsp;search all records</label><br/>
+						<div style="width:170px; text-align:right; display:inline-block">Name for this search:</div>
+						<input style="width:150px;height: 17px; margin-left: 5px;" type=text id=search-name onkeypress="return keypress(event)">
+						<span id="bookmark-check-span" style="float: right; margin-right: 107px;">
+							<input type="checkbox" id="bookmark-check" onclick="document.getElementById('bookmark-warning').style.display = this.checked?'block':'none';">
+							<label for="bookmark">&nbsp;Add to My Bookmarks</label><br/>
 						</span>
 					</div>
 					<div class="div-section">
-					<div style="width:125px; text-align:right; display:inline-block">Add search to:</div>
-					<select id=wg-select onChange="displayBookmarkCheck();" style="width:150px;margin-left: 5px; height: 17px;">
+						<div style="width:170px; text-align:right; display:inline-block">Add search to:</div>
+						<select id=wg-select onChange="displayBookmarkCheck();" style="width:150px;margin-left: 5px; height: 17px;">
 							<option value="">personal saved searches</option>
 							<optgroup label="workgroup saved searches" id=wg-options></optgroup>
 						</select>
 						<span style="float: right; margin-right: 56px;">
-							<input type="radio" name="w" id="bookmark" value="bookmark" onclick="document.getElementById('bookmark-warning').style.display = '';">
-							<label for="bookmark">&nbsp;only my bookmarked records</label><br/>
 							<span class="warning-message" id="bookmark-warning" style="margin-left: 25px; display: none;">&nbsp;records in collection will be bookmarked</span>
 						</span>
 					</div>
 					<div class="div-section">
+						<div style="width:170px; text-align:right; display:inline-block">Default result style:</div>
+						<select id=result-style-select style="width:150px;margin-left: 5px; height: 17px;">
+							<option value="" selected>Status quo</option>
+							<option value=list>One column</option>
+							<option value=two-col>Two columns</option>
+							<option value=icon>Icon</option>
+							<option value=thumbs>Thumbnails</option>
+							<option value=blog disabled>Blog</option>
+						</select>
+					</div>
+
+
+<!--
+			<div class="div-section">
 					<div style="width:125px; text-align:right; display:inline-block">Personal tag(s)</div>
 					<input style="width:150px;height: 17px; margin-left:5px" type=text id="personal-tags" onkeypress="setTimeout(function(){checkPersonalTags();},10); return true;"><span class="warning-message" id="personal-tags-warning" style="margin-left: 5px; display:none;">records in collection will be bookmarked</span>
 				<div class="help prompt" style="margin-left:133px">
@@ -286,26 +476,20 @@
 							</td></tr>
 						</table>
 
-						<form id=wgtag-form onsubmit="return false;"></form> <!-- not used so stub teh submit -->
+						<form id=wgtag-form onsubmit="return false;"></form>
 
-						Default result style:
-						<select id=result-style-select>
-							<option value="" selected>Status quo</option>
-							<option value=list>One column</option>
-							<option value=two-col>Two columns</option>
-							<option value=icon>Icon</option>
-							<option value=thumbs>Thumbnails</option>
-							<option value=blog disabled>Blog</option>
-						</select>
 					</div>
 				</div>
-
+-->
 			</div>
 		</div>
 
 		<div class="separator_row" style="margin:20px 0"></div>
 
-		<p><input type=button value=Save id=save onclick="save();" style="float: right; margin-right: 50px;"></p>
+		<p>
+			<input type=button value=Cancel id=btnCancel onclick="window.close();" style="float: right; margin-right: 30px;">
+			<input type=button value=Save id=btnSave onclick="save();" style="float: right;margin-right: 4px;">
+		</p>
 
 	</body>
 

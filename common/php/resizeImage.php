@@ -19,6 +19,7 @@ if (! @$_REQUEST['w']  &&  ! @$_REQUEST['h']  &&  ! @$_REQUEST['maxw']  &&  ! @$
 	$y = 100;
 	$no_enlarge = false;
 } else {
+	$standard_thumb = false;
 	$x = @$_REQUEST['w'] ? intval($_REQUEST['w']) : 0;
 	$y = @$_REQUEST['h'] ? intval($_REQUEST['h']) : 0;
 	$x = @$_REQUEST['maxw'] ? intval($_REQUEST['maxw']) : $x;
@@ -139,7 +140,7 @@ imagedestroy($img_resized);
 $resized = file_get_contents($resized_file);
 unlink($resized_file);
 
-if (@$standard_thumb  &&  @$file) {
+if ($standard_thumb  &&  @$file) {
 	// store to database
 	mysql_query('update recUploadedFiles set ulf_Thumbnail = "' . addslashes($resized) . '" where ulf_ID = ' . $file['ulf_ID']);
 }

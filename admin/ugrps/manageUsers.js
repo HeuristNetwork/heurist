@@ -318,6 +318,9 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 								var myColumnDefs = [
 			{ key: "selection", label: "Sel", hidden:(!_isSelection), sortable:true, width:20,
 				formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
+
+			{ key: "id", label: "#", sortable:true, className:'right',resizeable:false},
+
 			{ key: null, label: "Active", sortable:false,  hidden:(_isSelection), className:'center',
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var isenabled = (oRecord.getData('enabled')==="y");

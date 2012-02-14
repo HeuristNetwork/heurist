@@ -57,7 +57,7 @@ function EditRecStructure() {
 		'<input style="display:none override;color:red;visibility:hidden;" type="button" id="btnSaveOrder" value="Save order" onclick="onUpdateStructureOnServer(false)"/>'+
 		'<input type="button" class="add" value="Insert field" onclick="onAddNewDetail()"/>'+
 		// note class=add --> global.css add-button, is set to float:right, but class adds the + to the button
-		'<input type="button" style="margin:0 5px" value="New field type" onClick="onDefineNewType()"/>'+
+		'<input type="button" style="margin:0 5px" value="Define New Field Type" onClick="onDefineNewType()" class="add"/>'+
 		// '<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/>'+
 		'</div>';
 

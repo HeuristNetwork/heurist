@@ -224,12 +224,24 @@ function GroupManager(_isFilterMode, _isSelection, _isWindowMode) {
 			{ key: "selection", label: "Sel", hidden:(!_isSelection), sortable:true,
 				formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
 
-			{ key: "id", label: "Admins", sortable:false, className:'center',
+			{ key: "id", label: "#", sortable:true, className:'right',resizeable:false},
+
+			{ key: null, label: "Admins", sortable:false, className:'center',
 				formatter: function(elLiner, oRecord, oColumn, oData){
 					var recID = oRecord.getData('id');
 elLiner.innerHTML = '<div align="center"><img src="../../common/images/info.png" '+
 'onmouseover="groupManager.showInfo('+recID+', event)" onmouseout="groupManager.hideInfo()"/></div>';}
 			},
+			{ key: null, label: "Edit", sortable:false,  width:20,
+				formatter: function(elLiner, oRecord, oColumn, oData) {
+					var recID = oRecord.getData('id');
+					if(top.HEURIST.is_admin() || _isGroupAdmin(top.HEURIST.get_user_id(), recID) ){
+elLiner.innerHTML = '<a href="#edit_group"><img src="../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit"><\/a>';
+					}else{
+						elLiner.innerHTML = "<img src=\"../../common/images/lock_bw.png\" title=\"Status: Not Admin - Locked\">";
+					}
+			}},
+
 			{ key: "members", label: "Edit Membership", sortable:false, className:'center',
 				formatter: function(elLiner, oRecord, oColumn, oData){
 elLiner.innerHTML = '<div align="center">'+

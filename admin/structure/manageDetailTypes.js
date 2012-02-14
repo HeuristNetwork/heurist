@@ -622,19 +622,25 @@ function DetailTypeManager() {
 			arrDataSources[currentTabIndex] = myDataSource;
 
 			var filter_forall = Dom.get('filter_forall'+dtg_ID);
-			filter_forall.onchange = function (e) {
-				_filterForAll = filter_forall.checked;
+			if(!Hul.isnull(filter_forall)){
+				filter_forall.onchange = function (e) {
+					_filterForAll = filter_forall.checked;
 				};
+			}
 
 			var filter = Dom.get('filter'+dtg_ID);
-			filter.onkeyup = function (e) {
-				clearTimeout(filterTimeout);
-				setTimeout(updateFilter,600);  };
+			if(!Hul.isnull(filter)){
+				filter.onkeyup = function (e) {
+					clearTimeout(filterTimeout);
+					setTimeout(updateFilter,600);  };
+			}
 
 			var filtervis = Dom.get('filter'+dtg_ID+'vis');
-			filtervis.onchange = function (e) {
-				clearTimeout(filterTimeout);
-				updateFilter();  };
+			if(!Hul.isnull(filtervis)){
+				filtervis.onchange = function (e) {
+					clearTimeout(filterTimeout);
+					updateFilter();  };
+			}
 
 			var btnAdd = Dom.get('btnAdd'+dtg_ID);
 			btnAdd.onclick = function (e) {

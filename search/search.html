@@ -139,6 +139,20 @@
 					//document.forms[0].submit();
 				}
 			}
+
+			/**
+			*
+			*/
+			function saveCollection()
+			{
+				if (top.HEURIST.search.collectCount == 0) {
+					alert("No records have been collected. Please select records from the search results and press collect to add records, then press save.");
+				}else{
+					top.HEURIST.util.popupURL(window, 'saved/saveCollectionPopup.html',{width:650, height:380});
+				}
+				//return false;
+			}
+
 		</script>
 		<script src="../common/php/displayPreferences.php"></script> <!-- sets body css classes based on prefs in session -->
 		<iframe src="../search/actions/actionHandler.php" id=i_action></iframe>
@@ -339,7 +353,7 @@
 									<li><a class=collected-hidden href="#" onClick="top.HEURIST.search.addToCollection();return false;" title="Select one or more records, then click to add to the collection">Add</a></li>
 									<li><a class=collected-shown href="#" onClick="top.HEURIST.search.removeFromCollection(); return false;" title="Select one or more records, then click to remove records from the collection">Remove</a></li>
 									<li><a class=toolbar-large-icon-link-normal href=" " title="Empty records from the collection" onclick='top.HEURIST.util.getJsonData(top.HEURIST.basePath+"search/saved/manageCollection.php?clear", top.HEURIST.search.addRemoveCollectionCB); document.getElementById("q").focus(); return false;'>Remove all</a></li>
-									<li><a class=toolbar-large-icon-link-normal href=" " title="Save current set of records in collection" onClick="top.HEURIST.util.popupURL(window, 'saved/saveCollectionPopup.html',{width:650, height:600}); return false;">Save to...</a></li>
+									<li><a class=toolbar-large-icon-link-normal href="#" title="Save current set of records in collection" onClick="saveCollection()">Save to...</a></li>
 									<li><a class=toolbar-large-icon-link-normal href=" " onClick="top.HEURIST.search.loadSearchLocation('?q=_COLLECTED_&amp;label=Collected');return false;" title="Show current set of records in collection" >Show</a></li>
 								</ul>
 							</li>

@@ -53,7 +53,7 @@ switch (@$_REQUEST['action']) {
 		break;
 
 	case 'bookmark_and_tag':
-	case 'bookmark_and_tags':
+	case 'bookmark_and_tags':   //save collection of ids with some tag
 		$script = bookmark_and_tag_bibids(false);
 		break;
 
