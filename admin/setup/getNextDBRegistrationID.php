@@ -56,7 +56,7 @@
     $callingServer = $_SERVER['REMOTE_ADDR'];
     // TO DO: we need to check that the script is not being called repeatedly from the same server
 
-    define("HEURIST_DB_DESCRIPTOR_RECTYPE", 21); // the record type for database descriptor records, hardcodes in this database
+    define("HEURIST_DB_DESCRIPTOR_RECTYPE", 22); // the record type for database (collection) descriptor recordsv - fixed forr Master database
 
 	// allocate a new user for this database unless the user's email address is recognised
 	// If a new user, log the user in and assign the record ownership to that user
@@ -66,14 +66,27 @@
 	$usrEmail = strtolower(trim($usrEmail));
 	$res = mysql_query("select ugr_ID, ugr_Name, ugr_Password, ugr_FirstName, ugr_LastName from sysUGrps where lower(ugr_eMail)='".$usrEmail."'");
 	$indexdb_user_id = null;
-	if($res) { // query OK
+    error_log('trying for email address');
+
+    // Check if the email address is recognised as a user name
+    // Added 19 Jan 2012: we also use email for ugr_Name and it must be unique, so check it has not been used
+    if(($res) && (mysql_num_rows($res) == 0)) { // no user found on email, try querying on user name
+        error_log('trying for user name');
+        $res = mysql_query("select ugr_ID, ugr_Name, ugr_Password, ugr_FirstName, ugr_LastName from sysUGrps where lower(ugr_Name)='".$usrEmail."'");
+        }
+	if($res) { // query OK, now see if we have found the user
+    error_log('Query OK, got '.mysql_num_rows($res).' rows returned');
 		if(mysql_num_rows($res) == 0) { // did not find the user, create a new one and pass back login info
+            error_log('inserting a record for '.$usrEmail,', '.$usrPassword,', '.$usrEmail,', '.$usrFirstName,', '.$usrLastName);
 			$res = mysql_query("insert into sysUGrps (`ugr_Name`, `ugr_Password`, `ugr_eMail`, `ugr_Enabled`, `ugr_FirstName`, `ugr_lastName`)
-			VALUES  ('$usrName','$usrPassword','$usrEmail','y','$usrFirstName','$usrLastName')");
-			if($res) { 	// New user created successfully
+			VALUES  ('$usrEmail','$usrPassword','$usrEmail','y','$usrFirstName','$usrLastName')");
+            // Note: we use $usrEmail as user name because the person's name may be repeated across many different users of
+            // different databases eg. there are lots of johnsons, which will cause insert statement to fail as ugr_Name is unique.
+            if($res) { 	// New user created successfully
 				$indexdb_user_id = mysql_insert_id();
 				header('Location: ' . HEURIST_BASE_URL . '/common/connect/login.php?db=' . HEURIST_DBNAME . (isset($last_uri) ? '&last_uri=' . urlencode($last_uri) : '')); // TODO: Change to HEURIST_BASE_URL
 			} else { // Unable to create the new user
+                error_log('unable to crate new user');
                 $error = "Unable to write new user in Heurist master index database\n" . "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
                 $returnData = $dbID . "," . $error;
                 echo $returnData; // if you can't set up user it isn't worth trying to register the database''
@@ -81,6 +94,7 @@
 		} else { // existing user
 		$row = mysql_fetch_row($res);
 		$indexdb_user_id = $row[0]; // set the user ID for the user in the index database, everything else is known
+        error_log('Existing user ID is '.$indexdb_user_id);
 		}
 
 	} else {// error trying to find usergroup in UGrps table
@@ -90,33 +104,35 @@
 	}
 
 	// write the core database record describing the database to be registered and allocate registration ID
-	// First look to see if ther is an existing registration - note, this uses the URL to find the record, not the registration ID
-	$res = mysql_query("select rec_ID, rec_Title from Records where `rec_URL`='$serverURL'");
+    // This is not a fully valid Heurist record, we let the edit form take care of that
+	// First look to see if there is an existing registration - note, this uses the URL to find the record, not the registration ID
+    // TODO: Would be good to have a recaptcha style challenge otherwise can be called repeatedly with slight URL variations to spawn multiple registrations of dummy databases
+    $res = mysql_query("select rec_ID, rec_Title from Records where `rec_URL`='$serverURL'");
 	if(mysql_num_rows($res) == 0) { // new registration
 		 $res = mysql_query("insert into Records
 		 (rec_URL, rec_Added, rec_Title, rec_RecTypeID, rec_AddedByImport, rec_OwnerUGrpID, rec_NonOwnerVisibility,rec_Popularity)
 		 VALUES  ('$serverURL', now(), '$dbTitle', " . HEURIST_DB_DESCRIPTOR_RECTYPE . ", 0, $indexdb_user_id, 'viewable', 99)");
 	    if (!$res) { // Unable to allocate a new ID
-	        $error = "Unable to write record in Heurist master index database\n" . "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
+	        $error = "Cannot write record in Heurist master index database\nThe URL may have been registered wit ha previous database.\n" . "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
 	        $returnData = $dbID . "," . $error;
 	        echo $returnData;
 		} else { // core database record created OK
 	        $dbID = mysql_insert_id();
 	        $returnData = $dbID;
-	    }
-    } else { // existing registration - note that it updates the record based on its URL, not itse registration ID
-        // TO DO: we should really check the registration ID b/c someone could update a different registration with the
-        // same URL and then the update might go there instead of to the registration record for the desired DB
-        // TO DO: We should make rec_URL a UNIQUE index (???) so no two records can point to the same URL - but this woyuld
-        // cause a problem if a hidden record already pointed to a URL and someone tries to add a record referencing it
-	    $row = mysql_fetch_row($res);
-		$res = mysql_query("update Records set `rec_Title`='$dbTitle' where `rec_ID`='".$row[0]."'");
-		if(!mysql_error()) {
-			$returnData = -1 . ", Description succesfully changed";
-		} else {
-			error_log('ERROR: '.mysql_error()); // TODO: Fix database not to give this error
-			$returnData = 0 . ", An error occurred while trying to change the database description";
-		}
+            
+            //Write the database title into the details, further data will be entered by the Heurist form
+            $res = mysql_query("insert into recDetails
+               (dtl_RecID,dtl_DetailTypeID,dtl_Value) VALUES ('$dbID', '1', '$dbTitle')");
+
+            // Write the record bookmark into the bookmarks table. This allos the user registering the database
+            // to see thir lsit of databases as My Bookmarks
+            $res = mysql_query("insert into usrBookmarks
+               (bkm_UGrpID,bkm_RecID) VALUES ('$indexdb_user_id','$dbID')");
+
+        }
+    } else {
+        // existing registration - used to update title, but this is now handled by metadata edit form
+        // This should now not be called any more
 	}
 
 	echo $returnData;

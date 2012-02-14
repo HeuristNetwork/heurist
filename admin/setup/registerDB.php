@@ -31,6 +31,7 @@ if (!is_admin()) {
 		<title>Register DB to Heurist Index Server</title>
 	</head>
 
+<!-- Database registration form -->
 
 	<body class="popup">
     <div class="banner"><h2>Database registration</h2></div>
@@ -77,11 +78,11 @@ $usrName = $row[2];
 $usrFirstName = $row[3];
 $usrLastName = $row[4];
 
-error_log('current dbid = '.$dbID);
+error_log('registerDB.php: current dbid = '.$dbID.'   user ID = '.$user_id.' user email = '.$usrEmail);
 
 // Check if database has already been registered
 
-if (isset($dbID) && ($dbID != 0)) { // already registered
+if (isset($dbID) && ($dbID != 0)) { // already registered, display info and link to H3MasterIndex edit
 	echo '<script type="text/javascript">';
 	echo 'document.getElementById("registerDBForm").style.display = "none";';
 	echo '</script>';
@@ -90,9 +91,9 @@ if (isset($dbID) && ($dbID != 0)) { // already registered
     echo "<div class='input-row'><div class='input-header-cell'>Description:</div><div class='input-cell'>". $dbDescription . "</div></div>";
     $url="http://heuristscholar.org/h3/records/edit/editRecord.html?recID=".$dbID."&db=H3MasterIndex";
     echo "<div class='input-row'><div class='input-header-cell'>Collection metadata:</div><div class='input-cell'>
-    <a href=$url target=_blank>Click here to edit</a> (login - if asked - as person who registered this database)
+    <a href=$url target=_blank>Click here to edit</a> (login as person who registered this database)
     </div></div>";
-} else {
+} else { // New registration, display registration form
 	echo '<script type="text/javascript">';
 	echo 'document.getElementById("registerDBForm").style.display = "block";';
 	echo '</script>';
@@ -103,15 +104,15 @@ function registerDatabase() {
 	global $dbID, $dbName, $ownerGrpID, $indexdb_user_id, $usrEmail, $usrPassword, $usrName, $usrFirstName, $usrLastName, $dbDescription;
 	$serverURL = HEURIST_BASE_URL . "?db=" . $heuristDBname;
 	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);    //return curl_exec output as string
-	curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_NOBODY, 0);
-	curl_setopt($ch, CURLOPT_HEADER, 0);    //don't include header in output
-	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);    // follow server header redirects
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);    // don't verify peer cert
-	curl_setopt($ch, CURLOPT_TIMEOUT, 10);    // timeout after ten seconds
-	curl_setopt($ch, CURLOPT_MAXREDIRS, 5);    // no more than 5 redirections
+    curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);    //return curl_exec output as string
+    curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_NOBODY, 0);
+    curl_setopt($ch, CURLOPT_HEADER, 0);    //don't include header in output
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);    // follow server header redirects
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);    // don't verify peer cert
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);    // timeout after ten seconds
+    curl_setopt($ch, CURLOPT_MAXREDIRS, 5);    // no more than 5 redirections
 	$usrEmail = rawurlencode($usrEmail);
 	$usrName = rawurlencode($usrName);
 	$usrFirstName = rawurlencode($usrFirstName);
@@ -122,29 +123,32 @@ function registerDatabase() {
 				"?serverURL=" . $serverURL . "&dbReg=" . $heuristDBname .
 				"&dbTitle=" . $dbDescriptionEncoded . "&usrPassword=" . $usrPassword .
 				"&usrName=" . $usrName . "&usrFirstName=" . $usrFirstName . "&usrLastName=" . $usrLastName . "&usrEmail=".$usrEmail;
-	curl_setopt($ch, CURLOPT_URL,$reg_url);
-	$data = curl_exec($ch);
+    curl_setopt($ch, CURLOPT_URL,$reg_url);
+	error_log('cALLING CURL, CURLOPT_URL = '.$reg_url);
+    $data = curl_exec($ch);
+    error_log('return data from getNextDBReg..ID = '.$data);
 	$error = curl_error($ch);
 	if ($error) {
 		$code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
 		echo $error . " (" . $code . ")";
+        error_log('CURL error code = '.$code.'  error = '.$error);
     } else {
 		$dbID = intval($data);
     }
 
-    error_log('registered dbid = '.$dbID);
+    error_log('CURL returned registered dbid = '.$dbID.'   '.$usrEmail);
 
 
     if ($dbID == 0) { // Unable to allocate a new database identifier
 		$decodedData = explode(',', $data);
 		$errorMsg = $decodedData[0];
-		error_log ('Problem allocating a database identifier from the Heurist index, dbID is 0');
+		error_log ('registerDB.php had problem allocating a database identifier from the Heurist index, dbID is 0');
         $msg = "Problem allocating a database identifier from the Heurist index.\n" .
         "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
         return;
-    } else if($dbID == -1) {
+    } else if($dbID == -1) { // old title update function, should no longer be called
 	    $res = mysql_query("update sysIdentification set `sys_dbDescription`='$dbDescription' where `sys_ID`='1'");
-		echo "<div class='input-row'><div class='input-header-cell'>Database description succesfully changed to:</div><div class='input-cell'>". $dbDescription."</div></div>";
+		echo "<div class='input-row'><div class='input-header-cell'>Database description (updated):</div><div class='input-cell'>". $dbDescription."</div></div>";
     } else { // We have got a new dbID, set the assigned dbID in sysIdentification
 		$res = mysql_query("update sysIdentification set `sys_dbRegisteredID`='$dbID', `sys_dbDescription`='$dbDescription' where `sys_ID`='1'");
 		if($res) {
@@ -153,54 +157,48 @@ function registerDatabase() {
 			echo "<div class='input-row'><div class='input-header-cell'></div><div class='input-cell'>Basic description: " . $dbDescription . "</div></div>";
 			$url="http://heuristscholar.org/h3/records/edit/editRecord.html?recID=".$dbID."&db=H3MasterIndex";
     		echo "<div class='input-row'><div class='input-header-cell'>Collection metadata:</div><div class='input-cell'>
-    			 <a href=$url target=_blank>Click here to edit</a> (login - if asked - as yourself)";
+    			 <a href=$url target=_blank>Click here to edit</a> (login - if asked - as yourself) </div></div>";
+            ?>
+                <script> // automatically call H3MasterIndix metadata edit form for this database
+                window.open("<?=$url?>",'_blank'); 
+                </script>
+            <?
 		} else {
 			error_log ('Unable to write database identification record, dbID is '.$dbID);
 			$msg = "<div class=wrap><div id=errorMsg><span>Unable to write database identification record</span>this database might be incorrectly set up<br />Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice</div></div>";
-			echo '<script type="text/javascript">';
-			echo 'document.getElementById("changeDescriptionForm").style.display = "none";';
-			echo '</script>';
-			echo $msg;
+            echo $msg;
 			return;
-		}
-    }
-}
+		} // unable to write db identification record 
+   } // successful new DB ID
+} // registerDatabase()
 ?>
-<div id="changeDescriptionForm" class="input-row">
-	<form action="registerDB.php" method="POST" name="NewDBRegistration">
-		<div class='input-header-cell'>New description:</div><div class='input-cell'><input type="text" maxlength="100" size="50" name="dbDescription" class="in">
-		<input type="submit" name="submitDescriptionChange" value="Change description" style="font-weight: bold;" onClick="changeDescription()" ></div>
-	</form>
-</div>
 
 <script type="text/javascript">
 	function registerDB() {
 		document.getElementById("registerDBForm").style.display = "none";
 	}
-	function changeDescription() {
-		document.getElementById("changeDescriptionForm").style.display = "none";
-	}
-	document.getElementById("changeDescriptionForm").style.display = "none";
 </script>
 
+
 <?php
+
+// Do the work of registering the database if a suitable title is set
+
 if(isset($_POST['dbDescription'])) {
 	if(strlen($_POST['dbDescription']) > 3 && strlen($_POST['dbDescription']) < 1022) {
 		$dbDescription = $_POST['dbDescription'];
 		echo '<script type="text/javascript">';
 		echo 'document.getElementById("registerDBForm").style.display = "none";';
 		echo '</script>';
-		registerDatabase();
+		registerDatabase(); // this does all the work
 	} else {
 		echo "The database description should be at least 4 characters, and at most 1021 characters long.";
 	}
 }
-if (isset($dbID) && ($dbID != 0) && !isset($_POST['dbDescription'])) {
-	echo '<script type="text/javascript">';
-	echo 'document.getElementById("changeDescriptionForm").style.display = "block";';
-	echo '</script>';
-}
+
 ?>
+
+<!-- Explanation for the user -->
 
 <div class="separator_row" style="margin:20px 0;"></div>
 <h3>Suggested workflow for new databases:</h3>
