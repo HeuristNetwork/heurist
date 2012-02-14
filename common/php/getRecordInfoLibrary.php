@@ -457,6 +457,7 @@ function getTermColNames(){
 }
 
 function getTerms($useCachedData = false) {
+	global $dbID;
 	$cacheKey = DATABASE.":getTerms";
 	if ($useCachedData) {
 		$terms = getCachedData($cacheKey);
@@ -852,7 +853,6 @@ function getRectypeStructure($rtID) {
 
 // returns an array of RecType Structures for array of ids passed in
 function getRectypeStructures($rt_ids) {
-
 	$rtStructs = array('commonFieldNames' => getRectypeColNames(),
 						'commonNamesToIndex' => getColumnNameToIndex(getRectypeColNames()),
 						'dtFieldNamesToIndex' => getColumnNameToIndex(getRectypeStructureFieldColNames()),
@@ -865,6 +865,7 @@ function getRectypeStructures($rt_ids) {
 
 // returns an array of RecType Structures for all RecTypes
 function getAllRectypeStructures($useCachedData = false) {
+	global $dbID;
 	$cacheKey = DATABASE.":AllRecTypeInfo";
 	if ($useCachedData) {
 		$rtStructs = getCachedData($cacheKey);
@@ -944,7 +945,7 @@ function getAllRectypeStructures($useCachedData = false) {
 
 	while ($row = mysql_fetch_row($res)) {
 		array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$row[1]]]['allTypes'],$row[0]);
-		if ($row[11]) {//rty_ShowInList
+		if ($row[14]) {//rty_ShowInList
 			array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$row[1]]]['showTypes'],$row[0]);
 		}
 
@@ -952,7 +953,7 @@ function getAllRectypeStructures($useCachedData = false) {
 
 		$rtStructs['typedefs'][$row[0]]['commonFields'] = $commonFields;
 		$rtStructs['names'][$row[0]] = $row[3];
-		$rtStructs['pluralNames'][$row[0]] = $row[5];
+		$rtStructs['pluralNames'][$row[0]] = $row[8];
 	}
 	$rtStructs['constraints'] = getAllRectypeConstraint();
 	setCachedData($cacheKey,$rtStructs);
@@ -1050,6 +1051,7 @@ function getDetailTypeColNames() {
 
 // returns an array of RecType Structures for all RecTypes
 function getAllDetailTypeStructures($useCachedData = false) {
+	global $dbID;
 	$cacheKey = DATABASE.":AllDetailTypeInfo";
 	if ($useCachedData) {
 		$dtStructs = getCachedData($cacheKey);
