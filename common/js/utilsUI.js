@@ -887,7 +887,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 	},
 
 
-	setDisplayPreference: function(prefName, val, win, replacementRegExp) {
+	setDisplayPreference: function(prefName, val, win, replacementRegExp,noframes,noclass) {
 		// set display preference in all windows below win; save preferences too
 		// The third and fourth arguments are for recursion: don't use them externally.
 
@@ -914,19 +914,21 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
 			win = top;
 		}
-		if (! (val+"").match(/\s/)) {
-            if (win.document.body.className.search(prefName)== -1){
-                win.document.body.className = win.document.body.className + ' '+prefName+'-'+val+' ';
-            }else{
-			    win.document.body.className = win.document.body.className.replace(replacementRegExp, ' '+prefName+'-'+val+' ');
-            }
+		if (!noclass && ! (val+"").match(/\s/)) {
+			if (win.document.body.className.search(prefName)== -1){
+				win.document.body.className = win.document.body.className + ' '+prefName+'-'+val+' ';
+			}else{
+				win.document.body.className = win.document.body.className.replace(replacementRegExp, ' '+prefName+'-'+val+' ');
+			}
 		}
 
-		for (var i=0; i < win.frames.length; ++i) {
-			try {
-				// some frames may be from another domain, e.g. addthis
-				top.HEURIST.util.setDisplayPreference(prefName, val, win.frames[i], replacementRegExp);
-			} catch (e) { }
+		if (!noframes) {
+			for (var i=0; i < win.frames.length; ++i) {
+				try {
+					// some frames may be from another domain, e.g. addthis
+					top.HEURIST.util.setDisplayPreference(prefName, val, win.frames[i], replacementRegExp);
+				} catch (e) { }
+			}
 		}
 		//reread preferences
 		top.HEURIST.loadScript(top.HEURIST.basePath+'common/php/displayPreferences.php?'+

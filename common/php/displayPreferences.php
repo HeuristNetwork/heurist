@@ -45,9 +45,14 @@ $prefs = array(
 
 	"record-search-string" => "",
 	"record-search-type" => "",
-	"record-search-last" => "", //list of rectypes and last selected records - up to 15
+	"record-search-scope" => "r-all",
+	"record-search-last" => "", //list of rectypes and last selected records - up to 50
 
 	"search-result-style" => "list",
+	"search-result-style0" => "list",
+	"search-result-style1" => "icon",
+	"search-result-style2" => "icon",
+	"search-result-style3" => "icon",
 	"results-per-page" => 50,
 
 	"scratchpad-bottom" => 0,
