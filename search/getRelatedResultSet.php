@@ -73,6 +73,7 @@ require_once(dirname(__FILE__).'/../common/config/initialise.php');
 require_once(dirname(__FILE__).'/../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../search/getSearchResults.php');
 require_once(dirname(__FILE__).'/../common/php/getRecordInfoLibrary.php');
+require_once(dirname(__FILE__).'/../records/files/uploadFile.php');
 
 mysql_connection_db_select(DATABASE);
 
@@ -259,7 +260,8 @@ global $ACCESSABLE_OWNER_IDS;
 																				@$row['trgVis'],
 																				null,
 																				null,
-																				null,null));
+																				null,
+																				getThumbnailURL($row['trgRecID'])));
 		}
 		if ( !@$recSet['recSet'][$row['trgRecID']]['revPtrLinks']) {
 			$recSet['recSet'][$row['trgRecID']]['revPtrLinks']= array('byInvDtlType'=>array(),'byRecIDs' => array());	//create an entry
@@ -352,7 +354,8 @@ global $REVERSE, $ACCESSABLE_OWNER_IDS, $relRT;
 																				@$row['trgVis'],
 																				null,
 																				null,
-																				null,null));
+																				null,
+																				getThumbnailURL($row['trgRecID'])));
 		}
 		if ( !@$recSet['recSet'][$row['trgRecID']]['ptrLinks']) {
 			$recSet['recSet'][$row['trgRecID']]['ptrLinks']= array('byDtlType'=>array(),'byRecIDs' => array());	//create an entry
@@ -469,7 +472,8 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 									$row['srcVis'],
 									null,
 									null,
-									null,null));
+									null,
+									getThumbnailURL($row['srcRecID'])));
 		}
 		// if target is not in the result
 		if ( !array_key_exists($row['trgRecID'], $recSet['recSet'])) {
@@ -483,7 +487,8 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 									$row['trgVis'],
 									null,
 									null,
-									null,null));
+									null,
+									getThumbnailURL($row['trgRecID'])));
 		}
 		if ( !@$recSet['recSet'][$row['srcRecID']]['relLinks']) {
 			$recSet['recSet'][$row['srcRecID']]['relLinks']= array('byRelType'=>array(),'byRecIDs' => array(), 'relRecIDs'=> array());	//create an entry
@@ -585,7 +590,8 @@ function createQueryRecSet() {
 									$record['rec_NonOwnerVisibility'],
 									null,
 									null,
-									null,null));
+									null,
+									getThumbnailURL($record['rec_ID'])));
 		array_push($recSet['infoByDepth'][0]['recIDs'],$record['rec_ID']);
 		// add recID to it's rectype array for this depth
 		if (!@$recSet['infoByDepth'][0]['rectypes'][$record['rec_RecTypeID']]) {
