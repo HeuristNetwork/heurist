@@ -2078,13 +2078,13 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.wktValueToDescription
 	}
 
 	if (typeCode == "p") {
-		return { type: "Point", summary: round(X[0],5)+", "+round(Y[0],5)};
+		return { type: "Point", summary: Math.round(X[0],5)+", "+Math.round(Y[0],5)};
 	}
 	else if (typeCode == "l") {
 /*       DELETE THIS
         return { type: "Path", summary: "X,Y ("+Math.round(X.shift()*100000)/100000+","+Math.round(Y.shift()*100000)/100000+") - ("+Math.round(X.pop()*100000)/100000+","+Math.round(Y.pop()*100000)/100000+")" };
 */
-        return { type: "Path", summary: "X,Y ("+round(X.shift(),5)+","+Math.round(Y.shift(),5)+") - ("+Math.round(X.pop(),5)+","+Math.round(Y.pop(),5)+")" };
+        return { type: "Path", summary: "X,Y ("+Math.round(X.shift(),5)+","+Math.round(Y.shift(),5)+") - ("+Math.round(X.pop(),5)+","+Math.round(Y.pop(),5)+")" };
 	}
 	else {
 		X.sort();
@@ -2100,7 +2100,7 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.wktValueToDescription
 		var minY = Y[0];
 		var maxX = X.pop();
 		var maxY = Y.pop();
-		return { type: type, summary: "X "+round(minX,5)+","+round(maxX,5)+" Y "+round(minY,5)+","+round(maxY,5) };
+		return { type: type, summary: "X "+Math.round(minX,5)+","+Math.round(maxX,5)+" Y "+Math.round(minY,5)+","+Math.round(maxY,5) };
 	}
 };
 top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(bdValue) {
@@ -2144,7 +2144,7 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 				alert("Geographic objects use Google Maps API, which doesn't work on this browser - sorry");
 				return;
 			}
-
+/*
 			HAPI.PJ.store("gigitiser_geo_object", input.value, {
 				callback: function(_, _, response) {
 					top.HEURIST.util.popupURL(
@@ -2154,7 +2154,7 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 					);
 				}
 			});
-/*
+*/
 			HAPI.PJ.store("gigitiser_geo_object", input.value, {
 				callback: function(_, _, response) {
 					top.HEURIST.util.popupURL(
@@ -2164,7 +2164,7 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 					);
 				}
 			});
-*/
+
 		};
 
 	var editSpan = newDiv.appendChild(this.document.createElement("span"));

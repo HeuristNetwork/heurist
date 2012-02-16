@@ -606,7 +606,6 @@ function EditRecStructure() {
 					//DEBUG if(values[k] != edt.value){
 					//	dbg.value = dbg.value + (fieldnames[k]+'='+edt.value);
 					//}
-
 					if(values[k] !== edt.value){
 						values[k] = edt.value;
 

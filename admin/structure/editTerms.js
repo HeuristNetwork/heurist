@@ -51,7 +51,8 @@ function EditTerms() {
 		_currentDomain,
 		_db,
 		_isWindowMode=false,
-		_isSomethingChanged=false;
+		_isSomethingChanged=false,
+		_affectedVocabs = [];
 
 	/**
 	*	Initialization of tabview with 2 tabs with treeviews
@@ -149,6 +150,7 @@ function EditTerms() {
 			var term = {};//new Object();
 			term.id = termid;
 			term.parent_id = null;
+			term.conceptid = arTerm[fi.trm_ConceptID];
 			term.domain = _currentDomain;
 			term.label = arTerm[fi.trm_Label];
 			term.description = arTerm[fi.trm_Description];
@@ -177,6 +179,7 @@ function EditTerms() {
 					term = {};//new Object();
 					term.id = child;
 					term.parent_id = parent_id;
+					term.conceptid = arTerm[fi.trm_ConceptID];
 					term.domain = _currentDomain;
 					term.label = arTerm[fi.trm_Label];
 					term.description = arTerm[fi.trm_Description];
@@ -197,7 +200,7 @@ function EditTerms() {
 			}
 
 			var topLayerParent = new YAHOO.widget.TextNode(term, tv_parent, false); // Create the node
-			
+
 			if(!first_node) { first_node = topLayerParent;}
 
 			var parentNode = treesByDomain[termid];
@@ -207,7 +210,7 @@ function EditTerms() {
 
 		tv.subscribe("labelClick", _onNodeClick);
 		tv.singleNodeHighlight = true;
-		
+
 		tv.subscribe("clickEvent", tv.onEventToggleHighlight);
 
 		tv.render();
@@ -261,6 +264,23 @@ function EditTerms() {
 		}
 		//internal
 	}
+	/*
+	* find vocabulary term (top level node)
+	*/
+	function _findTopLevelForId(nodeid){
+
+		var node = _findNodeById(nodeid, false);
+		if(Hul.isnull(node)){
+			return null;
+		}else{
+			var parent_id = Number(node.data.parent_id)
+			if(Hul.isnull(parent_id) || isNaN(parent_id) || parent_id===0){
+				return node;
+			}else{
+				return _findTopLevelForId(parent_id);
+			}
+		}
+	}
 
 	/**
 	* Loads values to edit form
@@ -284,6 +304,12 @@ function EditTerms() {
 			if(!Hul.isnull(node)){
 				Dom.get('formMessage').style.display = "none";
 				Dom.get('formEditor').style.display = "block";
+
+				if (Hul.isempty( node.data.conceptid)){
+					Dom.get('div_ConceptID').innerHTML = '';
+				}else{
+					Dom.get('div_ConceptID').innerHTML = 'Concept ID: '+node.data.conceptid;
+				}
 
 				//	alert("label was clicked"+ node.data.id+"  "+node.data.domain+"  "+node.label);
 				Dom.get('edId').value = node.data.id;
@@ -508,7 +534,23 @@ function EditTerms() {
 								alert("An error occurred: " + item);
 								error = true;
 							}else{
-								node.data.id = item;
+
+								if(node.data.id != item){ //new term
+									node.data.id = item;
+									//find vocab term (top level)
+									//top.HEURIST.treesByDomain
+									var topnode = _findTopLevelForId(node.data.parent_id);
+									if (!Hul.isnull(topnode)) {
+										var vocab_id = topnode.data.id;
+										if(_affectedVocabs.indexOf(vocab_id)<0){
+											_affectedVocabs.push(vocab_id);
+											if(_affectedVocabs.length===1){
+												Dom.get('formAffected').style.display = 'block';
+											}
+										}
+									}
+								}
+
 								//update ID field
 								if(_currentNode ===  node){
 									Dom.get('edId').value = item;
@@ -654,6 +696,7 @@ function EditTerms() {
 			term = {}; //new Object();
 			term.id = (value.id)?value.id:"0-" + (rootNode.getNodeCount()); //correct
 			term.parent_id = null;
+			term.conceptid = null;
 			term.domain = _currentDomain;
 			term.label = value.label;
 			term.description = value.description;
@@ -671,6 +714,7 @@ function EditTerms() {
 			term = {}; //new Object();
 			term.id = (value.id)?value.id:_currentNode.data.id+"-" + (_currentNode.getNodeCount());  //correct
 			term.parent_id = _currentNode.data.id;
+			term.conceptid = null;
 			term.domain = _currentDomain;
 			term.label = value.label;
 			term.description = value.description;
@@ -749,7 +793,7 @@ function EditTerms() {
 		if(context && !context.error) {
 			top.HEURIST.terms = context.terms;
 			var res = context.result,
-				ind;
+				ind,
 				parentNode = (context.parent===0)?_currTreeView.getRoot():_currentNode,
 				fi = top.HEURIST.terms.fieldNamesToIndex;
 
@@ -765,6 +809,7 @@ function EditTerms() {
 					var term = {}; //new Object();
 					term.id = termid;
 					term.label = arTerm[fi.trm_Label];
+					term.conceptid = null;
 					term.description = arTerm[fi.trm_Description];
 					term.parent_id = context.parent; //_currentNode.data.id;
 					term.domain = _currentDomain;
@@ -783,6 +828,216 @@ function EditTerms() {
 		}
 	}
 
+	//
+	function _preventSel(event){
+		event.target.selectedIndex=0;
+	}
+
+	//show pop - to update affected field type
+	function _showFieldUpdater(){
+
+		//_affectedVocabs
+
+		//1. find the affected fieldtypes
+		var fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex,
+			allTerms = top.HEURIST.terms.treesByDomain[_currentDomain],
+			dty_ID, ind, td, deftype,
+			arrRes = [],
+			_needtype = _currentDomain==='enum'?'enum':'relationtype';   //relmarker???
+
+
+		//
+		// internal function to loop through all field terms tree
+		// if one of term has parent that is in affectedVocabs
+		//
+		function __loopForFieldTerms(parentNode){
+
+					for(child in parentNode)
+					{
+					if(!Hul.isnull(child)){
+
+						var topnode = _findTopLevelForId(child);
+						if (!Hul.isnull(topnode)) {
+							var vocab_id = topnode.data.id;
+							if(_affectedVocabs.indexOf(vocab_id)>=0){
+									return true;
+							}
+						}
+
+						var newparentNode = parentNode[child];
+						if(__loopForFieldTerms(newparentNode)){
+							return true;
+						}
+					}
+					}//for
+
+					return false;
+		}
+
+		//2. loop
+		for (dty_ID in top.HEURIST.detailTypes.typedefs) {
+
+			if(!isNaN(Number(dty_ID)))
+			{
+				td = top.HEURIST.detailTypes.typedefs[dty_ID];
+				deftype = td.commonFields;
+
+				if(deftype[fi["dty_Type"]]===_needtype){
+
+					var fldTerms = Hul.expandJsonStructure(deftype[fi["dty_JsonTermIDTree"]]);
+					//check if one these terms are child of affected vocab
+					if(!Hul.isnull(fldTerms)) {
+
+						if(__loopForFieldTerms(fldTerms)){
+							arrRes.push(dty_ID);
+						}
+					}
+				}
+			}
+		}//for
+
+
+		//3. show list of affected field types
+		if(arrRes.length==0){
+
+			var parent = Dom.get('formEditFields');
+			parent.innerHTML = "<h2>No affected field types found</h2>";
+
+			Dom.get('formAffected').style.display = 'none';
+
+		}else{
+			//debug alert(arrRes.join(","));
+
+			var parent = Dom.get('formEditFields');
+			parent.innerHTML = "<p>The fields most likely to be affected are:</p>";
+
+			for(ind=0; ind<arrRes.length; ind++){
+
+				dty_ID = arrRes[ind];
+				td = top.HEURIST.detailTypes.typedefs[dty_ID];
+				deftype = td.commonFields;
+
+				var _div = document.createElement("div");
+				_div.innerHTML = '<div class="dtyLabel">'+deftype[fi.dty_Name]+':</div>'+
+				'<div class="dtyField">'+
+				'<input type="submit" value="Change vocabulary" id="btnST_'+dty_ID+'" onClick="window.editTerms.onSelectTerms(event)"/>&nbsp;&nbsp;'+
+				'</div>';
+				//'<span class="dtyValue" id="termsPreview"><span>preview:</span></span></div>'
+
+				_recreateSelector(dty_ID, deftype[fi.dty_JsonTermIDTree], deftype[fi.dty_TermIDTreeNonSelectableIDs], _div);
+
+				parent.appendChild(_div);
+			}
+
+		}
+
+	}
+
+	function _recreateSelector(dty_ID, allTerms, disabledTerms, parentdiv)
+	{
+			//
+			var el_sel = Dom.get("selector"+dty_ID);
+			if(el_sel){
+				parentdiv = el_sel.parentNode;
+				parentdiv.removeChild(el_sel);
+			}
+
+			allTerms = Hul.expandJsonStructure(allTerms);
+			disabledTerms = Hul.expandJsonStructure(disabledTerms);
+
+			el_sel = Hul.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup[_currentDomain], null);
+			el_sel.id = "selector"+dty_ID;
+			el_sel.style.backgroundColor = "#cccccc";
+			el_sel.width = 150;
+			el_sel.onchange =  _preventSel;
+			parentdiv.appendChild(el_sel);
+	}
+
+	/**
+	* onSelectTerms
+	*
+	* listener of "Change vocabulary" button
+	* Shows a popup window where user can select terms to create a term tree as wanted
+	*/
+	function _onSelectTerms(event){
+
+		var dty_ID = event.target.id.substr(6);
+		var td = top.HEURIST.detailTypes.typedefs[dty_ID],
+			deftype = td.commonFields,
+			fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+
+		var type = deftype[fi.dty_Type];
+		var allTerms = deftype[fi.dty_JsonTermIDTree];
+		var disTerms = deftype[fi.dty_TermIDTreeNonSelectableIDs];
+		var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+
+		Hul.popupURL(top, top.HEURIST.basePath +
+		"admin/structure/selectTerms.html?dtname="+dty_ID+"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+"&db="+db,
+		{
+		"close-on-blur": false,
+		"no-resize": true,
+		height: 500,
+		width: 750,
+		callback: function(editedTermTree, editedDisabledTerms) {
+			if(editedTermTree || editedDisabledTerms) {
+
+				//Save update vocabulary on server side
+				var _oDetailType = {detailtype:{
+					colNames:{common:['dty_JsonTermIDTree','dty_TermIDTreeNonSelectableIDs']},
+					defs: {}
+					}};
+
+				_oDetailType.detailtype.defs[dty_ID] = {common:[editedTermTree, editedDisabledTerms]};
+
+				var str = YAHOO.lang.JSON.stringify(_oDetailType);
+
+				function _updateResult(context) {
+					if(!context) {
+						alert("An error occurred trying to contact the database");
+					}else{
+
+						/* @todo move this to the separate function */
+						var error = false,
+							report = "",
+							ind;
+
+						for(ind in context.result)
+						{
+						if(!Hul.isnull(ind)){
+							var item = context.result[ind];
+							if(isNaN(item)){
+								alert("An error occurred: " + item);
+								error = true;
+							}else{
+								detailTypeID = Number(item);
+								if(!Hul.isempty(report)) { report = report + ","; }
+								report = report + detailTypeID;
+							}
+						}
+						}
+
+						if(!error) {
+							//recreate selector
+							deftype[fi.dty_JsonTermIDTree] = editedTermTree;
+							deftype[fi.dty_TermIDTreeNonSelectableIDs] = editedDisabledTerms;
+							_recreateSelector(dty_ID, editedTermTree, editedDisabledTerms, null);
+						}
+					}
+				}//end internal function
+
+				if(!Hul.isnull(str)) {
+
+					var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+					var callback = _updateResult;
+					var params = "method=saveDT&db="+db+"&data=" + encodeURIComponent(str);
+					top.HEURIST.util.getJsonData(baseurl, callback, params);
+				}
+
+			}
+		}
+		});
+
+	}
 
 	//
 	//public members
@@ -808,9 +1063,15 @@ function EditTerms() {
 						}
 				},
 
+				showFieldUpdater: function(){
+					_showFieldUpdater();
+				},
+
 				getClass: function () {
 					return _className;
 				},
+
+				onSelectTerms : function(event){ _onSelectTerms(event); },
 
 				isA: function (strClass) {
 					return (strClass === _className);

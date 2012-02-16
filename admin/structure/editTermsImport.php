@@ -114,15 +114,15 @@ function upload_file($parent_id,$domain) {
     	while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
         	$num = count($data);
         	if($num>0){
-        		$label = trim($data[0]);
+        		$label = substr(trim($data[0]), 0, 399);
         		$len = strlen($label);
-        		if($len>0 && $len<64){
+        		if($len>0 && $len<400){
 					$desc = "";
         			for ($c=1; $c < $num; $c++) {
         				if($c>1) $desc = $desc.",";
         				$desc = $desc.$data[$c];
         			}
-        			array_push($parsed, array($label,$desc,$domain,$parent_id,1));
+        			array_push($parsed, array($label,substr($desc, 0, 999),$domain,$parent_id,1));
         			$row++;
 				}
 			}

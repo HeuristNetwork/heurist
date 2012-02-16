@@ -778,6 +778,11 @@
 							$query = $query."$colName = ?";
 						}
 
+						//special beviour
+						if($colName=='rst_MaxValues' && $val==0){
+								$val = null;
+						}
+
 						$parameters[0] = $parameters[0].$rstColumnNames[$colName]; //take datatype from array
 						array_push($parameters, $val);
 					}
@@ -1336,17 +1341,18 @@
 
 				$rows = execSQL($ext_db, $query, $parameters, true);
 
-			if ($rows==0 || is_string($rows) ) {
-					$oper = (($isInsert)?"inserting":"updating");
-					$ret = "SQL error $oper term $trmID in updateTerms: ".$rows;
-			} else {
-					if($isInsert){
-						$trmID = $ext_db->insert_id;
-			}
+				if ($rows==0 || is_string($rows) ) {
+						$oper = (($isInsert)?"inserting":"updating");
+						$ret = "SQL error $oper term $trmID in updateTerms: ".$rows;
+				} else {
+						if($isInsert){
+							$trmID = $ext_db->insert_id;
+						}
 
-					$ret = $trmID;
-		}
-	}
+						$ret = $trmID;
+				}
+
+			}
 		} //if column names
 
 		if ($ret==null){

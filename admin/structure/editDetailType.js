@@ -206,7 +206,7 @@ function DetailTypeEditor() {
 	* @allTerms - JSON string with terms
 	* @disabledTerms  - JSON string with disabled terms
 	*/
-		function _recreateTermsPreviewSelector( datatype, allTerms, disabledTerms ) {
+	function _recreateTermsPreviewSelector( datatype, allTerms, disabledTerms ) {
 
 				allTerms = Hul.expandJsonStructure(allTerms);
 				disabledTerms = Hul.expandJsonStructure(disabledTerms);
@@ -405,6 +405,13 @@ function DetailTypeEditor() {
 			fnames = top.HEURIST.detailTypes.typedefs.commonFieldNames,
 			fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
 
+		if (Hul.isempty(_detailType[fi.dty_ConceptID])){
+			Dom.get('div_dty_ConceptID').innerHTML = '';
+		}else{
+			Dom.get('div_dty_ConceptID').innerHTML = 'Concept ID: '+_detailType[fi.dty_ConceptID];
+		}
+
+
 		for (i = 0, l = fnames.length; i < l; i++) {
 			var fname = fnames[i];
 			el = Dom.get(fname);
@@ -412,8 +419,8 @@ function DetailTypeEditor() {
 				if ( fname==='dty_ShowInLists' ) { // dty_ShowInLists
 					el.checked = (Number(_detailType[fi.dty_ShowInLists])===1);
 				}else{
-				el.value = _detailType[i];
-			}
+					el.value = _detailType[i];
+				}
 		}
 		}
 

@@ -317,7 +317,7 @@
 	'DT_OTHER_FILE' => array(3,62),
 	'DT_LOGO_IMAGE' => array(3,222),
 	'DT_THUMBNAIL' => array(2,9),
-	'DT_IMAGES' => array(3,222),	//TODO: remove from code
+	'DT_IMAGES' => array(3,224),	//TODO: remove from code
 	'DT_DATE' => array(3,16),
 	'DT_START_DATE' => array(2,2),
 	'DT_END_DATE' => array(2,3),

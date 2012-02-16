@@ -55,7 +55,7 @@ if (!is_admin()) {
 			.dtyField {
 				padding-bottom: 3px;
 				padding-top: 3px;
-				display: block;
+				display: inline-block;
 			}
 			.dtyLabel {
 				display: inline-block;
@@ -106,12 +106,15 @@ if (!is_admin()) {
 		Click button on the left to add a new vocabulary
 
 	    <!-- Edit form for modifying characteristics of terms, including insertion of child terms and deletion -->
-        <div id="formEditor" style="display:none;">
+        <div id="formEditor" style="display:none;width:500px;">
 			<h3 style="border-style: none;">Edit Selected Term</h3>
 			<div style="border: black; border-style: solid; border-width:thin; padding:10px;">
 
-			<div class="dtyField"><label class="dtyLabel">ID:</label><input id="edId" readonly="readonly" style="width:50px"/>
+			<div class="dtyField">
+				<label class="dtyLabel">ID:</label>
+				<input id="edId" readonly="readonly" style="width:50px"/>
 				<input id="edParentId" type="hidden"/>
+				&nbsp;&nbsp;&nbsp;<div id="div_ConceptID" style="display: inline-block;"></div>
 				<div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
 					<b>Term saved</b>
 				</div>
@@ -137,14 +140,28 @@ if (!is_admin()) {
 					</div>
 					<input id="btnSave" type="button" value="Save Changes" onClick="{editTerms.doSave()}" />
 				</div>
-				<p><h2>WARNING</h2> ADDING TERMS TO THE TREE DOES NOT ADD THEM TO ENUMERATED FIELDS
-				<p>To add terms to fields, edit the field and click the [Vocabulary] button<p>
+<!--
+				<p><h2>WARNING</h2> ADDING TERMS TO THE TREE DOES NOT ADD THEM TO ENUMERATED FIELDS</p>
+				<p>To add terms to fields, edit the field and click the [Vocabulary] button</p>
+-->
 				<input id="btnImport" type="button" value="Import from file" onClick="{editTerms.doImport(false)}"/>&nbsp;&nbsp;&nbsp;
 				<input id="btnSetParent" type="button" value="Change Parent" title="Change the parent" onClick="{editTerms.selectParent()}"/>&nbsp;&nbsp;&nbsp;
-					<input id="btnDelete" type="button" value="Delete Term" onClick="{editTerms.doDelete()}" />
+				<input id="btnDelete" type="button" value="Delete Term" onClick="{editTerms.doDelete()}" />
+
+			</div>
+
+			<div id="formAffected" style="display:none;padding:10px;width:480px;">
+				<p><h2>WARNING</h2> ADDING TERMS TO THE TREE DOES NOT ADD THEM TO ENUMERATED FIELDS</p>
+				You have added terms to the term tree. Since terms are chosen individually for each field, you will need to update your selection for enumerated fields using these terms.
+				<p align="center">
+					<input id="btnUpdateFieldTypes" type="button" value="Update Field Types" onClick="{editTerms.showFieldUpdater()}" />
+				</p>
+			</div>
+			<div id="formEditFields" style="padding:10px;width:480px;">
 
 			</div>
 		</div>
+
 
         <!-- search for and set inverse terms, only for relationship types -->
 		<div id="formInverse" style="display:none;">

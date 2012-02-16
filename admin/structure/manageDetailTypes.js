@@ -267,7 +267,9 @@ function DetailTypeManager() {
 								deftype[fi.dty_Type],
 								deftype[fi.dty_Status],
 								deftype[fi.dty_ExtendedDescription],
-								dtg_ID, iusage]);
+								dtg_ID,
+								iusage,
+								deftype[fi.dty_ConceptID]]);
 					}
 				}
 			}
@@ -277,7 +279,7 @@ function DetailTypeManager() {
 				responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
 				responseSchema : {
 					fields: [ "id", "vis", "order", "name", "help",  "type", "status",
-					"description", "grp_id", "usage"]
+					"description", "grp_id", "usage", "conceptid"]
 				},
 				doBeforeCallback : function (req,raw,res,cb) {
 					// This is the filter function
@@ -333,6 +335,7 @@ function DetailTypeManager() {
 
 			var myColumnDefs = [
 			{ key: "id", label: "Code", sortable:true, width:40, className:'right',resizeable:false },
+			{ key: "conceptid", label: "Concept", sortable:true, width:40, className:'right',resizeable:false },
 			{ key: "usage", label: "Info", sortable:true, className:'count',
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 				var str = oRecord.getData("usage");

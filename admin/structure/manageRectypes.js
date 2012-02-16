@@ -276,7 +276,8 @@ function RectypeManager() {
 						rectype[fi.rty_Description],
 						rectype[fi.rty_Status],
 						rectype[fi.rty_RecTypeGroupID],
-						null]);
+						null,
+						rectype[fi.rty_ConceptID]]);
 
 						/*TODO: top.HEURIST.rectype.rectypeUsage[rectypeID].length*/
 					}
@@ -286,7 +287,7 @@ function RectypeManager() {
 			var myDataSource = new YAHOO.util.LocalDataSource(arr,{
 				responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
 				responseSchema : {
-					fields: [ "id", "active", "icon", "name", "description", "status", "grp_id", "info"]
+					fields: [ "id", "active", "icon", "name", "description", "status", "grp_id", "info", "conceptid"]
 				},
 				doBeforeCallback : function (req,raw,res,cb) {
 					// This is the filter function
@@ -336,6 +337,7 @@ function RectypeManager() {
 
 			var myColumnDefs = [
 			{ key: "id", label: "Code", sortable:true, minWidth:40, maxAutoWidth:40, width:40, className:'right' },
+			{ key: "conceptid", label: "Concept", sortable:true, minWidth:40, maxAutoWidth:40, width:40, className:'right' },
 			{ key: "info", label: "Info", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
 				var rectypeID = oRecord.getData('id');
                 elLiner.innerHTML = '<img src="../../common/images/info.png"'+
