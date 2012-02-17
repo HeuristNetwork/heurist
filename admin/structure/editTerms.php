@@ -119,8 +119,9 @@ if (!is_admin()) {
 					<b>Term saved</b>
 				</div>
 			</div>
-			<div class="dtyField"><label class="dtyLabel">Display name:</label><input id="edName" style="width:150px"/></div>
+			<div class="dtyField"><label class="dtyLabel">Display name:</label><input id="edName" style="width:300px"/></div>
 			<div class="dtyField"><label class="dtyLabel">Description:</label><input id="edDescription" style="width:300px"/></div>
+			<div class="dtyField"><label class="dtyLabel">Code:</label><input id="edCode" style="width:80px"/></div>
 			<div id="divInverse" class="dtyField"><label class="dtyLabel">Inverse Term:</label><input id="edInverseTerm" readonly="readonly" style="width:250px"/>
 				<input id="btnInverseSetClear" type="button" value="clear" style="width:45px" onClick="{setOrclearInverseTermId()}" />
 				<input id="edInverseTermId" type="hidden"/>

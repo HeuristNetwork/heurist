@@ -158,7 +158,8 @@
 	"trm_ParentTermID"=>"i",
 	"trm_Depth"=>"i",
 	"trm_Modified"=>"i",
-	"trm_LocallyModified"=>"i"
+	"trm_LocallyModified"=>"i",
+	"trm_Code"=>"s"
 	);
 
 	$method = null;

@@ -154,6 +154,7 @@ function EditTerms() {
 			term.domain = _currentDomain;
 			term.label = arTerm[fi.trm_Label];
 			term.description = arTerm[fi.trm_Description];
+			term.termcode  = arTerm[fi.trm_Code];
 			term.inverseid = arTerm[fi.trm_InverseTermID];
             term.status = arTerm[fi.trm_Status];
             term.original_db = arTerm[fi.trm_OriginatingDBID];
@@ -183,6 +184,7 @@ function EditTerms() {
 					term.domain = _currentDomain;
 					term.label = arTerm[fi.trm_Label];
 					term.description = arTerm[fi.trm_Description];
+					term.termcode  =  arTerm[fi.trm_Code];
 					term.inverseid = arTerm[fi.trm_InverseTermID];
                     term.status = arTerm[fi.trm_Status];
                     term.original_db = arTerm[fi.trm_OriginatingDBID];
@@ -325,7 +327,11 @@ function EditTerms() {
 				if(Hul.isnull(node.data.description)) {
 					node.data.description="";
 				}
+				if(Hul.isnull(node.data.termcode)) {
+					node.data.termcode="";
+				}
 				Dom.get('edDescription').value = node.data.description;
+				Dom.get('edCode').value = node.data.termcode;
 
 				var node_invers = null;
 				if(node.data.inverseid>0){
@@ -443,6 +449,7 @@ function EditTerms() {
 
 		var sName = Dom.get('edName').value;
 		var sDesc = Dom.get('edDescription').value;
+		var sCode = Dom.get('edCode').value;
 		var sStatus = Dom.get('trm_Status').value;
 		var iInverseId = Number(Dom.get('edInverseTermId').value);
 		iInverseId = (iInverseId>0) ?iInverseId:null;
@@ -453,6 +460,7 @@ function EditTerms() {
 
 		var wasChanged = ((_currentNode.label !== sName) ||
 			(_currentNode.data.description !== sDesc) ||
+			(_currentNode.data.termcode !== sCode) ||
 			(_currentNode.data.status !== sStatus) ||
 			(iParentId_prev !== iParentId) ||
 			( !(Hul.isempty(_currentNode.data.inverseid)&&Hul.isnull(iInverseId)) &&
@@ -481,6 +489,7 @@ function EditTerms() {
 
 			_currentNode.label = sName;
 			_currentNode.data.description = sDesc;
+			_currentNode.data.termcode = sCode;
 			_currentNode.data.status = sStatus;
 
 			_currentNode.data.inverseid = (iInverseId>0) ?iInverseId:null;
@@ -521,10 +530,10 @@ function EditTerms() {
 		var needReload = _needReload;
 
 		var oTerms = {terms:{
-				colNames:['trm_Label','trm_InverseTermId','trm_Description','trm_Domain','trm_ParentTermID','trm_Status'],
+				colNames:['trm_Label','trm_InverseTermId','trm_Description','trm_Domain','trm_ParentTermID','trm_Status','trm_Code'],
 				defs: {}
 		}};
-		oTerms.terms.defs[term.id] = [node.label, term.inverseid, term.description, term.domain, term.parent_id, term.status ];
+		oTerms.terms.defs[term.id] = [node.label, term.inverseid, term.description, term.domain, term.parent_id, term.status, term.termcode ];
 
 		var str = YAHOO.lang.JSON.stringify(oTerms);
 
@@ -716,6 +725,7 @@ function EditTerms() {
 			term.domain = _currentDomain;
 			term.label = value.label;
 			term.description = value.description;
+			term.termcode = valie.termcode;
 			term.inverseid = null;
 
 			rootNode = new YAHOO.widget.TextNode(term, rootNode, false); // Create root node
@@ -734,6 +744,7 @@ function EditTerms() {
 			term.domain = _currentDomain;
 			term.label = value.label;
 			term.description = value.description;
+			term.termcode = value.termcode;
 			term.inverseid = null;
 
 			var newNode = new YAHOO.widget.TextNode(term, _currentNode, false);
@@ -827,6 +838,7 @@ function EditTerms() {
 					term.label = arTerm[fi.trm_Label];
 					term.conceptid = null;
 					term.description = arTerm[fi.trm_Description];
+					term.termcode = "";
 					term.parent_id = context.parent; //_currentNode.data.id;
 					term.domain = _currentDomain;
 					term.inverseid = null;

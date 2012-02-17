@@ -515,7 +515,7 @@ function ShowMap() {
 			if(Hul.isempty(errors)){
 				elem.innerHTML = '';
 			}else{
-				elem.innerHTML = '<a href="#" onclick="{alert(\''+errors+'\')}">!!!</a>';
+				elem.innerHTML = '<a href="#" style="color:#ff0000;" onclick="{alert(\''+errors+'\')}">!!!</a>';
 			}
 		}
 	}
