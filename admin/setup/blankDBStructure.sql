@@ -884,6 +884,19 @@ CREATE TABLE woots (
 -- 
 
 
+-- This will later jsut be incorporated b/c the structure of H3cOREdEFINITIONS will be correct
+ 
+ALTER TABLE `defRecStructure`
+MODIFY COLUMN `rst_MaxValues`  tinyint(3) UNSIGNED NULL DEFAULT NULL 
+COMMENT 'Maximum number of values per record for this detail, NULL = unlimited, 0 = not allowed' AFTER `rst_IDInOriginatingDB`;
+ALTER TABLE defTerms 
+  MODIFY COLUMN trm_Label varchar(500) NOT NULL
+    COMMENT "Human readable term used in the interface, cannot be blank", 
+  add trm_Code varchar(100) NULL 
+    COMMENT "Optional code eg. alphanumeric code which may be required for import or export";
+UPDATE defRecStructure set rst_MaxValues=Null where rst_MaxValues=0;
+
+
 -- ------------------------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
@@ -1019,3 +1032,4 @@ VALUES
 -- ------------------------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
+
