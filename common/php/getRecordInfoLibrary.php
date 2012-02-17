@@ -453,6 +453,7 @@ function getTermColNames(){
 					"trm_Depth",
 					"trm_Modified",
 					"trm_LocallyModified",
+					"trm_Code",
 					"trm_ConceptID");
 }
 
