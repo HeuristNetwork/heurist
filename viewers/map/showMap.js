@@ -142,7 +142,8 @@ function ShowMap() {
 
 		setLayout(((context.cntWithGeo+HEURIST.tmap.layers.length)>0), (rec_withtime>0));
 
-		initMapping(); //from mapping.js
+		var errors = initMapping(); //from mapping.js
+		_showErrorSign(errors);
 	}
 
 	/**
@@ -486,7 +487,8 @@ function ShowMap() {
 	*/
 	function _loadLayer(event){
 
-		var val = Number(event.target.value);
+		var val = Number(event.target.value),
+			errors='';
 
 		if(isNaN(val) || val < 0){
 			RelBrowser.Mapping.addLayers([]);
@@ -494,11 +496,28 @@ function ShowMap() {
 			top.HEURIST.currentQuery_sel = top.HEURIST.currentQuery_sel.replace(","+currentBackgroundLayer,"");
 		}else{
 			currentBackgroundLayer = systemAllLayers[val].rec_ID;
-			RelBrowser.Mapping.addLayers([systemAllLayers[val]]);
+			errors = RelBrowser.Mapping.addLayers([systemAllLayers[val]]);
 			top.HEURIST.currentQuery_all = top.HEURIST.currentQuery_all + "," + currentBackgroundLayer;
 			top.HEURIST.currentQuery_sel = top.HEURIST.currentQuery_sel + "," + currentBackgroundLayer;
-		}
 
+
+		}
+		_showErrorSign(errors);
+	}
+
+	/**
+	* show/hide error sign with report alert - what's wrong with image layers
+	*/
+	function _showErrorSign(errors){
+
+		var elem = document.getElementById('errorSign');
+		if(elem){
+			if(Hul.isempty(errors)){
+				elem.innerHTML = '';
+			}else{
+				elem.innerHTML = '<a href="#" onclick="{alert(\''+errors+'\')}">!!!</a>';
+			}
+		}
 	}
 
 

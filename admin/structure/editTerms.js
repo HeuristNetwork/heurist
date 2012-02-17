@@ -503,6 +503,21 @@ function EditTerms() {
 	{
 
 		var term = node.data;
+
+		//check for duplicates
+		if(term.id.indexOf("-")>0){ //new
+
+			var sibs = node.getSiblings();
+			var ind;
+			for (ind in sibs){
+				if(!Hul.isnull(ind) && sibs[ind].label == node.label){
+					alert("There is already the term with the same label in this branch");
+					return;
+				}
+			}
+		}
+
+
 		var needReload = _needReload;
 
 		var oTerms = {terms:{
@@ -544,9 +559,10 @@ function EditTerms() {
 										var vocab_id = topnode.data.id;
 										if(_affectedVocabs.indexOf(vocab_id)<0){
 											_affectedVocabs.push(vocab_id);
-											if(_affectedVocabs.length===1){
+											_showFieldUpdater();
+											/*if(_affectedVocabs.length===1){
 												Dom.get('formAffected').style.display = 'block';
-											}
+											}*/
 										}
 									}
 								}
@@ -901,7 +917,7 @@ function EditTerms() {
 		if(arrRes.length==0){
 
 			var parent = Dom.get('formEditFields');
-			parent.innerHTML = "<h2>No affected field types found</h2>";
+			parent.innerHTML = ""; //"<h2>No affected field types found</h2>";
 
 			Dom.get('formAffected').style.display = 'none';
 

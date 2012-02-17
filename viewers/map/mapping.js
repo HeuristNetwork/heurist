@@ -329,13 +329,14 @@ ether_zoom = function(_band, ether, zoomIn) {
 			}
 
 			//tiled images
-			M.addLayers(M.mapdata.layers);
+			var errors = M.addLayers(M.mapdata.layers);
 
 			//???? M.map.setUIToDefault();
 			if (! mini) {
 				M.addCustomMapTypeControl();
 			}
 
+			return errors;
 		},
 
 		initTMap: function (mini, bounds) {
@@ -544,15 +545,40 @@ ether_zoom = function(_band, ether, zoomIn) {
 
 		addLayers: function (layers) {
 
-			var i, M = RelBrowser.Mapping;
+			var i, M = RelBrowser.Mapping,
+				errors = "";
 
 			M.map.removeAllTileLayers();
 
+			function _isempty(obj){
+				return ( (typeof obj==="undefined") || (obj===null) || (obj==="") || (obj==="null") );
+			}
+			function _checkURL(str) {
+/*
+				return this.optional(element) || /^(https?|ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i.test(value);*/
+
+				var v = new RegExp();
+				v.compile("^((ht|f)tp(s?)\:\/\/|~/|/)?[A-Za-z0-9-_]+\\.[A-Za-z0-9-_%&\?\/.=]+$");
+				//		^(http:\/\/www.|https:\/\/www.|ftp:\/\/www.|www.){1}([0-9A-Za-z]+\.)
+				if (!v.test(str)) {
+					return false;
+				}
+				return true;
+			}
+
 			for (i = 0; i < layers.length; ++i) {
-				(function (layer) {
+				(function (layer) { //execute this function for each layer in given array
 
 					var tile_url;
-					if (layer.type === "virtual earth") {
+					if(_isempty(layer.url)){
+
+						errors = errors + "URL is not defined for image layer. Rec#"+layer.rec_ID;
+
+					}else if(!_checkURL(layer.url)){
+
+						errors = errors + "URL is not valid for image layer. Rec#"+layer.rec_ID;
+
+					}else if (layer.type === "virtual earth") {
 						tile_url = function (a,b) {
 							var res = layer.url + M.tileToQuadKey(a.x,a.y,b) + (layer.mime_type == "image/png" ? ".png" : ".gif");
 							return res;
@@ -574,7 +600,11 @@ ether_zoom = function(_band, ether, zoomIn) {
 			                  return "http://www.maptiler.org/img/none.png";
 			              }
 			          };
+					} else {
+						errors = errors + "Map type is not defined properly for image layer. It should be virtual earth or maptiler. Rec#"+layer.rec_ID;//+"\n";
 					}
+
+				//it tile_url is defined - add this layer to mapstrcation
 				if(tile_url){
 					layer.min_zoom = new Number(layer.min_zoom);
 					layer.max_zoom = new Number(layer.max_zoom);
@@ -594,7 +624,8 @@ ether_zoom = function(_band, ether, zoomIn) {
 
 
 				})(layers[i]);
-			}
+			}//for
+			return errors;
 		},
 
 		timeMidPoint: function (start, end) {
@@ -625,6 +656,7 @@ ether_zoom = function(_band, ether, zoomIn) {
 	// default to 100px per century
 	RelBrowser.Mapping.initTimeZoomIndex = RelBrowser.Mapping.timeZoomSteps.length - 1;
 
+	// returns error string in case wrong image layer definition
 	function initMapping() {
 		var mini, $img, M = RelBrowser.Mapping;
 
@@ -632,8 +664,9 @@ ether_zoom = function(_band, ether, zoomIn) {
 		$img = $("img.entity-picture");
 		if ($img.length > 0  &&  $img.width() === 0) {
 			$img.load(function () { M.initMap(mini); });
+			return '';
 		} else {
-			M.initMap(mini);
+			return M.initMap(mini);
 		}
 	}
 
