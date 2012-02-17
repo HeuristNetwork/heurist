@@ -113,15 +113,20 @@ if (! rectype) {
 		firstOption.selected = true;
 
 	// rectypes displayed in Groups by group display order then by display order within group
-	for (var grpID in top.HEURIST.rectypes.groups){
-	var grp = document.createElement("optgroup");
-		grp.label = top.HEURIST.rectypes.groups[grpID].name;
+	var index;
+	for (index in top.HEURIST.rectypes.groups){
+		if (index == "groupIDToIndex" ||
+		top.HEURIST.rectypes.groups[index].showTypes.length < 1) continue;
+		var grp = document.createElement("optgroup");
+		grp.label = top.HEURIST.rectypes.groups[index].name;
 		rectypeDropdown.appendChild(grp);
-		for (var recTypeID in top.HEURIST.rectypes.groups[grpID].showTypes) {
+		for (var recTypeIDIndex in top.HEURIST.rectypes.groups[index].showTypes) {
+			var recTypeID = top.HEURIST.rectypes.groups[index].showTypes[recTypeIDIndex];
 			var name = top.HEURIST.rectypes.names[recTypeID];
-			rectypeDropdown.appendChild( new Option(name, recTypeID));
+			rectypeDropdown.appendChild(new Option(name, recTypeID));
 		}
 	}
+
 
 	rectypeDropdown.onchange = setInitialrectype;
 
