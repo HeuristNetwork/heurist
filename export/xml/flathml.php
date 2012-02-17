@@ -816,13 +816,20 @@ function makeFileContentNode($file){
 				$attrs = array("type" => "TEI");
 				$teiHeader = $xml->xpath('//TEI/teiHeader');
 				$content = $xml->xpath('//TEI/text');
+				$content = (@$teiHeader && @$teiHeader[0]? $teiHeader[0]->asXML():"").
+							($content && $content[0]? $content[0]->asXML():"");
 			}else if ( count($xml->xpath('//TEI.2'))) {
 				$attrs = array("type" => "TEI.2");
 				$teiHeader = $xml->xpath('//TEI.2/teiHeader');
 				$content = $xml->xpath('//TEI.2/text');
+				$content = (@$teiHeader && @$teiHeader[0]? $teiHeader[0]->asXML():"").
+							($content && $content[0]? $content[0]->asXML():"");
+			}else if ( count($xml->xpath('//rss'))) {
+				$attrs = array("type" => "rss");
+				$content = $xml->xpath('//rss');
+				$content = ($content && $content[0]? $content[0]->asXML():"");
+				$content = preg_replace("/^\<\?xml[^\?]+\?\>/","",$content);
 			}
-			$content = ($teiHeader && $teiHeader[0]? $teiHeader[0]->asXML():"").
-						($content && $content[0]? $content[0]->asXML():"");
 			if ($content) {
 			makeTag('content',$attrs,$content,true,false);
 		}
