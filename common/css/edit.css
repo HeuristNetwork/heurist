@@ -562,7 +562,7 @@ div.temporal-div input.temporal-button:hover {
 }
 .input-row select {
 	display: block;
-	border: none;
+	border: 1px solid rgga(0,0,0,0.2);
 	font-size:11px;
 	padding: 0.5ex;
 	display:inline-block;

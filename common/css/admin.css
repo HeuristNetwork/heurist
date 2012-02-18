@@ -532,3 +532,12 @@ div#termsFilter.popup {
 	visibility:hidden;
 	opacity:0;
 }
+#ygddfdiv {
+	background-color:#FFE;
+	opacity:1;
+	box-shadow:0 2px 3px RGBA(0,0,0,0.5);
+	border:2px solid #62A7F8 !important;
+}
+#ygddfdiv table{
+	width:100%;
+}
