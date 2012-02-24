@@ -162,7 +162,7 @@ $INV = mysql__select_assoc('defTerms',	//saw Enum change just assoc id to relate
 							'1');
 
 // lookup detail type enum values
-$query = 'SELECT trm_ID, trm_Label, trm_ParentTermID, trm_OntID FROM defTerms';
+$query = 'SELECT trm_ID, trm_Label, trm_ParentTermID, trm_OntID, trm_Code FROM defTerms';
 $res = mysql_query($query);
 while ($row = mysql_fetch_assoc($res)) {
 	$TL[$row['trm_ID']] = $row;
@@ -703,6 +703,9 @@ function outputRecord($recordInfo, $recInfos, $outputStub=false, $parentID = nul
 							$attrs['type'] = $TL[$trmID]['trm_Label'];
 							$attrs['termID'] = $trmID;
 							$attrs['termConceptID'] = getTermConceptID($trmID);
+							if ($TL[$trmID]['trm_Code']){
+								$attrs['code'] = $TL[$trmID]['trm_Code'];
+							};
 							if ($relatedRecID){
 								$attrs['relatedRecordID'] = $relatedRecID;
 							}

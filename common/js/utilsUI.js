@@ -964,9 +964,10 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		if (!req) return;
 		var method = (postData) ? "POST" : "GET";
 		req.open(method,url,true);// set for asynch call
-		if (postData)
+		if (postData){
 			req.setRequestHeader('Content-type','application/x-www-form-urlencoded');
-			req.onreadystatechange = function () {// callback for ajax object
+		}
+		req.onreadystatechange = function () {// callback for ajax object
 				if (req.readyState != 4) return;
 				if (req.status != 200 && req.status != 304) {
 					if (req.status == 404) {

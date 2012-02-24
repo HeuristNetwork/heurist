@@ -20,6 +20,9 @@
 	var label = decodeURIComponent(top.HEURIST.parameters["label"]);
 	var sid = top.HEURIST.parameters["sid"];
 	var q = top.HEURIST.parameters["q"];
+	var rtFilter = top.HEURIST.search.getPushDownFilter("rectype"),
+		relFilter = top.HEURIST.search.getPushDownFilter("reltype"),
+		ptrFilter = top.HEURIST.search.getPushDownFilter("ptrtype");
 
 	// if the user pressed Save when showing a collection then divert them to saveCollectionPopup.html
 	if (!q) {
@@ -153,6 +156,7 @@
 		var cmb_instance = action_fr.document.getElementById("db");
 		var publish_elt = action_fr.document.getElementById("publish");
 		var bkmk_only = document.getElementById("bookmark-check");
+		var saveFilters = document.getElementById("saveFilters");
 
 		if (publish == "yes"){
 			publish_elt.value = "true";
@@ -185,6 +189,18 @@
 		for (var p in top.HEURIST.parameters) {
 			if (p != "label" && p != "sid" && p != "db") {
 				query.push(p + "=" + encodeURIComponent(top.HEURIST.parameters[p]));
+			}
+		}
+
+		if (saveFilters.checked) {
+			if (rtFilter.length){
+				query.push(rtFilter[1]);
+			}
+			if (relFilter.length){
+				query.push(relFilter[1]);
+			}
+			if (ptrFilter.length){
+				query.push(ptrFilter[1]);
 			}
 		}
 
@@ -244,7 +260,8 @@
   </p>
   		<div class="separator_row" style="margin:20px 0"></div>
 
-<input style="float:right" type=button value=Save id=save onClick="check();">
+<div style="float: right;"><label  for="saveFilters">  save Filters  <input style="display: inline; margin-right: 20px;" type="checkbox" id="saveFilters"/></label>
+<input style="float:right" type=button value=Save id=save onClick="check();"></div>
   <p id=message></p>
 <!--  </div>-->
 <div id="coverall" style="display:none">

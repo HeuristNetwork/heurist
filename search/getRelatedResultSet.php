@@ -236,11 +236,23 @@ global $ACCESSABLE_OWNER_IDS;
 		if (!@$recSet['infoByDepth'][$depth]['ptrtypes']) {
 			$recSet['infoByDepth'][$depth]['ptrtypes'] = array();
 		}
-		if (!@$recSet['infoByDepth'][$depth]['ptrtypes'][$row['ptrDetailTypeID']]) {
+
+		if (!@$recSet['infoByDepth'][$depth]['ptrtypes']['fwd']) {
+			$recSet['infoByDepth'][$depth]['ptrtypes']['fwd'] = array($row['ptrDetailTypeID']=> array($row['srcRecID']=>array($row['trgRecID'])));
+		}else if (!@$recSet['infoByDepth'][$depth]['ptrtypes']['fwd'][$row['ptrDetailTypeID']]) {
+			$recSet['infoByDepth'][$depth]['ptrtypes']['fwd'][$row['ptrDetailTypeID']] = array($row['srcRecID']=>array($row['trgRecID']));
+		}else if (!@$recSet['infoByDepth'][$depth]['ptrtypes']['fwd'][$row['ptrDetailTypeID']][$row['srcRecID']]) {
+			$recSet['infoByDepth'][$depth]['ptrtypes']['fwd'][$row['ptrDetailTypeID']][$row['srcRecID']] = array($row['trgRecID']);
+		}else if ( !in_array($row['trgRecID'],$recSet['infoByDepth'][$depth]['ptrtypes']['fwd'][$row['ptrDetailTypeID']][$row['srcRecID']])){
+			array_push($recSet['infoByDepth'][$depth]['ptrtypes']['fwd'][$row['ptrDetailTypeID']][$row['srcRecID']],$row['trgRecID']);
+		}
+
+		// pointer types
+/*		if (!@$recSet['infoByDepth'][$depth]['ptrtypes'][$row['ptrDetailTypeID']]) {
 			$recSet['infoByDepth'][$depth]['ptrtypes'][$row['ptrDetailTypeID']] = array($row['trgRecID']);
 		} else if ( !in_array($row['trgRecID'],$recSet['infoByDepth'][$depth]['ptrtypes'][$row['ptrDetailTypeID']])){
 			array_push($recSet['infoByDepth'][$depth]['ptrtypes'][$row['ptrDetailTypeID']],$row['trgRecID']);
-		}
+		}*/
 		if ( !in_array($row['trgRecID'],$recSet['infoByDepth'][$depth]['recIDs'])){
 			array_push($recSet['infoByDepth'][$depth]['recIDs'],$row['trgRecID']);
 		}
@@ -330,11 +342,22 @@ global $REVERSE, $ACCESSABLE_OWNER_IDS, $relRT;
 		if (!@$recSet['infoByDepth'][$depth]['ptrtypes']) {
 			$recSet['infoByDepth'][$depth]['ptrtypes'] = array();
 		}
-		if (!@$recSet['infoByDepth'][$depth]['ptrtypes'][$row['ptrDetailTypeID']]) {
+
+		if (!@$recSet['infoByDepth'][$depth]['ptrtypes']['rev']) {
+			$recSet['infoByDepth'][$depth]['ptrtypes']['rev'] = array($row['ptrDetailTypeID']=> array($row['srcRecID']=>array($row['trgRecID'])));
+		}else if (!@$recSet['infoByDepth'][$depth]['ptrtypes']['rev'][$row['ptrDetailTypeID']]) {
+			$recSet['infoByDepth'][$depth]['ptrtypes']['rev'][$row['ptrDetailTypeID']] = array($row['srcRecID']=>array($row['trgRecID']));
+		}else if (!@$recSet['infoByDepth'][$depth]['ptrtypes']['rev'][$row['ptrDetailTypeID']][$row['srcRecID']]) {
+			$recSet['infoByDepth'][$depth]['ptrtypes']['rev'][$row['ptrDetailTypeID']][$row['srcRecID']] = array($row['trgRecID']);
+		}else if ( !in_array($row['trgRecID'],$recSet['infoByDepth'][$depth]['ptrtypes']['rev'][$row['ptrDetailTypeID']][$row['srcRecID']])){
+			array_push($recSet['infoByDepth'][$depth]['ptrtypes']['rev'][$row['ptrDetailTypeID']][$row['srcRecID']],$row['trgRecID']);
+		}
+
+/*		if (!@$recSet['infoByDepth'][$depth]['ptrtypes'][$row['ptrDetailTypeID']]) {
 			$recSet['infoByDepth'][$depth]['ptrtypes'][$row['ptrDetailTypeID']] = array($row['trgRecID']);
 		} else if ( !in_array($row['trgRecID'],$recSet['infoByDepth'][$depth]['ptrtypes'][$row['ptrDetailTypeID']])){
 			array_push($recSet['infoByDepth'][$depth]['ptrtypes'][$row['ptrDetailTypeID']],$row['trgRecID']);
-		}
+		}*/
 		if ( !in_array($row['trgRecID'],$recSet['infoByDepth'][$depth]['recIDs'])){
 			array_push($recSet['infoByDepth'][$depth]['recIDs'],$row['trgRecID']);
 		}
@@ -430,23 +453,19 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 		if (!@$recSet['infoByDepth'][$depth]['reltypes']) {
 			$recSet['infoByDepth'][$depth]['reltypes'] = array();
 		}
-		if ( !$row['srcIsFrom']) {//inverse relation
-			$nlrIDs[$row['srcRecID']] = 1;	//save it for next level query
-			if ( !in_array($row['srcRecID'],$recSet['infoByDepth'][$depth]['recIDs'])){
-				array_push($recSet['infoByDepth'][$depth]['recIDs'],$row['srcRecID']);
-			}
-			if (!@$recSet['infoByDepth'][$depth]['rectypes'][$row['srcType']]) {
-				$recSet['infoByDepth'][$depth]['rectypes'][$row['srcType']] = array($row['srcRecID']);
-			} else if ( !in_array($row['srcRecID'],$recSet['infoByDepth'][$depth]['rectypes'][$row['srcType']])){
-				array_push($recSet['infoByDepth'][$depth]['rectypes'][$row['srcType']],$row['srcRecID']);
-			}
-			if (!@$recSet['infoByDepth'][$depth]['reltypes'][$row['invRelType']]) {
-				$recSet['infoByDepth'][$depth]['reltypes'][$row['invRelType']] = array($row['srcRecID']);
-			} else if ( !in_array($row['srcRecID'],$recSet['infoByDepth'][$depth]['reltypes'][$row['invRelType']])){
-				array_push($recSet['infoByDepth'][$depth]['reltypes'][$row['invRelType']],$row['srcRecID']);
-			}
-		}else{
+		if ($row['srcIsFrom']== 1) {//qrec_id is source or primary resource of the relationship
 			$nlrIDs[$row['trgRecID']] = 1;	//save it for next level query
+
+			if (!@$recSet['infoByDepth'][$depth]['reltypes']['fwd']) {
+				$recSet['infoByDepth'][$depth]['reltypes']['fwd'] = array($row['relType']=> array($row['srcRecID']=>array($row['trgRecID'])));
+			}else if (!@$recSet['infoByDepth'][$depth]['reltypes']['fwd'][$row['relType']]) {
+				$recSet['infoByDepth'][$depth]['reltypes']['fwd'][$row['relType']] = array($row['srcRecID']=>array($row['trgRecID']));
+			}else if (!@$recSet['infoByDepth'][$depth]['reltypes']['fwd'][$row['relType']][$row['srcRecID']]) {
+				$recSet['infoByDepth'][$depth]['reltypes']['fwd'][$row['relType']][$row['srcRecID']] = array($row['trgRecID']);
+			}else if ( !in_array($row['trgRecID'],$recSet['infoByDepth'][$depth]['reltypes']['fwd'][$row['relType']][$row['srcRecID']])){
+				array_push($recSet['infoByDepth'][$depth]['reltypes']['fwd'][$row['relType']][$row['srcRecID']],$row['trgRecID']);
+			}
+
 			if ( !in_array($row['trgRecID'],$recSet['infoByDepth'][$depth]['recIDs'])){
 				array_push($recSet['infoByDepth'][$depth]['recIDs'],$row['trgRecID']);
 			}
@@ -455,11 +474,37 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 			} else if ( !in_array($row['trgRecID'],$recSet['infoByDepth'][$depth]['rectypes'][$row['trgType']])){
 				array_push($recSet['infoByDepth'][$depth]['rectypes'][$row['trgType']],$row['trgRecID']);
 			}
-			if (!@$recSet['infoByDepth'][$depth]['reltypes'][$row['relType']]) {
+/*			if (!@$recSet['infoByDepth'][$depth]['reltypes'][$row['relType']]) {
+				$recSet['infoByDepth'][$depth]['reltypes'][$row['relType']] = array($row['srcRecID']);
+			} else if ( !in_array($row['srcRecID'],$recSet['infoByDepth'][$depth]['reltypes'][$row['relType']])){
+				array_push($recSet['infoByDepth'][$depth]['reltypes'][$row['relType']],$row['srcRecID']);
+			}*/
+		}else{//inverse relation meaning that the qrec_ids are the target of the relation so the trg is actually the primary
+			$nlrIDs[$row['srcRecID']] = 1;	//save it for next level query
+
+			if (!@$recSet['infoByDepth'][$depth]['reltypes']['rev']) {
+				$recSet['infoByDepth'][$depth]['reltypes']['rev'] = array($row['relType']=> array($row['trgRecID']=>array($row['srcRecID'])));
+			}else if (!@$recSet['infoByDepth'][$depth]['reltypes']['rev'][$row['relType']]) {
+				$recSet['infoByDepth'][$depth]['reltypes']['rev'][$row['relType']] = array($row['trgRecID']=>array($row['srcRecID']));
+			}else if (!@$recSet['infoByDepth'][$depth]['reltypes']['rev'][$row['relType']][$row['trgRecID']]) {
+				$recSet['infoByDepth'][$depth]['reltypes']['rev'][$row['relType']][$row['trgRecID']] = array($row['srcRecID']);
+			}else if ( !in_array($row['srcRecID'],$recSet['infoByDepth'][$depth]['reltypes']['rev'][$row['relType']][$row['trgRecID']])){
+				array_push($recSet['infoByDepth'][$depth]['reltypes']['rev'][$row['relType']][$row['trgRecID']],$row['srcRecID']);
+			}
+
+			if ( !in_array($row['srcRecID'],$recSet['infoByDepth'][$depth]['recIDs'])){
+				array_push($recSet['infoByDepth'][$depth]['recIDs'],$row['srcRecID']);
+			}
+			if (!@$recSet['infoByDepth'][$depth]['rectypes'][$row['srcType']]) {
+				$recSet['infoByDepth'][$depth]['rectypes'][$row['srcType']] = array($row['srcRecID']);
+			} else if ( !in_array($row['srcRecID'],$recSet['infoByDepth'][$depth]['rectypes'][$row['srcType']])){
+				array_push($recSet['infoByDepth'][$depth]['rectypes'][$row['srcType']],$row['srcRecID']);
+			}
+/*			if (!@$recSet['infoByDepth'][$depth]['reltypes'][$row['relType']]) {
 				$recSet['infoByDepth'][$depth]['reltypes'][$row['relType']] = array($row['trgRecID']);
 			} else if ( !in_array($row['trgRecID'],$recSet['infoByDepth'][$depth]['reltypes'][$row['relType']])){
 				array_push($recSet['infoByDepth'][$depth]['reltypes'][$row['relType']],$row['trgRecID']);
-			}
+			}*/
 		}
 		if ( !array_key_exists($row['srcRecID'], $recSet['recSet'])) {
 			$recSet['recSet'][$row['srcRecID']]=array('depth'=>$depth,

@@ -154,7 +154,7 @@ top.HEURIST.search = {
 					(top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : "");
 			});
 		}
-		// when the last result is loaded start loading related if user wants it
+		// when the last result is loaded start loading related if user wants it or it's impled from a filter in the URL
 		if (top.HEURIST.search.results.infoByDepth[0].count == top.HEURIST.search.results.totalQueryResultRecordCount &&
 			(top.HEURIST.util.getDisplayPreference("loadRelatedOnSearch") === "true" ||
 				top.HEURIST.parameters['rtfilters'] ||
@@ -276,17 +276,65 @@ top.HEURIST.search = {
 						(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : ""))) +
 			"&depth=3";
 		top.HEURIST.registerEvent(window, "heurist-related-recordset-loaded",
-									function (evt) {
-													top.HEURIST.search.loadLevelFilter(0);
-													top.HEURIST.search.addResultLevelLinks(0);
-													if (top.HEURIST.search.results.infoByDepth.length >1 &&
-															top.HEURIST.search.results.infoByDepth[1].count > 0) {
-														top.HEURIST.search.loadLevelFilter(1);
+					function (evt) {
+									var i,
+										maxFilterDepth=0;
+									if (top.HEURIST.parameters &&
+										(	top.HEURIST.parameters['rtfilters'] ||
+											top.HEURIST.parameters['ptrfilters'] ||
+											top.HEURIST.parameters['relfilters']	)) {
+											//calculate max depth of filters
+											var rtf = top.HEURIST.parameters['rtfilters'],
+												ptrf = top.HEURIST.parameters['ptrfilters'],
+												relf = top.HEURIST.parameters['relfilters'];
+											for (i=1; i<=3; i++) {
+												if (rtf && rtf.search('"' + i + '":') != -1 ||
+													ptrf && ptrf.search('"' + i + '":') != -1 ||
+													relf && relf.search('"' + i + '":') != -1) {
+														maxFilterDepth = i;
 													}
-													top.HEURIST.search.filterRelated(0);
-									});
+											}
+											//expand to the the max defined by the filter or byt the data
+											maxFilterDepth = Math.min(maxFilterDepth, top.HEURIST.search.results.infoByDepth.length-1);
+											//for each level loadLevelFilter Menu, loadRelatedLevel results, expand level, filterRelated results with noPush
+											top.HEURIST.search.filterRelated(0,true,true);
+											for (i=1; i<=maxFilterDepth; i++) {
+												//loadLevelFilter Menu
+												top.HEURIST.search.loadLevelFilter(i);
+												//loadRelatedLevel results
+												top.HEURIST.search.loadRelatedLevel(i,true);
+												document.getElementById("showrelated" + i).className += " loaded";
+												//filterRelated results with noPush
+												top.HEURIST.search.filterRelated(i,true,true);
+												// expand level
+												$("#results-level"+i).removeClass('collapsed');// remove collapsed class on parent
+												$("#showrelated" + i).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +i + ")' href='#'>Hide Level "+i+" Related Records </a><span class=\"relatedCount\">"+top.HEURIST.search.results.infoByDepth[i].count+"</span>");
+											}
+											if (maxFilterDepth < top.HEURIST.search.results.infoByDepth.length - 1 &&
+												top.HEURIST.search.results.infoByDepth[maxFilterDepth+1].count > 0){
+												top.HEURIST.search.loadLevelFilter(maxFilterDepth+1);
+											}
+											//clear the filters
+											if (rtf) {
+												delete top.HEURIST.parameters['rtfilters'];
+											}
+											if (ptrf) {
+												delete top.HEURIST.parameters['ptrfilters'];
+											}
+											if (relf) {
+												delete top.HEURIST.parameters['relfilters'];
+											}
+										}else{
+											// if filters then load related to depth..
+											if (top.HEURIST.search.results.infoByDepth.length >1 &&
+													top.HEURIST.search.results.infoByDepth[1].count > 0) {
+												top.HEURIST.search.loadLevelFilter(1);
+											}
+											top.HEURIST.search.filterRelated(0);
+										}
+					});
 		top.HEURIST.util.getJsonData(URL,
-				function(related) {	// callback function to process results from
+				function(related) {	// callback function to process related record results into HEURIST search results
 					var results = top.HEURIST.search.results,
 						recID,i,j;
 					if (related && related.count >= results.totalQueryResultRecordCount) { //check that we have related records
@@ -326,7 +374,7 @@ top.HEURIST.search = {
 				});
 	},
 
-	loadLevelFilter: function(level){
+	loadLevelFilter: function(level){	// it's important that this function be called after results are completely loaded
 		var results = top.HEURIST.search.results;
 		var maxDepth = Math.min((results.params ? results.params.depth : 4), results.infoByDepth.length - 1);
 		if (level > maxDepth) {
@@ -362,9 +410,8 @@ top.HEURIST.search = {
 			filterDiv.innerHTML = "";
 		}
 
-		if(level>0){
+		if(level>0){// create load-show-hide  with count banner for a related level
 			var showRelatedMenuItem = document.createElement("div");
-//			<!--showRelatedMenuItem.innerHTML = "<a title=\"Click to show records related to the records listed above\" href='#' onclick=top.HEURIST.search.toggleRelated("+level+")>Show Related Records</a>";-->
 			showRelatedMenuItem.innerHTML = "<a title=\"Click to show "+depthInfo.count+" records related to the records listed above\" href='#' onclick=top.HEURIST.search.toggleRelated("+level+")>Load Level "+level+" Related Records <span class=\"relatedCount\">"+depthInfo.count+"</span></a>";
 			showRelatedMenuItem.id = "showrelated"+level;
 			showRelatedMenuItem.className = "showrelated level" + level;
@@ -383,9 +430,18 @@ top.HEURIST.search = {
 			var levelPtrTypes = (level <= maxDepth && depthInfo.ptrtypes ? depthInfo.ptrtypes: null);
 			var levelRelTypes = (level <= maxDepth && depthInfo.reltypes? depthInfo.reltypes : null);
 		}
-		//create rectype filter menu
 
+		// check for filtering from the uri
+		var rtfilter = top.HEURIST.parameters['rtfilters'] ? top.YAHOO.lang.JSON.parse(top.HEURIST.parameters['rtfilters']) : null,
+			ptrfilter = top.HEURIST.parameters['ptrfilters'] ? top.YAHOO.lang.JSON.parse(top.HEURIST.parameters['ptrfilters']) : null,
+			relfilter = top.HEURIST.parameters['relfilters'] ? top.YAHOO.lang.JSON.parse(top.HEURIST.parameters['relfilters']) : null;
+		var filterRtIDs = (rtfilter && rtfilter[level] ? rtfilter[level] : null),
+			filterPtrDtIDs = (ptrfilter && ptrfilter[level] ? ptrfilter[level] : null),
+			filterRelTrmIDs = (relfilter && relfilter[level] ? relfilter[level] : null);
+
+		// create  view Style menu
 		var viewStyleMenu = document.createElement("li");
+		viewStyleMenu.className = "view";
 		viewStyleMenu.innerHTML = '<span>View</span>'+
 									'<ul>'+
 										'<li><a href="#" class="view" title="View results as a list" onClick="top.HEURIST.search.setResultStyle(\'list\','+level+');">1 column</a></li>'+
@@ -395,6 +451,7 @@ top.HEURIST.search = {
 									'</ul>';
 		filterMenu.appendChild(viewStyleMenu);
 
+		//create rectype filter menu
 		if (levelRecTypes){
 			var j;
 			var rtNames = $.map(levelRecTypes, function(recIDs,rtID) {
@@ -416,20 +473,44 @@ top.HEURIST.search = {
 			for (j=0; j< rtNames.length; j++) {
 				var rtInfo = rtNames[j].split(":");
 				li = document.createElement("li");
-				li.rectype = rtInfo[1];
+				li.rectype = rtID = rtInfo[1];
 				$(li).attr("rectype", rtInfo[1]);
-				li.innerHTML = "<a href='#' onclick=top.HEURIST.search.toggleRectypeFilter(this.parentNode,"+level+","+rtInfo[1]+")>" + rtInfo[0] + "</a>";
-				li.className = "checked level"+level;
+				li.innerHTML = "<a href='#' onclick=top.HEURIST.search.toggleRectypeFilter(this.parentNode,"+level+","+rtID+")>" + rtInfo[0] + "</a>";
+				li.className = (!filterRtIDs || filterRtIDs &&
+													(filterRtIDs.indexOf(parseInt(rtID)) != -1 ||
+														filterRtIDs.indexOf(rtID) != -1)? "checked ":'') + "level"+level;
 				rectypeList.appendChild(li);
 			}
 			rectypeMenuItem.appendChild(rectypeList);
 			filterMenu.appendChild(rectypeMenuItem);
 		}
-		if (levelPtrTypes){
+
+		//create ptrtype filter menu
+		if (levelPtrTypes){	// this is skipped for level 0 since there are no links from an upper level since level 0 is the top level
 			var j;
-			var ptrNames = $.map(levelPtrTypes, function(recIDs,dtlID) {
-								return (top.HEURIST.detailTypes.names[dtlID] ? "" + top.HEURIST.detailTypes.names[dtlID] + ":" + dtlID : null);
-							});
+			var ptrNames = [];
+			var ptrDirection = {};
+			var dtlID;
+			if (levelPtrTypes.fwd) {
+				$.each(levelPtrTypes.fwd, function(dtlID,linkSetIDs) {
+					if (top.HEURIST.detailTypes.names[dtlID]) {
+						ptrNames.push("" + top.HEURIST.detailTypes.names[dtlID]+ ":" + dtlID);
+						ptrDirection[dtlID] = "down";//towards increased depth
+					}
+				});
+			}
+			if (levelPtrTypes.rev) {
+				$.each(levelPtrTypes.rev, function(dtlID,linkSetIDs) {
+					if (top.HEURIST.detailTypes.names[dtlID]) {
+						if (ptrDirection[dtlID]) {//name exist from forward
+							ptrDirection[dtlID] = "both";//both directions
+						}else{
+							ptrNames.push("" + top.HEURIST.detailTypes.names[dtlID]+ ":" + dtlID);
+							ptrDirection[dtlID] = "up";//towards decreased depth
+						}
+					}
+				});
+			}
 			ptrNames.sort();
 			var ptrtypeMenuItem = document.createElement("li");
 			ptrtypeMenuItem.innerHTML = "<span>Filter by Pointer Type</span>";
@@ -446,20 +527,46 @@ top.HEURIST.search = {
 			for (j=0; j< ptrNames.length; j++) {
 				var ptrInfo = ptrNames[j].split(":");
 				li = document.createElement("li");
-				li.ptrtype = ptrInfo[1];
-				$(li).attr("ptrtype", ptrInfo[1]);
-				li.innerHTML = "<a href='#' onclick=top.HEURIST.search.togglePtrtypeFilter(this.parentNode,"+level+","+ptrInfo[1]+")>" + ptrInfo[0] + "</a>";
+				li.ptrtype = dtlID = ptrInfo[1];
+				$(li).attr("ptrtype", dtlID);
+				li.innerHTML = "<a href='#' onclick=top.HEURIST.search.togglePtrtypeFilter(this.parentNode,"+level+","+dtlID+")>" +
+								(ptrDirection[dtlID] == "both"? "↕": (ptrDirection[dtlID] == "up"?"↑" :"↓")) + ptrInfo[0] + "</a>";
 				li.className = "checked level"+level;
+				li.className = (!filterPtrDtIDs || filterPtrDtIDs &&
+													(filterPtrDtIDs.indexOf(parseInt(dtlID)) != -1 ||
+														filterPtrDtIDs.indexOf(dtlID) != -1)? "checked ":'') + "level"+level;
 				ptrtypeList.appendChild(li);
 			}
 			ptrtypeMenuItem.appendChild(ptrtypeList);
 			filterMenu.appendChild(ptrtypeMenuItem);
 		}
-		if (levelRelTypes){
+
+		//create reltype filter menu
+		if (levelRelTypes){	// this is skipped for level 0 since there are no links from an upper level since level 0 is the top level
 			var j;
-			var relNames = $.map(levelRelTypes, function(recIDs,trmID) {
-								return (top.HEURIST.terms.termsByDomainLookup.relation[trmID] ? "" + top.HEURIST.terms.termsByDomainLookup.relation[trmID][top.HEURIST.terms.fieldNamesToIndex['trm_Label']] + ":" + trmID : null);
-								});
+			var relNames = [];
+			var relDirection = {};
+			var trmID;
+			if (levelRelTypes.fwd) {
+				$.each(levelRelTypes.fwd, function(trmID,linkSetIDs) {
+					if (top.HEURIST.terms.termsByDomainLookup.relation[trmID] && top.HEURIST.terms.termsByDomainLookup.relation[trmID][0]) {
+						relNames.push("" + top.HEURIST.terms.termsByDomainLookup.relation[trmID][0]+ ":" + trmID);
+						relDirection[trmID] = "down";//towards increased depth
+					}
+				});
+			}
+			if (levelRelTypes.rev) {
+				$.each(levelRelTypes.rev, function(trmID,linkSetIDs) {
+					if (top.HEURIST.terms.termsByDomainLookup.relation[trmID] && top.HEURIST.terms.termsByDomainLookup.relation[trmID][0]) {
+						if (relDirection[trmID]) {//name exist from forward
+							relDirection[trmID] = "both";//both directions
+						}else{
+							relNames.push("" + top.HEURIST.terms.termsByDomainLookup.relation[trmID][0]+ ":" + trmID);
+							relDirection[trmID] = "up";//towards decreased depth
+						}
+					}
+				});
+			}
 			relNames.sort();
 			var reltypeMenuItem = document.createElement("li");
 			reltypeMenuItem.innerHTML = "<span>Filter by Relation Type</span>";
@@ -476,16 +583,21 @@ top.HEURIST.search = {
 			for (j=0; j< relNames.length; j++) {
 				var relInfo = relNames[j].split(":");
 				var li = document.createElement("li");
-				li.reltype = relInfo[1];
-				$(li).attr("reltype", relInfo[1]);
-				li.innerHTML = "<a href='#' onclick=top.HEURIST.search.toggleReltypeFilter(this.parentNode,"+level+","+relInfo[1]+")>" + relInfo[0] + "</a>";
+				li.reltype = trmID = relInfo[1];
+				$(li).attr("reltype", trmID);
+				li.innerHTML = "<a href='#' onclick=top.HEURIST.search.toggleReltypeFilter(this.parentNode,"+level+","+trmID+")>" +
+								(relDirection[trmID] == "both"? "↕": (relDirection[trmID] == "up"?"↑" :"↓")) + relInfo[0] + "</a>";
 				li.className = "checked level"+level;
+				li.className = (!filterRelTrmIDs || filterRelTrmIDs &&
+													(filterRelTrmIDs.indexOf(parseInt(trmID)) != -1 ||
+														filterRelTrmIDs.indexOf(trmID) != -1)? "checked ":'') + "level"+level;
 				reltypeList.appendChild(li);
 			}
 			reltypeMenuItem.appendChild(reltypeList);
 			filterMenu.appendChild(reltypeMenuItem);
 		}
 	},
+
 	setBodyClass: function() {
 		top.HEURIST.parameters["w"] = document.getElementById("w-input").value;
 		var searchType = document.getElementById("w-input").value;
@@ -496,6 +608,7 @@ top.HEURIST.search = {
 		var bodyClass = "w-" + searchType;
 		$("body").addClass(bodyClass);
 	},
+
 	toggleRelated: function(level){
 		var className =  document.getElementById("showrelated" + level).className;
 		var depthInfo = top.HEURIST.search.results.infoByDepth[level];
@@ -507,6 +620,7 @@ top.HEURIST.search = {
 				$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Hide Level "+level+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span>");
 			};
 		}else{  //not loaded yet
+			//This is where we load the next related level and it's important to load all parts (recDiv and Filters before filtering.
 			top.HEURIST.search.loadRelatedLevel(level);
 			document.getElementById("showrelated" + level).className = className + " loaded";
 			$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Hide Level "+level+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span>");
@@ -538,72 +652,136 @@ top.HEURIST.search = {
 			});
 		$(menuItem).toggleClass('checked')
 		// recalc lower level filters (pushdown filtering)
+		top.HEURIST.search.recalcLinkMenus(level);
 		top.HEURIST.search.filterRelated(level+1);
 		top.HEURIST.search.updateMapRelated();
 	},
 
-	togglePtrtypeFilter: function(menuItem, level, dtyID){
-		var recalcFilters = false;
-		var resultsDiv =  $("#results-level" + level).get(0);
-		var recIDs = top.HEURIST.search.results.infoByDepth[level].ptrtypes[dtyID];
-		var recSet = top.HEURIST.search.results.recSet;
-		var activeParentRecIDs = {};
-		$("div.recordDiv"+(level-1 > 0?".lnk":"")+":not(.filtered)",$("#results-level" + (level -1)).get(0)).each(function(){
-			activeParentRecIDs[$(this).attr('recid')]=1;});
-		if ($(menuItem).hasClass('checked')) {// filter all pointer links of type dtyID by removing a "lnk" class
-			$.each(recIDs,function(i,recID){
-				if (recSet[recID] && recSet[recID]['revPtrLinks'] && recSet[recID]['revPtrLinks']['byInvDtlType'][dtyID]){
-					$.each(recSet[recID]['revPtrLinks']['byInvDtlType'][dtyID], function(i, parentRecID){
-						if (activeParentRecIDs[parentRecID]){
-							$('.recordDiv[recID='+recID+']',resultsDiv).removeClass('lnk');
-						}
-					});
-				}
-				if (recSet[recID] && recSet[recID]['revPtrLinks'] && recSet[recID]['revPtrLinks']['byInvDtlType'][dtyID]){
-					$.each(recSet[recID]['revPtrLinks']['byInvDtlType'][dtyID], function(i, parentRecID){
-						if (activeParentRecIDs[parentRecID]){
-							$('.recordDiv[recID='+recID+']',resultsDiv).removeClass('lnk');
-						}
-					});
-				}
-			});
-		}else{
-			$.each(recIDs,function(i,recID){
-				//for each of the revPointer[dtyID] recIDs check if there is one active
-				if (recSet[recID] && recSet[recID]['revPtrLinks'] && recSet[recID]['revPtrLinks']['byInvDtlType'][dtyID]){
-					$.each(recSet[recID]['revPtrLinks']['byInvDtlType'][dtyID], function(i, parentRecID){
-						if (activeParentRecIDs[parentRecID]){
-							$('.recordDiv[recID='+recID+']',resultsDiv).get(0).className += ' lnk';
-						}
-					});
-				}
-			});
+	// this functions assumes the rectypes for this level are stable. It checks for links between this level and it's parent.
+	recalcLinkMenus: function(level) {
+		if (level == 0){
+			return;
 		}
+		var resultsDiv =  $("#results-level" + level).get(0);
+		var parentLevelResultDiv =  $("#results-level" + (level-1)).get(0);
+		var depthInfo = top.HEURIST.search.results.infoByDepth[level];
+		var activeRecIDs = {},
+			activeParentRecIDs = {},
+			ptrRecordIDs = {},
+			relRecordIDs = {},
+			activePtrTypes = {},
+			activeRelTypes = {};
+
+		//find all recIds of unfiltered records in this level
+		$('div.recordDiv:not(.filtered)',resultsDiv).each(function(i,recDiv){
+				activeRecIDs[$(this).attr('recid')] = 1;
+			})
+		// find all visible records in parent level
+		$('div.recordDiv'+(level==1?'':'.lnk') +':not(.filtered)',parentLevelResultDiv).each(function(i,recDiv){
+				activeParentRecIDs[$(this).attr('recid')] = 1;
+			})
+		//enable all link filter menus' items
+		$('li:not(.view)>ul:not(.rectype)>li.disabled',resultsDiv).each( function(i,li){
+				$(li).toggleClass('disabled');
+			});
+		// remove all lnk class tags
+		$('.recordDiv',resultsDiv).each( function(i,recDiv){
+				while($(recDiv).hasClass('lnk')){
+					$(recDiv).removeClass('lnk');
+				}
+			});
+		$('ul.reltype>li:not(.cmd)',resultsDiv).each( function(i,li){
+				var trmID = $(li).attr('reltype'),
+					isChecked = $(li).hasClass('checked');;
+
+				var hasActiveLink = false;
+				if (depthInfo.reltypes.fwd && depthInfo.reltypes.fwd[trmID]) {
+					$.each(depthInfo.reltypes.fwd[trmID],function(parentRecID,linkedRecIDs){
+							if (activeParentRecIDs[parentRecID]){// link's parent record is active
+								for (var j=0; j<linkedRecIDs.length; j++) {
+									if (activeRecIDs[linkedRecIDs[j]]) { // link's level record is active
+										if (isChecked) {
+											$('.recordDiv[recID='+linkedRecIDs[j]+']',resultsDiv).get(0).className += ' lnk';
+										}
+										hasActiveLink = true;//found link of this type that is active
+									}
+								}
+							}
+						});
+				}
+				if (depthInfo.reltypes.rev && depthInfo.reltypes.rev[trmID]) {
+					$.each(depthInfo.reltypes.rev[trmID],function(parentRecID,linkedRecIDs){
+							if (activeParentRecIDs[parentRecID]){// link's parent record is active
+								for (var j=0; j<linkedRecIDs.length; j++) {
+									if (activeRecIDs[linkedRecIDs[j]]) {// link's level record is active
+										if (isChecked) {
+											$('.recordDiv[recID='+linkedRecIDs[j]+']',resultsDiv).get(0).className += ' lnk';
+										}
+										hasActiveLink = true;//found link of this type that is active
+									}
+								}
+							}
+						});
+				}
+
+				if (!hasActiveLink) {
+					$(li).toggleClass('disabled');
+				}
+			});
+		//for each of the menus disable ptrtype menu items not in the ptrtype set and lnk records for those that are checked
+		$('ul.ptrtype>li:not(.cmd)',resultsDiv).each( function(i,li){
+				var dtyID = $(li).attr('ptrtype'),
+					isChecked = $(li).hasClass('checked');;
+
+				var hasActiveLink = false;
+				if (depthInfo.ptrtypes.fwd && depthInfo.ptrtypes.fwd[dtyID]) {
+					$.each(depthInfo.ptrtypes.fwd[dtyID],function(parentRecID,linkedRecIDs){
+							if (activeParentRecIDs[parentRecID]){/// link's parent record is active
+								for (var j=0; j<linkedRecIDs.length; j++) {
+									if (activeRecIDs[linkedRecIDs[j]]) {// link's level record is active
+										if (isChecked) {
+											$('.recordDiv[recID='+linkedRecIDs[j]+']',resultsDiv).get(0).className += ' lnk';
+										}
+										hasActiveLink = true;
+									}
+								}
+							}
+						});
+				}
+				if (depthInfo.ptrtypes.rev && depthInfo.ptrtypes.rev[dtyID]) {
+					$.each(depthInfo.ptrtypes.rev[dtyID],function(parentRecID,linkedRecIDs){
+							if (activeParentRecIDs[parentRecID]){// link's parent record is active
+								for (var j=0; j<linkedRecIDs.length; j++) {
+									if (activeRecIDs[linkedRecIDs[j]]) {// link's level record is active
+										if (isChecked) {
+											$('.recordDiv[recID='+linkedRecIDs[j]+']',resultsDiv).get(0).className += ' lnk';
+										}
+										hasActiveLink = true;
+									}
+								}
+							}
+						});
+				}
+
+				if (!hasActiveLink) {// no active links
+					$(li).toggleClass('disabled');
+				}
+			});
+	},
+
+
+	togglePtrtypeFilter: function(menuItem, level, dtyID){
 		$(menuItem).toggleClass('checked');
-//		if (recalcFilters) {
-			top.HEURIST.search.filterRelated(level+1);
-			top.HEURIST.search.updateMapRelated();
-//		}
+		top.HEURIST.search.recalcLinkMenus(level);
+		top.HEURIST.search.filterRelated(level+1);
+		top.HEURIST.search.updateMapRelated();
 	},
 
 	toggleReltypeFilter: function(menuItem, level, trmID){
-		var recalcFilters = false;
-		var resultsDiv =  $("#results-level" + level).get(0);
-		var recIDs = top.HEURIST.search.results.infoByDepth[level].reltypes[trmID];
-		if ($(menuItem).hasClass('checked')) {// filter all relation links of type dtyID by removing a "lnk" class
-			$.each(recIDs,function(i,recID){
-					$('.recordDiv[recID='+recID+']',resultsDiv).removeClass('lnk');
-				});
-		}else{
-			$.each(recIDs,function(i,recID){
-					$('.recordDiv[recID='+recID+']',resultsDiv).get(0).className += ' lnk';
-				});
-		}
 		$(menuItem).toggleClass('checked')
-//		if (recalcFilters) {
-			top.HEURIST.search.filterRelated(level+1);
-			top.HEURIST.search.updateMapRelated();
-//		}
+		top.HEURIST.search.recalcLinkMenus(level);
+		top.HEURIST.search.filterRelated(level+1);
+		top.HEURIST.search.updateMapRelated();
 	},
 
 	// new render common result record
@@ -859,7 +1037,7 @@ top.HEURIST.search = {
 		top.HEURIST.search.selectedRecordDivs = [];
 	},
 
-	loadRelatedLevel: function(level){
+	loadRelatedLevel: function(level, noFilter){
 		//level 0 is the result set and should already be loaded
 		if (level == 0) {
 			return;
@@ -883,26 +1061,65 @@ top.HEURIST.search = {
 		top.HEURIST.search.addResultLevelLinks(level);
 		//for each link type add lnkrel or lnkptr  to the recordDiv's class for next level records
 		//when all links are filtered (removed) the record is hidden. This is how we get multivalued filtering
-		$('ul.ptrtype>li.checked',resultsDiv).each( function(i,li){
-				var dtyID = $(li).attr('ptrtype');
-				$.each(depthInfo.ptrtypes[dtyID],function(i,recID){
-						$('.recordDiv[recID='+recID+']',resultsDiv).get(0).className += ' lnk';
-					});
-			});
-		$('ul.reltype>li.checked',resultsDiv).each( function(i,li){
-				var dtyID = $(li).attr('reltype');
-				$.each(depthInfo.reltypes[dtyID],function(i,recID){
-						$('.recordDiv[recID='+recID+']',resultsDiv).get(0).className += ' lnk';
-					});
-			});
-		top.HEURIST.search.loadLevelFilter(level + 1);
+		if (!noFilter) {
+			var activeParentRecIDs = {},
+				j;
+			$("div.recordDiv"+(level-1 > 0?".lnk":"")+":not(.filtered)",$("#results-level" + (level -1)).get(0)).each(function(){
+				activeParentRecIDs[$(this).attr('recid')]=1;});
+			$('ul.ptrtype>li.checked',resultsDiv).each( function(i,li){
+					var dtyID = $(li).attr('ptrtype');
+					if (depthInfo.ptrtypes.fwd && depthInfo.ptrtypes.fwd[dtyID]) {
+						$.each(depthInfo.ptrtypes.fwd[dtyID],function(parentRecID,linkedRecIDs){
+								if (activeParentRecIDs[parentRecID]){// active link
+									for (var j=0; j<linkedRecIDs.length; j++) {
+										$('.recordDiv[recID='+linkedRecIDs[j]+']',resultsDiv).get(0).className += ' lnk';
+									}
+								}
+							});
+					}
+					if (depthInfo.ptrtypes.rev && depthInfo.ptrtypes.rev[dtyID]) {
+						$.each(depthInfo.ptrtypes.rev[dtyID],function(parentRecID,linkedRecIDs){
+								if (activeParentRecIDs[parentRecID]){// active link
+									for (var j=0; j<linkedRecIDs.length; j++) {
+										$('.recordDiv[recID='+linkedRecIDs[j]+']',resultsDiv).get(0).className += ' lnk';
+									}
+								}
+							});
+					}
+				});
+			$('ul.reltype>li.checked',resultsDiv).each( function(i,li){
+					var trmID = $(li).attr('reltype');
+					if (depthInfo.reltypes.fwd && depthInfo.reltypes.fwd[trmID]) {
+						$.each(depthInfo.reltypes.fwd[trmID],function(parentRecID,linkedRecIDs){
+								if (activeParentRecIDs[parentRecID]){// active link
+									for (var j=0; j<linkedRecIDs.length; j++) {
+										$('.recordDiv[recID='+linkedRecIDs[j]+']',resultsDiv).get(0).className += ' lnk';
+									}
+								}
+							});
+					}
+					if (depthInfo.reltypes.rev && depthInfo.reltypes.rev[trmID]) {
+						$.each(depthInfo.reltypes.rev[trmID],function(parentRecID,linkedRecIDs){
+								if (activeParentRecIDs[parentRecID]){// active link
+									for (var j=0; j<linkedRecIDs.length; j++) {
+										$('.recordDiv[recID='+linkedRecIDs[j]+']',resultsDiv).get(0).className += ' lnk';
+									}
+								}
+							});
+					}
+				});
+			top.HEURIST.search.loadLevelFilter(level + 1);
+		}
 	},
 
-	filterRelated: function(level){//assumes that we are pushing down with complete reset and recalculation
+	//assumes that we are pushing down with complete reset and recalculation
+	//filters are applied accordingly.
+	filterRelated: function(level,noPush,useParamFilters){
 		//terminate pushdown calculation
 		if (level != 0 && !$("#showrelated" + level).hasClass("loaded")) {
 			return;
 		}
+
 		var resultsDiv = document.getElementById("results-level"+level);
 		var parentLevelResultDiv = (level == 0 ? null : document.getElementById("results-level"+(level-1)));
 		if (!resultsDiv || (level>0 && !parentLevelResultDiv)) {
@@ -919,136 +1136,115 @@ top.HEURIST.search = {
 		var depthInfo = top.HEURIST.search.results.infoByDepth[level];
 		var ptrRecordIDs = {};
 		var relRecordIDs = {};
+		var activeRecIDs = {};
+		var activeParentRecIDs = {};
 		var recInfo;
 		if (level==0) {// there is not parent level record set
-			//calculate the rectypes in this recset page
-			$('.recordDiv',resultsDiv).each(function(i,recDiv){
-				recTypeID = recSet[$(recDiv).attr("recID")].record[4];
-				rectypes[recTypeID] = 1;
-			});
+			//calculate the rectypes in this recset page with filtering
+			for ( rtID in depthInfo.rectypes) {
+				rectypes[rtID] = 1;
+			}
 		}else{
 			//for each active parent record
 			$('div.recordDiv'+(level==1?'':'.lnk') +':not(.filtered)',parentLevelResultDiv).each(function(i,recDiv){
-				//for this parentlevel record find the rectypes, ptrtypes and relation types of all linked child records
-				recInfo = recSet[$(recDiv).attr("recID")];
-				if (recInfo.ptrLinks){
-					$.each(recInfo.ptrLinks.byDtlType,function(dtlID, recIDs){
-							var j, recID, recTypeID;
-							ptrtypes[dtlID] =1;
-							for (j in recIDs){
-								recID = recIDs[j];
-								recTypeID = recSet[recID].record[4];
-								rectypes[recTypeID] = 1;
-								ptrRecordIDs[recID] = 1;
+				//for this parentlevel record find the rectypes of all validly linked child records
+				var parentRecID = $(recDiv).attr("recID");
+				activeParentRecIDs[parentRecID] = 1;
+				});
+
+				if (depthInfo.reltypes && depthInfo.reltypes.fwd) {
+					for (trmID in depthInfo.reltypes.fwd){
+						$.each(depthInfo.reltypes.fwd[trmID],function(parentRecID,linkedRecIDs){
+							if (activeParentRecIDs[parentRecID]){// link's parent record is active
+								for (var j=0; j<linkedRecIDs.length; j++) {
+									recTypeID = recSet[linkedRecIDs[j]].record[4];
+									rectypes[recTypeID] = 1;
+								}
 							}
 						});
+					}
 				}
-				if (recInfo.revPtrLinks){
-					$.each(recInfo.revPtrLinks.byInvDtlType,function(dtlID, recIDs){
-							var j, recID, recTypeID;
-							ptrtypes[dtlID] =1;
-							for (j in recIDs){
-								recID = recIDs[j];
-								recTypeID = recSet[recID].record[4];
-								rectypes[recTypeID] = 1;
-								ptrRecordIDs[recID] = 1;
+				if (depthInfo.reltypes && depthInfo.reltypes.rev) {
+					for (trmID in depthInfo.reltypes.rev){
+						$.each(depthInfo.reltypes.rev[trmID],function(parentRecID,linkedRecIDs){
+							if (activeParentRecIDs[parentRecID]){// link's parent record is active
+								for (var j=0; j<linkedRecIDs.length; j++) {
+									recTypeID = recSet[linkedRecIDs[j]].record[4];
+									rectypes[recTypeID] = 1;
+								}
 							}
 						});
+					}
 				}
-				if (recInfo.relLinks){
-					$.each(recInfo.relLinks.byRelType,function(trmID, recIDs){
-							var j, recID, recTypeID;
-							reltypes[trmID] =1;
-							for (j in recIDs){
-								recID = recIDs[j];
-								recTypeID = recSet[recID].record[4];
-								rectypes[recTypeID] = 1;
-								relRecordIDs[recID] = 1;
+				if (depthInfo.ptrtypes && depthInfo.ptrtypes.fwd) {
+					for (dtyID in depthInfo.ptrtypes.fwd){
+						$.each(depthInfo.ptrtypes.fwd[dtyID],function(parentRecID,linkedRecIDs){
+							if (activeParentRecIDs[parentRecID]){// link's parent record is active
+								for (var j=0; j<linkedRecIDs.length; j++) {
+									recTypeID = recSet[linkedRecIDs[j]].record[4];
+									rectypes[recTypeID] = 1;
+								}
 							}
 						});
+					}
 				}
-				if (recInfo.revRelLinks){
-					$.each(recInfo.revRelLinks.byInvRelType,function(trmID, recIDs){
-							var j, recID, recTypeID;
-							reltypes[trmID] = 1;
-							for (j in recIDs){
-								recID = recIDs[j];
-								recTypeID = recSet[recID].record[4];
-								rectypes[recTypeID] = 1;
-								relRecordIDs[recID] = 1;
+				if (depthInfo.ptrtypes && depthInfo.ptrtypes.rev) {
+					for (dtyID in depthInfo.ptrtypes.rev){
+						$.each(depthInfo.ptrtypes.rev[dtyID],function(parentRecID,linkedRecIDs){
+							if (activeParentRecIDs[parentRecID]){// link's parent record is active
+								for (var j=0; j<linkedRecIDs.length; j++) {
+									recTypeID = recSet[linkedRecIDs[j]].record[4];
+									rectypes[recTypeID] = 1;
+								}
 							}
 						});
+					}
 				}
-			});
 		}
-		//check all filter menu items
-//		$('ul>li:not(.checked.view)',resultsDiv).each( function(i,li){
-//				$(li).toggleClass('checked');
-//			});
+/*		if (filterRtIDs) { // need to set to uri filter set
+			//uncheck all rectype filter menu items
+			$('ul.rectype>li:not(.cmd).checked',resultsDiv).each( function(i,li){
+					$(li).toggleClass('checked');
+				});
+			$('ul.rectype>li:not(.cmd)',resultsDiv).each( function(i,li){
+					var rtID = $(li).attr('rectype');
+					if (filterRtIDs.indexOf(parseInt(rtID)) != -1){
+						$(li).toggleClass('checked');
+					}
+				});
+		}*/
 		//enable all filter menu items
-		$('ul>li.disabled',resultsDiv).each( function(i,li){
+		$('li>ul>li.disabled',resultsDiv).each( function(i,li){
 				$(li).toggleClass('disabled');
 			});
 		// remove all lnk class tags
 		$('.recordDiv',resultsDiv).each( function(i,recDiv){
-				var recID = $(recDiv).attr('recID');
-				while($(recDiv).hasClass('lnk')){
-					$(recDiv).toggleClass('lnk');
+				while($(recDiv).hasClass('filtered')){
+					$(recDiv).removeClass('filtered');
 				}
 			});
-		//for each of the menus reltype menu items not in the reltype set and lnk records for those that are checked
-		$('ul.reltype>li:not(.cmd)',resultsDiv).each( function(i,li){
-				var trmID = $(li).attr('reltype');
-				if (reltypes[trmID] === 1) {
-					if ($(li).hasClass('checked')) {
-						$.each(depthInfo.reltypes[trmID],function(i,recID){
-								if (relRecordIDs[recID] === 1) {
-									$('.recordDiv[recID='+recID+']',resultsDiv).get(0).className += ' lnk';
-								}
-							});
-					}
-				}else{
-					$(li).toggleClass('disabled');
-				}
-			});
-		//for each of the menus disable ptrtype menu items not in the ptrtype set and lnk records for those that are checked
-		$('ul.ptrtype>li:not(.cmd)',resultsDiv).each( function(i,li){
-				var dtyID = $(li).attr('ptrtype');
-				if (ptrtypes[dtyID] === 1) {
-					if ($(li).hasClass('checked')) {
-						$.each(depthInfo.ptrtypes[dtyID],function(i,recID){
-								if (ptrRecordIDs[recID] === 1) {
-									$('.recordDiv[recID='+recID+']',resultsDiv).get(0).className += ' lnk';
-								}
-							});
-					}
-				}else{
-					$(li).toggleClass('disabled');
-				}
-			});
+
 		//for each of the menus disable rectype menu items not in the rectype set and filter records of those that are not checked
+		//DO THIS FIRST  so that the links can be validated for non-filtered records on this level
+		var activeRecIDs = {};
 		$('ul.rectype>li:not(.cmd)',resultsDiv).each( function(i,li){
-				var rtID = $(li).attr('rectype');
-				var filterType = !$(li).hasClass('checked'),
-					isFiltered;
-				if (rectypes[rtID] === 1) { //rectype menu is in the related set
-					$.each(depthInfo.rectypes[rtID],function(i,recID){
-							var recDiv = $('.recordDiv[recID='+recID+']', resultsDiv);
-							if (recDiv.hasClass('filtered')) {
-								if (!filterType) {// it's filtered and need to be unfiltered
-									recDiv.toggleClass('filtered');
-								}
-							}else{
-								if (filterType) {// it's not filtered and needed to be filtered
-									recDiv.toggleClass('filtered');
-								}
-							}
-						});
-				}else{
-					$(li).toggleClass('disabled');
+				var rtID = $(li).attr('rectype'),
+					isChecked = $(li).hasClass('checked');
+				// if it's not an active rectype or this menu item is unchecked
+				if (!rectypes[rtID] || !isChecked) {
+					$.each(depthInfo.rectypes[rtID],function(i,recID){// filter all recordDivs of this rectype
+						$('.recordDiv[recID='+recID+']', resultsDiv).toggleClass('filtered');
+					});
+					if (!rectypes[rtID]){//no connection to an active parent so disable this rectype menu item
+						$(li).toggleClass('disabled');
+					}
 				}
 			});
-		top.HEURIST.search.filterRelated(level + 1);
+
+		top.HEURIST.search.recalcLinkMenus(level);
+		if (!noPush) {
+			top.HEURIST.search.filterRelated(level + 1, noPush, useParamFilters);
+		}
 	},
 
 	renderSearchResults: function(firstIndex, lastIndex) {
@@ -1107,6 +1303,7 @@ top.HEURIST.search = {
 		// add click handlers
 		top.HEURIST.search.addResultLevelEventHandlers(0);
 		top.HEURIST.search.addResultLevelLinks(0);
+		top.HEURIST.search.loadLevelFilter(0);
 		top.HEURIST.search.filterRelated(0);
 		top.HEURIST.search.updateMapRelated();
 
@@ -1119,7 +1316,7 @@ top.HEURIST.search = {
 		});
 	},
 
-	addResultLevelLinks: function(level) {
+	addResultLevelLinks: function(level) {// this function adds link+recID tags to a record for every related record fir highlight and selction code
 		var resultsDiv = document.getElementById("results-level"+level);
 		var recSet = top.HEURIST.search.results.recSet;
 		//apply classes for linked recordIDs
@@ -2320,7 +2517,7 @@ top.HEURIST.search = {
 					$('.recordDiv',resultsDiv).each( function(i,recDiv){
 
 						if( ((ilevel===0) || $(recDiv).hasClass('lnk')) && !$(recDiv).hasClass('filtered')){
-							var recID = $(recDiv).attr('recID');
+							var recID = $(recDiv).attr('recid');
 							recIDs.push(recID);
 						}
 					}); //each functions
@@ -3000,9 +3197,9 @@ top.HEURIST.search = {
 			var level = filterMenus[i].className.match(/level(\d+)/);
 			level = level[1];
 			maxLevel = parseInt(level) > maxLevel ?  parseInt(level): maxLevel;
-			if ($("li:not('[class*=checked],[class*=cmd]')",filterMenus[i]).length && level){//any unchecked
+			if ($("li:not('[class*=checked],[class*=cmd]')",filterMenus[i]).length && level){//if not all checked then need to specify filtering
 				filter[level] = [];
-				$("li[class*=checked]:not([class*=disabled])",filterMenus[i]).each(function(){
+				$("li[class*=checked]:not([class*=disabled])",filterMenus[i]).each(function(){// find all enabled and checked menu items
 					filter[level].push( $(this).attr(type));
 				});
 			}
@@ -3035,7 +3232,7 @@ top.HEURIST.search = {
 		}
 		if (includeRelated){
 			var rtFilter = top.HEURIST.search.getPushDownFilter('rectype');
-			if (rtFilter[0] > depth){
+			if (rtFilter[0] > depth){ // if filter max depth is greater than depth -> adjust depth
 				depth = rtFilter[0];
 			}
 			rtFilter = rtFilter[1];
