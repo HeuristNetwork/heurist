@@ -425,8 +425,8 @@ FlexImport = (function () {
 				var det_id = detailTypes[d].getID();
 				var isrequired = false;
 
-				for (k = 0; d < rdl; ++k) {
-					if(det_id = reqDetailTypes[k].getID()){
+				for (k = 0; k < rdl; ++k) {
+					if(det_id == reqDetailTypes[k].getID()){
 						isrequired = true;
 						break;
 					}
