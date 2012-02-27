@@ -447,6 +447,8 @@
 				} else {
 					if (confirm("SUCCESS!  " + fields.length + " entries processed. \n" +"Would you like to use DetailUpdater for more updating?")){
 						location.reload();
+					}else{
+						window.close();
 					}
 				}
 			}

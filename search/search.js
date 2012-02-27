@@ -279,6 +279,8 @@ top.HEURIST.search = {
 					function (evt) {
 									var i,
 										maxFilterDepth=0;
+										top.HEURIST.search.addResultLevelLinks(0); // now we know the links add the tags to top level
+										top.HEURIST.search.loadLevelFilter(0);
 									if (top.HEURIST.parameters &&
 										(	top.HEURIST.parameters['rtfilters'] ||
 											top.HEURIST.parameters['ptrfilters'] ||
@@ -1302,7 +1304,7 @@ top.HEURIST.search = {
 
 		// add click handlers
 		top.HEURIST.search.addResultLevelEventHandlers(0);
-		top.HEURIST.search.addResultLevelLinks(0);
+//		top.HEURIST.search.addResultLevelLinks(0); // can't be done here since links aren't read in yet
 		top.HEURIST.search.loadLevelFilter(0);
 		top.HEURIST.search.filterRelated(0);
 		top.HEURIST.search.updateMapRelated();

@@ -1092,7 +1092,7 @@ FlexImport = (function () {
 		l = FlexImport.cols.length;
 		for (i = 0; i < l; ++i) {
 			if (FlexImport.cols[i]) {
-				if (recordIDColumn == undefined) {
+				if (recordIDColumn == undefined) {// insert the rec id just before the first import data column
 					recordIDColumn = i;
 					line.push(FlexImport.recType.getName() + " Record ID");
 				}
@@ -1104,11 +1104,14 @@ FlexImport = (function () {
 					line.push(FlexImport.cols[i]);
 				}
 			}
-			else {
-				line.push("");
+			else { // column not imported let the user know
+				line.push("not imported");
 			}
 		}
 		$textarea.append(line.join() + "\n");
+
+		$("#result-message").html('Your data was successfully imported and has been rewritten below. <br/>Record Ids have been inserted into your original data in column ' + (recordIDColumn + 1) +
+					' below. <br/> Note that columns not used in the import are identified in the header row as "not imported"');
 
 		l = FlexImport.fields.length;
 		for (i = 0; i < l; ++i) {

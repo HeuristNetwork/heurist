@@ -101,7 +101,7 @@ function insertData() {
 					$approxRty_Name = mysql_escape_string($approxRectype["rty_Name"]);
 					$approxRty_Description = mysql_escape_string($approxRectype["rty_Description"]);
 					if (!$approxMatches[$rectype["rty_ID"]]){
-						$approxMatches[$rectype["rty_ID"]] = array($approxRty_Name,$approxRty_Description);
+						$approxMatches[$rectype["rty_ID"]] = array(array($approxRty_Name,$approxRty_Description));
 					}else{
 						array_push($approxMatches[$rectype["rty_ID"]],array($approxRty_Name,$approxRty_Description));
 					}
@@ -116,8 +116,8 @@ function insertData() {
 		}
 	}
 
-	echo "approxRectypes = ".json_format($approxMatches,true). "\n";
-	echo "var tableData = ".json_format($tableRows,true). "\n\n";
+	echo "approxRectypes = ".json_format($approxMatches,true). ";\n";
+	echo "var tableData = ".json_format($tableRows,true). ";\n\n";
 ?>
 	var l = tableData.length,
 		i;
@@ -165,7 +165,7 @@ function insertData() {
 			}
 		}
 	}
-	echo "rectypeStructures = ".json_format($rectypeStructures,true). "\n";
+	echo "rectypeStructures = ".json_format($rectypeStructures,true). ";\n";
 	?>
 }
 <?php
@@ -317,12 +317,12 @@ function showMatchesTooltip(rty_ID, rty_Name, event) {
 		clearHideTimer();
 	}
 	var forceHideTip = true;
-	if(rty_ID != null) {
-		if(currentTipId != rty_ID) {
+	if(rty_ID != null ) {
+		if(currentTipId != rty_ID && approxRectypes[rty_ID] && approxRectypes[rty_ID].length) {
 			currentTipId = rty_ID;
 			// 0 = rty_Name
 			// 1 = rty_Description
-			var textTip = '<strong>Approximate matches for record type: '+rty_Name+'</strong><br /><br />';
+			var textTip = '<strong>Approximate matches for record type: '+rty_Name+'</strong><br/><br/>';
 			for(i = 0; i < approxRectypes[rty_ID].length; i++) {
 				textTip += "<li>"+approxRectypes[rty_ID][i][0] + " - " + approxRectypes[rty_ID][i][1] + "</li>";
 			}
