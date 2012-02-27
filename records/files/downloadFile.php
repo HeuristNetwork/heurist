@@ -28,6 +28,12 @@ if (mysql_num_rows($res) != 1) return; // nothign returned if parameter does not
 
 $file = mysql_fetch_assoc($res);
 
+$type_source = $file['ulf_RemoteSource'];
+$type_media = $file['ulf_MediaType'];
+
+if ($type_source==null || $type_source=='heurist')
+{
+
 // try and work out mime type, first stored in table and failign that look at extension of original file name
 $mimeExt = '';
 if ($file['ulf_MimeExt']) {
@@ -102,4 +108,50 @@ error_log(">>>>>>>>>>".$zname);
 }else{
 	readfile($filename);
 }
+
+}else if($type_media=='image'){ //Remote resources
+
+	header('Location: '.$file['ulf_ExternalFileReference']);
+
+}else if($type_source=='youtube'){
+
+	error_log(">>>>>>".linkifyYouTubeURLs($file['ulf_ExternalFileReference'], ''));
+
+	//return linkifyYouTubeURLs($file['ulf_ExternalFileReference'], '');// $size
+	header('Location: '.$file['ulf_ExternalFileReference']);
+
+}
+
+// Linkify youtube URLs which are not already links.
+function linkifyYouTubeURLs($text, $size) {
+    $text = preg_replace('~
+        # Match non-linked youtube URL in the wild. (Rev:20111012)
+        https?://         # Required scheme. Either http or https.
+        (?:[0-9A-Z-]+\.)? # Optional subdomain.
+        (?:               # Group host alternatives.
+          youtu\.be/      # Either youtu.be,
+        | youtube\.com    # or youtube.com followed by
+          \S*             # Allow anything up to VIDEO_ID,
+          [^\w\-\s]       # but char before ID is non-ID char.
+        )                 # End host alternatives.
+        ([\w\-]{11})      # $1: VIDEO_ID is exactly 11 chars.
+        (?=[^\w\-]|$)     # Assert next char is non-ID or EOS.
+        (?!               # Assert URL is not pre-linked.
+          [?=&+%\w]*      # Allow URL (query) remainder.
+          (?:             # Group pre-linked alternatives.
+            [\'"][^<>]*>  # Either inside a start tag,
+          | </a>          # or inside <a> element text contents.
+          )               # End recognized pre-linked alts.
+        )                 # End negative lookahead assertion.
+        [?=&+%\w]*        # Consume any URL (query) remainder.
+        ~ix',
+        '<iframe '.$size.' src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>',
+        $text);
+
+        //'<a href="http://www.youtube.com/watch?v=$1">YouTube link: $1</a>'
+        //'<iframe width="420" height="345" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>',
+//error_log(">>>".$text."<<<<");
+    return $text;
+}
+
 ?>

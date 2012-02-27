@@ -167,6 +167,9 @@ if (typeof mxn.LatLonPoint == "function") {
 
 	},
 
+	/**
+	*
+	*/
 	renderTimelineZoom: function () {
 
 		var $div = $("#divZoomOut");
@@ -177,6 +180,9 @@ if (typeof mxn.LatLonPoint == "function") {
 
 		var zoom, x, M = RelBrowser.Mapping;
 
+		/*
+		* internal
+		*/
 		zoom = function (zoomIn) {
 
 			var band = M.tmap.timeline.getBand(0);
@@ -188,26 +194,26 @@ if (typeof mxn.LatLonPoint == "function") {
 
 //artem: timelne 1.2 has some problems with zoom - so we took it from v2.0
 
-ether_zoom = function(_band, ether, zoomIn) {
-	var netIntervalChange = 0;
-	var currentZoomIndex = _band._zoomIndex;
-	var newZoomIndex = currentZoomIndex;
+				ether_zoom = function(_band, ether, zoomIn) {
+					var netIntervalChange = 0;
+					var currentZoomIndex = _band._zoomIndex;
+					var newZoomIndex = currentZoomIndex;
 
-	if (zoomIn && (currentZoomIndex > 0)) {
-		newZoomIndex = currentZoomIndex - 1;
-	}
+					if (zoomIn && (currentZoomIndex > 0)) {
+						newZoomIndex = currentZoomIndex - 1;
+					}
 
-	if (!zoomIn && (currentZoomIndex < (_band._zoomSteps.length - 1))) {
-		newZoomIndex = currentZoomIndex + 1;
-	}
+					if (!zoomIn && (currentZoomIndex < (_band._zoomSteps.length - 1))) {
+						newZoomIndex = currentZoomIndex + 1;
+					}
 
-	_band._zoomIndex = newZoomIndex;
-	ether._interval  = Timeline.DateTime.gregorianUnitLengths[_band._zoomSteps[newZoomIndex].unit];
-	ether._pixelsPerInterval = _band._zoomSteps[newZoomIndex].pixelsPerInterval;
-	netIntervalChange = _band._zoomSteps[newZoomIndex].unit -
-						_band._zoomSteps[currentZoomIndex].unit;
-	return netIntervalChange;
-};
+					_band._zoomIndex = newZoomIndex;
+					ether._interval  = Timeline.DateTime.gregorianUnitLengths[_band._zoomSteps[newZoomIndex].unit];
+					ether._pixelsPerInterval = _band._zoomSteps[newZoomIndex].pixelsPerInterval;
+					netIntervalChange = _band._zoomSteps[newZoomIndex].unit -
+										_band._zoomSteps[currentZoomIndex].unit;
+					return netIntervalChange;
+				};
 
 				// zoom disabled
 				// shift the x value by our offset
@@ -232,7 +238,9 @@ ether_zoom = function(_band, ether, zoomIn) {
 			/*
 			band.zoom(zoomIn, x);*/
 			M.tmap.timeline.paint();
-		};
+		}; //end internal zoom function
+
+
 		$("<div id='divZoomIn' title='Zoom In'><img src='"+RelBrowser.baseURL+"common/images/plus.png'></img></div>")
 			.click(function () {
 				zoom(true);
@@ -245,8 +253,10 @@ ether_zoom = function(_band, ether, zoomIn) {
 			.appendTo($div);
 	},
 
-		// information window
-		openInfoWindowHandler: function () {
+	/**
+	* information window
+	*/
+	openInfoWindowHandler: function () {
 			var $preview, content;
 
 			content = $(this).data("info");
@@ -283,12 +293,12 @@ ether_zoom = function(_band, ether, zoomIn) {
 			}
 			// custom functions will need to set this as well
 			this.selected = true;
-		},
+	},
 
-		/**
-		*
-		*/
-		initMap: function (mini) {
+	/**
+	*
+	*/
+	initMap: function (mini) {
 			var matches, coords, points, l, i, lnglat, bounds = null, M = RelBrowser.Mapping;
 
 			if (M.mapdata.focus) {
@@ -314,22 +324,24 @@ ether_zoom = function(_band, ether, zoomIn) {
 				}
 			}
 
-			if (window["Timeline"]) {
-				M.initTMap(mini, bounds);
+			if (window["Timeline"]) { //there is Timeline object
+				M.initMapAndTimeline(mini, bounds);
 			} else {
-
+				//init empty map wihout timeline (for digitizer) without simile timemap - only mapstraction
 				M.map = new mxn.Mapstraction($("#map")[0]);
-				if (bounds) {
+
+				M.map.setMapType(M.customMapTypes[0] || mxn.Mapstraction.ROAD);
+
+				if (bounds) { //zoom or bounds defined in config options
 					M.map.setCenterAndZoom(bounds.getCenter(), M.map.getZoomLevelForBoundingBox(bounds));
 				} else {
 					M.map.setCenterAndZoom(M.defaultCenter, M.defaultZoom);
 				}
-				M.map.setMapType(M.customMapTypes[0] || mxn.Mapstraction.ROAD);
-
 			}
 
 			//tiled images
-			var errors = M.addLayers(M.mapdata.layers);
+			var errors = M.addLayers(M.mapdata.layers, (M.mapdata.timemap.length>0)?0:1 );
+
 
 			//???? M.map.setUIToDefault();
 			if (! mini) {
@@ -337,10 +349,14 @@ ether_zoom = function(_band, ether, zoomIn) {
 			}
 
 			return errors;
-		},
+	}, //end initMap
 
-		initTMap: function (mini, bounds) {
-			var tl_theme, tl_theme2, onDataLoaded, M = RelBrowser.Mapping;
+	/**
+	*
+	*/
+	initMapAndTimeline: function (mini, bounds)
+	{
+			var tl_theme, tl_theme2, M = RelBrowser.Mapping;
 
 			//???? SimileAjax.History.enabled = false;
 
@@ -362,7 +378,7 @@ ether_zoom = function(_band, ether, zoomIn) {
 			//tl_theme2.event.tape.height = 3;
 
 			//after loading - zoom to extent
-			onDataLoaded = function (tm) {
+			var __onDataLoaded = function (tm) {
 				// find centre date, choose scale to show entire dataset
 				var start, end, zoomIndex, eventSource, d = new Date();
 				var M = RelBrowser.Mapping;
@@ -381,10 +397,10 @@ ether_zoom = function(_band, ether, zoomIn) {
 				tm.timeline.getBand(0).setCenterVisibleDate(d);
 				tm.timeline.layout();
 
-				// finally, draw the zoom control
+				// finally, draw the zoom control for timeline
 				M.renderTimelineZoom();
 
-				if (bounds) {
+				if (bounds) { //extent was defined as given parameter
 					tm.map.setCenterAndZoom(bounds.getCenter(), tm.map.getZoomLevelForBoundingBox(bounds));
 				} else {
 					var mapables = 0, markers = 0;
@@ -392,11 +408,25 @@ ether_zoom = function(_band, ether, zoomIn) {
 						var type = tm.datasets.ds0.items[i].getType();
 						if ( type == "none") {
 							continue;
-						} else if (type  == "marker"){
+						} else if (type  == "marker" || type == "array"){
 							markers++;
 						}
 						mapables++
 					}
+					for (i = 0; i < M.mapdata.layers.length; ++i) {
+						var layer = M.mapdata.layers[i];
+						var layerbnd = layer.extent = M.getImageLayerExtent(layer['extent']);
+						if(layerbnd){
+							markers++;
+							if(tm.mapBounds){
+								tm.mapBounds.extend(layerbnd.getSouthWest());
+								tm.mapBounds.extend(layerbnd.getNorthEast());
+							}else{
+								tm.mapBounds = layerbnd;
+							}
+						}
+					}
+
 
 					//if (mapables == 1 && markers == 1){	tm.map.setZoom(tm.opts.mapZoom);
 					if (markers>0 && tm.mapBounds && tm.mapBounds.sw){
@@ -404,26 +434,29 @@ ether_zoom = function(_band, ether, zoomIn) {
 					}else{
 						tm.map.setZoom(tm.opts.mapZoom);
 					}
+
 				}
-			};
+
+
+			};//end __onDataLoaded
 
 			var myLatlng = new mxn.LatLonPoint(-33.87, 151.20);
-//				     mapZoom: 13,
-// 					 mapCenter: myLatlng,
+	//				     mapZoom: 13,
+	// 					 mapCenter: myLatlng,
 
-		var basePath = RelBrowser.baseURL,
-			db = RelBrowser.database,
-			iconPath = RelBrowser.iconBaseURL;
+			var basePath = RelBrowser.baseURL,
+				db = RelBrowser.database,
+				iconPath = RelBrowser.iconBaseURL;
 
-		var rectypeImg = "style='background-image:url(" + iconPath + "{{rectype}}.png)'";
+			var rectypeImg = "style='background-image:url(" + iconPath + "{{rectype}}.png)'";
 
-		var editLinkIcon = "<div id='rec_edit_link' style='display:inline-block;' class='logged-in-only'><a href='"+
-						basePath+ "records/edit/editRecord.html?recID={{recid}}&db="+ db +
-						 "' target='_blank' title='Click to edit record'><img src='"+
-						 basePath + "common/images/edit_pencil_small.png'/></a></div>";
+			var editLinkIcon = "<div id='rec_edit_link' style='display:inline-block;' class='logged-in-only'><a href='"+
+							basePath+ "records/edit/editRecord.html?recID={{recid}}&db="+ db +
+							 "' target='_blank' title='Click to edit record'><img src='"+
+							 basePath + "common/images/edit_pencil_small.png'/></a></div>";
 
-		var newSearchWindow = "<div style='float:right;'><a href='"+basePath+"search/search.html?q=ids:{{recid}}&db=" + db +
-						"' target='_blank' title='Open in new window' class='externalLink'>view</a></div>"
+			var newSearchWindow = "<div style='float:right;'><a href='"+basePath+"search/search.html?q=ids:{{recid}}&db=" + db +
+							"' target='_blank' title='Open in new window' class='externalLink'>view</a></div>"
 
 		//info window
 		/*OLD WAY
@@ -525,13 +558,17 @@ ether_zoom = function(_band, ether, zoomIn) {
 					width: "100%"
 					}
 					],
-				dataLoadedFunction: onDataLoaded
+				dataLoadedFunction: __onDataLoaded
 			}, M.tmap);
 
 			M.map = M.tmap.map; //background map - gmap or other
-		},
 
-		tileToQuadKey: function (x, y, zoom) {
+	},// end initMapAndTimeline
+
+	/**
+	* helper function for "virtaul earth"  image layer tile calculation
+	*/
+	tileToQuadKey: function (x, y, zoom) {
 			var i, mask, cell, quad = "";
 			for (i = zoom; i > 0; i--) {
 				mask = 1 << (i - 1);
@@ -541,22 +578,29 @@ ether_zoom = function(_band, ether, zoomIn) {
 				quad += cell;
 			}
 			return quad;
-		},
+	},
 
-		addLayers: function (layers) {
+	/**
+	* add image layer background
+	*
+	* zoom_mode
+	* 0 - no zoom
+	* 1 - zoom to image layers
+	* 2 - extend current map bounds to include extent of these layers
+	*/
+	addLayers: function (layers, zoom_mode) {
 
 			var i, M = RelBrowser.Mapping,
-				errors = "";
+				errors = "",
+				bounds = null;
 
 			M.map.removeAllTileLayers();
 
 			function _isempty(obj){
 				return ( (typeof obj==="undefined") || (obj===null) || (obj==="") || (obj==="null") );
 			}
+			// verifies url consistency
 			function _checkURL(str) {
-/*
-				return this.optional(element) || /^(https?|ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i.test(value);*/
-
 				var v = new RegExp();
 				v.compile("^((ht|f)tp(s?)\:\/\/|~/|/)?[A-Za-z0-9-_]+\\.[A-Za-z0-9-_%&\?\/.=]+$");
 				//		^(http:\/\/www.|https:\/\/www.|ftp:\/\/www.|www.){1}([0-9A-Za-z]+\.)
@@ -564,17 +608,22 @@ ether_zoom = function(_band, ether, zoomIn) {
 					return false;
 				}
 				return true;
-			}
+			}//end internal _checkURL
 
 			for (i = 0; i < layers.length; ++i) {
 				(function (layer) { //execute this function for each layer in given array
 
 					var tile_url;
-					if(_isempty(layer.url)){
+
+					if(!_isempty(layer['error'])){ //server side error messages
+
+						errors = errors + layer['error'];
+
+					}else if(_isempty(layer.url)){ //check is redundant - we validate it on server
 
 						errors = errors + "URL is not defined for image layer. Rec#"+layer.rec_ID;
 
-					}else if(!_checkURL(layer.url)){
+					}else if(!_checkURL(layer.url)){ //check is redundant - we validate it on server
 
 						errors = errors + "URL is not valid for image layer. Rec#"+layer.rec_ID;
 
@@ -588,23 +637,27 @@ ether_zoom = function(_band, ether, zoomIn) {
 							layer.url = layer.url + "/";
 						}
 						tile_url =	function(tile,zoom) {
-			              if ((zoom < 1) || (zoom > 19)) {
+			              if ((zoom < 1) || (zoom > 19) || (zoom < layer.min_zoom) || (zoom > layer.max_zoom)) {
 			                  return "http://www.maptiler.org/img/none.png";
 			              }
 			              var ymax = 1 << zoom;
 			              var y = ymax - tile.y -1;
-			              if (true) { //(mapBounds.intersects(tileBounds)) {
+
+			              var pnt = M.map.fromPixelToLatLng(tile.x, tile.y, zoom);
+
+
+			              if (layer.extent==null || layer.extent.contains(pnt)){ // true) { //(mapBounds.intersects(tileBounds)) {
 			              		var surl = layer.url+zoom+"/"+tile.x+"/"+y+".png";
-			                  return surl;
+			                  	return surl;
 			              } else {
-			                  return "http://www.maptiler.org/img/none.png";
+			                  	return "http://www.maptiler.org/img/none.png";
 			              }
 			          };
 					} else {
 						errors = errors + "Map type is not defined properly for image layer. It should be virtual earth or maptiler. Rec#"+layer.rec_ID;//+"\n";
 					}
 
-				//it tile_url is defined - add this layer to mapstrcation
+				//it tile_url is defined - add this layer to mapstraction
 				if(tile_url){
 					layer.min_zoom = new Number(layer.min_zoom);
 					layer.max_zoom = new Number(layer.max_zoom);
@@ -620,23 +673,63 @@ ether_zoom = function(_band, ether, zoomIn) {
 
 					M.map.addTileLayer(tile_url, 0.75, layer.rec_ID, layer.min_zoom, layer.max_zoom, true);
 					//layer.min_zoom, layer.max_zoom, true);
-				}
 
+					if(zoom_mode>0){
+						var layerbnd = layer.extent = M.getImageLayerExtent(layer['extent']);
+						if(layerbnd){
+							if(bounds==null){
+								bounds = layerbnd;
+							}else{
+								bounds.extend(layerbnd.getSouthWest());
+								bounds.extend(layerbnd.getNorthEast());
+							}
+						}
+					}
+
+				}
 
 				})(layers[i]);
 			}//for
-			return errors;
-		},
 
-		timeMidPoint: function (start, end) {
+
+			if(bounds!=null && zoom_mode>0){
+
+				/*if(zoom_mode==2){ // extend current map bounds to include extent of these layers
+					var bounds2 = M.map.getBounds();
+					bounds.extend(bounds2.getSouthWest());
+					bounds.extend(bounds2.getNorthEast());
+				}*/
+				var _zoom = M.map.getZoomLevelForBoundingBox(bounds);
+				setTimeout(function(){
+						//M.map.setCenterAndZoom(bounds.getCenter(), _zoom);
+						}, 1000);
+				//M.map.setCenterAndZoom(bounds.getCenter(), _zoom);
+			}
+
+			return errors;
+
+	},  //end addLayers
+
+	getImageLayerExtent: function(extent){
+		if(extent && typeof(extent)=='string'){
+			var coords = extent.split(',');
+			return new mxn.BoundingBox(coords[1], coords[0], coords[3], coords[2]);
+		}else if (typeof(extent)=='mxn.BoundingBox') {
+			return extent;
+		}else{
+			return null;
+		}
+	},
+
+	timeMidPoint: function (start, end) {
 			var d, diff;
 			d = new Date();
 			diff = end.getTime() - start.getTime();
 			d.setTime(start.getTime() + diff/2);
 			return d;
-		},
+	},
 
-		findTimeScale: function (start, end, scales, timelineWidth) {
+	findTimeScale: function (start, end, scales, timelineWidth) {
 			var diff, span, unitLength, intervals, i;
 			s = new Date();
 			e = new Date();
@@ -650,8 +743,8 @@ ether_zoom = function(_band, ether, zoomIn) {
 				}
 			}
 			return i;
-		}
-	};
+	}
+};
 
 	// default to 100px per century
 	RelBrowser.Mapping.initTimeZoomIndex = RelBrowser.Mapping.timeZoomSteps.length - 1;

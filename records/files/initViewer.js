@@ -101,29 +101,31 @@ strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*):?([^:@]*))?@)?([^:\/?#]*)(?::(\d
 */
 function detectSourceAndType(link, extension){
 
-	var source = 'Arbitrary';
-	var type = 'Unknown';
+	var source = 'arbitrary';
+	var type = 'unknown';
+
+	if(link){
 
 	//1. detect source
 	if(link.indexOf('http://heuristscholar.org')==0){
-		source = 'Heurist';
+		source = 'heurist';
 	}else if(link.indexOf('http://www.flickr.com')==0){
-		source = 'Flickr';
-		type = 'Image';
+		source = 'flickr';
+		type = 'image';
 	}else if(link.indexOf('http://www.panoramio.com/')==0){
-		source = 'Panoramio';
-		type = 'Image';
+		source = 'panoramio';
+		type = 'image';
 	}else if(link.match('http://(www.)?locr\.de|locr\.com')){
-		source = 'Locr';
-		type = 'Image';
+		source = 'locr';
+		type = 'image';
 	//}else if(link.indexOf('http://www.youtube.com/')==0 || link.indexOf('http://youtu.be/')==0){
 	}else if(link.match('http://(www.)?youtube|youtu\.be')){
-		source = 'Youtube';
-		type = 'Video';
+		source = 'youtube';
+		type = 'video';
 	}
 
 	//try to detect type by extension and protocol
-	if(type==='Unknown'){
+	if(type==='unknown'){
 
 		if ( Hul.isnull(extension ) ){ //
 			//get extension from url - unreliable
@@ -142,21 +144,21 @@ function detectSourceAndType(link, extension){
 
 
 		if(extension==="jpg" || extension==="jpeg" || extension==="png" || extension==="gif"){
-			type = 'Image';
+			type = 'image';
 		}else if(extension==="mp4" || extension==="mov" || extension==="avi"){
-			type = 'Video';
+			type = 'video';
 		}else if(extension==="mp3" || extension==="wav"){
-			type = 'Audio';
+			type = 'audio';
 		}else if(extension==="html" || extension==="htm" || extension==="txt"){
-			type = 'Text/HTML';
+			type = 'text/htnl';
 		}else if(extension==="pdf" || extension==="doc" || extension==="xls"){
-			type = 'Document';
+			type = 'document';
 		}else if(extension==="swf"){
-			type = 'Flash';
+			type = 'flash';
 		}
 	}
-
-	return {source:source, type:type};
+	}
+	return {source:source, type:type, extension:extension};
 }
 
 function linkifyYouTubeURLs(text) {
@@ -230,7 +232,7 @@ function showViewer(container, url_and_cfg){
 
 	   clearViewer(container);
 
- 		if(sType === "Image"){
+ 		if(sType === "image"){
 
  			viewerObject = null;
 			viewer.toolbarImages = top.HEURIST.baseURL+"images/toolbar";
@@ -242,9 +244,9 @@ function showViewer(container, url_and_cfg){
 					frame: ['100%','100%']
 			});
 
-		}else if (sType === "Video"){
+		}else if (sType === "video"){
 
-			if(sSource === "Youtube"){
+			if(sSource === "youtube"){
 				//var id = /^.*((youtu.be\/)|(v\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/.exec(curr_link);
 				container.innerHTML = linkifyYouTubeURLs(sUrl);
 			}

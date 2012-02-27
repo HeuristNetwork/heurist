@@ -32,7 +32,7 @@
 
 	mysql_connection_db_select(DATABASE);
 
-	if (array_key_exists('layers', $_REQUEST)) { //special mode - load ALL image layers and kml records only
+	if (array_key_exists('layers', $_REQUEST)) { //special mode - load ALL image layers and kml records only - for general drop down list on map
 
 		$_REQUEST['ver'] = "1";
 		$_REQUEST['q'] = "type:".$imagelayerRT;
@@ -134,13 +134,13 @@
 		$records[$bibID]["icon_url"] = HEURIST_ICON_URL_BASE . $row[7] . ".png";;
 
 		$thumb_url = getThumbnailURL($bibID); //function from uploadFile.php
-		if($thumb_url==""){
+		if($thumb_url==""){  //if thumb not defined - use rectype default thumb
 			$thumb_url = HEURIST_ICON_URL_BASE.	"thumb/th_" . $row[7] . ".png";
 		}
 
 		$records[$bibID]["thumb_url"] = $thumb_url;
 
-		if($row[7] && is_numeric($row[4]) && ! in_array($row[7],$imageLayers)){
+		if($row[4] && is_numeric($row[4]) && ! in_array($row[4],$imageLayers)){ //DT_MAP_IMAGE_LAYER_REFERENCE
 			array_push($imageLayers, $row[4]);
 		}
 		$kml_path =  getKmlFilePath($row[3]); //DT_ASSOCIATED_FILE
@@ -283,75 +283,58 @@ if(mysql_error()) {
 		$res = mysql_query($squery);
 //error_log(mysql_error());
 		while ($rec = mysql_fetch_assoc($res)) {
+
+			//find the extent for image layer
+			if($rec['type'] == "maptiler"){
+				$manifest_file = $rec['url']."tilemapresource.xml";
+			}else if($rec['type'] == "virtual earth"){
+				$manifest_file = $rec['url']."MapCruncherMetadata.xml";
+			}else{
+				$rec['error'] = "Wrong or non supported map type ".$rec['type'];
+			}
+
+			if(!$rec['url']){
+
+				$rec['error'] = "URL is not defined for image layer";
+
+			}else if($manifest_file){
+
+				$manifest = simplexml_load_file($manifest_file);
+				if($manifest==null || is_string($manifest)){ //manifest not found
+
+					$rec['error'] = "Cant load manifest file image layer. ".$manifest_file;
+
+				}else{
+					if($rec['type'] == "maptiler"){
+
+						foreach ($manifest->children() as $f_gen){
+							if($f_gen->getName()=="BoundingBox"){
+								$arr = $f_gen->attributes();
+								$rec['extent'] = $arr['miny'].','.$arr['minx'].','.$arr['maxy'].','.$arr['maxx']; //warning!!! wrong labels in these manifests!!!!
+								break;
+							}
+						}
+					}else{
+
+						$rect = findXMLelement($manifest, 0, array("LayerList","Layer","SourceMapRecordList","SourceMapRecord","MapRectangle"));
+						if($rect){
+							$sw = $rect[0];
+							$ne = $rect[1];
+							$rec['extent'] = $sw['lon'].','.$sw['lat'].','.$ne['lon'].','.$ne['lat'];
+						}
+					}
+
+					if(!array_key_exists('extent',$rec)){
+						$rec['error'] = "Can't find bounds parameters in manifest file";
+					}
+				}
+			}
+
 			array_push($layers, $rec);
 		}
 
 
-		/*
-		$res = mysql_query("select dtl_DetailTypeId, dtl_Value, dtl_RecID
-		from recDetails
-		where dtl_RecID in (" . join(",", $imageLayers) . ")
-		order by dtl_RecID");
-
-		$currrecid = null;
-		$l_title = "";
-		$l_type= null;
-		$l_url = null;
-		$l_mime_type = 245;
-		$l_min_zoom = 1;
-		$l_max_zoom = 19;
-		$l_copyright = "";
-
-		while ($val = mysql_fetch_row($res)) {
-		error_log(">>>>>>".$val[0]."   ".$val[1]);
-		if($currrecid != $val[2]){
-
-		if($currrecid){
-		array_push($layers,  array(
-		"title"=>$l_title,
-		"type"=>$l_type,
-		"url"=>$l_url,
-		"mime_type"=>$l_mime_type,
-		"min_zoom"=>$l_min_zoom,
-		"max_zoom"=>$l_max_zoom,
-		"copyright"=>$l_copyright
-		));
-		}
-
-		$l_title = "";
-		$l_type= null;
-		$l_url = null;
-		$l_mime_type = 245;
-		$l_min_zoom = 1;
-		$l_max_zoom = 19;
-		$l_copyright = "";
-
-		$currrecid = $val[2];
-		}
-
-		if($val[0]==173) $l_title = $val[1];
-		if($val[0]==585) $l_type= $val[1];
-		if($val[0]==339) $l_url = $val[1];
-		if($val[0]==289) $l_mime_type = $val[1];
-		if($val[0]==586) $l_min_zoom = $val[1];
-		if($val[0]==587) $l_max_zoom = $val[1];
-		if($val[0]==331) $l_copyright = $val[1];
-		}//while
-
-		error_log("ADDED!!!!!");
-
-		array_push($layers,  array(
-		"title"=>$l_title,
-		"type"=>$l_type,
-		"url"=>$l_url,
-		"mime_type"=>$l_mime_type,
-		"min_zoom"=>$l_min_zoom,
-		"max_zoom"=>$l_max_zoom,
-		"copyright"=>$l_copyright
-		));
-		*/
-
-	}
+	}//count($imageLayers)>0
 
 	// Find time extents -- must have at least a start time (end time is optional)
 
@@ -503,5 +486,30 @@ if(mysql_error()) {
 	HEURIST.tmap.geoObjects = <?= json_format($geoObjects) ?>;
 	HEURIST.tmap.totalRecordCount = <?= count($geoRecords) ?>;
 	*/
+
+	/**
+	* helper function to scan xml for element with given name
+	*
+	* @param mixed $xml
+	* @param mixed $ind
+	* @param mixed $atree
+	*/
+	function findXMLelement($xml, $ind, $atree){
+
+			foreach ($xml->children() as $f_gen){
+				if($f_gen->getName()==$atree[$ind]){
+
+					$ind++;
+					if($ind==count($atree)){
+						return $f_gen;
+					}else{
+						return findXMLelement($xml, $ind, $atree);
+					}
+
+				}
+			}
+
+			return null;
+	}
 
 ?>

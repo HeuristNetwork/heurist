@@ -2,7 +2,7 @@
 
 /**
  * saveURLasFile
- * Dowbloads file from given URL and saves in uploaded-images.
+ * Downloads file from given URL and saves in uploaded-images.
  * Registers it in recUploadedFiles table
  *
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
@@ -38,7 +38,7 @@ if (! defined("USING-XSS")) {
 */
 
 if(@$_REQUEST['url']){
-	$sURL = $_REQUEST['url'];
+	$sURL = $_REQUEST['url']; //url to be thumbnailed
 	$res = generate_thumbnail($sURL, true);
 	print json_format($res);
 	exit;
@@ -73,14 +73,14 @@ function generate_thumbnail($sURL, $needConnect){
 			if($image_info[1]<50){
 				//remove temp file
 				unlink($heurist_path);
-				return getError("Thumbnail genetator service can't create the image for specified URL");
+				return getError("Thumbnail generator service can't create the image for specified URL");
 			}
 		}
 
 		$fileID = upload_file("snapshot.jpg", "jpg", $heurist_path, null, $filesize, $sURL, $needConnect);
-
+error_log("2222>>>>>>>>>>>".HEURIST_DBNAME);
 		if (is_numeric($fileID)) {
-			$res = get_uploaded_file_info($fileID, false, $needConnect);
+			$res = get_uploaded_file_info($fileID, true, $needConnect);
 		}
 		else {
 			$res = getError("File upload was interrupted. ".$fileID);

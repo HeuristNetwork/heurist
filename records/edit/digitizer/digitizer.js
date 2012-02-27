@@ -2181,10 +2181,10 @@ function loadLayer(event){
 function loadLayer2(index){
 
 	if(isNaN(index) || index < 0){
-		RelBrowser.Mapping.addLayers([]);
+		RelBrowser.Mapping.addLayers([], 0);
 	}else{
 		currentBackgroundLayer = systemAllLayers[index].rec_ID;
-		RelBrowser.Mapping.addLayers([systemAllLayers[index]]);
+		RelBrowser.Mapping.addLayers([systemAllLayers[index]], 1);
 	}
 }
 

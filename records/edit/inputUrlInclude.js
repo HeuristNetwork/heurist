@@ -16,36 +16,64 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.focus = function() { 
 //top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.regex = new RegExp("^[1-9]\\d*$");
 top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.typeDescription = "a url to be included";
 
+/**
+* creates visible input to display file name or URL
+* and invisible to keep real value - either file ID (for uploaded) or URL|source|type for remote resources
+*/
 top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(bdValue) {
 	var thisRef = this;	// provide input reference for closures
 
 	var newDiv = this.document.createElement("div");
-		newDiv.className = bdValue? "resource-div" : "resource-div empty";
+		newDiv.className = "resource-div"; //bdValue? "resource-div" : "resource-div empty";
 		newDiv.expando = true;
+		newDiv.bdValue = null;
 	this.addInputHelper.call(this, bdValue, newDiv);
 
-	var val = "";
+	var valueVisible = "";
+	var valueHidden = "";
+
 	if(bdValue){
-		val = bdValue.value;
-		var arr = val.split("|");
-		if(arr && arr.length>0){
-			val = arr[0];
+		if(bdValue.file){
+			//new way
+			valueHidden = YAHOO.lang.JSON.stringify(bdValue.file);
+
+			if(bdValue.file.remoteURL){
+				//remote resource
+				valueVisible = bdValue.file.remoteURL;
+				//newDiv.bdValue = valueHidden + '|' + bdValue.file.remoteURL+'|'+bdValue.file.remoteSource+'|'+bdValue.file.mediaType;
+			}else{
+				//local uploaded file or file on server
+				valueVisible = bdValue.file.origName;
+				//newDiv.bdValue =  valueHidden + '|'+ bdValue.file.URL+'|heurist|'+(bdValue.file.mediaType?bdValue.file.mediaType:'')+'|'+bdValue.file.ext;
+			}
+
+		}else{
+			/* old way for real urlinclude - @todo remove
+			valueVisible = bdValue.value;
+			var arr = valueVisible.split("|");
+			if(arr && arr.length>0){
+				valueVisible = arr[0]; //url only
+			}
+			valueHidden = (bdValue.value)?bdValue.value:"";
+			*/
 		}
 	}
 
+
+
 	var hiddenElt = newDiv.hiddenElt = this.document.createElement("input");
 		hiddenElt.name = newDiv.name;
-		hiddenElt.value = hiddenElt.defaultValue = (bdValue)? bdValue.value : "";
+		hiddenElt.value = hiddenElt.defaultValue = valueHidden;
 		hiddenElt.type = "hidden";
 		newDiv.appendChild(hiddenElt);
 
 	var textElt = newDiv.textElt = newDiv.appendChild(this.document.createElement("input"));
 		textElt.type = "text";
-		textElt.value = textElt.defaultValue = val;
-		textElt.title = "Click here to upload file and/or define the URL";
+		textElt.value = textElt.defaultValue = valueVisible;
+		textElt.title = "Click here to upload file or define the URL";
 		textElt.setAttribute("autocomplete", "off");
 		textElt.className = "in"; //"resource-title";
-		textElt.style.width = 200;
+		textElt.style.width = 500;
 		textElt.onkeypress = function(e) {
 			// refuse non-tab key-input
 			if (! e) e = window.event;
@@ -57,15 +85,16 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 			}
 			else return true;	// allow tab or control/alt etc to do their normal thing (cycle through controls)
 		};
-		top.HEURIST.registerEvent(textElt, "click", function() { thisRef.defineURL(newDiv); });
-		top.HEURIST.registerEvent(textElt, "mouseup", function() { if (! newDiv.readOnly) thisRef.handlePossibleDragDrop(thisRef, newDiv); });
-		top.HEURIST.registerEvent(textElt, "mouseover", function() { if (! newDiv.readOnly) thisRef.handlePossibleDragDrop(thisRef, newDiv); });
+
+	top.HEURIST.registerEvent(textElt, "click", function() { thisRef.defineURL(newDiv); });
+	top.HEURIST.registerEvent(textElt, "mouseup", function() { if (! newDiv.readOnly) thisRef.handlePossibleDragDrop(thisRef, newDiv); });
+	top.HEURIST.registerEvent(textElt, "mouseover", function() { if (! newDiv.readOnly) thisRef.handlePossibleDragDrop(thisRef, newDiv); });
 
 
 	var removeImg = newDiv.appendChild(this.document.createElement("img"));
 		removeImg.src = top.HEURIST.basePath+"common/images/12x12.gif";
 		removeImg.className = "delete-resource";
-		removeImg.title = "Clear url";
+		removeImg.title = "Clear";
 		var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 		top.HEURIST.registerEvent(removeImg, "click", function() {
 			if (! newDiv.readOnly) {
@@ -87,13 +116,17 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 	});
 */
 
+	/* ??????????
 	if (window.HEURIST && window.HEURIST.parameters && window.HEURIST.parameters["title"]  &&  bdValue  &&  bdValue.title  &&  windowRef.parent.frameElement) {
 		// we've been given a search string for a record pointer field - pop up the search box
 		top.HEURIST.registerEvent(windowRef.parent.frameElement, "heurist-finished-loading-popup", function() {
 			thisRef.defineURL(newDiv, bdValue.title);
 		});
-	}
+	}*/
 };
+/**
+*  returns the value - ulf_ID or combined URL|source|type
+*/
 top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.getPrimaryValue = function(input) { return input? input.hiddenElt.value : ""; };
 
 /**
@@ -102,9 +135,13 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.getPrimaryValue = fun
 top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.defineURL = function(element, editValue) {
 
 	var thisRef = this;
+	var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-	if (!editValue) editValue = element.hiddenElt.value;
-	var url = top.HEURIST.basePath+"records/files/uploadFileOrDefineURL.html?value="+encodeURIComponent(editValue);
+	if (!editValue) {
+		editValue = element.hiddenElt.value; //json string with bdValue.file
+	}
+
+	var url = top.HEURIST.basePath+"records/files/uploadFileOrDefineURL.html?value="+encodeURIComponent(editValue)+"&db="+_db;
 	/*if (element.input.constrainrectype){
 		url += "&t="+element.input.constrainrectype;
 	}*/
@@ -112,7 +149,16 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.defineURL = function(
 	top.HEURIST.util.popupURL(window, url, {
 		height: 480,
 		width: 640,
-		callback: function(url, source, type) {
+		callback: function(fileJSON) {
+
+			if(!HEURIST.util.isnull(fileJSON)){
+				var filedata = HEURIST.util.expandJsonStructure(fileJSON);
+				if(filedata){
+					element.input.setURL(element, ((filedata.remoteSource=='heurist')?filedata.origName:filedata.remoteURL), fileJSON);
+				}
+			}
+
+/*
 			//it returns url - link to external or heurist file
 			//			source - name of source/service
 			//			type - type of media
@@ -121,6 +167,7 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.defineURL = function(
 			}else{
 				element.input.setURL(element, url, url+'|'+source+"|"+type);
 			}
+*/
 		}
 	} );
 };
@@ -129,14 +176,17 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.defineURL = function(
 * clear value
 */
 top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.clearURL = function(element) { this.setURL(element, "", ""); };
+
 /**
-* assign new URL value
+* assign new URL value - returns from uploadFileOrDefineURL
 */
-top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.setURL = function(element, url, src_type) {
+top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.setURL = function(element, visibleValue, hiddenValue) {
 
-	element.textElt.title = element.textElt.value = element.textElt.defaultValue = url? url : "";
-	element.hiddenElt.title = element.hiddenElt.value = element.hiddenElt.defaultValue = src_type? src_type : "";
+	element.textElt.value = element.textElt.defaultValue = HEURIST.util.isempty(visibleValue)? "" :visibleValue;
 
+	element.hiddenElt.value = element.hiddenElt.defaultValue = HEURIST.util.isempty(hiddenValue)? "" :hiddenValue;
+
+	element.className = HEURIST.util.isempty(hiddenValue)?"resource-div empty":"resource-div";
 
 	var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 	windowRef.changed();

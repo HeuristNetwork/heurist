@@ -3675,7 +3675,8 @@ var HeuristScholarDB = new HStorageManager();
 				// id, name, sizeKB, mime-type, download URL, thumbnail URL, description
 				//sm, id, originalName, size, type, URL, thumbnailURL, description
 				that.initFile = newIframe.onload;
-				newFile = new HFile(that, parseInt(d[0]), d[1], d[2], d[3], d[4], d[5], d[6]);
+				//ARTEM newFile = new HFile(that, parseInt(d[0]), d[1], d[2], d[3], d[4], d[5], d[6]);
+				newFile = new HFile(that, parseInt(d.id), d.origName, d.fileSize, d.mimeType, d.URL, d.thumbURL, d.description);
 				delete that.initFile;
 
 				if (saver.onsave) { callback = function() { saver.onsave(fileInput, newFile); }; }

@@ -622,9 +622,10 @@ top.HEURIST.edit = {
 				newInput = new top.HEURIST.edit.inputs.BibDetailDropdownInput(recID, dt, rfr, fieldValues, container);
 				break;
 			case "file":
-				newInput = new top.HEURIST.edit.inputs.BibDetailFileInput(recID, dt, rfr, fieldValues, container);
+				newInput = new top.HEURIST.edit.inputs.BibDetailURLincludeInput(recID, dt, rfr, fieldValues, container);
+				//newInput = new top.HEURIST.edit.inputs.BibDetailFileInput(recID, dt, rfr, fieldValues, container);
 				break;
-			case "urlinclude":
+			case "urlinclude": //ARTEM - toremove
 				newInput = new top.HEURIST.edit.inputs.BibDetailURLincludeInput(recID, dt, rfr, fieldValues, container);
 				break;
 			case "geo":
@@ -704,7 +705,9 @@ top.HEURIST.edit = {
 	uploadsDiv: null,
 	uploadsInProgress: { counter: 0, names: {} },
 */
-
+	/**
+	* create snapshot for bookmark
+	*/
 	uploadURL: function(fileInput) {
 
 		//var URLInput = new top.HEURIST.edit.inputs.BibURLInput(container, defaultURL, required);
@@ -725,7 +728,8 @@ top.HEURIST.edit = {
 		var thisRef = this;
 		var element = fileInput.parentNode;
 		//call thumbnail maker
-		top.HEURIST.util.getJsonData(top.HEURIST.basePath + "records/files/saveURLasFile.php?url=" + sURL + "&db=" + HAPI.database, 				function(vals) {
+		top.HEURIST.util.getJsonData(top.HEURIST.basePath + "records/files/saveURLasFile.php?url=" + sURL + "&db=" + HAPI.database,
+			function(vals) {
 					top.HEURIST.edit.fileInputURLsaved.call(thisRef, element, vals);
 			});
 
@@ -746,19 +750,15 @@ top.HEURIST.edit = {
 
 		} else {
 			// translate the HFile object back into something we can use here
-			var fo = {file:{
-				id: fileDetails.file[0],
-				origName: fileDetails.file[1],
-				url: fileDetails.file[4],
-				fileSize: fileDetails.file[2],
-				fileType: fileDetails.file[3]
-			}};
 			// update the BibDetailFileInput to show the file
-			element.input.replaceInput(element, fo );
+			element.input.replaceInput(element, fileDetails );
 			windowRef.changed();
 		}
 	},
 
+	/**
+	* start uploadig as soon as user browsed the file
+	*/
 	uploadFileInput: function(fileInput) {
 		var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
@@ -835,10 +835,10 @@ top.HEURIST.edit = {
 			uploadsDiv.appendChild(this.document.createTextNode(fileDetails.error));
 		} else {
 			// translate the HFile object back into something we can use here
-			fileObj = {
+			var fileObj = {
 				id: fileDetails.file.getID(),
 				origName: fileDetails.file.getOriginalName(),
-				url: fileDetails.file.getURL(),
+				URL: fileDetails.file.getURL(),
 				fileSize: fileDetails.file.getSize(),
 				fileType: fileDetails.file.getType()
 			};
@@ -1916,10 +1916,11 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 
 		var link = inputDiv.appendChild(this.document.createElement("a"));
 			if (bdValue.file.nonce) {
+				//not used anymore   @todo - remove
 				link.href = top.HEURIST.basePath+"records/files/downloadFile.php/" + /*encodeURIComponent(bdValue.file.origName)*/
 								"?ulf_ID=" + encodeURIComponent(bdValue.file.nonce);
-			} else if (bdValue.file.url) {
-				link.href = bdValue.file.url;
+			} else if (bdValue.file.URL) {
+				link.href = bdValue.file.URL;
 			}
 			link.target = "_surf";
 			link.onclick = function() { top.open(link.href, "", "width=300,height=200,resizable=yes"); return false; };
@@ -1947,6 +1948,7 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 		inputDiv.removeImg = removeImg;
 		inputDiv.link = link.href;
 		inputDiv.fileType = bdValue.file.fileType;
+		inputDiv.filedata = bdValue.file;
 		inputDiv.className = "file-div";
 
 	} else {
@@ -2030,6 +2032,14 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.removeFile = function(input
 	}
 
 	// FIXME: window.changed()
+};
+top.HEURIST.edit.inputs.BibDetailFileInput.prototype.getFileData = function() {
+	for (var i=0; i < this.inputs.length; ++i) {
+		if(this.inputs[0].filedata){
+			return this.inputs[0].filedata;
+		}
+	}
+	return "";
 };
 top.HEURIST.edit.inputs.BibDetailFileInput.prototype.getPrimaryValue = function(input) { return input? input.valueElt.value : ""; };
 top.HEURIST.edit.inputs.BibDetailFileInput.prototype.regex = new RegExp("\\S");
@@ -2156,10 +2166,12 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(b
 			});
 */
 			HAPI.PJ.store("gigitiser_geo_object", input.value, {
-				callback: function(_, _, response) {
+					height: 550,
+					width: 780,
+					callback: function(_, _, response) {
 					top.HEURIST.util.popupURL(
 						windowRef,
-						"digitizer/index.html?" + (response.success ? "edit" : encodeURIComponent(input.value)),	// FIXME: need to map this to new location of gigitiser
+						"digitizer/index.html?" + (response.success ? "edit" : encodeURIComponent(input.value)),
 						{ callback: function(type, value) { thisRef.setGeo(newDiv, value? (type+" "+value) : ""); } }
 					);
 				}

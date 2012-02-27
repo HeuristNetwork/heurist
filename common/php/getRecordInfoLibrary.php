@@ -10,6 +10,7 @@
  -->*/
 
 require_once(dirname(__FILE__).'/imageLibrary.php');
+require_once(dirname(__FILE__).'/../../records/files/uploadFile.php');
 
 
 if (!defined('MEMCACHED_PORT')) define('MEMCACHED_PORT', 11211);
@@ -164,7 +165,7 @@ function getBaseProperties($rec_id, $bkm_ID) {
 	return $props;
 }
 
-function getAllBibDetails($rec_id) {
+function getAllRecordDetails($rec_id) {
 	// Get all recDetails entries for this entry,
 	// as an array.
 	// File entries have file data associated,
@@ -193,6 +194,14 @@ function getAllBibDetails($rec_id) {
 		if ($row["rec_Title"]) $detail["title"] = $row["rec_Title"];
 
 		if ($row["dtl_UploadedFileID"]) {
+
+			$fileres = get_uploaded_file_info($row["dtl_UploadedFileID"], true, false);
+			if($fileres){
+				$detail["file"] = $fileres["file"];
+			}
+
+/* ARTEM - remarked it. All works with recUploadedFiles to be centralized in uploadFile.php
+
 			$fileRes = mysql_query("select recUploadedFiles.*, fxm_MimeType
 										from recUploadedFiles left join defFileExtToMimetype on ulf_MimeExt = fxm_Extension
 										where ulf_ID=" . intval($row["dtl_UploadedFileID"]));
@@ -208,6 +217,7 @@ function getAllBibDetails($rec_id) {
 					"fileSize" => $file["ulf_FileSizeKB"]
 				);
 			}
+*/
 		}
 		else if ($row["envelope"]  &&  preg_match("/^POLYGON[(][(]([^ ]+) ([^ ]+),[^,]*,([^ ]+) ([^,]+)/", $row["envelope"], $poly)) {
 			list($match, $minX, $minY, $maxX, $maxY) = $poly;

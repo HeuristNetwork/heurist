@@ -441,6 +441,7 @@ function linkifyYouTubeURLs($text, $size) {
     return $text;
 }
 //
+// the same function in uploadFile.php
 //
 function detectSourceAndType($url){
 

@@ -86,7 +86,7 @@ error_log("base Properties".print_r($record,true));
 		$record = array();
 		$record["denied"] = true;
 	} else {
-		$record["bdValuesByType"] = getAllBibDetails($rec_id);
+		$record["bdValuesByType"] = getAllRecordDetails($rec_id);
 		$record["reminders"] = getAllReminders($rec_id);
 		$record["comments"] = getAllComments($rec_id);
 		$record["workgroupTags"] = getAllworkgroupTags($rec_id);

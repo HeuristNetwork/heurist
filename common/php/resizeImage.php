@@ -1,12 +1,20 @@
 <?php
-/*<!--
- * filename, brief description, date of creation, by whom
+/* resizeImage.php
+ *
+ * Thumbnail service
+ * It loads thumbnail from recUploadedFiles.ulf_Thumbnail
+ * Or creates new thumbnail and stores it in this field in case this is standard thumnail request
+ *
+ * parameters
+ * w, h or maxw, maxh - size of thumbnail, if they are omitted - it returns standard thumbnail 100x100
+ * ulf_ID - file ID from recUploadedFiles, if defined and standard thumbnail - thumbnail is stored in table
+ *
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
- * @todo
- -->*/
+ *
+ */
 
  header('Content-type: image/png');
 
@@ -44,68 +52,69 @@ if (array_key_exists('ulf_ID', $_REQUEST))
 		return;
 	}
 
-	if ($file['ulf_FileName']) {
-		$filename = $file['ulf_FilePath'].$file['ulf_FileName']; // post 18/11/11 proper file path and name
-	} else {
-		$filename = HEURIST_UPLOAD_DIR ."/". $file['ulf_ID']; // pre 18/11/11 - bare numbers as names, just use file ID
+	$type_source = $file['ulf_RemoteSource'];
+	$type_media = $file['ulf_MediaType'];
+
+	if ($type_source==null || $type_source=='heurist') {
+
+		if ($file['ulf_FileName']) {
+			$filename = $file['ulf_FilePath'].$file['ulf_FileName']; // post 18/11/11 proper file path and name
+		} else {
+			$filename = HEURIST_UPLOAD_DIR ."/". $file['ulf_ID']; // pre 18/11/11 - bare numbers as names, just use file ID
+		}
+
+		$filename = str_replace('/../', '/', $filename);
+
+		$mimeExt = '';
+		if ($file['ulf_MimeExt']) {
+			$mimeExt = $file['ulf_MimeExt'];
+		} else {
+			preg_match('/\\.([^.]+)$/', $file["ulf_OrigFileName"], $matches);	//find the extention
+			$mimeExt = $matches[1];
+		}
+
+	//DEBUG	error_log("filename = $filename and mime = $mimeExt");
+
+		switch($mimeExt) {
+		case 'image/jpeg':
+		case 'jpeg':
+		case 'jpg':
+			$img = imagecreatefromjpeg($filename);
+			break;
+		case 'image/gif':
+		case 'gif':
+			$img = imagecreatefromgif($filename);
+			break;
+		case 'image/png':
+		case 'png':
+			$img = imagecreatefrompng($filename);
+			break;
+		default:
+			$desc = '***' . strtoupper(preg_replace('/.*[.]/', '', $file['ulf_OrigFileName'])) . ' file';
+			$img = make_file_image($desc); //from string
+			break;
+		}
+
+	}else if($type_media=='image'){ //$type_source=='arbitrary' &&
+
+		//@todo for image services (panoramio, flikr) take thumbnails directly
+
+		$img = get_remote_image($file['ulf_ExternalFileReference']);
+
+	}else if($type_source=='youtube'){
+
+		$url = $file['ulf_ExternalFileReference'];
+		$youtubeid = preg_replace('/^[^v]+v.(.{11}).*/' , '$1', $url);
+		$img = get_remote_image("http://img.youtube.com/vi/".$youtubeid."/0.jpg");
+
 	}
 
-	$filename = str_replace('/../', '/', $filename);
+}
+else if (array_key_exists('file_url', $_REQUEST))   //get thumbnail for any URL
+{
 
-	$mimeExt = '';
-	if ($file['ulf_MimeExt']) {
-		$mimeExt = $file['ulf_MimeExt'];
-	} else {
-		preg_match('/\\.([^.]+)$/', $file["ulf_OrigFileName"], $matches);	//find the extention
-		$mimeExt = $matches[1];
-	}
-error_log("filename = $filename and mime = $mimeExt");
+	$img = get_remote_image($_REQUEST['file_url']);
 
-	switch($mimeExt) {
-	case 'image/jpeg':
-	case 'jpeg':
-	case 'jpg':
-		$img = imagecreatefromjpeg($filename);
-		break;
-	case 'image/gif':
-	case 'gif':
-		$img = imagecreatefromgif($filename);
-		break;
-	case 'image/png':
-	case 'png':
-		$img = imagecreatefrompng($filename);
-		break;
-	default:
-		$desc = '***' . strtoupper(preg_replace('/.*[.]/', '', $file['ulf_OrigFileName'])) . ' file';
-		$img = make_file_image($desc);
-		break;
-	}
-
-} else if (array_key_exists('file_url', $_REQUEST)) {
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);	//return teh output as a string from curl_exec
-	curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_NOBODY, 0);
-	curl_setopt($ch, CURLOPT_HEADER, 0);	//don't include header in output
-	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);	// follow server header redirects
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);	// don't verify peer cert
-	curl_setopt($ch, CURLOPT_TIMEOUT, 10);	// timeout after ten seconds
-	curl_setopt($ch, CURLOPT_MAXREDIRS, 5);	// no more than 5 redirections
-	if (defined("HEURIST_HTTP_PROXY")) {
-		curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
-	}
-
-	curl_setopt($ch, CURLOPT_URL, $_REQUEST['file_url']);
-	$data = curl_exec($ch);
-
-	$error = curl_error($ch);
-	if ($error) {
-		$code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-		error_log("$error ($code)" . " url = ". $_REQUEST['file_url']);
-	} else {
-		$img = imagecreatefromstring($data);
-	}
 }
 
 
@@ -113,11 +122,14 @@ if (!$img) {
 	header('Location: ../images/100x100-check.gif');
 	return;
 }
+
+
 // calculate image size
 // note - we never change the aspect ratio of the image!
 $orig_x = imagesx($img);
 $orig_y = imagesy($img);
-error_log(" image orig size x= $orig_x  y=$orig_y");
+
+//DEBUG error_log(" image orig size x= $orig_x  y=$orig_y");
 $rx = $x / $orig_x;
 $ry = $y / $orig_y;
 
@@ -129,7 +141,7 @@ if ($no_enlarge  &&  $scale > 1) {
 
 $new_x = ceil($orig_x * $scale);
 $new_y = ceil($orig_y * $scale);
-error_log(" image new size x= $new_x  y=$new_y");
+//DEBUG error_log(" image new size x= $new_x  y=$new_y");
 
 $img_resized = imagecreatetruecolor($new_x, $new_y)  or die;
 imagecopyresampled($img_resized, $img, 0, 0, 0, 0, $new_x, $new_y, $orig_x, $orig_y)  or die;
@@ -148,7 +160,12 @@ if ($standard_thumb  &&  @$file) {
 // output to browser
 echo $resized;
 
-
+/**
+* Creates image from given string
+*
+* @param mixed $desc - text to be inserted into resulted image
+* @return resource - image with the given text
+*/
 function make_file_image($desc) {
 	$desc = preg_replace('/\\s+/', ' ', $desc);
 
@@ -196,4 +213,41 @@ function make_file_image($desc) {
 	return $im;
 }
 
+/**
+* download image from given url
+*
+* @param mixed $remote_url
+* @return resource
+*/
+function get_remote_image($remote_url){
+
+	$img = null;
+
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);	//return the output as a string from curl_exec
+	curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_NOBODY, 0);
+	curl_setopt($ch, CURLOPT_HEADER, 0);	//don't include header in output
+	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);	// follow server header redirects
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);	// don't verify peer cert
+	curl_setopt($ch, CURLOPT_TIMEOUT, 10);	// timeout after ten seconds
+	curl_setopt($ch, CURLOPT_MAXREDIRS, 5);	// no more than 5 redirections
+	if (defined("HEURIST_HTTP_PROXY")) {
+		curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
+	}
+
+	curl_setopt($ch, CURLOPT_URL, $remote_url);
+	$data = curl_exec($ch);
+
+	$error = curl_error($ch);
+	if ($error) {
+		$code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+		error_log("$error ($code)" . " url = ". $remote_url);
+	} else {
+		$img = imagecreatefromstring($data);
+	}
+
+	return $img;
+}
 ?>

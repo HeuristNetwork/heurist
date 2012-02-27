@@ -21,6 +21,9 @@ mysql_connection_db_select(DATABASE);
 require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 
+require_once(dirname(__FILE__).'/../../records/files/uploadFile.php');
+
+
 $noclutter = array_key_exists('noclutter', $_REQUEST);
 
 $terms = getTerms();
@@ -417,6 +420,30 @@ function print_private_details($bib) {
 				$row = mysql_fetch_row($res);
 				$bd['val'] = '<a target="_new" href="'.HEURIST_SITE_PATH.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['val'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row[0]).'</a>';
 			} else if ($bd['dty_Type'] == 'file'  &&  $bd['dtl_UploadedFileID']) {
+
+//@todo ARTEM - to be to get_uploaded_file_info. All works with recUploadedFiles MUST be centralized in uploadFile.php
+
+				$filedata = get_uploaded_file_info($bd['dtl_UploadedFileID'], true, false);
+				if($filedata){
+
+					$filedata = $filedata['file'];
+
+					//add to thumbnail list
+					if (is_image($filedata) || $filedata['remoteSource']=='youtube'){
+						array_push($thumbs, array(
+							'url' => $filedata['URL'],
+							'thumb' => $filedata['thumbURL'],
+							'source' => $filedata['remoteSource']
+						));
+					}
+					if($filedata['remoteURL']){ //remote resource
+						$bd['val'] = '<a target="_surf" href="'.htmlspecialchars($filedata['remoteURL']).'"><img src="'.HEURIST_SITE_PATH.'common/images/external_link_16x16.gif">'.htmlspecialchars($filedata['remoteURL']).'</a>';
+					}else{ //uploaded file
+						$bd['val'] = '<a target="_surf" href="'.htmlspecialchars($filedata['URL']).'"><img src="'.HEURIST_SITE_PATH.'common/images/external_link_16x16.gif">'.htmlspecialchars($filedata['origName']).'</a> [' .htmlspecialchars($filedata['fileSize']) . 'kB]';
+					}
+				}
+
+				/* OLD WAY
 				$res = mysql_query('select * from recUploadedFiles left join defFileExtToMimetype on ulf_MimeExt = fxm_Extension where ulf_ID='.intval($bd['dtl_UploadedFileID']));
 				$file = mysql_fetch_assoc($res);
 				if ($file) {
@@ -429,6 +456,7 @@ function print_private_details($bib) {
 					}
 					$bd['val'] = '<a target="_surf" href="'.htmlspecialchars($img_url).'"><img src="'.HEURIST_SITE_PATH.'common/images/external_link_16x16.gif">'.htmlspecialchars($file['ulf_OrigFileName']).'</a> [' .htmlspecialchars($file['ulf_FileSizeKB']) . 'kB]';
 				}
+				*/
 			} else {
 				if (preg_match('/^http:/', $bd['val'])) {
 					if (strlen($bd['val']) > 100)
@@ -492,7 +520,7 @@ function print_private_details($bib) {
 ?>
 
 <div class=detailRow><div class=detailType>Updated</div><div class=detail><?= $bib['rec_Modified'] ?></div></div>
-<div class=detailRow><div class=detailType>Cite as</div><div class=detail><a target=_blank 
+<div class=detailRow><div class=detailType>Cite as</div><div class=detail><a target=_blank
     href="<?= HEURIST_BASE_URL ?>resolver.php?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>">
           <?= HEURIST_BASE_URL ?>resolver.php?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?></a></div></div></div>
 <?php

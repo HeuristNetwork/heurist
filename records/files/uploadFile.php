@@ -1,6 +1,18 @@
 <?php
 
 /**
+ * uploadFile.php
+ *
+ * set of functions
+ * 		upload_file - copies temp file to HEURIST_UPLOAD_DIR and registger in recUploadedFiles
+ *
+ * 		register_file - registger the file on the server in recUploadedFiles (used in import)
+ *
+ * 		get_uploaded_file_info  - returns values from recUploadedFiles for given file ID
+ *
+ * 		getThumbnailURL - find the appropriate detail type for given record ID and returns thumbnail URL
+ *
+ * 		is_image - detect if resource is image
  *
  *
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
@@ -14,7 +26,17 @@ require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 
 /**
-* @param mixed $name - originak file name
+* Invoked from HAPI.saveFile.php
+*
+* Copies temp file to HEURIST_UPLOAD_DIR and registger in recUploadedFiles
+*
+* Check that the uploaded file has a sane name / size / no errors etc,
+* enter an appropriate record in the recUploadedFiles table,
+* save it to disk,
+* and return the ulf_ID for that record.
+* This will be error message if anything went pear-shaped along the way.
+*
+* @param mixed $name - original file name
 * @param mixed $mimetypeExt - ??
 * @param mixed $tmp_name - temporary name from FILE array
 * @param mixed $error
@@ -26,12 +48,6 @@ function upload_file($name, $mimetypeExt, $tmp_name, $error, $size, $description
 
 	if (! is_logged_in()) return "Not logged in";
 
-	/* Check that the uploaded file has a sane name / size / no errors etc,
-	 * enter an appropriate record in the recUploadedFiles table,
-	 * save it to disk,
-	 * and return the ulf_ID for that record.
-	 * This will be error message if anything went pear-shaped along the way.
-	 */
 	if ($size <= 0  ||  $error) {
 			error_log("size is $size, error is $error");
 			return $error;
@@ -77,7 +93,9 @@ function upload_file($name, $mimetypeExt, $tmp_name, $error, $size, $description
 			'ulf_MimeExt ' => $mimetypeExt,
 			'ulf_FileSizeKB' => $file_size,
 			'ulf_Description' => $description? $description : NULL,
-			'ulf_FilePath' => HEURIST_UPLOAD_DIR)
+			'ulf_FilePath' => HEURIST_UPLOAD_DIR,
+			'ulf_RemoteSource' => 'heurist',
+			'ulf_MediaType' => getMediaType($mimetypeExt))
 			);
 
 	if (! $res) {
@@ -111,8 +129,11 @@ function upload_file($name, $mimetypeExt, $tmp_name, $error, $size, $description
 }
 
 /**
+ * Registger the file on the server in recUploadedFiles
  *
- * @param type $name
+ * It used in import (from db and folder) to register the existing files
+ *
+ * @param type $fullname - absolute path to file on this server
  * @param type $description
  * @param type $needConnect
  * @return string  new file id
@@ -179,7 +200,9 @@ function register_file($fullname, $description, $needConnect) {
 				'ulf_FileSizeKB' => $file_size,
 				'ulf_Description' => $description? $description : NULL,
 				'ulf_FilePath' => $dirname,
-				'ulf_FileName' => $filename)
+				'ulf_FileName' => $filename,
+				'ulf_RemoteSource' => 'heurist',
+				'ulf_MediaType' => getMediaType($mimetypeExt))
 				);
 
 	    if (!$res) {
@@ -195,8 +218,206 @@ function register_file($fullname, $description, $needConnect) {
 	}
 }
 
+
+
+
 /**
-* put your comment there...
+* try to detect the source (service) and type of file/media content
+*
+* returns object with 2 properties
+*
+* !!! the same function in smarty/showReps.php
+*/
+function detectSourceAndType($url){
+
+	$source = 'arbitrary';
+	$type = 'unknown';
+
+	//1. detect source
+	if(strpos($url,'http://heuristscholar.org')==0){
+		$source = 'heurist';
+	}else if(strpos($url,'http://www.flickr.com')==0){
+		$source = 'flickr';
+		$type = 'image';
+	}else if(strpos($url, 'http://www.panoramio.com/')==0){
+		$source = 'panoramio';
+		$type = 'image';
+	}else if(preg_match('http://(www.)?locr\.de|locr\.com', $url)){
+		$source = 'locr';
+		$type = 'image';
+	//}else if(link.indexOf('http://www.youtube.com/')==0 || link.indexOf('http://youtu.be/')==0){
+	}else if(preg_match('http://(www.)?youtube|youtu\.be', $url)){
+		$source = 'youtube';
+		$type = 'video';
+	}
+
+	//try to detect type by extension and protocol
+	if($type=='unknown'){
+
+		//get extension from url - unreliable
+		$extension = null;
+		$ap = parse_url($url);
+		if( array_key_exists('path', $ap) ){
+			$path = $ap['path'];
+			if($path){
+				$extension = pathinfo($path, PATHINFO_EXTENSION);
+			}
+		}
+		if($extension){
+			$extension = strtolower($extension);
+		}
+
+		$type = getMediaType($extension);
+	}
+
+	return array($source, $type, $extension);
+}
+
+/**
+* detect media type
+*
+* @param mixed $extension
+*/
+function getMediaType($extension){
+
+		if($extension=="jpg" || $extension=="jpeg" || $extension=="png" || $extension=="gif"){
+			$type = 'image';
+		}else if($extension=="mp4" || $extension=="mov" || $extension=="avi"){
+			$type = 'video';
+		}else if($extension=="mp3" || $extension=="wav"){
+			$type = 'audio';
+		}else if($extension=="html" || $extension=="htm" || $extension=="txt"){
+			$type = 'text/html';
+		}else if($extension=="pdf" || $extension=="doc" || $extension=="xls"){
+			$type = 'document';
+		}else if($extension=="swf"){
+			$type = 'flash';
+		}else{
+			$type = NULL;
+		}
+		return $type;
+}
+
+
+/**
+* register external URL (see saveRecordDetails.php)
+* $filejson - either url or json string with file data array
+*
+* returns ulf_ID
+*/
+function register_external($filejson)
+{
+	$filedata = json_decode($filejson, true);
+
+//DEBUG
+error_log(">>>>>".print_r($filedata, true));
+
+	if($filedata==null){
+
+		$filedata = array();
+		$url = $filejson;
+		//1. get url, source and type
+		$acfg = explode('|', $url);
+		$filedata['remoteURL'] = $acfg[0];
+		$filedata['ext'] = NULL;
+
+		if(count($acfg)<3){
+	   		$oType = detectSourceAndType($url);
+	   		$filedata['remoteSource'] = $oType[0];
+	   		$filedata['mediaType']  = $oType[1];
+	   		$filedata['ext'] = $oType[2];
+		}else{
+	   		$filedata['remoteSource'] = $acfg[1];
+	   		$filedata['mediaType'] = $acfg[2];
+	   		if(count($acfg)==4){
+	   			$filedata['ext'] = $acfg[3];
+			}
+		}
+/*
+			        ulf_OrigFileName as origName,
+			        ulf_FileSizeKB as fileSize,
+			        fxm_MimeType as mimeType,
+			        ulf_Added as date,
+			        ulf_Description as description,
+			        ulf_MimeExt as ext,
+			        ulf_ExternalFileReference as remoteURL,
+					ulf_RemoteSource as remoteSource,
+					ulf_MediaType as mediaType
+*/
+	}
+
+	//if id is defined
+	if($filedata['id'] &&  intval($filedata['id'])>0){
+		//update
+		$file_id = $filedata['id'];
+		//ignore registration for already uploaded file
+		if(array_key_exists('remoteSource', $filedata) && $filedata['remoteSource']!='heurist'){
+
+			mysql__update('recUploadedFiles','ulf_ID='.$file_id,
+				array(
+				'ulf_OrigFileName' => ($filedata['origName']!=null ?$filedata['origName']:'none'),
+				'ulf_UploaderUGrpID' => get_user_id(),
+				'ulf_Added' => date('Y-m-d H:i:s'),
+				'ulf_MimeExt ' => $filedata['ext'],
+				//'ulf_FileSizeKB' => $file['fileSize'],
+				//'ulf_Description' => $file['fileSize'],
+				'ulf_ExternalFileReference' => $filedata['remoteURL'],
+				'ulf_RemoteSource' => $filedata['remoteSource'],
+				'ulf_MediaType' => $filedata['mediaType'])
+				);
+
+		}
+	}else{
+
+		if(!array_key_exists('remoteURL', $filedata) || $filedata['remoteURL']==null || $filedata['remoteURL']==""){
+			return null;
+		}
+
+		//2. find duplication (the same url)
+		if(array_key_exists('remoteSource', $filedata) && $filedata['remoteSource']!='heurist'){
+			$res = mysql_query('select ulf_ID from recUploadedFiles '.
+				'where ulf_ExternalFileReference = "'.addslashes($filedata['remoteURL']).'"');
+
+			if (mysql_num_rows($res) == 1) {
+		    	$row = mysql_fetch_assoc($res);
+		    	$file_id = $row['ulf_ID'];
+		    	return $file_id;
+			}
+		}
+
+		//3. save into  recUploadedFiles
+		$res = mysql__insert('recUploadedFiles', array(
+				'ulf_OrigFileName' => '_none',
+				'ulf_UploaderUGrpID' => get_user_id(),
+				'ulf_Added' => date('Y-m-d H:i:s'),
+				'ulf_MimeExt ' => array_key_exists('ext', $filedata)?$filedata['ext']:NULL,
+				'ulf_FileSizeKB' => 0,
+				'ulf_Description' => NULL,
+				'ulf_ExternalFileReference' => array_key_exists('remoteURL', $filedata)?$filedata['remoteURL']:NULL,
+				'ulf_RemoteSource' => $filedata['remoteSource'],
+				'ulf_MediaType' => $filedata['mediaType'])
+				);
+
+		if (!$res) {
+			return null; //"Error registration remote source  $url into database";
+		}
+
+		$file_id = mysql_insert_id();
+
+		mysql_query('update recUploadedFiles set ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
+
+	}
+
+	//4. returns ulf_ID
+	return $file_id;
+}
+
+/**
+* Returns values from recUploadedFiles for given file ID
+*
+* used in saveURLasFile and getSearchResults
+*
+* @todo to use in renderRecordData
 *
 * @param mixed $fileID
 * @param mixed $needConnect
@@ -208,40 +429,53 @@ function get_uploaded_file_info($fileID, $isnamedarray, $needConnect)
 			mysql_connection_db_overwrite(DATABASE);
 		}
 
+		$res = null;
+
 		$fres = mysql_query(//saw NOTE! these field names match thoses used in HAPI to init an HFile object.
 			"select ulf_ID as id,
 			        ulf_ObfuscatedFileID as nonce,
 			        ulf_OrigFileName as origName,
-			        ulf_FileSizeKB as size,
-			        fxm_MimeType as type,
+			        ulf_FileSizeKB as fileSize,
+			        fxm_MimeType as mimeType,
 			        ulf_Added as date,
 			        ulf_Description as description,
-			        ulf_MimeExt as ext
+			        ulf_MimeExt as ext,
+			        ulf_ExternalFileReference as remoteURL,
+					ulf_RemoteSource as remoteSource,
+					ulf_MediaType as mediaType
+
 			   from recUploadedFiles left join defFileExtToMimetype on ulf_MimeExt = fxm_Extension
 			  where ulf_ID = ".intval($fileID));
 
-		$res = array("file" => mysql_fetch_assoc($fres));
+		if (mysql_num_rows($fres) == 1) {
 
-		$origName = urlencode($res["file"]["origName"]);
-		$res["file"]["URL"] =
-			HEURIST_URL_BASE."records/files/downloadFile.php/".$origName."?".
-				(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["file"]["nonce"];
-		$res["file"]["thumbURL"] =
-			HEURIST_URL_BASE."common/php/resizeImage.php?".
-				(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["file"]["nonce"];
+			$res = array("file" => mysql_fetch_assoc($fres));
+error_log(">>>>>>>>>>>".HEURIST_DBNAME);
+			$origName = urlencode($res["file"]["origName"]);
+			$res["file"]["URL"] =
+				HEURIST_URL_BASE."records/files/downloadFile.php/".$origName."?".
+					(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["file"]["nonce"];
+			$res["file"]["thumbURL"] =
+				HEURIST_URL_BASE."common/php/resizeImage.php?".
+					(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["file"]["nonce"];
 
-		if(!$isnamedarray){
+			if(!$isnamedarray){
 
-			$res = array("file" => array(	// file[0] => id , file [1] => origFileName, etc...
-					$res["file"]["id"],
-					$res["file"]["origName"],
-					$res["file"]["size"],
-					$res["file"]["ext"],
-					$res["file"]["URL"],
-					$res["file"]["thumbURL"],
-					$res["file"]["description"]
-			));
+				$res = array("file" => array(	// file[0] => id , file [1] => origFileName, etc...
+						$res["file"]["id"],
+						$res["file"]["origName"],
+						$res["file"]["fileSize"],
+						$res["file"]["ext"],      //do we need it????
+						$res["file"]["mimeType"],
+						$res["file"]["URL"],
+						$res["file"]["thumbURL"],
+						$res["file"]["description"],
+						$res["file"]["remoteURL"],
+						$res["file"]["remoteSource"],
+						$res["file"]["mediaType"]
+				));
 
+			}
 		}
 /*
 			$res = mysql_query("select * from recUploadedFiles where ulf_ID = $fileID");
@@ -270,7 +504,9 @@ function get_uploaded_file_info($fileID, $isnamedarray, $needConnect)
 }
 
 /**
-* returns thumbail url or empty string
+* Find the appropriate detail type for given record ID
+* and
+* returns thumbnail URL or empty string
 *
 * used in getResultsPageAsync.php and showMap.php
 *
@@ -341,6 +577,18 @@ function getThumbnailURL($recordId){
 	}
 
 	return $thumb_url;
+}
+
+/**
+*  detect if resource is image
+*
+* @param mixed $filedata - see get_uploaded_file_info
+*/
+function is_image($filedata){
+
+	return ($filedata['mediaType'] == 'image' ||
+		$filedata['mimeType'] == 'image/jpeg'  ||  $filedata['mimeType'] == 'image/gif'  ||  $filedata['mimeType'] == 'image/png');
+
 }
 
 ?>

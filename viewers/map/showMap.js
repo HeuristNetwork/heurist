@@ -491,12 +491,12 @@ function ShowMap() {
 			errors='';
 
 		if(isNaN(val) || val < 0){
-			RelBrowser.Mapping.addLayers([]);
+			RelBrowser.Mapping.addLayers([], 0);
 			top.HEURIST.currentQuery_all = top.HEURIST.currentQuery_all.replace(","+currentBackgroundLayer,"");
 			top.HEURIST.currentQuery_sel = top.HEURIST.currentQuery_sel.replace(","+currentBackgroundLayer,"");
 		}else{
 			currentBackgroundLayer = systemAllLayers[val].rec_ID;
-			errors = RelBrowser.Mapping.addLayers([systemAllLayers[val]]);
+			errors = RelBrowser.Mapping.addLayers([systemAllLayers[val]], 1); //and zoom to these layers
 			top.HEURIST.currentQuery_all = top.HEURIST.currentQuery_all + "," + currentBackgroundLayer;
 			top.HEURIST.currentQuery_sel = top.HEURIST.currentQuery_sel + "," + currentBackgroundLayer;
 

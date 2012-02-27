@@ -1,5 +1,4 @@
 <?php
-
 /*<!--
  * filename, brief description, date of creation, by whom
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
@@ -32,8 +31,6 @@
 	or write to the Free Software Foundation,Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 	-->*/
-
-
 /* Save a bibliographic record (create a new one, or update an existing one) */
 
 define('SAVE_URI', 'disabled');
@@ -144,7 +141,8 @@ function updateRecord($bibID) {
 		}
 
 		$bdType = substr($eltName, 5);	// everything after "type:"
-		$bdInputHandler = getInputHandlerForType($bdType);
+
+		$bdInputHandler = getInputHandlerForType($bdType); //returns the particular handler (processor) for given field type
 		foreach ($bibDetails[$eltName] as $eltID => $val) {
 			if (! preg_match("/^bd:\\d+$/", $eltID)) continue;
 
@@ -152,7 +150,10 @@ function updateRecord($bibID) {
 			if (! $bdInputHandler->inputOK($val)) continue;	// faulty input ... ignore
 
 			$bdID = substr($eltID, 3);	// everything after "bd:"
-			$bibDetailUpdates[$bdID] = $bdInputHandler->convertPostToMysql($val);
+			$toadd = $bdInputHandler->convertPostToMysql($val);
+			if ($toadd==null) continue;
+
+			$bibDetailUpdates[$bdID] = $toadd;
 			$bibDetailUpdates[$bdID]["dtl_DetailTypeID"] = $bdType;
 
 			unset($_POST[$eltName][$eltID]);	// remove data from post submission
@@ -228,7 +229,9 @@ function updateRecord($bibID) {
 if (mysql_error()) error_log("error rec update".mysql_error());
 	$updatedRowCount = 0;
 	foreach ($bibDetailUpdates as $bdID => $vals) {
-//	error_log(" in saveRecord update details dtl_ID = $bdID value =".print_r($vals,true));
+
+//error_log(" in saveRecord update details dtl_ID = $bdID value =".print_r($vals,true));
+
 		mysql__update("recDetails", "dtl_ID=$bdID and dtl_RecID=$bibID", $vals);
 		if (mysql_affected_rows() > 0) {
 			++$updatedRowCount;
@@ -238,7 +241,7 @@ if (mysql_error()) error_log("error detail updates".mysql_error());
 
 	$insertedRowCount = 0;
 	foreach ($bibDetailInserts as $vals) {
-//	error_log(" in saveRecord insert details detail =".print_r($vals,true));
+//error_log(" in saveRecord insert details detail =".print_r($vals,true));
 		mysql__insert("recDetails", $vals);
 		if (mysql_affected_rows() > 0) {
 			++$insertedRowCount;
@@ -248,7 +251,7 @@ if (mysql_error()) error_log("error detail inserts".mysql_error());
 
 	$deletedRowCount = 0;
 	if ($bibDetailDeletes) {
-//	error_log(" in saveRecord delete details ".print_r($bibDetailDeletes,true));
+//error_log(" in saveRecord delete details ".print_r($bibDetailDeletes,true));
 		mysql_query("delete from recDetails where dtl_ID in (" . join($bibDetailDeletes, ",") . ") and dtl_RecID=$bibID");
 		if (mysql_affected_rows() > 0) {
 			$deletedRowCount = mysql_affected_rows();
@@ -403,7 +406,7 @@ function getInputHandlerForType($typeID) {
 			"relationtype" => new BibDetailDropdownInput(),
 			"enum" => new BibDetailDropdownInput(),
 			"file" => new BibDetailFileInput(),
-			"urlinclude" => new BibDetailUrlIncludeInput(),
+			"urlinclude" => new BibDetailUrlIncludeInput(), //artem to remove
 			"geo" => new BibDetailGeographicInput(),
 			"separator" => new BibDetailSeparator(),
 			"default" => new BibDetailInput()
@@ -498,10 +501,19 @@ class BibDetailDropdownInput extends BibDetailInput {
 }
 class BibDetailFileInput extends BibDetailInput {
 	function convertPostToMysql($postVal) {
-		return array("dtl_UploadedFileID" => $postVal);
+		//artem
+		if(is_numeric($postVal)){  //this is old way - ulf_ID
+			return array("dtl_UploadedFileID" => $postVal);
+
+		}else{  // new way - $postVal - json string with file data array - structure similar get_uploaded_file_info
+
+			$ulf_ID = register_external($postVal); //in uploadFile.php
+			return ($ulf_ID==null)?null:array("dtl_UploadedFileID" => $ulf_ID);
+		}
 	}
 	function inputOK($postVal) {
-		return preg_match("/\\S/", $postVal);	// has non space characters
+//error_log("FILE:>>>>>>>>>>>".$postVal);
+		return (is_numeric($postVal) || preg_match("/\\S/", $postVal));
 	}
 }
 class BibDetailUrlIncludeInput extends BibDetailInput {

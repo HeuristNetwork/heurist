@@ -14,7 +14,10 @@
 var viewerObject,
 	Hul = top.HEURIST.util,
 	curr_link,
-	URLInput;
+	curr_ext,
+	URLInput,
+	fileUploadInput,
+	_filedata = null;
 
  /**
  * User has uploaded the file - change the url to point to this file and change source and type
@@ -23,7 +26,7 @@ var viewerObject,
  {
 		var rec_url = URLInput.inputs[0]; //document.getElementById("rec_url");
  		rec_url.value = input.link;
- 		onChangeURL(null, input.fileType);
+ 		onChangeURL(null, null);//input.fileType);
  }
 
  /**
@@ -39,6 +42,7 @@ var viewerObject,
 
  		document.getElementById("cbSource").value = oType.source;
  		document.getElementById("cbType").value = oType.type;
+ 		curr_ext = oType.extension;
 
  		showViewer(document.getElementById('preview'), curr_link+'|'+oType.source+'|'+oType.type)
 	}
@@ -70,6 +74,8 @@ function initPage() {
 
 		var fieldValues = [];
 
+
+
 		//toremove
 		var dt = findDetailTypeByType("file"); //top.HEURIST.detailTypes.typedefs[221]['commonFields']; //associated file
 		var rfr = ["File", "File", null, "005", "60", "", "0", null, "optional", "viewable", "open", null, "1", "0", "1",
@@ -82,11 +88,22 @@ function initPage() {
 		if(location.search.length > 1) {
 			top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 
-			var acfg = top.HEURIST.parameters['value'].split('|');
+			_filedata = Hul.expandJsonStructure(top.HEURIST.parameters['value']);
+
+			sUrl    = _filedata.remoteURL?_filedata.remoteURL:_filedata.URL;
+			sType   = _filedata.mediaType;
+			sSource = _filedata.remoteSource;
+
+			if( !Hul.isempty(sUrl) && (Hul.isempty(sSource) || Hul.isempty(sType)) ){
+				var oType = detectSourceAndType(sUrl, _filedata.ext);
+				sType = oType.type;
+				sSource = oType.source;
+			}
+
+			/*var acfg = top.HEURIST.parameters['value'].split('|');
 			if(Hul.isnull(acfg) || acfg.length<1){
 				return;
 			}
-
 			sUrl = acfg[0];
 
 			if(acfg.length<3){
@@ -96,14 +113,14 @@ function initPage() {
 			}else{
 				sSource = acfg[1];
 				sType = acfg[2];
-			}
+			}*/
 		}
 
 		//add file upload component
 		var container = document.getElementById("div_fileupload");
-		var newInput = new top.HEURIST.edit.inputs.BibDetailFileInput("0", dt, rfr, fieldValues, container);
+		fileUploadInput = new top.HEURIST.edit.inputs.BibDetailFileInput("0", dt, rfr, fieldValues, container);
 
-		newInput.onchange = updateURLtoFile;
+		fileUploadInput.onchange = updateURLtoFile;
 
 		//add URL component
 		container = document.getElementById("div_url");
@@ -113,25 +130,70 @@ function initPage() {
 		this.changed = function(){};
 		URLInput.inputs[0].onblur = onChangeURL;
 
+		/*
 		if(Hul.isempty(sSource)){
 			document.getElementById("cbSource").selectedIndex = 0;
 		}else{
 			document.getElementById("cbSource").value = sSource;
 		}
-		if(Hul.isempty(sSource)){
+		if(Hul.isempty(sType)){
 			document.getElementById("cbType").selectedIndex = 0;
 		}else{
 			document.getElementById("cbType").value = sType;
-		}
+		}*/
 
 		if(!Hul.isempty(sUrl)){
-			onChangeURL(null, null);
+			if(Hul.isempty(sSource) || Hul.isempty(sType)) {
+				onChangeURL(null, null);
+			}else{
+ 				curr_link = sUrl;
+ 				document.getElementById("cbSource").value = sSource;
+ 				document.getElementById("cbType").value = sType;
+ 				showViewer(document.getElementById('preview'), curr_link+'|'+sSource+'|'+sType);
+			}
 		}
 
 }
 
 function onApply(){
-	window.close(curr_link, document.getElementById("cbSource").value, document.getElementById("cbType").value);
+/*
+	if(Hul.isempty(_filedata)){ //new
+
+		_filedata = {id:0, remoteURL:curr_link,
+					origName:
+					remoteSource:document.getElementById("cbSource").value,
+					mediaType:document.getElementById("cbType").value };
+
+	}else{
+		_filedata.origName =
+		_filedata.remoteURL = curr_link;
+		_filedata.remoteSource = document.getElementById("cbSource").value;
+		_filedata.mediaType = document.getElementById("cbType").value;
+	}
+
+	_filedata = fileUploadInput.getFileId();
+
+	if(_filedata.remoteSource=='heurist' &&  !Hul.isempty(fileId) ){  //!!!!!
+		//take id from
+		_filedata.id = fileId;
+	}
+*/
+	_filedata = fileUploadInput.getFileData();
+
+	if(Hul.isempty(_filedata)){ //new
+		_filedata = {id:0, remoteURL:curr_link,
+					ext:curr_ext,
+					remoteSource:document.getElementById("cbSource").value,
+					mediaType:document.getElementById("cbType").value };
+	}else{
+		_filedata.remoteURL = curr_link;
+		_filedata.remoteSource = document.getElementById("cbSource").value;
+		_filedata.mediaType = document.getElementById("cbType").value;
+		if(curr_ext) _filedata.ext = curr_ext;
+	}
+
+	var res = top.YAHOO.lang.JSON.stringify(_filedata);
+	window.close( res );//curr_link, document.getElementById("cbSource").value, document.getElementById("cbType").value);
 }
 
 function onCancel(){

@@ -49,7 +49,7 @@ $fileID = upload_file($upload["name"], null, $upload["tmp_name"], $upload["error
 
 if (is_numeric($fileID)) {
 
-	$file = get_uploaded_file_info($fileID, false, false);
+	$file = get_uploaded_file_info($fileID, true, false);
 	print json_format($file);
 
 	mysql_query("commit");

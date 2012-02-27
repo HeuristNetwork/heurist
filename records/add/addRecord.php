@@ -525,7 +525,7 @@ function insert_thumbnail_content($recid, $url){
 		$res = generate_thumbnail($url, false);
 
 		if(!array_key_exists("error", $res)){
-			mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_UploadedFileID) values ('.$recid.','.DT_THUMBNAIL.','.$res['file']['0'].')');
+			mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_UploadedFileID) values ('.$recid.','.DT_THUMBNAIL.','.$res['file']['id'].')');
 		}
 	}
 }
