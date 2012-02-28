@@ -78,7 +78,7 @@ function generate_thumbnail($sURL, $needConnect){
 		}
 
 		$fileID = upload_file("snapshot.jpg", "jpg", $heurist_path, null, $filesize, $sURL, $needConnect);
-error_log("2222>>>>>>>>>>>".HEURIST_DBNAME);
+
 		if (is_numeric($fileID)) {
 			$res = get_uploaded_file_info($fileID, true, $needConnect);
 		}

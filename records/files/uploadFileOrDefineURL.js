@@ -26,7 +26,7 @@ var viewerObject,
  {
 		var rec_url = URLInput.inputs[0]; //document.getElementById("rec_url");
  		rec_url.value = input.link;
- 		onChangeURL(null, null);//input.fileType);
+ 		onChangeURL(null, input.fileType);
  }
 
  /**

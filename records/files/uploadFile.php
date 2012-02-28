@@ -309,8 +309,7 @@ function register_external($filejson)
 {
 	$filedata = json_decode($filejson, true);
 
-//DEBUG
-error_log(">>>>>".print_r($filedata, true));
+//DEBUG error_log(">>>>>".print_r($filedata, true));
 
 	if($filedata==null){
 
@@ -450,7 +449,7 @@ function get_uploaded_file_info($fileID, $isnamedarray, $needConnect)
 		if (mysql_num_rows($fres) == 1) {
 
 			$res = array("file" => mysql_fetch_assoc($fres));
-error_log(">>>>>>>>>>>".HEURIST_DBNAME);
+
 			$origName = urlencode($res["file"]["origName"]);
 			$res["file"]["URL"] =
 				HEURIST_URL_BASE."records/files/downloadFile.php/".$origName."?".
@@ -459,13 +458,13 @@ error_log(">>>>>>>>>>>".HEURIST_DBNAME);
 				HEURIST_URL_BASE."common/php/resizeImage.php?".
 					(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["file"]["nonce"];
 
-			if(!$isnamedarray){
+			if(!$isnamedarray){ //not used anymore
 
 				$res = array("file" => array(	// file[0] => id , file [1] => origFileName, etc...
 						$res["file"]["id"],
 						$res["file"]["origName"],
 						$res["file"]["fileSize"],
-						$res["file"]["ext"],      //do we need it????
+						$res["file"]["ext"],
 						$res["file"]["mimeType"],
 						$res["file"]["URL"],
 						$res["file"]["thumbURL"],

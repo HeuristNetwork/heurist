@@ -840,7 +840,7 @@ top.HEURIST.edit = {
 				origName: fileDetails.file.getOriginalName(),
 				URL: fileDetails.file.getURL(),
 				fileSize: fileDetails.file.getSize(),
-				fileType: fileDetails.file.getType()
+				ext: fileDetails.file.getType()  //extension
 			};
 
 			var b = uploadsDiv.appendChild(this.document.createElement("b"));
@@ -1918,7 +1918,8 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 			if (bdValue.file.nonce) {
 				//not used anymore   @todo - remove
 				link.href = top.HEURIST.basePath+"records/files/downloadFile.php/" + /*encodeURIComponent(bdValue.file.origName)*/
-								"?ulf_ID=" + encodeURIComponent(bdValue.file.nonce);
+								"?ulf_ID=" + encodeURIComponent(bdValue.file.nonce)+
+								(top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:"");
 			} else if (bdValue.file.URL) {
 				link.href = bdValue.file.URL;
 			}
@@ -1947,7 +1948,7 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 		inputDiv.valueElt = hiddenElt;
 		inputDiv.removeImg = removeImg;
 		inputDiv.link = link.href;
-		inputDiv.fileType = bdValue.file.fileType;
+		inputDiv.fileType = bdValue.file.ext;
 		inputDiv.filedata = bdValue.file;
 		inputDiv.className = "file-div";
 

@@ -148,13 +148,13 @@ function getBaseProperties($rec_id, $bkm_ID) {
 	if (@$row["rating"]) {
 		$props['rating'] = $row['rating'];
 	}
-	$props["quickNotes"] = @$row["quickNotes"]? $row["quickNotes"] : "";
+	$props["quickNotes"] = @$row["notes"]? $row["notes"] : "";
 	if ($row['workgroupID']) {
 		$props['workgroupID'] = $row['workgroupID'];
 		$props['workgroup'] = $row['workgroupID']== get_user_id()? $row['name']:$row['workgroup'];
 	}
 	$props['visibility'] = ($row['visibility']?$row['visibility']:'') ;
-//	$props['notes'] = $row['notes']; // saw TODO: add code to get personal woots
+	$props['notes'] = $row['notes']; // saw TODO: add code to get personal woots
 
 	if ($bkm_ID) {
 		// grab the user tags for this bookmark, as a single comma-delimited string

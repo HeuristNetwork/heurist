@@ -493,6 +493,7 @@ function SelectDetailType() {
 								clearTimeout(filterTimeout);
 								setTimeout(_updateFilter, 600);
 							};
+							setTimeout(function(){filterByName.focus();}, 1000);
 
 							filterBySelection1 = Dom.get('inputFilterBySelection1');
 							filterBySelection1.onchange = _updateFilter;

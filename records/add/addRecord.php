@@ -246,11 +246,11 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 	}
 //if no similar url's and recID was -1 then force a new record of rec_rectype supplied
 
-	if (!$rec_id  ||  (@$force_new && $force_new)) {
+	if (!isset($rec_id)  ||  (@$force_new && $force_new)) {
 		$isNewRecID = true;
 		$rt = intval($_REQUEST['rec_rectype']);
 		if (! $rt) {
-			if ( $userDefaultRectype && check_rectype_exist($userDefaultRectype)) {
+			if ( isset($userDefaultRectype) && check_rectype_exist($userDefaultRectype)) {
 				 $_REQUEST['rec_rectype']= $rt = $userDefaultRectype;
 			} else if ($url && defined('RT_INTERNET_BOOKMARK')) {
 				$_REQUEST['rec_rectype']= $rt = RT_INTERNET_BOOKMARK;	/* Internet bookmark */
@@ -318,6 +318,7 @@ if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 							. ' (it may not have been enabled). Please choose the record type from the pulldown '));
 		return;
 	}
+
 	mysql__insert('Records', array('rec_Title' => $_REQUEST['bkmrk_bkmk_title'],
 									'rec_ScratchPad' => $description,
 									'rec_Added' => date('Y-m-d H:i:s'),
@@ -373,6 +374,7 @@ if ($rec_id  &&  ! @$_REQUEST['force_new']) {
 				}
 			}
 			$notesOut = preg_replace("/\n\n+/", "\n", $notesOut);
+
 			mysql_query("update Records set rec_ScratchPad = '" . addslashes($notesOut) . "' where rec_ID = $rec_id");
 
 			insert_woot_content($rec_id, $description);

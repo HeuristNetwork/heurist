@@ -10,7 +10,6 @@
  **/
 
 ?>
-
 <?php
 
 define('SAVE_URI', 'disabled');
@@ -88,22 +87,27 @@ mysql_connection_db_overwrite(DATABASE);
 
 			}
 		}
-		print '<p><b>' . $bibs . '</b> records records, <b>' . $rels . '</b> relationships and <b>' . $bkmks . '</b> associated bookmarks deleted</p>' . "\n";
+		print '<p><b>' . $bibs . '</b> records, <b>' . $rels . '</b> relationships and <b>' . $bkmks . '</b> associated bookmarks deleted</p>' . "\n";
 		print '<input type="button" value="close" onclick="top.location.reload(true);">' . "\n";
 	} else {
 ?>
 
 <form method="post">
-
 <?php
-
+	$bib_ids = explode(',', $_REQUEST['ids']);
+	if(count($bib_ids)>20){
+?>
+<div style="height:45px;">
+This is a fairly slow process, taking several minutes per 1000 records, please be patient…
+<input class="deleteButton" type="submit" style="color:red !important" value="delete" onClick="return confirm('ARE YOU SURE YOU WISH TO DELETE THE SELECTED RECORDS, ALONG WITH ALL ASSOCIATED BOOKMARKS?')  &&  confirm('REALLY REALLY SURE?');">
+</div>
+<?php
+	}
 	if (is_admin()) {
 		print '<a style="float: right;" target=_new href=../../admin/verification/combineDuplicateRecords.php?bib_ids='.$_REQUEST['ids'].'>fix duplicates</a>';
 	} else {
 		print '<p style="color:#BB0000; font-size:12px; line-height:14px"><strong>NOTE:</strong>You may not delete records you did not create, or records that have been bookmarked by other users</p><div class="separator_row"></div>';
 	}
-
-	$bib_ids = explode(',', $_REQUEST['ids']);
 	foreach ($bib_ids as $rec_id) {
 		if (! $rec_id) continue;
 		$res = mysql_query('select rec_Title,rec_AddedByUGrpID from Records where rec_ID = ' . $rec_id);
@@ -144,7 +148,10 @@ mysql_connection_db_overwrite(DATABASE);
 ?>
 
 <input type="hidden" name="delete" value="1">
+<div style="padding-top:5px;">
+<?=(count($bib_ids)>20)?"This is a fairly slow process, taking several minutes per 1000 records, please be patient…":""?>
 <input class="deleteButton" type="submit" style="color:red !important" value="delete" onClick="return confirm('ARE YOU SURE YOU WISH TO DELETE THE SELECTED RECORDS, ALONG WITH ALL ASSOCIATED BOOKMARKS?')  &&  confirm('REALLY REALLY SURE?');">
+</div>
 
 </form>
 

@@ -2113,7 +2113,7 @@ var HFile = function(sm, id, originalName, size, type, URL, thumbnailURL, descri
 	var _id = id;
 	var _originalName = originalName;
 	var _size = size;
-	var _type = type;
+	var _type = type;  //extension
 	var _URL = URL;
 	var _thumbnailURL = thumbnailURL;
 	var _description = description;
@@ -3254,7 +3254,7 @@ var HeuristScholarDB = new HStorageManager();
 			// Oh, wow ... this really isn't the best way to protect the HFile constructor.  FIXME
 			that.initFile = makeDetail;
 			// HFile (sm, id, originalName, size, type, URL, thumbnailURL, description)
-			val = new HFile(that, parseInt(f.id), f.origName, f.size, f.type, f.URL, f.thumbURL, f.description);
+			val = new HFile(that, parseInt(f.id), f.origName, f.size, f.ext, f.URL, f.thumbURL, f.description);
 			delete that.initFile;
 			return val;
 
@@ -3523,7 +3523,7 @@ var HeuristScholarDB = new HStorageManager();
 				// each file's details are returned as an array:
 				// id, name, size, mime-type, download URL, thumbnail URL
 				d = response.files[i];
-				newFile = new HFile(that, parseInt(d[0]), d[1], d[2], d[3], d[4], d[5], d[6]);
+				newFile = new HFile(that, parseInt(d[0]), d[1], d[2], d[3], d[4], d[5], d[6], '');
 				results.push(newFile);
 			}
 			delete that.initFile;
@@ -3676,7 +3676,7 @@ var HeuristScholarDB = new HStorageManager();
 				//sm, id, originalName, size, type, URL, thumbnailURL, description
 				that.initFile = newIframe.onload;
 				//ARTEM newFile = new HFile(that, parseInt(d[0]), d[1], d[2], d[3], d[4], d[5], d[6]);
-				newFile = new HFile(that, parseInt(d.id), d.origName, d.fileSize, d.mimeType, d.URL, d.thumbURL, d.description);
+				newFile = new HFile(that, parseInt(d.id), d.origName, d.fileSize, d.ext, d.URL, d.thumbURL, d.description);
 				delete that.initFile;
 
 				if (saver.onsave) { callback = function() { saver.onsave(fileInput, newFile); }; }

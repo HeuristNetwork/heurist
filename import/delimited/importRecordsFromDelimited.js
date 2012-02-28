@@ -405,7 +405,7 @@ FlexImport = (function () {
 			opt.value = null; opt.innerHTML = "do not import";
 
 			var grp = sel.appendChild(document.createElement("optgroup"));
-			grp.label = " ";
+			grp.label = (navigator.userAgent.indexOf('Firefox')>0)?" ":"---";
 
 			_addOpt(sel, "tags", "Tag(s)", columnName == "tag(s)");
 			_addOpt(sel, "wgTags", "Workgroup Tag(s)", columnName == "workgroup tag(s)");
@@ -441,7 +441,7 @@ FlexImport = (function () {
 			});
 
 			grp = sel.appendChild(document.createElement("optgroup"));
-			grp.label = " ";
+			grp.label = (navigator.userAgent.indexOf('Firefox')>0)?" ":"---";
 
 			//create options for select
 			for (d = 0; d < alist.length; ++d) {
