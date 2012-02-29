@@ -78,7 +78,7 @@ $prefs = array(
 	"loadRelatedOnSearch" => "true", // by default do not load related records, can be set in Preferences dialogue
 	"defaultRecentPointerSearch" => "true", // when searching for pointers to records, show recent records by default
 	"defaultMyBookmarksSearch" => "true", // hitting Enter will do a My Bookmarks search
-	"autoSelectRelated" => "true", // autoSelect related records
+	"autoSelectRelated" => "false", // autoSelect related records
 	"autoDeselectOtherLevels" => "true" // auto deselct other level before selecting current.
 );
 

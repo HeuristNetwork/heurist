@@ -2063,12 +2063,12 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.setReadonly = functio
 	}
 };
 top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.geoValueToDescription = function(geo) {
-	function R(x) { return Math.round(x*100000)/100000 ; }
+	function R(x) { return Math.round(x*10000000)/10000000 ; }
 
 	var geoSummary;
 	var geoType = geo.type.charAt(0).toUpperCase() + geo.type.substring(1);
 	if (geo.type == "point") {
-		geoSummary = R(geo.x)+", "+R(geo.y);
+		geoSummary = R(geo.x)+",  "+R(geo.y);
 	} else {
 		geoSummary = "X "+R(geo.minX)+" - "+R(geo.maxX)+"  Y "+R(geo.minY)+" - "+R(geo.maxY);
 	}

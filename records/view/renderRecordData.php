@@ -244,7 +244,7 @@ function print_private_details($bib) {
 					"3"=>"***",
 					"4"=>"****",
 					"5"=>"*****");
-	$rating_label = $ratings[$bkmk['bkm_Rating']];
+	$rating_label = @$ratings[@$bkmk['bkm_Rating']?$bkmk['bkm_Rating']:"0"];
 	?>
 
 	<div class=detailRow>
@@ -486,10 +486,10 @@ function print_private_details($bib) {
 					}
 
 					if ($type == "Point")
-						$bd["val"] = "<b>Point</b> ".round($minX,5).",".round($minY,5);
+						$bd["val"] = "<b>Point</b> ".round($minX,7).", ".round($minY,7);
 					else
-						$bd['val'] = "<b>$type</b> X ".round($minX,5).",".round($maxX,5).
-                                                 " Y ".round($minY,5).",".round($maxY,5);
+						$bd['val'] = "<b>$type</b> X ".round($minX,7).", ".round($maxX,7).
+                                                 " Y ".round($minY,7).", ".round($maxY,7);
 				} else {
 					$bd['val'] = output_chunker($bd['val']);
 				}

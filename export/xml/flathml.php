@@ -799,7 +799,7 @@ function outputRecordStub($recordStub) {
 
 function makeFileContentNode($file){
 	$filename = $file['URL'];
-	if ($file['type'] ==="application/xml"){// && file_exists($filename)) {
+	if ($file['mimeType'] ==="application/xml"){// && file_exists($filename)) {
 		$xml = simplexml_load_file($filename);
 		// convert to xml
 		if (!$xml) {
@@ -835,8 +835,8 @@ function makeFileContentNode($file){
 			}
 			if ($content) {
 			makeTag('content',$attrs,$content,true,false);
+			}
 		}
-	}
 	}
 }
 
@@ -866,12 +866,24 @@ function outputDetail($dt, $value, $rt, $recInfos, $depth=0, $outputStub, $paren
 					makeTag('id', null, $file['id']);
 					makeTag('nonce', null, $file['nonce']);
 					makeTag('origName', null, $file['origName']);
-					makeTag('type', null, $file['type']);
-					makeTag('size', array('units' => 'kB'), $file['size']);
-					makeTag('date', null, $file['date']);
-					makeTag('description', null, $file['description']);
-					makeTag('url', null, $file['URL']);
-					makeTag('thumbURL', null, $file['thumbURL']);
+					if (@$file['mimeType']) {
+						makeTag('mimeType', null, $file['mimeType']);
+					}
+					if (@$file['fileSize']) {
+						makeTag('fileSize', array('units' => 'kB'), $file['fileSize']);
+					}
+					if (@$file['date']) {
+						makeTag('date', null, $file['date']);
+					}
+					if (@$file['description']) {
+						makeTag('description', null, $file['description']);
+					}
+					if (@$file['URL']) {
+						makeTag('url', null, $file['URL']);
+					}
+					if (@$file['thumbURL']) {
+						makeTag('thumbURL', null, $file['thumbURL']);
+					}
 					if ($INCLUDE_FILE_CONTENT) {
 						makeFileContentNode($file);
 					}
