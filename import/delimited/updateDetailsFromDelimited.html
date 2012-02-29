@@ -92,18 +92,18 @@
 					var newIDs = [];
 					// flatten the recordID
 					if ( !isNaN(fields[i+recStart][0]) && !(recIDs.indexOf(fields[i+recStart][0])>=0)) { //if new value
-						recIDs.push(fields[i+recStart][0]); //store the Record ID
+						recIDs.push(parseInt(fields[i+recStart][0])); //store the Record ID
 					}
 					if (!isNaN(fields[i+recStart][1]) && HDetailManager.getDetailTypeById(parseInt(fields[i+recStart][1])).getVariety()==HVariety.REFERENCE) { // updating a reference detail load referenced object
 						var vals = fields[i+recStart][2].split("|");
 						for(v in vals){
 							if (!isNaN(vals[v]) && !(recIDs.indexOf(vals[v])>=0)){
-								recIDs.push(vals[v]);
+								recIDs.push(parseInt(vals[v]));
 							}
 						}
 						// case - replace existing value with a new value - redirecting a reference
 						if (fields[i+recStart][3] && !isNaN(fields[i+recStart][3]) && !(recIDs.indexOf(fields[i+recStart][3])>=0)){
-							recIDs.push(fields[i+recStart][3]);
+							recIDs.push(parseInt(fields[i+recStart][3]));
 						}
 					}
 					if ((newIDs.length + recIDs.length)>recChunkSize){ // increased from 1000 by Ian 24/10/11
