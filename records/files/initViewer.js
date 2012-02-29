@@ -213,9 +213,16 @@ function clearViewer(container){
 //
 function showViewer(container, url_and_cfg){
 
-	   var acfg = url_and_cfg.split('|');
+	   var acfg;
+
+	   if(typeof url_and_cfg == 'string'){ ///old way
+	   		acfg = url_and_cfg.split('|');
+	   }else{
+	   	   acfg = url_and_cfg;
+	   }
+
 	   if(Hul.isnull(acfg) || acfg.length<1){
-	   	   return;
+				return;
 	   }
 
 	   var sUrl = acfg[0];

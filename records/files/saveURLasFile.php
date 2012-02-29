@@ -80,7 +80,7 @@ function generate_thumbnail($sURL, $needConnect){
 		$fileID = upload_file("snapshot.jpg", "jpg", $heurist_path, null, $filesize, $sURL, $needConnect);
 
 		if (is_numeric($fileID)) {
-			$res = get_uploaded_file_info($fileID, true, $needConnect);
+			$res = get_uploaded_file_info($fileID, $needConnect);
 		}
 		else {
 			$res = getError("File upload was interrupted. ".$fileID);

@@ -20,6 +20,8 @@
 
 require_once(dirname(__FILE__).'/../connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/dbMySqlWrappers.php');
+require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
+
 
 if (! @$_REQUEST['w']  &&  ! @$_REQUEST['h']  &&  ! @$_REQUEST['maxw']  &&  ! @$_REQUEST['maxh']) {
 	$standard_thumb = true;
@@ -51,9 +53,10 @@ if (array_key_exists('ulf_ID', $_REQUEST))
 		echo $file['ulf_Thumbnail'];
 		return;
 	}
-
-	$type_source = $file['ulf_RemoteSource'];
-	$type_media = $file['ulf_MediaType'];
+//error_log(">>>>>>>>>".$file['ulf_Parameters']);
+	$fileparams = parseParameters($file['ulf_Parameters']);
+	$type_media	 = (array_key_exists('mediatype', $fileparams)) ?$fileparams['mediatype']:null;
+	$type_source = (array_key_exists('source', $fileparams)) ?$fileparams['source']:null;
 
 	if ($type_source==null || $type_source=='heurist') {
 
@@ -95,7 +98,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
 			break;
 		}
 
-	}else if($type_media=='image'){ //$type_source=='arbitrary' &&
+	}else if($type_media=='image'){ //$type_source=='generic' &&
 
 		//@todo for image services (panoramio, flikr) take thumbnails directly
 

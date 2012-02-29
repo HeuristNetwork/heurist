@@ -226,7 +226,7 @@ function loadRecordDetails(&$record) {
 
 			case "file":
 
-			$detailValue = get_uploaded_file_info($rd["dtl_UploadedFileID"], true, false);
+			$detailValue = get_uploaded_file_info($rd["dtl_UploadedFileID"], false);
 
 			break;
 

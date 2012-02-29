@@ -195,7 +195,7 @@ function getAllRecordDetails($rec_id) {
 
 		if ($row["dtl_UploadedFileID"]) {
 
-			$fileres = get_uploaded_file_info($row["dtl_UploadedFileID"], true, false);
+			$fileres = get_uploaded_file_info($row["dtl_UploadedFileID"], false);
 			if($fileres){
 				$detail["file"] = $fileres["file"];
 			}

@@ -423,7 +423,7 @@ function print_private_details($bib) {
 
 //@todo ARTEM - to be to get_uploaded_file_info. All works with recUploadedFiles MUST be centralized in uploadFile.php
 
-				$filedata = get_uploaded_file_info($bd['dtl_UploadedFileID'], true, false);
+				$filedata = get_uploaded_file_info($bd['dtl_UploadedFileID'], false);
 				if($filedata){
 
 					$filedata = $filedata['file'];

@@ -4,9 +4,9 @@
  * uploadFile.php
  *
  * set of functions
- * 		upload_file - copies temp file to HEURIST_UPLOAD_DIR and registger in recUploadedFiles
+ * 		upload_file - copies temp file to HEURIST_UPLOAD_DIR and register in recUploadedFiles
  *
- * 		register_file - registger the file on the server in recUploadedFiles (used in import)
+ * 		register_file - registger the existing file on the server in recUploadedFiles (used in import)
  *
  * 		get_uploaded_file_info  - returns values from recUploadedFiles for given file ID
  *
@@ -62,23 +62,18 @@ function upload_file($name, $mimetypeExt, $tmp_name, $error, $size, $description
 		mysql_connection_db_overwrite(DATABASE);
 	}
 
+	$mimeType = null;
+
 	if($mimetypeExt){ //check extension
-		$res = mysql_query('select fxm_Extension from defFileExtToMimetype where fxm_Extension = "'.addslashes($mimetypeExt).'"');
-		if (mysql_num_rows($res) == 1) {
-			$mimetype = mysql_fetch_assoc($res);
-			$mimetypeExt = $mimetype['fxm_Extension'];
-		}
+		$mimetypeExt = strtolower($mimetypeExt);
+		$mimeType = findMimeType($mimetypeExt);
 	}
 
 	if (!$mimetypeExt && preg_match('/\\.([^.]+)$/', $name, $matches))
 	{	//find the extention
-
-		$extension = $matches[1];
-		$res = mysql_query('select * from defFileExtToMimetype where fxm_Extension = "'.addslashes($extension).'"');
-		if (mysql_num_rows($res) == 1) {
-			$mimetype = mysql_fetch_assoc($res);
-			$mimetypeExt = $mimetype['fxm_Extension'];
-		}
+		$extension = strtolower($matches[1]);
+		$mimeType = findMimeType($extension);
+		if($mimeType) $mimetypeExt = $extension;
 	}
 
 	if ($size && $size < 1024) {
@@ -94,8 +89,7 @@ function upload_file($name, $mimetypeExt, $tmp_name, $error, $size, $description
 			'ulf_FileSizeKB' => $file_size,
 			'ulf_Description' => $description? $description : NULL,
 			'ulf_FilePath' => HEURIST_UPLOAD_DIR,
-			'ulf_RemoteSource' => 'heurist',
-			'ulf_MediaType' => getMediaType($mimetypeExt))
+			'ulf_Parameters' => "mediatype=".getMediaType($mimeType, $mimetypeExt))
 			);
 
 	if (! $res) {
@@ -162,17 +156,14 @@ function register_file($fullname, $description, $needConnect) {
 	//get folder, extension and filename
 	$path_parts = pathinfo($fullname);
 	$dirname = $path_parts['dirname']."/";
-	$mimetypeExt = $path_parts['extension'];
+	$mimetypeExt = strtolower($path_parts['extension']);
 	//$filename = $path_parts['filename'];
 	$filename = $path_parts['basename'];
 
 	if($mimetypeExt){ //check extension
-	    $res = mysql_query('select fxm_Extension from defFileExtToMimetype where fxm_Extension = "'.addslashes($mimetypeExt).'"');
-	    if (mysql_num_rows($res) == 1) {
-		$mimetype = mysql_fetch_assoc($res);
-		$mimetypeExt = $mimetype['fxm_Extension'];
-	    }else{
-		return "Error: unsupported extension ".$mimetypeExt;
+		$mimeType = findMimeType($mimetypeExt);
+		if($mimeType==null){
+			return "Error: unsupported extension ".$mimetypeExt;
 	    }
 	}
 
@@ -201,8 +192,7 @@ function register_file($fullname, $description, $needConnect) {
 				'ulf_Description' => $description? $description : NULL,
 				'ulf_FilePath' => $dirname,
 				'ulf_FileName' => $filename,
-				'ulf_RemoteSource' => 'heurist',
-				'ulf_MediaType' => getMediaType($mimetypeExt))
+				'ulf_Parameters' => "mediatype=".getMediaType($mimeType, $mimetypeExt))
 				);
 
 	    if (!$res) {
@@ -230,7 +220,7 @@ function register_file($fullname, $description, $needConnect) {
 */
 function detectSourceAndType($url){
 
-	$source = 'arbitrary';
+	$source = 'generic';
 	$type = 'unknown';
 
 	//1. detect source
@@ -263,11 +253,14 @@ function detectSourceAndType($url){
 				$extension = pathinfo($path, PATHINFO_EXTENSION);
 			}
 		}
+
+		$mimeType = null;
 		if($extension){
 			$extension = strtolower($extension);
+			$mimeType = findMimeType($extension);
 		}
 
-		$type = getMediaType($extension);
+		$type = getMediaType($mimeType, $extension);
 	}
 
 	return array($source, $type, $extension);
@@ -276,9 +269,11 @@ function detectSourceAndType($url){
 /**
 * detect media type
 *
+* @todo - use mimetype to detect proper mediaType
+*
 * @param mixed $extension
 */
-function getMediaType($extension){
+function getMediaType($mimeType, $extension){
 
 		if($extension=="jpg" || $extension=="jpeg" || $extension=="png" || $extension=="gif"){
 			$type = 'image';
@@ -293,9 +288,29 @@ function getMediaType($extension){
 		}else if($extension=="swf"){
 			$type = 'flash';
 		}else{
-			$type = NULL;
+			$type = null;
 		}
 		return $type;
+}
+
+/**
+* verifies the extension and returns mimetype
+*
+* @param mixed $mimetypeExt
+* @return null if extension is not found and mimeType if it is found
+*/
+function findMimeType($mimetypeExt)
+{
+		$fres = mysql_query('select fxm_Extension, fxm_Mimetype from defFileExtToMimetype where fxm_Extension = "'.addslashes($mimetypeExt).'"');
+		if (mysql_num_rows($fres) == 1) {
+			$res = mysql_fetch_assoc($fres);
+			$mimeType = $res['fxm_Mimetype'];
+			if($mimeType==null){
+				$mimeType=='';
+			}
+		}
+
+		return $mimeType;
 }
 
 
@@ -311,7 +326,7 @@ function register_external($filejson)
 
 //DEBUG error_log(">>>>>".print_r($filedata, true));
 
-	if($filedata==null){
+	if($filedata==null){ //can't parse - assume this is URL - old way
 
 		$filedata = array();
 		$url = $filejson;
@@ -332,17 +347,11 @@ function register_external($filejson)
 	   			$filedata['ext'] = $acfg[3];
 			}
 		}
-/*
-			        ulf_OrigFileName as origName,
-			        ulf_FileSizeKB as fileSize,
-			        fxm_MimeType as mimeType,
-			        ulf_Added as date,
-			        ulf_Description as description,
-			        ulf_MimeExt as ext,
-			        ulf_ExternalFileReference as remoteURL,
-					ulf_RemoteSource as remoteSource,
-					ulf_MediaType as mediaType
-*/
+	}
+
+	$fileparameters = "mediatype=".$filedata['mediaType'];
+	if($filedata['remoteSource'] && $filedata['remoteSource']!='heurist'){ // && $filedata['remoteSource']!='generic'){
+		$fileparameters	= $fileparameters."|source=".$filedata['remoteSource'];
 	}
 
 	//if id is defined
@@ -354,15 +363,14 @@ function register_external($filejson)
 
 			mysql__update('recUploadedFiles','ulf_ID='.$file_id,
 				array(
-				'ulf_OrigFileName' => ($filedata['origName']!=null ?$filedata['origName']:'none'),
+				'ulf_OrigFileName' => ($filedata['origName']!=null ?$filedata['origName']:'_remote'),
 				'ulf_UploaderUGrpID' => get_user_id(),
 				'ulf_Added' => date('Y-m-d H:i:s'),
 				'ulf_MimeExt ' => $filedata['ext'],
 				//'ulf_FileSizeKB' => $file['fileSize'],
 				//'ulf_Description' => $file['fileSize'],
 				'ulf_ExternalFileReference' => $filedata['remoteURL'],
-				'ulf_RemoteSource' => $filedata['remoteSource'],
-				'ulf_MediaType' => $filedata['mediaType'])
+				'ulf_Parameters' => $fileparameters)
 				);
 
 		}
@@ -386,15 +394,14 @@ function register_external($filejson)
 
 		//3. save into  recUploadedFiles
 		$res = mysql__insert('recUploadedFiles', array(
-				'ulf_OrigFileName' => '_none',
+				'ulf_OrigFileName' => '_remote',
 				'ulf_UploaderUGrpID' => get_user_id(),
 				'ulf_Added' => date('Y-m-d H:i:s'),
 				'ulf_MimeExt ' => array_key_exists('ext', $filedata)?$filedata['ext']:NULL,
 				'ulf_FileSizeKB' => 0,
 				'ulf_Description' => NULL,
 				'ulf_ExternalFileReference' => array_key_exists('remoteURL', $filedata)?$filedata['remoteURL']:NULL,
-				'ulf_RemoteSource' => $filedata['remoteSource'],
-				'ulf_MediaType' => $filedata['mediaType'])
+				'ulf_Parameters' => $fileparameters)
 				);
 
 		if (!$res) {
@@ -421,7 +428,7 @@ function register_external($filejson)
 * @param mixed $fileID
 * @param mixed $needConnect
 */
-function get_uploaded_file_info($fileID, $isnamedarray, $needConnect)
+function get_uploaded_file_info($fileID, $needConnect)
 {
 
 		if($needConnect){
@@ -431,7 +438,7 @@ function get_uploaded_file_info($fileID, $isnamedarray, $needConnect)
 		$res = null;
 
 		$fres = mysql_query(//saw NOTE! these field names match thoses used in HAPI to init an HFile object.
-			"select ulf_ID as id,
+			'select ulf_ID as id,
 			        ulf_ObfuscatedFileID as nonce,
 			        ulf_OrigFileName as origName,
 			        ulf_FileSizeKB as fileSize,
@@ -440,66 +447,70 @@ function get_uploaded_file_info($fileID, $isnamedarray, $needConnect)
 			        ulf_Description as description,
 			        ulf_MimeExt as ext,
 			        ulf_ExternalFileReference as remoteURL,
-					ulf_RemoteSource as remoteSource,
-					ulf_MediaType as mediaType
+					ulf_Parameters as parameters,
+					concat(ulf_FilePath,ulf_FileName) as fullpath,
+					ulf_PreferredSource as prefsource
 
 			   from recUploadedFiles left join defFileExtToMimetype on ulf_MimeExt = fxm_Extension
-			  where ulf_ID = ".intval($fileID));
+			  where '.(is_numeric($fileID)
+			  	?'ulf_ID = '.intval($fileID)
+			  	:'ulf_ObfuscatedFileID = "'.addslashes($fileID).'"') );
 
 		if (mysql_num_rows($fres) == 1) {
 
-			$res = array("file" => mysql_fetch_assoc($fres));
+			$res = mysql_fetch_assoc($fres);
 
-			$origName = urlencode($res["file"]["origName"]);
-			$res["file"]["URL"] =
-				HEURIST_URL_BASE."records/files/downloadFile.php/".$origName."?".
-					(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["file"]["nonce"];
-			$res["file"]["thumbURL"] =
+			$origName = urlencode($res["origName"]);
+
+			$res["thumbURL"] =
 				HEURIST_URL_BASE."common/php/resizeImage.php?".
-					(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["file"]["nonce"];
+					(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["nonce"];
 
-			if(!$isnamedarray){ //not used anymore
 
-				$res = array("file" => array(	// file[0] => id , file [1] => origFileName, etc...
-						$res["file"]["id"],
-						$res["file"]["origName"],
-						$res["file"]["fileSize"],
-						$res["file"]["ext"],
-						$res["file"]["mimeType"],
-						$res["file"]["URL"],
-						$res["file"]["thumbURL"],
-						$res["file"]["description"],
-						$res["file"]["remoteURL"],
-						$res["file"]["remoteSource"],
-						$res["file"]["mediaType"]
-				));
-
+			if($res["remoteURL"]==null || $res["prefsource"]=="local"){
+				$res["URL"] =
+					HEURIST_URL_BASE."records/files/downloadFile.php/".$origName."?".
+						(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["nonce"];
+			}else{
+				$res["URL"] = $res["remoteURL"];
 			}
-		}
-/*
-			$res = mysql_query("select * from recUploadedFiles where ulf_ID = $fileID");
-			$file = mysql_fetch_assoc($res);
-			$origName = urlencode($file["ulf_OrigFileName"]);
 
-			$thumbnailURL = HEURIST_URL_BASE."common/php/resizeImage.php?".
-				(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=" . $file["ulf_ObfuscatedFileID"];
-			$URL = HEURIST_URL_BASE."records/files/downloadFile.php/".$origName."?".
-				(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=" . $file["ulf_ObfuscatedFileID"];
-		//error_log("url = ". $URL);
-			$res = array("file" => array(	// file[0] => id , file [1] => origFileName, etc...
-					$file["ulf_ID"],
-					$file["ulf_OrigFileName"],
-					$file["ulf_FileSizeKB"],
-					$file["ulf_MimeExt"],
-					$URL,
-					$thumbnailURL,
-					$file["ulf_Description"]
-			));
+			$params = parseParameters($res["parameters"]);
+			$res["mediaType"] =	 (array_key_exists('mediatype', $params))?$params['mediatype']:null;
+			$res["remoteSource"] = (array_key_exists('source', $params))?$params['source']:null;
+
+			//
+			//@todo - add special parameters for specific sources and media types
+			//
+
+
+			unset($res["parameters"]);
+			//unset($res["remoteURL"]);
+			//unset($res["fullpath"]);
+			unset($res["prefsource"]);
+
+			$res = array("file" => $res);
 		}
-*/
 
 	return $res;
 
+}
+
+/**
+* put your comment there...
+*
+* @param mixed $params
+*/
+function parseParameters($params){
+	$op = array();
+	if($params){
+		$pairs = explode('|', $params);
+    	foreach ($pairs as $pair) {
+        	list($k, $v) = explode("=", $pair); //array_map("urldecode", explode("=", $pair));
+        	$op[$k] = $v;
+		}
+	}
+	return $op;
 }
 
 /**

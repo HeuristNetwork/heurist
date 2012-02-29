@@ -152,6 +152,7 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.defineURL = function(
 		callback: function(fileJSON) {
 
 			if(!HEURIST.util.isnull(fileJSON)){
+				//var filedata = (typeof fileJSON == 'String')?HEURIST.util.expandJsonStructure(fileJSON) :fileJSON;
 				var filedata = HEURIST.util.expandJsonStructure(fileJSON);
 				if(filedata){
 					element.input.setURL(element, ((filedata.remoteSource=='heurist')?filedata.origName:filedata.remoteURL), fileJSON);

@@ -44,7 +44,7 @@ var viewerObject,
  		document.getElementById("cbType").value = oType.type;
  		curr_ext = oType.extension;
 
- 		showViewer(document.getElementById('preview'), curr_link+'|'+oType.source+'|'+oType.type)
+ 		showViewer(document.getElementById('preview'), [curr_link, oType.source, oType.type])
 	}
  }
 
@@ -149,7 +149,7 @@ function initPage() {
  				curr_link = sUrl;
  				document.getElementById("cbSource").value = sSource;
  				document.getElementById("cbType").value = sType;
- 				showViewer(document.getElementById('preview'), curr_link+'|'+sSource+'|'+sType);
+ 				showViewer(document.getElementById('preview'), [curr_link, sSource, sType]);
 			}
 		}
 
