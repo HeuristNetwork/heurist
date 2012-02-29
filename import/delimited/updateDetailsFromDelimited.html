@@ -161,7 +161,7 @@
 				for (j = recStart; j <recEnd ; j++) {
 					if(!isNaN(fields[j][0])) { //record input
 						//get the HRecord to be updated
-						recHR = HeuristScholarDB.getRecord(fields[j][0]);
+						recHR = HeuristScholarDB.getRecord(parseInt(fields[j][0]));
 
 						if (! recHR) {
 							continue;
