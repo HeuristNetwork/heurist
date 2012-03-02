@@ -341,7 +341,8 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 				}
 			}
 			switch ($typeVarieties[$bdtID]) {
-				case "integer":
+				case "integer":  // these shoudl no logner exist, retained for backward compatibility
+                    // bug: non-integer valeus are not saved
 					if (intval($val)  ||  $val == "0") $bdVal = intval($val);
 					else { if ($bdID) array_push($updateIDs, $bdID); continue; }
 					break;
@@ -352,12 +353,13 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 					break;
 
 				case "freetext": case "blocktext":
-				case "date": case "year": case "urlinclude":
+				case "date": 
+                case "year": case "urlinclude": // these shoudl no logner exist, retained for backward compatibility
 					if (! $val) { if ($bdID) array_push($updateIDs, $bdID); continue; }
 					$bdVal = "'" . addslashes($val) . "'";
 					break;
 
-				case "boolean":
+				case "boolean":  // these shoudl no logner exist, retained for backward compatibility
 					$bdVal = ($val && $val != "0")? "'true'" : "'false'";
 					break;
 

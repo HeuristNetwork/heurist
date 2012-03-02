@@ -839,16 +839,16 @@ function EditRecStructure() {
 			if(Hul.isnull(recDetTypes[dty_ID])){
 				var arrs = detTypes[dty_ID].commonFields;
 				//add new detail type
-
-				var def_width = 60;
+                // note that integer, boolean, year, urlinclude can no longer be created but are retained for backward compatibility
+				var def_width = 40;
 				var dt_type = arrs[fi.dty_Type];
 				if(dt_type === "file" || dt_type === "geo") {
-                    def_width = 40;
+                    def_width = 0; // 0 indicates length adapts to content of field
 				}else if (dt_type === "enum" || dt_type === "relationtype") {
-                    def_width = 20;
+                    def_width = 0; // was 20, as for previous the length adapts to the length of labels
 				}else if (dt_type === "integer" || dt_type === "float" || dt_type === "year" ||
 							dt_type === "date" || dt_type === "calculated") {
-                    def_width = 10;
+                    def_width = 15;
 				}else if (dt_type === "boolean") {
                     def_width = 4; break;
 				}

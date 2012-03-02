@@ -397,19 +397,20 @@ function getInputHandlerForType($typeID) {
 		$speciesToInput = array(
 			"freetext" => new BibDetailFreetextInput(),
 			"blocktext" => new BibDetailBlocktextInput(),
-			"integer" => new BibDetailIntegerInput(),
-			"year" => new BibDetailYearInput(),
 			"date" => new BibDetailDateInput(),
-			"boolean" => new BibDetailBooleanInput(),
 			"resource" => new BibDetailResourceInput(),
 			"float" => new BibDetailFloatInput(),
-			"relationtype" => new BibDetailDropdownInput(),
 			"enum" => new BibDetailDropdownInput(),
 			"file" => new BibDetailFileInput(),
-			"urlinclude" => new BibDetailUrlIncludeInput(), //artem to remove
 			"geo" => new BibDetailGeographicInput(),
 			"separator" => new BibDetailSeparator(),
-			"default" => new BibDetailInput()
+			"default" => new BibDetailInput(),
+            "relationtype" => new BibDetailDropdownInput(),
+            // Note: The following types can no logner be defined, but are incldued here for backward compatibility
+            "boolean" => new BibDetailBooleanInput(),
+            "integer" => new BibDetailIntegerInput(),
+            "year" => new BibDetailYearInput(),
+            "urlinclude" => new BibDetailUrlIncludeInput() //artem to remove
 		);
 	}
 

@@ -599,17 +599,8 @@ top.HEURIST.edit = {
 			case "blocktext":
 				newInput = new top.HEURIST.edit.inputs.BibDetailBlocktextInput(recID, dt, rfr, fieldValues, container);
 				break;
-			case "integer":
-				newInput = new top.HEURIST.edit.inputs.BibDetailIntegerInput(recID, dt, rfr, fieldValues, container);
-				break;
-			case "year":
-				newInput = new top.HEURIST.edit.inputs.BibDetailYearInput(recID, dt, rfr, fieldValues, container);
-				break;
 			case "date":
 				newInput = new top.HEURIST.edit.inputs.BibDetailTemporalInput(recID, dt, rfr, fieldValues, container);
-				break;
-			case "boolean":
-				newInput = new top.HEURIST.edit.inputs.BibDetailBooleanInput(recID, dt, rfr, fieldValues, container);
 				break;
 			case "resource":
 				newInput = new top.HEURIST.edit.inputs.BibDetailResourceInput(recID, dt, rfr, fieldValues, container);
@@ -625,9 +616,6 @@ top.HEURIST.edit = {
 				newInput = new top.HEURIST.edit.inputs.BibDetailURLincludeInput(recID, dt, rfr, fieldValues, container);
 				//newInput = new top.HEURIST.edit.inputs.BibDetailFileInput(recID, dt, rfr, fieldValues, container);
 				break;
-			case "urlinclude": //ARTEM - toremove
-				newInput = new top.HEURIST.edit.inputs.BibDetailURLincludeInput(recID, dt, rfr, fieldValues, container);
-				break;
 			case "geo":
 				newInput = new top.HEURIST.edit.inputs.BibDetailGeographicInput(recID, dt, rfr, fieldValues, container);
 				break;
@@ -640,6 +628,19 @@ top.HEURIST.edit = {
 				}
 				newInput = new top.HEURIST.edit.inputs.BibDetailRelationMarker(recID, dt, rfr, [], container);
 				break;
+            // Note: The following types can no longer be created, but are incldued here for backward compatibility
+            case "integer":
+                newInput = new top.HEURIST.edit.inputs.BibDetailIntegerInput(recID, dt, rfr, fieldValues, container);
+                break;
+            case "year":
+                newInput = new top.HEURIST.edit.inputs.BibDetailYearInput(recID, dt, rfr, fieldValues, container);
+                break;
+            case "boolean":
+                newInput = new top.HEURIST.edit.inputs.BibDetailBooleanInput(recID, dt, rfr, fieldValues, container);
+                break;
+            case "urlinclude": //ARTEM - toremove
+                newInput = new top.HEURIST.edit.inputs.BibDetailURLincludeInput(recID, dt, rfr, fieldValues, container);
+                break;
 			case "fieldsetmarker": // note we make sure that values are ignored for a fieldsetmarker as it is a container for a set of details
 				newInput = new top.HEURIST.edit.inputs.BibDetailFieldSetMarker(recID, dt, rfr, [], container);
 				break;

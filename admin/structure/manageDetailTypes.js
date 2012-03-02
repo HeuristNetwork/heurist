@@ -372,21 +372,22 @@ function DetailTypeManager() {
 					var lookup = {
 						"enum" : "Enumerated (terms)",
 						"relationtype" : "Relationship type (terms)",
-						"integer" : "Numeric - integer",
-						"float" : "Numeric - decimal",
+						"float" : "Numeric (integer/decimal)",
 						"date" : "Date / temporal",
-						"year" : "Year (no mm-dd)",
 						"file" : "File - local or uploaded",
-						"urlinclude" : "File/URL of include content",
 						"geo" : "Geospatial object",
 						"freetext" : "Text (single line)",
 						"blocktext" : "Memo (multi-line)",
 						"resource" : "Record pointer",
 						"relmarker" : "Relationship marker",
-						"boolean" : "Boolean (true/false)",
 						"separator" : "Separator (no data)",
 						"calculated" : "Calculated value",
-						"fieldsetmarker" : "Field set marker"
+                        // Note: the following types are no longer deinable but may be required for backward compatibility
+						"fieldsetmarker" : "Field set marker",
+                        "integer" : "Numeric - integer",
+                        "year" : "Year (no mm-dd)",
+                        "urlinclude" : "File/URL of include content",
+                        "boolean" : "Boolean (true/false)"
 					};
 					elLiner.innerHTML = lookup[type];
 				}

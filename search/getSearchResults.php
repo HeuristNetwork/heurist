@@ -215,12 +215,12 @@ function loadRecordDetails(&$record) {
 		$detailValue = null;
 
 		switch ($rd["dty_Type"]) {
-			case "urlinclude":
 			case "freetext": case "blocktext":
-			case "integer": case "float": case "boolean":
-			case "date": case "year":
+            case "float": 
+			case "date": 
 			case "enum":
 			case "relationtype":
+            case "integer": case "boolean": case "year": case "urlinclude": // these shoudl no logner exist, retained for backward compatibility
 			$detailValue = $rd["dtl_Value"];
 			break;
 
