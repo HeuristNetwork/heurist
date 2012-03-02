@@ -24,17 +24,40 @@ mysql_connection_db_select(DATABASE);
 
 if (! @$_REQUEST['ulf_ID']) return; // nothing returned if no ulf_ID parameter
 
-$filedata = get_uploaded_file_info($_REQUEST['ulf_ID'], false);
+$filedata = get_uploaded_file_info_internal($_REQUEST['ulf_ID'], false);
 if($filedata==null) return; // nothing returned if parameter does not match one and only one row
-
-$filedata = $filedata['file'];
 
 $type_source = $filedata['remoteSource'];
 $type_media = $filedata['mediaType'];
 
-if ($type_source==null || $type_source=='heurist' || $filedata['remoteURL']==null)
-{
+$isplayer = (array_key_exists('player',$_REQUEST) &&  $_REQUEST['player']=='yes');
 
+
+error_log(">>>>>".$type_media."   ".$isplayer);
+
+if($isplayer){
+
+	if($type_source=='youtube')
+	{
+//error_log(">>>>>".linkifyYouTubeURLs($filedata['URL'], ''));
+		print linkifyYouTubeURLs($filedata['URL'], null); // $size
+	}
+	else if($type_media=='video')
+	{
+		print createVideoTag($filedata['URL'], $filedata['mimeType'], ''); // $size
+	}
+	else if($type_media=='audio')
+	{
+error_log(">>>>>".createAudioTag($filedata['URL'], $filedata['mimeType']));
+
+		print createAudioTag($filedata['URL'], $filedata['mimeType']);
+	}
+
+	exit;
+}
+
+if ($type_source==null || $type_source=='heurist')  //Local/Uploaded resources
+{
 	// set the actual filename. Up to 18/11/11 this is jsut a bare nubmer corresponding with ulf_ID
 	// from 18/11/11, it is a disambiguated concatenation of 'ulf_' plus ulf_id plus ulfFileName
 	if ($filedata['fullpath']) {
@@ -46,12 +69,11 @@ if ($type_source==null || $type_source=='heurist' || $filedata['remoteURL']==nul
 	$filename = str_replace('/../', '/', $filename);  // not sure why this is being taken out, pre 18/11/11, unlikely to be needed any more
 	$filename = str_replace('//', '/', $filename);
 //DEBUG error_log("filename = ".$filename);
+}
 
-	if(!file_exists($filename) && $filedata['remoteURL']!=null){
+if(isset($filename) && file_exists($filename)){ //local resources
 
-		header('Location: '.$filedata['remoteURL']);
-
-	}else if(false)
+	if(false)
 	{
 	/*
 		todo: waht is all this and when was it removed? Could it be useful for the furture. ? check with Artem, may be work related to kmls mid Nov 2011
@@ -90,6 +112,8 @@ if ($type_source==null || $type_source=='heurist' || $filedata['remoteURL']==nul
 	*/
 	}else{
 
+error_log(">>>>mineTYPE=".$filedata['mimeType']);
+
 		// set the mime type, set to binary if mime type unknown
 		if ($filedata['mimeType']) {
 			header('Content-type: ' .$filedata['mimeType']);
@@ -100,20 +124,40 @@ if ($type_source==null || $type_source=='heurist' || $filedata['remoteURL']==nul
 		readfile($filename);
 	}
 
-}else if($type_media=='image'){ //Remote resources
+}else if ($filedata['URL']!=null){  //Remote resources - just redirect
 
-	header('Location: '.$filedata['remoteURL']);
-
-}else if($type_source=='youtube'){
-
-//DEBUG	error_log(">>>>>>".linkifyYouTubeURLs($filedata['remoteURL'], ''));
-
-	//return linkifyYouTubeURLs($filedata['remoteURL'], '');// $size
-	header('Location: '.$filedata['remoteURL']);
+		header('Location: '.$filedata['URL']);
 }
 
-// Linkify youtube URLs which are not already links.
+/**
+* create HTML5 video tag
+*
+* @param mixed $url
+* @param mixed $size
+*/
+function createVideoTag($url, $mimeType, $size) {
+// width="320" height="240"
+ 	return '<video '.$size.' controls="controls"><source src="'.$url.'" type="'.$mimeType.'"/>Your browser does not support the video element.</video>';
+}
+
+function createAudioTag($url, $mimeType) {
+// width="320" height="240"
+ 	return '<audio controls="controls"><source src="'.$url.'" type="'.$mimeType.'"/>Your browser does not support the audio element.</audio>';
+}
+
+/**
+* Linkify youtube URLs which are not already links.
+*
+* @param mixed $text
+* @param mixed $size
+* @return mixed
+*/
 function linkifyYouTubeURLs($text, $size) {
+
+	if($size==null){
+		$size = 'width="420" height="345"';
+	}
+
     $text = preg_replace('~
         # Match non-linked youtube URL in the wild. (Rev:20111012)
         https?://         # Required scheme. Either http or https.

@@ -348,15 +348,17 @@ top.HEURIST.edit = {
 		if (personalWindow  &&  ! personalWindow.tagCheckDone  &&  personalWindow.document.getElementById("tags").value.replace(/^\s+|\s+$/g, "") == "") {
 			// personal tags field is empty -- popup the add tags dialogue
 			personalWindow.tagCheckDone = true;
-			top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "records/tags/addTagsPopup.html?no-tags", { callback: function(tags) {
-				if (tags) {
-					personalWindow.document.getElementById("tags").value = tags;
-					top.HEURIST.edit.changed("personal");
-				}
-				setTimeout(function() { top.HEURIST.edit.save(); }, 0);
-			} });
 
-			return;
+			if(top.HEURIST.util.getDisplayPreference('tagging-popup') !== "false"){
+				top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "records/tags/addTagsPopup.html?no-tags", { callback: function(tags) {
+					if (tags) {
+						personalWindow.document.getElementById("tags").value = tags;
+						top.HEURIST.edit.changed("personal");
+					}
+					setTimeout(function() { top.HEURIST.edit.save(); }, 0);
+					} });
+				return;
+			}
 		}
 
 
@@ -881,7 +883,7 @@ top.HEURIST.edit = {
 		inputs.push(URLInput);
 
 		var order = top.HEURIST.rectypes.dtDisplayOrder[rectypeID];
-
+		if(order){
 		var i, l = order.length;
 		for (i = 0; i < l; ++i) {
 			var dtID = order[i];
@@ -891,6 +893,7 @@ top.HEURIST.edit = {
 			if (newInput) {
 				inputs.push(newInput);
 			}
+		}
 		}
 
 		return inputs;
@@ -2090,13 +2093,13 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.wktValueToDescription
 	}
 
 	if (typeCode == "p") {
-		return { type: "Point", summary: Math.round(X[0],5)+", "+Math.round(Y[0],5)};
+		return { type: "Point", summary: X[0].toFixed(5)+", "+Y[0].toFixed(5) };
 	}
 	else if (typeCode == "l") {
 /*       DELETE THIS
         return { type: "Path", summary: "X,Y ("+Math.round(X.shift()*100000)/100000+","+Math.round(Y.shift()*100000)/100000+") - ("+Math.round(X.pop()*100000)/100000+","+Math.round(Y.pop()*100000)/100000+")" };
 */
-        return { type: "Path", summary: "X,Y ("+Math.round(X.shift(),5)+","+Math.round(Y.shift(),5)+") - ("+Math.round(X.pop(),5)+","+Math.round(Y.pop(),5)+")" };
+        return { type: "Path", summary: "X,Y ("+ X.shift().toFixed(5)+","+Y.shift().toFixed(5)+") - ("+X.pop().toFixed(5)+","+Y.pop().toFixed(5)+")" };
 	}
 	else {
 		X.sort();
@@ -2112,7 +2115,7 @@ top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.wktValueToDescription
 		var minY = Y[0];
 		var maxX = X.pop();
 		var maxY = Y.pop();
-		return { type: type, summary: "X "+Math.round(minX,5)+","+Math.round(maxX,5)+" Y "+Math.round(minY,5)+","+Math.round(maxY,5) };
+		return { type: type, summary: "X "+minX.toFixed(5)+","+maxX.toFixed(5)+" Y "+minY.toFixed(5)+","+maxY.toFixed(5) };
 	}
 };
 top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput = function(bdValue) {

@@ -3254,7 +3254,7 @@ var HeuristScholarDB = new HStorageManager();
 			// Oh, wow ... this really isn't the best way to protect the HFile constructor.  FIXME
 			that.initFile = makeDetail;
 			// HFile (sm, id, originalName, size, type, URL, thumbnailURL, description)
-			val = new HFile(that, parseInt(f.id), f.origName, f.size, f.ext, f.URL, f.thumbURL, f.description);
+			val = new HFile(that, parseInt(f.id), f.origName, f.fileSize, f.ext, f.URL, f.thumbURL, f.description);
 			delete that.initFile;
 			return val;
 
@@ -3506,7 +3506,7 @@ var HeuristScholarDB = new HStorageManager();
 		var results;
 		var callback, errorString;
 		var newFile;
-		var d;
+		var f;
 
 		if (! response) {
 			errorString = "internal Heurist error";
@@ -3522,8 +3522,9 @@ var HeuristScholarDB = new HStorageManager();
 			for (i=0; i < response.files.length; ++i) {
 				// each file's details are returned as an array:
 				// id, name, size, mime-type, download URL, thumbnail URL
-				d = response.files[i];
-				newFile = new HFile(that, parseInt(d[0]), d[1], d[2], d[3], d[4], d[5], d[6], '');
+				f = response.files[i];
+				//newFile = new HFile(that, parseInt(d[0]), d[1], d[2], d[3], d[4], d[5], d[6], '');
+				newFile = new HFile(that, parseInt(f.id), f.origName, f.fileSize, f.ext, f.URL, f.thumbURL, f.description);
 				results.push(newFile);
 			}
 			delete that.initFile;

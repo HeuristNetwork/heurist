@@ -430,6 +430,20 @@ function register_external($filejson)
 */
 function get_uploaded_file_info($fileID, $needConnect)
 {
+	$res = get_uploaded_file_info_internal($fileID, $needConnect);
+	if($res){
+		unset($res["parameters"]);
+		//unset($res["remoteURL"]);
+		unset($res["fullpath"]);
+		unset($res["prefsource"]);
+
+		$res = array("file" => $res);
+	}
+	return $res;
+}
+
+function get_uploaded_file_info_internal($fileID, $needConnect)
+{
 
 		if($needConnect){
 			mysql_connection_db_overwrite(DATABASE);
@@ -467,29 +481,28 @@ function get_uploaded_file_info($fileID, $needConnect)
 					(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["nonce"];
 
 
-			if($res["remoteURL"]==null || $res["prefsource"]=="local"){
-				$res["URL"] =
-					HEURIST_URL_BASE."records/files/downloadFile.php/".$origName."?".
+			$downloadURL = HEURIST_URL_BASE."records/files/downloadFile.php/".$origName."?".
 						(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["nonce"];
-			}else{
+
+			if($res["remoteURL"]!=null || $res["prefsource"]=="external") {
 				$res["URL"] = $res["remoteURL"];
+			}else{
+				$res["URL"] = $downloadURL;
 			}
 
 			$params = parseParameters($res["parameters"]);
-			$res["mediaType"] =	 (array_key_exists('mediatype', $params))?$params['mediatype']:null;
+			$res["mediaType"] =	(array_key_exists('mediatype', $params))?$params['mediatype']:null;
 			$res["remoteSource"] = (array_key_exists('source', $params))?$params['source']:null;
 
 			//
 			//@todo - add special parameters for specific sources and media types
+			// QUESTION - store it in database? Or create on-fly??
 			//
+			if($res["remoteSource"]=="youtube" || $res["mediaType"]=="video" || $res["mediaType"]=="audio"){
+				$res["playerURL"] =	$downloadURL."&player=yes";
+			}
 
-
-			unset($res["parameters"]);
-			//unset($res["remoteURL"]);
-			//unset($res["fullpath"]);
-			unset($res["prefsource"]);
-
-			$res = array("file" => $res);
+			//$res = array("file" => $res);
 		}
 
 	return $res;

@@ -50,6 +50,43 @@ function zoomInOut(obj,thumb,url) {
 		currentImg.parentNode.className = "thumb_image";
 	}
 }
+
+function showPlayer(obj, id, url) {
+
+	var currentImg = obj;
+
+	if (currentImg.parentNode.className != "fullSize"){  //thumb to player
+		currentImg.style.display = 'none';
+		currentImg.parentNode.className = "fullSize";
+		//add content to player div
+
+		top.HEURIST.util.sendRequest(url, function(xhr) {
+			var obj = xhr.responseText;
+//alert('!!!!'+obj);
+			if (obj){
+				var  elem = document.getElementById('player'+id);
+				elem.innerHTML = obj;
+				elem.style.display = 'block';
+				elem = document.getElementById('lnk'+id);
+				elem.style.display = 'block';
+			}
+		}, null);
+
+	}
+}
+function hidePlayer(id) {
+	var  elem = document.getElementById('player'+id);
+	elem.innerHTML = '';
+	elem.style.display = 'none';
+	elem = document.getElementById('lnk'+id);
+	elem.style.display = 'none';
+
+	elem = document.getElementById('img'+id);
+	elem.parentNode.className = "thumb_image";
+	elem.style.display = 'block';
+}
+
+
 function start_roll_open() {
 		window.roll_open_id = setInterval(roll_open, 100);
 }
@@ -244,6 +281,7 @@ function print_private_details($bib) {
 					"3"=>"***",
 					"4"=>"****",
 					"5"=>"*****");
+
 	$rating_label = @$ratings[@$bkmk['bkm_Rating']?$bkmk['bkm_Rating']:"0"];
 	?>
 
@@ -343,14 +381,14 @@ function print_private_details($bib) {
 
 		while ($bd = mysql_fetch_assoc($bds_res)) {
 
-			if ($bd['dty_ID'] == 603) {
+			if ($bd['dty_ID'] == 603) { //DT_FULL_IMAG_URL
 				array_push($thumbs, array(
 					'url' => $bd['val'],
 					'thumb' => HEURIST_SITE_PATH.'common/php/resizeImage.php?db='.HEURIST_DBNAME.'&file_url='.$bd['val']
 				));
 			}
 
-			if ($bd['dty_Type'] == 'urlinclude') {
+			if ($bd['dty_Type'] == 'urlinclude') { //to remove
 
 				$bd['val'] = '<div id="preview'.$bd['dty_ID'].'" class="urlinclude" style="border:none red 1px;width:100%;height:300px;"><input type="hidden" value="'.$bd['val'].'"></div>';
 
@@ -419,27 +457,32 @@ function print_private_details($bib) {
 				$res = mysql_query('select rec_Title from Records where rec_ID='.intval($bd['val']));
 				$row = mysql_fetch_row($res);
 				$bd['val'] = '<a target="_new" href="'.HEURIST_SITE_PATH.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['val'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row[0]).'</a>';
-			} else if ($bd['dty_Type'] == 'file'  &&  $bd['dtl_UploadedFileID']) {
+			}
+			else if ($bd['dty_Type'] == 'file'  &&  $bd['dtl_UploadedFileID']) {
 
-//@todo ARTEM - to be to get_uploaded_file_info. All works with recUploadedFiles MUST be centralized in uploadFile.php
-
+				//All works with recUploadedFiles MUST be centralized in uploadFile.php
 				$filedata = get_uploaded_file_info($bd['dtl_UploadedFileID'], false);
+
 				if($filedata){
 
 					$filedata = $filedata['file'];
 
 					//add to thumbnail list
-					if (is_image($filedata) || $filedata['remoteSource']=='youtube'){
+					$isplayer = (array_key_exists('playerURL', $filedata) && $filedata['playerURL']);
+					if (is_image($filedata) || $isplayer)
+					{
 						array_push($thumbs, array(
-							'url' => $filedata['URL'],
+							'id' => $filedata['id'],
+							'url' => $filedata['URL'],   //download
 							'thumb' => $filedata['thumbURL'],
-							'source' => $filedata['remoteSource']
+							'player' => $isplayer?$filedata['playerURL']:null  //link to generate player html
 						));
 					}
-					if($filedata['remoteURL']){ //remote resource
-						$bd['val'] = '<a target="_surf" href="'.htmlspecialchars($filedata['remoteURL']).'"><img src="'.HEURIST_SITE_PATH.'common/images/external_link_16x16.gif">'.htmlspecialchars($filedata['remoteURL']).'</a>';
-					}else{ //uploaded file
-						$bd['val'] = '<a target="_surf" href="'.htmlspecialchars($filedata['URL']).'"><img src="'.HEURIST_SITE_PATH.'common/images/external_link_16x16.gif">'.htmlspecialchars($filedata['origName']).'</a> [' .htmlspecialchars($filedata['fileSize']) . 'kB]';
+
+					if($filedata['URL']==$filedata['remoteURL']){ //remote resource
+						$bd['val'] = '<a target="_surf" href="'.htmlspecialchars($filedata['URL']).'"><img src="'.HEURIST_SITE_PATH.'common/images/external_link_16x16.gif">'.htmlspecialchars($filedata['URL']).'</a>';
+					}else{
+						$bd['val'] = '<a target="_surf" href="'.htmlspecialchars($filedata['URL']).'"><img src="'.HEURIST_SITE_PATH.'common/images/external_link_16x16.gif">'.htmlspecialchars($filedata['origName']).'</a> '.($filedata['fileSize']>0?'[' .htmlspecialchars($filedata['fileSize']) . 'kB]':'');
 					}
 				}
 
@@ -507,8 +550,17 @@ function print_private_details($bib) {
 <?php
 	foreach ($thumbs as $thumb) {
 		print '<div class=thumb_image>';
-		print '<img src="'.htmlspecialchars($thumb['thumb']).'" onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($thumb['url']) .'\')">';
-		print '<br/><div class=download_link><a href="' . htmlspecialchars($thumb['url']) . '" target=_surf class="image_tool">DOWNLOAD</a></div>';
+		if($thumb['player']){
+			print '<img id="img'.$thumb['id'].'" src="'.htmlspecialchars($thumb['thumb']).'" onClick="showPlayer(this,'.$thumb['id'].',\''. htmlspecialchars($thumb['player']) .'\')">';
+			print '<div id="player'.$thumb['id'].'" style="min-height:240px;min-width:320px;display:none;"></div>';
+		}else{
+			print '<img src="'.htmlspecialchars($thumb['thumb']).'" onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($thumb['url']) .'\')">';
+		}
+		print '<br/><div class="download_link">';
+		if($thumb['player']){
+			print '<a id="lnk'.$thumb['id'].'" href="#" style="display:none;" onclick="hidePlayer('.$thumb['id'].')">CLOSE</a>&nbsp;';
+		}
+		print '<a href="' . htmlspecialchars($thumb['url']) . '" target=_surf class="image_tool">DOWNLOAD</a></div>';
 		print '</div>';
 	};
 ?>

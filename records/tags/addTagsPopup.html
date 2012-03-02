@@ -89,6 +89,9 @@ table { margin-top: 10px; }
   <td colspan=2 align=right><b class=prompt><a href="../../help/tags.html" onclick="top.HEURIST.util.popupURL(top, href); return false;">More about tags</a></b></td>
  </tr>
 </table>
+<div  style="position:absolute;bottom:20px;font-size: 85%;">
+<input type="checkbox" id="cbPrefToggleOff" checked="checked" onclick="onTooglePopup(event)"/>Prompt for tags on data addition (you can turn this popup back on in user preferences)
+</div>
 <script>
 if (location.search.match(/no-tags/))	// only show the no-tags row if requested
 	document.getElementById("no-tags").style.display = "";
@@ -128,6 +131,10 @@ function addTagLink(tag, parentNode) {
 		newLink.appendChild(document.createTextNode(tag));
 
 	parentNode.appendChild(newLink);
+}
+
+function onTooglePopup(event){
+	top.HEURIST.util.setDisplayPreference('tagging-popup', event.target.checked?"true":"false");
 }
 
 var alphasort = function(a,b) { a = a.toLowerCase(); b = b.toLowerCase(); return (a < b)? -1 : (a > b)? 1 : 0; };

@@ -226,6 +226,18 @@ function EditRecStructure() {
 			}
 			];
 
+			//special formatter
+			var myRowFormatter = function(elTr, oRecord) {
+				var val1 = oRecord.getData('rst_NonOwnerVisibility');
+				var val2 = oRecord.getData('rst_RequirementType');
+				if (val1==='hidden' || val2==='forbidden') {
+					Dom.addClass(elTr, 'gray');
+				}else{
+					Dom.removeClass(elTr, 'gray');
+				}
+				return true;
+			};
+
 			//create datatable
 			_myDataTable = new YAHOO.widget.RowExpansionDataTable(
 			"tableContainer",
@@ -233,6 +245,7 @@ function EditRecStructure() {
 			myDataSource,
 			//this is box of expandable record
 			{	sortedBy:{key:'rst_DisplayOrder', dir:YAHOO.widget.DataTable.CLASS_ASC},
+				formatRow: myRowFormatter,
 				rowExpansionTemplate :
 				function ( obj ) {
 					var rst_ID = obj.data.getData('rst_ID');
@@ -771,6 +784,13 @@ function EditRecStructure() {
 					//hide all, required - once
 					edt.parentNode.parentNode.style.display = "none";
 			}
+
+			//hide width for some field types
+			if(fieldnames[k] === "rst_DisplayWidth" && (rst_type === "enum" || rst_type === "file" || rst_type === "geo" || rst_type === "resource") ){
+					edt.parentNode.parentNode.style.display = "none";
+			}
+
+
 			}
 		}//for
 
@@ -842,12 +862,11 @@ function EditRecStructure() {
                 // note that integer, boolean, year, urlinclude can no longer be created but are retained for backward compatibility
 				var def_width = 40;
 				var dt_type = arrs[fi.dty_Type];
-				if(dt_type === "file" || dt_type === "geo") {
-                    def_width = 0; // 0 indicates length adapts to content of field
-				}else if (dt_type === "enum" || dt_type === "relationtype") {
-                    def_width = 0; // was 20, as for previous the length adapts to the length of labels
-				}else if (dt_type === "integer" || dt_type === "float" || dt_type === "year" ||
-							dt_type === "date" || dt_type === "calculated") {
+
+				if(dt_type === "enum" || dt_type === "file" || dt_type === "geo" || dt_type === "resource" || dt_type === "relationtype") {
+                    def_width = 0;
+				}else if (dt_type === "date" || dt_type === "integer" || dt_type === "float" || dt_type === "year" ||
+							dt_type === "calculated") {
                     def_width = 15;
 				}else if (dt_type === "boolean") {
                     def_width = 4; break;

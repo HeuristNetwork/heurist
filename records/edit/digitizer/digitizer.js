@@ -944,20 +944,21 @@ function addpolyShapelistener() {
 }
 // Clear current Map
 function clearMap(){
-	if(editing == true) stopediting();
-	if(polyShape) polyShape.setMap(null); // polyline or polygon
-	if(outerShape) outerShape.setMap(null);
-	if(rectangle) rectangle.setMap(null);
-	if(circle) circle.setMap(null);
-	if(drawnShapes.length > 0) {
-		for(var i = 0; i < drawnShapes.length; i++) {
-			drawnShapes[i].setMap(null);
-		}
-	}
-	plmcur = 0;
-	newstart();
-	placemarks = [];
-	createplacemarkobject();
+    if(editing == true) stopediting();
+    if(polyShape) polyShape.setMap(null); // polyline or polygon
+    if(outerShape) outerShape.setMap(null);
+    if(rectangle) rectangle.setMap(null);
+    if(circle) circle.setMap(null);
+    if(drawnShapes.length > 0) {
+        for(var i = 0; i < drawnShapes.length; i++) {
+            drawnShapes[i].setMap(null);
+        }
+    }
+    plmcur = 0;
+    newstart();
+    placemarks = [];
+    createplacemarkobject();
+    markerShape = null;
 }
 function newstart() {
 	polyPoints = [];
@@ -1407,16 +1408,16 @@ function showKML() {
 //
 //
 function searchAddress(address) {
-	geocoder.geocode({'address': address}, function(results, status) {
-		if (status == google.maps.GeocoderStatus.OK) {
-			var pos = results[0].geometry.location;
-			map.setCenter(pos);
-			//artem if(directionsYes == 1) drawDirections(pos);
-			if(toolID == 5) drawMarkers(pos);
-		} else {
-			alert("Geocode was not successful for the following reason: " + status);
-		}
-	});
+    geocoder.geocode({'address': address}, function(results, status) {
+        if (status == google.maps.GeocoderStatus.OK) {
+            var pos = results[0].geometry.location;
+            map.setCenter(pos);
+            //artem if(directionsYes == 1) drawDirections(pos);
+            if(toolID == 5 && markerShape==null) drawMarkers(pos);
+        } else {
+            alert("Geocode was not successful for the following reason: " + status);
+        }
+    });
 }
 
 function activateDirections() {
@@ -2070,8 +2071,12 @@ function closeWithValue() {
 	switch (toolID) {
 		case 5: //"point":
 		type = "p";
-		var point = markerShape.getPosition();
-		value = "POINT("+r(point.lng())+" "+r(point.lat())+")";
+		if(markerShape){
+			var point = markerShape.getPosition();
+			value = "POINT("+r(point.lng())+" "+r(point.lat())+")";
+		}else{
+			value = null;
+		}
 		break;
 
 		case 3: //"rectangle":

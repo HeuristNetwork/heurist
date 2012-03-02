@@ -79,7 +79,8 @@ $prefs = array(
 	"defaultRecentPointerSearch" => "true", // when searching for pointers to records, show recent records by default
 	"defaultMyBookmarksSearch" => "true", // hitting Enter will do a My Bookmarks search
 	"autoSelectRelated" => "false", // autoSelect related records
-	"autoDeselectOtherLevels" => "true" // auto deselct other level before selecting current.
+	"autoDeselectOtherLevels" => "true", // auto deselct other level before selecting current.
+	"tagging-popup" => "true"
 );
 
 foreach (get_group_ids() as $gid) {

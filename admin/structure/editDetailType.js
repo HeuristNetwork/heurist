@@ -653,6 +653,17 @@ function DetailTypeEditor() {
 		var el = Dom.get("dty_Type"); //e.target;
 		var isInitialCall = (e===null);
 
+		//prevent setting outdated types for new field type
+		if(!isInitialCall && (el.value==="relationtype" || el.value==="year" || el.value==="boolean")){
+			alert('You selected an outdated type. It is not allowed anymore');
+			if(that.keepType){
+				el.value = that.keepType;
+			}else{
+				el.selectedIndex = 0;
+			}
+			return;
+		}
+
 		Dom.get("pnl_relmarker").style.display = "none";
 		Dom.get("pnl_enum").style.display = "none";
 		Dom.get("pnl_fieldsetmarker").style.display = "none";

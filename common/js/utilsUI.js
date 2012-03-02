@@ -53,7 +53,12 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 	},
 
 	setDocumentTitle: function() {
-		document.title = "HEURIST" + top.HEURIST.VERSION + " - "+ top.HEURIST.database.name;
+		//was till 2012/03/02 document.title = "HEURIST" + top.HEURIST.VERSION + " - "+ top.HEURIST.database.name;
+		if(top.HEURIST.database.name){
+			document.title = top.HEURIST.database.name+" [Heurist Vsn 3]"; // + top.HEURIST.VERSION + "]"+ ;
+		}else{
+			document.title = "HEURIST " + top.HEURIST.VERSION;
+		}
 	},
 
 	/* see README.style for comments on the autosize functions */

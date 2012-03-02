@@ -43,7 +43,7 @@
 						<td style="width: 40px; text-align: right;"><b>Find</b>&nbsp;</td>
 						<td style="padding: 2px 5px 5px 5px;">
 							<div style="width: 98%;" class="searchInput">
-								<div><input autocomplete=off type=text name=q id=q onChange="top.HEURIST.util.setDisplayPreference('record-search-string', this.value,window);" style="padding: 1px 18px 1px 2px; margin: 0; width: 100%;"></div>
+								<div><input autocomplete=off type=text name=q id=q onChange="top.HEURIST.util.setDisplayPreference('record-search-string', this.value);" style="padding: 1px 18px 1px 2px; margin: 0; width: 100%;"></div>
 								<div id=help-div  style="width: 250px;">Enter search (partial match), hit [enter] or click <img src="../../common/images/tiny-magglass.gif" onClick="document.forms[0].submit()" style="vertical-align: middle;"></div>
 							</div>
 						</td>
@@ -176,7 +176,7 @@
 								lastSelected.push(bibID);	// and put it on top of list
 							}
 
-							top.HEURIST.util.setDisplayPreference("record-search-last", lastSelected.join(","),window);
+							top.HEURIST.util.setDisplayPreference("record-search-last", lastSelected.join(","));
 
 							///close and window and sent result
 							window.close(bibID, bibTitle);
@@ -206,12 +206,12 @@
 					case "r-recent":
 					case "r-all":
 						if (top.HEURIST.util.getDisplayPreference('record-search-scope') != txt){
-							top.HEURIST.util.setDisplayPreference('record-search-scope', txt,window);
+							top.HEURIST.util.setDisplayPreference('record-search-scope', txt);
 						}
 						break;
 					case "record-search-type":
 						if (top.HEURIST.util.getDisplayPreference('record-search-type') != t){
-							top.HEURIST.util.setDisplayPreference('record-search-type', t, window);
+							top.HEURIST.util.setDisplayPreference('record-search-type', t);
 						}
 						break;
 					default:
@@ -263,7 +263,7 @@
 				var lastSearchString = top.HEURIST.util.getDisplayPreference("record-search-string");
 				var searchScope = top.HEURIST.util.getDisplayPreference("record-search-scope");
 				var lastSelected = top.HEURIST.util.getDisplayPreference("record-search-last");
-
+				var lastSearchType = top.HEURIST.util.getDisplayPreference("record-search-type");
 				//set focus
 				window.setTimeout(function() { document.forms[0].elements["q"].focus(); },100);
 
@@ -317,6 +317,7 @@
 					document.forms[0].elements["q"].value = qVal;
 					document.getElementById("r-all").checked = true;
 				}else{//new record
+					document.getElementById("t").value = lastSearchType;
 					document.getElementById(searchScope).checked = true;
 				}
 				document.forms[0].submit();
