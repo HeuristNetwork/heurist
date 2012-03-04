@@ -32,7 +32,7 @@
 -- http://www.phpmyadmin.net
 -- 
 -- Host: localhost
--- Generation Time: Dec 03, 2011 at 09:19 AM
+-- Generation Time: Mar 04, 2012 at 11:04 PM
 -- Server version: 5.0.51
 -- PHP Version: 5.2.3
 -- 
@@ -41,6 +41,7 @@
 
 -- --------------------------------------------------------
 
+                              
 -- 
 -- Table structure for table 'defCalcFunctions'
 -- 
@@ -98,6 +99,7 @@ CREATE TABLE defDetailTypes (
   dty_Type enum('freetext','blocktext','integer','date','year','relmarker','boolean','enum','relationtype','resource','float','file','geo','separator','calculated','fieldsetmarker','urlinclude') NOT NULL COMMENT 'The value-type of this detail type, what sort of data is stored',
   dty_HelpText varchar(255) NOT NULL default 'Please provide a short explanation for the user ...' COMMENT 'The default help text displayed to the user under the field',
   dty_ExtendedDescription varchar(5000) default 'Please provide an extended description for display on rollover ...' COMMENT 'Extended text describing this detail type, for display in rollover',
+  dty_EntryMask text COMMENT 'Data entry mask, use to control decimals ion numeric values, content of text fields etc.',
   dty_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
   dty_OriginatingDBID mediumint(8) unsigned default NULL COMMENT 'Database where this detail type originated, 0 = locally',
   dty_NameInOriginatingDB varchar(255) default NULL COMMENT 'Name used in database where this detail type originated',
@@ -197,7 +199,7 @@ CREATE TABLE defRecStructure (
   rst_MayModify enum('locked','discouraged','open') NOT NULL default 'open' COMMENT 'Extent to which detail may be modified within this record structure',
   rst_OriginatingDBID mediumint(8) unsigned default NULL COMMENT 'Database where this record structure element originated, 0 = locally',
   rst_IDInOriginatingDB smallint(5) unsigned default NULL COMMENT 'ID used in database where this record structure element originated',
-  rst_MaxValues tinyint(3) unsigned NOT NULL default '0' COMMENT 'Maximum number of values per record for this detail, 0 = unlimited',
+  rst_MaxValues tinyint(3) unsigned default NULL COMMENT 'Maximum number of values per record for this detail, NULL = unlimited, 0 = not allowed',
   rst_MinValues tinyint(3) unsigned NOT NULL default '0' COMMENT 'If required, minimum number of values per record for this detail',
   rst_DisplayDetailTypeGroupID tinyint(3) unsigned default NULL COMMENT 'If set, places detail in specified group instead of according to dty_DetailTypeGroup',
   rst_FilteredJsonTermIDTree varchar(500) default NULL COMMENT 'JSON encoded tree of allowed terms, subset of those defined in defDetailType',
@@ -254,6 +256,7 @@ CREATE TABLE defRecTypes (
   rty_ReferenceURL varchar(250) default NULL COMMENT 'A reference URL describing/defining the record type',
   rty_AlternativeRecEditor varchar(63) default NULL COMMENT 'Name or URL of alternative record editor function to be used for this rectype',
   rty_Type enum('normal','relationship','dummy') NOT NULL default 'normal' COMMENT 'Use to flag special record types to trigger special functions',
+  rty_ShowURLOnEditForm tinyint(1) NOT NULL default '1' COMMENT 'Determines whether special URL field is shown at the top of the edit form',
   rty_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   rty_LocallyModified tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flags a definition element which has been modified relative to the original source',
   PRIMARY KEY  (rty_ID),
@@ -294,7 +297,7 @@ CREATE TABLE defRelationshipConstraints (
 
 CREATE TABLE defTerms (
   trm_ID int(10) unsigned NOT NULL auto_increment COMMENT 'Primary key, the term code used in the detail record',
-  trm_Label varchar(63) NOT NULL COMMENT 'Text label for the term, cannot be blank',
+  trm_Label varchar(500) NOT NULL COMMENT 'Human readable term used in the interface, cannot be blank',
   trm_InverseTermId int(10) unsigned default NULL COMMENT 'ID for the inverse value (relationships), null if no inverse',
   trm_Description varchar(1000) default NULL COMMENT 'A description/gloss on the meaning of the term',
   trm_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
@@ -310,6 +313,7 @@ CREATE TABLE defTerms (
   trm_Depth tinyint(1) unsigned NOT NULL default '1' COMMENT 'Depth of term in the term tree, should always be 1+parent depth',
   trm_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   trm_LocallyModified tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flags a definition element which has been modified relative to the original source',
+  trm_Code varchar(100) default NULL COMMENT 'Optional code eg. alphanumeric code which may be required for import or export',
   PRIMARY KEY  (trm_ID),
   KEY trm_ParentTermIDKey (trm_ParentTermID),
   KEY trm_InverseTermIDKey (trm_InverseTermId)
@@ -347,3 +351,5 @@ CREATE TABLE defURLPrefixes (
   UNIQUE KEY urp_Prefix (urp_Prefix)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Common URL prefixes allowing single-point change of URL for ';
 
+-- --------------------------------------------------------
+                                                                                               
