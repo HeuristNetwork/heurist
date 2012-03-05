@@ -66,7 +66,13 @@
                 if ($res4!= 0 ) {
                     echo ("<br>Warning: Unable to delete Records from <b>$dbname</b> - SQL error on DELETE FROM Records<br>");
                     echo($output2);
-                }                 
+                } 
+                $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'ALTER TABLE Records AUTO_INCREMENT = 0' ";
+                $output2 = exec($cmdline . ' 2>&1', $output, $res5); 
+                if ($res5!= 0 ) {
+                    echo ("<br>Warning: Unable to reset record IDs to start at 1 for <b>$dbname</b> - SQL error on ALTER TABLE Records AUTO_INCREMENT = 0<br>");
+                    echo($output2);
+                } 
             }
             if (($res2 != 0 ) or ($res3!= 0 ) or ($res4!= 0 )) {
                 echo ("<h2>Warning:</h2> Unable to fully delete records from <b>".HEURIST_DB_PREFIX.$dbname."</b>");
