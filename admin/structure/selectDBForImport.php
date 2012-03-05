@@ -109,7 +109,9 @@ var registeredDBs = [];
 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);    // don't verify peer cert
 	curl_setopt($ch, CURLOPT_TIMEOUT, 10);    // timeout after ten seconds
 	curl_setopt($ch, CURLOPT_MAXREDIRS, 5);    // no more than 5 redirections
-	$reg_url =  HEURIST_BASE_URL . "admin/structure/getRegisteredDBs.php"; // TODO: Change to HEURIST_INDEX_BASE_URL
+	
+    // TO DO: The below is a fudge until the next H3 update when the master index name will get migrated to H3
+    $reg_url =  /*HEURIST_INDEX_BASE_URL*/ "http://heuristscholar.org/h3-ij/" . "admin/structure/getRegisteredDBs.php"; //HEURIST_INDEX_BASE_URL POINTS TO HEURISTSCHOLAR.ORG
 	curl_setopt($ch, CURLOPT_URL,$reg_url);
 	$data = curl_exec($ch);
 	$error = curl_error($ch);

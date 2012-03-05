@@ -107,7 +107,7 @@
 		// TODO: get this locking mechanism to work
 
 		if (($res && mysql_num_rows($res)>0)) { // SQL OK and there is a lock record
-			// error log says “supplied argument is not a valid MySQL result resource”
+			// error log says “supplied argument is not a valid MySQL result resources
 			echo "Definitions are already being modified or SQL failure on lock check.";
 			header('Location: ' . BASE_PATH . 'common/html/msgLockedByAdmin.html'); // put up informative failure message
 			die("Definitions are already being modified.<p> If this is not the case, you will need to delete the lock record in sysLocks table. <br>Consult Heurist team for assistance if needed");

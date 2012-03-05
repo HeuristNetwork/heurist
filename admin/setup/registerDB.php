@@ -1,6 +1,6 @@
 <?php
     /**
-    * registerDB.php - Registers the current database with HeuristScholar.org/db=HeuristSystem_Index , stores
+    * registerDB.php - Registers the current database with HeuristScholar.org/db=H3MasterIndex , stores
     * metadata in the index database, sets registration code in sysIdentification table. Juan Adriaanse 26 May 2011.
     * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
     * @link: http://HeuristScholar.org
