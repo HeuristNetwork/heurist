@@ -700,11 +700,14 @@ global $relRT;
 <div class=detailType>Linked From</div>
 <div class=detail><a href="<?=HEURIST_SITE_PATH?>search/search.html?db=<?=HEURIST_DBNAME?>&w=all&q=linkto:<?=$bib['rec_ID']?>" onClick="top.location.href = this.href; return false;"><b>Show list below as search results</b></a> <b>(linkto:<?=$bib['rec_ID']?> = records pointing TO this record)</b></div></div>
 <?php
+	$rectypesStructure = getAllRectypeStructures();
+
 	while ($row = mysql_fetch_assoc($res)) {
 
 		print '<div class=detailRow>';
 		print '<div class=detailType></div>';
 		print '<div class=detail>';
+		print '<img class="rft" style="background-image:url('.HEURIST_ICON_URL_BASE.$row['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_SITE_PATH.'common/images/16x16.gif">&nbsp;';
 		print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a>';
 		print '</div></div>';
 	}

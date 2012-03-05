@@ -109,9 +109,12 @@ function DetailTypeEditor() {
 		}
 
 
+
 		//creates new empty field type in case ID is not defined
 		if(Hul.isnull(_detailType)){
 			_dtyID =  -1;
+
+			_initFieldTypeComboBox();
 
 			_detailType = new Array();
 
@@ -131,7 +134,21 @@ function DetailTypeEditor() {
 
 			Dom.get("dty_Type").disabled = false;
 		}else{
-			Dom.get("dty_Type").disabled = true;
+			var el = Dom.get("dty_Type"),
+				ftype = _detailType[fi.dty_Type];
+
+			Hul.addoption(el, ftype, top.HEURIST.detailTypes.lookups[ftype]);
+			el.disabled = false;
+
+			if(ftype=='float' || ftype=='date'){
+				Hul.addoption(el, 'freetext', top.HEURIST.detailTypes.lookups['freetext']);
+			}else if(ftype=='freetext'){
+				Hul.addoption(el, 'blocktext', top.HEURIST.detailTypes.lookups['blocktext']);
+			}else if(ftype=='blocktext'){
+				Hul.addoption(el, 'freetext', top.HEURIST.detailTypes.lookups['freetext']);
+			}else{
+				el.disabled = true;
+			}
 
 
 			if(_detailType[fi.dty_Status]==='reserved'){ //if reserved - it means original dbid<1001
@@ -165,15 +182,7 @@ function DetailTypeEditor() {
 	function _addOptionReserved(){
 		var selstatus = Dom.get("dty_Status");
 		if(selstatus.length<4){
-				var option = document.createElement("option");
-				option.text = 'reserved';
-				option.value = 'reserved';
-				try {
-					// for IE earlier than version 8
-					selstatus.add(option, sel.options[null]);
-				}catch (ex2){
-					selstatus.add(option,null);
-				}
+			Hul.addoption(selstatus, 'reserved','reserved');
 		}
 	}
 
@@ -378,19 +387,25 @@ function DetailTypeEditor() {
 				dtg_ID = top.HEURIST.detailTypes.groups[index].id;
 				var grpName = top.HEURIST.detailTypes.groups[index].name;
 
-				var option = document.createElement("option");
-				option.text = grpName;
-				option.value = dtg_ID;
+				Hul.addoption(el, dtg_ID, grpName);
+			}
+		} //for
+	}
 
-				try
-				{
-					// for IE earlier than version 8
-					el.add(option, el.options[null]);
-				}
-				catch (e)
-				{
-					el.add(option,null);
-				}
+	/**
+	* Init field type selector
+	*/
+	function _initFieldTypeComboBox() {
+		var el = Dom.get("dty_Type"),
+			text,
+			value;
+
+		Hul.addoption(el, "", "-- Select data type --");
+
+		for (value in top.HEURIST.detailTypes.lookups){
+			if(!Hul.isnull(Number(value))) {
+				text = top.HEURIST.detailTypes.lookups[value];
+				Hul.addoption(el, value, text);
 			}
 		} //for
 	}
@@ -654,7 +669,7 @@ function DetailTypeEditor() {
 		var isInitialCall = (e===null);
 
 		//prevent setting outdated types for new field type
-		if(!isInitialCall && (el.value==="relationtype" || el.value==="year" || el.value==="boolean")){
+		if(!isInitialCall && (el.value==="relationtype" || el.value==="year" || el.value==="boolean" || el.value==="integer")){
 			alert('You selected an outdated type. It is not allowed anymore');
 			if(that.keepType){
 				el.value = that.keepType;

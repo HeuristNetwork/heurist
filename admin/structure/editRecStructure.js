@@ -166,8 +166,11 @@ function EditRecStructure() {
 				key:"dty_Name", label: "Field type", width:120, sortable:false },
 			{
 				key:"rst_DisplayName", label: "Field name (used for this type)", width:120, sortable:false },
-			{
-				key:"dty_Type", label: "Data type", sortable:false
+			{ key: "dty_Type", label: "Data Type", sortable:false,
+				formatter: function(elLiner, oRecord, oColumn, oData) {
+					var type = oRecord.getData("dty_Type");
+					elLiner.innerHTML = top.HEURIST.detailTypes.lookups[type];
+				}
 			},
 			{
 				key:"rst_DisplayWidth", label: "Width", sortable:false, width:20, className:"center"
@@ -673,15 +676,7 @@ function EditRecStructure() {
 	*/
 	function _optionReserved(selstatus, isAdd){
 		if(isAdd && selstatus.length<4){
-				var option = document.createElement("option");
-				option.text = 'reserved';
-				option.value = 'reserved';
-				try {
-					// for IE earlier than version 8
-					selstatus.add(option, sel.options[null]);
-				}catch (ex2){
-					selstatus.add(option,null);
-				}
+			Hul.addoption(selstatus, "reserved", "reserved");
 		}else if (!isAdd && selstatus.length===4){
 			selstatus.length=3;
 			//selstaus.remove(3);

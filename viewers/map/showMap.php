@@ -144,6 +144,7 @@
 			array_push($imageLayers, $row[4]);
 		}
 		$kml_path =  getKmlFilePath($row[3]); //DT_ASSOCIATED_FILE
+error_log(">>>>>>".$row[3]."=".$kml_path);
 // removed by SAW as DT_KML_FILE changed from a file base type to blocktext
 //		if($kml_path==null){
 //			$kml_path =  getKmlFilePath($row[6]); //DT_KML_FILE

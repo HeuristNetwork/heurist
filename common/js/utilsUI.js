@@ -1423,6 +1423,23 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 	},
 
 	/**
+	* create and add option to select element
+	*/
+	addoption: function(sel, value, text)
+	{
+				var option = document.createElement("option");
+				option.text = text;
+				option.value = value;
+				try {
+					// for IE earlier than version 8
+					sel.add(option, sel.options[null]);
+				}catch (ex2){
+					sel.add(option,null);
+				}
+				return option;
+	},
+
+	/**
 	* Utility function to validate that input value is as integer
 	*/
 	validate: function(evt) {

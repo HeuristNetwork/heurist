@@ -324,9 +324,11 @@ function register_external($filejson)
 {
 	$filedata = json_decode($filejson, true);
 
-//DEBUG error_log(">>>>>".print_r($filedata, true));
+//DEBUG
+//error_log("1.>>>>>".$filedata);
+//error_log("2.>>>>>".print_r($filedata, true));
 
-	if($filedata==null){ //can't parse - assume this is URL - old way
+	if(!is_array($filedata)){ //can't parse - assume this is URL - old way
 
 		$filedata = array();
 		$url = $filejson;
@@ -355,7 +357,7 @@ function register_external($filejson)
 	}
 
 	//if id is defined
-	if($filedata['id'] &&  intval($filedata['id'])>0){
+	if(array_key_exists('id', $filedata) &&  intval($filedata['id'])>0){
 		//update
 		$file_id = $filedata['id'];
 		//ignore registration for already uploaded file

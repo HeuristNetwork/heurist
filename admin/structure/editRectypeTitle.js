@@ -99,18 +99,9 @@ function EditRectypeTitle() {
 
 			var i;
 			for (i in _recs){
-			if(i!==undefined){
-
-				option = document.createElement("option");
-				option.text = _recs[i].rec_Title; //name of rectype
-				option.value = _recs[i].rec_ID; //id of rectype
-				try {
-					// for IE earlier than version 8
-					sel.add(option, sel.options[null]);
-				}catch (ex2){
-					sel.add(option,null);
+				if(i!==undefined){
+					Hul.addoption(sel, _recs[i].rec_ID, _recs[i].rec_Title);
 				}
-			}
 			} // for
 
 			sel.selectedIndex = 0;

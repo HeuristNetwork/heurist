@@ -164,30 +164,14 @@ function DetailTypeManager() {
 			while (sel.length>0){
 				sel.remove(0);
 			}
-			option = document.createElement("option");
-			option.text = "new group";
-			option.value = "-1";
-			try {
-				// for IE earlier than version 8
-				sel.add(option, sel.options[null]);
-			}catch (ex1){
-				sel.add(option,null);
-			}
+
+			Hul.addoption(sel, "-1", "new group");
 
 			var i;
 			for (i in _groups){
-			if(i!==undefined){
-
-				option = document.createElement("option");
-				option.text = _groups[i].text;
-				option.value = _groups[i].value;
-				try {
-					// for IE earlier than version 8
-					sel.add(option, sel.options[null]);
-				}catch (ex2){
-					sel.add(option,null);
+				if(i!==undefined){
+					Hul.addoption(el, _groups[i].value, _groups[i].text);
 				}
-			}
 			} // for
 
 			Dom.get('edName').value = "";
@@ -369,27 +353,7 @@ function DetailTypeManager() {
 			{ key: "type", label: "Data Type", sortable:true,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var type = oRecord.getData("type");
-					var lookup = {
-						"enum" : "Enumerated (terms)",
-						"relationtype" : "Relationship type (terms)",
-						"float" : "Numeric (integer/decimal)",
-						"date" : "Date / temporal",
-						"file" : "File - local or uploaded",
-						"geo" : "Geospatial object",
-						"freetext" : "Text (single line)",
-						"blocktext" : "Memo (multi-line)",
-						"resource" : "Record pointer",
-						"relmarker" : "Relationship marker",
-						"separator" : "Separator (no data)",
-						"calculated" : "Calculated value",
-                        // Note: the following types are no longer deinable but may be required for backward compatibility
-						"fieldsetmarker" : "Field set marker",
-                        "integer" : "Numeric - integer",
-                        "year" : "Year (no mm-dd)",
-                        "urlinclude" : "File/URL of include content",
-                        "boolean" : "Boolean (true/false)"
-					};
-					elLiner.innerHTML = lookup[type];
+					elLiner.innerHTML = top.HEURIST.detailTypes.lookups[type];
 				}
 			},
 			{ key: "description",   hidden:true},

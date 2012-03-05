@@ -404,15 +404,7 @@ function EditTerms() {
 	function _optionReserved(isAdd){
 		var selstatus = Dom.get("trm_Status");
 		if(isAdd && selstatus.length<4){
-				var option = document.createElement("option");
-				option.text = 'reserved';
-				option.value = 'reserved';
-				try {
-					// for IE earlier than version 8
-					selstatus.add(option, sel.options[null]);
-				}catch (ex2){
-					selstatus.add(option,null);
-				}
+			Hul.addoption(selstatus, "reserved", "reserved");
 		}else if (!isAdd && selstatus.length===4){
 			selstatus.length=3;
 			//selstaus.remove(3);
@@ -1159,16 +1151,8 @@ function doSearch(event){
 		if(!Hul.isnull(ind)){
 			var node = nodes[ind];
 
-			var option = document.createElement("option");
-				option.text = getParentLabel(node);
-				option.value = node.data.id;
-				option.title = option.text;
-			try {
-				// for IE earlier than version 8
-				sel.add(option, sel.options[null]);
-			}catch (e){
-				sel.add(option,null);
-			}
+			var option = Hul.addoption(sel, node.data.id, getParentLabel(node));
+			option.title = option.text;
 		}
 		}//for
 

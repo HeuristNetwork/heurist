@@ -83,6 +83,28 @@ print "\ntop.HEURIST.terms.treesByDomain = { 'relation' : " . json_format(getTer
 												'enum' : " . json_format(getTermTree("enum","prefix"),true)." };\n";
 */
 ?>
+
+top.HEURIST.detailTypes.lookups = {
+						"enum" : "Enumerated (terms)",
+						"float" : "Numeric (integer/decimal)",
+						"date" : "Date / temporal",
+						"file" : "File - local or uploaded",
+						"geo" : "Geospatial object",
+						"freetext" : "Text (single line)",
+						"blocktext" : "Memo (multi-line)",
+						"resource" : "Record pointer",
+						"relmarker" : "Relationship marker",
+						"separator" : "Separator (no data)",
+						"calculated" : "Calculated value",
+                        // Note: the following types are no longer deinable but may be required for backward compatibility
+						"relationtype" : "Relationship type (terms)",
+						//"fieldsetmarker" : "Field set marker",
+                        "integer" : "Numeric - integer",
+                        "year" : "Year (no mm-dd)",
+                        //"urlinclude" : "File/URL of include content",
+                        "boolean" : "Boolean (true/false)"
+					};
+
 top.HEURIST.ratings = {"0": "not rated",
 						"1": "*",
 						"2": "**",

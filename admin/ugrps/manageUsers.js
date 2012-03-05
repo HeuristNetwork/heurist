@@ -793,18 +793,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 										continue; //exclude itself
 									}
 
-									option = document.createElement("option");
-									option.text = grpName;
-									option.value = grpID;
-									try
-									{
-										// for IE earlier than version 8
-										filterByGroup.add(option, filterByGroup.options[null]);
-									}
-									catch (e2)
-									{
-										filterByGroup.add(option,null);
-									}
+									Hul.addoption(filterByGroup, grpID, grpName);
 								}
 							} //for
 

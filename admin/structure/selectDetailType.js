@@ -168,7 +168,12 @@ function SelectDetailType() {
 								{ key: "order", label: "Order", hidden:true },
 								{ key: "name", label: "Field type name", sortable:true, width:100 },
 								{ key: "help", label: "Help", hidden:true, sortable:false},
-								{ key: "type", label: "Field type", sortable:true, width:40 },
+								{ key: "type", label: "Field Type", sortable:true,
+									formatter: function(elLiner, oRecord, oColumn, oData) {
+										var type = oRecord.getData("type");
+										elLiner.innerHTML = top.HEURIST.detailTypes.lookups[type];
+									}
+								},
 								{ key: "status", label: "Status", hidden:true, sortable:false },
 								{ key: "description",   hidden:true},
 								{ key: "group",   hidden:true},

@@ -35,6 +35,7 @@
 	-->*/
 require_once(dirname(__FILE__)."/../../search/getSearchResults.php");
 require_once(dirname(__FILE__)."/../../common/php/utilsTitleMask.php");
+require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 
 
 $msgInfoSaveRec = array(); //array for containing the warning and error information for the calling code.
@@ -353,7 +354,7 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 					break;
 
 				case "freetext": case "blocktext":
-				case "date": 
+				case "date":
                 case "year": case "urlinclude": // these shoudl no logner exist, retained for backward compatibility
 					if (! $val) { if ($bdID) array_push($updateIDs, $bdID); continue; }
 					$bdVal = "'" . addslashes($val) . "'";
@@ -399,12 +400,19 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 					break;
 
 				case "file":
-					if (mysql_num_rows(mysql_query("select ulf_ID from recUploadedFiles where ulf_ID=".intval($val))) <= 0){
+
+					if(is_numeric($val)){  //this is ulf_ID
+						$ulf_ID = intval($val);
+					}else{  // new way - URL or JSON string with file data array (structure similar get_uploaded_file_info)
+						$ulf_ID = register_external($val); //this is URL
+					}
+
+					if ($ulf_ID==null || mysql_num_rows(mysql_query("select ulf_ID from recUploadedFiles where ulf_ID=".$ulf_ID)) <= 0){
 						errSaveRec("invalid file pointer '".$val."' for detail type '".$bdtID);
 						return array("error" => "recordID = $recordID rectype = $recordType detailtype = $bdtID".
 												($bdID ? " detailID = $bdID":""));
 					}
-					$bdFileID = intval($val);
+					$bdFileID = intval($ulf_ID);
 					break;
 
 				case "geo":

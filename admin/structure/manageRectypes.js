@@ -181,32 +181,14 @@ function RectypeManager() {
 			while (sel.length>0){
 				sel.remove(0);
 			}
-			option = document.createElement("option");
-			option.text = "Add new group";
-			option.value = "-1";
-			try {
-				// for IE earlier than version 8
-				sel.add(option, sel.options[null]);
-			}catch (ex1){
-				sel.add(option,null);
-			}
 
+			Hul.addoption(sel, "-1", "Add new group");
 
 			var i;
 			for (i in _groups){
-			if(!Hul.isnull(i)){
-
-
-				option = document.createElement("option");
-				option.text = _groups[i].text;
-				option.value = _groups[i].value;
-				try {
-					// for IE earlier than version 8
-					sel.add(option, sel.options[null]);
-				}catch (ex2){
-					sel.add(option,null);
+				if(!Hul.isnull(i)){
+					Hul.addoption(el, _groups[i].value, _groups[i].text);
 				}
-			}
 			} // for
 
 			Dom.get('edName').value = "";

@@ -466,18 +466,7 @@ oRecord.getData('description')+'"/>';}
 						grpID = top.HEURIST.rectypes.groups[index].id;
 						var grpName = top.HEURIST.rectypes.groups[index].name;
 
-						var option = document.createElement("option");
-						option.text = grpName;
-						option.value = grpID;
-						try
-						{
-								// for IE earlier than version 8
-								filterByGroup.add(option, filterByGroup.options[null]);
-						}
-						catch (e)
-						{
-								filterByGroup.add(option,null);
-						}
+						Hul.addoption(filterByGroup, grpID, grpName);
 					}
 				} //for
 				filterByGroup.onchange = _updateFilter;

@@ -58,14 +58,22 @@ if (array_key_exists('ulf_ID', $_REQUEST))
 	$type_media	 = (array_key_exists('mediatype', $fileparams)) ?$fileparams['mediatype']:null;
 	$type_source = (array_key_exists('source', $fileparams)) ?$fileparams['source']:null;
 
-	if ($type_source==null || $type_source=='heurist') {
+	if($type_source==null || $type_source=='heurist') {
+		if ($file['ulf_FileName']) {
+			$filename = $file['ulf_FilePath'].$file['ulf_FileName']; // post 18/11/11 proper file path and name
+		} else {
+			$filename = HEURIST_UPLOAD_DIR . $file['ulf_ID']; // pre 18/11/11 - bare numbers as names, just use file ID
+		}
+		$filename = str_replace('/../', '/', $filename);
+	}
+
+	if (isset($filename) && file_exists($filename)){
 
 		if ($file['ulf_FileName']) {
 			$filename = $file['ulf_FilePath'].$file['ulf_FileName']; // post 18/11/11 proper file path and name
 		} else {
-			$filename = HEURIST_UPLOAD_DIR ."/". $file['ulf_ID']; // pre 18/11/11 - bare numbers as names, just use file ID
+			$filename = HEURIST_UPLOAD_DIR . $file['ulf_ID']; // pre 18/11/11 - bare numbers as names, just use file ID
 		}
-
 		$filename = str_replace('/../', '/', $filename);
 
 		$mimeExt = '';
@@ -98,18 +106,16 @@ if (array_key_exists('ulf_ID', $_REQUEST))
 			break;
 		}
 
-	}else if($type_media=='image'){ //$type_source=='generic' &&
+	}else if($file['ulf_ExternalFileReference']){
 
-		//@todo for image services (panoramio, flikr) take thumbnails directly
-
-		$img = get_remote_image($file['ulf_ExternalFileReference']);
-
-	}else if($type_source=='youtube'){
-
-		$url = $file['ulf_ExternalFileReference'];
-		$youtubeid = preg_replace('/^[^v]+v.(.{11}).*/' , '$1', $url);
-		$img = get_remote_image("http://img.youtube.com/vi/".$youtubeid."/0.jpg");
-
+		 if($type_media=='image'){ //$type_source=='generic' &&
+		 		//@todo for image services (panoramio, flikr) take thumbnails directly
+		 		$img = get_remote_image($file['ulf_ExternalFileReference']);
+		}else if($type_source=='youtube'){
+				$url = $file['ulf_ExternalFileReference'];
+				$youtubeid = preg_replace('/^[^v]+v.(.{11}).*/' , '$1', $url);
+				$img = get_remote_image("http://img.youtube.com/vi/".$youtubeid."/0.jpg");
+		}
 	}
 
 }

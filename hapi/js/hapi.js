@@ -1334,7 +1334,7 @@ var HRecord = function() {
 				else { throw new HUnsavedRecordException("Cannot save reference to unsaved record"); }
 			}
 			else if (HAPI.isA(val, "HFile")) {
-				return val.getID();
+				return (val.getID()>0)?val.getID():val.getURL();
 			}
 			else if (HAPI.isA(val, "HGeographicValue")) {
 				return (HGeographicType.abbreviationForType(val.getType()) + " " + val.getWKT());

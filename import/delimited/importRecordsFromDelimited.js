@@ -1028,7 +1028,18 @@ FlexImport = (function () {
 						vals = [ val ];
 					}
 
-					if (detailType.getVariety() == HVariety.GEOGRAPHIC) {
+					if (detailType.getVariety() == HVariety.FILE) {
+						 //create HFile object from given value
+						 //@todo!!!!
+						 this.initFile = this.createRecord;
+						 for (var v = 0; v < vals.length; ++v) {
+						 		//d.id, d.origName, d.fileSize, d.ext, d.URL, d.thumbURL, d.description
+						 		vals[v] = new HFile(this, 0, '', 0, null, vals[v], null, '');
+						 }
+						 delete this.initFile;
+
+
+					} else if (detailType.getVariety() == HVariety.GEOGRAPHIC) {
 						for (var v = 0; v < vals.length; ++v) {
 							vals[v] = new HGeographicValue(HGeographicType.abbreviationForType(FlexImport.subTypes[j]), vals[v]);
 						}
