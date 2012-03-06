@@ -58,7 +58,7 @@ $processed_count = 0;
 //print '<ul>';
 
 ?>
-<h2>COMPOSITE RECORD RECALCULATION</h2>
+<h2>CONSTRUCTED TITLE RECALCULATION</h2>
 
 <p>
    This function recalculates the constructed record titles for the given

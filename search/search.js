@@ -1524,7 +1524,7 @@ top.HEURIST.search = {
 			document.getElementById("resource-count").innerHTML = "1 record";
 			document.getElementById("selectRecords").innerHTML = "Select All";
 		} else if (totalRecordCount <= resultsPerPage) {
-			document.getElementById("resource-count").innerHTML = "Showing all <span class=\"recordCount\">" + totalRecordCount + "</span> records";
+			document.getElementById("resource-count").innerHTML = /*"Showing all */"<span class=\"recordCount\">" + totalRecordCount + "</span> records";
 			document.getElementById("selectRecords").innerHTML = "Select All";
 		} else {
 			document.getElementById("resource-count").innerHTML = firstRes + " - " + lastRes + " / <span class=\"recordCount\">" + totalRecordCount + "</span>";

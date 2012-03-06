@@ -1,6 +1,7 @@
 <?php
     /**
     * File: clearCurrentDB.php Deletes all records/details/bookmarks from the current database (owner group admins only)
+    *  Does not affect definitions. Resets record counter to 0.
     * Ian Johnson 13/2/12
     * @copyright 2005-2010 University of Sydney Digital Innovation Unit.
     * @link: http://HeuristScholar.org
@@ -23,27 +24,32 @@
     if(!array_key_exists('mode', $_REQUEST)) {
         print "<html>";
         print "<head><meta content='text/html; charset=ISO-8859-1' http-equiv='content-type'>";
-        print "<title>Delete Records from Current Heurist Database</title>";
+        print "<title>Clear Records from Current Heurist Database</title>";
         print "<link rel='stylesheet' type='text/css' href='../../common/css/global.css'>";
         print "<link rel='stylesheet' type='text/css' href='../../common/css/edit.css'>";
         print "<link rel='stylesheet' type='text/css' href='../../common/css/admin.css'>";
         print "</head>";
         print "<body class='popup'>";
-        print "<div class='banner'><h2>Delete Records from Current Heurist database</h2></div>";
+        print "<div class='banner'><h2>Clear Records from Current Heurist database</h2></div>";
         print "<div id='page-inner' style='overflow:auto'>";
-        print "<h4 style='display:inline-block; margin:0 5px 0 0'><span><img src='../../common/images/url_error.png' /> DANGER <img src='../../common/images/url_error.png' /></span></h4><h1 style='display:inline-block'>DELETE ALL RECORDS FROM CURRENT DATABASE</h1><br>";
-        print "<h3>This will delete all records from the current database: </h3> <b>$dbname</b>";
+        print "<h4 style='display:inline-block; margin:0 5px 0 0'>".
+        "<span><img src='../../common/images/url_error.png' /> DANGER <img src='../../common/images/url_error.png' /></span>".
+        "</h4><h1 style='display:inline-block'>CLEAR ALL RECORDS FROM CURRENT DATABASE</h1><br>";
+        print "<h3>This will clear (delete) all records and reset counter to 1 for the current database: </h3> <b>$dbname</b>";
         print "<form name='deletion' action='clearCurrentDB.php' method='get'>";
-        print "<p>Enter the words DELETE ALL RECORDS in all-capitals to confirm that you want to clear all records from the current database".
-        "<p>Type the word above to confirm deletion: <input type='input' maxlength='20' size='20' name='del' id='del'>".
-        "&nbsp;&nbsp;&nbsp;&nbsp;<input type='submit' value='OK to Delete' style='font-weight: bold;' >".
+        print "<p>Database definitions - record types, fields, terms, tags, users etc. - are not affected. ";
+        print "Uploaded files are not deleted. Bookmarks and tags on specific records are deleted.<p>";
+        print "This operation may take some minutes on a large database<br>";
+        print "<p>Enter the words CLEAR ALL RECORDS in all-capitals to confirm that you want to clear all records from the current database".
+        "<p>Type the words above to confirm deletion: <input type='input' maxlength='20' size='20' name='del' id='del'>".
+        "&nbsp;&nbsp;&nbsp;&nbsp;<input type='submit' value='OK to Clear' style='font-weight: bold;' >".
         "<input name='mode' value='2' type='hidden'>".
         "<input name='db' value='$dbname' type='hidden'>";
         print "</form></body></html>";
     }
 
     if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2') {
-        if (array_key_exists('del', $_REQUEST) && $_REQUEST['del']=='DELETE ALL RECORDS') {
+        if (array_key_exists('del', $_REQUEST) && $_REQUEST['del']=='CLEAR ALL RECORDS') {
             print "<p><hr>";
             if ($dbname=='') {
                 print "<p>Undefined database name"; // shouldn't get here
@@ -78,12 +84,12 @@
                 echo ("<h2>Warning:</h2> Unable to fully delete records from <b>".HEURIST_DB_PREFIX.$dbname."</b>");
                 print "<p><a href=".HEURIST_URL_BASE."?db=$dbname>Return to Heurist</a>";
             } else {
-                print "Data has been deleted from <b>$dbname</b>";
-                print "<p><a href=".HEURIST_URL_BASE."?db=$dbname>Return to Heurist</a>";
+                print "Record data, bookmarks and tags have been deleted from <b>$dbname</b>";
+                print "<p><a href=".HEURIST_URL_BASE."?db=$dbname>Return to the database home page</a>";
             }
         } else { // didn't request properly
             print "<p><h2>Request disallowed</h2>Incorrect challenge words entered. Data was note deleted from $dbname ".
-            "<p><a href=".HEURIST_URL_BASE."?db=$dbname>Return to Heurist</a>";
+            "<p><a href=".HEURIST_URL_BASE."?db=$dbname>Return to the database home page</a>";
         }
     }
 

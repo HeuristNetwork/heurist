@@ -75,7 +75,7 @@ function update_counts2(processed, total) {
 </script>
 </head>
 <body>
-<h2>COMPOSITE RECORD RECALCULATION</h2>
+<h2>CONSTRCUTED TITLE RECALCULATION</h2>
 
 <p>
    This function recalculates all the constructed record titles, compares

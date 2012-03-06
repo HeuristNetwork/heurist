@@ -124,7 +124,7 @@
 				var loader = new HLoader(
 				function(s,r) {
 					recRecords = r;
-					document.getElementById("info-p").innerHTML =" loaded " + recRecords.length + " records processing input row " + (recStart+1) + " to " + recEnd;
+					document.getElementById("info-p").innerHTML = "Processing input rows " + (recStart+1) + " to " + recEnd;
 					updateDetails();
 				},
 				function(s,e) {
@@ -441,15 +441,13 @@
 						}
 					}
 				}
-				if (errorsOrWarningExist) {
+				if (errorsOrWarningExist) { // there were problems
 					p.appendChild(table);
 					e.style.display = "block";
-				} else {
-					if (confirm("SUCCESS!  " + fields.length + " entries processed. \n" +"Would you like to use DetailUpdater for more updating?")){
-						location.reload();
-					}else{
-						window.close();
-					}
+				} else { // The detail update completed successfully
+                /*  Unecessary option: if (confirm("Update successful, " + fields.length + " entries processed. \n" +"Would you like to use DetailUpdater for more updating?")){location.reload();}else{window.close();}   */
+                alert("Update successful, " + fields.length + " entries processed" );
+                window.close();
 				}
 			}
 
@@ -528,7 +526,7 @@
 		<p id=info-p></p>
 		<div id=process-div style="display:none;">
 			<p>The details shown below will be used to update records in the database. Please review before processing.
-			Note that erronious input rows will be skipped.</p>
+			Note that erroneous input rows will be skipped.</p>
 			<input  type=button value="Process Links" onClick="loadPointers();" >
 			<p id=records-p></p>
 		</div>

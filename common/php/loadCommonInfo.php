@@ -95,7 +95,7 @@ top.HEURIST.detailTypes.lookups = {
 						"resource" : "Record pointer",
 						"relmarker" : "Relationship marker",
 						"separator" : "Separator (no data)",
-						"calculated" : "Calculated value",
+						"calculated" : "Calculated value (not yet impl.)",
                         // Note: the following types are no longer deinable but may be required for backward compatibility
 						"relationtype" : "Relationship type (terms)",
 						//"fieldsetmarker" : "Field set marker",

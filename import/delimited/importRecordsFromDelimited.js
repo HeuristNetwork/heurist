@@ -576,7 +576,7 @@ FlexImport = (function () {
 						var btn = p.appendChild(document.createElement("button"));
 						btn.col = j;
 						btn.wrongValue = (eS[j][i]?eS[j][i]:"");
-						btn.innerHTML = "Modify data";
+						btn.innerHTML = "Apply this value";
 						btn.onclick = function () {
 
 								//was FlexImport.fields[this.row][this.col] = this.value;
@@ -631,7 +631,7 @@ FlexImport = (function () {
 			}
 			if(haserr){
 				e.insertBefore(table, before);
-                e.insertBefore(document.createTextNode("Unrecognised values in imported data (edit red values below and click Modify Data, then Prepare Records again. Alternatively you can edit the field definitions with the link to the right of each value.)"), table);
+                e.insertBefore(document.createTextNode("Unrecognised values in imported data (edit red values below and click Apply this value, then Prepare Records again. Alternatively you can edit the field definitions with the link to the right of each value.)"), table);
 			}
 
 		}
@@ -947,7 +947,7 @@ FlexImport = (function () {
 		if(FlexImport.wrong_values>0){
 			e.innerHTML = "<p class='invalidInput'>There are "+FlexImport.wrong_values+" unexpected values in "+
 							FlexImport.wrong_columns+" columns. "+
-							"<input type=button value=\"Go back\" onclick=\"FlexImport.createColumnSelectors();\"></p>";
+							"<input type=button value=\"Modify data and try again\" onclick=\"FlexImport.createColumnSelectors();\"></p>";
 		}else{
 			e.innerHTML = "<p>If records appear OK: <input type=button value=\"Save records\" onclick=\"FlexImport.Saver.saveRecords();\">&nbsp;&nbsp;This step updates the database (irreversible, except by editing the database)</p>";
 			e.innerHTML += "<p><b>Records prepared for import:</b></p>";

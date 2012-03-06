@@ -404,8 +404,10 @@ function DetailTypeEditor() {
 
 		for (value in top.HEURIST.detailTypes.lookups){
 			if(!Hul.isnull(Number(value))) {
-				text = top.HEURIST.detailTypes.lookups[value];
-				Hul.addoption(el, value, text);
+                if(!(value==="relationtype" || value==="year" || value==="boolean" || value==="integer")){
+				    text = top.HEURIST.detailTypes.lookups[value];
+				    Hul.addoption(el, value, text);
+                }
 			}
 		} //for
 	}

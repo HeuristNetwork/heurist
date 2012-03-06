@@ -202,58 +202,89 @@
 
 					<li class="logged-in-only"> <span id=advanced-menu-link class="logged-in-only"><b>Advanced</b></span>
 						<ul id="advanced-menu">
-							<li><a href="../admin/structure/getListOfDatabases.php" name="auto-popup" class="portrait" title="For administrators only">List databases</a></li>
-							<li><a href="javascript:void(0)" onClick="{top.HEURIST.util.reloadStrcuture();}"
-							title="Click to clear the internal working memory of Heurist" >Clear memory</a></li>
+
+                            <li>&nbsp;</li>
+                            <li><a href="../admin/structure/getListOfDatabases.php" name="auto-popup" class="portrait" 
+                                title="Navigate to and login to another Heurist database">
+                                Select database</a></li>
+							
+                            <li><a href="javascript:void(0)" onClick="{top.HEURIST.util.reloadStrcuture();}"
+							    title="Click to refresh the internal working memory of Heurist" >
+                                Refresh memory</a></li>
+
+                            <li><a href="?ver=1&amp;w=bookmark&amp;q=-tag&amp;label=Bookmarks+without+tags" class='seperator'
+                                title="Find bookmarked records which you have not tagged">
+                                Bookmarked records with&nbsp;no&nbsp;tags</a></li>
+
+                            <!-- --- sep --- -->
+                            <li>&nbsp;</li><li>HARVEST</li> <!-- temporary fudge -->
+                            
+                            <li><a href="../import/hyperlinks/importHyperlinks.php" name="auto-popup"
+                                title="Import web links from a browser bookmarks file or an html web page file">
+                                Hyperlinks << HTML<br>(webpage/bookmarks)</a></li>
+
+                            <li><a href="../admin/profile/configImportSettings.php" name="auto-popup" class="small"
+                                title="Settings for web links importer">
+                                Settings<br>(hyperlink harvester)</a></li>
 
 							<li><a href="../import/email/emailProcessingSetup.php" name="auto-popup" class='seperator small'
-							title="Harvest email from a designated IMAP email server (set in configuration)">Harvest email</a></li>
+							    title="Harvest email from a designated IMAP email server (set in configuration)">
+                                Email from IMAP server</a></li>
 
 							<li class="admin-only"><a href="../import/fieldhelper/synchroniseWithFieldHelper.php"
-								onClick="this.href = top.HEURIST.baseURL +'import/fieldhelper/synchroniseWithFieldHelper.php?db=' + database;" target="_blank"
-								title="Read in FieldHelper XML manifests and create metadata records from them linked back to the indexed files"
-								name="auto-popup">FieldHelper import</a></li>
+							    onClick="this.href = top.HEURIST.baseURL +'import/fieldhelper/synchroniseWithFieldHelper.php?db=' + database;" target="_blank"
+							    title="Read in FieldHelper XML manifests and create metadata records from them linked back to the indexed files" name="auto-popup">
+                                FieldHelper manifests <br>(XML)</a></li>
 
-							<li><a href="../import/hyperlinks/importHyperlinks.php" name="auto-popup"
-								title="Import web links from a browser bookmarks file or an html web page file">Import hyperlinks</a></li>
 
-							<li><a href="../admin/profile/configImportSettings.php" name="auto-popup" class="small"
-								title="Settings for web links importer">Importer settings</a></li>
+                            <!-- --- sep --- -->
+                            <li>&nbsp;</li><li>IMPORT</li> <!-- temporary fudge -->
+
+                            <li><a href="../import/delimited/importRecordsFromDelimited.html" name="auto-popup"
+                                onClick="this.href = top.HEURIST.baseURL +'import/delimited/importRecordsFromDelimited.html?db=' + database;"
+                                title="Import data from delimited text for one record type at a time" target="_blank">
+                                Import new records <br>( << CSV,&nbsp;tab)</a></li>
+
+                            <li class="admin-only"><a href="../import/delimited/updateDetailsFromDelimited.html"
+                                onClick="this.href = top.HEURIST.baseURL +'import/delimited/updateDetailsFromDelimited.html?db=' + database;" target="_blank"
+                                title="Update or add fields in existing records from delimited text" name="auto-popup">
+                                Update records <br>( << CSV,&nbsp;tab)</a></li>
+                                
+                            <li><a href="../import/importerFramework.php?format=GEO" name="auto-popup" 
+                                title="Import KML files (geographic data in WKT can be imported from CSV & tab delimtied files)">
+                                Geographic import <br>( << KML)</a></li>
 
 							<li><a href="../import/importerFramework.php?format=BIB" name="auto-popup"  class="seperator"
-							title="Import bibliographic exchange format files">Import bibliographic</a></li>
+							    title="Import bibliographic exchange format files">
+                                Bibliographic import <br>( << EndNote)</a></li>
 
-							<li><a href="../import/importerFramework.php?format=GEO" name="auto-popup" title="Import KML files">Import geographic</a></li>
 
-							<li><a href="../import/delimited/importRecordsFromDelimited.html" name="auto-popup"
-							onClick="this.href = top.HEURIST.baseURL +'import/delimited/importRecordsFromDelimited.html?db=' + database;"
-							title="Import a delimited text file of data for one record type" target="_blank">Import delimited</a></li>
-
-							<li class="admin-only"><a href="../import/delimited/updateDetailsFromDelimited.html"
-								onClick="this.href = top.HEURIST.baseURL +'import/delimited/updateDetailsFromDelimited.html?db=' + database;" target="_blank"
-								title="Update record details using delimited text" name="auto-popup">Update fields from CSV</a></li>
-
-							<!-- separator-->
-							<li><a href="?ver=1&amp;w=bookmark&amp;q=-tag&amp;label=Bookmarks+without+tags" class='seperator'
-								title="Find bookmarks which you have not tagged">Bookmarks w/o tags</a></li>
-							<!-- separator-->
+                            <!-- --- sep --- -->
+                            <li>&nbsp;</li><li>EXPORT</li> <!-- temporary fudge -->
+                            
 
 							<!--<li class="admin-only"><a href="#" target="_blank" onClick="this.href = top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database;" title="Export records as delimited text">Export delimited</a></li>-->
-							<li class="admin-only"><a href="#"
-								onClick="top.HEURIST.search.popupLink(top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database);"
-								title="Export records as delimited text">Export delim (filtered)</a></li>
+                            <li><a href="#" id=result-style-icons-link title="Generate HML for selected set of search results"
+                                onClick="top.HEURIST.search.exportHML(false);">
+                                Current selection <br>( >> HML)</a></li>
+
+                            <li><a href="#" id=result-style-icons-link title="Generate KML for selected set of search results"
+                                onClick="top.HEURIST.search.exportKML(false);">
+                                Current selection <br>( >> KML)</a></li>
 
 							<li><a href="#" id=result-style-icons-link title="Generate HML for current set of search results"
-								onClick="top.HEURIST.search.exportHML(true);" >Export HML (resultset)</a></li>
+								onClick="top.HEURIST.search.exportHML(true);" >
+                                Current query <br>( >> HML)</a></li>
 
 							<li><a href="#" id=result-style-icons-link title="Generate HML for current set of search results"
-								onClick="top.HEURIST.search.exportHML(true,true);" >Export HML (resultset with related)</a></li>
+								onClick="top.HEURIST.search.exportHML(true,true);" >
+                                Current query + related <br>( >> HML) </a></li>
 
-							<li><a href="#" id=result-style-icons-link title="Generate HML for selected set of search results"
-								onClick="top.HEURIST.search.exportHML(false);">Export HML (selected)</a></li>
+                            <li class="admin-only"><a href="#"
+                                onClick="top.HEURIST.search.popupLink(top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database);"
+                                title="Export records as delimited text">
+                                Filtered record dump <br>( >> CSV, tab)</a></li>
 
-							<li><a href="#" id=result-style-icons-link title="Generate KML for selected set of search results"
-								onClick="top.HEURIST.search.exportKML(false);">Export KML (selected)</a></li>
 
 							<!-- separator-->
 						</ul>
@@ -318,7 +349,10 @@
 						<input id=my-records-button type=button value="my bookmarks" title="Search only records which have been bookmarked by you" onClick="document.getElementById('w-input').value = 'bookmark'; top.HEURIST.search.submitSearchForm();" class="logged-in-only">
 						<input id=all-records-button type=button value="all records"  title="Search across all records in Heurist" onClick="document.getElementById('w-input').value = 'all'; top.HEURIST.search.submitSearchForm();">
 						</div>
-					<span id="add-record"><input id=add-record-link value="Add New Record" title="Add a new record to the Heurist database, setting record type and ownership" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/addRecordPopup.php'); return false;" class="logged-in-only" ></span>
+					<!-- TODO: We need a better position for the Add New Record button. Needs to be separated from search button --> 
+                    <span style="padding-left: 100;" id="add-record" > 
+                    <input id=add-record-link value="Add New Record" title="Add a new record to the Heurist database, setting record type and ownership" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/addRecordPopup.php'); return false;" class="logged-in-only" >
+                    </span>
 				</form>
 
 				<div id="viewTriggers">

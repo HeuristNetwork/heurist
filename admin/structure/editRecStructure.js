@@ -163,9 +163,7 @@ function EditRecStructure() {
 				key:"rst_DisplayOrder", label: "Order", sortable:true, hidden:true
 			},
 			{
-				key:"dty_Name", label: "Field type", width:120, sortable:false },
-			{
-				key:"rst_DisplayName", label: "Field name (used for this type)", width:120, sortable:false },
+				key:"rst_DisplayName", label: "Field prompt/display name", width:120, sortable:false },
 			{ key: "dty_Type", label: "Data Type", sortable:false,
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var type = oRecord.getData("dty_Type");
@@ -173,7 +171,19 @@ function EditRecStructure() {
 				}
 			},
 			{
-				key:"rst_DisplayWidth", label: "Width", sortable:false, width:20, className:"center"
+				key:"rst_DisplayWidth", label: "Width", sortable:false, width:25, className:"center" ,
+                formatter: function(elLiner, oRecord, oColumn, oData){
+                    var wid = oRecord.getData('rst_DisplayWidth');
+                    var typ = oRecord.getData('dty_Type');
+                    if ((typ == "enum") || (typ=="resource") || (typ=="relmarker") || 
+                       (typ=="file") || (typ=="date") || (typ=="geo") || (typ=="separator"))
+                        { 
+                        res = 'auto'
+                        }
+                    else 
+                        res = wid;                  
+                    elLiner.innerHTML = res;
+                }
 			},
 			//{ key:"rst_DisplayHelpText", label: "Prompt", sortable:false },
 			{
@@ -204,6 +214,9 @@ function EditRecStructure() {
 					elLiner.innerHTML = reqtype.substring(0,9);
 				}
 			},
+            {
+                key:"dty_Name", label: "Based on template field", width:120, sortable:false 
+            },
 			{
 				key:"rst_Status", label: "Status", sortable:false, className:"center"
 			},
@@ -258,12 +271,16 @@ function EditRecStructure() {
 					*/
 					obj.liner_element.innerHTML =
 					'<div style="padding-left:30; padding-bottom:5; padding-right:5">'+
-					'<div class="input-row"><div class="input-header-cell">Display name/Label:</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DisplayName" title="Display Name/Label"/></div></div>'+
-					'<div class="input-row"><div class="input-header-cell">Help Text/Prompt:</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DisplayHelpText" style="width:350px" title="Help Text"/></div></div>'+
-					'<div class="input-row"><div class="input-header-cell">Default Value:</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DefaultValue" title="Default Value"/></div></div>'+
-					'<div class="input-row"><div class="input-header-cell">Width:</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DisplayWidth" title="Visible width of field" style="width:40" size="4" onkeypress="Hul.validate(event)"/></div></div>'+
+					
+                    '<div class="input-row"><div class="input-header-cell">Prompt (display name):</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DisplayName" title="Display Name/Label"/></div></div>'+
+                    
+                    // Field width
+                    '<div class="input-row"><div class="input-header-cell">Field width:</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DisplayWidth" title="Visible width of field" style="width:40" size="4" onkeypress="Hul.validate(event)"/></div></div>'+
+                    
+					'<div class="input-row"><div class="input-header-cell">Help text (under field):</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DisplayHelpText" style="width:350px" title="Help Text"/></div></div>'+
 
-					'<div class="input-row"><div class="input-header-cell">Requirement:</div>'+
+					// Required/recommended optional
+                    '<div class="input-row"><div class="input-header-cell">Requirement:</div>'+
 					'<div class="input-cell">'+
 					'<select id="ed'+rst_ID+'_rst_RequirementType" onchange="onReqtypeChange(event)" style="display:inline; margin-right:20px">'+
 					'<option value="required">required</option>'+
@@ -272,37 +289,49 @@ function EditRecStructure() {
 					'<option value="forbidden">forbidden</option></select>'+
 					'<span id="ed'+rst_ID+'_spanMinValue"><label class="input-header-cell">Minimum&nbsp;values:</label>'+
 					'<input id="ed'+rst_ID+
-					'_rst_MinValues" title="Min Values" style="width:20px" size="2" '+
+					// Minimum values
+                    '_rst_MinValues" title="Min Values" style="width:20px" size="2" '+
 					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/></span></div></div>'+
 
-					'<div class="input-row"><div class="input-header-cell">Repeatability :</div>'+
+					// Repeatability
+                    '<div class="input-row"><div class="input-header-cell">Repeatability :</div>'+
 					'<div class="input-cell">'+
 					'<select id="ed'+rst_ID+'_Repeatability" onchange="onRepeatChange(event)">'+
 					'<option value="single">single</option>'+
 					'<option value="repeatable">repeatable</option>'+
 					'<option value="limited">limited</option></select>'+
-					'<span id="ed'+rst_ID+'_spanMaxValue"><label>Maximum&nbsp;values:</label>'+
+					// Maximum values
+                    '<span id="ed'+rst_ID+'_spanMaxValue"><label>Maximum&nbsp;values:</label>'+
 					'<input id="ed'+rst_ID+
 					'_rst_MaxValues" title="Maximum Values" style="width:20px; text-align:center;" size="2" '+
-					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/></span></div></div>'+
+					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/></span></div></div>'+   
 
-
-					'<div class="input-row"><div class="input-header-cell">Terms list:</div>'+
+					// Terms - enums and relmarkers
+                    '<div class="input-row"><div class="input-header-cell">Terms list:</div>'+
 					'<div class="input-cell">'+
 					'<input id="ed'+rst_ID+'_rst_FilteredJsonTermIDTree" type="hidden"/>'+
 					'<input id="ed'+rst_ID+'_rst_TermIDTreeNonSelectableIDs" type="hidden"/>'+
-//REMOVED BY IAN's request on 16-09					'<input type="submit" value="Filter terms" id="btnSelTerms" onclick="showTermsTree('+rst_ID+', event)" style="margin:0 20px 0 0"/>'+
-//					'Preview:'+
+                    //REMOVED BY IAN's request on 16-09-11 - this provides too much complexity		
+                    //'<input type="submit" value="Filter terms" id="btnSelTerms" onclick="showTermsTree('+rst_ID+', event)" style="margin:0 20px 0 0"/>'+
+                    //					'Preview:'+
 					'<span class="input-cell" id="termsPreview" class="dtyValue"></span>'+
-					'<span class="input-cell" style="margin:0 10px">to change click "Edit" and then "Change Vocabulary"</span>'+
+					'<span class="input-cell" style="margin:0 10px">to change click "Edit Field Type" and then "Change Vocabulary"</span>'+
 					'</div></div>'+
 
-					'<div class="input-row"><div class="input-header-cell">Rectype pointer:</div>'+
+					// Pointer target types - pointers and relmarkers
+                    '<div class="input-row"><div class="input-header-cell">Can point to:</div>'+
 					'<div id="pointerPreview" class="input-cell">'+
 					'<input id="ed'+rst_ID+'_rst_PtrFilteredIDs" type="hidden"/>'+
-//REMOVED BY IAN's request on 16-09					'<input value="Filter pointers" id="btnSelTerms" onclick="showPointerFilter('+rst_ID+', event)">'+
+                    //REMOVED BY IAN's request on 16-09	- too much complexity
+                    // '<input value="Filter pointers" id="btnSelTerms" onclick="showPointerFilter('+rst_ID+', event)">'+
 					'</div></div>'+
-					'<div class="input-row"><div class="input-header-cell">Status:</div>'+
+
+
+                    // Default value
+                    '<div class="input-row"><div class="input-header-cell">Default Value:</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DefaultValue" title="Default Value"/></div></div>'+
+                    
+					// Status
+                    '<div class="input-row"><div class="input-header-cell">Status:</div>'+
 					'<div class="input-cell"><select id="ed'+rst_ID+
 					'_rst_Status" style="display:inline-block" onchange="onStatusChange(event)">'+
 					'<option value="open">open</option>'+
@@ -310,7 +339,8 @@ function EditRecStructure() {
 					'<option value="approved">approved</option>'+
 					'</select>'+  //<option value="reserved">reserved</option>
 
-					'<span><label class="input-header-cell">Non owner visibility:</label><select id="ed'+rst_ID+
+					// Non-owner visibility
+                    '<span><label class="input-header-cell">Non owner visibility:</label><select id="ed'+rst_ID+
 					'_rst_NonOwnerVisibility">'+  // style="display:inline-block"
 					'<option value="hidden">hidden</option>'+
 					'<option value="viewable">viewable</option>'+
