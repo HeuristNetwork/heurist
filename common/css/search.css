@@ -2099,6 +2099,9 @@ ul.menu li ul li.checked a {
 .recordDiv {
 	display:none !important;
 }
+div.list > div.recordDiv.lnk {
+	display:block !important;
+}
 .recordDiv.lnk {
 	display:inline-block !important;
 }
@@ -2106,7 +2109,7 @@ ul.menu li ul li.checked a {
 */#results-level0 .recordDiv {
 	display:inline-block !important;
 }
-#results-level0.list .recordDiv {
+div.list > div.recordDiv {
 	display:block !important;
 }
 .recordDiv.filtered {

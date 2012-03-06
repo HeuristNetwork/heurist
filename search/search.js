@@ -277,15 +277,24 @@ top.HEURIST.search = {
 			"&depth=3";
 		top.HEURIST.registerEvent(window, "heurist-related-recordset-loaded",
 					function (evt) {
-									var i,
-										maxFilterDepth=0;
+									var i,layout,style,
+										maxFilterDepth,
+										maxDepth=0;
 										top.HEURIST.search.addResultLevelLinks(0); // now we know the links add the tags to top level
 										top.HEURIST.search.loadLevelFilter(0);
 									if (top.HEURIST.parameters &&
 										(	top.HEURIST.parameters['rtfilters'] ||
 											top.HEURIST.parameters['ptrfilters'] ||
-											top.HEURIST.parameters['relfilters']	)) {
+											top.HEURIST.parameters['relfilters'] ||
+											(top.HEURIST.parameters['layout'] &&
+												top.HEURIST.parameters['layout'].indexOf('srch') != -1 ))) {
 											//calculate max depth of filters
+											if (top.HEURIST.parameters['layout'] &&
+												top.HEURIST.parameters['layout'].indexOf('srch:') != -1 ) {
+												//
+												layout = top.HEURIST.parameters['layout'].match(/srch:([^\|]+)/);
+												layout = layout[1].split("-");
+											}
 											var rtf = top.HEURIST.parameters['rtfilters'],
 												ptrf = top.HEURIST.parameters['ptrfilters'],
 												relf = top.HEURIST.parameters['relfilters'];
@@ -296,25 +305,33 @@ top.HEURIST.search = {
 														maxFilterDepth = i;
 													}
 											}
-											//expand to the the max defined by the filter or byt the data
-											maxFilterDepth = Math.min(maxFilterDepth, top.HEURIST.search.results.infoByDepth.length-1);
+											//expand to the the max defined by the filter or layout  or by the data
+											maxDepth = Math.min(Math.max((layout? layout.length -1 : 0), maxFilterDepth), top.HEURIST.search.results.infoByDepth.length-1);
 											//for each level loadLevelFilter Menu, loadRelatedLevel results, expand level, filterRelated results with noPush
+											if (layout) {
+												top.HEURIST.search.setResultStyle(layout[0][0],0);
+											}
 											top.HEURIST.search.filterRelated(0,true,true);
-											for (i=1; i<=maxFilterDepth; i++) {
+											for (i=1; i<=maxDepth; i++) {
 												//loadLevelFilter Menu
-												top.HEURIST.search.loadLevelFilter(i);
+												top.HEURIST.search.loadLevelFilter(i,(layout && layout[i] && layout[i][0] ? layout[i][0]: null));
 												//loadRelatedLevel results
 												top.HEURIST.search.loadRelatedLevel(i,true);
 												document.getElementById("showrelated" + i).className += " loaded";
 												//filterRelated results with noPush
 												top.HEURIST.search.filterRelated(i,true,true);
 												// expand level
-												$("#results-level"+i).removeClass('collapsed');// remove collapsed class on parent
-												$("#showrelated" + i).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +i + ")' href='#'>Hide Level "+i+" Related Records </a><span class=\"relatedCount\">"+top.HEURIST.search.results.infoByDepth[i].count+"</span>");
+												if (!(layout && layout[i][1] && layout[i][1].toLowerCase() == "c")) {
+													$("#results-level"+i).removeClass('collapsed');// remove collapsed class on parent
+													$("#showrelated" + i).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +i + ")' href='#'>Hide Level "+i+" Related Records </a><span class=\"relatedCount\">"+top.HEURIST.search.results.infoByDepth[i].count+"</span>");
+												}else{
+													$("#showrelated" + i).html("<a onclick='top.HEURIST.search.toggleRelated(" +i + ")' href='#'>Show Level "+i+" Related Records </a><span class=\"relatedCount\">"+top.HEURIST.search.results.infoByDepth[i].count+"</span>");
+//													$("#showrelated" + i).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +i + ")' href='#'>Show Level "+i+" Related Records </a><span class=\"relatedCount\">"+top.HEURIST.search.results.infoByDepth[i].count+"</span>");
+												}
 											}
-											if (maxFilterDepth < top.HEURIST.search.results.infoByDepth.length - 1 &&
-												top.HEURIST.search.results.infoByDepth[maxFilterDepth+1].count > 0){
-												top.HEURIST.search.loadLevelFilter(maxFilterDepth+1);
+											if (maxDepth < top.HEURIST.search.results.infoByDepth.length - 1 &&
+												top.HEURIST.search.results.infoByDepth[maxDepth+1].count > 0){
+												top.HEURIST.search.loadLevelFilter(maxDepth+1);
 											}
 											//clear the filters
 											if (rtf) {
@@ -376,7 +393,7 @@ top.HEURIST.search = {
 				});
 	},
 
-	loadLevelFilter: function(level){	// it's important that this function be called after results are completely loaded
+	loadLevelFilter: function(level,style){	// it's important that this function be called after results are completely loaded
 		var results = top.HEURIST.search.results;
 		var maxDepth = Math.min((results.params ? results.params.depth : 4), results.infoByDepth.length - 1);
 		if (level > maxDepth) {
@@ -395,8 +412,12 @@ top.HEURIST.search = {
 		}else{
 			resultsDiv =resultsDiv.get(0);
 		}
-		var style = top.HEURIST.util.getDisplayPreference("search-result-style"); // get startup prefernce style
-		resultsDiv.className = style + (level > 0 ? " related-results":"");
+		if (!style) {
+			style = top.HEURIST.util.getDisplayPreference("search-result-style"+level); // get startup prefernce style
+		}
+		if (level > 0 ) {
+			resultsDiv.className = " related-results";
+		}
 
 		var filterDiv =  $(".filter",resultsDiv);
 		if (filterDiv.length == 0) {
@@ -446,12 +467,13 @@ top.HEURIST.search = {
 		viewStyleMenu.className = "view";
 		viewStyleMenu.innerHTML = '<span>View</span>'+
 									'<ul>'+
-										'<li><a href="#" class="view" title="View results as a list" onClick="top.HEURIST.search.setResultStyle(\'list\','+level+');">1 column</a></li>'+
-										'<li><a href="#" class="view" title="View results as a list" onClick="top.HEURIST.search.setResultStyle(\'two-col\','+level+');">2 columns</a></li>'+
-										'<li><a href="#" class="view" title="View results as icons" onClick="top.HEURIST.search.setResultStyle(\'icons\','+level+');">Icons</a></li>'+
-										'<li><a href="#" class="view" title="View results as icons" onClick="top.HEURIST.search.setResultStyle(\'thumbnails\','+level+');">Thumbnails</a></li>'+
+										'<li><a href="#" class="list" title="View results as a list" onClick="top.HEURIST.search.setResultStyle(\'list\','+level+');">1 column</a></li>'+
+										'<li><a href="#" class="two-col" title="View results as 2 column list" onClick="top.HEURIST.search.setResultStyle(\'two-col\','+level+');">2 columns</a></li>'+
+										'<li><a href="#" class="icons" title="View results as icons" onClick="top.HEURIST.search.setResultStyle(\'icons\','+level+');">Icons</a></li>'+
+										'<li><a href="#" class="thumbs" title="View results as thumbnails" onClick="top.HEURIST.search.setResultStyle(\'thumbnails\','+level+');">Thumbnails</a></li>'+
 									'</ul>';
 		filterMenu.appendChild(viewStyleMenu);
+		top.HEURIST.search.setResultStyle(style,level);
 
 		//create rectype filter menu
 		if (levelRecTypes){
@@ -1249,7 +1271,7 @@ top.HEURIST.search = {
 		}
 	},
 
-	renderSearchResults: function(firstIndex, lastIndex) {
+	renderSearchResults: function(firstIndex, lastIndex, style) {
 		document.getElementById("search-status").className = "";
 		// This is rooted ... Firefox doesn't render the display: none on this element until after the results are actually loaded.
 		// We shall do a manual override.
@@ -1260,18 +1282,21 @@ top.HEURIST.search = {
 		// clear out old data before rendering anew
 		top.HEURIST.search.clearResultRows();
 
-		var style = top.HEURIST.util.getDisplayPreference("search-result-style");
+		if (!style) {
+			style = top.HEURIST.util.getDisplayPreference("search-result-style0");
+		}
 		//if (style != "list"  ||  style != "thumbnails" || style !="icons") {
 		//	style = "thumbnails"; // fall back for old styles
 		//top.HEURIST.util.setDisplayPreference("search-result-style", style);
 		//}
 		var resultsDiv = document.getElementById("results-level0");
 		var pageWidth = document.getElementById('page').offsetWidth;
-		if (pageWidth < 390 && style == "two-col") {
-			resultsDiv.className = "list";
-		}else{
-			resultsDiv.className = style;
-		};
+		top.HEURIST.search.setResultStyle(style,0);
+//		if (pageWidth < 390 && style == "two-col") {
+//			resultsDiv.className = "list";
+//		}else{
+//			resultsDiv.className = style;
+//		};
 
 		var recSet = top.HEURIST.search.results.recSet;
 		var recInfo = top.HEURIST.search.results.infoByDepth[0];
@@ -1403,8 +1428,25 @@ top.HEURIST.search = {
 				}
 			}
 		}
-		var searchWidth = top.HEURIST.util.getDisplayPreference("searchWidth");
-		if (style == "two-col" && searchWidth < 180) {return;}
+		if (style.length <= 2) { // code style so decode
+			switch (style[0]) {
+				case "t":
+					style="thumbs";
+				break;
+				case "i":
+					style="icons";
+				break;
+				case "2":
+					style="two-col";
+				break;
+				default:
+					style="list";
+			}
+		}
+		var pageWidth = document.getElementById('page').offsetWidth;
+		if (pageWidth < 390 && style == "two-col") {
+			style = "list";
+		}
 		var i,l;
 		if (allLevels) {
 			i=0;
@@ -1413,12 +1455,15 @@ top.HEURIST.search = {
 			i = level,
 			l = level+1;
 		}
-		var resultDiv;
+		var resultsDiv;
 		for (;i<l; i++) {
-			resultDiv = document.getElementById("results-level"+i);
-			if (resultDiv) {
+			resultsDiv = document.getElementById("results-level"+i);
+			if (resultsDiv) {
 				top.HEURIST.util.setDisplayPreference("search-result-style"+ (allLevels?"":i), style, window,null,true,true);
-				resultDiv.className = style + (i>0?" related-results":"");
+				resultsDiv.className = style + (i>0?" related-results":"") +
+										($(resultsDiv).hasClass("collapsed") ? " collapsed" : "");
+				$("li.view > ul > li", resultsDiv).removeClass("checked");
+				$("li.view > ul > li > a."+style, resultsDiv).parent().addClass("checked");
 			}
 		}
 		return false;
@@ -3211,6 +3256,39 @@ top.HEURIST.search = {
 			ret = "";
 		}else{
 			ret = prefix+"filters="+ret;
+		}
+		return [maxLevel,ret];
+	},
+
+	getLayoutString: function(){
+		var ret = "layout=srch:",
+			prefix;
+		//for each level find its style and collapsed state
+		// then find id's of all check items
+		var i,
+			len = 3,
+			maxLevel = 0;
+		for (i=0; i<=len; i++) {
+			var resultsDiv = $("#results-level" + i);
+			if (!resultsDiv || resultsDiv.length < 1) {
+				break;
+			}
+			maxLevel = i;
+			if (i>0) {// new level exist so add separator
+				ret += "-";
+			}
+			if ($(resultsDiv).hasClass('thumbs')) {
+				ret += "t";
+			}else if ($(resultsDiv).hasClass('icons')) {
+				ret += "i";
+			}else if ($(resultsDiv).hasClass('two-col')) {
+				ret += "2";
+			} else { // default to list
+				ret += "l";
+			}
+			if ($(resultsDiv).hasClass('collapsed')) {
+				ret += "c";
+			}
 		}
 		return [maxLevel,ret];
 	},

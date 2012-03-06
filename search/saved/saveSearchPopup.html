@@ -22,7 +22,8 @@
 	var q = top.HEURIST.parameters["q"];
 	var rtFilter = top.HEURIST.search.getPushDownFilter("rectype"),
 		relFilter = top.HEURIST.search.getPushDownFilter("reltype"),
-		ptrFilter = top.HEURIST.search.getPushDownFilter("ptrtype");
+		ptrFilter = top.HEURIST.search.getPushDownFilter("ptrtype"),
+		layout = top.HEURIST.search.getLayoutString();;
 
 	// if the user pressed Save when showing a collection then divert them to saveCollectionPopup.html
 	if (!q) {
@@ -206,7 +207,15 @@
 
 		var result_style = document.getElementById("result-style-select").value;
 		if (result_style) {
-			query.push("view=" + result_style);
+			if (result_style == "layout") {
+				if ( layout && layout[1] && layout[1].length > 0) {
+					query.push(layout[1])
+				}else{
+					query.push("layout=srch:l");
+				}
+			} else {
+				query.push("view=" + result_style);
+			}
 		}
 		if (top.HEURIST.database.name)
 			cmb_instance.value = top.HEURIST.database.name;
@@ -255,6 +264,8 @@
     <option value=list>One column</option>
     <option value=two-col>Two columns</option>
     <option value=thumbs>Thumbnails</option>
+    <option value=icons>Icons</option>
+    <option value=layout>Save Current Layout</option>
     <option value=blog disabled>Blog</option>
    </select>
   </p>
