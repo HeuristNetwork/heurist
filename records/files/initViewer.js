@@ -124,8 +124,11 @@ function detectSourceAndType(link, extension){
 		type = 'video';
 	}
 
-	//try to detect type by extension and protocol
-	if(type==='unknown'){
+	if(type==='xml'){
+
+		extension = 'xml';
+
+	}else if(type==='unknown'){ //try to detect type by extension and protocol
 
 		if ( Hul.isnull(extension ) ){ //
 			//get extension from url - unreliable

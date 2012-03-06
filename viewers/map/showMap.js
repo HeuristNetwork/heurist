@@ -32,9 +32,10 @@ Event = YAHOO.util.Event;
 function ShowMap() {
 
 	var _className = "ShowMap",
-		_isUseAllRecords = true,
+		_sQueryMode = "all",
 		squery_all,
 		squery_sel,
+		squery_main,
 		currentQuery,
 		systemAllLayers; //all image layers in the system
 
@@ -321,20 +322,6 @@ function ShowMap() {
 		return {items: items, kmls:kmls, rec_withtime:rec_withtime};
 	}
 
-/* outdated - to remove
-	function _onSelectionChange(eventType, argList) {
-		if (parent.document.getElementById("m3").className == "yui-hidden") {
-			return false;
-		}else {
-			if ( (!_isUseAllRecords && eventType == "heurist-selectionchange")
-						 || eventType == "heurist-recordset-loaded")
-			{
-				HRST.search.mapSelected3();
-			}
-		}
-	}
-*/
-
 	var layout, _ismap, _istime, _hidetoolbar = false;
 
 	function setLayout(ismap, istime){
@@ -392,11 +379,10 @@ function ShowMap() {
 
 
 		if(HRST.displayPreferences){
-			_isUseAllRecords = (top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]=="all");
-			//ian's request document.getElementById('rbMapUseAllRecords').checked = _isUseAllRecords;
-			document.getElementById('rbMapUseSelectedRecords').checked = !_isUseAllRecords;
+			_sQueryMode = top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"];
+			document.getElementById('rbMapUseSelectedRecords').value = _sQueryMode;
 		}else{
-			_isUseAllRecords = true;
+			_sQueryMode = "all";
 			//hide toolbar
 			_hidetoolbar = true;
 		}
@@ -416,9 +402,11 @@ function ShowMap() {
 			 s1 = null;
 			 squery_all = top.HEURIST.currentQuery_all;
 			 squery_sel = top.HEURIST.currentQuery_sel;
+			 squery_main = top.HEURIST.currentQuery_main;
 		}else{
-			squery_all = _isUseAllRecords?s1:null;
-			squery_sel = _isUseAllRecords?null:s1;
+			squery_all = _sQueryMode=="all"?s1:null;
+			squery_sel = _sQueryMode=="selected"?s1:null;
+			squery_main = _sQueryMode=="main"?s1:null;
 		}
 		_reload();
 
@@ -535,7 +523,13 @@ function ShowMap() {
 
 	//
 	function _getQuery(){
-		return _isUseAllRecords ?squery_all:squery_sel;
+		if(_sQueryMode=="all"){
+			return squery_all;
+		}else if(_sQueryMode=="selected"){
+			return squery_sel;
+		}else {
+			return squery_main;
+		}
 	}
 
 	// NOT USED relRecords - array of queries
@@ -563,33 +557,33 @@ function ShowMap() {
 			return _getQuery();
 		},
 
-		setQuery: function(q_all, q_sel){
+		setQuery: function(q_all, q_sel, q_main){
 			if(q_all) squery_all = q_all;
 			squery_sel = q_sel;
+			squery_main = q_main;
 		},
 
-		isUseAllRecords: function(){
-			return _isUseAllRecords;
+		getQueryMode: function(){
+			return _sQueryMode;
 		},
 
 		isEmpty: function(){
 			return !(_ismap || _istime);
 		},
 
-		setUseAllRecords: function(val){
+		setQueryMode: function(val){
 			if(val.target){
-				val = !val.target.checked; // (val.target.value == "0");
+				val = val.target.value; // (val.target.value == "0");
 			}
-			var isChanged = _isUseAllRecords != val;
-			_isUseAllRecords = val;
-			if (isChanged) { // && _isUseAllRecords
+			var isChanged = _sQueryMode != val;
+			_sQueryMode = val;
+			if (isChanged) {
 				_reload();
 			}
 
 			if(document.getElementById('rbMapUseSelectedRecords')){
-				top.HEURIST.util.setDisplayPreference("showSelectedOnlyOnMapAndSmarty", _isUseAllRecords?"all":"selected");
-				//ian's request document.getElementById('rbMapUseAllRecords').checked = _isUseAllRecords;
-				document.getElementById('rbMapUseSelectedRecords').checked = !_isUseAllRecords;
+				top.HEURIST.util.setDisplayPreference("showSelectedOnlyOnMapAndSmarty", _sQueryMode);
+				document.getElementById('rbMapUseSelectedRecords').value = _sQueryMode;
 			}
 		},
 

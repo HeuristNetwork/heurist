@@ -281,10 +281,17 @@ button {height:auto !important;
 								 onChange="showMap.setUseAllRecords(event)">
 							<label>Selected only</label>
 -->
+<!--
 							<input type="checkbox" style="display:inline-block;"
 								id="rbMapUseSelectedRecords" name="showmapmode" value="1"
 								 onChange="showMap.setUseAllRecords(event)">
 							<label>Selected only</label>
+-->
+							<select id="rbMapUseSelectedRecords" name="showmapmode" onChange="showMap.setQueryMode(event)" style="width:90px">
+								<option value="all" selected="selected">All on page</option>
+								<option value="selected">Selected only</option>
+								<option value="main">Query result</option>
+							</select>
 					</div>
 					<label>Background:</label>
 					<select id="cbLayers" style="display:inline-block;" onchange="showMap.loadLayer(event)"></select>

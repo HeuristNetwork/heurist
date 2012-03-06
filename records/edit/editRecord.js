@@ -1974,6 +1974,7 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 				fileElt.name = inputDiv.name;
 				fileElt.className = "file-select";
 				fileElt.type = "file";
+				fileElt.style.height = 26;
 
 			inputDiv.appendChild(fileElt);
 
@@ -1985,6 +1986,8 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.constructInput = function(i
 			var thisRef = this;
 			fileElt.onchange = function() { top.HEURIST.edit.uploadFileInput.call(thisRef, fileElt); };
 			inputDiv.className = "file-div empty";
+			//inputDiv.style.height = "40px";
+			//inputDiv.style.border = "solid 1px red"; debug
 
 			//additional button for Thumbnail Image - to create web snap shot
 			if(Number(top.HEURIST.edit.record.rectypeID) === top.HEURIST.magicNumbers['RT_INTERNET_BOOKMARK']){
@@ -2046,6 +2049,11 @@ top.HEURIST.edit.inputs.BibDetailFileInput.prototype.getFileData = function() {
 	}
 	return "";
 };
+top.HEURIST.edit.inputs.BibDetailFileInput.prototype.setFileData = function(_filedata) {
+	if(this.inputs.length>0) {
+		this.inputs[0].filedata = _filedata;
+	}
+}
 top.HEURIST.edit.inputs.BibDetailFileInput.prototype.getPrimaryValue = function(input) { return input? input.valueElt.value : ""; };
 top.HEURIST.edit.inputs.BibDetailFileInput.prototype.regex = new RegExp("\\S");
 /*
@@ -2645,6 +2653,7 @@ top.HEURIST.edit.inputs.BibURLInput = function(parentElement, defaultValue, requ
 	var headerCell = row.appendChild(this.document.createElement("div"));
 		headerCell.className = "input-header-cell";
 		headerCell.appendChild(this.document.createTextNode("URL"));
+	this.headerCell  = headerCell;
 	var inputCell = row.appendChild(this.document.createElement("div"));
 		inputCell.className = "input-cell";
 	this.inputCell = inputCell;

@@ -111,8 +111,13 @@
 				</ul>
 			</li>
 		</ul>
-		<input type="checkbox" id="cbUseAllRecords1" onChange="onUseAll(event)" style="margin-right: 5px; vertical-align: middle;"/>
-		Selected only </div>
+							<select id="cbUseAllRecords1" onChange="setQueryMode(event)" style="width:90px">
+								<option value="all" selected="selected">All on page</option>
+								<option value="selected">Selected only</option>
+								<option value="main">Query result</option>
+							</select>
+
+		</div>
 	<div id="rep_container"></div>
 </div>
 <div id="editorcontainer" style="display:none">
@@ -198,8 +203,12 @@
 				<option value="2">Show errors</option>
 				<option value="3">Debug info</option>
 			</select>
-			<input type="checkbox" id="cbUseAllRecords2" onChange="onUseAll(event)"/>
-			Selected only </div>
+							<select id="cbUseAllRecords2" onChange="setQueryMode(event)" style="width:90px">
+								<option value="all" selected="selected">All on page</option>
+								<option value="selected">Selected only</option>
+								<option value="main">Query result</option>
+							</select>
+		</div>
 		<button onClick="doExecuteFromEditor()" title="Test your template" style="font-weight: 800;">Update output below</button>
 		<button onClick="doEditor(2)" title="Save, Close and Execute the updated template">Save</button>
 		<button onClick="doEditor(1)">Save As</button>
@@ -375,9 +384,9 @@ if(isInited){
 		}
 	}
 
-	function onUseAll(event,needReload){
+	function setQueryMode(event,needReload){
 		var elem = event.target;
-		window.showReps.setUseAllRecords(!elem.checked);
+		window.showReps.setQueryMode(elem.value);
 	}
 
 	//

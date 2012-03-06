@@ -73,7 +73,13 @@ function upload_file($name, $mimetypeExt, $tmp_name, $error, $size, $description
 	{	//find the extention
 		$extension = strtolower($matches[1]);
 		$mimeType = findMimeType($extension);
-		if($mimeType) $mimetypeExt = $extension;
+		/*
+		//unfortunately mimeType is not defined for some extensions
+		if(!$mimeType){
+			return "Error: unsupported extension ".$extension;
+	    }
+	    */
+		$mimetypeExt = $extension;
 	}
 
 	if ($size && $size < 1024) {
@@ -162,7 +168,7 @@ function register_file($fullname, $description, $needConnect) {
 
 	if($mimetypeExt){ //check extension
 		$mimeType = findMimeType($mimetypeExt);
-		if($mimeType==null){
+		if(!$mimeType){
 			return "Error: unsupported extension ".$mimetypeExt;
 	    }
 	}
@@ -184,19 +190,23 @@ function register_file($fullname, $description, $needConnect) {
 	    return $file_id;
 	}else{
 
-	    $res = mysql__insert('recUploadedFiles', array(	'ulf_OrigFileName' => $filename,
+		$toins = array(	'ulf_OrigFileName' => $filename,
 				'ulf_UploaderUGrpID' => get_user_id(),
 				'ulf_Added' => date('Y-m-d H:i:s'),
 				'ulf_MimeExt ' => $mimetypeExt,
 				'ulf_FileSizeKB' => $file_size,
-				'ulf_Description' => $description? $description : NULL,
+				'ulf_Description' => $description?$description : NULL,
 				'ulf_FilePath' => $dirname,
 				'ulf_FileName' => $filename,
-				'ulf_Parameters' => "mediatype=".getMediaType($mimeType, $mimetypeExt))
-				);
+				'ulf_Parameters' => "mediatype=".getMediaType($mimeType, $mimetypeExt));
+
+
+//error_log(">>>>>".print_r($toins,true));
+
+	    $res = mysql__insert('recUploadedFiles', $toins);
 
 	    if (!$res) {
-		    return "Error registration file $fullanme into database";
+		    return "Error registration file $fullname into database";
 	    }
 
 	    $file_id = mysql_insert_id();
@@ -241,8 +251,12 @@ function detectSourceAndType($url){
 		$type = 'video';
 	}
 
-	//try to detect type by extension and protocol
-	if($type=='unknown'){
+
+	if($type=='xml'){
+
+		$extension = 'xml';
+
+	}else if($type=='unknown'){ //try to detect type by extension and protocol
 
 		//get extension from url - unreliable
 		$extension = null;
@@ -287,6 +301,8 @@ function getMediaType($mimeType, $extension){
 			$type = 'document';
 		}else if($extension=="swf"){
 			$type = 'flash';
+		}else if($extension=="xml"){
+			$type = 'xml';
 		}else{
 			$type = null;
 		}

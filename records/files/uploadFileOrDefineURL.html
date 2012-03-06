@@ -35,7 +35,7 @@
 			}
 		</style>
 	</head>
-<body class="popup">
+<body class="popup" style="overflow:hidden;">
 <script src="../../common/js/utilsLoad.js"></script>
 <script src="../../common/js/utilsUI.js"></script>
 <script src="uploadFileOrDefineURL.js"></script>
@@ -47,8 +47,8 @@ if (window == top) {
 }
 </script>
 
-<div>
-<div id="search" class="banner" style="top:0;height:105px">
+<div style="overflow:hidden;">
+<div id="search" class="banner" style="top:0;height:105px;">
 		<div style="width: 100%;" id="div_fileupload"></div>
 		<div style="width: 100%;" id="div_url"></div>
 		<div style="width: 100%; text-align: center;" id="div_type">
@@ -70,13 +70,14 @@ if (window == top) {
 				<option>text/html</option>
 				<option>document</option>
 				<option>flash</option>
+				<option>xml</option>
 			</select>
 			<button onclick="onApply()">Apply</button>
 			<button onclick="onCancel()">Cancel</button>
 		</div>
 </div>
 </div>
-<div id="preview" style="position:absolute;top:106px;bottom:0px;left:0px;right:0px;"></div>
+<div id="preview" style="position:absolute;top:106px;bottom:0px;left:0px;right:0px;"><div class='wrap'><div id='errorMsg'><span>PREVIEW</span></div></div></div>
 
   <script language="JavaScript">
   		top.HEURIST.registerEvent(window, "load", initPage);

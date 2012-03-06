@@ -32,14 +32,15 @@ function ShowReps() {
 
 	var _className = "ShowReps",
 		_originalFileName,
-		_currentQuery_all,
-		_currentQuery_sel,
+		squery_all,
+		squery_sel,
+		squery_main,
 		_variables, //object with all variables
 		_varsTree, //treeview object
 		_needListRefresh = false, //if true - reload list of templates after editor exit
 		_keepTemplateValue,
 		_needSelection = false,
-		_isUseAllRecords = true,
+		_sQueryMode = "all",
 		mySimpleDialog,
 		needReload = true,
 		infoMessageBox;
@@ -126,18 +127,20 @@ function ShowReps() {
 	function _init() {
 		_setLayout(true, false); //aftert load show viewer only
 
-		_isUseAllRecords = (top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]=="all");
-		document.getElementById('cbUseAllRecords2').checked = !_isUseAllRecords;
-		document.getElementById('cbUseAllRecords1').checked = !_isUseAllRecords;
+		_sQueryMode = top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"];
+		document.getElementById('cbUseAllRecords2').value = _sQueryMode;
+		document.getElementById('cbUseAllRecords1').value = _sQueryMode;
 
 		var s1 = location.search;
 		if(s1=="" || s1=="?null" || s1=="?noquery"){
 			 s1 = null;
-			 _currentQuery_all = top.HEURIST.currentQuery_all;
-			 _currentQuery_sel = top.HEURIST.currentQuery_sel;
+			 squery_all = top.HEURIST.currentQuery_all;
+			 squery_sel = top.HEURIST.currentQuery_sel;
+			 squery_main = top.HEURIST.currentQuery_main;
 		}else{
-			_currentQuery_all = _isUseAllRecords?s1:null;
-			_currentQuery_sel = _isUseAllRecords?null:s1;
+			squery_all = _sQueryMode=="all"?s1:null;
+			squery_sel = _sQueryMode=="selected"?s1:null;
+			squery_main = _sQueryMode=="main"?s1:null;
 		}
 
 		_reload_templates();
@@ -193,10 +196,10 @@ function ShowReps() {
 				var squery = _getQuery();
 
 				if(Hul.isempty(squery) ||  (squery.indexOf("&q=")<0) || (squery.indexOf("&q=") == squery.length-3)) {
-					if(_isUseAllRecords){
-						_updateReps("<b><font color='#ff0000'>Perform search to see template output</font></b>");
-					}else{
+					if(_sQueryMode=="selected"){
 						_updateReps("<div class='wrap'><div id='errorMsg'><span>No Records Selected</span></div></div>");
+					}else{
+						_updateReps("<b><font color='#ff0000'>Perform search to see template output</font></b>");
 					}
 
 				}else{
@@ -1238,7 +1241,13 @@ function ShowReps() {
 
 	//
 	function _getQuery(){
-		return _isUseAllRecords?_currentQuery_all:_currentQuery_sel;
+		if(_sQueryMode=="all"){
+			return squery_all;
+		}else if(_sQueryMode=="selected"){
+			return squery_sel;
+		}else {
+			return squery_main;
+		}
 	}
 
 	//public members
@@ -1248,9 +1257,10 @@ function ShowReps() {
 				return _getQuery();
 			},
 
-			setQuery: function(q_all, q_sel){
-				if(q_all) _currentQuery_all = q_all;
-				_currentQuery_sel = q_sel;
+			setQuery: function(q_all, q_sel, q_main){
+				if(q_all) squery_all = q_all;
+				squery_sel = q_sel;
+				squery_main = q_main;
 			},
 
 			processTemplate: function (template_file){
@@ -1261,21 +1271,21 @@ function ShowReps() {
 				return _needSelection;
 			},
 
-			isUseAllRecords: function(){
-				return _isUseAllRecords;
+			getQueryMode: function(){
+				return _sQueryMode;
 			},
 
-			setUseAllRecords: function(val){
-				var isChanged = _isUseAllRecords != val;
-				_isUseAllRecords = val;
-				top.HEURIST.util.setDisplayPreference("showSelectedOnlyOnMapAndSmarty", _isUseAllRecords?"all":"selected");
+			setQueryMode: function(val){
+				var isChanged = _sQueryMode != val;
+				_sQueryMode = val;
+				top.HEURIST.util.setDisplayPreference("showSelectedOnlyOnMapAndSmarty", _sQueryMode);
 
 
 				if(document.getElementById('cbUseAllRecords1')){
-						document.getElementById('cbUseAllRecords1').checked = !val;
+						document.getElementById('cbUseAllRecords1').value = !val;
 				}
 				if(document.getElementById('cbUseAllRecords2')){
-					document.getElementById('cbUseAllRecords2').checked = !val;
+					document.getElementById('cbUseAllRecords2').value = !val;
 				}
 
 				if (isChanged && needReload) {

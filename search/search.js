@@ -52,8 +52,6 @@ var _TAB_MAP = 1,
 top.HEURIST.search = {
 	VERSION: "1",
 
-	//currentSearchQuery_all:null, //keeps current search query to use it in mapMenu (publish map)
-	//currentSearchQuery_sel:null,
 	pageLimit: 5000,
 	resultsPerPage: top.HEURIST.util.getDisplayPreference("results-per-page"),
 	currentPage: 0,
@@ -2530,18 +2528,21 @@ top.HEURIST.search = {
 			var p = top.HEURIST.parameters,
 				query_string = "w=all",
 				query_string_sel = null,
-				query_string_all = null;
+				query_string_all = null,
+				query_string_main = null;
 
 
 			if(p["q"]){
 				query_string = 'ver='+(p['ver'] || "") +
-									'&w=all'+   //(p['w'] || "") +
+									'&w='+(p['w'] || "") +
 									'&stype='+(p['stype'] || "");
 			}
 
 			var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 					 (top.HEURIST.database.name?top.HEURIST.database.name:''));
 			query_string = query_string+"&db="+db;
+
+			query_string_main = query_string + (p["q"]?"&q="+p["q"]:'');
 
 			//only selected
 			var recIDs = top.HEURIST.search.getSelectedRecIDs().get();
@@ -2578,14 +2579,22 @@ top.HEURIST.search = {
 			}
 			query_string_all = encodeURI(query_string + '&q=ids:' + recIDs.join(","));
 
-			var currentSearchQuery =
-					(top.HEURIST.util.getDisplayPreference("showSelectedOnlyOnMapAndSmarty")=="selected")
-								?query_string_sel :query_string_all;
+			var currentSearchQuery = '';
+			var selmode = top.HEURIST.util.getDisplayPreference("showSelectedOnlyOnMapAndSmarty");
+			if(selmode=="selected"){
+				currentSearchQuery = query_string_sel;
+			}else if(selmode=="all"){
+				currentSearchQuery = query_string_all;
+			}else{
+				currentSearchQuery = query_string_main;
+			}
+
 			//top.HEURIST.search.currentSearchQuery_all = query_string_all;
 			//top.HEURIST.search.currentSearchQuery_sel = query_string_sel;
 
 			top.HEURIST.currentQuery_all = query_string_all;
 			top.HEURIST.currentQuery_sel = query_string_sel;
+			top.HEURIST.currentQuery_main = query_string_main;
 
 			if(currentTab===_TAB_MAP){ //map
 
@@ -2593,7 +2602,7 @@ top.HEURIST.search = {
 				if(mapframe.src){ //do not reload map frame
 					var showMap = mapframe.contentWindow.showMap;
 					if(showMap){
-						showMap.setQuery( query_string_all, query_string_sel);
+						showMap.setQuery( query_string_all, query_string_sel, query_string_main);
 						showMap.processMap(); //reload
 					}else{
 						//alert('not inited 1');
@@ -2610,7 +2619,7 @@ top.HEURIST.search = {
 
 					var showReps = smartyFrame.contentWindow.showReps;
 					if(showReps){
-						showReps.setQuery( query_string_all, query_string_sel);
+						showReps.setQuery( query_string_all, query_string_sel, query_string_main);
 						showReps.processTemplate();
 					}else{
 						//alert('not inited 2');
@@ -2674,15 +2683,6 @@ top.HEURIST.search = {
 				mapframe.src = url;
 			}
 	},*/
-
-	//TODO: this code needs to be changed to the application model using events. Special knowledge of applications
-	// couples this code to the application and is not maintainable in the long run.
-	onMapUseAllRecords: function(event) {
-		var mapframe = document.getElementById("map-frame3");
-		if(mapframe.src){
-			mapframe.contentWindow.showMap.setUseAllRecords(!event.target.checked);
-		}
-	},
 
 	/*outdaated
 	//ARTEM
@@ -2852,7 +2852,7 @@ top.HEURIST.search = {
 		if (!top.HEURIST.search.selectedRecordIds || top.HEURIST.search.selectedRecordIds.length == 0) return false;
 		var level = 0;
 		for (level; level < top.HEURIST.search.selectedRecordIds.length; level++) {
-			while (top.HEURIST.search.selectedRecordIds[level].length != 0 ) {
+			while (top.HEURIST.search.selectedRecordIds[level] && top.HEURIST.search.selectedRecordIds[level].length != 0 ) {
 				recID = top.HEURIST.search.selectedRecordIds[level][0];
 				top.HEURIST.search.deselectResultItem(recID,level);
 			}
@@ -3902,7 +3902,7 @@ function removeCustomAlert() {
 
 			var mapFrame3 = document.getElementById("map-frame3");
 			if(mapFrame3.src && mapFrame3.contentWindow.showMap){
-				mapFrame3.contentWindow.showMap.setUseAllRecords(
+				mapFrame3.contentWindow.showMap.setQueryMode(
 						(top.HEURIST.util.getDisplayPreference("showSelectedOnlyOnMapAndSmarty")=="all"));
 				mapFrame3.contentWindow.showMap.checkResize(); //to fix gmap bug
 			}
@@ -3911,7 +3911,7 @@ function removeCustomAlert() {
 		}else if (currentTab===_TAB_SMARTY){ //smarty
 			var smartyFrame = document.getElementById("smarty-frame");
 			if(smartyFrame.src && smartyFrame.contentWindow.showReps){
-				smartyFrame.contentWindow.showReps.setUseAllRecords(
+				smartyFrame.contentWindow.showReps.setQueryMode(
 						(top.HEURIST.util.getDisplayPreference("showSelectedOnlyOnMapAndSmarty")=="all"), false);
 			}
 			top.HEURIST.search.updateMapOrSmarty();

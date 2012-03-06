@@ -32,8 +32,7 @@ $type_media = $filedata['mediaType'];
 
 $isplayer = (array_key_exists('player',$_REQUEST) &&  $_REQUEST['player']=='yes');
 
-
-error_log(">>>>>".$type_media."   ".$isplayer);
+//error_log(">>>>>".$type_media."   ".$isplayer);
 
 if($isplayer){
 
