@@ -32,9 +32,7 @@ function ShowReps() {
 
 	var _className = "ShowReps",
 		_originalFileName,
-		squery_all,
-		squery_sel,
-		squery_main,
+		//squery_all,squery_sel,squery_main,
 		_variables, //object with all variables
 		_varsTree, //treeview object
 		_needListRefresh = false, //if true - reload list of templates after editor exit
@@ -131,7 +129,7 @@ function ShowReps() {
 		document.getElementById('cbUseAllRecords2').value = _sQueryMode;
 		document.getElementById('cbUseAllRecords1').value = _sQueryMode;
 
-		var s1 = location.search;
+		/*var s1 = location.search;
 		if(s1=="" || s1=="?null" || s1=="?noquery"){
 			 s1 = null;
 			 squery_all = top.HEURIST.currentQuery_all;
@@ -141,7 +139,7 @@ function ShowReps() {
 			squery_all = _sQueryMode=="all"?s1:null;
 			squery_sel = _sQueryMode=="selected"?s1:null;
 			squery_main = _sQueryMode=="main"?s1:null;
-		}
+		}*/
 
 		_reload_templates();
 
@@ -1242,11 +1240,11 @@ function ShowReps() {
 	//
 	function _getQuery(){
 		if(_sQueryMode=="all"){
-			return squery_all;
+			return top.HEURIST.currentQuery_all;
 		}else if(_sQueryMode=="selected"){
-			return squery_sel;
+			return top.HEURIST.currentQuery_sel;
 		}else {
-			return squery_main;
+			return top.HEURIST.currentQuery_main;
 		}
 	}
 
@@ -1257,11 +1255,11 @@ function ShowReps() {
 				return _getQuery();
 			},
 
-			setQuery: function(q_all, q_sel, q_main){
+			/*setQuery: function(q_all, q_sel, q_main){
 				if(q_all) squery_all = q_all;
 				squery_sel = q_sel;
 				squery_main = q_main;
-			},
+			},*/
 
 			processTemplate: function (template_file){
 				_reload(template_file);

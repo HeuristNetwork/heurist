@@ -45,11 +45,11 @@
 
      		query_string = encodeURI(query_string);
 */
-
+			var mode = top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"];
 	 		var currentSearchQuery =
-	 				(top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"]=="selected")
+	 				(mode=="selected")
 						?top.HEURIST.currentQuery_sel  //top.HEURIST.search.currentSearchQuery_sel
-						:top.HEURIST.currentQuery_all;  //top.HEURIST.search.currentSearchQuery_all;
+						:((mode=="all")?top.HEURIST.currentQuery_all:top.HEURIST.currentQuery_main);
 
 			if(currentSearchQuery)
 			{

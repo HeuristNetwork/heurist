@@ -90,7 +90,7 @@
 			if ($fres) {
 				$row2 = mysql_fetch_row($fres);
 				$ext = strtolower( $row2[1] );
-				if($row2[0] && ($ext=="kml")){
+				if($row2[0]){ // && ($ext=="kml")){
 					return $row2[0];
 				}
 			}
@@ -113,7 +113,7 @@
 
 //d.dtl_UploadedFileID,e.dtl_UploadedFileID,f.dtl_UploadedFileID,
 
-		$res = mysql_query("select a.dtl_Value, b.dtl_Value, rec_URL, c.dtl_UploadedFileID, g.dtl_Value, h.dtl_Value, i.dtl_UploadedFileID, rec_RecTypeID
+		$squery = "select a.dtl_Value, b.dtl_Value, rec_URL, c.dtl_UploadedFileID, g.dtl_Value, h.dtl_Value, i.dtl_UploadedFileID, rec_RecTypeID
 		from Records
 		left join recDetails a on a.dtl_RecID=rec_ID and a.dtl_DetailTypeID=".(defined('DT_SHORT_SUMMARY')?DT_SHORT_SUMMARY:"0").
 		" left join recDetails b on b.dtl_RecID=rec_ID and b.dtl_DetailTypeID=".(defined('DT_EXTENDED_DESCRIPTION')?DT_EXTENDED_DESCRIPTION:"0").
@@ -124,7 +124,11 @@
 		" left join recDetails g on g.dtl_RecID=rec_ID and g.dtl_DetailTypeID=".(defined('DT_MAP_IMAGE_LAYER_REFERENCE')?DT_MAP_IMAGE_LAYER_REFERENCE:"0").
 		" left join recDetails h on h.dtl_RecID=rec_ID and h.dtl_DetailTypeID=".(defined('DT_KML')?DT_KML:"0").
 		" left join recDetails i on i.dtl_RecID=rec_ID and i.dtl_DetailTypeID=".(defined('DT_KML_FILE')?DT_KML_FILE:"0").
-		" where rec_ID=$bibID");
+		" where rec_ID=$bibID";
+
+//error_log(">>>>>>QUERY=".$squery);
+
+		$res = mysql_query($squery);
 		$row = mysql_fetch_row($res);
 		$records[$bibID]["recID"] = $bibID;
 		$records[$bibID]["rectype"] = $row[7];

@@ -826,7 +826,8 @@ top.HEURIST.search = {
 		var wgHTML = "";
 		var wgColor = "";
 		if (res[6]  &&  res[6] != "0" && res[6] != res[1]) {	// check if this is a usergroup owned record
-			linkTitle = "Owned by " + (top.HEURIST.workgroups[wgID] ? "workgroup " + top.HEURIST.workgroups[wgID].name:top.HEURIST.allUsers[wgID][0]) + " - " + ((res[7]=='hidden')? "hidden" : "read-only") + " to others";
+			var sowner = top.HEURIST.allUsers[wgID]?top.HEURIST.allUsers[wgID][0]:"unknow";
+			linkTitle = "Owned by " + (top.HEURIST.workgroups[wgID] ? "workgroup " + top.HEURIST.workgroups[wgID].name:sowner) + " - " + ((res[7]=='hidden')? "hidden" : "read-only") + " to others";
 			wgHTML = res[6];
 			wgColor = " style='color:" + ((res[7]=='hidden')? "red" : "green") + "'";
 		}
@@ -2579,7 +2580,7 @@ top.HEURIST.search = {
 			}
 			query_string_all = encodeURI(query_string + '&q=ids:' + recIDs.join(","));
 
-			var currentSearchQuery = '';
+			/*var currentSearchQuery = '';
 			var selmode = top.HEURIST.util.getDisplayPreference("showSelectedOnlyOnMapAndSmarty");
 			if(selmode=="selected"){
 				currentSearchQuery = query_string_sel;
@@ -2587,10 +2588,7 @@ top.HEURIST.search = {
 				currentSearchQuery = query_string_all;
 			}else{
 				currentSearchQuery = query_string_main;
-			}
-
-			//top.HEURIST.search.currentSearchQuery_all = query_string_all;
-			//top.HEURIST.search.currentSearchQuery_sel = query_string_sel;
+			}*/
 
 			top.HEURIST.currentQuery_all = query_string_all;
 			top.HEURIST.currentQuery_sel = query_string_sel;
@@ -2602,7 +2600,7 @@ top.HEURIST.search = {
 				if(mapframe.src){ //do not reload map frame
 					var showMap = mapframe.contentWindow.showMap;
 					if(showMap){
-						showMap.setQuery( query_string_all, query_string_sel, query_string_main);
+						//showMap.setQuery( query_string_all, query_string_sel, query_string_main);
 						showMap.processMap(); //reload
 					}else{
 						//alert('not inited 1');
@@ -2619,7 +2617,7 @@ top.HEURIST.search = {
 
 					var showReps = smartyFrame.contentWindow.showReps;
 					if(showReps){
-						showReps.setQuery( query_string_all, query_string_sel, query_string_main);
+						///showReps.setQuery( query_string_all, query_string_sel, query_string_main);
 						showReps.processTemplate();
 					}else{
 						//alert('not inited 2');
@@ -3903,7 +3901,7 @@ function removeCustomAlert() {
 			var mapFrame3 = document.getElementById("map-frame3");
 			if(mapFrame3.src && mapFrame3.contentWindow.showMap){
 				mapFrame3.contentWindow.showMap.setQueryMode(
-						(top.HEURIST.util.getDisplayPreference("showSelectedOnlyOnMapAndSmarty")=="all"));
+						top.HEURIST.util.getDisplayPreference("showSelectedOnlyOnMapAndSmarty"));
 				mapFrame3.contentWindow.showMap.checkResize(); //to fix gmap bug
 			}
 			top.HEURIST.search.updateMapOrSmarty();
@@ -3912,7 +3910,7 @@ function removeCustomAlert() {
 			var smartyFrame = document.getElementById("smarty-frame");
 			if(smartyFrame.src && smartyFrame.contentWindow.showReps){
 				smartyFrame.contentWindow.showReps.setQueryMode(
-						(top.HEURIST.util.getDisplayPreference("showSelectedOnlyOnMapAndSmarty")=="all"), false);
+						top.HEURIST.util.getDisplayPreference("showSelectedOnlyOnMapAndSmarty"), false);
 			}
 			top.HEURIST.search.updateMapOrSmarty();
 		}

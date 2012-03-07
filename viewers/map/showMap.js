@@ -33,9 +33,7 @@ function ShowMap() {
 
 	var _className = "ShowMap",
 		_sQueryMode = "all",
-		squery_all,
-		squery_sel,
-		squery_main,
+		//squery_all,		squery_sel,		squery_main,
 		currentQuery,
 		systemAllLayers; //all image layers in the system
 
@@ -145,6 +143,12 @@ function ShowMap() {
 
 		var errors = initMapping(); //from mapping.js
 		_showErrorSign(errors);
+
+		if(context.cntWithGeo+HEURIST.tmap.layers.length>1){
+			_showMessage(context.cntWithGeo+HEURIST.tmap.layers.length+' objects');
+		}else{
+			_showMessage('');
+		}
 	}
 
 	/**
@@ -397,7 +401,7 @@ function ShowMap() {
 		});
 		*/
 
-		var s1 = location.search;
+		/*var s1 = location.search;
 		if(s1=="" || s1=="?null" || s1=="?noquery"){
 			 s1 = null;
 			 squery_all = top.HEURIST.currentQuery_all;
@@ -407,7 +411,7 @@ function ShowMap() {
 			squery_all = _sQueryMode=="all"?s1:null;
 			squery_sel = _sQueryMode=="selected"?s1:null;
 			squery_main = _sQueryMode=="main"?s1:null;
-		}
+		}*/
 		_reload();
 
 		if(HRST.displayPreferences){
@@ -508,6 +512,21 @@ function ShowMap() {
 		}
 	}
 
+	/**
+	* show/hide error sign with report alert - what's wrong with image layers
+	*/
+	function _showMessage(msg){
+
+		var elem = document.getElementById('messageSign');
+		if(elem){
+			if(Hul.isempty(msg)){
+				elem.innerHTML = '';
+			}else{
+				elem.innerHTML = msg;
+			}
+		}
+	}
+
 
 	/**
 	* mode: 0 - both, 1 -image layers, 2 - kml
@@ -524,11 +543,11 @@ function ShowMap() {
 	//
 	function _getQuery(){
 		if(_sQueryMode=="all"){
-			return squery_all;
+			return top.HEURIST.currentQuery_all;
 		}else if(_sQueryMode=="selected"){
-			return squery_sel;
+			return top.HEURIST.currentQuery_sel;
 		}else {
-			return squery_main;
+			return top.HEURIST.currentQuery_main;
 		}
 	}
 
@@ -557,11 +576,11 @@ function ShowMap() {
 			return _getQuery();
 		},
 
-		setQuery: function(q_all, q_sel, q_main){
+		/*setQuery: function(q_all, q_sel, q_main){
 			if(q_all) squery_all = q_all;
 			squery_sel = q_sel;
 			squery_main = q_main;
-		},
+		},*/
 
 		getQueryMode: function(){
 			return _sQueryMode;
