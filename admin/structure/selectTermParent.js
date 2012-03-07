@@ -80,7 +80,7 @@ function SelectTermParent() {
 			var newparent_id = _currentNode.data.id;
 			window.close(newparent_id);
 		}else{
-			alert("You have to select term in the tree");
+			alert("Please select a term in the tree");
 		}
 	}
 

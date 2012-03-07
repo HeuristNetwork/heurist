@@ -298,7 +298,7 @@ function ShowReps() {
 			var squery = _getQuery();
 
 			if(Hul.isnull(squery)){
-				alert('You have to select some records in search result');
+				alert('Please select some records in search results');
 			}else{
 				var baseurl = top.HEURIST.basePath + "viewers/smarty/templateGenerate.php";
 				top.HEURIST.util.getJsonData(baseurl, __onGenerateTemplate, squery);
@@ -1106,7 +1106,7 @@ function ShowReps() {
 			_varsTree.render();
 
 		}else{
-			alert('To insert the loop for particular rectord type you have to select one of parent nodes');
+			alert('To insert the loop for a particular rectord type, you first have to select one of the parent nodes');
 		}
 	}
 
@@ -1295,7 +1295,7 @@ function ShowReps() {
 
 			generateTemplate:  function (name){
 				if(_needSelection){
-					alert('You have to select some records');
+					alert('Please select some records to allow generation of the template');
 				}else{
 				_needListRefresh = true;
 					_generateTemplate(name, true);
@@ -1304,7 +1304,7 @@ function ShowReps() {
 
 			showEditor:  function (template_file){
 				if(_needSelection){
-					alert('You have to select some records');
+					alert('Please select some records in the search results before editing the template');
 				}else{
 				_showEditor(template_file);
 				}

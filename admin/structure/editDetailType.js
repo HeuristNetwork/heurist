@@ -534,7 +534,7 @@ function DetailTypeEditor() {
 			var dd = Dom.get("dty_JsonTermIDTree").value;
 			if( dd==="" || dd==="{}" ) {
 				if(isShowWarn) {
-					alert("For enum type you have to select at least one term. Click button 'Change vocabulary'");
+					alert("For an enum field types you msut select at least one term. Please click 'Change vocabulary'");
 				}
 				_updatedFields = [];
 				return "mandatory";

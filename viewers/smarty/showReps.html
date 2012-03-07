@@ -149,10 +149,10 @@
 		</div> -->
 	</div>
 	<div id="templateTree">
-		<div style="height:40px">
+		<div style=margin-bottom: 20px;>
 			<!-- div>Choose required fields in tree then:</div -->
-			<div>
-				<label>Modifiers</label>
+            Position cursor in text on left <br>before selecting actions below<br>
+             	<label>Modifiers</label>
 				<select id="selInsertModifiers" onChange="onSelectModifier()" style="width:100px">
 					<option>choose modifier</option>
 					<option>capitalize</option>
@@ -177,7 +177,10 @@
 					<option>upper</option>
 					<option>wordwrap</option>
 				</select>
-				<a href="javascript:void(0)" title="Insert root FOREACH operator" onClick="showReps.insertRootForEach()">insert loop</a> <a href="../../../help/index.html?SmartyTemplates" title="Read documentation how to create the exellent Smarty template" target="_blank">help</a> </div>
+			    &nbsp;&nbsp;
+                <a href="javascript:void(0)" 
+                    title="Insert ForEach loop to loop through all records in the current query or selection" 
+                    onClick="showReps.insertRootForEach()">Insert records loop</a><br>
 			<!--
 					<button onclick="window.showReps.insertSelectedVars(null, false)">Insert fields only</button><br/>
 					<button onclick="window.showReps.insertRectypeSection()">All</button>
@@ -189,7 +192,12 @@
 				<option value="1">Field + Label</option>
 				<option value="2">Field + function wrapper</option>
 			</select>
+            &nbsp;&nbsp;
+            <a href="../../../help/index.html?SmartyTemplates" 
+                    title="Read full documentation on the Smarty templating language" 
+                    target="_blank">Smarty Help</a> 
 		</div>
+        
 		<div id="treeContainer">
 			<div id="varsTree" class="ygtv"></div>
 			<!-- was ygtv-checkbox -highlight -->
