@@ -28,8 +28,8 @@ FlexImport = (function () {
 	recTypeSelectSavedMapping: null,
 	recType: null,
 	errorSummary: null,
-	wrong_columns: 0,
-	wrong_values: 0,
+	num_err_columns: 0,
+	num_err_values: 0,
 	workgroupSelect: null,
 	workgroups: {},
 	workgroupTags: {},
@@ -486,8 +486,14 @@ FlexImport = (function () {
 		for (var i = this.hasHeaderRow ? 1:0; i < FlexImport.fields.length; ++i) {
 			var inputRow = FlexImport.fields[i];
 			tr = tbody.appendChild(document.createElement("tr"));
-			if (FlexImport.lineErrorMap[i] && FlexImport.lineErrorMap[i].invalidRecord){
-				tr.className = "invalidRecord";
+			if (FlexImport.lineErrorMap[i]) {
+				if(FlexImport.lineErrorMap[i].invalidRecord){
+					tr.className = "invalidRecord";
+					tr.title = FlexImport.lineErrorMap[i].invalidRecord;
+				}else if(FlexImport.lineErrorMap[i].duplicateRecord){
+					tr.className = "duplicateRecord";
+					tr.title = FlexImport.lineErrorMap[i].duplicateRecord;
+				}
 			}
 			td = tr.appendChild(document.createElement("td"));
 			td.innerHTML = i + (this.hasHeaderRow?0:1); //row number
@@ -551,7 +557,7 @@ FlexImport = (function () {
 					td = tr.appendChild(document.createElement("td"));
 					td.style.width = 220;
 
-					for (var i = 0; i < eS[j].length; ++i) {
+					for (var errVal in eS[j]) {
 
 						/*var temp = "";
 						if (eS[j][i]) {
@@ -561,9 +567,9 @@ FlexImport = (function () {
 						}*/
 						var p = td.appendChild(document.createElement("div"));
 						var ed = p.appendChild(document.createElement("input"));
-						ed.id = "edcorrect"+j;
+						ed.id = "edcorrect"+j +"-" + eS[j][errVal][0];
 						ed.style.width = 120;
-						ed.value = eS[j][i];
+						ed.value = errVal;
 						ed.className = "invalidInput";
 						ed.cleared = false;
 						/*ed.onfocus = function () {
@@ -575,20 +581,20 @@ FlexImport = (function () {
 
 						var btn = p.appendChild(document.createElement("button"));
 						btn.col = j;
-						btn.wrongValue = (eS[j][i]?eS[j][i]:"");
-						btn.innerHTML = "Apply this value";
+						btn.rows = eS[j][errVal];
+						btn.incorrectValue = errVal?errVal:"";
+						btn.innerHTML = "Modify data";
 						btn.onclick = function () {
 
 								//was FlexImport.fields[this.row][this.col] = this.value;
-								var edinput = document.getElementById("edcorrect"+this.col);
-								var wrongValue = this.wrongValue;
-								var i, len = FlexImport.fields.length;
-								for (i = 1; i < len; ++i) {
-									if(wrongValue==FlexImport.fields[i][this.col]){
-										FlexImport.fields[i][this.col] = edinput.value;
-										this.wrongValue = edinput.value;
+								var edinput = document.getElementById("edcorrect"+this.col+"-"+this.rows[0]);
+								var incorrectValue = this.incorrectValue;
+								var i, len = this.rows.length;
+								for (i=0; i<len; i++) {
+									if(incorrectValue==FlexImport.fields[this.rows[i]][this.col]){
+										FlexImport.fields[this.rows[i]][this.col] = edinput.value;
 										//find the table cell with wrong value
-										var td_tocorrect = document.getElementById("wrin"+i+"_"+this.col);
+										var td_tocorrect = document.getElementById("wrin"+this.rows[i]+"_"+this.col);
 										if(td_tocorrect){
 											td_tocorrect.innerHTML = edinput.value;
 										}
@@ -615,7 +621,7 @@ FlexImport = (function () {
 								"admin/structure/editDetailType.html?db="+HAPI.database+"&detailTypeID="+dtid;
 
 							top.HEURIST.util.popupURL(top, url,
-							{   "close-on-blur": false,
+							{	"close-on-blur": false,
 								"no-resize": false,
 								height: 680,
 								width: 660,
@@ -631,7 +637,7 @@ FlexImport = (function () {
 			}
 			if(haserr){
 				e.insertBefore(table, before);
-                e.insertBefore(document.createTextNode("Unrecognised values in imported data (edit red values below and click Apply this value, then Prepare Records again. Alternatively you can edit the field definitions with the link to the right of each value.)"), table);
+				e.insertBefore(document.createTextNode("Unrecognised values in imported data (edit red values below and click Modify Data, then Prepare Records again. Alternatively you can edit the field definitions with the link to the right of each value.)"), table);
 			}
 
 		}
@@ -795,7 +801,6 @@ FlexImport = (function () {
 
 		//e.innerHTML += ("<p>If there are errors: <input type=button value=\"Go back\" onclick=\"FlexImport.createColumnSelectors();\"></p>");
 
-
 		var e = $("#records-div")[0];
 
 		var table = e.appendChild(document.createElement("table"));
@@ -854,21 +859,28 @@ FlexImport = (function () {
 		}
 
 		FlexImport.errorSummary = new Array(FlexImport.columnCount);
-		FlexImport.wrong_columns = 0;
-		FlexImport.wrong_values = 0;
+		FlexImport.num_err_columns = 0;
+		FlexImport.num_err_values = 0;
 
 		// create records
 		l = FlexImport.fields.length;
-		var istart = (FlexImport.hasHeaderRow)?1:0;
-		for (var i = istart; i < l; ++i) {
-
-			var lineHash = FlexImport.makeHash(FlexImport.fields[i]);
+		var istart = (FlexImport.hasHeaderRow)?1:0,
+			i,lineHash;
+		for ( i = istart; i < l; i++) {
+			record = null;
+			lineHash = FlexImport.makeHash(FlexImport.fields[i]);
 
 			if (FlexImport.lineHashes[lineHash] != undefined) {
-				// we've already created a record for an identical input line
-				record = FlexImport.lineRecordMap[FlexImport.lineHashes[lineHash]];
-				error = [FlexImport.lineHashes[lineHash]];
-			} else {
+				// we've already created a record for an identical input lineHash
+				//ask user if this is a Duplicate or a different and unique record
+				if (confirm("Input line " + i + "is possibly a duplicate of record on line " + FlexImport.lineHashes[lineHash] +
+					". Reuse previous record? If you would like to reuse that previous record (press OK) " +
+					"or would like to create a new and unique record with the similar input values (press cancel).")) {
+					record = FlexImport.lineRecordMap[FlexImport.lineHashes[lineHash]];
+					error = {"duplicateRecord":"duplicate of record on line " + FlexImport.lineHashes[lineHash]};
+				}
+			}
+			if (!record) {
 				FlexImport.lineHashes[lineHash] = i;
 				var ret = FlexImport.createRecord(FlexImport.recType, importTag, FlexImport.fields[i]);
 				record = ret.record;
@@ -884,12 +896,17 @@ FlexImport = (function () {
 
 			// display record using the information from the initialized record (this ensures correct formating)
 			tr = tbody.appendChild(document.createElement("tr"));
-			if (error && error.invalidRecord) {
-				tr.className = "invalidRecord";
-				tr.title = error.invalidRecord;
+			if (error) {
+				if (error.invalidRecord) {
+					tr.className = "invalidRecord";
+					tr.title = error.invalidRecord;
+				}else if (error.duplicateRecord) {
+					tr.className = "duplicateRecord";
+					tr.title = error.duplicateRecord;
+				}
 			}
 			td = tr.appendChild(document.createElement("td"));
-			td.innerHTML = i + 1;
+			td.innerHTML = i;
 
 			tags = false; kwds = false;
 			for (var j = 0; j < FlexImport.fields[i].length; ++j) {
@@ -926,16 +943,18 @@ FlexImport = (function () {
 					td.innerHTML += "<p class=errorMsg>" + error[j] + "</p>";
 
 						var eS = FlexImport.errorSummary;
-						if(eS[j]){
-							if(eS[j].indexOf(inputRow[j])<0){
-								FlexImport.wrong_values++;
-								eS[j].push(inputRow[j]);
-							}
+						if(eS[j] && eS[j][inputRow[j]]){
+//							if(eS[j].indexOf(inputRow[j])<0){
+								FlexImport.num_err_values++;
+								eS[j][inputRow[j]].push(i);
+//							}
 						}else{
-							FlexImport.wrong_columns++;
-							FlexImport.wrong_values++;
-							eS[j] = [];
-							eS[j].push(inputRow[j]);
+							FlexImport.num_err_columns++;
+							FlexImport.num_err_values++;
+							if (!eS[j]) {
+								eS[j] = {};
+							}
+							eS[j][inputRow[j]] = [i];
 						}
 				}
 			} // for j in FlexImport.fields loop
@@ -944,10 +963,10 @@ FlexImport = (function () {
 		// show command button for saving records
 		var e = $("#records-div-info")[0];
 
-		if(FlexImport.wrong_values>0){
-			e.innerHTML = "<p class='invalidInput'>There are "+FlexImport.wrong_values+" unexpected values in "+
-							FlexImport.wrong_columns+" columns. "+
-							"<input type=button value=\"Modify data and try again\" onclick=\"FlexImport.createColumnSelectors();\"></p>";
+		if(FlexImport.num_err_values>0){
+			e.innerHTML = "<p class='invalidInput'>There are "+FlexImport.num_err_values+" unexpected values in "+
+							FlexImport.num_err_columns+" columns. "+
+							"<input type=button value=\"Go back\" onclick=\"FlexImport.createColumnSelectors();\"></p>";
 		}else{
 			e.innerHTML = "<p>If records appear OK: <input type=button value=\"Save records\" onclick=\"FlexImport.Saver.saveRecords();\">&nbsp;&nbsp;This step updates the database (irreversible, except by editing the database)</p>";
 			e.innerHTML += "<p><b>Records prepared for import:</b></p>";
@@ -1224,7 +1243,7 @@ FlexImport.Saver = (function () {
 				$("#rec-type-select-div").empty();
 				$("#rec-type-select-div").empty();
 				$("#records-div").html("Saved <b>" + FlexImport.recEnd+ "</b> records");
-                // r.length gives the number of records in the chunk being saved
+				// r.length gives the number of records in the chunk being saved
 				FlexImport.recStart = FlexImport.recEnd;
 				_getChunk();
 			},

@@ -825,9 +825,10 @@ top.HEURIST.search = {
 		var linkTitle = "";
 		var wgHTML = "";
 		var wgColor = "";
-		if (res[6]  &&  res[6] != "0" && res[6] != res[1]) {	// check if this is a usergroup owned record
-			var sowner = top.HEURIST.allUsers[wgID]?top.HEURIST.allUsers[wgID][0]:"unknow";
-			linkTitle = "Owned by " + (top.HEURIST.workgroups[wgID] ? "workgroup " + top.HEURIST.workgroups[wgID].name:sowner) + " - " + ((res[7]=='hidden')? "hidden" : "read-only") + " to others";
+		if (res[6] && res[6] != "0" ) {	// check if this is an usergroup or user owned record
+			linkTitle = "Owned by " + ( top.HEURIST.workgroups[wgID] ? "workgroup " + top.HEURIST.workgroups[wgID].name:
+										top.HEURIST.allUsers[wgID] ? top.HEURIST.allUsers[wgID][0] : "unknown group") + " - " +
+										((res[7]=='hidden')? "hidden" : "read-only") + " to others";
 			wgHTML = res[6];
 			wgColor = " style='color:" + ((res[7]=='hidden')? "red" : "green") + "'";
 		}

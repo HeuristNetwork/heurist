@@ -2109,6 +2109,9 @@ div.list > div.recordDiv.lnk {
 */#results-level0 .recordDiv {
 	display:inline-block !important;
 }
+#results-level0.list > div.recordDiv  {
+	display:block !important;
+}
 div.list > div.recordDiv {
 	display:block !important;
 }

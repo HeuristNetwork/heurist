@@ -50,9 +50,9 @@ $prefs = array(
 
 	"search-result-style" => "list",
 	"search-result-style0" => "list",
-	"search-result-style1" => "icon",
-	"search-result-style2" => "icon",
-	"search-result-style3" => "icon",
+	"search-result-style1" => "icons",
+	"search-result-style2" => "icons",
+	"search-result-style3" => "icons",
 	"results-per-page" => 50,
 
 	"scratchpad-bottom" => 0,
