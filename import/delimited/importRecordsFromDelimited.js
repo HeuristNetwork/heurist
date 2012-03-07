@@ -1073,17 +1073,23 @@ FlexImport = (function () {
 							if(parseInt(vals[v])<1){
 								logError(j," Record id is not defined");
 							}else{
-							vals[v] = HeuristScholarDB.getRecord(parseInt(vals[v]));
-							if (!vals[v]) { //there was an error loading the referenced record so mark it
-								logError(j," Record id:" + temp + " not found.");
-								vals.splice(v,1);	// remove the val in order to ignore it
-								v--;
-								l = vals.length;
-							}else if (detailType.getConstrainedRecordType &&	//check to make sure the record matches constraints
-										detailType.getConstrainedRecordType() &&
-										detailType.getConstrainedRecordType().getID() != vals[v].getRecordType().getID()){
-								logError(j,"Constraint error - Record id:" + temp + " is not type: " + detailType.getConstrainedRecordType().getName() );
-							}
+								vals[v] = HeuristScholarDB.getRecord(parseInt(vals[v]));
+								if (!vals[v]) { //there was an error loading the referenced record so mark it
+									logError(j," Record id:" + temp + " not found.");
+									vals.splice(v,1);	// remove the val in order to ignore it
+									v--;
+									l = vals.length;
+								}else if (detailType.getConstrainedRecordTypeIDs &&	//check to make sure the record matches constraints
+											detailType.getConstrainedRecordTypeIDs() &&
+											detailType.getConstrainedRecordTypeIDs().length > 0 &&
+											detailType.getConstrainedRecordTypeIDs().indexOf(vals[v].getRecordType().getID()) == -1){
+									hRecTypes = detailType.getConstrainedRecordTypes();
+									typeList = "";
+									for ( index = 0; index < hRecTypes.length; index++) {
+										typeList += hRecTypes[index].getName();
+									}
+									logError(j,"Constraint error - Record id:" + temp + " is not of type(s): " + typeList );
+								}
 							}
 						}
 					}

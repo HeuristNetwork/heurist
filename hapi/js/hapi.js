@@ -1826,6 +1826,7 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
 	var _termsMap = {};
 	var _relatedEnums = {};
 	var _constraint = null;
+	var _constrainedRecTypeID = null
 	var i;
 
 	if (constraint) {
@@ -1834,8 +1835,13 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
 		}
 		if( constraint instanceof Array) {
 			_constraint = [];
+			_constrainedRecTypeID = [];
 			for (i=0; i<constraint.length; i++) {
-				_constraint.push(HRecordTypeManager.getRecordTypeById(constraint[i]));
+				hRecType = HRecordTypeManager.getRecordTypeById(constraint[i]);
+				if (hRecType) {
+					_constraint.push(hRecType);
+					_constrainedRecTypeID.push(constraint[i]);
+				}
 			}
 		}
 	}
@@ -1874,6 +1880,9 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
 	};
 	this.getConstrainedRecordTypes = function() {
 		return _constraint;
+	};
+	this.getConstrainedRecordTypeIDs = function() {
+		return _constrainedRecTypeID;
 	};
 	this.getRelatedEnumerationValues = function() { return _relatedEnums; };
 	this.getIdForEnumerationValue = function(value) { return (_termsMap[("" + value).toLowerCase()]  ||  null); };
