@@ -468,7 +468,7 @@ top.HEURIST.search = {
 										'<li><a href="#" class="list" title="View results as a list" onClick="top.HEURIST.search.setResultStyle(\'list\','+level+');">1 column</a></li>'+
 										'<li><a href="#" class="two-col" title="View results as 2 column list" onClick="top.HEURIST.search.setResultStyle(\'two-col\','+level+');">2 columns</a></li>'+
 										'<li><a href="#" class="icons" title="View results as icons" onClick="top.HEURIST.search.setResultStyle(\'icons\','+level+');">Icons</a></li>'+
-										'<li><a href="#" class="thumbs" title="View results as thumbnails" onClick="top.HEURIST.search.setResultStyle(\'thumbnails\','+level+');">Thumbnails</a></li>'+
+										'<li><a href="#" class="thumbnails" title="View results as thumbnails" onClick="top.HEURIST.search.setResultStyle(\'thumbnails\','+level+');">Thumbnails</a></li>'+
 									'</ul>';
 		filterMenu.appendChild(viewStyleMenu);
 		top.HEURIST.search.setResultStyle(style,level);
@@ -1431,7 +1431,7 @@ top.HEURIST.search = {
 		if (style.length <= 2) { // code style so decode
 			switch (style[0]) {
 				case "t":
-					style="thumbs";
+					style="thumbnails";
 				break;
 				case "i":
 					style="icons";
@@ -3276,7 +3276,7 @@ top.HEURIST.search = {
 			if (i>0) {// new level exist so add separator
 				ret += "-";
 			}
-			if ($(resultsDiv).hasClass('thumbs')) {
+			if ($(resultsDiv).hasClass('thumbnails')) {
 				ret += "t";
 			}else if ($(resultsDiv).hasClass('icons')) {
 				ret += "i";
