@@ -1103,7 +1103,7 @@ FlexImport = (function () {
 	},
 
 	outputCSV: function () {
-		var $textarea, l, i, k, j, line, recordIDColumn, recordID, dtID;
+		var $textarea, l, i, k, j, line, recordIDColumn, recordID, dtID, columnHeader;
 
 		var csvField = function (s) {
 			if (s.match(/"/)) {
@@ -1119,8 +1119,8 @@ FlexImport = (function () {
 		$("<div>").append($textarea).appendTo("body");
 
 		line = [];
-		l = FlexImport.cols.length;
-		for (i = 0; i < l; ++i) {
+		for (i = 0; i < FlexImport.columnCount; ++i) {
+			columnHeader = FlexImport.hasHeaderRow ? FlexImport.fields[0][i]:"";
 			if (FlexImport.cols[i]) {
 				if (recordIDColumn == undefined) {// insert the rec id just before the first import data column
 					recordIDColumn = i;
@@ -1131,20 +1131,20 @@ FlexImport = (function () {
 					line.push(HDetailManager.getDetailTypeById(dtID).getName());
 				}
 				else {
-					line.push(FlexImport.cols[i]);
+					line.push(columnHeader);
 				}
 			}
 			else { // column not imported let the user know
-				line.push("not imported");
+				line.push((columnHeader? columnHeader + " ":"") + "(not imported)");
 			}
 		}
-		$textarea.append(line.join() + "\n");
+		$textarea.append(line.join(", ") + "\n");
 
 		$("#result-message").html('Your data was successfully imported and has been rewritten below. <br/>Record Ids have been inserted into your original data in column ' + (recordIDColumn + 1) +
 					' below. <br/> Note that columns not used in the import are identified in the header row as "not imported"');
 
 		l = FlexImport.fields.length;
-		for (i = 0; i < l; ++i) {
+		for (i = FlexImport.hasHeaderRow ? 1:0; i < l; ++i) {
 			recordID = FlexImport.lineRecordMap[i].getID();
 			line = [];
 			k = FlexImport.fields[i].length;
