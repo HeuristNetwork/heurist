@@ -436,7 +436,7 @@ function ShowMap() {
 			var callback = _updateMap;
 			var params =  currentQuery;
 			if(params!=null){
-				HRST.util.getJsonData(baseurl, callback, params);
+				Hul.getJsonData(baseurl, callback, params);
 			}
 		}
 		if (!currentQuery) {
@@ -446,15 +446,18 @@ function ShowMap() {
 
 	}
 
+	var currentBackgroundLayer = "";
+	
 	/**
-	* fill list of layers
+	* fill list of layers   - call for _load_layers
 	*/
 	function _updateLayersList(context){
 
 		systemAllLayers = context.layers;
 		var elem = document.getElementById('cbLayers'),
-			s = "<option value='-1'>none</option>";
-
+			s = "<option value='-1'>none</option>",
+			keptLayer = top.HEURIST.util.getDisplayPreference("mapbackground"); //read record id
+			
 		for (ind in systemAllLayers) {
 			if(!Hul.isnull(ind)){
 
@@ -465,36 +468,58 @@ function ShowMap() {
 				if(Hul.isempty(sTitle)){
 					sTitle = 'Undefined title. Rec#'+systemAllLayers[ind].rec_ID;
 				}
+				
+				var sSel = '';
+				if(keptLayer==systemAllLayers[ind].rec_ID){
+					sSel = ' selected="selected"';
+				}
 
-				s = s + "<option value='" + ind + "'>"+ sTitle +"</option>";
+				s = s + "<option value='" + ind + "' "+sSel+">"+ sTitle +"</option>";
 			}
 		}
 
 		elem.innerHTML = s;
+		
+		if(currentBackgroundLayer!=keptLayer){
+			currentBackgroundLayer = keptLayer;
+			 _loadLayer(elem);
+		}
+		
 	}
 
-	var currentBackgroundLayer = "";
 	/**
-	*
+	* loads background image layer - listener of selector
 	*/
-	function _loadLayer(event){
+	function _loadLayer(obj){
 
-		var val = Number(event.target.value),
+		var val = Number((obj.target) ?obj.target.value:obj.value),
 			errors='';
 
 		if(isNaN(val) || val < 0){
 			RelBrowser.Mapping.addLayers([], 0);
-			top.HEURIST.currentQuery_all = top.HEURIST.currentQuery_all.replace(","+currentBackgroundLayer,"");
-			top.HEURIST.currentQuery_sel = top.HEURIST.currentQuery_sel.replace(","+currentBackgroundLayer,"");
+			if(!Hul.isempty(currentBackgroundLayer)){
+				top.HEURIST.currentQuery_all = top.HEURIST.currentQuery_all.replace(","+currentBackgroundLayer,"");
+				top.HEURIST.currentQuery_sel = top.HEURIST.currentQuery_sel.replace(","+currentBackgroundLayer,"");
+				top.HEURIST.currentQuery_main = top.HEURIST.currentQuery_main.replace(","+currentBackgroundLayer,"");
+			}
+			currentBackgroundLayer = '';
 		}else{
-			currentBackgroundLayer = systemAllLayers[val].rec_ID;
 			errors = RelBrowser.Mapping.addLayers([systemAllLayers[val]], 1); //and zoom to these layers
-			top.HEURIST.currentQuery_all = top.HEURIST.currentQuery_all + "," + currentBackgroundLayer;
-			top.HEURIST.currentQuery_sel = top.HEURIST.currentQuery_sel + "," + currentBackgroundLayer;
-
-
+			//that's required that map panel will be visible in case there are no more other map objects
+			if(Hul.isempty(errors)){
+				currentBackgroundLayer = systemAllLayers[val].rec_ID;
+				top.HEURIST.currentQuery_all = top.HEURIST.currentQuery_all + "," + currentBackgroundLayer;
+				top.HEURIST.currentQuery_sel = top.HEURIST.currentQuery_sel + "," + currentBackgroundLayer;
+				top.HEURIST.currentQuery_main = top.HEURIST.currentQuery_main + "," + currentBackgroundLayer;
+			}else{
+				currentBackgroundLayer = '';
+			}
 		}
 		_showErrorSign(errors);
+		
+		if(HRST.displayPreferences){
+			top.HEURIST.util.setDisplayPreference("mapbackground", currentBackgroundLayer); //save record id of background layer 
+		}
 	}
 
 	/**
@@ -529,6 +554,7 @@ function ShowMap() {
 
 
 	/**
+	* Load list of image layer on init
 	* mode: 0 - both, 1 -image layers, 2 - kml
 	*/
 	function _load_layers(mode) {
@@ -536,7 +562,7 @@ function ShowMap() {
 			var baseurl = HRST.basePath + "viewers/map/showMap.php";
 			var callback = _updateLayersList;
 			var params =  "ver=1&layers="+mode+"&db="+HRST.database.name;
-			HRST.util.getJsonData(baseurl, callback, params);
+			Hul.getJsonData(baseurl, callback, params);
 	}
 
 

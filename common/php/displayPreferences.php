@@ -80,7 +80,8 @@ $prefs = array(
 	"defaultMyBookmarksSearch" => "true", // hitting Enter will do a My Bookmarks search
 	"autoSelectRelated" => "false", // autoSelect related records
 	"autoDeselectOtherLevels" => "true", // auto deselct other level before selecting current.
-	"tagging-popup" => "true"
+	"tagging-popup" => "true",
+	"mapbackground" => ""
 );
 
 foreach (get_group_ids() as $gid) {

@@ -235,6 +235,19 @@
 										break;
 
 										case HVariety.FILE:
+
+											var newval = fields[j][2]; 
+						 					this.initFile = this.updateDetails;
+				 							ffile = new HFile(this, 0, '', 0, null, newval, null, '');
+						 					delete this.initFile;
+										
+											details = recHR.getDetails(recHDT);
+											if (!details[0]) {
+												recHR.addDetail(recHDT, ffile);
+											} else {
+												recHR.changeDetail(recHDT, details[0], ffile);
+											}
+										
 										break;
 
 										case HVariety.DATE:

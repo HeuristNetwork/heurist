@@ -50,7 +50,7 @@
 	}
 
 	if( !array_key_exists("limit", $_REQUEST) ){ //not defined
-		$_REQUEST["limit"] = "500"; //force offset and limit (max 500)
+		//$_REQUEST["limit"] = "500"; //force offset and limit (max 500)
 	}
 
 	// find all matching records
@@ -85,12 +85,15 @@
 	function getKmlFilePath($fileID){
 		if ($fileID) {/* search for KML file */
 			$fres = mysql_query(
-			"select ulf_ObfuscatedFileID, ulf_MimeExt from recUploadedFiles where ulf_ID = ".intval($fileID));
+			"select ulf_ObfuscatedFileID, ulf_MimeExt, ulf_FileName from recUploadedFiles where ulf_ID = ".intval($fileID));
 
 			if ($fres) {
 				$row2 = mysql_fetch_row($fres);
 				$ext = strtolower( $row2[1] );
-				if($row2[0]){ // && ($ext=="kml")){
+				if($ext!="kml" && $row[2] && preg_match('/\\.([^.]+)$/', $row[2], $matches)){
+					$ext = strtolower($matches[1]);
+				}
+				if($row2[0] && ($ext=="kml")){
 					return $row2[0];
 				}
 			}
@@ -148,7 +151,7 @@
 			array_push($imageLayers, $row[4]);
 		}
 		$kml_path =  getKmlFilePath($row[3]); //DT_ASSOCIATED_FILE
-error_log(">>>>>>".$row[3]."=".$kml_path);
+//error_log(">>>>>>".$row[3]."=".$kml_path);
 // removed by SAW as DT_KML_FILE changed from a file base type to blocktext
 //		if($kml_path==null){
 //			$kml_path =  getKmlFilePath($row[6]); //DT_KML_FILE

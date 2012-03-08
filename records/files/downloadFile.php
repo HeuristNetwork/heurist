@@ -111,7 +111,7 @@ if(isset($filename) && file_exists($filename)){ //local resources
 	*/
 	}else{
 
-error_log(">>>>mineTYPE=".$filedata['mimeType']);
+//error_log(">>>>mineTYPE=".$filedata['mimeType']);
 
 		// set the mime type, set to binary if mime type unknown
 		if ($filedata['mimeType']) {

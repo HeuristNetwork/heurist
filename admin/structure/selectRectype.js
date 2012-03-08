@@ -170,8 +170,8 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 										rectype = top.HEURIST.rectypes.typedefs[rty_ID].commonFields;
 
 										if(datatype!=="fieldsetmarker" || rectype[fi.rty_FlagAsFieldset]==="1")//??????????????SAW what is this  (flagAsFieldSet)
-										{
-										arr.push([(_arr_selection.indexOf(rty_ID)>0),
+										{                                                                      //AO: only rectypes with this marker may be selected for fieldsetmarker
+										arr.push([(_arr_selection.indexOf(rty_ID)>=0),
 											"", //icon
 											rectype[fi.rty_Name], //name
 											rectype[fi.rty_Description], //descr
@@ -182,6 +182,8 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 										}
 								}
 						}
+						
+						_showSelectCount();						
 				}
 
 
@@ -442,13 +444,18 @@ oRecord.getData('description')+'"/>';}
 											_arr_selection.splice(ind,1);
 										}
 									}
+									
+									_showSelectCount();
 
-									lblSelect1.innerHTML = "<b>"+_arr_selection.length+"</b> record type"+((_arr_selection.length>1)?"s":"");
-									if(!Hul.isnull(lblSelect2)) {
-										lblSelect2.innerHTML = lblSelect1.innerHTML;
-									}
 	}
 
+	function _showSelectCount(){
+				lblSelect1.innerHTML = "<b>"+_arr_selection.length+"</b> record type"+((_arr_selection.length>1)?"s":"");
+				if(!Hul.isnull(lblSelect2)) {
+					lblSelect2.innerHTML = lblSelect1.innerHTML;
+				}
+	}
+	
 	/**
 	* Fills the selector (combobox) with names of group
 	* @see _init

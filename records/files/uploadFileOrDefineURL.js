@@ -39,50 +39,15 @@ var viewerObject,
 
  		curr_link = rec_url.value;
 
- 		var k = rec_url.value.indexOf('http');
- 		if(k==0){
+ 		var oType = detectSourceAndType(curr_link, ext);
 
- 			var oType = detectSourceAndType(curr_link, ext);
+ 		document.getElementById("cbSource").value = oType.source;
+ 		document.getElementById("cbType").value = oType.type;
+ 		curr_ext = oType.extension;
 
- 			document.getElementById("cbSource").value = oType.source;
- 			document.getElementById("cbType").value = oType.type;
- 			curr_ext = oType.extension;
-
- 			showViewer(document.getElementById('preview'), [curr_link, oType.source, oType.type])
-
-		}else{
-			var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
-			var baseurl = top.HEURIST.basePath + "records/files/registerFile.php";
-			var callback = _onFileRegister;
-			top.HEURIST.util.getJsonData(baseurl, callback, 'db='+_db+'&path='+encodeURIComponent(rec_url.value));
-		}
+ 		showViewer(document.getElementById('preview'), [curr_link, oType.source, oType.type])
 	}
  }
-
-function _onFileRegister(context){
-
-		if(context)
-		{
-			if(context.file){
-
-				fileUploadInput.setFileData(context.file);
-
- 				curr_link = context.file.URL;
- 				var oType = detectSourceAndType(curr_link, context.file.ext);
-
-				URLInput.inputs[0].value = curr_link;
-				document.getElementById("cbSource").value = oType.source;
- 				document.getElementById("cbType").value = oType.type;
- 				curr_ext = oType.extension;
-
- 				showViewer(document.getElementById('preview'), [curr_link, oType.source, oType.type])
-
-			}else if(context.error) {
-				//alert(context.error);
-			}
-		}
-}
-
 
 // @todo MOVE to HEURIST.util ????
 //
@@ -162,7 +127,7 @@ function initPage() {
 		//add URL component
 		container = document.getElementById("div_url");
 		URLInput = new top.HEURIST.edit.inputs.BibURLInput(container, sUrl, false);
-		URLInput.headerCell.innerHTML = "URL or Absolute Path";
+		//URLInput.headerCell.innerHTML = "URL or Absolute Path";
 
 		// access to input element URLInput.inputs[0]
 		this.changed = function(){};

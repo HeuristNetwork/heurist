@@ -358,7 +358,8 @@ if (typeof mxn.LatLonPoint == "function") {
 	{
 			var tl_theme, tl_theme2, M = RelBrowser.Mapping;
 
-			//???? SimileAjax.History.enabled = false;
+			//there is bug in timeline - it looks _history_.html in wrong place
+			//SimileAjax.History.enabled = false;
 
 			// modify timeline theme
 			tl_theme = Timeline.ClassicTheme.create();
@@ -674,8 +675,9 @@ if (typeof mxn.LatLonPoint == "function") {
 					M.map.addTileLayer(tile_url, 0.75, layer.rec_ID, layer.min_zoom, layer.max_zoom, true);
 					//layer.min_zoom, layer.max_zoom, true);
 
+					layer.extent = M.getImageLayerExtent(layer['extent']);
 					if(zoom_mode>0){
-						var layerbnd = layer.extent = M.getImageLayerExtent(layer['extent']);
+						var layerbnd = layer.extent;
 						if(layerbnd){
 							if(bounds==null){
 								bounds = layerbnd;

@@ -1078,8 +1078,28 @@ function getAllDetailTypeStructures($useCachedData = false) {
 						'rectypeUsage' => getDetailTypeDefUsage(),
 						'usageCount' => getDetailTypeUsageCount(),
 						'typedefs' => array('commonFieldNames' => getDetailTypeColNames(),
-											'fieldNamesToIndex' => getColumnNameToIndex(getDetailTypeColNames())));
-
+											'fieldNamesToIndex' => getColumnNameToIndex(getDetailTypeColNames())),
+						'lookups' => array(
+						"enum" => "Enumerated (terms)",
+						"float" => "Numeric (integer/decimal)",
+						"date" => "Date / temporal",
+						"file" => "File - local or uploaded",
+						"geo" => "Geospatial object",
+						"freetext" => "Text (single line)",
+						"blocktext" => "Memo (multi-line)",
+						"resource" => "Record pointer",
+						"relmarker" => "Relationship marker",
+						"separator" => "Separator (no data)",
+						"calculated" => "Calculated value (not yet impl.)",
+                        // Note=> the following types are no longer deinable but may be required for backward compatibility
+						"relationtype" => "Relationship type (terms)",
+						//"fieldsetmarker" => "Field set marker",
+                        "integer" => "Numeric - integer",
+                        "year" => "Year (no mm-dd)",
+                        //"urlinclude" => "File/URL of include content",
+                        "boolean" => "Boolean (true/false)") );
+															
+											
 	$query = "select dtg_ID, dtg_Name, ".join(",", getDetailTypeColNames());
 	$query = preg_replace("/dty_ConceptID/","",$query);
 	if ($dbID) {//if(trm_OriginatingDBID,concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))),'null') as trm_ConceptID

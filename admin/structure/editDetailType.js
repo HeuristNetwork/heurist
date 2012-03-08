@@ -357,7 +357,7 @@ function DetailTypeEditor() {
 			height: 480,
 			width: 440,
 			callback: function(recordTypesSelected) {
-				if(recordTypesSelected !== null) { // TODO: Test this
+				if(!Hul.isnull(recordTypesSelected)) { 
 					if(type === "fieldsetmarker") { // Change comma seperated list to right format
 						Dom.get("dty_FieldSetRecTypeID").value = recordTypesSelected;
 					} else {
