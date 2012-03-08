@@ -202,91 +202,65 @@
 
 					<li class="logged-in-only"> <span id=advanced-menu-link class="logged-in-only"><b>Advanced</b></span>
 						<ul id="advanced-menu">
-
-                            <li>&nbsp;</li>
-                            <li><a href="../admin/structure/getListOfDatabases.php" name="auto-popup" class="portrait" 
-                                title="Navigate to and login to another Heurist database">
-                                Select database</a></li>
-							
-                            <li><a href="javascript:void(0)" onClick="{top.HEURIST.util.reloadStrcuture();}"
-							    title="Click to refresh the internal working memory of Heurist" >
-                                Refresh memory</a></li>
-
-                            <li><a href="?ver=1&amp;w=bookmark&amp;q=-tag&amp;label=Bookmarks+without+tags" class='seperator'
-                                title="Find bookmarked records which you have not tagged">
-                                Bookmarked records with&nbsp;no&nbsp;tags</a></li>
-
-                            <!-- --- sep --- -->
-                            <li>&nbsp;</li><li>HARVEST</li> <!-- temporary fudge -->
-                            
-                            <li><a href="../import/hyperlinks/importHyperlinks.php" name="auto-popup"
-                                title="Import web links from a browser bookmarks file or an html web page file">
-                                Hyperlinks << HTML<br>(webpage/bookmarks)</a></li>
-
-                            <li><a href="../admin/profile/configImportSettings.php" name="auto-popup" class="small"
-                                title="Settings for web links importer">
-                                Settings<br>(hyperlink harvester)</a></li>
-
+							<li><a href="../admin/structure/getListOfDatabases.php" name="auto-popup" class="portrait" 
+								title="Navigate to and login to another Heurist database">
+								Select database</a></li>
+							<li><a href="javascript:void(0)" onClick="{top.HEURIST.util.reloadStrcuture();}"
+								title="Click to refresh the internal working memory of Heurist" >
+								Refresh memory</a></li>
+							<li><a href="?ver=1&amp;w=bookmark&amp;q=-tag&amp;label=Bookmarks+without+tags" class='seperator'
+								title="Find bookmarked records which you have not tagged">
+								Bookmarked records with&nbsp;no&nbsp;tags</a></li>
+							<!-- --- sep --- -->
+							<div class="separator">HARVEST</div>
+							<li><a href="../import/hyperlinks/importHyperlinks.php" name="auto-popup"
+								title="Import web links from a browser bookmarks file or an html web page file">
+								Hyperlinks << HTML<br>(webpage/bookmarks)</a></li>
+							<li><a href="../admin/profile/configImportSettings.php" name="auto-popup" class="small"
+								title="Settings for web links importer">
+								Settings<br>(hyperlink harvester)</a></li>
 							<li><a href="../import/email/emailProcessingSetup.php" name="auto-popup" class='seperator small'
-							    title="Harvest email from a designated IMAP email server (set in configuration)">
-                                Email from IMAP server</a></li>
-
+								title="Harvest email from a designated IMAP email server (set in configuration)">
+								Email from IMAP server</a></li>
 							<li class="admin-only"><a href="../import/fieldhelper/synchroniseWithFieldHelper.php"
-							    onClick="this.href = top.HEURIST.baseURL +'import/fieldhelper/synchroniseWithFieldHelper.php?db=' + database;" target="_blank"
-							    title="Read in FieldHelper XML manifests and create metadata records from them linked back to the indexed files" name="auto-popup">
-                                FieldHelper manifests <br>(XML)</a></li>
-
-
-                            <!-- --- sep --- -->
-                            <li>&nbsp;</li><li>IMPORT</li> <!-- temporary fudge -->
-
-                            <li><a href="../import/delimited/importRecordsFromDelimited.html" name="auto-popup"
-                                onClick="this.href = top.HEURIST.baseURL +'import/delimited/importRecordsFromDelimited.html?db=' + database;"
-                                title="Import data from delimited text for one record type at a time" target="_blank">
-                                Import new records <br>( << CSV,&nbsp;tab)</a></li>
-
-                            <li class="admin-only"><a href="../import/delimited/updateDetailsFromDelimited.html"
-                                onClick="this.href = top.HEURIST.baseURL +'import/delimited/updateDetailsFromDelimited.html?db=' + database;" target="_blank"
-                                title="Update or add fields in existing records from delimited text" name="auto-popup">
-                                Update records <br>( << CSV,&nbsp;tab)</a></li>
-                                
-                            <li><a href="../import/importerFramework.php?format=GEO" name="auto-popup" 
-                                title="Import KML files (geographic data in WKT can be imported from CSV & tab delimtied files)">
-                                Geographic import <br>( << KML)</a></li>
-
+								onClick="this.href = top.HEURIST.baseURL +'import/fieldhelper/synchroniseWithFieldHelper.php?db=' + database;" target="_blank"
+								title="Read in FieldHelper XML manifests and create metadata records from them linked back to the indexed files" name="auto-popup">
+								FieldHelper manifests <br>(XML)</a></li>
+							<!-- --- sep --- -->
+							<div class="separator">IMPORT</div>
+							<li><a href="../import/delimited/importRecordsFromDelimited.html" name="auto-popup"
+								onClick="this.href = top.HEURIST.baseURL +'import/delimited/importRecordsFromDelimited.html?db=' + database;"
+								title="Import data from delimited text for one record type at a time" target="_blank">
+								Import new records <br>( << CSV,&nbsp;tab)</a></li>
+							<li class="admin-only"><a href="../import/delimited/updateDetailsFromDelimited.html"
+								onClick="this.href = top.HEURIST.baseURL +'import/delimited/updateDetailsFromDelimited.html?db=' + database;" target="_blank"
+								title="Update or add fields in existing records from delimited text" name="auto-popup">
+								Update records <br>( << CSV,&nbsp;tab)</a></li>
+							<li><a href="../import/importerFramework.php?format=GEO" name="auto-popup" 
+								title="Import KML files (geographic data in WKT can be imported from CSV & tab delimtied files)">
+								Geographic import <br>( << KML)</a></li>
 							<li><a href="../import/importerFramework.php?format=BIB" name="auto-popup"  class="seperator"
-							    title="Import bibliographic exchange format files">
-                                Bibliographic import <br>( << EndNote)</a></li>
-
-
-                            <!-- --- sep --- -->
-                            <li>&nbsp;</li><li>EXPORT</li> <!-- temporary fudge -->
-                            
-
+								title="Import bibliographic exchange format files">
+								Bibliographic import <br>( << EndNote)</a></li>
+							<!-- --- sep --- -->
+							<div class="separator">EXPORT</div>
 							<!--<li class="admin-only"><a href="#" target="_blank" onClick="this.href = top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database;" title="Export records as delimited text">Export delimited</a></li>-->
-                            <li><a href="#" id=result-style-icons-link title="Generate HML for selected set of search results"
-                                onClick="top.HEURIST.search.exportHML(false);">
-                                Current selection <br>( >> HML)</a></li>
-
-                            <li><a href="#" id=result-style-icons-link title="Generate KML for selected set of search results"
-                                onClick="top.HEURIST.search.exportKML(false);">
-                                Current selection <br>( >> KML)</a></li>
-
+							<li><a href="#" id=result-style-icons-link title="Generate HML for selected set of search results"
+								onClick="top.HEURIST.search.exportHML(false);">
+								Current selection <br>( >> HML)</a></li>
+							<li><a href="#" id=result-style-icons-link title="Generate KML for selected set of search results"
+								onClick="top.HEURIST.search.exportKML(false);">
+								Current selection <br>( >> KML)</a></li>
 							<li><a href="#" id=result-style-icons-link title="Generate HML for current set of search results"
 								onClick="top.HEURIST.search.exportHML(true);" >
-                                Current query <br>( >> HML)</a></li>
-
+								Current query <br>( >> HML)</a></li>
 							<li><a href="#" id=result-style-icons-link title="Generate HML for current set of search results"
 								onClick="top.HEURIST.search.exportHML(true,true);" >
-                                Current query + related <br>( >> HML) </a></li>
-
-                            <li class="admin-only"><a href="#"
-                                onClick="top.HEURIST.search.popupLink(top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database);"
-                                title="Export records as delimited text">
-                                Filtered record dump <br>( >> CSV, tab)</a></li>
-
-
-							<!-- separator-->
+								Current query + related <br>( >> HML) </a></li>
+							<li class="admin-only"><a href="#"
+								onClick="top.HEURIST.search.popupLink(top.HEURIST.baseURL +'export/delimited/exportDelimitedForRectype.html?db=' + database);"
+								title="Export records as delimited text">
+								Filtered record dump <br>( >> CSV, tab)</a></li>
 						</ul>
 					</li>
 
