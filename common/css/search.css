@@ -1090,16 +1090,6 @@ div.hide .saved-search-subheading {
 	border-top-right-radius:5px;
 	border: 1px solid #999999;
 }
-#search {
-	display:block;
-	height:29px;
-	padding:0;
-	position:relative;
-	top:0;
-	left:2px;
-	width:100%;
-	overflow:visible;
-}
 .banner a, .banner a:hover, .banner input {
 	border:medium none;
 	height:auto;
@@ -1118,8 +1108,9 @@ div.hide .saved-search-subheading {
 #add-record {
 	border-left: 1px solid rgba(150, 150, 150, 0.3);
 	display: inline-block;
+	left: 443px;
 	padding: 0 0 0 8px;
-	margin-left:133px;
+	top: 6px;
 }
 .shadow {
 	-webkit-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
@@ -2306,7 +2297,6 @@ div.recorddiv:hover > #recordID {
 	height:40px !important;
 	background-color: #F2F2F2 !important;
 	top: 6px;
-	position: absolute;
 	z-index:10;
 	padding:0 !important;
 	display:inline-block !important;
@@ -2314,9 +2304,11 @@ div.recorddiv:hover > #recordID {
 	text-align:right;
 	width: 120px;
 	overflow: hidden;
-	margin-left:3px
+	margin-left:313px
 }
-
+#searchButtons, #searchInput, #add-record {
+	position:absolute;
+}
 #searchButtons .searchButtonsTrigger {
 	background-image: url("../images/blue-down-triangle.png");
 	height: 43px;
@@ -2390,6 +2382,8 @@ div.recorddiv:hover > #recordID {
 	background-image: url(../images/b_showhide_L.png);
 }
 #search {
+	display:block;
+	overflow:visible;
 	border-bottom: 1px solid #696969;
 	height: 45px;
 	left: 10px;

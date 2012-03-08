@@ -292,7 +292,7 @@
 			<div id=search class="banner searchTable" style="border-bottom:1px solid #696969;">
 				<form onSubmit="top.HEURIST.search.checkSearchForm();return false;"><input type=hidden id=w-input name=w>
 					<!-- SEARCH:  it's obvious it's a search, one less bit of clutter -->
-					<div class="searchInput" style="position:relative"><input id=q name=q type=text style="width:300px; clear:both" onKeyPress="if (event.keyCode == 13) {top.HEURIST.search.submitSearchForm();}">
+<div style="position:relative">					<div class="searchInput" id="searchInput"><input id=q name=q type=text style="width:300px; clear:both" onKeyPress="if (event.keyCode == 13) {top.HEURIST.search.submitSearchForm();}">
 
 						<div class="simplesearch" title="Click to show simple search builder panel" onclick='$("#simple-search").toggleClass("collapsed");$(this).toggleClass("collapsed");'></div>
 
@@ -324,9 +324,10 @@
 						<input id=all-records-button type=button value="all records"  title="Search across all records in Heurist" onClick="document.getElementById('w-input').value = 'all'; top.HEURIST.search.submitSearchForm();">
 						</div>
 					<!-- TODO: We need a better position for the Add New Record button. Needs to be separated from search button --> 
-                    <span style="padding-left: 100;" id="add-record" > 
-                    <input id=add-record-link value="Add New Record" title="Add a new record to the Heurist database, setting record type and ownership" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/addRecordPopup.php'); return false;" class="logged-in-only" >
-                    </span>
+	<div id="add-record" > 
+	<input id=add-record-link value="Add New Record" title="Add a new record to the Heurist database, setting record type and ownership" onClick="top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/addRecordPopup.php'); return false;" class="logged-in-only" >
+	</div>
+</div>
 				</form>
 
 				<div id="viewTriggers">
