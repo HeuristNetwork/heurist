@@ -8,117 +8,117 @@
  */
 
 div.heurist {
-	width: 370px;
-	height: 240px;
-	border: 2px solid #FFF;
-	background-color: #fff;
-	z-index: 999999;
-	display: none;
-	-moz-border-radius: 6px;
-	-webkit-border-radius:6px;
-	border-radius:6px
-	text-align: left;
-	opacity: 1.0;
-		-webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
-	-moz-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
-	box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
+	width: 370px!important;
+	height: 240px!important;
+	border: 2px solid #FFF!important;
+	background-color: #fff!important;
+	z-index: 999999!important;
+	display: none!important;
+	-moz-border-radius: 6px!important;
+	-webkit-border-radius:6px!important;
+	border-radius:6px !important;
+	text-align: left!important;
+	opacity: 1.0 !important;
+		-webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6) !important;
+	-moz-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6) !important;
+	box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6) !important;
 	background:url("../images/backgrounds/thumbnail_bg.png") repeat-x scroll 0 bottom #F6F6F6 !important;
 	border:3px solid #FFFFFF !important;
 }
 div.heurist td{
-	padding:0 5px
+	padding:0 5px !important;
 }
 div.heurist * {
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 12px;
-	text-align: left;
-	font-weight: bold;
+	font-family: Arial, Helvetica, sans-serif!important;
+	font-size: 12px!important;
+	text-align: left!important;
+	font-weight: bold!important;
 }
 
 div.heurist div.bookmarklet_header {
-	background-attachment:scroll;
-	background-image:url("../images/backgrounds/banner_bg.png");
-	background-position:0 bottom;
-	background-repeat:repeat-x;
-	color:#999999;
-	cursor:move;
-	font-size:14px;
-	font-weight:bold;
-	height:25px;
-	line-height:24px;
-	padding-left:3px;
-	text-shadow:0 1px 1px #FFFFFF;
-	text-transform:uppercase;
+	background-attachment:scroll!important;
+	background-image:url("../images/backgrounds/banner_bg.png")!important;
+	background-position:0 bottom!important;
+	background-repeat:repeat-x!important;
+	color:#999999!important;
+	cursor:move!important;
+	font-size:14px!important;
+	font-weight:bold!important;
+	height:25px!important;
+	line-height:24px!important;
+	padding-left:3px!important;
+	text-shadow:0 1px 1px #FFFFFF!important;
+	text-transform:uppercase!important;
 }
 div.heurist div.bookmarklet_header span {
-	font-weight: normal;
+	font-weight: normal!important;
 }
 
 div.heurist div.bookmarklet_close {
-	-moz-border-radius:15px 15px 15px 15px;
-	-webkit-border-radius:15px 15px 15px 15px;
-	border-radius:15px 15px 15px 15px;
-	-moz-box-shadow:0 1px 6px #000000;
-	-webkit-box-shadow:0 1px 6px #000000;
-	box-shadow:0 1px 6px #000000;
-	background:url("../images/white-cross.gif") no-repeat scroll center center rgba(0, 0, 0, 0.5);
+	-moz-border-radius:15px 15px 15px 15px!important;
+	-webkit-border-radius:15px 15px 15px 15px!important;
+	border-radius:15px 15px 15px 15px!important;
+	-moz-box-shadow:0 1px 6px #000000!important;
+	-webkit-box-shadow:0 1px 6px #000000!important;
+	box-shadow:0 1px 6px #000000!important;
+	background:url("../images/white-cross.gif") no-repeat scroll center center rgba(0, 0, 0, 0.5)!important;
 	border:2px solid #FFFFFF !important;
-	cursor:pointer;
-	float:right;
-	height:14px;
-	margin-bottom:9px;
-	margin-left:9px;
-	position:absolute;
-	right:-14px;
-	text-align:center;
-	top:-14px;
-	width:14px;
+	cursor:pointer!important;
+	float:right!important;
+	height:14px!important;
+	margin-bottom:9px!important;
+	margin-left:9px!important;
+	position:absolute!important;
+	right:-14px!important;
+	text-align:center!important;
+	top:-14px!important;
+	width:14px!important;
 }
 
 div.heurist div#topline {
-	padding:10px;
+	padding:10px!important;
 }
 
 div.heurist select#rectype-select {
-	width: 230px;
-	margin-right: 10px;
+	width: 230px!important;
+	margin-right: 10px!important;
 }
 
 div.heurist a.imglnk {
-	margin: 0px;
+	margin: 0px!important;
 }
 div.heurist a {
-	color: blue;
-	text-decoration: underline;
+	color: blue!important;
+	text-decoration: underline!important;
 }
 
 div.heurist img {
-	border: none;
-	vertical-align: text-bottom;
-	margin-right:3px;
+	border: none!important;
+	vertical-align: text-bottom!important;
+	margin-right:3px!important;
 }
 div.heurist nobr img {
-	vertical-align: middle;
+	vertical-align: middle!important;
 }
 
 div.heurist div#hr-div {
-	height: 1px;
-	width: 100%;
-	background-color: black;
-	margin: 25px 0 15px 0;
+	height: 1px!important;
+	width: 100%!important;
+	background-color: black!important;
+	margin: 25px 0 15px 0!important;
 }
 
 div.heurist td input, div.heurist td a {
-	margin-right: 0;
+	margin-right: 0!important;
 }
 .bookmarklet_link_importer {
-	padding :10px;
+	padding :10px!important;
 	text-Align :right !important;
-	border-Top :1px solid #AAA;
-	position : absolute;
-	bottom: 0;
-	left:0;
-	right:0;
-	color: #6A7C99;
+	border-Top :1px solid #AAA!important;
+	position : absolute!important;
+	bottom: 0!important;
+	left:0!important;
+	right:0!important;
+	color: #6A7C99!important;
 	font-weight: normal !important;
 	}
