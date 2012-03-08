@@ -47,7 +47,8 @@ body.popup #page-inner {
 	padding-right:5px;
 }
 #sidebar {
-	width:170px
+	width:170px;
+	background-color: #FFEEAA;
 }
 .dbList li {
 	list-style: none;
@@ -353,6 +354,8 @@ img.button:hover {
 body {
 	margin:0;
 	padding:0;
+	background-color:#606060;
+		
 }
 /*button {
 	width: 80px;
@@ -540,4 +543,18 @@ div#termsFilter.popup {
 }
 #ygddfdiv table{
 	width:100%;
+}
+.button.white {
+	border:1px solid rgba(255,255,255, 0.25) !important;
+	color:#AAA;
+}
+.button.white A:link {
+	color:#AAA;
+}
+#tabs li a:hover, ul.menu li a:hover, #quicklink-cell li:hover a, #views li:hover a {
+	color: #FFFFFF;
+	font-weight: bold;
+}
+#page, #sidebar, #center-panel {
+    border: 1px solid #FFFFFF;
 }
