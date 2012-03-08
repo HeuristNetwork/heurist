@@ -276,7 +276,7 @@ top.HEURIST.search = {
 		top.HEURIST.registerEvent(window, "heurist-related-recordset-loaded",
 					function (evt) {
 									var i,layout,style,
-										maxFilterDepth,
+										maxFilterDepth=0,
 										maxDepth=0;
 										top.HEURIST.search.addResultLevelLinks(0); // now we know the links add the tags to top level
 										top.HEURIST.search.loadLevelFilter(0);
