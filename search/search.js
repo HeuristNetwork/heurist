@@ -430,7 +430,12 @@ top.HEURIST.search = {
 			filterDiv = filterDiv.get(0);
 			filterDiv.innerHTML = "";
 		}
-
+		if(level==0) {//create count button
+			var showSearchResults = document.createElement("div");
+			showSearchResults.innerHTML = "<a title=\"Click to toggle results\" href='#' onclick=top.HEURIST.search.toggleResults()>Search Results <span class=\"relatedCount\">"+top.HEURIST.search.results.totalQueryResultRecordCount+"</span></a><span id=\"selectedCount-0\"></span>";
+			showSearchResults.className = "showrelated";
+			filterDiv.appendChild(showSearchResults);
+		}
 		if(level>0){// create load-show-hide  with count banner for a related level
 			var showRelatedMenuItem = document.createElement("div");
 			showRelatedMenuItem.innerHTML = "<a title=\"Click to show "+depthInfo.count+" records related to the records listed above\" href='#' onclick=top.HEURIST.search.toggleRelated("+level+")>Load Level "+level+" Related Records <span class=\"relatedCount\">"+depthInfo.count+"</span></a>";
@@ -630,22 +635,36 @@ top.HEURIST.search = {
 		var bodyClass = "w-" + searchType;
 		$("body").addClass(bodyClass);
 	},
-
+	setSelectedCount: function() {
+		for (i=0;i<=3;i++) {
+			if (!top.HEURIST.search.selectedRecordIds[i] || top.HEURIST.search.selectedRecordIds[i].length == 0) {
+			$("#selectedCount-"+i).html("");
+			}else{
+			$("#selectedCount-"+i).html("<span title=\"Number of records selected in this level is "+top.HEURIST.search.selectedRecordIds[i].length +"\">"+top.HEURIST.search.selectedRecordIds[i].length +"</span>");
+			}
+		}
+	},
+	toggleResults: function(){
+		$("#results-level0").toggleClass("collapsed");
+	},
 	toggleRelated: function(level){
 		var className =  document.getElementById("showrelated" + level).className;
 		var depthInfo = top.HEURIST.search.results.infoByDepth[level];
 		$("#results-level" + level).toggleClass("collapsed");
 		if (className.match(/loaded/)) {  //loaded
 			if ($("#results-level" + level).hasClass("collapsed")) {
-				$("#showrelated" + level).html("<a onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Show Level "+level+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span>");
+				$("#showrelated" + level).html("<a onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Level "+level+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+level+"\"></span>");
+			top.HEURIST.search.setSelectedCount();
 			}else{
-				$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Hide Level "+level+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span>");
+				$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Level "+level+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+level+"\"></span>");
+			top.HEURIST.search.setSelectedCount();
 			};
 		}else{  //not loaded yet
 			//This is where we load the next related level and it's important to load all parts (recDiv and Filters before filtering.
 			top.HEURIST.search.loadRelatedLevel(level);
 			document.getElementById("showrelated" + level).className = className + " loaded";
-			$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Hide Level "+level+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span>");
+			$("#showrelated" + level).html("<a style='background-image:url(../common/images/heading_saved_search.png)' onclick='top.HEURIST.search.toggleRelated(" +level + ")' href='#'>Level "+level+" Related Records </a><span class=\"relatedCount\">"+depthInfo.count+"</span><span class=\"selectedCount\" id=\"selectedCount-"+level+"\"></span>");
+			top.HEURIST.search.setSelectedCount();
 			top.HEURIST.search.filterRelated(level);
 		}
 		top.HEURIST.search.updateMapRelated();
@@ -1863,6 +1882,8 @@ top.HEURIST.search = {
 				top.HEURIST.search.selectedRecordIds[level] = [];
 			}
 			top.HEURIST.search.selectedRecordIds[level].push(recID);
+			top.HEURIST.search.setSelectedCount(level);
+
 		}
 	},
 
@@ -1871,6 +1892,7 @@ top.HEURIST.search = {
 		if (resultDiv && $(resultDiv).hasClass("selected")) {
 			delete top.HEURIST.search.selectedRecordDivs[level][recID];
 			$(resultDiv).toggleClass("selected");
+			top.HEURIST.search.setSelectedCount(level);
 			if (top.HEURIST.util.getDisplayPreference("autoSelectRelated") != "true"){
 				$(".link"+recID,$("#results")).removeClass("linkSelected");
 			}else{// unmark all related records
@@ -2756,6 +2778,8 @@ top.HEURIST.search = {
 		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);*/
 
 		top.HEURIST.search.updateMapOrSmarty();
+		top.HEURIST.search.setSelectedCount();
+
 
 		return false;
 	},
@@ -2779,6 +2803,7 @@ top.HEURIST.search = {
 		top.HEURIST.fireEvent(mapFrame.contentWindow,"heurist-selectionchange",  ssel);*/
 
 		top.HEURIST.search.updateMapOrSmarty();
+		top.HEURIST.search.setSelectedCount();
 
 		return false;
 	},
@@ -2856,6 +2881,8 @@ top.HEURIST.search = {
 				top.HEURIST.search.deselectResultItem(recID,level);
 			}
 		}
+		top.HEURIST.search.setSelectedCount();
+
 		var viewerFrame = document.getElementById("viewer-frame");
 
 		var recordFrame = document.getElementById("record-view-frame");
