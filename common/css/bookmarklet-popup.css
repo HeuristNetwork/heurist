@@ -13,13 +13,13 @@ div.heurist {
 	border: 2px solid #FFF!important;
 	background-color: #fff!important;
 	z-index: 999999!important;
-	display: none!important;
+	display: none;
 	-moz-border-radius: 6px!important;
 	-webkit-border-radius:6px!important;
 	border-radius:6px !important;
 	text-align: left!important;
 	opacity: 1.0 !important;
-		-webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6) !important;
+	-webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6) !important;
 	-moz-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6) !important;
 	box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6) !important;
 	background:url("../images/backgrounds/thumbnail_bg.png") repeat-x scroll 0 bottom #F6F6F6 !important;
@@ -27,6 +27,7 @@ div.heurist {
 }
 div.heurist td{
 	padding:0 5px !important;
+	border:none;
 }
 div.heurist * {
 	font-family: Arial, Helvetica, sans-serif!important;
