@@ -81,7 +81,8 @@ $prefs = array(
 	"autoSelectRelated" => "false", // autoSelect related records
 	"autoDeselectOtherLevels" => "true", // auto deselct other level before selecting current.
 	"tagging-popup" => "true",
-	"mapbackground" => ""
+	"mapbackground" => "",
+	"report-output-limit" => "1000"   //report output limit for smarty and map
 );
 
 foreach (get_group_ids() as $gid) {

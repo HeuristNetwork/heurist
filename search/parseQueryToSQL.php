@@ -1208,9 +1208,9 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 		}
 		if ($limit < 1 ) unset($limit);
 		if (@$limit){
-			$limit = min($limit, 1000);
+			//ARTEM. It should not overwrite the limit specified in dispPreferences $limit = min($limit, 1000);
 		}else{
-			$limit = 100;
+			$limit = 100; // Artem says 12/3/12 that this will not happen b/c it only happens if the parameter is bad.
 		}
 
 		if (array_key_exists("o", $parms)) {

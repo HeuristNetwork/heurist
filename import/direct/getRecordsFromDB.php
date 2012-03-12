@@ -52,6 +52,11 @@
      print "Make sure the target records and field types are compatible. <b>";
     print "If you get the codes wrong, you will get a complete dog's breakfast in your target database ...</b><p>\n";
 
+	$dt_SourceRecordID = getDetailTypeLocalID("2-589");
+	if(!$dt_SourceRecordID){
+		print "If you want the <b>original IDs</b> of the records to be recorded in the database, please <b>import the Origianl ID field</b> from the Heurist Reference database";
+	}
+
     print "<p>This function is under development at 23/11/11 - please check back shortly ...</p>";
 
 	$sourcedbname = NULL;
@@ -247,13 +252,13 @@
 
  		 // --------------------------------------------------------------------------------------------------------------------
 
- 		createTermsOptions('enum');
- 		createTermsOptions('relation');
+ 		createTermsOptions($config, 'enum');
+ 		createTermsOptions($config, 'relation');
 		print "</form>";
 
 	}
 
- 	function createTermsOptions($type){
+ 	function createTermsOptions($config, $type){
 
 		global $sourcedbname, $db_prefix, $dbPrefix, $is_h2;
 
@@ -470,10 +475,13 @@
 				//die ("<p>Sorry ...</p>");
 			}
 
+			//special detailtype to keep original record id
+			$dt_SourceRecordID = getDetailTypeLocalID("2-589");
+
 			while ($row2 = mysql_fetch_array($res2)) {
 
 				//select details and create details array
-				$rid = $row2[0];
+				$rid = $row2[0]; //record id
 
 				print "<br>".$rid."&nbsp;&nbsp;&nbsp;";
 
@@ -500,6 +508,12 @@ FROM $sourcedb.`recDetails` rd, $sourcedb.`defDetailTypes` dt where rd.`dtl_Deta
 				$key = 0;
 				$ind = 0;
 				$values = array();
+
+				//add special detail type 2-589 - reference to original record id
+				if($dt_SourceRecordID){
+					$details["t:".$dt_SourceRecordID] = array('0'=>$rid);
+				}
+
 				while ($row3 = mysql_fetch_array($res3)) {
 
 					if($dtid != $row3[0]){
@@ -622,7 +636,7 @@ print "mapping not defined for detail #".$dtid;
 
 		} // end of loop for record types
 
-error_log(">>>>>".print_r($unresolved_pointers, true));
+//error_log("DEBUG: UNRESOLVED POINTERS>>>>>".print_r($unresolved_pointers, true));
 
 		//resolve record pointers
 		$inserts = array();
@@ -649,7 +663,7 @@ error_log(">>>>>".print_r($unresolved_pointers, true));
 		}
 		if (count($inserts)) {//insert all new details
 			$query1 = "insert into $dbPrefix".HEURIST_DBNAME.".recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) values " . join(",", $inserts);
-error_log(">>>>>>>>>>>>>>>".$query1);
+//error_log(">>>>>>>>>>>>>>>".$query1);
 			mysql_query($query1);
 		}
 

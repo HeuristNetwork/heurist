@@ -189,6 +189,8 @@ function ShowReps() {
 	*/
 	function _reload(template_file) {
 
+				_showLimitWarning();
+
 				var baseurl = top.HEURIST.basePath + "viewers/smarty/showReps.php";
 
 				var squery = _getQuery();
@@ -1248,6 +1250,26 @@ function ShowReps() {
 		}
 	}
 
+	//
+	function _showLimitWarning(){
+
+			var msg = "";
+
+			var limit = parseInt(top.HEURIST.util.getDisplayPreference("report-output-limit"));
+			if (isNaN(limit)) limit = 1000; //def value for dispPreference
+
+			if( (_sQueryMode=="all" && top.HEURIST.currentQuery_all_waslimited) ||
+				(_sQueryMode=="selected" && top.HEURIST.currentQuery_sel_waslimited) ||
+				(_sQueryMode=="main" && limit<top.HEURIST.search.results.totalQueryResultRecordCount))
+			{
+				msg = "&nbsp;&nbsp;<font color='red'>(result set limited to "+limit+")</font>";
+			}else if(_sQueryMode=="main"){
+					msg = "&nbsp;&nbsp;total records: "+top.HEURIST.search.results.totalQueryResultRecordCount;
+			}
+
+			document.getElementById('recordCount').innerHTML = msg;
+	}
+
 	//public members
 	var that = {
 
@@ -1280,10 +1302,10 @@ function ShowReps() {
 
 
 				if(document.getElementById('cbUseAllRecords1')){
-						document.getElementById('cbUseAllRecords1').value = !val;
+					document.getElementById('cbUseAllRecords1').value = val;
 				}
 				if(document.getElementById('cbUseAllRecords2')){
-					document.getElementById('cbUseAllRecords2').value = !val;
+					document.getElementById('cbUseAllRecords2').value = val;
 				}
 
 				if (isChanged && needReload) {

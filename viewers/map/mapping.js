@@ -325,9 +325,11 @@ if (typeof mxn.LatLonPoint == "function") {
 			}
 
 			if (window["Timeline"]) { //there is Timeline object
-				M.initMapAndTimeline(mini, bounds);
+				M.initMapAndTimeline(mini, bounds); //init timemap+timeline and fill with the custom data
 			} else {
-				//init empty map wihout timeline (for digitizer) without simile timemap - only mapstraction
+				//init empty map (for digitizer)
+				// wihout timeline without simile timemap - only mapstraction map
+				// without custom data (except background image layer)
 				M.map = new mxn.Mapstraction($("#map")[0]);
 
 				M.map.setMapType(M.customMapTypes[0] || mxn.Mapstraction.ROAD);
@@ -352,14 +354,14 @@ if (typeof mxn.LatLonPoint == "function") {
 	}, //end initMap
 
 	/**
-	*
+	* init timemap+timeline and fill with the custom data
 	*/
 	initMapAndTimeline: function (mini, bounds)
 	{
 			var tl_theme, tl_theme2, M = RelBrowser.Mapping;
 
 			//there is bug in timeline - it looks _history_.html in wrong place
-			//SimileAjax.History.enabled = false;
+			SimileAjax.History.enabled = false;
 
 			// modify timeline theme
 			tl_theme = Timeline.ClassicTheme.create();
@@ -459,25 +461,7 @@ if (typeof mxn.LatLonPoint == "function") {
 			var newSearchWindow = "<div style='float:right;'><a href='"+basePath+"search/search.html?q=ids:{{recid}}&db=" + db +
 							"' target='_blank' title='Open in new window' class='externalLink'>view</a></div>"
 
-		//info window
-		/*OLD WAY
-		var template = "<div style='max-width:450px;'>"+
-			//"<div style='display:inline-block;background-image:url({{thumb}})'></div>"+
-			"<b><a href={{url}}>{{title}}</a></b><br/>"+
-
-			"<div id='rec_popup'>"+
-			"<img src='"+basePath+"common/images/10x10.gif' width='100' align='left' style='display:inline-block;background-repeat:no-repeat;background-image:url({{thumb}})'>{{description}}</div>"+
-
-			"<div style='width:100%'>"+
-				"<div style='display:inline-block;'>"+
-					"<img src='"+basePath+"common/images/16x16.gif' "+rectypeImg+" class='rft'>"+
-				"</div>"+
-				"<div style='float:right;padding-right:10px;' id='recordID'>"+
-						editLinkIcon +
-						newSearchWindow +
-				"</div>"
-			"<div>";*/
-//class="simileAjax-bubble-contentContainer simileAjax-bubble-contentContainer-pngTranslucent"
+			//info window template for map (for timeline we use default window with small modifications)
 			var template = '<div style="max-width: 300px;padding-top:5px;">'+
 '<div style="position: static;"><img src="{{thumb}}" class="timeline-event-bubble-image">'+
 '<div class="timeline-event-bubble-title"><a href={{url}}>{{title}}</a></div>'+
@@ -510,6 +494,7 @@ if (typeof mxn.LatLonPoint == "function") {
 				datasets: M.mapdata.timemap,
 				options: {
 					mapZoom: 2,
+					useMarkerCluster: (M.mapdata.count_mapobjects<300),
 					onlyTimeline: (M.mapdata.count_mapobjects<1),
 					infoTemplate: template,
 					theme: customTheme,

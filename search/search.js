@@ -2559,7 +2559,6 @@ top.HEURIST.search = {
 			var p = top.HEURIST.parameters,
 				query_string = "w=all",
 				query_string_sel = null,
-				query_string_all = null,
 				query_string_main = null;
 
 
@@ -2575,12 +2574,20 @@ top.HEURIST.search = {
 
 			query_string_main = query_string + (p["q"]?"&q="+p["q"]:'');
 
+			var limit = parseInt(top.HEURIST.util.getDisplayPreference("report-output-limit"));
+			if(isNaN(limit)) {
+				limit = 1000; //default dispPreference
+			}
+
 			//only selected
 			var recIDs = top.HEURIST.search.getSelectedRecIDs().get();
+			top.HEURIST.currentQuery_sel_waslimited = false;
 			if(recIDs && recIDs.length>0){
-				if (recIDs.length >= 500) {// maximum number of records ids 500
-					alert("Selected record count is great than 500, opening the first 500 records!");
-					recIDs = recIDs.slice(0,500);
+				top.HEURIST.currentQuery_sel_waslimited = (recIDs.length > limit);
+
+				if (top.HEURIST.currentQuery_sel_waslimited) {
+					//alert("Selected record count is great than 500, opening the first 500 records!");
+					recIDs = recIDs.slice(0,limit);
 				}
 				query_string_sel = encodeURI(query_string + '&q=ids:' + recIDs.join(","));
 			}
@@ -2604,11 +2611,13 @@ top.HEURIST.search = {
 				}
 			}
 			recIDs = jQuery.unique(recIDs);
-			if (recIDs.length >= 500) {// maximum number of records ids 500
+			top.HEURIST.currentQuery_all_waslimited = (recIDs.length > limit);
+			if (top.HEURIST.currentQuery_all_waslimited) {
 				//alert("Selected record count is great than 500, opening the first 500 records!");
-				recIDs = recIDs.slice(0,500);
+				recIDs = recIDs.slice(0,limit);
+				top.HEURIST.currentQuery_all_limited = true;
 			}
-			query_string_all = encodeURI(query_string + '&q=ids:' + recIDs.join(","));
+			top.HEURIST.currentQuery_all = encodeURI(query_string + '&q=ids:' + recIDs.join(","));
 
 			/*var currentSearchQuery = '';
 			var selmode = top.HEURIST.util.getDisplayPreference("showSelectedOnlyOnMapAndSmarty");
@@ -2620,7 +2629,7 @@ top.HEURIST.search = {
 				currentSearchQuery = query_string_main;
 			}*/
 
-			top.HEURIST.currentQuery_all = query_string_all;
+
 			top.HEURIST.currentQuery_sel = query_string_sel;
 			top.HEURIST.currentQuery_main = query_string_main;
 

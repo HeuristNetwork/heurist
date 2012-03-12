@@ -33,8 +33,15 @@ require_once('libs.inc.php');
 
 	$_REQUEST["f"] = 1; //always search
 
+
 	if( !array_key_exists("limit", $_REQUEST) ){ //not defined
-		$_REQUEST["limit"] = "500"; //force offset and limit (max 500)
+
+		$limit = intval(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['report-output-limit']);
+		if (!$limit || $limit<1){
+			$limit = 1000; //default limit in dispPreferences
+		}
+
+		$_REQUEST["limit"] = $limit; //force limit
 	}
 
 	$qresult = loadSearch($_REQUEST); //from search/getSearchResults.php - loads array of records based og GET request
@@ -167,6 +174,7 @@ function getRecordForSmarty($rec, $recursion_depth){
 	{
 
 		$record = array();
+		$recTypeID = null;
 
 		//loop for all record properties
 		foreach ($rec as $key => $value){
@@ -176,6 +184,7 @@ function getRecordForSmarty($rec, $recursion_depth){
 				$record['rec'.substr($key,4)] = $value;
 
 				if($key=="rec_RecTypeID"){ //additional field
+					$recTypeID = $value;
 					$record["recTypeName"] = $rtStructs['typedefs'][$value]['commonFields'][ $rtStructs['typedefs']['commonNamesToIndex']['rty_Name'] ];
 				}
 
@@ -185,7 +194,7 @@ function getRecordForSmarty($rec, $recursion_depth){
 
 				$details = array();
 				foreach ($value as $dtKey => $dtValue){
-					$dt = getDetailForSmarty($dtKey, $dtValue, $recursion_depth);
+					$dt = getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID);
 					if($dt){
 //DEBUG error_log("ADD ".$kk[0]."=".$dt[$kk[0]]);
 						//$kk = array_keys($dt);
@@ -209,13 +218,20 @@ error_log(">>>".$dtKey."=".$dtValue);
 
 //
 // convert details to array to be assigned to smarty variable
+// $dtKey - detailtype ID
 //
 // @todo - implement as method
-function getDetailForSmarty($dtKey, $dtValue, $recursion_depth){
+function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID){
 
 	global $dtStructs, $dtTerms, $rtStructs;
 	$dtNames = $dtStructs['names'];
 	$rtNames = $rtStructs['names'];
+	$dty_fi = $dtStructs['typedefs']['fieldNamesToIndex'];
+
+	$rt_structure = $rtStructs['typedefs'][$recTypeID]['dtFields'];
+	$dtlabel_index = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
+	$dt_label = $rt_structure[$dtKey][ $dtlabel_index ];
+
 
 	if($dtNames[$dtKey]){
 
@@ -228,8 +244,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth){
 
 		$dtDef = $dtStructs['typedefs'][$dtKey]['commonFields'];
 		if($dtDef){
-			$detailType = $dtDef[ $dtStructs['typedefs']['fieldNamesToIndex']['dty_Type']  ];
-
+			$detailType = $dtDef[ $dty_fi['dty_Type']  ];
 //error_log(">>>>>>>".$dtKey."=".$dtNames[$dtKey].">>>".$dtname." TYPE=".$detailType);
 //ENUM('freetext','blocktext','integer','date','year','relmarker','boolean','enum','relationtype','resource','float','file','geo','separator','calculated','fieldsetmarker','urlinclude')
 
@@ -302,8 +317,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth){
 
 			break;
 */
-			case 'relmarker':
-			break;
+
 			case 'relationtype':
 			break;
 			case 'geo':
@@ -315,6 +329,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth){
 			case 'fieldsetmarker':
 			break;
 
+			case 'relmarker':
 			case 'resource': // link to another record type
 
 				//@todo - parsing will depend on depth level
@@ -338,10 +353,10 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth){
 						//get full record info
 						$record = loadRecord($recordID); //from search/getSearchResults.php
 
-				$res0 = null;
-				if(true){  //64719  45171   48855    57247
-					$res0 = getRecordForSmarty($record, $recursion_depth+1); //@todo - need to
-				}
+						$res0 = null;
+						if(true){  //64719  45171   48855    57247
+							$res0 = getRecordForSmarty($record, $recursion_depth+1); //@todo - need to
+						}
 
 						if($res0){
 							array_push($res, $res0);
@@ -351,13 +366,20 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth){
 						}
 
 					}
-				}//for each
+				}//for each repeated value
 
 				if( count($res)>0 && array_key_exists($rectypeID, $rtNames))
 				{
-					$recordTypeName = $rtNames[$rectypeID];
+					$pointerIDs = $dtDef[ $dty_fi['dty_PtrTargetRectypeIDs'] ];
+					if($pointerIDs==""){ //unconstrainted pointer - we will use as name of variable display name for current record type
+						$recordTypeName = $dt_label;
+					}else{
+						$recordTypeName = $rtNames[$rectypeID];
+					}
 					$recordTypeName = getVariableNameForSmarty($recordTypeName, false);
-//error_log(">>>>>>>>>>".$rectypeID."=".$rtNames[$rectypeID]."=".$recordTypeName."array=".print_r($res[0],true));
+
+error_log(">>>>>>>>>>".$rectypeID."=".$rtNames[$rectypeID]."=".$recordTypeName."array=".print_r($res[0],true));
+
 					$res = array( $recordTypeName."s" =>$res, $recordTypeName =>$res[0] );
 				}else{
 					$res = null;

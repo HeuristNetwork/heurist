@@ -117,6 +117,8 @@
 								<option value="main">Query result</option>
 							</select>
 
+							<span id="recordCount"></span>
+
 		</div>
 	<div id="rep_container"></div>
 </div>
@@ -178,8 +180,8 @@
 					<option>wordwrap</option>
 				</select>
 			    &nbsp;&nbsp;
-                <a href="javascript:void(0)" 
-                    title="Insert ForEach loop to loop through all records in the current query or selection" 
+                <a href="javascript:void(0)"
+                    title="Insert ForEach loop to loop through all records in the current query or selection"
                     onClick="showReps.insertRootForEach()">Insert records loop</a><br>
 			<!--
 					<button onclick="window.showReps.insertSelectedVars(null, false)">Insert fields only</button><br/>
@@ -193,11 +195,11 @@
 				<option value="2">Field + function wrapper</option>
 			</select>
             &nbsp;&nbsp;
-            <a href="../../../help/index.html?SmartyTemplates" 
-                    title="Read full documentation on the Smarty templating language" 
-                    target="_blank">Smarty Help</a> 
+            <a href="../../../help/index.html?SmartyTemplates"
+                    title="Read full documentation on the Smarty templating language"
+                    target="_blank">Smarty Help</a>
 		</div>
-        
+
 		<div id="treeContainer">
 			<div id="varsTree" class="ygtv"></div>
 			<!-- was ygtv-checkbox -highlight -->

@@ -95,7 +95,7 @@ require_once('libs.inc.php');
 
 			//convert to array that will assigned to smarty variable
 			$records =  $qresult["records"];
-			
+
 			//it is required to obtain name of header (common) fields only
 			$first_record = $records[0];
 
@@ -196,7 +196,7 @@ exit();
 *
 * @param mixed $lines
 */
-function _maketext($lines, $ind){
+function _maketext($lines, $ind=0){
 
 	$sep1 = str_repeat('   ', $ind);
 	$sep2 = '\n';
@@ -265,7 +265,7 @@ function getVariableNameForSmarty($name, $is_fieldtype = true){
 //
 // @todo - labels or headers
 //
-function getRecordHeaderSectionForSmarty($rec, $parentName, $ind){
+function getRecordHeaderSectionForSmarty($rec, $parentName, $ind, $addrelationfield=false){
 
 	$tree = array($parentName=>array());
 	$vars = array();
@@ -300,6 +300,14 @@ function getRecordHeaderSectionForSmarty($rec, $parentName, $ind){
 		$tree[$parentName] = array_merge($tree[$parentName], array($name_wo_parent=>$name));
 		$vars = array_merge($vars, array($name=>$key));
 
+		if($addrelationfield){
+				$key="RelationType";
+				$name_wo_parent = 'rec'.$key;
+				$name = $parentName.'.'.$name_wo_parent;
+				$tree[$parentName] = array_merge($tree[$parentName], array($name_wo_parent=>$name));
+				$vars = array_merge($vars, array($name=>$key));
+		}
+
       	return array("text"=>"", "vars"=>$vars, "tree"=>$tree);
 	}
 	else
@@ -314,7 +322,7 @@ function getRecordHeaderSectionForSmarty($rec, $parentName, $ind){
 			if(is_numeric($pos) && $pos==0){
 				//array_push($record, array(substr($key,4) => $value));
 				$key = substr($key, 4); //label
-				$name_wo_parent = 'rec'.$key;	   //wo parent
+				$name_wo_parent = 'rec'.$key;	   //without parent
 				$name = $parentName.'.'.$name_wo_parent;
 
 				if($key=="RecTypeID"){  //instead of type id we add type name
@@ -335,6 +343,15 @@ function getRecordHeaderSectionForSmarty($rec, $parentName, $ind){
 				}
 			}
 		} // for
+
+		if($addrelationfield){
+				$key="RelationType";
+				$name_wo_parent = 'rec'.$key;
+				$name = $parentName.'.'.$name_wo_parent;
+				$tree[$parentName] = array_merge($tree[$parentName], array($name_wo_parent=>$name));
+				$vars = array_merge($vars, array($name=>$key));
+				array_push($arr_text, '{$'.$name.'}');
+		}
 
 		$text = _maketext($arr_text, $ind);
 
@@ -361,7 +378,7 @@ function getRecordTypeSectionForSmarty($recTypeId, $parentName, $ind){
 	$vars = array();
 	$detailtypes = array();
 	$arr_text = array();
-	//IAN ask for comparison with rectype name 
+	//IAN ask for comparison with rectype name
     // $text = $ind.$ind.'{if ($'.$parentName.'.recRecTypeID=='.$recTypeId.')}\n'; //table mode<tr><td colspan="13">';
 	$recTypeName = $rtStructs['names'][$recTypeId];
 	array_push($arr_text, '{if ($'.$parentName.'.recTypeName=="'.$recTypeName.'")}');
@@ -432,43 +449,41 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind){
 			break;
 			case 'file':
 			break;
-			case 'relmarker':
-			break;
-			case 'relationtype':
-			break;
 			case 'geo':
 			break;
 			case 'calculated':
 			break;
 			case 'fieldsetmarker':
 			break;
+			case 'relationtype':
 			*/
+
 			case 'resource': // link to another record type
+			case 'relmarker':
 
 				$pointerRecTypeId = $dtValue[$rst_fi['rst_PtrFilteredIDs']]; //@TODO!!!!! it may be comma separated string
 
 				//load this record
-				if($recursion_depth<2 && ($mode=='varsonly' || array_key_exists($pointerRecTypeId, $rtNames))) {
+				if($recursion_depth<2){ // && ($mode=='varsonly' || array_key_exists($pointerRecTypeId, $rtNames))) {
 
 				$recursion_depth++;
 
-				if($mode=='varsonly'){
+				if($mode=='varsonly' || !array_key_exists($pointerRecTypeId, $rtNames)){
 					$recordTypeName = $dt_label;
 				}else{
 					$recordTypeName = $rtNames[$pointerRecTypeId];
-					$recordTypeName = getVariableNameForSmarty($recordTypeName, false);
 				}
- 
+				$recordTypeName = getVariableNameForSmarty($recordTypeName, false);
+
 				$_fe = array($dt_label,'{foreach $'.$parentName.'.'.$recordTypeName.'s as $'.$recordTypeName.'}');
 
 				array_push($arr_text, _maketext($_fe, $ind));
 
 				//creates headers
-				$res2 = getRecordHeaderSectionForSmarty($first_record, $recordTypeName, $ind); //from
+				$res2 = getRecordHeaderSectionForSmarty($first_record, $recordTypeName, $ind, ($detailType=='relmarker')); //from
 
 				array_push($arr_text, $res2['text']);
 				$vars = array_merge($vars, $res2['vars']);
-
 				$tree = $res2['tree'];
 
 				if($recursion_depth>1){
@@ -477,46 +492,47 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind){
 
 				}
 
+				//add specific for this record type details
 				if(array_key_exists($pointerRecTypeId, $rtNames)){
 
-				//$tree[$recordTypeName] = array_merge($tree[$recordTypeName], $res2['tree']);
+					//$tree[$recordTypeName] = array_merge($tree[$recordTypeName], $res2['tree']);
 
-				//get the list of details from this record
-				$details =  $rtStructs['typedefs'][$pointerRecTypeId]['dtFields'];
-                // TODO: delete this? TEMP - to avoid self recursion
-				// no need $text  = $text.'\n<tr><td colspan="13">';
+					//get the list of details from this record
+					$details =  $rtStructs['typedefs'][$pointerRecTypeId]['dtFields'];
+	                // TODO: delete this? TEMP - to avoid self recursion
+					// no need $text  = $text.'\n<tr><td colspan="13">';
 
-				foreach ($details as $dtKey2 => $dtValue2){
-					$dt = getDetailSectionForSmarty($recordTypeName, $dtKey2, $dtValue2, $ind);
-					if($dt){
-						array_push($arr_text, $dt['text']);
-						$vars = array_merge($vars, $dt['vars']);
-						$detailtypes = array_merge($detailtypes, $dt['detailtypes']);
+					foreach ($details as $dtKey2 => $dtValue2){
+						$dt = getDetailSectionForSmarty($recordTypeName, $dtKey2, $dtValue2, $ind);
+						if($dt){
+							array_push($arr_text, $dt['text']);
+							$vars = array_merge($vars, $dt['vars']);
+							$detailtypes = array_merge($detailtypes, $dt['detailtypes']);
 
-						if(false && $recursion_depth>1){
-							//$res2[$recordTypeName] = array_merge($res2[$recordTypeName], $dt['tree_children']);
-							//$res2 = array_merge($res2, $dt['tree']);
-						}else{
-
-
-
-							$tree[$recordTypeName] = array_merge($tree[$recordTypeName], $dt['tree_children']); //detail fields
-
-							if($recursion_depth>1){
-								$tree[$recordTypeName] = array_merge($tree[$recordTypeName], $dt['tree']);
+							if(false && $recursion_depth>1){
+								//$res2[$recordTypeName] = array_merge($res2[$recordTypeName], $dt['tree_children']);
+								//$res2 = array_merge($res2, $dt['tree']);
 							}else{
-								$tree = array_merge($tree, $dt['tree']); //assign first level records to root
+
+
+
+								$tree[$recordTypeName] = array_merge($tree[$recordTypeName], $dt['tree_children']); //detail fields
+
+								if($recursion_depth>1){
+									$tree[$recordTypeName] = array_merge($tree[$recordTypeName], $dt['tree']);
+								}else{
+									$tree = array_merge($tree, $dt['tree']); //assign first level records to root
+								}
 							}
 						}
-					}
-				}//for
-				///no need $text = $text.'</td></tr>\n';
-				/*
-				if($recursion_depth>1){
-error_log(">>>>            ");
-error_log(">>>>            ".print_r($res2['tree'], true));
-					$tree = array_merge($tree, $res2['tree']);
-				}*/
+					}//for
+					///no need $text = $text.'</td></tr>\n';
+					/*
+					if($recursion_depth>1){
+	error_log(">>>>            ");
+	error_log(">>>>            ".print_r($res2['tree'], true));
+						$tree = array_merge($tree, $res2['tree']);
+					}*/
 
 				}//array_key_exists($pointerRecTypeId, $rtNames))
 

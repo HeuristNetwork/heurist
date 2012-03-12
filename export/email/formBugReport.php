@@ -93,9 +93,9 @@ var uploadCompleted = function(inputDiv, bdValue) {
 		var link = inputDiv.appendChild(window.document.createElement("a"));
 			if (bdValue.file.nonce) {
 				link.href = top.HEURIST.basePath+"records/files/downloadFile.php/" + /*encodeURIComponent(bdValue.file.origName)*/
-								"?ulf_ID=" + encodeURIComponent(bdValue.file.nonce);
-			} else if (bdValue.file.url) {
-				link.href = bdValue.file.url;
+								"?ulf_ID=" + encodeURIComponent(bdValue.file.nonce)+"&db=<?=HEURIST_DBNAME?>";
+			} else if (bdValue.file.URL) {
+				link.href = bdValue.file.URL;
 			}
 			link.target = "_surf";
 			link.onclick = function() { top.open(link.href, "", "width=300,height=300,resizable=yes"); return false; };

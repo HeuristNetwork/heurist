@@ -53,6 +53,10 @@
 
 		var ptd = top.HEURIST.util.getDisplayPreference("tagging-popup");
 		document.getElementById("promptTagOnDataAddition").checked = (ptd!=='false');
+
+		var mol = top.HEURIST.util.getDisplayPreference("report-output-limit");
+		if(isNaN(mol) || parseInt(mol)<1) mol = 1000;
+		document.getElementById("report-output-limit").value = mol;
 	}
 
 	function save() {
@@ -67,10 +71,23 @@
 		var ptd = (document.getElementById("promptTagOnDataAddition").checked)?'true':'false';
 
 
-		if (rpp < 0 || rpp > 500) {
+		if (isNaN(rpp) || rpp < 1 || rpp > 500) {
 			alert("Results per page must be between 1 and 500");
 			return;
 		}
+
+		var mol = parseInt(document.getElementById("report-output-limit").value);
+		if (isNaN(mol) || mol<rpp){
+			alert("'Limit for report output' must be equal or more than 'Results per page'");
+			return;
+		}
+		if(mol>5000){
+			if(! confirm("Large limit for report output may delay map rendereing and smarty processing. Do you confirm?") ){
+				return;
+			}
+		}
+
+
 		top.HEURIST.util.setDisplayPreference("results-per-page", rpp);
 		top.HEURIST.util.setDisplayPreference("defaultSearch", def);
 		top.HEURIST.util.setDisplayPreference("favourites", fav);
@@ -80,6 +97,7 @@
 		top.HEURIST.util.setDisplayPreference("autoSelectRelated", asr);
 		top.HEURIST.util.setDisplayPreference("autoDeselectOtherLevels", adl);
 		top.HEURIST.util.setDisplayPreference("tagging-popup", ptd);
+		top.HEURIST.util.setDisplayPreference("report-output-limit", mol);
 		window.close();
 	}
   </script>
@@ -89,6 +107,9 @@
 
    <div class="input-row">
 	<div class="input-header-cell">Search results per page (20 - 500)</div><div  class="input-cell"><input id="results-per-page"></div>
+   </div>
+   <div class="input-row">
+	<div class="input-header-cell">Limit for report output</div><div  class="input-cell"><input id="report-output-limit"></div>
    </div>
    <div class="input-row">
 	<div class="input-header-cell">Default search on load</div><div  class="input-cell"><input id="defaultSearch">

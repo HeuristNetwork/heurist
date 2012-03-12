@@ -158,8 +158,12 @@ function saveRecord($recordID, $type, $url, $notes, $wg, $vis, $personalised, $p
 		}
 //error_log("MISSED ".$missed);
 		// at least one missing field
-		errSaveRec("record is missing required field(s): ".$missed);
-		return $msgInfoSaveRec;
+		if($modeImport==2){
+			warnSaveRec("record is missing required field(s): ".$missed);
+		}else{
+			errSaveRec("record is missing required field(s): ".$missed);
+			return $msgInfoSaveRec;
+		}
 	}
 	mysql_query("commit");// if we get to here we have a valid save of the core record.
 
@@ -510,7 +514,7 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
 			errSaveRec("db error while inserting '" . $insertQueryValues . "' for record ID ".$recordID." error : ".mysql_error());
 			return array("error" => "recordID = $recordID rectype = $recordType ");
 		}
-		$retval["inserted"] = range($first_bd_id, $first_bd_id + count($inserts) - 1);
+		$retval["inserted"] = range($first_bd_id, $first_bd_id + count($insertQueryValues) - 1);
 	}
 
 	if (count($badIdInsertQueryValues)) {//insert all new details

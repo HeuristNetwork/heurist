@@ -50,12 +50,20 @@
 	}
 
 	if( !array_key_exists("limit", $_REQUEST) ){ //not defined
-		//$_REQUEST["limit"] = "500"; //force offset and limit (max 500)
+
+		$limit = intval(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['report-output-limit']);
+		if (!$limit || $limit<1){
+			$limit = 1000; //default limit in dispPreferences
+		}
+
+		$_REQUEST["limit"] = $limit; //force limit
 	}
 
 	// find all matching records
 	$cols = "rec_ID as bibID, rec_RecTypeID as rectype, rec_Title as title, rec_URL as URL";
 	$query = REQUEST_to_query("select $cols ", $search_type);
+
+//DEBUG error_log("query=".$query);
 
 //error_log(">>>>>>>>>>>>>>>>>>>>>>>".$search_type."<<<<<<".$query);
 	$res = mysql_query($query);
@@ -90,7 +98,7 @@
 			if ($fres) {
 				$row2 = mysql_fetch_row($fres);
 				$ext = strtolower( $row2[1] );
-				if($ext!="kml" && $row[2] && preg_match('/\\.([^.]+)$/', $row[2], $matches)){
+				if($ext!="kml" && $row[2] && preg_match('/\\.([^.]+)$/', $row2[2], $matches)){
 					$ext = strtolower($matches[1]);
 				}
 				if($row2[0] && ($ext=="kml")){
@@ -480,9 +488,12 @@ if(mysql_error()) {
 	}
 
 	//count($geoRecords)
-	$mapobjects = array("records"=>$geoRecords,"geoObjects"=>$geoObjects,
+	$mapobjects = array(
+	"records"=>$geoRecords,
+	"geoObjects"=>$geoObjects,
 	"cntWithGeo"=>$cnt_geo,
-	"cntWithTime"=>$cnt_time,"layers"=>$layers);
+	"cntWithTime"=>$cnt_time,
+	"layers"=>$layers);
 
 	print json_format($mapobjects);
 	exit();

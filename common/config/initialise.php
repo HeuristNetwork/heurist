@@ -48,9 +48,9 @@
 		}
 	if($installDir != @$_SERVER["SCRIPT_NAME"]) {	// this should be the path difference between document root and heurist code root
 		define('INSTALL_DIR', $installDir);	//the subdir of the server's document directory where heurist is installed
-		}else{
+	}else{
 		define('INSTALL_DIR', '');	//the default is the document root directory
-		}
+	}
 
 
 	define('HEURIST_SITE_PATH',INSTALL_DIR == ''? '/' : INSTALL_DIR.'/'); // eg. /h3-ij/
@@ -252,13 +252,13 @@
 	// set up email defines
 	if ($infoEmail) {
 		define('HEURIST_MAIL_TO_INFO', $infoEmail);	//mailto string for heurist installation issues
-		}
+	}
 
 	if ($sysAdminEmail) {
 		define('HEURIST_MAIL_TO_ADMIN', $sysAdminEmail);	//mailto string for heurist installation issues
-		}else if ($infoEmail){
+	}else if ($infoEmail){
 		define('HEURIST_MAIL_TO_ADMIN', $infoEmail);	//mailto string for heurist installation issues
-		}
+	}
 
 	// url of 3d party service that generates thumbnails for given website, set for installation in intialise.php
 	define('WEBSITE_THUMBNAIL_SERVICE',$websiteThumbnailService);
@@ -322,6 +322,7 @@
 	'DT_START_DATE' => array(2,2),
 	'DT_END_DATE' => array(2,3),
 	'DT_INTERPRETATION_REFERENCE' => array(2,13),
+	'DT_ORIGINAL RECORD_ID' => array(2,589), //for import
 	'DT_DOI' => array(3,99),
 	'DT_WEBSITE_ICON' => array(3,347),
 	'DT_ISBN' => array(3,97),

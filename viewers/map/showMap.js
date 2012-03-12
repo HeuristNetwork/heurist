@@ -144,11 +144,7 @@ function ShowMap() {
 		var errors = initMapping(); //from mapping.js
 		_showErrorSign(errors);
 
-		if(context.cntWithGeo+HEURIST.tmap.layers.length>1){
-			_showMessage(context.cntWithGeo+HEURIST.tmap.layers.length+' objects');
-		}else{
-			_showMessage('');
-		}
+		_showMessage();
 	}
 
 	/**
@@ -447,7 +443,7 @@ function ShowMap() {
 	}
 
 	var currentBackgroundLayer = "";
-	
+
 	/**
 	* fill list of layers   - call for _load_layers
 	*/
@@ -457,7 +453,7 @@ function ShowMap() {
 		var elem = document.getElementById('cbLayers'),
 			s = "<option value='-1'>none</option>",
 			keptLayer = top.HEURIST.util.getDisplayPreference("mapbackground"); //read record id
-			
+
 		for (ind in systemAllLayers) {
 			if(!Hul.isnull(ind)){
 
@@ -468,7 +464,7 @@ function ShowMap() {
 				if(Hul.isempty(sTitle)){
 					sTitle = 'Undefined title. Rec#'+systemAllLayers[ind].rec_ID;
 				}
-				
+
 				var sSel = '';
 				if(keptLayer==systemAllLayers[ind].rec_ID){
 					sSel = ' selected="selected"';
@@ -479,12 +475,12 @@ function ShowMap() {
 		}
 
 		elem.innerHTML = s;
-		
+
 		if(currentBackgroundLayer!=keptLayer){
 			currentBackgroundLayer = keptLayer;
 			 _loadLayer(elem);
 		}
-		
+
 	}
 
 	/**
@@ -516,9 +512,9 @@ function ShowMap() {
 			}
 		}
 		_showErrorSign(errors);
-		
+
 		if(HRST.displayPreferences){
-			top.HEURIST.util.setDisplayPreference("mapbackground", currentBackgroundLayer); //save record id of background layer 
+			top.HEURIST.util.setDisplayPreference("mapbackground", currentBackgroundLayer); //save record id of background layer
 		}
 	}
 
@@ -540,15 +536,33 @@ function ShowMap() {
 	/**
 	* show/hide error sign with report alert - what's wrong with image layers
 	*/
-	function _showMessage(msg){
+	function _showMessage(){
 
 		var elem = document.getElementById('messageSign');
 		if(elem){
-			if(Hul.isempty(msg)){
-				elem.innerHTML = '';
-			}else{
-				elem.innerHTML = msg;
+			var msg = "";
+			var mapobjects = HEURIST.tmap.cntWithGeo+HEURIST.tmap.layers.length;
+
+			if(mapobjects>0){
+
+				var limit = parseInt(top.HEURIST.util.getDisplayPreference("report-output-limit"));
+				if (isNaN(limit)) limit = 1000; //def value for dispPreference
+
+
+
+				if( (_sQueryMode=="all" && top.HEURIST.currentQuery_all_waslimited) ||
+					(_sQueryMode=="selected" && top.HEURIST.currentQuery_sel_waslimited) ||
+					(_sQueryMode=="main" && limit<top.HEURIST.search.results.totalQueryResultRecordCount))
+				{
+					msg = "&nbsp;&nbsp;<font color='red'>(result set limited to "+limit+")</font>";
+				}
+
+				if(mapobjects>1){
+					msg = mapobjects+' objects'+msg;
+				}
 			}
+
+			elem.innerHTML = msg;
 		}
 	}
 

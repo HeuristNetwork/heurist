@@ -20,6 +20,17 @@
 
 	require_once(dirname(__FILE__).'/../../external/php/geekMail-1.0.php');
 
+	if(defined('HEURIST_MAIL_TO_INFO')){
+		$toEmailAddress = HEURIST_MAIL_TO_INFO;
+	}
+	if ( !(isset($toEmailAddress) && $toEmailAddress) && defined('HEURIST_MAIL_TO_ADMIN')){
+		$toEmailAddress = HEURIST_MAIL_TO_ADMIN;
+	}
+	if(!(isset($toEmailAddress) && $toEmailAddress)){
+		print '({"error":"The owner of this instance of Heurist has not defined either the info nor system emails"})';
+		exit();
+	}
+
 	//send an email
 	$geekMail = new geekMail();
 	$geekMail->setMailType('html');
@@ -30,11 +41,13 @@
 	// TODO: has been establsihed for automatically harvesting and notifying emails
 	// $geekMail->to('prime.heurist@gmail.com');
 	// but during development it's best just to send it to the team so we actually SEE them ...
-	$geekMail->to(HEURIST_MAIL_TO_INFO);
+
+	$geekMail->to($toEmailAddress);
+
 
   $ids = "";
 
-	if($_POST["rectype"] == RT_BUG_REPORT){
+  if($_POST["rectype"] == RT_BUG_REPORT){
 
 	$bug_title = $_POST["type:".DT_BUG_REPORT_NAME];
 
