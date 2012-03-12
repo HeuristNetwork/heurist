@@ -236,18 +236,18 @@
 
 										case HVariety.FILE:
 
-											var newval = fields[j][2]; 
+											var newval = fields[j][2];
 						 					this.initFile = this.updateDetails;
 				 							ffile = new HFile(this, 0, '', 0, null, newval, null, '');
 						 					delete this.initFile;
-										
+
 											details = recHR.getDetails(recHDT);
 											if (!details[0]) {
 												recHR.addDetail(recHDT, ffile);
 											} else {
 												recHR.changeDetail(recHDT, details[0], ffile);
 											}
-										
+
 										break;
 
 										case HVariety.DATE:
@@ -438,14 +438,14 @@
 							}
 							td = tr.appendChild(document.createElement("td"));
 							var errors = recHR.getError();
-							if (errors.length) {
+							if (errors && errors.length) {
 								errorsOrWarningExist = true;
 								para = document.createElement('pre');
 								para.innerHTML = "Error(s):\n" + errors.join(". \n");
 								td.appendChild(para);
 							}
 							var warnings = recHR.getWarning();
-							if (warnings.length) {
+							if (warnings && warnings.length) {
 								errorsOrWarningExist = true;
 								para = document.createElement('pre');
 								para.innerHTML = "Warning(s):\n" + warnings.join(". \n");

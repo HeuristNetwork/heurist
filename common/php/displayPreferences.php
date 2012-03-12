@@ -48,7 +48,6 @@ $prefs = array(
 	"record-search-scope" => "r-all",
 	"record-search-last" => "", //list of rectypes and last selected records - up to 50
 
-	"search-result-style" => "list",
 	"search-result-style0" => "list",
 	"search-result-style1" => "icons",
 	"search-result-style2" => "icons",

@@ -1485,7 +1485,7 @@ top.HEURIST.search = {
 		for (;i<l; i++) {
 			resultsDiv = document.getElementById("results-level"+i);
 			if (resultsDiv) {
-				top.HEURIST.util.setDisplayPreference("search-result-style"+ (allLevels?"":i), style, window,null,true,true);
+				top.HEURIST.util.setDisplayPreference("search-result-style"+ i, style, null,null,true,true);
 				resultsDiv.className = style + (i>0?" related-results":"") +
 										($(resultsDiv).hasClass("collapsed") ? " collapsed" : "");
 				$("li.view > ul > li", resultsDiv).removeClass("checked");
@@ -2079,12 +2079,13 @@ top.HEURIST.search = {
 			var newSelectedRecIdMap = {};
 			var newSelectedRecIds = [];
 			var recIDs = results.infoByDepth[level].recIDs,
-				recID;
+				recID,recDiv;
 			// order this object so lasted selected remains last.
 			if (clickedIndex < lastSelectedIndex){
 				for(var i = clickedIndex; i <= lastSelectedIndex; i++) {
 					recID = recIDs[i];
-					if (!$(".recordDiv[recID="+recID,$("#results-level"+level)).hasClass("filtered")){
+					recDiv = $(".recordDiv[recID="+recID+"].lnk:not(filtered)",$("#results-level"+level));
+					if (recDiv.length){
 						newSelectedRecIdMap[recID] = true;
 						newSelectedRecIds.push(recID);
 					}
@@ -2092,7 +2093,8 @@ top.HEURIST.search = {
 			}else{
 				for(var i = clickedIndex; i >= lastSelectedIndex; i--) {
 					recID = recIDs[i];
-					if (!$(".recordDiv[recID="+recID,$("#results-level"+level)).hasClass("filtered")){
+					recDiv = $(".recordDiv[recID="+recID+"].lnk:not(filtered)",$("#results-level"+level));
+					if (recDiv.length){
 						newSelectedRecIdMap[recID] = true;
 						newSelectedRecIds.push(recID);
 					}
@@ -3821,7 +3823,7 @@ function removeCustomAlert() {
 				layout.getUnitByPosition('right').set("width",maxRightWidth);
 				top.HEURIST.util.setDisplayPreference("searchWidth", maxRightWidth);
 			}
-			var currentStyle = top.HEURIST.util.getDisplayPreference("search-result-style");
+			var currentStyle = top.HEURIST.util.getDisplayPreference("search-result-style0");
 			var twocollink = document.getElementById("result-style-twoCol");
 			if (centerPanelWidth < 180 && currentStyle == "two-col") {
 					 document.getElementById("results-level0").className = "list"; //temporarliy changes 2-col to list
