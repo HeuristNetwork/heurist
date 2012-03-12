@@ -75,7 +75,7 @@ function update_counts2(processed, total) {
 </script>
 </head>
 <body>
-<h2>CONSTRCUTED TITLE RECALCULATION</h2>
+<h2>CONSTRUCTED TITLE RECALCULATION</h2>
 
 <p>
    This function recalculates all the constructed record titles, compares
@@ -84,13 +84,16 @@ function update_counts2(processed, total) {
    for which the titles were changed and a list of records for which the
    new title would be blank (an error condition).
 </p>
+<p>This will take some time for large databases.</p>
+ <p>The scanning step does not write to the database 
+and can be cancelled safely at any time</p>
 
 <div><span id=total_count><?=count($recs)?></span> records in total</div>
-<div><span id=processed_count>0</span> processed so far (<span id=percent>0<font color="#ff0000"><b>%</b></font></span>)</div>
+<div><span id=processed_count>0</span> processed so far</div>
 <div><span id=changed_count>0</span> to be updated</div>
-<div><span id=same_count>0</span> are the same</div>
-<div><span id=repair_count>0</span> are internet bookmarks that are reparable</div>
-<div><span id=blank_count>0</span> to be left as is (missing fields etc)</div>
+<div><span id=same_count>0</span> are unchanged</div>
+<div><span id=repair_count>0</span> marked for update</div>
+<div><span id=blank_count>0</span> will be left as-is (missing fields etc)</div>
 
 <?php
 /*

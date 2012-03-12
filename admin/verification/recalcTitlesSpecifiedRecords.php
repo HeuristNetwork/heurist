@@ -67,7 +67,9 @@ $processed_count = 0;
    a list of records for which the titles were changed and a list of
    records for which the new title would be blank (an error condition).
 </p>
-
+<p>This will take some time for large databases.</p>
+ <p>The scanning step does not write to the database 
+and can be cancelled safely at any time</p>
 
 <script type="text/javascript">
 function update_counts(processed, blank, repair, changed) {
@@ -90,11 +92,11 @@ function update_counts2(processed, total) {
 <?php
 
 print '<div><span id=total_count>'.count($recs).'</span> records in total</div>';
-print '<div><span id=processed_count>0</span> processed so far (<span id=percent>0</span><font color="#ff0000"><b>%</b></font> done)</div>';
+print '<div><span id=processed_count>0</span> processed so far</div>';
 print '<div><span id=changed_count>0</span> to be updated</div>';
-print '<div><span id=same_count>0</span> are the same</div>';
-print '<div><span id=repair_count>0</span> are internet bookmarks that are reparable</div>';
-print '<div><span id=blank_count>0</span> to be left as is (missing fields etc)</div>';
+print '<div><span id=same_count>0</span> are unchanged</div>';
+print '<div><span id=repair_count>0</span>marked for update</div>';
+print '<div><span id=blank_count>0</span> will be left as-is (missing fields etc)</div>';
 
 $blanks = array();
 $reparables = array();

@@ -103,20 +103,20 @@ require_once('libs.inc.php');
 
 			// Instructions at top of generated template and start of main records loop
             $resText = _maketext(array(
-                '{* Enter html (to write web pages) or other text format.',
-                '   Use {foreach ...} loops for repeated records/values.',
-                '   Use {$r.fieldname} to indicate field values to be inserted.',
-                '   Use tree on right to insert loops, fields & functions. ',
-                '   Asterisk and brace enclose comments which are ignored ',
-                '   <!-- --> is html comment which is ignored in html output',
-                '   ---------------------------------------------------------------------------- *}',
+                '{*',
+                'Enter html (to write web pages) or other text format',
+                'Use {foreach ...} loops for repeated records/values',
+                'Use {$r.fldname} to indicate field values to be inserted',
+                'Use tree on right to insert loops, fields & functions',
+                'Braces and * enclose comments which are ignored',
+                '<!-- --> is html comment which is ignored in html output',
+                '---------------------------------------------------------------- *}',
                 '',
-                '{foreach $results as $r} {* Loop through records, defines $r *}',
+                '{foreach $results as $r} {* Records loop, do not remove *}',
                 '',
-                '   <b>id=<b> ',
+                '   <b>id=</b> <!-- use html tags as you wish -->',
                 '',
-                '   <!-- The following lines output some common fields, all on one line -->',
-                ''));
+                '   <!-- Output some common fields -->'));
 
 			$recTypes = array();
 
@@ -163,9 +163,9 @@ require_once('libs.inc.php');
                 '',
                 '   {* add further sub-loops and fields here *}',
                 '',
-                '   <hr> <!-- adds a line between each record -->',
+                '   <hr> <!-- add line between each record -->',
                 '',
-                '{/foreach} {* end of loop through records *}'));
+                '{/foreach} {* end records loop, do not remove *}'));
 
 			header("Content-type: text/javascript");
 			echo json_format( array("text"=>$resText,
