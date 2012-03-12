@@ -861,6 +861,7 @@ FlexImport = (function () {
 		FlexImport.errorSummary = new Array(FlexImport.columnCount);
 		FlexImport.num_err_columns = 0;
 		FlexImport.num_err_values = 0;
+		FlexImport.num_invalid_records = 0;
 
 		// create records
 		l = FlexImport.fields.length;
@@ -900,6 +901,7 @@ FlexImport = (function () {
 				if (error.invalidRecord) {
 					tr.className = "invalidRecord";
 					tr.title = error.invalidRecord;
+					FlexImport.num_invalid_records++;
 				}else if (error.duplicateRecord) {
 					tr.className = "duplicateRecord";
 					tr.title = error.duplicateRecord;
@@ -967,6 +969,8 @@ FlexImport = (function () {
 			e.innerHTML = "<p class='invalidInput'>There are "+FlexImport.num_err_values+" unexpected values in "+
 							FlexImport.num_err_columns+" columns. "+
 							"<input type=button value=\"Go back\" onclick=\"FlexImport.createColumnSelectors();\"></p>";
+		}else if ( FlexImport.num_invalid_records > 0){
+			e.innerHTML = "<p>You have invalid records below with no specific errors. Please check that you have include data for all required fields.</p>";
 		}else{
 			e.innerHTML = "<p>If records appear OK: <input type=button value=\"Save records\" onclick=\"FlexImport.Saver.saveRecords();\">&nbsp;&nbsp;This step updates the database (irreversible, except by editing the database)</p>";
 			e.innerHTML += "<p><b>Records prepared for import:</b></p>";
@@ -1082,7 +1086,7 @@ FlexImport = (function () {
 								}else if (detailType.getConstrainedRecordTypeIDs &&	//check to make sure the record matches constraints
 											detailType.getConstrainedRecordTypeIDs() &&
 											detailType.getConstrainedRecordTypeIDs().length > 0 &&
-											detailType.getConstrainedRecordTypeIDs().indexOf(vals[v].getRecordType().getID()) == -1){
+											(detailType.getConstrainedRecordTypeIDs()).indexOf("" + vals[v].getRecordType().getID()) == -1){
 									hRecTypes = detailType.getConstrainedRecordTypes();
 									typeList = "";
 									for ( index = 0; index < hRecTypes.length; index++) {
