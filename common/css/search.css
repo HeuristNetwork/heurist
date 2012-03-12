@@ -1854,6 +1854,10 @@ div#layout-doc.yui-layout-doc div#yui-gen1.yui-layout-unit {
 	position: absolute;
 	top: 0;
 }
+.recorddiv .recordIcons {
+	width:35px;
+	white-space:nowrap;
+}
 div.recorddiv:hover {
 	-moz-box-shadow:0 1px 4px #000;
 	-webkit-box-shadow:0 1px 4px #000;
@@ -1861,6 +1865,13 @@ div.recorddiv:hover {
 	z-index: 20;
 	background:-moz-linear-gradient(center top, #EFEFEF, #DDDDDD) repeat scroll 0 0 transparent;
 	background:-webkit-gradient(linear, left top, left bottom, from(#EFEFEF), to(#DDD));
+}
+.user_pwd {
+	cursor:pointer;
+	margin-left:0px;
+}
+.thumbnails .recordDiv .recordIcons img.user_pwd {
+	margin-left:8px;
 }
 .filter {
 /*	border-top:1px solid #999; */

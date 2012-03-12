@@ -908,7 +908,7 @@ top.HEURIST.search = {
 		}
 
 		var userPwd;
-		if (res[10]) userPwd = "style='display:inline;cursor:pointer;margin-left:8px' user_pwd='"+res[10].htmlEscape()+"'";
+		if (res[10]) userPwd = "class='user_pwd' style='display:inline;' user_pwd='"+res[10].htmlEscape()+"'";
 		else userPwd = "style='display:none;'";
 
 		var rectypeImg = "style='background-image:url("+ top.HEURIST.iconBaseURL + (res[4]? res[4] : "blank") + ".png)'";
