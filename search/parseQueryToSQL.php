@@ -9,10 +9,6 @@
  * @todo
  -->*/
 
-?>
-
-<?php
-
 define('BOOKMARK', 'bookmark');
 define('BIBLIO', 'biblio');
 define('BOTH', 'both');

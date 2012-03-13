@@ -382,9 +382,11 @@ function ShowMap() {
 			_sQueryMode = top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"];
 			document.getElementById('rbMapUseSelectedRecords').value = _sQueryMode;
 		}else{
-			_sQueryMode = "all";
+			_sQueryMode = "main";
 			//hide toolbar
 			_hidetoolbar = true;
+
+			top.HEURIST.currentQuery_main = location.search;
 		}
 
 

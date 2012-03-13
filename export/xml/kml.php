@@ -8,16 +8,17 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @package Heurist academic knowledge management system
  * @todo - only one kml per record, perhaps need to return the combination of kml
+require_once(dirname(__FILE__).'/../../common/config/initialise.php');
  * **/
 
-require_once(dirname(__FILE__).'/../../common/config/initialise.php');
+require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
 include_once('../../external/geoPHP/geoPHP.inc');
 
 mysql_connection_select(DATABASE);
 
 $islist = array_key_exists("q", $_REQUEST);
-
 
 //header('Content-type: text/xml; charset=utf-8');
 
@@ -50,9 +51,9 @@ if(!$islist){
 	}else{
 		$res = mysql_query("select dtl_Value from recDetails where dtl_RecID = " . intval($_REQUEST["id"]) . " and dtl_DetailTypeID = ".(defined('DT_KML')?DT_KML:"0"));
 
-		echo "<?xml version='1.0' encoding='UTF-8'?>\n";
-		echo '<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">';
-		echo '<Document>';
+		print "<?xml version='1.0' encoding='UTF-8'?>\n";
+		print '<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">';
+		print '<Document>';
 
 		if (mysql_num_rows($res)) {
 			$kml = mysql_fetch_array($res);
@@ -60,100 +61,146 @@ if(!$islist){
 			print $kml;
 		}
 
-		echo '</Document>';
-		echo '</kml>';
+		print '</Document>';
+		print '</kml>';
 	}
 
 	}
 	exit;
 }
 
-echo "<?xml version='1.0' encoding='UTF-8'?>\n";
-echo '<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">';
-echo '<Document>';
-echo '<name>Export from Heurist</name>';
+print "<?xml version='1.0' encoding='UTF-8'?>\n";
+print '<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">';
+print '<Document>';
+print '<name>Export from Heurist</name>';
 
 /*
 2. create new KML output that contains placemarks created from WKT and links to heurist's uploaded kml files
 */
 if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 
-//kml is created from WKT stored in GEO field in database
-		if($islist){
-			$q = $_REQUEST["q"];
-			$where = " in (".substr($q,4).")";
-		}else{
-			$where = "=".$_REQUEST["id"];
-		}
+		// for wkt
+		$squery = "select rec_ID, rec_URL, rec_Title, dtl_DetailTypeID, dtl_Value, if(dtl_Geo is null, null, asText(dtl_Geo)) as dtl_Geo ";
+		$ourwhere = " and (dtl_RecID=rec_ID) and (dtl_Geo is not null ".(defined('DT_KML')?" or dtl_DetailTypeID=".DT_KML:"").")";
 
-		$squery = "select rec_ID, rec_URL, rec_Title, dtl_DetailTypeID, dtl_Value, if(dtl_Geo is null, null, asText(dtl_Geo)) as dtl_Geo from Records, recDetails where dtl_RecID=rec_ID and  rec_ID " . $where . " and (dtl_DetailTypeID = " . (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:"0")." or dtl_DetailTypeID = " . (defined('DT_KML')?DT_KML:"0")	.")";
+		//for kml
+		$squery2 = "select  rec_ID, rec_URL, rec_Title, ulf_ID, ulf_FilePath, ulf_FileName ";
+		$ourwhere2 = " and (dtl_RecID=rec_ID) and (dtl_DetailTypeID=".(defined('DT_KML_FILE')?DT_KML_FILE:"0").(defined('DT_ASSOCIATED_FILE')?" or (dtl_DetailTypeID = ".DT_ASSOCIATED_FILE." AND ulf_MimeExt='kml'))":")");
+		$detTable = "recDetails left join recUploadedFiles on ulf_ID = dtl_UploadedFileID";
+
+		$isSearchKml = defined('DT_KML_FILE') || defined('DT_ASSOCIATED_FILE');
+
+
+		if($islist){
+
+			if ($_REQUEST['w'] == 'B'  ||  $_REQUEST['w'] == 'bookmark')
+				$search_type = BOOKMARK;	// my bookmarks
+			else
+				$search_type = BOTH;	// all records
+
+			$limit = intval(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['report-output-limit']);
+			if (!$limit || $limit<1){
+					$limit = 1000; //default limit in dispPreferences
+			}
+
+			$squery = prepareQuery($squery, $search_type, "recDetails", $ourwhere, $limit);
+			if($isSearchKml){
+				$squery2 = prepareQuery($squery2, $search_type, $detTable, $ourwhere2, $limit);
+			}
+
+
+		}else{
+			$squery = $squery." from Records, recDetails where rec_ID=".$_REQUEST["id"].$ourwhere;
+			$squery2 = $squery2." from Records,".$detTable." where rec_ID=".$_REQUEST["id"].$ourwhere2;
+		}
 
 //error_log("1.>>>>".$squery);
 
 		$res = mysql_query($squery);
 		$wkt_reccount = mysql_num_rows($res);
 
+//error_log("2.>>>>".$wkt_reccount);
 
-		$squery = "select  rec_ID, rec_URL, rec_Title, ulf_ID, ulf_FilePath, ulf_FileName from Records, recDetails left join recUploadedFiles on ulf_ID = dtl_UploadedFileID where dtl_RecID=rec_ID and  rec_ID " . $where . " and ".
-"((dtl_DetailTypeID = ".(defined('DT_ASSOCIATED_FILE')?DT_ASSOCIATED_FILE:"0")." AND ulf_MimeExt='kml') OR dtl_DetailTypeID = ".(defined('DT_KML_FILE')?DT_KML_FILE:"0").")";
-
-//error_log("2.>>>>".$squery);
-
-		$res2 = mysql_query($squery);
-
-		$kml_reccount = mysql_num_rows($res2);
+//error_log(">>>>".$isSearchKml."2.>>>>".$squery2);
+		if($isSearchKml){
+			$res2 = mysql_query($squery2);
+			$kml_reccount = mysql_num_rows($res2);
+		}else{
+			$kml_reccount = 0;
+		}
 
 		if ($wkt_reccount>0 || $kml_reccount>0)
 		{
 
-
-			while ($row = mysql_fetch_row($res)) {
-				$kml = null;
-				$dt = $row[3];
-//error_log(">>>>>".$dt." == ".(defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:"0"));
-				if($dt == (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:"0")){
-					$wkt = $row[5];
-					$geom = geoPHP::load($wkt,'wkt');
-					$kml = $geom->out('kml');
-					if($kml){
-						echo '<Placemark>';
-						echo '<name>'.$row[2].'</name>';
-						if($row[1]){
-  							echo '<description><![CDATA[ <a href="'.$row[1].'">link</a>]]></description>'; 										}
-						echo $kml;
-						echo '</Placemark>';
+			if($wkt_reccount>0){
+				while ($row = mysql_fetch_row($res)) {
+					$kml = null;
+					$dt = $row[3];
+	//error_log(">>>>>".$dt." == ".(defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:"0"));
+					if($row[5]){
+						$wkt = $row[5];
+						$geom = geoPHP::load($wkt,'wkt');
+						$kml = $geom->out('kml');
+						if($kml){
+							print '<Placemark>';
+							print '<name>'.$row[2].'</name>';
+							if($row[1]){
+  								print '<description><![CDATA[ <a href="'.$row[1].'">link</a>]]></description>'; 										}
+							print $kml;
+							print '</Placemark>';
+						}
+					}else{
+						/* @todo - tomorrow
+						$kml = $row[1];
+	//error_log($kml);
+						if(strpos($kml, "<?xml")>=0){
+							$start = strpos($kml, "<Placemark>");
+							$len = strpos($kml, strrchr($kml, "</Placemark>"))+strlen("</Placemark>")-$start;
+	error_log("START ".$start.",  len=".$len);
+							$kml = substr($kml, $start, $len);
+						}
+						print $kml;
+						*/
 					}
-				}else{
-					/* @todo - tomorrow
-					$kml = $row[1];
-//error_log($kml);
-					if(strpos($kml, "<?xml")>=0){
-						$start = strpos($kml, "<Placemark>");
-						$len = strpos($kml, strrchr($kml, "</Placemark>"))+strlen("</Placemark>")-$start;
-error_log("START ".$start.",  len=".$len);
-						$kml = substr($kml, $start, $len);
+				}//while wkt records
+			}
+
+			if($kml_reccount>0){
+				while ($file_data = mysql_fetch_row($res2)) {
+					if ($file_data[3]) {
+
+	print "<NetworkLink>";
+	print "<name>".$file_data[2]."</name>";
+	print "<Link id=\"".$file_data[0]."\">";
+	print "<href>".HEURIST_BASE_URL."export/xml/kml.php?id=".$file_data[0]."</href>";
+	print "</Link>";
+	print "</NetworkLink>";
 					}
-					echo $kml;
-					*/
-				}
-			}//while wkt records
-
-
-			while ($file_data = mysql_fetch_row($res2)) {
-				if ($file_data[3]) {
-
-echo "<NetworkLink>";
-echo "<name>".$file_data[2]."</name>";
-echo "<Link id=\"".$file_data[0]."\">";
-echo "<href>".HEURIST_BASE_URL."export/xml/kml.php?id=".$file_data[0]."</href>";
-echo "</Link>";
-echo "</NetworkLink>";
-				}
-			}//while kml records
+				}//while kml records
+			}
 
 
 		}
 }
-echo '</Document>';
-echo '</kml>';
+print '</Document>';
+print '</kml>';
+
+//
+function prepareQuery($squery, $search_type, $detailsTable, $where, $limit)
+{
+			$squery = REQUEST_to_query($squery, $search_type);
+			//remove order by
+			$pos = strpos($squery," order by ");
+			if($pos>0){
+				$squery = substr($squery, 0, $pos);
+			}
+
+			//add recDetails
+			$squery = str_replace(" where ", ",".$detailsTable." where ", $squery);
+
+			//add our where clause and limit
+			$squery = $squery.$where." limit ".$limit;
+
+			return $squery;
+}
 ?>
