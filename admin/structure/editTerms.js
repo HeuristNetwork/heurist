@@ -717,7 +717,7 @@ function EditTerms() {
 			term.domain = _currentDomain;
 			term.label = value.label;
 			term.description = value.description;
-			term.termcode = valie.termcode;
+			term.termcode = value.termcode;
 			term.inverseid = null;
 
 			rootNode = new YAHOO.widget.TextNode(term, rootNode, false); // Create root node

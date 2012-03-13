@@ -163,7 +163,7 @@
 		print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
 		print "<input name='h2' value='".($is_h2?1:0)."' type='hidden'>";
 		print "<input name='sourcedbname' value='$sourcedbname' type='hidden'>";
-
+		print "<input name='reportlevel' value='1' type='checkbox' checked='checked'>Report level: show errors only<br>";
 		print "Check the code mappings below, then click  <input type='button' value='Import data' onclick='{document.getElementById(\"mode\").value=5; document.forms[\"mappings\"].submit();}'>\n";
 		// alert(document.getElementById(\"mode\").value);
 
@@ -412,6 +412,9 @@
 
 		$sourcedb = $db_prefix.$sourcedbname;
 
+		$rep_errors_only = (array_key_exists('reportlevel', $_REQUEST) && $_REQUEST['reportlevel']=="1");
+
+
 	    echo "<p>Now copying data from <b>$sourcedb</b> to <b>". $dbPrefix.HEURIST_DBNAME. "</b><p>Processing: ";
 
 	    $terms_h2 = array();
@@ -439,11 +442,21 @@
 
 		$added_records = array();
 		$unresolved_pointers = array();
+		$missed_terms = array();
+		$missed_terms2 = array();
 
 		 /*$detailTypes = getAllDetailTypeStructures(); //in current database
 		 $detailTypes = $detailTypes['typedefs'];
 		 $fld_ind = $detailTypes['fieldNamesToIndex']['dty_Type']
 		 $detailTypes[$dttype][$fld_ind];*/
+
+print "<br>************************************************<br>Import records";
+if(!$rep_errors_only){
+print "<br>Copying records. Report:   source recid=>target recid<br>";
+}
+
+
+
 
 	    // loop through the set of rectypes actually in the records in the database
 	    while ($row1 = mysql_fetch_array($res1)) {
@@ -459,6 +472,7 @@
 			}
 
 							//@todo - add record type name
+			$rt_counter = 0;
 	        print "<br>Record type: $rt"; // tell user somethign is happening
 			ob_flush();flush(); // flush to screen
 	    	if($is_h2){
@@ -483,7 +497,7 @@
 				//select details and create details array
 				$rid = $row2[0]; //record id
 
-				print "<br>".$rid."&nbsp;&nbsp;&nbsp;";
+//				print "<br>".$rid."&nbsp;&nbsp;&nbsp;";
 
 	    		if($is_h2){
 					$query3 = "SELECT `rd_type`, `rdt_type`, `rd_val`, `rd_file_id`, astext(`rd_geo`)
@@ -495,8 +509,8 @@ FROM $sourcedb.`recDetails` rd, $sourcedb.`defDetailTypes` dt where rd.`dtl_Deta
         		$res3 = mysql_query($query3);
         		// todo: check query was successful
 				if(!$res3) {
-					print "<div  style='color:red;'>bad select of detail fields</div>";
-					print "query3: $query3";
+					print "<br>record ".$rid."&nbsp;&nbsp;&nbsp;<div  style='color:red;'>bad select of detail fields</div>";
+					print "<br>query: $query3";
 					ob_flush();flush(); // flush to screen
 					continue;
 					//die ("<p>Sorry ...</p>");
@@ -544,10 +558,21 @@ print "mapping not defined for detail #".$dtid;
 							if(array_key_exists($value, $terms_h2)){
 						 		$value = $terms_h2[$value];
 							}else{
-								print "<div  style='color:#ffaaaa;'>term ".$value." not found in $sourcedb</div>";
+								if(!array_search($value, $missed_terms, true)){
+									array_push($missed_terms, $value);
+								}
 							}
 						}
-						$value = getDestinationTerm($value);
+						$term = getDestinationTerm($value);
+
+						if($term==null){
+							if(!array_search($value, $missed_terms2, true)){
+								 array_push($missed_terms2, $value);
+							}
+							$value = null;
+						}else{
+							$value = $term;
+						}
 
 					}else if($row3[1]=='file'){
 
@@ -613,24 +638,33 @@ print "mapping not defined for detail #".$dtid;
 						);
 
 					if (@$out['error']) {
+						print "<br>Source record# ".$rid."&nbsp;&nbsp;&nbsp;";
 						print "=><div style='color:red'> Error: ".implode("; ",$out["error"])."</div>";
 					}else{
 
 						$new_recid = $out["bibID"];
 						$added_records[$rid] = $new_recid;
 
+						$rt_counter++;
+
 						if(count($unresolved_records)>0){
 							$unresolved_pointers[$new_recid] = $unresolved_records;
 						}
 
-						print "=>".$out["bibID"];
+						if(!$rep_errors_only){
+							print "<br>".$rid."&nbsp;=>&nbsp;".$out["bibID"];
 
-						if (@$out['warning']) {
-								print "<br>Warning: ".implode("; ",$out["warning"]);
+							if (@$out['warning']) {
+									print "<br>Warning: ".implode("; ",$out["warning"]);
+							}
 						}
 
 					}
 			}//while by record of particular record type
+
+			if($rt_counter>0){
+				print "&nbsp;&nbsp;=> added $rt_counter records";
+			}
 
 			ob_flush();flush(); // flush to screen
 
@@ -638,36 +672,68 @@ print "mapping not defined for detail #".$dtid;
 
 //error_log("DEBUG: UNRESOLVED POINTERS>>>>>".print_r($unresolved_pointers, true));
 
-		//resolve record pointers
-		$inserts = array();
-		foreach ($unresolved_pointers as $recid => $unresolved_records) {
+		if(count($missed_terms)>0){
+print "<br><br>*********************************************************";
+print "<br>These terms are not found in $sourcedb<br>";
+print implode('<br>',$missed_terms);
+		}
 
-			foreach ($unresolved_records as $code) {
+		if(count($missed_terms2)>0){
+print "<br><br>*********************************************************";
+print "<br>Mapping for these terms is not specified<br>";
+print implode('<br>',$missed_terms2);
+		}
 
-//print "<br>".$code;
-				$aa = explode("|", $code);
-				$dt_id = $aa[0];
-				$src_recid = $aa[1];
+		if(count($unresolved_pointers)>0){
 
-//print "    ".$dt_id."=".$src_recid;
+			$notfound_rec = array();
 
-				if(array_key_exists($src_recid, $added_records)){
+print "<br><br>*********************************************************";
+print "<br>Finding and setting unresolved record pointers<br>";
 
-					print "<br>      resource ".$src_recid."=>".$added_records[$src_recid];
+			//resolve record pointers
+			$inserts = array();
+			foreach ($unresolved_pointers as $recid => $unresolved_records) {
 
-					array_push($inserts, "($recid, $dt_id, ".$added_records[$src_recid].", 1)");
-				}else{
-					print "<div  style='color:#ffaaaa;'>resource record#".$src_recid." not found</div>";
+				foreach ($unresolved_records as $code) {
+
+	//print "<br>".$code;
+					$aa = explode("|", $code);
+					$dt_id = $aa[0];
+					$src_recid = $aa[1];
+
+	//print "    ".$dt_id."=".$src_recid;
+
+					if(array_key_exists($src_recid, $added_records)){
+
+						if(!$rep_errors_only){
+							print "<br>      resource ".$src_recid."=>".$added_records[$src_recid];
+						}
+
+						array_push($inserts, "($recid, $dt_id, ".$added_records[$src_recid].", 1)");
+					}else{
+						if(!array_search($src_recid, $notfound_rec, true)){
+							array_push($notfound_rec, $src_recid);
+						}
+					}
 				}
 			}
-		}
-		if (count($inserts)) {//insert all new details
-			$query1 = "insert into $dbPrefix".HEURIST_DBNAME.".recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) values " . join(",", $inserts);
-//error_log(">>>>>>>>>>>>>>>".$query1);
-			mysql_query($query1);
+
+			if(count($notfound_rec)>0){
+print "<br>These records are specified as pointers in source database but they were not added into target database:<br>";
+				print implode('<br>',$notfound_rec);
+			}
+
+
+			if (count($inserts)>0) {//insert all new details
+				$query1 = "insert into $dbPrefix".HEURIST_DBNAME.".recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) values " . join(",", $inserts);
+	//error_log(">>>>>>>>>>>>>>>".$query1);
+				mysql_query($query1);
+				print "<br><br>Number of resolved pointers:".count($inserts);
+			}
 		}
 
-		print "<p><h3>Transfer completed</h3>";
+		print "<br><br><br><h3>Transfer completed</h3>";
 	} // function doTransfer
 
     /**
@@ -805,7 +871,6 @@ error_log("ERROR :".$message);
 	function getDestinationTerm($src_termid){
 
 	    if(!array_key_exists('cbt'.$src_termid, $_REQUEST)) {
-print "TERM NOT FOUND >>>>".$src_termid;
 	    	return null;
 		}
 		$key = $_REQUEST['cbt'.$src_termid];

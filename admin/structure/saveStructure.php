@@ -67,6 +67,7 @@
 	"rty_ReferenceURL"=>"s",
 	"rty_AlternativeRecEditor"=>"s",
 	"rty_Type"=>"s",
+	"rty_ShowURLOnEditForm" =>"i",
 	"rty_Modified"=>"i",
 	"rty_LocallyModified"=>"i"
 	);
@@ -121,7 +122,8 @@
 	"dty_ShowInLists"=>"i",
 	"dty_NonOwnerVisibility"=>"s",
 	"dty_Modified"=>"i",
-	"dty_LocallyModified"=>"i"
+	"dty_LocallyModified"=>"i",
+	"dty_EntryMask"=>"s"
 	);
 
 	//field names and types for defRecTypeGroups

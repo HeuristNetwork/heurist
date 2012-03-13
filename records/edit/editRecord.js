@@ -713,8 +713,7 @@ top.HEURIST.edit = {
 	*/
 	uploadURL: function(fileInput) {
 
-		//var URLInput = new top.HEURIST.edit.inputs.BibURLInput(container, defaultURL, required);
-		//get URL
+		//get URL.  ARTEM: WARNING! We assume that first element in allInputs is BibURLInput
 		var sURL = top.HEURIST.edit.allInputs[0].inputs[0].value;
 
 		if (top.HEURIST.util.isempty(sURL)){ // (typeof sURL==="undefined") || (sURL===null) || (sURL==="") || (sURL==="null") ){
@@ -874,13 +873,18 @@ top.HEURIST.edit = {
 
 		var inputs = [];
 
-		var defaultURL = (recID && windowRef.parent.HEURIST.edit.record &&
-							windowRef.parent.HEURIST.edit.record.bibID == recID &&
-							windowRef.parent.HEURIST.edit.record.url)? windowRef.parent.HEURIST.edit.record.url : "";
-		var required = (rectypeID == top.HEURIST.magicNumbers['RT_INTERNET_BOOKMARK']);	// URL input is only REQUIRED for internet bookmark
-		var URLInput = new top.HEURIST.edit.inputs.BibURLInput(container, defaultURL, required);
-		top.HEURIST.edit.allInputs.push(URLInput);
-		inputs.push(URLInput);
+		var cfi = top.HEURIST.rectypes.typedefs.commonNamesToIndex;
+
+		if(top.HEURIST.rectypes.typedefs[rectypeID].commonFields[cfi.rty_ShowURLOnEditForm]!=="0"){
+
+			var defaultURL = (recID && windowRef.parent.HEURIST.edit.record &&
+								windowRef.parent.HEURIST.edit.record.bibID == recID &&
+								windowRef.parent.HEURIST.edit.record.url)? windowRef.parent.HEURIST.edit.record.url : "";
+			var required = (rectypeID == top.HEURIST.magicNumbers['RT_INTERNET_BOOKMARK']);	// URL input is only REQUIRED for internet bookmark
+			var URLInput = new top.HEURIST.edit.inputs.BibURLInput(container, defaultURL, required);
+			top.HEURIST.edit.allInputs.push(URLInput);
+			inputs.push(URLInput);
+		}
 
 		var order = top.HEURIST.rectypes.dtDisplayOrder[rectypeID];
 		if(order){

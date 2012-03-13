@@ -762,6 +762,7 @@ function getRectypeColNames(){
 					"rty_ReferenceURL",
 					"rty_AlternativeRecEditor",
 					"rty_Type",
+					"rty_ShowURLOnEditForm",
 					"rty_Modified",
 					"rty_LocallyModified",
 					"rty_ConceptID");
@@ -951,8 +952,8 @@ function getAllRectypeStructures($useCachedData = false) {
 	}
 	$query .= " from defRecTypes left join defRecTypeGroups  on rtg_ID = rty_RecTypeGroupID".
 				" order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name";
-	$res = mysql_query($query);
 
+	$res = mysql_query($query);
 
 	while ($row = mysql_fetch_row($res)) {
 		array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$row[1]]]['allTypes'],$row[0]);
@@ -1057,6 +1058,7 @@ function getDetailTypeColNames() {
 					"dty_NonOwnerVisibility",
 					"dty_Modified",
 					"dty_LocallyModified",
+					"dty_EntryMask",
 					"dty_ConceptID");
 }
 
@@ -1098,8 +1100,8 @@ function getAllDetailTypeStructures($useCachedData = false) {
                         "year" => "Year (no mm-dd)",
                         //"urlinclude" => "File/URL of include content",
                         "boolean" => "Boolean (true/false)") );
-															
-											
+
+
 	$query = "select dtg_ID, dtg_Name, ".join(",", getDetailTypeColNames());
 	$query = preg_replace("/dty_ConceptID/","",$query);
 	if ($dbID) {//if(trm_OriginatingDBID,concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))),'null') as trm_ConceptID
