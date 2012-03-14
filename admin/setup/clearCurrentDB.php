@@ -54,40 +54,151 @@
             if ($dbname=='') {
                 print "<p>Undefined database name"; // shouldn't get here
             } else {
+                // This is a bit inelegant but it does the job effectively. Delete all the related records first because
+                // otherwise referential integrity will stop you deleting the recordss and/or bookmarks
                 $fulldbname = HEURIST_DB_PREFIX.$dbname;
-                $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM recDetails' ";
+
+                $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname.
+                " -e'ALTER TABLE recThreadedComments DROP FOREIGN KEY fk_cmt_OwnerUgrpID, DROP FOREIGN KEY fk_cmt_ParentCmtID, DROP FOREIGN KEY fk_cmt_RecID'";
                 $output2 = exec($cmdline . ' 2>&1', $output, $res2); 
+                if ($res2!= 0 ) {
+                    echo ("<br>Warning: Unable to temporarily disable referential integrity on <b>$dbname.recThreadedComments</b><br>");
+                    echo($output2);
+                } 
+
+                if ($res2=0) {
+                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM recThreadedComments' ";
+                    $output2 = exec($cmdline . ' 2>&1', $output, $res2); 
+                    if ($res2!= 0 ) {
+                        echo ("<br>Warning: Unable to delete recThreadedComments from <b>$dbname</b> - SQL error on DELETE FROM recThreadedComments<br>");
+                        echo($output2);
+                    } 
+                }
+
+                if ($res2=0) {
+                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'ALTER TABLE recThreadedComments ".
+                    "ADD CONSTRAINT fk_cmt_OwnerUgrpID FOREIGN KEY (cmt_OwnerUgrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE ON UPDATE CASCADE,".
+                    "ADD CONSTRAINT fk_cmt_ParentCmtID FOREIGN KEY (cmt_ParentCmtID) REFERENCES recThreadedComments (cmt_ID) ON UPDATE CASCADE ON DELETE RESTRICT,".
+                    "ADD CONSTRAINT fk_cmt_RecID FOREIGN KEY (cmt_RecID) REFERENCES Records (rec_ID) ON DELETE CASCADE ON UPDATE CASCADE;'";
+                    $output2 = exec($cmdline . ' 2>&1', $output, $res2); 
+                    if ($res2!= 0 ) {
+                        echo ("<br>Warning: Unable to re-enable referential integrity on <b>$dbname.recThreadedComments</b><br>");
+                        echo($output2);
+                    } 
+                }
+
+                if ($res2=0) {
+                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM recForwarding' ";
+                    $output2 = exec($cmdline . ' 2>&1', $output, $res2); 
+                    if ($res2!= 0 ) {
+                        echo ("<br>Warning: Unable to delete recForwarding from <b>$dbname</b> - SQL error on DELETE FROM recForwarding<br>");
+                        echo($output2);
+                    } 
+                } 
+
+                if ($res2=0) {
+                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM recRelationshipsCache' ";
+                    $output2 = exec($cmdline . ' 2>&1', $output, $res2); 
+                    if ($res2!= 0 ) {
+                        echo ("<br>Warning: Unable to delete recRelationshipsCache from <b>$dbname</b> - SQL error on DELETE FROM recRelationshipsCache<br>");
+                        echo($output2);
+                    } 
+                } 
+
+                if ($res2=0) {
+                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM recSimilarButNotDupes' ";
+                    $output2 = exec($cmdline . ' 2>&1', $output, $res2); 
+                    if ($res2!= 0 ) {
+                        echo ("<br>Warning: Unable to delete recSimilarButNotDupes from <b>$dbname</b> - SQL error on DELETE FROM recSimilarButNotDupes<br>");
+                        echo($output2);
+                    } 
+                } 
+
+                if ($res2=0) {
+                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM usrRecentRecords' ";
+                    $output2 = exec($cmdline . ' 2>&1', $output, $res2); 
+                    if ($res2!= 0 ) {
+                        echo ("<br>Warning: Unable to delete usrRecentRecords from <b>$dbname</b> - SQL error on DELETE FROM usrRecentRecords<br>");
+                        echo($output2);
+                    } 
+                } 
+
+                if ($res2=0) {
+                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM usrRecTagLinks' ";
+                    $output2 = exec($cmdline . ' 2>&1', $output, $res2); 
+                    if ($res2!= 0 ) {
+                        echo ("<br>Warning: Unable to delete usrRecTagLinks from <b>$dbname</b> - SQL error on DELETE FROM usrRecTagLinks<br>");
+                        echo($output2);
+                    } 
+                } 
+
+                if ($res2=0) {
+                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM usrReminders' ";
+                    $output2 = exec($cmdline . ' 2>&1', $output, $res2); 
+                    if ($res2!= 0 ) {
+                        echo ("<br>Warning: Unable to delete usrReminders from <b>$dbname</b> - SQL error on DELETE FROM usrReminders<br>");
+                        echo($output2);
+                    } 
+                } 
+
+                if ($res2=0) {
+                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM usrRemindersBlockList' ";
+                    $output2 = exec($cmdline . ' 2>&1', $output, $res2); 
+                    if ($res2!= 0 ) {
+                        echo ("<br>Warning: Unable to delete usrRemindersBlockList from <b>$dbname</b> - SQL error on DELETE FROM usrRemindersBlockList<br>");
+                        echo($output2);
+                    } 
+                }
+                
+                // Now delete the main data tables                
+
+                if ($res2=0) {
+                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM recDetails' ";
+                    $output2 = exec($cmdline . ' 2>&1', $output, $res2); 
+                    if ($res2 != 0 ) {
+                        echo ("<br>Warning: Unable to delete recDetails from <b>$dbname</b> - SQL error on: DELETE FROM recDetails<br>");
+                        echo($output2);
+                    }                 
+                } 
+
+                if ($res2=0) {
+                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM usrBookmarks' ";
+                    $output2 = exec($cmdline . ' 2>&1', $output, $res2); 
+                    if ($res2!= 0 ) {
+                        echo ("<br>Warning: Unable to delete usrBookmarks from <b>$dbname</b> - SQL error on DELETE FROM usrBookmarks<br>");
+                        echo($output2);
+                    }                 
+                } 
+
+                if ($res2=0) {
+                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM Records' ";
+                    $output2 = exec($cmdline . ' 2>&1', $output, $res2); 
+                    if ($res2!= 0 ) {
+                        echo ("<br>Warning: Unable to delete Records from <b>$dbname</b> - SQL error on DELETE FROM Records<br>");
+                        echo($output2);
+                    } 
+                }
+                
+                // Reset the record counter to zero
+
+                if ($res2=0) {
+                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'ALTER TABLE Records AUTO_INCREMENT = 0' ";
+                    $output2 = exec($cmdline . ' 2>&1', $output, $res2); 
+                    if ($res2!= 0 ) {
+                        echo ("<br>Warning: Unable to reset record IDs to start at 1 for <b>$dbname</b> - SQL error on ALTER TABLE Records AUTO_INCREMENT = 0<br>");
+                        echo($output2);
+                    } 
+                }
                 if ($res2 != 0 ) {
-                    echo ("<br>Warning: Unable to delete recDetails from <b>$dbname</b> - SQL error on: DELETE FROM recDetails<br>");
-                    echo($output2);
-                }                 
-                $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM usrBookmarks' ";
-                $output2 = exec($cmdline . ' 2>&1', $output, $res3); 
-                if ($res3!= 0 ) {
-                    echo ("<br>Warning: Unable to delete usrBookmarks from <b>$dbname</b> - SQL error on DELETE FROM usrBookmarks<br>");
-                    echo($output2);
-                }                 
-                $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'DELETE FROM Records' ";
-                $output2 = exec($cmdline . ' 2>&1', $output, $res4); 
-                if ($res4!= 0 ) {
-                    echo ("<br>Warning: Unable to delete Records from <b>$dbname</b> - SQL error on DELETE FROM Records<br>");
-                    echo($output2);
-                } 
-                $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'ALTER TABLE Records AUTO_INCREMENT = 0' ";
-                $output2 = exec($cmdline . ' 2>&1', $output, $res5); 
-                if ($res5!= 0 ) {
-                    echo ("<br>Warning: Unable to reset record IDs to start at 1 for <b>$dbname</b> - SQL error on ALTER TABLE Records AUTO_INCREMENT = 0<br>");
-                    echo($output2);
-                } 
-            }
-            if (($res2 != 0 ) or ($res3!= 0 ) or ($res4!= 0 )) {
-                echo ("<h2>Warning:</h2> Unable to fully delete records from <b>".HEURIST_DB_PREFIX.$dbname."</b>");
-                print "<p><a href=".HEURIST_URL_BASE."?db=$dbname>Return to Heurist</a>";
-            } else {
-                print "Record data, bookmarks and tags have been deleted from <b>$dbname</b>";
-                print "<p><a href=".HEURIST_URL_BASE."?db=$dbname>Return to the database home page</a>";
-            }
-        } else { // didn't request properly
+                    echo ("<h2>Warning:</h2> Unable to fully delete records from <b>".HEURIST_DB_PREFIX.$dbname."</b>");
+                    print "<p><a href=".HEURIST_URL_BASE."?db=$dbname>Return to Heurist</a>";
+                } else {
+                    print "Record data, bookmarks and tags have been deleted from <b>$dbname</b>";
+                    print "<p><a href=".HEURIST_URL_BASE."?db=$dbname>Return to the database home page</a>";
+                }
+            } 
+        }
+        else { // didn't request properly
             print "<p><h2>Request disallowed</h2>Incorrect challenge words entered. Data was note deleted from $dbname ".
             "<p><a href=".HEURIST_URL_BASE."?db=$dbname>Return to the database home page</a>";
         }

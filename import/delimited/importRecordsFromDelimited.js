@@ -112,7 +112,7 @@ FlexImport = (function () {
 		$("#info-p").html(
 			"Found <b>" + (this.hasHeaderRow ? FlexImport.fields.length - 1:FlexImport.fields.length) + "</b> rows of data," +
 			" in <b>" + FlexImport.fields[0].length + "</b> columns. " +
-			"<a href='"+HeuristBaseURL+"import/delimited/importRecordsFromDelimited.html?db="+HAPI.database+"' ><b>Start over</b></a>"
+			"<a href='"+HeuristBaseURL+"import/delimited/importRecordsFromDelimited.html?db="+HAPI.database+"' ><b>Start over / import more</b></a>"
 		);
 
 		FlexImport.createRecTypeOptions();
@@ -271,8 +271,12 @@ FlexImport = (function () {
 		$("#records-div").empty();
 		$("#records-div-info").empty();
 
+/* Ian 14/3/12: 
+    I can't work out what this section does - it does not seem to set anything in the record created, 
+    even less give you a lsit of tags for the workgroup selected. It's not particualrly necessary, so easier to omit than fix.
+   
 		var p = e.appendChild(document.createElement("p"));
-		p.appendChild(document.createTextNode("Workgroup for tags: "));
+		p.appendChild(document.createTextNode("Apply workgroup tags for workgroup: "));
 		FlexImport.workgroupSelect = p.appendChild(document.createElement("select"));
 		FlexImport.workgroupSelect.onchange = function() {
 			FlexImport.workgroupTags = {};
@@ -298,11 +302,19 @@ FlexImport = (function () {
 			a.href = HeuristBaseURL + "admin/ugrps/editGroupTags.php?db="+HAPI.database
 			a.innerHTML = "Create new tags";
 		p.appendChild(document.createTextNode(" then start over"));
+*/
 
 		p = e.appendChild(document.createElement("p"));
-		p.appendChild(document.createTextNode("Select column assignments, then "));
+        p.appendChild(document.createTextNode(
+            "Note: In order to normalise the data, eg. to extract a list of persons (entities) as records and then " +
+            "point to these person records rather than including names repetitively in the main data records, " +
+            "start by importing only those fields relating to the entities to be normalised. After import, the data " +
+            "will be redisplayed with the ID numbers for the extracted records, which can be used as a pointer field " +
+            "in the subsequent import of the remaining columns of data."));
 
-		var button = p.appendChild(document.createElement("input"));
+        p = e.appendChild(document.createElement("p"));
+        p.appendChild(document.createTextNode("Select column assignments, then "));
+            var button = p.appendChild(document.createElement("input"));
 			button.type = "button";
 			button.value = " Save field mapping ";
 			button.onclick = function() { FlexImport.saveMappings(); };
@@ -312,8 +324,7 @@ FlexImport = (function () {
 			button.type = "button";
 			button.value = " Prepare records ";
 			button.onclick = function() { FlexImport.loadReferencedRecords(); };
-		p.appendChild(document.createTextNode(" SAFE - doesn't write to the database"));
-
+		p.appendChild(document.createTextNode(" - SAFE - doesn't write to the database"));
 
 		p = e.appendChild(document.createElement("p"));
 		a = p.appendChild(document.createElement("a"));
@@ -637,7 +648,7 @@ FlexImport = (function () {
 			}
 			if(haserr){
 				e.insertBefore(table, before);
-				e.insertBefore(document.createTextNode("Unrecognised values in imported data (edit red values below and click Modify Data, then Prepare Records again. Alternatively you can edit the field definitions with the link to the right of each value.)"), table);
+				e.insertBefore(document.createTextNode("Unrecognised values in imported data. Edit values below and click Modify Data to change the values, then click Prepare Records again. <br>Alternatively, edit the field definitions with the <u>edit definitions</u>link(s) to the right.)"), table);
 			}
 
 		}
@@ -874,9 +885,8 @@ FlexImport = (function () {
 			if (FlexImport.lineHashes[lineHash] != undefined) {
 				// we've already created a record for an identical input lineHash
 				//ask user if this is a Duplicate or a different and unique record
-				if (confirm("Input line " + i + "is possibly a duplicate of record on line " + FlexImport.lineHashes[lineHash] +
-					". Reuse previous record? If you would like to reuse that previous record (press OK) " +
-					"or would like to create a new and unique record with the similar input values (press cancel).")) {
+				if (confirm("Line " + i + " may be duplicate of line " + FlexImport.lineHashes[lineHash] +
+					"(selected fields have identical values)<p>OK = store as one record, Cancel = create two records ")) {
 					record = FlexImport.lineRecordMap[FlexImport.lineHashes[lineHash]];
 					error = {"duplicateRecord":"duplicate of record on line " + FlexImport.lineHashes[lineHash]};
 				}
@@ -968,9 +978,9 @@ FlexImport = (function () {
 		if(FlexImport.num_err_values>0){
 			e.innerHTML = "<p class='invalidInput'>There are "+FlexImport.num_err_values+" unexpected values in "+
 							FlexImport.num_err_columns+" columns. "+
-							"<input type=button value=\"Go back\" onclick=\"FlexImport.createColumnSelectors();\"></p>";
+							"<input type=button value=\"Correct the data\" onclick=\"FlexImport.createColumnSelectors();\"></p>";
 		}else if ( FlexImport.num_invalid_records > 0){
-			e.innerHTML = "<p>You have invalid records below with no specific errors. Please check that you have include data for all required fields.</p>";
+			e.innerHTML = "<p><b>Invalid records are marked in red. If no specific message is shown, the most likely cause is that the data contains no value for a required field.</b></p>";
 		}else{
 			e.innerHTML = "<p>If records appear OK: <input type=button value=\"Save records\" onclick=\"FlexImport.Saver.saveRecords();\">&nbsp;&nbsp;This step updates the database (irreversible, except by editing the database)</p>";
 			e.innerHTML += "<p><b>Records prepared for import:</b></p>";
@@ -1015,11 +1025,11 @@ FlexImport = (function () {
 				if (FlexImport.reqDetailsMap[FlexImport.cols[j]]) {
 					var name = HDetailManager.getDetailNameForRecordType(FlexImport.recType,HDetailManager.getDetailTypeById(FlexImport.cols[j]));
 					logError( j, "Null value found for required field : " + name + "(" + FlexImport.cols[j] + ")");
-					logError("invalidRecord", " Missing " + name +".");
+					logError("invalidRecord", " Missing value for " + name +".");
 				}
 				detailType = HDetailManager.getDetailTypeById(FlexImport.cols[j]);
 				if (detailType && detailType.getVariety() == HVariety.REFERENCE) {
-					logError( j, "Resource record ID is not defined");
+					logError( j, "Pointer record ID is not defined");
 				}
 				continue;
 			}
@@ -1107,7 +1117,7 @@ FlexImport = (function () {
 			}
 		}
 		if ((!err || !err.invalidRecord) && !hRec.isValid()) { // if record is invalid and hasn't been flagged yet, must be a missing req detail
-			logError("invalidRecord", " Missing unknown required detail.");
+			logError("invalidRecord", " Missing required field(s).");
 		}
 		return {record : hRec, error : err};
 	},
@@ -1150,8 +1160,10 @@ FlexImport = (function () {
 		}
 		$textarea.append(line.join(", ") + "\n");
 
-		$("#result-message").html('Your data was successfully imported and has been rewritten below. <br/>Record Ids have been inserted into your original data in column ' + (recordIDColumn + 1) +
-					' below. <br/> Note that columns not used in the import are identified in the header row as "not imported"');
+		$("#result-message").html('IMPORT SUCCESSFUL' + 
+        '<p/>Record IDs for the imported columns have been added as column ' + (recordIDColumn + 1) +
+		'<br/>Copy and save these data immediately if there are additional fields to import, to allow use of the record IDs as record pointers'+
+        '<p/>WARNING: you will lose the record IDs as soon as you click START OVER, so save the data below to a file first<br/>&nbsp;<br/>');
 
 		l = FlexImport.fields.length;
 		for (i = FlexImport.hasHeaderRow ? 1:0; i < l; ++i) {

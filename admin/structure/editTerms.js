@@ -929,7 +929,9 @@ function EditTerms() {
 			//debug alert(arrRes.join(","));
 
 			var parent = Dom.get('formEditFields');
-			parent.innerHTML = "<p>The fields most likely to be affected are:</p>";
+			parent.innerHTML = "Term(s) have been added to the term tree but this does not add them to the individual trees for different fields," +
+            " since these are individually selected from the complete term tree. Please update the lists for each field to which these terms should be added." +
+            "<p>The fields most likely to be affected are:</p>";
 
 			for(ind=0; ind<arrRes.length; ind++){
 

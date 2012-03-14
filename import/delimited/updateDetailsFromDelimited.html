@@ -116,6 +116,7 @@
 				} //for i
 //				console.debug("loading records " + recIDs.join());
 				if (recIDs.length > recChunkSize) { // increased from 1000 by Ian 24/10/11
+                    // the chunks are now processed automatically, so you shouldn't get this message
 					alert("This is embarrassing, but somehow you have exceeded ("+ recIDs.length +
 							") the capacity (1000) of the updater to handle. We need to start again. The last row handled was " + recStart);
 					location.reload();
@@ -538,9 +539,9 @@
 		<div id="theList" class="tooltip"><div class="close-button fieldsToggle" style="right:3px; top:3px"></div><ul id="fieldList"><h3>Field Types</h3></ul></div>
 		<p id=info-p></p>
 		<div id=process-div style="display:none;">
-			<p>The details shown below will be used to update records in the database. Please review before processing.
-			Note that erroneous input rows will be skipped.</p>
-			<input  type=button value="Process Links" onClick="loadPointers();" >
+			<p>The details shown below will be used to update records in the database. 
+            <br>Please review before proceeding. Note that erroneous input rows will be skipped.</p>
+			<input  type=button value="Update database" onClick="loadPointers();" >
 			<p id=records-p></p>
 		</div>
 		<div id=csv-entry-div>

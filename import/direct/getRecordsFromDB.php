@@ -54,10 +54,11 @@
 
 	$dt_SourceRecordID = getDetailTypeLocalID("2-589");
 	if(!$dt_SourceRecordID){
-		print "If you want the <b>original IDs</b> of the records to be recorded in the database, please <b>import the Origianl ID field</b> from the Heurist Reference database";
+		print "<b>This function will save the original (source) record IDs in the <i>Original ID</i> field in each record.<br>".
+            " This field does not exist in this database. Please import it from the Heurist Reference database (H3ReferenceSet, #3) ".
+            " using DBAdmin > Structure > Import Structure. Note: pending individual field import, import the <i>Original ID container record</i>'".
+            " You do not need to add the <i>Original ID</i> field to each record type, it is recorded automatically as additional data.";
 	}
-
-    print "<p>This function is under development at 23/11/11 - please check back shortly ...</p>";
 
 	$sourcedbname = NULL;
 
