@@ -477,7 +477,7 @@ img {border: 0;}
 #page-inner {right:50%;top:40px;overflow: hidden;}
 /******* basic paragraph styles ********/
 H1 {color:#666;font-size: 16px;vertical-align: middle;line-height: 18px;}
-H2 {color:#6A7C99;font-size: 14px;text-transform: uppercase;line-height:25px; margin:0}
+H2 {color:#6A7C99;font-size: 14px;line-height:25px; margin:0}
 H3 {color:#DC8501;font-size: 12px; white-space: nowrap;}
 H4 {color:#000;font-size: 11px}
 H5 {color:#999;font-size: 10px}
@@ -528,7 +528,7 @@ a#dbSearch-link div#dbname:hover {padding-right:10px; background-color:RGBA(100,
 	font: 10px arial,helvetica,clean,sans-serif;
 	}
 	button {height:auto !important; line-height:16px !important}
-#my-records-button:hover, #all-records-button:hover, #add-record-link:hover, #new-entry-button:hover, .button:hover, button:hover, input[type="button"]:hover {
+#my-records-button:hover, #all-records-button:hover, #add-record-link:hover, #new-entry-button:hover, .button:hover, button:hover, input[type="button"]:hover, input[type="submit"]:hover {
 	background-color:RGBA(0,0,0,0.1) !important;
 	border:1px solid RGBA(0,0,0,0.4) !important;
 	box-shadow: 0 1px 2px RGBA(0,0,0,0.4) inset !important;
