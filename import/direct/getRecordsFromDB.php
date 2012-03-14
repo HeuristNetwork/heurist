@@ -452,8 +452,9 @@
 		 $detailTypes[$dttype][$fld_ind];*/
 
 print "<br>************************************************<br>Import records";
+print "<br>The following section adds records and allocates them new IDs.";
 if(!$rep_errors_only){
-print "<br>Copying records. Report:   source recid=>target recid<br>";
+print "<br>It reports this in the form Old ID => New ID";
 }
 
 
@@ -559,7 +560,7 @@ print "mapping not defined for detail #".$dtid;
 							if(array_key_exists($value, $terms_h2)){
 						 		$value = $terms_h2[$value];
 							}else{
-								if(!array_search($value, $missed_terms, true)){
+								if(array_search($value, $missed_terms)==false){
 									array_push($missed_terms, $value);
 								}
 							}
@@ -567,8 +568,10 @@ print "mapping not defined for detail #".$dtid;
 						$term = getDestinationTerm($value);
 
 						if($term==null){
-							if(!array_search($value, $missed_terms2, true)){
-								 array_push($missed_terms2, $value);
+
+							$ind = array_search(intval($value), $missed_terms2);
+							if ( count($missed_terms2)==0 || ($ind==0 && $missed_terms2[$ind]!=intval($value)) ) {
+								 array_push($missed_terms2, intval($value));
 							}
 							$value = null;
 						}else{
@@ -675,13 +678,13 @@ print "mapping not defined for detail #".$dtid;
 
 		if(count($missed_terms)>0){
 print "<br><br>*********************************************************";
-print "<br>These terms are not found in $sourcedb<br>";
+print "<br>These terms IDs are not found in $sourcedb<br>";
 print implode('<br>',$missed_terms);
 		}
 
 		if(count($missed_terms2)>0){
 print "<br><br>*********************************************************";
-print "<br>Mapping for these terms is not specified<br>";
+print "<br>Mapping for these terms IDs is not specified<br>";
 print implode('<br>',$missed_terms2);
 		}
 
@@ -691,6 +694,9 @@ print implode('<br>',$missed_terms2);
 
 print "<br><br>*********************************************************";
 print "<br>Finding and setting unresolved record pointers<br>";
+if(!$rep_errors_only){
+print "<br>It reports in form: source RecID => now target pointer RecID => in Rec Id<br>";
+}
 
 			//resolve record pointers
 			$inserts = array();
@@ -708,13 +714,13 @@ print "<br>Finding and setting unresolved record pointers<br>";
 					if(array_key_exists($src_recid, $added_records)){
 
 						if(!$rep_errors_only){
-							print "<br>      resource ".$src_recid."=>".$added_records[$src_recid];
+							print "<br>".$src_recid."=>".$added_records[$src_recid]."=>".$recid;
 						}
 
 						array_push($inserts, "($recid, $dt_id, ".$added_records[$src_recid].", 1)");
 					}else{
-						if(!array_search($src_recid, $notfound_rec, true)){
-							array_push($notfound_rec, $src_recid);
+						if(array_search($src_recid, $notfound_rec)==false){
+							array_push($notfound_rec, $src_recid." for ".$recid);
 						}
 					}
 				}
@@ -730,7 +736,7 @@ print "<br>These records are specified as pointers in source database but they w
 				$query1 = "insert into $dbPrefix".HEURIST_DBNAME.".recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) values " . join(",", $inserts);
 	//error_log(">>>>>>>>>>>>>>>".$query1);
 				mysql_query($query1);
-				print "<br><br>Number of resolved pointers:".count($inserts);
+				print "<br><br>Total count of resolved pointers:".count($inserts);
 			}
 		}
 

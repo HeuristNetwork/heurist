@@ -187,7 +187,7 @@ function RectypeManager() {
 			var i;
 			for (i in _groups){
 				if(!Hul.isnull(i)){
-					Hul.addoption(el, _groups[i].value, _groups[i].text);
+					Hul.addoption(sel, _groups[i].value, _groups[i].text);
 				}
 			} // for
 

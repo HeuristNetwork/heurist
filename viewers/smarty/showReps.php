@@ -57,7 +57,7 @@ require_once('libs.inc.php');
 		exit();
 	}
 
-	//get name of tempalte file
+	//get name of template file
 	$template_file = (array_key_exists('template',$_REQUEST)?$_REQUEST['template']:null);
 	//get template body from request (for execution from editor)
 	$template_body = (array_key_exists('template_body',$_REQUEST)?$_REQUEST['template_body']:null);
@@ -172,6 +172,9 @@ function getRecordForSmarty($rec, $recursion_depth){
 	}
 	else
 	{
+		$relRT = (defined('RT_RELATION')?RT_RELATION:0);
+		$relSrcDT = (defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
+		$relTrgDT = (defined('DT_LINKED_RESOURCE')?DT_LINKED_RESOURCE:0);
 
 		$record = array();
 		$recTypeID = null;
@@ -199,12 +202,38 @@ function getRecordForSmarty($rec, $recursion_depth){
 //DEBUG error_log("ADD ".$kk[0]."=".$dt[$kk[0]]);
 						//$kk = array_keys($dt);
 						//$record[ $kk[0] ] = $dt[ $kk[0] ];
+//error_log(">>>>>>main  ".print_r($dt, true));
+//error_log(">>>>".print_r($dtValue, true));
 
 						$record = array_merge($record, $dt);
 					}
 				}
 
 				//$record['rec'.substr($key,4)] = $details;
+			}
+		}
+
+		if($relRT>0 && $relTrgDT>0){
+			/* find related records */
+			$to_res = mysql_query('select recDetails.dtl_RecID as id
+	                         from recDetails
+	                    left join Records on rec_ID = dtl_RecID
+	                        where dtl_DetailTypeID = '.$relTrgDT.
+	                         ' and rec_RecTypeID = '.$relRT.
+	                         ' and dtl_Value = ' . $record["recID"]);          //linked resource
+
+
+			$dtValue = array();
+			$k=1;
+			while ($reln = mysql_fetch_assoc($to_res)) {
+				array_push($dtValue, $reln);
+				$k++;
+			}//while
+			if($k>1){
+				$dt = getDetailForSmarty(-1,$dtValue, $recursion_depth, $recTypeID);
+				if($dt){
+					$record = array_merge($record, $dt);
+				}
 			}
 		}
 
@@ -216,9 +245,10 @@ error_log(">>>".$dtKey."=".$dtValue);
 	}
 }
 
+
 //
 // convert details to array to be assigned to smarty variable
-// $dtKey - detailtype ID
+// $dtKey - detailtype ID, if <1 this dummy relationship detail
 //
 // @todo - implement as method
 function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID){
@@ -228,23 +258,29 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID){
 	$rtNames = $rtStructs['names'];
 	$dty_fi = $dtStructs['typedefs']['fieldNamesToIndex'];
 
-	$rt_structure = $rtStructs['typedefs'][$recTypeID]['dtFields'];
-	$dtlabel_index = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
-	$dt_label = $rt_structure[$dtKey][ $dtlabel_index ];
+	if($dtKey<1 || $dtNames[$dtKey]){
 
-
-	if($dtNames[$dtKey]){
-
-		$dtname = getVariableNameForSmarty($dtNames[$dtKey]);
+		if($dtKey<1){
+			$dt_label = "Relationship";
+		}else{
+			$rt_structure = $rtStructs['typedefs'][$recTypeID]['dtFields'];
+			$dtlabel_index = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
+//error_log($dtKey."   ".$dtlabel_index);
+			if(array_key_exists($dtKey,$rt_structure)){
+				$dt_label = $rt_structure[$dtKey][ $dtlabel_index ];
+			}
+			$dtname = getVariableNameForSmarty($dtNames[$dtKey]);
+		}
 
 //error_log(">>>>>>>".$dtKey."=".$dtNames[$dtKey]."=".$dtname."====".$dtValue);
 
 	if(is_array($dtValue)){ //complex type - need more analize
 		$res = null;
 
-		$dtDef = $dtStructs['typedefs'][$dtKey]['commonFields'];
+		$dtDef = ($dtKey<1) ? "dummy" :$dtStructs['typedefs'][$dtKey]['commonFields'];
+
 		if($dtDef){
-			$detailType = $dtDef[ $dty_fi['dty_Type']  ];
+			$detailType = ($dtKey<1) ?"relmarker" :$dtDef[ $dty_fi['dty_Type']  ];
 //error_log(">>>>>>>".$dtKey."=".$dtNames[$dtKey].">>>".$dtname." TYPE=".$detailType);
 //ENUM('freetext','blocktext','integer','date','year','relmarker','boolean','enum','relationtype','resource','float','file','geo','separator','calculated','fieldsetmarker','urlinclude')
 
@@ -253,10 +289,13 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID){
 
 				$res = "";
 				foreach ($dtValue as $key => $value){
-					$term_value = $dtTerms['termsByDomainLookup']['enum'][$value][ $dtTerms['fieldNamesToIndex']['trm_Label'] ];
-					if($term_value){
-						if(strlen($res)>0) $res = $res.", ";
-						$res = $res.$term_value;
+					if(array_key_exists($value, $dtTerms['termsByDomainLookup']['enum'])){
+						$term = $dtTerms['termsByDomainLookup']['enum'][$value];
+						$term_value =   $term[ $dtTerms['fieldNamesToIndex']['trm_Label'] ];
+						if($term_value){
+							if(strlen($res)>0) $res = $res.", ";
+							$res = $res.$term_value;
+						}
 					}
 				}
 				if(strlen($res)==0){ //no valid terms
@@ -318,8 +357,6 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID){
 			break;
 */
 
-			case 'relationtype':
-			break;
 			case 'geo':
 			break;
 			case 'separator':
@@ -340,7 +377,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID){
 				$res = array();
 				$rectypeID = null;
 				$prevID = null;
-
+//error_log("dtValue>>>>>".print_r($dtValue,true));
 
 				foreach ($dtValue as $key => $value){
 
@@ -370,16 +407,13 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID){
 
 				if( count($res)>0 && array_key_exists($rectypeID, $rtNames))
 				{
-					$pointerIDs = $dtDef[ $dty_fi['dty_PtrTargetRectypeIDs'] ];
+					$pointerIDs = ($dtKey<1) ?"" :$dtDef[ $dty_fi['dty_PtrTargetRectypeIDs'] ];
 					if($pointerIDs==""){ //unconstrainted pointer - we will use as name of variable display name for current record type
 						$recordTypeName = $dt_label;
 					}else{
 						$recordTypeName = $rtNames[$rectypeID];
 					}
 					$recordTypeName = getVariableNameForSmarty($recordTypeName, false);
-
-error_log(">>>>>>>>>>".$rectypeID."=".$rtNames[$rectypeID]."=".$recordTypeName."array=".print_r($res[0],true));
-
 					$res = array( $recordTypeName."s" =>$res, $recordTypeName =>$res[0] );
 				}else{
 					$res = null;

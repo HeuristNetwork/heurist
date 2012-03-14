@@ -394,7 +394,11 @@ function print_private_details($bib) {
 
 			}else if ($bd['dty_Type'] == 'enum') {
 
-				$bd['val'] = output_chunker($terms['termsByDomainLookup']['enum'][$bd['val']][0]);
+				if(array_key_exists($bd['val'], $terms['termsByDomainLookup']['enum'])){
+					$bd['val'] = output_chunker($terms['termsByDomainLookup']['enum'][$bd['val']][0]);
+				}else{
+					$bd['val'] = "";
+				}
 
 			}else if ($bd['dty_Type'] == 'relationtype') {
 

@@ -150,7 +150,7 @@ function EditRecStructure() {
 
 			var myColumnDefs = [
 			{
-				key:"rst_ID", label: "Code", sortable:true, className:"right"
+				key:"rst_ID", label: "Code", sortable:false, className:"right"
 			},
 			{
 				key:"expandColumn",
@@ -175,13 +175,13 @@ function EditRecStructure() {
                 formatter: function(elLiner, oRecord, oColumn, oData){
                     var wid = oRecord.getData('rst_DisplayWidth');
                     var typ = oRecord.getData('dty_Type');
-                    if ((typ == "enum") || (typ=="resource") || (typ=="relmarker") || 
+                    if ((typ == "enum") || (typ=="resource") || (typ=="relmarker") ||
                        (typ=="file") || (typ=="date") || (typ=="geo") || (typ=="separator"))
-                        { 
+                        {
                         res = 'auto'
                         }
-                    else 
-                        res = wid;                  
+                    else
+                        res = wid;
                     elLiner.innerHTML = res;
                 }
 			},
@@ -215,7 +215,7 @@ function EditRecStructure() {
 				}
 			},
             {
-                key:"dty_Name", label: "Based on template field", width:120, sortable:false 
+                key:"dty_Name", label: "Based on template field", width:120, sortable:false
             },
 			{
 				key:"rst_Status", label: "Status", sortable:false, className:"center"
@@ -271,12 +271,12 @@ function EditRecStructure() {
 					*/
 					obj.liner_element.innerHTML =
 					'<div style="padding-left:30; padding-bottom:5; padding-right:5">'+
-					
+
                     '<div class="input-row"><div class="input-header-cell">Prompt (display name):</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DisplayName" title="Display Name/Label"/></div></div>'+
-                    
+
                     // Field width
                     '<div class="input-row"><div class="input-header-cell">Field width:</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DisplayWidth" title="Visible width of field" style="width:40" size="4" onkeypress="Hul.validate(event)"/></div></div>'+
-                    
+
 					'<div class="input-row"><div class="input-header-cell">Help text (under field):</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DisplayHelpText" style="width:350px" title="Help Text"/></div></div>'+
 
 					// Required/recommended optional
@@ -304,14 +304,14 @@ function EditRecStructure() {
                     '<span id="ed'+rst_ID+'_spanMaxValue"><label>Maximum&nbsp;values:</label>'+
 					'<input id="ed'+rst_ID+
 					'_rst_MaxValues" title="Maximum Values" style="width:20px; text-align:center;" size="2" '+
-					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/></span></div></div>'+   
+					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/></span></div></div>'+
 
 					// Terms - enums and relmarkers
                     '<div class="input-row"><div class="input-header-cell">Terms list:</div>'+
 					'<div class="input-cell">'+
 					'<input id="ed'+rst_ID+'_rst_FilteredJsonTermIDTree" type="hidden"/>'+
 					'<input id="ed'+rst_ID+'_rst_TermIDTreeNonSelectableIDs" type="hidden"/>'+
-                    //REMOVED BY IAN's request on 16-09-11 - this provides too much complexity		
+                    //REMOVED BY IAN's request on 16-09-11 - this provides too much complexity
                     //'<input type="submit" value="Filter terms" id="btnSelTerms" onclick="showTermsTree('+rst_ID+', event)" style="margin:0 20px 0 0"/>'+
                     //					'Preview:'+
 					'<span class="input-cell" id="termsPreview" class="dtyValue"></span>'+
@@ -329,7 +329,7 @@ function EditRecStructure() {
 
                     // Default value
                     '<div class="input-row"><div class="input-header-cell">Default Value:</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DefaultValue" title="Default Value"/></div></div>'+
-                    
+
 					// Status
                     '<div class="input-row"><div class="input-header-cell">Status:</div>'+
 					'<div class="input-cell"><select id="ed'+rst_ID+
@@ -482,7 +482,10 @@ function EditRecStructure() {
 			});
 
 
-			_myDataTable.subscribe("initEvent", function() {_setDragEnabled(true);});
+			_myDataTable.subscribe("initEvent", function() {
+					_myDataTable.sortColumn(_myDataTable.getColumn('rst_DisplayOrder'),YAHOO.widget.DataTable.CLASS_ASC); //fix bug in Chrome
+					_setDragEnabled(true);
+			});
 
 			//////////////////////////////////////////////////////////////////////////////
 			// Create DDRows instances when DataTable is initialized

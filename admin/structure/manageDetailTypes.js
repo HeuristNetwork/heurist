@@ -170,7 +170,7 @@ function DetailTypeManager() {
 			var i;
 			for (i in _groups){
 				if(i!==undefined){
-					Hul.addoption(el, _groups[i].value, _groups[i].text);
+					Hul.addoption(sel, _groups[i].value, _groups[i].text);
 				}
 			} // for
 

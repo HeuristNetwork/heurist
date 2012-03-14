@@ -263,6 +263,7 @@ function getVariableNameForSmarty($name, $is_fieldtype = true){
 }
 
 //
+// Creates default header details for any record (name, modified, URL
 // @todo - labels or headers
 //
 function getRecordHeaderSectionForSmarty($rec, $parentName, $ind, $addrelationfield=false){
@@ -320,22 +321,17 @@ function getRecordHeaderSectionForSmarty($rec, $parentName, $ind, $addrelationfi
 		foreach ($rec as $key => $value){
 		    $pos = strpos($key,"rec_");
 			if(is_numeric($pos) && $pos==0){
-				//array_push($record, array(substr($key,4) => $value));
-				$key = substr($key, 4); //label
-				$name_wo_parent = 'rec'.$key;	   //without parent
-				$name = $parentName.'.'.$name_wo_parent;
 
-				if($key=="RecTypeID"){  //instead of type id we add type name
+				if($key=="RecTypeID"){
 					$key = "TypeName";
-					$name_wo_parent = 'rec'.$key; //additional field
-					$name = $parentName.'.'.$name_wo_parent;
-					//array_push($vars, $name);
-					$tree[$parentName] = array_merge($tree[$parentName], array($name_wo_parent=>$name));
-					//array_push($tree[$parentName], array($name_wo_parent=>$name));
-					$vars = array_merge($vars, array($name=>$key));
+				}else{
+					$key = substr($key, 4); //label
 				}
-				if($key=="ID" || $key=="Title" || $key=="TypeName" || $key=="URL"||
-					$key=="RecTypeID" || $key=="Modified") {
+
+				if($key=="ID" || $key=="Title" || $key=="TypeName" || $key=="URL" || $key=="Modified")
+				{
+					$name_wo_parent = 'rec'.$key;	   //without parent
+					$name = $parentName.'.'.$name_wo_parent;
 					$tree[$parentName] = array_merge($tree[$parentName], array($name_wo_parent=>$name));
 					$vars = array_merge($vars, array($name=>$key));
 					array_push($arr_text, '{$'.$name.'}');
@@ -366,7 +362,7 @@ function getRecordHeaderSectionForSmarty($rec, $parentName, $ind, $addrelationfi
 
 function getRecordTypeSectionForSmarty($recTypeId, $parentName, $ind){
 
-	global $rtStructs, $recursion_depth, $mode;
+	global $first_record, $rtStructs, $recursion_depth, $mode;
 
 	/*$rtNames = $rtStructs['names'];
 	$recordTypeName = $rtNames[$rectypeID];
@@ -400,6 +396,15 @@ function getRecordTypeSectionForSmarty($recTypeId, $parentName, $ind){
 			$tree = array_merge($tree, $dt['tree']);
 		}
 	}//for
+
+	//add Relationship "detail"
+	$res2 = getRecordHeaderSectionForSmarty($first_record, "Relationship", $ind, false);
+
+	array_push($arr_text, $res2['text']);
+	$vars = array_merge($vars, $res2['vars']);
+	$tree = array_merge($tree, $res2['tree']);
+	// end add Relationship
+
 
 	array_push($arr_text, '{/if}');
 	$text = _maketext($arr_text, $ind);
