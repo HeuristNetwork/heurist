@@ -53,7 +53,6 @@
 <!-- for yui simply dialog -->
 <script type="text/javascript" src="../../external/yui/2.8.2r1/build/container/container-min.js"></script>
 <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
-
 <script type="text/javascript" src="../../external/tinymce3.4.4/jscripts/tiny_mce/tiny_mce.js"></script>
 <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
 <link rel="stylesheet" type="text/css" href="../../common/css/report.css">
@@ -68,7 +67,7 @@
 /*display: none !important;
 	display: block;
 */
-.linkadmin{
+.linkadmin {
 	visibility: hidden;
 }
 </style>
@@ -78,8 +77,8 @@
 </head>
 
 <body class="yui-skin-sam">
-<script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
-<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
+<script type="text/javascript" src="../../common/js/utilsLoad.js"></script> 
+<script type="text/javascript" src="../../common/js/utilsUI.js"></script> 
 <script type="text/javascript" src="../../viewers/smarty/showReps.js"></script>
 <iframe id="ifrmPrint" src="#" style="width:0px; height:0px;"></iframe>
 
@@ -91,7 +90,7 @@
 
 <div id="viewercontainer">
 	<div id="toolbar"
-				style="width:100%;text-align:left;">
+				style="width:100%;text-align:left;"> 
 		<!--<div id="rep_list" style="padding-left:10px;display:inline-block;">
 					<label style="width:100px">Select template</label>
 					<select id="selTemplates" onChange="onSelectTemplate()" style="width:200px;"></select>
@@ -102,24 +101,22 @@
 					<button onClick="onGenerate()">New Template</button>
 					<input type="checkbox" id="cbUseAllRecords1" onChange="onUseAll(event)"/>Selected only
 				</div>-->
-		<label style="width:100px">Select template</label>
+		<div><label style="width:100px">Select template</label>
 		<select id="selTemplates" onChange="onSelectTemplate()" style="width:200px;vertical-align:middle"class="button">
 		</select>
 		<ul id="rep_list" class="horizontal menu">
-			<li><span class="button">Tools</span>
+			<li><span class="button">Menu</span>
 				<ul id="toolMenuItems">
 				</ul>
 			</li>
-		</ul>
-							<select id="cbUseAllRecords1" onChange="setQueryMode(event)" style="width:90px">
-								<option value="all" selected="selected">All on page</option>
-								<option value="selected">Selected only</option>
-								<option value="main">Query result</option>
-							</select>
-
-							<span id="recordCount"></span>
-
-		</div>
+		</ul></div>
+		<div><label style="width:100px">View</label>
+		<select id="cbUseAllRecords1" onChange="setQueryMode(event)" style="width:90px;vertical-align:middle"class="button">
+			<option value="all" selected="selected">All on page</option>
+			<option value="selected">Selected only</option>
+			<option value="main">Query result</option>
+		</select></div>
+		<span id="recordCount"></span> </div>
 	<div id="rep_container"></div>
 </div>
 <div id="editorcontainer" style="display:none">
@@ -131,101 +128,88 @@
  position:absolute;bottom: 0px;
  height:99%;
  position:absolute;right:2px;bottom:2px;
- -->
-
-
-
+ --> 
+		
 		<!--<div style="width:100%;height:20px;position:absolute;bottom: 0px;">
-			<div style="display: inline-block;">  -->
-
-				<!--
+			<div style="display: inline-block;">  --> 
+		
+		<!--
 						<input id="cbNorep" name="replevel" value="0" type="radio"  title="No report output"/>
 						<label for="cbNorep">Ignore errors</label>&nbsp;&nbsp;
 						<input id="cbError" name="replevel" value="2" type="radio"  title="Show errors and missed fields" checked="checked"/>
 						<label for="cbError">Show errors</label>&nbsp;&nbsp;
 						<input id="cbDebug" name="replevel" value="1" type="radio"  title="Show debug info"/>
 						<label for="cbDebug">Debug info</label>
--->
-			<!--</div>
+--> 
+		<!--</div>
 			<div style="float:right;"> </div>
-		</div> -->
+		</div> --> 
 	</div>
 	<div id="templateTree">
-		<div style=margin-bottom: 20px;>
-			<!-- div>Choose required fields in tree then:</div -->
-            Position cursor in text on left <br>before selecting actions below<br>
-             	<label>Modifiers</label>
-				<select id="selInsertModifiers" onChange="onSelectModifier()" style="width:100px">
-					<option>choose modifier</option>
-					<option>capitalize</option>
-					<option>cat</option>
-					<option>count_characters</option>
-					<option>count_paragraphs</option>
-					<option>count_sentences</option>
-					<option>count_words</option>
-					<option>date_format</option>
-					<option>default</option>
-					<option>escape</option>
-					<option>indent</option>
-					<option>lower</option>
-					<option>nl2br</option>
-					<option>regex_replace</option>
-					<option>replace</option>
-					<option>spacify</option>
-					<option>string_format</option>
-					<option>strip</option>
-					<option>strip_tags</option>
-					<option>truncate</option>
-					<option>upper</option>
-					<option>wordwrap</option>
-				</select>
-			    &nbsp;&nbsp;
-                <a href="javascript:void(0)"
-                    title="Insert ForEach loop to loop through all records in the current query or selection"
-                    onClick="showReps.insertRootForEach()">Insert records loop</a><br>
-			<!--
-					<button onclick="window.showReps.insertSelectedVars(null, false)">Insert fields only</button><br/>
-					<button onclick="window.showReps.insertRectypeSection()">All</button>
-					<button onclick="window.showReps.insertSelectedVarsAsLoop(null)">Insert fields in loop</button><br/>
-					-->
-			<label>Style</label>
+		<div style="margin-bottom: 20px;white-space:nowrap"> <span style="white-space:normal">Position cursor in text on left before selecting actions below<br/>
+			</span>
+			<div><label>Modifiers</label>
+			<select id="selInsertModifiers" onChange="onSelectModifier()" style="width:100px">
+				<option>choose modifier</option>
+				<option>capitalize</option>
+				<option>cat</option>
+				<option>count_characters</option>
+				<option>count_paragraphs</option>
+				<option>count_sentences</option>
+				<option>count_words</option>
+				<option>date_format</option>
+				<option>default</option>
+				<option>escape</option>
+				<option>indent</option>
+				<option>lower</option>
+				<option>nl2br</option>
+				<option>regex_replace</option>
+				<option>replace</option>
+				<option>spacify</option>
+				<option>string_format</option>
+				<option>strip</option>
+				<option>strip_tags</option>
+				<option>truncate</option>
+				<option>upper</option>
+				<option>wordwrap</option>
+			</select></div>
+			<div><label>Style</label>
 			<select id="selInsertMode" style="width:100px">
 				<option value="0">Field only</option>
 				<option value="1">Field + Label</option>
 				<option value="2">Field + function wrapper</option>
-			</select>
-            &nbsp;&nbsp;
-            <a href="../../../help/index.html?SmartyTemplates"
-                    title="Read full documentation on the Smarty templating language"
-                    target="_blank">Smarty Help</a>
+			</select></div>
+			<div><label>Insert</label><a href="javascript:void(0)" title="ForEach loop to loop through all records in the current query or selection" onClick="showReps.insertRootForEach()">Records loop</a><br>
+			</div>
+			<div><label></label><a href="../../../help/index.html?SmartyTemplates" title="Read full documentation on the Smarty templating language" target="_blank">Smarty Help</a></div>
 		</div>
-
 		<div id="treeContainer">
 			<div id="varsTree" class="ygtv"></div>
-			<!-- was ygtv-checkbox -highlight -->
+			<!-- was ygtv-checkbox -highlight --> 
 		</div>
 	</div>
 	<div class="actionButtons">
-		<div style="float:left">
+		<div>
 			<select id="cbErrorReportLevel">
 				<option value="0" selected="selected">Ignore errors</option>
 				<option value="1">Show warnings</option>
 				<option value="2">Show errors</option>
 				<option value="3">Debug info</option>
 			</select>
-							<select id="cbUseAllRecords2" onChange="setQueryMode(event)" style="width:90px">
-								<option value="all" selected="selected">All on page</option>
-								<option value="selected">Selected only</option>
-								<option value="main">Query result</option>
-							</select>
+			<select id="cbUseAllRecords2" onChange="setQueryMode(event)" style="width:90px">
+				<option value="all" selected="selected">All on page</option>
+				<option value="selected">Selected only</option>
+				<option value="main">Query result</option>
+			</select>
 		</div>
-		<button onClick="doExecuteFromEditor()" title="Test your template" style="font-weight: 800;">Update output below</button>
+		<button onClick="doExecuteFromEditor()" title="Test your template">TEST</button>
 		<button onClick="doEditor(2)" title="Save, Close and Execute the updated template">Save</button>
 		<button onClick="doEditor(1)">Save As</button>
-		<button onClick="doEditor(3)">Delete</button>
+		<!--		<button onClick="doEditor(3)">Delete</button>
+-->
 		<button onClick="doEditor(0)">Close Editor</button>
 	</div>
-
+	
 	<!--
 					<select id="selRectype" onchange="window.showReps.onSelectRectype()" title="List of available rectypes">
 							<option>List of available rectypes</option>
@@ -235,8 +219,8 @@
 						<button onclick="doEditor(0)">Close Editor</button>
 					 button onclick="javascript:setupMCE();">TinyMCE</button
 					</div>
--->
-
+--> 
+	
 </div>
 <script type="text/javascript">
 
