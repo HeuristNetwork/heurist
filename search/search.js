@@ -2084,7 +2084,7 @@ top.HEURIST.search = {
 			if (clickedIndex < lastSelectedIndex){
 				for(var i = clickedIndex; i <= lastSelectedIndex; i++) {
 					recID = recIDs[i];
-					recDiv = $(".recordDiv[recID="+recID+"].lnk:not(filtered)",$("#results-level"+level));
+					recDiv = $(".recordDiv[recID="+recID+"]"+(level>0?".lnk":"")+":not(filtered)",$("#results-level"+level));
 					if (recDiv.length){
 						newSelectedRecIdMap[recID] = true;
 						newSelectedRecIds.push(recID);
@@ -2093,7 +2093,7 @@ top.HEURIST.search = {
 			}else{
 				for(var i = clickedIndex; i >= lastSelectedIndex; i--) {
 					recID = recIDs[i];
-					recDiv = $(".recordDiv[recID="+recID+"].lnk:not(filtered)",$("#results-level"+level));
+					recDiv = $(".recordDiv[recID="+recID+"]"+(level>0?".lnk":"")+":not(filtered)",$("#results-level"+level));
 					if (recDiv.length){
 						newSelectedRecIdMap[recID] = true;
 						newSelectedRecIds.push(recID);
