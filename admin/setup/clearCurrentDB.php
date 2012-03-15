@@ -58,12 +58,14 @@
                 // otherwise referential integrity will stop you deleting the recordss and/or bookmarks
                 $fulldbname = HEURIST_DB_PREFIX.$dbname;
 
-                $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname.
-                " -e'ALTER TABLE recThreadedComments DROP FOREIGN KEY fk_cmt_OwnerUgrpID, DROP FOREIGN KEY fk_cmt_ParentCmtID, DROP FOREIGN KEY fk_cmt_RecID'";
-                $output2 = exec($cmdline . ' 2>&1', $output, $res2); 
-                if ($res2!= 0 ) {
-                    echo ("<br>Warning: Unable to temporarily disable referential integrity on <b>$dbname.recThreadedComments</b><br>");
-                    echo($output2);
+                // set parents to null to avoid referential integrity checks on deletion of parent before child
+                if ($res2=0) {
+                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'update recThreadedComments set cmt_ParentCmtID = NULL' ";
+                    $output2 = exec($cmdline . ' 2>&1', $output, $res2); 
+                    if ($res2!= 0 ) {
+                        echo ("<br>Warning: Unable to set parent IDs to null for comments in <b>$dbname</b> - SQL error on update recThreadedComments set cmt_ParentCmtID = NULL<br>");
+                        echo($output2);
+                    } 
                 } 
 
                 if ($res2=0) {
@@ -71,18 +73,6 @@
                     $output2 = exec($cmdline . ' 2>&1', $output, $res2); 
                     if ($res2!= 0 ) {
                         echo ("<br>Warning: Unable to delete recThreadedComments from <b>$dbname</b> - SQL error on DELETE FROM recThreadedComments<br>");
-                        echo($output2);
-                    } 
-                }
-
-                if ($res2=0) {
-                    $cmdline = "mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".$fulldbname." -e'ALTER TABLE recThreadedComments ".
-                    "ADD CONSTRAINT fk_cmt_OwnerUgrpID FOREIGN KEY (cmt_OwnerUgrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE ON UPDATE CASCADE,".
-                    "ADD CONSTRAINT fk_cmt_ParentCmtID FOREIGN KEY (cmt_ParentCmtID) REFERENCES recThreadedComments (cmt_ID) ON UPDATE CASCADE ON DELETE RESTRICT,".
-                    "ADD CONSTRAINT fk_cmt_RecID FOREIGN KEY (cmt_RecID) REFERENCES Records (rec_ID) ON DELETE CASCADE ON UPDATE CASCADE;'";
-                    $output2 = exec($cmdline . ' 2>&1', $output, $res2); 
-                    if ($res2!= 0 ) {
-                        echo ("<br>Warning: Unable to re-enable referential integrity on <b>$dbname.recThreadedComments</b><br>");
                         echo($output2);
                     } 
                 }
