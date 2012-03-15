@@ -13,7 +13,6 @@
 
 <?php
 
-	define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 	require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
@@ -134,47 +133,30 @@
 
 					print '<input type="hidden" name="bib_ids" value="'.$_REQUEST['bib_ids'].'">';
 
-					$rfts = array();
+					$rtyNameLookup = array();
 					$res = mysql_query('select rty_ID, rty_Name from Records left join defRecTypes on rty_ID=rec_RecTypeID where rec_ID in ('.$_REQUEST['bib_ids'].')');
 					//FIXME add code to pprint cross type matching  header " Cross Type - Author Editor with Person with Book"
-					while ($row = mysql_fetch_assoc($res)) $rfts[$row['rty_ID']]= $row['rty_Name'];
+					while ($row = mysql_fetch_assoc($res)) $rtyNameLookup[$row['rty_ID']]= $row['rty_Name'];
 
 					$temptypes = '';
-					if (count($rfts) > 0) {
-						foreach ($rfts as $rft){
-							if (!$temptypes) $temptypes = $rft;
-							else $temptypes .= '/'.$rft;
+					if (count($rtyNameLookup) > 0) {
+						foreach ($rtyNameLookup as $rtyID => $rtyName){
+							if (!$temptypes) {
+								$temptypes = $rtyName;
+								$firstRtyID = $rtyID;
+							}else{
+								$temptypes .= '/'.$rtyName;
+							}
 						}
 						print '<tr><td colspan="3" style="text-align: center; font-weight: bold;">'.$temptypes.'</td></tr>';
 					}
 					//save rec type for merging code
-					if (!@$_SESSION['rec_type_id']) $_SESSION['rty_ID'] = @$rfts[0]['rty_ID'];
+					if (!@$_SESSION['rty_ID']) $_SESSION['rty_ID'] = @$firstRtyID;
 					//get requirements for details
-					$res = mysql_query('select rst_RecTypeID,rst_DetailTypeID, rst_DisplayName, rst_RequirementType, rst_MaxValues from defRecStructure where rst_RecTypeID in ('.join(',',array_keys($rfts)).')');
+					$res = mysql_query('select rst_RecTypeID,rst_DetailTypeID, rst_DisplayName, rst_RequirementType, rst_MaxValues from defRecStructure where rst_RecTypeID in ('.join(',',array_keys($rtyNameLookup)).')');
 					$rec_requirements =  array();
-					while ($req = mysql_fetch_assoc($res)) $rec_requirements[$req['rst_RecTypeID']][$req['rst_DetailTypeID']]= $req;
-					/* Override merge code removed by SAW on 13/1/11
-					// get overrides - this will potentially overwrite the main requirements
-					$wg_ids_list = join(',',array_keys($_SESSION['heurist']['user_access']));
-					$res = mysql_query('select rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, rst_RequirementType, rst_MaxValues from rec_detail_requirements_overrides where rst_RecTypeID in ('.join(',',array_keys($rfts)).') AND rdr_wg_id in ('.$wg_ids_list.')');
-					$precedence = array( 'required'=> 4, 'recommended'=> 3, 'optional'=> 2, 'forbidden'=> 1 );
 
-					while ($req = mysql_fetch_assoc($res)) {
-					$rdt_id = $req['rst_DetailTypeID'];
-					$type = $req['rst_RecTypeID'];
-					if (!$rec_requirements[$type][$rdt_id]) $rec_requirements[$type][$rdt_id] = $req; //if it doesn't exist then add it
-					else {  // if name doesn't exist append it and select max required and max repeatable
-					$name = $req['rst_DisplayName'];
-					$required = $req['rst_RequirementType'];
-					$repeatable = $req['rst_MaxValues'];
-					if (strpos($rec_requirements[$type][$rdt_id]['rst_DisplayName'],$name) === false) $rec_requirements[$type][$rdt_id]['rst_DisplayName'] .= '/'.$name ;
-					if ( $precedence[$rec_requirements[$type][$rdt_id]['rst_RequirementType']] < $precedence[$required])
-					$rec_requirements[$type][$rdt_id]['rst_RequirementType'] = $required;
-					if ( intval($rec_requirements[$type][$rdt_id]['rst_MaxValues']) < intval($repeatable))
-					$rec_requirements[$type][$rdt_id]['rst_MaxValues'] = intval($repeatable);
-					}
-					}
-					*/
+					while ($req = mysql_fetch_assoc($res)) $rec_requirements[$req['rst_RecTypeID']][$req['rst_DetailTypeID']]= $req;
 					$res = mysql_query('select * from Records where rec_ID in ('.$_REQUEST['bib_ids'].') order by find_in_set(rec_ID, "'.$_REQUEST['bib_ids'].'")');
 					$records = array();
 					$counts = array();
@@ -234,7 +216,7 @@
 							'" title="Click to select this record as the Master record"'.
 							' id="keep'.$record['rec_ID'].
 							'" onclick="keep_bib('.$record['rec_ID'].');">';
-							print '<span style="font-size: 120%;"><a target="edit" href="'.HEURIST_URL_BASE.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$record['rec_ID'].'">'.$record['rec_ID'] . ' ' . '<b>'.$record['rec_Title'].'</b></a> - <span style="background-color: #EEE;">'. $rfts[$record['rec_RecTypeID']].'</span></span>';
+							print '<span style="font-size: 120%;"><a target="edit" href="'.HEURIST_URL_BASE.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$record['rec_ID'].'">'.$record['rec_ID'] . ' ' . '<b>'.$record['rec_Title'].'</b></a> - <span style="background-color: #EEE;">'. $rtyNameLookup[$record['rec_RecTypeID']].'</span></span>';
 							print '<table>';
 							foreach ($record['details'] as $rd_type => $detail) {
 								if (! $detail) continue;    //FIXME  check if required and mark it as missing and required
@@ -286,7 +268,7 @@
 
 							print '<table>';
 
-							if ($record["refs"]) {
+							if (array_key_exists("refs",$record)) {
 								print '<tr><td>References</td><td>';
 								$i = 1;
 								foreach ($record["refs"] as $ref) {  //FIXME  check for reference to be a valid record else mark detail for delete and don't print
@@ -329,7 +311,7 @@
 							if ($is_master) print '<td><div><b>MASTER</b></div></td>';
 							else print '<td><div><b>Duplicate</b></div></td>';
 							print '<td style="width: 500px;">';
-							print '<div style="font-size: 120%;"><a target="edit" href="'.HEURIST_URL_BASE.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$record['rec_ID'].'">'.$record['rec_ID'] . ' ' . '<b>'.$record['rec_Title'].'</b></a> - <span style="background-color: #EEE;">'. $rfts[$record['rec_RecTypeID']].'</span></div>';
+							print '<div style="font-size: 120%;"><a target="edit" href="'.HEURIST_URL_BASE.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$record['rec_ID'].'">'.$record['rec_ID'] . ' ' . '<b>'.$record['rec_Title'].'</b></a> - <span style="background-color: #EEE;">'. $rtyNameLookup[$record['rec_RecTypeID']].'</span></div>';
 							print '<table>';
 							if ($is_master) $_SESSION['master_details']=$record['details']; // save master details for processing - signals code to do_fix_dupe
 							foreach ($record['details'] as $rd_type => $detail) {
@@ -362,7 +344,7 @@
 								$repeatCount =  intval($rec_requirements[$master_rec_type][$rd_type]['rst_MaxValues']);
 								$detail = detail_get_html_input_str( $detail, $repeatCount, $is_master );
 								if (is_array($detail)) {
-									if ($is_type_repeatable){
+									if ($repeatCount != 1){//repeatable
 										foreach ($detail as $val) {
 											print '<div>'. $val . '</div>';
 										}
@@ -391,7 +373,7 @@
 
 							print '<table>';
 
-							if ($record["refs"]) {
+							if (array_key_exists("refs",$record)) {
 								print '<tr><td>References</td><td>';
 								$i = 1;
 								foreach ($record["refs"] as $ref) {
@@ -424,18 +406,19 @@
 		</tbody></table>
 		<?php
 			if (! $finished_merge) {
-				print '<input type="button" name="'.($do_merge_details? "commit":"merge").'" style="float:right;" value="'. ($do_merge_details? "commit&nbsp;changes":"merge&nbsp;duplicates").'" >';
+				print '<input type="submit" name="'.($do_merge_details? "commit":"merge").'" style="float:right;" value="'. ($do_merge_details? "commit&nbsp;changes":"merge&nbsp;duplicates").'" >';
 			} else{
 				print '<div> Changes were commited </div>';
 				print '<input type="button" name="close_window" id="close_window" value="Close Window"   title="Cick here to close this window" onclick="window.close();">';
 			}
 		?>
+		<input type="hidden" name="db" id="db" value="<?=HEURIST_DBNAME?>">
 	</form>
 </body>
 </html>
 
 <?php
-
+	session_commit();
 	function detail_get_html_input_str( $detail, $repeatCount, $is_master ) {
 		$is_type_repeatable = $repeatCount != 1;
 		foreach($detail as $rg){
@@ -520,7 +503,6 @@
 		$add_dt_ids = array();   // array of detail ids to insert for the master record grouped by detail type is
 		$update_dt_ids = array(); // array of detail ids to get value for updating the master record
 		$keep_dt_ids = array();   // array of master record repeatable detail ids to keep grouped by detail type id- used to find master details to remove
-
 		//parse form data
 		foreach($_REQUEST as $key => $value){
 			preg_match('/(add|update|keep)(\d+)/',$key,$matches);
@@ -706,10 +688,13 @@
 		//try to get the record to update title and hash
 		// calculate title, do an update
 		$type =  $_SESSION['rty_ID'];
-		$mask = mysql__select_array("defRecTypes", "rty_TitleMask", "rty_ID=".$type);  $mask = $mask[0];
-		$title = fill_title_mask($mask, $master_rec_id, $type);
-		if ($title) {
-			mysql_query("update Records set rec_Title = '" . addslashes($title) . "' where rec_ID = $master_rec_id");
+		$mask = mysql__select_array("defRecTypes", "rty_TitleMask", "rty_ID=".$type);
+		if ( $mask && count($mask) > 0) {
+			$mask = $mask[0];
+			$title = fill_title_mask($mask, $master_rec_id, $type);
+			if ($title) {
+				mysql_query("update Records set rec_Title = '" . addslashes($title) . "' where rec_ID = $master_rec_id");
+			}
 		}
 		mysql_query('update Records set rec_Hash = hhash(rec_ID) where rec_ID='.$master_rec_id);
 

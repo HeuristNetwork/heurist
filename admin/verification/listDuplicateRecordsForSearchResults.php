@@ -13,7 +13,6 @@
 
 <?php
 
-	define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 	require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
@@ -204,6 +203,7 @@
 					<option value=25 <?= $fuzziness >= 25 && $fuzziness < 30 ? "selected" : "" ?>>25</option>
 					<option value=30 <?= $fuzziness >= 30 ? "selected" : "" ?>>30</option>
 				</select>
+				<input type="hidden" name="db" id="db" value="<?=HEURIST_DBNAME?>">
 				characters of metaphone must match
 				<div id=searchString>Search string: <input type="text" name="q" id="q" value="<?= @$_REQUEST['q'] ?>" /></div>
 			</div>
@@ -242,10 +242,19 @@
 
 				unset($_REQUEST['personmatch']);
 
-				print '<div id=dupeCount>' . count($dupes) . ' potential groups of duplicates</div><div class=duplicateList>';
+				$cnt = 0;
+				foreach ($dupes as $rectype => $subarr) {
+					foreach ($subarr as $index => $key) {
+					$diffHash = array_keys($bibs[$key]);
+					sort($diffHash,SORT_ASC);
+					$diffHash = join(',',$diffHash );
+					if (in_array($diffHash,$dupeDifferences)) continue;
+						$cnt ++;
+					}
+				}
+				print '<div id=dupeCount>' . $cnt . ' potential groups of duplicates</div><div class=duplicateList>';
 
-				print "<div>Not dupes button applies to one set. To apply to several sets at once, check the boxes then click any <b>not dupes</b> button</div>";
-
+				print "<div>Note dupes button applies to one set. To apply to several sets at once, check the boxes then click any <b>not dupes</b> button</div>";
 
 				foreach ($dupes as $rectype => $subarr) {
 					foreach ($subarr as $index => $key) {
@@ -258,7 +267,7 @@
 						'" value="' . $diffHash . '">&nbsp;&nbsp;';
 						print $rectype . ' &nbsp;&nbsp;&nbsp;&nbsp;';
 						print '<input type="button" value="&nbsp;not dupes&nbsp;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-						print '<a onClick=top.HEURIST.search.popupLink("'.HEURIST_URL_BASE.'admin/verification/combineDuplicateRecords.php?bib_ids=' . join(',', array_keys($bibs[$key])).'","small")>fix this group</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+						print '<a onClick=top.HEURIST.search.popupLink("'.HEURIST_URL_BASE.'admin/verification/combineDuplicateRecords.php?bib_ids=' . join(',', array_keys($bibs[$key])).'","small")>merge this group</a>&nbsp;&nbsp;&nbsp;&nbsp;';
 						print '<a title="View in new search window" target="_new" href="'.HEURIST_URL_BASE.'search/search.html?q=ids:'.join(",",array_keys($bibs[$key])).'&db='.HEURIST_DBNAME.'"><img src="'.HEURIST_URL_BASE.'common/images/jump.png"></a>&nbsp;&nbsp;&nbsp;&nbsp;';
 						print '</div>';
 						print '<ul>';
