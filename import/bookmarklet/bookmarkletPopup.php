@@ -103,8 +103,8 @@ render: function() {
 	// heurist bookmarklet
 	var dd = document.createElement("div");
 	dd.id = "topline";
-	dd.innerHTML = (! HEURIST_url_bib_id ? "Add this page as:" : "");
-	d.appendChild(dd);
+	dd.innerHTML = (! HEURIST_url_bib_id ? "Highlight text that you want to include in your record<br/> then choose one of the following:" : "");
+    d.appendChild(dd);
 
 	var t = d.appendChild(document.createElement("table"));
 	t.style.margin = "0";
@@ -113,7 +113,7 @@ render: function() {
 	var tr = t.appendChild(document.createElement("tr"));
 	var td = tr.appendChild(document.createElement("td"));
 
-	if (HEURIST_url_bkmk_id) {
+	if (HEURIST_url_bkmk_id) {  // The page is already bookmarked by the current user
 		var nobr = td.appendChild(document.createElement("nobr"));
 		nobr.appendChild(document.createTextNode("Page already in Heurist"));
 		nobr.style.color = "green";
@@ -141,7 +141,7 @@ render: function() {
 		td.colSpan = "2";
 		td.style.height = "10px";
 
-	} else if (HEURIST_url_bib_id) {
+	} else if (HEURIST_url_bib_id) { // The page has been bookmarked by someone but not current user
 		var nobr = td.appendChild(document.createElement("nobr"));
 		nobr.appendChild(document.createTextNode("Page already in Heurist"));
 		nobr.style.color = "green";
@@ -167,37 +167,40 @@ render: function() {
 		td.colSpan = "2";
 		td.style.height = "30px";
 
-	} else {
-		// specify rectype
-		td.appendChild(Heurist.renderrectypeSelect());
-
-		td = tr.appendChild(document.createElement("td"));
-		var button = document.createElement("input");
-		button.id = "add-as-type-button";
-		button.type = "button";
-		button.value = "Add";
-		button.disabled = true;
-		button.onclick = function() {
-			var r = document.getElementById("rectype-select").value;
-			if (r) Heurist.bookmark(r);
-		};
-		td.appendChild(button);
-
+	} else { // Page has never been bookmarked in this database
+        
+        // Add the page as the default type, Web page / Internet bookmark
 		tr = t.appendChild(document.createElement("tr"));
 		td = tr.appendChild(document.createElement("td"));
-		td.colSpan = "2";
-		td.style.height = "20px";
-
-		// add as internet bookmark
-		tr = t.appendChild(document.createElement("tr"));
-		td = tr.appendChild(document.createElement("td"));
-		td.innerHTML = "Quick add (generic bookmark)";
 		td = tr.appendChild(document.createElement("td"));
 		button = document.createElement("input");
 		button.type = "button";
-		button.value = "Add";
+		button.value = "Bookmark as web page";
 		button.onclick = function() { Heurist.bookmark(); };
 		td.appendChild(button);
+
+        tr = t.appendChild(document.createElement("tr"));
+        td = tr.appendChild(document.createElement("td"));
+        td.colSpan = "2";
+        td.style.height = "20px";
+
+        // specify rectype
+        td.innerHTML = "<p/>or: ";
+        td.appendChild(Heurist.renderrectypeSelect());
+        td = tr.appendChild(document.createElement("td"));
+        var button = document.createElement("input");
+        button.id = "add-as-type-button";
+        button.type = "button";
+        button.value = "Add";
+        button.disabled = true;
+        button.onclick = function() {
+            var r = document.getElementById("rectype-select").value;
+            if (r) Heurist.bookmark(r);
+        };
+        td.appendChild(button);
+                        
+       // "Highlighted text is copied to the scratchpad from where it can be dragged to other fields. <br/>DOI, ISBN, ISSN are extracted and inserted as fields."
+       
 	}
 
 	// link importer
