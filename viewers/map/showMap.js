@@ -66,7 +66,8 @@ function ShowMap() {
 				var _url = kmls[i];
 				rec_withtime++; //it is assumed that kml is timeenabled
 
-				datasets.push({theme: "blue", type: "kml",
+				//theme: "blue",
+				datasets.push({ type: "kml",
 					options: {
 						url: _url // KML file to load
 					}
