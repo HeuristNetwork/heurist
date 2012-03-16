@@ -24,14 +24,26 @@ define('SORT_TITLE', 't');
 function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL, $publicOnly = false) {
 	// wg_ids is a list of the workgroups we can access; records records marked with a rec_OwnerUGrpID not in this list are omitted
 
-	// clean up the query.
-	// liposuction out all the non-kocher characters
-	// (this means all punctuation except -, _, :, ', ", = and ,  ...?)
 
-	$text = preg_replace('/[\000-\041\043-\046\050-\053\073\077\100\133\135\136\140\173-\177]+/s', ' ', $text);
-	$text = preg_replace('/- (?=[^"]*(?:"[^"]*"[^"]*)*$)/', ' ', $text); // remove any dashes outside matched quotes.
+	// remove any  lone dashes outside matched quotes.
+	$text = preg_replace('/- (?=[^"]*(?:"[^"]*"[^"]*)*$)|-\s*$/', ' ', $text);
+	// divide the query into dbl-quoted and other (note a dash(-) in front of a string is preserved and means negate)
+	preg_match_all('/(-?"[^"]+")|([^" ]+)/',$text,$matches);
+	$preProcessedQuery = "";
+	foreach ($matches[0] as $queryPart) {
+		//if the query part is not a dbl-quoted string (ignoring a preceeding dash and spaces)
+		//necessary since we want to doble quotes to allow all characters
+		if (!preg_match('/^\s*-?".*"$/',$queryPart)) {
+		// clean up the query.
+		// liposuction out all the non-kocher characters
+		// (this means all punctuation except -, _, :, ', ", = and ,  ...?)
+			$queryPart = preg_replace('/[\000-\041\043-\046\050-\053\073\077\100\133\135\136\140\173-\177]+/s', ' ', $queryPart);
+		}
+		//reconstruct the string
+		$preProcessedQuery .= ($preProcessedQuery ? " ":"").$queryPart;
+	}
 
-	$query = new Query($search_type, $text, $publicOnly);
+	$query = new Query($search_type, $preProcessedQuery, $publicOnly);
 	$query->addWorkgroupRestriction($wg_ids);
 	$q = $query->makeSQL();
 
@@ -70,7 +82,7 @@ function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL, $publicO
 			}
 		}
 	}
-
+//error_log("q after parse ".print_r($q,true));
 	return $q;
 }
 
@@ -84,9 +96,10 @@ class Query {
 
 	var $workgroups;
 
-	function Query($search_type, $text, $publicOnly) {
+	function Query($search_type, $text, $publicOnly, $absoluteStrQuery = false) {
 		$this->search_type = $search_type;
 		$this->isPublicOnly = $publicOnly;
+		$this->absoluteStrQuery = $absoluteStrQuery;
 		$this->or_limbs = array();
 		$this->sort_phrases = array();
 		$this->sort_tables = array();
@@ -95,13 +108,15 @@ class Query {
 		// Find any 'sortby:' phrases in the query, and pull them out.
 		// "sortby:..." within double quotes is regarded as a search term, and we don't remove it here
 		while (preg_match('/\\G([^"]*(?:"[^"]*"[^"]*)*)\\b(sortby:(?:f:|field:)?"[^"]+"\\S*|sortby:\\S*)/', $text, $matches)) {
-//error_log(print_r($matches, 1));
+//error_log("Create query obj ".print_r($matches, 1));
 			$this->addSortPhrase($matches[2]);
 			$text = $matches[1] . substr($text, strlen($matches[1])+strlen($matches[2]));
 		}
+//error_log("Create query obj text after processing sortby ".print_r($text, 1));
 
 		// According to WWGD, OR is the top-level delimiter (yes, more top-level than double-quoted text)
 		$or_texts = preg_split('/\\b *OR *\\b/i', $text);
+//error_log("Create query obj text after processing or's ".print_r($or_texts, 1));
 		for ($i=0; $i < count($or_texts); ++$i)
 			if ($or_texts[$i]) $this->addOrLimb($or_texts[$i]);	// NO LONGER collapse uppercase -> lowercase ... let's wait till PHP understands UTF-8 (mysql match ignores case anyway)
 	}
@@ -182,7 +197,7 @@ class OrLimb {
 
 	function OrLimb(&$parent, $text) {
 		$this->parent = &$parent;
-
+		$this->absoluteStrQuery = $parent->absoluteStrQuery;
 		$this->and_limbs = array();
 		if (substr_count($text, '"') % 2 != 0) $text .= '"';	// unmatched quote
 
@@ -226,6 +241,11 @@ class AndLimb {
 
 	function AndLimb(&$parent, $text) {
 		$this->parent = &$parent;
+		$this->absoluteStrQuery = false;
+		if (preg_match('/^".*"$/',$text,$matches)) {
+			$this->absoluteStrQuery = true;
+			error_log("AndLimb has quotes ".print_r($matches,true));
+		}
 
 		$this->exact = false;
 		if ($text[0] == '-') {
@@ -263,7 +283,7 @@ class AndLimb {
 			}
 		}
 
-		if (! $colon_pos) {	// a colon was either NOT FOUND or AT THE BEGINNING OF THE STRING
+		if ($this->absoluteStrQuery || ! $colon_pos) {	// a colon was either NOT FOUND or AT THE BEGINNING OF THE STRING
 			$pred_val = $this->cleanQuotedValue($text);
 
 			if (defined('stype')  &&  stype == 'key')

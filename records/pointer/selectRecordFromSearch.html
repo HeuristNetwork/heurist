@@ -264,6 +264,7 @@
 				var searchScope = top.HEURIST.util.getDisplayPreference("record-search-scope");
 				var lastSelected = top.HEURIST.util.getDisplayPreference("record-search-last");
 				var lastSearchType = top.HEURIST.util.getDisplayPreference("record-search-type");
+				var rectypeIDList = [];
 				//set focus
 				window.setTimeout(function() { document.forms[0].elements["q"].focus(); },100);
 
@@ -307,8 +308,9 @@
 						if (rectypeID == initialType) {// select inital type
 							tElt.selectedIndex = tElt.options.length-1;
 						}
+						rectypeIDList.push(rectypeID);
 					}
-					tElt.rectypes = rectypes.join();
+					tElt.rectypes = rectypeIDList.join();
 				}
 
 				//initialise form
