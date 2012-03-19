@@ -191,7 +191,7 @@ if (top.HEURIST && top.HEURIST.firedEvents["heurist-search-html-loaded"] && top.
 			if (!@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$sid]["recSet"][$row[2]]){
 				$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$sid]["recSet"][$row[2]] = array("depth" => $resDepth,
 																												"record" => $row);
-		if (!$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$sid]['infoByDepth'][0]['rectypes'][$row[4]]) {
+		if (!@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$sid]['infoByDepth'][0]['rectypes'][$row[4]]) {
 			$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$sid]['infoByDepth'][0]['rectypes'][$row[4]] = array($row[2]);
 		} else if ( !in_array($row[2],$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$sid]['infoByDepth'][0]['rectypes'][$row[4]])){
 			array_push($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results'][$sid]['infoByDepth'][0]['rectypes'][$row[4]],$row[2]);

@@ -24,7 +24,6 @@ define('SORT_TITLE', 't');
 function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL, $publicOnly = false) {
 	// wg_ids is a list of the workgroups we can access; records records marked with a rec_OwnerUGrpID not in this list are omitted
 
-
 	// remove any  lone dashes outside matched quotes.
 	$text = preg_replace('/- (?=[^"]*(?:"[^"]*"[^"]*)*$)|-\s*$/', ' ', $text);
 	// divide the query into dbl-quoted and other (note a dash(-) in front of a string is preserved and means negate)
@@ -40,9 +39,10 @@ function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL, $publicO
 			$queryPart = preg_replace('/[\000-\041\043-\046\050-\053\073\077\100\133\135\136\140\173-\177]+/s', ' ', $queryPart);
 		}
 		//reconstruct the string
-		$preProcessedQuery .= ($preProcessedQuery ? " ":"").$queryPart;
+		$preProcessedQuery .= ($preProcessedQuery &&
+								strrpos($preProcessedQuery,":") != strlen($preProcessedQuery)-1 &&
+								strpos($queryPart,":") !== 0 ? " ":"").$queryPart;
 	}
-
 	$query = new Query($search_type, $preProcessedQuery, $publicOnly);
 	$query->addWorkgroupRestriction($wg_ids);
 	$q = $query->makeSQL();
@@ -244,7 +244,6 @@ class AndLimb {
 		$this->absoluteStrQuery = false;
 		if (preg_match('/^".*"$/',$text,$matches)) {
 			$this->absoluteStrQuery = true;
-			error_log("AndLimb has quotes ".print_r($matches,true));
 		}
 
 		$this->exact = false;
