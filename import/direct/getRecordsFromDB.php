@@ -1,6 +1,7 @@
 <?php
 
 /* getRecordsFromDB.php - gets all records in a specified database (later, a selection) and write directly to current DB
+ * Reads from either H2 or H3 format databases
  * Ian Johnson Artem Osmakov 25 - 28 Oct 2011
  * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
  * @link: http://HeuristScholar.org
@@ -29,7 +30,7 @@
 <html>
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<title>Heurist - Direct import</title>
+	<title>Heurist - Direct database transfer</title>
 </head>
 <body>
 	<!-- script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
@@ -45,20 +46,24 @@
 
 	print "<h2>Heurist Direct Data Transfer</h2>";
 	print "<h2>FOR  ADVANCED USERS ONLY</h2>";
-	print "This script reads records from a source database, maps the record type, field type and terms codes to new values, ";
-    print "and writes the records into the current logged-in database. It also transfers uploaded file records. ";
+	print "This script reads records from a source database of H2 or H3 format, maps the record type, field type and term codes to new values, ";
+    print "and writes the records into the current logged-in database. It also transfers uploaded file records. It does not (at present) transfer tags and othe user data";
     print "The current database can already contain data, new records are appended and IDs adjsuted for records and files.<br>";
     print "<br>";
      print "Make sure the target records and field types are compatible. <b>";
     print "If you get the codes wrong, you will get a complete dog's breakfast in your target database ...</b><p>\n";
 
-	$dt_SourceRecordID = getDetailTypeLocalID("2-589");
+	$dt_SourceRecordID = getDetailTypeLocalID("3-678"); // initially 2-589
 	if(!$dt_SourceRecordID){
-		print "<b>This function will save the original (source) record IDs in the <i>Original ID</i> field in each record.<br>".
-            " This field does not exist in this database. Please import it from the Heurist Reference database (H3ReferenceSet, #3) ".
-            " using DBAdmin > Structure > Import Structure. Note: pending individual field import, import the <i>Original ID container record</i>'".
-            " You do not need to add the <i>Original ID</i> field to each record type, it is recorded automatically as additional data.";
-	}
+		print "<hr><b>Original record IDs</b> ".
+            "<br/>This data transfer function saves the original (source) record IDs in the <i>Original ID</i> field (origin code 3-678) for each record".
+            "<br/>This field does not exist in the database - please import it from the Heurist Reference database (db#3)".
+            "<br/>You do not need to add the <i>Original ID</i> field to each record type, it is recorded automatically as additional data.".
+            "<p><a href=../../admin/structure/selectDBForImport.php?db=" . HEURIST_DBNAME . " title='Import database structure elements' target=_blank><b>Import structure elements</b></a> (loads in new tab)".
+            "<br/>(choose H3 Reference database (#3), import the <i>Original ID container record</i>, then delete it - the required field remains)".
+            "<br/>Reload this page after importing the field<hr><p>";
+
+    }
 
 	$sourcedbname = NULL;
 
@@ -76,7 +81,7 @@
 		if(!$is_h2){
 			print "<input name='h2' value='1' type='hidden'>";
 		}
-		print "<input type='submit' value='Switch to H".($is_h2?"3":"2")."' /><br/>";
+		print "<input type='submit' value='Switch to H".($is_h2?"3":"2")." databases' /><br/>";
 		print "</form>";
 
 		print "<form name='selectdb' action='getRecordsFromDB.php' method='get'>";
@@ -193,7 +198,7 @@
 	     if (mysql_num_rows($res1) == 0) {
 			 die ("<p><b>Sorry, there are no data records in this database, or database is bad format</b>");
 	     }
-	     print "<h3>Record type mappings</h3>Code on left, in <b>$sourcedb</b>, maps to record type in <b>$dbPrefix" . HEURIST_DBNAME."</b><p>";// . "<p>";
+	     print "<h3>Record type mappings</h3>[RT code] <b>$sourcedb</b> ==> <b>$dbPrefix" . HEURIST_DBNAME."</b><p>";// . "<p>";
 	     print "<table>";
 	     while ($row1 = mysql_fetch_array($res1)) {
      		$rt=$row1[0]; //0=rec_RecTypeID
@@ -209,7 +214,7 @@
 			 }
 
        		print "<tr><td>[ $rt ] ".$row1[1]." </td>".
-       				"<td><select id='cbr$rt' name='cbr$rt' class='rectypes'><option id='or0' value='0'></option>".$selopts."</select></td></tr>\n";
+       				"<td>==> <select id='cbr$rt' name='cbr$rt' class='rectypes'><option id='or0' value='0'></option>".$selopts."</select></td></tr>\n";
 		 } // loop through record types
 		 print "</table>";
 
@@ -221,7 +226,7 @@
 		 $entnames = $entnames['names'];
 		 $seloptions = createOptions("od", $entnames);
 
-		 print "<h3>Field type mappings</h3>Code on left, in <b>$sourcedb</b>, maps to field type in <b>$dbPrefix" . HEURIST_DBNAME."</b><p>";// . "<p>";
+		 print "<h3>Field type mappings</h3>[FT code] <b>$sourcedb</b> ==> <b>$dbPrefix" . HEURIST_DBNAME."</b><p>";// . "<p>";
 		 if($is_h2){
 	     	$query1 = "SELECT DISTINCT `rd_type`,`rdt_name`,`rdt_type` FROM `$sourcedb`.`rec_details`,`$sourcedb`.`rec_detail_types` ".
 	     		"where `rd_type`=`rdt_id`";
@@ -246,7 +251,7 @@
 			 }
 
 			 print "<tr><td>[ $ft ] - ".$row1[2]." ".$row1[1]." </td>".  //2=dty_Type
-			 		"<td><select id='cbd$ft' name='cbd$ft' class='detailTypes'><option id='od0' value='0'></option>".
+			 		"<td>==> <select id='cbd$ft' name='cbd$ft' class='detailTypes'><option id='od0' value='0'></option>".
 			 		$selopts."</select></td></tr>\n";
 		 } // loop through field types
          print "</table>";
@@ -273,7 +278,7 @@
 		 $seloptions = createOptions("ot", $entnames);
 
 
-		 print "<h3>Term mappings $type</h3>Code on left, in <b>$sourcedb</b>, maps to field type in <b>$dbPrefix" . HEURIST_DBNAME."</b><p>";// . "<p>";
+		 print "<h3>Term mappings ($type"."s)"."</h3>[Term code] <b>$sourcedb</b> ==> <b>$dbPrefix" . HEURIST_DBNAME."</b><p>";// . "<p>";
 	     // Get the term mapping, by default assume that the code is unchanged so select the equivalent term if available
 		 if($is_h2){
 	     	$query1 = "SELECT DISTINCT `rdl_id`,`rdl_id`,`rd_val` FROM `$sourcedb`.`rec_details`,`$sourcedb`.`rec_detail_lookups` ".
@@ -305,7 +310,7 @@
 			 }
 
        		print "<tr><td>[ $tt ] ".$row1[2]." </td>".
-       				"<td><select id='cbt$tt' name='cbt$tt' class='terms'><option id='ot0' value='0'></option>".
+       				"<td>==> <select id='cbt$tt' name='cbt$tt' class='terms'><option id='ot0' value='0'></option>".
        				$selopts."</select></td></tr>\n";
 		 } // loop through terms
          print "</table>";
@@ -727,7 +732,7 @@ print "<br>It reports in form: source RecID => now target pointer RecID => in Re
 			}
 
 			if(count($notfound_rec)>0){
-print "<br>These records are specified as pointers in source database but they were not added into target database:<br>";
+                print "<br>These records are specified as pointers in source database but they were not added into target database:<br>";
 				print implode('<br>',$notfound_rec);
 			}
 
@@ -740,7 +745,9 @@ print "<br>These records are specified as pointers in source database but they w
 			}
 		}
 
-		print "<br><br><br><h3>Transfer completed</h3>";
+		print "<br><br><br><h3>Transfer completed - <a href=../../index.php?db=" . HEURIST_DBNAME . 
+              " title='Return to the main search page of the current database'><b>return to main page</b></a></h3>";
+              
 	} // function doTransfer
 
     /**

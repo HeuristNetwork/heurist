@@ -103,7 +103,7 @@ render: function() {
 	// heurist bookmarklet
 	var dd = document.createElement("div");
 	dd.id = "topline";
-	dd.innerHTML = (! HEURIST_url_bib_id ? "Highlight text that you want to include in your record<br/> then choose one of the following:" : "");
+	dd.innerHTML = (! HEURIST_url_bib_id ? "Highlight text that you want to include in your record,<br/> then choose one of the following:" : "");
     d.appendChild(dd);
 
 	var t = d.appendChild(document.createElement("table"));
@@ -199,7 +199,9 @@ render: function() {
         };
         td.appendChild(button);
                         
-       // "Highlighted text is copied to the scratchpad from where it can be dragged to other fields. <br/>DOI, ISBN, ISSN are extracted and inserted as fields."
+       // IREK TODO: Include this text as a help text in lighter font
+       // "Text is copied to the scratchpad from where it can be dragged to other fields. 
+       // <br/>DOI, ISBN, ISSN are extracted and inserted as fields."
        
 	}
 

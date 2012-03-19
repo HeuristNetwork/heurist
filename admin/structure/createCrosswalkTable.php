@@ -416,7 +416,7 @@ function processAction(rtyID, action, rectypeName) {
 		importPending = true;
 		document.getElementById("importIcon"+rtyID).src = "../../common/images/mini-loading.gif";
 		curTime = new Date();
-		logHeader = '<p style="color:green; font-weight:bold">'+"Attemp importing rectype "+rectypeName+" at "+ curTime +"</p>";
+		logHeader = "Importing record type " + '<p style="color:green; font-weight:bold">' + rectypeName + " at "+ curTime +"</p>";
 	}
 	var xmlhttp;
 	if (action.length == 0) {

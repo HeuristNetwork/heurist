@@ -50,6 +50,11 @@ mysql_connection_db_insert(DATABASE); // Connect to the current database (the on
 
 $res = mysql_query("select sys_dbRegisteredID, sys_dbName, sys_dbDescription, sys_OwnerGroupID from sysIdentification where `sys_ID`='1'");
 
+// Start by hiding the registration/title edit form
+echo '<script type="text/javascript">';
+echo 'document.getElementById("registerDBForm").style.display = "none";';
+echo '</script>';
+
 if (!$res) { // Problem reading current registration ID
     $msg = "Unable to read database identification record, this database might be incorrectly set up. \n" .
     "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice.";
@@ -64,7 +69,16 @@ $dbDescription = $row[2];
 $ownerGrpID = $row[3];
 
 // Look up current user email from sysUGrps table in the current database (the one being registered)
+// Registering user must be a real user so that there is an email address and password to attach to the registration record. 
+// which rules out using the Database owners group. Since other users will be unable to login and edit this record, it's better 
+// to only allow the creator (user #2) to register the db, to avoid problems down the track knowing who registered it.
 $user_id=get_user_id();
+if ($user_id !=2) {
+    print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap>".
+        "<div id=errorMsg><span>Only the owner/creator of the database (user #2) may register the database. ".
+        "<br>This user will also own (and be able to edit) the registration record in the heuristscholar.org master index database</span><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
+    return;
+}
 $res = mysql_query("select ugr_eMail, ugr_Password,ugr_Name,ugr_FirstName,ugr_LastName from sysUGrps where `ugr_ID`='$user_id'");
 if(mysql_num_rows($res) == 0) {
 	echo "<div class=wrap><div id=errorMsg><span>Non-critical warning</span>Unable to read your email address from sysUGrps. Note: not currently supporting deferred users database</div></div>";

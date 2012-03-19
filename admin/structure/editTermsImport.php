@@ -36,7 +36,7 @@
 		if(array_key_exists('error', $res)){
 			$failure_msg = $res['error'];
 		}else{
-			$success_msg = "Import successefull";
+			$success_msg = "Record type imported";
 			$res_array = json_format($res);
 		}
 	}
