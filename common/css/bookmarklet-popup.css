@@ -6,7 +6,37 @@
  * @package Heurist academic knowledge management system
  * @todo
  */
-
+input[type="button"], input[type="submit"], select {
+	text-transform: uppercase !important;
+	display:inline-block !important;
+	color: #666;
+	cursor: pointer !important;
+	font-weight:bold !important;
+	background-color:transparent !important;
+	border:1px solid RGBA(0,0,0,0.2) !important;
+	-moz-border-radius:3px !important;
+	-webkit-border-radius:3px !important;
+	border-radius:3px !important;
+	padding:0 3px !important;
+	height:20px !important;
+	line-height:19px !important;
+	font: 10px arial, helvetica, clean, sans-serif;
+}
+div.heurist option, div.heurist option:checked {
+	background:none repeat scroll 0 0 #FFF;
+	color: #666;
+}
+input[type="button"]:hover, input[type="submit"]:hover {
+	background-color:RGBA(0,0,0,0.1) !important;
+	border:1px solid RGBA(0,0,0,0.4) !important;
+	box-shadow: 0 1px 2px RGBA(0,0,0,0.4) inset !important;
+	text-decoration:none !important;
+	color:#000 !important;
+}
+textarea {
+	background-color:#FFF;
+	color:#666;
+}
 div.heurist {
 	width: 370px!important;
 	height: 240px!important;
@@ -25,7 +55,7 @@ div.heurist {
 	background:url("../images/backgrounds/thumbnail_bg.png") repeat-x scroll 0 bottom #F6F6F6 !important;
 	border:3px solid #FFFFFF !important;
 }
-div.heurist td{
+div.heurist td {
 	padding:0 5px !important;
 	border:none;
 }
@@ -35,7 +65,6 @@ div.heurist * {
 	text-align: left!important;
 	font-weight: bold!important;
 }
-
 div.heurist div.bookmarklet_header {
 	background-attachment:scroll!important;
 	background-image:url("../images/backgrounds/banner_bg.png")!important;
@@ -54,7 +83,6 @@ div.heurist div.bookmarklet_header {
 div.heurist div.bookmarklet_header span {
 	font-weight: normal!important;
 }
-
 div.heurist div.bookmarklet_close {
 	-moz-border-radius:15px 15px 15px 15px!important;
 	-webkit-border-radius:15px 15px 15px 15px!important;
@@ -75,16 +103,14 @@ div.heurist div.bookmarklet_close {
 	top:-14px!important;
 	width:14px!important;
 }
-
 div.heurist div#topline {
 	padding:10px!important;
 }
-
 div.heurist select#rectype-select {
-	width: 230px!important;
-	margin-right: 10px!important;
+	height: 20px !important;
+	margin: 3px 10px 0 0 !important;
+	width: 230px !important;
 }
-
 div.heurist a.imglnk {
 	margin: 0px!important;
 }
@@ -92,7 +118,6 @@ div.heurist a {
 	color: blue!important;
 	text-decoration: underline!important;
 }
-
 div.heurist img {
 	border: none!important;
 	vertical-align: text-bottom!important;
@@ -101,14 +126,12 @@ div.heurist img {
 div.heurist nobr img {
 	vertical-align: middle!important;
 }
-
 div.heurist div#hr-div {
 	height: 1px!important;
 	width: 100%!important;
 	background-color: black!important;
 	margin: 25px 0 15px 0!important;
 }
-
 div.heurist td input, div.heurist td a {
 	margin-right: 0!important;
 }
@@ -122,4 +145,10 @@ div.heurist td input, div.heurist td a {
 	right:0!important;
 	color: #6A7C99!important;
 	font-weight: normal !important;
-	}
+}
+td p.prompt {
+	color: #999999 !important;
+	font-size: 11px !important;
+	font-weight: normal !important;
+	padding: 10px 0 0 !important;
+}

@@ -527,7 +527,7 @@ a#dbSearch-link div#dbname:hover {padding-right:10px; background-color:RGBA(100,
 	line-height:19px !important;
 	font: 10px arial,helvetica,clean,sans-serif;
 	}
-	button {height:auto !important; line-height:16px !important}
+button {height:auto !important; line-height:16px !important}
 #my-records-button:hover, #all-records-button:hover, #add-record-link:hover, #new-entry-button:hover, .button:hover, button:hover, input[type="button"]:hover, input[type="submit"]:hover {
 	background-color:RGBA(0,0,0,0.1) !important;
 	border:1px solid RGBA(0,0,0,0.4) !important;

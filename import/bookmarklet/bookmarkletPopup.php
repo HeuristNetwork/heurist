@@ -172,7 +172,6 @@ render: function() {
         // Add the page as the default type, Web page / Internet bookmark
 		tr = t.appendChild(document.createElement("tr"));
 		td = tr.appendChild(document.createElement("td"));
-		td = tr.appendChild(document.createElement("td"));
 		button = document.createElement("input");
 		button.type = "button";
 		button.value = "Bookmark as web page";
@@ -183,11 +182,12 @@ render: function() {
         td = tr.appendChild(document.createElement("td"));
         td.colSpan = "2";
         td.style.height = "20px";
+		td.innerHTML = "or: ";
 
         // specify rectype
-        td.innerHTML = "<p/>or: ";
+		tr = t.appendChild(document.createElement("tr"));
+		td = tr.appendChild(document.createElement("td"));
         td.appendChild(Heurist.renderrectypeSelect());
-        td = tr.appendChild(document.createElement("td"));
         var button = document.createElement("input");
         button.id = "add-as-type-button";
         button.type = "button";
@@ -198,11 +198,11 @@ render: function() {
             if (r) Heurist.bookmark(r);
         };
         td.appendChild(button);
-                        
-       // IREK TODO: Include this text as a help text in lighter font
-       // "Text is copied to the scratchpad from where it can be dragged to other fields. 
-       // <br/>DOI, ISBN, ISSN are extracted and inserted as fields."
-       
+		
+		tr = t.appendChild(document.createElement("tr"));
+		td = tr.appendChild(document.createElement("td"));
+		td.colSpan = "2";
+ 		td.innerHTML = "<p class=\"prompt\">Text is copied to the scratchpad from where it can be dragged to other fields. DOI, ISBN, ISSN are extracted and inserted as fields.</p>"
 	}
 
 	// link importer
