@@ -13,7 +13,7 @@
 
 <html>
  <head>
-  <title>ACL/SHSSERI Password Reset</title>
+  <title>Heurist Password Reset</title>
   <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/newshsseri.css">
  </head>
  <body>
@@ -91,9 +91,7 @@ if (!$_REQUEST['username']  ||  $error) {
 <?= $error ?>
 <form method="get">
  Enter username / email:
- <input type="text" name="username" size="20">
- <br>
- <br>
+ <input type="text" name="username" size="20"> &nbsp;&nbsp;
  <input type="submit" value="reset password">
 </form>
 <?php

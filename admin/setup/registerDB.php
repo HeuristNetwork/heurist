@@ -17,7 +17,10 @@ if (!is_logged_in()) {
 
 // User must be system administrator or admin of the owners group for this database
 if (!is_admin()) {
-    print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to register a database</span><p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME." target='_top'>Log out</a></p></div></div></body></html>";
+    print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head>".
+          "<body><div class=wrap><div id=errorMsg><span>You must be logged in as system administrator to register a database</span>".
+          "<p><a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME.
+          " target='_top'>Log out</a></p></div></div></body></html>";
     return;
 }
 ?>
@@ -105,7 +108,7 @@ if (isset($dbID) && ($dbID != 0)) { // already registered, display info and link
     echo "<div class='input-row'><div class='input-header-cell'>Description:</div><div class='input-cell'>". $dbDescription . "</div></div>";
     $url="http://heuristscholar.org/h3/records/edit/editRecord.html?recID=".$dbID."&db=H3MasterIndex";
     echo "<div class='input-row'><div class='input-header-cell'>Collection metadata:</div><div class='input-cell'>
-    <a href=$url target=_blank>Click here to edit</a> (login as person who registered this database)
+    <a href=$url target=_blank>Click here to edit</a> (login as person who registered this database - note: use EMAIL ADDRESS as username)
     </div></div>";
 } else { // New registration, display registration form
 	echo '<script type="text/javascript">';

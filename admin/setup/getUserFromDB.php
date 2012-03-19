@@ -15,7 +15,7 @@
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 	if (! is_admin()) {
-		print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href=".HEURIST_URL_BASE.">Return to Heurist</a></p></body></html>";
+		print "<html><body><p>You must be an adminstrator to access user information</p><p><a href=".HEURIST_URL_BASE.">Return to Heurist</a></p></body></html>";
 		return;
 	}
 ?>

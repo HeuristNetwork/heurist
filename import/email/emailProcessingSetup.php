@@ -20,7 +20,7 @@ if (! is_logged_in()) {
 }
 
 if(!is_admin()){
-    print "<html><body><p>You do not have sufficient privileges to access this page</p><p><a href=../../php/login.php?logout=1>Log out</a></p></body></html>";
+    print "<html><body><p>You msut be an adminstrator to access email processing setup</p><p><a href=../../php/login.php?logout=1>Log out</a></p></body></html>";
     exit;
 }
 

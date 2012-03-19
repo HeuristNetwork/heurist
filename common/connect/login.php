@@ -97,7 +97,7 @@ if (@$_REQUEST['username']  or  @$_REQUEST['password']) {
 
 
 	} else {
-		$LOGIN_ERROR = 'Incorrect Username / Password';
+		$LOGIN_ERROR = 'Incorrect Username / Password - try email address for user name';
 	}
 
 }
@@ -147,9 +147,9 @@ if (@$_REQUEST['logout']) {
 
 
 <div id=page style="padding: 20px;">
-<a id=home-link href='../../'>
+<a id=home-link href='../../'></a>
 <div id=logo title="Click the logo at top left of any Heurist page to return to your Favourites"></div>
-</a>
+
 <div><h1>PLEASE LOGIN or <a href='../../' style='font-size:16px'>SEARCH</a></h1></div>
 
 <form name=mainform method=post>
@@ -169,7 +169,7 @@ if (@$_REQUEST['logout']) {
 <table cellpadding=3 id="login-table">
 	<tr class="input-row">
 	<td class="input-header-cell">Database name</td>
-	<td class="input-cell"><?php echo HEURIST_DBNAME; ?></td>
+	<td class="input-cell"><b><?php echo HEURIST_DBNAME; ?></b></td>
 	</tr>
 
 	<tr class="input-row">
@@ -179,14 +179,20 @@ if (@$_REQUEST['logout']) {
 
 	<tr class="input-row">
 	<td class="input-header-cell">Username</td>
-	<td class="input-cell"><input type="text" name="username" id="username" size="20" class="in"></td>
+	<td class="input-cell"><input type="text" name="username" id="username" size="20" class="in"><br/>email address by default</td>
 	</tr>
 
    <tr class="input-row">
     <td class="input-header-cell">Password</td>
-    <td class="input-cell"><input type="password" name="password" size="20" class="in"></td>
+    <td class="input-cell"><input type="password" name="password" size="20" class="in"><br/>case sensitive</td>
    </tr>
 
+   <tr class="input-row">
+    <td class="input-header-cell"></td>
+    <td class="input-cell"></td>
+   </tr>
+
+   
    <tr class="input-row">
     <td class="input-header-cell"></td>
     <td class="input-cell"><input type="radio" name="session_type" value="public">Expire on browser close (public computer)<br>
@@ -206,7 +212,7 @@ if (@$_REQUEST['logout']) {
  <p align=center>
   Forgotten your password?
   &nbsp;
-  <a href='<?=HEURIST_URL_BASE?>admin/ugrps/resetUserPassword.php?db=<?=HEURIST_DBNAME?>' onclick="window.open(this.href,'','status=0,scrollbars=0,width=400,height=200'); return false;">Click here to reset your password</a>
+  <a href='<?=HEURIST_URL_BASE?>admin/ugrps/resetUserPassword.php?db=<?=HEURIST_DBNAME?>' onclick="window.open(this.href,'','status=0,scrollbars=0,width=500,height=200'); return false;">Click here to reset your password</a>
  </p>
 
 

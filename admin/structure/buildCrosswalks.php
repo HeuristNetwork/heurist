@@ -48,11 +48,15 @@
 	// Verify credentials of the user and check that they are an administrator, check no-one else is trying to
 	// change the definitions at the same time
 
-	// Requires admin user, access to definitions though get_definitions is open
-	if (! is_admin()) {
+    if(!isset($isNewDB)) { $isNewDB = false; }
+    $isExistingDB = !$isNewDB; // for clarity
+    
+	// Requires admin user if updating current database, even though get_definitions is open
+    // If it's processing the SQL file for a new database it does not  
+	if ((! is_admin()) && $isExistingDB) {
 		print "<html><head><link rel=stylesheet href='../../common/css/global.css'>
 		</head><body><div class=wrap><div id=errorMsg>
-		<span>You do not have sufficient privileges to access this page</span><p>
+		<span>You must be an administrator to get structure elements from another database</span><p>
 		<a href=".HEURIST_URL_BASE."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME.
 		" target='_top'>Log out</a></p></div></div></body></html>";
 		return;
@@ -69,14 +73,11 @@
 	global $dbname;
 	global $tempDBName;
 
-	if(!isset($isNewDB)) { $isNewDB = false; }
-	$isExistingDB = !$isNewDB; // for clarity
-
 	if($isNewDB)
 	{ // For new database, insert coreDefinitions.txt directly into tables, no temp database required
 		$tempDBName =$newname;
 		$dbname = $newname;
-	} Else { // existing database needs temporary database to store data read and allow selection
+	} else { // existing database needs temporary database to store data read and allow selection
 		$dbname = DATABASE;
 		$isNewDB = false;
 		$tempDBName = "temp_".$dbname;
