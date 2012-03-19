@@ -1,0 +1,85 @@
+<!--
+/**
+* repMenu.html
+*
+* Dialog to publish smarty report
+*
+* @version 2012.0320
+* @author: Artem Osmakov
+*
+* @copyright (C) 2005-2011 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+* @todo
+**/
+
+-->
+<html>
+
+<head>
+ <link rel="stylesheet" href="../../common/css/global.css">
+ <title>Publish report</title>
+ <script>
+
+   function build_links() {
+     if (top.HEURIST  && top.HEURIST.search)
+     {
+
+			var mode = top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"];
+
+			top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+			var template_file = top.HEURIST.parameters.template_file;
+
+	 		var currentSearchQuery =
+	 				(mode=="selected")
+						?top.HEURIST.currentQuery_sel
+						:((mode=="all")?top.HEURIST.currentQuery_all:top.HEURIST.currentQuery_main);
+
+			if(currentSearchQuery)
+			{
+
+				var surl = top.HEURIST.baseURL + "viewers/smarty/showReps.php?"+
+					currentSearchQuery + '&publish=1&debug=0&template='+template_file;
+
+				document.getElementById("linkOpenInNewWindow").href = surl;
+
+     			document.getElementById("code-textbox1").value = surl;
+     			document.getElementById("code-textbox2").value =
+('<script type="text/javascript" src="'+surl+'&mode=js"><'+'/script>'+
+'<noscript>'+
+'<iframe width="80%" height="70%" frameborder="0" src="'+surl+'">'+
+'</iframe>'+
+'</noscript>');
+
+
+	 		}
+	 }
+   }
+ </script>
+</head>
+
+<body onLoad="build_links()" width="600" height="350" class="popup">
+
+<p>
+Note: The URL will only show records to which the viewer has access.
+External viewers will not be able to see any records unless they are marked as Public visibility
+</p>
+
+<a href="#" id="linkOpenInNewWindow" target=_new onClick="setTimeout(window.close, 200);"><b>Open in new window</b></a>
+
+<blockquote>
+	Copy to clipboard by hitting Ctrl-C or [Enter]
+</blockquote>
+   <br>
+   URL:
+  <textarea readonly style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; font-size: 10px; width: 100%; height: 60px;"
+    id="code-textbox1" onClick="select(); if (window.clipboardData) clipboardData.setData('Text', value);"></textarea>
+
+   <br>
+   Javascript wrap:
+  <textarea readonly style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; font-size: 10px; width: 100%; height: 100px;"
+    id="code-textbox2" onClick="select(); if (window.clipboardData) clipboardData.setData('Text', value);"></textarea>
+
+</body>
+</html>

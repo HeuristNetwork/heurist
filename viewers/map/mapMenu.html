@@ -1,7 +1,8 @@
 <!--
-
 /**
 * mapMenu.html
+*
+* Dialog to publish map
 *
 * @version 2011.0615
 * @author: Artem Osmakov
@@ -25,26 +26,6 @@
      if (top.HEURIST  && top.HEURIST.search)
      {
 
-/*
-			var p = top.HEURIST.parameters;
-
-			var db = p['db'] ? p['db'] :
-					(top.HEURIST.database && top.HEURIST.database.name ? top.HEURIST.database.name : "");
-
-			var query_string = 'ver='+(p['ver'] || "") +
-									'&w='+(p['w'] || "") +
-									'&stype='+(p['stype'] || "") +
-									'&db='+(p['db'] || "") +
-									'&limit='+top.HEURIST.search.resultsPerPage;
-
-			if(top.HEURIST.search.currentPage>0){
-				query_string = query_string + '&offset=' +
-					top.HEURIST.search.currentPage*top.HEURIST.search.resultsPerPage;
-			}
-
-
-     		query_string = encodeURI(query_string);
-*/
 			var mode = top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"];
 	 		var currentSearchQuery =
 	 				(mode=="selected")
@@ -70,7 +51,7 @@
  </script>
 </head>
 
-<body onLoad="build_links()" width=600 height=450 class="popup">
+<body onLoad="build_links()" width=600 height=350 class="popup">
 
 <p>
  Note: records will only appear on the map if they include geographic objects.

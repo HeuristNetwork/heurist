@@ -33,6 +33,7 @@ require_once('libs.inc.php');
 
 	$_REQUEST["f"] = 1; //always search
 
+	$isJSwrap = (array_key_exists("mode", $_REQUEST) && $_REQUEST["mode"]=="js"); //use javascript wrap
 
 	if( !array_key_exists("limit", $_REQUEST) ){ //not defined
 
@@ -78,7 +79,7 @@ require_once('libs.inc.php');
 
 	$smarty->assign('results', $results);
 
-	ini_set( 'display_errors' , 'false');// 'stdout' );
+	ini_set( 'display_errors' , 'false'); // 'stdout' );
 	$smarty->error_reporting = 0;
 
 	if($template_body)
@@ -116,10 +117,17 @@ require_once('libs.inc.php');
 		if(!$template_file){
 			$template_file = 'test01.tpl';
 		}
-//error_log(">>>>>>>>PRINT".$template_file);
+
+//error_log(">>>>>>>>PRINT ".$template_file."     >>>>>".$isJSwrap);
 		$smarty->debugging = false;
 		$smarty->error_reporting = 0;
+		if($isJSwrap){
+			$smarty->registerFilter('output','add_javascript_wrap5');
+		}
 		$smarty->display($template_file);
+
+		//$smarty->unregisterFilter('post','add_javascript_wrap');
+
 	}
 
 	//$tpl_vars = $smarty->get_template_vars();
@@ -139,6 +147,16 @@ require_once('libs.inc.php');
 	//END DEBUG stuff
 
 exit();
+
+
+//
+// wrap smarty output into javascript function
+//
+function add_javascript_wrap5($tpl_source, Smarty_Internal_Template $template)
+{
+	$tpl_source = str_replace("\n","",$tpl_source);
+    return "document.write('".htmlspecialchars($tpl_source, ENT_QUOTES)."');";
+}
 
 //
 // convert record or detail name string to PHP applicable variable name (index in smarty variable)
