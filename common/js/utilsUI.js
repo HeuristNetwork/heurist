@@ -1356,7 +1356,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 * @return selObj an HTML select object node
 **/
 	createTermSelect: function(termIDTree, disabledTermIDsList, termLookup, defaultTermID) { // Creates the preview
-		return createTermSelectExt(termIDTree, disabledTermIDsList, termLookup, defaultTermID, false); // Creates the preview
+		return top.HEURIST.util.createTermSelectExt(termIDTree, disabledTermIDsList, termLookup, defaultTermID, false); // Creates the preview
 	},
 	createTermSelectExt: function(termIDTree, disabledTermIDsList, termLookup, defaultTermID, isAddFirstEmpty) { // Creates the preview
 		var selObj = document.createElement("select");
