@@ -713,7 +713,7 @@ $determinationCodes = array(	0 =>	"Unknown",
 							);
 
 $profileCodes = array(	0 =>	"Flat",
-						1 =>	"Bezier",
+						1 =>	"Central",
 						2 =>	"Slow Start",
 						3 =>	"Slow Finish"
 						);
