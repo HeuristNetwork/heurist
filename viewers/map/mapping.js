@@ -406,6 +406,7 @@ if (typeof mxn.LatLonPoint == "function") {
 				if (bounds) { //extent was defined as given parameter
 					tm.map.setCenterAndZoom(bounds.getCenter(), tm.map.getZoomLevelForBoundingBox(bounds));
 				} else {
+					/*
 					var mapables = 0, markers = 0;
 					for (var i = 0; i < tm.datasets.ds0.items.length; i++) {
 						var type = tm.datasets.ds0.items[i].getType();
@@ -415,7 +416,7 @@ if (typeof mxn.LatLonPoint == "function") {
 							markers++;
 						}
 						mapables++
-					}
+					}*/
 					for (i = 0; i < M.mapdata.layers.length; ++i) {
 						var layer = M.mapdata.layers[i];
 						var layerbnd = layer.extent = M.getImageLayerExtent(layer['extent']);
@@ -431,8 +432,8 @@ if (typeof mxn.LatLonPoint == "function") {
 					}
 
 
-					//if (mapables == 1 && markers == 1){	tm.map.setZoom(tm.opts.mapZoom);
-					if (markers>0 && tm.mapBounds && tm.mapBounds.sw){
+					//if (mapables == 1 && markers == 1){	tm.map.setZoom(tm.opts.mapZoom);  markers>0 &&
+					if (tm.mapBounds && tm.mapBounds.sw){
 						tm.map.setCenterAndZoom(tm.mapBounds.getCenter(), tm.map.getZoomLevelForBoundingBox(tm.mapBounds));
 					}else{
 						tm.map.setZoom(tm.opts.mapZoom);
