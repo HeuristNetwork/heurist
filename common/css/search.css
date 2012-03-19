@@ -114,6 +114,9 @@ a {
 	padding-left: 10px;
 	text-align: left !important;
 	text-transform: uppercase;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 .toolboxheading {
 	font-size: 140%;
@@ -2259,15 +2262,16 @@ div.recorddiv:hover > #recordID {
 	display:none;
 }
 #pageNavCount {
-	height: 7px;
-	padding: 4px 0px 8px;
-	right: 10px;
+	height: 10px;
+	padding: 6px 5px;
+	right: 0;
 	text-align: right;
-	top: 1px;
+	top: 0px;
 	z-index: 1;
-	float:right;
-	background:none !important;
-	white-space:nowrap
+	float: right;
+	background: none !important;
+	white-space: nowrap;
+	background: none repeat scroll 0 0 #DCDFE6 !important;
 }
 #pageNavCount span.nav a, #pageNavCount span.nav {
 	color:#2D2D2D;
