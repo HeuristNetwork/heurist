@@ -1328,6 +1328,23 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 		};
 	}(),
 
+	/**
+	* create and add option to select element
+	*/
+	addoption: function(sel, value, text)
+	{
+				var option = document.createElement("option");
+				option.text = text;
+				option.value = value;
+				try {
+					// for IE earlier than version 8
+					sel.add(option, sel.options[null]);
+				}catch (ex2){
+					sel.add(option,null);
+				}
+				return option;
+	},
+
 /**
 * Helper function that creates a select HTML object filled with an option element for each term "depth first"
 * tagged with class depthN and termHeader according to the terms tree depth and if it's id in in the headerList.
@@ -1339,6 +1356,9 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 * @return selObj an HTML select object node
 **/
 	createTermSelect: function(termIDTree, disabledTermIDsList, termLookup, defaultTermID) { // Creates the preview
+		return createTermSelectExt(termIDTree, disabledTermIDsList, termLookup, defaultTermID, false); // Creates the preview
+	},
+	createTermSelectExt: function(termIDTree, disabledTermIDsList, termLookup, defaultTermID, isAddFirstEmpty) { // Creates the preview
 		var selObj = document.createElement("select");
 		var temp = ( disabledTermIDsList instanceof(Array) ?
 						disabledTermIDsList : (typeof(disabledTermIDsList) === "string" && disabledTermIDsList.length > 0 ?
@@ -1389,7 +1409,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 					opt.selected = true;
 				}
 					if(optgroup==null){
-				selObj.appendChild(opt);
+						selObj.appendChild(opt);
 					}else{
 						optgroup.appendChild(opt);
 					}
@@ -1402,6 +1422,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 				}
 			}
 		}
+
+		if(isAddFirstEmpty){
+			top.HEURIST.util.addoption(selObj, '', '');
+		}
+
 		createSubTreeOptions(null, 0,termIDTree, termLookup, defaultTermID);
 		if (!defaultTermID) selObj.selectedIndex = 0;
 		return selObj;
@@ -1420,23 +1445,6 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 	*/
 	isempty: function(obj){
 		return ( top.HEURIST.util.isnull(obj) || (obj==="") || (obj==="null") );
-	},
-
-	/**
-	* create and add option to select element
-	*/
-	addoption: function(sel, value, text)
-	{
-				var option = document.createElement("option");
-				option.text = text;
-				option.value = value;
-				try {
-					// for IE earlier than version 8
-					sel.add(option, sel.options[null]);
-				}catch (ex2){
-					sel.add(option,null);
-				}
-				return option;
 	},
 
 	/**

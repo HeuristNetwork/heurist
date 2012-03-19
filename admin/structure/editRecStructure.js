@@ -328,7 +328,9 @@ function EditRecStructure() {
 
 
                     // Default value
-                    '<div class="input-row"><div class="input-header-cell">Default Value:</div><div class="input-cell"><input id="ed'+rst_ID+'_rst_DefaultValue" title="Default Value"/></div></div>'+
+                    '<div class="input-row"><div class="input-header-cell">Default Value:</div><div class="input-cell">'+
+                    '<span class="input-cell" id="termsDefault" name="def'+rst_ID+'_rst_DefaultValue" class="dtyValue"></span>'+
+                    '<input id="ed'+rst_ID+'_rst_DefaultValue" title="Default Value"/></div></div>'+
 
 					// Status
                     '<div class="input-row"><div class="input-header-cell">Status:</div>'+
@@ -762,6 +764,9 @@ function EditRecStructure() {
 					edt.parentNode.parentNode.style.display = "none";
 					//show disable jsontree
 			}else if(fieldnames[k] === "rst_TermIDTreeNonSelectableIDs"){
+
+				var edt_def = Dom.get('ed'+rst_ID+'_rst_DefaultValue');
+
 				if(rst_type === "enum" || rst_type === "relmarker" || rst_type === "relationtype"){
 					//show filter jsontree
 					edt.parentNode.parentNode.style.display = "block";
@@ -775,12 +780,17 @@ function EditRecStructure() {
 */
 					recreateTermsPreviewSelector(rst_type,
 						top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_JsonTermIDTree],
-						top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_TermIDTreeNonSelectableIDs]);
+						top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_TermIDTreeNonSelectableIDs],
+						edt_def.value); //default value
 
 					//editedTermTree, editedDisabledTerms);
+					Dom.setStyle(edt_def, "visibility", "hidden");
 
 				}else{
 					edt.parentNode.parentNode.style.display = "none";
+					Dom.setStyle(edt_def, "visibility", "visible");
+					var el = document.getElementById("termsDefault");
+					Dom.setStyle(el, "visibility", "hidden");
 				}
 
 			}else if(fieldnames[k] === "rst_PtrFilteredIDs"){
@@ -1577,6 +1587,17 @@ editStructure.initTabDesign(document.getElementById("ed_rty_ID").value);
 function _preventSel(event){
 		event.target.selectedIndex=0;
 }
+function _setDefTermValue(event){
+
+	var el = event.target,
+		name = el.parentElement.attributes.item('id').nodeValue;
+
+	name = name.substr(3);
+
+	var edt_def = Dom.get('ed'+name);
+	edt_def.value =  event.target.value;
+}
+
 /**
 * recreateTermsPreviewSelector
 * creates and fills selector for Terms Tree if datatype is enum, relmarker, relationtype
@@ -1584,7 +1605,7 @@ function _preventSel(event){
 * @allTerms - JSON string with terms
 * @disabledTerms  - JSON string with disabled terms
 */
-function recreateTermsPreviewSelector(datatype, allTerms, disabledTerms ) {
+function recreateTermsPreviewSelector(datatype, allTerms, disabledTerms, defvalue ) {
 
 				allTerms = Hul.expandJsonStructure(allTerms);
 				disabledTerms = Hul.expandJsonStructure(disabledTerms);
@@ -1601,25 +1622,32 @@ function recreateTermsPreviewSelector(datatype, allTerms, disabledTerms ) {
 					parent.removeChild( el_sel );
 					*/
 
-					var parent = document.getElementById("termsPreview"),
-						i;
-					for (i = 0; i < parent.children.length; i++) {
-						parent.removeChild(parent.childNodes[0]);
-					}
+					var parent1 = document.getElementById("termsPreview"),
+						parent2 = document.getElementById("termsDefault");
 
-					// add new select (combobox)
-					if(datatype === "enum") {
-						el_sel = Hul.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup['enum'], null);
-						el_sel.style.backgroundColor = "#cccccc";
-						el_sel.onchange =  _preventSel;
-						parent.appendChild(el_sel);
-					}
-					else if(datatype === "relmarker" || datatype === "relationtype") {
-						el_sel = Hul.createTermSelect(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup.relation, null);
-						el_sel.style.backgroundColor = "#cccccc";
-						el_sel.onchange =  _preventSel;
-						parent.appendChild(el_sel);
-					}
+					function __recreate(parent, onchangehandler, bgcolor, isdefselector){
+						var i;
+						for (i = 0; i < parent.children.length; i++) {
+							parent.removeChild(parent.childNodes[0]);
+						}
+
+						// add new select (combobox)
+						if(datatype === "enum") {
+							el_sel = Hul.createTermSelectExt(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup['enum'], defvalue, isdefselector);
+							el_sel.style.backgroundColor = bgcolor;
+							el_sel.onchange =  onchangehandler;
+							parent.appendChild(el_sel);
+						}
+						else if(datatype === "relmarker" || datatype === "relationtype") {
+							el_sel = Hul.createTermSelectExt(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup.relation, defvalue, isdefselector);
+							el_sel.style.backgroundColor = bgcolor;
+							el_sel.onchange =  onchangehandler;
+							parent.appendChild(el_sel);
+						}
+					}//end __recreate
+
+					__recreate(parent1, _preventSel, "#cccccc", null, false);
+					__recreate(parent2, _setDefTermValue, "#ffffff", defvalue, true);
 				}
 }
 
@@ -1696,11 +1724,11 @@ function _onAddEditFieldType(dty_ID, dtg_ID){
 					if(rst_type === "enum" || rst_type === "relmarker" || rst_type === "relationtype"){
 						recreateTermsPreviewSelector(rst_type,
 							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_Type.dty_JsonTermIDTree],
-							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_TermIDTreeNonSelectableIDs]);
+							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_TermIDTreeNonSelectableIDs], null);
 					}
 					if(rst_type === "relmarker" || rst_type === "resource"){
 						recreateRecTypesPreview(rst_type,
-							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_PtrTargetRectypeIDs]);
+							top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_PtrTargetRectypeIDs], null);
 					}
 
 					/*detect what group
