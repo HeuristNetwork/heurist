@@ -212,14 +212,17 @@ top.HEURIST.search = {
 		var params = top.HEURIST.parameters;
 		if (params["label"]) {
 			document.getElementById("active-label").innerHTML = params["label"];
+			document.getElementById("active-label").title = params["label"];
 			if (params["label"] == "Favourites") {
 				document.getElementById("results-message").innerHTML = "Click on a record to view details. CTRL click to select multiple records";
 				document.getElementById("results-message").style.display = "block";
 			}
 		} else if (params['q']){
 			document.getElementById("active-label").innerHTML = params['q'];
+			document.getElementById("active-label").title = params['q'];
 		}else{
 			document.getElementById("active-label").innerHTML = "Search results";
+			document.getElementById("active-label").title = params['q'];
 		}
 		iframeElt.style.border = "0";
 		iframeElt.style.width = "0";
@@ -972,12 +975,14 @@ top.HEURIST.search = {
 		}
 		if (params["label"]) {
 			document.getElementById("active-label").innerHTML = params["label"];
+			document.getElementById("active-label").title = params["label"];
 			if (params["label"] == "Favourites") {
 				document.getElementById("results-message").innerHTML = "Click on a record to view details. CTRL click to select multiple records";
 				document.getElementById("results-message").style.display = "block";
 			}
 		} else {
 			document.getElementById("active-label").innerHTML = "Search results";
+			document.getElementById("active-label").title = "Search results";
 		}
 		if (params["description"]) {
 			document.getElementById("search-description").innerHTML = params["description"];
@@ -2396,6 +2401,7 @@ top.HEURIST.search = {
 			//if this is a renamed search or ovewritten search
 			if (sid == svs_ID) {
 				document.getElementById("active-label").innerHTML = newEntry[0];
+				document.getElementById("active-label").title = newEntry[0];
 				savedSearches[i] = newEntry;
 				top.HEURIST.search.fillInSavedSearches();
 				return;
