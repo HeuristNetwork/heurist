@@ -1625,7 +1625,7 @@ function recreateTermsPreviewSelector(datatype, allTerms, disabledTerms, defvalu
 					var parent1 = document.getElementById("termsPreview"),
 						parent2 = document.getElementById("termsDefault");
 
-					function __recreate(parent, onchangehandler, bgcolor, isdefselector){
+					function __recreate(parent, onchangehandler, bgcolor, _defvalue, isdefselector){
 						var i;
 						for (i = 0; i < parent.children.length; i++) {
 							parent.removeChild(parent.childNodes[0]);
@@ -1633,13 +1633,13 @@ function recreateTermsPreviewSelector(datatype, allTerms, disabledTerms, defvalu
 
 						// add new select (combobox)
 						if(datatype === "enum") {
-							el_sel = Hul.createTermSelectExt(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup['enum'], defvalue, isdefselector);
+							el_sel = Hul.createTermSelectExt(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup['enum'], _defvalue, isdefselector);
 							el_sel.style.backgroundColor = bgcolor;
 							el_sel.onchange =  onchangehandler;
 							parent.appendChild(el_sel);
 						}
 						else if(datatype === "relmarker" || datatype === "relationtype") {
-							el_sel = Hul.createTermSelectExt(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup.relation, defvalue, isdefselector);
+							el_sel = Hul.createTermSelectExt(allTerms, disabledTerms, top.HEURIST.terms.termsByDomainLookup.relation, _defvalue, isdefselector);
 							el_sel.style.backgroundColor = bgcolor;
 							el_sel.onchange =  onchangehandler;
 							parent.appendChild(el_sel);

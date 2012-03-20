@@ -155,7 +155,8 @@ exit();
 function add_javascript_wrap5($tpl_source, Smarty_Internal_Template $template)
 {
 	$tpl_source = str_replace("\n","",$tpl_source);
-    return "document.write('".htmlspecialchars($tpl_source, ENT_QUOTES)."');";
+	$tpl_source = str_replace("'","&#039;",$tpl_source);
+    return "document.write('". $tpl_source."');";
 }
 
 //

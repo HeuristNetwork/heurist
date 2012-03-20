@@ -600,6 +600,7 @@ term.id+'\', -1)">&nbsp;&nbsp;all</a>&nbsp;'; //+termsByDomainLookup[parentEleme
 	* Verifies if given term is disabled originally
 	*/
 	function _isDisabledOriginally(term_id){
+		if(_isFilterMode){
 				var index = 0;
 				while(index < disabledTermsListOriginal.length) {
 					if(disabledTermsListOriginal[index] === term_id) {
@@ -607,6 +608,7 @@ term.id+'\', -1)">&nbsp;&nbsp;all</a>&nbsp;'; //+termsByDomainLookup[parentEleme
 					}
 					index++;
 				}
+		}
 		return false;
 	}
 
