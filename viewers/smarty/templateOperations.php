@@ -35,7 +35,7 @@ if($mode){ //opeartion with template files
 
 	//get name of tempalte file
 	$template_file = (array_key_exists('template',$_REQUEST)?  urldecode($_REQUEST['template'])  :null);
-error_log(">>>>>>>>>>".$template_file);
+//error_log(">>>>>>>>>>".$template_file);
 	try{
 
 	switch ($mode) {

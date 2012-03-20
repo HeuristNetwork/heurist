@@ -20,6 +20,7 @@ require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
 require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
+require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 require_once('libs.inc.php');
 
 //error_log(">>>>>>>>>>>>>".print_r($_REQUEST, true));
@@ -208,6 +209,9 @@ function getRecordForSmarty($rec, $recursion_depth){
 				if($key=="rec_RecTypeID"){ //additional field
 					$recTypeID = $value;
 					$record["recTypeName"] = $rtStructs['typedefs'][$value]['commonFields'][ $rtStructs['typedefs']['commonNamesToIndex']['rty_Name'] ];
+				}else if ($key=="rec_ID"){ //load woottext once per record
+
+					$record["recWootText"] = getWootText($value);
 				}
 
 			}
@@ -467,6 +471,35 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID){
 			return null;
 	}
 
+}
+
+//
+// Returns the united woot text
+//
+function getWootText($recID){
+
+	$res = "";
+
+	$woot = loadWoot(array("title"=>"record:".$recID));
+	if(@$woot["success"])
+	{
+		if(@$woot["woot"]){
+
+			$chunks = $woot["woot"]["chunks"];
+			$cnt = count($chunks);
+
+			for ($i = 0; $i < $cnt; $i++) {
+    			$chunk = $chunks[$i];
+    			if(@$chunk["text"]){
+					$res = $res.$chunk["text"];
+				}
+			}//for
+		}
+	}else if (@$woot["errorType"]) {
+		$res = "WootText: ".$woot["errorType"];
+	}
+
+	return $res;
 }
 
 //

@@ -340,6 +340,15 @@ function getRecordHeaderSectionForSmarty($rec, $parentName, $ind, $addrelationfi
 			}
 		} // for
 
+		//add WOOT field
+		$key="WootText";
+		$name_wo_parent = 'rec'.$key;
+		$name = $parentName.'.'.$name_wo_parent;
+		$tree[$parentName] = array_merge($tree[$parentName], array($name_wo_parent=>$name));
+		$vars = array_merge($vars, array($name=>$key));
+		array_push($arr_text, '{$'.$name.'}');
+
+
 		if($addrelationfield){
 				$key="RelationType";
 				$name_wo_parent = 'rec'.$key;
