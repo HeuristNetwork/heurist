@@ -112,7 +112,7 @@ function updateRecord($bibID) {
 		$res = mysql_query("select grp.ugr_Name from Records, ".USERS_DATABASE.".sysUGrps grp where rec_ID=$bibID and grp.ugr_ID=rec_OwnerUGrpID");
 		$grpName = mysql_fetch_row($res);  $grpName = $grpName[0];
 
-		print '({ error: "Sorry - you can\'t edit this record.\nYou aren\'t in the ' . slash($grpName) . ' workgroup" })';
+		print '({ error: "\nSorry - you can\'t edit this record.\nYou aren\'t in the ' . slash($grpName) . ' workgroup" })';
 		return;
 	}
 	$bib = mysql_fetch_assoc($res);

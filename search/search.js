@@ -871,7 +871,7 @@ top.HEURIST.search = {
 							top.HEURIST.basePath + "common/images/edit_pencil_small.png'/></a></div>";
 		}else{
 			editLinkIcon += "' target='_blank' title='Click to edit record extras only'><img src='"+
-							top.HEURIST.basePath + "common/images/partial_edit_pencil_small.png'/></a></div>";
+							top.HEURIST.basePath + "common/images/no_edit_pencil_small.png'/></a></div>";
 		}
 		var newSearchWindow = "<div><a href='"+top.HEURIST.basePath+"search/search.html?q=ids:"+res[2]+
 			(top.HEURIST.database && top.HEURIST.database.name ? '&db=' + top.HEURIST.database.name : '') +
