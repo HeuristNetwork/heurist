@@ -67,7 +67,8 @@
 	"rty_ReferenceURL"=>"s",
 	"rty_AlternativeRecEditor"=>"s",
 	"rty_Type"=>"s",
-	"rty_ShowURLOnEditForm" =>"i",
+    "rty_ShowURLOnEditForm" =>"i",
+    "rty_ShowDescriptionOnEditForm" =>"i",
 	"rty_Modified"=>"i",
 	"rty_LocallyModified"=>"i"
 	);

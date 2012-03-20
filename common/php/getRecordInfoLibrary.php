@@ -763,7 +763,8 @@ function getRectypeColNames(){
 					"rty_AlternativeRecEditor",
 					"rty_Type",
 					"rty_ShowURLOnEditForm",
-					"rty_Modified",
+                    "rty_ShowDescriptionOnEditForm",
+                    "rty_Modified",
 					"rty_LocallyModified",
 					"rty_ConceptID");
 }

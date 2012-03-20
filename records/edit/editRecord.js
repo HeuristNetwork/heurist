@@ -875,6 +875,13 @@ top.HEURIST.edit = {
 
 		var cfi = top.HEURIST.rectypes.typedefs.commonNamesToIndex;
 
+        if(top.HEURIST.rectypes.typedefs[rectypeID].commonFields[cfi.rty_ShowDescriptionOnEditForm]!=="0"){
+            // If switched on, the record tyupe description field is display as a contextualisation at top of form
+            
+            // IREK TODO: Please display the record type description field somewhere appropriate
+            
+        }
+
 		if(top.HEURIST.rectypes.typedefs[rectypeID].commonFields[cfi.rty_ShowURLOnEditForm]!=="0"){
 
 			var defaultURL = (recID && windowRef.parent.HEURIST.edit.record &&

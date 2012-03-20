@@ -172,12 +172,23 @@
   </div>
 
    <div class="input-row">
-    <div class="input-header-cell" for="rty_ShowURLOnEditForm">Show URLin lists:</div>
+    <div class="input-header-cell" for="rty_ShowURLOnEditForm">Show record URL on edit form:</div>
     <div class="input-cell">
       <input id="rty_ShowURLOnEditForm" type="checkbox"/>
-      <div class="help prompt">Display URL at top of edit form for this record type</div>
+      <div class="help prompt">Display URL at top of edit form for this record type. 
+                This is a special URL used to hyperlink search results. 
+                It is distinct from any URL fields in the record, which are not affected</div>
     </div>
-  </div>
+   </div>
+
+   <div class="input-row">
+    <div class="input-header-cell" for="rty_ShowDescriptionOnEditForm">Show description on edit form:</div>
+    <div class="input-cell">
+      <input id="rty_ShowDescriptionOnEditForm" type="checkbox"/>
+      <div class="help prompt">Display record type description at top of edit form for this record type. 
+                This is a useful way of providing some context for the content of the form</div>
+    </div>
+   </div>
 
 	<div class="input-row">
 		<div class="input-header-cell" for="rty_NonOwnerVisibility">Non-owner visibility:</div>
@@ -309,7 +320,8 @@
 		document.getElementById("infoImage").style.display = "none";
 		document.getElementById("rty_ID").innerHTML= "<span style=\"color:#999; font-weight:normal; font-size:11px;\">will be automatically assigned</span>";
 		document.getElementById("rty_ShowInLists").checked = true;
-		document.getElementById("rty_ShowURLOnEditForm").checked = true;
+        document.getElementById("rty_ShowURLOnEditForm").checked = true;
+        document.getElementById("rty_ShowDescriptionOnEditForm").checked = true;
 		document.getElementById("rty_NonOwnerVisibility").selectedIndex = 0;
 
 		document.getElementById("rty_TitleMask").value = "record [ID]: Please set title mask for this record type once fields have been defined";
@@ -361,7 +373,8 @@
 			document.getElementById("rty_Description").value = rectype[fi.rty_Description];
 			document.getElementById("rty_OrderInGroup").value = rectype[fi.rty_OrderInGroup];
 			document.getElementById("rty_ShowInLists").checked = (Number(rectype[fi.rty_ShowInLists]) === 1);
-			document.getElementById("rty_ShowURLOnEditForm").checked = (Number(rectype[fi.rty_ShowURLOnEditForm]) !== 0);
+            document.getElementById("rty_ShowURLOnEditForm").checked = (Number(rectype[fi.rty_ShowURLOnEditForm]) !== 0);
+            document.getElementById("rty_ShowDescriptionOnEditForm").checked = (Number(rectype[fi.rty_ShowDescriptionOnEditForm]) !== 0);
 			document.getElementById("rty_TitleMask").value = rectype[fi.rty_TitleMask];
 			document.getElementById("rty_FlagAsFieldset").checked = (Number(rectype[fi.rty_FlagAsFieldset]) === 1);
 			document.getElementById("rty_ReferenceURL").value = rectype[fi.rty_ReferenceURL];
