@@ -214,7 +214,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #footer {
 	position:absolute;
 	left:200px;
-	top:120px;
+	top:105px;
+	white-space: nowrap;
+
+}
+#footer #rty_description {
+    height: 16px;
+    margin-bottom: 3px;
+    white-space: nowrap;
+}
+#footer #rty_description span {
+	padding: 0 5px 0 0;
+	color:#363636;
+}
+#footer #rty_description span.recID{
+	color:#6A7C99;
+	font-weight: bold;
 }
 #footer span {
 	padding-right:20px;
