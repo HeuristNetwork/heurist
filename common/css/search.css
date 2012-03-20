@@ -574,7 +574,8 @@ div.right_margin_info div.mini-tools a {
 #loading-search-status, #noquery-search-status, #noresult-search-status {
 	display: none;
 	margin: 10px;
- text-align:left  margin: 20px 10px;
+	text-align:left;
+	margin: 20px 10px;
 	top: 20px;
 	position: absolute;
 }
@@ -1877,12 +1878,11 @@ div.recorddiv:hover {
 	margin-left:8px;
 }
 .filter {
-/*	border-top:1px solid #999; */
+	border-bottom:1px solid #EEE;
 	color: #999999;
 	position: relative;
 	min-height:20px;
 	margin-bottom: 0;
-	/*border-bottom:1px solid #DDD;*/
 	left:0;
 	right:0;
 	top:0;
@@ -1960,14 +1960,14 @@ div.filter .showrelated {
 	color:#999;
 	margin:0 0 0 5px;
 	font-size:10px;
-	font-weight:bold;	
+	font-weight:bold;
 	}
 .showrelated:hover:after {
 	content:"HIDE";
 	color:#999;
 	margin:0 0 0 5px;
 	font-size:10px;
-	font-weight:bold;	
+	font-weight:bold;
 	}
 div.filter .showrelated a {
 	background-image: url("../images/heading_saved_search-hidden.png");
