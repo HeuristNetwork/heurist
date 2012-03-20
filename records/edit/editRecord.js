@@ -247,8 +247,8 @@ top.HEURIST.edit = {
 				document.getElementById('rectype-img').style.backgroundImage = "url("+ top.HEURIST.iconBaseURL + top.HEURIST.edit.record.rectypeID + ".png)";
 			}
 			if (document.getElementById('title-val')) {
-				document.getElementById('title-val').innerHTML = '';
-				document.getElementById('title-val').appendChild(document.createTextNode(top.HEURIST.edit.record.title));
+				document.getElementById('title-val').innerHTML = top.HEURIST.edit.record.title;
+				// document.getElementById('title-val').appendChild(document.createTextNode(top.HEURIST.edit.record.title));
 			}
 			if (document.getElementById('workgroup-val')) {
 				if (top.HEURIST.edit.record.workgroup) {

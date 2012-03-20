@@ -189,6 +189,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	top: 0;
 	vertical-align: middle;
 }
+#title-val * {
+	font-size:inherit;
+}
 #save-record-buttons {
 	border-left:1px solid #D6D6D6;
 	bottom:0;
@@ -260,8 +263,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	padding:4px 4px 6px 45px;
 }
 .sidebar-link ::-moz-selection {
-color: inherit;
-background-color: inherit;
+	color: inherit;
+	background-color: inherit;
 }
 .sidebar-link ::selection {
 	color: inherit;

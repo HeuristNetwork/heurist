@@ -483,6 +483,8 @@ H4 {color:#000;font-size: 11px}
 H5 {color:#999;font-size: 10px}
 P {color:#333333;font-size:11px;line-height:21px;}
 
+H2 i {font-size:inherit;}
+
 /******* links and id-specific styles ********/
 A:link {color:#6A7C99;text-decoration: none;}
 A:visited {color:#6A7C99;text-decoration: none;}
