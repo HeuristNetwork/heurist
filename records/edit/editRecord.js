@@ -877,8 +877,13 @@ top.HEURIST.edit = {
 
         if(top.HEURIST.rectypes.typedefs[rectypeID].commonFields[cfi.rty_ShowDescriptionOnEditForm]!=="0"){
             // If switched on, the record tyupe description field is display as a contextualisation at top of form
-			        var e = document.getElementById("rty_description");
-      				e.innerHTML = "<span class=\"recID\">" + top.HEURIST.rectypes.typedefs[rectypeID].commonFields[0] + ": </span><span>" + top.HEURIST.rectypes.typedefs[rectypeID].commonFields[2] +"</span>";
+			var e = document.getElementById("rty_description");
+			if(e){
+				var cfi = top.HEURIST.rectypes.typedefs.commonNamesToIndex;
+				e.innerHTML = "<span class=\"recID\">" + top.HEURIST.rectypes.typedefs[rectypeID].commonFields[cfi.rty_Name] +
+								": </span><span>" +
+								top.HEURIST.rectypes.typedefs[rectypeID].commonFields[cfi.rty_Description] +"</span>";
+			}
         }
 
 		if(top.HEURIST.rectypes.typedefs[rectypeID].commonFields[cfi.rty_ShowURLOnEditForm]!=="0"){

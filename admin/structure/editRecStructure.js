@@ -175,13 +175,17 @@ function EditRecStructure() {
                 formatter: function(elLiner, oRecord, oColumn, oData){
                     var wid = oRecord.getData('rst_DisplayWidth');
                     var typ = oRecord.getData('dty_Type');
-                    if ((typ == "enum") || (typ=="resource") || (typ=="relmarker") ||
-                       (typ=="file") || (typ=="date") || (typ=="geo") || (typ=="separator"))
-                        {
-                        res = 'auto'
-                        }
-                    else
+                    if ((typ == "enum") || (typ=="resource") ||
+                    	(typ=="relmarker") || (dt_type === "relationtype") ||
+                        (typ=="file") || (typ=="geo") || (typ=="separator"))
+                    {
+                        res = "";
+                    }
+                    else{
                         res = wid;
+					}
+
+
                     elLiner.innerHTML = res;
                 }
 			},
@@ -815,8 +819,8 @@ function EditRecStructure() {
 					//show disable target pnr rectype
 
 			}else if(rst_type === "separator"  &&
-				!(fieldnames[k] === "rst_DisplayName" || fieldnames[k] === "rst_DisplayWidth")){
-					//hide all but width
+				!(fieldnames[k] === "rst_DisplayName")){ // || fieldnames[k] === "rst_DisplayWidth")){
+					//hide all but name
 					edt.parentNode.parentNode.style.display = "none";
 			}else if(rst_type === "fieldsetmarker" && !(fieldnames[k] === "rst_DisplayName" || fieldnames[k] === "rst_Status")){
 					//hide all, required - once
@@ -901,7 +905,10 @@ function EditRecStructure() {
 				var def_width = 40;
 				var dt_type = arrs[fi.dty_Type];
 
-				if(dt_type === "enum" || dt_type === "file" || dt_type === "geo" || dt_type === "resource" || dt_type === "relationtype") {
+                if ((typ == "enum") || (typ=="resource") ||
+                    (typ=="relmarker") || (dt_type === "relationtype") ||
+                    (typ=="file") || (typ=="geo") || (typ=="separator"))
+				{
                     def_width = 0;
 				}else if (dt_type === "date" || dt_type === "integer" || dt_type === "float" || dt_type === "year" ||
 							dt_type === "calculated") {
