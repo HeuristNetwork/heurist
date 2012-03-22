@@ -32,8 +32,6 @@ require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
 require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 require_once('libs.inc.php');
 
-//error_log(">>>>>>>>>>>>>".print_r($_REQUEST, true));
-
 	mysql_connection_db_select(DATABASE);
 
 	//load definitions (USE CACHE)
@@ -314,6 +312,16 @@ function getRecordHeaderSectionForSmarty($rec, $parentName, $ind, $addrelationfi
 	else
 	{
 
+		/*function __addvar($key)
+		{
+					$name_wo_parent = 'rec'.$key;	   //without parent
+					$name = $parentName.'.'.$name_wo_parent;
+
+					$tree[$parentName] = array_merge($tree[$parentName], array($name_wo_parent=>$name));
+					$vars = array_merge($vars, array($name=>$key));
+					array_push($arr_text, '{$'.$name.'}');
+		}*/
+
 		$arr_text = array();
 		$ind++;
 
@@ -330,17 +338,18 @@ function getRecordHeaderSectionForSmarty($rec, $parentName, $ind, $addrelationfi
 
 				if($key=="ID" || $key=="Title" || $key=="TypeName" || $key=="URL" || $key=="Modified")
 				{
+					//__addvar($key);
 					$name_wo_parent = 'rec'.$key;	   //without parent
 					$name = $parentName.'.'.$name_wo_parent;
 					$tree[$parentName] = array_merge($tree[$parentName], array($name_wo_parent=>$name));
 					$vars = array_merge($vars, array($name=>$key));
 					array_push($arr_text, '{$'.$name.'}');
-
 				}
 			}
 		} // for
 
 		//add WOOT field
+		//__addvar("WootText");
 		$key="WootText";
 		$name_wo_parent = 'rec'.$key;
 		$name = $parentName.'.'.$name_wo_parent;
@@ -350,6 +359,7 @@ function getRecordHeaderSectionForSmarty($rec, $parentName, $ind, $addrelationfi
 
 
 		if($addrelationfield){
+				//__addvar("RelationType");
 				$key="RelationType";
 				$name_wo_parent = 'rec'.$key;
 				$name = $parentName.'.'.$name_wo_parent;
@@ -459,8 +469,6 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind){
 
 			switch ($detailType) {
 			/* @TODO
-			case 'enum':
-			break;
 			case 'file':
 			break;
 			case 'geo':
@@ -471,6 +479,35 @@ function getDetailSectionForSmarty($parentName, $dtKey, $dtValue, $ind){
 			break;
 			case 'relationtype':
 			*/
+
+			case 'enum':	//@todo!!!!
+
+/*
+				$tree_children = array_merge($tree_children, array($dtname_wo_parent=>$dtname));
+				$vars = array_merge($vars, array($dtname=>$dt_label));
+				$detailtypes = array_merge($detailtypes, array($dtname=>$detailType));
+				array_push($arr_text, '{$'.$dtname.'}'); //lbl="'.$dt_label.'"
+*/
+				//
+				$enumtree = array(
+					"id"=>$dtname.".id",
+					"code"=>$dtname.".code",
+					"label"=>$dtname.".label",
+					"conceptid"=>$dtname.".conceptid");
+
+				$tree_children = array_merge($tree_children, array($dtname=>$enumtree));
+
+
+				$vars = array_merge($vars, array($dtname.".id"=>"id"));
+				$vars = array_merge($vars, array($dtname.".code"=>"code"));
+				$vars = array_merge($vars, array($dtname.".label"=>"label"));
+				$vars = array_merge($vars, array($dtname.".conceptid"=>"conceptid"));
+
+				array_push($arr_text, '{$'.$dtname.'.id}',  '{$'.$dtname.'.code}', '{$'.$dtname.'.label}', '{$'.$dtname.'.conceptid}');
+
+				$detailtypes = array_merge($detailtypes, array($dtname=>$detailType));
+
+			break;
 
 			case 'resource': // link to another record type
 			case 'relmarker':

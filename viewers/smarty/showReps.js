@@ -653,15 +653,36 @@ function ShowReps() {
 				{
 				if(!Hul.isnull(child)){
 
-					var fullid = parentNode[child];
+					var fullid = parentNode[child],
+						_varnames = varnames.vars,
+						_detailtypes = varnames.detailtypes,
+						is_enum = false,
+						dt_type = '',
+						label = '';
 
+					//check if child is related record
 					var is_record = ((typeof(fullid) == "object") &&
 									Object.keys(fullid).length > 0);
 
-					var _varnames = varnames.vars;
-					var _detailtypes = varnames.detailtypes;
-					var label = is_record?child:_varnames[fullid];
-					var dtype = (is_record || Hul.isnull(_detailtypes))?"":_detailtypes[fullid];
+
+					if(is_record)
+					{ //nodes - records or enum detail types
+
+							//check if child is enumeration detail type
+							is_enum = (_detailtypes && child.indexOf(parent_id+".")==0 && _detailtypes[child]==='enum');
+							if(is_enum){
+								dtype = 'enum';
+								label = child.substr(parent_id.length+1);
+							}else{
+								dtype = '';
+								label = child;
+							}
+
+					}else{ //usual variables
+						label = _varnames[fullid];
+						dtype = (_detailtypes)?_detailtypes[fullid]:'';
+					}
+
 
 					if(!Hul.isnull(label)){
 
@@ -673,7 +694,9 @@ function ShowReps() {
 					term.labelonly = label;
 					term.dtype = dtype;
 
-					if( is_record ){
+					if(is_enum){
+							term.label = term.label + label + '&nbsp;(enum)';
+					}else if( is_record ){
 /* Ian's reuest 10-28
 							term.label = term.label +
 							'<a href="javascript:void(0)" onClick="showReps.markAllChildren(\''+
@@ -687,7 +710,7 @@ function ShowReps() {
 '&nbsp;<a href="javascript:void(0)" title="Insert marked variables with parent prefix. To use outside the loop" onClick="showReps.insertSelectedVars(\''+term.id+'\', false)">out</a>)</div>';
 */
 					}else{
-						if(parent_id=="r"){
+						if(parent_id=="r" || parent_id.indexOf("r")==0){
 							term.label = term.label + label +
 '&nbsp;(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.insertSelectedVars(\''+term.id+'\', true)">insert</a>)</div>';
 						}else{

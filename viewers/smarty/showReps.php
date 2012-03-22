@@ -23,8 +23,6 @@ require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 require_once('libs.inc.php');
 
-//error_log(">>>>>>>>>>>>>".print_r($_REQUEST, true));
-
 	mysql_connection_db_select(DATABASE);
 
 	//load definitions (USE CACHE)
@@ -48,14 +46,17 @@ require_once('libs.inc.php');
 
 	$qresult = loadSearch($_REQUEST); //from search/getSearchResults.php - loads array of records based og GET request
 
-//error_log(">>>>>>>>".print_r($qresult,true));
-
 	if(!array_key_exists('records',$qresult) ||  $qresult['resultCount']==0 ){
 		if(array_key_exists("publish", $_REQUEST)){
-			echo "<b><font color='#ff0000'>Note: There are no records in this view. The URL will only show records to which the viewer has access. Unless you are logged in to the database, you can only see records which are marked as Public visibility</font></b>";
+			$error = "<b><font color='#ff0000'>Note: There are no records in this view. The URL will only show records to which the viewer has access. Unless you are logged in to the database, you can only see records which are marked as Public visibility</font></b>";
 		}else{
-			echo "<b><font color='#ff0000'>Search or Select records to see template output</font></b>";
+			$error = "<b><font color='#ff0000'>Search or Select records to see template output</font></b>";
 		}
+		if($isJSwrap){
+			$error = add_javascript_wrap4($error, null);
+		}
+		echo $error;
+
 		exit();
 	}
 
@@ -66,12 +67,10 @@ require_once('libs.inc.php');
 
 	$replevel = (array_key_exists('replevel',$_REQUEST) ?$_REQUEST['replevel']:0);
 
-//DEBUG error_log(">>>>>>>>".$template_file);
 	//convert to array that will assigned to smarty variable
 	$records =  $qresult["records"];
 	$results = array();
 	foreach ($records as $rec){
-//error_log(print_r($rec, true));
 
 		$res1 = getRecordForSmarty($rec, 0);
 		array_push($results, $res1);
@@ -119,7 +118,6 @@ require_once('libs.inc.php');
 			$template_file = 'test01.tpl';
 		}
 
-//error_log(">>>>>>>>PRINT ".$template_file."     >>>>>".$isJSwrap);
 		$smarty->debugging = false;
 		$smarty->error_reporting = 0;
 		if($isJSwrap){
@@ -154,6 +152,10 @@ exit();
 // wrap smarty output into javascript function
 //
 function add_javascript_wrap5($tpl_source, Smarty_Internal_Template $template)
+{
+	return add_javascript_wrap4($tpl_source);
+}
+function add_javascript_wrap4($tpl_source)
 {
 	$tpl_source = str_replace("\n","",$tpl_source);
 	$tpl_source = str_replace("'","&#039;",$tpl_source);
@@ -222,12 +224,6 @@ function getRecordForSmarty($rec, $recursion_depth){
 				foreach ($value as $dtKey => $dtValue){
 					$dt = getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID);
 					if($dt){
-//DEBUG error_log("ADD ".$kk[0]."=".$dt[$kk[0]]);
-						//$kk = array_keys($dt);
-						//$record[ $kk[0] ] = $dt[ $kk[0] ];
-//error_log(">>>>>>main  ".print_r($dt, true));
-//error_log(">>>>".print_r($dtValue, true));
-
 						$record = array_merge($record, $dt);
 					}
 				}
@@ -260,12 +256,20 @@ function getRecordForSmarty($rec, $recursion_depth){
 			}
 		}
 
-/* DEBUG
-		foreach ($record as $dtKey => $dtValue){
-error_log(">>>".$dtKey."=".$dtValue);
-		}*/
 		return $record;
 	}
+}
+
+/**
+*
+*/
+function _add_term_val($res, $val){
+
+	if($val){
+		if(strlen($res)>0) $res = $res.", ";
+		$res = $res.$val;
+	}
+	return $res;
 }
 
 
@@ -288,14 +292,12 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID){
 		}else{
 			$rt_structure = $rtStructs['typedefs'][$recTypeID]['dtFields'];
 			$dtlabel_index = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
-//error_log($dtKey."   ".$dtlabel_index);
 			if(array_key_exists($dtKey,$rt_structure)){
 				$dt_label = $rt_structure[$dtKey][ $dtlabel_index ];
 			}
 			$dtname = getVariableNameForSmarty($dtNames[$dtKey]);
 		}
 
-//error_log(">>>>>>>".$dtKey."=".$dtNames[$dtKey]."=".$dtname."====".$dtValue);
 
 	if(is_array($dtValue)){ //complex type - need more analize
 		$res = null;
@@ -304,28 +306,36 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID){
 
 		if($dtDef){
 			$detailType = ($dtKey<1) ?"relmarker" :$dtDef[ $dty_fi['dty_Type']  ];
-//error_log(">>>>>>>".$dtKey."=".$dtNames[$dtKey].">>>".$dtname." TYPE=".$detailType);
-//ENUM('freetext','blocktext','integer','date','year','relmarker','boolean','enum','relationtype','resource','float','file','geo','separator','calculated','fieldsetmarker','urlinclude')
 
 			switch ($detailType) {
 			case 'enum':
 
-				$res = "";
+				$fi = $dtTerms['fieldNamesToIndex'];
+
+				$res_id = "";
+				$res_cid = "";
+				$res_code = "";
+				$res_label = "";
+
 				foreach ($dtValue as $key => $value){
 					if(array_key_exists($value, $dtTerms['termsByDomainLookup']['enum'])){
 						$term = $dtTerms['termsByDomainLookup']['enum'][$value];
-						$term_value =   $term[ $dtTerms['fieldNamesToIndex']['trm_Label'] ];
-						if($term_value){
-							if(strlen($res)>0) $res = $res.", ";
-							$res = $res.$term_value;
-						}
+
+						$res_id = _add_term_val($res_id, $value);
+						$res_cid = _add_term_val($res_cid, $term[ $fi['trm_ConceptID'] ]);
+						$res_code = _add_term_val($res_code, $term[ $fi['trm_Code'] ]);
+						$res_label = _add_term_val($res_label, $term[ $fi['trm_Label'] ]);
 					}
 				}
-				if(strlen($res)==0){ //no valid terms
+
+				$res = array("id"=>$res_id, "code"=>$res_code, "label"=>$res_label, "conceptid"=>$res_cid);
+				$res = array( $dtname=>$res );
+
+				/*if(strlen($res)==0){ //no valid terms
 					$res = null;
 				}else{
 					$res = array( $dtname=>$res );
-				}
+				}*/
 
 			break;
 
@@ -333,7 +343,6 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID){
 			   //get url for file download
 
 			   //if image - special case
-//error_log("FILE>>>>>".print_r($dtValue, true));
 
 				$res = "";
 				$arres = array();
@@ -351,8 +360,6 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID){
 				}else{
 					$res = array_merge($arres, array($dtname=>$res));
 				}
-
-//error_log("RES>>>>>".print_r($res, true));
 
 			break;
 /* NOT USED ANYMORE
