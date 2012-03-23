@@ -391,6 +391,7 @@ function EditRecStructure() {
 					record_id = _myDataTable.getTdEl({record:oRecord, column:_myDataTable.getColumn("expandColumn")});
 				}
 
+
 				// after expansion - fill input values from HEURIST db
 				// after collapse - save data on server
 				function __toggle(){
@@ -399,6 +400,12 @@ function EditRecStructure() {
 						_myDataTable.onEventToggleRowExpansion(record_id);
 						_expandedRecord = rst_ID;
 						_fromArrayToUI(rst_ID, false); //after expand restore values from HEURIST
+
+
+						var rowrec = _myDataTable.getTrEl(oRecord);
+						var maindiv = Dom.get("page-inner");
+						var pos = rowrec.offsetTop;
+						maindiv.scrollTop = pos - 30;
 
 					}else{
 						_saveUpdates(false); //save on server
@@ -918,7 +925,7 @@ function EditRecStructure() {
 				var def_width = 40;
 				var dt_type = arrs[fi.dty_Type];
 
-                if (_isNoWidth(typ))
+                if (_isNoWidth(dt_type))
 				{
                     def_width = 0;
 				}else if (dt_type === "date" || dt_type === "integer" || dt_type === "float" || dt_type === "year" ||
@@ -979,6 +986,8 @@ function EditRecStructure() {
 			top.HEURIST.rectypes.typedefs[rty_ID].dtFields = recDetTypes;
 
 			_myDataTable.addRows(data_toadd, index_toinsert);
+
+			_myDataTable.selectRow(index_toinsert);
 
 			// in case of addition - all fields were affected
 			_updatedFields = null;
