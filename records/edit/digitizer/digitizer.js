@@ -269,7 +269,7 @@ function initmap(){
 	}
 
 
-	_load_layers(1);
+	_load_layers(0);
 
 	geocoder = new google.maps.Geocoder();
 	/*
@@ -2140,10 +2140,29 @@ function _load_layers(mode) {
 */
 function _updateLayersList(context){
 
-	systemAllLayers = context.layers;
-	var elem = document.getElementById('cbLayers'),
-	s = "<option value='-1'>none</option>",
-	selIndex = -1;
+		var ind,
+			elem = document.getElementById('cbLayers'),
+			s = "<option value='-1'>none</option>",
+			selIndex = -1;
+
+		systemAllLayers = context.layers;
+
+
+	for (ind in context.geoObjects) {
+		if(!top.HEURIST.util.isnull(ind))
+		{
+			geoobj = context.geoObjects[ind];
+			if(geoobj.type === "kmlfile"){
+
+				var url = top.HEURIST.baseURL;
+				url += "records/files/downloadFile.php?db=" + top.HEURIST.database.name + "&ulf_ID="+geoobj.fileid;
+				geoobj.url = url;
+
+				systemAllLayers.push(geoobj);
+			}
+		}
+	}
+
 
 	for (ind in systemAllLayers) {
 		if(!top.HEURIST.util.isnull(ind))

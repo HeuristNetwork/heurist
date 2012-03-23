@@ -35,7 +35,7 @@ function ShowMap() {
 		_sQueryMode = "all",
 		//squery_all,		squery_sel,		squery_main,
 		currentQuery,
-		systemAllLayers; //all image layers in the system
+		systemAllLayers; //all image layers (3-6) and kml layers (3-24) in the system with detail type 3-679 true
 
 	/**
 	* Initialization
@@ -452,10 +452,28 @@ function ShowMap() {
 	*/
 	function _updateLayersList(context){
 
-		systemAllLayers = context.layers;
-		var elem = document.getElementById('cbLayers'),
+		var ind,
+			elem = document.getElementById('cbLayers'),
 			s = "<option value='-1'>none</option>",
 			keptLayer = top.HEURIST.util.getDisplayPreference("mapbackground"); //read record id
+
+		systemAllLayers = context.layers;
+
+
+		for (ind in context.geoObjects) {
+			if(!Hul.isnull(ind))
+			{
+				geoobj = context.geoObjects[ind];
+				if(geoobj.type === "kmlfile"){
+
+					var url = HRST.baseURL;
+					url += "records/files/downloadFile.php?db=" + HRST.database.name + "&ulf_ID="+geoobj.fileid;
+					geoobj.url = url;
+
+					systemAllLayers.push(geoobj);
+				}
+			}
+		}
 
 		for (ind in systemAllLayers) {
 			if(!Hul.isnull(ind)){

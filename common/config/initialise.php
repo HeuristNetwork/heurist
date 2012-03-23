@@ -288,12 +288,13 @@
 	'RT_PERSON' => array(2,20),
 	'RT_MEDIA_RECORD' => array(2,5),
 	'RT_IMAGE_LAYER' => array(3,6),
+	'RT_KML_LAYER' => array(3,24),
 	'RT_AUTHOR_EDITOR' => array(3,23),
 	'RT_BLOG_ENTRY' => array(2,8),
 	'RT_INTERPRETATION' => array(2,10),
 	'RT_FACTOID' => array(3,22),
 	'RT_ANNOTATION' => array(3,25),
-	'RT_IMAGELAYER' => array(70,168)
+	'RT_IMAGELAYER' => array(70,168)  //AO: What's this? We already have RT_IMAGE_LAYER?
 	);
 
 	foreach ($rtDefines as $str => $id) {
@@ -345,7 +346,8 @@
 	'DT_MAP_IMAGE_LAYER_REFERENCE' => array(3,92),
 	'DT_MAXIMUM_ZOOM_LEVEL' => array(3,587),
 	'DT_LOCATION' => array(3,181),
-	'DT_CONTACT_INFO' => array(70,309)
+	'DT_CONTACT_INFO' => array(70,309),
+	'DT_SHOW_IN_MAP_BG_LIST' => array(3,679)   //show image layer or kml in map background list
 	);
 
 	foreach ($dtDefines as $str => $id) {

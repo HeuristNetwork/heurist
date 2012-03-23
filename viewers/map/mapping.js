@@ -421,7 +421,7 @@ if (typeof mxn.LatLonPoint == "function") {
 						var layer = M.mapdata.layers[i];
 						var layerbnd = layer.extent = M.getImageLayerExtent(layer['extent']);
 						if(layerbnd){
-							markers++;
+							//markers++;
 							if(tm.mapBounds){
 								tm.mapBounds.extend(layerbnd.getSouthWest());
 								tm.mapBounds.extend(layerbnd.getNorthEast());
@@ -568,7 +568,7 @@ if (typeof mxn.LatLonPoint == "function") {
 	},
 
 	/**
-	* add image layer background
+	* add image layer or kml overlay as map background
 	*
 	* zoom_mode
 	* 0 - no zoom
@@ -581,7 +581,11 @@ if (typeof mxn.LatLonPoint == "function") {
 				errors = "",
 				bounds = null;
 
-			M.map.removeAllTileLayers();
+			if(M.map){
+				M.map.removeAllTileLayers();
+			}else{
+				return;
+			}
 
 			function _isempty(obj){
 				return ( (typeof obj==="undefined") || (obj===null) || (obj==="") || (obj==="null") );
@@ -599,6 +603,11 @@ if (typeof mxn.LatLonPoint == "function") {
 
 			for (i = 0; i < layers.length; ++i) {
 				(function (layer) { //execute this function for each layer in given array
+
+				if (layer.type === "kmlfile")
+				{
+					M.map.addOverlay(layer.url, (zoom_mode==1));
+				}else{
 
 					var tile_url;
 
@@ -644,38 +653,38 @@ if (typeof mxn.LatLonPoint == "function") {
 						errors = errors + "Map type is not defined properly for image layer. It should be virtual earth or maptiler. Rec#"+layer.rec_ID;//+"\n";
 					}
 
-				//it tile_url is defined - add this layer to mapstraction
-				if(tile_url){
-					layer.min_zoom = new Number(layer.min_zoom);
-					layer.max_zoom = new Number(layer.max_zoom);
-					if(isNaN(layer.max_zoom)) {
-						layer.max_zoom = 19;
-					}
-					if(isNaN(layer.min_zoom)) {
-						layer.min_zoom = layer.max_zoom - 8;
-					}
-					if(layer.min_zoom>layer.max_zoom){layer.min_zoom = layer.max_zoom;}
-					if(layer.min_zoom<1){ layer.min_zoom = 1; }
-					if(layer.max_zoom>19){ layer.max_zoom = 19; }
+					//it tile_url is defined - add this layer to mapstraction
+					if(tile_url){
+						layer.min_zoom = new Number(layer.min_zoom);
+						layer.max_zoom = new Number(layer.max_zoom);
+						if(isNaN(layer.max_zoom)) {
+							layer.max_zoom = 19;
+						}
+						if(isNaN(layer.min_zoom)) {
+							layer.min_zoom = layer.max_zoom - 8;
+						}
+						if(layer.min_zoom>layer.max_zoom){layer.min_zoom = layer.max_zoom;}
+						if(layer.min_zoom<1){ layer.min_zoom = 1; }
+						if(layer.max_zoom>19){ layer.max_zoom = 19; }
 
-					M.map.addTileLayer(tile_url, 0.75, layer.rec_ID, layer.min_zoom, layer.max_zoom, true);
-					//layer.min_zoom, layer.max_zoom, true);
+						M.map.addTileLayer(tile_url, 0.75, layer.rec_ID, layer.min_zoom, layer.max_zoom, true);
+						//layer.min_zoom, layer.max_zoom, true);
 
-					layer.extent = M.getImageLayerExtent(layer['extent']);
-					if(zoom_mode>0){
-						var layerbnd = layer.extent;
-						if(layerbnd){
-							if(bounds==null){
-								bounds = layerbnd;
-							}else{
-								bounds.extend(layerbnd.getSouthWest());
-								bounds.extend(layerbnd.getNorthEast());
+						layer.extent = M.getImageLayerExtent(layer['extent']);
+						if(zoom_mode>0){
+							var layerbnd = layer.extent;
+							if(layerbnd){
+								if(bounds==null){
+									bounds = layerbnd;
+								}else{
+									bounds.extend(layerbnd.getSouthWest());
+									bounds.extend(layerbnd.getNorthEast());
+								}
 							}
 						}
+
 					}
-
 				}
-
 				})(layers[i]);
 			}//for
 

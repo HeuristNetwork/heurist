@@ -29,13 +29,14 @@
 	header("Content-type: text/javascript");
 
 	$imagelayerRT = (defined('RT_IMAGE_LAYER')?RT_IMAGE_LAYER:0);
+	$KMLlayerRT = (defined('RT_IMAGE_LAYER')?RT_KML_LAYER:0);
 
 	mysql_connection_db_select(DATABASE);
 
 	if (array_key_exists('layers', $_REQUEST)) { //special mode - load ALL image layers and kml records only - for general drop down list on map
 
 		$_REQUEST['ver'] = "1";
-		$_REQUEST['q'] = "type:".$imagelayerRT;
+		$_REQUEST['q'] = "type:".$imagelayerRT.",".$KMLlayerRT;
 		$search_type = BOTH;
 	}else{
 
@@ -124,7 +125,8 @@
 
 //d.dtl_UploadedFileID,e.dtl_UploadedFileID,f.dtl_UploadedFileID,
 
-		$squery = "select a.dtl_Value, b.dtl_Value, rec_URL, c.dtl_UploadedFileID, g.dtl_Value, h.dtl_Value, i.dtl_UploadedFileID, rec_RecTypeID
+		//					0				1			2			3				4 imagelayer 5 kmltext		6 kmlfile				7			8
+		$squery = "select a.dtl_Value, b.dtl_Value, rec_URL, c.dtl_UploadedFileID, g.dtl_Value, h.dtl_Value, i.dtl_UploadedFileID, rec_RecTypeID, rec_Title, j.dtl_Value
 		from Records
 		left join recDetails a on a.dtl_RecID=rec_ID and a.dtl_DetailTypeID=".(defined('DT_SHORT_SUMMARY')?DT_SHORT_SUMMARY:"0").
 		" left join recDetails b on b.dtl_RecID=rec_ID and b.dtl_DetailTypeID=".(defined('DT_EXTENDED_DESCRIPTION')?DT_EXTENDED_DESCRIPTION:"0").
@@ -135,6 +137,7 @@
 		" left join recDetails g on g.dtl_RecID=rec_ID and g.dtl_DetailTypeID=".(defined('DT_MAP_IMAGE_LAYER_REFERENCE')?DT_MAP_IMAGE_LAYER_REFERENCE:"0").
 		" left join recDetails h on h.dtl_RecID=rec_ID and h.dtl_DetailTypeID=".(defined('DT_KML')?DT_KML:"0").
 		" left join recDetails i on i.dtl_RecID=rec_ID and i.dtl_DetailTypeID=".(defined('DT_KML_FILE')?DT_KML_FILE:"0").
+		" left join recDetails j on j.dtl_RecID=rec_ID and j.dtl_DetailTypeID=".(defined('DT_SHOW_IN_MAP_BG_LIST')?DT_SHOW_IN_MAP_BG_LIST:"0").
 		" where rec_ID=$bibID";
 
 //error_log(">>>>>>QUERY=".$squery);
@@ -165,10 +168,10 @@
 //			$kml_path =  getKmlFilePath($row[6]); //DT_KML_FILE
 //			}
 		if($kml_path!=null){
-			array_push($geoObjects, array("bibID" => $bibID, "type" => "kmlfile", "fileid" => $kml_path));
+			array_push($geoObjects, array("bibID" => $bibID, "type" => "kmlfile", "fileid" => $kml_path, "title" => $row[8], "isbackground"=>$row[9]));
 			$geoBibIDs[$bibID] = $bibID;
 		}else if ($row[5]) { //DT_KML dtl_value contains KML		saw TODO: modify to check that text is valid KML.
-			array_push($geoObjects, array("bibID" => $bibID, "type" => "kml", "recid" => $bibID));
+			array_push($geoObjects, array("bibID" => $bibID, "type" => "kml", "recid" => $bibID, "title" => $row[8]));
 			$geoBibIDs[$bibID] = $bibID;
 		}
 	}//for
@@ -285,7 +288,7 @@ if(mysql_error()) {
 		" (select trm_Label from defTerms where trm_ID=b.dtl_Value) as type,".
 		" c.dtl_Value as url,".
 		" (select trm_Label from defTerms where trm_ID=d.dtl_Value) as mime_type,".
-		" e.dtl_Value as min_zoom, f.dtl_Value as max_zoom, g.dtl_Value as copyright".
+		" e.dtl_Value as min_zoom, f.dtl_Value as max_zoom, g.dtl_Value as copyright, j.dtl_Value as isbackground".
 		" from Records".
 		" left join recDetails a on a.dtl_RecID=rec_ID and a.dtl_DetailTypeID=".(defined('DT_TITLE_SHORT')?DT_TITLE_SHORT:"0").
 		" left join recDetails b on b.dtl_RecID=rec_ID and b.dtl_DetailTypeID=".(defined('DT_MAP_IMAGE_LAYER_SCHEMA')?DT_MAP_IMAGE_LAYER_SCHEMA:"0").
@@ -293,7 +296,8 @@ if(mysql_error()) {
 		" left join recDetails d on d.dtl_RecID=rec_ID and d.dtl_DetailTypeID=".(defined('DT_MIME_TYPE')?DT_MIME_TYPE:"0").
 		" left join recDetails e on e.dtl_RecID=rec_ID and e.dtl_DetailTypeID=".(defined('DT_MINMUM_ZOOM_LEVEL')?DT_MINMUM_ZOOM_LEVEL:"0").
 		" left join recDetails f on f.dtl_RecID=rec_ID and f.dtl_DetailTypeID=".(defined('DT_MAXIMUM_ZOOM_LEVEL')?DT_MAXIMUM_ZOOM_LEVEL:"0").
-		" left join recDetails g on g.dtl_RecID=rec_ID and g.dtl_DetailTypeID=".(defined('DT_ALTERNATE_NAME')?DT_ALTERNATE_NAME:"0").    //change to DT_COPYRIGHT (#311 in sandpit5)
+		" left join recDetails g on g.dtl_RecID=rec_ID and g.dtl_DetailTypeID=".(defined('DT_ALTERNATE_NAME')?DT_ALTERNATE_NAME:"0").
+		" left join recDetails j on j.dtl_RecID=rec_ID and j.dtl_DetailTypeID=".(defined('DT_SHOW_IN_MAP_BG_LIST')?DT_SHOW_IN_MAP_BG_LIST:"0").
 		" where rec_ID in (" . join(",", $imageLayers) . ")";
 //error_log($squery);
 		$res = mysql_query($squery);

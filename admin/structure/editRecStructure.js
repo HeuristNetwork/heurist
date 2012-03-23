@@ -175,9 +175,7 @@ function EditRecStructure() {
                 formatter: function(elLiner, oRecord, oColumn, oData){
                     var wid = oRecord.getData('rst_DisplayWidth');
                     var typ = oRecord.getData('dty_Type');
-                    if ((typ == "enum") || (typ=="resource") ||
-                    	(typ=="relmarker") || (dt_type === "relationtype") ||
-                        (typ=="file") || (typ=="geo") || (typ=="separator"))
+                    if (_isNoWidth(typ))
                     {
                         res = "";
                     }
@@ -298,7 +296,7 @@ function EditRecStructure() {
 					'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/></span></div></div>'+
 
 					// Repeatability
-                    '<div class="input-row"><div class="input-header-cell">Repeatability :</div>'+
+                    '<div class="input-row" id="divRepeatability"><div class="input-header-cell">Repeatability :</div>'+
 					'<div class="input-cell">'+
 					'<select id="ed'+rst_ID+'_Repeatability" onchange="onRepeatChange(event)">'+
 					'<option value="single">single</option>'+
@@ -819,7 +817,7 @@ function EditRecStructure() {
 					//show disable target pnr rectype
 
 			}else if(rst_type === "separator"  &&
-				!(fieldnames[k] === "rst_DisplayName")){ // || fieldnames[k] === "rst_DisplayWidth")){
+				!(fieldnames[k] === "rst_DisplayName")){
 					//hide all but name
 					edt.parentNode.parentNode.style.display = "none";
 			}else if(rst_type === "fieldsetmarker" && !(fieldnames[k] === "rst_DisplayName" || fieldnames[k] === "rst_Status")){
@@ -828,17 +826,23 @@ function EditRecStructure() {
 			}
 
 			//hide width for some field types
-			if(fieldnames[k] === "rst_DisplayWidth" && (rst_type === "enum" || rst_type === "file" || rst_type === "geo" || rst_type === "resource") ){
+			if(fieldnames[k] === "rst_DisplayWidth" && _isNoWidth(rst_type) ){
 					edt.parentNode.parentNode.style.display = "none";
 			}
-
 
 			}
 		}//for
 
 
-		//update min/max visibility
-		onReqtypeChange(Number(rst_ID));
+
+		if(rst_type === "separator"){
+			//hide repeatability
+			var dr = Dom.get('divRepeatability');
+			Dom.setStyle(dr, "display", "none");
+		}else{
+			//update min/max visibility
+			onReqtypeChange(Number(rst_ID));
+		}
 
 		//determine what is repeatability type
 		var sel = Dom.get("ed"+rst_ID+"_Repeatability");
@@ -854,6 +858,15 @@ function EditRecStructure() {
 
 		//If reserved, requirements can only be increased, nor can you change min or max values
 		onStatusChange(Number(rst_ID));
+	}
+
+	/**
+	* These field types have no width
+	*/
+	function _isNoWidth(typ){
+	       return ((typ == "enum") || (typ=="resource") ||
+                    (typ=="relmarker") || (typ === "relationtype") ||
+                    (typ=="file") || (typ=="geo") || (typ=="separator"));
 	}
 
 
@@ -905,9 +918,7 @@ function EditRecStructure() {
 				var def_width = 40;
 				var dt_type = arrs[fi.dty_Type];
 
-                if ((typ == "enum") || (typ=="resource") ||
-                    (typ=="relmarker") || (dt_type === "relationtype") ||
-                    (typ=="file") || (typ=="geo") || (typ=="separator"))
+                if (_isNoWidth(typ))
 				{
                     def_width = 0;
 				}else if (dt_type === "date" || dt_type === "integer" || dt_type === "float" || dt_type === "year" ||
